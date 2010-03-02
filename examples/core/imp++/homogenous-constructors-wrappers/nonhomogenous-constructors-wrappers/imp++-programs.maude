@@ -1,0 +1,66 @@
+mod IMP++-PROGRAMS0 is
+  including IMP++-SYNTAX0 .
+  op pCollatz : -> K .
+  op pSum : -> K .
+  op d : -> VarId
+    [format(g o)] .
+  op i : -> VarId
+    [format(g o)] .
+  op limit : -> VarId
+    [format(g o)] .
+  op n : -> VarId
+    [format(g o)] .
+  op nn : -> VarId
+    [format(g o)] .
+  op nr : -> VarId
+    [format(g o)] .
+  op s : -> VarId
+    [format(g o)] .
+  op steps : -> VarId
+    [format(g o)] .
+  op t : -> VarId
+    [format(g o)] .
+  eq pCollatz
+    = (vars((subsort"VarId < KProper" limit),((subsort"VarId < KProper" steps),
+    ((subsort"VarId < KProper" nr),(subsort"VarId < KProper" t))));
+  ((limit :=(subsort"Int < KResult" 10));
+  ((steps :=(subsort"Int < KResult" 10));
+  ((nr :=(subsort"Int < KResult" 1));
+  ((t :=(subsort"Int < KResult" 2));
+  ((while((++(subsort"VarId < KProper" nr))<=(subsort"VarId < KProper"
+    limit))do
+    (vars(subsort"VarId < KProper" n);
+      ((n :=(subsort"VarId < KProper" nr));
+      (spawn
+        ((while((subsort"Int < KResult" 2)<=(subsort"VarId < KProper" n))do
+          (vars((subsort"VarId < KProper" d),(subsort"VarId < KProper" nn));
+            ((nn :=(++(subsort"VarId < KProper" steps)));
+            ((d :=(subsort"Int < KResult" 0));
+            ((nn :=(subsort"VarId < KProper" n));
+            ((while((subsort"Int < KResult" 2)<=(subsort"VarId < KProper"
+    nn))do
+              ((d :=((subsort"VarId < KProper" d)+(subsort"Int < KResult" 1)));
+              (nn :=((subsort"VarId < KProper" nn)+(subsort"Int < KResult"
+    -2)))));
+            (if((subsort"Int < KResult" 1)<=(subsort"VarId < KProper" nn))
+            then
+              (n :=((((subsort"VarId < KProper" n)+(subsort"VarId < KProper"
+    n))+(subsort"VarId < KProper" n))+(subsort"Int < KResult" 1)))
+            else
+              (n :=(subsort"VarId < KProper" d)))))))));
+        (n :=(++(subsort"VarId < KProper" t))))))));
+  ((while((subsort"VarId < KProper" t)<=(subsort"VarId < KProper" limit))do
+    skip);
+  (print(subsort"VarId < KProper" steps))))))))) .
+  eq pSum
+    = (vars((subsort"VarId < KProper" n),((subsort"VarId < KProper" s),(
+    subsort"VarId < KProper" i)));
+  ((n :=(subsort"Int < KResult" 1000));
+  ((s :=(subsort"Int < KResult" 0));
+  ((i :=(subsort"VarId < KProper" n));
+  ((while((subsort"Int < KResult" 1)<=(subsort"VarId < KProper" i))do
+    ((s :=((subsort"VarId < KProper" s)+(subsort"VarId < KProper" i)));
+    (i :=((subsort"VarId < KProper" i)+(subsort"Int < KResult" -1)))));
+  (print(subsort"VarId < KProper" s))))))) .
+endm
+

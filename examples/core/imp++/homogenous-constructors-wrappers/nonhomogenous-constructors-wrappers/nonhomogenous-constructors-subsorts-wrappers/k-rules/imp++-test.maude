@@ -1,0 +1,18 @@
+load ../../../../../../../k-prelude
+load ../imp++-syntax
+load ../imp++-programs
+load imp++-semantics
+
+---()
+set print attribute on .
+load ../../../../../../../tools/make-k-rules-interface
+
+---(
+red in MAKE-K-RULES-INTERFACE : resolveKRules("IMP++-SEMANTICS","IMP++-SEMANTICS") .
+q
+---)
+loop make-k-rules .
+(resolveKRules IMP++-SEMANTICS IMP++-SEMANTICS .)
+q
+---()
+

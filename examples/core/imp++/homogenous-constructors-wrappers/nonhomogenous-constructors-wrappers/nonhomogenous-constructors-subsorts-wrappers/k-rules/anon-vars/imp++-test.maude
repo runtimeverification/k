@@ -1,0 +1,18 @@
+load ../../../../../../../../k-prelude
+load ../../imp++-syntax
+load ../../imp++-programs
+load imp++-semantics
+
+---()
+set print attribute on .
+load ../../../../../../../../tools/anon-vars-interface
+
+---(
+red in  ANONYMOUS-VARIABLES-META : resolveAnonVars('IMP++-SEMANTICS,'IMP++-SEMANTICS) .
+q
+---)
+loop anon-vars .
+(resolveAnonVars IMP++-SEMANTICS IMP++-SEMANTICS .)
+q
+---()
+

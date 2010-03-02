@@ -1,0 +1,42 @@
+mod IMP++-SYNTAX0 is
+  including PL-INT .
+  including K .
+  sorts Pgm Stmt VarId .
+  op ++_ : K -> KProper
+    [prec 30 format(b o d)] .
+  op _+_ : K K -> KProper
+    [prec 33 gather(E e)format(d b o d)] .
+  op _/_ : K K -> KProper
+    [prec 31 gather(E e)format(d b o d)] .
+  op _:=_ : VarId K -> KProper
+    [prec 40 format(d b o d)metadata "strict(2)"] .
+  op _;_ : K K -> KProper
+    [prec 60 gather(e E)format(d b noi d)] .
+  op _<=_ : K K -> KProper
+    [prec 37 format(d b o d)metadata "seqstrict"] .
+  op _and_ : K K -> KProper
+    [prec 55 format(d b o d)metadata "strict(1)"] .
+  op halt : -> KProper
+    [format(b o)] .
+  op if_then_else_ : K K K -> KProper
+    [prec 59 format(b o bni n++i bn--i n++i --)metadata "strict(1)"] .
+  op not_ : K -> KProper
+    [prec 53 format(b o d)metadata "strict"] .
+  op print_ : K -> KProper
+    [prec 59 format(b o d)metadata "strict"] .
+  op skip : -> KProper
+    [format(b o)] .
+  op spawn_ : K -> KProper
+    [prec 59 format(b n++i --)] .
+  op subsort"Bool < KResult"_ : Bool -> KResult
+    [metadata "builtin wrapper"] .
+  op subsort"Int < KResult"_ : Int -> KResult
+    [metadata "builtin wrapper"] .
+  op subsort"VarId < KProper"_ : VarId -> KProper
+    [metadata "builtin wrapper"] .
+  op vars_;_ : KList K -> KProper
+    [prec 59 format(b o b on++i --)] .
+  op while_do_ : K K -> KProper
+    [prec 59 format(b o b on++i --)] .
+endm
+

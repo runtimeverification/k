@@ -1,0 +1,143 @@
+load pl-builtins
+
+--- Level 0
+
+mod K is 
+  including PL-NAT .
+  sorts EmptyK KBaseProper KProper KBaseResult KResult NeK K .
+  subsorts KProper KResult < NeK < K .
+  subsort EmptyK < K .
+  op .k : -> EmptyK [metadata "latex(renameTo \\ensuremath{\\kdot})"].
+  op _~>_ : K K -> K [prec 100  assoc id: .k metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
+
+--- next line is useful only if not using <k> wrappers for strictness
+---  op _~>_ : KProper K -> KProper [ditto] .
+
+  sorts EmptyKList NeProperList ResultList NeResultList KList NeKList .
+  op .kl : -> EmptyKList .
+  subsort K < NeKList < KList .
+  subsort EmptyKList < ResultList < KList .
+  subsort KProper < NeProperList < NeKList .  
+  subsort KResult < NeResultList < ResultList NeKList .
+
+  op _`,_ : KList KList -> KList [assoc id: .kl prec 121] .
+  op _`,_ : NeKList KList -> NeKList [ditto] .
+  op _`,_ : KList NeKList -> NeKList [ditto] .
+  op _`,_ : NeProperList KList -> NeProperList [ditto] .
+  op _`,_ : KList NeProperList -> NeProperList [ditto] .
+  op _`,_ : ResultList ResultList -> ResultList [ditto] .
+  op _`,_ : NeResultList ResultList -> NeResultList [ditto] .
+  op _`,_ : ResultList NeResultList -> NeResultList [ditto] .
+
+
+  op length_ : KList -> Nat . 
+  eq length(.kl) = 0 .
+  eq length(K:K,KL:KList) = sNat length(KL:KList) . 
+
+  sorts KLabel KProperLabel KResultLabel .
+  subsorts KProperLabel KResultLabel < KLabel .
+  op ~ : -> KProperLabel .
+  op ~Result : -> KResultLabel .
+  eq ~(RL:ResultList) = ~Result(RL:ResultList) [metadata "cooling"] .
+  
+  
+  op _`(_`) : KLabel KList -> NeK [prec 0 gather(& &)] .
+  op _`(_`) : KProperLabel KList -> KProper [ditto] .
+  op _`(_`) : KResultLabel KList -> KResult [ditto] .
+
+  sort ListItem List NeList .
+  subsort ListItem < NeList < List .
+  op .l : -> List .
+  op l : K -> ListItem  .
+  op _,_ : List List -> List [assoc comm id: .l] .
+  op _,_ : NeList List -> NeList [ditto] .
+  op _,_ : List NeList -> NeList [ditto] .
+  var LItem : ListItem .  var List : List .
+  op length_ : List -> Nat .
+  eq length(.l) = 0 .
+  eq length(LItem,List) = sNat length(List) .
+
+  sort SetItem Set NeSet .
+  subsort SetItem < NeSet < Set .
+  op .s : -> Set .
+  op s : K -> SetItem .
+  op __ : Set Set -> Set [assoc comm id: .s] .
+  op __ : NeSet Set -> NeSet [ditto] .
+  
+  sort MapItem Map NeMap .
+  subsort MapItem < NeMap < Map .
+  op .m : -> Map .
+  op m : K K -> MapItem .
+  op __ : Map Map -> Map [assoc comm id: .m prec 120] .
+  op __ : NeMap Map -> NeMap [ditto] .
+
+  op _[_<-_] : Map K K -> Map [prec 0] .
+
+  var Map : Map .  vars K1 K2 K2' : K .
+  eq (Map m(K1, K2))[K1 <- K2'] = Map m(K1, K2') .
+  eq Map[K1 <- K2] = Map m(K1, K2) [owise] .
+endm
+
+mod CONFIG is including K .
+  sort CellLabel .
+  ops k T : -> CellLabel .
+  op <_>_</_> : CellLabel K CellLabel -> SetItem [prec 0] .
+  op <_>_</_> : CellLabel List CellLabel -> SetItem [prec 0] .
+  op <_>_</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
+  op <_>_</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
+endm
+
+mod K-SENTENCE is
+  sort KSentence . 
+endm
+
+--- Strictness Level
+
+mod K-STRICTNESS is 
+  including CONFIG .
+  including PL-STRING .
+  op freezer : String -> KLabel .
+  op freezeVar : String -> KLabel .
+endm
+
+mod K-STRICTNESS-INTERNAL is
+  including K .
+  including K-SENTENCE .
+  ops kcxt_ : K -> [KSentence] [prec 127] .
+  op [] : -> K .
+endm
+
+---- K Rules Level 
+
+mod K-RULES is
+  including K-SENTENCE .
+  ops keq_ krl_ knd_ : Universal -> [KSentence] [prec 127 poly(1)] .
+  op `[`[_==>_`]`] : Universal Universal -> Universal [poly (0 1 2) prec 0] .
+endm
+
+---- Context transformers level
+
+mod K-CONFIG is
+  including CONFIG .
+  including K-SENTENCE .
+  op kconf_ : Set -> [KSentence] [prec 127] .
+endm
+
+--- extra stuff
+
+mod K-MAP-EXTRAS is
+  including K .
+  var Map : Map .  var List : KList . var NList1 NList2 : NeKList .
+  vars K1 K2 K2' K : K .
+  op m : KList KList -> Map [ditto] .
+  eq m((K1,NList1),(K2, NList2)) = m(K1,K2) m(NList1, NList2) .
+  eq m((K1,NList1),K2) = m(K1,K2) m(NList1,K2) .
+  eq m(.kl, List) = .m .
+
+  op _[_<-_] : Map KList KList -> Map [ditto] .
+  eq Map[(K1,NList1) <- (K2, NList2)] = (Map[K1 <- K2])[NList1 <- NList2] .
+  eq Map[(K1,NList1) <- K2] = (Map[K1 <- K2])[NList1 <- K2] .
+  eq Map[.kl <- List] = Map .
+endm
+
+

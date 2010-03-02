@@ -1,0 +1,55 @@
+set include PL-BOOL off .
+set include BOOL on .
+
+load prelude-extras 
+load meta-k
+
+fmod MAKE-K-RULES is
+  including META-MODULE-EXTRAS .
+  including  META-K-RULES .
+  var M : Module .  var T T1 T2 : Term .  var AS : AttrSet . 
+  var C : Condition . var S : Sort . var Ct : Constant . var V : Variable .
+  var O : Qid . var N : Nat . var Tl : TermList .
+  var KRuleType : KRuleKind .  var Split : KRuleSplit .
+  var Mas : MembAxSet . var Max : MembAx .
+  
+  op resolveKRules : Qid Module -> Module .
+  eq resolveKRules(O, M) = setName(resolveReplace(setMbs(removeImports(M, (including 'K-RULES .)),none), getMbs(M)), O) .
+
+  op resolveReplace : Module MembAxSet -> Module .
+  eq resolveReplace(M, none) = M .
+  eq resolveReplace(M, Max Mas)
+   = resolveReplace(M, Max, Mas) .
+  op resolveReplace : Module MembAx MembAxSet -> Module .
+ ceq resolveReplace(M, Max, Mas)
+   = resolveReplace(addReplace(M, Split), Mas)
+  if Split := splitKRule(Max) .
+  eq resolveReplace(M, Max, Mas) = resolveReplace(addMbs(Max, M), Mas) [owise] .
+
+  op addReplace : Module KRuleSplit ~> Module .
+  eq addReplace(M,{keq,T,nil,AS})
+   = addEqs((eq splitReplace(T,1) = splitReplace(T,2) [AS metadata("keq")] .), M) . 
+  eq addReplace(M, {keq, T, C, AS})
+   = addEqs((ceq splitReplace(T,1) = splitReplace(T,2) if C [AS metadata("keq")] .), M) [owise] .
+  eq addReplace(M, {knd,T, nil,AS})
+    = addRls((rl splitReplace(T,1) => splitReplace(T,2) [AS metadata("knd")] .), M) .
+  eq addReplace(M, {knd, T, C, AS})
+    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C [AS metadata("knd")] .), M) [owise] .
+  eq addReplace(M, {krl, T, nil, AS})
+    = addRls((rl splitReplace(T,1) => splitReplace(T,2) [AS metadata("krl")] .), M) .
+  eq addReplace(M, {krl, T, C, AS}) 
+    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C [AS metadata("krl")] .), M) [owise] .
+      
+  
+  op splitReplace : Term Nat -> Term .
+ ceq splitReplace(O[T1, T2],N) = if N == 1 then T1 else T2 fi
+  if O == replaceS .
+  eq splitReplace(O[Tl],N) = O[splitReplaceL(Tl,N)] [owise] .
+  eq splitReplace(Ct,N) = Ct .
+  eq splitReplace(V, N) = V .
+
+  op splitReplaceL : TermList Nat -> TermList .
+  eq splitReplaceL((T, Tl),N) = splitReplace(T,N), splitReplaceL(Tl,N) .
+  eq splitReplaceL(empty,N) = empty .
+endfm
+

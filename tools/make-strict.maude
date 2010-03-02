@@ -1,0 +1,196 @@
+set include PL-BOOL off .
+set include BOOL on .
+load prelude-extras
+load meta-k
+
+fmod K-STRICTNESS-OPS is including META-LEVEL .
+  including K-META-OPS .
+  op hole : -> Term .
+  eq hole = '`[`].K .
+
+  var S : String .
+
+  op freezeLabel : String -> Term .
+  eq freezeLabel(S) = 'freezer[upTerm(S)] .
+
+  op freezeVariable : String Variable -> Term .
+  eq freezeVariable(S, V:Variable) = kApply('freezeVar[upTerm(S)],V:Variable) .
+endfm
+
+fmod STRICT-ATTRS is
+  including META-MODULE .
+  ops kstrict seqkstrict : NatList -> Attr .
+  op karity : Nat -> Attr .
+endfm
+
+fmod SYNTAX-ATTRS is
+  including META-MODULE .
+  ops kaux kdisolve : -> Attr .
+  op krenameTo : Qid -> Attr .
+  op ksyntax : -> Attr .
+  op klatex : AttrSet -> Attr .
+  op kcolor : Qid -> Attr .
+endfm
+
+
+fmod CONFIGURATION-ATTRS is
+  including META-MODULE .
+  op kwrapping : Qid -> Attr .
+endfm
+
+
+mod STRICTOPS2CXT is 
+  including CONVERSION .
+  including META-MODULE-EXTRAS .
+  including NAT-LIST-EXTRAS .
+  including STRICT-ATTRS .
+  including K-STRICTNESS-OPS .
+  including K-SORTS .
+  var Str : String . var Nats Nats' : NatList . var NNats : NeNatList .
+  var AS : AttrSet . var N N' : Nat . var NA : NzNat .  var Tl : TermList .
+  var Q : Qid . var Ty : Type . var Tyl : TypeList . 
+  var Op : OpDecl . var OPDS : OpDeclSet . var Mod : Module .
+
+  op strictOps2cxt : Qid Module ~> Module .
+  eq strictOps2cxt(Q, Mod) 
+   = setMbs(setImports(setName(emptySModule, Q), (including getName(Mod) .) including 'K-STRICTNESS-INTERNAL .), strictOps2cxtOps(getOps(Mod))) .
+
+  op strictOps2cxtOps : OpDeclSet ~> MembAxSet .
+  eq strictOps2cxtOps(none) = none .
+  eq strictOps2cxtOps(Op OPDS) = strictOps2cxtOp(Op) strictOps2cxtOps(OPDS) .
+  
+  op strictOps2cxtOp : OpDecl ~> MembAxSet .
+  eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS kstrict(Nats) karity(N)] .)
+   = strictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Nats, N) .
+  eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS seqkstrict(Nats) karity(N)] .)
+   = seqstrictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Nats, N) .
+  eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS kstrict(Nats)] .)
+   = strictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Nats, -1) [owise] .
+  eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS seqkstrict(Nats)] .)
+   = seqstrictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Nats, -1) [owise] .
+  eq strictOps2cxtOp(Op) = none [owise] .
+
+  op strictOps2cxtMbs : Qid NatList Int  ~> MembAxSet .
+--- regardless of arity
+  eq strictOps2cxtMbs(Q, N NNats, N')
+   = strictOps2cxtMbs(Q, N, N') strictOps2cxtMbs(Q, NNats, N') .
+--- if arity is unspecified 
+  eq strictOps2cxtMbs(Q, nil, -1)
+   = (mb 'kcxt_[kApply(Q, ('Kl1:KList,
+              hole, 'Kl2:KList))] : kSentenceSort [none] .) .
+  eq strictOps2cxtMbs(Q, s(N), -1)
+   =  (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), hole, 'Kl:KList))] : kSentenceSort [none] .) .
+--- if arity is specified and not 0
+  eq strictOps2cxtMbs(Q, nil, NA)
+   = strictOps2cxtMbs(Q, seq(1,NA), NA) .
+  eq strictOps2cxtMbs(Q, s(N), NA)
+   = (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), hole, makeKVars(seq(s(s(N)),NA), "K")))] : kSentenceSort [none] .) .
+
+
+  op seqstrictOps2cxtMbs  : Qid NatList Nat ~> MembAxSet .
+--- regardless of arity
+  eq seqstrictOps2cxtMbs(Q, NNats, N')
+   = seqstrictOps2cxtMbsAux(Q, nil, NNats, N') .
+--- if arity is unspecified
+  eq seqstrictOps2cxtMbs(Q, nil, -1)
+   = (mb 'kcxt_[kApply(Q, ('Kl1:ResultList,
+         hole, 'Kl2:KList))] : kSentenceSort [none] .) .
+--- if arity is specified and not 0
+  eq seqstrictOps2cxtMbs(Q, nil, NA)
+   = seqstrictOps2cxtMbs(Q, seq(1,NA), NA)  .
+
+  op seqstrictOps2cxtMbsAux  : Qid NatList NatList Nat ~> MembAxSet .
+--- regardless of arity
+  eq seqstrictOps2cxtMbsAux(Q, Nats, nil, N') = none .
+--- if arity is unspecified 
+  eq seqstrictOps2cxtMbsAux(Q, Nats, N Nats',-1)
+   =  seqstrictOps2cxtMbsAux(Q, Nats N, Nats', -1)
+     (mb 'kcxt_[kApply(Q, (makeSSVars(1, sort(Nats N), N), 'Kl:KList))] : kSentenceSort [none] .) .
+--- if arity is specified and not 0
+  eq seqstrictOps2cxtMbsAux(Q, Nats, N Nats',NA)
+   =  seqstrictOps2cxtMbsAux(Q, Nats N, Nats', NA)
+     (mb 'kcxt_[kApply(Q, (makeSSVars(1, sort(Nats N), N), makeKVars(seq(s(last(sort(Nats N))), NA), "K")))] : kSentenceSort [none] .) .
+
+  vars M : Nat . 
+
+  op makeSSVars : Nat NatList Nat ~> TermList .
+  eq makeSSVars(N, nil, M) = empty .
+  eq makeSSVars(N, N Nats, N) = (hole, makeSSVars(s(N), Nats, N)) .
+  eq makeSSVars(N, N Nats, M) 
+   =  (qid("K" + string(N,10) + ":KResult"), makeSSVars(s(N), Nats, M))
+  [owise] .
+  eq makeSSVars(N, Nats, M)
+   =  (qid("K" + string(N,10) + ":K"), makeSSVars(s(N), Nats, M)) 
+  [owise] .
+
+  op makeKVars : NatList String -> TermList .
+  eq makeKVars(nil, Str) = empty .
+  eq makeKVars(N Nats, Str) 
+   = qid("K" + string(N,10) + ":" + Str), makeKVars(Nats, Str) . 
+endm
+
+mod STRICTCXT2EQ is
+  including K-SORTS .
+  including K-META-OPS .
+  including K-STRICTNESS-OPS .
+  including META-TERM-EXTRAS .
+  including STRING-EXTRAS .
+  including META-MODULE-EXTRAS .
+  var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
+  var AS : AttrSet . var MAS : MembAxSet . var Eqs : EquationSet .
+  sort MASEqsPair .
+  op {_,_} : MembAxSet EquationSet -> MASEqsPair [ctor] .
+
+  op strictCxt2eq : Module MembAxSet ~> MASEqsPair .
+  eq strictCxt2eq(M,MAS) = strictCxt2eq(M, MAS, none) .
+  op strictCxt2eq : Module MembAxSet EquationSet ~> MASEqsPair . 
+ ceq strictCxt2eq(M, (mb 'kcxt_[T] : Sort [AS] .) MAS,Eqs)
+   = strictCxt2eq(M, MAS, Eqs
+     ((eq kWrap(T[hole <- 'Kcxt:KProper])  
+        = kWrap(kra('Kcxt:KProper, freezeTerm(M, T))) 
+       [metadata("heating")] .)
+      (eq kWrap(kra('Kcxt:KResult, freezeTerm(M, T)))
+        = kWrap(T[hole <- 'Kcxt:KResult])
+       [metadata("cooling")] .))) 
+  if Sort = kSentenceSort .
+  eq strictCxt2eq(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
+
+
+  op freezeTerm : Module Term -> Term .
+  eq freezeTerm(M, T) = kApply(
+   freezeLabel(untokenize(metaPrettyPrint(M,T, mixfix flat number rat))),
+   freezeVariables(noDuplicates(getVars(T)))) .
+
+
+
+  op freezeVariables : TermList -> TermList .
+  op freezeVariable : Variable -> Variable .
+  eq freezeVariables((V,Trl)) 
+   = (freezeVariable(V),freezeVariables(Trl)) .
+  eq freezeVariables(empty) = empty .
+
+  eq freezeVariable(V) = freezeVariable(string(V),V) . 
+
+  op strictCxt2eq : Qid Qid Module ~> Module .
+  var Syntax StrictEqs : Qid . var M : Module .
+
+  eq strictCxt2eq(Syntax,StrictEqs,M) = strictCxt2eq(Syntax,StrictEqs,strictCxt2eq(M, getMbs(M))) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
+
+  op strictCxt2eq : Qid Qid MASEqsPair ~> Module .
+  eq strictCxt2eq(Syntax, StrictEqs, {MAS,Eqs}) 
+   = setMbs(addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))), MAS) .
+endm
+
+mod STRICTOPS2EQ is
+  including STRICTOPS2CXT .
+  including STRICTCXT2EQ .
+  op strictOps2eq : Qid Module ~> Module .
+  var StrictEq : Qid .  var Syntax : Module .
+  eq strictOps2eq(StrictEq, Syntax) 
+   = strictCxt2eq(getName(Syntax), StrictEq, strictOps2cxt('STRICTCXT,Syntax)) .
+  --- [print "Syntax: " Syntax] .
+endm
+
+
+
+

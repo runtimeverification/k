@@ -1,0 +1,509 @@
+fmod NAT-LIST-EXTRAS is
+  including NAT-LIST .
+  vars M N : Nat . vars Nats Nats' : NatList .
+
+  op sort : NatList ~> NatList .
+  ceq sort(Nats M N Nats') = sort(Nats N M Nats') if M > N .
+  eq sort(Nats) = Nats [owise] .
+
+  --- precondition first argument should be at most succesor of the second
+  op seq : Nat Nat ~> NatList .
+  eq seq(N, M) = if N > M then nil else N seq(s(N), M) fi .
+endfm
+
+fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
+	including QID-LIST .
+  op stripSpaces : String -> String .
+  var S : String . var N : Nat .
+  ceq stripSpaces(S) = stripSpaces(substr(S, 1, length(S))) 
+   if " " = substr(S,0,1) .
+  ceq stripSpaces(S) = stripSpaces(substr(S, 0, N)) 
+   if s(N) := length(S) 
+   /\ " " = substr(S,N,1) .
+  eq stripSpaces(S) = S [owise] .
+
+  op replace : String Char String Nat String -> String .
+  var ToRepl : Char . var Repl Default : String . var Occ : NzNat .
+  ceq replace(S, ToRepl, Repl, s(Occ), Default)
+    = substr(S, 0, s(N)) 
+    + replace(substr(S, s(N), length(S)), ToRepl, Repl, Occ, Default) 
+   if N := find(S, ToRepl, 0) .
+  ceq replace(S, ToRepl, Repl, 1, Default)
+    = substr(S, 0, s(N)) + Repl + substr(S, s(s(N)), length(S)) 
+   if s(N) := find(S, ToRepl, 0) .
+  ceq replace(S, ToRepl, Repl, 1, Default)
+    = Repl + substr(S, 1, length(S)) 
+   if 0 := find(S, ToRepl, 0) .
+   eq replace(S, ToRepl, Repl, N, Default) = S + Default [owise] .
+
+  op insertBeforeOrAppend : String String String -> String .
+  vars Source With What : String . vars L : Nat . var F : FindResult .
+  ceq insertBeforeOrAppend(Source, What, With) 
+    = substr(Source, 0, N) + With + substr(Source, N, L)
+   if L := length(Source) 
+   /\ F := rfind(Source, What, L) 
+   /\ N := if F :: Nat then F else L fi .
+
+--- replaces all occurences of the second string by the third in the first
+   op replace : String String String -> String .
+   ceq replace(Source, What, With) 
+     = if F :: Nat then 
+         substr(Source, 0, F) + With 
+       + replace(substr(Source, F + length(What), length(Source)), What, With) 
+       else Source fi 
+    if F := find(Source, What, 0) .
+
+  var StrM : Map{String,String} .
+  op replaceAll : String Map{String,String} -> String .
+  eq replaceAll(Source, ((What |-> With), StrM))
+   = replaceAll(replace(Source, What, With), StrM) .
+  
+  eq replaceAll(Source, empty) = Source .
+  
+  op makeInfix : String Nat -> String .
+  eq makeInfix(Source, 0) = Source .
+  ceq makeInfix(Source, L) = Source 
+   if N := find(Source, "_", 0) .
+  eq makeInfix(Source, s(N)) = makeInfix(Source, N) + "_" [owise] .
+
+  op tokenize : String -> QidList .
+  ceq tokenize(S) 
+    = qid(substr(S,0,N)) tokenize(stripSpaces(substr(S, N + 1, length(S))))
+   if N := find(S, " ", 0) . 
+  eq tokenize("") = nil .
+  eq tokenize(S) = qid(S) [owise] .
+
+
+  var Q : Qid . var QIL : QidList .
+  op untokenize : QidList -> String .
+  eq untokenize(nil) = "" .
+  eq untokenize(Q QIL) = unqidify(string(Q)) + untokenize(QIL) .
+
+  op unqidify : String -> String .
+  eq unqidify("\\s") = " " .
+  eq unqidify("\\t") = "  " .
+  eq unqidify("\\n") = " " .
+  eq unqidify("\\r") = "" .
+  eq unqidify("\\g") = "" .
+  eq unqidify("\\y") = "" .
+  eq unqidify("\\b") = "" .
+  eq unqidify("\\m") = "" .
+  eq unqidify("\\c") = "" .
+  eq unqidify("\\u") = "" .
+  eq unqidify("\\!") = "" .
+  eq unqidify("\\o") = "" .
+  eq unqidify("`(") = "(" .
+  eq unqidify("`)") = ")" .
+  eq unqidify("`{") = "{" .
+  eq unqidify("`}") = "}" .
+  eq unqidify("`[") = "[" .
+  eq unqidify("`]") = "]" .
+  eq unqidify("`,") = "," .
+  eq unqidify(S) = S [owise] .
+
+
+---  replace each left pair char in the map by its corresponding right pair char
+---  in the given input string
+  op replace : String Map{String,String} -> String . 
+  var M : Map{String, String} . var C : Char .
+  eq replace("", M) = "" .
+  eq replace(S, M) 
+   = replaceOne(substr(S,0,1), M) + replace(substr(S,1, length(S)), M) .
+  op replaceOne : Char Map{String, String} -> String .
+  eq replaceOne(C, ((C |-> S), M)) = S .
+  eq replaceOne(C, M) = C [owise] .
+  
+  op allCaps : String -> String .
+  eq allCaps(S) = replace(S, ("a" |-> "A", "b" |-> "B", "c" |-> "C", "d" |-> "D", "e" |-> "E", "f" |-> "F", "g" |-> "G", "h" |-> "H", "i" |-> "I", "j" |-> "J", "k" |-> "K", "l" |-> "K", "m" |-> "M", "n" |-> "N", "o" |-> "O", "p" |-> "P", "q" |-> "Q", "r" |-> "R", "s" |-> "S", "t" |-> "T", "u" |-> "U", "v" |-> "V", "w" |-> "W", "x" |-> "X", "y" |-> "Y", "z" |-> "Z")) .
+endfm
+
+fmod QID-EXTRAS is
+  pr QID-LIST .
+
+  op qidList2Qid : QidList -> Qid .
+
+  var  QI : Qid .
+  var  QIL : QidList .
+  vars St St' : String .
+  var  N : Nat .
+  var  F : FindResult .
+
+  eq qidList2Qid(('\s QIL)) = qid(" " + string(qidList2Qid(QIL))) .
+  eq qidList2Qid((QI QIL)) 
+    = qid(string(QI) + " " + string(qidList2Qid(QIL))) 
+    [owise] .
+  eq qidList2Qid(nil) = qid("") .
+
+  op trimQidList : QidList -> QidList .
+  eq trimQidList(' QIL) = trimQidList(QIL) .
+  eq trimQidList(QI QIL) = QI trimQidList(QIL) [owise] .
+  eq trimQidList(nil) = nil .
+
+  op string2qidList : String -> QidList .
+  op string2qidListAux : String -> QidList .
+  
+  eq string2qidList(St) = trimQidList(string2qidListAux(St)) .
+  
+  eq string2qidListAux("") = nil .
+  ceq string2qidListAux(St)
+    = if F == notFound
+      then qid(substr(St, findNonSpace(St), length(St))) 
+      else qid(substr(St, findNonSpace(St), F)) 
+           if substr(St, findNonSpace(St) + F, 1) =/= " "
+           then qid(substr(St, findNonSpace(St) + F, 1))
+           else nil
+           fi 
+           string2qidListAux(substr(St, findNonSpace(St) + F + 1, length(St)))
+      fi
+    if F := myfind(substr(St, findNonSpace(St), length(St)), " (){}[],", 0)
+    [owise] .
+  
+  op findNonSpace : String -> Nat .
+  op findNonSpace : String Nat -> Nat .
+  ---- returns the length of the string if not found
+  eq findNonSpace(St) = findNonSpace(St, 0) .
+
+  eq findNonSpace(St, N)  
+    = if N < length(St)
+      then if substr(St, N, 1) == " " 
+           then findNonSpace(St, N + 1)  
+           else N
+           fi 
+      else length(St)
+      fi .
+      
+  op myfind : String String Nat -> FindResult .
+  eq myfind(St, St', N)
+    = if N < length(St) 
+      then if find(St', substr(St, N, 1), 0) =/= notFound
+           then N
+           else myfind(St, St', N + 1)
+           fi
+      else notFound 
+      fi .
+    
+endfm
+
+fmod META-TERM-EXTRAS is
+  including META-TERM .
+  var V : Variable . var Trl' Trl Trl'' : TermList .  var Tr Tr' : Term .
+  var C : Constant . var Nz : NzNat . var N : Nat .  var Q : Qid .
+  var Subst : Substitution .
+
+  op countTerms : TermList -> Nat .
+  eq countTerms(empty) = 0 .
+  eq countTerms((T:Term,TL:TermList)) = s(countTerms(TL:TermList)) .
+
+  --- retrieves a list of all vars in the term, top-bottom, left-right
+  op getVars : TermList -> TermList .
+  eq getVars((V,Trl)) = V,getVars(Trl) .
+  eq getVars((C,Trl)) = getVars(Trl) .
+  eq getVars((Q[Trl],Trl')) = getVars((Trl, Trl')) .
+  eq getVars(empty) = empty .
+
+  --- eliminates term/variable duplicates (keeps only the leftmost occurrences
+  op noDuplicates : TermList -> TermList .
+  eq noDuplicates((Trl,Tr,Trl',Tr,Trl'')) = noDuplicates((Trl,Tr,Trl',Trl'')) .
+  eq noDuplicates(Trl) = Trl [owise] .
+
+
+  --- retrieves the nth var in a term. uses getVars
+  op getVar : TermList NzNat ~> Term .
+  eq getVar((V,Trl),1) = V .
+  eq getVar((V,Trl),s(Nz)) = getVar(Trl,Nz) .
+  eq getVar(Tr,Nz) = getVar(getVars(Tr), Nz) [owise] .
+
+
+  --- retrieves the position of a variable in a term by its name, 
+  --- uses getVars
+  op getVarPos : TermList Qid ~> NzNat .
+  eq getVarPos((V, Trl), Q) 
+   = if Q == getName(V)  then 1 else s(getVarPos(Trl, Q)) fi .
+  eq getVarPos(Tr,Q) = getVarPos(getVars(Tr), Q) [owise] .
+
+
+  op _<-_ : Term Term -> Assignment [ditto] .
+
+  op _[_] : TermList Substitution ~> Term .
+  eq empty[Subst] = empty .
+  eq (Tr,Trl)[(Tr <- Tr') ; Subst] = Tr', (Trl[(Tr <- Tr') ; Subst]) .
+  eq (Q[Trl],Trl')[Subst] = Q[Trl[Subst]],(Trl'[Subst]) [owise] .
+  eq (V,Trl)[Subst] = V,(Trl[Subst]) [owise] .
+  eq (C,Trl)[Subst] = C,(Trl[Subst]) [owise] .
+endfm
+
+fmod META-MODULE-EXTRAS is
+  including META-MODULE .
+
+  sort ViewExp .
+  subsorts Sort < ViewExp < ModuleExpression NeParameterList .
+
+  op mtViewExp : -> ViewExp .
+  op _{_} : Sort ParameterList -> ViewExp [ctor prec 37].
+  op _;;_ : ViewExp ViewExp -> ViewExp 
+       [assoc id: mtViewExp] .                       *** view composition  _;_
+      
+  var  M : Module .
+  vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
+  vars OPDS OPDS' : OpDeclSet .
+  vars MAS MAS' : MembAxSet .
+  vars EqS EqS' : EquationSet .
+  vars RlS RlS' : RuleSet .
+  vars SS SS' : SortSet .  var S S' : Sort .
+  vars IL IL' IL'' : ImportList .  var I : Import .
+  vars U U' : Module .
+  var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
+  vars PDL PDL' : ParameterDeclList .
+  var Q Q' : Qid . var Tl : TypeList . var T : Type . var AS AS' : AttrSet .
+  var N : Nat .
+
+  op nullHeader : -> Header .
+
+  op setName : Module ModuleExpression -> Module .
+  op setImports : Module ImportList -> Module .
+  op setSorts : Module SortSet -> Module .
+  op setSubsorts : Module SubsortDeclSet -> Module .
+  op setOps : Module OpDeclSet -> Module .
+  op setMbs : Module MembAxSet -> Module .
+  op setEqs : Module EquationSet -> Module .
+  op setRls : Module RuleSet -> Module .
+  
+  op addImports : ImportList Module -> Module .
+  op addSorts : SortSet Module -> Module .
+  op addSubsorts : [SubsortDeclSet] Module -> Module .
+  op addOps : [OpDeclSet] Module -> Module .
+  op addMbs : MembAxSet Module -> Module .
+  op addEqs : EquationSet Module -> Module .
+  op addRls : RuleSet Module -> Module .
+
+  op removeSubsorts : SubsortDeclSet SubsortDeclSet -> SubsortDeclSet .
+  eq removeSubsorts(SSDS SSD, SSDS' SSD) = removeSubsorts(SSDS, SSDS' SSD) .
+  eq removeSubsorts(SSDS, SSDS') = SSDS [owise] . 
+
+  op removeSubsorts : Module SubsortDeclSet -> Module .
+  eq removeSubsorts(M, SSDS) 
+   = setSubsorts(M, removeSubsorts(getSubsorts(M),SSDS)) .
+  
+  op removeOps : OpDeclSet OpDeclSet -> OpDeclSet .
+  eq removeOps(OPDS (op Q : Tl -> T [AS] .), OPDS' (op Q : Tl -> T [AS'] .))
+   = removeOps(OPDS, OPDS' (op Q : Tl -> T [AS'] .)) .
+  eq removeOps(OPDS, OPDS') = OPDS [owise] .
+
+  op removeOps : Module OpDeclSet -> Module .
+  eq removeOps(M, OPDS) = setOps(M, removeOps(getOps(M), OPDS)) .
+
+  op removeImports : Module ImportList -> Module .
+  eq removeImports(M, IL) = setImports(M, removeImports(getImports(M), IL)) .
+
+  op removeImports : ImportList ImportList -> ImportList .
+  eq removeImports(IL, nil) = IL .
+  eq removeImports(IL I IL', I IL'') = removeImports(IL IL', IL'') .
+  eq removeImports(IL, I IL') = removeImports(IL, IL') [owise] .
+
+  op getSubsorts : SubsortDeclSet SortSet -> SubsortDeclSet .
+  eq getSubsorts(SSDS (subsort S < S' .), SS ; S') 
+   = getSubsorts(SSDS, SS ; S')  (subsort S < S' .) .
+  eq getSubsorts(SSDS, SS) = none [owise] .
+
+  op getOps : OpDeclSet SortSet -> OpDeclSet .
+  eq getOps(OPDS (op Q : Tl -> S' [AS] .), SS ; S') 
+   = getOps(OPDS, SS ; S') (op Q : Tl -> S' [AS] .)  .
+  eq getOps(OPDS, SS) = OPDS [owise] .
+
+  op emptyFModule : -> FModule .
+  op emptySModule : -> SModule .
+
+
+  eq setName(mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm, ME') 
+    = mod ME' is IL sorts SS . SSDS OPDS MAS EqS RlS endm .
+  eq setName(mod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm, ME') 
+    = mod ME'{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm .
+  eq setName(fmod ME is IL sorts SS . SSDS OPDS MAS EqS endfm, ME') 
+    = fmod ME' is IL sorts SS . SSDS OPDS MAS EqS endfm .
+  eq setName(fmod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS endfm, ME') 
+    = fmod ME'{PDL} is IL sorts SS . SSDS OPDS MAS EqS endfm .
+  eq setName(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, MN') 
+    = fth MN' is IL sorts SS . SSDS OPDS MAS EqS endfth .
+  eq setName(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, MN') 
+    = th MN' is IL sorts SS . SSDS OPDS MAS EqS RlS endth .
+
+  eq setName(mod nullHeader is IL sorts SS . SSDS OPDS MAS EqS RlS endm, ME') 
+    = mod ME' is IL sorts SS . SSDS OPDS MAS EqS RlS endm .
+  eq setName(fmod nullHeader is IL sorts SS . SSDS OPDS MAS EqS endfm, ME') 
+    = fmod ME' is IL sorts SS . SSDS OPDS MAS EqS endfm .
+  eq setName(fth nullHeader is IL sorts SS . SSDS OPDS MAS EqS endfth, MN) 
+    = fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth .
+  eq setName(th nullHeader is IL sorts SS . SSDS OPDS MAS EqS RlS endth, MN) 
+    = th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth .
+
+
+  eq setImports(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, IL')
+    = mod H is IL' sorts SS . SSDS OPDS MAS EqS RlS endm .
+  eq setImports(th H is IL sorts SS . SSDS OPDS MAS EqS RlS endth, IL')
+    = th H is IL' sorts SS . SSDS OPDS MAS EqS RlS endth .
+  eq setImports(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, IL')
+    = fmod H is IL' sorts SS . SSDS OPDS MAS EqS endfm .
+  eq setImports(fth H is IL sorts SS . SSDS OPDS MAS EqS endfth, IL')
+    = fth H is IL' sorts SS . SSDS OPDS MAS EqS endfth .
+
+  eq setOps(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, OPDS')
+    = mod H is IL sorts SS . SSDS OPDS' MAS EqS RlS endm .
+  eq setOps(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, OPDS')
+    = th MN is IL sorts SS . SSDS OPDS' MAS EqS RlS endth .
+  eq setOps(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, OPDS')
+    = fmod H is IL sorts SS . SSDS OPDS' MAS EqS endfm .
+  eq setOps(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, OPDS')
+    = fth MN is IL sorts SS . SSDS OPDS' MAS EqS endfth .
+
+  eq setSubsorts(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, SSDS')
+    = mod H is IL sorts SS . SSDS' OPDS MAS EqS RlS endm . 
+  eq setSubsorts(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, SSDS')
+    = th MN is IL sorts SS . SSDS' OPDS MAS EqS RlS endth .
+  eq setSubsorts(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, SSDS')
+    = fmod H is IL sorts SS . SSDS' OPDS MAS EqS endfm .
+  eq setSubsorts(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, SSDS')
+    = fth MN is IL sorts SS . SSDS' OPDS MAS EqS endfth .
+
+  eq setMbs(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, MAS')
+    = mod H is IL sorts SS . SSDS OPDS MAS' EqS RlS endm .
+  eq setMbs(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, MAS')
+    = th MN is IL sorts SS . SSDS OPDS MAS' EqS RlS endth .
+  eq setMbs(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, MAS')
+    = fmod H is IL sorts SS . SSDS OPDS MAS' EqS endfm .
+  eq setMbs(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, MAS')
+    = fth MN is IL sorts SS . SSDS OPDS MAS' EqS endfth .
+
+  eq setEqs(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, EqS')
+    = mod H is IL sorts SS . SSDS OPDS MAS EqS' RlS endm .
+  eq setEqs(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, EqS')
+    = th MN is IL sorts SS . SSDS OPDS MAS EqS' RlS endth .
+  eq setEqs(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, EqS')
+    = fmod H is IL sorts SS . SSDS OPDS MAS EqS' endfm .
+  eq setEqs(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, EqS')
+    = fth MN is IL sorts SS . SSDS OPDS MAS EqS' endfth .
+
+  op setRls : [Module] [RuleSet] -> [Module] .
+  var U? : [Module] .
+
+  eq setRls(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, RlS')
+    = mod H is IL sorts SS . SSDS OPDS MAS EqS RlS' endm .
+  eq setRls(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, RlS')
+    = th MN is IL sorts SS . SSDS OPDS MAS EqS RlS' endth .
+  eq setRls(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, RlS)
+    = if RlS == none 
+      then fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm
+      else mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm
+      fi .
+  eq setRls(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, RlS)
+    = if RlS == none 
+      then fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth
+      else th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth
+      fi .
+
+  eq setSorts(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, SS')
+    = mod H is IL sorts SS' . SSDS OPDS MAS EqS RlS endm .
+  eq setSorts(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, SS')
+    = th MN is IL sorts SS' . SSDS OPDS MAS EqS RlS endth .
+  eq setSorts(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, SS')
+    = fmod H is IL sorts SS' . SSDS OPDS MAS EqS endfm .
+  eq setSorts(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, SS')
+    = fth MN is IL sorts SS' . SSDS OPDS MAS EqS endfth .
+
+  eq addSorts(SS, U) = setSorts(U, (SS ; getSorts(U))) .
+  eq addSubsorts(SSDS, U) = setSubsorts(U, (SSDS getSubsorts(U))) .
+  eq addOps(OPDS, U) = setOps(U, (OPDS getOps(U))) .
+  eq addMbs(MAS, U) = setMbs(U, (MAS getMbs(U))) .
+  eq addEqs(EqS, U) = setEqs(U, (EqS getEqs(U))) .
+  eq addRls(RlS, U) = setRls(U, (RlS getRls(U))) .
+  eq addImports(IL, U) = setImports(U, (getImports(U) IL)) .
+
+  eq emptyFModule 
+    = fmod nullHeader is nil sorts none . none none none none endfm .
+  eq emptySModule
+    = mod nullHeader is nil sorts none . none none none none none endm . 
+
+
+  op arity : TypeList -> Nat .
+  eq arity(nil) = 0 .
+  eq arity(T Tl) = s(arity(Tl)) .
+
+  op dup : Type Nat -> TypeList .
+  eq dup(T, 0) = nil .
+  eq dup(T, s(N)) = dup(T, N) T .
+
+  op _in_ : Type SortSet -> Bool .
+  eq S in (S ; SS) = true .
+  eq T in SS = false [owise] .
+
+  op _in_ : SubsortDecl SubsortDeclSet -> Bool .
+  eq SSD in (SSD SSDS) = true .
+  eq SSD in SSDS = false [owise] .
+
+  op intersection : SortSet SortSet -> SortSet .
+  op $intersect : SortSet SortSet SortSet -> SortSet .
+  var A : SortSet .
+
+  eq intersection (SS, none) = none .
+  eq intersection (SS, SS') = $intersect (SS, SS', none) [owise] .
+  eq $intersect (none, SS', A) = A .
+  eq $intersect (S ; SS, SS', A) = $intersect (SS, SS', if S in SS' then S ; A else
+    A fi) .
+  
+  op assoc : AttrSet -> Bool .
+  eq assoc(AS assoc) = true .
+  eq assoc(AS) = false [owise] .
+
+
+  sort ModuleSet .
+  subsort Module < ModuleSet .
+  op __ : ModuleSet ModuleSet -> ModuleSet [assoc comm id: empty] .
+  op empty : -> ModuleSet .
+
+
+  op addSuffix : Qid ImportList -> ImportList .
+  eq addSuffix(Q, IL (including Q' .))
+   = addSuffix(Q, IL) (including qid(string(Q') + string(Q)) .) .
+  eq addSuffix(Q, IL (protecting Q' .))
+   = addSuffix(Q, IL) (protecting qid(string(Q') + string(Q)) .) .
+  eq addSuffix(Q, IL (extending Q' .))
+   = addSuffix(Q, IL) (extending qid(string(Q') + string(Q)) .) .
+  eq addSuffix(Q, nil) = nil .
+endfm
+
+fmod META-LEVEL-EXTRAS is
+  including META-LEVEL .
+  including META-MODULE-EXTRAS .
+
+  var M : Module . var T T' : Type . var Tl : TypeList .
+  var Trm Trm' : Term . var Trms : TermList .
+  var S S' : Sort  . var SS : SortSet .
+
+  op matchSorts : Module TermList TypeList ~> Bool .
+--- assuming Universal means Polymorfic
+---  eq matchSorts(M, (Trm,Trms), ('Universal Tl))
+---   = matchSorts(M, Trms, Tl) .
+  eq matchSorts(M, (Trm, Trms), (T Tl)) 
+   = sortLeq(M, leastSort(M, Trm), T) and-then matchSorts(M, Trms, Tl) .
+---  [owise] .
+  eq matchSorts(M, empty,nil) = true .
+
+  op greaterSorts : Module Sort -> SortSet .
+  eq greaterSorts(M, S) = greaterSorts(M, S, lesserSorts(M, getKind(M, S))) .
+  op greaterSorts : Module Sort SortSet -> SortSet .
+  eq greaterSorts(M, S, S' ; SS)  
+   = greaterSorts(M, S, SS) ; if sortLeq(M, S, S') then S' else none fi .
+  eq greaterSorts(M, S, none) = none .
+
+  op lubSorts : Module Type Type -> TypeSet .
+  eq lubSorts(M, S, S') = minimalSort(M, intersection(greaterSorts(M, S), greaterSorts(M, S'))) .
+  eq lubSorts(M, S, T) = T [owise] .
+  eq lubSorts(M, T, S') = T [owise] .
+ ceq lubSorts(M, T, T') = completeName(M,T) if sameKind(M, T, T') [owise] .
+
+  op minimalSort : Module SortSet ~> Sort .
+  ceq minimalSort(M, S ; S' ; SS) = minimalSort(M, S' ; SS) if sortLeq(M, S',S) .
+  eq minimalSort(M, S) = S .
+
+  op lubSort : Module Term Term ~> Sort .
+  eq lubSort(M, Trm, Trm') = lubSorts(M, leastSort(M, Trm), leastSort(M, Trm')) .
+endfm
