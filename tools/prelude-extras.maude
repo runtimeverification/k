@@ -490,19 +490,19 @@ fmod META-LEVEL-EXTRAS is
 
   op leastSorts : Module TermList ~> TypeList .
   eq leastSorts(M,empty) = nil .
-  eq leastSorts(M, (Trm, Trms)) = leastSort(M,Trm), leastSorts(M, Trms) .
+  eq leastSorts(M, (Trm, Trms)) = leastSort(M,Trm)  leastSorts(M, Trms) .
 
     op sortsLeq : Module TypeList TypeList ~> Bool .
 --- assuming Universal means Polymorfic
 ---  eq sortsLeq(M, T' Tl', ('Universal Tl))
 ---   = sortsLeq(M, Tl', Tl) .
-  eq sortsLeq(M, (T, Tl'), (T Tl)) 
+  eq sortsLeq(M, (T Tl'), (T Tl)) 
    = sortsLeq(M, Tl', Tl) .
 ---  [owise] .
-  eq sortsLeq(M, (T', Tl'), (T Tl)) 
+  eq sortsLeq(M, (T' Tl'), (T Tl)) 
    = sortLeq(M, T', T) and-then sortsLeq(M, Tl', Tl) 
   [owise] .
-  eq sortsLeq(M, empty,nil) = true .
+  eq sortsLeq(M, nil,nil) = true .
 
   op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
@@ -510,10 +510,10 @@ fmod META-LEVEL-EXTRAS is
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
  ceq findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, T)
    = (op Q : T' T' -> T' [AS assoc] .) 
-  if sortsLeq(M,T' Tl,T dup(T',arity(Tl))) .
+  if sortLeq(M,T',T) and-then sortsLeq(M,Tl,dup(T',arity(Tl))) .
  ceq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
-   = (op Q : Tl -> T' [AS] .)
-  if sortsLeq(M, T' Tl, T Tl') [owise] .
+   = (op Q : Tl' -> T' [AS] .)
+  if sortLeq(M,T',T) and-then sortsLeq(M, Tl, Tl') [owise] .
 
   op getTypes : Nat OpDecl ~> TypeList .
   eq getTypes(N, (op Q : Tl -> T [AS] .))
@@ -547,3 +547,4 @@ fmod META-LEVEL-EXTRAS is
   op lubSort : Module Term Term ~> Sort .
   eq lubSort(M, Trm, Trm') = lubSorts(M, leastSort(M, Trm), leastSort(M, Trm')) .
 endfm
+

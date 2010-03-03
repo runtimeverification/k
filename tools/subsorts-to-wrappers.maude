@@ -85,11 +85,15 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op subsorts2wrappersEq : Equation Module OpDeclSet SubsortDeclMap ~> Equation .
  eq subsorts2wrappersEq((eq T1 = T2 [AS] .), M, OPDS, SSDM)
-  = (eq findPurifyRedex(T1, lubSort(M,T1,T2), M, OPDS, SSDM) 
-      = findPurifyRedex(T2, lubSort(M,T1,T2), M, OPDS, SSDM) [AS] .) . 
+  = (eq findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) 
+      = findPurifyRedex(T2, getKind(M,leastSort(M,T2)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) [AS] .) . 
  eq subsorts2wrappersEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, SSDM)
-  = (ceq findPurifyRedex(T1, lubSort(M,T1,T2), M, OPDS, SSDM) 
-      = findPurifyRedex(T2, lubSort(M,T1,T2), M, OPDS, SSDM) if Cond [AS] .) . 
+  = (ceq findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) 
+      = findPurifyRedex(T2, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) if Cond [AS] .) . 
 
  op subsorts2wrappersRls : RuleSet Module OpDeclSet SubsortDeclMap ~> RuleSet .
  eq subsorts2wrappersRls(Rls Rl, M, OPDS, SSDM)
@@ -98,11 +102,15 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op subsorts2wrappersRl : Rule Module OpDeclSet SubsortDeclMap ~> Rule .
  eq subsorts2wrappersRl((rl T1 => T2 [AS] .), M, OPDS, SSDM)
-  = (rl findPurifyRedex(T1, lubSort(M,T1,T2), M, OPDS, SSDM) 
-     => findPurifyRedex(T2, lubSort(M,T1,T2), M, OPDS, SSDM) [AS] .) . 
+  = (rl findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) 
+     => findPurifyRedex(T2, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) [AS] .) . 
  eq subsorts2wrappersRl((crl T1 => T2 if Cond [AS] .), M, OPDS, SSDM)
-  = (crl findPurifyRedex(T1, lubSort(M,T1,T2), M, OPDS, SSDM) 
-     => findPurifyRedex(T2, lubSort(M,T1,T2), M, OPDS, SSDM) if Cond [AS] .) . 
+  = (crl findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) 
+     => findPurifyRedex(T2, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+, M, OPDS, SSDM) if Cond [AS] .) . 
 
  op findPurifyRedexes : TermList TypeList Module OpDeclSet SubsortDeclMap ~> TermList .
  eq findPurifyRedexes((Trm,Trms),(T Tl),M,OPDS, SSDM)
