@@ -422,6 +422,14 @@ fmod META-MODULE-EXTRAS is
   eq emptySModule
     = mod nullHeader is nil sorts none . none none none none none endm . 
 
+  op notMatchingSortsList : TypeList SortSet -> NatList .
+  eq notMatchingSortsList(Tl,SS) = notMatchingSortsList(Tl, SS, 1) .
+ 
+  op notMatchingSortsList : TypeList SortSet Nat -> NatList .
+  eq notMatchingSortsList(nil,SS,N) = nil .
+  eq notMatchingSortsList(S Tl, SS, N)
+   = if S in SS then notMatchingSortsList(Tl,SS,s(N)) 
+     else N notMatchingSortsList(Tl,SS,s(N)) fi .
 
   op arity : TypeList -> Nat .
   eq arity(nil) = 0 .
@@ -474,18 +482,50 @@ fmod META-LEVEL-EXTRAS is
   including META-LEVEL .
   including META-MODULE-EXTRAS .
 
-  var M : Module . var T T' : Type . var Tl : TypeList .
+  var M : Module . var T T' : Type . var Tl Tl' : TypeList .
+  var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
   var Trm Trm' : Term . var Trms : TermList .
   var S S' : Sort  . var SS : SortSet .
+  var N N' : Nat .
 
-  op matchSorts : Module TermList TypeList ~> Bool .
+  op leastSorts : Module TermList ~> TypeList .
+  eq leastSorts(M,empty) = nil .
+  eq leastSorts(M, (Trm, Trms)) = leastSort(M,Trm), leastSorts(M, Trms) .
+
+    op sortsLeq : Module TypeList TypeList ~> Bool .
 --- assuming Universal means Polymorfic
----  eq matchSorts(M, (Trm,Trms), ('Universal Tl))
----   = matchSorts(M, Trms, Tl) .
-  eq matchSorts(M, (Trm, Trms), (T Tl)) 
-   = sortLeq(M, leastSort(M, Trm), T) and-then matchSorts(M, Trms, Tl) .
+---  eq sortsLeq(M, T' Tl', ('Universal Tl))
+---   = sortsLeq(M, Tl', Tl) .
+  eq sortsLeq(M, (T, Tl'), (T Tl)) 
+   = sortsLeq(M, Tl', Tl) .
 ---  [owise] .
-  eq matchSorts(M, empty,nil) = true .
+  eq sortsLeq(M, (T', Tl'), (T Tl)) 
+   = sortLeq(M, T', T) and-then sortsLeq(M, Tl', Tl) 
+  [owise] .
+  eq sortsLeq(M, empty,nil) = true .
+
+  op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
+ ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
+   =  (op 'sNat_ : Tl' -> T' [AS] .)
+  if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
+ ceq findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, T)
+   = (op Q : T' T' -> T' [AS assoc] .) 
+  if sortsLeq(M,T' Tl,T dup(T',arity(Tl))) .
+ ceq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
+   = (op Q : Tl -> T' [AS] .)
+  if sortsLeq(M, T' Tl, T Tl') [owise] .
+
+  op getTypes : Nat OpDecl ~> TypeList .
+  eq getTypes(N, (op Q : Tl -> T [AS] .))
+   = getTypes(N,Tl, arity(Tl), AS) .
+
+  op getTypes : Nat TypeList Nat AttrSet ~> TypeList .
+  eq getTypes(N,Tl,N,AS) = Tl .
+  eq getTypes(N,T Tl,N',assoc AS) = dup(T,N) .
+
+
+  op matchTermSorts : Module TermList TypeList ~> Bool .
+  eq matchTermSorts(M, Trms, Tl) = sortsLeq(M, leastSorts(M, Trms), Tl) .
 
   op greaterSorts : Module Sort -> SortSet .
   eq greaterSorts(M, S) = greaterSorts(M, S, lesserSorts(M, getKind(M, S))) .
