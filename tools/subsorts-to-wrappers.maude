@@ -80,15 +80,19 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op subsorts2wrappersEq : Equation Module OpDeclSet SubsortDeclMap ~> Equation .
  eq subsorts2wrappersEq((eq T1 = T2 [AS] .), M, OPDS, SSDM)
-  = (eq findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+  = (eq findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
 , M, OPDS, SSDM) 
-      = findPurifyRedex(T2, getKind(M,leastSort(M,T2)) ---lubSort(M,T1,T2)
+      = findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2))
 , M, OPDS, SSDM) [AS] .) . 
  eq subsorts2wrappersEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, SSDM)
-  = (ceq findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+  = (ceq findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
 , M, OPDS, SSDM) 
-      = findPurifyRedex(T2, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+      = findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2))
 , M, OPDS, SSDM) if Cond [AS] .) . 
+
+
+ op kind-if-not-k : Module Type -> Type .
+ eq kind-if-not-k(M, T) = if isKSort(T) then T else getKind(M,T) fi .
 
  op subsorts2wrappersRls : RuleSet Module OpDeclSet SubsortDeclMap ~> RuleSet .
  eq subsorts2wrappersRls(Rls Rl, M, OPDS, SSDM)
@@ -97,14 +101,14 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op subsorts2wrappersRl : Rule Module OpDeclSet SubsortDeclMap ~> Rule .
  eq subsorts2wrappersRl((rl T1 => T2 [AS] .), M, OPDS, SSDM)
-  = (rl findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+  = (rl findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
 , M, OPDS, SSDM) 
-     => findPurifyRedex(T2, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+     => findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2)) 
 , M, OPDS, SSDM) [AS] .) . 
  eq subsorts2wrappersRl((crl T1 => T2 if Cond [AS] .), M, OPDS, SSDM)
-  = (crl findPurifyRedex(T1, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+  = (crl findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2)) 
 , M, OPDS, SSDM) 
-     => findPurifyRedex(T2, getKind(M,leastSort(M, T1)) ---lubSort(M,T1,T2)
+     => findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2)) 
 , M, OPDS, SSDM) if Cond [AS] .) . 
 
  op findPurifyRedexes : TermList TypeList Module OpDeclSet SubsortDeclMap ~> TermList .

@@ -3,8 +3,8 @@ load imp++-syntax
 --- resolving Builtins subsorted to K into injections
 ---(
 load ../../../../../../tools/subsorts-to-wrappers-interface
-set print attribute on .
 ---(
+set print attribute on .
 red in SUBSORTS-TO-WRAPPERS-META : resolveKSubsorts('IMP++-SYNTAX, '0SUBSORTS) .
 q
 ---)
@@ -15,11 +15,11 @@ q
 
 --- generating strictness equations
 ---(
-set print attribute on .
 load ../../tools/make-strict-interface
 
 ---(
 ---(
+set print attribute on .
 red in STRICTOPS2CXT-INTERFACE : strictOps2cxt("IMP++-SYNTAX","IMP++-STRICTCXT") .
 q
 ---)
@@ -42,8 +42,8 @@ load imp++-programs
 load ../imp++-syntax
 load ../../../../../../tools/subsorts-to-wrappers-interface
 
-set print attribute on .
 ---(
+set print attribute on .
 red in SUBSORTS-TO-WRAPPERS-META : resolveKSubsorts('IMP++-PROGRAMS, '0SUBSORTS) .
 q
 ---)
@@ -57,8 +57,8 @@ load imp++-semantics
 ---()
 load ../imp++-syntax
 load ../../../../../../tools/subsorts-to-wrappers-interface
-set print attribute on .
 ---(
+set print attribute on .
 red in SUBSORTS-TO-WRAPPERS-META : resolveKSubsorts('IMP++-SEMANTICS, '0) .
 q
 ---)

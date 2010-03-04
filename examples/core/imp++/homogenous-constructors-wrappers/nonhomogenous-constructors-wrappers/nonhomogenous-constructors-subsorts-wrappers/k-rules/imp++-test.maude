@@ -4,11 +4,11 @@ load ../imp++-programs
 load imp++-semantics
 
 ---()
-set print attribute on .
 load ../../../../../../../tools/make-k-rules-interface
+set print attribute on .
 
 ---(
-red in MAKE-K-RULES-INTERFACE : resolveKRules("IMP++-SEMANTICS","IMP++-SEMANTICS") .
+red in MAKE-K-RULES-META : resolveKRules("IMP++-SEMANTICS","IMP++-SEMANTICS") .
 q
 ---)
 loop make-k-rules .

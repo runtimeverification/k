@@ -8,7 +8,7 @@ fmod MAKE-K-RULES is
   including META-MODULE-EXTRAS .
   including  META-K-RULES .
   var M : Module .  var T T1 T2 : Term .  var AS : AttrSet . 
-  var C : Condition . var S : Sort . var Ct : Constant . var V : Variable .
+  var C : Term . var S : Sort . var Ct : Constant . var V : Variable .
   var O : Qid . var N : Nat . var Tl : TermList .
   var KRuleType : KRuleKind .  var Split : KRuleSplit .
   var Mas : MembAxSet . var Max : MembAx .
@@ -27,18 +27,18 @@ fmod MAKE-K-RULES is
   eq resolveReplace(M, Max, Mas) = resolveReplace(addMbs(Max, M), Mas) [owise] .
 
   op addReplace : Module KRuleSplit ~> Module .
-  eq addReplace(M,{keq,T,nil,AS})
+  eq addReplace(M,{keq,T,empty,AS})
    = addEqs((eq splitReplace(T,1) = splitReplace(T,2) [AS metadata("keq")] .), M) . 
-  eq addReplace(M, {keq, T, C, AS})
-   = addEqs((ceq splitReplace(T,1) = splitReplace(T,2) if C [AS metadata("keq")] .), M) [owise] .
-  eq addReplace(M, {knd,T, nil,AS})
+  eq addReplace(M, {kceq, T, C, AS})
+   = addEqs((ceq splitReplace(T,1) = splitReplace(T,2) if C = trueCt [AS metadata("keq")] .), M) .
+  eq addReplace(M, {knd,T, empty,AS})
     = addRls((rl splitReplace(T,1) => splitReplace(T,2) [AS metadata("knd")] .), M) .
-  eq addReplace(M, {knd, T, C, AS})
-    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C [AS metadata("knd")] .), M) [owise] .
-  eq addReplace(M, {krl, T, nil, AS})
+  eq addReplace(M, {kcnd, T, C, AS})
+    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C = trueCt [AS metadata("knd")] .), M) .
+  eq addReplace(M, {krl, T, empty, AS})
     = addRls((rl splitReplace(T,1) => splitReplace(T,2) [AS metadata("krl")] .), M) .
-  eq addReplace(M, {krl, T, C, AS}) 
-    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C [AS metadata("krl")] .), M) [owise] .
+  eq addReplace(M, {kcrl, T, C, AS}) 
+    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C = trueCt  [AS metadata("krl")] .), M) .
       
   
   op splitReplace : Term Nat -> Term .

@@ -3,9 +3,8 @@ load ../../../imp++-syntax
 load ../../../imp++-programs
 load imp++-semantics
 ---()
-set print attribute on .
 load ../../../../../../../../../tools/context-transformers-interface
-
+---set print attribute on .
 ---(
 red in  CONTEXT-TRANSFORMERS-META : resolveKCxt("IMP++-KCONF","IMP++-ANON","IMP++-KCONF") .
 q

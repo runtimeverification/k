@@ -21,16 +21,13 @@ mod IMP++-SEMANTICS is
   eq __(<_>_</_>(k,_~>_(restore(Env:Map),K:K),k),<_>_</_>(env,Env':Map,env))
     = __(<_>_</_>(k,_~>_(.k,K:K),k),<_>_</_>(env,Env:Map,env)) [metadata "keq"]
     .
-  eq __(<_>_</_>(nextLoc,N:Nat,nextLoc),<_>_</_>(threads,__(AnyVar21:Set,
-    <_>_</_>(thread,__(AnyVar22:Set,<_>_</_>(k,_~>_(vars_;_(Xl:KList,S:K),K:K),
-    k),<_>_</_>(env,Env:Map,env)),thread)),threads),<_>_</_>(store,__(
-    Store:Map,.m),store))
-    = __(<_>_</_>(nextLoc,_+Int_(N:Nat,length_(Xl:KList)),nextLoc),<_>_</_>(
-    threads,__(AnyVar21:Set,<_>_</_>(thread,__(AnyVar22:Set,<_>_</_>(k,_~>_(
-    _~>_(S:K,restore(Env:Map)),K:K),k),<_>_</_>(env,_`[_<-_`](Env:Map,Xl:KList,
-    `[_;_`](N:Nat,_+Int_(N:Nat,length_(Xl:KList)))),env)),thread)),threads),
-    <_>_</_>(store,__(Store:Map,m(`[_;_`](N:Nat,_+Int_(N:Nat,length_(
-    Xl:KList))),0)),store)) [metadata "keq"] .
+  eq __(<_>_</_>(k,_~>_(vars_;_(Xl:KList,S:K),K:K),k),<_>_</_>(nextLoc,N:Nat,
+    nextLoc),<_>_</_>(env,Env:Map,env),<_>_</_>(store,__(Store:Map,.m),store))
+    = __(<_>_</_>(k,_~>_(_~>_(S:K,restore(Env:Map)),K:K),k),<_>_</_>(nextLoc,
+    _+Int_(N:Nat,length_(Xl:KList)),nextLoc),<_>_</_>(env,_`[_<-_`](Env:Map,
+    Xl:KList,`[_;_`](N:Nat,_+Int_(N:Nat,length_(Xl:KList)))),env),<_>_</_>(
+    store,__(Store:Map,m(`[_;_`](N:Nat,_+Int_(N:Nat,length_(Xl:KList))),0)),
+    store)) [metadata "keq"] .
   eq `[_;_`](N1:Nat,N2:Nat)
     = if_then_else_fi(_>=Int_(N1:Nat,N2:Nat),.kl,_`,_(N1:Nat,`[_;_`](sNat_(
     N1:Nat),N2:Nat))) [metadata "keq"] .
@@ -52,35 +49,25 @@ mod IMP++-SEMANTICS is
     => __(<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,Env:Map,env)),
     thread),<_>_</_>(thread,__(Thread:Set,<_>_</_>(k,_~>_(.k,K:K),k),<_>_</_>(
     env,Env:Map,env)),thread)) [metadata "krl"] .
-  rl __(<_>_</_>(output,_`,_(Output:List,.l),output),<_>_</_>(threads,__(
-    AnyVar7:Set,<_>_</_>(thread,__(AnyVar8:Set,<_>_</_>(k,_~>_(print_(I:Int),
-    K:K),k)),thread)),threads))
-    => __(<_>_</_>(output,_`,_(Output:List,l(I:Int)),output),<_>_</_>(threads,
-    __(AnyVar7:Set,<_>_</_>(thread,__(AnyVar8:Set,<_>_</_>(k,_~>_(.k,K:K),k)),
-    thread)),threads)) [metadata "krl"] .
-  rl __(<_>_</_>(threads,__(AnyVar12:Set,<_>_</_>(thread,__(AnyVar13:Set,
-    <_>_</_>(k,_~>_(X:VarId,K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,L:Int)),
-    env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,I:Int)),store))
-    => __(<_>_</_>(threads,__(AnyVar12:Set,<_>_</_>(thread,__(AnyVar13:Set,
-    <_>_</_>(k,_~>_(I:Int,K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,L:Int)),
-    env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,I:Int)),store))
-    [metadata "krl"] .
-  rl __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,
-    <_>_</_>(k,_~>_(++_(X:VarId),K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,
-    L:Int)),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,
-    I:Int)),store))
-    => __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,
-    <_>_</_>(k,_~>_(_+Int_(I:Int,1),K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,
-    L:Int)),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,_+Int_(
-    I:Int,1))),store)) [metadata "krl"] .
-  rl __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,
-    <_>_</_>(k,_~>_(_:=_(X:VarId,I1:Int),K:K),k),<_>_</_>(env,__(Env:Map,m(
-    X:VarId,L:Int)),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(
-    L:Int,I2:Int)),store))
-    => __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,
-    <_>_</_>(k,_~>_(.k,K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,L:Int)),env)),
-    thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,I1:Int)),store)) [
-    metadata "krl"] .
+  rl __(<_>_</_>(k,_~>_(print_(I:Int),K:K),k),<_>_</_>(output,_`,_(Output:List,
+    .l),output))
+    => __(<_>_</_>(k,_~>_(.k,K:K),k),<_>_</_>(output,_`,_(Output:List,l(
+    I:Int)),output)) [metadata "krl"] .
+  rl __(<_>_</_>(k,_~>_(X:VarId,K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,
+    L:Int)),env),<_>_</_>(store,__(Store:Map,m(L:Int,I:Int)),store))
+    => __(<_>_</_>(k,_~>_(I:Int,K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,
+    L:Int)),env),<_>_</_>(store,__(Store:Map,m(L:Int,I:Int)),store)) [metadata
+    "krl"] .
+  rl __(<_>_</_>(k,_~>_(++_(X:VarId),K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,
+    L:Int)),env),<_>_</_>(store,__(Store:Map,m(L:Int,I:Int)),store))
+    => __(<_>_</_>(k,_~>_(_+Int_(I:Int,1),K:K),k),<_>_</_>(env,__(Env:Map,m(
+    X:VarId,L:Int)),env),<_>_</_>(store,__(Store:Map,m(L:Int,_+Int_(I:Int,1))),
+    store)) [metadata "krl"] .
+  rl __(<_>_</_>(k,_~>_(_:=_(X:VarId,I1:Int),K:K),k),<_>_</_>(env,__(Env:Map,m(
+    X:VarId,L:Int)),env),<_>_</_>(store,__(Store:Map,m(L:Int,I2:Int)),store))
+    => __(<_>_</_>(k,_~>_(.k,K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,L:Int)),
+    env),<_>_</_>(store,__(Store:Map,m(L:Int,I1:Int)),store)) [metadata "krl"]
+    .
   rl _and_(false,B:K)
     => false [metadata "krl"] .
   rl _and_(true,B:K)
@@ -95,3 +82,4 @@ mod IMP++-SEMANTICS is
     => _/Int_(I1:Int,I2:Int)
     if _=/=Bool_(I2:Int,0)= true [metadata "krl"] .
 endm
+

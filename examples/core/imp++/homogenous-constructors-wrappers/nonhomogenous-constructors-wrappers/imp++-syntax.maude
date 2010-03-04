@@ -1,7 +1,7 @@
 mod IMP++-SYNTAX0 is
   including PL-INT .
   including K .
-  sorts Pgm Stmt VarId .
+  sorts VarId .
   op ++_ : K -> KProper
     [prec 30 format(b o d)] .
   op _+_ : K K -> KProper
@@ -11,7 +11,7 @@ mod IMP++-SYNTAX0 is
   op _:=_ : VarId K -> KProper
     [prec 40 format(d b o d)metadata "strict(2)"] .
   op _;_ : K K -> KProper
-    [prec 60 gather(e E)format(d b noi d)] .
+    [prec 122 gather(e E)format(d b noi d)] .
   op _<=_ : K K -> KProper
     [prec 37 format(d b o d)metadata "seqstrict"] .
   op _and_ : K K -> KProper
@@ -35,7 +35,7 @@ mod IMP++-SYNTAX0 is
   op subsort"VarId < KProper"_ : VarId -> KProper
     [metadata "builtin wrapper"] .
   op vars_;_ : KList K -> KProper
-    [prec 59 format(b o b on++i --)] .
+    [prec 121 format(b o b on++i --)] .
   op while_do_ : K K -> KProper
     [prec 59 format(b o b on++i --)] .
 endm

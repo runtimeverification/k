@@ -126,7 +126,9 @@ endm
 
 mod K-RULES is
   including K-SENTENCE .
-  ops keq_ krl_ knd_ : Universal -> [KSentence] [prec 127 poly(1)] .
+  including PL-BOOL .
+  ops keq_ krl_ knd_ : Universal -> [KSentence] [prec 127 poly(1) format(b o d)] .
+  ops keq_if_ krl_if_ knd_if_ : Universal Bool -> [KSentence] [prec 127 poly(1) format (b o b o d)] .
   op `[`[_==>_`]`] : Universal Universal -> Universal [poly (0 1 2) prec 0] .
 endm
 

@@ -90,34 +90,39 @@ endfm
 
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE .
-  var Q : Qid . var T : Term . var S : Type . var C : Condition .
+  var Q : Qid . var T : Term . var S : Type . var C : Term .
   var AS : AttrSet .  var RK : KRuleKind .
   sort KRuleKind .
-  ops keq krl knd : -> KRuleKind .
+  ops keq krl knd kceq kcrl kcnd : -> KRuleKind .
   op error : Qid -> [KRuleKind] .
+
+  op trueCt : -> Constant .
+  eq trueCt = 'true.Bool .
   
   ops symbol_ : KRuleKind -> Qid .
   eq symbol keq = 'keq_ .  eq symbol krl = 'krl_ .  eq symbol knd = 'knd_ .
+  eq symbol kceq = 'keq_if_ .  eq symbol kcrl = 'krl_if_ .  
+  eq symbol kcnd = 'knd_if_ .
 
   op replaceS : -> Qid .
   eq replaceS = '`[`[_==>_`]`] .
 
   op getKRuleKind : Qid ~> KRuleKind . 
-  eq getKRuleKind(Q) = if Q == symbol keq then keq else if Q == symbol krl then krl else if Q == symbol knd then knd else error(Q) fi fi fi .
+  eq getKRuleKind(Q) = if Q == symbol keq then keq else if Q == symbol krl then krl else if Q == symbol knd then knd else if Q == symbol kceq then kceq else if Q == symbol kcrl then kcrl else if Q == symbol kcnd then kcnd else error(Q) fi fi fi fi fi fi .
 
   sort KRuleSplit .
-  op {_,_,_,_} : KRuleKind Term Condition AttrSet -> KRuleSplit .
+  op {_,_,_,_} : KRuleKind Term TermList AttrSet -> KRuleSplit .
 
   
   op splitKRule : MembAx ~> KRuleSplit .
  ceq splitKRule((mb Q[T] : S [AS] .))
-   = {getKRuleKind(Q),T,nil,AS} if S := kSentenceSort . 
- ceq splitKRule((cmb Q[T] : S if C [AS] .))
+   = {getKRuleKind(Q),T,empty,AS} if S := kSentenceSort . 
+ ceq splitKRule((mb Q[T,C] : S [AS] .))
    = {getKRuleKind(Q),T,C,AS} if S := kSentenceSort . 
 
   op plugKRule : KRuleSplit ~> MembAx .
-  eq plugKRule({RK,T,nil,AS}) = (mb symbol(RK)[T] : kSentenceSort [AS] .) .
-  eq plugKRule({RK,T,C,AS}) = (cmb symbol(RK)[T] : kSentenceSort if C [AS] .) [owise] .
+  eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : kSentenceSort [AS] .) .
+  eq plugKRule({RK,T,C,AS}) = (mb symbol(RK)[T,C] : kSentenceSort [AS] .) [owise] .
 endfm
 
 

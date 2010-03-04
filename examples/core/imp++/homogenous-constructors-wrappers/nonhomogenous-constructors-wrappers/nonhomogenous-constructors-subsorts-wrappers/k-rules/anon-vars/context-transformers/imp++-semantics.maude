@@ -11,7 +11,7 @@ mod IMP++-SEMANTICS is
   var B : K .  var S S1 S2 : K .  var K : K .  var Xl : KList .
   mb kconf < T > < threads > < thread* > < k > K </ k > < env > Env </ env > </ thread* > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
   mb krl [[I1 + I2 ==> I1 +Int I2]] : KSentence .
-  cmb krl [[I1 / I2 ==> I1 /Int I2]] : KSentence if I2 =/=Bool 0 = true .
+  mb krl [[I1 / I2 ==> I1 /Int I2]] if I2 =/=Bool 0 : KSentence .
   mb krl [[skip ==> .k]] : KSentence .
   mb krl [[not(T) ==> notBool T]] : KSentence .
   mb krl [[I1 <= I2 ==> I1 <=Int I2]] : KSentence .

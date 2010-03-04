@@ -20,7 +20,7 @@ fmod CONTEXT-TRANSFORMERS is
 
   sort KConf KConfElement . 
   subsort KConfElement < KConf .
-  var KC KC' : KConf . var Cond : Condition .
+  var KC KC' : KConf . var Cond : Term .
   op {_,_,_,_,_,_} : Qid Nat Bool Qid SortSet KConf -> KConfElement .
   op getMultiplicity : KConfElement -> Bool .
   eq getMultiplicity({Q, Level, B, Q', Ss, KC'}) = B .
