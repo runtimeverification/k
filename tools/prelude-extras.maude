@@ -1,3 +1,23 @@
+***(
+    This file is part of the K-Maude tool
+
+    Copyright (C) 2009-2010 Traian Florin Șerbănuță
+
+    This file is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+)
+
 fmod NAT-LIST-EXTRAS is
   including NAT-LIST .
   vars M N : Nat . vars Nats Nats' : NatList .
@@ -476,6 +496,13 @@ fmod META-MODULE-EXTRAS is
   eq addSuffix(Q, IL (extending Q' .))
    = addSuffix(Q, IL) (extending qid(string(Q') + string(Q)) .) .
   eq addSuffix(Q, nil) = nil .
+
+  op suffixImports : Qid Module ImportList ~> Module .
+  eq suffixImports(Q, M, IL) 
+   = addImports(addSuffix(Q, IL), removeImports(M, IL)) .
+
+  op getTypes : OpDecl -> TypeList .
+  eq getTypes(op Q : Tl -> T [AS] .) = Tl .
 endfm
 
 fmod META-LEVEL-EXTRAS is
@@ -486,7 +513,7 @@ fmod META-LEVEL-EXTRAS is
   var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
   var Trm Trm' : Term . var Trms : TermList .
   var S S' : Sort  . var SS : SortSet .
-  var N N' : Nat .
+  var N N' : Nat .  var IL : ImportList .
 
   op leastSorts : Module TermList ~> TypeList .
   eq leastSorts(M,empty) = nil .
@@ -546,5 +573,12 @@ fmod META-LEVEL-EXTRAS is
 
   op lubSort : Module Term Term ~> Sort .
   eq lubSort(M, Trm, Trm') = lubSorts(M, leastSort(M, Trm), leastSort(M, Trm')) .
+
+  op upImports : ImportList -> ModuleSet .
+  eq upImports(nil) = empty .
+  eq upImports((including Q .) IL) = upModule(Q,true) upImports(IL) .
+  eq upImports((protecting Q .) IL) = upModule(Q,true) upImports(IL) .
+  eq upImports((extending Q .) IL) = upModule(Q,true) upImports(IL) .
+
 endfm
 

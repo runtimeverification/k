@@ -3,7 +3,6 @@ set include BOOL on .
 
 load prelude-extras 
 load meta-k
-load printing
 
 fmod SUBSORTS-TO-WRAPPERS is
  including META-TERM-EXTRAS .
@@ -24,7 +23,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op resolveKSubsorts : Qid Module Module ModuleSet ~> Module .
  eq resolveKSubsorts(Q, M, Flat, MS) 
-  = setName(subsorts2wrappers(subsorts2wrappersImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(pseudoKSubsorts(getSubsorts(Flat)))), qid(string(getName(M)) + string(Q))) .
+  = setName(subsorts2wrappers(suffixImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(pseudoKSubsorts(getSubsorts(Flat)))), qid(string(getName(M)) + string(Q))) .
 
  sorts SubsortDeclMapItem SubsortDeclMap .
  subsort SubsortDeclMapItem < SubsortDeclMap .
@@ -40,10 +39,6 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq filteredProject(SSDM [SSD |-> Op'], SSDS) 
   = if SSD in SSDS then Op' filteredProject(SSDM,SSDS) 
     else filteredProject(SSDM,SSDS) fi .
-
- op subsorts2wrappersImports : Qid Module ImportList ~> Module .
- eq subsorts2wrappersImports(Q, M, IL) 
-  = addImports(addSuffix(Q, IL), removeImports(M, IL)) .
 
  op subsorts2wrappersImports : ModuleSet ~> ImportList .
  eq subsorts2wrappersImports(M' MS)

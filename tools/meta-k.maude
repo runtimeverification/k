@@ -208,3 +208,9 @@ fmod META-ANONYMOUS-VARIABLE is
   op anyVar : Nat Type -> Variable .
   eq anyVar(N, T) = qid(string(anyVarS) + string(N,10) + ":" + string(T)) .
 endfm
+
+fmod META-K-WRAPPERS is
+  including META-LEVEL .
+  op builtin-wrappers : -> OpDeclSet [memo] .
+  eq builtin-wrappers = getOps(upModule('K-WRAPPERS, false)) .
+endfm

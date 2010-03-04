@@ -107,6 +107,21 @@ mod K-STRICTNESS-INTERNAL is
   op [] : -> K .
 endm
 
+
+--- KLabel-Wrappers level
+
+--- K-Wrappers level
+
+mod K-WRAPPERS is
+  including CONFIG .
+  op wklabel_ : KLabel -> K [metadata "builtin wrapper"] .
+  op wcelllabel_ : CellLabel -> K [metadata "builtin wrapper"] .
+  op wklist_ : KList -> K [metadata "builtin wrapper"] .
+  op wset_ : Set -> K [metadata "builtin wrapper"] .
+  op wlist_ : List -> K [metadata "builtin wrapper"] .
+  op wmap_ : Map -> K [metadata "builtin wrapper"] .
+endm
+
 ---- K Rules Level 
 
 mod K-RULES is

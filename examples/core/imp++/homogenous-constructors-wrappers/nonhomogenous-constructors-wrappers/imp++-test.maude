@@ -1,4 +1,16 @@
 load ../../../../../k-prelude
 load imp++-syntax
+--- resolving Builtins subsorted to K into injections
+---()
+load ../../../../../tools/homogenous-arguments-interface
+---()
+set print attribute on .
+red in HOMOGENOUS-ARGUMENTS-META : makeHomogenousArgs('IMP++-SYNTAX0, '1) .
+q
+---()
+loop homogenous-arguments .
+(makeHomogenousArgs IMP++-SYNTAX 0 .)
+q
+---()
 load imp++-programs
 
