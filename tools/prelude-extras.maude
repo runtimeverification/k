@@ -328,7 +328,7 @@ fmod META-MODULE-EXTRAS is
   op getOps : OpDeclSet SortSet -> OpDeclSet .
   eq getOps(OPDS (op Q : Tl -> S' [AS] .), SS ; S') 
    = getOps(OPDS, SS ; S') (op Q : Tl -> S' [AS] .)  .
-  eq getOps(OPDS, SS) = OPDS [owise] .
+  eq getOps(OPDS, SS) = none [owise] .
 
   op emptyFModule : -> FModule .
   op emptySModule : -> SModule .
@@ -500,9 +500,6 @@ fmod META-MODULE-EXTRAS is
   op suffixImports : Qid Module ImportList ~> Module .
   eq suffixImports(Q, M, IL) 
    = addImports(addSuffix(Q, IL), removeImports(M, IL)) .
-
-  op getTypes : OpDecl -> TypeList .
-  eq getTypes(op Q : Tl -> T [AS] .) = Tl .
 endfm
 
 fmod META-LEVEL-EXTRAS is

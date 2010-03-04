@@ -8,7 +8,7 @@ fmod HOMOGENOUS-ARGUMENTS is
  including META-K-MODULE .
  including META-K-WRAPPERS .
 
- var Q : Qid . var T T' T'' : Type . var Tl : TypeList . 
+ var Q : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
  var N : Nat . var Nl : NatList .
  var MS : ModuleSet .  var M Flat : Module .
  vars Mbs : MembAxSet . var Mb : MembAx .
@@ -17,7 +17,7 @@ fmod HOMOGENOUS-ARGUMENTS is
  var Trms : TermList . vars T1 T2 Trm : Term .  var Cond : Condition .
  var C : Constant . var V : Variable .
  vars OPDS Wrappers Homogenous : OpDeclSet . var Op Op' : OpDecl .
- var AS : AttrSet .
+ var AS AS' : AttrSet .
  var OPDM : OpDeclMap .  var WrapList : WrapList .
 
  op homogenousArgsImports : ModuleSet ~> ImportList .
@@ -28,13 +28,13 @@ fmod HOMOGENOUS-ARGUMENTS is
   = if OPDS == getWrappers(OPDS)
     then homogenousArgsImports(MS)
     else homogenousArgsImports(MS) (including Q .) 
-    fi .
+    fi [print Q "(" OPDS ")" ] .
  eq homogenousArgsImports(empty) = nil .
 
 
  op makeHomogenousArgs : Qid Module Module ModuleSet ~> Module .
  eq makeHomogenousArgs(Q, M, Flat, MS)
-  = makeHomogenousArgs(setName(suffixImports(Q,M,homogenousArgsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, pseudoKOps(getOps(M))) .
+  = makeHomogenousArgs(setName(addImports((including 'K-WRAPPERS .), suffixImports(Q,M,homogenousArgsImports(MS))), qid(string(getName(M)) + string(Q))), Flat, pseudoKOps(getOps(Flat))) .
 
  op makeHomogenousArgs : Module Module OpDeclSet ~> Module .
  eq makeHomogenousArgs(M, Flat, OPDS) 
@@ -42,11 +42,19 @@ fmod HOMOGENOUS-ARGUMENTS is
 
  op makeHomogenousArgs : Module Module OpDeclSet OpDeclSet ~> Module .
  eq makeHomogenousArgs(M, Flat, OPDS, Wrappers) 
-  = makeHomogenousArgs(M, Flat, removeOps(OPDS, Wrappers), processOps(Flat, removeOps(OPDS, Wrappers), builtin-wrappers Wrappers)) .
+  = makeHomogenousArgs(M, Flat, processOps(Flat, removeOps(OPDS, Wrappers), builtin-wrappers Wrappers)) .
 
- op makeHomogenousArgs : Module Module OpDeclSet OpDeclMap ~> Module .
- eq makeHomogenousArgs(M, Flat, OPDS, homogenous(Homogenous) OPDM) 
-  = makeHomogenousArgs(addOps(Homogenous, removeOps(M, OPDS)), Flat, OPDM) .
+ op makeHomogenousArgs : Module Module OpDeclMap ~> Module .
+ eq makeHomogenousArgs(M, Flat, homogenous(Homogenous) OPDM) 
+  = makeHomogenousArgs(addOps(localOps(Homogenous,getOps(M)), removeOps(M, getKeys(OPDM))), Flat, OPDM) .
+
+
+ op localOps : OpDeclSet OpDeclSet ~> OpDeclSet .
+ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
+  = (op Q : Tl -> T [AS] .) localOps(Homogenous, OPDS) 
+ if arity(Tl) = arity(Tl') .
+ eq localOps(Homogenous, OPDS) = none [owise] .
+
 ---  = setName(subsorts2wrappers(subsorts2wrappersImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(pseudoKSubsorts(getSubsorts(Flat)))), qid(string(getName(M)) + string(Q))) .
 
  op makeHomogenousArgs : Module  Module OpDeclMap ~> Module .
@@ -120,14 +128,16 @@ fmod HOMOGENOUS-ARGUMENTS is
  op homogenousT : Term Type Module OpDeclSet OpDeclMap ~> Term .
  eq homogenousT(C, T, M, OPDS, OPDM ) = C .
  eq homogenousT(V, T, M, OPDS, OPDM) = V .
+ eq homogenousT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
+  = 'if_then_else_fi[homogenousTs(Trms, 'Bool T T, M, OPDS,OPDM)] .
  eq homogenousT(Q[Trms], T, M, OPDS, OPDM)
-  = homogenousT(Q[Trms], T, M, OPDS, OPDM, findOp(M, OPDS,Q, leastSorts(M, Trms), T)) .
+  = homogenousT(Q[Trms], T, M, OPDS, OPDM, findOp(M, OPDS,Q, leastSorts(M, Trms), T)) [owise] .
 
 
  op homogenousT : Term Type Module OpDeclSet OpDeclMap OpDecl ~> Term .
 --- subsorted terms becoming klabels
  eq homogenousT(Q[Trms], T, M, OPDS, OPDM, Op)
-  = Q[homogenousTs(Trms, getTypes(Op), M, OPDS, OPDM, OPDM[Op], 1)] .
+  = Q[homogenousTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM, OPDM[Op], 1)] .
 
 
  sort WrapList .
@@ -145,7 +155,9 @@ fmod HOMOGENOUS-ARGUMENTS is
  eq ((Op |-> WrapList) OPDM)[Op] = WrapList .
  eq OPDM[Op] = nil [owise] .
 
- 
+ op getKeys : OpDeclMap ~> OpDeclSet .
+ eq getKeys((Op |-> WrapList) OPDM) = Op getKeys(OPDM) .
+ eq getKeys(empty) = none .
 
  op pseudoKOps : OpDeclSet -> OpDeclSet .
  eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
@@ -197,131 +209,3 @@ ceq getWrapper(M,T,(op Q : T' -> T'' [AS] .) Wrappers) = Q
 endfm
 
 
-
-
-eof
-
-fmod PURIFY-K is
- including STRING-EXTRAS .
- including META-MODULE-EXTRAS .
- including META-LEVEL-EXTRAS .
- including META-LEVEL .
- including META-K-MODULE .
- including K-META-OPS .
- including DECL-META-PRETTY-PRINT .
- including EXT-BOOL .
- var OPDS : OpDeclSet .  var Op Op' : OpDecl .
- var SSDS : SubsortDeclSet .  var SSD : SubsortDecl . var S S' : Sort .
- var Q O : Qid . var Tl : TypeList . var T T' : Type .  var NTl : NeTypeList .
- var AS AS' : AttrSet .
- var M : Module .  vars OPDM : OpDeclMap . var SSDM : SubsortDeclMap .
- var Trm : Term . var Trms : TermList . var V : Variable . var C : Constant .
-
- sort OpDeclMap .
- op [_|->_] : OpDecl OpDecl -> OpDeclMap .
- op empty : -> OpDeclMap .
- op __ : OpDeclMap OpDeclMap -> OpDeclMap [assoc comm id: empty ] .
-
-
- op projectFirst : OpDeclMap -> OpDeclSet .
- eq projectFirst((empty).OpDeclMap) = none .
- eq projectFirst(OPDM [Op |-> Op']) = Op projectFirst(OPDM) .
-
- op projectSecond : OpDeclMap -> OpDeclSet .
- eq projectSecond((empty).OpDeclMap) = none .
- eq projectSecond(OPDM [Op |-> Op']) = Op' projectSecond(OPDM) .
-
- op purifyK : Module ~> Module .
- eq purifyK(M) = purifyK(M, getOps(M), mapKOps(M, pseudoKOps(getOps(M))), subsorts2Labels(pseudoKSubsorts(getSubsorts(M)))) .
-
- op purifyK : Module OpDeclSet OpDeclMap SubsortDeclMap ~> Module .
- eq purifyK(M, OPDS, OPDM, SSDM)
-  = addOps(projectSecond(OPDM) projectSecond(SSDM), removeOps(removeSubsorts(M,projectFirst(SSDM)), projectFirst(OPDM))) .
- 
- op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .
- eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) . 
-
- op pseudoKOps : OpDeclSet -> OpDeclSet .
- eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
-
- op mapKOps : Module OpDeclSet ~> OpDeclMap .
- eq mapKOps(M, Op OPDS)
-  = [Op |-> mapKOp(M, Op)]  --- , untokenize(eMetaPrettyPrint(M, Op))
-    mapKOps(M, OPDS) . 
- eq mapKOps(M, none) = empty .
-
- op mapKOp : Module OpDecl ~> OpDecl .
- eq mapKOp(M, (op Q : T -> T' [AS metadata("builtin wrapper")] .))
-  = (op Q : T -> makeKLabel(T') [AS metadata("arity 0")] .)  .
- eq mapKOp(M, (op Q : Tl -> T [AS] .)) 
-  = (op qid("op:\"" + untokenize(eMetaPrettyPrint(M, (op Q : Tl -> T [none] .)))+ "\"") : nil -> makeKLabel(T) [AS metadata("arity " + string(arity(Tl),10))] .) [owise] .
-
- op subsorts2Labels : SubsortDeclSet -> SubsortDeclMap .
- eq subsorts2Labels((subsort S < S' .) SSDS)
-  = [(subsort S < S' .) |-> (op qid("subsort:\"subsort " + string(S) + " < " + string(S') + " .\"") : S -> makeKLabel(S') [metadata("arity 0")] .)]
-    subsorts2Labels(SSDS) .
-
- op findPurifyRedexes : TermList TypeList Module OpDeclSet OpDeclMap SubsortDeclMap -> TermList .
- eq findPurifyRedexes((Trm,Trms),(T,Tl),M,OPDS,OPDM, SSDM)
-  = findPurifyRedexes(Trm,T, M, OPDS, OPDM, SSDM),
-    findPurifyRedexes(Trms,Tl,M,OPDS,OPDM, SSDM) .
-  eq findPurifyRedexes(empty, nil, M, OPDS, OPDM, SSDM) = empty .
-
- op findPurifyRedex : Term Type Module OpDeclSet OpDeclMap SubsortDeclMap -> TermList .
-ceq findPurifyRedex(Trm, T, M, OPDS, OPDM, SSDM) 
-  = kPurifyTerm(Trm,T,M, OPDS, OPDM, SSDM) 
- if isKSort(T) or-else isKListSort(T) .
-ceq findPurifyRedex(Q[Trms], T, M, OPDS, OPDM, SSDM)
-  = Q[findPurifyRedexes(Trms,getTypes(countTerms(Trms),findOp(M, OPDS, Q, leastSorts(M,Trms), T)),M, OPDS, OPDM, SSDM)]
- if sortLeq(M, T', T) and-then matchTermSorts(M, Trms, Tl) [owise] .
- eq findPurifyRedex(C, T, M, OPDS, OPDM, SSDM) = C [owise] .
- eq findPurifyRedex(V, T, M, OPDS, OPDM, SSDM) = V [owise] .
-
-
- op kPurifyTerms : TermList TypeList Module OpDeclSet OpDeclMap SubsortDeclMap -> TermList  .
- eq kPurifyTerms((Trm,Trms), T Tl, M, OPDS, OPDM, SSDM)
-  = kPurifyTerm(Trm,T,M,OPDS,OPDM,SSDM), kPurifyTerms(Trms,Tl, M,OPDS,OPDM, SSDM) .
- eq kPurifyTerms(empty,nil,M,OPDS,OPDM, SSDM) = empty .
-
- op kPurifyTerm : Term Type Module OpDeclSet OpDeclMap SubsortDeclMap -> Term .
---- subsorted terms becoming klabels
-ceq kPurifyTerm(Trm, T, M, OPDS, OPDM, SSDM [(subsort S < S' .) |-> (op Q : S -> T [AS] .)])
-  = kApply(Q[findPurifyRedex(Trm,S,M,OPDS, OPDM, SSDM [(subsort S < S' .) |-> (op Q : S -> T [AS] .)])] ,empty)
- if matchTermSorts(M, Trm, S) .
-
---- operation symbols turning into K labels
-ceq kPurifyTerm(O[Trms], T, M, OPDS, OPDM [(op O : Tl -> T' [AS] .) |-> (op Q : nil -> S' [AS'] .)], SSDM)
-  = kApply(Q, kLabelParameters(Trms, Tl, M, OPDS, OPDM [(op O : Tl -> T' [AS] .) |-> (op Q : nil -> S' [AS'] .)], SSDM))
- if sortLeq(M,T',T)  /\ matchTermSorts(M, Trms, Tl) .
-ceq kPurifyTerm(C, T, M, OPDS, OPDM [(op O : nil -> S [AS] .) |-> (op Q : nil -> S' [AS] .)], SSDM)
-  =  kApply(Q,empty)
- if getName(C) = O /\ getType(C) = S .
-
---- operation symbols turning into injections to K labels
-ceq kPurifyTerm(O[Trms], T, M, OPDS, OPDM [(op O : NTl -> T' [AS] .) |-> (op O : NTl -> S' [AS] .)], SSDM)
-  = kApply(O[findPurifyRedexes(Trms,NTl, M, OPDS, OPDM [(op O : NTl -> T' [AS] .) |-> (op O : NTl -> S' [AS] .)], SSDM)], empty) 
- if sortLeq(M,T',T)  and-then matchTermSorts(M, Trms, NTl) .
-
- op kLabelParameters : TermList TypeList Module OpDeclSet OpDeclMap SubsortDeclMap -> TermList  .
- eq kLabelParameters((Trm,Trms), T Tl, M, OPDS, OPDM, SSDM)
-  = kLabelParameter(Trm,T,M,OPDS,OPDM,SSDM), kLabelParameters(Trms,Tl, M,OPDS,OPDM, SSDM) .
- eq kLabelParameters(empty,nil,M,OPDS,OPDM, SSDM) = empty .
- 
- op kLabelParameter : Term Type Module OpDeclSet OpDeclMap SubsortDeclMap -> Term  .
- eq kLabelParameter(Trm,T,M,OPDS,OPDM, SSDM)
-  = if isKSort(T) then kPurifyTerm(Trm,T,M,OPDS,OPDM, SSDM)
-    else if isKListSort(T) then --- is list?
-      wrapKList(findPurifyRedex(Trm,T,M,OPDS,OPDM, SSDM))
-     else --- needs to be wrapped
-       wrapBuiltin(Trm, T, M, OPDS, OPDM, SSDM)  
-     fi
-    fi .
-
- op wrapBuiltin :  Term Type Module OpDeclSet OpDeclMap SubsortDeclMap -> Term .
- ceq wrapBuiltin(Trm, T, M, OPDS, OPDM [Op |-> (op Q : S -> S' [AS] .)], SSDM)
-   = kApply(Q[findPurifyRedex(Trm,T,M, OPDS, OPDM [Op |-> (op Q : S -> S' [AS] .)], SSDM)], empty) 
-  if sortLeq(M, T, S) .
- ceq wrapBuiltin(Trm, T, M, OPDS, OPDM, SSDM [SSD |-> (op Q : S -> S' [AS] .)])
-   = kApply(Q[findPurifyRedex(Trm,T,M, OPDS, OPDM, SSDM [SSD |-> (op Q : S -> S' [AS] .)])], empty)  
-  if sortLeq(M, T, S) .
-endfm

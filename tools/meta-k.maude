@@ -51,6 +51,7 @@ fmod META-K-MODULE is
   ops EmptyKList ProperList NeProperList ResultList NeResultList NeKList KList : -> Sort .
   eq EmptyK = 'EmptyK .  eq KProper = 'KProper .  eq KResult = 'KResult .
   eq NeK = 'NeK .  eq K = 'K .
+  eq KLabel = 'KLabel .
   eq KProperLabel = 'KProperLabel .  eq KResultLabel = 'KResultLabel .
   eq EmptyKList = 'EmptyKList .  eq ProperList = 'ProperList .  eq ResultList = 'ResultList .  eq NeProperList = 'NeProperList .  eq NeResultList = 'NeResultList .  eq KList = 'KList .  eq NeKList = 'NeKList .
   op ksorts : -> SortSet [memo] .
