@@ -1,0 +1,16 @@
+load ../../../k-prelude
+load imp++-syntax
+---(
+load ../../../../tools/make-all-labels-interface
+---(
+set print attribute on .
+red in MAKE-ALL-LABELS-META : makeAllLabels('IMP++-SYNTAX01, '2) .
+q
+---)
+loop make-all-labels .
+(makeAllLabels IMP++-SYNTAX01 2 .)
+q
+---)
+load imp++-programs
+load imp++-semantics 
+

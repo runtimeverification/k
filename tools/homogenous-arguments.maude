@@ -31,7 +31,6 @@ fmod HOMOGENOUS-ARGUMENTS is
     fi [print Q "(" OPDS ")" ] .
  eq homogenousArgsImports(empty) = nil .
 
-
  op makeHomogenousArgs : Qid Module Module ModuleSet ~> Module .
  eq makeHomogenousArgs(Q, M, Flat, MS)
   = makeHomogenousArgs(setName(addImports((including 'K-WRAPPERS .), suffixImports(Q,M,homogenousArgsImports(MS))), qid(string(getName(M)) + string(Q))), Flat, pseudoKOps(getOps(Flat))) .
@@ -46,7 +45,7 @@ fmod HOMOGENOUS-ARGUMENTS is
 
  op makeHomogenousArgs : Module Module OpDeclMap ~> Module .
  eq makeHomogenousArgs(M, Flat, homogenous(Homogenous) OPDM) 
-  = makeHomogenousArgs(addOps(localOps(Homogenous,getOps(M)), removeOps(M, getKeys(OPDM))), Flat, OPDM) .
+  = applyHomogenousArgs(addOps(localOps(Homogenous,getOps(M)), removeOps(M, getKeys(OPDM))), Flat, OPDM) .
 
 
  op localOps : OpDeclSet OpDeclSet ~> OpDeclSet .
@@ -57,8 +56,8 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
 
 ---  = setName(subsorts2wrappers(subsorts2wrappersImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(pseudoKSubsorts(getSubsorts(Flat)))), qid(string(getName(M)) + string(Q))) .
 
- op makeHomogenousArgs : Module  Module OpDeclMap ~> Module .
- eq makeHomogenousArgs(M, Flat, OPDM)
+ op applyHomogenousArgs : Module  Module OpDeclMap ~> Module .
+ eq applyHomogenousArgs(M, Flat, OPDM)
   = 
    setRls(
    setEqs(
@@ -162,11 +161,6 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
  op pseudoKOps : OpDeclSet -> OpDeclSet .
  eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
  
- op getWrappers : OpDeclSet -> OpDeclSet .
- eq getWrappers((op Q : T -> T' [metadata("builtin wrapper") AS] .) OPDS)
-  = (op Q : T -> T' [metadata("builtin wrapper") AS] .) getWrappers(OPDS) .
- eq getWrappers(OPDS) = none [owise] .
-
  op processOps : Module OpDeclSet OpDeclSet ~> OpDeclMap .
  eq processOps(M, OPDS, Wrappers) 
   = processOps(M, OPDS, Wrappers, none) .

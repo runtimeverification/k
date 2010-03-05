@@ -110,13 +110,25 @@ endm
 
 --- KLabel-Wrappers level
 
+mod K-WRAPPERS-LABELS is
+  including CONFIG .
+  including PL-STRING .
+  op wklabel_ : KLabel -> KLabel [metadata "builtin wrapper"] .
+  op wcelllabel_ : CellLabel -> KLabel [metadata "builtin wrapper"] .
+  op kList : String -> KLabel [metadata "list wrapper"] .
+  op wset_ : Set -> KLabel [metadata "builtin wrapper"] .
+  op wlist_ : List -> KLabel [metadata "builtin wrapper"] .
+  op wmap_ : Map -> KLabel [metadata "builtin wrapper"] .
+endm
+
+
 --- K-Wrappers level
 
 mod K-WRAPPERS is
   including CONFIG .
   op wklabel_ : KLabel -> K [metadata "builtin wrapper"] .
   op wcelllabel_ : CellLabel -> K [metadata "builtin wrapper"] .
-  op wklist_ : KList -> K [metadata "builtin wrapper"] .
+  op wklist_ : KList -> K [metadata "list wrapper"] .
   op wset_ : Set -> K [metadata "builtin wrapper"] .
   op wlist_ : List -> K [metadata "builtin wrapper"] .
   op wmap_ : Map -> K [metadata "builtin wrapper"] .

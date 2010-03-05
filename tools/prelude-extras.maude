@@ -208,7 +208,7 @@ fmod META-TERM-EXTRAS is
   including META-TERM .
   var V : Variable . var Trl' Trl Trl'' : TermList .  var Tr Tr' : Term .
   var C : Constant . var Nz : NzNat . var N : Nat .  var Q : Qid .
-  var Subst : Substitution .
+  var Subst : Substitution .  var T : Type .
 
   op countTerms : TermList -> Nat .
   eq countTerms(empty) = 0 .
@@ -250,6 +250,9 @@ fmod META-TERM-EXTRAS is
   eq (Q[Trl],Trl')[Subst] = Q[Trl[Subst]],(Trl'[Subst]) [owise] .
   eq (V,Trl)[Subst] = V,(Trl[Subst]) [owise] .
   eq (C,Trl)[Subst] = C,(Trl[Subst]) [owise] .
+
+  op mkConstant : Qid Type -> Constant .
+  eq mkConstant(Q, T) = qid(string(Q) + "." + string(T)) .
 endfm
 
 fmod META-MODULE-EXTRAS is
@@ -263,9 +266,9 @@ fmod META-MODULE-EXTRAS is
   op _;;_ : ViewExp ViewExp -> ViewExp 
        [assoc id: mtViewExp] .                       *** view composition  _;_
       
-  var  M : Module .
+  var  M : Module .  var Trm : Term .
   vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
-  vars OPDS OPDS' : OpDeclSet .
+  vars OPDS OPDS' : OpDeclSet .  var Op : OpDecl .
   vars MAS MAS' : MembAxSet .
   vars EqS EqS' : EquationSet .
   vars RlS RlS' : RuleSet .
@@ -274,8 +277,11 @@ fmod META-MODULE-EXTRAS is
   vars U U' : Module .
   var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
   vars PDL PDL' : ParameterDeclList .
-  var Q Q' : Qid . var Tl : TypeList . var T : Type . var AS AS' : AttrSet .
-  var N : Nat .
+  var QIL : QidList .  var Q Q' : Qid . 
+  var Tl : TypeList . var T : Type . 
+  var AS AS' : AttrSet .  var Attr : Attr .
+  var NNl : NeNatList . var N : Nat .
+  
 
   op nullHeader : -> Header .
 
@@ -467,6 +473,10 @@ fmod META-MODULE-EXTRAS is
   eq SSD in (SSD SSDS) = true .
   eq SSD in SSDS = false [owise] .
 
+  op _in_ : OpDecl OpDeclSet -> Bool .
+  eq Op in (Op OPDS) = true .
+  eq Op in OPDS = false [owise] .
+
   op intersection : SortSet SortSet -> SortSet .
   op $intersect : SortSet SortSet SortSet -> SortSet .
   var A : SortSet .
@@ -480,7 +490,6 @@ fmod META-MODULE-EXTRAS is
   op assoc : AttrSet -> Bool .
   eq assoc(AS assoc) = true .
   eq assoc(AS) = false [owise] .
-
 
   sort ModuleSet .
   subsort Module < ModuleSet .
@@ -500,6 +509,20 @@ fmod META-MODULE-EXTRAS is
   op suffixImports : Qid Module ImportList ~> Module .
   eq suffixImports(Q, M, IL) 
    = addImports(addSuffix(Q, IL), removeImports(M, IL)) .
+
+  op removeNaryAttrs : AttrSet -> AttrSet .
+  eq removeNaryAttrs(Attr AS) = if naryAttr(Attr) then removeNaryAttrs(AS) else Attr removeNaryAttrs(AS) fi .
+  eq removeNaryAttrs(none) = none .
+
+  op naryAttr : Attr -> Bool .
+  eq naryAttr(assoc) = true .  eq naryAttr(comm) = true .  eq naryAttr(idem) = true .  eq naryAttr(iter) = true .  eq naryAttr(id(Trm)) = true .  eq naryAttr(left-id(Trm)) = true .  eq naryAttr(right-id(Trm)) = true .  eq naryAttr(strat(NNl)) = true .  eq naryAttr(memo) = true .  eq naryAttr(prec(N)) = true .  eq naryAttr(gather(QIL)) = true .  eq naryAttr(format(QIL)) = true .  eq naryAttr(frozen(NNl)) = true .  eq naryAttr(poly(NNl)) = true .  eq naryAttr(special(NHl:NeHookList)) = true .
+  eq naryAttr(Attr) = false [owise] .
+endfm
+
+fmod JOIN-METADATA is
+  including META-MODULE .
+  var S S' : String .
+  eq metadata(S) metadata(S') = metadata(S + " " + S') .
 endfm
 
 fmod META-LEVEL-EXTRAS is
@@ -576,6 +599,5 @@ fmod META-LEVEL-EXTRAS is
   eq upImports((including Q .) IL) = upModule(Q,true) upImports(IL) .
   eq upImports((protecting Q .) IL) = upModule(Q,true) upImports(IL) .
   eq upImports((extending Q .) IL) = upModule(Q,true) upImports(IL) .
-
 endfm
 

@@ -9,6 +9,7 @@ fmod SUBSORTS-TO-WRAPPERS is
  including META-MODULE-EXTRAS .
  including META-LEVEL-EXTRAS .
  including META-K-MODULE .
+ including META-K-WRAPPERS .
   var IL : ImportList .
  var OPDS : OpDeclSet .  var Op Op' : OpDecl .
  var SSDS : SubsortDeclSet .  var SSD : SubsortDecl . var S S' : Sort .
@@ -58,7 +59,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op subsorts2wrappers : SubsortDeclSet ~> SubsortDeclMap .
  eq subsorts2wrappers((subsort S < S' .) SSDS)
-  = [(subsort S < S' .) |-> (op qid("subsort\"" + string(S) + " < " + string(S') + "\"_") : S -> S' [metadata("builtin wrapper")] .)]
+  = [(subsort S < S' .) |-> (op mkSubsortWrapper(S,S') : S -> S' [metadata("builtin wrapper")] .)]
     subsorts2wrappers(SSDS) .
  eq subsorts2wrappers(none) = empty .
 

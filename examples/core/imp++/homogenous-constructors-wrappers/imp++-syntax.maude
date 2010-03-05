@@ -1,6 +1,7 @@
-mod IMP++-SYNTAX0 is
+mod IMP++-SYNTAX01 is
   including PL-INT .
   including K .
+  including K-WRAPPERS .
   sorts VarId .
   op "Bool < KResult"_ : Bool -> KResult
     [metadata "builtin wrapper"] .
@@ -14,7 +15,7 @@ mod IMP++-SYNTAX0 is
     [prec 33 gather(E e)format(d b o d)metadata "strict"] .
   op _/_ : K K -> KProper
     [prec 31 gather(E e)format(d b o d)metadata "strict"] .
-  op _:=_ : VarId K -> KProper
+  op _:=_ : K K -> KProper
     [prec 40 format(d b o d)metadata "strict(2)"] .
   op _;_ : K K -> KProper
     [prec 122 gather(e E)format(d b noi d)] .
@@ -34,7 +35,7 @@ mod IMP++-SYNTAX0 is
     [format(b o)] .
   op spawn_ : K -> KProper
     [prec 59 format(b n++i --)] .
-  op vars_;_ : KList K -> KProper
+  op vars_;_ : K K -> KProper
     [prec 121 format(b o b on++i --)] .
   op while_do_ : K K -> KProper
     [prec 59 format(b o b on++i --)] .

@@ -217,6 +217,39 @@ endfm
 
 fmod META-K-WRAPPERS is
   including META-LEVEL .
+  vars T T' : Type . var Q : Qid . var AS : AttrSet . var OPDS : OpDeclSet .
   op builtin-wrappers : -> OpDeclSet [memo] .
   eq builtin-wrappers = getOps(upModule('K-WRAPPERS, false)) .
+
+  op getWrappers : OpDeclSet -> OpDeclSet .
+  eq getWrappers((op Q : T -> T' [metadata("builtin wrapper") AS] .) OPDS)
+   = (op Q : T -> T' [metadata("builtin wrapper") AS] .) getWrappers(OPDS) .
+  eq getWrappers((op Q : T -> T' [metadata("list wrapper") AS] .) OPDS)
+   = (op Q : T -> T' [metadata("list wrapper") AS] .) getWrappers(OPDS) .
+  eq getWrappers(OPDS) = none [owise] .
+
+  op mkSubsortWrapper : Type Type -> Qid .
+  eq mkSubsortWrapper(T,T') 
+   = qid("\"" + string(T) + " < " + string(T') + "\"_") .
+endfm
+
+
+fmod META-K-LABELS is
+  including META-K-MODULE .
+  including META-LEVEL .
+  var Q : Qid . var T : Type . 
+
+  op klistLabelS : -> Qid .
+  eq klistLabelS = 'kList .
+
+  op mkKLabel : Qid -> Qid .
+  eq mkKLabel(Q) = qid("\"" + string(Q) + "\"") .
+
+  op mkListLabel : Qid -> Term .
+  eq mkListLabel(Q) = klistLabelS[upTerm(string(Q))] .
+
+  op mkKLabelSort : Type -> Type .
+  eq mkKLabelSort(T) 
+   = if T == KProper then KProperLabel
+     else if T == KResult then KResultLabel else KLabel fi fi .
 endfm

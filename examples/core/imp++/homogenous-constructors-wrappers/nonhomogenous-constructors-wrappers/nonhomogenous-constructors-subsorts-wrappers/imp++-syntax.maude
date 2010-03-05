@@ -4,8 +4,8 @@ mod IMP++-SYNTAX is
   sort VarId .
   subsort VarId < KProper .
   subsort Int < KResult .
-  op _+_ : K K -> KProper [prec 33 gather (E e) format (d b o d)] .
-  op _/_ : K K -> KProper [prec 31 gather (E e) format (d b o d)] .
+  op _+_ : K K -> KProper [prec 33 gather (E e) format (d b o d) metadata "strict"] .
+  op _/_ : K K -> KProper [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : K -> KProper [prec 30 format (b o d)] .
 --- BExp
   subsort Bool < KResult .
