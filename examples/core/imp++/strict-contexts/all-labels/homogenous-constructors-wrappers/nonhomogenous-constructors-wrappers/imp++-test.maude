@@ -1,7 +1,7 @@
-load ../../../../../k-prelude
+load ../../../../../../../k-prelude
 load imp++-syntax
 ---(
-load ../../../../../tools/homogenous-arguments-interface
+load ../../../../../../../tools/homogenous-arguments-interface
 ---(
 set print attribute on .
 red in HOMOGENOUS-ARGUMENTS-META : makeHomogenousArgs('IMP++-SYNTAX0, '1) .
@@ -14,7 +14,7 @@ q
 load imp++-programs
 ---(
 load ../imp++-syntax
-load ../../../../../tools/homogenous-arguments-interface
+load ../../../../../../../tools/homogenous-arguments-interface
 ---(
 set print attribute on .
 red in HOMOGENOUS-ARGUMENTS-META : makeHomogenousArgs('IMP++-PROGRAMS0, '1) .
@@ -27,7 +27,7 @@ q
 load imp++-semantics 
 ---()
 load ../imp++-syntax
-load ../../../../../tools/homogenous-arguments-interface
+load ../../../../../../../tools/homogenous-arguments-interface
 ---(
 set print attribute on .
 red in HOMOGENOUS-ARGUMENTS-META : makeHomogenousArgs('IMP++-SEMANTICS0, '1) .

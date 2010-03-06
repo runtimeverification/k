@@ -288,4 +288,12 @@ fmod CONFIGURATION-ATTRS is
   op kwrapping : Qid -> Attr .
 endfm
 
+fmod K-ATTRS is 
+  including SYNTAX-ATTRS .
+  including STRICT-ATTRS .
+  including CONFIGURATION-ATTRS .
+endfm
+
+
+
 

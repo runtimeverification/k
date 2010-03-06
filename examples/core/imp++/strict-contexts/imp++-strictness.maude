@@ -1,0 +1,15 @@
+mod IMP++-STRICTCXT is
+  including IMP++-SYNTAX01-LABELS .
+  including K-STRICTNESS-INTERNAL .
+  mb kcxt_(_`(_`)("_+_",_`,_(K1:K,`[`]))): KSentence .
+  mb kcxt_(_`(_`)("_+_",_`,_(`[`],K2:K))): KSentence .
+  mb kcxt_(_`(_`)("_/_",_`,_(K1:K,`[`]))): KSentence .
+  mb kcxt_(_`(_`)("_/_",_`,_(`[`],K2:K))): KSentence .
+  mb kcxt_(_`(_`)("_:=_",_`,_(K1:K,`[`]))): KSentence .
+  mb kcxt_(_`(_`)("_<=_",_`,_(K1:KResult,`[`]))): KSentence .
+  mb kcxt_(_`(_`)("_<=_",_`,_(`[`],K2:K))): KSentence .
+  mb kcxt_(_`(_`)("_and_",_`,_(`[`],K2:K))): KSentence .
+  mb kcxt_(_`(_`)("if_then_else_",_`,_(`[`],K2:K,K3:K))): KSentence .
+  mb kcxt_(_`(_`)("not_",`[`])): KSentence .
+  mb kcxt_(_`(_`)("print_",`[`])): KSentence .
+endm

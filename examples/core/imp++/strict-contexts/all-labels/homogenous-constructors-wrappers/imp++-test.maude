@@ -1,7 +1,7 @@
-load ../../../../k-prelude
+load ../../../../../../k-prelude
 load imp++-syntax
 ---(
-load ../../../../tools/make-all-labels-interface
+load ../../../../../../tools/make-all-labels-interface
 ---(
 set print attribute on .
 red in MAKE-ALL-LABELS-META : makeAllLabels('IMP++-SYNTAX01, '-LABELS) .
@@ -14,7 +14,7 @@ q
 load imp++-programs
 ---(
 load ../imp++-syntax
-load ../../../../tools/make-all-labels-interface
+load ../../../../../../tools/make-all-labels-interface
 ---(
 set print attribute on .
 red in MAKE-ALL-LABELS-META : makeAllLabels('IMP++-PROGRAMS01, '-LABELS) .
@@ -27,7 +27,7 @@ q
 load imp++-semantics 
 ---()
 load ../imp++-syntax
-load ../../../../tools/make-all-labels-interface
+load ../../../../../../tools/make-all-labels-interface
 ---(
 set print attribute on .
 red in MAKE-ALL-LABELS-META : makeAllLabels('IMP++-SEMANTICS01, '-LABELS) .

@@ -1,6 +1,7 @@
-load ../../../../../k-prelude
-load imp++-syntax
----()
+load ../../../../k-prelude
+load all-labels/imp++-syntax
+load imp++-strictness
+---(
 load ../../../../../tools/strict-ops2cxt-interface
 ---(
 set print attribute on .
@@ -10,7 +11,7 @@ q
 loop strict-ops2cxt .
 (strictOps2cxt IMP++-SYNTAX01-LABELS IMP++-STRICTCXT .)
 q
----()
-load imp++-programs
-load imp++-semantics 
+---)
+load all-labels/imp++-programs
+load all-labels/imp++-semantics 
 
