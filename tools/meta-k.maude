@@ -253,3 +253,39 @@ fmod META-K-LABELS is
    = if T == KProper then KProperLabel
      else if T == KResult then KResultLabel else KLabel fi fi .
 endfm
+
+fmod K-STRICTNESS-OPS is including META-LEVEL .
+  including K-META-OPS .
+  op hole : -> Term .
+  eq hole = '`[`].K .
+
+  var S : String .
+
+  op freezeLabel : String -> Term .
+  eq freezeLabel(S) = 'freezer[upTerm(S)] .
+
+  op freezeVariable : String Variable -> Term .
+  eq freezeVariable(S, V:Variable) = kApply('freezeVar[upTerm(S)],V:Variable) .
+endfm
+
+fmod STRICT-ATTRS is
+  including META-MODULE .
+  ops kstrict seqkstrict : NatList -> Attr .
+  op karity : Nat -> Attr .
+endfm
+
+fmod SYNTAX-ATTRS is
+  including META-MODULE .
+  ops kaux kdisolve : -> Attr .
+  op krenameTo : Qid -> Attr .
+  op ksyntax : -> Attr .
+  op klatex : AttrSet -> Attr .
+  op kcolor : Qid -> Attr .
+endfm
+
+fmod CONFIGURATION-ATTRS is
+  including META-MODULE .
+  op kwrapping : Qid -> Attr .
+endfm
+
+
