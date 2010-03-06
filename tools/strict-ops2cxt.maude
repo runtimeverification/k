@@ -50,7 +50,6 @@ mod STRICTOPS2CXT is
   eq strictOps2cxtMbs(Q, s(N), NA)
    = (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), hole, makeKVars(seq(s(s(N)),NA), "K")))] : kSentenceSort [none] .) .
 
-
   op seqstrictOps2cxtMbs  : Qid NatList Nat ~> MembAxSet .
 --- regardless of arity
   eq seqstrictOps2cxtMbs(Q, NNats, N')
@@ -92,69 +91,4 @@ mod STRICTOPS2CXT is
   eq makeKVars(N Nats, Str) 
    = qid("K" + string(N,10) + ":" + Str), makeKVars(Nats, Str) . 
 endm
-
-mod STRICTCXT2EQ is
-  including K-SORTS .
-  including K-META-OPS .
-  including K-STRICTNESS-OPS .
-  including META-TERM-EXTRAS .
-  including STRING-EXTRAS .
-  including META-MODULE-EXTRAS .
-  var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
-  var AS : AttrSet . var MAS : MembAxSet . var Eqs : EquationSet .
-  sort MASEqsPair .
-  op {_,_} : MembAxSet EquationSet -> MASEqsPair [ctor] .
-
-  op strictCxt2eq : Module MembAxSet ~> MASEqsPair .
-  eq strictCxt2eq(M,MAS) = strictCxt2eq(M, MAS, none) .
-  op strictCxt2eq : Module MembAxSet EquationSet ~> MASEqsPair . 
- ceq strictCxt2eq(M, (mb 'kcxt_[T] : Sort [AS] .) MAS,Eqs)
-   = strictCxt2eq(M, MAS, Eqs
-     ((eq kWrap(T[hole <- 'Kcxt:KProper])  
-        = kWrap(kra('Kcxt:KProper, freezeTerm(M, T))) 
-       [metadata("heating")] .)
-      (eq kWrap(kra('Kcxt:KResult, freezeTerm(M, T)))
-        = kWrap(T[hole <- 'Kcxt:KResult])
-       [metadata("cooling")] .))) 
-  if Sort = kSentenceSort .
-  eq strictCxt2eq(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
-
-
-  op freezeTerm : Module Term -> Term .
-  eq freezeTerm(M, T) = kApply(
-   freezeLabel(untokenize(metaPrettyPrint(M,T, mixfix flat number rat))),
-   freezeVariables(noDuplicates(getVars(T)))) .
-
-
-
-  op freezeVariables : TermList -> TermList .
-  op freezeVariable : Variable -> Variable .
-  eq freezeVariables((V,Trl)) 
-   = (freezeVariable(V),freezeVariables(Trl)) .
-  eq freezeVariables(empty) = empty .
-
-  eq freezeVariable(V) = freezeVariable(string(V),V) . 
-
-  op strictCxt2eq : Qid Qid Module ~> Module .
-  var Syntax StrictEqs : Qid . var M : Module .
-
-  eq strictCxt2eq(Syntax,StrictEqs,M) = strictCxt2eq(Syntax,StrictEqs,strictCxt2eq(M, getMbs(M))) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
-
-  op strictCxt2eq : Qid Qid MASEqsPair ~> Module .
-  eq strictCxt2eq(Syntax, StrictEqs, {MAS,Eqs}) 
-   = setMbs(addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))), MAS) .
-endm
-
-mod STRICTOPS2EQ is
-  including STRICTOPS2CXT .
-  including STRICTCXT2EQ .
-  op strictOps2eq : Qid Module ~> Module .
-  var StrictEq : Qid .  var Syntax : Module .
-  eq strictOps2eq(StrictEq, Syntax) 
-   = strictCxt2eq(getName(Syntax), StrictEq, strictOps2cxt('STRICTCXT,Syntax)) .
-  --- [print "Syntax: " Syntax] .
-endm
-
-
-
 
