@@ -91,7 +91,7 @@ endfm
 
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE .
-  var Q : Qid . var T : Term . var S : Type . var C : Term .
+  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
   var AS : AttrSet .  var RK : KRuleKind .
   sort KRuleKind .
   ops keq krl knd kceq kcrl kcnd : -> KRuleKind .
@@ -120,6 +120,12 @@ fmod META-K-RULES is including K-SORTS .
    = {getKRuleKind(Q),T,empty,AS} if S := kSentenceSort . 
  ceq splitKRule((mb Q[T,C] : S [AS] .))
    = {getKRuleKind(Q),T,C,AS} if S := kSentenceSort . 
+
+  op getContents : KRuleSplit -> Term .
+  eq getContents({RK,T,Cond,AS}) = T .
+
+  op setContents : KRuleSplit Term -> KRuleSplit .
+  eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
 
   op plugKRule : KRuleSplit ~> MembAx .
   eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : kSentenceSort [AS] .) .

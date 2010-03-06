@@ -7,9 +7,10 @@ fmod CONTEXT-TRANSFORMERS is
   including INT .
   var M : Module .  var T T' : Term . var O Q : Qid .  var Ct : Constant . 
   var Tl Tl' : TermList .  var N : Nat .
-  var Ss : SortSet .  var V : Variable . var AS : AttrSet .
+  var Ss : SortSet .  var V : Variable .
   var MAS : MembAxSet .  var MAx : MembAx . var SC : SplitCell .
-  var KRK : KRuleKind .
+  var KRS : KRuleSplit .
+  
   op contextTransformers : Qid Module Term ~> Module .
   var IL : ImportList . var SSDS : SubsortDeclSet . 
   eq contextTransformers(Q, M, T) = removeImports(setName(contextTransformers1(setMbs(M, contextTransformMbs(removeConfTerm(getMbs(M)),getConf(T)))),Q),(including 'K-CONFIG .)) [print "Applying context transformers."] . 
@@ -69,8 +70,8 @@ fmod CONTEXT-TRANSFORMERS is
    = contextTransformKR(MAx, splitKRule(MAx), KC) contextTransformMbs(MAS,KC) .
 
   op contextTransformKR : MembAx KRuleSplit KConf -> MembAx .
-  eq contextTransformKR(MAx,{KRK,T,Cond,AS},KC)
-   = plugKRule({KRK,contextTransformT(getMinLevel(T,KC), T, KC),Cond,AS}) .
+  eq contextTransformKR(MAx,KRS,KC)
+   = plugKRule(setContents(KRS,contextTransformT(getMinLevel(getContents(KRS),KC), getContents(KRS), KC))) .
   eq contextTransformKR(MAx,RS:[KRuleSplit],KC) = MAx [owise print RS:[KRuleSplit]] .
  
   eq contextTransformMbs(none, KC) = none .
