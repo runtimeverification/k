@@ -49,7 +49,7 @@ fmod CONTEXT-TRANSFORMERS is
 
   op getCellNames_ : TermList -> [SortSet] .
  ceq getCellNames(T, Tl) 
-   = getCellName(getName(SC)) ; getCellNames(Tl) 
+   = getName(SC) ; getCellNames(Tl) 
   if SC := splitKCell(T) .
   eq getCellNames(Tl) = none [owise] .
 

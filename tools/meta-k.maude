@@ -158,43 +158,42 @@ fmod K-META-CONFIG is including META-K-RULES .
   eq symbol both = '<_>..._...</_> .
 
   sort SplitCell .
-  op {_,_,_,_} : Qid Term Bool Ellipses -> SplitCell .
+  op {_,_,_,_} : Constant Term Bool Ellipses -> SplitCell .
 
   op splitKCell : Term ~> SplitCell .
-  eq splitKCell(Q[Label,Contents,Label]) = {getCellName(getName(Label)), Contents,getCellMultiplicity(getName(Label)), getEllipses(Q)} .
+  eq splitKCell(Q[Label,Contents,Label]) = {Label, Contents,false, getEllipses(Q)} .
+  eq splitKCell(Q[Q'[Label],Contents,Q'[Label]]) = {Label, Contents,true, getEllipses(Q)} .
 
   op getEllipses : Qid -> Ellipses .
   eq getEllipses(Q) = if (Q == symbol none) then none else if (Q == symbol left) then left else if (Q == symbol right) then right else if (Q == symbol both) then both else error fi fi fi fi .
 
-  op getCellName : Qid -> Qid .
-  eq getCellName(Q) = if getCellMultiplicity(Q) then 
-   qid(substr(string(Q), 0, _-_(length(string(Q)),1))) else Q fi .
-  op getCellMultiplicity : Qid -> Bool .
-  eq getCellMultiplicity(Q) 
-   = substr(string(Q), _-_(length(string(Q)), 1), 1) == "*" .
-
-
   op getName : SplitCell -> Qid .
-  eq getName({Q,Contents,B,E}) = Q .
+  eq getName({Label,Contents,B,E}) = getName(Label) .
   op setName : SplitCell Qid -> SplitCell .
-  eq setName({Q,Contents,B,E},Q') = {Q',Contents,B,E} .
+  eq setName({Label,Contents,B,E},Q) = {mkCellLabel(Q),Contents,B,E} .
 
   op getContents : SplitCell -> Term .
-  eq getContents({Q,Contents,B,E}) = Contents .
+  eq getContents({Label,Contents,B,E}) = Contents .
   op setContents : SplitCell Term -> SplitCell .
-  eq setContents({Q,Contents,B,E}, Contents') = {Q,Contents',B,E} .
+  eq setContents({Label,Contents,B,E}, Contents') = {Label,Contents',B,E} .
 
   op getMultiplicity : SplitCell -> Bool .
-  eq getMultiplicity({Q,Contents,B,E}) = B .
+  eq getMultiplicity({Label,Contents,B,E}) = B .
 
   op plugCell : SplitCell -> Term .
-  eq plugCell({Q,Contents,B,E}) = symbol E[cellLabel(Q,B),Contents,cellLabel(Q,B)] .
+  eq plugCell({Label,Contents,B,E}) = symbol E[cellLabel(Label,B),Contents,cellLabel(Label,B)] .
 
   op mkCell : Qid Term -> Term .
-  eq mkCell(Q,Contents) = plugCell({Q,Contents,false,none}) .
+  eq mkCell(Q,Contents) = plugCell({mkCellLabel(Q),Contents,false,none}) .
 
-  op cellLabel : Qid Bool -> Constant .
-  eq cellLabel(Q,B) = qid(string(Q) + if B then "*" else "" fi + ".CellLabel") .
+  op mkCellLabel : Qid -> Constant . 
+  eq mkCellLabel(Q) = qid(string(Q) + ".CellLabel") .
+
+  op multiCellS : -> Qid .
+  eq multiCellS = '_* .  
+
+  op cellLabel : Constant Bool -> Term .
+  eq cellLabel(Label,B) = if B then multiCellS[Label] else Label fi .
 
   op sortSet : -> Sort .
   eq sortSet = 'Set .

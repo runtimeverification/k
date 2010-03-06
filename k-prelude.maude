@@ -150,6 +150,7 @@ mod K-CONFIG is
   including CONFIG .
   including K-SENTENCE .
   op kconf_ : Set -> [KSentence] [prec 127] .
+  op _* : CellLabel -> CellLabel .
 endm
 
 --- extra stuff

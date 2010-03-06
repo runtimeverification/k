@@ -4,12 +4,12 @@ mod IMP++-SEMANTICS is
   including K-MAP-EXTRAS .
   including K-RULES .
   including K-CONFIG .
-  ops output threads thread thread* k env store nextLoc result : -> CellLabel .
+  ops output threads thread k env store nextLoc result : -> CellLabel .
   vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : VarId .
   var N N1 N2 : Nat .
   var Top Threads Thread : Set .  var Env Env' Store : Map .  var Output : List .
   var B : K .  var S S1 S2 : K .  var K : K .  var Xl : KList .
-  mb kconf < T > < threads > < thread* > < k > K </ k > < env > Env </ env > </ thread* > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
+  mb kconf < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
   mb krl [[I1 + I2 ==> I1 +Int I2]] : KSentence .
   mb krl [[I1 / I2 ==> I1 /Int I2]] if I2 =/=Bool 0 : KSentence .
   mb krl [[skip ==> .k]] : KSentence .
