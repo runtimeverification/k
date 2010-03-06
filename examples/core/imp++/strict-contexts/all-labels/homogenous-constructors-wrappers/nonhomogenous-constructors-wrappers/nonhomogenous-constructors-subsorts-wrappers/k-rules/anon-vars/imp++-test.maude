@@ -4,10 +4,10 @@ load ../../imp++-programs
 load imp++-semantics
 
 ---()
-set print attribute on .
 load ../../../../../../../../../../tools/anon-vars-interface
 
 ---(
+set print attribute on .
 red in  ANONYMOUS-VARIABLES-META : resolveAnonVars('IMP++-SEMANTICS,'IMP++-SEMANTICS) .
 q
 ---)

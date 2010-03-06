@@ -4,11 +4,11 @@ load imp++-syntax
 load ../../../../../tools/strict-ops2cxt-interface
 ---(
 set print attribute on .
-red in STRICTOPS2CXT-META : strictOps2cxt('IMP++-SYNTAX01-LABELS, 'IMP++-STRICTCXT) .
+red in STRICTOPS2CXT-META : strictOps2cxt('IMP++-SYNTAX01-LABELS, 'IMP++-STRICTNESS) .
 q
 ---)
 loop strict-ops2cxt .
-(strictOps2cxt IMP++-SYNTAX01-LABELS IMP++-STRICTCXT .)
+(strictOps2cxt IMP++-SYNTAX01-LABELS IMP++-STRICTNESS .)
 q
 ---()
 load imp++-programs

@@ -4,9 +4,9 @@ load ../../../imp++-programs
 load imp++-semantics
 ---()
 load ../../../../../../../../../../../tools/context-transformers-interface
----set print attribute on .
 ---(
-red in  CONTEXT-TRANSFORMERS-META : resolveKCxt("IMP++-KCONF","IMP++-ANON","IMP++-KCONF") .
+set print attribute on .
+red in  CONTEXT-TRANSFORMERS-META : resolveKCxt("IMP++-SEMANTICS","IMP++-SEMANTICS","IMP++-SEMANTICS") .
 q
 ---)
 loop context-transformers .
