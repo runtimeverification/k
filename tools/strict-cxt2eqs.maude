@@ -3,7 +3,7 @@ set include BOOL on .
 load prelude-extras
 load meta-k
 
-mod STRICTCXT2EQ is
+mod STRICTCXT2EQS is
   including K-SORTS .
   including K-META-OPS .
   including K-STRICTNESS-OPS .
@@ -15,11 +15,11 @@ mod STRICTCXT2EQ is
   sort MASEqsPair .
   op {_,_} : MembAxSet EquationSet -> MASEqsPair [ctor] .
 
-  op strictCxt2eq : Module MembAxSet ~> MASEqsPair .
-  eq strictCxt2eq(M,MAS) = strictCxt2eq(M, MAS, none) .
-  op strictCxt2eq : Module MembAxSet EquationSet ~> MASEqsPair . 
- ceq strictCxt2eq(M, (mb 'kcxt_[T] : Sort [AS] .) MAS,Eqs)
-   = strictCxt2eq(M, MAS, Eqs
+  op strictCxt2eqs : Module MembAxSet ~> MASEqsPair .
+  eq strictCxt2eqs(M,MAS) = strictCxt2eqs(M, MAS, none) .
+  op strictCxt2eqs : Module MembAxSet EquationSet ~> MASEqsPair . 
+ ceq strictCxt2eqs(M, (mb 'kcxt_[T] : Sort [AS] .) MAS,Eqs)
+   = strictCxt2eqs(M, MAS, Eqs
      ((eq kWrap(T[hole <- 'Kcxt:KProper])  
         = kWrap(kra('Kcxt:KProper, freezeTerm(M, T))) 
        [metadata("heating")] .)
@@ -27,7 +27,7 @@ mod STRICTCXT2EQ is
         = kWrap(T[hole <- 'Kcxt:KResult])
        [metadata("cooling")] .))) 
   if Sort = kSentenceSort .
-  eq strictCxt2eq(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
+  eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
 
 
   op freezeTerm : Module Term -> Term .
@@ -43,13 +43,13 @@ mod STRICTCXT2EQ is
 
   eq freezeVariable(V) = freezeVariable(string(V),V) . 
 
-  op strictCxt2eq : Qid Qid Module ~> Module .
+  op strictCxt2eqs : Qid Qid Module ~> Module .
   var Syntax StrictEqs : Qid . var M : Module .
 
-  eq strictCxt2eq(Syntax,StrictEqs,M) = strictCxt2eq(Syntax,StrictEqs,strictCxt2eq(M, getMbs(M))) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
+  eq strictCxt2eqs(Syntax,StrictEqs,M) = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(M, getMbs(M))) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
 
-  op strictCxt2eq : Qid Qid MASEqsPair ~> Module .
-  eq strictCxt2eq(Syntax, StrictEqs, {MAS,Eqs}) 
+  op strictCxt2eqs : Qid Qid MASEqsPair ~> Module .
+  eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs}) 
    = setMbs(addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))), MAS) .
 endm
 
