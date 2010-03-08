@@ -91,7 +91,9 @@ loop strict-cxt2eqs .
 runMaude "$COMPILED $OUTPUT $STRICTEQS" "Generating Strictness Equations" "$COMPILED"
 
 TEST="
-$COMPILED\n$OUTPUT
+$COMPILED
+
+$OUTPUT
 mod ${LANG}-TEST is
   including ${LANG}01-LABELS .
   including ${LANG}-STRICTNESS .
