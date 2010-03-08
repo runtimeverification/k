@@ -1,0 +1,47 @@
+set include PL-BOOL off .
+set include BOOL on .
+
+load prelude-extras 
+load meta-k
+
+fmod ADD-KPROPER is
+  including META-MODULE-EXTRAS .
+  including  META-K-MODULE .
+  var M : Module .  var AS : AttrSet . 
+  var S S' : Sort .
+  var O Q : Qid . var Tl : TypeList . var T : Type .
+  var SSDS : SubsortDeclSet .  var OPDS : OpDeclSet .
+  var MS : ModuleSet .
+  
+  op addKProper : Qid Module ModuleSet ~> Module .
+  eq addKProper(O, M, MS) = setName(addKProper(addImports((including 'K-PROPER .), removeImports(suffixImports(O,M,kProperImports(MS)), (including 'K .))), kSubsorts(getSubsorts(M)), kOps(getOps(M))), qid(string(getName(M)) + string(O))) .
+
+  op addKProper : Module SubsortDeclSet OpDeclSet ~> Module .
+  eq addKProper(M, SSDS, OPDS) = addSubsorts(kProperSubsorts(SSDS),addOps(kProperOps(OPDS),removeOps(removeSubsorts(M,SSDS),OPDS))) .
+
+ op kProperImports : ModuleSet ~> ImportList .
+ eq kProperImports(M MS) = kProperImports(MS, getName(M), kSubsorts(getSubsorts(M)), kOps(getOps(M))) .
+ eq kProperImports(empty) = nil .
+
+ op kSubsorts : SubsortDeclSet ~> SubsortDeclSet .
+ eq kSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), K ; NeK) .
+
+ op kOps : OpDeclSet ~> OpDeclSet .
+ eq kOps(OPDS) = getOps(removeOps(OPDS,kops), K ; NeK) .
+
+ op kProperImports : ModuleSet Qid SubsortDeclSet OpDeclSet ~> ImportList .
+ eq kProperImports(MS, Q, none, none) = kProperImports(MS) .
+ eq kProperImports(MS, Q, SSDS, OPDS)
+  = kProperImports(MS) (including Q .) [owise] .
+
+  op kProperSubsorts : SubsortDeclSet ~> SubsortDeclSet .
+  eq kProperSubsorts((subsort S < S' .) SSDS)
+   = (subsort S < KProper .) kProperSubsorts(SSDS) .
+  eq kProperSubsorts(none) = none .
+
+  op kProperOps : OpDeclSet ~> OpDeclSet .
+  eq kProperOps((op Q : Tl -> T [AS] .) OPDS)
+   = (op Q : Tl -> KProper [AS] .) kProperOps(OPDS) .
+  eq kProperOps(none) = none .
+endfm
+

@@ -54,9 +54,6 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq subsorts2wrappers(M, Flat, SSDS, SSDM)
   = setMbs(setRls(setEqs(addOps(filteredProject(SSDM,SSDS), removeSubsorts(M,SSDS)), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
  
- op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .
- eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) . 
-
  op subsorts2wrappers : SubsortDeclSet ~> SubsortDeclMap .
  eq subsorts2wrappers((subsort S < S' .) SSDS)
   = [(subsort S < S' .) |-> (op mkSubsortWrapper(S,S') : S -> S' [metadata("builtin wrapper")] .)]

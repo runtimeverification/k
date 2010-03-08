@@ -4,7 +4,7 @@ mod IMP++ is
   including K-RULES .
   including K-CONFIG .
   including PL-INT .
-  including K .
+  including K-PROPER .
 
 ---Syntax
   sort VarId .

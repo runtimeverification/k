@@ -54,8 +54,6 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
  if arity(Tl) = arity(Tl') .
  eq localOps(Homogenous, OPDS) = none [owise] .
 
----  = setName(subsorts2wrappers(subsorts2wrappersImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(pseudoKSubsorts(getSubsorts(Flat)))), qid(string(getName(M)) + string(Q))) .
-
  op applyHomogenousArgs : Module  Module OpDeclMap ~> Module .
  eq applyHomogenousArgs(M, Flat, OPDM)
   = 
@@ -158,9 +156,6 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
  eq getKeys((Op |-> WrapList) OPDM) = Op getKeys(OPDM) .
  eq getKeys(empty) = none .
 
- op pseudoKOps : OpDeclSet -> OpDeclSet .
- eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
- 
  op processOps : Module OpDeclSet OpDeclSet ~> OpDeclMap .
  eq processOps(M, OPDS, Wrappers) 
   = processOps(M, OPDS, Wrappers, none) .

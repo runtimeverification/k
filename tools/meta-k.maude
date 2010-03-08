@@ -44,8 +44,9 @@ fmod K-META-OPS is including META-TERM .
 endfm
 
 fmod META-K-MODULE is
-  including META-MODULE .
- var S : Sort .  var T : Type .
+  including META-MODULE-EXTRAS .
+  var S : Sort .  var T : Type .  var SSDS : SubsortDeclSet . 
+  vars OPDS : OpDeclSet .
 
   ops EmptyK KProper KResult NeK K KLabel KProperLabel KResultLabel : -> Sort .
   ops EmptyKList ProperList NeProperList ResultList NeResultList NeKList KList : -> Sort .
@@ -87,6 +88,12 @@ fmod META-K-MODULE is
  ceq makeKLabel(S) = KResultLabel if S = KResult .
  ceq makeKLabel(S) = KProperLabel if S = KProper .
  eq makeKLabel(S) = KLabel [owise] .
+ 
+ op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .
+ eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) . 
+ 
+  op pseudoKOps : OpDeclSet -> OpDeclSet .
+  eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
 endfm
 
 fmod META-K-RULES is including K-SORTS .

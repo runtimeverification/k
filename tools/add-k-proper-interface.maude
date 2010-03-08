@@ -1,0 +1,37 @@
+load add-k-proper
+load printing
+
+mod ADD-KPROPER-META is
+  including ADD-KPROPER .
+  including META-LEVEL-EXTRAS .
+  var NoKProper KProper : String .
+  var Q QNoKProper QKProper : Qid .  var IL : ImportList .
+  op addKProper : String String ~> Module .
+  eq addKProper(NoKProper, KProper) = addKProper(qid(NoKProper), qid(KProper)) .
+  op addKProper : Qid Qid ~> Module .
+  eq addKProper(QNoKProper,QKProper) = addKProper(QKProper, upModule(QNoKProper, false), upImports(getImports(upModule(QNoKProper, false)))) .
+endm
+
+mod ADD-KPROPER-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op add-k-proper : -> System .
+  op idle : -> State .
+  var Q NoKProper KProper : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq add-k-proper = [nil, idle, 
+ 'Usage: 'addKProper '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['addKProper NoKProper KProper QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoKProper,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('ADD-KPROPER-META),
+                        'addKProper[upTerm(string(NoKProper)),upTerm(string(KProper))])),error) .
+endm
