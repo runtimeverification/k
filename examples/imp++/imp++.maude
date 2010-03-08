@@ -1,0 +1,112 @@
+mod IMP++ is
+  including CONFIG .
+  including K-MAP-EXTRAS .
+  including K-RULES .
+  including K-CONFIG .
+  including PL-INT .
+  including K .
+
+---Syntax
+  sort VarId .
+  subsort VarId < KProper .
+  subsort Int < KResult .
+  op _+_ : K K -> KProper [prec 33 gather (E e) format (d b o d) metadata "strict"] .
+  op _/_ : K K -> KProper [prec 31 gather (E e) format (d b o d) metadata "strict"] .
+  op ++_ : K -> KProper [prec 30 format (b o d)] .
+--- BExp
+  subsort Bool < KResult .
+  op _<=_ : K K -> KProper  [prec 37 metadata "seqstrict" format (d b o d)] .
+  op not_ : K -> KProper [prec 53 metadata "strict" format (b o d)] .
+  op _and_ : K K -> KProper [prec 55 metadata "strict(1)" format (d b o d)] .
+--- Stmt
+  op skip : -> KProper [format (b o)] .
+  op _:=_ : VarId K -> KProper [prec 40 metadata "strict(2)" format (d b o d)] .
+  op _;_ : K K -> KProper [prec 122 gather (e E) format (d b noi d)] .
+  op if_then_else_ : K K K -> KProper [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
+  op while_do_ : K K -> KProper [prec 59 format (b o b on++i --)] .
+--- Pgm
+  op vars_;_ : KList K -> KProper [prec 121 format (b o b on++i --)] .
+  ops print_ :  K -> KProper [prec 59 metadata "strict" format (b o d)] .
+  op spawn_ : K -> KProper [prec 59 format(b n++i --)] .
+  ops halt  : -> KProper [format (b o)] .
+
+---Programs
+  ops pSum pCollatz : -> K .
+  ops n s i limit steps nr t  d nn : -> VarId [format (g o)].
+  eq pSum = 
+        vars n,s,i ; 
+         (n := 1000 ;
+         s := 0 ;
+         i := n ;
+         while 1 <= i do (
+           s := s + i ;
+           i := i + -1 
+          );
+          print(s)) .
+
+  eq pCollatz = 
+            vars limit,steps,nr,t ; 
+             (limit := 10 ; 
+             steps := 10 ; nr := 1 ; t := 2 ;
+             while ++ nr <= limit do (vars n ; 
+                (n := nr ;
+                spawn(
+                  while 2 <= n do (vars d,nn ; 
+                     (nn := ++ steps ; 
+                     d := 0 ;
+                     nn := n ;
+                     while 2 <= nn do (
+                       d := d + 1 ;
+                       nn := nn + -2
+                     ) ;
+                     if 1 <= nn then n := n + n + n + 1
+                      else n := d )
+                  ) ;
+                  n := ++ t
+                ))
+             ) ;
+             while t <= limit do skip ;
+             print(steps))
+.
+
+
+---Semantics
+  ops output threads thread k env store nextLoc result : -> CellLabel .
+  vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : VarId .
+  var N N1 N2 : Nat .
+  var Top Threads Thread : Set .  var Env Env' Store : Map .  var Output : List .
+  var B : K .  var S S1 S2 : K .  var K : K .  var Xl : KList .
+  mb kconf < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
+  mb krl [[I1 + I2 ==> I1 +Int I2]] : KSentence .
+  mb krl [[I1 / I2 ==> I1 /Int I2]] if I2 =/=Bool 0 : KSentence .
+  mb krl [[skip ==> .k]] : KSentence .
+  mb krl [[not(T) ==> notBool T]] : KSentence .
+  mb krl [[I1 <= I2 ==> I1 <=Int I2]] : KSentence .
+  mb krl [[true and B ==> B]] : KSentence .
+  mb krl [[false and B ==> false]] : KSentence .
+  mb krl [[if true then S1 else S2 ==> S1]] : KSentence .
+  mb krl [[if false then S1 else S2 ==> S2]] : KSentence .
+  mb krl [[S1 ; S2 ==> S1 ~> S2]] : KSentence .
+  mb krl < k > [[X ==> I]] ~> K </ k > < env > Env m(X, L) </ env > < store > Store m(L, I) </ store > : KSentence .
+  mb krl < k > [[++ X ==> (I +Int 1)]] ~> K </ k > < env > Env m(X, L) </ env > < store > Store m(L, [[I ==> I +Int 1]]) </ store >  : KSentence .
+  mb krl < k > [[X := I1 ==> .k]] ~> K </ k > < env > Env m(X, L) </ env > < store > Store m(L, [[I2 ==> I1]]) </ store > : KSentence .
+  mb krl [[< k > while B do S ~> K </ k >
+  ==> < k > if B then (S ; while B do S) else skip ~> K </ k >]] : KSentence .
+  mb krl < k > [[print(I) ==> .k]] ~> K </ k > < output > Output,[[.l ==> l(I)]] </ output >  : KSentence .
+  mb krl [[< k > halt ~> K </ k > 
+  ==> < k > .k </ k >]] : KSentence .
+  mb krl < thread > Thread < k > [[spawn(S) ==> .k]] ~> K </ k > < env > Env </ env > </ thread > [[.s ==> < thread > < k > S </ k > < env > Env </ env > </ thread >]] : KSentence .
+  mb keq [[< thread > Thread < k > .k </ k > </ thread > ==> .s]] : KSentence .
+
+  mb keq [[< T > Top < threads > .s </ threads > < output > Output </ output > </ T >
+   ==> < result > Output </ result >]] : KSentence .
+
+  mb keq < k > [[vars Xl ; S ==> S ~> restore(Env)]] ~> K </ k > < env > [[Env ==>  Env[Xl <- [N ; (N +Int length(Xl))]]]]</ env > < store > Store [[.m ==>  m([N ; (N +Int length(Xl))], 0)]] </ store > < nextLoc > [[N ==> N +Int length(Xl)]] </ nextLoc >  : KSentence .
+
+  op restore : Map -> K .
+  mb keq < k > [[restore(Env) ==> .k]] ~> K </ k > 
+          < env > [[Env' ==> Env]] </ env > : KSentence .
+
+  op [_;_] : Nat Nat -> KList .
+  mb keq [[[N1 ; N2] ==> if N1 >=Int N2 then .kl else (N1, [sNat N1 ; N2]) fi]] : KSentence .
+endm
