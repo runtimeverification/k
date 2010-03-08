@@ -4,27 +4,22 @@ load pl-builtins
 
 mod K is 
   including PL-NAT .
-  sorts EmptyK KBaseProper KProper KBaseResult KResult NeK K .
-  subsorts KProper KResult < NeK < K .
+  sorts EmptyK KResult NeK K .
+  subsorts KResult < NeK < K .
   subsort EmptyK < K .
   op .k : -> EmptyK [metadata "latex(renameTo \\ensuremath{\\kdot})"].
   op _~>_ : K K -> K [prec 100  assoc id: .k metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
 
---- next line is useful only if not using <k> wrappers for strictness
----  op _~>_ : KProper K -> KProper [ditto] .
 
-  sorts EmptyKList NeProperList ResultList NeResultList KList NeKList .
+  sorts EmptyKList ResultList NeResultList KList NeKList .
   op .kl : -> EmptyKList .
   subsort K < NeKList < KList .
   subsort EmptyKList < ResultList < KList .
-  subsort KProper < NeProperList < NeKList .  
   subsort KResult < NeResultList < ResultList NeKList .
 
   op _`,_ : KList KList -> KList [assoc id: .kl prec 121] .
   op _`,_ : NeKList KList -> NeKList [ditto] .
   op _`,_ : KList NeKList -> NeKList [ditto] .
-  op _`,_ : NeProperList KList -> NeProperList [ditto] .
-  op _`,_ : KList NeProperList -> NeProperList [ditto] .
   op _`,_ : ResultList ResultList -> ResultList [ditto] .
   op _`,_ : NeResultList ResultList -> NeResultList [ditto] .
   op _`,_ : ResultList NeResultList -> NeResultList [ditto] .
@@ -34,15 +29,11 @@ mod K is
   eq length(.kl) = 0 .
   eq length(K:K,KL:KList) = sNat length(KL:KList) . 
 
-  sorts KLabel KProperLabel KResultLabel .
-  subsorts KProperLabel KResultLabel < KLabel .
-  op ~ : -> KProperLabel .
-  op ~Result : -> KResultLabel .
-  eq ~(RL:ResultList) = ~Result(RL:ResultList) [metadata "cooling"] .
-  
+  sorts KLabel KResultLabel .
+
+  subsorts KResultLabel < KLabel .
   
   op _`(_`) : KLabel KList -> NeK [prec 0 gather(& &)] .
-  op _`(_`) : KProperLabel KList -> KProper [ditto] .
   op _`(_`) : KResultLabel KList -> KResult [ditto] .
 
   sort ListItem List NeList .
@@ -89,6 +80,23 @@ endm
 
 mod K-SENTENCE is
   sort KSentence . 
+endm
+
+--- KProper Level
+
+mod K-PROPER is
+  including K .
+  sort KProper .
+  subsort KProper < NeK .
+--- next line is useful only if not using <k> wrappers for strictness
+---  op _~>_ : KProper K -> KProper [ditto] .
+  sort NeProperList .
+  subsort KProper < NeProperList < NeKList .  
+  sort KProperLabel .
+  subsort KProperLabel < KLabel .
+  op _`(_`) : KProperLabel KList -> KProper [ditto] .
+  op _`,_ : NeProperList KList -> NeProperList [ditto] .
+  op _`,_ : KList NeProperList -> NeProperList [ditto] .
 endm
 
 --- Strictness Level

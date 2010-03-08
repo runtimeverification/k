@@ -13,6 +13,9 @@ mod IMP++ is
   op _+_ : K K -> KProper [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _/_ : K K -> KProper [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : K -> KProper [prec 30 format (b o d)] .
+  op list_ : KList -> KProper [metadata "strict"] .
+  op head : K -> KProper [metadata "strict"] .
+  op tail : K -> KProper [metadata "strict"] .
 --- BExp
   subsort Bool < KResult .
   op _<=_ : K K -> KProper  [prec 37 metadata "seqstrict" format (d b o d)] .
@@ -31,8 +34,12 @@ mod IMP++ is
   ops halt  : -> KProper [format (b o)] .
 
 ---Programs
-  ops pSum pCollatz : -> K .
+  ops pSum pCollatz pList : -> K .
   ops n s i limit steps nr t  d nn : -> VarId [format (g o)].
+  eq pList =
+    vars n ;
+    (n := 10 ;
+    print(head(list(n,2,3)))) .
   eq pSum = 
         vars n,s,i ; 
          (n := 1000 ;
@@ -76,9 +83,16 @@ mod IMP++ is
   var N N1 N2 : Nat .
   var Top Threads Thread : Set .  var Env Env' Store : Map .  var Output : List .
   var B : K .  var S S1 S2 : K .  var K : K .  var Xl : KList .
+  var RL : ResultList .
   mb kconf < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
+  op startConfig : K -> Set .
+  eq startConfig(K) = < T > < threads > < thread > < k > K </ k > < env > .m </ env > </ thread > </ threads > < store > .m </ store >  < output > .l </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .l </ result > .
+  
   mb krl [[I1 + I2 ==> I1 +Int I2]] : KSentence .
   mb krl [[I1 / I2 ==> I1 /Int I2]] if I2 =/=Bool 0 : KSentence .
+  op vl_ : KList -> KResult .
+  mb keq [[list(RL) ==> vl RL]] : KSentence .
+  mb krl [[head(vl(I,RL)) ==> I]] : KSentence . 
   mb krl [[skip ==> .k]] : KSentence .
   mb krl [[not(T) ==> notBool T]] : KSentence .
   mb krl [[I1 <= I2 ==> I1 <=Int I2]] : KSentence .

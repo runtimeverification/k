@@ -1,5 +1,5 @@
 
-load /Users/traian/Documents/k-framework/k-maude/trunk/tools/../k-prelude
+load /home/grosu/tserban2/work/k-framework/k-maude/trunk/tools/../k-prelude
 
 mod IMP++01-LABELS is
   including CONFIG .
@@ -14,6 +14,7 @@ mod IMP++01-LABELS is
   op nextLoc : -> CellLabel .
   op output : -> CellLabel .
   op result : -> CellLabel .
+  op startConfig : K -> Set .
   op store : -> CellLabel .
   op thread : -> CellLabel .
   op threads : -> CellLabel .
@@ -39,11 +40,17 @@ mod IMP++01-LABELS is
     [metadata "arity 2 strict(1)"] .
   op "halt" : -> KProperLabel
     [metadata "arity 0"] .
+  op "head" : -> KProperLabel
+    [metadata "arity 1 strict"] .
   op "if_then_else_" : -> KProperLabel
     [metadata "arity 3 strict(1)"] .
+  op "list_" : -> KProperLabel
+    [metadata "arity 1 strict"] .
   op "not_" : -> KProperLabel
     [metadata "arity 1 strict"] .
   op "pCollatz" : -> KLabel
+    [metadata "arity 0"] .
+  op "pList" : -> KLabel
     [metadata "arity 0"] .
   op "pSum" : -> KLabel
     [metadata "arity 0"] .
@@ -55,8 +62,12 @@ mod IMP++01-LABELS is
     [metadata "arity 0"] .
   op "spawn_" : -> KProperLabel
     [metadata "arity 1"] .
+  op "tail" : -> KProperLabel
+    [metadata "arity 1 strict"] .
   op "vars_;_" : -> KProperLabel
     [metadata "arity 2"] .
+  op "vl_" : -> KResultLabel
+    [metadata "arity 1"] .
   op "while_do_" : -> KProperLabel
     [metadata "arity 2"] .
   op d : -> VarId
@@ -118,6 +129,13 @@ mod IMP++01-LABELS is
     _`,_(_`(_`)("while_do_",_`,_(_`(_`)("_<=_",_`,_(_`(_`)("VarId < KProper"_(
     t),.kl),_`(_`)("VarId < KProper"_(limit),.kl))),_`(_`)("skip",.kl))),
     _`(_`)("print_",_`(_`)("VarId < KProper"_(steps),.kl)))))))))))))))) .
+  eq _`(_`)("pList",.kl)
+    = _`(_`)("vars_;_",_`,_(_`(_`)(kList("wklist_"),_`(_`)("VarId < KProper"_(
+    n),.kl)),_`(_`)("_;_",_`,_(_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(n),
+    .kl),_`(_`)("Int < KResult"_(10),.kl))),_`(_`)("print_",_`(_`)("head",
+    _`(_`)("list_",_`(_`)(kList("wklist_"),_`,_(_`(_`)("VarId < KProper"_(n),
+    .kl),_`,_(_`(_`)("Int < KResult"_(2),.kl),_`(_`)("Int < KResult"_(3),
+    .kl))))))))))) .
   eq _`(_`)("pSum",.kl)
     = _`(_`)("vars_;_",_`,_(_`(_`)(kList("wklist_"),_`,_(_`(_`)(
     "VarId < KProper"_(n),.kl),_`,_(_`(_`)("VarId < KProper"_(s),.kl),_`(_`)(
@@ -133,6 +151,11 @@ mod IMP++01-LABELS is
     .kl))))),_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("_+_",
     _`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("Int < KResult"_(-1),
     .kl))))))))),_`(_`)("print_",_`(_`)("VarId < KProper"_(s),.kl)))))))))))) .
+  eq startConfig(K:K)
+    = __(<_>_</_>(result,.l,result),<_>_</_>(T,__(__(__(<_>_</_>(nextLoc,
+    _`(_`)("Int < KResult"_(0),.kl),nextLoc),<_>_</_>(output,.l,output)),
+    <_>_</_>(store,.m,store)),<_>_</_>(threads,<_>_</_>(thread,__(<_>_</_>(k,
+    K:K,k),<_>_</_>(env,.m,env)),thread),threads)),T)) .
   eq <_>_</_>(T,__(Top:Set,<_>_</_>(output,Output:List,output),<_>_</_>(
     threads,.s,threads)),T)
     = <_>_</_>(result,Output:List,result) [metadata "keq"] .
@@ -153,6 +176,8 @@ mod IMP++01-LABELS is
     N:Nat,_+Int_(N:Nat,length_(Xl:KList)))),env)),thread)),threads),<_>_</_>(
     store,__(Store:Map,m(`[_;_`](N:Nat,_+Int_(N:Nat,length_(Xl:KList))),_`(_`)(
     "Int < KResult"_(0),.kl))),store)) [metadata "keq"] .
+  eq _`(_`)("list_",_`(_`)(kList("wklist_"),RL:ResultList))
+    = _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:ResultList)) [metadata "keq"] .
   eq `[_;_`](N1:Nat,N2:Nat)
     = if_then_else_fi(_>=Int_(N1:Nat,N2:Nat),.kl,_`,_(_`(_`)("Int < KResult"_(
     N1:Nat),.kl),`[_;_`](sNat_(N1:Nat),N2:Nat))) [metadata "keq"] .
@@ -220,6 +245,9 @@ mod IMP++01-LABELS is
     => _`(_`)("Bool < KResult"_(false),.kl) [metadata "krl"] .
   rl _`(_`)("_and_",_`,_(_`(_`)("Bool < KResult"_(true),.kl),B:K))
     => B:K [metadata "krl"] .
+  rl _`(_`)("head",_`(_`)("vl_",_`(_`)(kList("wklist_"),_`,_(_`(_`)(
+    "Int < KResult"_(I:Int),.kl),RL:ResultList))))
+    => _`(_`)("Int < KResult"_(I:Int),.kl) [metadata "krl"] .
   rl _`(_`)("if_then_else_",_`,_(_`(_`)("Bool < KResult"_(false),.kl),S1:K,
     S2:K))
     => S2:K [metadata "krl"] .
@@ -235,6 +263,7 @@ mod IMP++01-LABELS is
     => _`(_`)("Int < KResult"_(_/Int_(I1:Int,I2:Int)),.kl)
     if _=/=Bool_(I2:Int,0)= true [metadata "krl"] .
 endm
+
 mod IMP++-STRICTNESS is
   including IMP++01-LABELS .
   including K-STRICTNESS .
@@ -263,17 +292,26 @@ mod IMP++-STRICTNESS is
   eq <_>_</_>(k,_~>_(_`(_`)("_and_",_`,_(Kcxt:KProper,K2:K)),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_and_\"([],K2:K)"),_`(_`)(
     freezeVar("K2:K"),K2:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("head",Kcxt:KProper),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"head\"([])"),.kl),Rest:K),
+    k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,_(Kcxt:KProper,K2:K,K3:K)),
     Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer(
     "\"if_then_else_\"([],K2:K,K3:K)"),_`,_(_`(_`)(freezeVar("K2:K"),K2:K),
     _`(_`)(freezeVar("K3:K"),K3:K))),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("list_",Kcxt:KProper),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"list_\"([])"),.kl),
+    Rest:K),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)("not_",Kcxt:KProper),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"not_\"([])"),.kl),Rest:K),
     k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)("print_",Kcxt:KProper),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"print_\"([])"),.kl),
     Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("tail",Kcxt:KProper),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"tail\"([])"),.kl),Rest:K),
+    k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_+_\"(K1:K,[])"),_`(_`)(
     freezeVar("K1:K"),K1:K)),Rest:K),k)
     = <_>_</_>(k,_~>_(_`(_`)("_+_",_`,_(K1:K,Kcxt:KResult)),Rest:K),k) [
@@ -306,11 +344,19 @@ mod IMP++-STRICTNESS is
     freezeVar("K2:K"),K2:K)),Rest:K),k)
     = <_>_</_>(k,_~>_(_`(_`)("_and_",_`,_(Kcxt:KResult,K2:K)),Rest:K),k) [
     metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"head\"([])"),.kl),Rest:K),
+    k)
+    = <_>_</_>(k,_~>_(_`(_`)("head",Kcxt:KResult),Rest:K),k) [metadata
+    "cooling"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer(
     "\"if_then_else_\"([],K2:K,K3:K)"),_`,_(_`(_`)(freezeVar("K2:K"),K2:K),
     _`(_`)(freezeVar("K3:K"),K3:K))),Rest:K),k)
     = <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,_(Kcxt:KResult,K2:K,K3:K)),
     Rest:K),k) [metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"list_\"([])"),.kl),Rest:K),
+    k)
+    = <_>_</_>(k,_~>_(_`(_`)("list_",Kcxt:KResult),Rest:K),k) [metadata
+    "cooling"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"not_\"([])"),.kl),Rest:K),
     k)
     = <_>_</_>(k,_~>_(_`(_`)("not_",Kcxt:KResult),Rest:K),k) [metadata
@@ -318,6 +364,10 @@ mod IMP++-STRICTNESS is
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"print_\"([])"),.kl),
     Rest:K),k)
     = <_>_</_>(k,_~>_(_`(_`)("print_",Kcxt:KResult),Rest:K),k) [metadata
+    "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"tail\"([])"),.kl),Rest:K),
+    k)
+    = <_>_</_>(k,_~>_(_`(_`)("tail",Kcxt:KResult),Rest:K),k) [metadata
     "cooling"] .
 endm
 mod IMP++-TEST is
