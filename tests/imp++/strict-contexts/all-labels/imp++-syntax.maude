@@ -1,6 +1,6 @@
 mod IMP++-SYNTAX01-LABELS is
   including PL-INT .
-  including K .
+  including K-PROPER .
   including K-WRAPPERS-LABELS .
   sorts VarId .
   op "++_" : -> KProperLabel

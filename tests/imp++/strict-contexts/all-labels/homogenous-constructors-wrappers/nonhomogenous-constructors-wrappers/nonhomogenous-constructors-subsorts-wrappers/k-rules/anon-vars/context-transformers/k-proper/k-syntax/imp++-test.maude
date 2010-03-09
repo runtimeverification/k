@@ -1,0 +1,46 @@
+load ../../../../../../../../../../../../k-prelude
+load imp++-syntax
+--- resolving Builtins subsorted to K into injections
+---(
+load ../../../../../../../../../../../../tools/syntax-to-k-interface
+---(
+set print attribute on .
+red in SYNTAX-TO-K-META : syntax2k('IMP++-SYNTAX, '-K) .
+q
+---)
+loop syntax-to-k .
+(syntax2k IMP++-SYNTAX -K .)
+q
+---)
+
+load imp++-programs
+
+--- resolving Builtins subsorted to K into injections
+---(
+load ../imp++-syntax
+load ../../../../../../../../../../../tools/syntax-to-k-interface
+
+---(
+set print attribute on .
+red in SYNTAX-TO-K-META : syntax2k('IMP++-PROGRAMS, '-K) .
+q
+---)
+loop syntax-to-k .
+(syntax2k IMP++-PROGRAMS -K .)
+q
+---)
+load imp++-semantics
+
+--- resolving Builtins subsorted to K into injections
+---()
+load ../imp++-syntax
+load ../../../../../../../../../../../../tools/syntax-to-k-interface
+---(
+set print attribute on .
+red in SYNTAX-TO-K-META : syntax2k('IMP++-SEMANTICS, '-K) .
+q
+---)
+loop syntax-to-k .
+(syntax2k IMP++-SEMANTICS -K .)
+q
+---()

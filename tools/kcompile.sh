@@ -16,6 +16,8 @@ else
   LANG=`echo $FILE | tr a-z A-Z`
 fi
 
+LANG0=LANG
+
 function runMaude {
   printf "%s.." "$2"
   result=$( { stdout=$(echo "$1" | $MAUDE $KBASE/k-prelude | grep -A  10000 '^mod' | grep -B 10000 '^endm') ; } 2>&1; printf "%s" "--------------------$stdout")
@@ -48,12 +50,20 @@ Stopping the compilation!"
 
 OUTPUT=$(<$FILE.maude)
 
+SYNTAX2K="
+load $KBASE/tools/syntax-to-k-interface
+loop syntax-to-k .
+(syntax2k $LANG -K .)
+"
+runMaude "$OUTPUT $SYNTAX2K" "Merging syntax sorts into K"
+
+LANG="${LANG}-K"
+
 KPROPER="
 load $KBASE/tools/add-k-proper-interface
 loop add-k-proper .
 (addKProper $LANG -PROPER .)
 "
-
 runMaude "$OUTPUT $KPROPER" "Adding the KProper Sort"
 
 LANG="${LANG}-PROPER"
@@ -127,7 +137,7 @@ TEST="
 $COMPILED
 
 $OUTPUT
-mod ${LANG}-TEST is
+mod ${LANG0}-TEST is
   including ${LANG}01-LABELS .
   including ${LANG}-STRICTNESS .
 endm

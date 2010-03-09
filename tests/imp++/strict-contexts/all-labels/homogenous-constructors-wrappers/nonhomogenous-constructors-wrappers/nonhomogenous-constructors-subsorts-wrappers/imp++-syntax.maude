@@ -1,26 +1,38 @@
-mod IMP++-SYNTAX is 
+mod IMP++-SYNTAX-K-PROPER is
   including PL-INT .
-  including K .
-  sort VarId .
-  subsort VarId < KProper .
-  subsort Int < KResult .
-  op _+_ : K K -> KProper [prec 33 gather (E e) format (d b o d) metadata "strict"] .
-  op _/_ : K K -> KProper [prec 31 gather (E e) format (d b o d) metadata "strict"] .
-  op ++_ : K -> KProper [prec 30 format (b o d)] .
---- BExp
+  including PL-VARID .
+  including K-PROPER .
   subsort Bool < KResult .
-  op _<=_ : K K -> KProper  [prec 37 metadata "seqstrict" format (d b o d)] .
-  op not_ : K -> KProper [prec 53 metadata "strict" format (b o d)] .
-  op _and_ : K K -> KProper [prec 55 metadata "strict(1)" format (d b o d)] .
---- Stmt
-  op skip : -> KProper [format (b o)] .
-  op _:=_ : VarId K -> KProper [prec 40 metadata "strict(2)" format (d b o d)] .
-  op _;_ : K K -> KProper [prec 122 gather (e E) format (d b noi d)] .
-  op if_then_else_ : K K K -> KProper [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
-  op while_do_ : K K -> KProper [prec 59 format (b o b on++i --)] .
---- Pgm
-  op vars_;_ : KList K -> KProper [prec 121 format (b o b on++i --)] .
-  ops print_ :  K -> KProper [prec 59 metadata "strict" format (b o d)] .
-  op spawn_ : K -> KProper [prec 59 format(b n++i --)] .
-  ops halt  : -> KProper [format (b o)] .
+  subsort Int < KResult .
+  subsort VarId < KProper .
+  op ++_ : VarId -> KProper
+    [prec 30 format(b o d)] .
+  op _+_ : K K -> KProper
+    [prec 33 gather(E e)format(d b o d)metadata "strict"] .
+  op _/_ : K K -> KProper
+    [prec 31 gather(E e)format(d b o d)metadata "strict"] .
+  op _:=_ : VarId K -> KProper
+    [prec 40 format(d b o d)metadata "strict(2)"] .
+  op _;_ : K K -> KProper
+    [prec 122 gather(e E)format(d b noi d)] .
+  op _<=_ : K K -> KProper
+    [prec 37 format(d b o d)metadata "seqstrict"] .
+  op _and_ : K K -> KProper
+    [prec 55 format(d b o d)metadata "strict(1)"] .
+  op halt : -> KProper
+    [format(b o)] .
+  op if_then_else_ : K K K -> KProper
+    [prec 59 format(b o bni n++i bn--i n++i --)metadata "strict(1)"] .
+  op not_ : K -> KProper
+    [prec 53 format(b o d)metadata "strict"] .
+  op print_ : K -> KProper
+    [prec 59 format(b o d)metadata "strict"] .
+  op skip : -> KProper
+    [format(b o)] .
+  op spawn_ : K -> KProper
+    [prec 59 format(b n++i --)] .
+  op vars_;_ : KList K -> KProper
+    [prec 121 format(b o b on++i --)] .
+  op while_do_ : K K -> KProper
+    [prec 59 format(b o b on++i --)] .
 endm

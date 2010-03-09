@@ -43,6 +43,12 @@ fmod K-META-OPS is including META-TERM .
   eq kApply(T, Trl) = '_`(_`)[T,kList(Trl)] .
 endfm
 
+fmod META-K-BUILTINS is
+  including META-LEVEL .
+  op builtinSorts : -> SortSet [memo] .
+  eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
+endfm
+
 fmod META-K-MODULE is
   including META-MODULE-EXTRAS .
   var S : Sort .  var T : Type .  var SSDS : SubsortDeclSet . 

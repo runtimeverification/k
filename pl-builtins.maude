@@ -21,7 +21,7 @@
 set include BOOL off .
 set show advisories off .
 
-fmod PL-BOOL is 
+fmod PL-BOOL is
   sort Bool .
   op true : -> Bool [ctor special (id-hook SystemTrue)] .
   op false : -> Bool [ctor special (id-hook SystemFalse)] .
@@ -871,6 +871,26 @@ mod PL-COUNTER is
     op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 endm
 
+
+mod PL-VARID is
+  sort VarId .
+endm
+
+mod PL-BUILTINS is
+including PL-BOOL .
+including PL-EXT-BOOL .
+including PL-NAT .
+including PL-INT .
+including PL-RAT .
+including PL-FLOAT .
+including PL-STRING .
+including PL-CONVERSION .
+including PL-QID .
+including PL-RANDOM .
+including PL-COUNTER .
+including PL-BOOL .
+including PL-VARID .
+endm
 ---set include PL-BOOL on .
 set show advisories on .
 

@@ -1,4 +1,4 @@
-load ../../../k-prelude
+load ../../k-prelude
 load strict-contexts/all-labels/imp++-syntax
 load imp++-strictness
 load strict-contexts/all-labels/imp++-programs

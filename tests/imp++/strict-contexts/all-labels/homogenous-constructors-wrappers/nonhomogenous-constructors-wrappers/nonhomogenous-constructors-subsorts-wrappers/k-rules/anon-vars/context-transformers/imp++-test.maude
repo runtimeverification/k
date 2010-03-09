@@ -1,16 +1,16 @@
-load ../../../../../../../../../../../k-prelude
+load ../../../../../../../../../../k-prelude
 load ../../../imp++-syntax
 load ../../../imp++-programs
 load imp++-semantics
 ---()
-load ../../../../../../../../../../../tools/context-transformers-interface
+load ../../../../../../../../../../tools/context-transformers-interface
 ---(
 set print attribute on .
-red in  CONTEXT-TRANSFORMERS-META : resolveKCxt("IMP++-SEMANTICS","IMP++-SEMANTICS","IMP++-SEMANTICS") .
+red in  CONTEXT-TRANSFORMERS-META : resolveKCxt("IMP++-SEMANTICS-K-PROPER","IMP++-SEMANTICS-K-PROPER","IMP++-SEMANTICS-K-PROPER") .
 q
 ---)
 loop context-transformers .
-(resolveKCxt IMP++-SEMANTICS IMP++-SEMANTICS IMP++-SEMANTICS .)
+(resolveKCxt IMP++-SEMANTICS-K-PROPER IMP++-SEMANTICS-K-PROPER IMP++-SEMANTICS-K-PROPER .)
 q
 ---()
 

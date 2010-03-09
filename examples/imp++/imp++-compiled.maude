@@ -1,14 +1,14 @@
 
 load /home/grosu/tserban2/work/k-framework/k-maude/trunk/tools/../k-prelude
 
-mod IMP++-PROPER01-LABELS is
+mod IMP++-K-PROPER01-LABELS is
   including CONFIG .
   including K-MAP-EXTRAS .
   including PL-INT .
+  including PL-VARID .
   including K-PROPER .
   including K-PROPER .
   including K-WRAPPERS-LABELS .
-  sorts VarId .
   op `[_;_`] : Nat Nat -> KList .
   op env : -> CellLabel .
   op k : -> CellLabel .
@@ -265,8 +265,8 @@ mod IMP++-PROPER01-LABELS is
     if _=/=Bool_(I2:Int,0)= true [metadata "krl"] .
 endm
 
-mod IMP++-PROPER-STRICTNESS is
-  including IMP++-PROPER01-LABELS .
+mod IMP++-K-PROPER-STRICTNESS is
+  including IMP++-K-PROPER01-LABELS .
   including K-STRICTNESS .
   eq <_>_</_>(k,_~>_(_`(_`)("_+_",_`,_(K1:K,Kcxt:KProper)),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_+_\"(K1:K,[])"),_`(_`)(
@@ -371,9 +371,9 @@ mod IMP++-PROPER-STRICTNESS is
     = <_>_</_>(k,_~>_(_`(_`)("tail",Kcxt:KResult),Rest:K),k) [metadata
     "cooling"] .
 endm
-mod IMP++-PROPER-TEST is
-  including IMP++-PROPER01-LABELS .
-  including IMP++-PROPER-STRICTNESS .
+mod LANG-TEST is
+  including IMP++-K-PROPER01-LABELS .
+  including IMP++-K-PROPER-STRICTNESS .
 endm
 
 

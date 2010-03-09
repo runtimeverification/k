@@ -1,0 +1,139 @@
+set include PL-BOOL off .
+set include BOOL on .
+
+load prelude-extras 
+load meta-k
+
+fmod SYNTAX-TO-K is
+ including META-TERM-EXTRAS .
+ including META-MODULE-EXTRAS .
+ including META-LEVEL-EXTRAS .
+ including META-K-MODULE .
+ including META-K-BUILTINS .
+  var IL : ImportList .
+ var Ops : OpDeclSet .  var Op : OpDecl .
+ var SSDS : SubsortDeclSet .  var SSD : SubsortDecl . 
+ var SS : SortSet . var S S' : Sort .
+ var Q O : Qid . var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
+ var AS AS' : AttrSet .  var HL : HookList .
+ var MS : ModuleSet . var M M' Flat : Module .
+ var Trm : Term . var Trms : TermList . var V : Variable . var C : Constant .
+var Mbs : MembAxSet . var Mb : MembAx .
+ var Eqs : EquationSet .  var Eq : Equation . 
+ var Rls : RuleSet . var Rl : Rule .
+ var T1 T2 : Term . var Cond : Condition .
+
+ op syntax2k : Qid Module Module ModuleSet ~> Module .
+ eq syntax2k(Q, M, Flat, MS) 
+  = setName(syntax2k(suffixImports(Q, M,syntax2kImports(MS)), syntaxSorts(Flat)), qid(string(getName(M)) + string(Q))) .
+
+  op syntaxSorts :  Module ~> SortSet .
+  eq syntaxSorts(M) = removeSorts(getSubsorts(M, K),ksorts ; builtinSorts) .
+
+ op syntax2kImports : ModuleSet ~> ImportList .
+ eq syntax2kImports(M' MS) 
+  = if K in getSorts(M') 
+    then syntax2kImports(MS, getName(M'), syntaxSorts(M')) 
+    else syntax2kImports(MS)
+    fi .
+ 
+ op syntax2kImports : ModuleSet Qid SortSet ~> ImportList . 
+ eq syntax2kImports(MS, Q, none) = syntax2kImports(MS) .
+ eq syntax2kImports(MS, Q, SS) 
+  = syntax2kImports(MS) (including Q .) [owise print Q "(" SS ")"] .
+ eq syntax2kImports(empty) = nil .
+ 
+
+ op syntax2k : Module SortSet ~> Module .
+ eq syntax2k(M, SS)
+  = setSubsorts(setOps(setMbs(setRls(setEqs(removeSorts(M,SS), syntax2kEqs(getEqs(M), SS)), syntax2kRls(getRls(M), SS)),syntax2kMbs(getMbs(M), SS)),syntax2kOps(getOps(M),SS)),syntax2kSSs(getSubsorts(M), SS)) .
+ 
+ op syntax2kSSs : SubsortDeclSet SortSet ~> SubsortDeclSet .
+ eq syntax2kSSs(SSDS SSD, SS)
+  =  syntax2kSSs(SSDS, SS) syntax2kSS(SSD, SS) .
+ eq syntax2kSSs(none, SS)  = none .
+
+ op syntax2kSS : SubsortDecl SortSet ~> SubsortDeclSet .
+ eq syntax2kSS((subsort S < S' .), SS)
+  = if S in SS 
+    then if S' in SS or-else S' in ksorts then none else (subsort K < S' .) fi
+    else if S' in SS then (subsort S < K .) else (subsort S < S' .) fi 
+    fi .  
+
+ op syntax2kOps : OpDeclSet SortSet ~> OpDeclSet .
+ eq syntax2kOps(Ops Op, SS)
+  =  syntax2kOps(Ops, SS) syntax2kOp(Op, SS) .
+ eq syntax2kOps(none, SS)  = none .
+
+ op syntax2kOp : OpDecl SortSet ~> OpDecl .
+ eq syntax2kOp((op Q : Tl -> T [AS] .), SS)
+  = (op Q : syntax2kTypes(Tl,SS) -> syntax2kType(T,SS) [syntax2kAS(AS,SS)] .) .
+
+ op syntax2kTypes : TypeList SortSet ~> TypeList .
+ eq syntax2kTypes(T Tl,SS) = syntax2kType(T,SS) syntax2kTypes(Tl,SS) .
+ eq syntax2kTypes(nil,SS) = nil .
+ 
+ op syntax2kType : Type SortSet ~> Type .
+ eq syntax2kType(T,SS) = if T in SS then K else T fi .
+
+ op syntax2kAS : AttrSet SortSet ~> AttrSet .
+ eq syntax2kAS(AS id(Trm),SS) = id(syntax2kT(Trm,SS)) syntax2kAS(AS,SS) .
+ eq syntax2kAS(AS,SS) = AS [owise] .
+
+ op syntax2kMbs : MembAxSet SortSet ~> MembAxSet .
+ eq syntax2kMbs(Mbs Mb, SS)
+  =  syntax2kMbs(Mbs, SS) syntax2kMb(Mb, SS) .
+ eq syntax2kMbs(none, SS)  = none .
+
+ op syntax2kMb : MembAx SortSet ~> MembAx .
+ eq syntax2kMb((mb T1 : T [AS] .), SS)
+  = (mb syntax2kT(T1, SS) : syntax2kType(T,SS) [AS] .) .
+ eq syntax2kMb((cmb T1 : T if Cond [AS] .), SS)
+  = (cmb syntax2kT(T1, SS) : syntax2kType(T,SS) 
+      if syntax2kC(Cond,SS) [AS] .) .
+
+ op syntax2kEqs : EquationSet SortSet ~> EquationSet .
+ eq syntax2kEqs(Eqs Eq, SS)
+  =  syntax2kEqs(Eqs, SS) syntax2kEq(Eq, SS) .
+ eq syntax2kEqs(none, SS)  = none .
+
+ op syntax2kEq : Equation SortSet ~> Equation .
+ eq syntax2kEq((eq T1 = T2 [AS] .), SS)
+  = (eq syntax2kT(T1,SS) = syntax2kT(T2,SS) [AS] .) .
+ eq syntax2kEq((ceq T1 = T2 if Cond [AS] .), SS)
+  = (ceq syntax2kT(T1,SS) = syntax2kT(T2,SS) if syntax2kC(Cond,SS) [AS] .) .
+
+ op syntax2kRls : RuleSet SortSet ~> RuleSet .
+ eq syntax2kRls(Rls Rl, SS)
+  =  syntax2kRls(Rls, SS) syntax2kRl(Rl, SS) .
+ eq syntax2kRls(none, SS)  = none .
+
+ op syntax2kRl : Rule SortSet ~> Rule .
+ eq syntax2kRl((rl T1 => T2 [AS] .), SS)
+  = (rl syntax2kT(T1,SS) => syntax2kT(T2,SS) [AS] .) .
+ eq syntax2kRl((crl T1 => T2 if Cond [AS] .), SS)
+  = (crl syntax2kT(T1,SS) => syntax2kT(T2,SS) if syntax2kC(Cond,SS) [AS] .) .
+
+ op syntax2kC : Condition SortSet ~> Condition .
+ eq syntax2kC(T1 = T2 /\ Cond,SS) 
+  = syntax2kT(T1,SS) = syntax2kT(T2,SS) /\ syntax2kC(Cond,SS) .
+ eq syntax2kC(T1 => T2 /\ Cond,SS) 
+  = syntax2kT(T1,SS) => syntax2kT(T2,SS) /\ syntax2kC(Cond,SS) .
+ eq syntax2kC(T1 := T2 /\ Cond,SS) 
+  = syntax2kT(T1,SS) := syntax2kT(T2,SS) /\ syntax2kC(Cond,SS) .
+ eq syntax2kC(T1 : T /\ Cond,SS) 
+  = syntax2kT(T1,SS) : syntax2kType(T,SS) /\ syntax2kC(Cond,SS) .
+ eq syntax2kC(nil, SS) = nil .
+
+ op syntax2kTs : TermList SortSet ~> TermList  .
+ eq syntax2kTs((Trm,Trms), SS)
+  = syntax2kT(Trm,SS), syntax2kTs(Trms,SS) .
+ eq syntax2kTs(empty,SS) = empty .
+
+ op syntax2kT : Term SortSet ~> Term .
+ eq syntax2kT(Q[Trms],SS) = Q[syntax2kTs(Trms,SS)] .
+ eq syntax2kT(V,SS) 
+  = if getType(V) in SS then mkVariable(getName(V),K) else V fi .
+ eq syntax2kT(C,SS) 
+  = if getType(C) in SS then mkConstant(getName(C),K) else C fi .
+endfm

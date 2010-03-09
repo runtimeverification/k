@@ -253,6 +253,9 @@ fmod META-TERM-EXTRAS is
 
   op mkConstant : Qid Type -> Constant .
   eq mkConstant(Q, T) = qid(string(Q) + "." + string(T)) .
+
+  op mkVariable : Qid Type -> Variable .
+  eq mkVariable(Q, T) = qid(string(Q) + ":" + string(T)) .
 endfm
 
 fmod META-MODULE-EXTRAS is
@@ -302,6 +305,13 @@ fmod META-MODULE-EXTRAS is
   op addEqs : EquationSet Module -> Module .
   op addRls : RuleSet Module -> Module .
 
+  op removeSorts : SortSet SortSet -> SortSet .
+  eq removeSorts(SS ; S, SS' ; S) = removeSorts(SS, SS' ; S) .
+  eq removeSorts(SS, SS') = SS [owise] .
+
+  op removeSorts : Module SortSet -> Module .
+  eq removeSorts(M, SS) = setSorts(M, removeSorts(getSorts(M), SS)) .
+ 
   op removeSubsorts : SubsortDeclSet SubsortDeclSet -> SubsortDeclSet .
   eq removeSubsorts(SSDS SSD, SSDS' SSD) = removeSubsorts(SSDS, SSDS' SSD) .
   eq removeSubsorts(SSDS, SSDS') = SSDS [owise] . 
@@ -532,7 +542,7 @@ fmod META-LEVEL-EXTRAS is
   var M : Module . var T T' : Type . var Tl Tl' : TypeList .
   var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
   var Trm Trm' : Term . var Trms : TermList .
-  var S S' : Sort  . var SS : SortSet .
+  var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
   var N N' : Nat .  var IL : ImportList .
 
   op leastSorts : Module TermList ~> TypeList .
@@ -593,6 +603,18 @@ fmod META-LEVEL-EXTRAS is
 
   op lubSort : Module Term Term ~> Sort .
   eq lubSort(M, Trm, Trm') = lubSorts(M, leastSort(M, Trm), leastSort(M, Trm')) .
+
+  op getSubsorts : Module SortSet -> SortSet .
+  eq getSubsorts(M, SS) = getSubsorts(M, getSorts(M), SS) .
+  
+  op getSubsorts : Module SortSet SortSet -> SortSet .
+  eq getSubsorts(M, S ; SS, SS') 
+   = if sortLeq(M, S, SS') then S ; getSubsorts(M, SS, SS') 
+     else getSubsorts(M, SS, SS') fi .
+  eq getSubsorts(M, none, SS') = none .
+
+  eq sortLeq(M, S, S' ; NeSS) = sortLeq(M, S, S') or-else sortLeq(M, S, NeSS) .
+  eq sortLeq(M, S, none) = false .
 
   op upImports : ImportList -> ModuleSet .
   eq upImports(nil) = empty .

@@ -1,0 +1,32 @@
+mod IMP++-SYNTAX is 
+  including PL-INT .
+  including PL-VARID .
+  including K .
+  sort AExp .
+  subsort VarId < AExp .
+  subsort Int < AExp .
+  op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
+  op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
+  op ++_ : VarId -> AExp [prec 30 format (b o d)] .
+--- BExp
+  sort BExp .
+  subsort Bool < BExp .
+  op _<=_ : AExp AExp -> BExp  [prec 37 metadata "seqstrict" format (d b o d)] .
+  op not_ : BExp -> BExp [prec 53 metadata "strict" format (b o d)] .
+  op _and_ : BExp BExp -> BExp [prec 55 metadata "strict(1)" format (d b o d)] .
+--- Stmt
+  sort Stmt .
+  op skip : -> Stmt [format (b o)] .
+  op _:=_ : VarId AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
+  op _;_ : Stmt Stmt -> Stmt [prec 122 gather (e E) format (d b noi d)] .
+  op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
+  op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
+--- Pgm
+  op vars_;_ : KList Stmt -> Stmt [prec 121 format (b o b on++i --)] .
+  ops print_ :  AExp -> Stmt [prec 59 metadata "strict" format (b o d)] .
+  op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
+  ops halt  : -> Stmt [format (b o)] .
+  subsorts AExp BExp Stmt < K .
+  subsort Bool < KResult .
+  subsort Int < KResult .
+endm

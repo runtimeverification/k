@@ -8,16 +8,26 @@ fmod ADD-KPROPER is
   including META-MODULE-EXTRAS .
   including  META-K-MODULE .
   var M : Module .  var AS : AttrSet . 
-  var S S' : Sort .
+  var SS : SortSet . var S S' : Sort .
   var O Q : Qid . var Tl : TypeList . var T : Type .
   var SSDS : SubsortDeclSet .  var OPDS : OpDeclSet .
   var MS : ModuleSet .
   
   op addKProper : Qid Module ModuleSet ~> Module .
-  eq addKProper(O, M, MS) = setName(addKProper(addImports((including 'K-PROPER .), removeImports(suffixImports(O,M,kProperImports(MS)), (including 'K .))), kSubsorts(getSubsorts(M)), kOps(getOps(M))), qid(string(getName(M)) + string(O))) .
+  eq addKProper(O, M, MS) = setName(addKProper(addImports((including 'K-PROPER .), removeImports(suffixImports(O,M,kProperImports(MS)), (including 'K .))), pseudoKSubsorts(getSubsorts(M)), kOps(getOps(M))), qid(string(getName(M)) + string(O))) .
 
   op addKProper : Module SubsortDeclSet OpDeclSet ~> Module .
-  eq addKProper(M, SSDS, OPDS) = addSubsorts(kProperSubsorts(SSDS),addOps(kProperOps(OPDS),removeOps(removeSubsorts(M,SSDS),OPDS))) .
+  eq addKProper(M, SSDS, OPDS) = addSubsorts(kProperSubsorts(kSubsorts(fixResults(SSDS, KResult, K ; NeK))),addOps(kProperOps(OPDS),removeOps(removeSubsorts(M,kSubsorts(SSDS)),OPDS))) .
+
+ op fixResults : SubsortDeclSet Sort SortSet ~> SubsortDeclSet .
+ eq fixResults((subsort S < S' .) SSDS, S', SS)
+  = (subsort S < S' .) fixResults(removeAll(SSDS, S, SS), S', SS) [print S " < " S'] .
+ eq fixResults(SSDS, S, SS) = SSDS [owise print SSDS] .
+
+ op removeAll : SubsortDeclSet Sort SortSet ~> SubsortDeclSet .
+ eq removeAll(SSDS (subsort S < S' .), S, S' ; SS)
+  = removeAll(SSDS, S, S' ; SS) .
+ eq removeAll(SSDS, S, SS) = SSDS [owise] .
 
  op kProperImports : ModuleSet ~> ImportList .
  eq kProperImports(M MS) = kProperImports(MS, getName(M), kSubsorts(getSubsorts(M)), kOps(getOps(M))) .
