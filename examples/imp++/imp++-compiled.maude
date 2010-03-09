@@ -1,11 +1,12 @@
 
 load /home/grosu/tserban2/work/k-framework/k-maude/trunk/tools/../k-prelude
 
-mod IMP++01-LABELS is
+mod IMP++-PROPER01-LABELS is
   including CONFIG .
   including K-MAP-EXTRAS .
   including PL-INT .
-  including K .
+  including K-PROPER .
+  including K-PROPER .
   including K-WRAPPERS-LABELS .
   sorts VarId .
   op `[_;_`] : Nat Nat -> KList .
@@ -48,15 +49,15 @@ mod IMP++01-LABELS is
     [metadata "arity 1 strict"] .
   op "not_" : -> KProperLabel
     [metadata "arity 1 strict"] .
-  op "pCollatz" : -> KLabel
+  op "pCollatz" : -> KProperLabel
     [metadata "arity 0"] .
-  op "pList" : -> KLabel
+  op "pList" : -> KProperLabel
     [metadata "arity 0"] .
-  op "pSum" : -> KLabel
+  op "pSum" : -> KProperLabel
     [metadata "arity 0"] .
   op "print_" : -> KProperLabel
     [metadata "arity 1 strict"] .
-  op "restore" : -> KLabel
+  op "restore" : -> KProperLabel
     [metadata "arity 1"] .
   op "skip" : -> KProperLabel
     [metadata "arity 0"] .
@@ -264,8 +265,8 @@ mod IMP++01-LABELS is
     if _=/=Bool_(I2:Int,0)= true [metadata "krl"] .
 endm
 
-mod IMP++-STRICTNESS is
-  including IMP++01-LABELS .
+mod IMP++-PROPER-STRICTNESS is
+  including IMP++-PROPER01-LABELS .
   including K-STRICTNESS .
   eq <_>_</_>(k,_~>_(_`(_`)("_+_",_`,_(K1:K,Kcxt:KProper)),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_+_\"(K1:K,[])"),_`(_`)(
@@ -370,9 +371,9 @@ mod IMP++-STRICTNESS is
     = <_>_</_>(k,_~>_(_`(_`)("tail",Kcxt:KResult),Rest:K),k) [metadata
     "cooling"] .
 endm
-mod IMP++-TEST is
-  including IMP++01-LABELS .
-  including IMP++-STRICTNESS .
+mod IMP++-PROPER-TEST is
+  including IMP++-PROPER01-LABELS .
+  including IMP++-PROPER-STRICTNESS .
 endm
 
 

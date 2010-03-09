@@ -18,12 +18,45 @@ fi
 
 function runMaude {
   printf "%s.." "$2"
-  OUTPUT=`echo "$1" | $MAUDE $KBASE/k-prelude | grep -A  10000 '^mod' | grep -B 10000 '^endm'`
-  echo "$3 $OUTPUT show module ." | $MAUDE $KBASE/k-prelude >/dev/null
+  result=$( { stdout=$(echo "$1" | $MAUDE $KBASE/k-prelude | grep -A  10000 '^mod' | grep -B 10000 '^endm') ; } 2>&1; printf "%s" "--------------------$stdout")
+OUTPUT=${result#*--------------------}
+ERROR=${result%--------------------*}
+  if [ -n "$ERROR" ]; then
+    echo ". Error
+$ERROR
+encountered when generating the output module: 
+$OUTPUT
+Input:
+$1
+Stopping the compilation!"
+    exit
+  fi
+  
+  result=$( { stdout=$(echo "$3 $OUTPUT show module ." | $MAUDE $KBASE/k-prelude ) ; } 2>&1; printf "%s" "--------------------$stdout")
+OUTPUT1=${result#*--------------------}
+ERROR=${result%--------------------*}
+  if [ -n "$ERROR" ]; then
+    echo ". Error
+$ERROR
+encountered when loading generated module 
+$OUTPUT1
+Stopping the compilation!"
+    exit
+  fi
   printf ". Done!\n"
 }
 
-FILE_CONTENTS=$(<$FILE.maude)
+OUTPUT=$(<$FILE.maude)
+
+KPROPER="
+load $KBASE/tools/add-k-proper-interface
+loop add-k-proper .
+(addKProper $LANG -PROPER .)
+"
+
+runMaude "$OUTPUT $KPROPER" "Adding the KProper Sort"
+
+LANG="${LANG}-PROPER"
 
 CONTEXT_TRANSFORMERS="
 load $KBASE/tools/context-transformers-interface
@@ -31,7 +64,7 @@ loop context-transformers .
 (resolveKCxt $LANG $LANG $LANG .)
 "
 
-runMaude "$FILE_CONTENTS $CONTEXT_TRANSFORMERS" "Applying Context Transformers"
+runMaude "$OUTPUT $CONTEXT_TRANSFORMERS" "Applying Context Transformers"
 
 ANON_VARS="
 load $KBASE/tools/anon-vars-interface
