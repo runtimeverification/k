@@ -151,11 +151,11 @@ mod IMP++-K-PROPER01-LABELS is
     .kl))))),_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("_+_",
     _`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("Int < KResult"_(-1),
     .kl))))))))),_`(_`)("print_",_`(_`)("VarId < KProper"_(s),.kl)))))))))))) .
-  eq startConfig(K:K)
+  eq startConfig(S:K)
     = __(<_>_</_>(result,.l,result),<_>_</_>(T,__(__(__(<_>_</_>(nextLoc,
     _`(_`)("Int < KResult"_(0),.kl),nextLoc),<_>_</_>(output,.l,output)),
     <_>_</_>(store,.m,store)),<_>_</_>(threads,<_>_</_>(thread,__(<_>_</_>(k,
-    K:K,k),<_>_</_>(env,.m,env)),thread),threads)),T)) .
+    S:K,k),<_>_</_>(env,.m,env)),thread),threads)),T)) .
   eq <_>_</_>(T,__(Top:Set,<_>_</_>(output,Output:List,output),<_>_</_>(
     threads,.s,threads)),T)
     = <_>_</_>(result,Output:List,result) [metadata "keq"] .

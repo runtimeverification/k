@@ -91,8 +91,8 @@ mod IMP++ is
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var Xl : KList .
   var RL : ResultList .
   mb kconf < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
-  op startConfig : K -> Set .
-  eq startConfig(K) = < T > < threads > < thread > < k > K </ k > < env > .m </ env > </ thread > </ threads > < store > .m </ store >  < output > .l </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .l </ result > .
+  op startConfig : Stmt -> Set .
+  eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .m </ env > </ thread > </ threads > < store > .m </ store >  < output > .l </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .l </ result > .
   
   mb krl [[I1 + I2 ==> I1 +Int I2]] : KSentence .
   mb krl [[I1 / I2 ==> I1 /Int I2]] if I2 =/=Bool 0 : KSentence .
