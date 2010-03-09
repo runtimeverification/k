@@ -5,7 +5,7 @@ mod IMP++ is
   including K-CONFIG .
   including PL-INT .
   including PL-VARID .
-  including K-PROPER .
+  including K .
 
 ---Syntax
   sort AExp .
@@ -81,7 +81,6 @@ mod IMP++ is
 
 ---Semantics
   subsort AExp BExp Stmt < K .
-  subsort VarId < KProper .
   subsort Int < KResult .
   subsort Bool < KResult .
 

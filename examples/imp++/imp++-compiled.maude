@@ -7,7 +7,6 @@ mod IMP++-K-PROPER01-LABELS is
   including PL-INT .
   including PL-VARID .
   including K-PROPER .
-  including K-PROPER .
   including K-WRAPPERS-LABELS .
   op `[_;_`] : Nat Nat -> KList .
   op env : -> CellLabel .
