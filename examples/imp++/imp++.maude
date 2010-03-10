@@ -13,7 +13,7 @@ mod IMP++ is
   op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : VarId -> AExp [prec 30 format (b o d)] .
-  op list_ : KList -> AExp [metadata "strict"] .
+  op list_ : KList -> AExp [metadata "strict(-1)"] .
   op head : AExp -> AExp [metadata "strict"] .
   op tail : AExp -> AExp [metadata "strict"] .
 --- BExp

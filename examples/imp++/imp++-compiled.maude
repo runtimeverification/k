@@ -1,5 +1,5 @@
 
-load /home/grosu/tserban2/work/k-framework/k-maude/trunk/tools/../k-prelude
+load ../../tools/../k-prelude
 
 mod IMP++-K-PROPER01-LABELS is
   including CONFIG .

@@ -20,11 +20,19 @@
 
 fmod NAT-LIST-EXTRAS is
   including NAT-LIST .
-  vars M N : Nat . vars Nats Nats' : NatList .
+  including INT .
+  sort IntList NeIntList .
+  subsort NatList < IntList .
+  subsort Int NeNatList < NeIntList < IntList .
+  op __ : IntList IntList -> IntList [ditto] .
+  op __ : NeIntList IntList -> NeIntList [ditto] .
+  op __ : IntList NeIntList -> NeIntList [ditto] .
 
-  op sort : NatList ~> NatList .
-  ceq sort(Nats M N Nats') = sort(Nats N M Nats') if M > N .
-  eq sort(Nats) = Nats [owise] .
+  vars M N : Int . vars Ints Ints' : IntList .
+
+  op sortAbs : IntList ~> IntList .
+  ceq sortAbs(Ints M N Ints') = sortAbs(Ints N M Ints') if abs(M) > abs(N) .
+  eq sortAbs(Ints) = Ints [owise] .
 
   --- precondition first argument should be at most succesor of the second
   op seq : Nat Nat ~> NatList .

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 MAUDE="maude"
 which $MAUDE 1>/dev/null 2>/dev/null
 if [[ $? -ne 0 ]]; then
@@ -24,12 +24,13 @@ function runMaude {
 OUTPUT=${result#*--------------------}
 ERROR=${result%--------------------*}
   if [ -n "$ERROR" ]; then
-    echo ". Error
-$ERROR
-encountered when generating the output module: 
-$OUTPUT
+    echo ". Error encountered when generating the output module: 
 Input:
 $1
+Output:
+$OUTPUT
+Error ($2): 
+$ERROR
 Stopping the compilation!"
     exit
   fi
@@ -38,10 +39,13 @@ Stopping the compilation!"
 OUTPUT1=${result#*--------------------}
 ERROR=${result%--------------------*}
   if [ -n "$ERROR" ]; then
-    echo ". Error
-$ERROR
-encountered when loading generated module 
+    echo ". Error in encountered when loading generated module 
+Generated Module:
+$OUTPUT
+Output:
 $OUTPUT1
+Error ($2): 
+$ERROR
 Stopping the compilation!"
     exit
   fi

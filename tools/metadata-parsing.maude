@@ -57,7 +57,7 @@ endfm
 fmod PARSE-METADATA-STRICT is
   including PARSE-METADATA-BASIC .
   including STRICT-ATTRS .
-  var Q : Qid . var AS : AttrSet . var Nl : NatList .
+  var Q : Qid . var AS : AttrSet . var Nl : IntList .
   var A : Attr . var S S' S1 : String . var F : FindResult .
  ceq metadataStrippedParse(S) = karity(N) metadataParse(S')
    if "arity " = substr(S,0,length("arity ")) 
@@ -77,7 +77,7 @@ fmod PARSE-METADATA-STRICT is
 ---  eq conv2SeqStrict(vstrict(Ql)) = seqvstrict(Ql) .
 
   op strictParse : String -> AttrStringPair .
-  var N : Nat . var Ql : QidList .
+  var N : Int . var Ql : QidList .
   ceq strictParse(S) 
     = {strictListParse(tokenize(stripSpaces(substr(S,1,N)))), substr(S, N + 2, length(S))}
    if "(" = substr(S, 0, 1)
@@ -85,14 +85,14 @@ fmod PARSE-METADATA-STRICT is
   eq strictParse(S) = {kstrict(nil), S} [owise] .
 
   op strictListParse : QidList -> Attr .
-  ceq strictListParse(Q Ql) = kstrict(parseNatList(Q Ql)) 
-   if (rat(string(Q),10) :: Nat) .
+  ceq strictListParse(Q Ql) = kstrict(parseIntList(Q Ql)) 
+   if (rat(string(Q),10) :: Int) .
   eq strictListParse(Ql) = none [owise print "error parsing strict arguments" Ql] .
 ---     else vstrict(Q Ql) fi .
 
-  op parseNatList : QidList -> [NatList] .
-  eq parseNatList(Q Ql) = rat(string(Q), 10) parseNatList(Ql) .
-  eq parseNatList(nil) = nil .
+  op parseIntList : QidList -> [IntList] .
+  eq parseIntList(Q Ql) = rat(string(Q), 10) parseIntList(Ql) .
+  eq parseIntList(nil) = nil .
 
 endfm
 
