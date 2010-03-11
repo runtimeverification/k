@@ -1,0 +1,39 @@
+load ../../tools/../k-prelude
+
+mod IMP++ is
+	including CONFIG .
+	including K-MAP-EXTRAS .
+	including K-RULES .
+	including K-CONFIG .
+	including PL-INT .
+	including PL-VARID .
+	including K .
+
+--- Syntax
+	op memory : -> CellLabel .
+	op output : -> CellLabel .
+	op input : -> CellLabel .
+	op k : -> CellLabel .
+
+	--- comments from http://en.wikipedia.org/wiki/Brainfuck
+	op Seq : -> KLabel [metadata "arity 2"] .
+	op GoRight : -> KLabel [metadata "arity 0"] . --- increment the data pointer (to point to the next cell to the right).
+	op GoLeft : -> KLabel [metadata "arity 0"] . --- decrement the data pointer (to point to the next cell to the left).
+	op Increase : -> KLabel [metadata "arity 0"] . --- increment (increase by one) the byte at the data pointer.
+	op Decrease : -> KLabel [metadata "arity 0"] . --- decrement (decrease by one) the byte at the data pointer.
+	op Print : -> KLabel [metadata "arity 0"] . --- output the value of the byte at the data pointer.
+	op Read : -> KLabel [metadata "arity 0"] . --- accept one byte of input, storing its value in the byte at the data pointer.
+	op While : -> KLabel [metadata "arity 1"] .
+	--- [ 	if the byte at the data pointer is zero, then instead of moving 
+	---		the instruction pointer forward to the next command, jump it 
+	---		forward to the command after the matching ] command*.
+	--- ] 	if the byte at the data pointer is nonzero, then instead of moving 
+	---		the instruction pointer forward to the next command, jump it back 
+	---		to the command after the matching [ command*.
+	
+---Programs
+  	op helloWorld : -> [K] .
+	eq helloWorld = (
+		Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( While( Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Decrease(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+	) .
+endm
