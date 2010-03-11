@@ -1,6 +1,7 @@
 load ../../tools/../k-prelude
 
-mod IMP++ is
+mod BF is
+	including K-PROPER .
 	including CONFIG .
 	including K-MAP-EXTRAS .
 	including K-RULES .
@@ -8,7 +9,6 @@ mod IMP++ is
 	including PL-INT .
 	including PL-VARID .
 	including K .
-
 --- Syntax
 	op memory : -> CellLabel .
 	op output : -> CellLabel .
@@ -16,14 +16,14 @@ mod IMP++ is
 	op k : -> CellLabel .
 
 	--- comments from http://en.wikipedia.org/wiki/Brainfuck
-	op Seq : -> KLabel [metadata "arity 2"] .
-	op GoRight : -> KLabel [metadata "arity 0"] . --- increment the data pointer (to point to the next cell to the right).
-	op GoLeft : -> KLabel [metadata "arity 0"] . --- decrement the data pointer (to point to the next cell to the left).
-	op Increase : -> KLabel [metadata "arity 0"] . --- increment (increase by one) the byte at the data pointer.
-	op Decrease : -> KLabel [metadata "arity 0"] . --- decrement (decrease by one) the byte at the data pointer.
-	op Print : -> KLabel [metadata "arity 0"] . --- output the value of the byte at the data pointer.
-	op Read : -> KLabel [metadata "arity 0"] . --- accept one byte of input, storing its value in the byte at the data pointer.
-	op While : -> KLabel [metadata "arity 1"] .
+	op Seq : -> KProperLabel [metadata "arity 2"] .
+	op GoRight : -> KProperLabel [metadata "arity 0"] . --- increment the data pointer (to point to the next cell to the right).
+	op GoLeft : -> KProperLabel [metadata "arity 0"] . --- decrement the data pointer (to point to the next cell to the left).
+	op Increase : -> KProperLabel [metadata "arity 0"] . --- increment (increase by one) the byte at the data pointer.
+	op Decrease : -> KProperLabel [metadata "arity 0"] . --- decrement (decrease by one) the byte at the data pointer.
+	op Print : -> KProperLabel [metadata "arity 0"] . --- output the value of the byte at the data pointer.
+	op Read : -> KProperLabel [metadata "arity 0"] . --- accept one byte of input, storing its value in the byte at the data pointer.
+	op While : -> KProperLabel [metadata "arity 1"] .
 	--- [ 	if the byte at the data pointer is zero, then instead of moving 
 	---		the instruction pointer forward to the next command, jump it 
 	---		forward to the command after the matching ] command*.
@@ -31,9 +31,25 @@ mod IMP++ is
 	---		the instruction pointer forward to the next command, jump it back 
 	---		to the command after the matching [ command*.
 	
----Programs
-  	op helloWorld : -> [K] .
-	eq helloWorld = (
-		Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( While( Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Decrease(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
-	) .
+--- Programs
+  	--- op helloWorld : -> [K] .
+	--- eq helloWorld = (
+	---	Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( While( Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Decrease(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+	--- ) .
+	
+--- Semantics
+	op sentinel : -> KProperLabel .
+	op eval : K -> Set .
+	
+	eq [Start]: eval(K:K) = 
+		< T >
+			< k > K:K </ k >
+			< memory > sentinel(.kl) </ memory >
+			< output > .l </ output >
+			< input > .l </ input >
+		</ T > .
+	
+	mb keq [[< T > S:Set < k > .k </ k > < output > K:K </ output > S':Set </ T > ==> < output > K:K </ output >]] : KSentence .
 endm
+
+---rew eval(helloWorld) .
