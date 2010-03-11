@@ -154,3 +154,4 @@ load $KBASE/k-prelude
 $TEST
 " > $OUTPUT_FILE.maude
 
+echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."

@@ -1,5 +1,5 @@
 
-load ../../tools/../k-prelude
+load /home/grosu/tserban2/work/k-framework/k-maude/trunk/tools/../k-prelude
 
 mod IMP++-K-PROPER01-LABELS is
   including CONFIG .
@@ -8,7 +8,7 @@ mod IMP++-K-PROPER01-LABELS is
   including PL-VARID .
   including K-PROPER .
   including K-WRAPPERS-LABELS .
-  op `[_;_`] : Nat Nat -> KList .
+  op _.._ : Nat Nat -> KList .
   op env : -> CellLabel .
   op k : -> CellLabel .
   op nextLoc : -> CellLabel .
@@ -38,6 +38,8 @@ mod IMP++-K-PROPER01-LABELS is
     [metadata "arity 2 seqstrict"] .
   op "_and_" : -> KProperLabel
     [metadata "arity 2 strict(1)"] .
+  op "env" : -> KProperLabel
+    [metadata "arity 1"] .
   op "halt" : -> KProperLabel
     [metadata "arity 0"] .
   op "head" : -> KProperLabel
@@ -56,8 +58,6 @@ mod IMP++-K-PROPER01-LABELS is
     [metadata "arity 0"] .
   op "print_" : -> KProperLabel
     [metadata "arity 1 strict"] .
-  op "restore" : -> KProperLabel
-    [metadata "arity 1"] .
   op "skip" : -> KProperLabel
     [metadata "arity 0"] .
   op "spawn_" : -> KProperLabel
@@ -152,16 +152,19 @@ mod IMP++-K-PROPER01-LABELS is
     _`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("Int < KResult"_(-1),
     .kl))))))))),_`(_`)("print_",_`(_`)("VarId < KProper"_(s),.kl)))))))))))) .
   eq startConfig(S:K)
-    = __(<_>_</_>(result,.l,result),<_>_</_>(T,__(__(__(<_>_</_>(nextLoc,
-    _`(_`)("Int < KResult"_(0),.kl),nextLoc),<_>_</_>(output,.l,output)),
-    <_>_</_>(store,.m,store)),<_>_</_>(threads,<_>_</_>(thread,__(<_>_</_>(k,
-    S:K,k),<_>_</_>(env,.m,env)),thread),threads)),T)) .
+    = <_>_</_>(T,__(__(__(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(0),.kl),
+    nextLoc),<_>_</_>(output,.l,output)),<_>_</_>(store,.m,store)),<_>_</_>(
+    threads,<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,.m,env)),thread),
+    threads)),T) .
   eq <_>_</_>(T,__(Top:Set,<_>_</_>(output,Output:List,output),<_>_</_>(
     threads,.s,threads)),T)
     = <_>_</_>(result,Output:List,result) [metadata "keq"] .
   eq <_>_</_>(thread,__(Thread:Set,<_>_</_>(k,.k,k)),thread)
     = .s [metadata "keq"] .
-  eq __(<_>_</_>(k,_~>_(_`(_`)("restore",_`(_`)(wmap_(Env:Map),.kl)),K:K),k),
+  eq _.._(N1:Nat,N2:Nat)
+    = if_then_else_fi(_>=Int_(N1:Nat,N2:Nat),.kl,_`,_(_`(_`)("Int < KResult"_(
+    N1:Nat),.kl),_.._(sNat_(N1:Nat),N2:Nat))) [metadata "keq"] .
+  eq __(<_>_</_>(k,_~>_(_`(_`)("env",_`(_`)(wmap_(Env:Map),.kl)),K:K),k),
     <_>_</_>(env,Env':Map,env))
     = __(<_>_</_>(k,K:K,k),<_>_</_>(env,Env:Map,env)) [metadata "keq"] .
   eq __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(N:Nat),.kl),nextLoc),<_>_</_>(
@@ -171,16 +174,13 @@ mod IMP++-K-PROPER01-LABELS is
     store))
     = __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(_+Int_(N:Nat,length_(
     Xl:KList))),.kl),nextLoc),<_>_</_>(threads,__(AnyVar21:Set,<_>_</_>(thread,
-    __(AnyVar22:Set,<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)("restore",_`(_`)(wmap_(
-    Env:Map),.kl))),K:K),k),<_>_</_>(env,_`[_<-_`](Env:Map,Xl:KList,`[_;_`](
-    N:Nat,_+Int_(N:Nat,length_(Xl:KList)))),env)),thread)),threads),<_>_</_>(
-    store,__(Store:Map,m(`[_;_`](N:Nat,_+Int_(N:Nat,length_(Xl:KList))),_`(_`)(
+    __(AnyVar22:Set,<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)("env",_`(_`)(wmap_(
+    Env:Map),.kl))),K:K),k),<_>_</_>(env,_`[_<-_`](Env:Map,Xl:KList,_.._(N:Nat,
+    _+Int_(N:Nat,length_(Xl:KList)))),env)),thread)),threads),<_>_</_>(store,
+    __(Store:Map,m(_.._(N:Nat,_+Int_(N:Nat,length_(Xl:KList))),_`(_`)(
     "Int < KResult"_(0),.kl))),store)) [metadata "keq"] .
   eq _`(_`)("list_",_`(_`)(kList("wklist_"),RL:ResultList))
     = _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:ResultList)) [metadata "keq"] .
-  eq `[_;_`](N1:Nat,N2:Nat)
-    = if_then_else_fi(_>=Int_(N1:Nat,N2:Nat),.kl,_`,_(_`(_`)("Int < KResult"_(
-    N1:Nat),.kl),`[_;_`](sNat_(N1:Nat),N2:Nat))) [metadata "keq"] .
   rl <_>_</_>(k,_~>_(_`(_`)("halt",.kl),K:K),k)
     => <_>_</_>(k,.k,k) [metadata "krl"] .
   rl <_>_</_>(k,_~>_(_`(_`)("while_do_",_`,_(B:K,S:K)),K:K),k)
@@ -258,6 +258,9 @@ mod IMP++-K-PROPER01-LABELS is
     => _`(_`)("Bool < KResult"_(notBool_(T:Bool)),.kl) [metadata "krl"] .
   rl _`(_`)("skip",.kl)
     => .k [metadata "krl"] .
+  rl _`(_`)("tail",_`(_`)("vl_",_`(_`)(kList("wklist_"),_`,_(_`(_`)(
+    "Int < KResult"_(I:Int),.kl),RL:ResultList))))
+    => _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:ResultList)) [metadata "krl"] .
   crl _`(_`)("_/_",_`,_(_`(_`)("Int < KResult"_(I1:Int),.kl),_`(_`)(
     "Int < KResult"_(I2:Int),.kl)))
     => _`(_`)("Int < KResult"_(_/Int_(I1:Int,I2:Int)),.kl)
