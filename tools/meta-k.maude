@@ -291,9 +291,6 @@ fmod STRICT-ATTRS is
   including NAT-LIST-EXTRAS .
   ops kstrict seqkstrict : IntList -> Attr .
   op karity : Nat -> Attr .
-
-  op kListWS : -> Qid .
-  eq kListWS = 'kList .
 endfm
 
 fmod SYNTAX-ATTRS is

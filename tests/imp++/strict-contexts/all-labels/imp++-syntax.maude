@@ -17,6 +17,8 @@ mod IMP++-SYNTAX01-LABELS is
     [metadata "arity 2 strict"] .
   op "_:=_" : -> KProperLabel
     [metadata "arity 2 strict(2)"] .
+  op "__" : -> KProperLabel
+    [metadata "arity 2 strict(-2)"] .
   op "_;_" : -> KProperLabel
     [metadata "arity 2"] .
   op "_<=_" : -> KProperLabel

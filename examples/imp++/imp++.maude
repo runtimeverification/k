@@ -13,6 +13,7 @@ mod IMP++ is
   op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : VarId -> AExp [prec 30 format (b o d)] .
+
   op list_ : KList -> AExp [metadata "strict(-1)"] .
   op head : AExp -> AExp [metadata "strict"] .
   op tail : AExp -> AExp [metadata "strict"] .
@@ -29,7 +30,7 @@ mod IMP++ is
   op _;_ : Stmt Stmt -> Stmt [prec 122 gather (e E) format (d b noi d)] .
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
---- Pgm
+
   op vars_;_ : KList Stmt -> Stmt [prec 121 format (b o b on++i --)] .
   ops print_ :  AExp -> Stmt [prec 59 metadata "strict" format (b o d)] .
   op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
@@ -110,22 +111,18 @@ mod IMP++ is
   mb krl < k > [[X ==> I]] ~> K </ k > < env > Env m(X, L) </ env > < store > Store m(L, I) </ store > : KSentence .
   mb krl < k > [[++ X ==> (I +Int 1)]] ~> K </ k > < env > Env m(X, L) </ env > < store > Store m(L, [[I ==> I +Int 1]]) </ store >  : KSentence .
   mb krl < k > [[X := I1 ==> .k]] ~> K </ k > < env > Env m(X, L) </ env > < store > Store m(L, [[I2 ==> I1]]) </ store > : KSentence .
-  mb krl [[< k > while B do S ~> K </ k >
-  ==> < k > if B then (S ; while B do S) else skip ~> K </ k >]] : KSentence .
+  mb krl [[< k > while B do S ~> K </ k > ==> < k > if B then (S ; while B do S) else skip ~> K </ k >]] : KSentence .
   mb krl < k > [[print(I) ==> .k]] ~> K </ k > < output > Output,[[.l ==> l(I)]] </ output >  : KSentence .
-  mb krl [[< k > halt ~> K </ k > 
-  ==> < k > .k </ k >]] : KSentence .
+  mb krl [[< k > halt ~> K </ k > ==> < k > .k </ k >]] : KSentence .
   mb krl < thread > Thread < k > [[spawn(S) ==> .k]] ~> K </ k > < env > Env </ env > </ thread > [[.s ==> < thread > < k > S </ k > < env > Env </ env > </ thread >]] : KSentence .
   mb keq [[< thread > Thread < k > .k </ k > </ thread > ==> .s]] : KSentence .
 
-  mb keq [[< T > Top < threads > .s </ threads > < output > Output </ output > </ T >
-   ==> < result > Output </ result >]] : KSentence .
+  mb keq [[< T > Top < threads > .s </ threads > < output > Output </ output > </ T > ==> < result > Output </ result >]] : KSentence .
 
   mb keq < k > [[vars Xl ; S ==> S ~> restore(Env)]] ~> K </ k > < env > [[Env ==>  Env[Xl <- [N ; (N +Int length(Xl))]]]]</ env > < store > Store [[.m ==>  m([N ; (N +Int length(Xl))], 0)]] </ store > < nextLoc > [[N ==> N +Int length(Xl)]] </ nextLoc >  : KSentence .
 
   op restore : Map -> K .
-  mb keq < k > [[restore(Env) ==> .k]] ~> K </ k > 
-          < env > [[Env' ==> Env]] </ env > : KSentence .
+  mb keq < k > [[restore(Env) ==> .k]] ~> K </ k > < env > [[Env' ==> Env]] </ env > : KSentence .
 
   op [_;_] : Nat Nat -> KList .
   mb keq [[[N1 ; N2] ==> if N1 >=Int N2 then .kl else (N1, [sNat N1 ; N2]) fi]] : KSentence .

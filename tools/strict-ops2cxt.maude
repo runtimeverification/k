@@ -10,11 +10,13 @@ mod STRICTOPS2CXT is
   including STRICT-ATTRS .
   including K-STRICTNESS-OPS .
   including K-SORTS .
+  including META-K-LABELS .
   var Str : String .  var Ints Ints' : IntList .  var NInts : NeIntList . var I I' : Int .
   var Nats Nats' : NatList . var NNats : NeNatList .
-  var AS : AttrSet . var N N' : Nat . var NA : NzNat .  var Tl : TermList .
+  var AS : AttrSet . var N N' M : Nat . var NA : NzNat .  var Tl : TermList .
   var Q : Qid . var Ty : Type . var Tyl : TypeList . 
   var Op : OpDecl . var OPDS : OpDeclSet . var Mod : Module .
+  var Wrapper : Term .
 
   op strictOps2cxt : Qid Module ~> Module .
   eq strictOps2cxt(Q, Mod) 
@@ -26,74 +28,72 @@ mod STRICTOPS2CXT is
   
   op strictOps2cxtOp : OpDecl ~> MembAxSet .
   eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS kstrict(Ints) karity(N)] .)
-   = strictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, N) .
+   = strictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, N, mkListLabel('wklist_)) .
   eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS seqkstrict(Ints) karity(N)] .)
-   = seqstrictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, N) .
+   = seqstrictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, N, mkListLabel('wklist_)) .
   eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS kstrict(Ints)] .)
-   = strictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, -1) [owise] .
+   = strictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, -1, mkListLabel('wklist_)) [owise] .
   eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS seqkstrict(Ints)] .)
-   = seqstrictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, -1) [owise] .
+   = seqstrictOps2cxtMbs(qid(string(Q) + ".KProperLabel"), Ints, -1, mkListLabel('wklist_)) [owise] .
   eq strictOps2cxtOp(Op) = none [owise] .
 
-  op strictOps2cxtMbs : Qid IntList Int  ~> MembAxSet .
+  op strictOps2cxtMbs : Qid IntList Int  Term ~> MembAxSet .
 --- regardless of arity
-  eq strictOps2cxtMbs(Q, I NInts, I')
-   = strictOps2cxtMbs(Q, I, I') strictOps2cxtMbs(Q, NInts, I') .
+  eq strictOps2cxtMbs(Q, I NInts, I', Wrapper)
+   = strictOps2cxtMbs(Q, I, I', Wrapper) strictOps2cxtMbs(Q, NInts, I', Wrapper) .
 --- if arity is unspecified 
-  eq strictOps2cxtMbs(Q, nil, -1)
+  eq strictOps2cxtMbs(Q, nil, -1, Wrapper)
    = (mb 'kcxt_[kApply(Q, ('Kl1:KList,
               hole, 'Kl2:KList))] : kSentenceSort [none] .) .
-  eq strictOps2cxtMbs(Q, s(N), -1)
+  eq strictOps2cxtMbs(Q, s(N), -1, Wrapper)
    =  (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), hole, 'Kl:KList))] : kSentenceSort [none] .) .
-  eq strictOps2cxtMbs(Q, - s(N), -1)
-   =  (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), kApply(kListWS[qid("S" + string(N,10) + ":String")],(qid("Kl" + string(s(N),10) + "-1:KList"), hole, qid("Kl" + string(s(N),10) + "-2:KList"))), 'Kl:KList))] : kSentenceSort [none] .) .
+  eq strictOps2cxtMbs(Q, - s(N), -1, Wrapper)
+   =  (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), kApply(Wrapper,(qid("Kl" + string(s(N),10) + "-1:KList"), hole, qid("Kl" + string(s(N),10) + "-2:KList"))), 'Kl:KList))] : kSentenceSort [none] .) .
 --- if arity is specified and not 0
-  eq strictOps2cxtMbs(Q, nil, NA)
-   = strictOps2cxtMbs(Q, seq(1,NA), NA) .
-  eq strictOps2cxtMbs(Q, s(N), NA)
+  eq strictOps2cxtMbs(Q, nil, NA, Wrapper)
+   = strictOps2cxtMbs(Q, seq(1,NA), NA, Wrapper) .
+  eq strictOps2cxtMbs(Q, s(N), NA, Wrapper)
    = (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), hole, makeKVars(seq(s(s(N)),NA), "K")))] : kSentenceSort [none] .) .
-  eq strictOps2cxtMbs(Q, - s(N), NA)
-   = (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), kApply(kListWS[qid("S" + string(N,10) + ":String")],(qid("Kl" + string(s(N),10) + "-1:KList"), hole, qid("Kl" + string(s(N),10) + "-2:KList"))), makeKVars(seq(s(s(N)),NA), "K")))] : kSentenceSort [none] .) .
+  eq strictOps2cxtMbs(Q, - s(N), NA, Wrapper)
+   = (mb 'kcxt_[kApply(Q, (makeKVars(seq(1,N), "K"), kApply(Wrapper,(qid("Kl" + string(s(N),10) + "-1:KList"), hole, qid("Kl" + string(s(N),10) + "-2:KList"))), makeKVars(seq(s(s(N)),NA), "K")))] : kSentenceSort [none] .) .
   
 
-  op seqstrictOps2cxtMbs  : Qid NatList Nat ~> MembAxSet .
+  op seqstrictOps2cxtMbs  : Qid NatList Nat Term ~> MembAxSet .
 --- regardless of arity
-  eq seqstrictOps2cxtMbs(Q, NInts, I')
-   = seqstrictOps2cxtMbsAux(Q, nil, NInts, I') .
+  eq seqstrictOps2cxtMbs(Q, NInts, I', Wrapper)
+   = seqstrictOps2cxtMbsAux(Q, nil, NInts, I', Wrapper) .
 --- if arity is unspecified
-  eq seqstrictOps2cxtMbs(Q, nil, -1)
+  eq seqstrictOps2cxtMbs(Q, nil, -1, Wrapper)
    = (mb 'kcxt_[kApply(Q, ('Kl:ResultList,
          hole, 'Kl2:KList))] : kSentenceSort [none] .) .
 --- if arity is specified and not 0
-  eq seqstrictOps2cxtMbs(Q, nil, NA)
-   = seqstrictOps2cxtMbs(Q, seq(1,NA), NA)  .
+  eq seqstrictOps2cxtMbs(Q, nil, NA, Wrapper)
+   = seqstrictOps2cxtMbs(Q, seq(1,NA), NA, Wrapper)  .
 
-  op seqstrictOps2cxtMbsAux  : Qid IntList IntList Nat ~> MembAxSet .
+  op seqstrictOps2cxtMbsAux  : Qid IntList IntList Nat Term ~> MembAxSet .
 --- regardless of arity
-  eq seqstrictOps2cxtMbsAux(Q, Ints, nil, N') = none .
+  eq seqstrictOps2cxtMbsAux(Q, Ints, nil, N', Wrapper) = none .
 --- if arity is unspecified 
-  eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints',-1)
-   =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', -1)
-     (mb 'kcxt_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I), 'Kl:KList))] : kSentenceSort [none] .) .
+  eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints',-1, Wrapper)
+   =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', -1, Wrapper)
+     (mb 'kcxt_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, Wrapper), 'Kl:KList))] : kSentenceSort [none] .) .
 --- if arity is specified and not 0
-  eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints',NA)
-   =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', NA)
-     (mb 'kcxt_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I), makeKVars(seq(s(abs(last(sortAbs(Ints I)))), NA), "K")))] : kSentenceSort [none] .) .
+  eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints',NA, Wrapper)
+   =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', NA, Wrapper)
+     (mb 'kcxt_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, Wrapper), makeKVars(seq(s(abs(last(sortAbs(Ints I)))), NA), "K")))] : kSentenceSort [none] .) .
 
-  vars M : Nat . 
-
-  op makeSSVars : Nat IntList Int ~> TermList .
-  eq makeSSVars(N, nil, I) = empty .
-  eq makeSSVars(N, N Ints, N) = (hole, makeSSVars(s(N), Ints, N)) .
-  eq makeSSVars(N, - N Ints, - N) = (kApply(kListWS[qid("S" + string(N,10) + ":String")],(qid("Kl" + string(s(N),10) + "-1:ResultList"), hole, qid("Kl" + string(N,10) + "-2:KList"))), makeSSVars(s(N), Ints, - N)) .
-  eq makeSSVars(N, N Ints, I) 
-   =  (qid("K" + string(N,10) + ":KResult"), makeSSVars(s(N), Ints, I))
+  op makeSSVars : Nat IntList Int Term ~> TermList .
+  eq makeSSVars(N, nil, I, Wrapper) = empty .
+  eq makeSSVars(N, N Ints, N, Wrapper) = (hole, makeSSVars(s(N), Ints, N, Wrapper)) .
+  eq makeSSVars(N, - N Ints, - N, Wrapper) = (kApply(Wrapper,(qid("Kl" + string(s(N),10) + "-1:ResultList"), hole, qid("Kl" + string(N,10) + "-2:KList"))), makeSSVars(s(N), Ints, - N, Wrapper)) .
+  eq makeSSVars(N, N Ints, I, Wrapper) 
+   =  (qid("K" + string(N,10) + ":KResult"), makeSSVars(s(N), Ints, I, Wrapper))
   [owise] .
-  eq makeSSVars(N, - N Ints, I) 
-   =  (kApply(kListWS[qid("S" + string(N,10) + ":String")],(qid("Kl" + string(N,10) + ":ResultList"))), makeSSVars(s(N), Ints, I))
+  eq makeSSVars(N, - N Ints, I, Wrapper) 
+   =  (kApply(Wrapper,(qid("Kl" + string(N,10) + ":ResultList"))), makeSSVars(s(N), Ints, I, Wrapper))
   [owise] .
-  eq makeSSVars(N, Ints, I)
-   =  (qid("K" + string(N,10) + ":K"), makeSSVars(s(N), Ints, I)) 
+  eq makeSSVars(N, Ints, I, Wrapper)
+   =  (qid("K" + string(N,10) + ":K"), makeSSVars(s(N), Ints, I, Wrapper)) 
   [owise] .
 
   op makeKVars : NatList String -> TermList .

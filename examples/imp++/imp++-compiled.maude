@@ -45,7 +45,7 @@ mod IMP++-K-PROPER01-LABELS is
   op "if_then_else_" : -> KProperLabel
     [metadata "arity 3 strict(1)"] .
   op "list_" : -> KProperLabel
-    [metadata "arity 1 strict"] .
+    [metadata "arity 1 strict(-1)"] .
   op "not_" : -> KProperLabel
     [metadata "arity 1 strict"] .
   op "pCollatz" : -> KProperLabel
@@ -300,9 +300,12 @@ mod IMP++-K-PROPER-STRICTNESS is
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer(
     "\"if_then_else_\"([],K2:K,K3:K)"),_`,_(_`(_`)(freezeVar("K2:K"),K2:K),
     _`(_`)(freezeVar("K3:K"),K3:K))),Rest:K),k) [metadata "heating"] .
-  eq <_>_</_>(k,_~>_(_`(_`)("list_",Kcxt:KProper),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"list_\"([])"),.kl),
-    Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("list_",_`(_`)(kList("wklist_"),_`,_(Kl1-1:KList,
+    Kcxt:KProper,Kl1-2:KList))),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer(
+    "\"list_\"(kList(\"wklist_\")(Kl1-1:KList,[],Kl1-2:KList))"),_`,_(_`(_`)(
+    freezeVar("Kl1-1:KList"),Kl1-1:KList),_`(_`)(freezeVar("Kl1-2:KList"),
+    Kl1-2:KList))),Rest:K),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)("not_",Kcxt:KProper),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"not_\"([])"),.kl),Rest:K),
     k) [metadata "heating"] .
@@ -353,10 +356,12 @@ mod IMP++-K-PROPER-STRICTNESS is
     _`(_`)(freezeVar("K3:K"),K3:K))),Rest:K),k)
     = <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,_(Kcxt:KResult,K2:K,K3:K)),
     Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"list_\"([])"),.kl),Rest:K),
-    k)
-    = <_>_</_>(k,_~>_(_`(_`)("list_",Kcxt:KResult),Rest:K),k) [metadata
-    "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer(
+    "\"list_\"(kList(\"wklist_\")(Kl1-1:KList,[],Kl1-2:KList))"),_`,_(_`(_`)(
+    freezeVar("Kl1-1:KList"),Kl1-1:KList),_`(_`)(freezeVar("Kl1-2:KList"),
+    Kl1-2:KList))),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("list_",_`(_`)(kList("wklist_"),_`,_(Kl1-1:KList,
+    Kcxt:KResult,Kl1-2:KList))),Rest:K),k) [metadata "cooling"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"not_\"([])"),.kl),Rest:K),
     k)
     = <_>_</_>(k,_~>_(_`(_`)("not_",Kcxt:KResult),Rest:K),k) [metadata
