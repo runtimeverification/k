@@ -1,5 +1,3 @@
-load ../../tools/../k-prelude
-
 mod BF is
 	including K-PROPER .
 	including CONFIG .
@@ -12,6 +10,7 @@ mod BF is
 --- Syntax
 	op memory : -> CellLabel .
 	op output : -> CellLabel .
+	op result : -> CellLabel .
 	op input : -> CellLabel .
 	op k : -> CellLabel .
 
@@ -44,12 +43,17 @@ mod BF is
 	eq [Start]: eval(K:K) = 
 		< T >
 			< k > K:K </ k >
-			< memory > sentinel(.kl) </ memory >
+			< memory > l(sentinel(.kl)) </ memory >
 			< output > .l </ output >
 			< input > .l </ input >
 		</ T > .
-	
-	mb keq [[< T > S:Set < k > .k </ k > < output > K:K </ output > S':Set </ T > ==> < output > K:K </ output >]] : KSentence .
+	mb kconf 	< T >
+			< k > K:K </ k >
+			< memory > L:List </ memory >
+			< output > L:List </ output >
+			< input > L:List </ input >
+		</ T >  < result > L:List </ result > : KSentence .
+	mb keq [[< T > S:Set < k > .k </ k > S'':Set < output > L:List </ output > S':Set </ T > ==> < result > L:List </ result >]] : KSentence .
 endm
 
 ---rew eval(helloWorld) .
