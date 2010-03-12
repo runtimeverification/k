@@ -5,7 +5,7 @@ mod BF is
 	including K-RULES .
 	including K-CONFIG .
 	including PL-INT .
-	including PL-VARID .
+	including PL-STRING .
 	including K .
 --- Syntax
 	op memory : -> CellLabel .
@@ -31,29 +31,84 @@ mod BF is
 	---		to the command after the matching [ command*.
 	
 --- Programs
-  	--- op helloWorld : -> [K] .
-	--- eq helloWorld = (
-	---	Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( While( Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Decrease(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
-	--- ) .
+  	op helloWorld : -> KProperLabel [metadata "arity 0"] .
+	eq helloWorld(.kl) = (
+		Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( While( Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Decrease(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+	) .
 	
 --- Semantics
 	op sentinel : -> KProperLabel .
 	op eval : K -> Set .
+	op inject : Int -> KResultLabel .
+	op inject : String -> KResultLabel .
+	
+	mb kconf 
+		< T >
+			< k > K:K </ k >
+			< memory > L:List </ memory >
+			< output > K:K </ output >
+			< input > L:List </ input >
+		</ T >  
+		< result > K:K </ result > 
+		: KSentence .
 	
 	eq [Start]: eval(K:K) = 
 		< T >
 			< k > K:K </ k >
 			< memory > l(sentinel(.kl)) </ memory >
-			< output > .l </ output >
+			< output > inject("")(.kl) </ output >
 			< input > .l </ input >
 		</ T > .
-	mb kconf 	< T >
-			< k > K:K </ k >
-			< memory > L:List </ memory >
-			< output > L:List </ output >
-			< input > L:List </ input >
-		</ T >  < result > L:List </ result > : KSentence .
-	mb keq [[< T > S:Set < k > .k </ k > S'':Set < output > L:List </ output > S':Set </ T > ==> < result > L:List </ result >]] : KSentence .
+
+	mb [Finish]: keq [[
+		< T > S:Set < k > .k </ k > < output > K:K </ output > </ T > 
+			==> < result > K:K </ result >
+		]] : KSentence .
+		
+	mb keq
+		< memory > [[l(sentinel(.kl)) ==> l(inject(0)(.kl)), l(sentinel(.kl))]], L:List </ memory > 
+		: KSentence .
+		
+	mb [Sequence]: keq
+		[[Seq(K1:K, K2:K) ==> K1:K ~> K2:K]]
+		: KSentence .
+		
+	mb [Increase]: keq 
+		< k > [[Increase(.kl) ==> .k]] ~> KCxt:K </ k >
+		--- < memory > l([[inject(I:Int)(.kl) ==> inject(sNat(I:Int))(.kl)]]), L:List </ memory > --- doesn't work
+		--- < memory > l([[inject(I:Int)(.kl) ==> .k]]), L:List </ memory >  --- works
+		< memory > l([[inject(I:Int)(.kl) ==> (inject(I:Int +Int 1))(.kl)]]), L:List </ memory > 
+		: KSentence .
+	mb [Decrease]: keq 
+		< k > [[Decrease(.kl) ==> .k]] ~> KCxt:K </ k >
+		< memory > l([[inject(I:Int)(.kl) ==> (inject(I:Int -Int 1))(.kl)]]), L:List </ memory > 
+		: KSentence .
+	
+	mb [WhileNZ-NZ]: keq 
+		< k > [[While(K:K) ==> K:K ~> While(K:K)]] ~> KCxt:K </ k > 
+		< memory > l(inject(I:Int)(.kl)), L:List </ memory > 
+		if (I:Int =/=Bool 0) 
+		: KSentence .
+	mb [WhileNZ-Z]: keq 
+		< k > [[While(K:K) ==> .k]] ~> KCxt:K </ k >
+		< memory > l(inject(0)(.kl)), L:List </ memory > 
+		: KSentence .
+		
+	mb [GoRight]: keq 
+		< k > [[GoRight(.kl) ==> .k]] ~> KCxt:K </ k > 
+		< memory > [[Li:ListItem, L:List ==> L:List, Li:ListItem]] </ memory > 
+		: KSentence .
+	mb [GoLeft]: keq 
+		< k > [[GoLeft(.kl) ==> .k]] ~> KCxt:K </ k > 
+		< memory > [[L:List, Li:ListItem ==> Li:ListItem, L:List]] </ memory > 
+		: KSentence .
+		
+	--- mb [Output]: keq 
+		--- < k > [[Print(.kl) ==> .k]] ~> KCxt:K </ k > 
+		--- < memory > l(inject(I:Int)(.kl)), L:List </ memory > 
+		--- < output > inject([[S:String ==> S:String +String charString(I:Int)]])(.kl) </ output > 
+		--- : KSentence .
+
 endm
 
----rew eval(helloWorld) .
+---rew eval(helloWorld(.kl)) .
