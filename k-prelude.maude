@@ -40,7 +40,7 @@ mod K is
   subsort ListItem < NeList < List .
   op .l : -> List .
   op l : K -> ListItem  .
-  op _,_ : List List -> List [assoc comm id: .l] .
+  op _,_ : List List -> List [assoc id: .l] .
   op _,_ : NeList List -> NeList [ditto] .
   op _,_ : List NeList -> NeList [ditto] .
   var LItem : ListItem .  var List : List .
