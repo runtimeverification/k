@@ -1,4 +1,21 @@
 #!/bin/bash
+function usage {
+  echo "usage: $0 <source_file>[.maude] [<module_name>]
+  
+  If <module_name> is not specified, is asumed to be allcaps(<source_file>).
+  <source_file> should ensure that a module <module_name> is loaded.
+  IMPORTANT: <source_file> should not load the k-prelude, as it will be loaded automatically by the script and, if loaded, will cause the script to stop.
+  Module <module_name> should contain the entire definition of the language.
+  Output is printed in <source_file>-compiled.maude.
+  
+  If an error occurs in the compilation process (including warnings such as Module redefined), the script will stop, displaying the input, the (maybe partial) generated output, and the error/warning messages reported by Maude.
+  "
+}
+
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then 
+  usage
+  exit
+fi
 MAUDE="maude"
 which $MAUDE 1>/dev/null 2>/dev/null
 if [[ $? -ne 0 ]]; then
@@ -6,12 +23,12 @@ if [[ $? -ne 0 ]]; then
   exit 1;
 fi
 echo "q" | $MAUDE -no-banner -batch >/dev/null
-RUNNER=`which $0`
+RUNNER=`which "$0"`
 KBASE=`dirname $RUNNER`/..
 FILE=${1/.*/}
 OUTPUT_FILE="${FILE}-compiled"
 if [[ $# -eq  2 ]]; then
-  LANG=$2
+  LANG="$2"
 else
   LANG=`echo $FILE | tr a-z A-Z`
 fi
@@ -51,6 +68,14 @@ Stopping the compilation!"
   fi
   printf ". Done!\n"
 }
+
+OUTPUT=$(<$FILE.maude)
+
+TEST_INPUT="
+show module $LANG .
+"
+
+runMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
 
 OUTPUT=$(<$FILE.maude)
 
