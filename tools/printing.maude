@@ -544,7 +544,7 @@ fmod MODULE-META-PRETTY-PRINT is
 ---  eq eMetaPrettyPrint(unitError(QIL), noModule) = QIL .
 ---  eq eMetaPrettyPrint(noModule, noModule) = nil .
   eq eMetaPrettyPrint(M, mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
-    = ('\n '\b          
+    = ('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n '\b          
        'mod '\o eMetaPrettyPrint(ME) '\b 'is '\o 
           eMetaPrettyPrint(IL) 
           (if SS == none
@@ -556,7 +556,7 @@ fmod MODULE-META-PRETTY-PRINT is
           eMetaPrettyPrint(M, MAS) 
           eMetaPrettyPrint(M, EqS) 
           eMetaPrettyPrint(M, RlS) 
-       '\n '\b 'endm '\o '\n) .
+       '\n '\b 'endm '\o '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
   eq eMetaPrettyPrint(M, mod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
     = ('\n '\b 
        'mod '\o eMetaPrettyPrint(ME) (if PDL == nil 

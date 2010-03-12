@@ -22,7 +22,8 @@ if [[ $? -ne 0 ]]; then
   echo "set MAUDE to the correct path of the maude executable in kcompile.sh on line 2"
   exit 1;
 fi
-echo "q" | $MAUDE -no-banner -batch >/dev/null
+MAUDE="$MAUDE -no-banner -batch -no-wrap"
+echo "q" | $MAUDE >/dev/null
 RUNNER=`which "$0"`
 KBASE=`dirname $RUNNER`/..
 FILE=${1/.*/}
@@ -35,11 +36,39 @@ fi
 
 LANG0=LANG
 
+function checkMaude {
+  if [ -n "$2" ]; then
+    printf "%s.." "$2"
+  fi
+  result=$( { stdout=$(echo "$1" | $MAUDE $KBASE/k-prelude ) ; } 2>&1; printf "%s" "--------------------$stdout")
+OUTPUT1=${result#*--------------------}
+ERROR=${result%--------------------*}
+  if [ -n "$ERROR" ]; then
+    echo ". Error in encountered when passing the Input below to Maude 
+Input:
+$1
+Output:
+$OUTPUT1
+Error ($2): 
+$ERROR
+Stopping the compilation!"
+    exit
+  fi
+  if [ -n "$2" ]; then
+    printf ". Done!\n"
+  fi
+}
+
 function runMaude {
   printf "%s.." "$2"
-  result=$( { stdout=$(echo "$1" | $MAUDE $KBASE/k-prelude | grep -A  10000 '^mod' | grep -B 10000 '^endm') ; } 2>&1; printf "%s" "--------------------$stdout")
-OUTPUT=${result#*--------------------}
-ERROR=${result%--------------------*}
+  result=$( { stdout=$(echo "$1" | $MAUDE $KBASE/k-prelude ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
+OUTPUT=${result#*-k-maude-delimiter--}
+#echo "$OUTPUT"
+OUTPUT="${OUTPUT%---K-MAUDE-GENERATED-OUTPUT-END-----*}"
+#echo "$OUTPUT"
+OUTPUT="${OUTPUT#*---K-MAUDE-GENERATED-OUTPUT-BEGIN---}"
+#echo "$OUTPUT"
+ERROR=${result%-k-maude-delimiter--*}
   if [ -n "$ERROR" ]; then
     echo ". Error encountered when generating the output module: 
 Input:
@@ -51,21 +80,9 @@ $ERROR
 Stopping the compilation!"
     exit
   fi
-  
-  result=$( { stdout=$(echo "$3 $OUTPUT show module ." | $MAUDE $KBASE/k-prelude ) ; } 2>&1; printf "%s" "--------------------$stdout")
-OUTPUT1=${result#*--------------------}
-ERROR=${result%--------------------*}
-  if [ -n "$ERROR" ]; then
-    echo ". Error in encountered when loading generated module 
-Generated Module:
-$OUTPUT
-Output:
-$OUTPUT1
-Error ($2): 
-$ERROR
-Stopping the compilation!"
-    exit
-  fi
+ 
+  checkMaude "$3 $OUTPUT show module ."
+
   printf ". Done!\n"
 }
 
@@ -75,7 +92,7 @@ TEST_INPUT="
 show module $LANG .
 "
 
-runMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
+checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
 
 OUTPUT=$(<$FILE.maude)
 
@@ -172,7 +189,7 @@ mod ${LANG0}-TEST is
 endm
 "
 
-runMaude "$TEST" "Putting everything together"
+checkMaude "$TEST" "Putting everything together"
 
 echo "
 load $KBASE/k-prelude
