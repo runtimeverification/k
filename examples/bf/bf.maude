@@ -103,11 +103,11 @@ mod BF is
 		< memory > [[L:List, Li:ListItem ==> Li:ListItem, L:List]] </ memory > 
 		: KSentence .
 		
-	--- mb [Output]: keq 
-		--- < k > [[Print(.kl) ==> .k]] ~> KCxt:K </ k > 
-		--- < memory > l(inject(I:Int)(.kl)), L:List </ memory > 
-		--- < output > inject([[S:String ==> S:String +String charString(I:Int)]])(.kl) </ output > 
-		--- : KSentence .
+	mb [Output]: keq 
+		< k > [[Print(.kl) ==> .k]] ~> KCxt:K </ k > 
+		< memory > l(inject(I:Int)(.kl)), L:List </ memory > 
+		< output > inject([[S:String ==> S:String +String charString(absInt(I:Int))]])(.kl) </ output > 
+		: KSentence .
 
 endm
 
