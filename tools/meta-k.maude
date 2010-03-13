@@ -107,22 +107,21 @@ fmod META-K-RULES is including K-SORTS .
   var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
   var AS : AttrSet .  var RK : KRuleKind .
   sort KRuleKind .
-  ops keq krl knd kceq kcrl kcnd : -> KRuleKind .
+  ops krl kcrl : -> KRuleKind .
   op error : Qid -> [KRuleKind] .
 
   op trueCt : -> Constant .
   eq trueCt = 'true.Bool .
   
   ops symbol_ : KRuleKind -> Qid .
-  eq symbol keq = 'keq_ .  eq symbol krl = 'krl_ .  eq symbol knd = 'knd_ .
-  eq symbol kceq = 'keq_if_ .  eq symbol kcrl = 'krl_if_ .  
-  eq symbol kcnd = 'knd_if_ .
+  eq symbol krl = 'rule_ .
+  eq symbol kcrl = 'rule_if_ .  
 
   op replaceS : -> Qid .
-  eq replaceS = '`[`[_==>_`]`] .
+  eq replaceS = '`[_=>_`] .
 
   op getKRuleKind : Qid ~> KRuleKind . 
-  eq getKRuleKind(Q) = if Q == symbol keq then keq else if Q == symbol krl then krl else if Q == symbol knd then knd else if Q == symbol kceq then kceq else if Q == symbol kcrl then kcrl else if Q == symbol kcnd then kcnd else error(Q) fi fi fi fi fi fi .
+  eq getKRuleKind(Q) = if Q == symbol krl then krl else if Q == symbol kcrl then kcrl else error(Q) fi fi .
 
   sort KRuleSplit .
   op {_,_,_,_} : KRuleKind Term TermList AttrSet -> KRuleSplit .
@@ -155,10 +154,10 @@ fmod K-META-CONFIG is including META-K-RULES .
   op extractConfTerm : Module ~> Term .
   eq extractConfTerm(M) = extractConfTerm(getMbs(M)) .
   op extractConfTerm : MembAxSet ~> Term .
-  eq extractConfTerm((mb 'kconf_[T] : 'KSentence [AS] .) MAS) = T .
+  eq extractConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = T .
 
   op removeConfTerm : MembAxSet -> MembAxSet .
-  eq removeConfTerm((mb 'kconf_[T] : 'KSentence [AS] .) MAS) = MAS .
+  eq removeConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = MAS .
   eq removeConfTerm(MAS) = MAS [owise] .
   
   sort Ellipses .

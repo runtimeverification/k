@@ -27,18 +27,14 @@ fmod MAKE-K-RULES is
   eq resolveReplace(M, Max, Mas) = resolveReplace(addMbs(Max, M), Mas) [owise] .
 
   op addReplace : Module KRuleSplit ~> Module .
-  eq addReplace(M,{keq,T,empty,AS})
-   = addEqs((eq splitReplace(T,1) = splitReplace(T,2) [AS metadata("keq")] .), M) . 
-  eq addReplace(M, {kceq, T, C, AS})
-   = addEqs((ceq splitReplace(T,1) = splitReplace(T,2) if C = trueCt [AS metadata("keq")] .), M) .
-  eq addReplace(M, {knd,T, empty,AS})
-    = addRls((rl splitReplace(T,1) => splitReplace(T,2) [AS metadata("knd")] .), M) .
-  eq addReplace(M, {kcnd, T, C, AS})
-    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C = trueCt [AS metadata("knd")] .), M) .
+  eq addReplace(M,{krl,T,empty,AS metadata("structural")})
+   = addEqs((eq splitReplace(T,1) = splitReplace(T,2) [AS metadata("structural rule")] .), M) . 
+  eq addReplace(M, {kcrl, T, C, AS metadata("structural")})
+   = addEqs((ceq splitReplace(T,1) = splitReplace(T,2) if C = trueCt [AS metadata("structural rule")] .), M) .
   eq addReplace(M, {krl, T, empty, AS})
-    = addRls((rl splitReplace(T,1) => splitReplace(T,2) [AS metadata("krl")] .), M) .
+    = addRls((rl splitReplace(T,1) => splitReplace(T,2) [AS metadata("computational rule")] .), M) [owise] .
   eq addReplace(M, {kcrl, T, C, AS}) 
-    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C = trueCt  [AS metadata("krl")] .), M) .
+    = addRls((crl splitReplace(T,1) => splitReplace(T,2) if C = trueCt  [AS metadata("computational rule")] .), M) [owise] .
       
   
   op splitReplace : Term Nat -> Term .

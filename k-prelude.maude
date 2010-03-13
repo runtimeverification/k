@@ -111,8 +111,7 @@ endm
 mod K-STRICTNESS-INTERNAL is
   including K .
   including K-SENTENCE .
-  ops kcxt_ : K -> [KSentence] [prec 127] .
----TODO: rename to "context_"
+  ops context_ : K -> [KSentence] [prec 127] .
   op [] : -> K .
 endm
 
@@ -148,12 +147,10 @@ endm
 mod K-RULES is
   including K-SENTENCE .
   including PL-BOOL .
-  ops keq_ krl_ knd_ : Universal -> [KSentence] [prec 127 poly(1) format(b o d)] .
-  ops keq_if_ krl_if_ knd_if_ : Universal Bool -> [KSentence] [prec 127 poly(1) format (b o b o d)] .
---- TODO: have only one type of rule, say "rule_" and "rule_if_"
+  ops rule_ : Universal -> [KSentence] [prec 127 poly(1) format(b o d)] .
+  ops rule_if_ : Universal Bool -> [KSentence] [prec 127 poly(1) format (b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
-  op `[`[_==>_`]`] : Universal Universal -> Universal [poly (0 1 2) prec 0] .
---- TODO: maybe renounce the doubleness ;-)
+  op `[_=>_`] : Universal Universal -> Universal [poly (0 1 2) prec 0] .
 endm
 
 ---- Context transformers level
@@ -161,7 +158,7 @@ endm
 mod K-CONFIG is
   including CONFIG .
   including K-SENTENCE .
-  op kconf_ : Set -> [KSentence] [prec 127] .
+  op configuration_ : Set -> [KSentence] [prec 127] .
 --- TODO: rename to "configuration_"
   op _* : CellLabel -> CellLabel .
 endm

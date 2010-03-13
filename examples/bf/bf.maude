@@ -42,7 +42,7 @@ mod BF is
 	op inject : Int -> KResultLabel .
 	op inject : String -> KResultLabel .
 	
-	mb kconf 
+	mb configuration 
 		< T >
 			< k > K:K </ k >
 			< memory > L:List </ memory >
@@ -60,54 +60,54 @@ mod BF is
 			< input > .l </ input >
 		</ T > .
 
-	mb [Finish]: keq [[
+	mb [Finish]: rule [
 		< T > S:Set < k > .k </ k > < output > K:K </ output > </ T > 
-			==> < result > K:K </ result >
-		]] : KSentence .
+			=> < result > K:K </ result >
+		] : KSentence [metadata "structural"] .
 		
-	mb keq
-		< memory > [[l(sentinel(.kl)) ==> l(inject(0)(.kl)), l(sentinel(.kl))]], L:List </ memory > 
-		: KSentence .
+	mb rule
+		< memory > [l(sentinel(.kl)) => l(inject(0)(.kl)), l(sentinel(.kl))], L:List </ memory > 
+		: KSentence [metadata "structural"] .
 		
-	mb [Sequence]: keq
-		[[Seq(K1:K, K2:K) ==> K1:K ~> K2:K]]
-		: KSentence .
+	mb [Sequence]: rule
+		[Seq(K1:K, K2:K) => K1:K ~> K2:K]
+		: KSentence [metadata "structural"] .
 		
-	mb [Increase]: keq 
-		< k > [[Increase(.kl) ==> .k]] ~> KCxt:K </ k >
-		--- < memory > l([[inject(I:Int)(.kl) ==> inject(sNat(I:Int))(.kl)]]), L:List </ memory > --- doesn't work
-		--- < memory > l([[inject(I:Int)(.kl) ==> .k]]), L:List </ memory >  --- works
-		< memory > l([[inject(I:Int)(.kl) ==> (inject(I:Int +Int 1))(.kl)]]), L:List </ memory > 
-		: KSentence .
-	mb [Decrease]: keq 
-		< k > [[Decrease(.kl) ==> .k]] ~> KCxt:K </ k >
-		< memory > l([[inject(I:Int)(.kl) ==> (inject(I:Int -Int 1))(.kl)]]), L:List </ memory > 
-		: KSentence .
+	mb [Increase]: rule 
+		< k > [Increase(.kl) => .k] ~> KCxt:K </ k >
+		--- < memory > l([inject(I:Int)(.kl) => inject(sNat(I:Int))(.kl)]), L:List </ memory > --- doesn't work
+		--- < memory > l([inject(I:Int)(.kl) => .k]), L:List </ memory >  --- works
+		< memory > l([inject(I:Int)(.kl) => (inject(I:Int +Int 1))(.kl)]), L:List </ memory > 
+		: KSentence [metadata "structural"] .
+	mb [Decrease]: rule 
+		< k > [Decrease(.kl) => .k] ~> KCxt:K </ k >
+		< memory > l([inject(I:Int)(.kl) => (inject(I:Int -Int 1))(.kl)]), L:List </ memory > 
+		: KSentence [metadata "structural"] .
 	
-	mb [WhileNZ-NZ]: keq 
-		< k > [[While(K:K) ==> K:K ~> While(K:K)]] ~> KCxt:K </ k > 
+	mb [WhileNZ-NZ]: rule 
+		< k > [While(K:K) => K:K ~> While(K:K)] ~> KCxt:K </ k > 
 		< memory > l(inject(I:Int)(.kl)), L:List </ memory > 
 		if (I:Int =/=Bool 0) 
-		: KSentence .
-	mb [WhileNZ-Z]: keq 
-		< k > [[While(K:K) ==> .k]] ~> KCxt:K </ k >
+		: KSentence [metadata "structural"] .
+	mb [WhileNZ-Z]: rule 
+		< k > [While(K:K) => .k] ~> KCxt:K </ k >
 		< memory > l(inject(0)(.kl)), L:List </ memory > 
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
-	mb [GoRight]: keq 
-		< k > [[GoRight(.kl) ==> .k]] ~> KCxt:K </ k > 
-		< memory > [[Li:ListItem, L:List ==> L:List, Li:ListItem]] </ memory > 
-		: KSentence .
-	mb [GoLeft]: keq 
-		< k > [[GoLeft(.kl) ==> .k]] ~> KCxt:K </ k > 
-		< memory > [[L:List, Li:ListItem ==> Li:ListItem, L:List]] </ memory > 
-		: KSentence .
+	mb [GoRight]: rule 
+		< k > [GoRight(.kl) => .k] ~> KCxt:K </ k > 
+		< memory > [Li:ListItem, L:List => L:List, Li:ListItem] </ memory > 
+		: KSentence [metadata "structural"] .
+	mb [GoLeft]: rule 
+		< k > [GoLeft(.kl) => .k] ~> KCxt:K </ k > 
+		< memory > [L:List, Li:ListItem => Li:ListItem, L:List] </ memory > 
+		: KSentence [metadata "structural"] .
 		
-	mb [Output]: keq 
-		< k > [[Print(.kl) ==> .k]] ~> KCxt:K </ k > 
+	mb [Output]: rule 
+		< k > [Print(.kl) => .k] ~> KCxt:K </ k > 
 		< memory > l(inject(I:Int)(.kl)), L:List </ memory > 
-		< output > inject([[S:String ==> S:String +String charString(absInt(I:Int))]])(.kl) </ output > 
-		: KSentence .
+		< output > inject([S:String => S:String +String charString(absInt(I:Int))])(.kl) </ output > 
+		: KSentence [metadata "structural"] .
 
 endm
 

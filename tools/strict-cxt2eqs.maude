@@ -18,7 +18,7 @@ mod STRICTCXT2EQS is
   op strictCxt2eqs : Module MembAxSet ~> MASEqsPair .
   eq strictCxt2eqs(M,MAS) = strictCxt2eqs(M, MAS, none) .
   op strictCxt2eqs : Module MembAxSet EquationSet ~> MASEqsPair . 
- ceq strictCxt2eqs(M, (mb 'kcxt_[T] : Sort [AS] .) MAS,Eqs)
+ ceq strictCxt2eqs(M, (mb 'context_[T] : Sort [AS] .) MAS,Eqs)
    = strictCxt2eqs(M, MAS, Eqs
      ((eq kWrap(T[hole <- 'Kcxt:KProper])  
         = kWrap(kra('Kcxt:KProper, freezeTerm(M, T))) 
