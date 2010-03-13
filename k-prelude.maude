@@ -153,6 +153,30 @@ mod K-RULES is
   op `[_=>_`] : Universal Universal -> Universal [poly (0 1 2) prec 0] .
 endm
 
+
+--- Anonymous variables level
+
+mod K-ANONYMOUS-VARIABLES is
+  op ? : -> Universal [poly (0)] .
+endm
+
+--- ... level
+mod OPEN-CELLS is
+  including CONFIG .
+  op <_>..._...</_> : CellLabel K CellLabel -> SetItem [prec 0] .
+  op <_>..._...</_> : CellLabel List CellLabel -> SetItem [prec 0] .
+  op <_>..._...</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
+  op <_>..._...</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
+  op <_>..._</_> : CellLabel K CellLabel -> SetItem [prec 0] .
+  op <_>..._</_> : CellLabel List CellLabel -> SetItem [prec 0] .
+  op <_>..._</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
+  op <_>..._</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
+  op <_>_...</_> : CellLabel K CellLabel -> SetItem [prec 0] .
+  op <_>_...</_> : CellLabel List CellLabel -> SetItem [prec 0] .
+  op <_>_...</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
+  op <_>_...</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
+endm
+
 ---- Context transformers level
 
 mod K-CONFIG is
