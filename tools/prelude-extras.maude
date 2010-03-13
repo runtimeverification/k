@@ -570,6 +570,8 @@ fmod META-LEVEL-EXTRAS is
   eq sortsLeq(M, nil,nil) = true .
 
   op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
+  eq findOp(M, OPDS, Q, Tl, 'String)
+   =  (op Q : nil -> 'String [none] .) .
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
    =  (op 'sNat_ : Tl' -> T' [AS] .)
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
