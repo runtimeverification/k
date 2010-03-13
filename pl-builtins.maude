@@ -112,7 +112,7 @@ fmod PL-NAT is
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
   op _^Nat_ : NzNat Nat -> NzNat [ditto] .
 
-  op modExpNat : Nat Nat NzNat ~> Nat
+  op modExpNat : Nat Nat NzNat -> Nat
         [special (id-hook NumberOpSymbol (modExp)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
  
@@ -588,17 +588,17 @@ fmod PL-FLOAT is
          special (id-hook FloatOpSymbol (*)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op _/Float_ : Float Float ~> Float
+  op _/Float_ : Float Float -> Float
         [prec 31 gather (E e)
          special (id-hook FloatOpSymbol (/)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op _%Float_ : Float Float ~> Float
+  op _%Float_ : Float Float -> Float
         [prec 31 gather (E e)
          special (id-hook FloatOpSymbol (rem)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op _^Float_ : Float Float ~> Float
+  op _^Float_ : Float Float -> Float
         [prec 29  gather (E e)
          special (id-hook FloatOpSymbol (^)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
@@ -625,7 +625,7 @@ fmod PL-FLOAT is
         [special (id-hook FloatOpSymbol (max)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op sqrtFloat : Float ~> Float
+  op sqrtFloat : Float -> Float
         [special (id-hook FloatOpSymbol (sqrt)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
@@ -633,7 +633,7 @@ fmod PL-FLOAT is
         [special (id-hook FloatOpSymbol (exp)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op logFloat : Float ~> Float
+  op logFloat : Float -> Float
         [special (id-hook FloatOpSymbol (log)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
@@ -649,11 +649,11 @@ fmod PL-FLOAT is
         [special (id-hook FloatOpSymbol (tan)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op asinFloat : Float ~> Float
+  op asinFloat : Float -> Float
         [special (id-hook FloatOpSymbol (asin)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op acosFloat : Float ~> Float
+  op acosFloat : Float -> Float
         [special (id-hook FloatOpSymbol (acos)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
@@ -720,7 +720,7 @@ fmod PL-STRING is
                   op-hook stringSymbol (<Strings> : ~> Char)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
-  op charString : Nat ~> Char
+  op charString : Nat -> Char
         [special (id-hook StringOpSymbol (char)
                   op-hook stringSymbol (<Strings> : ~> Char)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
@@ -803,14 +803,14 @@ fmod PL-CONVERSION is
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op stringConversion : Rat NzNat ~> String
+  op stringConversion : Rat NzNat -> String
         [special (id-hook StringOpSymbol (string)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op ratConversion : String NzNat ~> Rat
+  op ratConversion : String NzNat -> Rat
         [special (id-hook StringOpSymbol (rat)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
@@ -822,7 +822,7 @@ fmod PL-CONVERSION is
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op floatConversion : String ~> Float
+  op floatConversion : String -> Float
         [special (id-hook StringOpSymbol (float)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
@@ -849,7 +849,7 @@ fmod PL-QID is
                   op-hook quotedIdentifierSymbol (<Qids> : ~> Qid)
                   op-hook stringSymbol (<Strings> : ~> String))] .
 
-  op qid : String ~> Qid 
+  op qid : String -> Qid 
         [special (id-hook QuotedIdentifierOpSymbol (qid)
                   op-hook quotedIdentifierSymbol (<Qids> : ~> Qid)
                   op-hook stringSymbol (<Strings> : ~> String))] .
