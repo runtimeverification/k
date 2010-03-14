@@ -1,0 +1,77 @@
+load prelude-extras
+load meta-k
+fmod ANONYMOUS-CONSTANTS is
+  including META-MODULE-EXTRAS .
+  including META-TERM-EXTRAS .
+  including META-LEVEL-EXTRAS .
+  including META-ANONYMOUS-VARIABLE .
+  var M Flat : Module . var Q : Qid .
+  var Mbs : MembAxSet . var Mb : MembAx .  
+  var Eqs : EquationSet . var Eq : Equation .
+  var Rls : RuleSet . var Rl : Rule .
+  var Trm Trm' : Term .   var Trms : TermList .  
+  var TLS : TypeListSet .  var Tl : TypeList .  var T : Type .
+  var V : Variable . var Ct : Constant . var Cond : Condition .
+  var N : Nat .  var AS : AttrSet .  
+  op resolveAnonymousConsts : Qid Module Module ~> Module .
+  eq resolveAnonymousConsts(Q,M,Flat) = setName(setRls(setEqs(setMbs(removeImports(M,(including 'K-ANONYMOUS-VARIABLES .)),resolveConstsMbs(Flat,getMbs(M))),resolveConstsEqs(Flat,getEqs(M))),resolveConstsRls(Flat,getRls(M))), Q) .
+
+  op resolveConstsMbs : Module MembAxSet ~> MembAxSet .
+  eq resolveConstsMbs(M, none) = none .
+  eq resolveConstsMbs(M, Mbs Mb) = resolveConstsMbs(M, Mbs) resolveConstsMb(M, Mb) .
+
+
+  op resolveConstsEqs : Module EquationSet ~> EquationSet .
+  eq resolveConstsEqs(M, none) = none .
+  eq resolveConstsEqs(M, Eqs Eq) = resolveConstsEqs(M, Eqs) resolveConstsEq(M, Eq) .
+
+  op resolveConstsRls : Module RuleSet ~> RuleSet .
+  eq resolveConstsRls(M, none) = none .
+  eq resolveConstsRls(M, Rls Rl) = resolveConstsRls(M, Rls) resolveConstsRl(M, Rl) .
+
+  op resolveConstsMb : Module MembAx ~> MembAx .
+  eq resolveConstsMb(M, (mb Trm : T [AS] .))
+   = (mb resolveConstsT(M,Trm) : T [AS] .) .
+  eq resolveConstsMb(M, (cmb Trm : T if Cond [AS] .))
+   = (cmb resolveConstsT(M,Trm) : T if Cond [AS] .) .
+  op resolveConstsEq : Module Equation ~> Equation .
+  eq resolveConstsEq(M, (eq Trm = Trm' [AS] .))
+   = (eq resolveConstsT(M,Trm) = Trm' [AS] .) .
+  eq resolveConstsEq(M, (ceq Trm = Trm' if Cond [AS] .))
+   = (ceq resolveConstsT(M,Trm) = Trm' if Cond [AS] .) .
+  op resolveConstsRl : Module Rule ~> Rule .
+  eq resolveConstsRl(M, (rl Trm => Trm' [AS] .))
+   = (rl resolveConstsT(M,Trm) => Trm' [AS] .) .
+  eq resolveConstsRl(M, (crl Trm => Trm' if Cond [AS] .))
+   = (crl resolveConstsT(M,Trm) => Trm' if Cond [AS] .) .
+
+  op resolveConstsT : Module Term ~> Term .
+  eq resolveConstsT(M, Trm) =  resolveConstsT(M, Trm, 0, none) .
+
+  op resolveConstsT : Module Term Nat TypeListSet  ~> Term .
+  eq resolveConstsT(M, Q[Trms], N, TLS)
+   = Q[resolveConstsTl(M,Trms, 0,maximalAritySet(M,Q[Trms]))] . 
+  eq resolveConstsT(M, V, N, TLS) = V .
+  eq resolveConstsT(M, Ct, N, TLS) 
+   = if getName(Ct) == anyVarS then anyVar(getNthType(N, TLS)) else Ct fi .
+
+  op resolveConstsTl : Module TermList Nat TypeListSet ~> TermList .
+  eq resolveConstsTl(M, empty, N, TLS) = empty .
+  eq resolveConstsTl(M, (Trm,Trms), N, TLS) = resolveConstsT(M, Trm, N, TLS),resolveConstsTl(M,Trms,s N, TLS) .
+
+
+  op getNthType : Nat TypeListSet ~> Type .
+  eq getNthType(0,TLS) = checkCommonType(TLS) .
+  eq getNthType(s N, TLS) = getNthType(N, removeFirst(TLS)) .
+
+  op removeFirst : TypeListSet ~> TypeListSet .
+  eq removeFirst(T Tl ; TLS) = Tl ; removeFirst(TLS) .
+  eq removeFirst(none) = none .
+
+  op checkCommonType : TypeListSet ~> Type .
+  eq checkCommonType(T Tl ; TLS) = checkCommonType(T, TLS) .
+  
+  op checkCommonType : Type TypeListSet ~> Type .
+  eq checkCommonType(T, none) = T .
+  eq checkCommonType(T, T Tl ; TLS) = checkCommonType(T, TLS) .
+endfm

@@ -97,47 +97,47 @@ mod IMP++-K-PROPER01-LABELS is
     = _`(_`)("vars_;_",_`,_(_`(_`)(kList("wklist_"),_`,_(_`(_`)("VarId < KProper"_(n),.kl),_`,_(_`(_`)("VarId < KProper"_(s),.kl),_`(_`)("VarId < KProper"_(i),.kl)))),_`(_`)("_;_",_`,_(_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(n),.kl),_`(_`)("Int < KResult"_(1000),.kl))),_`(_`)("_;_",_`,_(_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(s),.kl),_`(_`)("Int < KResult"_(0),.kl))),_`(_`)("_;_",_`,_(_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("VarId < KProper"_(n),.kl))),_`(_`)("_;_",_`,_(_`(_`)("while_do_",_`,_(_`(_`)("_<=_",_`,_(_`(_`)("Int < KResult"_(1),.kl),_`(_`)("VarId < KProper"_(i),.kl))),_`(_`)("_;_",_`,_(_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(s),.kl),_`(_`)("_+_",_`,_(_`(_`)("VarId < KProper"_(s),.kl),_`(_`)("VarId < KProper"_(i),.kl))))),_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("_+_",_`,_(_`(_`)("VarId < KProper"_(i),.kl),_`(_`)("Int < KResult"_(-1),.kl))))))))),_`(_`)("print_",_`(_`)("VarId < KProper"_(s),.kl)))))))))))) .
   eq startConfig(S:K)
     = <_>_</_>(T,__(__(__(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(0),.kl),nextLoc),<_>_</_>(output,.l,output)),<_>_</_>(store,.m,store)),<_>_</_>(threads,<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,.m,env)),thread),threads)),T) .
-  eq <_>_</_>(T,__(Top:Set,<_>_</_>(output,Output:List,output),<_>_</_>(threads,.s,threads)),T)
+  eq <_>_</_>(T,__(?4:Set,<_>_</_>(output,Output:List,output),<_>_</_>(threads,.s,threads)),T)
     = <_>_</_>(result,Output:List,result) [metadata "structural rule"] .
-  eq <_>_</_>(thread,__(Thread:Set,<_>_</_>(k,.k,k)),thread)
+  eq <_>_</_>(thread,__(?2:Set,<_>_</_>(k,.k,k)),thread)
     = .s [metadata "structural rule"] .
   eq _.._(N1:Nat,N2:Nat)
     = if_then_else_fi(_>=Int_(N1:Nat,N2:Nat),.kl,_`,_(_`(_`)("Int < KResult"_(N1:Nat),.kl),_.._(sNat_(N1:Nat),N2:Nat))) [metadata "structural rule"] .
-  eq __(<_>_</_>(k,_~>_(_`(_`)("env",_`(_`)(wmap_(Env:Map),.kl)),K:K),k),<_>_</_>(env,Env':Map,env))
-    = __(<_>_</_>(k,K:K,k),<_>_</_>(env,Env:Map,env)) [metadata "structural rule"] .
-  eq __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(N:Nat),.kl),nextLoc),<_>_</_>(threads,__(AnyVar21:Set,<_>_</_>(thread,__(AnyVar22:Set,<_>_</_>(k,_~>_(_`(_`)("vars_;_",_`,_(_`(_`)(kList("wklist_"),Xl:KList),S:K)),K:K),k),<_>_</_>(env,Env:Map,env)),thread)),threads),<_>_</_>(store,Store:Map,store))
-    = __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(_+Int_(N:Nat,length_(Xl:KList))),.kl),nextLoc),<_>_</_>(threads,__(AnyVar21:Set,<_>_</_>(thread,__(AnyVar22:Set,<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)("env",_`(_`)(wmap_(Env:Map),.kl))),K:K),k),<_>_</_>(env,_`[_<-_`](Env:Map,Xl:KList,_.._(N:Nat,_+Int_(N:Nat,length_(Xl:KList)))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(_.._(N:Nat,_+Int_(N:Nat,length_(Xl:KList))),_`(_`)("Int < KResult"_(0),.kl))),store)) [metadata "structural rule"] .
+  eq __(<_>_</_>(k,_~>_(_`(_`)("env",_`(_`)(wmap_(Env:Map),.kl)),?5:K),k),<_>_</_>(env,Env':Map,env))
+    = __(<_>_</_>(k,?5:K,k),<_>_</_>(env,Env:Map,env)) [metadata "structural rule"] .
+  eq __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(N:Nat),.kl),nextLoc),<_>_</_>(threads,__(?21:Set,<_>_</_>(thread,__(?22:Set,<_>_</_>(k,_~>_(_`(_`)("vars_;_",_`,_(_`(_`)(kList("wklist_"),Xl:KList),S:K)),?23:K),k),<_>_</_>(env,Env:Map,env)),thread)),threads),<_>_</_>(store,?24:Map,store))
+    = __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(_+Int_(N:Nat,length_(Xl:KList))),.kl),nextLoc),<_>_</_>(threads,__(?21:Set,<_>_</_>(thread,__(?22:Set,<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)("env",_`(_`)(wmap_(Env:Map),.kl))),?23:K),k),<_>_</_>(env,_`[_<-_`](Env:Map,Xl:KList,_.._(N:Nat,_+Int_(N:Nat,length_(Xl:KList)))),env)),thread)),threads),<_>_</_>(store,__(?24:Map,m(_.._(N:Nat,_+Int_(N:Nat,length_(Xl:KList))),_`(_`)("Int < KResult"_(0),.kl))),store)) [metadata "structural rule"] .
   eq _`(_`)("list_",_`(_`)(kList("wklist_"),RL:ResultList))
     = _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:ResultList)) [metadata "structural rule"] .
-  rl <_>_</_>(k,_~>_(_`(_`)("halt",.kl),K:K),k)
+  rl <_>_</_>(k,_~>_(_`(_`)("halt",.kl),?2:K),k)
     => <_>_</_>(k,.k,k) [metadata "computational rule"] .
-  rl <_>_</_>(k,_~>_(_`(_`)("while_do_",_`,_(B:K,S:K)),K:K),k)
-    => <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,_(B:K,_`(_`)("_;_",_`,_(S:K,_`(_`)("while_do_",_`,_(B:K,S:K)))),_`(_`)("skip",.kl))),K:K),k) [metadata "computational rule"] .
-  rl <_>_</_>(thread,__(Thread:Set,<_>_</_>(k,_~>_(_`(_`)("spawn_",S:K),K:K),k),<_>_</_>(env,Env:Map,env)),thread)
-    => __(<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,Env:Map,env)),thread),<_>_</_>(thread,__(Thread:Set,<_>_</_>(k,K:K,k),<_>_</_>(env,Env:Map,env)),thread)) [metadata "computational rule"] .
-  rl __(<_>_</_>(output,Output:List,output),<_>_</_>(threads,__(AnyVar7:Set,<_>_</_>(thread,__(AnyVar8:Set,<_>_</_>(k,_~>_(_`(_`)("print_",_`(_`)("Int < KResult"_(I:Int),.kl)),K:K),k)),thread)),threads))
-    => __(<_>_</_>(output,_`,_(Output:List,l(_`(_`)("Int < KResult"_(I:Int),.kl))),output),<_>_</_>(threads,__(AnyVar7:Set,<_>_</_>(thread,__(AnyVar8:Set,<_>_</_>(k,K:K,k)),thread)),threads)) [metadata "computational rule"] .
-  rl __(<_>_</_>(threads,__(AnyVar12:Set,<_>_</_>(thread,__(AnyVar13:Set,<_>_</_>(k,_~>_(_`(_`)("VarId < KProper"_(X:VarId),.kl),K:K),k),<_>_</_>(env,__(Env:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I:Int),.kl))),store))
-    => __(<_>_</_>(threads,__(AnyVar12:Set,<_>_</_>(thread,__(AnyVar13:Set,<_>_</_>(k,_~>_(_`(_`)("Int < KResult"_(I:Int),.kl),K:K),k),<_>_</_>(env,__(Env:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I:Int),.kl))),store)) [metadata "computational rule"] .
-  rl __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,<_>_</_>(k,_~>_(_`(_`)("++_",_`(_`)("VarId < KProper"_(X:VarId),.kl)),K:K),k),<_>_</_>(env,__(Env:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I:Int),.kl))),store))
-    => __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,<_>_</_>(k,_~>_(_`(_`)("Int < KResult"_(_+Int_(I:Int,1)),.kl),K:K),k),<_>_</_>(env,__(Env:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(_+Int_(I:Int,1)),.kl))),store)) [metadata "computational rule"] .
-  rl __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,<_>_</_>(k,_~>_(_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(I1:Int),.kl))),K:K),k),<_>_</_>(env,__(Env:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I2:Int),.kl))),store))
-    => __(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,<_>_</_>(k,K:K,k),<_>_</_>(env,__(Env:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I1:Int),.kl))),store)) [metadata "computational rule"] .
+  rl <_>_</_>(k,_~>_(_`(_`)("while_do_",_`,_(B:K,S:K)),?8:K),k)
+    => <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,_(B:K,_`(_`)("_;_",_`,_(S:K,_`(_`)("while_do_",_`,_(B:K,S:K)))),_`(_`)("skip",.kl))),?8:K),k) [metadata "computational rule"] .
+  rl <_>_</_>(thread,__(?7:Set,<_>_</_>(k,_~>_(_`(_`)("spawn_",S:K),?8:K),k),<_>_</_>(env,Env:Map,env)),thread)
+    => __(<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,Env:Map,env)),thread),<_>_</_>(thread,__(?7:Set,<_>_</_>(k,?8:K,k),<_>_</_>(env,Env:Map,env)),thread)) [metadata "computational rule"] .
+  rl __(<_>_</_>(output,?7:List,output),<_>_</_>(threads,__(?8:Set,<_>_</_>(thread,__(?9:Set,<_>_</_>(k,_~>_(_`(_`)("print_",_`(_`)("Int < KResult"_(I:Int),.kl)),?10:K),k)),thread)),threads))
+    => __(<_>_</_>(output,_`,_(?7:List,l(_`(_`)("Int < KResult"_(I:Int),.kl))),output),<_>_</_>(threads,__(?8:Set,<_>_</_>(thread,__(?9:Set,<_>_</_>(k,?10:K,k)),thread)),threads)) [metadata "computational rule"] .
+  rl __(<_>_</_>(threads,__(?12:Set,<_>_</_>(thread,__(?13:Set,<_>_</_>(k,_~>_(_`(_`)("VarId < KProper"_(X:VarId),.kl),?14:K),k),<_>_</_>(env,__(?15:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(?16:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I:Int),.kl))),store))
+    => __(<_>_</_>(threads,__(?12:Set,<_>_</_>(thread,__(?13:Set,<_>_</_>(k,_~>_(_`(_`)("Int < KResult"_(I:Int),.kl),?14:K),k),<_>_</_>(env,__(?15:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(?16:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I:Int),.kl))),store)) [metadata "computational rule"] .
+  rl __(<_>_</_>(threads,__(?13:Set,<_>_</_>(thread,__(?14:Set,<_>_</_>(k,_~>_(_`(_`)("++_",_`(_`)("VarId < KProper"_(X:VarId),.kl)),?15:K),k),<_>_</_>(env,__(?16:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I:Int),.kl))),store))
+    => __(<_>_</_>(threads,__(?13:Set,<_>_</_>(thread,__(?14:Set,<_>_</_>(k,_~>_(_`(_`)("Int < KResult"_(_+Int_(I:Int,1)),.kl),?15:K),k),<_>_</_>(env,__(?16:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(_+Int_(I:Int,1)),.kl))),store)) [metadata "computational rule"] .
+  rl __(<_>_</_>(threads,__(?13:Set,<_>_</_>(thread,__(?14:Set,<_>_</_>(k,_~>_(_`(_`)("_:=_",_`,_(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(I1:Int),.kl))),?15:K),k),<_>_</_>(env,__(?16:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I2:Int),.kl))),store))
+    => __(<_>_</_>(threads,__(?13:Set,<_>_</_>(thread,__(?14:Set,<_>_</_>(k,?15:K,k),<_>_</_>(env,__(?16:Map,m(_`(_`)("VarId < KProper"_(X:VarId),.kl),_`(_`)("Int < KResult"_(L:Int),.kl))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,m(_`(_`)("Int < KResult"_(L:Int),.kl),_`(_`)("Int < KResult"_(I1:Int),.kl))),store)) [metadata "computational rule"] .
   rl _`(_`)("_+_",_`,_(_`(_`)("Int < KResult"_(I1:Int),.kl),_`(_`)("Int < KResult"_(I2:Int),.kl)))
     => _`(_`)("Int < KResult"_(_+Int_(I1:Int,I2:Int)),.kl) [metadata "computational rule"] .
   rl _`(_`)("_;_",_`,_(S1:K,S2:K))
     => _~>_(S1:K,S2:K) [metadata "computational rule"] .
   rl _`(_`)("_<=_",_`,_(_`(_`)("Int < KResult"_(I1:Int),.kl),_`(_`)("Int < KResult"_(I2:Int),.kl)))
     => _`(_`)("Bool < KResult"_(_<=Int_(I1:Int,I2:Int)),.kl) [metadata "computational rule"] .
-  rl _`(_`)("_and_",_`,_(_`(_`)("Bool < KResult"_(false),.kl),B:K))
+  rl _`(_`)("_and_",_`,_(_`(_`)("Bool < KResult"_(false),.kl),?2:K))
     => _`(_`)("Bool < KResult"_(false),.kl) [metadata "computational rule"] .
   rl _`(_`)("_and_",_`,_(_`(_`)("Bool < KResult"_(true),.kl),B:K))
     => B:K [metadata "computational rule"] .
-  rl _`(_`)("head",_`(_`)("vl_",_`(_`)(kList("wklist_"),_`,_(_`(_`)("Int < KResult"_(I:Int),.kl),RL:ResultList))))
+  rl _`(_`)("head",_`(_`)("vl_",_`(_`)(kList("wklist_"),_`,_(_`(_`)("Int < KResult"_(I:Int),.kl),?4:KList))))
     => _`(_`)("Int < KResult"_(I:Int),.kl) [metadata "computational rule"] .
-  rl _`(_`)("if_then_else_",_`,_(_`(_`)("Bool < KResult"_(false),.kl),S1:K,S2:K))
+  rl _`(_`)("if_then_else_",_`,_(_`(_`)("Bool < KResult"_(false),.kl),?4:K,S2:K))
     => S2:K [metadata "computational rule"] .
-  rl _`(_`)("if_then_else_",_`,_(_`(_`)("Bool < KResult"_(true),.kl),S1:K,S2:K))
+  rl _`(_`)("if_then_else_",_`,_(_`(_`)("Bool < KResult"_(true),.kl),S1:K,?4:K))
     => S1:K [metadata "computational rule"] .
   rl _`(_`)("not_",_`(_`)("Bool < KResult"_(T:Bool),.kl))
     => _`(_`)("Bool < KResult"_(notBool_(T:Bool)),.kl) [metadata "computational rule"] .

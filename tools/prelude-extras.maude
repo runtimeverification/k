@@ -547,11 +547,25 @@ fmod META-LEVEL-EXTRAS is
   including META-LEVEL .
   including META-MODULE-EXTRAS .
 
-  var M : Module . var T T' : Type . var Tl Tl' : TypeList .
+  var M : Module . var T T' : Type . var K : Kind . var Tl Tl' : TypeList .
   var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
   var Trm Trm' : Term . var Trms : TermList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
   var N N' : Nat .  var IL : ImportList .
+
+  op maximalAritySet : Module Term ~> TypeListSet .
+  eq maximalAritySet(M, Q[Trms])
+   = maximalAritySetAux(M, Q, leastSorts(M, Trms), leastSort(M, Q[Trms])) .
+  eq maximalAritySet(M, Trm) = none [owise] .
+
+  op maximalAritySetAux : Module Qid TypeList TypeSet ~> TypeListSet .
+  eq maximalAritySetAux(M, Q, Tl, S) = maximalAritySet(M, Q, Tl, S) .
+  eq maximalAritySetAux(M, Q, Tl, K) 
+   = maximalAritySetAux(M, Q, Tl, maximalSorts(M, K)) [owise] .
+  eq maximalAritySetAux(M, Q, Tl, S ; NeSS)
+   = maximalAritySet(M, Q, Tl, S) ; maximalAritySetAux(M, Q, Tl, NeSS) .
+  eq maximalAritySet(M, Q, Tl, S)  = none [owise] .
+
 
   op leastSorts : Module TermList ~> TypeList .
   eq leastSorts(M,empty) = nil .

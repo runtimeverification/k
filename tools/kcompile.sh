@@ -84,6 +84,12 @@ Stopping the compilation!"
   checkMaude "$3 $OUTPUT show module ."
 
   printf ". Done!\n"
+  if [ -n "$DEBUG" ]; then
+    echo "
+--------------$2--------------------
+$OUTPUT
+" >>log.txt
+  fi
 }
 
 OUTPUT=$(<$FILE.maude)
@@ -95,6 +101,14 @@ show module $LANG .
 checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
 
 OUTPUT=$(<$FILE.maude)
+
+ANON_CONSTS="
+load $KBASE/tools/anon-consts-interface
+loop anon-consts .
+(resolveAnonConsts $LANG $LANG .)
+"
+runMaude "$OUTPUT $ANON_CONSTS" "Transforming anonymous constants to anonymous variables"
+
 
 SYNTAX2K="
 load $KBASE/tools/syntax-to-k-interface

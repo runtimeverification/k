@@ -144,7 +144,6 @@ fmod META-K-RULES is including K-SORTS .
   eq plugKRule({RK,T,C,AS}) = (mb symbol(RK)[T,C] : kSentenceSort [AS] .) [owise] .
 endfm
 
-
 fmod K-META-CONFIG is including META-K-RULES .
   including INT .
   var Label Label' : Constant . var Contents Contents' T : Term .
@@ -223,7 +222,7 @@ fmod META-ANONYMOUS-VARIABLE is
   var T : Type . var N : Nat .
 
   op anyVarS : -> Qid .
-  eq anyVarS = 'AnyVar .
+  eq anyVarS = '? .
 
   op anyVar : Type -> Variable .
   eq anyVar(T) = qid(string(anyVarS) + ":" + string(T)) .

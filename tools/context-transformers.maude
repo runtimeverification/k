@@ -82,7 +82,7 @@ fmod CONTEXT-TRANSFORMERS is
    = bringToSameLevel(Level,solveEach(T, KC),KC)  .
   eq contextTransformT(I:[Int], T, KC) = T [owise print "cannot bring " T " to  level " I:[Int]] . 
   op solveEach : Term KConf -> [Term] .
-  ceq solveEach(Ct,KC) = Ct if getName(Ct) == '_ or-else getName(Ct) == 'AnyVar or-else Ct == emptySet .
+  ceq solveEach(Ct,KC) = Ct if getName(Ct) == anyVarS or-else Ct == emptySet .
   eq solveEach(V, KC) = V .
  ceq solveEach(Q[Tl],KC) = Q[solveEachL(Tl,KC)] 
   if Q == ctorSet .
@@ -169,7 +169,7 @@ fmod CONTEXT-TRANSFORMERS is
 
   op term2Set : Term KConf -> [TermSet] .
   ceq term2Set(Ct, KC) = emptyTS if Ct = emptySet .
-  ceq term2Set(Ct, KC) = var(Ct) if getName(Ct) == 'AnyVar or-else getName(Ct) == '_ .
+  ceq term2Set(Ct, KC) = var(Ct) if getName(Ct) == anyVarS .
   eq term2Set(V, KC) = var(V) .
   ceq term2Set(O[Tl],KC) = term2SetL(Tl,KC) if O == ctorSet .
   ceq term2Set(T, KC) = qt(getName(SC), getMultiplicity(getConfElement(getName(SC),KC)), T) 
