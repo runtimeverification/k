@@ -78,8 +78,6 @@ mod BF is
 		
 	mb [Increase]: rule 
 		< k > [Increase(.kl) => .k] ~> KCxt:K </ k >
-		--- < memory > l([inject(I:Int)(.kl) => inject(sNat(I:Int))(.kl)]), L:List </ memory > --- doesn't work
-		--- < memory > l([inject(I:Int)(.kl) => .k]), L:List </ memory >  --- works
 		< memory > l([inject(I:Int)(.kl) => (inject(I:Int +Int 1))(.kl)]), L:List </ memory > 
 		: KSentence [metadata "structural"] .
 	mb [Decrease]: rule 
@@ -132,4 +130,3 @@ mod BF is
 		: KSentence [metadata "structural"] .
 endm
 
----rew eval(helloWorld(.kl)) .
