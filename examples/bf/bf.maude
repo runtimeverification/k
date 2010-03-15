@@ -30,15 +30,10 @@ mod BF is
 	---		the instruction pointer forward to the next command, jump it back 
 	---		to the command after the matching [ command*.
 	
---- Programs
-  	op helloWorld : -> KProperLabel [metadata "arity 0"] .
-	eq helloWorld(.kl) = (
-		Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( While( Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Decrease(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoLeft(.kl) , Seq( GoLeft(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Decrease(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Increase(.kl) , Seq( Print(.kl) , Seq( GoRight(.kl) , Seq( Print(.kl) , .k ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
-	) .
-	
 --- Semantics
 	op sentinel : -> KProperLabel .
 	op eval : K -> Set .
+	op eval : K K -> Set .
 	op inject : Int -> KResultLabel .
 	op inject : String -> KResultLabel .
 	
@@ -47,17 +42,25 @@ mod BF is
 			< k > K:K </ k >
 			< memory > L:List </ memory >
 			< output > K:K </ output >
-			< input > L:List </ input >
+			< input > K:K </ input >
 		</ T >  
 		< result > K:K </ result > 
 		: KSentence .
 	
-	eq [Start]: eval(K:K) = 
+	eq [Start]: eval(K:K) =
 		< T >
 			< k > K:K </ k >
 			< memory > l(sentinel(.kl)) </ memory >
 			< output > inject("")(.kl) </ output >
-			< input > .l </ input >
+			< input > inject("")(.kl) </ input >
+		</ T > .
+		
+	eq [Start-With-Input]: eval(K:K, K':K) = 
+		< T >
+			< k > K:K </ k >
+			< memory > l(sentinel(.kl)) </ memory >
+			< output > inject("")(.kl) </ output >
+			< input > K':K </ input >
 		</ T > .
 
 	mb [Finish]: rule [
@@ -108,7 +111,25 @@ mod BF is
 		< memory > l(inject(I:Int)(.kl)), L:List </ memory > 
 		< output > inject([S:String => S:String +String charString(absInt(I:Int))])(.kl) </ output > 
 		: KSentence [metadata "structural"] .
-
+	mb [Input]: rule
+		< k > [Read(.kl) => .k] ~> KCxt:K </ k >
+		< memory > l([inject(I:Int)(.kl) => charToAscii(firstChar(Input:K))]), L:List </ memory > 
+		< input > [Input:K => butFirstChar(Input:K)] </ input > 
+		: KSentence [metadata "structural"] .
+	
+	op firstChar : -> KProperLabel [metadata "arity 1"] .
+	op butFirstChar : -> KProperLabel [metadata "arity 1"] .
+	op charToAscii : -> KProperLabel [metadata "arity 1"] .
+	
+	mb [firstChar]: rule
+		[firstChar(inject(S:String)(.kl)) => inject(substrString(S:String, 0, 1))(.kl)]
+		: KSentence [metadata "structural"] .
+	mb [charToAscii]: rule
+		[charToAscii(inject(C:Char)(.kl)) => inject(asciiString(C:Char))(.kl)]
+		: KSentence [metadata "structural"] .
+	mb [butFirstChar]: rule
+		[butFirstChar(inject(S:String)(.kl)) => inject(substrString(S:String, 1, lengthString(S:String)))(.kl)]
+		: KSentence [metadata "structural"] .
 endm
 
 ---rew eval(helloWorld(.kl)) .
