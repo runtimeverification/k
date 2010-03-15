@@ -25,7 +25,7 @@ fi
 MAUDE="$MAUDE -no-banner -batch -no-wrap"
 echo "q" | $MAUDE >/dev/null
 RUNNER=`which "$0"`
-KBASE=`dirname $RUNNER`/..
+KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
 OUTPUT_FILE="${FILE}-compiled"
 if [[ $# -eq  2 ]]; then
