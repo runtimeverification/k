@@ -40,7 +40,7 @@ function checkMaude {
   if [ -n "$2" ]; then
     printf "%s.." "$2"
   fi
-  result=$( { stdout=$(echo "$1" | $MAUDE $KBASE/k-prelude ) ; } 2>&1; printf "%s" "--------------------$stdout")
+  result=$( { stdout=$(echo "$1" | $MAUDE "$KBASE/k-prelude" ) ; } 2>&1; printf "%s" "--------------------$stdout")
 OUTPUT1=${result#*--------------------}
 ERROR=${result%--------------------*}
   if [ -n "$ERROR" ]; then
@@ -61,7 +61,7 @@ Stopping the compilation!"
 
 function runMaude {
   printf "%s.." "$2"
-  result=$( { stdout=$(echo "$1" | $MAUDE $KBASE/k-prelude ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
+  result=$( { stdout=$(echo "$1" | $MAUDE "$KBASE/k-prelude" ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
 OUTPUT=${result#*-k-maude-delimiter--}
 #echo "$OUTPUT"
 OUTPUT="${OUTPUT%---K-MAUDE-GENERATED-OUTPUT-END-----*}"
@@ -103,7 +103,7 @@ checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
 OUTPUT=$(<$FILE.maude)
 
 ANON_CONSTS="
-load $KBASE/tools/anon-consts-interface
+load \"$KBASE/tools/anon-consts-interface\"
 loop anon-consts .
 (resolveAnonConsts $LANG $LANG .)
 "
@@ -111,7 +111,7 @@ runMaude "$OUTPUT $ANON_CONSTS" "Transforming anonymous constants to anonymous v
 
 
 SYNTAX2K="
-load $KBASE/tools/syntax-to-k-interface
+load \"$KBASE/tools/syntax-to-k-interface\"
 loop syntax-to-k .
 (syntax2k $LANG -K .)
 "
@@ -120,7 +120,7 @@ runMaude "$OUTPUT $SYNTAX2K" "Merging syntax sorts into K"
 LANG="${LANG}-K"
 
 KPROPER="
-load $KBASE/tools/add-k-proper-interface
+load \"$KBASE/tools/add-k-proper-interface\"
 loop add-k-proper .
 (addKProper $LANG -PROPER .)
 "
@@ -129,7 +129,7 @@ runMaude "$OUTPUT $KPROPER" "Adding the KProper Sort"
 LANG="${LANG}-PROPER"
 
 CONTEXT_TRANSFORMERS="
-load $KBASE/tools/context-transformers-interface
+load \"$KBASE/tools/context-transformers-interface\"
 loop context-transformers .
 (resolveKCxt $LANG $LANG $LANG .)
 "
@@ -137,7 +137,7 @@ loop context-transformers .
 runMaude "$OUTPUT $CONTEXT_TRANSFORMERS" "Applying Context Transformers"
 
 ANON_VARS="
-load $KBASE/tools/anon-vars-interface
+load \"$KBASE/tools/anon-vars-interface\"
 loop anon-vars .
 (resolveAnonVars $LANG $LANG .)
 "
@@ -145,7 +145,7 @@ loop anon-vars .
 runMaude "$OUTPUT $ANON_VARS"  "Resolving Anonymous Variables"
 
 K_RULES="
-load $KBASE/tools/make-k-rules-interface
+load \"$KBASE/tools/make-k-rules-interface\"
 loop make-k-rules .
 (resolveKRules $LANG $LANG .)
 "
@@ -153,7 +153,7 @@ loop make-k-rules .
 runMaude "$OUTPUT $K_RULES"  "Generating Maude rules from K rules"
 
 SUBSORTS="
-load $KBASE/tools/subsorts-to-wrappers-interface
+load \"$KBASE/tools/subsorts-to-wrappers-interface\"
 loop subsorts-to-wrappers .
 (resolveKSubsorts $LANG 0 .)
 "
@@ -161,7 +161,7 @@ loop subsorts-to-wrappers .
 runMaude "$OUTPUT $SUBSORTS"  "Transforming subsorted builtins into injections"
 
 ARGUMENTS="
-load $KBASE/tools/homogenous-arguments-interface
+load \"$KBASE/tools/homogenous-arguments-interface\"
 loop homogenous-arguments .
 (makeHomogenousArgs ${LANG}0 1 .)
 "
@@ -169,7 +169,7 @@ loop homogenous-arguments .
 runMaude "$OUTPUT $ARGUMENTS" "Wrapping non-K arguments"
 
 LABELS="
-load $KBASE/tools/make-all-labels-interface
+load \"$KBASE/tools/make-all-labels-interface\"
 loop make-all-labels .
 (makeAllLabels ${LANG}01 -LABELS .)
 "
@@ -179,7 +179,7 @@ runMaude "$OUTPUT $LABELS" "Reducing all K constructs to K labels"
 COMPILED="$OUTPUT"
 
 STRICTCXT="
-load $KBASE/tools/strict-ops2cxt-interface
+load \"$KBASE/tools/strict-ops2cxt-interface\"
 loop strict-ops2cxt .
 (strictOps2cxt ${LANG}01-LABELS ${LANG}-STRICTNESS .)
 "
@@ -187,7 +187,7 @@ loop strict-ops2cxt .
 runMaude "$OUTPUT $STRICTCXT" "Generating Strictness Axioms" "$COMPILED"
 
 STRICTEQS="
-load $KBASE/tools/strict-cxt2eqs-interface
+load \"$KBASE/tools/strict-cxt2eqs-interface\"
 loop strict-cxt2eqs .
 (strictCxt2eqs ${LANG}01-LABELS ${LANG}-STRICTNESS ${LANG}-STRICTNESS .)
 "
@@ -206,7 +206,7 @@ endm
 checkMaude "$TEST" "Putting everything together"
 
 echo "
-load $KBASE/k-prelude
+load \"$KBASE/k-prelude\"
 $TEST
 " > $OUTPUT_FILE.maude
 
