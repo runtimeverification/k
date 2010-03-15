@@ -1,12 +1,12 @@
 
-load ../../tools/../k-prelude
+load "../../tools/../k-prelude"
 
 
 mod IMP++-K-PROPER01-LABELS is
-  including CONFIG .
-  including K-MAP-EXTRAS .
   including PL-INT .
   including PL-VARID .
+  including CONFIG .
+  including K-MAP-EXTRAS .
   including K-PROPER .
   including K-WRAPPERS-LABELS .
   op _.._ : Nat Nat -> KList .
@@ -107,8 +107,8 @@ mod IMP++-K-PROPER01-LABELS is
     = __(<_>_</_>(k,?5:K,k),<_>_</_>(env,Env:Map,env)) [metadata "structural rule"] .
   eq __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(N:Nat),.kl),nextLoc),<_>_</_>(threads,__(?21:Set,<_>_</_>(thread,__(?22:Set,<_>_</_>(k,_~>_(_`(_`)("vars_;_",_`,_(_`(_`)(kList("wklist_"),Xl:KList),S:K)),?23:K),k),<_>_</_>(env,Env:Map,env)),thread)),threads),<_>_</_>(store,?24:Map,store))
     = __(<_>_</_>(nextLoc,_`(_`)("Int < KResult"_(_+Int_(N:Nat,length_(Xl:KList))),.kl),nextLoc),<_>_</_>(threads,__(?21:Set,<_>_</_>(thread,__(?22:Set,<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)("env",_`(_`)(wmap_(Env:Map),.kl))),?23:K),k),<_>_</_>(env,_`[_<-_`](Env:Map,Xl:KList,_.._(N:Nat,_+Int_(N:Nat,length_(Xl:KList)))),env)),thread)),threads),<_>_</_>(store,__(?24:Map,m(_.._(N:Nat,_+Int_(N:Nat,length_(Xl:KList))),_`(_`)("Int < KResult"_(0),.kl))),store)) [metadata "structural rule"] .
-  eq _`(_`)("list_",_`(_`)(kList("wklist_"),RL:ResultList))
-    = _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:ResultList)) [metadata "structural rule"] .
+  eq _`(_`)("list_",_`(_`)(kList("wklist_"),RL:KResultList))
+    = _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:KResultList)) [metadata "structural rule"] .
   rl <_>_</_>(k,_~>_(_`(_`)("halt",.kl),?2:K),k)
     => <_>_</_>(k,.k,k) [metadata "computational rule"] .
   rl <_>_</_>(k,_~>_(_`(_`)("while_do_",_`,_(B:K,S:K)),?8:K),k)
@@ -143,8 +143,8 @@ mod IMP++-K-PROPER01-LABELS is
     => _`(_`)("Bool < KResult"_(notBool_(T:Bool)),.kl) [metadata "computational rule"] .
   rl _`(_`)("skip",.kl)
     => .k [metadata "computational rule"] .
-  rl _`(_`)("tail",_`(_`)("vl_",_`(_`)(kList("wklist_"),_`,_(_`(_`)("Int < KResult"_(I:Int),.kl),RL:ResultList))))
-    => _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:ResultList)) [metadata "computational rule"] .
+  rl _`(_`)("tail",_`(_`)("vl_",_`(_`)(kList("wklist_"),_`,_(_`(_`)("Int < KResult"_(I:Int),.kl),RL:KResultList))))
+    => _`(_`)("vl_",_`(_`)(kList("wklist_"),RL:KResultList)) [metadata "computational rule"] .
   crl _`(_`)("_/_",_`,_(_`(_`)("Int < KResult"_(I1:Int),.kl),_`(_`)("Int < KResult"_(I2:Int),.kl)))
     => _`(_`)("Int < KResult"_(_/Int_(I1:Int,I2:Int)),.kl)
     if _=/=Bool_(I2:Int,0)= true [metadata "computational rule"] .

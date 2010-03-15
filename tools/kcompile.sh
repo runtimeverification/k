@@ -102,6 +102,15 @@ checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
 
 OUTPUT=$(<$FILE.maude)
 
+OPEN_CELLS="
+load \"$KBASE/tools/open-cells-interface\"
+loop open-cells .
+(resolveOpenCells $LANG $LANG .)
+"
+runMaude "$OUTPUT $OPEN_CELLS" "Transforming open cells to normal cells through anonymous variables"
+
+
+
 ANON_CONSTS="
 load \"$KBASE/tools/anon-consts-interface\"
 loop anon-consts .

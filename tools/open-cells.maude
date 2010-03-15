@@ -1,0 +1,94 @@
+load prelude-extras
+load meta-k
+fmod OPEN-CELLS is
+  including META-MODULE-EXTRAS .
+  including META-TERM-EXTRAS .
+  including META-LEVEL-EXTRAS .
+  including META-ANONYMOUS-VARIABLE .
+  including K-META-OPEN-CELLS .
+  including META-K-RULES .
+
+  var M Flat : Module . var Q : Qid .
+  var Mbs : MembAxSet . var Mb : MembAx .  
+  var Eqs : EquationSet . var Eq : Equation .
+  var Rls : RuleSet . var Rl : Rule .
+  var Trm Trm' : Term .   var Trms : TermList .  
+  var TLS : TypeListSet .  var Tl : TypeList .  var T : Type .
+  var V : Variable . var Ct : Constant . var Cond : Condition .
+  var N : Nat .  var AS : AttrSet .  var SC : SplitCell .
+  var E : Ellipses .
+  op resolveOpenCells : Qid Module Module ~> Module .
+  eq resolveOpenCells(Q,M,Flat) = setName(setRls(setEqs(setMbs(removeImports(M,(including 'K-OPEN-CELLS .)),resolveCellsMbs(Flat,getMbs(M))),resolveCellsEqs(Flat,getEqs(M))),resolveCellsRls(Flat,getRls(M))), Q) .
+
+  op resolveCellsMbs : Module MembAxSet ~> MembAxSet .
+  eq resolveCellsMbs(M, none) = none .
+  eq resolveCellsMbs(M, Mbs Mb) = resolveCellsMbs(M, Mbs) resolveCellsMb(M, Mb) .
+
+
+  op resolveCellsEqs : Module EquationSet ~> EquationSet .
+  eq resolveCellsEqs(M, none) = none .
+  eq resolveCellsEqs(M, Eqs Eq) = resolveCellsEqs(M, Eqs) resolveCellsEq(M, Eq) .
+
+  op resolveCellsRls : Module RuleSet ~> RuleSet .
+  eq resolveCellsRls(M, none) = none .
+  eq resolveCellsRls(M, Rls Rl) = resolveCellsRls(M, Rls) resolveCellsRl(M, Rl) .
+
+  op resolveCellsMb : Module MembAx ~> MembAx .
+  eq resolveCellsMb(M, (mb Trm : T [AS] .))
+   = (mb resolveCellsT(M,Trm) : T [AS] .) .
+  eq resolveCellsMb(M, (cmb Trm : T if Cond [AS] .))
+   = (cmb resolveCellsT(M,Trm) : T if Cond [AS] .) .
+  op resolveCellsEq : Module Equation ~> Equation .
+  eq resolveCellsEq(M, (eq Trm = Trm' [AS] .))
+   = (eq resolveCellsT(M,Trm) = Trm' [AS] .) .
+  eq resolveCellsEq(M, (ceq Trm = Trm' if Cond [AS] .))
+   = (ceq resolveCellsT(M,Trm) = Trm' if Cond [AS] .) .
+  op resolveCellsRl : Module Rule ~> Rule .
+  eq resolveCellsRl(M, (rl Trm => Trm' [AS] .))
+   = (rl resolveCellsT(M,Trm) => Trm' [AS] .) .
+  eq resolveCellsRl(M, (crl Trm => Trm' if Cond [AS] .))
+   = (crl resolveCellsT(M,Trm) => Trm' if Cond [AS] .) .
+
+  op resolveCellsT : Module Term ~> Term .
+  eq resolveCellsT(M, V) = V .
+  eq resolveCellsT(M, Ct) = Ct .
+ ceq resolveCellsT(M, Q[Trms])
+   = resolveCellsSC(M, SC) 
+  if SC := splitKCell(Q[Trms]) .
+  eq resolveCellsT(M, Q[Trms])
+   = Q[resolveCellsTl(M,Trms)] [owise] . 
+
+  op resolveCellsTl : Module TermList ~> TermList .
+  eq resolveCellsTl(M, empty) = empty .
+  eq resolveCellsTl(M, (Trm,Trms)) 
+   = resolveCellsT(M, Trm),resolveCellsTl(M,Trms) .
+
+
+  op resolveCellsSC : Module SplitCell ~> Term .
+  eq resolveCellsSC(M, SC) 
+   = resolveCellsSC(M, setEllipses(SC,none), resolveCellsT(M,getContents(SC)), getEllipses(SC)) .
+
+  op resolveCellsSC : Module SplitCell Term Ellipses ~> Term .
+  eq resolveCellsSC(M, SC, Trm, E) 
+   = if E == none 
+     then plugCell(setContents(SC,Trm)) 
+     else resolveCellsSC(M,SC,Trm,E,getCellType(M, leastSort(M,Trm))) 
+     fi .
+
+  op resolveCellsSC : Module SplitCell Term Ellipses Type ~> Term .
+  eq resolveCellsSC(M,SC,Trm,E,T) 
+   = if T == Set or-else T == Map or-else E == left
+     then plugCell(setContents(SC, ctor(T)[anyVar(T),Trm]))
+     else if E == right 
+          then plugCell(setContents(SC, ctor(T)[Trm,anyVar(T)]))
+          else plugCell(setContents(SC, ctor(T)[anyVar(T),Trm,anyVar(T)])) 
+          fi
+     fi .
+
+  op getCellType : Module Type ~> Sort .
+ ceq getCellType(M, T) = Set if sameKind(M, T, Set) .
+ ceq getCellType(M, T) = Map if sameKind(M, T, Map) .
+ ceq getCellType(M, T) = List if sameKind(M, T, List) .
+ ceq getCellType(M, T) = K if sameKind(M, T, K) .
+
+endfm

@@ -82,10 +82,10 @@ fmod CONTEXT-TRANSFORMERS is
    = bringToSameLevel(Level,solveEach(T, KC),KC)  .
   eq contextTransformT(I:[Int], T, KC) = T [owise print "cannot bring " T " to  level " I:[Int]] . 
   op solveEach : Term KConf -> [Term] .
-  ceq solveEach(Ct,KC) = Ct if getName(Ct) == anyVarS or-else Ct == emptySet .
+  ceq solveEach(Ct,KC) = Ct if getName(Ct) == anyVarS or-else Ct == emptyCt(Set) .
   eq solveEach(V, KC) = V .
  ceq solveEach(Q[Tl],KC) = Q[solveEachL(Tl,KC)] 
-  if Q == ctorSet .
+  if Q == ctor(Set) .
   ceq solveEach(T, KC)
     = if getSons(KC') == none then T else plugCell(setContents(SC, contextTransformT(getLevel(KC') + 1, getContents(SC), getConf(KC')))) fi 
    if SC := splitKCell(T) /\  KC' := getConfElement(getName(SC),KC) . --- [print "solving " Ct "[" T "]" ].
@@ -126,7 +126,7 @@ fmod CONTEXT-TRANSFORMERS is
 
   op resolveMultiplicity : Qid Bool TermSet -> [Term] .
   eq resolveMultiplicity(Q, false, TS) 
-   = mkCell(Q, ctorSet[anyVar(sortSet),flattenTS(TS)]) .
+   = mkCell(Q, ctor(Set)[anyVar(Set),flattenTS(TS)]) .
   eq resolveMultiplicity(Q, true, TS)
    = flattenTS(flattenTSL(Q, splitTS(TS, {1, emptyTS}))) .
   
@@ -142,7 +142,7 @@ fmod CONTEXT-TRANSFORMERS is
   eq Q in qt(Q, B, T) && TS = true .
   eq Q in TS = false [owise] .
 
-  eq mergeLevels(nilTSL, KC) = emptySet .
+  eq mergeLevels(nilTSL, KC) = emptyCt(Set) .
 
   op flattenTS : TermSet -> Term .
   eq flattenTS(qt(Q, B', T)) = T .
@@ -156,7 +156,7 @@ fmod CONTEXT-TRANSFORMERS is
 
   op flattenTSL : Qid TermSetLevel -> TermSet .
   eq flattenTSL(Q, {N, TS} || TSLs) 
-   = qt(Q, true, mkCell(Q, ctorSet[anyVar(sortSet),flattenTS(TS)]))
+   = qt(Q, true, mkCell(Q, ctor(Set)[anyVar(Set),flattenTS(TS)]))
      && flattenTSL(Q, TSLs) .
   eq flattenTSL(Q, nilTSL) = emptyTS .
 
@@ -165,13 +165,13 @@ fmod CONTEXT-TRANSFORMERS is
   op emptyTS : -> VariableSet .
   op _&&_ : VariableSet VariableSet -> VariableSet [assoc comm id: emptyTS] .
   op _&&_ : TermSet TermSet -> TermSet [ditto] .
-  eq qt(Q, true, T) && qt(Q, true, T') = qt(Q, true, ctorSet[T,T']) .
+  eq qt(Q, true, T) && qt(Q, true, T') = qt(Q, true, ctor(Set)[T,T']) .
 
   op term2Set : Term KConf -> [TermSet] .
-  ceq term2Set(Ct, KC) = emptyTS if Ct = emptySet .
+  ceq term2Set(Ct, KC) = emptyTS if Ct = emptyCt(Set) .
   ceq term2Set(Ct, KC) = var(Ct) if getName(Ct) == anyVarS .
   eq term2Set(V, KC) = var(V) .
-  ceq term2Set(O[Tl],KC) = term2SetL(Tl,KC) if O == ctorSet .
+  ceq term2Set(O[Tl],KC) = term2SetL(Tl,KC) if O == ctor(Set) .
   ceq term2Set(T, KC) = qt(getName(SC), getMultiplicity(getConfElement(getName(SC),KC)), T) 
    if SC := splitKCell(T)  .
   ceq term2Set(Q[T,T'], KC) 
@@ -205,11 +205,11 @@ fmod CONTEXT-TRANSFORMERS is
    = levelize(Level + 1, TS, KC) || {Level,TS'} [owise] .
 
   op getMinLevel : Term KConf -> [Nat] .
- ceq getMinLevel(Ct, KC) = 100 if Ct == emptySet .
+ ceq getMinLevel(Ct, KC) = 100 if Ct == emptyCt(Set) .
  ceq getMinLevel(T,KC) = getLevel(getConfElement(getName(SC), KC)) 
   if SC := splitKCell(T) .
  ceq getMinLevel(O[T,Tl], KC) = getMinLevelL(getMinLevel(T,KC), Tl, KC) 
-  if O == ctorSet .
+  if O == ctor(Set) .
  ceq getMinLevel(O[T,T'], KC) 
    = getMinLevelL(getMinLevel(T,KC), T', KC) 
   if O == replaceS  .

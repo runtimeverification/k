@@ -5,6 +5,8 @@ fmod ANONYMOUS-CONSTANTS is
   including META-TERM-EXTRAS .
   including META-LEVEL-EXTRAS .
   including META-ANONYMOUS-VARIABLE .
+  including META-K-RULES .
+
   var M Flat : Module . var Q : Qid .
   var Mbs : MembAxSet . var Mb : MembAx .  
   var Eqs : EquationSet . var Eq : Equation .
@@ -49,8 +51,11 @@ fmod ANONYMOUS-CONSTANTS is
   eq resolveConstsT(M, Trm) =  resolveConstsT(M, Trm, 0, none) .
 
   op resolveConstsT : Module Term Nat TypeListSet  ~> Term .
+ ceq resolveConstsT(M, Q[Trm,Trm'], N, TLS)
+   = Q[resolveConstsT(M,Trm, N, TLS), resolveConstsT(M,Trm', N, TLS)] 
+  if Q == replaceS . 
   eq resolveConstsT(M, Q[Trms], N, TLS)
-   = Q[resolveConstsTl(M,Trms, 0,maximalAritySet(M,Q[Trms]))] . 
+   = Q[resolveConstsTl(M,Trms, 0,maximalAritySet(M,Q[Trms]))] [owise] . 
   eq resolveConstsT(M, V, N, TLS) = V .
   eq resolveConstsT(M, Ct, N, TLS) 
    = if getName(Ct) == anyVarS then anyVar(getNthType(N, TLS)) else Ct fi .

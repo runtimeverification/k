@@ -1,0 +1,39 @@
+load open-cells
+load printing
+
+mod OPEN-CELLS-META is
+  including OPEN-CELLS .
+  including META-LEVEL .
+  var OpenCells NoOpenCells : String .
+  var QOpenCells QNoOpenCells : Qid .
+  op resolveOpenCells : String String ~> Module .
+  eq resolveOpenCells(OpenCells, NoOpenCells) 
+   = resolveOpenCells(qid(OpenCells), qid(NoOpenCells)) .
+  op resolveOpenCells : Qid Qid ~> Module .
+  eq resolveOpenCells(QOpenCells,QNoOpenCells) 
+   = resolveOpenCells(QNoOpenCells, upModule(QOpenCells, false), upModule(QOpenCells, true)) .
+endm
+
+mod OPEN-CELLS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op open-cells : -> System .
+  op idle : -> State .
+  var Q OpenCells NoOpenCells : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq open-cells = [nil, idle, 
+ 'Usage: 'resolveOpenCells '<SourceModule> '<DestModule> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveOpenCells OpenCells NoOpenCells QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(OpenCells,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('OPEN-CELLS-META),
+                        'resolveOpenCells[upTerm(string(OpenCells)),upTerm(string(NoOpenCells))])),error) .
+endm

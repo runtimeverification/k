@@ -26,7 +26,7 @@ mod STRICTCXT2EQS is
       (eq kWrap(kra('Kcxt:KResult, freezeTerm(M, T)))
         = kWrap(T[hole <- 'Kcxt:KResult])
        [metadata("cooling")] .))) 
-  if Sort = kSentenceSort .
+  if Sort = KSentence .
   eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
 
 

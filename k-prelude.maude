@@ -11,18 +11,18 @@ mod K is
   op _~>_ : K K -> K [prec 100  assoc id: .k metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
 
 
-  sorts EmptyKList ResultList NeResultList KList NeKList .
+  sorts EmptyKList KResultList NeKResultList KList NeKList .
   op .kl : -> EmptyKList .
   subsort K < NeKList < KList .
-  subsort EmptyKList < ResultList < KList .
-  subsort KResult < NeResultList < ResultList NeKList .
+  subsort EmptyKList < KResultList < KList .
+  subsort KResult < NeKResultList < KResultList NeKList .
 
   op _`,_ : KList KList -> KList [assoc id: .kl prec 121] .
   op _`,_ : NeKList KList -> NeKList [ditto] .
   op _`,_ : KList NeKList -> NeKList [ditto] .
-  op _`,_ : ResultList ResultList -> ResultList [ditto] .
-  op _`,_ : NeResultList ResultList -> NeResultList [ditto] .
-  op _`,_ : ResultList NeResultList -> NeResultList [ditto] .
+  op _`,_ : KResultList KResultList -> KResultList [ditto] .
+  op _`,_ : NeKResultList KResultList -> NeKResultList [ditto] .
+  op _`,_ : KResultList NeKResultList -> NeKResultList [ditto] .
 
 
   op length_ : KList -> Nat . 
@@ -90,13 +90,13 @@ mod K-PROPER is
   subsort KProper < NeK .
 --- next line is useful only if not using <k> wrappers for strictness
 ---  op _~>_ : KProper K -> KProper [ditto] .
-  sort NeProperList .
-  subsort KProper < NeProperList < NeKList .  
+  sort NeKProperList .
+  subsort KProper < NeKProperList < NeKList .  
   sort KProperLabel .
   subsort KProperLabel < KLabel .
   op _`(_`) : KProperLabel KList -> KProper [ditto] .
-  op _`,_ : NeProperList KList -> NeProperList [ditto] .
-  op _`,_ : KList NeProperList -> NeProperList [ditto] .
+  op _`,_ : NeKProperList KList -> NeKProperList [ditto] .
+  op _`,_ : KList NeKProperList -> NeKProperList [ditto] .
 endm
 
 --- Strictness Level
@@ -161,7 +161,7 @@ mod K-ANONYMOUS-VARIABLES is
 endm
 
 --- ... level
-mod OPEN-CELLS is
+mod K-OPEN-CELLS is
   including CONFIG .
   op <_>..._...</_> : CellLabel K CellLabel -> SetItem [prec 0] .
   op <_>..._...</_> : CellLabel List CellLabel -> SetItem [prec 0] .

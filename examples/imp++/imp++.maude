@@ -1,12 +1,13 @@
 mod IMP++ is
+  including PL-INT .
+  including PL-VARID .
+  including K .
   including CONFIG .
   including K-MAP-EXTRAS .
   including K-RULES .
   including K-CONFIG .
-  including PL-INT .
-  including PL-VARID .
   including K-ANONYMOUS-VARIABLES .
-  including K .
+  including K-OPEN-CELLS .
 
 ---Syntax
   sort AExp .
@@ -93,7 +94,7 @@ mod IMP++ is
   var N N1 N2 : Nat .
   var Top Threads Thread : Set .  var Env Env' Store : Map .  var Output : List .
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var Xl : KList .
-  var RL : ResultList .
+  var RL : KResultList .
   mb configuration < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
   op startConfig : Stmt -> Set .
   eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .m </ env > </ thread > </ threads > < store > .m </ store >  < output > .l </ output > < nextLoc > 0 </ nextLoc > </ T > .
@@ -113,21 +114,21 @@ mod IMP++ is
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
   mb rule [S1 ; S2 => S1 ~> S2] : KSentence .
-  mb rule < k > [X => I] ~> ? </ k > < env > ? m(X, L) </ env > < store > ? m(L, I) </ store > : KSentence .
-  mb rule < k > [++ X => (I +Int 1)] ~> ? </ k > < env > ? m(X, L) </ env > < store > ? m(L, [I => I +Int 1]) </ store >  : KSentence .
-  mb rule < k > [X := I1 => .k] ~> ? </ k > < env > ? m(X, L) </ env > < store > ? m(L, [I2 => I1]) </ store > : KSentence .
-  mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ~> ? </ k > : KSentence .
-  mb rule < k > [print(I) => .k] ~> ? </ k > < output > ?,[.l => l(I)] </ output >  : KSentence .
+  mb rule < k > [X => I] ...</ k > < env >... m(X, L) ...</ env > < store >... m(L, I) ...</ store > : KSentence .
+  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... m(X, L) ...</ env > < store >... m(L, [I => I +Int 1]) ...</ store >  : KSentence .
+  mb rule < k > [X := I1 => .k] ...</ k > < env >... m(X, L) ...</ env > < store >... m(L, [I2 => I1]) ...</ store > : KSentence .
+  mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
+  mb rule < k > [print(I) => .k] ...</ k > < output >... [.l => l(I)] </ output >  : KSentence .
   mb rule < k > [halt ~> ? => .k] </ k > : KSentence .
-  mb rule < thread > ? < k > [spawn(S) => .k] ~> ? </ k > < env > Env </ env > </ thread > [.s => < thread > < k > S </ k > < env > Env </ env > </ thread >] : KSentence .
-  mb rule [< thread > ? < k > .k </ k > </ thread > => .s] : KSentence [metadata "structural"] .
+  mb rule < thread >... < k > [spawn(S) => .k] ...</ k > < env > Env </ env > ...</ thread > [.s => < thread > < k > S </ k > < env > Env </ env > </ thread >] : KSentence .
+  mb rule [< thread >... < k > .k </ k > ...</ thread > => .s] : KSentence [metadata "structural"] .
 
-  mb rule [< T > ? < threads > .s </ threads > < output > Output </ output > </ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
+  mb rule [< T >... < threads > .s </ threads > < output > Output </ output > ...</ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
 
-  mb rule < k > [vars Xl ; S => S ~> env(Env)] ~> ? </ k > < env > [Env =>  Env[Xl <- N .. (N +Int length(Xl))]]</ env > < store > ? [.m =>  m((N .. (N +Int length(Xl))), 0)] </ store > < nextLoc > [N => N +Int length(Xl)] </ nextLoc >  : KSentence [metadata "structural"] .
+  mb rule < k > [vars Xl ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[Xl <- N .. (N +Int length(Xl))]]</ env > < store >... [.m =>  m((N .. (N +Int length(Xl))), 0)] ...</ store > < nextLoc > [N => N +Int length(Xl)] </ nextLoc >  : KSentence [metadata "structural"] .
 
   op env : Map -> K .
-  mb rule < k > [env(Env) => .k] ~> ? </ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
+  mb rule < k > [env(Env) => .k] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
 
   op _.._ : Nat Nat -> KList .
   mb rule [N1 .. N2 => if N1 >=Int N2 then .kl else (N1, (sNat N1) .. N2) fi] : KSentence [metadata "structural"] .

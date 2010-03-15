@@ -1,7 +1,7 @@
 fmod K-SORTS is including QID .
   
-  op kSentenceSort : -> Qid .
-  eq kSentenceSort = 'KSentence .
+  ops KSentence : -> Qid .
+  eq KSentence = 'KSentence .
 endfm
 
 fmod K-META-OPS is including META-TERM .
@@ -60,7 +60,7 @@ fmod META-K-MODULE is
   eq NeK = 'NeK .  eq K = 'K .
   eq KLabel = 'KLabel .
   eq KProperLabel = 'KProperLabel .  eq KResultLabel = 'KResultLabel .
-  eq EmptyKList = 'EmptyKList .  eq ProperList = 'ProperList .  eq ResultList = 'ResultList .  eq NeProperList = 'NeProperList .  eq NeResultList = 'NeResultList .  eq KList = 'KList .  eq NeKList = 'NeKList .
+  eq EmptyKList = 'EmptyKList .  eq ProperList = 'KProperList .  eq ResultList = 'KResultList .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeKResultList .  eq KList = 'KList .  eq NeKList = 'NeKList .
   op ksorts : -> SortSet [memo] .
   eq ksorts = EmptyK ; KProper ; KResult ; NeK ; K .
 
@@ -129,9 +129,9 @@ fmod META-K-RULES is including K-SORTS .
   
   op splitKRule : MembAx ~> KRuleSplit .
  ceq splitKRule((mb Q[T] : S [AS] .))
-   = {getKRuleKind(Q),T,empty,AS} if S := kSentenceSort . 
+   = {getKRuleKind(Q),T,empty,AS} if S := KSentence . 
  ceq splitKRule((mb Q[T,C] : S [AS] .))
-   = {getKRuleKind(Q),T,C,AS} if S := kSentenceSort . 
+   = {getKRuleKind(Q),T,C,AS} if S := KSentence . 
 
   op getContents : KRuleSplit -> Term .
   eq getContents({RK,T,Cond,AS}) = T .
@@ -140,15 +140,18 @@ fmod META-K-RULES is including K-SORTS .
   eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
 
   op plugKRule : KRuleSplit ~> MembAx .
-  eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : kSentenceSort [AS] .) .
-  eq plugKRule({RK,T,C,AS}) = (mb symbol(RK)[T,C] : kSentenceSort [AS] .) [owise] .
+  eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
+  eq plugKRule({RK,T,C,AS}) = (mb symbol(RK)[T,C] : KSentence [AS] .) [owise] .
 endfm
 
-fmod K-META-CONFIG is including META-K-RULES .
+fmod K-META-CONFIG is 
+  including META-K-RULES .
+  including META-K-MODULE .
+  including META-TERM-EXTRAS .
   including INT .
   var Label Label' : Constant . var Contents Contents' T : Term .
-  var Q Q' : Qid .  var B : Bool . var E : Ellipses .  var M : Module .  
-  var AS : AttrSet .  var MAS : MembAxSet .
+  var Q Q' : Qid .  var B : Bool . var E E' : Ellipses .  var M : Module .  
+  var AS : AttrSet .  var MAS : MembAxSet .  var S : Sort .
 
   op extractConfTerm : Module ~> Term .
   eq extractConfTerm(M) = extractConfTerm(getMbs(M)) .
@@ -160,13 +163,10 @@ fmod K-META-CONFIG is including META-K-RULES .
   eq removeConfTerm(MAS) = MAS [owise] .
   
   sort Ellipses .
-  ops left right both none : -> Ellipses .
+  ops none : -> Ellipses .
   op error : -> [Ellipses] .
   op symbol_ : Ellipses -> Qid .
   eq symbol none = '<_>_</_> .
-  eq symbol left = '<_>..._</_> .
-  eq symbol right = '<_>_...</_> .
-  eq symbol both = '<_>..._...</_> .
 
   sort SplitCell .
   op {_,_,_,_} : Constant Term Bool Ellipses -> SplitCell .
@@ -176,7 +176,12 @@ fmod K-META-CONFIG is including META-K-RULES .
   eq splitKCell(Q[Q'[Label],Contents,Q'[Label]]) = {Label, Contents,true, getEllipses(Q)} .
 
   op getEllipses : Qid -> Ellipses .
-  eq getEllipses(Q) = if (Q == symbol none) then none else if (Q == symbol left) then left else if (Q == symbol right) then right else if (Q == symbol both) then both else error fi fi fi fi .
+  ceq getEllipses(Q) = none if Q = symbol none .
+
+  op getEllipses : SplitCell -> Ellipses .
+  eq getEllipses({Label,Contents,B,E}) = E .
+  op setEllipses : SplitCell Ellipses -> SplitCell .
+  eq setEllipses({Label,Contents,B,E}, E') = {Label,Contents,B,E'} .
 
   op getName : SplitCell -> Qid .
   eq getName({Label,Contents,B,E}) = getName(Label) .
@@ -206,14 +211,24 @@ fmod K-META-CONFIG is including META-K-RULES .
   op cellLabel : Constant Bool -> Term .
   eq cellLabel(Label,B) = if B then multiCellS[Label] else Label fi .
 
-  op sortSet : -> Sort .
-  eq sortSet = 'Set .
+  ops Map Set List  : -> Sort .
+  eq Map = 'Map . eq Set = 'Set . eq List = 'List .
 
-  op emptySet : -> Constant .
-  eq emptySet = '.s.Set .
+  op emptyCt : Sort -> Constant .
+  eq emptyCt(S) = if S == Set then mkConstant('.s,Set) else if S == Map then mkConstant('.m,Map) else if S == List then mkConstant('.l, List) else if S == K then mkConstant('.k, K) else 'error.K fi fi fi fi .
 
-  op ctorSet : -> Qid .
-  eq ctorSet = '__ .
+  op ctor : Sort -> Qid .
+  eq ctor(S) = if S == Set then '__ else if S == Map then '__ else if S == List then '_`,_ else if S == K then '_~>_ else 'error fi fi fi fi .
+endfm
+
+fmod K-META-OPEN-CELLS is 
+  including K-META-CONFIG .
+  ops left right both : -> Ellipses .
+  eq symbol left = '<_>..._</_> .
+  eq symbol right = '<_>_...</_> .
+  eq symbol both = '<_>..._...</_> .
+  var Q : Qid .
+  eq getEllipses(Q) = if (Q == symbol left) then left else if (Q == symbol right) then right else if (Q == symbol both) then both else if (Q == symbol none) then none else error fi fi fi fi .
 endfm
 
 fmod META-ANONYMOUS-VARIABLE is
