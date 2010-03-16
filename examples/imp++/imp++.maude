@@ -1,3 +1,4 @@
+load ../../k-prelude
 mod IMP++ is
   including PL-INT .
   including PL-VARID .
@@ -33,12 +34,10 @@ mod IMP++ is
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
 
-  
   op vars_;_ : KList Stmt -> Stmt [prec 121 format (b o b on++i --)] .
   ops print_ :  AExp -> Stmt [prec 59 metadata "strict" format (b o d)] .
   op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
   ops halt  : -> Stmt [format (b o)] .
-
 
 ---Programs
   ops pSum pCollatz pList : -> Stmt .
@@ -114,9 +113,9 @@ mod IMP++ is
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
   mb rule [S1 ; S2 => S1 ~> S2] : KSentence .
-  mb rule < k > [X => I] ...</ k > < env >... m(X, L) ...</ env > < store >... m(L, I) ...</ store > : KSentence .
-  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... m(X, L) ...</ env > < store >... m(L, [I => I +Int 1]) ...</ store >  : KSentence .
-  mb rule < k > [X := I1 => .k] ...</ k > < env >... m(X, L) ...</ env > < store >... m(L, [I2 => I1]) ...</ store > : KSentence .
+  mb rule < k > [X => I] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> I ...</ store > : KSentence .
+  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store >  : KSentence .
+  mb rule < k > [X := I1 => .k] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I2 => I1] ...</ store > : KSentence .
   mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
   mb rule < k > [print(I) => .k] ...</ k > < output >... [.l => l(I)] </ output >  : KSentence .
   mb rule < k > [halt ~> ? => .k] </ k > : KSentence .
@@ -125,7 +124,7 @@ mod IMP++ is
 
   mb rule [< T >... < threads > .s </ threads > < output > Output </ output > ...</ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
 
-  mb rule < k > [vars Xl ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[Xl <- N .. (N +Int length(Xl))]]</ env > < store >... [.m =>  m((N .. (N +Int length(Xl))), 0)] ...</ store > < nextLoc > [N => N +Int length(Xl)] </ nextLoc >  : KSentence [metadata "structural"] .
+  mb rule < k > [vars Xl ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[N .. N +Int length(Xl) / Xl]]</ env > < store >... [.m =>  N .. N +Int length(Xl) |-> 0] ...</ store > < nextLoc > [N => N +Int length(Xl)] </ nextLoc >  : KSentence [metadata "structural"] .
 
   op env : Map -> K .
   mb rule < k > [env(Env) => .k] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .

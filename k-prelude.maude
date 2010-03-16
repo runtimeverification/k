@@ -18,6 +18,8 @@ mod K is
   subsort KResult < NeKResultList < KResultList NeKList .
 
   op _`,_ : KList KList -> KList [assoc id: .kl prec 121] .
+  --- One should not modify the precedence above.  
+  --- Might cause the compilation to fail.
   op _`,_ : NeKList KList -> NeKList [ditto] .
   op _`,_ : KList NeKList -> NeKList [ditto] .
   op _`,_ : KResultList KResultList -> KResultList [ditto] .
@@ -58,15 +60,15 @@ mod K is
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .
   op .m : -> Map .
-  op m : K K -> MapItem .
+  op _|->_ : K K -> MapItem .
   op __ : Map Map -> Map [assoc comm id: .m prec 120] .
   op __ : NeMap Map -> NeMap [ditto] .
 
-  op _[_<-_] : Map K K -> Map [prec 0] .
+  op _[_/_] : Map K K -> Map [prec 0] .
 
   var Map : Map .  vars K1 K2 K2' : K .
-  eq (Map m(K1, K2))[K1 <- K2'] = Map m(K1, K2') .
-  eq Map[K1 <- K2] = Map m(K1, K2) [owise] .
+  eq (Map K1 |-> K2)[K2' / K1] = Map K1 |-> K2' .
+  eq Map[K2 / K1] = Map K1 |-> K2 [owise] .
 endm
 
 mod CONFIG is including K .
@@ -193,15 +195,15 @@ mod K-MAP-EXTRAS is
   including K .
   var Map : Map .  var List : KList . var NList1 NList2 : NeKList .
   vars K1 K2 K2' K : K .
-  op m : KList KList -> Map [ditto] .
-  eq m((K1,NList1),(K2, NList2)) = m(K1,K2) m(NList1, NList2) .
-  eq m((K1,NList1),K2) = m(K1,K2) m(NList1,K2) .
-  eq m(.kl, List) = .m .
+  op _|->_ : KList KList -> Map [ditto] .
+  eq (K1,NList1) |-> (K2, NList2) = (K1 |-> K2) (NList1 |-> NList2) .
+  eq (K1,NList1) |-> K2 = (K1 |-> K2) (NList1 |-> K2) .
+  eq .kl |-> List = .m .
 
-  op _[_<-_] : Map KList KList -> Map [ditto] .
-  eq Map[(K1,NList1) <- (K2, NList2)] = (Map[K1 <- K2])[NList1 <- NList2] .
-  eq Map[(K1,NList1) <- K2] = (Map[K1 <- K2])[NList1 <- K2] .
-  eq Map[.kl <- List] = Map .
+  op _[_/_] : Map KList KList -> Map [ditto] .
+  eq Map[(K1,NList1) / (K2, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
+  eq Map[K2 / (K1,NList1)] = (Map[K2 / K1])[K2 / NList1] .
+  eq Map[List / .kl] = Map .
 endm
 
 

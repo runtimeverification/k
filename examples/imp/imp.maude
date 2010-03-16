@@ -1,0 +1,153 @@
+--- this file is not executable in Maude as is
+--- it is an "encoding" in Maude syntax of a K semantics
+--- it needs to be processed by the K-Maude tool
+
+in ../../k-prelude.maude
+
+mod IMP is
+  including PL-INT .
+  including PL-VARID .
+  including K .
+  including CONFIG .
+  including K-MAP-EXTRAS .
+  including K-RULES .
+  including K-CONFIG .
+  including K-ANONYMOUS-VARIABLES .
+  including K-OPEN-CELLS .
+
+
+--------------
+--- Syntax ---
+--------------
+
+  sort AExp .
+  subsort VarId Int < AExp .
+  op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format(d b o d) metadata "strict"] .
+  op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format(d b o d) metadata "strict"] .
+--- BExp
+  sort BExp .
+  subsort Bool < BExp .
+  op _<=_ : AExp AExp -> BExp  [prec 37 format(d b o d) metadata "seqstrict"] .
+  op not_ : BExp -> BExp [prec 53 format(b o d) metadata "strict"] .
+  op _and_ : BExp BExp -> BExp [prec 55 format(d b o d) metadata "strict(1)"] .
+--- Stmt
+  sort Stmt .
+  op skip : -> Stmt [format (b o)] .
+  op _:=_ : VarId AExp -> Stmt [prec 40 format(d b o d) metadata "strict(2)"] .
+  op _;_ : Stmt Stmt -> Stmt [prec 60 gather (e E) format (d b noi d)] .
+  op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 format (b o bni n++i bn--i n++i --) metadata "strict(1)"] .
+  op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b n++i --)] .
+--- Pgm
+  sort Pgm .
+  op vars_;_ : KList Stmt -> Pgm [prec 70 format (nb o d ni d)] .
+
+
+----------------
+--- Programs ---
+----------------
+
+ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> VarId .
+ops sumPgm collatzPgm countPrimesPgm : -> Pgm .
+ops collatzStmt multiplicationStmt primalityStmt : -> Stmt .
+eq sumPgm = (
+     vars n, s ; (
+     n := 100 ;
+     s := 0 ;
+     while not(n <= 0) do (
+       s := s + n ;
+       n := n + -1
+     ))
+) .
+
+eq collatzStmt = (
+     while not (n <= 1) do (
+       s := s + 1 ;
+       q := n / 2 ;
+       r := q + q + 1 ;
+       if r <= n
+         then n := n + n + n + 1 
+         else n := q
+     )
+) .
+
+eq collatzPgm = (
+   vars m, n, q, r, s ; (
+   m := 10 ;
+   s := 0 ;
+   while not (m <= 2) do (
+     n := m ;
+     m := m + -1 ;
+     collatzStmt
+   ))
+) .
+
+eq multiplicationStmt = ( --- fast multiplication (base 2) algorithm
+  z := 0 ;
+  while not(x <= 0) do (
+    q := x / 2 ;
+    r := q + q + 1 ;
+    if r <= x then z := z + y --- if x % 2 == 1
+    else skip ;
+    x := q ;
+    y := y + y 
+  )
+) .
+
+eq primalityStmt = (
+  i := 2 ;
+  q := n / i ;
+  t := 1 ;
+  while (i <= q and 1 <= t) do (
+    x := i ;
+    y := q ;
+    multiplicationStmt ;
+    if n <= z then t := 0 else (
+      i := i + 1 ;
+      q := n / i 
+    )
+  )
+) .
+
+eq countPrimesPgm = (
+   vars i, m, n, q, r, s, t, x, y, z ; (
+   m := 10 ;
+   s := 0 ; n := 2 ;
+   while n <= m do (
+     primalityStmt ;
+     if 1 <= t then s := s + 1 else skip ;
+     n := n + 1
+   ))
+) .
+
+
+-----------------
+--- Semantics ---
+-----------------
+
+  subsort AExp BExp Stmt Pgm < K .
+  subsorts Int Bool < KResult .
+
+  ops state : -> CellLabel .
+  vars I I1 I2 : Int .  var T : Bool .  var X : VarId .  var Sigma : Map .
+  var B : BExp .  var S S1 S2 : Stmt .  var Xl : KList .  var K : K .
+
+  mb configuration < T > < k > K </ k > < state > Sigma </ state > </ T > : KSentence .
+
+  op c(_) : K -> Set .  eq c(K) = < T > < k > K </ k > < state > .m </ state > </ T > .
+  op pgm : -> Set .  eq pgm = c(sumPgm) .
+
+  mb rule < k > [X => I] ...</ k > < state >... X |-> I ...</ state > : KSentence .
+  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
+  mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
+  mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
+  mb rule [not(T) => notBool T] : KSentence .
+  mb rule [true and B => B] : KSentence .
+  mb rule [false and ? => false] : KSentence .
+  mb rule [skip => .k] : KSentence .
+  mb rule < k > [X := I => .k] ...</ k > < state >... X |-> [? => I] ...</ state > : KSentence .
+  mb rule [S1 ; S2 => S1 ~> S2] : KSentence .
+  mb rule [if true then S1 else ? => S1] : KSentence .
+  mb rule [if false then ? else S2 => S2] : KSentence .
+  mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
+  mb rule < k > [vars Xl ; S => S] </ k > < state > [.m => Xl |-> 0] </ state > : KSentence .
+endm

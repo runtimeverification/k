@@ -36,11 +36,21 @@ fi
 
 LANG0=LANG
 
+function addLoadPrelude {
+if ! [[ "$INPUT" =~ load\ .*k-prelude ]] && ! [[ "$INPUT" =~ in\ .*k-prelude ]] ; then
+     INPUT="
+load \"$KBASE/k-prelude\"
+$INPUT"
+fi
+}
+
 function checkMaude {
   if [ -n "$2" ]; then
     printf "%s.." "$2"
   fi
-  result=$( { stdout=$(echo "$1" | $MAUDE "$KBASE/k-prelude" ) ; } 2>&1; printf "%s" "--------------------$stdout")
+  INPUT="$1"
+  addLoadPrelude
+  result=$( { stdout=$(echo "$INPUT" | $MAUDE ) ; } 2>&1; printf "%s" "--------------------$stdout")
 OUTPUT1=${result#*--------------------}
 ERROR=${result%--------------------*}
   if [ -n "$ERROR" ]; then
@@ -61,7 +71,9 @@ Stopping the compilation!"
 
 function runMaude {
   printf "%s.." "$2"
-  result=$( { stdout=$(echo "$1" | $MAUDE "$KBASE/k-prelude" ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
+  INPUT="$1"
+  addLoadPrelude
+  result=$( { stdout=$(echo "$INPUT" | $MAUDE ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
 OUTPUT=${result#*-k-maude-delimiter--}
 #echo "$OUTPUT"
 OUTPUT="${OUTPUT%---K-MAUDE-GENERATED-OUTPUT-END-----*}"

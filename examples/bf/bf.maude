@@ -1,3 +1,4 @@
+load ../../k-prelude
 mod BF is
 	including K-PROPER .
 	including CONFIG .
