@@ -4,7 +4,6 @@ function usage {
   
   If <module_name> is not specified, is asumed to be allcaps(<source_file>).
   <source_file> should ensure that a module <module_name> is loaded.
-  IMPORTANT: <source_file> should not load the k-prelude, as it will be loaded automatically by the script and, if loaded, will cause the script to stop.
   Module <module_name> should contain the entire definition of the language.
   Output is printed in <source_file>-compiled.maude.
   
