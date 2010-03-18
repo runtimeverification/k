@@ -1,0 +1,19 @@
+load ../../k-prelude
+mod BEFUNGE is
+	including K-PROPER .
+	including CONFIG .
+	including K-MAP-EXTRAS .
+	including K-RULES .
+	including K-CONFIG .
+	including PL-INT .
+	including PL-STRING .
+	including K .
+--- Syntax
+	op memory : -> CellLabel .
+	op output : -> CellLabel .
+	op result : -> CellLabel .
+	op input : -> CellLabel .
+	op k : -> CellLabel .
+
+endm
+
