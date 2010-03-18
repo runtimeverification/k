@@ -7,8 +7,13 @@ mod BEFUNGE is
 	including K-CONFIG .
 	including PL-INT .
 	including PL-STRING .
+	
+	including K-OPEN-CELLS .
+	---including K-WRAPPERS-LABELS . --- can't include this?
+	
 	including K .
 --- Syntax
+	---- Comments from Chris Pressey, http://catseye.tc/projects/befunge93/doc/befunge93.html
 	--- COMMAND         INITIAL STACK (bot->top)	RESULT (STACK)
 	----        		 -------------           -----------------
 	--- + (add)         <value1> <value2>       <value1 + value2>
@@ -76,20 +81,22 @@ mod BEFUNGE is
 	
 	--- [space] (nop)
 	op nop : -> KProperLabel [metadata "arity 0"] .
-	
 	op err : -> KProperLabel [metadata "arity 0"] .
 	
 	--- [all commands] (push)
 	op command : -> KProperLabel [metadata "arity 2"] . --- necessary to handle stringmode
+	op push : -> KProperLabel [metadata "arity 1"] .
 	---------
 	--- e.g.:
 	--- command('$', pop(.kl))
 	--- command(' ', nop(.kl))
 	--- command('x', err(.kl))
+	--- command('4', push(inject(4)(.kl))
 	
 --- Configuration
 	op stack : -> CellLabel .
 	op direction : -> CellLabel .
+	op mode : -> CellLabel .
 	op program : -> CellLabel .
 	op pc : -> CellLabel .
 	op output : -> CellLabel .
@@ -100,37 +107,117 @@ mod BEFUNGE is
 --- Semantics
 	op eval : K -> Set .
 	op eval : K K -> Set .
-	op inject : Int -> KResultLabel .
-	op inject : String -> KResultLabel .
+	op inject : Int -> KLabel .
+	op inject : Char -> KLabel .
+	op inject : String -> KLabel .
+	op injectM : Map -> KLabel .
+	
+	op coord : -> KLabel .
+	op load : -> KLabel .
+	op defaultmode : -> KLabel .
+	op movePC : -> KLabel .
 	
 	mb configuration 
 		< T >
 			< k > K:K </ k >
 			< stack > L:List </ stack >
 			< direction > K:K </ direction >
-			< pc > L:List </ pc >
-			< program > K:K </ program >
+			< pc > K:K </ pc >
+			< mode > K:K </ mode >
+			< program > M:Map </ program >
 			< output > K:K </ output >
 			< input > K:K </ input >
 		</ T >  
 		< result > K:K </ result > 
 		: KSentence .
 	
-	eq [Start]: eval(K:K) =
+	eq [Start]: eval(injectM(M:Map)(.kl)) =
 		< T >
 			< k > .k </ k >
 			< stack > .l </ stack >
 			< direction > right(.kl) </ direction >
-			< pc > l(inject(0)(.kl)), l(inject(0)(.kl))  </ pc >
-			< program > K:K </ program >
+			< pc > coord(inject(0)(.kl), inject(0)(.kl)) </ pc >
+			< mode > defaultmode(.kl) </ mode >
+			< program > M:Map </ program >
 			< output > inject("")(.kl) </ output >
 			< input > .k </ input >
 		</ T > .
 		
 	mb [Finish]: rule [
-		< T > S:Set < k > .k </ k > < output > K:K </ output > </ T > 
+		< T > S:Set < k > end(.kl) ...</ k > < output > K:K </ output > </ T > 
 			=> < result > K:K </ result >
 		] : KSentence [metadata "structural"] .
 		
-endm
+	---------------------------
+	---- very structural
+	
+	mb [Next]: rule
+		< k > [.k => load(.kl) ~> movePC(.kl)] </ k >
+		: KSentence [metadata "structural"] .
+	
+	mb [Load]: rule
+		< k > [load(.kl) => K:K] ...</ k >
+		< pc > Loc:K </ pc >
+		< program >... Loc:K |-> K:K ...</ program >
+		: KSentence [metadata "structural"] .
+	
+	mb [MovePC-right]: rule 
+		< k > [movePC(.kl) => .k] ...</ k >
+		< direction > right(.kl) </ direction >
+		< pc > coord(inject([I:Int => (I:Int +Int 1) %Int 80])(.kl), K:K) </ pc >
+		: KSentence [metadata "structural"] .
+	mb [MovePC-left]: rule 
+		< k > [movePC(.kl) => .k] ...</ k >
+		< direction > left(.kl) </ direction >
+		< pc > coord(inject([I:Int => ((I:Int -Int 1) +Int 80) %Int 80])(.kl), K:K) </ pc >
+		: KSentence [metadata "structural"] .
+	mb [MovePC-up]: rule 
+		< k > [movePC(.kl) => .k] ...</ k >
+		< direction > up(.kl) </ direction >
+		< pc > coord(K:K, inject([I:Int => ((I:Int -Int 1) +Int 25) %Int 25])(.kl)) </ pc >
+		: KSentence [metadata "structural"] .
+	mb [MovePC-down]: rule 
+		< k > [movePC(.kl) => .k] ...</ k >
+		< direction > down(.kl) </ direction >
+		< pc > coord(K:K, inject([I:Int => (I:Int +Int 1) %Int 25])(.kl)) </ pc >
+		: KSentence [metadata "structural"] .
+		
+	mb [InterpretCommand-default]: rule
+		< k > [command(K1:K, K2:K) => K2:K] ...</ k >
+		< mode > defaultmode(.kl) </ mode >
+		: KSentence [metadata "structural"] .
+	mb [InterpretCommand-string-notmode]: rule
+		< k > [command(K1:K, K2:K) => push(charToAscii(K1:K))] ...</ k >
+		< mode > stringmode(.kl) </ mode >
+		if (K2:K =/=Bool stringmode(.kl))
+		: KSentence [metadata "structural"] .
+	mb [InterpretCommand-string-mode]: rule
+		< k > [command(K1:K, stringmode(.kl)) => stringmode(.kl)] ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	---op asAscii : -> KLabel .
+	---eq asAscii(inject(S:String)(.kl)) = inject(asciiString(S:String))(.kl) .
+		
+	op charToAscii : -> KProperLabel [metadata "arity 1"] .
+	
+	mb [charToAscii]: rule
+		[charToAscii(inject(C:Char)(.kl)) => inject(asciiString(C:Char))(.kl)]
+		: KSentence [metadata "structural"] .
+	---- end structural
+	---------------------------
 
+	mb [stringmode-on]: rule
+		< k > [stringmode(.kl) => .k] ...</ k >
+		< mode > [defaultmode(.kl) => stringmode(.kl)] </ mode >
+		: KSentence [metadata "computational rule"] .
+	mb [stringmode-off]: rule
+		< k > [stringmode(.kl) => .k] ...</ k >
+		< mode > [stringmode(.kl) => defaultmode(.kl)] </ mode >
+		: KSentence [metadata "computational rule"] .
+		
+	mb [push]: rule
+		< k > [push(K:K) => .k] ...</ k >
+		< stack > [.l => l(K:K)] ...</ stack >
+		: KSentence [metadata "computational rule"] .
+		
+endm

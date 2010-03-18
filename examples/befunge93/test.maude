@@ -1,0 +1,29 @@
+load befunge-compiled
+mod BEFUNGE-TEST is
+	including LANG-TEST .
+	
+	--- Programs
+  	op pHelloWorld : -> KProperLabel [metadata "arity 0"] .
+		
+	--- "olleH">:#,_@
+	eq pHelloWorld = injectM(
+			__(
+			coord(inject(0)(.kl), inject(0)(.kl)) |-> command(inject("\"")(.kl), stringmode(.kl)),(
+			coord(inject(1)(.kl), inject(0)(.kl)) |-> command(inject("o")(.kl), err(.kl))
+			coord(inject(2)(.kl), inject(0)(.kl)) |-> command(inject("l")(.kl), err(.kl))
+			coord(inject(3)(.kl), inject(0)(.kl)) |-> command(inject("l")(.kl), err(.kl)) 
+			coord(inject(4)(.kl), inject(0)(.kl)) |-> command(inject("e")(.kl), err(.kl)) 
+			coord(inject(5)(.kl), inject(0)(.kl)) |-> command(inject("H")(.kl), err(.kl))
+			coord(inject(6)(.kl), inject(0)(.kl)) |-> command(inject("\"")(.kl), stringmode(.kl))
+			coord(inject(7)(.kl), inject(0)(.kl)) |-> command(inject(">")(.kl), right(.kl))
+			coord(inject(8)(.kl), inject(0)(.kl)) |-> command(inject(":")(.kl), dup(.kl)) 
+			coord(inject(9)(.kl), inject(0)(.kl)) |-> command(inject("#")(.kl), bridge(.kl)) 
+			coord(inject(10)(.kl), inject(0)(.kl)) |-> command(inject(",")(.kl), printCharacter(.kl)) 
+			coord(inject(11)(.kl), inject(0)(.kl)) |-> command(inject("_")(.kl), horizontalIf(.kl)) 
+			coord(inject(12)(.kl), inject(0)(.kl)) |-> command(inject("@")(.kl), end(.kl))
+			))
+		) .
+endm
+
+---set trace on .
+rew eval(pHelloWorld(.kl)) .
