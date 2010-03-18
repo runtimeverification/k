@@ -74,10 +74,10 @@ endm
 mod CONFIG is including K .
   sort CellLabel .
   ops k T : -> CellLabel .
-  op <_>_</_> : CellLabel K CellLabel -> SetItem [prec 0] .
-  op <_>_</_> : CellLabel List CellLabel -> SetItem [prec 0] .
-  op <_>_</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
-  op <_>_</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
+  op <_>_</_> : CellLabel K CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel List CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Set CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Map CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
 endm
 
 mod K-SENTENCE is
