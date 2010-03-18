@@ -23,7 +23,47 @@ mod BEFUNGE-TEST is
 			coord(inject(12)(.kl), inject(0)(.kl)) |-> command(inject("@")(.kl), end(.kl))
 			))
 		) .
+	
+	op pFactorial : -> KProperLabel [metadata "arity 0"] .
+	--- 1&>: #v_$\:#v_$.@
+	---   ^-1:<^00 *<
+	eq pFactorial = injectM(
+			__(
+			coord(inject(0)(.kl), inject(0)(.kl)) |-> command(inject("1")(.kl), push(inject(1)(.kl))),(
+			coord(inject(1)(.kl), inject(0)(.kl)) |-> command(inject("&")(.kl), readNumber(.kl))
+			coord(inject(2)(.kl), inject(0)(.kl)) |-> command(inject(">")(.kl), right(.kl))
+			coord(inject(3)(.kl), inject(0)(.kl)) |-> command(inject(":")(.kl), dup(.kl)) 
+			coord(inject(4)(.kl), inject(0)(.kl)) |-> command(inject(" ")(.kl), nop(.kl)) 
+			coord(inject(5)(.kl), inject(0)(.kl)) |-> command(inject("#")(.kl), bridge(.kl))
+			coord(inject(6)(.kl), inject(0)(.kl)) |-> command(inject("v")(.kl), down(.kl))
+			coord(inject(7)(.kl), inject(0)(.kl)) |-> command(inject("_")(.kl), horizontalIf(.kl))
+			coord(inject(8)(.kl), inject(0)(.kl)) |-> command(inject("$")(.kl), pop(.kl)) 
+			coord(inject(9)(.kl), inject(0)(.kl)) |-> command(inject("\\")(.kl), swap(.kl)) 
+			coord(inject(10)(.kl), inject(0)(.kl)) |-> command(inject(":")(.kl), dup(.kl)) 
+			coord(inject(11)(.kl), inject(0)(.kl)) |-> command(inject("#")(.kl), bridge(.kl)) 
+			coord(inject(12)(.kl), inject(0)(.kl)) |-> command(inject("v")(.kl), down(.kl))
+			coord(inject(13)(.kl), inject(0)(.kl)) |-> command(inject("_")(.kl), horizontalIf(.kl))
+			coord(inject(14)(.kl), inject(0)(.kl)) |-> command(inject("$")(.kl), pop(.kl))
+			coord(inject(15)(.kl), inject(0)(.kl)) |-> command(inject(".")(.kl), printNumber(.kl))
+			coord(inject(16)(.kl), inject(0)(.kl)) |-> command(inject("@")(.kl), end(.kl))
+			
+			coord(inject(0)(.kl), inject(1)(.kl)) |-> command(inject(" ")(.kl), nop(.kl))
+			coord(inject(1)(.kl), inject(1)(.kl)) |-> command(inject(" ")(.kl), nop(.kl))
+			coord(inject(2)(.kl), inject(1)(.kl)) |-> command(inject("^")(.kl), up(.kl))
+			coord(inject(3)(.kl), inject(1)(.kl)) |-> command(inject("-")(.kl), subtract(.kl))
+			coord(inject(4)(.kl), inject(1)(.kl)) |-> command(inject("1")(.kl), push(inject(1)(.kl)))
+			coord(inject(5)(.kl), inject(1)(.kl)) |-> command(inject(":")(.kl), dup(.kl))
+			coord(inject(6)(.kl), inject(1)(.kl)) |-> command(inject("<")(.kl), left(.kl))
+			coord(inject(7)(.kl), inject(1)(.kl)) |-> command(inject("^")(.kl), up(.kl))
+			coord(inject(8)(.kl), inject(1)(.kl)) |-> command(inject("0")(.kl), push(inject(0)(.kl)))
+			coord(inject(9)(.kl), inject(1)(.kl)) |-> command(inject("0")(.kl), push(inject(0)(.kl)))
+			coord(inject(10)(.kl), inject(1)(.kl)) |-> command(inject(" ")(.kl), nop(.kl))
+			coord(inject(11)(.kl), inject(1)(.kl)) |-> command(inject("*")(.kl), multiply(.kl))
+			coord(inject(12)(.kl), inject(1)(.kl)) |-> command(inject("<")(.kl), left(.kl))
+			))
+		) .
 endm
 
 ---set trace on .
 rew eval(pHelloWorld(.kl)) .
+rew eval(pFactorial(.kl), injectL(l(inject(6)(.kl)))(.kl)) .

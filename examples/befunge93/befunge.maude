@@ -111,6 +111,7 @@ mod BEFUNGE is
 	op inject : Char -> KLabel .
 	op inject : String -> KLabel .
 	op injectM : Map -> KLabel .
+	op injectL : List -> KLabel .
 	
 	op coord : -> KLabel .
 	op load : -> KLabel .
@@ -126,7 +127,7 @@ mod BEFUNGE is
 			< mode > K:K </ mode >
 			< program > M:Map </ program >
 			< output > K:K </ output >
-			< input > K:K </ input >
+			< input > L:List </ input >
 		</ T >  
 		< result > K:K </ result > 
 		: KSentence .
@@ -140,7 +141,18 @@ mod BEFUNGE is
 			< mode > defaultmode(.kl) </ mode >
 			< program > M:Map </ program >
 			< output > inject("")(.kl) </ output >
-			< input > .k </ input >
+			< input > .l </ input >
+		</ T > .
+	eq [Start-With-Input]: eval(injectM(M:Map)(.kl), injectL(L:List)(.kl)) =
+		< T >
+			< k > .k </ k >
+			< stack > .l </ stack >
+			< direction > right(.kl) </ direction >
+			< pc > coord(inject(0)(.kl), inject(0)(.kl)) </ pc >
+			< mode > defaultmode(.kl) </ mode >
+			< program > M:Map </ program >
+			< output > inject("")(.kl) </ output >
+			< input > L:List </ input >
 		</ T > .
 		
 	mb [Finish]: rule [
@@ -270,9 +282,41 @@ mod BEFUNGE is
 		
 	--- The . command will pop a value off the stack and output it as a decimal integer, followed by a space, somewhat like Forth. ,  will pop a value, interpret it as the ASCII value of a character, and output that character (not followed by a space.)
 	mb [printCharacter]: rule
-		< k > [printCharacter(.kl) => left(.kl)] ...</ k >
+		< k > [printCharacter(.kl) => .k] ...</ k >
 		< stack > [l(inject(I:Int)(.kl)) => .l] ...</ stack >
 		< output > inject([S:String => S:String +String charString(absInt(I:Int))])(.kl) </ output >
 		: KSentence [metadata "computational rule"] .
 		
+	--- The & (ampersand) command will get a numeric value (in decimal) from the standard input and push it on the stack. ~ (tilde) will get the next ASCII character from standard input and push it on the stack.
+	mb [readNumber]: rule
+		< k > [readNumber(.kl) => .k] ...</ k >
+		< stack > [.l => Li:ListItem] ...</ stack >
+		< input > [Li:ListItem => .l] ...</ input >
+		: KSentence [metadata "computational rule"] .
+	
+	--- Note that   (space) is a null command which does nothing.
+	mb [nop]: rule
+		< k > [nop(.kl) => .k] ...</ k >		
+		: KSentence [metadata "computational rule"] .
+		
+	mb [add]: rule
+		< k > [add(.kl) => .k] ...</ k >
+		< stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int +Int I1:Int)(.kl))] ...</ stack >
+		: KSentence [metadata "computational rule"] .
+	--- mb [subtract]: rule
+		--- < k > [subtract(.kl) => .k] ...</ k >
+		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int -Int I1:Int)(.kl))] ...</ stack >
+		--- : KSentence [metadata "computational rule"] .
+	--- mb [multiply]: rule
+		--- < k > [multiply(.kl) => .k] ...</ k >
+		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int *Int I1:Int)(.kl))] ...</ stack >
+		--- : KSentence [metadata "computational rule"] .
+	--- mb [divide]: rule
+		--- < k > [divide(.kl) => .k] ...</ k >
+		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int /Int I1:Int)(.kl))] ...</ stack >
+		--- : KSentence [metadata "computational rule"] .
+	--- mb [modulo]: rule
+		--- < k > [modulo(.kl) => .k] ...</ k >
+		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int %Int I1:Int)(.kl))] ...</ stack >
+		--- : KSentence [metadata "computational rule"] .	
 endm
