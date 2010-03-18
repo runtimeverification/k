@@ -9,11 +9,128 @@ mod BEFUNGE is
 	including PL-STRING .
 	including K .
 --- Syntax
-	op memory : -> CellLabel .
+	--- COMMAND         INITIAL STACK (bot->top)	RESULT (STACK)
+	----        		 -------------           -----------------
+	--- + (add)         <value1> <value2>       <value1 + value2>
+	op add : -> KProperLabel [metadata "arity 0"] .
+	--- - (subtract)    <value1> <value2>       <value1 - value2>
+	op subtract : -> KProperLabel [metadata "arity 0"] .
+	--- / (divide)      <value1> <value2>       <value1 / value2> (nb. integer)
+	op divide : -> KProperLabel [metadata "arity 0"] .
+	--- * (multiply)    <value1> <value2>       <value1 * value2>
+	op multiply : -> KProperLabel [metadata "arity 0"] .
+	--- % (modulo)      <value1> <value2>       <value1 mod value2>
+	op modulo : -> KProperLabel [metadata "arity 0"] .
+	
+	--- ! (not)         <value>                 <0 if value non-zero, 1 otherwise>
+	op not : -> KProperLabel [metadata "arity 0"] .
+	--- ` (greater)     <value1> <value2>       <1 if value1 > value2, 0 otherwise>
+	op greater : -> KProperLabel [metadata "arity 0"] .
+	
+	--- > (right)                               PC -> right
+	op right : -> KProperLabel [metadata "arity 0"] .
+	--- < (left)                                PC -> left
+	op left : -> KProperLabel [metadata "arity 0"] .
+	--- ^ (up)                                  PC -> up
+	op up : -> KProperLabel [metadata "arity 0"] .
+	--- v (down)                                PC -> down
+	op down : -> KProperLabel [metadata "arity 0"] .
+	--- ? (random)                              PC -> right? left? up? down? ???
+	op random : -> KProperLabel [metadata "arity 0"] .
+	
+	--- _ (horizontal if) <boolean value>       PC->left if <value>, else PC->right
+	op horizontalIf : -> KProperLabel [metadata "arity 0"] .
+	--- | (vertical if)   <boolean value>       PC->up if <value>, else PC->down
+	op verticalIf : -> KProperLabel [metadata "arity 0"] .
+	
+	--- " (stringmode)                          Toggles 'stringmode'
+	op stringmode : -> KProperLabel [metadata "arity 0"] .
+	
+	--- : (dup)         <value>                 <value> <value>
+	op dup : -> KProperLabel [metadata "arity 0"] .
+	--- # (bridge)                              'jumps' PC one farther; skips over next command
+	op bridge : -> KProperLabel [metadata "arity 0"] .
+	
+	--- \ (swap)        <value1> <value2>       <value2> <value1>
+	op swap : -> KProperLabel [metadata "arity 0"] .
+	--- $ (pop)         <value>                 pops <value> but does nothing
+	op pop : -> KProperLabel [metadata "arity 0"] .
+	
+	--- . (output value)	<value>             outputs <value> as integer
+	op printNumber : -> KProperLabel [metadata "arity 0"] .
+	--- , (output character)	<value>         outputs <value> as ASCII
+	op printCharacter : -> KProperLabel [metadata "arity 0"] .
+	--- & (input value)                         <value user entered>
+	op readNumber : -> KProperLabel [metadata "arity 0"] .
+	--- ~ (input character)                     <character user entered>
+	op readCharacter : -> KProperLabel [metadata "arity 0"] .
+	
+	--- @ (end)                                 ends program
+	op end : -> KProperLabel [metadata "arity 0"] .
+	
+	--- g (get)         <x> <y>                 <value at (x,y)>
+	op metaGet : -> KProperLabel [metadata "arity 0"] .
+	--- p (put)         <value> <x> <y>         puts <value> at (x,y)
+	op metaPut : -> KProperLabel [metadata "arity 0"] .
+	
+	
+	--- [space] (nop)
+	op nop : -> KProperLabel [metadata "arity 0"] .
+	
+	op err : -> KProperLabel [metadata "arity 0"] .
+	
+	--- [all commands] (push)
+	op command : -> KProperLabel [metadata "arity 2"] . --- necessary to handle stringmode
+	---------
+	--- e.g.:
+	--- command('$', pop(.kl))
+	--- command(' ', nop(.kl))
+	--- command('x', err(.kl))
+	
+--- Configuration
+	op stack : -> CellLabel .
+	op direction : -> CellLabel .
+	op program : -> CellLabel .
+	op pc : -> CellLabel .
 	op output : -> CellLabel .
-	op result : -> CellLabel .
 	op input : -> CellLabel .
 	op k : -> CellLabel .
-
+	op result : -> CellLabel .
+	
+--- Semantics
+	op eval : K -> Set .
+	op eval : K K -> Set .
+	op inject : Int -> KResultLabel .
+	op inject : String -> KResultLabel .
+	
+	mb configuration 
+		< T >
+			< k > K:K </ k >
+			< stack > L:List </ stack >
+			< direction > K:K </ direction >
+			< pc > L:List </ pc >
+			< program > K:K </ program >
+			< output > K:K </ output >
+			< input > K:K </ input >
+		</ T >  
+		< result > K:K </ result > 
+		: KSentence .
+	
+	eq [Start]: eval(K:K) =
+		< T >
+			< k > .k </ k >
+			< stack > .l </ stack >
+			< direction > right(.kl) </ direction >
+			< pc > l(inject(0)(.kl)), l(inject(0)(.kl))  </ pc >
+			< program > K:K </ program >
+			< output > inject("")(.kl) </ output >
+			< input > .k </ input >
+		</ T > .
+		
+	mb [Finish]: rule [
+		< T > S:Set < k > .k </ k > < output > K:K </ output > </ T > 
+			=> < result > K:K </ result >
+		] : KSentence [metadata "structural"] .
+		
 endm
 
