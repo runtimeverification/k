@@ -154,6 +154,13 @@ mod BEFUNGE is
 	mb [Next]: rule
 		< k > [.k => load(.kl) ~> movePC(.kl)] </ k >
 		: KSentence [metadata "structural"] .
+		
+	mb [startStack]: rule
+		< stack > [.l => l(inject(0)(.kl))] </ stack >
+		: KSentence [metadata "structural"] .
+	mb [refillStack]: rule
+		< stack > [Li:ListItem => Li:ListItem, l(inject(0)(.kl))] </ stack >
+		: KSentence [metadata "structural"] .
 	
 	mb [Load]: rule
 		< k > [load(.kl) => K:K] ...</ k >
@@ -218,6 +225,54 @@ mod BEFUNGE is
 	mb [push]: rule
 		< k > [push(K:K) => .k] ...</ k >
 		< stack > [.l => l(K:K)] ...</ stack >
+		: KSentence [metadata "computational rule"] .
+		
+	mb [right]: rule
+		< k > [right(.kl) => .k] ...</ k >
+		< direction > [K:K => right(.kl)] </ direction >
+		: KSentence [metadata "computational rule"] .
+	mb [left]: rule
+		< k > [left(.kl) => .k] ...</ k >
+		< direction > [K:K => left(.kl)] </ direction >
+		: KSentence [metadata "computational rule"] .
+	mb [up]: rule
+		< k > [up(.kl) => .k] ...</ k >
+		< direction > [K:K => up(.kl)] </ direction >
+		: KSentence [metadata "computational rule"] .
+	mb [down]: rule
+		< k > [down(.kl) => .k] ...</ k >
+		< direction > [K:K => down(.kl)] </ direction >
+		: KSentence [metadata "computational rule"] .		
+		
+	--- : is the duplication command.  It makes a copy of the top element of the stack
+	mb [dup]: rule
+		< k > [dup(.kl) => .k] ...</ k >
+		< stack > [Li:ListItem => Li:ListItem, Li:ListItem] ...</ stack >
+		: KSentence [metadata "computational rule"] .	
+	
+	--- # is the 'bridge' command... it causes the next command which would normally be executed to be skipped over, and not executed.
+	mb [bridge]: rule
+		< k > [bridge(.kl) => movePC(.kl)] ...</ k >
+		: KSentence [metadata "computational rule"] .	
+		
+	--- The standard 'if' statement in Befunge-93 is either _ or |, depending on how you want to branch.  Both of these instructions pop a value off the stack and check to see if it is true (non-zero,) and change the direction of the PC accordingly:
+	--- _ acts like < if the value is true or > if it is false; and
+    --- | acts like ^ if the value is true or v if it is false.
+	mb [horizontalIf-false]: rule
+		< k > [horizontalIf(.kl) => right(.kl)] ...</ k >
+		< stack > [l(inject(0)(.kl)) => .l] ...</ stack >
+		: KSentence [metadata "computational rule"] .	
+	mb [horizontalIf-true]: rule
+		< k > [horizontalIf(.kl) => left(.kl)] ...</ k >
+		< stack > [l(inject(I:Int)(.kl)) => .l] ...</ stack >
+		if (I:Int =/=Bool 0)
+		: KSentence [metadata "computational rule"] .
+		
+	--- The . command will pop a value off the stack and output it as a decimal integer, followed by a space, somewhat like Forth. ,  will pop a value, interpret it as the ASCII value of a character, and output that character (not followed by a space.)
+	mb [printCharacter]: rule
+		< k > [printCharacter(.kl) => left(.kl)] ...</ k >
+		< stack > [l(inject(I:Int)(.kl)) => .l] ...</ stack >
+		< output > inject([S:String => S:String +String charString(absInt(I:Int))])(.kl) </ output >
 		: KSentence [metadata "computational rule"] .
 		
 endm
