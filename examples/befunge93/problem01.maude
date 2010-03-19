@@ -1,0 +1,34 @@
+load ../../k-prelude
+mod BEFUNGE is
+	including CONFIG .
+	including K-MAP-EXTRAS .
+	including K-RULES .
+	including K-CONFIG .
+	including PL-INT .
+	including PL-STRING .
+	
+	including K-OPEN-CELLS .
+	---including K-WRAPPERS-LABELS . --- can't include this?
+	
+	including K .
+--- Syntax
+
+--- --- Configuration
+
+	op k : -> CellLabel .
+	
+--- --- Semantics
+
+	op inject : Char -> KLabel .
+
+	mb configuration 
+		< T >
+			< k > K:K </ k >
+		</ T >  
+		: KSentence .
+	
+	--- Note that   (space) is a null command which does nothing.
+	mb [nop]: rule
+		< k > [inject(" ")(.kl) => .k] ...</ k >
+		: KSentence [metadata "computational rule"] .
+endm
