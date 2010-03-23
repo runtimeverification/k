@@ -1,4 +1,5 @@
 #!/bin/bash
+MAUDE="maude"
 function usage {
   echo "usage: $0 <source_file>[.maude] [<module_name>]
   
@@ -15,7 +16,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   usage
   exit
 fi
-MAUDE="maude"
 which $MAUDE 1>/dev/null 2>/dev/null
 if [[ $? -ne 0 ]]; then
   echo "set MAUDE to the correct path of the maude executable in kcompile.sh on line 2"

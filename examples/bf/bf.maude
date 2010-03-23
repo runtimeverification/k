@@ -74,7 +74,7 @@ mod BF is
 		: KSentence [metadata "structural"] .
 		
 	mb [Sequence]: rule
-		[Seq(K1:K, K2:K) => K1:K ~> K2:K]
+		[Seq(K1:K,, K2:K) => K1:K ~> K2:K]
 		: KSentence [metadata "structural"] .
 		
 	mb [Increase]: rule 

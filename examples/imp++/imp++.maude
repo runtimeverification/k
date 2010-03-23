@@ -1,14 +1,16 @@
 load ../../k-prelude
 mod IMP++ is
-  including PL-INT .
-  including PL-VARID .
-  including K .
-  including CONFIG .
-  including K-MAP-EXTRAS .
-  including K-RULES .
-  including K-CONFIG .
-  including K-ANONYMOUS-VARIABLES .
-  including K-OPEN-CELLS .
+  including PL-INT .   --- built-in integers
+  including PL-VARID . --- built-in variable identifiers
+
+  including K .            --- defines K, List, Map, and Set
+  including CONFIG .       --- defines CellLabel
+  including K-MAP-EXTRAS . --- operations on Maps with lists of keys/values
+
+  including K-RULES .  --- to write k rules with in-place rewriting
+  including K-CONFIG . --- to specify the global configuration term
+  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
+  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
 
 ---Syntax
   sort AExp .
@@ -17,6 +19,8 @@ mod IMP++ is
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : VarId -> AExp [prec 30 format (b o d)] .
 
+  sort LExp .
+  subsort LExp < K .
   op list_ : KList -> AExp [metadata "strict(-1)"] .
   op head : AExp -> AExp [metadata "strict"] .
   op tail : AExp -> AExp [metadata "strict"] .
@@ -45,9 +49,9 @@ mod IMP++ is
   eq pList =
     vars n ;
     (n := 10 ;
-    print(head(list(n,2,3)))) .
+    print(head(list(n,,2,,3)))) .
   eq pSum = 
-        vars n,s,i ; 
+        vars n,,s,,i ; 
          (n := 1000 ;
          s := 0 ;
          i := n ;
@@ -58,13 +62,13 @@ mod IMP++ is
           print(s)) .
 
   eq pCollatz = 
-            vars limit,steps,nr,t ; 
+            vars limit,,steps,,nr,,t ; 
              (limit := 10 ; 
              steps := 10 ; nr := 1 ; t := 2 ;
              while ++ nr <= limit do (vars n ; 
                 (n := nr ;
                 spawn(
-                  while 2 <= n do (vars d,nn ; 
+                  while 2 <= n do (vars d,,nn ; 
                      (nn := ++ steps ; 
                      d := 0 ;
                      nn := n ;
@@ -98,12 +102,12 @@ mod IMP++ is
   op startConfig : Stmt -> Set .
   eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .m </ env > </ thread > </ threads > < store > .m </ store >  < output > .l </ output > < nextLoc > 0 </ nextLoc > </ T > .
   
-  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
+---  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
   op vl_ : KList -> KResult .  
   mb rule [list(RL) => vl RL] : KSentence [metadata "structural"] .
-  mb rule [head(vl(I,?)) => I] : KSentence . 
-  mb rule [tail(vl(I,RL)) => vl RL] : KSentence . 
+  mb rule [head(vl(I,,?)) => I] : KSentence . 
+  mb rule [tail(vl(I,,RL)) => vl RL] : KSentence . 
 
   mb rule [skip => .k] : KSentence .
   mb rule [not(T) => notBool T] : KSentence .
@@ -115,7 +119,7 @@ mod IMP++ is
   mb rule [S1 ; S2 => S1 ~> S2] : KSentence .
   mb rule < k > [X => I] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> I ...</ store > : KSentence .
   mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store >  : KSentence .
-  mb rule < k > [X := I1 => .k] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I2 => I1] ...</ store > : KSentence .
+  mb rule < k > [X := I => .k] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => I] ...</ store > : KSentence .
   mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
   mb rule < k > [print(I) => .k] ...</ k > < output >... [.l => l(I)] </ output >  : KSentence .
   mb rule < k > [halt ~> ? => .k] </ k > : KSentence .
@@ -130,5 +134,5 @@ mod IMP++ is
   mb rule < k > [env(Env) => .k] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
 
   op _.._ : Nat Nat -> KList .
-  mb rule [N1 .. N2 => if N1 >=Int N2 then .kl else (N1, (sNat N1) .. N2) fi] : KSentence [metadata "structural"] .
+  mb rule [N1 .. N2 => if N1 >=Int N2 then .kl else (N1,, (sNat N1) .. N2) fi] : KSentence [metadata "structural"] .
 endm

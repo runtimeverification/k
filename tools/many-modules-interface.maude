@@ -1,0 +1,39 @@
+load many-modules
+load printing
+
+mod MANY-MODULES-META is
+  including MANY-MODULES .
+  including META-LEVEL-EXTRAS .
+  including META-K-MODULES .
+  including META-K-BUILTINS .
+  var NoKProper KProper : String .
+  var Q QNoKProper QKProper : Qid .  var IL : ImportList .
+  op manyModules : String String ~> Module .
+  eq manyModules(NoKProper, KProper) = manyModules(qid(NoKProper), qid(KProper)) .
+  op manyModules : Qid Qid ~> Module .
+  eq manyModules(QNoKProper,QKProper) = manyModules(QKProper,  getAllImportsBut(QNoKProper, kModules ; builtinModules)) .
+endm
+
+mod MANY-MODULES-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op many-modules : -> System .
+  op idle : -> State .
+  var Q NoKProper KProper : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq many-modules = [nil, idle, 
+ 'Usage: 'manyModules '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['manyModules NoKProper KProper QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoKProper,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('MANY-MODULES-META),
+                        'manyModules[upTerm(string(NoKProper)),upTerm(string(KProper))])),error) .
+endm

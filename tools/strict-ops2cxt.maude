@@ -20,7 +20,7 @@ mod STRICTOPS2CXT is
 
   op strictOps2cxt : Qid Module ~> Module .
   eq strictOps2cxt(Q, Mod) 
-   = setMbs(setImports(setName(emptySModule, Q), (including getName(Mod) .) including 'K-STRICTNESS-INTERNAL .), strictOps2cxtOps(getOps(Mod))) .
+   = setMbs(setImports(setName(emptySModule, Q), (including getName(Mod) .) including 'K-CONTEXTS .), strictOps2cxtOps(getOps(Mod))) .
 
   op strictOps2cxtOps : OpDeclSet ~> MembAxSet .
   eq strictOps2cxtOps(none) = none .

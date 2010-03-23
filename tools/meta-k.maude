@@ -34,7 +34,7 @@ fmod K-META-OPS is including META-TERM .
   op kList : TermList -> Term .
   eq kList(T) = T .
   eq kList(empty) = nilKList .
-  eq kList(Trl) = '_`,_[Trl] [owise] .
+  eq kList(Trl) = '_`,`,_[Trl] [owise] .
 
   op wrapKList : Term -> Term .
   eq wrapKList(T) = '~[T] .
@@ -45,8 +45,23 @@ endfm
 
 fmod META-K-BUILTINS is
   including META-LEVEL .
+  including META-MODULE-EXTRAS .
   op builtinSorts : -> SortSet [memo] .
   eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
+  op builtinModules : ~> SortSet [memo] .
+  eq builtinModules 
+   = getModuleNames(getImports(upModule('PL-BUILTINS, false)))
+     getModuleNames(getImports(upModule('K-ALL,false))) .
+                 
+endfm
+
+fmod META-K-MODULES is
+  including META-MODULE .
+  op kModules : ~> SortSet [memo] .
+  eq kModules 
+   = 'K ; 'CONFIG ; 'K-SENTENCE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
+     'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-ANONYMOUS-VARIABLES ; 
+     'K-OPEN-CELLS ; 'K-CONFIG .
 endfm
 
 fmod META-K-MODULE is
@@ -88,6 +103,7 @@ fmod META-K-MODULE is
     op '_`(_`) : KProperLabel KList -> KProper [none] .
     op '_`(_`) : KResultLabel KList -> KResult [none] .
     op '_~>_ : K K -> K [none] .
+    op '`[`] : nil -> K [none] .
   ) .
 
  op makeKLabel : Sort -> Sort .
@@ -261,7 +277,7 @@ fmod META-K-WRAPPERS is
 
   op mkSubsortWrapper : Type Type -> Qid .
   eq mkSubsortWrapper(T,T') 
-   = qid("\"" + string(T) + " < " + string(T') + "\"_") .
+   = qid("\"" + string(T) + "\"_") .
 endfm
 
 

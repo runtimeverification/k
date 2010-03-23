@@ -17,19 +17,19 @@ mod K is
   subsort EmptyKList < KResultList < KList .
   subsort KResult < NeKResultList < KResultList NeKList .
 
-  op _`,_ : KList KList -> KList [assoc id: .kl prec 121] .
+  op _`,`,_ : KList KList -> KList [assoc id: .kl prec 121] .
   --- One should not modify the precedence above.  
   --- Might cause the compilation to fail.
-  op _`,_ : NeKList KList -> NeKList [ditto] .
-  op _`,_ : KList NeKList -> NeKList [ditto] .
-  op _`,_ : KResultList KResultList -> KResultList [ditto] .
-  op _`,_ : NeKResultList KResultList -> NeKResultList [ditto] .
-  op _`,_ : KResultList NeKResultList -> NeKResultList [ditto] .
+  op _`,`,_ : NeKList KList -> NeKList [ditto] .
+  op _`,`,_ : KList NeKList -> NeKList [ditto] .
+  op _`,`,_ : KResultList KResultList -> KResultList [ditto] .
+  op _`,`,_ : NeKResultList KResultList -> NeKResultList [ditto] .
+  op _`,`,_ : KResultList NeKResultList -> NeKResultList [ditto] .
 
 
   op length_ : KList -> Nat . 
   eq length(.kl) = 0 .
-  eq length(K:K,KL:KList) = sNat length(KL:KList) . 
+  eq length(K:K,,KL:KList) = sNat length(KL:KList) . 
 
   sorts KLabel KResultLabel .
 
@@ -97,8 +97,8 @@ mod K-PROPER is
   sort KProperLabel .
   subsort KProperLabel < KLabel .
   op _`(_`) : KProperLabel KList -> KProper [ditto] .
-  op _`,_ : NeKProperList KList -> NeKProperList [ditto] .
-  op _`,_ : KList NeKProperList -> NeKProperList [ditto] .
+  op _`,`,_ : NeKProperList KList -> NeKProperList [ditto] .
+  op _`,`,_ : KList NeKProperList -> NeKProperList [ditto] .
 endm
 
 --- Strictness Level
@@ -110,7 +110,7 @@ mod K-STRICTNESS is
   op freezeVar : String -> KLabel .
 endm
 
-mod K-STRICTNESS-INTERNAL is
+mod K-CONTEXTS is
   including K .
   including K-SENTENCE .
   ops context_ : K -> [KSentence] [prec 127] .
@@ -189,6 +189,7 @@ mod K-CONFIG is
   op _* : CellLabel -> CellLabel .
 endm
 
+
 --- extra stuff
 
 mod K-MAP-EXTRAS is
@@ -196,13 +197,13 @@ mod K-MAP-EXTRAS is
   var Map : Map .  var List : KList . var NList1 NList2 : NeKList .
   vars K1 K2 K2' K : K .
   op _|->_ : KList KList -> Map [ditto] .
-  eq (K1,NList1) |-> (K2, NList2) = (K1 |-> K2) (NList1 |-> NList2) .
-  eq (K1,NList1) |-> K2 = (K1 |-> K2) (NList1 |-> K2) .
+  eq (K1,,NList1) |-> (K2,, NList2) = (K1 |-> K2) (NList1 |-> NList2) .
+  eq (K1,,NList1) |-> K2 = (K1 |-> K2) (NList1 |-> K2) .
   eq .kl |-> List = .m .
 
   op _[_/_] : Map KList KList -> Map [ditto] .
-  eq Map[(K1,NList1) / (K2, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
-  eq Map[K2 / (K1,NList1)] = (Map[K2 / K1])[K2 / NList1] .
+  eq Map[(K1,,NList1) / (K2,, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
+  eq Map[K2 / (K1,,NList1)] = (Map[K2 / K1])[K2 / NList1] .
   eq Map[List / .kl] = Map .
 endm
 

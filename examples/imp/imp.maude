@@ -5,15 +5,18 @@
 in ../../k-prelude.maude
 
 mod IMP is
-  including PL-INT .
-  including PL-VARID .
-  including K .
-  including CONFIG .
-  including K-MAP-EXTRAS .
-  including K-RULES .
-  including K-CONFIG .
-  including K-ANONYMOUS-VARIABLES .
-  including K-OPEN-CELLS .
+  including PL-INT .                --- built-in integers
+  including PL-VARID .              --- built-in variable identifiers
+
+  including K .                     --- defines K, List, Map, and Set
+  including CONFIG .                --- defines CellLabel
+  including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
+
+  including K-RULES .               --- to write k rules with in-place rewriting
+  including K-CONFIG .              --- to specify the global configuration term
+  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
+  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
+
 
 
 --------------
@@ -50,7 +53,7 @@ ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> VarId .
 ops sumPgm collatzPgm countPrimesPgm : -> Pgm .
 ops collatzStmt multiplicationStmt primalityStmt : -> Stmt .
 eq sumPgm = (
-     vars n, s ; (
+     vars n,, s ; (
      n := 100 ;
      s := 0 ;
      while not(n <= 0) do (
@@ -71,7 +74,7 @@ eq collatzStmt = (
 ) .
 
 eq collatzPgm = (
-   vars m, n, q, r, s ; (
+   vars m,, n,, q,, r,, s ; (
    m := 10 ;
    s := 0 ;
    while not (m <= 2) do (
@@ -109,7 +112,7 @@ eq primalityStmt = (
 ) .
 
 eq countPrimesPgm = (
-   vars i, m, n, q, r, s, t, x, y, z ; (
+   vars i,, m,, n,, q,, r,, s,, t,, x,, y,, z ; (
    m := 10 ;
    s := 0 ; n := 2 ;
    while n <= m do (

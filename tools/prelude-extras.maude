@@ -277,7 +277,7 @@ fmod META-MODULE-EXTRAS is
   op _;;_ : ViewExp ViewExp -> ViewExp 
        [assoc id: mtViewExp] .                       *** view composition  _;_
       
-  var  M : Module .  var Trm : Term .
+  var  M M' : Module .  var Trm : Term .
   vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
   vars OPDS OPDS' : OpDeclSet .  var Op : OpDecl .
   vars MAS MAS' : MembAxSet .
@@ -312,6 +312,10 @@ fmod META-MODULE-EXTRAS is
   op addMbs : MembAxSet Module -> Module .
   op addEqs : EquationSet Module -> Module .
   op addRls : RuleSet Module -> Module .
+
+  op addModule : Module Module -> Module .
+  eq addModule(M, M')
+   = addRls(getRls(M),addEqs(getEqs(M),addMbs(getMbs(M),addOps(getOps(M),addSubsorts(getSubsorts(M),addSorts(getSorts(M),addImports(getImports(M), M'))))))) .
 
   op removeSorts : SortSet SortSet -> SortSet .
   eq removeSorts(SS ; S, SS' ; S) = removeSorts(SS, SS' ; S) .
@@ -504,7 +508,15 @@ fmod META-MODULE-EXTRAS is
   eq $intersect (none, SS', A) = A .
   eq $intersect (S ; SS, SS', A) = $intersect (SS, SS', if S in SS' then S ; A else
     A fi) .
-  
+
+  op removeSorts : SortSet SortSet -> SortSet .
+  eq removeSorts(SS, none) = SS .
+  eq removeSorts(SS, SS') = $removeSorts(SS, SS', none) [owise] .
+  op $removeSorts : SortSet SortSet SortSet -> SortSet .
+  eq $removeSorts(none, SS', A) = A .
+  eq $removeSorts(S ; SS, SS', A) = $removeSorts(SS, SS', if S in SS' then A else S ; S fi) .
+
+
   op assoc : AttrSet -> Bool .
   eq assoc(AS assoc) = true .
   eq assoc(AS) = false [owise] .
@@ -535,6 +547,27 @@ fmod META-MODULE-EXTRAS is
   op naryAttr : Attr -> Bool .
   eq naryAttr(assoc) = true .  eq naryAttr(comm) = true .  eq naryAttr(idem) = true .  eq naryAttr(iter) = true .  eq naryAttr(id(Trm)) = true .  eq naryAttr(left-id(Trm)) = true .  eq naryAttr(right-id(Trm)) = true .  eq naryAttr(strat(NNl)) = true .  eq naryAttr(memo) = true .  eq naryAttr(prec(N)) = true .  eq naryAttr(gather(QIL)) = true .  eq naryAttr(format(QIL)) = true .  eq naryAttr(frozen(NNl)) = true .  eq naryAttr(poly(NNl)) = true .  eq naryAttr(special(NHl:NeHookList)) = true .
   eq naryAttr(Attr) = false [owise] .
+
+  op getModuleNames : ImportList ~> SortSet .
+  eq getModuleNames(I IL) = getModuleName(I) getModuleNames(IL) .
+  eq getModuleNames(nil) = none .
+
+  op getModuleName : Import ~> SortSet .
+  eq getModuleName(including ME .) = getModuleName(ME) .
+  eq getModuleName(protecting ME .) = getModuleName(ME) .
+  eq getModuleName(extending ME .) = getModuleName(ME) .
+  
+  op getModuleName : ModuleExpression ~> SortSet .
+  eq getModuleName(ME + ME') = getModuleName(ME) ; getModuleName(ME') .
+  eq getModuleName(Q) = Q .
+
+  op getImportNames : Module ~> SortSet .
+  eq getImportNames(M) = getModuleNames(getImports(M)) .
+
+
+  op generateImports : SortSet ~> ImportList .
+  eq generateImports(none) = nil .
+  eq generateImports(S ; SS) = (including S .) generateImports(SS) .
 endfm
 
 fmod JOIN-METADATA is
@@ -551,7 +584,7 @@ fmod META-LEVEL-EXTRAS is
   var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
   var Trm Trm' : Term . var Trms : TermList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
-  var N N' : Nat .  var IL : ImportList .
+  var N N' : Nat .  var IL : ImportList .  var MS : ModuleSet .
 
   op maximalAritySet : Module Term ~> TypeListSet .
   eq maximalAritySet(M, Q[Trms])
@@ -645,5 +678,19 @@ fmod META-LEVEL-EXTRAS is
   eq upImports((including Q .) IL) = upModule(Q,true) upImports(IL) .
   eq upImports((protecting Q .) IL) = upModule(Q,true) upImports(IL) .
   eq upImports((extending Q .) IL) = upModule(Q,true) upImports(IL) .
+
+  op getAllImportsBut : Qid SortSet ~> ModuleSet .
+  eq getAllImportsBut(Q, SS) 
+   = getAllImportsBut(Q, SS, empty) .
+  
+  op getAllImportsBut : SortSet SortSet ModuleSet ~> ModuleSet .
+  eq getAllImportsBut(none, SS, MS) = MS .
+  eq getAllImportsBut(Q ; SS, SS', MS)
+   = if Q in SS then getAllImportsBut(SS, SS', MS)
+     else getAllImportsBut(upModule(Q, false), SS, SS' ; Q, MS) fi .
+
+  op getAllImportsBut : Module SortSet SortSet ModuleSet ~> ModuleSet .
+  eq getAllImportsBut(M, SS, SS', MS) 
+   = getAllImportsBut(getImportNames(M) ; SS, SS', MS M) .
 endfm
 
