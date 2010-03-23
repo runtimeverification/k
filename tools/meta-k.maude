@@ -50,8 +50,7 @@ fmod META-K-BUILTINS is
   eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
   op builtinModules : ~> SortSet [memo] .
   eq builtinModules 
-   = getModuleNames(getImports(upModule('PL-BUILTINS, false)))
-     getModuleNames(getImports(upModule('K-ALL,false))) .
+   = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
                  
 endfm
 

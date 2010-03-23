@@ -548,21 +548,21 @@ fmod META-MODULE-EXTRAS is
   eq naryAttr(assoc) = true .  eq naryAttr(comm) = true .  eq naryAttr(idem) = true .  eq naryAttr(iter) = true .  eq naryAttr(id(Trm)) = true .  eq naryAttr(left-id(Trm)) = true .  eq naryAttr(right-id(Trm)) = true .  eq naryAttr(strat(NNl)) = true .  eq naryAttr(memo) = true .  eq naryAttr(prec(N)) = true .  eq naryAttr(gather(QIL)) = true .  eq naryAttr(format(QIL)) = true .  eq naryAttr(frozen(NNl)) = true .  eq naryAttr(poly(NNl)) = true .  eq naryAttr(special(NHl:NeHookList)) = true .
   eq naryAttr(Attr) = false [owise] .
 
-  op getModuleNames : ImportList ~> SortSet .
-  eq getModuleNames(I IL) = getModuleName(I) getModuleNames(IL) .
-  eq getModuleNames(nil) = none .
+  op getImportNames : ImportList ~> SortSet .
+  eq getImportNames(I IL) = getImportName(I) ; getImportNames(IL) .
+  eq getImportNames(nil) = none .
 
-  op getModuleName : Import ~> SortSet .
-  eq getModuleName(including ME .) = getModuleName(ME) .
-  eq getModuleName(protecting ME .) = getModuleName(ME) .
-  eq getModuleName(extending ME .) = getModuleName(ME) .
+  op getImportName : Import ~> SortSet .
+  eq getImportName(including ME .) = getImportName(ME) .
+  eq getImportName(protecting ME .) = getImportName(ME) .
+  eq getImportName(extending ME .) = getImportName(ME) .
   
-  op getModuleName : ModuleExpression ~> SortSet .
-  eq getModuleName(ME + ME') = getModuleName(ME) ; getModuleName(ME') .
-  eq getModuleName(Q) = Q .
+  op getImportName : ModuleExpression ~> SortSet .
+  eq getImportName(ME + ME') = getImportName(ME) ; getImportName(ME') .
+  eq getImportName(Q) = Q .
 
   op getImportNames : Module ~> SortSet .
-  eq getImportNames(M) = getModuleNames(getImports(M)) .
+  eq getImportNames(M) = getImportNames(getImports(M)) .
 
 
   op generateImports : SortSet ~> ImportList .
@@ -686,7 +686,7 @@ fmod META-LEVEL-EXTRAS is
   op getAllImportsBut : SortSet SortSet ModuleSet ~> ModuleSet .
   eq getAllImportsBut(none, SS, MS) = MS .
   eq getAllImportsBut(Q ; SS, SS', MS)
-   = if Q in SS then getAllImportsBut(SS, SS', MS)
+   = if Q in SS' then getAllImportsBut(SS, SS', MS)
      else getAllImportsBut(upModule(Q, false), SS, SS' ; Q, MS) fi .
 
   op getAllImportsBut : Module SortSet SortSet ModuleSet ~> ModuleSet .

@@ -113,6 +113,13 @@ checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
 
 OUTPUT=$(<$FILE.maude)
 
+MANY_MODULES="
+load  \"$KBASE/tools/many-modules-interface\"
+loop many-modules .
+(manyModules $LANG $LANG .)
+"
+runMaude "$OUTPUT $MANY_MODULES" "Flattening entire definition in a single module"
+
 OPEN_CELLS="
 load \"$KBASE/tools/open-cells-interface\"
 loop open-cells .

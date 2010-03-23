@@ -21,6 +21,6 @@ fmod MANY-MODULES is
   op manyModules : Module ModuleSet  SortSet SortSet ~> Module .
   eq manyModules(M, M' MS, SS, SS') 
    = manyModules(addModule(setImports(M',nil),M), MS,  SS, getImportNames(M') ; SS') .
-  eq manyModules(M, empty, SS, SS') = addImports(generateImports(removeSorts(SS', SS)),M) .
+  eq manyModules(M, empty, SS, SS') = addImports(generateImports(intersection(SS', SS)),M) .
 endfm
 
