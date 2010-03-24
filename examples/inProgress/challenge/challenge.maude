@@ -4,7 +4,7 @@
     Definition by Grigore Rosu: http://fsl.cs.uiuc.edu/images/0/0c/CS422-Spring-2010-CHALLENGE.pdf
     This implementation by David Lazar <lazar6@illinois.edu>.
 )
-load ../../k-prelude
+load ../../../k-prelude
 
 mod CHALLENGE is
   including PL-INT .
