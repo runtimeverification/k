@@ -1,4 +1,4 @@
-load ../../k-prelude
+load ../../../k-prelude
 mod BEFUNGE is
 	including K-PROPER .
 	including CONFIG .
@@ -137,7 +137,7 @@ mod BEFUNGE is
 			< k > .k </ k >
 			< stack > .l </ stack >
 			< direction > right(.kl) </ direction >
-			< pc > coord(inject(0)(.kl), inject(0)(.kl)) </ pc >
+			< pc > coord(inject(0)(.kl),, inject(0)(.kl)) </ pc >
 			< mode > defaultmode(.kl) </ mode >
 			< program > M:Map </ program >
 			< output > inject("")(.kl) </ output >
@@ -148,7 +148,7 @@ mod BEFUNGE is
 			< k > .k </ k >
 			< stack > .l </ stack >
 			< direction > right(.kl) </ direction >
-			< pc > coord(inject(0)(.kl), inject(0)(.kl)) </ pc >
+			< pc > coord(inject(0)(.kl),, inject(0)(.kl)) </ pc >
 			< mode > defaultmode(.kl) </ mode >
 			< program > M:Map </ program >
 			< output > inject("")(.kl) </ output >
@@ -183,35 +183,35 @@ mod BEFUNGE is
 	mb [MovePC-right]: rule 
 		< k > [movePC(.kl) => .k] ...</ k >
 		< direction > right(.kl) </ direction >
-		< pc > coord(inject([I:Int => (I:Int +Int 1) %Int 80])(.kl), K:K) </ pc >
+		< pc > coord(inject([I:Int => (I:Int +Int 1) %Int 80])(.kl),, K:K) </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-left]: rule 
 		< k > [movePC(.kl) => .k] ...</ k >
 		< direction > left(.kl) </ direction >
-		< pc > coord(inject([I:Int => ((I:Int -Int 1) +Int 80) %Int 80])(.kl), K:K) </ pc >
+		< pc > coord(inject([I:Int => ((I:Int -Int 1) +Int 80) %Int 80])(.kl),, K:K) </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-up]: rule 
 		< k > [movePC(.kl) => .k] ...</ k >
 		< direction > up(.kl) </ direction >
-		< pc > coord(K:K, inject([I:Int => ((I:Int -Int 1) +Int 25) %Int 25])(.kl)) </ pc >
+		< pc > coord(K:K,, inject([I:Int => ((I:Int -Int 1) +Int 25) %Int 25])(.kl)) </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-down]: rule 
 		< k > [movePC(.kl) => .k] ...</ k >
 		< direction > down(.kl) </ direction >
-		< pc > coord(K:K, inject([I:Int => (I:Int +Int 1) %Int 25])(.kl)) </ pc >
+		< pc > coord(K:K,, inject([I:Int => (I:Int +Int 1) %Int 25])(.kl)) </ pc >
 		: KSentence [metadata "structural"] .
 		
 	mb [InterpretCommand-default]: rule
-		< k > [command(K1:K, K2:K) => K2:K] ...</ k >
+		< k > [command(K1:K,, K2:K) => K2:K] ...</ k >
 		< mode > defaultmode(.kl) </ mode >
 		: KSentence [metadata "structural"] .
 	mb [InterpretCommand-string-notmode]: rule
-		< k > [command(K1:K, K2:K) => push(charToAscii(K1:K))] ...</ k >
+		< k > [command(K1:K,, K2:K) => push(charToAscii(K1:K))] ...</ k >
 		< mode > stringmode(.kl) </ mode >
 		if (K2:K =/=Bool stringmode(.kl))
 		: KSentence [metadata "structural"] .
 	mb [InterpretCommand-string-mode]: rule
-		< k > [command(K1:K, stringmode(.kl)) => stringmode(.kl)] ...</ k >
+		< k > [command(K1:K,, stringmode(.kl)) => stringmode(.kl)] ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	---op asAscii : -> KLabel .
