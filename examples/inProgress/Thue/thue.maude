@@ -13,14 +13,36 @@ mod THUE is
 	
 	including K .
 --- Syntax
-	---op add : -> KProperLabel [metadata "arity 0"] .
+	op subst : -> KProperLabel [metadata "arity 2"] .
+	op write : -> KProperLabel [metadata "arity 2"] .
+	op read : -> KProperLabel [metadata "arity 2"] .
+	op start : -> KProperLabel [metadata "arity 1"] .
 	
 --- Configuration
 	op output : -> CellLabel .
 	op input : -> CellLabel .
 	op k : -> CellLabel .
+	op rules : -> CellLabel .
 	op result : -> CellLabel .
 	
+	mb configuration 
+	< T >
+		< k > K:K </ k >
+		< rules > S:Set </ rules >
+		< output > K:K </ output >
+		< input > L:List </ input >
+	</ T >  
+	< result > K:K </ result > 
+	: KSentence .
+	
+	eq [Start]: eval(K:K) =
+	< T >
+		< k > K:K </ k >
+		< rules > .s </ rules >
+		< output > .k </ output >
+		< input > .l </ input >
+	</ T > .
+
 --- Semantics
 	op eval : K -> Set .
 	op eval : K K -> Set .
@@ -30,4 +52,31 @@ mod THUE is
 	op injectM : Map -> KLabel .
 	op injectL : List -> KLabel .
 
+	op explode : -> KProperLabel [metadata "arity 1"] .
+	
+	---- define explode of a string
+	mb [explodeString]: rule
+		explode([inject(S:String)(.kl) => inject(substrString(S:String, 1, lengthString(S:String)))(.kl)] ~> K:K ~> [.k => inject(substrString(S:String, 0, 1))(.kl)])
+		if notBool(S:String ==Bool "")
+		: KSentence [metadata "computational rule"] .
+	mb rule
+		[explode(inject("")(.kl) ~> K:K) => K:K]
+		: KSentence [metadata "computational rule"] .
+	---- end define explode of a string	
+		
+	mb [saveRule]: rule
+		< k > [subst(K1:K,, K2:K) => .k] ...</ k >
+		< rules >... [.s => s(subst(explode(K1:K),, explode(K2:K)))] ...</ rules >
+		: KSentence [metadata "computational rule"] .
+	
+
+		
+	--- mb [applySubst]: rule
+		--- < k >... [K1:K => .k] ...</ k >
+		--- < rules >... subst(K1:K,, K2:K)] ...</ rules >
+		--- : KSentence [metadata "computational rule"] .
+		
+
+	
+	
 endm
