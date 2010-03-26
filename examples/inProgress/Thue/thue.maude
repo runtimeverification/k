@@ -1,0 +1,33 @@
+load ../../../k-prelude
+mod THUE is
+	including K-PROPER .
+	including CONFIG .
+	including K-MAP-EXTRAS .
+	including K-RULES .
+	including K-CONFIG .
+	including PL-INT .
+	including PL-STRING .
+	
+	including K-OPEN-CELLS .
+	---including K-WRAPPERS-LABELS . --- can't include this?
+	
+	including K .
+--- Syntax
+	---op add : -> KProperLabel [metadata "arity 0"] .
+	
+--- Configuration
+	op output : -> CellLabel .
+	op input : -> CellLabel .
+	op k : -> CellLabel .
+	op result : -> CellLabel .
+	
+--- Semantics
+	op eval : K -> Set .
+	op eval : K K -> Set .
+	op inject : Int -> KLabel .
+	op inject : Char -> KLabel .
+	op inject : String -> KLabel .
+	op injectM : Map -> KLabel .
+	op injectL : List -> KLabel .
+
+endm
