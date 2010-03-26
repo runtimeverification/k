@@ -1,27 +1,19 @@
 load ../../k-prelude
-mod IMP++ is
+mod IMP++-SYNTAX is
   including PL-INT .   --- built-in integers
   including PL-VARID . --- built-in variable identifiers
 
-  including K .            --- defines K, List, Map, and Set
-  including CONFIG .       --- defines CellLabel
-  including K-MAP-EXTRAS . --- operations on Maps with lists of keys/values
-
-  including K-RULES .  --- to write k rules with in-place rewriting
-  including K-CONFIG . --- to specify the global configuration term
-  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
-  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
-
----Syntax
   sort AExp .
   subsort VarId Int < AExp .
   op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : VarId -> AExp [prec 30 format (b o d)] .
 
-  sort LExp .
-  subsort LExp < K .
-  op list_ : KList -> AExp [metadata "strict(-1)"] .
+  sort AExpList .
+  subsort AExp < AExpList .
+  op _,_ : AExpList AExpList -> AExpList [assoc id: nil] .
+  op nil : -> AExpList .
+  op list_ : AExpList -> AExp [metadata "strict(1) hybrid"] .
   op head : AExp -> AExp [metadata "strict"] .
   op tail : AExp -> AExp [metadata "strict"] .
 --- BExp
@@ -34,42 +26,45 @@ mod IMP++ is
   sort Stmt .
   op skip : -> Stmt [format (b o)] .
   op _:=_ : VarId AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
-  op _;_ : Stmt Stmt -> Stmt [prec 122 gather (e E) format (d b noi d)] .
+  op _;_ : Stmt Stmt -> Stmt [prec 120 gather (e E) format (d b noi d)] .
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
 
-  op vars_;_ : KList Stmt -> Stmt [prec 121 format (b o b on++i --)] .
+  op var_;_ : VarId Stmt -> Stmt [prec 121 format (b o b on++i --)] .
   ops print_ :  AExp -> Stmt [prec 59 metadata "strict" format (b o d)] .
   op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
   ops halt  : -> Stmt [format (b o)] .
+endm
 
----Programs
+mod IMP++-PROGRAMS is
+  including IMP++-SYNTAX .
+
   ops pSum pCollatz pList : -> Stmt .
   ops n s i limit steps nr t  d nn : -> VarId [format (g o)].
   eq pList =
-    vars n ;
+    var n ;
     (n := 10 ;
-    print(head(list(n,,2,,3)))) .
+    print(head(list(n,2,3)))) .
   eq pSum = 
-        vars n,,s,,i ; 
-         (n := 1000 ;
+        var n ; var s ; var i ; 
+         n := 1000 ;
          s := 0 ;
          i := n ;
          while 1 <= i do (
            s := s + i ;
            i := i + -1 
           );
-          print(s)) .
+          print(s) .
 
   eq pCollatz = 
-            vars limit,,steps,,nr,,t ; 
-             (limit := 10 ; 
+            var limit ; var steps ; var nr ; var t ; 
+             limit := 10 ; 
              steps := 10 ; nr := 1 ; t := 2 ;
-             while ++ nr <= limit do (vars n ; 
-                (n := nr ;
+             while ++ nr <= limit do (var n ; 
+                n := nr ;
                 spawn(
-                  while 2 <= n do (vars d,,nn ; 
-                     (nn := ++ steps ; 
+                  while 2 <= n do (var d ; var nn ; 
+                     nn := ++ steps ; 
                      d := 0 ;
                      nn := n ;
                      while 2 <= nn do (
@@ -77,17 +72,26 @@ mod IMP++ is
                        nn := nn + -2
                      ) ;
                      if 1 <= nn then n := n + n + n + 1
-                      else n := d )
+                      else n := d 
                   ) ;
                   n := ++ t
-                ))
+                )
              ) ;
              while t <= limit do skip ;
-             print(steps))
+             print(steps)
 .
+endm
 
+mod IMP++ is
+  including IMP++-PROGRAMS .
+  including K .            --- defines K, List, Map, and Set
+  including CONFIG .       --- defines CellLabel
 
----Semantics
+  including K-RULES .  --- to write k rules with in-place rewriting
+  including K-CONFIG . --- to specify the global configuration term
+  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
+  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
+
   subsort AExp BExp Stmt < K .
   subsort Int < KResult .
   subsort Bool < KResult .
@@ -96,18 +100,16 @@ mod IMP++ is
   vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : VarId .
   var N N1 N2 : Nat .
   var Top Threads Thread : Set .  var Env Env' Store : Map .  var Output : List .
-  var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var Xl : KList .
-  var RL : KResultList .
+  var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var El : AExpList .
   mb configuration < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
   op startConfig : Stmt -> Set .
   eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .m </ env > </ thread > </ threads > < store > .m </ store >  < output > .l </ output > < nextLoc > 0 </ nextLoc > </ T > .
   
----  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
+  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
-  op vl_ : KList -> KResult .  
-  mb rule [list(RL) => vl RL] : KSentence [metadata "structural"] .
-  mb rule [head(vl(I,,?)) => I] : KSentence . 
-  mb rule [tail(vl(I,,RL)) => vl RL] : KSentence . 
+
+  mb rule [head(list(I,?)) => I] : KSentence . 
+  mb rule [tail(list(I,El)) => list(El)] : KSentence . 
 
   mb rule [skip => .k] : KSentence .
   mb rule [not(T) => notBool T] : KSentence .
@@ -116,7 +118,7 @@ mod IMP++ is
   mb rule [false and ? => false] : KSentence .
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
-  mb rule [S1 ; S2 => S1 ~> S2] : KSentence .
+  mb rule [S1 ; S2 => S1 ~> S2] : KSentence [metadata "structural"] .
   mb rule < k > [X => I] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> I ...</ store > : KSentence .
   mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store >  : KSentence .
   mb rule < k > [X := I => .k] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => I] ...</ store > : KSentence .
@@ -128,11 +130,11 @@ mod IMP++ is
 
   mb rule [< T >... < threads > .s </ threads > < output > Output </ output > ...</ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
 
-  mb rule < k > [vars Xl ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[N .. N +Int length(Xl) / Xl]]</ env > < store >... [.m =>  N .. N +Int length(Xl) |-> 0] ...</ store > < nextLoc > [N => N +Int length(Xl)] </ nextLoc >  : KSentence [metadata "structural"] .
+  mb rule < k > [var X ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[N / X]]</ env > < store >... [.m =>  N |-> 0] ...</ store > < nextLoc > [N => N +Int 1] </ nextLoc >  : KSentence [metadata "structural"] .
 
   op env : Map -> K .
+  mb rule [env(Env) ~> env(Env') => env(Env')] : KSentence [metadata "structural"] .
   mb rule < k > [env(Env) => .k] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
-
-  op _.._ : Nat Nat -> KList .
-  mb rule [N1 .. N2 => if N1 >=Int N2 then .kl else (N1,, (sNat N1) .. N2) fi] : KSentence [metadata "structural"] .
 endm
+
+mod IMPPP is including IMP++ . endm

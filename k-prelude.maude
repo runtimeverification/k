@@ -31,12 +31,13 @@ mod K is
   eq length(.kl) = 0 .
   eq length(K:K,,KL:KList) = sNat length(KL:KList) . 
 
-  sorts KLabel KResultLabel .
+  sorts KLabel KResultLabel KHybridLabel .
 
-  subsorts KResultLabel < KLabel .
+  subsorts KResultLabel KHybridLabel < KLabel .
   
   op _`(_`) : KLabel KList -> NeK [prec 0 gather(& &)] .
   op _`(_`) : KResultLabel KList -> KResult [ditto] .
+  op _`(_`) : KHybridLabel KResultList -> KResult [ditto] .
 
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
@@ -99,6 +100,7 @@ mod K-PROPER is
   op _`(_`) : KProperLabel KList -> KProper [ditto] .
   op _`,`,_ : NeKProperList KList -> NeKProperList [ditto] .
   op _`,`,_ : KList NeKProperList -> NeKProperList [ditto] .
+  op _`(_`) : KHybridLabel NeKProperList -> KProper [ditto] .
 endm
 
 --- Strictness Level

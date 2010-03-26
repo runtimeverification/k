@@ -5,9 +5,9 @@ load metadata-parsing
 mod STRICT-METADATA-META is
   including STRICTOPS2CXT .
   including PARSE-METADATA .
-  var Q : Qid . var AS : AttrSet . var Str : String .
-  eq strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS metadata(Str)] .)
-   = strictOps2cxtOp(op Q : nil -> 'KProperLabel [AS metadataParse(Str)] .) .
+  var Q : Qid . var AS : AttrSet . var Str : String . var Ty : Type .
+  eq strictOps2cxtOp(op Q : nil -> Ty [AS metadata(Str)] .)
+   = strictOps2cxtOp(op Q : nil -> Ty [AS metadataParse(Str)] .) .
 endm
 
 mod STRICTOPS2CXT-META is

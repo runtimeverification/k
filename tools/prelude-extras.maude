@@ -284,6 +284,7 @@ fmod META-MODULE-EXTRAS is
   vars EqS EqS' : EquationSet .
   vars RlS RlS' : RuleSet .
   vars SS SS' : SortSet .  var S S' : Sort .
+  vars TS TS' : TypeSet .  var T' : Type .
   vars IL IL' IL'' : ImportList .  var I : Import .
   vars U U' : Module .
   var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
@@ -352,6 +353,21 @@ fmod META-MODULE-EXTRAS is
   eq getSubsorts(SSDS (subsort S < S' .), SS ; S') 
    = getSubsorts(SSDS, SS ; S')  (subsort S < S' .) .
   eq getSubsorts(SSDS, SS) = none [owise] .
+
+  op getSupersorts : SubsortDeclSet SortSet -> SubsortDeclSet .
+  eq getSupersorts(none, SS) = none .
+  eq getSupersorts(SSDS, SS) = $getSupersorts(SSDS, SS, none) [owise] .
+
+  op $getSupersorts : SubsortDeclSet SortSet SubsortDeclSet -> SubsortDeclSet .
+  eq $getSupersorts(SSDS (subsort S < S' .), SS, SSDS') 
+   = if S in SS then $getSupersorts(SSDS, SS, SSDS' (subsort S < S' .))
+     else $getSupersorts(SSDS, SS, SSDS') fi .
+  eq $getSupersorts(none, SS, SSDS) = SSDS [print "supersorts: " SSDS] .
+
+  op getSupersorts : SubsortDeclSet -> SortSet .
+  eq getSupersorts(SSDS (subsort S < S' .)) 
+   = getSupersorts(SSDS) ; S' .
+  eq getSupersorts(none) = none .
 
   op getOps : OpDeclSet SortSet -> OpDeclSet .
   eq getOps(OPDS (op Q : Tl -> S' [AS] .), SS ; S') 
@@ -487,9 +503,9 @@ fmod META-MODULE-EXTRAS is
   eq dup(T, 0) = nil .
   eq dup(T, s(N)) = dup(T, N) T .
 
-  op _in_ : Type SortSet -> Bool .
-  eq S in (S ; SS) = true .
-  eq T in SS = false [owise] .
+  op _in_ : Type TypeSet -> Bool .
+  eq T in (T ; TS) = true .
+  eq T in TS = false [owise] .
 
   op _in_ : SubsortDecl SubsortDeclSet -> Bool .
   eq SSD in (SSD SSDS) = true .
@@ -499,15 +515,14 @@ fmod META-MODULE-EXTRAS is
   eq Op in (Op OPDS) = true .
   eq Op in OPDS = false [owise] .
 
-  op intersection : SortSet SortSet -> SortSet .
-  op $intersect : SortSet SortSet SortSet -> SortSet .
-  var A : SortSet .
+  op intersection : TypeSet TypeSet -> TypeSet .
+  op $intersect : TypeSet TypeSet TypeSet -> TypeSet .
+  var A : TypeSet .
 
-  eq intersection (SS, none) = none .
-  eq intersection (SS, SS') = $intersect (SS, SS', none) [owise] .
-  eq $intersect (none, SS', A) = A .
-  eq $intersect (S ; SS, SS', A) = $intersect (SS, SS', if S in SS' then S ; A else
-    A fi) .
+  eq intersection (TS, none) = none .
+  eq intersection (TS, TS') = $intersect (TS, TS', none) [owise] .
+  eq $intersect (none, TS', A) = A .
+  eq $intersect (T ; TS, TS', A) = $intersect (TS, TS', if T in TS' then T ; A else A fi) .
 
   op removeSorts : SortSet SortSet -> SortSet .
   eq removeSorts(SS, none) = SS .
@@ -568,12 +583,32 @@ fmod META-MODULE-EXTRAS is
   op generateImports : SortSet ~> ImportList .
   eq generateImports(none) = nil .
   eq generateImports(S ; SS) = (including S .) generateImports(SS) .
+
+
+  op coGetOps : OpDeclSet SortSet ~> OpDeclSet .
+  eq coGetOps(none, SS) = none .
+  eq coGetOps(OPDS, SS) = $coGetOps(OPDS, SS, none) [owise] .
+
+  op $coGetOps : OpDeclSet SortSet OpDeclSet ~> OpDeclSet .
+  eq $coGetOps(none, SS, OPDS) = OPDS .
+  eq $coGetOps(OPDS Op, SS, OPDS') = if taintedOp(Op, SS) then $coGetOps(OPDS, SS, Op OPDS') else $coGetOps(OPDS, SS, OPDS') fi .
+
+  op taintedOp : OpDecl SortSet -> Bool .
+  eq taintedOp((op Q : Tl -> T [AS] .), SS) = (intersection(list2set(Tl), SS) =/= none) .
+
+  op list2set : TypeList -> TypeSet .
+  eq list2set((T, Tl)) = T ; list2set(Tl) .
+  eq list2set(nil) = none .
 endfm
 
-fmod JOIN-METADATA is
+fmod METADATA-EXTRAS is
   including META-MODULE .
-  var S S' : String .
+  var S S' : String .  var AS : AttrSet .
   eq metadata(S) metadata(S') = metadata(S + " " + S') .
+
+  op metadataString : AttrSet -> String .
+  eq metadataString(AS metadata(S)) = S .
+  eq metadataString(AS) = "" [owise] .
 endfm
 
 fmod META-LEVEL-EXTRAS is

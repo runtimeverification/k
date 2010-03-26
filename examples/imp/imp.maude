@@ -42,7 +42,12 @@ mod IMP is
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b n++i --)] .
 --- Pgm
   sort Pgm .
-  op vars_;_ : KList Stmt -> Pgm [prec 70 format (nb o d ni d)] .
+
+  sort VarIdList .
+  subsort AExp < VarIdList .
+  op _,_ : VarIdList VarIdList -> VarIdList [assoc id: nil] .
+  op nil : -> VarIdList .
+  op vars_;_ : VarIdList Stmt -> Pgm [prec 70 format (nb o d ni d)] .
 
 
 ----------------
@@ -53,7 +58,7 @@ ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> VarId .
 ops sumPgm collatzPgm countPrimesPgm : -> Pgm .
 ops collatzStmt multiplicationStmt primalityStmt : -> Stmt .
 eq sumPgm = (
-     vars n,, s ; (
+     vars n, s ; (
      n := 100 ;
      s := 0 ;
      while not(n <= 0) do (
@@ -74,7 +79,7 @@ eq collatzStmt = (
 ) .
 
 eq collatzPgm = (
-   vars m,, n,, q,, r,, s ; (
+   vars m, n, q, r, s ; (
    m := 10 ;
    s := 0 ;
    while not (m <= 2) do (
@@ -112,7 +117,7 @@ eq primalityStmt = (
 ) .
 
 eq countPrimesPgm = (
-   vars i,, m,, n,, q,, r,, s,, t,, x,, y,, z ; (
+   vars i, m, n, q, r, s, t, x, y, z ; (
    m := 10 ;
    s := 0 ; n := 2 ;
    while n <= m do (
@@ -132,7 +137,7 @@ eq countPrimesPgm = (
 
   ops state : -> CellLabel .
   vars I I1 I2 : Int .  var T : Bool .  var X : VarId .  var Sigma : Map .
-  var B : BExp .  var S S1 S2 : Stmt .  var Xl : KList .  var K : K .
+  var B : BExp .  var S S1 S2 : Stmt .  var Xl : VarIdList .  var K : K .
 
   mb configuration < T > < k > K </ k > < state > Sigma </ state > </ T > : KSentence .
 
@@ -152,5 +157,6 @@ eq countPrimesPgm = (
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
   mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
-  mb rule < k > [vars Xl ; S => S] </ k > < state > [.m => Xl |-> 0] </ state > : KSentence .
+  mb rule < k > vars [X => nil],Xl ; S </ k > < state >... [.m => X |-> 0] ...</ state > : KSentence [metadata "structural"] .
+  mb rule < k > [vars nil ; S => S] </ k >  : KSentence .
 endm

@@ -68,18 +68,18 @@ fmod META-K-MODULE is
   var S : Sort .  var T : Type .  var SSDS : SubsortDeclSet . 
   vars OPDS : OpDeclSet .
 
-  ops EmptyK KProper KResult NeK K KLabel KProperLabel KResultLabel : -> Sort .
-  ops EmptyKList ProperList NeProperList ResultList NeResultList NeKList KList : -> Sort .
+  ops EmptyK KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
+  ops EmptyKList NeProperList ResultList NeResultList NeKList KList : -> Sort .
   eq EmptyK = 'EmptyK .  eq KProper = 'KProper .  eq KResult = 'KResult .
   eq NeK = 'NeK .  eq K = 'K .
-  eq KLabel = 'KLabel .
+  eq KLabel = 'KLabel .  eq KHybridLabel = 'KHybridLabel .
   eq KProperLabel = 'KProperLabel .  eq KResultLabel = 'KResultLabel .
-  eq EmptyKList = 'EmptyKList .  eq ProperList = 'KProperList .  eq ResultList = 'KResultList .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeKResultList .  eq KList = 'KList .  eq NeKList = 'NeKList .
+  eq EmptyKList = 'EmptyKList .   eq ResultList = 'KResultList .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeKResultList .  eq KList = 'KList .  eq NeKList = 'NeKList .
   op ksorts : -> SortSet [memo] .
   eq ksorts = EmptyK ; KProper ; KResult ; NeK ; K .
 
   op klistSorts : -> SortSet [memo] .
-  eq klistSorts = EmptyKList ; ProperList ; NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
+  eq klistSorts = EmptyKList ; NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
 
   op isKSort : Type -> Bool [memo] .
   eq isKSort(T) = T in ksorts .
@@ -95,26 +95,45 @@ fmod META-K-MODULE is
     subsort NeK < K .
     ) .
 
+  op ksupersorts : -> SubsortDeclSet [memo] .
+  eq ksupersorts = (
+    subsort EmptyK < K .
+    subsort KProper < NeK .
+    subsort KProper < NeProperList .
+    subsort KResult < NeK .
+    subsort NeK < K .
+      subsort K < KList .
+      subsort K < NeKList .
+      subsort KResult < NeResultList .
+      subsort KResult < ResultList .
+      subsort KResult < NeKList .
+      subsort KResult < NeK .
+     ) .
+
   op kops : -> OpDeclSet [memo] .
   eq kops = (
     op '.k : nil -> EmptyK [none] .
     op '_`(_`) : KLabel KList -> NeK [none] .
     op '_`(_`) : KProperLabel KList -> KProper [none] .
     op '_`(_`) : KResultLabel KList -> KResult [none] .
+    op '_`(_`) : KHybridLabel NeProperList -> KProper [none] .
+    op '_`(_`) : KHybridLabel ResultList -> KResult [none] .
     op '_~>_ : K K -> K [none] .
     op '`[`] : nil -> K [none] .
   ) .
 
- op makeKLabel : Sort -> Sort .
- ceq makeKLabel(S) = KResultLabel if S = KResult .
- ceq makeKLabel(S) = KProperLabel if S = KProper .
- eq makeKLabel(S) = KLabel [owise] .
- 
  op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .
  eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) . 
  
+ op pseudoKSupersorts : SubsortDeclSet -> SubsortDeclSet .
+ eq pseudoKSupersorts(SSDS) = getSupersorts(removeSubsorts(SSDS,ksupersorts), ksorts) . 
+ 
   op pseudoKOps : OpDeclSet -> OpDeclSet .
   eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
+
+  op pseudoKListSorts : SubsortDeclSet OpDeclSet -> SubsortDeclSet .
+  eq pseudoKListSorts(SSDS, OPDS)
+   = (getSupersorts(removeSubsorts(SSDS,ksupersorts), K ; KResult)) .
 endfm
 
 fmod META-K-RULES is including K-SORTS .
@@ -283,7 +302,7 @@ endfm
 fmod META-K-LABELS is
   including META-K-MODULE .
   including META-LEVEL .
-  var Q : Qid . var T : Type . 
+  var Q : Qid . var T : Type .  var Str : String .
 
   op klistLabelS : -> Qid .
   eq klistLabelS = 'kList .
@@ -294,10 +313,11 @@ fmod META-K-LABELS is
   op mkListLabel : Qid -> Term .
   eq mkListLabel(Q) = klistLabelS[upTerm(string(Q))] .
 
-  op mkKLabelSort : Type -> Type .
-  eq mkKLabelSort(T) 
-   = if T == KProper then KProperLabel
-     else if T == KResult then KResultLabel else KLabel fi fi .
+  op mkKLabelSort : Type String -> Type .
+  eq mkKLabelSort(T,Str) 
+   = if find(Str,"hybrid",0) :: Nat then KHybridLabel
+     else if T == KProper then KProperLabel
+     else if T == KResult then KResultLabel else KLabel fi fi fi .
 endfm
 
 fmod K-STRICTNESS-OPS is including META-LEVEL .
@@ -314,11 +334,19 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   eq freezeVariable(S, V:Variable) = kApply('freezeVar[upTerm(S)],V:Variable) .
 endfm
 
+fmod LIST-ATTRS is
+  including META-MODULE .
+  op klist : Nat Qid Type -> Attr .
+  op klist : Nat Term -> Attr .
+endfm
+
 fmod STRICT-ATTRS is
   including META-MODULE .
   including NAT-LIST-EXTRAS .
+  including LIST-ATTRS .
   ops kstrict seqkstrict : IntList -> Attr .
   op karity : Nat -> Attr .
+  op khybrid : -> Attr .
 endfm
 
 fmod SYNTAX-ATTRS is
@@ -342,5 +370,32 @@ fmod K-ATTRS is
 endfm
 
 
+
+fmod K-META-LISTS is including K-META-OPS .
+  including META-K-MODULE .
+  including META-TERM-EXTRAS .
+  including LIST-ATTRS .
+
+  var Q : Qid . var T : Type . var Trm : Term . var Trms : TermList .
+  var N : Nat .
+  op klistType : Type ~> Type .
+  eq klistType('K) = 'KList  .
+  eq klistType('KResult) = 'KResultList .
+
+  op klabelType : Type ~> Type .
+  eq klabelType(Q) = if Q == K then KLabel else if Q ==  KResult then KResultLabel else KHybridLabel fi fi .
+  
+  op wrapList : Type Term TermList ~> Term .
+  eq wrapList(T, Q[Trm], Trms) = kApply(listWrapperT(Q,KHybridLabel),Trms) .
+
+
+  op listWrapperS : Qid -> Qid .
+  eq listWrapperS(Q) = qid("\"" + string(Q) + "\"") .
+  op listWrapperT : Qid Type -> Constant .
+  eq listWrapperT(Q,T) = mkConstant(listWrapperS(Q),klabelType(T)) .
+
+  eq klist(N,Q,T) = klist(N, listWrapperT(Q,T)) .
+   
+endfm
 
 

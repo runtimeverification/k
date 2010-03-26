@@ -8,7 +8,7 @@ fmod MAKE-ALL-LABELS is
  including META-K-LABELS .
  including META-K-WRAPPERS .
  including K-META-OPS .
- including JOIN-METADATA .
+ including METADATA-EXTRAS .
  including CONVERSION .
 
  var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
@@ -150,11 +150,11 @@ fmod MAKE-ALL-LABELS is
 
  op processOp : OpDecl ~> OpDeclSet .
  eq processOp(op Q : T -> T' [AS metadata("builtin wrapper")] .)
-  = (op Q : T -> mkKLabelSort(T') [AS metadata("builtin wrapper")] .) .
+  = (op Q : T -> mkKLabelSort(T',"") [AS metadata("builtin wrapper")] .) .
  eq processOp(op Q : T -> T' [AS metadata("list wrapper")] .)
   = none .
  eq processOp(op Q : Tl -> T [AS] .)
-  = (op mkKLabel(Q) : nil -> mkKLabelSort(T) [removeNaryAttrs(AS) metadata("arity " + string(arity(Tl),10))] .) .
+  = (op mkKLabel(Q) : nil -> mkKLabelSort(T,metadataString(AS)) [removeNaryAttrs(AS) metadata("arity " + string(arity(Tl),10))] .) [owise] .
 endfm
 
 

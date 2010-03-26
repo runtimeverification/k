@@ -146,6 +146,8 @@ runMaude "$OUTPUT $SYNTAX2K" "Merging syntax sorts into K"
 
 LANG="${LANG}-K"
 
+
+
 KPROPER="
 load \"$KBASE/tools/add-k-proper-interface\"
 loop add-k-proper .
@@ -178,6 +180,15 @@ loop make-k-rules .
 "
 
 runMaude "$OUTPUT $K_RULES"  "Generating Maude rules from K rules"
+
+LISTS2K="
+load \"$KBASE/tools/lists-to-k-interface\"
+loop lists-to-k .
+(makeLists2k $LANG -L .)
+"
+runMaude "$OUTPUT $LISTS2K" "Merging lists sorts into K"
+
+LANG="${LANG}-L"
 
 SUBSORTS="
 load \"$KBASE/tools/subsorts-to-wrappers-interface\"
