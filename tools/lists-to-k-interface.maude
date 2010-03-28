@@ -1,15 +1,17 @@
 load lists-to-k
-load printing
 
 mod LISTS-TO-K-META is
   including LISTS-TO-K .
   including META-LEVEL-EXTRAS .
-  var NoLists2k Lists2k : String .
+  var NoLists2k Lists2k : String .  var M : Module .
   var Q QNoLists2k QLists2k : Qid .  var IL : ImportList .
   op makeLists2k : String String ~> Module .
   eq makeLists2k(NoLists2k, Lists2k) = makeLists2k(qid(NoLists2k), qid(Lists2k)) .
   op makeLists2k : Qid Qid ~> Module .
   eq makeLists2k(QNoLists2k,QLists2k) = makeLists2k(QLists2k, upModule(QNoLists2k, false), upModule(QNoLists2k, true), upImports(getImports(upModule(QNoLists2k, false)))) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = setName(makeLists2k(getName(M), M, flatten(M), empty), getName(M)) .
 endm
 
 mod LISTS-TO-K-LOOP is 

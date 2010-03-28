@@ -113,139 +113,24 @@ checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
 
 OUTPUT=$(<$FILE.maude)
 
-MANY_MODULES="
-load  \"$KBASE/tools/many-modules-interface\"
-loop many-modules .
-(manyModules $LANG $LANG .)
-"
-runMaude "$OUTPUT $MANY_MODULES" "Flattening entire definition in a single module"
-
-OPEN_CELLS="
-load \"$KBASE/tools/open-cells-interface\"
-loop open-cells .
-(resolveOpenCells $LANG $LANG .)
-"
-runMaude "$OUTPUT $OPEN_CELLS" "Transforming open cells to normal cells through anonymous variables"
-
-
-
-ANON_CONSTS="
-load \"$KBASE/tools/anon-consts-interface\"
-loop anon-consts .
-(resolveAnonConsts $LANG $LANG .)
-"
-runMaude "$OUTPUT $ANON_CONSTS" "Transforming anonymous constants to anonymous variables"
-
-
-SYNTAX2K="
-load \"$KBASE/tools/syntax-to-k-interface\"
-loop syntax-to-k .
-(syntax2k $LANG -K .)
-"
-runMaude "$OUTPUT $SYNTAX2K" "Merging syntax sorts into K"
-
-LANG="${LANG}-K"
-
-
-
-KPROPER="
-load \"$KBASE/tools/add-k-proper-interface\"
-loop add-k-proper .
-(addKProper $LANG -PROPER .)
-"
-runMaude "$OUTPUT $KPROPER" "Adding the KProper Sort"
-
-LANG="${LANG}-PROPER"
-
-CONTEXT_TRANSFORMERS="
-load \"$KBASE/tools/context-transformers-interface\"
-loop context-transformers .
-(resolveKCxt $LANG $LANG $LANG .)
+DEFAULTH="
+set include PL-BOOL off .
+set include BOOL on .
+load \"$KBASE/tools/prelude-extras\"
+load \"$KBASE/tools/meta-k\"
+load \"$KBASE/tools/printing\"
 "
 
-runMaude "$OUTPUT $CONTEXT_TRANSFORMERS" "Applying Context Transformers"
-
-ANON_VARS="
-load \"$KBASE/tools/anon-vars-interface\"
-loop anon-vars .
-(resolveAnonVars $LANG $LANG .)
+COMPILE="
+load  \"$KBASE/tools/all-tools\"
+loop compile .
+(compile $LANG .)
 "
-
-runMaude "$OUTPUT $ANON_VARS"  "Resolving Anonymous Variables"
-
-K_RULES="
-load \"$KBASE/tools/make-k-rules-interface\"
-loop make-k-rules .
-(resolveKRules $LANG $LANG .)
-"
-
-runMaude "$OUTPUT $K_RULES"  "Generating Maude rules from K rules"
-
-LISTS2K="
-load \"$KBASE/tools/lists-to-k-interface\"
-loop lists-to-k .
-(makeLists2k $LANG -L .)
-"
-runMaude "$OUTPUT $LISTS2K" "Merging lists sorts into K"
-
-LANG="${LANG}-L"
-
-SUBSORTS="
-load \"$KBASE/tools/subsorts-to-wrappers-interface\"
-loop subsorts-to-wrappers .
-(resolveKSubsorts $LANG 0 .)
-"
-
-runMaude "$OUTPUT $SUBSORTS"  "Transforming subsorted builtins into injections"
-
-ARGUMENTS="
-load \"$KBASE/tools/homogenous-arguments-interface\"
-loop homogenous-arguments .
-(makeHomogenousArgs ${LANG}0 1 .)
-"
-
-runMaude "$OUTPUT $ARGUMENTS" "Wrapping non-K arguments"
-
-LABELS="
-load \"$KBASE/tools/make-all-labels-interface\"
-loop make-all-labels .
-(makeAllLabels ${LANG}01 -LABELS .)
-"
-
-runMaude "$OUTPUT $LABELS" "Reducing all K constructs to K labels"
-
-COMPILED="$OUTPUT"
-
-STRICTCXT="
-load \"$KBASE/tools/strict-ops2cxt-interface\"
-loop strict-ops2cxt .
-(strictOps2cxt ${LANG}01-LABELS ${LANG}-STRICTNESS .)
-"
-
-runMaude "$OUTPUT $STRICTCXT" "Generating Strictness Axioms" "$COMPILED"
-
-STRICTEQS="
-load \"$KBASE/tools/strict-cxt2eqs-interface\"
-loop strict-cxt2eqs .
-(strictCxt2eqs ${LANG}01-LABELS ${LANG}-STRICTNESS ${LANG}-STRICTNESS .)
-"
-runMaude "$COMPILED $OUTPUT $STRICTEQS" "Generating Strictness Equations" "$COMPILED"
-
-TEST="
-$COMPILED
-
-$OUTPUT
-mod ${LANG0}-TEST is
-  including ${LANG}01-LABELS .
-  including ${LANG}-STRICTNESS .
-endm
-"
-
-checkMaude "$TEST" "Putting everything together"
+runMaude "$OUTPUT $COMPILE" "Compiling the definition"
 
 echo "
 load \"$KBASE/k-prelude\"
-$TEST
+$OUTPUT
 " > $OUTPUT_FILE.maude
 
 echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."

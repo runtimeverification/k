@@ -171,7 +171,7 @@ mod BEFUNGE is
 		< stack > [.l => l(inject(0)(.kl))] </ stack >
 		: KSentence [metadata "structural"] .
 	mb [refillStack]: rule
-		< stack > [Li:ListItem => Li:ListItem, l(inject(0)(.kl))] </ stack >
+		< stack > [Li:ListItem => Li:ListItem l(inject(0)(.kl))] </ stack >
 		: KSentence [metadata "structural"] .
 	
 	mb [Load]: rule
@@ -259,7 +259,7 @@ mod BEFUNGE is
 	--- : is the duplication command.  It makes a copy of the top element of the stack
 	mb [dup]: rule
 		< k > [dup(.kl) => .k] ...</ k >
-		< stack > [Li:ListItem => Li:ListItem, Li:ListItem] ...</ stack >
+		< stack > [Li:ListItem => Li:ListItem  Li:ListItem] ...</ stack >
 		: KSentence [metadata "computational rule"] .	
 	
 	--- # is the 'bridge' command... it causes the next command which would normally be executed to be skipped over, and not executed.
@@ -301,7 +301,7 @@ mod BEFUNGE is
 		
 	mb [add]: rule
 		< k > [add(.kl) => .k] ...</ k >
-		< stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int +Int I1:Int)(.kl))] ...</ stack >
+		< stack > [l(inject(I1:Int)(.kl))  l(inject(I2:Int)(.kl)) => l(inject(I2:Int +Int I1:Int)(.kl))] ...</ stack >
 		: KSentence [metadata "computational rule"] .
 	--- mb [subtract]: rule
 		--- < k > [subtract(.kl) => .k] ...</ k >

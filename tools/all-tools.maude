@@ -1,0 +1,94 @@
+set include PL-BOOL off .
+set include BOOL on .
+load prelude-extras
+load meta-k
+load printing
+load many-modules-interface
+load open-cells-interface
+load anon-consts-interface
+load syntax-to-k-interface
+load add-k-proper-interface
+load context-transformers-interface
+load anon-vars-interface
+load make-k-rules-interface
+load lists-to-k-interface
+load subsorts-to-wrappers-interface
+load homogenous-arguments-interface
+load make-all-labels-interface
+load metadata-parsing
+load strict-ops2cxt-interface
+load strict-cxt2eqs-interface
+
+fmod COMPILE-META is
+  including META-LEVEL .
+  var Q : Qid . var QIL : QidList . var M : Module . 
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) [print "Got to " Q] .
+  op error : -> [Module] .
+
+  op compile : Qid ~> Module .
+  eq compile(Q) = compile(upModule(Q, false)) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = compile(M, 'MANY-MODULES 'OPEN-CELLS 'ANONYMOUS-CONSTANTS 'SYNTAX-TO-K 'ADD-KPROPER 'CONTEXT-TRANSFORMERS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS
+  ) .
+  op compile : Module QidList ~> Module .
+  eq compile(M,nil) = M .
+  eq compile(M, Q QIL) =  compile(
+    downTerm(getTerm(
+             metaReduce(wrapper(qid(string(Q) + "-META")),
+                        'compile[upTerm(M)])), error)
+     , QIL) .
+endfm
+
+mod COMPILE-LOOP is
+  including LOOP-MODE + COMPILE-META .
+  including MODULE-META-PRETTY-PRINT .
+  op compile : -> System .
+  op idle : -> State .
+  var Q : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq compile = [nil, idle, 
+ 'Usage: 'compile '<ModuleName> '. ] .
+
+  op error : -> [Module] .
+  op print : [Module] -> QidList .
+  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
+  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['compile Q QIL, idle, QIL'] 
+   => [QIL, idle, print(FM )] 
+   if FM := compile(Q) .
+endm
+
+
+---(
+loop many-modules .
+(manyModules $LANG $LANG .)
+loop open-cells .
+(resolveOpenCells $LANG $LANG .)
+loop anon-consts .
+(resolveAnonConsts $LANG $LANG .)
+loop syntax-to-k .
+(syntax2k $LANG -K .)
+loop add-k-proper .
+(addKProper $LANG -PROPER .)
+loop context-transformers .
+(resolveKCxt $LANG $LANG $LANG .)
+loop anon-vars .
+(resolveAnonVars $LANG $LANG .)
+loop make-k-rules .
+(resolveKRules $LANG $LANG .)
+loop lists-to-k .
+(makeLists2k $LANG -L .)
+loop subsorts-to-wrappers .
+(resolveKSubsorts $LANG 0 .)
+loop homogenous-arguments .
+(makeHomogenousArgs ${LANG}0 1 .)
+loop make-all-labels .
+(makeAllLabels ${LANG}01 -LABELS .)
+loop strict-ops2cxt .
+(strictOps2cxt ${LANG}01-LABELS ${LANG}-STRICTNESS .)
+loop strict-cxt2eqs .
+(strictCxt2eqs ${LANG}01-LABELS ${LANG}-STRICTNESS ${LANG}-STRICTNESS .)
+---)

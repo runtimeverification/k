@@ -1,15 +1,17 @@
 load make-k-rules
-load printing
 
 mod MAKE-K-RULES-META is
   including MAKE-K-RULES .
   including META-LEVEL .
   var KRules NoKRules : String .
-  var QKRules QNoKRules : Qid .
+  var QKRules QNoKRules : Qid .  var M : Module .
   op resolveKRules : String String ~> Module .
   eq resolveKRules(KRules, NoKRules) = resolveKRules(qid(KRules), qid(NoKRules)) .
   op resolveKRules : Qid Qid ~> Module .
   eq resolveKRules(QKRules,QNoKRules) = resolveKRules(QNoKRules, upModule(QKRules, false)) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = resolveKRules(getName(M), M) .
 endm
 
 mod MAKE-K-RULES-LOOP is 

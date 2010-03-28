@@ -1,10 +1,9 @@
 load anon-vars
-load printing
 
 mod ANONYMOUS-VARIABLES-META is
   including ANONYMOUS-VARIABLES .
   including META-LEVEL .
-  var AnonVars NoAnonVars : String .
+  var AnonVars NoAnonVars : String .  var M : Module .
   var QAnonVars QNoAnonVars : Qid .
   op resolveAnonVars : String String ~> Module .
   eq resolveAnonVars(AnonVars, NoAnonVars) 
@@ -12,6 +11,9 @@ mod ANONYMOUS-VARIABLES-META is
   op resolveAnonVars : Qid Qid ~> Module .
   eq resolveAnonVars(QAnonVars,QNoAnonVars) 
    = resolveAnonymousVars(QNoAnonVars, upModule(QAnonVars, false)) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = resolveAnonymousVars(getName(M), M) .
 endm
 
 mod ANONYMOUS-VARIABLES-LOOP is 

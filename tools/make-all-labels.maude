@@ -1,6 +1,3 @@
-load prelude-extras
-load meta-k
-
 fmod MAKE-ALL-LABELS is
  including META-TERM-EXTRAS .
  including META-MODULE-EXTRAS .
@@ -110,6 +107,8 @@ fmod MAKE-ALL-LABELS is
  eq labelsT(V, T, M, OPDS, OPDM) = V .
  eq labelsT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
   = 'if_then_else_fi[labelsTs(Trms, 'Bool T T, M, OPDS,OPDM)] .
+ eq labelsT('_==Bool_[T1,T2],T,M,OPDS,OPDM)
+  = '_==Bool_[labelsTs((T1,T2), leastSort(M,T1) leastSort(M, T2), M, OPDS,OPDM)] .
  eq labelsT(Q[Trms], T, M, OPDS, OPDM)
   = labelsT(Q[Trms], T, M, OPDS, OPDM, findOp(M, OPDS,Q, leastSorts(M, Trms), T)) [owise] .
 

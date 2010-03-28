@@ -252,7 +252,7 @@ fmod K-META-CONFIG is
   eq emptyCt(S) = if S == Set then mkConstant('.s,Set) else if S == Map then mkConstant('.m,Map) else if S == List then mkConstant('.l, List) else if S == K then mkConstant('.k, K) else 'error.K fi fi fi fi .
 
   op ctor : Sort -> Qid .
-  eq ctor(S) = if S == Set then '__ else if S == Map then '__ else if S == List then '_`,_ else if S == K then '_~>_ else 'error fi fi fi fi .
+  eq ctor(S) = if S == Set then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else 'error fi fi fi fi .
 endfm
 
 fmod K-META-OPEN-CELLS is 

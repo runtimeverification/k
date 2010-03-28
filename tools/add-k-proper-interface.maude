@@ -1,15 +1,16 @@
 load add-k-proper
-load printing
 
 mod ADD-KPROPER-META is
   including ADD-KPROPER .
   including META-LEVEL-EXTRAS .
-  var NoKProper KProper : String .
+  var NoKProper KProper : String .  var M : Module .
   var Q QNoKProper QKProper : Qid .  var IL : ImportList .
   op addKProper : String String ~> Module .
   eq addKProper(NoKProper, KProper) = addKProper(qid(NoKProper), qid(KProper)) .
   op addKProper : Qid Qid ~> Module .
   eq addKProper(QNoKProper,QKProper) = addKProper(QKProper, upModule(QNoKProper, false), upImports(getImports(upModule(QNoKProper, false)))) .
+  op compile : Module ~> Module .
+  eq compile(M) = setName(addKProper(getName(M),M, empty),getName(M)) .
 endm
 
 mod ADD-KPROPER-LOOP is 

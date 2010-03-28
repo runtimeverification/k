@@ -43,13 +43,13 @@ mod K is
   subsort ListItem < NeList < List .
   op .l : -> List .
   op l : K -> ListItem  .
-  op _,_ : List List -> List [assoc id: .l] .
-  op _,_ : NeList List -> NeList [ditto] .
-  op _,_ : List NeList -> NeList [ditto] .
+  op __ : List List -> List [assoc id: .l] .
+  op __ : NeList List -> NeList [ditto] .
+  op __ : List NeList -> NeList [ditto] .
   var LItem : ListItem .  var List : List .
   op length_ : List -> Nat .
   eq length(.l) = 0 .
-  eq length(LItem,List) = sNat length(List) .
+  eq length(LItem List) = sNat length(List) .
 
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .

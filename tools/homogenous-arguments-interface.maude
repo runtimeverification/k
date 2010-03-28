@@ -1,15 +1,17 @@
 load homogenous-arguments
-load printing
 
 mod HOMOGENOUS-ARGUMENTS-META is
   including HOMOGENOUS-ARGUMENTS .
   including META-LEVEL-EXTRAS .
-  var NoHomogenousArgs HomogenousArgs : String .
+  var NoHomogenousArgs HomogenousArgs : String .  var M : Module .
   var Q QNoHomogenousArgs QHomogenousArgs : Qid .  var IL : ImportList .
   op makeHomogenousArgs : String String ~> Module .
   eq makeHomogenousArgs(NoHomogenousArgs, HomogenousArgs) = makeHomogenousArgs(qid(NoHomogenousArgs), qid(HomogenousArgs)) .
   op makeHomogenousArgs : Qid Qid ~> Module .
   eq makeHomogenousArgs(QNoHomogenousArgs,QHomogenousArgs) = makeHomogenousArgs(QHomogenousArgs, upModule(QNoHomogenousArgs, false), upModule(QNoHomogenousArgs, true), upImports(getImports(upModule(QNoHomogenousArgs, false)))) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = setName(makeHomogenousArgs(getName(M), M, flatten(M), empty), getName(M)) .
 endm
 
 mod HOMOGENOUS-ARGUMENTS-LOOP is 

@@ -1,12 +1,14 @@
 load strict-cxt2eqs
-load printing
 
 mod STRICTCXT2EQS-META is
   including STRICTCXT2EQS .
   including META-LEVEL .
-   op strictCxt2eqs : String String String ~> Module .
-   var Syntax StrictCxt StrictEqs : String .
-   eq strictCxt2eqs(Syntax, StrictCxt, StrictEqs) = strictCxt2eqs(qid(Syntax), qid(StrictEqs), upModule(qid(StrictCxt),false)) .
+  op strictCxt2eqs : String String String ~> Module .
+  var Syntax StrictCxt StrictEqs : String .  var M : Module .
+  eq strictCxt2eqs(Syntax, StrictCxt, StrictEqs) = strictCxt2eqs(qid(Syntax), qid(StrictEqs), upModule(qid(StrictCxt),false)) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
 endm
 
 mod STRICTCXT2EQS-LOOP is 

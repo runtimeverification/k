@@ -1,5 +1,3 @@
-load prelude-extras
-load meta-k
 fmod ANONYMOUS-VARIABLES is
   including META-MODULE-EXTRAS .
   including META-TERM-EXTRAS .

@@ -1,17 +1,19 @@
 load open-cells
-load printing
 
 mod OPEN-CELLS-META is
   including OPEN-CELLS .
-  including META-LEVEL .
+  including META-LEVEL-EXTRAS .
   var OpenCells NoOpenCells : String .
   var QOpenCells QNoOpenCells : Qid .
+  var M : Module .
   op resolveOpenCells : String String ~> Module .
   eq resolveOpenCells(OpenCells, NoOpenCells) 
    = resolveOpenCells(qid(OpenCells), qid(NoOpenCells)) .
   op resolveOpenCells : Qid Qid ~> Module .
   eq resolveOpenCells(QOpenCells,QNoOpenCells) 
    = resolveOpenCells(QNoOpenCells, upModule(QOpenCells, false), upModule(QOpenCells, true)) .
+  op compile : Module ~> Module .
+  eq compile(M) = resolveOpenCells(getName(M), M, flatten(M)) .
 endm
 
 mod OPEN-CELLS-LOOP is 

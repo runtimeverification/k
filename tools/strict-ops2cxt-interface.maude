@@ -1,6 +1,4 @@
 load strict-ops2cxt
-load printing
-load metadata-parsing
 
 mod STRICT-METADATA-META is
   including STRICTOPS2CXT .
@@ -13,14 +11,16 @@ endm
 mod STRICTOPS2CXT-META is
   including STRICTOPS2CXT .
   including  STRICT-METADATA-META .
-  including META-LEVEL .
-  var Syntax CxtStrict : String .
+  including META-LEVEL-EXTRAS .
+  var Syntax CxtStrict : String .  var M : Module .
   var QSyntax QCxtStrict : Qid .
   op strictOps2cxt : String String ~> Module .
   eq strictOps2cxt(Syntax, CxtStrict) = strictOps2cxt(qid(Syntax), qid(CxtStrict)) .
   op strictOps2cxt : Qid Qid ~> Module .
   eq strictOps2cxt(QSyntax,QCxtStrict) = strictOps2cxt(QCxtStrict, upModule(QSyntax, true)) .
 
+  op compile : Module ~> Module .
+  eq compile(M) = addModule(setImports(strictOps2cxt(getName(M),flatten(M)),including 'K-CONTEXTS .),M) .
 endm
 
 mod STRICTOPS2CXT-LOOP is 

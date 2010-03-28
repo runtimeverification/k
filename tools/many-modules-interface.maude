@@ -1,17 +1,20 @@
 load many-modules
-load printing
 
 mod MANY-MODULES-META is
   including MANY-MODULES .
   including META-LEVEL-EXTRAS .
   including META-K-MODULES .
   including META-K-BUILTINS .
-  var NoKProper KProper : String .
-  var Q QNoKProper QKProper : Qid .  var IL : ImportList .
+  var NoManyModules ManyModules : String .
+  var Q QNoManyModules QManyModules : Qid .
+  var M : Module .
   op manyModules : String String ~> Module .
-  eq manyModules(NoKProper, KProper) = manyModules(qid(NoKProper), qid(KProper)) .
+  eq manyModules(NoManyModules, ManyModules) = manyModules(qid(NoManyModules), qid(ManyModules)) .
   op manyModules : Qid Qid ~> Module .
-  eq manyModules(QNoKProper,QKProper) = manyModules(QKProper,  getAllImportsBut(QNoKProper, kModules ; builtinModules)) .
+  eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules)) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = manyModules(getName(M), getAllImportsBut(M,  none, kModules ; builtinModules ; getName(M), empty)) .
 endm
 
 mod MANY-MODULES-LOOP is 
@@ -19,7 +22,7 @@ mod MANY-MODULES-LOOP is
   including MODULE-META-PRETTY-PRINT .
   op many-modules : -> System .
   op idle : -> State .
-  var Q NoKProper KProper : Qid . var QIL QIL' : QidList . var FM : Module .
+  var Q NoManyModules ManyModules : Qid . var QIL QIL' : QidList . var FM : Module .
   eq many-modules = [nil, idle, 
  'Usage: 'manyModules '<Name> '<Suffix> '.] .
 
@@ -31,9 +34,9 @@ mod MANY-MODULES-LOOP is
   op print : Module [Module] -> QidList .
   var Str : String . var M FM' : Module .
   eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
-  crl ['manyModules NoKProper KProper QIL, idle, QIL'] 
-   => [QIL, idle, print(upModule(NoKProper,false), FM )] 
+  crl ['manyModules NoManyModules ManyModules QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoManyModules,false), FM )] 
    if FM := downTerm(getTerm(
              metaReduce(wrapper('MANY-MODULES-META),
-                        'manyModules[upTerm(string(NoKProper)),upTerm(string(KProper))])),error) .
+                        'manyModules[upTerm(string(NoManyModules)),upTerm(string(ManyModules))])),error) .
 endm

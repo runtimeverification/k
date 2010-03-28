@@ -1,9 +1,3 @@
-set include PL-BOOL off .
-set include BOOL on .
-
-load prelude-extras 
-load meta-k
-
 fmod SUBSORTS-TO-WRAPPERS is
  including META-TERM-EXTRAS .
  including META-MODULE-EXTRAS .
@@ -119,6 +113,8 @@ var Mbs : MembAxSet . var Mb : MembAx .
 ceq findPurifyRedex('if_then_else_fi[Trm,T1,T2], T, M, OPDS, SSDM)
   = 'if_then_else_fi[findPurifyRedex(Trm, 'Bool, M, OPDS, SSDM), findPurifyRedex(T1, T, M, OPDS, SSDM), findPurifyRedex(T2, T, M, OPDS, SSDM)]
  if sortLeq(M, leastSort(M, Trm), 'Bool) .
+ eq findPurifyRedex('_==Bool_[T1,T2], T, M, OPDS, SSDM)
+  = '_==Bool_[findPurifyRedex(T1, leastSort(M, T1), M, OPDS, SSDM), findPurifyRedex(T2, leastSort(M, T2), M, OPDS, SSDM)] .
  eq findPurifyRedex(Trm, T, M, OPDS, SSDM)
   = findPurifyRedex(Trm, T, M, OPDS, SSDM, isKSort(T) or-else isKListSort(T))
  [owise] .

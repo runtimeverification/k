@@ -1,15 +1,17 @@
 load subsorts-to-wrappers
-load printing
 
 mod SUBSORTS-TO-WRAPPERS-META is
   including SUBSORTS-TO-WRAPPERS .
   including META-LEVEL-EXTRAS .
-  var KSubsorts NoKSubsorts : String .
+  var KSubsorts NoKSubsorts : String .  var M : Module .
   var Q QKSubsorts QNoKSubsorts : Qid .  var IL : ImportList .
   op resolveKSubsorts : String String ~> Module .
   eq resolveKSubsorts(KSubsorts, NoKSubsorts) = resolveKSubsorts(qid(KSubsorts), qid(NoKSubsorts)) .
   op resolveKSubsorts : Qid Qid ~> Module .
   eq resolveKSubsorts(QKSubsorts,QNoKSubsorts) = resolveKSubsorts(QNoKSubsorts, upModule(QKSubsorts, false), upModule(QKSubsorts, true), upImports(getImports(upModule(QKSubsorts, false)))) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = setName(resolveKSubsorts(getName(M), M, flatten(M), empty),getName(M)) .
 endm
 
 mod SUBSORTS-TO-WRAPPERS-LOOP is 

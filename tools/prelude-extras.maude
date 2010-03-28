@@ -615,7 +615,7 @@ fmod META-LEVEL-EXTRAS is
   including META-LEVEL .
   including META-MODULE-EXTRAS .
 
-  var M : Module . var T T' : Type . var K : Kind . var Tl Tl' : TypeList .
+  var M M' : Module . var T T' : Type . var K : Kind . var Tl Tl' : TypeList .
   var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
   var Trm Trm' : Term . var Trms : TermList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
@@ -716,16 +716,23 @@ fmod META-LEVEL-EXTRAS is
 
   op getAllImportsBut : Qid SortSet ~> ModuleSet .
   eq getAllImportsBut(Q, SS) 
-   = getAllImportsBut(Q, SS, empty) .
+   = getAllImportsBut(Q, SS, empty) [print Q " : " SS] .
   
   op getAllImportsBut : SortSet SortSet ModuleSet ~> ModuleSet .
   eq getAllImportsBut(none, SS, MS) = MS .
   eq getAllImportsBut(Q ; SS, SS', MS)
    = if Q in SS' then getAllImportsBut(SS, SS', MS)
-     else getAllImportsBut(upModule(Q, false), SS, SS' ; Q, MS) fi .
+     else getAllImportsBut(upModule(Q, false), SS, SS' ; Q, MS) fi [print "Q: " Q " SS: " SS " SS': " SS'] .
 
   op getAllImportsBut : Module SortSet SortSet ModuleSet ~> ModuleSet .
   eq getAllImportsBut(M, SS, SS', MS) 
    = getAllImportsBut(getImportNames(M) ; SS, SS', MS M) .
+
+  op flatten : Module ~> Module .
+  eq flatten(M) = flatten(setImports(M,nil), getAllImportsBut(getImportNames(M),none, empty)) .
+
+  op flatten : Module ModuleSet ~> Module .
+  eq flatten(M, empty) = M .
+  eq flatten(M, M' MS) = flatten(addModule(setImports(M',nil),M), MS) .
 endfm
 

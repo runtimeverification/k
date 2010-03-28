@@ -1,9 +1,3 @@
-set include PL-BOOL off .
-set include BOOL on .
-
-load prelude-extras 
-load meta-k
-
 fmod MAKE-K-RULES is
   including META-MODULE-EXTRAS .
   including  META-K-RULES .

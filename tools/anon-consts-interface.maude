@@ -1,17 +1,18 @@
 load anon-consts
-load printing
 
 mod ANONYMOUS-CONSTANTS-META is
   including ANONYMOUS-CONSTANTS .
   including META-LEVEL .
   var AnonConsts NoAnonConsts : String .
-  var QAnonConsts QNoAnonConsts : Qid .
+  var QAnonConsts QNoAnonConsts : Qid .  var M : Module .
   op resolveAnonConsts : String String ~> Module .
   eq resolveAnonConsts(AnonConsts, NoAnonConsts) 
    = resolveAnonConsts(qid(AnonConsts), qid(NoAnonConsts)) .
   op resolveAnonConsts : Qid Qid ~> Module .
   eq resolveAnonConsts(QAnonConsts,QNoAnonConsts) 
    = resolveAnonymousConsts(QNoAnonConsts, upModule(QAnonConsts, false), upModule(QAnonConsts, true)) .
+  op compile : Module ~> Module .
+  eq compile(M) = resolveAnonymousConsts(getName(M),M, flatten(M)) .
 endm
 
 mod ANONYMOUS-CONSTANTS-LOOP is 

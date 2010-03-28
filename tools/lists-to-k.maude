@@ -1,6 +1,3 @@
-load prelude-extras
-load meta-k
-
 fmod LISTS-TO-K is
  including META-TERM-EXTRAS .
  including META-MODULE-EXTRAS .
@@ -175,6 +172,8 @@ fmod LISTS-TO-K is
  eq listsT(V, T, M, OPDS, OPDS', CTORS) = listsCV(V, getType(V), CTORS)  .
  eq listsT('if_then_else_fi[Trms],T,M,OPDS,OPDS', CTORS)
   = 'if_then_else_fi[listsTs(Trms, 'Bool T T, M, OPDS,OPDS', CTORS)] .
+ eq listsT('_==Bool_[Trm,Trm'],T,M,OPDS,OPDS', CTORS)
+  = '_==Bool_[listsTs((Trm,Trm'), leastSort(M,Trm) leastSort(M,Trm'), M, OPDS,OPDS', CTORS)] .
  ceq listsT(Q[Trms],T,M,OPDS,OPDS', CTORS)
    = Q[listsTs(Trms, T T, M, OPDS, OPDS', CTORS)] if  Q = replaceS .
  eq listsT(Q[Trms],T,M,OPDS,OPDS', CTORS (subsort T' < T .) |-> Q[Trm])
