@@ -1,6 +1,6 @@
 load befunge-compiled
 mod BEFUNGE-TEST is
-	including LANG-TEST .
+	including BEFUNGE .
 	
 	--- Programs
   	op pHelloWorld : -> KProperLabel [metadata "arity 0"] .

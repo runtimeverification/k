@@ -301,22 +301,22 @@ mod BEFUNGE is
 		
 	mb [add]: rule
 		< k > [add(.kl) => .k] ...</ k >
-		< stack > [l(inject(I1:Int)(.kl))  l(inject(I2:Int)(.kl)) => l(inject(I2:Int +Int I1:Int)(.kl))] ...</ stack >
+		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int +Int I1:Int)(.kl))] ...</ stack >
 		: KSentence [metadata "computational rule"] .
-	--- mb [subtract]: rule
-		--- < k > [subtract(.kl) => .k] ...</ k >
-		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int -Int I1:Int)(.kl))] ...</ stack >
-		--- : KSentence [metadata "computational rule"] .
-	--- mb [multiply]: rule
-		--- < k > [multiply(.kl) => .k] ...</ k >
-		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int *Int I1:Int)(.kl))] ...</ stack >
-		--- : KSentence [metadata "computational rule"] .
-	--- mb [divide]: rule
-		--- < k > [divide(.kl) => .k] ...</ k >
-		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int /Int I1:Int)(.kl))] ...</ stack >
-		--- : KSentence [metadata "computational rule"] .
-	--- mb [modulo]: rule
-		--- < k > [modulo(.kl) => .k] ...</ k >
-		--- < stack > [l(inject(I1:Int)(.kl)), l(inject(I2:Int)(.kl)) => l(inject(I2:Int %Int I1:Int)(.kl))] ...</ stack >
-		--- : KSentence [metadata "computational rule"] .	
+	mb [subtract]: rule
+		< k > [subtract(.kl) => .k] ...</ k >
+		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int -Int I1:Int)(.kl))] ...</ stack >
+		: KSentence [metadata "computational rule"] .
+	mb [multiply]: rule
+		< k > [multiply(.kl) => .k] ...</ k >
+		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int *Int I1:Int)(.kl))] ...</ stack >
+		: KSentence [metadata "computational rule"] .
+	mb [divide]: rule
+		< k > [divide(.kl) => .k] ...</ k >
+		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int /Int I1:Int)(.kl))] ...</ stack >
+		: KSentence [metadata "computational rule"] .
+	mb [modulo]: rule
+		< k > [modulo(.kl) => .k] ...</ k >
+		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int %Int I1:Int)(.kl))] ...</ stack >
+		: KSentence [metadata "computational rule"] .	
 endm
