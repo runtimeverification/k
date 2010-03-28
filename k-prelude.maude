@@ -9,8 +9,7 @@ mod K is
   subsort EmptyK < K .
   op .k : -> EmptyK [metadata "latex(renameTo \\ensuremath{\\kdot})"].
   op _~>_ : K K -> K [prec 100  assoc id: .k metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
-
-
+  
   sorts EmptyKList KResultList NeKResultList KList NeKList .
   op .kl : -> EmptyKList .
   subsort K < NeKList < KList .
@@ -207,6 +206,15 @@ mod K-MAP-EXTRAS is
   eq Map[(K1,,NList1) / (K2,, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
   eq Map[K2 / (K1,,NList1)] = (Map[K2 / K1])[K2 / NList1] .
   eq Map[List / .kl] = Map .
+endm
+
+mod K-LIST-EXTRAS is
+	including K .
+	including PL-BOOL .
+	op inKList : K K -> Bool .
+	
+	eq inKList(K:K, (K1:K ~> K:K ~> K2:K)) = true .
+	eq inKList(K:K, K':K) = false [owise] .
 endm
 
 
