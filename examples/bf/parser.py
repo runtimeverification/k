@@ -104,27 +104,27 @@ def p_whilestatement(p):
 	
 def executeStatements(tuplesList):
 	if (len(tuplesList) == 0):
-		print ".k",
+		print ".K",
 		return
 	node = tuplesList.pop(0)
 	print "Seq(",
 	if node[0] == 'GoLeft':
-		print "%s(.kl)" % node[0],
+		print "%s(.List{K})" % node[0],
 	elif node[0] == 'GoRight':
-		print "%s(.kl)" % node[0],
+		print "%s(.List{K})" % node[0],
 	elif node[0] == 'Print':
-		print "%s(.kl)" % node[0],
+		print "%s(.List{K})" % node[0],
 	elif node[0] == 'Read':
-		print "%s(.kl)" % node[0],
+		print "%s(.List{K})" % node[0],
 	elif node[0] == 'Increase':
-		print "%s(.kl)" % node[0],
+		print "%s(.List{K})" % node[0],
 	elif node[0] == 'Decrease':
-		print "%s(.kl)" % node[0],
+		print "%s(.List{K})" % node[0],
 	elif node[0] == 'While':
 		print "%s(" % node[0],
 		executeStatements(node[1])
 		print ")",
-	print ",",
+	print ",,",
 	executeStatements(tuplesList)
 	print ")",
 
