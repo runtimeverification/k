@@ -9,6 +9,7 @@ mod THUE is
 	including PL-STRING .
 	including K-LIST-EXTRAS .
 	including K-OPEN-CELLS .
+	including K-ANONYMOUS-VARIABLES .
 	---including K-WRAPPERS-LABELS . --- can't include this?
 	
 	including K .
@@ -42,7 +43,6 @@ mod THUE is
 --- Semantics
 	op eval : K -> Set .
 	op eval : K K -> Set .
-	op inject : Int -> KLabel .
 	op inject : Char -> KLabel .
 	op inject : String -> KLabel .
 	op injectM : Map -> KLabel .
@@ -50,6 +50,7 @@ mod THUE is
 
 	op explode : -> KProperLabel [metadata "arity 1"] .
 	op join : -> KProperLabel [metadata "arity 1"] .
+	op string : -> KLabel .
 	
 	---- define explode of a string
 	mb [explodeString]: rule
@@ -57,7 +58,7 @@ mod THUE is
 		if notBool(S:String ==Bool "")
 		: KSentence [metadata "computational rule"] .
 	mb rule
-		[explode(inject("")(.kl) ~> K:K) => K:K]
+		[explode(inject("")(.kl) ~> K:K) => string(K:K)]
 		: KSentence [metadata "computational rule"] .
 	---- end define explode of a string
 	
@@ -98,22 +99,22 @@ mod THUE is
 		: KSentence [metadata "computational rule"] .
 		
 	mb [applyRule]: rule
-		< k >... [K1:K => K2:K] ...</ k >
-		< rules >... s(subst(K1:K,, K2:K)) [.s => D:Set] ...</ rules >
+		< k > string(? ~> [K1:K => K2:K] ~> ?) </ k >
+		< rules >... s(subst(string(K1:K),, string(K2:K))) [.s => D:Set] ...</ rules >
 		< disabled > [D:Set => .s] </ disabled >
 		: KSentence [metadata "computational rule"] .
-	mb [applyWrite]: rule
-		< k >... [K1:K => .k] ...</ k >
-		< rules >... s(write(K1:K,, K2:K)) [.s => D:Set] ...</ rules >
-		< disabled > [D:Set => .s] </ disabled >
-		< output >... [.k => K2:K] </ output >
-		: KSentence [metadata "computational rule"] .
-	mb [applyRead]: rule
-		< k >... [K1:K => explode(K2:K)] ...</ k >
-		< rules >... s(read(K1:K)) [.s => D:Set] ...</ rules >
-		< disabled > [D:Set => .s] </ disabled >
-		< input >[l(K2:K) => .l] ...</ input >
-		: KSentence [metadata "computational rule"] .
+	--- mb [applyWrite]: rule
+		--- < k >... [K1:K => .k] ...</ k >
+		--- < rules >... s(write(K1:K,, K2:K)) [.s => D:Set] ...</ rules >
+		--- < disabled > [D:Set => .s] </ disabled >
+		--- < output >... [.k => K2:K] </ output >
+		--- : KSentence [metadata "computational rule"] .
+	--- mb [applyRead]: rule
+		--- < k >... [K1:K => explode(K2:K)] ...</ k >
+		--- < rules >... s(read(K1:K)) [.s => D:Set] ...</ rules >
+		--- < disabled > [D:Set => .s] </ disabled >
+		--- < input >[l(K2:K) => .l] ...</ input >
+		--- : KSentence [metadata "computational rule"] .
 	
 	--- mb [disabledRule]: rule
 		--- < k > K2:K </ k >
