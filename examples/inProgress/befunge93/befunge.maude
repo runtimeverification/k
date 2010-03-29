@@ -1,12 +1,10 @@
 load ../../../k-prelude
 mod BEFUNGE is
 	including K-PROPER .
-	including CONFIG .
 	including K-MAP-EXTRAS .
 	including K-RULES .
 	including K-CONFIG .
-	including PL-INT .
-	including PL-STRING .
+	including PL-BUILTINS .
 	
 	including K-OPEN-CELLS .
 	---including K-WRAPPERS-LABELS . --- can't include this?
@@ -17,81 +15,49 @@ mod BEFUNGE is
 	--- COMMAND         INITIAL STACK (bot->top)	RESULT (STACK)
 	----        		 -------------           -----------------
 	--- + (add)         <value1> <value2>       <value1 + value2>
-	op add : -> KProperLabel [metadata "arity 0"] .
 	--- - (subtract)    <value1> <value2>       <value1 - value2>
-	op subtract : -> KProperLabel [metadata "arity 0"] .
 	--- / (divide)      <value1> <value2>       <value1 / value2> (nb. integer)
-	op divide : -> KProperLabel [metadata "arity 0"] .
 	--- * (multiply)    <value1> <value2>       <value1 * value2>
-	op multiply : -> KProperLabel [metadata "arity 0"] .
 	--- % (modulo)      <value1> <value2>       <value1 mod value2>
-	op modulo : -> KProperLabel [metadata "arity 0"] .
 	
 	--- ! (not)         <value>                 <0 if value non-zero, 1 otherwise>
-	op not : -> KProperLabel [metadata "arity 0"] .
 	--- ` (greater)     <value1> <value2>       <1 if value1 > value2, 0 otherwise>
-	op greater : -> KProperLabel [metadata "arity 0"] .
 	
 	--- > (right)                               PC -> right
-	op right : -> KProperLabel [metadata "arity 0"] .
 	--- < (left)                                PC -> left
-	op left : -> KProperLabel [metadata "arity 0"] .
 	--- ^ (up)                                  PC -> up
-	op up : -> KProperLabel [metadata "arity 0"] .
 	--- v (down)                                PC -> down
-	op down : -> KProperLabel [metadata "arity 0"] .
 	--- ? (random)                              PC -> right? left? up? down? ???
-	op random : -> KProperLabel [metadata "arity 0"] .
 	
 	--- _ (horizontal if) <boolean value>       PC->left if <value>, else PC->right
-	op horizontalIf : -> KProperLabel [metadata "arity 0"] .
 	--- | (vertical if)   <boolean value>       PC->up if <value>, else PC->down
-	op verticalIf : -> KProperLabel [metadata "arity 0"] .
 	
 	--- " (stringmode)                          Toggles 'stringmode'
-	op stringmode : -> KProperLabel [metadata "arity 0"] .
 	
 	--- : (dup)         <value>                 <value> <value>
-	op dup : -> KProperLabel [metadata "arity 0"] .
 	--- # (bridge)                              'jumps' PC one farther; skips over next command
-	op bridge : -> KProperLabel [metadata "arity 0"] .
 	
 	--- \ (swap)        <value1> <value2>       <value2> <value1>
-	op swap : -> KProperLabel [metadata "arity 0"] .
 	--- $ (pop)         <value>                 pops <value> but does nothing
-	op pop : -> KProperLabel [metadata "arity 0"] .
 	
 	--- . (output value)	<value>             outputs <value> as integer
-	op printNumber : -> KProperLabel [metadata "arity 0"] .
 	--- , (output character)	<value>         outputs <value> as ASCII
-	op printCharacter : -> KProperLabel [metadata "arity 0"] .
 	--- & (input value)                         <value user entered>
-	op readNumber : -> KProperLabel [metadata "arity 0"] .
 	--- ~ (input character)                     <character user entered>
-	op readCharacter : -> KProperLabel [metadata "arity 0"] .
 	
 	--- @ (end)                                 ends program
-	op end : -> KProperLabel [metadata "arity 0"] .
 	
 	--- g (get)         <x> <y>                 <value at (x,y)>
-	op metaGet : -> KProperLabel [metadata "arity 0"] .
 	--- p (put)         <value> <x> <y>         puts <value> at (x,y)
-	op metaPut : -> KProperLabel [metadata "arity 0"] .
-	
 	
 	--- [space] (nop)
-	op nop : -> KProperLabel [metadata "arity 0"] .
-	op err : -> KProperLabel [metadata "arity 0"] .
-	
-	--- [all commands] (push)
-	op command : -> KProperLabel [metadata "arity 2"] . --- necessary to handle stringmode
-	op push : -> KProperLabel [metadata "arity 1"] .
+
 	---------
 	--- e.g.:
-	--- command('$', pop(.kl))
-	--- command(' ', nop(.kl))
-	--- command('x', err(.kl))
-	--- command('4', push(inject(4)(.kl))
+	--- command('$', pop(.List{K}))
+	--- command(' ', nop(.List{K}))
+	--- command('x', err(.List{K}))
+	--- command('4', push(inject(4)(.List{K}))
 	
 --- Configuration
 	op stack : -> CellLabel .
@@ -105,8 +71,8 @@ mod BEFUNGE is
 	op result : -> CellLabel .
 	
 --- Semantics
-	op eval : K -> Set .
-	op eval : K K -> Set .
+	op eval : K -> Bag .
+	op eval : K K -> Bag .
 	op inject : Int -> KLabel .
 	op inject : Char -> KLabel .
 	op inject : String -> KLabel .
@@ -117,6 +83,13 @@ mod BEFUNGE is
 	op load : -> KLabel .
 	op defaultmode : -> KLabel .
 	op movePC : -> KLabel .
+	op stringmode : -> KLabel .
+	op push : -> KLabel .
+	
+	op right : -> KLabel .
+	op left : -> KLabel .
+	op up : -> KLabel .
+	op down : -> KLabel .
 	
 	mb configuration 
 		< T >
@@ -132,31 +105,31 @@ mod BEFUNGE is
 		< result > K:K </ result > 
 		: KSentence .
 	
-	eq [Start]: eval(injectM(M:Map)(.kl)) =
+	eq [Start]: eval(injectM(M:Map)(.List{K})) =
 		< T >
-			< k > .k </ k >
-			< stack > .l </ stack >
-			< direction > right(.kl) </ direction >
-			< pc > coord(inject(0)(.kl),, inject(0)(.kl)) </ pc >
-			< mode > defaultmode(.kl) </ mode >
+			< k > .K </ k >
+			< stack > .List </ stack >
+			< direction > right(.List{K}) </ direction >
+			< pc > coord(inject(0)(.List{K}),, inject(0)(.List{K})) </ pc >
+			< mode > defaultmode(.List{K}) </ mode >
 			< program > M:Map </ program >
-			< output > inject("")(.kl) </ output >
-			< input > .l </ input >
+			< output > inject("")(.List{K}) </ output >
+			< input > .List </ input >
 		</ T > .
-	eq [Start-With-Input]: eval(injectM(M:Map)(.kl), injectL(L:List)(.kl)) =
+	eq [Start-With-Input]: eval(injectM(M:Map)(.List{K}), injectL(L:List)(.List{K})) =
 		< T >
-			< k > .k </ k >
-			< stack > .l </ stack >
-			< direction > right(.kl) </ direction >
-			< pc > coord(inject(0)(.kl),, inject(0)(.kl)) </ pc >
-			< mode > defaultmode(.kl) </ mode >
+			< k > .K </ k >
+			< stack > .List </ stack >
+			< direction > right(.List{K}) </ direction >
+			< pc > coord(inject(0)(.List{K}),, inject(0)(.List{K})) </ pc >
+			< mode > defaultmode(.List{K}) </ mode >
 			< program > M:Map </ program >
-			< output > inject("")(.kl) </ output >
+			< output > inject("")(.List{K}) </ output >
 			< input > L:List </ input >
 		</ T > .
 		
 	mb [Finish]: rule [
-		< T > S:Set < k > end(.kl) ...</ k > < output > K:K </ output > </ T > 
+		< T > S:Bag < k > inject("@")(.List{K}) ...</ k > < output > K:K </ output > </ T > 
 			=> < result > K:K </ result >
 		] : KSentence [metadata "structural"] .
 		
@@ -164,159 +137,204 @@ mod BEFUNGE is
 	---- very structural
 	
 	mb [Next]: rule
-		< k > [.k => load(.kl) ~> movePC(.kl)] </ k >
+		< k > [.K => load(.List{K}) ~> movePC(.List{K})] </ k >
 		: KSentence [metadata "structural"] .
 		
 	mb [startStack]: rule
-		< stack > [.l => l(inject(0)(.kl))] </ stack >
+		< stack > [.List => List(inject(0)(.List{K}))] </ stack >
 		: KSentence [metadata "structural"] .
 	mb [refillStack]: rule
-		< stack > [Li:ListItem => Li:ListItem l(inject(0)(.kl))] </ stack >
+		< stack > [Li:ListItem => Li:ListItem List(inject(0)(.List{K}))] </ stack >
 		: KSentence [metadata "structural"] .
 	
 	mb [Load]: rule
-		< k > [load(.kl) => K:K] ...</ k >
+		< k > [load(.List{K}) => K:K] ...</ k >
 		< pc > Loc:K </ pc >
 		< program >... Loc:K |-> K:K ...</ program >
 		: KSentence [metadata "structural"] .
 	
 	mb [MovePC-right]: rule 
-		< k > [movePC(.kl) => .k] ...</ k >
-		< direction > right(.kl) </ direction >
-		< pc > coord(inject([I:Int => (I:Int +Int 1) %Int 80])(.kl),, K:K) </ pc >
+		< k > [movePC(.List{K}) => .K] ...</ k >
+		< direction > right(.List{K}) </ direction >
+		< pc > coord(inject([I:Int => (I:Int +Int 1) %Int 80])(.List{K}),, K:K) </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-left]: rule 
-		< k > [movePC(.kl) => .k] ...</ k >
-		< direction > left(.kl) </ direction >
-		< pc > coord(inject([I:Int => ((I:Int -Int 1) +Int 80) %Int 80])(.kl),, K:K) </ pc >
+		< k > [movePC(.List{K}) => .K] ...</ k >
+		< direction > left(.List{K}) </ direction >
+		< pc > coord(inject([I:Int => ((I:Int -Int 1) +Int 80) %Int 80])(.List{K}),, K:K) </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-up]: rule 
-		< k > [movePC(.kl) => .k] ...</ k >
-		< direction > up(.kl) </ direction >
-		< pc > coord(K:K,, inject([I:Int => ((I:Int -Int 1) +Int 25) %Int 25])(.kl)) </ pc >
+		< k > [movePC(.List{K}) => .K] ...</ k >
+		< direction > up(.List{K}) </ direction >
+		< pc > coord(K:K,, inject([I:Int => ((I:Int -Int 1) +Int 25) %Int 25])(.List{K})) </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-down]: rule 
-		< k > [movePC(.kl) => .k] ...</ k >
-		< direction > down(.kl) </ direction >
-		< pc > coord(K:K,, inject([I:Int => (I:Int +Int 1) %Int 25])(.kl)) </ pc >
+		< k > [movePC(.List{K}) => .K] ...</ k >
+		< direction > down(.List{K}) </ direction >
+		< pc > coord(K:K,, inject([I:Int => (I:Int +Int 1) %Int 25])(.List{K})) </ pc >
 		: KSentence [metadata "structural"] .
-		
-	mb [InterpretCommand-default]: rule
-		< k > [command(K1:K,, K2:K) => K2:K] ...</ k >
-		< mode > defaultmode(.kl) </ mode >
-		: KSentence [metadata "structural"] .
-	mb [InterpretCommand-string-notmode]: rule
-		< k > [command(K1:K,, K2:K) => push(charToAscii(K1:K))] ...</ k >
-		< mode > stringmode(.kl) </ mode >
-		if (K2:K =/=Bool stringmode(.kl))
-		: KSentence [metadata "structural"] .
-	mb [InterpretCommand-string-mode]: rule
-		< k > [command(K1:K,, stringmode(.kl)) => stringmode(.kl)] ...</ k >
-		: KSentence [metadata "structural"] .
-		
+				
 	---op asAscii : -> KLabel .
-	---eq asAscii(inject(S:String)(.kl)) = inject(asciiString(S:String))(.kl) .
+	---eq asAscii(inject(S:String)(.List{K})) = inject(asciiString(S:String))(.List{K}) .
 		
 	op charToAscii : -> KProperLabel [metadata "arity 1"] .
-	
 	mb [charToAscii]: rule
-		[charToAscii(inject(C:Char)(.kl)) => inject(asciiString(C:Char))(.kl)]
+		[charToAscii(inject(C:Char)(.List{K})) => inject(asciiString(C:Char))(.List{K})]
+		: KSentence [metadata "structural"] .
+		
+	op charToNumber : -> KProperLabel [metadata "arity 1"] .
+	mb [charToNumber]: rule
+		[charToNumber(inject(C:Char)(.List{K})) => inject(asciiString(C:Char) -Int asciiString("0"))(.List{K})]
 		: KSentence [metadata "structural"] .
 	---- end structural
 	---------------------------
 
 	mb [stringmode-on]: rule
-		< k > [stringmode(.kl) => .k] ...</ k >
-		< mode > [defaultmode(.kl) => stringmode(.kl)] </ mode >
+		< k > [inject("\"")(.List{K}) => .K] ...</ k >
+		< mode > [defaultmode(.List{K}) => stringmode(.List{K})] </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [stringmode-off]: rule
-		< k > [stringmode(.kl) => .k] ...</ k >
-		< mode > [stringmode(.kl) => defaultmode(.kl)] </ mode >
+		< k > [inject("\"")(.List{K}) => .K] ...</ k >
+		< mode > [stringmode(.List{K}) => defaultmode(.List{K})] </ mode >
 		: KSentence [metadata "computational rule"] .
+	mb [stringmode-push]: rule
+		< k > [inject(C:Char)(.List{K}) => push(charToAscii(inject(C:Char)(.List{K})))] ...</ k >
+		< mode > stringmode(.List{K}) </ mode >
+		if (C:Char =/=Bool "\"")
+		: KSentence [metadata "structural"] .
+	mb [defaultmode-push-number]: rule
+		< k > [inject(C:Char)(.List{K}) => push(charToNumber(inject(C:Char)(.List{K})))] ...</ k >
+		< mode > defaultmode(.List{K}) </ mode >
+		if (C:Char ==Bool "0") 
+			orBool (C:Char ==Bool "1") 
+			orBool (C:Char ==Bool "2")
+			orBool (C:Char ==Bool "3") 
+			orBool (C:Char ==Bool "4")
+			orBool (C:Char ==Bool "5")
+			orBool (C:Char ==Bool "6")
+			orBool (C:Char ==Bool "7")
+			orBool (C:Char ==Bool "8")
+			orBool (C:Char ==Bool "9")
+		: KSentence [metadata "structural"] .
 		
+	
 	mb [push]: rule
-		< k > [push(K:K) => .k] ...</ k >
-		< stack > [.l => l(K:K)] ...</ stack >
+		< k > [push(K:K) => .K] ...</ k >
+		< stack > [.List => List(K:K)] ...</ stack >
 		: KSentence [metadata "computational rule"] .
 		
 	mb [right]: rule
-		< k > [right(.kl) => .k] ...</ k >
-		< direction > [K:K => right(.kl)] </ direction >
+		< k > [inject(">")(.List{K}) => .K] ...</ k >
+		< direction > [K:K => right(.List{K})] </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [left]: rule
-		< k > [left(.kl) => .k] ...</ k >
-		< direction > [K:K => left(.kl)] </ direction >
+		< k > [inject("<")(.List{K}) => .K] ...</ k >
+		< direction > [K:K => left(.List{K})] </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [up]: rule
-		< k > [up(.kl) => .k] ...</ k >
-		< direction > [K:K => up(.kl)] </ direction >
+		< k > [inject("^")(.List{K}) => .K] ...</ k >
+		< direction > [K:K => up(.List{K})] </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [down]: rule
-		< k > [down(.kl) => .k] ...</ k >
-		< direction > [K:K => down(.kl)] </ direction >
+		< k > [inject("v")(.List{K}) => .K] ...</ k >
+		< direction > [K:K => down(.List{K})] </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .		
 		
 	--- : is the duplication command.  It makes a copy of the top element of the stack
 	mb [dup]: rule
-		< k > [dup(.kl) => .k] ...</ k >
+		< k > [inject(":")(.List{K}) => .K] ...</ k >
 		< stack > [Li:ListItem => Li:ListItem  Li:ListItem] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .	
 	
 	--- # is the 'bridge' command... it causes the next command which would normally be executed to be skipped over, and not executed.
 	mb [bridge]: rule
-		< k > [bridge(.kl) => movePC(.kl)] ...</ k >
+		< k > [inject("#")(.List{K}) => movePC(.List{K})] ...</ k >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .	
 		
 	--- The standard 'if' statement in Befunge-93 is either _ or |, depending on how you want to branch.  Both of these instructions pop a value off the stack and check to see if it is true (non-zero,) and change the direction of the PC accordingly:
 	--- _ acts like < if the value is true or > if it is false; and
     --- | acts like ^ if the value is true or v if it is false.
 	mb [horizontalIf-false]: rule
-		< k > [horizontalIf(.kl) => right(.kl)] ...</ k >
-		< stack > [l(inject(0)(.kl)) => .l] ...</ stack >
+		< k > [inject("_")(.List{K}) => inject(">")(.List{K})] ...</ k >
+		< stack > [List(inject(0)(.List{K})) => .List] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .	
 	mb [horizontalIf-true]: rule
-		< k > [horizontalIf(.kl) => left(.kl)] ...</ k >
-		< stack > [l(inject(I:Int)(.kl)) => .l] ...</ stack >
+		< k > [inject("_")(.List{K}) => inject("<")(.List{K})] ...</ k >
+		< stack > [List(inject(I:Int)(.List{K})) => .List] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		if (I:Int =/=Bool 0)
 		: KSentence [metadata "computational rule"] .
 		
-	--- The . command will pop a value off the stack and output it as a decimal integer, followed by a space, somewhat like Forth. ,  will pop a value, interpret it as the ASCII value of a character, and output that character (not followed by a space.)
+	--- The . command will pop a value off the stack and output it as a decimal integer, followed by a space, somewhat like Forth. 
+	mb [printNumber]: rule
+		< k > [inject(".")(.List{K}) => .K] ...</ k >
+		< stack > [List(inject(I:Int)(.List{K})) => .List] ...</ stack >
+		< output > inject([S:String => S:String +String stringConversion(absInt(I:Int), 10) +String " "])(.List{K}) </ output >
+		: KSentence [metadata "computational rule"] .
+		
+	--- ,  will pop a value, interpret it as the ASCII value of a character, and output that character (not followed by a space.)
 	mb [printCharacter]: rule
-		< k > [printCharacter(.kl) => .k] ...</ k >
-		< stack > [l(inject(I:Int)(.kl)) => .l] ...</ stack >
-		< output > inject([S:String => S:String +String charString(absInt(I:Int))])(.kl) </ output >
+		< k > [inject(",")(.List{K}) => .K] ...</ k >
+		< stack > [List(inject(I:Int)(.List{K})) => .List] ...</ stack >
+		< output > inject([S:String => S:String +String charString(absInt(I:Int))])(.List{K}) </ output >
 		: KSentence [metadata "computational rule"] .
 		
 	--- The & (ampersand) command will get a numeric value (in decimal) from the standard input and push it on the stack. ~ (tilde) will get the next ASCII character from standard input and push it on the stack.
 	mb [readNumber]: rule
-		< k > [readNumber(.kl) => .k] ...</ k >
-		< stack > [.l => Li:ListItem] ...</ stack >
-		< input > [Li:ListItem => .l] ...</ input >
+		< k > [inject("&")(.List{K}) => .K] ...</ k >
+		< stack > [.List => Li:ListItem] ...</ stack >
+		< input > [Li:ListItem => .List] ...</ input >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	
-	--- Note that   (space) is a null command which does nothing.
+	--- --- Note that   (space) is a null command which does nothing.
 	mb [nop]: rule
-		< k > [nop(.kl) => .k] ...</ k >		
+		< k > [inject(" ")(.List{K}) => .K] ...</ k >	
+		< mode > defaultmode(.List{K}) </ mode >		
+		: KSentence [metadata "computational rule"] .
+		
+	mb [pop]: rule
+		< k > [inject("$")(.List{K}) => .K] ...</ k >
+		< stack > [Li:ListItem => .List] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >		
+		: KSentence [metadata "computational rule"] .
+	
+	mb [swap]: rule
+		< k > [inject("\\")(.List{K}) => .K] ...</ k >
+		< stack > [Li1:ListItem Li2:ListItem => Li2:ListItem Li1:ListItem] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >		
 		: KSentence [metadata "computational rule"] .
 		
 	mb [add]: rule
-		< k > [add(.kl) => .k] ...</ k >
-		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int +Int I1:Int)(.kl))] ...</ stack >
+		< k > [inject("+")(.List{K}) => .K] ...</ k >
+		< stack > [List(inject(I1:Int)(.List{K})) List(inject(I2:Int)(.List{K})) => List(inject(I2:Int +Int I1:Int)(.List{K}))] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [subtract]: rule
-		< k > [subtract(.kl) => .k] ...</ k >
-		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int -Int I1:Int)(.kl))] ...</ stack >
+		< k > [inject("-")(.List{K}) => .K] ...</ k >
+		< stack > [List(inject(I1:Int)(.List{K})) List(inject(I2:Int)(.List{K})) => List(inject(I2:Int -Int I1:Int)(.List{K}))] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [multiply]: rule
-		< k > [multiply(.kl) => .k] ...</ k >
-		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int *Int I1:Int)(.kl))] ...</ stack >
+		< k > [inject("*")(.List{K}) => .K] ...</ k >
+		< stack > [List(inject(I1:Int)(.List{K})) List(inject(I2:Int)(.List{K})) => List(inject(I2:Int *Int I1:Int)(.List{K}))] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [divide]: rule
-		< k > [divide(.kl) => .k] ...</ k >
-		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int /Int I1:Int)(.kl))] ...</ stack >
+		< k > [inject("/")(.List{K}) => .K] ...</ k >
+		< stack > [List(inject(I1:Int)(.List{K})) List(inject(I2:Int)(.List{K})) => List(inject(I2:Int /Int I1:Int)(.List{K}))] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 	mb [modulo]: rule
-		< k > [modulo(.kl) => .k] ...</ k >
-		< stack > [l(inject(I1:Int)(.kl)) l(inject(I2:Int)(.kl)) => l(inject(I2:Int %Int I1:Int)(.kl))] ...</ stack >
+		< k > [inject("%")(.List{K}) => .K] ...</ k >
+		< stack > [List(inject(I1:Int)(.List{K})) List(inject(I2:Int)(.List{K})) => List(inject(I2:Int %Int I1:Int)(.List{K}))] ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .	
 endm
