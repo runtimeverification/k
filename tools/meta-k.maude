@@ -6,10 +6,10 @@ endfm
 
 fmod K-META-OPS is including META-TERM .
   op nilKList : -> Qid .
-  eq nilKList = '.kl.KList .
+  eq nilKList = '.List`{K`}.List`{K`} .
 
   op nilK : -> Qid .
-  eq nilK = '.k.EmptyK .
+  eq nilK = '.K.K .
 
   op kra_ : TermList -> Term .
   eq kra(Trl1,'_~>_[Trl],Trl2) = kra(Trl1,Trl,Trl2) .
@@ -36,9 +36,6 @@ fmod K-META-OPS is including META-TERM .
   eq kList(empty) = nilKList .
   eq kList(Trl) = '_`,`,_[Trl] [owise] .
 
-  op wrapKList : Term -> Term .
-  eq wrapKList(T) = '~[T] .
-
   op kApply : Term TermList -> Term .
   eq kApply(T, Trl) = '_`(_`)[T,kList(Trl)] .
 endfm
@@ -51,14 +48,13 @@ fmod META-K-BUILTINS is
   op builtinModules : ~> SortSet [memo] .
   eq builtinModules 
    = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
-                 
 endfm
 
 fmod META-K-MODULES is
   including META-MODULE .
   op kModules : ~> SortSet [memo] .
   eq kModules 
-   = 'K ; 'CONFIG ; 'K-SENTENCE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
+   = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
      'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-ANONYMOUS-VARIABLES ; 
      'K-OPEN-CELLS ; 'K-CONFIG .
 endfm
@@ -68,18 +64,18 @@ fmod META-K-MODULE is
   var S : Sort .  var T : Type .  var SSDS : SubsortDeclSet . 
   vars OPDS : OpDeclSet .
 
-  ops EmptyK KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
-  ops EmptyKList NeProperList ResultList NeResultList NeKList KList : -> Sort .
-  eq EmptyK = 'EmptyK .  eq KProper = 'KProper .  eq KResult = 'KResult .
+  ops KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
+  ops NeProperList ResultList NeResultList NeKList KList : -> Sort .
+  eq KProper = 'KProper .  eq KResult = 'KResult .
   eq NeK = 'NeK .  eq K = 'K .
   eq KLabel = 'KLabel .  eq KHybridLabel = 'KHybridLabel .
   eq KProperLabel = 'KProperLabel .  eq KResultLabel = 'KResultLabel .
-  eq EmptyKList = 'EmptyKList .   eq ResultList = 'KResultList .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeKResultList .  eq KList = 'KList .  eq NeKList = 'NeKList .
+  eq ResultList = 'List`{KResult`} .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeList`{KResult`} .  eq KList = 'List`{K`} .  eq NeKList = 'NeList`{K`} .
   op ksorts : -> SortSet [memo] .
-  eq ksorts = EmptyK ; KProper ; KResult ; NeK ; K .
+  eq ksorts = KProper ; KResult ; NeK ; K .
 
   op klistSorts : -> SortSet [memo] .
-  eq klistSorts = EmptyKList ; NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
+  eq klistSorts = NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
 
   op isKSort : Type -> Bool [memo] .
   eq isKSort(T) = T in ksorts .
@@ -89,7 +85,6 @@ fmod META-K-MODULE is
 
   op ksubsorts : -> SubsortDeclSet [memo] .
   eq ksubsorts = (
-    subsort EmptyK < K .
     subsort KProper < NeK .
     subsort KResult < NeK .
     subsort NeK < K .
@@ -97,7 +92,6 @@ fmod META-K-MODULE is
 
   op ksupersorts : -> SubsortDeclSet [memo] .
   eq ksupersorts = (
-    subsort EmptyK < K .
     subsort KProper < NeK .
     subsort KProper < NeProperList .
     subsort KResult < NeK .
@@ -112,7 +106,7 @@ fmod META-K-MODULE is
 
   op kops : -> OpDeclSet [memo] .
   eq kops = (
-    op '.k : nil -> EmptyK [none] .
+    op '.K : nil -> K [none] .
     op '_`(_`) : KLabel KList -> NeK [none] .
     op '_`(_`) : KProperLabel KList -> KProper [none] .
     op '_`(_`) : KResultLabel KList -> KResult [none] .
@@ -245,14 +239,14 @@ fmod K-META-CONFIG is
   op cellLabel : Constant Bool -> Term .
   eq cellLabel(Label,B) = if B then multiCellS[Label] else Label fi .
 
-  ops Map Set List  : -> Sort .
-  eq Map = 'Map . eq Set = 'Set . eq List = 'List .
+  ops Map Bag List  : -> Sort .
+  eq Map = 'Map . eq Bag = 'Bag . eq List = 'List .
 
   op emptyCt : Sort -> Constant .
-  eq emptyCt(S) = if S == Set then mkConstant('.s,Set) else if S == Map then mkConstant('.m,Map) else if S == List then mkConstant('.l, List) else if S == K then mkConstant('.k, K) else 'error.K fi fi fi fi .
+  eq emptyCt(S) = if S == Bag then mkConstant('.Bag,Bag) else if S == Map then mkConstant('.Map,Map) else if S == List then mkConstant('.List, List) else if S == K then mkConstant('.K, K) else 'error.K fi fi fi fi .
 
   op ctor : Sort -> Qid .
-  eq ctor(S) = if S == Set then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else 'error fi fi fi fi .
+  eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else 'error fi fi fi fi .
 endfm
 
 fmod K-META-OPEN-CELLS is 
@@ -379,8 +373,8 @@ fmod K-META-LISTS is including K-META-OPS .
   var Q : Qid . var T : Type . var Trm : Term . var Trms : TermList .
   var N : Nat .
   op klistType : Type ~> Type .
-  eq klistType('K) = 'KList  .
-  eq klistType('KResult) = 'KResultList .
+  eq klistType('K) = KList  .
+  eq klistType('KResult) = ResultList .
 
   op klabelType : Type ~> Type .
   eq klabelType(Q) = if Q == K then KLabel else if Q ==  KResult then KResultLabel else KHybridLabel fi fi .

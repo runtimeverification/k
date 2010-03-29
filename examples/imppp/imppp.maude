@@ -84,13 +84,7 @@ endm
 
 mod IMP++ is
   including IMP++-PROGRAMS .
-  including K .            --- defines K, List, Map, and Set
-  including CONFIG .       --- defines CellLabel
-
-  including K-RULES .  --- to write k rules with in-place rewriting
-  including K-CONFIG . --- to specify the global configuration term
-  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
-  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
+  including K .
 
   subsort AExp BExp Stmt < K .
   subsort Int < KResult .
@@ -99,11 +93,11 @@ mod IMP++ is
   ops output threads thread k env store nextLoc result : -> CellLabel .
   vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : VarId .
   var N N1 N2 : Nat .
-  var Top Threads Thread : Set .  var Env Env' Store : Map .  var Output : List .
+  var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List .
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var El : AExpList .
   mb configuration < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
-  op startConfig : Stmt -> Set .
-  eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .m </ env > </ thread > </ threads > < store > .m </ store >  < output > .l </ output > < nextLoc > 0 </ nextLoc > </ T > .
+  op startConfig : Stmt -> Bag .
+  eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .Map </ env > </ thread > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > .
   
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
@@ -111,7 +105,7 @@ mod IMP++ is
   mb rule [head(list(I,?)) => I] : KSentence . 
   mb rule [tail(list(I,El)) => list(El)] : KSentence . 
 
-  mb rule [skip => .k] : KSentence .
+  mb rule [skip => .K] : KSentence .
   mb rule [not(T) => notBool T] : KSentence .
   mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
   mb rule [true and B => B] : KSentence .
@@ -121,20 +115,20 @@ mod IMP++ is
   mb rule [S1 ; S2 => S1 ~> S2] : KSentence [metadata "structural"] .
   mb rule < k > [X => I] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> I ...</ store > : KSentence .
   mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store >  : KSentence .
-  mb rule < k > [X := I => .k] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => I] ...</ store > : KSentence .
+  mb rule < k > [X := I => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => I] ...</ store > : KSentence .
   mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
-  mb rule < k > [print(I) => .k] ...</ k > < output >... [.l => l(I)] </ output >  : KSentence .
-  mb rule < k > [halt ~> ? => .k] </ k > : KSentence .
-  mb rule < thread >... < k > [spawn(S) => .k] ...</ k > < env > Env </ env > ...</ thread > [.s => < thread > < k > S </ k > < env > Env </ env > </ thread >] : KSentence .
-  mb rule [< thread >... < k > .k </ k > ...</ thread > => .s] : KSentence [metadata "structural"] .
+  mb rule < k > [print(I) => .K] ...</ k > < output >... [.List => List(I)] </ output >  : KSentence .
+  mb rule < k > [halt ~> ? => .K] </ k > : KSentence .
+  mb rule < thread >... < k > [spawn(S) => .K] ...</ k > < env > Env </ env > ...</ thread > [.Bag => < thread > < k > S </ k > < env > Env </ env > </ thread >] : KSentence .
+  mb rule [< thread >... < k > .K </ k > ...</ thread > => .Bag] : KSentence [metadata "structural"] .
 
-  mb rule [< T >... < threads > .s </ threads > < output > Output </ output > ...</ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
+  mb rule [< T >... < threads > .Bag </ threads > < output > Output </ output > ...</ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
 
-  mb rule < k > [var X ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[N / X]]</ env > < store >... [.m =>  N |-> 0] ...</ store > < nextLoc > [N => N +Int 1] </ nextLoc >  : KSentence [metadata "structural"] .
+  mb rule < k > [var X ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[N / X]]</ env > < store >... [.Map =>  N |-> 0] ...</ store > < nextLoc > [N => N +Int 1] </ nextLoc >  : KSentence [metadata "structural"] .
 
   op env : Map -> K .
   mb rule [env(Env) ~> env(Env') => env(Env')] : KSentence [metadata "structural"] .
-  mb rule < k > [env(Env) => .k] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
+  mb rule < k > [env(Env) => .K] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
 endm
 
 mod IMPPP is including IMP++ . endm

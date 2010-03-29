@@ -4,25 +4,8 @@
 
 in ../../k-prelude.maude
 
-mod IMP is
-  including PL-INT .                --- built-in integers
-  including PL-VARID .              --- built-in variable identifiers
-
-  including K .                     --- defines K, List, Map, and Set
-  including CONFIG .                --- defines CellLabel
-  including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
-
-  including K-RULES .               --- to write k rules with in-place rewriting
-  including K-CONFIG .              --- to specify the global configuration term
-  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
-  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
-
-
-
---------------
---- Syntax ---
---------------
-
+mod IMP-SYNTAX is including PL-INT + PL-VARID .   --- built-in integers and variable identifiers
+--- AExp
   sort AExp .
   subsort VarId Int < AExp .
   op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format(d b o d) metadata "strict"] .
@@ -41,30 +24,23 @@ mod IMP is
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 format (b o bni n++i bn--i n++i --) metadata "strict(1)"] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b n++i --)] .
 --- Pgm
-  sort Pgm .
+  sort Pgm .  sort List{VarId} .  subsort AExp < List{VarId} .
+  op .List{VarId} : -> List{VarId} .  op _,_ : List{VarId} List{VarId} -> List{VarId} [assoc id: .List{VarId}] .
+  op vars_;_ : List{VarId} Stmt -> Pgm [prec 70 format (nb o d ni d)] .
+endm
 
-  sort VarIdList .
-  subsort AExp < VarIdList .
-  op _,_ : VarIdList VarIdList -> VarIdList [assoc id: nil] .
-  op nil : -> VarIdList .
-  op vars_;_ : VarIdList Stmt -> Pgm [prec 70 format (nb o d ni d)] .
-
-
-----------------
---- Programs ---
-----------------
-
-ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> VarId .
-ops sumPgm collatzPgm countPrimesPgm : -> Pgm .
-ops collatzStmt multiplicationStmt primalityStmt : -> Stmt .
+mod IMP-PROGRAMS is including IMP-SYNTAX .
+  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> VarId .
+  ops sumPgm collatzPgm countPrimesPgm : -> Pgm .
+  ops collatzStmt multiplicationStmt primalityStmt : -> Stmt .
 eq sumPgm = (
-     vars n, s ; (
-     n := 100 ;
+     vars n, s ;
+     n := 10000 ;
      s := 0 ;
      while not(n <= 0) do (
        s := s + n ;
        n := n + -1
-     ))
+     )
 ) .
 
 eq collatzStmt = (
@@ -79,14 +55,14 @@ eq collatzStmt = (
 ) .
 
 eq collatzPgm = (
-   vars m, n, q, r, s ; (
+   vars m, n, q, r, s ;
    m := 10 ;
    s := 0 ;
    while not (m <= 2) do (
      n := m ;
      m := m + -1 ;
      collatzStmt
-   ))
+   )
 ) .
 
 eq multiplicationStmt = ( --- fast multiplication (base 2) algorithm
@@ -117,32 +93,30 @@ eq primalityStmt = (
 ) .
 
 eq countPrimesPgm = (
-   vars i, m, n, q, r, s, t, x, y, z ; (
+   vars i, m, n, q, r, s, t, x, y, z ;
    m := 10 ;
    s := 0 ; n := 2 ;
    while n <= m do (
      primalityStmt ;
      if 1 <= t then s := s + 1 else skip ;
      n := n + 1
-   ))
+   )
 ) .
+endm
 
-
------------------
---- Semantics ---
------------------
+mod IMP-SEMANTICS is
+  including IMP-SYNTAX .
+  including K .                     --- defines K, List, Map, and Set
+  including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
 
   subsort AExp BExp Stmt Pgm < K .
   subsorts Int Bool < KResult .
 
   ops state : -> CellLabel .
   vars I I1 I2 : Int .  var T : Bool .  var X : VarId .  var Sigma : Map .
-  var B : BExp .  var S S1 S2 : Stmt .  var Xl : VarIdList .  var K : K .
+  var B : BExp .  var S S1 S2 : Stmt .  var Xl : List{VarId} .  var K : K .
 
-  mb configuration < T > < k > K </ k > < state > Sigma </ state > </ T > : KSentence .
-
-  op c(_) : K -> Set .  eq c(K) = < T > < k > K </ k > < state > .m </ state > </ T > .
-  op pgm : -> Set .  eq pgm = c(sumPgm) .
+  mb configuration < T > < k > K </ k > < state > .Map </ state > </ T > : KSentence .
 
   mb rule < k > [X => I] ...</ k > < state >... X |-> I ...</ state > : KSentence .
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
@@ -151,12 +125,23 @@ eq countPrimesPgm = (
   mb rule [not(T) => notBool T] : KSentence .
   mb rule [true and B => B] : KSentence .
   mb rule [false and ? => false] : KSentence .
-  mb rule [skip => .k] : KSentence .
-  mb rule < k > [X := I => .k] ...</ k > < state >... X |-> [? => I] ...</ state > : KSentence .
+  mb rule [skip => .K] : KSentence .
+  mb rule < k > [X := I => .K] ...</ k > < state >... X |-> [? => I] ...</ state > : KSentence .
   mb rule [S1 ; S2 => S1 ~> S2] : KSentence .
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
   mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
-  mb rule < k > vars [X => nil],Xl ; S </ k > < state >... [.m => X |-> 0] ...</ state > : KSentence [metadata "structural"] .
-  mb rule < k > [vars nil ; S => S] </ k >  : KSentence .
+  mb rule < k > [vars Xl ; S => S] </ k > < state >... [.Map => klist(Xl) |-> 0] ...</ state > : KSentence [metadata "structural"] .
+
+--- AUXILLIARY
+--- klist : K -> KList should be defined as part of the framework: it should drop the label and keep the KList
+  op klist : List{VarId} -> List{K} .  eq klist(X,Xl) = X ,, klist(Xl) .  eq klist(.List{VarId}) = .List{K} .
+endm
+
+mod IMP is including IMP-PROGRAMS + IMP-SEMANTICS .
+  op [[_]] : K -> Bag .
+  eq [[K:K]] = < T > < k > K:K </ k > < state > .Map </ state > </ T > .
+--- We should eventually replace the above with
+---  eq [[K:K]] = < T >... < k > K:K </ k > ...</ T > .
+  op pgm : -> Bag .  eq pgm = [[sumPgm]] .
 endm

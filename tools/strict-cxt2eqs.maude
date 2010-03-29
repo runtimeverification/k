@@ -5,6 +5,7 @@ mod STRICTCXT2EQS is
   including META-TERM-EXTRAS .
   including STRING-EXTRAS .
   including META-MODULE-EXTRAS .
+  including META-K-MODULE .
   var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
   var AS : AttrSet . var MAS : MembAxSet . var Eqs : EquationSet .
   sort MASEqsPair .
@@ -15,11 +16,11 @@ mod STRICTCXT2EQS is
   op strictCxt2eqs : Module MembAxSet EquationSet ~> MASEqsPair . 
  ceq strictCxt2eqs(M, (mb 'context_[T] : Sort [AS] .) MAS,Eqs)
    = strictCxt2eqs(M, MAS, Eqs
-     ((eq kWrap(T[hole <- 'Kcxt:KProper])  
-        = kWrap(kra('Kcxt:KProper, freezeTerm(M, T))) 
+     ((eq kWrap(T[hole <- mkVariable('Kcxt,KProper)])  
+        = kWrap(kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))) 
        [metadata("heating")] .)
-      (eq kWrap(kra('Kcxt:KResult, freezeTerm(M, T)))
-        = kWrap(T[hole <- 'Kcxt:KResult])
+      (eq kWrap(kra(mkVariable('Kcxt,KResult), freezeTerm(M, T)))
+        = kWrap(T[hole <- mkVariable('Kcxt,KResult)])
        [metadata("cooling")] .))) 
   if Sort = KSentence .
   eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 

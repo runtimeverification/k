@@ -116,6 +116,7 @@ OUTPUT=$(<$FILE.maude)
 DEFAULTH="
 set include PL-BOOL off .
 set include BOOL on .
+set print attribute on .
 load \"$KBASE/tools/prelude-extras\"
 load \"$KBASE/tools/meta-k\"
 load \"$KBASE/tools/printing\"

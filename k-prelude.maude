@@ -2,66 +2,66 @@ load pl-builtins
 
 --- Level 0
 
-mod K is 
+mod K-TECHNIQUE is 
   including PL-NAT .
-  sorts EmptyK KResult NeK K .
+  sorts KResult NeK K .
   subsorts KResult < NeK < K .
-  subsort EmptyK < K .
-  op .k : -> EmptyK [metadata "latex(renameTo \\ensuremath{\\kdot})"].
-  op _~>_ : K K -> K [prec 100  assoc id: .k metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
+  op .K : -> K [metadata "latex(renameTo \\ensuremath{\\kdot})"].
+  op _~>_ : K K -> K [prec 100  assoc id: .K metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
   
-  sorts EmptyKList KResultList NeKResultList KList NeKList .
-  op .kl : -> EmptyKList .
-  subsort K < NeKList < KList .
-  subsort EmptyKList < KResultList < KList .
-  subsort KResult < NeKResultList < KResultList NeKList .
+  sorts List{KResult} NeList{KResult} List{K} NeList{K} .
+  op .List{K} : -> List{K} .
+  subsort K < NeList{K} < List{K} .
+  op .List{K} : -> List{KResult} .
+  subsort List{KResult} < List{K} .
+  subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
 
-  op _`,`,_ : KList KList -> KList [assoc id: .kl prec 121] .
+  op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121] .
   --- One should not modify the precedence above.  
   --- Might cause the compilation to fail.
-  op _`,`,_ : NeKList KList -> NeKList [ditto] .
-  op _`,`,_ : KList NeKList -> NeKList [ditto] .
-  op _`,`,_ : KResultList KResultList -> KResultList [ditto] .
-  op _`,`,_ : NeKResultList KResultList -> NeKResultList [ditto] .
-  op _`,`,_ : KResultList NeKResultList -> NeKResultList [ditto] .
+  op _`,`,_ : NeList{K} List{K} -> NeList{K} [ditto] .
+  op _`,`,_ : List{K} NeList{K} -> NeList{K} [ditto] .
+  op _`,`,_ : List{KResult} List{KResult} -> List{KResult} [ditto] .
+  op _`,`,_ : NeList{KResult} List{KResult} -> NeList{KResult} [ditto] .
+  op _`,`,_ : List{KResult} NeList{KResult} -> NeList{KResult} [ditto] .
 
 
-  op length_ : KList -> Nat . 
-  eq length(.kl) = 0 .
-  eq length(K:K,,KL:KList) = sNat length(KL:KList) . 
+  op length_ : List{K} -> Nat . 
+  eq length(.List`{K`}) = 0 .
+  eq length(K:K,,KL:List{K}) = sNat length(KL:List{K}) . 
 
   sorts KLabel KResultLabel KHybridLabel .
 
   subsorts KResultLabel KHybridLabel < KLabel .
   
-  op _`(_`) : KLabel KList -> NeK [prec 0 gather(& &)] .
-  op _`(_`) : KResultLabel KList -> KResult [ditto] .
-  op _`(_`) : KHybridLabel KResultList -> KResult [ditto] .
+  op _`(_`) : KLabel List{K} -> NeK [prec 0 gather(& &)] .
+  op _`(_`) : KResultLabel List{K} -> KResult [ditto] .
+  op _`(_`) : KHybridLabel List{KResult} -> KResult [ditto] .
 
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
-  op .l : -> List .
-  op l : K -> ListItem  .
-  op __ : List List -> List [assoc id: .l] .
+  op .List : -> List .
+  op List : K -> ListItem  .
+  op __ : List List -> List [assoc id: .List] .
   op __ : NeList List -> NeList [ditto] .
   op __ : List NeList -> NeList [ditto] .
   var LItem : ListItem .  var List : List .
   op length_ : List -> Nat .
-  eq length(.l) = 0 .
+  eq length(.List) = 0 .
   eq length(LItem List) = sNat length(List) .
 
-  sort SetItem Set NeSet .
-  subsort SetItem < NeSet < Set .
-  op .s : -> Set .
-  op s : K -> SetItem .
-  op __ : Set Set -> Set [assoc comm id: .s] .
-  op __ : NeSet Set -> NeSet [ditto] .
+  sort BagItem Bag NeBag .
+  subsort BagItem < NeBag < Bag .
+  op .Bag : -> Bag .
+  op Bag : K -> BagItem .
+  op __ : Bag Bag -> Bag [assoc comm id: .Bag] .
+  op __ : NeBag Bag -> NeBag [ditto] .
   
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .
-  op .m : -> Map .
+  op .Map : -> Map .
   op _|->_ : K K -> MapItem .
-  op __ : Map Map -> Map [assoc comm id: .m prec 120] .
+  op __ : Map Map -> Map [assoc comm id: .Map prec 120] .
   op __ : NeMap Map -> NeMap [ditto] .
 
   op _[_/_] : Map K K -> Map [prec 0] .
@@ -69,15 +69,15 @@ mod K is
   var Map : Map .  vars K1 K2 K2' : K .
   eq (Map K1 |-> K2)[K2' / K1] = Map K1 |-> K2' .
   eq Map[K2 / K1] = Map K1 |-> K2 [owise] .
-endm
-
-mod CONFIG is including K .
+  
   sort CellLabel .
+
+  op <_>_</_> : CellLabel K CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel List CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Bag CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Map CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+
   ops k T : -> CellLabel .
-  op <_>_</_> : CellLabel K CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
-  op <_>_</_> : CellLabel List CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
-  op <_>_</_> : CellLabel Set CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
-  op <_>_</_> : CellLabel Map CellLabel -> SetItem [prec 0 format(nib g b o+ -b g b o)] .
 endm
 
 mod K-SENTENCE is
@@ -87,32 +87,32 @@ endm
 --- KProper Level
 
 mod K-PROPER is
-  including K .
+  including K-TECHNIQUE .
   sort KProper .
   subsort KProper < NeK .
 --- next line is useful only if not using <k> wrappers for strictness
 ---  op _~>_ : KProper K -> KProper [ditto] .
   sort NeKProperList .
-  subsort KProper < NeKProperList < NeKList .  
+  subsort KProper < NeKProperList < NeList{K} .  
   sort KProperLabel .
   subsort KProperLabel < KLabel .
-  op _`(_`) : KProperLabel KList -> KProper [ditto] .
-  op _`,`,_ : NeKProperList KList -> NeKProperList [ditto] .
-  op _`,`,_ : KList NeKProperList -> NeKProperList [ditto] .
+  op _`(_`) : KProperLabel List{K} -> KProper [ditto] .
+  op _`,`,_ : NeKProperList List{K} -> NeKProperList [ditto] .
+  op _`,`,_ : List{K} NeKProperList -> NeKProperList [ditto] .
   op _`(_`) : KHybridLabel NeKProperList -> KProper [ditto] .
 endm
 
 --- Strictness Level
 
 mod K-STRICTNESS is 
-  including CONFIG .
+  including K-TECHNIQUE .
   including PL-STRING .
   op freezer : String -> KLabel .
   op freezeVar : String -> KLabel .
 endm
 
 mod K-CONTEXTS is
-  including K .
+  including K-TECHNIQUE .
   including K-SENTENCE .
   ops context_ : K -> [KSentence] [prec 127] .
   op [] : -> K .
@@ -122,12 +122,12 @@ endm
 --- KLabel-Wrappers level
 
 mod K-WRAPPERS-LABELS is
-  including CONFIG .
+  including K-TECHNIQUE .
   including PL-STRING .
   op wklabel_ : KLabel -> KLabel [metadata "builtin wrapper"] .
   op wcelllabel_ : CellLabel -> KLabel [metadata "builtin wrapper"] .
   op kList : String -> KLabel [metadata "list wrapper"] .
-  op wset_ : Set -> KLabel [metadata "builtin wrapper"] .
+  op wset_ : Bag -> KLabel [metadata "builtin wrapper"] .
   op wlist_ : List -> KLabel [metadata "builtin wrapper"] .
   op wmap_ : Map -> KLabel [metadata "builtin wrapper"] .
 endm
@@ -136,11 +136,11 @@ endm
 --- K-Wrappers level
 
 mod K-WRAPPERS is
-  including CONFIG .
+  including K-TECHNIQUE .
   op wklabel_ : KLabel -> K [metadata "builtin wrapper"] .
   op wcelllabel_ : CellLabel -> K [metadata "builtin wrapper"] .
-  op wklist_ : KList -> K [metadata "list wrapper"] .
-  op wset_ : Set -> K [metadata "builtin wrapper"] .
+  op wklist_ : List{K} -> K [metadata "list wrapper"] .
+  op wset_ : Bag -> K [metadata "builtin wrapper"] .
   op wlist_ : List -> K [metadata "builtin wrapper"] .
   op wmap_ : Map -> K [metadata "builtin wrapper"] .
 endm
@@ -165,51 +165,60 @@ endm
 
 --- ... level
 mod K-OPEN-CELLS is
-  including CONFIG .
-  op <_>..._...</_> : CellLabel K CellLabel -> SetItem [prec 0] .
-  op <_>..._...</_> : CellLabel List CellLabel -> SetItem [prec 0] .
-  op <_>..._...</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
-  op <_>..._...</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
-  op <_>..._</_> : CellLabel K CellLabel -> SetItem [prec 0] .
-  op <_>..._</_> : CellLabel List CellLabel -> SetItem [prec 0] .
-  op <_>..._</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
-  op <_>..._</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
-  op <_>_...</_> : CellLabel K CellLabel -> SetItem [prec 0] .
-  op <_>_...</_> : CellLabel List CellLabel -> SetItem [prec 0] .
-  op <_>_...</_> : CellLabel Set CellLabel -> SetItem [prec 0] .
-  op <_>_...</_> : CellLabel Map CellLabel -> SetItem [prec 0] .
+  including K-TECHNIQUE .
+  op <_>..._...</_> : CellLabel K CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel List CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel K CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel List CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel K CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel List CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
 endm
 
 ---- Context transformers level
 
 mod K-CONFIG is
-  including CONFIG .
+  including K-TECHNIQUE .
   including K-SENTENCE .
-  op configuration_ : Set -> [KSentence] [prec 127] .
+  op configuration_ : Bag -> [KSentence] [prec 127] .
 --- TODO: rename to "configuration_"
   op _* : CellLabel -> CellLabel .
 endm
 
 
+
+mod K is 
+  including K-TECHNIQUE .
+  including K-RULES .               --- to write k rules with in-place rewriting
+  including K-CONFIG .              --- to specify the global configuration term
+  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
+  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
+endm
+
 --- extra stuff
 
 mod K-MAP-EXTRAS is
-  including K .
-  var Map : Map .  var List : KList . var NList1 NList2 : NeKList .
+  including K-TECHNIQUE .
+  var Map : Map .  var List : List{K} . var NList1 NList2 : NeList{K} .
   vars K1 K2 K2' K : K .
-  op _|->_ : KList KList -> Map [ditto] .
+  op _|->_ : List{K} List{K} -> Map [ditto] .
   eq (K1,,NList1) |-> (K2,, NList2) = (K1 |-> K2) (NList1 |-> NList2) .
   eq (K1,,NList1) |-> K2 = (K1 |-> K2) (NList1 |-> K2) .
-  eq .kl |-> List = .m .
+  eq .List`{K`} |-> List = .Map .
 
-  op _[_/_] : Map KList KList -> Map [ditto] .
+  op _[_/_] : Map List{K} List{K} -> Map [ditto] .
   eq Map[(K1,,NList1) / (K2,, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
   eq Map[K2 / (K1,,NList1)] = (Map[K2 / K1])[K2 / NList1] .
-  eq Map[List / .kl] = Map .
+  eq Map[List / .List`{K`}] = Map .
 endm
 
 mod K-LIST-EXTRAS is
-	including K .
+	including K-TECHNIQUE .
 	including PL-BOOL .
 	op inKList : K K -> Bool .
 	
