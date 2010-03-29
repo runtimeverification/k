@@ -1,0 +1,66 @@
+load thue-compiled
+mod THUE-TEST is
+	including THUE .
+	
+	--- Programs
+  	op pHelloWorld : -> K [metadata "arity 0"] .
+	--- a::=~Hello World!
+	--- ::=
+	--- a
+	eq pHelloWorld = write(inject("a")(.kl),, inject("Hello world")(.kl)) ~> start(inject("a")(.kl)) .
+	
+	op pIncAny : -> K [metadata "arity 0"] .
+	***(
+		_0::=_
+
+		1_::=1++
+		0_::=0++
+
+		0++::=1
+		01++::=10
+		11++::=1++0
+		_1++::=10
+
+		__::=_//_
+		//::=:::
+		
+		.0::=~0
+		.1::=~1
+		!0::=!.0
+		!1::=!.1
+
+		 ::= 
+
+		!.__.!
+	***)
+	 
+	eq pIncAny = .k
+		~> subst(inject("_0")(.kl),, inject("_")(.kl))
+		
+		~> subst(inject("1_")(.kl),, inject("1++")(.kl))
+		~> subst(inject("0_")(.kl),, inject("0++")(.kl))
+		
+		~> subst(inject("0++")(.kl),, inject("#1")(.kl))
+		~> subst(inject("01++")(.kl),, inject("#10")(.kl))
+		~> subst(inject("11++")(.kl),, inject("1++0")(.kl))
+		~> subst(inject("_1++")(.kl),, inject("10")(.kl))
+		~> subst(inject("0#")(.kl),, inject("#0")(.kl))
+		~> subst(inject("1#")(.kl),, inject("#1")(.kl))
+		~> subst(inject("_#")(.kl),, inject("")(.kl))
+		
+		~> subst(inject("__")(.kl),, inject("_*_")(.kl))
+		~> read(inject("*")(.kl))
+		
+		~> write(inject(".0")(.kl),, inject("0")(.kl))
+		~> write(inject(".1")(.kl),, inject("1")(.kl))
+		~> subst(inject("!0")(.kl),, inject("!.0")(.kl))
+		~> subst(inject("!1")(.kl),, inject("!.1")(.kl))
+		
+		~> start(inject("!.__.!")(.kl))
+	.
+endm
+
+---set trace on .
+rew eval(pHelloWorld) .
+rew eval(pIncAny, injectL(l(inject("101")(.kl)))(.kl)) .
+rew eval(pIncAny, injectL(l(inject("11")(.kl)))(.kl)) .
