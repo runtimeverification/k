@@ -654,6 +654,10 @@ fmod META-LEVEL-EXTRAS is
   op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
   eq findOp(M, OPDS, Q, nil, 'String)
    =  (op Q : nil -> 'String [none] .) .
+  eq findOp(M, OPDS, Q, nil, 'Char)
+   =  (op Q : nil -> 'Char [none] .) .
+  eq findOp(M, OPDS, '_==Bool_, Tl, 'Bool)
+   =  (op '_==Bool_ : Tl -> 'Bool [none] .) .
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
    =  (op 'sNat_ : Tl' -> T' [AS] .)
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
