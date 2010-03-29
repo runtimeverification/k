@@ -80,6 +80,15 @@ mod K-TECHNIQUE is
   ops k T : -> CellLabel .
 endm
 
+mod K-DESTRUCTORS is
+  including K-TECHNIQUE .
+  op getKLabel_ : K ~> KLabel .
+  op getList`{K`}_ : K ~> List{K} .
+  var L : KLabel .  var Ks : List{K} .
+  eq getKLabel(L(Ks)) = L .
+  eq getList{K}(L(Ks)) = Ks .
+endm
+
 mod K-SENTENCE is
   sort KSentence . 
 endm
@@ -198,6 +207,7 @@ mod K is
   including K-CONFIG .              --- to specify the global configuration term
   including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
+  including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
 endm
 
 --- extra stuff
