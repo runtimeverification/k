@@ -214,6 +214,7 @@ endm
 
 mod K-MAP-EXTRAS is
   including K-TECHNIQUE .
+  including PL-BOOL .
   var Map : Map .  var List : List{K} . var NList1 NList2 : NeList{K} .
   vars K1 K2 K2' K : K .
   op _|->_ : List{K} List{K} -> Map [ditto] .
@@ -225,6 +226,10 @@ mod K-MAP-EXTRAS is
   eq Map[(K1,,NList1) / (K2,, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
   eq Map[K2 / (K1,,NList1)] = (Map[K2 / K1])[K2 / NList1] .
   eq Map[List / .List`{K`}] = Map .
+  
+  op $hasMapping : Map K -> Bool .
+  eq $hasMapping ((M:Map (D:K |-> R:K)), D:K) = true .
+  eq $hasMapping (M:Map, D:K) = false [owise] .
 endm
 
 mod K-LIST-EXTRAS is
