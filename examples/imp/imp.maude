@@ -24,7 +24,7 @@ mod IMP-SYNTAX is including PL-INT + PL-VARID .   --- built-in integers and vari
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 format (b o bni n++i bn--i n++i --) metadata "strict(1)"] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b n++i --)] .
 --- Pgm
-  sort Pgm .  sort List{VarId} .  subsort AExp < List{VarId} .
+  sort Pgm .  sort List{VarId} .  subsort VarId < List{VarId} .
   op .List{VarId} : -> List{VarId} .  op _,_ : List{VarId} List{VarId} -> List{VarId} [assoc id: .List{VarId}] .
   op vars_;_ : List{VarId} Stmt -> Pgm [prec 70 format (nb o d ni d)] .
 endm

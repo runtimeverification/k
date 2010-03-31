@@ -25,7 +25,7 @@ fmod LISTS-TO-K is
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
- var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
+ var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList .  var S : Sort .
  var N : Nat .
  var MS : ModuleSet .  var M Flat : Module .
  vars Mbs : MembAxSet . var Mb : MembAx .
@@ -39,7 +39,7 @@ fmod LISTS-TO-K is
  var CTORS : CTORSMap .
 
  op lists2kImports : ModuleSet ~> ImportList .
- eq lists2kImports(M MS) = lists2kImports(MS, getName(M), pseudoKSupersorts(getSubsorts(M))) .
+ eq lists2kImports(M MS) = lists2kImports(MS, getName(M), getSubsorts(getSubsorts(M), getListWrapperSorts(getOps(M)))) .
 
  op lists2kImports : ModuleSet Qid SubsortDeclSet ~> ImportList .
  eq lists2kImports(MS, Q, SSDS) 
@@ -51,8 +51,21 @@ fmod LISTS-TO-K is
 
  op makeLists2k : Qid Module Module ModuleSet ~> Module .
  eq makeLists2k(Q, M, Flat, MS)
-  = makeLists2k(setName(suffixImports(Q,M,lists2kImports(MS)), qid(string(getName(M)) + string(Q))), Flat, pseudoKSupersorts(getSubsorts(Flat))) .
+  = makeLists2k(setName(suffixImports(Q,M,lists2kImports(MS)), qid(string(getName(M)) + string(Q))), Flat, getSubsorts(getSubsorts(Flat), getListWrapperSorts(getOps(Flat)))) .
 
+
+ op getListWrapperSorts : OpDeclSet ~> SortSet .
+ eq getListWrapperSorts(Op OPDS) = if isListWrapper(Op) then getWrappedSort(Op) ; 
+ getListWrapperSorts(OPDS) else getListWrapperSorts(OPDS) fi .
+ eq getListWrapperSorts(none) = none .
+ 
+ op isListWrapper : OpDecl -> Bool .
+ eq isListWrapper(op Q : T -> T' [AS metadata("list wrapper")] .) = true .
+ eq isListWrapper(Op) = false [owise] .
+
+ op getWrappedSort : OpDecl ~> Sort .
+ eq getWrappedSort(op Q : S -> T [AS] .) = S .
+ 
  op makeLists2k : Module Module SubsortDeclSet ~> Module .
  eq makeLists2k(M, Flat, SSDS) 
   = listsModule(M, Flat, processSupersorts(getOps(Flat), SSDS)) .

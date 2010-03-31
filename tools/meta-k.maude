@@ -399,6 +399,7 @@ fmod K-META-LISTS is including K-META-OPS .
   op klistType : Type ~> Type .
   eq klistType('K) = KList  .
   eq klistType('KResult) = ResultList .
+  eq klistType(T) = KList [owise] .
 
   op klabelType : Type ~> Type .
   eq klabelType(Q) = if Q == K then KLabel else if Q ==  KResult then KResultLabel else KHybridLabel fi fi .
