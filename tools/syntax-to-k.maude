@@ -21,9 +21,6 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq syntax2k(Q, M, Flat, MS) 
   = setName(syntax2k(suffixImports(Q, M,syntax2kImports(MS)), syntaxSorts(Flat)), qid(string(getName(M)) + string(Q))) .
 
-  op syntaxSorts :  Module ~> SortSet .
-  eq syntaxSorts(M) = removeSorts(getSubsorts(M, K),ksorts ; builtinSorts) .
-
  op syntax2kImports : ModuleSet ~> ImportList .
  eq syntax2kImports(M' MS) 
   = if K in getSorts(M') 

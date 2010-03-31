@@ -147,29 +147,6 @@ loop anon-consts .
 "
 runMaude "$OUTPUT $ANON_CONSTS" "Transforming anonymous constants to anonymous variables"
 
-
-SYNTAX2K="
-$DEFAULTH
-load \"$KBASE/tools/syntax-to-k-interface\"
-loop syntax-to-k .
-(syntax2k $LANG -K .)
-"
-runMaude "$OUTPUT $SYNTAX2K" "Merging syntax sorts into K"
-
-LANG="${LANG}-K"
-
-
-
-KPROPER="
-$DEFAULTH
-load \"$KBASE/tools/add-k-proper-interface\"
-loop add-k-proper .
-(addKProper $LANG -PROPER .)
-"
-runMaude "$OUTPUT $KPROPER" "Adding the KProper Sort"
-
-LANG="${LANG}-PROPER"
-
 CONTEXT_TRANSFORMERS="
 $DEFAULTH
 load \"$KBASE/tools/context-transformers-interface\"
@@ -196,6 +173,36 @@ loop make-k-rules .
 "
 
 runMaude "$OUTPUT $K_RULES"  "Generating Maude rules from K rules"
+
+LISTS2WRAPPERS="
+$DEFAULTH
+load \"$KBASE/tools/lists-to-wrappers-interface\"
+loop lists-to-wrappers .
+(makeLists2wrappers $LANG -W .)
+"
+runMaude "$OUTPUT $LISTS2WRAPPERS" "Wrapping Syntax lists into K"
+
+LANG="${LANG}-W"
+
+SYNTAX2K="
+$DEFAULTH
+load \"$KBASE/tools/syntax-to-k-interface\"
+loop syntax-to-k .
+(syntax2k $LANG -K .)
+"
+runMaude "$OUTPUT $SYNTAX2K" "Merging syntax sorts into K"
+
+LANG="${LANG}-K"
+
+KPROPER="
+$DEFAULTH
+load \"$KBASE/tools/add-k-proper-interface\"
+loop add-k-proper .
+(addKProper $LANG -PROPER .)
+"
+runMaude "$OUTPUT $KPROPER" "Adding the KProper Sort"
+
+LANG="${LANG}-PROPER"
 
 LISTS2K="
 $DEFAULTH

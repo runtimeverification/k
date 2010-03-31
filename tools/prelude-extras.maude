@@ -21,6 +21,7 @@
 fmod NAT-LIST-EXTRAS is
   including NAT-LIST .
   including INT .
+  including EXT-BOOL .
   sort IntList NeIntList .
   subsort NatList < IntList .
   subsort Int NeNatList < NeIntList < IntList .
@@ -37,6 +38,10 @@ fmod NAT-LIST-EXTRAS is
   --- precondition first argument should be at most succesor of the second
   op seq : Nat Nat ~> NatList .
   eq seq(N, M) = if N > M then nil else N seq(s(N), M) fi .
+
+  op _in_ : Int IntList -> Bool .
+  eq N in M Ints = N == M or-else N in Ints .
+  eq N in nil = false .
 endfm
 
 fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
@@ -268,6 +273,7 @@ endfm
 
 fmod META-MODULE-EXTRAS is
   including META-MODULE .
+  including NAT-LIST-EXTRAS .
 
   sort ViewExp .
   subsorts Sort < ViewExp < ModuleExpression NeParameterList .
@@ -284,15 +290,15 @@ fmod META-MODULE-EXTRAS is
   vars EqS EqS' : EquationSet .
   vars RlS RlS' : RuleSet .
   vars SS SS' : SortSet .  var S S' : Sort .
-  vars TS TS' : TypeSet .  var T' : Type .
+  vars TS TS' : TypeSet .
   vars IL IL' IL'' : ImportList .  var I : Import .
   vars U U' : Module .
   var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
   vars PDL PDL' : ParameterDeclList .
   var QIL : QidList .  var Q Q' : Qid . 
-  var Tl : TypeList . var T : Type . 
+  var Tl Tl' : TypeList . var T T' : Type . 
   var AS AS' : AttrSet .  var Attr : Attr .
-  var NNl : NeNatList . var N : Nat .
+  var NNl : NeNatList . var Nl : NatList . var N N' : Nat .
   
 
   op nullHeader : -> Header .
@@ -368,6 +374,11 @@ fmod META-MODULE-EXTRAS is
   eq getSupersorts(SSDS (subsort S < S' .)) 
    = getSupersorts(SSDS) ; S' .
   eq getSupersorts(none) = none .
+
+  op getSubsorts : SubsortDeclSet -> SortSet .
+  eq getSubsorts(SSDS (subsort S < S' .)) 
+   = getSubsorts(SSDS) ; S .
+  eq getSubsorts(none) = none .
 
   op getOps : OpDeclSet SortSet -> OpDeclSet .
   eq getOps(OPDS (op Q : Tl -> S' [AS] .), SS ; S') 
@@ -599,6 +610,25 @@ fmod META-MODULE-EXTRAS is
   op list2set : TypeList -> TypeSet .
   eq list2set((T, Tl)) = T ; list2set(Tl) .
   eq list2set(nil) = none .
+
+  op getPoly : AttrSet -> NatList .
+  eq getPoly(poly(Nl) AS) = Nl .
+  eq getPoly(AS) = nil [owise] .
+  
+
+  op getTypes : Nat OpDecl ~> TypeList .
+  eq getTypes(N, (op Q : Tl -> T [AS] .))
+   = getTypes(N,Tl, arity(Tl), AS) .
+
+  op getTypes : Nat TypeList Nat AttrSet ~> TypeList .
+  eq getTypes(N,Tl,N,AS) = Tl .
+  eq getTypes(N,T Tl,N',assoc AS) = dup(T,N) .
+
+
+  op mergeTypes : TypeList TypeList Nat NatList -> TypeList .
+  eq mergeTypes((T Tl), (T' Tl'), N, Nl)
+   = if N in Nl then T else T' fi mergeTypes(Tl, Tl', s N, Nl) .
+  eq mergeTypes(nil, nil, N, Nl) = nil .
 endfm
 
 fmod METADATA-EXTRAS is
@@ -614,10 +644,11 @@ endfm
 fmod META-LEVEL-EXTRAS is
   including META-LEVEL .
   including META-MODULE-EXTRAS .
+  including NAT-LIST-EXTRAS .
 
   var M M' : Module . var T T' : Type . var K : Kind . var Tl Tl' : TypeList .
   var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
-  var Trm Trm' : Term . var Trms : TermList .
+  var Trm Trm' : Term . var Trms : TermList .  var Nl : NatList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
   var N N' : Nat .  var IL : ImportList .  var MS : ModuleSet .
 
@@ -639,7 +670,13 @@ fmod META-LEVEL-EXTRAS is
   eq leastSorts(M,empty) = nil .
   eq leastSorts(M, (Trm, Trms)) = leastSort(M,Trm)  leastSorts(M, Trms) .
 
-    op sortsLeq : Module TypeList TypeList ~> Bool .
+  op sortsLeq : Module TypeList TypeList Nat NatList ~> Bool .
+  eq sortsLeq(M, (T' Tl'), (T Tl), N, Nl) 
+   = (N in Nl or-else T == T' or-else sortLeq(M, T', T)) 
+     and-then sortsLeq(M, Tl', Tl, s N, Nl) .
+  eq sortsLeq(M, nil, nil, N, Nl) = true .
+  
+  op sortsLeq : Module TypeList TypeList ~> Bool .
 --- assuming Universal means Polymorfic
 ---  eq sortsLeq(M, T' Tl', ('Universal Tl))
 ---   = sortsLeq(M, Tl', Tl) .
@@ -665,16 +702,8 @@ fmod META-LEVEL-EXTRAS is
    = (op Q : T' T' -> T' [AS assoc] .) 
   if sortLeq(M,T',T) and-then sortsLeq(M,Tl,dup(T',arity(Tl))) .
  ceq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
-   = (op Q : Tl' -> T' [AS] .)
-  if sortLeq(M,T',T) and-then sortsLeq(M, Tl, Tl') [owise] .
-
-  op getTypes : Nat OpDecl ~> TypeList .
-  eq getTypes(N, (op Q : Tl -> T [AS] .))
-   = getTypes(N,Tl, arity(Tl), AS) .
-
-  op getTypes : Nat TypeList Nat AttrSet ~> TypeList .
-  eq getTypes(N,Tl,N,AS) = Tl .
-  eq getTypes(N,T Tl,N',assoc AS) = dup(T,N) .
+   = (op Q : mergeTypes(Tl, Tl', 1, getPoly(AS)) -> mergeTypes(T, T', 0, getPoly(AS)) [AS] .)
+  if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise] .
 
 
   op matchTermSorts : Module TermList TypeList ~> Bool .

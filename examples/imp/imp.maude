@@ -109,7 +109,7 @@ mod IMP-SEMANTICS is
   including K .                     --- defines K, List, Map, and Set
   including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
 
-  subsort AExp BExp Stmt Pgm < K .
+  subsort AExp BExp Stmt Pgm List{VarId} < K .
   subsorts Int Bool < KResult .
 
   ops state : -> CellLabel .
@@ -131,11 +131,11 @@ mod IMP-SEMANTICS is
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
   mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
-  mb rule < k > [vars Xl ; S => S] </ k > < state >... [.Map => klist(Xl) |-> 0] ...</ state > : KSentence [metadata "structural"] .
+  mb rule < k > [vars Xl ; S => S] </ k > < state >... [.Map => getList{K}(Xl) |-> 0] ...</ state > : KSentence [metadata "structural"] .
 
 --- AUXILLIARY
 --- klist : K -> KList should be defined as part of the framework: it should drop the label and keep the KList
-  op klist : List{VarId} -> List{K} .  eq klist(X,Xl) = X ,, klist(Xl) .  eq klist(.List{VarId}) = .List{K} .
+---  op klist : List{VarId} -> List{K} .  eq klist(X,Xl) = X ,, klist(Xl) .  eq klist(.List{VarId}) = .List{K} .
 endm
 
 mod IMP is including IMP-PROGRAMS + IMP-SEMANTICS .

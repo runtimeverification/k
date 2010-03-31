@@ -56,13 +56,14 @@ fmod META-K-MODULES is
   eq kModules 
    = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
      'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-ANONYMOUS-VARIABLES ; 
-     'K-OPEN-CELLS ; 'K-CONFIG .
+     'K-OPEN-CELLS ; 'K-CONFIG ; 'K-DESTRUCTORS .
 endfm
 
 fmod META-K-MODULE is
-  including META-MODULE-EXTRAS .
-  var S : Sort .  var T : Type .  var SSDS : SubsortDeclSet . 
-  vars OPDS : OpDeclSet .
+  including META-LEVEL-EXTRAS .
+  including META-K-BUILTINS .
+  var S : Sort .  var T T' : Type .  var SSDS : SubsortDeclSet . 
+  vars OPDS : OpDeclSet .  var M : Module .
 
   ops KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
   ops NeProperList ResultList NeResultList NeKList KList : -> Sort .
@@ -128,6 +129,29 @@ fmod META-K-MODULE is
   op pseudoKListSorts : SubsortDeclSet OpDeclSet -> SubsortDeclSet .
   eq pseudoKListSorts(SSDS, OPDS)
    = (getSupersorts(removeSubsorts(SSDS,ksupersorts), K ; KResult)) .
+
+  op syntaxSorts :  Module ~> SortSet .
+  eq syntaxSorts(M) = removeSorts(getSubsorts(M, K),ksorts ; builtinSorts ; getSubsorts(getList2KSubsorts(M))) .
+
+  op syntaxOps : Module -> OpDeclSet .
+  eq syntaxOps(M) = getOps(getOps(M), syntaxSorts(M)) .
+
+  op getList2KSubsorts : Module -> SubsortDeclSet .
+  eq getList2KSubsorts(M) = getList2KSubsorts(pseudoKSubsorts(getSubsorts(M))) .
+
+  op getList2KSubsorts : SubsortDeclSet -> SubsortDeclSet .
+  eq getList2KSubsorts(none) = none .
+  eq getList2KSubsorts((subsort T < T' .) SSDS) 
+   = if find(string(T),"List`{",0) == 0 
+     then (subsort T < T' .)  getList2KSubsorts(SSDS) 
+     else getList2KSubsorts(SSDS) fi .
+
+  op getK2ListSubsorts : SubsortDeclSet -> SubsortDeclSet .
+  eq getK2ListSubsorts(none) = none .
+  eq getK2ListSubsorts((subsort T < T' .) SSDS) 
+   = if find(string(T'),"List`{",0) == 0 
+     then (subsort T < T' .)  getK2ListSubsorts(SSDS) 
+     else getK2ListSubsorts(SSDS) fi .
 endfm
 
 fmod META-K-RULES is including K-SORTS .

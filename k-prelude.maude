@@ -82,8 +82,8 @@ endm
 
 mod K-DESTRUCTORS is
   including K-TECHNIQUE .
-  op getKLabel_ : K ~> KLabel .
-  op getList`{K`}_ : K ~> List{K} .
+  op getKLabel_ : K -> KLabel .
+  op getList`{K`}_ : K -> List{K} .
   var L : KLabel .  var Ks : List{K} .
   eq getKLabel(L(Ks)) = L .
   eq getList{K}(L(Ks)) = Ks .
@@ -233,12 +233,12 @@ mod K-MAP-EXTRAS is
 endm
 
 mod K-LIST-EXTRAS is
-	including K-TECHNIQUE .
-	including PL-BOOL .
-	op inKList : K K -> Bool .
-	
-	eq inKList(K:K, (K1:K ~> K:K ~> K2:K)) = true .
-	eq inKList(K:K, K':K) = false [owise] .
+  including K-TECHNIQUE .
+  including PL-BOOL .
+  op inKList : K K -> Bool .
+
+  eq inKList(K:K, (K1:K ~> K:K ~> K2:K)) = true .
+  eq inKList(K:K, K':K) = false [owise] .
 endm
 
 

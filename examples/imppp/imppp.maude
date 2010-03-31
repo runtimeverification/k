@@ -9,11 +9,11 @@ mod IMP++-SYNTAX is
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : VarId -> AExp [prec 30 format (b o d)] .
 
-  sort AExpList .
-  subsort AExp < AExpList .
-  op _,_ : AExpList AExpList -> AExpList [assoc id: nil] .
-  op nil : -> AExpList .
-  op list_ : AExpList -> AExp [metadata "strict(1) hybrid"] .
+  sort List{AExp} .
+  subsort AExp < List{AExp} .
+  op _,_ : List{AExp} List{AExp} -> List{AExp} [assoc id: .List`{AExp`}] .
+  op .List{AExp} : -> List{AExp} .
+  op list_ : List{AExp} -> AExp [metadata "strict(1) hybrid"] .
   op head : AExp -> AExp [metadata "strict"] .
   op tail : AExp -> AExp [metadata "strict"] .
 --- BExp
@@ -86,7 +86,7 @@ mod IMP++ is
   including IMP++-PROGRAMS .
   including K .
 
-  subsort AExp BExp Stmt < K .
+  subsort AExp BExp Stmt List{AExp} < K .
   subsort Int < KResult .
   subsort Bool < KResult .
 
@@ -94,7 +94,7 @@ mod IMP++ is
   vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : VarId .
   var N N1 N2 : Nat .
   var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List .
-  var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var El : AExpList .
+  var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var El : List{AExp} .
   mb configuration < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
   op startConfig : Stmt -> Bag .
   eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .Map </ env > </ thread > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > .
