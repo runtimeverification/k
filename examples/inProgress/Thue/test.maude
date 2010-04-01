@@ -62,5 +62,5 @@ endm
 
 ---set trace on .
 rew eval(pHelloWorld) .
-rew eval(pIncAny, injectL(List(inject("101")(.List{K})))(.List{K})) .
-rew eval(pIncAny, injectL(List(inject("11")(.List{K})))(.List{K})) .
+rew eval(pIncAny, injectL(List(explode(inject("101")(.List{K}))))(.List{K})) .
+rew eval(pIncAny, injectL(List(explode(inject("11")(.List{K}))))(.List{K})) .

@@ -49,7 +49,7 @@ mod THUE is
 
 	op explode : -> KProperLabel [metadata "arity 1"] .
 	op join : -> KProperLabel [metadata "arity 1"] .
-	op string : -> KLabel .
+	op string : -> KResultLabel .
 	
 	---- define explode of a string
 	mb [explodeString]: rule
@@ -57,9 +57,21 @@ mod THUE is
 		if notBool(S:String ==Bool "")
 		: KSentence [metadata "computational rule"] .
 	mb rule
-		[explode(inject("")(.List{K}) ~> K:K) => K:K]
+		[explode(inject("")(.List{K}) ~> K:K) => string(K:K)]
 		: KSentence [metadata "computational rule"] .
 	---- end define explode of a string
+	---- define join of a string
+	mb [joinString-start]: rule
+		[join(K:K) => join(K:K,, inject("")(.List{K}))]
+		: KSentence [metadata "computational rule"] .
+	mb [joinString-normal]: rule
+		[join(inject(C:Char)(.List{K}) ~> K:K,, inject(S:String)(.List{K})) => join(K:K,, inject(S:String +String C:Char)(.List{K}))]
+		: KSentence [metadata "computational rule"] .
+	mb [joinString-finish]: rule
+		[join(.K,, inject(S:String)(.List{K})) => inject(S:String)(.List{K})]
+		: KSentence [metadata "computational rule"] .
+	----
+	
 	
 	eq [Start]: eval(K:K) =
 	< T >
@@ -98,46 +110,46 @@ mod THUE is
 		: KSentence [metadata "computational rule"] .
 		
 	mb [applyRule]: rule
-		< k >... [K1:K => K2:K] ...</ k >
-		< rules >... Bag(subst(K1:K,, K2:K)) [.Bag => D:Bag] ...</ rules >
+		< k > string(Ka:K ~> [K1:K => K2:K] ~> Kb:K) </ k >
+		< rules >... Bag(subst(string(K1:K),, string(K2:K))) [.Bag => D:Bag] ...</ rules >
 		< disabled > [D:Bag => .Bag] </ disabled >
 		: KSentence [metadata "computational rule"] .
 	mb [applyWrite]: rule
-		< k >... [K1:K => .K] ...</ k >
-		< rules >... Bag(write(K1:K,, K2:K)) [.Bag => D:Bag] ...</ rules >
+		< k > string(Ka:K ~> [K1:K => .K] ~> Kb:K) </ k >
+		< rules >... Bag(write(string(K1:K),, string(K2:K))) [.Bag => D:Bag] ...</ rules >
 		< disabled > [D:Bag => .Bag] </ disabled >
 		< output >... [.K => K2:K] </ output >
 		: KSentence [metadata "computational rule"] .
 	mb [applyRead]: rule
-		< k >... [K1:K => explode(K2:K)] ...</ k >
-		< rules >... Bag(read(K1:K)) [.Bag => D:Bag] ...</ rules >
+		< k > string(Ka:K ~> [K1:K => K2:K] ~> Kb:K) </ k >
+		< rules >... Bag(read(string(K1:K))) [.Bag => D:Bag] ...</ rules >
 		< disabled > [D:Bag => .Bag] </ disabled >
-		< input >[List(K2:K) => .List] ...</ input >
+		< input >[List(string(K2:K)) => .List] ...</ input >
 		: KSentence [metadata "computational rule"] .
 	
-	--- mb [disabledRule]: rule
-		--- < k > K2:K </ k >
-		--- < rules >... [Bag(L:KLabel(K1:K,, Kl:List{K})) => .Bag] ...</ rules >
-		--- < disabled >... [.Bag => Bag(L:KLabel(K1:K,, Kl:List{K}))] ...</ disabled >
-		--- if notBool(inKList(K1:K, K2:K))
-		--- : KSentence [metadata "computational rule"] .
-		
-	mb [disabledRead]: rule
-		< k > K2:K </ k >
-		< rules >... [Bag(read(K1:K)) => .Bag] ...</ rules >
-		< disabled >... [.Bag => Bag(read(K1:K))] ...</ disabled >
+	mb [disabledRule]: rule
+		< k > string(K2:K) </ k >
+		< rules >... [Bag(L:KLabel(string(K1:K),, Kl:List{K})) => .Bag] ...</ rules >
+		< disabled >... [.Bag => Bag(L:KLabel(string(K1:K),, Kl:List{K}))] ...</ disabled >
 		if notBool(inKList(K1:K, K2:K))
 		: KSentence [metadata "computational rule"] .
-	
-	
-	--- mb [finish]: rule
-		--- [< T >... 
-			--- < rules > .Bag </ rules >
-			--- < output > K:K </ output >
-			--- ...</ T >
-		--- =>
-		--- < result > join(K:K) </ result >]
+		
+	--- mb [disabledRead]: rule
+		--- < k > string(K2:K) </ k >
+		--- < rules >... [Bag(read(K1:K)) => .Bag] ...</ rules >
+		--- < disabled >... [.Bag => Bag(read(K1:K))] ...</ disabled >
+		--- if notBool(inKList(K1:K, K2:K))
 		--- : KSentence [metadata "computational rule"] .
+	
+	
+	mb [finish]: rule
+		[< T >... 
+			< rules > .Bag </ rules >
+			< output > K:K </ output >
+			...</ T >
+		=>
+		< result > join(K:K) </ result >]
+		: KSentence [metadata "computational rule"] .
 	
 	
 endm
