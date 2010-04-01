@@ -1,13 +1,13 @@
 load ../../k-prelude
 mod IMP++-SYNTAX is
   including PL-INT .   --- built-in integers
-  including PL-VARID . --- built-in variable identifiers
+  including PL-ID . --- built-in variable identifiers
 
   sort AExp .
-  subsort VarId Int < AExp .
+  subsort Id Int < AExp .
   op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
-  op ++_ : VarId -> AExp [prec 30 format (b o d)] .
+  op ++_ : Id -> AExp [prec 30 format (b o d)] .
 
   sort List{AExp} .
   subsort AExp < List{AExp} .
@@ -25,12 +25,12 @@ mod IMP++-SYNTAX is
 --- Stmt
   sort Stmt .
   op skip : -> Stmt [format (b o)] .
-  op _:=_ : VarId AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
+  op _:=_ : Id AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
   op _;_ : Stmt Stmt -> Stmt [prec 120 gather (e E) format (d b noi d)] .
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
 
-  op var_;_ : VarId Stmt -> Stmt [prec 121 format (b o b on++i --)] .
+  op var_;_ : Id Stmt -> Stmt [prec 121 format (b o b on++i --)] .
   ops print_ :  AExp -> Stmt [prec 59 metadata "strict" format (b o d)] .
   op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
   ops halt  : -> Stmt [format (b o)] .
@@ -40,7 +40,7 @@ mod IMP++-PROGRAMS is
   including IMP++-SYNTAX .
 
   ops pSum pCollatz pList : -> Stmt .
-  ops n s i limit steps nr t  d nn : -> VarId [format (g o)].
+  ops n s i limit steps nr t  d nn : -> Id [format (g o)].
   eq pList =
     var n ;
     (n := 10 ;
@@ -91,13 +91,13 @@ mod IMP++ is
   subsort Bool < KResult .
 
   ops output threads thread k env store nextLoc result : -> CellLabel .
-  vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : VarId .
+  vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : Id .
   var N N1 N2 : Nat .
   var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List .
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .  var El : List{AExp} .
-  mb configuration < T > < threads > < thread * > < k > K </ k > < env > Env </ env > </ thread * > </ threads > < store > Store </ store >  < output > Output </ output > < nextLoc > N </ nextLoc > </ T > < result > Output </ result > : KSentence .
+  mb configuration < T > < threads > < thread * > < k > .K </ k > < env > .Map </ env > </ thread * > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .List </ result > : KSentence .
   op startConfig : Stmt -> Bag .
-  eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .Map </ env > </ thread > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > .
+  eq startConfig(S) = < T >... < k > S </ k > ...</ T > .
   
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .

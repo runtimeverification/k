@@ -872,8 +872,8 @@ mod PL-COUNTER is
 endm
 
 
-mod PL-VARID is
-  sort VarId .
+mod PL-ID is
+  sort Id .
 endm
 
 mod PL-BUILTINS is
@@ -889,7 +889,7 @@ including PL-QID .
 including PL-RANDOM .
 including PL-COUNTER .
 including PL-BOOL .
-including PL-VARID .
+including PL-ID .
 endm
 ---set include PL-BOOL on .
 set show advisories on .

@@ -4,10 +4,10 @@
 
 in ../../k-prelude.maude
 
-mod IMP-SYNTAX is including PL-INT + PL-VARID .   --- built-in integers and variable identifiers
+mod IMP-SYNTAX is including PL-INT + PL-ID .   --- built-in integers and variable identifiers
 --- AExp
   sort AExp .
-  subsort VarId Int < AExp .
+  subsort Id Int < AExp .
   op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format(d b o d) metadata "strict"] .
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format(d b o d) metadata "strict"] .
 --- BExp
@@ -19,18 +19,18 @@ mod IMP-SYNTAX is including PL-INT + PL-VARID .   --- built-in integers and vari
 --- Stmt
   sort Stmt .
   op skip : -> Stmt [format (b o)] .
-  op _:=_ : VarId AExp -> Stmt [prec 40 format(d b o d) metadata "strict(2)"] .
+  op _:=_ : Id AExp -> Stmt [prec 40 format(d b o d) metadata "strict(2)"] .
   op _;_ : Stmt Stmt -> Stmt [prec 60 gather (e E) format (d b noi d)] .
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 format (b o bni n++i bn--i n++i --) metadata "strict(1)"] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b n++i --)] .
 --- Pgm
-  sort Pgm .  sort List{VarId} .  subsort VarId < List{VarId} .
-  op .List{VarId} : -> List{VarId} .  op _,_ : List{VarId} List{VarId} -> List{VarId} [assoc id: .List{VarId}] .
-  op vars_;_ : List{VarId} Stmt -> Pgm [prec 70 format (nb o d ni d)] .
+  sort Pgm .  sort List{Id} .  subsort Id < List{Id} .
+  op .List{Id} : -> List{Id} .  op _,_ : List{Id} List{Id} -> List{Id} [assoc id: .List{Id}] .
+  op vars_;_ : List{Id} Stmt -> Pgm [prec 70 format (nb o d ni d)] .
 endm
 
 mod IMP-PROGRAMS is including IMP-SYNTAX .
-  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> VarId .
+  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
   ops sumPgm collatzPgm countPrimesPgm : -> Pgm .
   ops collatzStmt multiplicationStmt primalityStmt : -> Stmt .
 eq sumPgm = (
@@ -109,12 +109,12 @@ mod IMP-SEMANTICS is
   including K .                     --- defines K, List, Map, and Set
   including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
 
-  subsort AExp BExp Stmt Pgm List{VarId} < K .
+  subsort AExp BExp Stmt Pgm List{Id} < K .
   subsorts Int Bool < KResult .
 
   ops state : -> CellLabel .
-  vars I I1 I2 : Int .  var T : Bool .  var X : VarId .  var Sigma : Map .
-  var B : BExp .  var S S1 S2 : Stmt .  var Xl : List{VarId} .  var K : K .
+  vars I I1 I2 : Int .  var T : Bool .  var X : Id .  var Sigma : Map .
+  var B : BExp .  var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .
 
   mb configuration < T > < k > K </ k > < state > .Map </ state > </ T > : KSentence .
 
@@ -135,7 +135,7 @@ mod IMP-SEMANTICS is
 
 --- AUXILLIARY
 --- klist : K -> KList should be defined as part of the framework: it should drop the label and keep the KList
----  op klist : List{VarId} -> List{K} .  eq klist(X,Xl) = X ,, klist(Xl) .  eq klist(.List{VarId}) = .List{K} .
+---  op klist : List{Id} -> List{K} .  eq klist(X,Xl) = X ,, klist(Xl) .  eq klist(.List{Id}) = .List{K} .
 endm
 
 mod IMP is including IMP-PROGRAMS + IMP-SEMANTICS .

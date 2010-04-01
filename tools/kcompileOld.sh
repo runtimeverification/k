@@ -129,24 +129,6 @@ loop many-modules .
 "
 runMaude "$OUTPUT $MANY_MODULES" "Flattening entire definition in a single module"
 
-OPEN_CELLS="
-$DEFAULTH
-load \"$KBASE/tools/open-cells-interface\"
-loop open-cells .
-(resolveOpenCells $LANG $LANG .)
-"
-runMaude "$OUTPUT $OPEN_CELLS" "Transforming open cells to normal cells through anonymous variables"
-
-
-
-ANON_CONSTS="
-$DEFAULTH
-load \"$KBASE/tools/anon-consts-interface\"
-loop anon-consts .
-(resolveAnonConsts $LANG $LANG .)
-"
-runMaude "$OUTPUT $ANON_CONSTS" "Transforming anonymous constants to anonymous variables"
-
 CONTEXT_TRANSFORMERS="
 $DEFAULTH
 load \"$KBASE/tools/context-transformers-interface\"
@@ -155,6 +137,22 @@ loop context-transformers .
 "
 
 runMaude "$OUTPUT $CONTEXT_TRANSFORMERS" "Applying Context Transformers"
+
+OPEN_CELLS="
+$DEFAULTH
+load \"$KBASE/tools/open-cells-interface\"
+loop open-cells .
+(resolveOpenCells $LANG $LANG .)
+"
+runMaude "$OUTPUT $OPEN_CELLS" "Transforming open cells to normal cells through anonymous variables"
+
+ANON_CONSTS="
+$DEFAULTH
+load \"$KBASE/tools/anon-consts-interface\"
+loop anon-consts .
+(resolveAnonConsts $LANG $LANG .)
+"
+runMaude "$OUTPUT $ANON_CONSTS" "Transforming anonymous constants to anonymous variables"
 
 ANON_VARS="
 $DEFAULTH

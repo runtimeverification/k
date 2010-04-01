@@ -8,7 +8,7 @@ load ../../../k-prelude
 
 mod CHALLENGE is
   including PL-INT .
-  including PL-VARID .
+  including PL-ID .
   including K .
   including CONFIG .
   including K-CONFIG .
@@ -20,7 +20,7 @@ mod CHALLENGE is
 --- Syntax
   sort Exp .
   sort Stmt .
-  subsort Bool Int VarId < Exp .
+  subsort Bool Int Id < Exp .
 
   op _+_ : Exp Exp -> Exp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _*_ : Exp Exp -> Exp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
@@ -38,10 +38,10 @@ mod CHALLENGE is
   op while_do_ : Exp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
   op output_ : Exp -> Exp [prec 59 format (b o d) metadata "strict"] .
 
-  op ++_ : VarId -> Exp [prec 30 format (b o d)] .
+  op ++_ : Id -> Exp [prec 30 format (b o d)] .
   op _:=_ : Exp Exp -> Stmt [prec 40 format (d b o d) metadata "strict(2)"] .
 
-  op &_ : VarId -> Exp [prec 30 format (b o d)] .
+  op &_ : Id -> Exp [prec 30 format (b o d)] .
   op *_ : Exp -> Exp [prec 30 format (b o d)] .
   op malloc_ : Exp -> Exp [format (b o d) metadata "strict"] .
   op free_ : Exp -> Stmt [format (b o d) metadata "strict"] .
@@ -50,7 +50,7 @@ mod CHALLENGE is
   --- We'd like to use λ and μ here but Maude has some bugs
   --- in its unicode handling.
   op \_->_ : KList Exp -> Exp [prec 123 format (b o b o d)] .
-  op \Y_->_ : VarId Exp -> Exp [prec 123 format (b o b o d)] .
+  op \Y_->_ : Id Exp -> Exp [prec 123 format (b o b o d)] .
   op __ : Exp KList -> Exp [prec 0 metadata "strict(1 -2)"] .
 
   op {vars_;_} : KList Stmt -> Stmt [prec 121 format (y b o b noi y o)] .
@@ -77,8 +77,8 @@ mod CHALLENGE is
   op halt-system : -> Stmt [format (b o)] .
 
 --- Example programs
-  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> VarId [format (g o)] .
-  ops fib even limit nr steps : -> VarId [format (g o)] .
+  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id [format (g o)] .
+  ops fib even limit nr steps : -> Id [format (g o)] .
 
   op pFib : -> Stmt .
   eq pFib = {
@@ -199,7 +199,7 @@ mod CHALLENGE is
   vars B V E : Exp .
   vars Xl Vl : KList .
   var T : Bool .
-  var X : VarId .
+  var X : Id .
   var Env' : Map .
   var Kr : KResult .
 

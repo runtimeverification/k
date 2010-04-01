@@ -2,6 +2,7 @@ fmod CONTEXT-TRANSFORMERS is
   including META-MODULE-EXTRAS .
   including K-META-CONFIG .
   including META-ANONYMOUS-VARIABLE . 
+  including K-META-OPEN-CELLS .
   including INT .
   var M : Module .  var T T' : Term . var O Q : Qid .  var Ct : Constant . 
   var Tl Tl' : TermList .  var N : Nat .
@@ -21,6 +22,14 @@ fmod CONTEXT-TRANSFORMERS is
   subsort KConfElement < KConf .
   var KC KC' : KConf . var Cond : TermList .
   op {_,_,_,_,_,_} : Qid Nat Bool Qid SortSet KConf -> KConfElement .
+--- KConfElement ::= { 
+---  CellLabel(Qid),
+---  Level(Nat),
+---  Multiplicity(Bool),
+---  Parent(Qid),
+---  Descendants(SortSet),
+---  SubConfiguration(KConf)
+--- } 
   op getMultiplicity : KConfElement -> Bool .
   eq getMultiplicity({Q, Level, B, Q', Ss, KC'}) = B .
 
@@ -51,7 +60,6 @@ fmod CONTEXT-TRANSFORMERS is
   if SC := splitKCell(T) .
   eq getCellNames(Tl) = none [owise] .
 
-
   op getConfL : Qid Nat TermList -> KConf .
  ceq getConfL(Q, N, (T, Tl))
    = getConf(getName(SC), getMultiplicity(SC), N, Q, getConfList(getContents(SC))) getConfL(Q, N, Tl) 
@@ -72,7 +80,7 @@ fmod CONTEXT-TRANSFORMERS is
    = plugKRule(setContents(KRS,contextTransformT(getMinLevel(getContents(KRS),KC), getContents(KRS), KC))) .
   eq contextTransformKR(MAx,RS:[KRuleSplit],KC) = MAx [owise print RS:[KRuleSplit]] .
  
-  eq contextTransformMbs(none, KC) = none .
+  eq contextTransformMbs(none, KC) = none [print "Done. Configuration used: " KC] .
 
   op contextTransformT : Int Term KConf -> [Term] .
   var Level : NzNat . var B B' : Bool .
@@ -90,7 +98,6 @@ fmod CONTEXT-TRANSFORMERS is
  ceq solveEach(Q[T,T'], KC)
    = Q[solveEach(T,KC), solveEach(T',KC)] 
   if Q == replaceS .
-
   
   op solveEachL : TermList KConf -> [TermList] .
   eq solveEachL((T, Tl), KC) = solveEach(T,KC),solveEachL(Tl,KC) .

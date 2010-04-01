@@ -1,5 +1,4 @@
 fmod K-SORTS is including QID .
-  
   ops KSentence : -> Qid .
   eq KSentence = 'KSentence .
 endfm
@@ -29,7 +28,6 @@ fmod K-META-OPS is including META-TERM .
   eq kWrap(T) = kcell(kra(T,'Rest:K)) .
 --- replace the line above with the one below to get unrestricted strictness
 ---  eq kWrap(T) = T .
-
 
   op kList : TermList -> Term .
   eq kList(T) = T .
@@ -158,6 +156,7 @@ fmod META-K-RULES is including K-SORTS .
   including META-MODULE .
   var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
   var AS : AttrSet .  var RK : KRuleKind .
+
   sort KRuleKind .
   ops krl kcrl : -> KRuleKind .
   op error : Qid -> [KRuleKind] .
@@ -301,6 +300,7 @@ endfm
 fmod META-K-WRAPPERS is
   including META-LEVEL .
   vars T T' : Type . var Q : Qid . var AS : AttrSet . var OPDS : OpDeclSet .
+
   op builtin-wrappers : -> OpDeclSet [memo] .
   eq builtin-wrappers = getOps(upModule('K-WRAPPERS, false)) .
 
@@ -340,10 +340,10 @@ endfm
 
 fmod K-STRICTNESS-OPS is including META-LEVEL .
   including K-META-OPS .
+  var S : String .
+
   op hole : -> Term .
   eq hole = '`[`].K .
-
-  var S : String .
 
   op freezeLabel : String -> Term .
   eq freezeLabel(S) = 'freezer[upTerm(S)] .
@@ -387,8 +387,6 @@ fmod K-ATTRS is
   including CONFIGURATION-ATTRS .
 endfm
 
-
-
 fmod K-META-LISTS is including K-META-OPS .
   including META-K-MODULE .
   including META-TERM-EXTRAS .
@@ -407,14 +405,12 @@ fmod K-META-LISTS is including K-META-OPS .
   op wrapList : Type Term TermList ~> Term .
   eq wrapList(T, Q[Trm], Trms) = kApply(listWrapperT(Q,KHybridLabel),Trms) .
 
-
   op listWrapperS : Qid -> Qid .
   eq listWrapperS(Q) = qid("\"" + string(Q) + "\"") .
   op listWrapperT : Qid Type -> Constant .
   eq listWrapperT(Q,T) = mkConstant(listWrapperS(Q),klabelType(T)) .
 
   eq klist(N,Q,T) = klist(N, listWrapperT(Q,T)) .
-   
 endfm
 
 
