@@ -1,14 +1,14 @@
 
 load "../../tools/../k-prelude"
 
-
-mod IMPPP-W-K-PROPER-L01-LABELS is
+mod IMPPP is
   including K-DESTRUCTORS .
   including K-TECHNIQUE .
+  including PL-ID .
   including PL-INT .
-  including PL-VARID .
   including K-PROPER .
   including K-WRAPPERS-LABELS .
+  including K-STRICTNESS .
   op env : -> CellLabel .
   op k : -> CellLabel .
   op nextLoc : -> CellLabel .
@@ -22,9 +22,9 @@ mod IMPPP-W-K-PROPER-L01-LABELS is
     [metadata "arity 1"] .
   op "Bool"_ : Bool -> KResultLabel
     [metadata "builtin wrapper"] .
-  op "Int"_ : Int -> KResultLabel
+  op "Id"_ : Id -> KProperLabel
     [metadata "builtin wrapper"] .
-  op "VarId"_ : VarId -> KProperLabel
+  op "Int"_ : Int -> KResultLabel
     [metadata "builtin wrapper"] .
   op "_+_" : -> KProperLabel
     [metadata "arity 2 strict"] .
@@ -70,88 +70,34 @@ mod IMPPP-W-K-PROPER-L01-LABELS is
     [metadata "arity 2"] .
   op "while_do_" : -> KProperLabel
     [metadata "arity 2"] .
-  op d : -> VarId
+  op d : -> Id
     [format(g o)] .
-  op i : -> VarId
+  op i : -> Id
     [format(g o)] .
-  op limit : -> VarId
+  op limit : -> Id
     [format(g o)] .
-  op n : -> VarId
+  op n : -> Id
     [format(g o)] .
-  op nn : -> VarId
+  op nn : -> Id
     [format(g o)] .
-  op nr : -> VarId
+  op nr : -> Id
     [format(g o)] .
-  op s : -> VarId
+  op s : -> Id
     [format(g o)] .
-  op steps : -> VarId
+  op steps : -> Id
     [format(g o)] .
-  op t : -> VarId
+  op t : -> Id
     [format(g o)] .
   eq _`(_`)("pCollatz",.List`{K`})
-    = _`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(limit),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(steps),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(nr),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(t),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(limit),.List`{K`}),_`(_`)("Int"_(10),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(steps),.List`{K`}),_`(_`)("Int"_(10),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(nr),.List`{K`}),_`(_`)("Int"_(1),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(t),.List`{K`}),_`(_`)("Int"_(2),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("++_",_`(_`)("VarId"_(nr),.List`{K`})),_`(_`)("VarId"_(limit),.List`{K`}))),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("VarId"_(nr),.List`{K`}))),_`(_`)("spawn_",_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(2),.List`{K`}),_`(_`)("VarId"_(n),.List`{K`}))),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(d),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(nn),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(nn),.List`{K`}),_`(_`)("++_",_`(_`)("VarId"_(steps),.List`{K`})))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(d),.List`{K`}),_`(_`)("Int"_(0),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(nn),.List`{K`}),_`(_`)("VarId"_(n),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(2),.List`{K`}),_`(_`)("VarId"_(nn),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(d),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("VarId"_(d),.List`{K`}),_`(_`)("Int"_(1),.List`{K`}))))),_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(nn),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("VarId"_(nn),.List`{K`}),_`(_`)("Int"_(-2),.List`{K`}))))))))),_`(_`)("if_then_else_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(1),.List`{K`}),_`(_`)("VarId"_(nn),.List`{K`}))),_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("_+_",_`,`,_(_`(_`)("_+_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("VarId"_(n),.List`{K`}))),_`(_`)("VarId"_(n),.List`{K`}))),_`(_`)("Int"_(1),.List`{K`}))))),_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("VarId"_(d),.List`{K`}))))))))))))))))))),_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("++_",_`(_`)("VarId"_(t),.List`{K`}))))))))))))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("VarId"_(t),.List`{K`}),_`(_`)("VarId"_(limit),.List`{K`}))),_`(_`)("skip",.List`{K`}))),_`(_`)("print_",_`(_`)("VarId"_(steps),.List`{K`})))))))))))))))))))))) .
+    = _`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(limit),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(steps),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(nr),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(t),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(limit),.List`{K`}),_`(_`)("Int"_(10),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(steps),.List`{K`}),_`(_`)("Int"_(10),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(nr),.List`{K`}),_`(_`)("Int"_(1),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(t),.List`{K`}),_`(_`)("Int"_(2),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("++_",_`(_`)("Id"_(nr),.List`{K`})),_`(_`)("Id"_(limit),.List`{K`}))),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("Id"_(nr),.List`{K`}))),_`(_`)("spawn_",_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(2),.List`{K`}),_`(_`)("Id"_(n),.List`{K`}))),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(d),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(nn),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(nn),.List`{K`}),_`(_`)("++_",_`(_`)("Id"_(steps),.List`{K`})))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(d),.List`{K`}),_`(_`)("Int"_(0),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(nn),.List`{K`}),_`(_`)("Id"_(n),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(2),.List`{K`}),_`(_`)("Id"_(nn),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(d),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("Id"_(d),.List`{K`}),_`(_`)("Int"_(1),.List`{K`}))))),_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(nn),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("Id"_(nn),.List`{K`}),_`(_`)("Int"_(-2),.List`{K`}))))))))),_`(_`)("if_then_else_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(1),.List`{K`}),_`(_`)("Id"_(nn),.List`{K`}))),_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("_+_",_`,`,_(_`(_`)("_+_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("Id"_(n),.List`{K`}))),_`(_`)("Id"_(n),.List`{K`}))),_`(_`)("Int"_(1),.List`{K`}))))),_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("Id"_(d),.List`{K`}))))))))))))))))))),_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("++_",_`(_`)("Id"_(t),.List`{K`}))))))))))))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Id"_(t),.List`{K`}),_`(_`)("Id"_(limit),.List`{K`}))),_`(_`)("skip",.List`{K`}))),_`(_`)("print_",_`(_`)("Id"_(steps),.List`{K`})))))))))))))))))))))) .
   eq _`(_`)("pList",.List`{K`})
-    = _`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("Int"_(10),.List`{K`}))),_`(_`)("print_",_`(_`)("head",_`(_`)("list_",_`(_`)("_`,_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`,`,_(_`(_`)("Int"_(2),.List`{K`}),_`(_`)("Int"_(3),.List`{K`}))))))))))) .
+    = _`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("Int"_(10),.List`{K`}))),_`(_`)("print_",_`(_`)("head",_`(_`)("list_",_`(_`)("_`,_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`,`,_(_`(_`)("Int"_(2),.List`{K`}),_`(_`)("Int"_(3),.List`{K`}))))))))))) .
   eq _`(_`)("pSum",.List`{K`})
-    = _`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(s),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(i),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(n),.List`{K`}),_`(_`)("Int"_(1000),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(s),.List`{K`}),_`(_`)("Int"_(0),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(i),.List`{K`}),_`(_`)("VarId"_(n),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(1),.List`{K`}),_`(_`)("VarId"_(i),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(s),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("VarId"_(s),.List`{K`}),_`(_`)("VarId"_(i),.List`{K`}))))),_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(i),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("VarId"_(i),.List`{K`}),_`(_`)("Int"_(-1),.List`{K`}))))))))),_`(_`)("print_",_`(_`)("VarId"_(s),.List`{K`})))))))))))))))) .
+    = _`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(s),.List`{K`}),_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(i),.List`{K`}),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(n),.List`{K`}),_`(_`)("Int"_(1000),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(s),.List`{K`}),_`(_`)("Int"_(0),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(i),.List`{K`}),_`(_`)("Id"_(n),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("while_do_",_`,`,_(_`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(1),.List`{K`}),_`(_`)("Id"_(i),.List`{K`}))),_`(_`)("_;_",_`,`,_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(s),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("Id"_(s),.List`{K`}),_`(_`)("Id"_(i),.List`{K`}))))),_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(i),.List`{K`}),_`(_`)("_+_",_`,`,_(_`(_`)("Id"_(i),.List`{K`}),_`(_`)("Int"_(-1),.List`{K`}))))))))),_`(_`)("print_",_`(_`)("Id"_(s),.List`{K`})))))))))))))))) .
   eq startConfig(S:K)
     = <_>_</_>(T,__(__(__(<_>_</_>(nextLoc,_`(_`)("Int"_(0),.List`{K`}),nextLoc),<_>_</_>(output,.List,output)),<_>_</_>(store,.Map,store)),<_>_</_>(threads,<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,.Map,env)),thread),threads)),T) .
-  eq <_>_</_>(T,__(?4:Bag,<_>_</_>(output,Output:List,output),<_>_</_>(threads,.Bag,threads)),T)
+  eq <_>_</_>(T,__(?4:Bag,__(<_>_</_>(output,Output:List,output),<_>_</_>(threads,.Bag,threads))),T)
     = <_>_</_>(result,Output:List,result) [metadata "structural rule"] .
-  eq <_>_</_>(thread,__(?2:Bag,<_>_</_>(k,.K,k)),thread)
-    = .Bag [metadata "structural rule"] .
-  eq __(<_>_</_>(k,_~>_(_`(_`)("env",_`(_`)(wmap_(Env:Map),.List`{K`})),?5:K),k),<_>_</_>(env,Env':Map,env))
-    = __(<_>_</_>(k,?5:K,k),<_>_</_>(env,Env:Map,env)) [metadata "structural rule"] .
-  eq __(<_>_</_>(nextLoc,_`(_`)("Int"_(N:Nat),.List`{K`}),nextLoc),<_>_</_>(threads,__(?16:Bag,<_>_</_>(thread,__(?17:Bag,<_>_</_>(k,_~>_(_`(_`)("var_;_",_`,`,_(_`(_`)("VarId"_(X:VarId),.List`{K`}),S:K)),?18:K),k),<_>_</_>(env,Env:Map,env)),thread)),threads),<_>_</_>(store,?19:Map,store))
-    = __(<_>_</_>(nextLoc,_`(_`)("Int"_(_+Int_(N:Nat,1)),.List`{K`}),nextLoc),<_>_</_>(threads,__(?16:Bag,<_>_</_>(thread,__(?17:Bag,<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)("env",_`(_`)(wmap_(Env:Map),.List`{K`}))),?18:K),k),<_>_</_>(env,_`[_/_`](Env:Map,_`(_`)("Int"_(N:Nat),.List`{K`}),_`(_`)("VarId"_(X:VarId),.List`{K`})),env)),thread)),threads),<_>_</_>(store,__(?19:Map,_|->_(_`(_`)("Int"_(N:Nat),.List`{K`}),_`(_`)("Int"_(0),.List`{K`}))),store)) [metadata "structural rule"] .
-  eq _`(_`)("_;_",_`,`,_(S1:K,S2:K))
-    = _~>_(S1:K,S2:K) [metadata "structural rule"] .
-  eq _~>_(_`(_`)("env",_`(_`)(wmap_(Env:Map),.List`{K`})),_`(_`)("env",_`(_`)(wmap_(Env':Map),.List`{K`})))
-    = _`(_`)("env",_`(_`)(wmap_(Env':Map),.List`{K`})) [metadata "structural rule"] .
-  rl <_>_</_>(k,_~>_(_`(_`)("halt",.List`{K`}),?2:K),k)
-    => <_>_</_>(k,.K,k) [metadata "computational rule"] .
-  rl <_>_</_>(k,_~>_(_`(_`)("while_do_",_`,`,_(B:K,S:K)),?8:K),k)
-    => <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,`,_(B:K,_`(_`)("_;_",_`,`,_(S:K,_`(_`)("while_do_",_`,`,_(B:K,S:K)))),_`(_`)("skip",.List`{K`}))),?8:K),k) [metadata "computational rule"] .
-  rl <_>_</_>(thread,__(?7:Bag,<_>_</_>(k,_~>_(_`(_`)("spawn_",S:K),?8:K),k),<_>_</_>(env,Env:Map,env)),thread)
-    => __(<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,Env:Map,env)),thread),<_>_</_>(thread,__(?7:Bag,<_>_</_>(k,?8:K,k),<_>_</_>(env,Env:Map,env)),thread)) [metadata "computational rule"] .
-  rl __(<_>_</_>(output,?7:List,output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,_~>_(_`(_`)("print_",_`(_`)("Int"_(I:Int),.List`{K`})),?10:K),k)),thread)),threads))
-    => __(<_>_</_>(output,__(?7:List,List(_`(_`)("Int"_(I:Int),.List`{K`}))),output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,?10:K,k)),thread)),threads)) [metadata "computational rule"] .
-  rl __(<_>_</_>(threads,__(?12:Bag,<_>_</_>(thread,__(?13:Bag,<_>_</_>(k,_~>_(_`(_`)("VarId"_(X:VarId),.List`{K`}),?14:K),k),<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("VarId"_(X:VarId),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env)),thread)),threads),<_>_</_>(store,__(?16:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store))
-    => __(<_>_</_>(threads,__(?12:Bag,<_>_</_>(thread,__(?13:Bag,<_>_</_>(k,_~>_(_`(_`)("Int"_(I:Int),.List`{K`}),?14:K),k),<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("VarId"_(X:VarId),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env)),thread)),threads),<_>_</_>(store,__(?16:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store)) [metadata "computational rule"] .
-  rl __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,<_>_</_>(k,_~>_(_`(_`)("++_",_`(_`)("VarId"_(X:VarId),.List`{K`})),?15:K),k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("VarId"_(X:VarId),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store))
-    => __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,<_>_</_>(k,_~>_(_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}),?15:K),k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("VarId"_(X:VarId),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}))),store)) [metadata "computational rule"] .
-  rl __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,<_>_</_>(k,_~>_(_`(_`)("_:=_",_`,`,_(_`(_`)("VarId"_(X:VarId),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),?15:K),k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("VarId"_(X:VarId),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),?18:K)),store))
-    => __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,<_>_</_>(k,?15:K,k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("VarId"_(X:VarId),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env)),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store)) [metadata "computational rule"] .
-  rl _`(_`)("_+_",_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))
-    => _`(_`)("Int"_(_+Int_(I1:Int,I2:Int)),.List`{K`}) [metadata "computational rule"] .
-  rl _`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))
-    => _`(_`)("Bool"_(_<=Int_(I1:Int,I2:Int)),.List`{K`}) [metadata "computational rule"] .
-  rl _`(_`)("_and_",_`,`,_(_`(_`)("Bool"_(false),.List`{K`}),?2:K))
-    => _`(_`)("Bool"_(false),.List`{K`}) [metadata "computational rule"] .
-  rl _`(_`)("_and_",_`,`,_(_`(_`)("Bool"_(true),.List`{K`}),B:K))
-    => B:K [metadata "computational rule"] .
-  rl _`(_`)("head",_`(_`)("list_",_`(_`)("_`,_",_`,`,_(_`(_`)("Int"_(I:Int),.List`{K`}),?4:List{K}))))
-    => _`(_`)("Int"_(I:Int),.List`{K`}) [metadata "computational rule"] .
-  rl _`(_`)("if_then_else_",_`,`,_(_`(_`)("Bool"_(false),.List`{K`}),?4:K,S2:K))
-    => S2:K [metadata "computational rule"] .
-  rl _`(_`)("if_then_else_",_`,`,_(_`(_`)("Bool"_(true),.List`{K`}),S1:K,?4:K))
-    => S1:K [metadata "computational rule"] .
-  rl _`(_`)("not_",_`(_`)("Bool"_(T:Bool),.List`{K`}))
-    => _`(_`)("Bool"_(notBool_(T:Bool)),.List`{K`}) [metadata "computational rule"] .
-  rl _`(_`)("skip",.List`{K`})
-    => .K [metadata "computational rule"] .
-  rl _`(_`)("tail",_`(_`)("list_",_`(_`)("_`,_",_`,`,_(_`(_`)("Int"_(I:Int),.List`{K`}),El:List{K}))))
-    => _`(_`)("list_",_`(_`)("_`,_",El:List{K})) [metadata "computational rule"] .
-  crl _`(_`)("_/_",_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))
-    => _`(_`)("Int"_(_/Int_(I1:Int,I2:Int)),.List`{K`})
-    if _=/=Bool_(I2:Int,0)= true [metadata "computational rule"] .
-endm
-
-
-
-mod IMPPP-W-K-PROPER-L-STRICTNESS is
-  including IMPPP-W-K-PROPER-L01-LABELS .
-  including K-STRICTNESS .
   eq <_>_</_>(k,_~>_(_`(_`)("_+_",_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_+_\"(K1:K,,[])"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)("_+_",_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)
@@ -208,11 +154,53 @@ mod IMPPP-W-K-PROPER-L-STRICTNESS is
     = <_>_</_>(k,_~>_(_`(_`)("print_",Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"tail\"([])"),.List`{K`}),Rest:K),k)
     = <_>_</_>(k,_~>_(_`(_`)("tail",Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
-endm
-
-mod LANG-TEST is
-  including IMPPP-W-K-PROPER-L01-LABELS .
-  including IMPPP-W-K-PROPER-L-STRICTNESS .
+  eq <_>_</_>(thread,__(?2:Bag,<_>_</_>(k,.K,k)),thread)
+    = .Bag [metadata "structural rule"] .
+  eq __(<_>_</_>(env,Env':Map,env),<_>_</_>(k,_~>_(_`(_`)("env",_`(_`)(wmap_(Env:Map),.List`{K`})),?5:K),k))
+    = __(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(.K,?5:K),k)) [metadata "structural rule"] .
+  eq __(<_>_</_>(nextLoc,_`(_`)("Int"_(N:Nat),.List`{K`}),nextLoc),<_>_</_>(store,__(?16:Map,.Map),store),<_>_</_>(threads,__(?17:Bag,<_>_</_>(thread,__(?18:Bag,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(_`(_`)("var_;_",_`,`,_(_`(_`)("Id"_(X:Id),.List`{K`}),S:K)),?19:K),k))),thread)),threads))
+    = __(<_>_</_>(nextLoc,_`(_`)("Int"_(_+Int_(N:Nat,1)),.List`{K`}),nextLoc),<_>_</_>(store,__(?16:Map,_|->_(_`(_`)("Int"_(N:Nat),.List`{K`}),_`(_`)("Int"_(0),.List`{K`}))),store),<_>_</_>(threads,__(?17:Bag,<_>_</_>(thread,__(?18:Bag,__(<_>_</_>(env,_`[_/_`](Env:Map,_`(_`)("Int"_(N:Nat),.List`{K`}),_`(_`)("Id"_(X:Id),.List`{K`})),env),<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)("env",_`(_`)(wmap_(Env:Map),.List`{K`}))),?19:K),k))),thread)),threads)) [metadata "structural rule"] .
+  eq _`(_`)("_;_",_`,`,_(S1:K,S2:K))
+    = _~>_(S1:K,S2:K) [metadata "structural rule"] .
+  eq _~>_(_`(_`)("env",_`(_`)(wmap_(Env:Map),.List`{K`})),_`(_`)("env",_`(_`)(wmap_(Env':Map),.List`{K`})))
+    = _`(_`)("env",_`(_`)(wmap_(Env':Map),.List`{K`})) [metadata "structural rule"] .
+  rl <_>_</_>(k,_~>_(_`(_`)("halt",.List`{K`}),?2:K),k)
+    => <_>_</_>(k,.K,k) [metadata "computational rule"] .
+  rl <_>_</_>(k,_~>_(_`(_`)("while_do_",_`,`,_(B:K,S:K)),?8:K),k)
+    => <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,`,_(B:K,_`(_`)("_;_",_`,`,_(S:K,_`(_`)("while_do_",_`,`,_(B:K,S:K)))),_`(_`)("skip",.List`{K`}))),?8:K),k) [metadata "computational rule"] .
+  rl __(<_>_</_>(output,__(?7:List,.List),output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,_~>_(_`(_`)("print_",_`(_`)("Int"_(I:Int),.List`{K`})),?10:K),k)),thread)),threads))
+    => __(<_>_</_>(output,__(?7:List,List(_`(_`)("Int"_(I:Int),.List`{K`}))),output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,_~>_(.K,?10:K),k)),thread)),threads)) [metadata "computational rule"] .
+  rl __(<_>_</_>(store,__(?12:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("Id"_(X:Id),.List`{K`}),?16:K),k))),thread)),threads))
+    => __(<_>_</_>(store,__(?12:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("Int"_(I:Int),.List`{K`}),?16:K),k))),thread)),threads)) [metadata "computational rule"] .
+  rl __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),?14:K)),store),<_>_</_>(threads,__(?15:Bag,<_>_</_>(thread,__(?16:Bag,__(<_>_</_>(env,__(?17:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("_:=_",_`,`,_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),?18:K),k))),thread)),threads))
+    => __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?15:Bag,<_>_</_>(thread,__(?16:Bag,__(<_>_</_>(env,__(?17:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(.K,?18:K),k))),thread)),threads)) [metadata "computational rule"] .
+  rl __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?14:Bag,<_>_</_>(thread,__(?15:Bag,__(<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("++_",_`(_`)("Id"_(X:Id),.List`{K`})),?17:K),k))),thread)),threads))
+    => __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}))),store),<_>_</_>(threads,__(?14:Bag,<_>_</_>(thread,__(?15:Bag,__(<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}),?17:K),k))),thread)),threads)) [metadata "computational rule"] .
+  rl __(<_>_</_>(thread,__(?7:Bag,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(_`(_`)("spawn_",S:K),?8:K),k))),thread),.Bag)
+    => __(<_>_</_>(thread,__(?7:Bag,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(.K,?8:K),k))),thread),<_>_</_>(thread,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,S:K,k)),thread)) [metadata "computational rule"] .
+  rl _`(_`)("_+_",_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))
+    => _`(_`)("Int"_(_+Int_(I1:Int,I2:Int)),.List`{K`}) [metadata "computational rule"] .
+  rl _`(_`)("_<=_",_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))
+    => _`(_`)("Bool"_(_<=Int_(I1:Int,I2:Int)),.List`{K`}) [metadata "computational rule"] .
+  rl _`(_`)("_and_",_`,`,_(_`(_`)("Bool"_(false),.List`{K`}),?2:K))
+    => _`(_`)("Bool"_(false),.List`{K`}) [metadata "computational rule"] .
+  rl _`(_`)("_and_",_`,`,_(_`(_`)("Bool"_(true),.List`{K`}),B:K))
+    => B:K [metadata "computational rule"] .
+  rl _`(_`)("head",_`(_`)("list_",_`(_`)("_`,_",_`,`,_(_`(_`)("Int"_(I:Int),.List`{K`}),?4:List{K}))))
+    => _`(_`)("Int"_(I:Int),.List`{K`}) [metadata "computational rule"] .
+  rl _`(_`)("if_then_else_",_`,`,_(_`(_`)("Bool"_(false),.List`{K`}),?4:K,S2:K))
+    => S2:K [metadata "computational rule"] .
+  rl _`(_`)("if_then_else_",_`,`,_(_`(_`)("Bool"_(true),.List`{K`}),S1:K,?4:K))
+    => S1:K [metadata "computational rule"] .
+  rl _`(_`)("not_",_`(_`)("Bool"_(T:Bool),.List`{K`}))
+    => _`(_`)("Bool"_(notBool_(T:Bool)),.List`{K`}) [metadata "computational rule"] .
+  rl _`(_`)("skip",.List`{K`})
+    => .K [metadata "computational rule"] .
+  rl _`(_`)("tail",_`(_`)("list_",_`(_`)("_`,_",_`,`,_(_`(_`)("Int"_(I:Int),.List`{K`}),El:List{K}))))
+    => _`(_`)("list_",_`(_`)("_`,_",El:List{K})) [metadata "computational rule"] .
+  crl _`(_`)("_/_",_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))
+    => _`(_`)("Int"_(_/Int_(I1:Int,I2:Int)),.List`{K`})
+    if _=/=Bool_(I2:Int,0)= true [metadata "computational rule"] .
 endm
 
 
