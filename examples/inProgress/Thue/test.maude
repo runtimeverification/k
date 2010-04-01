@@ -7,7 +7,7 @@ mod THUE-TEST is
 	--- a::=~Hello World!
 	--- ::=
 	--- a
-	eq pHelloWorld = write(inject("a")(.kl),, inject("Hello world")(.kl)) ~> start(inject("a")(.kl)) .
+	eq pHelloWorld = write(inject("a")(.List{K}),, inject("Hello world")(.List{K})) ~> start(inject("a")(.List{K})) .
 	
 	op pIncAny : -> K [metadata "arity 0"] .
 	***(
@@ -34,33 +34,33 @@ mod THUE-TEST is
 		!.__.!
 	***)
 	 
-	eq pIncAny = .k
-		~> subst(inject("_0")(.kl),, inject("_")(.kl))
+	eq pIncAny = .K
+		~> subst(inject("_0")(.List{K}),, inject("_")(.List{K}))
 		
-		~> subst(inject("1_")(.kl),, inject("1++")(.kl))
-		~> subst(inject("0_")(.kl),, inject("0++")(.kl))
+		~> subst(inject("1_")(.List{K}),, inject("1++")(.List{K}))
+		~> subst(inject("0_")(.List{K}),, inject("0++")(.List{K}))
 		
-		~> subst(inject("0++")(.kl),, inject("#1")(.kl))
-		~> subst(inject("01++")(.kl),, inject("#10")(.kl))
-		~> subst(inject("11++")(.kl),, inject("1++0")(.kl))
-		~> subst(inject("_1++")(.kl),, inject("10")(.kl))
-		~> subst(inject("0#")(.kl),, inject("#0")(.kl))
-		~> subst(inject("1#")(.kl),, inject("#1")(.kl))
-		~> subst(inject("_#")(.kl),, inject("")(.kl))
+		~> subst(inject("0++")(.List{K}),, inject("#1")(.List{K}))
+		~> subst(inject("01++")(.List{K}),, inject("#10")(.List{K}))
+		~> subst(inject("11++")(.List{K}),, inject("1++0")(.List{K}))
+		~> subst(inject("_1++")(.List{K}),, inject("10")(.List{K}))
+		~> subst(inject("0#")(.List{K}),, inject("#0")(.List{K}))
+		~> subst(inject("1#")(.List{K}),, inject("#1")(.List{K}))
+		~> subst(inject("_#")(.List{K}),, inject("")(.List{K}))
 		
-		~> subst(inject("__")(.kl),, inject("_*_")(.kl))
-		~> read(inject("*")(.kl))
+		~> subst(inject("__")(.List{K}),, inject("_*_")(.List{K}))
+		~> read(inject("*")(.List{K}))
 		
-		~> write(inject(".0")(.kl),, inject("0")(.kl))
-		~> write(inject(".1")(.kl),, inject("1")(.kl))
-		~> subst(inject("!0")(.kl),, inject("!.0")(.kl))
-		~> subst(inject("!1")(.kl),, inject("!.1")(.kl))
+		~> write(inject(".0")(.List{K}),, inject("0")(.List{K}))
+		~> write(inject(".1")(.List{K}),, inject("1")(.List{K}))
+		~> subst(inject("!0")(.List{K}),, inject("!.0")(.List{K}))
+		~> subst(inject("!1")(.List{K}),, inject("!.1")(.List{K}))
 		
-		~> start(inject("!.__.!")(.kl))
+		~> start(inject("!.__.!")(.List{K}))
 	.
 endm
 
 ---set trace on .
 rew eval(pHelloWorld) .
-rew eval(pIncAny, injectL(l(inject("101")(.kl)))(.kl)) .
-rew eval(pIncAny, injectL(l(inject("11")(.kl)))(.kl)) .
+rew eval(pIncAny, injectL(List(inject("101")(.List{K})))(.List{K})) .
+rew eval(pIncAny, injectL(List(inject("11")(.List{K})))(.List{K})) .
