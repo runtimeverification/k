@@ -107,7 +107,6 @@ endm
 mod IMP-SEMANTICS is
   including IMP-SYNTAX .
   including K .                     --- defines K, List, Map, and Set
-  including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
 
   subsort AExp BExp Stmt Pgm List{Id} < K .
   subsorts Int Bool < KResult .

@@ -200,16 +200,6 @@ mod K-CONFIG is
 endm
 
 
-
-mod K is 
-  including K-TECHNIQUE .
-  including K-RULES .               --- to write k rules with in-place rewriting
-  including K-CONFIG .              --- to specify the global configuration term
-  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
-  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
-  including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
-endm
-
 --- extra stuff
 
 mod K-MAP-EXTRAS is
@@ -239,6 +229,17 @@ mod K-LIST-EXTRAS is
 
   eq inKList(K:K, (K1:K ~> K:K ~> K2:K)) = true .
   eq inKList(K:K, K':K) = false [owise] .
+endm
+
+
+mod K is 
+  including K-TECHNIQUE .
+  including K-RULES .               --- to write k rules with in-place rewriting
+  including K-CONFIG .              --- to specify the global configuration term
+  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
+  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
+  including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
+  including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
 endm
 
 

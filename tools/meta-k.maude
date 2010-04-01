@@ -61,7 +61,7 @@ fmod META-K-MODULE is
   including META-LEVEL-EXTRAS .
   including META-K-BUILTINS .
   var S : Sort .  var T T' : Type .  var SSDS : SubsortDeclSet . 
-  vars OPDS : OpDeclSet .  var M : Module .
+  vars OPDS : OpDeclSet .  var M : Module . var SS : SortSet .
 
   ops KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
   ops NeProperList ResultList NeResultList NeKList KList : -> Sort .
@@ -136,6 +136,18 @@ fmod META-K-MODULE is
 
   op getList2KSubsorts : Module -> SubsortDeclSet .
   eq getList2KSubsorts(M) = getList2KSubsorts(pseudoKSubsorts(getSubsorts(M))) .
+
+  op getListSorts : Module -> SortSet .
+  eq getListSorts(M) = removeSorts(getListSorts(getSorts(M)), klistSorts) .
+
+  op getListSorts : SortSet -> SortSet .
+  eq getListSorts(none) = none .
+  eq getListSorts( S ; SS) 
+   =  if find(string(S),"List`{",0) == 0 then S ; getListSorts(SS) else getListSorts(SS) fi .
+
+  op getListSubsorts : Module -> SubsortDeclSet .
+  eq getListSubsorts(M) = makeSubsorts(M, getListSorts(M), getMaximalSorts(M, getListSorts(M))) .
+  
 
   op getList2KSubsorts : SubsortDeclSet -> SubsortDeclSet .
   eq getList2KSubsorts(none) = none .

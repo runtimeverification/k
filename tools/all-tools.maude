@@ -10,6 +10,7 @@ load context-transformers-interface
 load anon-vars-interface
 load make-k-rules-interface
 load lists-to-wrappers-interface
+load remove-sublists-interface
 load syntax-to-k-interface
 load add-k-proper-interface
 load lists-to-k-interface
@@ -33,7 +34,7 @@ fmod COMPILE-META is
   eq compile(Q) = compile(upModule(Q, false)) .
 
   op compile : Module ~> Module .
-  eq compile(M) = compile(M, 'MANY-MODULES 'CONTEXT-TRANSFORMERS 'OPEN-CELLS 'ANONYMOUS-CONSTANTS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'LISTS-TO-WRAPPERS 'SYNTAX-TO-K 'ADD-KPROPER 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS
+  eq compile(M) = compile(M, 'MANY-MODULES 'CONTEXT-TRANSFORMERS 'OPEN-CELLS 'ANONYMOUS-CONSTANTS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'REMOVE-SUBLISTS 'LISTS-TO-WRAPPERS 'SYNTAX-TO-K 'ADD-KPROPER 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS
   ) .
   op compile : Module QidList ~> Module .
   eq compile(M,nil) = M .

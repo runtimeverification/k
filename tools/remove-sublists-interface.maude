@@ -1,0 +1,38 @@
+load remove-sublists
+
+mod REMOVE-SUBLISTS-META is
+  including REMOVE-SUBLISTS .
+  including META-LEVEL-EXTRAS .
+  var Syntax NoSyntax : String .  var M : Module .
+  var Q QSyntax QNoSyntax : Qid .  var IL : ImportList .
+  op removeSublists : String String ~> Module .
+  eq removeSublists(Syntax, NoSyntax) = removeSublists(qid(Syntax), qid(NoSyntax)) .
+  op removeSublists : Qid Qid ~> Module .
+  eq removeSublists(QSyntax,QNoSyntax) = removeSublists(QNoSyntax, upModule(QSyntax, false), upModule(QSyntax, true), upImports(getImports(upModule(QSyntax, false)))) .
+  op compile : Module ~> Module .
+  eq compile(M) = setName(removeSublists(getName(M), M, flatten(M), empty), getName(M)) .
+endm
+
+mod REMOVE-SUBLISTS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op remove-sublists : -> System .
+  op idle : -> State .
+  var Q Syntax NoSyntax : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq remove-sublists = [nil, idle, 
+ 'Usage: 'removeSublists '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['removeSublists Syntax NoSyntax QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(Syntax,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('REMOVE-SUBLISTS-META),
+                        'removeSublists[upTerm(string(Syntax)),upTerm(string(NoSyntax))])),error) .
+endm

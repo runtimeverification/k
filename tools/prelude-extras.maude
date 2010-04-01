@@ -767,5 +767,33 @@ fmod META-LEVEL-EXTRAS is
   op flatten : Module ModuleSet ~> Module .
   eq flatten(M, empty) = M .
   eq flatten(M, M' MS) = flatten(addModule(setImports(M',nil),M), MS) .
+
+  op getMaximalSorts : Module SortSet -> SortSet .
+  eq getMaximalSorts(M, none) = none .
+  eq getMaximalSorts(M, S ; SS) = $maximalSorts(M, SS, S) [owise] .
+
+  op $maximalSorts : Module SortSet SortSet -> SortSet .
+  eq $maximalSorts(M, none, SS) = SS .
+  eq $maximalSorts(M, S ; SS, SS')
+   = $maximalSorts(M, SS, filterMaximal(M, S, SS')) .
+
+  op filterMaximal : Module Sort SortSet ~> SortSet .
+  eq filterMaximal(M, S, none) = S .
+  eq filterMaximal(M, S, S' ; SS) 
+   = if sortLeq(M, S, S') then S' ; SS 
+     else if sortLeq(M, S', S) then filterMaximal(M, S, SS)
+          else S' ; filterMaximal(M, S, SS) fi fi .
+
+  op makeSubsorts : Module SortSet SortSet ~> SubsortDeclSet .
+  eq makeSubsorts(M, none, SS) = none .
+  eq makeSubsorts(M, S ; SS, SS') 
+   = makeSubsorts(M, SS, SS') makeSubsort(M, S, SS') .
+
+  op makeSubsort : Module Sort SortSet ~> SubsortDeclSet .
+  eq makeSubsort(M, S, none) = none .
+  eq makeSubsort(M, S, S ; SS) = none .
+  eq makeSubsort(M, S, S' ; SS) 
+   = if sortLeq(M, S, S') then (subsort S < S' .) else makeSubsort(M,S, SS) fi
+  [owise] .
 endfm
 

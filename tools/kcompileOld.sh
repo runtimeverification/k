@@ -172,6 +172,16 @@ loop make-k-rules .
 
 runMaude "$OUTPUT $K_RULES"  "Generating Maude rules from K rules"
 
+REMOVE_SUBLISTS="
+$DEFAULTH
+load \"$KBASE/tools/remove-sublists-interface\"
+loop remove-sublists .
+(removeSublists $LANG -SL .)
+"
+runMaude "$OUTPUT $REMOVE_SUBLISTS" "Removing subsorted lists"
+
+LANG="${LANG}-SL"
+
 LISTS2WRAPPERS="
 $DEFAULTH
 load \"$KBASE/tools/lists-to-wrappers-interface\"

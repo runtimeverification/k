@@ -164,20 +164,19 @@ fmod LISTS-TO-WRAPPERS is
  op listsT : Term Module OpDeclSet OpDeclSet CTORSMap OpDecl ~> Term .
  eq listsT(Q[Trms], M, OPDS, OPDS', CTORS, Op)
   = if Op in OPDS' 
-    then Q[listsTKs(Trms, M, OPDS, OPDS', CTORS)]
+    then Q[listsTKs(Trms, getTypes(countTerms(Trms),Op), M, OPDS, OPDS', CTORS)]
     else Q[listsTs(Trms, M, OPDS, OPDS', CTORS)]
     fi .
 
- op listsTKs : TermList Module OpDeclSet OpDeclSet CTORSMap ~> TermList .
- eq listsTKs(empty, M, OPDS, OPDS', CTORS) = empty .
- eq listsTKs((Trm,Trms), M, OPDS, OPDS', CTORS)
-  = listsTK(Trm, findCtor(leastSort(M, Trm),CTORS), M, OPDS, OPDS',CTORS),
-    listsTKs(Trms, M, OPDS, OPDS', CTORS) .
- op listsTK : Term Type Module OpDeclSet OpDeclSet CTORSMap ~> Term .
- eq listsTK(Trm, T, M, OPDS, OPDS', CTORS)
-   = listWrapperS(T)[listsT(Trm, M, OPDS, OPDS', CTORS)]  .
- eq listsTK(Trm, T:[Type], M, OPDS, OPDS', CTORS)
-   = listsT(Trm, M, OPDS, OPDS', CTORS) [owise] .
+ op listsTKs : TermList TypeList Module OpDeclSet OpDeclSet CTORSMap ~> TermList .
+ eq listsTKs(empty, nil, M, OPDS, OPDS', CTORS) = empty .
+ eq listsTKs((Trm,Trms), T Tl, M, OPDS, OPDS', CTORS)
+  = if findCtor(T, CTORS) == T 
+    then listWrapperS(T)[listsT(Trm, M, OPDS, OPDS', CTORS)]
+    else if findCtor(leastSort(M, Trm),CTORS) :: Type then 
+    listWrapperS(leastSort(M,Trm))[listsT(Trm, M, OPDS, OPDS', CTORS)]
+    else listsT(Trm, M, OPDS, OPDS',CTORS)
+    fi fi , listsTKs(Trms, Tl, M, OPDS, OPDS', CTORS) .
 
  op findCtor : Type CTORSMap ~> Type .
  eq findCtor(T, CTORS (subsort T < T' .) |-> Trm) = T .
