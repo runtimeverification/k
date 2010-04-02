@@ -163,17 +163,36 @@ endm
 mod K-RULES is
   including K-SENTENCE .
   including PL-BOOL .
-  ops rule_ : Universal -> [KSentence] [prec 127 poly(1) format(b o d)] .
-  ops rule_if_ : Universal Bool -> [KSentence] [prec 127 poly(1) format (b o b o d)] .
+  including K-TECHNIQUE .
+  ops rule_ : List{K} -> [KSentence] [prec 127 format(b o d)] .
+  ops rule_ : Map -> [KSentence] [prec 127 format(b o d)] .
+  ops rule_ : List -> [KSentence] [prec 127 format(b o d)] .
+  ops rule_ : Bag -> [KSentence] [prec 127 format(b o d)] .
+  ops rule_if_ : List{K} Bool -> [KSentence] [prec 127 format(b o b o d)] .
+  ops rule_if_ : Map Bool -> [KSentence] [prec 127 format(b o b o d)] .
+  ops rule_if_ : List Bool -> [KSentence] [prec 127 format(b o b o d)] .
+  ops rule_if_ : Bag Bool -> [KSentence] [prec 127 format(b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
-  op `[_=>_`] : Universal Universal -> Universal [poly (0 1 2) prec 0] .
+  op `[_=>_`] : K K -> K [prec 0] .
+  op `[_=>_`] : KResult KResult -> KResult [prec 0] .
+  op `[_=>_`] : KLabel KLabel -> KLabel [prec 0] .
+  op `[_=>_`] : KResultLabel KResultLabel -> KResultLabel [prec 0] .
+  op `[_=>_`] : List{K} List{K} -> List{K} [prec 0] .
+  op `[_=>_`] : List{KResult} List{KResult} -> List{KResult} [prec 0] .
+  op `[_=>_`] : Map Map -> Map [prec 0] .
+  op `[_=>_`] : List List -> List [prec 0] .
+  op `[_=>_`] : Bag Bag -> Bag [prec 0] .
 endm
 
 
 --- Anonymous variables level
 
 mod K-ANONYMOUS-VARIABLES is
-  op ? : -> Universal [poly (0)] .
+  including K-TECHNIQUE .
+  op ? : -> K .
+  op ? : -> Map .
+  op ? : -> Bag .
+  op ? : -> List .
 endm
 
 --- ... level

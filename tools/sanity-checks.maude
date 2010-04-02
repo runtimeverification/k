@@ -1,0 +1,120 @@
+fmod SANITY-CHECKS is
+ including META-LEVEL .
+ including META-MODULE-EXTRAS .
+
+ var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList .  var S : Sort .
+ var N : Nat .
+ var M Flat : Module .
+ vars Mbs Mbs' : MembAxSet . var Mb : MembAx .
+ var Eqs Eqs' : EquationSet . var Eq : Equation .
+ var Rls Rls' : RuleSet . var Rl : Rule .
+ var Trms : TermList . vars T1 T2 Trm Trm' : Term .  var Cond : Condition .
+ var C : Constant . var V : Variable .
+ vars OPDS OPDS' Ops : OpDeclSet . var Op Op' : OpDecl .
+ var SSDS : SubsortDeclSet . var SSD : SubsortDecl .
+ var AS AS' : AttrSet .
+
+ op sanityChecks : Module Module ~> Module .
+ eq sanityChecks(M, Flat)
+  = sanityCheckModule(M, Flat) .
+
+ op sanityCheckModule : Module  Module ~> Module .
+ eq sanityCheckModule(M, Flat)
+  = 
+   setRls(
+   setEqs(
+   setMbs(
+    M
+    , sanityCheckMbs(Flat, getMbs(M)))
+    , sanityCheckEqs(Flat, getEqs(M)))
+    , sanityCheckRls(Flat, getRls(M)))
+  .
+
+ op error : Term Type -> [Term] .
+ op error : MembAx -> [MembAx] .
+ op error : Equation -> [Equation] .
+ op error : Rule -> [Rule] .
+
+ op sanityCheckMbs : Module MembAxSet ~> MembAxSet .
+ eq sanityCheckMbs(M, none) = none .
+ eq sanityCheckMbs(M, Mbs) = $sanityCheckMbs(M, Mbs, none) [owise] .
+
+ op $sanityCheckMbs : Module MembAxSet MembAxSet ~> MembAxSet .
+ eq $sanityCheckMbs(M, Mbs Mb, Mbs')
+  =  $sanityCheckMbs(M, Mbs, Mbs', sanityCheckMb(Mb, M)) .
+ eq $sanityCheckMbs(M, none, Mbs') = Mbs' .
+
+ op $sanityCheckMbs : Module MembAxSet MembAxSet MembAx ~> MembAxSet .
+ eq $sanityCheckMbs(M, Mbs, Mbs', Mb) 
+  = $sanityCheckMbs(M, Mbs, Mbs' Mb) .
+ eq $sanityCheckMbs(M, Mbs, Mbs', Mb:[MembAx]) = error(Mb:[MembAx]) [owise] .
+
+ op sanityCheckMb : MembAx Module ~> MembAx .
+ eq sanityCheckMb((mb T1 : T [AS] .), M)
+  = (mb sanityCheckT(T1, M) : T [AS] .) .
+ eq sanityCheckMb((cmb T1 : T if Cond [AS] .), M)
+  = (cmb sanityCheckT(T1, M) : T if Cond [AS] .) .
+
+ op sanityCheckEqs : Module EquationSet ~> EquationSet .
+ eq sanityCheckEqs(M, none) = none .
+ eq sanityCheckEqs(M, Eqs) = $sanityCheckEqs(M, Eqs, none) [owise] .
+
+ op $sanityCheckEqs : Module EquationSet EquationSet ~> EquationSet .
+ eq $sanityCheckEqs(M, Eqs Eq, Eqs')
+  =  $sanityCheckEqs(M, Eqs, Eqs', sanityCheckEq(Eq, M)) .
+ eq $sanityCheckEqs(M, none, Eqs') = Eqs' .
+
+ op $sanityCheckEqs : Module EquationSet EquationSet Equation ~> EquationSet .
+ eq $sanityCheckEqs(M, Eqs, Eqs', Eq) 
+  = $sanityCheckEqs(M, Eqs, Eqs' Eq) .
+ eq $sanityCheckEqs(M, Eqs, Eqs', Eq:[Equation]) = error(Eq:[Equation]) [owise] .
+
+ op sanityCheckEq : Equation Module ~> Equation .
+ eq sanityCheckEq((eq T1 = T2 [AS] .), M)
+  = (eq sanityCheckT(T1, M) 
+      = sanityCheckT(T2, M) [AS] .) .
+ eq sanityCheckEq((ceq T1 = T2 if Cond [AS] .), M)
+  = (ceq sanityCheckT(T1, M) 
+       = sanityCheckT(T2, M) 
+      if Cond [AS] .) .
+
+ op sanityCheckRls : Module RuleSet ~> RuleSet .
+ eq sanityCheckRls(M, none) = none .
+ eq sanityCheckRls(M, Rls) = $sanityCheckRls(M, Rls, none) [owise] .
+
+ op $sanityCheckRls : Module RuleSet RuleSet ~> RuleSet .
+ eq $sanityCheckRls(M, Rls Rl, Rls')
+  =  $sanityCheckRls(M, Rls, Rls', sanityCheckRl(Rl, M)) .
+ eq $sanityCheckRls(M, none, Rls') = Rls' .
+
+ op $sanityCheckRls : Module RuleSet RuleSet Rule ~> RuleSet .
+ eq $sanityCheckRls(M, Rls, Rls', Rl) 
+  = $sanityCheckRls(M, Rls, Rls' Rl) .
+ eq $sanityCheckRls(M, Rls, Rls', Rl:[Rule]) = error(Rl:[Rule]) [owise] .
+
+ op sanityCheckRl : Rule Module ~> Rule .
+ eq sanityCheckRl((rl T1 => T2 [AS] .), M)
+  = (rl sanityCheckT(T1, M) 
+     => sanityCheckT(T2, M) [AS] .) .
+ eq sanityCheckRl((crl T1 => T2 if Cond [AS] .), M)
+  = (crl sanityCheckT(T1, M) 
+      => sanityCheckT(T2, M) 
+      if Cond [AS] .) .
+
+ op sanityCheckTs : TermList Module ~> TermList .
+ eq sanityCheckTs((Trm,Trms), M)
+  = sanityCheckT(Trm, M), sanityCheckTs(Trms, M) .
+ eq sanityCheckTs(empty, M) = empty .
+
+ op sanityCheckT : Term Module ~> Term .
+ eq sanityCheckT(Trm,M) 
+  = if leastSort(M,Trm) :: Sort  then sanityCheckT1(Trm,M) 
+    else error(sanityCheckT1(Trm,M), leastSort(M, Trm)) fi .
+
+ op sanityCheckT1 : Term Module ~> Term .
+ eq sanityCheckT1(C,M) = C .
+ eq sanityCheckT1(V,M) = V .
+ eq sanityCheckT1(Q[Trms],M) = Q[sanityCheckTs(Trms, M)] . 
+endfm
+
+

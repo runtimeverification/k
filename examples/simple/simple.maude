@@ -5,13 +5,15 @@ in simple-untyped-programs
 mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX .
   including K .                     --- defines K, List, Map, and Set
 
+  sort Val .
+  subsort Int Bool < Val < Exp .
   subsorts Exp Decl Stmt Stmts List{Id} List{Exp} < K .
-  subsorts Int Bool < KResult .
+  subsorts Val < KResult .
 
   ops env store fstack in out functions nextLoc : -> CellLabel .
   vars I I1 I2 : Int .  var N N1 N2 L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env Sigma : Map .
   var B : Exp .  var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .
-  var Rl : List{KResult} .  var R R1 R2 : KResult .
+  var Rl : List{KResult} .  var R R1 R2 : Val .  
 
   op (_,_) : Map K -> List .
   op _.._ : Nat Nat -> List{K} .
@@ -29,17 +31,18 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX .
                      < in > .List </ in >
                      < out > .List </ out >
                      < nextLoc > 0 </ nextLoc >
-                     < functions > .List{K} </ functions >
+                     < functions > .Bag </ functions >
                    </ T > : KSentence .
 
   mb rule < k > [read() => .K] ...</ k > < in > [List(I) => .List] ...</ in > : KSentence .
+---(
   mb rule < k > _`(_`)(F,Rl) ~> K </ k >
           < fstack > [.List => (Env,K)] ...</ fstack >
           < env > [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]] </ env >
           < store >... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> 0] ...</ store >
           < nextLoc > [N => N +Nat length(getList{K}(Xl))] </ nextLoc >
-          < functions >... function F(Xl) S ...</ functions > : KSentence .
-
+          < functions >... Bag(function F(Xl) S) ...</ functions > : KSentence .
+---)
   mb rule < k > [X => R] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> R ...</ store > : KSentence .
   mb rule < k > [X[N] => Sigma(L +Int N)] ...</ k > < env >... X |-> L ...</ env > < store > Sigma </ store > : KSentence .
   mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .
@@ -68,15 +71,18 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX .
   mb rule < k > [X[N] = R ; => .K] ...</ k > < env >... X |-> L ...</ env > < store > [Sigma => Sigma[R / (L +Int N)]] </ store > : KSentence .
   mb rule [if true then S else ? => S] : KSentence .
   mb rule [if false then ? else S => S] : KSentence .
-  mb rule < k > [while B do S  => if B then {S ; while B do S} else {}] ...</ k > : KSentence .
+  mb rule < k > [while B do S  => if B then {S while B do S} else {}] ...</ k > : KSentence .
   mb rule [R ; => .K] : KSentence .
   mb rule < k > [return(R); ~> ? => R ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > : KSentence .
 
-  mb rule < k > [function F(Xl) S => .K] ...</ k > < functions >... [.List{K} => function F(Xl) S] </ functions > : KSentence .
+  mb rule < k > [function F(Xl) S => .K] ...</ k > < functions >... [.Bag => Bag(function F(Xl) S)] ...</ functions > : KSentence .
 endm
 
 
-mod SIMPLE is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS .
+mod SIMPLE is 
+  including SIMPLE-UNTYPED-SEMANTICS .
+---(
+  including SIMPLE-UNTYPED-PROGRAMS .
   op pgm : -> Bag .
   eq pgm = < T > 
              < k > pFactorial ~> main(); </ k >
@@ -86,6 +92,7 @@ mod SIMPLE is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS .
              < in > .List </ in >
              < out > .List </ out >
              < nextLoc > 0 </ nextLoc >
-             < functions > .List{K} </ functions >
+             < functions > .Bag </ functions >
            </ T > .
+---)
 endm

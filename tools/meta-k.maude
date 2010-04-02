@@ -113,6 +113,8 @@ fmod META-K-MODULE is
     op '_`(_`) : KHybridLabel ResultList -> KResult [none] .
     op '_~>_ : K K -> K [none] .
     op '`[`] : nil -> K [none] .
+    op '_`(_`) : 'Map K -> K [none] .
+    
   ) .
 
  op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .

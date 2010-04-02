@@ -1,0 +1,39 @@
+load sanity-checks
+
+mod SANITY-CHECKS-META is
+  including SANITY-CHECKS .
+  including META-LEVEL-EXTRAS .
+  var NoInSane : String .  var M : Module .
+  var Q QNoInSane : Qid . 
+  op sanityChecks : String ~> Module .
+  eq sanityChecks(NoInSane) = sanityChecks(qid(NoInSane)) .
+  op sanityChecks : Qid ~> Module .
+  eq sanityChecks(QNoInSane) = sanityChecks(upModule(QNoInSane, false), upModule(QNoInSane, true)) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = sanityChecks(M, flatten(M)) .
+endm
+
+mod SANITY-CHECKS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op sanity-checks : -> System .
+  op idle : -> State .
+  var Q NoInSane : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq sanity-checks = [nil, idle, 
+ 'Usage: 'sanityChecks '<Name> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['sanityChecks NoInSane QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoInSane,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('SANITY-CHECKS-META),
+                        'sanityChecks[upTerm(string(NoInSane))])),error) .
+endm
