@@ -154,8 +154,8 @@ fmod LISTS-TO-WRAPPERS is
  eq listsT(V, M, OPDS, OPDS', CTORS) = V .
  eq listsT('if_then_else_fi[Trms],M,OPDS,OPDS', CTORS)
   = 'if_then_else_fi[listsTs(Trms, M, OPDS,OPDS', CTORS)] .
- eq listsT('_==Bool_[Trm,Trm'],M,OPDS,OPDS', CTORS)
-  = '_==Bool_[listsTs((Trm,Trm'), M, OPDS,OPDS', CTORS)] .
+--- eq listsT('_==Bool_[Trm,Trm'],M,OPDS,OPDS', CTORS)
+---  = '_==Bool_[listsTs((Trm,Trm'), M, OPDS,OPDS', CTORS)] .
  ceq listsT(Q[Trms],M,OPDS,OPDS', CTORS)
    = Q[listsTs(Trms, M, OPDS, OPDS', CTORS)] if  Q = replaceS .
  eq listsT(Q[Trms], M, OPDS, OPDS', CTORS)

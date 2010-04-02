@@ -159,8 +159,8 @@ ceq listsOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
  eq listsT(V, T, M, OPDS, CTORS) = listsCV(V, getType(V), CTORS)  .
  eq listsT('if_then_else_fi[Trms],T,M,OPDS,CTORS)
   = 'if_then_else_fi[listsTs(Trms, 'Bool T T, M, OPDS,CTORS)] .
- eq listsT('_==Bool_[Trm,Trm'],T,M,OPDS,CTORS)
-  = '_==Bool_[listsTs((Trm,Trm'), leastSort(M,Trm) leastSort(M,Trm'), M, OPDS,CTORS)] .
+--- eq listsT('_==Bool_[Trm,Trm'],T,M,OPDS,CTORS)
+---  = '_==Bool_[listsTs((Trm,Trm'), leastSort(M,Trm) leastSort(M,Trm'), M, OPDS,CTORS)] .
  ceq listsT(Q[Trms],T,M,OPDS,CTORS)
    = Q[listsTs(Trms, T T, M, OPDS, CTORS)] if  Q = replaceS .
  eq listsT(Q[Trms],T,M,OPDS,CTORS (subsort T' < T .) |-> Q[Trm])

@@ -43,7 +43,6 @@ var Mbs : MembAxSet . var Mb : MembAx .
     fi .
  eq subsorts2wrappersImports(empty) = nil .
  
-
  op subsorts2wrappers : Module Module SubsortDeclSet SubsortDeclMap ~> Module .
  eq subsorts2wrappers(M, Flat, SSDS, SSDM)
   = setMbs(setRls(setEqs(addOps(filteredProject(SSDM,SSDS), removeSubsorts(M,SSDS)), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
@@ -96,7 +95,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
   = (rl findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
 , M, OPDS, SSDM) 
      => findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2)) 
-, M, OPDS, SSDM) [AS] .) . 
+, M, OPDS, SSDM) [AS] .) [print "rl " T1 " => " T2] . 
  eq subsorts2wrappersRl((crl T1 => T2 if Cond [AS] .), M, OPDS, SSDM)
   = (crl findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2)) 
 , M, OPDS, SSDM) 
@@ -113,8 +112,6 @@ var Mbs : MembAxSet . var Mb : MembAx .
 ceq findPurifyRedex('if_then_else_fi[Trm,T1,T2], T, M, OPDS, SSDM)
   = 'if_then_else_fi[findPurifyRedex(Trm, 'Bool, M, OPDS, SSDM), findPurifyRedex(T1, T, M, OPDS, SSDM), findPurifyRedex(T2, T, M, OPDS, SSDM)]
  if sortLeq(M, leastSort(M, Trm), 'Bool) .
- eq findPurifyRedex('_==Bool_[T1,T2], T, M, OPDS, SSDM)
-  = '_==Bool_[findPurifyRedex(T1, leastSort(M, T1), M, OPDS, SSDM), findPurifyRedex(T2, leastSort(M, T2), M, OPDS, SSDM)] .
  eq findPurifyRedex(Trm, T, M, OPDS, SSDM)
   = findPurifyRedex(Trm, T, M, OPDS, SSDM, isKSort(T) or-else isKListSort(T))
  [owise] .

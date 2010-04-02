@@ -35,14 +35,12 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX .
                    </ T > : KSentence .
 
   mb rule < k > [read() => .K] ...</ k > < in > [List(I) => .List] ...</ in > : KSentence .
----(
-  mb rule < k > _`(_`)(F,Rl) ~> K </ k >
+  mb rule < k > _`(_`)(F,R) ~> K </ k >
           < fstack > [.List => (Env,K)] ...</ fstack >
           < env > [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]] </ env >
-          < store >... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> 0] ...</ store >
+          < store >... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> getList{K}(R)] ...</ store >
           < nextLoc > [N => N +Nat length(getList{K}(Xl))] </ nextLoc >
           < functions >... Bag(function F(Xl) S) ...</ functions > : KSentence .
----)
   mb rule < k > [X => R] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> R ...</ store > : KSentence .
   mb rule < k > [X[N] => Sigma(L +Int N)] ...</ k > < env >... X |-> L ...</ env > < store > Sigma </ store > : KSentence .
   mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .

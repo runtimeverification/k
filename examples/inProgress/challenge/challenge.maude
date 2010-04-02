@@ -10,12 +10,6 @@ mod CHALLENGE is
   including PL-INT .
   including PL-ID .
   including K .
-  including CONFIG .
-  including K-CONFIG .
-  including K-RULES .
-  including K-MAP-EXTRAS .
-  including K-OPEN-CELLS .
-  including K-ANONYMOUS-VARIABLES .
 
 --- Syntax
   sort Exp .
@@ -49,11 +43,11 @@ mod CHALLENGE is
   op aspect : Exp -> Stmt [format (b o)] .
   --- We'd like to use λ and μ here but Maude has some bugs
   --- in its unicode handling.
-  op \_->_ : KList Exp -> Exp [prec 123 format (b o b o d)] .
+  op \_->_ : List{K} Exp -> Exp [prec 123 format (b o b o d)] .
   op \Y_->_ : Id Exp -> Exp [prec 123 format (b o b o d)] .
-  op __ : Exp KList -> Exp [prec 0 metadata "strict(1 -2)"] .
+  op __ : Exp List{K} -> Exp [prec 0 metadata "strict(1 -2)"] .
 
-  op {vars_;_} : KList Stmt -> Stmt [prec 121 format (y b o b noi y o)] .
+  op {vars_;_} : List{K} Stmt -> Stmt [prec 121 format (y b o b noi y o)] .
 
   op callcc : Exp -> Exp [format (b o) metadata "strict"] .
   
@@ -139,7 +133,7 @@ mod CHALLENGE is
   var K : K .
   vars Env Holds Store Ptr : Map .
   vars NextLoc NextAgent Me Parent Sender Receiver : Nat .
-  var Busy : Set .
+  var Busy : Bag .
   var Val : Exp .
   var Output : List .
 
@@ -176,14 +170,14 @@ mod CHALLENGE is
     </ T >
     : KSentence .
 
-  op initconfig : K -> Set .
+  op initconfig : K -> Bag .
   eq initconfig(K) = 
     < T >
         < agents >
-            mkAgent(mkThread(K, .m), 0, 0)
+            mkAgent(mkThread(K, .Map), 0, 0)
         </ agents >
-        < output > .l </ output >
-        < messages > .s </ messages >
+        < output > .List </ output >
+        < messages > .Bag </ messages >
         < nextAgent > 0 </ nextAgent >
     </ T >
     .
@@ -197,7 +191,7 @@ mod CHALLENGE is
   vars I I1 I2 : Int .
   vars S S1 S2 : Stmt .
   vars B V E : Exp .
-  vars Xl Vl : KList .
+  vars Xl Vl : List{K} .
   var T : Bool .
   var X : Id .
   var Env' : Map .
@@ -215,7 +209,7 @@ mod CHALLENGE is
   mb rule [true and B => B] : KSentence .
   mb rule [false and ? => false] : KSentence .
 
-  mb rule [skip => .k] : KSentence .
+  mb rule [skip => .K] : KSentence .
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
 
@@ -228,8 +222,8 @@ mod CHALLENGE is
 
   --- output
   mb rule
-     < k > [output(Kr) => .k] ...</ k >
-     < output > Output [.l => l(Kr)] </ output >
+     < k > [output(Kr) => .K] ...</ k >
+     < output > Output [.List => List(Kr)] </ output >
      : KSentence .
 
   --- variable lookup
@@ -248,7 +242,7 @@ mod CHALLENGE is
 
   --- variable assignment
   mb rule
-    < k > [X := V => .k] ...</ k >
+    < k > [X := V => .K] ...</ k >
     < env >... X |-> L ...</ env >
     < store >... L |-> [? => V] ...</ store >
     : KSentence .
@@ -271,18 +265,18 @@ mod CHALLENGE is
   mb rule
     < k > [malloc(N) => L] ...</ k >
     < nextLoc > [L => L +Nat N] </ nextLoc >
-    < ptr >... [.m => L |-> N] ...</ ptr >
-    < store >... [.m => N .. sdNat(L +Nat N, 1) |-> 0] ...</ store >
+    < ptr >... [.Map => L |-> N] ...</ ptr >
+    < store >... [.Map => N .. sdNat(L +Nat N, 1) |-> 0] ...</ store >
     : KSentence .
 
   --- TODO: free
 
-  op closure : KList K Map -> KResult .
+  op closure : List{K} K Map -> KResult .
   op restoreEnv : Map -> K .
 
   --- aspect
   mb rule
-    < k > [aspect(E) => .k] ...</ k >
+    < k > [aspect(E) => .K] ...</ k >
     < aspect > [? => E] </ aspect >
     : KSentence .
 
@@ -298,7 +292,7 @@ mod CHALLENGE is
     < k > [\Y X -> E => E ~> restoreEnv(Env)] ...</ k >
     < nextLoc > [N => sNat(N)] </ nextLoc >
     < env > [Env => Env[N / X]] </ env >
-    < store >... [.m => N |-> (\Y X -> E)] ...</ store >
+    < store >... [.Map => N |-> (\Y X -> E)] ...</ store >
     : KSentence .
 
   --- function application
@@ -311,7 +305,7 @@ mod CHALLENGE is
 
   --- restore environment from function application
   mb rule
-    < k > Kr ~> [restoreEnv(Env) => .k] ...</ k >
+    < k > Kr ~> [restoreEnv(Env) => .K] ...</ k >
     < env > [? => Env] </ env >
     : KSentence [metadata "structural"] .
 
@@ -329,7 +323,7 @@ mod CHALLENGE is
 
   --- restore environment from block
   mb rule
-    < k > [restoreEnv(Env) => .k] ...</ k >
+    < k > [restoreEnv(Env) => .K] ...</ k >
     < env > [? => Env] </ env >
     : KSentence [metadata "structural"] .
 
@@ -353,42 +347,42 @@ mod CHALLENGE is
   --- spawn a thread
   mb rule
     < thread >...
-        < k > [spawn(S) => .k] ...</ k >
+        < k > [spawn(S) => .K] ...</ k >
         < env > Env </ env >
     ...</ thread >
-    [.s => mkThread(S, Env)]
+    [.Bag => mkThread(S, Env)]
     : KSentence .
 
   --- aquire a free lock
   mb rule
-    < k > [acquire V => .k] ...</ k >
-    < holds >... [.m => V |-> 0] ...</ holds >
-    < busy > Busy [.s => s(V)] </ busy >
-    if notBool(s(V) inSet Busy)
+    < k > [acquire V => .K] ...</ k >
+    < holds >... [.Map => V |-> 0] ...</ holds >
+    < busy > Busy [.Bag => Bag(V)] </ busy >
+    if notBool(Bag(V) inSet Busy)
     : KSentence .
 
   --- re-aquire a lock
   mb rule
-    < k > [acquire V => .k] ...</ k >
+    < k > [acquire V => .K] ...</ k >
     < holds >... V |-> [N => sNat(N)] ...</ holds >
     : KSentence .
 
   --- release lock
   mb rule
-    < k > [release V => .k] ...</ k >
+    < k > [release V => .K] ...</ k >
     < holds >... V |-> [sNat(N) => N] ...</ holds >
     : KSentence .
 
   mb rule
-    < k > [release V => .k] ...</ k >
+    < k > [release V => .K] ...</ k >
     < holds >... V |-> 0 ...</ holds >
-    < busy >... [s(V) => .s] ...</ busy >
+    < busy >... [Bag(V) => .Bag] ...</ busy >
     : KSentence .
 
   --- rendezvous synchronization
   mb rule
-    < k > [rv V => .k] ...</ k >
-    < k > [rv V => .k] ...</ k >
+    < k > [rv V => .K] ...</ k >
+    < k > [rv V => .K] ...</ k >
     : KSentence .
 
   --- spawn a new agent
@@ -396,7 +390,7 @@ mod CHALLENGE is
     < k > [new-agent S => N] ...</ k >
     < me > M </ me >
     < nextAgent > [N => sNat(N)] </ nextAgent >
-    [.s => mkAgent(mkThread(S, .m), N, M)]
+    [.Bag => mkAgent(mkThread(S, .Map), N, M)]
     : KSentence .
 
   --- my agent id
@@ -419,7 +413,7 @@ mod CHALLENGE is
         < sender > N </ sender >
         < receiver > M </ receiver >
         < val > V </ val >
-    </ message > => .s]
+    </ message > => .Bag]
     : KSentence .
 
   --- receive a message from any agent
@@ -429,14 +423,14 @@ mod CHALLENGE is
     [< message >...
         < receiver > M </ receiver >
         < val > V </ val >
-    ...</ message > => .s]
+    ...</ message > => .Bag]
     : KSentence .
 
   --- send asynchronous message
   mb rule
-    < k > [send-asynch N V => .k] ...</ k >
+    < k > [send-asynch N V => .K] ...</ k >
     < me > M </ me >
-    [.s =>
+    [.Bag =>
         < message >
             < sender > M </ sender >
             < receiver > N </ receiver >
@@ -452,7 +446,7 @@ mod CHALLENGE is
   ---( send a message synchronously
   mb rule
     < agent >...
-        < k > [send-synch N V => .k] ...</ k >
+        < k > [send-synch N V => .K] ...</ k >
         < me > M </ me >
     ...</ agent >
     < agent >...
@@ -462,7 +456,7 @@ mod CHALLENGE is
     : KSentence .
 
   mb rule
-    < k > [send-synch N V => .k] ...</ k >
+    < k > [send-synch N V => .K] ...</ k >
     < agent >...
         < k > [receive => V] ...</ k >
         < me > N </ me >
@@ -471,7 +465,7 @@ mod CHALLENGE is
   )
 
   --- halt thread
-  mb rule [< k > halt-thread ...</ k > => < k > .k </ k >] : KSentence .
+  mb rule [< k > halt-thread ...</ k > => < k > .K </ k >] : KSentence .
 
   --- TODO: I believe a bug in the context transformers level prevents
   --- the following halt rules to be less general then they could be.
@@ -483,7 +477,7 @@ mod CHALLENGE is
             < k > halt-agent ...</ k >
         ...</ thread >
     ...</ threads >
-    => < threads > .s </ threads >]
+    => < threads > .Bag </ threads >]
     : KSentence .
 
   --- halt system
@@ -497,79 +491,79 @@ mod CHALLENGE is
             ...</ threads >
         ...</ agent >
     ...</ agents >
-    => < agents > .s </ agents >]
+    => < agents > .Bag </ agents >]
     : KSentence .
 
   --- dissolve thread and release holds
   mb rule
     [< thread >...
-        < k > .k </ k >
+        < k > .K </ k >
         < holds > Holds </ holds >
     ...</ thread >
-    => .s]
+    => .Bag]
     < busy > [Busy => Busy -Set domMap(Holds)] </ busy >
     : KSentence [metadata "structural"] .
 
   --- dissolve agent
   mb rule
     [< agent >...
-        < threads > .s </ threads >
+        < threads > .Bag </ threads >
     ...</ agent >
-    => .s]
+    => .Bag]
     : KSentence [metadata "structural"] .
 
   --- dissolve top
   mb rule
     [< T >...
-        < agents > .s </ agents >
+        < agents > .Bag </ agents >
         < output > Output </ output >
     ...</ T >
     => < result > Output </ result >]
     : KSentence [metadata "structural"] .
 
-  vars Thread : SetItem .
+  vars Thread : BagItem .
 
-  op mkThread : Stmt Map -> SetItem .
+  op mkThread : Stmt Map -> BagItem .
   eq mkThread(S, Env) =
     < thread >
         < k > S </ k >
         < env > Env </ env >
-        < holds > .m </ holds >
+        < holds > .Map </ holds >
     </ thread >
     .
 
-  op mkAgent : SetItem Nat Nat -> SetItem .
+  op mkAgent : BagItem Nat Nat -> BagItem .
   eq mkAgent(Thread, Me, Parent) =
     < agent >
         < threads > Thread </ threads >
-        < store > .m </ store >
-        < ptr > .m  </ ptr >
+        < store > .Map </ store >
+        < ptr > .Map  </ ptr >
         < nextLoc > 0 </ nextLoc >
-        < aspect > .k </ aspect >
-        < busy > .s </ busy >
+        < aspect > .K </ aspect >
+        < busy > .Bag </ busy >
         < me > Me </ me >
         < parent > Parent </ parent >
     </ agent >
     .
 
 --- Utilities (perhaps these should be in the k-prelude)
-  op _.._ : Nat Nat -> KList .
-  eq N1 .. N2 = if N1 >Nat N2 then .kl else (N1,, (sNat N1) .. N2) fi .
+  op _.._ : Nat Nat -> List{K} .
+  eq N1 .. N2 = if N1 >Nat N2 then .List{K} else (N1,, (sNat N1) .. N2) fi .
 
-  var Set Set' : Set . var Item : SetItem .
-  op _inSet_ : SetItem Set -> Bool .
-  eq Item inSet Item Set = true .
-  eq Item inSet Set = false [owise] .
+  var Bag Bag' : Bag . var Item : BagItem .
+  op _inSet_ : BagItem Bag -> Bool .
+  eq Item inSet Item Bag = true .
+  eq Item inSet Bag = false [owise] .
 
-  op _-Set_ : Set Set -> Set .
-  eq Set -Set .s = Set .
-  eq .s -Set Set = .s .
-  eq (Item Set) -Set Set' = if Item inSet Set' then .s else Item fi (Set -Set Set') .
+  op _-Set_ : Bag Bag -> Bag .
+  eq Bag -Set .Bag = Bag .
+  eq .Bag -Set Bag = .Bag .
+  eq (Item Bag) -Set Bag' = if Item inSet Bag' then .Bag else Item fi (Bag -Set Bag') .
 
   var Map : Map . var K' : K .
-  op domMap : Map -> Set .
-  eq domMap(.m) = .s .
-  eq domMap((K |-> K' Map)) = s(K) domMap(Map) .
+  op domMap : Map -> Bag .
+  eq domMap(.Map) = .Bag .
+  eq domMap((K |-> K' Map)) = Bag(K) domMap(Map) .
 
   --- For some reason, K-Maude does not react well to ==Bool, so we use
   --- this for the time being. (Something about being unable to include
