@@ -31,11 +31,31 @@ mod BF is
 	---		to the command after the matching [ command*.
 	
 --- Semantics
-	op sentinel : -> KProperLabel .
+	op sentinel : -> KLabel .
 	op eval : K -> Bag .
 	op eval : K K -> Bag .
 	op inject : Int -> KResultLabel .
 	op inject : String -> KResultLabel .
+	
+	--- helper functions.  can the basic ones be auto generated?
+	op eightbit : -> KLabel .
+	mb rule [
+		eightbit(inject(I:Int)(.List{K})) 
+		=> inject((((I:Int %Int 256) +Int 256) %Int 256))(.List{K})
+	] : KSentence .
+	
+	op charString : -> KLabel .
+	mb rule [
+		charString(inject(N:Nat)(.List{K})) 
+		=> inject(charString(N:Nat))(.List{K})
+	] : KSentence .
+
+	op +String : -> KLabel .
+	mb rule [
+		+String(inject(S1:String)(.List{K}),, inject(S2:String)(.List{K})) 
+		=> inject(S1:String +String S2:String)(.List{K})
+	] : KSentence .
+	--- end helper functions
 	
 	mb configuration 
 		< T >
@@ -106,8 +126,8 @@ mod BF is
 		
 	mb [Output]: rule 
 		< k > [Print(.List{K}) => .K] ~> KCxt:K </ k > 
-		< memory > List(inject(I:Int)(.List{K})) L:List </ memory > 
-		< output > inject([S:String => S:String +String charString(absInt(I:Int))])(.List{K}) </ output > 
+		< memory > List(I:K) L:List </ memory > 
+		< output > [S:K => +String(S:K,, charString(eightbit(I:K)))] </ output > 
 		: KSentence [metadata "structural"] .
 	mb [Input]: rule
 		< k > [Read(.List{K}) => .K] ~> KCxt:K </ k >
