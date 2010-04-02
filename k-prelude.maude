@@ -69,6 +69,10 @@ mod K-TECHNIQUE is
   var Map : Map .  vars K1 K2 K2' : K .
   eq (Map K1 |-> K2)[K2' / K1] = Map K1 |-> K2' .
   eq Map[K2 / K1] = Map K1 |-> K2 [owise] .
+
+  op _(_) : Map K -> K [prec 0] .
+  eq (Map K1 |-> K2)(K1) = K2 .
+
   
   sort CellLabel .
 
