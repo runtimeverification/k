@@ -15,11 +15,6 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
 
   vars F X : Id .  vars E E1 E2 : Exp .  vars S S' : Stmt .
 
-  op read() : -> Exp .
-  op _() : Id -> Exp .
-  eq F() = F(.List{Id}) .
-  op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict(2)"] .
-
   op ++_ : Id -> Exp [prec 0] .
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _-_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
@@ -38,8 +33,14 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
 
   op _[_] : Id Exp -> Exp [prec 1 metadata "strict(2)"] .
-  op var_; : Id -> Decl [prec 0] .
-  op var_[_] : Id Nat -> Decl [prec 0] .
+
+  op read() : -> Exp .
+  op _() : Id -> Exp .
+  eq F() = F(.List{Id}) .
+  op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict(2)"] .
+
+  op var_; : Id -> Decl [prec 0 gather(E)] .
+  op var_[_]; : Id Nat -> Decl [prec 0] .
   op {} : -> Stmt .
   op {_} : Stmts -> Stmt .
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
