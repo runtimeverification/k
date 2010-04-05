@@ -1,0 +1,19 @@
+load kernel-c-compiled
+mod KERNEL-C-TEST is
+	including KERNEL-C .
+	
+	--- Programs
+	
+	---op declaration : -> K .
+	---eq declaration = "Declaration"("int`main`(void`)"(.List{K})) .
+  	---op program : -> K [metadata "arity 0"] .
+	---eq program = "_`{_`}"("Declaration"("int`main`(void`)"(.List{K})),,"return_;"("Int" 0(.List{K}))) .
+
+	
+endm
+
+---set trace on .
+---rew eval(program) .
+rew eval("pSimplest"(.List{K})) .
+rew eval("pSumN"(.List{K})) .
+rew eval("pFactorial"(.List{K})) .
