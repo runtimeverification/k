@@ -14,7 +14,7 @@ function usage {
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then 
   usage
-  exit
+  exit 1
 fi
 which $MAUDE 1>/dev/null 2>/dev/null
 if [[ $? -ne 0 ]]; then
@@ -89,7 +89,7 @@ $OUTPUT
 Error ($2): 
 $ERROR
 Stopping the compilation!"
-    exit
+    exit 1
   fi
  
   checkMaude "$3 $OUTPUT show module ."
