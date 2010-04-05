@@ -20,12 +20,12 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op removeSublists : Qid Module Module ModuleSet ~> Module .
  eq removeSublists(Q, M, Flat, MS) 
-  = setName(removeSublists(suffixImports(Q, M,removeSublistsImports(MS)), getListSubsorts(Flat)), qid(string(getName(M)) + string(Q))) .
+  = setName(removeSublists(suffixImports(Q, M,removeSublistsImports(MS)), getNoResultListSubsorts(Flat)), qid(string(getName(M)) + string(Q))) .
 
  op removeSublistsImports : ModuleSet ~> ImportList .
  eq removeSublistsImports(empty) = nil .
  eq removeSublistsImports(M' MS) 
-  = removeSublistsImports(MS, getName(M'), getListSubsorts(M'))  .
+  = removeSublistsImports(MS, getName(M'), getNoResultListSubsorts(M'))  .
  
  op removeSublistsImports : ModuleSet Qid SubsortDeclSet ~> ImportList . 
  eq removeSublistsImports(MS, Q, none) = removeSublistsImports(MS) .

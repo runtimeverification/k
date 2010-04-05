@@ -149,6 +149,14 @@ fmod META-K-MODULE is
 
   op getListSubsorts : Module -> SubsortDeclSet .
   eq getListSubsorts(M) = makeSubsorts(M, getListSorts(M), getMaximalSorts(M, getListSorts(M))) .
+
+  op getResultLists : Module -> SortSet .
+  eq getResultLists(M) = getSubsorts(makeSubsorts(M,getListSorts(M),KResult)) .
+
+
+  op getNoResultListSubsorts : Module -> SubsortDeclSet .
+  eq getNoResultListSubsorts(M) = removeSubsorts(getListSubsorts(M), getResultLists(M)) .
+
   
 
   op getList2KSubsorts : SubsortDeclSet -> SubsortDeclSet .

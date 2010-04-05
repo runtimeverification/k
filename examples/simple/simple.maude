@@ -5,15 +5,17 @@ in simple-untyped-programs
 mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX .
   including K .                     --- defines K, List, Map, and Set
 
-  sort Val .
+  sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
+  subsort Val < List{Val} < List{Exp} KResult .
+  subsort Val < KResult .
+  op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
   subsorts Exp Decl Stmt Stmts List{Id} List{Exp} < K .
-  subsorts Val < KResult .
 
   ops env store fstack in out functions nextLoc : -> CellLabel .
   vars I I1 I2 : Int .  var N N1 N2 L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env Sigma : Map .
   var B : Exp .  var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .
-  var Rl : List{KResult} .  var R R1 R2 : Val .  
+  var Rl : List{Val} .  var R R1 R2 : Val .  
 
   op (_,_) : Map K -> List .
   op _.._ : Nat Nat -> List{K} .
@@ -55,10 +57,10 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX .
 
   mb rule < k > [X[N] => Sigma(L +Int N)] ...</ k > < env >... X |-> L ...</ env > < store > Sigma </ store > : KSentence .
   mb rule < k > [read() => .K] ...</ k > < in > [List(I) => .List] ...</ in > : KSentence .
-  mb rule < k > [_`(_`)(F,R) ~> K => S] </ k >
+  mb rule < k > [_`(_`)(F,Rl) ~> K => S] </ k >
           < fstack > [.List => (Env,K)] ...</ fstack >
           < env > [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]] </ env >
-          < store >... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> getList{K}(R)] ...</ store >
+          < store >... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> getList{K}(Rl)] ...</ store >
           < nextLoc > [N => N +Nat length(getList{K}(Xl))] </ nextLoc >
           < functions >... Bag(function F(Xl) S) ...</ functions > : KSentence .
   mb rule < k > [var X ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env > < store >... [.Map => L |-> 0] ...</ store >

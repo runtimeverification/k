@@ -335,6 +335,11 @@ fmod META-MODULE-EXTRAS is
   eq removeSubsorts(SSDS SSD, SSDS' SSD) = removeSubsorts(SSDS, SSDS' SSD) .
   eq removeSubsorts(SSDS, SSDS') = SSDS [owise] . 
 
+  op removeSubsorts : SubsortDeclSet SortSet -> SubsortDeclSet .
+  eq removeSubsorts(SSDS (subsort S < S' .), S ; SS)
+   = removeSubsorts(SSDS, S ; SS) .
+  eq removeSubsorts(SSDS, SS) = SSDS [owise] .
+
   op removeSubsorts : Module SubsortDeclSet -> Module .
   eq removeSubsorts(M, SSDS) 
    = setSubsorts(M, removeSubsorts(getSubsorts(M),SSDS)) .
