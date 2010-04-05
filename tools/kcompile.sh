@@ -61,7 +61,7 @@ $OUTPUT1
 Error ($2): 
 $ERROR
 Stopping the compilation!"
-    exit
+    exit 1
   fi
   if [ -n "$2" ]; then
     printf ". Done!\n"
