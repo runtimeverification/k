@@ -10,7 +10,7 @@ fmod ANONYMOUS-CONSTANTS is
   var Eqs : EquationSet . var Eq : Equation .
   var Rls : RuleSet . var Rl : Rule .
   var Trm Trm' : Term .   var Trms : TermList .  
-  var TLS : TypeListSet .  var Tl : TypeList .  var T : Type .
+  var TLS : TypeListSet .  var Tl : TypeList .  var NeTl : NeTypeList .  var T : Type .
   var V : Variable . var Ct : Constant . var Cond : Condition .
   var N : Nat .  var AS : AttrSet .  
   op resolveAnonymousConsts : Qid Module Module ~> Module .
@@ -68,7 +68,8 @@ fmod ANONYMOUS-CONSTANTS is
   eq getNthType(s N, TLS) = getNthType(N, removeFirst(TLS)) .
 
   op removeFirst : TypeListSet ~> TypeListSet .
-  eq removeFirst(T Tl ; TLS) = Tl ; removeFirst(TLS) .
+  eq removeFirst(T ; TLS) = T ; TLS .
+  eq removeFirst(T NeTl ; TLS) = NeTl ; removeFirst(TLS) .
   eq removeFirst(none) = none .
 
   op checkCommonType : TypeListSet ~> Type .
