@@ -166,22 +166,22 @@ mod BEFUNGE is
 	mb [MovePC-right]: rule 
 		< k > [movePC(.List{K}) => .K] ...</ k >
 		< direction > right(.List{K}) </ direction >
-		< pc > coord(inject([I:Int => (I:Int +Int 1) %Int 80])(.List{K}),, K:K) </ pc >
+		< pc > [coord(inject(I:Int)(.List{K}),, K:K) => coord(inject((I:Int +Int 1) %Int 80)(.List{K}),, K:K)] </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-left]: rule 
 		< k > [movePC(.List{K}) => .K] ...</ k >
 		< direction > left(.List{K}) </ direction >
-		< pc > coord(inject([I:Int => ((I:Int -Int 1) +Int 80) %Int 80])(.List{K}),, K:K) </ pc >
+		< pc > [coord(inject(I:Int)(.List{K}),, K:K) => coord(inject(((I:Int -Int 1) +Int 80) %Int 80)(.List{K}),, K:K)] </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-up]: rule 
 		< k > [movePC(.List{K}) => .K] ...</ k >
 		< direction > up(.List{K}) </ direction >
-		< pc > coord(K:K,, inject([I:Int => ((I:Int -Int 1) +Int 25) %Int 25])(.List{K})) </ pc >
+		< pc > [coord(K:K,, inject(I:Int)(.List{K})) => coord(K:K,, inject(((I:Int -Int 1) +Int 25) %Int 25)(.List{K}))] </ pc >
 		: KSentence [metadata "structural"] .
 	mb [MovePC-down]: rule 
 		< k > [movePC(.List{K}) => .K] ...</ k >
 		< direction > down(.List{K}) </ direction >
-		< pc > coord(K:K,, inject([I:Int => (I:Int +Int 1) %Int 25])(.List{K})) </ pc >
+		< pc > [coord(K:K,, inject(I:Int)(.List{K})) => coord(K:K,, inject((I:Int +Int 1) %Int 25)(.List{K}))] </ pc >
 		: KSentence [metadata "structural"] .
 				
 	---op asAscii : -> KLabel .
@@ -298,7 +298,8 @@ mod BEFUNGE is
 	mb [printNumber]: rule
 		< k > [inject(".")(.List{K}) => .K] ...</ k >
 		< stack > [List(inject(I:Int)(.List{K})) => .List] ...</ stack >
-		< output > inject([S:String => S:String +String stringConversion(absInt(I:Int), 10) +String " "])(.List{K}) </ output >
+		---< output > inject([S:String => S:String +String stringConversion(absInt(I:Int), 10) +String " "])(.List{K}) </ output >
+		< output > [inject(S:String)(.List{K}) => inject(S:String +String stringConversion(absInt(I:Int), 10) +String " ")(.List{K})] </ output >
 		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 		
@@ -306,7 +307,7 @@ mod BEFUNGE is
 	mb [printCharacter]: rule
 		< k > [inject(",")(.List{K}) => .K] ...</ k >
 		< stack > [List(inject(I:Int)(.List{K})) => .List] ...</ stack >
-		< output > inject([S:String => S:String +String charString(absInt(I:Int %Int 256))])(.List{K}) </ output >
+		< output > [inject(S:String)(.List{K}) => inject(S:String +String charString(absInt(I:Int %Int 256)))(.List{K})] </ output >
 		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 		

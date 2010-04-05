@@ -6,9 +6,8 @@ mod BEFUNGE-TEST is
   	op pHelloWorld : -> KProperLabel [metadata "arity 0"] .
 		
 	--- "olleH">:#,_@
-	eq pHelloWorld = injectM(
-			__(
-			coord(inject(0)(.List{K}),, inject(0)(.List{K})) |-> inject("\"")(.List{K}),(
+	eq pHelloWorld = injectM((
+			coord(inject(0)(.List{K}),, inject(0)(.List{K})) |-> inject("\"")(.List{K})
 			coord(inject(1)(.List{K}),, inject(0)(.List{K})) |-> inject("o")(.List{K})
 			coord(inject(2)(.List{K}),, inject(0)(.List{K})) |-> inject("l")(.List{K})
 			coord(inject(3)(.List{K}),, inject(0)(.List{K})) |-> inject("l")(.List{K}) 
@@ -21,8 +20,7 @@ mod BEFUNGE-TEST is
 			coord(inject(10)(.List{K}),, inject(0)(.List{K})) |-> inject(",")(.List{K}) 
 			coord(inject(11)(.List{K}),, inject(0)(.List{K})) |-> inject("_")(.List{K})
 			coord(inject(12)(.List{K}),, inject(0)(.List{K})) |-> inject("@")(.List{K})
-			))
-		) .
+		)) .
 	
 	op pFactorial : -> KProperLabel [metadata "arity 0"] .
 	--- 1&>: #v_$\:#v_$.@
