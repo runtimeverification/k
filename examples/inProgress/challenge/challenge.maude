@@ -16,6 +16,16 @@ mod CHALLENGE is
   sort Stmt .
   subsort Bool Int Id < Exp .
 
+  sort List{Exp} .
+  subsort Exp < List{Exp} .
+  op _,_ : List{Exp} List{Exp} -> List{Exp} [assoc id: .List`{Exp`}] .
+  op .List{Exp} : -> List{Exp} .
+
+  sort List{Id} .
+  subsort Id < List{Id} .
+  op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
+  subsort List{Id} < List{Exp} .
+
   op _+_ : Exp Exp -> Exp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _*_ : Exp Exp -> Exp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op _/_ : Exp Exp -> Exp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
@@ -43,11 +53,11 @@ mod CHALLENGE is
   op aspect : Exp -> Stmt [format (b o)] .
   --- We'd like to use λ and μ here but Maude has some bugs
   --- in its unicode handling.
-  op \_->_ : List{K} Exp -> Exp [prec 123 format (b o b o d)] .
+  op \_->_ : List{Id} Exp -> Exp [prec 123 format (b o b o d)] .
   op \Y_->_ : Id Exp -> Exp [prec 123 format (b o b o d)] .
-  op __ : Exp List{K} -> Exp [prec 0 metadata "strict(1 -2)"] .
+  op __ : Exp List{Exp} -> Exp [prec 0 metadata "strict(1 -2)"] .
 
-  op {vars_;_} : List{K} Stmt -> Stmt [prec 121 format (y b o b noi y o)] .
+  op {vars_;_} : List{Id} Stmt -> Stmt [prec 121 format (y b o b noi y o)] .
 
   op callcc : Exp -> Exp [format (b o) metadata "strict"] .
   
@@ -76,7 +86,7 @@ mod CHALLENGE is
 
   op pFib : -> Stmt .
   eq pFib = {
-    vars x,,fib ;
+    vars x, fib ;
     (fib := (\Y f -> \ n -> if n == 0 then 0 else if n == 1 then 1 else f(n + (-1)) + f(n + (-2))) ;
     x := fib 15 ;
     output(x))
@@ -84,7 +94,7 @@ mod CHALLENGE is
 
   op pRandom : -> Stmt .
   eq pRandom = {
-    vars x,,y,,z ;
+    vars x, y, z ;
     (x := randomBool ;
     y := randomBool ;
     z := randomBool ;
@@ -95,7 +105,7 @@ mod CHALLENGE is
 
   op pSum : -> Stmt .
   eq pSum = {
-    vars n,,s,,i ;
+    vars n, s, i ;
     (n := 1000 ;
     s := 0 ;
     i := n ;
@@ -108,11 +118,11 @@ mod CHALLENGE is
 
   op pCollatz : -> Stmt .
   eq pCollatz = {
-    vars even,,limit,,nr ;
+    vars even, limit, nr ;
     (even := (\ x -> x % 2 == 0) ;
     limit := 10 ;
     while ++ nr <= limit do ({
-        vars n,,steps ;
+        vars n, steps ;
         (n := nr ;
         spawn(
             while not(n == 1) do (
@@ -183,7 +193,7 @@ mod CHALLENGE is
     .
 
 --- Semantics
-  subsort Exp Stmt < K .
+  subsort Exp Stmt List{Exp} < K .
   subsort Int < KResult .
   subsort Bool < KResult .
 
@@ -191,7 +201,8 @@ mod CHALLENGE is
   vars I I1 I2 : Int .
   vars S S1 S2 : Stmt .
   vars B V E : Exp .
-  vars Xl Vl : List{K} .
+  vars Xl : List{Id} .
+  var Vl : List{Exp} .
   var T : Bool .
   var X : Id .
   var Env' : Map .
@@ -271,7 +282,7 @@ mod CHALLENGE is
 
   --- TODO: free
 
-  op closure : List{K} K Map -> KResult .
+  op closure : List{Id} K Map -> KResult .
   op restoreEnv : Map -> K .
 
   --- aspect
@@ -298,9 +309,9 @@ mod CHALLENGE is
   --- function application
   mb rule
     < k > [closure(Xl, E, Env') Vl => E ~> restoreEnv(Env)] ...</ k >
-    < nextLoc > [N => N +Nat length(Xl)] </ nextLoc >
-    < env > [Env => Env'[N .. sdNat(N +Nat length(Xl), 1) / Xl]] </ env >
-    < store > [Store => Store[Vl / N .. sdNat(N +Nat length(Xl), 1)]] </ store >
+    < nextLoc > [N => N +Nat length(getList{K}(Xl))] </ nextLoc >
+    < env > [Env => Env'[N .. sdNat(N +Nat length(getList{K}(Xl)), 1) / getList{K}(Xl)]] </ env >
+    < store > [Store => Store[getList{K}(Vl) / N .. sdNat(N +Nat length(getList{K}(Xl)), 1)]] </ store >
     : KSentence .
 
   --- restore environment from function application
@@ -316,9 +327,9 @@ mod CHALLENGE is
   --- block
   mb rule
     < k > [{vars Xl ; S} => S ~> restoreEnv(Env)] ...</ k >
-    < nextLoc > [N => N +Nat length(Xl)] </ nextLoc >
-    < env > [Env => Env[N .. sdNat(N +Nat length(Xl), 1) / Xl]] </ env >
-    < store > [Store => Store[0 / N .. sdNat(N +Nat length(Xl), 1)]] </ store >
+    < nextLoc > [N => N +Nat length(getList{K}(Xl))] </ nextLoc >
+    < env > [Env => Env[N .. sdNat(N +Nat length(getList{K}(Xl)), 1) / getList{K}(Xl)]] </ env >
+    < store > [Store => Store[0 / N .. sdNat(N +Nat length(getList{K}(Xl)), 1)]] </ store >
     : KSentence .
 
   --- restore environment from block
@@ -358,7 +369,7 @@ mod CHALLENGE is
     < k > [acquire V => .K] ...</ k >
     < holds >... [.Map => V |-> 0] ...</ holds >
     < busy > Busy [.Bag => Bag(V)] </ busy >
-    if notBool(Bag(V) inSet Busy)
+    if notBool(Bag(V) inBag Busy)
     : KSentence .
 
   --- re-aquire a lock
@@ -501,7 +512,7 @@ mod CHALLENGE is
         < holds > Holds </ holds >
     ...</ thread >
     => .Bag]
-    < busy > [Busy => Busy -Set domMap(Holds)] </ busy >
+    < busy > [Busy => Busy -Bag domMap(Holds)] </ busy >
     : KSentence [metadata "structural"] .
 
   --- dissolve agent
@@ -551,26 +562,18 @@ mod CHALLENGE is
   eq N1 .. N2 = if N1 >Nat N2 then .List{K} else (N1,, (sNat N1) .. N2) fi .
 
   var Bag Bag' : Bag . var Item : BagItem .
-  op _inSet_ : BagItem Bag -> Bool .
-  eq Item inSet Item Bag = true .
-  eq Item inSet Bag = false [owise] .
+  op _inBag_ : BagItem Bag -> Bool .
+  eq Item inBag Item Bag = true .
+  eq Item inBag Bag = false [owise] .
 
-  op _-Set_ : Bag Bag -> Bag .
-  eq Bag -Set .Bag = Bag .
-  eq .Bag -Set Bag = .Bag .
-  eq (Item Bag) -Set Bag' = if Item inSet Bag' then .Bag else Item fi (Bag -Set Bag') .
+  op _-Bag_ : Bag Bag -> Bag .
+  eq Bag -Bag .Bag = Bag .
+  eq .Bag -Bag Bag = .Bag .
+  eq (Item Bag) -Bag Bag' = if Item inBag Bag' then .Bag else Item fi (Bag -Bag Bag') .
 
   var Map : Map . var K' : K .
   op domMap : Map -> Bag .
   eq domMap(.Map) = .Bag .
   eq domMap((K |-> K' Map)) = Bag(K) domMap(Map) .
-
-  --- For some reason, K-Maude does not react well to ==Bool, so we use
-  --- this for the time being. (Something about being unable to include
-  --- the Universal sort.)
----  op _==Int_ : Int Int -> Bool [prec 37 special(
----    id-hook EqualitySymbol
----    term-hook equalTerm (true)
----    term-hook notEqualTerm (false))] .
 
 endm
