@@ -76,7 +76,7 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
 endm
 
 
-mod SIMPLE is 
+mod SIMPLE-UNTYPED is 
   including SIMPLE-UNTYPED-SEMANTICS .
   including SIMPLE-UNTYPED-PROGRAMS .
   op pgm : -> Bag .
