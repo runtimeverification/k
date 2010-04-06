@@ -22,7 +22,7 @@ fmod LISTS-TO-WRAPPERS is
 -------------------------------------------------------------------------------
 
  var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
- var N : Nat .
+ var N : Nat .  var S S' S'' S''' : Sort .
  var MS : ModuleSet .  var M Flat : Module .
  vars Mbs : MembAxSet . var Mb : MembAx .
  var Eqs : EquationSet . var Eq : Equation .
@@ -59,14 +59,26 @@ fmod LISTS-TO-WRAPPERS is
    setRls(
    setEqs(
    setMbs(
-   removeSubsorts(
+   setSubsorts(
     M
-    , getKeys(CTORS))
+    , listsSSs(Flat, CTORS, getSubsorts(M)))
     , listsMbs(Flat, getOps(Flat), OPDS, CTORS, getMbs(M)))
     , listsEqs(Flat, getOps(Flat), OPDS, CTORS, getEqs(M)))
     , listsRls(Flat, getOps(Flat), OPDS, CTORS, getRls(M)))
     , listsOps(OPDS, CTORS, getOps(M)))
   .
+
+ op listsSSs : Module CTORSMap SubsortDeclSet ~> SubsortDeclSet .
+ eq listsSSs(M, CTORS, none) = none .
+ eq listsSSs(M, CTORS, SSDS SSD)
+  = listsSSs(M, CTORS, SSDS) listsSS(M, CTORS, SSD) .
+
+ op listsSS : Module CTORSMap SubsortDecl ~> SubsortDeclSet .
+ eq listsSS(M, CTORS (subsort S < S' .) |-> Trm, (subsort S < S' .)) = none .
+ eq listsSS(M, CTORS ((subsort S < S' .) |-> Trm) (subsort S'' < S''' .) |-> Trm, (subsort S'' < S .)) = (subsort S'' < S .) .
+ eq listsSS(M, CTORS (subsort S < S' .) |-> Trm, (subsort S'' < S .)) 
+  =  (subsort S'' < S .) (subsort S'' < S' .) .
+ eq listsSS(M, CTORS, SSD) = SSD [owise] .
 
  op listsOps : OpDeclSet CTORSMap OpDeclSet ~> OpDeclSet .
  eq listsOps(OPDS, CTORS, Ops Op)

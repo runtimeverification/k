@@ -13,8 +13,6 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   subsort List{Id} < List{Exp} .
   op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
 
-  vars F X : Id .  vars E E1 E2 : Exp .  vars S S' : Stmt .
-
   op ++_ : Id -> Exp [prec 0] .
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _-_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
@@ -31,14 +29,10 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
   op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
-
   op _[_] : Id Exp -> Exp [prec 1 metadata "strict(2)"] .
-
   op read() : -> Exp .
   op _() : Id -> Exp .
-  eq F() = F(.List{Id}) .
-  op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict(2)"] .
-
+  op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict"] .
   op var_; : Id -> Decl [prec 0 gather(E)] .
   op var_[_]; : Id Nat -> Decl [prec 0] .
   op {} : -> Stmt .
@@ -49,15 +43,24 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op _[_]=_; : Id Exp Exp -> Stmt [prec 0 gather(e & &) metadata "strict(2 3)"] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op if_then_ : Exp Stmt -> Stmt .
-  eq if E then S = if E then S else {} .
   op while_do_ : Exp Stmt -> Stmt .
   op for _=_to_do_ : Id Exp Exp Stmt -> Stmt .
-  eq for X = E1 to E2 do S = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
   op main : -> Id .
   op _; : Exp -> Stmt [prec 50 metadata "strict"] .
   op return_; : Exp -> Stmt [metadata "strict"] .
-
   op function_()_ : Id Stmt -> Decl .
-  eq function F() S = function F(.List{Id}) S .
   op function_(_)_ : Id List{Id} Stmt -> Decl .
 endm
+
+mod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX .
+  vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
+  eq if E then S = if E then S else {} .
+  eq for X = E1 to E2 do S = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
+  op lambda : List{Id} Stmt -> Exp .
+  eq function F() S = function F(.List{Id}) S .
+  eq function F(Xl) S = var F ; F = lambda(Xl,S) ; .
+  op _() : Exp -> Exp .
+  op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
+  eq E() = E(.List{Id}) .
+endm
+

@@ -2,7 +2,7 @@ in ../../k-prelude
 in simple-untyped-syntax
 in simple-untyped-programs
 
-mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX + K .
+mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
   sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
   subsort Val < List{Val} < List{Exp} KResult .
@@ -53,8 +53,6 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX + K .
   mb rule < k > [X[N] => Sigma(L +Int N)] ...</ k > < env >... X |-> L ...</ env > < store > Sigma </ store > : KSentence .
   mb rule < k > [read() => .K] ...</ k > < in > [List(I) => .List] ...</ in > : KSentence .
 
-  op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-
   mb rule < k > [_`(_`)(lambda(Xl,S),Vl) ~> K => S ~> return(0);] </ k > < fstack > [.List => (Env,K)] ...</ fstack >
           < env > [Env =>  GEnv[(N .. (N +Nat len(Xl))) / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
           < store >... [.Map =>  (N .. N +Nat len(Xl)) |-> getList{K}(Vl)] ...</ store >
@@ -74,7 +72,6 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-SYNTAX + K .
   mb rule < k > [while B do S  => if B then {S while B do S} else {}] ...</ k > : KSentence .
   mb rule [V ; => .K] : KSentence .
   mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > : KSentence .
-  mb rule [function F(Xl) S => var F ; F = lambda(Xl,S) ;] : KSentence .
   mb rule < k > [.K => main();] </ k > < env > Env </ env > < genv > [.Map => Env] </ genv > : KSentence .
 endm
 
@@ -94,3 +91,4 @@ mod SIMPLE is
              < nextLoc > 0 </ nextLoc >
            </ T > .
 endm
+

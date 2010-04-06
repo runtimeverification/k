@@ -5,7 +5,7 @@ fmod SYNTAX-TO-K is
  including META-K-MODULE .
  including META-K-BUILTINS .
   var IL : ImportList .
- var Ops : OpDeclSet .  var Op : OpDecl .
+ var Ops OPDS : OpDeclSet .  var Op : OpDecl .
  var SSDS SSDS' : SubsortDeclSet .  var SSD : SubsortDecl . 
  var SS : SortSet . var S S' : Sort .
  var Q O : Qid . var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
@@ -45,13 +45,18 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op syntax2k : Module SortSet SubsortDeclSet ~> Module .
  eq syntax2k(M, SS, SSDS)
-  = setSubsorts(setOps(setMbs(setRls(setEqs(removeSorts(M,SS), syntax2kEqs(getEqs(M), SSDS)), syntax2kRls(getRls(M), SSDS)),syntax2kMbs(getMbs(M), SSDS)),syntax2kOps(getOps(M),SSDS)),syntax2kSSs(getSubsorts(M), SS, SSDS)) .
+  = setSubsorts(setOps(setMbs(setRls(setEqs(removeSorts(M,SS), syntax2kEqs(getEqs(M), SSDS)), syntax2kRls(getRls(M), SSDS)),syntax2kMbs(getMbs(M), SSDS)),concretize(syntax2kOps(getOps(M),SSDS))),syntax2kSSs(getSubsorts(M), SS, SSDS)) .
  
  op syntax2kSSs : SubsortDeclSet SortSet SubsortDeclSet ~> SubsortDeclSet .
  eq syntax2kSSs(SSDS SSD, SS, SSDS')
   =  syntax2kSSs(SSDS, SS, SSDS') syntax2kSS(SSD, SS, SSDS') .
  eq syntax2kSSs(none, SS, SSDS')  = none .
 
+ op concretize : OpDeclSet ~> OpDeclSet .
+ceq concretize((op Q : Tl -> T [AS] .) (op Q : Tl -> T' [AS] .) OPDS)
+  = (op Q : Tl -> T [AS] .) concretize(OPDS) 
+ if T = KResult /\ T' = K .
+ eq concretize(OPDS) = OPDS [owise] .
  op syntax2kSS : SubsortDecl SortSet SubsortDeclSet ~> SubsortDeclSet .
  eq syntax2kSS((subsort S < S' .), SS, SSDS')
   = if S in SS 

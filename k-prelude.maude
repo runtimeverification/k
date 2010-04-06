@@ -176,6 +176,7 @@ mod K-RULES is
   op `[_=>_`] : K K -> K [prec 0] .
   op `[_=>_`] : KResult KResult -> KResult [prec 0] .
   op `[_=>_`] : KLabel KLabel -> KLabel [prec 0] .
+  op `[_=>_`] : CellLabel CellLabel -> CellLabel [prec 0] .
   op `[_=>_`] : KResultLabel KResultLabel -> KResultLabel [prec 0] .
   op `[_=>_`] : List{K} List{K} -> List{K} [prec 0] .
   op `[_=>_`] : List{KResult} List{KResult} -> List{KResult} [prec 0] .
