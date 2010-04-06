@@ -4,6 +4,10 @@ load pl-builtins
 
 mod K-TECHNIQUE is 
   including PL-NAT .
+
+  var K : K . var Ks : List{K} .
+  var LItem : ListItem .  var List : List .
+
   sorts KResult NeK K .
   subsorts KResult < NeK < K .
   op .K : -> K [metadata "latex(renameTo \\ensuremath{\\kdot})"].
@@ -28,7 +32,7 @@ mod K-TECHNIQUE is
 
   op length_ : List{K} -> Nat . 
   eq length(.List`{K`}) = 0 .
-  eq length(K:K,,KL:List{K}) = sNat length(KL:List{K}) . 
+  eq length(K:K,,Ks) = sNat length(Ks) . 
 
   sorts KLabel KResultLabel KHybridLabel .
 
@@ -41,11 +45,15 @@ mod K-TECHNIQUE is
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
   op .List : -> List .
-  op List : K -> ListItem  .
+  op ListItem : K -> ListItem  .
   op __ : List List -> List [assoc id: .List] .
   op __ : NeList List -> NeList [ditto] .
   op __ : List NeList -> NeList [ditto] .
-  var LItem : ListItem .  var List : List .
+  
+  op List_ : List{K} -> List .
+  eq List(.List{K}) = .List .
+  eq List(K,, Ks) = ListItem(K) List(Ks) .
+
   op length_ : List -> Nat .
   eq length(.List) = 0 .
   eq length(LItem List) = sNat length(List) .
@@ -53,9 +61,13 @@ mod K-TECHNIQUE is
   sort BagItem Bag NeBag .
   subsort BagItem < NeBag < Bag .
   op .Bag : -> Bag .
-  op Bag : K -> BagItem .
+  op BagItem : K -> BagItem .
   op __ : Bag Bag -> Bag [assoc comm id: .Bag] .
   op __ : NeBag Bag -> NeBag [ditto] .
+
+  op Bag_ : List{K} -> Bag .
+  eq Bag(.List{K}) = .Bag .
+  eq Bag(K,, Ks) = BagItem(K) Bag(Ks) .
   
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .

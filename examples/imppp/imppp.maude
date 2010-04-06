@@ -122,7 +122,7 @@ mod IMP++ is
   mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store >  : KSentence .
   mb rule < k > [X := I => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => I] ...</ store > : KSentence .
   mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
-  mb rule < k > [print(I) => .K] ...</ k > < output >... [.List => List(I)] </ output >  : KSentence .
+  mb rule < k > [print(I) => .K] ...</ k > < output >... [.List => ListItem(I)] </ output >  : KSentence .
   mb rule < k > [halt ~> ? => .K] </ k > : KSentence .
   mb rule < thread >... < k > [spawn(S) => .K] ...</ k > < env > Env </ env > ...</ thread > [.Bag => < thread > < k > S </ k > < env > Env </ env > </ thread >] : KSentence .
   mb rule [< thread >... < k > .K </ k > ...</ thread > => .Bag] : KSentence [metadata "structural"] .

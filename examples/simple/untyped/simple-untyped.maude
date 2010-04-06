@@ -17,8 +17,8 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
   vars I I1 I2 : Int .  var N N1 N2 L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env GEnv Sigma : Map .  var B : Exp .
   var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .  var Vl : List{Val} .  var V V1 V2 : Val .
 
-  op _.._ : Nat Nat -> List{K} .
-  eq N1 .. N2 = if N1 >=Nat N2 then .List{K} else (N1,, (sNat N1 .. N2)) fi .
+  op _.._ : Nat Nat -> List{Exp} .
+  eq N1 .. N2 = if N1 >=Nat N2 then .List{Id} else (N1, (sNat N1 .. N2)) fi .
 
   op len : List{Id} -> Nat .
   eq len(.List{Id}) = 0 .
@@ -54,8 +54,8 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
   mb rule < k > [read() => .K] ...</ k > < in > [List(I) => .List] ...</ in > : KSentence .
 
   mb rule < k > [_`(_`)(lambda(Xl,S),Vl) ~> K => S ~> return(0);] </ k > < fstack > [.List => (Env,K)] ...</ fstack >
-          < env > [Env =>  GEnv[(N .. (N +Nat len(Xl))) / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
-          < store >... [.Map =>  (N .. N +Nat len(Xl)) |-> getList{K}(Vl)] ...</ store >
+          < env > [Env =>  GEnv[getList{K}(N .. (N +Nat len(Xl))) / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
+          < store >... [.Map =>  getList{K}(N .. N +Nat len(Xl)) |-> getList{K}(Vl)] ...</ store >
           < nextLoc > [N => N +Nat len(Xl)] </ nextLoc > : KSentence .
 
   mb rule < k > [var X ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env > < store >... [.Map => L |-> 0] ...</ store >
