@@ -1,33 +1,34 @@
-mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
+mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
 
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
   ops main divide2 collatz dummy1 dummy2 init printAll bubbleSort siftDown heapSort : -> Id .
   ops done root bottom maxChild temp numbers size : -> Id .
   ops pFactorial pCollatz pInsertionSort1 pInsertionSort2 pBubbleSort pHeapSort pTwoReturns1 pTwoReturns2 : -> Stmts .
 
-  eq pFactorial =
-       var x ;
 
-       function f(y) {
-         var t ;
+  eq pFactorial =
+       int x ;
+
+       int f(int y) {
+         int t ;
 	 t = 1 ;
          for i = 1 to y do
 	   t = t * i ;
 	 return t ;
        }
 
-       function main() {
+       void main() {
          x = 5 ;
 	 write(f(f(x))) ;
-	 return 0 ;
        } .
 
-  eq pCollatz =
-       var n ;
-       var m ;
 
-       function divide2(dummy1, r, dummy2) {
-         var q ;
+  eq pCollatz =
+       int n ;
+       int m ;
+
+       int divide2(int dummy1, int r, int dummy2) {
+         int q ;
 	 q = 0 ;
 	 while not r <= 1 do {
 	   r = r - 2 ;
@@ -36,8 +37,8 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
 	 return q ;
        }
 
-       function collatz() {
-         var s ;
+       int collatz() {
+         int s ;
          s = 0 ;
 	 write(n) ;
          while n > 1 do {
@@ -49,17 +50,19 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
 	 return s ;
        }
 
-       function main() {
+       void main() {
          m = 10 ;
          for i = 1 to m do {
 	   n = i ;
 	   write(collatz()) ;
 	 }
-         return 0 ;
        } .
 
+endm
 
---- following does not run, because "and" is not shortcut in SIMPLE, but it types!
+q
+
+--- following does not run, because "and" is not shortcut in SILF, but it types!
   eq pInsertionSort1 =
        var x[10] ;
 
@@ -77,7 +80,7 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
 
        function main() {
          var n ;
-         n = 10 ;
+         n = 2 ;
          init(n) ;
          printAll(n) ;
          for i = 1 to n - 1 do {
@@ -95,6 +98,9 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
          return 0 ;
        } .
 
+endm
+
+q
 
   eq pInsertionSort2 =
        var x[100] ;
@@ -214,16 +220,16 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
     }
 
     function main() {
-      var x ;
-      x = read() ;
-      for i = 0 to (x - 1) do {
-        numbers[i] = read() ;
-      }
-      heapSort(x) ;
-      for i = 0 to (x - 1) do {
-        write(numbers[i]) ;
-      }
-      return 0 ;
+         var x ;
+         x = read() ;
+     for i = 0 to (x - 1) do {
+	   numbers[i] = read() ;
+	 }
+         heapSort(x) ;
+     for i = 0 to (x - 1) do {
+	      write(numbers[i]) ;
+	 }
+         return 0 ;
     }
   .
 

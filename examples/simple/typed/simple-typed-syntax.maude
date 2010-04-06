@@ -1,16 +1,22 @@
-mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
+mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   sorts Exp Decl Stmt Stmts .
   subsorts Id Int Bool < Exp .
   subsort Decl Stmt < Stmts .
+  sorts BasicType Type .
+  subsort BasicType < Type .
+  ops int bool void : -> BasicType .
+  op _[] : BasicType -> Type .
 
---- List{Id}
-  sort List{Id} .  subsort Id < List{Id} .
-  op .List{Id} : -> List{Id} .
-  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] .
 --- List{Exp}
   sort List{Exp} .  subsort Exp < List{Exp} .
-  subsort List{Id} < List{Exp} .
-  op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
+  op .List{Exp} : -> List{Exp} .
+  op _,_ : List{Exp} List{Exp} -> List{Exp} [prec 70 assoc id: .List{Exp}] .
+--- List{TypedId}
+  sorts TypedId List{TypedId} .
+  subsort TypedId < List{TypedId} .
+  op .List{TypedId} : -> List{TypedId} .
+  op __ : Type Id -> TypedId .
+  op _,_ : List{TypedId} List{TypedId} -> List{TypedId} [prec 70 assoc id: .List{TypedId}] .
 
   op ++_ : Id -> Exp [prec 0] .
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
@@ -32,8 +38,8 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op read() : -> Exp .
   op _() : Id -> Exp .
   op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict"] .
-  op var_; : Id -> Decl [prec 0 gather(E)] .
-  op var_[_]; : Id Nat -> Decl [prec 0] .
+  op __; : BasicType Id -> Decl [prec 0 gather(E E)] .
+  op __[_]; : BasicType Id Nat -> Decl [prec 0] .
   op {} : -> Stmt .
   op {_} : Stmts -> Stmt .
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
@@ -47,11 +53,19 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op main : -> Id .
   op _; : Exp -> Stmt [prec 50 metadata "strict"] .
   op return_; : Exp -> Stmt [metadata "strict"] .
-  op function_()_ : Id Stmt -> Decl .
-  op function_(_)_ : Id List{Id} Stmt -> Decl .
+  op __()_ : Type Id Stmt -> Decl .
+  op __(_)_ : Type Id List{TypedId} Stmt -> Decl .
 endm
 
-mod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX .
+eof
+
+mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
+
+--- List{Id}
+  sort List{Id} .  subsort Id < List{Id} .
+  op .List{Id} : -> List{Id} .
+  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] .
+
   vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
   eq if E then S = if E then S else {} .
   eq for X = E1 to E2 do S = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
@@ -62,4 +76,3 @@ mod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
   eq E() = E(.List{Id}) .
 endm
-
