@@ -64,6 +64,9 @@ mod K-TECHNIQUE is
   op __ : Map Map -> Map [assoc comm id: .Map prec 120] .
   op __ : NeMap Map -> NeMap [ditto] .
 
+  op _(_) : Map K -> K [prec 0] .
+  eq (Map K1 |-> K2)(K1) = K2 .
+
   op _[_/_] : Map K K -> Map [prec 0] .
 
   var Map : Map .  vars K1 K2 K2' : K .
