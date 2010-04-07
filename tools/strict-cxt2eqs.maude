@@ -29,7 +29,7 @@ mod STRICTCXT2EQS is
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(
    freezeLabel(untokenize(metaPrettyPrint(M,T, mixfix flat number rat))),
-   freezeVariables(noDuplicates(getVars(T)))) .
+   freezeVariables(removeHole(noDuplicates(getVars(T))))) .
 
   op freezeVariables : TermList -> TermList .
   op freezeVariable : Variable -> Variable .

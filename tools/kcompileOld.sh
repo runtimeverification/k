@@ -129,13 +129,13 @@ loop many-modules .
 "
 runMaude "$OUTPUT $MANY_MODULES" "Flattening entire definition in a single module"
 
-ANON_CONSTS="
+POLY_CONSTS="
 $DEFAULTH
-load \"$KBASE/tools/anon-consts-interface\"
-loop anon-consts .
-(resolveAnonConsts $LANG $LANG .)
+load \"$KBASE/tools/poly-consts-interface\"
+loop poly-consts .
+(resolvePolyConsts $LANG $LANG .)
 "
-runMaude "$OUTPUT $ANON_CONSTS" "Transforming anonymous constants to anonymous variables"
+runMaude "$OUTPUT $POLY_CONSTS" "Transforming Polymorphic constants into variables"
 
 SANITY_CHECKS="
 $DEFAULTH
@@ -258,41 +258,27 @@ loop make-all-labels .
 
 runMaude "$OUTPUT $LABELS" "Reducing all K constructs to K labels"
 
-COMPILED="$OUTPUT"
-
 STRICTCXT="
 $DEFAULTH
 load \"$KBASE/tools/metadata-parsing\"
 load \"$KBASE/tools/strict-ops2cxt-interface\"
 loop strict-ops2cxt .
-(strictOps2cxt ${LANG}01-LABELS ${LANG}-STRICTNESS .)
+(strictOps2cxt ${LANG}01-LABELS ${LANG}01-LABELS .)
 "
 
-runMaude "$OUTPUT $STRICTCXT" "Generating Strictness Axioms" "$COMPILED"
+runMaude "$OUTPUT $STRICTCXT" "Generating Strictness Axioms"
 
 STRICTEQS="
 $DEFAULTH
 load \"$KBASE/tools/strict-cxt2eqs-interface\"
 loop strict-cxt2eqs .
-(strictCxt2eqs ${LANG}01-LABELS ${LANG}-STRICTNESS ${LANG}-STRICTNESS .)
+(strictCxt2eqs ${LANG}01-LABELS  ${LANG}01-LABELS .)
 "
-runMaude "$COMPILED $OUTPUT $STRICTEQS" "Generating Strictness Equations" "$COMPILED"
-
-TEST="
-$COMPILED
-
-$OUTPUT
-mod ${LANG0}-TEST is
-  including ${LANG}01-LABELS .
-  including ${LANG}-STRICTNESS .
-endm
-"
-
-checkMaude "$TEST" "Putting everything together"
+runMaude "$OUTPUT $STRICTEQS" "Generating Strictness Equations"
 
 echo "
 load \"$KBASE/k-prelude\"
-$TEST
+$OUTPUT
 " > $OUTPUT_FILE.maude
 
 echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."

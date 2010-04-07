@@ -296,7 +296,7 @@ fmod META-MODULE-EXTRAS is
   var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
   vars PDL PDL' : ParameterDeclList .
   var QIL : QidList .  var Q Q' : Qid . 
-  var Tl Tl' : TypeList . var T T' : Type . 
+  var Tl Tl' : TypeList .  var NTl : NeTypeList .  var T T' : Type . 
   var AS AS' : AttrSet .  var Attr : Attr .
   var NNl : NeNatList . var Nl : NatList . var N N' : Nat .
   
@@ -619,8 +619,20 @@ fmod META-MODULE-EXTRAS is
   op getPoly : AttrSet -> NatList .
   eq getPoly(poly(Nl) AS) = Nl .
   eq getPoly(AS) = nil [owise] .
-  
 
+
+  op getPolyConsts : Module ~> SortSet .
+  eq getPolyConsts(M) = getPolyConsts(getOps(M)) .
+
+  op getPolyConsts : OpDeclSet ~> SortSet .
+  eq getPolyConsts(Op OPDS) = getPolyConsts(Op, OPDS) .
+  eq getPolyConsts(none) = none .
+  
+  op getPolyConsts : OpDecl OpDeclSet ~> SortSet .
+  eq getPolyConsts(op Q : nil -> T [poly(0) AS] ., OPDS) 
+   = Q ; getPolyConsts(OPDS) .
+  eq getPolyConsts(Op, OPDS) = getPolyConsts(OPDS) [owise] .
+  
   op getTypes : Nat OpDecl ~> TypeList .
   eq getTypes(N, (op Q : Tl -> T [AS] .))
    = getTypes(N,Tl, arity(Tl), AS) .
@@ -634,6 +646,20 @@ fmod META-MODULE-EXTRAS is
   eq mergeTypes((T Tl), (T' Tl'), N, Nl)
    = if N in Nl then T else T' fi mergeTypes(Tl, Tl', s N, Nl) .
   eq mergeTypes(nil, nil, N, Nl) = nil .
+
+
+  op tupleType : TypeList ~> Type .
+  eq tupleType(Tl) = qid($tupleType(Tl)) .
+
+  op $tupleType : TypeList ~> String .
+  eq $tupleType(nil) = "" .
+  eq $tupleType(T NTl) = string(T) + "*" + $tupleType(NTl) .
+  eq $tupleType(T) = string(T) .
+
+
+  op disambiguate : OpDecl -> OpDecl .
+  eq disambiguate(op Q : Tl -> T [AS] .) 
+   = (op qid(string(Q) + ":" + string(tupleType(Tl)) + "->" + string(T)) : Tl -> T [AS] .) .
 endfm
 
 fmod METADATA-EXTRAS is
@@ -652,7 +678,8 @@ fmod META-LEVEL-EXTRAS is
   including NAT-LIST-EXTRAS .
 
   var M M' : Module . var T T' : Type . var K : Kind . var Tl Tl' : TypeList .
-  var OPDS : OpDeclSet . var AS : AttrSet . var Q : Qid .
+  var OPDS OPDS' : OpDeclSet .  var Op Op' : OpDecl .
+  var AS AS' : AttrSet . var Q Q' : Qid .
   var Trm Trm' : Term . var Trms : TermList .  var Nl : NatList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
   var N N' : Nat .  var IL : ImportList .  var MS : ModuleSet .
@@ -800,5 +827,53 @@ fmod META-LEVEL-EXTRAS is
   eq makeSubsort(M, S, S' ; SS) 
    = if sortLeq(M, S, S') then (subsort S < S' .) else makeSubsort(M,S, SS) fi
   [owise] .
+
+  op minimalOps : Module OpDeclSet ~> OpDeclSet .
+  eq minimalOps(M, none) = none .
+  eq minimalOps(M, Op) = Op .
+  eq minimalOps(M, Op OPDS) = $minimalOps(M, Op, OPDS, none) [owise] .
+
+  op $minimalOps : Module OpDecl OpDeclSet OpDeclSet ~> OpDeclSet .
+  eq $minimalOps(M, Op, Op' OPDS, OPDS') 
+   = $minimalOps(M, Op, Op', isGreater(M, Op, Op'), OPDS, OPDS') .
+  eq $minimalOps(M, Op, none, OPDS') = Op minimalOps(M, OPDS') .
+
+  op $minimalOps : Module OpDecl OpDecl Bool OpDeclSet OpDeclSet ~> OpDeclSet .
+  eq $minimalOps(M, Op, Op', true, OPDS, OPDS')
+   = $minimalOps(M, Op', OPDS, OPDS') .
+  eq $minimalOps(M, Op, Op', false, OPDS, OPDS')
+   = $minimalOps(M, Op, OPDS, OPDS') .
+  eq $minimalOps(M, Op, Op', B:[Bool], OPDS, OPDS')
+   = $minimalOps(M, Op, OPDS, Op' OPDS') [owise] .
+
+  op isGreater : Module OpDecl OpDecl ~> Bool .
+ ceq isGreater(M, op Q : Tl -> T [AS] ., op Q : Tl' -> T' [AS'] .)
+   = true
+  if sortsLeq(M, Tl' T', Tl T) .
+ ceq isGreater(M, op Q : Tl -> T [AS] ., op Q : Tl' -> T' [AS'] .)
+   = false
+  if sortsLeq(M, Tl T, Tl' T') .
+
+  op leastOp : Module OpDecl OpDeclSet ~> OpDecl .
+  eq leastOp(M, Op, none) = Op .
+  eq leastOp(M, Op, Op' OPDS) = leastOp(M, Op, Op', isGreater(M, Op, Op'), OPDS) .
+
+  op leastOp : Module OpDecl OpDecl Bool OpDeclSet ~> OpDecl .
+  eq leastOp(M, Op, Op', true, OPDS) = Op' .
+  eq leastOp(M, Op, Op', B:[Bool], OPDS) = leastOp(M, Op, OPDS) [owise] .
+
+  op relatedOps : Module OpDecl OpDeclSet ~> OpDeclSet .
+  eq relatedOps(M, Op, none) = none .
+  eq relatedOps(M, Op, Op' OPDS) = if isRelated(M, Op, Op') then Op' relatedOps(M, Op, OPDS) else relatedOps(M, Op, OPDS) fi .
+
+
+  op isRelated : Module OpDecl OpDecl -> Bool .
+  eq isRelated(M, op Q : Tl -> T [AS] ., op Q' : Tl' -> T' [AS'] .)
+   = Q == Q' and-then sameKinds(M, Tl T, Tl' T') .
+
+  op sameKinds : Module TypeList TypeList -> Bool .
+  eq sameKinds(M, nil, nil) = true .
+  eq sameKinds(M, T Tl, T' Tl') 
+   = sameKind(M, T, T') and-then sameKinds(M, Tl, Tl') .
 endfm
 

@@ -53,7 +53,7 @@ fmod META-K-MODULES is
   op kModules : ~> SortSet [memo] .
   eq kModules 
    = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
-     'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-ANONYMOUS-VARIABLES ; 
+     'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-POLYMORPHIC-VARIABLES ; 
      'K-OPEN-CELLS ; 'K-CONFIG ; 'K-DESTRUCTORS .
 endfm
 
@@ -362,10 +362,14 @@ endfm
 
 fmod K-STRICTNESS-OPS is including META-LEVEL .
   including K-META-OPS .
-  var S : String .
+  var S : String .  var T : Term . var Trl : TermList .
 
   op hole : -> Term .
-  eq hole = '`[`].K .
+  eq hole = '`[`]:K .
+
+  op removeHole : TermList ~> TermList .
+  eq removeHole((T, Trl)) = if T == hole then removeHole(Trl) else T,removeHole(Trl) fi .
+  eq removeHole(empty) = empty .
 
   op freezeLabel : String -> Term .
   eq freezeLabel(S) = 'freezer[upTerm(S)] .

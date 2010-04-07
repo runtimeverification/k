@@ -3,9 +3,16 @@ load strict-cxt2eqs
 mod STRICTCXT2EQS-META is
   including STRICTCXT2EQS .
   including META-LEVEL .
-  op strictCxt2eqs : String String String ~> Module .
-  var Syntax StrictCxt StrictEqs : String .  var M : Module .
-  eq strictCxt2eqs(Syntax, StrictCxt, StrictEqs) = strictCxt2eqs(qid(Syntax), qid(StrictEqs), upModule(qid(StrictCxt),false)) .
+  var StrictCxt StrictEqs : String .  var M : Module .
+  var QStrictCxt QStrictEqs : Qid .
+  op strictCxt2eqs : String String ~> Module .
+  eq strictCxt2eqs(StrictCxt, StrictEqs) 
+   = strictCxt2eqs(qid(StrictCxt), qid(StrictEqs)) .
+
+  op strictCxt2eqs : Qid Qid ~> Module .
+  eq strictCxt2eqs(QStrictCxt, QStrictEqs) 
+   = setName(addModule(setImports(strictCxt2eqs(QStrictCxt, QStrictCxt, upModule(QStrictCxt,false)), including 'K-STRICTNESS .),setMbs(removeImports(upModule(QStrictCxt, false), including 'K-CONTEXTS .),none)), QStrictEqs)
+ .
 
   op compile : Module ~> Module .
   eq compile(M) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
@@ -27,11 +34,11 @@ mod STRICTCXT2EQS-LOOP is
   op print : Module [Module] -> QidList .
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
   eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
-  crl ['strictCxt2eqs Syntax StrictCxt StrictEqs QIL, idle, QIL'] 
+  crl ['strictCxt2eqs StrictCxt StrictEqs QIL, idle, QIL'] 
    => [QIL, idle, print(upModule(StrictCxt,false), FM )] 
    if FM := downTerm(getTerm(
              metaReduce(wrapper('STRICTCXT2EQS-META),
-                        'strictCxt2eqs[upTerm(string(Syntax)),upTerm(string(StrictCxt)),upTerm(string(StrictEqs))])),error) .
+                        'strictCxt2eqs[upTerm(string(StrictCxt)),upTerm(string(StrictEqs))])),error) .
 endm
 
 ---(
