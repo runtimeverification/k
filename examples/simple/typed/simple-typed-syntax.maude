@@ -62,24 +62,20 @@ mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
 --- List{Id}
   sort List{Id} .  subsort Id < List{Id} .
   op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
-
-  op typeList : List{TypedId} -> List{BasicType} .
-  op idList : List{TypedId} -> List{Id} .
-
 --- List{BasicType}
   sort List{BasicType} .  subsort BasicType < List{BasicType} .
   op .List{BasicType} : -> List{BasicType} .
   op _,_ : List{BasicType} List{BasicType} -> List{BasicType} [prec 70 assoc id: .List{BasicType}] .
 
-  vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .  var Tp : Type .  var TpXl : List{TypedId} .
+  vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
   eq if E then S = if E then S else {} .
   eq for X = E1 to E2 do S = {int X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
   op lambda : BasicType List{BasicType} List{Id} Stmt -> Exp .
   eq Tp F() S = Tp F(.List{TypedId}) S .
----  eq Tp F(TpXl) S = (typeList(TpXl) -> Tp) F ; F = lambda(Tp,typeList(TpXl),idList(TpXl),S) ; .
+  eq Tp F(TpXl) S = (typeList(TpXl) -> Tp) F ; F = lambda(Tp,typeList(TpXl),idList(TpXl),S) ; .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-  eq E() = E(.List{Exp}) .
+  eq E() = E(.List{Id}) .
 endm
 
-
+q

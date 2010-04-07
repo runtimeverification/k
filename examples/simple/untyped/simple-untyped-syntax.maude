@@ -29,16 +29,17 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
   op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
+  op _() : Exp -> Exp .
+  op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
   op read() : -> Exp .
-  op _() : Id -> Exp .
-  op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict"] .
+  op write(_); : Exp -> Stmt [metadata "strict"] .
   op _[_] : Id Exp -> Var [prec 1 metadata "strict(2)"] .
   op _[_] : Exp Exp -> Exp [ditto metadata "strict"] .
+  op sizeOf : Exp -> Exp [metadata "strict"] .
   op var_; : Var -> Decl [prec 2] .
   op {} : -> Stmt .
-  op {_} : Stmts -> Stmt .
+  op {_} : Stmts -> Stmt [gather(&)] .
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
-  op write(_); : Exp -> Stmt [metadata "strict"] .
   op _=_; : Exp Exp -> Stmt [prec 2 metadata "strict(2)"] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op if_then_ : Exp Stmt -> Stmt .
@@ -59,6 +60,5 @@ mod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX .
   eq function F() S = function F(.List{Id}) S .
   eq function F(Xl) S = var F ; F = lambda(Xl,S) ; .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-  op _() : Exp -> Exp .
   eq E() = E(.List{Id}) .
 endm

@@ -1,9 +1,10 @@
 mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
 
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
-  ops main divide2 collatz dummy1 dummy2 init printAll bubbleSort siftDown heapSort : -> Id .
+  ops main divide2 collatz dummy1 dummy2 init reverse printAll writeArray insertionSort bubbleSort siftDown heapSort map : -> Id .
   ops done root bottom maxChild temp numbers size : -> Id .
-  ops pFactorial pCollatz pInsertionSort1 pInsertionSort2 pBubbleSort pHeapSort pTwoReturns1 pTwoReturns2 : -> Stmts .
+  ops pFactorial pCollatz pInsertionSort1 pInsertionSort2 pInsertionSort3 pInsertionSort4
+      pBubbleSort pHeapSort pSorting : -> Stmts .
 
   eq pFactorial =
        var x ;
@@ -125,7 +126,73 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
          printAll(n) ;
        } .
 
+  eq pInsertionSort3 =
+       function init(x,n) {
+         for i = 0 to n - 1 do
+           x[i] = (n - i) + 100 ;
+       }
 
+       function printAll(x,n) {
+         for i = 0 to n - 1 do
+           write(x[i]) ;
+       }
+
+       function main() {
+         var x[100] ;
+         var n ;
+         n = 30 ;
+         init(x,n) ;
+         printAll(x,n) ;
+         write(-1) ;
+         for i = 1 to n - 1 do {
+           var j ;
+           var v ;
+           v = x[i] ;
+           j = i - 1 ;
+           while (j >= 0) do {
+             if x[j] > v then
+               x[j + 1] = x[j] ;
+             j = j - 1 ;
+           }
+           x[j + 1] = v ;
+         }
+         printAll(x,n) ;
+       } .
+
+  eq pInsertionSort4 =
+       function init(n) {
+         var x[100] ;
+         for i = 0 to n - 1 do
+           x[i] = (n - i) + 100 ;
+         return x ;
+       }
+
+       function printAll(x,n) {
+         for i = 0 to n - 1 do
+           write(x[i]) ;
+       }
+
+       function main() {
+         var x ;
+         var n ;
+         n = 30 ;
+         x = init(n) ;
+         printAll(x,n) ;
+         write(-1) ;
+         for i = 1 to n - 1 do {
+           var j ;
+           var v ;
+           v = x[i] ;
+           j = i - 1 ;
+           while (j >= 0) do {
+             if x[j] > v then
+               x[j + 1] = x[j] ;
+             j = j - 1 ;
+           }
+           x[j + 1] = v ;
+         }
+         printAll(x,n) ;
+       } .
 
   eq pBubbleSort =
        var v[100] ;
@@ -139,7 +206,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
                v[y + 1] = v[y] ;
                v[y] = t ;
              }
-         return 0 ;
        }
 
        function main() {
@@ -214,23 +280,131 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
   .
 
 
---- following should run and type chek
-  eq pTwoReturns1 =
-       function main() {
-         write(0) ;
-         if true then return 1 ; else return 2 ;
-         write(1) ;
+  eq pSorting =
+       function init(n) {
+         var x[n] ;
+         for i = 0 to n - 1 do
+           x[i] = i ;
+         return x ;
        }
-     .
 
-
---- following should run, but should not type chek
-  eq pTwoReturns2 =
-       function main() {
-         write(0) ;
-         if true then return 1 ; else return false ;
-         write(1) ;
+       function writeArray(x) {
+         for i = 0 to sizeOf(x) - 1 do
+           write(x[i]) ;
        }
-     .
+
+       function reverse(x) {
+         var n ;
+         n = sizeOf(x) ;
+         for i = 0 to n / 2 - 1 do {
+           var t ;
+           t = x[i] ;
+           x[i] = x[n - i - 1] ;
+           x[n - i - 1] = t ;
+         }
+       }
+
+       function map(f,x) {
+         for i = 0 to sizeOf(f) - 1 do {
+           f[i](x) ;
+         }
+       }
+
+       function insertionSort(x) {
+         for i = 1 to sizeOf(x) - 1 do {
+           var v ;
+           v = x[i] ;
+           var j ;
+           j = i - 1 ;
+           while (j >= 0) do {
+             if x[j] > v then
+               x[j + 1] = x[j] ;
+             j = j - 1 ;
+           }
+           x[j + 1] = v ;
+         }
+       }
+
+       function bubbleSort(v) {
+         var n ;
+         n = sizeOf(v) ;
+         for i = 0 to n - 1 do
+           for j = 0 to n - 2 do
+             if v[j] > v[j + 1] then {
+               var t ;
+               t = v[j + 1] ;
+               v[j + 1] = v[j] ;
+               v[j] = t ;
+             }
+       }
+
+       function siftDown(x, root, bottom) {
+         var done ;
+         done = false ;
+         var maxChild ;
+         while (root * 2 <= bottom and not done) do {
+           if (root * 2 == bottom) then {
+             maxChild = root * 2 ;
+           }
+           else if (x[root * 2] > x[root * 2 + 1]) then {
+                  maxChild = root * 2 ;
+                }
+	        else {
+                  maxChild = root * 2 + 1 ;
+                }
+           if (x[root] < x[maxChild]) then {
+             var t ;
+             t = x[root] ;
+             x[root] = x[maxChild] ;
+             x[maxChild] = t ;
+             root = maxChild ;
+           }
+           else {
+             done = true ;
+           }
+         }
+       }
+
+       function heapSort(x){
+         var n ;
+         n = sizeOf(x) ;
+         var i ;
+         i = n / 2 - 1 ;
+         while (i >= 0) do {
+           siftDown(x, i, n - 1) ;
+           i = i - 1 ;
+         }
+         i = n - 1 ;
+         while (i >= 1 ) do {
+           var t ;
+           t = x[0] ;
+           x[0] = x[i] ;
+           x[i] = t ;
+           siftDown(x, 0, i - 1) ;
+           i = i - 1 ;
+         }
+       }
+
+       function main() {
+         var x ;
+         var n ;
+         n = 10 ;
+         x = init(n) ;
+         var f[11] ;
+         f[ 0] = writeArray ;
+         f[ 1] = reverse ;
+         f[ 2] = writeArray ;
+         f[ 3] = insertionSort ;
+         f[ 4] = writeArray ;
+         f[ 5] = reverse ;
+         f[ 6] = bubbleSort ;
+         f[ 7] = writeArray ;
+         f[ 8] = reverse ;
+         f[ 9] = heapSort ;
+         f[10] = writeArray ;
+         map(f,x) ;
+       }
+  .
 
 endm
+

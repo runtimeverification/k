@@ -40,7 +40,7 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K + 
   mb rule [T1 or T2 => T1 orBool T2] : KSentence .
   mb rule [not(T) => notBool(T)] : KSentence .
 
-  mb rule < k > [array(L)[N] => Sigma(L +Int N)] ...</ k > < store > Sigma </ store > : KSentence .
+  mb rule < k > [array(L,?)[N] => Sigma(L +Int N)] ...</ k > < store > Sigma </ store > : KSentence .
   mb rule < k > [read() => I] ...</ k > < in > [ListItem(I) => .List] ...</ in > : KSentence .
 
   op lambda : List{Id} Stmt -> Val .
@@ -52,12 +52,14 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K + 
 
   mb context var X[[]]; : KSentence .
 
+  mb rule [sizeOf(array(?,N)) => N] : KSentence .
+
   mb rule < k > [var X ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env > < store >... [.Map => L |-> 0] ...</ store >
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
 
-  op array : Nat -> Val .
-  mb rule < k > [var X[N] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >  < store >...[.Map => L |-> array(sNat L)]...</ store >
-          < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
+  op array : Nat Nat -> Val .
+  mb rule < k > [var X[N] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >
+          < store >...[.Map => L |-> array(sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
 
   mb rule [{} => .K] : KSentence .
   mb rule < k > [{Ss} => Ss ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
@@ -68,7 +70,7 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K + 
   mb context [][?] = ? ; : KSentence .
 
   mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => V] ...</ store > : KSentence .
-  mb rule < k > [array(L)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > : KSentence .
+  mb rule < k > [array(L,?)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > : KSentence .
 
   mb rule [if true then S else ? => S] : KSentence .
   mb rule [if false then ? else S => S] : KSentence .
@@ -96,6 +98,7 @@ mod SIMPLE-UNTYPED is
   including SIMPLE-UNTYPED-PROGRAMS .
   op run : KLabel -> Bag .
   var PgmName : KLabel .  var Input : List{K} .
+--- after loading simple-untyped-compiled into maude, type `rew run("pFactorial") .', etc.
   eq run(PgmName) = < T > 
              < k > PgmName(.List{K}) </ k >
              < fstack > .List </ fstack >

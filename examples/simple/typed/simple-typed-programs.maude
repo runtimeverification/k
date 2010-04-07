@@ -58,34 +58,29 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
 	 }
        } .
 
-endm
 
-eof
-
---- following does not run, because "and" is not shortcut in SILF, but it types!
+--- following does not run, because "and" is not shortcut in SIMPLE, but it types!
   eq pInsertionSort1 =
-       var x[10] ;
+       int x[10] ;
 
-       function init(n) {
+       void init(int n) {
          for i = 0 to n - 1 do
            x[i] = (n - i) + 100 ;
-         return 0 ;
        }
 
-       function printAll(n) {
+       void printAll(int n) {
          for i = 0 to n - 1 do
            write(x[i]) ;
-         return 0 ;
        }
 
-       function main() {
-         var n ;
+       void main() {
+         int n ;
          n = 2 ;
          init(n) ;
          printAll(n) ;
          for i = 1 to n - 1 do {
-           var j ;
-           var v ;
+           int j ;
+           int v ;
            v = x[i] ;
            j = i - 1 ;
            while (j >= 0 and ((x[j]) > v)) do {
@@ -95,37 +90,31 @@ eof
            x[j + 1] = v ;
          }
          printAll(n) ;
-         return 0 ;
        } .
 
-endm
-
-eof
 
   eq pInsertionSort2 =
-       var x[100] ;
+       int x[100] ;
 
-       function init(n) {
+       void init(int n) {
          for i = 0 to n - 1 do
            x[i] = (n - i) + 100 ;
-         return 0 ;
        }
 
-       function printAll(n) {
+       void printAll(int n) {
          for i = 0 to n - 1 do
            write(x[i]) ;
-         return 0 ;
        }
 
-       function main() {
-         var n ;
+       void main() {
+         int n ;
          n = 30 ;
          init(n) ;
          printAll(n) ;
          write(-1) ;
          for i = 1 to n - 1 do {
-           var j ;
-           var v ;
+           int j ;
+           int v ;
            v = x[i] ;
            j = i - 1 ;
            while (j >= 0) do {
@@ -140,12 +129,11 @@ eof
        } .
 
 
-
   eq pBubbleSort =
-       var v[100] ;
+       int v[100] ;
 
-       function bubbleSort(n) {
-         var t ;
+       void bubbleSort(int n) {
+         int t ;
          for x = 0 to n - 1 do
            for y = 0 to n - 2 do
              if v[y] > v[y + 1] then {
@@ -153,11 +141,10 @@ eof
                v[y + 1] = v[y] ;
                v[y] = t ;
              }
-         return 0 ;
        }
 
-       function main() {
-         var x ;
+       void main() {
+         int x ;
          x = read() ;
          for y = 0 to (x - 1) do {
 	   v[y] = read() ;
@@ -166,43 +153,39 @@ eof
          bubbleSort(x) ;
          for y = 0 to (x - 1) do
 	   write(v[y]) ;
-         return 0 ;
---- try replacing the above with the return below (should run but should not type-check)
----         return true ;
        } .
 
 
   eq pHeapSort =
-    var numbers[100] ;
+    int numbers[100] ;
 
-    function siftDown(root, bottom) {
-       var done ;
-       var maxChild ;
-       var temp ;
+    void siftDown(int root, int bottom) {
+       int done ;
+       int maxChild ;
+       int temp ;
        done = false ;
        
        while (root * 2 <= bottom and not done) do {
-          if (root * 2 == bottom) then {
-            maxChild = root * 2 ;
-          }
-	  else if (numbers[root * 2] > numbers[root * 2 + 1]) then {
-                   maxChild = root * 2 ;
-               }
-	       else { maxChild = root * 2 + 1 ; }
-          if (numbers[root] < numbers[maxChild]) then {
-            temp = numbers[root] ;
-            numbers[root] = numbers[maxChild] ;
-            numbers[maxChild] = temp ;
-            root = maxChild ;
-          }
-          else {done = true ;}
-       }
-       return 0 ;
+         if (root * 2 == bottom) then {
+           maxChild = root * 2 ;
+         }
+         else if (numbers[root * 2] > numbers[root * 2 + 1]) then {
+                  maxChild = root * 2 ;
+              }
+              else { maxChild = root * 2 + 1 ; }
+         if (numbers[root] < numbers[maxChild]) then {
+           temp = numbers[root] ;
+           numbers[root] = numbers[maxChild] ;
+           numbers[maxChild] = temp ;
+           root = maxChild ;
+         }
+         else {done = true ;}
+      }
     }
 
-    function heapSort(size){
-      var temp ;
-      var i ;
+    void heapSort(int size){
+      int temp ;
+      int i ;
       i = (size / 2) - 1 ;
       while (i >= 0) do {
          siftDown(i, size - 1) ;
@@ -216,27 +199,25 @@ eof
         siftDown(0, i - 1) ;
         i = i - 1 ;
       }
-      return 0 ;
     }
 
-    function main() {
-         var x ;
-         x = read() ;
-     for i = 0 to (x - 1) do {
-	   numbers[i] = read() ;
-	 }
-         heapSort(x) ;
-     for i = 0 to (x - 1) do {
-	      write(numbers[i]) ;
-	 }
-         return 0 ;
+    void main() {
+      int x ;
+      x = read() ;
+      for i = 0 to (x - 1) do {
+        numbers[i] = read() ;
+      }
+      heapSort(x) ;
+      for i = 0 to (x - 1) do {
+        write(numbers[i]) ;
+      }
     }
   .
 
 
 --- following should run and type chek
   eq pTwoReturns1 =
-       function main() {
+       void main() {
          write(0) ;
          if true then return 1 ; else return 2 ;
          write(1) ;
@@ -246,7 +227,7 @@ eof
 
 --- following should run, but should not type chek
   eq pTwoReturns2 =
-       function main() {
+       void main() {
          write(0) ;
          if true then return 1 ; else return false ;
          write(1) ;
