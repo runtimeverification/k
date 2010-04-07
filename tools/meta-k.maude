@@ -392,8 +392,8 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   op freezeLabel : String -> Term .
   eq freezeLabel(S) = 'freezer[upTerm(S)] .
 
-  op freezeVariable : String Variable -> Term .
-  eq freezeVariable(S, V:Variable) = kApply('freezeVar[upTerm(S)],V:Variable) .
+  op freezeVariable : String Term -> Term .
+  eq freezeVariable(S, V:Term) = kApply('freezeVar[upTerm(S)],V:Term) .
 endfm
 
 fmod LIST-ATTRS is

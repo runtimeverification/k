@@ -25,7 +25,7 @@ mod IMP++-SYNTAX is
 --- BExp
   sort BExp .
   subsort Bool < BExp .
-  op _<=_ : AExp AExp -> BExp  [prec 37 metadata "seqstrict" format (d b o d)] .
+  op _<=_ : AExp AExp -> BExp  [prec 37 format (d b o d)] .
   op not_ : BExp -> BExp [prec 53 metadata "strict" format (b o d)] .
   op _and_ : BExp BExp -> BExp [prec 55 metadata "strict(1)" format (d b o d)] .
 --- Stmt
@@ -103,6 +103,8 @@ mod IMP++ is
   var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List . 
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .
 
+  mb context [] <= ? : KSentence .
+  mb context I <= [] : KSentence .
   mb context * [] := ? : KSentence .
 
   mb configuration < T > < threads > < thread * > < k > .K </ k > < env > .Map </ env > </ thread * > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .List </ result > : KSentence .

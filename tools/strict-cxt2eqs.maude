@@ -7,7 +7,8 @@ mod STRICTCXT2EQS is
   including META-MODULE-EXTRAS .
   including META-K-MODULE .
   var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
-  var AS : AttrSet . var MAS : MembAxSet . var Eqs : EquationSet .
+  var AS : AttrSet . var MAS : MembAxSet . var Eqs : EquationSet . var Q : Qid .
+  vars Type Type' : Type .  var OPDS : OpDeclSet .
   sort MASEqsPair .
   op {_,_} : MembAxSet EquationSet -> MASEqsPair [ctor] .
 
@@ -29,15 +30,26 @@ mod STRICTCXT2EQS is
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(
    freezeLabel(untokenize(metaPrettyPrint(M,T, mixfix flat number rat))),
-   freezeVariables(removeHole(noDuplicates(getVars(T))))) .
+   freezeVariables(M, removeHole(noDuplicates(getVars(T))))) .
 
-  op freezeVariables : TermList -> TermList .
-  op freezeVariable : Variable -> Variable .
-  eq freezeVariables((V,Trl)) 
-   = (freezeVariable(V),freezeVariables(Trl)) .
-  eq freezeVariables(empty) = empty .
+  op freezeVariables : Module TermList ~> TermList .
+  op freezeVariable : Module Variable ~> Variable .
+  eq freezeVariables(M, (V,Trl)) 
+   = (freezeVariable(M, V),freezeVariables(M, Trl)) .
+  eq freezeVariables(M, empty) = empty .
 
-  eq freezeVariable(V) = freezeVariable(string(V),V) . 
+  eq freezeVariable(M, V) = freezeVariable(string(V),makeK(M,V, getType(V))) .
+
+  op makeK : Module Variable Type ~> Term . 
+  eq makeK(M, V, Type) = makeK(M, V, Type, sortLeq(M, Type, KList)) .
+
+  op makeK : Module Variable Type Bool ~> Term . 
+  eq makeK(M, V, Type, true) = V .
+  eq makeK(M, V, Type, B:[Bool]) 
+   = kApply(findWrapper(getOps(M), Type)[V],empty) .
+
+  op findWrapper : OpDeclSet Type ~> Qid .
+  eq findWrapper(OPDS op Q : Type -> Type' [AS metadata("builtin wrapper")] ., Type) = Q .
 
   op strictCxt2eqs : Qid Qid Module ~> Module .
   var Syntax StrictEqs : Qid . var M : Module .

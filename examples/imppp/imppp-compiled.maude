@@ -43,7 +43,7 @@ mod IMPPP is
   op "_;_" : -> KProperLabel
     [metadata "arity 2"] .
   op "_<=_" : -> KProperLabel
-    [metadata "arity 2 seqstrict"] .
+    [metadata "arity 2"] .
   op "_`,_" : -> KHybridLabel
     [metadata "list wrapper"] .
   op "_and_" : -> KProperLabel
@@ -142,10 +142,10 @@ mod IMPPP is
     = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(_`(_`)(("*_").KProperLabel,Kcxt:KProper),?3:K)),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel((\"*_\").KProperLabel(`[`]:K),,?3:K)"),_`(_`)(freezeVar("?3:K"),?3:K)),Rest:K)),k) [metadata "heating"] .
-  eq <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(K1:KResult,Kcxt:KProper)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(K1:KResult,,`[`]:K)"),_`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K)),k) [metadata "heating"] .
-  eq <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(Kcxt:KProper,?3:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(`[`]:K,,?3:K)"),_`(_`)(freezeVar("?3:K"),?3:K)),Rest:K)),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(_`(_`)("Int"_(I:Int),.List`{K`}),Kcxt:KProper)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(\"Int\"I:Int(.List{K}),,`[`]:K)"),_`(_`)(freezeVar("I:Int"),_`(_`)("Int"_(I:Int),.List`{K`}))),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_and_").KProperLabel,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)
     = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_and_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("head").KProperLabel,Kcxt:KProper),Rest:K),k)
@@ -176,10 +176,10 @@ mod IMPPP is
     = <_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(_`(_`)(("*_").KProperLabel,Kcxt:KResult),?3:K)),Rest:K),k) [metadata "cooling"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(K1:KResult,,`[`]:K)"),_`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K)),k)
-    = <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(K1:KResult,Kcxt:KResult)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
-    = <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k) [metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(\"Int\"I:Int(.List{K}),,`[`]:K)"),_`(_`)(freezeVar("I:Int"),_`(_`)("Int"_(I:Int),.List`{K`}))),Rest:K)),k)
+    = <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(_`(_`)("Int"_(I:Int),.List`{K`}),Kcxt:KResult)),Rest:K),k) [metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(`[`]:K,,?3:K)"),_`(_`)(freezeVar("?3:K"),?3:K)),Rest:K)),k)
+    = <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(Kcxt:KResult,?3:K)),Rest:K),k) [metadata "cooling"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_and_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_and_").KProperLabel,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k) [metadata "cooling"] .
   eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"head\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k)
