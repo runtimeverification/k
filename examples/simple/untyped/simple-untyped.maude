@@ -2,20 +2,25 @@ in ../../../k-prelude
 in simple-untyped-syntax
 in simple-untyped-programs
 
-mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
+mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K + K-CONTEXTS .
   sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
   subsort Val < List{Val} < List{Exp} KResult .
   op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
-
   subsorts Exp Decl Stmt Stmts List{Exp} < K .
 
   ops env genv store fstack in out nextLoc : -> CellLabel .
-  vars I I1 I2 : Int .  var N N1 N2 L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env GEnv Sigma : Map .  var B : Exp .
-  var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .  var Vl : List{Val} .  var V V1 V2 : Val .
 
-  mb configuration < T >  < k > K </ k > < fstack > .List </ fstack > < env > .Map </ env > < genv > .Map </ genv > < store > .Map </ store >
-                          < in > .List </ in > < out > .List </ out > < nextLoc > 0 </ nextLoc > </ T > : KSentence .
+  mb configuration < T > 
+                     < k > K </ k >
+                     < fstack > .List </ fstack >
+                     < env > .Map </ env >
+                     < genv > .Map </ genv >
+                     < store > .Map </ store >
+                     < in > .List </ in >
+                     < out > .List </ out >
+                     < nextLoc > 0 </ nextLoc >
+                   </ T > : KSentence .
 
   mb rule < k > [X => V] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> V ...</ store > : KSentence .
   mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .
@@ -34,26 +39,37 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
   mb rule [T1 and T2 => T1 andBool T2] : KSentence .
   mb rule [T1 or T2 => T1 orBool T2] : KSentence .
   mb rule [not(T) => notBool(T)] : KSentence .
-  mb rule < k > [X[N] => Sigma(L +Int N)] ...</ k > < env >... X |-> L ...</ env > < store > Sigma </ store > : KSentence .
+
+  mb rule < k > [array(L)[N] => Sigma(L +Int N)] ...</ k > < store > Sigma </ store > : KSentence .
   mb rule < k > [read() => I] ...</ k > < in > [ListItem(I) => .List] ...</ in > : KSentence .
 
   op lambda : List{Id} Stmt -> Val .
-  op (_,_) : Map K -> List .
+  op (_,_) : Map K -> ListItem .
   mb rule < k > [_`(_`)(lambda(Xl,S),Vl) ~> K => S ~> return(0);] </ k > < fstack > [.List => (Env,K)] ...</ fstack >
-          < env > [Env =>  GEnv[(N .. (N +Nat len(Xl))) / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
-          < store >... [.Map => (N .. N +Nat len(Xl)) |-> getList{K}(Vl)] ...</ store >
-          < nextLoc > [N => N +Nat len(Xl)] </ nextLoc > : KSentence .
+          < env > [Env =>  GEnv[| Xl | from N / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
+          < store >... [.Map => | Xl | from N |-> getList{K}(Vl)] ...</ store >
+          < nextLoc > [N => N +Nat | Xl |] </ nextLoc > : KSentence .
+
+  mb context var X[[]]; : KSentence .
 
   mb rule < k > [var X ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env > < store >... [.Map => L |-> 0] ...</ store >
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
-  mb rule < k > [var X[N] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >  < nextLoc > [L => L +Nat N] </ nextLoc > : KSentence .
+
+  op array : Nat -> Val .
+  mb rule < k > [var X[N] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >  < store >...[.Map => L |-> array(sNat L)]...</ store >
+          < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
 
   mb rule [{} => .K] : KSentence .
   mb rule < k > [{Ss} => Ss ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
   mb rule [S1 S2 => S1 ~> S2] : KSentence .
   mb rule < k > [write(I) ; => .K] ...</ k > < out >... [.List => ListItem(I)] </ out >  : KSentence .
+
+  mb context ?[[]] = ? ; : KSentence .
+  mb context [][?] = ? ; : KSentence .
+
   mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => V] ...</ store > : KSentence .
-  mb rule < k > [X[N] = V ; => .K] ...</ k > < env >... X |-> L ...</ env > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > : KSentence .
+  mb rule < k > [array(L)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > : KSentence .
+
   mb rule [if true then S else ? => S] : KSentence .
   mb rule [if false then ? else S => S] : KSentence .
   mb rule < k > [while B do S  => if B then {S while B do S} else {}] ...</ k > : KSentence .
@@ -61,9 +77,12 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
   mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > : KSentence .
   mb rule < k > [.K => main();] </ k > < env > Env </ env > < genv > [.Map => Env] </ genv > : KSentence .
 
---- auxilliary operations
-  op _.._ : Nat Nat -> List{K} .  eq N1 .. N2 = if N1 >=Nat N2 then .List{K} else (N1,, (sNat N1 .. N2)) fi .
-  op len : List{Id} -> Nat .  eq len(.List{Id}) = 0 .  eq len(X,Xl) = sNat(len(Xl)) .
+--- auxilliary declarations and operations
+  vars I I1 I2 : Int .  var N N1 N2 L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env GEnv Sigma : Map .  var B : Exp .
+  var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .  var Vl : List{Val} .  var V V1 V2 : Val .
+
+  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
+  op |_| : List{Id} -> Nat .  eq | .List{Id} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
 
   op env : Map -> K .
   mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .

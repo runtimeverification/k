@@ -1,6 +1,7 @@
 mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
-  sorts Exp Decl Stmt Stmts .
-  subsorts Id Int Bool < Exp .
+  sorts Var Exp Decl Stmt Stmts .
+  subsort Id < Var .
+  subsorts Var Int Bool < Exp .
   subsort Decl Stmt < Stmts .
 
 --- List{Id}
@@ -28,18 +29,17 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
   op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
-  op _[_] : Id Exp -> Exp [prec 1 metadata "strict(2)"] .
   op read() : -> Exp .
   op _() : Id -> Exp .
   op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict"] .
-  op var_; : Id -> Decl [prec 0 gather(E)] .
-  op var_[_]; : Id Nat -> Decl [prec 0] .
+  op _[_] : Id Exp -> Var [prec 1 metadata "strict(2)"] .
+  op _[_] : Exp Exp -> Exp [ditto metadata "strict"] .
+  op var_; : Var -> Decl [prec 2] .
   op {} : -> Stmt .
   op {_} : Stmts -> Stmt .
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
   op write(_); : Exp -> Stmt [metadata "strict"] .
-  op _=_; : Id Exp -> Stmt [prec 1 gather(e &) metadata "strict(2)"] .
-  op _[_]=_; : Id Exp Exp -> Stmt [prec 0 gather(e & &) metadata "strict(2 3)"] .
+  op _=_; : Exp Exp -> Stmt [prec 2 metadata "strict(2)"] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op if_then_ : Exp Stmt -> Stmt .
   op while_do_ : Exp Stmt -> Stmt .
@@ -58,8 +58,7 @@ mod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX .
   op lambda : List{Id} Stmt -> Exp .
   eq function F() S = function F(.List{Id}) S .
   eq function F(Xl) S = var F ; F = lambda(Xl,S) ; .
-  op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
+  op _() : Exp -> Exp .
   eq E() = E(.List{Id}) .
 endm
-

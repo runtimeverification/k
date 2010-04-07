@@ -19,7 +19,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
        function main() {
          x = 5 ;
 	 write(f(f(x))) ;
-	 return 0 ;
        } .
 
   eq pCollatz =
@@ -55,7 +54,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
 	   n = i ;
 	   write(collatz()) ;
 	 }
-         return 0 ;
        } .
 
 
@@ -66,13 +64,11 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
        function init(n) {
          for i = 0 to n - 1 do
            x[i] = (n - i) + 100 ;
-         return 0 ;
        }
 
        function printAll(n) {
          for i = 0 to n - 1 do
            write(x[i]) ;
-         return 0 ;
        }
 
        function main() {
@@ -92,7 +88,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
            x[j + 1] = v ;
          }
          printAll(n) ;
-         return 0 ;
        } .
 
 
@@ -102,13 +97,11 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
        function init(n) {
          for i = 0 to n - 1 do
            x[i] = (n - i) + 100 ;
-         return 0 ;
        }
 
        function printAll(n) {
          for i = 0 to n - 1 do
            write(x[i]) ;
-         return 0 ;
        }
 
        function main() {
@@ -130,7 +123,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
            x[j + 1] = v ;
          }
          printAll(n) ;
-         return 0 ;
        } .
 
 
@@ -160,9 +152,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
          bubbleSort(x) ;
          for y = 0 to (x - 1) do
 	   write(v[y]) ;
-         return 0 ;
---- try replacing the above with the return below (should run but should not type-check)
----         return true ;
        } .
 
 
@@ -191,7 +180,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
           }
           else {done = true ;}
        }
-       return 0 ;
     }
 
     function heapSort(size){
@@ -210,7 +198,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
         siftDown(0, i - 1) ;
         i = i - 1 ;
       }
-      return 0 ;
     }
 
     function main() {
@@ -223,7 +210,6 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
       for i = 0 to (x - 1) do {
         write(numbers[i]) ;
       }
-      return 0 ;
     }
   .
 
