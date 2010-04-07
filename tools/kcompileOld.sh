@@ -129,13 +129,13 @@ loop many-modules .
 "
 runMaude "$OUTPUT $MANY_MODULES" "Flattening entire definition in a single module"
 
-POLY_CONSTS="
+ANON_CONSTS="
 $DEFAULTH
-load \"$KBASE/tools/poly-consts-interface\"
-loop poly-consts .
-(resolvePolyConsts $LANG $LANG .)
+load \"$KBASE/tools/anon-consts-interface\"
+loop anon-consts .
+(resolveAnonConsts $LANG $LANG .)
 "
-runMaude "$OUTPUT $POLY_CONSTS" "Transforming Polymorphic constants into variables"
+runMaude "$OUTPUT $ANON_CONSTS" "Transforming Anonymous constants into variables"
 
 SANITY_CHECKS="
 $DEFAULTH

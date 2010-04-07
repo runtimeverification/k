@@ -305,18 +305,36 @@ fmod K-META-OPEN-CELLS is
 endfm
 
 fmod META-ANONYMOUS-VARIABLE is
-  including META-TERM .
+  including META-LEVEL .
   including CONVERSION .
   var T : Type . var N : Nat .
+  var M : Module .  var Op : OpDecl . var OPDS : OpDeclSet . 
+  var Q : Qid .   var AS : AttrSet .
 
   op anyVarS : -> Qid .
   eq anyVarS = '? .
+
+  op Anonymous : -> Sort .
+  eq Anonymous = 'Anonymous .
 
   op anyVar : Type -> Variable .
   eq anyVar(T) = qid(string(anyVarS) + ":" + string(T)) .
 
   op anyVar : Nat Type -> Variable .
   eq anyVar(N, T) = qid(string(anyVarS) + string(N,10) + ":" + string(T)) .
+
+
+  op getAnonConsts : Module ~> TypeSet .
+  eq getAnonConsts(M) = '`[`] ; '? . ---getAnonConsts(getOps(M)) .
+
+  op getAnonConsts : OpDeclSet ~> SortSet .
+  eq getAnonConsts(Op OPDS) = getAnonConsts(Op, OPDS) .
+  eq getAnonConsts(none) = none .
+  
+  op getAnonConsts : OpDecl OpDeclSet ~> SortSet .
+  eq getAnonConsts(op Q : nil -> T [poly(0) AS] ., OPDS) 
+   = if T == Anonymous then Q ; getAnonConsts(OPDS) else getAnonConsts(OPDS) fi  [print "Q: " Q ", T: " T] .
+  eq getAnonConsts(Op, OPDS) = getAnonConsts(OPDS) [owise] .
 endfm
 
 fmod META-K-WRAPPERS is

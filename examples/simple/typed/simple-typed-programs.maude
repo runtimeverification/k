@@ -100,7 +100,7 @@ eof
 
 endm
 
-q
+eof
 
   eq pInsertionSort2 =
        var x[100] ;

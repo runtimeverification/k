@@ -204,8 +204,8 @@ endm
 
 mod K-POLYMORPHIC-VARIABLES is
   including K-TECHNIQUE .
-  op ? : -> Variable [poly(0)] .
-  op [] : -> Variable [poly(0)] .
+  op ? : -> Anonymous [poly(0)] .
+  op [] : -> Anonymous [poly(0)] .
 endm
 
 --- ... level

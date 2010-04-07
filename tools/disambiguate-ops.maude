@@ -136,9 +136,6 @@ fmod DISAMBIGUATE-OPS is
  eq getKeys((Op |-> OPDS) OPDM) = Op getKeys(OPDM) .
  eq getKeys(empty) = none .
 
- op pseudoKOps : OpDeclSet -> OpDeclSet .
- eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
- 
  op processOps : Module OpDeclSet ~> OpDeclMap .
  eq processOps(M, Op OPDS) = processOps(M, OPDS, Op relatedOps(M, Op, OPDS)) .
  eq processOps(M, none) = empty .

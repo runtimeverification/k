@@ -9,7 +9,7 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
   subsort Val < KResult .
   op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
 
-  subsorts Exp Decl Stmt Stmts List{Exp} < K .
+  subsorts Exp Decl Stmt Stmts List{Exp} List{BasicType} List{TypedId} < K .
   op lambda : List{Id} Stmt -> Val .
   op (_,_) : Map K -> List .
 

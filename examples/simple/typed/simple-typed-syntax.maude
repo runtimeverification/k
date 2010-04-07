@@ -1,4 +1,3 @@
-load ../../../k-prelude
 mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   sorts Exp Decl Stmt Stmts .
   subsorts Id Int Bool < Exp .
@@ -57,12 +56,15 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op __()_ : Type Id Stmt -> Decl .
   op __(_)_ : Type Id List{TypedId} Stmt -> Decl .
 endm
-eof
+
 mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
 
 --- List{Id}
   sort List{Id} .  subsort Id < List{Id} .
   op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
+
+  op typeList : List{TypedId} -> List{BasicType} .
+  op idList : List{TypedId} -> List{Id} .
 
 --- List{BasicType}
   sort List{BasicType} .  subsort BasicType < List{BasicType} .
@@ -74,10 +76,10 @@ mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
   eq for X = E1 to E2 do S = {int X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
   op lambda : BasicType List{BasicType} List{Id} Stmt -> Exp .
   eq Tp F() S = Tp F(.List{TypedId}) S .
-  eq Tp F(TpXl) S = (typeList(TpXl) -> Tp) F ; F = lambda(Tp,typeList(TpXl),idList(TpXl),S) ; .
+---  eq Tp F(TpXl) S = (typeList(TpXl) -> Tp) F ; F = lambda(Tp,typeList(TpXl),idList(TpXl),S) ; .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
   eq E() = E(.List{Exp}) .
 endm
 
-q
+
