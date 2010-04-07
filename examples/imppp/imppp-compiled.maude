@@ -1,7 +1,7 @@
 
 load "../../tools/../k-prelude"
 
-mod IMPPP is
+mod IMPPP-SL-W-K-PROPER-L01-LABELS is
   including K-DESTRUCTORS .
   including K-TECHNIQUE .
   including PL-BOOL .
@@ -9,6 +9,7 @@ mod IMPPP is
   including PL-INT .
   including K-PROPER .
   including K-WRAPPERS-LABELS .
+  including K-CONTEXTS .
   including K-STRICTNESS .
   op $hasMapping : Map K -> Bool .
   op _.._ : Nat Nat -> List{K}.
@@ -22,6 +23,8 @@ mod IMPPP is
   op store : -> CellLabel .
   op thread : -> CellLabel .
   op threads : -> CellLabel .
+  op "*_" : -> KProperLabel
+    [metadata "arity 1 strict"] .
   op "++_" : -> KProperLabel
     [metadata "arity 1"] .
   op "Bool"_ : Bool -> KResultLabel
@@ -63,6 +66,8 @@ mod IMPPP is
   op "pSum" : -> KProperLabel
     [metadata "arity 0"] .
   op "print_" : -> KProperLabel
+    [metadata "arity 1 strict"] .
+  op "ref" : -> KProperLabel
     [metadata "arity 1 strict"] .
   op "skip" : -> KProperLabel
     [metadata "arity 0"] .
@@ -122,68 +127,80 @@ mod IMPPP is
     = false [owise] .
   eq <_>_</_>(T,__(?4:Bag,__(<_>_</_>(output,Output:List,output),<_>_</_>(threads,.Bag,threads))),T)
     = <_>_</_>(result,Output:List,result) [metadata "structural rule"] .
+  eq <_>_</_>(k,_~>_(_`(_`)(("*_").KProperLabel,Kcxt:KProper),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"*_\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_+_").KProperLabel,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel(K1:K,,[])"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_+_").KProperLabel,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_/_").KProperLabel,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel(K1:K,,[])"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_/_").KProperLabel,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel(K1:K,,[])"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(_`(_`)(("*_").KProperLabel,Kcxt:KProper),A:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel((\"*_\").KProperLabel(`[`]:K),,A:K)"),_`(_`)(freezeVar("A:K"),A:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(K1:KResult,Kcxt:KProper)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(K1:KResult,,[])"),_`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(K1:KResult,,`[`]:K)"),_`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("_and_").KProperLabel,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_and_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"_and_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("head").KProperLabel,Kcxt:KProper),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"head\").KProperLabel([])"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"head\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("if_then_else_").KProperLabel,_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"if_then_else_\").KProperLabel([],,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"if_then_else_\").KProperLabel(`[`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("list_").KHybridLabel,_`(_`)(("_`,_").KHybridLabel,_`,`,_(Kl1-1:List{K},_`,`,_(Kcxt:KProper,Kl1-2:List{K})))),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"list_\").KHybridLabel((\"_`,_\").KHybridLabel(Kl1-1:List{K},,[],,Kl1-2:List{K}))"),_`,`,_(_`(_`)(freezeVar("Kl1-1:List`{K`}"),Kl1-1:List{K}),_`(_`)(freezeVar("Kl1-2:List`{K`}"),Kl1-2:List{K}))),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"list_\").KHybridLabel((\"_`,_\").KHybridLabel(Kl1-1:List{K},,`[`]:K,,Kl1-2:List{K}))"),_`,`,_(_`(_`)(freezeVar("Kl1-1:List`{K`}"),Kl1-1:List{K}),_`(_`)(freezeVar("Kl1-2:List`{K`}"),Kl1-2:List{K}))),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("not_").KProperLabel,Kcxt:KProper),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"not_\").KProperLabel([])"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"not_\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("print_").KProperLabel,Kcxt:KProper),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"print_\").KProperLabel([])"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"print_\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)(("ref").KProperLabel,Kcxt:KProper),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"ref\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
   eq <_>_</_>(k,_~>_(_`(_`)(("tail").KProperLabel,Kcxt:KProper),Rest:K),k)
-    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"tail\").KProperLabel([])"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel(K1:K,,[])"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("(\"tail\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"*_\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k)
+    = <_>_</_>(k,_~>_(_`(_`)(("*_").KProperLabel,Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_+_").KProperLabel,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_+_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_+_").KProperLabel,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel(K1:K,,[])"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_/_").KProperLabel,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_/_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_/_").KProperLabel,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel(K1:K,,[])"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel((\"*_\").KProperLabel(`[`]:K),,A:K)"),_`(_`)(freezeVar("A:K"),A:K)),Rest:K)),k)
+    = <_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(_`(_`)(("*_").KProperLabel,Kcxt:KResult),A:K)),Rest:K),k) [metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_:=_\").KProperLabel(K1:K,,`[`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(K1:KResult,,[])"),_`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(K1:KResult,,`[`]:K)"),_`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(K1:KResult,Kcxt:KResult)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_<=_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_<=_").KProperLabel,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_and_\").KProperLabel([],,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"_and_\").KProperLabel(`[`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("_and_").KProperLabel,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"head\").KProperLabel([])"),.List`{K`}),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"head\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("head").KProperLabel,Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"if_then_else_\").KProperLabel([],,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"if_then_else_\").KProperLabel(`[`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("if_then_else_").KProperLabel,_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"list_\").KHybridLabel((\"_`,_\").KHybridLabel(Kl1-1:List{K},,[],,Kl1-2:List{K}))"),_`,`,_(_`(_`)(freezeVar("Kl1-1:List`{K`}"),Kl1-1:List{K}),_`(_`)(freezeVar("Kl1-2:List`{K`}"),Kl1-2:List{K}))),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"list_\").KHybridLabel((\"_`,_\").KHybridLabel(Kl1-1:List{K},,`[`]:K,,Kl1-2:List{K}))"),_`,`,_(_`(_`)(freezeVar("Kl1-1:List`{K`}"),Kl1-1:List{K}),_`(_`)(freezeVar("Kl1-2:List`{K`}"),Kl1-2:List{K}))),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("list_").KHybridLabel,_`(_`)(("_`,_").KHybridLabel,_`,`,_(Kl1-1:List{K},_`,`,_(Kcxt:KResult,Kl1-2:List{K})))),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"not_\").KProperLabel([])"),.List`{K`}),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"not_\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("not_").KProperLabel,Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"print_\").KProperLabel([])"),.List`{K`}),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"print_\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("print_").KProperLabel,Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
-  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"tail\").KProperLabel([])"),.List`{K`}),Rest:K)),k)
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"ref\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k)
+    = <_>_</_>(k,_~>_(_`(_`)(("ref").KProperLabel,Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("(\"tail\").KProperLabel(`[`]:K)"),.List`{K`}),Rest:K)),k)
     = <_>_</_>(k,_~>_(_`(_`)(("tail").KProperLabel,Kcxt:KResult),Rest:K),k) [metadata "cooling"] .
   eq <_>_</_>(thread,__(?2:Bag,<_>_</_>(k,.K,k)),thread)
     = .Bag [metadata "structural rule"] .
-  eq __(<_>_</_>(env,Env':Map,env),<_>_</_>(k,_~>_(_`(_`)(("env").KProperLabel,_`(_`)(wmap_(Env:Map),.List`{K`})),?5:K),k))
-    = __(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(.K,?5:K),k)) [metadata "structural rule"] .
-  eq __(<_>_</_>(nextLoc,_`(_`)("Int"_(N:Nat),.List`{K`}),nextLoc),__(<_>_</_>(store,__(?21:Map,.Map),store),<_>_</_>(threads,__(?22:Bag,<_>_</_>(thread,__(?23:Bag,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(_`(_`)(("vars_;_").KProperLabel,_`,`,_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}),S:K)),?24:K),k))),thread)),threads)))
-    = __(<_>_</_>(nextLoc,_`(_`)("Int"_(_+Nat_(N:Nat,length_(getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))))),.List`{K`}),nextLoc),__(<_>_</_>(store,__(?21:Map,_|->_(_.._(N:Nat,_+Nat_(N:Nat,length_(getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))))),_`(_`)("Int"_(0),.List`{K`}))),store),<_>_</_>(threads,__(?22:Bag,<_>_</_>(thread,__(?23:Bag,__(<_>_</_>(env,_`[_/_`](Env:Map,_.._(N:Nat,_+Nat_(N:Nat,length_(getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))))),getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))),env),<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)(("env").KProperLabel,_`(_`)(wmap_(Env:Map),.List`{K`}))),?24:K),k))),thread)),threads))) [metadata "structural rule"] .
+  eq __(<_>_</_>(k,_~>_(_`(_`)(("env").KProperLabel,_`(_`)(wmap_(Env:Map),.List`{K`})),?5:K),k),<_>_</_>(env,Env':Map,env))
+    = __(<_>_</_>(k,?5:K,k),<_>_</_>(env,Env:Map,env)) [metadata "structural rule"] .
+  eq __(<_>_</_>(nextLoc,_`(_`)("Int"_(N:Nat),.List`{K`}),nextLoc),__(<_>_</_>(threads,__(?21:Bag,<_>_</_>(thread,__(?22:Bag,__(<_>_</_>(k,_~>_(_`(_`)(("vars_;_").KProperLabel,_`,`,_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}),S:K)),?23:K),k),<_>_</_>(env,Env:Map,env))),thread)),threads),<_>_</_>(store,?24:Map,store)))
+    = __(__(<_>_</_>(threads,__(?21:Bag,<_>_</_>(thread,__(?22:Bag,__(<_>_</_>(k,_~>_(_~>_(S:K,_`(_`)(("env").KProperLabel,_`(_`)(wmap_(Env:Map),.List`{K`}))),?23:K),k),<_>_</_>(env,_`[_/_`](Env:Map,_.._(N:Nat,_+Nat_(N:Nat,length_(getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))))),getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))),env))),thread)),threads),<_>_</_>(store,__(?24:Map,_|->_(_.._(N:Nat,_+Nat_(N:Nat,length_(getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))))),_`(_`)("Int"_(0),.List`{K`}))),store)),<_>_</_>(nextLoc,_`(_`)("Int"_(_+Nat_(N:Nat,length_(getList`{K`}_(_`(_`)(("_`,_").KHybridLabel,Xl:List{K}))))),.List`{K`}),nextLoc)) [metadata "structural rule"] .
   eq _`(_`)(("_;_").KProperLabel,_`,`,_(S1:K,S2:K))
     = _~>_(S1:K,S2:K) [metadata "structural rule"] .
   eq _~>_(_`(_`)(("env").KProperLabel,_`(_`)(wmap_(Env:Map),.List`{K`})),_`(_`)(("env").KProperLabel,_`(_`)(wmap_(Env':Map),.List`{K`})))
@@ -192,16 +209,16 @@ mod IMPPP is
     => <_>_</_>(k,.K,k) [metadata "computational rule"] .
   rl <_>_</_>(k,_~>_(_`(_`)(("while_do_").KProperLabel,_`,`,_(B:K,S:K)),?8:K),k)
     => <_>_</_>(k,_~>_(_`(_`)(("if_then_else_").KProperLabel,_`,`,_(B:K,_`,`,_(_`(_`)(("_;_").KProperLabel,_`,`,_(S:K,_`(_`)(("while_do_").KProperLabel,_`,`,_(B:K,S:K)))),_`(_`)(("skip").KProperLabel,.List`{K`})))),?8:K),k) [metadata "computational rule"] .
-  rl __(<_>_</_>(output,__(?7:List,.List),output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,_~>_(_`(_`)(("print_").KProperLabel,_`(_`)("Int"_(I:Int),.List`{K`})),?10:K),k)),thread)),threads))
-    => __(<_>_</_>(output,__(?7:List,ListItem(_`(_`)("Int"_(I:Int),.List`{K`}))),output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,_~>_(.K,?10:K),k)),thread)),threads)) [metadata "computational rule"] .
-  rl __(<_>_</_>(store,__(?12:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("Id"_(X:Id),.List`{K`}),?16:K),k))),thread)),threads))
-    => __(<_>_</_>(store,__(?12:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("Int"_(I:Int),.List`{K`}),?16:K),k))),thread)),threads)) [metadata "computational rule"] .
-  rl __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),?14:K)),store),<_>_</_>(threads,__(?15:Bag,<_>_</_>(thread,__(?16:Bag,__(<_>_</_>(env,__(?17:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),?18:K),k))),thread)),threads))
-    => __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?15:Bag,<_>_</_>(thread,__(?16:Bag,__(<_>_</_>(env,__(?17:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(.K,?18:K),k))),thread)),threads)) [metadata "computational rule"] .
-  rl __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store),<_>_</_>(threads,__(?14:Bag,<_>_</_>(thread,__(?15:Bag,__(<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)(("++_").KProperLabel,_`(_`)("Id"_(X:Id),.List`{K`})),?17:K),k))),thread)),threads))
-    => __(<_>_</_>(store,__(?13:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}))),store),<_>_</_>(threads,__(?14:Bag,<_>_</_>(thread,__(?15:Bag,__(<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env),<_>_</_>(k,_~>_(_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}),?17:K),k))),thread)),threads)) [metadata "computational rule"] .
-  rl __(<_>_</_>(thread,__(?7:Bag,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(_`(_`)(("spawn_").KProperLabel,S:K),?8:K),k))),thread),.Bag)
-    => __(<_>_</_>(thread,__(?7:Bag,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,_~>_(.K,?8:K),k))),thread),<_>_</_>(thread,__(<_>_</_>(env,Env:Map,env),<_>_</_>(k,S:K,k)),thread)) [metadata "computational rule"] .
+  rl <_>_</_>(thread,__(?7:Bag,__(<_>_</_>(k,_~>_(_`(_`)(("spawn_").KProperLabel,S:K),?8:K),k),<_>_</_>(env,Env:Map,env))),thread)
+    => __(<_>_</_>(thread,__(?7:Bag,__(<_>_</_>(k,?8:K,k),<_>_</_>(env,Env:Map,env))),thread),<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,Env:Map,env)),thread)) [metadata "computational rule"] .
+  rl __(<_>_</_>(output,?7:List,output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,_~>_(_`(_`)(("print_").KProperLabel,_`(_`)("Int"_(I:Int),.List`{K`})),?10:K),k)),thread)),threads))
+    => __(<_>_</_>(output,__(?7:List,ListItem(_`(_`)("Int"_(I:Int),.List`{K`}))),output),<_>_</_>(threads,__(?8:Bag,<_>_</_>(thread,__(?9:Bag,<_>_</_>(k,?10:K,k)),thread)),threads)) [metadata "computational rule"] .
+  rl __(<_>_</_>(threads,__(?12:Bag,<_>_</_>(thread,__(?13:Bag,__(<_>_</_>(k,_~>_(_`(_`)("Id"_(X:Id),.List`{K`}),?14:K),k),<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env))),thread)),threads),<_>_</_>(store,__(?16:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store))
+    => __(<_>_</_>(threads,__(?12:Bag,<_>_</_>(thread,__(?13:Bag,__(<_>_</_>(k,_~>_(_`(_`)("Int"_(I:Int),.List`{K`}),?14:K),k),<_>_</_>(env,__(?15:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env))),thread)),threads),<_>_</_>(store,__(?16:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store)) [metadata "computational rule"] .
+  rl __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(k,_~>_(_`(_`)(("++_").KProperLabel,_`(_`)("Id"_(X:Id),.List`{K`})),?15:K),k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env))),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store))
+    => __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(k,_~>_(_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}),?15:K),k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env))),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(_+Int_(I:Int,1)),.List`{K`}))),store)) [metadata "computational rule"] .
+  rl __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(k,_~>_(_`(_`)(("_:=_").KProperLabel,_`,`,_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),?15:K),k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env))),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),?18:List{K})),store))
+    => __(<_>_</_>(threads,__(?13:Bag,<_>_</_>(thread,__(?14:Bag,__(<_>_</_>(k,?15:K,k),<_>_</_>(env,__(?16:Map,_|->_(_`(_`)("Id"_(X:Id),.List`{K`}),_`(_`)("Int"_(L:Int),.List`{K`}))),env))),thread)),threads),<_>_</_>(store,__(?17:Map,_|->_(_`(_`)("Int"_(L:Int),.List`{K`}),_`(_`)("Int"_(I:Int),.List`{K`}))),store)) [metadata "computational rule"] .
   rl _`(_`)(("_+_").KProperLabel,_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))
     => _`(_`)("Int"_(_+Int_(I1:Int,I2:Int)),.List`{K`}) [metadata "computational rule"] .
   rl _`(_`)(("_<=_").KProperLabel,_`,`,_(_`(_`)("Int"_(I1:Int),.List`{K`}),_`(_`)("Int"_(I2:Int),.List`{K`})))

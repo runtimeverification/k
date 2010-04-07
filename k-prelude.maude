@@ -143,7 +143,6 @@ mod K-CONTEXTS is
   including K-TECHNIQUE .
   including K-SENTENCE .
   ops context_ : K -> [KSentence] [prec 127] .
-  op [] : -> K .
 endm
 
 
@@ -203,12 +202,10 @@ endm
 
 --- Anonymous variables level
 
-mod K-ANONYMOUS-VARIABLES is
+mod K-POLYMORPHIC-VARIABLES is
   including K-TECHNIQUE .
-  op ? : -> K .
-  op ? : -> Map .
-  op ? : -> Bag .
-  op ? : -> List .
+  op ? : -> Variable [poly(0)] .
+  op [] : -> Variable [poly(0)] .
 endm
 
 --- ... level
@@ -275,7 +272,7 @@ mod K is
   including K-TECHNIQUE .
   including K-RULES .               --- to write k rules with in-place rewriting
   including K-CONFIG .              --- to specify the global configuration term
-  including K-ANONYMOUS-VARIABLES . --- defines the ? polmorfic constant
+  including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-MAP-EXTRAS .          --- operations on Maps with lists of keys

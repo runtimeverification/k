@@ -20,6 +20,8 @@ mod IMP++-SYNTAX is
   op list_ : List{AExp} -> AExp [metadata "strict(1) hybrid"] .
   op head : AExp -> AExp [metadata "strict"] .
   op tail : AExp -> AExp [metadata "strict"] .
+  op ref : AExp -> AExp [metadata "strict"] .
+  op *_ : AExp -> AExp [metadata "strict"] .
 --- BExp
   sort BExp .
   subsort Bool < BExp .
@@ -29,7 +31,7 @@ mod IMP++-SYNTAX is
 --- Stmt
   sort Stmt .
   op skip : -> Stmt [format (b o)] .
-  op _:=_ : Id AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
+  op _:=_ : AExp AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
   op _;_ : Stmt Stmt -> Stmt [prec 120 gather (e E) format (d b noi d)] .
   op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
   op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
@@ -89,6 +91,7 @@ endm
 mod IMP++ is
   including IMP++-PROGRAMS .
   including K .
+  including K-CONTEXTS .
 
   subsort AExp BExp Stmt List{AExp} < K .
   subsort Int < KResult .
@@ -97,8 +100,11 @@ mod IMP++ is
   ops output threads thread k env store nextLoc result : -> CellLabel .
   vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : Id .
   var N N1 N2 : Nat .  var Xl : List{Id} .  var El : List{AExp} .
-  var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List .
+  var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List . 
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .
+
+  mb context * `[`]:AExp := A:AExp : KSentence .
+
   mb configuration < T > < threads > < thread * > < k > .K </ k > < env > .Map </ env > </ thread * > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .List </ result > : KSentence .
   op startConfig : Stmt -> Bag .
 ---  eq startConfig(S) = < T >... < k > S </ k > ...</ T > .
