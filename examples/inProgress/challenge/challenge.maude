@@ -22,9 +22,8 @@ mod CHALLENGE is
   op .List{Exp} : -> List{Exp} .
 
   sort List{Id} .
-  subsort Id < List{Id} .
+  subsort Id < List{Id} < List{Exp} .
   op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
-  subsort List{Id} < List{Exp} .
 
   op _+_ : Exp Exp -> Exp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _*_ : Exp Exp -> Exp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
@@ -40,7 +39,7 @@ mod CHALLENGE is
   op if_then_else_ : Exp Stmt Stmt -> Stmt [prec 59 format (b o bni n++i bn--i n++i --) metadata "strict(1)"] .
   op _;_ : Stmt Stmt -> Stmt [prec 122 gather (e E) format (d b noi d)] .
   op while_do_ : Exp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
-  op output_ : Exp -> Exp [prec 59 format (b o d) metadata "strict"] .
+  op output_ : Exp -> Stmt [prec 59 format (b o d) metadata "strict"] .
 
   op ++_ : Id -> Exp [prec 30 format (b o d)] .
   op _:=_ : Exp Exp -> Stmt [prec 40 format (d b o d) metadata "strict(2)"] .
@@ -50,12 +49,12 @@ mod CHALLENGE is
   op malloc_ : Exp -> Exp [format (b o d) metadata "strict"] .
   op free_ : Exp -> Stmt [format (b o d) metadata "strict"] .
 
-  op aspect : Exp -> Stmt [format (b o)] .
+  op aspect : Stmt -> Stmt [format (b o)] .
   --- We'd like to use λ and μ here but Maude has some bugs
   --- in its unicode handling.
   op \_->_ : List{Id} Exp -> Exp [prec 123 format (b o b o d)] .
   op \Y_->_ : Id Exp -> Exp [prec 123 format (b o b o d)] .
-  op __ : Exp List{Exp} -> Exp [prec 0 metadata "strict(1 -2)"] .
+  op __ : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
 
   op {vars_;_} : List{Id} Stmt -> Stmt [prec 121 format (y b o b noi y o)] .
 
@@ -84,13 +83,13 @@ mod CHALLENGE is
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id [format (g o)] .
   ops fib even limit nr steps : -> Id [format (g o)] .
 
-  op pFib : -> Stmt .
+---( op pFib : -> Stmt .
   eq pFib = {
     vars x, fib ;
     (fib := (\Y f -> \ n -> if n == 0 then 0 else if n == 1 then 1 else f(n + (-1)) + f(n + (-2))) ;
     x := fib 15 ;
     output(x))
-  } .
+  } .)
 
   op pRandom : -> Stmt .
   eq pRandom = {
@@ -116,6 +115,7 @@ mod CHALLENGE is
     output(s))
   } .
 
+  --- http://www.research.att.com/~njas/sequences/A006577
   op pCollatz : -> Stmt .
   eq pCollatz = {
     vars even, limit, nr ;
@@ -180,11 +180,11 @@ mod CHALLENGE is
     </ T >
     : KSentence .
 
-  op initconfig : K -> Bag .
-  eq initconfig(K) = 
+  op initconfig : Stmt -> Bag .
+  eq initconfig(S) =
     < T >
         < agents >
-            mkAgent(mkThread(K, .Map), 0, 0)
+            mkAgent(mkThread(S, .Map), 0, 0)
         </ agents >
         < output > .List </ output >
         < messages > .Bag </ messages >
@@ -193,20 +193,28 @@ mod CHALLENGE is
     .
 
 --- Semantics
+  sort Val .
+  subsort Val < Exp .
+  subsort Int Bool < Val < KResult .
   subsort Exp Stmt List{Exp} < K .
-  subsort Int < KResult .
-  subsort Bool < KResult .
+
+  sort List{Val} .
+  subsort Val < List{Val} < List{Exp} .
+  op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
+
+  op closure : List{Id} K Map -> Val .
+  op restoreEnv : Map -> K .
 
   vars N N1 N2 L M : Nat .
   vars I I1 I2 : Int .
   vars S S1 S2 : Stmt .
-  vars B V E : Exp .
+  vars B E : Exp .
   vars Xl : List{Id} .
-  var Vl : List{Exp} .
+  var Vl : List{Val} .
   var T : Bool .
   var X : Id .
   var Env' : Map .
-  var Kr : KResult .
+  var V : Val .
 
   --- TODO: make numeric operators polymorphic over Int and Float
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
@@ -233,8 +241,8 @@ mod CHALLENGE is
 
   --- output
   mb rule
-     < k > [output(Kr) => .K] ...</ k >
-     < output > Output [.List => List(Kr)] </ output >
+     < k > [output(V) => .K] ...</ k >
+     < output > Output [.List => ListItem(V)] </ output >
      : KSentence .
 
   --- variable lookup
@@ -282,20 +290,17 @@ mod CHALLENGE is
 
   --- TODO: free
 
-  op closure : List{Id} K Map -> KResult .
-  op restoreEnv : Map -> K .
-
   --- aspect
   mb rule
-    < k > [aspect(E) => .K] ...</ k >
-    < aspect > [? => E] </ aspect >
+    < k > [aspect(S) => .K] ...</ k >
+    < aspect > [? => S] </ aspect >
     : KSentence .
 
   --- lambda
   mb rule
-    < k > [\ Xl -> E => closure(Xl, (K ~> E), Env)] ...</ k >
+    < k > [\ Xl -> E => closure(Xl, (S ~> E), Env)] ...</ k >
     < env > Env </ env >
-    < aspect > K </ aspect >
+    < aspect > S </ aspect >
     : KSentence [metadata "structural"] .
 
   --- fixed-point combinator
@@ -316,7 +321,7 @@ mod CHALLENGE is
 
   --- restore environment from function application
   mb rule
-    < k > Kr ~> [restoreEnv(Env) => .K] ...</ k >
+    < k > V ~> [restoreEnv(Env) => .K] ...</ k >
     < env > [? => Env] </ env >
     : KSentence [metadata "structural"] .
 
@@ -369,7 +374,7 @@ mod CHALLENGE is
     < k > [acquire V => .K] ...</ k >
     < holds >... [.Map => V |-> 0] ...</ holds >
     < busy > Busy [.Bag => Bag(V)] </ busy >
-    if notBool(Bag(V) inBag Busy)
+    if notBool(BagItem(V) inBag Busy)
     : KSentence .
 
   --- re-aquire a lock
@@ -574,6 +579,6 @@ mod CHALLENGE is
   var Map : Map . var K' : K .
   op domMap : Map -> Bag .
   eq domMap(.Map) = .Bag .
-  eq domMap((K |-> K' Map)) = Bag(K) domMap(Map) .
+  eq domMap((K |-> K' Map)) = BagItem(K) domMap(Map) .
 
 endm
