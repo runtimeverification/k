@@ -60,7 +60,7 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
 
 endm
 
-q
+eof
 
 --- following does not run, because "and" is not shortcut in SILF, but it types!
   eq pInsertionSort1 =

@@ -1,3 +1,4 @@
+load ../../../k-prelude
 mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   sorts Exp Decl Stmt Stmts .
   subsorts Id Int Bool < Exp .
@@ -49,30 +50,34 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op if_then_ : Exp Stmt -> Stmt .
   op while_do_ : Exp Stmt -> Stmt .
-  op for _=_to_do_ : Id Exp Exp Stmt -> Stmt .
+  op for_=_to_do_ : Id Exp Exp Stmt -> Stmt .
   op main : -> Id .
   op _; : Exp -> Stmt [prec 50 metadata "strict"] .
   op return_; : Exp -> Stmt [metadata "strict"] .
   op __()_ : Type Id Stmt -> Decl .
   op __(_)_ : Type Id List{TypedId} Stmt -> Decl .
 endm
-
 eof
-
 mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
 
 --- List{Id}
   sort List{Id} .  subsort Id < List{Id} .
-  op .List{Id} : -> List{Id} .
-  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] .
+  op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
 
-  vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
+--- List{BasicType}
+  sort List{BasicType} .  subsort BasicType < List{BasicType} .
+  op .List{BasicType} : -> List{BasicType} .
+  op _,_ : List{BasicType} List{BasicType} -> List{BasicType} [prec 70 assoc id: .List{BasicType}] .
+
+  vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .  var Tp : Type .  var TpXl : List{TypedId} .
   eq if E then S = if E then S else {} .
-  eq for X = E1 to E2 do S = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
-  op lambda : List{Id} Stmt -> Exp .
-  eq function F() S = function F(.List{Id}) S .
-  eq function F(Xl) S = var F ; F = lambda(Xl,S) ; .
+  eq for X = E1 to E2 do S = {int X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
+  op lambda : BasicType List{BasicType} List{Id} Stmt -> Exp .
+  eq Tp F() S = Tp F(.List{TypedId}) S .
+  eq Tp F(TpXl) S = (typeList(TpXl) -> Tp) F ; F = lambda(Tp,typeList(TpXl),idList(TpXl),S) ; .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-  eq E() = E(.List{Id}) .
+  eq E() = E(.List{Exp}) .
 endm
+
+q
