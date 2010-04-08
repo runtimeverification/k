@@ -137,15 +137,18 @@ fmod META-K-MODULE is
   eq syntaxOps(M) = getOps(getOps(M), syntaxSorts(M)) .
 
   op getList2KSubsorts : Module -> SubsortDeclSet .
-  eq getList2KSubsorts(M) = getList2KSubsorts(pseudoKSubsorts(getSubsorts(M))) .
+  eq getList2KSubsorts(M) = getList2KSubsorts(M, getSubsorts(M,K)) .
 
   op getListSorts : Module -> SortSet .
   eq getListSorts(M) = removeSorts(getListSorts(getSorts(M)), klistSorts) .
 
+  op isListSort : Type -> Bool .
+  eq isListSort(T) = find(string(T),"List`{",0) == 0 .
+
   op getListSorts : SortSet -> SortSet .
   eq getListSorts(none) = none .
   eq getListSorts( S ; SS) 
-   =  if find(string(S),"List`{",0) == 0 then S ; getListSorts(SS) else getListSorts(SS) fi .
+   =  if isListSort(S) then S ; getListSorts(SS) else getListSorts(SS) fi .
 
   op getListSubsorts : Module -> SubsortDeclSet .
   eq getListSubsorts(M) = makeSubsorts(M, getListSorts(M), getMaximalSorts(M, getListSorts(M))) .
@@ -158,13 +161,13 @@ fmod META-K-MODULE is
   eq getNoResultListSubsorts(M) = removeSubsorts(getListSubsorts(M), getResultLists(M)) .
 
   
-
-  op getList2KSubsorts : SubsortDeclSet -> SubsortDeclSet .
-  eq getList2KSubsorts(none) = none .
-  eq getList2KSubsorts((subsort T < T' .) SSDS) 
-   = if find(string(T),"List`{",0) == 0 
-     then (subsort T < T' .)  getList2KSubsorts(SSDS) 
-     else getList2KSubsorts(SSDS) fi .
+  op getList2KSubsorts : Module SortSet -> SubsortDeclSet .
+  eq getList2KSubsorts(M, none) = none .
+  eq getList2KSubsorts(M, T ; SS) 
+   = if isListSort(T)
+     then (subsort T < (if sortLeq(M,T,KResult) then KResult else K fi) .) 
+        getList2KSubsorts(M, SS) 
+     else getList2KSubsorts(M, SS) fi .
 
   op getK2ListSubsorts : SubsortDeclSet -> SubsortDeclSet .
   eq getK2ListSubsorts(none) = none .

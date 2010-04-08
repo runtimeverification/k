@@ -51,7 +51,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op makeLists2wrappers : Module Module SubsortDeclSet ~> Module .
  eq makeLists2wrappers(M, Flat, SSDS) 
-  = listsModule(M, Flat, coGetOps(removeOps(getOps(Flat), getOps(getOps(Flat),getSubsorts(getList2KSubsorts(getSubsorts(Flat))))),K ; getSubsorts(getList2KSubsorts(getSubsorts(Flat)))),  processSubsorts(getOps(Flat), SSDS)) .
+  = listsModule(M, Flat, coGetOps(removeOps(getOps(Flat), getOps(getOps(Flat),getSubsorts(getList2KSubsorts(Flat)))),K ; getSubsorts(getList2KSubsorts(Flat))),  processSubsorts(getOps(Flat), SSDS)) .
  
  op listsModule : Module  Module OpDeclSet CTORSMap ~> Module .
  eq listsModule(M, Flat, OPDS, CTORS)

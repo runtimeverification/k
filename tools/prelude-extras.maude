@@ -373,7 +373,7 @@ fmod META-MODULE-EXTRAS is
   eq $getSupersorts(SSDS (subsort S < S' .), SS, SSDS') 
    = if S in SS then $getSupersorts(SSDS, SS, SSDS' (subsort S < S' .))
      else $getSupersorts(SSDS, SS, SSDS') fi .
-  eq $getSupersorts(none, SS, SSDS) = SSDS [print "supersorts: " SSDS] .
+  eq $getSupersorts(none, SS, SSDS) = SSDS .
 
   op getSupersorts : SubsortDeclSet -> SortSet .
   eq getSupersorts(SSDS (subsort S < S' .)) 
@@ -749,14 +749,14 @@ fmod META-LEVEL-EXTRAS is
   eq greaterSorts(M, S, none) = none .
 
   op lubSorts : Module Type Type -> TypeSet .
-  eq lubSorts(M, S, S') = minimalSort(M, intersection(greaterSorts(M, S), greaterSorts(M, S'))) [print "lubSort " S " and " S'] .
-  eq lubSorts(M, S, T) = T [owise print "lubSort " S " and " T] .
-  eq lubSorts(M, T, S') = T [owise print "lubSort " T " and " S'] .
- ceq lubSorts(M, T, T') = completeName(M,T) if sameKind(M, T, T') [owise print "lubSort " T " and " T'] .
+  eq lubSorts(M, S, S') = minimalSort(M, intersection(greaterSorts(M, S), greaterSorts(M, S'))) .
+  eq lubSorts(M, S, T) = T [owise] .
+  eq lubSorts(M, T, S') = T [owise] .
+ ceq lubSorts(M, T, T') = completeName(M,T) if sameKind(M, T, T') [owise] .
 
   op minimalSort : Module SortSet ~> Sort .
   ceq minimalSort(M, S ; S' ; SS) = minimalSort(M, S' ; SS) if sortLeq(M, S',S) .
-  eq minimalSort(M, S) = S [print "minimal sort: " S] .
+  eq minimalSort(M, S) = S .
 
   op lubSort : Module Term Term ~> Sort .
   eq lubSort(M, Trm, Trm') = lubSorts(M, leastSort(M, Trm), leastSort(M, Trm')) .
@@ -781,13 +781,13 @@ fmod META-LEVEL-EXTRAS is
 
   op getAllImportsBut : Qid SortSet ~> ModuleSet .
   eq getAllImportsBut(Q, SS) 
-   = getAllImportsBut(Q, SS, empty) [print Q " : " SS] .
-  
+   = getAllImportsBut(Q, SS, empty) .
+
   op getAllImportsBut : SortSet SortSet ModuleSet ~> ModuleSet .
   eq getAllImportsBut(none, SS, MS) = MS .
   eq getAllImportsBut(Q ; SS, SS', MS)
    = if Q in SS' then getAllImportsBut(SS, SS', MS)
-     else getAllImportsBut(upModule(Q, false), SS, SS' ; Q, MS) fi [print "Q: " Q " SS: " SS " SS': " SS'] .
+     else getAllImportsBut(upModule(Q, false), SS, SS' ; Q, MS) fi .
 
   op getAllImportsBut : Module SortSet SortSet ModuleSet ~> ModuleSet .
   eq getAllImportsBut(M, SS, SS', MS) 
@@ -823,9 +823,9 @@ fmod META-LEVEL-EXTRAS is
 
   op makeSubsort : Module Sort SortSet ~> SubsortDeclSet .
   eq makeSubsort(M, S, none) = none .
-  eq makeSubsort(M, S, S ; SS) = none .
+  eq makeSubsort(M, S, S ; SS) = makeSubsort(M, S, SS) .
   eq makeSubsort(M, S, S' ; SS) 
-   = if sortLeq(M, S, S') then (subsort S < S' .) else makeSubsort(M,S, SS) fi
+   = if sortLeq(M, S, S') then (subsort S < S' .) makeSubsort(M, S, SS) else makeSubsort(M,S, SS) fi
   [owise] .
 
   op minimalOps : Module OpDeclSet ~> OpDeclSet .

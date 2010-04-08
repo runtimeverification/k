@@ -11,7 +11,8 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op _->_ : List{Type} Type -> Type .
 
 --- List{Bottom}
-  sort List{Bottom} .
+  sorts Bottom List{Bottom} .
+  subsort Bottom < List{Bottom} .
   op .List{Bottom} : -> List{Bottom} .
   op _,_ : List{Bottom} List{Bottom} -> List{Bottom} [prec 70 assoc id: .List{Bottom}] .
 --- List{Type}

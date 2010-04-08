@@ -3,12 +3,14 @@ load lists-to-wrappers
 mod LISTS-TO-WRAPPERS-META is
   including LISTS-TO-WRAPPERS .
   including META-LEVEL-EXTRAS .
+  including META-K-BUILTINS .
+  including META-K-MODULES .
   var NoLists2wrappers Lists2wrappers : String .  var M : Module .
   var Q QNoLists2wrappers QLists2wrappers : Qid .  var IL : ImportList .
   op makeLists2wrappers : String String ~> Module .
   eq makeLists2wrappers(NoLists2wrappers, Lists2wrappers) = makeLists2wrappers(qid(NoLists2wrappers), qid(Lists2wrappers)) .
   op makeLists2wrappers : Qid Qid ~> Module .
-  eq makeLists2wrappers(QNoLists2wrappers,QLists2wrappers) = makeLists2wrappers(QLists2wrappers, upModule(QNoLists2wrappers, false), upModule(QNoLists2wrappers, true), upImports(getImports(upModule(QNoLists2wrappers, false)))) .
+  eq makeLists2wrappers(QNoLists2wrappers,QLists2wrappers) = makeLists2wrappers(QLists2wrappers, upModule(QNoLists2wrappers, false), upModule(QNoLists2wrappers, true), empty) .
 
   op compile : Module ~> Module .
   eq compile(M) = setName(makeLists2wrappers(getName(M), M, flatten(M), empty), getName(M)) .

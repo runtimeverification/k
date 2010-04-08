@@ -60,7 +60,7 @@ ceq concretize((op Q : Tl -> T [AS] .) (op Q : Tl -> T' [AS] .) OPDS)
  op syntax2kSS : SubsortDecl SortSet SubsortDeclSet ~> SubsortDeclSet .
  eq syntax2kSS((subsort S < S' .), SS, SSDS')
   = if S in SS 
-    then if S' in SS or-else S' in ksorts then none else (subsort syntax2kType(S, SSDS') < S' .) fi
+    then if S' in SS or-else S' in ksorts then none else (subsort if isListSort(S') then K else syntax2kType(S, SSDS') fi < S' .) fi
     else if S' in SS then (subsort S < syntax2kType(S', SSDS') .) else (subsort S < S' .) fi 
     fi .  
 
