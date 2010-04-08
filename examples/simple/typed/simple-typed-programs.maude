@@ -1,34 +1,34 @@
 mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
 
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
-  ops main divide2 collatz dummy1 dummy2 init printAll bubbleSort siftDown heapSort : -> Id .
-  ops done root bottom maxChild temp numbers size : -> Id .
-  ops pFactorial pCollatz pInsertionSort1 pInsertionSort2 pBubbleSort pHeapSort pTwoReturns1 pTwoReturns2 : -> Stmts .
+  ops main divide2 collatz dummy1 dummy2 init reverse writeArray insertionSort bubbleSort siftDown heapSort map : -> Id .
+  ops done root bottom maxChild size : -> Id .
+  ops pFactorial pCollatz pSorting : -> Stmts .
 
 
   eq pFactorial =
-       int x ;
+       var x : int ;
 
-       int f(int y) {
-         int t ;
+       function f(y : int) : int {
+         var t : int ;
 	 t = 1 ;
          for i = 1 to y do
 	   t = t * i ;
 	 return t ;
        }
 
-       void main() {
+       function main() : void {
          x = 5 ;
 	 write(f(f(x))) ;
        } .
 
 
   eq pCollatz =
-       int n ;
-       int m ;
+       var n : int ;
+       var m : int ;
 
-       int divide2(int dummy1, int r, int dummy2) {
-         int q ;
+       function divide2(dummy1 : int, r : int, dummy2 : bool) : int {
+         var q : int ;
 	 q = 0 ;
 	 while not r <= 1 do {
 	   r = r - 2 ;
@@ -37,8 +37,8 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
 	 return q ;
        }
 
-       int collatz() {
-         int s ;
+       function collatz() : void {
+         var s : int ;
          s = 0 ;
 	 write(n) ;
          while n > 1 do {
@@ -50,7 +50,7 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
 	 return s ;
        }
 
-       void main() {
+       function main() : void {
          m = 10 ;
          for i = 1 to m do {
 	   n = i ;
@@ -59,63 +59,41 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
        } .
 
 
---- following does not run, because "and" is not shortcut in SIMPLE, but it types!
-  eq pInsertionSort1 =
-       int x[10] ;
-
-       void init(int n) {
+  eq pSorting =
+       function init(n : int) : int[] {
+         var x[n] : int[] ;
          for i = 0 to n - 1 do
-           x[i] = (n - i) + 100 ;
+           x[i] = i ;
+         return x ;
        }
 
-       void printAll(int n) {
-         for i = 0 to n - 1 do
+       function writeArray(x : int[]) : void {
+         for i = 0 to sizeOf(x) - 1 do
            write(x[i]) ;
        }
 
-       void main() {
-         int n ;
-         n = 2 ;
-         init(n) ;
-         printAll(n) ;
-         for i = 1 to n - 1 do {
-           int j ;
-           int v ;
-           v = x[i] ;
-           j = i - 1 ;
-           while (j >= 0 and ((x[j]) > v)) do {
-             x[j + 1] = x[j] ;
-             j = j - 1 ;
-           }
-           x[j + 1] = v ;
+       function reverse(x : int[]) : void {
+         var n : int ;
+         n = sizeOf(x) ;
+         for i = 0 to n / 2 - 1 do {
+           var t : int ;
+           t = x[i] ;
+           x[i] = x[n - i - 1] ;
+           x[n - i - 1] = t ;
          }
-         printAll(n) ;
-       } .
-
-
-  eq pInsertionSort2 =
-       int x[100] ;
-
-       void init(int n) {
-         for i = 0 to n - 1 do
-           x[i] = (n - i) + 100 ;
        }
 
-       void printAll(int n) {
-         for i = 0 to n - 1 do
-           write(x[i]) ;
+       function map(f : (int[] -> void)[], x : int[]) : void {
+         for i = 0 to sizeOf(f) - 1 do {
+           f[i](x) ;
+         }
        }
 
-       void main() {
-         int n ;
-         n = 30 ;
-         init(n) ;
-         printAll(n) ;
-         write(-1) ;
-         for i = 1 to n - 1 do {
-           int j ;
-           int v ;
+       function insertionSort(x : int[]) : void {
+         for i = 1 to sizeOf(x) - 1 do {
+           var v : int ;
            v = x[i] ;
+           var j : int ;
            j = i - 1 ;
            while (j >= 0) do {
              if x[j] > v then
@@ -124,114 +102,88 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
            }
            x[j + 1] = v ;
          }
-         printAll(n) ;
-         return 0 ;
-       } .
+       }
 
-
-  eq pBubbleSort =
-       int v[100] ;
-
-       void bubbleSort(int n) {
-         int t ;
-         for x = 0 to n - 1 do
-           for y = 0 to n - 2 do
-             if v[y] > v[y + 1] then {
-               t = v[y + 1] ;
-               v[y + 1] = v[y] ;
-               v[y] = t ;
+       function bubbleSort(v : int[]) : void {
+         var n : int ;
+         n = sizeOf(v) ;
+         for i = 0 to n - 1 do
+           for j = 0 to n - 2 do
+             if v[j] > v[j + 1] then {
+               var t : int ;
+               t = v[j + 1] ;
+               v[j + 1] = v[j] ;
+               v[j] = t ;
              }
        }
 
-       void main() {
-         int x ;
-         x = read() ;
-         for y = 0 to (x - 1) do {
-	   v[y] = read() ;
-	   write(v[y]) ;
-	 }
-         bubbleSort(x) ;
-         for y = 0 to (x - 1) do
-	   write(v[y]) ;
-       } .
-
-
-  eq pHeapSort =
-    int numbers[100] ;
-
-    void siftDown(int root, int bottom) {
-       int done ;
-       int maxChild ;
-       int temp ;
-       done = false ;
-       
-       while (root * 2 <= bottom and not done) do {
-         if (root * 2 == bottom) then {
-           maxChild = root * 2 ;
-         }
-         else if (numbers[root * 2] > numbers[root * 2 + 1]) then {
+       function siftDown(x : int[], root : int, bottom : int) : void {
+         var done : bool ;
+         done = false ;
+         var maxChild : int ;
+         while (root * 2 <= bottom and not done) do {
+           if (root * 2 == bottom) then {
+             maxChild = root * 2 ;
+           }
+           else if (x[root * 2] > x[root * 2 + 1]) then {
                   maxChild = root * 2 ;
-              }
-              else { maxChild = root * 2 + 1 ; }
-         if (numbers[root] < numbers[maxChild]) then {
-           temp = numbers[root] ;
-           numbers[root] = numbers[maxChild] ;
-           numbers[maxChild] = temp ;
-           root = maxChild ;
+                }
+	        else {
+                  maxChild = root * 2 + 1 ;
+                }
+           if (x[root] < x[maxChild]) then {
+             var t : int ;
+             t = x[root] ;
+             x[root] = x[maxChild] ;
+             x[maxChild] = t ;
+             root = maxChild ;
+           }
+           else {
+             done = true ;
+           }
          }
-         else {done = true ;}
-      }
-    }
+       }
 
-    void heapSort(int size){
-      int temp ;
-      int i ;
-      i = (size / 2) - 1 ;
-      while (i >= 0) do {
-         siftDown(i, size - 1) ;
-         i = i - 1 ;
-      }
-      i = size - 1 ;
-      while (i >= 1 ) do {
-        temp = numbers[0] ;
-        numbers[0] = numbers[i] ;
-        numbers[i] = temp ;
-        siftDown(0, i - 1) ;
-        i = i - 1 ;
-      }
-    }
+       function heapSort(x : int[]) : void {
+         var n : int ;
+         n = sizeOf(x) ;
+         var i : int ;
+         i = n / 2 - 1 ;
+         while (i >= 0) do {
+           siftDown(x, i, n - 1) ;
+           i = i - 1 ;
+         }
+         i = n - 1 ;
+         while (i >= 1 ) do {
+           var t : int ;
+           t = x[0] ;
+           x[0] = x[i] ;
+           x[i] = t ;
+           siftDown(x, 0, i - 1) ;
+           i = i - 1 ;
+         }
+       }
 
-    void main() {
-      int x ;
-      x = read() ;
-      for i = 0 to (x - 1) do {
-        numbers[i] = read() ;
-      }
-      heapSort(x) ;
-      for i = 0 to (x - 1) do {
-        write(numbers[i]) ;
-      }
-    }
+       function main() : void {
+         var x : int[] ;
+         var n : int ;
+         n = 10 ;
+         x = init(n) ;
+         var f[11] : (int[] -> void)[] ;
+         f[ 0] = writeArray ;
+         f[ 1] = reverse ;
+         f[ 2] = writeArray ;
+         f[ 3] = insertionSort ;
+         f[ 4] = writeArray ;
+         f[ 5] = reverse ;
+         f[ 6] = bubbleSort ;
+         f[ 7] = writeArray ;
+         f[ 8] = reverse ;
+         f[ 9] = heapSort ;
+         f[10] = writeArray ;
+         map(f,x) ;
+       }
   .
 
-
---- following should run and type chek
-  eq pTwoReturns1 =
-       void main() {
-         write(0) ;
-         if true then return 1 ; else return 2 ;
-         write(1) ;
-       }
-     .
-
-
---- following should run, but should not type chek
-  eq pTwoReturns2 =
-       void main() {
-         write(0) ;
-         if true then return 1 ; else return false ;
-         write(1) ;
-       }
-     .
-
 endm
+

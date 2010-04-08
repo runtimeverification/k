@@ -1,22 +1,34 @@
 mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
-  sorts Exp Decl Stmt Stmts .
-  subsorts Id Int Bool < Exp .
+  sorts Var Exp Decl Stmt Stmts .
+  subsort Id < Var .
+  subsorts Var Int Bool < Exp .
   subsort Decl Stmt < Stmts .
+
   sorts BasicType Type .
   subsort BasicType < Type .
   ops int bool void : -> BasicType .
-  op _[] : BasicType -> Type .
+  op _[] : Type -> Type [prec 0] .
+  op _->_ : List{Type} Type -> Type .
 
+--- List{Bottom}
+  sorts Bottom List{Bottom} .
+  subsort Bottom < List{Bottom} .
+  op .List{Bottom} : -> List{Bottom} .
+  op _,_ : List{Bottom} List{Bottom} -> List{Bottom} [prec 70 assoc id: .List{Bottom}] .
+--- List{Type}
+  sort List{Type} .
+  subsort Bottom < Type List{Bottom} < List{Type} .
+  op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
+--- List{Id:Type}
+  sorts Id:Type List{Id:Type} .
+  subsort Bottom < Id:Type List{Bottom} < List{Id:Type} .
+  op _:_ : Id Type -> Id:Type .
+  op _,_ : List{Id:Type} List{Id:Type} -> List{Id:Type} [ditto] .
 --- List{Exp}
-  sort List{Exp} .  subsort Exp < List{Exp} .
+  sort List{Exp} .
+  subsort Bottom < Exp List{Bottom} < List{Exp} .
   op .List{Exp} : -> List{Exp} .
-  op _,_ : List{Exp} List{Exp} -> List{Exp} [prec 70 assoc id: .List{Exp}] .
---- List{TypedId}
-  sorts TypedId List{TypedId} .
-  subsort TypedId < List{TypedId} .
-  op .List{TypedId} : -> List{TypedId} .
-  op __ : Type Id -> TypedId .
-  op _,_ : List{TypedId} List{TypedId} -> List{TypedId} [prec 70 assoc id: .List{TypedId}] .
+  op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
 
   op ++_ : Id -> Exp [prec 0] .
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
@@ -34,48 +46,50 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
   op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
-  op _[_] : Id Exp -> Exp [prec 1 metadata "strict(2)"] .
+  op _() : Exp -> Exp .
+  op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
   op read() : -> Exp .
-  op _() : Id -> Exp .
-  op _(_) : Id List{Exp} -> Exp [prec 0 metadata "strict"] .
-  op __; : BasicType Id -> Decl [prec 0 gather(E E)] .
-  op __[_]; : BasicType Id Nat -> Decl [prec 0] .
-  op {} : -> Stmt .
-  op {_} : Stmts -> Stmt .
-  op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
   op write(_); : Exp -> Stmt [metadata "strict"] .
-  op _=_; : Id Exp -> Stmt [prec 1 gather(e &) metadata "strict(2)"] .
-  op _[_]=_; : Id Exp Exp -> Stmt [prec 0 gather(e & &) metadata "strict(2 3)"] .
+  op _[_] : Id Exp -> Var [prec 1 metadata "strict(2)"] .
+  op _[_] : Exp Exp -> Exp [ditto metadata "strict"] .
+  op sizeOf : Exp -> Exp [metadata "strict"] .
+  op var_:_; : Var Type -> Decl [prec 2] .
+  op {} : -> Stmt .
+  op {_} : Stmts -> Stmt [gather(&)] .
+  op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
+  op _=_; : Exp Exp -> Stmt [prec 2 metadata "strict(2)"] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op if_then_ : Exp Stmt -> Stmt .
   op while_do_ : Exp Stmt -> Stmt .
-  op for_=_to_do_ : Id Exp Exp Stmt -> Stmt .
+  op for _=_to_do_ : Id Exp Exp Stmt -> Stmt .
   op main : -> Id .
   op _; : Exp -> Stmt [prec 50 metadata "strict"] .
   op return_; : Exp -> Stmt [metadata "strict"] .
-  op __()_ : Type Id Stmt -> Decl .
-  op __(_)_ : Type Id List{TypedId} Stmt -> Decl .
+  op function_():__ : Id Type Stmt -> Decl .
+  op function_(_):__ : Id List{Id:Type} Type Stmt -> Decl .
 endm
 
 mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
-
 --- List{Id}
-  sort List{Id} .  subsort Id < List{Id} .
+  sort List{Id} .
+  subsort Bottom < Id List{Bottom} < List{Id} < List{Exp} .
   op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
---- List{BasicType}
-  sort List{BasicType} .  subsort BasicType < List{BasicType} .
-  op .List{BasicType} : -> List{BasicType} .
-  op _,_ : List{BasicType} List{BasicType} -> List{BasicType} [prec 70 assoc id: .List{BasicType}] .
 
-  vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
+  vars F X : Id .  var Tp : Type .  vars XTl : List{Id:Type} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
+
   eq if E then S = if E then S else {} .
-  eq for X = E1 to E2 do S = {int X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
-  op lambda : BasicType List{BasicType} List{Id} Stmt -> Exp .
-  eq Tp F() S = Tp F(.List{TypedId}) S .
-  eq Tp F(TpXl) S = (typeList(TpXl) -> Tp) F ; F = lambda(Tp,typeList(TpXl),idList(TpXl),S) ; .
-  op _() : Exp -> Exp .
+  eq for X = E1 to E2 do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
+  op lambda : Type List{Type} List{Id} Stmt -> Exp .
+  eq function F() : Tp S = function F(.List{Bottom}) : Tp S .
+  eq function F(XTl) : Tp S = var F : typeList(XTl) -> Tp ; F = lambda(Tp,typeList(XTl),idList(XTl),S) ; .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-  eq E() = E(.List{Id}) .
-endm
+  eq E() = E(.List{Exp}) .
+--- auxilliary
+  op idList : List{Id:Type} -> List{Id} .
+  eq idList(.List{Bottom}) = .List{Bottom} .
+  eq idList(X : Tp,XTl) = X,idList(XTl) .
 
-q
+  op typeList : List{Id:Type} -> List{Type} .
+  eq typeList(.List{Bottom}) = .List{Bottom} .
+  eq typeList(X : Tp,XTl) = Tp,typeList(XTl) .
+endm

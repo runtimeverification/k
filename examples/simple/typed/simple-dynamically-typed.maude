@@ -1,15 +1,15 @@
 in ../../../k-prelude
-in simple-untyped-syntax
-in simple-untyped-programs
+in simple-typed-syntax
+in simple-typed-programs
 
-mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K .
+mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CONTEXTS .
   sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
-  subsort Val < List{Val} < List{Exp} KResult .
+  subsort Bottom < Val List{Bottom} < List{Val} < List{Exp} KResult .
   op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
-  subsorts Exp Decl Stmt Stmts List{Exp} List{BasicType} List{TypedId} < K .
+  subsorts Exp Decl Stmt Stmts List{Exp} List{Id:Type} Type < K .
 
-  ops env genv store fstack in out retType nextLoc : -> CellLabel .
+  ops env genv store fstack in out nextLoc return : -> CellLabel .
 
   mb configuration < T > 
                      < k > K </ k >
@@ -19,7 +19,7 @@ mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K .
                      < store > .Map </ store >
                      < in > .List </ in >
                      < out > .List </ out >
-                     < retType> .K </ retType >
+                     < return > .K </ return >
                      < nextLoc > 0 </ nextLoc >
                    </ T > : KSentence .
 
@@ -40,56 +40,67 @@ mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K .
   mb rule [T1 and T2 => T1 andBool T2] : KSentence .
   mb rule [T1 or T2 => T1 orBool T2] : KSentence .
   mb rule [not(T) => notBool(T)] : KSentence .
-  mb rule < k > [X[N] => Sigma(L +Int N)] ...</ k > < env >... X |-> L : Tp[N'] ...</ env > < store > Sigma </ store >
-       if N >=Nat 0 andBool N <=Nat N' : KSentence .
+
+  mb rule < k > [array(?,L,M)[N] => Sigma(L +Int N)] ...</ k > < store > Sigma </ store > if N >=Nat 0 andBool N <=Nat M : KSentence .
   mb rule < k > [read() => I] ...</ k > < in > [ListItem(I) => .List] ...</ in > : KSentence .
 
-  op lambda : List{Id} Stmt -> Val .
-  op (_,_) : Map K -> List .
+  op lambda : Type List{Type} List{Id} Stmt -> Val .
+  op (_,_) : Map K -> ListItem .
   mb rule < k > [_`(_`)(lambda(Tp,Tpl,Xl,S),Vl) ~> K => S ~> return(initVal(Tp));] </ k > < fstack > [.List => (Env,K)] ...</ fstack >
-          < env > [Env =>  GEnv[(N .. N +Nat len(Xl)) / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
-          < store >... [.Map => (N .. N +Nat len(Xl)) |-> getList{K}(Vl)] ...</ store > < retType > Tp </ retType >
-          < nextLoc > [N => N +Nat len(Xl)] </ nextLoc >
+          < env > [Env =>  GEnv[| Xl | from N / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
+          < store >... [.Map => | Xl | from N |-> getList{K}(Vl)] ...</ store > < return > Tp </ return >
+          < nextLoc > [N => N +Nat | Xl |] </ nextLoc > 
        if typeOf(Vl) ==Bool Tpl : KSentence .
 
-  mb rule < k > [Tp X ; => .K] ...</ k > < env > [Env => Env[L : Tp / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
+  mb context var X[[]] : Tp[] ; : KSentence .
+
+  mb rule [sizeOf(array(?,?,N)) => N] : KSentence .
+
+  mb rule < k > [var X : Tp ; => .K] ...</ k > < env > [Env => Env[L : Tp / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
-  mb rule < k > [Tp X[N] ; => .K] ...</ k > < env > [Env => Env[L : Tp[N] / X]] </ env >  < nextLoc > [L => L +Nat N] </ nextLoc > : KSentence .
+
+  op array : Type Nat Nat -> Val .
+  mb rule < k > [var X[N] : Tp[] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >
+          < store >...[.Map => L |-> array(Tp, sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
+
   mb rule [{} => .K] : KSentence .
   mb rule < k > [{Ss} => Ss ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
   mb rule [S1 S2 => S1 ~> S2] : KSentence .
   mb rule < k > [write(I) ; => .K] ...</ k > < out >... [.List => ListItem(I)] </ out >  : KSentence .
-  mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L : Tp ...</ env > < store >... L |-> [? => V] ...</ store >
-       if typeOf(V) ==Bool Tp : KSentence .
-  mb rule < k > [X[N] = V ; => .K] ...</ k > < env >... X |-> L : Tp[N'] ...</ env > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > 
-       if typeOf(V) ==Bool Tp andBool N >=Nat 0 andBool N <=Nat N' : KSentence .
+
+  mb context ?[[]] = ? ; : KSentence .
+  mb context [][?] = ? ; : KSentence .
+
+  mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => V] ...</ store > : KSentence .
+  mb rule < k > [array(L,?)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > : KSentence .
+
   mb rule [if true then S else ? => S] : KSentence .
   mb rule [if false then ? else S => S] : KSentence .
   mb rule < k > [while B do S  => if B then {S while B do S} else {}] ...</ k > : KSentence .
   mb rule [V ; => .K] : KSentence .
-  mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > < retType > Tp </ retType >
-       if typeOf(V) ==Bool Tp : KSentence .
+  mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > : KSentence .
   mb rule < k > [.K => main();] </ k > < env > Env </ env > < genv > [.Map => Env] </ genv > : KSentence .
 
 --- auxilliary declarations and operations
-  vars I I1 I2 : Int .  var N N1 N2 L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env GEnv Sigma : Map .  var B : Exp .
+  vars I I1 I2 : Int .  var N N1 N2 M L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env GEnv Sigma : Map .  var B : Exp .
   var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .  var Vl : List{Val} .  var V V1 V2 : Val .
+  var Tp : Type .  var Tpl : List{Type} .
 
-  op _.._ : Nat Nat -> List{K} .  eq N1 .. N2 = if N1 >=Nat N2 then .List{K} else (N1,, (sNat N1 .. N2)) fi .
-  op len : List{Id} -> Nat .  eq len(.List{Id}) = 0 .  eq len(X,Xl) = sNat(len(Xl)) .
+  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
+  op |_| : List{Id} -> Nat .  eq | .List{Id} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
 
   op env : Map -> K .
   mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .
   mb rule < k > [env(Env) => .K] ...</ k > < env > [? => Env] </ env > : KSentence [metadata "structural"] .
   mb rule < k > V ~> [env(Env) => .K] ...</ k > < env > [? => Env] </ env > : KSentence [metadata "structural"] .
 
-  op initVal : BasicType -> Val .
+  op initVal : Type -> Val .
   eq initVal(int) = 0 .
   eq initVal(bool) = false .
-  eq initVal(void) = .
+  eq initVal(void) = none .
   op none : -> Val .
 
-  op typeOf : List{Val} -> List{BasicType} .
+  op typeOf : List{Val} -> List{Type} .
   eq typeof(I) = int .
   eq typeOf(T) = bool .
   eq typeOf(none) = void .
@@ -102,6 +113,7 @@ mod SIMPLE-UNTYPED is
   including SIMPLE-UNTYPED-PROGRAMS .
   op run : KLabel -> Bag .
   var PgmName : KLabel .  var Input : List{K} .
+--- after loading simple-untyped-compiled into maude, type `rew run("pFactorial") .', etc.
   eq run(PgmName) = < T > 
              < k > PgmName(.List{K}) </ k >
              < fstack > .List </ fstack >
