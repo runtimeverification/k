@@ -2,7 +2,10 @@ in ../../../k-prelude
 in simple-typed-syntax
 in simple-typed-programs
 
-mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CONTEXTS .
+mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is
+  including SIMPLE-TYPED-DESUGARED-SYNTAX .
+  including K .
+  including K-CONTEXTS .
   sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
   subsort Bottom < Val List{Bottom} < List{Val} < List{Exp} KResult .
@@ -41,7 +44,8 @@ mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CO
   mb rule [T1 or T2 => T1 orBool T2] : KSentence .
   mb rule [not(T) => notBool(T)] : KSentence .
 
-  mb rule < k > [array(?,L,M)[N] => Sigma(L +Int N)] ...</ k > < store > Sigma </ store > if N >=Nat 0 andBool N <=Nat M : KSentence .
+  mb rule < k > [array(?,L,M)[N] => Sigma(L +Int N)] ...</ k > < store > Sigma </ store > 
+       if N >=Nat 0 andBool N <=Nat M : KSentence .
   mb rule < k > [read() => I] ...</ k > < in > [ListItem(I) => .List] ...</ in > : KSentence .
 
   op lambda : Type List{Type} List{Id} Stmt -> Val .
@@ -72,7 +76,8 @@ mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CO
   mb context [][?] = ? ; : KSentence .
 
   mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => V] ...</ store > : KSentence .
-  mb rule < k > [array(L,?)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > : KSentence .
+  mb rule < k > [array(Tp,L,M)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > 
+       if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp : KSentence .
 
   mb rule [if true then S else ? => S] : KSentence .
   mb rule [if false then ? else S => S] : KSentence .
@@ -87,7 +92,7 @@ mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CO
   var Tp : Type .  var Tpl : List{Type} .
 
   op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
-  op |_| : List{Id} -> Nat .  eq | .List{Id} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
+  op |_| : List{Bottom} -> Nat .  eq | .List{Bottom} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
 
   op env : Map -> K .
   mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .
@@ -101,16 +106,16 @@ mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CO
   op none : -> Val .
 
   op typeOf : List{Val} -> List{Type} .
-  eq typeof(I) = int .
+  eq typeOf(I) = int .
   eq typeOf(T) = bool .
   eq typeOf(none) = void .
   eq typeOf(V1,V2,Vl) = typeOf(V1),typeOf(V2,Vl) .
 endm
 
 
-mod SIMPLE-UNTYPED is 
-  including SIMPLE-UNTYPED-SEMANTICS .
-  including SIMPLE-UNTYPED-PROGRAMS .
+mod SIMPLE-DYNAMICALLY-TYPED is 
+  including SIMPLE-DYNAMICALLY-TYPED-SEMANTICS .
+  including SIMPLE-TYPED-PROGRAMS .
   op run : KLabel -> Bag .
   var PgmName : KLabel .  var Input : List{K} .
 --- after loading simple-untyped-compiled into maude, type `rew run("pFactorial") .', etc.
