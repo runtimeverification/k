@@ -19,11 +19,11 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   sort List{Type} .
   subsort Bottom < Type List{Bottom} < List{Type} .
   op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
---- List{Id:Type}
-  sorts Id:Type List{Id:Type} .
-  subsort Bottom < Id:Type List{Bottom} < List{Id:Type} .
-  op _:_ : Id Type -> Id:Type .
-  op _,_ : List{Id:Type} List{Id:Type} -> List{Id:Type} [ditto] .
+--- List{IdType}
+  sorts IdType List{IdType} .
+  subsort Bottom < IdType List{Bottom} < List{IdType} .
+  op _:_ : Id Type -> IdType .
+  op _,_ : List{IdType} List{IdType} -> List{IdType} [ditto] .
 --- List{Exp}
   sort List{Exp} .
   subsort Bottom < Exp List{Bottom} < List{Exp} .
@@ -66,7 +66,7 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op _; : Exp -> Stmt [prec 50 metadata "strict"] .
   op return_; : Exp -> Stmt [metadata "strict"] .
   op function_():__ : Id Type Stmt -> Decl .
-  op function_(_):__ : Id List{Id:Type} Type Stmt -> Decl .
+  op function_(_):__ : Id List{IdType} Type Stmt -> Decl .
 endm
 
 mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
@@ -75,7 +75,7 @@ mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
   subsort Bottom < Id List{Bottom} < List{Id} < List{Exp} .
   op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
 
-  vars F X : Id .  var Tp : Type .  vars XTl : List{Id:Type} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
+  vars F X : Id .  var Tp : Type .  vars XTl : List{IdType} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
 
   eq if E then S = if E then S else {} .
   eq for X = E1 to E2 do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
@@ -85,11 +85,11 @@ mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
   eq E() = E(.List{Exp}) .
 --- auxilliary
-  op idList : List{Id:Type} -> List{Id} .
+  op idList : List{IdType} -> List{Id} .
   eq idList(.List{Bottom}) = .List{Bottom} .
   eq idList(X : Tp,XTl) = X,idList(XTl) .
 
-  op typeList : List{Id:Type} -> List{Type} .
+  op typeList : List{IdType} -> List{Type} .
   eq typeList(.List{Bottom}) = .List{Bottom} .
   eq typeList(X : Tp,XTl) = Tp,typeList(XTl) .
 endm

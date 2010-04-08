@@ -2,15 +2,12 @@ in ../../../k-prelude
 in simple-typed-syntax
 in simple-typed-programs
 
-mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is
-  including SIMPLE-TYPED-DESUGARED-SYNTAX .
-  including K .
-  including K-CONTEXTS .
+mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CONTEXTS .
   sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
   subsort Bottom < Val List{Bottom} < List{Val} < List{Exp} KResult .
   op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
-  subsorts Exp Decl Stmt Stmts List{Exp} List{Id:Type} Type < K .
+  subsorts Exp Decl Stmt Stmts List{Exp} List{IdType} List{Type} < K .
 
   ops env genv store fstack in out nextLoc return : -> CellLabel .
 
