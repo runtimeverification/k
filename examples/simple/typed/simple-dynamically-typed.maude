@@ -5,7 +5,7 @@ in simple-typed-programs
 mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CONTEXTS .
   sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
-  subsort Bottom < Val List{Bottom} < List{Val} < List{Exp} KResult .
+  subsort Val List{Bottom} < List{Val} < List{Exp} KResult .
   op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
   subsorts Exp Decl Stmt Stmts List{Exp} List{IdType} List{Type} < K .
 
@@ -23,8 +23,10 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
                      < nextLoc > 0 </ nextLoc >
                    </ T > : KSentence .
 
-  mb rule < k > [X => V] ...</ k > < env >... X |-> L : ? ...</ env > < store >... L |-> V ...</ store > : KSentence .
-  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L : int ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .
+  op _of`type_ : Nat Type -> K .
+
+  mb rule < k > [X => V] ...</ k > < env >... X |-> L of type ? ...</ env > < store >... L |-> V ...</ store > : KSentence .
+  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L of type int ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [_-_(I1,I2) => _-Int_(I1,I2)] : KSentence .
   mb rule [I1 * I2 => I1 *Int I2] : KSentence .
@@ -57,7 +59,7 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
 
   mb rule [sizeOf(array(?,?,N)) => N] : KSentence .
 
-  mb rule < k > [var X : Tp ; => .K] ...</ k > < env > [Env => Env[L : Tp / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
+  mb rule < k > [var X : Tp ; => .K] ...</ k > < env > [Env => Env[L of type Tp / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
 
   op array : Type Nat Nat -> Val .
@@ -72,7 +74,8 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
   mb context ?[[]] = ? ; : KSentence .
   mb context [][?] = ? ; : KSentence .
 
-  mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => V] ...</ store > : KSentence .
+  mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L of type Tp ...</ env > < store >... L |-> [? => V] ...</ store >
+       if typeOf(V) ==Bool Tp : KSentence .
   mb rule < k > [array(Tp,L,M)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > 
        if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp : KSentence .
 
@@ -80,7 +83,8 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
   mb rule [if false then ? else S => S] : KSentence .
   mb rule < k > [while B do S  => if B then {S while B do S} else {}] ...</ k > : KSentence .
   mb rule [V ; => .K] : KSentence .
-  mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > : KSentence .
+  mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > < return > Tp </ return >
+       if typeOf(V) ==Bool Tp : KSentence .
   mb rule < k > [.K => main();] </ k > < env > Env </ env > < genv > [.Map => Env] </ genv > : KSentence .
 
 --- auxilliary declarations and operations
@@ -89,7 +93,7 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
   var Tp : Type .  var Tpl : List{Type} .
 
   op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
-  op |_| : List{Bottom} -> Nat .  eq | .List{Bottom} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
+  op |_| : List{Id} -> Nat .  eq | .List{Bottom} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
 
   op env : Map -> K .
   mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .

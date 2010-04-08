@@ -11,22 +11,21 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op _->_ : List{Type} Type -> Type .
 
 --- List{Bottom}
-  sorts Bottom List{Bottom} .
-  subsort Bottom < List{Bottom} .
+  sort List{Bottom} .
   op .List{Bottom} : -> List{Bottom} .
   op _,_ : List{Bottom} List{Bottom} -> List{Bottom} [prec 70 assoc id: .List{Bottom}] .
 --- List{Type}
   sort List{Type} .
-  subsort Bottom < Type List{Bottom} < List{Type} .
+  subsort Type List{Bottom} < List{Type} .
   op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
 --- List{IdType}
   sorts IdType List{IdType} .
-  subsort Bottom < IdType List{Bottom} < List{IdType} .
+  subsort IdType List{Bottom} < List{IdType} .
   op _:_ : Id Type -> IdType .
   op _,_ : List{IdType} List{IdType} -> List{IdType} [ditto] .
 --- List{Exp}
   sort List{Exp} .
-  subsort Bottom < Exp List{Bottom} < List{Exp} .
+  subsort Exp List{Bottom} < List{Exp} .
   op .List{Exp} : -> List{Exp} .
   op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
 
@@ -72,7 +71,7 @@ endm
 mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
 --- List{Id}
   sort List{Id} .
-  subsort Bottom < Id List{Bottom} < List{Id} < List{Exp} .
+  subsort Id List{Bottom} < List{Id} < List{Exp} .
   op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
 
   vars F X : Id .  var Tp : Type .  vars XTl : List{IdType} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
