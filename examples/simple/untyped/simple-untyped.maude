@@ -73,7 +73,7 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
   mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > : KSentence .
   mb rule < k > [read() => I] ...</ k > < in > [ListItem(I) => .List] ...</ in > : KSentence .
   mb rule < k > [write(I) ; => .K] ...</ k > < out >... [.List => ListItem(I)] </ out >  : KSentence .
---- when we are done witht the first pass (genv is empty), call main and initialize the global environment
+--- when we are done with the first pass (computation and genv are empty), call main and initialize the global environment
   mb rule < k > [.K => main();] </ k > < env > Env </ env > < genv > [.Map => Env] </ genv > : KSentence .
 
 ----------------------------------------------

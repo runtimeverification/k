@@ -1,4 +1,4 @@
-mod SIMPLE-TYPED-STATIC-SYNTAX is including PL-INT + PL-ID .
+mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   sorts Var Exp Decl Stmt Stmts .
   subsort Id < Var .
   subsorts Var Int Bool < Exp .
@@ -68,7 +68,7 @@ mod SIMPLE-TYPED-STATIC-SYNTAX is including PL-INT + PL-ID .
   op function_(_):__ : Id List{IdType} Type Stmt -> Decl .
 endm
 
-mod SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-STATIC-SYNTAX .
+mod SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
   vars F X : Id .  var Tp : Type .  vars XTl : List{IdType} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
   eq if E then S = if E then S else {} .
   eq for X = E1 to E2 do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .

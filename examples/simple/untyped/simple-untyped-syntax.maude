@@ -3,22 +3,6 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   subsort Id < Var .
   subsorts Var Int Bool < Exp .
   subsort Decl Stmt < Stmts .
-
------------------------------------------------------------------------------
---- Lists should be eventually builtin; for now, they need to be declared ---
------------------------------------------------------------------------------
---- List{Id}
-  sort List{Id} .  subsort Id < List{Id} .
-  op .List{Id} : -> List{Id} .
-  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] .
---- List{Exp}
-  sort List{Exp} .  subsort Exp List{Id} < List{Exp} .
-  op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
------------------------------------------------------------------------------
-
---------------------------------------------
---- The actual SIMPLE syntax starts here ---
---------------------------------------------
   op ++_ : Id -> Exp [prec 0] .
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _-_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
@@ -56,7 +40,19 @@ mod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID .
   op return_; : Exp -> Stmt [metadata "strict"] .
   op read() : -> Exp .
   op write(_); : Exp -> Stmt [metadata "strict"] .
+-----------------------------------------------------------------------------
+--- Lists should be eventually builtin; for now, they need to be declared ---
+-----------------------------------------------------------------------------
+--- List{Id}
+  sort List{Id} .  subsort Id < List{Id} .
+  op .List{Id} : -> List{Id} .
+  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] .
+--- List{Exp}
+  sort List{Exp} .  subsort Exp List{Id} < List{Exp} .
+  op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
+-----------------------------------------------------------------------------
 endm
+
 
 mod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX .
 ------------------------------------------------------------------------------------

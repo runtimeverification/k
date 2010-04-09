@@ -1,7 +1,5 @@
 in ../../../../k-prelude
 in simple-typed-static-syntax
-
-mod SIMPLE-TYPED-SYNTAX is including SIMPLE-TYPED-STATIC-SYNTAX . endm
 in ../simple-typed-programs
 
 mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX + K .
