@@ -3,16 +3,11 @@ in simple-typed-static-syntax
 in ../simple-typed-programs
 
 mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX + K .
-  var T T' : Type . var Tl : List{Type} . var TEnv TEnv' : Map .
-  var F X : Id . var Xl : List{Id} .  var S : Stmt .
-  var XTl : List{IdType} .
-
-  subsort List{Type} < KResult .
+  subsort List{Type} < List{Exp} KResult .
   subsort Type < Exp Stmt .
-  subsort List{Type} < List{Exp} .
   op stmt : -> Type .
 
-  subsorts Exp Decl Stmt Stmts List{Exp} List{IdType} < K .
+  subsorts Stmts List{Exp} List{IdType} < K .
 
   ops tenv gtenv return : -> CellLabel .
 
@@ -23,6 +18,19 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
                      < gtenv > .Map </ gtenv >
                    </ T > : KSentence .
 
+
+--- first pass: collect function prototypes in gtenv 
+  mb rule < T > < k > S ~> [.K => doneGlobals ~> S] </ k > 
+           [.Bag => < gtenv > .Map </ gtenv >] </ T > : KSentence .
+  op doneGlobals : -> K .  --- to mark when the collection of globals completed
+  mb rule < k > [var X : T ; => stmt]...</ k > < gtenv > [TEnv => TEnv[T / X]] </ gtenv > : KSentence .
+  mb rule < k > [function F(XTl) : T S => stmt] ...</ k > < gtenv > [TEnv => TEnv[typeList(XTl) -> T / F]] </ gtenv > : KSentence [metadata "structural"] .
+
+--- when we are done with the first pass (doneGlobals mark), replace gtenv by tenv and start typing the bodies of functions
+  mb rule < T > < k > [stmt ~> doneGlobals => .K] ...</ k > 
+            [ < gtenv > TEnv </ gtenv > 
+           => < tenv > TEnv </ tenv > < return > void </ return >] 
+          </ T > : KSentence .
 
   mb rule [I:Int => int] : KSentence .
   mb rule [B:Bool => bool] : KSentence .
@@ -43,10 +51,22 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
   mb rule [bool and bool => bool] : KSentence .
   mb rule [bool or bool => bool] : KSentence .
   mb rule [not(bool) => bool] : KSentence .
-
   mb rule [_`[`](T)[int] => T] : KSentence .
-  mb rule [read() => int] : KSentence .
-
+  mb rule [sizeOf(T []) => int] : KSentence .
+  mb rule < k > [var X : T ; => stmt] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > : KSentence .
+  mb context var X[[]] : T ; : KSentence .
+  mb rule < k > [var X[int] : _`[`](T) ; => stmt] ...</ k > < tenv > [TEnv => TEnv[_`[`](T) / X]] </ tenv > : KSentence .
+  mb rule [{} => stmt] : KSentence .
+  mb rule [{stmt} => stmt] : KSentence .
+  mb rule [stmt stmt => stmt] : KSentence .
+  mb rule < k > [X = T ; => stmt] ...</ k > < tenv >... X |-> T ...</ tenv >  : KSentence .
+  mb context ?[[]] = ? ; : KSentence .
+  mb context [][?] = ? ; : KSentence .
+  mb rule [_`[`](T)[int] = T ; => stmt] : KSentence .
+  mb rule [T ; => stmt] : KSentence .
+  mb rule [if bool then stmt else stmt => stmt] : KSentence .
+  mb rule [if bool then stmt else stmt => stmt] : KSentence .
+  mb rule [while bool do stmt  => stmt] : KSentence .
 
   mb rule < k > [function F(XTl) : T S => S ~> tenv(TEnv)]...</ k > 
           < tenv > [TEnv => TEnv[getList{K}(typeList(XTl)) / getList{K}(idList(XTl))]] </ tenv > 
@@ -54,49 +74,10 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
   op tenv : Map -> K .
   mb rule < k > stmt ~> [tenv(TEnv) => .K]...</ k > 
           < tenv > [? => TEnv] </ tenv > : KSentence . 
-
   mb rule [_`(_`)(Tl -> T,Tl) => T] : KSentence .
-
-
-  mb rule [sizeOf(T []) => int] : KSentence .
-
-  mb rule < k > [var X : T ; => stmt] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > : KSentence .
-  mb context var X[[]] : T ; : KSentence .
-  mb rule < k > [var X[int] : _`[`](T) ; => stmt] ...</ k > < tenv > [TEnv => TEnv[_`[`](T) / X]] </ tenv > : KSentence .
-
-  mb rule [{} => stmt] : KSentence .
-  mb rule [{stmt} => stmt] : KSentence .
-
-  mb rule [stmt stmt => stmt] : KSentence .
-  mb rule [write(int) ; => stmt]   : KSentence .
-
-  mb context ?[[]] = ? ; : KSentence .
-  mb context [][?] = ? ; : KSentence .
-
-  mb rule < k > [X = T ; => stmt] ...</ k > < tenv >... X |-> T ...</ tenv >  : KSentence .
-  mb rule [_`[`](T)[int] = T ; => stmt] : KSentence .
-
-  mb rule [if bool then stmt else stmt => stmt] : KSentence .
-  mb rule [if bool then stmt else stmt => stmt] : KSentence .
-
-  mb rule [while bool do stmt  => stmt] : KSentence .
-  mb rule [T ; => stmt] : KSentence .
   mb rule < k > [return(T); => stmt] ...</ k > < return > T </ return > : KSentence .
-
-  mb rule < T > < k > S ~> [.K => doneGlobals ~> S] </ k > 
-           [.Bag => < gtenv > .Map </ gtenv >] </ T > : KSentence .
-
-  mb rule < k > [var X : T ; => stmt]...</ k > < gtenv > [TEnv => TEnv[T / X]] </ gtenv >
-    : KSentence .
-  
-  mb rule < k > [function F(XTl) : T S => stmt] ...</ k > < gtenv > [TEnv => TEnv[typeList(XTl) -> T / F]] </ gtenv > : KSentence [metadata "structural"] .
- 
-  op doneGlobals : -> K .
-
-  mb rule < T > < k > [stmt ~> doneGlobals => .K] ...</ k > 
-            [ < gtenv > TEnv </ gtenv > 
-           => < tenv > TEnv </ tenv > < return > void </ return >] 
-          </ T > : KSentence .
+  mb rule [read() => int] : KSentence .
+  mb rule [write(int) ; => stmt]   : KSentence .
 
 --- auxilliary
 --- List{Id}
@@ -112,6 +93,9 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
   eq typeList(.List{Bottom}) = .List{Bottom} .
   eq typeList(X : T,XTl) = T,typeList(XTl) .
 
+  var T T' : Type . var Tl : List{Type} . var TEnv TEnv' : Map .
+  var F X : Id . var Xl : List{Id} .  var S : Stmt .
+  var XTl : List{IdType} .
 endm
 
 mod SIMPLE-TYPED-STATIC is including SIMPLE-TYPED-STATIC-SEMANTICS + SIMPLE-TYPED-PROGRAMS .
