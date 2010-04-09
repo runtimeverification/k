@@ -4,9 +4,8 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   subsorts Var Int Bool < Exp .
   subsort Decl Stmt < Stmts .
 
-  sorts BasicType Type .
-  subsort BasicType < Type .
-  ops int bool void : -> BasicType .
+  sort Type .
+  ops int bool void : -> Type .
   op _[] : Type -> Type [prec 0] .
   op _->_ : List{Type} Type -> Type .
 
@@ -71,11 +70,6 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
 endm
 
 mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
---- List{Id}
-  sort List{Id} .
-  subsort Id List{Bottom} < List{Id} < List{Exp} .
-  op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
-
   vars F X : Id .  var Tp : Type .  vars XTl : List{IdType} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
 
   eq if E then S = if E then S else {} .
@@ -83,12 +77,4 @@ mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
   eq function F() : Tp S = function F(.List{Bottom}) : Tp S .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
   eq E() = E(.List{Exp}) .
---- auxilliary
-  op idList : List{IdType} -> List{Id} .
-  eq idList(.List{Bottom}) = .List{Bottom} .
-  eq idList(X : Tp,XTl) = X,idList(XTl) .
-
-  op typeList : List{IdType} -> List{Type} .
-  eq typeList(.List{Bottom}) = .List{Bottom} .
-  eq typeList(X : Tp,XTl) = Tp,typeList(XTl) .
 endm

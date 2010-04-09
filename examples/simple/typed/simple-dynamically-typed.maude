@@ -3,10 +3,25 @@ in simple-typed-syntax
 in simple-typed-programs
 
 mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CONTEXTS .
+
+--- List{Id}
+  sort List{Id} .
+  subsort Id List{Bottom} < List{Id} < List{Exp} .
+  op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
+--- List{Val}
   sorts Val List{Val} .
   subsort Int Bool < Val < Exp .
   subsort Val List{Bottom} < List{Val} < List{Exp} KResult .
   op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
+--- auxilliary
+  op idList : List{IdType} -> List{Id} .
+  eq idList(.List{Bottom}) = .List{Bottom} .
+  eq idList(X : Tp,XTl) = X,idList(XTl) .
+
+  op typeList : List{IdType} -> List{Type} .
+  eq typeList(.List{Bottom}) = .List{Bottom} .
+  eq typeList(X : Tp,XTl) = Tp,typeList(XTl) .
+
   subsorts Exp Decl Stmt Stmts List{Exp} List{IdType} List{Type} < K .
 
   ops env genv store fstack in out nextLoc return : -> CellLabel .
