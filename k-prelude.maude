@@ -276,6 +276,7 @@ mod K is
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
+  including K-CONTEXTS .
 endm
 
 
