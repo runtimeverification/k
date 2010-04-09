@@ -407,4 +407,3 @@ mod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX .
   .
 
 endm
-

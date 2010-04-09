@@ -11,6 +11,7 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op _->_ : List{Type} Type -> Type .
 
 --- List{Bottom}
+--- do not add Bottom as subsort to anything else, like Id, Exp, etc.
   sorts Bottom List{Bottom} .
   subsort Bottom < List{Bottom} .
   op .List{Bottom} : -> List{Bottom} .
@@ -79,9 +80,7 @@ mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
 
   eq if E then S = if E then S else {} .
   eq for X = E1 to E2 do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
-  op lambda : Type List{Type} List{Id} Stmt -> Exp .
   eq function F() : Tp S = function F(.List{Bottom}) : Tp S .
-  eq function F(XTl) : Tp S = var F : typeList(XTl) -> Tp ; F = lambda(Tp,typeList(XTl),idList(XTl),S) ; .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
   eq E() = E(.List{Exp}) .
 --- auxilliary

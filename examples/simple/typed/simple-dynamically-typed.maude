@@ -63,7 +63,7 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
 
   op array : Type Nat Nat -> Val .
-  mb rule < k > [var X[N] : Tp[] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >
+  mb rule < k > [var X[N] : Tp[] ; => .K] ...</ k > < env > [Env => Env[L of type Tp[] / X]] </ env >
           < store >...[.Map => L |-> array(Tp, sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
 
   mb rule [{} => .K] : KSentence .

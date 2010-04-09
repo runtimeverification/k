@@ -45,9 +45,10 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K + 
 
   op lambda : List{Id} Stmt -> Val .
   op (_,_) : Map K -> ListItem .
-  mb rule < k > [_`(_`)(lambda(Xl,S),Vl) ~> K => S ~> return(0);] </ k > < fstack > [.List => (Env,K)] ...</ fstack >
+
+  mb rule < k > [_`(_`)(function(L),Vl)  ~> K => S ~> return(0);] </ k > < fstack > [.List => (Env,K)] ...</ fstack >
           < env > [Env =>  GEnv[| Xl | from N / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
-          < store >... [.Map => | Xl | from N |-> getList{K}(Vl)] ...</ store >
+          < store >... L |-> lambda(Xl,S) [.Map => | Xl | from N |-> getList{K}(Vl)] ...</ store >
           < nextLoc > [N => N +Nat | Xl |] </ nextLoc > : KSentence .
 
   mb context var X[[]]; : KSentence .
@@ -60,6 +61,11 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K + 
   op array : Nat Nat -> Val .
   mb rule < k > [var X[N] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >
           < store >...[.Map => L |-> array(sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
+
+  op function : Nat -> Val .
+  mb rule < k > [function F(Xl) S => .K] ...</ k > < env > [Env => Env[L / F]] </ env >
+          < store >...[.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S)]...</ store >
+          < nextLoc > [L => sNat sNat L] </ nextLoc > : KSentence .
 
   mb rule [{} => .K] : KSentence .
   mb rule < k > [{Ss} => Ss ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
@@ -110,4 +116,3 @@ mod SIMPLE-UNTYPED is
              < nextLoc > 0 </ nextLoc >
            </ T > .
 endm
-

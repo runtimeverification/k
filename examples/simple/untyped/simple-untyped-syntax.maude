@@ -56,9 +56,7 @@ mod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX .
   vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
   eq if E then S = if E then S else {} .
   eq for X = E1 to E2 do S = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
-  op lambda : List{Id} Stmt -> Exp .
   eq function F() S = function F(.List{Id}) S .
-  eq function F(Xl) S = var F ; F = lambda(Xl,S) ; .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
   eq E() = E(.List{Id}) .
 endm
