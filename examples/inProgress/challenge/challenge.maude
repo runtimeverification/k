@@ -153,30 +153,30 @@ mod CHALLENGE is
             < agent * >
                 < threads >
                     < thread * >
-                        < k > K </ k >
-                        < env > Env </ env >
-                        < holds > Holds </ holds >
+                        < k > .K </ k >
+                        < env > .Map </ env >
+                        < holds > .Map </ holds >
                     </ thread * >
                 </ threads >
-                < store > Store </ store >
-                < ptr > Ptr </ ptr >
+                < store > .Map </ store >
+                < ptr > .Map </ ptr >
                 < nextLoc > NextLoc </ nextLoc >
-                < aspect > K </ aspect >
-                < busy > Busy </ busy >
-                < me > Me </ me >
-                < parent > Parent </ parent >
+                < aspect > .K </ aspect >
+                < busy > .Bag </ busy >
+                < me > 0 </ me >
+                < parent > 0 </ parent >
             </ agent * >
         </ agents >
-        < output > Output </ output >
+        < output > .List </ output >
         < messages >
             < message * >
-                < sender > Sender </ sender >
-                < receiver > Receiver </ receiver >
-                < val > Val </ val >
+                < sender > 0 </ sender >
+                < receiver > 0 </ receiver >
+                < val > .K </ val >
             </ message * >
         </ messages >
-        < nextAgent > NextAgent </ nextAgent >
-        < result > Output </ result >
+        < nextAgent > 0 </ nextAgent >
+        < result > .List </ result >
     </ T >
     : KSentence .
 
