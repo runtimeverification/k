@@ -1,0 +1,135 @@
+in ../../../k-prelude
+in simple-typed-syntax
+in simple-typed-programs
+
+mod SIMPLE-TYPECHECKER-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K .
+  var T T' : Type . var Tl : List{Type} . var TEnv TEnv' : Map .
+  var F X : Id . var Xl : List{Id} .  var S : Stmt .
+  var XTl : List{IdType} .
+
+  subsort List{Type} < KResult .
+  subsort Type < Exp Stmt .
+  subsort List{Type} < List{Exp} .
+  op stmt : -> Type .
+
+  subsorts Exp Decl Stmt Stmts List{Exp} List{IdType} < K .
+
+  ops tenv gtenv return : -> CellLabel .
+
+  mb configuration < T > 
+                     < k > .K </ k >
+                     < tenv > .Map </ tenv >
+                     < return > stmt </ return >
+                     < gtenv > .Map </ gtenv >
+                   </ T > : KSentence .
+
+
+  mb rule [I:Int => int] : KSentence .
+  mb rule [B:Bool => bool] : KSentence .
+  mb rule < k > [X => T] ...</ k > < tenv >... X |-> T ...</ tenv > : KSentence .
+  mb rule < k > [++ X => int] ...</ k > < tenv >... X |-> int ...</ tenv > : KSentence .
+  mb rule [int + int => int] : KSentence .
+  mb rule [_-_(int,int) => int] : KSentence .
+  mb rule [int * int => int] : KSentence .
+  mb rule [int / int => int] : KSentence .
+  mb rule [int % int => int] : KSentence .
+  mb rule [- int => int] : KSentence .
+  mb rule [int < int => bool] : KSentence .
+  mb rule [int <= int => bool] : KSentence .
+  mb rule [int > int => bool] : KSentence .
+  mb rule [int >= int => bool] : KSentence .
+  mb rule [T == T => bool] : KSentence .
+  mb rule [T != T => bool] : KSentence .
+  mb rule [bool and bool => bool] : KSentence .
+  mb rule [bool or bool => bool] : KSentence .
+  mb rule [not(bool) => bool] : KSentence .
+
+  mb rule [_`[`](T)[int] => T] : KSentence .
+  mb rule [read() => int] : KSentence .
+
+
+  mb rule < k > [function F(XTl) : T S => S ~> tenv(TEnv)]...</ k > 
+          < tenv > [TEnv => TEnv[getList{K}(typeList(XTl)) / getList{K}(idList(XTl))]] </ tenv > 
+          < return > [? => T] </ return > : KSentence .
+  op tenv : Map -> K .
+  mb rule < k > stmt ~> [tenv(TEnv) => .K]...</ k > 
+          < tenv > [? => TEnv] </ tenv > : KSentence . 
+
+  mb rule [_`(_`)(Tl -> T,Tl) => T] : KSentence .
+
+
+  mb rule [sizeOf(T []) => int] : KSentence .
+  
+  mb rule < k > [var X : T ; => stmt] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > : KSentence .
+  mb context var X[[]] : T ; : KSentence .
+  mb rule < k > [var X[int] : _`[`](T) ; => stmt] ...</ k > < tenv > [TEnv => TEnv[_`[`](T) / X]] </ tenv > : KSentence .
+
+  mb rule [{} => stmt] : KSentence .
+  mb context {[]} : KSentence .
+  mb rule [{stmt} => stmt] : KSentence .
+
+  mb context __([],?) : KSentence .
+  mb context __(stmt,[]) : KSentence .
+  mb rule [stmt stmt => stmt] : KSentence .
+  mb rule [write(int) ; => stmt]   : KSentence .
+
+  mb context ?[[]] = ? ; : KSentence .
+  mb context [][?] = ? ; : KSentence .
+
+  mb rule < k > [X = T ; => stmt] ...</ k > < tenv >... X |-> T ...</ tenv >  : KSentence .
+  mb rule [_`[`](T)[int] = T ; => stmt] : KSentence .
+
+  mb context if ? then [] else ? : KSentence .
+  mb context if ? then ? else [] : KSentence .
+  mb rule [if bool then stmt else stmt => stmt] : KSentence .
+  mb rule [if bool then stmt else stmt => stmt] : KSentence .
+
+  mb context while [] do ? : KSentence .
+  mb context while ? do [] : KSentence .
+  mb rule [while bool do stmt  => stmt] : KSentence .
+  mb rule [T ; => stmt] : KSentence .
+  mb rule < k > [return(T); => stmt] ...</ k > < return > T </ return > : KSentence .
+
+  mb rule < T > < k > S ~> [.K => doneGlobals ~> S] </ k > 
+           [.Bag => < gtenv > .Map </ gtenv >] </ T > : KSentence .
+
+  mb rule < k > [var X : T ; => stmt]...</ k > < gtenv > [TEnv => TEnv[T / X]] </ gtenv >
+    : KSentence .
+  
+  mb rule < k > [function F(XTl) : T S => stmt] ...</ k > < gtenv > [TEnv => TEnv[typeList(XTl) -> T / F]] </ gtenv > : KSentence [metadata "structural"] .
+ 
+  op doneGlobals : -> K .
+
+  mb rule < T > < k > [stmt ~> doneGlobals => .K] ...</ k > 
+            [ < gtenv > TEnv </ gtenv > 
+           => < tenv > TEnv </ tenv > < return > void </ return >] 
+          </ T > : KSentence .
+
+--- auxilliary
+--- List{Id}
+  sort List{Id} .
+  subsort Id List{Bottom} < List{Id} < List{Exp} .
+  op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
+
+  op idList : List{IdType} -> List{Id} .
+  eq idList(.List{Bottom}) = .List{Bottom} .
+  eq idList(X : T,XTl) = X,idList(XTl) .
+
+  op typeList : List{IdType} -> List{Type} .
+  eq typeList(.List{Bottom}) = .List{Bottom} .
+  eq typeList(X : T,XTl) = T,typeList(XTl) .
+
+endm
+
+---eof
+mod SIMPLE-TYPECHECKER is 
+  including SIMPLE-TYPECHECKER-SEMANTICS .
+  including SIMPLE-TYPED-PROGRAMS .
+  op run : KLabel -> Bag .
+  var PgmName : KLabel .  var Input : List{K} .
+--- after loading simple-untyped-compiled into maude, type `rew run("pFactorial") .', etc.
+  eq run(PgmName) = < T > 
+             < k > PgmName(.List{K}) </ k >
+           </ T > .
+endm
+

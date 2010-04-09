@@ -1,0 +1,237 @@
+mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
+
+  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
+  ops main divide2 collatz dummy1 dummy2 init printAll bubbleSort siftDown heapSort : -> Id .
+  ops done root bottom maxChild temp numbers size : -> Id .
+  ops pFactorial pCollatz pInsertionSort1 pInsertionSort2 pBubbleSort pHeapSort pTwoReturns1 pTwoReturns2 : -> Stmts .
+
+
+  eq pFactorial =
+       int x ;
+
+       int f(int y) {
+         int t ;
+	 t = 1 ;
+         for i = 1 to y do
+	   t = t * i ;
+	 return t ;
+       }
+
+       void main() {
+         x = 5 ;
+	 write(f(f(x))) ;
+       } .
+
+
+  eq pCollatz =
+       int n ;
+       int m ;
+
+       int divide2(int dummy1, int r, int dummy2) {
+         int q ;
+	 q = 0 ;
+	 while not r <= 1 do {
+	   r = r - 2 ;
+	   q = q + 1 ;
+	 }
+	 return q ;
+       }
+
+       int collatz() {
+         int s ;
+         s = 0 ;
+	 write(n) ;
+         while n > 1 do {
+	   s = s + 1 ;
+           if n == (n / 2) * 2
+	   then n = divide2(3 + n, n, true or false) ;
+	   else n = 3 * n + 1 ;
+         }
+	 return s ;
+       }
+
+       void main() {
+         m = 10 ;
+         for i = 1 to m do {
+	   n = i ;
+	   write(collatz()) ;
+	 }
+       } .
+
+
+--- following does not run, because "and" is not shortcut in SIMPLE, but it types!
+  eq pInsertionSort1 =
+       int x[10] ;
+
+       void init(int n) {
+         for i = 0 to n - 1 do
+           x[i] = (n - i) + 100 ;
+       }
+
+       void printAll(int n) {
+         for i = 0 to n - 1 do
+           write(x[i]) ;
+       }
+
+       void main() {
+         int n ;
+         n = 2 ;
+         init(n) ;
+         printAll(n) ;
+         for i = 1 to n - 1 do {
+           int j ;
+           int v ;
+           v = x[i] ;
+           j = i - 1 ;
+           while (j >= 0 and ((x[j]) > v)) do {
+             x[j + 1] = x[j] ;
+             j = j - 1 ;
+           }
+           x[j + 1] = v ;
+         }
+         printAll(n) ;
+       } .
+
+
+  eq pInsertionSort2 =
+       int x[100] ;
+
+       void init(int n) {
+         for i = 0 to n - 1 do
+           x[i] = (n - i) + 100 ;
+       }
+
+       void printAll(int n) {
+         for i = 0 to n - 1 do
+           write(x[i]) ;
+       }
+
+       void main() {
+         int n ;
+         n = 30 ;
+         init(n) ;
+         printAll(n) ;
+         write(-1) ;
+         for i = 1 to n - 1 do {
+           int j ;
+           int v ;
+           v = x[i] ;
+           j = i - 1 ;
+           while (j >= 0) do {
+             if x[j] > v then
+               x[j + 1] = x[j] ;
+             j = j - 1 ;
+           }
+           x[j + 1] = v ;
+         }
+         printAll(n) ;
+         return 0 ;
+       } .
+
+
+  eq pBubbleSort =
+       int v[100] ;
+
+       void bubbleSort(int n) {
+         int t ;
+         for x = 0 to n - 1 do
+           for y = 0 to n - 2 do
+             if v[y] > v[y + 1] then {
+               t = v[y + 1] ;
+               v[y + 1] = v[y] ;
+               v[y] = t ;
+             }
+       }
+
+       void main() {
+         int x ;
+         x = read() ;
+         for y = 0 to (x - 1) do {
+	   v[y] = read() ;
+	   write(v[y]) ;
+	 }
+         bubbleSort(x) ;
+         for y = 0 to (x - 1) do
+	   write(v[y]) ;
+       } .
+
+
+  eq pHeapSort =
+    int numbers[100] ;
+
+    void siftDown(int root, int bottom) {
+       int done ;
+       int maxChild ;
+       int temp ;
+       done = false ;
+       
+       while (root * 2 <= bottom and not done) do {
+         if (root * 2 == bottom) then {
+           maxChild = root * 2 ;
+         }
+         else if (numbers[root * 2] > numbers[root * 2 + 1]) then {
+                  maxChild = root * 2 ;
+              }
+              else { maxChild = root * 2 + 1 ; }
+         if (numbers[root] < numbers[maxChild]) then {
+           temp = numbers[root] ;
+           numbers[root] = numbers[maxChild] ;
+           numbers[maxChild] = temp ;
+           root = maxChild ;
+         }
+         else {done = true ;}
+      }
+    }
+
+    void heapSort(int size){
+      int temp ;
+      int i ;
+      i = (size / 2) - 1 ;
+      while (i >= 0) do {
+         siftDown(i, size - 1) ;
+         i = i - 1 ;
+      }
+      i = size - 1 ;
+      while (i >= 1 ) do {
+        temp = numbers[0] ;
+        numbers[0] = numbers[i] ;
+        numbers[i] = temp ;
+        siftDown(0, i - 1) ;
+        i = i - 1 ;
+      }
+    }
+
+    void main() {
+      int x ;
+      x = read() ;
+      for i = 0 to (x - 1) do {
+        numbers[i] = read() ;
+      }
+      heapSort(x) ;
+      for i = 0 to (x - 1) do {
+        write(numbers[i]) ;
+      }
+    }
+  .
+
+
+--- following should run and type chek
+  eq pTwoReturns1 =
+       void main() {
+         write(0) ;
+         if true then return 1 ; else return 2 ;
+         write(1) ;
+       }
+     .
+
+
+--- following should run, but should not type chek
+  eq pTwoReturns2 =
+       void main() {
+         write(0) ;
+         if true then return 1 ; else return false ;
+         write(1) ;
+       }
+     .
+
+endm

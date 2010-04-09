@@ -1,0 +1,78 @@
+mod SIMPLE-TYPED-STATIC-SYNTAX is including PL-INT + PL-ID .
+  sorts Var Exp Decl Stmt Stmts .
+  subsort Id < Var .
+  subsorts Var Int Bool < Exp .
+  subsort Decl Stmt < Stmts .
+
+  sort Type .
+  ops int bool void : -> Type .
+  op _[] : Type -> Type [prec 0] .
+  op _->_ : List{Type} Type -> Type .
+
+--- List{Bottom}
+--- do not add Bottom as subsort to anything else, like Id, Exp, etc.
+  sorts Bottom List{Bottom} .
+  subsort Bottom < List{Bottom} .
+  op .List{Bottom} : -> List{Bottom} .
+  op _,_ : List{Bottom} List{Bottom} -> List{Bottom} [prec 70 assoc id: .List{Bottom}] .
+--- List{Type}
+  sort List{Type} .
+  subsort Type List{Bottom} < List{Type} .
+  op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
+--- List{IdType}
+  sorts IdType List{IdType} .
+  subsort IdType List{Bottom} < List{IdType} .
+  op _:_ : Id Type -> IdType .
+  op _,_ : List{IdType} List{IdType} -> List{IdType} [ditto] .
+--- List{Exp}
+  sort List{Exp} .
+  subsort Exp List{Bottom} < List{Exp} .
+  op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
+
+  op ++_ : Id -> Exp [prec 0] .
+  op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
+  op _-_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
+  op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op _/_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op _%_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op -_ : Exp -> Exp  [metadata "strict"] .
+  op _<_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _<=_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _>_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _>=_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _==_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _!=_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
+  op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
+  op not_ : Exp -> Exp [prec 53 metadata "strict"] .
+  op _() : Exp -> Exp .
+  op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
+  op read() : -> Exp .
+  op write(_); : Exp -> Stmt [metadata "strict"] .
+  op _[_] : Id Exp -> Var [prec 1 metadata "strict(2)"] .
+  op _[_] : Exp Exp -> Exp [ditto metadata "strict"] .
+  op sizeOf : Exp -> Exp [metadata "strict"] .
+  op var_:_; : Var Type -> Decl [prec 2] .
+  op {} : -> Stmt .
+  op {_} : Stmts -> Stmt [gather(&) metadata "strict"] .
+  op __ : Stmts Stmts -> Stmts [prec 100 gather(e E) metadata "seqstrict"] .
+  op _=_; : Exp Exp -> Stmt [prec 2 metadata "strict(2)"] .
+  op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict"] .
+  op if_then_ : Exp Stmt -> Stmt .
+  op while_do_ : Exp Stmt -> Stmt [metadata "strict"] .
+  op for _=_to_do_ : Id Exp Exp Stmt -> Stmt .
+  op main : -> Id .
+  op _; : Exp -> Stmt [prec 50 metadata "strict"] .
+  op return_; : Exp -> Stmt [metadata "strict"] .
+  op function_():__ : Id Type Stmt -> Decl .
+  op function_(_):__ : Id List{IdType} Type Stmt -> Decl .
+endm
+
+mod SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-STATIC-SYNTAX .
+  vars F X : Id .  var Tp : Type .  vars XTl : List{IdType} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
+  eq if E then S = if E then S else {} .
+  eq for X = E1 to E2 do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
+  eq function F() : Tp S = function F(.List{Bottom}) : Tp S .
+  op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
+  eq E() = E(.List{Bottom}) .
+endm

@@ -1,0 +1,116 @@
+in ../../../k-prelude
+in simple-untyped-syntax
+in simple-untyped-programs
+
+mod SIMPLE-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K .
+  sorts Val List{Val} .
+  subsort Int Bool < Val < Exp .
+  subsort Val < List{Val} < List{Exp} KResult .
+  op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
+  subsorts Exp Decl Stmt Stmts List{Exp} List{BasicType} List{TypedId} < K .
+
+  ops env genv store fstack in out retType nextLoc : -> CellLabel .
+
+  mb configuration < T > 
+                     < k > K </ k >
+                     < fstack > .List </ fstack >
+                     < env > .Map </ env >
+                     < genv > .Map </ genv >
+                     < store > .Map </ store >
+                     < in > .List </ in >
+                     < out > .List </ out >
+                     < retType> .K </ retType >
+                     < nextLoc > 0 </ nextLoc >
+                   </ T > : KSentence .
+
+  mb rule < k > [X => V] ...</ k > < env >... X |-> L : ? ...</ env > < store >... L |-> V ...</ store > : KSentence .
+  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L : int ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .
+  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
+  mb rule [_-_(I1,I2) => _-Int_(I1,I2)] : KSentence .
+  mb rule [I1 * I2 => I1 *Int I2] : KSentence .
+  mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
+  mb rule [I1 % I2 => I1 %Int I2] if I2 =/=Bool 0 : KSentence .
+  mb rule [- I => -Int I] : KSentence .
+  mb rule [I1 < I2 => I1 <Int I2] : KSentence .
+  mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
+  mb rule [I1 > I2 => I1 >Int I2] : KSentence .
+  mb rule [I1 >= I2 => I1 >=Int I2] : KSentence .
+  mb rule [V1 == V2 => V1 ==Bool V2] : KSentence .
+  mb rule [V1 != V2 => V1 =/=Bool V2] : KSentence .
+  mb rule [T1 and T2 => T1 andBool T2] : KSentence .
+  mb rule [T1 or T2 => T1 orBool T2] : KSentence .
+  mb rule [not(T) => notBool(T)] : KSentence .
+  mb rule < k > [X[N] => Sigma(L +Int N)] ...</ k > < env >... X |-> L : Tp[N'] ...</ env > < store > Sigma </ store >
+       if N >=Nat 0 andBool N <=Nat N' : KSentence .
+  mb rule < k > [read() => I] ...</ k > < in > [ListItem(I) => .List] ...</ in > : KSentence .
+
+  op lambda : List{Id} Stmt -> Val .
+  op (_,_) : Map K -> List .
+  mb rule < k > [_`(_`)(lambda(Tp,Tpl,Xl,S),Vl) ~> K => S ~> return(initVal(Tp));] </ k > < fstack > [.List => (Env,K)] ...</ fstack >
+          < env > [Env =>  GEnv[(N .. N +Nat len(Xl)) / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
+          < store >... [.Map => (N .. N +Nat len(Xl)) |-> getList{K}(Vl)] ...</ store > < retType > Tp </ retType >
+          < nextLoc > [N => N +Nat len(Xl)] </ nextLoc >
+       if typeOf(Vl) ==Bool Tpl : KSentence .
+
+  mb rule < k > [Tp X ; => .K] ...</ k > < env > [Env => Env[L : Tp / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
+          < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
+  mb rule < k > [Tp X[N] ; => .K] ...</ k > < env > [Env => Env[L : Tp[N] / X]] </ env >  < nextLoc > [L => L +Nat N] </ nextLoc > : KSentence .
+  mb rule [{} => .K] : KSentence .
+  mb rule < k > [{Ss} => Ss ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
+  mb rule [S1 S2 => S1 ~> S2] : KSentence .
+  mb rule < k > [write(I) ; => .K] ...</ k > < out >... [.List => ListItem(I)] </ out >  : KSentence .
+  mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L : Tp ...</ env > < store >... L |-> [? => V] ...</ store >
+       if typeOf(V) ==Bool Tp : KSentence .
+  mb rule < k > [X[N] = V ; => .K] ...</ k > < env >... X |-> L : Tp[N'] ...</ env > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > 
+       if typeOf(V) ==Bool Tp andBool N >=Nat 0 andBool N <=Nat N' : KSentence .
+  mb rule [if true then S else ? => S] : KSentence .
+  mb rule [if false then ? else S => S] : KSentence .
+  mb rule < k > [while B do S  => if B then {S while B do S} else {}] ...</ k > : KSentence .
+  mb rule [V ; => .K] : KSentence .
+  mb rule < k > [return(V); ~> ? => V ~> K] </ k > < fstack > [(Env,K) => .List] ...</ fstack > < env > [? => Env] </ env > < retType > Tp </ retType >
+       if typeOf(V) ==Bool Tp : KSentence .
+  mb rule < k > [.K => main();] </ k > < env > Env </ env > < genv > [.Map => Env] </ genv > : KSentence .
+
+--- auxilliary declarations and operations
+  vars I I1 I2 : Int .  var N N1 N2 L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env GEnv Sigma : Map .  var B : Exp .
+  var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .  var Vl : List{Val} .  var V V1 V2 : Val .
+
+  op _.._ : Nat Nat -> List{K} .  eq N1 .. N2 = if N1 >=Nat N2 then .List{K} else (N1,, (sNat N1 .. N2)) fi .
+  op len : List{Id} -> Nat .  eq len(.List{Id}) = 0 .  eq len(X,Xl) = sNat(len(Xl)) .
+
+  op env : Map -> K .
+  mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .
+  mb rule < k > [env(Env) => .K] ...</ k > < env > [? => Env] </ env > : KSentence [metadata "structural"] .
+  mb rule < k > V ~> [env(Env) => .K] ...</ k > < env > [? => Env] </ env > : KSentence [metadata "structural"] .
+
+  op initVal : BasicType -> Val .
+  eq initVal(int) = 0 .
+  eq initVal(bool) = false .
+  eq initVal(void) = .
+  op none : -> Val .
+
+  op typeOf : List{Val} -> List{BasicType} .
+  eq typeof(I) = int .
+  eq typeOf(T) = bool .
+  eq typeOf(none) = void .
+  eq typeOf(V1,V2,Vl) = typeOf(V1),typeOf(V2,Vl) .
+endm
+
+
+mod SIMPLE-UNTYPED is 
+  including SIMPLE-UNTYPED-SEMANTICS .
+  including SIMPLE-UNTYPED-PROGRAMS .
+  op run : KLabel -> Bag .
+  var PgmName : KLabel .  var Input : List{K} .
+  eq run(PgmName) = < T > 
+             < k > PgmName(.List{K}) </ k >
+             < fstack > .List </ fstack >
+             < env > .Map </ env >
+             < genv > .Map </ genv >
+             < store > .Map </ store >
+             < in > List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576) </ in >
+             < out > .List </ out >
+             < nextLoc > 0 </ nextLoc >
+           </ T > .
+endm
+
