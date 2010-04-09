@@ -1,8 +1,8 @@
-in ../../../k-prelude
+in ../../../../k-prelude
 in simple-typed-syntax
-in simple-typed-programs
+in ../simple-typed-programs
 
-mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K + K-CONTEXTS .
+mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTAX + K .
 
 --- List{Id}
   sort List{Id} .
@@ -71,7 +71,7 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
 
   op array : Type Nat Nat -> Val .
-  mb rule < k > [var X[N] : Tp[] ; => .K] ...</ k > < env > [Env => Env[L of type Tp[] / X]] </ env >
+  mb rule < k > [var X[N] : _`[`](Tp) ; => .K] ...</ k > < env > [Env => Env[L of type _`[`](Tp) / X]] </ env >
           < store >...[.Map => L |-> array(Tp, sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
 
   mb rule [{} => .K] : KSentence .
@@ -98,7 +98,7 @@ mod SIMPLE-DYNAMICALLY-TYPED-SEMANTICS is including SIMPLE-TYPED-DESUGARED-SYNTA
 --- auxilliary declarations and operations
   vars I I1 I2 : Int .  var N N1 N2 M L : Nat .  var T T1 T2 : Bool .  var F X : Id .  var Env GEnv Sigma : Map .  var B : Exp .
   var S S1 S2 : Stmt .  var Xl : List{Id} .  var K : K .  var Ss : Stmts .  var Vl : List{Val} .  var V V1 V2 : Val .
-  var XTl : List{IdType}  var Tp : Type .  var Tpl : List{Type} .
+  var XTl : List{IdType} . var Tp : Type .  var Tpl : List{Type} .
 
   op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
   op |_| : List{Id} -> Nat .  eq | .List{Bottom} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
