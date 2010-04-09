@@ -1,0 +1,47 @@
+load strict-ops2cxt
+
+mod STRICT-METADATA-META is
+  including STRICTOPS2CXT .
+  including PARSE-METADATA .
+  var Q : Qid . var AS : AttrSet . var Str : String . var Ty : Type .
+  eq strictOps2cxtOp(op Q : nil -> Ty [AS metadata(Str)] .)
+   = strictOps2cxtOp(op Q : nil -> Ty [AS metadataParse(Str)] .) .
+endm
+
+mod STRICTOPS2CXT-META is
+  including STRICTOPS2CXT .
+  including  STRICT-METADATA-META .
+  including META-LEVEL-EXTRAS .
+  var Syntax CxtStrict : String .  var M : Module .
+  var QSyntax QCxtStrict : Qid .
+  op strictOps2cxt : String String ~> Module .
+  eq strictOps2cxt(Syntax, CxtStrict) = strictOps2cxt(qid(Syntax), qid(CxtStrict)) .
+  op strictOps2cxt : Qid Qid ~> Module .
+  eq strictOps2cxt(QSyntax,QCxtStrict) 
+   = setName(addModule(setImports(strictOps2cxt(QCxtStrict, upModule(QSyntax, true)), including 'K-CONTEXTS .), upModule(QSyntax, false)), QCxtStrict) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = addModule(setImports(strictOps2cxt(getName(M),flatten(M)),including 'K-CONTEXTS .),M) .
+endm
+
+mod STRICTOPS2CXT-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op strict-ops2cxt : -> System .
+  op idle : -> State .
+  var Q Syntax StrictCxt StrictEq : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq strict-ops2cxt = [nil, idle, 'Usage: 'strictOps2cxt '<Name> '.] .
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKS is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['strictOps2cxt Syntax StrictCxt QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(Syntax,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('STRICTOPS2CXT-META),
+                        'strictOps2cxt[upTerm(string(Syntax)),upTerm(string(StrictCxt))])),error) .
+endm

@@ -1,0 +1,85 @@
+mod IMP++-STRICTNESS is
+  including IMP++-SYNTAX01-LABELS .
+  including K-STRICTNESS .
+  eq <_>_</_>(k,_~>_(_`(_`)("_+_",_`,_(K1:K,Kcxt:KProper)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_+_\"(K1:K,[])"),_`(_`)(
+    freezeVar("K1:K"),K1:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("_+_",_`,_(Kcxt:KProper,K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_+_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("_/_",_`,_(K1:K,Kcxt:KProper)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_/_\"(K1:K,[])"),_`(_`)(
+    freezeVar("K1:K"),K1:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("_/_",_`,_(Kcxt:KProper,K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_/_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("_:=_",_`,_(K1:K,Kcxt:KProper)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_:=_\"(K1:K,[])"),_`(_`)(
+    freezeVar("K1:K"),K1:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("_<=_",_`,_(K1:KResult,Kcxt:KProper)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_<=_\"(K1:KResult,[])"),
+    _`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K),k) [metadata "heating"]
+    .
+  eq <_>_</_>(k,_~>_(_`(_`)("_<=_",_`,_(Kcxt:KProper,K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_<=_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("_and_",_`,_(Kcxt:KProper,K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"_and_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,_(Kcxt:KProper,K2:K,K3:K)),
+    Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer(
+    "\"if_then_else_\"([],K2:K,K3:K)"),_`,_(_`(_`)(freezeVar("K2:K"),K2:K),
+    _`(_`)(freezeVar("K3:K"),K3:K))),Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("not_",Kcxt:KProper),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"not_\"([])"),.kl),Rest:K),
+    k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(_`(_`)("print_",Kcxt:KProper),Rest:K),k)
+    = <_>_</_>(k,_~>_(Kcxt:KProper,_`(_`)(freezer("\"print_\"([])"),.kl),
+    Rest:K),k) [metadata "heating"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_+_\"(K1:K,[])"),_`(_`)(
+    freezeVar("K1:K"),K1:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_+_",_`,_(K1:K,Kcxt:KResult)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_+_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_+_",_`,_(Kcxt:KResult,K2:K)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_/_\"(K1:K,[])"),_`(_`)(
+    freezeVar("K1:K"),K1:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_/_",_`,_(K1:K,Kcxt:KResult)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_/_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_/_",_`,_(Kcxt:KResult,K2:K)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_:=_\"(K1:K,[])"),_`(_`)(
+    freezeVar("K1:K"),K1:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_:=_",_`,_(K1:K,Kcxt:KResult)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_<=_\"(K1:KResult,[])"),
+    _`(_`)(freezeVar("K1:KResult"),K1:KResult)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_<=_",_`,_(K1:KResult,Kcxt:KResult)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_<=_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_<=_",_`,_(Kcxt:KResult,K2:K)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"_and_\"([],K2:K)"),_`(_`)(
+    freezeVar("K2:K"),K2:K)),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("_and_",_`,_(Kcxt:KResult,K2:K)),Rest:K),k) [
+    metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer(
+    "\"if_then_else_\"([],K2:K,K3:K)"),_`,_(_`(_`)(freezeVar("K2:K"),K2:K),
+    _`(_`)(freezeVar("K3:K"),K3:K))),Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("if_then_else_",_`,_(Kcxt:KResult,K2:K,K3:K)),
+    Rest:K),k) [metadata "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"not_\"([])"),.kl),Rest:K),
+    k)
+    = <_>_</_>(k,_~>_(_`(_`)("not_",Kcxt:KResult),Rest:K),k) [metadata
+    "cooling"] .
+  eq <_>_</_>(k,_~>_(Kcxt:KResult,_`(_`)(freezer("\"print_\"([])"),.kl),
+    Rest:K),k)
+    = <_>_</_>(k,_~>_(_`(_`)("print_",Kcxt:KResult),Rest:K),k) [metadata
+    "cooling"] .
+endm

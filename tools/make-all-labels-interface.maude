@@ -1,0 +1,39 @@
+load make-all-labels
+
+mod MAKE-ALL-LABELS-META is
+  including MAKE-ALL-LABELS .
+  including META-LEVEL-EXTRAS .
+  var NoAllLabels AllLabels : String .  var M : Module .
+  var Q QNoAllLabels QAllLabels : Qid .  var IL : ImportList .
+  op makeAllLabels : String String ~> Module .
+  eq makeAllLabels(NoAllLabels, AllLabels) = makeAllLabels(qid(NoAllLabels), qid(AllLabels)) .
+  op makeAllLabels : Qid Qid ~> Module .
+  eq makeAllLabels(QNoAllLabels,QAllLabels) = makeAllLabels(QAllLabels, upModule(QNoAllLabels, false), upModule(QNoAllLabels, true), upImports(getImports(upModule(QNoAllLabels, false)))) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = setName(makeAllLabels('-LABELS, M, flatten(M), upModule('K-WRAPPERS,false)), getName(M)) .
+endm
+
+mod MAKE-ALL-LABELS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op make-all-labels : -> System .
+  op idle : -> State .
+  var Q NoAllLabels AllLabels : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq make-all-labels = [nil, idle, 
+ 'Usage: 'makeAllLabels '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['makeAllLabels NoAllLabels AllLabels QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoAllLabels,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('MAKE-ALL-LABELS-META),
+                        'makeAllLabels[upTerm(string(NoAllLabels)),upTerm(string(AllLabels))])),error) .
+endm

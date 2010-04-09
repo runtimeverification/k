@@ -1,0 +1,46 @@
+load ../../../../../../../../../../../k-prelude
+load imp++-syntax
+--- resolving Builtins subsorted to K into injections
+---(
+load ../../../../../../../../../../../tools/add-k-proper-interface
+---(
+set print attribute on .
+red in ADD-KPROPER-META : addKProper('IMP++-SYNTAX-K, '-PROPER) .
+q
+---)
+loop add-k-proper .
+(addKProper IMP++-SYNTAX-K -PROPER .)
+q
+---)
+
+load imp++-programs
+
+--- resolving Builtins subsorted to K into injections
+---(
+load ../../../../imp++-syntax
+load ../../../../../../../../../../../tools/add-k-proper-interface
+
+---(
+set print attribute on .
+red in ADD-KPROPER-META : addKProper('IMP++-PROGRAMS-K, '-PROPER) .
+q
+---)
+loop add-k-proper .
+(addKProper IMP++-PROGRAMS-K -PROPER .)
+q
+---)
+load imp++-semantics
+
+--- resolving Builtins subsorted to K into injections
+---()
+load ../../../../imp++-syntax
+load ../../../../../../../../../../../tools/add-k-proper-interface
+---(
+set print attribute on .
+red in ADD-KPROPER-META : addKProper('IMP++-SEMANTICS-K, '-PROPER) .
+q
+---)
+loop add-k-proper .
+(addKProper IMP++-SEMANTICS-K -PROPER .)
+q
+---()

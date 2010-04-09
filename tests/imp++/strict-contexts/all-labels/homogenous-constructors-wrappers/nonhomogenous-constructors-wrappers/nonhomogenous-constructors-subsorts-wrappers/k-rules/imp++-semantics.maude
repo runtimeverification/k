@@ -1,0 +1,38 @@
+mod IMP++-SEMANTICS is
+  including IMP++-SYNTAX .
+  including CONFIG .
+  including K-MAP-EXTRAS .
+  including K-RULES .
+  op `[_;_`] : Nat Nat -> KList .
+  op env : -> CellLabel .
+  op k : -> CellLabel .
+  op nextLoc : -> CellLabel .
+  op output : -> CellLabel .
+  op restore : Map -> K .
+  op result : -> CellLabel .
+  op store : -> CellLabel .
+  op thread : -> CellLabel .
+  op threads : -> CellLabel .
+  mb keq_(__(<_>_</_>(k,_~>_(`[`[_==>_`]`](restore(Env:Map),.k),K:K),k),<_>_</_>(env,`[`[_==>_`]`](Env':Map,Env:Map),env))): KSentence .
+  mb keq_(__(<_>_</_>(nextLoc,`[`[_==>_`]`](N:Nat,_+Int_(N:Nat,length_(Xl:KList))),nextLoc),<_>_</_>(threads,__(AnyVar21:Set,<_>_</_>(thread,__(AnyVar22:Set,<_>_</_>(k,_~>_(`[`[_==>_`]`](vars_;_(Xl:KList,S:K),_~>_(S:K,restore(Env:Map))),K:K),k),<_>_</_>(env,`[`[_==>_`]`](Env:Map,_`[_<-_`](Env:Map,Xl:KList,`[_;_`](N:Nat,_+Int_(N:Nat,length_(Xl:KList))))),env)),thread)),threads),<_>_</_>(store,__(Store:Map,`[`[_==>_`]`](.m,m(`[_;_`](N:Nat,_+Int_(N:Nat,length_(Xl:KList))),0))),store))): KSentence .
+  mb keq_(`[`[_==>_`]`](<_>_</_>(T,__(Top:Set,<_>_</_>(output,Output:List,output),<_>_</_>(threads,.s,threads)),T),<_>_</_>(result,Output:List,result))): KSentence .
+  mb keq_(`[`[_==>_`]`](<_>_</_>(thread,__(Thread:Set,<_>_</_>(k,.k,k)),thread),.s)): KSentence .
+  mb keq_(`[`[_==>_`]`](`[_;_`](N1:Nat,N2:Nat),if_then_else_fi(_>=Int_(N1:Nat,N2:Nat),.kl,_`,_(N1:Nat,`[_;_`](sNat_(N1:Nat),N2:Nat))))): KSentence .
+  mb krl_(__(<_>_</_>(output,_`,_(Output:List,`[`[_==>_`]`](.l,l(I:Int))),output),<_>_</_>(threads,__(AnyVar7:Set,<_>_</_>(thread,__(AnyVar8:Set,<_>_</_>(k,_~>_(`[`[_==>_`]`](print_(I:Int),.k),K:K),k)),thread)),threads))): KSentence .
+  mb krl_(__(<_>_</_>(threads,__(AnyVar12:Set,<_>_</_>(thread,__(AnyVar13:Set,<_>_</_>(k,_~>_(`[`[_==>_`]`](X:VarId,I:Int),K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,L:Int)),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,I:Int)),store))): KSentence .
+  mb krl_(__(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,<_>_</_>(k,_~>_(`[`[_==>_`]`](++_(X:VarId),_+Int_(I:Int,1)),K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,L:Int)),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,`[`[_==>_`]`](I:Int,_+Int_(I:Int,1)))),store))): KSentence .
+  mb krl_(__(<_>_</_>(threads,__(AnyVar13:Set,<_>_</_>(thread,__(AnyVar14:Set,<_>_</_>(k,_~>_(`[`[_==>_`]`](_:=_(X:VarId,I1:Int),.k),K:K),k),<_>_</_>(env,__(Env:Map,m(X:VarId,L:Int)),env)),thread)),threads),<_>_</_>(store,__(Store:Map,m(L:Int,`[`[_==>_`]`](I2:Int,I1:Int))),store))): KSentence .
+  mb krl_(__(`[`[_==>_`]`](.s,<_>_</_>(thread,__(<_>_</_>(k,S:K,k),<_>_</_>(env,Env:Map,env)),thread)),<_>_</_>(thread,__(Thread:Set,<_>_</_>(k,_~>_(`[`[_==>_`]`](spawn_(S:K),.k),K:K),k),<_>_</_>(env,Env:Map,env)),thread))): KSentence .
+  mb krl_(`[`[_==>_`]`](skip,.k)): KSentence .
+  mb krl_(`[`[_==>_`]`](<_>_</_>(k,_~>_(halt,K:K),k),<_>_</_>(k,.k,k))): KSentence .
+  mb krl_(`[`[_==>_`]`](<_>_</_>(k,_~>_(while_do_(B:K,S:K),K:K),k),<_>_</_>(k,_~>_(if_then_else_(B:K,_;_(S:K,while_do_(B:K,S:K)),skip),K:K),k))): KSentence .
+  mb krl_(`[`[_==>_`]`](_+_(I1:Int,I2:Int),_+Int_(I2:Int,I1:Int))): KSentence .
+  mb krl_(`[`[_==>_`]`](_;_(S1:K,S2:K),_~>_(S1:K,S2:K))): KSentence .
+  mb krl_(`[`[_==>_`]`](_<=_(I1:Int,I2:Int),_<=Int_(I1:Int,I2:Int))): KSentence .
+  mb krl_(`[`[_==>_`]`](_and_(false,B:K),false)): KSentence .
+  mb krl_(`[`[_==>_`]`](_and_(true,B:K),B:K)): KSentence .
+  mb krl_(`[`[_==>_`]`](if_then_else_(false,S1:K,S2:K),S2:K)): KSentence .
+  mb krl_(`[`[_==>_`]`](if_then_else_(true,S1:K,S2:K),S1:K)): KSentence .
+  mb krl_(`[`[_==>_`]`](not_(T:Bool),notBool_(T:Bool))): KSentence .
+  mb krl_if_(`[`[_==>_`]`](_/_(I1:Int,I2:Int),_/Int_(I1:Int,I2:Int)),_=/=Bool_(I2:Int,0)): KSentence .
+endm

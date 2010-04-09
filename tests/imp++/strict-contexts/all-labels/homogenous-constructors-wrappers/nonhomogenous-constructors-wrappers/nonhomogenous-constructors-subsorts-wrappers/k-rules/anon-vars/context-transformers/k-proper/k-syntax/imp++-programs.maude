@@ -1,0 +1,39 @@
+mod IMP++-PROGRAMS is including IMP++-SYNTAX .
+  ops pSum pCollatz : -> Stmt .
+  ops n s i limit steps nr t  d nn : -> VarId [format (g o)].
+  eq pSum = 
+        vars n,s,i ; 
+         (n := 1000 ;
+         s := 0 ;
+         i := n ;
+         while 1 <= i do (
+           s := s + i ;
+           i := i + -1 
+          );
+          print(s)) .
+
+  eq pCollatz = 
+            vars limit,steps,nr,t ; 
+             (limit := 10 ; 
+             steps := 10 ; nr := 1 ; t := 2 ;
+             while ++ nr <= limit do (vars n ; 
+                (n := nr ;
+                spawn(
+                  while 2 <= n do (vars d,nn ; 
+                     (nn := ++ steps ; 
+                     d := 0 ;
+                     nn := n ;
+                     while 2 <= nn do (
+                       d := d + 1 ;
+                       nn := nn + -2
+                     ) ;
+                     if 1 <= nn then n := n + n + n + 1
+                      else n := d )
+                  ) ;
+                  n := ++ t
+                ))
+             ) ;
+             while t <= limit do skip ;
+             print(steps))
+.
+endm

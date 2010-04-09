@@ -1,0 +1,215 @@
+fmod LISTS-TO-WRAPPERS is
+ including META-TERM-EXTRAS .
+ including META-MODULE-EXTRAS .
+ including META-LEVEL-EXTRAS .
+ including META-K-MODULE .
+ including META-K-RULES .
+ including K-META-LISTS .
+ including METADATA-EXTRAS .
+ including CONVERSION .
+
+--------------------------------------------------------------------------------
+--- What needs to be done:
+--------------------------
+--- - Identify Lists sorts as subsorts ok K of the form List{S}
+---   - remove sorts and their subsort declarations 
+---   - add a new wrapper List{S} : List{S} -> K .
+--- - find all ops that have result K and contain a list sort in arity
+---   - change that sort to K and update strictness (if needed)
+--- - Update all terms (mb, eq, rl) to be consistent with above declaration----
+---   - if list sort under op of result sort K then add a wrapper--------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+ var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
+ var N : Nat .  var S S' S'' S''' : Sort .
+ var MS : ModuleSet .  var M Flat : Module .
+ vars Mbs : MembAxSet . var Mb : MembAx .
+ var Eqs : EquationSet . var Eq : Equation .
+ var Rls : RuleSet . var Rl : Rule .
+ var Trms : TermList . vars T1 T2 Trm Trm' : Term .  var Cond : Condition .
+ var C : Constant . var V : Variable .
+ vars OPDS OPDS' Ops : OpDeclSet . var Op Op' : OpDecl .
+ var SSDS : SubsortDeclSet . var SSD : SubsortDecl .
+ var AS AS' : AttrSet .
+ var CTORS : CTORSMap .
+
+ op lists2wrappersImports : ModuleSet ~> ImportList .
+ eq lists2wrappersImports(M MS) = lists2wrappersImports(MS, getName(M), getList2KSubsorts(M)) .
+
+ op lists2wrappersImports : ModuleSet Qid SubsortDeclSet ~> ImportList .
+ eq lists2wrappersImports(MS, Q, SSDS) 
+  = if SSDS == none
+    then lists2wrappersImports(MS)
+    else lists2wrappersImports(MS) (including Q .) 
+    fi [print Q "(" SSDS ")" ] .
+ eq lists2wrappersImports(empty) = nil .
+
+ op makeLists2wrappers : Qid Module Module ModuleSet ~> Module .
+ eq makeLists2wrappers(Q, M, Flat, MS)
+  = makeLists2wrappers(setName(suffixImports(Q,M,lists2wrappersImports(MS)), qid(string(getName(M)) + string(Q))), Flat, getList2KSubsorts(Flat)) .
+
+ op makeLists2wrappers : Module Module SubsortDeclSet ~> Module .
+ eq makeLists2wrappers(M, Flat, SSDS) 
+  = listsModule(M, Flat, coGetOps(removeOps(getOps(Flat), getOps(getOps(Flat),getSubsorts(getList2KSubsorts(Flat)))),K ; getSubsorts(getList2KSubsorts(Flat))),  processSubsorts(getOps(Flat), SSDS)) .
+ 
+ op listsModule : Module  Module OpDeclSet CTORSMap ~> Module .
+ eq listsModule(M, Flat, OPDS, CTORS)
+  = setOps(
+   setRls(
+   setEqs(
+   setMbs(
+   setSubsorts(
+    M
+    , listsSSs(Flat, CTORS, getSubsorts(M)))
+    , listsMbs(Flat, getOps(Flat), OPDS, CTORS, getMbs(M)))
+    , listsEqs(Flat, getOps(Flat), OPDS, CTORS, getEqs(M)))
+    , listsRls(Flat, getOps(Flat), OPDS, CTORS, getRls(M)))
+    , listsOps(OPDS, CTORS, getOps(M)))
+  .
+
+ op listsSSs : Module CTORSMap SubsortDeclSet ~> SubsortDeclSet .
+ eq listsSSs(M, CTORS, none) = none .
+ eq listsSSs(M, CTORS, SSDS SSD)
+  = listsSSs(M, CTORS, SSDS) listsSS(M, CTORS, SSD) .
+
+ op listsSS : Module CTORSMap SubsortDecl ~> SubsortDeclSet .
+ eq listsSS(M, CTORS (subsort S < S' .) |-> Trm, (subsort S < S' .)) = none .
+ eq listsSS(M, CTORS ((subsort S < S' .) |-> Trm) (subsort S'' < S''' .) |-> Trm, (subsort S'' < S .)) = (subsort S'' < S .) .
+ eq listsSS(M, CTORS (subsort S < S' .) |-> Trm, (subsort S'' < S .)) 
+  =  (subsort S'' < S .) (subsort S'' < S' .) .
+ eq listsSS(M, CTORS, SSD) = SSD [owise] .
+
+ op listsOps : OpDeclSet CTORSMap OpDeclSet ~> OpDeclSet .
+ eq listsOps(OPDS, CTORS, Ops Op)
+  =  listsOps(OPDS, CTORS, Ops) listsOp(Op, OPDS, CTORS) .
+ eq listsOps(OPDS, CTORS, none) = none .
+
+ op listsOp : OpDecl OpDeclSet CTORSMap ~> OpDeclSet .
+ eq listsOp(Op, OPDS, CTORS) 
+  = if Op in OPDS then listsKOp(Op, CTORS) else listsOp(Op, CTORS) fi .
+
+ op listsKOp : OpDecl CTORSMap ~> OpDeclSet .
+ eq listsKOp((op Q : Tl -> T [AS] .), CTORS)
+  = (op Q : listsKTypes(Tl, CTORS) -> T [AS listsMetadata(Tl,CTORS)] .) .
+
+ op listsMetadata : TypeList CTORSMap ~> AttrSet .
+ eq listsMetadata(Tl, CTORS) = listsMetadata(1, Tl, CTORS) .
+
+ op listsMetadata : Nat TypeList CTORSMap ~> AttrSet .
+ eq listsMetadata(N, T Tl, CTORS (subsort T < T' .) |-> Q[Trm]) 
+  = metadata("list(" + string(N,10) + ":" + string(Q) + ":" + string(T') + ")") 
+    listsMetadata(s N, Tl, CTORS (subsort T < T' .) |-> Trm).
+ eq listsMetadata(N, T Tl, CTORS) = listsMetadata(s N, Tl, CTORS) [owise] .
+ eq listsMetadata(N, nil, CTORS) = none .
+
+ op listsKTypes : TypeList CTORSMap ~> TypeList .
+ eq listsKTypes(T Tl, CTORS (subsort T < T' .) |-> Trm) 
+  = K listsKTypes(Tl, CTORS (subsort T < T' .) |-> Trm).
+ eq listsKTypes(T Tl, CTORS) = T listsKTypes(Tl, CTORS) [owise] .
+ eq listsKTypes(nil, CTORS) = nil .
+
+ op listsOp : OpDecl CTORSMap ~> OpDeclSet .
+ eq listsOp((op Q : Tl -> T [AS] .), CTORS (subsort T < T' .) |-> Q[Trm])
+  = (op listWrapperS(T) : T -> T' [metadata("list wrapper")] .) (op Q : Tl -> T [AS] .) .
+ eq listsOp(Op, CTORS) = Op [owise] .
+
+ op listsMbs : Module OpDeclSet OpDeclSet CTORSMap MembAxSet ~> MembAxSet .
+ eq listsMbs(M, OPDS, OPDS', CTORS, Mbs Mb)
+  =  listsMbs(M, OPDS, OPDS', CTORS, Mbs) listsMb(Mb, M, OPDS, OPDS', CTORS) .
+ eq listsMbs(M, OPDS, OPDS', CTORS, none) = none .
+
+ op listsMb : MembAx Module OpDeclSet OpDeclSet CTORSMap ~> MembAx .
+ eq listsMb((mb T1 : T [AS] .), M, OPDS, OPDS', CTORS)
+  = (mb listsT(T1, M, OPDS, OPDS', CTORS) : T [AS] .) .
+ eq listsMb((cmb T1 : T if Cond [AS] .), M, OPDS, OPDS', CTORS)
+  = (cmb listsT(T1, M, OPDS, OPDS', CTORS) : T if Cond [AS] .) .
+
+
+ op listsEqs : Module OpDeclSet OpDeclSet CTORSMap EquationSet ~> EquationSet .
+ eq listsEqs(M, OPDS, OPDS', CTORS, Eqs Eq)
+  =  listsEqs(M, OPDS, OPDS', CTORS, Eqs) listsEq(Eq, M, OPDS, OPDS', CTORS) .
+ eq listsEqs(M, OPDS, OPDS', CTORS, none) = none .
+
+ op listsEq : Equation Module OpDeclSet OpDeclSet CTORSMap ~> Equation .
+ eq listsEq((eq T1 = T2 [AS] .), M, OPDS, OPDS', CTORS)
+  = (eq listsT(T1, M, OPDS, OPDS', CTORS) 
+      = listsT(T2, M, OPDS, OPDS', CTORS) [AS] .) .
+ eq listsEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, OPDS', CTORS)
+  = (ceq listsT(T1, M, OPDS, OPDS', CTORS) 
+       = listsT(T2, M, OPDS, OPDS', CTORS) 
+      if Cond [AS] .) .
+
+ op listsRls : Module OpDeclSet OpDeclSet CTORSMap RuleSet ~> RuleSet .
+ eq listsRls(M, OPDS, OPDS', CTORS, Rls Rl)
+  =  listsRls(M, OPDS, OPDS', CTORS, Rls) listsRl(Rl, M, OPDS, OPDS', CTORS) .
+ eq listsRls(M, OPDS, OPDS', CTORS, none) = none .
+
+ op listsRl : Rule Module OpDeclSet OpDeclSet CTORSMap ~> Rule .
+ eq listsRl((rl T1 => T2 [AS] .), M, OPDS, OPDS', CTORS)
+  = (rl listsT(T1, M, OPDS, OPDS', CTORS) 
+     => listsT(T2, M, OPDS, OPDS', CTORS) [AS] .) .
+ eq listsRl((crl T1 => T2 if Cond [AS] .), M, OPDS, OPDS', CTORS)
+  = (crl listsT(T1, M, OPDS, OPDS', CTORS) 
+      => listsT(T2, M, OPDS, OPDS', CTORS) 
+      if Cond [AS] .) .
+
+ op listsTs : TermList Module OpDeclSet OpDeclSet CTORSMap 
+    ~> TermList .
+ eq listsTs((Trm,Trms), M, OPDS, OPDS', CTORS)
+  = listsT(Trm,M, OPDS,OPDS', CTORS), 
+    listsTs(Trms, M, OPDS, OPDS', CTORS) .
+ eq listsTs(empty, M, OPDS, OPDS', CTORS) = empty .
+
+ op listsT : Term Module OpDeclSet OpDeclSet CTORSMap ~> Term .
+ eq listsT(C, M, OPDS, OPDS', CTORS) = C .
+ eq listsT(V, M, OPDS, OPDS', CTORS) = V .
+ eq listsT('if_then_else_fi[Trms],M,OPDS,OPDS', CTORS)
+  = 'if_then_else_fi[listsTs(Trms, M, OPDS,OPDS', CTORS)] .
+--- eq listsT('_==Bool_[Trm,Trm'],M,OPDS,OPDS', CTORS)
+---  = '_==Bool_[listsTs((Trm,Trm'), M, OPDS,OPDS', CTORS)] .
+ ceq listsT(Q[Trms],M,OPDS,OPDS', CTORS)
+   = Q[listsTs(Trms, M, OPDS, OPDS', CTORS)] if  Q = replaceS .
+ eq listsT(Q[Trms], M, OPDS, OPDS', CTORS)
+  = listsT(Q[Trms], M, OPDS, OPDS', CTORS, findOp(M, OPDS,Q, leastSorts(M, Trms), getKind(M,leastSort(M,Q[Trms])))) [owise] .
+
+ op listsT : Term Module OpDeclSet OpDeclSet CTORSMap OpDecl ~> Term .
+ eq listsT(Q[Trms], M, OPDS, OPDS', CTORS, Op)
+  = if Op in OPDS' 
+    then Q[listsTKs(Trms, getTypes(countTerms(Trms),Op), M, OPDS, OPDS', CTORS)]
+    else Q[listsTs(Trms, M, OPDS, OPDS', CTORS)]
+    fi .
+
+ op listsTKs : TermList TypeList Module OpDeclSet OpDeclSet CTORSMap ~> TermList .
+ eq listsTKs(empty, nil, M, OPDS, OPDS', CTORS) = empty .
+ eq listsTKs((Trm,Trms), T Tl, M, OPDS, OPDS', CTORS)
+  = if findCtor(T, CTORS) == T 
+    then listWrapperS(T)[listsT(Trm, M, OPDS, OPDS', CTORS)]
+    else if findCtor(leastSort(M, Trm),CTORS) :: Type then 
+    listWrapperS(leastSort(M,Trm))[listsT(Trm, M, OPDS, OPDS', CTORS)]
+    else listsT(Trm, M, OPDS, OPDS',CTORS)
+    fi fi , listsTKs(Trms, Tl, M, OPDS, OPDS', CTORS) .
+
+ op findCtor : Type CTORSMap ~> Type .
+ eq findCtor(T, CTORS (subsort T < T' .) |-> Trm) = T .
+
+ sort CTORSMap .
+ op _|->_ : SubsortDecl Term -> CTORSMap .
+ op __ : CTORSMap CTORSMap -> CTORSMap [assoc comm id: empty] .
+ op empty : -> CTORSMap .
+
+ op getKeys : CTORSMap -> SubsortDeclSet .
+ eq getKeys(empty) = none .
+ eq getKeys(CTORS SSD |-> Trm) = getKeys(CTORS) SSD .
+
+ op processSubsorts : OpDeclSet SubsortDeclSet ~> CTORSMap .
+ eq processSubsorts(OPDS, none) = empty .
+ eq processSubsorts(OPDS, (subsort T < T' .) SSDS)
+  = ((subsort T < T' .) |-> getListTerm(T, OPDS))
+    processSubsorts(OPDS, SSDS) .
+
+  op getListTerm : Type OpDeclSet ~> Term .
+  eq getListTerm(T, (op Q : T T -> T [assoc id(Trm) AS] .) OPDS) = Q[Trm] .
+endfm
+
+

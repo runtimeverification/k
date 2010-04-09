@@ -1,0 +1,27 @@
+mod IMP++-PROGRAMS-K is
+  including IMP++-SYNTAX-K .
+  op pCollatz : -> K .
+  op pSum : -> K .
+  op d : -> VarId
+    [format(g o)] .
+  op i : -> VarId
+    [format(g o)] .
+  op limit : -> VarId
+    [format(g o)] .
+  op n : -> VarId
+    [format(g o)] .
+  op nn : -> VarId
+    [format(g o)] .
+  op nr : -> VarId
+    [format(g o)] .
+  op s : -> VarId
+    [format(g o)] .
+  op steps : -> VarId
+    [format(g o)] .
+  op t : -> VarId
+    [format(g o)] .
+  eq pCollatz
+    = vars_;_(_`,_(limit,_`,_(steps,_`,_(nr,t))),_;_(_:=_(limit,10),_;_(_:=_(steps,10),_;_(_:=_(nr,1),_;_(_:=_(t,2),_;_(while_do_(_<=_(++_(nr),limit),vars_;_(n,_;_(_:=_(n,nr),spawn_(_;_(while_do_(_<=_(2,n),vars_;_(_`,_(d,nn),_;_(_:=_(nn,++_(steps)),_;_(_:=_(d,0),_;_(_:=_(nn,n),_;_(while_do_(_<=_(2,nn),_;_(_:=_(d,_+_(d,1)),_:=_(nn,_+_(nn,-2)))),if_then_else_(_<=_(1,nn),_:=_(n,_+_(_+_(_+_(n,n),n),1)),_:=_(n,d)))))))),_:=_(n,++_(t))))))),_;_(while_do_(_<=_(t,limit),skip),print_(steps)))))))) .
+  eq pSum
+    = vars_;_(_`,_(n,_`,_(s,i)),_;_(_:=_(n,1000),_;_(_:=_(s,0),_;_(_:=_(i,n),_;_(while_do_(_<=_(1,i),_;_(_:=_(s,_+_(s,i)),_:=_(i,_+_(i,-1)))),print_(s)))))) .
+endm

@@ -1,0 +1,17 @@
+load ../../../../k-prelude
+load all-labels/imp++-syntax
+load imp++-strictness
+---()
+load ../../../../tools/strict-cxt2eqs-interface
+---(
+set print attribute on .
+red in STRICTCXT2EQS-META : strictCxt2eqs("IMP++-SYNTAX01-LABELS", "IMP++-STRICTNESS", "IMP++-STRICTNESS") .
+q
+---)
+loop strict-cxt2eqs .
+(strictCxt2eqs IMP++-SYNTAX01-LABELS IMP++-STRICTNESS IMP++-STRICTNESS .)
+q
+---()
+load all-labels/imp++-programs
+load all-labels/imp++-semantics 
+

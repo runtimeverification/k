@@ -1,0 +1,150 @@
+load ../../k-prelude
+mod IMP++-SYNTAX is
+  including PL-INT .   --- built-in integers
+  including PL-ID . --- built-in variable identifiers
+
+  sort AExp .
+  subsort Id Int < AExp .
+  op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
+  op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
+  op ++_ : Id -> AExp [prec 30 format (b o d)] .
+
+  sort List{Id} .
+  subsort Id < List{Id} .
+  op _,_ : List{Id} List{Id} -> List{Id} [assoc id: .List`{Id`}] .
+  op .List{Id} : -> List{Id} .
+  sort List{AExp} .
+  subsort AExp < List{AExp} .
+  op _,_ : List{AExp} List{AExp} -> List{AExp} [ditto] .
+  subsort List{Id} < List{AExp} .
+  op list_ : List{AExp} -> AExp [metadata "strict(1) hybrid"] .
+  op head : AExp -> AExp [metadata "strict"] .
+  op tail : AExp -> AExp [metadata "strict"] .
+  op ref : AExp -> AExp [metadata "strict"] .
+  op *_ : AExp -> AExp [metadata "strict"] .
+--- BExp
+  sort BExp .
+  subsort Bool < BExp .
+  op _<=_ : AExp AExp -> BExp  [prec 37 format (d b o d)] .
+  op not_ : BExp -> BExp [prec 53 metadata "strict" format (b o d)] .
+  op _and_ : BExp BExp -> BExp [prec 55 metadata "strict(1)" format (d b o d)] .
+--- Stmt
+  sort Stmt .
+  op skip : -> Stmt [format (b o)] .
+  op _:=_ : AExp AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
+  op _;_ : Stmt Stmt -> Stmt [prec 120 gather (e E) format (d b noi d)] .
+  op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
+  op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
+
+  op vars_;_ : List{Id} Stmt -> Stmt [prec 121 format (b o b on++i --)] .
+  ops print_ :  AExp -> Stmt [prec 59 metadata "strict" format (b o d)] .
+  op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
+  ops halt  : -> Stmt [format (b o)] .
+endm
+
+mod IMP++-PROGRAMS is
+  including IMP++-SYNTAX .
+
+  ops pSum pCollatz pList : -> Stmt .
+  ops n s i limit steps nr t  d nn : -> Id [format (g o)].
+  eq pList =
+    vars n ;
+    (n := 10 ;
+    print(head(list(n,2,3)))) .
+  eq pSum = 
+        vars n, s, i ; 
+         n := 1000 ;
+         s := 0 ;
+         i := n ;
+         while 1 <= i do (
+           s := s + i ;
+           i := i + -1 
+          );
+          print(s) .
+
+  eq pCollatz = 
+            vars limit, steps, nr, t ; 
+             limit := 10 ; 
+             steps := 10 ; nr := 1 ; t := 2 ;
+             while ++ nr <= limit do (vars n ; 
+                n := nr ;
+                spawn(
+                  while 2 <= n do (vars d, nn ; 
+                     nn := ++ steps ; 
+                     d := 0 ;
+                     nn := n ;
+                     while 2 <= nn do (
+                       d := d + 1 ;
+                       nn := nn + -2
+                     ) ;
+                     if 1 <= nn then n := n + n + n + 1
+                      else n := d 
+                  ) ;
+                  n := ++ t
+                )
+             ) ;
+             while t <= limit do skip ;
+             print(steps)
+.
+endm
+
+mod IMP++ is
+  including IMP++-PROGRAMS .
+  including K .
+  including K-CONTEXTS .
+
+  subsort AExp BExp Stmt List{AExp} < K .
+  subsort Int < KResult .
+  subsort Bool < KResult .
+
+  ops output threads thread k env store nextLoc result : -> CellLabel .
+  vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : Id .
+  var N N1 N2 : Nat .  var Xl : List{Id} .  var El : List{AExp} .
+  var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List . 
+  var B : BExp .  var S S1 S2 : Stmt .  var K : K .
+
+  mb context [] <= ? : KSentence .
+  mb context I <= [] : KSentence .
+  mb context * [] := ? : KSentence .
+
+  mb configuration < T > < threads > < thread * > < k > .K </ k > < env > .Map </ env > </ thread * > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .List </ result > : KSentence .
+  op startConfig : Stmt -> Bag .
+---  eq startConfig(S) = < T >... < k > S </ k > ...</ T > .
+  eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .Map </ env > </ thread > </ threads > < store > .Map </ store > < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > .
+  
+  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
+  mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
+
+  mb rule [head(list(I,?)) => I] : KSentence . 
+  mb rule [tail(list(I,El)) => list(El)] : KSentence . 
+
+  mb rule [skip => .K] : KSentence .
+  mb rule [not(T) => notBool T] : KSentence .
+  mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
+  mb rule [true and B => B] : KSentence .
+  mb rule [false and ? => false] : KSentence .
+  mb rule [if true then S1 else ? => S1] : KSentence .
+  mb rule [if false then ? else S2 => S2] : KSentence .
+  mb rule [S1 ; S2 => S1 ~> S2] : KSentence [metadata "structural"] .
+  mb rule < k > [X => I] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> I ...</ store > : KSentence .
+  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store >  : KSentence .
+  mb rule < k > [X := I => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => I] ...</ store > : KSentence .
+  mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
+  mb rule < k > [print(I) => .K] ...</ k > < output >... [.List => ListItem(I)] </ output >  : KSentence .
+  mb rule < k > [halt ~> ? => .K] </ k > : KSentence .
+  mb rule < thread >... < k > [spawn(S) => .K] ...</ k > < env > Env </ env > ...</ thread > [.Bag => < thread > < k > S </ k > < env > Env </ env > </ thread >] : KSentence .
+  mb rule [< thread >... < k > .K </ k > ...</ thread > => .Bag] : KSentence [metadata "structural"] .
+
+  mb rule [< T >... < threads > .Bag </ threads > < output > Output </ output > ...</ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
+
+  mb rule < k > [vars Xl ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]]</ env > < store >... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> 0] ...</ store > < nextLoc > [N => N +Nat length(getList{K}(Xl))] </ nextLoc >  : KSentence [metadata "structural"] .
+
+  op _.._ : Nat Nat -> List{K} .
+  eq N1 .. N2 = if N1 >=Nat N2 then .List{K} else (N1,, (sNat N1 .. N2)) fi .
+
+  op env : Map -> K .
+  mb rule [env(Env) ~> env(Env') => env(Env')] : KSentence [metadata "structural"] .
+  mb rule < k > [env(Env) => .K] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
+endm
+
+mod IMPPP is including IMP++ . endm

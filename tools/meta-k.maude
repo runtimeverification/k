@@ -1,0 +1,463 @@
+fmod K-SORTS is including QID .
+  ops KSentence : -> Qid .
+  eq KSentence = 'KSentence .
+endfm
+
+fmod K-META-OPS is including META-TERM .
+  op nilKList : -> Qid .
+  eq nilKList = '.List`{K`}.List`{K`} .
+
+  op nilK : -> Qid .
+  eq nilK = '.K.K .
+
+  op kra_ : TermList -> Term .
+  eq kra(Trl1,'_~>_[Trl],Trl2) = kra(Trl1,Trl,Trl2) .
+  eq kra(empty) = nilK .
+  eq kra(T) = T [owise] .
+  eq kra(Trl) = '_~>_[Trl] [owise] .
+ 
+  op klabel : -> Constant .
+  eq klabel = 'k.CellLabel .
+ 
+  var T : Term .  var Trl Trl1 Trl2 : TermList . 
+
+  op kcell : Term -> Term .
+  eq kcell(T) = '<_>_</_>[klabel,T,klabel] .
+  
+  op kWrap : Term -> Term .
+  eq kWrap(T) = kcell(kra(T,'Rest:K)) .
+--- replace the line above with the one below to get unrestricted strictness
+---  eq kWrap(T) = T .
+
+  op kList : TermList -> Term .
+  eq kList(T) = T .
+  eq kList(empty) = nilKList .
+  eq kList(Trl) = '_`,`,_[Trl] [owise] .
+
+  op kApply : Term TermList -> Term .
+  eq kApply(T, Trl) = '_`(_`)[T,kList(Trl)] .
+endfm
+
+fmod META-K-BUILTINS is
+  including META-LEVEL .
+  including META-MODULE-EXTRAS .
+  op builtinSorts : -> SortSet [memo] .
+  eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
+  op builtinModules : ~> SortSet [memo] .
+  eq builtinModules 
+   = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
+endfm
+
+fmod META-K-MODULES is
+  including META-MODULE .
+  op kModules : ~> SortSet [memo] .
+  eq kModules 
+   = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
+     'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-POLYMORPHIC-VARIABLES ; 
+     'K-OPEN-CELLS ; 'K-CONFIG ; 'K-DESTRUCTORS .
+endfm
+
+fmod META-K-MODULE is
+  including META-LEVEL-EXTRAS .
+  including META-K-BUILTINS .
+  var S : Sort .  var T T' : Type .  var SSDS : SubsortDeclSet . 
+  vars OPDS : OpDeclSet .  var M : Module . var SS : SortSet .
+
+  ops KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
+  ops NeProperList ResultList NeResultList NeKList KList : -> Sort .
+  eq KProper = 'KProper .  eq KResult = 'KResult .
+  eq NeK = 'NeK .  eq K = 'K .
+  eq KLabel = 'KLabel .  eq KHybridLabel = 'KHybridLabel .
+  eq KProperLabel = 'KProperLabel .  eq KResultLabel = 'KResultLabel .
+  eq ResultList = 'List`{KResult`} .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeList`{KResult`} .  eq KList = 'List`{K`} .  eq NeKList = 'NeList`{K`} .
+  op ksorts : -> SortSet [memo] .
+  eq ksorts = KProper ; KResult ; NeK ; K .
+
+  op klistSorts : -> SortSet [memo] .
+  eq klistSorts = NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
+
+  op isKSort : Type -> Bool [memo] .
+  eq isKSort(T) = T in ksorts .
+
+  op isKListSort : Type -> Bool [memo] .
+  eq isKListSort(T) = T in klistSorts .
+
+  op ksubsorts : -> SubsortDeclSet [memo] .
+  eq ksubsorts = (
+    subsort KProper < NeK .
+    subsort KResult < NeK .
+    subsort NeK < K .
+    ) .
+
+  op ksupersorts : -> SubsortDeclSet [memo] .
+  eq ksupersorts = (
+    subsort KProper < NeK .
+    subsort KProper < NeProperList .
+    subsort KResult < NeK .
+    subsort NeK < K .
+      subsort K < KList .
+      subsort K < NeKList .
+      subsort KResult < NeResultList .
+      subsort KResult < ResultList .
+      subsort KResult < NeKList .
+      subsort KResult < NeK .
+     ) .
+
+  op kops : -> OpDeclSet [memo] .
+  eq kops = (
+    op '.K : nil -> K [none] .
+    op '_`(_`) : KLabel KList -> NeK [none] .
+    op '_`(_`) : KProperLabel KList -> KProper [none] .
+    op '_`(_`) : KResultLabel KList -> KResult [none] .
+    op '_`(_`) : KHybridLabel NeProperList -> KProper [none] .
+    op '_`(_`) : KHybridLabel ResultList -> KResult [none] .
+    op '_~>_ : K K -> K [none] .
+    op '`[`] : nil -> K [none] .
+    op '_`(_`) : 'Map K -> K [none] .
+    
+  ) .
+
+ op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .
+ eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) . 
+ 
+ op pseudoKSupersorts : SubsortDeclSet -> SubsortDeclSet .
+ eq pseudoKSupersorts(SSDS) = getSupersorts(removeSubsorts(SSDS,ksupersorts), ksorts) . 
+ 
+  op pseudoKOps : OpDeclSet -> OpDeclSet .
+  eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
+
+  op pseudoKListSorts : SubsortDeclSet OpDeclSet -> SubsortDeclSet .
+  eq pseudoKListSorts(SSDS, OPDS)
+   = (getSupersorts(removeSubsorts(SSDS,ksupersorts), K ; KResult)) .
+
+  op syntaxSorts :  Module ~> SortSet .
+  eq syntaxSorts(M) = removeSorts(getSubsorts(M, K),ksorts ; builtinSorts ; getSubsorts(getList2KSubsorts(M))) .
+
+  op syntaxOps : Module -> OpDeclSet .
+  eq syntaxOps(M) = getOps(getOps(M), syntaxSorts(M)) .
+
+  op getList2KSubsorts : Module -> SubsortDeclSet .
+  eq getList2KSubsorts(M) = getList2KSubsorts(M, getSubsorts(M,K)) .
+
+  op getListSorts : Module -> SortSet .
+  eq getListSorts(M) = removeSorts(getListSorts(getSorts(M)), klistSorts) .
+
+  op isListSort : Type -> Bool .
+  eq isListSort(T) = find(string(T),"List`{",0) == 0 .
+
+  op getListSorts : SortSet -> SortSet .
+  eq getListSorts(none) = none .
+  eq getListSorts( S ; SS) 
+   =  if isListSort(S) then S ; getListSorts(SS) else getListSorts(SS) fi .
+
+  op getListSubsorts : Module -> SubsortDeclSet .
+  eq getListSubsorts(M) = makeSubsorts(M, getListSorts(M), getMaximalSorts(M, getListSorts(M))) .
+
+  op getResultLists : Module -> SortSet .
+  eq getResultLists(M) = getSubsorts(makeSubsorts(M,getListSorts(M),KResult)) .
+
+
+  op getNoResultListSubsorts : Module -> SubsortDeclSet .
+  eq getNoResultListSubsorts(M) = removeSubsorts(getListSubsorts(M), getResultLists(M)) .
+
+  
+  op getList2KSubsorts : Module SortSet -> SubsortDeclSet .
+  eq getList2KSubsorts(M, none) = none .
+  eq getList2KSubsorts(M, T ; SS) 
+   = if isListSort(T)
+     then (subsort T < (if sortLeq(M,T,KResult) then KResult else K fi) .) 
+        getList2KSubsorts(M, SS) 
+     else getList2KSubsorts(M, SS) fi .
+
+  op getK2ListSubsorts : SubsortDeclSet -> SubsortDeclSet .
+  eq getK2ListSubsorts(none) = none .
+  eq getK2ListSubsorts((subsort T < T' .) SSDS) 
+   = if find(string(T'),"List`{",0) == 0 
+     then (subsort T < T' .)  getK2ListSubsorts(SSDS) 
+     else getK2ListSubsorts(SSDS) fi .
+endfm
+
+fmod META-K-RULES is including K-SORTS .
+  including META-MODULE .
+  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
+  var AS : AttrSet .  var RK : KRuleKind .
+
+  sort KRuleKind .
+  ops krl kcrl : -> KRuleKind .
+  op error : Qid -> [KRuleKind] .
+
+  op trueCt : -> Constant .
+  eq trueCt = 'true.Bool .
+  
+  ops symbol_ : KRuleKind -> Qid .
+  eq symbol krl = 'rule_ .
+  eq symbol kcrl = 'rule_if_ .  
+
+  op replaceS : -> Qid .
+  eq replaceS = '`[_=>_`] .
+
+  op getKRuleKind : Qid ~> KRuleKind . 
+  eq getKRuleKind(Q) = if Q == symbol krl then krl else if Q == symbol kcrl then kcrl else error(Q) fi fi .
+
+  sort KRuleSplit .
+  op {_,_,_,_} : KRuleKind Term TermList AttrSet -> KRuleSplit .
+
+  
+  op splitKRule : MembAx ~> KRuleSplit .
+ ceq splitKRule((mb Q[T] : S [AS] .))
+   = {getKRuleKind(Q),T,empty,AS} if S := KSentence . 
+ ceq splitKRule((mb Q[T,C] : S [AS] .))
+   = {getKRuleKind(Q),T,C,AS} if S := KSentence . 
+
+  op getContents : KRuleSplit -> Term .
+  eq getContents({RK,T,Cond,AS}) = T .
+
+  op setContents : KRuleSplit Term -> KRuleSplit .
+  eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
+
+  op plugKRule : KRuleSplit ~> MembAx .
+  eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
+  eq plugKRule({RK,T,C,AS}) = (mb symbol(RK)[T,C] : KSentence [AS] .) [owise] .
+endfm
+
+fmod K-META-CONFIG is 
+  including META-K-RULES .
+  including META-K-MODULE .
+  including META-TERM-EXTRAS .
+  including INT .
+  var Label Label' : Constant . var Contents Contents' T : Term .
+  var Q Q' : Qid .  var B : Bool . var E E' : Ellipses .  var M : Module .  
+  var AS : AttrSet .  var MAS : MembAxSet .  var S : Sort .
+
+  op extractConfTerm : Module ~> Term .
+  eq extractConfTerm(M) = extractConfTerm(getMbs(M)) .
+  op extractConfTerm : MembAxSet ~> Term .
+  eq extractConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = T .
+
+  op removeConfTerm : MembAxSet -> MembAxSet .
+  eq removeConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = MAS .
+  eq removeConfTerm(MAS) = MAS [owise] .
+  
+  sort Ellipses .
+  ops none : -> Ellipses .
+  op error : -> [Ellipses] .
+  op symbol_ : Ellipses -> Qid .
+  eq symbol none = '<_>_</_> .
+
+  sort SplitCell .
+  op {_,_,_,_} : Constant Term Bool Ellipses -> SplitCell .
+
+  op splitKCell : Term ~> SplitCell .
+  eq splitKCell(Q[Label,Contents,Label]) = {Label, Contents,false, getEllipses(Q)} .
+  eq splitKCell(Q[Q'[Label],Contents,Q'[Label]]) = {Label, Contents,true, getEllipses(Q)} .
+
+  op getEllipses : Qid -> Ellipses .
+  ceq getEllipses(Q) = none if Q = symbol none .
+
+  op getEllipses : SplitCell -> Ellipses .
+  eq getEllipses({Label,Contents,B,E}) = E .
+  op setEllipses : SplitCell Ellipses -> SplitCell .
+  eq setEllipses({Label,Contents,B,E}, E') = {Label,Contents,B,E'} .
+
+  op getName : SplitCell -> Qid .
+  eq getName({Label,Contents,B,E}) = getName(Label) .
+  op setName : SplitCell Qid -> SplitCell .
+  eq setName({Label,Contents,B,E},Q) = {mkCellLabel(Q),Contents,B,E} .
+
+  op getContents : SplitCell -> Term .
+  eq getContents({Label,Contents,B,E}) = Contents .
+  op setContents : SplitCell Term -> SplitCell .
+  eq setContents({Label,Contents,B,E}, Contents') = {Label,Contents',B,E} .
+
+  op getMultiplicity : SplitCell -> Bool .
+  eq getMultiplicity({Label,Contents,B,E}) = B .
+
+  op plugCell : SplitCell -> Term .
+  eq plugCell({Label,Contents,B,E}) = symbol E[cellLabel(Label,B),Contents,cellLabel(Label,B)] .
+
+  op mkCell : Qid Term -> Term .
+  eq mkCell(Q,Contents) = plugCell({mkCellLabel(Q),Contents,false,none}) .
+
+  op mkCellLabel : Qid -> Constant . 
+  eq mkCellLabel(Q) = qid(string(Q) + ".CellLabel") .
+
+  op multiCellS : -> Qid .
+  eq multiCellS = '_* .  
+
+  op cellLabel : Constant Bool -> Term .
+  eq cellLabel(Label,B) = if B then multiCellS[Label] else Label fi .
+
+  ops Map Bag List  : -> Sort .
+  eq Map = 'Map . eq Bag = 'Bag . eq List = 'List .
+
+  op emptyCt : Sort -> Constant .
+  eq emptyCt(S) = if S == Bag then mkConstant('.Bag,Bag) else if S == Map then mkConstant('.Map,Map) else if S == List then mkConstant('.List, List) else if S == K then mkConstant('.K, K) else 'error.K fi fi fi fi .
+
+  op ctor : Sort -> Qid .
+  eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else 'error fi fi fi fi .
+endfm
+
+fmod K-META-OPEN-CELLS is 
+  including K-META-CONFIG .
+  ops left right both : -> Ellipses .
+  eq symbol left = '<_>..._</_> .
+  eq symbol right = '<_>_...</_> .
+  eq symbol both = '<_>..._...</_> .
+  var Q : Qid .
+  eq getEllipses(Q) = if (Q == symbol left) then left else if (Q == symbol right) then right else if (Q == symbol both) then both else if (Q == symbol none) then none else error fi fi fi fi .
+endfm
+
+fmod META-ANONYMOUS-VARIABLE is
+  including META-LEVEL .
+  including CONVERSION .
+  var T : Type . var N : Nat .
+  var M : Module .  var Op : OpDecl . var OPDS : OpDeclSet . 
+  var Q : Qid .   var AS : AttrSet .
+
+  op anyVarS : -> Qid .
+  eq anyVarS = '? .
+
+  op Anonymous : -> Sort .
+  eq Anonymous = 'Anonymous .
+
+  op anyVar : Type -> Variable .
+  eq anyVar(T) = qid(string(anyVarS) + ":" + string(T)) .
+
+  op anyVar : Nat Type -> Variable .
+  eq anyVar(N, T) = qid(string(anyVarS) + string(N,10) + ":" + string(T)) .
+
+
+  op getAnonConsts : Module ~> TypeSet .
+  eq getAnonConsts(M) = '`[`] ; '? . ---getAnonConsts(getOps(M)) .
+
+  op getAnonConsts : OpDeclSet ~> SortSet .
+  eq getAnonConsts(Op OPDS) = getAnonConsts(Op, OPDS) .
+  eq getAnonConsts(none) = none .
+  
+  op getAnonConsts : OpDecl OpDeclSet ~> SortSet .
+  eq getAnonConsts(op Q : nil -> T [poly(0) AS] ., OPDS) 
+   = if T == Anonymous then Q ; getAnonConsts(OPDS) else getAnonConsts(OPDS) fi  [print "Q: " Q ", T: " T] .
+  eq getAnonConsts(Op, OPDS) = getAnonConsts(OPDS) [owise] .
+endfm
+
+fmod META-K-WRAPPERS is
+  including META-LEVEL .
+  vars T T' : Type . var Q : Qid . var AS : AttrSet . var OPDS : OpDeclSet .
+
+  op builtin-wrappers : -> OpDeclSet [memo] .
+  eq builtin-wrappers = getOps(upModule('K-WRAPPERS, false)) .
+
+  op getWrappers : OpDeclSet -> OpDeclSet .
+  eq getWrappers((op Q : T -> T' [metadata("builtin wrapper") AS] .) OPDS)
+   = (op Q : T -> T' [metadata("builtin wrapper") AS] .) getWrappers(OPDS) .
+  eq getWrappers((op Q : T -> T' [metadata("list wrapper") AS] .) OPDS)
+   = (op Q : T -> T' [metadata("list wrapper") AS] .) getWrappers(OPDS) .
+  eq getWrappers(OPDS) = none [owise] .
+
+  op mkSubsortWrapper : Type Type -> Qid .
+  eq mkSubsortWrapper(T,T') 
+   = qid("\"" + string(T) + "\"_") .
+endfm
+
+
+fmod META-K-LABELS is
+  including META-K-MODULE .
+  including META-LEVEL .
+  var Q : Qid . var T : Type .  var Str : String .
+
+  op klistLabelS : -> Qid .
+  eq klistLabelS = 'kList .
+
+  op mkKLabel : Qid -> Qid .
+  eq mkKLabel(Q) = qid("\"" + string(Q) + "\"") .
+
+  op mkListLabel : Qid -> Term .
+  eq mkListLabel(Q) = klistLabelS[upTerm(string(Q))] .
+
+  op mkKLabelSort : Type String -> Type .
+  eq mkKLabelSort(T,Str) 
+   = if find(Str,"hybrid",0) :: Nat then KHybridLabel
+     else if T == KProper then KProperLabel
+     else if T == KResult then KResultLabel else KLabel fi fi fi .
+endfm
+
+fmod K-STRICTNESS-OPS is including META-LEVEL .
+  including K-META-OPS .
+  var S : String .  var T : Term . var Trl : TermList .
+
+  op hole : -> Term .
+  eq hole = '`[`]:K .
+
+  op removeHole : TermList ~> TermList .
+  eq removeHole((T, Trl)) = if T == hole then removeHole(Trl) else T,removeHole(Trl) fi .
+  eq removeHole(empty) = empty .
+
+  op freezeLabel : String -> Term .
+  eq freezeLabel(S) = 'freezer[upTerm(S)] .
+
+  op freezeVariable : String Term -> Term .
+  eq freezeVariable(S, V:Term) = kApply('freezeVar[upTerm(S)],V:Term) .
+endfm
+
+fmod LIST-ATTRS is
+  including META-MODULE .
+  op klist : Nat Qid Type -> Attr .
+  op klist : Nat Term -> Attr .
+endfm
+
+fmod STRICT-ATTRS is
+  including META-MODULE .
+  including NAT-LIST-EXTRAS .
+  including LIST-ATTRS .
+  ops kstrict seqkstrict : IntList -> Attr .
+  op karity : Nat -> Attr .
+  op khybrid : -> Attr .
+endfm
+
+fmod SYNTAX-ATTRS is
+  including META-MODULE .
+  ops kaux kdisolve : -> Attr .
+  op krenameTo : Qid -> Attr .
+  op ksyntax : -> Attr .
+  op klatex : AttrSet -> Attr .
+  op kcolor : Qid -> Attr .
+endfm
+
+fmod CONFIGURATION-ATTRS is
+  including META-MODULE .
+  op kwrapping : Qid -> Attr .
+endfm
+
+fmod K-ATTRS is 
+  including SYNTAX-ATTRS .
+  including STRICT-ATTRS .
+  including CONFIGURATION-ATTRS .
+endfm
+
+fmod K-META-LISTS is including K-META-OPS .
+  including META-K-MODULE .
+  including META-TERM-EXTRAS .
+  including LIST-ATTRS .
+
+  var Q : Qid . var T : Type . var Trm : Term . var Trms : TermList .
+  var N : Nat .
+  op klistType : Type ~> Type .
+  eq klistType('K) = KList  .
+  eq klistType('KResult) = ResultList .
+  eq klistType(T) = KList [owise] .
+
+  op klabelType : Type ~> Type .
+  eq klabelType(Q) = if Q == K then KLabel else if Q ==  KResult then KResultLabel else KHybridLabel fi fi .
+  
+  op wrapList : Type Term TermList ~> Term .
+  eq wrapList(T, Q[Trm], Trms) = kApply(listWrapperT(Q,KHybridLabel),Trms) .
+
+  op listWrapperS : Qid -> Qid .
+  eq listWrapperS(Q) = qid("\"" + string(Q) + "\"") .
+  op listWrapperT : Qid Type -> Constant .
+  eq listWrapperT(Q,T) = mkConstant(listWrapperS(Q),klabelType(T)) .
+
+  eq klist(N,Q,T) = klist(N, listWrapperT(Q,T)) .
+endfm
+
+

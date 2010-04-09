@@ -1,0 +1,65 @@
+set include PL-BOOL off .
+set include BOOL on .
+load prelude-extras
+load meta-k
+load printing
+load many-modules-interface
+load open-cells-interface
+load sanity-checks-interface
+load anon-consts-interface
+load context-transformers-interface
+load anon-vars-interface
+load make-k-rules-interface
+load lists-to-wrappers-interface
+load remove-sublists-interface
+load syntax-to-k-interface
+load add-k-proper-interface
+load lists-to-k-interface
+load subsorts-to-wrappers-interface
+load homogenous-arguments-interface
+load make-all-labels-interface
+load metadata-parsing
+load strict-ops2cxt-interface
+load strict-cxt2eqs-interface
+
+fmod COMPILE-META is
+  including META-LEVEL .
+  var Q : Qid . var QIL : QidList . var M : Module . 
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) [print "Got to " Q] .
+  op error : -> [Module] .
+
+  op compile : Qid ~> Module .
+  eq compile(Q) = compile(upModule(Q, false)) .
+
+  op compile : Module ~> Module .
+  eq compile(M) = compile(M, 'MANY-MODULES 'ANONYMOUS-CONSTANTS 'SANITY-CHECKS 'CONTEXT-TRANSFORMERS 'OPEN-CELLS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'REMOVE-SUBLISTS 'LISTS-TO-WRAPPERS 'SYNTAX-TO-K 'ADD-KPROPER 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS
+  ) .
+  op compile : Module QidList ~> Module .
+  eq compile(M,nil) = M .
+  eq compile(M, Q QIL) =  compile(
+    downTerm(getTerm(
+             metaReduce(wrapper(qid(string(Q) + "-META")),
+                        'compile[upTerm(M)])), error)
+     , QIL) .
+endfm
+
+mod COMPILE-LOOP is
+  including LOOP-MODE + COMPILE-META .
+  including MODULE-META-PRETTY-PRINT .
+  op compile : -> System .
+  op idle : -> State .
+  var Q : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq compile = [nil, idle, 
+ 'Usage: 'compile '<ModuleName> '. ] .
+
+  op error : -> [Module] .
+  op print : [Module] -> QidList .
+  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
+  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['compile Q QIL, idle, QIL'] 
+   => [QIL, idle, print(FM )] 
+   if FM := compile(Q) .
+endm
