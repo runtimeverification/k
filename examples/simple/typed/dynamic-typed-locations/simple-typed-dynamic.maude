@@ -24,8 +24,10 @@ mod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-S
                      < nextLoc > 0 </ nextLoc >
                    </ T > : KSentence .
 
-  mb rule < k > [X => V] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> V ...</ store > : KSentence .
-  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .
+  op _of`type_ : Nat Type -> K .
+
+  mb rule < k > [X => V] ...</ k > < env >... X |-> L of type ? ...</ env > < store >... L |-> V ...</ store > : KSentence .
+  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L of type int ...</ env > < store >... L |-> [I => I +Int 1] ...</ store > : KSentence .
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [_-_(I1,I2) => _-Int_(I1,I2)] : KSentence .
   mb rule [I1 * I2 => I1 *Int I2] : KSentence .
@@ -45,31 +47,31 @@ mod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-S
   mb rule < k > [array(?,L,M)[N] => Sigma(L +Int N)] ...</ k > < store > Sigma </ store > 
        if N >=Nat 0 andBool N <=Nat M : KSentence .
   mb rule [sizeOf(array(?,?,N)) => N] : KSentence .
-  mb rule < k > [var X : Tp ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
+  mb rule < k > [var X : Tp ; => .K] ...</ k > < env > [Env => Env[L of type Tp / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
   mb context var X[[]] : Tp[] ; : KSentence .
-  mb rule < k > [var X[N] : _`[`](Tp) ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >
-          < store >...[.Map => L |-> array(_`[`](Tp), sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
+  mb rule < k > [var X[N] : _`[`](Tp) ; => .K] ...</ k > < env > [Env => Env[L of type _`[`](Tp) / X]] </ env >
+          < store >...[.Map => L |-> array(Tp, sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
   mb rule [{} => .K] : KSentence .
   mb rule < k > [{Ss} => Ss ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
   mb rule [S1 S2 => S1 ~> S2] : KSentence .
-  mb rule < k > [X = V2 ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [V1 => V2] ...</ store >
-       if typeOf(V1) ==Bool typeOf(V2) : KSentence .
+  mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L of type Tp ...</ env > < store >... L |-> [? => V] ...</ store >
+       if typeOf(V) ==Bool Tp : KSentence .
   mb context ?[[]] = ? ; : KSentence .
   mb context [][?] = ? ; : KSentence .
-  mb rule < k > [array(_`[`](Tp),L,M)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > 
+  mb rule < k > [array(Tp,L,M)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > 
        if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp : KSentence .
   mb rule [V ; => .K] : KSentence .
   mb rule [if true then S else ? => S] : KSentence .
   mb rule [if false then ? else S => S] : KSentence .
   mb rule < k > [while B do S  => if B then {S while B do S} else {}] ...</ k > : KSentence .
   op function : Type Nat -> Val .
-  mb rule < k > [function F(XTl) : Tp S => .K] ...</ k > < env > [Env => Env[L / F]] </ env > < nextLoc > [L => sNat sNat L] </ nextLoc > 
+  mb rule < k > [function F(XTl) : Tp S => .K] ...</ k > < env > [Env => Env[L of type (typeList(XTl) -> Tp) / F]] </ env > < nextLoc > [L => sNat sNat L] </ nextLoc > 
           < store >...[.Map => L |-> function(typeList(XTl) -> Tp,sNat L) sNat(L) |-> lambda(idList(XTl),S)]...</ store > : KSentence .
   op lambda : List{Id} Stmt -> Val .
   op (_,_,_) : Map K Type -> ListItem .
  mb rule < k > [_`(_`)(function(Tpl -> Tp,L),Vl)  ~> K => S ~> return(initVal(Tp));] </ k > < fstack > [.List => (Env,K,Tp')] ...</ fstack >
-          < env > [Env =>  GEnv[| Xl | from N / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
+          < env > [Env =>  GEnv[(| Xl | from N) of types Tpl / getList{K}(Xl)]] </ env > < genv > GEnv </ genv >
           < return > [Tp' => Tp] </ return >
           < store >... L |-> lambda(Xl,S) [.Map => | Xl | from N |-> getList{K}(Vl)] ...</ store >
           < nextLoc > [N => N +Nat | Xl |] </ nextLoc > 
@@ -88,17 +90,22 @@ mod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-S
   eq initVal(int) = 0 .
   eq initVal(bool) = false .
   eq initVal(void) = none .
-  eq initVal(_`[`](Tp)) = array(_`[`](Tp),0,0) .
   op none : -> Val .
 
   op typeOf : List{Val} -> List{Type} .
   eq typeOf(function(Tp, ?)) = Tp .
-  eq typeOf(array(Tp,?,?)) = Tp .
+  eq typeOf(array(Tp,?,?)) = _`[`](Tp) .
   eq typeOf(I) = int .
   eq typeOf(T) = bool .
   eq typeOf(none) = void .
   eq typeOf(V1,V2,Vl) = typeOf(V1),typeOf(V2,Vl) .
   eq typeOf(.List{Bottom}) = .List{Bottom} .
+
+
+  op _of`types_ : List{K} List{Type} -> List{K} .
+  eq (N,,Kl:List{K}) of types (Tp,Tpl) 
+   = (N of type Tp),,(Kl:List{K} of types Tpl) .
+  eq .List{K} of types .List{Bottom} = .List{K} .
 
 --- List{Id}
   sort List{Id} .
@@ -133,10 +140,11 @@ endm
 mod SIMPLE-TYPED-DYNAMIC is 
   including SIMPLE-TYPED-DYNAMIC-SEMANTICS .
   including SIMPLE-TYPED-PROGRAMS .
-  op run : -> Bag .
+  op run : KLabel -> Bag .
   var PgmName : KLabel .  var Input : List{K} .
-  eq run = < T > 
-             < k > pSorting </ k >
+--- after loading simple-untyped-compiled into maude, type `rew run("pFactorial") .', etc.
+  eq run(PgmName) = < T > 
+             < k > PgmName(.List{K}) </ k >
              < fstack > .List </ fstack >
              < env > .Map </ env >
              < genv > .Map </ genv >
