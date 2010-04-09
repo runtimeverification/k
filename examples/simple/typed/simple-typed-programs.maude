@@ -37,7 +37,7 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
 	 return q ;
        }
 
-       function collatz() : void {
+       function collatz() : int {
          var s : int ;
          s = 0 ;
 	 write(n) ;

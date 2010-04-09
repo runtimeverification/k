@@ -27,7 +27,6 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
 --- List{Exp}
   sort List{Exp} .
   subsort Exp List{Bottom} < List{Exp} .
-  op .List{Exp} : -> List{Exp} .
   op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
 
   op ++_ : Id -> Exp [prec 0] .
@@ -76,5 +75,5 @@ mod SIMPLE-TYPED-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
   eq for X = E1 to E2 do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
   eq function F() : Tp S = function F(.List{Bottom}) : Tp S .
   op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-  eq E() = E(.List{Exp}) .
+  eq E() = E(.List{Bottom}) .
 endm
