@@ -1,0 +1,58 @@
+mod CHALLENGE-PROGRAMS is
+  including CHALLENGE-SYNTAX .
+
+  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id [format (g o)] .
+  ops fib even limit nr steps : -> Id [format (g o)] .
+
+  op pFib : -> Stmt .
+  eq pFib = {
+    vars x, fib ;
+    (fib := (\Y f -> \ n -> if' n == 0 then 0 else if' n == 1 then 1 else f(n + (-1)) + f(n + (-2))) ;
+    x := fib 15 ;
+    output(x))
+  } .
+
+  op pRandom : -> Stmt .
+  eq pRandom = {
+    vars x, y, z ;
+    (x := randomBool ;
+    y := randomBool ;
+    z := randomBool ;
+    output(x) ;
+    output(y) ;
+    output(z))
+  } .
+
+  op pSum : -> Stmt .
+  eq pSum = {
+    vars n, s, i ;
+    (n := 1000 ;
+    s := 0 ;
+    i := n ;
+    while 1 <= i do (
+        s := s + i ;
+        i := i + -1
+    ) ;
+    output(s))
+  } .
+
+  --- http://www.research.att.com/~njas/sequences/A006577
+  op pCollatz : -> Stmt .
+  eq pCollatz = {
+    vars even, limit, nr ;
+    (even := (\ x -> x % 2 == 0) ;
+    limit := 10 ;
+    while ++ nr <= limit do ({
+        vars n, steps ;
+        (n := nr ;
+        spawn(
+            while not(n == 1) do (
+                if even n then n := n / 2 else n := 3 * n + 1 ;
+                steps := steps + 1
+            ) ;
+            output(steps)
+        ))
+    }))
+  } .
+
+endm

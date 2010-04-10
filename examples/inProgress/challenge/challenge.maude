@@ -5,147 +5,18 @@
     This implementation by David Lazar <lazar6@illinois.edu>.
 )
 load ../../../k-prelude
+in challenge-syntax
+in challenge-programs
 
-mod CHALLENGE is
-  including PL-INT .
-  including PL-ID .
+mod CHALLENGE-SEMANTICS is
+  including CHALLENGE-SYNTAX .
   including K .
-
---- Syntax
-  sort Exp .
-  sort Stmt .
-  subsort Bool Int Id < Exp .
-
-  sort List{Exp} .
-  subsort Exp < List{Exp} .
-  op _,_ : List{Exp} List{Exp} -> List{Exp} [assoc id: .List`{Exp`}] .
-  op .List{Exp} : -> List{Exp} .
-
-  sort List{Id} .
-  subsort Id < List{Id} < List{Exp} .
-  op _,_ : List{Id} List{Id} -> List{Id} [ditto] .
-
-  op _+_ : Exp Exp -> Exp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
-  op _*_ : Exp Exp -> Exp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
-  op _/_ : Exp Exp -> Exp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
-  op _%_ : Exp Exp -> Exp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
-
-  op _<=_ : Exp Exp -> Exp [prec 37 format (d b o d) metadata "seqstrict"] .
-  op _==_ : Exp Exp -> Exp [prec 37 format (d b o d) metadata "seqstrict"] .
-  op not_ : Exp -> Exp [prec 55 format (b o d) metadata "strict"] .
-  op _and_ : Exp Exp -> Exp [prec 55 format (d b o d) metadata "strict(1)"] .
-
-  op skip : -> Stmt [format (b o)] .
-  op if_then_else_ : Exp Stmt Stmt -> Stmt [prec 59 format (b o bni n++i bn--i n++i --) metadata "strict(1)"] .
-  op _;_ : Stmt Stmt -> Stmt [prec 122 gather (e E) format (d b noi d)] .
-  op while_do_ : Exp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
-  op output_ : Exp -> Stmt [prec 59 format (b o d) metadata "strict"] .
-
-  op ++_ : Id -> Exp [prec 30 format (b o d)] .
-  op _:=_ : Exp Exp -> Stmt [prec 40 format (d b o d) metadata "strict(2)"] .
-
-  op &_ : Id -> Exp [prec 30 format (b o d)] .
-  op *_ : Exp -> Exp [prec 30 format (b o d)] .
-  op malloc_ : Exp -> Exp [format (b o d) metadata "strict"] .
-  op free_ : Exp -> Stmt [format (b o d) metadata "strict"] .
-
-  op aspect : Stmt -> Stmt [format (b o)] .
-  --- We'd like to use λ and μ here but Maude has some bugs
-  --- in its unicode handling.
-  op \_->_ : List{Id} Exp -> Exp [prec 123 format (b o b o d)] .
-  op \Y_->_ : Id Exp -> Exp [prec 123 format (b o b o d)] .
-  op __ : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-
-  op {vars_;_} : List{Id} Stmt -> Stmt [prec 121 format (y b o b noi y o)] .
-
-  op callcc : Exp -> Exp [format (b o) metadata "strict"] .
-  
-  op randomBool : -> Exp [format (b o)] .
-
-  op spawn_ : Stmt -> Stmt [prec 59 format(b on++i --)] .
-  op acquire_ : Exp -> Stmt [format (b o d) metadata "strict"] .
-  op release_ : Exp -> Stmt [format (b o d) metadata "strict"] .
-  op rv_ : Exp -> Stmt [format (b o d) metadata "strict"] .
-
-  op new-agent_ : Stmt -> Exp [format (b o d)] .
-  op me : -> Exp [format (b o)] .
-  op parent : -> Exp [format (b o)] .
-  op receive-from_ : Exp -> Exp [format (b o d) metadata "strict"] .
-  op receive : -> Exp [format (b o)] .
-  op send-asynch__ : Exp Exp -> Stmt [format (b o d d) metadata "strict"] .
-  op send-synch__ : Exp Exp -> Stmt [format (b o d d) metadata "strict"] .
-
-  op halt-thread : -> Stmt [format (b o)] .
-  op halt-agent : -> Stmt [format (b o)] .
-  op halt-system : -> Stmt [format (b o)] .
-
---- Example programs
-  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id [format (g o)] .
-  ops fib even limit nr steps : -> Id [format (g o)] .
-
----( op pFib : -> Stmt .
-  eq pFib = {
-    vars x, fib ;
-    (fib := (\Y f -> \ n -> if n == 0 then 0 else if n == 1 then 1 else f(n + (-1)) + f(n + (-2))) ;
-    x := fib 15 ;
-    output(x))
-  } .)
-
-  op pRandom : -> Stmt .
-  eq pRandom = {
-    vars x, y, z ;
-    (x := randomBool ;
-    y := randomBool ;
-    z := randomBool ;
-    output(x) ;
-    output(y) ;
-    output(z))
-  } .
-
-  op pSum : -> Stmt .
-  eq pSum = {
-    vars n, s, i ;
-    (n := 1000 ;
-    s := 0 ;
-    i := n ;
-    while 1 <= i do (
-        s := s + i ;
-        i := i + -1
-    ) ;
-    output(s))
-  } .
-
-  --- http://www.research.att.com/~njas/sequences/A006577
-  op pCollatz : -> Stmt .
-  eq pCollatz = {
-    vars even, limit, nr ;
-    (even := (\ x -> x % 2 == 0) ;
-    limit := 10 ;
-    while ++ nr <= limit do ({
-        vars n, steps ;
-        (n := nr ;
-        spawn(
-            while not(n == 1) do (
-                if even n then n := n / 2 else n := 3 * n + 1 ;
-                steps := steps + 1
-            ) ;
-            output(steps)
-        ))
-    }))
-  } .
 
 --- Configuration
   ops agents agent threads thread k env holds store ptr
       nextLoc aspect busy me parent output messages message
       sender receiver val nextAgent result
       : -> CellLabel .
-
-  var K : K .
-  vars Env Holds Store Ptr : Map .
-  vars NextLoc NextAgent Me Parent Sender Receiver : Nat .
-  var Busy : Bag .
-  var Val : Exp .
-  var Output : List .
 
   mb configuration
     < T >
@@ -160,7 +31,7 @@ mod CHALLENGE is
                 </ threads >
                 < store > .Map </ store >
                 < ptr > .Map </ ptr >
-                < nextLoc > NextLoc </ nextLoc >
+                < nextLoc > 0 </ nextLoc >
                 < aspect > .K </ aspect >
                 < busy > .Bag </ busy >
                 < me > 0 </ me >
@@ -205,6 +76,12 @@ mod CHALLENGE is
   op closure : List{Id} K Map -> Val .
   op restoreEnv : Map -> K .
 
+  var K : K .
+  vars Env Holds Store : Map .
+  vars Me Parent : Nat .
+  var Busy : Bag .
+  var Output : List .
+
   vars N N1 N2 L M : Nat .
   vars I I1 I2 : Int .
   vars S S1 S2 : Stmt .
@@ -231,6 +108,8 @@ mod CHALLENGE is
   mb rule [skip => .K] : KSentence .
   mb rule [if true then S1 else ? => S1] : KSentence .
   mb rule [if false then ? else S2 => S2] : KSentence .
+  mb rule [if' true then E else ? => E] : KSentence .
+  mb rule [if' false then ? else E => E] : KSentence .
 
   mb rule [S1 ; S2 => S1 ~> S2] : KSentence .
 
@@ -581,4 +460,9 @@ mod CHALLENGE is
   eq domMap(.Map) = .Bag .
   eq domMap((K |-> K' Map)) = BagItem(K) domMap(Map) .
 
+endm
+
+mod CHALLENGE is
+  including CHALLENGE-SEMANTICS .
+  including CHALLENGE-PROGRAMS .
 endm
