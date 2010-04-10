@@ -1,0 +1,20 @@
+The languages defined so far using the K framework can be found in the examples directory. For example, the directory examples/simple contains 2 directories, untyped containing the definition of the untyped version of the language, and typed which in turn contains three directories with definitions: static , for the static semantics, i.e., the type checker, dynamic , for the dynamically typed version of simple, and dynamic-typed-locations which is a variant of dynamic , in which the type information is maintained in the environment.
+
+Please update regularly using `svn up' from the base directory to benefit of the latest fixes and features.
+
+When writing new definitions: all definitions should load the k-prelude.maude file, and the semantics should include the K module. The name of the main module of a definition should be the capitalized version of the name of the file containing it.
+
+When adding new rules to a definition, keep in mind the following important restrictions: (1) never define two operations with the same name (but different arities), and (2) any operation should be applied on terms of sorts lower than those declared in the arity (that is, no subterm appearing in the definition should parse to a kind; if desired, overload the operations to extend their range).
+
+To compile a definition: execute the kcompile.sh script passing as parameter the name of the file containing the main module. If the compilation succeeds, the output would be placed in name-of-the-file-compiled.maude . Currently, the script only runs under Unix.
+
+Recommendations on running the script:
+- The Maude executable should be on the path and MAUDE_LIB should point to the location where prelude.maude resides
+- the script should be run from the directory where the definition resides, e.g., by providing the relative path to the script. The scrips should not be moved from the tools directory.
+
+Example of usage: from the examples/simple/untyped directory run the script as:
+ MAUDE_LIB=<maudeDir> ../../../tools/kcompile.sh simple-untyped.maude
+where <maudeDir> should be replaced by the path where prelude.maude reside Alternatively, you could set MAUDE_LIB in your .bash_profile and add the tools directory to the path, and run the script as:
+ kcompile.sh simple-untyped.maude
+
+Please report issues to Traian Serbanuta <tserban2@illinois.edu>.
