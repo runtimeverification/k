@@ -4,4 +4,4 @@ mod REMORSE-TEST is
 	including REMORSE .
 endm
 
-rew "pHelloWorld"(.List{K}) .
+rew eval("pHelloWorld"(.List{K})) .

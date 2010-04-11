@@ -38,10 +38,41 @@ endm
 mod REMORSE-SEMANTICS is
 	including K .
 	including REMORSE-SYNTAX .
-
+	including K-MAP-EXTRAS .
 	subsort Instruction Program < K .
+	subsort Nat < K .
 	
-	mb configuration .Bag : KSentence .
+	op store : -> CellLabel .
+	op stack : -> CellLabel .
+	op sentinel : -> K .
+	
+	mb configuration 
+		< T >
+			< k > .K </ k > 
+			< store > .Map </ store > 
+			< stack > .K </ stack >
+		</ T >
+		: KSentence .
+
+	op eval : Program -> Bag .
+	eq eval(P:Program) =
+		< T >
+			< k > P:Program ~> sentinel </ k > 
+			< store > .Map </ store > 
+			< stack > sentinel </ stack >
+		</ T > .
+		
+	mb rule [I:Instruction I':Instruction => I:Instruction ~> I':Instruction] : KSentence .
+	
+	--- op _To_ : Nat Nat -> List{K} .
+	--- op seq : -> KLabel .
+	--- mb rule [N:Nat To N':Nat => getList{K}(seq(N:Nat to N':Nat))] : KSentence .
+	--- op _to_ : Nat Nat -> K .
+	--- mb rule [N:Nat to N:Nat => N:Nat] : KSentence .
+	--- mb rule [N:Nat to N':Nat => N:Nat,, ((N:Nat +Nat 1) to N':Nat)] 
+		--- if N:Nat <Nat N':Nat 
+		--- : KSentence .
+	
 endm
 
 mod REMORSE is
