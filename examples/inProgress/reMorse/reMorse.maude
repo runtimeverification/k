@@ -1,0 +1,51 @@
+in ../../../k-prelude.maude
+
+mod REMORSE-SYNTAX is 
+	including PL-BUILTINS .
+	
+	sort Program .
+	sort Instruction .
+	subsort Instruction < Program .
+	
+	op __ : Program Program -> Program [assoc] .
+	op .. : -> Instruction .
+	op .- : -> Instruction .
+	op -. : -> Instruction .
+	op -- : -> Instruction .
+endm
+
+mod REMORSE-SYNTAX-TEST is
+	including REMORSE-SYNTAX .
+	
+	op pHelloWorld : -> Program .
+	eq pHelloWorld = 
+	--- 33dec is '!' in ascii
+	--- we start at register 1 and op 1
+	.. --- push 1 onto our stack
+	-. -. --- will now increase reg ptr by reg val
+	.. --- reg ptr 1 + 1 = 2
+	.. --- reg ptr 2 + 2 = 4
+	.. --- reg ptr 2 + 2 = 8
+	.. --- reg ptr 2 + 2 = 16
+	.. --- reg ptr 2 + 2 = 32
+	-. --- will now add stack byte and reg to stack
+	.. --- stack now contains 33
+	-- -- -- -- --- will now output ascii
+	.. --- should output '!'
+	.
+endm
+
+mod REMORSE-SEMANTICS is
+	including K .
+	including REMORSE-SYNTAX .
+
+	subsort Instruction Program < K .
+	
+	mb configuration .Bag : KSentence .
+endm
+
+mod REMORSE is
+	including REMORSE-SYNTAX .
+	including REMORSE-SEMANTICS .
+	including REMORSE-SYNTAX-TEST .
+endm

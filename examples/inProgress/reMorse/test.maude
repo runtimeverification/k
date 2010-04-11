@@ -1,0 +1,7 @@
+load reMorse-compiled
+
+mod REMORSE-TEST is
+	including REMORSE .
+endm
+
+rew "pHelloWorld"(.List{K}) .
