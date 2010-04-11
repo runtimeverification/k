@@ -145,7 +145,13 @@ mod CHALLENGE-SEMANTICS is
     < store >... L |-> [? => V] ...</ store >
     : KSentence .
 
-  --- TODO: pointer assignment
+  --- pointer assignment
+  mb context * [] := ? : KSentence .
+
+  mb rule
+    < k > [* L := V => .K] ...</ k >
+    < store >... L |-> [? => V] ...</ store >
+    : KSentence .
 
   --- variable reference
   mb rule
@@ -164,10 +170,15 @@ mod CHALLENGE-SEMANTICS is
     < k > [malloc(N) => L] ...</ k >
     < nextLoc > [L => L +Nat N] </ nextLoc >
     < ptr >... [.Map => L |-> N] ...</ ptr >
-    < store >... [.Map => N .. sdNat(L +Nat N, 1) |-> 0] ...</ store >
+    < store >... [.Map => L .. sdNat(L +Nat N, 1) |-> 0] ...</ store >
     : KSentence .
 
-  --- TODO: free
+  --- free
+  mb rule
+    < k > [free(L) => .K] ...</ k >
+    < ptr >... [L |-> N => .Map] ...</ ptr >
+    < store > [Store => Store -Map (L .. sdNat(L +Nat N, 1))] </ store >
+    : KSentence .
 
   --- aspect
   mb rule
@@ -333,12 +344,7 @@ mod CHALLENGE-SEMANTICS is
         </ message >]
     : KSentence .
 
-  --- TODO: I believe the following rules for synchronous messaging
-  --- suffer from the same context transformer bug as the halting rules
-  --- below. I expect the following two rules to compile, but they do
-  --- not, so they are commented out for the time being.
-
-  ---( send a message synchronously
+  --- send a message synchronously
   mb rule
     < agent >...
         < k > [send-synch N V => .K] ...</ k >
@@ -357,20 +363,14 @@ mod CHALLENGE-SEMANTICS is
         < me > N </ me >
     ...</ agent >
     : KSentence .
-  )
 
   --- halt thread
   mb rule [< k > halt-thread ...</ k > => < k > .K </ k >] : KSentence .
 
-  --- TODO: I believe a bug in the context transformers level prevents
-  --- the following halt rules to be less general then they could be.
-
   --- halt agent
   mb rule
     [< threads >...
-        < thread >...
-            < k > halt-agent ...</ k >
-        ...</ thread >
+        < k > halt-agent ...</ k >
     ...</ threads >
     => < threads > .Bag </ threads >]
     : KSentence .
@@ -378,13 +378,7 @@ mod CHALLENGE-SEMANTICS is
   --- halt system
   mb rule
     [< agents >...
-        < agent >...
-            < threads >...
-                < thread >...
-                    < k > halt-system ...</ k >
-                ...</ thread >
-            ...</ threads >
-        ...</ agent >
+        < k > halt-system ...</ k >
     ...</ agents >
     => < agents > .Bag </ agents >]
     : KSentence .
@@ -459,6 +453,16 @@ mod CHALLENGE-SEMANTICS is
   op domMap : Map -> Bag .
   eq domMap(.Map) = .Bag .
   eq domMap((K |-> K' Map)) = BagItem(K) domMap(Map) .
+
+  op _inList{K}_ : K List{K} -> Bool .
+  eq K:K inList{K} (K1:K,, K:K,, K2:K) = true .
+  eq K:K inList{K} K':K = false [owise] .
+
+  var Kl : List{K} .
+  op _-Map_ : Map List{K} -> Map .
+  eq Map -Map .List{K} = Map .
+  eq .Map -Map Kl = .Map .
+  eq (K |-> K' Map) -Map Kl = if K inList{K} Kl then .Map else (K |-> K') fi (Map -Map Kl) .
 
 endm
 

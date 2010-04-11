@@ -55,4 +55,32 @@ mod CHALLENGE-PROGRAMS is
     }))
   } .
 
+  op pPointer : -> Stmt .
+  eq pPointer = {
+    vars x, p ;
+    (x := 4242 ;
+    p := & x ;
+    output(p) ;
+    output(* p) ;
+    * p := 1234 ;
+    output(x))
+  } .
+
+  op pReverse : -> Stmt .
+  eq pReverse = {
+    vars n, i, p ;
+    (n := 10 ; i := 0 ;
+    p := malloc n ;
+    while i <= n + (-1) do (
+        * (p + i) := i ;
+        i := i + 1
+    ) ;
+    i := n + (-1) ;
+    while 0 <= i do (
+        output(* (p + i)) ;
+        i := i + (-1)
+    ) ;
+    free(p))
+  } .
+
 endm

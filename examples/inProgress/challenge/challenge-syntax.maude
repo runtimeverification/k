@@ -36,7 +36,7 @@ mod CHALLENGE-SYNTAX is
   op _:=_ : Exp Exp -> Stmt [prec 40 format (d b o d) metadata "strict(2)"] .
 
   op &_ : Id -> Exp [prec 30 format (b o d)] .
-  op *_ : Exp -> Exp [prec 30 format (b o d)] .
+  op *_ : Exp -> Exp [prec 30 format (b o d) metadata "strict"] .
   op malloc_ : Exp -> Exp [format (b o d) metadata "strict"] .
   op free_ : Exp -> Stmt [format (b o d) metadata "strict"] .
 
