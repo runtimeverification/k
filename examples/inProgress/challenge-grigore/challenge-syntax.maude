@@ -1,0 +1,57 @@
+mod CHALLENGE-SYNTAX is including PL-INT + PL-ID .
+  sorts Exp Stmt .
+  subsorts Id Int Bool < Exp .
+
+  op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
+  op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op _/_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op _<=_ : Exp Exp -> Exp [prec 37 metadata "seqstrict"] .
+  op not_ : Exp -> Exp [prec 53 metadata "strict"] .
+  op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict(1)"] .
+  op ++_ : Id -> Exp [prec 0] .
+
+  op {} : -> Stmt .
+  op var_; : List{Id} -> Stmt [prec 2] .
+  op _=_; : Id Exp -> Stmt [prec 2 metadata "strict(2)"] .
+  op _; : Exp -> Stmt [prec 50 metadata "strict"] .
+  op if__else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
+  op while__ : Exp Stmt -> Stmt .
+  op __ : Stmt Stmt -> Stmt [prec 100 gather(e E)] .
+  op {_} : Stmt -> Stmt [gather(&)] .
+
+  op function_()_ : Id Stmt -> Decl .
+  op function_(_)_ : Id List{Id} Stmt -> Decl .
+  op _() : Exp -> Exp .
+  op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
+  op return_; : Exp -> Stmt [metadata "strict"] .
+  op read() : -> Exp .
+  op write(_); : Exp -> Stmt [metadata "strict"] .
+-----------------------------------------------------------------------------
+--- Lists should be eventually builtin; for now, they need to be declared ---
+-----------------------------------------------------------------------------
+--- List{Id}
+  sort List{Id} .  subsort Id < List{Id} .
+  op .List{Id} : -> List{Id} .
+  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] .
+--- List{Exp}
+  sort List{Exp} .  subsort Exp List{Id} < List{Exp} .
+  op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
+--- List{__}{{}}{Decl|Stmt}
+  sort List{Decl|Stmt} .  subsort Decl Stmt < List{Decl|Stmt} .
+-----------------------------------------------------------------------------
+endm
+
+
+mod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX .
+------------------------------------------------------------------------------------
+--- This module desugars some of SIMPLE's language constructs into the core ones ---
+--- The idea is that we only want to give semantics to the core constructs,      ---
+--- so we get rid of the derived ones asap (before we start the semantics        ---
+------------------------------------------------------------------------------------
+  vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
+  eq if E then S = if E then S else {} .
+  eq for X = E1 to E2 do S = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
+  eq function F() S = function F(.List{Id}) S .
+  op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
+  eq E() = E(.List{Id}) .
+endm
