@@ -54,14 +54,14 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
   mb rule [_`[`](T)[int] => T] : KSentence .
   mb rule [sizeOf(T []) => int] : KSentence .
   mb rule < k > [var X : T ; => stmt] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > : KSentence .
-  mb context var X[[]] : T ; : KSentence .
+  mb context var X[[HOLE]] : T ; : KSentence .
   mb rule < k > [var X[int] : _`[`](T) ; => stmt] ...</ k > < tenv > [TEnv => TEnv[_`[`](T) / X]] </ tenv > : KSentence .
   mb rule [{} => stmt] : KSentence .
   mb rule [{stmt} => stmt] : KSentence .
   mb rule [stmt stmt => stmt] : KSentence .
   mb rule < k > [X = T ; => stmt] ...</ k > < tenv >... X |-> T ...</ tenv >  : KSentence .
-  mb context ?[[]] = ? ; : KSentence .
-  mb context [][?] = ? ; : KSentence .
+  mb context ?[[HOLE]] = ? ; : KSentence .
+  mb context [HOLE][?] = ? ; : KSentence .
   mb rule [_`[`](T)[int] = T ; => stmt] : KSentence .
   mb rule [T ; => stmt] : KSentence .
   mb rule [if bool then stmt else stmt => stmt] : KSentence .

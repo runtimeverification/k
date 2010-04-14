@@ -47,7 +47,7 @@ mod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-S
   mb rule [sizeOf(array(?,?,N)) => N] : KSentence .
   mb rule < k > [var X : Tp ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env > < store >... [.Map => L |-> initVal(Tp)] ...</ store >
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
-  mb context var X[[]] : Tp[] ; : KSentence .
+  mb context var X[[HOLE]] : Tp[] ; : KSentence .
   mb rule < k > [var X[N] : _`[`](Tp) ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >
           < store >...[.Map => L |-> array(_`[`](Tp), sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
   mb rule [{} => .K] : KSentence .
@@ -55,8 +55,8 @@ mod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-S
   mb rule [S1 S2 => S1 ~> S2] : KSentence .
   mb rule < k > [X = V2 ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [V1 => V2] ...</ store >
        if typeOf(V1) ==Bool typeOf(V2) : KSentence .
-  mb context ?[[]] = ? ; : KSentence .
-  mb context [][?] = ? ; : KSentence .
+  mb context ?[[HOLE]] = ? ; : KSentence .
+  mb context [HOLE][?] = ? ; : KSentence .
   mb rule < k > [array(_`[`](Tp),L,M)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > 
        if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp : KSentence .
   mb rule [V ; => .K] : KSentence .
