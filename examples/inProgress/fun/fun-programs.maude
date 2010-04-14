@@ -77,7 +77,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
     and
       map f l = 
         if null? l
-        then []
+        then [.]
         else cons (f (car l)) (map f (cdr l))
     and
       factorial x =
@@ -166,7 +166,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
 --- p20 justifies the restriction that reference types should not be polymorphic
 --- the following runs in our semantics, but it should not type (elements of different types are added in *r)!
   eq p20 = (
-    let f = let r = ref []
+    let f = let r = ref [.]
             in fun x -> (r := cons x (* r) ; x)
     in if f true then f 3 else f 4
   ) .

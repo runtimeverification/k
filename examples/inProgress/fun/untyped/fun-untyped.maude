@@ -14,7 +14,7 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
   subsorts List{Exp} < K .
   subsort List{Val} < KResult .
 
-  ops env genv store fstack in out nextLoc : -> CellLabel .
+  ops env store nextLoc : -> CellLabel .
   mb configuration < T >
                      < k > .K </ k >
                      < env > .Map </ env >
@@ -50,8 +50,11 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
   mb rule [null? [.List{Id}] => true] : KSentence .
   mb rule [null? [V,Vl] => false] : KSentence .
   mb rule [cons V [Vl] => [V,Vl]] : KSentence .
----  mb rule < k > [ref V => L] ...</ k > < store >... [.Map
-
+  mb rule < k > [ref V => L] ...</ k > < store >... [.Map => L |-> V] ...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
+  mb rule < k > [& X => L] ...</ k > < env >... X |-> L ...</ env > : KSentence .
+  mb rule < k > [* L => V] ...</ k > < store >... L |-> V ...</ store > : KSentence .
+  mb rule < k > [L := V] ...</ k > < store >... L |-> [? => V] ...</ store > : KSentence .
+  mb rule [V1 ; V2 => V2] : KSentence .
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
