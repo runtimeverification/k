@@ -1,5 +1,4 @@
---- remove DESUGARED- below
-mod FUN-PROGRAMS is including FUN-DESUGARED-SYNTAX .
+mod FUN-PROGRAMS is including FUN-SYNTAX .
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
  
   ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15-1 p15-2 p16 p17 p18 p19 p20 p21 p22 : -> Exp .
@@ -190,29 +189,3 @@ mod FUN-PROGRAMS is including FUN-DESUGARED-SYNTAX .
   ) .
 
 endm
-
-rew p1 .
-rew p2 .
-rew p3 .
-rew p4 .
-rew p5 .
-rew p6 .
-rew p7 .
-rew p8 .
-rew p9 .
-rew p10 .
-rew p11 .
-rew p12 .
-rew p13 .
-rew p14 .
-rew p15-1 .
-rew p15-2 .
-rew p16 .
-rew p17 .
-rew p18 .
-rew p19 .
-rew p20 .
-rew p21 .
-rew p22 .
-
-q

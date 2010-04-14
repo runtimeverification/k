@@ -66,4 +66,5 @@ mod FUN-DESUGARED-SYNTAX is including FUN-SYNTAX .
   eq (E () = E') = (E = fun () -> E') .
   eq (E Xl = E') = (E = fun Xl -> E') .
   eq (Xl = El) and (Xl' = El') = ((Xl,Xl') = (El,El')) .
+  eq [] = [.List{Id}] .
 endm

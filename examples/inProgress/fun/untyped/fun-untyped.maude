@@ -3,5 +3,100 @@ in ../fun-syntax
 in ../fun-programs
 
 
-mod FUN-UNTYPED-SEMANTICS is including FUN-UNTYPED-DESUGARED-SYNTAX + K .
+mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
+--- We need values when we define the semantics
+  sort Val .
+  subsort Int Bool < Val < Exp .
+
+--- We have to subsort all the syntactic categories to K, and the lists of values
+--- to KResult.  Recall that the second argument of a function application is a list
+--- of expressions, so that becomes a result when it becomes a list of values
+  subsorts List{Exp} < K .
+  subsort List{Val} < KResult .
+
+  ops env genv store fstack in out nextLoc : -> CellLabel .
+  mb configuration < T >
+                     < k > .K </ k >
+                     < env > .Map </ env >
+                     < store > .Map </ store >
+                     < nextLoc > 0 </ nextLoc >
+                   </ T > : KSentence .
+
+  mb rule < k > [X => V] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> V ...</ store > : KSentence .
+  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
+  mb rule [_-_(I1,I2) => _-Int_(I1,I2)] : KSentence .
+  mb rule [I1 * I2 => I1 *Int I2] : KSentence .
+  mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
+  mb rule [I1 % I2 => I1 %Int I2] if I2 =/=Bool 0 : KSentence .
+  mb rule [- I => -Int I] : KSentence .
+  mb rule [I1 < I2 => I1 <Int I2] : KSentence .
+  mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
+  mb rule [I1 > I2 => I1 >Int I2] : KSentence .
+  mb rule [I1 >= I2 => I1 >=Int I2] : KSentence .
+  mb rule [V1 == V2 => V1 ==Bool V2] : KSentence .
+  mb rule [V1 != V2 => V1 =/=Bool V2] : KSentence .
+  mb rule [T1 and T2 => T1 andBool T2] : KSentence .
+  mb rule [T1 or T2 => T1 orBool T2] : KSentence .
+  mb rule [not(T) => notBool(T)] : KSentence .
+  op closure : Map List{Id} Exp -> Val .
+  mb rule < k > [fun Xl -> E => closure(Env,Xl,E)] ...</ k > < env > Env </ env > : KSentence .
+  mb rule < k > [closure(Env,Xl,E) Vl => [Vl] ~> bindTo(Xl) ~> E ~> env(Env')] ...</ k > < env > [Env' =>  Env] </ env > : KSentence .
+  mb rule < k > [let Xl = El in E => [El] ~> bindTo(Xl) ~> E ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
+  mb rule < k > [letrec Xl = El in E => bindTo(Xl) ~> [El] ~> writeTo(Xl) ~> E ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
+  mb rule [if true then E else ? => E] : KSentence .
+  mb rule [if false then ? else E => E] : KSentence .
+  mb rule [car [V,Vl] => V] : KSentence .
+  mb rule [cdr [V,Vl] => [Vl]] : KSentence .
+  mb rule [null? [.List{Id}] => true] : KSentence .
+  mb rule [null? [V,Vl] => false] : KSentence .
+  mb rule [cons V [Vl] => [V,Vl]] : KSentence .
+---  mb rule < k > [ref V => L] ...</ k > < store >... [.Map
+
+
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
+--- List{Val}
+  sort List{Val} .
+  subsort Val < List{Val} < List{Exp} .
+  op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
+--- length
+  op |_| : List{Id} -> Nat .  eq | .List{Id} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
+--- generate sequence of locations
+  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
+--- environment recovery
+  op env : Map -> K .
+  mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .
+  mb rule < k > [env(Env) => .K] ...</ k > < env > [? => Env] </ env > : KSentence [metadata "structural"] .
+  mb rule < k > V ~> [env(Env) => .K] ...</ k > < env > [? => Env] </ env > : KSentence [metadata "structural"] .
+--- bindTo and writeTo
+  ops bindTo writeTo : List{Id} -> K .
+  mb rule < k > [[Vl] ~> bindTo(Xl) => .K] ...</ k >
+          < env > [Env =>  Env[| Xl | from N / getList{K}(Xl)]] </ env >
+          < store >... [.Map => | Xl | from N |-> getList{K}(Vl)] ...</ store >
+          < nextLoc > [N => N +Nat | Xl |] </ nextLoc > : KSentence .
+  mb rule < k > [bindTo(Xl) => .K] ...</ k >
+          < env > [Env =>  Env[| Xl | from N / getList{K}(Xl)]] </ env >
+          < nextLoc > [N => N +Nat | Xl |] </ nextLoc > : KSentence .
+  mb rule < k > [[Vl] ~> writeTo(Xl) => .K] ...</ k >
+          < env > Env </ env >
+          < store > Sigma[getList{K}(Vl) / Env(getList{K}(Xl))] ...</ store > : KSentence .
+
+--- variable declarations; we put them last because we are going to infer them automatically in the future
+  var I I1 I2 : Int .  var X : Id .  var E : Exp .  var V V1 V2 : Val .  var Xl : List{Id} .  var El : List{Exp} .  var Vl : List{Val} .
+  var L N N1 N2 : Nat .  var T T1 T2 : Bool .  var Env Env' Sigma : Map .
 endm
+
+
+mod FUN-UNTYPED is including FUN-UNTYPED-SEMANTICS + FUN-PROGRAMS .
+--- make sure the name of the final module is the capitalized version of the file name
+  op run : -> Bag .
+--- After loading simple-untyped-compiled into maude, type "rew run .".  Replace pSorting by any other program, then recompile.
+  eq run = < T >
+             < k > p1 </ k >
+             < env > .Map </ env >
+             < store > .Map </ store >
+             < nextLoc > 0 </ nextLoc >
+           </ T > .
+endm
+
