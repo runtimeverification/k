@@ -47,15 +47,15 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
   mb rule [sizeOf(array(?,N)) => N] : KSentence .
   mb rule < k > [var X ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env > < store >... [.Map => L |-> 0] ...</ store >
           < nextLoc > [L => sNat(L)] </ nextLoc > : KSentence .
-  mb context var X[[]]; : KSentence .  --- If an array is declared, then calculate its size; then next rule gives its semantics
+  mb context var X[[HOLE]]; : KSentence .  --- If an array is declared, then calculate its size; then next rule gives its semantics
   mb rule < k > [var X[N] ; => .K] ...</ k > < env > [Env => Env[L / X]] </ env >
           < store >...[.Map => L |-> array(sNat L, N)]...</ store > < nextLoc > [L => sNat L +Nat N] </ nextLoc > : KSentence .
   mb rule [{} => .K] : KSentence .
   mb rule < k > [{Ss} => Ss ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
   mb rule [S1 S2 => S1 ~> S2] : KSentence .
   mb rule < k > [X = V ; => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => V] ...</ store > : KSentence .
-  mb context ?[[]] = ? ; : KSentence .  --- for array assignment, first evaluate the array and its index
-  mb context [][?] = ? ; : KSentence .
+  mb context ?[[HOLE]] = ? ; : KSentence .  --- for array assignment, first evaluate the array and its index
+  mb context [HOLE][?] = ? ; : KSentence .
   mb rule < k > [array(L,?)[N] = V ; => .K] ...</ k > < store > [Sigma => Sigma[V / (L +Int N)]] </ store > : KSentence .
   mb rule [V ; => .K] : KSentence .
   mb rule [if true then S else ? => S] : KSentence .
