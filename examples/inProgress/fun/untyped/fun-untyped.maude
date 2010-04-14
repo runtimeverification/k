@@ -84,7 +84,7 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
           < nextLoc > [N => N +Nat | Xl |] </ nextLoc > : KSentence .
   mb rule < k > [[Vl] ~> writeTo(Xl) => .K] ...</ k >
           < env > Env </ env >
-          < store > Sigma[getList{K}(Vl) / Env(getList{K}(Xl))] ...</ store > : KSentence .
+          < store > [Sigma => Sigma[getList{K}(Vl) / Env(getList{K}(Xl))]] ...</ store > : KSentence .
 
 --- variable declarations; we put them last because we are going to infer them automatically in the future
   var I I1 I2 : Int .  var X : Id .  var E : Exp .  var V V1 V2 : Val .  var Xl : List{Id} .  var El : List{Exp} .  var Vl : List{Val} .
