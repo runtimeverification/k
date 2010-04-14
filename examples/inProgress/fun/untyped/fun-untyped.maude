@@ -1,0 +1,7 @@
+in ../../../../k-prelude
+in ../fun-syntax
+in ../fun-programs
+
+
+mod FUN-UNTYPED-SEMANTICS is including FUN-UNTYPED-DESUGARED-SYNTAX + K .
+endm
