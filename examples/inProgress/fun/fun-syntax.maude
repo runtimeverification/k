@@ -21,7 +21,8 @@ mod FUN-SYNTAX is including PL-INT + PL-ID .
   op fun()->_ : Exp -> Exp .
   op fun_->_ : List{Id} Exp -> Exp .
   op fun_->_ : Exp Exp -> Exp .
-  op __ : List{Exp} List{Exp} -> Exp [prec 10 gather(E e) metadata "strict"] .
+  op __ : Exp List{Exp} -> Exp [prec 10 gather(E e) metadata "strict"] .
+  op __ : List{Exp} List{Exp} -> Exp [ditto] .
   op _() : List{Exp} -> Exp [prec 10] .
 
   sort Binding .

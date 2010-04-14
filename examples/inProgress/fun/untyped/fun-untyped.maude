@@ -54,7 +54,7 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
   mb rule < k > [ref V => L] ...</ k > < store >... [.Map => L |-> V] ...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
   mb rule < k > [& X => L] ...</ k > < env >... X |-> L ...</ env > : KSentence .
   mb rule < k > [* L => V] ...</ k > < store >... L |-> V ...</ store > : KSentence .
-  mb rule < k > [L := V] ...</ k > < store >... L |-> [? => V] ...</ store > : KSentence .
+  mb rule < k > [L := V => V]  ...</ k > < store >... L |-> [? => V] ...</ store > : KSentence .
   mb rule [V1 ; V2 => V2] : KSentence .
 
 ----------------------------------------------
@@ -97,7 +97,7 @@ mod FUN-UNTYPED is including FUN-UNTYPED-SEMANTICS + FUN-PROGRAMS .
   op run : -> Bag .
 --- After loading simple-untyped-compiled into maude, type "rew run .".  Replace pSorting by any other program, then recompile.
   eq run = < T >
-             < k > p1 </ k >
+             < k > p9 </ k >
              < env > .Map </ env >
              < store > .Map </ store >
              < nextLoc > 0 </ nextLoc >
