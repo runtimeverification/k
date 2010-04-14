@@ -248,6 +248,11 @@ mod K-MAP-EXTRAS is
   eq (K1,,NList1) |-> K2 = (K1 |-> K2) (NList1 |-> K2) .
   eq .List`{K`} |-> List = .Map .
 
+  op _(_) : Map List{K} -> List{K} [prec 0] .
+  eq Map((K1,,NList1)) = Map(K1),,Map(NList1) .
+  eq Map(.List{K}) = .List{K} .
+
+
   op _[_/_] : Map List{K} List{K} -> Map [ditto] .
   eq Map[(K1,,NList1) / (K2,, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
   eq Map[K2 / (K1,,NList1)] = (Map[K2 / K1])[K2 / NList1] .
