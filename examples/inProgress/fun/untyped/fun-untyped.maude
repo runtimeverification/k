@@ -40,10 +40,14 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
   mb rule [T1 or T2 => T1 orBool T2] : KSentence .
   mb rule [not(T) => notBool(T)] : KSentence .
   op closure : Map List{Id} Exp -> Val .
+---  mb rule < k > [fun X -> E => closure(Env,X,E)] ...</ k > < env > Env </ env > : KSentence .
   mb rule < k > [fun Xl -> E => closure(Env,Xl,E)] ...</ k > < env > Env </ env > : KSentence .
   mb rule < k > [closure(Env,Xl,E) Vl => [Vl] ~> bindTo(Xl) ~> E ~> env(Env')] ...</ k > < env > [Env' =>  Env] </ env > : KSentence .
   mb rule < k > [let Xl = El in E => [El] ~> bindTo(Xl) ~> E ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
   mb rule < k > [letrec Xl = El in E => bindTo(Xl) ~> [El] ~> writeTo(Xl) ~> E ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
+  op cc : Map K -> Val .
+  mb rule < k > [callcc V => V cc(Env,K)] ~> K </ k > < env > Env </ env > : KSentence .
+  mb rule < k > [cc(Env,K) V ~> ? => V ~> K] </ k > < env > [? => Env] </ env > : KSentence .
   mb rule [if true then E else ? => E] : KSentence .
   mb rule [if false then ? else E => E] : KSentence .
   mb rule [car [V,Vl] => V] : KSentence .
@@ -88,7 +92,7 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
 
 --- variable declarations; we put them last because we are going to infer them automatically in the future
   var I I1 I2 : Int .  var X : Id .  var E : Exp .  var V V1 V2 : Val .  var Xl : List{Id} .  var El : List{Exp} .  var Vl : List{Val} .
-  var L N N1 N2 : Nat .  var T T1 T2 : Bool .  var Env Env' Sigma : Map .
+  var L N N1 N2 : Nat .  var T T1 T2 : Bool .  var Env Env' Sigma : Map .  var K : K .
 endm
 
 
@@ -97,7 +101,7 @@ mod FUN-UNTYPED is including FUN-UNTYPED-SEMANTICS + FUN-PROGRAMS .
   op run : -> Bag .
 --- After loading simple-untyped-compiled into maude, type "rew run .".  Replace pSorting by any other program, then recompile.
   eq run = < T >
-             < k > p9 </ k >
+             < k > p29 </ k >
              < env > .Map </ env >
              < store > .Map </ store >
              < nextLoc > 0 </ nextLoc >

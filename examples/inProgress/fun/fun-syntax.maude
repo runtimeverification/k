@@ -1,7 +1,6 @@
 mod FUN-SYNTAX is including PL-INT + PL-ID .
-  sort Exp .
+  sorts Exp Binding .
   subsort Id Int Bool < Exp .
-
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _-_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
@@ -17,33 +16,24 @@ mod FUN-SYNTAX is including PL-INT + PL-ID .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
   op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
-
   op fun()->_ : Exp -> Exp .
-  op fun_->_ : List{Id} Exp -> Exp .
-  op fun_->_ : Exp Exp -> Exp .
-  op __ : Exp List{Exp} -> Exp [prec 10 gather(E e) metadata "strict"] .
-  op __ : List{Exp} List{Exp} -> Exp [ditto] .
+  op fun_->_ : List{Exp} Exp -> Exp .
+  op __ : List{Exp} List{Exp} -> Exp [prec 10 gather(E e) metadata "strict"] .
   op _() : List{Exp} -> Exp [prec 10] .
-
-  sort Binding .
+  op callcc_ : Exp -> Exp [metadata "strict"] .
   ops (let_in_) (letrec_in_) : Binding Exp -> Exp .
   op _=_ : List{Exp} List{Exp} -> Binding .
   op _and_ : Binding Binding -> Binding [prec 100 assoc] .
-
   op if_then_else_ : Exp Exp Exp -> Exp [metadata "strict(1)"] .
-
   op [] : -> Exp .
   op [_] : List{Exp} -> Exp [prec 0 metadata "strict hybrid"] .
   ops (car_) (cdr_) (null?_) : Exp -> Exp [prec 0 metadata "strict"] .
   op cons__ : Exp Exp -> Exp [metadata "strict"] .
-
   op ref_ : Exp -> Exp [metadata "strict"] .
   op &_ : Id -> Exp .
   op *_ : Exp -> Exp [metadata "strict"] .
   op _:=_ : Exp Exp -> Exp [metadata "strict"] .
-
   op _;_ : Exp Exp -> Exp [prec 110 gather(e E) metadata "seqstrict"] .
-
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------

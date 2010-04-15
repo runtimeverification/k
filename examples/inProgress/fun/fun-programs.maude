@@ -1,8 +1,8 @@
 mod FUN-PROGRAMS is including FUN-SYNTAX .
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
- 
-  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15-1 p15-2 p16 p17 p18 p19 p20 p21 p22 : -> Exp .
-  ops factorial max map : -> Id .
+
+  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15-1 p15-2 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26-1 p26-2 p27-1 p27-2 p27-3 p28 p29 : -> Exp .
+  ops factorial max map return throw aux continuation value exit goto : -> Id .
   ops f00 f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 : -> Id .
 
   eq p1 = (
@@ -186,6 +186,96 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
                   let f07 = fun x -> f06 (f06 x) in
                     let f08 = fun x -> f07 (f07 x) in
                        f08
+  ) .
+
+  eq p23 = (
+    callcc (fun k -> 7)
+  ) .
+
+  eq p24 = (
+    callcc (fun k -> k 7)
+  ) .
+
+  eq p25 = (
+    callcc (fun k -> (k 7) + 5)
+  ) .
+
+--- using callcc for returning
+  eq p26-1 = (
+    let f l return = (
+          if null?(l)
+          then return 0
+          else return 1 ;
+          0 / 0
+        )
+    in callcc (f [])
+  ) .
+
+  eq p26-2 = (
+    let f l = callcc (fun return -> (
+          if null?(l)
+          then return 0
+          else return 1 ;
+          0 / 0
+        ) )
+    in f [1,2]
+  ) .
+
+--- using callcc for exceptions
+--- the following is inefficient
+  eq p27-1 = (
+    letrec f l =
+             if null?(l)
+             then 1
+             else if (car l) == 0
+                  then 0
+                  else (car l) * f(cdr l)
+    in f [1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7,8,9]
+  ) .
+
+--- the following is efficient
+  eq p27-2 = (
+    let f l = callcc (fun throw -> (
+                letrec aux l =
+                         if null?(l)
+                         then 1
+                         else if (car l) == 0
+                              then throw 0
+                              else (car l) * aux(cdr l)
+                in aux l
+              ) )
+    in f [1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7,8,9]
+  ) .
+
+  op try_catch(_)_ : Exp Id Exp -> Exp .
+  var X : Id .  var E E' : Exp .
+--- assume that continuation and value are not free in E and E'
+  eq try E catch(X) E' = callcc (fun continuation -> (fun throw -> E)(fun value -> continuation ((fun X -> E') value))) .
+--- the following is also efficient and uses try/catch
+  eq p27-3 = (
+    let f l = try
+                letrec aux l =
+                         if null?(l)
+                         then 1
+                         else if (car l) == 0
+                              then throw 0
+                              else (car l) * aux(cdr l)
+                in aux l
+              catch(x)
+                x
+    in f [1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7,8,9]
+  ) .
+
+--- using callcc for looping
+  eq p29 = (
+   let goto = 0 and n = 0
+   in callcc (fun exit -> (
+        callcc (fun k -> (& goto := k)) ; --- "goto _" will jump here
+        if n < 100
+        then & n := n + 1
+        else exit n ;
+        goto 0
+      ) )
   ) .
 
 endm
