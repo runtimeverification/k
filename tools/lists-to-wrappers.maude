@@ -99,7 +99,7 @@ fmod LISTS-TO-WRAPPERS is
  op listsMetadata : Nat TypeList CTORSMap ~> AttrSet .
  eq listsMetadata(N, T Tl, CTORS (subsort T < T' .) |-> Q[Trm]) 
   = metadata("list(" + string(N,10) + ":" + string(Q) + ":" + string(T') + ")") 
-    listsMetadata(s N, Tl, CTORS (subsort T < T' .) |-> Trm).
+    listsMetadata(s N, Tl, CTORS (subsort T < T' .) |-> Q[Trm]).
  eq listsMetadata(N, T Tl, CTORS) = listsMetadata(s N, Tl, CTORS) [owise] .
  eq listsMetadata(N, nil, CTORS) = none .
 
