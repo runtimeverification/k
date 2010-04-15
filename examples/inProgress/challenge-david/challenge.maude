@@ -281,7 +281,7 @@ mod CHALLENGE-SEMANTICS is
 
   mb rule
     < k > [release V => .K] ...</ k >
-    < holds >... V |-> 0 ...</ holds >
+    < holds >... [V |-> 0 => .Map] ...</ holds >
     < busy >... [Bag(V) => .Bag] ...</ busy >
     : KSentence .
 
