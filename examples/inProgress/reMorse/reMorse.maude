@@ -64,11 +64,8 @@ mod REMORSE-SEMANTICS is
 		
 	mb rule [I:Instruction I':Instruction => I:Instruction ~> I':Instruction] : KSentence .
 	
-	--- op _To_ : Nat Nat -> List{K} .
-	--- op seq : -> KLabel .
-	--- mb rule [N:Nat To N':Nat => getList{K}(seq(N:Nat to N':Nat))] : KSentence .
-	--- op _to_ : Nat Nat -> K .
-	--- mb rule [N:Nat to N:Nat => N:Nat] : KSentence .
+	op _to_ : Nat Nat -> List{K} .
+	---eq N:Nat to N:Nat = N:Nat .
 	--- mb rule [N:Nat to N':Nat => N:Nat,, ((N:Nat +Nat 1) to N':Nat)] 
 		--- if N:Nat <Nat N':Nat 
 		--- : KSentence .
