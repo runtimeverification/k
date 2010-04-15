@@ -146,7 +146,7 @@ mod CHALLENGE-SEMANTICS is
     : KSentence .
 
   --- pointer assignment
-  mb context * [] := ? : KSentence .
+  mb context * [HOLE] := ? : KSentence .
 
   mb rule
     < k > [* L := V => .K] ...</ k >
