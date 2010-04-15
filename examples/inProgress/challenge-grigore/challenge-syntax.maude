@@ -1,6 +1,6 @@
-mod CHALLENGE-SYNTAX is including PL-INT + PL-ID .
+mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   sorts Exp Stmt .
-  subsorts Id Int Bool < Exp .
+  subsorts Bool Int Float Id < Exp .
 
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
@@ -8,36 +8,70 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-ID .
   op _<=_ : Exp Exp -> Exp [prec 37 metadata "seqstrict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict(1)"] .
+  op randomBool : -> Exp .
+
+  op vars_; : List{Id} -> Stmt [prec 2] .
+  op _:=_ : Exp Exp -> Exp [prec 80 gather (e E) metadata "strict(2)"] .
   op ++_ : Id -> Exp [prec 0] .
 
   op {} : -> Stmt .
-  op var_; : List{Id} -> Stmt [prec 2] .
-  op _=_; : Id Exp -> Stmt [prec 2 metadata "strict(2)"] .
-  op _; : Exp -> Stmt [prec 50 metadata "strict"] .
-  op if__else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
-  op while__ : Exp Stmt -> Stmt .
-  op __ : Stmt Stmt -> Stmt [prec 100 gather(e E)] .
   op {_} : Stmt -> Stmt [gather(&)] .
+  op __ : Stmt Stmt -> Stmt [prec 100 gather(e E)] .
+  op _; : Exp -> Stmt [prec 90 metadata "strict"] .
+  op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
+  op while_do_ : Exp Stmt -> Stmt .
+---  op __ : Stmt Exp -> Exp [prec 100 gather(e E)] .
+  
+--- Pointers
+  op malloc(_) : Exp -> Exp [metadata "strict"] .
+  op free(_); : Exp -> Stmt [metadata "strict"] .
+  op &_ : Id -> Exp .
+  op *_ : Exp -> Exp [metadata "strict"] .
 
-  op function_()_ : Id Stmt -> Decl .
-  op function_(_)_ : Id List{Id} Stmt -> Decl .
+--- Functions
+  op lambda_._ : List{Id} Exp -> Exp .
+  op return_; : Exp -> Stmt [metadata "strict"] .
+  op mu_._ : Id Exp -> Exp .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
-  op return_; : Exp -> Stmt [metadata "strict"] .
+  op callcc_ : Exp -> Exp .
+  op aspect_ : Stmt -> Stmt .
   op read() : -> Exp .
-  op write(_); : Exp -> Stmt [metadata "strict"] .
+  op output_; : Exp -> Stmt [metadata "strict"] .
+
+ --- Threads
+  op spawn_ : Stmt -> Stmt .
+  op acquire_; : Exp -> Stmt [metadata "strict"] .
+  op release_; : Exp -> Stmt [metadata "strict"] .
+  op rv_; : Exp -> Stmt [metadata "strict"] .
+  op halt-thread; : -> Stmt .
+
+--- Agents
+  op new-agent_ : Stmt -> Exp .
+  op me : -> Exp .
+  op parent : -> Exp .
+  op receive : -> Exp .
+  op receive-from_ : Exp -> Exp [metadata "strict"] .
+  op send-asynch(_,_); : Exp Exp -> Stmt [metadata "strict"] .
+  op send-synch(_,_); : Exp Exp -> Stmt [metadata "strict"] .
+  op halt-agent; : -> Stmt .
+
+--- Reflection
+  op quote_ : Exp -> Exp .
+  op unquote_ : Exp -> Exp .
+  op eval_ : Exp -> Exp [metadata "strict"].
+
+ 
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
   sort List{Id} .  subsort Id < List{Id} .
-  op .List{Id} : -> List{Id} .
-  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] .
+  op `(`) : -> List{Id} .
+  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: `(`)] .
 --- List{Exp}
   sort List{Exp} .  subsort Exp List{Id} < List{Exp} .
   op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
---- List{__}{{}}{Decl|Stmt}
-  sort List{Decl|Stmt} .  subsort Decl Stmt < List{Decl|Stmt} .
 -----------------------------------------------------------------------------
 endm
 
@@ -49,9 +83,5 @@ mod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX .
 --- so we get rid of the derived ones asap (before we start the semantics        ---
 ------------------------------------------------------------------------------------
   vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
-  eq if E then S = if E then S else {} .
-  eq for X = E1 to E2 do S = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
-  eq function F() S = function F(.List{Id}) S .
-  op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
-  eq E() = E(.List{Id}) .
+  eq E() = E(`(`)) .
 endm
