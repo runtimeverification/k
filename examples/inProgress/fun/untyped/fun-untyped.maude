@@ -11,8 +11,7 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
 --- We have to subsort all the syntactic categories to K, and the lists of values
 --- to KResult.  Recall that the second argument of a function application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
-  subsorts List{Exp} < K .
-  op Binding : Binding -> K [metadata "builtin wrapper"] .
+  subsort List{Exp} Binding < K .
   subsort List{Val} < KResult .
 
   ops env store nextLoc : -> CellLabel .
@@ -40,7 +39,6 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
   mb rule [T1 or T2 => T1 orBool T2] : KSentence .
   mb rule [not(T) => notBool(T)] : KSentence .
   op closure : Map List{Id} Exp -> Val .
----  mb rule < k > [fun X -> E => closure(Env,X,E)] ...</ k > < env > Env </ env > : KSentence .
   mb rule < k > [fun Xl -> E => closure(Env,Xl,E)] ...</ k > < env > Env </ env > : KSentence .
   mb rule < k > [closure(Env,Xl,E) Vl => [Vl] ~> bindTo(Xl) ~> E ~> env(Env')] ...</ k > < env > [Env' =>  Env] </ env > : KSentence .
   mb rule < k > [let Xl = El in E => [El] ~> bindTo(Xl) ~> E ~> env(Env)] ...</ k > < env > Env </ env > : KSentence .
@@ -71,7 +69,7 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
 --- length
   op |_| : List{Id} -> Nat .  eq | .List{Id} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
 --- generate sequence of locations
-  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
+  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = (N1,,(N2 from sNat N1)) .
 --- environment recovery
   op env : Map -> K .
   mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .

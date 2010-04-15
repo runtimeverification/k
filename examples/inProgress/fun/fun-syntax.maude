@@ -23,7 +23,7 @@ mod FUN-SYNTAX is including PL-INT + PL-ID .
   op callcc_ : Exp -> Exp [metadata "strict"] .
   ops (let_in_) (letrec_in_) : Binding Exp -> Exp .
   op _=_ : List{Exp} List{Exp} -> Binding .
-  op _and_ : Binding Binding -> Binding [prec 100 assoc] .
+  op _&&&_ : Binding Binding -> Binding [prec 100 assoc] .
   op if_then_else_ : Exp Exp Exp -> Exp [metadata "strict(1)"] .
   op [] : -> Exp .
   op [_] : List{Exp} -> Exp [prec 0 metadata "strict hybrid"] .
@@ -56,6 +56,6 @@ mod FUN-DESUGARED-SYNTAX is including FUN-SYNTAX .
   eq E() = E(.List{Id}) .
   eq (E () = E') = (E = fun () -> E') .
   eq (E Xl = E') = (E = fun Xl -> E') .
-  eq (Xl = El) and (Xl' = El') = ((Xl,Xl') = (El,El')) .
+  eq (Xl = El) &&& (Xl' = El') = ((Xl,Xl') = (El,El')) .
   eq [] = [.List{Id}] .
 endm
