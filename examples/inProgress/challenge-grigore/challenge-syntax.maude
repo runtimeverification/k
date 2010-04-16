@@ -31,14 +31,13 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
 
 --- Functions
   op lambda_._ : List{Id} Exp -> Exp .
-  op return_; : Exp -> Stmt [metadata "strict"] .
   op mu_._ : Id Exp -> Exp .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
-  op callcc_ : Exp -> Exp .
-  op aspect_ : Stmt -> Stmt .
+  op callcc_ : Exp -> Exp [metadata "strict"] .
+  op aspect_; : Stmt -> Stmt .
   op read() : -> Exp .
-  op output_; : Exp -> Stmt [metadata "strict"] .
+  op print(_); : Exp -> Stmt [metadata "strict"] .
 
  --- Threads
   op spawn_ : Stmt -> Stmt .

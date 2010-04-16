@@ -9,11 +9,14 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   subsort Bool Int Float < Val < Exp .
   subsort List{Val} < KResult .
 
-  ops env store nextLoc ptr fstack : -> CellLabel .
+  ops env store nextLoc ptr ---(fstack) input output  aspect : -> CellLabel .
   mb configuration < T > < k > .K </ k > < env > .Map </ env > 
-     < fstack > .List </ fstack >
+---     < fstack > .List </ fstack >
      < store > .Map </ store > < nextLoc > 0 </ nextLoc > 
      < ptr > .Map </ ptr >
+     < aspect > .K </ aspect >
+     < input > .List </ input >
+     < output > .List </ output >
    </ T > : KSentence .
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [I1 + F2 => floatConversion(I1) +Float F2] : KSentence .
@@ -61,6 +64,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
    : KSentence .
 
   mb rule [V ; => .K] : KSentence .
+  mb rule [_;_(S, E) => S ~> E] : KSentence .
   mb rule [S1 S2 => S1 ~> S2] : KSentence [metadata "structural"] .
 
   mb rule [{} => .K] : KSentence [metadata "structural"] .
@@ -92,10 +96,18 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   
 --- Functions
 
-  op closure : List{Id} Exp Map -> Val .
+  mb rule < k > [aspect S ; => .K] ...</ k > 
+          < aspect > [? => S] </ aspect > : KSentence .
+  op closure : List{Id} K Map -> Val .
+  mb rule < k > [lambda Xl . E => closure(Xl, (S ~> E), Env)] ...</ k >
+          < env > Env </ env > < aspect > S </ aspect > : KSentence .
+  mb rule < k > [_`(_`)(closure(Xl, E, Env),Vl) => E ~> env(Env')] ...</ k >
+    < env > [Env' => Env[| Xl | from N / getList{K}(Xl)]] </ env >
+    < store >... [.Map => | Xl | from N |-> getList{K}(Vl)] </ store >
+    < nextLoc > [N => N +Nat | Xl |] </ nextLoc > 
+    : KSentence .
+---(
   op `(_`,_`) : K Map -> ListItem .
-  mb rule < k > [lambda Xl . E => closure(Xl, E, Env)] ...</ k >
-          < env > Env </ env > : KSentence .
   mb rule < k > [_`(_`)(closure(Xl, E, Env),Vl) ~> K => E] </ k >
     < env > [Env' => Env[| Xl | from N / getList{K}(Xl)]] </ env >
     < fstack > [.List => (K,Env)] ...</ fstack >
@@ -105,7 +117,19 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   mb rule < k > V ~> [.K => K] </ k >
           < env > [? => Env] </ env >
           < fstack > [(K,Env) => .List] ...</ fstack > : KSentence . 
+---)
 
+   op cc : K Map -> Val .
+   mb rule < k > [callcc V => _`(_`)(V, cc(K, Env))] ~> K </ k > 
+           < env > Env </ env > : KSentence .
+   mb rule < k > [_`(_`)(cc(K, Env), V) ~> ? => V ~> K] </ k >
+           < env > [? => Env] </ env > : KSentence .
+   mb rule < k > [mu X . E => vars X ; ~> X := E] ...</ k > : KSentence .
+
+   mb rule < k > [read() => I] ...</ k >
+           < input > [ListItem(I) => .List] ...</ input > : KSentence .
+   mb rule < k > [print(V); => .K] ...</ k >
+           < output >... [.List => ListItem(V)] </ output > : KSentence .
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
@@ -142,16 +166,19 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   var Map : Map . var K K' : K . var Kl : List{K} .
 endm
 
-
-
 mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
   op run : KLabel -> Bag .
-  eq run(L:KLabel) = < T > < k > L:KLabel(.List{K}) </ k > 
+  eq run(L:KLabel) = run(L:KLabel,.List{K}) .
+  op run : KLabel List{K} -> Bag .
+  eq run(L:KLabel,L:List{K}) = < T > < k > L:KLabel(.List{K}) </ k > 
      < env > .Map </ env >
-     < fstack > .List </ fstack >
+---     < fstack > .List </ fstack >
      < store > .Map </ store >
      < nextLoc > 0 </ nextLoc >
      < ptr > .Map </ ptr >
+     < aspect > .K </ aspect >
+     < input > List(L:List{K}) </ input >
+     < output > .List </ output >
    </ T > .
 endm
 
