@@ -18,6 +18,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op {_} : Stmt -> Stmt [gather(&)] .
   op __ : Stmt Stmt -> Stmt [prec 100 gather(e E)] .
   op _; : Exp -> Stmt [prec 90 metadata "strict"] .
+  op _;_ : Stmt Exp -> Exp [prec 110] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op while_do_ : Exp Stmt -> Stmt .
 ---  op __ : Stmt Exp -> Exp [prec 100 gather(e E)] .
