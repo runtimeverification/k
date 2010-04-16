@@ -11,14 +11,14 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op randomBool : -> Exp .
 
   op vars_; : List{Id} -> Stmt [prec 2] .
-  op _:=_ : Exp Exp -> Exp [prec 80 gather (e E) metadata "strict(2)"] .
+  op _=_ : Exp Exp -> Exp [prec 80 gather (e E) metadata "strict(2)"] .
   op ++_ : Id -> Exp [prec 0] .
 
   op {} : -> Stmt .
   op {_} : Stmt -> Stmt [gather(&)] .
   op __ : Stmt Stmt -> Stmt [prec 100 gather(e E)] .
   op _; : Exp -> Stmt [prec 90 metadata "strict"] .
-  op _;_ : Stmt Exp -> Exp [prec 110] .
+---  op _;_ : Stmt Exp -> Exp [prec 110] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op while_do_ : Exp Stmt -> Stmt .
 ---  op __ : Stmt Exp -> Exp [prec 100 gather(e E)] .
@@ -30,16 +30,17 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op *_ : Exp -> Exp [metadata "strict"] .
 
 --- Functions
-  op lambda_._ : List{Id} Exp -> Exp .
+  op lambda_._ : List{Id} Stmt -> Exp .
   op mu_._ : Id Exp -> Exp .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
-  op callcc_ : Exp -> Exp [metadata "strict"] .
-  op aspect_; : Stmt -> Stmt .
+  op return_; : Exp -> Stmt [metadata "strict"] .
+  op callcc : Exp -> Exp [metadata "strict"] .
+  op aspect_ : Stmt -> Stmt .
   op read() : -> Exp .
   op print(_); : Exp -> Stmt [metadata "strict"] .
 
- --- Threads
+--- Threads
   op spawn_ : Stmt -> Stmt .
   op acquire_; : Exp -> Stmt [metadata "strict"] .
   op release_; : Exp -> Stmt [metadata "strict"] .

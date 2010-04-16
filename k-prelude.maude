@@ -261,6 +261,27 @@ mod K-MAP-EXTRAS is
   op $hasMapping : Map K -> Bool .
   eq $hasMapping ((M:Map (D:K |-> R:K)), D:K) = true .
   eq $hasMapping (M:Map, D:K) = false [owise] .
+
+  op keys_ : Map -> Bag .
+  eq keys(Map (K1 |-> K2)) = BagItem(K1) keys(Map) .
+  eq keys(.Map) = .Bag .
+endm
+
+mod K-BAG-EXTRAS is
+  including K-TECHNIQUE .
+  including PL-BOOL .
+  var K : K . var Bag Bag' : Bag . var BagItem : BagItem .
+  op _in_ : K Bag -> Bool .
+  eq K in Bag BagItem(K) = true .
+  eq K in Bag = false [owise] .
+
+  op _in_ : BagItem Bag -> Bool .
+  eq BagItem in Bag BagItem = true .
+  eq BagItem in Bag = false [owise] .
+
+  op _-_ : Bag Bag -> Bag .
+  eq .Bag - Bag = .Bag .
+  eq (BagItem Bag) - Bag' = if BagItem in Bag' then Bag - Bag' else BagItem (Bag - Bag') fi .
 endm
 
 mod K-LIST-EXTRAS is
@@ -281,6 +302,7 @@ mod K is
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
+  including K-BAG-EXTRAS .          --- operations on Maps with lists of keys
   including K-CONTEXTS .
 endm
 

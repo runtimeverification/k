@@ -9,15 +9,30 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   subsort Bool Int Float < Val < Exp .
   subsort List{Val} < KResult .
 
-  ops env store nextLoc ptr ---(fstack) input output  aspect : -> CellLabel .
-  mb configuration < T > < k > .K </ k > < env > .Map </ env > 
----     < fstack > .List </ fstack >
+  ops env store nextLoc ptr fstack input output  aspect thread holds busy agent message from to body threads me parent nextAgent : -> CellLabel .
+  mb configuration < T > 
+   < agent * > 
+    < threads >
+     < thread * >
+      < k > .K </ k > < env > .Map </ env > 
+      < fstack > .List </ fstack >
+      < aspect > .K </ aspect >
+      < holds > .Map </ holds >
+     </ thread * >
+    </ threads >
+     < busy > .Bag </ busy >
      < store > .Map </ store > < nextLoc > 0 </ nextLoc > 
      < ptr > .Map </ ptr >
-     < aspect > .K </ aspect >
-     < input > .List </ input >
-     < output > .List </ output >
-   </ T > : KSentence .
+     < me > 0 </ me >
+     < parent > .K </ parent > 
+   </ agent * >
+   < nextAgent > 1 </ nextAgent >
+   < message * > 
+      < from > .K </ from > < to > .K </ to > < body > .K </ body >
+   </ message * >
+   < input > .List </ input >
+   < output > .List </ output >
+  </ T > : KSentence .
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
   mb rule [I1 + F2 => floatConversion(I1) +Float F2] : KSentence .
   mb rule [F1 + I2 => F1 +Float floatConversion(I2)] : KSentence .
@@ -54,7 +69,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
         < env >... X |-> N ...</ env >
         < store >... N |-> V ...</ store > 
    : KSentence .
-  mb rule < k > [X := V => V] ...</ k >
+  mb rule < k > [X = V => V] ...</ k >
         < env >... X |-> N ...</ env >
         < store >... N |-> [? => V] ...</ store > 
    : KSentence .
@@ -64,7 +79,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
    : KSentence .
 
   mb rule [V ; => .K] : KSentence .
-  mb rule [_;_(S, E) => S ~> E] : KSentence .
+---  mb rule [_;_(S, E) => S ~> E] : KSentence .
   mb rule [S1 S2 => S1 ~> S2] : KSentence [metadata "structural"] .
 
   mb rule [{} => .K] : KSentence [metadata "structural"] .
@@ -90,46 +105,114 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
           < store > [Store => Store[undef/ N1 from N2]] </ store >
        : KSentence .
        
-  mb context * [HOLE] := ? : KSentence .
-  mb rule < k > [* N := V => V] ...</ k >
+  mb context * [HOLE] = ? : KSentence .
+  mb rule < k > [* N = V => V] ...</ k >
           < store >... N |-> [? => V] ...</ store > : KSentence .
   
 --- Functions
 
-  mb rule < k > [aspect S ; => .K] ...</ k > 
+  mb rule < k > [aspect S => .K] ...</ k > 
           < aspect > [? => S] </ aspect > : KSentence .
-  op closure : List{Id} K Map -> Val .
-  mb rule < k > [lambda Xl . E => closure(Xl, (S ~> E), Env)] ...</ k >
-          < env > Env </ env > < aspect > S </ aspect > : KSentence .
+  op closure : List{Id} Stmt Map -> Val .
+  mb rule < k > [lambda Xl . S1 => closure(Xl, (S2 S1), Env)] ...</ k >
+          < env > Env </ env > < aspect > S2 </ aspect > : KSentence .
+---(
   mb rule < k > [_`(_`)(closure(Xl, E, Env),Vl) => E ~> env(Env')] ...</ k >
     < env > [Env' => Env[| Xl | from N / getList{K}(Xl)]] </ env >
     < store >... [.Map => | Xl | from N |-> getList{K}(Vl)] </ store >
     < nextLoc > [N => N +Nat | Xl |] </ nextLoc > 
     : KSentence .
----(
+---)
   op `(_`,_`) : K Map -> ListItem .
-  mb rule < k > [_`(_`)(closure(Xl, E, Env),Vl) ~> K => E] </ k >
+  mb rule < k > [_`(_`)(closure(Xl, S, Env),Vl) ~> K => S] </ k >
     < env > [Env' => Env[| Xl | from N / getList{K}(Xl)]] </ env >
     < fstack > [.List => (K,Env)] ...</ fstack >
     < store >... [.Map => | Xl | from N |-> getList{K}(Vl)] </ store >
     < nextLoc > [N => N +Nat | Xl |] </ nextLoc > 
     : KSentence .
-  mb rule < k > V ~> [.K => K] </ k >
+  mb rule < k > [return V ; ~> ? => V ~> K] </ k >
           < env > [? => Env] </ env >
           < fstack > [(K,Env) => .List] ...</ fstack > : KSentence . 
----)
 
-   op cc : K Map -> Val .
-   mb rule < k > [callcc V => _`(_`)(V, cc(K, Env))] ~> K </ k > 
-           < env > Env </ env > : KSentence .
-   mb rule < k > [_`(_`)(cc(K, Env), V) ~> ? => V ~> K] </ k >
-           < env > [? => Env] </ env > : KSentence .
-   mb rule < k > [mu X . E => vars X ; ~> X := E] ...</ k > : KSentence .
+   op cc : K Map List -> Val .
+   mb rule < k > [callcc(V) => _`(_`)(V, cc(K, Env, FStack))] ~> K </ k > 
+           < env > Env </ env > 
+           < fstack > FStack </ fstack > : KSentence .
+   mb rule < k > [_`(_`)(cc(K, Env, FStack), V) ~> ? => V ~> K] </ k >
+           < env > [? => Env] </ env > 
+           < fstack > [? => FStack] </ fstack > : KSentence .
+   mb rule < k > [mu X . E => vars X ; ~> X = E] ...</ k > : KSentence .
 
    mb rule < k > [read() => I] ...</ k >
            < input > [ListItem(I) => .List] ...</ input > : KSentence .
    mb rule < k > [print(V); => .K] ...</ k >
            < output >... [.List => ListItem(V)] </ output > : KSentence .
+
+
+--- Threads
+   mb rule < thread >... < k > [spawn S => .K] ...</ k > < env > Env </ env > ...</ thread >
+          [.Bag => < thread > < k > S </ k > < env > Env </ env > < aspect > .K </ aspect > < holds > .Map </ holds > </ thread >] : KSentence .
+   mb rule [< thread >... < k > .K </ k > < holds > Holds </ holds > ...</ thread > => .Bag]
+           < busy > [Busy => Busy - keys(Holds)] </ busy > : KSentence .
+   mb rule [< thread >... < k > halt-thread; ...</ k > < holds > Holds </ holds > ...</ thread > => .Bag]
+           < busy > [Busy => Busy - keys(Holds)] </ busy > : KSentence .
+
+   mb rule < k > [acquire V ; => .K] ...</ k > < holds >... V |-> [N => sNat N] ...</ holds > : KSentence .
+   mb rule < k > [acquire V ; => .K] ...</ k > < holds >... [.Map => V |-> 0] ...</ holds > 
+        < busy > Busy [.Bag => BagItem(V)] </ busy > if notBool(V in Busy) : KSentence .
+   mb rule < k > [release V ; => .K] ...</ k > < holds >... V |-> [sNat N => N] ...</ holds > : KSentence .
+   mb rule < k > [release V ; => .K] ...</ k > < holds >... [V |-> 0 => .Map] ...</ holds > 
+        < busy >... [BagItem(V) => .Bag] ...</ busy > : KSentence .
+
+   mb rule < k > [rv V ; => .K] ...</ k > < k > [rv V ; => .K] ...</ k > : KSentence .
+
+--- Agents
+  mb rule < agent >... < k > [new-agent S => N2] ...</ k > 
+             < me > N1 </ me >
+          ...</ agent >
+     [.Bag => < agent > 
+    < threads >
+     < thread >
+      < k > S </ k > 
+      < env > .Map </ env >
+      < fstack > .List </ fstack >
+      < aspect > .K </ aspect >
+      < holds > .Map </ holds >
+     </ thread >
+    </ threads >
+    < busy > .Bag </ busy >
+    < store > .Map </ store >
+    < nextLoc > 0 </ nextLoc >
+    < ptr > .Map </ ptr >
+    < me > N2 </ me >
+    < parent > N1 </ parent >
+   </ agent >]
+   < nextAgent > [N2 => sNat N2] </ nextAgent > : KSentence .
+  mb rule [< agent >... < threads > .Bag </ threads > ...</ agent > 
+        => .Bag] : KSentence .
+  mb rule [< agent >... < k > halt-agent; ...</ k > ...</ agent > 
+        => .Bag] : KSentence .
+
+  mb rule < k > [me => N] ...</ k > < me > N </ me > : KSentence .
+  mb rule < k > [parent => N] ...</ k > < parent > N </ parent > : KSentence .
+  mb rule < me > N1 </ me > < k > [send-asynch(N2,V); => .K] ...</ k > 
+          [.Bag => < message > < from > N1 </ from > < to > N2 </ to > 
+                     < body > V </ body > </ message >]
+       : KSentence . 
+  mb rule < me > N </ me > < k > [receive => V] ...</ k > 
+          [< message >... < to > N </ to > < body > V </ body > ...</ message >
+        => .Bag] : KSentence . 
+  mb rule < me > N1 </ me > < k > [receive-from(N2) => V] ...</ k > 
+          [< message > < from > N2 </ from > < to > N1 </ to > < body > V </ body > 
+          </ message > => .Bag] : KSentence . 
+  mb rule < agent >... < me > N1 </ me > < k > [send-synch(N2,V); => .K] ...</ k >
+          ...</ agent >
+          < agent >... < me > N2 </ me > < k > [receive-from(N1) => V] ...</ k >
+          ...</ agent > : KSentence .
+   mb rule < agent >... < k > [send-synch(N2,V); => .K] ...</ k > ...</ agent >
+          < agent >... < me > N2 </ me > < k > [receive => V] ...</ k >
+          ...</ agent > : KSentence .
+ 
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
@@ -153,14 +236,15 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
 --- length
   op |_| : List{Id} -> Nat .  eq | () | = 0 .  eq | X,Xl | = sNat(| Xl |) .
 --- generate sequence of locations
-  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) .
+  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq (sNat N2 from N1) = (N1,,(N2 from sNat N1)) .
 
   vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .
   var X : Id . var Xl : List{Id} .  var E : Exp . var El : List{Exp} .
   vars S S1 S2 : Stmt .
   
   vars N N1 N2 : Nat .
-  var Env Env' Store : Map . 
+  var Env Env' Store : Map .  var Holds : Map . var Busy : Bag . 
+  var FStack : List .
   var V : Val .  var Vl : List{Val} .
 
   var Map : Map . var K K' : K . var Kl : List{K} .
@@ -170,15 +254,26 @@ mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
   op run : KLabel -> Bag .
   eq run(L:KLabel) = run(L:KLabel,.List{K}) .
   op run : KLabel List{K} -> Bag .
-  eq run(L:KLabel,L:List{K}) = < T > < k > L:KLabel(.List{K}) </ k > 
-     < env > .Map </ env >
----     < fstack > .List </ fstack >
-     < store > .Map </ store >
-     < nextLoc > 0 </ nextLoc >
-     < ptr > .Map </ ptr >
-     < aspect > .K </ aspect >
-     < input > List(L:List{K}) </ input >
-     < output > .List </ output >
-   </ T > .
+  eq run(L:KLabel,L:List{K}) = < T > 
+   < agent >
+    < threads >
+     < thread >
+      < k > L:KLabel(.List{K}) </ k > 
+      < env > .Map </ env >
+      < fstack > .List </ fstack >
+      < aspect > .K </ aspect >
+      < holds > .Map </ holds >
+     </ thread >
+    </ threads >
+    < busy > .Bag </ busy >
+    < store > .Map </ store >
+    < nextLoc > 0 </ nextLoc >
+    < ptr > .Map </ ptr >
+    < me > 0 </ me >
+   </ agent >
+   < nextAgent > 1 </ nextAgent >
+   < input > List(L:List{K}) </ input >
+   < output > .List </ output >
+  </ T > .
 endm
 

@@ -721,6 +721,8 @@ fmod META-LEVEL-EXTRAS is
   eq sortsLeq(M, nil,nil) = true .
 
   op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
+  eq findOp(M, OPDS, Q, nil, 'FiniteFloat)
+   =  (op Q : nil -> 'FiniteFloat [none] .) .
   eq findOp(M, OPDS, Q, nil, 'String)
    =  (op Q : nil -> 'String [none] .) .
   eq findOp(M, OPDS, Q, nil, 'Char)
