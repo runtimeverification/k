@@ -73,12 +73,6 @@ function runMaude {
   INPUT="$1"
   addLoadPrelude
   result=$( { stdout=$(echo "$INPUT" | $MAUDE ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
-OUTPUT=${result#*-k-maude-delimiter--}
-#echo "$OUTPUT"
-OUTPUT="${OUTPUT%---K-MAUDE-GENERATED-OUTPUT-END-----*}"
-#echo "$OUTPUT"
-OUTPUT="${OUTPUT#*---K-MAUDE-GENERATED-OUTPUT-BEGIN---}"
-#echo "$OUTPUT"
 ERROR=${result%-k-maude-delimiter--*}
   if [ -n "$ERROR" ]; then
     echo ". Error encountered when generating the output module: 
@@ -92,6 +86,22 @@ Stopping the compilation!"
     exit 1
   fi
  
+OUTPUT=${result#*-k-maude-delimiter--}
+#echo "$OUTPUT"
+  if [[ ! "$OUTPUT" =~ "---K-MAUDE-GENERATED-OUTPUT-END-----" ]]
+  then
+    echo ". Error encountered when generating the output module: 
+Input:
+$1
+Error ($2): 
+$OUTPUT
+Stopping the compilation!"
+    exit 1
+  fi
+OUTPUT="${OUTPUT%---K-MAUDE-GENERATED-OUTPUT-END-----*}"
+#echo "$OUTPUT"
+OUTPUT="${OUTPUT#*---K-MAUDE-GENERATED-OUTPUT-BEGIN---}"
+#echo "$OUTPUT"
   checkMaude "$3 $OUTPUT show module ."
 
   printf ". Done!\n"

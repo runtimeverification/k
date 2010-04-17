@@ -24,7 +24,8 @@ load strict-cxt2eqs-interface
 
 fmod COMPILE-META is
   including META-LEVEL .
-  var Q : Qid . var QIL : QidList . var M : Module . 
+  including META-MODULE-EXTRAS .
+  var Q : Qid . var QIL QIL' : QidList . var M : Module . 
 
   op wrapper : Qid -> Module .
   eq wrapper(Q) = (mod 'MKKR is including Q . 
@@ -44,6 +45,8 @@ fmod COMPILE-META is
              metaReduce(wrapper(qid(string(Q) + "-META")),
                         'compile[upTerm(M)])), error)
      , QIL) .
+  eq compile(moduleError(QIL), QIL') = moduleError(QIL) .
+
 endfm
 
 mod COMPILE-LOOP is
@@ -58,8 +61,9 @@ mod COMPILE-LOOP is
   op error : -> [Module] .
   op print : [Module] -> QidList .
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
-  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
-  crl ['compile Q QIL, idle, QIL'] 
-   => [QIL, idle, print(FM )] 
-   if FM := compile(Q) .
+
+  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) .
+  eq print(moduleError(QIL)) = QIL .
+  rl ['compile Q QIL, idle, QIL'] 
+   => [QIL, idle, print(compile(Q) )] .
 endm

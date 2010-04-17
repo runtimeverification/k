@@ -237,12 +237,25 @@ fmod DECL-META-PRETTY-PRINT is
   op eMetaPrettyPrint : Module Condition -> QidList .
   op eMetaPrettyPrint : Module Term -> QidList .
 
+  eq eMetaPrettyPrint(U, MAS) = eMetaPrettyPrint(U, MAS, false) .
+  eq eMetaPrettyPrint(U, EqS) = eMetaPrettyPrint(U, EqS, false) .
+  eq eMetaPrettyPrint(U, RlS) = eMetaPrettyPrint(U, RlS, false) .
+  eq eMetaPrettyPrint(U, Cond) = eMetaPrettyPrint(U, Cond, false) .
+  eq eMetaPrettyPrint(U, T) = eMetaPrettyPrint(U, T, false) .
+
+  op eMetaPrettyPrint : Module MembAxSet Bool -> QidList .
+  op eMetaPrettyPrint : Module EquationSet Bool -> QidList .
+  op eMetaPrettyPrint : Module RuleSet Bool -> QidList .
+  op eMetaPrettyPrint : Module Condition Bool -> QidList .
+  op eMetaPrettyPrint : Module Term Bool -> QidList .
+
   ---- error handling
   eq metaPrettyPrint(M, T, POS:PrintOptionSet) 
     = 'Module getName(M) 'contains 'errors. .
 
-  eq eMetaPrettyPrint(U, T) = metaPrettyPrint(U, T,  with-parens ---mixfix flat 
+  eq eMetaPrettyPrint(U, T, false) = metaPrettyPrint(U, T,  with-parens ---mixfix flat 
 format number rat) .
+  eq eMetaPrettyPrint(U, T, true) = metaPrettyPrint(U, T) .
  
   op eMetaPrettyPrint : Module AttrSet -> QidList .
   op eMetaPrettyPrint : NatList -> QidList .
@@ -271,6 +284,7 @@ format number rat) .
   vars T T' T'' T3 : Term .
   var  Cond : Condition .
   var  K : Kind .
+  var B : Bool .
 
 ---  ceq eMetaPrettyPrint(VE) = viewExp2QidList(VE) if not VE :: TypeList .
 
@@ -320,112 +334,112 @@ format number rat) .
        eMetaPrettyPrintVars(OPDS)) .
   eq eMetaPrettyPrintVars((none).OpDeclSet)  = nil .
 
-  eq eMetaPrettyPrint(M, (mb T : S [none] .) MAS)
-    = ('\n '\s '\s '\b 'mb '\o eMetaPrettyPrint(M, T) 
+  eq eMetaPrettyPrint(M, (mb T : S [none] .) MAS, B)
+    = ('\n '\s '\s '\b 'mb '\o eMetaPrettyPrint(M, T, B) 
                    '\b ': '\o eMetaPrettyPrint(S) '\b '. '\o 
-       eMetaPrettyPrint(M, MAS)) .
-  eq eMetaPrettyPrint(M, (mb T : S [AtS] .) MAS)
-    = ('\n '\s '\s '\b 'mb '\o eMetaPrettyPrint(M, T) 
+       eMetaPrettyPrint(M, MAS, B)) .
+  eq eMetaPrettyPrint(M, (mb T : S [AtS] .) MAS, B)
+    = ('\n '\s '\s '\b 'mb '\o eMetaPrettyPrint(M, T, B) 
                    '\b ': '\o eMetaPrettyPrint(S) 
                '\s '\b '`[ '\o eMetaPrettyPrint(M, AtS) '\b '`] '\s '. '\o 
-       eMetaPrettyPrint(M, MAS)) 
+       eMetaPrettyPrint(M, MAS, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, (cmb T : S if Cond [none] .) MAS)
-    = ('\n '\s '\s '\b 'cmb '\o eMetaPrettyPrint(M, T) 
+  eq eMetaPrettyPrint(M, (cmb T : S if Cond [none] .) MAS, B)
+    = ('\n '\s '\s '\b 'cmb '\o eMetaPrettyPrint(M, T, B) 
                    '\b ': '\o eMetaPrettyPrint(S) 
-       '\n '\s '\s '\s '\s '\b 'if '\o eMetaPrettyPrint(M, Cond) '\b '. '\o 
-       eMetaPrettyPrint(M, MAS)) .
-  eq eMetaPrettyPrint(M, (cmb T : S if Cond [AtS] .) MAS)
-    = ('\n '\s '\s '\b 'cmb '\o eMetaPrettyPrint(M, T) 
+       '\n '\s '\s '\s '\s '\b 'if '\o eMetaPrettyPrint(M, Cond, B) '\b '. '\o 
+       eMetaPrettyPrint(M, MAS, B)) .
+  eq eMetaPrettyPrint(M, (cmb T : S if Cond [AtS] .) MAS, B)
+    = ('\n '\s '\s '\b 'cmb '\o eMetaPrettyPrint(M, T, B) 
                    '\b ': '\o eMetaPrettyPrint(S) 
-       '\n '\s '\s '\s '\s '\b 'if '\o eMetaPrettyPrint(M, Cond) 
+       '\n '\s '\s '\s '\s '\b 'if '\o eMetaPrettyPrint(M, Cond, B) 
            '\s '\b '`[ '\o eMetaPrettyPrint(M, AtS) '\b '`] '\s '. '\o 
-       eMetaPrettyPrint(M, MAS)) 
+       eMetaPrettyPrint(M, MAS, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, (none).MembAxSet) = nil .
+  eq eMetaPrettyPrint(M, (none).MembAxSet, B) = nil .
 
-  eq eMetaPrettyPrint(M, ((eq T = T' [none] .) EqS))
-    = ('\n '\s '\s '\b 'eq '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T') '\b '\s '. 
+  eq eMetaPrettyPrint(M, ((eq T = T' [none] .) EqS), B)
+    = ('\n '\s '\s '\b 'eq '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T', B) '\b '\s '. 
        '\o 
-       eMetaPrettyPrint(M, EqS)) .
-  eq eMetaPrettyPrint(M, ((eq T = T' [AtS] .) EqS))
-    = ('\n '\s '\s '\b 'eq '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T') 
+       eMetaPrettyPrint(M, EqS, B)) .
+  eq eMetaPrettyPrint(M, ((eq T = T' [AtS] .) EqS), B)
+    = ('\n '\s '\s '\b 'eq '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T', B) 
            '\s '\b '`[ '\o eMetaPrettyPrint(M, AtS) '\b '`] '\s '. '\o 
-       eMetaPrettyPrint(M, EqS)) 
+       eMetaPrettyPrint(M, EqS, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, ((ceq T = T' if Cond [none] .) EqS))
-    = ('\n '\s '\s '\b 'ceq '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T') 
-       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond) '\b '\s '.
+  eq eMetaPrettyPrint(M, ((ceq T = T' if Cond [none] .) EqS), B)
+    = ('\n '\s '\s '\b 'ceq '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T', B) 
+       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond, B) '\b '\s '.
        '\o
-       eMetaPrettyPrint(M, EqS)) .
-  eq eMetaPrettyPrint(M, ((ceq T = T' if Cond [AtS] .) EqS))
-    = ('\n '\s '\s '\b 'ceq '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T') 
-       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond) 
+       eMetaPrettyPrint(M, EqS, B)) .
+  eq eMetaPrettyPrint(M, ((ceq T = T' if Cond [AtS] .) EqS), B)
+    = ('\n '\s '\s '\b 'ceq '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '= '\s '\o eMetaPrettyPrint(M, T', B) 
+       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond, B) 
            '\s '\b '`[ '\o eMetaPrettyPrint(M, AtS) '\b '`] '\s '. '\o
-       eMetaPrettyPrint(M, EqS)) 
+       eMetaPrettyPrint(M, EqS, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, (none).EquationSet) = nil .
+  eq eMetaPrettyPrint(M, (none).EquationSet, B) = nil .
 
-  eq eMetaPrettyPrint(M, ((rl T => T' [none] .) RlS))
-    = ('\n '\s '\s '\b 'rl '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T') '\b '\s '. 
+  eq eMetaPrettyPrint(M, ((rl T => T' [none] .) RlS), B)
+    = ('\n '\s '\s '\b 'rl '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T', B) '\b '\s '. 
        '\o
-       eMetaPrettyPrint(M, RlS)) .
-  eq eMetaPrettyPrint(M, ((rl T => T' [AtS] .) RlS))
-    = ('\n '\s '\s '\b 'rl '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T') 
+       eMetaPrettyPrint(M, RlS, B)) .
+  eq eMetaPrettyPrint(M, ((rl T => T' [AtS] .) RlS), B)
+    = ('\n '\s '\s '\b 'rl '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T', B) 
            '\s '\b '`[ '\o eMetaPrettyPrint(M, AtS) '\b '`] '\s '. '\o
-       eMetaPrettyPrint(M, RlS)) 
+       eMetaPrettyPrint(M, RlS, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, ((crl T => T' if Cond [none] .) RlS))
-    = ('\n '\s '\s '\b 'crl '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T') 
-       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond) '\b '\s '.
+  eq eMetaPrettyPrint(M, ((crl T => T' if Cond [none] .) RlS), B)
+    = ('\n '\s '\s '\b 'crl '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T', B) 
+       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond, B) '\b '\s '.
        '\o
-       eMetaPrettyPrint(M, RlS)) .
-  eq eMetaPrettyPrint(M, ((crl T => T' if Cond [AtS] .) RlS))
-    = ('\n '\s '\s '\b 'crl '\s '\o eMetaPrettyPrint(M, T) 
-       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T') 
-       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond) 
+       eMetaPrettyPrint(M, RlS, B)) .
+  eq eMetaPrettyPrint(M, ((crl T => T' if Cond [AtS] .) RlS), B)
+    = ('\n '\s '\s '\b 'crl '\s '\o eMetaPrettyPrint(M, T, B) 
+       '\n '\s '\s '\s '\s '\b '=> '\o '\s eMetaPrettyPrint(M, T', B) 
+       '\n '\s '\s '\s '\s '\b 'if '\o '\s eMetaPrettyPrint(M, Cond, B) 
            '\s '\b '`[ '\o eMetaPrettyPrint(M, AtS) '\b '`] '\s '. '\o
-       eMetaPrettyPrint(M, RlS)) 
+       eMetaPrettyPrint(M, RlS, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, (none).RuleSet) = nil .
+  eq eMetaPrettyPrint(M, (none).RuleSet, B) = nil .
 
-  eq eMetaPrettyPrint(M, T = 'true.Bool /\ Cond)
-   =  (eMetaPrettyPrint(M, T)'\b 
-      '/\ '\o eMetaPrettyPrint(M, Cond)) 
+  eq eMetaPrettyPrint(M, T = 'true.Bool /\ Cond, B)
+   =  (eMetaPrettyPrint(M, T, B)'\b 
+      '/\ '\o eMetaPrettyPrint(M, Cond, B)) 
     [owise] .
-  ceq eMetaPrettyPrint(M, T = T' /\ Cond)
-    = (eMetaPrettyPrint(M, T) '\b '= '\o eMetaPrettyPrint(M, T') '\b 
-      '/\ '\o eMetaPrettyPrint(M, Cond)) if T' =/= 'true.Bool 
+  ceq eMetaPrettyPrint(M, T = T' /\ Cond, B)
+    = (eMetaPrettyPrint(M, T, B) '\b '= '\o eMetaPrettyPrint(M, T', B) '\b 
+      '/\ '\o eMetaPrettyPrint(M, Cond, B)) if T' =/= 'true.Bool 
     [owise] .
-  eq eMetaPrettyPrint(M, T : S /\ Cond)
-    = (eMetaPrettyPrint(M, T) '\b ': '\o eMetaPrettyPrint(S) '\b 
-      '/\ '\o eMetaPrettyPrint(M, Cond)) 
+  eq eMetaPrettyPrint(M, T : S /\ Cond, B)
+    = (eMetaPrettyPrint(M, T, B) '\b ': '\o eMetaPrettyPrint(S) '\b 
+      '/\ '\o eMetaPrettyPrint(M, Cond, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, T := T' /\ Cond)
-    = (eMetaPrettyPrint(M, T) '\b ':= '\o eMetaPrettyPrint(M, T') '\b 
-      '/\ '\o eMetaPrettyPrint(M, Cond)) 
+  eq eMetaPrettyPrint(M, T := T' /\ Cond, B)
+    = (eMetaPrettyPrint(M, T, B) '\b ':= '\o eMetaPrettyPrint(M, T', B) '\b 
+      '/\ '\o eMetaPrettyPrint(M, Cond, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, T => T' /\ Cond)
-    = (eMetaPrettyPrint(M, T) '\b '=> '\o eMetaPrettyPrint(M, T') '\b 
-      '/\ '\o eMetaPrettyPrint(M, Cond)) 
+  eq eMetaPrettyPrint(M, T => T' /\ Cond, B)
+    = (eMetaPrettyPrint(M, T, B) '\b '=> '\o eMetaPrettyPrint(M, T', B) '\b 
+      '/\ '\o eMetaPrettyPrint(M, Cond, B)) 
     [owise] .
-  eq eMetaPrettyPrint(M, T = 'true.Bool) 
-    = eMetaPrettyPrint(M, T) .
-  eq eMetaPrettyPrint(M, T = T') 
-    = (eMetaPrettyPrint(M, T) '\b '= '\o eMetaPrettyPrint(M, T')) [owise] .
-  eq eMetaPrettyPrint(M, T : S) 
-    = (eMetaPrettyPrint(M, T) '\b ': '\o eMetaPrettyPrint(S)) .
-  eq eMetaPrettyPrint(M, T := T') 
-    = (eMetaPrettyPrint(M, T) '\b ':= '\o eMetaPrettyPrint(M, T')) .
-  eq eMetaPrettyPrint(M, T => T') 
-    = (eMetaPrettyPrint(M, T) '\b '=> '\o eMetaPrettyPrint(M, T')) .
+  eq eMetaPrettyPrint(M, T = 'true.Bool, B) 
+    = eMetaPrettyPrint(M, T, B) .
+  eq eMetaPrettyPrint(M, T = T', B) 
+    = (eMetaPrettyPrint(M, T, B) '\b '= '\o eMetaPrettyPrint(M, T', B)) [owise] .
+  eq eMetaPrettyPrint(M, T : S, B) 
+    = (eMetaPrettyPrint(M, T, B) '\b ': '\o eMetaPrettyPrint(S)) .
+  eq eMetaPrettyPrint(M, T := T', B) 
+    = (eMetaPrettyPrint(M, T, B) '\b ':= '\o eMetaPrettyPrint(M, T', B)) .
+  eq eMetaPrettyPrint(M, T => T', B) 
+    = (eMetaPrettyPrint(M, T, B) '\b '=> '\o eMetaPrettyPrint(M, T', B)) .
 
   eq eMetaPrettyPrint(M, (assoc AtS))  
     = ('\b 'assoc '\o eMetaPrettyPrint(M, AtS)) .

@@ -283,12 +283,12 @@ fmod META-MODULE-EXTRAS is
   op _;;_ : ViewExp ViewExp -> ViewExp 
        [assoc id: mtViewExp] .                       *** view composition  _;_
       
-  var  M M' : Module .  var Trm : Term .
+  var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
   vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
   vars OPDS OPDS' : OpDeclSet .  var Op : OpDecl .
-  vars MAS MAS' : MembAxSet .
-  vars EqS EqS' : EquationSet .
-  vars RlS RlS' : RuleSet .
+  vars MAS MAS' : MembAxSet .  var Mb : MembAx .
+  vars EqS EqS' : EquationSet . var Eq : Equation .
+  vars RlS RlS' : RuleSet . var Rl : Rule .
   vars SS SS' : SortSet .  var S S' : Sort .
   vars TS TS' : TypeSet .
   vars IL IL' IL'' : ImportList .  var I : Import .
@@ -299,6 +299,8 @@ fmod META-MODULE-EXTRAS is
   var Tl Tl' : TypeList .  var NTl : NeTypeList .  var T T' : Type . 
   var AS AS' : AttrSet .  var Attr : Attr .
   var NNl : NeNatList . var Nl : NatList . var N N' : Nat .
+
+  op moduleError : QidList -> [Module] .
   
 
   op nullHeader : -> Header .
@@ -660,6 +662,33 @@ fmod META-MODULE-EXTRAS is
   op disambiguate : OpDecl -> OpDecl .
   eq disambiguate(op Q : Tl -> T [AS] .) 
    = (op qid(string(Q) + ":" + string(tupleType(Tl)) + "->" + string(T)) : Tl -> T [AS] .) .
+
+
+  op labelled : MembAx -> Bool .
+  op labelled : Equation -> Bool .
+  op labelled : Rule -> Bool .
+  eq labelled(mb Trm : T [AS label(Q)] .) = true .
+  eq labelled(cmb Trm : T if Cond [AS label(Q)] .) = true .
+  eq labelled(Mb) = false [owise] . 
+  eq labelled(eq T1 = T2 [AS label(Q)] .) = true .
+  eq labelled(ceq T1 = T2 if Cond [AS label(Q)] .) = true .
+  eq labelled(Eq) = false [owise] . 
+  eq labelled(rl T1 => T2 [AS label(Q)] .) = true .
+  eq labelled(crl T1 => T2 if Cond [AS label(Q)] .) = true .
+  eq labelled(Rl) = false [owise] . 
+
+  op getLabel : MembAx ~> Qid .
+  op getLabel : Equation ~> Qid .
+  op getLabel : Rule ~> Qid .
+  eq getLabel(mb Trm : T [AS label(Q)] .) = Q .
+  eq getLabel(cmb Trm : T if Cond [AS label(Q)] .) = Q .
+  eq getLabel(mb Trm : T [AS label(Q)] .) = Q .
+  eq getLabel(cmb Trm : T if Cond [AS label(Q)] .) = Q .
+  eq getLabel(eq T1 = T2 [AS label(Q)] .) = Q .
+  eq getLabel(ceq T1 = T2 if Cond [AS label(Q)] .) = Q .
+  eq getLabel(rl T1 => T2 [AS label(Q)] .) = Q .
+  eq getLabel(crl T1 => T2 if Cond [AS label(Q)] .) = Q .
+
 endfm
 
 fmod METADATA-EXTRAS is

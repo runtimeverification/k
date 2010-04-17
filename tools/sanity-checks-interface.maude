@@ -3,15 +3,41 @@ load sanity-checks
 mod SANITY-CHECKS-META is
   including SANITY-CHECKS .
   including META-LEVEL-EXTRAS .
-  var NoInSane : String .  var M : Module .
+  including MODULE-META-PRETTY-PRINT .
+  including META-MODULE-EXTRAS .
+  var NoInSane : String .  var Flat M : Module .  var MM : [Module] .
+  var Trm : Term . var T : Type .  var Mb : MembAx . var Eq : Equation . var Rl : Rule .
   var Q QNoInSane : Qid . 
   op sanityChecks : String ~> Module .
   eq sanityChecks(NoInSane) = sanityChecks(qid(NoInSane)) .
   op sanityChecks : Qid ~> Module .
-  eq sanityChecks(QNoInSane) = sanityChecks(upModule(QNoInSane, false), upModule(QNoInSane, true)) .
+  eq sanityChecks(QNoInSane) = $sanityChecks(upModule(QNoInSane, false), upModule(QNoInSane, true)) .
+  
+  op $sanityChecks : Module Module ~> Module .
+  op $$sanityChecks : Module Module ~> Module .
+  eq $sanityChecks(M, Flat) = $$sanityChecks(Flat, sanityChecks(M, Flat)) .
+  eq $$sanityChecks(Flat, MM) = if MM :: Module then MM else moduleError(extractError(Flat, MM)) fi .
+
+  op error : QidList QidList QidList -> QidList .
+  vars Rule Term Type : QidList .
+  eq error(Rule, Term, Type)
+   = '\r 'Error: '\o 'The 'sanity 'checks 'phase 'of 'compilation 'failed 'for Rule '. '\n '\s '\s 'Term '\n '\t '\r Term '\o '\n '\s '\s 'does 'not 'parse 'to 'a 'sort 'but 'rather 'to 'kind '\n '\t '\r Type '\o '. '\n '\s '\s 'Please 'resolve 'that 'before 'continuing. .
+
+  op extractError : Module [Module] -> QidList .
+  eq extractError(Flat, errorM(Trm, T, Q)) 
+   = error('rule '\g Q '\o,  metaPrettyPrint(Flat, Trm), T) .
+  eq extractError(Flat, errorMMb(Trm, T, Mb)) 
+   = error('\g eMetaPrettyPrint(Flat, Mb, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
+  eq extractError(Flat, errorMEq(Trm, T, Eq)) 
+   = error('\g eMetaPrettyPrint(Flat, Eq, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
+  eq extractError(Flat, errorMRl(Trm, T, Rl)) 
+   = error('\g eMetaPrettyPrint(Flat, Rl, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
 
   op compile : Module ~> Module .
-  eq compile(M) = sanityChecks(M, flatten(M)) .
+  eq compile(M) = $compile(flatten(M), sanityChecks(M, flatten(M))) .
+  
+  op $compile : Module Module ~> Module .
+  eq $compile(Flat, MM) = if MM :: Module then MM else moduleError(extractError(Flat,MM)) fi .
 endm
 
 mod SANITY-CHECKS-LOOP is 
@@ -28,12 +54,12 @@ mod SANITY-CHECKS-LOOP is
   eq wrapper(Q) = (mod 'MKKR is including Q . 
                     sorts none . none none none none none endm) .
   op error : -> [Module] .
-  op print : Module [Module] -> QidList .
-  var Str : String . var M FM' : Module .
-  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
-  crl ['sanityChecks NoInSane QIL, idle, QIL'] 
-   => [QIL, idle, print(upModule(NoInSane,false), FM )] 
-   if FM := downTerm(getTerm(
+  op print : [Module] -> QidList .
+  var Str : String . var M FM' : Module . 
+  eq print(moduleError(QIL)) = QIL '\n .
+  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) .
+  rl ['sanityChecks NoInSane QIL, idle, QIL'] 
+   => [QIL, idle, print(downTerm(getTerm(
              metaReduce(wrapper('SANITY-CHECKS-META),
-                        'sanityChecks[upTerm(string(NoInSane))])),error) .
+                        'sanityChecks[upTerm(string(NoInSane))])), error))] .
 endm
