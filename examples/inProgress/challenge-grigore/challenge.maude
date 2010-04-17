@@ -138,9 +138,9 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
    mb rule < k > [callcc(V) => _`(_`)(V, cc(K, Env, FStack))] ~> K </ k > 
            < env > Env </ env > 
            < fstack > FStack </ fstack > : KSentence .
-   mb rule < k > [_`(_`)(cc(K, Env, FStack), V) ~> ? => V ~> K] </ k >
-           < env > [? => Env] </ env > 
-           < fstack > [? => FStack] </ fstack > : KSentence .
+   mb rule < k > [_`(_`)(cc(K, Env, FStack), V) ~> ?:K => V ~> K] </ k >
+           < env > [?:Map => Env] </ env > 
+           < fstack > [?:List => FStack] </ fstack > : KSentence .
    mb rule < k > [mu X . E => vars X ; ~> X = E] ...</ k > : KSentence .
 
    mb rule < k > [read() => I] ...</ k >
@@ -209,10 +209,39 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
           ...</ agent >
           < agent >... < me > N2 </ me > < k > [receive-from(N1) => V] ...</ k >
           ...</ agent > : KSentence .
-   mb rule < agent >... < k > [send-synch(N2,V); => .K] ...</ k > ...</ agent >
+  mb rule < agent >... < k > [send-synch(N2,V); => .K] ...</ k > ...</ agent >
           < agent >... < me > N2 </ me > < k > [receive => V] ...</ k >
           ...</ agent > : KSentence .
  
+--- Reflection
+
+  op quote[_] : Nat -> KLabel .
+  op code : List{K} -> Val .
+  op _box(~>)_ : K K -> K [metadata "strict"] .
+  op _box(,,)_ : K K -> K [metadata "strict"] .
+  op box : KLabel -> KLabel .
+  mb context box(Label)(?,,`[HOLE`]:K,,?) : KSentence .
+  
+  mb rule < k > [quote E => quote[0](E)] ...</ k > : KSentence .
+  mb rule [quote[N]((K1 ~> K2)) 
+        => quote[N](K1) box(~>) quote[N](K2)] 
+        if K1 =/=Bool .K andBool K2 =/=Bool .K : KSentence .
+  mb rule [code(K1) box(~>) code(K2) => code((K1 ~> K2))] : KSentence .
+  mb rule [quote[N](Label(Kl)) => box(Label)(quote[N](Kl))]
+   if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_ : KSentence .
+  mb rule [box(Label)(code(Kl)) => code(Label(Kl))] : KSentence .
+  mb rule [quote[N](quote(E)) 
+        => box('quote_)(quote[sNat(N)](E))] : KSentence .
+  mb rule [quote[0](unquote(E)) => E] : KSentence .
+  mb rule [quote[sNat(N)](unquote(E)) 
+        => box('unquote_)(quote[N](E))] : KSentence .
+
+  mb rule [quote[N]((K,, Kl)) => quote[N](K) box(,,) quote[N](Kl)] 
+        if Kl =/=Bool .List{K} : KSentence .
+  mb rule [quote[N](.List{K}) => code(.List{K})] : KSentence .
+  mb rule [code(K) box(,,) code(Kl) => code((K,, Kl))] : KSentence .
+
+  mb rule [eval code(K) => K]  : KSentence .
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
@@ -245,9 +274,9 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   vars N N1 N2 : Nat .
   var Env Env' Store : Map .  var Holds : Map . var Busy : Bag . 
   var FStack : List .
-  var V : Val .  var Vl : List{Val} .
+  var V : Val .  var Vl : List{Val} . 
 
-  var Map : Map . var K K' : K . var Kl : List{K} .
+  var Map : Map . var K K' K1 K2 : K . var Kl : List{K} .  var Label : KLabel .
 endm
 
 mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
