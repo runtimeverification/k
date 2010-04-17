@@ -1,43 +1,31 @@
 in ../../../../k-prelude
-in fun-untyped-syntax
+in ../fun-syntax
 in ../fun-programs
 
 
 mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
---- We need values when we define the semantics
-  sort Val .
-  subsort Int Bool < Val < Exp .
+--- We need type values/results when we define the type system
+  sort Type .
+  subsort Type < Exp .
 
 --- We have to subsort all the syntactic categories to K, and the lists of values
 --- to KResult.  Recall that the second argument of a function application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
   subsort List{Exp} Binding < K .
-  subsort List{Val} < KResult .
+  subsort List{Type} < KResult .
 
-  ops env store nextLoc : -> CellLabel .
+  ops tenv eqns nextType : -> CellLabel .
   mb configuration < T >
                      < k > .K </ k >
-                     < env > .Map </ env >
-                     < store > .Map </ store >
-                     < nextLoc > 0 </ nextLoc >
+                     < tenv > .Map </ tenv >
+                     < eqns > .Map </ eqns >
+                     < nextType > 0 </ nextType >
                    </ T > : KSentence .
 
   mb rule < k > [X => V] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> V ...</ store > : KSentence .
-  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
-  mb rule [_-_(I1,I2) => _-Int_(I1,I2)] : KSentence .
-  mb rule [I1 * I2 => I1 *Int I2] : KSentence .
-  mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
-  mb rule [I1 % I2 => I1 %Int I2] if I2 =/=Bool 0 : KSentence .
-  mb rule [- I => -Int I] : KSentence .
-  mb rule [I1 < I2 => I1 <Int I2] : KSentence .
-  mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
-  mb rule [I1 > I2 => I1 >Int I2] : KSentence .
-  mb rule [I1 >= I2 => I1 >=Int I2] : KSentence .
-  mb rule [V1 == V2 => V1 ==Bool V2] : KSentence .
-  mb rule [V1 != V2 => V1 =/=Bool V2] : KSentence .
-  mb rule [T1 and T2 => T1 andBool T2] : KSentence .
-  mb rule [T1 or T2 => T1 orBool T2] : KSentence .
-  mb rule [not(T) => notBool(T)] : KSentence .
+
+  mb rule < k > [Tp1 + Tp2 => int] ...</ k > < eqns >...[.Bag => Tp1,Tp2 = int,int]...</ eqns > : KSentence .
+
   op closure : Map List{Id} Exp -> Val .
   mb rule < k > [fun Xl -> E => closure(Env,Xl,E)] ...</ k > < env > Env </ env > : KSentence .
   mb rule < k > [closure(Env,Xl,E) Vl => [Vl] ~> bindTo(Xl) ~> E ~> env(Env')] ...</ k > < env > [Env' =>  Env] </ env > : KSentence .
@@ -62,10 +50,10 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
---- List{Val}
-  sort List{Val} .
-  subsort Val < List{Val} < List{Exp} .
-  op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
+--- List{Type}
+  sort List{Type} .
+  subsort Type < List{Type} < List{Exp} .
+  op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
 --- length
   op |_| : List{Id} -> Nat .  eq | .List{Id} | = 0 .  eq | X,Xl | = sNat(| Xl |) .
 --- generate sequence of locations

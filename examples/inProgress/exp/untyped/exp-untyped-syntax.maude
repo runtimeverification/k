@@ -1,0 +1,32 @@
+mod EXP-SYNTAX is including PL-INT + PL-ID .
+  sort Exp .
+  subsort Id Int Bool < Exp .
+  op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
+  op _-_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
+  op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op _/_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op _%_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
+  op -_ : Exp -> Exp  [metadata "strict"] .
+  op _<_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _<=_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _>_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _>=_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _==_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _!=_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
+  op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
+  op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
+  op not_ : Exp -> Exp [prec 53 metadata "strict"] .
+
+  ops (lambda_._) (mu_._) : Id Exp -> Exp .
+  op __ : Exp Exp -> Exp [prec 10 gather(E e) metadata "strict"] .
+  op let_=_in_ : Id Exp Exp -> Exp .
+  op letrec__=_in_ : Id Id Exp Exp -> Exp .
+  op if_then_else_ : Exp Exp Exp -> Exp [metadata "strict(1)"] .
+endm
+
+
+mod EXP-DESUGARED-SYNTAX is including EXP-SYNTAX .
+  var X F : Id .  var E E' : Exp .
+  eq let X = E in E' = (lambda X . E') E .
+  eq (letrec F X = E in E') = (let F = mu F . (lambda X . E) in E') .
+endm
