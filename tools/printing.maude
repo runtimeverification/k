@@ -396,9 +396,13 @@ format number rat) .
     [owise] .
   eq eMetaPrettyPrint(M, (none).RuleSet) = nil .
 
-  eq eMetaPrettyPrint(M, T = T' /\ Cond)
-    = (eMetaPrettyPrint(M, T) '\b '= '\o eMetaPrettyPrint(M, T') '\b 
+  eq eMetaPrettyPrint(M, T = 'true.Bool /\ Cond)
+   =  (eMetaPrettyPrint(M, T)'\b 
       '/\ '\o eMetaPrettyPrint(M, Cond)) 
+    [owise] .
+  ceq eMetaPrettyPrint(M, T = T' /\ Cond)
+    = (eMetaPrettyPrint(M, T) '\b '= '\o eMetaPrettyPrint(M, T') '\b 
+      '/\ '\o eMetaPrettyPrint(M, Cond)) if T' =/= 'true.Bool 
     [owise] .
   eq eMetaPrettyPrint(M, T : S /\ Cond)
     = (eMetaPrettyPrint(M, T) '\b ': '\o eMetaPrettyPrint(S) '\b 
@@ -412,8 +416,10 @@ format number rat) .
     = (eMetaPrettyPrint(M, T) '\b '=> '\o eMetaPrettyPrint(M, T') '\b 
       '/\ '\o eMetaPrettyPrint(M, Cond)) 
     [owise] .
+  eq eMetaPrettyPrint(M, T = 'true.Bool) 
+    = eMetaPrettyPrint(M, T) .
   eq eMetaPrettyPrint(M, T = T') 
-    = (eMetaPrettyPrint(M, T) '\b '= '\o eMetaPrettyPrint(M, T')) .
+    = (eMetaPrettyPrint(M, T) '\b '= '\o eMetaPrettyPrint(M, T')) [owise] .
   eq eMetaPrettyPrint(M, T : S) 
     = (eMetaPrettyPrint(M, T) '\b ': '\o eMetaPrettyPrint(S)) .
   eq eMetaPrettyPrint(M, T := T') 
