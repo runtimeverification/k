@@ -1,6 +1,7 @@
 fmod ADD-KPROPER is
   including META-MODULE-EXTRAS .
   including  META-K-MODULE .
+  including  META-K-MODULES .
   var M : Module .  var AS : AttrSet . 
   var SS : SortSet . var S S' : Sort .
   var O Q : Qid . var Tl : TypeList . var T : Type .
@@ -31,9 +32,10 @@ fmod ADD-KPROPER is
  eq kSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), K ; NeK) .
 
  op kOps : OpDeclSet ~> OpDeclSet .
- eq kOps(OPDS) = getOps(removeOps(OPDS,kops), K ; NeK) .
+ eq kOps(OPDS) = getOps(removeOps(OPDS,kops), K ; NeK ; KLabel) .
 
  op kProperImports : ModuleSet Qid SubsortDeclSet OpDeclSet ~> ImportList .
+ ceq kProperImports(MS, Q, SSDS, OPDS) =  kProperImports(MS) if Q in kModules .
  eq kProperImports(MS, Q, none, none) = kProperImports(MS) .
  eq kProperImports(MS, Q, SSDS, OPDS)
   = kProperImports(MS) (including Q .) [owise] .
@@ -45,7 +47,8 @@ fmod ADD-KPROPER is
 
   op kProperOps : OpDeclSet ~> OpDeclSet .
   eq kProperOps((op Q : Tl -> T [AS] .) OPDS)
-   = (op Q : Tl -> KProper [AS] .) kProperOps(OPDS) .
+   = (op Q : Tl -> if T == KLabel then KProperLabel else KProper fi [AS] .) 
+     kProperOps(OPDS) .
   eq kProperOps(none) = none .
 endfm
 
