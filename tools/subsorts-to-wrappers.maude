@@ -83,7 +83,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
 
  op kind-if-not-k : Module Type -> Type .
- eq kind-if-not-k(M, T) = if isKSort(T) then T else getKind(M,T) fi .
+ eq kind-if-not-k(M, T) = if isKSort(T) or-else isKListSort(T) then T else getKind(M,T) fi .
 
  op subsorts2wrappersRls : RuleSet Module OpDeclSet SubsortDeclMap ~> RuleSet .
  eq subsorts2wrappersRls(Rls Rl, M, OPDS, SSDM)
