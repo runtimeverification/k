@@ -51,10 +51,10 @@ mod STRICTCXT2EQS is
   op findWrapper : OpDeclSet Type ~> Qid .
   eq findWrapper(OPDS op Q : Type -> Type' [AS metadata("builtin wrapper")] ., Type) = Q .
 
-  op strictCxt2eqs : Qid Qid Module ~> Module .
-  var Syntax StrictEqs : Qid . var M : Module .
+  op strictCxt2eqs : Qid Qid Module Module ~> Module .
+  var Syntax StrictEqs : Qid . var M Flat : Module .
 
-  eq strictCxt2eqs(Syntax,StrictEqs,M) = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(M, getMbs(M))) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
+  eq strictCxt2eqs(Syntax,StrictEqs,M,Flat) = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M))) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
 
   op strictCxt2eqs : Qid Qid MASEqsPair ~> Module .
   eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs}) 
