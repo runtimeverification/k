@@ -146,6 +146,15 @@ mod K-CONTEXTS is
 endm
 
 
+--- Quoted Labels for syntax
+
+mod K-QUOTED-LABELS is
+  including K-TECHNIQUE .
+  including PL-QID .
+  subsort Qid < KLabel .
+endm
+
+
 --- KLabel-Wrappers level
 
 mod K-WRAPPERS-LABELS is
@@ -300,10 +309,11 @@ mod K is
   including K-CONFIG .              --- to specify the global configuration term
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
-  including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
-  including K-MAP-EXTRAS .          --- operations on Maps with lists of keys
-  including K-BAG-EXTRAS .          --- operations on Maps with lists of keys
+  including K-QUOTED-LABELS .
   including K-CONTEXTS .
+  including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
+  including K-MAP-EXTRAS .          --- operations on Maps
+  including K-BAG-EXTRAS .          --- operations on Bags
 endm
 
 
