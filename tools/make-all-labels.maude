@@ -33,7 +33,7 @@ fmod MAKE-ALL-LABELS is
 
  op makeAllLabels : Qid Module Module ModuleSet ~> Module .
  eq makeAllLabels(Q, M, Flat, MS)
-  = makeAllLabels(setName(suffixImports(Q,M,allLabelsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, processOps(pseudoKOps(getOps(Flat)))) .
+  = makeAllLabels(setName(suffixImports(Q,removeImports(M, including 'K-QUOTED-LABELS .),allLabelsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, processOps(pseudoKOps(getOps(Flat)))) .
 
  op makeAllLabels : Module Module OpDeclMap ~> Module .
  eq makeAllLabels(M, Flat, OPDM) 
@@ -66,7 +66,7 @@ fmod MAKE-ALL-LABELS is
  eq labelsMb((mb T1 : T [AS] .), M, OPDS, OPDM)
   = (mb labelsT(T1, getKind(M,T), M, OPDS, OPDM) : T [AS] .) .
  eq labelsMb((cmb T1 : T if Cond [AS] .), M, OPDS, OPDM)
-  = (cmb labelsT(T1, getKind(M,T), M, OPDS, OPDM) : T if Cond [AS] .) .
+  = (cmb labelsT(T1, getKind(M,T), M, OPDS, OPDM) : T if labelsCond(Cond, M, OPDS, OPDM) [AS] .) .
 
  op labelsEqs : Module OpDeclSet OpDeclMap EquationSet ~> EquationSet .
  eq labelsEqs(M, OPDS, OPDM, Eqs Eq)
@@ -80,7 +80,7 @@ fmod MAKE-ALL-LABELS is
  eq labelsEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, OPDM)
   = (ceq labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
        = labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
-      if Cond [AS] .) .
+      if labelsCond(Cond, M, OPDS, OPDM) [AS] .) .
 
  op labelsRls : Module OpDeclSet OpDeclMap RuleSet ~> RuleSet .
  eq labelsRls(M, OPDS, OPDM, Rls Rl)
@@ -94,7 +94,22 @@ fmod MAKE-ALL-LABELS is
  eq labelsRl((crl T1 => T2 if Cond [AS] .), M, OPDS, OPDM)
   = (crl labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
       => labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
-      if Cond [AS] .) .
+      if labelsCond(Cond, M, OPDS, OPDM) [AS] .) .
+
+ op labelsCond : Condition Module OpDeclSet OpDeclMap ~> Condition .
+ eq labelsCond(T1 = T2 /\ Cond, M, OPDS, OPDM)
+  = labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) = labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM)
+    /\ labelsCond(Cond, M, OPDS, OPDM) .
+ eq labelsCond(T1 := T2 /\ Cond, M, OPDS, OPDM)
+  = labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) := labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM)
+    /\ labelsCond(Cond, M, OPDS, OPDM) .
+ eq labelsCond(T1 => T2 /\ Cond, M, OPDS, OPDM)
+  = labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) => labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM)
+    /\ labelsCond(Cond, M, OPDS, OPDM) .
+ eq labelsCond(Trm : T /\ Cond, M, OPDS, OPDM)
+  = labelsT(Trm, getKind(M,T), M, OPDS, OPDM) : T
+    /\ labelsCond(Cond, M, OPDS, OPDM) .
+ eq labelsCond(nil, M, OPDS, OPDM) = nil .
 
  op labelsTs : TermList TypeList Module OpDeclSet OpDeclMap ~> TermList  .
  eq labelsTs((Trm,Trms), T Tl, M, OPDS, OPDM)
@@ -103,7 +118,8 @@ fmod MAKE-ALL-LABELS is
 
  op labelsT : Term Type Module OpDeclSet OpDeclMap ~> Term .
  eq labelsT(C, T, M, OPDS, OPDM ) 
-  = labelsT(C, T, M, OPDS, OPDM, findOp(M, OPDS, getName(C), nil, getType(C))) .
+  = if getType(C) == 'Qid then mkConstant(qid("\"" + substr(string(getName(C)),1,length(string(getName(C)))) + "\""),KLabel) 
+    else labelsT(C, T, M, OPDS, OPDM, findOp(M, OPDS, getName(C), nil, getType(C))) fi .
  eq labelsT(V, T, M, OPDS, OPDM) = V .
  eq labelsT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
   = 'if_then_else_fi[labelsTs(Trms, 'Bool T T, M, OPDS,OPDM)] .
