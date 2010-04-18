@@ -33,7 +33,7 @@ mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
           < store >...[.Map => L |-> closure-mu(Env[L / X],E)]...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
   mb rule < k > [closure-mu(Env,E) => E ~> env(Env')] ...</ k > < env > [Env' => Env] </ env > : KSentence .
 
----( the rule below is wrong, because the free variables of E can be captured ... nastily ... argh; see p12
+---( we need mu closures ... the rule below is wrong, because the free variables of E can be captured ... nastily ... argh; see p12
   mb rule < k > [mu X . E => E ~> env(Env)]...</ k > < env > [Env => Env[L / X]] </ env >
           < store >...[.Map => L |-> mu X . E]...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
 ---)

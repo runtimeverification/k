@@ -1,3 +1,9 @@
+---(
+Here are the differences from the actual exp language annotated syntax:
+  (*) conditional is fully strict
+  (*) let is not desugared (because it has a different type semantics than its desugaring - it is polymorphic)
+---)
+
 mod EXP-SYNTAX is including PL-INT + PL-ID .
   sort Exp .
   subsort Id Int Bool < Exp .
@@ -20,12 +26,11 @@ mod EXP-SYNTAX is including PL-INT + PL-ID .
   op __ : Exp Exp -> Exp [prec 10 gather(E e) metadata "strict"] .
   op let_=_in_ : Id Exp Exp -> Exp .
   op letrec__=_in_ : Id Id Exp Exp -> Exp .
-  op if_then_else_ : Exp Exp Exp -> Exp [metadata "strict(1)"] .
+  op if_then_else_ : Exp Exp Exp -> Exp [metadata "strict"] .
 endm
 
 
 mod EXP-DESUGARED-SYNTAX is including EXP-SYNTAX .
   var X F : Id .  var E E' : Exp .
-  eq let X = E in E' = (lambda X . E') E .
   eq (letrec F X = E in E') = (let F = mu F . (lambda X . E) in E') .
 endm
