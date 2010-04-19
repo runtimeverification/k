@@ -9,6 +9,12 @@ fmod CONTEXT-TRANSFORMERS is
   var Ss : SortSet .  var V : Variable .
   var MAS : MembAxSet .  var MAx : MembAx . var SC : SplitCell .
   var KRS : KRuleSplit .
+  sort DefaultTerm .
+  op default : Term -> DefaultTerm .
+  sort Descendants .
+  subsort SortSet DefaultTerm < Descendants .
+
+  var Ds : Descendants .
   
   op contextTransformers : Qid Module Term ~> Module .
   var IL : ImportList . var SSDS : SubsortDeclSet . 
@@ -21,7 +27,7 @@ fmod CONTEXT-TRANSFORMERS is
   sort KConf KConfElement . 
   subsort KConfElement < KConf .
   var KC KC' : KConf . var Cond : TermList .
-  op {_,_,_,_,_,_} : Qid Nat Bool Qid SortSet KConf -> KConfElement .
+  op {_,_,_,_,_,_} : Qid Nat Bool Qid Descendants KConf -> KConfElement .
 --- KConfElement ::= { 
 ---  CellLabel(Qid),
 ---  Level(Nat),
@@ -38,6 +44,11 @@ fmod CONTEXT-TRANSFORMERS is
 
   op getSons : KConfElement -> SortSet .
   eq getSons({Q, Level, B, Q', Ss, KC'}) = Ss .
+  eq getSons({Q, Level, B, Q', Ds, KC'}) = none [owise] .
+
+  op getDefaultValue : KConfElement -> Term .
+  eq getDefaultValue({Q, Level, B, Q', default(T), KC'}) = T .
+  eq getDefaultValue({Q, Level, B, Q', Ds, KC'}) = emptyCt(Bag) .
 
   op getConf : KConfElement -> KConf .
   eq getConf({Q, Level, B, Q', Ss, KC'}) = KC' .

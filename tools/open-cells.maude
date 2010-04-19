@@ -75,18 +75,12 @@ fmod OPEN-CELLS is
 
   op resolveCellsSC : Module SplitCell Term Ellipses Type ~> Term .
   eq resolveCellsSC(M,SC,Trm,E,T) 
-   = if T == Bag or-else T == Map or-else E == left
+   = if T == Bag or-else T == Set or-else T == Map or-else E == left
      then plugCell(setContents(SC, ctor(T)[anyVar(T),Trm]))
      else if E == right 
           then plugCell(setContents(SC, ctor(T)[Trm,anyVar(T)]))
           else plugCell(setContents(SC, ctor(T)[anyVar(T),Trm,anyVar(T)])) 
           fi
      fi .
-
-  op getCellType : Module Type ~> Sort .
- ceq getCellType(M, T) = Bag if sameKind(M, T, Bag) .
- ceq getCellType(M, T) = Map if sameKind(M, T, Map) .
- ceq getCellType(M, T) = List if sameKind(M, T, List) .
- ceq getCellType(M, T) = K if sameKind(M, T, K) .
 
 endfm

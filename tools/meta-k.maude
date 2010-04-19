@@ -224,6 +224,7 @@ fmod K-META-CONFIG is
   including META-K-RULES .
   including META-K-MODULE .
   including META-TERM-EXTRAS .
+  including META-LEVEL .
   including INT .
   var Label Label' : Constant . var Contents Contents' T : Term .
   var Q Q' : Qid .  var B : Bool . var E E' : Ellipses .  var M : Module .  
@@ -295,6 +296,15 @@ fmod K-META-CONFIG is
 
   op ctor : Sort -> Qid .
   eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else if S == Set then '__ else 'error fi fi fi fi fi .
+
+  var Ty : Type .
+
+  op getCellType : Module Type ~> Sort .
+ ceq getCellType(M, Ty) = Bag if sameKind(M, Ty, Bag) .
+ ceq getCellType(M, Ty) = Set if sameKind(M, Ty, Set) .
+ ceq getCellType(M, Ty) = Map if sameKind(M, Ty, Map) .
+ ceq getCellType(M, Ty) = List if sameKind(M, Ty, List) .
+ ceq getCellType(M, Ty) = K if sameKind(M, Ty, K) .
 endfm
 
 fmod K-META-OPEN-CELLS is 
