@@ -287,14 +287,14 @@ fmod K-META-CONFIG is
   op cellLabel : Constant Bool -> Term .
   eq cellLabel(Label,B) = if B then multiCellS[Label] else Label fi .
 
-  ops Map Bag List  : -> Sort .
-  eq Map = 'Map . eq Bag = 'Bag . eq List = 'List .
+  ops Map Bag List Set : -> Sort .
+  eq Map = 'Map . eq Bag = 'Bag . eq List = 'List . eq Set = 'Set .
 
   op emptyCt : Sort -> Constant .
-  eq emptyCt(S) = if S == Bag then mkConstant('.Bag,Bag) else if S == Map then mkConstant('.Map,Map) else if S == List then mkConstant('.List, List) else if S == K then mkConstant('.K, K) else 'error.K fi fi fi fi .
+  eq emptyCt(S) = if S == Bag then mkConstant('.Bag,Bag) else if S == Map then mkConstant('.Map,Map) else if S == List then mkConstant('.List, List) else if S == K then mkConstant('.K, K) else if S == Set then mkConstant('.Set, Set) else 'error.K fi fi fi fi fi .
 
   op ctor : Sort -> Qid .
-  eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else 'error fi fi fi fi .
+  eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else if S == Set then '__ else 'error fi fi fi fi fi .
 endfm
 
 fmod K-META-OPEN-CELLS is 
