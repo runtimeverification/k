@@ -69,6 +69,19 @@ mod K-TECHNIQUE is
   eq Bag(.List{K}) = .Bag .
   eq Bag(K,, Ks) = BagItem(K) Bag(Ks) .
   
+  sort SetItem Set NeSet .
+  subsort SetItem < NeSet < Set .
+  op .Set : -> Set .
+  op SetItem : K -> SetItem .
+  op __ : Set Set -> Set [assoc comm id: .Set] .
+  op __ : NeSet Set -> NeSet [ditto] .
+
+  op Set_ : List{K} -> Set .
+  eq Set(.List{K}) = .Set .
+  eq Set(K,, Ks) = SetItem(K) Set(Ks) .
+
+  eq SI:SetItem SI:SetItem = SI:SetItem .
+
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .
   op .Map : -> Map .
@@ -276,6 +289,23 @@ mod K-MAP-EXTRAS is
   eq keys(.Map) = .Bag .
 endm
 
+mod K-SET-EXTRAS is
+  including K-TECHNIQUE .
+  including PL-BOOL .
+  var K : K . var Set Set' : Set . var SetItem : SetItem .
+  op _in_ : K Set -> Bool .
+  eq K in Set SetItem(K) = true .
+  eq K in Set = false [owise] .
+
+  op _in_ : SetItem Set -> Bool .
+  eq SetItem in Set SetItem = true .
+  eq SetItem in Set = false [owise] .
+
+  op _-_ : Set Set -> Set .
+  eq .Set - Set = .Set .
+  eq (SetItem Set) - Set' = if SetItem in Set' then Set - Set' else SetItem (Set - Set') fi .
+endm
+
 mod K-BAG-EXTRAS is
   including K-TECHNIQUE .
   including PL-BOOL .
@@ -314,6 +344,7 @@ mod K is
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-MAP-EXTRAS .          --- operations on Maps
   including K-BAG-EXTRAS .          --- operations on Bags
+  including K-SET-EXTRAS .          --- operations on Sets
 endm
 
 
