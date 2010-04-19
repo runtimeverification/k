@@ -65,7 +65,6 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
   mb rule [_`[`](T)[int] = T ; => stmt] : KSentence .
   mb rule [T ; => stmt] : KSentence .
   mb rule [if bool then stmt else stmt => stmt] : KSentence .
-  mb rule [if bool then stmt else stmt => stmt] : KSentence .
   mb rule [while bool do stmt  => stmt] : KSentence .
 
   mb rule < k > [function F(XTl) : T S => S ~> tenv(TEnv)]...</ k > 
