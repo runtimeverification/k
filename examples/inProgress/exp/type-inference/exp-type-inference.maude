@@ -4,15 +4,14 @@ in ../exp-programs
 
 mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
 --- We need type values/results when we define the type system
-  sort Type .
-  subsort Type < Exp KResult .
-  subsort Exp < K .
----  subsort KResult < K .
+  sorts TypeVar Type UniversalType .
+  subsort TypeVar < Type < Exp KResult .
+  subsort Exp UniversalType List{TypeVar} < K .
 
   ops int bool : -> Type .
-  op t : Nat -> Type .
-  op sType_ : Type -> Type .
-  eq sType t(N) = t(sNat N) .
+  op t : Nat -> TypeVar .
+  op _+Type_ : TypeVar Nat -> TypeVar .
+  eq t(N) +Type M = t(N +Nat M) .
 
 ---  op _->_ : Type Type -> Type .
   op _->_ : Type Exp -> K [metadata "strict(2) hybrid"] .
@@ -29,7 +28,7 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
 --- this should be defined on types, not on K's ...
   op _=_ : K K -> SetItem [prec 30 comm] .
 
----  mb rule < k > [X => V] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> V ...</ store > : KSentence .
+  mb rule < k > [X => T] ...</ k > < tenv >... X |-> T ...</ tenv > : KSentence .
   mb rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
        if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_ : KSentence .
   mb rule < k > [- T => int] ...</ k > < eqns >... [.Set => T = int] ...</ eqns > : KSentence .
@@ -38,22 +37,49 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
   mb rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Set => T1 = bool T2 = bool] ...</ eqns > if L ==Bool '_and_ orBool L ==Bool '_or_ : KSentence .
   mb rule < k > [not T => bool] ...</ k > < eqns >... [.Set => T = bool] ...</ eqns > : KSentence .
 
-  mb rule < k > [lambda X . E => (T -> E) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > < nextType > [T => sType T] </ nextType > : KSentence .
-  mb rule < k > [T1 T2 => T] ...</ k > < eqns >... [.Set => T1 = (T2 -> T)] ...</ eqns > < nextType > [T => sType T] </ nextType > : KSentence .
+  mb rule < k > [lambda X . E => (Tv -> E) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
+  mb rule < k > [T1 T2 => Tv] ...</ k > < eqns >... [.Set => T1 = (T2 -> Tv)] ...</ eqns > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
 
   op _?=_ : Exp Type -> K [metadata "strict(1)"] .
-  mb rule < k > [mu X . E => E ?= T] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > < nextType > [T => sType T] </ nextType > : KSentence .
+  mb rule < k > [mu X . E => E ?= Tv] ...</ k > < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
   mb rule < k > [T1 ?= T2 => .K] ...</ k > < eqns >... [.Set => T1 = T2] ...</ eqns > : KSentence .
 
+---  mb rule < k > [let X = T in E => E ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[let(vars(T) \ vars(TEnv), T) / X]] </ tenv > : KSentence .
+  op forall_._ : List{TypeVar} Type -> UniversalType .
+  mb rule < k > [let X = T in E => E ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[forall (vars(T) \ vars(TEnv)) . T / X]] </ tenv > : KSentence .
+  mb rule < k > [X => Eqns[T][| vars(Eqns[T]) | from Tv / vars(Eqns[T])]] ...</ k >
+          < tenv >... X |-> forall [Tvl => vars(Eqns[T])] . [T => Eqns[T]] ...</ tenv >
+          < eqns > Eqns </ eqns >
+          < nextType > [Tv => Tv +Type | vars(Eqns[T]) |] </ nextType > : KSentence .
 
   mb rule < k > [if T then T1 else T2 => T1] ...</ k > < eqns >... [.Set => T = bool T1 = T2] ...</ eqns > : KSentence .
 
 ---
-  var T T1 T2 : Type .  var L : KLabel .  var N : Nat .  var X : Id .  var E : Exp .  var TEnv : Map .
+  var T T1 T2 : Type .  var Tv : TypeVar .  var L : KLabel .  var N M : Nat .  var X : Id .  var E : Exp .  var TEnv : Map .  var Eqns : Set .
+  var Tvl Tvl' : List{TypeVar} .
 --- type environment recovery
   op tenv : Map -> K .
   mb rule < k > T ~> [tenv(TEnv) => .K] ...</ k > < tenv > [? => TEnv] </ tenv > : KSentence [metadata "structural"] .
+
+--- to be defined ...
+  op vars : Type -> List{TypeVar} .
+  op vars : Map -> List{TypeVar} .
+  op _\_ : List{TypeVar} List{TypeVar} -> List{TypeVar} .
+  op _[_] : Set Type -> Type .
+  op |_| : List{TypeVar} -> Nat .
+  op _from_ : Nat TypeVar -> List{TypeVar} .
+  op _[_/_] : Type List{TypeVar} List{TypeVar} -> Type .
+
+--- List{TypeVar}
+  sort List{TypeVar} .
+  subsort TypeVar < List{TypeVar} .
+  op .List{TypeVar} : -> List{TypeVar} .
+  op _,_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [prec 70 assoc id: .List{TypeVar}] .
 endm
+
+parse forall Tvl . T .
+parse forall vars(Eqns[T]) . Eqns[T] .
+parse forall [Tvl => vars(Eqns[T])] . [T => Eqns[T]] .
 
 mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS .
 endm
