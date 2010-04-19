@@ -1,4 +1,4 @@
-in ../../../k-prelude
+in ../../k-prelude
 in challenge-syntax
 in challenge-programs
 
