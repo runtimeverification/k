@@ -9,7 +9,7 @@ fmod ADD-KPROPER is
   var MS : ModuleSet .
   
   op addKProper : Qid Module ModuleSet ~> Module .
-  eq addKProper(O, M, MS) = setName(addKProper(addImports((including 'K-PROPER .), removeImports(suffixImports(O,M,kProperImports(MS)), (including 'K .))), pseudoKSubsorts(getSubsorts(M)), kOps(getOps(M))), qid(string(getName(M)) + string(O))) .
+  eq addKProper(O, M, MS) = setName(addKProper(addImports((including 'K-PROPER .), removeImports(suffixImports(O,M,kProperImports(MS)), (including 'K .))), pseudoKSubsorts(removeSubsorts(getSubsorts(M), subsort KResult < K .)), kOps(getOps(M))), qid(string(getName(M)) + string(O))) .
 
   op addKProper : Module SubsortDeclSet OpDeclSet ~> Module .
   eq addKProper(M, SSDS, OPDS) = addSubsorts(kProperSubsorts(kSubsorts(fixResults(SSDS, KResult, K ; NeK))),addOps(kProperOps(OPDS),removeOps(removeSubsorts(M,kSubsorts(SSDS)),OPDS))) .
