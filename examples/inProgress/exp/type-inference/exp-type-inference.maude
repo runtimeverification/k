@@ -7,13 +7,14 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
   sort Type .
   subsort Type < Exp KResult .
   subsort Exp < K .
+---  subsort KResult < K .
 
-  subsort KResult < K .
   ops int bool : -> Type .
   op t : Nat -> Type .
   op sType_ : Type -> Type .
   eq sType t(N) = t(sNat N) .
 
+---  op _->_ : Type Type -> Type .
   op _->_ : Type Exp -> K [metadata "strict(2) hybrid"] .
 
 
@@ -21,23 +22,31 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
   mb configuration < T >
                      < k > .K </ k >
                      < tenv > .Map </ tenv >
-                     < eqns > .Bag </ eqns >
+                     < eqns > .Set </ eqns >
                      < nextType > t(0) </ nextType >
                    </ T > : KSentence .
 
-  op _=_ : Type Type -> BagItem [prec 30 comm] .
+--- this should be defined on types, not on K's ...
+  op _=_ : K K -> SetItem [prec 30 comm] .
 
 ---  mb rule < k > [X => V] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> V ...</ store > : KSentence .
-  mb rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Bag => T1 = int T2 = int] ...</ eqns > 
+  mb rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
        if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_ : KSentence .
-  mb rule < k > [- T => int] ...</ k > < eqns >... [.Bag => T = int] ...</ eqns > : KSentence .
-  mb rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Bag => T1 = int T2 = int] ...</ eqns > 
+  mb rule < k > [- T => int] ...</ k > < eqns >... [.Set => T = int] ...</ eqns > : KSentence .
+  mb rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
        if L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_ : KSentence .
-  mb rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Bag => T1 = bool T2 = bool] ...</ eqns > 
-       if L ==Bool '_and_ orBool L ==Bool '_or_ : KSentence .
-  mb rule < k > [not T => bool] ...</ k > < eqns >... [.Bag => T = bool] ...</ eqns > : KSentence .
+  mb rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Set => T1 = bool T2 = bool] ...</ eqns > if L ==Bool '_and_ orBool L ==Bool '_or_ : KSentence .
+  mb rule < k > [not T => bool] ...</ k > < eqns >... [.Set => T = bool] ...</ eqns > : KSentence .
 
   mb rule < k > [lambda X . E => (T -> E) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > < nextType > [T => sType T] </ nextType > : KSentence .
+  mb rule < k > [T1 T2 => T] ...</ k > < eqns >... [.Set => T1 = (T2 -> T)] ...</ eqns > < nextType > [T => sType T] </ nextType > : KSentence .
+
+  op _?=_ : Exp Type -> K [metadata "strict(1)"] .
+  mb rule < k > [mu X . E => E ?= T] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > < nextType > [T => sType T] </ nextType > : KSentence .
+  mb rule < k > [T1 ?= T2 => .K] ...</ k > < eqns >... [.Set => T1 = T2] ...</ eqns > : KSentence .
+
+
+  mb rule < k > [if T then T1 else T2 => T1] ...</ k > < eqns >... [.Set => T = bool T1 = T2] ...</ eqns > : KSentence .
 
 ---
   var T T1 T2 : Type .  var L : KLabel .  var N : Nat .  var X : Id .  var E : Exp .  var TEnv : Map .
