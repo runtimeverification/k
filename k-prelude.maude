@@ -107,6 +107,7 @@ mod K-TECHNIQUE is
   op <_>_</_> : CellLabel K CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel List CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Bag CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Map CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
 
   ops k T : -> CellLabel .
@@ -176,7 +177,8 @@ mod K-WRAPPERS-LABELS is
   op wklabel_ : KLabel -> KLabel [metadata "builtin wrapper"] .
   op wcelllabel_ : CellLabel -> KLabel [metadata "builtin wrapper"] .
   op kList : String -> KLabel [metadata "list wrapper"] .
-  op wset_ : Bag -> KLabel [metadata "builtin wrapper"] .
+  op wbag_ : Bag -> KLabel [metadata "builtin wrapper"] .
+  op wset_ : Set -> KLabel [metadata "builtin wrapper"] .
   op wlist_ : List -> KLabel [metadata "builtin wrapper"] .
   op wmap_ : Map -> KLabel [metadata "builtin wrapper"] .
 endm
@@ -189,7 +191,8 @@ mod K-WRAPPERS is
   op wklabel_ : KLabel -> K [metadata "builtin wrapper"] .
   op wcelllabel_ : CellLabel -> K [metadata "builtin wrapper"] .
   op wklist_ : List{K} -> K [metadata "list wrapper"] .
-  op wset_ : Bag -> K [metadata "builtin wrapper"] .
+  op wset_ : Set -> K [metadata "builtin wrapper"] .
+  op wbag_ : Bag -> K [metadata "builtin wrapper"] .
   op wlist_ : List -> K [metadata "builtin wrapper"] .
   op wmap_ : Map -> K [metadata "builtin wrapper"] .
 endm
@@ -204,10 +207,12 @@ mod K-RULES is
   ops rule_ : Map -> [KSentence] [prec 127 format(b o d)] .
   ops rule_ : List -> [KSentence] [prec 127 format(b o d)] .
   ops rule_ : Bag -> [KSentence] [prec 127 format(b o d)] .
+  ops rule_ : Set -> [KSentence] [prec 127 format(b o d)] .
   ops rule_if_ : List{K} Bool -> [KSentence] [prec 127 format(b o b o d)] .
   ops rule_if_ : Map Bool -> [KSentence] [prec 127 format(b o b o d)] .
   ops rule_if_ : List Bool -> [KSentence] [prec 127 format(b o b o d)] .
   ops rule_if_ : Bag Bool -> [KSentence] [prec 127 format(b o b o d)] .
+  ops rule_if_ : Set Bool -> [KSentence] [prec 127 format(b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
   op `[_=>_`] : K K -> K [prec 0] .
   op `[_=>_`] : KResult KResult -> KResult [prec 0] .
@@ -219,6 +224,7 @@ mod K-RULES is
   op `[_=>_`] : Map Map -> Map [prec 0] .
   op `[_=>_`] : List List -> List [prec 0] .
   op `[_=>_`] : Bag Bag -> Bag [prec 0] .
+  op `[_=>_`] : Set Set -> Set [prec 0] .
 endm
 
 
@@ -236,14 +242,17 @@ mod K-OPEN-CELLS is
   op <_>..._...</_> : CellLabel K CellLabel -> BagItem [prec 0] .
   op <_>..._...</_> : CellLabel List CellLabel -> BagItem [prec 0] .
   op <_>..._...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel Set CellLabel -> BagItem [prec 0] .
   op <_>..._...</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
   op <_>..._</_> : CellLabel K CellLabel -> BagItem [prec 0] .
   op <_>..._</_> : CellLabel List CellLabel -> BagItem [prec 0] .
   op <_>..._</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel Set CellLabel -> BagItem [prec 0] .
   op <_>..._</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
   op <_>_...</_> : CellLabel K CellLabel -> BagItem [prec 0] .
   op <_>_...</_> : CellLabel List CellLabel -> BagItem [prec 0] .
   op <_>_...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel Set CellLabel -> BagItem [prec 0] .
   op <_>_...</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
 endm
 
