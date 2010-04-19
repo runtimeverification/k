@@ -1,0 +1,50 @@
+in ../../../../k-prelude
+in exp-type-inference-syntax
+in ../exp-programs
+
+mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
+--- We need type values/results when we define the type system
+  sort Type .
+  subsort Type < Exp KResult .
+  subsort Exp < K .
+
+  subsort KResult < K .
+  ops int bool : -> Type .
+  op t : Nat -> Type .
+  op sType_ : Type -> Type .
+  eq sType t(N) = t(sNat N) .
+
+  op _->_ : Type Exp -> K [metadata "strict(2) hybrid"] .
+
+
+  ops tenv eqns nextType : -> CellLabel .
+  mb configuration < T >
+                     < k > .K </ k >
+                     < tenv > .Map </ tenv >
+                     < eqns > .Bag </ eqns >
+                     < nextType > t(0) </ nextType >
+                   </ T > : KSentence .
+
+  op _=_ : Type Type -> BagItem [prec 30 comm] .
+
+---  mb rule < k > [X => V] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> V ...</ store > : KSentence .
+  mb rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Bag => T1 = int T2 = int] ...</ eqns > 
+       if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_ : KSentence .
+  mb rule < k > [- T => int] ...</ k > < eqns >... [.Bag => T = int] ...</ eqns > : KSentence .
+  mb rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Bag => T1 = int T2 = int] ...</ eqns > 
+       if L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_ : KSentence .
+  mb rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Bag => T1 = bool T2 = bool] ...</ eqns > 
+       if L ==Bool '_and_ orBool L ==Bool '_or_ : KSentence .
+  mb rule < k > [not T => bool] ...</ k > < eqns >... [.Bag => T = bool] ...</ eqns > : KSentence .
+
+  mb rule < k > [lambda X . E => (T -> E) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[T / X]] </ tenv > < nextType > [T => sType T] </ nextType > : KSentence .
+
+---
+  var T T1 T2 : Type .  var L : KLabel .  var N : Nat .  var X : Id .  var E : Exp .  var TEnv : Map .
+--- type environment recovery
+  op tenv : Map -> K .
+  mb rule < k > T ~> [tenv(TEnv) => .K] ...</ k > < tenv > [? => TEnv] </ tenv > : KSentence [metadata "structural"] .
+endm
+
+mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS .
+endm
