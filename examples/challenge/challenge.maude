@@ -38,7 +38,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   mb rule [I1 + F2 => floatConversion(I1) +Float F2] : KSentence .
   mb rule [F1 + I2 => F1 +Float floatConversion(I2)] : KSentence .
   mb rule [F1 + F2 => F1 +Float F2] : KSentence .
---- following needs to be written like that because of parsing ambiguities: a*b can also be seen as __(a,*b) ...
+--- following rules for _*_ need to be written like that because of parsing ambiguities: a*b can also be seen as __(a,*b) ...
   mb rule [_*_(I1,I2) => I1 *Int I2] : KSentence .
   mb rule [_*_(I1,F2) => floatConversion(I1) *Float F2] : KSentence .
   mb rule [_*_(F1,I2) => F1 *Float floatConversion(I2)] : KSentence .
@@ -211,24 +211,17 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   mb context box(Label)(?,,`[HOLE`]:K,,?) : KSentence .
   
   mb rule < k > [quote E => quote[0](E)] ...</ k > : KSentence .
-  mb rule [quote[N]((K1 ~> K2)) 
-        => quote[N](K1) box(~>) quote[N](K2)] 
-        if K1 =/=Bool .K andBool K2 =/=Bool .K : KSentence .
-  mb rule [code(K1) box(~>) code(K2) => code((K1 ~> K2))] : KSentence .
-  mb rule [quote[N](Label(Kl)) => box(Label)(quote[N](Kl))]
-   if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_ : KSentence .
-  mb rule [box(Label)(code(Kl)) => code(Label(Kl))] : KSentence .
-  mb rule [quote[N](quote(E)) 
-        => box('quote_)(quote[sNat(N)](E))] : KSentence .
+  mb rule [quote[N](quote(E)) => box('quote_)(quote[sNat(N)](E))] : KSentence .
   mb rule [quote[0](unquote(E)) => E] : KSentence .
-  mb rule [quote[sNat(N)](unquote(E)) 
-        => box('unquote_)(quote[N](E))] : KSentence .
-
-  mb rule [quote[N]((K,, Kl)) => quote[N](K) box(,,) quote[N](Kl)] 
-        if Kl =/=Bool .List{K} : KSentence .
+  mb rule [quote[sNat(N)](unquote(E)) => box('unquote_)(quote[N](E))] : KSentence .
+  mb rule [quote[N](.K) => code(.K)] : KSentence [metadata "structural"] .
+  mb rule [quote[N]((K1 ~> K2)) => quote[N](K1) box(~>) quote[N](K2)] if K1 =/=Bool .K andBool K2 =/=Bool .K : KSentence .
+  mb rule [code(K1) box(~>) code(K2) => code((K1 ~> K2))] : KSentence .
+  mb rule [quote[N](Label(Kl)) => box(Label)(quote[N](Kl))] if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_ : KSentence .
+  mb rule [box(Label)(code(Kl)) => code(Label(Kl))] : KSentence .
   mb rule [quote[N](.List{K}) => code(.List{K})] : KSentence .
-  mb rule [code(K) box(,,) code(Kl) => code((K,, Kl))] : KSentence .
-
+  mb rule [quote[N]((Kl1,, Kl2)) => quote[N](Kl1) box(,,) quote[N](Kl2)] if Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K} : KSentence .
+  mb rule [code(Kl1) box(,,) code(Kl2) => code((Kl1,, Kl2))] : KSentence .
   mb rule [eval code(K) => K]  : KSentence .
 
 ----------------------------------------------
@@ -257,7 +250,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
 
   vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .  var X : Id . var Xl : List{Id} .  var E : Exp .  var El : List{Exp} .
   vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Bag .
-  var FStack : List .  var V : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl : List{K} .  var Label : KLabel .
+  var FStack : List .  var V : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl Kl1 Kl2 : List{K} .  var Label : KLabel .
 endm
 
 mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
