@@ -27,6 +27,15 @@ RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
 OUTPUT_FILE="${FILE}-compiled"
+IFILE="kcompile_in.txt"
+EFILE="kcompile_err.txt"
+OFILE="kcompile_out.txt"
+TFILE="kcompile_tmp.txt"
+: >"$IFILE"
+: >"$EFILE"
+: >"$OFILE"
+: >"$TFILE"
+
 if [[ $# -eq  2 ]]; then
   LANG="$2"
 else
@@ -36,112 +45,103 @@ fi
 LANG0=LANG
 
 function addLoadPrelude {
-if ! [[ "$INPUT" =~ load\ .*k-prelude ]] && ! [[ "$INPUT" =~ in\ .*k-prelude ]] ; then
-     INPUT="
-load \"$KBASE/k-prelude\"
-$INPUT"
+if ! grep -q "^[[:space:]]*\(load\|in\)[[:space:]].*k-prelude\(\.maude\)\?[[:space:]]*$" "$INPUT"
+then
+  echo "load \"$KBASE/k-prelude\"" > $IFILE
 fi
 }
 
+function cleanAndExit {
+  if [[ "$1" -eq 0 ]];
+  then 
+    rm -f "$IFILE"
+    rm -f "$EFILE"
+    rm -f "$OFILE"
+    rm -f "$TFILE"
+  fi
+  exit $1
+}
+
 function checkMaude {
-  if [ -n "$2" ]; then
-    printf "%s.." "$2"
+  if [ -n "$3" ]; then
+    printf "%s.." "$3"
   fi
   INPUT="$1"
+  : > $IFILE
   addLoadPrelude
-  result=$( { stdout=$(echo "$INPUT" | $MAUDE ) ; } 2>&1; printf "%s" "--------------------$stdout")
-OUTPUT1=${result#*--------------------}
-ERROR=${result%--------------------*}
-  if [ -n "$ERROR" ]; then
+  cat "$INPUT" >> $IFILE
+  echo "$2" >> $IFILE
+  $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
+  if [ -n "$(<$EFILE)" ]; 
+  then 
     echo ". Error in encountered when passing the Input below to Maude 
-Input:
-$1
-Output:
-$OUTPUT1
-Error ($2): 
-$ERROR
-Stopping the compilation!"
-    exit 1
+Input:"
+    cat "$IFILE"
+    echo "Output:"
+    cat "$OFILE"
+    echo "Error ($3):" 
+    cat "$EFILE"
+    echo "Stopping the compilation!"
+    cleanAndExit 1
   fi
-  if [ -n "$2" ]; then
+  if [ -n "$3" ]; then
     printf ". Done!\n"
   fi
 }
 
 function runMaude {
-  printf "%s.." "$2"
+  printf "%s.." "$3"
   INPUT="$1"
+  : > $IFILE
   addLoadPrelude
-  result=$( { stdout=$(echo "$INPUT" | $MAUDE ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
-ERROR=${result%-k-maude-delimiter--*}
-  if [ -n "$ERROR" ]; then
-    echo ". Error encountered when generating the output module: 
-Input:
-$1
-Output:
-$OUTPUT
-Error ($2): 
-$ERROR
-Stopping the compilation!"
-    exit 1
+  cat "$INPUT" >> $IFILE
+  echo "$2" >> $IFILE
+  $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
+  if [ -n "$(<$EFILE)" ]; 
+  then 
+   echo ". Error in encountered when passing the Input below to Maude 
+Input:"
+    cat "$IFILE"
+    echo "Output:"
+    cat "$OFILE"
+    echo "Error ($3):" 
+    cat "$EFILE"
+    echo "Stopping the compilation!"
+    cleanAndExit 1
   fi
- 
-OUTPUT=${result#*-k-maude-delimiter--}
-#echo "$OUTPUT"
-  if [[ ! "$OUTPUT" =~ "---K-MAUDE-GENERATED-OUTPUT-END-----" ]]
+  if ! grep -q '[-]--K-MAUDE-GENERATED-OUTPUT-END-----' "$OFILE"
   then
-    echo ". Error encountered when generating the output module: 
-Input:
-$1
-Error ($2): 
-$OUTPUT
-Stopping the compilation!"
-    exit 1
+    printf ". Error encountered when generating the output module:\nInput:"
+    cat "$IFILE"
+    echo "Error ($3):" 
+    cat "$EFILE"
+    echo "Stopping the compilation!"
+    cleanAndExit 1
   fi
-OUTPUT="${OUTPUT%---K-MAUDE-GENERATED-OUTPUT-END-----*}"
-#echo "$OUTPUT"
-OUTPUT="${OUTPUT#*---K-MAUDE-GENERATED-OUTPUT-BEGIN---}"
-#echo "$OUTPUT"
-  checkMaude "$3 $OUTPUT show module ."
 
+  sed -n "/---K-MAUDE-GENERATED-OUTPUT-BEGIN---/,/---K-MAUDE-GENERATED-OUTPUT-END-----/p" "$OFILE" | sed "1 d;$ d" >"$TFILE"
+  checkMaude "$TFILE" "show module ."
+  echo "load \"$KBASE/k-prelude\"" > $4
+  cat "$TFILE" >> $4
   printf ". Done!\n"
-  if [ -n "$DEBUG" ]; then
-    echo "
---------------$2--------------------
-$OUTPUT
-" >>log.txt
-  fi
 }
 
-OUTPUT=$(<$FILE.maude)
+OUTPUT="$FILE.maude"
 
 TEST_INPUT="
 show module $LANG .
 "
 
-checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
+checkMaude "$OUTPUT" "$TEST_INPUT" "Testing the input module $LANG exists"
 
-OUTPUT=$(<$FILE.maude)
-
-DEFAULTH="
-set include PL-BOOL off .
-set include BOOL on .
-set print attribute on .
-load \"$KBASE/tools/prelude-extras\"
-load \"$KBASE/tools/meta-k\"
-load \"$KBASE/tools/printing\"
-"
+OUTPUT="$FILE.maude"
 
 COMPILE="
 load  \"$KBASE/tools/all-tools\"
 loop compile .
 (compile $LANG .)
 "
-runMaude "$OUTPUT $COMPILE" "Compiling the definition"
-
-echo "
-load \"$KBASE/k-prelude\"
-$OUTPUT
-" > $OUTPUT_FILE.maude
+runMaude "$OUTPUT" "$COMPILE" "Compiling the definition" $OUTPUT_FILE.maude
 
 echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."
+cleanAndExit 0
