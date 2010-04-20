@@ -35,21 +35,21 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   </ T > : KSentence .
 
   mb rule [I1 + I2 => I1 +Int I2] : KSentence .
-  mb rule [I1 + F2 => floatConversion(I1) +Float F2] : KSentence .
-  mb rule [F1 + I2 => F1 +Float floatConversion(I2)] : KSentence .
+  mb rule [I1 + F2 => rat2floatConversion(I1) +Float F2] : KSentence .
+  mb rule [F1 + I2 => F1 +Float rat2floatConversion(I2)] : KSentence .
   mb rule [F1 + F2 => F1 +Float F2] : KSentence .
 --- following rules for _*_ need to be written like that because of parsing ambiguities: a*b can also be seen as __(a,*b) ...
   mb rule [_*_(I1,I2) => I1 *Int I2] : KSentence .
-  mb rule [_*_(I1,F2) => floatConversion(I1) *Float F2] : KSentence .
-  mb rule [_*_(F1,I2) => F1 *Float floatConversion(I2)] : KSentence .
+  mb rule [_*_(I1,F2) => rat2floatConversion(I1) *Float F2] : KSentence .
+  mb rule [_*_(F1,I2) => F1 *Float rat2floatConversion(I2)] : KSentence .
   mb rule [_*_(F1,F2) => F1 *Float F2] : KSentence .
   mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
-  mb rule [I1 / F2 => floatConversion(I1) /Float F2] if F2 =/=Bool 0.0 : KSentence .
-  mb rule [F1 / I2 => F1 /Float floatConversion(I2)] if I2 =/=Bool 0 : KSentence .
+  mb rule [I1 / F2 => rat2floatConversion(I1) /Float F2] if F2 =/=Bool 0.0 : KSentence .
+  mb rule [F1 / I2 => F1 /Float rat2floatConversion(I2)] if I2 =/=Bool 0 : KSentence .
   mb rule [F1 / F2 => F1 /Float F2] if F2 =/=Bool 0.0 : KSentence .
   mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
-  mb rule [I1 <= F2 => floatConversion(I1) <=Float F2] : KSentence .
-  mb rule [F1 <= I2 => F1 <=Float floatConversion(I2)] : KSentence .
+  mb rule [I1 <= F2 => rat2floatConversion(I1) <=Float F2] : KSentence .
+  mb rule [F1 <= I2 => F1 <=Float rat2floatConversion(I2)] : KSentence .
   mb rule [F1 <= F2 => F1 <=Float F2] : KSentence .
   mb rule [not T => notBool T] : KSentence .
   mb rule [true and E => E] : KSentence .

@@ -39,10 +39,13 @@ fmod K-META-OPS is including META-TERM .
 endfm
 
 fmod META-K-BUILTINS is
-  including META-LEVEL .
+  including META-LEVEL-EXTRAS .
   including META-MODULE-EXTRAS .
-  op builtinSorts : -> SortSet [memo] .
-  eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
+  op Builtins : -> Sort .
+  eq Builtins = 'Builtins .
+  op builtinSorts : Module -> SortSet [memo] .
+---  eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
+  eq builtinSorts(M:Module) = getSubsorts(flatten(M:Module), Builtins) .
   op builtinModules : ~> SortSet [memo] .
   eq builtinModules 
    = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
@@ -87,6 +90,7 @@ fmod META-K-MODULE is
     subsort KProper < NeK .
     subsort KResult < NeK .
     subsort NeK < K .
+    subsort Builtins < NeK .
     ) .
 
   op ksupersorts : -> SubsortDeclSet [memo] .
@@ -131,7 +135,7 @@ fmod META-K-MODULE is
    = (getSupersorts(removeSubsorts(SSDS,ksupersorts), K ; KResult)) .
 
   op syntaxSorts :  Module ~> SortSet .
-  eq syntaxSorts(M) = removeSorts(getSubsorts(M, K),ksorts ; builtinSorts ; getSubsorts(getList2KSubsorts(M))) .
+  eq syntaxSorts(M) = removeSorts(getSubsorts(M, K),ksorts ; builtinSorts(M) ; getSubsorts(getList2KSubsorts(M))) .
 
   op syntaxOps : Module -> OpDeclSet .
   eq syntaxOps(M) = getOps(getOps(M), syntaxSorts(M)) .

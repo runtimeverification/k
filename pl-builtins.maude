@@ -21,8 +21,15 @@
 set include BOOL off .
 set show advisories off .
 
+
+fmod BUILTINS is 
+  sort Builtins .
+endfm
+
 fmod PL-BOOL is
+  including BUILTINS .
   sort Bool .
+  subsort Bool < Builtins .
   op true : -> Bool [ctor special (id-hook SystemTrue)] .
   op false : -> Bool [ctor special (id-hook SystemFalse)] .
   op if_then_else_fi : Bool Universal Universal -> Universal [poly (2 3 0)
@@ -71,7 +78,7 @@ endfm
 fmod PL-NAT is
   protecting PL-BOOL .
   sorts Zero NzNat Nat .
-  subsort Zero NzNat < Nat .
+  subsort Zero NzNat < Nat < Builtins .
   op 0 : -> Zero [ctor] .
 
   op sNat_ : Nat -> NzNat
@@ -205,7 +212,7 @@ endfm
 fmod PL-INT is
   protecting PL-NAT .
   sorts NzInt Int .
-  subsorts NzNat < NzInt Nat < Int .
+  subsorts NzNat < NzInt Nat < Int < Builtins .
 
   op -Int_ : NzNat -> NzInt
         [ctor
@@ -381,7 +388,7 @@ endfm
 fmod PL-RAT is
   protecting PL-INT .
   sorts PosRat NzRat Rat .
-  subsorts NzInt < NzRat Int < Rat .
+  subsorts NzInt < NzRat Int < Rat < Builtins .
   subsorts NzNat < PosRat < NzRat .
 
   op _/Rat_ : NzInt NzNat -> NzRat
@@ -560,7 +567,7 @@ endfm
 fmod PL-FLOAT is
   protecting PL-BOOL .
   sorts FiniteFloat Float .
-  subsort FiniteFloat < Float .
+  subsort FiniteFloat < Float < Builtins .
 
 *** pseudo constructor for the set of double precision floats
   op <Floats> : -> FiniteFloat [special (id-hook FloatSymbol)] .
@@ -706,7 +713,7 @@ endfm
 fmod PL-STRING is
   protecting PL-INT .
   sorts String Char FindResult .
-  subsort Char < String .
+  subsort Char < String . --- < Builtins .
 ---  subsort Int < FindResult .
 
 *** pseudo constructor for the infinite set of strings
@@ -787,42 +794,43 @@ fmod PL-CONVERSION is
   protecting PL-FLOAT .
   protecting PL-STRING .
   sort DecFloat .
+  subsort DecFloat < Builtins .
   op <_,_,_>Conversion : Int String Int -> DecFloat [ctor] .
 
-  op floatConversion : Rat -> Float
+  op rat2floatConversion : Rat -> Float
         [special (id-hook FloatOpSymbol (float)
                   op-hook floatSymbol (<Floats> : ~> Float)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op ratConversion : FiniteFloat -> Rat
+  op float2ratConversion : FiniteFloat -> Rat
         [special (id-hook FloatOpSymbol (rat)
                   op-hook floatSymbol (<Floats> : ~> Float)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op stringConversion : Rat NzNat -> String
+  op rat2stringConversion : Rat NzNat -> String
         [special (id-hook StringOpSymbol (string)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op ratConversion : String NzNat -> Rat
+  op string2ratConversion : String NzNat -> Rat
         [special (id-hook StringOpSymbol (rat)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op stringConversion : Float -> String
+  op float2stringConversion : Float -> String
         [special (id-hook StringOpSymbol (string)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op floatConversion : String -> Float
+  op string2floatConversion : String -> Float
         [special (id-hook StringOpSymbol (float)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
@@ -873,7 +881,9 @@ endm
 
 
 mod PL-ID is
+  including BUILTINS .
   sort Id .
+  subsort Id < Builtins .
 endm
 
 mod PL-BUILTINS is

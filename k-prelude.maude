@@ -9,7 +9,7 @@ mod K-TECHNIQUE is
   var LItem : ListItem .  var List : List .
 
   sorts KResult NeK K .
-  subsorts KResult < NeK < K .
+  subsorts KResult Builtins < NeK < K .
   op .K : -> K [metadata "latex(renameTo \\ensuremath{\\kdot})"].
   op _~>_ : K K -> K [prec 100  assoc id: .K metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
   
