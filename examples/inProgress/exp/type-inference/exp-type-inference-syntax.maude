@@ -24,7 +24,7 @@ mod EXP-SYNTAX is including PL-INT + PL-ID .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
   ops (lambda_._) (mu_._) : Id Exp -> Exp .
   op __ : Exp Exp -> Exp [prec 10 gather(E e) metadata "strict"] .
-  op let_=_in_ : Id Exp Exp -> Exp [metadata "strict"] .
+  op let_=_in_ : Id Exp Exp -> Exp .
   op letrec__=_in_ : Id Id Exp Exp -> Exp .
   op if_then_else_ : Exp Exp Exp -> Exp [metadata "strict"] .
 endm
