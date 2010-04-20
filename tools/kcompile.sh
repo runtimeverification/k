@@ -114,7 +114,7 @@ Input:"
     printf ". Error encountered when generating the output module:\nInput:"
     cat "$IFILE"
     echo "Error ($3):" 
-    cat "$EFILE"
+    cat "$OFILE"
     echo "Stopping the compilation!"
     cleanAndExit 1
   fi
