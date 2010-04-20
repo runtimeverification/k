@@ -706,7 +706,7 @@ fmod META-LEVEL-EXTRAS is
   including META-MODULE-EXTRAS .
   including NAT-LIST-EXTRAS .
 
-  var M M' : Module . var T T' : Type . var K : Kind . var Tl Tl' : TypeList .
+  var M M' : Module . var T T' T'' : Type . var K : Kind . var Tl Tl' : TypeList .
   var OPDS OPDS' : OpDeclSet .  var Op Op' : OpDecl .
   var AS AS' : AttrSet . var Q Q' : Qid .
   var Trm Trm' : Term . var Trms : TermList .  var Nl : NatList .
@@ -761,9 +761,12 @@ fmod META-LEVEL-EXTRAS is
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
    =  (op 'sNat_ : Tl' -> T' [AS] .)
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
+ ceq findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, S)
+   = (op Q : T' T' -> T' [AS assoc] .) 
+  if sortLeq(M,S,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl))) .
  ceq findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, T)
    = (op Q : T' T' -> T' [AS assoc] .) 
-  if sortLeq(M,T',T) and-then sortsLeq(M,Tl,dup(T',arity(Tl))) .
+  if sameKind(M,T,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl))) [owise] .
  ceq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
    = (op Q : mergeTypes(Tl, Tl', 1, getPoly(AS)) -> mergeTypes(T, T', 0, getPoly(AS)) [AS] .)
   if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise] .
