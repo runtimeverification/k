@@ -27,6 +27,15 @@ RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
 OUTPUT_FILE="${FILE}-compiled"
+IFILE="kcompile_in.txt"
+EFILE="kcompile_err.txt"
+OFILE="kcompile_out.txt"
+TFILE="kcompile_tmp.txt"
+: >"$IFILE"
+: >"$EFILE"
+: >"$OFILE"
+: >"$TFILE"
+
 if [[ $# -eq  2 ]]; then
   LANG="$2"
 else
@@ -36,92 +45,89 @@ fi
 LANG0=LANG
 
 function addLoadPrelude {
-if ! [[ "$INPUT" =~ load\ .*k-prelude ]] && ! [[ "$INPUT" =~ in\ .*k-prelude ]] ; then
-     INPUT="
-load \"$KBASE/k-prelude\"
-$INPUT"
+if ! grep -q "^[[:space:]]*\(load\|in\)[[:space:]].*k-prelude\(\.maude\)\?[[:space:]]*$" "$INPUT"
+then
+  echo "load \"$KBASE/k-prelude\"" > $IFILE
 fi
 }
 
+function cleanAndExit {
+  if [[ "$1" -eq 0 ]];
+  then 
+    rm -f "$IFILE"
+    rm -f "$EFILE"
+    rm -f "$OFILE"
+    rm -f "$TFILE"
+  fi
+  exit $1
+}
+
 function checkMaude {
-  if [ -n "$2" ]; then
-    printf "%s.." "$2"
+  if [ -n "$3" ]; then
+    printf "%s.." "$3"
   fi
   INPUT="$1"
+  : > $IFILE
   addLoadPrelude
-  result=$( { stdout=$(echo "$INPUT" | $MAUDE ) ; } 2>&1; printf "%s" "--------------------$stdout")
-OUTPUT1=${result#*--------------------}
-ERROR=${result%--------------------*}
-  if [ -n "$ERROR" ]; then
-    echo ". Error in encountered when passing the Input below to Maude 
-Input:
-$1
-Output:
-$OUTPUT1
-Error ($2): 
-$ERROR
-Stopping the compilation!"
-    exit 1
+  cat "$INPUT" >> $IFILE
+  echo "$2" >> $IFILE
+  $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
+  if [ -n "$(<$EFILE)" ]; 
+  then
+   echo ". Error ($3) when checking that $IFILE is a valid Maude module."
+    cat "$EFILE"
+    echo "Aborting the compilation!"
+    cleanAndExit 1
   fi
-  if [ -n "$2" ]; then
+  if [ -n "$3" ]; then
     printf ". Done!\n"
   fi
 }
 
 function runMaude {
-  printf "%s.." "$2"
+  printf "%s.." "$3"
   INPUT="$1"
+  : > $IFILE
   addLoadPrelude
-  result=$( { stdout=$(echo "$INPUT" | $MAUDE ) ; } 2>&1; printf "%s" "-k-maude-delimiter--$stdout")
-  ERROR=${result%-k-maude-delimiter--*}
-  if [ -n "$ERROR" ]; then
-    echo ". Error encountered when generating the output module: 
-Input:
-$1
-Output:
-$OUTPUT
-Error ($2): 
-$ERROR
-Stopping the compilation!"
-    exit 1
+  cat "$INPUT" >> $IFILE
+  echo "$2" >> $IFILE
+  $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
+  if [ -n "$(<$EFILE)" ]; 
+  then 
+    echo ". Error ($3) during the transformation phase. Input is in $IFILE"
+    cat "$EFILE"
+    echo "Aborting the compilation!"
+    cleanAndExit 1
   fi
- 
-  OUTPUT=${result#*-k-maude-delimiter--}
-  #echo "$OUTPUT"
-  if [[ ! "$OUTPUT" =~ "---K-MAUDE-GENERATED-OUTPUT-END-----" ]]
+  if ! grep -q '[-]--K-MAUDE-GENERATED-OUTPUT-END-----' "$OFILE"
   then
-    echo ". Error encountered when generating the output module: 
-Input:
-$1
-Error ($2): 
-$OUTPUT
-Stopping the compilation!"
-    exit 1
+    echo ". Error ($3) during the transformation phase. Input is in $IFILE"
+    cat "$OFILE"
+    echo "Aborting the compilation!"
+    cleanAndExit 1
   fi
-  OUTPUT="${OUTPUT%---K-MAUDE-GENERATED-OUTPUT-END-----*}"
-  #echo "$OUTPUT"
-  OUTPUT="${OUTPUT#*---K-MAUDE-GENERATED-OUTPUT-BEGIN---}"
-  #echo "$OUTPUT"
-  checkMaude "$3 $OUTPUT show module ."
 
+  sed -n "/---K-MAUDE-GENERATED-OUTPUT-BEGIN---/,/---K-MAUDE-GENERATED-OUTPUT-END-----/p" "$OFILE" | sed "1 d;$ d" >"$TFILE"
+  checkMaude "$TFILE" "show module ."
+#  echo "load \"$KBASE/k-prelude\"" > $4
+#  cat "$TFILE" >> $4
+  cp "$TFILE" "$4"
   printf ". Done!\n"
   if [ -n "$DEBUG" ]; then
-    echo "
---------------$2--------------------
-$OUTPUT
-" >>log.txt
+    printf "\n--------------$3--------------------\n">>log.txt
+    cat "$TFILE" >>log.txt
   fi
 }
 
-OUTPUT=$(<$FILE.maude)
+OUTPUT="$FILE.maude"
 
 TEST_INPUT="
 show module $LANG .
 "
 
-checkMaude "$OUTPUT $TEST_INPUT" "Testing the input module $LANG exists"
+checkMaude "$OUTPUT" "$TEST_INPUT" "Testing the input module $LANG exists"
 
-OUTPUT=$(<$FILE.maude)
+OUTPUT="$FILE.maude"
 
 DEFAULTH="
 set include PL-BOOL off .
@@ -137,7 +143,7 @@ load  \"$KBASE/tools/many-modules-interface\"
 loop many-modules .
 (manyModules $LANG $LANG .)
 "
-runMaude "$OUTPUT $MANY_MODULES" "Flattening entire definition in a single module"
+runMaude "$OUTPUT" "$MANY_MODULES" "Flattening entire definition in a single module" "$OFILE"
 
 ANON_CONSTS="
 $DEFAULTH
@@ -145,7 +151,7 @@ load \"$KBASE/tools/anon-consts-interface\"
 loop anon-consts .
 (resolveAnonConsts $LANG $LANG .)
 "
-runMaude "$OUTPUT $ANON_CONSTS" "Transforming Anonymous constants into variables"
+runMaude "$OFILE" "$ANON_CONSTS" "Transforming Anonymous constants into variables" "$OFILE"
 
 SANITY_CHECKS="
 $DEFAULTH
@@ -154,7 +160,7 @@ loop sanity-checks .
 (sanityChecks $LANG .)
 "
 
-runMaude "$OUTPUT $SANITY_CHECKS" "Checking each (sub)term parses to a sort"
+runMaude "$OFILE" "$SANITY_CHECKS" "Checking each (sub)term parses to a sort" "$OFILE"
 
 CONTEXT_TRANSFORMERS="
 $DEFAULTH
@@ -163,7 +169,7 @@ loop context-transformers .
 (resolveKCxt $LANG $LANG $LANG .)
 "
 
-runMaude "$OUTPUT $CONTEXT_TRANSFORMERS" "Applying Context Transformers"
+runMaude "$OFILE" "$CONTEXT_TRANSFORMERS" "Applying Context Transformers" "$OFILE"
 
 OPEN_CELLS="
 $DEFAULTH
@@ -171,7 +177,7 @@ load \"$KBASE/tools/open-cells-interface\"
 loop open-cells .
 (resolveOpenCells $LANG $LANG .)
 "
-runMaude "$OUTPUT $OPEN_CELLS" "Transforming open cells to normal cells through anonymous variables"
+runMaude "$OFILE" "$OPEN_CELLS" "Transforming open cells to normal cells through anonymous variables" "$OFILE"
 
 ANON_VARS="
 $DEFAULTH
@@ -180,7 +186,7 @@ loop anon-vars .
 (resolveAnonVars $LANG $LANG .)
 "
 
-runMaude "$OUTPUT $ANON_VARS"  "Resolving Anonymous Variables"
+runMaude "$OFILE" "$ANON_VARS"  "Resolving Anonymous Variables" "$OFILE"
 
 K_RULES="
 $DEFAULTH
@@ -189,7 +195,7 @@ loop make-k-rules .
 (resolveKRules $LANG $LANG .)
 "
 
-runMaude "$OUTPUT $K_RULES"  "Generating Maude rules from K rules"
+runMaude "$OFILE" "$K_RULES"  "Generating Maude rules from K rules" "$OFILE"
 
 REMOVE_SUBLISTS="
 $DEFAULTH
@@ -197,7 +203,7 @@ load \"$KBASE/tools/remove-sublists-interface\"
 loop remove-sublists .
 (removeSublists $LANG -SL .)
 "
-runMaude "$OUTPUT $REMOVE_SUBLISTS" "Removing subsorted lists"
+runMaude "$OFILE" "$REMOVE_SUBLISTS" "Removing subsorted lists" "$OFILE"
 
 LANG="${LANG}-SL"
 
@@ -207,7 +213,7 @@ load \"$KBASE/tools/lists-to-wrappers-interface\"
 loop lists-to-wrappers .
 (makeLists2wrappers $LANG -W .)
 "
-runMaude "$OUTPUT $LISTS2WRAPPERS" "Wrapping Syntax lists into K"
+runMaude "$OFILE" "$LISTS2WRAPPERS" "Wrapping Syntax lists into K" "$OFILE"
 
 LANG="${LANG}-W"
 
@@ -217,7 +223,7 @@ load \"$KBASE/tools/syntax-to-k-interface\"
 loop syntax-to-k .
 (syntax2k $LANG -K .)
 "
-runMaude "$OUTPUT $SYNTAX2K" "Merging syntax sorts into K"
+runMaude "$OFILE" "$SYNTAX2K" "Merging syntax sorts into K" "$OFILE"
 
 LANG="${LANG}-K"
 
@@ -227,7 +233,7 @@ load \"$KBASE/tools/add-k-proper-interface\"
 loop add-k-proper .
 (addKProper $LANG -PROPER .)
 "
-runMaude "$OUTPUT $KPROPER" "Adding the KProper Sort"
+runMaude "$OFILE" "$KPROPER" "Adding the KProper Sort" "$OFILE"
 
 LANG="${LANG}-PROPER"
 
@@ -237,7 +243,7 @@ load \"$KBASE/tools/lists-to-k-interface\"
 loop lists-to-k .
 (makeLists2k $LANG -L .)
 "
-runMaude "$OUTPUT $LISTS2K" "Merging lists sorts into K"
+runMaude "$OFILE" "$LISTS2K" "Merging lists sorts into K" "$OFILE"
 
 LANG="${LANG}-L"
 
@@ -248,7 +254,7 @@ loop subsorts-to-wrappers .
 (resolveKSubsorts $LANG 0 .)
 "
 
-runMaude "$OUTPUT $SUBSORTS"  "Transforming subsorted builtins into injections"
+runMaude "$OFILE" "$SUBSORTS"  "Transforming subsorted builtins into injections" "$OFILE"
 
 ARGUMENTS="
 $DEFAULTH
@@ -257,7 +263,7 @@ loop homogenous-arguments .
 (makeHomogenousArgs ${LANG}0 1 .)
 "
 
-runMaude "$OUTPUT $ARGUMENTS" "Wrapping non-K arguments"
+runMaude "$OFILE" "$ARGUMENTS" "Wrapping non-K arguments" "$OFILE"
 
 LABELS="
 $DEFAULTH
@@ -266,7 +272,7 @@ loop make-all-labels .
 (makeAllLabels ${LANG}01 -LABELS .)
 "
 
-runMaude "$OUTPUT $LABELS" "Reducing all K constructs to K labels"
+runMaude "$OFILE" "$LABELS" "Reducing all K constructs to K labels" "$OFILE"
 
 STRICTCXT="
 $DEFAULTH
@@ -276,7 +282,7 @@ loop strict-ops2cxt .
 (strictOps2cxt ${LANG}01-LABELS ${LANG}01-LABELS .)
 "
 
-runMaude "$OUTPUT $STRICTCXT" "Generating Strictness Axioms"
+runMaude "$OFILE" "$STRICTCXT" "Generating Strictness Axioms" "$OFILE"
 
 STRICTEQS="
 $DEFAULTH
@@ -284,11 +290,9 @@ load \"$KBASE/tools/strict-cxt2eqs-interface\"
 loop strict-cxt2eqs .
 (strictCxt2eqs ${LANG}01-LABELS  ${LANG}01-LABELS .)
 "
-runMaude "$OUTPUT $STRICTEQS" "Generating Strictness Equations"
+runMaude "$OFILE" "$STRICTEQS" "Generating Strictness Equations" "$OFILE"
 
-echo "
-load \"$KBASE/k-prelude\"
-$OUTPUT
-" > $OUTPUT_FILE.maude
+printf "load \"$KBASE/k-prelude\"\n" >$OUTPUT_FILE.maude
+cat "$OFILE" >> $OUTPUT_FILE.maude
 
 echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."

@@ -74,14 +74,9 @@ function checkMaude {
   $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
   if [ -n "$(<$EFILE)" ]; 
   then 
-    echo ". Error in encountered when passing the Input below to Maude 
-Input:"
-    cat "$IFILE"
-    echo "Output:"
-    cat "$OFILE"
-    echo "Error ($3):" 
+    echo ". Error ($3) when checking that $IFILE is a valid Maude module."
     cat "$EFILE"
-    echo "Stopping the compilation!"
+    echo "Aborting the compilation!"
     cleanAndExit 1
   fi
   if [ -n "$3" ]; then
@@ -99,23 +94,16 @@ function runMaude {
   $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
   if [ -n "$(<$EFILE)" ]; 
   then 
-   echo ". Error in encountered when passing the Input below to Maude 
-Input:"
-    cat "$IFILE"
-    echo "Output:"
-    cat "$OFILE"
-    echo "Error ($3):" 
+    echo ". Error ($3) during the transformation phase. Input is in $IFILE"
     cat "$EFILE"
-    echo "Stopping the compilation!"
+    echo "Aborting the compilation!"
     cleanAndExit 1
   fi
   if ! grep -q '[-]--K-MAUDE-GENERATED-OUTPUT-END-----' "$OFILE"
   then
-    printf ". Error encountered when generating the output module:\nInput:"
-    cat "$IFILE"
-    echo "Error ($3):" 
+    echo ". Error ($3) during the transformation phase. Input is in $IFILE"
     cat "$OFILE"
-    echo "Stopping the compilation!"
+    echo "Aborting the compilation!"
     cleanAndExit 1
   fi
 
