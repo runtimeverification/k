@@ -61,7 +61,7 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
     , homogenousMbs(Flat, getOps(Flat), OPDM, getMbs(M)))
     , homogenousEqs(Flat, getOps(Flat), OPDM, getEqs(M)))
     , homogenousRls(Flat, getOps(Flat), OPDM, getRls(M)))
-  .
+  [print OPDM] .
 
  op homogenousMbs : Module OpDeclSet OpDeclMap MembAxSet ~> MembAxSet .
  eq homogenousMbs(M, OPDS, OPDM, Mbs Mb)
@@ -165,7 +165,7 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
  eq processOps(M, none, Wrappers, Homogenous) = homogenous(Homogenous) .
 
  op notKSorts : OpDecl ~> NatList .
- eq notKSorts(op Q : Tl -> T [AS] .) = notMatchingSortsList(Tl,K) .
+ eq notKSorts(op Q : Tl -> T [AS] .) = notMatchingSortsList(Tl,K ; KResult ; NeK) .
  
  op processOps : Module OpDeclSet OpDecl OpDeclSet OpDeclSet NatList ~> OpDeclMap . 
  eq processOps(M, OPDS, Op, Wrappers, Homogenous, nil)

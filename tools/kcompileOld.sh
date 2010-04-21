@@ -27,14 +27,16 @@ RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
 OUTPUT_FILE="${FILE}-compiled"
-IFILE="kcompile_in.txt"
+IFILE="kcompile_in.maude"
 EFILE="kcompile_err.txt"
 OFILE="kcompile_out.txt"
 TFILE="kcompile_tmp.txt"
+LFILE="kcompile_log.maude"
 : >"$IFILE"
 : >"$EFILE"
 : >"$OFILE"
 : >"$TFILE"
+: >"$LFILE"
 
 if [[ $# -eq  2 ]]; then
   LANG="$2"
@@ -114,8 +116,8 @@ function runMaude {
   cp "$TFILE" "$4"
   printf ". Done!\n"
   if [ -n "$DEBUG" ]; then
-    printf "\n--------------$3--------------------\n">>log.txt
-    cat "$TFILE" >>log.txt
+    printf "\n--------------$3--------------------\n">>"$LFILE"
+    cat "$TFILE" >>"$LFILE"
   fi
 }
 
@@ -296,3 +298,4 @@ printf "load \"$KBASE/k-prelude\"\n" >$OUTPUT_FILE.maude
 cat "$OFILE" >> $OUTPUT_FILE.maude
 
 echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."
+cleanAndExit 0

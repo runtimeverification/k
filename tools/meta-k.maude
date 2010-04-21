@@ -80,7 +80,7 @@ fmod META-K-MODULE is
   eq klistSorts = NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
 
   op isKSort : Type -> Bool [memo] .
-  eq isKSort(T) = T in ksorts .
+  eq isKSort(T) = T in (ksorts ; Builtins) .
 
   op isKListSort : Type -> Bool [memo] .
   eq isKListSort(T) = T in klistSorts .
