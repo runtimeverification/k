@@ -5,8 +5,8 @@ in ../exp-programs
 mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
 --- We need type values/results when we define the type system
   sorts BasicType TypeVar Type UniversalType .
-  subsort TypeVar < Type < Exp KResult .
-  subsort Exp UniversalType List{Type} < Builtins K .
+  subsort TypeVar < Type < Builtins Exp KResult .
+  subsort Exp UniversalType List{Type} < K .
 
   ops int bool : -> BasicType .
   subsort BasicType < Type .
