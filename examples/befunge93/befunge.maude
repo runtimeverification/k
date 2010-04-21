@@ -1,4 +1,4 @@
-load ../../../k-prelude
+load ../../k-prelude
 mod BEFUNGE is
 	including K .
 	including PL-BUILTINS .
@@ -274,7 +274,7 @@ mod BEFUNGE is
 	mb [printNumber]: rule
 		< k > [inject(".")(.List{K}) => .K] ...</ k >
 		< stack > [ListItem(inject(I:Int)(.List{K})) => .List] ...</ stack >
-		< output > [inject(S:String)(.List{K}) => inject(S:String +String stringConversion(absInt(I:Int), 10) +String " ")(.List{K})] </ output >
+		< output > [inject(S:String)(.List{K}) => inject(S:String +String rat2stringConversion(absInt(I:Int), 10) +String " ")(.List{K})] </ output >
 		< mode > defaultmode(.List{K}) </ mode >
 		: KSentence [metadata "computational rule"] .
 		
