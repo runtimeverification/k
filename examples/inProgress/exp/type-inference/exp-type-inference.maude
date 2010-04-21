@@ -73,7 +73,8 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
                      < nextType > tvar(0) </ nextType >
                    </ T > : KSentence .
 
-  mb rule [I => int] : KSentence .
+---  mb rule < k > [?:Int => int] ...</ k > : KSentence .
+  mb rule [?:Int => int] : KSentence .
   mb rule < k > [X => T] ...</ k > < tenv >... X |-> T ...</ tenv > : KSentence .
   mb rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
        if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_ : KSentence .
@@ -89,21 +90,20 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
   mb rule [T ~> mkFunType(Tv) => Tv -> T] : KSentence .
   mb rule < k > [T1 T2 => Tv] ...</ k > < eqns >... [.Set => T1 = (T2 -> Tv)] ...</ eqns > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
 
-  op _?=_ : Exp Type -> K [metadata "strict(1)"] .
-  mb rule < k > [mu X . E => E ?= Tv] ...</ k > < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
-  mb rule < k > [T1 ?= T2 => .K] ...</ k > < eqns >... [.Set => T1 = T2] ...</ eqns > : KSentence .
+  op addEqn : Type -> K .
+  mb rule < k > [mu X . E => E ~> addEqn(Tv) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
+  mb rule < k > [T ~> addEqn(Tv) => Tv] ...</ k > < eqns >... [.Set => Tv = T] ...</ eqns > : KSentence .
 
   op let : TypeVar Id Exp -> K .
   mb rule < k > [let X = E in E' => E ~> let(Tv,X,E')] ...</ k > < nextType > Tv </ nextType > : KSentence .
   mb rule < k > [T ~> let(Tv,X,E') => E' ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[forall newVars(T,Tv) . T / X]] </ tenv > : KSentence .
-  mb rule < k > [X => T[| Tvl | from Tv / Tvl]] ...</ k > < tenv >... X |-> forall Tvl . T ...</ tenv >
-          < nextType > [Tv => Tv +Type | Tvl |] </ nextType > : KSentence .
+---  mb rule < k > [X => T[| Tvl | from Tv / Tvl]] ...</ k > < tenv >... X |-> forall Tvl . T ...</ tenv > < nextType > [Tv => Tv +Type | Tvl |] </ nextType > : KSentence .
 
   mb rule < k > [if T then T1 else T2 => T1] ...</ k > < eqns >... [.Set => T = bool T1 = T2] ...</ eqns > : KSentence .
 
 ---
   var T T1 T2 T' T1' T2' : Type .  var Tv Tv' Tv1 Tv2 Tv1' Tv2' : TypeVar .  var L : KLabel .  var N M : Nat .  var X : Id .  var E E' : Exp .  var TEnv : Map .  var Eqns : Set .
-  var BT : BasicType .  var Tvl Tvl' Tvl1 Tvl2 Tvl1' Tvl2' : List{TypeVar} .  var Tl : List{Type} .  var I : Int .
+  var BT : BasicType .  var Tvl Tvl' Tvl1 Tvl2 Tvl1' Tvl2' : List{TypeVar} .  var Tl : List{Type} .
 --- type environment recovery
   op tenv : Map -> K .
   mb rule < k > T ~> [tenv(TEnv) => .K] ...</ k > < tenv > [? => TEnv] </ tenv > : KSentence [metadata "structural"] .
@@ -118,7 +118,7 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
  ceq (T = Tv) = (Tv = T) if notBool typeVar?(T) .
 
   eq (Tv = T Tv  = T') = (Tv = T    T = T') .
- ceq (Tv = T Tv' = T') = (Tv = T  Tv' = T'[T / Tv]) if Tv in T' .
+--- ceq (Tv = T Tv' = T') = (Tv = T  Tv' = T'[T / Tv]) if Tv in T' .
 
   op _in_ : TypeVar Type -> Bool .
   eq Tv in BT = false .
@@ -127,7 +127,7 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
 
   op _[_] : Set Type -> Type [strat(1 0)] .
   eq .Set[T] = T .
- ceq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] if notBool(Tv in T') .
+--- ceq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] if notBool(Tv in T') .
 ***)
 
 
@@ -154,5 +154,5 @@ mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS 
   op solve : -> K .
   var T : Type .  var Eqns : Set .
   eq run = < T > < k > p1 ~> solve </ k > < tenv > .Map </ tenv > < eqns > .Set </ eqns > < nextType > tvar(0) </ nextType > </ T > .
-  mb rule < k > [T ~> solve => Eqns[T]] </ k > < eqns > Eqns </ eqns > : KSentence .
+---  mb rule < k > [T ~> solve => Eqns[T]] </ k > < eqns > Eqns </ eqns > : KSentence .
 endm
