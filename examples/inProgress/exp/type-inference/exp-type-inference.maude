@@ -6,13 +6,13 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
 --- We need type values/results when we define the type system
   sorts BasicType TypeVar Type UniversalType .
   subsort TypeVar < Type < Exp KResult .
-  subsort Exp UniversalType List{TypeVar} < K .
+  subsort Exp UniversalType List{Type} < Builtins K .
 
   ops int bool : -> BasicType .
   subsort BasicType < Type .
-  op t : Nat -> TypeVar .
+  op tvar : Nat -> TypeVar .
   op _+Type_ : TypeVar Nat -> TypeVar .
-  eq t(N) +Type M = t(N +Nat M) .
+  eq tvar(N) +Type M = tvar(N +Nat M) .
   op _->_ : Type Type -> Type .
 
   ops tenv eqns nextType : -> CellLabel .
@@ -20,11 +20,8 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
                      < k > .K </ k >
                      < tenv > .Map </ tenv >
                      < eqns > .Set </ eqns >
-                     < nextType > t(0) </ nextType >
+                     < nextType > tvar(0) </ nextType >
                    </ T > : KSentence .
-
---- this should be defined on types, not on K's ...
-  op _=_ : K K -> SetItem [prec 30 comm] .
 
   mb rule < k > [X => T] ...</ k > < tenv >... X |-> T ...</ tenv > : KSentence .
   mb rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
@@ -55,42 +52,75 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
   mb rule < k > [if T then T1 else T2 => T1] ...</ k > < eqns >... [.Set => T = bool T1 = T2] ...</ eqns > : KSentence .
 
 ---
-  var T T1 T2 : Type .  var Tv Tv' Tv1 Tv2 Tv1' Tv2' : TypeVar .  var L : KLabel .  var N M : Nat .  var X : Id .  var E E' : Exp .  var TEnv : Map .  var Eqns : Set .
-  var BT : BasicType .  var Tvl Tvl' Tvl1 Tvl2 Tvl1' Tvl2' : List{TypeVar} .
+  var T T1 T2 T' T1' T2' : Type .  var Tv Tv' Tv1 Tv2 Tv1' Tv2' : TypeVar .  var L : KLabel .  var N M : Nat .  var X : Id .  var E E' : Exp .  var TEnv : Map .  var Eqns : Set .
+  var BT : BasicType .  var Tvl Tvl' Tvl1 Tvl2 Tvl1' Tvl2' : List{TypeVar} .  var Tl : List{Type} .
 --- type environment recovery
   op tenv : Map -> K .
   mb rule < k > T ~> [tenv(TEnv) => .K] ...</ k > < tenv > [? => TEnv] </ tenv > : KSentence [metadata "structural"] .
 
---- newVars should take a Type as first argument ...
-  op newVars : K TypeVar -> List{TypeVar} .
-  eq newVars(BT,Tv) = .List{TypeVar} .
-  eq newVars(t(N),t(M)) = if N >=Nat M then t(N) else .List{TypeVar} fi .
-  eq newVars((T1 -> T2), Tv) = newVars(T1,Tv),newVars(T2,Tv) .
-  eq Tv,Tvl,Tv = Tv,Tvl .
 
-  op |_| : List{TypeVar} -> Nat [strat(1 0)] .
+  op newVars : Type TypeVar -> List{TypeVar} .
+  eq newVars(BT,Tv) = .List{TypeVar} .
+  eq newVars(tvar(N),tvar(M)) = if N >=Nat M then tvar(N) else .List{TypeVar} fi .
+  eq newVars((T1 -> T2), Tv) = mergeVars(newVars(T1,Tv),newVars(T2,Tv)) .
+
+  op mergeVars : List{TypeVar} List{TypeVar} -> List{TypeVar} .
+  eq mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tv,Tvl2)) = mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tvl2)) .
+  eq mergeVars(Tvl,Tvl') = Tvl,Tvl' [owise] .
+
+  op |_| : List{TypeVar} -> Nat .
   eq | Tv,Tvl | = 1 + | Tvl | .
   eq | .List{TypeVar} | = 0 .
 
   op _from_ : Nat TypeVar -> List{TypeVar} .
   eq 0 from Tv = .List{TypeVar} .
-  eq (sNat N) from t(M) = t(M),(N from t(sNat M)) .
+  eq (sNat N) from tvar(M) = tvar(M),(N from tvar(sNat M)) .
+
+  op _[_/_] : Type List{Type} List{TypeVar} -> Type [prec 2] .
+  eq T[T1,T2,Tl / Tv1,Tv2,Tvl] = T[T1 / Tv1][T2,Tl / Tv2,Tvl] .
+  eq BT[T / Tv] = BT .
+  eq Tv'[T / Tv] = if Tv' ==Bool Tv then T else Tv' fi .
+  eq (T1 -> T2)[T / Tv] = T1[T / Tv] -> T2[T / Tv] .
 
 --- to be defined ...
-  op _[_] : Set Type -> Type .
+  op _=_ : Type Type -> SetItem [prec 30 comm] .
 
-  op _[_/_] : Type List{TypeVar} List{TypeVar} -> Type [prec 2] .
-  eq T[Tv1,Tv2,Tvl / Tv1',Tv2',Tvl'] = T[Tv1 / Tv1'][Tv2,Tvl / Tv2',Tvl'] .
-  eq BT[Tv / Tv'] = BT .
-  eq Tv1[Tv / Tv'] = if Tv ==Bool Tv then Tv' else Tv1 fi .
-  eq (T1 -> T2)[Tv / Tv'] = T1[Tv / Tv'] -> T2[Tv / Tv'] .
+  eq (T = T) = .Set .
+  eq ((T1 -> T2) = (T1' -> T2')) = (T1 = T1' T2 = T2') .
+--- ceq (T = Tv) = (Tv = T) if not T :: TypeVar .
+--- cmb Tv = T : Eqn if not(Tv in vars(T)) .
+
+  eq (Tv = T Tv  = T') = (Tv = T    T = T') .
+ ceq (Tv = T Tv' = T') = (Tv = T  Tv' = T'[T / Tv]) if Tv in T' .
+  op circular : TypeVar Type -> SetItem .
+ ceq (Tv = T) = circular(Tv,T) if Tv in T .
+
+  op _in_ : TypeVar Type -> Bool .
+  eq Tv in BT = false .
+  eq Tv in Tv' = Tv ==Bool Tv' .
+  eq Tv in (T1 -> T2) = (Tv in T1) orBool (Tv in T2) .
+
+  op _[_] : Set Type -> Type [strat(1 0)] .
+  eq .Set[T] = T .
+---  eq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] .
 
 --- List{TypeVar}
   sort List{TypeVar} .
   subsort TypeVar < List{TypeVar} .
   op .List{TypeVar} : -> List{TypeVar} .
   op _,_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [prec 70 assoc id: .List{TypeVar}] .
+--- List{Type}
+  sort List{Type} .
+  subsort Type List{TypeVar} < List{Type} .
+  op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
 endm
 
+rew (tvar(1) -> tvar(0)) = tvar(0) .
+
 mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS .
+  op run : -> Bag .
+  op solve : -> K .
+  var T : Type .  var Eqns : Set .
+  eq run = < T > < k > p4 ~> solve </ k > < tenv > .Map </ tenv > < eqns > .Set </ eqns > < nextType > tvar(0) </ nextType > </ T > .
+  mb rule < k > [T ~> solve => Eqns[T]] </ k > < eqns > Eqns </ eqns > : KSentence .
 endm
