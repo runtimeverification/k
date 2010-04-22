@@ -99,10 +99,10 @@ endm
 
 mod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS .
 --- make sure the name of the final module is the capitalized version of the file name
-  op run : -> Bag .
+  op run : KLabel -> Bag .
 --- After loading simple-untyped-compiled into maude, type "rew run .".  Replace pSorting by any other program, then recompile.
-  eq run = < T > 
-             < k > pSorting </ k >
+  eq run(K:KLabel) = < T > 
+             < k > K:KLabel(.List{K}) </ k >
              < fstack > .List </ fstack >
              < env > .Map </ env >
              < genv > .Map </ genv >

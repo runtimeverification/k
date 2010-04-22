@@ -133,10 +133,10 @@ endm
 mod SIMPLE-TYPED-DYNAMIC is 
   including SIMPLE-TYPED-DYNAMIC-SEMANTICS .
   including SIMPLE-TYPED-PROGRAMS .
-  op run : -> Bag .
+  op run : KLabel -> Bag .
   var PgmName : KLabel .  var Input : List{K} .
-  eq run = < T > 
-             < k > pSorting </ k >
+  eq run(PgmName) = < T > 
+             < k > PgmName(.List{K}) </ k >
              < fstack > .List </ fstack >
              < env > .Map </ env >
              < genv > .Map </ genv >

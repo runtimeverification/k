@@ -35,7 +35,7 @@ mod IMP-PROGRAMS is including IMP-SYNTAX .
   ops collatzStmt multiplicationStmt primalityStmt : -> Stmt .
 eq sumPgm = (
      vars n, s ;
-     n := 10000 ;
+     n := 10 ;
      s := 0 ;
      while not(n <= 0) do (
        s := s + n ;
@@ -56,7 +56,7 @@ eq collatzStmt = (
 
 eq collatzPgm = (
    vars m, n, q, r, s ;
-   m := 10 ;
+   m := 5 ;
    s := 0 ;
    while not (m <= 2) do (
      n := m ;
@@ -138,9 +138,9 @@ mod IMP-SEMANTICS is
 endm
 
 mod IMP is including IMP-PROGRAMS + IMP-SEMANTICS .
-  op [[_]] : K -> Bag .
-  eq [[K:K]] = < T > < k > K:K </ k > < state > .Map </ state > </ T > .
+  op [[_]] : KLabel -> Bag .
+  eq [[K:KLabel]] = < T > < k > K:KLabel(.List{K}) </ k > < state > .Map </ state > </ T > .
 --- We should eventually replace the above with
 ---  eq [[K:K]] = < T >... < k > K:K </ k > ...</ T > .
-  op pgm : -> Bag .  eq pgm = [[sumPgm]] .
+  op pgm : -> Bag .  eq pgm = [['sumPgm]] .
 endm

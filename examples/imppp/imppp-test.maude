@@ -1,0 +1,4 @@
+load imppp-compiled
+rew startConfig("pSum"(.List{K})) .
+rew startConfig("pList"(.List{K})) .
+frew startConfig("pCollatz"(.List{K})) .

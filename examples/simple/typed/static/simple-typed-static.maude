@@ -57,7 +57,11 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
   mb context var X[[HOLE]] : T ; : KSentence .
   mb rule < k > [var X[int] : _`[`](T) ; => stmt] ...</ k > < tenv > [TEnv => TEnv[_`[`](T) / X]] </ tenv > : KSentence .
   mb rule [{} => stmt] : KSentence .
-  mb rule [{stmt} => stmt] : KSentence .
+  op tenv : Map -> K .
+  mb rule < k > [{S} => S ~> tenv(TEnv)] ...</ k > 
+          < tenv > TEnv </ tenv > : KSentence .
+  mb rule < k > stmt ~> [tenv(TEnv) => .K] ...</ k > 
+          < tenv > [? => TEnv] </ tenv > : KSentence .
   mb rule [stmt stmt => stmt] : KSentence .
   mb rule < k > [X = T ; => stmt] ...</ k > < tenv >... X |-> T ...</ tenv >  : KSentence .
   mb context ?[[HOLE]] = ? ; : KSentence .
@@ -98,9 +102,9 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
 endm
 
 mod SIMPLE-TYPED-STATIC is including SIMPLE-TYPED-STATIC-SEMANTICS + SIMPLE-TYPED-PROGRAMS .
-  op run : -> Bag .
-  eq run = < T >
-             < k > pSorting </ k >
+  op run : KLabel -> Bag .
+  eq run(K:KLabel) = < T >
+             < k > K:KLabel(.List{K}) </ k >
            </ T > .
 endm
 

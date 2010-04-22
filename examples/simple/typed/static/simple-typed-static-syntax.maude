@@ -30,7 +30,7 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op sizeOf : Exp -> Exp [metadata "strict"] .
   op var_:_; : Var Type -> Decl [prec 2] .
   op {} : -> Stmt .
-  op {_} : Stmts -> Stmt [gather(&) metadata "strict"] .
+  op {_} : Stmts -> Stmt [gather(&)] .
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E) metadata "seqstrict"] .
   op _=_; : Exp Exp -> Stmt [prec 2 metadata "strict(2)"] .
   op _; : Exp -> Stmt [prec 50 metadata "strict"] .
