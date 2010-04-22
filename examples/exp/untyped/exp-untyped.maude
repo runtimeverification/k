@@ -1,4 +1,4 @@
-in ../../../../k-prelude
+in ../../../k-prelude
 in exp-untyped-syntax
 in ../exp-programs
 

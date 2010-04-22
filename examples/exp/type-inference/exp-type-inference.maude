@@ -1,4 +1,4 @@
-in ../../../../k-prelude
+in ../../../k-prelude
 in exp-type-inference-syntax
 in ../exp-programs
 
@@ -83,7 +83,6 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
 
   mb rule < k > [?:Int => int] ...</ k > : KSentence .
   mb rule < k > [?:Bool => bool] ...</ k > : KSentence .
----  mb rule [?:Int => int] : KSentence .
   mb rule < k > [X => T] ...</ k > < tenv >... X |-> T ...</ tenv > : KSentence .
   mb rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
        if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_ : KSentence .
@@ -103,19 +102,10 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
   mb rule < k > [mu X . E => E ~> addEqn(Tv) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
   mb rule < k > [T ~> addEqn(Tv) => Tv] ...</ k > < eqns >... [.Set => Tv = T] ...</ eqns > : KSentence .
 
-
-***(
-  op let : TypeVar Id Exp -> K .
-  mb rule < k > [let X = E in E' => E ~> let(Tv,X,E')] ...</ k > < nextType > Tv </ nextType > : KSentence .
-  mb rule < k > [T ~> let(Tv,X,E') => E' ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[forall newVars(T,Tv) . T / X]] </ tenv > : KSentence .
-  mb rule < k > [X => T[| Tvl | from Tv / Tvl] ~> X] ...</ k > < tenv >... X |-> forall Tvl . T ...</ tenv > < nextType > [Tv => Tv +Type | Tvl |] </ nextType > : KSentence .
-***)
-
   op let : Type -> K .
   mb rule < k > [let X = T in E => E ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[let(T) / X]] </ tenv > : KSentence .
   mb rule < k > [X => (Eqns[T])[|(vars(Eqns[T]) \ vars(Eqns))| from Tv / (vars(Eqns[T]) \ vars(Eqns))]] ...</ k > 
           < tenv >... X |-> let(T) ...</ tenv > < eqns > Eqns </ eqns > < nextType > [Tv => Tv +Type |(vars(Eqns[T]) \ vars(Eqns))|]</ nextType > : KSentence .
----     where T' := Eqns[T] /\ Tvl := vars(T') \ vars(Eqns)) /\ T0' := T0 + length(Tvl) /\ Tvl' := T0 ... (T0' + (-1)) .
 
   mb rule < k > [if T then T1 else T2 => T1] ...</ k > < eqns >... [.Set => T = bool T1 = T2] ...</ eqns > : KSentence .
 
@@ -128,26 +118,6 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
 
 --- equational constraint solving stuff
   op _=_ : Type Type -> SetItem [prec 30] .
-
-***(
---- this is how I would like these equations to be like
-  eq (T = T) = .Set .
-  eq ((T1 -> T2) = (T1' -> T2')) = (T1 = T1' T2 = T2') .
- ceq (T = Tv) = (Tv = T) if notBool typeVar?(T) .
-
-  eq (Tv = T Tv  = T') = (Tv = T    T = T') .
---- ceq (Tv = T Tv' = T') = (Tv = T  Tv' = T'[T / Tv]) if Tv in T' .
-
-  op _in_ : TypeVar Type -> Bool .
-  eq Tv in BT = false .
-  eq Tv in Tv' = Tv ==Bool Tv' .
-  eq Tv in (T1 -> T2) = (Tv in T1) orBool (Tv in T2) .
-
-  op _[_] : Set Type -> Type [strat(1 0)] .
-  eq .Set[T] = T .
---- ceq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] if notBool(Tv in T') .
-***)
-
 
   op fail : -> SetItem .
   eq fail SI:SetItem = fail .
@@ -175,8 +145,6 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + TYPES + K .
   eq .Set[T] = T .
   eq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] .
 endm
-
---- rew (tvar(0) = tvar(1) -> tvar(2)   tvar(1) = tvar(1) -> tvar(2))[tvar(0)] .
 
 mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS .
   op solve : -> K .

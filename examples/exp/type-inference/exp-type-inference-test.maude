@@ -7,7 +7,8 @@ rew run("p5") .
 rew run("p6") .
 rew run("p7") .
 rew run("p8") .
----rew run("p9") .
+set trace on .
+rew run("p9") .
 rew run("p10") .
 rew run("p11") .
 rew run("p12") .
