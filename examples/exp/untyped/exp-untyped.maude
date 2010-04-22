@@ -1,0 +1,60 @@
+in ../../../../k-prelude
+in exp-untyped-syntax
+in ../exp-programs
+
+mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
+  sort Val .
+  subsort Int Bool < Val < Exp < K .
+  subsort Val < KResult .
+  ops env store nextLoc : -> CellLabel .
+  mb configuration < T > < k > .K </ k > < env > .Map </ env > < store > .Map </ store > < nextLoc > 0 </ nextLoc > </ T > : KSentence .
+  mb rule < k > [X => E] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> E ...</ store > : KSentence .
+  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
+  mb rule [_-_(I1,I2) => _-Int_(I1,I2)] : KSentence .
+  mb rule [I1 * I2 => I1 *Int I2] : KSentence .
+  mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
+  mb rule [I1 % I2 => I1 %Int I2] if I2 =/=Bool 0 : KSentence .
+  mb rule [- I => -Int I] : KSentence .
+  mb rule [I1 < I2 => I1 <Int I2] : KSentence .
+  mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
+  mb rule [I1 > I2 => I1 >Int I2] : KSentence .
+  mb rule [I1 >= I2 => I1 >=Int I2] : KSentence .
+  mb rule [V1 == V2 => V1 ==Bool V2] : KSentence .
+  mb rule [V1 != V2 => V1 =/=Bool V2] : KSentence .
+  mb rule [T1 and T2 => T1 andBool T2] : KSentence .
+  mb rule [T1 or T2 => T1 orBool T2] : KSentence .
+  mb rule [not(T) => notBool(T)] : KSentence .
+  op closure-lambda : Map Id Exp -> Val .
+  mb rule < k > [lambda X . E => closure-lambda(Env,X,E)] ...</ k > < env > Env </ env > : KSentence .
+  mb rule < k > [closure-lambda(Env,X,E) V => E ~> env(Env')] ...</ k > < env > [Env' =>  Env[L / X]] </ env >
+          < store >...[.Map => L |-> V]...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
+  op closure-mu : Map Exp -> Exp .
+  mb rule < k > [mu X . E => closure-mu(Env[L / X],E)]...</ k > < env > Env </ env >
+          < store >...[.Map => L |-> closure-mu(Env[L / X],E)]...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
+  mb rule < k > [closure-mu(Env,E) => E ~> env(Env')] ...</ k > < env > [Env' => Env] </ env > : KSentence .
+
+---( we need mu closures ... the rule below is wrong, because the free variables of E can be captured ... nastily ... argh; see p12
+  mb rule < k > [mu X . E => E ~> env(Env)]...</ k > < env > [Env => Env[L / X]] </ env >
+          < store >...[.Map => L |-> mu X . E]...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
+---)
+
+  mb rule [if  true then E else ? => E] : KSentence .
+  mb rule [if false then ? else E => E] : KSentence .
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
+--- environment recovery
+  op env : Map -> K .
+  mb rule < k > V ~> [env(Env) => .K] ...</ k > < env > [? => Env] </ env > : KSentence [metadata "structural"] .
+--- tail recursion
+  mb rule [env(?) ~> env(Env) => env(Env)] : KSentence [metadata "structural"] .
+--- variable declarations; we put them last because we are going to infer them automatically in the future
+  var I I1 I2 : Int .  var X : Id .  var E : Exp .  var V V1 V2 : Val .
+  var L : Nat .  var T T1 T2 : Bool .  var Env Env' : Map .
+endm
+
+mod EXP-UNTYPED is including EXP-UNTYPED-SEMANTICS + EXP-PROGRAMS .
+  op run : -> Bag .
+  eq run = < T > < k > p12 </ k > < env > .Map </ env > < store > .Map </ store > < nextLoc > 0 </ nextLoc > </ T > .
+endm
+
