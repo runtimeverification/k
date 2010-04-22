@@ -1,6 +1,6 @@
 mod EXP-PROGRAMS is including EXP-SYNTAX .
   ops a b c d e f g h i j k l m n o p q r s u v w x y z : -> Id .
-  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p9 p9 p10 p11 p12 : -> Exp .
+  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p9 p9 p10 p11 p12 p13 p14 p15 p16 : -> Exp .
   ops f00 f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 : -> Id .
 
   eq p1 = (
@@ -75,4 +75,20 @@ mod EXP-PROGRAMS is including EXP-SYNTAX .
        in f 1
   ) .
 
+  eq p13 = lambda x .
+             let f = lambda y . if true then y else x
+              in (lambda x . f 0) .
+
+  eq p14 = lambda x .
+             let f = lambda y . if true then x 7 else x y
+              in f .
+
+  eq p15 = lambda x .
+             let f = lambda x . x
+              in let d = (f x) + 1
+                  in x .
+
+  eq p16 = lambda x .
+             let f = lambda y . x y
+              in let z = x 0 in f .
 endm
