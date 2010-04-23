@@ -756,8 +756,10 @@ fmod META-LEVEL-EXTRAS is
    =  (op Q : nil -> 'String [none] .) .
   eq findOp(M, OPDS, Q, nil, 'Char)
    =  (op Q : nil -> 'Char [none] .) .
-  eq findOp(M, OPDS, '_==Bool_, Tl, 'Bool)
-   =  (op '_==Bool_ : Tl -> 'Bool [none] .) .
+  eq findOp(M, OPDS, '_==Bool_, T T', T'')
+   =  (op '_==Bool_ : dup(lubSorts(M,T,T'),2) -> 'Bool [none] .) .
+  eq findOp(M, OPDS, '_=/=Bool_, T T', T'')
+   =  (op '_=/=Bool_ : dup(lubSorts(M,T,T'),2) -> 'Bool [none] .) [print "_=/=Bool_: " T "\/" T' ] .
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
    =  (op 'sNat_ : Tl' -> T' [AS] .)
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
