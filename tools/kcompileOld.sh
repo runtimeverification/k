@@ -142,6 +142,11 @@ load \"$KBASE/tools/printing\"
 MANY_MODULES="
 $DEFAULTH
 load  \"$KBASE/tools/many-modules-interface\"
+---(
+set print attribute on .
+red in MANY-MODULES-META : manyModules('$LANG, '$LANG) .
+q
+---)
 loop many-modules .
 (manyModules $LANG $LANG .)
 "
@@ -150,6 +155,11 @@ runMaude "$OUTPUT" "$MANY_MODULES" "Flattening entire definition in a single mod
 ANON_CONSTS="
 $DEFAULTH
 load \"$KBASE/tools/anon-consts-interface\"
+---(
+set print attribute on .
+red in ANONYMOUS-CONSTANTS-META : resolveAnonConsts('$LANG, '$LANG) .
+q
+---)
 loop anon-consts .
 (resolveAnonConsts $LANG $LANG .)
 "
@@ -158,6 +168,11 @@ runMaude "$OFILE" "$ANON_CONSTS" "Transforming Anonymous constants into variable
 SANITY_CHECKS="
 $DEFAULTH
 load  \"$KBASE/tools/sanity-checks-interface\"
+---(
+set print attribute on .
+red in SANITY-CHECKS-META : sanityChecks('$LANG) .
+q
+---)
 loop sanity-checks .
 (sanityChecks $LANG .)
 "
@@ -167,6 +182,11 @@ runMaude "$OFILE" "$SANITY_CHECKS" "Checking each (sub)term parses to a sort" "$
 CONTEXT_TRANSFORMERS="
 $DEFAULTH
 load \"$KBASE/tools/context-transformers-interface\"
+---(
+set print attribute on .
+red in CONTEXT-TRANSFORMERS-META : resolveKCxt('$LANG,'$LANG,'$LANG) .
+q
+---)
 loop context-transformers .
 (resolveKCxt $LANG $LANG $LANG .)
 "
@@ -176,6 +196,11 @@ runMaude "$OFILE" "$CONTEXT_TRANSFORMERS" "Applying Context Transformers" "$OFIL
 OPEN_CELLS="
 $DEFAULTH
 load \"$KBASE/tools/open-cells-interface\"
+---(
+set print attribute on .
+red in OPEN-CELLS-META : resolveOpenCells('$LANG,'$LANG) .
+q
+---)
 loop open-cells .
 (resolveOpenCells $LANG $LANG .)
 "
@@ -184,6 +209,11 @@ runMaude "$OFILE" "$OPEN_CELLS" "Transforming open cells to normal cells through
 ANON_VARS="
 $DEFAULTH
 load \"$KBASE/tools/anon-vars-interface\"
+---(
+set print attribute on .
+red in ANONYMOUS-VARIABLES-META : resolveAnonVars('$LANG,'$LANG) .
+q
+---)
 loop anon-vars .
 (resolveAnonVars $LANG $LANG .)
 "
@@ -193,6 +223,11 @@ runMaude "$OFILE" "$ANON_VARS"  "Resolving Anonymous Variables" "$OFILE"
 K_RULES="
 $DEFAULTH
 load \"$KBASE/tools/make-k-rules-interface\"
+---(
+set print attribute on .
+red in MAKE-K-RULES-META : resolveKRules('$LANG,'$LANG) .
+q
+---)
 loop make-k-rules .
 (resolveKRules $LANG $LANG .)
 "
@@ -202,6 +237,11 @@ runMaude "$OFILE" "$K_RULES"  "Generating Maude rules from K rules" "$OFILE"
 REMOVE_SUBLISTS="
 $DEFAULTH
 load \"$KBASE/tools/remove-sublists-interface\"
+---(
+set print attribute on .
+red in REMOVE-SUBLISTS-META : removeSublists('$LANG,'SL) .
+q
+---)
 loop remove-sublists .
 (removeSublists $LANG -SL .)
 "
@@ -212,6 +252,11 @@ LANG="${LANG}-SL"
 LISTS2WRAPPERS="
 $DEFAULTH
 load \"$KBASE/tools/lists-to-wrappers-interface\"
+---(
+set print attribute on .
+red in LISTS-TO-WRAPPERS-META : makeLists2wrappers('$LANG,'W) .
+q
+---)
 loop lists-to-wrappers .
 (makeLists2wrappers $LANG -W .)
 "
@@ -222,6 +267,11 @@ LANG="${LANG}-W"
 SYNTAX2K="
 $DEFAULTH
 load \"$KBASE/tools/syntax-to-k-interface\"
+---(
+set print attribute on .
+red in SYNTAX-TO-K-META : resolveAnonVars('$LANG,'K) .
+q
+---)
 loop syntax-to-k .
 (syntax2k $LANG -K .)
 "
@@ -232,6 +282,11 @@ LANG="${LANG}-K"
 KPROPER="
 $DEFAULTH
 load \"$KBASE/tools/add-k-proper-interface\"
+---(
+set print attribute on .
+red in ADD-K-PROPER-META : addKProper('$LANG,'-PROPER) .
+q
+---)
 loop add-k-proper .
 (addKProper $LANG -PROPER .)
 "
@@ -242,6 +297,11 @@ LANG="${LANG}-PROPER"
 LISTS2K="
 $DEFAULTH
 load \"$KBASE/tools/lists-to-k-interface\"
+---(
+set print attribute on .
+red in LISTS-TO-K-META : resolveAnonVars('$LANG,'-L) .
+q
+---)
 loop lists-to-k .
 (makeLists2k $LANG -L .)
 "
@@ -252,6 +312,11 @@ LANG="${LANG}-L"
 SUBSORTS="
 $DEFAULTH
 load \"$KBASE/tools/subsorts-to-wrappers-interface\"
+---(
+set print attribute on .
+red in SUBSORTS-TO-WRAPPERS-META : resolveKSubsorts('$LANG,'0) .
+q
+---)
 loop subsorts-to-wrappers .
 (resolveKSubsorts $LANG 0 .)
 "
@@ -261,6 +326,11 @@ runMaude "$OFILE" "$SUBSORTS"  "Transforming subsorted builtins into injections"
 ARGUMENTS="
 $DEFAULTH
 load \"$KBASE/tools/homogenous-arguments-interface\"
+---(
+set print attribute on .
+red in HOMOGENOUS-ARGUMENTS-META : makeHomogenousArgs('${LANG}0,'1) .
+q
+---)
 loop homogenous-arguments .
 (makeHomogenousArgs ${LANG}0 1 .)
 "
@@ -270,6 +340,11 @@ runMaude "$OFILE" "$ARGUMENTS" "Wrapping non-K arguments" "$OFILE"
 LABELS="
 $DEFAULTH
 load \"$KBASE/tools/make-all-labels-interface\"
+---(
+set print attribute on .
+red in MAKE-ALL-LABELS-META : makeAllLabels('${LANG}01,'-LABELS) .
+q
+---)
 loop make-all-labels .
 (makeAllLabels ${LANG}01 -LABELS .)
 "
@@ -280,6 +355,11 @@ STRICTCXT="
 $DEFAULTH
 load \"$KBASE/tools/metadata-parsing\"
 load \"$KBASE/tools/strict-ops2cxt-interface\"
+---(
+set print attribute on .
+red in STRICTOPS2CXT-META : strictOps2cxt('${LANG}01-LABELS,'${LANG}01-LABELS) .
+q
+---)
 loop strict-ops2cxt .
 (strictOps2cxt ${LANG}01-LABELS ${LANG}01-LABELS .)
 "
@@ -289,6 +369,11 @@ runMaude "$OFILE" "$STRICTCXT" "Generating Strictness Axioms" "$OFILE"
 STRICTEQS="
 $DEFAULTH
 load \"$KBASE/tools/strict-cxt2eqs-interface\"
+---(
+set print attribute on .
+red in STRICTCXT2EQS-META : strictCxt2eqs('${LANG}01-LABELS,'${LANG}01-LABELS) .
+q
+---)
 loop strict-cxt2eqs .
 (strictCxt2eqs ${LANG}01-LABELS  ${LANG}01-LABELS .)
 "
