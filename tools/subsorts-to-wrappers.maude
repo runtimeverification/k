@@ -62,7 +62,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq subsorts2wrappersMb((mb T1 : T [AS] .), M, OPDS, SSDM)
   = (mb findPurifyRedex(T1, getKind(M,T), M, OPDS, SSDM) : T [AS] .) .
  eq subsorts2wrappersMb((cmb T1 : T if Cond [AS] .), M, OPDS, SSDM)
-  = (cmb findPurifyRedex(T1, getKind(M,T), M, OPDS, SSDM) : T if Cond [AS] .) .
+  = (cmb findPurifyRedex(T1, getKind(M,T), M, OPDS, SSDM) : T if subsort2wrappersCond(Cond,M,OPDS,SSDM) [AS] .) .
 
  op subsorts2wrappersEqs : EquationSet Module OpDeclSet SubsortDeclMap ~> EquationSet .
  eq subsorts2wrappersEqs(Eqs Eq, M, OPDS, SSDM)
@@ -79,7 +79,36 @@ var Mbs : MembAxSet . var Mb : MembAx .
   = (ceq findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
 , M, OPDS, SSDM) 
       = findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2))
-, M, OPDS, SSDM) if Cond [AS] .) . 
+, M, OPDS, SSDM) if subsort2wrappersCond(Cond,M,OPDS,SSDM) [AS] .) . 
+
+
+ op subsort2wrappersCond : Condition Module OpDeclSet SubsortDeclMap ~> Condition .
+ eq subsort2wrappersCond(nil,M, OPDS, SSDM) = nil .
+ eq subsort2wrappersCond(T1 = T2 /\ Cond, M, OPDS, SSDM)
+  =  (findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
+, M, OPDS, SSDM) 
+      = findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2))
+, M, OPDS, SSDM))
+    /\ subsort2wrappersCond(Cond, M, OPDS, SSDM) .
+ eq subsort2wrappersCond(T1 := T2 /\ Cond, M, OPDS, SSDM)
+  =  (findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
+, M, OPDS, SSDM) 
+      := findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2))
+, M, OPDS, SSDM))
+    /\ subsort2wrappersCond(Cond, M, OPDS, SSDM) .
+ eq subsort2wrappersCond(T1 => T2 /\ Cond, M, OPDS, SSDM)
+  =  (findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2))
+, M, OPDS, SSDM) 
+      => findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2))
+, M, OPDS, SSDM))
+    /\ subsort2wrappersCond(Cond, M, OPDS, SSDM) .
+ eq subsort2wrappersCond(T : S /\ Cond, M, OPDS, SSDM)
+  =  (findPurifyRedex(T, kind-if-not-k(M,leastSort(M,T))
+, M, OPDS, SSDM) : S)
+    /\ subsort2wrappersCond(Cond, M, OPDS, SSDM) .
+
+
+
 
 
  op kind-if-not-k : Module Type -> Type .
@@ -100,7 +129,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
   = (crl findPurifyRedex(T1, kind-if-not-k(M,lubSort(M,T1,T2)) 
 , M, OPDS, SSDM) 
      => findPurifyRedex(T2, kind-if-not-k(M,lubSort(M,T1,T2)) 
-, M, OPDS, SSDM) if Cond [AS] .) . 
+, M, OPDS, SSDM) if subsort2wrappersCond(Cond,M,OPDS,SSDM) [AS] .) . 
 
  op findPurifyRedexes : TermList TypeList Module OpDeclSet SubsortDeclMap ~> TermList .
  eq findPurifyRedexes((Trm,Trms),(T Tl),M,OPDS, SSDM)
