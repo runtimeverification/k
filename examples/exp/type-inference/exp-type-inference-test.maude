@@ -7,7 +7,10 @@ rew run("p5") .
 rew run("p6") .
 rew run("p7") .
 rew run("p8") .
-set trace on .
+---set trace on .
+---set trace whole on .
+---set trace condition off .
+---set print attribute on .
 rew run("p9") .
 rew run("p10") .
 rew run("p11") .
