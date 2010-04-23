@@ -65,20 +65,29 @@ endm
 
 mod UNIFICATION is including TYPES + K .
 --- equational constraint solving stuff
+  ops eqn eqns solved started cycle : -> CellLabel .
   op _=_ : Type Type -> SetItem [strat(1 2 0) prec 30] .
 
-  op fail : -> SetItem .
-  eq fail SI:SetItem = fail .
- ceq (BT = BT') = fail if notBool(BT ==Bool BT') .
- ceq (BT = T) = fail if notBool(typeVar?(T)) .
- ceq (T = BT) = fail if notBool(typeVar?(T)) .
- ceq [fail] : (Tv = T) = fail if Tv in T .
+  mb [reflexivity] : rule < started >... [(T = T) => .Set] ...</ started > 
+  : KSentence .
+  mb [constructors] : rule < started >... [(T1 -> T2) = (T1' -> T2') => T1 = T1' T2 = T2'] ...</ started > : KSentence .
+  mb [orient] : rule < started >... [T = Tv => Tv = T] ...</ started > 
+     if notBool typeVar?(T) : KSentence .
+ ceq [eqn] : < started > Tv = T Eqns </ started > < solved > Solved </ solved >
+           = if Tv in T then < cycle > Tv = T </ cycle >
+             else < started > Eqns[T / Tv ] </ started > 
+             < solved > Tv = T (Solved[T /right Tv ]) </ solved > fi if Tv =/=Bool T .
+  mb [add-constraint] : rule [< eqn > T = T' </ eqn > => .Bag]
+          < started >... [.Set => (Solved[T]) = (Solved[T'])] ...</ started > 
+          < solved > Solved </ solved > : KSentence .
+  
+  op _[_/right_] : Set Type TypeVar -> Set .
+  eq .Set[T /right Tv] = .Set .
+  eq (Tv = T Eqns)[T' /right Tv'] = Tv = T[T' / Tv'] (Eqns[T' /right Tv']) .
 
-  eq [eqn] : (T = T) = .Set .
-  eq [eqn] : ((T1 -> T2) = (T1' -> T2')) = (T1 = T1' T2 = T2') .
- ceq [eqn] : (T = Tv) = (Tv = T) if notBool typeVar?(T) .
-  eq [eqn] : (Tv = T Tv = T') = (Tv = T  T = T') .
- ceq [eqn1] : (Tv = T Tv' = T') = (Tv = T  Tv' = T'[T / Tv]) if Tv in T' .
+  op _[_/_] : Set Type TypeVar -> Set .
+  eq .Set[T / Tv] = .Set .
+  eq (T1 = T2 Eqns)[T / Tv] = T1[T / Tv] = T2[T / Tv] (Eqns[T / Tv]) .
 
   op _in_ : TypeVar Type -> Bool .
   eq [eqn2] : Tv in BT = false .
@@ -94,7 +103,7 @@ mod UNIFICATION is including TYPES + K .
   eq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] .
 
 ---
-  var T T1 T2 T' T1' T2' : Type .  var Tv Tv' : TypeVar .  var Eqns : Set .
+  var T T1 T2 T' T1' T2' : Type .  var Tv Tv' : TypeVar .  var Eqns Solved : Set .
   var BT BT' : BasicType .
 endm
 
@@ -102,43 +111,48 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
 --- We need type values/results when we define the type system
   subsort Type < Exp KResult .
   subsort Exp List{Type} < K .
+  op fail : Set -> K .
 
-  ops tenv eqns nextType : -> CellLabel .
+  ops tenv nextType : -> CellLabel .
   mb configuration < T >
                      < k > .K </ k >
                      < tenv > .Map </ tenv >
-                     < eqns > .Set </ eqns >
+                     < eqns > < eqn * > .Set </ eqn * >
+                        < started > .Set </ started > 
+                        < solved > .Set </ solved > 
+                        < cycle > .Set </ cycle > 
+                     </ eqns >
                      < nextType > tvar(0) </ nextType >
                    </ T > : KSentence .
 
   mb [sem] : rule < k > [?:Int => int] ...</ k > : KSentence .
   mb [sem] : rule < k > [?:Bool => bool] ...</ k > : KSentence .
   mb [sem] : rule < k > [X => T] ...</ k > < tenv >... X |-> T ...</ tenv > : KSentence .
-  mb [sem] : rule < k > [L(T1,,T2) => int] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
+  mb [sem] : rule < k > [L(T1,,T2) => int] ...</ k > [.Bag => < eqn > T1 = int </ eqn > < eqn > T2 = int </ eqn >] 
        if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_ : KSentence .
-  mb [sem] : rule < k > [- T => int] ...</ k > < eqns >... [.Set => T = int] ...</ eqns > : KSentence .
-  mb [sem] : rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Set => T1 = int T2 = int] ...</ eqns > 
+  mb [sem] : rule < k > [- T => int] ...</ k > [.Bag => < eqn > T = int </ eqn >] : KSentence .
+  mb [sem] : rule < k > [L(T1,,T2) => bool] ...</ k > [.Bag => < eqn > T1 = int </ eqn > < eqn > T2 = int </ eqn >] 
        if L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_ : KSentence .
-  mb [sem] : rule < k > [L(T1,,T2) => bool] ...</ k > < eqns >... [.Set => T1 = bool T2 = bool] ...</ eqns >
+  mb [sem] : rule < k > [L(T1,,T2) => bool] ...</ k > [.Bag => < eqn > T1 = bool </ eqn > < eqn > T2 = bool </ eqn >]
        if L ==Bool '_and_ orBool L ==Bool '_or_ : KSentence .
-  mb [sem] : rule < k > [not T => bool] ...</ k > < eqns >... [.Set => T = bool] ...</ eqns > : KSentence .
+  mb [sem] : rule < k > [not T => bool] ...</ k > [.Bag => < eqn > T = bool </ eqn >] : KSentence .
 
   op mkFunType : TypeVar -> K .
   mb [sem] : rule < k > [lambda X . E => E ~> mkFunType(Tv) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
   mb [sem] : rule [T ~> mkFunType(Tv) => Tv -> T] : KSentence .
-  mb [sem] : rule < k > [T1 T2 => Tv] ...</ k > < eqns >... [.Set => T1 = (T2 -> Tv)] ...</ eqns > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
+  mb [sem] : rule < k > [T1 T2 => Tv] ...</ k > [.Bag => < eqn > T1 = (T2 -> Tv) </ eqn >] < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
 
   op addEqn : Type -> K .
   mb [sem] : rule < k > [mu X . E => E ~> addEqn(Tv) ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
-  mb [sem] : rule < k > [T ~> addEqn(Tv) => Tv] ...</ k > < eqns >... [.Set => Tv = T] ...</ eqns > : KSentence .
+  mb [sem] : rule < k > [T ~> addEqn(Tv) => Tv] ...</ k > [.Bag => < eqn > Tv = T </ eqn >] : KSentence .
 
   op let : Type -> K .
   mb [sem] : rule < k > [let X = T in E => E ~> tenv(TEnv)] ...</ k > < tenv > [TEnv => TEnv[let(T) / X]] </ tenv > : KSentence .
   mb [sem] : rule < k > [X => (Eqns[T])[|(vars(Eqns[T]) \ vars(Eqns))| from Tv / (vars(Eqns[T]) \ vars(Eqns))]] ...</ k > 
-          < tenv >... X |-> let(T) ...</ tenv > < eqns > Eqns </ eqns >
+          < tenv >... X |-> let(T) ...</ tenv > < eqns > < started > .Set </ started > < solved > Eqns </ solved > </ eqns >
           < nextType > [Tv => Tv +Type |(vars(Eqns[T]) \ vars(Eqns))|]</ nextType > : KSentence .
 
-  mb [sem] : rule < k > [if T then T1 else T2 => T1] ...</ k > < eqns >... [.Set => T = bool T1 = T2] ...</ eqns > : KSentence .
+  mb [sem] : rule < k > [if T then T1 else T2 => T1] ...</ k > [.Bag => < eqn > T = bool </ eqn > < eqn > T1 = T2 </ eqn >] : KSentence .
 
 ---
   var T T1 T2 T' T1' T2' : Type .  var Tv Tv' Tv1 Tv2 Tv1' Tv2' : TypeVar .  var L : KLabel .  var N M : Nat .  var X : Id .  var E E' : Exp .  var TEnv : Map .  var Eqns : Set .
@@ -146,6 +160,9 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
 --- type environment recovery
   op tenv : Map -> K .
   mb rule < k > T ~> [tenv(TEnv) => .K] ...</ k > < tenv > [? => TEnv] </ tenv > : KSentence [metadata "structural"] .
+
+  mb [fail-cycle] : rule < k > [?:K => fail(Eqns)] </ k > [< cycle > Eqns </ cycle > => .Bag] : KSentence .
+  mb [fail-conflict] : rule < k > [?:K => fail(BT = BT')] </ k > < started >... [BT = BT' => .Set] ...</ started > if BT =/=Bool BT' : KSentence .
 endm
 
 mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS .
@@ -154,6 +171,6 @@ mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS 
   op run : KLabel -> Bag .
   eq run(L:KLabel) = run(L:KLabel,.List{K}) .
   op run : KLabel List{K} -> Bag .
-  eq run(L:KLabel,L:List{K}) = < T > < k > L:KLabel(.List{K}) ~> solve </ k > < tenv > .Map </ tenv > < eqns > .Set </ eqns > < nextType > tvar(0) </ nextType > </ T > .
-  mb rule < k > [T ~> solve => Eqns[T]] </ k > < eqns > Eqns </ eqns > : KSentence .
+  eq run(L:KLabel,L:List{K}) = < T > < k > L:KLabel(.List{K}) ~> solve </ k > < tenv > .Map </ tenv > < eqns > < started > .Set </ started > < solved > .Set </ solved > </ eqns > < nextType > tvar(0) </ nextType > </ T > .
+  mb rule < k > [T ~> solve => Eqns[T]] </ k > < eqns > < started > .Set </ started > < solved > Eqns </ solved > </ eqns > : KSentence .
 endm
