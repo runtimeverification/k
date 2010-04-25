@@ -1,6 +1,6 @@
 mod EXP-PROGRAMS is including EXP-SYNTAX .
   ops a b c d e f g h i j k l m n o p q r s u v w x y z : -> Id .
-  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p9 p9 p10 p11 p12 p13 p14 p15 p16 : -> Exp .
+  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p9 p9 p10 p11 p12 p13 p14 p15 p16 p17 : -> Exp .
   ops f00 f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 : -> Id .
 
   eq p1 = (
@@ -49,14 +49,17 @@ mod EXP-PROGRAMS is including EXP-SYNTAX .
   eq p9 = (
     let f00 = lambda x . lambda y . x in
       let f01 = lambda x . f00 (f00 x) in
----        let f02 = lambda x . f01 (f01 x) in
----          let f03 = lambda x . f02 (f02 x) in
----            let f04 = lambda x . f03 (f03 x) in
----              let f05 = lambda x . f04 (f04 x) in
----                let f06 = lambda x . f05 (f05 x) in
----                  let f07 = lambda x . f06 (f06 x) in
-                    let f08 = lambda x . f01 (f01 x) in
-                       f08
+        let f02 = lambda x . f01 (f01 x) in
+          let f03 = lambda x . f02 (f02 x) in
+            let f04 = lambda x . f03 (f03 x) in
+              let f05 = lambda x . f04 (f04 x) in
+                let f06 = lambda x . f05 (f05 x) in
+                  let f07 = lambda x . f06 (f06 x) in
+                    let f08 = lambda x . f07 (f07 x) in
+                      let f09 = lambda x . f08 (f08 x) in
+                        let f10 = lambda x . f09 (f09 x) in
+                          let f11 = lambda x . f10 (f10 x) in
+                            f11
   ) .
 
   eq p10 = (
@@ -75,9 +78,11 @@ mod EXP-PROGRAMS is including EXP-SYNTAX .
        in f 1
   ) .
 
-  eq p13 = lambda x .
-             let f = lambda y . if true then y else x
-              in (lambda x . f 0) .
+  eq p13 = (
+    lambda x .
+      let f = lambda y . if true then y else x
+      in lambda x . f 0
+  ) .
 
   eq p14 = lambda x .
              let f = lambda y . if true then x 7 else x y
@@ -91,4 +96,11 @@ mod EXP-PROGRAMS is including EXP-SYNTAX .
   eq p16 = lambda x .
              let f = lambda y . x y
               in let z = x 0 in f .
+
+--- this tests that one does not use the unifying substitution to find the type parameters
+  eq p17 = (
+    let f = lambda x . x in
+      let g = lambda y . f y in
+        g g
+  ) .
 endm
