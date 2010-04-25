@@ -22,6 +22,7 @@ mod TYPES is including PL-NAT .
   eq tvar(N) +Type M = tvar(N +Nat M) .
 
 --- free type variables
+--- I should add List{TypeSchema} and then have only one general ftv
   op ftv : TypeSchema -> List{TypeVar} .
   eq ftv(BT) = .List{TypeVar} .
   eq ftv(Tv) = Tv .
