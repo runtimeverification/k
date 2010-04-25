@@ -8,7 +8,6 @@ rew run("p6") .
 rew run("p7") .
 rew run("p8") .
 rew run("p9") .
-q
 rew run("p10") .
 rew run("p11") .
 rew run("p12") .

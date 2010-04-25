@@ -2,6 +2,9 @@ in ../../../k-prelude
 in exp-type-inference-syntax
 in ../exp-programs
 
+
+
+--- types stuff
 mod TYPES is including PL-NAT .
   sorts BasicType TypeVar Type TypeSchema .
   subsort BasicType TypeVar < Builtins Type .
@@ -11,6 +14,9 @@ mod TYPES is including PL-NAT .
   op tvar : Nat -> TypeVar .
   op _->_ : Type Type -> Type [prec 10 gather(e E)] .
   op forall_._ : List{TypeVar} Type -> TypeSchema .
+
+  var N M : Nat .  var BT : BasicType .  var Tv Tv' Tv1 Tv2 : TypeVar .  var T T1 T2 : Type .
+  var Tvl Tvl' Tvl1 Tvl1' Tvl2 Tvl2' : List{TypeVar} .  var Tl : List{Type} .
 
   op _+Type_ : TypeVar Nat -> TypeVar .
   eq tvar(N) +Type M = tvar(N +Nat M) .
@@ -52,12 +58,12 @@ mod TYPES is including PL-NAT .
 
   op typeVar? : Type -> Bool .
   eq typeVar?(tvar(N)) = true .
----  eq typeVar?(T) = false [owise] .
-  eq typeVar?(T1 -> T2) = false .
-  eq typeVar?(BT) = false .
+  eq typeVar?(T) = false [owise] .  --- if needed, replace with: eq typeVar?(T1 -> T2) = false .  eq typeVar?(BT) = false .
 
-  var N M : Nat .  var BT : BasicType .  var Tv Tv' Tv1 Tv2 : TypeVar .
-  var T T1 T2 : Type .  var Tvl Tvl' Tvl1 Tvl1' Tvl2 Tvl2' : List{TypeVar} .  var Tl : List{Type} .
+  op _in_ : TypeVar Type -> Bool .
+  eq Tv in BT = false .
+  eq Tv in Tv' = Tv ==Bool Tv' .
+  eq Tv in (T1 -> T2) = (Tv in T1) orBool (Tv in T2) .
 
 ----------------------------------------------------------------------------------------
 --- Lists of any type should eventually be builtin; for now, we have to declare them ---
@@ -71,54 +77,54 @@ mod TYPES is including PL-NAT .
   sort List{Type} .
   subsort Type List{TypeVar} < List{Type} .
   op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
+--- List{TypeSchema}
+---  sort List{TypeSchema} .
+---  subsort TypeSchema List{Type} < List{TypeSchema} .
+---  op _,_ : List{TypeSchema} List{TypeSchema} -> List{TypeSchema} [ditto] .
 endm
 
-mod UNIFICATION is including TYPES + K .
+
+
 --- equational constraint solving stuff
-  ops eqn eqns solved started cycle : -> CellLabel .
+mod UNIFICATION is including TYPES + K .
+  var T T1 T2 T' T1' T2' : Type .  var Tv Tv' : TypeVar .  var Tl : List{Type} .  var Eqns Solved : Set .  var BT BT' : BasicType .
+
+  ops eqn eqns solved started : -> CellLabel .
   op _=_ : Type Type -> SetItem [strat(1 2 0) prec 30] .
 
+  mb [add-constraint] : rule [< eqn > T = T' </ eqn > => .Bag] < started >... [.Set => (Solved[T]) = (Solved[T'])] ...</ started > 
+          < solved > Solved </ solved > : KSentence .
   mb [reflexivity] : rule < started >... [(T = T) => .Set] ...</ started > : KSentence .
   mb [constructors] : rule < started >... [(T1 -> T2) = (T1' -> T2') => T1 = T1' T2 = T2'] ...</ started > : KSentence .
   mb [orient] : rule < started >... [T = Tv => Tv = T] ...</ started > if notBool typeVar?(T) : KSentence .
- ceq [eqn] : < started > Tv = T Eqns </ started > < solved > Solved </ solved >
-           = if Tv in T then < cycle > Tv = T Eqns Solved </ cycle >
-             else < started > Eqns[T / Tv] </ started > < solved > Tv = T (Solved[T /right Tv]) </ solved > fi if Tv =/=Bool T .
-  mb [add-constraint] : rule [< eqn > T = T' </ eqn > => .Bag]
-          < started >... [.Set => (Solved[T]) = (Solved[T'])] ...</ started > 
-          < solved > Solved </ solved > : KSentence .
-  
-  op _[_/right_] : Set Type TypeVar -> Set .
-  eq .Set[T /right Tv] = .Set .
-  eq (Tv = T Eqns)[T' /right Tv'] = Tv = T[T' / Tv'] (Eqns[T' /right Tv']) .
+  mb [eqn] : rule < started > [Tv = T Eqns => Eqns[T / Tv]] </ started > < solved > [Solved => Tv = T (Solved[T /right Tv])] </ solved >
+               if notBool(Tv in T) : KSentence .
 
   op _[_/_] : Set Type TypeVar -> Set .
   eq .Set[T / Tv] = .Set .
   eq (T1 = T2 Eqns)[T / Tv] = T1[T / Tv] = T2[T / Tv] (Eqns[T / Tv]) .
 
-  op _in_ : TypeVar Type -> Bool .
-  eq Tv in BT = false .
-  eq Tv in Tv' = Tv ==Bool Tv' .
-  eq Tv in (T1 -> T2) = (Tv in T1) orBool (Tv in T2) .
+  op _[_/right_] : Set Type TypeVar -> Set .
+  eq .Set[T /right Tv] = .Set .
+  eq (Tv = T Eqns)[T' /right Tv'] = Tv = T[T' / Tv'] (Eqns[T' /right Tv']) .
 
   op _[_] : Set Type -> Type .
   op _[[_]] : Set List{Type} -> List{Type} .
+--- I would like to use the following operation name instead, but K-Maude does not like it ...
+---  op _[_] : Set List{Type} -> List{Type} .
   eq .Set[T] = T .
   eq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] .
   eq Eqns[[.List{TypeVar}]] = .List{TypeVar} .
   eq Eqns[[T]] = Eqns[T] .
   eq Eqns[[T1,T2,Tl]] = Eqns[T1],Eqns[T2],Eqns[[Tl]] .
-
----
-  var T T1 T2 T' T1' T2' : Type .  var Tv Tv' : TypeVar .  var Tl : List{Type} .  var Eqns Solved : Set .
-  var BT BT' : BasicType .
 endm
 
+
+
+--- the actual type inferencer
 mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION + K .
---- We need type values/results when we define the type system
   subsort Type < Exp KResult .
   subsort Exp List{Type} TypeSchema < K .
-  op fail : Set -> K .
 
   ops tenv nextType : -> CellLabel .
   mb configuration < T >
@@ -127,7 +133,6 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
                      < eqns > < eqn * > .Set </ eqn * >
                         < started > .Set </ started > 
                         < solved > .Set </ solved > 
-                        < cycle > .Set </ cycle > 
                      </ eqns >
                      < nextType > tvar(0) </ nextType >
                    </ T > : KSentence .
@@ -155,7 +160,7 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
           < tenv > [TEnv => TEnv[Tv / X]] </ tenv > < nextType > [Tv => Tv +Type 1] </ nextType > : KSentence .
   mb rule < k > [T ~> addEqn(Tv) => Tv] ...</ k > [.Bag => < eqn > Tv = T </ eqn >] : KSentence .
 
-  mb [let] : rule < k > [let X = T in E => E ~> tenv(TEnv)] ...</ k > < eqns > < started > .Set </ started > < solved > Eqns </ solved > </ eqns >
+  mb rule < k > [let X = T in E => E ~> tenv(TEnv)] ...</ k > < eqns > < started > .Set </ started > < solved > Eqns </ solved > </ eqns >
           < tenv > [TEnv => TEnv[forall (ftv(Eqns[T]) \ ftv(Eqns[[types(TEnv)]])) . Eqns[T] / X]] </ tenv > : KSentence .
 
   mb rule < k > [X => T[| Tvl | from Tv / Tvl]] ...</ k > < tenv >... X |-> forall Tvl . T ...</ tenv >
@@ -163,19 +168,19 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
 
   mb rule < k > [if T then T1 else T2 => T1] ...</ k > [.Bag => < eqn > T = bool </ eqn > < eqn > T1 = T2 </ eqn >] : KSentence .
 
----
+------------------------
+--- Auxilliary stuff ---
+------------------------
   var T T1 T2 T' T1' T2' : Type .  var Tv Tv' Tv1 Tv2 Tv1' Tv2' : TypeVar .  var L : KLabel .  var N M : Nat .  var X : Id .  var E E' : Exp .
   var TEnv : Map .  var Eqns : Set .  var BT BT' : BasicType .  var Tvl Tvl' Tvl1 Tvl2 Tvl1' Tvl2' : List{TypeVar} .  var Tl : List{Type} .
---- type environment recovery
+
   op tenv : Map -> K .
   mb rule < k > T ~> [tenv(TEnv) => .K] ...</ k > < tenv > [? => TEnv] </ tenv > : KSentence [metadata "structural"] .
 
+--- next should probably be generic in some way, for all maps ...
   op types_ : Map -> List{Type} .
   eq types(.Map) = .List{TypeVar} .
   eq types(X |-> T TEnv) = T,types(TEnv) .
-
----  mb [fail-cycle] : rule < k > [?:K => fail(Eqns)] </ k > [< cycle > Eqns </ cycle > => .Bag] : KSentence .
----  mb [fail-conflict] : rule < k > [?:K => fail(BT = BT')] </ k > < started >... [BT = BT' => .Set] ...</ started > if BT =/=Bool BT' : KSentence .
 endm
 
 mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS .
@@ -184,7 +189,9 @@ mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS 
   op run : KLabel -> Bag .
   eq run(L:KLabel) = run(L:KLabel,.List{K}) .
   op run : KLabel List{K} -> Bag .
+---- first step: accumulate the type constraints (also partially solving them when creating type schemas)
   eq run(L:KLabel,L:List{K}) = < T > < k > L:KLabel(.List{K}) ~> solve </ k > < tenv > .Map </ tenv >
                  < eqns > < started > .Set </ started > < solved > .Set </ solved > </ eqns > < nextType > tvar(0) </ nextType > </ T > .
+--- second step: solve the remaining constraints and apply resulting substitution to the result type
   mb rule < k > [T ~> solve => Eqns[T]] </ k > < eqns > < started > .Set </ started > < solved > Eqns </ solved > </ eqns > : KSentence .
 endm
