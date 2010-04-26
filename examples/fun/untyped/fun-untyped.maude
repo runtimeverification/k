@@ -1,4 +1,4 @@
-in ../../../../k-prelude
+in ../../../k-prelude
 in fun-untyped-syntax
 in ../fun-programs
 
@@ -96,13 +96,8 @@ endm
 
 mod FUN-UNTYPED is including FUN-UNTYPED-SEMANTICS + FUN-PROGRAMS .
 --- make sure the name of the final module is the capitalized version of the file name
-  op run : -> Bag .
---- After loading simple-untyped-compiled into maude, type "rew run .".  Replace pSorting by any other program, then recompile.
-  eq run = < T >
-             < k > p9 </ k >
-             < env > .Map </ env >
-             < store > .Map </ store >
-             < nextLoc > 0 </ nextLoc >
-           </ T > .
+  op run : KLabel -> Bag .
+  eq run(L:KLabel) = run(L:KLabel,.List{K}) .
+  op run : KLabel List{K} -> Bag .
+  eq run(L:KLabel,L:List{K}) = < T > < k > L:KLabel(.List{K}) </ k > < env > .Map </ env > < store > .Map </ store > < nextLoc > 0 </ nextLoc > </ T > .
 endm
-
