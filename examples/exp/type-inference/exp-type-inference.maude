@@ -147,6 +147,7 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
   mb rule < k > [L(T1,,T2) => bool] ...</ k > [.Bag => < eqn > T1 = bool </ eqn > < eqn > T2 = bool </ eqn >]
        if L ==Bool '_and_ orBool L ==Bool '_or_ : KSentence .
   mb rule < k > [not T => bool] ...</ k > [.Bag => < eqn > T = bool </ eqn >] : KSentence .
+  mb rule < k > [if T then T1 else T2 => T1] ...</ k > [.Bag => < eqn > T = bool </ eqn > < eqn > T1 = T2 </ eqn >] : KSentence .
 
   op mkFunType : TypeVar -> K .
   mb rule < k > [lambda X . E => E ~> mkFunType(Tv) ~> tenv(TEnv)] ...</ k >
@@ -161,11 +162,9 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
 
   mb rule < k > [let X = T in E => E ~> tenv(TEnv)] ...</ k > < eqns > < started > .Set </ started > < solved > Eqns </ solved > </ eqns >
           < tenv > [TEnv => TEnv[forall (ftv(Eqns[T]) \ ftv(Eqns[[types(TEnv)]])) . Eqns[T] / X]] </ tenv > : KSentence .
-
   mb rule < k > [X => T[| Tvl | from Tv / Tvl]] ...</ k > < tenv >... X |-> forall Tvl . T ...</ tenv >
           < nextType > [Tv => Tv +Type | Tvl |]</ nextType > : KSentence .
 
-  mb rule < k > [if T then T1 else T2 => T1] ...</ k > [.Bag => < eqn > T = bool </ eqn > < eqn > T1 = T2 </ eqn >] : KSentence .
 
 ------------------------
 --- Auxilliary stuff ---

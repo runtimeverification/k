@@ -24,6 +24,8 @@ mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
   mb rule [T1 and T2 => T1 andBool T2] : KSentence .
   mb rule [T1 or T2 => T1 orBool T2] : KSentence .
   mb rule [not(T) => notBool(T)] : KSentence .
+  mb rule [if  true then E else ? => E] : KSentence .
+  mb rule [if false then ? else E => E] : KSentence .
   op closure-lambda : Map Id Exp -> Val .
   mb rule < k > [lambda X . E => closure-lambda(Env,X,E)] ...</ k > < env > Env </ env > : KSentence .
   mb rule < k > [closure-lambda(Env,X,E) V => E ~> env(Env')] ...</ k > < env > [Env' =>  Env[L / X]] </ env >
@@ -38,8 +40,6 @@ mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
           < store >...[.Map => L |-> mu X . E]...</ store > < nextLoc > [L => sNat L] </ nextLoc > : KSentence .
 ---)
 
-  mb rule [if  true then E else ? => E] : KSentence .
-  mb rule [if false then ? else E => E] : KSentence .
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
@@ -54,7 +54,9 @@ mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
 endm
 
 mod EXP-UNTYPED is including EXP-UNTYPED-SEMANTICS + EXP-PROGRAMS .
-  op run : -> Bag .
-  eq run = < T > < k > p12 </ k > < env > .Map </ env > < store > .Map </ store > < nextLoc > 0 </ nextLoc > </ T > .
+  op run : KLabel -> Bag .
+  eq run(L:KLabel) = run(L:KLabel,.List{K}) .
+  op run : KLabel List{K} -> Bag .
+  eq run(L:KLabel,L:List{K}) = < T > < k > L:KLabel(.List{K}) </ k > < env > .Map </ env > < store > .Map </ store > < nextLoc > 0 </ nextLoc > </ T > .
 endm
 
