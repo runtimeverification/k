@@ -16,22 +16,20 @@ mod TYPES is including PL-NAT .
   op forall_._ : List{TypeVar} Type -> TypeSchema .
 
   var N M : Nat .  var BT : BasicType .  var Tv Tv' Tv1 Tv2 : TypeVar .  var T T1 T2 : Type .
-  var Tvl Tvl' Tvl1 Tvl1' Tvl2 Tvl2' : List{TypeVar} .  var Tl : List{Type} .
+  var Tvl Tvl' Tvl1 Tvl1' Tvl2 Tvl2' : List{TypeVar} .  var Tl : List{Type} .  var Ts1 Ts2 : TypeSchema .
+  var Tsl : List{TypeSchema} .
 
   op _+Type_ : TypeVar Nat -> TypeVar .
   eq tvar(N) +Type M = tvar(N +Nat M) .
 
 --- free type variables
---- I should add List{TypeSchema} and then have only one general ftv
-  op ftv : TypeSchema -> List{TypeVar} .
+  op ftv : List{TypeSchema} -> List{TypeVar} .
   eq ftv(BT) = .List{TypeVar} .
   eq ftv(Tv) = Tv .
   eq ftv(T1 -> T2) = mergeVars(ftv(T1),ftv(T2)) .
   eq ftv(forall Tvl . T) = ftv(T) \ Tvl .
-
-  op ftv : List{Type} -> List{TypeVar} .
   eq ftv(.List{TypeVar}) = .List{TypeVar} .
-  eq ftv(T1,T2,Tl) = mergeVars(ftv(T1),ftv(T2,Tl)) .
+  eq ftv(Ts1,Ts2,Tsl) = mergeVars(ftv(Ts1),ftv(Ts2,Tsl)) .
 
   op mergeVars : List{TypeVar} List{TypeVar} -> List{TypeVar} .
   eq mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tv,Tvl2')) = mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tvl2')) .
@@ -79,9 +77,9 @@ mod TYPES is including PL-NAT .
   subsort Type List{TypeVar} < List{Type} .
   op _,_ : List{Type} List{Type} -> List{Type} [ditto] .
 --- List{TypeSchema}
----  sort List{TypeSchema} .
----  subsort TypeSchema List{Type} < List{TypeSchema} .
----  op _,_ : List{TypeSchema} List{TypeSchema} -> List{TypeSchema} [ditto] .
+  sort List{TypeSchema} .
+  subsort TypeSchema List{Type} < List{TypeSchema} .
+  op _,_ : List{TypeSchema} List{TypeSchema} -> List{TypeSchema} [ditto] .
 endm
 
 
@@ -125,7 +123,7 @@ endm
 --- the actual type inferencer
 mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION + K .
   subsort Type < Exp KResult .
-  subsort Exp List{Type} TypeSchema < K .
+  subsort Exp List{TypeSchema} < K .
 
   ops tenv nextType : -> CellLabel .
   mb configuration < T >
