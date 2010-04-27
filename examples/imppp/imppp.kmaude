@@ -103,48 +103,48 @@ mod IMP++ is
   var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List . 
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .
 
-  mb context [HOLE] <= ? : KSentence .
-  mb context I <= [HOLE] : KSentence .
-  mb context * [HOLE] := ? : KSentence .
+  context [HOLE] <= ? .
+  context I <= [HOLE] .
+  context * [HOLE] := ? .
 
-  mb configuration < T > < threads > < thread * > < k > .K </ k > < env > .Map </ env > </ thread * > </ threads > < store > .Map </ store >  < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > < result > .List </ result > : KSentence .
+  configuration <T> <threads> <thread*> <k> .K </k> <env> .Map </env> </thread*> </threads> <store> .Map </store>  <output> .List </output> <nextLoc> 0 </nextLoc> </T> <result> .List </result> .
   op startConfig : Stmt -> Bag .
----  eq startConfig(S) = < T >... < k > S </ k > ...</ T > .
-  eq startConfig(S) = < T > < threads > < thread > < k > S </ k > < env > .Map </ env > </ thread > </ threads > < store > .Map </ store > < output > .List </ output > < nextLoc > 0 </ nextLoc > </ T > .
+---  eq startConfig(S) = <T>... <k> S </k> ...</T> .
+  eq startConfig(S) = <T> <threads> <thread> <k> S </k> <env> .Map </env> </thread> </threads> <store> .Map </store> <output> .List </output> <nextLoc> 0 </nextLoc> </T> .
   
-  mb rule [I1 + I2 => I1 +Int I2] : KSentence .
-  mb rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 : KSentence .
+  rule [I1 + I2 => I1 +Int I2] .
+  rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 .
 
-  mb rule [head(list(I,?)) => I] : KSentence . 
-  mb rule [tail(list(I,El)) => list(El)] : KSentence . 
+  rule [head(list(I,?)) => I] . 
+  rule [tail(list(I,El)) => list(El)] . 
 
-  mb rule [skip => .K] : KSentence .
-  mb rule [not(T) => notBool T] : KSentence .
-  mb rule [I1 <= I2 => I1 <=Int I2] : KSentence .
-  mb rule [true and B => B] : KSentence .
-  mb rule [false and ? => false] : KSentence .
-  mb rule [if true then S1 else ? => S1] : KSentence .
-  mb rule [if false then ? else S2 => S2] : KSentence .
-  mb rule [S1 ; S2 => S1 ~> S2] : KSentence [metadata "structural"] .
-  mb rule < k > [X => I] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> I ...</ store > : KSentence .
-  mb rule < k > [++ X => (I +Int 1)] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [I => I +Int 1] ...</ store >  : KSentence .
-  mb rule < k > [X := I => .K] ...</ k > < env >... X |-> L ...</ env > < store >... L |-> [? => I] ...</ store > : KSentence .
-  mb rule < k > [while B do S  => if B then (S ; while B do S) else skip] ...</ k > : KSentence .
-  mb rule < k > [print(I) => .K] ...</ k > < output >... [.List => ListItem(I)] </ output >  : KSentence .
-  mb rule < k > [halt ~> ? => .K] </ k > : KSentence .
-  mb rule < thread >... < k > [spawn(S) => .K] ...</ k > < env > Env </ env > ...</ thread > [.Bag => < thread > < k > S </ k > < env > Env </ env > </ thread >] : KSentence .
-  mb rule [< thread >... < k > .K </ k > ...</ thread > => .Bag] : KSentence [metadata "structural"] .
+  rule [skip => .K] .
+  rule [not(T) => notBool T] .
+  rule [I1 <= I2 => I1 <=Int I2] .
+  rule [true and B => B] .
+  rule [false and ? => false] .
+  rule [if true then S1 else ? => S1] .
+  rule [if false then ? else S2 => S2] .
+  rule [S1 ; S2 => S1 ~> S2] [metadata "structural"] .
+  rule <k> [X => I] ...</k> <env>... X |-> L ...</env> <store>... L |-> I ...</store> .
+  rule <k> [++ X => (I +Int 1)] ...</k> <env>... X |-> L ...</env> <store>... L |-> [I => I +Int 1] ...</store>  .
+  rule <k> [X := I => .K] ...</k> <env>... X |-> L ...</env> <store>... L |-> [? => I] ...</store> .
+  rule <k> [while B do S  => if B then (S ; while B do S) else skip] ...</k> .
+  rule <k> [print(I) => .K] ...</k> <output>... [.List => ListItem(I)] </output>  .
+  rule <k> [halt ~> ? => .K] </k> .
+  rule <thread>... <k> [spawn(S) => .K] ...</k> <env> Env </env> ...</thread> [.Bag => <thread> <k> S </k> <env> Env </env> </thread>] .
+  rule [<thread>... <k> .K </k> ...</thread> => .Bag] [metadata "structural"] .
 
-  mb rule [< T >... < threads > .Bag </ threads > < output > Output </ output > ...</ T > => < result > Output </ result >] : KSentence [metadata "structural"] .
+  rule [<T>... <threads> .Bag </threads> <output> Output </output> ...</T> => <result> Output </result>] [metadata "structural"] .
 
-  mb rule < k > [vars Xl ; S => S ~> env(Env)] ...</ k > < env > [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]]</ env > < store >... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> 0] ...</ store > < nextLoc > [N => N +Nat length(getList{K}(Xl))] </ nextLoc >  : KSentence [metadata "structural"] .
+  rule <k> [vars Xl ; S => S ~> env(Env)] ...</k> <env> [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]]</env> <store>... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> 0] ...</store> <nextLoc> [N => N +Nat length(getList{K}(Xl))] </nextLoc>  [metadata "structural"] .
 
   op _.._ : Nat Nat -> List{K} .
   eq N1 .. N2 = if N1 >=Nat N2 then .List{K} else (N1,, (sNat N1 .. N2)) fi .
 
   op env : Map -> K .
-  mb rule [env(Env) ~> env(Env') => env(Env')] : KSentence [metadata "structural"] .
-  mb rule < k > [env(Env) => .K] ...</ k > < env > [Env' => Env] </ env > : KSentence [metadata "structural"] .
+  rule [env(Env) ~> env(Env') => env(Env')] [metadata "structural"] .
+  rule <k> [env(Env) => .K] ...</k> <env> [Env' => Env] </env> [metadata "structural"] .
 endm
 
 mod IMPPP is including IMP++ . endm
