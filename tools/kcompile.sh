@@ -26,6 +26,10 @@ echo "q" | $MAUDE >/dev/null
 RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
+if [ -f "$FILE.kmaude" ]
+then 
+  maudify.sh "$FILE.kmaude" > "$FILE.maude"
+fi
 OUTPUT_FILE="${FILE}-compiled"
 IFILE="kcompile_in.maude"
 EFILE="kcompile_err.txt"
