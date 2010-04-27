@@ -34,8 +34,11 @@ fmod K-META-OPS is including META-TERM .
   eq kList(empty) = nilKList .
   eq kList(Trl) = '_`,`,_[Trl] [owise] .
 
+  op kApplyS : -> Qid .
+  eq kApplyS = '_`(_`) .
+
   op kApply : Term TermList -> Term .
-  eq kApply(T, Trl) = '_`(_`)[T,kList(Trl)] .
+  eq kApply(T, Trl) = kApplyS[T,kList(Trl)] .
 endfm
 
 fmod META-K-BUILTINS is
@@ -453,7 +456,8 @@ fmod K-META-LISTS is including K-META-OPS .
   including META-TERM-EXTRAS .
   including LIST-ATTRS .
 
-  var Q : Qid . var T : Type . var Trm : Term . var Trms : TermList .
+  var Q : Qid . var T : Type . var Tl : TypeList . var AS : AttrSet .
+  var Trm : Term . var Trms : TermList .  var OPDS : OpDeclSet .
   var N : Nat .
   op klistType : Type ~> Type .
   eq klistType('K) = KList  .
@@ -472,6 +476,11 @@ fmod K-META-LISTS is including K-META-OPS .
   eq listWrapperT(Q,T) = mkConstant(listWrapperS(Q),klabelType(T)) .
 
   eq klist(N,Q,T) = klist(N, listWrapperT(Q,T)) .
+
+
+  op getListConstructor : OpDeclSet Type ~> OpDecl .
+  eq getListConstructor(OPDS op Q : Tl -> T [assoc AS] ., T)
+   = (op Q : Tl -> T [assoc AS] .) .
 endfm
 
 

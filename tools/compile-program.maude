@@ -1,0 +1,94 @@
+fmod COMPILE-PROGRAM is
+  including META-TERM-EXTRAS .
+  including META-LEVEL-EXTRAS .
+  including META-K-LABELS .
+  including K-META-OPS .
+  including META-K-WRAPPERS .
+  including K-META-LISTS .
+
+  vars Compiled Syntax : Module .
+  var SyntaxOps Wrappers Ops : OpDeclSet .  var AS : AttrSet .
+  var Eqs : EquationSet .
+  vars Trms Trms' : TermList .  var Trm : Term .
+  var Q : Qid .  var W : [Qid] .
+  var C : Constant .
+  var Tl : TypeList . var T T' T'' : Type .
+  
+  op compileProgram : Module Module Qid ~> Module .
+  eq compileProgram(Compiled, Syntax, Q)
+   =  compileProgram(Compiled, Syntax, Q, compileProgram(Compiled, Syntax, getOps(Syntax), Q)) .
+
+  op compileProgram : Module Module Qid Term ~> Module .
+  eq compileProgram(Compiled, Syntax, Q, Trm)
+   = addOps(missingConsts(getOps(Compiled), Trm),addImports(including getName(Compiled) .,addEqs(eq kApply(mkConstant(mkKLabel(Q), KLabel), empty) = Trm [none] ., addOps(op mkKLabel(Q) : nil -> KLabel [none] ., setName(emptySModule, qid(string(getName(Compiled)) + "-" + string(Q))))))) .
+
+
+  op missingConsts : OpDeclSet TermList ~> OpDeclSet .
+  eq missingConsts(Ops, (Trms', Q[Trms])) = missingConsts(Ops, (Trms', Trms)) .
+  eq missingConsts(Ops, (Trms, C)) = missingConsts(Ops, getName(C), getType(C), Trms) .
+  eq missingConsts(Ops, empty) = none .
+
+  op missingConsts : OpDeclSet Qid Type TermList ~> OpDeclSet .
+ceq missingConsts(Ops, Q, T, Trms) = missingConsts(Ops, Trms)
+  if T == KLabel or-else T == 'String or-else T == 'FiniteFloat or-else T == 'Char .
+  eq missingConsts(Ops op Q : nil -> T [AS] ., Q, T, Trms) 
+   = missingConsts(Ops op Q : nil -> T [AS] ., Trms) .
+  eq missingConsts(Ops, Q, T, Trms) 
+   = (op Q : nil -> T [none] .)
+     missingConsts(Ops, Trms) [owise] .
+
+  op compileProgram : Module Module OpDeclSet Qid ~> Term .
+  eq compileProgram(Compiled, Syntax, SyntaxOps op Q : nil -> T [AS] ., Q)
+   = compileProgram(Compiled, Syntax, SyntaxOps, getEqs(Syntax), mkConstant(Q, T)) .
+
+  op compileProgram : Module Module OpDeclSet EquationSet Constant ~> Term .
+  eq compileProgram(Compiled, Syntax, SyntaxOps, Eqs eq C = Trm [AS] ., C)
+   = compileProgram(Compiled, getWrappers(getOps(Compiled)), Syntax, SyntaxOps, leastSort(Syntax,Trm), Trm) .
+  
+  op compileProgram : Module OpDeclSet Module OpDeclSet Type Term ~> Term .
+  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm)
+   = if isListSort(T) then compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, getListConstructor(SyntaxOps, T), Trm)
+     else compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T,  getWrapper(Compiled, Wrappers, leastSort(Syntax, Trm)), Trm) fi .
+
+
+  op getWrapper : Module OpDeclSet Type ~> Qid .
+ ceq getWrapper(Compiled, Wrappers op Q : T -> T' [AS] ., T'')
+   = Q 
+  if T'' in getSorts(Compiled)
+  /\ sortLeq(Compiled,T'', T) .
+
+  op compileProgram : Module OpDeclSet Module OpDeclSet OpDecl Term ~> Term .
+  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, op Q : Tl -> T [AS id(C)] ., Trm)
+   = kApply(mkConstant(mkKLabel(Q),KLabel), compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, Trm)) .
+
+  op compileProgramL : Module OpDeclSet Module OpDeclSet Qid Constant TermList ~> TermList .
+  eq compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, (Trms',Q[Trms])) = compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, (Trms', Trms)) .
+  eq compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, (Trms',C)) 
+   = compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, Trms') .
+  eq compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, (Trms',Trm)) 
+   = compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, Trms'), compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, leastSort(Syntax, Trm), getWrapper(Compiled, Wrappers, leastSort(Syntax, Trm)), Trm) .
+  eq compileProgramL(Compiled, Wrappers, Syntax, SyntaxOps, Q, C, empty) 
+   = empty .
+
+  op compileProgram : Module OpDeclSet Module OpDeclSet Type Qid Term ~> Term .
+  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, W, Trm) 
+   = if W :: Qid then kApply(W[Trm],  empty) 
+     else compileProgramT(Compiled, Wrappers, Syntax, SyntaxOps, leastSort(Syntax, Trm), Trm) fi .
+  
+  op compileProgramT : Module OpDeclSet Module OpDeclSet Type Term ~> Term .
+  eq compileProgramT(Compiled, Wrappers, Syntax, SyntaxOps, T, Q[Trms])
+   = compileProgramT(Compiled, Wrappers, Syntax, SyntaxOps, findOp(Syntax, SyntaxOps,Q, leastSorts(Syntax, Trms), T), Trms) .
+  eq compileProgramT(Compiled, Wrappers, Syntax, SyntaxOps, T, C)
+   = kApply(mkConstant(mkKLabel(getName(C)),KLabel), empty) .
+
+  op compileProgramT : Module OpDeclSet Module OpDeclSet OpDecl TermList ~> Term .
+  eq compileProgramT(Compiled, Wrappers, Syntax, SyntaxOps, op Q : Tl -> T [AS] ., Trms) = kApply(mkConstant(mkKLabel(Q),KLabel), compileProgramTs(Compiled, Wrappers, Syntax, SyntaxOps, Tl, Trms)) .
+
+  op compileProgramTs : Module OpDeclSet Module OpDeclSet TypeList TermList 
+                      ~> TermList .
+  eq compileProgramTs(Compiled, Wrappers, Syntax, SyntaxOps, Tl T, (Trms, Trm))
+   = compileProgramTs(Compiled, Wrappers, Syntax, SyntaxOps, Tl, Trms),
+     compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm) .
+  eq compileProgramTs(Compiled, Wrappers, Syntax, SyntaxOps, nil, empty) 
+   = empty .
+endfm

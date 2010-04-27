@@ -1,12 +1,12 @@
 #!/bin/bash
 MAUDE="maude"
 function usage {
-  echo "usage: $0 <source_file>[.maude] [<module_name>]
+  echo "usage: $0 <source_file>[.maude] <compiled_module_name> <program_module_name> <program_name>
   
-  If <module_name> is not specified, is asumed to be allcaps(<source_file>).
-  <source_file> should ensure that a module <module_name> is loaded.
-  Module <module_name> should contain the entire definition of the language.
-  Output is printed in <source_file>-compiled.maude.
+  <source_file> should ensure that modules <compiled_module_name> and
+  <program_module_name> are loaded, and that module <program_module_name>
+  contains a constant <program_name>.
+  Output is printed in <program_name>-compiled.maude.
   
   If an error occurs in the compilation process (including warnings such as Module redefined), the script will stop, displaying the input, the (maybe partial) generated output, and the error/warning messages reported by Maude.
   "
@@ -26,7 +26,10 @@ echo "q" | $MAUDE >/dev/null
 RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
-OUTPUT_FILE="${FILE}-compiled"
+COMPILED_MODULE="$2"
+PROGRAM_MODULE="$3"
+PROGRAM="$4"
+OUTPUT_FILE="${PROGRAM}-compiled"
 IFILE="kcompile_in.maude"
 EFILE="kcompile_err.txt"
 OFILE="kcompile_out.txt"
@@ -35,14 +38,6 @@ TFILE="kcompile_tmp.txt"
 : >"$EFILE"
 : >"$OFILE"
 : >"$TFILE"
-
-if [[ $# -eq  2 ]]; then
-  LANG="$2"
-else
-  LANG=`echo $FILE | tr a-z A-Z`
-fi
-
-LANG0=LANG
 
 function addLoadPrelude {
 if ! grep -q "^[[:space:]]*\(load\|in\)[[:space:]].*k-prelude\(\.maude\)\?[[:space:]]*$" "$INPUT"
@@ -68,7 +63,6 @@ function checkMaude {
   fi
   INPUT="$1"
   : > $IFILE
-  addLoadPrelude
   cat "$INPUT" >> $IFILE
   echo "$2" >> $IFILE
   $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
@@ -88,7 +82,6 @@ function runMaude {
   printf "%s.." "$3"
   INPUT="$1"
   : > $IFILE
-  addLoadPrelude
   cat "$INPUT" >> $IFILE
   echo "$2" >> $IFILE
   $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
@@ -107,29 +100,49 @@ function runMaude {
     cleanAndExit 1
   fi
 
-  sed -n "/---K-MAUDE-GENERATED-OUTPUT-BEGIN---/,/---K-MAUDE-GENERATED-OUTPUT-END-----/p" "$OFILE" | sed "1 d;$ d" >"$TFILE"
+  echo "load \"$FILE\"" >"$TFILE"
+  sed -n "/---K-MAUDE-GENERATED-OUTPUT-BEGIN---/,/---K-MAUDE-GENERATED-OUTPUT-END-----/p" "$OFILE" | sed "1 d;$ d" >>"$TFILE"
   checkMaude "$TFILE" "show module ."
-  echo "load \"$KBASE/k-prelude\"" > $4
-  cat "$TFILE" >> $4
+  cp "$TFILE" $4
   printf ". Done!\n"
 }
 
 OUTPUT="$FILE.maude"
 
 TEST_INPUT="
-show module $LANG .
+show module $COMPILED_MODULE .
 "
+checkMaude "$OUTPUT" "$TEST_INPUT" "Testing the input module $COMPILED_MODULE exists"
 
-checkMaude "$OUTPUT" "$TEST_INPUT" "Testing the input module $LANG exists"
+TEST_INPUT="
+show module $PROGRAM_MODULE .
+"
+checkMaude "$OUTPUT" "$TEST_INPUT" "Testing the input module $PROGRAM_MODULE exists"
+
+TEST_INPUT="
+red in $PROGRAM_MODULE : $PROGRAM .
+"
+checkMaude "$OUTPUT" "$TEST_INPUT" "Testing the input program $PROGRAM exists"
 
 OUTPUT="$FILE.maude"
 
 COMPILE="
-load  \"$KBASE/tools/all-tools\"
-loop compile .
-(compile $LANG .)
+set include PL-BOOL off .
+set include BOOL on .
+load \"$KBASE/tools/prelude-extras\"
+load \"$KBASE/tools/meta-k\"
+load \"$KBASE/tools/printing\"
+
+load  \"$KBASE/tools/compile-program-interface\"
+---(
+set print attribute on .
+red in COMPILE-PROGRAM-META : compileProgram(\"$COMPILED_MODULE\",\"$PROGRAM_MODULE\",\"$PROGRAM\") .
+q
+---)
+loop compile-program .
+(compileProgram $COMPILED_MODULE $PROGRAM_MODULE $PROGRAM .)
 "
-runMaude "$OUTPUT" "$COMPILE" "Compiling the definition" $OUTPUT_FILE.maude
+runMaude "$OUTPUT" "$COMPILE" "Compiling program $PROGRAM." $OUTPUT_FILE.maude
 
 echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."
 cleanAndExit 0
