@@ -44,9 +44,9 @@ mod BF is
 		=> inject((((I:Int %Int 256) +Int 256) %Int 256))(.List{K})
 	] : KSentence .
 	
-	op charString : -> KLabel .
+	op kcharString : -> KLabel .
 	mb rule [
-		charString(inject(N:Nat)(.List{K})) 
+		kcharString(inject(N:Nat)(.List{K})) 
 		=> inject(charString(N:Nat))(.List{K})
 	] : KSentence .
 
@@ -84,7 +84,7 @@ mod BF is
 	eq [Start]: eval(K:K) =
 		< T >
 			< k > K:K </ k >
-			< memory > List(sentinel(.List{K})) </ memory >
+			< memory > ListItem(sentinel(.List{K})) </ memory >
 			< output > inject("")(.List{K}) </ output >
 			< input > inject("")(.List{K}) </ input >
 		</ T > .
@@ -92,7 +92,7 @@ mod BF is
 	eq [Start-With-Input]: eval(K:K, K':K) = 
 		< T >
 			< k > K:K </ k >
-			< memory > List(sentinel(.List{K})) </ memory >
+			< memory > ListItem(sentinel(.List{K})) </ memory >
 			< output > inject("")(.List{K}) </ output >
 			< input > K':K </ input >
 		</ T > .
@@ -103,7 +103,7 @@ mod BF is
 		] : KSentence [metadata "structural"] .
 		
 	mb rule
-		< memory > [List(sentinel(.List{K})) => List(inject(0)(.List{K})) List(sentinel(.List{K}))] ...</ memory > 
+		< memory > [ListItem(sentinel(.List{K})) => ListItem(inject(0)(.List{K})) ListItem(sentinel(.List{K}))] ...</ memory > 
 		: KSentence [metadata "structural"] .
 		
 	mb [Sequence]: rule
@@ -112,21 +112,21 @@ mod BF is
 		
 	mb [Increase]: rule 
 		< k > [Increase(.List{K}) => .K] ...</ k >
-		< memory > List([inject(I:Int)(.List{K}) => (inject(I:Int +Int 1))(.List{K})]) ...</ memory > 
+		< memory > ListItem([inject(I:Int)(.List{K}) => (inject(I:Int +Int 1))(.List{K})]) ...</ memory > 
 		: KSentence [metadata "structural"] .
 	mb [Decrease]: rule 
 		< k > [Decrease(.List{K}) => .K] ...</ k >
-		< memory > List([inject(I:Int)(.List{K}) => (inject(I:Int -Int 1))(.List{K})]) ...</ memory > 
+		< memory > ListItem([inject(I:Int)(.List{K}) => (inject(I:Int -Int 1))(.List{K})]) ...</ memory > 
 		: KSentence [metadata "structural"] .
 	
 	mb [WhileNZ-NZ]: rule 
 		< k > [While(K:K) => K:K ~> While(K:K)] ...</ k > 
-		< memory > List(inject(I:Int)(.List{K})) ...</ memory > 
+		< memory > ListItem(inject(I:Int)(.List{K})) ...</ memory > 
 		if (I:Int =/=Bool 0) 
 		: KSentence [metadata "structural"] .
 	mb [WhileNZ-Z]: rule 
 		< k > [While(K:K) => .K] ...</ k >
-		< memory > List(inject(0)(.List{K})) ...</ memory > 
+		< memory > ListItem(inject(0)(.List{K})) ...</ memory > 
 		: KSentence [metadata "structural"] .
 		
 	mb [GoRight]: rule 
@@ -140,12 +140,12 @@ mod BF is
 		
 	mb [Output]: rule 
 		< k > [Print(.List{K}) => .K] ...</ k > 
-		< memory > List(I:K) ...</ memory > 
-		< output > [S:K => +String(S:K,, charString(eightbit(I:K)))] </ output > 
+		< memory > ListItem(I:K) ...</ memory > 
+		< output > [S:K => +String(S:K,, kcharString(eightbit(I:K)))] </ output > 
 		: KSentence [metadata "structural"] .
 	mb [Input]: rule
 		< k > [Read(.List{K}) => .K] ...</ k >
-		< memory > List([inject(I:Int)(.List{K}) => charToAscii(firstChar(Input:K))]) ...</ memory > 
+		< memory > ListItem([inject(I:Int)(.List{K}) => charToAscii(firstChar(Input:K))]) ...</ memory > 
 		< input > [Input:K => butFirstChar(Input:K)] </ input > 
 		: KSentence [metadata "structural"] .
 endm
