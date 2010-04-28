@@ -123,7 +123,7 @@ endm
 --- the actual type inferencer
 mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION + K .
   subsort Type < Exp KResult .
-  subsort Exp List{TypeSchema} < K .
+  subsort Exp TypeSchema List{TypeSchema} < K .
 
   ops tenv nextType : -> CellLabel .
   mb configuration < T >
