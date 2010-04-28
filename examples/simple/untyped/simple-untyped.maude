@@ -10,8 +10,8 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K .
 --- We have to subsort all the syntactic categories to K, and the lists of values
 --- to KResult.  Recall that the second argument of a function application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
-  subsorts Stmts List{Exp} < K .
-  subsort List{Val} < KResult .
+  subsorts Stmts Exp List{Exp} < K .
+  subsort Val List{Val} < KResult .
 
   ops env genv store fstack in out nextLoc : -> CellLabel .
   mb configuration < T > 

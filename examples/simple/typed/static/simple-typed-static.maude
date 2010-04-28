@@ -7,7 +7,7 @@ mod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYN
   subsort Type < Exp Stmt .
   op stmt : -> Type .
 
-  subsorts Stmts List{Exp} List{IdType} < K .
+  subsorts Stmts Exp List{Exp} IdType List{IdType} < K .
 
   ops tenv gtenv return : -> CellLabel .
 

@@ -11,8 +11,8 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K .
 --- We have to subsort all the syntactic categories to K, and the lists of values
 --- to KResult.  Recall that the second argument of a function application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
-  subsort List{Exp} Binding < K .
-  subsort List{Val} < KResult .
+  subsort Exp List{Exp} Binding < K .
+  subsort Val List{Val} < KResult .
 
   ops env store nextLoc : -> CellLabel .
   mb configuration < T >
