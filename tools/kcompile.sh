@@ -105,7 +105,14 @@ function runMaude {
   if [ -n "$(<$EFILE)" ]; 
   then 
     echo ". Error ($3) during the transformation phase. Input is in $IFILE"
-    cat "$EFILE"
+    if [ `stat -t -c %s $EFILE` -ge 4000 ] 
+	then 
+		cat "$EFILE" | head -c2000
+		echo -e \\n...
+		cat "$EFILE" | tail -c2000
+	else 
+		cat "$EFILE"
+	fi
     echo "Aborting the compilation!"
     cleanAndExit 1
   fi
