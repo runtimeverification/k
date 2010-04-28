@@ -7,8 +7,8 @@ mod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-S
   sort Val .
   subsort Int Bool < Val < Exp .
 
-  subsorts Stmts Exp IdType Type List{Exp} List{IdType} List{Type} < K .
-  subsort Val List{Val} < KResult .
+  subsorts Stmts List{Exp} List{IdType} List{Type} < K .
+  subsort List{Val} < KResult .
 
   ops env genv store fstack in out nextLoc return : -> CellLabel .
 
