@@ -28,7 +28,7 @@ KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
 if [ -f "$FILE.kmaude" ]
 then 
-  maudify.sh "$FILE.kmaude" > "$FILE.maude"
+  $KBASE/tools/maudify.sh "$FILE.kmaude" > "$FILE.maude"
 fi
 OUTPUT_FILE="${FILE}-compiled"
 IFILE="kcompile_in.maude"
