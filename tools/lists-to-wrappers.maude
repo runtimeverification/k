@@ -74,11 +74,14 @@ fmod LISTS-TO-WRAPPERS is
   = listsSSs(M, CTORS, SSDS) listsSS(M, CTORS, SSD) [print SSD] .
 
  op listsSS : Module CTORSMap SubsortDecl ~> SubsortDeclSet .
- eq listsSS(M, CTORS (subsort S < S' .) |-> Trm, (subsort S < S' .)) = none .
+ eq listsSS(M, CTORS SSD |-> Trm, SSD) = none .
+ eq listsSS(M, CTORS, subsort S < S' .) = if isListSort(S) and-then S' in ksorts then none else (subsort S < S' .) fi  [owise] .
+---( 
  eq listsSS(M, CTORS ((subsort S < S' .) |-> Trm) (subsort S'' < S''' .) |-> Trm, (subsort S'' < S .)) 
   = (subsort S'' < S .) [print "subsort 2: " S'' " < " S " ."] .
  eq listsSS(M, CTORS (subsort S < S' .) |-> Trm, (subsort S'' < S .)) 
   =  if S' == K then (subsort S'' < S .) else (subsort S'' < S .) (subsort S'' < S' .) fi [print "subsort 3: " S'' " < " S ", " S'' " < " S' " ."] .
+---)
  eq listsSS(M, CTORS, SSD) = SSD [owise] .
 
  op listsOps : OpDeclSet CTORSMap OpDeclSet ~> OpDeclSet .

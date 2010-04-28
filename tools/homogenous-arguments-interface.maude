@@ -3,12 +3,14 @@ load homogenous-arguments
 mod HOMOGENOUS-ARGUMENTS-META is
   including HOMOGENOUS-ARGUMENTS .
   including META-LEVEL-EXTRAS .
+  including META-K-MODULES .
+  including META-K-BUILTINS .
   var NoHomogenousArgs HomogenousArgs : String .  var M : Module .
   var Q QNoHomogenousArgs QHomogenousArgs : Qid .  var IL : ImportList .
   op makeHomogenousArgs : String String ~> Module .
   eq makeHomogenousArgs(NoHomogenousArgs, HomogenousArgs) = makeHomogenousArgs(qid(NoHomogenousArgs), qid(HomogenousArgs)) .
   op makeHomogenousArgs : Qid Qid ~> Module .
-  eq makeHomogenousArgs(QNoHomogenousArgs,QHomogenousArgs) = makeHomogenousArgs(QHomogenousArgs, upModule(QNoHomogenousArgs, false), upModule(QNoHomogenousArgs, true), upImports(getImports(upModule(QNoHomogenousArgs, false)))) .
+  eq makeHomogenousArgs(QNoHomogenousArgs,QHomogenousArgs) = makeHomogenousArgs(QHomogenousArgs, upModule(QNoHomogenousArgs, false), upModule(QNoHomogenousArgs, true), empty) .
 
   op compile : Module ~> Module .
   eq compile(M) = setName(makeHomogenousArgs(getName(M), M, flatten(M), empty), getName(M)) .

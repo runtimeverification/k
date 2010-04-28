@@ -4,10 +4,10 @@ in challenge-programs
 
 mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   including PL-CONVERSION .
-  subsort Exp List{Exp} Stmt < K .
+  subsort List{Exp} Stmt < K .
   sort Val .
   subsort Bool Int Float < Val < Exp .
-  subsort Val List{Val} < KResult .
+  subsort List{Val} < KResult .
 
   ops env store nextLoc ptr fstack input output  aspect thread holds busy agent message from to body threads me parent nextAgent : -> CellLabel .
   configuration <T> 

@@ -861,7 +861,7 @@ fmod META-LEVEL-EXTRAS is
   eq makeSubsort(M, S, none) = none .
   eq makeSubsort(M, S, S ; SS) = makeSubsort(M, S, SS) .
   eq makeSubsort(M, S, S' ; SS) 
-   = if sortLeq(M, S, S') then (subsort S < S' .) makeSubsort(M, S, SS) else makeSubsort(M,S, SS) fi
+   = if S in getSorts(M) and-then S' in getSorts(M) and-then sortLeq(M, S, S') then (subsort S < S' .) makeSubsort(M, S, SS) else makeSubsort(M,S, SS) fi
   [owise] .
 
   op minimalOps : Module OpDeclSet ~> OpDeclSet .

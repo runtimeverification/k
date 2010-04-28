@@ -58,7 +58,7 @@ fmod META-K-MODULES is
   including META-MODULE .
   op kModules : ~> SortSet [memo] .
   eq kModules 
-   = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
+   = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-WHERE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
      'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-POLYMORPHIC-VARIABLES ; 
      'K-OPEN-CELLS ; 'K-CONFIG ; 'K-DESTRUCTORS ; 'K-QUOTED-LABELS .
 endfm
@@ -92,6 +92,8 @@ fmod META-K-MODULE is
   eq ksubsorts = (
     subsort KProper < NeK .
     subsort KResult < NeK .
+    subsort KProper < K .
+    subsort KResult < K .
     subsort NeK < K .
     subsort Builtins < NeK .
     ) .
@@ -99,8 +101,10 @@ fmod META-K-MODULE is
   op ksupersorts : -> SubsortDeclSet [memo] .
   eq ksupersorts = (
     subsort KProper < NeK .
+    subsort KProper < K .
     subsort KProper < NeProperList .
     subsort KResult < NeK .
+    subsort KResult < K .
     subsort NeK < K .
       subsort K < KList .
       subsort K < NeKList .
@@ -126,6 +130,11 @@ fmod META-K-MODULE is
 
  op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .
  eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) . 
+
+
+ op maximalKSubsorts : Module -> SubsortDeclSet .
+ eq maximalKSubsorts(M)
+  = getSubsorts(getSupersorts(getSubsorts(M),getMaximalSorts(M, getSubsorts(pseudoKSubsorts(getSubsorts(M))))), ksorts) .
  
  op pseudoKSupersorts : SubsortDeclSet -> SubsortDeclSet .
  eq pseudoKSupersorts(SSDS) = getSupersorts(removeSubsorts(SSDS,ksupersorts), ksorts) . 

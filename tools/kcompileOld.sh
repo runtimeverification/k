@@ -183,6 +183,20 @@ loop sanity-checks .
 
 runMaude "$OFILE" "$SANITY_CHECKS" "Checking each (sub)term parses to a sort" "$OFILE"
 
+MISSING_SUBSORTS="
+$DEFAULTH
+load  \"$KBASE/tools/missing-subsorts-interface\"
+---(
+set print attribute on .
+red in MISSING-SUBSORTS-META : missingSubsorts('$LANG) .
+q
+---)
+loop missing-subsorts .
+(missingSubsorts $LANG .)
+"
+
+runMaude "$OFILE" "$MISSING_SUBSORTS" "(Almost) transitively closing the subsorts" "$OFILE"
+
 CONTEXT_TRANSFORMERS="
 $DEFAULTH
 load \"$KBASE/tools/context-transformers-interface\"

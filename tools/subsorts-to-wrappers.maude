@@ -18,7 +18,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op resolveKSubsorts : Qid Module Module ModuleSet ~> Module .
  eq resolveKSubsorts(Q, M, Flat, MS) 
-  = setName(subsorts2wrappers(suffixImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(pseudoKSubsorts(getSubsorts(Flat)))), qid(string(getName(M)) + string(Q))) .
+  = setName(subsorts2wrappers(suffixImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(maximalKSubsorts(Flat))), qid(string(getName(M)) + string(Q))) .
 
  sorts SubsortDeclMapItem SubsortDeclMap .
  subsort SubsortDeclMapItem < SubsortDeclMap .

@@ -9,7 +9,8 @@ mod K-TECHNIQUE is
   var LItem : ListItem .  var List : List .
 
   sorts KResult NeK K .
-  subsorts KResult Builtins < NeK < K .
+  subsorts KResult < NeK < K .
+  subsorts KResult < K .
   op .K : -> K [metadata "latex(renameTo \\ensuremath{\\kdot})"].
   op _~>_ : K K -> K [prec 100  assoc id: .K metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
   
@@ -44,6 +45,7 @@ mod K-TECHNIQUE is
 
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
+  subsort ListItem < List .
   op .List : -> List .
   op ListItem : K -> ListItem  .
   op __ : List List -> List [assoc id: .List] .
@@ -60,6 +62,7 @@ mod K-TECHNIQUE is
 
   sort BagItem Bag NeBag .
   subsort BagItem < NeBag < Bag .
+  subsort BagItem < Bag .
   op .Bag : -> Bag .
   op BagItem : K -> BagItem .
   op __ : Bag Bag -> Bag [assoc comm id: .Bag] .
@@ -71,6 +74,7 @@ mod K-TECHNIQUE is
   
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .
+  subsort SetItem < Set .
   op .Set : -> Set .
   op SetItem : K -> SetItem .
   op __ : Set Set -> Set [assoc comm id: .Set] .
@@ -84,6 +88,7 @@ mod K-TECHNIQUE is
 
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .
+  subsort MapItem < Map .
   op .Map : -> Map .
   op _|->_ : K K -> MapItem .
   op __ : Map Map -> Map [assoc comm id: .Map prec 120] .
@@ -131,7 +136,7 @@ endm
 mod K-PROPER is
   including K-TECHNIQUE .
   sort KProper .
-  subsort KProper < NeK .
+  subsort KProper < NeK K .
 --- next line is useful only if not using <k> wrappers for strictness
 ---  op _~>_ : KProper K -> KProper [ditto] .
   sort NeKProperList .
@@ -203,16 +208,16 @@ mod K-RULES is
   including K-SENTENCE .
   including PL-BOOL .
   including K-TECHNIQUE .
-  ops rule_ : List{K} -> [KSentence] [prec 127 format(b o d)] .
-  ops rule_ : Map -> [KSentence] [prec 127 format(b o d)] .
-  ops rule_ : List -> [KSentence] [prec 127 format(b o d)] .
-  ops rule_ : Bag -> [KSentence] [prec 127 format(b o d)] .
-  ops rule_ : Set -> [KSentence] [prec 127 format(b o d)] .
-  ops rule_if_ : List{K} Bool -> [KSentence] [prec 127 format(b o b o d)] .
-  ops rule_if_ : Map Bool -> [KSentence] [prec 127 format(b o b o d)] .
-  ops rule_if_ : List Bool -> [KSentence] [prec 127 format(b o b o d)] .
-  ops rule_if_ : Bag Bool -> [KSentence] [prec 127 format(b o b o d)] .
-  ops rule_if_ : Set Bool -> [KSentence] [prec 127 format(b o b o d)] .
+  ops rule_ : List{K} -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : Map -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : List -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : Bag -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : Set -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_if_ : List{K} Bool -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : Map Bool -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : List Bool -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : Bag Bool -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : Set Bool -> [KSentence] [prec 126 format(b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
   op `[_=>_`] : K K -> K [prec 0] .
   op `[_=>_`] : KResult KResult -> KResult [prec 0] .
@@ -227,6 +232,20 @@ mod K-RULES is
   op `[_=>_`] : Set Set -> Set [prec 0] .
 endm
 
+--- rule where level
+
+mod K-WHERE is
+  including K-RULES .
+  sort KAssignments .
+  
+  op _/\_ : KAssignments KAssignments -> KAssignments [gather (e E)] .
+  op _::=_ : List{K} List{K} -> KAssignments .
+  op _::=_ : KLabel KLabel -> KAssignments .
+  op _::=_ : List List -> KAssignments .
+  op _::=_ : Bag Bag -> KAssignments .
+  op _::=_ : Set Set -> KAssignments .
+  op _where_ : [KSentence] KAssignments -> [KSentence] [prec 127 format (o b o d)] .
+endm
 
 --- Anonymous variables level
 
@@ -350,6 +369,7 @@ mod K is
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
   including K-QUOTED-LABELS .
   including K-CONTEXTS .
+  including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-MAP-EXTRAS .          --- operations on Maps
   including K-BAG-EXTRAS .          --- operations on Bags

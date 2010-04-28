@@ -1,0 +1,38 @@
+load missing-subsorts
+
+mod MISSING-SUBSORTS-META is
+  including MISSING-SUBSORTS .
+  including META-LEVEL .
+  var NoInSane : String .  var M : Module .  var Q QNoInSane : Qid . 
+  op missingSubsorts : String ~> Module .
+  eq missingSubsorts(NoInSane) = missingSubsorts(qid(NoInSane)) .
+  op missingSubsorts : Qid ~> Module .
+  eq missingSubsorts(QNoInSane) = missingSubsorts(upModule(QNoInSane, false), upModule(QNoInSane, true)) .
+  
+  op compile : Module ~> Module .
+  eq compile(M) = missingSubsorts(M, flatten(M)) .
+endm
+
+mod MISSING-SUBSORTS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op missing-subsorts : -> System .
+  op idle : -> State .
+  var Q NoInSane : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq missing-subsorts = [nil, idle, 
+ 'Usage: 'missingSubsorts '<Name> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : [Module] -> QidList .
+  var Str : String . var M FM' : Module . 
+  eq print(moduleError(QIL)) = QIL '\n .
+  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) .
+  rl ['missingSubsorts NoInSane QIL, idle, QIL'] 
+   => [QIL, idle, print(downTerm(getTerm(
+             metaReduce(wrapper('MISSING-SUBSORTS-META),
+                        'missingSubsorts[upTerm(string(NoInSane))])), error))] .
+endm

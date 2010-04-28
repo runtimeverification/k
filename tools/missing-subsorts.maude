@@ -1,0 +1,8 @@
+fmod MISSING-SUBSORTS is
+  including META-LEVEL-EXTRAS .
+  including META-MODULE-EXTRAS .
+  including META-K-MODULE .
+  vars Flat M : Module .
+  op missingSubsorts : Module Module ~> Module .
+  eq missingSubsorts(M, Flat) = addSubsorts(removeSubsorts(makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getSubsorts(Flat) makeSubsorts(Flat,getSorts(Flat),klistSorts ; NeK)), M) .
+endfm
