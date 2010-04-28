@@ -6,7 +6,7 @@ ALL_MAUDE_FILES = $(wildcard *.maude) $(wildcard */*.maude) $(wildcard */*/*.mau
 MAUDE_FILES = $(filter-out %-compiled.maude,$(ALL_MAUDE_FILES))
 TOOL_DIR_FILES = $(wildcard $(TOOL_DIR)/*)
 COMPILED_FILE = $(MAIN_FILE)-compiled.maude
-LANGUAGE_FILE = $(MAIN_FILE).maude
+LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi))
 
 # phony tells make which targets aren't real files
 .PHONY: all test-% test force build
