@@ -26,11 +26,14 @@ echo "q" | $MAUDE >/dev/null
 RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
-if [ -f "$FILE.kmaude" ]
-then 
-  $KBASE/tools/maudify.sh "$FILE.kmaude" > "$FILE.maude"
-fi
 OUTPUT_FILE="${FILE}-compiled"
+if [[ $# -eq  2 ]]; then
+  LANG="$2"
+else
+  LANG=`echo $FILE | tr a-z A-Z`
+fi
+
+GFILE="kcompile_gen"
 IFILE="kcompile_in.maude"
 EFILE="kcompile_err.txt"
 OFILE="kcompile_out.txt"
@@ -39,11 +42,10 @@ TFILE="kcompile_tmp.txt"
 : >"$EFILE"
 : >"$OFILE"
 : >"$TFILE"
-
-if [[ $# -eq  2 ]]; then
-  LANG="$2"
-else
-  LANG=`echo $FILE | tr a-z A-Z`
+if [ -f "$FILE.kmaude" ]
+then 
+  $KBASE/tools/maudify.sh "$FILE.kmaude" > "$GFILE.maude"
+  FILE="$GFILE"
 fi
 
 LANG0=LANG
@@ -62,6 +64,10 @@ function cleanAndExit {
     rm -f "$EFILE"
     rm -f "$OFILE"
     rm -f "$TFILE"
+    if [ -f "$GFILE.maude" ]
+    then
+      rm -f "$GFILE.maude"
+    fi
   fi
   exit $1
 }
@@ -135,5 +141,5 @@ loop compile .
 "
 runMaude "$OUTPUT" "$COMPILE" "Compiling the definition" $OUTPUT_FILE.maude
 
-echo "Compiled version of $FILE.maude written in $OUTPUT_FILE.maude. Exiting."
+echo "Compiled version of $LANG written in $OUTPUT_FILE.maude. Exiting."
 cleanAndExit 0
