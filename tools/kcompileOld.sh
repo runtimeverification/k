@@ -273,7 +273,7 @@ $DEFAULTH
 load \"$KBASE/tools/syntax-to-k-interface\"
 ---(
 set print attribute on .
-red in SYNTAX-TO-K-META : resolveAnonVars('$LANG,'K) .
+red in SYNTAX-TO-K-META : syntax2k('$LANG,'K) .
 q
 ---)
 loop syntax-to-k .
@@ -303,7 +303,7 @@ $DEFAULTH
 load \"$KBASE/tools/lists-to-k-interface\"
 ---(
 set print attribute on .
-red in LISTS-TO-K-META : resolveAnonVars('$LANG,'-L) .
+red in LISTS-TO-K-META : makeLists2k('$LANG,'-L) .
 q
 ---)
 loop lists-to-k .

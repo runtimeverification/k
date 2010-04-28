@@ -124,7 +124,7 @@ fmod LISTS-TO-WRAPPERS is
  eq listsMb((mb T1 : T [AS] .), M, OPDS, OPDS', CTORS)
   = (mb listsT(T1, M, OPDS, OPDS', CTORS) : T [AS] .) .
  eq listsMb((cmb T1 : T if Cond [AS] .), M, OPDS, OPDS', CTORS)
-  = (cmb listsT(T1, M, OPDS, OPDS', CTORS) : T if Cond [AS] .) .
+  = (cmb listsT(T1, M, OPDS, OPDS', CTORS) : T if listsCond(Cond,M,OPDS, OPDS', CTORS) [AS] .) .
 
 
  op listsEqs : Module OpDeclSet OpDeclSet CTORSMap EquationSet ~> EquationSet .
@@ -139,7 +139,7 @@ fmod LISTS-TO-WRAPPERS is
  eq listsEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, OPDS', CTORS)
   = (ceq listsT(T1, M, OPDS, OPDS', CTORS) 
        = listsT(T2, M, OPDS, OPDS', CTORS) 
-      if Cond [AS] .) .
+      if  listsCond(Cond,M,OPDS, OPDS', CTORS) [AS] .) .
 
  op listsRls : Module OpDeclSet OpDeclSet CTORSMap RuleSet ~> RuleSet .
  eq listsRls(M, OPDS, OPDS', CTORS, Rls Rl)
@@ -153,7 +153,23 @@ fmod LISTS-TO-WRAPPERS is
  eq listsRl((crl T1 => T2 if Cond [AS] .), M, OPDS, OPDS', CTORS)
   = (crl listsT(T1, M, OPDS, OPDS', CTORS) 
       => listsT(T2, M, OPDS, OPDS', CTORS) 
-      if Cond [AS] .) .
+      if  listsCond(Cond,M,OPDS, OPDS', CTORS) [AS] .) .
+
+ 
+ op listsCond : Condition Module OpDeclSet OpDeclSet CTORSMap ~> Condition .
+ eq listsCond(T1 = T2 /\ Cond, M, OPDS, OPDS', CTORS)
+  = (listsT(T1, M, OPDS, OPDS', CTORS) = listsT(T2, M, OPDS, OPDS', CTORS)) /\
+    listsCond(Cond, M, OPDS, OPDS', CTORS) .
+ eq listsCond(T1 := T2 /\ Cond, M, OPDS, OPDS', CTORS)
+  = (listsT(T1, M, OPDS, OPDS', CTORS) := listsT(T2, M, OPDS, OPDS', CTORS)) /\
+    listsCond(Cond, M, OPDS, OPDS', CTORS) .
+ eq listsCond(T1 => T2 /\ Cond, M, OPDS, OPDS', CTORS)
+  = (listsT(T1, M, OPDS, OPDS', CTORS) => listsT(T2, M, OPDS, OPDS', CTORS)) /\
+    listsCond(Cond, M, OPDS, OPDS', CTORS) .
+ eq listsCond(T1 : T /\ Cond, M, OPDS, OPDS', CTORS)
+  = (listsT(T1, M, OPDS, OPDS', CTORS) : T) /\
+    listsCond(Cond, M, OPDS, OPDS', CTORS) .
+ eq listsCond(nil, M, OPDS, OPDS', CTORS) = nil . 
 
  op listsTs : TermList Module OpDeclSet OpDeclSet CTORSMap 
     ~> TermList .
