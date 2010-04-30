@@ -689,6 +689,17 @@ fmod META-MODULE-EXTRAS is
   eq getLabel(rl T1 => T2 [AS label(Q)] .) = Q .
   eq getLabel(crl T1 => T2 if Cond [AS label(Q)] .) = Q .
 
+  op clearReductionAttrs : OpDeclSet ~> OpDeclSet .
+ ceq clearReductionAttrs(OPDS op Q : Tl -> T [special(NHl:NeHookList) AS] .)
+   = clearReductionAttrs(OPDS) (op Q : Tl -> T [clearReductionAttrs(AS)] .) 
+  if Q == '_==Bool_ or-else Q == '_=/=Bool_ or-else Q == 'if_then_else_fi .
+  eq clearReductionAttrs(OPDS op Q : Tl -> T [AS] .)
+   = clearReductionAttrs(OPDS) (op Q : Tl -> T [clearReductionAttrs(AS)] .) 
+  [owise] .
+  eq clearReductionAttrs((none).OpDeclSet) = none .
+  op clearReductionAttrs : AttrSet ~> AttrSet .
+  eq clearReductionAttrs(strat(Nl:NeNatList) AS) = clearReductionAttrs(AS) .
+  eq clearReductionAttrs(AS) = AS [owise] .
 endfm
 
 fmod METADATA-EXTRAS is
