@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
-)
+***)
 
 set include BOOL off .
 set show advisories off .
@@ -804,7 +804,7 @@ fmod PL-CONVERSION is
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op float2ratConversion : FiniteFloat -> Rat
+  op float2ratConversion : Float -> Rat
         [special (id-hook FloatOpSymbol (rat)
                   op-hook floatSymbol (<Floats> : ~> Float)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
