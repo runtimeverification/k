@@ -25,8 +25,7 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict"] .
   op _or_ : Exp Exp -> Exp [gather(E e) prec 59 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
-  op _[_] : Id Exp -> Var [prec 1 metadata "strict(2)"] .
-  op _[_] : Exp Exp -> Exp [ditto metadata "strict"] .
+  op _[_] : Exp Exp -> Var [prec 1 metadata "strict"] .
   op sizeOf : Exp -> Exp [metadata "strict"] .
   op var_:_; : Var Type -> Decl [prec 2] .
   op {} : -> Stmt .
@@ -81,6 +80,5 @@ mod SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX .
   eq if E then S = if E then S else {} .
   eq for X = E1 to E2 do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} .
   eq function F() : Tp S = function F(.List{Bottom}) : Tp S .
-  op _(_) : Exp List{Exp} -> Exp [prec 0 metadata "strict"] .
   eq E() = E(.List{Bottom}) .
 endm
