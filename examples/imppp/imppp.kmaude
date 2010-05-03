@@ -127,8 +127,8 @@ mod IMP++ is
   rule [if false then ? else S2 => S2] .
   rule [S1 ; S2 => S1 ~> S2] [metadata "structural"] .
   rule <k> [X => I] ...</k> <env>... X |-> L ...</env> <store>... L |-> I ...</store> .
-  rule <k> [++ X => (I +Int 1)] ...</k> <env>... X |-> L ...</env> <store>... L |-> [I => I +Int 1] ...</store>  .
-  rule <k> [X := I => .K] ...</k> <env>... X |-> L ...</env> <store>... L |-> [? => I] ...</store> .
+  rule <k> [++ X => (I +Int 1)] ... </k> <env> ...X |-> L... </env> <store> ...L |-> [I => I +Int 1]... </store>  .
+  rule <k> [X := I => .K]... </k> <env> ...X |-> L... </env> <store> ...L |-> [? => I]... </store> .
   rule <k> [while B do S  => if B then (S ; while B do S) else skip] ...</k> .
   rule <k> [print(I) => .K] ...</k> <output>... [.List => ListItem(I)] </output>  .
   rule <k> [halt ~> ? => .K] </k> .
