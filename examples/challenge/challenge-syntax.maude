@@ -11,7 +11,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op randomBool : -> Exp .
 
   op var_; : List{Id} -> Stmt [prec 2] .
-  op _=_ : Exp Exp -> Exp [prec 80 gather (e E) metadata "strict(2)"] .
+  op _=_; : Exp Exp -> Stmt [prec 80 gather (e E) metadata "strict(2)"] .
   op ++_ : Id -> Exp [prec 0] .
 
   op {} : -> Stmt .
@@ -20,23 +20,23 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op _; : Exp -> Stmt [prec 90 metadata "strict"] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op while_do_ : Exp Stmt -> Stmt .
+  op read : -> Exp .
+  op print_; : Exp -> Stmt [metadata "strict"] .
   
 --- Pointers
-  op malloc(_) : Exp -> Exp [metadata "strict"] .
-  op free(_); : Exp -> Stmt [metadata "strict"] .
+  op malloc_ : Exp -> Exp [metadata "strict"] .
+  op free_; : Exp -> Stmt [metadata "strict"] .
   op &_ : Id -> Exp .
   op *_ : Exp -> Exp [metadata "strict"] .
 
 --- Functions
   op lambda_._ : List{Id} Stmt -> Exp .
-  op mu_._ : Id Exp -> Exp .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
+  op mu_._ : Id Exp -> Exp .
   op return_; : Exp -> Stmt [metadata "strict"] .
-  op callcc : Exp -> Exp [metadata "strict"] .
+  op callcc_ : Exp -> Exp [metadata "strict"] .
   op aspect_ : Stmt -> Stmt .
-  op read() : -> Exp .
-  op print(_); : Exp -> Stmt [metadata "strict"] .
 
 --- Threads
   op spawn_ : Stmt -> Stmt .
@@ -51,9 +51,11 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op parent : -> Exp .
   op receive : -> Exp .
   op receive-from_ : Exp -> Exp [metadata "strict"] .
-  op send-asynch(_,_); : Exp Exp -> Stmt [metadata "strict"] .
-  op send-synch(_,_); : Exp Exp -> Stmt [metadata "strict"] .
+  op send-asynch_to_; : Exp Exp -> Stmt [metadata "strict"] .
+  op send-synch_to_; : Exp Exp -> Stmt [metadata "strict"] .
   op halt-agent; : -> Stmt .
+
+  op halt-system; : -> Stmt .
 
 --- Reflection
   op quote_ : Exp -> Exp .
@@ -83,4 +85,9 @@ mod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX .
 ------------------------------------------------------------------------------------
   vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
   eq E() = E(`(`)) .
+---()
+---mu as syntactic sugar
+  eq mu X . E = (lambda(). (var X ; X = E ; return X ;))() .
+---()
+
 endm

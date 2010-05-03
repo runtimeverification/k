@@ -19,7 +19,7 @@ mod CHALLENGE-PROGRAMS is
   eq p5 = 3 / 2 + 3 / 2.0 .
 
   op p6 : -> Stmt .
-  eq p6 = var x,y ; y = 1.5 + (x = ++ y) ; print(y) ; .
+  eq p6 = var x,y ; y = 1.5 + ++ y ; print(y) ; .
 
   op p7 : -> Stmt .
   eq p7 = 
@@ -37,7 +37,8 @@ mod CHALLENGE-PROGRAMS is
   eq p8 = var a,n,i,j,t ;
           n = 10 ;
           a = malloc(n) ;
-          n = n + (i = -1) ;
+          n = n + -1 ;
+          i = -1 ;
           while (++ i <= n) do {
             *(a + i) = i ;
           }
@@ -60,8 +61,8 @@ mod CHALLENGE-PROGRAMS is
           odd = lambda x . (if not(0 <= x) then return even(x + 1); else if not(x <= 0) then return even(x + -1) ; else return false ;) ;
           aspect (even-calls = even-calls + 1 ;)
           even = lambda x . (if not(0 <= x) then return odd(x + 1); else if not(x <= 0) then return odd(x + -1) ; else return true ;) ;
-          print(odd(read())) ; 
-          print(even(read())) ;
+          print(odd(read)) ; 
+          print(even(read)) ;
           print(odd-calls) ;
           print(even-calls) ; .
 
@@ -73,7 +74,7 @@ mod CHALLENGE-PROGRAMS is
   eq p11 = var y ; y = 0 ; var f ; f = lambda x . if (x <= 0) then return y ; else {var y ; y = 1 ; return f(x + -1) ;} ; print(f(1)) ; .
 
   op p12 : -> Stmt .
-  eq p12 = var goto,n ; print(callcc (lambda exit . ((callcc (lambda k . (return (goto = k) ;))) ; if n <= 10 then (n = n + 1 ;) else (exit (n) ;) return goto(0);))) ; .
+  eq p12 = var goto,n ; print(callcc (lambda exit . ((callcc (lambda k . (goto = k ;))) ; if n <= 10 then (n = n + 1 ;) else (exit (n) ;) return goto(0);))) ; .
 
   op p13 : -> Stmt .
   eq p13 = var x,y ;
@@ -129,10 +130,10 @@ mod CHALLENGE-PROGRAMS is
   eq p18 = var x,y,z ;
                 x = 1 ; 
                 y = new-agent(var y ; y = receive-from parent ; 
-                     send-synch(y, me); spawn halt-agent; print(receive);) ; 
+                     send-synch me to y ; spawn halt-agent; print(receive);) ; 
                 z = new-agent(var z ; z = receive ; 
-                     send-asynch(z, 17); print(z);) ;
-                send-asynch(y, z);
+                     send-asynch 17 to z ; print(z);) ;
+                send-asynch z to y ;
   .
 
   op p19 : -> Stmt .

@@ -2,30 +2,32 @@ in ../../k-prelude
 in challenge-syntax
 in challenge-programs
 
-mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
+mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   including PL-CONVERSION .
   subsort List{Exp} Stmt < K .
   sort Val .
   subsort Bool Int Float < Val < Exp .
   subsort List{Val} < KResult .
 
-  ops env store nextLoc ptr fstack input output  aspect thread holds busy agent message from to body threads me parent nextAgent : -> CellLabel .
+  ops env store nextLoc ptr fstack input output  aspect thread holds busy agents agent message from to body threads me parent nextAgent : -> CellLabel .
   configuration <T> 
-   <agent*> 
-    <threads>
-     <thread*>
-      <k> .K </k> <env> .Map </env> 
-      <fstack> .List </fstack>
-      <aspect> .K </aspect>
-      <holds> .Map </holds>
-     </thread*>
-    </threads>
-     <busy> .Bag </busy>
-     <store> .Map </store> <nextLoc> 0 </nextLoc> 
-     <ptr> .Map </ptr>
-     <me> 0 </me>
-     <parent> .K </parent> 
-   </agent*>
+   <agents>
+    <agent*> 
+     <threads>
+      <thread*>
+       <k> .K </k> <env> .Map </env> 
+       <fstack> .List </fstack>
+       <aspect> .K </aspect>
+       <holds> .Map </holds>
+      </thread*>
+     </threads>
+      <busy> .Bag </busy>
+      <store> .Map </store> <nextLoc> 0 </nextLoc> 
+      <ptr> .Map </ptr>
+      <me> 0 </me>
+      <parent> .K </parent> 
+    </agent*>
+   </agents>
    <nextAgent> 1 </nextAgent>
    <message*> 
       <from> .K </from> <to> .K </to> <body> .K </body>
@@ -63,11 +65,11 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
        <store>... [.Map => | Xl | from N |-> 0] ...</store>
        <nextLoc> [N => N +Nat | Xl |] </nextLoc>
    .
-  rule <k> [X => V] ...</k>
+  rule <k> [X => K] ...</k>
         <env>... X |-> N ...</env>
-        <store>... N |-> V ...</store> 
+        <store>... N |-> K ...</store> 
    .
-  rule <k> [X = V => V] ...</k>
+  rule <k> [X = V ; => .K] ...</k>
         <env>... X |-> N ...</env>
         <store>... N |-> [? => V] ...</store> 
    .
@@ -102,26 +104,48 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
           <store> [Store => Store[undef/ N1 from N2]] </store>
    .
        
-  context * [HOLE] = ? .
-  rule <k> [* N = V => V] ...</k>
+  context * [HOLE] = ? ; .
+  rule <k> [* N = V ; => .K] ...</k>
           <store>... N |-> [? => V] ...</store> .
   
 --- Functions
   rule <k> [aspect S => .K] ...</k> 
           <aspect> [? => S] </aspect> .
-  op closure : List{Id} Stmt Map -> Val .
-  rule <k> [lambda Xl . S1 => closure(Xl, (S2 S1), Env)] ...</k>
+  op closure-lambda : List{Id} Stmt Map -> Val .
+  rule <k> [lambda Xl . S1 => closure-lambda(Xl, (S2 S1), Env)] ...</k>
           <env> Env </env> <aspect> S2 </aspect> .
   op `(_`,_`) : K Map -> ListItem .
-  rule <k> [_`(_`)(closure(Xl, S, Env),Vl) ~> K => S] </k>
+  rule <k> [_`(_`)(closure-lambda(Xl, S, Env),Vl) ~> K => S return 0 ;] </k>
     <env> [Env' => Env[| Xl | from N / getList{K}(Xl)]] </env>
-    <fstack> [.List => (K,Env)] ...</fstack>
+    <fstack> [.List => (K,Env')] ...</fstack>
     <store>... [.Map => | Xl | from N |-> getList{K}(Vl)] </store>
     <nextLoc> [N => N +Nat | Xl |] </nextLoc> 
     .
   rule <k> [return V ; ~> ? => V ~> K] </k>
           <env> [? => Env] </env>
           <fstack> [(K,Env) => .List] ...</fstack> .
+
+---(
+---mu as in call-by-name
+  op closure-mu : Exp Map -> K .
+  rule <k> [mu X . E => closure-mu(E, Env[N / X])]...</k> <env> Env </env>
+        <store>...[.Map => N |-> closure-mu(E, Env[N / X])]...</store> 
+        <nextLoc> [N => sNat N] </nextLoc> .
+  rule <k> [closure-mu(E, Env) => E ~> env(Env')] ...</k> 
+       <env> [Env' => Env] </env> .
+---)
+
+---(
+---mu through assigment (if X does not appear at top of E)
+  rule <k>[mu X . E => var X ; ~> X = E ; ~> X ~> env(Env)]...</k>
+       <env> Env </env> .
+---)
+
+---(
+---mu just for functions
+   context mu ? . [HOLE] .
+   rule <k>[mu X . closure-lambda(Y,S,Env) => closure-lambda(Y,S,Env[N / X])]...</k> <store>...[.Map => N |-> closure-lambda(Y,S,Env[N / X])]...</store> <nextLoc>[N => sNat N]</nextLoc> .
+---)
 
    op cc : K Map List -> Val .
    rule <k> [callcc(V) => _`(_`)(V, cc(K, Env, FStack))] ~> K </k> 
@@ -130,25 +154,21 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
    rule <k> [_`(_`)(cc(K, Env, FStack), V) ~> ?:K => V ~> K] </k>
            <env> [?:Map => Env] </env> 
            <fstack> [?:List => FStack] </fstack> .
---- the following is nice, but wrong (in an interesting way - see p11)
-   rule <k> [mu X . E => var X ; ~> X = E] ...</k> .
 
-   rule <k> [read() => I] ...</k>
+   rule <k> [read => I] ...</k>
            <input> [ListItem(I) => .List] ...</input> .
-   rule <k> [print(V); => .K] ...</k>
+   rule <k> [print V ; => .K] ...</k>
            <output>... [.List => ListItem(V)] </output> .
 
 --- Threads
    rule <thread>... <k> [spawn S => .K] ...</k> <env> Env </env> ...</thread>
-          [.Bag => <thread> <k> S </k> <env> Env </env> <aspect> .K </aspect> <holds> .Map </holds> </thread>] .
-   rule [<thread>... <k> .K </k> <holds> Holds </holds> ...</thread> => .Bag]
-           <busy> [Busy => Busy - keys(Holds)] </busy> .
-   rule [<thread>... <k> halt-thread; ...</k> <holds> Holds </holds> ...</thread> => .Bag]
+          [.Bag => <thread> <k> S </k> <env> Env </env> <fstack> .List </fstack> <aspect> .K </aspect> <holds> .Map </holds> </thread>] .
+   rule [<thread>... <k> .K </k> <fstack> .List </fstack> <holds> Holds </holds> ...</thread> => .Bag]
            <busy> [Busy => Busy - keys(Holds)] </busy> .
 
-   rule <k> [acquire V ; => .K] ...</k> <holds>... V |-> [N => sNat N] ...</holds> .
    rule <k> [acquire V ; => .K] ...</k> <holds>... [.Map => V |-> 0] ...</holds> 
         <busy> Busy [.Bag => BagItem(V)] </busy> if notBool(V in Busy) .
+   rule <k> [acquire V ; => .K] ...</k> <holds>... V |-> [N => sNat N] ...</holds> .
    rule <k> [release V ; => .K] ...</k> <holds>... V |-> [sNat N => N] ...</holds> .
    rule <k> [release V ; => .K] ...</k> <holds>... [V |-> 0 => .Map] ...</holds> 
         <busy>... [BagItem(V) => .Bag] ...</busy> .
@@ -160,6 +180,8 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
              <me> N1 </me>
           ...</agent>
      [.Bag => <agent> 
+    <me> N2 </me>
+    <parent> N1 </parent>
     <threads>
      <thread>
       <k> S </k> 
@@ -173,35 +195,36 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
     <store> .Map </store>
     <nextLoc> 0 </nextLoc>
     <ptr> .Map </ptr>
-    <me> N2 </me>
-    <parent> N1 </parent>
    </agent>]
    <nextAgent> [N2 => sNat N2] </nextAgent> .
   rule [<agent>... <threads> .Bag </threads> ...</agent> 
         => .Bag] .
-  rule [<agent>... <k> halt-agent; ...</k> ...</agent> 
-        => .Bag] .
 
   rule <k> [me => N] ...</k> <me> N </me> .
   rule <k> [parent => N] ...</k> <parent> N </parent> .
-  rule <me> N1 </me> <k> [send-asynch(N2,V); => .K] ...</k> 
+  rule <me> N1 </me> <k> [send-asynch V to N2 ; => .K] ...</k> 
           [.Bag => <message> <from> N1 </from> <to> N2 </to> 
                      <body> V </body> </message>]
    . 
   rule <me> N </me> <k> [receive => V] ...</k> 
           [<message>... <to> N </to> <body> V </body> ...</message>
         => .Bag] . 
-  rule <me> N1 </me> <k> [receive-from(N2) => V] ...</k> 
+  rule <me> N1 </me> <k> [receive-from N2 => V] ...</k> 
           [<message> <from> N2 </from> <to> N1 </to> <body> V </body> 
           </message> => .Bag] . 
-  rule <agent>... <me> N1 </me> <k> [send-synch(N2,V); => .K] ...</k>
+  rule <agent>... <me> N1 </me> <k> [send-synch V to N2 ; => .K] ...</k>
           ...</agent>
-          <agent>... <me> N2 </me> <k> [receive-from(N1) => V] ...</k>
+          <agent>... <me> N2 </me> <k> [receive-from N1 => V] ...</k>
           ...</agent> .
-  rule <agent>... <k> [send-synch(N2,V); => .K] ...</k> ...</agent>
+  rule <k> [send-synch V to N2 ; => .K] ...</k>
           <agent>... <me> N2 </me> <k> [receive => V] ...</k>
           ...</agent> .
  
+--- Halt (thread, agent, system)
+  rule <k> [halt-thread; ~> ? => .K] </k> <fstack> [? => .List] </fstack> .
+  rule [<threads>... <k> halt-agent; ...</k> ...</threads> => <threads> .Bag </threads>] .
+  rule [<agents>... <k> halt-system; ...</k> ...</agents> => <agents> .Bag </agents>] .
+
 --- Reflection
   op quote[_] : Nat -> KLabel .
   op code : List{K} -> Val .
@@ -231,7 +254,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
   op env : Map -> K .
   rule [env(?) ~> env(Env) => env(Env)] [metadata "structural"] .
   rule <k> [env(Env) => .K] ...</k> <env> [? => Env] </env> [metadata "structural"] .
-  rule <k> V ~> [env(Env) => .K] ...</k> <env> [? => Env] </env> [metadata "structural"] .
+  rule [V ~> env(Env) => env(Env) ~> V] [metadata "structural"] .
 
   op _[undef/_] : Map List{K} -> Map .
   eq Map[undef/ K,,K',,Kl] = Map[undef/ K][undef/ K'][undef/ Kl] .
@@ -248,7 +271,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-SYNTAX + K .
 --- generate sequence of locations
   op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq (sNat N2 from N1) = (N1,,(N2 from sNat N1)) .
 
-  vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .  var X : Id . var Xl : List{Id} .  var E : Exp .  var El : List{Exp} .
+  vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .  var X Y : Id . var Xl : List{Id} .  var E : Exp .  var El : List{Exp} .
   vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Bag .
   var FStack : List .  var V : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl Kl1 Kl2 : List{K} .  var Label : KLabel .
 endm
@@ -258,22 +281,24 @@ mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
   eq run(L:KLabel) = run(L:KLabel,.List{K}) .
   op run : KLabel List{K} -> Bag .
   eq run(L:KLabel,L:List{K}) = <T> 
-   <agent>
-    <threads>
-     <thread>
-      <k> L:KLabel(.List{K}) </k> 
-      <env> .Map </env>
-      <fstack> .List </fstack>
-      <aspect> .K </aspect>
-      <holds> .Map </holds>
-     </thread>
-    </threads>
-    <busy> .Bag </busy>
-    <store> .Map </store>
-    <nextLoc> 0 </nextLoc>
-    <ptr> .Map </ptr>
-    <me> 0 </me>
-   </agent>
+   <agents>
+    <agent>
+     <threads>
+      <thread>
+       <k> L:KLabel(.List{K}) </k> 
+       <env> .Map </env>
+       <fstack> .List </fstack>
+       <aspect> .K </aspect>
+       <holds> .Map </holds>
+      </thread>
+     </threads>
+     <busy> .Bag </busy>
+     <store> .Map </store>
+     <nextLoc> 0 </nextLoc>
+     <ptr> .Map </ptr>
+     <me> 0 </me>
+    </agent>
+   </agents>
    <nextAgent> 1 </nextAgent>
    <input> List(L:List{K}) </input>
    <output> .List </output>
