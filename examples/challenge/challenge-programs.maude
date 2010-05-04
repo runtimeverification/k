@@ -1,7 +1,7 @@
 mod CHALLENGE-PROGRAMS is 
   including CHALLENGE-SYNTAX .
 
-  ops a b c f i j k n s t x y z 
+  ops a b c f i j k m n s t x y z 
       odd even odd-calls even-calls goto exit : -> Id .
   op p1 : -> Exp .
   eq p1 = 3 + 5 .
@@ -118,7 +118,7 @@ mod CHALLENGE-PROGRAMS is
   op p17 : -> Stmt .
   eq p17 = var x ; 
                 x = 1 ; 
-                spawn (acquire 1 ; rv 1 ; x = x + 1 ; halt-thread;)
+                spawn (acquire 1 ; rv 1 ; x = x + 1 ; haltThread ;)
                 rv 1 ;
                 acquire 1 ;
                 x = x + 1 ;
@@ -129,11 +129,11 @@ mod CHALLENGE-PROGRAMS is
   op p18 : -> Stmt .
   eq p18 = var x,y,z ;
                 x = 1 ; 
-                y = new-agent(var y ; y = receive-from parent ; 
-                     send-synch me to y ; spawn halt-agent; print(receive);) ; 
-                z = new-agent(var z ; z = receive ; 
-                     send-asynch 17 to z ; print(z);) ;
-                send-asynch z to y ;
+                y = newAgent(var y ; y = receiveFrom parent ; 
+                     sendSynch me to y ; spawn haltAgent ; print(receive) ;) ; 
+                z = newAgent(var z ; z = receive ; 
+                     sendAsynch 17 to z ; print(z);) ;
+                sendAsynch z to y ;
   .
 
   op p19 : -> Stmt .
@@ -151,9 +151,10 @@ mod CHALLENGE-PROGRAMS is
 
   op p20 : -> Stmt .
   eq p20 =
-   var a,b ;
-   a = quote(1) ;
-   b = quote(quote(unquote(unquote(a))));
+   var a,b,c ;
+   c = 10 ;
+   a = quoteEval c ;
+   b = quote(quote(unquote(unquote(quoteEval c))));
    print(eval(b));
   .
 
@@ -176,4 +177,47 @@ mod CHALLENGE-PROGRAMS is
    x = quote(2); 
    print(eval(quote(1 + 2 + unquote(x) + 4 + 5))); .
 
+  op p23 : -> Stmt .
+  ops genpow cube : -> Id .
+  eq p23 = {
+   var genpow ;
+   genpow = lambda n . {
+              if n <= 0
+              then return quote 1 ;
+              else return quote (x * unquote (genpow (n + -1))) ;
+            } ;
+   var cube ;
+   cube = lambda x . { return eval genpow(3) ;} ;
+   print cube(5) ;
+   print cube(10) ;
+ }
+.
+
+  op p24 : -> Stmt .
+  ops f1 f2 fib loc code sender : -> Id .
+  eq p24 = 
+   var fib,loc ;
+   fib = newAgent
+   {
+     var m, c, code ;
+     m = receive ;
+     sendAsynch & c to head m ;
+     code = eval receiveFrom head m ;
+     aspect code() ;
+     var f ;
+     f = mu f . lambda x .
+             if x <= 1 then { return x ; } else {
+               var f1,f2 ;
+               spawn {f1 = f(x + -1) ; rv & f1 ;}
+               spawn {f2 = f(x + -2) ; rv & f2 ;}
+               rv & f1 ; rv & f2 ;
+               return f1 + f2 ;
+             } ;
+     sendAsynch [f(head tail m),c] to head m ;
+   } ;
+   sendAsynch [me,5] to fib ;
+   loc = quoteEval receiveFrom fib ;
+   sendAsynch quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to fib ;
+   print receiveFrom fib ;
+.
 endm

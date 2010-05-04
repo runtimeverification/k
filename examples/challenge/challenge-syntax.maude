@@ -22,12 +22,18 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op while_do_ : Exp Stmt -> Stmt .
   op read : -> Exp .
   op print_; : Exp -> Stmt [metadata "strict"] .
-  
+
 --- Pointers
   op malloc_ : Exp -> Exp [metadata "strict"] .
   op free_; : Exp -> Stmt [metadata "strict"] .
   op &_ : Id -> Exp .
   op *_ : Exp -> Exp [metadata "strict"] .
+
+--- Lists
+  op [] : -> Exp .
+  op [_] : List{Exp} -> Exp [prec 0 metadata "strict hybrid"] .
+  ops (head_) (tail_) : Exp -> Exp [prec 0 metadata "strict"] .
+  op _:_ : Exp Exp -> Exp [metadata "strict"] .
 
 --- Functions
   op lambda_._ : List{Id} Stmt -> Exp .
@@ -36,29 +42,29 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op mu_._ : Id Exp -> Exp .
   op return_; : Exp -> Stmt [metadata "strict"] .
   op callcc_ : Exp -> Exp [metadata "strict"] .
-  op aspect_ : Stmt -> Stmt .
+  op aspect_ : Stmt -> Stmt [prec 90] .
 
 --- Threads
   op spawn_ : Stmt -> Stmt .
   op acquire_; : Exp -> Stmt [metadata "strict"] .
   op release_; : Exp -> Stmt [metadata "strict"] .
   op rv_; : Exp -> Stmt [metadata "strict"] .
-  op halt-thread; : -> Stmt .
+  op haltThread ; : -> Stmt .
 
 --- Agents
-  op new-agent_ : Stmt -> Exp .
+  op newAgent_ : Stmt -> Exp .
   op me : -> Exp .
   op parent : -> Exp .
   op receive : -> Exp .
-  op receive-from_ : Exp -> Exp [metadata "strict"] .
-  op send-asynch_to_; : Exp Exp -> Stmt [metadata "strict"] .
-  op send-synch_to_; : Exp Exp -> Stmt [metadata "strict"] .
-  op halt-agent; : -> Stmt .
-
-  op halt-system; : -> Stmt .
+  op receiveFrom_ : Exp -> Exp [metadata "strict"] .
+  op sendAsynch_to_; : Exp Exp -> Stmt [metadata "strict"] .
+  op sendSynch_to_; : Exp Exp -> Stmt [metadata "strict"] .
+  op haltAgent ; : -> Stmt .
+  op haltSystem ; : -> Stmt .
 
 --- Reflection
   op quote_ : Exp -> Exp .
+  op quoteEval_ : Exp -> Exp [metadata "strict"] .
   op unquote_ : Exp -> Exp .
   op eval_ : Exp -> Exp [metadata "strict"].
 

@@ -108,6 +108,11 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   rule <k> [* N = V ; => .K] ...</k>
           <store>... N |-> [? => V] ...</store> .
   
+--- Lists
+  rule [head [V,Vl] => V] .
+  rule [tail [V,Vl] => [Vl]] .
+  rule [V : [Vl] => [V,Vl]] .
+ 
 --- Functions
   rule <k> [aspect S => .K] ...</k> 
           <aspect> [? => S] </aspect> .
@@ -176,7 +181,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
    rule <k> [rv V ; => .K] ...</k> <k> [rv V ; => .K] ...</k> .
 
 --- Agents
-  rule <agent>... <k> [new-agent S => N2] ...</k> 
+  rule <agent>... <k> [newAgent S => N2] ...</k> 
              <me> N1 </me>
           ...</agent>
      [.Bag => <agent> 
@@ -202,50 +207,52 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
 
   rule <k> [me => N] ...</k> <me> N </me> .
   rule <k> [parent => N] ...</k> <parent> N </parent> .
-  rule <me> N1 </me> <k> [send-asynch V to N2 ; => .K] ...</k> 
+  rule <me> N1 </me> <k> [sendAsynch V to N2 ; => .K] ...</k> 
           [.Bag => <message> <from> N1 </from> <to> N2 </to> 
                      <body> V </body> </message>]
    . 
   rule <me> N </me> <k> [receive => V] ...</k> 
           [<message>... <to> N </to> <body> V </body> ...</message>
         => .Bag] . 
-  rule <me> N1 </me> <k> [receive-from N2 => V] ...</k> 
+  rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> 
           [<message> <from> N2 </from> <to> N1 </to> <body> V </body> 
           </message> => .Bag] . 
-  rule <agent>... <me> N1 </me> <k> [send-synch V to N2 ; => .K] ...</k>
+  rule <agent>... <me> N1 </me> <k> [sendSynch V to N2 ; => .K] ...</k>
           ...</agent>
-          <agent>... <me> N2 </me> <k> [receive-from N1 => V] ...</k>
+          <agent>... <me> N2 </me> <k> [receiveFrom N1 => V] ...</k>
           ...</agent> .
-  rule <k> [send-synch V to N2 ; => .K] ...</k>
+  rule <k> [sendSynch V to N2 ; => .K] ...</k>
           <agent>... <me> N2 </me> <k> [receive => V] ...</k>
           ...</agent> .
  
 --- Halt (thread, agent, system)
-  rule <k> [halt-thread; ~> ? => .K] </k> <fstack> [? => .List] </fstack> .
-  rule [<threads>... <k> halt-agent; ...</k> ...</threads> => <threads> .Bag </threads>] .
-  rule [<agents>... <k> halt-system; ...</k> ...</agents> => <agents> .Bag </agents>] .
+  rule <k> [haltThread ; ~> ? => .K] </k> <fstack> [? => .List] </fstack> .
+  rule [<threads>... <k> haltAgent ; ...</k> ...</threads> => <threads> .Bag </threads>] .
+  rule [<agents>... <k> haltSystem ; ...</k> ...</agents> => <agents> .Bag </agents>] .
 
 --- Reflection
-  op quote[_] : Nat -> KLabel .
+  op quoteit[_] : Nat -> KLabel .
   op code : List{K} -> Val .
   op _box(~>)_ : K K -> K [metadata "strict"] .
   op _box(,,)_ : K K -> K [metadata "strict"] .
   op box : KLabel -> KLabel .
   context box(Label)(?,,`[HOLE`]:K,,?) .
   
-  rule <k> [quote E => quote[0](E)] ...</k> .
-  rule [quote[N](quote(E)) => box('quote_)(quote[sNat(N)](E))] .
-  rule [quote[0](unquote(E)) => E] .
-  rule [quote[sNat(N)](unquote(E)) => box('unquote_)(quote[N](E))] .
-  rule [quote[N](.K) => code(.K)] [metadata "structural"] .
-  rule [quote[N]((K1 ~> K2)) => quote[N](K1) box(~>) quote[N](K2)] if K1 =/=Bool .K andBool K2 =/=Bool .K .
+  rule <k> [quote E => quoteit[0](E)] ...</k> .
+  rule [quoteit[N](quote(E)) => box('quote_)(quoteit[sNat(N)](E))] .
+  rule [quoteit[0](unquote(E)) => E] .
+  rule [quoteit[sNat(N)](unquote(E)) => box('unquote_)(quoteit[N](E))] .
+  rule [quoteit[N](.K) => code(.K)] [metadata "structural"] .
+  rule [quoteit[N]((K1 ~> K2)) => quoteit[N](K1) box(~>) quoteit[N](K2)] if K1 =/=Bool .K andBool K2 =/=Bool .K .
   rule [code(K1) box(~>) code(K2) => code((K1 ~> K2))] .
-  rule [quote[N](Label(Kl)) => box(Label)(quote[N](Kl))] if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_ .
+  rule [quoteit[N](Label(Kl)) => box(Label)(quoteit[N](Kl))] if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_ .
   rule [box(Label)(code(Kl)) => code(Label(Kl))] .
-  rule [quote[N](.List{K}) => code(.List{K})] .
-  rule [quote[N]((Kl1,, Kl2)) => quote[N](Kl1) box(,,) quote[N](Kl2)] if Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K} .
+  rule [quoteit[N](.List{K}) => code(.List{K})] .
+  rule [quoteit[N]((Kl1,, Kl2)) => quoteit[N](Kl1) box(,,) quoteit[N](Kl2)] if Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K} .
   rule [code(Kl1) box(,,) code(Kl2) => code((Kl1,, Kl2))] .
   rule [eval code(K) => K]  .
+
+  rule [quoteEval V => code(V)] .
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---

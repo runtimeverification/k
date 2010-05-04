@@ -14,7 +14,6 @@ rew run("p12") .
 search[2] run("p13") =>! B:Bag .
 search run("p14") =>! B:Bag .
 search run("p15") =>! B:Bag .
-q
 search run("p16") =>! B:Bag .
 search run("p17") =>! B:Bag .
 search run("p18") =>! B:Bag .
@@ -22,3 +21,5 @@ rew run("p19") .
 rew run("p20") .
 rew run("p21") .
 rew run("p22") .
+rew run("p23") .
+---search run("p23") =>! B:Bag .
