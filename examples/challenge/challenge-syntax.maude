@@ -6,6 +6,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
   op _/_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
   op _<=_ : Exp Exp -> Exp [prec 37 metadata "seqstrict"] .
+  op _==_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict(1)"] .
   op randomBool : -> Exp .
@@ -57,7 +58,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op parent : -> Exp .
   op receive : -> Exp .
   op receiveFrom_ : Exp -> Exp [metadata "strict"] .
-  op sendAsynch_to_; : Exp Exp -> Stmt [metadata "strict"] .
+  op send_to_; : Exp Exp -> Stmt [metadata "strict"] .
   op sendSynch_to_; : Exp Exp -> Stmt [metadata "strict"] .
   op haltAgent ; : -> Stmt .
   op haltSystem ; : -> Stmt .
@@ -94,6 +95,7 @@ mod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX .
 ---()
 ---mu as syntactic sugar
   eq mu X . E = (lambda(). (var X ; X = E ; return X ;))() .
+  eq [] = [()] .
 ---()
 
 endm

@@ -53,6 +53,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   rule [I1 <= F2 => rat2floatConversion(I1) <=Float F2] .
   rule [F1 <= I2 => F1 <=Float rat2floatConversion(I2)] .
   rule [F1 <= F2 => F1 <=Float F2] .
+  rule [V1 == V2 => V1 ==Bool V2] .
   rule [not T => notBool T] .
   rule [true and E => E] .
   rule [false and E => false] .
@@ -207,7 +208,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
 
   rule <k> [me => N] ...</k> <me> N </me> .
   rule <k> [parent => N] ...</k> <parent> N </parent> .
-  rule <me> N1 </me> <k> [sendAsynch V to N2 ; => .K] ...</k> 
+  rule <me> N1 </me> <k> [send V to N2 ; => .K] ...</k> 
           [.Bag => <message> <from> N1 </from> <to> N2 </to> 
                      <body> V </body> </message>]
    . 
@@ -280,7 +281,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
 
   vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .  var X Y : Id . var Xl : List{Id} .  var E : Exp .  var El : List{Exp} .
   vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Bag .
-  var FStack : List .  var V : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl Kl1 Kl2 : List{K} .  var Label : KLabel .
+  var FStack : List .  var V V1 V2 : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl Kl1 Kl2 : List{K} .  var Label : KLabel .
 endm
 
 mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .

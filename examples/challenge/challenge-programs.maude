@@ -132,8 +132,8 @@ mod CHALLENGE-PROGRAMS is
                 y = newAgent(var y ; y = receiveFrom parent ; 
                      sendSynch me to y ; spawn haltAgent ; print(receive) ;) ; 
                 z = newAgent(var z ; z = receive ; 
-                     sendAsynch 17 to z ; print(z);) ;
-                sendAsynch z to y ;
+                     send 17 to z ; print(z);) ;
+                send z to y ;
   .
 
   op p19 : -> Stmt .
@@ -201,7 +201,7 @@ mod CHALLENGE-PROGRAMS is
    {
      var m, c, code ;
      m = receive ;
-     sendAsynch & c to head m ;
+     send & c to head m ;
      code = eval receiveFrom head m ;
      aspect code() ;
      var f ;
@@ -213,11 +213,100 @@ mod CHALLENGE-PROGRAMS is
                rv & f1 ; rv & f2 ;
                return f1 + f2 ;
              } ;
-     sendAsynch [f(head tail m),c] to head m ;
+     send [f(head tail m),c] to head m ;
    } ;
-   sendAsynch [me,5] to fib ;
+   send [me,5] to fib ;
    loc = quoteEval receiveFrom fib ;
-   sendAsynch quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to fib ;
+   send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to fib ;
    print receiveFrom fib ;
 .
+
+  op p25 : -> Stmt .
+  ops split splitl merge msort csort  ltoa atol length sort l left right msortAgent : -> Id .
+  eq p25 = 
+    var l,csort,ltoa,length,atol,sort,msortAgent ; 
+    l = [1,7,3,5];
+    msortAgent = newAgent {
+      var split,merge,msort ;
+      split = lambda l . {
+        var t ;
+        if l == [] then return [[],[]];
+        else if tail l == [] then return [[head l],[]];
+        else {
+          t = split(tail tail l);
+          return [head l : head t,head tail l : head tail t];
+        }
+      };
+      merge = lambda (left,right) . {
+        if left == [] then return right ;
+        else if right == [] then return left ;
+        else if (head left <= head right) 
+        then return head left : merge(tail left,right) ;
+        else return head right : merge(left, tail right);
+      };
+      var m , c, code ;
+      m = receive ;
+      send & c to m ;
+      code = eval receiveFrom m ;
+      aspect code() ;
+      msort = lambda l . {
+       if l == [] then return []; else if tail l == [] then return l ;
+       else {
+         var t,left,right ; t = split(l) ; 
+         spawn {left = msort(head t) ; rv & left ;}
+         right = msort(head tail t);
+         rv & left ;
+         return merge(left, right);
+       }
+      };
+      while true do {
+        m = receive ;
+        spawn send [msort(head tail m),c] to head m ;
+      }
+    } ;
+     csort = lambda (a,n) . {
+      var i,j,t ;
+      i = 0 ;
+      while i + 2 <= n do {
+        j = i + 1 ;
+        while j + 1 <= n do  {
+          if not(*(a + i) <= *(a + j)) 
+          then {t = *(a + i); *(a + i) = *(a + j); *(a + j) = t ;}
+          else {}
+          ++ j ;
+        }
+        ++ i ;
+     }
+    } ;
+    length = lambda l . {
+      if l == [] then return 0 ; else return 1 + length(tail l);
+    };
+    ltoa = lambda l . {
+      var a,i ; a = malloc length(l) ; i = 0 ;
+      while not(l == []) do {
+        *(a + i) = head l ; l = tail l ; ++ i ;
+      }
+      return [a,i] ; 
+    };
+    atol = lambda (a,n) . {
+      if n == 0 then return []; else return * a : atol(a + 1, n + -1);
+    };
+   send me to msortAgent ;
+   var loc ;
+   loc = quoteEval receiveFrom msortAgent ;
+   send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to msortAgent ;
+   send [me,l] to msortAgent ;
+   sort = lambda l . {
+      var t ; t = ltoa(l) ; 
+      csort(head t,head tail t); 
+      l = atol(head t,head tail t);
+      free head t ;
+      return l ;
+    };
+    spawn {send [sort(l),-1] to me ;}
+    print receive ;
+
+    haltSystem ;
+  .
+  
 endm
