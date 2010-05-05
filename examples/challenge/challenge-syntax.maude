@@ -42,7 +42,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
   op mu_._ : Id Exp -> Exp .
   op return_; : Exp -> Stmt [metadata "strict"] .
-  op callcc_ : Exp -> Exp [metadata "strict"] .
+  op callcc_ : Exp -> Exp [prec 50 metadata "strict"] .
   op aspect_ : Stmt -> Stmt [prec 90] .
 
 --- Threads
@@ -65,8 +65,8 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
 
 --- Reflection
   op quote_ : Exp -> Exp .
-  op quoteEval_ : Exp -> Exp [metadata "strict"] .
   op unquote_ : Exp -> Exp .
+  op lift_ : Exp -> Exp [metadata "strict"] .
   op eval_ : Exp -> Exp [metadata "strict"].
 
  

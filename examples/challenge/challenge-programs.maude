@@ -153,8 +153,8 @@ mod CHALLENGE-PROGRAMS is
   eq p20 =
    var a,b,c ;
    c = 10 ;
-   a = quoteEval c ;
-   b = quote(quote(unquote(unquote(quoteEval c))));
+   a = lift c ;
+   b = quote(quote(unquote(unquote(lift c))));
    print(eval(b));
   .
 
@@ -216,55 +216,47 @@ mod CHALLENGE-PROGRAMS is
      send [f(head tail m),c] to head m ;
    } ;
    send [me,5] to fib ;
-   loc = quoteEval receiveFrom fib ;
+   loc = lift receiveFrom fib ;
    send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to fib ;
    print receiveFrom fib ;
 .
 
-  op p25 : -> Stmt .
-  ops split splitl merge msort csort  ltoa atol length sort l left right msortAgent : -> Id .
+  ops p25 p26 : -> Stmt .
+  ops input array fix split splitl merge mergeSort selectionSort  list2array array2list length sort l left right mergeSortAgent : -> Id .
   eq p25 = 
-    var l,csort,ltoa,length,atol,sort,msortAgent ; 
-    l = [1,7,3,5];
-    msortAgent = newAgent {
-      var split,merge,msort ;
+    var l, selectionSort, list2array, length, array2list, sort, mergeSortAgent ; 
+    l = [10,9,8,7,6,5,4,3,2,1];
+    mergeSortAgent = newAgent {
+      var split, merge, mergeSort ;
       split = lambda l . {
-        var t ;
-        if l == [] then return [[],[]];
-        else if tail l == [] then return [[head l],[]];
-        else {
-          t = split(tail tail l);
-          return [head l : head t,head tail l : head tail t];
-        }
-      };
-      merge = lambda (left,right) . {
-        if left == [] then return right ;
-        else if right == [] then return left ;
-        else if (head left <= head right) 
-        then return head left : merge(tail left,right) ;
-        else return head right : merge(left, tail right);
-      };
-      var m , c, code ;
+                var t ;
+                if l == [] then return [[],[]];
+                else if tail l == [] then return [[head l],[]];
+                     else {t = split(tail tail l); return [head l : head t,head tail l : head tail t]; } };
+      merge = lambda (left, right) . {
+                if left == [] then return right ;
+                else if right == [] then return left ;
+                else if (head left <= head right) then return head  left : merge(tail left,right) ;
+                else return head right : merge(left, tail right); };
+      var m, c, code ;
       m = receive ;
       send & c to m ;
       code = eval receiveFrom m ;
       aspect code() ;
-      msort = lambda l . {
-       if l == [] then return []; else if tail l == [] then return l ;
+      mergeSort = lambda l . {
+       if l == [] then return [];
+       else if tail l == [] then return l ;
        else {
-         var t,left,right ; t = split(l) ; 
-         spawn {left = msort(head t) ; rv & left ;}
-         right = msort(head tail t);
+         var t, left, right ; t = split(l) ; 
+         spawn {left = mergeSort(head t) ; rv & left ;}
+         right = mergeSort(head tail t);
          rv & left ;
          return merge(left, right);
        }
       };
-      while true do {
-        m = receive ;
-        spawn send [msort(head tail m),c] to head m ;
-      }
+      while true do { m = receive ; spawn send [mergeSort(head tail m), c] to head m ; }
     } ;
-     csort = lambda (a,n) . {
+    selectionSort = lambda (a,n) . {
       var i,j,t ;
       i = 0 ;
       while i + 2 <= n do {
@@ -276,37 +268,125 @@ mod CHALLENGE-PROGRAMS is
           ++ j ;
         }
         ++ i ;
-     }
-    } ;
-    length = lambda l . {
-      if l == [] then return 0 ; else return 1 + length(tail l);
-    };
-    ltoa = lambda l . {
-      var a,i ; a = malloc length(l) ; i = 0 ;
-      while not(l == []) do {
-        *(a + i) = head l ; l = tail l ; ++ i ;
       }
+    } ;
+    length = mu length . lambda l . { if l == [] then return 0 ; else return 1 + length(tail l); };
+    list2array = lambda l . {
+      var a, i ; a = malloc length(l) ; i = 0 ;
+      while not(l == []) do { *(a + i) = head l ; l = tail l ; ++ i ; }
       return [a,i] ; 
     };
-    atol = lambda (a,n) . {
-      if n == 0 then return []; else return * a : atol(a + 1, n + -1);
-    };
-   send me to msortAgent ;
-   var loc ;
-   loc = quoteEval receiveFrom msortAgent ;
-   send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to msortAgent ;
-   send [me,l] to msortAgent ;
-   sort = lambda l . {
-      var t ; t = ltoa(l) ; 
-      csort(head t,head tail t); 
-      l = atol(head t,head tail t);
+    array2list = lambda (a,n) . { if n == 0 then return []; else return * a : array2list(a + 1, n + -1); };
+    send me to mergeSortAgent ;
+    var loc ;  loc = lift receiveFrom mergeSortAgent ;
+    send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ;
+    send [me,l] to mergeSortAgent ;
+    sort = lambda l . {
+      var t ; t = list2array(l) ; 
+      selectionSort(head t, head tail t); 
+      l = array2list(head t, head tail t);
       free head t ;
       return l ;
     };
     spawn {send [sort(l),-1] to me ;}
     print receive ;
-
     haltSystem ;
   .
   
+
+  op SELECTION-SORT : -> Stmt .
+  eq SELECTION-SORT = 
+    length = mu fix . lambda l . { if l == [] then return 0 ; else return 1 + fix(tail l); };
+    array = malloc length(input) ; n = 0 ;
+    while not(input == []) do { *(array + n) = head input ; input = tail input ; ++ n ; }
+      i = 0 ;
+      while i + 2 <= n do {
+        j = i + 1 ;
+        while j + 1 <= n do  {
+          if not(*(array + i) <= *(array + j)) 
+          then {t = *(array + i); *(array + i) = *(array + j); *(array + j) = t ;}
+          else {}
+          ++ j ;
+        }
+        ++ i ;
+      }
+  .
+
+--- originally, suppose that the main agent did all the work, using only one thread
+  eq p26 = 
+    var input, length, array, n, i, j, t, k ;
+    input = [10,9,8,7,6,5,4,3,2,1];
+    SELECTION-SORT
+    print (mu fix . lambda (a,n) . {if n == 0 then return [] ; else return * a : fix(a + 1, n + -1); })(array,n) ;
+    free array ;
+  .
+
+--- now the main agent got smarter: creates a new thread and delegates the work to it
+  op p27 : -> Stmt .
+  eq p27 = 
+    var input, length, array, n, i, j, t, k ;
+    input = [10,9,8,7,6,5,4,3,2,1];
+--- the only difference is the line below!
+    callcc (lambda k . spawn {k(0) ;}) ;
+    SELECTION-SORT
+    print (mu fix . lambda (a,n) . {if n == 0 then return [] ; else return * a : fix(a + 1, n + -1); })(array,n) ;
+    free array ;
+  .
+
+  op MERGE-SORT-AGENT : -> Exp .
+  eq MERGE-SORT-AGENT = newAgent {
+      var split, merge, mergeSort ;
+      split = lambda l . {
+                var t ;
+                if l == [] then return [[],[]];
+                else if tail l == [] then return [[head l],[]];
+                     else {t = split(tail tail l); return [head l : head t,head tail l : head tail t]; } };
+      merge = lambda (left, right) . {
+                if left == [] then return right ;
+                else if right == [] then return left ;
+                else if (head left <= head right) then return head  left : merge(tail left,right) ;
+                else return head right : merge(left, tail right); };
+      var m, c, code ;
+      m = receive ;
+      send & c to m ;
+      code = eval receiveFrom m ;
+      aspect code() ;
+      mergeSort = lambda l . {
+       if l == [] then return [];
+       else if tail l == [] then return l ;
+       else {
+         var t, left, right ; t = split(l) ; 
+         spawn {left = mergeSort(head t) ; rv & left ;}
+         right = mergeSort(head tail t);
+         rv & left ;
+         return merge(left, right);
+       }
+      };
+      while true do { m = receive ; spawn send [mergeSort(head tail m), c] to head m ; }
+    }
+  .
+  
+--- now the main agent got even smarter: in addition to creating a new thread and delegating the
+--- selection sort work to it, it also creates a new agent running a multi-threaded merge sort, and
+--- then waits for whichever finishes first; once the first answer is printed, the system is halted
+  op p28 : -> Stmt .
+  eq p28 = 
+    var input, length, array, n, i, j, t, k, mergeSortAgent ;
+    input = [10,9,8,7,6,5,4,3,2,1];
+    callcc lambda k . {
+      spawn {k(0) ;}
+      mergeSortAgent = MERGE-SORT-AGENT ;
+      send me to mergeSortAgent ;
+      var loc ;  loc = lift receiveFrom mergeSortAgent ;
+      send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ;
+      send [me,input] to mergeSortAgent ;
+      print receive ;
+      haltSystem ;
+    } ;
+    SELECTION-SORT
+--- modified the follwing from a print into a send
+    send (mu fix . lambda (a,n) . {if n == 0 then return [] ; else return * a : fix(a + 1, n + -1); })(array,n) to me ;
+    free array ;
+  .
+
 endm

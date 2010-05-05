@@ -25,4 +25,7 @@ rew run("p23") .
 rew run("p24") .
 rew run("p25") .
 frew run("p25") .
+frew run("p26") .
+frew run("p27") .
+frew run("p28") .
 ---search run("p23") =>! B:Bag .

@@ -251,9 +251,8 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   rule [quoteit[N](.List{K}) => code(.List{K})] .
   rule [quoteit[N]((Kl1,, Kl2)) => quoteit[N](Kl1) box(,,) quoteit[N](Kl2)] if Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K} .
   rule [code(Kl1) box(,,) code(Kl2) => code((Kl1,, Kl2))] .
+  rule [lift V => code(V)] .
   rule [eval code(K) => K]  .
-
-  rule [quoteEval V => code(V)] .
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
