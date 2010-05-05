@@ -27,5 +27,5 @@ rew run("p25") .
 frew run("p25") .
 frew run("p26") .
 frew run("p27") .
-frew run("p28") .
+frew run("p28", ("Int" 5(.List{K}),,"Int" 3(.List{K}),,"Int" 7(.List{K}),,"Int" 2(.List{K}),,"Int" 9(.List{K}),,"Int" 4(.List{K}),,"Int" 8(.List{K}),,"Int" -1(.List{K}),,"Int" 1(.List{K}))) .
 ---search run("p23") =>! B:Bag .

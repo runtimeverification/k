@@ -154,7 +154,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
 ---)
 
    op cc : K Map List -> Val .
-   rule <k> [callcc(V) => _`(_`)(V, cc(K, Env, FStack))] ~> K </k> 
+   rule <k> [callcc(V) ~> K => _`(_`)(V, cc(K, Env, FStack))] </k> 
            <env> Env </env> 
            <fstack> FStack </fstack> .
    rule <k> [_`(_`)(cc(K, Env, FStack), V) ~> ?:K => V ~> K] </k>

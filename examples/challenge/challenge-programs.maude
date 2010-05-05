@@ -296,7 +296,7 @@ mod CHALLENGE-PROGRAMS is
 
   op SELECTION-SORT : -> Stmt .
   eq SELECTION-SORT = 
-    length = mu fix . lambda l . { if l == [] then return 0 ; else return 1 + fix(tail l); };
+    length = lambda l . { if l == [] then return 0 ; else return 1 + length(tail l); };
     array = malloc length(input) ; n = 0 ;
     while not(input == []) do { *(array + n) = head input ; input = tail input ; ++ n ; }
       i = 0 ;
@@ -327,10 +327,14 @@ mod CHALLENGE-PROGRAMS is
     var input, length, array, n, i, j, t, k ;
     input = [10,9,8,7,6,5,4,3,2,1];
 --- the only difference is the line below!
-    callcc (lambda k . spawn {k(0) ;}) ;
+    callcc (lambda k .
+              spawn {k(0) ;}
+              --- go to Hawaii
+    ) ;
     SELECTION-SORT
     print (mu fix . lambda (a,n) . {if n == 0 then return [] ; else return * a : fix(a + 1, n + -1); })(array,n) ;
     free array ;
+    haltSystem ;
   .
 
   op MERGE-SORT-AGENT : -> Exp .
@@ -349,7 +353,9 @@ mod CHALLENGE-PROGRAMS is
       var m, c, code ;
       m = receive ;
       send & c to m ;
+z ;
       code = eval receiveFrom m ;
+print -10 ; z ;
       aspect code() ;
       mergeSort = lambda l . {
        if l == [] then return [];
@@ -369,10 +375,17 @@ mod CHALLENGE-PROGRAMS is
 --- now the main agent got even smarter: in addition to creating a new thread and delegating the
 --- selection sort work to it, it also creates a new agent running a multi-threaded merge sort, and
 --- then waits for whichever finishes first; once the first answer is printed, the system is halted
+  ops exit goto : -> Id .
   op p28 : -> Stmt .
   eq p28 = 
-    var input, length, array, n, i, j, t, k, mergeSortAgent ;
+    var input, exit, goto, length, array, n, i, j, t, k, mergeSortAgent ;
+    input = [] ;
+---    callcc (lambda exit . {exit(0) ;}) ;
+    callcc lambda exit . { callcc (lambda k . {goto = k ;}) ; i = read ; if i == -1 then exit(0) ; else {input = (i : input) ; goto(1);}} ;
+print input ;
+haltSystem ;
     input = [10,9,8,7,6,5,4,3,2,1];
+---    input = [8,4,9,2,7,3,5];
     callcc lambda k . {
       spawn {k(0) ;}
       mergeSortAgent = MERGE-SORT-AGENT ;
@@ -380,12 +393,13 @@ mod CHALLENGE-PROGRAMS is
       var loc ;  loc = lift receiveFrom mergeSortAgent ;
       send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ;
       send [me,input] to mergeSortAgent ;
-      print receive ;
-      haltSystem ;
+      spawn{ print receive ; haltSystem ;}
+      --- go to Hawaii
     } ;
     SELECTION-SORT
 --- modified the follwing from a print into a send
     send (mu fix . lambda (a,n) . {if n == 0 then return [] ; else return * a : fix(a + 1, n + -1); })(array,n) to me ;
+---    print (mu fix . lambda (a,n) . {if n == 0 then return [] ; else return * a : fix(a + 1, n + -1); })(array,n) ;
     free array ;
   .
 
