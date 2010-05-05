@@ -399,7 +399,10 @@ op p29 : -> Stmt .
 eq p29 = 
   var input,exit,goto,length,array,a,n,i,j,t,k,mergeSortAgent ; 
   input = [] ; 
-  callcc lambda exit . {callcc lambda k . {goto = k ;} ; i = read ; if i == -1 then exit(0) ; else {input = i : input ; goto(1) ;}} ; 
+  callcc lambda exit . {
+   callcc lambda k . {goto = k ;} ; 
+   i = read ; if i == -1 then exit(0) ; else {input = i : input ; goto(1) ;}
+  } ; 
   callcc lambda k . {
    spawn {k(0) ;} 
    mergeSortAgent = newAgent {var split,merge,mergeSort ; 
@@ -416,12 +419,21 @@ eq p29 =
      var m,c,code ; 
      m = receive ; send & c to m ; 
      code = eval receiveFrom m ; aspect code() ; 
-     mergeSort = lambda l . {if l == [] then return [] ; else if tail l == [] then return l ; else {var t,left,right ; t = split(l) ; spawn {left = mergeSort(head t) ; rv & left ;} right = mergeSort(head tail t) ; rv & left ; return merge(left,right) ;}} ; 
+     mergeSort = lambda l . {
+       if l == [] then return [] ; 
+       else if tail l == [] then return l ; 
+       else {var t,left,right ; 
+         t = split(l) ; 
+         spawn {left = mergeSort(head t) ; rv & left ;} 
+         right = mergeSort(head tail t) ; 
+         rv & left ; return merge(left,right) ;
+     }} ; 
      while true do {m = receive ; spawn send [mergeSort(head tail m),c] to head m ;}
    } ; 
    send me to mergeSortAgent ; 
    var loc ; loc = lift receiveFrom mergeSortAgent ; 
-   send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ; 
+   send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) 
+     to mergeSortAgent ; 
    send [me,input] to mergeSortAgent ; 
    spawn {print receive ; haltSystem ;} 
    haltThread ;
@@ -431,7 +443,10 @@ eq p29 =
   a = array ; while not input == [] do {* a = head input ; input = tail input ; ++ a ;} 
   i = -1 ; while ++ i + 2 <= n do {
     j = i ; while ++ j + 1 <= n do {
-      if not *(array + i) <= *(array + j) then {t = *(array + i) ; *(array + i) = *(array + j) ; *(array + j) = t ;} else {} }} 
+      if not *(array + i) <= *(array + j) then {
+         t = *(array + i) ; *(array + i) = *(array + j) ; *(array + j) = t ;
+      } else {} 
+  }} 
   send (mu fix . lambda a,n . {if n == 0 then return [] ; else return * a : fix(a + 1,n + -1) ;})(array,n) to me ; 
   free array ;
 .
