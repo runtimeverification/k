@@ -307,14 +307,23 @@ mod K-MAP-EXTRAS is
   eq Map[(K1,,NList1) / (K2,, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
   eq Map[K2 / (K1,,NList1)] = (Map[K2 / K1])[K2 / NList1] .
   eq Map[List / .List`{K`}] = Map .
+
+
+  op _[undef/_] : Map List{K} -> Map .
+  eq Map[undef/ K1,,NList1] = Map[undef/ K1][undef/ NList1] .
+  eq Map[undef/ .List{K}] = Map .
+  eq (Map K1 |-> K2)[undef/ K1] = Map .
+---  eq Map[undef/ K] = Map [owise] .
+
+
   
   op $hasMapping : Map K -> Bool .
   eq $hasMapping ((M:Map (D:K |-> R:K)), D:K) = true .
   eq $hasMapping (M:Map, D:K) = false [owise] .
 
-  op keys_ : Map -> Bag .
-  eq keys(Map (K1 |-> K2)) = BagItem(K1) keys(Map) .
-  eq keys(.Map) = .Bag .
+  op keys_ : Map -> Set .
+  eq keys(Map (K1 |-> K2)) = SetItem(K1) keys(Map) .
+  eq keys(.Map) = .Set .
 endm
 
 mod K-SET-EXTRAS is
