@@ -105,7 +105,7 @@ function runMaude {
   if [ -n "$(<$EFILE)" ]; 
   then 
     echo ". Error ($3) during the transformation phase. Input is in $IFILE"
-    if [ `stat -t -c %s $EFILE` -ge 4000 ] 
+    if [ `ls -l "$EFILE" | awk '{ print $5 }'`  -ge 4000 ] 
 	then 
 		cat "$EFILE" | head -c2000
 		echo -e \\n...

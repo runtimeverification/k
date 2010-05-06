@@ -37,10 +37,10 @@ fmod CONTEXT-TRANSFORMERS is
 ---  SubConfiguration(KConf)
 --- } 
   op getMultiplicity : KConfElement -> Bool .
-  eq getMultiplicity({Q, Level, B, Q', Ss, KC'}) = B .
+  eq getMultiplicity({Q, Level, B, Q', Ds, KC'}) = B .
 
   op getLevel : KConfElement ~> Nat .
-  eq getLevel({Q, N, B, Q', Ss, KC'}) = N .
+  eq getLevel({Q, N, B, Q', Ds, KC'}) = N .
 
   op getSons : KConfElement -> SortSet .
   eq getSons({Q, Level, B, Q', Ss, KC'}) = Ss .
@@ -51,10 +51,10 @@ fmod CONTEXT-TRANSFORMERS is
   eq getDefaultValue({Q, Level, B, Q', Ds, KC'}) = emptyCt(Bag) .
 
   op getConf : KConfElement -> KConf .
-  eq getConf({Q, Level, B, Q', Ss, KC'}) = KC' .
+  eq getConf({Q, Level, B, Q', Ds, KC'}) = KC' .
  
   op getConfElement : Qid KConf ~> KConfElement .
-  eq getConfElement(Q,  {Q, N, B, Q', Ss, KC'} KC) = {Q, N, B, Q', Ss, KC'} .
+  eq getConfElement(Q,  {Q, N, B, Q', Ds, KC'} KC) = {Q, N, B, Q', Ds, KC'} .
 
   op __ : KConf KConf -> KConf [assoc comm id: none] .
   op none : -> KConf .
@@ -65,11 +65,17 @@ fmod CONTEXT-TRANSFORMERS is
   var Q' : Qid .
   eq getConf(Q, B, N, Q', Tl) = {Q, N, B, Q', getCellNames(Tl), getConfL(Q, N + 1, Tl)} getConfL(Q, N + 1, Tl) .
 
-  op getCellNames_ : TermList -> [SortSet] .
+  op getCellNames_ : TermList ~> Descendants .
  ceq getCellNames(T, Tl) 
-   = getName(SC) ; getCellNames(Tl) 
+   = getName(SC) ; $getCellNames(Tl) 
   if SC := splitKCell(T) .
-  eq getCellNames(Tl) = none [owise] .
+  eq getCellNames(T) = default(T) [owise] .
+
+  op $getCellNames_ : TermList ~> SortSet .
+ ceq $getCellNames(T, Tl) 
+   = getName(SC) ; $getCellNames(Tl) 
+  if SC := splitKCell(T) .
+  eq $getCellNames(empty) = none .
 
   op getConfL : Qid Nat TermList -> KConf .
  ceq getConfL(Q, N, (T, Tl))
@@ -121,21 +127,21 @@ fmod CONTEXT-TRANSFORMERS is
   op mergeLevels : TermSetLevels KConf -> Term .
   eq mergeLevels({N,TS}, KC) = finalMultiplicity({N, TS}, KC) .
   eq mergeLevels({N, emptyTS} || TSLs, KC) = mergeLevels(TSLs, KC) [owise] .
-  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, Q', Ss, KC'} KC)
-   = mergeLevels(upgrade(N, Q', getMultiplicity(getConfElement(Q', KC)), getSons(getConfElement(Q', KC)), qt(Q, B', T),TS) || TSLs, {Q, Level, B, Q', Ss, KC'} KC) [owise] .
+  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, Q', Ds, KC'} KC)
+   = mergeLevels(upgrade(N, Q', getMultiplicity(getConfElement(Q', KC)), getSons(getConfElement(Q', KC)), qt(Q, B', T),TS) || TSLs, {Q, Level, B, Q', Ds, KC'} KC) [owise] .
   op upgrade : Nat Qid Bool SortSet TermSet TermSet -> TermSetLevels .
-  eq upgrade(N, Q', B, Q ; Ss, TS, qt(Q, B', T) && TS')
-   = upgrade(N, Q', B, Q ; Ss, TS && qt(Q, B', T), TS') .
-  eq upgrade(s(N), Q', B, Ss, TS, TS') 
+  eq upgrade(N, Q', B, Q ; Ds, TS, qt(Q, B', T) && TS')
+   = upgrade(N, Q', B, Q ; Ds, TS && qt(Q, B', T), TS') .
+  eq upgrade(s(N), Q', B, Ds, TS, TS') 
    = {s(N), TS'} || {N, qt(Q', B, resolveMultiplicity(Q', B, TS))} [owise] .
 
   op finalMultiplicity : TermSetLevel KConf -> Term .
   eq finalMultiplicity({s(N), qt(Q, false, T) &&  qt(Q, false, T') && TS'}, KC)
    = mergeLevels({s(N), qt(Q, false, T) &&  qt(Q, false, T') && TS'} || {N, emptyTS}, KC) .
-  vars Level' : Nat  . vars B1 B1' : Bool . var Ss' : SortSet . 
+  vars Level' : Nat  . vars B1 B1' : Bool . var Ds' : Descendants . 
   vars KC1 KC1' : KConf . vars QP QP' : Qid .
-  ceq finalMultiplicity({s(N), qt(Q, B, T) && qt(Q', B', T') && TS},  {Q, Level, B1, QP, Ss, KC1} {Q', Level', B1', QP', Ss', KC1'} KC)
-    = mergeLevels({s(N), qt(Q, B, T) && qt(Q', B', T') && TS} || {N, emptyTS},  {Q, Level, B1, QP, Ss, KC1} {Q', Level', B1', QP', Ss', KC1'} KC) 
+  ceq finalMultiplicity({s(N), qt(Q, B, T) && qt(Q', B', T') && TS},  {Q, Level, B1, QP, Ds, KC1} {Q', Level', B1', QP', Ds', KC1'} KC)
+    = mergeLevels({s(N), qt(Q, B, T) && qt(Q', B', T') && TS} || {N, emptyTS},  {Q, Level, B1, QP, Ds, KC1} {Q', Level', B1', QP', Ds', KC1'} KC) 
    if QP =/= QP' .
 
   eq finalMultiplicity({N, TS}, KC) = flattenTS(TS) [owise] .
@@ -215,8 +221,8 @@ fmod CONTEXT-TRANSFORMERS is
   eq levelize(s(Level), VS:VariableSet, KC) = {Level, VS:VariableSet} [owise] .
   eq levelize(N, TS, KC) = levelize(N, TS, emptyTS, KC) [owise] .
   op levelize : Nat TermSet TermSet KConf -> TermSetLevels .
-  eq levelize(Level, qt(Q, B', T) && TS, TS', {Q, Level, B, Q', Ss, KC'} KC)
-   = levelize(Level, TS, qt(Q, B', T) && TS', {Q, Level, B, Q', Ss, KC'} KC) .
+  eq levelize(Level, qt(Q, B', T) && TS, TS', {Q, Level, B, Q', Ds, KC'} KC)
+   = levelize(Level, TS, qt(Q, B', T) && TS', {Q, Level, B, Q', Ds, KC'} KC) .
   eq levelize(Level, TS, TS', KC) 
    = levelize(Level + 1, TS, KC) || {Level,TS'} [owise] .
 
