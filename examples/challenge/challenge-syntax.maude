@@ -46,7 +46,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op aspect_ : Stmt -> Stmt [prec 90] .
 
 --- Threads
-  op spawn_ : Stmt -> Stmt .
+  op spawn_ : Stmt -> Stmt [prec 90] .
   op acquire_; : Exp -> Stmt [metadata "strict"] .
   op release_; : Exp -> Stmt [metadata "strict"] .
   op rv_; : Exp -> Stmt [metadata "strict"] .

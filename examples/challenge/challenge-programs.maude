@@ -395,52 +395,49 @@ mod CHALLENGE-PROGRAMS is
   .
 
 
+ops in g x y : -> Id .
 op p29 : -> Stmt .
 eq p29 = 
-  var input,exit,goto,length,array,a,n,i,j,t,k,mergeSortAgent ; 
-  input = [] ; 
-  callcc lambda exit . {
-   callcc lambda k . {goto = k ;} ; 
-   i = read ; if i == -1 then exit(0) ; else {input = i : input ; goto(1) ;}
-  } ; 
-  callcc lambda k . {
-   spawn {k(0) ;} 
-   mergeSortAgent = newAgent {var split,merge,mergeSort ; 
-     split = lambda l . {var t ; 
-       if l == [] then return [[],[]] ; 
-       else if tail l == [] then return [[head l],[]] ; 
-       else {t = split(tail tail l) ; return [head l : head t,head tail l : head tail t] ;}
-     } ; 
-     merge = lambda left,right . {
-       if left == [] then return right ; 
-       else if right == [] then return left ; 
-       else if head left <= head right then return head left : merge(tail left,right) ; 
-       else return head right : merge(left,tail right) ;} ; 
-     var m,c,code ; 
-     m = receive ; send & c to m ; 
-     code = eval receiveFrom m ; aspect code() ; 
-     mergeSort = lambda l . {
-       if l == [] then return [] ; 
-       else if tail l == [] then return l ; 
-       else {var t,left,right ; 
-         t = split(l) ; 
-         spawn {left = mergeSort(head t) ; rv & left ;} 
-         right = mergeSort(head tail t) ; 
-         rv & left ; return merge(left,right) ;
-     }} ; 
-     while true do {m = receive ; spawn send [mergeSort(head tail m),c] to head m ;}
-   } ; 
+var in,exit,g,length,array,a,n,i,j,t,x,y,mergeSortAgent ; in = [];
+callcc lambda k . {callcc lambda k . {g = k ;} ;
+  i = read ; if i == 0 then k(0); else {in = i : in ; g(1);}} ; 
+callcc lambda k . {
+  spawn k(0) ;
+  mergeSortAgent = newAgent {var split, merge, mergeSort ; 
+    split = lambda l . {var t ; if l == [] then return [[],[]] ;
+      else if tail l == [] then return [[head l],[]] ;
+      else {t = split(tail tail l); return [head l : head t,head tail l : head tail t];}
+    } ; 
+    merge = lambda (left,right) . {if left == [] then return right ; 
+      else if right == [] then return left ; 
+      else if head left <= head right then return head left : merge(tail left,right) ; 
+      else return head right : merge(left,tail right) ;} ; 
+    var m, c, code ; 
+    m = receive ; send & c to m ; 
+    code = eval receiveFrom m ; aspect code() ; 
+    mergeSort = lambda l . {
+      if l == [] then return [] ; 
+      else if tail l == [] then return l ; 
+      else {var t,left,right ; 
+        t = split(l) ; 
+        spawn {left = mergeSort(head t) ; rv & left ;} 
+        right = mergeSort(head tail t) ; 
+        rv & left ; return merge(left,right) ;
+      }
+    } ; 
+    while true do {m = receive ; spawn send [mergeSort(head tail m),c] to head m ;}
+   } ;
    send me to mergeSortAgent ; 
    var loc ; loc = lift receiveFrom mergeSortAgent ; 
-   send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) 
+   send quote(lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) 
      to mergeSortAgent ; 
-   send [me,input] to mergeSortAgent ; 
+   send [me,in] to mergeSortAgent ; 
    spawn {print receive ; haltSystem ;} 
    haltThread ;
-  } ; 
-  n = (mu length . lambda l . {if l == [] then return 0 ; else return 1 + length(tail l) ;})(input) ;
+  } ;
+  n = (mu length . lambda l . {if l == [] then return 0 ; else return 1 + length(tail l) ;})(in) ;
   array = malloc n ; 
-  a = array ; while not input == [] do {* a = head input ; input = tail input ; ++ a ;} 
+  a = array ; while not in == [] do {* a = head in ; in = tail in ; ++ a ;} 
   i = -1 ; while ++ i + 2 <= n do {
     j = i ; while ++ j + 1 <= n do {
       if not *(array + i) <= *(array + j) then {
