@@ -9,7 +9,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   subsort Bool Int Float < Val < Exp .
   subsort List{Val} < KResult .
 
-  ops env store nextLoc ptr fstack input output  aspect thread holds busy agents agent message from to body threads me parent nextAgent : -> CellLabel .
+  ops env store nextLoc ptr fstack I/O in out  aspect thread holds busy agents agent messages message from to body threads me parent nextAgent : -> CellLabel .
   configuration <T> 
    <agents>
     <agent*> 
@@ -21,21 +21,27 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
        <holds> .Map </holds>
       </thread*>
      </threads>
-      <busy> .Bag </busy>
+      <busy> .Set </busy>
       <store> .Map </store> <nextLoc> 0 </nextLoc> 
       <ptr> .Map </ptr>
       <me> 0 </me>
-      <parent> .K </parent> 
+      <parent> -1 </parent> 
     </agent*>
    </agents>
    <nextAgent> 1 </nextAgent>
-   <message*> 
-      <from> .K </from> <to> .K </to> <body> .K </body>
-   </message*>
-   <input> .List </input>
-   <output> .List </output>
+   <messages>
+    <message*> 
+     <from> .K </from> <to> .K </to> <body> .K </body>
+    </message*>
+   </messages>
+   <I/O>
+    <in> .List </in>
+    <out> .List </out>
+   </I/O>
   </T> .
 
+--- Basic arithmetic operators; integers are converted to reals when needed
+--- NOTE: add more here
   rule [I1 + I2 => I1 +Int I2] .
   rule [I1 + F2 => rat2floatConversion(I1) +Float F2] .
   rule [F1 + I2 => F1 +Float rat2floatConversion(I2)] .
@@ -58,9 +64,6 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   rule [true and E => E] .
   rule [false and E => false] .
 
-  rule [randomBool => true] .
-  rule [randomBool => false] .
-  
   rule <k> [var Xl ; => .K] ...</k>
        <env> [Env => Env[| Xl | from N / getList{K}(Xl)]] </env>
        <store>... [.Map => | Xl | from N |-> 0] ...</store>
@@ -161,11 +164,12 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
            <env> [?:Map => Env] </env> 
            <fstack> [?:List => FStack] </fstack> .
 
-   rule <k> [read => I] ...</k>
-           <input> [ListItem(I) => .List] ...</input> .
-   rule <k> [print V ; => .K] ...</k>
-           <output>... [.List => ListItem(V)] </output> .
+   rule <k> [read => I] ...</k> <in> [ListItem(I) => .List] ...</in> .
+   rule <k> [print V ; => .K] ...</k> <out>... [.List => ListItem(V)] </out> .
 
+  rule <k>[randomBool =>  true]...</k> .
+  rule <k>[randomBool => false]...</k> .
+  
 --- Threads
    rule <thread>... <k> [spawn S => .K] ...</k> <env> Env </env> ...</thread>
           [.Bag => <thread> <k> S </k> <env> Env </env> <fstack> .List </fstack> <aspect> .K </aspect> <holds> .Map </holds> </thread>] .
@@ -182,9 +186,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
    rule <k> [rv V ; => .K] ...</k> <k> [rv V ; => .K] ...</k> .
 
 --- Agents
-  rule <agent>... <k> [newAgent S => N2] ...</k> 
-             <me> N1 </me>
-          ...</agent>
+  rule <agent>... <k> [newAgent S => N2] ...</k> <me> N1 </me> ...</agent>
      [.Bag => <agent> 
     <me> N2 </me>
     <parent> N1 </parent>
@@ -197,34 +199,22 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
       <holds> .Map </holds>
      </thread>
     </threads>
-    <busy> .Bag </busy>
+    <busy> .Set </busy>
     <store> .Map </store>
     <nextLoc> 0 </nextLoc>
     <ptr> .Map </ptr>
    </agent>]
    <nextAgent> [N2 => sNat N2] </nextAgent> .
-  rule [<agent>... <threads> .Bag </threads> ...</agent> 
-        => .Bag] .
+
+  rule [<agent>... <threads> .Bag </threads> ...</agent> => .Bag] .
 
   rule <k> [me => N] ...</k> <me> N </me> .
   rule <k> [parent => N] ...</k> <parent> N </parent> .
-  rule <me> N1 </me> <k> [send V to N2 ; => .K] ...</k> 
-          [.Bag => <message> <from> N1 </from> <to> N2 </to> 
-                     <body> V </body> </message>]
-   . 
-  rule <me> N </me> <k> [receive => V] ...</k> 
-          [<message>... <to> N </to> <body> V </body> ...</message>
-        => .Bag] . 
-  rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> 
-          [<message> <from> N2 </from> <to> N1 </to> <body> V </body> 
-          </message> => .Bag] . 
-  rule <agent>... <me> N1 </me> <k> [sendSynch V to N2 ; => .K] ...</k>
-          ...</agent>
-          <agent>... <me> N2 </me> <k> [receiveFrom N1 => V] ...</k>
-          ...</agent> .
-  rule <k> [sendSynch V to N2 ; => .K] ...</k>
-          <agent>... <me> N2 </me> <k> [receive => V] ...</k>
-          ...</agent> .
+  rule <me> N1 </me> <k> [send V to N2 ; => .K] ...</k> [.Bag => <message> <from> N1 </from> <to> N2 </to> <body> V </body> </message>] .
+  rule <me> N </me> <k> [receive => V] ...</k> [<message>... <to> N </to> <body> V </body> ...</message> => .Bag] .
+  rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> [<message> <from> N2 </from> <to> N1 </to> <body> V </body> </message> => .Bag] .
+  rule <agent>... <me> N1 </me> <k> [sendSynch V to N2 ; => .K] ...</k> ...</agent> <agent>... <me> N2 </me> <k> [receiveFrom N1 => V] ...</k> ...</agent> .
+  rule <k> [sendSynch V to N2 ; => .K] ...</k> <agent>... <me> N2 </me> <k> [receive => V] ...</k> ...</agent> .
  
 --- Halt (thread, agent, system)
   rule <k> [haltThread ; ~> ? => .K] </k> <fstack> [? => .List] </fstack> .
@@ -306,8 +296,11 @@ mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
      <me> 0 </me>
     </agent>
    </agents>
+   <messages> .Bag </messages>
    <nextAgent> 1 </nextAgent>
-   <input> List(L:List{K}) </input>
-   <output> .List </output>
+   <I/O>
+    <in> List(L:List{K}) </in>
+    <out> .List </out>
+   </I/O>
   </T> .
 endm

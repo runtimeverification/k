@@ -1,7 +1,12 @@
 mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
+--- Two syntactic categories, Exp and Stmt
   sorts Exp Stmt .
+
+--- Basic constructs for expressions
   subsorts Bool Int Float Id < Exp .
 
+--- Basic arithmetic operators; they will work with both integers and floats
+--- NOTE: add more here
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
   op _/_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .
@@ -9,22 +14,29 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op _==_ : Exp Exp -> Exp [prec 37 metadata "strict"] .
   op not_ : Exp -> Exp [prec 53 metadata "strict"] .
   op _and_ : Exp Exp -> Exp [gather(E e) prec 55 metadata "strict(1)"] .
-  op randomBool : -> Exp .
 
+--- Variable declarations
   op var_; : List{Id} -> Stmt [prec 2] .
+
+--- Variable assignment
   op _=_; : Exp Exp -> Stmt [prec 80 gather (e E) metadata "strict(2)"] .
+
+--- Variable increment
   op ++_ : Id -> Exp [prec 0] .
 
+--- Basic statement constructs
   op {} : -> Stmt .
   op {_} : Stmt -> Stmt [gather(&)] .
   op __ : Stmt Stmt -> Stmt [prec 100 gather(e E)] .
   op _; : Exp -> Stmt [prec 90 metadata "strict"] .
   op if_then_else_ : Exp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op while_do_ : Exp Stmt -> Stmt .
+
+--- I/O
   op read : -> Exp .
   op print_; : Exp -> Stmt [metadata "strict"] .
 
---- Pointers
+--- Memory allocation and pointers
   op malloc_ : Exp -> Exp [metadata "strict"] .
   op free_; : Exp -> Stmt [metadata "strict"] .
   op &_ : Id -> Exp .
@@ -32,18 +44,27 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
 
 --- Lists
   op [] : -> Exp .
-  op [_] : List{Exp} -> Exp [prec 0 metadata "strict hybrid"] .
-  ops (head_) (tail_) : Exp -> Exp [prec 0 metadata "strict"] .
+  op [_] : List{Exp} -> Exp [prec 0 metadata "seqstrict hybrid"] .
   op _:_ : Exp Exp -> Exp [metadata "strict"] .
+  ops (head_) (tail_) : Exp -> Exp [prec 0 metadata "strict"] .
 
 --- Functions
   op lambda_._ : List{Id} Stmt -> Exp .
   op _() : Exp -> Exp .
   op _(_) : Exp List{Exp} -> Exp [prec 2 metadata "strict"] .
-  op mu_._ : Id Exp -> Exp .
   op return_; : Exp -> Stmt [metadata "strict"] .
-  op callcc_ : Exp -> Exp [prec 50 metadata "strict"] .
+
+--- Fixed point
+  op mu_._ : Id Exp -> Exp .
+
+--- Aspects
   op aspect_ : Stmt -> Stmt [prec 90] .
+
+--- Callcc
+  op callcc_ : Exp -> Exp [prec 50 metadata "strict"] .
+
+--- Sequential non-determinism
+  op randomBool : -> Exp .
 
 --- Threads
   op spawn_ : Stmt -> Stmt [prec 90] .
@@ -63,12 +84,11 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op haltAgent ; : -> Stmt .
   op haltSystem ; : -> Stmt .
 
---- Reflection
+--- Code generation / reflection
   op quote_ : Exp -> Exp .
   op unquote_ : Exp -> Exp .
   op lift_ : Exp -> Exp [metadata "strict"] .
   op eval_ : Exp -> Exp [metadata "strict"].
-
  
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
@@ -92,10 +112,7 @@ mod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX .
 ------------------------------------------------------------------------------------
   vars F X : Id .  vars Xl : List{Id} .  vars E E1 E2 : Exp .  vars S S' : Stmt .
   eq E() = E(`(`)) .
----()
----mu as syntactic sugar
-  eq mu X . E = (lambda(). (var X ; X = E ; return X ;))() .
+--- mu as syntactic sugar
+  eq mu X . E = (lambda(). {var X ; X = E ; return X ;})() .
   eq [] = [()] .
----()
-
 endm
