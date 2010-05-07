@@ -5,7 +5,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
 --- Basic constructs for expressions
   subsorts Bool Int Float Id < Exp .
 
---- Basic arithmetic operators; they will work with both integers and floats
+--- Basic arithmetic operations; they will work with both integers and floats
 --- NOTE: add more here
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 metadata "strict"] .
   op _*_ : Exp Exp -> Exp [gather(E e) prec 31 metadata "strict"] .

@@ -9,7 +9,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   subsort Bool Int Float < Val < Exp .
   subsort List{Val} < KResult .
 
-  ops env store nextLoc ptr fstack I/O in out  aspect thread holds busy agents agent messages message from to body threads me parent nextAgent world barrier barrierOpened : -> CellLabel .
+  ops env store nextLoc ptr fstack I/O in out  aspect thread holds busy agents agent messages message from to body threads me parent nextAgent world barrier waiting : -> CellLabel .
   configuration <T> 
    <agents>
     <agent*> 
@@ -30,8 +30,8 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
    </agents>
    <nextAgent> 1 </nextAgent>
    <world> SetItem(0) </world>
-   <barrierOpened> false </barrierOpened>
-   <barrier> .Set </barrier>
+   <barrier> true </barrier>
+   <waiting> .Set </waiting>
    <messages>
     <message*> 
      <from> .K </from> <to> .Set </to> <body> .K </body>
@@ -43,7 +43,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
    </I/O>
   </T> .
 
---- Basic arithmetic operators; integers are converted to reals when needed
+--- Basic arithmetic operations; integers are converted to reals when needed
 --- NOTE: add more here
   rule [I1 + I2 => I1 +Int I2] .
   rule [I1 + F2 => rat2floatConversion(I1) +Float F2] .
@@ -67,7 +67,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   rule [true and E => E] .
   rule [false and E => false] .
 
---- Variable declarations
+--- Variable declaration
   rule <k> [var Xl ; => .K] ...</k> <env> [Env => Env[| Xl | from N / getList{K}(Xl)]] </env> <store>... [.Map => | Xl | from N |-> 0] ...</store> <nextLoc> [N => N +Nat | Xl |] </nextLoc> .
 
 --- Variable lookup
@@ -178,36 +178,20 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
     <ptr> .Map </ptr>
    </agent>]
    <nextAgent> [N2 => sNat N2] </nextAgent> .
-
-  rule [<agent>... <threads> .Bag </threads> <me> N </me> ...</agent> => .Bag] 
-       <world>... [SetItem(N) => .Set] ...</world> .
-
+  rule [<agent>... <threads> .Bag </threads> <me> N </me> ...</agent> => .Bag] <world>... [SetItem(N) => .Set] ...</world> .
   rule <k> [me => N] ...</k> <me> N </me> .
   rule <k> [parent => N] ...</k> <parent> N </parent> .
   rule <me> N1 </me> <k> [send V to N2 ; => .K] ...</k> [.Bag => <message> <from> N1 </from> <to> SetItem(N2) </to> <body> V </body> </message>] .
   rule <me> N </me> <k> [receive => V] ...</k> <message>... <to>...[SetItem(N) => .Set]...</to> <body> V </body> ...</message> .
   rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> <message> <from> N2 </from> <to>...[SetItem(N1) => .Set]...</to> <body> V </body> </message> .
   rule <me> N </me> <k> [broadcast V ; => .K] ...</k> <world> W </world> [.Bag => <message> <from> N </from> <to> W </to> <body> V </body> </message>] .
-  rule [<message>... <to> .Set </to> ...</message> => .Bag] 
-    [metadata "structural"] .
-
+  rule [<message>... <to> .Set </to> ...</message> => .Bag] [metadata "structural"] .
   rule <agent>... <me> N1 </me> <k> [sendSynch V to N2 ; => .K] ...</k> ...</agent> <agent>... <me> N2 </me> <k> [receiveFrom N1 => V] ...</k> ...</agent> .
   rule <k> [sendSynch V to N2 ; => .K] ...</k> <agent>... <me> N2 </me> <k> [receive => V] ...</k> ...</agent> .
-
-  rule <me> N </me> 
-       <threads> <thread>... <k> barrier ; ...</k> ...</thread> </threads>
-       <barrierOpened> false </barrierOpened> 
-       <barrier> W [.Set => SetItem(N)] </barrier>
-    if notBool(N in W) .
-  rule <barrierOpened> [false => true] </barrierOpened>
-       <barrier> W </barrier>
-       <world> W </world> 
-    if W =/=Bool .Set .
-  rule <me> N </me> <k> [barrier ; => .K] ...</k>
-       <barrierOpened> true </barrierOpened>
-       <barrier>... [SetItem(N) => .Set] ...</barrier> .
-  rule <barrierOpened> [true => false] </barrierOpened>
-       <barrier> .Set </barrier> .
+  rule <me> N </me> <threads> <thread>... <k> barrier ; ...</k> ...</thread> </threads> <barrier> true </barrier> <waiting> W [.Set => SetItem(N)] </waiting> if notBool(N in W) .
+  rule <barrier> [true => false] </barrier> <waiting> W </waiting> <world> W </world> if W =/=Bool .Set .
+  rule <me> N </me> <k> [barrier ; => .K] ...</k> <barrier> false </barrier> <waiting>... [SetItem(N) => .Set] ...</waiting> .
+  rule <barrier> [false => true] </barrier> <waiting> .Set </waiting> .
 
 --- Abrupt termination (of thread, of agent, of system)
   rule <k> [haltThread ; ~> ? => .K] </k> <fstack> [? => .List] </fstack> .
@@ -284,8 +268,8 @@ mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
     </agent>
    </agents>
    <world> SetItem(0) </world>
-   <barrierOpened> false </barrierOpened>
-   <barrier> .Set </barrier>
+   <barrier> true </barrier>
+   <waiting> .Set </waiting>
    <messages> .Bag </messages>
    <nextAgent> 1 </nextAgent>
    <I/O>
