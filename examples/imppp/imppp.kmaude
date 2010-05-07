@@ -8,83 +8,73 @@ mod IMP++-SYNTAX is
   op _+_ : AExp AExp -> AExp [prec 33 gather (E e) format (d b o d) metadata "strict"] .
   op _/_ : AExp AExp -> AExp [prec 31 gather (E e) format (d b o d) metadata "strict"] .
   op ++_ : Id -> AExp [prec 30 format (b o d)] .
+  op read : -> AExp [format (b o)] .
+
+--- BExp
+  sort BExp .
+  subsort Bool < BExp .
+  op _<=_ : AExp AExp -> BExp  [prec 37 format (d b o d) metadata "seqstrict"] .
+  op not_ : BExp -> BExp [prec 53 metadata "strict" format (b o d)] .
+  op _and_ : BExp BExp -> BExp [prec 55 metadata "strict(1)" format (d b o d)] .
+
+--- Stmt
+  sort Stmt .
+  op skip ; : -> Stmt [format (b d o)] .
+  op _=_; : AExp AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o b o)] .
+  op __ : Stmt Stmt -> Stmt [prec 120 gather (e E) format (d noi d)] .
+  op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
+  op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
+
+  op var_;_ : List{Id} Stmt -> Stmt [prec 121 format (b o b on++i --)] .
+  ops print_; :  AExp -> Stmt [prec 59 metadata "strict" format (b o b o)] .
+  op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
+  ops haltThread ;  : -> Stmt [format (b d o)] .
 
   sort List{Id} .
   subsort Id < List{Id} .
   op _,_ : List{Id} List{Id} -> List{Id} [assoc id: .List`{Id`}] .
   op .List{Id} : -> List{Id} .
-  sort List{AExp} .
-  subsort AExp < List{AExp} .
-  op _,_ : List{AExp} List{AExp} -> List{AExp} [ditto] .
-  subsort List{Id} < List{AExp} .
-  op list_ : List{AExp} -> AExp [metadata "strict(1) hybrid"] .
-  op head : AExp -> AExp [metadata "strict"] .
-  op tail : AExp -> AExp [metadata "strict"] .
-  op ref : AExp -> AExp [metadata "strict"] .
-  op *_ : AExp -> AExp [metadata "strict"] .
---- BExp
-  sort BExp .
-  subsort Bool < BExp .
-  op _<=_ : AExp AExp -> BExp  [prec 37 format (d b o d)] .
-  op not_ : BExp -> BExp [prec 53 metadata "strict" format (b o d)] .
-  op _and_ : BExp BExp -> BExp [prec 55 metadata "strict(1)" format (d b o d)] .
---- Stmt
-  sort Stmt .
-  op skip : -> Stmt [format (b o)] .
-  op _:=_ : AExp AExp -> Stmt [prec 40 metadata "strict(2)" format (d b o d)] .
-  op _;_ : Stmt Stmt -> Stmt [prec 120 gather (e E) format (d b noi d)] .
-  op if_then_else_ : BExp Stmt Stmt -> Stmt [prec 59 metadata "strict(1)" format (b o bni n++i bn--i n++i --)] .
-  op while_do_ : BExp Stmt -> Stmt [prec 59 format (b o b on++i --)] .
-
-  op vars_;_ : List{Id} Stmt -> Stmt [prec 121 format (b o b on++i --)] .
-  ops print_ :  AExp -> Stmt [prec 59 metadata "strict" format (b o d)] .
-  op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
-  ops halt  : -> Stmt [format (b o)] .
 endm
 
 mod IMP++-PROGRAMS is
   including IMP++-SYNTAX .
 
-  ops pSum pCollatz pList : -> Stmt .
+  ops pSum pCollatz : -> Stmt .
   ops n s i limit steps nr t  d nn : -> Id [format (g o)].
-  eq pList =
-    vars n ;
-    (n := 10 ;
-    print(head(list(n,2,3)))) .
   eq pSum = 
-        vars n, s, i ; 
-         n := 1000 ;
-         s := 0 ;
-         i := n ;
+        var n, s, i ; 
+         n = 1000 ;
+         s = 0 ;
+         i = n ;
          while 1 <= i do (
-           s := s + i ;
-           i := i + -1 
-          );
-          print(s) .
+           s = s + i ;
+           i = i + -1 ;
+          )
+          print s ; .
 
   eq pCollatz = 
-            vars limit, steps, nr, t ; 
-             limit := 10 ; 
-             steps := 10 ; nr := 1 ; t := 2 ;
-             while ++ nr <= limit do (vars n ; 
-                n := nr ;
-                spawn(
-                  while 2 <= n do (vars d, nn ; 
-                     nn := ++ steps ; 
-                     d := 0 ;
-                     nn := n ;
+            var limit, steps, nr, t, n ; 
+             limit = 10 ; 
+             steps = 10 ; nr = 1 ; t = 2 ;
+             while ++ nr <= limit do (
+                n = nr ;
+                spawn( var d,nn ;
+                  while 2 <= n do (
+                     nn = ++ steps ; 
+                     d = 0 ;
+                     nn = n ;
                      while 2 <= nn do (
-                       d := d + 1 ;
-                       nn := nn + -2
-                     ) ;
-                     if 1 <= nn then n := n + n + n + 1
-                      else n := d 
-                  ) ;
-                  n := ++ t
+                       d = d + 1 ;
+                       nn = nn + -2 ;
+                     ) 
+                     if 1 <= nn then n = n + n + n + 1 ;
+                      else n = d ;
+                  ) 
+                  n = ++ t ;
                 )
-             ) ;
+             ) 
              while t <= limit do skip ;
-             print(steps)
+             print(steps) ;
 .
 endm
 
@@ -93,19 +83,15 @@ mod IMP++ is
   including K .
   including K-CONTEXTS .
 
-  subsort AExp BExp Stmt List{AExp} < K .
+  subsort AExp BExp Stmt < K .
   subsort Int < KResult .
   subsort Bool < KResult .
 
   ops output threads thread k env store nextLoc result : -> CellLabel .
   vars I I1 I2 : Int .  var T : Bool .  var L : Int .  var X : Id .
-  var N N1 N2 : Nat .  var Xl : List{Id} .  var El : List{AExp} .
+  var N N1 N2 : Nat .  var Xl : List{Id} .  
   var Top Threads Thread : Bag .  var Env Env' Store : Map .  var Output : List . 
   var B : BExp .  var S S1 S2 : Stmt .  var K : K .
-
-  context [HOLE] <= ? .
-  context I <= [HOLE] .
-  context * [HOLE] := ? .
 
   configuration <T> <threads> <thread*> <k> .K </k> <env> .Map </env> </thread*> </threads> <store> .Map </store>  <output> .List </output> <nextLoc> 0 </nextLoc> </T> <result> .List </result> .
   op startConfig : Stmt -> Bag .
@@ -115,29 +101,26 @@ mod IMP++ is
   rule [I1 + I2 => I1 +Int I2] .
   rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 .
 
-  rule [head(list(I,?)) => I] . 
-  rule [tail(list(I,El)) => list(El)] . 
-
-  rule [skip => .K] .
+  rule [skip ; => .K] .
   rule [not(T) => notBool T] .
   rule [I1 <= I2 => I1 <=Int I2] .
   rule [true and B => B] .
   rule [false and ? => false] .
   rule [if true then S1 else ? => S1] .
   rule [if false then ? else S2 => S2] .
-  rule [S1 ; S2 => S1 ~> S2] [metadata "structural"] .
+  rule [S1 S2 => S1 ~> S2] [metadata "structural"] .
   rule <k> [X => I] ...</k> <env>... X |-> L ...</env> <store>... L |-> I ...</store> .
   rule <k> [++ X => (I +Int 1)] ... </k> <env> ...X |-> L... </env> <store> ...L |-> [I => I +Int 1]... </store>  .
-  rule <k> [X := I => .K]... </k> <env> ...X |-> L... </env> <store> ...L |-> [? => I]... </store> .
-  rule <k> [while B do S  => if B then (S ; while B do S) else skip] ...</k> .
-  rule <k> [print(I) => .K] ...</k> <output>... [.List => ListItem(I)] </output>  .
-  rule <k> [halt ~> ? => .K] </k> .
+  rule <k> [X = I ; => .K]... </k> <env> ...X |-> L... </env> <store> ...L |-> [? => I]... </store> .
+  rule <k> [while B do S  => if B then (S while B do S) else skip ;] ...</k> .
+  rule <k> [print(I); => .K] ...</k> <output>... [.List => ListItem(I)] </output>  .
+  rule <k> [haltThread ; ~> ? => .K] </k> .
   rule <thread>... <k> [spawn(S) => .K] ...</k> <env> Env </env> ...</thread> [.Bag => <thread> <k> S </k> <env> Env </env> </thread>] .
   rule [<thread>... <k> .K </k> ...</thread> => .Bag] [metadata "structural"] .
 
   rule [<T>... <threads> .Bag </threads> <output> Output </output> ...</T> => <result> Output </result>] [metadata "structural"] .
 
-  rule <k> [vars Xl ; S => S ~> env(Env)] ...</k> <env> [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]]</env> <store>... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> 0] ...</store> <nextLoc> [N => N +Nat length(getList{K}(Xl))] </nextLoc>  [metadata "structural"] .
+  rule <k> [var Xl ; S => S ~> env(Env)] ...</k> <env> [Env =>  Env[(N .. (N +Nat length(getList{K}(Xl)))) / getList{K}(Xl)]]</env> <store>... [.Map =>  N .. N +Nat length(getList{K}(Xl)) |-> 0] ...</store> <nextLoc> [N => N +Nat length(getList{K}(Xl))] </nextLoc>  [metadata "structural"] .
 
   op _.._ : Nat Nat -> List{K} .
   eq N1 .. N2 = if N1 >=Nat N2 then .List{K} else (N1,, (sNat N1 .. N2)) fi .
