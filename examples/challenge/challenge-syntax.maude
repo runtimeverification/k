@@ -80,6 +80,7 @@ mod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID .
   op receiveFrom_ : Exp -> Exp [metadata "strict"] .
   op send_to_; : Exp Exp -> Stmt [metadata "strict"] .
   op sendSynch_to_; : Exp Exp -> Stmt [metadata "strict"] .
+  op barrier ; : -> Stmt .
 
 --- Abrupt termination (of thread, of agent, of system)
   op haltThread ; : -> Stmt .

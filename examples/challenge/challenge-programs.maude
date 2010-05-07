@@ -394,7 +394,6 @@ mod CHALLENGE-PROGRAMS is
     free array ;
   .
 
-
 ops in g x y : -> Id .
 op p29 : -> Stmt .
 eq p29 = 
@@ -446,5 +445,15 @@ callcc lambda k . {
   }} 
   send (mu fix . lambda a,n . {if n == 0 then return [] ; else return * a : fix(a + 1,n + -1) ;})(array,n) to me ; 
   free array ;
+.
+
+op p30 : -> Stmt .
+eq p30 = 
+var i ; i = 0 ;
+while (++ i <= 3) do {
+  newAgent {print me ; barrier ;} ;
+}
+barrier ;
+print me ;
 .
 endm

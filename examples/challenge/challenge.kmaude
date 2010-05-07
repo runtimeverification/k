@@ -9,7 +9,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   subsort Bool Int Float < Val < Exp .
   subsort List{Val} < KResult .
 
-  ops env store nextLoc ptr fstack I/O in out  aspect thread holds busy agents agent messages message from to body threads me parent nextAgent : -> CellLabel .
+  ops env store nextLoc ptr fstack I/O in out  aspect thread holds busy agents agent messages message from to body threads me parent nextAgent world barrier barrierOpened : -> CellLabel .
   configuration <T> 
    <agents>
     <agent*> 
@@ -29,6 +29,9 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
     </agent*>
    </agents>
    <nextAgent> 1 </nextAgent>
+   <world> SetItem(0) </world>
+   <barrierOpened> false </barrierOpened>
+   <barrier> .Set </barrier>
    <messages>
     <message*> 
      <from> .K </from> <to> .K </to> <body> .K </body>
@@ -156,6 +159,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
 
 --- Agents
   rule <agent>... <k> [newAgent S => N2] ...</k> <me> N1 </me> ...</agent>
+       <world>... [.Set => SetItem(N2)] ...</world>
      [.Bag => <agent> 
     <me> N2 </me>
     <parent> N1 </parent>
@@ -175,7 +179,8 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
    </agent>]
    <nextAgent> [N2 => sNat N2] </nextAgent> .
 
-  rule [<agent>... <threads> .Bag </threads> ...</agent> => .Bag] .
+  rule [<agent>... <threads> .Bag </threads> <me> N </me> ...</agent> => .Bag] 
+       <world>... [SetItem(N) => .Set] ...</world> .
 
   rule <k> [me => N] ...</k> <me> N </me> .
   rule <k> [parent => N] ...</k> <parent> N </parent> .
@@ -184,6 +189,20 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> [<message> <from> N2 </from> <to> N1 </to> <body> V </body> </message> => .Bag] .
   rule <agent>... <me> N1 </me> <k> [sendSynch V to N2 ; => .K] ...</k> ...</agent> <agent>... <me> N2 </me> <k> [receiveFrom N1 => V] ...</k> ...</agent> .
   rule <k> [sendSynch V to N2 ; => .K] ...</k> <agent>... <me> N2 </me> <k> [receive => V] ...</k> ...</agent> .
+
+  rule <me> N </me> <k> barrier ; ...</k> 
+       <barrierOpened> false </barrierOpened> 
+       <barrier> Waiting [.Set => SetItem(N)] </barrier>
+    if notBool(N in Waiting) .
+  rule <barrierOpened> [false => true] </barrierOpened>
+       <barrier> Waiting </barrier>
+       <world> Waiting </world> 
+    if Waiting =/=Bool .Set .
+  rule <me> N </me> <k> [barrier ; => .K] ...</k>
+       <barrierOpened> true </barrierOpened>
+       <barrier>... [SetItem(N) => .Set] ...</barrier> .
+  rule <barrierOpened> [true => false] </barrierOpened>
+       <barrier> .Set </barrier> .
 
 --- Abrupt termination (of thread, of agent, of system)
   rule <k> [haltThread ; ~> ? => .K] </k> <fstack> [? => .List] </fstack> .
@@ -232,7 +251,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq (sNat N2 from N1) = (N1,,(N2 from sNat N1)) .
 
   vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .  var X Y : Id . var Xl : List{Id} .  var E : Exp .  var El : List{Exp} .
-  vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Set .
+  vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Set . var Waiting : Set .
   var FStack : List .  var V V1 V2 : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl Kl1 Kl2 : List{K} .  var Label : KLabel .
 endm
 
@@ -259,6 +278,9 @@ mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
      <me> 0 </me>
     </agent>
    </agents>
+   <world> SetItem(0) </world>
+   <barrierOpened> false </barrierOpened>
+   <barrier> .Set </barrier>
    <messages> .Bag </messages>
    <nextAgent> 1 </nextAgent>
    <I/O>
