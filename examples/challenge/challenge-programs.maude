@@ -87,39 +87,39 @@ mod CHALLENGE-PROGRAMS is
   op p14 : -> Stmt .
   eq p14 =  var x ; 
                 x = 1 ; 
-                spawn (rv 1 ; print(x) ; rv 2 ;)
-                spawn (rv 3 ; print(x) ; rv 4 ;)
+                spawn (rendezvous 1 ; print(x) ; rendezvous 2 ;)
+                spawn (rendezvous 3 ; print(x) ; rendezvous 4 ;)
                 print(x) ;
                 x = x + 1 ;
-                rv 1 ;  rv 2 ;
+                rendezvous 1 ;  rendezvous 2 ;
                 x = x + 1 ;
-                rv 3 ; rv 4 ;
+                rendezvous 3 ; rendezvous 4 ;
     .
 
   op p15 : -> Stmt .
   eq p15 = var x ; 
                 x = 1 ; 
-                spawn (x = x + 1 ; rv 1 ;)
+                spawn (x = x + 1 ; rendezvous 1 ;)
                 x = x + 1 ;
-                rv 1 ;
+                rendezvous 1 ;
                 print(x) ;
      .
   op p16 : -> Stmt .
   eq p16 = var x ; 
                 x = 1 ; 
-                spawn (acquire 1 ; x = x + 1 ; release 1 ; rv 1 ;)
+                spawn (acquire 1 ; x = x + 1 ; release 1 ; rendezvous 1 ;)
                 acquire 1 ;
                 x = x + 1 ;
                 release 1 ;
-                rv 1 ;
+                rendezvous 1 ;
                 print(x) ;
      .
 
   op p17 : -> Stmt .
   eq p17 = var x ; 
                 x = 1 ; 
-                spawn (acquire 1 ; rv 1 ; x = x + 1 ; haltThread ;)
-                rv 1 ;
+                spawn (acquire 1 ; rendezvous 1 ; x = x + 1 ; haltThread ;)
+                rendezvous 1 ;
                 acquire 1 ;
                 x = x + 1 ;
                 release 1 ;
@@ -208,9 +208,9 @@ mod CHALLENGE-PROGRAMS is
      f = mu f . lambda x .
              if x <= 1 then { return x ; } else {
                var f1,f2 ;
-               spawn {f1 = f(x + -1) ; rv & f1 ;}
-               spawn {f2 = f(x + -2) ; rv & f2 ;}
-               rv & f1 ; rv & f2 ;
+               spawn {f1 = f(x + -1) ; rendezvous & f1 ;}
+               spawn {f2 = f(x + -2) ; rendezvous & f2 ;}
+               rendezvous & f1 ; rendezvous & f2 ;
                return f1 + f2 ;
              } ;
      send [f(head tail m),c] to head m ;
@@ -248,9 +248,9 @@ mod CHALLENGE-PROGRAMS is
        else if tail l == [] then return l ;
        else {
          var t, left, right ; t = split(l) ; 
-         spawn {left = mergeSort(head t) ; rv & left ;}
+         spawn {left = mergeSort(head t) ; rendezvous & left ;}
          right = mergeSort(head tail t);
-         rv & left ;
+         rendezvous & left ;
          return merge(left, right);
        }
       };
@@ -357,9 +357,9 @@ mod CHALLENGE-PROGRAMS is
        else if tail l == [] then return l ;
        else {
          var t, left, right ; t = split(l) ; 
-         spawn {left = mergeSort(head t) ; rv & left ;}
+         spawn {left = mergeSort(head t) ; rendezvous & left ;}
          right = mergeSort(head tail t);
-         rv & left ;
+         rendezvous & left ;
          return merge(left, right);
        }
       };
@@ -419,9 +419,9 @@ callcc lambda k . {
       else if tail l == [] then return l ; 
       else {var t,left,right ; 
         t = split(l) ; 
-        spawn {left = mergeSort(head t) ; rv & left ;} 
+        spawn {left = mergeSort(head t) ; rendezvous & left ;} 
         right = mergeSort(head tail t) ; 
-        rv & left ; return merge(left,right) ;
+        rendezvous & left ; return merge(left,right) ;
       }
     } ; 
     while true do {m = receive ; spawn send [mergeSort(head tail m),c] to head m ;}
@@ -455,5 +455,15 @@ while (++ i <= 3) do {
 }
 barrier ;
 print me ;
+.
+
+
+op p31 : -> Stmt .
+eq p31 = 
+var i ; i = 0 ;
+while (++ i <= 3) do {
+  newAgent {print receive ;} ;
+}
+broadcast 0 ;
 .
 endm

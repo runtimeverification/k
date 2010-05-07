@@ -31,3 +31,6 @@ frew run("p28", ("Int" 5(.List{K}),,"Int" 3(.List{K}),,"Int" 7(.List{K}),,"Int" 
 rew run("p28", ("Int" 5(.List{K}),,"Int" 3(.List{K}),,"Int" 7(.List{K}),,"Int" 2(.List{K}),,"Int" 9(.List{K}),,"Int" 4(.List{K}),,"Int" 8(.List{K}),,"Int" -1(.List{K}),,"Int" 1(.List{K}))) .
 frew run("p29", ("Int" 5(.List{K}),,"Int" 3(.List{K}),,"Int" 7(.List{K}),,"Int" 2(.List{K}),,"Int" 9(.List{K}),,"Int" 4(.List{K}),,"Int" 8(.List{K}),,"Int" 0(.List{K}),,"Int" 1(.List{K}))) .
 rew run("p29", ("Int" 5(.List{K}),,"Int" 3(.List{K}),,"Int" 7(.List{K}),,"Int" 2(.List{K}),,"Int" 9(.List{K}),,"Int" 4(.List{K}),,"Int" 8(.List{K}),,"Int" 0(.List{K}),,"Int" 1(.List{K}))) .
+
+search run("p30") =>! B:Bag .
+search run("p31") =>! B:Bag .

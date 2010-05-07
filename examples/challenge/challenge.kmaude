@@ -34,7 +34,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
    <barrier> .Set </barrier>
    <messages>
     <message*> 
-     <from> .K </from> <to> .K </to> <body> .K </body>
+     <from> .K </from> <to> .Set </to> <body> .K </body>
     </message*>
    </messages>
    <I/O>
@@ -155,7 +155,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
    rule <k> [acquire V ; => .K] ...</k> <holds>... V |-> [N => sNat N] ...</holds> .
    rule <k> [release V ; => .K] ...</k> <holds>... V |-> [sNat N => N] ...</holds> .
    rule <k> [release V ; => .K] ...</k> <holds>... [V |-> 0 => .Map] ...</holds> <busy>... [SetItem(V) => .Set] ...</busy> .
-   rule <k> [rv V ; => .K] ...</k> <k> [rv V ; => .K] ...</k> .
+   rule <k> [rendezvous V ; => .K] ...</k> <k> [rendezvous V ; => .K] ...</k> .
 
 --- Agents
   rule <agent>... <k> [newAgent S => N2] ...</k> <me> N1 </me> ...</agent>
@@ -184,20 +184,25 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
 
   rule <k> [me => N] ...</k> <me> N </me> .
   rule <k> [parent => N] ...</k> <parent> N </parent> .
-  rule <me> N1 </me> <k> [send V to N2 ; => .K] ...</k> [.Bag => <message> <from> N1 </from> <to> N2 </to> <body> V </body> </message>] .
-  rule <me> N </me> <k> [receive => V] ...</k> [<message>... <to> N </to> <body> V </body> ...</message> => .Bag] .
-  rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> [<message> <from> N2 </from> <to> N1 </to> <body> V </body> </message> => .Bag] .
+  rule <me> N1 </me> <k> [send V to N2 ; => .K] ...</k> [.Bag => <message> <from> N1 </from> <to> SetItem(N2) </to> <body> V </body> </message>] .
+  rule <me> N </me> <k> [receive => V] ...</k> <message>... <to>...[SetItem(N) => .Set]...</to> <body> V </body> ...</message> .
+  rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> <message> <from> N2 </from> <to>...[SetItem(N1) => .Set]...</to> <body> V </body> </message> .
+  rule <me> N </me> <k> [broadcast V ; => .K] ...</k> <world> W </world> [.Bag => <message> <from> N </from> <to> W </to> <body> V </body> </message>] .
+  rule [<message>... <to> .Set </to> ...</message> => .Bag] 
+    [metadata "structural"] .
+
   rule <agent>... <me> N1 </me> <k> [sendSynch V to N2 ; => .K] ...</k> ...</agent> <agent>... <me> N2 </me> <k> [receiveFrom N1 => V] ...</k> ...</agent> .
   rule <k> [sendSynch V to N2 ; => .K] ...</k> <agent>... <me> N2 </me> <k> [receive => V] ...</k> ...</agent> .
 
-  rule <me> N </me> <k> barrier ; ...</k> 
+  rule <me> N </me> 
+       <threads> <thread>... <k> barrier ; ...</k> ...</thread> </threads>
        <barrierOpened> false </barrierOpened> 
-       <barrier> Waiting [.Set => SetItem(N)] </barrier>
-    if notBool(N in Waiting) .
+       <barrier> W [.Set => SetItem(N)] </barrier>
+    if notBool(N in W) .
   rule <barrierOpened> [false => true] </barrierOpened>
-       <barrier> Waiting </barrier>
-       <world> Waiting </world> 
-    if Waiting =/=Bool .Set .
+       <barrier> W </barrier>
+       <world> W </world> 
+    if W =/=Bool .Set .
   rule <me> N </me> <k> [barrier ; => .K] ...</k>
        <barrierOpened> true </barrierOpened>
        <barrier>... [SetItem(N) => .Set] ...</barrier> .
@@ -251,7 +256,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq (sNat N2 from N1) = (N1,,(N2 from sNat N1)) .
 
   vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .  var X Y : Id . var Xl : List{Id} .  var E : Exp .  var El : List{Exp} .
-  vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Set . var Waiting : Set .
+  vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Set . var W : Set .
   var FStack : List .  var V V1 V2 : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl Kl1 Kl2 : List{K} .  var Label : KLabel .
 endm
 
