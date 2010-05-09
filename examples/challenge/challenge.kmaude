@@ -112,11 +112,8 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   op closure-lambda : List{Id} Stmt Map -> Val .
   rule <k> [lambda Xl . S1 => closure-lambda(Xl, (S2 S1), Env)] ...</k> <env> Env </env> <aspect> S2 </aspect> .
   op `(_`,_`) : K Map -> ListItem .
-  rule <k> [_`(_`)(closure-lambda(Xl, S, Env),Vl) ~> K => S return 0 ;] </k>
-    <env> [Env' => Env[| Xl | from N / getList{K}(Xl)]] </env>
-    <fstack> [.List => (K,Env')] ...</fstack>
-    <store>... [.Map => | Xl | from N |-> getList{K}(Vl)] </store>
-    <nextLoc> [N => N +Nat | Xl |] </nextLoc> .
+  rule <k> [_`(_`)(closure-lambda(Xl, S, Env),Vl) ~> K => S return 0 ;] </k> <env> [Env' => Env[| Xl | from N / getList{K}(Xl)]] </env>
+    <fstack> [.List => (K,Env')] ...</fstack> <store>... [.Map => | Xl | from N |-> getList{K}(Vl)] </store> <nextLoc> [N => N +Nat | Xl |] </nextLoc> .
   rule <k> [return V ; ~> ? => V ~> K] </k> <env> [? => Env] </env> <fstack> [(K,Env) => .List] ...</fstack> .
 
 --- Fixed point
@@ -150,7 +147,7 @@ mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
   
 --- Threads
    rule <thread>... <k> [spawn S => .K] ...</k> <env> Env </env> ...</thread> [.Bag => <thread> <k> S </k> <env> Env </env> <fstack> .List </fstack> <aspect> .K </aspect> <holds> .Map </holds> </thread>] .
-   rule [<thread>... <k> .K </k> <fstack> .List </fstack> <holds> Holds </holds> ...</thread> => .Bag] <busy> [Busy => Busy - keys(Holds)] </busy> .
+   rule [<thread>... <k> .K </k> <holds> Holds </holds> ...</thread> => .Bag] <busy> [Busy => Busy - keys(Holds)] </busy> .
    rule <k> [acquire V ; => .K] ...</k> <holds>... [.Map => V |-> 0] ...</holds> <busy> Busy [.Set => SetItem(V)] </busy> if notBool(V in Busy) .
    rule <k> [acquire V ; => .K] ...</k> <holds>... V |-> [N => sNat N] ...</holds> .
    rule <k> [release V ; => .K] ...</k> <holds>... V |-> [sNat N => N] ...</holds> .
