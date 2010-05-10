@@ -26,7 +26,8 @@ load strict-cxt2eqs-interface
 fmod COMPILE-META is
   including META-LEVEL .
   including META-MODULE-EXTRAS .
-  var Q : Qid . var QIL QIL' : QidList . var M : Module . 
+  including STRING-EXTRAS .
+  including MODULE-META-PRETTY-PRINT .
 
   op wrapper : Qid -> Module .
   eq wrapper(Q) = (mod 'MKKR is including Q . 
@@ -36,23 +37,71 @@ fmod COMPILE-META is
   op compile : Qid ~> Module .
   eq compile(Q) = compile(upModule(Q, false)) .
 
+  op getPhaseName : Qid ~> QidList .
+  eq getPhaseName('MANY-MODULES) 
+   = 'flattening 'entire 'definition 'in 'a 'single 'module .
+  eq getPhaseName('ANONYMOUS-CONSTANTS) 
+   = tokenize("transforming Anonymous constants into variables") .
+  eq getPhaseName('SANITY-CHECKS)
+   = tokenize("checking each (sub)term parses to a sort") .
+  eq getPhaseName('MISSING-SUBSORTS)
+   = tokenize("(almost) transitively closing the subsorts") .
+  eq getPhaseName('CONTEXT-TRANSFORMERS)
+   = tokenize("applying Context Transformers") .
+  eq getPhaseName('OPEN-CELLS)
+   = tokenize("transforming open cells to normal cells through anonymous variables") .
+  eq getPhaseName('ANONYMOUS-VARIABLES)
+   = tokenize( "resolving Anonymous Variables") .
+  eq getPhaseName( 'MAKE-K-RULES)
+   = tokenize("generating Maude rules from K rules") .
+  eq getPhaseName('REMOVE-SUBLISTS)
+   = tokenize("removing subsorted lists") .
+  eq getPhaseName('LISTS-TO-WRAPPERS)
+   = tokenize( "wrapping Syntax lists into K") .
+  eq getPhaseName('SYNTAX-TO-K)
+   = tokenize("merging syntax sorts into K") .
+  eq getPhaseName('ADD-KPROPER)
+   = tokenize("adding the KProper Sort") .
+  eq getPhaseName('LISTS-TO-K)
+   = tokenize("merging lists sorts into K") .
+  eq getPhaseName('SUBSORTS-TO-WRAPPERS)
+   = tokenize("transforming subsorted builtins into injections") .
+  eq getPhaseName('HOMOGENOUS-ARGUMENTS)
+   = tokenize("wrapping non-K arguments") .
+  eq getPhaseName( 'MAKE-ALL-LABELS )
+   = tokenize( "reducing all K constructs to K labels" ) .
+  eq getPhaseName('STRICTOPS2CXT) 
+   = tokenize("generating Strictness Axioms") .
+  eq getPhaseName('STRICTCXT2EQS)
+   = tokenize("generating Strictness Equations") .
   op compile : Module ~> Module .
   eq compile(M) = compile(M, 'MANY-MODULES 'ANONYMOUS-CONSTANTS 'SANITY-CHECKS 'MISSING-SUBSORTS 'CONTEXT-TRANSFORMERS 'OPEN-CELLS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'REMOVE-SUBLISTS 'LISTS-TO-WRAPPERS 'SYNTAX-TO-K 'ADD-KPROPER 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS
   ) .
   op compile : Module QidList ~> Module .
   eq compile(M,nil) = M .
-  eq compile(M, Q QIL) =  compile(
+  eq compile(M, Q QIL) =  $compile(M, Q, 
     downTerm(getTerm(
              metaReduce(wrapper(qid(string(Q) + "-META")),
                         'compile[upTerm(M)])), error)
      , QIL) .
-  eq compile(moduleError(QIL), QIL') = moduleError(QIL) .
+  
+  op $compile : Module Qid Module QidList ~> Module .
+  eq $compile(M, Q, moduleError(QIL), QIL') = moduleError(QIL) .
+  eq $compile(M, Q, M', QIL)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL) else generateError(M,Q,M') fi .
 
+  op print : [Module] -> QidList .
+  eq print(M) = eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
+  op generateError : Module Qid [Module] -> [Module] .
+  eq generateError(M, Q, M') = moduleError('Error 'while getPhaseName(Q) '\n
+   'To 'reproduce 'load 'k-prelude 'and 'then 'the 'generated 'module. '\n
+   print(M) 
+) .
+
+  var Q : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .
 endfm
 
 mod COMPILE-LOOP is
   including LOOP-MODE + COMPILE-META .
-  including MODULE-META-PRETTY-PRINT .
   op compile : -> System .
   op idle : -> State .
   var Q : Qid . var QIL QIL' : QidList . var FM : Module .
@@ -60,10 +109,8 @@ mod COMPILE-LOOP is
  'Usage: 'compile '<ModuleName> '. ] .
 
   op error : -> [Module] .
-  op print : [Module] -> QidList .
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
 
-  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) .
   eq print(moduleError(QIL)) = QIL .
   rl ['compile Q QIL, idle, QIL'] 
    => [QIL, idle, print(compile(Q) )] .

@@ -104,7 +104,7 @@ function runMaude {
   $MAUDE <"$IFILE" >"$OFILE" 2>"$EFILE"
   if [ -n "$(<$EFILE)" ]; 
   then 
-    echo ". Error ($3) during the transformation phase. Input is in $IFILE"
+    echo ". Error ($3) during the transformation phase. Check $OFILE"
     if [ `ls -l "$EFILE" | awk '{ print $5 }'`  -ge 4000 ] 
 	then 
 		cat "$EFILE" | head -c2000
@@ -113,10 +113,11 @@ function runMaude {
 	else 
 		cat "$EFILE"
 	fi
+    sed -n "/^Error/,/^---K-MAUDE-GENERATED-OUTPUT-BEGIN---/p" "$OFILE" | sed "$ d"
     echo "Aborting the compilation!"
     cleanAndExit 1
   fi
-  if ! grep -q '[-]--K-MAUDE-GENERATED-OUTPUT-END-----' "$OFILE"
+  if ! grep -q '[-]--K-MAUDE-GENERATED-OUTPUT-END-----' "$OFILE" || grep -q '^Error' "$OFILE"
   then
     echo ". Error ($3) during the transformation phase. Input is in $IFILE"
     cat "$OFILE"
