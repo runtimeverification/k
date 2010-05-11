@@ -1,7 +1,7 @@
 mod FUN-PROGRAMS is including FUN-SYNTAX .
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
 
-  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15-1 p15-2 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26-1 p26-2 p27-1 p27-2 p27-3 p28 p29 : -> Exp .
+  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15-1 p15-2 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26-1 p26-2 p27-1 p27-2 p27-3 p28 p29 p30 : -> Exp .
   ops factorial max map return throw aux continuation value exit goto : -> Id .
   ops f00 f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 : -> Id .
 
@@ -277,4 +277,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
       ) )
   ) .
 
+  eq p30 = (
+    (callcc (fun k -> 7)) + 3
+  ) .
 endm
