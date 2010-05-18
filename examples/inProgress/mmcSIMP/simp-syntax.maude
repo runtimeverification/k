@@ -1,0 +1,29 @@
+--- in ../../../k-prelude
+
+mod SIMP-SYNTAX is including PL-INT .
+  sorts Id Var AExp BExp Exp Decl Stmt Stmts .
+  subsort Id < Var .
+  subsorts Var Int < AExp .
+  subsorts Var Bool < BExp .
+  subsort Decl Stmt < Stmts .
+  subsort AExp BExp < Exp .
+  
+  op _+_ : AExp AExp -> AExp [gather(E e) prec 33 metadata "strict"] .
+  op _<=_ : AExp AExp -> BExp [prec 37 metadata "strict"] .
+  op _==_ : AExp AExp -> BExp [prec 37 metadata "strict"] .
+  op _and_ : BExp BExp -> BExp [gather(E e) prec 55 metadata "strict"] .
+  op not_ : BExp -> BExp [prec 53 metadata "strict"] .
+
+  op var_; : Var -> Decl [prec 2] .
+  op skip; : -> Stmt .
+  op {} : -> Stmt .
+  op {_} : Stmts -> Stmt [gather(&)] .
+  op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
+  op _=_; : Var Exp -> Stmt [prec 2 metadata "strict(2)"] . 
+  op _; : Exp -> Stmt [prec 50 metadata "strict"] .
+  op if_then_else_ : BExp Stmt Stmt -> Stmt [metadata "strict(1)"] .
+  op while_do_ : BExp Stmt -> Stmt .
+  
+endm
+
+

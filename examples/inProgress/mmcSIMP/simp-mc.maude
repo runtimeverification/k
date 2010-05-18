@@ -1,0 +1,220 @@
+in ../../../k-prelude
+in simp-syntax
+--- in path
+in KSharp
+in preds
+in simp-mc-programs
+
+mod SIMP-MC-SEMANTICS is including KSHARP + PREDS .
+
+--- @ < >_state#   < >_store# 
+
+  sorts False . 
+  sort  Pair{Label,Valid}. --- Store# = Bag (Pair{Labe,Valid}) .
+
+  subsort False < Map . --- State# = Map .
+
+--- from PREDS:
+  subsort PREDS < K .
+  subsort TValue < K .
+  subsort Var < VarPreds .
+  
+  subsort AExp < PExp .
+  subsort BExp < AtomicPreds .
+
+  subsort Pair{Label,Valid} < PREDS .
+
+  op _notin_ : PREDS Bag -> Bool .
+  eq Item notin (BagItem(Item) Bag) = false .
+  eq Item notin Bag = true [owise] .
+
+  var Item : PREDS .
+  var Bag : Bag . 
+
+  op invalid : -> False [ctor] . 
+
+  op |_`,_| : Label Map -> Pair{Label,Valid} [ctor] .
+
+  op _[_>->_] : Bag Label Map -> Bag .
+  eq Sigma [ L >-> Gamma ] = BagItem((| L, Gamma |)) Sigma . 
+   ---  op update : Store# Label Valid -> Store# . 
+   --- |_> already defined as [...] for Bag in K... Set{PREDS} in PREDS
+   --- ???!!!  update(Sigma, L, Gamma) = Sigma U (| L, Gamma |) iff (| L, Gamma |) notin Sigma . 
+   --- |_> iff UPDATED as conditional rules for R5 and R6
+
+
+  op post# : Map EdgeOp -> Map . 
+
+  
+--- TODODODO:
+--- ???!!!  post#(Gamma, Op) = list(p->pTValue : p in Pi)
+---  op evalPred : -> Pair[Pred, Tvalue] . 
+
+--- for cells < inv > and < state# >
+  op phi : -> List .
+  op st# : -> Map .
+
+ 
+--- VARIABLES
+  var Gamma : Map . --- var Gamma : State# . 
+  var Sigma : Bag . --- var Sigma : Store# . 
+  var Phi : List .
+  vars S S1 S2 : Stmt . var X : Var . var A : AExp . var B : BExp . 
+  vars L Lin : Label .
+  vars K1 K2 K : K .
+  var Op : EdgeOp .
+  var P : List{Label} .
+
+
+--- @ CONFIGURATION
+  ops state# path trace# store# inv : -> CellLabel .
+  mb configuration < T >
+     		     < trace# * >
+ 		           < k > K </ k >
+                     	   < state# > Gamma </ state# >
+		     	   < path > list(.List{Label}) </ path >
+		     </ trace# * >
+		     < store# > .Bag </ store# > 
+		     < inv > Phi </ inv >
+                   </ T > : KSentence .
+
+--- @ RULES MC
+  --- RULE R1 
+  mb rule [ < trace# > 
+     	     	< k > fin(L) </ k > 
+	        < state# > Gamma </ state# >
+---             < path > ? </ path >
+ 	    ...</ trace# > => .Bag ] : KSentence .
+
+  --- RULE R2
+  mb rule   < k > [ fin(L) => .K ] </ k > 
+	    < state# > [ invalid => .Map ] </ state# > 
+	    < path >... [ list(.List{Label}) => list(L) ] </ path >  
+     : KSentence .
+
+  --- RULE R3 
+  mb rule [  < trace# >
+     	     	< k > (L : ?) ...</ k > 
+	     	< state# > Gamma </ state# >
+---		< path > ? </ path >
+	     ...</ trace# > => .Bag
+	  ] 
+	  < store# >... (| L, Gamma |) ...</ store# > : KSentence .
+
+  --- RULE R4
+  mb rule   < k > [ ((L : ?) ~> ?) => .K ] </ k >
+	    < state# > [ invalid => .Map ] </ state# > 
+	    < path >... [ list(.List{Label}) =>  list(L) ] </ path > 
+     : KSentence .
+
+  --- RULE R5
+  mb rule       < k > [ (L : asg(X, A)) => .K ] ...</ k >
+	        < state# > [ Gamma => post#(Gamma, asg(X, A)) ] </ state# >
+	        < path >... [ list(.List{Label}) => list(L) ] </ path >
+	    < store# > [ Sigma => Sigma [ L >-> Gamma ] ] </ store# >
+	    < inv > Phi </ inv >  
+     if (| L, Gamma |) notin Sigma 
+     : KSentence .
+   
+  --- RULE R6  ???? .Bag# problem
+  mb rule < trace# >
+     	     < k > [ ((L : cnd(B)) ~> if (K1, K2))  => (skip ~> K1) ] ~> K 
+	     </ k >
+	     < state# > [ Gamma => post# (Gamma, cnd(B)) ] </ state# >
+	     < path > [ list(P) => list(P ;; L) ] </ path >
+--- !    	      < path > [ list(P) => list(L ;; P) ] </ path >  
+     	  </ trace# >
+	  [ .Bag => < trace# > 
+	     	        < k > skip ~> K2 ~> K </ k >
+	                < state# > post# (Gamma, cnd (not B)) </ state# >
+	                < path > list(P ;; L) </ path >
+--- !    		        < path > [ list(P) => list(L ;; P) ] </ path >   
+	  	    </ trace# > 
+          ]
+	  < store# > [ Sigma => Sigma [ L >-> Gamma ] ] </ store# >
+	  < inv > Phi </ inv >  
+      if (| L, Gamma |) notin Sigma 
+      : KSentence .
+
+  --- RULE R7
+  mb rule [ < trace# >...
+     	      < k > skip ~> ? </ k >
+	      < state# > invalid </ state# >
+     	    ...</ trace# > => .Bag ] : KSentence [metadata "structural"] .
+
+  --- RULE R8
+  mb rule   < k > [ skip => .K ] ...</ k >
+            < state# > Gamma </ state# > : KSentence [metadata "structural"] . 
+
+  --- RULE R9 
+  mb rule < k >
+     	    [ (while (L, cnd (B), K)) => 
+	      (( L : cnd (B)) ~> if ((K ~> while(L, cnd (B), K)), .K ))
+            ]
+     	  ...</ k > : KSentence [metadata "structural"] .
+
+
+  --- TERMINATION
+  mb rule [ < T >... 
+     	       < trace# >
+     	      	 < k > .K </ k >
+		 < state# > .Map </ state# >
+		 < path > list(P) </ path >
+	       </ trace# >
+	       < store# > Sigma </ store# >
+	       < inv > Phi </ inv >
+            ...</ T > 
+	    => 
+	    < T > < trace# > 
+	       	        < k > .K </ k >
+			< state# > .Map </ state# >
+	       	        < path > list(P) </ path > 
+	       	  </ trace# >
+		  < store# > .Bag </ store# >
+	          < inv > Phi </ inv >
+	    </ T >
+          ] : KSentence [metadata "structural"] .
+ 
+
+  mb rule  [ < T >
+		< store# > Sigma </ store# >
+		< inv > Phi </ inv >
+             </ T > 
+	    =>  
+	    < T >
+		< store# > .Bag </ store# >
+		< inv > Phi </ inv >
+             </ T >
+	   ] : KSentence [metadata "structural"] .
+ 
+endm
+
+
+mod SIMP-MC is including SIMP-MC-SEMANTICS + SIMP-MC-PROGRAMS .
+--- make sure the name of the final module is the capitalized version of the file name
+  op run : -> Bag .
+  var X : Var . var S : Stmts . 
+--- After loading simple-untyped-compiled into maude, type "rew run .".  Replace prog by any program, then recompile.
+ 
+  eq phi = List(err ==p 0) List(.List{K}) .
+  
+
+  eq post#( (st# (( err ==p 0 ) |-> eval1 )  (( x ==p 0 ) |-> eval1/2 )) , asg(x, 0)) = 
+     st# (( err ==p 0 ) |-> eval1 )  (( x ==p 0 ) |-> eval1 ) .
+  eq post#( (st# (( err ==p 0 ) |-> eval1 )  (( x ==p 0 ) |-> eval1 )) , asg(err, x)) = 
+     st# (( err ==p 0 ) |-> eval1 )  (( x ==p 0 ) |-> eval1 ) .
+  eq post#( (st# (( err ==p 0 ) |-> eval1 )  (( x ==p 0 ) |-> eval1 )) , cnd( y <= 0)) = 
+     st# (( err ==p 0 ) |-> eval1 )  (( x ==p 0 ) |-> eval1 ) .
+
+
+  eq run = < T > 
+             	< trace# >
+		  < k > k# (stripVars(pTest)) </ k >
+            	  < state# > st# (( err ==p 0 ) |-> eval1 )  (( x ==p 0 ) |-> eval1/2 ) </ state# >
+		  < path > list(.List{Label}) </ path >
+		</ trace# >
+            < store# > .Bag </ store# >
+            < inv > phi </ inv >
+          </ T > .
+
+endm

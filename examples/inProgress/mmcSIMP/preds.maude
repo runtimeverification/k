@@ -1,0 +1,27 @@
+--- in ../../../k-prelude
+--- IN PROGRESS
+mod PREDS is 
+   protecting PL-INT .
+
+  sort TValue .
+  subsort TValue < PREDS .
+
+  ops eval0, eval1, eval1/2 : -> TValue [ctor] .
+
+  sorts VarPreds .
+  sorts PExp AtomicPreds PREDS .
+
+  subsorts VarPreds Int < PExp .
+  subsort AtomicPreds < PREDS . 
+  
+  op _+p_ : PExp PExp -> PExp [gather(E e) prec 33 metadata "strict"] .
+  op _<=p_ : PExp PExp -> AtomicPreds [prec 37 metadata "strict"] .
+  op _>=p_ : PExp PExp -> AtomicPreds [prec 37 metadata "strict"] .
+  op _<p_ : PExp PExp -> AtomicPreds [prec 37 metadata "strict"] .
+  op _>p_ : PExp PExp -> AtomicPreds [prec 37 metadata "strict"] .
+  op _==p_ : PExp PExp -> AtomicPreds [prec 37 metadata "strict"] .
+
+  op not : AtomicPreds -> AtomicPreds [metadata "strict"] .
+
+
+endm

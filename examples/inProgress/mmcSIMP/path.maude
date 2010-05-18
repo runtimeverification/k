@@ -1,0 +1,38 @@
+--- in ../../../k-prelude
+--- IN PROGRESS
+
+mod PATH is
+  including PL-NAT .
+
+  sorts ZeroLabel NzLabel Label .
+  subsort ZeroLabel NzLabel < Label .
+  op 0Label : -> ZeroLabel [ctor] .
+
+  op sLabel_ : Label -> NzLabel
+        [ctor iter
+         special (id-hook SuccSymbol
+                  term-hook zeroTerm (0Label))] .
+
+  op _+Label_ : NzLabel Label -> NzLabel
+        [assoc comm prec 33
+         special (id-hook ACU_NumberOpSymbol (+)
+                  op-hook succSymbol (sLabel_ : Label ~> NzLabel))] .
+  op _+Label_ : Label Label -> Label [ditto] .
+
+  sorts List{Label} NeList{Label} . --- for path
+
+  subsort Label < NeList{Label} < List{Label} .
+
+  op .List{Label} : -> List{Label} .
+
+
+  op _;;_ : List{Label} List{Label} -> List{Label} [assoc id: .List`{Label`} prec 121] .
+  --- One should not modify the precedence above.  
+  --- Might cause the compilation to fail.
+  op _;;_ : NeList{Label} List{Label} -> NeList{Label} [ditto] .
+  op _;;_ : List{Label} NeList{Label} -> NeList{Label} [ditto] .
+
+
+  var L : Label . var Ls : List{Label} .
+  
+endm
