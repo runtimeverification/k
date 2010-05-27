@@ -28,7 +28,7 @@ mod IMP++-SYNTAX is
   op var_;_ : List{Id} Stmt -> Stmt [prec 121 format (b o b on++i --)] .
   ops print_; :  AExp -> Stmt [prec 59 metadata "strict" format (b o b o)] .
   op spawn_ : Stmt -> Stmt [prec 59 format(b n++i --)] .
-  ops haltThread ;  : -> Stmt [format (b d o)] .
+  ops haltThread`;  : -> Stmt [format (b d o)] .
 
   sort List{Id} .
   subsort Id < List{Id} .
