@@ -5,8 +5,8 @@ mod SIMP-SYNTAX is including PL-INT .
   subsort Id < Var .
   subsorts Var Int < AExp .
   subsorts Var Bool < BExp .
-  subsort Decl Stmt < Stmts .
-  subsort AExp BExp < Exp .
+  subsorts Decl Stmt < Stmts .
+  subsorts AExp BExp < Exp .
   
   op _+_ : AExp AExp -> AExp [gather(E e) prec 33 metadata "strict"] .
   op _<=_ : AExp AExp -> BExp [prec 37 metadata "strict"] .
@@ -19,11 +19,10 @@ mod SIMP-SYNTAX is including PL-INT .
   op {} : -> Stmt .
   op {_} : Stmts -> Stmt [gather(&)] .
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)] .
-  op _=_; : Var Exp -> Stmt [prec 2 metadata "strict(2)"] . 
+  op _=_; : Var AExp -> Stmt [prec 2 metadata "strict(2)"] . 
   op _; : Exp -> Stmt [prec 50 metadata "strict"] .
   op if_then_else_ : BExp Stmt Stmt -> Stmt [metadata "strict(1)"] .
   op while_do_ : BExp Stmt -> Stmt .
   
 endm
-
 

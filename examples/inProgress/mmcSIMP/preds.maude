@@ -21,7 +21,7 @@ mod PREDS is
   op _>p_ : PExp PExp -> AtomicPreds [prec 37 metadata "strict"] .
   op _==p_ : PExp PExp -> AtomicPreds [prec 37 metadata "strict"] .
 
-  op not : AtomicPreds -> AtomicPreds [metadata "strict"] .
+  op notP : AtomicPreds -> AtomicPreds [metadata "strict"] .
 
 
 endm

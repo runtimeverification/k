@@ -8,11 +8,11 @@ mod SIMP-MC-PROGRAMS is including SIMP-SYNTAX + PL-INT .
 
 
   eq pTest =
-       var x ; var y ;  var err ;
+       var x ; var y ;  var err ; var a ; var b ; var z ;
 
        x = 0 ;
        err = x ;
-       while ( y <= 0 ) do {
+       while ( y <= x ) do {
          x = x + 1 ;
 	 y = y + x ;
 	 x = -1 + x ;

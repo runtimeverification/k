@@ -1,17 +1,12 @@
 --- in ../../../k-prelude
-in path
+--- in path
+
+--- in simp-syntax
 
 mod KSHARP is 
-     including SIMP-SYNTAX + PATH .
-     protecting K .
+     including SIMP-SYNTAX .
+     including K .
 
- 
- op listItem : Label -> ListItem .
-
- op list_ : List{Label} -> List .
- eq list(.List{Label}) = .List .
- eq list(L ;; Ls) = listItem(L) list(Ls) .
- 
  --- @ < >_k#
   sorts Asg Cnd EdgeOp .
   sort Trans . --- Trans = TransAsg U TransCnd
@@ -21,19 +16,30 @@ mod KSHARP is
   subsort Cnd < EdgeOp .
   subsort Trans < K .
 
-  op asg : Var Exp -> Asg .
-  op cnd : Exp -> Cnd .
-  op (_:_) : Label EdgeOp -> Trans .
+--- 4k-safety-check
+  subsort EdgeOp <  K .
+  subsort Nat < K .
+  subsorts Int < AExp < K .
+  subsorts Bool < BExp < K .
+  subsort Exp < K .
+  subsort Var < K .
+  subsort Stmts < K .
+  subsort Pair{K,Label} < K .
+---
+
+  op asg : Var AExp -> Asg .
+  op cnd : BExp -> Cnd .
+  op (_::_) : Nat EdgeOp -> Trans .
   op if : K K -> K .
-  op while : Label Cnd K -> K .
+  op while : Nat Cnd K -> K .
   op skip : -> K .
  
-  op stmt#  : Label Stmts -> Pair{K,Label} .
+  op stmt#  : Nat Stmts -> Pair{K,Label} .
   op k# : Stmts -> K .
-  op pair : K Label -> Pair{K,Label} [ctor] .
+  op pair : K Nat -> Pair{K,Label} [ctor] .
   op fst : Pair{K,Label} -> K .
-  op snd : Pair{K,Label} -> Label .
-  op fin : Label -> K . 
+  op snd : Pair{K,Label} -> Nat .
+  op fin : Nat -> K . 
 
 
   eq fst (pair (K, L)) = K .
@@ -43,7 +49,10 @@ mod KSHARP is
 
   eq  stmt# (Lin, skip;) = pair (.K, Lin) .
 
-  eq  stmt# (Lin, (X = A ;)) = pair ((Lin : asg(X, A)), Lin +Label 1) .
+  eq  stmt# (Lin, (X = A ;)) = pair ((Lin :: asg(X, A)), Lin +Nat 1) .
+
+--- ???  why ???
+---  eq  stmt# (Lin, (X = I ;)) = pair ((Lin :: asg(X, I)), Lin +Nat 1) .
 
   ceq stmt# (Lin, (S1 S2)) = pair ((fst(K1Laux) ~> fst(K2Lfin)), snd(K2Lfin))
   	     if K1Laux := stmt# (Lin, S1) 
@@ -53,14 +62,14 @@ mod KSHARP is
 
 
   ceq stmt# (Lin, ( if B then ( { S1 } ) else ( { S2 } ) )) = 
-      pair (((Lin : cnd(B)) ~> if(fst(K1Laux),fst(K2Lfin))), snd(K2Lfin))
-  	     if K1Laux := stmt# (Lin +Label 1 , S1) 
+      pair (((Lin :: cnd(B)) ~> if(fst(K1Laux),fst(K2Lfin))), snd(K2Lfin))
+  	     if K1Laux := stmt# (Lin +Nat 1 , S1) 
 	     /\ K2Lfin := stmt# (snd(K1Laux), S2) . 
 
 
   ceq stmt# (Lin, ( while B do ( { S } ) )) = 
       pair (while(Lin, cnd(B), fst(KLfin)), snd(KLfin) )
-  	     if KLfin := stmt#(Lin +Label 1 , S) . 
+  	     if KLfin := stmt#(Lin +Nat 1 , S) . 
   
   ceq k# (S) = fst (KLfin) ~> fin (snd (KLfin))
 	     if KLfin := stmt# (1, S) . 
@@ -73,9 +82,8 @@ mod KSHARP is
 
   vars KLfin K1Laux K2Lfin : Pair{K,Label} .	
   vars S S1 S2 : Stmts . 
-  var X : Var . var A : AExp . var B : BExp . 
-  vars L Lin : Label .
-  var Ls : List{Label} .
+  var X : Var . var A : AExp . var B : BExp . var I : Int .
+  vars L Lin : Nat . --- var Ls : List{K} . 
   var K : K .
 
 endm
