@@ -125,10 +125,14 @@ function runMaude {
   # fi
 
   sed '1,3 d; $ d; s/^result SModule: //' "$OFILE" > "$TFILE"
-  echo "load \"$KBASE/k-prelude\"" > $4
-  cat "$TFILE" | perl unquote.pl >> $4
+  #echo "load \"$KBASE/k-prelude\"" > $4
   echo "load \"$KBASE/k-prelude\"" > quoted.maude
   cat "$TFILE" >> quoted.maude
+  cat "$TFILE" | perl unquote.pl > "$OFILE"
+  checkMaude "$OFILE" "show module ."
+  echo "load \"$KBASE/k-prelude\"" > "$4"
+  sed '$ d; s/^Maude> Maude>// ' "$OFILE" >> "$4"
+  
   printf ". Done!\n"
 }
 
