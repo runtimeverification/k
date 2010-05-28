@@ -4,7 +4,7 @@ mod BEFUNGE-TEST is
 	
 	--- equivalent to the b93 program from the fungus test suite found at http://www.phlamethrower.co.uk/befunge/fungus.php
 	op pB93 : -> KProperLabel [metadata "arity 0"] .
-	eq pB93 = injectM( __(.Map,(.Map
+	eq pB93 = injectM( __(.,(.
 	coord(inject(0)(.List{K}),, inject(0)(.List{K})) |-> inject("v")(.List{K})
 	coord(inject(1)(.List{K}),, inject(0)(.List{K})) |-> inject(" ")(.List{K})
 	coord(inject(2)(.List{K}),, inject(0)(.List{K})) |-> inject(" ")(.List{K})

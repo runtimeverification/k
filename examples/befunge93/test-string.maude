@@ -4,7 +4,7 @@ mod BEFUNGE-TEST is
 	
 	--- equivalent to the string program from the fungus test suite found at http://www.phlamethrower.co.uk/befunge/fungus.php
 	op pString : -> KProperLabel [metadata "arity 0"] .
-	eq pString = injectM( __(.Map,(.Map 
+	eq pString = injectM( __(.,(.
 	coord(inject(0)(.List{K}),, inject(0)(.List{K})) |-> inject("v")(.List{K})
 	coord(inject(1)(.List{K}),, inject(0)(.List{K})) |-> inject(" ")(.List{K})
 	coord(inject(2)(.List{K}),, inject(0)(.List{K})) |-> inject(" ")(.List{K})

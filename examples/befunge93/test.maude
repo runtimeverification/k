@@ -25,7 +25,7 @@ mod BEFUNGE-TEST is
 	op pFactorial : -> KProperLabel [metadata "arity 0"] .
 	--- 1&>: #v_$\:#v_$.@
 	---   ^-1:<^00 *<
-	eq pFactorial = injectM( __(.Map,(.Map
+	eq pFactorial = injectM( __(.,(.
         coord(inject(0)(.List{K}),, inject(0)(.List{K})) |-> inject("1")(.List{K})
         coord(inject(1)(.List{K}),, inject(0)(.List{K})) |-> inject("&")(.List{K})
         coord(inject(2)(.List{K}),, inject(0)(.List{K})) |-> inject(">")(.List{K})
@@ -60,7 +60,7 @@ mod BEFUNGE-TEST is
 
 		--- equivalent to the program compat.bf found at http://www.phlamethrower.co.uk/befunge/compat.php
 		op pCompat : -> KProperLabel [metadata "arity 0"] .
-		eq pCompat = injectM( __(.Map,(.Map 
+		eq pCompat = injectM( __(.,(.
 	coord(inject(0)(.List{K}),, inject(0)(.List{K})) |-> inject("1")(.List{K})
 	coord(inject(1)(.List{K}),, inject(0)(.List{K})) |-> inject("-")(.List{K})
 	coord(inject(2)(.List{K}),, inject(0)(.List{K})) |-> inject("0")(.List{K})
