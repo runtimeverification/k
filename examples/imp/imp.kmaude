@@ -13,7 +13,7 @@ mod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable 
 --- BExp
   sort BExp 
   subsort Bool < BExp 
-  op _<=_ : AExp AExp -> BExp  [prec 37 format(d b o d) seqstrict] 
+  op _<=_ : AExp AExp -> BExp  [prec 37 format(d b o d) metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict] 
   op not_ : BExp -> BExp [prec 53 format(b o d) strict] 
   op _and_ : BExp BExp -> BExp [prec 55 format(d b o d) strict(1)] 
 --- Stmt
@@ -134,6 +134,6 @@ endm
 
 mod IMP is including IMP-PROGRAMS + IMP-SEMANTICS 
   op `[`[_`]`] : KLabel -> Bag 
-  eq [[K:KLabel]] = <T_> <k> K:KLabel(.List{K}) </k> <_/T> 
+  eq [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T> 
   op pgm : -> Bag   eq pgm = [['sumPgm]] 
 endm
