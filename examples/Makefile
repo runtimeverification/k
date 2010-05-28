@@ -1,4 +1,4 @@
-KCOMPILE ?= $(realpath ../tools/kcompile.sh)
+KCOMPILE ?= $(realpath ../tools/kompile.sh)
 TEST_DIRS = befunge93 challenge imp imppp \
         simple/untyped simple/typed/dynamic simple/typed/static \
 	exp/untyped exp/type-inference fun/untyped \

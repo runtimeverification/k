@@ -1,0 +1,62 @@
+in ../../../k-prelude
+in exp-untyped-syntax
+in ../exp-programs
+
+mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K .
+  sort Val .
+  subsort Int Bool < Val < Exp < K .
+  subsort Val < KResult .
+  ops env store nextLoc : -> CellLabel .
+  configuration <T> <k> (.).K </k> <env> (.).Map </env> <store> (.).Map </store> <nextLoc> 0 </nextLoc> </T> 
+  rule <k> X => E _</k> <env>_ X |-> L _</env> <store>_ L |-> E _</store> 
+  rule I1 + I2 => I1 +Int I2 
+  rule _-_(I1,I2) => _-Int_(I1,I2) 
+  rule I1 * I2 => I1 *Int I2 
+  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0 
+  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0 
+  rule - I => -Int I 
+  rule I1 < I2 => I1 <Int I2 
+  rule I1 <= I2 => I1 <=Int I2 
+  rule I1 > I2 => I1 >Int I2 
+  rule I1 >= I2 => I1 >=Int I2 
+  rule V1 == V2 => V1 ==Bool V2 
+  rule V1 != V2 => V1 =/=Bool V2 
+  rule T1 and T2 => T1 andBool T2 
+  rule T1 or T2 => T1 orBool T2 
+  rule not(T) => notBool(T) 
+  rule if  true then E else  _  => E 
+  rule if false then  _  else E => E 
+  op closure-lambda : Map Id Exp -> Val .
+  rule <k> lambda X . E => closure-lambda(Env,X,E) _</k> <env> Env </env> 
+  rule <k> closure-lambda(Env,X,E) V => E ~> env(Env') _</k> <env> Env' =>  Env[L / X] </env>
+          <store>_ . => L |-> V _</store> <nextLoc> L => sNat L </nextLoc> 
+  op closure-mu : Map Exp -> Exp .
+  rule <k> mu X . E => closure-mu(Env[L / X],E) _</k> <env> Env </env>
+          <store>_ . => L |-> closure-mu(Env[L / X],E) _</store> <nextLoc> L => sNat L </nextLoc> 
+  rule <k> closure-mu(Env,E) => E ~> env(Env') _</k> <env> Env' => Env </env> 
+
+---( we need mu closures ... the rule below is wrong, because the free variables of E can be captured ... nastily ... argh; see p12
+  rule <k> mu X . E => E ~> env(Env) _</k> <env> Env => Env[L / X] </env>
+          <store>_ . => L |-> mu X . E _</store> <nextLoc> L => sNat L </nextLoc> 
+---)
+
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
+--- environment recovery
+  op env : Map -> K .
+  rule <k> V ~> (env(Env) => .) _</k> <env>  _  => Env </env> [structural] 
+--- tail recursion
+  rule env( _ ) ~> env(Env) => env(Env) [structural] 
+--- variable declarations; we put them last because we are going to infer them automatically in the future
+  var I I1 I2 : Int .  var X : Id .  var E : Exp .  var V V1 V2 : Val .
+  var L : Nat .  var T T1 T2 : Bool .  var Env Env' : Map .
+endm
+
+mod EXP-UNTYPED is including EXP-UNTYPED-SEMANTICS + EXP-PROGRAMS .
+  op run : KLabel -> Bag .
+  eq run(L:KLabel) = run(L:KLabel,.List{K}) .
+  op run : KLabel List{K} -> Bag .
+  eq run(L:KLabel,L:List{K}) = <T> <k> L:KLabel(.List{K}) </k> <env> (.).Map </env> <store> (.).Map </store> <nextLoc> 0 </nextLoc> </T> .
+endm
+
