@@ -8,7 +8,8 @@ fmod SYNTAX-TO-K is
  var Ops OPDS : OpDeclSet .  var Op : OpDecl .
  var SSDS SSDS' : SubsortDeclSet .  var SSD : SubsortDecl . 
  var SS : SortSet . var S S' : Sort .
- var Q O : Qid . var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
+ var Q O : Qid .  var QIL : QidList .
+ var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
  var AS AS' : AttrSet .  var HL : HookList .
  var MS : ModuleSet . var M M' Flat : Module .
  var Trm : Term . var Trms : TermList . var V : Variable . var C : Constant .
@@ -83,7 +84,15 @@ ceq concretize((op Q : Tl -> T [AS] .) (op Q : Tl -> T' [AS] .) OPDS)
 
  op syntax2kAS : AttrSet SubsortDeclSet ~> AttrSet .
  eq syntax2kAS(AS id(Trm),SSDS) = id(syntax2kT(Trm,SSDS)) syntax2kAS(AS,SSDS) .
+ eq syntax2kAS(AS print(QIL),SSDS) = print(syntax2kPrint(QIL, SSDS))
+    syntax2kAS(AS,SSDS) .
  eq syntax2kAS(AS,SSDS) = AS [owise] .
+
+ op syntax2kPrint : QidList SubsortDeclSet -> QidList .
+ eq syntax2kPrint(Q QIL, SSDS) 
+  = if Q :: Variable  then syntax2kT(Q, SSDS) else Q fi 
+    syntax2kPrint(QIL, SSDS) .
+ eq syntax2kPrint(nil, SSDS) = nil .
 
  op syntax2kMbs : MembAxSet SubsortDeclSet ~> MembAxSet .
  eq syntax2kMbs(Mbs Mb, SSDS)
@@ -92,10 +101,10 @@ ceq concretize((op Q : Tl -> T [AS] .) (op Q : Tl -> T' [AS] .) OPDS)
 
  op syntax2kMb : MembAx SubsortDeclSet ~> MembAx .
  eq syntax2kMb((mb T1 : T [AS] .), SSDS)
-  = (mb syntax2kT(T1, SSDS) : syntax2kType(T,SSDS) [AS] .) .
+  = (mb syntax2kT(T1, SSDS) : syntax2kType(T,SSDS) [syntax2kAS(AS, SSDS)] .) .
  eq syntax2kMb((cmb T1 : T if Cond [AS] .), SSDS)
   = (cmb syntax2kT(T1, SSDS) : syntax2kType(T,SSDS) 
-      if syntax2kC(Cond,SSDS) [AS] .) .
+      if syntax2kC(Cond,SSDS) [syntax2kAS(AS, SSDS)] .) .
 
  op syntax2kEqs : EquationSet SubsortDeclSet ~> EquationSet .
  eq syntax2kEqs(Eqs Eq, SSDS)
@@ -104,9 +113,9 @@ ceq concretize((op Q : Tl -> T [AS] .) (op Q : Tl -> T' [AS] .) OPDS)
 
  op syntax2kEq : Equation SubsortDeclSet ~> Equation .
  eq syntax2kEq((eq T1 = T2 [AS] .), SSDS)
-  = (eq syntax2kT(T1,SSDS) = syntax2kT(T2,SSDS) [AS] .) .
+  = (eq syntax2kT(T1,SSDS) = syntax2kT(T2,SSDS) [syntax2kAS(AS, SSDS)] .) .
  eq syntax2kEq((ceq T1 = T2 if Cond [AS] .), SSDS)
-  = (ceq syntax2kT(T1,SSDS) = syntax2kT(T2,SSDS) if syntax2kC(Cond,SSDS) [AS] .) .
+  = (ceq syntax2kT(T1,SSDS) = syntax2kT(T2,SSDS) if syntax2kC(Cond,SSDS) [syntax2kAS(AS, SSDS)] .) .
 
  op syntax2kRls : RuleSet SubsortDeclSet ~> RuleSet .
  eq syntax2kRls(Rls Rl, SSDS)
@@ -115,9 +124,9 @@ ceq concretize((op Q : Tl -> T [AS] .) (op Q : Tl -> T' [AS] .) OPDS)
 
  op syntax2kRl : Rule SubsortDeclSet ~> Rule .
  eq syntax2kRl((rl T1 => T2 [AS] .), SSDS)
-  = (rl syntax2kT(T1,SSDS) => syntax2kT(T2,SSDS) [AS] .) .
+  = (rl syntax2kT(T1,SSDS) => syntax2kT(T2,SSDS) [syntax2kAS(AS, SSDS)] .) .
  eq syntax2kRl((crl T1 => T2 if Cond [AS] .), SSDS)
-  = (crl syntax2kT(T1,SSDS) => syntax2kT(T2,SSDS) if syntax2kC(Cond,SSDS) [AS] .) .
+  = (crl syntax2kT(T1,SSDS) => syntax2kT(T2,SSDS) if syntax2kC(Cond,SSDS) [syntax2kAS(AS, SSDS)] .) .
 
  op syntax2kC : Condition SubsortDeclSet ~> Condition .
  eq syntax2kC(T1 = T2 /\ Cond,SSDS) 

@@ -33,7 +33,7 @@ else
   LANG=`echo $FILE | tr a-z A-Z`
 fi
 
-GFILE="kcompile_gen"
+#GFILE="kcompile_gen"
 IFILE="kcompile_in.maude"
 EFILE="kcompile_err.txt"
 OFILE="kcompile_out.txt"
@@ -42,11 +42,11 @@ TFILE="kcompile_tmp.txt"
 : >"$EFILE"
 : >"$OFILE"
 : >"$TFILE"
-if [ -f "$FILE.kmaude" ]
-then 
-  $KBASE/tools/maudify.sh "$FILE.kmaude" > "$GFILE.maude"
-  FILE="$GFILE"
-fi
+#if [ -f "$FILE.kmaude" ]
+#then 
+#  $KBASE/tools/maudify.sh "$FILE.kmaude" > "$GFILE.maude"
+#  FILE="$GFILE"
+#fi
 
 LANG0=LANG
 

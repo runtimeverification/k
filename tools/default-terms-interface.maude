@@ -1,0 +1,41 @@
+load default-terms
+
+mod DEFAULT-TERMS-META is
+  including DEFAULT-TERMS .
+  including META-LEVEL .
+  var DefaultTerms NoDefaultTerms Config : String .  var M : Module .
+  var QDefaultTerms QNoDefaultTerms QConfig : Qid .
+  op resolveDefaultTerms : String String String ~> Module .
+  eq resolveDefaultTerms(DefaultTerms, NoDefaultTerms, Config) 
+   = resolveDefaultTerms(qid(DefaultTerms), qid(NoDefaultTerms), qid(Config)) .
+  op resolveDefaultTerms : Qid Qid Qid ~> Module .
+  eq resolveDefaultTerms(QDefaultTerms,QNoDefaultTerms,QConfig) 
+   = defaultTerms(QNoDefaultTerms, upModule(QDefaultTerms, false), extractConfTerm(upModule(QConfig,false))) .
+
+  op compileDEFAULT-TERMS : Module ~> Module .
+  eq compileDEFAULT-TERMS(M) = defaultTerms(getName(M), M, extractConfTerm(M)) .
+endm
+
+mod DEFAULT-TERMS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op default-terms : -> System .
+  op idle : -> State .
+  var Q DefaultTerms NoDefaultTerms Config : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq default-terms = [nil, idle, 
+ 'Usage: 'resolveDefaultTerms '<SourceModule> '<DestModule> '<ConfigModule> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveDefaultTerms DefaultTerms NoDefaultTerms Config QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(DefaultTerms,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('DEFAULT-TERMS-META),
+                        'resolveDefaultTerms[upTerm(string(DefaultTerms)),upTerm(string(NoDefaultTerms)), upTerm(string(Config))])),error) .
+endm

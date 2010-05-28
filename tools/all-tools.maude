@@ -4,6 +4,7 @@ load prelude-extras
 load meta-k
 load printing
 load many-modules-interface
+load default-terms-interface
 load open-cells-interface
 load sanity-checks-interface
 load missing-subsorts-interface
@@ -22,6 +23,14 @@ load make-all-labels-interface
 load metadata-parsing
 load strict-ops2cxt-interface
 load strict-cxt2eqs-interface
+
+
+mod COMPILE-ONESHOT is
+ including MANY-MODULES-META + ANONYMOUS-CONSTANTS-META + SANITY-CHECKS-META + MISSING-SUBSORTS-META + DEFAULT-TERMS-META + CONTEXT-TRANSFORMERS-META + OPEN-CELLS-META + ANONYMOUS-VARIABLES-META + MAKE-K-RULES-META + REMOVE-SUBLISTS-META + LISTS-TO-WRAPPERS-META + SYNTAX-TO-K-META + ADD-KPROPER-META + LISTS-TO-K-META + SUBSORTS-TO-WRAPPERS-META + HOMOGENOUS-ARGUMENTS-META + MAKE-ALL-LABELS-META + STRICTOPS2CXT-META + STRICTCXT2EQS-META .
+ op compile : Module ~> Module .
+ eq compile(M:Module)
+  = compileSTRICTCXT2EQS(compileSTRICTOPS2CXT(compileMAKE-ALL-LABELS(compileHOMOGENOUS-ARGUMENTS(compileSUBSORTS-TO-WRAPPERS(compileLISTS-TO-K(compileADD-KPROPER(compileSYNTAX-TO-K(compileLISTS-TO-WRAPPERS(compileREMOVE-SUBLISTS(compileMAKE-K-RULES(compileANONYMOUS-VARIABLES(compileOPEN-CELLS(compileCONTEXT-TRANSFORMERS(compileDEFAULT-TERMS(compileMISSING-SUBSORTS(compileSANITY-CHECKS(compileANONYMOUS-CONSTANTS(compileMANY-MODULES(M:Module))))))))))))))))))) .
+endm
 
 fmod COMPILE-META is
   including META-LEVEL .
@@ -46,6 +55,8 @@ fmod COMPILE-META is
    = tokenize("checking each (sub)term parses to a sort") .
   eq getPhaseName('MISSING-SUBSORTS)
    = tokenize("(almost) transitively closing the subsorts") .
+  eq getPhaseName('DEFAULT-TERMS)
+   = tokenize("filling missing information in the right hand side.") .
   eq getPhaseName('CONTEXT-TRANSFORMERS)
    = tokenize("applying Context Transformers") .
   eq getPhaseName('OPEN-CELLS)
@@ -75,14 +86,14 @@ fmod COMPILE-META is
   eq getPhaseName('STRICTCXT2EQS)
    = tokenize("generating Strictness Equations") .
   op compile : Module ~> Module .
-  eq compile(M) = compile(M, 'MANY-MODULES 'ANONYMOUS-CONSTANTS 'SANITY-CHECKS 'MISSING-SUBSORTS 'CONTEXT-TRANSFORMERS 'OPEN-CELLS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'REMOVE-SUBLISTS 'LISTS-TO-WRAPPERS 'SYNTAX-TO-K 'ADD-KPROPER 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS
+  eq compile(M) = compile(M, 'MANY-MODULES 'ANONYMOUS-CONSTANTS 'SANITY-CHECKS 'MISSING-SUBSORTS 'DEFAULT-TERMS 'CONTEXT-TRANSFORMERS 'OPEN-CELLS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'REMOVE-SUBLISTS 'LISTS-TO-WRAPPERS 'SYNTAX-TO-K 'ADD-KPROPER 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS
   ) .
   op compile : Module QidList ~> Module .
   eq compile(M,nil) = M .
   eq compile(M, Q QIL) =  $compile(M, Q, 
     downTerm(getTerm(
              metaReduce(wrapper(qid(string(Q) + "-META")),
-                        'compile[upTerm(M)])), error)
+                        qid("compile" + string(Q))[upTerm(M)])), error)
      , QIL) .
   
   op $compile : Module Qid Module QidList ~> Module .

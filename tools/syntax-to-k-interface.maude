@@ -9,8 +9,8 @@ mod SYNTAX-TO-K-META is
   eq syntax2k(Syntax, NoSyntax) = syntax2k(qid(Syntax), qid(NoSyntax)) .
   op syntax2k : Qid Qid ~> Module .
   eq syntax2k(QSyntax,QNoSyntax) = syntax2k(QNoSyntax, upModule(QSyntax, false), upModule(QSyntax, true), upImports(getImports(upModule(QSyntax, false)))) .
-  op compile : Module ~> Module .
-  eq compile(M) = setName(syntax2k(getName(M), M, flatten(M), empty), getName(M)) .
+  op compileSYNTAX-TO-K : Module ~> Module .
+  eq compileSYNTAX-TO-K(M) = setName(syntax2k(getName(M), M, flatten(M), empty), getName(M)) .
 endm
 
 mod SYNTAX-TO-K-LOOP is 

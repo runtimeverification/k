@@ -33,8 +33,8 @@ mod SANITY-CHECKS-META is
   eq extractError(Flat, errorMRl(Trm, T, Rl)) 
    = error('\g eMetaPrettyPrint(Flat, Rl, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
 
-  op compile : Module ~> Module .
-  eq compile(M) = $compile(flatten(M), sanityChecks(M, flatten(M))) .
+  op compileSANITY-CHECKS : Module ~> Module .
+  eq compileSANITY-CHECKS(M) = $compile(flatten(M), sanityChecks(M, flatten(M))) .
   
   op $compile : Module Module ~> Module .
   eq $compile(Flat, MM) = if MM :: Module then MM else moduleError(extractError(Flat,MM)) fi .

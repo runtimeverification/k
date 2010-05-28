@@ -9,8 +9,8 @@ mod REMOVE-SUBLISTS-META is
   eq removeSublists(Syntax, NoSyntax) = removeSublists(qid(Syntax), qid(NoSyntax)) .
   op removeSublists : Qid Qid ~> Module .
   eq removeSublists(QSyntax,QNoSyntax) = removeSublists(QNoSyntax, upModule(QSyntax, false), upModule(QSyntax, true), upImports(getImports(upModule(QSyntax, false)))) .
-  op compile : Module ~> Module .
-  eq compile(M) = setName(removeSublists(getName(M), M, flatten(M), empty), getName(M)) .
+  op compileREMOVE-SUBLISTS : Module ~> Module .
+  eq compileREMOVE-SUBLISTS(M) = setName(removeSublists(getName(M), M, flatten(M), empty), getName(M)) .
 endm
 
 mod REMOVE-SUBLISTS-LOOP is 

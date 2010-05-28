@@ -13,8 +13,8 @@ mod MANY-MODULES-META is
   op manyModules : Qid Qid ~> Module .
   eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules)) .
 
-  op compile : Module ~> Module .
-  eq compile(M) = manyModules(getName(M), getAllImportsBut(M,  none, kModules ; builtinModules ; getName(M), empty)) .
+  op compileMANY-MODULES : Module ~> Module .
+  eq compileMANY-MODULES(M) = manyModules(getName(M), getAllImportsBut(M,  none, kModules ; builtinModules ; getName(M), empty)) .
 endm
 
 mod MANY-MODULES-LOOP is 

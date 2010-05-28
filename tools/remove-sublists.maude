@@ -9,7 +9,8 @@ fmod REMOVE-SUBLISTS is
  var Ops : OpDeclSet .  var Op : OpDecl .
  var SSDS SSDS' : SubsortDeclSet .  var SSD : SubsortDecl . 
  var SS : SortSet . var S S' S'' : Sort .
- var Q O : Qid . var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
+ var Q O : Qid . var QIL : QidList .
+ var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
  var AS AS' : AttrSet .  var HL : HookList .
  var MS : ModuleSet . var M M' Flat : Module .
  var Trm : Term . var Trms : TermList . var V : Variable . var C : Constant .
@@ -73,7 +74,15 @@ ceq removeSublistsImports(MS, Q, SSDS)
 
  op removeSublistsAS : AttrSet SubsortDeclSet ~> AttrSet .
  eq removeSublistsAS(AS id(Trm),SSDS) = id(removeSublistsT(Trm,SSDS)) removeSublistsAS(AS,SSDS) .
+ eq removeSublistsAS(AS print(QIL),SSDS) = print(removeSublistsPrint(QIL, SSDS))
+    removeSublistsAS(AS,SSDS) .
  eq removeSublistsAS(AS,SSDS) = AS [owise] .
+
+  op removeSublistsPrint : QidList SubsortDeclSet -> QidList .
+  eq removeSublistsPrint(Q QIL, SSDS) 
+   = if Q :: Variable  then removeSublistsT(Q, SSDS) else Q fi 
+     removeSublistsPrint(QIL, SSDS) .
+  eq removeSublistsPrint(nil, SSDS) = nil .
 
  op removeSublistsMbs : MembAxSet SubsortDeclSet ~> MembAxSet .
  eq removeSublistsMbs(Mbs Mb, SSDS)
@@ -82,10 +91,11 @@ ceq removeSublistsImports(MS, Q, SSDS)
 
  op removeSublistsMb : MembAx SubsortDeclSet ~> MembAx .
  eq removeSublistsMb((mb T1 : T [AS] .), SSDS)
-  = (mb removeSublistsT(T1, SSDS) : removeSublistsType(T,SSDS) [AS] .) .
+  = (mb removeSublistsT(T1, SSDS) : removeSublistsType(T,SSDS) 
+     [removeSublistsAS(AS, SSDS)] .) .
  eq removeSublistsMb((cmb T1 : T if Cond [AS] .), SSDS)
   = (cmb removeSublistsT(T1, SSDS) : removeSublistsType(T,SSDS) 
-      if removeSublistsC(Cond,SSDS) [AS] .) .
+      if removeSublistsC(Cond,SSDS) [removeSublistsAS(AS, SSDS)] .) .
 
  op removeSublistsEqs : EquationSet SubsortDeclSet ~> EquationSet .
  eq removeSublistsEqs(Eqs Eq, SSDS)
@@ -94,9 +104,9 @@ ceq removeSublistsImports(MS, Q, SSDS)
 
  op removeSublistsEq : Equation SubsortDeclSet ~> Equation .
  eq removeSublistsEq((eq T1 = T2 [AS] .), SSDS)
-  = (eq removeSublistsT(T1,SSDS) = removeSublistsT(T2,SSDS) [AS] .) .
+  = (eq removeSublistsT(T1,SSDS) = removeSublistsT(T2,SSDS) [removeSublistsAS(AS, SSDS)] .) .
  eq removeSublistsEq((ceq T1 = T2 if Cond [AS] .), SSDS)
-  = (ceq removeSublistsT(T1,SSDS) = removeSublistsT(T2,SSDS) if removeSublistsC(Cond,SSDS) [AS] .) .
+  = (ceq removeSublistsT(T1,SSDS) = removeSublistsT(T2,SSDS) if removeSublistsC(Cond,SSDS) [removeSublistsAS(AS, SSDS)] .) .
 
  op removeSublistsRls : RuleSet SubsortDeclSet ~> RuleSet .
  eq removeSublistsRls(Rls Rl, SSDS)
@@ -105,9 +115,9 @@ ceq removeSublistsImports(MS, Q, SSDS)
 
  op removeSublistsRl : Rule SubsortDeclSet ~> Rule .
  eq removeSublistsRl((rl T1 => T2 [AS] .), SSDS)
-  = (rl removeSublistsT(T1,SSDS) => removeSublistsT(T2,SSDS) [AS] .) .
+  = (rl removeSublistsT(T1,SSDS) => removeSublistsT(T2,SSDS) [removeSublistsAS(AS, SSDS)] .) .
  eq removeSublistsRl((crl T1 => T2 if Cond [AS] .), SSDS)
-  = (crl removeSublistsT(T1,SSDS) => removeSublistsT(T2,SSDS) if removeSublistsC(Cond,SSDS) [AS] .) .
+  = (crl removeSublistsT(T1,SSDS) => removeSublistsT(T2,SSDS) if removeSublistsC(Cond,SSDS) [removeSublistsAS(AS, SSDS)] .) .
 
  op removeSublistsC : Condition SubsortDeclSet ~> Condition .
  eq removeSublistsC(T1 = T2 /\ Cond,SSDS) 

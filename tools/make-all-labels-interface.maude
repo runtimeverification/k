@@ -10,8 +10,8 @@ mod MAKE-ALL-LABELS-META is
   op makeAllLabels : Qid Qid ~> Module .
   eq makeAllLabels(QNoAllLabels,QAllLabels) = makeAllLabels(QAllLabels, upModule(QNoAllLabels, false), upModule(QNoAllLabels, true), upModule('K-WRAPPERS,false)) .
 
-  op compile : Module ~> Module .
-  eq compile(M) = setName(makeAllLabels('-LABELS, M, flatten(M), upModule('K-WRAPPERS,false)), getName(M)) .
+  op compileMAKE-ALL-LABELS : Module ~> Module .
+  eq compileMAKE-ALL-LABELS(M) = setName(makeAllLabels('-LABELS, M, flatten(M), upModule('K-WRAPPERS,false)), getName(M)) .
 endm
 
 mod MAKE-ALL-LABELS-LOOP is 

@@ -11,8 +11,8 @@ mod ANONYMOUS-CONSTANTS-META is
   op resolveAnonConsts : Qid Qid ~> Module .
   eq resolveAnonConsts(QAnonConsts,QNoAnonConsts) 
    = resolveAnonymousConsts(QNoAnonConsts, upModule(QAnonConsts, false), upModule(QAnonConsts, true)) .
-  op compile : Module ~> Module .
-  eq compile(M) = resolveAnonymousConsts(getName(M),M, flatten(M)) .
+  op compileANONYMOUS-CONSTANTS : Module ~> Module .
+  eq compileANONYMOUS-CONSTANTS(M) = resolveAnonymousConsts(getName(M),M, flatten(M)) .
 endm
 
 mod ANONYMOUS-CONSTANTS-LOOP is 

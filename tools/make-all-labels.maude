@@ -18,7 +18,7 @@ fmod MAKE-ALL-LABELS is
  var C : Constant . var V : Variable .
  vars OPDS Wrappers Labels : OpDeclSet . var Op Op' : OpDecl .
  var AS AS' : AttrSet .
- var OPDM : OpDeclMap .  var LabelOp : OpDeclSet .
+ var OPDM : OpDeclOpDeclSetMap .  var LabelOp : OpDeclSet .
 
  op allLabelsImports : ModuleSet ~> ImportList .
  eq allLabelsImports(M MS) = allLabelsImports(MS, getName(M), pseudoKOps(getOps(M))) .
@@ -35,17 +35,17 @@ fmod MAKE-ALL-LABELS is
  eq makeAllLabels(Q, M, Flat, MS)
   = makeAllLabels(setName(suffixImports(Q,removeImports(M, including 'K-QUOTED-LABELS .),allLabelsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, processOps(pseudoKOps(getOps(Flat)))) .
 
- op makeAllLabels : Module Module OpDeclMap ~> Module .
+ op makeAllLabels : Module Module OpDeclOpDeclSetMap ~> Module .
  eq makeAllLabels(M, Flat, OPDM) 
   = applyLabels(addOps(filteredProject(OPDM,getOps(M)), removeOps(M, getKeys(OPDM))), Flat, OPDM) .
 
- op filteredProject : OpDeclMap OpDeclSet -> OpDeclSet .
- eq filteredProject((empty).OpDeclMap, OPDS) = none .
+ op filteredProject : OpDeclOpDeclSetMap OpDeclSet -> OpDeclSet .
+ eq filteredProject((empty).OpDeclOpDeclSetMap, OPDS) = none .
  eq filteredProject(OPDM (Op |-> LabelOp), OPDS) 
   = if Op in OPDS then LabelOp filteredProject(OPDM,OPDS) 
     else filteredProject(OPDM,OPDS) fi .
 
- op applyLabels : Module  Module OpDeclMap ~> Module .
+ op applyLabels : Module  Module OpDeclOpDeclSetMap ~> Module .
  eq applyLabels(M, Flat, OPDM)
   = 
    setRls(
@@ -57,23 +57,23 @@ fmod MAKE-ALL-LABELS is
     , labelsRls(Flat, getOps(Flat), OPDM, getRls(M)))
   .
 
- op labelsMbs : Module OpDeclSet OpDeclMap MembAxSet ~> MembAxSet .
+ op labelsMbs : Module OpDeclSet OpDeclOpDeclSetMap MembAxSet ~> MembAxSet .
  eq labelsMbs(M, OPDS, OPDM, Mbs Mb)
   =  labelsMbs(M, OPDS, OPDM, Mbs) labelsMb(Mb, M, OPDS, OPDM) .
  eq labelsMbs(M, OPDS, OPDM, none) = none .
 
- op labelsMb : MembAx Module OpDeclSet OpDeclMap ~> MembAx .
+ op labelsMb : MembAx Module OpDeclSet OpDeclOpDeclSetMap ~> MembAx .
  eq labelsMb((mb T1 : T [AS] .), M, OPDS, OPDM)
   = (mb labelsT(T1, getKind(M,T), M, OPDS, OPDM) : T [AS] .) .
  eq labelsMb((cmb T1 : T if Cond [AS] .), M, OPDS, OPDM)
   = (cmb labelsT(T1, getKind(M,T), M, OPDS, OPDM) : T if labelsCond(Cond, M, OPDS, OPDM) [AS] .) .
 
- op labelsEqs : Module OpDeclSet OpDeclMap EquationSet ~> EquationSet .
+ op labelsEqs : Module OpDeclSet OpDeclOpDeclSetMap EquationSet ~> EquationSet .
  eq labelsEqs(M, OPDS, OPDM, Eqs Eq)
   =  labelsEqs(M, OPDS, OPDM, Eqs) labelsEq(Eq, M, OPDS, OPDM) .
  eq labelsEqs(M, OPDS, OPDM, none) = none .
 
- op labelsEq : Equation Module OpDeclSet OpDeclMap ~> Equation .
+ op labelsEq : Equation Module OpDeclSet OpDeclOpDeclSetMap ~> Equation .
  eq labelsEq((eq T1 = T2 [AS] .), M, OPDS, OPDM)
   = (eq labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
       = labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) [AS] .) .
@@ -82,12 +82,12 @@ fmod MAKE-ALL-LABELS is
        = labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
       if labelsCond(Cond, M, OPDS, OPDM) [AS] .) .
 
- op labelsRls : Module OpDeclSet OpDeclMap RuleSet ~> RuleSet .
+ op labelsRls : Module OpDeclSet OpDeclOpDeclSetMap RuleSet ~> RuleSet .
  eq labelsRls(M, OPDS, OPDM, Rls Rl)
   =  labelsRls(M, OPDS, OPDM, Rls) labelsRl(Rl, M, OPDS, OPDM) .
  eq labelsRls(M, OPDS, OPDM, none) = none .
 
- op labelsRl : Rule Module OpDeclSet OpDeclMap ~> Rule .
+ op labelsRl : Rule Module OpDeclSet OpDeclOpDeclSetMap ~> Rule .
  eq labelsRl((rl T1 => T2 [AS] .), M, OPDS, OPDM)
   = (rl labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
      => labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) [AS] .) .
@@ -96,7 +96,7 @@ fmod MAKE-ALL-LABELS is
       => labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
       if labelsCond(Cond, M, OPDS, OPDM) [AS] .) .
 
- op labelsCond : Condition Module OpDeclSet OpDeclMap ~> Condition .
+ op labelsCond : Condition Module OpDeclSet OpDeclOpDeclSetMap ~> Condition .
  eq labelsCond(T1 = T2 /\ Cond, M, OPDS, OPDM)
   = labelsT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) = labelsT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM)
     /\ labelsCond(Cond, M, OPDS, OPDM) .
@@ -111,14 +111,14 @@ fmod MAKE-ALL-LABELS is
     /\ labelsCond(Cond, M, OPDS, OPDM) .
  eq labelsCond(nil, M, OPDS, OPDM) = nil .
 
- op labelsTs : TermList TypeList Module OpDeclSet OpDeclMap ~> TermList  .
+ op labelsTs : TermList TypeList Module OpDeclSet OpDeclOpDeclSetMap ~> TermList  .
  eq labelsTs((Trm,Trms), T Tl, M, OPDS, OPDM)
   = labelsT(Trm,T,M,OPDS,OPDM), labelsTs(Trms,Tl, M,OPDS,OPDM) .
  eq labelsTs(empty,nil,M,OPDS,OPDM) = empty .
 
- op labelsT : Term Type Module OpDeclSet OpDeclMap ~> Term .
+ op labelsT : Term Type Module OpDeclSet OpDeclOpDeclSetMap ~> Term .
  eq labelsT(C, T, M, OPDS, OPDM ) 
-  = if getType(C) == 'Qid then mkConstant(qid("\"" + substr(string(getName(C)),1,length(string(getName(C)))) + "\""),KLabel) 
+  = if getType(C) == 'Qid then mkConstant(downKLabel(getName(C)),KLabel) 
     else labelsT(C, T, M, OPDS, OPDM, findOp(M, OPDS, getName(C), nil, getType(C))) fi .
  eq labelsT(V, T, M, OPDS, OPDM) = V .
  eq labelsT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
@@ -128,7 +128,7 @@ fmod MAKE-ALL-LABELS is
  eq labelsT(Q[Trms], T, M, OPDS, OPDM)
   = labelsT(Q[Trms], T, M, OPDS, OPDM, findOp(M, OPDS,Q, leastSorts(M, Trms), T)) [owise] .
 
- op labelsT : Term Type Module OpDeclSet OpDeclMap OpDecl ~> Term .
+ op labelsT : Term Type Module OpDeclSet OpDeclOpDeclSetMap OpDecl ~> Term .
 --- subsorted terms becoming klabels
  eq labelsT(Q[Trms], T, M, OPDS, OPDM (Op |-> none), Op)
   =  kApply(mkListLabel(Q), labelsTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM (Op |-> none))) .
@@ -143,23 +143,23 @@ fmod MAKE-ALL-LABELS is
  eq labelsT(C, T, M, OPDS, OPDM, Op)
   = C [owise] .
 
- sort OpDeclMap .
- op _|->_ : OpDecl OpDeclSet -> OpDeclMap .
- op __ : OpDeclMap OpDeclMap -> OpDeclMap [assoc comm id: empty] .
- op empty : -> OpDeclMap .
+ sort OpDeclOpDeclSetMap .
+ op _|->_ : OpDecl OpDeclSet -> OpDeclOpDeclSetMap .
+ op __ : OpDeclOpDeclSetMap OpDeclOpDeclSetMap -> OpDeclOpDeclSetMap [assoc comm id: empty] .
+ op empty : -> OpDeclOpDeclSetMap .
 
- op _[_] : OpDeclMap OpDecl -> OpDeclSet .
+ op _[_] : OpDeclOpDeclSetMap OpDecl -> OpDeclSet .
  eq ((Op |-> LabelOp) OPDM)[Op] = LabelOp .
  eq OPDM[Op] = none [owise] .
 
- op getKeys : OpDeclMap ~> OpDeclSet .
+ op getKeys : OpDeclOpDeclSetMap ~> OpDeclSet .
  eq getKeys((Op |-> OPDS) OPDM) = Op getKeys(OPDM) .
  eq getKeys(empty) = none .
 
  op pseudoKOps : OpDeclSet -> OpDeclSet .
  eq pseudoKOps(OPDS) = getOps(removeOps(OPDS,kops), ksorts) .
  
- op processOps : OpDeclSet ~> OpDeclMap .
+ op processOps : OpDeclSet ~> OpDeclOpDeclSetMap .
  eq processOps(Op OPDS) = (Op |-> processOp(Op)) processOps(OPDS) .
  eq processOps(none) = empty .
 

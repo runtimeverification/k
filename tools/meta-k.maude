@@ -8,7 +8,7 @@ fmod K-META-OPS is including META-TERM .
   eq nilKList = '.List`{K`}.List`{K`} .
 
   op nilK : -> Qid .
-  eq nilK = '.K.K .
+  eq nilK = '..K .
 
   op kra_ : TermList -> Term .
   eq kra(Trl1,'_~>_[Trl],Trl2) = kra(Trl1,Trl,Trl2) .
@@ -116,7 +116,7 @@ fmod META-K-MODULE is
 
   op kops : -> OpDeclSet [memo] .
   eq kops = (
-    op '.K : nil -> K [none] .
+    op '. : nil -> K [none] .
     op '_`(_`) : KLabel KList -> NeK [none] .
     op '_`(_`) : KProperLabel KList -> KProper [none] .
     op '_`(_`) : KResultLabel KList -> KResult [none] .
@@ -226,7 +226,14 @@ fmod META-K-RULES is including K-SORTS .
    = {getKRuleKind(Q),T,C,AS} if S := KSentence . 
 
   op getContents : KRuleSplit -> Term .
+  op getRuleKind : KRuleSplit -> KRuleKind .
+  op getCondition : KRuleSplit -> TermList .
+  op getAttrs : KRuleSplit -> AttrSet .
   eq getContents({RK,T,Cond,AS}) = T .
+  op getKind : KRuleSplit -> KRuleKind .
+  eq getKind({RK,T,Cond,AS}) = RK .
+  eq getCondition({RK,T,Cond,AS}) = Cond .
+  eq getAttrs({RK,T,Cond,AS}) = AS .
 
   op setContents : KRuleSplit Term -> KRuleSplit .
   eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
@@ -243,7 +250,7 @@ fmod K-META-CONFIG is
   including META-LEVEL .
   including INT .
   var Label Label' : Constant . var Contents Contents' T : Term .
-  var Q Q' : Qid .  var B : Bool . var E E' : Ellipses .  var M : Module .  
+  var Q Q' : Qid .  var B B' : Bool . var E E' : Ellipses .  var M : Module .  
   var AS : AttrSet .  var MAS : MembAxSet .  var S : Sort .
 
   op extractConfTerm : Module ~> Term .
@@ -288,6 +295,8 @@ fmod K-META-CONFIG is
 
   op getMultiplicity : SplitCell -> Bool .
   eq getMultiplicity({Label,Contents,B,E}) = B .
+  op setMultiplicity : SplitCell Bool -> SplitCell .
+  eq setMultiplicity({Label,Contents,B,E}, B') = {Label,Contents,B',E} .
 
   op plugCell : SplitCell -> Term .
   eq plugCell({Label,Contents,B,E}) = symbol E[cellLabel(Label,B),Contents,cellLabel(Label,B)] .
@@ -308,7 +317,7 @@ fmod K-META-CONFIG is
   eq Map = 'Map . eq Bag = 'Bag . eq List = 'List . eq Set = 'Set .
 
   op emptyCt : Sort -> Constant .
-  eq emptyCt(S) = if S == Bag then mkConstant('.Bag,Bag) else if S == Map then mkConstant('.Map,Map) else if S == List then mkConstant('.List, List) else if S == K then mkConstant('.K, K) else if S == Set then mkConstant('.Set, Set) else 'error.K fi fi fi fi fi .
+  eq emptyCt(S) = if S == Bag then mkConstant('.,Bag) else if S == Map then mkConstant('.,Map) else if S == List then mkConstant('., List) else if S == K then mkConstant('., K) else if S == Set then mkConstant('., Set) else 'error.K fi fi fi fi fi .
 
   op ctor : Sort -> Qid .
   eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else if S == Set then '__ else 'error fi fi fi fi fi .
@@ -382,7 +391,7 @@ fmod META-K-WRAPPERS is
 
   op mkSubsortWrapper : Type Type -> Qid .
   eq mkSubsortWrapper(T,T') 
-   = qid("\"" + string(T) + "\"_") .
+   = qid(string(T) + "_") .
 endfm
 
 
@@ -395,7 +404,10 @@ fmod META-K-LABELS is
   eq klistLabelS = 'kList .
 
   op mkKLabel : Qid -> Qid .
-  eq mkKLabel(Q) = qid("\"" + string(Q) + "\"") .
+  eq mkKLabel(Q) = qid("'" + string(Q)) .
+
+  op downKLabel : Qid -> Qid .
+  eq downKLabel(Q) = Q .
 
   op mkListLabel : Qid -> Term .
   eq mkListLabel(Q) = klistLabelS[upTerm(string(Q))] .
@@ -464,6 +476,7 @@ fmod K-META-LISTS is including K-META-OPS .
   including META-K-MODULE .
   including META-TERM-EXTRAS .
   including LIST-ATTRS .
+  including META-K-LABELS .
 
   var Q : Qid . var T : Type . var Tl : TypeList . var AS : AttrSet .
   var Trm : Term . var Trms : TermList .  var OPDS : OpDeclSet .
@@ -480,7 +493,7 @@ fmod K-META-LISTS is including K-META-OPS .
   eq wrapList(T, Q[Trm], Trms) = kApply(listWrapperT(Q,KHybridLabel),Trms) .
 
   op listWrapperS : Qid -> Qid .
-  eq listWrapperS(Q) = qid("\"" + string(Q) + "\"") .
+  eq listWrapperS(Q) = mkKLabel(Q) .
   op listWrapperT : Qid Type -> Constant .
   eq listWrapperT(Q,T) = mkConstant(listWrapperS(Q),klabelType(T)) .
 
@@ -490,6 +503,18 @@ fmod K-META-LISTS is including K-META-OPS .
   op getListConstructor : OpDeclSet Type ~> OpDecl .
   eq getListConstructor(OPDS op Q : Tl -> T [assoc AS] ., T)
    = (op Q : Tl -> T [assoc AS] .) .
+
+ sort CTORSMap .  var CTORS : CTORSMap .  var SSD : SubsortDecl .
+ op _|->_ : SubsortDecl Term -> CTORSMap .
+ op __ : CTORSMap CTORSMap -> CTORSMap [assoc comm id: empty] .
+ op empty : -> CTORSMap .
+
+ op getKeys : CTORSMap -> SubsortDeclSet .
+ eq getKeys(empty) = none .
+ eq getKeys(CTORS SSD |-> Trm) = getKeys(CTORS) SSD .
+
+  op getListTerm : Type OpDeclSet ~> Term .
+  eq getListTerm(T, (op Q : T T -> T [assoc id(Trm) AS] .) OPDS) = Q[Trm] .
 endfm
 
 

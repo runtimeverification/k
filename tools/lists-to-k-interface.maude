@@ -10,8 +10,8 @@ mod LISTS-TO-K-META is
   op makeLists2k : Qid Qid ~> Module .
   eq makeLists2k(QNoLists2k,QLists2k) = makeLists2k(QLists2k, upModule(QNoLists2k, false), upModule(QNoLists2k, true), upImports(getImports(upModule(QNoLists2k, false)))) .
 
-  op compile : Module ~> Module .
-  eq compile(M) = setName(makeLists2k(getName(M), M, flatten(M), empty), getName(M)) .
+  op compileLISTS-TO-K : Module ~> Module .
+  eq compileLISTS-TO-K(M) = setName(makeLists2k(getName(M), M, flatten(M), empty), getName(M)) .
 endm
 
 mod LISTS-TO-K-LOOP is 

@@ -9,8 +9,8 @@ mod ADD-KPROPER-META is
   eq addKProper(NoKProper, KProper) = addKProper(qid(NoKProper), qid(KProper)) .
   op addKProper : Qid Qid ~> Module .
   eq addKProper(QNoKProper,QKProper) = addKProper(QKProper, upModule(QNoKProper, false), upImports(getImports(upModule(QNoKProper, false)))) .
-  op compile : Module ~> Module .
-  eq compile(M) = setName(addKProper(getName(M),M, empty),getName(M)) .
+  op compileADD-KPROPER : Module ~> Module .
+  eq compileADD-KPROPER(M) = setName(addKProper(getName(M),M, empty),getName(M)) .
 endm
 
 mod ADD-KPROPER-LOOP is 

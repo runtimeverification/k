@@ -14,8 +14,8 @@ mod STRICTCXT2EQS-META is
    = setName(addModule(setImports(strictCxt2eqs(QStrictCxt, QStrictCxt, upModule(QStrictCxt,false), upModule(QStrictCxt,true)), including 'K-STRICTNESS .),setMbs(removeImports(upModule(QStrictCxt, false), including 'K-CONTEXTS .),none)), QStrictEqs)
  .
 
-  op compile : Module ~> Module .
-  eq compile(M) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M)), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
+  op compileSTRICTCXT2EQS : Module ~> Module .
+  eq compileSTRICTCXT2EQS(M) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M)), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
 endm
 
 mod STRICTCXT2EQS-LOOP is 

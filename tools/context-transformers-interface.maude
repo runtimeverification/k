@@ -12,8 +12,8 @@ mod CONTEXT-TRANSFORMERS-META is
   eq resolveKCxt(QKCxt,QNoKCxt,QConfig) 
    = contextTransformers(QNoKCxt, upModule(QKCxt, false), extractConfTerm(upModule(QConfig,false))) .
 
-  op compile : Module ~> Module .
-  eq compile(M) = contextTransformers(getName(M), M, extractConfTerm(M)) .
+  op compileCONTEXT-TRANSFORMERS : Module ~> Module .
+  eq compileCONTEXT-TRANSFORMERS(M) = contextTransformers(getName(M), M, extractConfTerm(M)) .
 endm
 
 mod CONTEXT-TRANSFORMERS-LOOP is 

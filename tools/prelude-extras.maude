@@ -283,23 +283,6 @@ fmod META-MODULE-EXTRAS is
   op _;;_ : ViewExp ViewExp -> ViewExp 
        [assoc id: mtViewExp] .                       *** view composition  _;_
       
-  var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
-  vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
-  vars OPDS OPDS' : OpDeclSet .  var Op : OpDecl .
-  vars MAS MAS' : MembAxSet .  var Mb : MembAx .
-  vars EqS EqS' : EquationSet . var Eq : Equation .
-  vars RlS RlS' : RuleSet . var Rl : Rule .
-  vars SS SS' : SortSet .  var S S' : Sort .
-  vars TS TS' : TypeSet .
-  vars IL IL' IL'' : ImportList .  var I : Import .
-  vars U U' : Module .
-  var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
-  vars PDL PDL' : ParameterDeclList .
-  var QIL : QidList .  var Q Q' : Qid . 
-  var Tl Tl' : TypeList .  var NTl : NeTypeList .  var T T' : Type . 
-  var AS AS' : AttrSet .  var Attr : Attr .
-  var NNl : NeNatList . var Nl : NatList . var N N' : Nat .
-
   op moduleError : QidList -> [Module] .
   
 
@@ -700,6 +683,36 @@ fmod META-MODULE-EXTRAS is
   op clearReductionAttrs : AttrSet ~> AttrSet .
   eq clearReductionAttrs(strat(Nl:NeNatList) AS) = clearReductionAttrs(AS) .
   eq clearReductionAttrs(AS) = AS [owise] .
+
+
+  op getAttrs : MembAx -> AttrSet .
+  op getAttrs : OpDecl -> AttrSet .
+  op getAttrs : Rule -> AttrSet .
+  op getAttrs : Equation -> AttrSet .
+  eq getAttrs(mb Trm : S [AS] .) = AS .
+  eq getAttrs(cmb Trm : S if Cond [AS] .) = AS .
+  eq getAttrs(op Q : Tl -> T [AS] .) = AS .
+  eq getAttrs(eq T1 = T2 [AS] .) = AS .
+  eq getAttrs(ceq T1 = T2 if Cond [AS] .) = AS .
+  eq getAttrs(rl T1 => T2 [AS] .) = AS .
+  eq getAttrs(crl T1 => T2 if Cond [AS] .) = AS .
+
+  var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
+  vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
+  vars OPDS OPDS' : OpDeclSet .  var Op : OpDecl .
+  vars MAS MAS' : MembAxSet .  var Mb : MembAx .
+  vars EqS EqS' : EquationSet . var Eq : Equation .
+  vars RlS RlS' : RuleSet . var Rl : Rule .
+  vars SS SS' : SortSet .  var S S' : Sort .
+  vars TS TS' : TypeSet .
+  vars IL IL' IL'' : ImportList .  var I : Import .
+  vars U U' : Module .
+  var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
+  vars PDL PDL' : ParameterDeclList .
+  var QIL : QidList .  var Q Q' : Qid . 
+  var Tl Tl' : TypeList .  var NTl : NeTypeList .  var T T' : Type . 
+  var AS AS' : AttrSet .  var Attr : Attr .
+  var NNl : NeNatList . var Nl : NatList . var N N' : Nat .
 endfm
 
 fmod METADATA-EXTRAS is
@@ -719,7 +732,7 @@ fmod META-LEVEL-EXTRAS is
 
   var M M' : Module . var T T' T'' : Type . var K : Kind . var Tl Tl' : TypeList .
   var OPDS OPDS' : OpDeclSet .  var Op Op' : OpDecl .
-  var AS AS' : AttrSet . var Q Q' : Qid .
+  var AS AS' : AttrSet . var Q Q' : Qid .  var Ct : Constant .
   var Trm Trm' : Term . var Trms : TermList .  var Nl : NatList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
   var N N' : Nat .  var IL : ImportList .  var MS : ModuleSet .
@@ -783,6 +796,18 @@ fmod META-LEVEL-EXTRAS is
  ceq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
    = (op Q : mergeTypes(Tl, Tl', 1, getPoly(AS)) -> mergeTypes(T, T', 0, getPoly(AS)) [AS] .)
   if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise] .
+
+  op getTopOp : Module Term ~> OpDecl .
+  eq getTopOp(M, Q[Trms]) = (op Q : getTermKinds(M, Trms) -> getTermKind(M, Q[Trms]) [none] .) .
+  eq getTopOp(M, Ct) = (op getName(Ct) : nil -> getType(Ct) [none] .) .
+
+  op getTermKind : Module Term -> Type .
+  eq getTermKind(M,Trm) = getKind(M,leastSort(M,Trm)) .
+
+  op getTermKinds : Module TermList -> TypeList .
+  eq getTermKinds(M,(Trm,Trms)) = getTermKind(M,Trm) getTermKinds(M,Trms) .
+  eq getTermKinds(M,empty) = nil . 
+
 
 
   op matchTermSorts : Module TermList TypeList ~> Bool .

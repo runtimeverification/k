@@ -18,10 +18,10 @@ endif
 
 command! -nargs=+ MaudeHiLink hi def link <args>
 
-syn keyword maudeModule     mod fmod omod endm endfm endm is kmod
+syn keyword maudeModule     mod fmod omod endm endfm endm is kmod endkm
 syn keyword maudeImports    protecting including extending
 syn keyword maudeSortDecl      sort sorts subsort subsorts xsort 
-syn keyword maudeStatements op ops var vars eq ceq rl crl rule context configuration mb cmb KSentence
+syn keyword maudeStatements op ops var vars kvars kvar eq ceq rl crl rule context configuration mb cmb KSentence
 "syn match   maudeFlags      "\[.*\]"
 syn keyword maudeCommands   reduce red rewrite rew parse frewrite frew
 syn match   maudeComment    "\*\*\*.*"
@@ -47,7 +47,7 @@ syn keyword maudeSorts      CellLabel ListItem BagItem SetItem MapItem
 syn keyword maudeAttrs      assoc comm idem iter id left-id right-id strat memo
 syn keyword maudeAttrs      prec gather format ctor config object msg frozen
 syn keyword maudeAttrs      poly special label metadata owise nonexec
-syn keyword maudeAttrs      seqstrict strict structural nondet bidirectional
+syn keyword maudeAttrs      seqstrict strict structural hybrid nondet bidirectional
 
 syn match maudeStatements "?" "\.k\?" "\.l" "\.m" "\.s" "\.\.\." 
 

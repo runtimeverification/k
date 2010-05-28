@@ -12,8 +12,8 @@ mod LISTS-TO-WRAPPERS-META is
   op makeLists2wrappers : Qid Qid ~> Module .
   eq makeLists2wrappers(QNoLists2wrappers,QLists2wrappers) = makeLists2wrappers(QLists2wrappers, upModule(QNoLists2wrappers, false), upModule(QNoLists2wrappers, true), empty) .
 
-  op compile : Module ~> Module .
-  eq compile(M) = setName(makeLists2wrappers(getName(M), M, flatten(M), empty), getName(M)) .
+  op compileLISTS-TO-WRAPPERS : Module ~> Module .
+  eq compileLISTS-TO-WRAPPERS(M) = setName(makeLists2wrappers(getName(M), M, flatten(M), empty), getName(M)) .
 endm
 
 mod LISTS-TO-WRAPPERS-LOOP is 

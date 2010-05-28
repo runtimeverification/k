@@ -84,7 +84,8 @@ fmod CONTEXT-TRANSFORMERS is
   eq getConfL(Q, N, Tl) = none [owise] .
 
   op getConfList : TermList -> TermList .
-  eq getConfList(('__[Tl],Tl')) = (getConfList(Tl),getConfList(Tl')) .
+ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl')) 
+ if Q = ctor(Bag) . 
   eq getConfList((T,Tl)) = (T,getConfList(Tl)) [owise] .
   eq getConfList(empty) = empty .
 
@@ -169,7 +170,7 @@ fmod CONTEXT-TRANSFORMERS is
   op flattenTS : TermSet -> Term .
   eq flattenTS(qt(Q, B', T)) = T .
   eq flattenTS(var(T)) = T .
-  eq flattenTS(TS) = '__[flattenTSl(TS)] [owise] .
+  eq flattenTS(TS) = ctor(Bag)[flattenTSl(TS)] [owise] .
 
   op flattenTSl : TermSet -> TermList .
   eq flattenTSl(emptyTS) = empty .

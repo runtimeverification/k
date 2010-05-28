@@ -1,0 +1,1515 @@
+set show advisories off .
+fmod META-MODULE is
+  protecting META-TERM .
+  protecting NAT-LIST .
+  protecting QID-LIST .
+  protecting QID-SET * (op empty to none, op _,_ to _;_ [prec 43]) .
+
+*** subsort declarations
+  sorts SubsortDecl SubsortDeclSet .
+  subsort SubsortDecl < SubsortDeclSet .
+  op subsort_<_. : Sort Sort -> SubsortDecl [ctor] .
+  op none : -> SubsortDeclSet [ctor] .
+  op __ : SubsortDeclSet SubsortDeclSet -> SubsortDeclSet
+    [ctor assoc id: none format (d ni d)] .
+  eq S:SubsortDecl S:SubsortDecl = S:SubsortDecl .
+
+*** sort, kind and type sets
+  sorts EmptyTypeSet NeSortSet NeKindSet NeTypeSet SortSet KindSet TypeSet .
+  subsort EmptyTypeSet < SortSet KindSet < TypeSet < QidSet .
+  subsort Sort < NeSortSet < SortSet .
+  subsort Kind < NeKindSet < KindSet .
+  subsort Type NeSortSet NeKindSet < NeTypeSet < TypeSet NeQidSet .
+  op none : -> EmptyTypeSet [ctor] .
+  op _;_ : TypeSet TypeSet -> TypeSet [ctor ditto] .
+  op _;_ : NeTypeSet TypeSet -> NeTypeSet [ctor ditto] .
+  op _;_ : SortSet SortSet -> SortSet [ctor ditto] .
+  op _;_ : NeSortSet SortSet -> NeSortSet [ctor ditto] .
+  op _;_ : KindSet KindSet -> KindSet [ctor ditto] .
+  op _;_ : NeKindSet KindSet -> NeKindSet [ctor ditto] .
+  op _;_ : EmptyTypeSet EmptyTypeSet -> EmptyTypeSet [ctor ditto] .
+
+*** type lists
+  sort NeTypeList TypeList .
+  subsorts Type < NeTypeList < TypeList < QidList .
+  subsorts NeTypeList < NeQidList .
+  op nil : -> TypeList [ctor] .
+  op __ : TypeList TypeList -> TypeList [ctor ditto] .
+  op __ : NeTypeList TypeList -> NeTypeList [ctor ditto] .
+  op __ : TypeList NeTypeList -> NeTypeList [ctor ditto] .
+  eq T:TypeList ; T:TypeList = T:TypeList .
+
+*** sets of type lists
+  sort TypeListSet .
+  subsort TypeList TypeSet < TypeListSet .
+  op _;_ : TypeListSet TypeListSet -> TypeListSet [ctor ditto] .
+
+*** attribute sets
+  sorts Attr AttrSet .
+  subsort Attr < AttrSet .
+  op none : -> AttrSet [ctor] .
+  op __ : AttrSet AttrSet -> AttrSet [ctor assoc id: none] .
+  eq A:Attr A:Attr = A:Attr .
+
+*** renamings
+  sorts Renaming RenamingSet .
+  subsort Renaming < RenamingSet .
+  op sort_to_ : Qid Qid -> Renaming [ctor] .
+  op op_to_[_] : Qid Qid AttrSet -> Renaming
+    [ctor format (d d d d s d d d)] .
+  op op_:_->_to_[_] : Qid TypeList Type Qid AttrSet -> Renaming
+    [ctor format (d d d d d d d d s d d d)] .
+  op label_to_ : Qid Qid -> Renaming [ctor] .
+  op _,_ : RenamingSet RenamingSet -> RenamingSet
+    [ctor assoc prec 43 format (d d ni d)] .
+
+*** parameter lists
+  sort EmptyCommaList NeParameterList ParameterList .
+  subsorts Sort < NeParameterList < ParameterList .
+  subsort EmptyCommaList < GroundTermList ParameterList .
+  op empty : -> EmptyCommaList [ctor] .
+  op _,_ : ParameterList ParameterList -> ParameterList [ctor ditto] .
+  op _,_ : NeParameterList ParameterList -> NeParameterList [ctor ditto] .
+  op _,_ : ParameterList NeParameterList -> NeParameterList [ctor ditto] .
+  op _,_ : EmptyCommaList EmptyCommaList -> EmptyCommaList [ctor ditto] .
+
+*** module expressions
+  sort ModuleExpression .
+  subsort Qid < ModuleExpression .
+  op _+_ : ModuleExpression ModuleExpression -> ModuleExpression
+    [ctor assoc ] .
+  op _*(_) : ModuleExpression RenamingSet -> ModuleExpression
+    [ctor prec 39 format (d d s n++i n--i d)] .
+  op _{_} : ModuleExpression ParameterList -> ModuleExpression [ctor prec 37].
+
+*** parameter declarations
+  sorts ParameterDecl NeParameterDeclList ParameterDeclList .
+  subsorts ParameterDecl < NeParameterDeclList < ParameterDeclList .
+  op _::_ : Sort ModuleExpression -> ParameterDecl .
+  op nil : -> ParameterDeclList [ctor] .
+  op _,_ : ParameterDeclList ParameterDeclList -> ParameterDeclList [ctor assoc id: nil prec 121] .
+  op _,_ : NeParameterDeclList ParameterDeclList -> NeParameterDeclList [ctor ditto] .
+  op _,_ : ParameterDeclList NeParameterDeclList -> NeParameterDeclList [ctor ditto] .
+
+*** importations
+  sorts Import ImportList .
+  subsort Import < ImportList .
+  op protecting_. : ModuleExpression -> Import [ctor] .
+  op extending_. : ModuleExpression -> Import [ctor] .
+  op including_. : ModuleExpression -> Import [ctor] .
+  op nil : -> ImportList [ctor] .
+  op __ : ImportList ImportList -> ImportList
+    [ctor assoc id: nil format (d ni d)] .
+
+*** hooks
+  sorts Hook NeHookList HookList .
+  subsort Hook < NeHookList < HookList .
+  op id-hook : Qid QidList -> Hook [ctor format (nssss d)] .
+  op op-hook : Qid Qid QidList Qid -> Hook [ctor format (nssss d)] .
+  op term-hook : Qid Term -> Hook [ctor format (nssss d)] .
+  op nil : -> HookList [ctor] .
+  op __ : HookList HookList -> HookList [ctor assoc id: nil] .
+  op __ : NeHookList HookList -> NeHookList [ctor ditto] .
+  op __ : HookList NeHookList -> NeHookList [ctor ditto] .
+
+*** operator attributes
+  op assoc : -> Attr [ctor] .
+  op comm : -> Attr [ctor] .
+  op idem : -> Attr [ctor] .
+  op iter : -> Attr [ctor] .
+  op id : Term -> Attr [ctor] .
+  op left-id : Term -> Attr [ctor] .
+  op right-id : Term -> Attr [ctor] .
+  op strat : NeNatList -> Attr [ctor] .
+  op memo : -> Attr [ctor] .
+  op prec : Nat -> Attr [ctor] .
+  op gather : QidList -> Attr [ctor] .
+  op format : QidList -> Attr [ctor] .
+  op ctor : -> Attr [ctor] .
+  op config : -> Attr [ctor] .
+  op object : -> Attr [ctor] .
+  op msg : -> Attr [ctor] .
+  op frozen : NeNatList -> Attr [ctor] .
+  op poly : NeNatList -> Attr [ctor] .
+  op special : NeHookList -> Attr [ctor] .
+
+*** statement attributes
+  op label : Qid -> Attr [ctor] .
+  op metadata : String -> Attr [ctor] .
+  op owise : -> Attr [ctor] .
+  op nonexec : -> Attr [ctor] .
+  op print : QidList -> Attr [ctor] .
+
+*** operator declarations
+  sorts OpDecl OpDeclSet .
+  subsort OpDecl < OpDeclSet .
+  op (op_:_->_[_].) : Qid TypeList Type AttrSet -> OpDecl
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> OpDeclSet [ctor] .
+  op __ : OpDeclSet OpDeclSet -> OpDeclSet
+    [ctor assoc id: none format (d ni d)] .
+  eq O:OpDecl O:OpDecl = O:OpDecl .
+
+*** conditions
+  sorts EqCondition Condition .
+  subsort EqCondition < Condition .
+  op nil : -> EqCondition [ctor] .
+  op _=_ : Term Term -> EqCondition [ctor prec 71] .
+  op _:_ : Term Sort -> EqCondition [ctor prec 71] .
+  op _:=_ : Term Term -> EqCondition [ctor prec 71] .
+  op _=>_ : Term Term -> Condition [ctor prec 71] .
+  op _/\_ : EqCondition EqCondition -> EqCondition [ctor assoc id: nil prec 73] .
+  op _/\_ : Condition Condition -> Condition [ctor assoc id: nil prec 73] .
+
+*** membership axioms
+  sorts MembAx MembAxSet .
+  subsort MembAx < MembAxSet .
+  op mb_:_[_]. : Term Sort AttrSet -> MembAx
+    [ctor format (d d d d s d d s d)] .
+  op cmb_:_if_[_]. : Term Sort EqCondition AttrSet -> MembAx
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> MembAxSet [ctor] .
+  op __ : MembAxSet MembAxSet -> MembAxSet
+    [ctor assoc id: none format (d ni d)] .
+  eq M:MembAx M:MembAx = M:MembAx .
+
+*** equations
+  sorts Equation EquationSet .
+  subsort Equation < EquationSet .
+  op eq_=_[_]. : Term Term AttrSet -> Equation
+    [ctor format (d d d d s d d s d)] .
+  op ceq_=_if_[_]. : Term Term EqCondition AttrSet -> Equation
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> EquationSet [ctor] .
+  op __ : EquationSet EquationSet -> EquationSet
+    [ctor assoc id: none format (d ni d)] .
+  eq E:Equation E:Equation = E:Equation .
+
+*** rules
+  sorts Rule RuleSet .
+  subsort Rule < RuleSet .
+  op rl_=>_[_]. : Term Term AttrSet -> Rule
+    [ctor format (d d d d s d d s d)] .
+  op crl_=>_if_[_]. : Term Term Condition AttrSet -> Rule
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> RuleSet [ctor] .
+  op __ : RuleSet RuleSet -> RuleSet
+    [ctor assoc id: none format (d ni d)] .
+  eq R:Rule R:Rule = R:Rule .
+
+*** modules
+  sorts FModule SModule FTheory STheory Module .
+  subsorts FModule < SModule < Module .
+  subsorts FTheory < STheory < Module .
+  sort Header .
+  subsort Qid < Header .
+  op _{_}  : Qid ParameterDeclList -> Header [ctor] .
+  op fmod_is_sorts_.____endfm : Header ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet -> FModule [ctor gather (& & & & & & &)
+     format (d d s n++i ni d d ni ni ni ni n--i d)] .
+  op mod_is_sorts_._____endm : Header ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet RuleSet -> SModule
+    [ctor gather (& & & & & & & &)
+     format (d d s n++i ni d d ni ni ni ni ni n--i d)] .
+  op fth_is_sorts_.____endfth : Qid ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet -> FTheory [ctor gather (& & & & & & &)
+     format (d d d n++i ni d d ni ni ni ni n--i d)] .
+  op th_is_sorts_._____endth : Qid ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet RuleSet -> STheory
+    [ctor gather (& & & & & & & &)
+     format (d d d n++i ni d d ni ni ni ni ni n--i d)] .
+  op [_] : Qid -> Module .
+  eq [Q:Qid] = (th Q:Qid is including Q:Qid .
+                sorts none . none none none none none endth) .
+
+*** projection functions
+  var Q : Qid .
+  var PDL : ParameterDeclList .
+  var H : Header .
+  var M : Module .
+  var IL : ImportList .
+  var SS : SortSet .
+  var SSDS : SubsortDeclSet .
+  var OPDS : OpDeclSet .
+  var MAS : MembAxSet .
+  var EQS : EquationSet .
+  var RLS : RuleSet .
+
+  op getName : Module -> Qid .
+  eq getName(fmod Q is IL sorts SS . SSDS OPDS MAS EQS endfm) = Q .
+  eq getName(mod Q is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = Q .
+  eq getName(fmod Q{PDL} is IL sorts SS . SSDS OPDS MAS EQS endfm) = Q .
+  eq getName(mod Q{PDL} is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = Q .
+  eq getName(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = Q .
+  eq getName(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = Q .
+
+  op getImports : Module -> ImportList .
+  eq getImports(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = IL .
+  eq getImports(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = IL .
+  eq getImports(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = IL .
+  eq getImports(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = IL .
+
+  op getSorts : Module -> SortSet .
+  eq getSorts(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = SS .
+  eq getSorts(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = SS .
+  eq getSorts(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = SS .
+  eq getSorts(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = SS .
+
+  op getSubsorts : Module -> SubsortDeclSet .
+  eq getSubsorts(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = SSDS .
+  eq getSubsorts(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = SSDS .
+  eq getSubsorts(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = SSDS .
+  eq getSubsorts(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = SSDS .
+
+  op getOps : Module -> OpDeclSet .
+  eq getOps(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = OPDS .
+  eq getOps(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = OPDS .
+  eq getOps(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = OPDS .
+  eq getOps(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = OPDS .
+
+  op getMbs : Module -> MembAxSet .
+  eq getMbs(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = MAS .
+  eq getMbs(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = MAS .
+  eq getMbs(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = MAS .
+  eq getMbs(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = MAS .
+
+  op getEqs : Module -> EquationSet .
+  eq getEqs(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = EQS .
+  eq getEqs(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = EQS .
+  eq getEqs(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = EQS .
+  eq getEqs(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = EQS .
+
+  op getRls : Module -> RuleSet .
+  eq getRls(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = none .
+  eq getRls(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = RLS .
+  eq getRls(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = none .
+  eq getRls(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = RLS .
+endfm
+select META-LEVEL .
+set show advisories on .
+load prelude-extras
+load meta-k
+load metadata-parsing.maude
+load printing
+---load make-k
+mod DECL-META-LATEX-PRINT is
+  pr K-META-OPEN-CELLS .
+  pr META-K-RULES .
+  pr META-LEVEL .
+  pr CONVERSION .
+  pr NAT-LIST-EXTRAS .
+  pr META-MODULE-EXTRAS .
+  pr PARSE-METADATA .
+
+  var  St Pattern OpenPar ClosingPar : String .
+  vars Left R N OpenPars ClosingPars : Nat .
+  var Label : Qid .  var Contents : Term . var B : Bool .
+
+  ---- finds a pattern out of balanced parentheses 
+  ---- findOut("S{P1, P2{P21, P22}, P3}", ",", "{", "}", 6) returns 18, not 12
+  op findOut : String String String String Nat -> FindResult .
+  op findOut : String String String String Nat Nat -> FindResult .
+
+  eq findOut(St, Pattern, OpenPar, ClosingPar, N)
+    = findOut(St, Pattern, OpenPar, ClosingPar, 0, N) .
+
+  eq findOut(St, Pattern, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 and-then substr(St, N, length(Pattern)) == Pattern
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then findOut(St, Pattern, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then findOut(St, Pattern, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else findOut(St, Pattern, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the first closing unbalanced parenthesis 
+  ---- findOut("P1, P2{P21, P22}, P3}", "{", "}", 6) returns 21, not 16
+  op findClosing : String String String Nat -> FindResult .
+  op findClosing : String String String Nat Nat -> FindResult .
+
+  eq findClosing(St, OpenPar, ClosingPar, N)
+    = findClosing(St, OpenPar, ClosingPar, 0, N) .
+
+  eq findClosing(St, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == ClosingPar
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then findClosing(St, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then findClosing(St, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else findClosing(St, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the last opening unbalanced parenthesis 
+  ---- findOpening("S{P1, P2{P21, P22}, P3}", "{", "}", 21) returns 1, not 8
+  op findOpening : String String String Nat -> FindResult .
+  op findOpening : String String String Nat Nat -> FindResult .
+
+  eq findOpening(St, OpenPar, ClosingPar, N)
+    = findOpening(St, OpenPar, ClosingPar, 0, N) .
+
+  eq findOpening(St, OpenPar, ClosingPar, ClosingPars, N)
+    = if N == 0
+      then notFound
+      else if ClosingPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == OpenPar
+           then N
+           else if substr(St, N, length(OpenPar)) == ClosingPar
+                then findOpening(St, OpenPar, ClosingPar, 
+                       ClosingPars + 1, sd(N, 1))
+                else if substr(St, N, length(ClosingPar)) == OpenPar
+                     then findOpening(St, OpenPar, ClosingPar, 
+                            sd(ClosingPars, 1), sd(N, 1))
+                     else findOpening(St, OpenPar, ClosingPar, 
+                            ClosingPars, sd(N, 1))
+                     fi
+                fi
+           fi
+      fi .
+
+
+  op getSort : Kind -> Sort .
+  eq getSort(K:Kind) 
+    = if findOut(string(K:Kind), "`,", "{", "}", 0) == notFound
+      then qid(substr(string(K:Kind), 
+                      2, 
+                      sd(length(string(K:Kind)), 4)))
+      else qid(substr(string(K:Kind), 
+                      2, 
+                      sd(findOut(string(K:Kind), "`,", "{", "}", 0), 2)))
+      fi .
+
+
+
+  op attrSet2QidList : AttrSet -> QidList .
+  op hookList2QidList : HookList -> QidList .
+  op termList2QidList : TermList -> QidList .
+  op intList2QidList : IntList -> QidList .
+  op typeList2QidList : TypeList -> QidList .
+
+  eq attrSet2QidList(none) = nil .
+  eq attrSet2QidList((assoc AtS)) = ('\attr '`{ 'assoc '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((comm AtS))  = ('\attr '`{ 'comm '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((idem AtS))  = ('\attr '`{ 'idem '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((iter AtS))  = ('\attr '`{ 'iter '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((id(T) AtS)) 
+    = ('\idTerm '`{ termList2QidList(T) '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((right-id(T) AtS)) 
+    = ('right-id: termList2QidList(T) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((left-id(T) AtS))  
+    = ('left-id: termList2QidList(T) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((poly(NL) AtS))
+    = ('poly '`( intList2QidList(NL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((strat(NL) AtS))
+    = ('strat '`( intList2QidList(NL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((memo AtS))  = ('memo attrSet2QidList(AtS)) .
+  eq attrSet2QidList((prec(N) AtS))  
+    = (---('\prec '`{ intList2QidList(N) '`}) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((gather(QIL) AtS)) 
+    = (---('gather QIL) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((format(QIL) AtS)) 
+    = ('\format '`{ QIL '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((ctor AtS))  = ('ctor attrSet2QidList(AtS)) .
+  eq attrSet2QidList((frozen(NL) AtS))
+    = ('frozen '`( intList2QidList(NL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((config AtS))  = ('config attrSet2QidList(AtS)) .
+  eq attrSet2QidList((object AtS))  = ('object attrSet2QidList(AtS)) .
+  eq attrSet2QidList((msg AtS))  = ('msg attrSet2QidList(AtS)) .
+  eq attrSet2QidList((special(HkL) AtS))
+    = ('special '`( hookList2QidList(HkL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((none).AttrSet) = nil .
+
+  eq hookList2QidList((id-hook(QI, QIL) HkL))
+    = ('id-hook QI '`, '`( QIL '`) hookList2QidList(HkL)) .
+  eq hookList2QidList((op-hook(QI, QI', QIL, QI'') HkL))
+    = ('op-hook QI '`( QI' ': QIL '-> QI'' '`) hookList2QidList(HkL)) .
+  eq hookList2QidList((term-hook(QI, T) HkL))
+    = ('term-hook '`( QI '`, termList2QidList(T) '`) hookList2QidList(HkL)) .
+
+
+
+  op eMetaLatexPrint : Sort -> QidList .
+  op eMetaLatexPrint : SortSet -> QidList .
+  op eMetaLatexPrint : TypeList -> QidList .
+  op eMetaLatexPrint : SubsortDeclSet -> QidList .
+  op eMetaLatexPrint : Module OpDeclSet -> QidList .
+  op eMetaLatexPrintVars : OpDeclSet -> QidList .
+  op eMetaLatexPrint : Module MembAxSet -> QidList .
+  op eMetaLatexPrint : Module EquationSet -> QidList .
+  op eMetaLatexPrint : Module RuleSet -> QidList .
+  op eMetaLatexPrint : Module Condition -> QidList .
+  op eMetaLatexPrint : Module Term -> QidList .
+
+  ---- error handling
+---  eq metaLatexPrint(M, T, none)  = printTerm(M, T) .
+---  eq metaLatexPrint(M, T, POS:PrintOptionSet) 
+---   = 'Module getName(M) 'contains 'errors. [owise] .
+
+  eq eMetaLatexPrint(U, T) =  printTerm(U,T) . 
+
+  var NeTl : NeTermList .  var C : Constant . var Q : Qid . vars T1 T2 : Term .
+  var V : Variable .
+  op printTerm : Module Term -> QidList .
+  op printTermL : Module NeTermList -> QidList .
+  eq printTermL(U,(T,NeTl)) = printTerm(U,T) '`, printTermL(U,NeTl) .
+  eq printTermL(U,T) = printTerm(U,T) .
+  ops \constant`{_`} \variable`{_`} : Qid -> Term .
+  ops \kall`{_`}`{_`} \kprefix`{_`}`{_`} \ksuffix`{_`}`{_`} \kmiddle`{_`}`{_`} : Constant Term -> Term .
+  ops \reduce`{_`}`{_`} \ereduce`{_`}`{_`} : Term Term -> Term .
+  op merge : QidList TermList -> Term .
+  op splitMixFix : String -> QidList .
+  op prefixOp : Qid Term -> Term .
+  op genCommas : Nat -> QidList .
+  op mixfix : Qid -> Bool .
+  op \value{_} : Term -> Term .
+  op \myquote{_} : String -> QidList .
+
+  ceq printTerm(U,C) = \myquote{string(getName(C))} if getType(C) == 'String or getType(C) == 'Char  .
+  
+  eq printTerm(U,C) = \constant{getName(getOps(U),getName(C), getType(C))} [owise] .
+  eq printTerm(U,V) = \variable{ getName(V) } .
+
+  op getName : OpDeclSet Qid Type -> Qid .
+  eq getName(OPDS' (op Q : nil -> Ty [AS metadata(Str) AS'] .) OPDS, Q, Ty)
+   = getName(Q, metadataParse(Str)) .
+  eq getName(OPDS, Q, Ty) = Q [owise] .
+
+  var Q' : Qid . var AS' AS1 AS2 : AttrSet .
+  op getName : Qid AttrSet -> Qid .
+  eq getName(Q, AS1 klatex(AS2 krenameTo(Q') AS') AS) = Q' [print "renamed to " Q'].
+  eq getName(Q, AS) = Q [owise] .
+
+---  eq printTerm(U,Q[NeTl]) 
+---   = Q '`( printTermL(U, NeTl) '`) .
+  ceq  printTerm(U,T)
+    =  printTerm(U,\kprefix{Label}{Contents})
+    if {Label, Contents, B, right} := splitKCell(T) .
+  ceq  printTerm(U,T)
+    =  printTerm(U,\kall{Label}{Contents})
+    if {Label, Contents, B, none} :=  splitKCell(T) .
+  ceq  printTerm(U,T)
+    =  printTerm(U,\ksuffix{Label}{Contents})
+    if {Label, Contents, B, left} := splitKCell(T) .
+  ceq  printTerm(U,T)
+    =  printTerm(U,\kmiddle{Label}{Contents})
+    if {Label, Contents, B, both} := splitKCell(T) .
+  ceq printTerm(U,Q[T1,T2]) = 
+     printTerm(U,\reduce{T1}{T2}) 
+   if Q = replaceS .
+  ceq printTerm(U, Q['0.Zero]) = printTerm(U, qid(string(N,10) + ".Nat")) 
+   if N := getNat(string(Q)) .
+
+  op getNat : String -> [Nat] .
+  var Str : String .
+  ceq getNat(Str) 
+    = rat(substr(Str, length("sNat_^"), length(Str)), 10) 
+   if substr(Str, 0, length("sNat_^")) =  "sNat_^" .
+  eq getNat("sNat_") = 1 .
+  
+  ceq printTerm(U, Q[NeTl]) 
+    = printTerm1(U, Q'[NeTl])
+   if Q' := getRenamedQid(relatedOps(U, getTopOp(U, Q[NeTl]), getOps(U))) [owise print "replaced " Q " with " Q'] .
+  eq printTerm(U, T)
+   = printTerm1(U, T) [owise print "No replacement for " T] .
+
+  var TyL' : TypeList .  var Ty' : Type .
+  op getRenamedQid : OpDeclSet -> [Qid] .
+  eq getRenamedQid((op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS) = getRenamedQid(metadataParse(Str)) [owise] .
+  eq getRenamedQid(OPDS) = qid("\"") [owise] . --- print Op:[OpDecl]] .
+  
+  op getRenamedQid : AttrSet -> [Qid] .
+  eq getRenamedQid(AS klatex(AS1 krenameTo(Q') AS') AS2) = Q' .
+
+  op printTerm1 : Module Term -> QidList .
+
+ ceq printTerm1(U,Q[NeTl,T])
+   = printTerm1(U,Q[Q[NeTl],T])
+  if mixfix(Q) /\ size(splitMixFix(string(Q))) = 3 /\ 1 < countTerms(NeTl) [print "normalizing"] .
+  eq printTerm1(U, Q[NeTl]) 
+   =  '`{ printTerm(U, if mixfix(Q) 
+    then merge(splitMixFix(string(Q)), NeTl)
+    else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
+    fi) '`} [owise] .
+  eq printTerm(M, T:[Term]) = 'error 
+     [owise print "error in Print Term for " T:[Term]] .
+ 
+  op eMetaLatexPrint : Module AttrSet -> QidList .
+  op eMetaLatexPrint : IntList -> QidList .
+---  op eMetaLatexPrint : AttrDeclSet -> QidList .
+  op eMetaLatexPrint : Module HookList -> QidList .
+
+  vars QI QI' QI'' F L : Qid .
+  var  QIL : QidList .
+  var  M : Module .
+  var  U : Module .
+  vars SS : SortSet .
+  vars S S' : Sort .
+  var  TyL : TypeList .
+  var  Ty : Type .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  AtS : AttrSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  Hk : Hook .
+  var  HkL : HookList .
+  var  I : Int .
+  var  NL : IntList .
+  vars T T' T'' T3 : Term .
+  var  Cond : Condition .
+  var  Knd : Kind .
+
+---  ceq eMetaLatexPrint(VE) = viewExp2QidList(VE) if not VE :: TypeList .
+
+  --- eq eMetaLatexPrint(Ty) = Ty .
+
+  op \sort{_} : Sort -> QidList .
+  eq eMetaLatexPrint(S) = \sort{S} .
+---(
+    = if getPars(S) == empty
+      then S
+      else getName(S) '`{ parameterList2QidList(getPars(S)) '`}
+      fi .
+---)
+  eq eMetaLatexPrint(Knd) = '\kind '`{ eMetaLatexPrint(getSort(Knd)) '`} . 
+
+  eq eMetaLatexPrint((S ; SS)) 
+    = (eMetaLatexPrint(S) eMetaLatexPrint(SS))
+    [owise] .
+  eq eMetaLatexPrint((none).SortSet) = nil .
+
+  var NeTyL : NeTypeList .
+  eq eMetaLatexPrint(Ty NeTyL) 
+    = eMetaLatexPrint(Ty) '\times eMetaLatexPrint(NeTyL) 
+    [owise] .
+  eq eMetaLatexPrint((nil).TypeList) = nil .
+
+---  op \subsort{_}{_} : Sort Sort -> SubsortDecl [ctor] .
+  op \terminal{_} : Qid -> QidList [ctor] .
+  op \nterminal{_} : Type -> QidList [ctor] .
+  op \syntax{_}{_}{_} : QidList QidList AttrSet -> OpDecl .
+  op \cellLabel{_}{_} : Qid AttrSet -> OpDecl .
+  eq eMetaLatexPrint(M, (OPDS' (op F : nil -> 'CellLabel [AS] .) OPDS))
+   = ---(eMetaLatexPrint(M, \cellLabel{F}{metadataParse(St)}) '\o)
+       eMetaLatexPrint(M, OPDS' OPDS)  .
+  eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadata(St) AS] .) OPDS)) 
+   = eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadataParse(St) AS] .) OPDS)) [owise] .
+  eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS1 klatex(AS2 krenameTo(Q) AS) AS'] .)OPDS))
+   = eMetaLatexPrint(M, (OPDS' (op Q : TyL -> Ty [AS1 klatex(AS2 AS) AS'] .) OPDS)) .
+  eq eMetaLatexPrint(M, OPDS) = printSyntax(M, OPDS) [owise] .
+  var OPDS' : OpDeclSet .
+
+  op \subsort`{_`}`{_`} : QidList QidList -> OpDecl .
+  op subsortOps : SubsortDeclSet -> OpDeclSet .
+  var Sort Sort' : Sort .
+  eq subsortOps((subsort Sort < Sort' .) SSDS) 
+   = \subsort{\nterminal{Sort}}{\nterminal{Sort'}} subsortOps(SSDS) .
+  eq subsortOps(none) = none .
+  op printSyntax : Module OpDeclSet -> QidList .
+  eq printSyntax(M, none) = nil .
+  eq printSyntax(M, OPDS) 
+   = 
+---    '\n '\par '\textsc '`{ 'syntactic 'constructs: '`}
+---   '\setlength '`{ '\parindent '`} '`{ '2em '`}
+     printSyntax1(M, OPDS) 
+---   '\setlength '`{ '\parindent '`} '`{ '1em '`}
+   [owise] .
+  op printSyntax1 : Module OpDeclSet -> QidList .
+  op #Types : Nat -> Attr .
+  eq printSyntax1(M, (OPDS' (op F : TyL -> Ty [AS] .) OPDS)) 
+   = printSyntax1(M, OPDS' (\syntax{\nterminal{Ty}}{mergeTypes(splitMixFix(string(F)), TyL)}{#Types(arity(TyL)) AS} OPDS)) .
+
+  op mergeTypes : QidList TypeList -> TypeList .
+  var Op : OpDecl .
+---(
+  eq eMetaLatexPrint(M, Op OPDS)
+   = eMetaLatexPrint(M, OPDS) [owise] .
+---)
+  op \algebraicOp{_}{_}{_}{_} : Qid TypeList  Type AttrSet -> OpDecl .
+---  eq eMetaLatexPrint(M, ((op F : TyL -> Ty [AtS] .) OPDS))
+---    = eMetaLatexPrint(M, (\algebraicOp{F}{TyL}{Ty}{AtS} OPDS))
+---    [owise] .
+
+---  op eMetaLatexPrint1 : Module OpDeclSet -> QidList .
+---  eq eMetaLatexPrint(M, OPDS) = eMetaLatexPrint1(M, OPDS) [owise] .
+
+  op eMetaLatexPrint1 : Module AttrSet -> QidList .
+  eq eMetaLatexPrint1(M,(none).AttrSet) = nil .
+  eq eMetaLatexPrint1(M,AtS)
+   =  '`[ eMetaLatexPrint(M,AtS) '`] .
+
+  eq eMetaLatexPrint(M, (none).OpDeclSet)  = nil .
+  eq eMetaLatexPrint(M, OPDS:[OpDeclSet])  = 'error 
+     [owise print "Error in the Operation declaration set:" OPDS:[OpDeclSet]]. 
+
+  eq eMetaLatexPrintVars((op F : nil -> Ty [none] .) OPDS)
+    = ('\n 'var F ': eMetaLatexPrint(Ty) '. 
+       eMetaLatexPrintVars(OPDS)) .
+  eq eMetaLatexPrintVars((none).OpDeclSet)  = nil .
+
+  ops \rule`{_`}`{_`} : String KRuleSplit -> MembAx .
+  ops \mequation`{_`}`{_`}`{_`} : String Term Term -> Equation .
+  ops \mrule`{_`}`{_`}`{_`} : String Term Term -> Rule .
+  ops \cmrule`{_`}`{_`}`{_`}`{_`} : String Term Term Condition -> Rule .
+  ops \cmequation`{_`}`{_`}`{_`}`{_`} : String Term Term Condition -> Equation .
+ 
+  op  \config`{_`} : Term -> MembAx .
+  op \context`{_`}`{_`} : String Term -> MembAx . 
+  var AS : AttrSet .
+
+  op getLabel : AttrSet -> String .
+  eq getLabel(AS' label(Q) AS) = string(Q) .
+  eq getLabel(AS) = "\\!" [owise] .
+
+  var KRS : KRuleSplit .  var Mb : MembAx .  var MAS' : MembAxSet .
+  eq eMetaLatexPrint(M, MAS' (mb 'configuration_[T] : 'KSentence [AS] .) MAS)
+    = eMetaLatexPrint(M, MAS' \config{T} MAS) .
+ ceq eMetaLatexPrint(M, MAS' Mb MAS)
+   = eMetaLatexPrint(M, MAS' \rule{getLabel(getAttrs(Mb))}{KRS} MAS)
+  if KRS := splitKRule(Mb) .
+  eq eMetaLatexPrint(M, MAS' (mb 'context_[T] : 'KSentence [AS] .) MAS)
+   = eMetaLatexPrint(M, MAS' \context{getLabel(AS)}{T} MAS) .
+  eq eMetaLatexPrint(M, MAS) = eMetaLatexPrint0(M, MAS) [owise] .
+
+  op eMetaLatexPrint0 : Module MembAxSet -> QidList .
+
+  eq eMetaLatexPrint0(M, (mb T : S [none] .) MAS)
+    = ('\n 'mb eMetaLatexPrint(M, T) 
+                   ': eMetaLatexPrint(S) '. 
+       eMetaLatexPrint0(M, MAS)) [owise] .
+  eq eMetaLatexPrint0(M, (mb T : S [AtS] .) MAS)
+    = ('\n 'mb eMetaLatexPrint(M, T) 
+                   ': eMetaLatexPrint(S) 
+               '`[ eMetaLatexPrint(M, AtS) '`] '. 
+       eMetaLatexPrint0(M, MAS)) 
+    [owise] .
+  eq eMetaLatexPrint0(M, (cmb T : S if Cond [none] .) MAS)
+    = ('\n 'cmb eMetaLatexPrint(M, T) 
+                   ': eMetaLatexPrint(S) 
+       '\n 'if eMetaLatexPrint(M, Cond) '. 
+       eMetaLatexPrint0(M, MAS)) [owise] .
+  eq eMetaLatexPrint0(M, (cmb T : S if Cond [AtS] .) MAS)
+    = ('\n 'cmb eMetaLatexPrint(M, T) 
+                   ': eMetaLatexPrint(S) 
+       '\n 'if eMetaLatexPrint(M, Cond) 
+           '`[ eMetaLatexPrint(M, AtS) '`] '. 
+       eMetaLatexPrint0(M, MAS)) 
+    [owise] .
+  eq eMetaLatexPrint0(M, (none).MembAxSet) = nil .
+  eq eMetaLatexPrint0(M, MAS) = eMetaLatexPrintK(M, MAS) [owise] .
+  op eMetaLatexPrintK : Module MembAxSet -> QidList .
+
+  eq eMetaLatexPrint(M, ((eq T = T' [metadata("simplify")] .) EqS))
+   = eMetaLatexPrint(M, EqS) .
+  eq eMetaLatexPrint(M, ((eq T = T' [AtS] .) EqS))
+   = eMetaLatexPrint(M, \mequation{getLabel(AtS)}{T}{T'} EqS) [owise] .
+  eq eMetaLatexPrint(M, \mequation{Str}{T}{T'} EqS)
+    = ('\n '\mequation '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
+       '`} '`{ eMetaLatexPrint(M, T') 
+           '`} 
+       eMetaLatexPrint(M, EqS)) 
+    [owise] .
+  eq eMetaLatexPrint(M, ((ceq T = T' if Cond [AtS] .) EqS))
+   = eMetaLatexPrint(M, \cmequation{getLabel(AtS)}{T}{T'}{Cond} EqS) .
+  eq eMetaLatexPrint(M, \cmequation{Str}{T}{T'}{Cond} EqS) 
+    = ('\n '\cmequation '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
+        '`} '`{ eMetaLatexPrint(M, T') '`} 
+        '`{ eMetaLatexPrint(M, Cond) '`} 
+       
+       eMetaLatexPrint(M, EqS))  .
+  eq eMetaLatexPrint(M, (none).EquationSet) = nil .
+
+  eq eMetaLatexPrint(M, ((rl T => T' [AtS] .) RlS))
+   = eMetaLatexPrint(M, \mrule{getLabel(AtS)}{T}{T'} RlS) .
+  eq  eMetaLatexPrint(M, \mrule{Str}{T}{T'} RlS) 
+    = ('\n '\mrule '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
+        '`} '`{ eMetaLatexPrint(M, T') '`} 
+       
+       eMetaLatexPrint(M, RlS)) .
+  eq eMetaLatexPrint(M, ((crl T => T' if Cond [AtS] .) RlS))
+   =  eMetaLatexPrint(M, \cmrule{getLabel(AtS)}{T}{T'}{Cond} RlS) .
+  eq  eMetaLatexPrint(M, \cmrule{Str}{T}{T'}{Cond} RlS) 
+    = ('\n '\cmrule '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
+        '`} '`{ eMetaLatexPrint(M, T') '`} 
+        '`{ eMetaLatexPrint(M, Cond) '`} 
+       
+       eMetaLatexPrint(M, RlS)) .
+  eq eMetaLatexPrint(M, (none).RuleSet) = nil .
+
+  var Ct : Constant .
+  eq eMetaLatexPrint(M, T = 'true.Bool) 
+   = printTerm(M, T) .
+  eq eMetaLatexPrint(M, T = T') 
+    = (printTerm(M, T) '= printTerm(M, T')) [owise] .
+  eq eMetaLatexPrint(M, T : S) 
+    = (printTerm(M, T) ': eMetaLatexPrint(S)) .
+  eq eMetaLatexPrint(M, T := T') 
+    = (printTerm(M, T) ':= printTerm(M, T')) .
+  eq eMetaLatexPrint(M, T => T') 
+    = (printTerm(M, T) '=> printTerm(M, T')) .
+
+  eq eMetaLatexPrint(M, T = 'true.Bool /\ Cond)
+    = (printTerm(M, T) 
+      '$ '\ 'and '\ '$ eMetaLatexPrint(M, Cond)) [owise] .
+  eq eMetaLatexPrint(M, T = T' /\ Cond)
+    = (printTerm(M, T) '= printTerm(M, T') 
+      '$ '\ 'and '\ '$ eMetaLatexPrint(M, Cond)) 
+    [owise] .
+  eq eMetaLatexPrint(M, T : S /\ Cond)
+    = (printTerm(M, T) ': eMetaLatexPrint(S) 
+      '/\ eMetaLatexPrint(M, Cond)) 
+    [owise] .
+  eq eMetaLatexPrint(M, T := T' /\ Cond)
+    = (printTerm(M, T) ':= printTerm(M, T') 
+      '/\ eMetaLatexPrint(M, Cond)) 
+    [owise] .
+  eq eMetaLatexPrint(M, T => T' /\ Cond)
+    = (printTerm(M, T) '=> printTerm(M, T') 
+      '/\ eMetaLatexPrint(M, Cond)) 
+    [owise] .
+  eq eMetaLatexPrint(M, (assoc AtS))  
+    = ('assoc eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (comm AtS))   
+    = ('comm eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (memo AtS))   
+    = ('memo eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (idem AtS))   
+    = ('idem eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (id(T) AtS))
+    = ('id: eMetaLatexPrint(M, T) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (right-id(T) AtS))
+    = ('right 'id: eMetaLatexPrint(M, T) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (left-id(T) AtS))
+    = ('left 'id: eMetaLatexPrint(M, T) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (poly(NL) AtS))
+    = ('poly '`( eMetaLatexPrint(NL) '`) 
+       eMetaLatexPrint(M, AtS)) .
+---(
+  eq eMetaLatexPrint(M, (vstrict(QIL) AtS))
+    = ('strict '`( QIL '`) 
+       eMetaLatexPrint(M, AtS)) .
+---)
+---  op \wrapping{_} : Qid -> QidList .
+  op \renameTo{_} : Qid -> QidList .
+
+---(
+  eq eMetaLatexPrint(M, (kwrapping(Q) AtS))
+    = (\wrapping{Q} 
+       eMetaLatexPrint(M, AtS)) .
+---)
+  op eMetaLatexPrint : Module Nat AttrSet -> QidList .
+  eq eMetaLatexPrint(M, N, (krenameTo(Q) AtS))
+    = (\renameTo{getRenamedKOp(Q, N, getOps(M))} 
+       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, N, AtS) = eMetaLatexPrint(M, AtS) [owise] .
+
+  op getRenamedKOp : Qid Nat OpDeclSet -> Qid .
+  eq getRenamedKOp(Q, N, OPDS) 
+   = getRenamedKOp(Q, manyK(N), OPDS) .
+
+  op manyK : Nat -> TypeList .
+  eq manyK(0) = nil .
+  eq manyK(s(N)) = 'K manyK(N) .
+  
+  op getRenamedKOp : Qid TypeList OpDeclSet -> Qid .
+  eq getRenamedKOp(Q, TyL, OPDS' (op Q : TyL -> Ty [AS] .) OPDS)
+   = getRenamedKOp(Q, AS) .
+  eq getRenamedKOp(Q, TyL, OPDS) = Q [owise] .
+ 
+  op getRenamedKOp : Qid AttrSet -> Qid .
+  eq getRenamedKOp(Q, AS metadata(Str) AS') 
+   = getRenamedKOp(Q, AS metadataParse(Str) AS') .
+  eq getRenamedKOp(Q, AS1 klatex(AS2 krenameTo(Q') AS') AS)
+   = Q' .
+  eq getRenamedKOp(Q, AS) = Q [owise] .
+
+  var NNL : NeNatList .
+  eq eMetaLatexPrint(M, (kstrict(nil) AtS))
+    = ('strict eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (kaux AtS))
+    = ('aux eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (kstrict(NNL) AtS))
+    = ('strict '`( eMetaLatexPrint(NNL) '`) 
+       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (seqkstrict(nil) AtS))
+    = ('seqstrict eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (seqkstrict(NNL) AtS))
+    = ('seqstrict '`( eMetaLatexPrint(NNL) '`) 
+       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (khybrid AtS))   
+    = ('hybrid eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (strat(NL) AtS))
+    = ('strat '`( eMetaLatexPrint(NL) '`) 
+       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (memo AtS))   
+    = ('memo eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (prec(I) AtS))
+    = (---('prec eMetaLatexPrint(I)) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (klatex(AS) AtS))
+    = (---('prec eMetaLatexPrint(I)) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (gather(QIL) AtS))
+    = (---('gather '`( QIL '`)) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (format(QIL) AtS))
+    = (---('format '`( QIL '`)) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (ctor AtS))   
+    = ('ctor eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (frozen(NL) AtS)) 
+    = ('frozen '`( eMetaLatexPrint(NL) '`) 
+       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (iter AtS))   
+    = ('iter eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (special(HkL) AtS))
+    = ('special '`( eMetaLatexPrint(M, HkL) '`) 
+       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (config AtS))   
+    = ('config eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (object AtS))   
+    = ('object eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (msg AtS))   
+    = ('msg eMetaLatexPrint(M, AtS)) .
+
+  eq eMetaLatexPrint(M, (label(QI) AtS))
+    = ('label QI eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (metadata(St) AtS))
+    = ('metadata qid("\"" + St + "\"") 
+       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (nonexec AtS))
+    = ('nonexec eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (owise AtS))
+    = ('owise eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (print(QIL) AtS))
+    = ('print QIL eMetaLatexPrint(M, AtS)) .
+
+  eq eMetaLatexPrint(M, (none).AttrSet) = nil .
+
+  ceq eMetaLatexPrint(M, (Hk HkL)) 
+    = (eMetaLatexPrint(M, Hk) eMetaLatexPrint(M, HkL)) 
+    if HkL =/= nil .
+  eq eMetaLatexPrint(M, id-hook(QI, nil)) = ('id-hook QI) .
+  eq eMetaLatexPrint(M, id-hook(QI, QIL))
+    = ('id-hook QI '`( QIL '`) ) 
+    [owise] .
+  eq eMetaLatexPrint(M, op-hook(QI, QI', nil, QI''))
+    = ('op-hook QI '`( QI' ': '~> QI'' '`) '\o) .
+  eq eMetaLatexPrint(M, op-hook(QI, QI', QIL, QI''))
+    = ('op-hook QI '`( QI' ': QIL '~> QI'' '`) '\o) 
+    [owise] .
+  eq eMetaLatexPrint(M, term-hook(QI, T))
+    = ('term-hook QI '`( eMetaLatexPrint(M, T) '`) '\o) .
+
+  eq eMetaLatexPrint((I NL)) = (qid(string(I, 10)) eMetaLatexPrint(NL)) .
+  eq eMetaLatexPrint((nil).NatList) = nil .
+
+endm
+
+
+
+*******************************************************************************
+
+***
+*** 8.2.2 Meta Latex Printing of Modules
+***
+
+*** In the following module, the \texttt{meta-pretty-print} function is
+*** defined on sort \texttt{Module}.
+
+mod UNIT-META-LATEX-PRINT is
+  pr DECL-META-LATEX-PRINT .
+  pr MOD-NAME-TO-QID .
+
+  op eMetaLatexPrint : Module Module -> QidList .
+
+  op eMetaLatexPrint : Module Module -> QidList .
+  op eMetaLatexPrint : Header -> QidList .
+  op eMetaLatexPrint : ParameterDeclList -> QidList .
+  op eMetaLatexPrint : ImportList -> QidList .
+
+  var  M : Module .
+  vars QI F F' L L' : Qid .
+  var  QIL : QidList .
+  var  ME : ModuleExpression .
+  vars S S' : Sort .
+  var  Ty : Type .
+  var  TyL : TypeList .
+  var  SS : SortSet .
+  var  PD : ParameterDecl .
+  var  PDL : ParameterDeclList .
+  vars IL IL' : ImportList .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  U : Module .
+  var  AtS : AttrSet .
+  var  MN : ModuleExpression .
+
+  ceq eMetaLatexPrint(ME) 
+    = if QI == '`) or QI == '`] or QI == '`} 
+      then QIL QI 
+      else QIL QI 
+      fi
+    if QIL QI := header2QidList(ME) .
+
+
+  var I : Import .
+  op removeKModules : ModuleExpression ImportList -> ImportList .
+  eq removeKModules(ME, (including 'K-RULES .) IL) = removeKModules(ME, IL) .
+  eq removeKModules(ME, (including 'BOOL .) IL) = removeKModules(ME, IL) .
+  ceq removeKModules(ME, (including Q .) IL) 
+    = removeKModules(ME, IL) 
+   if string(Q) == string(ME) + "-K-CONFIGURATION" .
+  eq removeKModules(ME, I IL) = I removeKModules(ME, IL) [owise] .
+  eq removeKModules(ME, nil) = nil .
+ 
+  eq eMetaLatexPrint(M, mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
+    = ('\n          
+       '\begin '`{ 'module '`} '`{ eMetaLatexPrintME(ME) '`} 
+          eMetaLatexPrint(removeKModules(ME,IL)) 
+          (if SS == none
+           then nil
+           else ('\n '\sorts '`{ eMetaLatexPrint(SS) '`} '\o)
+           fi)
+          eMetaLatexPrint(M, subsortOps(SSDS) OPDS )
+          eMetaLatexPrint(M, MAS) 
+          eMetaLatexPrint(M, EqS) 
+          eMetaLatexPrint(M, RlS) 
+       '\n '\end '`{ 'module '`} '\n) .
+  eq eMetaLatexPrint(M, mod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
+    = ('\n 
+       'mod eMetaLatexPrint(ME) (if PDL == nil 
+                                      then nil
+                                      else '`{ eMetaLatexPrint(PDL) '`} 
+                                      fi) 'is 
+          eMetaLatexPrint(IL) 
+          (if SS == none
+           then nil
+           else ('\n 'sorts eMetaLatexPrint(SS) '. '\o)
+           fi) 
+          eMetaLatexPrint(SSDS) 
+          eMetaLatexPrint(M, OPDS) 
+          eMetaLatexPrint(M, MAS) 
+          eMetaLatexPrint(M, EqS) 
+          eMetaLatexPrint(M, RlS) 
+       '\n 'endm '\n) .
+  eq eMetaLatexPrint(M, th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth)
+    = ('\n 
+       'th eMetaLatexPrint(MN) 'is 
+          eMetaLatexPrint(IL) 
+          (if SS == none
+           then nil
+           else ('\n 'sorts eMetaLatexPrint(SS) '. '\o)
+           fi) 
+          eMetaLatexPrint(SSDS) 
+          eMetaLatexPrint(M, OPDS)
+          eMetaLatexPrint(M, MAS) 
+          eMetaLatexPrint(M, EqS) 
+          eMetaLatexPrint(M, RlS) 
+       '\n 'endth '\n) .
+  eq eMetaLatexPrint(M, fmod ME is IL sorts SS . SSDS OPDS MAS EqS endfm)
+    = ('\n 
+       'fmod eMetaLatexPrint(ME) 'is 
+           eMetaLatexPrint(IL) 
+           (if SS == none
+            then nil
+            else ('\n 'sorts eMetaLatexPrint(SS) '. '\o)
+            fi)  
+           eMetaLatexPrint(SSDS) 
+           eMetaLatexPrint(M, OPDS)
+           eMetaLatexPrint(M, MAS) 
+           eMetaLatexPrint(M, EqS) 
+       '\n 'endfm '\n) .
+  eq eMetaLatexPrint(M, fmod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS endfm)
+    = ('\n 
+       'fmod eMetaLatexPrint(ME) (if PDL == nil 
+                                       then nil
+                                       else '`{ eMetaLatexPrint(PDL) '`} 
+                                       fi) 'is 
+           eMetaLatexPrint(IL) 
+           (if SS == none
+            then nil
+            else ('\n 'sorts eMetaLatexPrint(SS) '. '\o)
+            fi)  
+           eMetaLatexPrint(SSDS)          
+           eMetaLatexPrint(M, OPDS)
+           eMetaLatexPrint(M, MAS)          
+           eMetaLatexPrint(M, EqS) 
+       '\n 'endfm '\n) .
+  eq eMetaLatexPrint(M, fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth)
+    = ('\n 
+       'fth eMetaLatexPrint(MN) 'is 
+          eMetaLatexPrint(IL)
+          (if SS == none
+           then nil
+           else ('\n 'sorts eMetaLatexPrint(SS) '. '\o)
+           fi)  
+          eMetaLatexPrint(SSDS) 
+          eMetaLatexPrint(M, OPDS)
+          eMetaLatexPrint(M, MAS) 
+          eMetaLatexPrint(M, EqS) 
+       '\n 'endfth '\n) .
+
+  eq eMetaLatexPrint((including ME .) IL)
+    = ('\n '\including '`{ eMetaLatexPrintME(ME) '`} 
+       eMetaLatexPrint(IL)) .
+  eq eMetaLatexPrint((extending ME .) IL)
+    = ('\n '\extending '`{ eMetaLatexPrintME(ME) '`} 
+       eMetaLatexPrint(IL)) .
+  eq eMetaLatexPrint((protecting ME .) IL)
+    = ('\n 
+       '\protecting '`{ eMetaLatexPrintME(ME) ''`} eMetaLatexPrint(IL)) .
+  eq eMetaLatexPrint((nil).ImportList) = nil .
+
+  eq eMetaLatexPrint((QI :: ME, PDL))
+    = (QI '::  eMetaLatexPrintME(ME) '`, eMetaLatexPrint(PDL))
+    [owise] .
+  eq eMetaLatexPrint((QI :: ME)) = (QI '::  eMetaLatexPrintME(ME)) .
+  eq eMetaLatexPrint((nil).ParameterDeclList) = (nil).QidList .
+
+  op eMetaLatexPrintME : ModuleExpression -> QidList .
+  var ME' : ModuleExpression .
+  eq eMetaLatexPrintME(ME' + ME:ModuleExpression)
+    = eMetaLatexPrintME(ME') '\modulePlus '`{ '`} eMetaLatexPrintME(ME:ModuleExpression) .
+  eq eMetaLatexPrintME(ME * (RnS:RenamingSet))
+    = eMetaLatexPrintME(ME) '* '`( renamingSet2QidList(RnS:RenamingSet) '`) .
+  var PL : ParameterList . var NePL : NeParameterList .
+  eq eMetaLatexPrintME(ME{PL})
+   = eMetaLatexPrintME(ME) '\ '`{ eMetaLatexPrintPL(PL) '\ '`} .
+  op eMetaLatexPrintPL : ParameterList -> QidList .
+  eq eMetaLatexPrintPL((QI,NePL)) = \moduleName{QI} '`, eMetaLatexPrintPL(NePL) .
+  eq eMetaLatexPrintPL(QI) = \moduleName{QI} .
+  var Q : Qid .
+  op \moduleName{_} : Qid -> Qid .
+  eq eMetaLatexPrintME(Q) = \moduleName{Q} .
+
+  op renamingSet2QidList : RenamingSet -> QidList .
+  eq renamingSet2QidList(((op F to F' [AtS]), RS:RenamingSet))
+    = if AtS == none 
+      then ('op F 'to F' '`, renamingSet2QidList(RS:RenamingSet))
+      else ('op F 'to F' '`[ attrSet2QidList(AtS) '`] '`, 
+            renamingSet2QidList(RS:RenamingSet))
+      fi
+    [owise] .
+  eq renamingSet2QidList((op F to F' [AtS]))
+    = if AtS == none 
+      then ('op F 'to F')  
+      else ('op F 'to F' '`[ attrSet2QidList(AtS) '`]) 
+      fi .
+  eq renamingSet2QidList(((op F : TyL -> Ty to F' [AtS]), RS:RenamingSet))
+    = if AtS == none 
+      then ('op F ': typeList2QidList(TyL) '-> Ty 'to F' '`, 
+            renamingSet2QidList(RS:RenamingSet))
+      else ('op F ': typeList2QidList(TyL) '-> Ty 'to F' 
+            '`[ attrSet2QidList(AtS) '`] '`, 
+            renamingSet2QidList(RS:RenamingSet))
+      fi 
+    [owise] .
+  eq renamingSet2QidList((op F : TyL -> Ty to F' [AtS]))
+    = if AtS == none 
+      then ('op F ': typeList2QidList(TyL) '-> Ty 'to F')
+      else ('op F ': typeList2QidList(TyL) '-> Ty 'to F' 
+            '`[ attrSet2QidList(AtS) '`]) 
+      fi .
+  eq renamingSet2QidList(((sort S to S'), RS:RenamingSet))
+    = ('sort S 'to S' '`, 
+       renamingSet2QidList(RS:RenamingSet))
+    [owise] .
+  eq renamingSet2QidList((sort S to S')) = ('sort S 'to S') .
+
+  eq renamingSet2QidList(((label L to L'), RS:RenamingSet))
+    = ('label L 'to L' '`, renamingSet2QidList(RS:RenamingSet))
+    [owise] .
+  eq renamingSet2QidList((label L to L')) = ('label L 'to L') .
+endm
+
+
+
+mod LATEX-PRINT-META is
+  including UNIT-META-LATEX-PRINT .
+  sort ProductionType .
+  op \textsf{_} : Qid -> Qid [ctor] .
+
+  var Ty : Type . var Tyl : TypeList . var NTyl : NeTypeList .
+  eq printTerm(M, merge(Q Ql, NeTl))
+   = printEndTerminal(Q)
+     printTerm(M, mergeT(Ql,NeTl)) .
+  eq printTerm(M, mergeT(Ql,(T, Tl)))
+   = '`{ printTerm(M, T) '`} printTerm(M, mergeQ(Ql, Tl)) .
+  eq printTerm(M, mergeQ(Q, empty)) 
+   = printEndTerminal(Q) .
+  eq printTerm(M, mergeQ(Q Ql,NeTl)) 
+   = printTerminal(Q) printTerm(M, mergeT(Ql, NeTl)) .
+
+  ops mergeT mergeQ : QidList TermList -> Term .
+
+  op printTerminal : Qid -> QidList .
+  eq printTerminal(Q) = if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ '\terminal '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi [print "terminal " Q] .
+
+  op latexTerminal : Qid -> Bool .
+  eq latexTerminal(Q) = (substr(string(Q), _-_(length(string(Q)), 1), 1) == "{" and substr(string(Q), _-_(length(string(Q)), 2), 1) == "`")  or-else (substr(string(Q), 1, 1) == "}" and substr(string(Q), 0, 1) == "`") .
+
+  op printEndTerminal : Qid -> QidList .
+  eq printEndTerminal(Q) 
+   = if Q == '\enspace  then nil else printTerminal(Q) fi .
+
+  eq mergeTypes(Q, nil) = printTerminal(Q) .
+  eq mergeTypes(Q, NTyl) = printTerminal(Q) mergeTypes('`( genCommas(arity(NTyl)) '`), NTyl) .
+  eq mergeTypes(Q Ql, NTyl) 
+   = printEndTerminal(Q) mergeTypesT(Ql, NTyl) [owise] .
+
+  ops mergeTypesT mergeTypesQ : QidList TypeList -> QidList .
+  eq mergeTypesT(Ql,Ty Tyl) 
+   = '`{ \nterminal{Ty} '`} mergeTypesQ(Ql,Tyl) .
+
+  eq mergeTypesQ(Q Ql, NTyl) = printTerminal(Q) mergeTypesT(Ql, NTyl) .
+  eq mergeTypesQ(Q , nil) = printEndTerminal(Q) .
+ 
+  var T : Term . var Cond : Condition . var AS : AttrSet .
+  var T1 T2 : Term . var POS : PrintOptionSet . var Ct : Constant .
+  var Q Q' : Qid . var Ql : QidList .
+  
+  eq \constant{'?} = \variable{'AnyVar} .
+  eq \constant{'`[HOLE`]} = \variable{'`[HOLE`]} .
+  eq \variable{'`[HOLE`]} = \variable{'\ensuremath`{\square`}} .
+  eq \variable{'?} = \variable{'AnyVar} .
+  eq \variable{'AnyVar} = '\AnyVar .
+  eq \variable{'Rho} = \variable{'\ensuremath`{\rho`}} .
+  eq \variable{'Rho'} = \variable{'\ensuremath`{\varrho`}} .
+  eq \variable{'Sigma} = \variable{'\ensuremath`{\sigma`}} .
+---  eq \constant{'.empty} = '\kdot .
+---  eq \constant{'.K} = '\kdot .
+---  eq \constant{'.nil} = '\kdot .
+  op printOpQid : Qid -> Qid .
+  eq printOpQid(Q) = printQid(Q) .
+---  eq \wrapping{Q} = 'wrapping printQid(Q) .
+  eq \renameTo{'AnyVar} = 'renameTo .
+  eq \renameTo{Q} = 'renameTo printOpQid(Q) [owise] .
+  eq \variable{Q} = '\variable '`{ printVariable(replaceAll(string(Q), ("$" |-> "\\$"))) '`} [owise] .
+  eq \constant{Q} = '\constant '`{ printQid(Q) '`} [owise] .
+  eq printTerm(M, prefixOp(Q, T))
+   = '\prefixOp '`{ printQid(Q)  '`} printTerm(M, T) .
+
+  vars St St' St'' : String .
+  op printVariable : String -> QidList .
+  ceq printVariable(St) 
+    =  if I:[Int] :: Nat 
+       then printIndexedVariable(substr(St, 0, _-_(length(St), 1)), St') 
+       else string2qidList(St) fi
+   if St' := substr(St, _-_(length(St),1), 1)
+   /\ I:[Int] := rat(St',10) .
+
+  op printIndexedVariable : String String -> QidList .
+  ceq printIndexedVariable(St, St'')
+    =  if I:[Int] :: Nat 
+       then printIndexedVariable(substr(St, 0, _-_(length(St),1)), St'' + St') 
+       else string2qidList(St + "\\ensuremath{\\nothing_{" + St'' + "}}") fi
+   if St' := substr(St, _-_(length(St), 1), 1)
+   /\ I:[Int] := rat(St',10) .
+
+  eq \moduleName{Q} = '\moduleName '`{ printQid(Q) '`} .
+
+  eq \textsf{'} = '\enspace .
+  eq \textsf{'\} = '\ensuremath`{\backslash`} .
+---  eq \textsf{'|->} = '\mapsto .
+---  eq \textsf{'<-} = '\leftarrow .
+---  eq \textsf{'&} = \textsf{'\&} .
+---  eq \textsf{'#} = ' .
+---  eq \textsf{'->} = '\kra .
+  eq \textsf{'==} = '= .
+  eq \textsf{Q} = Q [owise] .
+  eq \myquote{Str} 
+   = '\myquote '`{ printStr(replace(substr(Str,1, _-_(length(Str), 2)),"\\n","\\textbackslash n")) '`} .
+  op printQid : Qid -> QidList .
+  eq printQid(') = nil .
+  eq printQid(Q) = printStr(string(Q)) [owise] .
+ 
+  op printStr : String -> QidList .
+  eq printStr(Str) = string2qidList(replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))) .
+ 
+  eq printTerm(M, \kprefix{Ct}{T}) = '\kprefix '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
+  eq printTerm(M, \ksuffix{Ct}{T}) = '\ksuffix '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
+  eq printTerm(M, \kall{Ct}{T}) = '\kall '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
+  eq printTerm(M, \kmiddle{Ct}{T}) = '\kmiddle '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
+---  eq printTerm(M, T:[Term]) = 'error [owise print T:[Term]] .
+  eq printTerm(M, \reduce{T1}{T2}) = if getName(M) == 'STRUCTURAL then '\reduceS else '\reduce fi '`{ printTerm(M, T1) '`} '`{ printTerm(M, T2) '`} .
+  eq printTerm(M, \value{T}) = '\kvalue '`{ printTerm(M, T) '`} .
+
+  op getColor : Module Qid -> Qid .
+  eq getColor(M, Q) 
+   = getColor(getOps(M), Q, 'CellLabel) .
+
+  op getColor : OpDeclSet Qid Qid -> Qid .
+  eq getColor((op Q : nil -> Q' [AS metadata(Str) AS'] .) OPDS, Q, Q')
+   = getLatexColor(metadataParse(Str)) .
+  eq getColor(OPDS, Q, Q') = 'white [owise] .
+
+  op getLatexColor : AttrSet -> Qid .
+  var AS' AS1 AS2 : AttrSet .
+  eq getLatexColor(AS1 klatex(AS2 kcolor(Q) AS) AS') = Q .
+  eq getLatexColor(AS) = 'white [owise] .
+
+  op length : TermList -> Nat .
+  var Tl : TermList .
+  eq length(empty) = 0 .
+  eq length((T, Tl)) = s(length(Tl)) .
+
+
+  eq mixfix(Q) =  find(string(Q), "_", 0) :: Nat .
+
+  var Str : String . var N : Nat . var Nz : NzNat . var NeTl : NeTermList .
+  eq genCommas(s(0)) = nil .
+  eq genCommas(s(Nz)) = '`, genCommas(Nz) .
+
+  ceq splitMixFix(Str) 
+    = \textsf{qid(substr(Str, 0, N))} splitMixFix(substr(Str, N + 1, length(Str)))
+   if N := find(Str, "_", 0) .
+  eq splitMixFix(Str) = \textsf{qid(Str)} [owise] .
+
+  var M : Module .  var MAS : MembAxSet . var OPDS : OpDeclSet .
+  var QIL QIL' : QidList .
+  eq printSyntax1(M, OPDS' \syntax{QIL}{QIL'}{AS} OPDS)
+   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL,OPDS' OPDS) '`} '`{  '`} eMetaLatexPrintQ(M, QIL, \syntax{QIL}{QIL'}{AS} removeSubSorts(QIL, OPDS' OPDS))) [owise] .
+  eq printSyntax1(M, OPDS' \subsort{QIL'}{QIL} OPDS)
+   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) '`} '`{  '`} printSyntax1(M, removeSubSorts(QIL,OPDS' OPDS))) [owise] .
+---  eq \subsort{QIL}{QIL'} = \syntax{QIL'}{QIL}{none} .
+
+  op printSubSorts : QidList OpDeclSet -> QidList .
+  var QIL1 : QidList .  var OPDS' OPDS'' : OpDeclSet .
+  eq printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS'' \subsort{QIL1}{QIL} OPDS)
+   = QIL' '\ensuremath '`{ '\mid '`} printSubSorts(QIL,  OPDS' OPDS'' \subsort{QIL1}{QIL} OPDS) .
+  eq printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) = QIL' [owise] .
+  eq printSubSorts(QIL, OPDS) = nil [owise] .
+
+  op removeSubSorts : QidList OpDeclSet -> OpDeclSet .
+  eq removeSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) =  removeSubSorts(QIL, OPDS' OPDS) .
+  eq removeSubSorts(QIL, OPDS) = OPDS [owise] .
+
+  op eMetaLatexPrintQ : Module QidList OpDeclSet -> QidList .
+  eq eMetaLatexPrintQ(M, QIL, OPDS' (\syntax{QIL}{QIL'}{#Types(N) AS}) OPDS)
+   = ('\n '\syntaxCont '`{ QIL '`} '`{ 
+      QIL' '`} '`{ eMetaLatexPrint(M, N, AS) '`} eMetaLatexPrintQ(M, QIL, OPDS' OPDS)) .
+  eq eMetaLatexPrintQ(M, QIL, OPDS) = printSyntax1(M, OPDS) [owise] . 
+
+  var F : Qid .  var TyL : TypeList . var AtS : AttrSet .
+  eq printSyntax1(M, (none).OpDeclSet) = nil .
+
+---  op eMetaLatexPrint : ProductionType -> QidList .
+  eq (\nterminal{Ty}) 
+   = '\nonTerminal '`{ eMetaLatexPrint(Ty) '`} .
+  eq (\terminal{Q}) = ---('\terminal '`{) printQid(Q) . --- '`} .
+  eq \sort{Q} = '\sort '`{ printSortQid(Q) '`} .
+
+  op printSortQid : Qid -> QidList .
+  eq printSortQid(Q) = printQid(qid(replaceAll(string(Q), ("`{" |-> "\\{", "`}" |-> "\\}")))) .
+
+   var C : Constant .  var SC : SplitCell .
+   op printConfig : Module Term -> QidList .
+  ceq  printConfig(M,T)
+    =  printConfig(M,\kall{qid(string(getName(SC)) + if getMultiplicity(SC) then "*" else "" fi)}{getContents(SC)})
+    if SC := splitKCell(T)  .
+---(
+   eq printConfig(M, \kall{Q}{C}) 
+    = '\kall '`{ getColor(M,Q) '`} '`{ Q '`} '`{ \sort{printTerm(M,C)} '`} .
+---)
+   eq printConfig(M, \kall{Q}{T})
+    =  '\kall '`{ getColor(M,Q) '`} '`{ Q '`} '`{ printConfig(M,T) '`} [owise] .
+   eq printConfig(M, Q[Tl]) 
+    = if Q == ctor(Bag) then printConfigL(M,Tl) else printTerm(M,Q[Tl]) fi [owise] .
+   eq printConfig(M, C) 
+    = printTerm(M, C) if getName(C) == '. then eMetaLatexPrint(getType(C)) else nil fi [owise] .
+
+
+  op printConfigL : Module TermList -> QidList .
+  eq printConfigL(M, (T, NeTl)) 
+   = printConfig(M, T) '\mathrel '`{ '`} printConfigL(M, NeTl) .
+  eq printConfigL(M, T) = printConfig(M,T) [owise] .
+  var MAS' : MembAxSet .
+  eq eMetaLatexPrintK(M, MAS' (\config{T}) MAS)
+    = ('\n '\kconfig '`{ printConfig(M, T) 
+                   '`} 
+       eMetaLatexPrintK(M, MAS' MAS)) .
+  eq eMetaLatexPrintK(M, none) = nil .
+  eq eMetaLatexPrintK(M, MAS) 
+   = '\n '\bigskip '\par '\textsc '`{ 'K 'rules: '`}
+   '\setlength '`{ '\parindent '`} '`{ '2em '`}
+   eMetaLatexPrintCxt(M, MAS) [owise] .
+
+  var Cnd : Term .
+  op eMetaLatexPrintCxt : Module MembAxSet -> QidList .
+  op eMetaLatexPrintEqs : Module MembAxSet -> QidList .
+  op eMetaLatexPrintRls : Module MembAxSet -> QidList .
+  op eMetaLatexPrintNRls : Module MembAxSet -> QidList .
+  eq eMetaLatexPrintEqs(M, (\rule{Str}{{krl,T,empty,AS' metadata("structural") AS}}) MAS)
+    = ('\n '\kequation '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T) 
+                   '`} 
+       eMetaLatexPrintEqs(M, MAS)) .
+  eq eMetaLatexPrintEqs(M, (\rule{Str}{{kcrl,T,Cnd,AS' metadata("structural") AS}}) MAS)
+    = ('\n '\kcequation '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T) 
+                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
+       eMetaLatexPrintEqs(M, MAS)) .
+  eq eMetaLatexPrintRls(M, (\rule{Str}{{krl,T, empty, AS}}) MAS)
+    = ('\n '\krule '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(M, T) 
+                   '`} 
+       eMetaLatexPrintRls(M, MAS)) .
+  eq eMetaLatexPrintRls(M, (\rule{Str}{{kcrl,T, Cnd, AS}}) MAS)
+    = ('\n '\kcrule '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(M, T) 
+                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
+       eMetaLatexPrintRls(M, MAS)) .
+  eq eMetaLatexPrintCxt(M, (\context{Str}{T}) MAS)
+    = ('\n '\kcontext '`{ qid(Str) '`} '`{ '\ensuremath printTerm(M, T) 
+                   '`} 
+       eMetaLatexPrintCxt(M, MAS)) .
+  eq eMetaLatexPrintCxt(M, MAS) = eMetaLatexPrintEqs(M, MAS) [owise] .
+  eq eMetaLatexPrintEqs(M, MAS) = eMetaLatexPrintRls(M, MAS) .
+  eq eMetaLatexPrintRls(M, MAS) = eMetaLatexPrintNRls(M, MAS) .
+  eq eMetaLatexPrintNRls(M, none) = nil .
+  eq eMetaLatexPrintNRls(M, MAS:[MembAxSet]) 
+   = eMetaLatexPrintCxt(M, MAS:[MembAxSet]) 
+     [owise print "error in " MAS:[MembAxSet]] .
+
+  op printTerm0 : Module Term -> QidList .
+ ceq printTerm0(M, Q[T1,T2]) 
+   = if getName(M) == 'STRUCTURAL then '\reduceTopS else '\reduceTop fi '`{ printTerm(M, T1) '`}  '`{ printTerm(M, T2) '`}
+  if Q == replaceS .
+  eq printTerm0(M,T) = printTerm(M,T) [owise] .
+
+  op latexPrint : Module Module -> QidList .
+  var FM : Module .
+---(
+  eq latexPrint(M,
+(fmod 'SYNTAX-ERROR is nil sorts none . none (OPDS (op 'error : nil -> 'Error 
+      [metadata(Str)] .))
+      none none 
+endfm)) = tokenize(Str) '\n eMetaLatexPrint(setMbs(setRls(setEqs(M,none),none),none),OPDS) .
+---)
+  var StrL : List{String} .
+  op stringList2qidList : List{String} -> QidList .
+  eq stringList2qidList(St StrL) 
+   = string2qidList(St) '\n stringList2qidList(StrL) .
+  eq stringList2qidList(nil) = nil .
+
+  op preamble : -> QidList .
+  eq preamble = stringList2qidList(
+"\\documentclass[landscape]{article}"
+"\\usepackage[a0paper]{geometry}"
+"\\usepackage{fullpage}"
+"\\usepackage{arydshln}"
+"\\usepackage{amssymb}"
+"\\usepackage{stmaryrd}"
+"\\usepackage{color}"
+"\\usepackage{tikz}"
+"\\usetikzlibrary{shapes.misc}"
+"\\usetikzlibrary{positioning}"
+"\\usetikzlibrary{calc}"
+"\\usetikzlibrary{decorations.pathmorphing}"
+"\\usepackage{ucs}"
+"\\usepackage{ifthen}"
+""
+"\\definecolor{Grey}{rgb}{0.8,0.8,0.8}"
+"\\newcommand{\\nothing}{}"
+"\\newcommand{\\subscript}[1]{\\ensuremath{\\nothing_{#1}}}"
+"\\newcommand{\\kconfig}[1]{\\par\\textsc{configuration:}\\setlength{\\parindent}{2em}\\par$#1$\\setlength{\\parindent}{1em}}"
+"\\newcommand{\\kcontext}[2]{\\par\\textsc{context:" "}$#2$}"
+"\\newcommand{\\syntax}[3]{\\par $#1\\mathrel{::=} {#2}$ \\ifthenelse{\\equal{#3}{}}{}{[#3]}}" 
+"\\newcommand{\\syntaxCont}[3]{\\par ${\\color{white}#1::}\\mid {#2}$ \\ifthenelse{\\equal{#3}{}}{}{[#3]}}" 
+"\\newcommand{\\cellDecl}[2]{\\par \\textsc{cell:" "}$#1$ wraps $#2$}" 
+"\\newcommand{\\nonTerminal}[1]{\\textit{#1}\\/}"
+"\\newcommand{\\terminal}[1]{\\textsf{#1}}"
+"\\newcommand{\\sort}[1]{\\textit{#1}}"
+"\\newcommand{\\kind}[1]{\\textit{#1}}"
+"\\newcommand{\\kequation}[2]{"
+"\\par\\textsc{#1 rule:}\\hspace{1em}$#2$\\bigskip}"
+"\\newcommand{\\kdot}{{\\scriptscriptstyle\\bullet}}"
+"\\newcommand{\\AnyVar}{\\textrm{---}}"
+"\\newcommand{\\kcequation}[3]{"
+"\\par\\textsc{#1 rule:}\\hspace{1em}$#2$ when $#3$\\bigskip}"
+"\\newcommand{\\krule}[2]{"
+"\\par\\indent\\textsc{#1 rule:}\\hspace{1em}$#2$\\bigskip}"
+"\\newcommand{\\mrule}[3]{\\par\\textsc{#1 rule:}\\hspace{1em}$#2 \\Rightarrow #3$\\bigskip}"
+"\\newcommand{\\cmrule}[4]{\\par\\textsc{#1 rule:}\\hspace{1em}$#2 \\Rightarrow #3$ when $#4$\\bigskip}"
+"\\newcommand{\\mequation}[3]{\\par\\textsc{#1 equation:}\\hspace{1em}$#2 = #3$}"
+"\\newcommand{\\sorts}[1]{}"
+"\\newcommand{\\cmequation}[4]{\\par\\textsc{#1 equation:}\\hspace{1em}$#2 = #3$ when $#4$}"
+"\\newcommand{\\kcrule}[3]{"
+"\\par\\textsc{#1 rule:}\\hspace{1em}$#2$ when $#3$\\bigskip}"
+"\\newcommand{\\kndrule}[2]{\\par\\textsc{#1 non-det rule:}\\setlength{\\parindent}{3em}\\par$#2$\\setlength{\\parindent}{2em}\\bigskip}"
+"\\newcommand{\\myquote}[1]{\\textrm{\\unichar{8220}#1\\unichar{8221}}}"
+"\\newcommand{\\mybracket}[1]{\\textrm{\\unichar{40}#1\\unichar{41}}}"
+"\\newcommand{\\kcell}[5]{"
+"\\begin{tabular}{@{}c@{}}"
+"\\vtop{"
+"\\vskip-1ex"
+"\\hbox{"
+"\\begin{tikzpicture}"
+"  \\node[draw=#1!50!black,line width=1pt, name=cell, shape=rounded rectangle, /pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=#5, /pgf/rounded rectangle west arc=#4,  fill=#1!20,minimum height=4ex,minimum width=9em]{$#3$};"
+"\\draw[shift=(cell.north west)] plot coordinates{(0,-.5pt)}" 
+"node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle, /pgf/rounded rectangle arc length=180, /pgf/rounded rectangle east arc=convex, /pgf/rounded rectangle west arc=convex, fill=#1!20,draw=#1!20,line width=1pt,minimum width=2em,minimum height=2.5ex,draw=#1!50!black]"
+" {#2};%"
+" \\draw[color=#1!20,line width=3pt] (label.south east) -- (label.south west);"
+" \\ifthenelse{\\equal{#4}{none}}{%"
+"  \\draw[fill,color=#1!50!black, decorate,decoration={coil, aspect=0, segment length=.5ex,amplitude=1pt}] (cell.south west) -- (cell.north west);%"
+"}{"
+"}"
+" \\ifthenelse{\\equal{#5}{none}}{%"
+"  \\draw[fill,color=#1!50!black, decorate,decoration={coil, aspect=0, segment length=.5ex,amplitude=1pt}] (cell.north east) -- (cell.south east);%"
+"}{"
+"}"
+"\\end{tikzpicture}%"
+"}"
+"\\vskip2ex}"
+"\\end{tabular}"
+"}"
+"\\newcommand{\\kall}[3]{\\kcell{#1}{#2}{#3}{convex}{convex}}"
+"\\newcommand{\\kprefix}[3]{\\kcell{#1}{#2}{#3}{convex}{none}}"
+"\\newcommand{\\ksuffix}[3]{\\kcell{#1}{#2}{#3}{none}{convex}}"
+"\\newcommand{\\kmiddle}[3]{\\kcell{#1}{#2}{#3}{none}{none}}"
+"\\newcommand{\\reduceTop}[2]{{#1}\\Rightarrow{#2}}"
+"\\newcommand{\\reduceTopS}[2]{{#1}\\rightleftharpoons{#2}}"
+"\\newcommand{\\reduce}[2]{\\begin{array}[t]{@{\\extracolsep{0ex}}c@{\\extracolsep{0ex}}}{#1}\\\\\\hline{#2}\\end{array}}"
+"\\newcommand{\\reduceS}[2]{\\begin{array}[t]{@{\\extracolsep{0ex}}c@{\\extracolsep{0ex}}}{#1}\\\\\\hdashline[2pt/2pt]{#2}\\end{array}}"
+"\\newcommand{\\kra}{\\curvearrowright}"
+"\\newenvironment{module}[1]{\\par\\noindent\\textsc{Module #1}\\setlength{\\parindent}{1em}}{\\par\\noindent\\textsc{end module}}"
+"\\newcommand{\\moduleName}[1]{#1}"
+"\\newcommand{\\including}[1]{\\par \\textsc{imports}\\ #1}"
+"\\newcommand{\\modulePlus}{$+$}"
+"\\newcommand{\\variable}[1]{\\textit{#1}\\/}"
+"\\newcommand{\\kvalue}[1]{{\\color{red}#1}}"
+"\\newcommand{\\prefixOp}[1]{\\textsf{#1}}"
+"\\newcommand{\\constant}[1]{\\textsf{#1}}"
+"\\begin{document}"
+) .
+
+  eq latexPrint(FM, M) = preamble eMetaLatexPrint(setMbs(setRls(setEqs(FM,none),none), none), M) string2qidList("\\end{document}")  [print "red latexPrint((" FM "),(" M ")) ."] .
+endm
+
+mod LATEX-PRINT-LOOP is including LOOP-MODE + LATEX-PRINT-META .
+  op latex-print : -> System .
+  op idle : -> State .
+  var Q : Qid . var QIL QIL' : QidList .
+  eq latex-print = [nil, idle, 'Usage: 'print '<Name> '.] .
+
+  op error : -> [Module] .
+  rl ['print Q QIL, idle, QIL'] 
+   => [QIL, idle, latexPrint(upModule(Q,true), upModule(Q, false))] .
+
+endm
+
