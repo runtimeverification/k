@@ -305,17 +305,17 @@ mod K-RULES is
   ops rule_if_ : Bag Bool -> [KSentence] [prec 126 format(b o b o d)] .
   ops rule_if_ : Set Bool -> [KSentence] [prec 126 format(b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
-  op `[_=>_`] : K K -> K [prec 0] .
-  op `[_=>_`] : KResult KResult -> KResult [prec 0] .
-  op `[_=>_`] : KLabel KLabel -> KLabel [prec 0] .
-  op `[_=>_`] : CellLabel CellLabel -> CellLabel [prec 0] .
-  op `[_=>_`] : KResultLabel KResultLabel -> KResultLabel [prec 0] .
-  op `[_=>_`] : List{K} List{K} -> List{K} [prec 0] .
-  op `[_=>_`] : List{KResult} List{KResult} -> List{KResult} [prec 0] .
-  op `[_=>_`] : Map Map -> Map [prec 0] .
-  op `[_=>_`] : List List -> List [prec 0] .
-  op `[_=>_`] : Bag Bag -> Bag [prec 0] .
-  op `[_=>_`] : Set Set -> Set [prec 0] .
+  op _=>_ : K K -> K [prec 125] .
+  op _=>_ : KResult KResult -> KResult [prec 125] .
+  op _=>_ : KLabel KLabel -> KLabel [prec 125] .
+  op _=>_ : CellLabel CellLabel -> CellLabel [prec 125] .
+  op _=>_ : KResultLabel KResultLabel -> KResultLabel [prec 125] .
+  op _=>_ : List{K} List{K} -> List{K} [prec 125] .
+  op _=>_ : List{KResult} List{KResult} -> List{KResult} [prec 125] .
+  op _=>_ : Map Map -> Map [prec 125] .
+  op _=>_ : List List -> List [prec 125] .
+  op _=>_ : Bag Bag -> Bag [prec 125] .
+  op _=>_ : Set Set -> Set [prec 125] .
 endm
 
 --- rule where level
