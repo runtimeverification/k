@@ -210,7 +210,7 @@ fmod META-K-RULES is including K-SORTS .
   eq symbol kcrl = 'rule_if_ .  
 
   op replaceS : -> Qid .
-  eq replaceS = '`[_=>_`] .
+  eq replaceS = '_=>_ .
 
   op getKRuleKind : Qid ~> KRuleKind . 
   eq getKRuleKind(Q) = if Q == symbol krl then krl else if Q == symbol kcrl then kcrl else error(Q) fi fi .
