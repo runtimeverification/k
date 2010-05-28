@@ -1321,7 +1321,7 @@ mod LATEX-PRINT-META is
   op printSortQid : Qid -> QidList .
   eq printSortQid(Q) = printQid(qid(replaceAll(string(Q), ("`{" |-> "\\{", "`}" |-> "\\}")))) .
 
-   var C : Constant .  var SC : SplitCell .
+   var C : Constant .  var V : Variable . var SC : SplitCell .
    op printConfig : Module Term -> QidList .
   ceq  printConfig(M,T)
     =  printConfig(M,\kall{qid(string(getName(SC)) + if getMultiplicity(SC) then "*" else "" fi)}{getContents(SC)})
@@ -1336,6 +1336,7 @@ mod LATEX-PRINT-META is
     = if Q == ctor(Bag) then printConfigL(M,Tl) else printTerm(M,Q[Tl]) fi [owise] .
    eq printConfig(M, C) 
     = printTerm(M, C) if getName(C) == '. then eMetaLatexPrint(getType(C)) else nil fi [owise] .
+   eq printConfig(M, V) = printTerm(M,V) .
 
 
   op printConfigL : Module TermList -> QidList .
