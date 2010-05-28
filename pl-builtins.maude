@@ -82,12 +82,12 @@ fmod PL-NAT is
   op 0 : -> Zero [ctor] .
 
   op sNat_ : Nat -> NzNat
-        [ctor iter
+        [ctor iter metadata "latex(renameTo s\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook SuccSymbol
                   term-hook zeroTerm (0))] .
 
   op _+Nat_ : NzNat Nat -> NzNat
-        [assoc comm prec 33
+        [assoc comm prec 33 metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook ACU_NumberOpSymbol (+)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
   op _+Nat_ : Nat Nat -> Nat [ditto] .
