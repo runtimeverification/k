@@ -194,16 +194,16 @@ mod CHALLENGE-PROGRAMS is
 .
 
   op p24 : -> Stmt .
-  ops f1 f2 fib loc code sender : -> Id .
+  ops f1 f2 fib loc cod sender : -> Id .
   eq p24 = 
    var fib,loc ;
    fib = newAgent
    {
-     var m, c, code ;
+     var m, c, cod ;
      m = receive ;
      send & c to head m ;
-     code = eval receiveFrom head m ;
-     aspect code() ;
+     cod = eval receiveFrom head m ;
+     aspect cod() ;
      var f ;
      f = mu f . lambda x .
              if x <= 1 then { return x ; } else {
@@ -238,11 +238,11 @@ mod CHALLENGE-PROGRAMS is
                 else if right == [] then return left ;
                 else if (head left <= head right) then return head  left : merge(tail left,right) ;
                 else return head right : merge(left, tail right); };
-      var m, c, code ;
+      var m, c, cod ;
       m = receive ;
       send & c to m ;
-      code = eval receiveFrom m ;
-      aspect code() ;
+      cod = eval receiveFrom m ;
+      aspect cod() ;
       mergeSort = lambda l . {
        if l == [] then return [];
        else if tail l == [] then return l ;
@@ -347,11 +347,11 @@ mod CHALLENGE-PROGRAMS is
                 else if right == [] then return left ;
                 else if (head left <= head right) then return head  left : merge(tail left,right) ;
                 else return head right : merge(left, tail right); };
-      var m, c, code ;
+      var m, c, cod ;
       m = receive ;
       send & c to m ;
-      code = eval receiveFrom m ;
-      aspect code() ;
+      cod = eval receiveFrom m ;
+      aspect cod() ;
       mergeSort = lambda l . {
        if l == [] then return [];
        else if tail l == [] then return l ;
@@ -411,9 +411,9 @@ callcc lambda k . {
       else if right == [] then return left ; 
       else if head left <= head right then return head left : merge(tail left,right) ; 
       else return head right : merge(left,tail right) ;} ; 
-    var m, c, code ; 
+    var m, c, cod ; 
     m = receive ; send & c to m ; 
-    code = eval receiveFrom m ; aspect code() ; 
+    cod = eval receiveFrom m ; aspect cod() ; 
     mergeSort = lambda l . {
       if l == [] then return [] ; 
       else if tail l == [] then return l ; 

@@ -1,277 +1,231 @@
 in ../../k-prelude
-in challenge-syntax
+in challenge-syntax.kmaude
 in challenge-programs
 
-mod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K .
-  including PL-CONVERSION .
-  subsort List{Exp} Stmt < K .
-  sort Val .
-  subsort Bool Int Float < Val < Exp .
-  subsort List{Val} < KResult .
+kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVERSION 
+  subsort List{Exp} Stmt < K 
+  sort Val subsort Bool Int Float < Val < Exp subsort List{Val} < KResult 
 
-  ops env store nextLoc ptr fstack I/O in out  aspect thread holds busy agents agent messages message from to body threads me parent nextAgent world barrier waiting : -> CellLabel .
-  configuration <T> 
-   <agents>
-    <agent*> 
-     <threads>
-      <thread*>
-       <k> .K </k> <env> .Map </env> 
-       <fstack> .List </fstack>
-       <aspect> .K </aspect>
-       <holds> .Map </holds>
-      </thread*>
-     </threads>
-      <busy> .Set </busy>
-      <store> .Map </store> <nextLoc> 0 </nextLoc> 
-      <ptr> .Map </ptr>
-      <me> 0 </me>
-      <parent> -1 </parent> 
-    </agent*>
-   </agents>
-   <nextAgent> 1 </nextAgent>
-   <world> SetItem(0) </world>
-   <barrier> true </barrier>
-   <waiting> .Set </waiting>
-   <messages>
-    <message*> 
-     <from> .K </from> <to> .Set </to> <body> .K </body>
-    </message*>
-   </messages>
-   <I/O>
-    <in> .List </in>
-    <out> .List </out>
-   </I/O>
-  </T> .
+  configuration
+    <T>
+      <agents>
+        <agent*> 
+          <threads>
+            <thread*>
+              <k>.K</k>
+              <env>.Map</env>
+              <fstack>.List</fstack>
+              <holds>.Map</holds>
+            </thread*>
+          </threads>
+          <aspect>.K</aspect>
+          <busy>.Set</busy>
+          <store>.Map</store><nextLoc>0</nextLoc>
+          <ptr>.Map</ptr>
+          <me>0</me>
+          <parent>-1</parent>
+        </agent*>
+      </agents>
+      <nextAgent>1</nextAgent>
+      <world>SetItem(0)</world>
+      <barrier>true</barrier>
+      <waiting>.Set</waiting>
+      <messages>
+        <message*>
+          <from>.K</from>
+          <to>.Set</to>
+          <body>.K</body>
+        </message*>
+      </messages>
+      <I/O>
+        <in>.List</in>
+        <out>.List</out>
+      </I/O>
+    </T>
 
 --- Basic arithmetic operations; integers are converted to reals when needed
 --- NOTE: add more here
-  rule [I1 + I2 => I1 +Int I2] .
-  rule [I1 + F2 => rat2floatConversion(I1) +Float F2] .
-  rule [F1 + I2 => F1 +Float rat2floatConversion(I2)] .
-  rule [F1 + F2 => F1 +Float F2] .
+  rule  I1:Int + I2:Int => I1 +Int I2  
+  rule  I1 + F2:Float => Int2Float(I1) +Float F2 
+  rule  F1:Float + I2 => F1 +Float Int2Float(I2) 
+  rule  F1 + F2 => F1 +Float F2 
 --- following rules for _*_ need to be written like that because of parsing ambiguities: a*b can also be seen as __(a,*b) ...
-  rule [_*_(I1,I2) => I1 *Int I2] .
-  rule [_*_(I1,F2) => rat2floatConversion(I1) *Float F2] .
-  rule [_*_(F1,I2) => F1 *Float rat2floatConversion(I2)] .
-  rule [_*_(F1,F2) => F1 *Float F2] .
-  rule [I1 / I2 => I1 /Int I2] if I2 =/=Bool 0 .
-  rule [I1 / F2 => rat2floatConversion(I1) /Float F2] if F2 =/=Bool 0.0 .
-  rule [F1 / I2 => F1 /Float rat2floatConversion(I2)] if I2 =/=Bool 0 .
-  rule [F1 / F2 => F1 /Float F2] if F2 =/=Bool 0.0 .
-  rule [I1 <= I2 => I1 <=Int I2] .
-  rule [I1 <= F2 => rat2floatConversion(I1) <=Float F2] .
-  rule [F1 <= I2 => F1 <=Float rat2floatConversion(I2)] .
-  rule [F1 <= F2 => F1 <=Float F2] .
-  rule [V1 == V2 => V1 ==Bool V2] .
-  rule [not T => notBool T] .
-  rule [true and E => E] .
-  rule [false and E => false] .
+  rule  _*_(I1,I2) => I1 *Int I2 
+  rule  _*_(I1,F2) => Int2Float(I1) *Float F2  
+  rule  _*_(F1,I2) => F1 *Float Int2Float(I2)  
+  rule  _*_(F1,F2) => F1 *Float F2  
+  rule  I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
+  rule  I1 / F2 => Int2Float(I1) /Float F2  if F2 =/=Bool 0.0 
+  rule  F1 / I2 => F1 /Float Int2Float(I2)  if I2 =/=Bool 0 
+  rule  F1 / F2 => F1 /Float F2  if F2 =/=Bool 0.0 
+  rule  I1 <= I2 => I1 <=Int I2  
+  rule  I1 <= F2 => Int2Float(I1) <=Float F2  
+  rule  F1 <= I2 => F1 <=Float Int2Float(I2)  
+  rule  F1 <= F2 => F1 <=Float F2
+  rule  V1:Val == V2:Val => V1 ==Bool V2
+  rule  not T:Bool => notBool T
+  rule  true and E:Exp => E
+  rule  false and E => false
 
 --- Variable declaration
-  rule <k> [var Xl ; => .K] ...</k> <env> [Env => Env[| Xl | from N / getList{K}(Xl)]] </env> <store>... [.Map => | Xl | from N |-> 0] ...</store> <nextLoc> [N => N +Nat | Xl |] </nextLoc> .
+  rule <k>var Xl:List`{Id`} ; => .<_/k> <env>Env => Env[| Xl | from N:Nat / getList{K}(Xl)]</env> <store_>. => | Xl | from N |-> 0<_/store> <nextLoc>N => N +Nat | Xl |</nextLoc>
 
 --- Variable lookup
-  rule <k> [X => K] ...</k> <env>... X |-> N ...</env> <store>... N |-> K ...</store> .
+  rule <k>X:Id => K:K<_/k> <env_>X |-> N<_/env> <store_>N |-> K<_/store>
 
 --- Variable assignment
-  rule <k> [X = V ; => .K] ...</k> <env>... X |-> N ...</env> <store>... N |-> [? => V] ...</store> .
+  rule <k>X = V:Val ; => .<_/k> <env_>X |-> N<_/env> <store_>N |->(_ => V)<_/store>
 
 --- Variable increment
-  rule <k> [++ X => I +Int 1] ...</k> <env>... X |-> N ...</env> <store>... N |-> [I => I +Int 1] ...</store> .
+  rule <k>++ X => I:Int +Int 1<_/k> <env_>X |-> N<_/env> <store_>N |->(I => I +Int 1)<_/store>
 
 --- Basic statement constructs
-  rule [{} => .K] [metadata "structural"] .
-  rule <k> [{S} => S ~> env(Env)] ...</k> <env> Env </env> .
-  rule [S1 S2 => S1 ~> S2] [metadata "structural"] .
-  rule [V ; => .K] .
-  rule [if true then S1 else S2 => S1] .
-  rule [if false then S1 else S2 => S2] .
-  rule <k> [while E do S => if E then S while E do S else {}] ...</k> [metadata "structural"] .
+  rule  {} => .  [structural]
+  rule <k>{S:Stmt} => S ~> env(Env)<_/k> <env>Env</env>
+  rule  S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule  V ; => .
+  rule  if true then S1 else S2 => S1
+  rule  if false then S1 else S2 => S2
+  rule <k>while E do S => if E then S while E do S else {}<_/k> [structural]
 
 --- I/O
-   rule <k> [read => I] ...</k> <in> [ListItem(I) => .List] ...</in> .
-   rule <k> [print V ; => .K] ...</k> <out>... [.List => ListItem(V)] </out> .
+   rule <k>read => I<_/k> <in>ListItem(I) => .<_/in>
+   rule <k>print V ; => .<_/k> <out_>. => ListItem(V)</out>
 
 --- Memory allocation and pointers
-  rule <k> [& X => N] ...</k> <env>... X |-> N ...</env> .
-  rule <k> [* N => V] ...</k> <store>... N |-> V ...</store> .
-  rule <k> [malloc(N1) => N2] ...</k> <ptr>... [.Map => N2 |-> N1] ...</ptr> <store>... [.Map => N1 from N2 |-> 0] ...</store> <nextLoc> [N2 => N2 + N1] </nextLoc> .
-  rule <k> [free(N2); => .K] ...</k> <ptr>... [N2 |-> N1 => .Map] ...</ptr> <store> [Store => Store[undef/ N1 from N2]] </store> .
-  context * [HOLE] = ? ; .
-  rule <k> [* N = V ; => .K] ...</k> <store>... N |-> [? => V] ...</store> .
+  rule <k>& X => N<_/k> <env_>X |-> N<_/env>
+  rule <k>* N => V<_/k> <store_>N |-> V<_/store>
+  rule <k>malloc(N1:Nat) => N2:Nat<_/k> <ptr_>. => N2 |-> N1<_/ptr> <store_>. => N1 from N2 |-> 0<_/store> <nextLoc>N2 => N2 + N1</nextLoc>
+  rule <k>free(N2); => .<_/k> <ptr_>N2 |-> N1 => .<_/ptr> <store>Store:Map => Store[undef/ N1 from N2]</store>
+  context * [HOLE] = _ ;
+  rule <k>* N = V ; => .<_/k> <store_>N |->(_ => V)<_/store>
 
 --- Lists
-  rule [V : [Vl] => [V,Vl]] .
-  rule [head [V,Vl] => V] .
-  rule [tail [V,Vl] => [Vl]] .
+  rule V : [Vl:List`{Val`}] => [V,Vl]
+  rule head [V,Vl] => V
+  rule tail [V,Vl] => [Vl]
 
 --- Aspects
-  rule <k> [aspect S => .K] ...</k> <aspect> [? => S] </aspect> .
+  rule <k>aspect S => .<_/k> <aspect> _ => S</aspect>
 
 --- Functions
-  op closure-lambda : List{Id} Stmt Map -> Val .
-  rule <k> [lambda Xl . S1 => closure-lambda(Xl, (S2 S1), Env)] ...</k> <env> Env </env> <aspect> S2 </aspect> .
-  op `(_`,_`) : K Map -> ListItem .
-  rule <k> [_`(_`)(closure-lambda(Xl, S, Env),Vl) ~> K => S return 0 ;] </k> <env> [Env' => Env[| Xl | from N / getList{K}(Xl)]] </env>
-    <fstack> [.List => (K,Env')] ...</fstack> <store>... [.Map => | Xl | from N |-> getList{K}(Vl)] </store> <nextLoc> [N => N +Nat | Xl |] </nextLoc> .
-  rule <k> [return V ; ~> ? => V ~> K] </k> <env> [? => Env] </env> <fstack> [(K,Env) => .List] ...</fstack> .
+  op closure-lambda : List{Id} Stmt Map -> Val  [metadata "latex(renameTo closure\\subscript\\lambda)"]
+  rule <k>lambda Xl . S1 => closure-lambda(Xl, (S2 S1), Env)<_/k> <env>Env:Map</env> <aspect>S2</aspect>
+  op `(_`,_`) : K Map -> ListItem 
+  rule <k> _`(_`)(closure-lambda(Xl, S, Env),Vl) ~> K => S return 0 ;</k>
+       <env>Env':Map => Env[| Xl | from N / getList{K}(Xl)]</env>
+       <fstack>. => (K,Env')<_/fstack>
+       <store_>. => | Xl | from N |-> getList{K}(Vl)</store>
+       <nextLoc>N => N +Nat | Xl |</nextLoc>
+  rule <k>return V ; ~> _ => V ~> K</k> <env> _ => Env</env> <fstack>(K,Env) => .<_/fstack>
 
 --- Fixed point
 --- mu does not need to be defined, but below are several possibilities to do it in case one does not want to desugar it but define it directly
 ---(
 ---mu as in call-by-name
-  op closure-mu : Exp Map -> K .
-  rule <k> [mu X . E => closure-mu(E, Env[N / X])]...</k> <env> Env </env> <store>...[.Map => N |-> closure-mu(E, Env[N / X])]...</store> <nextLoc> [N => sNat N] </nextLoc> .
-  rule <k> [closure-mu(E, Env) => E ~> env(Env')] ...</k> <env> [Env' => Env] </env> .
+  op closure-mu : Exp Map -> K 
+  rule <k>mu X . E => closure-mu(E, Env[N / X])</k> <env>Env</env> <store_>. => N |-> closure-mu(E, Env[N / X])<_/store> <nextLoc>N => sNat N</nextLoc>
+  rule <k>closure-mu(E, Env) => E ~> env(Env')<_/k> <env>Env':Map => Env</env>
 ---)
 
 ---(
 ---mu through assigment (if X does not appear at top of E)
-  rule <k>[mu X . E => var X ; ~> X = E ; ~> X ~> env(Env)]...</k> <env> Env </env> .
+  rule <k>mu X . E => var X ; ~> X = E ; ~> X ~> env(Env)<_/k> <env>Env</env>
 ---)
 
 ---(
 ---mu just for functions
-   context mu ? . [HOLE] .
-   rule <k>[mu X . closure-lambda(Y,S,Env) => closure-lambda(Y,S,Env[N / X])]...</k> <store>...[.Map => N |-> closure-lambda(Y,S,Env[N / X])]...</store> <nextLoc>[N => sNat N]</nextLoc> .
+   context mu _ . [HOLE] 
+   rule <k>mu X . closure-lambda(Y,S,Env) => closure-lambda(Y,S,Env[N / X])<_/k> <store_>. => N |-> closure-lambda(Y,S,Env[N / X])<_/store> <nextLoc>N => sNat N</nextLoc>
 ---)
 
 --- Callcc
-  op cc : K Map List -> Val .
-  rule <k> [callcc(V) => _`(_`)(V, cc(K, Env, FStack))] ~> K </k> <env> Env </env> <fstack> FStack </fstack> .
-  rule <k> [_`(_`)(cc(K, Env, FStack), V) ~> ?:K => V ~> K] </k>  <env> [?:Map => Env] </env> <fstack> [?:List => FStack] </fstack> .
+  op cc : K Map List -> Val
+  rule <k>(callcc(V) => _`(_`)(V, cc(K, Env, FStack)))  ~> K</k> <env>Env</env> <fstack>FStack:List</fstack>
+  rule <k> _`(_`)(cc(K, Env, FStack), V) ~> _ => V ~> K</k> <env> _ => Env</env> <fstack> _ => FStack</fstack>
 
 --- Sequential non-determinism
-  rule <k>[randomBool =>  true]...</k> .
-  rule <k>[randomBool => false]...</k> .
-  
+  rule <k>randomBool =>  true<_/k>
+  rule <k>randomBool => false<_/k>
+
 --- Threads
-   rule <thread>... <k> [spawn S => .K] ...</k> <env> Env </env> ...</thread> [.Bag => <thread> <k> S </k> <env> Env </env> <fstack> .List </fstack> <aspect> .K </aspect> <holds> .Map </holds> </thread>] .
-   rule [<thread>... <k> .K </k> <holds> Holds </holds> ...</thread> => .Bag] <busy> [Busy => Busy - keys(Holds)] </busy> .
-   rule <k> [acquire V ; => .K] ...</k> <holds>... [.Map => V |-> 0] ...</holds> <busy> Busy [.Set => SetItem(V)] </busy> if notBool(V in Busy) .
-   rule <k> [acquire V ; => .K] ...</k> <holds>... V |-> [N => sNat N] ...</holds> .
-   rule <k> [release V ; => .K] ...</k> <holds>... V |-> [sNat N => N] ...</holds> .
-   rule <k> [release V ; => .K] ...</k> <holds>... [V |-> 0 => .Map] ...</holds> <busy>... [SetItem(V) => .Set] ...</busy> .
-   rule <k> [rendezvous V ; => .K] ...</k> <k> [rendezvous V ; => .K] ...</k> .
+   rule <thread_><k>spawn S => .<_/k> <env>Env</env><_/thread> (. => <thread_> <k>S</k> <env>Env</env> <_/thread>)
+   rule (<thread_><k>.K</k> <fstack>.List</fstack> <holds>Holds:Map</holds> <_/thread>=> .) <busy>Busy:Set => Busy - keys(Holds)</busy>
+   rule <k>acquire V ; => .<_/k> <holds_>. => V |-> 0<_/holds> <busy>Busy  (. => SetItem(V))</busy> if notBool(V in Busy)
+   rule <k>acquire V ; => .<_/k> <holds_>V |-> (N => sNat N)<_/holds>
+   rule <k>release V ; => .<_/k> <holds_>V |-> (sNat N => N)<_/holds>
+   rule <k>release V ; => .<_/k> <holds_>V |-> 0 => .<_/holds> <busy_>SetItem(V) => .<_/busy>
+   rule <k>rendezvous V ; => .<_/k> <k>rendezvous V ; => .<_/k>
 
 --- Agents
-  rule <agent>... <k> [newAgent S => N2] ...</k> <me> N1 </me> ...</agent>
-       <world>... [.Set => SetItem(N2)] ...</world>
-     [.Bag => <agent> 
-    <me> N2 </me>
-    <parent> N1 </parent>
-    <threads>
-     <thread>
-      <k> S </k> 
-      <env> .Map </env>
-      <fstack> .List </fstack>
-      <aspect> .K </aspect>
-      <holds> .Map </holds>
-     </thread>
-    </threads>
-    <busy> .Set </busy>
-    <store> .Map </store>
-    <nextLoc> 0 </nextLoc>
-    <ptr> .Map </ptr>
-   </agent>]
-   <nextAgent> [N2 => sNat N2] </nextAgent> .
-  rule [<agent>... <threads> .Bag </threads> <me> N </me> ...</agent> => .Bag] <world>... [SetItem(N) => .Set] ...</world> .
-  rule <k> [me => N] ...</k> <me> N </me> .
-  rule <k> [parent => N] ...</k> <parent> N </parent> .
-  rule <me> N1 </me> <k> [send V to N2 ; => .K] ...</k> [.Bag => <message> <from> N1 </from> <to> SetItem(N2) </to> <body> V </body> </message>] .
-  rule <me> N </me> <k> [receive => V] ...</k> <message>... <to>...[SetItem(N) => .Set]...</to> <body> V </body> ...</message> .
-  rule <me> N1 </me> <k> [receiveFrom N2 => V] ...</k> <message> <from> N2 </from> <to>...[SetItem(N1) => .Set]...</to> <body> V </body> </message> .
-  rule <me> N </me> <k> [broadcast V ; => .K] ...</k> <world> W </world> [.Bag => <message> <from> N </from> <to> W </to> <body> V </body> </message>] .
-  rule [<message>... <to> .Set </to> ...</message> => .Bag] [metadata "structural"] .
-  rule <agent>... <me> N1 </me> <k> [sendSynch V to N2 ; => .K] ...</k> ...</agent> <agent>... <me> N2 </me> <k> [receiveFrom N1 => V] ...</k> ...</agent> .
-  rule <k> [sendSynch V to N2 ; => .K] ...</k> <agent>... <me> N2 </me> <k> [receive => V] ...</k> ...</agent> .
-  rule <me> N </me> <threads> <thread>... <k> barrier ; ...</k> ...</thread> </threads> <barrier> true </barrier> <waiting> W [.Set => SetItem(N)] </waiting> if notBool(N in W) .
-  rule <barrier> [true => false] </barrier> <waiting> W </waiting> <world> W </world> if W =/=Bool .Set .
-  rule <me> N </me> <k> [barrier ; => .K] ...</k> <barrier> false </barrier> <waiting>... [SetItem(N) => .Set] ...</waiting> .
-  rule <barrier> [false => true] </barrier> <waiting> .Set </waiting> .
+  rule <agent_> <k>newAgent S => N2<_/k> <me>N1</me> <_/agent> <world_>. => SetItem(N2)<_/world>
+       (. => <agent_> <me>N2</me> <parent>N1</parent> <k>S</k> <_/agent>) <nextAgent>N2 => sNat N2</nextAgent>
+  rule  (<agent_><threads>.Bag</threads> <me>N</me> <_/agent>=> .) <world_>SetItem(N) => .<_/world>
+  rule <k>me => N<_/k> <me>N</me>
+  rule <k>parent => N<_/k> <parent>N</parent>
+  rule <me>N1</me> <k>send V to N2 ; => .<_/k>(. => <message> <from>N1</from> <to>SetItem(N2)</to> <body>V</body> </message>)
+  rule <me>N</me> <k>receive => V<_/k> <message_> <to_>SetItem(N) => .<_/to> <body>V</body> <_/message>
+  rule <me>N1</me> <k>receiveFrom N2 => V<_/k> <message> <from>N2</from> <to_>SetItem(N1) => .<_/to> <body>V</body> </message>
+  rule <me>N</me> <k>broadcast V ; => .<_/k> <world>W:Set</world>(. => <message> <from>N</from> <to>W</to> <body>V</body> </message>)
+  rule <message_><to>.Set</to><_/message>=> .  [structural]
+  rule <agent_> <me>N1</me> <k>sendSynch V to N2 ; => .<_/k> <_/agent> <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent>
+  rule <k>sendSynch V to N2 ; => .<_/k> <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
+  rule <me>N</me> <threads> <thread_><k>barrier ;<_/k> <_/thread> </threads> <barrier>true</barrier> <waiting>W  (. => SetItem(N))</waiting>if notBool(N in W) 
+  rule <barrier>true => false</barrier> <waiting>W</waiting> <world>W</world>if W =/=Bool .
+  rule <me>N</me> <k>barrier ; => .<_/k> <barrier>false</barrier> <waiting_>SetItem(N) => .<_/waiting>
+  rule <barrier>false => true</barrier> <waiting>.Set</waiting>
 
 --- Abrupt termination (of thread, of agent, of system)
-  rule <k> [haltThread ; ~> ? => .K] </k> <fstack> [? => .List] </fstack> .
-  rule [<threads>... <k> haltAgent ; ...</k> ...</threads> => <threads> .Bag </threads>] .
-  rule [<agents>... <k> haltSystem ; ...</k> ...</agents> => <agents> .Bag </agents>] .
+  rule <k>haltThread ; ~> _ => .</k> <fstack> _ => .List</fstack>
+  rule <threads_><k>haltAgent ;<_/k><_/threads>=> <threads>.Bag</threads>
+  rule <agents_><k>haltSystem ;<_/k><_/agents>=> <agents>.Bag</agents>
 
---- Reflection
-  op quoteit[_] : Nat -> KLabel .
-  op code : List{K} -> Val .
-  op _box(~>)_ : K K -> K [metadata "strict"] .
-  op _box(,,)_ : K K -> K [metadata "strict"] .
-  op box : KLabel -> KLabel .
-  context box(Label)(?,,`[HOLE`]:K,,?) .
-  
-  rule <k> [quote E => quoteit[0](E)] ...</k> .
-  rule [quoteit[N](quote(E)) => box('quote_)(quoteit[sNat(N)](E))] .
-  rule [quoteit[0](unquote(E)) => E] .
-  rule [quoteit[sNat(N)](unquote(E)) => box('unquote_)(quoteit[N](E))] .
-  rule [quoteit[N](.K) => code(.K)] [metadata "structural"] .
-  rule [quoteit[N]((K1 ~> K2)) => quoteit[N](K1) box(~>) quoteit[N](K2)] if K1 =/=Bool .K andBool K2 =/=Bool .K .
-  rule [code(K1) box(~>) code(K2) => code((K1 ~> K2))] .
-  rule [quoteit[N](Label(Kl)) => box(Label)(quoteit[N](Kl))] if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_ .
-  rule [box(Label)(code(Kl)) => code(Label(Kl))] .
-  rule [quoteit[N](.List{K}) => code(.List{K})] .
-  rule [quoteit[N]((Kl1,,Kl2)) => quoteit[N](Kl1) box(,,) quoteit[N](Kl2)] if Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K} .
-  rule [code(Kl1) box(,,) code(Kl2) => code((Kl1,, Kl2))] .
-  rule [lift V => code(V)] .
-  rule [eval code(K) => K]  .
+--- Code generation (via reflection)
+  op quoteit`[_`] : Nat -> KLabel
+  op code : List{K} -> Val
+  op _box`(~>`)_ : K K -> K [metadata "latex(renameTo _\\framebox{\\ensuremath\\kra}\_)" strict]
+  op _box`(`,`,`)_ : K K -> K [metadata "latex(renameTo _\\framebox{,,}\_)" strict]
+  op box : KLabel -> KLabel [metadata "latex(renameTo \\framebox{\_})"]
+  context box(Label:KLabel)(_,,`[HOLE`]:K,,_)
+
+  rule <k>quote E => quoteit[0](E)<_/k>
+  rule quoteit[N](quote(E)) => box('quote_)(quoteit[sNat(N)](E))
+  rule quoteit[0](unquote(E)) => E
+  rule quoteit[sNat(N)](unquote(E)) => box('unquote_)(quoteit[N](E))
+  rule quoteit[N](.) => code(.) [structural]
+  rule quoteit[N]((K1:K ~> K2:K)) => quoteit[N](K1) box(~>) quoteit[N](K2) if K1 =/=Bool . andBool K2 =/=Bool .
+  rule code(K1) box(~>) code(K2) => code((K1 ~> K2))
+  rule quoteit[N](Label(Kl:List`{K`})) => box(Label)(quoteit[N](Kl)) if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_
+  rule box(Label)(code(Kl)) => code(Label(Kl))
+  rule quoteit[N](.List{K}) => code(.List{K})
+  rule quoteit[N]((Kl1:List`{K`},, Kl2:List`{K`})) => quoteit[N](Kl1) box(,,) quoteit[N](Kl2) if Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K}
+  rule code(Kl1) box(,,) code(Kl2) => code((Kl1,, Kl2))
+  rule lift V => code(V)
+  rule eval code(K) => K
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
 --- environment recovery
-  op env : Map -> K .
-  rule [env(?) ~> env(Env) => env(Env)] [metadata "structural"] .
-  rule <k> [env(Env) => .K] ...</k> <env> [? => Env] </env> [metadata "structural"] .
-  rule [V ~> env(Env) => env(Env) ~> V] [metadata "structural"] .
+  op env : Map -> K
+  rule env(_) ~> env(Env) => env(Env) [structural]
+  rule <k>env(Env) => .<_/k> <env> _ => Env</env> [structural]
+  rule V ~> env(Env) => env(Env) ~> V [structural]
 
 --- List{Val}
-  sort List{Val} .
-  subsort Val < List{Val} < List{Exp} .
-  op _,_ : List{Val} List{Val} -> List{Val} [ditto] .
+  sort List{Val} 
+  subsort Val < List{Val} < List{Exp} 
+  op _`,_ : List{Val} List{Val} -> List{Val} [ditto] 
 --- length
-  op |_| : List{Id} -> Nat .  eq | () | = 0 .  eq | X,Xl | = sNat(| Xl |) .
+  op |_| : List{Id} -> Nat  [metadata "latex(renameTo \\ensuremath|_\\ensuremath|)"] 
+  rule | () | => 0 [structural]  rule | X,Xl | => sNat(| Xl |) [structural]
 --- generate sequence of locations
-  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq (sNat N2 from N1) = (N1,,(N2 from sNat N1)) .
+  op _from_ : Nat Nat -> List{K}   rule 0 from N1 => .List{K} [structural]  rule (sNat N2 from N1) => (N1,,(N2 from sNat N1)) [structural]
+endkm
 
-  vars I I1 I2 : Int .  vars F1 F2 : Float .  var T : Bool .  var X Y : Id . var Xl : List{Id} .  var E : Exp .  var El : List{Exp} .
-  vars S S1 S2 : Stmt .  vars N N1 N2 : Nat .  var Env Env' Store Map : Map .  var Holds : Map .  var Busy : Set . var W : Set .
-  var FStack : List .  var V V1 V2 : Val .  var Vl : List{Val} .  var K K' K1 K2 : K . var Kl Kl1 Kl2 : List{K} .  var Label : KLabel .
-endm
-
-mod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS .
-  op run : KLabel -> Bag .
-  eq run(L:KLabel) = run(L:KLabel,.List{K}) .
-  op run : KLabel List{K} -> Bag .
-  eq run(L:KLabel,L:List{K}) = <T> 
-   <agents>
-    <agent>
-     <threads>
-      <thread>
-       <k> L:KLabel(.List{K}) </k> 
-       <env> .Map </env>
-       <fstack> .List </fstack>
-       <aspect> .K </aspect>
-       <holds> .Map </holds>
-      </thread>
-     </threads>
-     <busy> .Set </busy>
-     <store> .Map </store>
-     <nextLoc> 0 </nextLoc>
-     <ptr> .Map </ptr>
-     <me> 0 </me>
-    </agent>
-   </agents>
-   <world> SetItem(0) </world>
-   <barrier> true </barrier>
-   <waiting> .Set </waiting>
-   <messages> .Bag </messages>
-   <nextAgent> 1 </nextAgent>
-   <I/O>
-    <in> List(L:List{K}) </in>
-    <out> .List </out>
-   </I/O>
-  </T> .
-endm
+kmod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS 
+  op run : KLabel -> Bag
+  op run : KLabel List{K} -> Bag
+  rule run(KL:KLabel) => run(KL,.List{K}) [structural]
+  rule run(KL,L:List`{K`}) => <T_> <k>KL(.List{K})</k> <in>List(L)</in> <_/T> [structural]
+endkm
