@@ -46,10 +46,10 @@ fmod PL-BOOL is
     term-hook equalTerm (false)
     term-hook notEqualTerm (true))] .
 
-  op _andBool_ : Bool Bool -> Bool [assoc comm prec 55] .
-  op _orBool_ : Bool Bool -> Bool [assoc comm prec 59   metadata "latex(renameTo _\\ensuremath{\\vee}_)"] .
+  op _andBool_ : Bool Bool -> Bool [assoc comm prec 55  metadata "latex(renameTo _and\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
+  op _orBool_ : Bool Bool -> Bool [assoc comm prec 59   metadata "latex(renameTo _or\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
   op _xorBool_ : Bool Bool -> Bool [assoc comm prec 57] .
-  op notBool_ : Bool -> Bool [prec 53 metadata "latex(renameTo not\\subscript{\\small\\textit{Bool}}_)"] .
+  op notBool_ : Bool -> Bool [prec 53 metadata "latex(renameTo not\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
   op _impliesBool_ : Bool Bool -> Bool [gather (e E) prec 61] .
   vars A B C : Bool .
   eq true andBool A = A .
@@ -223,7 +223,7 @@ fmod PL-INT is
   op -Int_ : Int -> Int [ditto] .
 
   op _+Int_ : Int Int -> Int
-        [assoc comm prec 33  metadata "latex(renameTo _+\\subscript{\\small\\textit{Int}}_)"
+        [assoc comm prec 33  metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (+)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -232,7 +232,7 @@ fmod PL-INT is
 
 
   op _-Int_ : Int Int -> Int
-        [prec 33 gather (E e)   metadata "latex(renameTo _-\\subscript{\\small\\textit{Int}}_)"
+        [prec 33 gather (E e)   metadata "latex(renameTo _-\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (-)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -247,7 +247,7 @@ fmod PL-INT is
   op _*Int_ : Nat Nat -> Nat [ditto] .
 
   op _/Int_ : Int Int -> Int
-        [prec 31 gather (E e)   metadata "latex(renameTo _\\ensuremath{/}\\subscript{\\small\\textit{Int}}_)"
+        [prec 31 gather (E e)   metadata "latex(renameTo _\\ensuremath{/}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (quo)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -344,7 +344,7 @@ fmod PL-INT is
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
 
   op _<Int_ : Int Int -> Bool
-        [prec 37  metadata "latex(renameTo _\\ensuremath{<}\\subscript{\\small\\textit{Int}}_)"
+        [prec 37  metadata "latex(renameTo _\\ensuremath{<}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (<)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
@@ -352,7 +352,7 @@ fmod PL-INT is
                   term-hook falseTerm (false))] .
 
   op _<=Int_ : Int Int -> Bool
-        [prec 37   metadata "latex(renameTo _\\ensuremath{\\leq}\\subscript{\\small\\textit{Int}}_)"
+        [prec 37   metadata "latex(renameTo _\\ensuremath{\\leq}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (<=)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
@@ -360,7 +360,7 @@ fmod PL-INT is
                   term-hook falseTerm (false))] .
 
   op _>Int_ : Int Int -> Bool
-        [prec 37   metadata "latex(renameTo _\\ensuremath{>}\\subscript{\\small\\textit{Int}}_)"
+        [prec 37   metadata "latex(renameTo _\\ensuremath{>}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (>)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
@@ -581,32 +581,32 @@ fmod PL-FLOAT is
   op -Float_ : FiniteFloat -> FiniteFloat [ditto] .
 
   op _+Float_ : Float Float -> Float
-        [prec 33 gather (E e)
+        [prec 33 gather (E e) metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (+)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
   op _-Float_ : Float Float -> Float
-        [prec 33 gather (E e)
+        [prec 33 gather (E e) metadata "latex(renameTo _-\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (-)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
   op _*Float_ : Float Float -> Float
-        [prec 31 gather (E e)
+        [prec 31 gather (E e) metadata "latex(renameTo _*\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (*)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
   op _/Float_ : Float Float -> Float
-        [prec 31 gather (E e)
+        [prec 31 gather (E e) metadata "latex(renameTo _/\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (/)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
   op _%Float_ : Float Float -> Float
-        [prec 31 gather (E e)
+        [prec 31 gather (E e) metadata "latex(renameTo _\\%\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (rem)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
   op _^Float_ : Float Float -> Float
-        [prec 29  gather (E e)
+        [prec 29  gather (E e) metadata "latex(renameTo _\^\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (^)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
@@ -673,28 +673,28 @@ fmod PL-FLOAT is
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
   op _<Float_ : Float Float -> Bool
-        [prec 51
+        [prec 51 metadata "latex(renameTo _\ensuremath<\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (<)
                   op-hook floatSymbol (<Floats> : ~> Float)
                    term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
   op _<=Float_ : Float Float -> Bool
-        [prec 51
+        [prec 51 metadata "latex(renameTo _\\ensuremath\\leq\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (<=)
                   op-hook floatSymbol (<Floats> : ~> Float)
                     term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
   op _>Float_ : Float Float -> Bool
-        [prec 51
+        [prec 51 metadata "latex(renameTo _\\ensuremath>\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (>)
                   op-hook floatSymbol (<Floats> : ~> Float)
                     term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
   op _>=Float_ : Float Float -> Bool
-        [prec 51
+        [prec 51 metadata "latex(renameTo _\\ensuremath\\geq\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (>=)
                   op-hook floatSymbol (<Floats> : ~> Float)
                     term-hook trueTerm (true)
@@ -797,45 +797,58 @@ fmod PL-CONVERSION is
   subsort DecFloat < Builtins .
   op <_,_,_>Conversion : Int String Int -> DecFloat [ctor] .
 
-  op rat2floatConversion : Rat -> Float
+  op Rat2Float : Rat -> Float
         [special (id-hook FloatOpSymbol (float)
                   op-hook floatSymbol (<Floats> : ~> Float)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
+  
+  op Int2Float : Int -> Float .
+  eq Int2Float(I:Int) = Rat2Float(I:Int) .
 
-  op float2ratConversion : Float -> Rat
+  op Float2Rat : Float -> Rat
         [special (id-hook FloatOpSymbol (rat)
                   op-hook floatSymbol (<Floats> : ~> Float)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op rat2stringConversion : Rat NzNat -> String
+  op Float2Int : Float -> Int .
+  eq Float2Int(F:Float) = truncRat(Float2Rat(floorFloat(F:Float))) .
+
+  op Rat2String : Rat NzNat -> String
         [special (id-hook StringOpSymbol (string)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op string2ratConversion : String NzNat -> Rat
+  op Int2String : Int -> String .
+  eq Int2String(I:Int) = Rat2String(I:Int,10) .
+
+  op String2Rat : String NzNat -> Rat
         [special (id-hook StringOpSymbol (rat)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook divisionSymbol (_/Rat_ : NzInt NzNat ~> NzRat))] .
 
-  op float2stringConversion : Float -> String
+  op String2Int : String -> Int .
+ceq String2Int(S:String) = I:Int if I:Int := String2Rat(S:String,10) .
+ 
+
+  op Float2String : Float -> String
         [special (id-hook StringOpSymbol (string)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op string2floatConversion : String -> Float
+  op String2Float : String -> Float
         [special (id-hook StringOpSymbol (float)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
-  op decFloatConversion : Float Nat -> DecFloat
+  op decFloat : Float Nat -> DecFloat
         [special (id-hook StringOpSymbol (decFloat)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook floatSymbol (<Floats> : ~> Float)
