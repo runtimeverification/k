@@ -44,6 +44,9 @@ else
   LANG=`echo $FILE | tr a-z A-Z`
 fi
 
+TFILE="kcompile_tmp.txt"
+
+printf "\nshow module META-MODULE .\nshow module K-TECHNIQUE .\n" | maude -no-banner -no-wrap ../../k-prelude.maude | sed 's/^Maude> //g; s/\[\([^][]*\)comm\([^][]*\)]/[\1\2]/g;$ d' >$TFILE
 
 echo "\\documentclass[landscape]{article}
 \\usepackage{import}
@@ -55,12 +58,13 @@ then
   echo "\\input{$FILE.sty}" >>$LANG.tex
 fi
 echo "
-load \"$KBASE/tools/k-to-latex\"
 set show advisories off .
-load  \"$KBASE/k-no-comm-prelude\"
+load  \"$TFILE\"
+select META-LEVEL .
 select $LANG .
 set show advisories on .
-select LATEX-PRINT-LOOP .
+load \"$KBASE/tools/k-to-latex\"
+set print attribute on .
 loop latex-print .
 (print $LANG .)
 q
