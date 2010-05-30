@@ -46,7 +46,7 @@ fi
 
 TFILE="kcompile_tmp.txt"
 
-printf "\nshow module META-MODULE .\nshow module K-TECHNIQUE .\n" | maude -no-banner -no-wrap ../../k-prelude.maude | sed 's/^Maude> //g; s/\[\([^][]*\)comm\([^][]*\)]/[\1\2]/g;$ d' >$TFILE
+printf "\nshow module META-MODULE .\nshow module K-TECHNIQUE .\n" | maude -no-banner -no-wrap "$KBASE/k-prelude.maude" | sed 's/^Maude> //g; s/\[\([^][]*\)comm\([^][]*\)]/[\1\2]/g;$ d' >$TFILE
 
 echo "\\documentclass[landscape]{article}
 \\usepackage{import}
