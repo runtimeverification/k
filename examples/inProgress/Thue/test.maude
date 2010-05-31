@@ -34,7 +34,7 @@ mod THUE-TEST is
 		!.__.!
 	***)
 	 
-	eq pIncAny = .K
+	eq pIncAny = (.).K
 		~> subst(inject("_0")(.List{K}),, inject("_")(.List{K}))
 		
 		~> subst(inject("1_")(.List{K}),, inject("1++")(.List{K}))
@@ -62,7 +62,7 @@ mod THUE-TEST is
 	--- Sierpinski's triangle, HTML version
 	--- By Nikita Ayzikovsky
 	op pSierpinski : -> K [metadata "arity 0"] .
-	eq pSierpinski = .K
+	eq pSierpinski = (.).K
 		~> write(inject("X")(.List{K}),, inject(" ")(.List{K}))
 		~> write(inject("Y")(.List{K}),, inject("*")(.List{K}))
 		~> write(inject("Z")(.List{K}),, inject("\n")(.List{K}))
