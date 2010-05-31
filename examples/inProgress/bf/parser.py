@@ -104,7 +104,7 @@ def p_whilestatement(p):
 	
 def executeStatements(tuplesList):
 	if (len(tuplesList) == 0):
-		print ".K",
+		print "(.).K",
 		return
 	node = tuplesList.pop(0)
 	print "Seq(",

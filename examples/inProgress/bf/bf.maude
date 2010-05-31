@@ -1,9 +1,6 @@
 load ../../k-prelude
 mod BF is
 	including K-PROPER .
-	including K-MAP-EXTRAS .
-	including K-RULES .
-	including K-CONFIG .
 	including PL-INT .
 	including PL-STRING .
 	including K .
@@ -39,35 +36,35 @@ mod BF is
 	
 	--- helper functions.  can the basic ones be auto generated?
 	op eightbit : -> KLabel .
-	mb rule [
+	mb rule 
 		eightbit(inject(I:Int)(.List{K})) 
 		=> inject((((I:Int %Int 256) +Int 256) %Int 256))(.List{K})
-	] : KSentence .
+	 : KSentence .
 	
 	op kcharString : -> KLabel .
-	mb rule [
+	mb rule 
 		kcharString(inject(N:Nat)(.List{K})) 
 		=> inject(charString(N:Nat))(.List{K})
-	] : KSentence .
+	 : KSentence .
 
 	op +String : -> KLabel .
-	mb rule [
+	mb rule 
 		+String(inject(S1:String)(.List{K}),, inject(S2:String)(.List{K})) 
 		=> inject(S1:String +String S2:String)(.List{K})
-	] : KSentence .
+	 : KSentence .
 	
 	op firstChar : -> KProperLabel [metadata "arity 1"] .
 	op butFirstChar : -> KProperLabel [metadata "arity 1"] .
 	op charToAscii : -> KProperLabel [metadata "arity 1"] .
 	
 	mb [firstChar]: rule
-		[firstChar(inject(S:String)(.List{K})) => inject(substrString(S:String, 0, 1))(.List{K})]
+		firstChar(inject(S:String)(.List{K})) => inject(substrString(S:String, 0, 1))(.List{K})
 		: KSentence [metadata "structural"] .
 	mb [charToAscii]: rule
-		[charToAscii(inject(C:Char)(.List{K})) => inject(asciiString(C:Char))(.List{K})]
+		charToAscii(inject(C:Char)(.List{K})) => inject(asciiString(C:Char))(.List{K})
 		: KSentence [metadata "structural"] .
 	mb [butFirstChar]: rule
-		[butFirstChar(inject(S:String)(.List{K})) => inject(substrString(S:String, 1, lengthString(S:String)))(.List{K})]
+		butFirstChar(inject(S:String)(.List{K})) => inject(substrString(S:String, 1, lengthString(S:String)))(.List{K})
 		: KSentence [metadata "structural"] .
 	--- end helper functions
 	
@@ -97,56 +94,56 @@ mod BF is
 			< input > K':K </ input >
 		</ T > .
 
-	mb [Finish]: rule [
-		< T > S:Bag < k > .K </ k > < output > K:K </ output > </ T > 
+	mb [Finish]: rule 
+		< T > S:Bag < k > (.).K </ k > < output > K:K </ output > </ T > 
 			=> < result > K:K </ result >
-		] : KSentence [metadata "structural"] .
+		 : KSentence [metadata "structural"] .
 		
 	mb rule
-		< memory > [ListItem(sentinel(.List{K})) => ListItem(inject(0)(.List{K})) ListItem(sentinel(.List{K}))] ...</ memory > 
+		< memory > ListItem(sentinel(.List{K})) => ListItem(inject(0)(.List{K})) ListItem(sentinel(.List{K})) ...</ memory > 
 		: KSentence [metadata "structural"] .
 		
 	mb [Sequence]: rule
-		[Seq(K1:K,, K2:K) => K1:K ~> K2:K]
+		Seq(K1:K,, K2:K) => K1:K ~> K2:K
 		: KSentence [metadata "structural"] .
 		
 	mb [Increase]: rule 
-		< k > [Increase(.List{K}) => .K] ...</ k >
-		< memory > ListItem([inject(I:Int)(.List{K}) => (inject(I:Int +Int 1))(.List{K})]) ...</ memory > 
+		< k > (Increase(.List{K}) => .) ...</ k >
+		< memory > ListItem((inject(I:Int)(.List{K}) => (inject(I:Int +Int 1))(.List{K}))) ...</ memory > 
 		: KSentence [metadata "structural"] .
 	mb [Decrease]: rule 
-		< k > [Decrease(.List{K}) => .K] ...</ k >
-		< memory > ListItem([inject(I:Int)(.List{K}) => (inject(I:Int -Int 1))(.List{K})]) ...</ memory > 
+		< k > (Decrease(.List{K}) => .) ...</ k >
+		< memory > ListItem((inject(I:Int)(.List{K}) => (inject(I:Int -Int 1))(.List{K}))) ...</ memory > 
 		: KSentence [metadata "structural"] .
 	
 	mb [WhileNZ-NZ]: rule 
-		< k > [While(K:K) => K:K ~> While(K:K)] ...</ k > 
+		< k > While(K:K) => K:K ~> While(K:K) ...</ k > 
 		< memory > ListItem(inject(I:Int)(.List{K})) ...</ memory > 
 		if (I:Int =/=Bool 0) 
 		: KSentence [metadata "structural"] .
 	mb [WhileNZ-Z]: rule 
-		< k > [While(K:K) => .K] ...</ k >
+		< k > (While(K:K) => .) ...</ k >
 		< memory > ListItem(inject(0)(.List{K})) ...</ memory > 
 		: KSentence [metadata "structural"] .
 		
 	mb [GoRight]: rule 
-		< k > [GoRight(.List{K}) => .K] ...</ k > 
-		< memory > [Li:ListItem L:List => L:List Li:ListItem] </ memory > 
+		< k > (GoRight(.List{K}) => .) ...</ k > 
+		< memory > Li:ListItem L:List => L:List Li:ListItem </ memory > 
 		: KSentence [metadata "structural"] .
 	mb [GoLeft]: rule 
-		< k > [GoLeft(.List{K}) => .K] ...</ k > 
-		< memory > [L:List Li:ListItem => Li:ListItem L:List] </ memory > 
+		< k > (GoLeft(.List{K}) => .) ...</ k > 
+		< memory > L:List Li:ListItem => Li:ListItem L:List </ memory > 
 		: KSentence [metadata "structural"] .
 		
 	mb [Output]: rule 
-		< k > [Print(.List{K}) => .K] ...</ k > 
+		< k > (Print(.List{K}) => .) ...</ k > 
 		< memory > ListItem(I:K) ...</ memory > 
-		< output > [S:K => +String(S:K,, kcharString(eightbit(I:K)))] </ output > 
+		< output > S:K => +String(S:K,, kcharString(eightbit(I:K))) </ output > 
 		: KSentence [metadata "structural"] .
 	mb [Input]: rule
-		< k > [Read(.List{K}) => .K] ...</ k >
-		< memory > ListItem([inject(I:Int)(.List{K}) => charToAscii(firstChar(Input:K))]) ...</ memory > 
-		< input > [Input:K => butFirstChar(Input:K)] </ input > 
+		< k > (Read(.List{K}) => .) ...</ k >
+		< memory > ListItem((inject(I:Int)(.List{K}) => charToAscii(firstChar(Input:K)))) ...</ memory > 
+		< input > Input:K => butFirstChar(Input:K) </ input > 
 		: KSentence [metadata "structural"] .
 endm
 
