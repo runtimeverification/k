@@ -7,7 +7,7 @@ import sys
 s = sys.stdin.read()
 x = 0
 y = 0
-print "injectM( __(.Map,(.Map "
+print "injectM( __((.).Map,((.).Map "
 for line in s.splitlines():
 	x = 0
 	for c in line:
