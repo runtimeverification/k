@@ -1,0 +1,36 @@
+---(
+Here are the differences from the actual exp language annotated syntax:
+  (*) conditional is fully strict
+  (*) let is not desugared (because it has a different type semantics than its desugaring - it is polymorphic)
+---)
+
+mod EXP-SYNTAX is including PL-INT + PL-ID 
+  sort Exp 
+  subsort Id Int Bool < Exp 
+  op _+_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
+  op _-_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
+  op _*_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op _/_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op _%_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op -_ : Exp -> Exp  [strict] 
+  op _<_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
+  op _<=_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
+  op _>_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
+  op _>=_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+  op _==_ : Exp Exp -> Exp [prec 37 strict] 
+  op _!=_ : Exp Exp -> Exp [prec 37 strict] 
+  op _and_ : Exp Exp -> Exp [gather(E e) prec 55 strict] 
+  op _or_ : Exp Exp -> Exp [gather(E e) prec 59 strict] 
+  op not_ : Exp -> Exp [prec 53 strict] 
+  op lambda_._ : Id Exp -> Exp [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
+  op mu_._ : Id Exp -> Exp [metadata "latex(renameTo \\ensuremath\\mu_._)"]
+  op __ : Exp Exp -> Exp [prec 10 gather(E e) strict] 
+  op let_=_in_ : Id Exp Exp -> Exp [strict(2)] 
+  op letrec__=_in_ : Id Id Exp Exp -> Exp 
+  op if_then_else_ : Exp Exp Exp -> Exp [strict] 
+endm
+
+
+mod EXP-DESUGARED-SYNTAX is including EXP-SYNTAX 
+  eq (letrec F:Id X:Id = E:Exp in E':Exp) = (let F = mu F . (lambda X . E) in E') 
+endm

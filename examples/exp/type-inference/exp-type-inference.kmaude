@@ -1,131 +1,125 @@
 in ../../../k-prelude
-in exp-type-inference-syntax
+in exp-type-inference-syntax.kmaude
 in ../exp-programs
 
 
 
 --- types stuff
-mod TYPES is including PL-NAT .
-  sorts BasicType TypeVar Type TypeSchema .
-  subsort BasicType TypeVar < Builtins Type .
-  subsort Type < TypeSchema .
+mod TYPES is including PL-NAT 
+  sorts BasicType TypeVar Type TypeSchema 
+  subsort BasicType TypeVar < Builtins Type 
+  subsort Type < TypeSchema 
 
-  ops int bool : -> BasicType .
-  op tvar : Nat -> TypeVar .
-  op _->_ : Type Type -> Type [prec 10 gather(e E)] .
-  op forall_._ : List{TypeVar} Type -> TypeSchema .
+  ops int bool : -> BasicType 
+  op tvar : Nat -> TypeVar 
+  op _->_ : Type Type -> Type [prec 10 gather(e E) metadata "latex(renameTo _\\ensuremath\\rightarrow_)"] 
+  op forall_._ : List{TypeVar} Type -> TypeSchema [metadata "latex(renameTo \\ensuremath\\forall_._)"]
 
-  var N M : Nat .  var BT : BasicType .  var Tv Tv' Tv1 Tv2 : TypeVar .  var T T1 T2 : Type .
-  var Tvl Tvl' Tvl1 Tvl1' Tvl2 Tvl2' : List{TypeVar} .  var Tl : List{Type} .  var Ts1 Ts2 : TypeSchema .
-  var Tsl : List{TypeSchema} .
-
-  op _+Type_ : TypeVar Nat -> TypeVar .
-  eq tvar(N) +Type M = tvar(N +Nat M) .
+  op _+Type_ : TypeVar Nat -> TypeVar [metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Type}}\_)"]
+  eq tvar(N) +Type M = tvar(N +Nat M) 
 
 --- free type variables
-  op ftv : List{TypeSchema} -> List{TypeVar} .
-  eq ftv(BT) = .List{TypeVar} .
-  eq ftv(Tv) = Tv .
-  eq ftv(T1 -> T2) = mergeVars(ftv(T1),ftv(T2)) .
-  eq ftv(forall Tvl . T) = ftv(T) \ Tvl .
-  eq ftv(.List{TypeVar}) = .List{TypeVar} .
-  eq ftv(Ts1,Ts2,Tsl) = mergeVars(ftv(Ts1),ftv(Ts2,Tsl)) .
+  op ftv : List{TypeSchema} -> List{TypeVar} 
+  eq ftv(BT:BasicType) = .List{TypeVar} 
+  eq ftv(Tv:TypeVar) = Tv 
+  eq ftv(T1:Type -> T2:Type) = mergeVars(ftv(T1),ftv(T2)) 
+  eq ftv(forall Tvl:List`{TypeVar`} . T:Type) = ftv(T) \ Tvl 
+  eq ftv(.List{TypeVar}) = .List{TypeVar} 
+  eq ftv(Ts1:TypeSchema,Ts2:TypeSchema,Tsl:List`{TypeSchema`}) = mergeVars(ftv(Ts1),ftv(Ts2,Tsl)) 
 
-  op mergeVars : List{TypeVar} List{TypeVar} -> List{TypeVar} .
-  eq mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tv,Tvl2')) = mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tvl2')) .
-  eq mergeVars(Tvl,Tvl') = Tvl,Tvl' [owise] .
+  op mergeVars : List{TypeVar} List{TypeVar} -> List{TypeVar} 
+  eq mergeVars((Tvl1:List`{TypeVar`},Tv,Tvl2:List`{TypeVar`}),(Tvl1':List`{TypeVar`},Tv,Tvl2':List`{TypeVar`})) = mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tvl2')) 
+  eq mergeVars(Tvl,Tvl':List`{TypeVar`}) = Tvl,Tvl' [owise] 
 
-  op _\_ : List{TypeVar} List{TypeVar} -> List{TypeVar} .
-  eq (Tvl1,Tv,Tvl2) \ (Tvl1',Tv,Tvl2') = (Tvl1,Tvl2) \ (Tvl1',Tvl2') .
-  eq Tvl \ Tvl' = Tvl [owise] .
+  op _\_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [metadata "latex(renameTo _\\ensuremath\\setminus_)"]
+  eq (Tvl1,Tv,Tvl2) \ (Tvl1',Tv,Tvl2') = (Tvl1,Tvl2) \ (Tvl1',Tvl2') 
+  eq Tvl \ Tvl' = Tvl [owise] 
 
-  op |_| : List{TypeVar} -> Nat .
-  eq | Tv,Tvl | = 1 +Nat | Tvl | .
-  eq | .List{TypeVar} | = 0 .
+  op |_| : List{TypeVar} -> Nat [metadata "latex(renameTo \\ensuremath|_\\ensuremath|)"] 
+  eq | Tv,Tvl | = 1 +Nat | Tvl | 
+  eq | .List{TypeVar} | = 0 
 
-  op _from_ : Nat TypeVar -> List{TypeVar} .
-  eq 0 from Tv = .List{TypeVar} .
-  eq (sNat N) from tvar(M) = tvar(M),(N from tvar(sNat M)) .
+  op _from_ : Nat TypeVar -> List{TypeVar} 
+  eq 0 from Tv = .List{TypeVar} 
+  eq (sNat N:Nat) from tvar(M:Nat) = tvar(M),(N from tvar(sNat M)) 
 
 --- type substitution: T[Tl / Tvl] substitutes list of type variables Tvl for list of types Tl in T
-  op _`[_/_`] : Type List{Type} List{TypeVar} -> Type [prec 2] .
-  eq T[.List{TypeVar} / .List{TypeVar}] = T .
-  eq T[T1,T2,Tl / Tv1,Tv2,Tvl] = T[T1 / Tv1][T2,Tl / Tv2,Tvl] .
-  eq BT[T / Tv] = BT .
-  eq Tv'[T / Tv] = if Tv' ==Bool Tv then T else Tv' fi .
-  eq (T1 -> T2)[T / Tv] = T1[T / Tv] -> T2[T / Tv] .
+  op _`[_/_`] : Type List{Type} List{TypeVar} -> Type [prec 2] 
+  eq T[.List{TypeVar} / .List{TypeVar}] = T 
+  eq T[T1,T2,Tl:List`{Type`} / Tv1:TypeVar,Tv2:TypeVar,Tvl] = T[T1 / Tv1][T2,Tl / Tv2,Tvl] 
+  eq BT[T / Tv] = BT 
+  eq Tv':TypeVar[T / Tv] = if Tv' ==Bool Tv then T else Tv' fi 
+  eq (T1 -> T2)[T / Tv] = T1[T / Tv] -> T2[T / Tv] 
 
-  op typeVar? : Type -> Bool .
-  eq typeVar?(tvar(N)) = true .
-  eq typeVar?(T) = false [owise] .  --- if needed, replace with: eq typeVar?(T1 -> T2) = false .  eq typeVar?(BT) = false .
+  op typeVar? : Type -> Bool 
+  eq typeVar?(tvar(N)) = true 
+  eq typeVar?(T) = false [owise]   --- if needed, replace with: eq typeVar?(T1 -> T2) = false .  eq typeVar?(BT) = false 
 
-  op _in_ : TypeVar Type -> Bool .
-  eq Tv in BT = false .
-  eq Tv in Tv' = Tv ==Bool Tv' .
-  eq Tv in (T1 -> T2) = (Tv in T1) orBool (Tv in T2) .
+  op _in_ : TypeVar Type -> Bool 
+  eq Tv in BT = false 
+  eq Tv in Tv' = Tv ==Bool Tv' 
+  eq Tv in (T1 -> T2) = (Tv in T1) orBool (Tv in T2) 
 
 ----------------------------------------------------------------------------------------
 --- Lists of any type should eventually be builtin; for now, we have to declare them ---
 ----------------------------------------------------------------------------------------
 --- List{TypeVar}
-  sort List{TypeVar} .
-  subsort TypeVar < List{TypeVar} .
-  op .List{TypeVar} : -> List{TypeVar} .
-  op _`,_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [prec 70 assoc id: .List{TypeVar}] .
+  sort List{TypeVar} 
+  subsort TypeVar < List{TypeVar} 
+  op .List{TypeVar} : -> List{TypeVar} 
+  op _`,_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [prec 70 assoc id: .List{TypeVar}] 
 --- List{Type}
-  sort List{Type} .
-  subsort Type List{TypeVar} < List{Type} .
-  op _`,_ : List{Type} List{Type} -> List{Type} [ditto] .
+  sort List{Type} 
+  subsort Type List{TypeVar} < List{Type} 
+  op _`,_ : List{Type} List{Type} -> List{Type} [ditto] 
 --- List{TypeSchema}
-  sort List{TypeSchema} .
-  subsort TypeSchema List{Type} < List{TypeSchema} .
-  op _`,_ : List{TypeSchema} List{TypeSchema} -> List{TypeSchema} [ditto] .
+  sort List{TypeSchema} 
+  subsort TypeSchema List{Type} < List{TypeSchema} 
+  op _`,_ : List{TypeSchema} List{TypeSchema} -> List{TypeSchema} [ditto] 
 endm
 
 
 
 --- equational constraint solving stuff
-mod UNIFICATION is including TYPES + K .
-  var T T1 T2 T' T1' T2' : Type .  var Tv Tv' : TypeVar .  var Tl : List{Type} .  var Eqns Solved : Set .  var BT BT' : BasicType .
+mod UNIFICATION is including TYPES + K 
 
-  ops eqn eqns solved started : -> CellLabel .
-  op _=_ : Type Type -> SetItem [strat(1 2 0) prec 30] .
+  ops eqn eqns solved started : -> CellLabel 
+  op _=_ : Type Type -> SetItem [strat(1 2 0) prec 30] 
 
-  rule [add-constraint] : (<eqn> T = T' </eqn> => .Bag) <started>_ (.Set => (Solved[T]) = (Solved[T']) )_</started> 
-          <solved> Solved </solved> 
-  rule [reflexivity] : <started>_ T = T => .Set _</started> 
-  rule [constructors] : <started>_ (T1 -> T2) = (T1' -> T2') => T1 = T1' T2 = T2' _</started> 
-  rule [orient] : <started>_ T = Tv => Tv = T _</started> if notBool typeVar?(T) 
+  rule [add-constraint] : (<eqn> T:Type = T':Type </eqn> => .Bag) <started_> (.Set => (Solved[T]) = (Solved[T']) )<_/started> 
+          <solved> Solved:Set </solved> 
+  rule [reflexivity] : <started_> T = T => .Set <_/started> 
+  rule [constructors] : <started_> (T1:Type -> T2:Type) = (T1':Type -> T2':Type) => T1 = T1' T2 = T2' <_/started> 
+  rule [orient] : <started_> T = Tv:TypeVar => Tv = T <_/started> if notBool typeVar?(T) 
   rule [eqn] : <started> Tv = T Eqns => Eqns[T / Tv] </started> <solved> Solved => Tv = T (Solved[T /right Tv]) </solved>
                if notBool(Tv in T) 
 
-  op _`[_/_`] : Set Type TypeVar -> Set .
-  eq .Set[T / Tv] = .Set .
-  eq (T1 = T2 Eqns)[T / Tv] = T1[T / Tv] = T2[T / Tv] (Eqns[T / Tv]) .
+  op _`[_/_`] : Set Type TypeVar -> Set 
+  eq .Set[T / Tv] = .Set 
+  eq (T1 = T2 Eqns:Set)[T / Tv] = T1[T / Tv] = T2[T / Tv] (Eqns[T / Tv]) 
 
-  op _`[_/right_`] : Set Type TypeVar -> Set .
-  eq .Set[T /right Tv] = .Set .
-  eq (Tv = T Eqns)[T' /right Tv'] = Tv = T[T' / Tv'] (Eqns[T' /right Tv']) .
+  op _`[_/right_`] : Set Type TypeVar -> Set 
+  eq .Set[T /right Tv] = .Set 
+  eq (Tv = T Eqns)[T' /right Tv':TypeVar] = Tv = T[T' / Tv'] (Eqns[T' /right Tv']) 
 
-  op _`[_`] : Set Type -> Type .
-  op _`[`[_`]`] : Set List{Type} -> List{Type} .
---- I would like to use the following operation name instead, but K-Maude does not like it ...
----  op _`[_`] : Set List{Type} -> List{Type} .
-  eq .Set[T] = T .
-  eq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] .
-  eq Eqns[[.List{TypeVar}]] = .List{TypeVar} .
-  eq Eqns[[T]] = Eqns[T] .
-  eq Eqns[[T1,T2,Tl]] = Eqns[T1],Eqns[T2],Eqns[[Tl]] .
+  op _`[_`] : Set Type -> Type 
+  op _`[`[_`]`] : Set List{Type} -> List{Type} 
+--- I would like to use the following operation name instead, but K-Maude does not like it ..
+---  op _`[_`] : Set List{Type} -> List{Type} 
+  eq .Set[T] = T 
+  eq (Tv = T' Eqns)[T] = Eqns[T[T' / Tv]] 
+  eq Eqns[[.List{TypeVar}]] = .List{TypeVar} 
+  eq Eqns[[T]] = Eqns[T] 
+  eq Eqns[[T1,T2,Tl:List`{Type`}]] = Eqns[T1],Eqns[T2],Eqns[[Tl]] 
 endm
 
 
 
 --- the actual type inferencer
-mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION + K .
-  subsort Type < Exp KResult .
-  subsort Exp TypeSchema List{TypeSchema} < K .
+mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION + K 
+  subsort Type < Exp KResult 
+  subsort Exp TypeSchema List{TypeSchema} < K 
 
-  ops tenv nextType : -> CellLabel .
   configuration <T>
                      <k> .K </k>
                      <tenv> .Map </tenv>
@@ -136,60 +130,56 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
                      <nextType> tvar(0) </nextType>
                    </T> 
 
-  rule <k> (?:Int => int) _</k> 
-  rule <k> (?:Bool => bool) _</k> 
-  rule <k> (X => T) _</k> <tenv>_ X |-> T _</tenv> 
-  rule <k> (L(T1,,T2) => int) _</k> (.Bag => <eqn> T1 = int </eqn> <eqn> T2 = int </eqn>)
+  rule <k> (?:Int => int) <_/k> 
+  rule <k> (?:Bool => bool) <_/k> 
+  rule <k> (X:Id => T:Type) <_/k> <tenv_> X |-> T <_/tenv> 
+  rule <k> (L:KLabel(T1:Type,,T2:Type) => int) <_/k> (.Bag => <eqn> T1 = int </eqn> <eqn> T2 = int </eqn>)
        if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_ 
-  rule <k> (- T => int) _</k> (.Bag => <eqn> T = int </eqn>) 
-  rule <k> (L(T1,,T2) => bool) _</k> (.Bag => <eqn> T1 = int </eqn> <eqn> T2 = int </eqn>)
+  rule <k> (- T => int) <_/k> (.Bag => <eqn> T = int </eqn>) 
+  rule <k> (L(T1,,T2) => bool) <_/k> (.Bag => <eqn> T1 = int </eqn> <eqn> T2 = int </eqn>)
        if L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_ 
-  rule <k> (L(T1,,T2) => bool) _</k> (.Bag => <eqn> T1 = bool </eqn> <eqn> T2 = bool </eqn>)
+  rule <k> (L(T1,,T2) => bool) <_/k> (.Bag => <eqn> T1 = bool </eqn> <eqn> T2 = bool </eqn>)
        if L ==Bool '_and_ orBool L ==Bool '_or_ 
-  rule <k> (not T => bool) _</k> (.Bag => <eqn> T = bool </eqn>) 
-  rule <k> (if T then T1 else T2 => T1) _</k> (.Bag => <eqn> T = bool </eqn> <eqn> T1 = T2 </eqn>) 
+  rule <k> (not T => bool) <_/k> (.Bag => <eqn> T = bool </eqn>) 
+  rule <k> (if T then T1 else T2 => T1) <_/k> (.Bag => <eqn> T = bool </eqn> <eqn> T1 = T2 </eqn>) 
 
-  op mkFunType : TypeVar -> K .
-  rule <k> lambda X . E => E ~> mkFunType(Tv) ~> tenv(TEnv) _</k>
+  op mkFunType : TypeVar -> K 
+  rule <k> lambda X . E:Exp => E ~> mkFunType(Tv:TypeVar) ~> tenv(TEnv:Map) <_/k>
           <tenv> TEnv => TEnv[Tv / X] </tenv> <nextType> (Tv => Tv +Type 1) </nextType> 
   rule T ~> mkFunType(Tv) => Tv -> T 
-  rule <k> T1 T2 => Tv _</k> (.Bag => <eqn> T1 = (T2 -> Tv) </eqn>) <nextType> Tv => Tv +Type 1 </nextType> 
+  rule <k> T1 T2 => Tv <_/k> (.Bag => <eqn> T1 = (T2 -> Tv) </eqn>) <nextType> Tv => Tv +Type 1 </nextType> 
 
-  op addEqn : Type -> K .
-  rule <k> mu X . E => E ~> addEqn(Tv) ~> tenv(TEnv) _</k>
+  op addEqn : Type -> K 
+  rule <k> mu X . E => E ~> addEqn(Tv) ~> tenv(TEnv) <_/k>
           <tenv> TEnv => TEnv[Tv / X] </tenv> <nextType> (Tv => Tv +Type 1) </nextType> 
-  rule <k> T ~> addEqn(Tv) => Tv _</k> (.Bag => <eqn> Tv = T </eqn>) 
+  rule <k> T ~> addEqn(Tv) => Tv <_/k> (.Bag => <eqn> Tv = T </eqn>) 
 
-  rule <k> let X = T in E => E ~> tenv(TEnv) _</k> <eqns> <started> .Set </started> <solved> Eqns </solved> </eqns>
+  rule <k> let X = T in E => E ~> tenv(TEnv) <_/k> <eqns> <started> .Set </started> <solved> Eqns:Set </solved> </eqns>
           <tenv> TEnv => TEnv[forall (ftv(Eqns[T]) \ ftv(Eqns[[types(TEnv)]])) . Eqns[T] / X] </tenv> 
-  rule <k> X => T[| Tvl | from Tv / Tvl] _</k> <tenv>_ X |-> forall Tvl . T _</tenv>
+  rule <k> X => T[| Tvl:List`{TypeVar`} | from Tv / Tvl] <_/k> <tenv_> X |-> forall Tvl . T <_/tenv>
           <nextType> Tv => Tv +Type | Tvl | </nextType> 
 
 
 ------------------------
 --- Auxilliary stuff ---
 ------------------------
-  var T T1 T2 T' T1' T2' : Type .  var Tv Tv' Tv1 Tv2 Tv1' Tv2' : TypeVar .  var L : KLabel .  var N M : Nat .  var X : Id .  var E E' : Exp .
-  var TEnv : Map .  var Eqns : Set .  var BT BT' : BasicType .  var Tvl Tvl' Tvl1 Tvl2 Tvl1' Tvl2' : List{TypeVar} .  var Tl : List{Type} .
 
-  op tenv : Map -> K .
-  rule <k> T ~> (tenv(TEnv) => .K) _</k> <tenv>  _  => TEnv </tenv> [structural]
+  op tenv : Map -> K 
+  rule <k> T ~> (tenv(TEnv) => .K) <_/k> <tenv>  _  => TEnv </tenv> [structural]
 
---- next should probably be generic in some way, for all maps ...
-  op types_ : Map -> List{Type} .
-  eq types(.Map) = .List{TypeVar} .
-  eq types(X |-> T TEnv) = T,types(TEnv) .
+--- next should probably be generic in some way, for all maps ..
+  op types_ : Map -> List{Type} 
+  eq types(.Map) = .List{TypeVar} 
+  eq types(X |-> T TEnv) = T,types(TEnv) 
 endm
 
-mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS .
-  op solve : -> K .
-  var T : Type .  var Eqns : Set .
-  op run : KLabel -> Bag .
-  eq run(L:KLabel) = run(L:KLabel,.List{K}) .
-  op run : KLabel List{K} -> Bag .
+mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS 
+  op solve : -> K 
+  op run : KLabel -> Bag 
+  eq run(KL:KLabel) = run(KL,.List{K}) 
+  op run : KLabel List{K} -> Bag 
 ---- first step: accumulate the type constraints (also partially solving them when creating type schemas)
-  eq run(L:KLabel,L:List{K}) = <T> <k> L:KLabel(.List{K}) ~> solve </k> <tenv> .Map </tenv>
-                 <eqns> <started> .Set </started> <solved> .Set </solved> </eqns> <nextType> tvar(0) </nextType> </T> .
+  eq run(KL,L:List`{K`}) = <T_> <k> KL(L) ~> solve </k> <_/T> 
 --- second step: solve the remaining constraints and apply resulting substitution to the result type
-  rule <k> T ~> solve => Eqns[T] </k> <eqns> <started> .Set </started> <solved> Eqns </solved> </eqns> 
+  rule <k> T:Type ~> solve => Eqns:Set[T] </k> <eqns> <started> .Set </started> <solved> Eqns </solved> </eqns> 
 endm
