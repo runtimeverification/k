@@ -37,7 +37,7 @@ fmod PL-BOOL is
     id-hook BranchSymbol
     term-hook 1 (true)
     term-hook 2 (false))] .
-  op _==Bool_ : Universal Universal -> Bool [poly (1 2) prec 51 special (
+  op _==Bool_ : Universal Universal -> Bool [poly (1 2) prec 51  metadata "latex(renameTo _==\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
     id-hook EqualitySymbol
     term-hook equalTerm (true)
     term-hook notEqualTerm (false))] .
@@ -253,7 +253,7 @@ fmod PL-INT is
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
 
   op _%Int_ : Int Int -> Int
-        [prec 31 gather (E e)
+        [prec 31 gather (E e)  metadata "latex(renameTo _\\ensuremath{%}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (rem)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -368,7 +368,7 @@ fmod PL-INT is
                   term-hook falseTerm (false))] .
 
   op _>=Int_ : Int Int -> Bool
-        [prec 37
+        [prec 37  metadata "latex(renameTo _\\ensuremath{\\geq}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (>=)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)

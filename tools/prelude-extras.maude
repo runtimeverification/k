@@ -941,11 +941,19 @@ fmod META-LEVEL-EXTRAS is
 
   op isRelated : Module OpDecl OpDecl -> Bool .
   eq isRelated(M, op Q : Tl -> T [AS] ., op Q' : Tl' -> T' [AS'] .)
-   = Q == Q' and-then sameKinds(M, Tl T, Tl' T') .
+   = Q == Q' and-then sameKinds(M, Tl T, getPoly(AS), Tl' T', getPoly(AS')) .
 
-  op sameKinds : Module TypeList TypeList -> Bool .
-  eq sameKinds(M, nil, nil) = true .
-  eq sameKinds(M, T Tl, T' Tl') 
-   = sameKind(M, T, T') and-then sameKinds(M, Tl, Tl') .
+  op sameKinds : Module TypeList NatList TypeList NatList -> Bool .
+  eq sameKinds(M, Tl, Nl, Tl', Nl') = sameKinds(M, 1, Tl, Nl, Tl', Nl') .
+  op sameKinds : Module Nat TypeList NatList TypeList NatList -> Bool .
+  eq sameKinds(M, N, nil, Nl, nil, Nl') = true .
+  eq sameKinds(M, N, T Tl, Nl1 N Nl2, T' Tl', Nl') 
+   = sameKinds(M, s N, Tl, Nl1 Nl2, Tl', Nl') .
+  eq sameKinds(M, N, T' Tl', Nl', T Tl, Nl1 N Nl2) 
+   = sameKinds(M, s N, Tl', Nl', Tl, Nl1 Nl2) .
+  eq sameKinds(M, N, T Tl, Nl, T' Tl', Nl') 
+   = sameKind(M, T, T') and-then sameKinds(M, s N, Tl, Nl, Tl', Nl') [owise] .
+
+  var Nl1 Nl2 Nl' : NatList .
 endfm
 

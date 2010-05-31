@@ -201,11 +201,19 @@ mod DECL-META-LATEX-PRINT is
   op getName : OpDeclSet Qid Type -> Qid .
   eq getName(OPDS' (op Q : nil -> Ty [AS metadata(Str) AS'] .) OPDS, Q, Ty)
    = getName(Q, metadataParse(Str)) .
+  eq getName(OPDS, Q, 'Qid) = getLabelName(OPDS, qid(substr(string(Q),1,length(string(Q))))) .
   eq getName(OPDS, Q, Ty) = Q [owise] .
+
+
+  op getLabelName : OpDeclSet Qid -> Qid .
+  eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS, Q)
+   = getName(Q, metadataParse(Str)) .
+  eq getLabelName(OPDS, Q) = Q [owise] .
+   
 
   var Q' : Qid . var AS' AS1 AS2 : AttrSet .
   op getName : Qid AttrSet -> Qid .
-  eq getName(Q, AS1 klatex(AS2 krenameTo(Q') AS') AS) = Q' [print "renamed to " Q'].
+  eq getName(Q, AS1 klatex(AS2 krenameTo(Q') AS') AS) = Q' [print Q " renamed to " Q'].
   eq getName(Q, AS) = Q [owise] .
 
 ---  eq printTerm(U,Q[NeTl]) 
@@ -237,22 +245,24 @@ mod DECL-META-LATEX-PRINT is
   
   ceq printTerm(U, Q[NeTl]) 
     = printTerm1(U, Q'[NeTl])
-   if Q' := getRenamedQid(relatedOps(U, getTopOp(U, Q[NeTl]), getOps(U))) [owise print "replaced " Q " with " Q'] .
+   if Q' := getRenamedQid(relatedOps(U, getTopOp(U, Q[NeTl]), getOps(U)))
+   /\ Q =/= Q' [owise print "replaced " Q " with " Q'] .
   eq printTerm(U, T)
    = printTerm1(U, T) [owise print "No replacement for " T] .
 
   var TyL' : TypeList .  var Ty' : Type .
   op getRenamedQid : OpDeclSet -> [Qid] .
-  eq getRenamedQid((op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS) = getRenamedQid(metadataParse(Str)) [owise] .
+  eq getRenamedQid((op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS) = getName(Q,metadataParse(Str)) [owise] .
   eq getRenamedQid(OPDS) = qid("\"") [owise] . --- print Op:[OpDecl]] .
-  
+ 
+---( 
   op getRenamedQid : AttrSet -> [Qid] .
   eq getRenamedQid(AS klatex(AS1 krenameTo(Q') AS') AS2) = Q' .
-
+---)
   op printTerm1 : Module Term -> QidList .
 
  ceq printTerm1(U,Q[NeTl,T])
-   = printTerm1(U,Q[Q[NeTl],T])
+   = printTerm(U,Q[Q[NeTl],T])
   if mixfix(Q) /\ size(splitMixFix(string(Q))) = 3 /\ 1 < countTerms(NeTl) [print "normalizing"] .
   eq printTerm1(U, Q[NeTl]) 
    =  '`{ printTerm(U, if mixfix(Q) 
@@ -506,7 +516,7 @@ mod DECL-META-LATEX-PRINT is
   eq eMetaLatexPrint(M, (idem AtS))   
     = ('idem eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (id(T) AtS))
-    = ('id: eMetaLatexPrint(M, T) eMetaLatexPrint(M, AtS)) .
+    = ('id: eMetaLatexPrint(M, T) '\s eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (right-id(T) AtS))
     = ('right 'id: eMetaLatexPrint(M, T) eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (left-id(T) AtS))
@@ -924,7 +934,7 @@ mod LATEX-PRINT-META is
   ceq printVariable(St) 
     =  if I:[Int] :: Nat 
        then printIndexedVariable(substr(St, 0, _-_(length(St), 1)), St') 
-       else string2qidList(St) fi
+       else if St' == "'" then ('\ensuremath '`{ printVariable(substr(St,0,_-_(length(St),1))) '' '`}) else string2qidList(St) fi fi
    if St' := substr(St, _-_(length(St),1), 1)
    /\ I:[Int] := rat(St',10) .
 
