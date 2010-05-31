@@ -2,7 +2,7 @@ KCOMPILE ?= $(realpath ../tools/kompile.sh)
 TEST_DIRS = challenge imp imppp \
         simple/untyped simple/typed/dynamic simple/typed/static \
 	exp/untyped exp/type-inference fun/untyped \
-	fun/untyped Thue
+	fun/untyped Thue bf
 
 .PHONY: all build test clean
 
