@@ -1,7 +1,7 @@
 TEST_DIRS = challenge imp imppp \
         simple/untyped simple/typed/dynamic simple/typed/static \
 	exp/untyped exp/type-inference fun/untyped \
-	fun/untyped Thue bf
+	Thue bf befunge93
 
 .PHONY: all build test clean
 
