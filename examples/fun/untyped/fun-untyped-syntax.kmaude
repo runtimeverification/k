@@ -1,0 +1,60 @@
+mod FUN-SYNTAX is including PL-INT + PL-ID 
+  sorts Exp Binding 
+  subsort Id Int Bool < Exp 
+  op _+_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
+  op _-_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
+  op _*_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op _/_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op _%_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op -_ : Exp -> Exp  [strict] 
+  op _<_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
+  op _<=_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
+  op _>_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
+  op _>=_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+  op _==_ : Exp Exp -> Exp [prec 37 strict] 
+  op _!=_ : Exp Exp -> Exp [prec 37 strict] 
+  op _and_ : Exp Exp -> Exp [gather(E e) prec 55 strict] 
+  op _or_ : Exp Exp -> Exp [gather(E e) prec 59 strict] 
+  op not_ : Exp -> Exp [prec 53 strict] 
+  op fun`(`)->_ : Exp -> Exp [metadata "latex(renameTo fun\\lp\\rp\\ensuremath\\rightarrow_)"]
+  op fun_->_ : List{Exp} Exp -> Exp  [metadata "latex(renameTo fun_\\ensuremath\\rightarrow_)"]
+  op __ : List{Exp} List{Exp} -> Exp [prec 10 gather(E e) strict] 
+  op _`(`) : List{Exp} -> Exp [prec 10] 
+  op callcc_ : Exp -> Exp [strict] 
+  ops (let_in_) (letrec_in_) : Binding Exp -> Exp 
+  op _=_ : List{Exp} List{Exp} -> Binding 
+  op _&&&_ : Binding Binding -> Binding [prec 100 assoc metadata "latex(renameTo _and_)"] 
+  op if_then_else_ : Exp Exp Exp -> Exp [strict(1)] 
+  op [] : -> Exp 
+  op `[_`] : List{Exp} -> Exp [prec 0 strict hybrid] 
+  ops (car_) (cdr_) (null?_) : Exp -> Exp [prec 0 strict] 
+  op cons__ : Exp Exp -> Exp [strict] 
+  op ref_ : Exp -> Exp [strict] 
+  op &_ : Id -> Exp [metadata "latex(renameTo \\&_)"]
+  op *_ : Exp -> Exp [strict] 
+  op _:=_ : Exp Exp -> Exp [strict] 
+  op _;_ : Exp Exp -> Exp [prec 110 gather(e E) seqstrict] 
+-----------------------------------------------------------------------------
+--- Lists should be eventually builtin; for now, they need to be declared ---
+-----------------------------------------------------------------------------
+--- List{Id}
+  sort List{Id}   subsort Id < List{Id} 
+  op .List{Id} : -> List{Id} 
+  op _`,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] 
+--- List{Exp}
+  sort List{Exp}   subsort Exp List{Id} < List{Exp} 
+  op _`,_ : List{Exp} List{Exp} -> List{Exp} [ditto] 
+-----------------------------------------------------------------------------
+endm
+
+
+mod FUN-DESUGARED-SYNTAX is including FUN-SYNTAX 
+  eq fun () -> E:Exp = fun (.List{Id}) -> E 
+  eq fun E Xl:List`{Id`} -> E':Exp = fun E -> fun Xl -> E' 
+  eq fun E () -> E' = fun E -> fun () -> E' 
+  eq E() = E(.List{Id}) 
+  eq (E () = E') = (E = fun () -> E') 
+  eq (E Xl = E') = (E = fun Xl -> E') 
+  eq (Xl = El:List`{Exp`}) &&& (Xl':List`{Id`} = El':List`{Exp`}) = ((Xl,Xl') = (El,El')) 
+  eq [] = [.List{Id}] 
+endm
