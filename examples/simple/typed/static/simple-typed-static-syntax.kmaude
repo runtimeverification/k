@@ -1,0 +1,86 @@
+
+kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
+  sorts Var Exp Decl Stmt Stmts 
+  subsort Id < Var 
+  subsorts Var Int Bool < Exp 
+  subsort Decl Stmt < Stmts 
+
+  sort Type 
+  ops int bool void : -> Type 
+  op _`[`] : Type -> Type [prec 0] 
+  op _->_ : List{Type} Type -> Type [metadata "latex(renameTo _\\ensuremath\\rightarrow_)"]
+
+  op ++_ : Id -> Exp [prec 0] 
+  op _+_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
+  op _-_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
+  op _*_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op _/_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op _%_ : Exp Exp -> Exp [gather(E e) prec 31 strict] 
+  op -_ : Exp -> Exp  [strict] 
+  op _<_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
+  op _<=_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
+  op _>_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
+  op _>=_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+  op _==_ : Exp Exp -> Exp [prec 37 strict] 
+  op _!=_ : Exp Exp -> Exp [prec 37 strict] 
+  op _and_ : Exp Exp -> Exp [gather(E e) prec 55 strict] 
+  op _or_ : Exp Exp -> Exp [gather(E e) prec 59 strict] 
+  op not_ : Exp -> Exp [prec 53 strict] 
+  op _`[_`] : Id Exp -> Var [prec 1 strict(2)] 
+  op _`[_`] : Exp Exp -> Exp [ditto strict] 
+  op sizeOf : Exp -> Exp [strict] 
+  op var_:_; : Var Type -> Decl [prec 2] 
+  op `{`} : -> Stmt [metadata "latex(renameTo \\{\\})"] 
+  op `{_`} : Stmts -> Stmt [gather(&) metadata "latex(renameTo \\{\_\\})"] 
+  op __ : Stmts Stmts -> Stmts [prec 100 gather(e E) seqstrict] 
+  op _=_; : Exp Exp -> Stmt [prec 2 strict(2)] 
+  op _; : Exp -> Stmt [prec 50 strict] 
+  op if_then_else_ : Exp Stmt Stmt -> Stmt [strict] 
+  op if_then_ : Exp Stmt -> Stmt 
+  op while_do_ : Exp Stmt -> Stmt [strict] 
+  op for _=_to_do_ : Id Exp Exp Stmt -> Stmt 
+  op main : -> Id 
+  op function_`(`):__ : Id Type Stmt -> Decl 
+  op function_`(_`):__ : Id List{IdType} Type Stmt -> Decl 
+  op _`(`) : Exp -> Exp 
+  op _`(_`) : Exp List{Exp} -> Exp [prec 2 strict] 
+  op read() : -> Exp 
+  op write`(_`); : Exp -> Stmt [strict] 
+  op return_; : Exp -> Stmt [strict] 
+
+-----------------------------------------------------------------------------
+--- Lists should be eventually builtin; for now, they need to be declared ---
+-----------------------------------------------------------------------------
+--- List{Bottom}  (needed for consistencies)
+--- do not add Bottom as subsort to anything else, like Id, Exp, etc
+  sorts Bottom List{Bottom} 
+  subsort Bottom < List{Bottom} 
+  op .List{Bottom} : -> List{Bottom} 
+  op _`,_ : List{Bottom} List{Bottom} -> List{Bottom} [prec 70 assoc id: .List{Bottom}] 
+--- List{Type}
+  sort List{Type} 
+  subsort Type List{Bottom} < List{Type} 
+  op _`,_ : List{Type} List{Type} -> List{Type} [ditto] 
+--- List{IdType}
+  sorts IdType List{IdType} 
+  subsort IdType List{Bottom} < List{IdType} 
+  op _:_ : Id Type -> IdType 
+  op _`,_ : List{IdType} List{IdType} -> List{IdType} [ditto] 
+--- List{Exp}
+  sort List{Exp} 
+  subsort Exp List{Bottom} < List{Exp} 
+  op _`,_ : List{Exp} List{Exp} -> List{Exp} [ditto] 
+endkm
+
+kmod SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX
+--------------------------------------------------------------------------------
+--- This module desugars some of SIMPLE's language constructs into core ones ---
+--- The idea is that we only want to give semantics to core constructs,      ---
+--- so we get rid of the derived ones before we start the semantics          ---
+--------------------------------------------------------------------------------
+  eq if E:Exp then S:Stmt = if E then S else {} 
+  eq for X:Id = E1:Exp to E2:Exp do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} 
+  eq function F:Id() : Tp:Type S = function F(.List{Bottom}) : Tp S 
+  op _`(_`) : Exp List{Exp} -> Exp [prec 0 strict] 
+  eq E() = E(.List{Bottom}) 
+endkm
