@@ -1,9 +1,9 @@
-in ../../../k-prelude
+in ../../../k-prelude.maude
 in fun-untyped-syntax.kmaude
-in ../fun-programs
+in ../fun-programs.maude
 
 
-mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K 
+kmod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K 
 --- We need values when we define the semantics
   sort Val 
   subsort Int Bool < Val < Exp 
@@ -87,13 +87,13 @@ mod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K
   rule <k> [Vl] ~> writeTo(Xl) => .K <_/k>
           <env> Env </env>
           <store> Sigma:Map => Sigma[getList{K}(Vl) / Env(getList{K}(Xl))] </store> 
-endm
+endkm
 
 
-mod FUN-UNTYPED is including FUN-UNTYPED-SEMANTICS + FUN-PROGRAMS 
+kmod FUN-UNTYPED is including FUN-UNTYPED-SEMANTICS + FUN-PROGRAMS 
 --- make sure the name of the final module is the capitalized version of the file name
   op run : KLabel -> Bag 
   eq run(KL:KLabel) = run(KL,.List{K}) 
   op run : KLabel List{K} -> Bag 
   eq run(KL,L:List`{K`}) = <T> <k> KL(L) </k> <env> .Map </env> <store> .Map </store> <nextLoc> 0 </nextLoc> </T> 
-endm
+endkm

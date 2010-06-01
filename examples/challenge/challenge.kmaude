@@ -1,6 +1,6 @@
-in ../../k-prelude
+in ../../k-prelude.maude
 in challenge-syntax.kmaude
-in challenge-programs
+in challenge-programs.maude
 
 kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVERSION 
   subsort List{Exp} Stmt < K 
@@ -81,7 +81,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
 
 --- Basic statement constructs
   rule  {} => .  [structural]
-  rule <k>{S:Stmt } => S ~> env(Env)<_/k> <env>Env</env>
+  rule <k>{S:Stmt} => S ~> env(Env)<_/k> <env>Env</env>
   rule  S1:Stmt S2:Stmt => S1 ~> S2  [structural]
   rule  V ; => .
   rule  if true then S1 else S2 => S1

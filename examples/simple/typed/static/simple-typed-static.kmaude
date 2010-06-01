@@ -1,6 +1,6 @@
-in ../../../../k-prelude
+in ../../../../k-prelude.maude
 in simple-typed-static-syntax.kmaude
-in ../simple-typed-programs
+in ../simple-typed-programs.maude
 
 kmod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX + K 
   subsort List{Type} < List{Exp} KResult 

@@ -1,6 +1,6 @@
-in ../../k-prelude
+in ../../k-prelude.maude
 in imppp-syntax.kmaude
-in imppp-programs
+in imppp-programs.maude
 
 kmod IMPPP-CONFIGURATION is
  including IMPPP-SYNTAX + K

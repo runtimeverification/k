@@ -1,11 +1,10 @@
-in ../../../k-prelude
+in ../../../k-prelude.maude
 in exp-type-inference-syntax.kmaude
-in ../exp-programs
-
+in ../exp-programs.maude
 
 
 --- types stuff
-mod TYPES is including PL-NAT 
+kmod TYPES is including PL-NAT 
   sorts BasicType TypeVar Type TypeSchema 
   subsort BasicType TypeVar < Builtins Type 
   subsort Type < TypeSchema 
@@ -76,12 +75,12 @@ mod TYPES is including PL-NAT
   sort List{TypeSchema} 
   subsort TypeSchema List{Type} < List{TypeSchema} 
   op _`,_ : List{TypeSchema} List{TypeSchema} -> List{TypeSchema} [ditto] 
-endm
+endkm
 
 
 
 --- equational constraint solving stuff
-mod UNIFICATION is including TYPES + K 
+kmod UNIFICATION is including TYPES + K 
 
   ops eqn eqns solved started : -> CellLabel 
   op _=_ : Type Type -> SetItem [strat(1 2 0) prec 30] 
@@ -111,12 +110,12 @@ mod UNIFICATION is including TYPES + K
   eq Eqns[[.List{TypeVar}]] = .List{TypeVar} 
   eq Eqns[[T]] = Eqns[T] 
   eq Eqns[[T1,T2,Tl:List`{Type`}]] = Eqns[T1],Eqns[T2],Eqns[[Tl]] 
-endm
+endkm
 
 
 
 --- the actual type inferencer
-mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION + K 
+kmod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION + K 
   subsort Type < Exp KResult 
   subsort Exp TypeSchema List{TypeSchema} < K 
 
@@ -171,9 +170,9 @@ mod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-DESUGARED-SYNTAX + UNIFICATION
   op types_ : Map -> List{Type} 
   eq types(.Map) = .List{TypeVar} 
   eq types(X |-> T TEnv) = T,types(TEnv) 
-endm
+endkm
 
-mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS 
+kmod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS 
   op solve : -> K 
   op run : KLabel -> Bag 
   eq run(KL:KLabel) = run(KL,.List{K}) 
@@ -182,4 +181,4 @@ mod EXP-TYPE-INFERENCE is including EXP-TYPE-INFERENCE-SEMANTICS + EXP-PROGRAMS
   eq run(KL,L:List`{K`}) = <T_> <k> KL(L) ~> solve </k> <_/T> 
 --- second step: solve the remaining constraints and apply resulting substitution to the result type
   rule <k> T:Type ~> solve => Eqns:Set[T] </k> <eqns> <started> .Set </started> <solved> Eqns </solved> </eqns> 
-endm
+endkm

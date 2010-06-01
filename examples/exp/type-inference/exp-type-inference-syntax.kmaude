@@ -4,7 +4,7 @@ Here are the differences from the actual exp language annotated syntax:
   (*) let is not desugared (because it has a different type semantics than its desugaring - it is polymorphic)
 ---)
 
-mod EXP-SYNTAX is including PL-INT + PL-ID 
+kmod EXP-SYNTAX is including PL-INT + PL-ID 
   sort Exp 
   subsort Id Int Bool < Exp 
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
@@ -28,9 +28,9 @@ mod EXP-SYNTAX is including PL-INT + PL-ID
   op let_=_in_ : Id Exp Exp -> Exp [strict(2)] 
   op letrec__=_in_ : Id Id Exp Exp -> Exp 
   op if_then_else_ : Exp Exp Exp -> Exp [strict] 
-endm
+endkm
 
 
-mod EXP-DESUGARED-SYNTAX is including EXP-SYNTAX 
+kmod EXP-DESUGARED-SYNTAX is including EXP-SYNTAX 
   eq (letrec F:Id X:Id = E:Exp in E':Exp) = (let F = mu F . (lambda X . E) in E') 
-endm
+endkm

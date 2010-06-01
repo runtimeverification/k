@@ -1,8 +1,8 @@
-in ../../../k-prelude
+in ../../../k-prelude.maude
 in exp-untyped-syntax.kmaude
-in ../exp-programs
+in ../exp-programs.maude
 
-mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K 
+kmod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K 
   sort Val 
   subsort Int Bool < Val < Exp < K 
   subsort Val < KResult 
@@ -47,12 +47,11 @@ mod EXP-UNTYPED-SEMANTICS is including EXP-DESUGARED-SYNTAX + K
   rule <k> V:Val ~> (env(Env) => .) <_/k> <env>  _  => Env </env> [structural] 
 --- tail recursion
   rule env( _ ) ~> env(Env) => env(Env) [structural] 
-endm
+endkm
 
-mod EXP-UNTYPED is including EXP-UNTYPED-SEMANTICS + EXP-PROGRAMS 
+kmod EXP-UNTYPED is including EXP-UNTYPED-SEMANTICS + EXP-PROGRAMS 
   op run : KLabel -> Bag 
   eq run(KL:KLabel) = run(KL,.List{K}) 
   op run : KLabel List{K} -> Bag 
   eq run(KL,L:List`{K`}) = <T_> <k> KL(L) </k> <_/T> 
-endm
-
+endkm

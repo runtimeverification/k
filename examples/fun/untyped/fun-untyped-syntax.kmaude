@@ -1,4 +1,4 @@
-mod FUN-SYNTAX is including PL-INT + PL-ID 
+kmod FUN-SYNTAX is including PL-INT + PL-ID 
   sorts Exp Binding 
   subsort Id Int Bool < Exp 
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
@@ -45,10 +45,10 @@ mod FUN-SYNTAX is including PL-INT + PL-ID
   sort List{Exp}   subsort Exp List{Id} < List{Exp} 
   op _`,_ : List{Exp} List{Exp} -> List{Exp} [ditto] 
 -----------------------------------------------------------------------------
-endm
+endkm
 
 
-mod FUN-DESUGARED-SYNTAX is including FUN-SYNTAX 
+kmod FUN-DESUGARED-SYNTAX is including FUN-SYNTAX 
   eq fun () -> E:Exp = fun (.List{Id}) -> E 
   eq fun E Xl:List`{Id`} -> E':Exp = fun E -> fun Xl -> E' 
   eq fun E () -> E' = fun E -> fun () -> E' 
@@ -57,4 +57,4 @@ mod FUN-DESUGARED-SYNTAX is including FUN-SYNTAX
   eq (E Xl = E') = (E = fun Xl -> E') 
   eq (Xl = El:List`{Exp`}) &&& (Xl':List`{Id`} = El':List`{Exp`}) = ((Xl,Xl') = (El,El')) 
   eq [] = [.List{Id}] 
-endm
+endkm

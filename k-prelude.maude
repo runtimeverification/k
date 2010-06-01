@@ -1,4 +1,4 @@
-load pl-builtins
+load pl-builtins.maude
 
 --- Level 0
 

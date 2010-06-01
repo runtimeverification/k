@@ -1,4 +1,4 @@
-mod EXP-SYNTAX is including PL-INT + PL-ID 
+kmod EXP-SYNTAX is including PL-INT + PL-ID 
   sort Exp 
   subsort Id Int Bool < Exp 
   op _+_ : Exp Exp -> Exp [gather(E e) prec 33 strict] 
@@ -22,10 +22,10 @@ mod EXP-SYNTAX is including PL-INT + PL-ID
   op let_=_in_ : Id Exp Exp -> Exp 
   op letrec__=_in_ : Id Id Exp Exp -> Exp 
   op if_then_else_ : Exp Exp Exp -> Exp [strict(1)] 
-endm
+endkm
 
 
-mod EXP-DESUGARED-SYNTAX is including EXP-SYNTAX 
+kmod EXP-DESUGARED-SYNTAX is including EXP-SYNTAX 
   eq let X:Id = E:Exp in E':Exp = (lambda X . E') E 
   eq (letrec F:Id X = E in E') = (let F = mu F . (lambda X . E) in E') 
-endm
+endkm

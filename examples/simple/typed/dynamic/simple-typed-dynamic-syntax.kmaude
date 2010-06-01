@@ -1,5 +1,5 @@
 
-mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
+kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
   sorts Var Exp Decl Stmt Stmts 
   subsort Id < Var 
   subsorts Var Int Bool < Exp 
@@ -69,9 +69,9 @@ mod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
   sort List{Exp} 
   subsort Exp List{Bottom} < List{Exp} 
   op _`,_ : List{Exp} List{Exp} -> List{Exp} [ditto] 
-endm
+endkm
 
-mod SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX 
+kmod SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX 
 --------------------------------------------------------------------------------
 --- This module desugars some of SIMPLE's language constructs into core ones ---
 --- The idea is that we only want to give semantics to core constructs,      ---
@@ -81,4 +81,4 @@ mod SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX
   eq for X:Id = E1:Exp to E2:Exp do S = {var X : int ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} 
   eq function F:Id() : Tp:Type S = function F(.List{Bottom}) : Tp S 
   eq E() = E(.List{Bottom}) 
-endm
+endkm

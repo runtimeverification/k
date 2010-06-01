@@ -1,8 +1,8 @@
-in ../../../k-prelude
+in ../../../k-prelude.maude
 in simple-untyped-syntax.kmaude
-in simple-untyped-programs
+in simple-untyped-programs.maude
 
-mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K 
+kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K 
 --- We need values when we define the semantics
   sort Val subsort Int Bool < Val < Exp 
 
@@ -91,9 +91,9 @@ mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule <k> env(Env) => .K <_/k> <env> _ => Env </env> [structural] 
   rule <k> V ~> (env(Env) => .K) <_/k> <env> _ => Env </env> [structural] 
 --- variable declarations; we put them last because we are going to infer them automatically in the future
-endm
+endkm
 
-mod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS 
+kmod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS 
 --- make sure the name of the final module is the capitalized version of the file name
   op run : KLabel -> Bag 
 --- After loading simple-untyped-compiled into maude, type "rew run .".  Replace pSorting by any other program, then recompile
@@ -101,4 +101,4 @@ mod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRA
              <k> K(.List{K}) </k>
              <in> List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576) </in>
            <_/T> 
-endm
+endkm
