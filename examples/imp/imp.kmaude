@@ -4,7 +4,7 @@
 
 in ../../k-prelude.maude
 
-mod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
+kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
 --- AExp
   sort AExp 
   subsort Id Int < AExp 
@@ -27,9 +27,9 @@ mod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable 
   sort Pgm   sort List{Id}   subsort Id < List{Id} 
   op .List{Id} : -> List{Id}   op _`,_ : List{Id} List{Id} -> List{Id} [assoc id: .List{Id}] 
   op var_;_ : List{Id} Stmt -> Pgm [prec 70 format (nb o d ni d)] 
-endm
+endkm
 
-mod IMP-PROGRAMS is including IMP-SYNTAX 
+kmod IMP-PROGRAMS is including IMP-SYNTAX 
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id 
   ops sumPgm collatzPgm countPrimesPgm : -> Pgm 
   ops collatzStmt multiplicationStmt primalityStmt : -> Stmt 
@@ -102,38 +102,35 @@ eq countPrimesPgm = (
      n = n + 1 ;
    )
 ) 
-endm
+endkm
 
-mod IMP-SEMANTICS is
+kmod IMP-SEMANTICS is
   including IMP-SYNTAX 
   including K                      --- defines K, List, Map, and Set
 
   subsort AExp BExp Stmt Pgm List{Id} < K 
   subsorts Int Bool < KResult 
 
-  kvars I I1 I2 : Int   kvar T : Bool   kvar X : Id   kvar Sigma : Map 
-  kvar B : BExp   kvar S S1 S2 : Stmt   kvar Xl : List{Id}   kvar K : K 
+  configuration <T> <k> K:K </k> <state> (.).Map </state> </T> 
 
-  configuration <T> <k> K </k> <state> (.).Map </state> </T> 
-
-  rule <k>  X => I  <_/k> <state_> X |-> I <_/state> 
-  rule I1 + I2 => I1 +Int I2  
+  rule <k>  X:Id => I:Int  <_/k> <state_> X |-> I <_/state> 
+  rule I1:Int + I2:Int => I1 +Int I2  
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
   rule I1 <= I2 => I1 <=Int I2  
-  rule not(T) => notBool T  
-  rule true and B => B  
+  rule not(T:Bool) => notBool T  
+  rule true and B:BExp => B  
   rule false and  _  => false  
   rule skip ; => .
   rule <k>  X = I ; => .  <_/k> <state_> X |->  ( _  => I)  <_/state> 
-  rule S1 S2 => S1 ~> S2  
-  rule if true then S else  _  => S 
+  rule S1:Stmt S2:Stmt => S1 ~> S2  
+  rule if true then S:Stmt else  _  => S 
   rule if false then  _  else S => S  
   rule <k>  while B do S  => if B then (S while B do S) else skip ; <_/k> 
-  rule <k>  var Xl ; S => S  </k> <state_>  . => getList{K}(Xl) |-> 0  <_/state> [structural] 
-endm
+  rule <k>  var Xl:List{Id} ; S => S  </k> <state_>  . => getList{K}(Xl) |-> 0  <_/state> [structural] 
+endkm
 
-mod IMP is including IMP-PROGRAMS + IMP-SEMANTICS 
+kmod IMP is including IMP-PROGRAMS + IMP-SEMANTICS 
   op `[`[_`]`] : KLabel -> Bag 
   eq [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T> 
   op pgm : -> Bag   eq pgm = [['sumPgm]] 
-endm
+endkm
