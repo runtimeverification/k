@@ -1,0 +1,103 @@
+load ../../k-prelude.maude
+load core-theory.maude
+
+
+mod MATHEMATICAL-K is inc MATHEMATICAL-INT + K .
+  sorts ?Map !Map FreeMap .
+  subsort ?Map !Map FreeMap < Map .
+  op ?Env : Nat -> ?Map .
+  op ?Heap : Nat -> ?Map .
+  op skolem : Nat ?Map -> FreeMap .
+
+  sort LocType .
+  op _:_ : Int++ KLabel -> KResult .
+  ---op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> Map .
+endm
+
+
+mod SUBST is inc MATHEMATICAL-K .
+  sort SubstItem Subst .
+  subsorts SubstItem < Subst < Builtins .
+  op .Subst : -> Subst .
+  op _;_ : Subst Subst -> Subst [assoc comm id: .Subst] .
+  op _<-_ : MathObj++ MathObj++ -> SubstItem .
+  op _<-_ : List List -> SubstItem .
+  op _<-_ : Bag Bag -> SubstItem .
+  op _<-_ : Set Set -> SubstItem .
+  op _<-_ : Map Map -> SubstItem .
+  ---op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
+  op _[_] : Bag Subst -> Bag [prec 0 strat(2 0)] .
+  op _[_] : Subst Subst -> Subst [prec 0 strat(2 0)] .
+
+  ---vars Obj Obj' : MathObj++ .
+  ---var ObjList ObjList' : List{MathObj++} .
+  ---eq (Obj, ObjList) <- (Obj', ObjList') = (Obj <- Obj') ; (ObjList <- ObjList') .
+  ---eq .List{MathObj++} <- .List{MathObj++} = .Subst .
+endm
+
+
+mod CONFIG is inc MATHEMATICAL-K + SUBST + PL-ID .
+  subsort Formula MathObj++ Subst < Builtins .
+  subsort MathObj++ < KResult .
+  ---subsort List{MathObj++} < KResult .
+  op <_>_</_> : CellLabel Formula CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Subst CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+
+  op errorBag : -> [Bag] .
+  op _===>_ : Bag Bag -> Bag [frozen] .
+
+***(
+  ops feasible infeasible : -> CellLabel .
+  ops config k env heap form subst newSym newImpl : -> CellLabel .
+
+  mb configuration < T >
+                     < feasible > 0 </ feasible >
+                     < infeasible > 0 </ infeasible >
+                     < config >
+                       < k > (.).K </ k >
+                       < env > (.).Map </ env >
+                       < heap > (.).Map </ heap >
+                       < form > TrueFormula </ form >
+                       < subst > .Subst </ subst >
+                       < newSym > 0 </ newSym >
+                       < newImpl > 0 </ newImpl >
+                     </ config >
+                   </ T > : KSentence .
+
+
+  sort Result .
+  op check : KLabel -> Result .
+  op (_feasible and_infeasible paths) : Nat Nat -> Result [format(g! d d d d d o)] .
+  op [|_,_,_|] : Nat Nat Bag -> Result [strat(0 1 2 3)] .
+
+  vars N M : Nat .
+  vars Cfgs CfgItems : Bag .
+
+  eq [| N, M, < config > < form > FalseFormula </ form > CfgItems </ config > Cfgs |] = [| N, M +Int 1, Cfgs |] .
+  eq [| N, M, < config > < k > .K </ k > CfgItems </ config > Cfgs |] = [| N +Int 1, M, Cfgs |] .
+  eq [| N, M, .Bag |] = N feasible and M infeasible paths .
+
+  eq check(K:KLabel) = [| 0, 0,
+                         < T >
+                           < config >
+                             < k > K:KLabel(.List{K}) </ k >
+                             < env > .Map </ env >
+                             < heap > .Map </ heap >
+                             < form > TrueFormula </ form >
+                             < subst > .Subst </ subst >
+                             < newSym > 0 </ newSym >
+                             < newImpl > 0 </ newImpl >
+                           </ config >
+                         </ T >
+                       |] .
+
+***)
+  op derive : Int++ -> K .
+
+  op VALID : Formula -> Bool .
+  eq VALID(TrueFormula) = true .
+
+  ---op _? : Bool -> K .
+  ---eq true ? = .K .
+endm
+

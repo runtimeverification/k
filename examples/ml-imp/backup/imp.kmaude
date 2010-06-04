@@ -1,0 +1,18 @@
+load imp-semantics.kmaude
+
+kmod IMP is including IMP-SEMANTICS
+---
+  sort Result
+
+  op check : KLabel -> Result
+  op (_feasible and_infeasible paths) : Nat Nat -> Result [format(g! d d d d d o)]
+  op [|_,_,_|] : Nat Nat Bag -> Result [strat(0 1 2 3)]
+
+  eq check(K:KLabel) = [| 0, 0,
+                         < T >
+                           < config >
+                             < k > K:KLabel(.List{K}) </ k >
+                           </ config >
+                         </ T >
+                       |]
+endkm

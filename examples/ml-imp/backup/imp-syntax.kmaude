@@ -1,13 +1,32 @@
-load config.maude
+load ../../k-prelude.maude
 
 
-kmod IMP-SYNTAX is including CONFIG
+kmod IMP-SYNTAX is including K + PL-ID + PL-INT
+***(
+  sorts ?Int !Int FreeInt Int++ .
+  subsort ?Int !Int FreeInt Int < Int++ .
+  ops _+Int_ _-Int_ _*Int_ _/Int_ _%Int_ : Int++ Int++ -> Int++ [ditto] .
+  ops _<=Int_ _<Int_ _>=Int_ _>Int_ : Int++ Int++ -> Bool [ditto] .
+  op -Int_ : Int++ -> Int++ [ditto] .
+  op _==Int_ : Int++ Int++ -> Bool .
+  op ?_ : Bool -> Int++ .
+  sort Formula .
+  ops TrueFormula FalseFormula : -> Formula .
+  op ~_ : Formula -> Formula .
+  op _===_ : Int++ Int++ -> Formula .
+  op _/\_ : Formula Formula -> Formula .
+  op <_>_</_> : CellLabel Formula CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+***)
+  op ?_ : Bool -> Int
+  op _==Int_ : Int Int -> Bool
+
   sort Val
   sort Exp
   sorts Stmt Stmts
   sort Annot
   subsort Id < Exp
-  subsort Int++ < Val < Exp
+  ---subsort Int++ < Val < Exp
+  subsort Int < Val < Exp
   subsort Stmt Annot < Stmts
 
   op NULL : -> Exp

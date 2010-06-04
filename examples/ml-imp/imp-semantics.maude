@@ -3,7 +3,7 @@ load imp-syntax.maude
 mod UTILS is including PL-INT .
   op isInt : Int -> Bool .
   var I : Int .
-  eq isInt(I) = I :: Int .
+---  eq isInt(I) = I :: Int .
 endm
 
 mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
@@ -12,11 +12,9 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
   subsort Val <  KResult .
   subsort Stmts Exp < K .
 
-  --- vars I I' I1 I2 : Int++
-  var NzI : NzInt .
-  vars I I' I1 I2 : Int .
   vars N N1 N2 L : Nat .
-  vars T T1 T2 : Bool .
+  vars I I' I1 I2 : Int++ .
+  var NzI : NzInt .
   vars F X : Id .
   ---var Xl : List{Id} .
   var V V1 V2 : Val .
@@ -25,7 +23,7 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
   var S S1 S2 : Stmt .
   var Ss : Stmts .
   var K : K .
-  --- var Phi : Formula .
+  var Phi : Formula .
   var CfgItems : Bag .
 
 
@@ -39,7 +37,7 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
                     < k > (.).K </ k >
                     < env > (.).Map </ env >
                     < heap > (.).Map </ heap >
-                    < form > (.).K </ form >
+                    < form > TrueFormula </ form >
                     < subst > (.).K </ subst >
                     < newSym > 0 </ newSym >
                     < newImpl > 0 </ newImpl >
@@ -59,7 +57,7 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
   mb rule I1 < I2 => ?_(I1 <Int I2) : KSentence .
   mb rule I1 == I2 => ?_(I1 ==Int I2) : KSentence .
 
-  mb rule I && E => (I ? 1 : 0) && E if notBool(isInt(I)) : KSentence .
+---  rule I && E => (I ? 1 : 0) && E if notBool(isInt(I))
   mb rule NzI && E => E : KSentence .
   mb rule 0 && E => 0 : KSentence .
 ---  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int)

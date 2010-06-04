@@ -12,9 +12,11 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
   subsort Val <  KResult
   subsort Stmts Exp < K
 
-  vars N N1 N2 L : Nat .
-  vars I I' I1 I2 : Int++
+  --- vars I I' I1 I2 : Int++
   var NzI : NzInt .
+  vars I I' I1 I2 : Int .
+  vars N N1 N2 L : Nat .
+  vars T T1 T2 : Bool .
   vars F X : Id .
   ---var Xl : List{Id} .
   var V V1 V2 : Val .
@@ -23,7 +25,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
   var S S1 S2 : Stmt .
   var Ss : Stmts .
   var K : K .
-  var Phi : Formula .
+  --- var Phi : Formula .
   var CfgItems : Bag .
 
 
@@ -37,7 +39,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
                     <k> .K </k>
                     <env> .Map </env>
                     <heap> .Map </heap>
-                    <form> TrueFormula </form>
+                    <form> .K </form>
                     <subst> .K </subst>
                     <newSym> 0 </newSym>
                     <newImpl> 0 </newImpl>
@@ -57,7 +59,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
   rule I1 < I2 => ?_(I1 <Int I2)
   rule I1 == I2 => ?_(I1 ==Int I2)
 
----  rule I && E => (I ? 1 : 0) && E if notBool(isInt(I))
+  rule I && E => (I ? 1 : 0) && E if notBool(isInt(I))
   rule NzI && E => E
   rule 0 && E => 0
 ---  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int)
