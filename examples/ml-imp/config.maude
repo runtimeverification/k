@@ -1,5 +1,3 @@
-load ../../k-prelude.maude
-load core-theory.maude
 
 
 mod MATHEMATICAL-K is inc MATHEMATICAL-INT + K .

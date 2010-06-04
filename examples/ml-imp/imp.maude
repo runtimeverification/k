@@ -1,3 +1,7 @@
+load ../../k-prelude.maude
+load core-theory.maude
+load config.maude
+load imp-syntax.maude
 load imp-semantics.maude
 
 mod IMP is including IMP-SEMANTICS .

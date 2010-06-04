@@ -1,4 +1,3 @@
-load config.maude
 
 
 mod IMP-SYNTAX is including CONFIG .

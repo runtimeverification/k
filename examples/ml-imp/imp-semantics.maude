@@ -1,4 +1,3 @@
-load imp-syntax.maude
 
 mod UTILS is including PL-INT .
   op isInt : Int -> Bool .
