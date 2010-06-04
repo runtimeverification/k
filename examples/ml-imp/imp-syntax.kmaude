@@ -1,0 +1,101 @@
+load ../../k-prelude.maude
+
+
+kmod IMP-SYNTAX is including K + PL-ID + PL-INT
+***(
+  sorts ?Int !Int FreeInt Int++ .
+  subsort ?Int !Int FreeInt Int < Int++ .
+  ops _+Int_ _-Int_ _*Int_ _/Int_ _%Int_ : Int++ Int++ -> Int++ [ditto] .
+  ops _<=Int_ _<Int_ _>=Int_ _>Int_ : Int++ Int++ -> Bool [ditto] .
+  op -Int_ : Int++ -> Int++ [ditto] .
+  op _==Int_ : Int++ Int++ -> Bool .
+  op ?_ : Bool -> Int++ .
+  sort Formula .
+  ops TrueFormula FalseFormula : -> Formula .
+  op ~_ : Formula -> Formula .
+  op _===_ : Int++ Int++ -> Formula .
+  op _/\_ : Formula Formula -> Formula .
+  op <_>_</_> : CellLabel Formula CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+***)
+  op ?_ : Bool -> Int
+  op _==Int_ : Int Int -> Bool
+
+  sort Val
+  sort Exp
+  sorts Stmt Stmts
+  sort Annot
+  subsort Id < Exp
+  ---subsort Int++ < Val < Exp
+  subsort Int < Val < Exp
+  subsort Stmt Annot < Stmts
+
+  op NULL : -> Exp
+
+  op *_ : Exp -> Exp [prec 10 metadata "strict"]
+  op _+_ : Exp Exp -> Exp [prec 33 gather (E e) metadata "strict"]
+  op _-_ : Exp Exp -> Exp [prec 33 gather (E e) metadata "strict"]
+  op _*_ : Exp Exp -> Exp [prec 31 gather (E e) metadata "strict"]
+  op _/_ : Exp Exp -> Exp [prec 31 gather (E e) metadata "strict"]
+  op _%_ : Exp Exp -> Exp [prec 29 gather (E e) metadata "strict"]
+  op -_ : Exp -> Exp  [metadata "strict"]
+  op _>=_ : Exp Exp -> Exp  [prec 35 metadata "strict"]
+  op _>_ : Exp Exp -> Exp  [prec 35 metadata "strict"]
+  op _<=_ : Exp Exp -> Exp  [prec 35 metadata "strict"]
+  op _<_ : Exp Exp -> Exp  [prec 35 metadata "strict"]
+  op _==_ : Exp Exp -> Exp  [prec 35 metadata "strict"]
+  op _!=_ : Exp Exp -> Exp  [prec 35]
+  op !_ : Exp -> Exp [prec 5 metadata "strict"]
+  op _&&_ : Exp Exp -> Exp [prec 55 gather(E e) metadata "strict(1)"]
+  op _||_ : Exp Exp -> Exp [prec 57 gather(E e) metadata "strict(1)"]
+  op _?_:_ : Exp Exp Exp -> Exp [prec 59 metadata "strict(1)"]
+
+  op _=_; : Exp Exp -> Stmt [prec 2 metadata "strict(2)"]
+  op {} : -> Stmt
+  op {_} : Stmts -> Stmt [gather(&)]
+  op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)]
+  op _; : Exp -> Stmt [prec 60 metadata "strict"]
+  op if`(_`)_else_ : Exp Stmt Stmt -> Stmt [prec 93 metadata "strict(1)"]
+  op if`(_`)_ : Exp Stmt -> Stmt [prec 95]
+  op while`(_`)_ : Exp Stmt -> Stmt
+  ---op function_()_ : Id Stmt -> Decl
+  ---op function_(_)_ : Id List{Id} Stmt -> Decl
+  ---op _`(`) : Exp -> Exp
+  ---op _`(_`) : Exp List{Exp} -> Exp [prec 2 metadata "strict"]
+  op return_; : Exp -> Stmt [metadata "strict"]
+
+  ---op alloc`(_`) : List{KLabel} -> Stmt [metadata "strict"]
+  ---op free`(`) : Exp -> Exp [metadata "strict"]
+
+  ops //`assume_ //`assert_ //`invariant_ : Bag -> Annot [prec 99 strat(0)]
+  ops //`pre_ //`post_ : Bag -> Annot [prec 99 strat(0)]
+endkm
+
+kmod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX
+--------------------------------------------------------------------------------
+--- This module desugars some of IMP's language constructs into core ones    ---
+--- The idea is that we only want to give semantics to core constructs,      ---
+--- so we get rid of the derived ones before we start the semantics          ---
+--------------------------------------------------------------------------------
+  vars E E1 E2 : Exp .
+  vars S : Stmt .
+  eq NULL = 0
+  eq E1 != E2 = !(E1 == E2)
+  eq if (E) S = if(E) S else {}
+
+---  eq function F() S = function F(.List{Id}) S
+---  eq E() = E(.List{Id})
+endkm
+
+***(
+  sort List{Id} .
+  subsorts Id < List{Id} .
+  op .List{Id} : -> List{Id} .
+  op _;;_ : List{Id} List{Id} -> List{Id} [assoc id: .List{Id}] .
+  sort List{Exp} .
+  subsorts Exp List{Id} < List{Exp} .
+  op _;;_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
+  sort List{Val} .
+  subsort Val < List{Val} < List{Exp} .
+  op _;;_ : List{Val} List{Val} -> List{Val} [ditto] .
+***)
+

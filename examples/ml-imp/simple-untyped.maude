@@ -1,0 +1,103 @@
+in simple-untyped-syntax.maude
+---in simple-untyped-programs.maude
+
+mod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX .
+--- We need values when we define the semantics
+  sort Val . subsort Int Bool < Val < Exp . 
+
+--- We have to subsort all the syntactic categories to K, and the lists of values
+--- to KResult.  Recall that the second argument of a function application is a list
+--- of expressions, so that becomes a result when it becomes a list of values
+  subsorts Stmts List{Exp} < K . 
+  subsort List{Val} < KResult . 
+
+  mb configuration < T > 
+                     < k > K </ k >
+                     < fstack > (.).List </ fstack >
+                     < env > (.).Map </ env >
+                     < genv > (.).Map </ genv >
+                     < store > (.).Map </ store >
+                     < in > (.).List </ in >
+                     < out > (.).List </ out >
+                     < nextLoc > 0 </ nextLoc >
+                   </ T > : KSentence . 
+
+  mb rule < k > X => V  ...</ k > < env >...  X |-> L  ...</ env > < store >...  L |-> V  ...</ store > : KSentence . 
+  mb rule < k > ++ X => I +Int 1  ...</ k > < env >...  X |-> L  ...</ env > < store >...  L |-> (I => I +Int 1)  ...</ store > : KSentence . 
+  mb rule I1 + I2 => I1 +Int I2 : KSentence . 
+  mb rule _-_(I1,I2) => _-Int_(I1,I2) : KSentence . 
+  mb rule I1 * I2 => I1 *Int I2 : KSentence . 
+  mb rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0 : KSentence . 
+  mb rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0 : KSentence . 
+  mb rule - I => -Int I : KSentence . 
+  mb rule I1 < I2 => I1 <Int I2 : KSentence . 
+  mb rule I1 <= I2 => I1 <=Int I2 : KSentence . 
+  mb rule I1 > I2 => I1 >Int I2 : KSentence . 
+  mb rule I1 >= I2 => I1 >=Int I2 : KSentence . 
+  mb rule V1 == V2 => V1 ==Bool V2 : KSentence . 
+  mb rule V1 != V2 => V1 =/=Bool V2 : KSentence . 
+  mb rule T1 and T2 => T1 andBool T2 : KSentence . 
+  mb rule T1 or T2 => T1 orBool T2 : KSentence . 
+  mb rule not(T) => notBool(T) : KSentence . 
+  op array : Nat Nat -> Val . --- array value: first arg. is the location of the first element in the array, and the second arg. is the array size
+  mb rule < k > array(L, ? )[N] => Sigma(L +Int N)  ...</ k > < store > Sigma </ store > . : KSentence .  --- untyped SIMPLE does not check array bounds
+  mb rule (sizeOf(array( ? ,N)) => N) : KSentence . 
+  mb rule < k > var X ; => (.).K  ...</ k > < env > Env => Env[L / X] </ env > < store >...  (.).Map => L |-> 0  ...</ store >
+          < nextLoc > L => sNat(L) </ nextLoc > : KSentence . 
+  mb context var X[[HOLE]]; : KSentence .   --- If an array is declared, then calculate its size; then next rule gives its semantics
+  mb rule < k > var X[N] ; => (.).K  ...</ k > < env > Env => Env[L / X] </ env >
+          < store >... (.).Map => L |-> array(sNat L, N)  ...</ store > < nextLoc > L => sNat L +Nat N </ nextLoc > : KSentence . 
+  mb rule {} => (.).K : KSentence . 
+  mb rule < k > {Ss} => Ss ~> env(Env)  ...</ k > < env > Env </ env > : KSentence . 
+  mb rule S1 S2 => S1 ~> S2 : KSentence . 
+  mb rule < k > X = V ; => (.).K  ...</ k > < env >...  X |-> L  ...</ env > < store >...  L |-> ( ?  => V)  ...</ store > : KSentence . 
+  mb context  ? [[HOLE]] =  ?  ; : KSentence .   --- for array assignment, first evaluate the array and its index
+  mb context [HOLE][ ? ] =  ?  ; : KSentence . 
+  mb rule < k > array(L, ? )[N] = V ; => (.).K  ...</ k > < store > Sigma => Sigma[V / (L +Int N)] </ store > : KSentence . 
+  mb rule V ; => (.).K : KSentence . 
+  mb rule if true then S else  ?  => S : KSentence . 
+  mb rule if false then  ?  else S => S : KSentence . 
+  mb rule < k > while B do S  => if B then {S while B do S} else {}  ...</ k > : KSentence . 
+  op function : Nat -> Val .   --- function value; like arrays, functions also evaluate to their address (wrapped as a specific value)
+  mb rule < k > function F(Xl) S => (.).K  ...</ k > < env > Env => Env[L / F] </ env > < nextLoc > L => L +Nat 2 </ nextLoc > 
+          < store >... ((.).Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S)) ...</ store > : KSentence . 
+  op lambda : List{Id} Stmt -> Val .   --- actual function values are stored as lambda abstractions
+  op `(_`,_`) : Map K -> ListItem .   --- used to stack the environment and the computation at each function call
+  mb rule < k > _`(_`)(function(L),Vl)  ~> K => S ~> return(0); </ k > < fstack > (.).List => (Env,K)  ...</ fstack >
+          < env > Env =>  GEnv[| Xl | from N / getList{K}(Xl)] </ env > < genv > GEnv </ genv >
+          < store >...  L |-> lambda(Xl,S) ((.).Map => | Xl | from N |-> getList{K}(Vl))  ...</ store >
+          < nextLoc > N => N +Nat | Xl | </ nextLoc > : KSentence . 
+  mb rule < k > return(V); ~>  ?  => V ~> K </ k > < fstack > (Env,K) => (.).List  ...</ fstack > < env >  ?  => Env </ env > : KSentence . 
+  mb rule < k > read() => I  ...</ k > < in > ListItem(I) => (.).List  ...</ in > : KSentence . 
+  mb rule < k > write(I) ; => (.).K  ...</ k > < out >...  (.).List => ListItem(I) </ out > : KSentence .  
+--- when we are done with the first pass (computation and genv are empty), call main and initialize the global environment
+  mb rule < k > (.).K => main(); </ k > < env > Env </ env > < genv > (.).Map => Env </ genv > : KSentence . 
+
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
+--- List{Val}
+  sort List{Val} . 
+  subsort Val < List{Val} < List{Exp} . 
+  op _`,_ : List{Val} List{Val} -> List{Val} [ditto] . 
+--- length
+  op |_| : List{Id} -> Nat .  eq | .List{Id} | = 0 .  eq | X,Xl | = sNat(| Xl |) . 
+--- generate sequence of locations
+  op _from_ : Nat Nat -> List{K} .  eq 0 from N1 = .List{K} .  eq sNat N2 from N1 = N1,,(N2 from sNat N1) . 
+--- environment recovery
+  op env : Map -> K . 
+  mb rule env( ? ) ~> env(Env) => env(Env) : KSentence [metadata "structural"] . 
+  mb rule < k > env(Env) => (.).K  ...</ k > < env >  ?  => Env </ env > : KSentence [metadata "structural"] . 
+  mb rule < k > V ~> (env(Env) => (.).K)  ...</ k > < env >  ?  => Env </ env > : KSentence [metadata "structural"] . 
+--- variable declarations; we put them last because we are going to infer them automatically in the future
+var F : Id . var S : Stmt . var S1 : Stmt . var T : Bool . var N : Nat . var N2 : Nat . var K : K . var V : Val . var S2 : Stmt . var GEnv : Map . var L : Nat . var V1 : Val . var N1 : Nat . var T1 : Bool . var Vl : List`{Val`} . var X : Id . var V2 : Val . var Env : Map . var Ss : Stmts . var B : Exp . var I2 : Int . var Xl : List`{Id`} . var Sigma : Map . var I : Int . var I1 : Int . var T2 : Bool .  ops fstack genv k in store out nextLoc env T : -> CellLabel .  endm
+
+mod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS . 
+--- make sure the name of the final module is the capitalized version of the file name
+  op run : KLabel -> Bag . 
+--- After loading simple-untyped-compiled into maude, type "rew run .".  Replace pSorting by any other program, then recompile
+  eq run(K) = < T >...  
+             < k > K(.List{K}) </ k >
+             < in > List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576) </ in >
+            ...</ T > . 
+var K : KLabel .  endm

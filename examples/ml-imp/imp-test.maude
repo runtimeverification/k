@@ -1,0 +1,5 @@
+load fol
+load imp-compiled
+
+rew run("pSum") .
+

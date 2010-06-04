@@ -1,0 +1,24 @@
+load "/home/grosu/stefane1/k-framework/tools/../k-prelude"
+load imp-semantics.maude
+
+mod IMP is including IMP-SEMANTICS .
+---
+  sort Result .
+
+  op check : KLabel -> Result .
+  op (_feasible and_infeasible paths) : Nat Nat -> Result [format(g! d d d d d o)] .
+  op [|_,_,_|] : Nat Nat Bag -> Result [strat(0 1 2 3)] .
+
+  eq check(K) = [| 0, 0,
+                         < T >
+                           < config >
+                             < k > K(.List{K}) </ k >
+                           </ config >
+                         </ T >
+                       |] .
+var K : KLabel .  endm
+
+load  "/home/grosu/stefane1/k-framework/tools/../tools/all-tools"
+loop compile .
+(compile IMP .)
+
