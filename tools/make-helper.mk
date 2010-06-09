@@ -19,7 +19,7 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) $(LANGUAGE_NAME)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME)
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
 test: $(COMPILED_FILE) $(addprefix test-,$(TESTS))

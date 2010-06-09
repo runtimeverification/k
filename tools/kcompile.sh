@@ -27,8 +27,8 @@ RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
 OUTPUT_FILE="${FILE}-compiled"
-if [[ $# -eq  2 ]]; then
-  LANG="$2"
+if [[ $# -eq  3 ]]; then
+  LANG="$3"
 else
   LANG=`echo $FILE | tr a-z A-Z`
 fi
