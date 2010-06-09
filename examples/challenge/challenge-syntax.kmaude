@@ -1,101 +1,95 @@
 
 kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
-
 --- Two syntactic categories, Exp and Stmt
-  sorts Exp Stmt
 
 --- Basic constructs for expressions
-  subsorts Bool Int Float Id < Exp
+  syntax Exp ::= Bool | Int | Float | Id
 
---- Basic arithmetic operations; they will work with both integers and floats
+--- Basic arithmetic and boolean operations; they will work with both integers and floats
 --- NOTE: add more here
-  op _+_ : Exp Exp -> Exp [gather(E e) prec 33 strict]
-  op _*_ : Exp Exp -> Exp [gather(E e) prec 31 strict]
-  op _/_ : Exp Exp -> Exp [gather(E e) prec 31 strict]
-  op _<=_ : Exp Exp -> Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict]
-  op _==_ : Exp Exp -> Exp [prec 37 strict]
-  op not_ : Exp -> Exp [prec 53 strict]
-  op _and_ : Exp Exp -> Exp [gather(E e) prec 55 strict(1)]
+  syntax Exp ::= Exp + Exp [gather(E e) prec 33 strict]       --- addition
+               | Exp * Exp [gather(E e) prec 31 strict]       --- multiplication
+               | Exp / Exp [gather(E e) prec 31 strict]       --- division
+               | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict]
+               | Exp == Exp [prec 37 strict]                  --- equality test
+               | not Exp [prec 53 strict]                     --- boolean negation
+               | Exp and Exp [gather(E e) prec 55 strict(1)]  --- boolean conjunction
 
 --- Variable declarations
-  op var_; : List{Id} -> Stmt [prec 2]
+  syntax Stmt ::= var List{Id} ; [prec 2]
 
 --- Variable assignment
-  op _=_; : Exp Exp -> Stmt [prec 80 gather (e E) strict(2)]
+  syntax Stmt ::= Exp = Exp ; [prec 80 gather(e E) strict(2)]
 
 --- Variable increment
-  op ++_ : Id -> Exp [prec 0]
+  syntax Exp ::= ++ Id [prec 0]
 
 --- Basic statement constructs
-  op {} : -> Stmt [metadata "latex(renameTo \\{\\})"] 
-  op `{_`} : Stmt -> Stmt [gather(&) metadata "latex(renameTo \\{_\\})"]
-  op __ : Stmt Stmt -> Stmt [prec 100 gather(e E)]
-  op _; : Exp -> Stmt [prec 90 strict]
-  op if_then_else_ : Exp Stmt Stmt -> Stmt [strict(1)]
-  op while_do_ : Exp Stmt -> Stmt
+  syntax Stmt ::= {} [metadata "latex(renameTo \\{\\})"]
+                | { Stmt } [gather(&) metadata "latex(renameTo \\{_\\})"]
+                | Stmt Stmt [prec 100 gather(e E)]
+                | Exp ; [prec 90 strict]
+                | if Exp then Stmt else Stmt [strict(1)]
+                | while Exp do Stmt
 
 --- I/O
-  op read : -> Exp
-  op print_; : Exp -> Stmt [strict]
+  syntax Exp ::= read
+  syntax Stmt ::= print Exp ; [strict]
 
 --- Memory allocation and pointers
-  op &_ : Id -> Exp [metadata "latex(renameTo \\&_)"]
-  op *_ : Exp -> Exp [strict]
-  op malloc_ : Exp -> Exp [strict]
-  op free_; : Exp -> Stmt [strict]
+  syntax Exp ::= & Id [metadata "latex(renameTo \\&_)"]
+               | * Exp [strict]
+               | malloc Exp [strict]
+  syntax Stmt ::= free Exp ; [strict]
 
 --- Lists
-  op [] : -> Exp
-  op `[_`] : List{Exp} -> Exp [prec 0 seqstrict hybrid]
-  op _:_ : Exp Exp -> Exp [strict]
-  ops (head_) (tail_) : Exp -> Exp [prec 0 strict]
+  syntax Exp ::= []
+               | [ List{Exp} ] [prec 0 seqstrict hybrid]
+               | Exp : Exp [strict]
+               | head Exp [prec 0 strict]
+               | tail Exp [prec 0 strict]
 
 --- Aspects
-  op aspect_ : Stmt -> Stmt [prec 90]
+  syntax Stmt ::= aspect Stmt [prec 90]
 
 --- Functions
-  op lambda_._ : List{Id} Stmt -> Exp [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
-  op _`(`) : Exp -> Exp
-  op _`(_`) : Exp List{Exp} -> Exp [prec 2 strict]
-  op return_; : Exp -> Stmt [strict]
+  syntax Exp ::= lambda List{Id} . Stmt [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
+                | Exp ()
+                | Exp ( List{Exp} ) [prec 2 strict]
+  syntax Stmt ::= return Exp ; [strict]
 
 --- Fixed point
-  op mu_._ : Id Exp -> Exp [metadata "latex(renameTo \\ensuremath\\mu_._)"]
+  syntax Exp ::= mu Id . Exp [metadata "latex(renameTo \\ensuremath\\mu_._)"]
 
 --- Callcc
-  op callcc_ : Exp -> Exp [prec 50 strict]
+  syntax Exp ::= callcc Exp [prec 50 strict]
 
 --- Sequential non-determinism
-  op randomBool : -> Exp
+  syntax Exp ::= randomBool
 
 --- Threads
-  op spawn_ : Stmt -> Stmt [prec 90]
-  op acquire_; : Exp -> Stmt [strict]
-  op release_; : Exp -> Stmt [strict]
-  op rendezvous_; : Exp -> Stmt [strict]
+  syntax Stmt ::= spawn Stmt [prec 90]
+                | acquire Exp ; [strict]
+                | release Exp ; [strict]
+                | rendezvous Exp ; [strict]
 
 --- Agents
-  op newAgent_ : Stmt -> Exp
-  op me : -> Exp
-  op parent : -> Exp
-  op receive : -> Exp
-  op receiveFrom_ : Exp -> Exp [strict]
-  op send_to_; : Exp Exp -> Stmt [strict]
-  op sendSynch_to_; : Exp Exp -> Stmt [strict]
-  op barrier ; : -> Stmt
-  op broadcast_; : Exp -> Stmt [strict]
+  syntax Exp ::= newAgent Stmt
+               | me
+               | parent
+               | receive
+               | receiveFrom Exp [strict]
+  syntax Stmt ::= send Exp to Exp ; [strict]
+                | sendSynch Exp to Exp ; [strict]
+                | barrier ;                    --- should be "barrier;" if one wants to dissalow spaces before ;
+                | broadcast Exp ; [strict]
 
 --- Abrupt termination (of thread, of agent, of system)
-  op haltThread ; : -> Stmt
-  op haltAgent ; : -> Stmt
-  op haltSystem ; : -> Stmt
+  syntax Stmt ::= haltThread ; | haltAgent ; | haltSystem;    --- no space before ; on purpose
 
 --- Code generation / reflection
-  op quote_ : Exp -> Exp
-  op unquote_ : Exp -> Exp
-  op lift_ : Exp -> Exp [strict]
-  op eval_ : Exp -> Exp [strict]
- 
+  syntax Exp ::= quote Exp | unquote Exp | lift Exp [strict] | eval Exp [strict]
+
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------

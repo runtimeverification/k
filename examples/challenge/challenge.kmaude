@@ -1,10 +1,12 @@
 in ../../k-prelude.maude
 in challenge-syntax.kmaude
-in challenge-programs.maude
+in challenge-programs.kmaude
 
 kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVERSION 
-  subsort List{Exp} Stmt < K 
-  sort Val subsort Bool Int Float < Val < Exp subsort List{Val} < KResult 
+  syntax Val ::= Bool | Int | Float
+  syntax Exp ::= Val
+  syntax K ::= List{Exp} | Stmt
+  syntax KResult ::= List{Val}
 
   configuration
     <T>
@@ -68,7 +70,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule  false and E => false
 
 --- Variable declaration
-  rule <k>var Xl:List`{Id`} ; => .<_/k> <env>Env => Env[| Xl | from N:Nat / getList{K}(Xl)]</env> <store_>. => | Xl | from N |-> 0<_/store> <nextLoc>N => N +Nat | Xl |</nextLoc>
+  rule <k>var Xl:List{Id};=>.<_/k><env>Env=>Env[|Xl|from N:Nat/getList{K}(Xl)]</env><store_>.=>|Xl|from N|->0<_/store> <nextLoc>N=>N+Nat|Xl|</nextLoc>
 
 --- Variable lookup
   rule <k>X:Id => K:K<_/k> <env_>X |-> N<_/env> <store_>N |-> K<_/store>
@@ -80,7 +82,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <k>++ X => I:Int +Int 1<_/k> <env_>X |-> N<_/env> <store_>N |->(I => I +Int 1)<_/store>
 
 --- Basic statement constructs
-  rule  {} => .  [structural]
+  rule  {} => . [structural]
   rule <k>{S:Stmt} => S ~> env(Env)<_/k> <env>Env</env>
   rule  S1:Stmt S2:Stmt => S1 ~> S2  [structural]
   rule  V ; => .
@@ -111,7 +113,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
 --- Functions
   op closure-lambda : List{Id} Stmt Map -> Val  [metadata "latex(renameTo closure\\subscript\\lambda)"]
   rule <k>lambda Xl . S1 => closure-lambda(Xl, (S2 S1), Env)<_/k> <env>Env:Map</env> <aspect>S2</aspect>
-  op `(_`,_`) : K Map -> ListItem 
+  op (_,_) : K Map -> ListItem 
   rule <k> _`(_`)(closure-lambda(Xl, S, Env),Vl) ~> K => S return 0 ;</k>
        <env>Env':Map => Env[| Xl | from N / getList{K}(Xl)]</env>
        <fstack>. => (K,Env')<_/fstack>
@@ -178,7 +180,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
 --- Abrupt termination (of thread, of agent, of system)
   rule <k>haltThread ; ~> _ => .</k> <fstack> _ => .List</fstack>
   rule <threads_><k>haltAgent ;<_/k><_/threads>=> <threads>.Bag</threads>
-  rule <agents_><k>haltSystem ;<_/k><_/agents>=> <agents>.Bag</agents>
+  rule <agents_><k>haltSystem;<_/k><_/agents>=> <agents>.Bag</agents>
 
 --- Code generation (via reflection)
   op quoteit`[_`] : Nat -> KLabel
@@ -213,9 +215,9 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule V ~> env(Env) => env(Env) ~> V [structural]
 
 --- List{Val}
-  sort List{Val} 
-  subsort Val < List{Val} < List{Exp} 
-  op _`,_ : List{Val} List{Val} -> List{Val} [ditto] 
+  sort List{Val}
+  subsort Val < List{Val} < List{Exp}
+  op _`,_ : List{Val} List{Val} -> List{Val} [ditto]
 --- length
   op |_| : List{Id} -> Nat  [metadata "latex(renameTo \\ensuremath|_\\ensuremath|)"] 
   rule | () | => 0 [structural]  rule | X,Xl | => sNat(| Xl |) [structural]

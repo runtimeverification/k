@@ -7,31 +7,44 @@ use Switch;
 # next subroutine prints the usage message;
 # $0 is initially bound to the program name, as typed
 sub usage {
-    print "
-usage: $0 <source_file>[.kmaude] [<module_name>]
+    print "usage: $0 (-option)* <source_file>[.kmaude] (-option)*
 
-  If <module_name> is not specified, it is asumed to be allcaps(<source_file>).
-  <source_file> must define directly or indirectly (via loading) module <module_name>.
-  Module <module_name> should contain the entire definition of the language.
-  Output is printed in <source_file>-compiled.maude.
+  Options:
+  -v or -verbose : verbose mode
+  -m or -maudify : only maudify, do not kompile
+  -h or -help : prints this message and exit
+  
+  Each <source_file>.kmaude must include a module with
+  the same name, but capitalized.  For example, the file
+  imp.kmaude must include a module called IMP.
+  
+  That module, which can include other modules, should
+  contain the entire definition of the language.
+  
+  Generated output printed in <source_file>-compiled.maude.
 
-  If an error occurs in the compilation process (including any Maude warnings),
-  the script will stop, displaying the input, the (possibly partially) generated output,
-  and the error/warning messages reported by Maude.
+  If an error occurs in the compilation process (including
+  any Maude warnings), the script will stop, displaying the
+  input, the (possibly partially) generated output, and the
+  error/warning messages reported by Maude.
 
 " ;
 }
 
-# prints the usage message whenever the program is not called with one or two arguments,
-# or whenever it is called with the help option (-h, --h, -help, --help, etc.)
-if ($#ARGV < 0 || $#ARGV > 1 || $ARGV[0] =~ /^--*(h|help)$/) {
+# Prints the usage message whenever the program is called without arguments
+if ($#ARGV < 0) {
+    print "No arguments given\n";
     usage;
-    exit;
+    exit(1);
 }
 
-# Special chars, strings and patterns, for configuring/tuning the tool
-# Since these special chars will be used as patterns in matching
-# and since some of them have special matching meaning, we use \Q \E
+########################
+# <TOOL CONFIGURATION> #
+########################
+
+# Special chars, strings and patterns, for configuring/tuning the tool  
+# Since these special chars will be used as patterns in matching        
+# and since some of them have special matching meaning, we use \Q \E    
 
 my $parentheses = "\Q{}[]()\E";
 
@@ -60,11 +73,8 @@ my $ksort = "[A-Z][A-Za-z0-9\\`]*(?:\\{[A-Za-z0-9\\`]*\\})?";
 my $klabel_body = "$maude_backquoted\_$maude_backquoted";
 my $klabel = "\'$klabel_body(?:[$parentheses\\s\\,])|$klabel_body(?=\\()";
 
-
-# Adds the extension ".kmaude" to <source_file> in case it didn't have it
-# It does not remove any other extension that it may have had
-# For example, lang.syntax becomes lang.syntax.kmaude
-my $language_file = (($ARGV[0] =~ /^(.*)\.kmaude$/) ? $1 : $ARGV[0]);
+# Builtin tokens
+my @builtin_tokens = qw(=> = -> id: .K .List .Set .Bag .Map);
 
 # A default freezer name, to be used as a prefix of frozen strings
 my $default_freezer = "FREEZER";
@@ -76,14 +86,25 @@ my $specialSymbol = "K";
 my $k_tools_dir = (File::Basename::fileparse($0))[1];
 my $kcompile_command = File::Spec->catfile($k_tools_dir,"kcompile.sh");
 
-my @kmaude_keywords = qw(context rule eq configuration op ops kvar sort sorts subsort subsorts including kmod endkm);
-push(@kmaude_keywords,$default_freezer);
+my @kmaude_keywords = qw(context rule eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
+#push(@kmaude_keywords,$default_freezer);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
-# Configuration pattern: matches all strings which need to be maude-ified
-# Note that maudify analyzes the entire module anyway for operation names, but
-# it only changes those substrings matching the $include pattern
-my $include = "kmod(?:.*?)endkm|(?:in|load).*?\$";
+my $comment = join("|", (
+		"---\\(.*?---\\)",
+		"---.*?\$",
+		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
+		"\\*\\*\\*.*?\$"
+));
+
+# Top level patterns
+my $top_level_pattern = join("|", (
+		"kmod(?:.*?)endkm",
+		"mod(?:.*?)endm",
+		"fmod(?:.*?)endfm",
+		"set\\s.*?\$",
+		"(?:in|load)\\s+\\S+"
+));
 
 # Configuration pattern: excludes, for the spacing, from the above all those substrings matching $exclude
 my $exclude = join("|",
@@ -99,76 +120,161 @@ my $exclude = join("|",
 		   );
 
 #print "$exclude\n";
-#exit;
+#exit(1);
 
-# Maudify the file "$language_file.kmaude", as well as all other reachable .kmaude files
-my @tokens = maudify("$language_file.kmaude");
-#print "The original language definition, $language_file.kmaude, has the following tokens: @tokens\n";
+# @all_sorts will hold all defined sorts
+my @all_sorts = ();
 
-system "$kcompile_command $language_file.maude";
+# @all_tokens will hold all defined tokens
+my @all_tokens = @builtin_tokens;
+
+my $verbose = 0;
+my $kompile = 1;
+my $language_module_name = "";
+my $language_file_name = "";
+
+#########################
+# </TOOL CONFIGURATION> #
+#########################
+
+
+# Process the command arguments
+foreach (@ARGV) {
+    if ($language_module_name eq "?") {
+	$language_module_name = $_;
+    }
+    elsif (/^--?h(elp)?$/) {
+# Terminates with usage info when asked for help
+	usage;
+	exit(1);
+    }
+    elsif (/^--?v(erbose)?$/) {
+# By default, it is not verbose
+	$verbose = 1;
+    }
+    elsif (/^--?m(audify)?$/) {
+# By default, it kompiles
+	$kompile = 0;
+    }
+    elsif (/^--?l(ang|anguage)?$/) {
+	$language_module_name = "?";
+    }
+    elsif (/^([^-].*?)(?:|\.kmaude)$/) {
+# Removes the extension ".kmaude" to <source_file> in case it has it
+# It does not remove any other extension that it may have had
+# For example, lang.syntax.kmaude or lang.syntax becomes lang.syntax
+# Then it calls kompile on it
+	$language_file_name = $1;
+    }
+    else {
+	print "Cannot parse \"$_\"\n";
+	usage;
+	exit(1);
+    }
+}
+
+if ($language_file_name eq "") {
+    print "No input file given\n";
+    usage;
+    exit(1);
+}
+
+# Maudify the file "$language_file_name.kmaude", as well as all other reachable .kmaude files
+maudify_file("$language_file_name.kmaude","");
+print "Data resulting from processing the language definition in $language_file_name.kmaude\n" if $verbose;
+print "Sorts: @all_sorts\n" if $verbose;
+print "Tokens: @all_tokens\n" if $verbose;
+
+my $exec_status = system "$kcompile_command $language_file_name.maude $language_module_name" if $kompile;
+exit($exec_status);
 
 
 # The function maudify($file) does the following operations:
 # 1) Maude-ifies $file in case it is a .kmaude file, generating a .maude file
 # 2) It does the same recursively on each included file
-# 3) Returns the list of tokens that appear in operations declared in the $file or its included files
-sub maudify {
+# 3) Returns two references:
+# - one to the list of sorts that are declared in the $file or in its included files
+# - another to the list of tokens that appear in operations declared in the $file or its included files
+sub maudify_file {
+# increment the indentation
 # Bind $file to the argument string
-    my ($file) = @_;
-# If $file has no extension, then add it the extension .maude
+    my ($file,$indent) = @_;
+# Only files with extensions .maude or .kmaude can be maudified
     if (! ($file =~ /\.k?maude$/)) {
 	print "File $file does not have the expected extension (.maude or .kmaude)\n";
 	print "Exiting.\n";
-	exit;
+	exit(1);
     }
-#    print "Processing $file \n";
+
+    print "$indent \bProcessing file $file\n" if $verbose;
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
-# Recursively call maudify on all loaded files (making sure that they have the right path)
-#    print "Recursive maudification of the files included by $file \n";
-    my @tokens = map(maudify(File::Spec->catfile((fileparse($file))[1],$_)), get_includes($_));
-#    print "Back to $file. Tokens from its imported modules: @tokens\n";
 
-    if ($file =~ /\.maude/) { return set(@tokens, get_tokens($_)); }
+# Getting rid of comments, maintaining the line numbers of the remaining code
+	s/($comment)/
+		{
+			local $_=$1;
+			s!\S!!gs;
+			$_
+		}/gsme;
+	
+	my $maudified = "";
+	while (s/^(\s*)($top_level_pattern)(\s*)//sm) {
+		(my $before, local $_, my $after) = ($1,$2,$3);
+		if (m!^kmod\s+(\S+)!) {
+			print "$indent \bProcessing K module $1\n" if $verbose;
+			$_ = maudify_module($_);
+		}
+		elsif (m!^f?mod\s+(\S+)!) {
+			print "$indent \bProcessing Maude module $1\n" if $verbose;
+			add_sorts($_);
+			add_tokens($_);
+		}
+		elsif (m!^(?:in|load)\s+(\S+)!) {
+			maudify_file(File::Spec->catfile((fileparse($file))[1],$1),"  $indent");
+			s!\.kmaude\s*$!\.maude!s;
+		}
+		else {
+#			print "Top level pattern:\n$_\n" if $verbose;
+		}
+		$maudified = "$maudified$before$_$after";
+	}
+	
+	if (/\S/) {
+		print "Cannot finish processing $file\n";
+		print "The following text does not parse:\n$_";
+		exit(1);
+	}
+	
+    print "$indent \bDone with processing file $file\n" if $verbose;
 
-    print "Maudifying $file\n";
-
-# Iterate and Maudify each included pattern
-    s/($include)/
-    {
-	local $_ = $1;
-	if    (m!^kmod!) { ($_,@tokens) = maudify_module($_,@tokens); }
-	elsif (m!^(in|load)!) { s!\.kmaude\s*$!\.maude!s; }
-	$_;
-    }
-    /gmse;
+    if ($file =~ /\.maude/) { return; }
 
     my $maude_file = ($file =~ /^(.*)\.kmaude$/)[0].".maude";
-    open FILE,">",$maude_file or die "Cannot write $maude_file\n"; print FILE $_; close FILE;
-
-    return @tokens;
-}
-
-
-sub get_includes {
-    local ($_) = @_;
-    s/^---.*?$//gms;
-    /^((?:\s*(?:in|load)\s+\S+)*)/s;
-    return $1 =~ /^\s*(?:in|load)\s+(\S+)\s*$/gms;
+    open FILE,">",$maude_file or die "Cannot write $maude_file\n";
+	print FILE $maudified;
+	close FILE;
 }
 
 
 sub maudify_module {
-    (local $_, my @tokens) = @_;
+    (local $_) = @_;
 
-#    print "Maudifying module \n$_\n with tokens @tokens";
+#    print "Maudifying module with tokens @all_tokens\n";
 
 # Step 1: Freeze all comments
-    s!(---.*?(?=$))!freeze($1)!gme;
+#    s!(---.*?(?=$))!freeze($1)!gme;
+
+# Step: Add to @all_sorts all sorts defined a la Maude, with "sort(s)"
+	add_sorts($_);
 
 # Step 2: Freeze on-the-fly anonymous variable declarations
     s!_(:$ksort)!?$1!;
     s!(\?:$ksort)!freeze($1,"ANONYMOUS")!ge;
+
+# Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
+# At the same time, also declare N as a sort if it is not declared already
+	s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops($1)!gse;
 
 # Step 2: Declare the on-the-fly variables
     $_ = on_the_fly_kvars($_);
@@ -181,10 +287,10 @@ sub maudify_module {
     $_ = add_cell_label_ops($_);
 
 # Step 5: Add the module's newly defined tokens to @tokens
-    @tokens = set(@tokens, get_tokens($_));
+    add_tokens($_);
 
 # Step 6: Add missing spaces around tokens
-    $_ = spacify($_, @tokens);
+    $_ = spacify($_);
 
 # Step 7: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
@@ -200,9 +306,62 @@ sub maudify_module {
 
 # Step 11: Unfreeze everything still frozen
     $_ = unfreeze($_,"ANONYMOUS");
-    $_ = unfreeze($_);
+#    $_ = unfreeze($_);
 
-    return ($_,@tokens);
+    return $_;
+}
+
+sub make_ops {
+	local ($_) = @_;
+#print "make_ops:\n$_\n";
+ 	my ($spaces1,$result_sort,$spaces2,$productions,$spaces3) =  /^syntax(\s+)($ksort)(\s*)::=(.*?\S)(\s*)$/s;
+#print "\$productions\n$productions\n";
+	my $sort_decl = "";
+	if ( ! (grep { "$_" eq "$result_sort" } @all_sorts) ) {
+	    $sort_decl = "sort $result_sort";
+	    push(@all_sorts, $result_sort);
+	}
+	my $result = "$spaces1 $sort_decl $spaces2";
+	my @productions = ($productions =~ /(.*?\S.*?(?:\s\|\s|$))/gs);
+#print "\@productions\n@productions\n";
+	foreach my $production (@productions) {
+# Removing the | separator
+		$production =~ s/(\s)\|(\s)/$1$2/s;
+# Getting the operation attributes, if any
+		my $attributes = "";
+		$production =~ s/(\[[^\[\]]*\]\s*)$/
+						{
+							if (op_attribute($1)) {
+								$attributes = $1;
+								"";
+							} else {$1;}
+						}/se;
+# Removing the spaces before and after the actual production
+		my ($space4,$space5) = ("","");
+		$production =~ s/^(\s*)(.*?\S)(\s*)$/
+						{
+							$space4 = $1;
+							$space5 = $3;
+							$2
+						}/se;
+# Extracting the list of sorts in the production, then replacing the sorts by "_"
+		my @sorts = ($production =~ m/((?:^|\s)$ksort(?=\s|$))/g);
+		$production =~ s/(?:^|\s)$ksort(?=\s|$)/_/g;
+		$production =~ s/\s*_\s*/_/gs;
+# Replacing spaces in the production by ""
+		$production =~ s/\s+/`/gs;
+		$result .= ($production eq "_")
+					? "$space4 subsort @sorts < $result_sort$space5 "
+					: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
+	}
+#print "Done\n";
+	return "$result$spaces3";
+}
+
+
+sub op_attribute {
+	local ($_) = @_;
+	/strict|prec|gather|metadata|latex/;
 }
 
 sub k2maude {
@@ -253,7 +412,7 @@ sub on_the_fly_kvars {
 	if ($kvar_decls{$1}) {
 	    if ($kvar_decls{$1} ne $2) {
 		print "ERROR: Variable $1 declared with two distinct sorts ($kvar_decls{$1} and $2)\n";
-		exit;
+		exit(1);
 	    }
 	} else {
 	    $kvar_decls{$1} = $2;
@@ -280,11 +439,8 @@ sub add_cell_label_ops {
 
 # This subroutine returns a list of all spacifiable tokens that appear in operations defined (using op) in the argument
 # By spacifiable tokens we mean ones that the tool may need to add spaces to their left and/or right
-sub get_tokens {
+sub add_tokens {
     local $_ = shift;
-
-# Builtin tokens
-    my @builtinTokens = qw(=> = -> id: .K .List .Set .Bag .Map);
 
 # Extracting all the defined operations
     my @ops=/\sops?\s+(.*?)\s+:\s+/gms;
@@ -295,74 +451,91 @@ sub get_tokens {
 # Extract all tokens that appear in operations
     my @tokens = /$maude_special?($maude_unspecial+)/g;
 
-# Add builtin tokens, remove duplicates, remove all tokens which are
-# alphanumeric words (these are suppossed to be separated), then return
-    return grep /\W/, set(@tokens,@builtinTokens);
+# Add all meaningful tokens in @tokens to @all_tokens
+    @all_tokens = set(@all_tokens, grep /\W/, set(@tokens));
 }
 
+# This subroutine returns a list of all spacifiable tokens that appear in operations defined (using op) in the argument
+# By spacifiable tokens we mean ones that the tool may need to add spaces to their left and/or right
+sub add_sorts {
+    local $_ = shift;
 
-# Next subroutine takes a string (usually comprising a kmaude file) and a list of tokens,
+# Extracting all the defined sorts
+    my @sorts = /\ssorts?((?:\s+$ksort)+)\s+(?=\.|$kmaude_keywords_pattern)/gs;
+
+	@sorts = split(/\s+/, "@sorts");
+	
+#	print "Adding sorts: @sorts\nModule: $_\n" if $verbose;
+# Add these sorts to @all_sorts
+    @all_sorts = set(@all_sorts, @sorts);
+
+# Extracting and add all sorts defined indirrectly by means of BNF grammars
+#	@sorts = /\ssyntax\s+($ksort)\s+::=/gs;
+#    @all_sorts = set(@all_sorts, @sorts);
+}
+
+# Next subroutine takes a string (expecte to be a kmaude module),
 # and returns a string obtained from the original one by adding spaces to the left and/or
-# to the right of tokens in the string
+# to the right of tokens in the string; recall that the global @all_tokens holds all tokens
 sub spacify {
-    my ($lines,@tokens) = @_;
+    my ($lines) = @_;
     my %substrings;
 
 #    print "$lines\n@tokens\n";
 
 # Put all tokens in a string
-    my $tokenString = " @tokens ";
-#    print "$tokenString\n";
-
-# Make tokens into patterns
-    map(s/([$special_perl_chars])/\\$1/g, @tokens);
-#    print " @tokens \n";
+    my $tokenString = " @all_tokens ";
 
 # Compute a hash mapping each token to a list of pairs (before,after)
 # Representing the contexts in which the token is a substring of other tokens
-    foreach my $token (@tokens) {
-#    print "\nToken $token ";
-	my @pairs = ();
+    foreach my $token (@all_tokens) {
+		my $token_pattern = $token;
+		$token_pattern =~ s/([$special_perl_chars])/\\$1/g;
+#		print "\nToken $token ";
+		my @pairs = ();
 # Iterate through all matches of the token in the string of tokens
-	while($tokenString =~ /$token/g) {
+		while($tokenString =~ /$token_pattern/g) {
 # Then extract and save the token fragments before and after the matched token
-	    my ($before,$after) = ($`,$');
-	    $before =~ s/^.* //;
-	    $after  =~ s/ .*$//;
-	    if ($before or $after) {
-		$before =~ s/([$special_perl_chars])/\\$1/g;
-		$after  =~ s/([$special_perl_chars])/\\$1/g;
-		push(@pairs, ($before,$after));
-	    }
-	}
+			my ($before,$after) = ($`,$');
+			$before =~ s/^.* //;
+			$after  =~ s/ .*$//;
+			if ($before or $after) {
+				$before =~ s/([$special_perl_chars])/\\$1/g;
+				$after  =~ s/([$special_perl_chars])/\\$1/g;
+				push(@pairs, ($before,$after));
+			}
+		}
 # Hash the list of token contexts
-	if (@pairs) {
-#	    print "$token : @pairs\n";
-	    $substrings{$token} = \@pairs;
-	}
+		if (@pairs) {
+#			print "$token : @pairs\n";
+			$substrings{$token} = \@pairs;
+		}
     }
 
 # Freeze all excluded substrings, which we do NOT want to be spacified
     $lines =~ s/($exclude)/freeze($1,"EXCLUDE")/gmse;
 
 #    print "Iterating through maximal tokens\n";
-    foreach my $token (@tokens) {
-	if (! exists $substrings{$token})
-	{
+    foreach my $token (@all_tokens) {
+		my $token_pattern = $token;
+		$token_pattern =~ s/([$special_perl_chars])/\\$1/g;
+		if (! exists $substrings{$token}) {
 #	    print "$token\n";
-	    $lines =~ s/(.)($token)(.)/add_spaces($1,freeze($2,"EXCLUDE"),$3)/gse;
-	}
+			$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,freeze($2,"EXCLUDE"),$3)/gse;
+		}
     }
 
     while (my ($token,$valref) = each %substrings) {
 #	print "Token: $token: @$valref\n";
-	my @temp = my @ba = @$valref;
-	while ((my $before, my $after, @temp) = @temp) {
+		my $token_pattern = $token;
+		$token_pattern =~ s/([$special_perl_chars])/\\$1/g;
+		my @temp = @$valref;
+		while ((my $before, my $after, @temp) = @temp) {
 #	    print "$before!!!$after\n";
-	    $lines =~ s/($before$token$after)/freeze($1,"TOKEN")/gse;
-	}
-	$lines =~ s/(.)($token)(.)/add_spaces($1,$2,$3)/gse;
-	$lines = unfreeze($lines,"TOKEN");
+			$lines =~ s/($before$token_pattern$after)/freeze($1,"TOKEN")/gse;
+		}
+		$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,$2,$3)/gse;
+		$lines = unfreeze($lines,"TOKEN");
     }
 
     $lines =~ s/_/ _ /gs;
@@ -386,7 +559,7 @@ sub freeze {
     if (@_) {
 	$marker = shift;
     }
-    return "$marker".join("$specialSymbol",map(ord,(split('',$string))));
+    return "$marker".join("$specialSymbol",map(ord,(split('',$string))))."$specialSymbol";
 
 #    return "$specialSymbol$marker".join("$specialSymbol$marker",map(ord,(split('',$string))));
 }
@@ -399,14 +572,12 @@ sub unfreeze {
 	$marker = shift;
     }
 
-    $all =~ s/$marker(\d+(?:$specialSymbol\d+)*)/join("", map(chr, split("$specialSymbol",$1)))/gse;
-
-#    $all =~ s/$specialSymbol$marker(\d+(?:$specialSymbol$marker\d+)*)/join("", map(chr, split("$specialSymbol$marker",$1)))/gse;
+    $all =~ s/$marker(\d+(?:$specialSymbol\d+)*)$specialSymbol/join("", map(chr, split("$specialSymbol",$1)))/gse;
 
     return $all;
 }
 
-# Eliminates duplicates from a list, possibly reordering the remaining ones
+# Takes a list and eliminates duplicates from it
 sub set {
     my %hash = map { $_,1 } @_;
     return keys %hash;
