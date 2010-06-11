@@ -517,4 +517,8 @@ fmod K-META-LISTS is including K-META-OPS .
   eq getListTerm(T, (op Q : T T -> T [assoc id(Trm) AS] .) OPDS) = Q[Trm] .
 endfm
 
-
+fmod META-K-CONDITION-SEARCH is
+  including QID .
+  op searchS : -> Qid .
+  eq searchS = 'search .
+endfm

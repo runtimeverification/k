@@ -334,6 +334,16 @@ mod K-WHERE is
   op _where_ : [KSentence] KAssignments -> [KSentence] [prec 127 format (o b o d)] .
 endm
 
+
+mod K-CONDITION-SEARCH is
+  including K-TECHNIQUE .
+  op search : List{K} -> Bool .
+  op search : KLabel -> Bool .
+  op search : List -> Bool .
+  op search : Bag -> Bool .
+  op search : Set -> Bool .
+endm
+
 --- Anonymous variables level
 
 mod K-POLYMORPHIC-VARIABLES is
