@@ -60,7 +60,8 @@ fmod META-K-MODULES is
   eq kModules 
    = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-WHERE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
      'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-POLYMORPHIC-VARIABLES ; 
-     'K-OPEN-CELLS ; 'K-CONFIG ; 'K-DESTRUCTORS ; 'K-QUOTED-LABELS .
+     'K-OPEN-CELLS ; 'K-CONFIG ; 'K-DESTRUCTORS ; 'K-QUOTED-LABELS ;
+     'K-CONDITION-SEARCH .
 endfm
 
 fmod META-K-MODULE is
@@ -520,5 +521,5 @@ endfm
 fmod META-K-CONDITION-SEARCH is
   including QID .
   op searchS : -> Qid .
-  eq searchS = 'search .
+  eq searchS = 'search_ .
 endfm

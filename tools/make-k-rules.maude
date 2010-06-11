@@ -10,7 +10,7 @@ fmod MAKE-K-RULES is
   var Mas : MembAxSet . var Max : MembAx .
   
   op resolveKRules : Qid Module Module -> Module .
-  eq resolveKRules(O, M, Flat) = setName(resolveReplace(setOps(setEqs(setRls(Flat,none),none),clearReductionAttrs(getOps(Flat))), setMbs(removeImports(M, (including 'K-RULES .)),none), getMbs(M)), O) .
+  eq resolveKRules(O, M, Flat) = setName(resolveReplace(setOps(setEqs(setRls(Flat,none),none),clearReductionAttrs(getOps(Flat))), setMbs(removeImports(M, (including 'K-RULES .) (including 'K-CONDITION-SEARCH .)),none), getMbs(M)), O) .
 
   op resolveReplace : Module Module MembAxSet -> Module .
   eq resolveReplace(Flat, M, none) = M .

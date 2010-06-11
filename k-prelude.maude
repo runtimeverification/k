@@ -337,11 +337,11 @@ endm
 
 mod K-CONDITION-SEARCH is
   including K-TECHNIQUE .
-  op search : List{K} -> Bool .
-  op search : KLabel -> Bool .
-  op search : List -> Bool .
-  op search : Bag -> Bool .
-  op search : Set -> Bool .
+  op search_ : List{K} -> Bool .
+  op search_ : KLabel -> Bool .
+  op search_ : List -> Bool .
+  op search_ : Bag -> Bool .
+  op search_ : Set -> Bool .
 endm
 
 --- Anonymous variables level
