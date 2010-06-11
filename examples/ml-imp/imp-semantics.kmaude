@@ -148,26 +148,27 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
 
   rule <config_> <k> // assume .Bag <_/k> <_/config> => .Bag
 
----  rule
----    < config >
----      < k > // assert Cfgs => // assume Cfgs <_/ k >
----      < subst > Subst => Subst' </ subst >
----      < newImpl > N => N +Int 1 </ newImpl >
----      CfgItems => skolemize(N, CfgItems)
----    </ config >
----  if search(
----    (< config >
----      < subst > Subst </ subst >
----      < newImpl > N </ newImpl >
----      CfgItems
----   </ config >
----    ===>
----    Cfgs)
----  =>
----    < config >
----      < form > TrueFormula </ form >
----      < subst > Subst' </ subst >
----    </ config >
----  )
+  rule
+    < config >
+      < k > // assert Cfgs => // assume Cfgs <_/ k >
+      < subst > Subst => Subst' </ subst >
+      < newImpl > N => N +Int 1 </ newImpl >
+      CfgItems => .Bag
+    </ config >
+  if search(
+    < config >
+      < subst > Subst </ subst >
+      < newImpl > N </ newImpl >
+      CfgItems
+    </ config >
+    ===>
+    Cfgs
+  =>
+    < config >
+      < form > TrueFormula </ form >
+      < subst > Subst' </ subst >
+    </ config >
+  )
+---CfgItems => skolemize(N, CfgItems)
 endkm
 

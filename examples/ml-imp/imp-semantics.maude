@@ -153,21 +153,22 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
       < k > // assert Cfgs => // assume Cfgs  ...</ k >
       < subst > Subst => Subst' </ subst >
       < newImpl > N => N +Int 1 </ newImpl >
-      CfgItems => skolemize(N, CfgItems)
-    </ config > : KSentence .
----  if search(
----    (< config >
----      < subst > Subst </ subst >
----      < newImpl > N </ newImpl >
----      CfgItems
----   </ config >
----    ===>
----    Cfgs)
----  =>
----    < config >
----      < form > TrueFormula </ form >
----      < subst > Subst' </ subst >
----    </ config >
----  )
+      CfgItems => (.).Bag
+    </ config >
+  if search(
+    < config >
+      < subst > Subst </ subst >
+      < newImpl > N </ newImpl >
+      CfgItems
+    </ config >
+    ===>
+    Cfgs
+  =>
+    < config >
+      < form > TrueFormula </ form >
+      < subst > Subst' </ subst >
+    </ config >
+  ) : KSentence .
+---CfgItems => skolemize(N, CfgItems)
 ops form feasible newImpl newSym k subst heap infeasible env T config : -> CellLabel .  endm
 
