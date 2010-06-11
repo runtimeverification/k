@@ -7,39 +7,36 @@ mod UTILS is including PL-INT .
 endm
 
 kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
----  subsort List{Val} <  KResult . 
----  subsort Stmts List{Exp} < K .
   subsort Val <  KResult
   subsort Stmts Exp < K
 
-  vars N N1 N2 L : Nat .
-  vars I I' I1 I2 : Int++
-  var NzI : NzInt .
-  vars F X : Id .
-  ---var Xl : List{Id} .
-  var V V1 V2 : Val .
-  ---var Vl : List{Val} .
-  var E E1 E2 : Exp .
-  var S S1 S2 : Stmt .
-  var Ss : Stmts .
-  var K : K .
-  var Phi : Formula .
-  var CfgItems : Bag .
+  kvar M N N1 N2 : Nat
+  kvar I I' I1 I2 : Int++
+  kvar NzI : NzInt
+  kvar F X : Id
+  ---var Xl : List{Id}
+  kvar V V1 V2 : Val
+  ---var Vl : List{Val}
+  kvar E E1 E2 : Exp
+  kvar S S1 S2 : Stmt
+  kvar Ss : Stmts
+  kvar K : K
+  kvar Phi Phi' : Formula
+  kvar Subst Subst' : Subst
+  kvar Cfg : BagItem
+  kvar Cfgs CfgItems : Bag
 
-
-  ops feasible infeasible : -> CellLabel
-  ops config k env heap form subst newSym newImpl : -> CellLabel
 
   configuration <T> 
-                  < feasible > 0 </ feasible >
-                  < infeasible > 0 </ infeasible >
+                  <feasible > 0 </feasible>
+                  <infeasible > 0 </infeasible>
                   <config>
                     <k> .K </k>
                     <env> .Map </env>
                     <heap> .Map </heap>
-                    <form> TrueFormula </form>
+                    <form>  TrueFormula </form>
                     <subst> .K </subst>
-                    <newSym> 0 </newSym>
+                    <newSym>  0 </newSym>
                     <newImpl> 0 </newImpl>
                   </config>
                 </T>
@@ -68,17 +65,20 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
   rule ! 0 => 1
 
   rule
-    <config>
-      <k> (I ? E1 : E2) ~> K </k>
+    < config >
+      < k > (I ? E1 : E2) ~> K </ k >
+      < form > Phi </ form >
       CfgItems
-    </config>
+    </ config >
   =>
-    <config>
-      <k> E1 ~> K </k>
+    < config >
+      < k > E1 ~> K </ k >
+      < form > Phi /\ ~(I === 0) </ form >
       CfgItems
-    </config>
-    <config>
-      <k> E2 ~> K </k>
+    </ config >
+    < config >
+      < k > E2 ~> K </ k >
+      < form > Phi /\ I === 0 </ form >
       CfgItems
     </config>
   rule NzI ? E1 : E2 => E1
@@ -86,7 +86,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
 
   rule V ; => .K
   rule {} => .K
-  rule {Ss} => Ss
+  rule { Ss } => Ss
   rule S1 S2 => S1 ~> S2
 
   rule
@@ -96,20 +96,78 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
     <k> X = V ; => .K <_/k>
     <env_> X |-> (_ => V) <_/env>
 
----
----  mb rule
----    < k > [* I => V] </ k >
----    < heap > </ heap >
----  : KSentence .
----  mb context * [HOLE] = ? ; : KSentence .
----  mb rule
----    < k > [* I = V ; => .K] </ k >
----    < heap > </ heap >
----  : KSentence .
----
+  rule <k> * I => derive(I) ~> load(I) <_/k>
+  context (* [HOLE]) = _ ;
+  rule <k> (* I) = V ; => derive(I) ~> store(I, V) <_/k>
+  rule
+    <k> derive(I) => .K <_/k>
+    <heap_> I |-> _ <_/heap>
+  rule
+    <k> load(I) => V <_/k>
+    <heap_> I |-> V <_/heap>
+  rule
+    <k> store(I, V) => .K <_/k>
+    <heap_> I |-> (_ => V) <_/heap>
+
 
 ---  rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
   rule if (NzI) S else _ => S
   rule if (0) _ else S => S
+
+  rule
+    <k>
+      (// invariant Cfgs ~> while (E) S ~> K)
+    =>
+      (// assert Cfgs ~> 'if`(_`)_else_(E,, { S // assert Cfgs },, K))
+    </k>
+
+  rule
+    <config_> 
+      <k>
+        // assume <config> <form> Phi' </form> CfgItems </config> Cfgs ~> K
+      =>
+        // assume Cfgs ~> K
+      </k>
+      <form> Phi </form>
+      <subst> Subst </subst>
+      <newSym> M </newSym>
+      <newImpl> N </newImpl>
+    <_/config>
+    (
+      .Bag
+    =>
+      <config>
+        <k> K </k>
+        <form> Phi /\ Phi'[Subst] </form>
+        <subst> Subst </subst>
+        <newSym> M </newSym>
+        <newImpl> N </newImpl>
+        CfgItems
+      </config>
+    )
+
+  rule <config_> <k> // assume .Bag <_/k> <_/config> => .Bag
+
+  rule
+    < config >
+      < k > // assert Cfgs => // assume Cfgs <_/ k >
+      < subst > Subst => Subst' </ subst >
+      < newImpl > N => N +Int 1 </ newImpl >
+      CfgItems => skolemize(N, CfgItems)
+    </ config >
+---  if search(
+---    (< config >
+---      < subst > Subst </ subst >
+---      < newImpl > N </ newImpl >
+---      CfgItems
+---   </ config >
+---    ===>
+---    Cfgs)
+---  =>
+---    < config >
+---      < form > TrueFormula </ form >
+---      < subst > Subst' </ subst >
+---    </ config >
+---  )
 endkm
 

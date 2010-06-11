@@ -1,3 +1,4 @@
+load imp-syntax.maude
 
 mod UTILS is including PL-INT .
   op isInt : Int -> Bool .
@@ -6,28 +7,25 @@ mod UTILS is including PL-INT .
 endm
 
 mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
----  subsort List{Val} <  KResult . 
----  subsort Stmts List{Exp} < K .
   subsort Val <  KResult .
   subsort Stmts Exp < K .
 
-  vars N N1 N2 L : Nat .
-  vars I I' I1 I2 : Int++ .
+  var M N N1 N2 : Nat .
+  var I I' I1 I2 : Int++ .
   var NzI : NzInt .
-  vars F X : Id .
-  ---var Xl : List{Id} .
+  var F X : Id .
+  ---var Xl : List{Id}
   var V V1 V2 : Val .
-  ---var Vl : List{Val} .
+  ---var Vl : List{Val}
   var E E1 E2 : Exp .
   var S S1 S2 : Stmt .
   var Ss : Stmts .
   var K : K .
-  var Phi : Formula .
-  var CfgItems : Bag .
+  var Phi Phi' : Formula .
+  var Subst Subst' : Subst .
+  var Cfg : BagItem .
+  var Cfgs CfgItems : Bag .
 
-
-  ops feasible infeasible : -> CellLabel .
-  ops config k env heap form subst newSym newImpl : -> CellLabel .
 
   mb configuration < T > 
                   < feasible > 0 </ feasible >
@@ -36,9 +34,9 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
                     < k > (.).K </ k >
                     < env > (.).Map </ env >
                     < heap > (.).Map </ heap >
-                    < form > TrueFormula </ form >
+                    < form >  TrueFormula </ form >
                     < subst > (.).K </ subst >
-                    < newSym > 0 </ newSym >
+                    < newSym >  0 </ newSym >
                     < newImpl > 0 </ newImpl >
                   </ config >
                 </ T > : KSentence .
@@ -69,15 +67,18 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
   mb rule
     < config >
       < k > (I ? E1 : E2) ~> K </ k >
+      < form > Phi </ form >
       CfgItems
     </ config >
   =>
     < config >
       < k > E1 ~> K </ k >
+      < form > Phi /\ ~(I === 0) </ form >
       CfgItems
     </ config >
     < config >
       < k > E2 ~> K </ k >
+      < form > Phi /\ I === 0 </ form >
       CfgItems
     </ config > : KSentence .
   mb rule NzI ? E1 : E2 => E1 : KSentence .
@@ -85,7 +86,7 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
 
   mb rule V ; => (.).K : KSentence .
   mb rule {} => (.).K : KSentence .
-  mb rule {Ss} => Ss : KSentence .
+  mb rule { Ss } => Ss : KSentence .
   mb rule S1 S2 => S1 ~> S2 : KSentence .
 
   mb rule
@@ -95,20 +96,78 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
     < k > X = V ; => (.).K  ...</ k >
     < env >...  X |-> ( ?  => V)  ...</ env > : KSentence .
 
----
----  mb rule
----    < k > [* I => V] </ k >
----    < heap > </ heap >
----  : KSentence .
----  mb context * [HOLE] = ? ; : KSentence .
----  mb rule
----    < k > [* I = V ; => .K] </ k >
----    < heap > </ heap >
----  : KSentence .
----
+  mb rule < k > * I => derive(I) ~> load(I)  ...</ k > : KSentence .
+  mb context (* [HOLE]) =  ?  ; : KSentence .
+  mb rule < k > (* I) = V ; => derive(I) ~> store(I, V)  ...</ k > : KSentence .
+  mb rule
+    < k > derive(I) => (.).K  ...</ k >
+    < heap >...  I |->  ?   ...</ heap > : KSentence .
+  mb rule
+    < k > load(I) => V  ...</ k >
+    < heap >...  I |-> V  ...</ heap > : KSentence .
+  mb rule
+    < k > store(I, V) => (.).K  ...</ k >
+    < heap >...  I |-> ( ?  => V)  ...</ heap > : KSentence .
+
 
 ---  rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
   mb rule if (NzI) S else  ?  => S : KSentence .
   mb rule if (0)  ?  else S => S : KSentence .
+
+  mb rule
+    < k >
+      (// invariant Cfgs ~> while (E) S ~> K)
+    =>
+      (// assert Cfgs ~> 'if`(_`)_else_(E,, { S // assert Cfgs },, K))
+    </ k > : KSentence .
+
+  mb rule
+    < config >...  
+      < k >
+        // assume < config > < form > Phi' </ form > CfgItems </ config > Cfgs ~> K
+      =>
+        // assume Cfgs ~> K
+      </ k >
+      < form > Phi </ form >
+      < subst > Subst </ subst >
+      < newSym > M </ newSym >
+      < newImpl > N </ newImpl >
+     ...</ config >
+    (
+      (.).Bag
+    =>
+      < config >
+        < k > K </ k >
+        < form > Phi /\ Phi'[Subst] </ form >
+        < subst > Subst </ subst >
+        < newSym > M </ newSym >
+        < newImpl > N </ newImpl >
+        CfgItems
+      </ config >
+    ) : KSentence .
+
+  mb rule < config >...  < k > // assume (.).Bag  ...</ k >  ...</ config > => (.).Bag : KSentence .
+
+  mb rule
+    < config >
+      < k > // assert Cfgs => // assume Cfgs  ...</ k >
+      < subst > Subst => Subst' </ subst >
+      < newImpl > N => N +Int 1 </ newImpl >
+      CfgItems => skolemize(N, CfgItems)
+    </ config > : KSentence .
+---  if search(
+---    (< config >
+---      < subst > Subst </ subst >
+---      < newImpl > N </ newImpl >
+---      CfgItems
+---   </ config >
+---    ===>
+---    Cfgs)
+---  =>
+---    < config >
+---      < form > TrueFormula </ form >
+---      < subst > Subst' </ subst >
+---    </ config >
+---  )
 ops form feasible newImpl newSym k subst heap infeasible env T config : -> CellLabel .  endm
 

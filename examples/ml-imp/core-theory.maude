@@ -1,4 +1,4 @@
----load pl-builtins-ext.maude
+load ../../pl-builtins.maude
 
 mod FORMULA is including PL-BOOL .
   sorts Truth Atom NtFormula Formula .
@@ -68,13 +68,13 @@ Sort stands for ground, non-symbolic mathematical objects
 Sort++ stands for all the above
 ***)
   sorts ?MathObj !MathObj FreeMathObj MathObj MathObj++ .
----  sorts List{MathObj++} Set{MathObj++} .
+  sorts List{MathObj++} Set{MathObj++} .
   subsort ?MathObj !MathObj FreeMathObj MathObj < MathObj++ .
----  subsort MathObj++ < List{MathObj++} Set{MathObj++} .
+  subsort MathObj++ < List{MathObj++} Set{MathObj++} .
   op skolem : Nat ?MathObj -> FreeMathObj [strat(0)] .
 
----  op .List{MathObj++} : -> List{MathObj++} .
----  op _`,_ : List{MathObj++} List{MathObj++} -> List{MathObj++} [assoc id: .List{MathObj++}] .
+  op .List{MathObj++} : -> List{MathObj++} .
+  op _`,_ : List{MathObj++} List{MathObj++} -> List{MathObj++} [assoc id: .List{MathObj++}] .
 
 ---  op .Set{MathObj++} : -> Set{MathObj++} .
 ---  op _&_ : Set{MathObj++} Set{MathObj++} -> Set{MathObj++} [assoc comm id: .Set{MathObj++}] .
@@ -85,15 +85,15 @@ Sort++ stands for all the above
 
   --- must not be comm 
   op _===_ : MathObj++ MathObj++ -> Atom .
----  op _===_ : List{MathObj++} List{MathObj++} -> Atom [ditto] .
+  op _===_ : List{MathObj++} List{MathObj++} -> Atom [ditto] .
 
   vars Obj Obj1 Obj2 : MathObj++ .
----  vars ObjList1 ObjList2 : List{MathObj++} .
+  vars ObjList1 ObjList2 : List{MathObj++} .
 
   eq Obj === Obj = TrueFormula .
----  eq (Obj1, ObjList1) === (Obj2, ObjList2)
----   = (Obj1 === Obj2) /\ (ObjList1 === ObjList2) .
----  eq .List{MathObj++} === .List{MathObj++} = TrueFormula .
+  eq (Obj1, ObjList1) === (Obj2, ObjList2)
+   = (Obj1 === Obj2) /\ (ObjList1 === ObjList2) .
+  eq .List{MathObj++} === .List{MathObj++} = TrueFormula .
 endm
 
 

@@ -1,3 +1,4 @@
+load config.maude
 
 
 mod IMP-SYNTAX is including CONFIG .
@@ -41,13 +42,16 @@ mod IMP-SYNTAX is including CONFIG .
   ---op function_(_)_ : Id List{Id} Stmt -> Decl
   ---op _`(`) : Exp -> Exp
   ---op _`(_`) : Exp List{Exp} -> Exp [prec 2 metadata "strict"]
-  op return_; : Exp -> Stmt [metadata "strict"] .
+  op return_ : Exp -> Exp [metadata "strict"] .
 
   ---op alloc`(_`) : List{KLabel} -> Stmt [metadata "strict"]
-  ---op free`(`) : Exp -> Exp [metadata "strict"]
+  ---op free`(_`) : Exp -> Exp [metadata "strict"]
 
   ops //`assume_ //`assert_ //`invariant_ : Bag -> Annot [prec 99 strat(0)] .
   ops //`pre_ //`post_ : Bag -> Annot [prec 99 strat(0)] .
+
+  op load : Int++ -> Exp .
+  op store : Int++ Exp -> Exp .
 endm
 
 mod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX .
@@ -56,8 +60,8 @@ mod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX .
 --- The idea is that we only want to give semantics to core constructs,      ---
 --- so we get rid of the derived ones before we start the semantics          ---
 --------------------------------------------------------------------------------
-  vars E E1 E2 : Exp .
-  vars S : Stmt .
+  var E E1 E2 : Exp .
+  var S : Stmt .
   eq NULL = 0 .
   eq E1 != E2 = !(E1 == E2) .
   eq if (E) S = if(E) S else {} .

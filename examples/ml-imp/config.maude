@@ -1,6 +1,7 @@
+load ../../k-prelude.maude
+load core-theory.maude
 
-
-mod MATHEMATICAL-K is inc MATHEMATICAL-INT + K .
+mod MATHEMATICAL-K is inc MATHEMATICAL-INT + K + K-CONDITION-SEARCH .
   sorts ?Map !Map FreeMap .
   subsort ?Map !Map FreeMap < Map .
   op ?Env : Nat -> ?Map .
@@ -9,7 +10,7 @@ mod MATHEMATICAL-K is inc MATHEMATICAL-INT + K .
 
   sort LocType .
   op _:_ : Int++ KLabel -> KResult .
-  ---op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> Map .
+  op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> Map .
 endm
 
 
@@ -25,6 +26,7 @@ mod SUBST is inc MATHEMATICAL-K .
   op _<-_ : Map Map -> SubstItem .
   ---op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
   op _[_] : Bag Subst -> Bag [prec 0 strat(2 0)] .
+  op _[_] : Formula Subst -> Formula [prec 0 strat(2 0)] .
   op _[_] : Subst Subst -> Subst [prec 0 strat(2 0)] .
 
   ---vars Obj Obj' : MathObj++ .
@@ -40,27 +42,32 @@ mod CONFIG is inc MATHEMATICAL-K + SUBST + PL-ID .
   ---subsort List{MathObj++} < KResult .
   op <_>_</_> : CellLabel Formula CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Subst CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op _=>_ : Formula Formula -> Formula [prec 125] .
+  op _=>_ : Subst Subst -> Subst [prec 125] .
 
   op errorBag : -> [Bag] .
   op _===>_ : Bag Bag -> Bag [frozen] .
 
-***(
+  op skolemize : Nat Bag -> Bag [strat(0)] .
+
+
   ops feasible infeasible : -> CellLabel .
   ops config k env heap form subst newSym newImpl : -> CellLabel .
 
-  mb configuration < T >
-                     < feasible > 0 </ feasible >
-                     < infeasible > 0 </ infeasible >
-                     < config >
-                       < k > (.).K </ k >
-                       < env > (.).Map </ env >
-                       < heap > (.).Map </ heap >
-                       < form > TrueFormula </ form >
-                       < subst > .Subst </ subst >
-                       < newSym > 0 </ newSym >
-                       < newImpl > 0 </ newImpl >
-                     </ config >
-                   </ T > : KSentence .
+***(
+  configuration < T > 
+                  < feasible > 0 </ feasible >
+                  < infeasible > 0 </ infeasible >
+                  < config >
+                    < k > .K </ k >
+                    < env > .Map </ env >
+                    < heap > .Map </ heap >
+                    < form > TrueFormula </ form >
+                    < subst > .K </ subst >
+                    < newSym>  0 </ newSym >
+                    < newImpl > 0 </ newImpl >
+                  </ config >
+                </ T >
 
 
   sort Result .

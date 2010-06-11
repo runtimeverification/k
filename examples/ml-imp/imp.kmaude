@@ -1,7 +1,10 @@
 load imp-semantics.kmaude
+load examples/sum.maude
 
 kmod IMP is including IMP-SEMANTICS
----
+  including PSUM
+
+
   sort Result
 
   op check : KLabel -> Result
@@ -9,10 +12,19 @@ kmod IMP is including IMP-SEMANTICS
   op [|_,_,_|] : Nat Nat Bag -> Result [strat(0 1 2 3)]
 
   eq check(K:KLabel) = [| 0, 0,
-                         < T >
-                           < config >
-                             < k > K:KLabel(.List{K}) </ k >
-                           </ config >
-                         </ T >
+                         <T>
+                           <feasible> 0 </feasible>
+                           <infeasible> 0 </infeasible>
+                           <config>
+                             <k> K(.List{K}) </k>
+                             <env> (.).Map </env>
+                             <heap> (.).Map </heap>
+                             <form>  TrueFormula </form>
+                             <subst> .Subst </subst>
+                             <newSym>  0 </newSym>
+                             <newImpl> 0 </newImpl>
+                           </config>
+                         </T>
+
                        |]
 endkm

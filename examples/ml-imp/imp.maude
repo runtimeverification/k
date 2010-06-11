@@ -1,11 +1,10 @@
-load ../../k-prelude.maude
-load core-theory.maude
-load config.maude
-load imp-syntax.maude
 load imp-semantics.maude
+load examples/sum.maude
 
 mod IMP is including IMP-SEMANTICS .
----
+  including PSUM .
+
+
   sort Result .
 
   op check : KLabel -> Result .
@@ -14,9 +13,18 @@ mod IMP is including IMP-SEMANTICS .
 
   eq check(K) = [| 0, 0,
                          < T >
+                           < feasible > 0 </ feasible >
+                           < infeasible > 0 </ infeasible >
                            < config >
                              < k > K(.List{K}) </ k >
+                             < env > (.)(.).Map </ env >
+                             < heap > (.)(.).Map </ heap >
+                             < form >  TrueFormula </ form >
+                             < subst > .Subst </ subst >
+                             < newSym >  0 </ newSym >
+                             < newImpl > 0 </ newImpl >
                            </ config >
                          </ T >
+
                        |] .
 var K : KLabel .  endm
