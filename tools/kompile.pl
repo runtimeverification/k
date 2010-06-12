@@ -6,37 +6,113 @@ use Switch;
 
 # next subroutine prints the usage message;
 # $0 is initially bound to the program name, as typed
-sub usage {
-    print "usage: $0 (-option)* <source_file>[.kmaude] (-option)*
+sub terminate {
+    print "\nERROR: $_[0]\n\n" if defined $_[0];
+    print "Usage:
+  $0 (-option)* <source_file>[.kmaude|.maude] (-option)*
 
-  Options:
-  -v or -verbose : verbose mode
-  -m or -maudify : only maudify, do not kompile
-  -h or -help : prints this message and exit
-  
-  Each <source_file>.kmaude must include a module with
-  the same name, but capitalized.  For example, the file
-  imp.kmaude must include a module called IMP.
-  
-  That module, which can include other modules, should
-  contain the entire definition of the language.
-  
-  Generated output printed in <source_file>-compiled.maude.
+  This program takes a K language definition and translates
+  it into a Maude executable specification.  The input K
+  definition can be spread over several files and modules,
+  all reachable from <source_file>[.kmaude|.maude], and the
+  generated output will be saved in <source_file>-compiled.maude.
+
+  <source_file> must be a K-Maude or a Maude file, expected
+  to directly or indirectly (by loading other files) include
+  the entire definition of the language.  It is highly
+  recommended that one omits the (.maude or .kmaude) extension
+  of the loaded files, to let this program choose the appropriate
+  one depending upon the compilation stage or parameters.
+
+  <source_file> is assumed to be a K-Maude file whenever it
+  has the extension \".kmaude\" and a Maude file whenever
+  it has the extension \".maude\".  If none of these extensions
+  is provided, then the K-Maude file <source_file>.kmaude is
+  considered if it exists; if <source_file>.kmaude does not exist,
+  then the Maude file <source_file>.maude is considered instead.
+  If none of the files <source_file>.kmaude or <source_file>.maude
+  is found, then this program stops with an error message.
+
+  The same name resolution principle as above is recursively
+  applied on files directly or indirectly loaded by <source_file>.
+
+  As part of the Maude-ification process, a corresponding
+  file.maude file will be associated to each file.kmaude
+  file directly or indirectly loaded by <source_file>.
+  Note that these are only intermediate representation files,
+  which are not executable.
 
   If an error occurs in the compilation process (including
-  any Maude warnings), the script will stop, displaying the
+  any Maude warnings), this program will stop, displaying the
   input, the (possibly partially) generated output, and the
-  error/warning messages reported by Maude.
+  error/warning messages reported by Maude.  Files containing
+  intermediate compilation results are also kept for debugging.
+
+  Options
+  -h (or -help) : print this message and exit
+  -v (or -verbose) : verbose mode
+  -m (or -maudify) : only maudify, do not kompile
+  -c (or -compile) : only compile, do not maudify
+  -l (or -lang or -language) <module_name> : start module
+
+  The option -m generates all the Maude files file.maude
+  corresponding to all the files file.kmaude reachable from
+  <source_file>.  Note that Maude files are also allowed to
+  load K-Maude files, which, as explained above, is the default
+  choice whenever an extension is not given for the loaded file.
+  This option is fast (since it does not compile the Maude-ified
+  K language definition), so it is generally good for debugging.
+
+  The option -c assumes that the K definition is already
+  Maude-ified (either manually or using the above -m option).
+  In particular, files with the extension .kmaude cannot be
+  loaded anymore: the program terminates with an error if one
+  attempts to do so, and the default extension is .maude.
+
+  If the -l option is used, then <source_file> must
+  contain a module called <module_name>.  If the option
+  -l is not used, then <source_file> must include a module
+  with the same root name, but capitalized.
+
+  Technically, the command kompile lang.kmaude is equivalent to
+  kompile -m lang.kmaude followed by kompile -c lang.maude.
+  Since kompile -m lang.kmaude associates a corresponding .maude
+  file to each reachable .kmaude file while it does not modify
+  any of the reachable .maude files, in order for
+  kompile -c lang.maude to work one is advised to not use
+  extensions for the loaded file names.
+
+  Examples
+
+  kompile lang.kmaude : compiles the K language definition
+  found in file lang.kmaude into an executable Maude
+  specification saved in file lang-compiled.maude.
+  The file lang.kmaude must contain a module named LANG.
+
+  kompile lang3.kmaude -l LANG : compiles the K language
+  definition reachable from module LANG of file lang3.kmaude
+  into a Maude specification saved in file lang3-compiled.maude.
+
+  kompile -v -m lang3.kmaude : it only (verbosely) Maude-ifies
+  the K language definition reachable as above, saving it in
+  file lang3.maude (and similarly for loaded files). To further
+  compile the Maude-ified K definition, use the following:
+
+  kompile lang3.maude -l LANG : it compiles the K definition
+  starting with module LANG of file lang3.maude into an
+  executable Maude specification saved in file
+  lang3-compiled.maude.  lang3.maude is still allowed to load
+  K-Maude files, which will be Maude-ified.
+
+  kompile -l LANG lang3 -c : it compiles the already
+  Maude-ified K definition starting with module LANG of file
+  lang3.maude.  lang3.maude cannot load any K-Maude files; the
+  default extension of loaded files is set to .maude.
 
 " ;
-}
-
-# Prints the usage message whenever the program is called without arguments
-if ($#ARGV < 0) {
-    print "No arguments given\n";
-    usage;
     exit(1);
 }
+
 
 ########################
 # <TOOL CONFIGURATION> #
@@ -56,7 +132,9 @@ my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 #########
 # Maude #
 #########
-my $maude_special   = "[ $parentheses\\s_\\,\\`]";
+my $maude_path = "maude";
+my $maude_temp_file = "ERASE-ME-PLEASE";
+my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
 my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\s\\,\\`])*";
 
@@ -67,7 +145,7 @@ my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\
 my $kvar  = "[A-Za-z][A-Za-z0-9]*[']*";
 
 # Pattern matched by K sorts
-my $ksort = "[A-Z][A-Za-z0-9\\`]*(?:\\{[A-Za-z0-9\\`]*\\})?";
+my $ksort = "[A-Z][A-Za-z0-9\\`]*(?:\\{[A-Za-z0-9\\`]*\\})?|Int\\+\\+";
 
 # Pattern matched by K variables
 my $klabel_body = "$maude_backquoted\_$maude_backquoted";
@@ -84,10 +162,10 @@ my $default_freezer = "FREEZER";
 my $specialSymbol = "K";
 
 my $k_tools_dir = (File::Basename::fileparse($0))[1];
-my $kcompile_command = File::Spec->catfile($k_tools_dir,"kcompile.sh");
+my $k_all_tools = File::Spec->catfile($k_tools_dir,"all-tools");
+my $k_prelude = File::Spec->catfile(File::Spec->catfile($k_tools_dir,".."),"k-prelude");
 
 my @kmaude_keywords = qw(context rule eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
-#push(@kmaude_keywords,$default_freezer);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 my $comment = join("|", (
@@ -129,9 +207,21 @@ my @all_sorts = ();
 my @all_tokens = @builtin_tokens;
 
 my $verbose = 0;
-my $kompile = 1;
+my $maudify_only = 0;
+my $compile_only = 0;
 my $language_module_name = "";
 my $language_file_name = "";
+
+# File names for the input to be sent to the Maude compiler, as well as
+# file names for the output, errors and temporary files generated by it
+# These are useful for debugging
+my $input_file  = "kompile_in.maude";
+my $error_file  = "kompile_err.txt";
+my $output_file = "kompile_out.txt";
+my $temp_file   = "kompile_tmp.txt";
+
+my $begin_compiled_module = "---K-MAUDE-GENERATED-OUTPUT-BEGIN---";
+my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";
 
 #########################
 # </TOOL CONFIGURATION> #
@@ -145,115 +235,233 @@ foreach (@ARGV) {
     }
     elsif (/^--?h(elp)?$/) {
 # Terminates with usage info when asked for help
-	usage;
-	exit(1);
+	terminate;
     }
     elsif (/^--?v(erbose)?$/) {
 # By default, it is not verbose
 	$verbose = 1;
     }
     elsif (/^--?m(audify)?$/) {
-# By default, it kompiles
-	$kompile = 0;
+# By default, it maudifies and compiles
+	$maudify_only = 1;
+    }
+    elsif (/^--?c(ompile)?$/) {
+# By default, it maudifies and compiles
+	$compile_only = 1;
     }
     elsif (/^--?l(ang|anguage)?$/) {
 	$language_module_name = "?";
     }
-    elsif (/^([^-].*?)(?:|\.kmaude)$/) {
-# Removes the extension ".kmaude" to <source_file> in case it has it
-# It does not remove any other extension that it may have had
-# For example, lang.syntax.kmaude or lang.syntax becomes lang.syntax
-# Then it calls kompile on it
-	$language_file_name = $1;
+    elsif (/^-/) {
+	terminate("Unknown option $_");
     }
     else {
-	print "Cannot parse \"$_\"\n";
-	usage;
+	$language_file_name = $_;
+    }
+}
+
+# Check if an input file was given and exit if not
+if ($language_file_name eq "") {
+    terminate("No input file given");
+}
+
+# Check if both -m and -c are given together
+if ($maudify_only && $compile_only) {
+    terminate("Options -m and -c cannot be given together\n(-m/-c means \"only maudify/compile, do not compile/maudify\")");
+}
+
+# Check if the -c option is given together with a .kmaude file
+if ($compile_only && $language_file_name =~ /.kmaude$/) {
+    terminate("Option -c only works with a .maude file");
+}
+
+if (!$compile_only) {
+# Maudify the .kmaude files reachable from file "$language_file_name"
+    print_header("Maudifying $language_file_name") if $verbose;
+    maudify_file("$language_file_name","");
+#    print_header("Done with maudifying $language_file_name") if $verbose;
+    print_header("Data resulting from maudifying $language_file_name") if $verbose;
+    print "Sorts:\n------\n@all_sorts\n\n" if $verbose;
+    print "Tokens:\n-------\n@all_tokens\n" if $verbose;
+    $language_file_name =~ s/\.kmaude$//;
+    print "\n" if $verbose;
+}
+
+if (!$maudify_only) {
+# Remove .maude extension if there
+    $language_file_name =~ s/\.maude$//;
+    print_header("Compiling $language_file_name") if $verbose;
+    compile();
+    print "Compiled version written in $language_file_name-compiled.maude\n" if $verbose;
+}
+
+exit(1);
+
+
+sub print_header {
+    my $starred_line = my $text = "*** $_[0] ***";
+    $starred_line =~ s/./*/g;
+    print "\n$starred_line\n$text\n$starred_line\n\n";
+}
+
+sub compile {
+# Assumes $language_file_name is a file name with no extension
+# However, since we eventually call Maude on it, $language_file_name.maude must exist
+    if (! -e "$language_file_name.maude") {
+	terminate("File $language_file_name.maude does not exist");
+    }
+
+# Checking whether Maude is available
+    run_maude("Detecting Maude ... ", "quit\n");
+
+# Create the module name, if not already given, by capitalizing the file name
+    if ($language_module_name eq "") {
+	$language_module_name = uc($language_file_name);
+    }
+
+# File name where the compiled output will be stored:
+    my $output_file_name = "$language_file_name-compiled.maude";
+
+# Testing whether the input module $language_module_name exists
+    run_maude("Testing if the input module $language_module_name exists ... ",
+	      "load $language_file_name\n",
+	      "show module $language_module_name .\n",
+	      "quit\n");
+
+# Compiling the input module $language_module_name
+    run_maude("Compiling the definition ... ",
+	      "load $language_file_name\n",
+	      "load $k_all_tools\n",
+	      "loop compile .\n",
+	      "(compile $language_module_name .)\n",
+	      "quit\n")
+	=~ /$begin_compiled_module(.*?)$end_compiled_module/s;
+    open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
+    print FILE "load $k_prelude\n";
+    print FILE $1;
+    close FILE;
+}
+
+
+sub clean {
+    unlink($input_file);
+    unlink($output_file);
+    unlink($error_file);
+    unlink($temp_file);
+}
+
+
+# Running Maude (cross platform)
+sub run_maude {
+    my ($message,@commands) = @_;
+    print $message if $verbose;
+    open FILE,">",$input_file or die "Cannot create $input_file\n";
+    print FILE "\n@commands\n";
+    close FILE;
+    system("$maude_path $input_file >$output_file 2>$error_file");
+    if ($? == 0) {
+	if (-s $error_file) {
+	    print "ERROR: check $error_file\n";
+	    print "Aborting the compilation\n";
+	    exit(1);
+	}
+	print "DONE\n" if $verbose;
+	local $/=undef; open FILE,"<",$output_file or die "Cannot open $output_file\n"; local $_ = <FILE>; close FILE;
+	clean();
+	return $_;
+    }
+    else {
+	print "\nMaude cannot be detected: the command $maude_path does not execute\n";
+	print "Aborting the compilation\n";
+	clean();
 	exit(1);
     }
 }
-
-if ($language_file_name eq "") {
-    print "No input file given\n";
-    usage;
-    exit(1);
-}
-
-# Maudify the file "$language_file_name.kmaude", as well as all other reachable .kmaude files
-maudify_file("$language_file_name.kmaude","");
-print "Data resulting from processing the language definition in $language_file_name.kmaude\n" if $verbose;
-print "Sorts: @all_sorts\n" if $verbose;
-print "Tokens: @all_tokens\n" if $verbose;
-
-my $exec_status = system "$kcompile_command $language_file_name.maude $language_module_name" if $kompile;
-exit($exec_status);
 
 
 # The function maudify($file) does the following operations:
 # 1) Maude-ifies $file in case it is a .kmaude file, generating a .maude file
 # 2) It does the same recursively on each included file
-# 3) Returns two references:
+# 3) Updates the global variables @all_sorts and @all_tokens
 # - one to the list of sorts that are declared in the $file or in its included files
 # - another to the list of tokens that appear in operations declared in the $file or its included files
 sub maudify_file {
-# increment the indentation
-# Bind $file to the argument string
+# Bind $file and $indent (the latter used for pretty printing when$verbose
     my ($file,$indent) = @_;
-# Only files with extensions .maude or .kmaude can be maudified
-    if (! ($file =~ /\.k?maude$/)) {
-	print "File $file does not have the expected extension (.maude or .kmaude)\n";
-	print "Exiting.\n";
-	exit(1);
+# If $file has extension .kmaude or .maude then tests if $file exists and errors if not
+    if ($file =~ /\.k?maude$/) {
+	if (! -e $file) {
+	    terminate("File $file does not exist");
+	}
+    }
+# If $file does not have the extension .kmaude or .maude the
+    else {
+# Add extension .kmaude if $file.kmaude exists
+	if (-e "$file.kmaude") {
+	    $file .= ".kmaude";
+	}
+# If not, then add extension .maude if $file.maude exists
+	elsif (-e "$file.maude") {
+	    $file .= ".maude";
+	}
+# Otherwise error: we only allow files with extensions .kmaude or .maude
+	else {
+	    terminate("Neither $file.kmaude nor $file.maude exist");
+	}
     }
 
-    print "$indent \bProcessing file $file\n" if $verbose;
+    print $indent."Processing file $file\n" if $verbose;
+    $indent .= "|   ";
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
 # Getting rid of comments, maintaining the line numbers of the remaining code
-	s/($comment)/
-		{
-			local $_=$1;
-			s!\S!!gs;
-			$_
-		}/gsme;
-	
-	my $maudified = "";
-	while (s/^(\s*)($top_level_pattern)(\s*)//sm) {
-		(my $before, local $_, my $after) = ($1,$2,$3);
-		if (m!^kmod\s+(\S+)!) {
-			print "$indent \bProcessing K module $1\n" if $verbose;
-			$_ = maudify_module($_);
-		}
-		elsif (m!^f?mod\s+(\S+)!) {
-			print "$indent \bProcessing Maude module $1\n" if $verbose;
-			add_sorts($_);
-			add_tokens($_);
-		}
-		elsif (m!^(?:in|load)\s+(\S+)!) {
-			maudify_file(File::Spec->catfile((fileparse($file))[1],$1),"  $indent");
-			s!\.kmaude\s*$!\.maude!s;
-		}
-		else {
-#			print "Top level pattern:\n$_\n" if $verbose;
-		}
-		$maudified = "$maudified$before$_$after";
+    s/($comment)/
+    {
+	local $_=$1;
+	s!\S!!gs;
+	$_;
+    }/gsme;
+    
+    my $maudified = "";
+    while (s/^(\s*)($top_level_pattern)(\s*)//sm) {
+	(my $before, local $_, my $after) = ($1,$2,$3);
+	if (m!^kmod\s+(\S+)!) {
+	    print $indent."K module $1 ... " if $verbose;
+	    $_ = maudify_module($_);
+	    print "DONE\n" if $verbose;
 	}
-	
-	if (/\S/) {
-		print "Cannot finish processing $file\n";
-		print "The following text does not parse:\n$_";
-		exit(1);
+	elsif (m!^f?mod\s+(\S+)!) {
+	    print $indent."Maude module $1 ... " if $verbose;
+	    add_sorts($_);
+	    add_tokens($_);
+	    print "DONE\n" if $verbose;
 	}
-	
-    print "$indent \bDone with processing file $file\n" if $verbose;
+	elsif (m!^(?:in|load)\s+(\S+)!) {
+	    maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
+	    s!\.kmaude\s*$!\.maude!s;
+	}
+	else {
+#	    print "Top level pattern:\n$_\n" if $verbose;
+	}
+	$maudified = "$maudified$before$_$after";
+    }
+    
+    if (/\S/) {
+	print "ERROR: Cannot finish processing $file\n";
+	print "ERROR: The following text does not parse:\n$_";
+	exit(1);
+    }
+    
+    $indent =~ s/\|   //;
+    print $indent."Done with processing file $file\n" if $verbose;
 
     if ($file =~ /\.maude/) { return; }
 
     my $maude_file = ($file =~ /^(.*)\.kmaude$/)[0].".maude";
     open FILE,">",$maude_file or die "Cannot write $maude_file\n";
-	print FILE $maudified;
-	close FILE;
+    print FILE $maudified;
+    close FILE;
 }
 
 
