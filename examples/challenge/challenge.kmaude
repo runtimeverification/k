@@ -1,6 +1,6 @@
-in ../../k-prelude.maude
-in challenge-syntax.kmaude
-in challenge-programs.kmaude
+in ../../k-prelude
+in challenge-syntax
+in challenge-programs
 
 kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVERSION 
   syntax Val ::= Bool | Int | Float
@@ -70,7 +70,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule  false and E => false
 
 --- Variable declaration
-  rule <k>var Xl:List{Id};=>.<_/k><env>Env=>Env[|Xl|from N:Nat/getList{K}(Xl)]</env><store_>.=>|Xl|from N|->0<_/store> <nextLoc>N=>N+Nat|Xl|</nextLoc>
+  rule <k>var Xl:List{Id};=>.<_/k><env>Env=>Env[|Xl|from N:Nat/getList{K}(Xl)]</env><store_>.=>|Xl|from N|->0<_/store> <nextLoc>N => N+Nat|Xl|</nextLoc>
 
 --- Variable lookup
   rule <k>X:Id => K:K<_/k> <env_>X |-> N<_/env> <store_>N |-> K<_/store>
@@ -79,7 +79,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <k>X = V:Val ; => .<_/k> <env_>X |-> N<_/env> <store_>N |->(_ => V)<_/store>
 
 --- Variable increment
-  rule <k>++ X => I:Int +Int 1<_/k> <env_>X |-> N<_/env> <store_>N |->(I => I +Int 1)<_/store>
+  rule <k>++X => I:Int +Int 1<_/k> <env_>X |-> N<_/env> <store_>N |->(I => I +Int 1)<_/store>
 
 --- Basic statement constructs
   rule  {} => . [structural]
@@ -174,7 +174,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <k>sendSynch V to N2 ; => .<_/k> <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
   rule <me>N</me> <threads> <thread_><k>barrier ;<_/k> <_/thread> </threads> <barrier>true</barrier> <waiting>W  (. => SetItem(N))</waiting>if notBool(N in W) 
   rule <barrier>true => false</barrier> <waiting>W</waiting> <world>W</world>if W =/=Bool .
-  rule <me>N</me> <k>barrier ; => .<_/k> <barrier>false</barrier> <waiting_>SetItem(N) => .<_/waiting>
+  rule <me>N</me> <k>barrier; => .<_/k> <barrier>false</barrier> <waiting_>SetItem(N) => .<_/waiting>
   rule <barrier>false => true</barrier> <waiting>.Set</waiting>
 
 --- Abrupt termination (of thread, of agent, of system)

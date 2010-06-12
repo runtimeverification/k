@@ -227,12 +227,12 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
       var split, merge, mergeSort ;
       split = lambda l .{
                 var t ;
-                if l ==[] then return [[],[]];
+                if l == [] then return [[],[]];
                 else if tail l == [] then return [[head l],[]];
                      else {t = split(tail tail l); return [head l : head t, head tail l : head tail t];}};
       merge = lambda (left,right).{
-                if left ==[] then return right ;
-                else if right ==[] then return left ;
+                if left == [] then return right ;
+                else if right == [] then return left ;
                 else if (head left <= head right) then return head  left : merge(tail left,right);
                 else return head right : merge(left, tail right);};
       var m, c, cod ;
@@ -241,8 +241,8 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
       cod = eval receiveFrom m ;
       aspect cod();
       mergeSort = lambda l .{
-       if l ==[] then return [];
-       else if tail l ==[] then return l ;
+       if l == [] then return [] ;
+       else if tail l == [] then return l ;
        else {
          var t, left, right ; t = split(l); 
          spawn {left = mergeSort(head t); rendezvous & left ;}
@@ -267,13 +267,13 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
         ++ i ;
       }
     };
-    length = mu length . lambda l . { if l == [] then return 0 ; else return 1 + length(tail l); };
+    length = mu length . lambda l .{if l == [] then return 0 ; else return 1 + length(tail l); };
     list2array = lambda l .{
       var a,i ; a = malloc length(l); i = 0 ;
-      while not(l ==[]) do {*(a + i)= head l ; l = tail l ; ++ i ;}
+      while not(l == []) do {*(a + i)= head l ; l = tail l ; ++ i ;}
       return [a,i];
     };
-    array2list = lambda(a,n).{if n == 0 then return[]; else return * a : array2list(a + 1,n + -1);};
+    array2list = lambda(a,n).{if n == 0 then return [] ; else return * a : array2list(a + 1,n + -1);};
     send me to mergeSortAgent ;
     var loc ;  loc = lift receiveFrom mergeSortAgent ;
     send quote(lambda().{acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ;
@@ -350,7 +350,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
       cod = eval receiveFrom m ;
       aspect cod() ;
       mergeSort = lambda l . {
-       if l == [] then return [];
+       if l == [] then return [] ;
        else if tail l == [] then return l ;
        else {
          var t, left, right ; t = split(l) ; 
@@ -392,7 +392,7 @@ ops in g x y : -> Id .
 op p29 : -> Stmt .
 eq p29 = 
   var in, exit, g, length, array, a, n, i, j, t, x, y, mergeSortAgent ;
-  in = [];
+  in = [] ;
   callcc lambda k .{
                     callcc lambda k .{g = k ;};
                     i = read ;

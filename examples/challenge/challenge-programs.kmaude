@@ -235,9 +235,9 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
                 else if right==[] then return left;
                 else if (head left <= head right) then return head  left:merge(tail left,right);
                 else return head right : merge(left, tail right);};
-      var m, c, cod ;
+      var m, c, cod;
       m = receive;
-      send &c to m ;
+      send &c to m;
       cod = eval receiveFrom m;
       aspect cod();
       mergeSort = lambda l.{
@@ -267,7 +267,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
         ++i;
       }
     };
-    length = mu length . lambda l . { if l == [] then return 0 ; else return 1 + length(tail l); };
+    length = mu length.lambda l.{if l==[] then return 0; else return 1+length(tail l); };
     list2array = lambda l.{
       var a,i; a=malloc length(l);i=0;
       while not(l==[]) do {*(a+i)=head l;l=tail l;++i;}
