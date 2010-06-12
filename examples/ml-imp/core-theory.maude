@@ -1,4 +1,4 @@
-load ../../pl-builtins.maude
+---load ../../pl-builtins.maude
 
 mod FORMULA is including PL-BOOL .
   sorts Truth Atom NtFormula Formula .

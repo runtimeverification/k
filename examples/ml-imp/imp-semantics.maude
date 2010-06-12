@@ -3,7 +3,7 @@ load imp-syntax.maude
 mod UTILS is including PL-INT .
   op isInt : Int -> Bool .
   var I : Int .
----  eq isInt(I) = I :: Int .
+        
 endm
 
 mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
@@ -14,9 +14,9 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
   var I I' I1 I2 : Int++ .
   var NzI : NzInt .
   var F X : Id .
-  ---var Xl : List{Id}
+     
   var V V1 V2 : Val .
-  ---var Vl : List{Val}
+     
   var E E1 E2 : Exp .
   var S S1 S2 : Stmt .
   var Ss : Stmts .
@@ -54,13 +54,13 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
   mb rule I1 < I2 => ?_(I1 <Int I2) : KSentence .
   mb rule I1 == I2 => ?_(I1 ==Int I2) : KSentence .
 
----  rule I && E => (I ? 1 : 0) && E if notBool(isInt(I))
+               
   mb rule NzI && E => E : KSentence .
   mb rule 0 && E => 0 : KSentence .
----  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int)
+                 
   mb rule NzI || E => NzI : KSentence .
   mb rule 0 || E => E : KSentence .
----  rule ! I => I ? 0 : 1 if notBool(I :: Int)
+              
   mb rule ! NzI => 1 : KSentence .
   mb rule ! 0 => 1 : KSentence .
 
@@ -110,7 +110,7 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
     < heap >...  I |-> ( ?  => V)  ...</ heap > : KSentence .
 
 
----  rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
+                     
   mb rule if (NzI) S else  ?  => S : KSentence .
   mb rule if (0)  ?  else S => S : KSentence .
 
@@ -169,6 +169,6 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
       < subst > Subst' </ subst >
     </ config >
   ) : KSentence .
----CfgItems => skolemize(N, CfgItems)
-ops form feasible newImpl newSym k subst heap infeasible env T config : -> CellLabel .  endm
+   
+ops heap infeasible form feasible newImpl newSym env T k subst config : -> CellLabel .  endm
 
