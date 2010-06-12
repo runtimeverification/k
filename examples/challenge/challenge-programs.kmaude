@@ -239,7 +239,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
       m = receive;
       send &c to m;
       cod = eval receiveFrom m;
-      aspect cod();
+      aspect cod ( );
       mergeSort = lambda l.{
        if l==[] then return [];
        else if tail l==[] then return l;
@@ -276,7 +276,8 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
     array2list=lambda(a,n).{if n==0 then return[]; else return *a:array2list(a+1,n+-1);};
     send me to mergeSortAgent;
     var loc;  loc = lift receiveFrom mergeSortAgent;
-    send quote(lambda().{acquire unquote loc;*unquote loc=*unquote loc+1;release unquote loc;}) to mergeSortAgent;
+    send quote(lambda(
+).{acquire unquote loc;*unquote loc=*unquote loc+1;release unquote loc;}) to mergeSortAgent;
     send [me,l] to mergeSortAgent;
     sorting=lambda l.{
       var t;t=list2array(l);

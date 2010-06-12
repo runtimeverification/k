@@ -24,7 +24,7 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
   syntax Exp ::= ++ Id [prec 0]
 
 --- Basic statement constructs
-  syntax Stmt ::= {}                         [metadata "latex(renameTo \\{\\})"]
+  syntax Stmt ::= { }                        [metadata "latex(renameTo \\{\\})"]
                 | { Stmt }                   [gather(&) metadata "latex(renameTo \\{_\\})"]
                 | Stmt Stmt                  [prec 100 gather(e E)]
                 | Exp ;                      [prec 90 strict]
@@ -42,7 +42,7 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
   syntax Stmt ::= free Exp ; [strict]
 
 --- Lists
-  syntax Exp ::= []
+  syntax Exp ::= [ ]
                | [ List{Exp} ] [prec 0 seqstrict hybrid]
                | Exp : Exp     [strict]
                | head Exp      [prec 0 strict]
@@ -53,7 +53,7 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
 
 --- Functions
   syntax Exp ::= lambda List{Id} . Stmt [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
-                | Exp ()
+                | Exp ( )
                 | Exp ( List{Exp} )     [prec 2 strict]
   syntax Stmt ::= return Exp ;          [strict]
 
@@ -113,7 +113,6 @@ kmod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX
 --- so we get rid of the derived ones asap (before we start the semantics        ---
 ------------------------------------------------------------------------------------
   macro E() = E(())
---- mu as syntactic sugar
   macro mu X:Id.E:Exp = (lambda().{var X; X=E; return X;})()
   macro [] = [()]
 endkm

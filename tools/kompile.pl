@@ -165,7 +165,7 @@ my $k_tools_dir = (File::Basename::fileparse($0))[1];
 my $k_all_tools = File::Spec->catfile($k_tools_dir,"all-tools");
 my $k_prelude = File::Spec->catfile(File::Spec->catfile($k_tools_dir,".."),"k-prelude");
 
-my @kmaude_keywords = qw(context rule eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
+my @kmaude_keywords = qw(context rule macro eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 my $comment = join("|", (
@@ -468,71 +468,77 @@ sub maudify_module {
 
 #    print "Maudifying module with tokens @all_tokens\n";
 
-# Step 1: Freeze all comments
-#    s!(---.*?(?=$))!freeze($1)!gme;
-
 # Step: Add to @all_sorts all sorts defined a la Maude, with "sort(s)"
 	add_sorts($_);
 
-# Step 2: Freeze on-the-fly anonymous variable declarations
+# Step: Freeze on-the-fly anonymous variable declarations
     s!_(:$ksort)!?$1!;
     s!(\?:$ksort)!freeze($1,"ANONYMOUS")!ge;
 
-# Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
+# Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
 	s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops($1)!gse;
 
-# Step 2: Declare the on-the-fly variables
+# Step: Declare the on-the-fly variables
     $_ = on_the_fly_kvars($_);
 
-# Step 3: Reduce cell notation with _ to cell notation with ...
+# Step: Reduce cell notation with _ to cell notation with ...
     s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
     s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
 
-# Step 4: Declare cell labels as operations
+# Step: Declare cell labels as operations
     $_ = add_cell_label_ops($_);
 
-# Step 5: Add the module's newly defined tokens to @tokens
+# Step: Add the module's newly defined tokens to @tokens
     add_tokens($_);
 
-# Step 6: Add missing spaces around tokens
+# Step: Add missing spaces around tokens
     $_ = spacify($_);
 
-# Step 7: Change .List into (.).List , etc.
+# Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
 
-# Step 8: Replace remaining _ by ? (spaces were put around _ by spacify)
+# Step: Replace remaining _ by ? (spaces were put around _ by spacify)
     s! _ ! ? !gs;
 
-# Step 9: Change K attributes to Maude metadata
+# Step: Change K attributes to Maude metadata
     s!(\[[^\]]*\])!make_metadata($1)!gse;
 
-# Step 10: Change K statements into Maude statements
+# Step: Change K statements into Maude statements
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
 
-# Step 11: Unfreeze everything still frozen
+# Step: Unfreeze everything still frozen
     $_ = unfreeze($_,"ANONYMOUS");
 #    $_ = unfreeze($_);
 
     return $_;
 }
 
+
+# Takes a syntax statement and extracts sorts, subsorts and operations
 sub make_ops {
 	local ($_) = @_;
-#print "make_ops:\n$_\n";
+#	print "make_ops:\n$_\n";
+
+# Grab the result sort and the productions, as well as all spacing
  	my ($spaces1,$result_sort,$spaces2,$productions,$spaces3) =  /^syntax(\s+)($ksort)(\s*)::=(.*?\S)(\s*)$/s;
-#print "\$productions\n$productions\n";
+#	print "\$productions\n$productions\n";
+
+# Add $result_sort to @all_sorts if not already there
 	my $sort_decl = "";
 	if ( ! (grep { "$_" eq "$result_sort" } @all_sorts) ) {
 	    $sort_decl = "sort $result_sort";
 	    push(@all_sorts, $result_sort);
 	}
 	my $result = "$spaces1 $sort_decl $spaces2";
+
+# Extract all productions in @productions
 	my @productions = ($productions =~ /(.*?\S.*?(?:\s\|\s|$))/gs);
-#print "\@productions\n@productions\n";
-	foreach my $production (@productions) {
+
+        foreach my $production (@productions) {
 # Removing the | separator
 		$production =~ s/(\s)\|(\s)/$1$2/s;
+
 # Getting the operation attributes, if any
 		my $attributes = "";
 		$production =~ s/(\[[^\[\]]*\]\s*)$/
@@ -542,6 +548,7 @@ sub make_ops {
 								"";
 							} else {$1;}
 						}/se;
+
 # Removing the spaces before and after the actual production
 		my ($space4,$space5) = ("","");
 		$production =~ s/^(\s*)(.*?\S)(\s*)$/
@@ -550,16 +557,26 @@ sub make_ops {
 							$space5 = $3;
 							$2
 						}/se;
+
 # Extracting the list of sorts in the production, then replacing the sorts by "_"
 		my @sorts = ($production =~ m/((?:^|\s)$ksort(?=\s|$))/g);
 		$production =~ s/(?:^|\s)$ksort(?=\s|$)/_/g;
 		$production =~ s/\s*_\s*/_/gs;
-# Replacing spaces in the production by ""
+
+# Replacing spaces in the production by "`"
 		$production =~ s/\s+/`/gs;
+
+# Removing unnecessary `
+		$production =~ s/(^|$maude_special)`/$1/gs;
+		$production =~ s/`($|$maude_special)/$1/gs;
+
 		$result .= ($production eq "_")
 					? "$space4 subsort @sorts < $result_sort$space5 "
 					: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
 	}
+
+
+
 #print "Done\n";
 	return "$result$spaces3";
 }
@@ -570,8 +587,10 @@ sub op_attribute {
 	/strict|prec|gather|metadata|latex/;
 }
 
+
 sub k2maude {
     local ($_) = @_;
+    s/macro(\s)/eq$1/gs;
     switch ($_) {
 	case /^kmod/                    { s/kmod/mod/; }
 	case /^endkm/                   { s/endkm/endm/; }
