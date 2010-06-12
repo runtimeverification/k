@@ -682,76 +682,77 @@ sub add_sorts {
 #    @all_sorts = set(@all_sorts, @sorts);
 }
 
-# Next subroutine takes a string (expecte to be a kmaude module),
+# Next subroutine takes a string (most likely a kmaude module),
 # and returns a string obtained from the original one by adding spaces to the left and/or
 # to the right of tokens in the string; recall that the global @all_tokens holds all tokens
 sub spacify {
     my ($lines) = @_;
-    my %substrings;
+    my @dag;
+    my %index;     # holds index of each token
+    my @array;     # holds token associated to each index
+    my $i=0;
 
-#    print "$lines\n@tokens\n";
-
-# Put all tokens in a string
-    my $tokenString = " @all_tokens ";
-
-# Compute a hash mapping each token to a list of pairs (before,after)
-# Representing the contexts in which the token is a substring of other tokens
+# First associate each token with a distinct number
     foreach my $token (@all_tokens) {
-		my $token_pattern = $token;
-		$token_pattern =~ s/([$special_perl_chars])/\\$1/g;
-#		print "\nToken $token ";
-		my @pairs = ();
-# Iterate through all matches of the token in the string of tokens
-		while($tokenString =~ /$token_pattern/g) {
-# Then extract and save the token fragments before and after the matched token
-			my ($before,$after) = ($`,$');
-			$before =~ s/^.* //;
-			$after  =~ s/ .*$//;
-			if ($before or $after) {
-				$before =~ s/([$special_perl_chars])/\\$1/g;
-				$after  =~ s/([$special_perl_chars])/\\$1/g;
-				push(@pairs, ($before,$after));
-			}
-		}
-# Hash the list of token contexts
-		if (@pairs) {
-#			print "$token : @pairs\n";
-			$substrings{$token} = \@pairs;
-		}
+	$array[$i] = $token;
+	$index{$token} = $i++;
+    }
+
+# Then create a dag as a an array of arrays over indexes
+    for $i (0..$#array) {
+	(my $token_pattern = $array[$i]) =~ s/([$special_perl_chars])/\\$1/g;
+	$dag[$i] = [map($index{$_}, grep(/.$token_pattern|$token_pattern./, @all_tokens))];
     }
 
 # Freeze all excluded substrings, which we do NOT want to be spacified
-    $lines =~ s/($exclude)/freeze($1,"EXCLUDE")/gmse;
+    $lines =~ s/($exclude)/freeze($1)/gmse;
 
-#    print "Iterating through maximal tokens\n";
-    foreach my $token (@all_tokens) {
-		my $token_pattern = $token;
-		$token_pattern =~ s/([$special_perl_chars])/\\$1/g;
-		if (! exists $substrings{$token}) {
-#	    print "$token\n";
-			$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,freeze($2,"EXCLUDE"),$3)/gse;
-		}
+# Spacify and then freeze each token in reversed topological order
+# This way, we are sure that a subtoken of a token will never be spacified
+    foreach my $token (map($array[$_], reverse(topological_sort(@dag)))) {
+	(my $token_pattern = $token) =~ s/([$special_perl_chars])/\\$1/g;
+	$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,freeze($2),$3)/gse;
     }
-
-    while (my ($token,$valref) = each %substrings) {
-#	print "Token: $token: @$valref\n";
-		my $token_pattern = $token;
-		$token_pattern =~ s/([$special_perl_chars])/\\$1/g;
-		my @temp = @$valref;
-		while ((my $before, my $after, @temp) = @temp) {
-#	    print "$before!!!$after\n";
-			$lines =~ s/($before$token_pattern$after)/freeze($1,"TOKEN")/gse;
-		}
-		$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,$2,$3)/gse;
-		$lines = unfreeze($lines,"TOKEN");
-    }
-
+ 
+# Dirty hack: add spaces around anonymous variables, so that they will be properly
+# translated into ? later on
     $lines =~ s/_/ _ /gs;
 
-    $lines = unfreeze($lines,"EXCLUDE");
-
-    return $lines;
+# Next unfreeze all tokens and return the spacified string
+    return unfreeze($lines);
 }
+
+
+# Pass it as input a list of array references; these specify that that index into the
+# list must come before all elements of its array.  Output is a topologically sorted
+# list of indices, or undef if input contains a cycle.  Note that you must pass an array
+# ref for every input elements (if necessary, by adding an empty list reference)! 
+sub topological_sort {
+    my @out = @_;
+    my @ret;
+
+# Compute initial in degrees
+    my @ind;
+    for my $l (@out) {
+    ++$ind[$_] for (@$l)
+    }
+
+# Work queue
+    my @q;
+    @q = grep { ! $ind[$_] } 0..$#out;
+
+# Loop
+    while (@q) {
+	my $el = pop @q;
+	$ret[@ret] = $el;
+	for (@{$out[$el]}) {
+	    push @q, $_ if (! --$ind[$_]);
+	}
+    }
+
+    return @ret == @out ? @ret : undef;
+}
+
 
 # Adds spaces before and/or after token, if needed
 sub add_spaces {
