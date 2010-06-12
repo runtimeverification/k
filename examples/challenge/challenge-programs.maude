@@ -201,7 +201,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
      m = receive ;
      send & c to head m ;
      cod = eval receiveFrom head m ;
-     aspect cod() ;
+     aspect cod () ;
      var f ;
      f = mu f . lambda x .
              if x <= 1 then { return x ; } else {
@@ -239,7 +239,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
       m = receive ;
       send & c to m ;
       cod = eval receiveFrom m ;
-      aspect cod();
+      aspect cod () ;
       mergeSort = lambda l .{
        if l == [] then return [] ;
        else if tail l == [] then return l ;
@@ -276,7 +276,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
     array2list = lambda(a,n).{if n == 0 then return [] ; else return * a : array2list(a + 1,n + -1);};
     send me to mergeSortAgent ;
     var loc ;  loc = lift receiveFrom mergeSortAgent ;
-    send quote(lambda().{acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ;
+    send quote(lambda () .{acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ;
     send [me,l] to mergeSortAgent ;
     sorting = lambda l .{
       var t ; t = list2array(l);
@@ -287,7 +287,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
     };
     spawn {send [sorting(l),-1] to me ;}
     print receive ;
-    haltSystem; .
+    haltSystem ; .
  
   
 
@@ -327,7 +327,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
     SELECTION-SORT
     print (mu fix . lambda (a,n) . {if n == 0 then return [] ; else return * a : fix(a + 1, n + -1); })(array,n) ;
     free array ;
-    haltSystem; .
+    haltSystem ; .
 
 
  
@@ -348,7 +348,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
       m = receive ;
       send & c to m ;
       cod = eval receiveFrom m ;
-      aspect cod() ;
+      aspect cod () ;
       mergeSort = lambda l . {
        if l == [] then return [] ;
        else if tail l == [] then return l ;
@@ -380,7 +380,7 @@ mod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX .
       var loc ;  loc = lift receiveFrom mergeSortAgent ;
       send quote (lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) to mergeSortAgent ;
       send [me,input] to mergeSortAgent ;
-      spawn{ print receive ; haltSystem;}
+      spawn{ print receive ; haltSystem ;}
       haltThread ;
     } ;
     SELECTION-SORT
@@ -411,7 +411,7 @@ eq p29 =
       else return head right : merge(left,tail right) ;} ; 
     var m, c, cod ; 
     m = receive ; send & c to m ; 
-    cod = eval receiveFrom m ; aspect cod() ; 
+    cod = eval receiveFrom m ; aspect cod () ; 
     mergeSort = lambda l . {
       if l == [] then return [] ; 
       else if tail l == [] then return l ; 
@@ -429,7 +429,7 @@ eq p29 =
    send quote(lambda () . {acquire unquote loc ; * unquote loc = * unquote loc + 1 ; release unquote loc ;}) 
      to mergeSortAgent ; 
    send [me,in] to mergeSortAgent ; 
-   spawn {print receive ; haltSystem;} 
+   spawn {print receive ; haltSystem ;} 
    haltThread ;
   } ;
   n = (mu length . lambda l . {if l == [] then return 0 ; else return 1 + length(tail l) ;})(in) ;
