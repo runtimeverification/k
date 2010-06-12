@@ -295,8 +295,6 @@ if (!$maudify_only) {
     print "Compiled version written in $language_file_name-compiled.maude\n" if $verbose;
 }
 
-exit(1);
-
 
 sub print_header {
     my $starred_line = my $text = "*** $_[0] ***";
