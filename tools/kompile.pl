@@ -145,7 +145,7 @@ my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\
 my $kvar  = "[A-Za-z][A-Za-z0-9]*[']*";
 
 # Pattern matched by K sorts
-my $ksort = "[A-Z][A-Za-z0-9\\`]*(?:\\{[A-Za-z0-9\\`]*\\})?|Int\\+\\+";
+my $ksort = "[A-Z\\?\\!][A-Za-z0-9\\`\\+\\?\\!]*(?:\\{[A-Za-z0-9\\`\\+\\?\\!]*\\})?";
 
 # Pattern matched by K variables
 my $klabel_body = "$maude_backquoted\_$maude_backquoted";
@@ -651,16 +651,20 @@ sub add_tokens {
     local $_ = shift;
 
 # Extracting all the defined operations
-    my @ops=/\sops?\s+(.*?)\s+:\s+/gms;
+#    my @ops = grep(split(/\s+/s, $_), /\sops?\s+(.*?)\s+:\s+/gms);
+    my @ops = /\sops?\s+(.*?)\s+:\s+/gms;
 
 # Put all operations in one string
     $_ = "@ops";
 
+# Keep those operation names which have no _ or ` as tokens
+    my @tokens = grep(!/[_`]/,split(/\s+/s));
+
 # Extract all tokens that appear in operations
-    my @tokens = /$maude_special?($maude_unspecial+)/g;
+    @tokens = (@tokens, /$maude_special?($maude_unspecial+)/g) ;
 
 # Add all meaningful tokens in @tokens to @all_tokens
-    @all_tokens = set(@all_tokens, grep /\W/, set(@tokens));
+    @all_tokens = set(@all_tokens, grep(/\W/, set(@tokens)));
 }
 
 # This subroutine returns a list of all spacifiable tokens that appear in operations defined (using op) in the argument
@@ -671,15 +675,16 @@ sub add_sorts {
 # Extracting all the defined sorts
     my @sorts = /\ssorts?((?:\s+$ksort)+)\s+(?=\.|$kmaude_keywords_pattern)/gs;
 
-	@sorts = split(/\s+/, "@sorts");
+#    print "\nSORTS: @sorts\n";
+
+    @sorts = split(/\s+/, "@sorts");
 	
-#	print "Adding sorts: @sorts\nModule: $_\n" if $verbose;
+#    print "Adding sorts: @sorts\nModule: $_\n" if $verbose;
 # Add these sorts to @all_sorts
     @all_sorts = set(@all_sorts, @sorts);
 
-# Extracting and add all sorts defined indirrectly by means of BNF grammars
-#	@sorts = /\ssyntax\s+($ksort)\s+::=/gs;
-#    @all_sorts = set(@all_sorts, @sorts);
+# Add all sorts with alphanumerics to @all_tokens as well
+    @all_tokens = set(@all_tokens, grep /\W/, @sorts);
 }
 
 # Next subroutine takes a string (most likely a kmaude module),
@@ -711,7 +716,7 @@ sub spacify {
 # This way, we are sure that a subtoken of a token will never be spacified
     foreach my $token (map($array[$_], reverse(topological_sort(@dag)))) {
 	(my $token_pattern = $token) =~ s/([$special_perl_chars])/\\$1/g;
-	$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,freeze($2),$3)/gse;
+	$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,$2,$3)/gse;
     }
  
 # Dirty hack: add spaces around anonymous variables, so that they will be properly
@@ -757,7 +762,9 @@ sub topological_sort {
 # Adds spaces before and/or after token, if needed
 sub add_spaces {
     my ($before,$token,$after) = @_;
-    return ($before.(($before =~ /$maude_special/) ? "":" ").$token.(($after =~ /$maude_special/) ? "":" ").$after);
+    if ($before =~ /\w$/ && $token =~ /^\w/) { return "$before$token$after"; }
+    if ($after =~ /^\w/ && $token =~ /\w$/) { return "$before$token$after"; }
+    return ($before.(($before =~ /$maude_special/) ? "":" ").freeze($token).(($after =~ /$maude_special/) ? "":" ").$after);
 }
     
 
