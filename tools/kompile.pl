@@ -275,6 +275,7 @@ if ($compile_only && $language_file_name =~ /.kmaude$/) {
     terminate("Option -c only works with a .maude file");
 }
 
+# Following is executed whenever the option -c was not selected
 if (!$compile_only) {
 # Maudify the .kmaude files reachable from file "$language_file_name"
     print_header("Maudifying $language_file_name") if $verbose;
@@ -287,6 +288,7 @@ if (!$compile_only) {
     print "\n" if $verbose;
 }
 
+# Following is executed whenever the option -m was not selected
 if (!$maudify_only) {
 # Remove .maude extension if there
     $language_file_name =~ s/\.maude$//;
@@ -296,12 +298,19 @@ if (!$maudify_only) {
 }
 
 
+# Prints a visible message, like
+# *************************
+# *** Here is a message ***
+# *************************
 sub print_header {
     my $starred_line = my $text = "*** $_[0] ***";
     $starred_line =~ s/./*/g;
     print "\n$starred_line\n$text\n$starred_line\n\n";
 }
 
+
+# Next routine compiles the language definition in $language_file_name
+# It also performs some sanity checks
 sub compile {
 # Assumes $language_file_name is a file name with no extension
 # However, since we eventually call Maude on it, $language_file_name.maude must exist
@@ -333,19 +342,21 @@ sub compile {
 	      "loop compile .\n",
 	      "(compile $language_module_name .)\n",
 	      "quit\n");
+# If the keyword "Error" begins a line in the output, then extract and report the error message
     if (/^Error: (.*?)Bye/sm) {
 	print "ERROR:\n";
 	print $1;
 	print "Aborting the compilation\n";
 	exit(1);
     }
-
+# If the output contains a generated Maude file, then write it in $output_file
     if (/$begin_compiled_module(.*?)$end_compiled_module/s) {
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	print FILE "load $k_prelude\n";
 	print FILE $1;
 	close FILE;
     }
+# Otherwise there must be some error that the script is now aware of, so show the whole thing
     else {
 	print "Uncknown ERROR: cannot parse the output below (returned by the compiler)\n$_";
 	print "Aborting the compilation\n";
@@ -354,6 +365,7 @@ sub compile {
 }
 
 
+# This is called whenever everything went fine, to clean up the temporary files
 sub clean {
     unlink($input_file);
     unlink($output_file);
