@@ -96,13 +96,9 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
-  sort List{Id}  subsort Id < List{Id}
-  op () : -> List{Id}
-  op _,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: ()]
+  syntax List{Id} ::= Id | ( ) | List{Id} , List{Id} [prec 70 assoc id: ()]
 --- List{Exp}
-  sort List{Exp}  subsort Exp List{Id} < List{Exp}
-  op _,_ : List{Exp} List{Exp} -> List{Exp} [ditto]
------------------------------------------------------------------------------
+  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]
 endkm
 
 

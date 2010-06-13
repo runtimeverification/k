@@ -327,17 +327,30 @@ sub compile {
 	      "quit\n");
 
 # Compiling the input module $language_module_name
-    run_maude("Compiling the definition ... ",
+    $_ = run_maude("Compiling the definition ... ",
 	      "load $language_file_name\n",
 	      "load $k_all_tools\n",
 	      "loop compile .\n",
 	      "(compile $language_module_name .)\n",
-	      "quit\n")
-	=~ /$begin_compiled_module(.*?)$end_compiled_module/s;
-    open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
-    print FILE "load $k_prelude\n";
-    print FILE $1;
-    close FILE;
+	      "quit\n");
+    if (/^Error: (.*?)Bye/sm) {
+	print "ERROR:\n";
+	print $1;
+	print "Aborting the compilation\n";
+	exit(1);
+    }
+
+    if (/$begin_compiled_module(.*?)$end_compiled_module/s) {
+	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
+	print FILE "load $k_prelude\n";
+	print FILE $1;
+	close FILE;
+    }
+    else {
+	print "Uncknown ERROR: cannot parse the output below (returned by the compiler)\n$_";
+	print "Aborting the compilation\n";
+	exit(1);
+    }
 }
 
 
@@ -359,12 +372,21 @@ sub run_maude {
     system("$maude_path $input_file >$output_file 2>$error_file");
     if ($? == 0) {
 	if (-s $error_file) {
-	    print "ERROR: check $error_file\n";
+	    print "ERROR:\n";
+	    open FILE,"<",$error_file or die "Cannot open $error_file\n";
+	    my $i = -1;
+	    while (<FILE>) {++$i; print if $i < 10;}
+	    if (<FILE>) {++$i;}
+	    close FILE;
+	    print "...\nCheck $error_file for the remaining errors\n" if $i==11;
 	    print "Aborting the compilation\n";
 	    exit(1);
 	}
 	print "DONE\n" if $verbose;
-	local $/=undef; open FILE,"<",$output_file or die "Cannot open $output_file\n"; local $_ = <FILE>; close FILE;
+	local $/=undef;
+	open FILE,"<",$output_file or die "Cannot open $output_file\n";
+	local $_ = <FILE>;
+	close FILE;
 	clean();
 	return $_;
     }
@@ -584,7 +606,7 @@ sub make_ops {
 
 sub op_attribute {
 	local ($_) = @_;
-	/strict|prec|gather|metadata|latex/;
+	/strict|prec|gather|metadata|latex|ditto/;
 }
 
 
