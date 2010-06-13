@@ -22,7 +22,8 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
           </threads>
           <aspect>.K</aspect>
           <busy>.Set</busy>
-          <store>.Map</store><nextLoc>0</nextLoc>
+          <store>.Map</store>
+          <nextLoc>0</nextLoc>
           <ptr>.Map</ptr>
           <me>0</me>
           <parent>-1</parent>
@@ -237,7 +238,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
 --- length
   syntax Nat ::= `| List{Id} `| [metadata "latex(renameTo \\ensuremath|_\\ensuremath|)"]
   rule |()| => 0 [structural]
-  rule |X,Xl| => sNat(|Xl|) [structural]
+  rule |X,Xl| => sNat|Xl| [structural]
 
 --- generate sequence of locations
   syntax List{K} ::= Nat .. Nat
@@ -248,5 +249,5 @@ endkm
 kmod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS 
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
   rule run(KL:KLabel) => run(KL,.List{K}) [structural]
-  rule run(KL,L:List`{K`}) => <T_> <k>KL(.List{K})</k> <in>List(L)</in> <_/T> [structural]
+  rule run(KL,L:List{K}) => <T_> <k>KL(.List{K})</k> <in>List(L)</in> <_/T> [structural]
 endkm
