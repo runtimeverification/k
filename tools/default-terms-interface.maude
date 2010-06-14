@@ -10,10 +10,15 @@ mod DEFAULT-TERMS-META is
    = resolveDefaultTerms(qid(DefaultTerms), qid(NoDefaultTerms), qid(Config)) .
   op resolveDefaultTerms : Qid Qid Qid ~> Module .
   eq resolveDefaultTerms(QDefaultTerms,QNoDefaultTerms,QConfig) 
-   = defaultTerms(QNoDefaultTerms, upModule(QDefaultTerms, false), extractConfTerm(upModule(QConfig,false))) .
+   = resolveDefaultTerms(QNoDefaultTerms, upModule(QDefaultTerms, false), extractConfTerm(upModule(QConfig,false))) .
+  
+  var T : [Term] .
+  op resolveDefaultTerms : Qid Module Term ~> Module .
+  eq resolveDefaultTerms(QNoDefaultTerms,M,T)
+   = if T :: Term then defaultTerms(QNoDefaultTerms,M,T) else M fi .
 
   op compileDEFAULT-TERMS : Module ~> Module .
-  eq compileDEFAULT-TERMS(M) = defaultTerms(getName(M), M, extractConfTerm(M)) .
+  eq compileDEFAULT-TERMS(M) = resolveDefaultTerms(getName(M), M, extractConfTerm(M)) .
 endm
 
 mod DEFAULT-TERMS-LOOP is 

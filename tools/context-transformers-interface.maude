@@ -10,10 +10,16 @@ mod CONTEXT-TRANSFORMERS-META is
    = resolveKCxt(qid(KCxt), qid(NoKCxt), qid(Config)) .
   op resolveKCxt : Qid Qid Qid ~> Module .
   eq resolveKCxt(QKCxt,QNoKCxt,QConfig) 
-   = contextTransformers(QNoKCxt, upModule(QKCxt, false), extractConfTerm(upModule(QConfig,false))) .
+   = resolveKCxt(QNoKCxt, upModule(QKCxt, false), extractConfTerm(upModule(QConfig,false))) .
+
+
+  var T : [Term] . 
+  op resolveKCxt : Qid Module Term ~> Module .
+  eq resolveKCxt(QNoKCxt, M, T) 
+   = if T :: Term then contextTransformers(QNoKCxt, M, T) else M fi .
 
   op compileCONTEXT-TRANSFORMERS : Module ~> Module .
-  eq compileCONTEXT-TRANSFORMERS(M) = contextTransformers(getName(M), M, extractConfTerm(M)) .
+  eq compileCONTEXT-TRANSFORMERS(M) = resolveKCxt(getName(M), M, extractConfTerm(M)) .
 endm
 
 mod CONTEXT-TRANSFORMERS-LOOP is 
