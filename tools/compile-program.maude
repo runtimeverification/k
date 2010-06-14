@@ -1,4 +1,5 @@
 fmod COMPILE-PROGRAM is
+  including SANITY-CHECKS .
   including META-TERM-EXTRAS .
   including META-LEVEL-EXTRAS .
   including META-K-LABELS .
@@ -21,6 +22,8 @@ fmod COMPILE-PROGRAM is
   op compileProgram : Module Module Qid Term ~> Module .
   eq compileProgram(Compiled, Syntax, Q, Trm)
    = addOps(missingConsts(getOps(Compiled), Trm),addImports(including getName(Compiled) .,addEqs(eq kApply(mkConstant(mkKLabel(Q), KLabel), empty) = Trm [none] ., addOps(op mkKLabel(Q) : nil -> KLabel [none] ., setName(emptySModule, qid(string(getName(Compiled)) + "-" + string(Q))))))) .
+  eq compileProgram(Compiled, Syntax, Q, error(Trm, T))
+   = errorM(Trm, T, Q) .
 
 
   op missingConsts : OpDeclSet TermList ~> OpDeclSet .
@@ -43,12 +46,14 @@ ceq missingConsts(Ops, Q, T, Trms) = missingConsts(Ops, Trms)
 
   op compileProgram : Module Module OpDeclSet EquationSet Constant ~> Term .
   eq compileProgram(Compiled, Syntax, SyntaxOps, Eqs eq C = Trm [AS] ., C)
-   = compileProgram(Compiled, getWrappers(getOps(Compiled)), Syntax, SyntaxOps, leastSort(Syntax,Trm), Trm) .
+   = compileProgram(Compiled, getWrappers(getOps(Compiled)), Syntax, SyntaxOps, leastSort(Syntax,Trm), sanityCheckT(Trm, Syntax)) .
   
   op compileProgram : Module OpDeclSet Module OpDeclSet Type Term ~> Term .
   eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm)
    = if isListSort(T) then compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, getListConstructor(SyntaxOps, T), Trm)
      else compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T,  getWrapper(Compiled, Wrappers, leastSort(Syntax, Trm)), Trm) fi .
+  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, error(Trm, T'))
+   = error(Trm, T') .
 
 
   op getWrapper : Module OpDeclSet Type ~> Qid .
