@@ -618,7 +618,7 @@ sub make_ops {
 
 sub op_attribute {
 	local ($_) = @_;
-	/strict|prec|gather|metadata|latex|ditto/;
+	/strict|prec|gather|metadata|latex|ditto|format|assoc|comm|id:/;
 }
 
 

@@ -123,30 +123,6 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
        <store>.=> N..N+Nat|Xl| |-> getList{K}(Vl)<_/store> <nextLoc>N => N +Nat |Xl|</nextLoc>
   rule <k>return V;~>_ => V~>K</k> <env>_=>Env</env> <fstack>(K,Env)=>.<_/fstack>
 
---- Fixed point
---- mu has been desugared in the syntax module, so it does not need to be defined
---- However, below there are several possibilities to define it in case one does
---- not want to desugar it but define it directly
----(
----mu as in call-by-name
-  syntax K ::= closure-mu ( Exp , Map )
-  rule <k>mu X . E => closure-mu(E, Env[N / X])</k> <env>Env</env>
-       <store>. => N |-> closure-mu(E, Env[N / X])<_/store> <nextLoc>N => sNat N</nextLoc>
-  rule <k>closure-mu(E, Env) => E ~> env(Env')<_/k> <env>Env':Map => Env</env>
----)
-
----(
----mu through assigment (if X does not appear at top of E)
-  rule <k>mu X.E => var X; ~> X=E; ~> X ~> env(Env)<_/k> <env>Env</env>
----)
-
----(
----mu just for functions
-   context mu_.[HOLE] 
-   rule <k>mu X.closure-lambda(Y,S,Env) => closure-lambda(Y,S,Env[N/X])<_/k>
-        <store>. => N|->closure-lambda(Y,S,Env[N/X])<_/store> <nextLoc>N => sNat N</nextLoc>
----)
-
 --- Callcc
   syntax Val ::= cc ( K , Map , List )
   rule <k>(callcc(V) => _`(_`)(V, cc(K,Env,FStack))) ~> K</k> <env>Env</env> <fstack>FStack:List</fstack>
@@ -251,3 +227,34 @@ kmod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS
   rule run(KL:KLabel) => run(KL,.List{K}) [structural]
   rule run(KL,L:List{K}) => <T_> <k>KL(.List{K})</k> <in>List(L)</in> <_/T> [structural]
 endkm
+
+
+
+
+
+
+
+--- Fixed point
+--- mu has been desugared in the syntax module, so it does not need to be defined
+--- However, below there are several possibilities to define it in case one does
+--- not want to desugar it but define it directly
+---(
+---mu as in call-by-name
+  syntax K ::= closure-mu ( Exp , Map )
+  rule <k>mu X . E => closure-mu(E, Env[N / X])</k> <env>Env</env>
+       <store>. => N |-> closure-mu(E, Env[N / X])<_/store> <nextLoc>N => sNat N</nextLoc>
+  rule <k>closure-mu(E, Env) => E ~> env(Env')<_/k> <env>Env':Map => Env</env>
+---)
+
+---(
+---mu through assigment (if X does not appear at top of E)
+  rule <k>mu X.E => var X; ~> X=E; ~> X ~> env(Env)<_/k> <env>Env</env>
+---)
+
+---(
+---mu just for functions
+   context mu_.[HOLE] 
+   rule <k>mu X.closure-lambda(Y,S,Env) => closure-lambda(Y,S,Env[N/X])<_/k>
+        <store>. => N|->closure-lambda(Y,S,Env[N/X])<_/store> <nextLoc>N => sNat N</nextLoc>
+---)
+
