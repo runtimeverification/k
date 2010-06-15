@@ -1,34 +1,30 @@
---- this file is not executable in Maude as is
---- it is an "encoding" in Maude syntax of a K semantics
---- it needs to be processed by the K-Maude tool
+--- This file needs to be processed by the K-Maude tool
 
-in ../../k-prelude.maude
+in ../../k-prelude
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
---- AExp
   syntax AExp ::= Id | Int
                 | AExp + AExp [prec 33 gather (E e) format(d b o d) strict] 
                 | AExp / AExp [prec 31 gather (E e) format(d b o d) strict] 
---- BExp
   syntax BExp ::= Bool
-               | AExp <= AExp [prec 37 format(d b o d) metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict] 
-               | not BExp [prec 53 format(b o d) strict] 
-               | BExp and BExp [prec 55 format(d b o d) strict(1)] 
---- Stmt
+                | AExp <= AExp [prec 37 format(d b o d) metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict] 
+                | not BExp [prec 53 format(b o d) strict] 
+                | BExp and BExp [prec 55 format(d b o d) strict(1)] 
   syntax Stmt ::= skip ; [format (b d o)]
                 | Id = AExp ; [prec 40 format(d b o b o) strict(2)]
                 | Stmt Stmt [prec 60 gather (e E) format (d noi d)] 
                 | if BExp then Stmt else Stmt [prec 59 format (b o bni n++i bn--i n++i --) strict(1)] 
                 | while BExp do Stmt [prec 59 format (b o b n++i --)] 
---- Pgm
   syntax Pgm ::=  var List{Id} ; Stmt [prec 70 format (nb o d ni d)]
   syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}] 
 endkm
 
 kmod IMP-PROGRAMS is including IMP-SYNTAX 
-  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id 
-  ops sumPgm collatzPgm countPrimesPgm : -> Pgm 
-  ops collatzStmt multiplicationStmt primalityStmt : -> Stmt 
+  syntax Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
+                | n | o | p | q | r | s | t | u | v | w | x | y | z
+  syntax Pgm  ::= sumPgm | collatzPgm | countPrimesPgm
+  syntax Stmt ::= collatzStmt | multiplicationStmt | primalityStmt
+
 macro sumPgm = (
      var n,s;
      n=10;
@@ -40,70 +36,67 @@ macro sumPgm = (
 ) 
 
 macro collatzStmt = (
-     while not (n <= 1) do (
-       s = s + 1 ;
-       q = n / 2 ;
-       r = q + q + 1 ;
-       if r <= n
-         then n = n + n + n + 1 ; else n = q ;
+     while not (n<=1) do (
+       s=s+1;
+       q=n/2;
+       r=q+q+1;
+       if r<=n
+         then n=n+n+n+1; else n=q;
      )
 ) 
 
 macro collatzPgm = (
-   var m, n, q, r, s ;
-   m = 5 ;
-   s = 0 ;
-   while not (m <= 2) do (
-     n = m ;
-     m = m + -1 ;
+   var m,n,q,r,s ;
+   m=5;
+   s=0;
+   while not(m<=2) do (
+     n=m;
+     m=m+-1;
      collatzStmt
    )
 ) 
 
 --- fast multiplication (base 2) algorithm
 macro multiplicationStmt = ( 
-  z = 0 ;
-  while not(x <= 0) do (
-    q = x / 2 ;
-    r = q + q + 1 ;
-    if r <= x then z = z + y ;
-    else skip ;
-    x = q ;
-    y = y + y ;
+  z=0;
+  while not(x<=0) do (
+    q=x/2;
+    r=q+q+1;
+    if r<=x then z=z+y;
+    else skip;
+    x=q;
+    y=y+y;
   )
 ) 
 
 macro primalityStmt = (
-  i = 2 ;
-  q = n / i ;
-  t = 1 ;
-  while (i <= q and 1 <= t) do (
-    x = i ;
-    y = q ;
+  i=2;
+  q=n/i;
+  t=1;
+  while (i<=q and 1<=t) do (
+    x=i;
+    y=q;
     multiplicationStmt 
-    if n <= z then t = 0 ; else (
-      i = i + 1 ;
-      q = n / i ;
+    if n<=z then t=0; else (
+      i=i+1;
+      q=n/i;
     )
   )
 ) 
 
 macro countPrimesPgm = (
-   var i, m, n, q, r, s, t, x, y, z ;
-   m = 10 ;
-   s = 0 ; n = 2 ;
-   while n <= m do (
-     primalityStmt 
-     if 1 <= t then s = s+1; else skip;
-     n = n+1;
+   var i,m,n,q,r,s,t,x,y,z;
+   m=10;
+   s=0; n=2;
+   while n<=m do (
+     primalityStmt
+     if 1<=t then s=s+1; else skip;
+     n=n+1;
    )
-) 
+)
 endkm
 
-kmod IMP-SEMANTICS is
-  including IMP-SYNTAX 
-  including K                      --- defines K, List, Map, and Set
-
+kmod IMP-SEMANTICS is including IMP-SYNTAX + K
   syntax K ::= AExp | BExp | Stmt | Pgm | List{Id}
   syntax KResult ::= Int | Bool
 
