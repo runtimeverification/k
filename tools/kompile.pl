@@ -387,7 +387,15 @@ sub run_maude {
 	    print "ERROR:\n";
 	    open FILE,"<",$error_file or die "Cannot open $error_file\n";
 	    my $i = -1;
-	    while (<FILE>) {++$i; print if $i < 10;}
+	    while (<FILE>) {
+		++$i;
+		if ($i < 10) {
+		    print;
+		}
+		else {
+		    last;
+		}
+	    }
 	    if (<FILE>) {++$i;}
 	    close FILE;
 	    print "...\nCheck $error_file for the remaining errors\n" if $i==11;
@@ -569,9 +577,11 @@ sub make_ops {
 # Extract all productions in @productions
 	my @productions = ($productions =~ /(.*?\S.*?(?:\s\|\s|$))/gs);
 
+#        print "PRODS: ".join("#",@productions)."\n";
+
         foreach my $production (@productions) {
 # Removing the | separator
-		$production =~ s/(\s)\|(\s)/$1$2/s;
+		$production =~ s/(\s)\|(\s)/$1$2/gs;
 
 # Getting the operation attributes, if any
 		my $attributes = "";
@@ -607,9 +617,7 @@ sub make_ops {
 		$result .= ($production eq "_")
 					? "$space4 subsort @sorts < $result_sort$space5 "
 					: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
-	}
-
-
+        }
 
 #print "Done\n";
 	return "$result$spaces3";
@@ -767,7 +775,7 @@ sub spacify {
 # This way, we are sure that a subtoken of a token will never be spacified
     foreach my $token (map($array[$_], reverse(topological_sort(@dag)))) {
 	(my $token_pattern = $token) =~ s/([$special_perl_chars])/\\$1/g;
-	$lines =~ s/(.)($token_pattern)(.)/add_spaces($1,$2,$3)/gse;
+	$lines =~ s/(.)($token_pattern)((?=.))/add_spaces($1,$2,$3)/gse;
     }
  
 # Dirty hack: add spaces around anonymous variables, so that they will be properly
@@ -813,11 +821,11 @@ sub topological_sort {
 # Adds spaces before and/or after token, if needed
 sub add_spaces {
     my ($before,$token,$after) = @_;
-    if ($before =~ /\w$/ && $token =~ /^\w/) { return "$before$token$after"; }
-    if ($after =~ /^\w/ && $token =~ /\w$/) { return "$before$token$after"; }
-    return ($before.(($before =~ /$maude_special/) ? "":" ").freeze($token).(($after =~ /$maude_special/) ? "":" ").$after);
+    if ($before =~ /\w$/ && $token =~ /^\w/) { return "$before$token"; }
+    if ($after =~ /^\w/ && $token =~ /\w$/) { return "$before$token"; }
+    return ($before.(($before =~ /$maude_special/) ? "":" ").freeze($token).(($after =~ /$maude_special/) ? "":" "));
 }
-    
+
 
 # Makes certain (sub)strings special, so that they stay "frozen" until other substitutions are complete
 sub freeze {
