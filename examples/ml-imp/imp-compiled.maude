@@ -1,104 +1,164 @@
-load "/home/grosu/stefane1/k-framework/tools/../k-prelude"
-mod IMP is including K-DESTRUCTORS .
+load ../../tools/../k-prelude
+
+mod IMP is including K-CONDITION-SEARCH .
+including K-CONFIG .
+including K-CONTEXTS .
+including K-DESTRUCTORS .
+including K-OPEN-CELLS .
 including K-POLYMORPHIC-VARIABLES .
+including K-QUOTED-LABELS .
+including K-RULES .
 including K-TECHNIQUE .
 including K-WHERE .
 including PL-BOOL .
 including PL-ID .
 including PL-INT .
 including PL-NAT .
-including K-PROPER .
-including K-WRAPPERS-LABELS .
-including K-CONTEXTS .
-including K-STRICTNESS .
-sorts !Int !Map !MathObj ?Int ?Map ?MathObj Atom Formula FreeInt FreeMap FreeMathObj Int++ List{MathObj++}LocType MathObj MathObj++ NtFormula Result Set{MathObj++}Subst SubstItem Truth . subsort !Int < !MathObj .
+sorts !Int !Map !MathObj ?Int ?Map ?MathObj Annot Atom Exp Formula FreeInt
+    FreeMap FreeMathObj Int++ List{MathObj++}LocType MathObj MathObj++
+    NtFormula Result Set{MathObj++}Stmt Stmts Subst SubstItem Truth Val .
+    subsort !Int < !MathObj .
 subsort !Int < Builtins .
+subsort !Int < Exp .
 subsort !Int < Int++ .
+subsort !Int < K .
+subsort !Int < KResult .
 subsort !Int < List{MathObj++}.
 subsort !Int < MathObj++ .
 subsort !Int < Set{MathObj++}.
+subsort !Int < Val .
 subsort !Map < Map .
 subsort !MathObj < Builtins .
+subsort !MathObj < K .
+subsort !MathObj < KResult .
 subsort !MathObj < List{MathObj++}.
 subsort !MathObj < MathObj++ .
 subsort !MathObj < Set{MathObj++}.
 subsort ?Int < ?MathObj .
 subsort ?Int < Builtins .
+subsort ?Int < Exp .
 subsort ?Int < Int++ .
+subsort ?Int < K .
+subsort ?Int < KResult .
 subsort ?Int < List{MathObj++}.
 subsort ?Int < MathObj++ .
 subsort ?Int < Set{MathObj++}.
+subsort ?Int < Val .
 subsort ?Map < Map .
 subsort ?MathObj < Builtins .
+subsort ?MathObj < K .
+subsort ?MathObj < KResult .
 subsort ?MathObj < List{MathObj++}.
 subsort ?MathObj < MathObj++ .
 subsort ?MathObj < Set{MathObj++}.
-subsort Atom < Builtins .
+subsort Annot < K .
+subsort Annot < Stmts .
 subsort Atom < Formula .
 subsort Atom < NtFormula .
-subsort Formula < Builtins .
+subsort Exp < K .
 subsort FreeInt < Builtins .
+subsort FreeInt < Exp .
 subsort FreeInt < FreeMathObj .
 subsort FreeInt < Int++ .
+subsort FreeInt < K .
+subsort FreeInt < KResult .
 subsort FreeInt < List{MathObj++}.
 subsort FreeInt < MathObj++ .
 subsort FreeInt < Set{MathObj++}.
+subsort FreeInt < Val .
 subsort FreeMap < Map .
 subsort FreeMathObj < Builtins .
+subsort FreeMathObj < K .
+subsort FreeMathObj < KResult .
 subsort FreeMathObj < List{MathObj++}.
 subsort FreeMathObj < MathObj++ .
 subsort FreeMathObj < Set{MathObj++}.
+subsort Id < Exp .
+subsort Id < K .
+subsort Int < Exp .
 subsort Int < Int++ .
+subsort Int < K .
+subsort Int < KResult .
 subsort Int < List{MathObj++}.
 subsort Int < MathObj .
 subsort Int < MathObj++ .
 subsort Int < Set{MathObj++}.
+subsort Int < Val .
 subsort Int++ < Builtins .
+subsort Int++ < Exp .
+subsort Int++ < K .
+subsort Int++ < KResult .
 subsort Int++ < List{MathObj++}.
 subsort Int++ < MathObj++ .
 subsort Int++ < Set{MathObj++}.
+subsort Int++ < Val .
 subsort MathObj < Builtins .
+subsort MathObj < K .
+subsort MathObj < KResult .
 subsort MathObj < List{MathObj++}.
 subsort MathObj < MathObj++ .
 subsort MathObj < Set{MathObj++}.
 subsort MathObj++ < Builtins .
+subsort MathObj++ < K .
+subsort MathObj++ < KResult .
 subsort MathObj++ < List{MathObj++}.
 subsort MathObj++ < Set{MathObj++}.
+subsort Nat < Exp .
 subsort Nat < Int++ .
+subsort Nat < K .
+subsort Nat < KResult .
 subsort Nat < List{MathObj++}.
 subsort Nat < MathObj .
 subsort Nat < MathObj++ .
 subsort Nat < Set{MathObj++}.
-subsort NtFormula < Builtins .
+subsort Nat < Val .
 subsort NtFormula < Formula .
 subsort NzInt < Builtins .
+subsort NzInt < Exp .
 subsort NzInt < Int++ .
+subsort NzInt < K .
+subsort NzInt < KResult .
 subsort NzInt < List{MathObj++}.
 subsort NzInt < MathObj .
 subsort NzInt < MathObj++ .
 subsort NzInt < Set{MathObj++}.
+subsort NzInt < Val .
 subsort NzNat < Builtins .
+subsort NzNat < Exp .
 subsort NzNat < Int .
 subsort NzNat < Int++ .
+subsort NzNat < K .
+subsort NzNat < KResult .
 subsort NzNat < List{MathObj++}.
 subsort NzNat < MathObj .
 subsort NzNat < MathObj++ .
 subsort NzNat < Set{MathObj++}.
+subsort NzNat < Val .
+subsort Stmt < K .
+subsort Stmt < Stmts .
+subsort Stmts < K .
 subsort Subst < Builtins .
 subsort SubstItem < Builtins .
 subsort SubstItem < Subst .
-subsort Truth < Builtins .
 subsort Truth < Formula .
+subsort Val < Exp .
+subsort Val < K .
+subsort Val < KResult .
 subsort Zero < Builtins .
+subsort Zero < Exp .
 subsort Zero < Int .
 subsort Zero < Int++ .
+subsort Zero < K .
+subsort Zero < KResult .
 subsort Zero < List{MathObj++}.
 subsort Zero < MathObj .
 subsort Zero < MathObj++ .
 subsort Zero < Set{MathObj++}.
+subsort Zero < Val .
 op !Int : Nat -> !Int .
 op $hasMapping : Map K -> Bool .
 op .List`{MathObj++`} : -> List{MathObj++}.
+op .Set`{MathObj++`} : -> Set{MathObj++}.
 op .Subst : -> Subst .
 op ?Env : Nat -> ?Map .
 op ?Heap : Nat -> ?Map .
@@ -107,11 +167,13 @@ op ?_ : Bool -> Int++ .
 op ?n : -> ?Int .
 op ?s : -> ?Int .
 op FalseFormula : -> Truth .
+op NULL : -> Exp .
 op T : -> CellLabel .
 op TrueFormula : -> Truth .
 op VALID : Formula -> Bool .
 op _-_ : Bag Bag -> Bag .
 op _-_ : Set Set -> Set .
+op _:_ : Int++ KLabel -> KResult .
 op _<-_ : Bag Bag -> SubstItem .
 op _<-_ : List List -> SubstItem .
 op _<-_ : Map Map -> SubstItem .
@@ -127,8 +189,9 @@ op _in_ : K Bag -> Bool .
 op _in_ : K Set -> Bool .
 op _in_ : SetItem Set -> Bool .
 op _|->_ : List{K}List{K}-> Map .
-op check : KLabel -> Result .
+op `{`} : -> Stmt .
 op config : -> CellLabel .
+op derive : Int++ -> K .
 op env : -> CellLabel .
 op errorBag : ->[Bag].
 op errorObj : ->[List{MathObj++}].
@@ -139,87 +202,195 @@ op infeasible : -> CellLabel .
 op isInt : Int -> Bool .
 op k : -> CellLabel .
 op keys_ : Map -> Set .
+op load : Int++ -> Exp .
+op mlcheck : KLabel -> Result .
 op n : -> Id .
 op n0 : -> FreeInt .
 op newImpl : -> CellLabel .
 op newSym : -> CellLabel .
+op pSum : -> Stmts .
 op s : -> Id .
 op skolem : Nat ?Map -> FreeMap .
+op store : Int++ Exp -> Exp .
 op subst : -> CellLabel .
-op '!_ : -> KProperLabel[metadata "arity 1 strict"].
-op '*_ : -> KProperLabel[metadata "arity 1 strict"].
-op '-_ : -> KProperLabel[metadata "arity 1 strict"].
-op '//`assert_ : -> KProperLabel[metadata "arity 1"].
-op '//`assume_ : -> KProperLabel[metadata "arity 1"].
-op '//`invariant_ : -> KProperLabel[metadata "arity 1"].
-op '//`post_ : -> KProperLabel[metadata "arity 1"].
-op '//`pre_ : -> KProperLabel[metadata "arity 1"].
-op 'NULL : -> KProperLabel[metadata "arity 0"].
-op '_!=_ : -> KProperLabel[metadata "arity 2"].
-op '_%_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_&&_ : -> KProperLabel[metadata "arity 2 strict(1)"].
-op '_*_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_+_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_-_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_/_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_:_ : -> KResultLabel[metadata "arity 2"].
-op '_; : -> KProperLabel[metadata "arity 1 strict"].
-op '_<=_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_<_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_==_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_=_; : -> KProperLabel[metadata "arity 2 strict(2)"].
-op '_>=_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_>_ : -> KProperLabel[metadata "arity 2 strict"].
-op '_?_:_ : -> KProperLabel[metadata "arity 3 strict(1)"].
-op '__ : -> KProperLabel[metadata "arity 2"].
-op '_||_ : -> KProperLabel[metadata "arity 2 strict(1)"].
-op '`{_`} : -> KProperLabel[metadata "arity 1"].
-op '`{`} : -> KProperLabel[metadata "arity 0"].
-op 'derive : -> KProperLabel[metadata "arity 1"].
-op 'if`(_`)_ : -> KProperLabel[metadata "arity 2"].
-op 'if`(_`)_else_ : -> KProperLabel[metadata "arity 3 strict(1)"].
-op 'load : -> KProperLabel[metadata "arity 1"].
-op 'pSum : -> KProperLabel[metadata "arity 0"].
-op 'return_ : -> KProperLabel[metadata "arity 1 strict"].
-op 'store : -> KProperLabel[metadata "arity 2"].
-op 'while`(_`)_ : -> KProperLabel[metadata "arity 2"].
-op -Int_ : Int++ -> Int++[special(id-hook MinusSymbol op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
-op <_>_</_> : CellLabel Formula CellLabel -> BagItem[prec 0 format(nib g b o+ -b g b o)].
-op <_>_</_> : CellLabel Subst CellLabel -> BagItem[prec 0 format(nib g b o+ -b g b o)].
+op while`(_`)_ : Exp Stmt -> Stmt .
+op !_ : Exp -> Exp[prec 5 metadata "strict"].
+op *_ : Exp -> Exp[prec 10 metadata "strict"].
+op -Int_ : Int++ -> Int++[special(id-hook MinusSymbol op-hook succSymbol(sNat_
+    : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op -_ : Exp -> Exp[metadata "strict"].
+op //`assert_ : Bag -> Annot[strat(0)prec 99].
+op //`assume_ : Bag -> Annot[strat(0)prec 99].
+op //`invariant_ : Bag -> Annot[strat(0)prec 99].
+op //`post_ : Bag -> Annot[strat(0)prec 99].
+op //`pre_ : Bag -> Annot[strat(0)prec 99].
+op <_>_</_> : CellLabel Formula CellLabel -> BagItem[prec 0 format(nib g b o+
+    -b g b o)].
+op <_>_</_> : CellLabel Subst CellLabel -> BagItem[prec 0 format(nib g b o+ -b
+    g b o)].
 op @_ : Bool -> Atom[prec 0].
-op Id_ : Id -> KProperLabel[metadata "builtin wrapper"].
-op MathObj++_ : MathObj++ -> KResultLabel[metadata "builtin wrapper"].
-op _%Int_ : Int++ Int++ -> Int++[prec 31 gather(E e)special(id-hook NumberOpSymbol(rem)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
-op _*Int_ : Int++ Int++ -> Int++[assoc comm prec 31 special(id-hook ACU_NumberOpSymbol(*)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
-op _+Int_ : Int++ Int++ -> Int++[assoc comm prec 33 special(id-hook ACU_NumberOpSymbol(+)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
-op _-Int_ : Int++ Int++ -> Int++[prec 33 gather(E e)special(id-hook NumberOpSymbol(-)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
-op _/Int_ : Int++ Int++ -> Int++[prec 31 gather(E e)special(id-hook NumberOpSymbol(quo)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _!=_ : Exp Exp -> Exp[prec 35].
+op _%Int_ : Int++ Int++ -> Int++[prec 31 gather(E e)special(id-hook
+    NumberOpSymbol(rem)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook
+    minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _%_ : Exp Exp -> Exp[prec 29 gather(E e)metadata "strict"].
+op _&&_ : Exp Exp -> Exp[prec 55 gather(E e)metadata "strict(1)"].
+op _&_ : Set{MathObj++}Set{MathObj++}-> Set{MathObj++}[assoc comm id:
+    .Set`{MathObj++`}].
+op _*Int_ : Int++ Int++ -> Int++[assoc comm prec 31 special(id-hook
+    ACU_NumberOpSymbol(*)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook
+    minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _*_ : Exp Exp -> Exp[prec 31 gather(E e)metadata "strict"].
+op _+Int_ : Int++ Int++ -> Int++[assoc comm prec 33 special(id-hook
+    ACU_NumberOpSymbol(+)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook
+    minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _+_ : Exp Exp -> Exp[prec 33 gather(E e)metadata "strict"].
+op _-Int_ : Int++ Int++ -> Int++[prec 33 gather(E e)special(id-hook
+    NumberOpSymbol(-)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook
+    minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _-_ : Exp Exp -> Exp[prec 33 gather(E e)metadata "strict"].
+op _/Int_ : Int++ Int++ -> Int++[prec 31 gather(E e)special(id-hook
+    NumberOpSymbol(quo)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook
+    minusSymbol(-Int_ : NzNat ~> NzInt))].
 op _/\_ : Formula Formula -> Formula[assoc comm id: TrueFormula prec 55].
 op _/\_ : NtFormula Formula -> NtFormula[assoc comm id: TrueFormula prec 55].
+op _/_ : Exp Exp -> Exp[prec 31 gather(E e)metadata "strict"].
+op _; : Exp -> Stmt[prec 60 metadata "strict"].
 op _;_ : Subst Subst -> Subst[assoc comm id: .Subst].
-op _<=Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(<=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
-op _<Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(<)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _<=Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(
+    <=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ :
+    NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _<=_ : Exp Exp -> Exp[prec 35 metadata "strict"].
+op _<Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(
+    <)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat
+    ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _<_ : Exp Exp -> Exp[prec 35 metadata "strict"].
 op _===>_ : Bag Bag -> Bag[frozen(1 2)].
 op _===>_ : Formula Formula -> NtFormula[prec 61].
+op _==_ : Exp Exp -> Exp[prec 35 metadata "strict"].
 op _=>_ : Formula Formula -> Formula[prec 125].
 op _=>_ : Subst Subst -> Subst[prec 125].
-op _>=Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(>=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
-op _>Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(>)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _=_; : Exp Exp -> Stmt[prec 2 metadata "strict(2)"].
+op _>=Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(
+    >=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ :
+    NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _>=_ : Exp Exp -> Exp[prec 35 metadata "strict"].
+op _>Int_ : Int++ Int++ -> Bool[prec 37 special(id-hook NumberOpSymbol(
+    >)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat
+    ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _>_ : Exp Exp -> Exp[prec 35 metadata "strict"].
+op _?_:_ : Exp Exp Exp -> Exp[prec 59 metadata "strict(1)"].
 op _\/_ : Formula Formula -> Formula[assoc comm id: FalseFormula prec 59].
 op _\/_ : NtFormula Formula -> NtFormula[assoc comm id: FalseFormula prec 59].
+op __ : Stmts Stmts -> Stmts[prec 100 gather(e E)].
 op _`(_`) : Map List{K}-> List{K}[prec 0].
-op _`,_ : List{MathObj++}List{MathObj++}-> List{MathObj++}[assoc id: .List`{MathObj++`}].
+op _`,_ : List{MathObj++}List{MathObj++}-> List{MathObj++}[assoc id:
+    .List`{MathObj++`}].
 op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
 op _`[_`] : Bag Subst -> Bag[strat(2 0)prec 0].
 op _`[_`] : Formula Subst -> Formula[strat(2 0)prec 0].
 op _`[_`] : Subst Subst -> Subst[strat(2 0)prec 0].
 op _feasible`and_infeasible`paths : Nat Nat -> Result[format(g! d d d d d o)].
+op _||_ : Exp Exp -> Exp[prec 57 gather(E e)metadata "strict(1)"].
 op `[|_`,_`,_|`] : Nat Nat Bag -> Result[strat(0 1 2 3 0)].
+op `{_`} : Stmts -> Stmt[gather(&)].
+op if`(_`)_ : Exp Stmt -> Stmt[prec 95].
+op if`(_`)_else_ : Exp Stmt Stmt -> Stmt[prec 93 metadata "strict(1)"].
+op return_ : Exp -> Exp[metadata "strict"].
 op skolem : Nat ?Int -> FreeInt[strat(0)].
 op skolem : Nat ?MathObj -> FreeMathObj[strat(0)].
 op skolemize : Nat Bag -> Bag[strat(0)].
 op ~_ : Atom -> Atom[prec 0].
 op ~_ : Formula -> NtFormula[prec 0].
+mb configuration_(<_>_</_>(T,__(<_>_</_>(feasible,0,feasible),__(<_>_</_>(
+    infeasible,0,infeasible),<_>_</_>(config,__(<_>_</_>(k,(.).K,k),__(
+    <_>_</_>(subst,(.).K,subst),__(<_>_</_>(newSym,0,newSym),__(<_>_</_>(
+    newImpl,0,newImpl),__(<_>_</_>(env,(.).Map,env),__(<_>_</_>(heap,(.).Map,
+    heap),<_>_</_>(form,TrueFormula,form))))))),config))),T)): KSentence .
+mb context_(_=_;(*_(`[HOLE`]:Exp),?:Exp)): KSentence .
+mb rule_(<_>_...</_>(k,_=>_(*_(I:Int++),_~>_(derive(I:Int++),load(I:Int++))),
+    k)): KSentence .
+mb rule_(<_>_...</_>(k,_=>_(_=_;(*_(I:Int++),V:Val),_~>_(derive(I:Int++),store(
+    I:Int++,V:Val))),k)): KSentence .
+mb rule_(<_>_</_>(k,_=>_(_~>_(//`invariant_(Cfgs:Bag),_~>_(while`(_`)_(E:Exp,
+    S:Stmt),K:K)),_~>_(//`assert_(Cfgs:Bag),_`(_`)('if`(_`)_else_,_`,`,_(E:Exp,
+    _`,`,_(`{_`}(__(S:Stmt,//`assert_(Cfgs:Bag))),K:K))))),k)): KSentence .
+mb rule_(_=>_(`{`},(.).K)): KSentence .
+mb rule_(_=>_(!_(0),1)): KSentence .
+mb rule_(_=>_(!_(NzI:NzInt),1)): KSentence .
+mb rule_(_=>_(-_(I:Int++),-Int_(I:Int++))): KSentence .
+mb rule_(_=>_(<_>..._...</_>(config,<_>_...</_>(k,//`assume_(.),k),config),(
+    .).Bag)): KSentence .
+mb rule_(_=>_(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(k,_~>_(_?_:_(I:Int++,
+    E1:Exp,E2:Exp),K:K),k),<_>_</_>(form,Phi:Formula,form))),config),__(
+    <_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(k,_~>_(E1:Exp,K:K),k),<_>_</_>(
+    form,_/\_(Phi:Formula,~_(_===_(I:Int++,0))),form))),config),<_>_</_>(
+    config,__(CfgItems:Bag,__(<_>_</_>(k,_~>_(E2:Exp,K:K),k),<_>_</_>(form,
+    _/\_(Phi:Formula,_===_(I:Int++,0)),form))),config)))): KSentence .
+mb rule_(_=>_(_%_(I1:Int++,I2:Int++),_%Int_(I1:Int++,I2:Int++))): KSentence .
+mb rule_(_=>_(_&&_(0,E:Exp),0)): KSentence .
+mb rule_(_=>_(_&&_(NzI:NzInt,E:Exp),E:Exp)): KSentence .
+mb rule_(_=>_(_*_(I1:Int++,I2:Int++),_*Int_(I1:Int++,I2:Int++))): KSentence .
+mb rule_(_=>_(_+_(I1:Int++,I2:Int++),_+Int_(I1:Int++,I2:Int++))): KSentence .
+mb rule_(_=>_(_-_(I1:Int++,I2:Int++),_-Int_(I1:Int++,I2:Int++))): KSentence .
+mb rule_(_=>_(_/_(I1:Int++,I2:Int++),_/Int_(I1:Int++,I2:Int++))): KSentence .
+mb rule_(_=>_(_;(V:Val),(.).K)): KSentence .
+mb rule_(_=>_(_<=_(I1:Int++,I2:Int++),?_(_<=Int_(I1:Int++,I2:Int++)))):
+    KSentence .
+mb rule_(_=>_(_<_(I1:Int++,I2:Int++),?_(_<Int_(I1:Int++,I2:Int++)))): KSentence
+    .
+mb rule_(_=>_(_==_(I1:Int++,I2:Int++),?_(_==Int_(I1:Int++,I2:Int++)))):
+    KSentence .
+mb rule_(_=>_(_>=_(I1:Int++,I2:Int++),?_(_>=Int_(I1:Int++,I2:Int++)))):
+    KSentence .
+mb rule_(_=>_(_>_(I1:Int++,I2:Int++),?_(_>Int_(I1:Int++,I2:Int++)))): KSentence
+    .
+mb rule_(_=>_(_?_:_(0,E1:Exp,E2:Exp),E2:Exp)): KSentence .
+mb rule_(_=>_(_?_:_(NzI:NzInt,E1:Exp,E2:Exp),E1:Exp)): KSentence .
+mb rule_(_=>_(__(S1:Stmt,S2:Stmt),_~>_(S1:Stmt,S2:Stmt))): KSentence .
+mb rule_(_=>_(_||_(0,E:Exp),E:Exp)): KSentence .
+mb rule_(_=>_(_||_(NzI:NzInt,E:Exp),NzI:NzInt)): KSentence .
+mb rule_(_=>_(`{_`}(Ss:Stmts),Ss:Stmts)): KSentence .
+mb rule_(_=>_(if`(_`)_else_(0,?:Stmt,S:Stmt),S:Stmt)): KSentence .
+mb rule_(_=>_(if`(_`)_else_(NzI:NzInt,S:Stmt,?:Stmt),S:Stmt)): KSentence .
+mb rule_(__(<_>..._...</_>(env,_|->_(X:Id,V:Val),env),<_>_...</_>(k,_=>_(X:Id,
+    V:Val),k))): KSentence .
+mb rule_(__(<_>..._...</_>(env,_|->_(X:Id,_=>_(?:List{K},V:Val)),env),
+    <_>_...</_>(k,_=>_(_=_;(X:Id,V:Val),(.).K),k))): KSentence .
+mb rule_(__(<_>..._...</_>(heap,_|->_(I:Int++,?:List{K}),heap),<_>_...</_>(k,
+    _=>_(derive(I:Int++),(.).K),k))): KSentence .
+mb rule_(__(<_>..._...</_>(heap,_|->_(I:Int++,V:Val),heap),<_>_...</_>(k,_=>_(
+    load(I:Int++),V:Val),k))): KSentence .
+mb rule_(__(<_>..._...</_>(heap,_|->_(I:Int++,_=>_(?:List{K},V:Val)),heap),
+    <_>_...</_>(k,_=>_(store(I:Int++,V:Val),(.).K),k))): KSentence .
+mb rule_(__(_=>_((.).Bag,<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(k,K:K,k),
+    __(<_>_</_>(subst,Subst:Subst,subst),__(<_>_</_>(newSym,M:Nat,newSym),__(
+    <_>_</_>(newImpl,N:Nat,newImpl),<_>_</_>(form,_/\_(Phi:Formula,_`[_`](
+    Phi':Formula,Subst:Subst)),form)))))),config)),<_>..._...</_>(config,__(
+    <_>_</_>(k,_=>_(_~>_(//`assume_(__(Cfgs:Bag,<_>_</_>(config,__(
+    CfgItems:Bag,<_>_</_>(form,Phi':Formula,form)),config))),K:K),_~>_(
+    //`assume_(Cfgs:Bag),K:K)),k),__(<_>_</_>(subst,Subst:Subst,subst),__(
+    <_>_</_>(newSym,M:Nat,newSym),__(<_>_</_>(newImpl,N:Nat,newImpl),<_>_</_>(
+    form,Phi:Formula,form))))),config))): KSentence .
+mb rule_if_(<_>_</_>(config,__(_=>_(CfgItems:Bag,skolemize(N:Nat,
+    CfgItems:Bag)),__(<_>_</_>(subst,_=>_(Subst:Subst,Subst':Subst),subst),__(
+    <_>_</_>(newSym,M:Nat,newSym),__(<_>_</_>(newImpl,_=>_(N:Nat,_+Int_(N:Nat,
+    1)),newImpl),<_>_...</_>(k,_=>_(//`assert_(Cfgs:Bag),//`assume_(Cfgs:Bag)),
+    k))))),config),search_(_=>_(_===>_(<_>_</_>(config,__(CfgItems:Bag,__(
+    <_>_</_>(subst,Subst:Subst,subst),<_>_</_>(newImpl,N:Nat,newImpl))),
+    config),Cfgs:Bag),<_>_</_>(config,__(<_>_</_>(subst,Subst':Subst,subst),
+    <_>_</_>(form,TrueFormula,form)),config)))): KSentence .
+eq NULL = 0 .
+eq pSum = __(//`assume_(<_>_</_>(config,__(__(<_>_</_>(heap,(.).Map,heap),
+    <_>_</_>(form,@_(_>=Int_(n0,0)),form)),<_>_</_>(env,__(_|->_(n,n0),_|->_(s,
+    ?s)),env)),config)),__(_=_;(s,0),__(//`invariant_(<_>_</_>(config,__(__(
+    <_>_</_>(heap,(.).Map,heap),<_>_</_>(form,_/\_(@_(_>=Int_(?n,0)),@_(
+    _>=Int_(n0,0))),form)),<_>_</_>(env,__(_|->_(n,?n),_|->_(s,_/Int_(_*Int_(
+    _+Int_(n0,-Int_(?n)),_+Int_(n0,_+Int_(?n,1))),2))),env)),config)),__(
+    while`(_`)_(_>_(n,0),`{_`}(__(_=_;(s,_+_(s,n)),_=_;(n,_-_(n,1))))),
+    //`assert_(<_>_</_>(config,__(__(<_>_</_>(heap,(.).Map,heap),<_>_</_>(form,
+    @_(_>=Int_(n0,0)),form)),<_>_</_>(env,__(_|->_(n,0),_|->_(s,_/Int_(_*Int_(
+    n0,_+Int_(n0,1)),2))),env)),config)))))).
 eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
 eq -Int_(-Int_(I:Int++))= I:Int++ .
 eq -Int_(_+Int_(I:Int++,J:Int++))= _+Int_(-Int_(I:Int++),-Int_(J:Int++)).
@@ -227,7 +398,10 @@ eq @_(false)= FalseFormula .
 eq @_(true)= TrueFormula .
 eq @_(_==Int_(I:Int++,J:Int++))= _===_(I:Int++,J:Int++).
 eq VALID(TrueFormula)= true .
-eq _*Int_(I:Int++,_+Int_(I1:Int++,I2:Int++))= _+Int_(_*Int_(I:Int++,I1:Int++),_*Int_(I:Int++,I2:Int++)).
+eq _!=_(E1:Exp,E2:Exp)= !_(_==_(E1:Exp,E2:Exp)).
+eq _&_(Obj:MathObj++,Obj:MathObj++)= Obj:MathObj++ .
+eq _*Int_(I:Int++,_+Int_(I1:Int++,I2:Int++))= _+Int_(_*Int_(I:Int++,I1:Int++),
+    _*Int_(I:Int++,I2:Int++)).
 eq _*Int_(I:Int++,1)= I:Int++ .
 eq _*Int_(J:Int++,-Int_(I:Int++))= -Int_(_*Int_(I:Int++,J:Int++)).
 eq _+Int_(0,I:Int++)= I:Int++ .
@@ -235,8 +409,12 @@ eq _+Int_(I:Int++,-Int_(I:Int++))= 0 .
 eq _-Int_(I:Int++,J:Int++)= _+Int_(I:Int++,-Int_(J:Int++)).
 eq _-_((.).Bag,Bag:Bag)=(.).Bag .
 eq _-_((.).Set,Set:Set)=(.).Set .
-eq _-_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:BagItem,Bag':Bag),_-_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-_(Bag:Bag,Bag':Bag))).
-eq _-_(__(Set:Set,SetItem:SetItem),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-_(Set:Set,Set':Set),__(SetItem:SetItem,_-_(Set:Set,Set':Set))).
+eq _-_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(
+    BagItem:BagItem,Bag':Bag),_-_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-_(
+    Bag:Bag,Bag':Bag))).
+eq _-_(__(Set:Set,SetItem:SetItem),Set':Set)= if_then_else_fi(_in_(
+    SetItem:SetItem,Set':Set),_-_(Set:Set,Set':Set),__(SetItem:SetItem,_-_(
+    Set:Set,Set':Set))).
 eq _/\_(FalseFormula,FalseFormula)= FalseFormula .
 eq _/\_(FalseFormula,NtPhi:NtFormula)= FalseFormula .
 eq _/\_(NtPhi:NtFormula,NtPhi:NtFormula)= NtPhi:NtFormula .
@@ -245,158 +423,88 @@ eq _<=Int_(I:Int++,J:Int++)= _>=Int_(J:Int++,I:Int++).
 eq _<Int_(I:Int++,J:Int++)= _>Int_(J:Int++,I:Int++).
 eq _===>_(Phi:Formula,FalseFormula)= ~_(Phi:Formula).
 eq _===>_(Phi:Formula,TrueFormula)= TrueFormula .
-eq _===>_(Phi:Formula,_\/_(NtPhi1:NtFormula,NtPhi2:NtFormula))= _\/_(_===>_(Phi:Formula,NtPhi1:NtFormula),_===>_(Phi:Formula,NtPhi2:NtFormula)).
+eq _===>_(Phi:Formula,_\/_(NtPhi1:NtFormula,NtPhi2:NtFormula))= _\/_(_===>_(
+    Phi:Formula,NtPhi1:NtFormula),_===>_(Phi:Formula,NtPhi2:NtFormula)).
 eq _===>_(TrueFormula,Phi:Formula)= Phi:Formula .
-eq _===>_(_/\_(Phi1:Formula,Atom:Atom),_/\_(Phi2:Formula,Atom:Atom))= _===>_(_/\_(Phi1:Formula,Atom:Atom),Phi2:Formula).
+eq _===>_(_/\_(Phi1:Formula,Atom:Atom),_/\_(Phi2:Formula,Atom:Atom))= _===>_(
+    _/\_(Phi1:Formula,Atom:Atom),Phi2:Formula).
 eq _===_(.List`{MathObj++`},.List`{MathObj++`})= TrueFormula .
 eq _===_(0,?_(B:Bool))= ~_(@_(B:Bool)).
 eq _===_(I:Int,J:Int)= @_(_==Bool_(I:Int,J:Int)).
 eq _===_(Obj:MathObj++,Obj:MathObj++)= TrueFormula .
 eq _===_(?_(B:Bool),0)= ~_(@_(B:Bool)).
 eq _===_(?_(B:Bool),1)= @_(B:Bool).
-eq _===_(_+Int_(I:Int++,K:Int++),_+Int_(J:Int++,K:Int++))= _===_(I:Int++,J:Int++).
-eq _===_(_`,_(Obj1:MathObj++,ObjList1:List{MathObj++}),_`,_(Obj2:MathObj++,ObjList2:List{MathObj++}))= _/\_(_===_(Obj1:MathObj++,Obj2:MathObj++),_===_(ObjList1:List{MathObj++},ObjList2:List{MathObj++})).
+eq _===_(_+Int_(I:Int++,K:Int++),_+Int_(J:Int++,K:Int++))= _===_(I:Int++,
+    J:Int++).
+eq _===_(_`,_(Obj1:MathObj++,_`,_(Obj1':MathObj++,ObjList1:List{MathObj++})),
+    _`,_(Obj2:MathObj++,_`,_(Obj2':MathObj++,ObjList2:List{MathObj++})))= _/\_(
+    _/\_(_===_(Obj1':MathObj++,Obj2':MathObj++),_===_(ObjList1:List{MathObj++},
+    ObjList2:List{MathObj++})),_===_(Obj1:MathObj++,Obj2:MathObj++)).
 eq _===_(1,?_(B:Bool))= @_(B:Bool).
 eq _>Int_(I:Int++,J:Int++)= _>=Int_(_+Int_(I:Int++,-1),J:Int++).
 eq _\/_(NtPhi:NtFormula,NtPhi:NtFormula)= NtPhi:NtFormula .
 eq _\/_(NtPhi:NtFormula,~_(NtPhi:NtFormula))= TrueFormula .
 eq _\/_(TrueFormula,NtPhi:NtFormula)= TrueFormula .
 eq _\/_(TrueFormula,TrueFormula)= TrueFormula .
-eq _`(_`)('NULL,.List`{K`})= _`(_`)(MathObj++_(0),.List`{K`}).
-eq _`(_`)('_!=_,_`,`,_(E1:K,E2:K))= _`(_`)('!_,_`(_`)('_==_,_`,`,_(E1:K,E2:K))).
-eq _`(_`)('if`(_`)_,_`,`,_(E:K,S:K))= _`(_`)('if`(_`)_else_,_`,`,_(E:K,_`,`,_(S:K,_`(_`)('`{`},.List`{K`})))).
-eq _`(_`)('pSum,.List`{K`})= _`(_`)('__,_`,`,_(_`(_`)('//`assume_,_`(_`)(wbag_(<_>_</_>(config,__(__(<_>_</_>(form,@_(_>=Int_(n0,0)),form),<_>_</_>(heap,(.).Map,heap)),<_>_</_>(env,__(_|->_(_`(_`)(Id_(n),.List`{K`}),_`(_`)(MathObj++_(n0),.List`{K`})),_|->_(_`(_`)(Id_(s),.List`{K`}),_`(_`)(MathObj++_(?s),.List`{K`}))),env)),config)),.List`{K`})),_`(_`)('__,_`,`,_(_`(_`)('_=_;,_`,`,_(_`(_`)(Id_(s),.List`{K`}),_`(_`)(MathObj++_(0),.List`{K`}))),_`(_`)('__,_`,`,_(_`(_`)('//`invariant_,_`(_`)(wbag_(<_>_</_>(config,__(__(<_>_</_>(form,_/\_(@_(_>=Int_(?n,0)),@_(_>=Int_(n0,0))),form),<_>_</_>(heap,(.).Map,heap)),<_>_</_>(env,__(_|->_(_`(_`)(Id_(n),.List`{K`}),_`(_`)(MathObj++_(?n),.List`{K`})),_|->_(_`(_`)(Id_(s),.List`{K`}),_`(_`)(MathObj++_(_/Int_(_*Int_(_+Int_(n0,-Int_(?n)),_+Int_(n0,_+Int_(?n,1))),2)),.List`{K`}))),env)),config)),.List`{K`})),_`(_`)('__,_`,`,_(_`(_`)('while`(_`)_,_`,`,_(_`(_`)('_>_,_`,`,_(_`(_`)(Id_(n),.List`{K`}),_`(_`)(MathObj++_(0),.List`{K`}))),_`(_`)('`{_`},_`(_`)('__,_`,`,_(_`(_`)('_=_;,_`,`,_(_`(_`)(Id_(s),.List`{K`}),_`(_`)('_+_,_`,`,_(_`(_`)(Id_(s),.List`{K`}),_`(_`)(Id_(n),.List`{K`}))))),_`(_`)('_=_;,_`,`,_(_`(_`)(Id_(n),.List`{K`}),_`(_`)('_-_,_`,`,_(_`(_`)(Id_(n),.List`{K`}),_`(_`)(MathObj++_(1),.List`{K`})))))))))),_`(_`)('//`assert_,_`(_`)(wbag_(<_>_</_>(config,__(__(<_>_</_>(form,@_(_>=Int_(n0,0)),form),<_>_</_>(heap,(.).Map,heap)),<_>_</_>(env,__(_|->_(_`(_`)(Id_(n),.List`{K`}),_`(_`)(MathObj++_(0),.List`{K`})),_|->_(_`(_`)(Id_(s),.List`{K`}),_`(_`)(MathObj++_(_/Int_(_*Int_(n0,_+Int_(n0,1)),2)),.List`{K`}))),env)),config)),.List`{K`})))))))))).
 eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
-eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
-eq _`[_/_`](Map:Map,K2:K,_`,`,_(K1:K,NList1:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K2:K,K1:K),K2:K,NList1:NeList{K}).
+eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),
+    _`(_`)(Map:Map,NList1:NeList{K})).
+eq _`[_/_`](Map:Map,K2:K,_`,`,_(K1:K,NList1:NeList{K}))= _`[_/_`](_`[_/_`](
+    Map:Map,K2:K,K1:K),K2:K,NList1:NeList{K}).
 eq _`[_/_`](Map:Map,List:List{K},.List`{K`})= Map:Map .
-eq _`[_/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K1:K,K2:K),NList1:NeList{K},NList2:NeList{K}).
+eq _`[_/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{
+    K}))= _`[_/_`](_`[_/_`](Map:Map,K1:K,K2:K),NList1:NeList{K},NList2:NeList{
+    K}).
 eq _`[undef/_`](Map:Map,.List`{K`})= Map:Map .
-eq _`[undef/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`[undef/_`](_`[undef/_`](Map:Map,K1:K),NList1:NeList{K}).
+eq _`[undef/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`[undef/_`](
+    _`[undef/_`](Map:Map,K1:K),NList1:NeList{K}).
 eq _`[undef/_`](__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= Map:Map .
 eq _in_(BagItem:BagItem,__(Bag:Bag,BagItem:BagItem))= true .
 eq _in_(K:K,__(Bag:Bag,BagItem(K:K)))= true .
 eq _in_(K:K,__(Set:Set,SetItem(K:K)))= true .
 eq _in_(SetItem:SetItem,__(Set:Set,SetItem:SetItem))= true .
 eq _|->_(.List`{K`},List:List{K})=(.).Map .
-eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},K2:K)).
-eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
-eq check(K:KLabel)= `[|_`,_`,_|`](0,0,<_>_</_>(T,__(__(<_>_</_>(infeasible,_`(_`)(MathObj++_(0),.List`{K`}),infeasible),<_>_</_>(config,__(__(__(__(__(__(<_>_</_>(newSym,_`(_`)(MathObj++_(0),.List`{K`}),newSym),<_>_</_>(newImpl,_`(_`)(MathObj++_(0),.List`{K`}),newImpl)),<_>_</_>(subst,.Subst,subst)),<_>_</_>(form,TrueFormula,form)),<_>_</_>(heap,(.).Map,heap)),<_>_</_>(env,(.).Map,env)),<_>_</_>(k,_`(_`)(K:KLabel,.List`{K`}),k)),config)),<_>_</_>(feasible,_`(_`)(MathObj++_(0),.List`{K`}),feasible)),T)).
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(
+    NList1:NeList{K},K2:K)).
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(
+    _|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
+eq if`(_`)_(E:Exp,S:Stmt)= if`(_`)_else_(E:Exp,S:Stmt,`{`}).
 eq keys_(.)=(.).Set .
 eq keys_(__(Map:Map,_|->_(K1:K,K2:K)))= __(SetItem(K1:K),keys_(Map:Map)).
+eq mlcheck(K:KLabel)= `[|_`,_`,_|`](0,0,<_>_</_>(T,__(__(<_>_</_>(infeasible,0,
+    infeasible),<_>_</_>(config,__(__(__(__(__(__(<_>_</_>(newSym,0,newSym),
+    <_>_</_>(newImpl,0,newImpl)),<_>_</_>(subst,.Subst,subst)),<_>_</_>(form,
+    TrueFormula,form)),<_>_</_>(heap,(.).Map,heap)),<_>_</_>(env,(.).Map,env)),
+    <_>_</_>(k,_`(_`)(K:KLabel,.List`{K`}),k)),config)),<_>_</_>(feasible,0,
+    feasible)),T)).
 eq ~_(FalseFormula)= TrueFormula .
 eq ~_(TrueFormula)= FalseFormula .
 eq ~_(@_(_>=Int_(I:Int++,0)))= @_(_>=Int_(_+Int_(-Int_(I:Int++),-1),0)).
 eq ~_(~_(Phi:Formula))= Phi:Formula .
-ceq _/\_(@_(_>=Int_(I:Int++,0)),@_(_>=Int_(J:Int++,0)))= @_(_>=Int_(I:Int++,0))if _>=Int_(_+Int_(J:Int++,-Int_(I:Int++)),0).
-ceq _/\_(@_(_>=Int_(I:Int++,0)),@_(_>=Int_(J:Int++,0)))= _===_(I:Int++,0)if _==Bool_(_+Int_(I:Int++,J:Int++),0).
-ceq _===>_(_/\_(Phi1:Formula,@_(_>=Int_(I:Int++,0))),_/\_(Phi2:Formula,@_(_>=Int_(J:Int++,0))))= _===>_(_/\_(Phi1:Formula,@_(_>=Int_(I:Int++,0))),Phi2:Formula)if _>=Int_(_+Int_(J:Int++,-Int_(I:Int++)),0).
-ceq _===>_(_/\_(Phi1:Formula,_===_(I1:Int++,J1:Int++)),_/\_(Phi2:Formula,_===_(I2:Int++,J2:Int++)))= _===>_(_/\_(Phi1:Formula,_===_(I1:Int++,J1:Int++)),Phi2:Formula)if _==Bool_(_+Int_(-Int_(I1:Int++),_+Int_(-Int_(I2:Int++),_+Int_(J1:Int++,J2:Int++))),0).
-ceq _===>_(_/\_(Phi1:Formula,_/\_(@_(_>=Int_(I:Int++,0)),@_(_>=Int_(J:Int++,0)))),_/\_(Phi2:Formula,@_(_>=Int_(K:Int++,0))))= _===>_(_/\_(@_(_>=Int_(I:Int++,0)),_/\_(Phi1:Formula,@_(_>=Int_(J:Int++,0)))),Phi2:Formula)if _>=Int_(_+Int_(-Int_(I:Int++),_+Int_(K:Int++,-Int_(J:Int++))),0).
-ceq _>=Int_(I:Int++,J:Int++)= _>=Int_(_+Int_(I:Int++,-Int_(J:Int++)),0)if _=/=Bool_(J:Int++,0).
+ceq _/\_(@_(_>=Int_(I:Int++,0)),@_(_>=Int_(J:Int++,0)))= @_(_>=Int_(I:Int++,
+    0))if _>=Int_(_+Int_(J:Int++,-Int_(I:Int++)),0).
+ceq _/\_(@_(_>=Int_(I:Int++,0)),@_(_>=Int_(J:Int++,0)))= _===_(I:Int++,0)if
+    _==Bool_(_+Int_(I:Int++,J:Int++),0).
+ceq _===>_(_/\_(Phi1:Formula,@_(_>=Int_(I:Int++,0))),_/\_(Phi2:Formula,@_(
+    _>=Int_(J:Int++,0))))= _===>_(_/\_(Phi1:Formula,@_(_>=Int_(I:Int++,0))),
+    Phi2:Formula)if _>=Int_(_+Int_(J:Int++,-Int_(I:Int++)),0).
+ceq _===>_(_/\_(Phi1:Formula,_===_(I1:Int++,J1:Int++)),_/\_(Phi2:Formula,_===_(
+    I2:Int++,J2:Int++)))= _===>_(_/\_(Phi1:Formula,_===_(I1:Int++,J1:Int++)),
+    Phi2:Formula)if _==Bool_(_+Int_(-Int_(I1:Int++),_+Int_(-Int_(I2:Int++),
+    _+Int_(J1:Int++,J2:Int++))),0).
+ceq _===>_(_/\_(Phi1:Formula,_/\_(@_(_>=Int_(I:Int++,0)),@_(_>=Int_(J:Int++,
+    0)))),_/\_(Phi2:Formula,@_(_>=Int_(K:Int++,0))))= _===>_(_/\_(@_(_>=Int_(
+    I:Int++,0)),_/\_(Phi1:Formula,@_(_>=Int_(J:Int++,0)))),Phi2:Formula)if
+    _>=Int_(_+Int_(-Int_(I:Int++),_+Int_(K:Int++,-Int_(J:Int++))),0).
+ceq _>=Int_(I:Int++,J:Int++)= _>=Int_(_+Int_(I:Int++,-Int_(J:Int++)),0)if
+    _=/=Bool_(J:Int++,0).
 eq $hasMapping(M:Map,D:K)= false[owise].
-eq <_>_</_>(k,_~>_(_`(_`)('!_,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'!_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('*_,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'*_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('-_,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'-_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_%_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_%_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_%_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_%_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_&&_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_&&_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_*_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_*_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_*_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_*_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_+_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_+_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_+_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_+_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_-_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_-_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_-_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_-_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_/_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_/_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_/_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_/_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_;,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_<=_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_<=_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_<=_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_<=_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_<_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_<_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_<_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_<_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_==_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_==_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_==_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_==_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_=_;,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_=_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_=_;,_`,`,_(_`(_`)('*_,Kcxt:KProper),?3:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_=_;('*_(`[HOLE`]:K),,?3:K)"),_`(_`)(freezeVar("?3:K"),?3:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_>=_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_>=_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_>=_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_>=_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_>_,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_>_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_>_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_>_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_?_:_,_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_?_:_(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('_||_,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'_||_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('if`(_`)_else_,_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'if`(_`)_else_(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(_`(_`)('return_,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'return_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'!_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('!_,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'*_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('*_,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'-_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('-_,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_%_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_%_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_%_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_%_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_&&_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_&&_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_*_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_*_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_*_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_*_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_+_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_+_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_+_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_+_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_-_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_-_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_-_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_-_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_/_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_/_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_/_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_/_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_;,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_<=_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_<=_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_<=_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_<=_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_<_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_<_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_<_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_<_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_==_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_==_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_==_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_==_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_=_;('*_(`[HOLE`]:K),,?3:K)"),_`(_`)(freezeVar("?3:K"),?3:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_=_;,_`,`,_(_`(_`)('*_,Kcxt:KResult),?3:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_=_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_=_;,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_>=_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_>=_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_>=_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_>=_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_>_(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_>_,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_>_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_>_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_?_:_(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_?_:_,_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'_||_(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_||_,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'if`(_`)_else_(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('if`(_`)_else_,_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'return_(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('return_,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
-eq _===>_(_/\_(NtPhi:NtFormula,_\/_(NtPhi1:NtFormula,NtPhi2:NtFormula)),NtPhi':NtFormula)= _\/_(_===>_(_/\_(NtPhi:NtFormula,NtPhi1:NtFormula),NtPhi':NtFormula),_===>_(_/\_(NtPhi:NtFormula,NtPhi2:NtFormula),NtPhi':NtFormula))[owise].
+eq _===>_(_/\_(NtPhi:NtFormula,_\/_(NtPhi1:NtFormula,NtPhi2:NtFormula)),
+    NtPhi':NtFormula)= _\/_(_===>_(_/\_(NtPhi:NtFormula,NtPhi1:NtFormula),
+    NtPhi':NtFormula),_===>_(_/\_(NtPhi:NtFormula,NtPhi2:NtFormula),
+    NtPhi':NtFormula))[owise].
 eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
 eq _in_(K:K,Bag:Bag)= false[owise].
 eq _in_(K:K,Set:Set)= false[owise].
 eq _in_(SetItem:SetItem,Set:Set)= false[owise].
-rl <_>_</_>(T,__(?21:Bag,<_>_</_>(config,__(?22:Bag,__(<_>_</_>(form,Phi:Formula,form),__(<_>_</_>(k,_~>_(_`(_`)('//`assume_,_`(_`)(wbag_(__(Cfgs:Bag,<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(form,Phi':Formula,form)),config))),.List`{K`})),K:K),k),__(<_>_</_>(newImpl,_`(_`)(MathObj++_(N:Nat),.List`{K`}),newImpl),__(<_>_</_>(newSym,_`(_`)(MathObj++_(M:Nat),.List`{K`}),newSym),<_>_</_>(subst,Subst:Subst,subst)))))),config)),T)=> <_>_</_>(T,__(?21:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(form,_/\_(Phi:Formula,_`[_`](Phi':Formula,Subst:Subst)),form),__(<_>_</_>(k,K:K,k),__(<_>_</_>(newImpl,_`(_`)(MathObj++_(N:Nat),.List`{K`}),newImpl),__(<_>_</_>(newSym,_`(_`)(MathObj++_(M:Nat),.List`{K`}),newSym),<_>_</_>(subst,Subst:Subst,subst)))))),config),<_>_</_>(config,__(?22:Bag,__(<_>_</_>(form,Phi:Formula,form),__(<_>_</_>(k,_~>_(_`(_`)('//`assume_,_`(_`)(wbag_(Cfgs:Bag),.List`{K`})),K:K),k),__(<_>_</_>(newImpl,_`(_`)(MathObj++_(N:Nat),.List`{K`}),newImpl),__(<_>_</_>(newSym,_`(_`)(MathObj++_(M:Nat),.List`{K`}),newSym),<_>_</_>(subst,Subst:Subst,subst)))))),config))),T)[metadata "computational rule"].
-rl <_>_</_>(config,__(?3:Bag,<_>_</_>(k,_~>_(_`(_`)('//`assume_,_`(_`)(wbag_(.),.List`{K`})),?4:K),k)),config)=>(.).Bag[metadata "computational rule"].
-rl <_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(form,Phi:Formula,form),<_>_</_>(k,_~>_(_`(_`)('_?_:_,_`,`,_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),_`,`,_(E1:K,E2:K))),K:K),k))),config)=> __(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(form,_/\_(Phi:Formula,~_(_===_(I:Int++,0))),form),<_>_</_>(k,_~>_(E1:K,K:K),k))),config),<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(form,_/\_(Phi:Formula,_===_(I:Int++,0)),form),<_>_</_>(k,_~>_(E2:K,K:K),k))),config))[metadata "computational rule"].
-rl <_>_</_>(k,_~>_(_`(_`)('*_,_`(_`)(MathObj++_(I:Int++),.List`{K`})),?5:K),k)=> <_>_</_>(k,_~>_(_`(_`)('derive,_`(_`)(MathObj++_(I:Int++),.List`{K`})),_~>_(_`(_`)('load,_`(_`)(MathObj++_(I:Int++),.List`{K`})),?5:K)),k)[metadata "computational rule"].
-rl <_>_</_>(k,_~>_(_`(_`)('_=_;,_`,`,_(_`(_`)('*_,_`(_`)(MathObj++_(I:Int++),.List`{K`})),V:KResult)),?7:K),k)=> <_>_</_>(k,_~>_(_`(_`)('derive,_`(_`)(MathObj++_(I:Int++),.List`{K`})),_~>_(_`(_`)('store,_`,`,_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),V:KResult)),?7:K)),k)[metadata "computational rule"].
-rl <_>_</_>(k,_~>_(_`(_`)('//`invariant_,_`(_`)(wbag_(Cfgs:Bag),.List`{K`})),_~>_(_`(_`)('while`(_`)_,_`,`,_(E:K,S:K)),K:K)),k)=> <_>_</_>(k,_~>_(_`(_`)('//`assert_,_`(_`)(wbag_(Cfgs:Bag),.List`{K`})),_`(_`)('if`(_`)_else_,_`,`,_(E:K,_`,`,_(_`(_`)('`{_`},_`(_`)('__,_`,`,_(S:K,_`(_`)('//`assert_,_`(_`)(wbag_(Cfgs:Bag),.List`{K`}))))),K:K)))),k)[metadata "computational rule"].
-rl __(<_>_</_>(k,_~>_(_`(_`)('_=_;,_`,`,_(_`(_`)(Id_(X:Id),.List`{K`}),V:KResult)),?10:K),k),<_>_</_>(env,__(?8:Map,_|->_(_`(_`)(Id_(X:Id),.List`{K`}),?9:List{K})),env))=> __(<_>_</_>(k,?10:K,k),<_>_</_>(env,__(?8:Map,_|->_(_`(_`)(Id_(X:Id),.List`{K`}),V:KResult)),env))[metadata "computational rule"].
-rl __(<_>_</_>(k,_~>_(_`(_`)('derive,_`(_`)(MathObj++_(I:Int++),.List`{K`})),?8:K),k),<_>_</_>(heap,__(?6:Map,_|->_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),?7:List{K})),heap))=> __(<_>_</_>(k,?8:K,k),<_>_</_>(heap,__(?6:Map,_|->_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),?7:List{K})),heap))[metadata "computational rule"].
-rl __(<_>_</_>(k,_~>_(_`(_`)('load,_`(_`)(MathObj++_(I:Int++),.List`{K`})),?8:K),k),<_>_</_>(heap,__(?7:Map,_|->_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),V:KResult)),heap))=> __(<_>_</_>(k,_~>_(V:KResult,?8:K),k),<_>_</_>(heap,__(?7:Map,_|->_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),V:KResult)),heap))[metadata "computational rule"].
-rl __(<_>_</_>(k,_~>_(_`(_`)('store,_`,`,_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),V:KResult)),?10:K),k),<_>_</_>(heap,__(?8:Map,_|->_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),?9:List{K})),heap))=> __(<_>_</_>(k,?10:K,k),<_>_</_>(heap,__(?8:Map,_|->_(_`(_`)(MathObj++_(I:Int++),.List`{K`}),V:KResult)),heap))[metadata "computational rule"].
-rl __(<_>_</_>(k,_~>_(_`(_`)(Id_(X:Id),.List`{K`}),?8:K),k),<_>_</_>(env,__(?7:Map,_|->_(_`(_`)(Id_(X:Id),.List`{K`}),V:KResult)),env))=> __(<_>_</_>(k,_~>_(V:KResult,?8:K),k),<_>_</_>(env,__(?7:Map,_|->_(_`(_`)(Id_(X:Id),.List`{K`}),V:KResult)),env))[metadata "computational rule"].
-rl _`(_`)('!_,_`(_`)(MathObj++_(0),.List`{K`}))=> _`(_`)(MathObj++_(1),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('!_,_`(_`)(MathObj++_(NzI:NzInt),.List`{K`}))=> _`(_`)(MathObj++_(1),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('-_,_`(_`)(MathObj++_(I:Int++),.List`{K`}))=> _`(_`)(MathObj++_(-Int_(I:Int++)),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_%_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(_%Int_(I1:Int++,I2:Int++)),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_&&_,_`,`,_(_`(_`)(MathObj++_(0),.List`{K`}),E:K))=> _`(_`)(MathObj++_(0),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_&&_,_`,`,_(_`(_`)(MathObj++_(NzI:NzInt),.List`{K`}),E:K))=> E:K[metadata "computational rule"].
-rl _`(_`)('_*_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(_*Int_(I1:Int++,I2:Int++)),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_+_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(_+Int_(I1:Int++,I2:Int++)),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_-_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(_-Int_(I1:Int++,I2:Int++)),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_/_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(_/Int_(I1:Int++,I2:Int++)),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_;,V:KResult)=>(.).K[metadata "computational rule"].
-rl _`(_`)('_<=_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(?_(_<=Int_(I1:Int++,I2:Int++))),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_<_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(?_(_<Int_(I1:Int++,I2:Int++))),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_==_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(?_(_==Int_(I1:Int++,I2:Int++))),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_>=_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(?_(_>=Int_(I1:Int++,I2:Int++))),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_>_,_`,`,_(_`(_`)(MathObj++_(I1:Int++),.List`{K`}),_`(_`)(MathObj++_(I2:Int++),.List`{K`})))=> _`(_`)(MathObj++_(?_(_>Int_(I1:Int++,I2:Int++))),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('_?_:_,_`,`,_(_`(_`)(MathObj++_(0),.List`{K`}),_`,`,_(E1:K,E2:K)))=> E2:K[metadata "computational rule"].
-rl _`(_`)('_?_:_,_`,`,_(_`(_`)(MathObj++_(NzI:NzInt),.List`{K`}),_`,`,_(E1:K,E2:K)))=> E1:K[metadata "computational rule"].
-rl _`(_`)('__,_`,`,_(S1:K,S2:K))=> _~>_(S1:K,S2:K)[metadata "computational rule"].
-rl _`(_`)('_||_,_`,`,_(_`(_`)(MathObj++_(0),.List`{K`}),E:K))=> E:K[metadata "computational rule"].
-rl _`(_`)('_||_,_`,`,_(_`(_`)(MathObj++_(NzI:NzInt),.List`{K`}),E:K))=> _`(_`)(MathObj++_(NzI:NzInt),.List`{K`})[metadata "computational rule"].
-rl _`(_`)('`{_`},Ss:K)=> Ss:K[metadata "computational rule"].
-rl _`(_`)('`{`},.List`{K`})=>(.).K[metadata "computational rule"].
-rl _`(_`)('if`(_`)_else_,_`,`,_(_`(_`)(MathObj++_(0),.List`{K`}),_`,`,_(?4:K,S:K)))=> S:K[metadata "computational rule"].
-rl _`(_`)('if`(_`)_else_,_`,`,_(_`(_`)(MathObj++_(NzI:NzInt),.List`{K`}),_`,`,_(S:K,?5:K)))=> S:K[metadata "computational rule"].
-crl <_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(k,_~>_(_`(_`)('//`assert_,_`(_`)(wbag_(Cfgs:Bag),.List`{K`})),?14:K),k),__(<_>_</_>(newImpl,_`(_`)(MathObj++_(N:Nat),.List`{K`}),newImpl),<_>_</_>(subst,Subst:Subst,subst)))),config)=> <_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(k,_~>_(_`(_`)('//`assume_,_`(_`)(wbag_(Cfgs:Bag),.List`{K`})),?14:K),k),__(<_>_</_>(newImpl,_`(_`)(MathObj++_(_+Int_(N:Nat,1)),.List`{K`}),newImpl),<_>_</_>(subst,Subst':Subst,subst)))),config)if _===>_(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(subst,Subst:Subst,subst),<_>_</_>(newImpl,_`(_`)(MathObj++_(N:Nat),.List`{K`}),newImpl))),config),Cfgs:Bag)=> <_>_</_>(config,__(<_>_</_>(form,TrueFormula,form),<_>_</_>(subst,Subst':Subst,subst)),config)[metadata "computational rule"].
 endm

@@ -6,9 +6,9 @@ mod IMP-SYNTAX is including CONFIG .
   sort Exp .
   sorts Stmt Stmts .
   sort Annot .
-  subsort Id < Exp .
-  subsort Int++ < Val < Exp .
-  subsort Stmt Annot < Stmts .
+  subsort Id <  Exp .
+  subsort Int++  <  Val <  Exp .
+  subsort Stmt Annot <  Stmts .
 
   op NULL : -> Exp .
 
@@ -60,11 +60,11 @@ mod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX .
                    
                        
 
-  var E E1 E2 : Exp .
-  var S : Stmt .
-  eq NULL = 0 .
-  eq E1 != E2 = !(E1 == E2) .
-  eq if (E) S = if(E) S else {} .
+  var E E1 E2 :  Exp .
+  var S :  Stmt .
+  eq NULL =  0 .
+  eq E1 !=  E2 =  ! (E1 ==  E2) .
+  eq if (E) S =  if(E) S else {} . 
 
          
      

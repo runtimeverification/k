@@ -152,8 +152,9 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
     < config >
       < k > // assert Cfgs => // assume Cfgs <_/ k >
       < subst > Subst => Subst' </ subst >
+      < newSym > M </ newSym >
       < newImpl > N => N +Int 1 </ newImpl >
-      CfgItems => .Bag
+      (CfgItems => skolemize(N, CfgItems))
     </ config >
   if search(
     < config >
@@ -169,6 +170,5 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
       < subst > Subst' </ subst >
     </ config >
   )
----CfgItems => skolemize(N, CfgItems)
 endkm
 

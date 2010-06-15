@@ -14,9 +14,6 @@ compiled_file=${filename}"-compiled.maude"
 ml_file="ml-"${filename}".maude"
 cwd=`pwd`
 
-${k_toolsdir}/kmaude2maude.pl $1
-cat ${maude_file} | sed "s/ + +/++/g" | sed "s/== =/===/g" | sed "s/\* \*\*/\*\*\*/g" > ${maude_file}
-cat ${syntax_file} | sed "s/ + +/++/g" | sed "s/== =/===/g" | sed "s/\* \*\*/\*\*\*/g" > ${syntax_file}
-cat ${semantics_file} | sed "s/ + +/++/g" | sed "s/== =/===/g" | sed "s/\* \*\*/\*\*\*/g" > ${semantics_file}
-${k_toolsdir}/kcompile.sh ${maude_file}
-(cd ${antlr_rootdir} && make -f ${makefile} ${target} MAIN=${main}) < ${compiled_file} | sed "1d" | sed "s/subsort Int++ < Builtins ./\0\nsubsort Int++ < K ./g" > ${cwd}/${ml_file}
+${k_toolsdir}/kompile.pl $1
+python format.py ${compiled_file} | (cd ${antlr_rootdir} && make -f ${makefile} ${target} MAIN=${main}) | sed "1d" | sed "s/subsort Int\+\+ < Builtins \./\0\nsubsort Int\+\+ < KResult \.\nsubsort Id < K \./g" >${cwd}/${ml_file}
+

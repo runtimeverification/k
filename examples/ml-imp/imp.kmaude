@@ -7,11 +7,11 @@ kmod IMP is including IMP-SEMANTICS
 
   sort Result
 
-  op check : KLabel -> Result
+  op mlcheck : KLabel -> Result
   op (_feasible and_infeasible paths) : Nat Nat -> Result [format(g! d d d d d o)]
   op [|_,_,_|] : Nat Nat Bag -> Result [strat(0 1 2 3)]
 
-  eq check(K:KLabel) = [| 0, 0,
+  eq mlcheck(K:KLabel) = [| 0, 0,
                          <T>
                            <feasible> 0 </feasible>
                            <infeasible> 0 </infeasible>

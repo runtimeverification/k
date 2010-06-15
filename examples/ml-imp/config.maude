@@ -1,4 +1,3 @@
-load ../../k-prelude.maude
 load core-theory.maude
 
 mod MATHEMATICAL-K is inc MATHEMATICAL-INT + K + K-CONDITION-SEARCH .
@@ -37,8 +36,8 @@ endm
 
 
 mod CONFIG is inc MATHEMATICAL-K + SUBST + PL-ID .
-  subsort Formula MathObj++ Subst < Builtins .
-  subsort MathObj++ < KResult .
+  subsort MathObj++ < Builtins KResult .
+  subsort Int++ < Builtins KResult .
   ---subsort List{MathObj++} < KResult .
   op <_>_</_> : CellLabel Formula CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Subst CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .

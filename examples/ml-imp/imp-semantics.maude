@@ -7,168 +7,168 @@ mod UTILS is including PL-INT .
 endm
 
 mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
-  subsort Val <  KResult .
-  subsort Stmts Exp < K .
+  subsort Val <   KResult .
+  subsort Stmts Exp <  K .
 
-  var M N N1 N2 : Nat .
-  var I I' I1 I2 : Int++ .
-  var NzI : NzInt .
-  var F X : Id .
+  var M N N1 N2 :  Nat .
+  var I I' I1 I2 :  Int++ . 
+  var NzI :  NzInt .
+  var F X :  Id .
      
-  var V V1 V2 : Val .
+  var V V1 V2 :  Val .
      
-  var E E1 E2 : Exp .
-  var S S1 S2 : Stmt .
-  var Ss : Stmts .
-  var K : K .
-  var Phi Phi' : Formula .
-  var Subst Subst' : Subst .
-  var Cfg : BagItem .
-  var Cfgs CfgItems : Bag .
+  var E E1 E2 :  Exp .
+  var S S1 S2 :  Stmt .
+  var Ss :  Stmts .
+  var K :  K .
+  var Phi Phi' :  Formula .
+  var Subst Subst' :  Subst .
+  var Cfg :  BagItem .
+  var Cfgs CfgItems :  Bag .
 
 
-  mb configuration < T > 
-                  < feasible > 0 </ feasible >
-                  < infeasible > 0 </ infeasible >
-                  < config >
-                    < k > (.).K </ k >
-                    < env > (.).Map </ env >
-                    < heap > (.).Map </ heap >
-                    < form >  TrueFormula </ form >
-                    < subst > (.).K </ subst >
-                    < newSym >  0 </ newSym >
-                    < newImpl > 0 </ newImpl >
-                  </ config >
-                </ T > : KSentence .
+  mb configuration < T >  
+                  < feasible >  0 </ feasible > 
+                  < infeasible >  0 </ infeasible > 
+                  < config > 
+                    < k >  (.).K  </ k > 
+                    < env >  (.).Map  </ env > 
+                    < heap >  (.).Map  </ heap > 
+                    < form >   TrueFormula </ form > 
+                    < subst >  (.).K  </ subst > 
+                    < newSym >   0 </ newSym > 
+                    < newImpl >  0 </ newImpl > 
+                  </ config > 
+                </ T > : KSentence . 
 
 
-  mb rule I1 + I2 => I1 +Int I2 : KSentence .
-  mb rule _-_(I1, I2) => _-Int_(I1, I2) : KSentence .
-  mb rule _*_(I1, I2) => I1 *Int I2 : KSentence .
-  mb rule I1 / I2 => I1 /Int I2 : KSentence .
-  mb rule I1 % I2 => I1 %Int I2 : KSentence .
-  mb rule - I => -Int I : KSentence .
-  mb rule I1 >= I2 => ?_(I1 >=Int I2) : KSentence .
-  mb rule I1 > I2 => ?_(I1 >Int I2) : KSentence .
-  mb rule I1 <= I2 => ?_(I1 <=Int I2) : KSentence .
-  mb rule I1 < I2 => ?_(I1 <Int I2) : KSentence .
-  mb rule I1 == I2 => ?_(I1 ==Int I2) : KSentence .
+  mb rule I1 +  I2 =>  I1 +Int  I2 : KSentence .
+  mb rule _-_(I1, I2) =>  _-Int_(I1, I2) : KSentence .
+  mb rule _*_(I1, I2) =>  I1 *Int  I2 : KSentence .
+  mb rule I1 /  I2 =>  I1 /Int  I2 : KSentence .
+  mb rule I1 %  I2 =>  I1 %Int  I2 : KSentence .
+  mb rule -  I =>  -Int  I : KSentence .
+  mb rule I1 >=  I2 =>  ?_(I1 >=Int  I2) : KSentence .
+  mb rule I1 >  I2 =>  ?_(I1 >Int  I2) : KSentence .
+  mb rule I1 <=  I2 =>  ?_(I1 <=Int  I2) : KSentence .
+  mb rule I1 <  I2 =>  ?_(I1 <Int  I2) : KSentence .
+  mb rule I1 ==  I2 =>  ?_(I1 ==Int  I2) : KSentence .
 
                
-  mb rule NzI && E => E : KSentence .
-  mb rule 0 && E => 0 : KSentence .
+  mb rule NzI &&  E =>  E : KSentence .
+  mb rule 0 &&  E =>  0 : KSentence .
                  
-  mb rule NzI || E => NzI : KSentence .
-  mb rule 0 || E => E : KSentence .
+  mb rule NzI ||  E =>  NzI : KSentence .
+  mb rule 0 ||  E =>  E : KSentence .
               
-  mb rule ! NzI => 1 : KSentence .
-  mb rule ! 0 => 1 : KSentence .
+  mb rule !  NzI =>  1 : KSentence .
+  mb rule !  0 =>  1 : KSentence .
 
   mb rule
-    < config >
-      < k > (I ? E1 : E2) ~> K </ k >
-      < form > Phi </ form >
+    <  config > 
+      <  k >  (I ?  E1 :  E2) ~>  K </  k > 
+      <  form >  Phi </  form > 
       CfgItems
-    </ config >
-  =>
-    < config >
-      < k > E1 ~> K </ k >
-      < form > Phi /\ ~(I === 0) </ form >
+    </  config > 
+  => 
+    <  config > 
+      <  k >  E1 ~>  K </  k > 
+      <  form >  Phi /\  ~ (I ===  0) </  form > 
       CfgItems
-    </ config >
-    < config >
-      < k > E2 ~> K </ k >
-      < form > Phi /\ I === 0 </ form >
+    </  config > 
+    <  config > 
+      <  k >  E2 ~>  K </  k > 
+      <  form >  Phi /\  I ===  0 </  form > 
       CfgItems
-    </ config > : KSentence .
-  mb rule NzI ? E1 : E2 => E1 : KSentence .
-  mb rule 0 ? E1 : E2 => E2 : KSentence .
+    </ config > : KSentence . 
+  mb rule NzI ?  E1 :  E2 =>  E1 : KSentence .
+  mb rule 0 ?  E1 :  E2 =>  E2 : KSentence .
 
-  mb rule V ; => (.).K : KSentence .
-  mb rule {} => (.).K : KSentence .
-  mb rule { Ss } => Ss : KSentence .
-  mb rule S1 S2 => S1 ~> S2 : KSentence .
+  mb rule V ;  =>  (.).K : KSentence . 
+  mb rule {}  =>  (.).K : KSentence . 
+  mb rule { Ss } =>  Ss : KSentence .
+  mb rule S1 S2 =>  S1 ~>  S2 : KSentence .
 
   mb rule
-    < k > X => V  ...</ k > 
-    < env >...  X |-> V  ...</ env > : KSentence .
+    < k >  X =>  V  ...</ k >  
+    < env >...   X |->  V  ...</ env > : KSentence . 
   mb rule
-    < k > X = V ; => (.).K  ...</ k >
-    < env >...  X |-> ( ?  => V)  ...</ env > : KSentence .
+    < k >  X =  V ;  =>  (.).K   ...</ k > 
+    < env >...   X |->  ( ?  =>  V)  ...</ env > : KSentence . 
 
-  mb rule < k > * I => derive(I) ~> load(I)  ...</ k > : KSentence .
-  mb context (* [HOLE]) =  ?  ; : KSentence .
-  mb rule < k > (* I) = V ; => derive(I) ~> store(I, V)  ...</ k > : KSentence .
+  mb rule < k >  *  I =>  derive(I) ~>  load(I)  ...</ k > : KSentence . 
+  mb context (*  [HOLE] ) =   ?  ; : KSentence . 
+  mb rule < k >  (*  I) =  V ;  =>  derive(I) ~>  store(I, V)  ...</ k > : KSentence . 
   mb rule
-    < k > derive(I) => (.).K  ...</ k >
-    < heap >...  I |->  ?   ...</ heap > : KSentence .
+    < k >  derive(I) =>  (.).K   ...</ k > 
+    < heap >...   I |->   ?   ...</ heap > : KSentence . 
   mb rule
-    < k > load(I) => V  ...</ k >
-    < heap >...  I |-> V  ...</ heap > : KSentence .
+    < k >  load(I) =>  V  ...</ k > 
+    < heap >...   I |->  V  ...</ heap > : KSentence . 
   mb rule
-    < k > store(I, V) => (.).K  ...</ k >
-    < heap >...  I |-> ( ?  => V)  ...</ heap > : KSentence .
+    < k >  store(I, V) =>  (.).K   ...</ k > 
+    < heap >...   I |->  ( ?  =>  V)  ...</ heap > : KSentence . 
 
 
                      
-  mb rule if (NzI) S else  ?  => S : KSentence .
-  mb rule if (0)  ?  else S => S : KSentence .
+  mb rule if (NzI) S else  ?  =>  S : KSentence .
+  mb rule if (0)  ?  else S =>  S : KSentence .
 
   mb rule
-    < k >
-      (// invariant Cfgs ~> while (E) S ~> K)
-    =>
-      (// assert Cfgs ~> 'if`(_`)_else_(E,, { S // assert Cfgs },, K))
-    </ k > : KSentence .
+    < k > 
+      (//  invariant Cfgs ~>  while (E) S ~>  K)
+    => 
+      (//  assert Cfgs ~>  'if`(_`)_else_(E,, { S //  assert Cfgs },, K))
+    </ k > : KSentence . 
 
   mb rule
-    < config >...  
-      < k >
-        // assume < config > < form > Phi' </ form > CfgItems </ config > Cfgs ~> K
-      =>
-        // assume Cfgs ~> K
-      </ k >
-      < form > Phi </ form >
-      < subst > Subst </ subst >
-      < newSym > M </ newSym >
-      < newImpl > N </ newImpl >
-     ...</ config >
+    < config >...   
+      < k > 
+        //  assume < config >  < form >  Phi' </ form >  CfgItems </ config >  Cfgs ~>  K
+      => 
+        //  assume Cfgs ~>  K
+      </ k > 
+      < form >  Phi </ form > 
+      < subst >  Subst </ subst > 
+      < newSym >  M </ newSym > 
+      < newImpl >  N </ newImpl > 
+     ...</ config > 
     (
-      (.).Bag
-    =>
-      < config >
-        < k > K </ k >
-        < form > Phi /\ Phi'[Subst] </ form >
-        < subst > Subst </ subst >
-        < newSym > M </ newSym >
-        < newImpl > N </ newImpl >
+      (.).Bag 
+    => 
+      < config > 
+        < k >  K </ k > 
+        < form >  Phi /\  Phi'[Subst] </ form > 
+        < subst >  Subst </ subst > 
+        < newSym >  M </ newSym > 
+        < newImpl >  N </ newImpl > 
         CfgItems
-      </ config >
+      </ config > 
     ) : KSentence .
 
-  mb rule < config >...  < k > // assume (.).Bag  ...</ k >  ...</ config > => (.).Bag : KSentence .
+  mb rule < config >...   < k >  //  assume (.).Bag   ...</ k >   ...</ config >  =>  (.).Bag : KSentence . 
 
   mb rule
-    < config >
-      < k > // assert Cfgs => // assume Cfgs  ...</ k >
-      < subst > Subst => Subst' </ subst >
-      < newImpl > N => N +Int 1 </ newImpl >
-      CfgItems => (.).Bag
-    </ config >
+    <  config > 
+      <  k >  //  assert Cfgs =>  //  assume Cfgs  ...</  k > 
+      <  subst >  Subst =>  Subst' </  subst > 
+      <  newSym >  M </  newSym > 
+      <  newImpl >  N =>  N +Int  1 </  newImpl > 
+      (CfgItems =>  skolemize(N, CfgItems))
+    </  config > 
   if search(
-    < config >
-      < subst > Subst </ subst >
-      < newImpl > N </ newImpl >
+    <  config > 
+      <  subst >  Subst </  subst > 
+      <  newImpl >  N </  newImpl > 
       CfgItems
-    </ config >
-    ===>
+    </  config > 
+    ===> 
     Cfgs
-  =>
-    < config >
-      < form > TrueFormula </ form >
-      < subst > Subst' </ subst >
-    </ config >
+  => 
+    <  config > 
+      <  form >  TrueFormula </  form > 
+      <  subst >  Subst' </  subst > 
+    </  config > 
   ) : KSentence .
-   
-ops heap infeasible form feasible newImpl newSym env T k subst config : -> CellLabel .  endm
+ops form feasible newImpl newSym k subst heap infeasible env T config : -> CellLabel .  endm
 
