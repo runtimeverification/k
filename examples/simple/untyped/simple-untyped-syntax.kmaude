@@ -1,30 +1,28 @@
---- in ../../../k-prelude
-
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID 
 
   syntax Var ::= Id | Exp [ Exp ] [prec 1 strict]
  
-  syntax Exp ::= Var | Int | Bool
-               | ++ Id [prec 0]
-               | Exp + Exp [gather(E e) prec 33 strict]
-               | Exp - Exp [gather(E e) prec 33 strict] 
-               | Exp * Exp [gather(E e) prec 31 strict] 
-               | Exp / Exp [gather(E e) prec 31 strict] 
-               | Exp % Exp [gather(E e) prec 31 strict] 
-               |  - Exp [strict] 
-               | Exp < Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
-               | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
-               | Exp > Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
-               | Exp >= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
-               | Exp == Exp [prec 37 strict] 
-               | Exp != Exp [prec 37 strict] 
-               | Exp and Exp [gather(E e) prec 55 strict] 
-               | Exp or Exp  [gather(E e) prec 59 strict] 
-               | not Exp [prec 53 strict] 
-               | sizeOf ( Exp ) [strict] 
-               | Exp ( )
-               | Exp ( List{Exp} ) [prec 2 strict]
-               | read ( ) 
+  syntax Exp  ::= Var | Int | Bool
+                | ++ Id [prec 0]
+                | Exp + Exp [gather(E e) prec 33 strict]
+                | Exp - Exp [gather(E e) prec 33 strict]
+                | Exp * Exp [gather(E e) prec 31 strict]
+                | Exp / Exp [gather(E e) prec 31 strict]
+                | Exp % Exp [gather(E e) prec 31 strict]
+                |  - Exp [strict]
+                | Exp < Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
+                | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
+                | Exp > Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
+                | Exp >= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+                | Exp == Exp [prec 37 strict] 
+                | Exp != Exp [prec 37 strict] 
+                | Exp and Exp [gather(E e) prec 55 strict] 
+                | Exp or Exp  [gather(E e) prec 59 strict] 
+                | not Exp [prec 53 strict]
+                | sizeOf ( Exp ) [strict]
+                | Exp ( )
+                | Exp ( List{Exp} ) [prec 2 strict]
+                | read ( )
 
   syntax Decl ::= var Var ; [prec 2]  
                 | function Id ( ) Stmt 
@@ -42,7 +40,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
                 | write ( Exp ) ; [strict] 
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts [prec 100 gather(e E)] 
+                | Stmts Stmts [prec 100 gather(e E)] 
 
   syntax Id ::= main
 -----------------------------------------------------------------------------
@@ -51,7 +49,6 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 --- List{Id}
   syntax List{Id}  ::= Id | .List{Id} 
                      | List{Id} , List{Id} [prec 70 assoc id: .List{Id}] 
-
 --- List{Exp}
   syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto] 
 -----------------------------------------------------------------------------
@@ -64,9 +61,8 @@ kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX
 --- The idea is that we only want to give semantics to core constructs,      ---
 --- so we get rid of the derived ones before we start the semantics          ---
 --------------------------------------------------------------------------------
-  macro if E:Exp then S:Stmt = if E then S else {} 
-  macro (for X:Id = E1:Exp to E2:Exp do S) 
-   = {var X ; X = E1 ; while X <= E2 do {S X = X + 1 ;}} 
-  macro function F:Id() S = function F(.List{Id}) S 
-  macro E() = E(.List{Id}) 
+  macro if E:Exp then S:Stmt = if E then S else {}
+  macro (for X:Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
+  macro function F:Id() S = function F(.List{Id}) S
+  macro E() = E(.List{Id})
 endkm
