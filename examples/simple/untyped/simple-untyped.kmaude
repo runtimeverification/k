@@ -5,13 +5,13 @@ in simple-untyped-programs
 kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K 
 
   syntax Val ::= Int | Bool
-  syntax Exp ::= Val  
+  syntax Exp ::= Val
 
 --- We have to subsort all the syntactic categories to K, and the lists of values
 --- to KResult.  Recall that the second argument of a function application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
 
-  syntax K ::= Stmts | List{Exp} 
+  syntax K ::= Stmts | List{Exp}
   syntax KResult ::= List{Val}
 
   configuration <T> 
@@ -23,7 +23,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
                      <in> .List </in>
                      <out> .List </out>
                      <nextLoc> 0 </nextLoc>
-                </T> 
+                </T>
 
   rule <k> X:Id => V:Val <_/k>  
        <env_> X |-> L:Nat <_/env>
