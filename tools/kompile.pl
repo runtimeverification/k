@@ -110,6 +110,7 @@ sub terminate {
   default extension of loaded files is set to .maude.
 
 " ;
+    print "\nERROR: $_[0]\n\n" if defined $_[0];
     exit(1);
 }
 
@@ -270,21 +271,21 @@ if ($maudify_only && $compile_only) {
     terminate("Options -m and -c cannot be given together\n(-m/-c means \"only maudify/compile, do not compile/maudify\")");
 }
 
-# Check if the -c option is given together with a .kmaude file
-if ($compile_only && $language_file_name =~ /.kmaude$/) {
+# Check if the -c option is given together with a .k or .kmaude file
+if ($compile_only && $language_file_name =~ /(?:.k|.kmaude)$/) {
     terminate("Option -c only works with a .maude file");
 }
 
 # Following is executed whenever the option -c was not selected
 if (!$compile_only) {
-# Maudify the .kmaude files reachable from file "$language_file_name"
+# Maudify the .k|.kmaude files reachable from file "$language_file_name"
     print_header("Maudifying $language_file_name") if $verbose;
     maudify_file("$language_file_name","");
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
     print "Sorts:\n------\n@all_sorts\n\n" if $verbose;
     print "Tokens:\n-------\n@all_tokens\n" if $verbose;
-    $language_file_name =~ s/\.kmaude$//;
+    $language_file_name =~ s/(\.k|\.kmaude)$//;
     print "\n" if $verbose;
 }
 
@@ -381,7 +382,7 @@ sub run_maude {
     open FILE,">",$input_file or die "Cannot create $input_file\n";
     print FILE "\n@commands\n";
     close FILE;
-    system("$maude_path -no-banner -no-wrap $input_file >$output_file 2>$error_file");
+    system("$maude_path $input_file >$output_file 2>$error_file");
     if ($? == 0) {
 	if (-s $error_file) {
 	    print "ERROR:\n";
@@ -420,7 +421,7 @@ sub run_maude {
 
 
 # The function maudify($file) does the following operations:
-# 1) Maude-ifies $file in case it is a .kmaude file, generating a .maude file
+# 1) Maude-ifies $file in case it is a .k|.kmaude file, generating a .maude file
 # 2) It does the same recursively on each included file
 # 3) Updates the global variables @all_sorts and @all_tokens
 # - one to the list of sorts that are declared in the $file or in its included files
@@ -428,25 +429,29 @@ sub run_maude {
 sub maudify_file {
 # Bind $file and $indent (the latter used for pretty printing when$verbose
     my ($file,$indent) = @_;
-# If $file has extension .kmaude or .maude then tests if $file exists and errors if not
-    if ($file =~ /\.k?maude$/) {
+# If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
+    if ($file =~ /\.k?(maude)?$/) {
 	if (! -e $file) {
 	    terminate("File $file does not exist");
 	}
     }
-# If $file does not have the extension .kmaude or .maude the
+# If $file does not have the extension .k, .kmaude, or .maude then
     else {
-# Add extension .kmaude if $file.kmaude exists
-	if (-e "$file.kmaude") {
+# Add extension .k if $file.k exists
+	if (-e "$file.k") {
+	    $file .= ".k";
+	}
+# If not, then add extension .kmaude if $file.kmaude exists
+	elsif (-e "$file.kmaude") {
 	    $file .= ".kmaude";
 	}
 # If not, then add extension .maude if $file.maude exists
 	elsif (-e "$file.maude") {
 	    $file .= ".maude";
 	}
-# Otherwise error: we only allow files with extensions .kmaude or .maude
+# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
 	else {
-	    terminate("Neither $file.kmaude nor $file.maude exist");
+	    terminate("Neither of $file.k, $file.kmaude, or $file.maude exist");
 	}
     }
 
@@ -479,7 +484,7 @@ sub maudify_file {
 	}
 	elsif (m!^(?:in|load)\s+(\S+)!) {
 	    maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
-	    s!\.kmaude\s*$!\.maude!s;
+	    s!\.k(maude)?\s*$!\.maude!s;
 	}
 	else {
 #	    print "Top level pattern:\n$_\n" if $verbose;
@@ -498,7 +503,7 @@ sub maudify_file {
 
     if ($file =~ /\.maude/) { return; }
 
-    my $maude_file = ($file =~ /^(.*)\.kmaude$/)[0].".maude";
+    my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
     open FILE,">",$maude_file or die "Cannot write $maude_file\n";
     print FILE $maudified;
     close FILE;
