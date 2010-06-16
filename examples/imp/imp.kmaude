@@ -7,7 +7,7 @@ kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable
                 | AExp + AExp [prec 33 gather (E e) format(d b o d) strict] 
                 | AExp / AExp [prec 31 gather (E e) format(d b o d) strict] 
   syntax BExp ::= Bool
-                | AExp <= AExp [prec 37 format(d b o d) metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict] 
+                | AExp <= AExp [prec 37 format(d b o d) seqstrict] 
                 | not BExp [prec 53 format(b o d) strict] 
                 | BExp and BExp [prec 55 format(d b o d) strict(1)] 
   syntax Stmt ::= skip ; [format (b d o)]
