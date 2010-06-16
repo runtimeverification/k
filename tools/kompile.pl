@@ -382,7 +382,7 @@ sub run_maude {
     open FILE,">",$input_file or die "Cannot create $input_file\n";
     print FILE "\n@commands\n";
     close FILE;
-    system("$maude_path $input_file >$output_file 2>$error_file");
+    system("$maude_path -no-banner -no-wrap $input_file >$output_file 2>$error_file");
     if ($? == 0) {
 	if (-s $error_file) {
 	    print "ERROR:\n";
@@ -568,8 +568,16 @@ sub make_ops {
 #	print "make_ops:\n$_\n";
 
 # Grab the result sort and the productions, as well as all spacing
- 	my ($spaces1,$result_sort,$spaces2,$productions,$spaces3) =  /^syntax(\s+)($ksort)(\s*)::=(.*?\S)(\s*)$/s;
+ 	my ($spaces1,$result_sort,$spaces2,$productions,$spaces3) =  /^syntax(\s+)(\S*)(\s*)::=(.*?\S)(\s*)$/s;
+#	print "$result_sort\n";
 #	print "\$productions\n$productions\n";
+
+# Report error and stop if the sort name does not match $ksort
+	if ($result_sort !~ /^$ksort$/) {
+	    print "ERROR: $result_sort does not match the pattern \"$ksort\"\n";
+	    print "ERROR: Syntactic categories must currently match this pattern\n";
+	    exit(1);
+	}
 
 # Add $result_sort to @all_sorts if not already there
 	my $sort_decl = "";
