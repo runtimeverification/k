@@ -9,7 +9,7 @@ LANGUAGE_NAME = IMPPP
 MAIN_FILE = imppp
 
 # this is a space-separated list of basename maude files to run
-TESTS = imppp-test
+TESTS = imppp-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

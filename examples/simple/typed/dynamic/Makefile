@@ -9,7 +9,7 @@ LANGUAGE_NAME = SIMPLE-TYPED-DYNAMIC
 MAIN_FILE = simple-typed-dynamic
 
 # this is a space-separated list of basename maude files to run
-TESTS = simple-typed-dynamic-test
+TESTS = simple-typed-dynamic-test.maude
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

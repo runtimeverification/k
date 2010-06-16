@@ -9,7 +9,7 @@ LANGUAGE_NAME = EXP-TYPE-INFERENCE
 MAIN_FILE = exp-type-inference
 
 # this is a space-separated list of basename maude files to run
-TESTS = exp-type-inference-test
+TESTS = exp-type-inference-test.maude
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

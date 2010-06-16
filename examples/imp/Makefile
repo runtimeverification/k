@@ -9,7 +9,7 @@ LANGUAGE_NAME = IMP
 MAIN_FILE = imp
 
 # this is a space-separated list of basename maude files to run
-TESTS = imp-test
+TESTS = imp-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

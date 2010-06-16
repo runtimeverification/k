@@ -9,7 +9,7 @@ LANGUAGE_NAME = CHALLENGE
 MAIN_FILE = challenge
 
 # this is a space-separated list of basename maude files to run
-TESTS = challenge-test
+TESTS = challenge-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

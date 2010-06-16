@@ -9,7 +9,7 @@ LANGUAGE_NAME = SIMPLE-UNTYPED
 MAIN_FILE = simple-untyped
 
 # this is a space-separated list of basename maude files to run
-TESTS = simple-untyped-test
+TESTS = simple-untyped-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

@@ -9,7 +9,7 @@ LANGUAGE_NAME = BEFUNGE
 MAIN_FILE = befunge
 
 # this is a space-separated list of basename maude files to run
-TESTS = test test-b93 test-string
+TESTS = test.maude test-b93.maude test-string.maude
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

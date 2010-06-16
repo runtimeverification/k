@@ -9,7 +9,7 @@ LANGUAGE_NAME = THUE
 MAIN_FILE = thue
 
 # this is a space-separated list of basename maude files to run
-TESTS = test
+TESTS = test.maude
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk
