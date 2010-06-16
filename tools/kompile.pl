@@ -381,7 +381,7 @@ sub run_maude {
     open FILE,">",$input_file or die "Cannot create $input_file\n";
     print FILE "\n@commands\n";
     close FILE;
-    system("$maude_path $input_file >$output_file 2>$error_file");
+    system("$maude_path -no-banner -no-wrap $input_file >$output_file 2>$error_file");
     if ($? == 0) {
 	if (-s $error_file) {
 	    print "ERROR:\n";
