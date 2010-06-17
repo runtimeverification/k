@@ -54,6 +54,8 @@ sub terminate {
   -m (or -maudify) : only maudify, do not kompile
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
+  -latex : maudifies/compiles for generating latex output
+    -style : a sub-option of latex, useful for typesetting
 
   The option -m generates all the Maude files file.maude
   corresponding to all the files file.kmaude reachable from
@@ -74,14 +76,37 @@ sub terminate {
   -l is not used, then <source_file> must include a module
   with the same root name, but capitalized.
 
-  Technically, the command kompile lang.kmaude is equivalent to
-  kompile -m lang.kmaude followed by kompile -c lang.maude.
-  Since kompile -m lang.kmaude associates a corresponding .maude
+  Technically, the command \"kompile lang.kmaude\" is equivalent to
+  \"kompile -m lang.kmaude\" followed by \"kompile -c lang.maude\".
+  Since \"kompile -m lang.kmaude\" associates a corresponding .maude
   file to each reachable .kmaude file while it does not modify
   any of the reachable .maude files, in order for
-  kompile -c lang.maude to work one is advised to not use
-  extensions for the loaded file names.
+  \"kompile -c lang.maude\" to work one is advised to not use
+  extensions for the loaded file names; in other words, write, e.g.,
+  \"in/load lang-syntax\" instead of \"in/load lang-syntax.kmaude\".
 
+  The option -latex is used for typesetting a K definition.  It can
+  be used in combination with any of the other options above.  If
+  used with -m, then it only maudifies the given input file, adding
+  for each operation a special latex attribute inside the operation's
+  metadata.  If used with -c, it assumes that the input file is
+  already maudified as above and generates a latex and a PDF file
+  corresponding to <module-name>.  If used wihout any of -m or -c,
+  it first applies the -m and then the -c, as explained in the
+  paragraph above but with the additional option -latex.
+
+  The optional parameter passed to -style (which only makes sense when
+  the -latex option is used) can alter the style used for typesetting.
+  Currently, there are two style options available, bb, for typesetting
+  via tikz graphical cells, and mm, for typesetting using the simple
+  mathematical notation.  The default option is bb.
+
+  If a file <source_file>.sty is provided by the user in the current
+  directory, it will be included in the generated latex file after the
+  above mentioned style, and thus could be used to alter the default
+  typesetting macros.
+
+ 
   Examples
 
   kompile lang.kmaude : compiles the K language definition
@@ -139,6 +164,12 @@ my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
 my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\s\\,\\`])*";
 
+#########
+# Latex #
+#########
+#my $latex_special = "[\\#\\$\\{\\}\\[\\]\\&\\^\\_\\%\\~\\\\]";
+my $latex_special = '[\\#\\$\\{\\}\\[\\]\\&\\^\\_\\%\\~\\\\]';
+
 #####
 # K #
 #####
@@ -164,6 +195,7 @@ my $specialSymbol = "K";
 
 my $k_tools_dir = (File::Basename::fileparse($0))[1];
 my $k_all_tools = File::Spec->catfile($k_tools_dir,"all-tools");
+my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
 my $k_prelude = File::Spec->catfile(File::Spec->catfile($k_tools_dir,".."),"k-prelude");
 
 my @kmaude_keywords = qw(context rule macro eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
@@ -208,6 +240,8 @@ my @all_sorts = ();
 my @all_tokens = @builtin_tokens;
 
 my $verbose = 0;
+my $latex = 0;
+my $style = "bb";
 my $maudify_only = 0;
 my $compile_only = 0;
 my $language_module_name = "";
@@ -228,11 +262,18 @@ my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";
 # </TOOL CONFIGURATION> #
 #########################
 
+my @newcommands = ();
+my $newcommand_prefix = "ksyntax";
+my $newcommand_counter = 0;
+my $newcommand_base = 6;
 
 # Process the command arguments
 foreach (@ARGV) {
-    if ($language_module_name eq "?") {
+    if (($language_module_name eq "?") && !/^-/) {
 	$language_module_name = $_;
+    }
+    elsif (($style eq "?") && !/^-/) {
+	$style = $_;
     }
     elsif (/^--?h(elp)?$/) {
 # Terminates with usage info when asked for help
@@ -252,6 +293,12 @@ foreach (@ARGV) {
     }
     elsif (/^--?l(ang|anguage)?$/) {
 	$language_module_name = "?";
+    }
+    elsif (/^--?latex$/) {
+	$latex = 1;
+    }
+    elsif (/^--?style$/) {
+	$style = "?";
     }
     elsif (/^-/) {
 	terminate("Unknown option $_");
@@ -276,6 +323,21 @@ if ($compile_only && $language_file_name =~ /(?:.k|.kmaude)$/) {
     terminate("Option -c only works with a .maude file");
 }
 
+# Check that a $language_module_name was indeed given if -l option was used
+if ($language_module_name eq "?") {
+    terminate("Option -l|-lang|-language requires that a module name be given right after");
+}
+
+# Check that a $style was indeed given if -style option was used
+if ($style eq "?") {
+    terminate("Option -style requires that a style be given right after");
+}
+
+# Create the module name, if not already given, by capitalizing the file name
+    if ($language_module_name eq "") {
+	$language_module_name = uc($language_file_name);
+    }
+
 # Following is executed whenever the option -c was not selected
 if (!$compile_only) {
 # Maudify the .k|.kmaude files reachable from file "$language_file_name"
@@ -291,11 +353,31 @@ if (!$compile_only) {
 
 # Following is executed whenever the option -m was not selected
 if (!$maudify_only) {
+
 # Remove .maude extension if there
     $language_file_name =~ s/\.maude$//;
-    print_header("Compiling $language_file_name") if $verbose;
-    compile();
-    print "Compiled version written in $language_file_name-compiled.maude\n" if $verbose;
+
+# Since we eventually call Maude on $language_file_name, $language_file_name.maude must exist
+    if (! -e "$language_file_name.maude") {
+	terminate("File $language_file_name.maude does not exist");
+    }
+
+# Checking whether Maude is available
+    run_maude("Detecting Maude ... ", "quit\n");
+
+# Testing whether the input module $language_module_name exists
+    run_maude("Testing if the input module $language_module_name exists ... ",
+	      "load $language_file_name\n",
+	      "show module $language_module_name .\n",
+	      "quit\n");
+
+# Calling either the maude compiler or the latex compiler, depending upon $latex
+    if ($latex) {
+	latexify();
+    }
+    else {
+	compile();
+    }
 }
 
 
@@ -310,31 +392,79 @@ sub print_header {
 }
 
 
+sub latexify {
+# Assumes $language_file_name is a file name with no extension
+
+    print_header("Latex-ifying module $language_module_name from language definition $language_file_name") if $verbose;
+
+# 
+    $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
+		   "load $k_prelude\n",
+		   "show module META-MODULE .\n",
+		   "show module K-TECHNIQUE .\n",
+		   "quit\n");
+    
+    s/^Bye.//gms;
+    s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
+
+    open FILE,">",$temp_file or die "Cannot create $temp_file\n";
+    print FILE;
+    close FILE;
+    print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
+
+    $_ = run_maude("Calling the Maude Latex-ifier ... ",
+		   "load $language_file_name\n",
+		   "set show advisories off .\n",
+		   "load $temp_file\n",
+		   "select META-LEVEL .\n",
+		   "select $language_module_name .\n",
+		   "set show advisories on .\n",
+		   "load $k_to_latex\n",
+		   "set print attribute on .\n",
+		   "loop latex-print .\n",
+		   "(print $language_module_name .)\n",
+		   "quit\n");
+
+    if (/(\\begin{document}.*?\\end{document})/gms) {
+	$_ = $1;
+    }
+    else {
+	print "ERROR: \\begin{document} ... \\end{document} not found in generated output\n";
+	print "This error most likely due to wrong latex attributes\n";
+	print "Check generated output in $output_file\n";
+	open FILE,">",$output_file or die "Cannot create $output_file\n";
+	print FILE;
+	close FILE;
+	print "Aborting the compilation\n";
+	exit(1);
+    }
+
+    print "Latex style used: $style\n" if $verbose;
+
+# File name where the compiled output will be stored:
+    my $output_file_name = "$language_module_name.tex";
+
+    open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
+    print FILE "\\documentclass[landscape]{article}\n";
+    print FILE "\\usepackage{import}\n";
+    print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
+    print FILE join("\n",@newcommands)."\n";
+    print FILE $_;
+    close FILE;
+
+    print "Latex version written in $output_file_name\n" if $verbose;
+}
+
+
 # Next routine compiles the language definition in $language_file_name
 # It also performs some sanity checks
 sub compile {
 # Assumes $language_file_name is a file name with no extension
-# However, since we eventually call Maude on it, $language_file_name.maude must exist
-    if (! -e "$language_file_name.maude") {
-	terminate("File $language_file_name.maude does not exist");
-    }
 
-# Checking whether Maude is available
-    run_maude("Detecting Maude ... ", "quit\n");
-
-# Create the module name, if not already given, by capitalizing the file name
-    if ($language_module_name eq "") {
-	$language_module_name = uc($language_file_name);
-    }
+    print_header("Compiling $language_file_name, starting with module $language_module_name") if $verbose;
 
 # File name where the compiled output will be stored:
     my $output_file_name = "$language_file_name-compiled.maude";
-
-# Testing whether the input module $language_module_name exists
-    run_maude("Testing if the input module $language_module_name exists ... ",
-	      "load $language_file_name\n",
-	      "show module $language_module_name .\n",
-	      "quit\n");
 
 # Compiling the input module $language_module_name
     $_ = run_maude("Compiling the definition ... ",
@@ -343,6 +473,7 @@ sub compile {
 	      "loop compile .\n",
 	      "(compile $language_module_name .)\n",
 	      "quit\n");
+
 # If the keyword "Error" begins a line in the output, then extract and report the error message
     if (/^Error: (.*?)Bye/sm) {
 	print "ERROR:\n";
@@ -350,13 +481,16 @@ sub compile {
 	print "Aborting the compilation\n";
 	exit(1);
     }
-# If the output contains a generated Maude file, then write it in $output_file
+
+# If the output contains a generated Maude file, then write it in $output_file_name
     if (/$begin_compiled_module(.*?)$end_compiled_module/s) {
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	print FILE "load $k_prelude\n";
 	print FILE $1;
 	close FILE;
+	print "Compiled version written in $output_file_name\n" if $verbose;
     }
+
 # Otherwise there must be some error that the script is now aware of, so show the whole thing
     else {
 	print "Uncknown ERROR: cannot parse the output below (returned by the compiler)\n$_";
@@ -549,7 +683,7 @@ sub maudify_module {
     s! _ ! ? !gs;
 
 # Step: Change K attributes to Maude metadata
-    s!(\[[^\]]*\])!make_metadata($1)!gse;
+    s!(\[(?:\\.|[^\]])*\])!make_metadata($1)!gse;
 
 # Step: Change K statements into Maude statements
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
@@ -627,6 +761,19 @@ sub make_ops {
 		$production =~ s/(^|$maude_special)`/$1/gs;
 		$production =~ s/`($|$maude_special)/$1/gs;
 
+# Add a latex attribute in case $latex and there is not already a user-defined one
+		if ($latex && ($attributes !~ /latex/)) {
+		    my $latex_text = $production;
+		    my $counter = 0;
+		    $latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
+		    $latex_text =~ s/_/$counter++;"{#$counter}"/ges;
+		    if ($attributes eq "") {
+			$attributes = "[]";
+		    }
+		    $attributes =~ s/^\[/[latex "$latex_text" /;
+		}
+
+# Generate the Maude replacement of the K syntactic construct
 		$result .= ($production eq "_")
 					? "$space4 subsort @sorts < $result_sort$space5 "
 					: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
@@ -642,6 +789,15 @@ sub op_attribute {
 	/strict|prec|gather|metadata|latex|ditto|format|assoc|comm|id:/;
 }
 
+
+sub make_latex {
+    local ($_) = @_;
+    s/(\W)`/$1/gsm;
+    s/`(\W)/$1/gsm;
+    s/`/ /gsm;
+    s/($latex_special)/\\$1/gsm;
+    return $_;
+}
 
 sub k2maude {
     local ($_) = @_;
@@ -674,14 +830,58 @@ sub make_metadata {
     local ($_) = @_;
 
     my @k_attributes = ();
-    s!(structural|hybrid|arity\s+\d\+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?)|metadata\s+\"([^\"]*)\"!
-      push(@k_attributes, ((defined $1)?$1:$2));""!gse;
+    my $have_attributes = 0;
+
+# Match the K specific attributes below and make them into metadata
+# Right now it assumes that no \" can appear inside the metadata string
+# Therefore, the latex attribute is expected to be outside
+    s!(structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
+      $have_attributes = 1;
+      if (defined $1) {
+	  local $_ = $1;
+	  if (/^latex\s+"([^"]*?)"$/gs) {
+#              print "Latex attribute $1\n";
+              push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if $latex;
+          }
+          else {
+              push(@k_attributes, $_);
+          }
+      }
+      else {
+	  push(@k_attributes, $2);
+      }
+     ""
+     !gse;
+
     if (@k_attributes) {
 #	print "->@k_attributes<-\n";
 	s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@k_attributes\"\]"!se;
+#	print "$_\n";
+    }
+    elsif ($have_attributes) {
+        $_ = "";
     }
     return $_;
 }
+
+
+sub get_newcommand {
+    local ($_) = @_;
+    my $n = $newcommand_counter++;
+    my $newcommand = $newcommand_prefix.chr(65 + $n % $newcommand_base);
+    while ($n >= $newcommand_base) {
+	$n /= $newcommand_base;
+	$newcommand .= chr(65 + $n % $newcommand_base);
+    }
+    my @args = sort /{#(\d+)}/gms;
+    my $max = $args[$#args];
+    my $args = @args ? "\[$max\]" : "";
+    s/\\\[/[/g;
+    s/\\\]/]/g;
+    push(@newcommands, "\\newcommand\{\\$newcommand\}$args\{$_\}");
+    return $newcommand;
+}
+
 
 # Extract and declare on-the-fly kvariables
 sub on_the_fly_kvars {
