@@ -45,7 +45,7 @@ fmod NAT-LIST-EXTRAS is
 endfm
 
 fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
-	including QID-LIST .
+	including QID-LIST . including EXT-BOOL .
   op stripSpaces : String -> String .
   var S : String . var N : Nat .
   ceq stripSpaces(S) = stripSpaces(substr(S, 1, length(S))) 
@@ -134,6 +134,12 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq unqidify("`,") = "," .
   eq unqidify(S) = S [owise] .
 
+ op all-letters : String -> Bool .
+  eq all-letters(S) = S == "" or-else (isLetter(substr(S,0,1)) and-then all-letters(substr(S,1,length(S)))) .
+  
+  op isLetter : Char -> Bool .
+  eq isLetter(C) = ("A" <= C and-then C <= "Z") or-else ("a" <= C and-then C <= "z") .
+
 
 ---  replace each left pair char in the map by its corresponding right pair char
 ---  in the given input string
@@ -155,7 +161,7 @@ fmod QID-EXTRAS is
 
   op qidList2Qid : QidList -> Qid .
 
-  var  QI : Qid .
+  var  Q QI : Qid .
   var  QIL : QidList .
   vars St St' : String .
   var  N : Nat .
@@ -214,6 +220,11 @@ fmod QID-EXTRAS is
            fi
       else notFound 
       fi .
+
+  op genQids : Nat Qid -> QidList .
+  eq genQids(0,Q) = nil .
+  eq genQids(s(N),Q) = Q genQids(N, Q) .
+
     
 endfm
 

@@ -11,6 +11,7 @@ mod DECL-META-LATEX-PRINT is
   pr NAT-LIST-EXTRAS .
   pr META-MODULE-EXTRAS .
   pr PARSE-METADATA .
+  pr QID-EXTRAS .
 
   var  St Pattern OpenPar ClosingPar : String .
   vars Left R N OpenPars ClosingPars : Nat .
@@ -188,8 +189,11 @@ mod DECL-META-LATEX-PRINT is
   op merge : QidList TermList -> Term .
   op splitMixFix : String -> QidList .
   op prefixOp : Qid Term -> Term .
+  op latexOp : Qid Term -> Term .
   op genCommas : Nat -> QidList .
+  eq genCommas(s(N)) = genQids(N, '`,) .
   op mixfix : Qid -> Bool .
+  op latexCmd : Qid -> Bool .
   op \value{_} : Term -> Term .
   op \myquote{_} : String -> QidList .
 
@@ -267,8 +271,10 @@ mod DECL-META-LATEX-PRINT is
   eq printTerm1(U, Q[NeTl]) 
    =  '`{ printTerm(U, if mixfix(Q) 
     then merge(splitMixFix(string(Q)), NeTl)
-    else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
-    fi) '`} [owise] .
+    else if latexCmd(Q) 
+     then latexOp(Q, merge(genQids(s countTerms(NeTl), '), NeTl))
+     else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
+    fi fi) '`} [owise] .
   eq printTerm(M, T:[Term]) = 'error 
      [owise print "error in Print Term for " T:[Term]] .
  
@@ -357,7 +363,10 @@ mod DECL-META-LATEX-PRINT is
   op printSyntax1 : Module OpDeclSet -> QidList .
   op #Types : Nat -> Attr .
   eq printSyntax1(M, (OPDS' (op F : TyL -> Ty [AS] .) OPDS)) 
-   = printSyntax1(M, OPDS' (\syntax{\nterminal{Ty}}{mergeTypes(splitMixFix(string(F)), TyL)}{#Types(arity(TyL)) AS} OPDS)) .
+   = printSyntax1(M, OPDS' (\syntax{\nterminal{Ty}}{
+      if latexCmd(F) then  F mergeTypes(genQids(s arity(TyL), '), TyL)
+      else mergeTypes(splitMixFix(string(F)), TyL)
+      fi}{#Types(arity(TyL)) AS} OPDS)) .
 
   op mergeTypes : QidList TypeList -> TypeList .
   var Op : OpDecl .
@@ -883,7 +892,7 @@ mod LATEX-PRINT-META is
   ops mergeT mergeQ : QidList TermList -> Term .
 
   op printTerminal : Qid -> QidList .
-  eq printTerminal(Q) = if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ '\terminal '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi [print "terminal " Q] .
+  eq printTerminal(Q) = if Q == ' then nil else if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ '\terminal '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi fi [print "terminal " Q] .
 
   op latexTerminal : Qid -> Bool .
   eq latexTerminal(Q) = (substr(string(Q), _-_(length(string(Q)), 1), 1) == "{" and substr(string(Q), _-_(length(string(Q)), 2), 1) == "`")  or-else (substr(string(Q), 1, 1) == "}" and substr(string(Q), 0, 1) == "`") .
@@ -928,6 +937,7 @@ mod LATEX-PRINT-META is
   eq \constant{Q} = '\constant '`{ printQid(Q) '`} [owise] .
   eq printTerm(M, prefixOp(Q, T))
    = '\prefixOp '`{ printQid(Q)  '`} printTerm(M, T) .
+  eq printTerm(M, latexOp(Q,T)) = Q printTerm(M,T) .
 
   vars St St' St'' : String .
   op printVariable : String -> QidList .
@@ -995,11 +1005,10 @@ mod LATEX-PRINT-META is
 
 
   eq mixfix(Q) =  find(string(Q), "_", 0) :: Nat .
+  ceq latexCmd(Q) = substr(Str,0,1) == "\\" and-then all-letters(substr(Str,1,length(Str))) 
+   if Str := string(Q) [print "testying for LaTeX " Str] .
 
-  var Str : String . var N : Nat . var Nz : NzNat . var NeTl : NeTermList .
-  eq genCommas(s(0)) = nil .
-  eq genCommas(s(Nz)) = '`, genCommas(Nz) .
-
+   var Str : String . var N : Nat . var Nz : NzNat . var NeTl : NeTermList .
   ceq splitMixFix(Str) 
     = \textsf{qid(substr(Str, 0, N))} splitMixFix(substr(Str, N + 1, length(Str)))
    if N := find(Str, "_", 0) .
