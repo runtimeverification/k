@@ -22,11 +22,11 @@ set include BOOL off .
 set show advisories off .
 
 
-fmod BUILTINS is 
+mod BUILTINS is 
   sort Builtins .
-endfm
+endm
 
-fmod PL-BOOL is
+mod PL-BOOL is
   including BUILTINS .
   sort Bool .
   subsort Bool < Builtins .
@@ -61,9 +61,9 @@ fmod PL-BOOL is
   eq notBool A = A xorBool true .
   eq A orBool B = A andBool B xorBool A xorBool B .
   eq A impliesBool B = notBool(A xorBool A andBool B) .
-endfm
+endm
 
-fmod PL-EXT-BOOL is
+mod PL-EXT-BOOL is
   protecting PL-BOOL .
   op _and-then_ : Bool Bool -> Bool [strat (1 0) gather (e E) prec 55] .
   op _or-else_ : Bool Bool -> Bool [strat (1 0) gather (e E) prec 59] .
@@ -72,10 +72,10 @@ fmod PL-EXT-BOOL is
   eq false and-then B = false .
   eq true or-else B = true .
   eq false or-else B = B .
-endfm
+endm
 
 
-fmod PL-NAT is
+mod PL-NAT is
   protecting PL-BOOL .
   sorts Zero NzNat Nat .
   subsort Zero NzNat < Nat < Builtins .
@@ -207,9 +207,9 @@ fmod PL-NAT is
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
-endfm
+endm
 
-fmod PL-INT is
+mod PL-INT is
   protecting PL-NAT .
   sorts NzInt Int .
   subsorts NzNat < NzInt Nat < Int < Builtins .
@@ -382,10 +382,10 @@ fmod PL-INT is
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
-endfm
+endm
 
 
-fmod PL-RAT is
+mod PL-RAT is
   protecting PL-INT .
   sorts PosRat NzRat Rat .
   subsorts NzInt < NzRat Int < Rat < Builtins .
@@ -562,9 +562,9 @@ fmod PL-RAT is
   eq ceilingRat(N /Rat M) = ((N +Int M) -Int 1) /Int M .
   eq floorRat(-Int N /Rat M) = -Int ceilingRat(N /Rat M) .
   eq ceilingRat(-Int N /Rat M) = -Int floorRat(N /Rat M) .
-endfm
+endm
 
-fmod PL-FLOAT is
+mod PL-FLOAT is
   protecting PL-BOOL .
   sorts FiniteFloat Float .
   subsort FiniteFloat < Float < Builtins .
@@ -707,10 +707,10 @@ fmod PL-FLOAT is
   var X Y : Float .
   var Z : FiniteFloat .
   eq X =[Z]Float Y = absFloat(X -Float Y) <Float Z .
-endfm
+endm
 
 
-fmod PL-STRING is
+mod PL-STRING is
   protecting PL-INT .
   sorts String Char FindResult .
   subsort Char < String . --- < Builtins .
@@ -786,10 +786,10 @@ fmod PL-STRING is
                   op-hook stringSymbol (<Strings> : ~> String)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
-endfm
+endm
 
 
-fmod PL-CONVERSION is
+mod PL-CONVERSION is
   protecting PL-RAT .
   protecting PL-FLOAT .
   protecting PL-STRING .
@@ -856,9 +856,9 @@ ceq String2Int(S:String) = I:Int if I:Int := String2Rat(S:String,10) .
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook decFloatSymbol 
                           (<_,_,_>Conversion : Int String Int ~> DecFloat))] .
-endfm
+endm
 
-fmod PL-QID is
+mod PL-QID is
   protecting PL-STRING .
   sort Qid .
 
@@ -874,16 +874,16 @@ fmod PL-QID is
         [special (id-hook QuotedIdentifierOpSymbol (qid)
                   op-hook quotedIdentifierSymbol (<Qids> : ~> Qid)
                   op-hook stringSymbol (<Strings> : ~> String))] .
-endfm
+endm
 
 
 
-fmod PL-RANDOM is
+mod PL-RANDOM is
   protecting PL-NAT .
   op randomRandom : Nat -> Nat
         [special (id-hook RandomOpSymbol
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
-endfm
+endm
 
 mod PL-COUNTER is
   protecting PL-NAT .

@@ -610,7 +610,7 @@ mod DECL-META-LATEX-PRINT is
   eq eMetaLatexPrint(M, (iter AtS))   
     = ('iter eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (special(HkL) AtS))
-    = ('special '`( eMetaLatexPrint(M, HkL) '`) 
+    = (---('special '`( eMetaLatexPrint(M, HkL) '`)) 
        eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (config AtS))   
     = ('config eMetaLatexPrint(M, AtS)) .
