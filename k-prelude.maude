@@ -11,7 +11,7 @@ mod K-TECHNIQUE is
   sorts KResult NeK K .
   subsorts KResult < NeK < K .
   subsorts KResult < K .
-  op . : -> K [metadata "latex(renameTo \\ensuremath{\\kdot})"].
+  op . : -> K [metadata "latex(renameTo \\kdot)"].
   op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
   
   sorts List{KResult} NeList{KResult} List{K} NeList{K} .
@@ -46,7 +46,7 @@ mod K-TECHNIQUE is
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
   subsort ListItem < List .
-  op . : -> List [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
+  op . : -> List [metadata "latex(renameTo \\kdot)"] .
   op ListItem : K -> ListItem  .
   op __ : List List -> List [assoc id: .] .
   op __ : NeList List -> NeList [ditto] .
@@ -63,7 +63,7 @@ mod K-TECHNIQUE is
   sort BagItem Bag NeBag .
   subsort BagItem < NeBag < Bag .
   subsort BagItem < Bag .
-  op . : -> Bag [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
+  op . : -> Bag [metadata "latex(renameTo \\kdot)"] .
   op BagItem : K -> BagItem .
   op __ : Bag Bag -> Bag [assoc comm id: .] .
   op __ : NeBag Bag -> NeBag [ditto] .
@@ -75,7 +75,7 @@ mod K-TECHNIQUE is
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .
   subsort SetItem < Set .
-  op . : -> Set [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
+  op . : -> Set [metadata "latex(renameTo \\kdot)"] .
   op SetItem : K -> SetItem .
   op __ : Set Set -> Set [assoc comm id: .] .
   op __ : NeSet Set -> NeSet [ditto] .
@@ -89,7 +89,7 @@ mod K-TECHNIQUE is
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .
   subsort MapItem < Map .
-  op . : -> Map [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
+  op . : -> Map [metadata "latex(renameTo \\kdot)"] .
   op _|->_ : K K -> MapItem [metadata "latex(renameTo _\\ensuremath{\\mapsto}_)"] .
   op __ : Map Map -> Map [assoc comm id: . prec 120] .
   op __ : NeMap Map -> NeMap [ditto] .

@@ -221,9 +221,9 @@ fmod QID-EXTRAS is
       else notFound 
       fi .
 
-  op genQids : Nat Qid -> QidList .
-  eq genQids(0,Q) = nil .
-  eq genQids(s(N),Q) = Q genQids(N, Q) .
+  op genQids : Nat QidList -> QidList .
+  eq genQids(0,QIL) = nil .
+  eq genQids(s(N),QIL) = QIL genQids(N, QIL) .
 
     
 endfm

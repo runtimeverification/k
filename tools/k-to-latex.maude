@@ -183,7 +183,7 @@ mod DECL-META-LATEX-PRINT is
   op printTermL : Module NeTermList -> QidList .
   eq printTermL(U,(T,NeTl)) = printTerm(U,T) '`, printTermL(U,NeTl) .
   eq printTermL(U,T) = printTerm(U,T) .
-  ops \constant`{_`} \variable`{_`} : Qid -> Term .
+  ops \constant`{_`} \variable`{_`} : QidList -> Term .
   ops \kall`{_`}`{_`} \kprefix`{_`}`{_`} \ksuffix`{_`}`{_`} \kmiddle`{_`}`{_`} : Constant Term -> Term .
   ops \reduce`{_`}`{_`} \ereduce`{_`}`{_`} : Term Term -> Term .
   op merge : QidList TermList -> Term .
@@ -211,9 +211,11 @@ mod DECL-META-LATEX-PRINT is
 
   op getLabelName : OpDeclSet Qid -> Qid .
   eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS, Q)
-   = getName(Q, metadataParse(Str)) .
+   = addParams(getName(Q, metadataParse(Str)),arity(TyL)) .
   eq getLabelName(OPDS, Q) = Q [owise] .
    
+  op addParams : Qid Nat -> Qid .
+  eq addParams(Q, N) = if latexCmd(Q) then qidList2Qid('\ensuremath '`{ Q genQids(N, '`{ '_ '`}) '`}) else Q fi .
 
   var Q' : Qid . var AS' AS1 AS2 : AttrSet .
   op getName : Qid AttrSet -> Qid .
@@ -970,8 +972,10 @@ mod LATEX-PRINT-META is
   eq \myquote{Str} 
    = '\myquote '`{ printStr(replace(substr(Str,1, _-_(length(Str), 2)),"\\n","\\textbackslash n")) '`} .
   op printQid : Qid -> QidList .
-  eq printQid(') = nil .
-  eq printQid(Q) = printStr(string(Q)) [owise] .
+  eq printQid(Q) 
+   = if Q == ' then nil else 
+     if latexCmd(Q) then '\ensuremath '`{ Q '`} 
+     else printStr(string(Q)) fi fi .
  
   op printStr : String -> QidList .
   eq printStr(Str) = string2qidList(replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))) .
