@@ -54,8 +54,9 @@ sub terminate {
   -m (or -maudify) : only maudify, do not kompile
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
+  -f (or -file) : the input source file (optional)
   -latex : maudifies/compiles for generating latex output
-    -style : a sub-option of latex, useful for typesetting
+    -style : useful for typesetting (optional)
 
   The option -m generates all the Maude files file.maude
   corresponding to all the files file.kmaude reachable from
@@ -87,13 +88,14 @@ sub terminate {
 
   The option -latex is used for typesetting a K definition.  It can
   be used in combination with any of the other options above.  If
-  used with -m, then it only maudifies the given input file, adding
-  for each operation a special latex attribute inside the operation's
-  metadata.  If used with -c, it assumes that the input file is
-  already maudified as above and generates a latex and a PDF file
-  corresponding to <module-name>.  If used wihout any of -m or -c,
-  it first applies the -m and then the -c, as explained in the
-  paragraph above but with the additional option -latex.
+  used with -m, then it only maudifies the (entire) given input file,
+  adding for each operation a special latex attribute inside the
+  operation's metadata.  If used with -c, it assumes that the input
+  file is already maudified as above and generates a latex and a
+  PDF file corresponding to a list of specified module names.  The list
+  of module names should be given following the -latex option.  If used
+  wihout any of -m or -c, it first applies the -m and then the -c, as
+  explained in the paragraph above but with the additional option -latex.
 
   The optional parameter passed to -style (which only makes sense when
   the -latex option is used) can alter the style used for typesetting.
@@ -105,7 +107,6 @@ sub terminate {
   directory, it will be included in the generated latex file after the
   above mentioned style, and thus could be used to alter the default
   typesetting macros.
-
  
   Examples
 
@@ -133,6 +134,12 @@ sub terminate {
   Maude-ified K definition starting with module LANG of file
   lang3.maude.  lang3.maude cannot load any K-Maude files; the
   default extension of loaded files is set to .maude.
+
+  kompile -latex LANG LANG-SEMANTICS LANG-SYNTAX -f lang3
+  or
+  kompile lang3 -latex LANG LANG-SEMANTICS LANG-SYNTAX
+  It typsets the specified modules reachable from the input
+  file lang3.
 
 " ;
     print "\nERROR: $_[0]\n\n" if defined $_[0];
@@ -262,14 +269,20 @@ my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";
 # </TOOL CONFIGURATION> #
 #########################
 
+my @kmodules = ();
+
 my @newcommands = ();
 my $newcommand_prefix = "ksyntax";
 my $newcommand_counter = 0;
 my $newcommand_base = 6;
+my @latexify_modules =();
 
 # Process the command arguments
 foreach (@ARGV) {
-    if (($language_module_name eq "?") && !/^-/) {
+    if (($language_file_name eq "?") && !/^-/) {
+	$language_file_name = $_;
+    }
+    elsif (($language_module_name eq "?") && !/^-/) {
 	$language_module_name = $_;
     }
     elsif (($style eq "?") && !/^-/) {
@@ -294,6 +307,9 @@ foreach (@ARGV) {
     elsif (/^--?l(ang|anguage)?$/) {
 	$language_module_name = "?";
     }
+    elsif (/^--?f(file)?$/) {
+	$language_file_name = "?";
+    }
     elsif (/^--?latex$/) {
 	$latex = 1;
     }
@@ -302,6 +318,9 @@ foreach (@ARGV) {
     }
     elsif (/^-/) {
 	terminate("Unknown option $_");
+    }
+    elsif ($latex) {
+	push(@latexify_modules, $_);
     }
     else {
 	$language_file_name = $_;
@@ -323,6 +342,11 @@ if ($compile_only && $language_file_name =~ /(?:.k|.kmaude)$/) {
     terminate("Option -c only works with a .maude file");
 }
 
+# Check that a $language_file_name was indeed given if -f option was used
+if ($language_file_name eq "?") {
+    terminate("Option -f|-file requires that a file name be given right after");
+}
+
 # Check that a $language_module_name was indeed given if -l option was used
 if ($language_module_name eq "?") {
     terminate("Option -l|-lang|-language requires that a module name be given right after");
@@ -331,6 +355,11 @@ if ($language_module_name eq "?") {
 # Check that a $style was indeed given if -style option was used
 if ($style eq "?") {
     terminate("Option -style requires that a style be given right after");
+}
+
+# Check that at least one module name was given with -latex option
+if ($latex && !@latexify_modules) {
+    terminate("At least one module name must be given right after -latex");
 }
 
 # Create the module name, if not already given, by capitalizing the file name
@@ -349,6 +378,9 @@ if (!$compile_only) {
     print "Tokens:\n-------\n@all_tokens\n" if $verbose;
     $language_file_name =~ s/(\.k|\.kmaude)$//;
     print "\n" if $verbose;
+
+    print_header("New commands that will be added to the generated latex file") if $verbose && $latex;
+    print join("\n",@newcommands)."\n" if $verbose && $latex;
 }
 
 # Following is executed whenever the option -m was not selected
@@ -364,12 +396,6 @@ if (!$maudify_only) {
 
 # Checking whether Maude is available
     run_maude("Detecting Maude ... ", "quit\n");
-
-# Testing whether the input module $language_module_name exists
-    run_maude("Testing if the input module $language_module_name exists ... ",
-	      "load $language_file_name\n",
-	      "show module $language_module_name .\n",
-	      "quit\n");
 
 # Calling either the maude compiler or the latex compiler, depending upon $latex
     if ($latex) {
@@ -412,47 +438,49 @@ sub latexify {
     close FILE;
     print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
 
-    $_ = run_maude("Calling the Maude Latex-ifier ... ",
-		   "load $language_file_name\n",
-		   "set show advisories off .\n",
-		   "load $temp_file\n",
-		   "select META-LEVEL .\n",
-		   "select $language_module_name .\n",
-		   "set show advisories on .\n",
-		   "load $k_to_latex\n",
-		   "set print attribute on .\n",
-		   "loop latex-print .\n",
-		   "(print $language_module_name .)\n",
-		   "quit\n");
+    my $latex_output = $_ =
+	run_maude("Calling the Maude Latex-ifier ... ",
+		  "load $language_file_name\n",
+		  "set show advisories off .\n",
+		  "load $temp_file\n",
+		  "select META-LEVEL .\n",
+		  "select $language_module_name .\n",
+		  "set show advisories on .\n",
+		  "load $k_to_latex\n",
+		  "set print attribute on .\n",
+		  "loop latex-print .\n",
+		  map("(print $_ .)\n", @latexify_modules),
+#		  "(print $language_module_name .)\n",
+		  "quit\n");
 
-    if (/(\\begin{document}.*?\\end{document})/gms) {
-	$_ = $1;
+    s/\\begin{module}.*?\\end{module}//gms;
+    my @latex_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
+    if (@latex_modules && !/\\begin{module}/) {
+	print "Latex style used: $style\n" if $verbose;
+	
+# File name where the compiled output will be stored:
+	my $output_file_name = "$language_file_name.tex";
+	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
+	print FILE "\\documentclass[landscape]{article}\n";
+	print FILE "\\usepackage{import}\n";
+	print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
+	print FILE join("\n",@newcommands)."\n";
+	print FILE "\\begin{document}\n";
+	print FILE join("\\newpage", @latex_modules)."\n";
+	print FILE "\\end{document}\n";
+	close FILE;
+	print "Latex version written in $output_file_name\n" if $verbose;
     }
     else {
-	print "ERROR: \\begin{document} ... \\end{document} not found in generated output\n";
+	print "ERROR: \\begin{module} ... \\end{module} not found in generated output\n";
 	print "This error most likely due to wrong latex attributes\n";
 	print "Check generated output in $output_file\n";
 	open FILE,">",$output_file or die "Cannot create $output_file\n";
-	print FILE;
+	print FILE $latex_output;
 	close FILE;
 	print "Aborting the compilation\n";
 	exit(1);
     }
-
-    print "Latex style used: $style\n" if $verbose;
-
-# File name where the compiled output will be stored:
-    my $output_file_name = "$language_module_name.tex";
-
-    open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
-    print FILE "\\documentclass[landscape]{article}\n";
-    print FILE "\\usepackage{import}\n";
-    print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
-    print FILE join("\n",@newcommands)."\n";
-    print FILE $_;
-    close FILE;
-
-    print "Latex version written in $output_file_name\n" if $verbose;
 }
 
 
@@ -460,6 +488,12 @@ sub latexify {
 # It also performs some sanity checks
 sub compile {
 # Assumes $language_file_name is a file name with no extension
+
+# Testing whether the input module $language_module_name exists
+    run_maude("Testing if the input module $language_module_name exists ... ",
+	      "load $language_file_name\n",
+	      "show module $language_module_name .\n",
+	      "quit\n");
 
     print_header("Compiling $language_file_name, starting with module $language_module_name") if $verbose;
 
@@ -607,6 +641,7 @@ sub maudify_file {
 	(my $before, local $_, my $after) = ($1,$2,$3);
 	if (m!^kmod\s+(\S+)!) {
 	    print $indent."K module $1 ... " if $verbose;
+	    push(@kmodules,$1);
 	    $_ = maudify_module($_);
 	    print "DONE\n" if $verbose;
 	}
@@ -1048,8 +1083,6 @@ sub freeze {
 	$marker = shift;
     }
     return "$marker".join("$specialSymbol",map(ord,(split('',$string))))."$specialSymbol";
-
-#    return "$specialSymbol$marker".join("$specialSymbol$marker",map(ord,(split('',$string))));
 }
 
 # Makes concrete all the frozen (sub)strings
