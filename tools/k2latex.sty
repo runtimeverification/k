@@ -21,7 +21,7 @@
 \newcommand{\kcontext}[2]{\par\textsc{context:
 }$#2$}
 \newcommand{\syntax}[3]{\par $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
-\newcommand{\syntaxCont}[3]{\par ${\color{white}#1::}\mid{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
+\newcommand{\syntaxCont}[3]{\par ${\color{white}#1::\;}\mid{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
 \newcommand{\cellDecl}[2]{\par \textsc{cell:
 }$#1$ wraps $#2$}
 \newcommand{\nonTerminal}[1]{\textit{#1}\/}
@@ -69,7 +69,7 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \end{tabular}
 }
 \newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
-\newcommand{\reduceTopS}[2]{{#1}\rightleftharpoons{#2}}
+\newcommand{\reduceTopS}[2]{{#1}\rightharpoonup{#2}}
 \newcommand{\reduce}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hline{#2}\end{array}}
 \newcommand{\reduceS}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hdashline[2pt/2pt]{#2}\end{array}}
 \newcommand{\kra}{\curvearrowright}

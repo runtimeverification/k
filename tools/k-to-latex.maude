@@ -1020,10 +1020,16 @@ mod LATEX-PRINT-META is
 
   var M : Module .  var MAS : MembAxSet . var OPDS : OpDeclSet .
   var QIL QIL' : QidList .
-  eq printSyntax1(M, OPDS' \syntax{QIL}{QIL'}{AS} OPDS)
-   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL,OPDS' OPDS) '`} '`{  '`} eMetaLatexPrintQ(M, QIL, \syntax{QIL}{QIL'}{AS} removeSubSorts(QIL, OPDS' OPDS))) [owise] .
+---(
+  eq printSyntax1(M, \syntax{QIL}{QIL'}{AS} OPDS)
+   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL,OPDS) '`} '`{  '`} eMetaLatexPrintQ(M, QIL, \syntax{QIL}{QIL'}{AS} removeSubSorts(QIL, OPDS))) [owise] .
+  eq printSyntax1(M, \subsort{QIL'}{QIL} OPDS)
+   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL, \subsort{QIL'}{QIL} OPDS) '`} '`{  '`} printSyntax1(M, removeSubSorts(QIL, OPDS))) [owise] .
+---)
   eq printSyntax1(M, OPDS' \subsort{QIL'}{QIL} OPDS)
-   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) '`} '`{  '`} printSyntax1(M, removeSubSorts(QIL,OPDS' OPDS))) [owise] .
+   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) '`} '`{  '`} eMetaLatexPrintQ(M, QIL, removeSubSorts(QIL,OPDS' OPDS))) [owise] .
+  eq printSyntax1(M, OPDS' \syntax{QIL}{QIL'}{#Types(N) AS} OPDS)
+   = ('\n '\syntax '`{ QIL '`} '`{ QIL' '`} '`{ eMetaLatexPrint(M, N, AS)  '`} eMetaLatexPrintQ(M, QIL, OPDS' OPDS)) [owise] .
 ---  eq \subsort{QIL}{QIL'} = \syntax{QIL'}{QIL}{none} .
 
   op printSubSorts : QidList OpDeclSet -> QidList .
