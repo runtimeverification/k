@@ -1128,7 +1128,7 @@ mod LATEX-PRINT-META is
   eq printTerm0(M,T) = printTerm(M,T) [owise] .
 
   op latexPrint : Module Module -> QidList .
-  var FM : Module .
+  var FM : [Module] .
 ---(
   eq latexPrint(M,
 (fmod 'SYNTAX-ERROR is nil sorts none . none (OPDS (op 'error : nil -> 'Error 
@@ -1146,7 +1146,16 @@ endfm)) = tokenize(Str) '\n eMetaLatexPrint(setMbs(setRls(setEqs(M,none),none),n
 
 
   op latexPrint : Qid -> QidList .
-  eq latexPrint(Q) = latexPrint(upModule(Q,true), upModule(Q,false)) .
+  eq latexPrint(Q) = $latexPrint(Q,upModule(Q,true)) .
+  op $latexPrint : Qid [Module] -> QidList .
+  eq $latexPrint(Q, FM) = if FM :: Module 
+     then latexPrint(FM, upModule(Q,false)) 
+     else (
+       '\begin '`{ 'module '`} '`{ eMetaLatexPrintME(Q) '`} 
+          '\mbox '`{ '\sc '\ '\s 'does 'not 'exist 
+                     'or 'is 'not 'valid. '`}
+       '\n '\end '`{ 'module '`} '\n) 
+     fi .
 endm
 
 mod LATEX-PRINT-LOOP is including LOOP-MODE + LATEX-PRINT-META .
@@ -1157,7 +1166,7 @@ mod LATEX-PRINT-LOOP is including LOOP-MODE + LATEX-PRINT-META .
 
   op error : -> [Module] .
   rl ['print Q QIL, idle, QIL'] 
-   => [QIL, idle, latexPrint(upModule(Q,true), upModule(Q, false))] .
+   => [QIL, idle, latexPrint(Q)] .
 
 endm
 
