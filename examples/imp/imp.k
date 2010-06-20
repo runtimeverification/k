@@ -4,19 +4,19 @@ in ../../k-prelude
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
   syntax AExp ::= Id | Int
-                | AExp + AExp [prec 33 gather (E e) format(d b o d) strict] 
-                | AExp / AExp [prec 31 gather (E e) format(d b o d) strict] 
+                | AExp + AExp [prec 33 gather (E e) format(d b o d) strict]
+                | AExp / AExp [prec 31 gather (E e) format(d b o d) strict]
   syntax BExp ::= Bool
-                | AExp <= AExp [prec 37 format(d b o d) seqstrict] 
-                | not BExp [prec 53 format(b o d) strict] 
-                | BExp and BExp [prec 55 format(d b o d) strict(1)] 
+                | AExp <= AExp [prec 37 format(d b o d) seqstrict latex "{#1}\leq{#2}"]
+                | not BExp [prec 53 format(b o d) strict]
+                | BExp and BExp [prec 55 format(d b o d) strict(1)]
   syntax Stmt ::= skip ; [format (b d o)]
                 | Id = AExp ; [prec 40 format(d b o b o) strict(2)]
-                | Stmt Stmt [prec 60 gather (e E) format (d noi d)] 
-                | if BExp then Stmt else Stmt [prec 59 format (b o bni n++i bn--i n++i --) strict(1)] 
-                | while BExp do Stmt [prec 59 format (b o b n++i --)] 
+                | Stmt Stmt [prec 60 gather (e E) format (d noi d)]
+                | if BExp then Stmt else Stmt [prec 59 format (b o bni n++i bn--i n++i --) strict(1)]
+                | while BExp do Stmt [prec 59 format (b o b n++i --)]
   syntax Pgm ::=  var List{Id} ; Stmt [prec 70 format (nb o d ni d)]
-  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}] 
+  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}]
 endkm
 
 kmod IMP-PROGRAMS is including IMP-SYNTAX 

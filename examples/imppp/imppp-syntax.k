@@ -7,14 +7,14 @@ kmod IMPPP-SYNTAX is including PL-INT + PL-ID
                 | read
 
   syntax BExp ::= Bool
-                | AExp <= AExp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict]
+                | AExp <= AExp [prec 37 latex "{#1}\leq{#2}" seqstrict]
                 | not BExp [prec 53 strict]
                 | BExp and BExp [gather(E e) prec 55 strict(1)]
 
   syntax Stmt ::= var Id ; [prec 2]
                 | Id = AExp ; [prec 80 gather (e E) strict(2)]
-                | { } [metadata "latex(renameTo \\{\\})"]
-                | { Stmt } [gather(&) metadata "latex(renameTo \\{_\\})"]
+                | { }
+                | { Stmt } [gather(&)]
                 | Stmt Stmt [prec 100 gather(e E)]
                 | AExp ; [prec 90 strict]
                 | if BExp then Stmt else Stmt [strict(1)]

@@ -115,7 +115,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <k>aspect S => .<_/k> <aspect>_=>S</aspect>
 
 --- Functions
-  syntax Val ::= closure-lambda ( List{Id} , Stmt , Map ) [metadata "latex(renameTo closure\\subscript\\lambda)"]
+  syntax Val ::= closure-lambda ( List{Id} , Stmt , Map ) [latex "{\it closure}_\lambda({#1},{#2},{#3})"]
   rule <k>lambda Xl.S1 => closure-lambda(Xl,(S2 S1),Env)<_/k> <env>Env:Map</env> <aspect>S2</aspect>
   syntax ListItem ::= ( K , Map )
   rule <k> _`(_`)(closure-lambda(Xl,S,Env),Vl) ~> K => S return 0;</k>
@@ -124,7 +124,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <k>return V;~>_ => V~>K</k> <env>_=>Env</env> <fstack>(K,Env)=>.<_/fstack>
 
 --- Callcc
-  syntax Val ::= cc ( K , Map , List )
+  syntax Val ::= cc ( K , Map , List ) [latex "{\it cc}({#1},{#2},{#3})"]
   rule <k>(callcc(V) => _`(_`)(V, cc(K,Env,FStack))) ~> K</k> <env>Env</env> <fstack>FStack:List</fstack>
   rule <k> _`(_`)(cc(K,Env,FStack),V)~>_ => V~>K</k> <env>_=>Env</env> <fstack>_=>FStack</fstack>
 
@@ -136,7 +136,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
    rule <thread_> <k>spawn S => .<_/k> <env>Env</env> <_/thread>
         (. => <thread_> <k>S</k> <env>Env</env> <_/thread>)
    rule (<thread_> <k>.K</k> <fstack>.List</fstack> <holds>Holds:Map</holds> <_/thread> => .)
-        <busy>Busy:Set => Busy-keys(Holds)</busy>
+        <busy>Busy:Set => Busy -Set keys(Holds)</busy>
    rule <k>acquire V; => .<_/k> <holds_>. => V|->0<_/holds> <busy>Busy (.=>SetItem(V))</busy>
      if notBool(V in Busy)
    rule <k>acquire V; => .<_/k> <holds_>V|->(N => sNat N)<_/holds>
@@ -173,10 +173,11 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <agents_><k>haltSystem;<_/k><_/agents>=> <agents>.Bag</agents>
 
 --- Code generation (via reflection)
-  syntax KLabel ::= quoteit[ Nat ] | box ( KLabel ) [metadata "latex(renameTo \\framebox{\_})"]
-  syntax Val ::= code ( List{K} )
-  syntax K ::= K box(~>) K [metadata "latex(renameTo _\\framebox{\\ensuremath\\kra}\_)" strict]
-             | K box(,,) K [metadata "latex(renameTo _\\framebox{,,}\_)" strict]
+  syntax KLabel ::= quoteit[ Nat ] [latex "{\it quote}_{\scriptsize{#1}}"]
+                  | box ( KLabel ) [latex "\framebox{#1}"]
+  syntax Val ::= code ( List{K} ) [latex "{\it code}({#1})"]
+  syntax K ::= K box(~>) K [latex "{#1}\framebox{$\kra$}{#2}" strict]
+             | K box(,,) K [latex "{#1}\framebox{,,}{#2}" strict]
 
   context box(Label:KLabel)(_,,`[HOLE`]:K,,_)
 
@@ -212,7 +213,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   syntax List{Exp} ::= List{Val}
 
 --- length
-  syntax Nat ::= `| List{Id} `| [metadata "latex(renameTo \\ensuremath|_\\ensuremath|)"]
+  syntax Nat ::= `| List{Id} `|
   rule |()| => 0 [structural]
   rule |X,Xl| => sNat|Xl| [structural]
 

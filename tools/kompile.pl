@@ -913,6 +913,7 @@ sub get_newcommand {
     my $args = @args ? "\[$max\]" : "";
     s/\\\[/[/g;
     s/\\\]/]/g;
+    s!(\{\#\d+\})(\{\#\d+\})!$1\\mathrel{}$2!g;
     push(@newcommands, "\\newcommand\{\\$newcommand\}$args\{$_\}");
     return $newcommand;
 }

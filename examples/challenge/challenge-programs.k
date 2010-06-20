@@ -3,25 +3,25 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
   ops a b c f i j k m n s t x y z odd even odd-calls even-calls goto exit : -> Id
 
   op p1 : -> Exp
-  eq p1 = 3+5
+  macro p1 = 3+5
 
   op p2 : -> Exp
-  eq p2 = (3 <= 5) and not (5.8 <= 1.0)
+  macro p2 = (3 <= 5) and not (5.8 <= 1.0)
 
   op p3 : -> Exp
-  eq p3 = randomBool and true
+  macro p3 = randomBool and true
 
   op p4 : -> Exp
-  eq p4 = (3 <= 5.2) and not (5.8 <= 1)
+  macro p4 = (3 <= 5.2) and not (5.8 <= 1)
 
   op p5 : -> Exp
-  eq p5 = 3 / 2 + 3 / 2.0
+  macro p5 = 3 / 2 + 3 / 2.0
 
   op p6 : -> Stmt
-  eq p6 = var x,y ; y = 1.5 + ++ y ; print(y) ;
+  macro p6 = var x,y ; y = 1.5 + ++ y ; print(y) ;
 
   op p7 : -> Stmt
-  eq p7 = 
+  macro p7 = 
         var n, s, i ; 
          n = 100 ;
          s = 0 ;
@@ -33,7 +33,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
           print( s / (n + 0.0)) ;
 
   op p8 : -> Stmt
-  eq p8 = var a,n,i,j,t ;
+  macro p8 = var a,n,i,j,t ;
           n = 10 ;
           a = malloc(n) ;
           n = n + -1 ;
@@ -55,7 +55,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
  
  
   op p9 : -> Stmt
-  eq p9 = var odd,even,odd-calls,even-calls ;
+  macro p9 = var odd,even,odd-calls,even-calls ;
           aspect (odd-calls = odd-calls + 1 ;)
           odd = lambda x . (if not(0 <= x) then return even(x + 1); else if not(x <= 0) then return even(x + -1) ; else return false ;) ;
           aspect (even-calls = even-calls + 1 ;)
@@ -66,17 +66,17 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
           print(even-calls) ;
 
   op p10 : -> Stmt
-  eq p10 = print((mu f . lambda x . if 2 <= x then return(f(x + -1) * x ); else return(x);)(10)) ;
+  macro p10 = print((mu f . lambda x . if 2 <= x then return(f(x + -1) * x ); else return(x);)(10)) ;
 
 --- should evaluate to 0 not to 1 (mu is wrong the way it is)
   op p11 : -> Stmt
-  eq p11 = var y ; y = 0 ; var f ; f = lambda x . if (x <= 0) then return y ; else {var y ; y = 1 ; return f(x + -1) ;} ; print(f(1)) ;
+  macro p11 = var y ; y = 0 ; var f ; f = lambda x . if (x <= 0) then return y ; else {var y ; y = 1 ; return f(x + -1) ;} ; print(f(1)) ;
 
   op p12 : -> Stmt
-  eq p12 = var goto,n ; print(callcc (lambda exit . ((callcc (lambda k . (goto = k ;))) ; if n <= 10 then (n = n + 1 ;) else (exit (n) ;) return goto(0);))) ;
+  macro p12 = var goto,n ; print(callcc (lambda exit . ((callcc (lambda k . (goto = k ;))) ; if n <= 10 then (n = n + 1 ;) else (exit (n) ;) return goto(0);))) ;
 
   op p13 : -> Stmt
-  eq p13 = var x,y ;
+  macro p13 = var x,y ;
            x = 1 ; y = 0 ;
            spawn (x = 0 ;)
            while (1 <= x) do (y = y + 1 ;)
@@ -84,7 +84,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
         
 
   op p14 : -> Stmt
-  eq p14 =  var x ; 
+  macro p14 =  var x ; 
                 x = 1 ; 
                 spawn (rendezvous 1 ; print(x) ; rendezvous 2 ;)
                 spawn (rendezvous 3 ; print(x) ; rendezvous 4 ;)
@@ -96,7 +96,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
    
 
   op p15 : -> Stmt
-  eq p15 = var x ; 
+  macro p15 = var x ; 
                 x = 1 ; 
                 spawn (x = x + 1 ; rendezvous 1 ;)
                 x = x + 1 ;
@@ -104,7 +104,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
                 print(x) ;
     
   op p16 : -> Stmt
-  eq p16 = var x ; 
+  macro p16 = var x ; 
                 x = 1 ; 
                 spawn (acquire 1 ; x = x + 1 ; release 1 ; rendezvous 1 ;)
                 acquire 1 ;
@@ -115,7 +115,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
     
 
   op p17 : -> Stmt
-  eq p17 = var x ; 
+  macro p17 = var x ; 
                 x = 1 ; 
                 spawn (acquire 1 ; rendezvous 1 ; x = x + 1 ; haltThread ;)
                 rendezvous 1 ;
@@ -126,7 +126,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
     
 
   op p18 : -> Stmt
-  eq p18 = var x,y,z ;
+  macro p18 = var x,y,z ;
                 x = 1 ; 
                 y = newAgent(var y ; y = receiveFrom parent ; 
                      sendSynch me to y ; spawn haltAgent ; print(receive) ;) ; 
@@ -136,7 +136,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
  
 
   op p19 : -> Stmt
-  eq p19 = 
+  macro p19 = 
    var n,c,i,x ;
    n = 5 ;
    c = quote(1) ;
@@ -149,7 +149,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
    print(eval(c));
 
   op p20 : -> Stmt
-  eq p20 =
+  macro p20 =
    var a,b,c ;
    c = 10 ;
    a = lift c ;
@@ -158,7 +158,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
  
 
   op p21 : -> Stmt
-  eq p21 = 
+  macro p21 = 
    var n,c,i,x ;
    n = 5 ;
    c = quote(1) ;
@@ -171,14 +171,14 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
    print(eval(c));
 
   op p22 : -> Stmt
-  eq p22 = 
+  macro p22 = 
    var x ; 
    x = quote(2); 
    print(eval(quote(1 + 2 + unquote(x) + 4 + 5)));
 
   op p23 : -> Stmt
   ops genpow cube : -> Id
-  eq p23 = {
+  macro p23 = {
    var genpow ;
    genpow = lambda n . {
               if n <= 0
@@ -193,7 +193,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
 
   op p24 : -> Stmt
   ops f1 f2 fib loc cod sender : -> Id
-  eq p24 = 
+  macro p24 = 
    var fib,loc ;
    fib = newAgent
    {
@@ -220,7 +220,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
 
   ops p25 p26 : -> Stmt
   ops input array fix split splitl merge mergeSort selectionSort  list2array array2list length sorting l left right mergeSortAgent : -> Id
-  eq p25 = 
+  macro p25 = 
     var l, selectionSort, list2array, length, array2list, sorting, mergeSortAgent ; 
     l = [10,9,8,7,6,5,4,3,2,1];
     mergeSortAgent = newAgent {
@@ -293,7 +293,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
   
 
   op SELECTION-SORT : -> Stmt
-  eq SELECTION-SORT = 
+  macro SELECTION-SORT = 
     length = lambda l . { if l == [] then return 0 ; else return 1 + length(tail l); };
     array = malloc length(input) ; n = 0 ;
     while not(input == []) do { *(array + n) = head input ; input = tail input ; ++ n ; }
@@ -311,7 +311,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
  
 
 --- originally, suppose that the main agent did all the work, using only one thread
-  eq p26 = 
+  macro p26 = 
     var input, length, array, n, i, j, t, k ;
     input = [10,9,8,7,6,5,4,3,2,1];
     SELECTION-SORT
@@ -321,7 +321,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
 
 --- now the main agent got smarter: creates a new thread and delegates the work to it
   op p27 : -> Stmt
-  eq p27 = 
+  macro p27 = 
     var input, length, array, n, i, j, t, k ;
     input = [10,9,8,7,6,5,4,3,2,1];
     callcc lambda k . { spawn {k(0) ;} haltThread ; } ;
@@ -333,7 +333,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
 
 --- comment
   op MERGE-SORT-AGENT : -> Exp
-  eq MERGE-SORT-AGENT = newAgent {
+  macro MERGE-SORT-AGENT = newAgent {
       var split, merge, mergeSort ;
       split = lambda l . {
                 var t ;
@@ -370,7 +370,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
 --- then waits for whichever finishes first; once the first answer is printed, the system is halted
   ops exit goto : -> Id
   op p28 : -> Stmt
-  eq p28 = 
+  macro p28 = 
     var input, exit, goto, length, array, n, i, j, t, k, mergeSortAgent ;
     input = [] ;
     callcc lambda exit . { callcc (lambda k . {goto = k ;}) ; i = read ; if i == -1 then exit(0) ; else {input = (i : input) ; goto(1);}} ;
@@ -391,7 +391,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
 
 ops in g x y : -> Id
 op p29 : -> Stmt
-eq p29 = 
+macro p29 = 
   var in, exit, g, length, array, a, n, i, j, t, x, y, mergeSortAgent;
   in = [];
   callcc lambda k.{
@@ -446,21 +446,26 @@ eq p29 =
   free array ;
 
 op p30 : -> Stmt
-eq p30 = 
-var i ; i = 0 ;
-while (++ i <= 3) do {
-  newAgent {print me ; barrier ;} ;
-}
-barrier ;
-print me ;
+macro p30 = 
+  var i;
+  i = 0;
+  while (++i <= 3) do {
+    newAgent {
+      print me;
+      barrier;
+    };
+  }
+  barrier;
+  print me;
 
 
 op p31 : -> Stmt
-eq p31 = 
-var i ; i = 0 ;
-while (++ i <= 3) do {
-  newAgent {print receive ;} ;
-}
-broadcast 0 ;
+macro p31 = 
+  var i;
+  i = 0;
+  while (++i <= 3) do {
+    newAgent {print receive;};
+  }
+  broadcast 0;
 
 endkm

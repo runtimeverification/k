@@ -9,7 +9,7 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
   syntax Exp ::= Exp + Exp   [gather(E e) prec 33 strict]       --- addition
                | Exp * Exp   [gather(E e) prec 31 strict]       --- multiplication
                | Exp / Exp   [gather(E e) prec 31 strict]       --- division
-               | Exp <= Exp  [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" seqstrict]
+               | Exp <= Exp  [prec 37 latex "{#1}\leq{#2}" seqstrict]
                | Exp == Exp  [prec 37 strict]                   --- equality test
                | not Exp     [prec 53 strict]                   --- boolean negation
                | Exp and Exp [gather(E e) prec 55 strict(1)]    --- boolean conjunction
@@ -24,8 +24,8 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
   syntax Exp ::= ++ Id [prec 0]
 
 --- Basic statement constructs
-  syntax Stmt ::= { }                        [metadata "latex(renameTo \\{\\})"]
-                | { Stmt }                   [gather(&) metadata "latex(renameTo \\{_\\})"]
+  syntax Stmt ::= { }
+                | { Stmt }                   [gather(&)]
                 | Stmt Stmt                  [prec 100 gather(e E)]
                 | Exp ;                      [prec 90 strict]
                 | if Exp then Stmt else Stmt [strict(1)]
@@ -36,7 +36,7 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
   syntax Stmt ::= print Exp ; [strict]
 
 --- Memory allocation and pointers
-  syntax Exp ::= & Id        [metadata "latex(renameTo \\&_)"]
+  syntax Exp ::= & Id
                | * Exp       [strict]
                | malloc Exp  [strict]
   syntax Stmt ::= free Exp ; [strict]
@@ -52,13 +52,13 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
   syntax Stmt ::= aspect Stmt [prec 90]
 
 --- Functions
-  syntax Exp ::= lambda List{Id} . Stmt [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
+  syntax Exp ::= lambda List{Id} . Stmt [latex "\lambda{#1}.{#2}"]
                 | Exp ( )
                 | Exp ( List{Exp} )     [prec 2 strict]
   syntax Stmt ::= return Exp ;          [strict]
 
 --- Fixed point
-  syntax Exp ::= mu Id . Exp [metadata "latex(renameTo \\ensuremath\\mu_._)"]
+  syntax Exp ::= mu Id . Exp [latex "\mu{#1}.{#2}"]
 
 --- Callcc
   syntax Exp ::= callcc Exp [prec 50 strict]

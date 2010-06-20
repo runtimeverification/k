@@ -13,11 +13,11 @@ mod K-TECHNIQUE is
   subsorts KResult < K .
   op . : -> K [metadata "latex(renameTo \\kdot)"].
   op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
-  
+
   sorts List{KResult} NeList{KResult} List{K} NeList{K} .
-  op .List{K} : -> List{K} .
+  op .List{K} : -> List{K} [metadata "latex(renameTo \\ensuremath{\\kdot}{\\it{}List\\{K\\}})"] .
   subsort K < NeList{K} < List{K} .
-  op .List{K} : -> List{KResult} .
+  op .List{K} : -> List{KResult} [metadata "latex(renameTo \\ensuremath{\\kdot}{\\it{}List\\{K\\}})"] .
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
 
@@ -76,7 +76,7 @@ mod K-TECHNIQUE is
   subsort SetItem < NeSet < Set .
   subsort SetItem < Set .
   op . : -> Set [metadata "latex(renameTo \\kdot)"] .
-  op SetItem : K -> SetItem .
+  op SetItem : K -> SetItem [metadata "latex(renameTo {\\it{}SetItem})"] .
   op __ : Set Set -> Set [assoc comm id: .] .
   op __ : NeSet Set -> NeSet [ditto] .
 
@@ -141,7 +141,7 @@ mod K-MAP-EXTRAS is
   eq Map[List / .List`{K`}] = Map .
 
 
-  op _[undef/_] : Map List{K} -> Map .
+  op _[undef/_] : Map List{K} -> Map [metadata "latex(renameTo _[\\ensuremath{\\bot\\;}/_])"] .
   eq Map[undef/ K1,,NList1] = Map[undef/ K1][undef/ NList1] .
   eq Map[undef/ .List{K}] = Map .
   eq (Map K1 |-> K2)[undef/ K1] = Map .
@@ -170,9 +170,9 @@ mod K-SET-EXTRAS is
   eq SetItem in Set SetItem = true .
   eq SetItem in Set = false [owise] .
 
-  op _-_ : Set Set -> Set .
-  eq . - Set = . .
-  eq (SetItem Set) - Set' = if SetItem in Set' then Set - Set' else SetItem (Set - Set') fi .
+  op _-Set_ : Set Set -> Set [metadata "latex(renameTo _-\\subscript{{\\scriptstyle\\it{}Set}}_)"] .
+  eq . -Set Set = . .
+  eq (SetItem Set) -Set Set' = if SetItem in Set' then Set -Set Set' else SetItem (Set -Set Set') fi .
 endm
 
 mod K-BAG-EXTRAS is
@@ -187,9 +187,9 @@ mod K-BAG-EXTRAS is
   eq BagItem in Bag BagItem = true .
   eq BagItem in Bag = false [owise] .
 
-  op _-_ : Bag Bag -> Bag .
-  eq . - Bag = . .
-  eq (BagItem Bag) - Bag' = if BagItem in Bag' then Bag - Bag' else BagItem (Bag - Bag') fi .
+  op _-Bag_ : Bag Bag -> Bag [metadata "latex(renameTo _-\\subscript{{\\scriptstyle\\it{}Bag}}_)"] .
+  eq . -Bag Bag = . .
+  eq (BagItem Bag) -Bag Bag' = if BagItem in Bag' then Bag -Bag Bag' else BagItem (Bag -Bag Bag') fi .
 endm
 
 mod K-LIST-EXTRAS is
