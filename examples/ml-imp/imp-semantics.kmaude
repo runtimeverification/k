@@ -1,12 +1,7 @@
 load imp-syntax.kmaude
 
-mod UTILS is including PL-INT .
-  op isInt : Int -> Bool .
-  var I : Int .
----  eq isInt(I) = I :: Int .
-endm
 
-kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS
+kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   subsort Val <  KResult
   subsort Stmts Exp < K
 

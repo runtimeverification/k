@@ -1,7 +1,7 @@
-load ml-prelude.maude
+load ../../k-prelude.maude
 
 
-mod FORMULA is including PL-BOOL .
+fmod FORMULA is including PL-BOOL .
   sorts Truth Atom NtFormula Formula .
   subsort Atom < NtFormula .
   subsort Truth NtFormula < Formula .
@@ -57,10 +57,10 @@ mod FORMULA is including PL-BOOL .
 --- very, very bad eqs
 ---   eq NtPhi /\ (NtPhi1 \/ NtPhi2) = (NtPhi /\ NtPhi1) \/ (NtPhi /\ NtPhi2) .
 ---   eq (NtPhi1 \/ NtPhi2) ===> Phi = (NtPhi1 ===> Phi) \/ (NtPhi2 ===> Phi) .
-endm
+endfm
 
 
-mod MATHEMATICAL-OBJECT is including FORMULA + PL-NAT .
+fmod MATHEMATICAL-OBJECT is including FORMULA + PL-NAT .
 ***(
 ?Sort stands for bound symbolic mathematical objects
 !Sort stands for unbound symbolic mathematical objects
@@ -97,10 +97,10 @@ Sort++ stands for all the above
   eq (Obj1, Obj1', ObjList1) === (Obj2, Obj2', ObjList2)
    = (Obj1 === Obj2) /\ (Obj1' === Obj2') /\ (ObjList1 === ObjList2) .
   eq .List{MathObj++} === .List{MathObj++} = TrueFormula .
-endm
+endfm
 
 
-mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
+fmod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
 --- define sorts, subsorts and skolem as below for each new mathematical object
   sorts ?Int !Int FreeInt Int++ .   --- sort Int already defined
   subsorts ?Int !Int FreeInt Int < Int++ < MathObj++ .
@@ -162,41 +162,5 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   eq (1 === ?(B)) = @ B .
 
   eq (I:Int === J:Int) = @(I:Int ==Bool J:Int) .
-endm
-
-
-mod VAR-UTILS is inc MATHEMATICAL-OBJECT + PL-META-TERM .
-  op get?VarSet : Formula -> Set{MathObj++} .
-  op get?VarSet : TermList -> Set{MathObj++} .
-  op get!VarSet : Formula -> Set{MathObj++} .
-  op get!VarSet : TermList -> Set{MathObj++} .
-  op getFreeVarSet : Formula -> Set{MathObj++} .
-  op getFreeVarSet : TermList -> Set{MathObj++} .
-
-  var Phi : Formula .
-  var Obj : MathObj++ .
-
-  eq get?VarSet(Phi) = get?VarSet(upTerm(Phi)) .
-  eq get!VarSet(Phi) = get!VarSet(upTerm(Phi)) .
-  eq getFreeVarSet(Phi) = getFreeVarSet(upTerm(Phi)) .
-
-  var Q : Qid .  var QC : Constant .  vars QT NT NT' : Term .
-  var QTList : TermList .  var QTNeList : NeTermList .
-  eq get?VarSet((QT : QTNeList)) = get?VarSet(QT) & get?VarSet(QTNeList) .
-  eq get?VarSet(empty) = .Set{MathObj++} .
-  eq get?VarSet(QC) = if downTerm(QC, errorObj) :: ?MathObj then
-     downTerm(QC, errorObj) else .Set{MathObj++} fi .
- ceq get?VarSet(Q[QT]) = downTerm(Q[QT], .Set{MathObj++})
-  if substrString(string(Q), 0, 1) ==Bool "?" .
-  eq get?VarSet(Q[QTList]) = get?VarSet(QTList) [owise] .
-
-  eq getFreeVarSet((QT : QTNeList))
-   = getFreeVarSet(QT) & getFreeVarSet(QTNeList) .
-  eq getFreeVarSet(empty) = .Set{MathObj++} .
-  eq getFreeVarSet(QC) = if downTerm(QC, errorObj) :: FreeMathObj then
-     downTerm(QC, errorObj) else .Set{MathObj++} fi .
-  eq getFreeVarSet('skolem[NT : QT])
-   = downTerm('skolem[NT : QT], .Set{MathObj++}) .
-  eq getFreeVarSet(Q[QTList]) = getFreeVarSet(QTList) [owise] .
-endm
+endfm
 

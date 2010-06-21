@@ -1,7 +1,7 @@
 load config.maude
 
 
-kmod IMP-SYNTAX is including CONFIG
+kmod IMP-SYNTAX is including ML-K
   sort Val
   sort Exp
   sorts Stmt Stmts

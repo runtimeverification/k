@@ -1,12 +1,7 @@
 load imp-syntax.maude
 
-mod UTILS is including PL-INT .
-  op isInt : Int -> Bool .
-  var I : Int .
-        
-endm
 
-mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
+mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX .
   subsort Val <   KResult .
   subsort Stmts Exp <  K .
 
@@ -170,5 +165,5 @@ mod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX + UTILS .
       <  subst >  Subst' </  subst > 
     </  config > 
   ) : KSentence .
-ops form feasible newImpl newSym k subst heap infeasible env T config : -> CellLabel .  endm
+ops heap infeasible form feasible newImpl newSym env T k subst config : -> CellLabel .  endm
 
