@@ -1,4 +1,4 @@
-in ../../../k-prelude
+--- in ../../../k-prelude
 
 kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID 
 
@@ -28,21 +28,22 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | Exp ( )
                | Exp ( List{Exp} ) [prec 2 strict]
                | read ( )
-                --- OO specific
+             --- <OO stuff addded>
                | new Id ( ) [prec 1]
                | new Id ( List{Exp} ) [prec 1 strict(2)]
-               | self
-               | Exp . Id ( ) [prec 1 strict(1)]
-               | Exp . Id ( List{Exp} ) [prec 1 strict(1 3)] 
+               | this
+               | Exp -> Id ( ) [prec 1 strict(1)]                       --- ???
+               | Exp -> Id ( List{Exp} ) [prec 1 strict(1 3)]           --- ???
                | super Id ( ) [prec 1]
                | super Id ( List{Exp} ) [prec 1 strict(2)]
                | Exp instanceOf Id [prec 0 strict(1)]
-
+             --- </OO stuff addded>
 
   syntax VarDecl ::= 
                  var Var ; [prec 2] 
                | var List{Var} ; [prec 2]
 
+--- <OO stuff addded>
   syntax MethodDecl ::=
                  method Id ( ) Stmt 
                | method Id ( List{Id} ) Stmt 
@@ -50,12 +51,12 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
   syntax ClassDecl ::= 
                  class Id { Stmts }
                | class Id extends Id { Stmts }
+--- </OO stuff addded>
 
   syntax Stmt ::=
                  { } [metadata "latex(renameTo \\{\\})"]
                | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
                | Exp = Exp ; [prec 2 strict(2)]
-               | Id [ Exp ] = Exp [prec 0 gather(e & &) strict(2 3)]
                | Exp ; [prec 50 strict]
                | if Exp then Stmt else Stmt [strict(1)]
                | if Exp then Stmt
@@ -64,18 +65,20 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | return Exp ; [strict]
                | write ( Exp ) ; [strict]
 
-  syntax Stmts ::=
+  syntax Stmts ::= 
                  VarDecl 
+             --- <OO stuff addded>
                | MethodDecl
                | ClassDecl
+             --- </OO stuff addded>
                | Stmt
                | Stmts Stmts [prec 100 gather(e E)]
 
-  syntax Id ::=
+  syntax Id ::= 
                  main 
-               | object
-
-
+             --- <OO stuff addded>
+               | Object
+             --- </OO stuff addded>
 
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
@@ -110,15 +113,18 @@ kmod SKOOL-UNTYPED-DESUGARED-SYNTAX is including SKOOL-UNTYPED-SYNTAX
 --------------------------------------------------------------------------------
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
+--- <OO stuff modified>
   macro method F:Id() S = method F(.List{Id}) S
+--- </OO stuff modified>
   macro E() = E(.List{Id})
 
-  macro O:Exp . F() = O . F(.List{Id})
+--- <OO stuff addded>
+  macro O:Exp -> F() = O -> F(.List{Id})      --- ???
   macro new C:Id() = new C(.List{Id})
-  macro O . F() = O . F(.List{Id})
+  macro O -> F() = O -> F(.List{Id})       --- ???
   macro super F() = super F(.List{Id})
 
-  macro class C {Ss:Stmts} = class C extends object {Ss}
-
+  macro class C {Ss:Stmts} = class C extends Object {Ss}
+--- <OO stuff addded>
 endkm
 
