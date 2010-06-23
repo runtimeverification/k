@@ -1,4 +1,4 @@
-load config.maude
+load ml-prelude.maude
 
 
 kmod IMP-SYNTAX is including ML-K
@@ -51,7 +51,10 @@ kmod IMP-SYNTAX is including ML-K
   ops //`pre_ //`post_ : Bag -> Annot [prec 99 strat(0)]
 
   op load : Int++ -> Exp
-  op store : Int++ Exp -> Exp
+  op store : Int++ Exp -> Exp [metadata "strict"]
+
+  op breakpoint; : -> Stmt
+  op watch; : -> Stmt
 endkm
 
 kmod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX

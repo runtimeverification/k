@@ -1,8 +1,10 @@
 load imp-semantics.kmaude
 load examples/sum.maude
+---load examples/reverse.maude
 
 kmod IMP is including IMP-SEMANTICS
-  including PSUM
+---  including P-SUM
+---  including P-LIST-REVERSE
 
 
   sort Result

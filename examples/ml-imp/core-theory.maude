@@ -1,7 +1,7 @@
 load ../../k-prelude.maude
 
 
-fmod FORMULA is including PL-BOOL .
+mod FORMULA is inc PL-BOOL + PL-STRING .
   sorts Truth Atom NtFormula Formula .
   subsort Atom < NtFormula .
   subsort Truth NtFormula < Formula .
@@ -18,6 +18,8 @@ fmod FORMULA is including PL-BOOL .
   [prec 59 assoc comm id: FalseFormula] .
   op _\/_ : Formula Formula -> Formula [ditto] .
   op _===>_ : Formula Formula -> NtFormula [prec 61] .
+
+  op check-sat : Formula -> String .
 
   var Atom : Atom .
   vars NtPhi NtPhi1 NtPhi2 NtPhi' : NtFormula .
@@ -50,17 +52,17 @@ fmod FORMULA is including PL-BOOL .
 
   eq Phi ===> (NtPhi1 \/ NtPhi2) = (Phi ===> NtPhi1) \/ (Phi ===> NtPhi2) .
 
---- bad, bad eq
-  eq NtPhi /\ (NtPhi1 \/ NtPhi2) ===> NtPhi'
-   = (NtPhi /\ NtPhi1 ===> NtPhi') \/ (NtPhi /\ NtPhi2 ===> NtPhi') [owise] .
-
 --- very, very bad eqs
 ---   eq NtPhi /\ (NtPhi1 \/ NtPhi2) = (NtPhi /\ NtPhi1) \/ (NtPhi /\ NtPhi2) .
 ---   eq (NtPhi1 \/ NtPhi2) ===> Phi = (NtPhi1 ===> Phi) \/ (NtPhi2 ===> Phi) .
-endfm
+
+--- bad, bad eq
+  eq NtPhi /\ (NtPhi1 \/ NtPhi2) ===> NtPhi'
+   = (NtPhi /\ NtPhi1 ===> NtPhi') \/ (NtPhi /\ NtPhi2 ===> NtPhi') [owise] .
+endm
 
 
-fmod MATHEMATICAL-OBJECT is including FORMULA + PL-NAT .
+mod MATHEMATICAL-OBJECT is inc FORMULA + PL-NAT .
 ***(
 ?Sort stands for bound symbolic mathematical objects
 !Sort stands for unbound symbolic mathematical objects
@@ -97,10 +99,10 @@ Sort++ stands for all the above
   eq (Obj1, Obj1', ObjList1) === (Obj2, Obj2', ObjList2)
    = (Obj1 === Obj2) /\ (Obj1' === Obj2') /\ (ObjList1 === ObjList2) .
   eq .List{MathObj++} === .List{MathObj++} = TrueFormula .
-endfm
+endm
 
 
-fmod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
+mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
 --- define sorts, subsorts and skolem as below for each new mathematical object
   sorts ?Int !Int FreeInt Int++ .   --- sort Int already defined
   subsorts ?Int !Int FreeInt Int < Int++ < MathObj++ .
@@ -118,7 +120,10 @@ fmod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   ops _<=Int_ _<Int_ _>=Int_ _>Int_ : Int++ Int++ -> Bool [ditto] .
   op -Int_ : Int++ -> Int++ [ditto] .
   op _==Int_ : Int++ Int++ -> Bool .
+
   op ?_ : Bool -> Int++ .
+  eq ?_(true) = 1 .
+  eq ?_(false) = 0 .
 
   var B : Bool .
   vars I J K I1 I2 J1 J2 N : Int++ .
@@ -162,5 +167,5 @@ fmod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   eq (1 === ?(B)) = @ B .
 
   eq (I:Int === J:Int) = @(I:Int ==Bool J:Int) .
-endfm
+endm
 

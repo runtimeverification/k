@@ -1,0 +1,49 @@
+
+***(
+    // assume < config > < env > n |-> n0 s |-> ?s </ env > < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config >
+    s = 0 ;
+    // invariant < config > < env > n |-> ?n s |-> (((n0 +Int (-Int ?n)) *Int (n0 +Int ?n +Int 1)) /Int 2) </ env >
+                          < heap > (.).Map </ heap > < form > @(?n >=Int 0) /\ @(n0 >=Int 0) </ form > </ config >
+    while (n > 0) {
+      s = s + n ;
+      n = n - 1 ;
+    }
+    // assert < config > < env > n |-> 0 s |-> ((n0 *Int (n0 +Int 1)) /Int 2) </ env >
+                       < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config >
+***)
+
+mod P-LIST-REVERSE is inc IMP-SYNTAX + LIST-HP .
+  ops x y p : -> Id .
+  ops ?x ?p : -> ?Int .
+  ops ?B ?C : -> ?IntSeq .
+  op A : -> FreeIntSeq .
+  ops n s : -> Id .
+  ops ?n ?s : -> ?Int .
+  op n0 : -> FreeInt .
+
+
+  op pListReverse : -> Stmts .
+  eq pListReverse = (
+    // assume < config > < env > x |-> ?x p |-> ?p </ env >
+                         < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config >
+    p = 0 ;
+    // invariant < config > < env > p |-> ?p x |-> ?x </ env >
+                            < heap > list(?p)(?B) list(?x)(?C) </ heap >
+                            < form > rev(A) === rev(?C) :: ?B </ form > </ config >
+    while (x != 0) {
+      p = p + x ;
+      p = p - 1 ;
+    }
+***(
+    while(x != 0) {
+      y = *(x + 1) ;
+      *(x + 1) = p ;
+      p = x ;
+      x = y ;
+    }
+***)
+    // assert < config > < env > p |-> ?p </ env >
+                         < heap > list(?p)(rev(A)) </ heap > < form > TrueFormula </ form > </ config >
+  ) .
+endm
+

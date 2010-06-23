@@ -2,6 +2,8 @@ load imp-syntax.kmaude
 
 
 kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
+  subsort MathObj++ < Builtins KResult
+  subsort Int++ < Builtins KResult
   subsort Val <  KResult
   subsort Stmts Exp < K
 
@@ -17,6 +19,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar Ss : Stmts
   kvar K : K
   kvar Phi Phi' : Formula
+  kvar NtPhi : NtFormula
   kvar Subst Subst' : Subst
   kvar Cfg : BagItem
   kvar Cfgs CfgItems : Bag
@@ -49,13 +52,13 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule I1 < I2 => ?_(I1 <Int I2)
   rule I1 == I2 => ?_(I1 ==Int I2)
 
----  rule I && E => (I ? 1 : 0) && E if notBool(isInt(I))
+  rule I && E => (I ? 1 : 0) && E if notBool(I :: Int)
   rule NzI && E => E
   rule 0 && E => 0
----  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int)
+  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int)
   rule NzI || E => NzI
   rule 0 || E => E
----  rule ! I => I ? 0 : 1 if notBool(I :: Int)
+  rule ! I => I ? 0 : 1 if notBool(I :: Int)
   rule ! NzI => 1
   rule ! 0 => 1
 
@@ -98,6 +101,10 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
     <k> derive(I) => .K <_/k>
     <heap_> I |-> _ <_/heap>
   rule
+    <k> derive(I) <_/k>
+    <form> NtPhi => FalseFormula </form>
+  if check-sat(NtPhi) ==Bool "unsat"
+  rule
     <k> load(I) => V <_/k>
     <heap_> I |-> V <_/heap>
   rule
@@ -105,7 +112,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
     <heap_> I |-> (_ => V) <_/heap>
 
 
----  rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
+  rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
   rule if (NzI) S else _ => S
   rule if (0) _ else S => S
 

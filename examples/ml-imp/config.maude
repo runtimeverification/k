@@ -1,34 +1,7 @@
 load core-theory.maude
 
 
-mod MATHEMATICAL-K is inc MATHEMATICAL-INT + K-TECHNIQUE .
-  sorts ?Map !Map FreeMap .
-  subsort ?Map !Map FreeMap < Map .
-  op ?Env : Nat -> ?Map .
-  op ?Heap : Nat -> ?Map .
-  op skolem : Nat ?Map -> FreeMap .
-
-  subsort MathObj++ < Builtins KResult .
-  subsort Int++ < Builtins KResult .
-  ---subsort List{MathObj++} < KResult .
- 
-  sort LocType .
-  op _:_ : Int++ KLabel -> KResult .
-  op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> Map .
-  op derive : Int++ -> K .
-
-  op errorBag : -> [Bag] .
-  op _===>_ : Bag Bag -> Bag [frozen] .
-  op skolemize : Nat Bag -> Bag [strat(0)] .
-
-  op VALID : Formula -> Bool .
-  eq VALID(TrueFormula) = true .
-
-  op isInt : Int++ -> Bool .
-endm
-
-
-mod SUBST is inc MATHEMATICAL-K .
+mod SUBST is inc MATHEMATICAL-INT + K-TECHNIQUE .
   sort SubstItem Subst .
   subsorts SubstItem < Subst .
   op .Subst : -> Subst .
@@ -38,19 +11,31 @@ mod SUBST is inc MATHEMATICAL-K .
   op _<-_ : Bag Bag -> SubstItem .
   op _<-_ : Set Set -> SubstItem .
   op _<-_ : Map Map -> SubstItem .
-  ---op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
+  op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
   op _[_] : Bag Subst -> Bag [prec 0 strat(2 0)] .
   op _[_] : Formula Subst -> Formula [prec 0 strat(2 0)] .
   op _[_] : Subst Subst -> Subst [prec 0 strat(2 0)] .
 
----  vars Obj Obj' : MathObj++ .
----  var ObjList ObjList' : List{MathObj++} .
----  eq (Obj, ObjList) <- (Obj', ObjList') = (Obj <- Obj') ; (ObjList <- ObjList') .
----  eq .List{MathObj++} <- .List{MathObj++} = .Subst .
+  vars Obj1 Obj2 Obj1' Obj2' : MathObj++ .
+  var ObjList ObjList' : List{MathObj++} .
+  eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
+   = (Obj1 <- Obj1') ; (Obj2 <- Obj2') ; (ObjList <- ObjList') .
+  eq .List{MathObj++} <- .List{MathObj++} = .Subst .
 endm
 
 
-mod CONFIG is inc MATHEMATICAL-K + SUBST + PL-ID .
+mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
+  sorts ?Map !Map FreeMap .
+  subsort ?Map !Map FreeMap < Map .
+  op ?Env : Nat -> ?Map .
+  op ?Heap : Nat -> ?Map .
+  op skolem : Nat ?Map -> FreeMap .
+
+  subsort MathObj++ < Builtins KResult .
+  subsort Int++ < Builtins KResult .
+  ---subsort Id < KProper .
+  ---subsort List{MathObj++} < KResult .
+ 
   op <_>_</_> : CellLabel Formula CellLabel -> BagItem
   [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Subst CellLabel -> BagItem
@@ -58,29 +43,31 @@ mod CONFIG is inc MATHEMATICAL-K + SUBST + PL-ID .
 
   ops feasible infeasible : -> CellLabel .
   ops config k env heap form subst newSym newImpl : -> CellLabel .
+
+  op errorBag : -> [Bag] .
+  op _===>_ : Bag Bag -> Bag [frozen] .
+  op skolemize : Nat Bag -> Bag [strat(0)] .
+  op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=skol=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=env=>_   : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=heap=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=form=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=debug=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+
+
+  op _:_ : Int++ KLabel -> KResult .
+  op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> Map .
+  op derive : -> KLabel .
+
+  op VALID : Formula -> Bool .
+  eq VALID(TrueFormula) = true .
+
+  op IntSort : -> KLabel .
+  op _: :_ : Int++ KLabel -> Bool .
 endm
 
 mod ML-K is inc CONFIG + K + K-CONDITION-SEARCH .
   op _=>_ : Formula Formula -> Formula [prec 125] .
   op _=>_ : Subst Subst -> Subst [prec 125] .
-endm
-
-
-mod PL-BUILTINS is
-  ---including BASIC-PL-BUILTINS .
-including PL-BOOL .
-including PL-EXT-BOOL .
-including PL-NAT .
-including PL-INT .
-including PL-RAT .
-including PL-FLOAT .
-including PL-STRING .
-including PL-CONVERSION .
-including PL-QID .
-including PL-RANDOM .
-including PL-COUNTER .
-including PL-BOOL .
-including PL-ID .
-  ---including CONFIG .
 endm
 

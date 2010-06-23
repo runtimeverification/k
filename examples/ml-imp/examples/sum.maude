@@ -1,6 +1,4 @@
----load ../imp-syntax.maude
-
-mod PSUM is inc IMP-SYNTAX .
+mod P-SUM is inc IMP-SYNTAX .
   ops n s : -> Id .
   ops ?n ?s : -> ?Int .
   op n0 : -> FreeInt .
@@ -19,3 +17,4 @@ mod PSUM is inc IMP-SYNTAX .
                        < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config >
   ) .
 endm
+

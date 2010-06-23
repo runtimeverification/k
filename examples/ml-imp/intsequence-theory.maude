@@ -1,0 +1,41 @@
+mod MATHEMATICAL-INT-SEQUENCE is inc MATHEMATICAL-INT .
+  sorts ?IntSeq !IntSeq FreeIntSeq IntSeq IntSeq++ NeIntSeq++ . 
+  subsorts ?Int < ?IntSeq < NeIntSeq++ ?MathObj .
+  subsorts !Int < !IntSeq < NeIntSeq++ !MathObj .
+  subsorts FreeInt < FreeIntSeq < NeIntSeq++ FreeMathObj .
+  subsorts Int < IntSeq < IntSeq++ MathObj .
+  subsorts Int++ < NeIntSeq++ < IntSeq++ < MathObj++ .
+  op ?IntSeq : Nat -> ?IntSeq .
+  op skolem : Nat ?IntSeq -> FreeIntSeq [ditto] .
+
+--- define operations to be used symbolically, as well as desired properties
+  op epsilon : -> IntSeq .
+  op _:::_ : IntSeq++ IntSeq++ -> IntSeq++ [assoc id: epsilon] .
+  op _:::_ : NeIntSeq++ IntSeq++ -> NeIntSeq++ [ditto] .
+  op _:::_ : IntSeq++ NeIntSeq++ -> NeIntSeq++ [ditto] .
+***(
+  op rev : IntSeq++ -> IntSeq++ .
+  op len : IntSeq++ -> Int++ .
+
+
+  var I I1 I2 : Int++ .
+  var A A1 A2 : IntSeq++ .
+  var NeA NeA1 NeA2 : NeIntSeq++ .
+
+  eq NeA :: A1 === NeA :: A2 = A1 === A2 .
+  eq A1 :: NeA === A2 :: NeA = A1 === A2  .
+  eq I1 :: NeA1 === I2 :: A2 = I1 === I2 /\ NeA1 === A2 .
+  eq I1 :: A1 === I2 :: NeA2 = I1 === I2 /\ A1 === NeA2 .
+  eq NeA1 :: I1 === A2 :: I2 = I1 === I2 /\ NeA1 === A2 .
+  eq A1 :: I1 === NeA2 :: I2 = I1 === I2 /\ A1 === NeA2 .
+
+  --- eq rev(I :: A) = rev(A) :: I .
+  eq rev(NeA1 :: NeA2) = rev(NeA2) :: rev(NeA1) .
+  eq rev(I) = I .
+  eq rev(epsilon) = epsilon .
+  eq len(NeA1 :: NeA2) = len(NeA1) +Int len(NeA2) .
+  eq len(I) = 1 .
+  eq len(epsilon) = 0 .
+***)
+endm
+
