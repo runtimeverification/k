@@ -1,6 +1,12 @@
---- in ../../../k-prelude
+in ../../../k-prelude
 
-kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID 
+
+------------------------------------
+--- SKOOL-UNTYPED-SYNTAX module ---
+-----------------------------------
+
+
+kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
   syntax Var ::= 
                  Id 
@@ -32,8 +38,8 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | new Id ( ) [prec 1]
                | new Id ( List{Exp} ) [prec 1 strict(2)]
                | this
-               | Exp -> Id ( ) [prec 1 strict(1)]                       --- ???
-               | Exp -> Id ( List{Exp} ) [prec 1 strict(1 3)]           --- ???
+               | Exp . Id ( ) [prec 1 strict(1)] 
+               | Exp . Id ( List{Exp} ) [prec 1 strict(1 3)] 
                | super Id ( ) [prec 1]
                | super Id ( List{Exp} ) [prec 1 strict(2)]
                | Exp instanceOf Id [prec 0 strict(1)]
@@ -41,7 +47,6 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
   syntax VarDecl ::= 
                  var Var ; [prec 2] 
-               | var List{Var} ; [prec 2]
 
 --- <OO stuff addded>
   syntax MethodDecl ::=
@@ -77,7 +82,7 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
   syntax Id ::= 
                  main 
              --- <OO stuff addded>
-               | Object
+               | object
              --- </OO stuff addded>
 
 -----------------------------------------------------------------------------
@@ -104,6 +109,10 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
 endkm
 
+---------------------------------------------
+--- SKOOL-UNTYPED-DESUGARED-SYNTAX module ---
+---------------------------------------------
+
 
 kmod SKOOL-UNTYPED-DESUGARED-SYNTAX is including SKOOL-UNTYPED-SYNTAX 
 --------------------------------------------------------------------------------
@@ -119,12 +128,12 @@ kmod SKOOL-UNTYPED-DESUGARED-SYNTAX is including SKOOL-UNTYPED-SYNTAX
   macro E() = E(.List{Id})
 
 --- <OO stuff addded>
-  macro O:Exp -> F() = O -> F(.List{Id})      --- ???
+  macro O:Exp . F() = O . F(.List{Id})      --- ???
   macro new C:Id() = new C(.List{Id})
-  macro O -> F() = O -> F(.List{Id})       --- ???
+  macro O . F() = O . F(.List{Id})       --- ???
   macro super F() = super F(.List{Id})
 
-  macro class C {Ss:Stmts} = class C extends Object {Ss}
+  macro class C {Ss:Stmts} = class C extends object {Ss}
 --- <OO stuff addded>
 endkm
 
