@@ -35,6 +35,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   subsort Int++ < Builtins KResult .
   ---subsort Id < KProper .
   ---subsort List{MathObj++} < KResult .
+
  
   op <_>_</_> : CellLabel Formula CellLabel -> BagItem
   [prec 0 format(nib g b o+ -b g b o)] .
@@ -55,8 +56,8 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op _=debug=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
 
 
-  op _:_ : Int++ KLabel -> KResult .
-  op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> Map .
+  op _|->_:_ : Int++ Int++ KLabel -> MapItem .
+  op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> MapItem .
   op derive : -> KLabel .
 
   op VALID : Formula -> Bool .
@@ -67,6 +68,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
 endm
 
 mod ML-K is inc CONFIG + K + K-CONDITION-SEARCH .
+  op _=>_ : Int++ Int++ -> Int++ [prec 125] .
   op _=>_ : Formula Formula -> Formula [prec 125] .
   op _=>_ : Subst Subst -> Subst [prec 125] .
 endm

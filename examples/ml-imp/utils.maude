@@ -1,4 +1,4 @@
-load config.maude
+load ml-prelude.maude
 
 
 mod PL-META-TERM is including PL-BOOL + PL-QID .

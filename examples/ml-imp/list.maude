@@ -38,7 +38,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
        </ heap >
        < form >
          Phi /\ ~(P === 0) /\
-         (Alpha === ?Int(N) :: ?IntSeq(N +Int 2))
+         (Alpha === ?Int(N) ::: ?IntSeq(N +Int 2))
        </ form >
        < newSym > N +Int 3 </ newSym >
        CfgItems
@@ -70,7 +70,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
        CfgItems
      </ config >
      =heap=> Cfg
-  => < config > < heap > list(P)(I :: Alpha) H </ heap > CfgItems </ config >
+  => < config > < heap > list(P)(I ::: Alpha) H </ heap > CfgItems </ config >
      =heap=> Cfg .
 
 ***(
@@ -80,7 +80,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
  ceq <config> <k> derive(P') ~> Rest </k> <heap> lseg(P,Q)(Alpha) ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>
    = <config> <k> derive(P') ~> Rest </k> <heap> H </heap> <form> Phi /\ (P === Q) /\ (Alpha === epsilon) </form> <newSym> N </newSym> Cfg </config>
      <config> <k> Rest </k> <heap> P |-> ?Int(N) : node ** (P +Int 1) |-> ?Int(N +Int 1) : next ** lseg(?Int(N +Int 1),Q)(?IntSeq(N +Int 2)) ** H </heap>
-              <form> Phi /\ ~(P === Q) /\ (Alpha === ?Int(N) :: ?IntSeq(N +Int 2)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
+              <form> Phi /\ ~(P === Q) /\ (Alpha === ?Int(N) ::: ?IntSeq(N +Int 2)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
     if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
 
   eq <heap> lseg(P,P)(Alpha) ** H </heap> <form> Phi </form> = <heap> H </heap> <form> Phi /\ Alpha === epsilon </form> .
@@ -91,10 +91,10 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
   => <config> <heap> lseg(P,Q)(I) ** H </heap> Cfg </config> =heap=> CFG .
 
   rl <config> <heap> lseg(P,P')(Alpha) ** lseg(P',Q)(Beta) ** H </heap> Cfg </config> =heap=> CFG
-  => <config> <heap> lseg(P,Q)(Alpha :: Beta) ** H </heap> Cfg </config> =heap=> CFG .
+  => <config> <heap> lseg(P,Q)(Alpha ::: Beta) ** H </heap> Cfg </config> =heap=> CFG .
 
   rl <config> <heap> lseg(P,P')(Alpha) ** list(P')(Beta) ** H </heap> Cfg </config> =heap=> CFG
-  => <config> <heap> list(P)(Alpha :: Beta) ** H </heap> Cfg </config> =heap=> CFG .
+  => <config> <heap> list(P)(Alpha ::: Beta) ** H </heap> Cfg </config> =heap=> CFG .
 
 
   ops dlist dlseg : -> HeapPatternName .
@@ -107,12 +107,12 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
  ceq <config> <k> derive(P') ~> Rest </k> <heap> dlseg(P,Q)(P1,Q1,Alpha) ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>
    = <config> <k> derive(P') ~> Rest </k> <heap> H </heap> <form> Phi /\ (P === P1) /\ (Q === Q1) /\ (Alpha === epsilon) </form> <newSym> N </newSym> Cfg </config>
      <config> <k> Rest </k> <heap> P |-> ?Int(N) : node ** (P +Int 1) |-> ?Int(N +Int 1) : next ** (P +Int 2) |-> Q1 : prev ** dlseg(?Int(N +Int 1),Q)(P1,P,?IntSeq(N +Int 2)) ** H </heap>
-              <form> Phi /\ ~(P === P1) /\ ~(Q === Q1) /\ (Alpha === ?Int(N) :: ?IntSeq(N +Int 2)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
+              <form> Phi /\ ~(P === P1) /\ ~(Q === Q1) /\ (Alpha === ?Int(N) ::: ?IntSeq(N +Int 2)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
     if VALID(Phi ===> P' === P \/ P' === P +Int 1 \/ P' === P +Int 2) .
  ceq <config> <k> derive(Q') ~> Rest </k> <heap> dlseg(P,Q)(P1,Q1,Alpha) ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>
    = <config> <k> derive(Q') ~> Rest </k> <heap> H </heap> <form> Phi /\ (P === P1) /\ (Q === Q1) /\ (Alpha === epsilon) </form> <newSym> N </newSym> Cfg </config>
      <config> <k> Rest </k> <heap> Q |-> ?Int(N) : node ** (P +Int 1) |-> P1 : next ** (P +Int 2) |-> ?Int(N +Int 1) : prev ** dlseg(P,?Int(N +Int 1))(Q,Q1,?IntSeq(N +Int 2)) ** H </heap>
-              <form> Phi /\ ~(P === P1) /\ ~(Q === Q1) /\ (Alpha === ?IntSeq(N +Int 2) :: ?Int(N)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
+              <form> Phi /\ ~(P === P1) /\ ~(Q === Q1) /\ (Alpha === ?IntSeq(N +Int 2) ::: ?Int(N)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
     if VALID(Phi ===> Q' === Q \/ Q' === Q +Int 1 \/ Q' === Q +Int 2) .
 
   eq <heap> dlseg(P,Q)(P,Q1,Alpha) ** H </heap> <form> Phi </form> = <heap> H </heap> <form> Phi /\ (Q === Q1) /\ Alpha === epsilon </form> .
@@ -122,7 +122,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
   => <config> <heap> dlseg(P,P)(Q1,Q2,I) ** H </heap> Cfg </config> =heap=> CFG .
 
   rl <config> <heap> dlseg(P,Q')(P',P1,Alpha) ** dlseg(P',Q)(Q1,Q',Beta) ** H </heap> Cfg </config> =heap=> CFG
-  => <config> <heap> dlseg(P,Q)(Q1,P1,Alpha :: Beta) ** H </heap> Cfg </config> =heap=> CFG .
+  => <config> <heap> dlseg(P,Q)(Q1,P1,Alpha ::: Beta) ** H </heap> Cfg </config> =heap=> CFG .
 ***)
 endm
 

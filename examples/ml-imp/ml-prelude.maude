@@ -1,6 +1,8 @@
 load config.maude
 load intsequence-theory.maude
----load list.maude
+load intmultiset-theory.maude
+load inttree-theory.maude
+load list.maude
 
 
 mod PL-BUILTINS is
@@ -20,6 +22,8 @@ including PL-BOOL .
 including PL-ID .
   including CONFIG .
   including MATHEMATICAL-INT-SEQUENCE .
-  ---including LIST-HP .
+  including MATHEMATICAL-INT-MULTISET .
+  including MATHEMATICAL-INT-TREE .
+  including LIST-HP .
 endm
 

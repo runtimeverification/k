@@ -2,12 +2,10 @@ load ml-prelude.maude
 
 
 kmod IMP-SYNTAX is including ML-K
-  sort Val
   sort Exp
   sorts Stmt Stmts
   sort Annot
-  subsort Id < Exp
-  subsort Int++ < Val < Exp
+  subsort Id Int++ < Exp
   subsort Stmt Annot < Stmts
 
   op NULL : -> Exp
@@ -30,11 +28,11 @@ kmod IMP-SYNTAX is including ML-K
   op _||_ : Exp Exp -> Exp [prec 57 gather(E e) metadata "strict(1)"]
   op _?_:_ : Exp Exp Exp -> Exp [prec 59 metadata "strict(1)"]
 
-  op _=_; : Exp Exp -> Stmt [prec 2 metadata "strict(2)"]
+  op _=_; : Exp Exp -> Stmt [prec 60 metadata "strict(2)"]
   op {} : -> Stmt
   op {_} : Stmts -> Stmt [gather(&)]
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)]
-  op _; : Exp -> Stmt [prec 60 metadata "strict"]
+  op _; : Exp -> Stmt [prec 65 metadata "strict"]
   op if`(_`)_else_ : Exp Stmt Stmt -> Stmt [prec 93 metadata "strict(1)"]
   op if`(_`)_ : Exp Stmt -> Stmt [prec 95]
   op while`(_`)_ : Exp Stmt -> Stmt
