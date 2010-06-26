@@ -48,6 +48,11 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
   syntax VarDecl ::= 
                  var Var ; [prec 2] 
 
+--- <OO stuff modified>
+---                | function Id ( ) Stmt 
+---                | function  Id ( List{Id} ) Stmt 
+--- </OO stuff modified>
+
 --- <OO stuff addded>
   syntax MethodDecl ::=
                  method Id ( ) Stmt 
@@ -128,9 +133,9 @@ kmod SKOOL-UNTYPED-DESUGARED-SYNTAX is including SKOOL-UNTYPED-SYNTAX
   macro E() = E(.List{Id})
 
 --- <OO stuff addded>
-  macro O:Exp . F() = O . F(.List{Id})      --- ???
+  macro O:Exp . F() = O . F(.List{Id}) 
   macro new C:Id() = new C(.List{Id})
-  macro O . F() = O . F(.List{Id})       --- ???
+  macro O . F() = O . F(.List{Id})
   macro super F() = super F(.List{Id})
 
   macro class C {Ss:Stmts} = class C extends object {Ss}

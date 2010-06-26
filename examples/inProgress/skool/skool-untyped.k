@@ -11,11 +11,25 @@ in skool-untyped-programs
 kmod SKOOL-UNTYPED is including SKOOL-UNTYPED-SEMANTICS + SKOOL-UNTYPED-PROGRAMS 
 --- make sure the name of the final module is the capitalized version of the file name
 
+---<OO stuff added>
 --- internal form of a program
 
 --- kpgm label is used to traverse a program and to build the content of the <pgm>..</pgm> cell
   syntax KLabel ::= kpgm
 
+--- global variables (for now they should be declared at the beginning of the program)
+
+  rule <k> kpgm(var X:Id;  Ss) => kpgm(Ss) <_/k>
+       <class> object </class>
+       <env> Env:Map => Env[L / X] </env> 
+       <store_> .Map => L |-> 0 <_/store>
+       <nextLoc> L => sNat(L) </nextLoc> 
+
+  rule <k> kpgm(var X:Id;) => . <_/k>
+       <class> object </class>
+       <env> Env:Map => Env[L / X] </env> 
+       <store_> .Map => L |-> 0 <_/store>
+       <nextLoc> L => sNat(L) </nextLoc> 
 
 --- a class traversal
   rule <k> kpgm(class C1:Id extends C2:Id { Ss:Stmts }) => kpgm(Ss) <_/k>
@@ -35,7 +49,24 @@ kmod SKOOL-UNTYPED is including SKOOL-UNTYPED-SEMANTICS + SKOOL-UNTYPED-PROGRAMS
                      <fields_> . => var X; </fields>
              <_/classes>
        </pgm>
+  rule <k> kpgm(var X:Id;) => . <_/k>   --- the var declaration is the last
+       <class> C </class>
+       <pgm_>
+             <classes_>
+                     <className> C </className>
+                     <fields_> . => var X; </fields>
+             <_/classes>
+       </pgm>
+
   rule <k> kpgm(var X[ N:Nat ] ;  Ss) => kpgm(Ss) <_/k>
+       <class> C </class>
+       <pgm_>
+             <classes_>
+                     <className> C </className>
+                     <fields_> . => var X[N]; </fields>
+             <_/classes>
+       </pgm>
+  rule <k> kpgm(var X[ N:Nat ];) => . <_/k>   --- the array declaration is the last
        <class> C </class>
        <pgm_>
              <classes_>
@@ -56,7 +87,7 @@ kmod SKOOL-UNTYPED is including SKOOL-UNTYPED-SEMANTICS + SKOOL-UNTYPED-PROGRAMS
        <env> Env:Map => Env[L/[C, F]] </env>  
        <nextLoc> L:Nat => L +Nat 2 </nextLoc> 
        <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
-  rule <k> kpgm(method F:Id(Xl:List{Id}) S:Stmt) => . <_/k>
+  rule <k> kpgm(method F:Id(Xl) S:Stmt) => . <_/k>    --- the method declaration is the last
        <class> C </class>
        <pgm_>
              <classes_>
@@ -72,12 +103,7 @@ kmod SKOOL-UNTYPED is including SKOOL-UNTYPED-SEMANTICS + SKOOL-UNTYPED-PROGRAMS
   
   rule <k> kpgm(Ss1:Stmts Ss2:Stmts) => kpgm(Ss1)~>kpgm(Ss2) <_/k>
 
---- the traversal of the program is finished; the k cell should include now the call of the main method
-  rule <k> . => (_._`(_`)(new_`(_`)(main, .List{Id}), main, .List{Id})) </k>
-       <env> Env </env>
-       <genv> . => Env </genv>
-       <class> C => main </class>
-
+---</OO stuff added>
 
   syntax Bag ::= run ( KLabel )
 

@@ -54,7 +54,7 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
               | p10 | p11 | p12 
               | p13 | p14 | p15 
               | p16 | p17 | p18 
-              | p19 | p20 
+              | p19 | p20 | p21
   
   macro p01 =
        class main {
@@ -751,6 +751,23 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
 	   return 0;
          }
        }
+
+  macro p20 =
+       var x;
+       class main {
+         var a;
+         method main() {
+           a = 1;
+           write(a);
+           if (x == 0) then
+           {
+              x = 1;
+              this.main();
+           }
+           return 0;  
+         }
+       }
+
 
 endkm
 

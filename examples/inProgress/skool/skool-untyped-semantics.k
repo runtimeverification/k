@@ -28,9 +28,10 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
                      <store> .Map </store>
                      <in> .List </in>
                      <out> .List </out>
-                     <nextLoc> 0 </nextLoc>
+                     <nextLoc> 1 </nextLoc>
+---<OO stuff added>
                      <obj> .List </obj>
-                     <class> main </class>
+                     <class> object </class>
                      <pgm>
                            <classes*>
                                     <className> object </className>
@@ -39,21 +40,37 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
                                     <methods> .K </methods>
                            </classes*>
                      </pgm>
+---</OO stuff added>
                 </T>
 
---- <OO stuff modified>
+---<OO stuff modified>
 ---  rule <k> X:Id => V:Val <_/k>  
 ---       <env_> X |-> L:Nat <_/env>
 ---       <store_> L |-> V <_/store> 
 
 --- getloc: returns the "location" of an object X 
-    syntax Nat ::= null | getloc ( Id , List ) [strict]
----  syntax Loc ::= Nat | null | getloc ( Id , List ) [strict] --- does not work because of the sanity check
-  macro getloc(X, ( ( C |-> .) Oenv )) = getloc(X, Oenv )
-  macro getloc(X, ( ( C |-> ( Y:Id |-> L:Nat Env )) Oenv ))
-        =
-        if X ==Bool Y then L else getloc(X,  ((C |->  Env )Oenv)) fi
-  macro getloc(X, .) = null
+---  the following does not work because of the sanity check
+---  syntax Loc ::= Nat | null | sNat Loc [ditto] | getloc ( Id , List ) [strict] 
+---  rule sNat null => null [structural]
+---  so that we decided to use 0 as null and  start to allocate locations from 1
+  syntax Nat ::= null | getloc ( Id , List ) [strict]
+  rule null => 0 [structural]
+---  macro getloc(X, ( ( C |-> .) Oenv )) = getloc(X, Oenv )
+---  macro getloc(X, ( ( C |-> ( Y:Id |-> L:Nat Env )) Oenv ))
+---        =
+---        if X ==Bool Y then L else getloc(X,  ((C |->  Env )Oenv)) fi
+---  macro getloc(X, .) = null
+
+  rule getloc(X, ( ( C |-> .) Oenv )) => getloc(X, Oenv ) [structural]
+  rule getloc(X, ( ( C |-> ( Y:Id |-> L:Nat Env )) Oenv ))
+       =>
+       if X ==Bool Y then L else getloc(X,  ((C |->  Env )Oenv)) fi [structural]
+  rule getloc(X, .) => null [structural]
+
+
+---  rule <k> X:Id => V:Val <_/k>  
+---       <env_> X |-> L:Nat <_/env>
+---       <store_> L |-> V <_/store> 
 
   syntax Id ::= @ny   --- the name of the current environment for an object
   rule <k> X:Id => Store(getloc(X, ((@ny |-> Env) (C |-> Env1) Oenv))) <_/k>
@@ -61,10 +78,10 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
        <obj_> (C:Id |-> Env1:Map) Oenv:List </obj>
        <class> C </class>
        <store> Store:Map </store>  
-  rule <k> this =>  oenv((C |-> Env1) Oenv) <_/k>
-       <obj_> (C |-> Env1) Oenv </obj>
+  rule <k> this =>  oenv(Oenv) <_/k>
+       <obj> Oenv </obj>
 
---- </OO stuf modified>
+---</OO stuf modified>
 
   rule <k> ++X => I:Int +Int 1 <_/k>
        <env_> X |-> L <_/env>
@@ -112,6 +129,8 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
   rule S1:Stmt S2:Stmt => S1~>S2 
 
 --- <OO stuf modified>
+---  rule <k> X=V; => . <_/k> <env_> X|->L <_/env> <store_> L|->(_=>V) <_/store> 
+
   rule <k> _=_;(X, V:Val) => . <_/k> 
        <env> Env:Map </env>
        <obj_> (C |-> Env1:Map) Oenv:List </obj>
@@ -137,39 +156,43 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 --- actual function values are stored as lambda abstractions
   syntax Val ::= lambda ( List{Id} , Stmt )
 
----<OO stuff modified (in fact are repalced by method call rules)
+---<OO stuff modified> (in fact are replaced it by method call rules)
 ---  op function : Nat -> Val   
-  rule <k> method F:Id(Xl:List{Id}) S => . <_/k> 
-       <env> Env => Env[L/F] </env> 
-       <nextLoc> L => L +Nat 2 </nextLoc> 
-       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
-
+---  rule <k> function F:Id(Xl:List{Id}) S => . <_/k> 
+---       <env> Env => Env[L/F] </env> 
+---       <nextLoc> L => L +Nat 2 </nextLoc> 
+---       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
+---</OO stuff modified>
 
 --- the next is used to stack the environment and the computation at each function call
   syntax ListItem ::=  ( Map , K )
 
   rule <k> _`(_`)(function(L),Vl:List`{Val`})~>K => S~>return(0); </k> 
        <fstack> .List => (Env,K) <_/fstack>
-       <env> Env => GEnv:Map[N..N+Nat|Xl| / getList{K}(Xl)] </env>
+       <env> Env => GEnv:Map[N..N+Nat|Xl:List{Id}| / getList{K}(Xl)] </env>
        <genv> GEnv </genv>
        <store_> L |-> lambda(Xl,S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
 
-
+---<OO stuff modified>; the new version is given after method call
 ---  rule <k> return(V); ~> _ => V ~> K </k>
 ---       <fstack> (Env,K) => . <_/fstack>
 ---       <env> _ => Env </env>
 
---- </OO stuff modified>
+---</OO stuff modified>
 
   rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
   rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out>
 
 
----<OO stuff modified: the next rule is replaced by the last rule from the definition of kpgm label
+---<OO stuff modified>: the next rule is replaced by the last rule from the definition of kpgm label
 --- when we are done with the first pass (computation and genv are empty),
 ---   call main and initialize the global environment
 ---  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
+  rule <k> . => new_`(_`)(main, .List{Id}) </k>
+       <env> Env </env>
+       <genv> . => Env </genv>
+       <class> C => main </class>
 ---</OO stuff modified>
 
 
@@ -184,7 +207,7 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 --- new operator
 ---   the semantics of the new operator consists of two actions: memory allocation for the new object
 ---   and the execution of the statements included in the constructor
-----  the current class, environment and object are stored on the stack
+---   the current class, environment and object are stored on the stack
   syntax ListItem ::=  [ Id , Map , K ]
   rule <k> (new_`(_`)(C:Id, Vl))~>K => create(C)~>invoke(_`(_`)(C, Vl))</k>
        <env> Env => . </env>
@@ -196,8 +219,8 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
        <env> Env => . </env>
        <obj> Oenv:List => . </obj>
        <class> C1:Id => C </class>
-       <fstack> . => [ C1, Env, . ] <_/fstack>
-       if C ==Bool main
+       <fstack> . => [ C1, Env, (restore(Oenv)~>K) ] <_/fstack>
+       if (C ==Bool main) andBool (K ==Bool .) 
 
 --- create a new object (memory allocation)
 ---   usually, an object is an instance of a class from an hierarchy
@@ -223,9 +246,6 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
        <obj_> . => (C |-> Env) </obj>
 
 --- method call
---- the internal name of a method is a pair [class, method-name], in order to be unique
---- (we assume that the name of a class in a program is unique)
-
   rule <k> (_._`(_`)(oenv((C |-> Env) Oenv), F, Vl)) ~> K => oenv((C |-> Env) Oenv) ~> invoke(_`(_`)(F:Id, Vl)) </k>
        <class> C1 => C </class>
        <obj> Oenv1:List => (C |-> Env) Oenv </obj>
@@ -235,7 +255,7 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
        <class> C => C1 </class>
        <obj> Oenv1 (C |-> Env) Oenv => Oenv </obj>
        <env> Env1 => . </env>
-       <fstack> .List => [ C1, Env1, (restore((C |-> Env) Oenv)~>K) ] <_/fstack>
+       <fstack> .List => [ C1, Env1, (restore(Oenv1 (C |-> Env) Oenv)~>K) ] <_/fstack>
        <pgm_>
             <classes_>
                    <className> C </className>
@@ -243,7 +263,8 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
             <_/classes>
        <_/pgm>
 
-
+--- the internal name of a method is a pair [class, method-name], in order to be unique
+--- (we assume that the name of a class in a program is unique)
   syntax Id ::= [ Id , Id ]
   rule <k> oenv((C |-> Env) Oenv) ~> invoke(_`(_`)(F:Id, Vl))
            =>
@@ -281,12 +302,14 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
   rule <k> V ~> restore(Oenv) => V <_/k> 
        <obj> _ => Oenv </obj>
 
-  rule <k> _`(_`)(F, Xl) => _._`(_`)(this, F, Xl) <_/k>
-
   rule <k> _instanceOf_(oenv( (C |-> Env) Oenv), C1) => true <_/k> if (C ==Bool C1)
   rule <k> _instanceOf_(oenv( (C |-> Env) Oenv), C1) => _instanceOf_(oenv(Oenv), C1) <_/k> if (C =/=Bool C1) 
   rule <k> _instanceOf_( oenv(.), C1) => false <_/k>
   
+-----------------------
+---<OO stuff added> ---
+-----------------------
+
 
 
 ----------------------------------------------
