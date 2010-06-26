@@ -1,0 +1,26 @@
+mod MATHEMATICAL-TREE is inc MATHEMATICAL-INT .
+  sorts ?Tree !Tree FreeTree Tree Tree++ .
+  subsort ?Tree !Tree FreeTree Tree < Tree++ .
+  subsort ?Tree < ?MathObj .
+  subsort !Tree < !MathObj .
+  subsort FreeTree < FreeMathObj .
+  subsort Tree < MathObj .
+  subsort Tree++ < MathObj++ .
+  op ?Tree : Nat -> ?Tree .
+  op skolem : Nat ?Tree -> FreeTree [ditto] .
+
+  op upsilon : -> Tree .
+  op _`[_`]_ : Tree++ MathObj++ Tree++ -> Tree++ .
+
+  op mirror : Tree++ -> Tree++ .
+
+  var Obj Obj' : MathObj++ .
+  var TL TR TL' TR' : Tree++ .
+
+  eq TL [Obj] TR === TL' [Obj'] TR'
+   = Obj === Obj' /\ TL === TL' /\ TR === TR' .
+
+  eq mirror(TL [Obj] TR) = mirror(TR) [Obj] mirror(TL) .
+  eq mirror(upsilon) = upsilon .
+endm
+

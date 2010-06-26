@@ -1,4 +1,4 @@
-load core-theory.maude
+load theories/core-theory.maude
 
 
 mod SUBST is inc MATHEMATICAL-INT + K-TECHNIQUE .

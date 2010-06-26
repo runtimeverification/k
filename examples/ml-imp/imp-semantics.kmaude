@@ -50,13 +50,13 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule I1 < I2 => ?_(I1 <Int I2)
   rule I1 == I2 => ?_(I1 ==Int I2)
 
-  rule I && E => (I ? 1 : 0) && E if notBool(I :: Int)
+  rule I && E => (I ? 1 : 0) && E if notBool(I :: Int) [metadata "structural"]
   rule NzI && E => E
   rule 0 && E => 0
-  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int)
+  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int) [metadata "structural"]
   rule NzI || E => NzI
   rule 0 || E => E
-  rule ! I => I ? 0 : 1 if notBool(I :: Int)
+  rule ! I => I ? 0 : 1 if notBool(I :: Int) [metadata "structural"]
   rule ! NzI => 1
   rule ! 0 => 1
 
@@ -80,10 +80,10 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule NzI ? E1 : E2 => E1
   rule 0 ? E1 : E2 => E2
 
-  rule I ; => .K
-  rule {} => .K
-  rule { Ss } => Ss
-  rule S1 S2 => S1 ~> S2
+  rule I ; => .K [metadata "structural"]
+  rule {} => .K [metadata "structural"]
+  rule { Ss } => Ss [metadata "structural"]
+  rule S1 S2 => S1 ~> S2 [metadata "structural"]
 
   rule
     <k> X => I <_/k> 
@@ -93,15 +93,18 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
     <env_> X |-> (_ => I) <_/env>
 
   rule <k> * I => derive(I) ~> load(I) <_/k>
+  [metadata "structural"]
   context (* [HOLE]) = _ ;
   rule <k> (* I) = J ; => derive(I) ~> store(I, J) <_/k>
+  [metadata "structural"]
   rule
     <k> derive(I) => .K <_/k>
     <heap_> I |-> _ : _ <_/heap>
+  [metadata "structural"]
   rule
     <k> derive(I) <_/k>
     <form> NtPhi => FalseFormula </form>
-  if check-sat(NtPhi) ==Bool "unsat"
+  if check-sat(NtPhi) ==Bool "unsat" 
   rule
     <k> load(I) => J <_/k>
     <heap_> I |-> J : L <_/heap>
@@ -111,6 +114,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
 
 
   rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
+  [metadata "structural"]
   rule if (NzI) S else _ => S
   rule if (0) _ else S => S
 
@@ -120,6 +124,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
     =>
       (// assert Cfgs ~> 'if`(_`)_else_(E,, { S // assert Cfgs },, K))
     </k>
+  [metadata "structural"]
 
   rule
     <config_> 
@@ -145,8 +150,10 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
         CfgItems
       </config>
     )
+  [metadata "structural"]
 
   rule <config_> <k> // assume .Bag <_/k> <_/config> => .Bag
+  [metadata "structural"]
 
   rule
     < config >

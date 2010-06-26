@@ -1,7 +1,8 @@
-mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
+mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var N : Nat .
-  var P P' P1 P2 Q Q' Q1 Q2 I I' : Int++ .
-  var Alpha Beta : IntSeq++ .
+  var P P' P1 P2 Q Q' Q1 Q2 : Int++ .
+  var I : Int++ .
+  var Alpha Beta : Seq++ .
   var H : Map .
   var K : K .
   var Phi : Formula .
@@ -33,12 +34,12 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
        < heap >
          P |-> ?Int(N) : node
          (P +Int 1) |-> ?Int(N +Int 1) : next
-         list(?Int(N +Int 1))(?IntSeq(N +Int 2))
+         list(?Int(N +Int 1))(?Seq(N +Int 2))
          H
        </ heap >
        < form >
          Phi /\ ~(P === 0) /\
-         (Alpha === ?Int(N) ::: ?IntSeq(N +Int 2))
+         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
        </ form >
        < newSym > N +Int 3 </ newSym >
        CfgItems
@@ -57,7 +58,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
        CfgItems
      </ config >
      =heap=> Cfg
-  => < config > < heap > list(P)(I) H </ heap > CfgItems </ config >
+  => < config > < heap > list(P)([I]) H </ heap > CfgItems </ config >
      =heap=> Cfg .
 
   rl < config >
@@ -70,7 +71,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-INT-SEQUENCE .
        CfgItems
      </ config >
      =heap=> Cfg
-  => < config > < heap > list(P)(I ::: Alpha) H </ heap > CfgItems </ config >
+  => < config > < heap > list(P)([I] ::: Alpha) H </ heap > CfgItems </ config >
      =heap=> Cfg .
 
 ***(

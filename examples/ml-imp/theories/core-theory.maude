@@ -1,4 +1,4 @@
-load ../../k-prelude.maude
+load ../../../k-prelude.maude
 
 
 mod FORMULA is inc PL-BOOL + PL-STRING .
@@ -105,11 +105,12 @@ endm
 mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
 --- define sorts, subsorts and skolem as below for each new mathematical object
   sorts ?Int !Int FreeInt Int++ .   --- sort Int already defined
-  subsorts ?Int !Int FreeInt Int < Int++ < MathObj++ .
+  subsort ?Int !Int FreeInt Int < Int++ .
   subsort ?Int < ?MathObj .
   subsort !Int < !MathObj .
   subsort FreeInt < FreeMathObj .
   subsort Int < MathObj .
+  subsort Int++ < MathObj++ .
 
   op ?Int : Nat -> ?Int .
   op !Int : Nat -> !Int .

@@ -6,27 +6,45 @@ kmod IMP is including IMP-SEMANTICS
 ---  including P-SUM
   including P-LIST-REVERSE
 
+  op check : KLabel -> BagItem
+  op (_feasible and_infeasible paths) : Nat Nat -> BagItem [format(g! d d d d d o)]
 
-  sort Result
+  kvar N M : Nat
 
-  op mlcheck : KLabel -> Result
-  op (_feasible and_infeasible paths) : Nat Nat -> Result [format(g! d d d d d o)]
-  op [|_,_,_|] : Nat Nat Bag -> Result [strat(0 1 2 3)]
+  eq check(K:KLabel) = <T>
+                         <feasible> 0 </feasible>
+                         <infeasible> 0 </infeasible>
+                         <config>
+                           <k> K(.List{K}) </k>
+                           <env> .Map </env>
+                           <heap> .Map </heap>
+                           <form> TrueFormula </form>
+                           <subst> .Subst </subst>
+                           <newSym>  0 </newSym>
+                           <newImpl> 0 </newImpl>
+                         </config>
+                       </T>
+  eq <T> <feasible> N </feasible> <infeasible> M </infeasible> </T>
+   = N feasible and M infeasible paths
 
-  eq mlcheck(K:KLabel) = [| 0, 0,
-                         <T>
-                           <feasible> 0 </feasible>
-                           <infeasible> 0 </infeasible>
-                           <config>
-                             <k> K(.List{K}) </k>
-                             <env> (.).Map </env>
-                             <heap> (.).Map </heap>
-                             <form>  TrueFormula </form>
-                             <subst> .Subst </subst>
-                             <newSym>  0 </newSym>
-                             <newImpl> 0 </newImpl>
-                           </config>
-                         </T>
-
-                       |]
+  rule
+    <feasible> N => N +Int 1 </feasible>
+    (
+      <config_>
+        <k> .K </k>
+      <_/config>
+    =>
+      .Bag
+    )
+  [metadata "structural"]
+  rule
+    <infeasible> N => N +Int 1 </infeasible>
+    (
+      <config_>
+        <form> FalseFormula </form>
+      <_/config>
+    =>
+      .Bag
+    )
+  [metadata "structural"]
 endkm

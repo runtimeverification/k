@@ -1,8 +1,8 @@
 mod P-LIST-REVERSE is inc IMP-SYNTAX + LIST-HP .
   ops x y p : -> Id .
   ops ?x ?y ?p : -> ?Int .
-  ops ?B ?C : -> ?IntSeq .
-  op A : -> FreeIntSeq .
+  ops ?B ?C : -> ?Seq .
+  op A : -> FreeSeq .
 
 
   op pListReverse : -> Stmts .

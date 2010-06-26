@@ -1,0 +1,65 @@
+mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
+  sorts ?Seq !Seq FreeSeq NeSeq Seq Seq++ NeSeq++ . 
+  subsort NeSeq < Seq .
+  subsort NeSeq++ Seq < Seq++ .
+  subsort ?Seq !Seq FreeSeq NeSeq < NeSeq++ .
+  subsort ?Seq < ?MathObj .
+  subsort !Seq < !MathObj .
+  subsort FreeSeq < FreeMathObj .
+  subsort Seq < MathObj .
+  subsort Seq++ < MathObj++ .
+ 
+  op ?Seq : Nat -> ?Seq .
+  op skolem : Nat ?Seq -> FreeSeq [ditto] .
+
+  op epsilon : -> Seq .
+  op `[_`] : List{MathObj++} -> NeSeq++ .
+  op `[_`] : ?MathObj -> ?Seq [ditto] .
+  op `[_`] : !MathObj -> !Seq [ditto] .
+  op `[_`] : FreeMathObj -> FreeSeq [ditto] .
+  op `[_`] : MathObj -> NeSeq [ditto] .
+  op `[_`] : MathObj++ -> NeSeq++ [ditto] .
+  op _:::_ : Seq++ Seq++ -> Seq++ [assoc id: epsilon] .
+  op _:::_ : NeSeq++ Seq++ -> NeSeq++ [ditto] .
+  op _:::_ : Seq++ NeSeq++ -> NeSeq++ [ditto] .
+  op _:::_ : ?Seq ?Seq -> ?Seq [ditto] .
+  op _:::_ : !Seq !Seq -> !Seq [ditto] .
+  op _:::_ : FreeSeq FreeSeq -> FreeSeq [ditto] .
+  op _:::_ : Seq Seq -> Seq [ditto] .
+  op _:::_ : NeSeq Seq -> NeSeq [ditto] .
+  op _:::_ : Seq NeSeq -> NeSeq [ditto] .
+  op _:::_ : NeSeq Seq++ -> NeSeq++ [ditto] .
+  op _:::_ : Seq++ NeSeq -> NeSeq++ [ditto] .
+  op _:::_ : NeSeq++ Seq -> NeSeq++ [ditto] .
+  op _:::_ : Seq NeSeq++ -> NeSeq++ [ditto] .
+  op _:::_ : Seq++ Seq -> Seq++ [ditto] .
+  op _:::_ : Seq Seq++ -> Seq++ [ditto] .
+  op _:::_ : NeSeq++ NeSeq -> NeSeq++ [ditto] .
+  op _:::_ : NeSeq NeSeq++ -> NeSeq++ [ditto] . 
+
+  op rev : Seq++ -> Seq++ .
+  op len : Seq++ -> Int++ .
+
+
+  var Obj Obj1 Obj2 : MathObj++ .
+  var ObjList : List{MathObj++} .
+  var A A1 A2 : Seq++ .
+  var NeA NeA1 NeA2 : NeSeq++ .
+
+  eq [Obj1, Obj2, ObjList] = [Obj1] ::: [Obj2] ::: [ObjList] .
+  eq [.List{MathObj++}] = epsilon .
+  eq NeA ::: A1 === NeA ::: A2 = A1 === A2 .
+  eq A1 ::: NeA === A2 ::: NeA = A1 === A2  .
+  eq [Obj1] ::: A1 === [Obj2] ::: A2 = Obj1 === Obj2 /\ A1 === A2 .
+  eq [Obj1] ::: A1 === [Obj2] ::: A2 = Obj1 === Obj2 /\ A1 === A2 .
+  eq A1 ::: [Obj1] === A2 ::: [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
+  eq A1 ::: [Obj1] === A2 ::: [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
+
+  eq rev(NeA1 ::: NeA2) = rev(NeA2) ::: rev(NeA1) .
+  eq rev([Obj]) = [Obj] .
+  eq rev(epsilon) = epsilon .
+  eq len(NeA1 ::: NeA2) = len(NeA1) +Int len(NeA2) .
+  eq len([Obj]) = 1 .
+  eq len(epsilon) = 0 .
+endm
+

@@ -170,11 +170,9 @@ mod SKOL is inc CONFIG + PL-META-TERM .
        QC
      fi .
   eq skolemTerm(NT, '?Int[QT]) = 'skolem[NT : '?Int[QT]] .
-  eq skolemTerm(NT, '?IntSeq[QT]) = 'skolem[NT : '?IntSeq[QT]] .
-  eq skolemTerm(NT, '?IntTree[QT]) = 'skolem[NT : '?IntTree[QT]] .
-  eq skolemTerm(NT, '?IntTreeSeq[QT]) = 'skolem[NT : '?IntTreeSeq[QT]] .
-  eq skolemTerm(NT, '?IntBag[QT]) = 'skolem[NT : '?IntBag[QT]] .
-  eq skolemTerm(NT, '?Graph[QT]) = 'skolem[NT : '?Graph[QT]] .
+  eq skolemTerm(NT, '?Seq[QT]) = 'skolem[NT : '?Seq[QT]] .
+  eq skolemTerm(NT, '?Tree[QT]) = 'skolem[NT : '?Tree[QT]] .
+  eq skolemTerm(NT, '?MSet[QT]) = 'skolem[NT : '?MSet[QT]] .
   eq skolemTerm(NT, 'skolem[NT' : QT]) = 'skolem[NT' : QT] .
   eq skolemTerm(NT, Q[QTList]) = Q[skolemTerm(NT, QTList)] [owise] .
 
@@ -184,7 +182,9 @@ mod SKOL is inc CONFIG + PL-META-TERM .
    = downTerm(skolemTerm(upTerm(N), upTerm(Cfgs)), errorBag) .
 endm
 
+
 mod MB-CONDITION is inc CONFIG .
   var I : Int++ .
   eq I : : IntSort = I :: Int .
 endm
+

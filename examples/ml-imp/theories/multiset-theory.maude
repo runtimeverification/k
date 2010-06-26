@@ -1,0 +1,65 @@
+mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
+  sorts ?MSet !MSet FreeMSet NeMSet MSet MSet++ NeMSet++ . 
+  subsort NeMSet < MSet .
+  subsort NeMSet++ MSet < MSet++ .
+  subsort ?MSet !MSet FreeMSet NeMSet < NeMSet++ .
+  subsort ?MSet < ?MathObj .
+  subsort !MSet < !MathObj .
+  subsort FreeMSet < FreeMathObj .
+  subsort MSet < MathObj .
+  subsort MSet++ < MathObj++ .
+ 
+  op ?MSet : Nat -> ?MSet .
+  op skolem : Nat ?MSet -> FreeMSet [ditto] .
+
+  op empty : -> MSet .
+  op `{_`} : List{MathObj++} -> NeMSet++ .
+  op `{_`} : ?MathObj -> ?MSet [ditto] .
+  op `{_`} : !MathObj -> !MSet [ditto] .
+  op `{_`} : FreeMathObj -> FreeMSet [ditto] .
+  op `{_`} : MathObj -> NeMSet [ditto] .
+  op `{_`} : MathObj++ -> NeMSet++ [ditto] .
+  op _U_ : MSet++ MSet++ -> MSet++ [assoc comm id: empty] .
+  op _U_ : NeMSet++ MSet++ -> NeMSet++ [ditto] .
+  op _U_ : MSet++ NeMSet++ -> NeMSet++ [ditto] .
+  op _U_ : ?MSet ?MSet -> ?MSet [ditto] .
+  op _U_ : !MSet !MSet -> !MSet [ditto] .
+  op _U_ : FreeMSet FreeMSet -> FreeMSet [ditto] .
+  op _U_ : MSet MSet -> MSet [ditto] .
+  op _U_ : NeMSet MSet -> NeMSet [ditto] .
+  op _U_ : MSet NeMSet -> NeMSet [ditto] .
+  op _U_ : NeMSet MSet++ -> NeMSet++ [ditto] .
+  op _U_ : MSet++ NeMSet -> NeMSet++ [ditto] .
+  op _U_ : NeMSet++ MSet -> NeMSet++ [ditto] .
+  op _U_ : MSet NeMSet++ -> NeMSet++ [ditto] .
+  op _U_ : MSet++ MSet -> MSet++ [ditto] .
+  op _U_ : MSet MSet++ -> MSet++ [ditto] .
+  op _U_ : NeMSet++ NeMSet -> NeMSet++ [ditto] .
+  op _U_ : NeMSet NeMSet++ -> NeMSet++ [ditto] . 
+
+  op size : MSet++ -> Int++ . 
+  ops min max : MSet++ -> Int++ .
+
+
+  var I : Int++ .
+  var Obj Obj1 Obj2 : MathObj++ .
+  var ObjList : List{MathObj++} .
+  var A A1 A2 : MSet++ .
+  var NeA NeA1 NeA2 : NeMSet++ .
+
+  eq {Obj1, Obj2, ObjList} = {Obj1} U {Obj2} U {ObjList} .
+  eq {.List{MathObj++}} = empty .
+  eq NeA U A1 === NeA U A2 = A1 === A2 .
+  eq size(NeA1 U NeA2) = size(NeA1) +Int size(NeA2) .
+  eq size(empty) = 0 .
+  eq @(min(NeA1 U NeA2) +Int I >=Int 0)
+   = @(min(NeA1) +Int I >=Int 0) /\ @(min(NeA2) +Int I >=Int 0) .
+  eq min(I) = I .
+  eq min(empty) +Int I >=Int 0 = true .
+  eq @((-Int max(NeA1 U NeA2)) +Int I >=Int 0)
+   = @((-Int max(NeA1)) +Int I >=Int 0) /\
+     @((-Int max(NeA2)) +Int I >=Int 0) .
+  eq max(I) = I .
+  eq (-Int max(empty)) +Int I >=Int 0 = true .
+endm
+
