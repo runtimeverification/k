@@ -1,10 +1,11 @@
-load challenge-compiled
+load agent-compiled
 rew run('p1) .
 rew run('p2) .
-search run('p3) =>! B:Bag .
+rew run('p3) .
 rew run('p4) .
 rew run('p5) .
 rew run('p6) .
+---(
 rew run('p7) .
 rew run('p8) .
 rew run('p9, (Int 5(.List{K}),,Int -5(.List{K}))) .
@@ -34,3 +35,4 @@ rew run('p29, (Int 5(.List{K}),,Int 3(.List{K}),,Int 7(.List{K}),,Int 2(.List{K}
 
 search run('p30) =>! B:Bag .
 search run('p31) =>! B:Bag .
+---)

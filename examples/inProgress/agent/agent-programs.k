@@ -1,9 +1,25 @@
-kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
+kmod AGENT-PROGRAMS is including AGENT-SYNTAX
 
   ops a b c f i j k m n s t x y z odd even odd-calls even-calls goto exit : -> Id
 
   op p1 : -> Exp
-  macro p1 = 3+5
+  macro p1 = print(3+5)
+  
+  op p2 : -> Exp
+  macro p2 = (lambda (x . x)) 
+  
+  op p3 : -> Exp
+  macro p3 = print((lambda (x . x + 7)) 10)
+  
+  op p4 : -> Exp
+  macro p4 = print((lambda (x . if 5 <= 3 then x + 7 else 0)) y)
+
+  op p5 : -> Exp 
+  macro p5 = (x (mu (f . (lambda (x . (f x))))))
+
+  op p6 : -> Exp 
+  macro p6 = print((mu (f . (lambda (x . if x <= 0 then 1 else ((f (x + -1)) * x))))) 5)
+---(
 
   op p2 : -> Exp
   macro p2 = (3 <= 5) and not (5.8 <= 1.0)
@@ -467,5 +483,5 @@ macro p31 =
     newAgent {print receive;};
   }
   broadcast 0;
-
+---)
 endkm
