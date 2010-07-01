@@ -20,11 +20,9 @@ tokens {
   String wrappedBuiltin;
 }
 
-
 module : (begin | end | content)* ;
 
 begin
-options { greedy = true; }
   : APP '(' BUILTIN '_' '('
   { isWrapper = true; count = 0; wrappedBuiltin = ""; }
   | APP (~'(' | '(' ~BUILTIN)
@@ -64,10 +62,12 @@ content
 
 
 BUILTIN
-  : 'MathObj++'
+  : 'Int++'
+  | 'Id'
 ;
 
 CONTENT
   : '_'?  ~('(' | ')' | ',' | '_')*
+  | '_`(`)'
 ;
 

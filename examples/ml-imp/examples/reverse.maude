@@ -1,26 +1,33 @@
 mod P-LIST-REVERSE is inc IMP-SYNTAX + LIST-HP .
-  ops x y p : -> Id .
+  ops x y p reverse : -> Id .
   ops ?x ?y ?p : -> ?Int .
   ops ?B ?C : -> ?Seq .
   op A : -> FreeSeq .
 
 
-  op pListReverse : -> Stmts .
+  op pListReverse : -> Decl .
   eq pListReverse = (
-    // assume < config > < env > x |-> ?x p |-> ?p y |-> ?y </ env >
-                         < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config >
-    p = 0 ;
-    // invariant < config > < env > p |-> ?p x |-> ?x y |-> ?y </ env >
-                            < heap > list(?p)(?B) list(?x)(?C) </ heap >
-                            < form > rev(A) === rev(?C) ::: ?B </ form > </ config >
-    while(x != 0) {
-      y = *(x + 1) ;
-      *(x + 1) = p ;
-      p = x ;
-      x = y ;
-    }
-    // assert < config > < env > p |-> ?p </ env >
-                         < heap > list(?p)(rev(A)) </ heap > < form > TrueFormula </ form > </ config >
+
+int reverse(x)
+// pre < config > < env > x |-> ?x </ env >
+                  < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config >
+// post < config > < env > (.).Map </ env >
+                   < heap > list(?return)(rev(A)) </ heap > < form > TrueFormula </ form > </ config >
+{
+  int p,,, y ;
+  p = 0 ;
+  // invariant < config > < env > p |-> ?p x |-> ?x </ env >
+                          < heap > list(?p)(?B) list(?x)(?C) </ heap >
+                          < form > rev(A) === rev(?C) ::: ?B </ form > </ config >
+  while(x != 0) {
+    y = *(x + 1) ;
+    *(x + 1) = p ;
+    p = x ;
+    x = y ;
+  }
+  return p ;
+}
+
   ) .
 endm
 

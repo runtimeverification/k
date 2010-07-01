@@ -1,0 +1,164 @@
+mod BINARY-TREE-HP is inc CONFIG + MATHEMATICAL-TREE .
+  var N : Nat .
+  var P P' P1 P2 Q Q' Q1 Q2 : Int++ .
+  var I : Int++ .
+  var Sigma Tau : Tree++ .
+  var H : Map .
+  var K : K .
+  var Phi : Formula .
+  var NtPhi : NtFormula .
+  var Cfg : BagItem .
+  var CfgItems : Bag .
+ 
+ 
+  op tree : -> HeapLabel .
+
+  ops left right : -> KLabel .
+
+
+*** Definition of Trees ***
+ ceq < config >
+       < k > derive(P') ~> K </ k >
+       < heap >
+         tree(P)(Tau)
+         H
+       </ heap >
+       < form > Phi </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+   = < config >
+       < k > derive(P') ~> K </ k >
+       < heap > H </ heap >
+       < form > Phi /\ (P === 0) /\ (Tau === upsilon) </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+     < config >
+       < k > K </ k >
+       < heap >
+         P |-> ?Int(N) : node
+         (P +Int 1) |-> ?Int(N +Int 1) : left
+         (P +Int 2) |-> ?Int(N +Int 2) : right
+         tree(?Int(N +Int 1))(?Tree(N +Int 3))
+         tree(?Int(N +Int 2))(?Tree(N +Int 4))
+         H
+       </ heap >
+       < form >
+         Phi /\ ~(P === 0) /\
+         (Tau === ?Tree(N +Int 3) [?Int(N)] ?Tree(N +Int 4))
+       </ form >
+       < newSym > N +Int 5 </ newSym >
+       CfgItems
+     </ config > 
+  if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+
+  eq < heap > tree(0)(Tau) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ Tau === upsilon </ form > .
+
+  rl < config >
+       < heap >
+         P |-> I : node
+         (P +Int 1) |-> 0 : left
+         (P +Int 2) |-> 0 : right
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         tree(P)(upsilon [I] upsilon)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+
+  rl < config >
+       < heap >
+         P |-> I : node
+         (P +Int 1) |-> Q : left
+         (P +Int 2) |-> 0 : right
+         tree(Q)(Tau)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         tree(P)(Tau [ I ] upsilon)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+
+  rl < config >
+       < heap >
+         P |-> I : node
+         (P +Int 1) |-> 0 : left
+         (P +Int 2) |-> Q : right
+         tree(Q)(Tau)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         tree(P)(upsilon [ I ] Tau)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+
+  rl < config >
+       < heap >
+         P |-> I : node
+         (P +Int 1) |-> Q : left
+         (P +Int 2) |-> Q' : right
+         tree(Q)(Tau)
+         tree(Q')(Sigma)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         tree(P)(Tau [ I ] Sigma)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+
+***(
+  op tree-list : -> HeapPatternName .
+
+*** Definition of Lists of Trees ***
+ ceq <config> <k> derive(P') ~> Rest </k> <heap> tree-list(P)(Alpha') ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>
+   = <config> <k> derive(P') ~> Rest </k> <heap> H </heap> <form> Phi /\ (P === 0) /\ (Alpha' === epsilon') </form> <newSym> N </newSym> Cfg </config>
+     <config> <k> Rest </k> <heap> P |-> ?Int(N) : node ** (P +Int 1) |-> ?Int(N +Int 1) : next ** tree(?Int(N))(?IntTree(N +Int 2)) ** tree-list(?Int(N +Int 1))(?IntTreeSeq(N +Int 3)) ** H </heap>
+              <form> Phi /\ ~(P === 0) /\ (Alpha' === ?IntTree(N +Int 2) ::' ?IntTreeSeq(N +Int 3)) /\ ~(?Int(N) === 0) </form> <newSym> N +Int 4 </newSym> Cfg </config>
+    if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+
+  eq <heap> tree-list(0)(Alpha') ** H </heap> <form> Phi </form> = <heap> H </heap> <form> Phi /\ Alpha' === epsilon' </form> .
+
+  rl <config> <heap> P |-> 0 : node ** (P +Int 1) |-> 0 : next ** H </heap> Cfg </config> =heap=> CFG
+  => <config> <heap> tree-list(P)(upsilon) ** H </heap> Cfg </config> =heap=> CFG .
+
+  rl <config> <heap> P |-> I : node ** (P +Int 1) |-> 0 : next ** tree(I)(Tau) ** H </heap> Cfg </config> =heap=> CFG
+  => <config> <heap> tree-list(P)(Tau) ** H </heap> Cfg </config> =heap=> CFG .
+
+  rl <config> <heap> P |-> 0 : node ** (P +Int 1) |-> P' : next ** tree-list(P')(Alpha') ** H </heap> Cfg </config> =heap=> CFG
+  => <config> <heap> tree-list(P)(upsilon ::' Alpha') ** H </heap> Cfg </config> =heap=> CFG .
+
+  rl <config> <heap> P |-> I : node ** (P +Int 1) |-> P' : next ** tree(I)(Tau) ** tree-list(P')(Alpha') ** H </heap> Cfg </config> =heap=> CFG
+  => <config> <heap> tree-list(P)(Tau ::' Alpha') ** H </heap> Cfg </config> =heap=> CFG .
+***)
+endm
+

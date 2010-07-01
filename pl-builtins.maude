@@ -899,6 +899,8 @@ mod PL-ID is
   subsort Id < Builtins .
 endm
 
+
+---mod BASIC-PL-BUILTINS is
 mod PL-BUILTINS is
 including PL-BOOL .
 including PL-EXT-BOOL .
@@ -914,6 +916,7 @@ including PL-COUNTER .
 including PL-BOOL .
 including PL-ID .
 endm
+
 ---set include PL-BOOL on .
 set show advisories on .
 

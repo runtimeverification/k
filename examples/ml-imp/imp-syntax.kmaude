@@ -2,13 +2,21 @@ load ml-prelude.maude
 
 
 kmod IMP-SYNTAX is including ML-K
-  sort Exp
-  sorts Stmt Stmts
-  sort Annot
-  subsort Id Int++ < Exp
-  subsort Stmt Annot < Stmts
+  sort Val Exp
+  sort Type
+  sort Stmt Stmts
+  sort StmtAnnot DeclAnnot DeclAnnots
+  sort Decl Decls
+  subsort Int++ < Val
+  subsort Id Val < Exp
+  subsort StmtAnnot Decl < Stmt
+  subsort Stmt Decls < Stmts
+  subsort DeclAnnot < DeclAnnots
+  subsort Decl < Decls
 
   op NULL : -> Exp
+  op void : -> Type
+  op int : -> Type
 
   op *_ : Exp -> Exp [prec 10 metadata "strict"]
   op _+_ : Exp Exp -> Exp [prec 33 gather (E e) metadata "strict"]
@@ -32,27 +40,42 @@ kmod IMP-SYNTAX is including ML-K
   op {} : -> Stmt
   op {_} : Stmts -> Stmt [gather(&)]
   op __ : Stmts Stmts -> Stmts [prec 100 gather(e E)]
+  op __ : Decls Decls -> Decls [ditto]
+  ---op __ : DeclAnnots DeclAnnots -> DeclAnnots [prec 100 gather(e E)]
+  op __; : Type List{Id} -> Stmt
   op _; : Exp -> Stmt [prec 65 metadata "strict"]
   op if`(_`)_else_ : Exp Stmt Stmt -> Stmt [prec 93 metadata "strict(1)"]
   op if`(_`)_ : Exp Stmt -> Stmt [prec 95]
   op while`(_`)_ : Exp Stmt -> Stmt
-  ---op function_()_ : Id Stmt -> Decl
-  ---op function_(_)_ : Id List{Id} Stmt -> Decl
-  ---op _`(`) : Exp -> Exp
-  ---op _`(_`) : Exp List{Exp} -> Exp [prec 2 metadata "strict"]
-  op return_ : Exp -> Exp [metadata "strict"]
+  op __`(`)_`{_`} : Type Id DeclAnnot Stmts -> Decl
+  op __`(_`)_`{_`} : Type Id List{Id} DeclAnnot Stmts -> Decl
+  op _`(`) : Id -> Exp
+  op _`(_`) : Id List{Exp} -> Exp [prec 2 metadata "strict(2)"]
+  op return_; : Exp -> Stmt [metadata "strict"]
 
   ---op alloc`(_`) : List{KLabel} -> Stmt [metadata "strict"]
   ---op free`(_`) : Exp -> Exp [metadata "strict"]
 
-  ops //`assume_ //`assert_ //`invariant_ : Bag -> Annot [prec 99 strat(0)]
-  ops //`pre_ //`post_ : Bag -> Annot [prec 99 strat(0)]
+  ops //`assume_ //`assert_ //`invariant_ : Bag -> StmtAnnot [prec 99 strat(0)]
+  op //`pre_//`post_ : Bag Bag -> DeclAnnot [prec 99 strat(0)]
 
   op load : Int++ -> Exp
   op store : Int++ Exp -> Exp [metadata "strict"]
 
   op breakpoint; : -> Stmt
   op watch; : -> Stmt
+
+
+  sort List{Id}
+  subsorts Id < List{Id}
+  op .List{Id} : -> List{Id}
+  op _`,`,`,_ : List{Id} List{Id} -> List{Id} [assoc id: .List{Id}]
+  sort List{Val}
+  subsorts Val < List{Val}
+  op _`,`,`,_ : List{Val} List{Val} -> List{Val} [ditto]
+  sort List{Exp}
+  subsorts Exp List{Id} List{Val} < List{Exp}
+  op _`,`,`,_ : List{Exp} List{Exp} -> List{Exp} [ditto]
 endkm
 
 kmod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX
@@ -61,26 +84,17 @@ kmod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX
 --- The idea is that we only want to give semantics to core constructs,      ---
 --- so we get rid of the derived ones before we start the semantics          ---
 --------------------------------------------------------------------------------
+  kvar T : Type
+  kvar F : Id
   kvar E E1 E2 : Exp
   kvar S : Stmt
+  kvar Ss : Stmts
+  kvar DA : DeclAnnot
   eq NULL = 0
   eq E1 != E2 = !(E1 == E2)
   eq if (E) S = if(E) S else {}
 
----  eq function F() S = function F(.List{Id}) S
----  eq E() = E(.List{Id})
+  eq T F() DA { Ss } = T F(.List{Id}) DA { Ss }
+  eq F() = F(.List{Id})
 endkm
-
-***(
-  sort List{Id} .
-  subsorts Id < List{Id} .
-  op .List{Id} : -> List{Id} .
-  op _;;_ : List{Id} List{Id} -> List{Id} [assoc id: .List{Id}] .
-  sort List{Exp} .
-  subsorts Exp List{Id} < List{Exp} .
-  op _;;_ : List{Exp} List{Exp} -> List{Exp} [ditto] .
-  sort List{Val} .
-  subsort Val < List{Val} < List{Exp} .
-  op _;;_ : List{Val} List{Val} -> List{Val} [ditto] .
-***)
 

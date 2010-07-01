@@ -2,36 +2,46 @@ load imp-syntax.kmaude
 
 
 kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
-  subsort MathObj++ < Builtins KResult
   subsort Int++ < Builtins KResult
-  subsort Stmts Exp < K
+  subsort List{Val} Type < KResult
+  subsort DeclAnnot Stmts List{Exp} < K
 
   kvar M N N1 N2 : Nat
   kvar I J I1 I2 : Int++
   kvar NzI : NzInt
+  kvar T : Type
   kvar F X : Id
-  ---var Xl : List{Id}
-  kvar E E1 E2 : Exp
+  kvar Xl : List{Id}
+  kvar V : Val
+  kvar Vl : List{Val}
+  kvar E E' E1 E2 : Exp
+  kvar El El' : List{Exp}
   kvar S S1 S2 : Stmt
   kvar Ss : Stmts
   kvar K : K
+  kvar NeK : NeK
   kvar L : KLabel
   kvar Phi Phi' : Formula
   kvar NtPhi : NtFormula
   kvar Subst Subst' : Subst
+  kvar Env Env' Spec : Map
   kvar Cfg : BagItem
-  kvar Cfgs CfgItems : Bag
+  kvar Cfgs Cfgs' CfgItems : Bag
+
+
+  op _`(_`):_=>_ : Id List{Id} Bag Bag -> MapItem
 
 
   configuration <T> 
                   <feasible > 0 </feasible>
                   <infeasible > 0 </infeasible>
+                  <spec> .Map </spec>
                   <config>
                     <k> .K </k>
                     <env> .Map </env>
                     <heap> .Map </heap>
                     <form>  TrueFormula </form>
-                    <subst> .K </subst>
+                    <subst> .Subst </subst>
                     <newSym>  0 </newSym>
                     <newImpl> 0 </newImpl>
                   </config>
@@ -80,6 +90,10 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule NzI ? E1 : E2 => E1
   rule 0 ? E1 : E2 => E2
 
+  rule
+    <k> int Xl ; => .K <_/k>
+    <env_> .Map => Xl |-> range(N, length,,,(Xl)) <_/env>
+    <newSym> N => N +Int length,,,(Xl) </newSym>
   rule I ; => .K [metadata "structural"]
   rule {} => .K [metadata "structural"]
   rule { Ss } => Ss [metadata "structural"]
@@ -111,7 +125,9 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule
     <k> store(I, J) => .K <_/k>
     <heap_> I |-> (_ => J) : L <_/heap>
-
+  rule
+    <k> return I ; => .K <_/k>
+    <form> Phi => Phi /\ ?return === I </form>
 
   rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
   [metadata "structural"]
@@ -129,10 +145,18 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule
     <config_> 
       <k>
-        // assume <config> <form> Phi' </form> CfgItems </config> Cfgs ~> K
+        // assume
+          <config>
+            <env> Env' </env>
+            <form> Phi' </form>
+            CfgItems
+          </config>
+          Cfgs
+        ~> K
       =>
         // assume Cfgs ~> K
       </k>
+      <env> Env </env>
       <form> Phi </form>
       <subst> Subst </subst>
       <newSym> M </newSym>
@@ -143,11 +167,14 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
     =>
       <config>
         <k> K </k>
-        <form> Phi /\ Phi'[Subst] </form>
+        (
+          <env> Env[Env'] </env>
+          <form> Phi /\ Phi' </form>
+          CfgItems
+        )[Subst]
         <subst> Subst </subst>
         <newSym> M </newSym>
         <newImpl> N </newImpl>
-        CfgItems
       </config>
     )
   [metadata "structural"]
@@ -156,26 +183,77 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   [metadata "structural"]
 
   rule
-    < config >
-      < k > // assert Cfgs => // assume Cfgs <_/ k >
-      < subst > Subst => Subst' </ subst >
-      < newSym > M </ newSym >
-      < newImpl > N => N +Int 1 </ newImpl >
+    <config>
+      <k> // assert Cfgs => // assume Cfgs <_/k>
+      <subst> Subst => Subst' </subst>
+      <newSym> M </newSym>
+      <newImpl> N => sNat N </newImpl>
       (CfgItems => skolemize(N, CfgItems))
-    </ config >
+    </config>
   if search(
-    < config >
-      < subst > Subst </ subst >
-      < newImpl > N </ newImpl >
+    <config>
+      <subst> Subst </subst>
+      <newImpl> N </newImpl>
       CfgItems
-    </ config >
+    </config>
     ===>
     Cfgs
   =>
-    < config >
-      < form > TrueFormula </ form >
-      < subst > Subst' </ subst >
-    </ config >
+    <config>
+      <form> TrueFormula </form>
+      <subst> Subst' </subst>
+    </config>
   )
+
+  rule
+    <spec_> F(Xl) : Cfgs => Cfgs' <_/spec>
+    <config>
+      <k> _`(_`)(F, Vl) => // assume Cfgs' <_/k>
+      <env> Env </env>
+      <subst> Subst => Subst' </subst>
+      <newSym> M </newSym>
+      <newImpl> N => sNat N </newImpl>
+      (CfgItems => skolemize(N, CfgItems))
+    </config>
+  if search(
+    <config>
+      <env> Xl |-> Vl </env>
+      <subst> Subst </subst>
+      <newImpl> N </newImpl>
+      CfgItems
+    </config>
+    ===>
+    Cfgs
+  =>
+    <config>
+      <form> TrueFormula </form>
+      <subst> Subst' </subst>
+    </config>
+  )   
+
+  rule
+      __`(_`)_`{_`}(T, F, Xl, (//pre Cfgs //post Cfgs'), Ss)
+    =>
+      //assume Cfgs ~> Ss ~> //assert Cfgs'
+
+
+  op mkSpec : K -> Map
+  rule
+      mkSpec((__`(_`)_`{_`}(T, F, Xl, (//pre Cfgs //post Cfgs'), Ss) ~> K))
+    =>
+      F(Xl) : Cfgs => Cfgs' mkSpec(K)
+  [metadata "structural"]
+  rule mkSpec(.K) => .Map [metadata "structural"]
+
+  rule E,,, El |-> E',,, El' => E |-> E' El |-> El' [metadata "structural"]
+  rule .List{Id} |-> .List{Id} => .Map [metadata "structural"]
+
+  op length`,`,`,_ : List{Exp} -> Nat
+  rule length,,,(X,,, Xl) => sNat length,,,(Xl) [metadata "structural"]
+  rule length,,,(.List{Id}) => 0 [metadata "structural"]
+
+  op range : Nat Nat -> List{Val}
+  rule range(N, sNat(M)) => ?Int(N),,, range(sNat N, M) [metadata "structural"]
+  rule range(N, 0) => .List{Id} [metadata "structural"]
 endkm
 

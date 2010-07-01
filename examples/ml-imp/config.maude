@@ -31,19 +31,16 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op ?Heap : Nat -> ?Map .
   op skolem : Nat ?Map -> FreeMap .
 
-  subsort MathObj++ < Builtins KResult .
   subsort Int++ < Builtins KResult .
-  ---subsort Id < KProper .
-  ---subsort List{MathObj++} < KResult .
-
- 
+  op <_>_</_> : CellLabel Int++ CellLabel -> BagItem
+  [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Formula CellLabel -> BagItem
   [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Subst CellLabel -> BagItem
   [prec 0 format(nib g b o+ -b g b o)] .
 
   ops feasible infeasible : -> CellLabel .
-  ops config k env heap form subst newSym newImpl : -> CellLabel .
+  ops config k env heap form subst newSym newImpl spec : -> CellLabel .
 
   op errorBag : -> [Bag] .
   op _===>_ : Bag Bag -> Bag [frozen] .
@@ -56,9 +53,14 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op _=debug=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
 
 
+  sort HeapLabel .
   op _|->_:_ : Int++ Int++ KLabel -> MapItem .
-  op _`(_`)`(_`) : KLabel List{MathObj++} List{MathObj++} -> MapItem .
+  op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op derive : -> KLabel .
+
+  op node : -> KLabel .
+
+  op ?return : -> FreeInt .
 
   op VALID : Formula -> Bool .
   eq VALID(TrueFormula) = true .
@@ -66,6 +68,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op IntSort : -> KLabel .
   op _: :_ : Int++ KLabel -> Bool .
 endm
+
 
 mod ML-K is inc CONFIG + K + K-CONDITION-SEARCH .
   op _=>_ : Int++ Int++ -> Int++ [prec 125] .

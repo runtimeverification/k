@@ -8,13 +8,6 @@ public class unwrapBuiltinsMain {
     try {
       ANTLRInputStream input = new ANTLRInputStream(System.in);
       unwrapBuiltinsLexer lexer = new unwrapBuiltinsLexer(input);
-/*
-Token token = lexer.nextToken();
-            while(token.getText() != null) {
-                System.out.println(token.getText());
-                token = lexer.nextToken();
-            }
-*/
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       unwrapBuiltinsParser parser = new unwrapBuiltinsParser(tokens);
       parser.module();
@@ -23,3 +16,4 @@ Token token = lexer.nextToken();
     catch (RecognitionException e) {}
   }
 }
+

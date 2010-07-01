@@ -15,7 +15,8 @@ mod FOL= is inc CONFIG + APPLY-SUBST + SKOL + MB-CONDITION + SMT-INTERFACE .
   var ObjList ObjList1 ObjList2 : List{MathObj++} .
   var X : Id .
   var P Q P' : Int++ .
-  var T HPN : KLabel .
+  var T : KLabel .
+  var HPN : HeapLabel .
   var Env Env1 Env2 : Map .
   var !Env : !Map .
   var H H1 H2 : Map .

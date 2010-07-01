@@ -3,6 +3,7 @@ load theories/sequence-theory.maude
 load theories/multiset-theory.maude
 load theories/tree-theory.maude
 load heap_patterns/list.maude
+load heap_patterns/binary_tree.maude
 
 
 mod PL-BUILTINS is
@@ -24,5 +25,6 @@ including PL-ID .
   including MATHEMATICAL-MULTISET .
   including MATHEMATICAL-TREE .
   including LIST-HP .
+  including BINARY-TREE-HP .
 endm
 

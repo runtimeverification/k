@@ -10,14 +10,18 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var Cfg : BagItem .
   var CfgItems : Bag .
   
-  ops node next : -> KLabel .
+  ops next prev : -> KLabel .
 
-  op list : -> KLabel .
 
 *** Definition of Lists ***
+  op list : -> HeapLabel .
+
  ceq < config >
        < k > derive(P') ~> K </ k >
-       < heap > list(P)(Alpha) H </ heap >
+       < heap >
+         list(P)(Alpha)
+         H
+       </ heap >
        < form > Phi </ form >
        < newSym > N </ newSym >
        CfgItems
@@ -60,7 +64,6 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =heap=> Cfg
   => < config > < heap > list(P)([I]) H </ heap > CfgItems </ config >
      =heap=> Cfg .
-
   rl < config >
        < heap >
          P |-> I : node
@@ -74,40 +77,112 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   => < config > < heap > list(P)([I] ::: Alpha) H </ heap > CfgItems </ config >
      =heap=> Cfg .
 
-***(
-  op lseg : -> HeapPatternName .
 
 *** Definition of List Segments ***
- ceq <config> <k> derive(P') ~> Rest </k> <heap> lseg(P,Q)(Alpha) ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>
-   = <config> <k> derive(P') ~> Rest </k> <heap> H </heap> <form> Phi /\ (P === Q) /\ (Alpha === epsilon) </form> <newSym> N </newSym> Cfg </config>
-     <config> <k> Rest </k> <heap> P |-> ?Int(N) : node ** (P +Int 1) |-> ?Int(N +Int 1) : next ** lseg(?Int(N +Int 1),Q)(?IntSeq(N +Int 2)) ** H </heap>
-              <form> Phi /\ ~(P === Q) /\ (Alpha === ?Int(N) ::: ?IntSeq(N +Int 2)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
-    if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+  op lseg : -> HeapLabel .
 
-  eq <heap> lseg(P,P)(Alpha) ** H </heap> <form> Phi </form> = <heap> H </heap> <form> Phi /\ Alpha === epsilon </form> .
+ ceq < config >
+       < k > derive(P') ~> K </ k >
+       < heap >
+         lseg(P, Q)(Alpha)
+         H
+       </ heap >
+       < form > Phi </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+   = < config >
+       < k > derive(P') ~> K </ k >
+       < heap > H </ heap >
+       < form > Phi /\ (P === Q) /\ (Alpha === epsilon) </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+     < config >
+       < k > K </ k >
+       < heap >
+         P |-> ?Int(N) : node
+         (P +Int 1) |-> ?Int(N +Int 1) : next
+         lseg(?Int(N +Int 1), Q)(?Seq(N +Int 2))
+         H
+       </ heap >
+       < form >
+         Phi /\ ~(P === Q) /\
+         (Alpha === ?Int(N) ::: ?Seq(N +Int 2))
+       </ form >
+       < newSym > N +Int 3 </ newSym >
+       CfgItems
+     </ config >
+  if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
 
-  eq <heap> lseg(P,0)(Alpha) ** H </heap> = <heap> list(P)(Alpha) ** H </heap> .
+  eq < heap > lseg(P, P)(Alpha) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ Alpha === epsilon </ form > .
+  eq < heap > lseg(P, 0)(Alpha) H </ heap >
+   = < heap > list(P)(Alpha) H </ heap > .
 
-  rl <config> <heap> P |-> I : node ** (P +Int 1) |-> Q : next ** H </heap> Cfg </config> =heap=> CFG
-  => <config> <heap> lseg(P,Q)(I) ** H </heap> Cfg </config> =heap=> CFG .
+  rl < config >
+       < heap >
+         P |-> I : node
+         (P +Int 1) |-> Q : next
+         H </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         lseg(P, Q)(I)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+  rl < config >
+       < heap >
+         lseg(P, P')(Alpha)
+         lseg(P', Q)(Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         lseg(P, Q)(Alpha ::: Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+  rl < config >
+       < heap >
+         lseg(P, P')(Alpha)
+         list(P')(Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         list(P)(Alpha ::: Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
 
-  rl <config> <heap> lseg(P,P')(Alpha) ** lseg(P',Q)(Beta) ** H </heap> Cfg </config> =heap=> CFG
-  => <config> <heap> lseg(P,Q)(Alpha ::: Beta) ** H </heap> Cfg </config> =heap=> CFG .
 
-  rl <config> <heap> lseg(P,P')(Alpha) ** list(P')(Beta) ** H </heap> Cfg </config> =heap=> CFG
-  => <config> <heap> list(P)(Alpha ::: Beta) ** H </heap> Cfg </config> =heap=> CFG .
-
-
+***(
   ops dlist dlseg : -> HeapPatternName .
 
----  eq dlist(P,Q)(Alpha) = dlseg(P,Q)(0,0,Alpha) .
----  eq dlist(P)(Alpha) = dlseg(P,0)(0,0,Alpha) .
+---  eq dlist(P, Q)(Alpha) = dlseg(P, Q)(0, 0, Alpha) .
+---  eq dlist(P)(Alpha) = dlseg(P, 0)(0, 0, Alpha) .
 
 *** Definition of Double Linked List Segments ***
 --- First equation tells how to derive a list segment , so it applies the equivalence in the paper from left to right by need.
- ceq <config> <k> derive(P') ~> Rest </k> <heap> dlseg(P,Q)(P1,Q1,Alpha) ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>
+ ceq <config> <k> derive(P') ~> Rest </k> <heap> dlseg(P, Q)(P1, Q1, Alpha) ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>
    = <config> <k> derive(P') ~> Rest </k> <heap> H </heap> <form> Phi /\ (P === P1) /\ (Q === Q1) /\ (Alpha === epsilon) </form> <newSym> N </newSym> Cfg </config>
-     <config> <k> Rest </k> <heap> P |-> ?Int(N) : node ** (P +Int 1) |-> ?Int(N +Int 1) : next ** (P +Int 2) |-> Q1 : prev ** dlseg(?Int(N +Int 1),Q)(P1,P,?IntSeq(N +Int 2)) ** H </heap>
+     <config> <k> Rest </k> <heap> P |-> ?Int(N) : node ** (P +Int 1) |-> ?Int(N +Int 1) : next ** (P +Int 2) |-> Q1 : prev ** dlseg(?Int(N +Int 1), Q)(P1, P, ?IntSeq(N +Int 2)) ** H </heap>
               <form> Phi /\ ~(P === P1) /\ ~(Q === Q1) /\ (Alpha === ?Int(N) ::: ?IntSeq(N +Int 2)) </form> <newSym> N +Int 3 </newSym> Cfg </config>
     if VALID(Phi ===> P' === P \/ P' === P +Int 1 \/ P' === P +Int 2) .
  ceq <config> <k> derive(Q') ~> Rest </k> <heap> dlseg(P,Q)(P1,Q1,Alpha) ** H </heap> <form> Phi </form> <newSym> N </newSym> Cfg </config>

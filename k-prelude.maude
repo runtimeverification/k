@@ -99,13 +99,13 @@ mod K-TECHNIQUE is
 
   op _[_/_] : Map K K -> Map [prec 0] .
 
-  var Map : Map .  vars K1 K2 K2' : K .
+  var Map Map' : Map .  vars K1 K2 K2' : K .
   eq (Map K1 |-> K2)[K2' / K1] = Map K1 |-> K2' .
   eq Map[K2 / K1] = Map K1 |-> K2 [owise] .
 
-  op _(_) : Map K -> K [prec 0] .
-  eq (Map K1 |-> K2)(K1) = K2 .
-
+  op _[_] : Map Map -> Map [prec 0] .
+  eq (Map K1 |-> K2)[Map' K1 |-> K2'] = Map[Map'] K1 |-> K2' .
+  eq Map[Map'] = Map Map' [owise] .
   
   sort CellLabel .
 
