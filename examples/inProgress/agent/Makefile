@@ -5,6 +5,9 @@ KCOMPILE ?= ../../../tools/kompile.pl
 # this is the name of the main maude module 
 LANGUAGE_NAME = AGENT
 
+# this are all interesting modules (used to latexify)
+LANGUAGE_MODULES = AGENT-SYNTAX AGENT-DESUGARED-SYNTAX AGENT-SEMANTICS AGENT
+
 #this is the basename of the main file
 MAIN_FILE = agent
 

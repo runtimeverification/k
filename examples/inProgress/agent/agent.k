@@ -151,7 +151,8 @@ kmod AGENT-SEMANTICS is including AGENT-DESUGARED-SYNTAX + K + PL-CONVERSION
   rule alpha[Z/Y](.) => . [structural]
   rule alpha[Z/Y]((K1:K ~> K2:K)) => alpha[Z/Y](K1) ~> alpha[Z/Y](K2)
     if K1 =/=Bool . andBool K2 =/=Bool . 
-  rule alpha[Z/Y]('_._(X,,K)) => if X ==Bool Y then '_._(X,,K) else '_._(X,,alpha[Z/Y](K)) fi 
+  rule alpha[Z/Y]('_._(X,,K)) =>  '_._(X,,K) if X ==Bool Y 
+  rule alpha[Z/Y]('_._(X,,K)) => '_._(X,,alpha[Z/Y](K)) if X =/=Bool Y 
   rule alpha[Z/Y](Label(Kl:List`{K`})) => Label(alpha[Z/Y](Kl))
     if Label(Kl) =/=Bool Y andBool Label =/=Bool 'BETA`[_/_`]_ andBool  Label =/=Bool 'beta`[_/_`]_ andBool  Label =/=Bool 'alpha`[_/_`]_  andBool Label =/=Bool done andBool Label =/=Bool clearDone  
   rule alpha[Z/Y](.List{K}) => .List{K} [structural]

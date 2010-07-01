@@ -5,6 +5,9 @@ KCOMPILE ?= ../../tools/kompile.pl
 # this is the name of the main maude module 
 LANGUAGE_NAME = IMP
 
+# this is the name of the interesting modules (used by make latex/pdf) 
+LANGUAGE_MODULES = IMP-SYNTAX IMP-SEMANTICS IMP
+
 #this is the basename of the main file
 MAIN_FILE = imp
 
