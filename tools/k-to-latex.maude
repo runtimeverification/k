@@ -241,6 +241,12 @@ mod DECL-META-LATEX-PRINT is
    if Q = replaceS .
   ceq printTerm(U, Q['0.Zero]) = printTerm(U, qid(string(N,10) + ".Nat")) 
    if N := getNat(string(Q)) .
+  ceq printTerm(U, '_`(_`)[Q,'_`,`,_[NeTl]]) = printTerm(U,Q'[NeTl])
+   if getType(Q) = 'Qid 
+   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) .
+  ceq printTerm(U, '_`(_`)[Q,T]) = printTerm(U,Q'[T])
+   if getType(Q) = 'Qid 
+   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise] .
 
   op getNat : String -> [Nat] .
   var Str : String .
