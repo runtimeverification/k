@@ -21,7 +21,7 @@ mod K-TECHNIQUE is
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
 
-  op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121] .
+  op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121 metadata "latex(renameTo _\\ensuremath{,\\!\\!,}_)"] .
   --- One should not modify the precedence above.  
   --- Might cause the compilation to fail.
   op _`,`,_ : NeList{K} List{K} -> NeList{K} [ditto] .
