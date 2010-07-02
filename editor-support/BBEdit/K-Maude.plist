@@ -1,0 +1,270 @@
+<!-- K/Maude syntax highlighter for TextWrangler/BBEdit
+To install, copy this file into 
+"Library/Application Support/TextWrangler/Language Modules"
+or, if using BBEdit, change "TextWrangler" to "BBEdit"
+if the "Language Modules" directory does not exist, create it.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BBEditDocumentType</key>
+	<string>CodelessLanguageModule</string>
+	<key>BBLMLanguageDisplayName</key>
+	<string>K-Maude</string>
+	<key>BBLMLanguageCode</key>
+	<string>CK</string>
+	<key>BBLMColorsSyntax</key>
+	<true/>
+	<key>BBLMScansFunctions</key>
+	<false/>
+	<key>BBLMIsCaseSensitive</key>
+	<true/>
+	<key>BBLMKeywordList</key>
+	<array>
+		<string>mod</string>
+		<string>fmod</string>
+		<string>endm</string>
+		<string>endfm</string>
+		<string>is</string>
+		<string>view</string>
+		<string>endv</string>
+		<string>from</string>
+		<string>to</string>
+		<string>including</string>
+		<string>protecting</string>
+		<string>op</string>
+		<string>ops</string>
+		<string>var</string>
+		<string>vars</string>
+		<string>extending</string>
+		<string>sort</string>
+		<string>sorts</string>
+		<string>subsort</string>
+		<string>subsorts</string>
+		<string>eq</string>
+		<string>ceq</string>
+		<string>rl</string>
+		<string>crl</string>
+		<string>mb</string>
+		<string>cmb</string>
+		<string>reduce</string>
+		<string>red</string>
+		<string>rewrite</string>
+		<string>rew</string>
+		<string>parse</string>
+		<string>frewrite</string>
+		<string>frew</string>
+		<string>search</string>
+		<string>load</string>
+		<string>in</string>
+		<string>select</string>
+		<string>assoc</string>
+		<string>comm</string>
+		<string>idem</string>
+		<string>id</string>
+		<string>iter</string>
+		<string>left-id</string>
+		<string>right-id</string>
+		<string>strat</string>
+		<string>memo</string>
+		<string>prec</string>
+		<string>gather</string>
+		<string>format</string>
+		<string>ctor</string>
+		<string>frozen</string>
+		<string>poly</string>
+		<string>special</string>
+		<string>label</string>
+		<string>metadata</string>
+		<string>owise</string>
+		<string>nonexec</string>
+		<string>ditto</string>
+		<string>BOOL</string>
+		<string>INT</string>
+		<string>NAT</string>
+		<string>STRING</string>
+		<string>QID</string>
+		<string>CONVERSION</string>
+		<string>FLOAT</string>
+		<string>RAT</string>
+		<string>LIST</string>
+		<string>SET</string>
+		<string>MAP</string>
+		<string>Bool</string>
+		<string>Int</string>
+		<string>Float</string>
+		<string>Nat</string>
+		<string>Qid</string>
+		<string>Id</string>
+		<string>Zero</string>
+		<string>NzNat</string>
+		<string>NzInt</string>
+		<string>Rat</string>
+		<string>FiniteFloat</string>
+		<string>String</string>
+		<string>Char</string>
+		<string>and</string>
+		<string>or</string>
+		<string>not</string>
+		<string>implies</string>
+		<string>s</string>
+		<string>true</string>
+		<string>false</string>
+		<string>if</string>
+		<string>then</string>
+		<string>else</string>
+		<string>fi</string>
+		<string>==</string>
+		<string>=</string>
+		<string>=/=</string>
+		<string>=&gt;</string>
+		<string>:</string>
+		<string>-&gt;</string>
+		<string>.</string>
+		<string>kmod</string>
+		<string>syntax</string>
+		<string>::=</string>
+		<string>|</string>
+		<string>strict</string>
+		<string>seqstrict</string>
+		<string>latex</string>
+		<string>PL-BOOL</string>
+		<string>PL-NAT</string>
+		<string>PL-INT</string>
+		<string>PL-RAT</string>
+		<string>PL-FLOAT</string>
+		<string>PL-STRING</string>
+		<string>PL-RANDOM</string>
+		<string>PL-COUNTER</string>
+		<string>PL-ID</string>
+		<string>PL-BUILTINS</string>
+		<string>PL-QID</string>
+		<string>PL-CONVERSION</string>
+		<string>PL-EXT-BOOL</string>
+		<string>K-TECHNIQUE</string>
+		<string>K</string>
+		<string>K-MAP-EXTRAS</string>
+		<string>K-SET-EXTRAS</string>
+		<string>K-BAG-EXTRAS</string>
+		<string>K-LIST-EXTRAS</string>
+		<string>K-RULES</string>
+		<string>K-CONFIG</string>
+		<string>K-POLYMORPHIC-VARIABLES</string>
+		<string>K-OPEN-CELLS</string>
+		<string>K-QUOTED-LABELS</string>
+		<string>K-CONTEXTS</string>
+		<string>K-WHERE</string>
+		<string>K-DESTRUCTORS</string>
+		<string>K-PROPER</string>
+		<string>K-SENTENCE</string>
+		<string>K-STRICTNESS</string>
+		<string>KResult</string>
+		<string>KProper</string>
+		<string>NeK</string>
+		<string>List</string>
+		<string>Map</string>
+		<string>Set</string>
+		<string>Bag</string>
+		<string>~&gt;</string>
+		<string>List{K}</string>
+		<string>.List{K}</string>
+		<string>.Set</string>
+		<string>.List</string>
+		<string>.Map</string>
+		<string>.Bag</string>
+		<string>List{KProper}</string>
+		<string>List{KResult}</string>
+		<string>NeList{K}</string>
+		<string>NeList{KResult}</string>
+		<string>KLabel</string>
+		<string>KResultLabel</string>
+		<string>KHybridLabel</string>
+		<string>,,</string>
+		<string>ListItem</string>
+		<string>SetItem</string>
+		<string>BagItem</string>
+		<string>MapItem</string>
+		<string>NeBag</string>
+		<string>NeList</string>
+		<string>NeSet</string>
+		<string>NeMap</string>
+		<string>CellLabel</string>
+		<string>sNat</string>
+		<string>|-&gt;</string>
+		<string>undef/</string>
+		<string>-Set</string>
+		<string>-Bag</string>
+		<string>inKList</string>
+		<string>getKLabel</string>
+		<string>getList{K}</string>
+		<string>KSentence</string>
+		<string>KProperLabel</string>
+		<string>NeKProperList</string>
+		<string>freezer</string>
+		<string>freezeVar</string>
+		<string>context</string>
+		<string>rule</string>
+		<string>where</string>
+		<string>?</string>
+		<string>HOLE</string>
+		<string>&gt;...</string>
+		<string>...&lt;/</string>
+		<string>_</string>
+	</array>
+	<key>BBLMSuffixMap</key>
+	<array>
+		<dict>
+			<key>BBLMLanguageSuffix</key>
+			<string>.maude</string>
+		</dict>
+		<dict>
+			<key>BBLMLanguageSuffix</key>
+			<string>.kmaude</string>
+		</dict>
+		<dict>
+			<key>BBLMLanguageSuffix</key>
+			<string>.m</string>
+		</dict>
+		<dict>
+			<key>BBLMLanguageSuffix</key>
+			<string>.k</string>
+		</dict>
+	</array>
+	<key>Language Features</key>
+	<dict>
+		<key>Identifier and Keyword Characters</key>
+		<string>0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-=&gt;:.|~,{}?_</string>
+		<key>Prefix for Functions</key>
+		<string></string>
+		<key>Prefix for Procedures</key>
+		<string></string>
+		<key>Open Parameter Lists</key>
+		<string></string>
+		<key>Close Parameter Lists</key>
+		<string></string>
+		<key>Terminator for Prototypes 1</key>
+		<string>.</string>
+		<key>Terminator for Prototypes 2</key>
+		<string></string>
+		<key>Open Statement Blocks</key>
+		<string>is</string>
+		<key>Close Statement Blocks</key>
+		<string>endm</string>
+		<key>Open Block Comments</key>
+		<string>---(</string>
+		<key>Close Block Comments</key>
+		<string>---)</string>
+		<key>Open Line Comments</key>
+		<string>---</string>
+		<key>Open Strings 1</key>
+		<string>&quot;</string>
+		<key>Close Strings 1</key>
+		<string>&quot;</string>
+		<key>Escape Char in Strings 1</key>
+		<string>\</string>
+		<key>End-of-line Ends Strings 1</key>
+		<false/>
+	</dict>
+</dict>
+</plist>

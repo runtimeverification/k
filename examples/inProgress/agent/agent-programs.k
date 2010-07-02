@@ -19,6 +19,12 @@ kmod AGENT-PROGRAMS is including AGENT-SYNTAX
 
   op p6 : -> Exp 
   macro p6 = print((mu (f . (lambda (x . if x <= 0 then 1 else ((f (x + -1)) * x))))) 5)
+
+  op p7 : -> Exp
+  macro p7 = (a ((lambda (z . (z z))) (lambda (x.(lambda (y.(x y)))))))
+
+  op p8 : -> Exp
+  macro p8 = (a ((lambda (x.(lambda (y.(x y))))) y))
 ---(
 
   op p2 : -> Exp

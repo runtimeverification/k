@@ -5,9 +5,9 @@ rew run('p3) .
 rew run('p4) .
 rew run('p5) .
 rew run('p6) .
----(
 rew run('p7) .
 rew run('p8) .
+---(
 rew run('p9, (Int 5(.List{K}),,Int -5(.List{K}))) .
 rew run('p10) .
 rew run('p11) .

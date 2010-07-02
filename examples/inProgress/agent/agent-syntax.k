@@ -1,8 +1,13 @@
-kmod AGENT-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
---- There are two main syntactic categories, Exp and Exp
+
+kmod BOUNDING-EXP-SYNTAX is including PL-ID
+  syntax Exp ::= Id
+  syntax BoundingExp ::= Id . Exp
+endkm
+
+kmod AGENT-SYNTAX is including PL-INT + BOUNDING-EXP-SYNTAX
 
 --- Basic constructs for expressions
-  syntax Exp ::= Bool | Int | Id
+  syntax Exp ::= Bool | Int 
 
 --- Basic arithmetic and boolean operations; they will work with both integers and floats
 --- NOTE: can add more here
@@ -16,18 +21,17 @@ kmod AGENT-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
 
 --- Basic statement constructs
   syntax Exp ::= skip
-                | Exp ; Exp                  [prec 100 gather(e E) strict(1)]
-                | if Exp then Exp else Exp [strict(1)]
-                | while Exp do Exp
+               | Exp ; Exp                  [prec 100 gather(e E) strict(1)]
+               | if Exp then Exp else Exp   [strict(1)]
+               | while Exp do Exp
 
 --- I/O
   syntax Exp ::= read
   syntax Exp ::= print Exp [strict]
 
 --- Functions
-  syntax BoundingExp ::= Id . Exp
   syntax Exp ::= lambda BoundingExp [latex "\lambda{#1}"]
-                | Exp Exp  [strict]
+               | Exp Exp  [strict]
 
 --- Fixed point
   syntax Exp ::= mu BoundingExp [latex "\mu{#1}"]
@@ -36,21 +40,21 @@ kmod AGENT-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
   syntax Exp ::= callcc Exp [prec 50 strict]
 
 --- Threads
-  syntax Exp ::= spawn Exp [prec 90]
-                | acquire Exp  [strict]
-                | release Exp  [strict]
-                | rendezvous Exp  [strict]
+  syntax Exp ::= spawn Exp       [prec 90]
+               | acquire Exp     [strict]
+               | release Exp     [strict]
+               | rendezvous Exp  [strict]
 
 --- Agents
   syntax Exp ::= newAgent Exp
                | me
                | parent
                | receive
-               | receiveFrom Exp         [strict]
+               | receiveFrom Exp       [strict]
   syntax Exp ::= send Exp to Exp       [strict]
-                | sendSynch Exp to Exp  [strict]
-                | barrier        
-                | broadcast Exp         [strict]
+               | sendSynch Exp to Exp  [strict]
+               | barrier        
+               | broadcast Exp         [strict]
 
 --- Abrupt termination (of thread, of agent, of system)
   syntax Exp ::= haltThread | haltAgent | haltSystem
@@ -58,11 +62,3 @@ kmod AGENT-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
 --- Additional unnecessary operators
 endkm
 
-
-kmod AGENT-DESUGARED-SYNTAX is including AGENT-SYNTAX 
-------------------------------------------------------------------------------------
---- This module desugars some of SIMPLE's language constructs into the core ones ---
---- The idea is that we only want to give semantics to the core constructs,      ---
---- so we get rid of the derived ones asap (before we start the semantics        ---
-------------------------------------------------------------------------------------
-endkm
