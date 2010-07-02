@@ -8,7 +8,7 @@ TOOL_DIR_FILES = $(wildcard $(TOOL_DIR)/*)
 COMPILED_FILE = $(MAIN_FILE)-compiled.maude
 LATEX_FILE = $(MAIN_FILE).tex
 PDF_FILE = $(MAIN_FILE).pdf
-LATEX_STYLE ?= bb
+LATEX_STYLE ?= mm
 LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k; fi), $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi)))
 
 # phony tells make which targets aren't real files
