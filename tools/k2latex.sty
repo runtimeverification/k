@@ -17,7 +17,7 @@
 \newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
 \newcommand{\lp}{(}
 \newcommand{\rp}{)}
-\newcommand{\kconfig}[1]{\par\textsc{configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
+\newcommand{\kconfig}[1]{\par\textsc{initial configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
 \newcommand{\kcontext}[2]{\par\textsc{context:
 }$#2$}
 \newcommand{\syntax}[3]{\par $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
@@ -44,6 +44,7 @@
 \newcommand{\kndrule}[2]{\par\textsc{#1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
 \newcommand{\myquote}[1]{\textrm{\unichar{8220}#1\unichar{8221}}}
 \newcommand{\mybracket}[1]{\textrm{\unichar{40}#1\unichar{41}}}
+\newcommand{\sqbracket}[1]{[#1]}
 \newcommand{\kcell}[5]{
 \begin{tabular}{@{}c@{}}
 \vtop{
