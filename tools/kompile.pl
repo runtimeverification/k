@@ -464,6 +464,9 @@ sub latexify {
 	print FILE "\\documentclass[landscape]{article}\n";
 	print FILE "\\usepackage{import}\n";
 	print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
+        if (-e "$language_file_name.sty") {
+	   print FILE "\\input{$language_file_name.sty}\n";
+        }
 	print FILE join("\n",@newcommands)."\n";
 	print FILE "\\begin{document}\n";
 	print FILE join("\\newpage", @latex_modules)."\n";
