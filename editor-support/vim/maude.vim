@@ -1,13 +1,23 @@
 " Vim syntax file
 " Language:      K <http://fsl.cs.uiuc.edu/K>
 " Maintainer:    Traian Florin Șerbănuță <tserban2@illinois.edu>
-" Insipred from, and reusing the Maude syntax file.  
+" Insipred from, and reusing most of the Maude syntax file.  
 " Below is the old copyright notice:
 "
 " Language:      Maude <http://maude.cs.uiuc.edu/>
 " Maintainer:    Steven N. Severinghaus <sns@severinghaus.org>
 " Last Modified: 2005-02-03
 " Version: 0.1
+" To install, copy (or link) this file into the ~/.vim directory 
+" and add the following to your ~/.vimrc file
+
+" au BufRead,BufNewFile *.maude set filetype=maude
+" au BufRead,BufNewFile *.kmaude set filetype=maude
+" au BufRead,BufNewFile *.k set filetype=maude
+" au BufRead,BufNewFile *.m set filetype=maude
+" au! Syntax maude source maude.vim
+" syn on
+
 
 " Quit if syntax file is already loaded
 if version < 600
@@ -21,12 +31,14 @@ command! -nargs=+ MaudeHiLink hi def link <args>
 syn keyword maudeModule     mod fmod omod endm endfm endm is kmod endkm
 syn keyword maudeImports    protecting including extending
 syn keyword maudeSortDecl      sort sorts subsort subsorts 
-syn keyword maudeStatements op ops var vars kvars kvar eq ceq rl crl rule context configuration mb cmb KSentence
+syn keyword maudeStatements op ops var vars kvars kvar eq ceq rl crl rule context configuration mb cmb KSentence  syntax
 "syn match   maudeFlags      "\[.*\]"
-syn keyword maudeCommands   reduce red rewrite rew parse frewrite frew
+syn keyword maudeCommands   reduce red rewrite rew parse frewrite frew search
 syn match   maudeComment    "\*\*\*.*"
 syn match   maudeComment    "---.*"
 syn match   maudeOps        "->"
+syn match   maudeOps        "::="
+syn match   maudeOps        "|"
 syn match   maudeOps        ":"
 "syn match   maudeOps        "^\s*subsorts[^<]*<"hs=e-1
 "syn match   maudeOps        "^\s*ceq[^=]*="
