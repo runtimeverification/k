@@ -23,7 +23,7 @@ kmod SUBSTITUTION is including BOUNDING-EXP-SYNTAX + PL-INT + K
   syntax KLabel ::= box ( KLabel ) [latex "\framebox{#1}"]
   context box(Label:KLabel)(_,,`[HOLE`]:K,,_)
 
-  rule K'[K:K/Y:Id] => clearDone(beta K'[K/Y]) [structural]
+  rule <k> K'[K:K/Y:Id] => clearDone(beta K'[K/Y]) <_/k> [structural]
   rule clearDone(done(K)) => K [structural] 
 
   rule beta Y[K/Y] => done(K) [structural]  ---this does the actual substitution
