@@ -4,7 +4,7 @@ in agent-syntax
 in agent-programs
 
 kmod AGENT-SEMANTICS is including AGENT-SYNTAX + SUBSTITUTION
-  syntax Val ::= Bool | Int | nothing | lambda BoundingExp | Id
+  syntax Val ::= Bool | Int | nothing | lambda BoundingExp [ditto] | Id
   syntax Exp ::= Val
   syntax KResult ::= Val
 
