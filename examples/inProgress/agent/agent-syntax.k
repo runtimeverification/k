@@ -1,9 +1,3 @@
-
-kmod BOUNDING-EXP-SYNTAX is including PL-ID
-  syntax Exp ::= Id
-  syntax BoundingExp ::= Id . Exp
-endkm
-
 kmod AGENT-SYNTAX is including PL-INT + BOUNDING-EXP-SYNTAX
 
 --- Basic constructs for expressions
