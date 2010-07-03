@@ -1,6 +1,11 @@
-kmod GENERIC-SUBSTITUTION is including BOUNDING-EXP-SYNTAX + PL-INT + K
+kmod BOUNDING-EXP-SYNTAX is including PL-ID
+  syntax Exp ::= Id
+  syntax BoundingExp ::= Id -> Exp [prec 100 latex "{#1}.{#2}"]
+endkm
+
+kmod SUBSTITUTION is including BOUNDING-EXP-SYNTAX + PL-INT + K
 ---beta-substitution definition using the K AST visitor pattern
----assuming the binding operator is _._
+---assuming the binding operator is _->_
   syntax K ::= Exp | BoundingExp
              | K [ K / Id ] [prec 0]
              | beta List{K} [ K / Id ] 
@@ -22,12 +27,12 @@ kmod GENERIC-SUBSTITUTION is including BOUNDING-EXP-SYNTAX + PL-INT + K
   rule clearDone(done(K)) => K [structural] 
 
   rule beta Y[K/Y] => done(K) [structural]  ---this does the actual substitution
-  rule <k> beta '_._(X:Id,,K':K)[K/Y] => 
-           box('_._)(done(fresh(N)) box(,,) beta-beta beta K'[fresh(N)/X][K/Y])
+  rule <k> beta '_->_(X:Id,,K':K)[K/Y] => 
+           box('_->_)(done(fresh(N)) box(,,) beta-beta beta K'[fresh(N)/X][K/Y])
       <_/k> <nextId>N:Nat => sNat N</nextId>
 ---    if Y =/=Bool X [structural] ---renaming bound variables
   rule beta-beta done(K')[K/Y] => beta K'[K/Y] [structural]
----  rule <k> beta '_._(Y,,K':K)[K/Y] => done('_._(Y,,K':K)) <_/k> [structural]
+---  rule <k> beta '_->_(Y,,K':K)[K/Y] => done('_->_(Y,,K':K)) <_/k> [structural]
   rule beta .[K/Y] => done(.) [structural]
   rule beta((K1:K ~> K2:K))[K/Y] => beta K1[K/Y] box(~>) beta K2[K/Y]
     if K1 =/=Bool . andBool K2 =/=Bool . [structural]
@@ -35,7 +40,7 @@ kmod GENERIC-SUBSTITUTION is including BOUNDING-EXP-SYNTAX + PL-INT + K
   rule beta (K1,,K2,,Kl)[K/Y] 
     => beta K1[K/Y] box(,,) beta (K2,,Kl)[K/Y] [structural]
   rule beta Label(Kl)[K/Y] => box(Label)(beta Kl[K/Y])
-    if Label =/=Bool '_._ andBool Label(Kl) =/=Bool Y  [structural]
+    if Label =/=Bool '_->_ andBool Label(Kl) =/=Bool Y  [structural]
 
   rule box(Label)(done(Kl:List`{K`})) => done(Label(Kl)) [structural]
   rule done(Kl) box(,,) done(Kl':List`{K`}) => done((Kl,,Kl')) [structural]
