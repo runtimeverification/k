@@ -1,4 +1,4 @@
-kmod AGENT-SYNTAX is including PL-INT + BOUNDING-EXP-SYNTAX
+kmod AGENT-SYNTAX is including PL-INT + PL-ID
 
 --- Basic constructs for expressions
   syntax Exp ::= Bool | Int 
@@ -24,11 +24,11 @@ kmod AGENT-SYNTAX is including PL-INT + BOUNDING-EXP-SYNTAX
   syntax Exp ::= print Exp [strict]
 
 --- Functions
-  syntax Exp ::= lambda BoundingExp [latex "\lambda{#1}"]
+  syntax Exp ::= lambda Id . Exp [prec 100 latex "\lambda{#1}"]
                | Exp Exp  [strict]
 
 --- Fixed point
-  syntax Exp ::= mu BoundingExp [latex "\mu{#1}"]
+  syntax Exp ::= mu Id . Exp [prec 100 latex "\mu{#1}"]
 
 --- Callcc
   syntax Exp ::= callcc Exp [prec 50 strict]

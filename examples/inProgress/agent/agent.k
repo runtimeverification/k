@@ -4,9 +4,13 @@ in agent-syntax
 in agent-programs
 
 kmod AGENT-SEMANTICS is including AGENT-SYNTAX + SUBSTITUTION
-  syntax Val ::= Bool | Int | nothing | lambda BoundingExp [ditto] | Id
+  syntax Val ::= Bool | Int | nothing | Id
   syntax Exp ::= Val
-  syntax KResult ::= Val
+  syntax K ::= Exp | \mu K
+  syntax KResult ::= Val | \lambda K 
+
+  macro lambda X . E = \lambda([X]E)
+  macro mu X . E = \mu([X]E)
 
   configuration
     <T>
@@ -120,10 +124,10 @@ kmod AGENT-SEMANTICS is including AGENT-SYNTAX + SUBSTITUTION
 
 
 ---Function application (through beta-substitution)
-  rule <k> (lambda (X:Id -> E)) E':Exp => E[E' / X]<_/k>
+  rule <k> '__(\lambda([X:Id]E),,E':Exp) => E[E' / X]<_/k>
 
 ---Fix point operator (through beta-substitution)
-  rule <k> mu (X -> E) => E[mu (X -> E) / X]<_/k>
+  rule <k> \mu ([X]E) => E[\mu ([X]E) / X]<_/k>
 endkm
 
 kmod AGENT is including AGENT-SEMANTICS + AGENT-PROGRAMS 
