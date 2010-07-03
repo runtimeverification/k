@@ -24,11 +24,11 @@ kmod AGENT-SYNTAX is including PL-INT + BOUNDING-EXP-SYNTAX
   syntax Exp ::= print Exp [strict]
 
 --- Functions
-  syntax Exp ::= lambda BoundingExp [latex "\lambda{#1}"]
+  syntax Exp ::= lambda BoundingExp [prec 110 latex "\lambda{#1}"]
                | Exp Exp  [strict]
 
 --- Fixed point
-  syntax Exp ::= mu BoundingExp [latex "\mu{#1}"]
+  syntax Exp ::= mu BoundingExp [prec 110 latex "\mu{#1}"]
 
 --- Callcc
   syntax Exp ::= callcc Exp [prec 50 strict]

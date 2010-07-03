@@ -6,7 +6,7 @@ endkm
 kmod SUBSTITUTION is including BOUNDING-EXP-SYNTAX + PL-INT + K
 ---beta-substitution definition using the K AST visitor pattern
 ---assuming the binding operator is _->_
-  syntax K ::= Exp | BoundingExp
+  syntax K ::= Exp | BoundingExp | Nat
              | K [ K / Id ] [prec 0]
              | beta List{K} [ K / Id ] 
                [prec 0 latex "{#1}\sqbracket{{#2}/_\beta{#3}}"]

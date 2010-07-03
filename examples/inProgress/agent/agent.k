@@ -1,10 +1,9 @@
 in ../../../k-prelude
-in ../substitution/beta-substitution-syntax
-in ../substitution/beta-substitution
+in ../substitution/substitution
 in agent-syntax
 in agent-programs
 
-kmod AGENT-SEMANTICS is including AGENT-SYNTAX + GENERIC-SUBSTITUTION
+kmod AGENT-SEMANTICS is including AGENT-SYNTAX + SUBSTITUTION
   syntax Val ::= Bool | Int | nothing | lambda BoundingExp | Id
   syntax Exp ::= Val
   syntax KResult ::= Val
@@ -121,11 +120,10 @@ kmod AGENT-SEMANTICS is including AGENT-SYNTAX + GENERIC-SUBSTITUTION
 
 
 ---Function application (through beta-substitution)
-  rule <k> '__('lambda_('_._(X:Id,,E)),,E':Exp) => E[E' / X]<_/k>
+  rule <k> (lambda (X:Id -> E)) E':Exp => E[E' / X]<_/k>
 
 ---Fix point operator (through beta-substitution)
-  rule <k> 'mu_('_._(X,,E)) => E['mu_('_._(X,,E)) / X]<_/k>
-
+  rule <k> mu (X -> E) => E[mu (X -> E) / X]<_/k>
 endkm
 
 kmod AGENT is including AGENT-SEMANTICS + AGENT-PROGRAMS 
