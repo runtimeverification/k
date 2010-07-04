@@ -6,11 +6,11 @@ in agent-programs
 kmod AGENT-SEMANTICS is including AGENT-SYNTAX + SUBSTITUTION
   syntax Val ::= Bool | Int | nothing | Id
   syntax Exp ::= Val
-  syntax K ::= Exp | \mu K
-  syntax KResult ::= Val | \lambda K 
+  syntax K ::= Exp | aMu K [latex "\mu{#1}"]
+  syntax KResult ::= Val | aLambda K [latex "\lambda{#1}"]
 
-  macro lambda X . E = \lambda([X]E)
-  macro mu X . E = \mu([X]E)
+  macro lambda X . E = aLambda([X]E)
+  macro mu X . E = aMu([X]E)
 
   configuration
     <T>
@@ -124,10 +124,10 @@ kmod AGENT-SEMANTICS is including AGENT-SYNTAX + SUBSTITUTION
 
 
 ---Function application (through beta-substitution)
-  rule <k> '__(\lambda([X:Id]E),,E':Exp) => E[E' / X]<_/k>
+  rule <k> '__(aLambda([X:Id]E),,E':Exp) => E[E' / X]<_/k>
 
 ---Fix point operator (through beta-substitution)
-  rule <k> \mu ([X]E) => E[\mu ([X]E) / X]<_/k>
+  rule <k> aMu ([X]E) => E[aMu ([X]E) / X]<_/k>
 endkm
 
 kmod AGENT is including AGENT-SEMANTICS + AGENT-PROGRAMS 

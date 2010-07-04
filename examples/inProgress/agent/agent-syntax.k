@@ -24,11 +24,11 @@ kmod AGENT-SYNTAX is including PL-INT + PL-ID
   syntax Exp ::= print Exp [strict]
 
 --- Functions
-  syntax Exp ::= lambda Id . Exp [prec 100 latex "\lambda{#1}"]
+  syntax Exp ::= lambda Id . Exp [latex "\lambda{#1}.{#2}"]
                | Exp Exp  [strict]
 
 --- Fixed point
-  syntax Exp ::= mu Id . Exp [prec 100 latex "\mu{#1}"]
+  syntax Exp ::= mu Id . Exp [latex "\mu{#1}.{#2}"]
 
 --- Callcc
   syntax Exp ::= callcc Exp [prec 50 strict]
