@@ -259,6 +259,8 @@ fmod K-META-CONFIG is
   op extractConfTerm : MembAxSet ~> Term .
   eq extractConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = T .
 
+  op removeConfTerm : Module -> Module .
+  eq removeConfTerm(M) = setMbs(M,removeConfTerm(getMbs(M))) .
   op removeConfTerm : MembAxSet -> MembAxSet .
   eq removeConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = MAS .
   eq removeConfTerm(MAS) = MAS [owise] .

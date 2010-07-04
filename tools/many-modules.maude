@@ -3,18 +3,20 @@ fmod MANY-MODULES is
   including  META-K-MODULE .
   including META-K-MODULES .
   including META-K-BUILTINS .
+  including K-META-CONFIG .
   var M M' : Module . 
   var SS SS' : SortSet .
   var O : Qid .
   var MS : ModuleSet .
+  var T : [Term] .
   
   op manyModules : Qid ModuleSet ~> Module .
   eq manyModules(O, MS) 
-   = setName(manyModules(emptySModule, MS,  kModules ; builtinModules, none), O) .
+   = setName(manyModules(emptySModule, MS,  kModules ; builtinModules, none, 'noConfig), O) .
 
-  op manyModules : Module ModuleSet  SortSet SortSet ~> Module .
-  eq manyModules(M, M' MS, SS, SS') 
-   = manyModules(addModule(setImports(M',nil),M), MS,  SS, getImportNames(M') ; SS') .
-  eq manyModules(M, empty, SS, SS') = addImports(generateImports(intersection(SS', SS)),M) .
+  op manyModules : Module ModuleSet  SortSet SortSet Term ~> Module .
+  eq manyModules(M, M' MS, SS, SS', T) 
+   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS,  SS, getImportNames(M') ; SS', T) else manyModules(addModule(setImports(M',nil),M), MS,  SS, getImportNames(M') ; SS', extractConfTerm(M')) fi [print T] .
+  eq manyModules(M, empty, SS, SS', T) = addImports(generateImports(intersection(SS', SS)),M) .
 endfm
 

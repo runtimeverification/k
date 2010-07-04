@@ -557,7 +557,7 @@ fmod META-MODULE-EXTRAS is
 
   sort ModuleSet .
   subsort Module < ModuleSet .
-  op __ : ModuleSet ModuleSet -> ModuleSet [assoc comm id: empty] .
+  op __ : ModuleSet ModuleSet -> ModuleSet [assoc id: empty] .
   op empty : -> ModuleSet .
 
 
@@ -597,6 +597,23 @@ fmod META-MODULE-EXTRAS is
 
   op getImportNames : Module ~> SortSet .
   eq getImportNames(M) = getImportNames(getImports(M)) .
+
+  op getImportNameList : ImportList ~> QidList .
+  eq getImportNameList(I IL) = getImportNameL(I)  getImportNameList(IL) .
+  eq getImportNameList(nil) = nil .
+
+  op getImportNameL : Import ~> QidList .
+  eq getImportNameL(including ME .) = getImportNameL(ME) .
+  eq getImportNameL(protecting ME .) = getImportNameL(ME) .
+  eq getImportNameL(extending ME .) = getImportNameL(ME) .
+  
+  op getImportNameL : ModuleExpression ~> QidList .
+  eq getImportNameL(ME + ME') = getImportNameL(ME)  getImportNameL(ME') .
+  eq getImportNameL(Q) = Q .
+
+  op getImportNameList : Module ~> QidList .
+  eq getImportNameList(M) = getImportNameList(getImports(M)) .
+
 
 
   op generateImports : SortSet ~> ImportList .
@@ -754,6 +771,7 @@ fmod META-LEVEL-EXTRAS is
   var Trm Trm' : Term . var Trms : TermList .  var Nl : NatList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
   var N N' : Nat .  var IL : ImportList .  var MS : ModuleSet .
+  var QIL : QidList .
 
   op maximalAritySet : Module Term ~> TypeListSet .
   eq maximalAritySet(M, Q[Trms])
@@ -873,18 +891,18 @@ fmod META-LEVEL-EXTRAS is
   eq getAllImportsBut(Q, SS) 
    = getAllImportsBut(Q, SS, empty) .
 
-  op getAllImportsBut : SortSet SortSet ModuleSet ~> ModuleSet .
-  eq getAllImportsBut(none, SS, MS) = MS .
-  eq getAllImportsBut(Q ; SS, SS', MS)
-   = if Q in SS' then getAllImportsBut(SS, SS', MS)
-     else getAllImportsBut(upModule(Q, false), SS, SS' ; Q, MS) fi .
+  op getAllImportsBut : QidList SortSet ModuleSet ~> ModuleSet .
+  eq getAllImportsBut(nil, SS, MS) = MS .
+  eq getAllImportsBut(Q QIL, SS', MS)
+   = if Q in SS' then getAllImportsBut(QIL, SS', MS)
+     else getAllImportsBut(upModule(Q, false), QIL, SS' ; Q, MS) fi .
 
-  op getAllImportsBut : Module SortSet SortSet ModuleSet ~> ModuleSet .
-  eq getAllImportsBut(M, SS, SS', MS) 
-   = getAllImportsBut(getImportNames(M) ; SS, SS', MS M) .
+  op getAllImportsBut : Module QidList SortSet ModuleSet ~> ModuleSet .
+  eq getAllImportsBut(M, QIL, SS', MS) 
+   = getAllImportsBut(QIL getImportNameList(M), SS', MS M) .
 
   op flatten : Module ~> Module .
-  eq flatten(M) = flatten(setImports(M,nil), getAllImportsBut(getImportNames(M),none, empty)) .
+  eq flatten(M) = flatten(setImports(M,nil), getAllImportsBut(getImportNameList(M),none, empty)) .
 
   op flatten : Module ModuleSet ~> Module .
   eq flatten(M, empty) = M .
