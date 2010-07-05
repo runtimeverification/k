@@ -1,4 +1,4 @@
-kmod THREADS-PROGRAMS is including THREADS + REF + IO + FUN + CONTROL + IDS
+kmod THREADS-PROGRAMS is including THREADS + IMP + REF + IO + FUN + HALT + IDS
   op p17 : -> K
   macro p17 = ((lambda x . lambda y . (
            (spawn(*x:=0));

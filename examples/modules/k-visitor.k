@@ -11,6 +11,7 @@ kmod K-VISITOR is including K + K-WRAPPERS
   rule visit Label(Kl) applying A if label in Labels
     => visitedL(Label)(visit Kl applying A if label in Labels)
     if notBool(wklabel(Label) in Labels)  
+    [structural]
     
   rule visit . applying A:KLabel if label in Labels:Set => visitedK(.) 
     [structural]

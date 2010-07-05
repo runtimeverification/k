@@ -1,4 +1,4 @@
-load agents-run-compiled
+load run-compiled
 
 search run('p22) =>! B:[Bag] .
 

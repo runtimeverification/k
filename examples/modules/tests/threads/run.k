@@ -1,18 +1,18 @@
 load ../basic-run
-load ../exp
-load ../imp
-load ../threads
+load ../../threads
 
 load ../ids
-load ../../reflection/reflection
-load ../../substitution/substitution
-load ../fun
-load ../control
-load ../io
-load ../ref
-load threads-programs
+load ../../exp
+load ../../k-visitor
+load ../../substitution
+load ../../fun
+load ../../halt
+load ../../io
+load ../../ref
+load ../../imp
+load programs
 
-kmod THREADS-RUN is including BASIC-RUN + THREADS-PROGRAMS
+kmod RUN is including BASIC-RUN + THREADS-PROGRAMS
   configuration <T> 
                 <thread*> 
                   <k> .K </k> <nextId> 0 </nextId> <holds> .Map </holds>

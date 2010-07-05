@@ -1,4 +1,4 @@
-load threads-run-compiled
+load run-compiled
 
 search[1] run('p17) =>! B:[Bag] .
 search run('p18) =>! B:[Bag] .

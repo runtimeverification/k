@@ -1,17 +1,17 @@
 load ../basic-run
-load ../exp
-load ../imp
-load ../agents
+load ../../agents
 
 load ../ids
-load ../../reflection/reflection
-load ../../substitution/substitution
-load ../fun
-load ../io
-load ../threads
-load agents-programs
+load ../../exp
+load ../../k-visitor
+load ../../substitution
+load ../../fun
+load ../../io
+load ../../imp
+load ../../threads
+load programs
 
-kmod AGENTS-RUN is including AGENTS-PROGRAMS + BASIC-RUN
+kmod RUN is including AGENTS-PROGRAMS + BASIC-RUN
   configuration
     <T>
       <agent*> 

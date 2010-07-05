@@ -3,16 +3,16 @@
 KCOMPILE ?= ../../../../tools/kompile.pl
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = THREADS-RUN
+LANGUAGE_NAME = RUN
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = THREADS
+LANGUAGE_MODULES = 
 
 #this is the basename of the main file
-MAIN_FILE = threads-run
+MAIN_FILE = run
 
 # this is a space-separated list of basename maude files to run
-TESTS = threads-run-test.m
+TESTS = test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk
