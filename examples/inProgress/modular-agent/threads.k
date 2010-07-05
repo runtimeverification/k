@@ -12,9 +12,9 @@ kmod THREADS is including IMP
                                   => skip<_/k> <_/thread>
                         (. => <thread_> <k>S</k> <_/thread>)
 
-  rule[end-thread]:(<thread_><k>V:KResult</k><holds>Holds:Map</holds><_/thread> 
-                 => .) <busy>Busy:Set 
-                          => Busy -Set keys(Holds)</busy>
+  rule [end-thread] : (<thread_> <k>V:KResult</k> <holds>Holds:Map</holds>        
+                       <_/thread> => .) <busy>Busy:Set 
+                                           => Busy -Set keys(Holds)</busy>
   rule [free-acquire] : <k>acquire V 
                         => skip<_/k> <holds_>. 
                                           => V|->0<_/holds> 
