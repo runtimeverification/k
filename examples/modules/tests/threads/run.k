@@ -1,15 +1,17 @@
 load ../basic-run
+load ../../seq
 load ../../threads
 
 load ../ids
 load ../../exp
+load ../../if
 load ../../k-visitor
 load ../../substitution
 load ../../lambda
 load ../../halt
 load ../../io
 load ../../ref
-load ../../imp
+load ../../while
 load programs
 
 kmod RUN is including BASIC-RUN + THREADS-PROGRAMS

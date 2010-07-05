@@ -1,4 +1,4 @@
-kmod MU is including LAMBDA
+kmod MU is including SUBSTITUTION
   syntax K ::= mu Id . K [latex "\mu{#1}.{#2}"]
              | aMu K [latex "\mu{#1}"]
 

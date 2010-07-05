@@ -1,4 +1,5 @@
 load ../basic-run
+load ../../seq
 load ../../agents
 
 load ../ids
@@ -7,7 +8,6 @@ load ../../k-visitor
 load ../../substitution
 load ../../lambda
 load ../../io
-load ../../imp
 load ../../threads
 load programs
 

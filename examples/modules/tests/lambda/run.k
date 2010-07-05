@@ -5,6 +5,7 @@ load ../../lambda
 
 load ../ids
 load ../../exp
+load ../../if
 load programs
 
 kmod RUN is including BASIC-RUN + LAMBDA-PROGRAMS 

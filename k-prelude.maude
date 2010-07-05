@@ -47,7 +47,7 @@ mod K-TECHNIQUE is
   subsort ListItem < NeList < List .
   subsort ListItem < List .
   op . : -> List [metadata "latex(renameTo \\kdot)"] .
-  op ListItem : K -> ListItem  .
+  op ListItem : K -> ListItem  [metadata "latex(renameTo _)"] .
   op __ : List List -> List [assoc id: .] .
   op __ : NeList List -> NeList [ditto] .
   op __ : List NeList -> NeList [ditto] .
@@ -64,7 +64,7 @@ mod K-TECHNIQUE is
   subsort BagItem < NeBag < Bag .
   subsort BagItem < Bag .
   op . : -> Bag [metadata "latex(renameTo \\kdot)"] .
-  op BagItem : K -> BagItem .
+  op BagItem : K -> BagItem [metadata "latex(renameTo _)"] .
   op __ : Bag Bag -> Bag [assoc comm id: .] .
   op __ : NeBag Bag -> NeBag [ditto] .
 
@@ -76,7 +76,7 @@ mod K-TECHNIQUE is
   subsort SetItem < NeSet < Set .
   subsort SetItem < Set .
   op . : -> Set [metadata "latex(renameTo \\kdot)"] .
-  op SetItem : K -> SetItem [metadata "latex(renameTo {\\it{}SetItem})"] .
+  op SetItem : K -> SetItem [metadata "latex(renameTo _)"] .
   op __ : Set Set -> Set [assoc comm id: .] .
   op __ : NeSet Set -> NeSet [ditto] .
 

@@ -1,4 +1,4 @@
-kmod IMP-PROGRAMS is  including IMP + REF + LAMBDA + IDS
+kmod IMP-PROGRAMS is  including WHILE + REF + LAMBDA + EXP + IDS
   op p16 : -> K 
   macro p16 = ((lambda x.(lambda y.((while(2<=*y) do (
           (*x:= _*_(*x,*y));

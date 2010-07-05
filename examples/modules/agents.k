@@ -1,17 +1,18 @@
-kmod AGENTS is  including K + PL-NAT
+kmod AGENTS is  including SEQ + PL-NAT
   configuration
       <agent*> 
           <me>0</me>
           <parent>-1</parent>
           <control> <k> .K </k> </control>
-          <ready> true </ready>
       </agent*>
+      <blocked-agent*> .Bag </blocked-agent*>
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting>
       <messages> <message*>
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message*> </messages>
+      
   syntax K ::= newAgent K
              | me
              | parent
@@ -23,8 +24,7 @@ kmod AGENTS is  including K + PL-NAT
              | broadcast K       [strict]
              | haltAgent
              | Nat
-   syntax KResult ::= .agent [latex "\cdot_{\scriptstyle\it agent}"]
-
+             | Bool
 
 --- Agents
   rule [agent-creation] : <agent_> <k>newAgent S:K => N2:Nat<_/k> <me>N1:Nat</me> 
@@ -36,26 +36,26 @@ kmod AGENTS is  including K + PL-NAT
   rule [halt-agent] : <control_> <k>haltAgent<_/k> <_/control> => <control> .Bag </control> .
   rule <k>me => N<_/k> <me>N</me>
   rule <k>parent => N<_/k> <parent>N</parent>
-  rule <me>N1</me> <k>send V to N2 => .agent<_/k> <ready>true</ready>
+  rule <me>N1</me> <k>send V to N2 => skip<_/k>
        (. => <message> <from>N1</from> <to>SetItem(N2)</to> <body>V</body> 
              </message>)
-  rule <me>N</me> <k>receive=>V:KResult<_/k> <ready>true</ready> 
+  rule <me>N</me> <k>receive=>V:KResult<_/k>
        <message_> <to_>SetItem(N)=>.<_/to> <body>V</body> <_/message>
   rule <message> <from>N2</from> <to_>SetItem(N1) => .<_/to> <body>V</body> 
-       </message> <me>N1</me> <k>receiveFrom N2 => V<_/k> <ready>true</ready>
-  rule <me>N</me> <k>broadcast V => .agent<_/k> <ready>true</ready> 
+       </message> <me>N1</me> <k>receiveFrom N2 => V<_/k>
+  rule <me>N</me> <k>broadcast V => skip<_/k>
        <world>W:Set</world>
        (. => <message> <from>N</from> <to>W</to> <body>V</body> </message>)
   rule <message_><to>.Set</to><_/message> => . [structural]
-  rule <agent_> <me>N1</me> <k>sendSynch V to N2 => .agent<_/k> <ready>true</ready> <_/agent>
-       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <ready>true</ready> <_/agent>
-  rule <k>sendSynch V to N2 => .agent<_/k> <ready>true</ready> 
-       <agent_><me>N2</me> <k>receive => V<_/k> <ready>true</ready> <_/agent>
-  rule [start-waiting-at-barrier] : <me>N</me> <k>barrier<_/k> <ready>true => false</ready> 
+  rule <agent_> <me>N1</me> <k>sendSynch V to N2 => skip<_/k> <_/agent>
+       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent>
+  rule <k>sendSynch V to N2 => skip<_/k>
+       <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
+  rule [start-waiting-at-barrier] : <agent=>blocked-agent_> <me>N</me> <k>barrier<_/k> <_/agent=>blocked-agent>
        <barrier>true</barrier> <waiting>W (. => SetItem(N))</waiting> 
   rule [lifting-barrier] : <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> 
     if W =/=Bool .
-  rule [leave-barrier] : <me>N</me> <k>barrier => .agent<_/k> <ready>false => true</ready> <barrier>false</barrier>
+  rule [leave-barrier] : <blocked-agent=>agent_> <me>N</me> <k>barrier => skip<_/k> <_/blocked-agent=>agent>  <barrier>false</barrier>
        <waiting_>(SetItem(N) => .)<_/waiting>
   rule [lowering-barrier] : <barrier>false => true</barrier> <waiting>.Set</waiting>
 endkm

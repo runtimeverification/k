@@ -1,8 +1,10 @@
 load ../basic-run
+load ../../seq
 load ../../io
 
 load ../ids
 load ../../exp
+load ../../if
 load ../../k-visitor
 load ../../substitution
 load ../../lambda

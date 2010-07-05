@@ -6,6 +6,7 @@ load ../../callcc
 
 load ../ids
 load ../../exp
+load ../../if
 load programs
 
 kmod RUN is including BASIC-RUN + CALLCC-PROGRAMS 

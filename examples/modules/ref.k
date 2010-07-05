@@ -1,4 +1,4 @@
-kmod REF is including K
+kmod REF is including SEQ
   configuration <k> .K </k>  
                 <mem> .Map </mem> <nextLoc> 0 </nextLoc>
   
@@ -11,5 +11,5 @@ kmod REF is including K
   rule <k> ref V:KResult => N:Nat <_/k> 
        <mem_> . => N |-> V <_/mem> <nextLoc> N => sNat N </nextLoc>
   rule <k> * N => V <_/k> <mem_> N |-> V <_/mem>
-  rule <k> * N := V => N <_/k> <mem_> N |-> (_ => V) <_/mem>
+  rule <k> * N := V => skip <_/k> <mem_> N |-> (_ => V) <_/mem>
 endkm

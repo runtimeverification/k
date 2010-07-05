@@ -11,7 +11,7 @@ kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
   syntax KLabel ::= beta [ K / Id ] 
                [prec 0 latex "\sqbracket{{#1}/_\beta{#2}}"]
                
-  syntax Id ::= fresh Nat  --- to generate fresh names
+  syntax Id ::= id Nat [latex "{\it id}_{{#1}}"] --- to generate fresh names
   configuration <k> .K </k> <nextId> 0 </nextId>
 
   rule <k> K'[K/Y] => endVisit(beta K'[K/Y]) <_/k> [structural]
@@ -19,8 +19,8 @@ kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
   rule beta[K/Y](Y) => visitedK(K) [structural]  ---this does the actual substitution
 
   rule <k> beta[K/Y]([X:Id]K') => 
-           visitedL('`[_`]_)(visitedK(fresh(N)) 
-                visitedL(,,) beta-beta (beta K' [fresh(N)/X])[K/Y])
+           visitedL('`[_`]_)(visitedK(id(N)) 
+                visitedL(,,) beta-beta (beta K' [id(N)/X])[K/Y])
       <_/k> <nextId>N:Nat => sNat N</nextId>
 ---    if Y =/=Bool X [structural] ---renaming bound variables
   rule beta-beta visitedK(K')[K/Y] => beta K'[K/Y] [structural]

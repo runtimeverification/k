@@ -1,4 +1,7 @@
-TEST_DIRS = challenge imp imppp agent \
+TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
+	    modules/tests/io modules/tests/imp modules/tests/halt \
+            modules/tests/callcc modules/tests/threads modules/tests/agents \
+        challenge imp imppp agent \
         simple/untyped simple/typed/dynamic simple/typed/static \
 	exp/untyped exp/type-inference fun/untyped \
 	Thue bf befunge93

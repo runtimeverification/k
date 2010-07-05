@@ -1,4 +1,4 @@
-kmod MU-PROGRAMS is including MU + EXP + IDS
+kmod MU-PROGRAMS is including MU + LAMBDA + IF + EXP + IDS
   op p7 : -> K 
   macro p7 = x mu f . lambda x . (f x)
 

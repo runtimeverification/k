@@ -1,4 +1,4 @@
-kmod LAMBDA-PROGRAMS is including LAMBDA + EXP + IDS
+kmod LAMBDA-PROGRAMS is including LAMBDA + IF + EXP + IDS
   op p2 : -> K
   macro p2 = lambda x . x
 
