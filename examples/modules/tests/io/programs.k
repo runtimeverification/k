@@ -1,4 +1,4 @@
-kmod IO-PROGRAMS is including IO + FUN + EXP + IDS
+kmod IO-PROGRAMS is including IO + MU + EXP + IDS
   op p14 : -> K
   macro p14 = print(read)
 

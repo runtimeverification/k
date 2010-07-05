@@ -1,19 +1,24 @@
-load basic-run
-load exp
-load ../reflection/reflection
-load ../substitution/substitution
-load fun
-load control
-load io
-load ref
-load imp
-load threads
-load agents
+load ../../k-prelude
 
-kmod MODULAR-AGENT is 
+load ../modules/exp
+load ../modules/k-visitor
+load ../modules/substitution
+load ../modules/lambda
+load ../modules/mu
+load ../modules/callcc
+load ../modules/halt
+load ../modules/io
+load ../modules/ref
+load ../modules/imp
+load ../modules/threads
+load ../modules/agents
+
+kmod AGENT is 
   including EXP 
-  including FUN 
-  including CONTROL 
+  including LAMBDA
+  including MU
+  including CALLCC
+  including HALT 
   including IO 
   including REF 
   including IMP 
@@ -43,6 +48,5 @@ kmod MODULAR-AGENT is
       </message*> </messages>
       <I/O> <in>.List</in> <out>.List</out> </I/O>
     </T>
-
 endkm
 

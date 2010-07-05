@@ -5,7 +5,8 @@ load ../ids
 load ../../exp
 load ../../k-visitor
 load ../../substitution
-load ../../fun
+load ../../lambda
+load ../../mu
 load programs
 
 kmod RUN is including IO-PROGRAMS + BASIC-RUN

@@ -5,7 +5,7 @@ load ../../imp
 load ../ids
 load ../../k-visitor
 load ../../substitution
-load ../../fun
+load ../../lambda
 load ../../ref
 load programs
 

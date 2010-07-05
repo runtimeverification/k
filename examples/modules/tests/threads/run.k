@@ -5,7 +5,7 @@ load ../ids
 load ../../exp
 load ../../k-visitor
 load ../../substitution
-load ../../fun
+load ../../lambda
 load ../../halt
 load ../../io
 load ../../ref

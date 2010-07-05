@@ -1,4 +1,4 @@
-kmod CALLCC-PROGRAMS is including CALLCC + FUN + EXP + IDS
+kmod CALLCC-PROGRAMS is including CALLCC + LAMBDA + EXP + IDS
   ops k return : -> Id 
 
   op p10 : -> K 

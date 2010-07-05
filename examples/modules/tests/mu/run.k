@@ -2,12 +2,13 @@ load ../basic-run
 load ../../k-visitor
 load ../../substitution
 load ../../lambda
-load ../../callcc
+load ../../mu
 
 load ../ids
 load ../../exp
 load programs
 
-kmod RUN is including BASIC-RUN + CALLCC-PROGRAMS 
+kmod RUN is including BASIC-RUN + MU-PROGRAMS 
   configuration <T> <k> .K </k> <nextId> 0 </nextId> </T>
+  syntax KResult ::= Id
 endkm
