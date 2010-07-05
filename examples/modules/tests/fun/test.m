@@ -1,4 +1,4 @@
-load fun-run-compiled
+load run-compiled
 
 rew run('p2) .
 rew run('p3) .
