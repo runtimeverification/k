@@ -6,6 +6,7 @@ load ../ids
 load ../../substitution/substitution
 load ../fun
 load ../ref
+load imp-programs
 
 kmod IMP-RUN is including IMP-PROGRAMS + BASIC-RUN
   configuration <T> <k> .K </k>  <nextId> 0 </nextId>
