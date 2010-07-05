@@ -1,15 +1,17 @@
 load ../../k-prelude
 
 load ../modules/exp
+load ../modules/if
 load ../modules/k-visitor
 load ../modules/substitution
 load ../modules/lambda
 load ../modules/mu
 load ../modules/callcc
 load ../modules/halt
+load ../modules/seq
 load ../modules/io
 load ../modules/ref
-load ../modules/imp
+load ../modules/while
 load ../modules/threads
 load ../modules/agents
 
@@ -32,7 +34,7 @@ kmod AGENT is
   including HALT 
   including IO 
   including REF 
-  including IMP 
+  including WHILE 
   including THREADS 
   including AGENTS 
 
@@ -53,7 +55,6 @@ kmod AGENT is
           <mem> .Map </mem> <nextLoc> 0 </nextLoc>
           <me>0</me>
           <parent>-1</parent>
-          <ready>true</ready>
       </agent*>
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>

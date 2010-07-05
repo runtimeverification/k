@@ -51,11 +51,11 @@ kmod AGENTS is  including SEQ + PL-NAT
        <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent>
   rule <k>sendSynch V to N2 => skip<_/k>
        <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
-  rule [start-waiting-at-barrier] : <agent=>blocked-agent_> <me>N</me> <k>barrier<_/k> <_/agent=>blocked-agent>
+  rule [start-waiting-at-barrier] : <me>N</me> <k>barrier<_/k>
        <barrier>true</barrier> <waiting>W (. => SetItem(N))</waiting> 
   rule [lifting-barrier] : <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> 
     if W =/=Bool .
-  rule [leave-barrier] : <blocked-agent=>agent_> <me>N</me> <k>barrier => skip<_/k> <_/blocked-agent=>agent>  <barrier>false</barrier>
+  rule [leave-barrier] : <me>N</me> <k>barrier => skip<_/k> <barrier>false</barrier>
        <waiting_>(SetItem(N) => .)<_/waiting>
   rule [lowering-barrier] : <barrier>false => true</barrier> <waiting>.Set</waiting>
 endkm

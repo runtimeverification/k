@@ -25,7 +25,6 @@ kmod RUN is including AGENTS-PROGRAMS + BASIC-RUN
           <busy>.Set</busy>
           <me>0</me>
           <parent>-1</parent>
-          <ready>true</ready>
       </agent*>
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
