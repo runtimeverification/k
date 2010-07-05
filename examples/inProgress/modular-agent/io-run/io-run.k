@@ -3,6 +3,7 @@ load ../io
 
 load ../ids
 load ../exp
+load ../../reflection/reflection
 load ../../substitution/substitution
 load ../fun
 load io-programs

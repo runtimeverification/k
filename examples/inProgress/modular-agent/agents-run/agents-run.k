@@ -4,6 +4,7 @@ load ../imp
 load ../agents
 
 load ../ids
+load ../../reflection/reflection
 load ../../substitution/substitution
 load ../fun
 load ../io

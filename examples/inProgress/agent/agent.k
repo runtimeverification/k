@@ -1,7 +1,8 @@
-in ../../../k-prelude
-in ../substitution/substitution
-in agent-syntax
-in agent-programs
+load ../../../k-prelude
+load ../reflection/reflection
+load ../substitution/substitution
+load agent-syntax
+load agent-programs
 
 kmod AGENT-SEMANTICS is including AGENT-SYNTAX + SUBSTITUTION
   syntax Val ::= Bool | Int | nothing | Id

@@ -6,7 +6,7 @@ KCOMPILE ?= ../../../tools/kompile.pl
 LANGUAGE_NAME = MODULAR-AGENT
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = EXP FUN CONTROL IO REF IMP THREADS AGENTS MODULAR-AGENT
+LANGUAGE_MODULES = K-VISITOR SUBSTITUTION EXP FUN CONTROL IO REF IMP THREADS AGENTS MODULAR-AGENT
 
 #this is the basename of the main file
 MAIN_FILE = modular-agent
