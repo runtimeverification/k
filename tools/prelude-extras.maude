@@ -360,7 +360,7 @@ fmod META-MODULE-EXTRAS is
 
   op removeImports : ImportList ImportList -> ImportList .
   eq removeImports(IL, nil) = IL .
-  eq removeImports(IL I IL', I IL'') = removeImports(IL IL', IL'') .
+  eq removeImports(IL I IL', I IL'') = removeImports(IL IL', I IL'') .
   eq removeImports(IL, I IL') = removeImports(IL, IL') [owise] .
 
   op getSubsorts : SubsortDeclSet SortSet -> SubsortDeclSet .
