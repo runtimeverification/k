@@ -1,6 +1,5 @@
-load control-run-compiled
+load run-compiled
 
-rew run('p9) .
 rew run('p10) .
 rew run('p11) .
 rew run('p12) .

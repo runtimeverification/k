@@ -1,9 +1,6 @@
-kmod CONTROL-PROGRAMS is including CONTROL + FUN + EXP + IDS
+kmod CALLCC-PROGRAMS is including CALLCC + FUN + EXP + IDS
   ops k return : -> Id 
 
-  op p9 : -> K 
-  macro p9 = ((mu f . (lambda x . lambda y . if x <= 0 then halt(y) else ((f (x + -1)) (y * x)))) 5) 1
-  
   op p10 : -> K 
   macro p10 = callcc (lambda k . 7)
 
