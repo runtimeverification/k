@@ -203,15 +203,17 @@ mod DECL-META-LATEX-PRINT is
   eq printTerm(U,V) = \variable{ getName(V) } .
 
   op getName : OpDeclSet Qid Type -> Qid .
+  eq getName(OPDS' (op Q : nil -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS, Q, Ty) = '_ .
   eq getName(OPDS' (op Q : nil -> Ty [AS metadata(Str) AS'] .) OPDS, Q, Ty)
-   = getName(Q, metadataParse(Str)) .
+   = getName(Q, metadataParse(Str)) [owise] .
   eq getName(OPDS, Q, 'Qid) = getLabelName(OPDS, qid(substr(string(Q),1,length(string(Q))))) .
   eq getName(OPDS, Q, Ty) = Q [owise] .
 
 
   op getLabelName : OpDeclSet Qid -> Qid .
+  eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS, Q) = '_ .
   eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS, Q)
-   = addParams(getName(Q, metadataParse(Str)),arity(TyL)) .
+   = addParams(getName(Q, metadataParse(Str)),arity(TyL)) [owise] .
   eq getLabelName(OPDS, Q) = Q [owise] .
    
   op addParams : Qid Nat -> Qid .
@@ -260,6 +262,7 @@ mod DECL-META-LATEX-PRINT is
 
   var TyL' : TypeList .  var Ty' : Type .
   op getRenamedQid : Qid OpDeclSet -> [Qid] .
+  eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS) = '_ .
   eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS) = getName(Q,metadataParse(Str)) [owise print Q " -> " Str "?"] .
   eq getRenamedQid(Q, OPDS) = latexify(Q) [owise] . --- print Op:[OpDecl]] .
  
@@ -570,8 +573,10 @@ mod DECL-META-LATEX-PRINT is
   eq getRenamedKOp(Q, TyL, OPDS) = Q [owise] .
  
   op getRenamedKOp : Qid AttrSet -> Qid .
+  eq getRenamedKOp(Q, AS metadata("builtin wrapper") AS') 
+   = '_ .
   eq getRenamedKOp(Q, AS metadata(Str) AS') 
-   = getName(Q, metadataParse(Str)) .
+   = getName(Q, metadataParse(Str)) [owise] .
 
   var NNL : NeNatList .
   eq eMetaLatexPrint(M, (kstrict(nil) AtS))

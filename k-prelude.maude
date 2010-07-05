@@ -80,7 +80,7 @@ mod K-TECHNIQUE is
   op __ : Set Set -> Set [assoc comm id: .] .
   op __ : NeSet Set -> NeSet [ditto] .
 
-  op Set_ : List{K} -> Set .
+  op Set_ : List{K} -> Set [metadata "latex(renameTo {\\it{}Set}\\mybracket{_})"] .
   eq Set(.List{K}) = . .
   eq Set(K,, Ks) = SetItem(K) Set(Ks) .
 
