@@ -1,4 +1,4 @@
-TEST_DIRS = challenge imp imppp \
+TEST_DIRS = challenge imp imppp agent \
         simple/untyped simple/typed/dynamic simple/typed/static \
 	exp/untyped exp/type-inference fun/untyped \
 	Thue bf befunge93

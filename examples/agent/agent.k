@@ -13,6 +13,17 @@ load ../modules/imp
 load ../modules/threads
 load ../modules/agents
 
+load ../modules/tests/ids
+load ../modules/tests/exp/programs
+load ../modules/tests/lambda/programs
+load ../modules/tests/mu/programs
+load ../modules/tests/callcc/programs
+load ../modules/tests/halt/programs
+load ../modules/tests/io/programs
+load ../modules/tests/imp/programs
+load ../modules/tests/threads/programs
+load ../modules/tests/agents/programs
+
 kmod AGENT is 
   including EXP 
   including LAMBDA
@@ -24,6 +35,10 @@ kmod AGENT is
   including IMP 
   including THREADS 
   including AGENTS 
+
+   including EXP-PROGRAMS + LAMBDA-PROGRAMS + MU-PROGRAMS + CALLCC-PROGRAMS
+   including HALT-PROGRAMS + IO-PROGRAMS + IMP-PROGRAMS 
+   including THREADS-PROGRAMS + AGENTS-PROGRAMS
  configuration
     <T>
       <agent*> 
@@ -48,5 +63,13 @@ kmod AGENT is
       </message*> </messages>
       <I/O> <in>.List</in> <out>.List</out> </I/O>
     </T>
+
+  syntax KResult ::= Id
+
+  syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
+
+  macro run(KL:KLabel) = <T_> <k>KL(.List{K})</k> <_/T>
+  macro run(KL:KLabel,L:List`{K`}) 
+      = <T_> <k> KL(.List{K}) </k> <in>List(L)</in> <_/T>
 endkm
 
