@@ -4,7 +4,7 @@ kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
   syntax K ::= Id | [ Id ] K | Nat
              | K [ K / Id ] [prec 0]
              | beta K [ K / Id ]
-               [prec 0 strict(1) latex "{#1}\sqbracket{{#2}/_\beta{#3}}"]
+               [prec 0 latex "{#1}\sqbracket{{#2}/_\beta{#3}}"]
              | beta-beta K [ K / Id ]  
                [prec 0 strict(1) latex "eval({#1})\sqbracket{{#2}/_\beta{#3}}"]
                
