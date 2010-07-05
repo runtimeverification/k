@@ -1,14 +1,14 @@
 load ../basic-run
-load ../io
+load ../../io
 
 load ../ids
-load ../exp
-load ../../reflection/reflection
-load ../../substitution/substitution
-load ../fun
-load io-programs
+load ../../exp
+load ../../k-visitor
+load ../../substitution
+load ../../fun
+load programs
 
-kmod IO-RUN is including IO-PROGRAMS + BASIC-RUN
+kmod RUN is including IO-PROGRAMS + BASIC-RUN
   configuration <T> <k> .K </k>  <nextId> 0 </nextId>
                 <in> .List </in> <out> .List </out> </T>
   syntax Bag ::= run ( KLabel , List{K} )
