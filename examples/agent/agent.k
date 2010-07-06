@@ -14,6 +14,7 @@ load ../modules/ref
 load ../modules/while
 load ../modules/threads
 load ../modules/agents
+load ../modules/quote-unquote
 
 load ../modules/tests/ids
 load ../modules/tests/exp/programs
@@ -25,6 +26,7 @@ load ../modules/tests/io/programs
 load ../modules/tests/imp/programs
 load ../modules/tests/threads/programs
 load ../modules/tests/agents/programs
+load ../modules/tests/quote-unquote/programs
 
 kmod AGENT is 
   including EXP 
@@ -37,10 +39,11 @@ kmod AGENT is
   including WHILE 
   including THREADS 
   including AGENTS 
+  including QUOTE-UNQUOTE 
 
    including EXP-PROGRAMS + LAMBDA-PROGRAMS + MU-PROGRAMS + CALLCC-PROGRAMS
    including HALT-PROGRAMS + IO-PROGRAMS + IMP-PROGRAMS 
-   including THREADS-PROGRAMS + AGENTS-PROGRAMS
+   including THREADS-PROGRAMS + AGENTS-PROGRAMS + QUOTE-UNQUOTE-PROGRAMS
  configuration
     <T>
       <agent*> 

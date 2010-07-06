@@ -22,3 +22,10 @@ search run('p19) =>! B:[Bag] .
 search run('p20) =>! B:[Bag] .
 search run('p21) =>! B:[Bag] .
 search run('p22) =>! B:[Bag] .
+search run('p23) =>! B:[Bag] .
+search run('p24) =>! B:[Bag] .
+rew run('p25) .
+rew run('p26) .
+rew run('p27) .
+rew run('p28) .
+rew run('p29) .
