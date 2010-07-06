@@ -1,6 +1,6 @@
-load ../../../../k-prelude
-load ../../../modules/k-visitor
-load ../../../modules/substitution
+load ../../../k-prelude
+load ../../modules/k-visitor
+load ../../modules/substitution
 kmod SIMPLY-TYPED-SEMANTICS is including SUBSTITUTION
   syntax Type ::= type
                 | Type --> Type [strict hybrid latex "{#1}\rightarrow{#2}"]

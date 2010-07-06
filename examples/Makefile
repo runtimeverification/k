@@ -1,8 +1,9 @@
 TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
 	    modules/tests/io modules/tests/imp modules/tests/halt \
             modules/tests/callcc modules/tests/threads modules/tests/agents \
-	    modules/tests/quote-unquote agent \
+	    modules/tests/quote-unquote \
 	    algorithms/tests/sort algorithms/tests/dijkstra \
+            agent lambda/simply-typed \
         challenge imp imppp \
         simple/untyped simple/typed/dynamic simple/typed/static \
 	exp/untyped exp/type-inference fun/untyped \
