@@ -1,6 +1,7 @@
 \usepackage[a0paper]{geometry}
 \usepackage{fullpage}
 \usepackage{arydshln}
+\usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{stmaryrd}
 \usepackage{color}
@@ -26,6 +27,7 @@
 }$#1$ wraps $#2$}
 \newcommand{\nonTerminal}[1]{\textit{#1}\/}
 \newcommand{\terminal}[1]{\ensuremath\mathrel{\texttt{#1}}}
+\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\texttt{#1}}}
 \newcommand{\sort}[1]{\textit{#1}}
 \newcommand{\kind}[1]{\textit{#1}}
 \newcommand{\kequation}[2]{

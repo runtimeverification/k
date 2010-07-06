@@ -134,9 +134,9 @@ mod DECL-META-LATEX-PRINT is
     = ('strat '`( intList2QidList(NL) '`) attrSet2QidList(AtS)) .
   eq attrSet2QidList((memo AtS))  = ('memo attrSet2QidList(AtS)) .
   eq attrSet2QidList((prec(N) AtS))  
-    = (---('\prec '`{ intList2QidList(N) '`}) attrSet2QidList(AtS)) .
+    = (---('\prec '`{ intList2QidList(N) '`}---) attrSet2QidList(AtS)) .
   eq attrSet2QidList((gather(QIL) AtS)) 
-    = (---('gather QIL) attrSet2QidList(AtS)) .
+    = (---('gather QIL---) attrSet2QidList(AtS)) .
   eq attrSet2QidList((format(QIL) AtS)) 
     = ('\format '`{ QIL '`} attrSet2QidList(AtS)) .
   eq attrSet2QidList((ctor AtS))  = ('ctor attrSet2QidList(AtS)) .
@@ -217,7 +217,7 @@ mod DECL-META-LATEX-PRINT is
   eq getLabelName(OPDS, Q) = Q [owise] .
    
   op addParams : Qid Nat -> Qid .
-  eq addParams(Q, N) = if latexCmd(Q) then qidList2Qid('\ensuremath '`{ Q genQids(N, '`{ '\_ '`}) '`}) else Q fi .
+  eq addParams(Q, N) = if latexCmd(Q) then qidList2Qid('\ensuremath '`{ qid(string(Q)+ "NoSpace") genQids(N, '`{ '\_ '`}) '`}) else Q fi .
 
   var Q' : Qid . var AS' AS1 AS2 : AttrSet .
   op getName : Qid AttrSet -> Qid .
@@ -599,13 +599,13 @@ mod DECL-META-LATEX-PRINT is
   eq eMetaLatexPrint(M, (memo AtS))   
     = ('memo eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (prec(I) AtS))
-    = (---('prec eMetaLatexPrint(I)) eMetaLatexPrint(M, AtS)) .
+    = (---('prec eMetaLatexPrint(I)---) eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (klatex(AS) AtS))
-    = (---('prec eMetaLatexPrint(I)) eMetaLatexPrint(M, AtS)) .
+    = (---('prec eMetaLatexPrint(I)---) eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (gather(QIL) AtS))
-    = (---('gather '`( QIL '`)) eMetaLatexPrint(M, AtS)) .
+    = (---('gather '`( QIL '`)---) eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (format(QIL) AtS))
-    = (---('format '`( QIL '`)) eMetaLatexPrint(M, AtS)) .
+    = (---('format '`( QIL '`)---) eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (ctor AtS))   
     = ('ctor eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (frozen(NL) AtS)) 
@@ -614,7 +614,7 @@ mod DECL-META-LATEX-PRINT is
   eq eMetaLatexPrint(M, (iter AtS))   
     = ('iter eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (special(HkL) AtS))
-    = (---('special '`( eMetaLatexPrint(M, HkL) '`)) 
+    = (---('special '`( eMetaLatexPrint(M, HkL) '`)---) 
        eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (config AtS))   
     = ('config eMetaLatexPrint(M, AtS)) .
@@ -1060,7 +1060,7 @@ mod LATEX-PRINT-META is
 ---  op eMetaLatexPrint : ProductionType -> QidList .
   eq (\nterminal{Ty}) 
    = '\nonTerminal '`{ eMetaLatexPrint(Ty) '`} .
-  eq (\terminal{Q}) = ---('\terminal '`{) printQid(Q) . --- '`} .
+  eq (\terminal{Q}) = ---('\terminal '`{---) printQid(Q) . --- '`} .
   eq \sort{Q} = '\sort '`{ printSortQid(Q) '`} .
 
   op printSortQid : Qid -> QidList .
