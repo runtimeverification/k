@@ -868,15 +868,15 @@ sub make_metadata {
     local ($_) = @_;
 
     my @k_attributes = ();
-    my $have_attributes = 0;
+    my $have_k_attributes = 0;
 
 # Match the K specific attributes below and make them into metadata
 # Right now it assumes that no \" can appear inside the metadata string
 # Therefore, the latex attribute is expected to be outside
     s!(structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
-      $have_attributes = 1;
       if (defined $1) {
 	  local $_ = $1;
+	  $have_k_attributes = 1;
 	  if (/^latex\s+"([^"]*?)"$/gs) {
 #              print "Latex attribute $1\n";
               push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if $latex;
@@ -891,13 +891,15 @@ sub make_metadata {
      ""
      !gse;
 
+#    print "K attributes: @k_attributes\n";
+
     if (@k_attributes) {
 #	print "->@k_attributes<-\n";
 	s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@k_attributes\"\]"!se;
 #	print "$_\n";
     }
-    elsif ($have_attributes) {
-        $_ = "";
+    elsif ($have_k_attributes) {
+        s/^\s*\[\s*\]\s*$//gs;
     }
     return $_;
 }
