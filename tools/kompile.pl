@@ -919,8 +919,8 @@ sub get_newcommand {
     s!(\{\#\d+\})(\{\#\d+\})!$1\\mathrel{}$2!g;
     push(@newcommands, "\\newcommand\{\\$newcommand\}$args\{$_\}");
     s/terminal/terminalNoSpace/gs;
-    $newcommand .= "NoSpace";
-    push(@newcommands, "\\newcommand\{\\$newcommand\}$args\{$_\}");
+    my $newcommandNoSpace = $newcommand."NoSpace";
+    push(@newcommands, "\\newcommand\{\\$newcommandNoSpace\}$args\{$_\}");
     return $newcommand;
 }
 
