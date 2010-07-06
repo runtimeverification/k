@@ -4,10 +4,13 @@ load ../../agents
 
 load ../ids
 load ../../exp
+load ../../if
 load ../../k-visitor
 load ../../substitution
 load ../../lambda
+load ../../ref
 load ../../io
+load ../../while
 load ../../threads
 load programs
 
@@ -20,6 +23,7 @@ kmod RUN is including AGENTS-PROGRAMS + BASIC-RUN
                   <k>.K</k>
                   <nextId>0</nextId>
                   <holds>.Map</holds>
+                  <mem>.Map</mem> <nextLoc>0</nextLoc>
               </thread*>
           </control>
           <busy>.Set</busy>
