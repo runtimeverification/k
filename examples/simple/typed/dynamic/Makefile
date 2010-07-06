@@ -5,6 +5,9 @@ KCOMPILE ?= ../../../../tools/kompile.pl
 # this is the name of the main maude module 
 LANGUAGE_NAME = SIMPLE-TYPED-DYNAMIC
 
+# this are all interesting modules (used to latexify)
+LANGUAGE_MODULES = SIMPLE-TYPED-DYNAMIC-SYNTAX SIMPLE-TYPED-DYNAMIC-SEMANTICS SIMPLE-TYPED-DYNAMIC 
+
 #this is the basename of the main file
 MAIN_FILE = simple-typed-dynamic
 

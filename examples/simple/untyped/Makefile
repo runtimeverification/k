@@ -5,6 +5,9 @@ KCOMPILE ?= ../../../tools/kompile.pl
 # this is the name of the main maude module 
 LANGUAGE_NAME = SIMPLE-UNTYPED
 
+# this are all interesting modules (used to latexify)
+LANGUAGE_MODULES = SIMPLE-UNTYPED-SYNTAX SIMPLE-UNTYPED-SEMANTICS SIMPLE-UNTYPED
+
 #this is the basename of the main file
 MAIN_FILE = simple-untyped
 
