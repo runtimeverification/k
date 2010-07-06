@@ -6,7 +6,7 @@ KCOMPILE ?= ../../../../tools/kompile.pl
 LANGUAGE_NAME = RUN
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = 
+LANGUAGE_MODULES = K-VISITOR SUBSTITUTION LAMBDA
 
 #this is the basename of the main file
 MAIN_FILE = run

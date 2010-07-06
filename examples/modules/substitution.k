@@ -4,14 +4,14 @@ kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
   syntax K ::= Id | [ Id ] K | Nat
              | K [ K / Id ] [prec 0]
              | beta K [ K / Id ]
-               [prec 0 latex "{#1}\sqbracket{{#2}/_\beta{#3}}"]
-             | beta-beta K [ K / Id ]  
-               [prec 0 strict(1) latex "eval({#1})\sqbracket{{#2}/_\beta{#3}}"]
+               [prec 0 latex "{#1}\sqbracket{{#2}^\square/{#3}}"]
+             | eval K , then apply [ K / Id ]  
+               [prec 0 strict(1) latex "eval({#1})\sqbracket{{#2}^\square/{#3}}"]
                
   syntax KLabel ::= beta [ K / Id ] 
-               [prec 0 latex "\sqbracket{{#1}/_\beta{#2}}"]
+               [prec 0 latex "\sqbracket{{#1}^\square/{#2}}"]
                
-  syntax Id ::= id Nat [latex "{\it id}_{{#1}}"] --- to generate fresh names
+  syntax Id ::= id Nat [latex "{\it id}_{\mbox{\scriptsize \ensuremath{#1}}}"] --- to generate fresh names
   configuration <k> .K </k> <nextId> 0 </nextId>
 
   rule <k> K'[K/Y] => endVisit(beta K'[K/Y]) <_/k> [structural]
@@ -20,13 +20,13 @@ kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
 
   rule <k> beta[K/Y]([X:Id]K') => 
            visitedL('`[_`]_)(visitedK(id(N)) 
-                visitedL(,,) beta-beta (beta K' [id(N)/X])[K/Y])
+                visitedL(,,) eval (beta K' [id(N)/X]), then apply [K/Y])
       <_/k> <nextId>N:Nat => sNat N</nextId>
 ---    if Y =/=Bool X [structural] ---renaming bound variables
-  rule beta-beta visitedK(K')[K/Y] => beta K'[K/Y] [structural]
+  rule eval visitedK(K'), then apply [ K / Y ] => beta K'[K/Y] [structural]
 
   macro beta K':K [K:K/Y:Id] 
       = visit K' applying beta[K/Y] 
-                       if label in Set(wklabel('`[_`]_),,wklabel(getKLabel(Y)))
+                       if label in SetItem(wklabel('`[_`]_)) SetItem(wklabel(getKLabel(Y)))
 
 endkm
