@@ -175,7 +175,7 @@ mod PL-NAT is
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
   op _<Nat_ : Nat Nat -> Bool
-        [prec 37
+        [prec 37 metadata "latex(renameTo _<\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (<)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   term-hook trueTerm (true)
