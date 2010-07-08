@@ -1101,32 +1101,32 @@ mod LATEX-PRINT-META is
 
   var Cnd : Term .
   op eMetaLatexPrintCxt : Module MembAxSet -> QidList .
-  op eMetaLatexPrintEqs : Module MembAxSet -> QidList .
+---  op eMetaLatexPrintEqs : Module MembAxSet -> QidList .
   op eMetaLatexPrintRls : Module MembAxSet -> QidList .
   op eMetaLatexPrintNRls : Module MembAxSet -> QidList .
-  eq eMetaLatexPrintEqs(M, (\rule{Str}{{krl,T,empty,AS' metadata("structural") AS}}) MAS)
+  eq eMetaLatexPrintRls(M, (\rule{Str}{{krl,T,empty,AS' metadata("structural") AS}}) MAS)
     = ('\n '\kequation '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T) 
                    '`} 
-       eMetaLatexPrintEqs(M, MAS)) .
-  eq eMetaLatexPrintEqs(M, (\rule{Str}{{kcrl,T,Cnd,AS' metadata("structural") AS}}) MAS)
+       eMetaLatexPrintRls(M, MAS)) .
+  eq eMetaLatexPrintRls(M, (\rule{Str}{{kcrl,T,Cnd,AS' metadata("structural") AS}}) MAS)
     = ('\n '\kcequation '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
-       eMetaLatexPrintEqs(M, MAS)) .
+       eMetaLatexPrintRls(M, MAS)) .
   eq eMetaLatexPrintRls(M, (\rule{Str}{{krl,T, empty, AS}}) MAS)
     = ('\n '\krule '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(M, T) 
                    '`} 
-       eMetaLatexPrintRls(M, MAS)) .
+       eMetaLatexPrintRls(M, MAS)) [owise] .
   eq eMetaLatexPrintRls(M, (\rule{Str}{{kcrl,T, Cnd, AS}}) MAS)
     = ('\n '\kcrule '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(M, T) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
-       eMetaLatexPrintRls(M, MAS)) .
+       eMetaLatexPrintRls(M, MAS)) [owise] .
   eq eMetaLatexPrintCxt(M, (\context{Str}{T}) MAS)
     = ('\n '\kcontext '`{ qid(Str) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} 
        eMetaLatexPrintCxt(M, MAS)) .
-  eq eMetaLatexPrintCxt(M, MAS) = eMetaLatexPrintEqs(M, MAS) [owise] .
-  eq eMetaLatexPrintEqs(M, MAS) = eMetaLatexPrintRls(M, MAS) .
-  eq eMetaLatexPrintRls(M, MAS) = eMetaLatexPrintNRls(M, MAS) .
+  eq eMetaLatexPrintCxt(M, MAS) = eMetaLatexPrintRls(M, MAS) [owise] .
+---  eq eMetaLatexPrintEqs(M, MAS) = eMetaLatexPrintRls(M, MAS) .
+  eq eMetaLatexPrintRls(M, MAS) = eMetaLatexPrintNRls(M, MAS) [owise] .
   eq eMetaLatexPrintNRls(M, none) = nil .
   eq eMetaLatexPrintNRls(M, MAS:[MembAxSet]) 
    = eMetaLatexPrintCxt(M, MAS:[MembAxSet]) 
