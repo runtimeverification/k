@@ -891,6 +891,8 @@ mod PL-COUNTER is
   op counter : -> [Nat] [special (
     id-hook CounterSymbol
     op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
+  op kcounter : -> Nat .
+  eq kcounter = counter .
 endm
 
 
