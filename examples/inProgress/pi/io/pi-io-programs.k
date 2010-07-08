@@ -7,5 +7,5 @@ kmod PI-IO-PROGRAMS is including PI-IO-SYNTAX + PI-PROGRAMS
   
   op p4 : -> Proc
   ops a b c onx ony : -> Id
-  macro p4 = receive a on x . send onx on c . () + receive a on y . send ony on c . ()   || (replicate receive a on read . send a on a . () || replicate receive a on c . send a on print . ())
+  macro p4 =  (replicate receive c on b . (receive a on x .  send onx on c .  ()  +  receive a on y .  send ony on c .  ()) )   ||  (replicate receive a on read .  send c on b . send a on a .  ()  ||  replicate receive a on c .  send a on print .  () )
 endkm

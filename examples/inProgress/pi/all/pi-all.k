@@ -1,5 +1,5 @@
-load ../top/pi
-load pi-semantics
+load ../pi
+load pi-all-semantics
 
 kmod PI-ALL is including PI-ALL-SEMANTICS + PI-PROGRAMS             
   op run : KLabel -> Bag
