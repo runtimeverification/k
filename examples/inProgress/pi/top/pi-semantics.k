@@ -5,7 +5,7 @@ kmod PI-SEMANTICS is including PI-SYNTAX + SUBSTITUTION
              
   syntax K ::= nu K [latex "\nu{#1}"]
              | apply K to received ( K )  [latex "{#2}?{#1}"]
-
+ 
   macro new X:Id.P:Proc = nu([X]P)
   macro receive X on C . P = apply([X]P) to received(C)
 
@@ -16,7 +16,6 @@ kmod PI-SEMANTICS is including PI-SYNTAX + SUBSTITUTION
   rule [comm] : (<sum_> <k> send X on C:Id . P </k>  <_/sum> => <sum> <k> P </k> </sum>)
        (<sum_> <k> apply([Y:Id]Q) to received(C) </k> <_/sum> =>
        <sum> <k> Q[X/Y] </k> </sum>)
-  rule tau . P => P [structural]
 
   rule <k>()</k> => . [structural]
   rule <sum> .Bag </sum> => . [structural]
