@@ -10,7 +10,7 @@ kmod QUOTE-UNQUOTE is including K-VISITOR + PL-NAT
                if label in SetItem(wklabel('quote_)) SetItem(wklabel('unquote_))
 
 --- Code generation (via reflection)
-  syntax KLabel ::= quoteit[ Nat ] [latex "{\it quote}_{\scriptsize{#1}}"]
+  syntax KLabel ::= quoteit[ Nat ] [latex "{\it quote}_{\mbox{\scriptsize\ensuremath{#1}}}"]
 
   rule <k>quote K:K => mQuote(K,0) <_/k>
   rule quoteit[N](quote(K)) => visitedL('quote_)(mQuote(K,sNat(N))) 
