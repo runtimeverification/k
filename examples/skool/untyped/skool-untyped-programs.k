@@ -67,6 +67,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          }
        }
 
+--- 1
+
   macro p02 =
        class c {
          var a;
@@ -79,6 +81,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
 	   return 0;
          }
        }
+
+--- 5
 
   macro p03 =
        class c {
@@ -114,6 +118,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          }
        }
 
+--- 5 6 8 3
+
   macro p04 =
        class c {
          method c() { return 0; }
@@ -130,6 +136,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
 	   return 0;
          }
        }
+
+--- 13
 
   macro p05 =
        class oddeven {
@@ -148,7 +156,9 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
            return 0;
          }
        }
-  
+
+--- 1
+
   macro p06 =
        class node {
          var left;
@@ -180,6 +190,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
            return 0;
          }
        }
+
+--- 12
 
   macro p07 =
        class point {
@@ -233,6 +245,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          }
        }
 
+--- 6 8 20 40 87
+
   macro p08 =
        class point {
          var x;
@@ -285,6 +299,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
         }
       }
 
+--- 6 8 20 40 87
+
   macro p09 =
        class point {
          var x;
@@ -336,6 +352,7 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
         }
       }
  
+--- 6 8 20 40 87
 
   macro p10 = 
        class c1 {
@@ -369,6 +386,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          }
        }
 
+--- 11 12 11  99
+
   macro p11 =
        class c1 {
          method c1() { return 0;}
@@ -391,6 +410,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
            return 0;
          }
        }
+
+--- 1 2 2 
 
   macro p12 =
        class c1 {
@@ -418,6 +439,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
            return 0;
          }
        }
+
+--- 1 100 100 1 2 2 
 
   macro p13 =
        class c1 {
@@ -448,6 +471,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
            return 0;
          }
        }
+
+--- 33 
 
   macro p14 =
        class a {
@@ -519,7 +544,10 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          }
        }
 
---- 2 2 3 11 3 3 102 10402 10402
+--- 2 2 3 11 3 3 102 10402 10402  ???
+
+--- 2 2 3 11 3 3 11 111 111 
+
   macro p15 =
        class i {
          var value;
@@ -545,6 +573,9 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
            return 0;
          }
        }
+
+--- 15 ???
+--- 10
 
   macro p16 =
        class i {
@@ -578,6 +609,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          }
        }
 
+--- 1
+
   macro p17 =
        class main {
 	 method f(x) {
@@ -588,6 +621,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
 	   return 0;
          }
        }
+
+--- (5!)!
 
   macro p18 =
        class sorting {
@@ -753,6 +788,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          }
        }
 
+--- -1 1 -1 2 -1 3
+
   macro p20 =
        var x;
        class main {
@@ -768,6 +805,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
            return 0;  
          }
        }
+
+--- 1  1
 
   macro p21 =
      var x;
@@ -793,6 +832,8 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
          write(b.val());
        }
      }
+
+--- 1 2 3 4 1 2 
 
   syntax Stmts ::= ss01
   macro ss01 =

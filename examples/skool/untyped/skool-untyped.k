@@ -20,7 +20,6 @@ kmod SKOOL-UNTYPED is including SKOOL-UNTYPED-SEMANTICS + SKOOL-UNTYPED-PROGRAMS
 ---        =
 ---        <T_> 
 ---           <k> K(.List{K}) </k>
----           <class> object </class>
 ---           <in>
 ---              List(7,,23,,654,,656,,54,,456,,436345647643567,,
 ---                   354654364356,,4357643576)
@@ -30,18 +29,11 @@ kmod SKOOL-UNTYPED is including SKOOL-UNTYPED-SEMANTICS + SKOOL-UNTYPED-PROGRAMS
   macro run(P:KLabel)
         =
         <T_> 
-           <k> kpgm(P(.List{K})) </k>
+           <k> P(.List{K}) </k>
            <in> 
               List(7,,23,,654,,656,,54,,456,,436345647643567,,
                    354654364356,,4357643576)
            </in>
-           <class> object </class>
-           <pgm>
-               <classes>
-                       <className> object </className>
-                       <fields> .K </fields>
-               </classes>
-           </pgm>
         <_/T> 
 ---</SKOOL modified>
 endkm

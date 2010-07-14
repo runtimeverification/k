@@ -45,11 +45,12 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
                      <nextLoc> 1 </nextLoc>
 ---<SKOOL added>
                      <obj> .List </obj>
-                     <class> Id:Id </class>
+                     <class> main </class>
                      <pgm>
                            <classes*>
                                     <className> Id:Id </className>
                                     <extends> Id:Id </extends>
+                                    <stmts> .K </stmts>
                                     <fields> .K </fields>
                            </classes*>
                      </pgm>
@@ -97,24 +98,13 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 --- the following is nedeed for stacking
   syntax ListItem ::=  [ Id , Map , K ]
 --- the following are needed at the creation of a new object and at a method call
-  syntax K ::= restore ( List ) | discard | load
+  syntax K ::= restore ( List ) | discard
   syntax KLabel ::= create | invoke | addOEnvLayer 
---- the name of the current environment for an object
-  syntax Id ::= @ny   
-
+--- the names for the local environment and the global environments for an object
+  syntax Id ::= @local | @global
 ---   the internal name of a method is a pair [class, method-name], in order to be unique
 ---   (we assume that the name of a class in a program is unique)
   syntax Id ::= [ Id , Id ]
-
-
---- kpgm label is used to traverse a program and to build the content of the <pgm>..</pgm> cell
-  syntax KLabel ::= kpgm
-
---- global variables are considered as data members of the object class; therefore
----   we consider a K label "global", which is used to switch current class to object
----   immediately preprocessing of a class is finished 
-  syntax K ::= global
-
 
 ---</SKOOL added>
 
@@ -143,7 +133,7 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
        <nextLoc> L => sNat L +Nat N </nextLoc> 
   rule (sizeOf(array(_,N)) => N)   
 
----</SKOOL modified>
+---<SKOOL modified>
 
 --- the following rule from Simple are removed (commented)
 ---  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k> 
@@ -154,78 +144,57 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
 
 --- the followings are added
 
+
 --- a class traversal
-  rule <k> kpgm(class C1:Id extends C2:Id { Ss:Stmts }) => kpgm(Ss) ~> global <_/k>
-       <class> _ => C1 </class>
+  --- the following is used to know where a class preprocessing is finished
+  syntax K ::= preprocessClass ( Id )
+  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => preprocessClass (C1) <_/k>
        <pgm_> . => <classes_>
                            <className> C1 </className>          
                            <extends> C2 </extends>
+                           <stmts> Ss </stmts>
                    <_/classes>
        <_/pgm>
-  rule <k> global => . <_/k>
-       <class> _ => object </class>
 
---- variable declaration
-  rule <k> kpgm(var X:Id;  Ss) => kpgm(Ss) <_/k>
-       <class> C:Id </class>
+--- variable member declaration 
+  rule <k> preprocessClass(C:Id) <_/k>
        <pgm_>
-             <classes_>
+            <classes_>
                      <className> C </className>
                      <fields_> . => var X; </fields>
-             <_/classes>
-       </pgm>
-  rule <k> kpgm(var X:Id;) => . <_/k>   --- the var declaration is the last
-       <class> C </class>
+                     <stmts> var X:Id; => . <_/stmts>
+            <_/classes>
+       <_/pgm>
+       
+  rule <k> preprocessClass(C) <_/k>
        <pgm_>
-             <classes_>
+            <classes_>
                      <className> C </className>
-                     <fields_> . => var X; </fields>
-             <_/classes>
-       </pgm>
+                     <fields_> . => var X[ N:Nat ]; </fields>
+                     <stmts> var X[ N:Nat ]; => . <_/stmts>
+            <_/classes>
+       <_/pgm>
+ 
+--- method declaration
 
-  rule <k> kpgm(var X[ N:Nat ] ;  Ss) => kpgm(Ss) <_/k>
-       <class> C </class>
+  rule <k> preprocessClass(C) <_/k>
        <pgm_>
-             <classes_>
+            <classes_>
                      <className> C </className>
-                     <fields_> . => var X[N]; </fields>
-             <_/classes>
-       </pgm>
-  rule <k> kpgm(var X[ N:Nat ];) => . <_/k>   --- the array declaration is the last
-       <class> C </class>
-       <pgm_>
-             <classes_>
-                     <className> C </className>
-                     <fields_> . => var X[N]; </fields>
-             <_/classes>
-       </pgm>
-
---- a method traversal
-
-  rule <k> kpgm(method F:Id(Xl:List{Id}) S:Stmt  Ss) => kpgm(Ss) <_/k>
-       <class> C </class>
-       <pgm_>
-             <classes_>
-                     <className> C </className>
-             <_/classes>
-       </pgm> 
-       <env> Env:Map => Env[L/[C, F]] </env>  
-       <nextLoc> L:Nat => L +Nat 2 </nextLoc> 
-       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
-  rule <k> kpgm(method F:Id(Xl) S:Stmt) => . <_/k>    --- the method declaration is the last
-       <class> C </class>
-       <pgm_>
-             <classes_>
-                     <className> C </className>
-             <_/classes>
-       </pgm> 
+                     <stmts> method F:Id(Xl:List{Id}) S:Stmt => . <_/stmts>
+            <_/classes>
+       <_/pgm>
        <env> Env:Map => Env[L/[C, F]] </env>  
        <nextLoc> L:Nat => L +Nat 2 </nextLoc> 
        <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
 
---- sequence of statements
-  
-  rule <k> kpgm(Ss1:Stmts Ss2:Stmts) => kpgm(Ss1) ~> kpgm(Ss2) <_/k>
+--- finish processing a class
+
+  rule <k> preprocessClass(C) => .K <_/k>
+        <classes_>
+                <className> C </className>
+                ( <stmts> .K </stmts> => .Bag )
+       <_/classes>
 
 --- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
 ---   call main and initialize the global environment
@@ -234,7 +203,7 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
 
 ---    ... and the following added:
   rule <k> . => new_`(_`)(main, .List{Id}) </k>
-       <env> Env </env>
+       <env> Env => . </env>
        <genv> . => Env </genv>
        <class> _ => main </class>
 
@@ -254,8 +223,9 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
 ---       <env_> X |-> L:Nat <_/env>
 ---       <store_> L |-> V <_/store> 
 
-  rule <k> X:Id => Store(getloc(X, ((@ny |-> Env) (C |-> Env1) Oenv))) <_/k>
+  rule <k> X:Id => Store(getloc(X, ((@local |-> Env) ((C |-> Env1) Oenv)(@global |-> GEnv)))) <_/k>
        <env> Env:Map </env>
+       <genv> GEnv:Map </genv>
        <obj_> (C:Id |-> Env1:Map) Oenv:List </obj>
        <class> C </class>
        <store> Store:Map </store>  
@@ -326,17 +296,15 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
                    <fields> Fs:Stmts </fields>
             <_/classes>
        <_/pgm>
-       if C =/=Bool object
-  rule <k> create(object) => Fs ~> addOEnvLayer(object) ~> load <_/k>
+       if C1 =/=Bool object
+  rule <k> create(C) => Fs ~> addOEnvLayer(C:Id) <_/k>
        <pgm_>
             <classes_>
-                   <className> object </className>
+                   <className> C </className>
+                   <extends> object </extends>
                    <fields> Fs:Stmts </fields>
             <_/classes>
        <_/pgm>
-  rule <k> load => oenv(Oenv) <_/k>
-       <obj> Oenv </obj>
-
 
 --- add a new tagged environment layer to the  current object
   rule <k> addOEnvLayer(C) => . <_/k>
@@ -350,7 +318,7 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
   rule <k> V ~> restore(Oenv) => V <_/k> 
        <obj> _ => Oenv </obj>
 
---- instenceOf operator
+--- instanceOf operator
 
   rule <k> _instanceOf_(oenv( (C |-> Env) Oenv), C1) => true <_/k> if (C ==Bool C1)
   rule <k> _instanceOf_(oenv( (C |-> Env) Oenv), C1) => _instanceOf_(oenv(Oenv), C1) <_/k> if (C =/=Bool C1) 
@@ -384,16 +352,15 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
 --- method call: preprocessing
   rule <k> (_._`(_`)(oenv((C:Id |-> Env:Map) Oenv:List), F:Id, Vl:List{Val})) ~> K:K 
            =>
-           oenv((C |-> Env) Oenv) ~> invoke(_`(_`)(F:Id, Vl)) </k>
+           invoke(_`(_`)(F:Id, Vl)) </k>
        <class> C1:Id => C:Id </class>
        <obj> Oenv1:List => (C |-> Env) Oenv </obj>
        <env> Env1:Map => . </env>
        <fstack> .List => [ C1, Env1, (restore(Oenv1)~>K) ] <_/fstack>
-  rule <k> super_`(_`)(F, Vl) ~> K => oenv(Oenv) ~> invoke(_`(_`)(F:Id, Vl)) </k>
+  rule <k> super_`(_`)(F, Vl) ~> K => invoke(_`(_`)(F:Id, Vl)) </k>
        <class> C => C1 </class>
-       <obj> Oenv1 (C |-> Env) Oenv => Oenv </obj>
        <env> Env1 => . </env>
-       <fstack> .List => [ C1, Env1, (restore(Oenv1 (C |-> Env) Oenv)~>K) ] <_/fstack>
+       <fstack> .List => [ C, Env1, K ] <_/fstack>
        <pgm_>
             <classes_>
                    <className> C </className>
@@ -401,15 +368,17 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
             <_/classes>
        <_/pgm>
 
-
-  rule <k> oenv((C |-> Env) Oenv) ~> invoke(_`(_`)(F:Id, Vl))
+  rule <k> invoke(_`(_`)(F:Id, Vl))
            =>
-           oenv((C |-> Env) Oenv) ~>(_`(_`)(function(sNat getloc( [C, F], ( @ny |-> GEnv:Map ))), Vl)) <_/k>
+           (_`(_`)(function(sNat getloc( [C, F], ( @global |-> GEnv:Map ))), Vl))
+       <_/k>
+       <class> C </class>
        <genv> GEnv </genv>
-       if getloc( [C, F], ( @ny |-> GEnv )) =/=Bool null 
-  rule <k> oenv((C |-> Env) Oenv) ~> invoke(_`(_`)(F:Id, Vl))
+       if getloc( [C, F], ( @global |-> GEnv )) =/=Bool null 
+  rule <k> invoke(_`(_`)(F:Id, Vl))
            =>
-           oenv(Oenv) ~>invoke(_`(_`)(F:Id, Vl)) <_/k>
+           invoke(_`(_`)(F:Id, Vl))
+       <_/k>
        <class> C => C1 </class>
        <pgm_>
             <classes_>
@@ -418,13 +387,14 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
             <_/classes>
        <_/pgm>
        <genv> GEnv </genv>
-       if getloc( [C, F], ( @ny |-> GEnv )) ==Bool null 
+       if getloc( [C, F], ( @global |-> GEnv )) ==Bool null 
 
---- method call: function execution 
+--- method call: function value loading 
 --- <OO modified>: the global environment not longer included in the loacl function call environment
 ---                    because the global variables are noe data members in the object class
-  rule <k> oenv((C |-> Env) Oenv) ~>(_`(_`)(function(L),Vl:List{Val}))~>K => S:Stmt~>return(0); </k> 
+  rule <k> (_`(_`)(function(L),Vl:List{Val}))~>K => S:Stmt~>return(0); </k> 
        <env> _ => .Map[N..N+Nat|Xl| / getList{K}(Xl:List{Id})] </env>
+       <genv> GEnv </genv>
        <store_> L:Nat |-> lambda(Xl,S) (. => N:Nat..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
 
@@ -446,13 +416,13 @@ kmod SKOOL-UNTYPED-INSTR-PROCESSING is including SKOOL-UNTYPED-CONFIG
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
   rule S1:Stmt S2:Stmt => S1~>S2 
 
----<SKOOL modified>
----  rule <k> X:Id = V:Val; => . <_/k> <env_> X|->L <_/env> <store_> L:Nat |->(_=>V) <_/store> 
+---<SKOOL modified> 
   rule <k> _=_;(X:Id, V:Val) => . <_/k> 
        <env> Env:Map </env>
+       <genv> GEnv:Map </genv>
        <obj_> (C:Id |-> Env1:Map) Oenv:List </obj>
        <class> C </class>
-       <store> Store:Map => Store [ V / getloc(X, ((@ny |-> Env) (C |-> Env1) Oenv)) ] </store>
+       <store> Store:Map => Store [ V / getloc(X, ((@local |-> Env) ((C |-> Env1) Oenv)(@global |-> GEnv))) ] </store>
 ---</SKOOL modified>
 
  --- for array assignment, first evaluate the array and its index
