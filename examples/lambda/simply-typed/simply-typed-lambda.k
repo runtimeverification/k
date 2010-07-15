@@ -1,19 +1,30 @@
 load ../../../k-prelude
-load ../../modules/k-visitor
-load ../../modules/substitution
+
+kmod SUBSTITUTION is including K + PL-ID
+  syntax List{K} ::= List{K} [ K // Id ] [prec 0]
+  syntax K ::= K [ K / Id ] [prec 0]
+  syntax K ::= Id 
+  
+  rule X[K/X] => K [structural]
+  rule KL:KLabel(L:List`{K`})[K:K/X:Id] => KL(L[K//X]) if KL(L) =/=Bool X [structural]
+  rule (K1:K ~> K2:K)[K/X] => (K1[K/X]) ~> (K2[K/X]) if K1 =/=Bool .K andBool K2 =/=Bool .K [structural]
+  rule (K1,,L)[K//X] => (K1[K/X]),,(L[K//X]) [structural]
+  rule .K[K/X] => .K [structural]
+  rule .List{K}[K//X] => .List{K} [structural]
+  
+   
+endkm
+
 kmod SIMPLY-TYPED-SEMANTICS is including SUBSTITUTION
   syntax Type ::= type
-                | Type --> Type [strict hybrid latex "{#1}\rightarrow{#2}"]
+                | Type --> Type [latex "{#1}\rightarrow{#2}"]
   syntax K ::= Id
              | lambda Id : Type . K [latex "\lambda{#1}\mathord{:}{#2}\mathrel{.}{#3}"]
-             | K K [strict]
-             | \lambda Type K [latex "\lambda{#1}{#2}"]
+             | K K
   syntax KResult ::= Type 
 
-  macro lambda X : T.E = \lambda T ([X]E)
-
   rule (T:Type --> T':Type) T => T'
-  rule <k> \lambda T ([X:Id]E:K) => '_-->_(T,,E[T/X]) <_/k>
+  rule lambda X:Id : T.E:K  => '_-->_(T,,E[T/X])
 endkm
 
 kmod SIMPLY-TYPED-PROGRAMS is including SIMPLY-TYPED-SEMANTICS
@@ -26,6 +37,6 @@ kmod SIMPLY-TYPED-PROGRAMS is including SIMPLY-TYPED-SEMANTICS
 endkm
 
 kmod SIMPLY-TYPED-LAMBDA is including SIMPLY-TYPED-PROGRAMS
-  syntax Bag ::= run ( KLabel )
-  macro run(L:KLabel) = <k>L(.List{K})</k> <nextId>0</nextId>
+  syntax K ::= run ( KLabel )
+  macro run(L:KLabel) = L(.List{K})
 endkm

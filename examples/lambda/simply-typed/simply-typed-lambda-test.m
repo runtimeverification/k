@@ -1,6 +1,6 @@
 load simply-typed-lambda-compiled
 
-rew run('p1) .
-rew run('p2) .
-rew run('p3) .
-rew run('p4) .
+rew ('p1(.List{K})) .
+rew ('p2(.List{K})) .
+rew ('p3(.List{K})) .
+rew ('p4(.List{K})) .

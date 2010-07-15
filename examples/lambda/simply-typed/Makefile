@@ -6,7 +6,7 @@ KCOMPILE ?= ../../../tools/kompile.pl
 LANGUAGE_NAME = SIMPLY-TYPED-LAMBDA
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = K-VISITOR SUBSTITUTION SIMPLY-TYPED-SEMANTICS
+LANGUAGE_MODULES = SUBSTITUTION SIMPLY-TYPED-SEMANTICS
 
 #this is the basename of the main file
 MAIN_FILE = simply-typed-lambda
