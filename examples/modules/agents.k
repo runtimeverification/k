@@ -5,7 +5,6 @@ kmod AGENTS is  including SEQ + PL-NAT
           <parent>-1</parent>
           <control> <k> .K </k> </control>
       </agent*>
-      <blocked-agent*> .Bag </blocked-agent*>
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting>

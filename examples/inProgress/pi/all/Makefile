@@ -6,7 +6,7 @@ KCOMPILE ?= ../../../../tools/kompile.pl
 LANGUAGE_NAME = PI-ALL
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = K-VISITOR SUBSTITUTION PI-SYNTAX PI-SEMANTICS PI-ALL-SEMANTICS PI-ALL
+LANGUAGE_MODULES = K-VISITOR SUBSTITUTION PI-SYNTAX PI-ALL-SEMANTICS PI-ALL
 
 #this is the basename of the main file
 MAIN_FILE = pi-all

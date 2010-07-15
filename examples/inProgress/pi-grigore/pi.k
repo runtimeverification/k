@@ -15,17 +15,17 @@ kmod PI is including SUBSTITUTION
   configuration <par> <sum*> .Bag </sum*> </par>
   
 
-  rule [comm] : <sum> _ send X on C:Id . P => P </sum>
-       <sum> _ receive Y:Id on C . Q => Q[X/Y] </sum>
+  rule [comm] : <sum> _ (send X:Id on C:Id . P:Bag) => P </sum>
+       <sum> _ (receive Y:Id on C . Q) => Q[X/Y] </sum>
 
-  rule [!comm] : <sum> _ send X on C . P  => P </sum>
-                 <sum> (_ => .) replicate receive Y on C . Q </sum> 
+  rule [!comm] : <sum> _ (send X on C . P)  => P </sum>
+                 <sum> (_ => .) (replicate receive Y on C . Q:Bag) </sum> 
                  (. => <sum> Q[X/Y] </sum>)
   
-  rule <par> R <sum> Q new X . P </sum> </par> => new Y . <par> R <sum> Q P[Y/X] </sum> </par>  if fresh(Y) [structural]
+  rule <par> R <sum> Q (new X . P) </sum> </par> => (new Y . <par> R:Bag <sum> Q (P[Y/X]) </sum> </par>)  if fresh(Y) [structural]
   
   rule <sum> .Bag </sum> => . [structural]
   rule <par> .Bag </par> => . [structural]  
   rule <sum> <par> P </par> </sum> => P [structural]
-  rule <sum> <sum> P </sum> </sum> => P [structural]
+  rule <sum> <sum> P </sum> => P </sum> [structural]
 endkm

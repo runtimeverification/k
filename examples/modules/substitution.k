@@ -1,7 +1,8 @@
 kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
 ---beta-substitution definition using the K AST visitor pattern
 ---assuming the binding operator is [_]_
-  syntax K ::= Id | [ Id ] K | Nat
+  syntax K ::= Id  | Nat
+             | [ Id ] K [latex "{#1}.{#2}"]
              | K [ K / Id ] [prec 0]
              | beta K [ K / Id ]
                [prec 0 latex "{#1}\sqbracket{{#2}^\square/{#3}}"]

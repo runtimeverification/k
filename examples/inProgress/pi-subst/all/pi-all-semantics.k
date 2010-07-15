@@ -11,9 +11,9 @@ kmod PI-ALL-SEMANTICS is including PI-SYNTAX + SUBSTITUTION
   rule <k>()</k> => . [structural]
   rule <sum> .Bag </sum> => . [structural]
   
-  rule [!comm] : (<sum_> <k> send X on C . P </k> 
-                 <_/sum> => <sum> <k> P </k> </sum>)
-                 <k> replicate  receive Y on C . Q </k>  (. => <sum> <k> Q[X/Y] </k> </sum>)
+  rule [!comm] : <sum> <k> (send X on C . P => P) </k> (_ => .)
+                 </sum>
+                 <sum> <k> replicate  receive Y on C . Q </k> (_ => .) </sum> (. => <sum> <k> Q[X/Y] </k> </sum>)
 
 
   syntax K ::= top Bag

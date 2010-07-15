@@ -1,8 +1,8 @@
 load pi-all-compiled
 
-search run('p1) =>! B:Bag .
+search 'run(wklabel('p1)(.List{K})) =>! K:K .
 show search graph  .
 
 
-rew run('p1) .
+rew 'run(wklabel('p1)(.List{K})) .
 
