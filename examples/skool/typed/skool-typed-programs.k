@@ -66,7 +66,7 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
            return 0;
          }
        }
-
+--- 2
   macro p02 =
        class c {
          var x : int;
@@ -79,7 +79,7 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
 	   return 0;
          }
        }
-
+--- 5
   macro p03 =
        class c {
          var i : int;
@@ -114,40 +114,15 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
          }
        }
 
+--- 5 6 8 3
+
   macro p04 =
        class a {
           method a() : int {
              return 1;
           }
-          method m1(x : int) : bool {
-             return x == 0;
-          }
-       }
-       class b extends a {
-          var x : int ;
-          method a () : int {
-             return 2;
-          }
-          method b() : void {
-             x = 3 ;
-          }
-       }
-       class main extends b {
-          method m1(y : int) : bool {
-              return  y != 0 ;
-          }
-          method main():void {
-             write(this.m1(3));
-          }
-       }
-
-  macro p05 =
-       class a {
-          method a() : int {
-             return 1;
-          }
-          method m1(x : int) : bool {
-             return x == 0;
+          method m1(x : int) : int {
+             return ++x;
           }
        }
        class b extends a {
@@ -161,12 +136,43 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
        }
        class main extends b {
           method m1(y : int) : int {
-              return  y != 0 ;
+              return  y * y ;
           }
           method main():void {
              write(this.m1(3));
           }
        }
+
+--- 9
+
+  macro p05 =
+       class a {
+          method a() : int {
+             return 1;
+          }
+          method m1(x : int) : int {
+             return x + 5;
+          }
+       }
+       class b extends a {
+          var x : int ;
+          method a () : int {
+             return 2;
+          }
+          method b() : void {
+             x = 3 ;
+          }
+       }
+       class main extends b {
+          method m1(y : int) : int {
+              return  y + x ;
+          }
+          method main():void {
+             write(this.m1(3));
+          }
+       }
+
+--- 3
 
   macro p06 =
        class a {
@@ -196,15 +202,16 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
              var p[4] : b[];
              var b : bool ;
              o[1] = new a();
-             p[2] = new a();
+             o[2] = new b();
              p[3] = new b();
              o[3] = o[1];
-             p[4] = o[1];
+             o[4] = p[3];
              b = p[3].m1(3);
              write(p[3].a());
           }
        }
 
+--- 2
 
 endkm
 

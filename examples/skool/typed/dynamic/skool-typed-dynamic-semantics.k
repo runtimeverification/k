@@ -1,12 +1,12 @@
---------------------------------------
---- SKOOL-UNTYPED-SEMANTICS module ---
---------------------------------------
+--------------------------------------------
+--- SKOOL-TYPED-DYNAMIC-SEMANTICS module ---
+--------------------------------------------
 
 
 ---------------------
 --- configuration ---
 ---------------------
-kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K 
+kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
 
   syntax Val ::= Int | Bool
 
@@ -16,11 +16,11 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 ---</SK00L added>
 
 --- array values are wrapped as specific values
-  syntax Val ::= array ( Nat , Nat )  
+  syntax Val ::= array ( Type , Nat , Nat )  
 
 --- function value; like arrays, functions also evaluate to 
 ---    their address (wrapped as a specific value)
-  syntax Val ::= function( Nat )
+  syntax Val ::= function( Type , Nat )
   ---  op function : Nat -> Val   
   syntax Val ::= lambda ( List{Id} , Stmt ) [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
 
@@ -31,8 +31,8 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 --- to KResult.  Recall that the second argument of a method application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
 
-  syntax K ::= Stmts | List{Exp}
-  syntax KResult ::= List{Val}
+  syntax K ::= Stmts | List{Exp} | List{Type} | List{IdType} | List{Top}
+  syntax KResult ::= List{Val} 
 
   configuration <T> 
                      <k> K:K </k>
@@ -42,6 +42,7 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
                      <store> .Map </store>
                      <in> .List </in>
                      <out> .List </out>
+                     <return> none </return>
                      <nextLoc> 1 </nextLoc>
 ---<SKOOL added>
                      <obj> .List </obj>
@@ -62,14 +63,49 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
+  syntax Val ::=
+                 initVal ( Type )
+               | none 
+  macro initVal(int) = 0 
+  macro initVal(bool) = false 
+  macro initVal(void) = none 
+  macro initVal(_`[`](T:Type)) = array(_`[`](T),0,0) 
+
+  syntax List{Type} ::= typeOf ( List{Val} ) [strict]
+---<SKOOL added>
+  syntax List{Bottom} ::= typeOf ( List{Bottom} ) 
+  syntax Type ::= typeOf ( Val ) [strict]
+  syntax Type ::= typeOf ( Int ) [strict]
+  syntax Type ::= typeOf ( Bool ) [strict]
+---<SKOOL added>
+  macro typeOf(function(T, _)) = T 
+  macro typeOf(array(T,_,_)) = T
+  macro typeOf(I:Int) = int 
+  macro typeOf(B:Bool) = bool 
+  macro typeOf(none) = void 
+  macro typeOf(V1:Val,V2:Val,Vl:List{Val}) = typeOf(V1),typeOf(V2,Vl) 
+  macro typeOf(.List{Bottom}) = .List{Bottom} 
+---<SKOOL added>
+  macro typeOf(initVal(type(C:Id))) = type(C:Id)
+  macro typeOf(oenv((C |-> Env:Map) OEnv:List)) = type(C)
+---<SKOOL added>
+  syntax List{Id} ::= idList ( List{IdType} ) 
+  macro idList(.List{Bottom}) = .List{Bottom} 
+  macro idList(X:Id : T:Type, XTl:List{IdType}) = X, idList(XTl) 
+
+--- translation of a lists of typed names into a list of the corresponding types
+  syntax List{Type} ::= typeList ( List{IdType} ) 
+  macro typeList(.List{Bottom}) = .List{Bottom} 
+  macro typeList(X : T,XTl) = T,typeList(XTl) 
+
 --- List{Val}
   syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
 --- length
   syntax Nat ::= `| List{Id} `|
-  macro |.List{Id}| = 0  
-  macro |X:Id,Xl:List{Id}| = sNat |Xl|
+  macro |.List{Bottom}| = 0  
+  macro |X:Id,Xl:List{Bottom}| = sNat |Xl|
 
 --- generate sequence of locations
   syntax List{K} ::= Nat .. Nat
@@ -96,7 +132,7 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
   syntax ListItem ::= Id |-> Map [metadata "latex(renameTo _\\ensuremath\\mapsto_)"]
 --- the following is nedeed for stacking
-  syntax ListItem ::=  [ Id , Map , K ]
+  syntax ListItem ::=  [ Id , Map , K , Type ]
 --- the following are needed at the creation of a new object and at a method call
   syntax K ::= restore ( List ) | discard
   syntax KLabel ::= create | invoke | addOEnvLayer 
@@ -106,6 +142,40 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 ---   (we assume that the name of a class in a program is unique)
   syntax Id ::= [ Id , Id ]
 
+--- successor - ancestor relationship
+  syntax  Bool ::= Type <: Type [strict]
+  syntax  Bool ::= List{Top} <: List{Top} [strict]
+
+  rule <k> T <: T => true <_/k> [structural]
+
+  rule <k> (type(C1:Id) <: type(C2:Id)) 
+           =>
+           true
+       <_/k>
+       <pgm_>
+            <classes_>
+                     <className> C1 </className>
+                     <extends> C2 </extends>
+            <_/classes>
+       <_/pgm>
+       [structural]
+  rule <k> (type(C1) <: type(C2)) 
+           =>
+          (type(C11) <: type(C2))
+       <_/k>
+       <pgm_>
+            <classes_>
+                     <className> C1 </className>
+                     <extends> C11:Id </extends>
+            <_/classes>
+       <_/pgm>
+       if C1 =/=Bool C2 andBool C1 =/=Bool C2
+       [structural]
+  rule Tl:List{Type} <: Tl => true [structural]
+  rule T1:Type , Tl2:List{Type} <: T1':Type , Tl2':List{Type}
+       =>
+       (T1 <: T1') andBool (Tl2 <: Tl2')
+       [structural]
 ---</SKOOL added>
 
 endkm
@@ -113,25 +183,25 @@ endkm
 ---------------------
 --- preprocessing ---
 ---------------------
-kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
+kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
 
 --- variable declaration; in the preprocessing phase only the global variables are processed 
 --- this rule is also used process the local variables of a function
 ---   as a part of the function evaluation 
 
-  rule <k> var X:Id ; => .K <_/k> 
+  rule <k> var X:Id : T:Type ; => .K <_/k> 
        <env> Env:Map => Env[L:Nat / X] </env> 
-       <store_> .Map => L |-> 0 <_/store>
+       <store_> .Map => L |-> initVal(T) <_/store>
        <nextLoc> L => sNat(L) </nextLoc> 
 
 --- If an array is declared, then calculate its size; 
 
-  context var X:Id[[HOLE]];
-  rule <k> var X[N:Nat]; => . <_/k> 
+  context var X:Id[[HOLE]] : T ;
+  rule <k> var X[N:Nat] : _`[`](T) ; => .K <_/k> 
        <env> Env => Env[L/X] </env>
-       <store_>. => L |-> array(sNat L, N) <_/store>
+       <store_>. => L |-> array(T, sNat L, N) <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc> 
-  rule (sizeOf(array(_,N)) => N)   
+  rule (sizeOf(array(_,_,N)) => N)   
 
 ---<SKOOL modified>
 
@@ -141,9 +211,7 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
 ---       <nextLoc> L => L +Nat 2 </nextLoc> 
 ---       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
 
-
 --- the followings are added
-
 
 --- a class traversal
   --- the following is used to know where a class preprocessing is finished
@@ -156,37 +224,38 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
                    <_/classes>
        <_/pgm>
 
---- variable member declaration 
+--- variable member declaration
+ 
   rule <k> preprocessClass(C:Id) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
-                     <fields_> . => var X; </fields>
-                     <stmts> var X:Id; => . <_/stmts>
+                     <fields_> . => var X : T; </fields>
+                     <stmts> var X:Id : T; => .K <_/stmts>
             <_/classes>
        <_/pgm>
-       
+
   rule <k> preprocessClass(C) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
-                     <fields_> . => var X[ N:Nat ]; </fields>
-                     <stmts> var X[ N:Nat ]; => . <_/stmts>
+                     <fields_> .K => var X[ N:Nat ] : _`[`](T); </fields>
+                     <stmts> var X[ N:Nat ] : _`[`](T); => .K <_/stmts>
             <_/classes>
        <_/pgm>
- 
+
 --- method declaration
 
   rule <k> preprocessClass(C) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
-                     <stmts> method F:Id(Xl:List{Id}) S:Stmt => . <_/stmts>
+                     <stmts> method F:Id(XTl:List{IdType}) : T S:Stmt => .K <_/stmts>
             <_/classes>
        <_/pgm>
        <env> Env:Map => Env[L/[C, F]] </env>  
        <nextLoc> L:Nat => L +Nat 2 </nextLoc> 
-       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
+       <store_>(.Map => L |-> function(typeList(XTl) -> T, sNat L) sNat(L) |-> lambda(idList(XTl), S))<_/store>
 
 --- finish processing a class
 
@@ -202,7 +271,7 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
 ---  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
 ---    ... and the following added:
-  rule <k> . => new_`(_`)(main, .List{Id}) </k>
+  rule <k> . => new_`(_`)(main, .List{Bottom}) </k>
        <env> Env => . </env>
        <genv> . => Env </genv>
        <class> _ => main </class>
@@ -214,7 +283,7 @@ endkm
 -------------------------------------
 --- Evaluation of the expressions ---
 -------------------------------------
-kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG 
+kmod SKOOL-TYPED-DYNAMIC-EXPR-EVALUATION is including SKOOL-TYPED-DYNAMIC-CONFIG 
 
 --- variable lookup
 
@@ -250,15 +319,13 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
   rule I1 >= I2 => I1 >=Int I2 
   rule V1:Val == V2:Val => V1 ==Bool V2 
   rule V1 != V2 => V1 =/=Bool V2 
-  rule T1:Bool and T2:Bool => T1 andBool T2 
-  rule T1 or T2 => T1 orBool T2 
-  rule not(T:Bool) => notBool(T) 
+  rule B1:Bool and B2:Bool => B1 andBool B2 
+  rule B1 or B2 => B1 orBool B2 
+  rule not(B:Bool) => notBool(B) 
 
 --- array component value:
----    first arg. is the location of the first element in the array, and 
----    the second argument is the array size (= the index)
 
-  rule <k> array(L,_)[N:Nat] => Sigma:Map(L +Int N) <_/k> <store> Sigma </store> .
+  rule <k> array(_,L,_)[N:Nat] => Sigma:Map(L +Int N) <_/k> <store> Sigma </store> .
                                 --- untyped SKOOL does not check array bounds
 --- read expression
 
@@ -274,13 +341,15 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
        <env> Env:Map => . </env>
        <obj> Oenv:List => . </obj>
        <class> C1:Id => C </class>
-       <fstack> . => [ C1, Env, (discard ~> this ~> restore(Oenv)~>K) ] <_/fstack>
+       <return> T:Type => type(C) </return>
+       <fstack> . => [ C1, Env, (discard ~> this ~> restore(Oenv)~>K), T ] <_/fstack>
        if C =/=Bool main
   rule <k> (new_`(_`)(C:Id, Vl))~>K => create(C)~>invoke(_`(_`)(C, Vl))</k>
        <env> Env => . </env>
        <obj> Oenv:List => . </obj>
        <class> C1:Id => C </class>
-       <fstack> . => [ C1, Env, (restore(Oenv)~>K) ] <_/fstack>
+       <return> T => type(C) </return>
+       <fstack> . => [ C1, Env, (restore(Oenv)~>K), type(C) ] <_/fstack>
        if (C ==Bool main) andBool (K ==Bool .) 
 
 --- create a new object (memory allocation)
@@ -331,7 +400,8 @@ endkm
 ---------------------
 --- method call ---
 ---------------------
-kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
+kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
+
 
 ---<SKOOL modified>
 
@@ -355,12 +425,13 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
            invoke(_`(_`)(F:Id, Vl)) </k>
        <class> C1:Id => C:Id </class>
        <obj> Oenv1:List => (C |-> Env) Oenv </obj>
+       <return> T:Type </return>
        <env> Env1:Map => . </env>
-       <fstack> .List => [ C1, Env1, (restore(Oenv1)~>K) ] <_/fstack>
+       <fstack> .List => [ C1, Env1, (restore(Oenv1)~>K), T ] <_/fstack>
   rule <k> super_`(_`)(F, Vl) ~> K => invoke(_`(_`)(F:Id, Vl)) </k>
        <class> C => C1 </class>
        <env> Env1 => . </env>
-       <fstack> .List => [ C, Env1, K ] <_/fstack>
+       <fstack> .List => [ C, Env1, K, type(C) ] <_/fstack>
        <pgm_>
             <classes_>
                    <className> C </className>
@@ -368,13 +439,21 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
             <_/classes>
        <_/pgm>
 
+  syntax K ::= floc ( Nat , List{Val} )
   rule <k> invoke(_`(_`)(F:Id, Vl))
            =>
-           (_`(_`)(function(sNat getloc( [C, F], ( @global |-> GEnv:Map ))), Vl))
+           floc(getloc( [C, F], ( @global |-> GEnv:Map )), Vl)
        <_/k>
        <class> C </class>
        <genv> GEnv </genv>
        if getloc( [C, F], ( @global |-> GEnv )) =/=Bool null 
+  rule <k> floc(L:Nat, Vl)
+           =>
+           (_`(_`)(function(Tl:List{Type} -> T, sNat L), Vl))
+       <_/k>
+       <class> C </class>
+       <return> T':Type => T </return>
+       <store_> L |->  function(Tl:List{Type} -> T, sNat L) <_/store>
   rule <k> invoke(_`(_`)(F:Id, Vl))
            =>
            invoke(_`(_`)(F:Id, Vl))
@@ -390,19 +469,38 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
        if getloc( [C, F], ( @global |-> GEnv )) ==Bool null 
 
 --- method call: function value loading 
---- <OO modified>: the global environment not longer included in the loacl function call environment
----                    because the global variables are noe data members in the object class
-  rule <k> (_`(_`)(function(L),Vl:List{Val}))~>K => S:Stmt~>return(0); </k> 
+--- <OO modified>: the global environment not longer included in the local function call environment
+  syntax K ::= functionLoad 
+  rule <k> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
+           =>
+           typeOf(Vl) ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
+       <_/k> 
+  rule <k>
+           Tl':List{Type} ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
+           =>
+           (Tl' <: Tl) ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val})) <_/k> 
+  rule <k>
+           true ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))~>K
+           =>
+           S:Stmt ~> return(initVal(T));
+       </k>
        <env> _ => .Map[N..N+Nat|Xl| / getList{K}(Xl:List{Id})] </env>
        <genv> GEnv </genv>
        <store_> L:Nat |-> lambda(Xl,S) (. => N:Nat..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
+---       if typeOf(Vl) <: Tl
 
 --- returning from a method call
-  rule <k> return(V:Val); ~> _ => V ~> K </k>
-       <fstack> [ C, Env, K ] => . <_/fstack>
+  syntax K ::= returnCheckType 
+  rule <k> return(V:Val);  => typeOf(V) ~> returnCheckType ~> return(V);  <_/k>
+ 
+  rule <k> T1:Type ~> returnCheckType ~> return(V:Val); ~> _ => V ~> K </k>
+       <fstack> [ C, Env, K, T':Type ] => .List <_/fstack>
        <class> _ => C </class>
        <env> _ => Env </env>
+       <return> T => T' </return>
+       if T1 <: T
+---       if typeOf(V) <: T
 
 ---</SKOOL modified>
 endkm
@@ -410,27 +508,44 @@ endkm
 ------------------------------
 --- instruction processing ---
 ------------------------------
-kmod SKOOL-UNTYPED-INSTR-PROCESSING is including SKOOL-UNTYPED-CONFIG 
+kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG 
 
   rule {} => .
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
   rule S1:Stmt S2:Stmt => S1~>S2 
 
 ---<SKOOL modified> 
-  rule <k> _=_;(X:Id, V:Val) => . <_/k> 
-       <env> Env:Map </env>
+--- this is just to safely keep the trace (it could work without it, as well)
+  syntax K ::= assignLeftValue ( Nat )
+  rule <k> (_=_;(X:Id, V:Val))
+           =>
+           assignLeftValue(getloc(X, ((@local |-> Env) ((C |-> Env1) Oenv)(@global |-> GEnv)))) ~> (_=_;(X:Id, V:Val)) <_/k> 
+       <env> Env:Map </env> 
        <genv> GEnv:Map </genv>
        <obj_> (C:Id |-> Env1:Map) Oenv:List </obj>
        <class> C </class>
-       <store> Store:Map => Store [ V / getloc(X, ((@local |-> Env) ((C |-> Env1) Oenv)(@global |-> GEnv))) ] </store>
+  rule <k> assignLeftValue(L:Nat) ~> (_=_;(X:Id, V:Val))
+       =>
+       typeOf(V) <: typeOf(V1) ~>  assignLeftValue(L) ~> (_=_;(X:Id, V:Val)) <_/k> 
+       <store_> L |-> V1:Val <_/store>
+---       if typeOf(V) <: typeOf(V1) ==Bool true
+  rule <k> true ~> assignLeftValue(L) ~> (_=_;(X:Id, V:Val)) => . <_/k> 
+       <store> Sigma:Map => Sigma [ V / L ] </store>
 ---</SKOOL modified>
 
  --- for array assignment, first evaluate the array and its index
   context _[[HOLE]]=_;
   context [HOLE][_]=_;
-  rule <k> array(L:Nat,_)[N:Nat]=V; => . <_/k>
-       <store> Sigma:Map => Sigma[V/(L +Int N)] </store> 
+---<SKOOL typed modified>
+  syntax K ::= assignArray
+  rule <k> array(T:Type, L:Nat,M:Nat)[N:Nat]=V;
+           =>
+           typeOf(V) <: T ~> assignArray ~> array(T:Type, L:Nat,M)[N:Nat]=V; <_/k>
+  rule <k> true ~> assignArray ~> array(T:Type, L:Nat,_)[N:Nat]=V; => . <_/k>
+       <store> Sigma => Sigma[V/(L +Int N)] </store> 
+---       if typeOf(V) <: T ==Bool true
 
+---</SKOOL type modified>
   rule V; => . 
   rule if true then S:Stmt else _ => S:Stmt
   rule if false then _ else S => S 
@@ -441,11 +556,11 @@ endkm
 -----------------
 --- semantics ---
 -----------------
-kmod SKOOL-UNTYPED-SEMANTICS is 
-  including SKOOL-UNTYPED-PREPROCESSING +
-            SKOOL-UNTYPED-FUNCTION-CALL +
-            SKOOL-UNTYPED-EXPR-EVALUATION +
-            SKOOL-UNTYPED-INSTR-PROCESSING
+kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is 
+  including SKOOL-TYPED-DYNAMIC-PREPROCESSING +
+            SKOOL-TYPED-DYNAMIC-FUNCTION-CALL +
+            SKOOL-TYPED-DYNAMIC-EXPR-EVALUATION +
+            SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING
 endkm
 
 

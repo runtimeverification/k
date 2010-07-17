@@ -44,7 +44,9 @@ kmod SKOOL-TYPED-STATIC-CONFIG is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX 
 ---</SKOOL added>
                 </T> 
 
---- auxiliary stuff
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
 
 --- translation of a list of typed names into a list of the corresponding untyped names
   syntax List{Id} ::= idList ( List{IdType} ) 
@@ -81,7 +83,7 @@ kmod SKOOL-TYPED-STATIC-CONFIG is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX 
 
 
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
-  syntax ListItem ::= Id :: Map [metadata "latex(renameTo _\\ensuremath\mathrel{::}_)"]
+  syntax ListItem ::= Id :: Map ---[metadata "latex(renameTo _\\ensuremath\\mathrel{::}_)"]
 
 --- the names for the local environment and the global environments for an object
   syntax Id ::= @local | @global
@@ -470,7 +472,7 @@ kmod SKOOL-TYPED-STATIC-METHODS-PROCESSING is including SKOOL-TYPED-STATIC-CONFI
 
 --- the assignment is reduced to subtype relationship
 
-  rule (T1 = T2 ;) => (T1 <: T2) ; 
+  rule (T1 = T2 ;) => (T2 <: T1) ; 
   rule (_`[`](T1:Type)[int] = T2:Type ;) => (T1 <: T2) ; 
 ---</SKOOL modified>
 
