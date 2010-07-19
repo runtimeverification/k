@@ -47,7 +47,7 @@ kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
               | pBubbleSort | pHeapSort 
               | pSorting
 
-  syntax ClassDecl ::= 
+  syntax Stmts ::= 
                 p01 | p02 | p03 
               | p04 | p05 | p06 
               | p07 | p08 | p09 
