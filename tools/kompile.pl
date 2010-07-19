@@ -365,6 +365,7 @@ if ($latex && !@latexify_modules) {
 # Create the module name, if not already given, by capitalizing the file name
     if ($language_module_name eq "") {
 	$language_module_name = uc($language_file_name);
+	$language_module_name =~ s/.K$|.KMAUDE$//;
     }
 
 # Following is executed whenever the option -c was not selected
