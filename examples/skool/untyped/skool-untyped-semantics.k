@@ -389,7 +389,7 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
 --- method call: function value loading 
 --- <OO modified>: the global environment not longer included in the loacl function call environment
 ---                    because the global variables are noe data members in the object class
-  rule <k> (_`(_`)(function(L),Vl:List{Val}))~>K => S:Stmt~>return(0); </k> 
+  rule <k> (_`(_`)(function(L),Vl:List{Val})) => S:Stmt~>return(0); </k> 
        <env> _ => .Map[N..N+Nat|Xl| / getList{K}(Xl:List{Id})] </env>
        <genv> GEnv </genv>
        <store_> L:Nat |-> lambda(Xl,S) (. => N:Nat..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>

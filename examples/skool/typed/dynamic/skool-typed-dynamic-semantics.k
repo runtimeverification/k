@@ -51,9 +51,9 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
                            <classes*>
                                     <className> Id:Id </className>
                                     <extends> Id:Id </extends>
-                                    <stmts> .K </stmts>
                                     <fields> .K </fields>
                            </classes*>
+                           <subClassRel> .Set </subClassRel>
                      </pgm>
 ---</SKOOL added>
                 </T>
@@ -77,7 +77,7 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
   syntax Type ::= typeOf ( Val ) [strict]
   syntax Type ::= typeOf ( Int ) [strict]
   syntax Type ::= typeOf ( Bool ) [strict]
----<SKOOL added>
+---</SKOOL added>
   macro typeOf(function(T, _)) = T 
   macro typeOf(array(T,_,_)) = T
   macro typeOf(I:Int) = int 
@@ -88,7 +88,7 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
 ---<SKOOL added>
   macro typeOf(initVal(type(C:Id))) = type(C:Id)
   macro typeOf(oenv((C :: Env:Map) OEnv:List)) = type(C)
----<SKOOL added>
+---</SKOOL added>
   syntax List{Id} ::= idList ( List{IdType} ) 
   macro idList(.List{Bottom}) = .List{Bottom} 
   macro idList(X:Id : T:Type, XTl:List{IdType}) = X, idList(XTl) 
@@ -142,40 +142,29 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
 ---   (we assume that the name of a class in a program is unique)
   syntax Id ::= [ Id , Id ]
 
---- successor - ancestor relationship
-  syntax  Bool ::= Type <: Type [strict]
-  syntax  Bool ::= List{Top} <: List{Top} [strict]
+--- subtype relationship
 
-  rule <k> T <: T => true <_/k> [structural]
+  syntax SetItem ::= Id <: Id
 
-  rule <k> (type(C1:Id) <: type(C2:Id)) 
-           =>
-           true
-       <_/k>
-       <pgm_>
-            <classes_>
-                     <className> C1 </className>
-                     <extends> C2 </extends>
-            <_/classes>
-       <_/pgm>
+--- transitive closure
+
+  rule <subClassRel>  
+                   (C1:Id <: C2:Id) (C2 <: C3:Id) R:Set
+                    =>
+                   (C1 <: C2) (C2 <: C3) (C1 <: C3) R
+       </subClassRel>
+       if  (C1 <: C3) in R ==Bool false
        [structural]
-  rule <k> (type(C1) <: type(C2)) 
-           =>
-          (type(C11) <: type(C2))
-       <_/k>
-       <pgm_>
-            <classes_>
-                     <className> C1 </className>
-                     <extends> C11:Id </extends>
-            <_/classes>
-       <_/pgm>
-       if C1 =/=Bool C2 andBool C1 =/=Bool C2
-       [structural]
-  rule Tl:List{Type} <: Tl => true [structural]
-  rule T1:Type , Tl2:List{Type} <: T1':Type , Tl2':List{Type}
-       =>
-       (T1 <: T1') andBool (Tl2 <: Tl2')
-       [structural]
+
+  syntax Bool ::= subType ( List{Type} , List{Type} , Set )
+  syntax Bool ::= subType ( Type , Type , Set )
+  macro subType(Tl:List{Type}, Tl, R) = true
+  macro subType(type(C1), type(C2), ((C1 <: C2) R)) = true 
+  macro subType(type(C1), type(C2), R) = false [owise]
+  macro subType((T1:Type , Tl2:List{Type}), (T1':Type , Tl2':List{Type}), R)
+        =
+        subType(T1, T1', R) andBool subType(Tl2, Tl2', R)
+
 ---</SKOOL added>
 
 endkm
@@ -215,13 +204,14 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
 
 --- a class traversal
   --- the following is used to know where a class preprocessing is finished
-  syntax K ::= preprocessClass ( Id )
+  syntax K ::= preprocessClass ( Id ) | preprocessClassDone
   rule <k> class C1:Id extends C2:Id { Ss:Stmts } => preprocessClass (C1) <_/k>
-       <pgm_> . => <classes_>
+       <pgm_> (. => <classes_>
                            <className> C1 </className>          
                            <extends> C2 </extends>
-                           <stmts> Ss </stmts>
-                   <_/classes>
+                           <fields> Ss ~> preprocessClassDone </fields>
+                   <_/classes>)
+               <subClassRel_> . => C1 <: C2 <_/subClassRel>
        <_/pgm>
 
 --- variable member declaration
@@ -230,8 +220,7 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
        <pgm_>
             <classes_>
                      <className> C </className>
-                     <fields_> . => var X : T; </fields>
-                     <stmts> var X:Id : T; => .K <_/stmts>
+                     <fields> var X:Id : T; ~> K:K => K ~> var X:Id : T; </fields>
             <_/classes>
        <_/pgm>
 
@@ -239,8 +228,7 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
        <pgm_>
             <classes_>
                      <className> C </className>
-                     <fields_> .K => var X[ N:Nat ] : _`[`](T); </fields>
-                     <stmts> var X[ N:Nat ] : _`[`](T); => .K <_/stmts>
+                     <fields> var X[ N:Nat ] : _`[`](T); ~> K => K ~> var X[ N ] : _`[`](T); </fields>
             <_/classes>
        <_/pgm>
 
@@ -250,7 +238,7 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
        <pgm_>
             <classes_>
                      <className> C </className>
-                     <stmts> method F:Id(XTl:List{IdType}) : T S:Stmt => .K <_/stmts>
+                     <fields> method F:Id(XTl:List{IdType}) : T S:Stmt => .K <_/fields>
             <_/classes>
        <_/pgm>
        <env> Env:Map => Env[L/[C, F]] </env>  
@@ -262,7 +250,7 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
   rule <k> preprocessClass(C) => .K <_/k>
         <classes_>
                 <className> C </className>
-                ( <stmts> .K </stmts> => .Bag )
+                <fields> preprocessClassDone => . <_/fields>
        <_/classes>
 
 --- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
@@ -275,6 +263,7 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
        <env> Env => . </env>
        <genv> . => Env </genv>
        <class> _ => main </class>
+
 
 ---</SKOOL modified>
 
@@ -475,12 +464,16 @@ kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
            =>
            typeOf(Vl) ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
        <_/k> 
+       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
   rule <k>
            Tl':List{Type} ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
            =>
-           (Tl' <: Tl) ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val})) <_/k> 
+           subType(typeOf(Vl), Tl, R) ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
+       <_/k> 
+       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
   rule <k>
-           true ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))~>K
+           true ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
+---           (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
            =>
            S:Stmt ~> return(initVal(T));
        </k>
@@ -488,7 +481,8 @@ kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
        <genv> GEnv </genv>
        <store_> L:Nat |-> lambda(Xl,S) (. => N:Nat..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
----       if typeOf(Vl) <: Tl
+---       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
+---       if subType(typeOf(Vl), Tl, R) ==Bool true
 
 --- returning from a method call
   syntax K ::= returnCheckType 
@@ -499,8 +493,8 @@ kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
        <class> _ => C </class>
        <env> _ => Env </env>
        <return> T => T' </return>
-       if T1 <: T
----       if typeOf(V) <: T
+       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
+       if subType(T1,  T, R) ==Bool true
 
 ---</SKOOL modified>
 endkm
@@ -526,9 +520,10 @@ kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFI
        <class> C </class>
   rule <k> assignLeftValue(L:Nat) ~> (_=_;(X:Id, V:Val))
        =>
-       typeOf(V) <: typeOf(V1) ~>  assignLeftValue(L) ~> (_=_;(X:Id, V:Val)) <_/k> 
+       subType(typeOf(V), typeOf(V1), R) ~>  assignLeftValue(L) ~> (_=_;(X:Id, V:Val)) <_/k> 
        <store_> L |-> V1:Val <_/store>
----       if typeOf(V) <: typeOf(V1) ==Bool true
+       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
+---       if subType(typeOf(V), typeOf(V1), R) ==Bool true
   rule <k> true ~> assignLeftValue(L) ~> (_=_;(X:Id, V:Val)) => . <_/k> 
        <store> Sigma:Map => Sigma [ V / L ] </store>
 ---</SKOOL modified>
@@ -540,10 +535,13 @@ kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFI
   syntax K ::= assignArray
   rule <k> array(T:Type, L:Nat,M:Nat)[N:Nat]=V;
            =>
-           typeOf(V) <: T ~> assignArray ~> array(T:Type, L:Nat,M)[N:Nat]=V; <_/k>
+           subType(typeOf(V), T, R) ~> assignArray ~> array(T:Type, L:Nat,M)[N:Nat]=V;
+       <_/k>
+       <pgm_> <subClassRel> R </subClassRel> <_/pgm>
   rule <k> true ~> assignArray ~> array(T:Type, L:Nat,_)[N:Nat]=V; => . <_/k>
        <store> Sigma => Sigma[V/(L +Int N)] </store> 
----       if typeOf(V) <: T ==Bool true
+       <pgm_> <subClassRel> R </subClassRel> <_/pgm>
+---       if subType(typeOf(V), T) ==Bool true
 
 ---</SKOOL type modified>
   rule V; => . 
