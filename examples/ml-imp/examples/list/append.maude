@@ -1,0 +1,41 @@
+mod P-LIST-APPEND is inc IMP-SYNTAX + LIST-HP .
+  ops a b x append : -> Id .
+  ops ?x ?a : -> ?Int .
+  ops a0 b0 : -> FreeInt .
+  ops ?A ?X : -> ?Seq .
+  ops A B : -> FreeSeq .
+  op !H : -> !MapItem .
+
+
+  op pListAppend : -> Decl .
+  eq pListAppend = (
+
+int append(a,,, b)
+// pre < config > < env > a |-> a0 b |-> b0 </ env >
+                  < heap > list(a0)(A) list(b0)(B) </ heap >
+                  < form > TrueFormula </ form > </ config >
+// post < config > < env > a |-> ?a </ env >
+                   < heap > list(?a)(A ::: B) </ heap >
+                   < form > ((~(a0 === 0) /\ (?a === a0)) \/
+                          ((a0 === 0) /\ (?a === b0))) /\
+                          ?return === ?a </ form > </ config >
+{
+  int x ;
+  if (a != 0) {
+    x = a ;
+    // invariant < config > < env > a |-> a0 x |-> ?x </ env >
+                            < heap > lseg(a0, ?x)(?A) list(?x)(?X) !H </ heap >
+                            < form > ?A ::: ?X === A /\ ~(?x === 0) </ form > </ config >
+    while (* (x + 1) != 0) {
+      x = *(x + 1) ;
+    }
+    *(x + 1) = b ;
+  }
+  else a = b ;
+
+  return a ;
+}
+
+ ) .
+endm
+

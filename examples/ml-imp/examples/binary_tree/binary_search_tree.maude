@@ -1,0 +1,23 @@
+
+
+int bst-search(root, v)
+{
+  if (root != NULL && * root != v) 
+    if (v < * root) return  bst-search(*(root + 1)) ;
+    else bst-search(*(root + 2),,, v) ;
+  return root ;
+}
+
+int bst-new(int v) {
+  Node* node = (Node *)malloc(sizeof(Node));
+  node->val = v;
+  node->left=node->right=NULL;
+  return node;
+}
+
+int bst-insert(Tree *t, int v) {
+  while (NULL != *t)
+    if (v > (*t)->val) t = &(*t)->right; else t = &(*t)->left;
+  *t = newNode(v);
+  return *t;
+}
