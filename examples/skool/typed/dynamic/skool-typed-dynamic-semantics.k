@@ -130,7 +130,7 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
   rule getloc(X, .) => null [structural]
 
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
-  syntax ListItem ::= Id :: Map [metadata "latex(renameTo _\\ensuremath\\mathrel{::}_)"]
+  syntax ListItem ::= Id :: Map [metadata "latex(renameTo _\\ensuremath{\\mathrel{::}}_)"]
 --- the following is nedeed for stacking
   syntax ListItem ::=  [ Id , Map , K , Type ]
 --- the following are needed at the creation of a new object and at a method call

@@ -83,7 +83,7 @@ kmod SKOOL-TYPED-STATIC-CONFIG is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX 
 
 
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
-  syntax ListItem ::= Id :: Map ---[metadata "latex(renameTo _\\ensuremath\\mathrel{::}_)"]
+  syntax ListItem ::= Id :: Map [metadata "latex(renameTo _\\ensuremath{\\mathrel{::}}_)"]
 
 --- the names for the local environment and the global environments for an object
   syntax Id ::= @local | @global
