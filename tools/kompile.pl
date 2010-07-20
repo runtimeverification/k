@@ -741,10 +741,16 @@ sub make_ops {
 #	print "make_ops:\n$_\n";
 
 # Grab the result sort and the productions, as well as all spacing
- 	my ($spaces1,$result_sort,$spaces2,$productions,$spaces3) =  /^syntax(\s+)(\S*)(\s*)::=(.*?\S)(\s*)$/s;
+ 	my ($spaces1,$result_sort,$spaces2,$bnf,$productions,$spaces3) =  /^syntax(\s+)(\S*)(\s*)(::=)(.*?\S)(\s*)$/s;
 #	print "$result_sort\n";
 #	print "\$productions\n$productions\n";
 
+# Report error and stop if the BNF form is not respected
+	if (!defined($bnf)){
+		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
+		exit(1);
+	}
+    
 # Report error and stop if the sort name does not match $ksort
 	if ($result_sort !~ /^$ksort$/) {
 	    print "ERROR: $result_sort does not match the pattern \"$ksort\"\n";
