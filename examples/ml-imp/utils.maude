@@ -70,23 +70,39 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
 endm
 
 
-mod VAR-UTILS is inc MATHEMATICAL-OBJECT + PL-META-TERM .
+mod VAR-UTILS is inc CONFIG + PL-META-TERM .
   op get?VarSet : Formula -> Set{MathObj++} .
+  op get?VarSet : Bag -> Set{MathObj++} .
   op get?VarSet : TermList -> Set{MathObj++} .
   op get!VarSet : Formula -> Set{MathObj++} .
+  op get!VarSet : Bag -> Set{MathObj++} .
   op get!VarSet : TermList -> Set{MathObj++} .
   op getFreeVarSet : Formula -> Set{MathObj++} .
+  op getFreeVarSet : Bag -> Set{MathObj++} .
   op getFreeVarSet : TermList -> Set{MathObj++} .
 
-  var Phi : Formula .
-  var Obj : MathObj++ .
+  op getFreeMap : Bag -> Map .
+  op getFreeMap : TermList -> Map .
 
+  var Obj : MathObj++ .
+  var Phi : Formula .
+  var Cfgs : Bag .
+
+  eq get?VarSet(Cfgs) = get?VarSet(upTerm(Cfgs)) .
   eq get?VarSet(Phi) = get?VarSet(upTerm(Phi)) .
+  eq get!VarSet(Cfgs) = get!VarSet(upTerm(Cfgs)) .
   eq get!VarSet(Phi) = get!VarSet(upTerm(Phi)) .
+  eq getFreeVarSet(Cfgs) = getFreeVarSet(upTerm(Cfgs)) .
   eq getFreeVarSet(Phi) = getFreeVarSet(upTerm(Phi)) .
 
-  var Q : Qid .  var QC : Constant .  vars QT NT NT' : Term .
-  var QTList : TermList .  var QTNeList : NeTermList .
+  eq getFreeMap(Cfgs) = getFreeMap(upTerm(Cfgs)) .
+
+  var Q : Qid .
+  var QC : Constant .
+  vars QT NT NT' : Term .
+  var QTList : TermList .
+  var QTNeList : NeTermList .
+
   eq get?VarSet((QT : QTNeList)) = get?VarSet(QT) & get?VarSet(QTNeList) .
   eq get?VarSet(empty) = .Set{MathObj++} .
   eq get?VarSet(QC) = if downTerm(QC, errorObj) :: ?MathObj then
@@ -103,56 +119,19 @@ mod VAR-UTILS is inc MATHEMATICAL-OBJECT + PL-META-TERM .
   eq getFreeVarSet('skolem[NT : QT])
    = downTerm('skolem[NT : QT], .Set{MathObj++}) .
   eq getFreeVarSet(Q[QTList]) = getFreeVarSet(QTList) [owise] .
+
+  eq getFreeMap((QT : QTNeList))
+   = getFreeMap(QT) getFreeMap(QTNeList) .
+  eq getFreeMap(empty) = (.).Map .
+  eq getFreeMap(QC) = if downTerm(QC, (.).Map) :: FreeMapItem then
+     downTerm(QC, (.).Map) else (.).Map fi [print QC] .
+  eq getFreeMap(Q[QTList]) = getFreeMap(QTList) [owise] .
 endm
 
 
-mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
-  sort MetaSubst .
-  op .MetaSubst : -> MetaSubst .
-  op _;_ : MetaSubst MetaSubst -> MetaSubst [assoc comm id: .MetaSubst] .
-  op _<-_ : Term Term -> MetaSubst .
-  op upSubst : Subst -> MetaSubst .
-
-  var Obj Obj' : MathObj++ .
-  var Subst Subst' : Subst .
-  eq upSubst((Obj <- Obj') ; Subst)
-   = (upTerm(Obj) <- upTerm(Obj')) ; upSubst(Subst) .
-  eq upSubst(.Subst) = .MetaSubst .
-
-  op substTerm : TermList MetaSubst -> TermList .
-
-  var Q : Qid .
-  var QC : Constant .
-  var QT QT' NT : Term .
-  var QTList : TermList .
-  var QTNeList : NeTermList .
-  var MetaSubst : MetaSubst .
-
-  eq substTerm((QT : QTNeList), MetaSubst)
-   = substTerm(QT, MetaSubst) : substTerm(QTNeList, MetaSubst) .
-  eq substTerm(empty, MetaSubst) = empty .
-  eq substTerm(QT, ((QT <- QT') ; MetaSubst)) = QT' .
-  eq substTerm('skolem[NT : QT], MetaSubst) = 'skolem[NT : QT] .
-  eq substTerm(QC, MetaSubst) = QC [owise] .
-  eq substTerm(Q[QTList], MetaSubst)
-   = Q[substTerm(QTList, MetaSubst)] [owise] .
-
-  var Cfgs : Bag .
-  var Phi : Formula .
-  --- apply substitution on a configuration
-  eq Cfgs[Subst]
-   = downTerm(substTerm(upTerm(Cfgs), upSubst(Subst)), errorBag) .
-  --- apply substitution on a substitution
-  eq Phi[Subst]
-   = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), FalseFormula) .
-  --- apply substitution on a substitution
-  eq Subst[Subst']
-   = downTerm(substTerm(upTerm(Subst), upSubst(Subst')), .Subst) .
-endm
-
-
-mod SKOL is inc CONFIG + PL-META-TERM .
+mod CONFIG-UTILS is inc CONFIG + VAR-UTILS .
   op skolemTerm : Term TermList -> TermList .
+  op co-skolemTerm : TermList -> TermList .
 
   var Q : Qid .
   var QC : Constant .
@@ -175,11 +154,85 @@ mod SKOL is inc CONFIG + PL-META-TERM .
   eq skolemTerm(NT, '?MSet[QT]) = 'skolem[NT : '?MSet[QT]] .
   eq skolemTerm(NT, 'skolem[NT' : QT]) = 'skolem[NT' : QT] .
   eq skolemTerm(NT, Q[QTList]) = Q[skolemTerm(NT, QTList)] [owise] .
+ 
+  eq co-skolemTerm((QT : QTNeList))
+   = co-skolemTerm(QT) : co-skolemTerm(QTNeList) .
+  eq co-skolemTerm(empty) = empty .
+  eq co-skolemTerm(QC)
+   = if substrString(string(getType(QC)), 0, 4) ==Bool "Free" then
+       'co-skolem[QC]
+     else
+       QC
+     fi .
+  eq co-skolemTerm('skolem[NT : QT]) = 'co-skolem['skolem[NT : QT]] .
+  eq co-skolemTerm(Q[QTList]) = Q[co-skolemTerm(QTList)] [owise] .
+
 
   var N : Nat .
   var Cfgs : Bag .
+
   eq skolemize(N, Cfgs)
    = downTerm(skolemTerm(upTerm(N), upTerm(Cfgs)), errorBag) .
+  eq co-skolemize(Cfgs)
+   = downTerm(co-skolemTerm(upTerm(Cfgs)), errorBag) .
+endm
+
+
+mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
+  sort MetaSubst .
+  op .MetaSubst : -> MetaSubst .
+  op _;_ : MetaSubst MetaSubst -> MetaSubst [assoc comm id: .MetaSubst] .
+  op _<-_ : Term Term -> MetaSubst .
+  op upSubst : Subst -> MetaSubst .
+
+  var Obj Obj' : MathObj++ .
+  var List List' : List .
+  var Bag Bag' : Bag .
+  var Set Set' : Set .
+  var Map Map' : Map .
+  var Subst Subst' : Subst .
+  eq upSubst((Obj <- Obj') ; Subst)
+   = (upTerm(Obj) <- upTerm(Obj')) ; upSubst(Subst) .
+  eq upSubst((List <- List') ; Subst)
+   = (upTerm(List) <- upTerm(List')) ; upSubst(Subst) .
+   eq upSubst((Bag <- Bag') ; Subst)
+   = (upTerm(Bag) <- upTerm(Bag')) ; upSubst(Subst) .
+   eq upSubst((Set <- Set') ; Subst)
+   = (upTerm(Set) <- upTerm(Set')) ; upSubst(Subst) .
+   eq upSubst((Map <- Map') ; Subst)
+   = (upTerm(Map) <- upTerm(Map')) ; upSubst(Subst) . 
+  eq upSubst(.Subst) = .MetaSubst .
+
+  op substTerm : TermList MetaSubst -> TermList .
+
+  var Q : Qid .
+  var QC : Constant .
+  var QT QT' NT : Term .
+  var QTList : TermList .
+  var QTNeList : NeTermList .
+  var MetaSubst : MetaSubst .
+
+  eq substTerm((QT : QTNeList), MetaSubst)
+   = substTerm(QT, MetaSubst) : substTerm(QTNeList, MetaSubst) .
+  eq substTerm(empty, MetaSubst) = empty .
+  eq substTerm(QT, ((QT <- QT') ; MetaSubst)) = QT' .
+  eq substTerm('skolem[NT : QT], MetaSubst) = 'skolem[NT : QT] .
+  eq substTerm('co-skolem[QT], MetaSubst) = 'co-skolem[QT] .
+  eq substTerm(QC, MetaSubst) = QC [owise] .
+  eq substTerm(Q[QTList], MetaSubst)
+   = Q[substTerm(QTList, MetaSubst)] [owise] .
+
+  var Cfgs : Bag .
+  var Phi : Formula .
+  --- apply substitution on a configuration
+  eq Cfgs[Subst]
+   = downTerm(substTerm(upTerm(Cfgs), upSubst(Subst)), errorBag) .
+  --- apply substitution on a substitution
+  eq Phi[Subst]
+   = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), FalseFormula) .
+  --- apply substitution on a substitution
+  eq Subst[Subst']
+   = downTerm(substTerm(upTerm(Subst), upSubst(Subst')), .Subst) .
 endm
 
 

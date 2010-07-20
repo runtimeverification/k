@@ -1,6 +1,3 @@
-load ../../../k-prelude.maude
-
-
 mod FORMULA is inc PL-BOOL + PL-STRING .
   sorts Truth Atom NtFormula Formula .
   subsort Atom < NtFormula .
@@ -75,6 +72,7 @@ Sort++ stands for all the above
   subsort ?MathObj !MathObj FreeMathObj MathObj < MathObj++ .
   subsort MathObj++ < List{MathObj++} Set{MathObj++} .
   op skolem : Nat ?MathObj -> FreeMathObj [strat(0)] .
+  op co-skolem : FreeMathObj -> !MathObj [strat(0)] .
 
   op .List{MathObj++} : -> List{MathObj++} .
   op _`,_ : List{MathObj++} List{MathObj++} -> List{MathObj++}
@@ -115,6 +113,7 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   op ?Int : Nat -> ?Int .
   op !Int : Nat -> !Int .
   op skolem : Nat ?Int -> FreeInt [ditto] .
+  op co-skolem : FreeInt -> !Int [ditto] .
 
 --- define operations to be used symbolically, as well as desired properties
   ops _+Int_ _-Int_ _*Int_ _/Int_ _%Int_ : Int++ Int++ -> Int++ [ditto] .

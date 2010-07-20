@@ -6,8 +6,11 @@ mod MATHEMATICAL-TREE is inc MATHEMATICAL-INT .
   subsort FreeTree < FreeMathObj .
   subsort Tree < MathObj .
   subsort Tree++ < MathObj++ .
+
   op ?Tree : Nat -> ?Tree .
+  op !Tree : Nat -> !Tree .
   op skolem : Nat ?Tree -> FreeTree [ditto] .
+  op co-skolem : FreeTree -> !Tree [ditto] .
 
   op upsilon : -> Tree .
   op _`[_`]_ : Tree++ MathObj++ Tree++ -> Tree++ .

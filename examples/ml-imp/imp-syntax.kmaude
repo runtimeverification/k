@@ -3,10 +3,11 @@ load ml-prelude.maude
 
 kmod IMP-SYNTAX is including ML-K
   sort Val Exp
-  sort Type
+  sort Void NvType Type
   sort Stmt Stmts
   sort StmtAnnot DeclAnnot DeclAnnots
   sort Decl Decls
+  subsort Void NvType < Type
   subsort Int++ < Val
   subsort Id Val < Exp
   subsort StmtAnnot Decl < Stmt
@@ -15,8 +16,8 @@ kmod IMP-SYNTAX is including ML-K
   subsort Decl < Decls
 
   op NULL : -> Exp
-  op void : -> Type
-  op int : -> Type
+  op void : -> Void
+  op int : -> NvType
 
   op *_ : Exp -> Exp [prec 10 metadata "strict"]
   op _+_ : Exp Exp -> Exp [prec 33 gather (E e) metadata "strict"]
@@ -61,6 +62,7 @@ kmod IMP-SYNTAX is including ML-K
 
   op load : Int++ -> Exp
   op store : Int++ Exp -> Exp [metadata "strict"]
+  op return : Type -> Exp 
 
   op breakpoint; : -> Stmt
   op watch; : -> Stmt

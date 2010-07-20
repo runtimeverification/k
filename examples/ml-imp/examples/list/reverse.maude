@@ -1,6 +1,6 @@
 mod P-LIST-REVERSE is inc IMP-SYNTAX + LIST-HP .
   ops x y p reverse : -> Id .
-  ops ?x ?y ?p : -> ?Int .
+  ops ?x ?p : -> ?Int .
   ops ?B ?C : -> ?Seq .
   op A : -> FreeSeq .
 
@@ -12,7 +12,7 @@ int reverse(x)
 // pre < config > < env > x |-> ?x </ env >
                   < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config >
 // post < config > < env > (.).Map </ env >
-                   < heap > list(?return)(rev(A)) </ heap > < form > TrueFormula </ form > </ config >
+                   < heap > list(?x)(rev(A)) </ heap > < form > ?return === ?x </ form > </ config >
 {
   int p,,, y ;
   p = 0 ;

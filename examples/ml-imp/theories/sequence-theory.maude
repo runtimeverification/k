@@ -10,7 +10,9 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   subsort Seq++ < MathObj++ .
  
   op ?Seq : Nat -> ?Seq .
+  op !Seq : Nat -> !Seq .
   op skolem : Nat ?Seq -> FreeSeq [ditto] .
+  op co-skolem : FreeSeq -> !Seq [ditto] .
 
   op epsilon : -> Seq .
   op `[_`] : List{MathObj++} -> NeSeq++ .
@@ -22,9 +24,9 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   op _:::_ : Seq++ Seq++ -> Seq++ [assoc id: epsilon] .
   op _:::_ : NeSeq++ Seq++ -> NeSeq++ [ditto] .
   op _:::_ : Seq++ NeSeq++ -> NeSeq++ [ditto] .
-  op _:::_ : ?Seq ?Seq -> ?Seq [ditto] .
-  op _:::_ : !Seq !Seq -> !Seq [ditto] .
-  op _:::_ : FreeSeq FreeSeq -> FreeSeq [ditto] .
+  ---op _:::_ : ?Seq ?Seq -> ?Seq [ditto] .
+  ---op _:::_ : !Seq !Seq -> !Seq [ditto] .
+  ---op _:::_ : FreeSeq FreeSeq -> FreeSeq [ditto] .
   op _:::_ : Seq Seq -> Seq [ditto] .
   op _:::_ : NeSeq Seq -> NeSeq [ditto] .
   op _:::_ : Seq NeSeq -> NeSeq [ditto] .

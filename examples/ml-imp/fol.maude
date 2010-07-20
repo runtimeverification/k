@@ -1,7 +1,7 @@
 load smt.maude
 
 
-mod FOL= is inc CONFIG + APPLY-SUBST + SKOL + MB-CONDITION + SMT-INTERFACE .
+mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFACE .
 --- FOL= is the proving heart of matching logic.  Provided that one had a "FOL= oracle" that can
 --- prove any implications of the form "Pattern ===> Pattern1 Pattern2 ... PatternN" (the conclusion is a disjunction of patterns),
 --- then one basically has a matching logic verifier.  Since we do not have such a magic oracle, we are going to mimic one.
@@ -18,9 +18,11 @@ mod FOL= is inc CONFIG + APPLY-SUBST + SKOL + MB-CONDITION + SMT-INTERFACE .
   var T : KLabel .
   var HPN : HeapLabel .
   var Env Env1 Env2 : Map .
-  var !Env : !Map .
+  var !Env : !MapItem .
+  var FreeEnv : FreeMapItem .
   var H H1 H2 : Map .
-  var !H : !Map .
+  var !H : !MapItem .
+  var FreeH : FreeMapItem .
   var Phi Phi1 Phi2 : Formula .
   var NtPhi NtPhi1 NtPhi2 : NtFormula .
   var K : K .
@@ -65,7 +67,13 @@ mod FOL= is inc CONFIG + APPLY-SUBST + SKOL + MB-CONDITION + SMT-INTERFACE .
    = < config > < subst > (!Env <- Env) ; Subst </ subst > CfgItems1 </ config >
      =heap=> < config > CfgItems2 </ config > .
 
---- Step 2.3 : Eliminate the environment cell
+--- Step 2.3 : Eliminate a env frame
+  eq < config > < env > Env1 FreeEnv </ env > CfgItems1 </ config >
+     =env=> < config > < env > Env2 FreeEnv </ env > CfgItems2 </ config >
+   = < config > < env > Env1 </ env > CfgItems1 </ config >
+     =env=> < config > < env > Env2 </ env > CfgItems2 </ config > .
+
+--- Step 2.4 : Eliminate the environment cell
   eq < config > < env > Env1 </ env > CfgItems1 </ config >
      =env=> < config > < env > (.).Map </ env > CfgItems2 </ config >
    = < config > CfgItems1 </ config >
@@ -94,10 +102,10 @@ mod FOL= is inc CONFIG + APPLY-SUBST + SKOL + MB-CONDITION + SMT-INTERFACE .
 
 --- Step 3.2 : Get rid of a globally bound equality in the conclusion
  ceq Cfg =heap=> < config > < form > Phi </ form > < subst > Subst </ subst > CfgItems </ config >
-   = Cfg[!Subst] =heap=> < config > < form > Phi </ form >[!Subst] < subst > !Subst ; Subst[!Subst] </ subst > CfgItems[Subst] </ config >
+   = Cfg[!Subst] =heap=> < config > < form > Phi </ form >[!Subst] < subst > !Subst ; Subst[!Subst] </ subst > CfgItems[!Subst] </ config >
   if !Subst := get!SubstItem(Phi) /\ !Subst =/=Bool .Subst .
  ceq Cfg =form=> < config > < form > Phi </ form > < subst > Subst </ subst > CfgItems </ config >
-   = Cfg[!Subst] =form=> < config > < form > Phi </ form >[!Subst] < subst > !Subst ; Subst[!Subst] </ subst > CfgItems[Subst] </ config >
+   = Cfg[!Subst] =form=> < config > < form > Phi </ form >[!Subst] < subst > !Subst ; Subst[!Subst] </ subst > CfgItems[!Subst] </ config >
   if !Subst := get!SubstItem(Phi) /\ !Subst =/=Bool .Subst .
 
 --- Step 3.3 : Get rid of unbound variables equalities in the hypothesis
@@ -133,10 +141,10 @@ mod FOL= is inc CONFIG + APPLY-SUBST + SKOL + MB-CONDITION + SMT-INTERFACE .
      =form=> < config > < subst > (!H <- H) ; Subst </ subst > CfgItems2 </ config > .
 
 --- Step 4.4 : Eliminate a heap frame
-  eq < config > < heap > H:FreeMap H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > H:FreeMap H2 </ heap > CfgItems2 </ config >
+  eq < config > < heap > H1 FreeH </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > H2 FreeH </ heap > CfgItems2 </ config >
    = < config > < heap > H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > H2 </ heap > CfgItems2 </ config > [owise] .
+     =heap=> < config > < heap > H2 </ heap > CfgItems2 </ config > .
 
 --- Step 4.5 : Eliminate the heap cell
   eq < config > < heap > (.).Map </ heap > < form > Phi1 </ form > CfgItems1 </ config >

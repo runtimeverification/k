@@ -22,9 +22,9 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
   op _U_ : MSet++ MSet++ -> MSet++ [assoc comm id: empty] .
   op _U_ : NeMSet++ MSet++ -> NeMSet++ [ditto] .
   op _U_ : MSet++ NeMSet++ -> NeMSet++ [ditto] .
-  op _U_ : ?MSet ?MSet -> ?MSet [ditto] .
-  op _U_ : !MSet !MSet -> !MSet [ditto] .
-  op _U_ : FreeMSet FreeMSet -> FreeMSet [ditto] .
+  ---op _U_ : ?MSet ?MSet -> ?MSet [ditto] .
+  ---op _U_ : !MSet !MSet -> !MSet [ditto] .
+  ---op _U_ : FreeMSet FreeMSet -> FreeMSet [ditto] .
   op _U_ : MSet MSet -> MSet [ditto] .
   op _U_ : NeMSet MSet -> NeMSet [ditto] .
   op _U_ : MSet NeMSet -> NeMSet [ditto] .

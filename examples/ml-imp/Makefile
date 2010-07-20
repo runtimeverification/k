@@ -31,10 +31,13 @@ build: $(ML_FILE)
 
 maudify: $(MAUDE_MAIN_FILE)
 
+configure:
+	sed 's/PL-BUILTINS/BASIC-PL-BUILTINS/' $(K_ROOTDIR)/pl-builtins.maude >pl-builtins.maude
+	cp $(K_ROOTDIR)/k-prelude.maude .
+
 $(ML_FILE): $(COMPILED_FILE)
 	$(MAKE) -C $(ANTLR_ROOTDIR) -f $(MAKEFILE)
 	$(MAKE) -C $(ANTLR_ROOTDIR) -f $(MAKEFILE) $(TARGET) MAIN=$(MAIN_CLASS) <$(PWD)/$(COMPILED_FILE) >$(PWD)/$(ML_FILE)
-	#cat $(ML_FILE) | grep -v "^make" | grep -v "^load" | sed  "12a\subsort Id < KProper ." >$(ML_FILE)
 	sed -i -e '12a\subsort Id < KProper .' -e '/^make/d' -e '/^load/d' $(ML_FILE)
 
 $(COMPILED_FILE): $(MAUDE_MAIN_FILE) $(MAUDE_SYNTAX_FILE) $(MAUDE_SEMANTICS_FILE)

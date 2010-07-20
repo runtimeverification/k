@@ -10,6 +10,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar I J I1 I2 : Int++
   kvar NzI : NzInt
   kvar T : Type
+  kvar NvT : NvType
   kvar F X : Id
   kvar Xl : List{Id}
   kvar V : Val
@@ -24,12 +25,12 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar Phi Phi' : Formula
   kvar NtPhi : NtFormula
   kvar Subst Subst' : Subst
-  kvar Env Env' Spec : Map
+  kvar Env Env' : Map
   kvar Cfg : BagItem
   kvar Cfgs Cfgs' CfgItems : Bag
 
 
-  op _`(_`):_=>_ : Id List{Id} Bag Bag -> MapItem
+  op __`(_`):_=>_ : Type Id List{Id} Bag Bag -> MapItem
 
 
   configuration <T> 
@@ -40,9 +41,9 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
                     <k> .K </k>
                     <env> .Map </env>
                     <heap> .Map </heap>
-                    <form>  TrueFormula </form>
+                    <form> TrueFormula </form>
                     <subst> .Subst </subst>
-                    <newSym>  0 </newSym>
+                    <newSym> 0 </newSym>
                     <newImpl> 0 </newImpl>
                   </config>
                 </T>
@@ -206,11 +207,11 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   )
 
   rule
-    <spec_> F(Xl) : Cfgs => Cfgs' <_/spec>
+    <spec_> T F(Xl) : Cfgs => Cfgs' <_/spec>
     <config>
-      <k> _`(_`)(F, Vl) => // assume Cfgs' <_/k>
-      <env> Env </env>
-      <subst> Subst => Subst' </subst>
+      <k> _`(_`)(F, Vl) => // assume Cfgs'[Subst'] ~> return(T) <_/k>
+      (<env> Env </env> => skolemize(N, <env> Env </env>))
+      <subst> Subst </subst>
       <newSym> M </newSym>
       <newImpl> N => sNat N </newImpl>
       (CfgItems => skolemize(N, CfgItems))
@@ -229,7 +230,12 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
       <form> TrueFormula </form>
       <subst> Subst' </subst>
     </config>
-  )   
+  )
+  rule
+    <k> return(NvT) => I <_/k>
+    <form> Phi /\ ?return === I => Phi </form>
+  [metadata "structural"]
+  rule <k> return(void) => NULL <_/k> [metadata "structural"]
 
   rule
       __`(_`)_`{_`}(T, F, Xl, (//pre Cfgs //post Cfgs'), Ss)
@@ -241,9 +247,17 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule
       mkSpec((__`(_`)_`{_`}(T, F, Xl, (//pre Cfgs //post Cfgs'), Ss) ~> K))
     =>
-      F(Xl) : Cfgs => Cfgs' mkSpec(K)
+      T F(Xl) : co-skolemize(Cfgs) => co-skolemize(rmEnv(Cfgs')) mkSpec(K)
   [metadata "structural"]
   rule mkSpec(.K) => .Map [metadata "structural"]
+
+  op rmEnv : Bag -> Bag
+  rule
+      rmEnv(<config> <env> Env </env> CfgItems </config> Cfgs)
+    =>
+      <config> <env> .Map </env> CfgItems </config> rmEnv(Cfgs)
+  [metadata "structural"]
+  rule rmEnv(.Bag) => .Bag [metadata "structural"]
 
   rule E,,, El |-> E',,, El' => E |-> E' El |-> El' [metadata "structural"]
   rule .List{Id} |-> .List{Id} => .Map [metadata "structural"]

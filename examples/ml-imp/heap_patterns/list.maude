@@ -62,7 +62,13 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        CfgItems
      </ config >
      =heap=> Cfg
-  => < config > < heap > list(P)([I]) H </ heap > CfgItems </ config >
+  => < config >
+       < heap >
+         list(P)([I])
+         H
+       </ heap >
+       CfgItems
+     </ config >
      =heap=> Cfg .
   rl < config >
        < heap >
@@ -74,7 +80,13 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        CfgItems
      </ config >
      =heap=> Cfg
-  => < config > < heap > list(P)([I] ::: Alpha) H </ heap > CfgItems </ config >
+  => < config >
+       < heap >
+         list(P)([I] ::: Alpha)
+         H
+       </ heap >
+       CfgItems
+     </ config >
      =heap=> Cfg .
 
 
@@ -108,7 +120,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        < form >
          Phi /\ ~(P === Q) /\
-         (Alpha === ?Int(N) ::: ?Seq(N +Int 2))
+         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
        </ form >
        < newSym > N +Int 3 </ newSym >
        CfgItems
@@ -130,7 +142,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =heap=> Cfg
   => < config >
        < heap >
-         lseg(P, Q)(I)
+         lseg(P, Q)([I])
          H
        </ heap >
        CfgItems
