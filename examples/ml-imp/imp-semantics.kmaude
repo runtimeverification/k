@@ -2,15 +2,11 @@ load imp-syntax.kmaude
 
 
 kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
-  subsort Int++ < Builtins KResult
-  subsort List{Val} Type < KResult
-  subsort DeclAnnot Stmts List{Exp} < K
-
   kvar M N N1 N2 : Nat
   kvar I J I1 I2 : Int++
   kvar NzI : NzInt
-  kvar T : Type
-  kvar NvT : NvType
+  kvar T : ExpType
+  kvar NvT : NvExpType
   kvar F X : Id
   kvar Xl : List{Id}
   kvar V : Val
@@ -29,8 +25,12 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar Cfg : BagItem
   kvar Cfgs Cfgs' CfgItems : Bag
 
+  subsort Int++ ExpType < Builtins KResult
+  subsort List{Val} < KResult
+  subsort DeclAnnot Stmts List{Exp} < K
 
-  op __`(_`):_=>_ : Type Id List{Id} Bag Bag -> MapItem
+
+  op __`(_`):_=>_ : ExpType Id List{Id} Bag Bag -> MapItem
 
 
   configuration <T> 
@@ -127,8 +127,10 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
     <k> store(I, J) => .K <_/k>
     <heap_> I |-> (_ => J) : L <_/heap>
   rule
-    <k> return I ; => .K <_/k>
-    <form> Phi => Phi /\ ?return === I </form>
+    <k> return; ~> K ~> functionEnd => .K <_/k>
+  rule
+    <k> return I ; ~> K ~> functionEnd => .K <_/k>
+    <form> Phi => Phi /\ ?return(I) </form>
 
   rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
   [metadata "structural"]
@@ -179,7 +181,6 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
       </config>
     )
   [metadata "structural"]
-
   rule <config_> <k> // assume .Bag <_/k> <_/config> => .Bag
   [metadata "structural"]
 
@@ -205,7 +206,6 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
       <subst> Subst' </subst>
     </config>
   )
-
   rule
     <spec_> T F(Xl) : Cfgs => Cfgs' <_/spec>
     <config>
@@ -233,14 +233,16 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   )
   rule
     <k> return(NvT) => I <_/k>
-    <form> Phi /\ ?return === I => Phi </form>
+    <form> Phi /\ ?return(I) => Phi </form>
   [metadata "structural"]
   rule <k> return(void) => NULL <_/k> [metadata "structural"]
 
   rule
-      __`(_`)_`{_`}(T, F, Xl, (//pre Cfgs //post Cfgs'), Ss)
-    =>
-      //assume Cfgs ~> Ss ~> //assert Cfgs'
+    <k>
+        __`(_`)_`{_`}(T, F, Xl, (//pre Cfgs //post Cfgs'), Ss)
+      =>
+        //assume Cfgs ~> Ss ~> functionEnd ~> //assert Cfgs'
+    <_/k>
 
 
   op mkSpec : K -> Map

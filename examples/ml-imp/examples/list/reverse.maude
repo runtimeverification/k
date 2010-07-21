@@ -12,7 +12,7 @@ int reverse(x)
 // pre < config > < env > x |-> ?x </ env >
                   < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config >
 // post < config > < env > (.).Map </ env >
-                   < heap > list(?x)(rev(A)) </ heap > < form > ?return === ?x </ form > </ config >
+                   < heap > list(?x)(rev(A)) </ heap > < form > ?return(?x) </ form > </ config >
 {
   int p,,, y ;
   p = 0 ;

@@ -1,4 +1,3 @@
-# Echo server program
 import sys
 import socket
 import subprocess

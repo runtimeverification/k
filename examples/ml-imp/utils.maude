@@ -16,8 +16,8 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
   subsorts NeGroundTermList < NeTermList GroundTermList < TermList .
   op <Qids> : -> Constant [special (id-hook QuotedIdentifierSymbol (constantQid))] .
   op <Qids> : -> Variable [special (id-hook QuotedIdentifierSymbol (variableQid))] .
-  op empty : -> GroundTermList [ctor] .
-  op _:_ : NeGroundTermList GroundTermList -> NeGroundTermList [ctor assoc id: empty gather (e E) prec 121] .
+  op .emptyTermList : -> GroundTermList [ctor] .
+  op _:_ : NeGroundTermList GroundTermList -> NeGroundTermList [ctor assoc id: .emptyTermList gather (e E) prec 121] .
   op _:_ : GroundTermList NeGroundTermList -> NeGroundTermList [ctor ditto] .
   op _:_ : GroundTermList GroundTermList -> GroundTermList [ctor ditto] .
   op _:_ : NeTermList TermList -> NeTermList [ctor ditto] .
@@ -104,7 +104,7 @@ mod VAR-UTILS is inc CONFIG + PL-META-TERM .
   var QTNeList : NeTermList .
 
   eq get?VarSet((QT : QTNeList)) = get?VarSet(QT) & get?VarSet(QTNeList) .
-  eq get?VarSet(empty) = .Set{MathObj++} .
+  eq get?VarSet(.emptyTermList) = .Set{MathObj++} .
   eq get?VarSet(QC) = if downTerm(QC, errorObj) :: ?MathObj then
      downTerm(QC, errorObj) else .Set{MathObj++} fi .
  ceq get?VarSet(Q[QT]) = downTerm(Q[QT], .Set{MathObj++})
@@ -113,7 +113,7 @@ mod VAR-UTILS is inc CONFIG + PL-META-TERM .
 
   eq getFreeVarSet((QT : QTNeList))
    = getFreeVarSet(QT) & getFreeVarSet(QTNeList) .
-  eq getFreeVarSet(empty) = .Set{MathObj++} .
+  eq getFreeVarSet(.emptyTermList) = .Set{MathObj++} .
   eq getFreeVarSet(QC) = if downTerm(QC, errorObj) :: FreeMathObj then
      downTerm(QC, errorObj) else .Set{MathObj++} fi .
   eq getFreeVarSet('skolem[NT : QT])
@@ -122,7 +122,7 @@ mod VAR-UTILS is inc CONFIG + PL-META-TERM .
 
   eq getFreeMap((QT : QTNeList))
    = getFreeMap(QT) getFreeMap(QTNeList) .
-  eq getFreeMap(empty) = (.).Map .
+  eq getFreeMap(.emptyTermList) = (.).Map .
   eq getFreeMap(QC) = if downTerm(QC, (.).Map) :: FreeMapItem then
      downTerm(QC, (.).Map) else (.).Map fi [print QC] .
   eq getFreeMap(Q[QTList]) = getFreeMap(QTList) [owise] .
@@ -141,7 +141,7 @@ mod CONFIG-UTILS is inc CONFIG + VAR-UTILS .
 
   eq skolemTerm(NT, (QT : QTNeList))
    = skolemTerm(NT, QT) : skolemTerm(NT, QTNeList) .
-  eq skolemTerm(NT, empty) = empty .
+  eq skolemTerm(NT, .emptyTermList) = .emptyTermList .
   eq skolemTerm(NT, QC)
    = if substrString(string(getType(QC)), 0, 1) ==Bool "?" then
        'skolem[NT : QC]
@@ -157,7 +157,7 @@ mod CONFIG-UTILS is inc CONFIG + VAR-UTILS .
  
   eq co-skolemTerm((QT : QTNeList))
    = co-skolemTerm(QT) : co-skolemTerm(QTNeList) .
-  eq co-skolemTerm(empty) = empty .
+  eq co-skolemTerm(.emptyTermList) = .emptyTermList .
   eq co-skolemTerm(QC)
    = if substrString(string(getType(QC)), 0, 4) ==Bool "Free" then
        'co-skolem[QC]
@@ -214,7 +214,7 @@ mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
 
   eq substTerm((QT : QTNeList), MetaSubst)
    = substTerm(QT, MetaSubst) : substTerm(QTNeList, MetaSubst) .
-  eq substTerm(empty, MetaSubst) = empty .
+  eq substTerm(.emptyTermList, MetaSubst) = .emptyTermList .
   eq substTerm(QT, ((QT <- QT') ; MetaSubst)) = QT' .
   eq substTerm('skolem[NT : QT], MetaSubst) = 'skolem[NT : QT] .
   eq substTerm('co-skolem[QT], MetaSubst) = 'co-skolem[QT] .

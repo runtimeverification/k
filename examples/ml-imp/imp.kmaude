@@ -1,15 +1,17 @@
 load imp-semantics.kmaude
 ---load examples/sum.maude
 ---load examples/list/reverse.maude
-load examples/list/append.maude
+---load examples/list/append.maude
 ---load examples/binary_tree/mirror.maude
+load examples/binary_tree/binary_search_tree.maude
 
 
 kmod IMP is including IMP-SEMANTICS
 ---  including P-SUM
 ---  including P-LIST-REVERSE
-  including P-LIST-APPEND
+---  including P-LIST-APPEND
 ---  including P-TREE-MIRROR
+  including P-BINARY-SEARCH-TREE
 
   op check : KLabel -> BagItem
   op (_feasible and_infeasible paths) : Nat Nat -> BagItem
@@ -31,9 +33,14 @@ kmod IMP is including IMP-SEMANTICS
                            <newImpl> 0 </newImpl>
                          </config>
                        </T>
-  eq <T> <feasible> N </feasible> <infeasible> M </infeasible> </T>
-   = N feasible and M infeasible paths
-
+  rule
+    <T>
+      <feasible> N </feasible>
+      <infeasible> M </infeasible>
+    </T>
+    =>
+    N feasible and M infeasible paths
+  [metadata "structural"]
   rule
     <feasible> N => N +Int 1 </feasible>
     (

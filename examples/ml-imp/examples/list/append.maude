@@ -18,7 +18,7 @@ int append(a,,, b)
                    < heap > list(?a)(A ::: B) </ heap >
                    < form > ((~(a0 === 0) /\ (?a === a0)) \/
                           ((a0 === 0) /\ (?a === b0))) /\
-                          ?return === ?a </ form > </ config >
+                          ?return(?a) </ form > </ config >
 {
   int x ;
   if (a != 0) {

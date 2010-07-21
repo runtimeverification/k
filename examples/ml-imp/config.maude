@@ -60,6 +60,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=skol=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=env=>_   : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=ret=>_   : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=heap=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=form=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=debug=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
@@ -74,7 +75,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op derive : -> KLabel .
 
-  op ?return : -> FreeInt .
+  op ?return : MathObj++ -> Atom .
 
   op VALID : Formula -> Bool .
   eq VALID(TrueFormula) = true .

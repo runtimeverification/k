@@ -39,7 +39,7 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   op _:::_ : NeSeq++ NeSeq -> NeSeq++ [ditto] .
   op _:::_ : NeSeq NeSeq++ -> NeSeq++ [ditto] . 
 
-  op rev : Seq++ -> Seq++ .
+  op rev : Seq++ -> NeSeq++ .
   op len : Seq++ -> Int++ .
 
 

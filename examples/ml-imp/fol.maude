@@ -65,7 +65,7 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
   eq < config > < env > Env </ env > < subst > Subst </ subst > CfgItems1 </ config >
      =env=> < config > < env > !Env </ env > < form > Phi2 </ form > CfgItems2 </ config >
    = < config > < subst > (!Env <- Env) ; Subst </ subst > CfgItems1 </ config >
-     =heap=> < config > CfgItems2 </ config > .
+     =ret=> < config > CfgItems2 </ config > .
 
 --- Step 2.3 : Eliminate a env frame
   eq < config > < env > Env1 FreeEnv </ env > CfgItems1 </ config >
@@ -77,7 +77,18 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
   eq < config > < env > Env1 </ env > CfgItems1 </ config >
      =env=> < config > < env > (.).Map </ env > CfgItems2 </ config >
    = < config > CfgItems1 </ config >
-     =heap=> < config > CfgItems2 </ config > .
+     =ret=> < config > CfgItems2 </ config > .
+
+
+--- Step 2.5 : Eliminate the return value (only when checking asserions at the end of function)
+  eq < config > < form > Phi1 /\ ?return(Obj1) </ form > CfgItems1 </ config >
+     =ret=> < config > < form > Phi2 /\ ?return(Obj2)</ form > CfgItems2 </ config >
+   = < config > < form > Phi1 </ form > CfgItems1 </ config >
+     =heap=> < config > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
+  eq < config > < form > Phi1 </ form > CfgItems1 </ config >
+     =ret=> < config > < form > Phi2 </ form > CfgItems2 </ config >
+   = < config > < form > Phi1 </ form > CfgItems1 </ config >
+     =heap=> < config > < form > Phi2 </ form > CfgItems2 </ config > [owise] .
 
 
 --- Step 3: Get rid of variable equalities and propagate them via substitution

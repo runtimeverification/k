@@ -6,8 +6,9 @@ mod TEST is inc IMP + FOL= . endm
 set print attribute on .
 ---rew check('pSum) .
 ---rew check('pListReverse) .
-rew check('pListAppend) .
+---rew check('pListAppend) .
 ---rew check('pTreeMirror) .
+rew check('pBstInsert) .
 
 
 eof
