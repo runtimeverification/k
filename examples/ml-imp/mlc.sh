@@ -21,7 +21,7 @@ PROG_OP=prog-${PROG}
 PROG_MOD=`echo ${LANG_NAME_UPPER}-${PROG_OP} | tr [:lower:] [:upper:]`
 TMP_PROG=tmp-${PROG}.maude
 
-USES=`cat $1 | expand -t 2 | grep "^ *using " | sed -e "s/^ *using /including/" -e "s/; *\r\?$/ ./"`
+USES=`cat $1 | expand -t 2 | grep "^ *using " | sed -e "s/^ *using /including /" -e "s/; *\r\?$/ ./"`
 DECLS=`cat $1 | expand -t 2 | grep "^ *vars\? " | sed -e "s/^ *vars\? /ops /" -e "s/ : / : -> /" -e "s/; *\r\?$/ ./"`
 STMTS=`cat $1 | expand -t 2 | grep -v '^ *using ' | grep -v '^ *vars\? '`
 MOD="
