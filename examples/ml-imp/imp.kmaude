@@ -3,7 +3,7 @@ load imp-semantics.kmaude
 ---load examples/list/reverse.maude
 ---load examples/list/append.maude
 ---load examples/binary_tree/mirror.maude
-load examples/binary_tree/binary_search_tree.maude
+---load examples/binary_tree/binary_search_tree.maude
 
 
 kmod IMP is including IMP-SEMANTICS
@@ -11,7 +11,7 @@ kmod IMP is including IMP-SEMANTICS
 ---  including P-LIST-REVERSE
 ---  including P-LIST-APPEND
 ---  including P-TREE-MIRROR
-  including P-BINARY-SEARCH-TREE
+---  including P-BINARY-SEARCH-TREE
 
   op check : KLabel -> BagItem
   op (_feasible and_infeasible paths) : Nat Nat -> BagItem

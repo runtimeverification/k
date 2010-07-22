@@ -1,10 +1,7 @@
-mod P-SUM is inc IMP-SYNTAX .
-  ops n s : -> Id .
-  ops ?n ?s : -> ?Int .
-  op n0 : -> FreeInt .
+  vars n s : Id;
+  var   ?n ?s   : ?Int;
+	vars n0 :  FreeInt ; 
 
-  op pSum : -> Stmts .
-  eq pSum = (
     // assume < config > < env > n |-> n0 s |-> ?s </ env > < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config >
     s = 0 ;
     // invariant < config > < env > n |-> ?n s |-> (((n0 +Int (-Int ?n)) *Int (n0 +Int ?n +Int 1)) /Int 2) </ env >
@@ -15,6 +12,4 @@ mod P-SUM is inc IMP-SYNTAX .
     }
     // assert < config > < env > n |-> 0 s |-> ((n0 *Int (n0 +Int 1)) /Int 2) </ env >
                        < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config >
-  ) .
-endm
 

@@ -131,6 +131,8 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule
     <k> return I ; ~> K ~> functionEnd => .K <_/k>
     <form> Phi => Phi /\ ?return(I) </form>
+  rule
+    <k> functionEnd => .K <_/k>
 
   rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
   [metadata "structural"]

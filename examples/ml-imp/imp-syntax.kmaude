@@ -1,7 +1,7 @@
 load ml-prelude.maude
 
 
-kmod IMP-SYNTAX is including PL-BUILTINS + ML-K
+kmod IMP-SYNTAX is including ML-K
   sort Val Exp
   sort Void NvExpType ExpType
   sort Stmt Stmts

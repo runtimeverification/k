@@ -2,7 +2,7 @@ load k-prelude.maude
 load theories/core-theory.maude
 
 
-mod SUBST is inc MATHEMATICAL-INT + K-TECHNIQUE .
+mod SUBST is inc MATHEMATICAL-INT + K-PROPER .
   sort SubstItem Subst .
   subsorts SubstItem < Subst .
   op .Subst : -> Subst .
@@ -45,6 +45,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op co-skolem : FreeMapItem -> !MapItem .
 
   subsort Int++ < Builtins KResult .
+  subsort Id < Builtins KProper .
   op <_>_</_> : CellLabel Int++ CellLabel -> BagItem
   [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Formula CellLabel -> BagItem
