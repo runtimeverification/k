@@ -4,6 +4,8 @@ use File::Basename;
 use File::Spec;
 use Switch;
 
+require 'common_functions.pl';
+
 # next subroutine prints the usage message;
 # $0 is initially bound to the program name, as typed
 sub terminate {
@@ -627,6 +629,9 @@ sub maudify_file {
 	}
     }
 
+# Before maudify, check the file for syntax errors
+    syntax_common_check($file);
+    
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";
 # Slurp all $file into $_;
