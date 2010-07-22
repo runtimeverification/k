@@ -3,8 +3,11 @@ use strict;
 use File::Basename;
 use File::Spec;
 use Switch;
+use Cwd 'abs_path';
 
-require 'common_functions.pl';
+my $path = abs_path($0);
+$path =~ s/kompile\.pl//;
+require $path . 'common_functions.pl';
 
 # next subroutine prints the usage message;
 # $0 is initially bound to the program name, as typed

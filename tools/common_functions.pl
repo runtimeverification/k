@@ -1,8 +1,16 @@
 # !usr/bin/perl -w
 use strict;
 use warnings;
-use Tree::Nary;
 
+my $path = ".";
+BEGIN {
+	use Cwd 'abs_path';
+	$path = abs_path($0);
+	$path =~ s/(kompile\.pl)|(common_functions\n.pl)//;
+}
+
+use lib $path;
+use Tree::Nary;
 
 my $language_file_name = "?";
 my $config_tree;
