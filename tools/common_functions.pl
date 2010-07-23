@@ -87,6 +87,13 @@ sub append_rec_tree_for_rule
 {
     my ($temp_cfg, $node_name, $rule) = (shift, shift, shift);
     
+    my $l = "unavailable line";
+    if ($rule =~ m/(^[\d]\d*)\s/)
+    {
+	$l = $1;
+	$rule =~ s/(^[\d]\d*)\s//;
+    }
+    
     # create the new node
     my $root = new Tree::Nary->new($node_name);
     
@@ -117,105 +124,11 @@ sub append_rec_tree_for_rule
     # find unmatched cells and report them.
     if ($temp_cfg =~ m/.*<([^\'=]+?)>.*/s)
       {
-	  warning("in expression:\n$rule\nUnmatched cell <$1>.");
+	  warning("(@ line $l) - in expression:\n$rule\nUnmatched cell <$1>.");
       }
     
     return $root;
 }                    
-
-# verify syntax by learning configuration
-sub syntax_verification
-{
-    # Slurp all $file into $_;
-    local $/=undef; open FILE,"<",$language_file_name or die "Cannot open $language_file_name\n"; local $_ = <FILE>; close FILE;
-
-    # Getting rid of comments, maintaining the line numbers of the remaining code
-    s/($comment)/
-    {
-	local $_=$1;
-	s!\S!!gs;
-	$_;
-    }/gsme;
-
-    my $lines = $_;
-    
-    # keep source
-    my $source = $lines;
-    
-    ###########################################
-    # parse and learn configuration structure #
-    #                                         #
-    # - the configuration structure is stored #
-    # in an n-ary tree.                       #
-    ###########################################
-
-    # extract configuration string from .kmaude file
-    if ($lines =~ m/configuration\s*(.+?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/s)
-    {
-	$lines = $1;
-    }
-    else
-    {
-#	print "INFO: File $language_file_name does not contain configuration definition.\n";
-	return;
-    }
-    
-    # learn configuration
-    $config_tree = append_rec_tree($lines, "super-node");    
-   
-    # verify each rule for errors
-    my $no = 0;
-    while ($source =~ m/(rule|eq|macro)(\s+)(.*?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/sg)
-    {
-	my $original_rule = $3;
-	# print "Matched: $1$2$3$4\n";
-	my $temp = $3;
-	my $expr_type = $1;
-	
-	$temp =~ s/top\(.*?\)//;
-	
-	# eliminate rules that not contain cell definitions
-	# also eliminate ambigous rules int < int => int
-	if ($temp =~ m/(.*?)<.*?[^=]>/)
-	{
-	    # build rule tree
-	    my $exp_tree = append_rec_tree_for_rule($temp, "super-node", "rule $original_rule");
-	    
-	    # $string will be used as DATA parameter for traverse function
-	    my $string = $expr_type . " " . $original_rule;
-
-	    # check if rule tree tree ~ configuration tree
-	    Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
-		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_node, \$string);
-
-	    # check closed/open cells
-	    Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
-		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_open_cells, \$string);
-	}
-	
-	# process top(something)-like expressions
-	while ($original_rule =~ m/top\s*\((.*?)\)/sg)
-	{
-	    my $top_content = $1;
-	    if ($top_content =~ m/(.*?)<.*?[^=]>/)
-	    {
-		# build "top" inside tree
-		my $exp_tree = append_rec_tree_for_rule($top_content, "super-node",  "rule $original_rule");
-	    
-		# $string will be used as DATA parameter for traverse function
-		my $string = "top expression: $expr_type  $original_rule";
-		
-		# check if rule tree tree ~ configuration tree
-		Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
-		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_node, \$string);
-		
-		# check closed/open cells
-		Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
-		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_open_cells, \$string);
-	    }   
-	}
-    }
-}
 
 # sub checks if the substructures determined by closed cells
 # are also substructures in the configuration definition
@@ -245,6 +158,13 @@ sub validate_open_cells()
     else 
     {
 	$rule = "cannot identify rule!";;
+    }
+
+    my $l = "unavailable line";
+    if ($rule =~ m/(^[\d]\d*)\s/)
+    {
+	$l = $1;
+	$rule =~ s/(^[\d]\d*)\s//;
     }
 
     # only for closed cells
@@ -284,7 +204,7 @@ sub validate_open_cells()
 	# if there are less children in rule tree than in the configuration tree print warning message
 	if ($not_found_def ne "")
 	{
-	    warning("missing declarations of cells:$not_found_def in:\n$rule\nAre you sure cell <$node_data> should be closed?");
+	    warning("(@ line $l) - missing declarations of cells:$not_found_def in:\n$rule\nAre you sure cell <$node_data> should be closed?");
 	}
     }
  
@@ -317,6 +237,14 @@ sub validate_node()
 	$rule = "cannot identify rule!";;
     }
     
+    my $l = "unavailable line";
+    if ($rule =~ m/(^[\d]\d*)\s/)
+    {
+	$l = $1;
+	$rule =~ s/(^[\d]\d*)\s//;
+    }
+
+    
     # get the coresponding for $node in configuration
     my $node_data = $node->{data};
     
@@ -329,7 +257,7 @@ sub validate_node()
     # if node not found in configuration: exit
     if (!defined($config_node))
     {
-	warning("cell <" . $node_data . "> in: \n" . $rule . "\nis not defined in configuration.");
+	warning("(@ line $l) - cell <" . $node_data . "> in: \n" . $rule . "\nis not defined in configuration.");
     }
     
     # get the parent for $node in rule
@@ -344,7 +272,7 @@ sub validate_node()
     # if undefined parent node in configuration: warning
     if (!defined($parent_node_config))
     {
-	warning("cell <" . $node_data . "> in:\n" . $rule . "\nhas parent <" 
+	warning("(@ line $l) - cell <" . $node_data . "> in:\n" . $rule . "\nhas parent <" 
 	  . $parent_data ."> which is not defined in configuration.");
     }
     
@@ -353,16 +281,118 @@ sub validate_node()
     if (Tree::Nary->is_ancestor($parent_node_config, $config_node) == $Tree::Nary::FALSE
 	&& Tree::Nary->is_ancestor($config_node, $parent_node_config) == $Tree::Nary::FALSE)
     {
-	warning("cell structure in:\n$rule \nis not a substructure in configuration.");
+	warning("(@ line $l) - cell structure in:\n$rule \nis not a substructure in configuration.");
     }	
     
     return $Tree::Nary::FALSE;
 }
 
+
+# verify syntax by learning configuration
+sub syntax_verification
+{
+    # Slurp all $file into $_;
+    local $/=undef; open FILE,"<",$language_file_name or die "Cannot open $language_file_name\n"; local $_ = <FILE>; close FILE;
+
+    # Getting rid of comments, maintaining the line numbers of the remaining code
+    s/($comment)/
+    {
+	local $_=$1;
+	s!\S!!gs;
+	$_;
+    }/gsme;
+
+    my $lines = $_;
+    
+    # keep source
+    my $source = $_;
+    
+    ###########################################
+    # parse and learn configuration structure #
+    #                                         #
+    # - the configuration structure is stored #
+    # in an n-ary tree.                       #
+    ###########################################
+
+    # extract configuration string from .kmaude file
+    if ($lines =~ m/configuration\s*(.+?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/s)
+    {
+	$lines = $1;
+    }
+    else
+    {
+#	print "INFO: File $language_file_name does not contain configuration definition.\n";
+	return;
+    }
+    
+    # learn configuration
+    $config_tree = append_rec_tree($lines, "super-node");    
+   
+    # verify each rule for errors
+    my $no = 0;
+    while ($source =~ m/(rule|eq|macro)(\s+)(.*?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/sg)
+    {
+	my $match_line = $-[0];
+	# print "Rule at line " . (find_line($source, $-[0])) . "\n";
+	my $original_rule = $3;
+	# print "Matched: $1$2$3$4\n";
+	my $temp = $3;
+	my $expr_type = $1;
+	
+	$temp =~ s/top\(.*?\)//;
+	
+	# get the line number
+	my $line_no = find_line($source, $match_line);
+	
+	# eliminate rules that not contain cell definitions
+	# also eliminate ambigous rules int < int => int
+	if ($temp =~ m/(.*?)<.*?[^=]>/)
+	{
+	    
+            # build rule tree
+	    my $exp_tree = append_rec_tree_for_rule($temp, "super-node", "$line_no rule $original_rule");
+	    
+	    # $string will be used as DATA parameter for traverse function
+	    my $string = $line_no . " " . $expr_type . " " . $original_rule;
+
+	    # check if rule tree tree ~ configuration tree
+	    Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
+		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_node, \$string);
+
+	    # check closed/open cells
+	    Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
+		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_open_cells, \$string);
+	}
+	
+	# process top(something)-like expressions
+	while ($original_rule =~ m/top\s*\((.*?)\)/sg)
+	{
+	    my $top_content = $1;
+	    if ($top_content =~ m/(.*?)<.*?[^=]>/)
+	    {
+		# build "top" inside tree
+		my $exp_tree = append_rec_tree_for_rule($top_content, "super-node",  "$line_no rule $original_rule");
+	    
+		# $string will be used as DATA parameter for traverse function
+		my $string = "$line_no top expression: $expr_type  $original_rule";
+		
+		# check if rule tree tree ~ configuration tree
+		Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
+		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_node, \$string);
+		
+		# check closed/open cells
+		Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
+		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_open_cells, \$string);
+	    }   
+	}
+    }
+}
+
+
 sub warning
 {
 #    print "WARNING: " . (shift) . "\n";
-    $warnings .= "WARNING: " . (shift) . "\n";
+    $warnings .= "WARNING" . (shift) . "\n";
 }
 
 sub write_warnings
@@ -370,7 +400,7 @@ sub write_warnings
     if (length($warnings) > 1)
     {
 	my $display_warnings = "";
-	my $i = 0;
+	my $i = -1;
 	while ($warnings =~ m/(.*?)\n/g)
 	{
 	    if ($i < 10)
@@ -385,7 +415,23 @@ sub write_warnings
 	print FILE $warnings;
 	close $warnings;
 	print $display_warnings;
-	print "...\nCheck $warnings_file for the remaining warnings\n" if $i > 10;             
+	print "...\nCheck $warnings_file for the remaining warnings\n" if $i >= 10;             
     }
+}
+
+sub find_line
+{
+    my ($text, $end) = (shift, shift);
+    
+    my $lines = substr $text, 0, $end;
+  #  print $lines . "\n";
+    
+    my $l_no = 1;
+    while($lines =~ m/\n/g)
+    {
+	$l_no++;
+    }
+    
+    return $l_no;
 }
 1;
