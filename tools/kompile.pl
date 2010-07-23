@@ -703,7 +703,7 @@ sub maudify_module {
 	add_sorts($_);
 
 # Step: Freeze on-the-fly anonymous variable declarations
-    s!_(:$ksort)!?$1!;
+    s!_(:$ksort)!?$1!sg;
     s!(\?:$ksort)!freeze($1,"ANONYMOUS")!ge;
 
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
