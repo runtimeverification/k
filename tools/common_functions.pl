@@ -15,9 +15,17 @@ use Tree::Nary;
 my $language_file_name = "?";
 my $config_tree;
 my $iteration_cells = {};
+my $warnings = "";
+my $warnings_file = "kompile_warnings.txt";
+my $comment = join("|", (
+    "---\\(.*?---\\)",                                                                                                            
+    "---.*?\$",                                                                                                                   
+    "\\*\\*\\*\\(.*?\\*\\*\\*\\)",                                                                                                
+    "\\*\\*\\*.*?\$"                                                                                                              
+));     
 
 # explicit call for debugging.
-syntax_common_check($ARGV[0]);
+# syntax_common_check($ARGV[0]);
 
 # start syntax checking.
 sub syntax_common_check
@@ -28,7 +36,10 @@ sub syntax_common_check
     {	
 	syntax_verification();
     }
+    
+    write_warnings();
 }
+
 
 # build recursively a configuration tree
 sub append_rec_tree
@@ -115,18 +126,20 @@ sub append_rec_tree_for_rule
 # verify syntax by learning configuration
 sub syntax_verification
 {
-    # open file and get content
-    open FILE, "<", $language_file_name or die "Could not open file $language_file_name";
-    my @lines = <FILE>;
-    my $lines = "@lines";
-    
-    # close file
-    close(FILE);
+    # Slurp all $file into $_;
+    local $/=undef; open FILE,"<",$language_file_name or die "Cannot open $language_file_name\n"; local $_ = <FILE>; close FILE;
 
-    # remove comments
-    $lines =~ s/---.*?\n/ /g;
+    # Getting rid of comments, maintaining the line numbers of the remaining code
+    s/($comment)/
+    {
+	local $_=$1;
+	s!\S!!gs;
+	$_;
+    }/gsme;
+
+    my $lines = $_;
     
-    # keep source code
+    # keep source
     my $source = $lines;
     
     ###########################################
@@ -143,7 +156,7 @@ sub syntax_verification
     }
     else
     {
-	print "INFO: File $language_file_name does not contain configuration definition.\n";
+#	print "INFO: File $language_file_name does not contain configuration definition.\n";
 	return;
     }
     
@@ -348,7 +361,31 @@ sub validate_node()
 
 sub warning
 {
-    print "WARNING: " . (shift) . "\n";
+#    print "WARNING: " . (shift) . "\n";
+    $warnings .= "WARNING: " . (shift) . "\n";
 }
 
+sub write_warnings
+{
+    if (length($warnings) > 1)
+    {
+	my $display_warnings = "";
+	my $i = 0;
+	while ($warnings =~ m/(.*?)\n/g)
+	{
+	    if ($i < 10)
+	    {
+		$display_warnings .= "$1\n";
+	    }
+	     
+	    $i++;
+	}
+
+	open FILE, ">", $warnings_file or die "Cannot open/create warnings file.\n";
+	print FILE $warnings;
+	close $warnings;
+	print $display_warnings;
+	print "...\nCheck $warnings_file for the remaining warnings\n" if $i > 10;             
+    }
+}
 1;

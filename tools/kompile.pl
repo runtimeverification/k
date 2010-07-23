@@ -170,7 +170,7 @@ my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 #########
 # Maude #
 #########
-my $maude_path = "maude";
+my $maude_path = "/home/andrei/Downloads/maude/maude.linux";
 my $maude_temp_file = "ERASE-ME-PLEASE";
 my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
@@ -377,6 +377,10 @@ if ($latex && !@latexify_modules) {
 if (!$compile_only) {
 # Maudify the .k|.kmaude files reachable from file "$language_file_name"
     print_header("Maudifying $language_file_name") if $verbose;
+
+# Before maudify, check the file for syntax errors
+    syntax_common_check($language_file_name);
+    
     maudify_file("$language_file_name","");
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
@@ -631,9 +635,6 @@ sub maudify_file {
 	    terminate("Neither of $file.k, $file.kmaude, or $file.maude exist");
 	}
     }
-
-# Before maudify, check the file for syntax errors
-    syntax_common_check($file);
     
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";
@@ -648,6 +649,7 @@ sub maudify_file {
 	$_;
     }/gsme;
     
+
     my $maudified = "";
     while (s/^(\s*)($top_level_pattern)(\s*)//sm) {
 	(my $before, local $_, my $after) = ($1,$2,$3);
@@ -668,6 +670,7 @@ sub maudify_file {
 	    s!\.k(maude)?\s*$!\.maude!s;
 	}
 	else {
+
 #	    print "Top level pattern:\n$_\n" if $verbose;
 	}
 	$maudified = "$maudified$before$_$after";
