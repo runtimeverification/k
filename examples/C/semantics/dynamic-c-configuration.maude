@@ -1,0 +1,43 @@
+mod C-CONFIGURATION is
+	including C-SYNTAX .
+	including COMMON-C-CONFIGURATION .
+	---including PL-BUILTINS .
+
+	mb configuration 
+		--- < T > 
+			--- < aLabelMap > .Map </ aLabelMap >
+			--- < genv > .Map </ genv >
+			--- < mem > .Map </ mem >
+			--- < nextLoc > 0 </ nextLoc >
+			--- < freshNat > 0 </ freshNat >
+			--- < nextFile > 0 </ nextFile >
+			--- < malloced > .Map </ malloced >
+			--- < statics > .Map </ statics >
+			--- < typedefs > .Map </ typedefs >
+			--- < sizes > .Map </ sizes >
+			--- < structs > .Map </ structs >
+			--- < openFiles > .Map </ openFiles >
+			--- < busy > .Bag </ busy >
+			--- < threads >
+				--- < thread * >
+					--- < callStack > .List </ callStack >
+					--- ---< local >
+						--- < k > .K </ k >
+						--- < locsWrittenTo > .Bag </ locsWrittenTo >
+						--- < holds > .Map </ holds >
+						--- < currentFunction > .K </ currentFunction >
+						--- < type > .K </ type >
+						--- < env > .Map </ env >
+						--- < loopStack > .List </ loopStack >
+						--- < locals > .Bag </ locals >
+						--- < types > .Map </ types >
+					--- ---</ local >
+				--- </ thread * >
+			--- </ threads >
+		--- </ T >
+		--- < files > .Map </ files > --- filenames to strings
+		--- < input > "" </ input >
+		--- < output > "" </ output >
+		< resultValue > .K </ resultValue >
+		: KSentence .
+endm

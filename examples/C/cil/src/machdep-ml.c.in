@@ -1,0 +1,288 @@
+/*
+ *
+ * Copyright (c) 2001-2002, 
+ *  George C. Necula    <necula@cs.berkeley.edu>
+ *  Scott McPeak        <smcpeak@cs.berkeley.edu>
+ *  Wes Weimer          <weimer@cs.berkeley.edu>
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. The names of the contributors may not be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+#include "../config.h"
+
+#include <stdio.h>
+#include <string.h>
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_WCHAR_H
+#include <wchar.h>
+#endif
+
+#ifdef HAVE_STDBOOL_H
+#include <stdbool.h>
+#else
+typedef int bool;
+#endif
+
+#define THREAD_IS_KEYWORD "@THREAD_IS_KEYWORD@"
+#define HAVE_BUILTIN_VA_LIST "@HAVE_BUILTIN_VA_LIST@"
+
+#ifdef _GNUCC
+#define LONGLONG long long
+#define CONST_STRING_LITERALS "true"
+#define VERSION __VERSION__
+#define VERSION_MAJOR __GNUC__
+#define VERSION_MINOR __GNUC_MINOR__
+#define UNDERSCORE_NAME "@UNDERSCORE_NAME@"
+#endif
+
+#ifdef _MSVC
+#define LONGLONG __int64
+#define CONST_STRING_LITERALS "false"
+#define VERSION "Microsoft C"
+#define VERSION_MAJOR (_MSC_VER / 100)
+#define VERSION_MINOR (_MSC_VER % 100)
+#define __alignof(x) 0
+#define UNDERSCORE_NAME "true"
+#endif
+
+char *underscore(char *s)
+{
+  char *copy = strdup(s);
+  char *space = copy;
+
+  while ((space = strchr(space, ' ')))
+    *space++ = '_';
+
+  return copy;
+}
+
+/* The type for the machine dependency structure is generated from the
+   Makefile */
+int main(int argc, char **argv)
+{
+  int env = argc == 2 && !strcmp(argv[1], "--env");
+  int alignof_short, alignof_int, alignof_long, alignof_ptr, alignof_enum,
+    alignof_float, alignof_double, alignof_longdouble, sizeof_fun,
+    alignof_fun, alignof_str, alignof_aligned, alignof_longlong, 
+    little_endian, char_is_unsigned, alignof_bool;
+
+  // The alignment of a short
+  {
+    struct shortstruct {
+      char c;
+      short s;
+    };
+    alignof_short = (int)(&((struct shortstruct*)0)->s);
+  }
+
+  // The alignment of an int
+  {
+    struct intstruct {
+      char c;
+      int i;
+    };
+    alignof_int = (int)(&((struct intstruct*)0)->i);
+  }
+  
+  // The alignment of a bool
+  {
+    struct boolstruct {
+      char c;
+      bool b;
+    };
+    alignof_bool = (int)(&((struct boolstruct*)0)->b);
+  }
+  
+  // The alignment of a long
+  {
+    struct longstruct {
+      char c;
+      long l;
+    };
+    alignof_long = (int)(&((struct longstruct*)0)->l);
+  }
+    
+  // The alignment of long long
+  {
+    struct longlong {
+      char c;
+      LONGLONG ll;
+    };
+    alignof_longlong = (int)(&((struct longlong*)0)->ll);
+  }
+
+  // The alignment of a ptr
+  {
+    struct ptrstruct {
+      char c; 
+      int * p;
+    };
+    alignof_ptr = (int)(&((struct ptrstruct*)0)->p);
+  }
+
+  // The alignment of an enum
+  {
+    struct enumstruct {
+      char c; 
+      enum e2 { THREE, FOUR, FIVE } e;
+    };
+    alignof_enum = (int)(&((struct enumstruct*)0)->e);
+  }
+    
+  // The alignment of a float
+  {
+    struct floatstruct {
+      char c;
+      float f;
+    };
+    alignof_float = (int)(&((struct floatstruct*)0)->f);
+  }
+  
+  // The alignment of double
+  {
+    struct s1 {
+      char c;
+      double d;
+    };
+    alignof_double = (int)(&((struct s1*)0)->d);
+  }    
+
+  // The alignment of long  double
+  {
+    struct s1 {
+      char c;
+      long double ld;
+    };
+    alignof_longdouble = (int)(&((struct s1*)0)->ld);
+  }    
+    
+  alignof_str = __alignof("a string");
+  alignof_fun = __alignof(main);
+
+  sizeof_fun = 0;
+#ifdef __GNUC__
+  sizeof_fun = sizeof(main);
+#endif
+
+  // The alignment of anything with __attribute__((aligned))
+  alignof_aligned = 0;
+#ifdef __GNUC__
+  {
+    char __attribute__((aligned)) c;
+    long double  __attribute__((aligned)) ld;
+    if (__alignof(c) != __alignof(ld)) {
+      fprintf(stderr, "__attribute__((aligned)) has a different effect on different types.  alignments may be computed incorrectly.\n");
+    }
+    alignof_aligned = __alignof(c);
+  }
+#endif
+
+
+  // Whether char is unsigned
+  char_is_unsigned = ((char)0xff) > 0;
+
+  // endianness
+  {
+    int e = 0x11223344;
+    little_endian = (0x44 == *(char*)&e) ? 1 :
+      ((0x11 == *(char*)&e) ? 0 : (exit(1), 0));
+  }
+
+  if (env)
+    {
+      fprintf(stderr, "Generating CIL_MACHINE machine dependency information string (for CIL)\n");
+      printf("short=%d,%d int=%d,%d long=%d,%d long_long=%d,%d pointer=%d,%d "
+	     "enum=%d,%d float=%d,%d double=%d,%d long_double=%d,%d void=%d "
+	     "bool=%d,%d fun=%d,%d alignof_string=%d max_alignment=%d size_t=%s "
+	     "wchar_t=%s char_signed=%s const_string_literals=%s "
+	     "big_endian=%s __thread_is_keyword=%s __builtin_va_list=%s "
+	     "underscore_name=%s\n",
+	     (int)sizeof(short), alignof_short, (int)sizeof(int), alignof_int,
+	     (int)sizeof(long), alignof_long, (int)sizeof(long long), alignof_longlong, 
+	     (int)sizeof(int *), alignof_ptr, (int)sizeof(enum e { ONE, TWO }), alignof_enum,
+	     (int)sizeof(float), alignof_float, (int)sizeof(double), alignof_double, 
+	     (int)sizeof(long double), alignof_longdouble, (int)sizeof(void), 
+	     sizeof(bool), alignof_bool,
+	     sizeof_fun, alignof_fun, alignof_str, alignof_aligned, 
+	     underscore(TYPE_SIZE_T), underscore(TYPE_WCHAR_T), 
+	     char_is_unsigned ? "false" : "true", CONST_STRING_LITERALS, 
+	     little_endian ? "false" : "true",
+	     THREAD_IS_KEYWORD, HAVE_BUILTIN_VA_LIST, UNDERSCORE_NAME);
+    }
+  else
+    {
+      fprintf(stderr, "Generating machine dependency information for CIL\n");
+
+      printf("(* Generated by code in %s *)\n", __FILE__);
+      printf("\t version_major    = %d;\n", VERSION_MAJOR);
+      printf("\t version_minor    = %d;\n", VERSION_MINOR);
+      printf("\t version          = \"%s\";\n", VERSION);
+
+      // Size of certain types
+      printf("\t sizeof_short          = %d;\n", (int)sizeof(short));
+      printf("\t sizeof_int            = %d;\n", (int)sizeof(int));
+      printf("\t sizeof_bool           = %d;\n", (int)sizeof(bool));
+      printf("\t sizeof_long           = %d;\n", (int)sizeof(long));
+      printf("\t sizeof_longlong       = %d;\n", (int)sizeof(LONGLONG));
+      printf("\t sizeof_ptr            = %d;\n", (int)sizeof(int *));
+      printf("\t sizeof_enum           = %d;\n", (int)sizeof(enum e { ONE, TWO }));
+      printf("\t sizeof_float          = %d;\n", (int)sizeof(float));
+      printf("\t sizeof_double         = %d;\n", (int)sizeof(double));
+      printf("\t sizeof_longdouble     = %d;\n", (int)sizeof(long double));
+      printf("\t sizeof_void           = %d;\n", (int)sizeof(void));
+      printf("\t sizeof_fun            = %d;\n", (int)sizeof_fun);
+      printf("\t size_t                = \"%s\";\n", TYPE_SIZE_T);
+      printf("\t wchar_t               = \"%s\";\n", TYPE_WCHAR_T);
+      printf("\t alignof_short         = %d;\n", alignof_short);
+      printf("\t alignof_int           = %d;\n", alignof_int);
+      printf("\t alignof_bool          = %d;\n", alignof_bool);
+      printf("\t alignof_long          = %d;\n", alignof_long);
+      printf("\t alignof_longlong      = %d;\n", alignof_longlong);
+      printf("\t alignof_ptr           = %d;\n", alignof_ptr);
+      printf("\t alignof_enum          = %d;\n", alignof_enum);
+      printf("\t alignof_float         = %d;\n", alignof_float);
+      printf("\t alignof_double        = %d;\n", alignof_double);
+      printf("\t alignof_longdouble    = %d;\n", alignof_longdouble);
+      printf("\t alignof_str           = %d;\n", alignof_str);
+      printf("\t alignof_fun           = %d;\n", alignof_fun);
+      printf("\t alignof_aligned       = %d;\n", alignof_aligned);
+      printf("\t char_is_unsigned      = %s;\n", char_is_unsigned ? "true" : "false");
+      printf("\t const_string_literals = %s;\n", CONST_STRING_LITERALS);
+      printf("\t underscore_name       = %s;\n", UNDERSCORE_NAME);
+      printf("\t __builtin_va_list     = %s;\n", HAVE_BUILTIN_VA_LIST);
+      printf("\t __thread_is_keyword   = %s;\n", THREAD_IS_KEYWORD);
+      printf("\t little_endian         = %s;\n", little_endian ? "true" : "false");
+    }
+  return 0;
+} 

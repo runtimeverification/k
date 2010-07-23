@@ -1,0 +1,8 @@
+int main(void){
+	int long long bugForTraian = (- 0x7FFFFFFFFFFFFFFF - 1);
+	return 17;
+	// 9223372036854775807
+	// 9223235645873324032
+	// 9223051112603451392
+	// 9222634509365673984
+}

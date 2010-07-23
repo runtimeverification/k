@@ -1,0 +1,79 @@
+load a.out
+load ../../../model-checker
+mod MODEL-CHECK-TEST is
+	including C-program-modelCheck .
+	---including C-program-spawn .
+	including PL-MODEL-CHECKER .
+	op modelBag : -> Bag .
+	eq modelBag = eval('program-modelCheck(.List{K}), String "a.out"(.List{K}), "") .
+	op spawnBag : -> Bag .
+	--- eq spawnBag = eval('program-spawn(.List{K}), String "a.out"(.List{K}), "") .
+	
+	op Start : -> Model-Checker-State .
+	op state : Bag -> Model-Checker-State .
+	eq Start = state(modelBag) .
+	
+	op error : -> Prop .
+	eq state(
+		B0:Bag
+		< T > 
+			B1:Bag
+			< genv > 
+				M0:Map
+				Id error(.List{K}) |-> Loc:K
+			</ genv >
+			< mem > 
+				M1:Map  
+				Loc:K |-> ('piece).KProperLabel(Rat 1(.List{K}),, Rat 8(.List{K})) 
+			</ mem >
+		</ T >	
+	) |= error = true .
+	eq state(
+		B0:Bag
+		< T > 
+			B1:Bag
+			< genv > 
+				M0:Map
+				Id error(.List{K}) |-> Loc:K
+			</ genv >
+			< mem > 
+				M1:Map  
+				Loc:K |-> ('piece).KProperLabel(Rat 0(.List{K}),, Rat 8(.List{K})) 
+			</ mem >
+		</ T >	
+	) |= error = false .
+	
+	op enabled : Id -> Prop .
+	eq state(
+		B0:Bag
+		< T > 
+			B1:Bag
+			< threads >
+				B2:Bag
+				< thread >
+					B3:Bag
+					< k > 'Apply('Closure(Id X:Id(.List{K}),, K0:K,, K1:K),, K3:K) ~> K:K </ k >
+				</ thread >
+			</ threads >
+		</ T >	
+	) |= enabled(X:Id) = true .
+	eq state(B:Bag) |= enabled(X:Id) = false [owise] .
+	
+	--- op zeros : -> Prop .
+	--- eq state(C:Bag) |= zeros  = false .
+	--- op ones : -> Prop .
+	--- eq state(C:Bag) |= ones  = true .
+endm
+
+---red modelCheck(Start, (~ enabled(use)) U enabled(authenticate)) .
+red modelCheck(Start, [] (~ error)) .
+--- red modelCheck(Start, [] ones) .
+
+--- search modelBag =>! B:Bag .
+--- search spawnBag =>! B:Bag .
+---search modelBag =>! B:Bag .
+---search[, 10] spawnBag =>! B:Bag .
+
+
+
+q

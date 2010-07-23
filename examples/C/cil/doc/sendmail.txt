@@ -1,0 +1,142 @@
+Here is a little bit on sendmail...
+
+Contents:
+
+I. Notes
+   a. General Notes
+   b. Running it through cil
+II. Making a .cf file (shuddder...)
+   a. Instructions on making a .cf file
+   b. Necessary modifications (if you're not root)
+III. Running the guy
+   a. step by step on how to use this thing
+IV. How to check if it worked
+
+
+I. Notes
+
+a. General Notes
+Documentation:
+
+sendmail/cf/README - information about making a cf file
+sendmail/doc/op/op.txt or op.ps - users manual for sendmail
+sendmail/README - release notes
+
+There is also a lot of information about sendmail at www.sendmail.org. 
+When you first download and uncompress sendmail, you must type in "sh Build" 
+in the directory you extracted to in order to compile. It does not use "make" 
+or anything yet on the first compilation. Once you type in "sh Build," it will
+do its magic and under the "sendmail-XXX/obj-OSTYPE/sendmail/" directory you
+will find the source files and the Makefile. It is from here that you can run
+"make" and recompile sendmail. (Note: XXX is whatever version of sendmail you
+downloaded, and OSTYPE is the operating system you are using, it is 
+obj.Linux.2.4.5.i686 on manju). 
+
+b. Running it through cil
+
+This should be simple. In the cil directory, type in "make sendmail" on manju. 
+If you have installed sendmail to a different directory, you must change the 
+SENDMAILSRC definition in the Makefile.
+
+
+II. Making a .cf file
+
+a. Instructions on making a .cf file
+Go to your sendmail/cf directory. From here, there are two subdirectories of 
+note: cf and m4. Both of these contain files necessary to make your config
+file. Here is the command to make a configuration file (run this from your
+/sendmail/cf directory):
+
+m4 ${CFDIR}/m4/cf.m4 config.mc > config.cf
+
+CFDIR is the cf directory (/usr/local/src/sendmail-8.12.1/cf on manju)
+
+config.mc is a generic name. You should replace it with the OS that you 
+are running. Typically, I used generic-linux.mc.
+
+config.cf is the name of the .cf file you want to make. config.cf or 
+sendmail.cf are perfectly fine names.
+
+Now, simply stick this file in the sendmail source code directory
+(/usr/local/src/sendmail-8.12.1/obj.Linux.2.4.5.i686/sendmail on manju).
+
+b. Necessary modifications
+If you are not root, you will not be able to access the default mailbox
+directory /etc/mail/ which is defined in the cfhead.m4 file, found in 
+the m4 subdirectory. It is not recommended that you modify the .m4 files.
+Instead, you can make modifications to a .mc file of your creation. I have
+one named winston.mc found in the cf subdirectory. At the top, this line was
+added: 
+
+define(`MAIL_SETTINGS_DIR', `/home/winston/mailbox/')dnl
+
+Note the difference between ` and ' used to quote the variable and definition.
+This means that all mail will instead be deposited in subdirectories of
+/home/winston/mailbox. For instance, mail will now be deposited in 
+/home/winston/var/spool/mqueue.
+
+Another thing you need to do is create a file called "local-host-names" in the
+mailbox directory. So, just create a file called "local-host-names" and put
+the name of the machine you are on. I put "manju@cs.berkeley.edu."
+
+Lastly, you must make sure that port 9999 is available on the machine you are
+working on (typically manju). You can check this by running the "netstat -anp"
+command in Unix scrolling up to check what ports are in use. If it is not
+available, you are going to have to modify the source code. Here's how to do it:
+
+In daemon.c, change all occurrences of 9999 to some other port above 1024 that
+is not in use.
+In config.cf change all occurrences of 9999 to that same port above. Lastly,
+change the TrustedUser to your manju login. (i.e. TrustedUser=winston, or
+whatever your login is.)
+
+III. Running the guy
+
+Ok, now to the fun part. After running it through cil, you want to see if it
+works. Here's the command to type in the $(SENDMAILDIR)/obj.Linux.xxx/sendmail
+directory:
+
+./sendmail -C config.cf -bD -v -d1
+
+Of course, if you named your config.cf file differently, change that here.
+
+The -bD flag tells it to run as a daemon in the foreground.
+The -v flag tells it to go to verbose mode (it's not really necessary)
+the -d1 flag tells it to go to debugging mode (not really necessary either)
+
+Now you are running sendmail! Now, open another console. Type in 
+"telnet localhost 9999" or whatever port you decided to use. If you are on
+another machine, change the localhost to whatever machine you are running
+sendmail on. You will get some sort of message telling you what you've 
+connected. 
+
+Now, type in: 
+HELO blah
+It's really not important what goes after HELO.
+
+Now, type in the sender of this message. To do that, type in:
+MAIL from: winston@manju.cs.berkeley.edu (or whatever address you are
+sending from)
+
+Next, designate the recipient. To do that, type in:
+RCPT to: winston@madrone.cs.berkeley.edu (or whatever address you are
+sending to)
+
+Next, write the body. To do that, type in:
+DATA (hit enter)
+blah blah blah blah blah
+Follow the instructions, end with a . on a line by itself.
+
+Now, that's it. You've sent something! (hopefully). To exit, type in:
+quit
+
+
+IV. Checking that it worked
+
+Now for the moment of truth. Go to one level above your mailbox directory (in 
+the examples above, my mailbox directory was /home/winston/mailbox, so I would
+go to /home/winston now) and go to the var/spool/mqueue directory. Inside there 
+should be file with gibberish names on them. "cat" the ones starting with "dff."
+One of those should be the body of your email. Wow, it worked! Sendmail just 
+places the files here so the MTA can pick them up for delivery. That's it!
+

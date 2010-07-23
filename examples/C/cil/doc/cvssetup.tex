@@ -1,0 +1,216 @@
+\documentclass{article}
+\usepackage{hevea}
+
+\def\t#1{{\tt #1}}
+\def\DYNAMIC{\t{DYNAMIC}}
+\title{Setting Up CVS and SSH}
+\author{Scott McPeak \and George Necula}
+
+\def\cvshost{manju}
+
+\begin{document}
+\maketitle
+
+ This document is intended to get you started with the tools that are
+necessary for checking out stuff out of the \cvshost{} CVS repository. These
+instructions work on Linux and Windows (NT4.0, 2000, XP and also less reliably
+on 95/98/Me).
+
+\section{If you want to use Windows}
+
+ \subsection{Get \t{cygwin}}
+
+ You must have a bunch of Unix tools installed on your machine. (In the future
+we might be able to avoid these but for now you are better off with them.).
+Here is what I (George) do to install Cygwin. You need a good network
+connection for this. 
+\begin{itemize}
+\item Create a directory \t{C:\backslash Download\backslash cygwin}
+\item Go to \ahrefurl{http://sources.redhat.com/cygwin} and click \t{Install
+cygwin} icon. Download \t{setup.exe} to the directory you just created.
+\item Run \t{setup.exe} and select ``Download to local directory''. Select all
+the packages. It is especially important to select all packages under
+``Devel'' category. If you want to use OCaml for other projects as well, I
+also suggest that you select the XFree86-bin, XFree86-lib and XFree86-prog as
+well. This will take a while (~ 30 minutes)
+\item Run \t{setup.exe} again and now select to ``Install from local
+directory''. It is best to {\bf deselect} the \t{tetex} package since I found
+it to interfere with other installations of Latex.
+\item I choose \t{C:\backslash Programs\backslash cygwin} 
+as the home for \t{cygwin}, I use \t{DOS} as the default text file and I
+choose ``Install for All''. 
+\item Add \t{C:\backslash Programs\backslash cygwin\backslash bin} to your
+PATH. You must put it in the ``System Variables'' PATH (In Control Panel/System/Advanced/Environment
+Variables'' and {\bf put it first} so that it comes before the default
+c:/WinNT/system32. You can verify that you got it right if you get
+\t{/usr/bin/find} when you run \t{which find}. 
+\end{itemize}
+
+
+ If you get a compilation error in file ``cltkImg.c'' while you compile Ocaml
+v 3.06, then you should patch the Ocaml sources as explained at
+\ahrefurl{http://groups.google.com/groups?selm=fa.i2v96ov.1p7cmbc\%40ifi.uio.no}
+(It is easy).
+
+ \subsection{Customize \t{ssh}}\label{sec-win-ssh}
+
+ Set the environment variable \t{HOME} to point to your home directory. I use
+ \t{C:\backslash Necula}. 
+
+ For some strange reason \t{ssh} does not see this \t{HOME} variable and
+insists on looking at \t{/home/necula} instead. So I create a link as follows:
+\begin{verbatim}
+bash
+cd /
+mkdir home
+ln -s /cygdrive/c/Necula /home/necula
+\end{verbatim}
+
+\section{Configure CVS}
+
+ \subsection{\t{.cvsrc}}
+
+ Create a \home{/.cvsrc} file with two lines in it: 
+\begin{verbatim}
+cvs -q
+update -d
+\end{verbatim}
+
+ \subsection{\t{.ssh/config}}
+
+ Create a \home{/.ssh/config} file with this line in it:
+\begin{verbatim}
+ForwardX11 yes
+\end{verbatim}
+
+ If the \t{DISPLAY} environment variable is set when you invoke \t{ssh} (e.g.
+to \t{localhost:0.0} then \t{ssh} will do automatic X11 forwarding for you.
+This is not useful for the use of \t{ssh} with \t{cvs} but when you want to do
+remote login. 
+
+ \subsection{Using CVS with \t{ssh}}
+
+ Note: these instructions appear to work even on Windows with the \t{ssh} and
+\t{cvs} that ships with \t{cygwin} (provided that you have installed
+\t{cygwin} and \t{ssh} as discussed in Section~\ref{sec-win-ssh}).
+
+ Set the environment variable \t{CVS\_RSH} to \t{ssh}. 
+
+ Now you can use cvs with ssh but you will have to type the remote password
+ everytime you run cvs. 
+
+ If you want to be able to use \t{ssh} without typing a password everytime
+here is what you can do. These instructions are for the case when you use one
+of the newer versions of SSH that support the protocol 2. 
+
+\begin{enumerate}
+  \item If you have a DSA private key that is already authorized on 
+        the server, copy it to \t{\home{}/.ssh/id\_dsa} and you 
+        should be done.
+  \item Otherwise
+     \begin{enumerate}
+       \item Run \t{ssh-keygen -t dsa} to create a private key. 
+        Choose a passphrase and remember it. 
+        If you do not have a passphrase then anybody who gets
+        access to your machine will also be able to log in to the server. This
+        step should create the files \t{id\_dsa.pub} and \t{id\_dsa} in your 
+        \t{\home{}/.ssh} directory.
+       \item Copy the public key to the server (say \cvshost.cs.berkeley.edu).
+          Make sure you append the key to {\bf authorized\_keys2}, not to {\bf
+          authorized\_keys}.  
+             \begin{verbatim}
+             cd ~
+             scp .ssh/id_dsa.pub manju:~/.ssh/newpublicid
+             ssh manju
+             cd .ssh
+             cat newpublicid >> authorized_keys2
+             rm newpublicid
+             \end{verbatim}
+     \end{enumerate}
+\end{enumerate}
+
+
+ If you want you can even start an agent to do the authentication for
+you. The steps are different for Linux or Windows:
+   \begin{itemize}
+     \item On Linux or on Windows if you work from within \t{bash} you can run
+        \begin{verbatim} 
+           eval `ssh-agent`
+           ssh-add
+        \end{verbatim}
+
+       The first step starts the agent and the second on loads your identity
+       in the agent. In this latter step you will be asked to enter your
+       passphrase. 
+     \item At the Windows command prompt (\t{cmd.exe}) you cannot just run
+       those commands. Instead you have to download
+       \ahref{http://raw.cs.berkeley.edu/winssh-agent.cmd}{this batch file
+       ({\bf do not execute it})},  
+       put it somewhere in your path and then run it instead of the above
+       sequence of commands. 
+   \end{itemize}
+
+\section{Using CVS}
+
+ You should read the rest only if you have not used CVS before. 
+
+ CVS is used to synchronize changes to the project across multiple
+developers.  See the CVS website for detailed information
+
+  \ahrefurl{http://www.cvshome.org/}
+  
+There are a few common commands you'll need.  Each of these is to be run
+in the base 'cil' directory (the one with 'regrtest'):
+
+\begin{itemize}
+\item \t{cvs [-n] update -d [filename]}
+
+    This retrieves any changes recently committed by others.  This is
+    usually necessary before you can commit your own changes.  It is a
+    good idea to run the fast regression test ('regrtest') before and
+    after doing "cvs update" so you can know whether it was you or the
+    update which broke something.
+
+    The optional -n flag tells CVS to not actually change any of your
+    files.  This is useful for querying the status of the repository.
+
+    The -d argument tells cvs to create on your machine any new directories
+    that somebody might have checked in. By default cvs does not create new
+    directories. This flag is so useful that many people find it useful to
+    create a \home{/.cvsrc} file with one line containing "update -d" in it.
+    This way you don't have to specify the flag all the time.
+
+    If you specify a filename (after cd'ing to the directory containing it),
+    only that file will be updated, otherwise everything in the current
+    directory and below is updated. Run this in the top-level project
+    directory to update the entire project. A useful idiom for undoing all of
+    your changes is "cd dir; rm file; cvs update file".
+
+    
+\item \t{cvs commit [filename]}
+
+    This pushes your changes into the repository, so that the next time
+    someone does "cvs update" they will get your changes.  Please try to
+    only commit when the regression test script passes.
+    
+    If you specify a filename, only that file will be committed, otherwise
+    everything in the current directory and below is checked in. Run this in
+    the top-level project directory to check all of your changes in.
+
+\item  \t{cvs add filename}
+
+    This adds a new file to the repository.  It isn't visible in the
+    repository until you do a commit.
+\end{itemize}
+ 
+
+\section{Useful Links}
+\begin{itemize}
+ \item  Tutorial on ML: 
+  \item Documentation and sources for CVS:
+        \ahrefurl{http://www.cvshome.org/}
+
+ \end{itemize}
+
+\end{document}
+

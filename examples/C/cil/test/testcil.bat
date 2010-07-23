@@ -1,0 +1,1 @@
+perl -S testcil.pl %*

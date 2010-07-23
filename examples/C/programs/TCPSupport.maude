@@ -1,0 +1,118 @@
+in socket .
+in pl-builtins .
+
+
+--- syntax used by the tcp interface and the tcp backend
+mod TCP-SYNTAX is
+	including SOCKET .
+	
+	op error : -> [String] .
+	op containedRequest : Configuration -> [String] .
+	op toSend : String -> Msg .
+	op start : Nat -> Configuration .
+	op tcpRequest : String -> [String] .
+endm
+
+mod TCP-CLIENT is
+	including TCP-SYNTAX .
+	
+	sort TCPState .
+		
+	op Client : -> Cid .
+	---op aClient : -> Oid .
+	op cnum : Nat -> Oid .
+	
+	ops idle connecting sending receiving haveAnswer closing connected finished : -> TCPState [ctor] .
+	
+	op state:_ : TCPState -> Attribute [ctor] .
+	op answer:_ : String -> Attribute [ctor] .
+	op connectedTo:_ : Oid -> Attribute [ctor] .
+	
+		
+	vars Me Server : Oid .
+	var A : AttributeSet .
+	var S : String .
+	var M : Msg .
+	var C : Configuration .
+	var N : Nat .
+	
+	rl < Me : Client | state: connecting, A > createdSocket(Me, socketManager, Server)
+	=> < Me : Client | state: connected, connectedTo: Server, A >
+	[print "connected"] .
+	
+	----- errors
+	eq containedRequest(C socketError(Me, socketManager, S))
+	= error
+	[print "socket error: " S] .
+	eq containedRequest(C < Me : Client | state: connecting, A > closedSocket(Me, Server, S))
+	= error
+	[print "error connecting: " S] .
+	eq containedRequest(C < Me : Client | state: receiving, A > closedSocket(Me, Server, S))
+	= error
+	[print "error receiving: " S] .
+	-----
+	
+	rl < Me : Client | state: connected, connectedTo: Server, A > toSend(S)
+	=> < Me : Client | state: sending, connectedTo: Server, A > send(Server, Me, S)
+	[print "sending"] .
+	
+	rl < Me : Client | state: sending, A > sent(Me, Server)
+	=> < Me : Client | state: receiving, A > receive(Server, Me)
+	[print "receiving"] .
+	
+	rl < Me : Client | state: receiving, A > received(Me, Server, S)
+	=> < Me : Client | state: haveAnswer, answer: S, A >
+	[print "have answer"] .
+	
+	rl < Me : Client | state: haveAnswer, connectedTo: Server, A > 
+	=> < Me : Client | state: closing, connectedTo: Server, A > closeSocket(Server, Me)
+	[print "closing"] .
+	
+	rl < Me : Client | state: closing, A  > closedSocket(Me, Server, S)
+	=> < Me : Client | state: finished, A  >
+	[print "finished"] .
+	
+	rl containedRequest(C < Me : Client | state: finished, answer: S, A  >)
+	=> S
+	[print "popping out of socket stuff"] .
+	
+	rl start(N) => 
+		<>
+		< cnum(N) : Client | state: connecting >
+		createClientTcpSocket(socketManager, cnum(N), "localhost", 7077) .
+		
+	----rl containedRequest(M) => containedRequest(M start) .
+endm
+
+mod TCP-INTERFACE is
+	including TCP-SYNTAX .
+	including TCP-CLIENT .
+	including COUNTER .
+	
+	---op tcpRequest : String -> [String] .
+	---vars S S' : String .
+	---var N : Nat .
+	---rl tcpRequest(S) => containedRequest(start(counter) toSend(S + "###EOMTCP###" + "\r\n")) .
+	
+	rl tcpRequest(S:String) => containedRequest(start(counter) toSend(S:String + "###EOMTCP###" + "\r\n")) .
+	
+	op readFile : String -> [String] .
+	op writeFile : String -> [String] .
+	op check : String -> [String] .
+	
+	eq readFile(S:String) = check(tcpRequest("###READFILE###" + S:String)) .
+	eq writeFile(S:String) = check(tcpRequest("###WRITEFILE###" + S:String)) .
+			
+	ceq check(S:String) = substr(S:String, length("###SUCC###"), length(S:String))
+		if substr(S:String, 0, length("###SUCC###")) == "###SUCC###" .
+
+	
+endm
+---set print attribute on .
+---red metaErewrite(upModule('TCP-INTERFACE, false), 'tcpRequest['"(= 5 5)\n".String,'s_^8['0.Zero]], unbounded, 1) .
+---red metaErewrite(upModule('TCP-INTERFACE, false), 'tcpRequest['"(= 2 4)\n".String,'s_^8['0.Zero]], unbounded, 1) .
+
+---erew tcpRequest("xxx") .
+---erew readFile("trial.txt") .
+
+---q
