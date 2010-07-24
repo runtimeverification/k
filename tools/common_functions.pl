@@ -23,6 +23,7 @@ my $comment = join("|", (
     "\\*\\*\\*\\(.*?\\*\\*\\*\\)",                                                                                                
     "\\*\\*\\*.*?\$"                                                                                                              
 ));     
+my @nodes = ();
 
 # explicit call for debugging.
 # syntax_common_check($ARGV[0]);
@@ -75,7 +76,7 @@ sub append_rec_tree
     # find unmatched cells and report them.
     if ($temp_cfg =~ m/.*<(.+?)>.*/s)
       {
-	  warning("configuration definition is not correct. Unmatched cell <$1>");
+	  warning(" - configuration definition is not correct. Unmatched cell <$1>");
       }
     
     return $root;
@@ -251,38 +252,51 @@ sub validate_node()
     # remove "closed" markers
     $node_data =~ s/;;;;;closed//;
     
-    my $config_node = Tree::Nary->find($config_tree, $Tree::Nary::PRE_ORDER, 
-	$Tree::Nary::TRAVERSE_ALL, $node_data);
-    
-    # if node not found in configuration: exit
-    if (!defined($config_node))
+    # get a list o all nodes.
+    find_all($node_data);
+
+    if (scalar @nodes == 0)
     {
 	warning("(@ line $l) - cell <" . $node_data . "> in: \n" . $rule . "\nis not defined in configuration.");
     }
     
-    # get the parent for $node in rule
-    my $parent_node_rule = $node->{parent};
-    my $parent_data = $parent_node_rule->{data};
-    $parent_data =~ s/;;;;;closed//;
-   
-    # get the coresponding for $parent_node_rule in configuration
-    my $parent_node_config = Tree::Nary->find($config_tree, $Tree::Nary::PRE_ORDER, 
-	$Tree::Nary::TRAVERSE_ALL, $parent_data);
-
-    # if undefined parent node in configuration: warning
-    if (!defined($parent_node_config))
+    my $flag = 0;
+    for my $config_node (@nodes)
     {
-	warning("(@ line $l) - cell <" . $node_data . "> in:\n" . $rule . "\nhas parent <" 
-	  . $parent_data ."> which is not defined in configuration.");
+	# get the parent for $node in rule
+	my $parent_node_rule = $node->{parent};
+	my $parent_data = $parent_node_rule->{data};
+	$parent_data =~ s/;;;;;closed//;
+	
+	# get the coresponding for $parent_node_rule in configuration
+	my $parent_node_config = Tree::Nary->find($config_tree, $Tree::Nary::PRE_ORDER, 
+	    $Tree::Nary::TRAVERSE_ALL, $parent_data);
+	
+#	print "\tNode " . $config_node->{data} . "   parent: " . $parent_node_config->{data} . "\n";
+
+        # if undefined parent node in configuration: warning
+	if (!defined($parent_node_config))
+	{
+	    warning("(@ line $l) - cell <" . $node_data . "> in:\n" . $rule . "\nhas parent <" 
+		. $parent_data ."> which is not defined in configuration.");
+	}
+	
+	
+	# check if $parent_node_config is ancestor for $config_node
+	if (Tree::Nary->is_ancestor($parent_node_config, $config_node) == $Tree::Nary::TRUE
+	    || Tree::Nary->is_ancestor($config_node, $parent_node_config) == $Tree::Nary::TRUE)
+	{
+	    $flag = 1;
+	}	
     }
     
-    
-    # check if $parent_node_config is ancestor for $config_node
-    if (Tree::Nary->is_ancestor($parent_node_config, $config_node) == $Tree::Nary::FALSE
-	&& Tree::Nary->is_ancestor($config_node, $parent_node_config) == $Tree::Nary::FALSE)
+    if ($flag == 0)
     {
 	warning("(@ line $l) - cell structure in:\n$rule \nis not a substructure in configuration.");
-    }	
+    }   
+    
+    # clear array
+    @nodes = ();
     
     return $Tree::Nary::FALSE;
 }
@@ -326,8 +340,14 @@ sub syntax_verification
     }
     
     # learn configuration
-    $config_tree = append_rec_tree($lines, "super-node");    
-   
+    $config_tree = append_rec_tree($lines, "super-node");
+    
+    # my $s = "";
+    # Tree::Nary->traverse($config_tree, $Tree::Nary::PRE_ORDER,
+	# $Tree::Nary::TRAVERSE_ALL, -1, \&show, \$s);
+    
+    
+    
     # verify each rule for errors
     my $no = 0;
     while ($source =~ m/(rule|eq|macro)(\s+)(.*?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/sg)
@@ -434,4 +454,42 @@ sub find_line
     
     return $l_no;
 }
+
+sub find_all
+{
+    my $node_name = shift;
+    
+    # reset
+    @nodes = ();
+    
+    my $s = "";
+    Tree::Nary->traverse($config_tree, $Tree::Nary::PRE_ORDER,
+	$Tree::Nary::TRAVERSE_ALL, -1, \&show, \$node_name);
+}
+
+sub show()
+{
+    # get current node and ref to arguments
+    my ($node, $ref) = (shift, shift);
+  
+    # get arguments reference
+    my $p = $ref;
+    my $n;
+    
+    # if no reference to arguments defined, no node is known
+    if(defined($p)) 
+    {
+	$n = $$p;
+    } 
+
+    # add node in list if found
+    if ($node->{data} eq $n)
+    {
+	push(@nodes, $node);
+    }
+    
+    return $Tree::Nary::FALSE;
+}
+
+
 1;
