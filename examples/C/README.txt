@@ -10,4 +10,8 @@ Finally, build the tool:
 
 	
 Changes to the CABS abstract syntax tree:
-	Different cases and names (e.g., "Signed" instead of "Tsigned")
+	- Different cases and names (e.g., "Signed" instead of "Tsigned", "DecDef" instead of "DECDEF", etc.)
+	- "Identifier" around strings
+	- Flattened SpecifierElem
+	PROTO => Prototype
+	NO_INIT => NoInit

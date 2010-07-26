@@ -98,11 +98,11 @@ let wrapString d1 d2 = d2 ^ paren(d1)
 *)
 let out = ref stdout
 
-let printListWithSep f x sep =
-	List.fold_left (fun aux arg -> aux ^ sep ^ f arg) "" x
-
 let printList f x =
-	printListWithSep f x ""
+	paren (commas (List.map f x))
+
+let printFlatList f x =
+	List.fold_left (fun aux arg -> aux ^ f arg) "" x
 
 let rec cabsToString ((fname, defs) : file) = 
 	wrapString (printDefs defs) "Program"
@@ -160,9 +160,11 @@ and printInitNameGroup (a, b) =
 and printNameGroup (a, b) = 
 	wrap ((printSpecifier a) :: (printNameList b) :: []) "NameGroup"
 and printNameList a =
-	wrap ((paren (commas (List.map printName a))) :: []) "NameList"
+	(* wrap ((paren (commas (List.map printName a))) :: []) "NameList" *)
+	paren (commas (List.map printName a))
 and printInitNameList a = 
-	wrap ((paren (commas (List.map printInitName a))) :: []) "InitNameList"
+	(* wrap ((paren (commas (List.map printInitName a))) :: []) "InitNameList" *)
+	(paren (commas (List.map printInitName a)))
 and printInitName (a, b) = 
 	wrap ((printName a) :: (printInitExpression b) :: []) "InitName"
 and printInitExpression a =
@@ -172,7 +174,7 @@ and printInitExpression a =
 	| COMPOUND_INIT a ->wrap ((printCompoundInit a) :: []) "CompoundInit"
 and printCompoundInit a =
 	"CompoundInit"
-	(* paren (printListWithSep printOneCompoundInit a ", ") *)
+	(* paren (printFlatListWithSep printOneCompoundInit a ", ") *)
 and printOneCompoundInit (a, b) =
 	"OneCompoundInitTODO"
 and printDeclType a =
@@ -366,15 +368,15 @@ and printStatementLoc s l =
 and printStatementList a =
 	match a with 
 	| [] -> "NoStatements"
-	| x::xs -> printList (fun x -> "\n\t" ^ printStatement x) (x::xs)
+	| x::xs -> printFlatList (fun x -> "\n\t" ^ printStatement x) (x::xs)
 and printAttributeList a =
 	match a with 
 	| [] -> "NoAttributes"
-	| x::xs -> printList printAttribute (x::xs)
+	| x::xs -> printFlatList printAttribute (x::xs)
 and printBlockLabels a =
 	match a with 
 	| [] -> "NoBlockLabels"
-	| x::xs -> printList (fun x -> x) (x::xs)
+	| x::xs -> printFlatList (fun x -> x) (x::xs)
 and printAttribute a =
 	"Attribute"
 and printSpecifier a =
@@ -382,41 +384,42 @@ and printSpecifier a =
 and printSpecElemList a =
 	wrapString (parenList (List.map printSpecElem a)) "Specifier"
 and printSingleNameList a =
-	wrapString (printList printSingleName a) "SingleNameList"
+	(* wrapString (printFlatList printSingleName a) "SingleNameList" *)
+	printFlatList printSingleName a
 and printSpecElem a =
 	match a with
-    | SpecTypedef -> "typedef"
-    | SpecInline -> "inline"
+    | SpecTypedef -> "SpecTypedef"
+    | SpecInline -> "Inline"
     | SpecStorage sto ->
         (match sto with
-        | NO_STORAGE -> "noStorage"
-        | AUTO -> "auto"
-        | STATIC -> "static"
-        | EXTERN -> "extern"
-        | REGISTER -> "register")
+        | NO_STORAGE -> "NoStorage"
+        | AUTO -> "Auto"
+        | STATIC -> "Static"
+        | EXTERN -> "Extern"
+        | REGISTER -> "Register")
     | SpecCV cv -> 
         (match cv with
-        | CV_CONST -> "const"
-        | CV_VOLATILE -> "volatile"
-        | CV_RESTRICT -> "restrict")
-    | SpecAttr al -> "attribute" (* print_attribute al;*)
+        | CV_CONST -> "Const"
+        | CV_VOLATILE -> "Volatile"
+        | CV_RESTRICT -> "Restrict")
+    | SpecAttr al -> "Attribute" (* print_attribute al;*)
     | SpecType bt -> printTypeSpec bt
     (*| SpecPattern name -> printl ["@specifier";"(";name;")"]*)
-	| _ -> "unknownElem"
+	| _ -> "UnknownElem"
 	
 and printTypeSpec = function
-	Tvoid -> "void "
-	| Tchar -> "char "
-	| Tbool -> "_Bool "
-	| Tshort -> "short "
-	| Tint -> "int "
-	| Tlong -> "long "
-	| Tint64 -> "__int64 "
-	| Tfloat -> "float "
-	| Tdouble -> "double "
-	| Tsigned -> "signed"
-	| Tunsigned -> "unsigned "
-	| Tnamed s -> wrap (s :: []) "tnamed"
+	Tvoid -> "Void"
+	| Tchar -> "Char"
+	| Tbool -> "Bool"
+	| Tshort -> "Short"
+	| Tint -> "Int"
+	| Tlong -> "Long"
+	| Tint64 -> "Int64"
+	| Tfloat -> "Float"
+	| Tdouble -> "Double"
+	| Tsigned -> "Signed"
+	| Tunsigned -> "Unsigned"
+	| Tnamed s -> wrap (s :: []) "Named"
 	| Tstruct (a, b, c) -> printStructType a b c
 	| Tunion (a, b, c) -> printUnionType a b c
 	| Tenum (a, b, c) -> printEnumType a b c

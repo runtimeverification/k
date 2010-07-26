@@ -34,7 +34,7 @@ c.maude: c-syntax.maude c-maude.template Makefile
 	@printf "`cat c-maude.template`" $(K-PRELUDE) $(CONFIGURATION_FILE) $(SEMANTICS_FILE) $(SEMANTICS_MODULE) > c.maude
 	
 c-compiled.maude: c.maude $(K-MAUDE) \
-common-c-syntax.maude common-c-configuration.maude common-c-semantics.maude common-c-standard-lib.maude common-c-expressions.maude common-c-statements.maude common-c-conversions.maude common-c-typing.maude \
+common-c-syntax.k common-c-configuration.maude common-c-semantics.maude common-c-standard-lib.maude common-c-expressions.maude common-c-statements.maude common-c-conversions.maude common-c-typing.maude \
 match-c-syntax.maude match-c-semantics.maude match-c-configuration.maude \
 dynamic-c-semantics.maude dynamic-c-configuration.maude
 	$(K-MAUDE) c.maude -language C
