@@ -149,7 +149,7 @@ mod K-MAP-EXTRAS is
 
 
   
-  op $hasMapping : Map K -> Bool   [metadata "latex(renameTo \\$hasMapping(_,_))"] .
+  op $hasMapping : Map K -> Bool   [metadata "latex(renameTo \\$hasMapping\\mybracket{_,_})"] .
   eq $hasMapping ((M:Map (D:K |-> R:K)), D:K) = true .
   eq $hasMapping (M:Map, D:K) = false [owise] .
 
