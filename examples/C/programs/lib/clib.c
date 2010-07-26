@@ -3,7 +3,7 @@
 // #include <stdio.h>
 // #include <stdlib.h>
 //#include <printf.h>
-// typedef unsigned long int size_t;
+typedef unsigned long int size_t;
 // // nice public domain implementations at http://en.wikibooks.org/wiki/C_Programming/Strings
 
 // int getc(FILE *stream){

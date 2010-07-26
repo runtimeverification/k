@@ -38,6 +38,6 @@ mod C-CONFIGURATION is
 		--- < files > .Map </ files > --- filenames to strings
 		--- < input > "" </ input >
 		--- < output > "" </ output >
-		< resultValue > .K </ resultValue >
+		< resultValue > (.).K </ resultValue >
 		: KSentence .
 endm

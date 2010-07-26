@@ -7,3 +7,7 @@ Now, configure the Makefile:
 
 Finally, build the tool:
 	- run "make dist"  in the main C directory
+
+	
+Changes to the CABS abstract syntax tree:
+	Different cases and names (e.g., "Signed" instead of "Tsigned")

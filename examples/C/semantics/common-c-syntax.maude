@@ -49,94 +49,123 @@ mod COMMON-C-SYNTAX is
 	--- op lock : -> Id [ctor] .
 	--- op unlock : -> Id [ctor] .
 	
-
-	sort TypeSpecifier .
 	sort CabsLoc .
-	sort SingleName .
-	sort Block .
-	sort InitNameGroup .
-	sort Specifier .
-	sort DeclarationDefinition .
+	sort TypeSpecifier .
+	sort Storage .
+	sort FunSpecifier .
+	sort CVSpecifier .
 	sort SpecifierElem .
-	sort InitNameList .
-	sort Name .
+	sort Specifier .
 	sort DeclType .
-	sort InitName .
-	sort SingleNameList .
-	sort Attribute .
-	sort AttributeList .
-	sort InitExpression .
-	sort Program .
 	sort NameGroup .
-	sort NameList .
+	sort FieldGroup .
+	sort InitNameGroup .
+	sort Name .
+	sort InitName .
+	sort SingleName .
+	sort EnumItem .
+	sort Definition .
+	sort Block .
+	sort AsmDetails .
+	sort Statement .
+	sort ForClause .
+	sort BinaryOperator .
+	sort UnaryOperator .
+	sort Expression .
+	sort Constant .
+	sort InitExpression .
+	sort InitWhat .
+	sort Attribute .
 	
-	subsort Name < NameList .
+	sort Program .
+	
+	--- sort InitNameList .
+	--- sort SingleNameList .
+	--- sort AttributeList .
+	--- sort NameList .
+	
+	---subsort Name < NameList .
 
 	op CabsLoc : String Int Int Int -> CabsLoc .
 	
-	--- ---sort List{InitName} .	
-	--- ---subsort InitName < List{InitName} .
-	op InitNameList : InitName -> InitNameList .
-	op InitName : Name InitExpression -> InitName .
+	--- --- ---sort List{InitName} .	
+	--- --- ---subsort InitName < List{InitName} .
+	--- op InitNameList : InitName -> InitNameList .
+	--- op InitName : Name InitExpression -> InitName .
 	
-	--- ---sort List{SpecifierElem} .
-	--- ---subsort SpecifierElem < List{SpecifierElem} .
+	--- --- ---sort List{SpecifierElem} .
+	--- --- ---subsort SpecifierElem < List{SpecifierElem} .
 	
-	op Specifier : SpecifierElem -> Specifier .
+	--- op Specifier : SpecifierElem -> Specifier .
 	
-	op NameGroup : Specifier NameList -> NameGroup .
+	--- op NameGroup : Specifier NameList -> NameGroup .
 
-	--- --- op _`,_ : Specifier Sp
+	--- --- --- op _`,_ : Specifier Sp
 	
-	--- ---sort List{SingleName} .
+	--- --- ---sort List{SingleName} .
 
-	--- ---subsort SingleName < List{SingleName} .
-	op SingleNameList : SingleName -> SingleNameList .
+	--- --- ---subsort SingleName < List{SingleName} .
+	--- op SingleNameList : SingleName -> SingleNameList .
 	
-	op SingleName : Specifier Name -> SingleName .
+	--- op SingleName : Specifier Name -> SingleName .
 	
-	op FunDef : SingleName Block CabsLoc CabsLoc -> DeclarationDefinition .
-	op DecDef : InitNameGroup CabsLoc -> DeclarationDefinition .
-	op TypeDef : NameGroup CabsLoc -> DeclarationDefinition .
+	--- op FunDef : SingleName Block CabsLoc CabsLoc -> DeclarationDefinition .
+	--- op DecDef : InitNameGroup CabsLoc -> DeclarationDefinition .
+	--- op TypeDef : NameGroup CabsLoc -> DeclarationDefinition .
 	
-	op InitNameGroup : Specifier InitNameList -> InitNameGroup .
+	--- op InitNameGroup : Specifier InitNameList -> InitNameGroup .
 
-	op Prototype : DeclType SingleNameList Bool -> DeclType .
-	op JustBase : -> DeclType .
-	op PointerType : Attribute DeclType -> DeclType .
+	--- op Prototype : DeclType SingleNameList Bool -> DeclType .
+	--- op JustBase : -> DeclType .
+	--- op PointerType : Attribute DeclType -> DeclType .
 	
-	--- ---sort List{Attribute} .
+	--- --- ---sort List{Attribute} .
 	
-	--- ---subsort List{Attribute} < AttributeList .
-	--- ---subsort Attribute < List{Attribute} .
+	--- --- ---subsort List{Attribute} < AttributeList .
+	--- --- ---subsort Attribute < List{Attribute} .
 
-	--- ---op _`,_ : List{Attribute} List{Attribute} -> List{Attribute} [assoc id: .List{Attribute}] .
-	--- ---op .List{Attribute} : -> List{Attribute} .
-	--- ---op AttributeList : List{Attribute} -> AttributeList .
-	op NoAttributes : -> Attribute .
+	--- --- ---op _`,_ : List{Attribute} List{Attribute} -> List{Attribute} [assoc id: .List{Attribute}] .
+	--- --- ---op .List{Attribute} : -> List{Attribute} .
+	--- --- ---op AttributeList : List{Attribute} -> AttributeList .
+	--- op NoAttributes : -> Attribute .
 
-	op NoInit : -> InitExpression .
+	--- op NoInit : -> InitExpression .
 	
-	op Name : Id DeclType Attribute CabsLoc -> Name .
+	--- op Name : Id DeclType Attribute CabsLoc -> Name .
 	
-	op Identifier : String -> Id .
-	op #NoName : -> Id .
-
-	ops void
-		bool 
-		double
-		char 
-		int
-		short 
-		long
-		signed
-		unsigned
-		: -> SpecifierElem [ctor] .
+	--- op Identifier : String -> Id .
+	--- op #NoName : -> Id .
+	
+	sort List{Attribute} .
+	sort List{FieldGroup} .
+	sort List{EnumItem} .
+	
+	ops Void
+		Char
+		Bool
+		Short
+		Int
+		Long
+		--- int64
+		Float
+		Double
+		Signed
+		Unsigned
+		: -> TypeSpecifier [ctor] .
+	op Named : String -> TypeSpecifier [ctor] .
+	op StructRef : String List{Attribute} -> TypeSpecifier [ctor] .
+	op StructDef : String List{FieldGroup} List{Attribute} -> TypeSpecifier [ctor] .
+	op UnionRef : String List{Attribute} -> TypeSpecifier [ctor] .
+	op UnionDef : String List{FieldGroup} List{Attribute} -> TypeSpecifier [ctor] .
+	op EnumRef : String List{Attribute} -> TypeSpecifier [ctor] .
+	op EnumDef : String List{EnumItem} List{Attribute} -> TypeSpecifier [ctor] .
+	op TypeOfE : Expression -> TypeSpecifier [ctor] .
+	op TypeOfT : Specifier DeclType -> TypeSpecifier [ctor] .
 		
 	
 	---sort List{DeclarationDefinition} .
 	---subsort DeclarationDefinition < List{DeclarationDefinition} .
-	op Program : DeclarationDefinition -> Program .
+	op Program : Definition -> Program .
 	
 
 ***(

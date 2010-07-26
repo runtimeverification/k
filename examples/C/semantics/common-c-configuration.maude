@@ -81,22 +81,19 @@ mod COMMON-C-CONFIGURATION is
 	subsort String < Builtins .
 	
 	--- subsort TypeSpecifier < K .
-	subsort CabsLoc < K .
-	subsort SingleName < K .
-	subsort Block < K .
-	subsort InitNameGroup < K .
-	subsort Specifier < K .
-	subsort DeclarationDefinition < K .
-	subsort SpecifierElem < K .
-	subsort InitNameList < K .
-	subsort Name < K .
-	subsort DeclType < K .
-	subsort InitName < K .
-	subsort SingleNameList < K .
-	subsort Attribute < K .
-	--- subsort AttributeList < K .
-	subsort InitExpression < K .
-	subsort Program < K .
-	subsort NameList < K .
-	subsort NameGroup < K .
+	--- subsort CabsLoc < K .
+	--- subsort SingleName < K .
+	--- subsort Block < K .
+	--- subsort InitNameGroup < K .
+	--- subsort Specifier < K .
+	--- subsort Definition < K .
+	--- subsort SpecifierElem < K .
+	--- subsort Name < K .
+	--- subsort DeclType < K .
+	--- subsort InitName < K .
+	--- subsort Attribute < K .
+	--- --- subsort AttributeList < K .
+	--- subsort InitExpression < K .
+	--- subsort Program < K .
+	--- subsort NameGroup < K .
 endm
