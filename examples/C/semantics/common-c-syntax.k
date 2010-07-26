@@ -76,7 +76,6 @@ kmod COMMON-C-SYNTAX is
 	sort InitExpression
 	sort InitWhat
 	sort Attribute
-	
 	sort Program
 	
 	subsort TypeSpecifier < SpecifierElem --- because I flattened SpecifierElem
@@ -85,7 +84,8 @@ kmod COMMON-C-SYNTAX is
 	--- lists
 	sort List{Definition}
 	subsort Definition < List{Definition}
-	op _`,_ : List{Definition} List{Definition} -> List{Definition} [assoc]
+	op _`,_ : List{Definition} List{Definition} -> List{Definition} [assoc id: NoDefinition]
+	op NoDefinition : -> List{Definition}
 	
 	sort List{Attribute}
 	subsort Attribute < List{Attribute} 
@@ -101,10 +101,13 @@ kmod COMMON-C-SYNTAX is
 	
 	sort List{SpecifierElem}
 	subsort SpecifierElem < List{SpecifierElem}
-	op _`,_ : List{SpecifierElem} List{SpecifierElem} -> List{SpecifierElem} [assoc]
+	op _`,_ : List{SpecifierElem} List{SpecifierElem} -> List{SpecifierElem} [assoc id: NoSpecifierElem]
+	op NoSpecifierElem : -> List{SpecifierElem}
 	
 	sort List{Name} 
-	subsort Name < List{Name} 
+	subsort Name < List{Name}
+	op _`,_ : List{Name} List{Name} -> List{Name} [assoc id: NoName]
+	op NoName : -> List{Name}
 	
 	--- Constructors 
 	op CabsLoc : String Int Int Int -> CabsLoc

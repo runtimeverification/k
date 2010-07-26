@@ -80,6 +80,44 @@ mod COMMON-C-CONFIGURATION is
 	subsort Id Int String Bool < K .
 	subsort String < Builtins .
 	
+	subsort CabsLoc < K .
+	subsort TypeSpecifier < K .
+	subsort Storage < K .
+	subsort FunSpecifier < K .
+	subsort CVSpecifier < K .
+	subsort SpecifierElem < K .
+	subsort Specifier < K .
+	subsort DeclType < K .
+	subsort NameGroup < K .
+	subsort FieldGroup < K .
+	subsort InitNameGroup < K .
+	subsort Name < K .
+	subsort InitName < K .
+	subsort SingleName < K .
+	subsort EnumItem < K .
+	subsort Definition < K .
+	subsort Block < K .
+	subsort AsmDetails < K .
+	subsort Statement < K .
+	subsort ForClause < K .
+	subsort BinaryOperator < K .
+	subsort UnaryOperator < K .
+	subsort Expression < K .
+	subsort Constant < K .
+	subsort InitExpression < K .
+	subsort InitWhat < K .
+	subsort Attribute < K .
+	subsort Program < K .
+	
+	subsort List{Definition} < K .
+	subsort List{Attribute} < K .
+	subsort List{FieldGroup} < K .
+	subsort List{EnumItem} < K .
+	subsort List{SingleName} < K .
+	subsort List{InitName} < K .
+	subsort List{SpecifierElem} < K .
+	subsort List{Name} < K .
+	
 	--- subsort TypeSpecifier < K .
 	--- subsort CabsLoc < K .
 	--- subsort SingleName < K .
