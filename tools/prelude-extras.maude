@@ -110,7 +110,7 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq latexify(Q) = qid(latexify(string(Q))) .
   
   op latexify : String -> String .
-  eq latexify(S) = replaceAll(S,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&" |-> "\\&", ---("_" |-> "\\_",)
+  eq latexify(S) = replaceAll(S,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&" |-> "\\&", ---("_" |-> "\\_",---)
  "'" |-> "", "`" |-> "", "{" |-> "\\{", "}" |-> "\\}", "\\" |-> "$\\backslash$", "~" |-> "\\verb$~$", "^" |-> "\\verb$^$")) .
  
 
@@ -232,7 +232,8 @@ fmod QID-EXTRAS is
   eq genQids(0,QIL) = nil .
   eq genQids(s(N),QIL) = QIL genQids(N, QIL) .
 
-    
+  op upTo : QidList Qid ~> QidList .
+  eq upTo(Q':Qid QIL,Q) = Q':Qid if Q == Q':Qid then nil else upTo(QIL,Q) fi .
 endfm
 
 fmod META-TERM-EXTRAS is
