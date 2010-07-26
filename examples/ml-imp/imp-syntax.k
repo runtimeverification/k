@@ -24,9 +24,6 @@ kmod IMP-SYNTAX is including ML-K
                | Exp >= Exp [prec 35 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
                | Exp == Exp [prec 35 strict] 
                | Exp != Exp [prec 35 strict] 
-               | Exp and Exp [gather(E e) prec 55 strict] 
-               | Exp or Exp  [gather(E e) prec 59 strict] 
-               | not Exp [prec 53 strict]
                | sizeOf ( Exp ) [strict]
                | Id ( )
                | Id ( List{Exp} ) [prec 2 strict(2)]
