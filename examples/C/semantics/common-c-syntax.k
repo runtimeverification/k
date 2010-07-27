@@ -78,6 +78,7 @@ kmod COMMON-C-SYNTAX is
 	sort InitWhat
 	sort Attribute
 	sort Program
+	sort IntConstant
 	
 	sort C
 	sort List{C} 
@@ -113,6 +114,7 @@ kmod COMMON-C-SYNTAX is
 	subsort InitWhat < C
 	subsort Attribute < C
 	subsort Program < C
+	subsort IntConstant < C
 	
 	op Nil : -> List{C}
 	subsort C < List{C}
@@ -524,7 +526,10 @@ and constant =
 	| CONST_STRING of string
 	| CONST_WSTRING of int64 list 
 ***)
-	op IntLiteral : Int -> Constant
+	op DecimalConstant : Int -> IntConstant
+	op OctalConstant : Int -> IntConstant
+	op HexConstant : Int -> IntConstant
+	op IntLiteral : IntConstant -> Constant
 	op FloatLiteral : Int -> Constant
 	op CharLiteral : Int -> Constant
 	op WCharLiteral : Int -> Constant

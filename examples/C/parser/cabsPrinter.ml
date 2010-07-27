@@ -239,12 +239,24 @@ and printExpressionList defs =
 	wrap (List.map printExpression defs) ""
 and printConstant const =
 	match const with
-	| CONST_INT i -> wrap (i :: []) "IntLiteral"
+	| CONST_INT i -> wrap ((printIntLiteral i) :: []) "IntLiteral"
 	| CONST_FLOAT r -> wrap (r :: []) "FloatLiteral"
 	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
 	| CONST_STRING s -> wrap (s :: []) "StringLiteral"
 	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
+and printIntLiteral i =
+	let firstTwo = if (String.length i > 2) then (Str.first_chars i 2) else ("xx") in
+	let firstOne = if (String.length i > 1) then (Str.first_chars i 1) else ("x") in
+		if (firstTwo = "0x" or firstTwo = "0X") then 
+			(wrapString ("\"" ^ Str.string_after i 2 ^ "\"") "HexConstant")
+		else (
+			if (firstOne = "0") then
+				(wrapString (Str.string_after i 1) "OctalConstant")
+			else (
+				wrapString i "DecimalConstant"
+			)
+		)
 and printExpression exp =
 	match exp with
 	| UNARY (op, exp1) -> wrap ((printExpression exp1) :: []) (getUnaryOperator op)
@@ -417,10 +429,8 @@ and printEnumItem (str, expression, cabsloc) =
 and printSpecifier a =
 	wrapString (printSpecElemList a) "Specifier"
 and printSpecElemList a =
-	(* wrapString (parenList (List.map printSpecElem a)) "Specifier" *)
 	printFlatList printSpecElem a
 and printSingleNameList a =
-	(* wrapString (printFlatList printSingleName a) "SingleNameList" *)
 	printFlatList printSingleName a
 and printSpecElem a =
 	match a with
