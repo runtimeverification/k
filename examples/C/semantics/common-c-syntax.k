@@ -79,6 +79,8 @@ kmod COMMON-C-SYNTAX is
 	sort Attribute
 	sort Program
 	sort IntConstant
+	sort InitFragment
+	sort FieldName
 	
 	sort C
 	sort List{C} 
@@ -115,6 +117,8 @@ kmod COMMON-C-SYNTAX is
 	subsort Attribute < C
 	subsort Program < C
 	subsort IntConstant < C
+	subsort InitFragment < C
+	subsort FieldName < C
 	
 	op Nil : -> List{C}
 	subsort C < List{C}
@@ -248,7 +252,6 @@ and name_group = specifier * name list
 	(* The optional expression is the bitfield *)
 and field_group = specifier * (name * expression option) list
 ***)
-	sort FieldName
 	op FieldName : Name -> FieldName
 	op BitFieldName : Name Expression -> FieldName
 	op FieldGroup : Specifier List{C} -> FieldGroup
@@ -528,18 +531,42 @@ and constant =
 ***)
 	op DecimalConstant : Int -> IntConstant
 	op OctalConstant : Int -> IntConstant
-	op HexConstant : Int -> IntConstant
+	op HexConstant : String -> IntConstant
+	
 	op IntLiteral : IntConstant -> Constant
-	op FloatLiteral : Int -> Constant
+	op FloatLiteral : Float -> Constant
 	op CharLiteral : Int -> Constant
 	op WCharLiteral : Int -> Constant
 	op StringLiteral : String -> Constant
 	op WStringLiteral : List{C} -> Constant
 	
 
+***(
+and init_expression =
+  | NO_INIT
+  | SINGLE_INIT of expression
+  | COMPOUND_INIT of (initwhat * init_expression) list
+***)
 	op NoInit : -> InitExpression
+	op SingleInit : Expression -> InitExpression
+	op CompoundInit : List{C} -> InitExpression
 	
+***(
+and initwhat =
+	NEXT_INIT
+	| INFIELD_INIT of string * initwhat
+	| ATINDEX_INIT of expression * initwhat
+	| ATINDEXRANGE_INIT of expression * expression
+***)
+	op NextInit : -> InitWhat
+	op InFieldInit : Id InitWhat -> InitWhat
+	op AtIndexInit : Expression InitWhat -> InitWhat
+	op AtIndexRangeInit : Expression Expression -> InitWhat
 	
+***(
+and attribute = string * expression list
+***)
+	op Attribute : String List{C} -> Attribute
 	
 
 

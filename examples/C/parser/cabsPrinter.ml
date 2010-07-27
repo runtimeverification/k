@@ -236,14 +236,15 @@ and printNop =
 and printComputation exp =
 	wrap ((printExpression exp) :: []) "Computation"
 and printExpressionList defs = 
-	wrap (List.map printExpression defs) ""
+	(* wrap (List.map printExpression defs) "" *)
+	printFlatList printExpression defs
 and printConstant const =
 	match const with
 	| CONST_INT i -> wrap ((printIntLiteral i) :: []) "IntLiteral"
 	| CONST_FLOAT r -> wrap (r :: []) "FloatLiteral"
 	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
-	| CONST_STRING s -> wrap (s :: []) "StringLiteral"
+	| CONST_STRING s -> wrap (("\"" ^ s ^ "\"") :: []) "StringLiteral"
 	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
 and printIntLiteral i =
 	let firstTwo = if (String.length i > 2) then (Str.first_chars i 2) else ("xx") in
@@ -268,7 +269,7 @@ and printExpression exp =
 	| CAST ((spec, declType), initExp) -> "Cast"
 	(* wrap ((printSpec exp1) :: []) "Cast" (* (specifier * decl_type) * init_expression *) *)
 		(* A CAST can actually be a constructor expression *)
-	| CALL (exp1, expList) -> wrap ((printExpression exp1) :: (printExpressionList expList) :: []) "Apply"
+	| CALL (exp1, expList) -> wrap ((printExpression exp1) :: (printExpressionList expList) :: []) "Call"
 		(* There is a special form of CALL in which the function called is
 		__builtin_va_arg and the second argument is sizeof(T). This 
 		should be printed as just T *)
@@ -422,8 +423,8 @@ and printBlockLabels a =
 	match a with 
 	| [] -> "Nil"
 	| x::xs -> printFlatList (fun x -> x) (x::xs)
-and printAttribute a =
-	"Attribute"
+and printAttribute (a, b) =
+	wrap (("\"" ^ a ^ "\"") :: (printExpressionList b) :: []) "Attribute"
 and printEnumItem (str, expression, cabsloc) =
 	wrap ((printIdentifier str) :: (printExpression expression) :: (printCabsLoc cabsloc) :: []) "EnumItem"
 and printSpecifier a =
