@@ -87,7 +87,7 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
  eq homogenousEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, OPDM)
   = (ceq homogenousT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
        = homogenousT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
-      if Cond [AS] .) .
+      if homogenousCond(Cond, M, OPDS, OPDM) [AS] .) .
 
  op homogenousRls : Module OpDeclSet OpDeclWrapListMap RuleSet ~> RuleSet .
  eq homogenousRls(M, OPDS, OPDM, Rls Rl)
@@ -101,7 +101,23 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
  eq homogenousRl((crl T1 => T2 if Cond [AS] .), M, OPDS, OPDM)
   = (crl homogenousT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
       => homogenousT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) 
-      if Cond [AS] .) .
+      if homogenousCond(Cond, M, OPDS, OPDM) [AS] .) .
+      
+ op homogenousCond : Condition Module OpDeclSet OpDeclWrapListMap ~> Condition .
+ eq homogenousCond(T1 = T2 /\ Cond, M, OPDS, OPDM)
+  = homogenousT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) = homogenousT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM)
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(T1 := T2 /\ Cond, M, OPDS, OPDM)
+  = homogenousT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) := homogenousT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM)
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(T1 => T2 /\ Cond, M, OPDS, OPDM)
+  = homogenousT(T1, getKind(M,leastSort(M,T1)), M, OPDS, OPDM) => homogenousT(T2, getKind(M,leastSort(M,T1)), M, OPDS, OPDM)
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(Trm : T /\ Cond, M, OPDS, OPDM)
+  = homogenousT(Trm, getKind(M,T), M, OPDS, OPDM) : T
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(nil, M, OPDS, OPDM) = nil .
+ 
 
  op homogenousTs : TermList TypeList Module OpDeclSet OpDeclWrapListMap ~> TermList  .
  eq homogenousTs((Trm,Trms), T Tl, M, OPDS, OPDM)
