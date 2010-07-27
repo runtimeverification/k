@@ -93,6 +93,31 @@ let wrap (d1) (d2)  = d2 ^ parenList d1
 let wrapString d1 d2 = d2 ^ paren(d1)
 
 
+(* Given a character constant (like 'a' or 'abc') as a list of 64-bit
+ * values, turn it into a CIL constant.  Multi-character constants are
+ * treated as multi-digit numbers with radix given by the bit width of
+ * the specified type (either char or wchar_t). *)
+let rec reduce_multichar typ : int64 list -> int64 =
+  let radix = 256 in
+  List.fold_left
+    (fun acc -> Int64.add (Int64.shift_left acc radix))
+    Int64.zero
+and interpret_character_constant char_list =
+  let value = reduce_multichar () char_list in
+  Int64.to_int value
+  (* if value < (Int64.of_int 256) then  
+    (* ISO C 6.4.4.4.10: single-character constants have type int *)
+    Int64.to_int value
+  else begin
+    let orig_rep = None (* Some("'" ^ (String.escaped str) ^ "'") *) in
+    if value <= (Int64.of_int32 Int32.max_int) then
+      (CInt64(value,IULong,orig_rep)),(TInt(IULong,[]))
+    else 
+      (CInt64(value,IULongLong,orig_rep)),(TInt(IULongLong,[]))
+  end	
+  *)
+
+
 (*
 ** FrontC Pretty printer
 *)
@@ -167,6 +192,16 @@ and printInitNameList a =
 	(* wrap ((paren (commas (List.map printInitName a))) :: []) "InitNameList" *)
 	(* (paren (commas (List.map printInitName a))) *)
 	printFlatList printInitName a
+and printFieldGroupList a =
+	printFlatList printFieldGroup a
+and printFieldGroup (spec, fields) =
+	wrap ((printSpecifier spec) :: (printFieldList fields) :: []) "FieldGroup"
+and printFieldList (fields) =
+	printFlatList printField fields
+and printField (name, expOpt) =
+	match expOpt with
+	| None -> wrap ((printName name) :: []) "FieldName"
+	| Some exp -> wrap ((printName name) :: (printExpression exp) :: []) "BitFieldName"	
 and printInitName (a, b) = 
 	wrap ((printName a) :: (printInitExpression b) :: []) "InitName"
 and printInitExpression a =
@@ -206,7 +241,7 @@ and printConstant const =
 	match const with
 	| CONST_INT i -> wrap (i :: []) "IntLiteral"
 	| CONST_FLOAT r -> wrap (r :: []) "FloatLiteral"
-	| CONST_CHAR c -> wrap (("'" ^ escape_wstring c ^ "'") :: []) "CharLiteral"
+	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
 	| CONST_STRING s -> wrap (s :: []) "StringLiteral"
 	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
@@ -227,12 +262,12 @@ and printExpression exp =
 		should be printed as just T *)
 	| COMMA (expList) -> wrap ((printExpressionList expList) :: []) "ExpSeq"
 	| CONSTANT (const) -> wrap (printConstant const :: []) "Constant"
-	| VARIABLE name -> wrap (name :: []) "Variable"
+	| VARIABLE name -> wrap ((printIdentifier name) :: []) "Variable"
 	| EXPR_SIZEOF exp1 -> wrap ((printExpression exp1) :: []) "ExpSizeof"
 	| TYPE_SIZEOF (spec, declType) -> "TypeSizeofTODO"
 	| EXPR_ALIGNOF exp -> "ExprAlignofTODO"
 	| TYPE_ALIGNOF _ -> "TypeAlignofTODO"
-	| INDEX (exp, idx) -> "ArrayIndexTODO"
+	| INDEX (exp, idx) -> wrap ((printExpression exp) :: (printExpression idx) :: []) "ArrayIndex"
 	| MEMBEROF (exp, fld) -> "DotTODO"
 	| MEMBEROFPTR (exp, fld) -> "ArrowTODO"
 	| GNU_BODY _ -> "GCCBlockExpressionTODO"
@@ -296,8 +331,8 @@ and printFor fc1 exp2 exp3 stat =
 	wrap ((printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printStatement stat) :: []) "For"
 and printForClause fc = 
 	match fc with
-	| FC_EXP exp1 -> printExpression exp1
-	| FC_DECL dec1 -> printDef dec1
+	| FC_EXP exp1 -> wrapString (printExpression exp1) "ForClauseExpression"
+	| FC_DECL dec1 -> wrapString (printDef dec1) "ForClauseDeclaration"
 and printBreak =
 	"Break"
 and printContinue =
@@ -367,12 +402,18 @@ and printAttributeList a =
 	match a with 
 	| [] -> "Nil"
 	| x::xs -> printFlatList printAttribute (x::xs)
+and printEnumItemList a =
+	match a with 
+	| [] -> "Nil"
+	| x::xs -> printFlatList printEnumItem (x::xs)
 and printBlockLabels a =
 	match a with 
 	| [] -> "Nil"
 	| x::xs -> printFlatList (fun x -> x) (x::xs)
 and printAttribute a =
 	"Attribute"
+and printEnumItem (str, expression, cabsloc) =
+	wrap ((printIdentifier str) :: (printExpression expression) :: (printCabsLoc cabsloc) :: []) "EnumItem"
 and printSpecifier a =
 	wrapString (printSpecElemList a) "Specifier"
 and printSpecElemList a =
@@ -421,11 +462,18 @@ and printTypeSpec = function
 	(* | TtypeofE e -> printl ["__typeof__";"("]; print_expression e; print ") "
 	| TtypeofT (s,d) -> printl ["__typeof__";"("]; print_onlytype (s, d); print ") " *)
 and printStructType a b c =
-	"struct"
+	match b with
+	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "StructRef"
+	| Some b -> wrap ((printIdentifier a) :: (printFieldGroupList b) :: (printAttributeList c) :: []) "StructDef"
 and printUnionType a b c = 
-	"union"
+	match b with
+	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "UnionRef"
+	| Some b -> wrap ((printIdentifier a) :: (printFieldGroupList b) :: (printAttributeList c) :: []) "UnionDef"
 and printEnumType a b c =
-	"enum"
+	match b with
+	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "EnumRef"
+	| Some b -> wrap ((printIdentifier a) :: (printEnumItemList b) :: (printAttributeList c) :: []) "EnumDef"
+
 	
 (* 
 and print_def def =

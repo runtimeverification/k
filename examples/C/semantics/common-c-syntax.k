@@ -116,7 +116,7 @@ kmod COMMON-C-SYNTAX is
 	
 	op Nil : -> List{C}
 	subsort C < List{C}
-	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil]
+	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil] --- format(++nio d d o--)
 
 --- -----------------------------------------------------------------------------
 --- Below, I give the declaration as found in cabs.ml first, followed by the K version
@@ -366,7 +366,7 @@ and statement =
 	op If : Expression Statement Statement -> PureStatement
 	op While : Expression Statement -> PureStatement
 	op DoWhile : Expression Statement -> PureStatement
-	op For : ForClause Expression Expression -> PureStatement
+	op For : ForClause Expression Expression Statement -> PureStatement
 ***(
 	| BREAK of cabsloc
 	| CONTINUE of cabsloc
@@ -410,6 +410,13 @@ and statement =
 	--- this wraps all statements with their location in the original file
 	op StatementLoc : PureStatement CabsLoc -> Statement
 	
+***(
+and for_clause = 
+	FC_EXP of expression
+	| FC_DECL of definition
+***)
+	op ForClauseExpression : Expression -> ForClause
+	op ForClauseDeclaration : Definition -> ForClause
 	
 ***(
 and binary_operator =
@@ -432,14 +439,14 @@ and unary_operator =
 	MINUS | PLUS | NOT | BNOT | MEMOF | ADDROF
 	| PREINCR | PREDECR | POSINCR | POSDECR
 ***)
-	op -_ : Expression -> Expression
-	op +_ : Expression -> Expression
-	op !_ : Expression -> Expression
-	op ~_ : Expression -> Expression
-	op *_ : Expression -> Expression
-	op &_ : Expression -> Expression
-	op ++_ : Expression -> Expression
-	op --_ : Expression -> Expression
+	op -_ : Expression -> Expression [prec 22]
+	op +_ : Expression -> Expression [prec 22]
+	op !_ : Expression -> Expression [prec 22]
+	op ~_ : Expression -> Expression [prec 22]
+	op *_ : Expression -> Expression [prec 22]
+	op &_ : Expression -> Expression [prec 22]
+	op ++_ : Expression -> Expression [prec 22]
+	op --_ : Expression -> Expression [prec 22]
 	op _++ : Expression -> Expression
 	op _-- : Expression -> Expression
 
@@ -452,28 +459,49 @@ and unary_operator =
 ***)
 	ops _*_ _/_ _%_ : Expression Expression -> Expression [prec 31 gather(E e) strict]
 	ops _+_ _-_ : Expression Expression -> Expression [prec 33 gather(E e) strict]
-	ops _<<_ _>>_ : Expression Expression -> Expression [prec 35 gather(E e) strict]
-	ops _<_ _>_ _<=_ _>=_ : Expression Expression -> Expression [prec 37 gather(E e) strict]
+	ops _<<_ : Expression Expression -> Expression [prec 35 gather(E e) strict]
+	ops _>>_ : Expression Expression -> Expression [prec 35 gather(E e) strict]
+	ops _<_ _<=_ : Expression Expression -> Expression [prec 37 gather(E e) strict]
+	ops _>_ _>=_ : Expression Expression -> Expression [prec 37 gather(E e) strict]
 	ops _==_ _!=_ : Expression Expression -> Expression [prec 39 gather(E e) strict]
 	op _&_ : Expression Expression -> Expression [prec 41 gather(E e) strict]
 	op _^_ : Expression Expression -> Expression [prec 43 gather(E e) strict]
 	op _|_ : Expression Expression -> Expression [prec 45 gather(E e) strict]
 	op _&&_ : Expression Expression -> Expression [prec 47 gather(E e) strict(1)]
 	op _||_ : Expression Expression -> Expression [prec 49 gather(E e) strict(1)]
+	
+	ops _*=_ _/=_ _%=_ _+=_ _-=_ _<<=_ _&=_ _^=_ _|=_ : Expression Expression -> Expression [prec 53]
+	ops _>>=_ : Expression Expression -> Expression [prec 53]
+	op _:=_ : Expression Expression -> Expression [prec 53 strict(2)]
 ***(
 	| QUESTION of expression * expression * expression
-
+***)
+	op _?_:_ : Expression Expression Expression -> Expression [prec 51 gather(e & E)]
+***(
 	(* A CAST can actually be a constructor expression *)
 	| CAST of (specifier * decl_type) * init_expression
-
+***)
+	op Cast : Specifier DeclType InitExpression -> Expression [strict]
+***(
 	(* There is a special form of CALL in which the function called is
 	   __builtin_va_arg and the second argument is sizeof(T). This 
 	   should be printed as just T *)
 	| CALL of expression * expression list
+***)
+	op Call : Expression List{C} -> Expression
+***(
 	| COMMA of expression list
+***)
+	op SeqExp : List{C} -> Expression
+***(
 	| CONSTANT of constant
 	| PAREN of expression
 	| VARIABLE of string
+***)
+	op Constant : Constant -> Expression
+	--- for paren, just putting parentheses
+	op Variable : Id -> Expression
+***(
 	| EXPR_SIZEOF of expression
 	| TYPE_SIZEOF of specifier * decl_type
 	| EXPR_ALIGNOF of expression
@@ -484,6 +512,24 @@ and unary_operator =
 	| GNU_BODY of block
 	| EXPR_PATTERN of string     (* pattern variable, and name *)
 ***)
+	op ArrayIndex : Expression Expression -> Expression
+	--- TODO a number of cases
+	
+***(
+and constant =
+	| CONST_INT of string   (* the textual representation *)
+	| CONST_FLOAT of string (* the textual representaton *)
+	| CONST_CHAR of int64 list
+	| CONST_WCHAR of int64 list
+	| CONST_STRING of string
+	| CONST_WSTRING of int64 list 
+***)
+	op IntLiteral : Int -> Constant
+	op FloatLiteral : Int -> Constant
+	op CharLiteral : Int -> Constant
+	op WCharLiteral : Int -> Constant
+	op StringLiteral : String -> Constant
+	op WStringLiteral : List{C} -> Constant
 	
 
 	op NoInit : -> InitExpression
