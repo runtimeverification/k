@@ -77,7 +77,7 @@ mod COMMON-C-CONFIGURATION is
 	--- subsort Type-Specifier < K .
 	--- subsort Typedef-Name < Builtins .
 	
-	subsort Id Int String Bool < K .
+	subsort Id Int String Float Bool < K .
 	subsort String < Builtins .
 	
 	subsort C < K .

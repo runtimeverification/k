@@ -166,12 +166,12 @@ type typeSpecifier = (* Merge all specifiers into one type *)
 	| TtypeofE of expression                      (* GCC __typeof__ *)
 	| TtypeofT of specifier * decl_type       (* GCC __typeof__ *)
 ***)	
-	op StructRef : String List{C} -> TypeSpecifier [ctor]
-	op StructDef : String List{C} List{C} -> TypeSpecifier [ctor]
-	op UnionRef : String List{C} -> TypeSpecifier [ctor]
-	op UnionDef : String List{C} List{C} -> TypeSpecifier [ctor]
-	op EnumRef : String List{C} -> TypeSpecifier [ctor]
-	op EnumDef : String List{C} List{C} -> TypeSpecifier [ctor]
+	op StructRef : Id List{C} -> TypeSpecifier [ctor]
+	op StructDef : Id List{C} List{C} -> TypeSpecifier [ctor]
+	op UnionRef : Id List{C} -> TypeSpecifier [ctor]
+	op UnionDef : Id List{C} List{C} -> TypeSpecifier [ctor]
+	op EnumRef : Id List{C} -> TypeSpecifier [ctor]
+	op EnumDef : Id List{C} List{C} -> TypeSpecifier [ctor]
 	op TypeOfE : Expression -> TypeSpecifier [ctor]
 	op TypeOfT : Specifier DeclType -> TypeSpecifier [ctor]
 
