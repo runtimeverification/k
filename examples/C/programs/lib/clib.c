@@ -1,22 +1,22 @@
 #define NULL 0
 // #include <math.h>
 // #include <stdio.h>
-// #include <stdlib.h>
-//#include <printf.h>
+#include <stdlib.h>
 typedef unsigned long int size_t;
-// // nice public domain implementations at http://en.wikibooks.org/wiki/C_Programming/Strings
+// nice public domain implementations at http://en.wikibooks.org/wiki/C_Programming/Strings
 
 // int getc(FILE *stream){
 	// return fgetc(stream);
 // }
 
-// char *strcpy(char *dest, const char *src) {
-  // unsigned i;
-  // for (i=0; src[i] != '\0'; ++i)
-    // dest[i] = src[i];
-  // dest[i] = '\0';
-  // return dest;
-// }
+char *strcpy(char *dest, const char *src) {
+	unsigned i;
+	for (i=0; src[i] != '\0'; ++i) {
+		dest[i] = src[i];
+	}
+	dest[i] = '\0';
+	return dest;
+}
 
 // size_t strlen(const char * str) {
     // const char *s;

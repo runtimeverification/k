@@ -123,13 +123,13 @@ and printDef def =
 		| GLOBASM (a, b) ->
 			wrap (a :: (printCabsLoc b) :: []) "GlobAsm"
 		| PRAGMA (a, b) ->
-			wrap ((printExp a) :: (printCabsLoc b) :: []) "Pragma"
+			wrap ((printExpression a) :: (printCabsLoc b) :: []) "Pragma"
 		| LINKAGE (a, b, c) ->
 			wrap (a :: (printCabsLoc b) :: (printDefs c) :: []) "OnlyTypeDef"
 		| TRANSFORMER (a, b, c) ->
 			wrap ((printDef a) :: (printDefs b) :: (printCabsLoc c) :: []) "Transformer"
 		| EXPRTRANSFORMER (a, b, c) ->
-			wrap ((printExp a) :: (printExp b) :: (printCabsLoc c) :: []) "ExprTransformer"
+			wrap ((printExpression a) :: (printExpression b) :: (printCabsLoc c) :: []) "ExprTransformer"
 		) ^ "\n"
 		
 and printSingleName (a, b) = 
@@ -172,7 +172,7 @@ and printInitName (a, b) =
 and printInitExpression a =
 	match a with 
 	| NO_INIT -> "NoInit"
-	| SINGLE_INIT exp -> wrap ((printExp exp) :: []) "SingleInit"
+	| SINGLE_INIT exp -> wrap ((printExpression exp) :: []) "SingleInit"
 	| COMPOUND_INIT a ->wrap ((printCompoundInit a) :: []) "CompoundInit"
 and printCompoundInit a =
 	"CompoundInit"
@@ -187,7 +187,7 @@ and printDeclType a =
 	| PTR (a, b) -> printPointerType a b
 	| PROTO (a, b, c) -> printProtoType a b c
 and printArrayType a b c = 
-	"ArrayTODO"
+	wrap ((printDeclType a) :: (printAttributeList b) :: (printExpression c) :: []) "ArrayType"
 and printPointerType a b = 
 	wrap ((printAttributeList a) :: (printDeclType b) :: []) "PointerType"
 and printProtoType a b c =
@@ -199,36 +199,36 @@ and printBool a =
 and printNop =
 	"Nop"
 and printComputation exp =
-	wrap ((printExp exp) :: []) "Computation"
-and printExpList defs = 
-	wrap (List.map printExp defs) ""
+	wrap ((printExpression exp) :: []) "Computation"
+and printExpressionList defs = 
+	wrap (List.map printExpression defs) ""
 and printConstant const =
 	match const with
-	| CONST_INT i -> wrap (i :: []) "Int"
-	| CONST_FLOAT r -> wrap (r :: []) "Float"
-	| CONST_CHAR c -> wrap (("'" ^ escape_wstring c ^ "'") :: []) "Char"
-	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WChar"
-	| CONST_STRING s -> wrap (s :: []) "String"
-	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WString"
-and printExp exp =
+	| CONST_INT i -> wrap (i :: []) "IntLiteral"
+	| CONST_FLOAT r -> wrap (r :: []) "FloatLiteral"
+	| CONST_CHAR c -> wrap (("'" ^ escape_wstring c ^ "'") :: []) "CharLiteral"
+	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
+	| CONST_STRING s -> wrap (s :: []) "StringLiteral"
+	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
+and printExpression exp =
 	match exp with
-	| UNARY (op, exp1) -> wrap ((printExp exp1) :: []) (getUnaryOperator op)
-	| BINARY (op, exp1, exp2) -> wrap ((printExp exp1) :: (printExp exp2) :: []) (getBinaryOperator op)
+	| UNARY (op, exp1) -> wrap ((printExpression exp1) :: []) (getUnaryOperator op)
+	| BINARY (op, exp1, exp2) -> wrap ((printExpression exp1) :: (printExpression exp2) :: []) (getBinaryOperator op)
 	| NOTHING -> "NothingExpression"
-	| PAREN (exp1) -> wrap ((printExp exp1) :: []) ""
+	| PAREN (exp1) -> wrap ((printExpression exp1) :: []) ""
 	| LABELADDR (s) -> wrap (s :: []) "GCCLabelOperator"
-	| QUESTION (exp1, exp2, exp3) -> wrap ((printExp exp1) :: (printExp exp2) :: (printExp exp3) :: []) "_?_:_"
+	| QUESTION (exp1, exp2, exp3) -> wrap ((printExpression exp1) :: (printExpression exp2) :: (printExpression exp3) :: []) "_?_:_"
 	| CAST ((spec, declType), initExp) -> "Cast"
 	(* wrap ((printSpec exp1) :: []) "Cast" (* (specifier * decl_type) * init_expression *) *)
 		(* A CAST can actually be a constructor expression *)
-	| CALL (exp1, expList) -> wrap ((printExp exp1) :: (printExpList expList) :: []) "Apply"
+	| CALL (exp1, expList) -> wrap ((printExpression exp1) :: (printExpressionList expList) :: []) "Apply"
 		(* There is a special form of CALL in which the function called is
 		__builtin_va_arg and the second argument is sizeof(T). This 
 		should be printed as just T *)
-	| COMMA (expList) -> wrap ((printExpList expList) :: []) "ExpSeq"
+	| COMMA (expList) -> wrap ((printExpressionList expList) :: []) "ExpSeq"
 	| CONSTANT (const) -> wrap (printConstant const :: []) "Constant"
 	| VARIABLE name -> wrap (name :: []) "Variable"
-	| EXPR_SIZEOF exp1 -> wrap ((printExp exp1) :: []) "ExpSizeof"
+	| EXPR_SIZEOF exp1 -> wrap ((printExpression exp1) :: []) "ExpSizeof"
 	| TYPE_SIZEOF (spec, declType) -> "TypeSizeofTODO"
 	| EXPR_ALIGNOF exp -> "ExprAlignofTODO"
 	| TYPE_ALIGNOF _ -> "TypeAlignofTODO"
@@ -287,28 +287,36 @@ and getBinaryOperator op =
 and printSeq s1 s2 =
 	"Seq"
 and printIf exp s1 s2 =
-	wrap ((printExp exp) :: (printStatement s1) :: (printStatement s2) :: []) "IfThenElse"
+	wrap ((printExpression exp) :: (printStatement s1) :: (printStatement s2) :: []) "IfThenElse"
 and printWhile exp stat =
-	wrap ((printExp exp) :: (printStatement stat) :: []) "While"
+	wrap ((printExpression exp) :: (printStatement stat) :: []) "While"
 and printDoWhile exp stat =
-	wrap ((printExp exp) :: (printStatement stat) :: []) "DoWhile"
+	wrap ((printExpression exp) :: (printStatement stat) :: []) "DoWhile"
 and printFor fc1 exp2 exp3 stat =
-	wrap ((printForClause fc1) :: (printExp exp2) :: (printExp exp3) :: (printStatement stat) :: []) "For"
+	wrap ((printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printStatement stat) :: []) "For"
 and printForClause fc = 
 	match fc with
-	| FC_EXP exp1 -> printExp exp1
+	| FC_EXP exp1 -> printExpression exp1
 	| FC_DECL dec1 -> printDef dec1
 and printBreak =
 	"Break"
 and printContinue =
 	"Continue"
 and printReturn exp =
-	wrap ((printExp exp) :: []) "Return"
+	wrap ((printExpression exp) :: []) "Return"
+and printSwitch exp stat =
+	wrap ((printExpression exp) :: (printStatement stat) :: []) "Switch"
+and printCase exp stat =
+	wrap ((printExpression exp) :: (printStatement stat) :: []) "Case"
+and printGoto name =
+	wrap ((printIdentifier name) :: []) "Goto"
+and printBlockStatement block =
+	wrap ((printBlock block) :: []) "BlockStatement"
 and printStatement a =
 	match a with
 	| NOP (loc) -> printStatementLoc (printNop) loc
 	| COMPUTATION (exp, loc) -> printStatementLoc (printComputation exp) loc
-	| BLOCK (blk, loc) -> printStatementLoc (printBlock blk) loc
+	| BLOCK (blk, loc) -> printStatementLoc (printBlockStatement blk) loc
 	| SEQUENCE (s1, s2, loc) -> printStatementLoc (printSeq s1 s2) loc
 	| IF (exp, s1, s2, loc) -> printStatementLoc (printIf exp s1 s2) loc
 	| WHILE (exp, stat, loc) -> printStatementLoc (printWhile exp stat) loc
@@ -317,22 +325,12 @@ and printStatement a =
 	| BREAK (loc) -> printStatementLoc (printBreak) loc
 	| CONTINUE (loc) -> printStatementLoc (printContinue) loc
 	| RETURN (exp, loc) -> printStatementLoc (printReturn exp) loc
+	| SWITCH (exp, stat, loc) -> printStatementLoc (printSwitch exp stat) loc
+	| CASE (exp, stat, loc) -> printStatementLoc (printCase exp stat) loc
+	| GOTO (name, loc) -> printStatementLoc (printGoto name) loc
+	| DEFINITION d -> wrap ((printDef d) :: []) "Definition"
 	| _ -> "OtherStatement"
 	(* 
-	| SWITCH (exp, stat, loc) ->
-	setLoc(loc);
-	printl ["switch";"("];
-	print_expression_level 0 exp;
-	print ")";
-	print_substatement stat
-	| CASE (exp, stat, loc) ->
-	setLoc(loc);
-	unindent ();
-	print "case ";
-	print_expression_level 1 exp;
-	print ":";
-	indent ();
-	print_substatement stat
 	| CASERANGE (expl, exph, stat, loc) ->
 	setLoc(loc);
 	unindent ();
@@ -354,22 +352,16 @@ and printStatement a =
 	printl [name;":"];
 	space ();
 	print_substatement stat
-	| GOTO (name, loc) ->
-	setLoc(loc);
-	printl ["goto";name;";"];
-	new_line ()
 	| COMPGOTO (exp, loc) -> 
 	setLoc(loc);
 	print ("goto *"); print_expression exp; print ";"; new_line ()
-	| DEFINITION d ->
-	print_def d
 	| ASM (attrs, tlist, details, loc) ->
 	"Assembly" *)
 and printStatementLoc s l =
 	wrap (s :: (printCabsLoc l) :: []) "StatementLoc"
 and printStatementList a =
 	match a with 
-	| [] -> "NoStatements"
+	| [] -> "Nil"
 	| x::xs -> printFlatList (fun x -> "\n\t" ^ printStatement x) (x::xs)
 and printAttributeList a =
 	match a with 
@@ -377,7 +369,7 @@ and printAttributeList a =
 	| x::xs -> printFlatList printAttribute (x::xs)
 and printBlockLabels a =
 	match a with 
-	| [] -> "NoBlockLabels"
+	| [] -> "Nil"
 	| x::xs -> printFlatList (fun x -> x) (x::xs)
 and printAttribute a =
 	"Attribute"
@@ -422,7 +414,7 @@ and printTypeSpec = function
 	| Tdouble -> "Double"
 	| Tsigned -> "Signed"
 	| Tunsigned -> "Unsigned"
-	| Tnamed s -> wrap (s :: []) "Named"
+	| Tnamed s -> wrap ((printIdentifier s) :: []) "Named"
 	| Tstruct (a, b, c) -> printStructType a b c
 	| Tunion (a, b, c) -> printUnionType a b c
 	| Tenum (a, b, c) -> printEnumType a b c
