@@ -78,42 +78,53 @@ kmod COMMON-C-SYNTAX is
 	sort Attribute
 	sort Program
 	
+	sort C
+	sort List{C} 
+	
+	--- subsort List{C} < Specifier
+	
+	subsort CabsLoc < C
+	subsort TypeSpecifier < C
+	subsort Storage < C
+	subsort FunSpecifier < C
+	subsort CVSpecifier < C
+	subsort SpecifierElem < C
+	subsort Specifier < C
+	subsort DeclType < C
+	subsort NameGroup < C
+	subsort FieldGroup < C
+	subsort InitNameGroup < C
+	subsort Name < C
+	subsort InitName < C
+	subsort SingleName < C
+	subsort EnumItem < C
+	subsort Definition < C
+	subsort Block < C
+	subsort AsmDetails < C
+	subsort Statement < C
+	subsort ForClause < C
+	subsort BinaryOperator < C
+	subsort UnaryOperator < C
+	subsort Expression < C
+	subsort Constant < C
+	subsort InitExpression < C
+	subsort InitWhat < C
+	subsort Attribute < C
+	subsort Program < C
+	
 	subsort TypeSpecifier < SpecifierElem --- because I flattened SpecifierElem
 	
 	
 	--- lists
-	sort List{Definition}
-	subsort Definition < List{Definition}
-	op _`,_ : List{Definition} List{Definition} -> List{Definition} [assoc id: NoDefinition]
-	op NoDefinition : -> List{Definition}
-	
-	sort List{Attribute}
-	subsort Attribute < List{Attribute} 
-	
-	sort List{FieldGroup}
-	sort List{EnumItem}
-	
-	sort List{SingleName}
-	subsort SingleName < List{SingleName}
-	
-	sort List{InitName}
-	subsort InitName < List{InitName}
-	
-	sort List{SpecifierElem}
-	subsort SpecifierElem < List{SpecifierElem}
-	op _`,_ : List{SpecifierElem} List{SpecifierElem} -> List{SpecifierElem} [assoc id: NoSpecifierElem]
-	op NoSpecifierElem : -> List{SpecifierElem}
-	
-	sort List{Name} 
-	subsort Name < List{Name}
-	op _`,_ : List{Name} List{Name} -> List{Name} [assoc id: NoName]
-	op NoName : -> List{Name}
-	
+	op Nil : -> List{C}
+	subsort C < List{C}
+	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil]
+
 	--- Constructors 
 	op CabsLoc : String Int Int Int -> CabsLoc
 	op InitName : Name InitExpression -> InitName
-	op Specifier : List{SpecifierElem} -> Specifier
-	op NameGroup : Specifier List{Name} -> NameGroup
+	op Specifier : List{C} -> Specifier
+	op NameGroup : Specifier List{C} -> NameGroup
 
 	op SpecTypedef : -> SpecifierElem
 	
@@ -130,11 +141,11 @@ kmod COMMON-C-SYNTAX is
 	op DecDef : InitNameGroup CabsLoc -> Definition
 	op TypeDef : NameGroup CabsLoc -> Definition
 	
-	op InitNameGroup : Specifier List{InitName} -> InitNameGroup
+	op InitNameGroup : Specifier List{C} -> InitNameGroup
 
-	op Prototype : DeclType List{SingleName} Bool -> DeclType
+	op Prototype : DeclType List{C} Bool -> DeclType
 	op JustBase : -> DeclType
-	op PointerType : List{Attribute} DeclType -> DeclType
+	op PointerType : List{C} DeclType -> DeclType
 	
 	--- --- ---sort List{Attribute}
 	
@@ -144,11 +155,9 @@ kmod COMMON-C-SYNTAX is
 	--- --- ---op _`,_ : List{Attribute} List{Attribute} -> List{Attribute} [assoc id:List{Attribute}]
 	--- --- ---opList{Attribute} : -> List{Attribute}
 	--- --- ---op AttributeList : List{Attribute} -> AttributeList
-	op NoAttributes : -> List{Attribute}
-
 	op NoInit : -> InitExpression
 	
-	op Name : Id DeclType List{Attribute} CabsLoc -> Name
+	op Name : Id DeclType List{C} CabsLoc -> Name
 	
 	op Identifier : String -> Id
 	op #NoName : -> Id
@@ -162,19 +171,19 @@ kmod COMMON-C-SYNTAX is
 	
 	ops Void Char Bool Short Int Long Float Double Signed Unsigned : -> TypeSpecifier [ctor]
 	op Named : String -> TypeSpecifier [ctor]
-	op StructRef : String List{Attribute} -> TypeSpecifier [ctor]
-	op StructDef : String List{FieldGroup} List{Attribute} -> TypeSpecifier [ctor]
-	op UnionRef : String List{Attribute} -> TypeSpecifier [ctor]
-	op UnionDef : String List{FieldGroup} List{Attribute} -> TypeSpecifier [ctor]
-	op EnumRef : String List{Attribute} -> TypeSpecifier [ctor]
-	op EnumDef : String List{EnumItem} List{Attribute} -> TypeSpecifier [ctor]
+	op StructRef : String List{C} -> TypeSpecifier [ctor]
+	op StructDef : String List{C} List{C} -> TypeSpecifier [ctor]
+	op UnionRef : String List{C} -> TypeSpecifier [ctor]
+	op UnionDef : String List{C} List{C} -> TypeSpecifier [ctor]
+	op EnumRef : String List{C} -> TypeSpecifier [ctor]
+	op EnumDef : String List{C} List{C} -> TypeSpecifier [ctor]
 	op TypeOfE : Expression -> TypeSpecifier [ctor]
 	op TypeOfT : Specifier DeclType -> TypeSpecifier [ctor]
 		
 	
 	--- sort List{DeclarationDefinition}
 	--- subsort DeclarationDefinition < List{DeclarationDefinition}
-	op Program : List{Definition} -> Program
+	op Program : List{C} -> Program
 	
 
 ***(

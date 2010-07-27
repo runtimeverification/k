@@ -102,13 +102,13 @@ let printList f x =
 	paren (commas (List.map f x))
 
 let printFlatList f x =
-	List.fold_left (fun aux arg -> aux ^ f arg) "" x
+	paren (List.fold_left (fun aux arg -> aux ^ " :: " ^ paren (f arg)) "Nil" x)
 
 let rec cabsToString ((fname, defs) : file) = 
 	wrapString (printDefs defs) "Program"
 
 and printDefs defs =
-	printList printDef defs
+	printFlatList printDef defs
 
 and printDef def =
 	(match def with
@@ -161,10 +161,12 @@ and printNameGroup (a, b) =
 	wrap ((printSpecifier a) :: (printNameList b) :: []) "NameGroup"
 and printNameList a =
 	(* wrap ((paren (commas (List.map printName a))) :: []) "NameList" *)
-	paren (commas (List.map printName a))
+	(* paren (commas (List.map printName a)) *)
+	printFlatList printName a
 and printInitNameList a = 
 	(* wrap ((paren (commas (List.map printInitName a))) :: []) "InitNameList" *)
-	(paren (commas (List.map printInitName a)))
+	(* (paren (commas (List.map printInitName a))) *)
+	printFlatList printInitName a
 and printInitName (a, b) = 
 	wrap ((printName a) :: (printInitExpression b) :: []) "InitName"
 and printInitExpression a =
@@ -371,7 +373,7 @@ and printStatementList a =
 	| x::xs -> printFlatList (fun x -> "\n\t" ^ printStatement x) (x::xs)
 and printAttributeList a =
 	match a with 
-	| [] -> "NoAttributes"
+	| [] -> "Nil"
 	| x::xs -> printFlatList printAttribute (x::xs)
 and printBlockLabels a =
 	match a with 
@@ -380,9 +382,10 @@ and printBlockLabels a =
 and printAttribute a =
 	"Attribute"
 and printSpecifier a =
-	printSpecElemList a
+	wrapString (printSpecElemList a) "Specifier"
 and printSpecElemList a =
-	wrapString (parenList (List.map printSpecElem a)) "Specifier"
+	(* wrapString (parenList (List.map printSpecElem a)) "Specifier" *)
+	printFlatList printSpecElem a
 and printSingleNameList a =
 	(* wrapString (printFlatList printSingleName a) "SingleNameList" *)
 	printFlatList printSingleName a
