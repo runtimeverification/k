@@ -79,6 +79,9 @@ fmod COMPILE-META is
   op compile : Qid ~> Module .
   eq compile(Q) = compile(upModule(Q, false)) .
 
+  op pcompile : Qid Qid ~> Module .
+  eq pcompile(Q, Q') = partialCompile(upModule(Q, false), Q') .
+
   op getPhaseName : Qid ~> QidList .
   eq getPhaseName('MANY-MODULES) 
    = 'flattening 'entire 'definition 'in 'a 'single 'module .
@@ -148,14 +151,14 @@ fmod COMPILE-META is
    print(M) 
 ) .
 
-  var Q : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .
+  var Q Q' : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .
 endfm
 
 mod COMPILE-LOOP is
   including LOOP-MODE + COMPILE-META .
   op compile : -> System .
   op idle : -> State .
-  var Q : Qid . var QIL QIL' : QidList . var FM : Module .
+  var Q Q' : Qid . var QIL QIL' : QidList . var FM : Module .
   eq compile = [nil, idle, 
  'Usage: 'compile '<ModuleName> '. ] .
 
@@ -165,4 +168,6 @@ mod COMPILE-LOOP is
   eq print(moduleError(QIL)) = QIL .
   rl ['compile Q QIL, idle, QIL'] 
    => [QIL, idle, print(compile(Q) )] .
+  rl ['pcompile Q Q' QIL, idle, QIL'] 
+   => [QIL, idle, print(pcompile(Q,Q') )] .
 endm
