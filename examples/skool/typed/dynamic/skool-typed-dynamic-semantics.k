@@ -73,10 +73,8 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
 
   syntax List{Type} ::= typeOf ( List{Val} ) [strict]
 ---<SKOOL added>
-  syntax List{Bottom} ::= typeOf ( List{Bottom} ) 
-  syntax Type ::= typeOf ( Val ) [strict]
-  syntax Type ::= typeOf ( Int ) [strict]
-  syntax Type ::= typeOf ( Bool ) [strict]
+---  syntax List{Bottom} ::= typeOf ( List{Bottom} ) [ditto]
+---  syntax Type ::= typeOf ( Val ) [ditto]
 ---</SKOOL added>
   macro typeOf(function(T, _)) = T 
   macro typeOf(array(T,_,_)) = T
@@ -99,7 +97,7 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
   macro typeList(X : T,XTl) = T,typeList(XTl) 
 
 --- List{Val}
-  syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto]
+  syntax List{Val} ::= Val | List{Bottom} |  List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
 --- length
@@ -156,14 +154,18 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
        if  (C1 <: C3) in R ==Bool false
        [structural]
 
-  syntax Bool ::= subType ( List{Type} , List{Type} , Set )
-  syntax Bool ::= subType ( Type , Type , Set )
+  syntax Bool ::= subType ( List{Type} , List{Type} , Set ) [strict]
   macro subType(Tl:List{Type}, Tl, R) = true
   macro subType(type(C1), type(C2), ((C1 <: C2) R)) = true 
-  macro subType(type(C1), type(C2), R) = false [owise]
-  macro subType((T1:Type , Tl2:List{Type}), (T1':Type , Tl2':List{Type}), R)
-        =
-        subType(T1, T1', R) andBool subType(Tl2, Tl2', R)
+---  macro subType((T1:Type , Tl2:List{Type}), (T1':Type , Tl2':List{Type}), R)
+---        =
+---        subType(T1, T1', R) andBool subType(Tl2, Tl2', R)
+  macro subType(int, type(C2), R) = false 
+  macro subType(bool, type(C2), R) = false 
+  macro subType(void, type(C2), R) = false 
+  macro subType(type(C1), int, R) = false 
+  macro subType(type(C1), bool, R) = false 
+  macro subType(type(C1), void, R) = false 
 
 ---</SKOOL added>
 
@@ -459,21 +461,8 @@ kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
 
 --- method call: function value loading 
 --- <OO modified>: the global environment not longer included in the local function call environment
-  syntax K ::= functionLoad 
-  rule <k> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
-           =>
-           typeOf(Vl) ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
-       <_/k> 
-       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
   rule <k>
-           Tl':List{Type} ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
-           =>
-           subType(typeOf(Vl), Tl, R) ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
-       <_/k> 
-       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
-  rule <k>
-           true ~> functionLoad ~> (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
----           (_`(_`)(function(Tl -> T, L),Vl:List{Val}))
+           _`(_`)(function(Tl -> T, L),Vl:List{Val})
            =>
            S:Stmt ~> return(initVal(T));
        </k>
@@ -481,21 +470,17 @@ kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
        <genv> GEnv </genv>
        <store_> L:Nat |-> lambda(Xl,S) (. => N:Nat..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
----       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
----       if subType(typeOf(Vl), Tl, R) ==Bool true
+       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
+       if subType(typeOf(Vl), Tl, R) ==Bool true
 
 --- returning from a method call
-  syntax K ::= returnCheckType 
-  rule <k> return(V:Val);  => typeOf(V) ~> returnCheckType ~> return(V);  <_/k>
- 
-  rule <k> T1:Type ~> returnCheckType ~> return(V:Val); ~> _ => V ~> K </k>
+  rule <k> return(V:Val); ~> _ => V ~> K </k>
        <fstack> [ C, Env, K, T':Type ] => .List <_/fstack>
        <class> _ => C </class>
        <env> _ => Env </env>
        <return> T => T' </return>
        <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
-       if subType(T1,  T, R) ==Bool true
-
+       if subType(typeOf(V),  T, R) ==Bool true
 ---</SKOOL modified>
 endkm
 
@@ -509,23 +494,19 @@ kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFI
   rule S1:Stmt S2:Stmt => S1~>S2 
 
 ---<SKOOL modified> 
---- this is just to safely keep the trace (it could work without it, as well)
-  syntax K ::= assignLeftValue ( Nat )
-  rule <k> (_=_;(X:Id, V:Val))
+  syntax Val ::= leftValue ( Nat )
+  rule <k> _=_;(X:Id, V:Val)
            =>
-           assignLeftValue(getloc(X, ((@local :: Env) ((C :: Env1) Oenv)(@global :: GEnv)))) ~> (_=_;(X:Id, V:Val)) <_/k> 
+           _=_;(leftValue(getloc(X, ((@local :: Env) ((C :: Env1) Oenv)(@global :: GEnv)))), V:Val) <_/k> 
        <env> Env:Map </env> 
        <genv> GEnv:Map </genv>
        <obj_> (C:Id :: Env1:Map) Oenv:List </obj>
        <class> C </class>
-  rule <k> assignLeftValue(L:Nat) ~> (_=_;(X:Id, V:Val))
-       =>
-       subType(typeOf(V), typeOf(V1), R) ~>  assignLeftValue(L) ~> (_=_;(X:Id, V:Val)) <_/k> 
-       <store_> L |-> V1:Val <_/store>
+  rule <k> (_=_;(leftValue(L:Nat), V:Val)) => . <_/k> 
+       <class> C </class>
        <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
----       if subType(typeOf(V), typeOf(V1), R) ==Bool true
-  rule <k> true ~> assignLeftValue(L) ~> (_=_;(X:Id, V:Val)) => . <_/k> 
-       <store> Sigma:Map => Sigma [ V / L ] </store>
+       <store_>  L |-> (V1:Val => V) <_/store>
+       if  (typeOf(V) ==Bool typeOf(V1)) orBool (subType(typeOf(V), type(C), R) ==Bool true)
 ---</SKOOL modified>
 
  --- for array assignment, first evaluate the array and its index
@@ -533,16 +514,10 @@ kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFI
   context [HOLE][_]=_;
 ---<SKOOL typed modified>
   syntax K ::= assignArray
-  rule <k> array(T:Type, L:Nat,M:Nat)[N:Nat]=V;
-           =>
-           subType(typeOf(V), T, R) ~> assignArray ~> array(T:Type, L:Nat,M)[N:Nat]=V;
-       <_/k>
+  rule <k> array(T:Type, L:Nat,M:Nat)[N:Nat]=V; => . <_/k>
+       <store> Sigma:Map => Sigma[V/(L +Int N)] </store> 
        <pgm_> <subClassRel> R </subClassRel> <_/pgm>
-  rule <k> true ~> assignArray ~> array(T:Type, L:Nat,_)[N:Nat]=V; => . <_/k>
-       <store> Sigma => Sigma[V/(L +Int N)] </store> 
-       <pgm_> <subClassRel> R </subClassRel> <_/pgm>
----       if subType(typeOf(V), T) ==Bool true
-
+       if subType(typeOf(V), T, R) ==Bool true
 ---</SKOOL type modified>
   rule V; => . 
   rule if true then S:Stmt else _ => S:Stmt
