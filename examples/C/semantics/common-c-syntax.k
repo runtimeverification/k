@@ -29,7 +29,7 @@ kmod COMMON-C-SYNTAX is
 	--- op exp : -> Id [ctor]
 	--- op log : -> Id [ctor]
 	--- op atan : -> Id [ctor]
-	--- op File-Scope : -> Id [ctor]
+	op File-Scope : -> Id [ctor]
 	
 	--- op fslOpenFile : -> Id [ctor]
 	--- op fslCloseFile : -> Id [ctor]
@@ -119,7 +119,9 @@ kmod COMMON-C-SYNTAX is
 	subsort IntConstant < C
 	subsort InitFragment < C
 	subsort FieldName < C
-	
+
+	subsort Id < C	
+
 	op Nil : -> List{C}
 	subsort C < List{C}
 	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil] --- format(++nio d d o--)

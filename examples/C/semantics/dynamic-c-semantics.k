@@ -1,5 +1,5 @@
-mod DYNAMIC-C-SEMANTICS is
-	including COMMON-C-SEMANTICS .
+kmod DYNAMIC-C-SEMANTICS is
+	including COMMON-C-SEMANTICS
 	
 ---C99 5.1.2.2.1:2
 --- If they are declared, the parameters to the main function shall obey the following
@@ -21,9 +21,9 @@ mod DYNAMIC-C-SEMANTICS is
 --- — The parameters argc and argv and the strings pointed to by the argv array shall
 --- be modifiable by the program, and retain their last-stored values between program
 --- startup and program termination.	
-	op incomingArgumentArray : -> Id [ctor] .
-	op incomingArguments : List{K} -> K .
-	op incomingArguments-aux : List{K} Nat -> K .
+	op incomingArgumentArray : -> Id [ctor]
+	op incomingArguments : List{K} -> K
+	op incomingArguments-aux : List{K} Nat -> K
 	***( eq incomingArguments(L:List{K}) = incomingArguments-aux(L:List{K}, 0) .
 	eq incomingArguments-aux((E:Expression,, L:List{K}), N:Nat) = ((incomingArgumentArray[N:Nat] := Cast(Pointer(char), E:Expression) ;) ~> incomingArguments-aux(L:List{K}, sNat(N:Nat))) .
 	eq incomingArguments-aux(.List{K}, N:Nat) = (incomingArgumentArray[N:Nat] := Cast(Pointer(char), NULL) ;) . ***)
@@ -37,8 +37,8 @@ mod DYNAMIC-C-SEMANTICS is
 --- int main(int argc, char *argv[]) { /* ... */ }
 --- or equivalent;9) or in some other implementation-defined manner
 
-	op unclutterConfiguration : Bag -> Bag .
-	op stripConfiguration : Bag -> Bag .
+	op unclutterConfiguration : Bag -> Bag
+	op stripConfiguration : Bag -> Bag
 	
 	--- doesn't [owise] rules :(
 	---eq unclutterConfiguration(B:Bag) = stripConfiguration(B:Bag) [owise] .
@@ -81,21 +81,24 @@ mod DYNAMIC-C-SEMANTICS is
 	--- eq stripConfiguration(B0:Bag (< T > B1:Bag
 		--- < genv > ?:Map </ genv >
 	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
-	***(
-	eq eval(P:Program) = eval(P:Program, .List{K}, "") .
+
+	
+	eq eval(P:Program) = eval(P:Program, .List{K}, "")
 	eq eval(P:Program, L:List{K}, Input:String) = 
 		< T >
 			< threads >
 				< thread >
 					< k > P:Program 
-						~> Global(Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
+						--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
 						~> incomingArguments(L:List{K})
 						--- ~> incomingArgumentArray[0] := Cast(Pointer(char), Name:String) ; 
 						--- ~> incomingArgumentArray[1] := Cast(Pointer(char), NULL) ; 
-						~> Apply(main, ((length L:List{K}) .,. incomingArgumentArray)) </ k >
+						~> Call(Variable(Identifier("printf")), (
+							(Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
+							:: (incomingArgumentArray)
+						)) </ k >
 					< locsWrittenTo > .Bag </ locsWrittenTo >
 					< holds > .Map </ holds >
-					---< children > .Bag </ children >
 					< callStack > .List </ callStack >
 					< env > .Map </ env >
 					< loopStack > .List </ loopStack >
@@ -126,8 +129,7 @@ mod DYNAMIC-C-SEMANTICS is
 			"stdin" |-> Input:String
 			"stdout" |-> ""
 		</ files >
-	.
-	
+	***(
 	--- throw away annotations
 	mb [no-annotations]: rule [annotation(?); => .K] : KSentence [metadata "structural"] .
 	
@@ -147,4 +149,4 @@ mod DYNAMIC-C-SEMANTICS is
 		[.Bag => < input > S1:String </ input >	< output > S2:String </ output >]
 		: KSentence .
 	***)
-endm
+endkm

@@ -39,64 +39,11 @@ mod COMMON-C-CONFIGURATION is
 	op freshNat : -> CellLabel .
 	op holds : -> CellLabel .
 	op busy : -> CellLabel .
-	
 	op locsWrittenTo : -> CellLabel .
-	
-	--- subsort Enum-Specifier < K .
-	--- subsort Enumeration-Constant < K .
-	--- subsort External-Declaration < K .
-	--- subsort Function-Definition < K .
-	--- subsort Jump-Statement < K .
-	--- subsort Selection-Statement < K .
-	--- subsort Initializer < K .
-	--- subsort Initializer-List < K .
-	--- subsort TogetherList < K .
-	--- subsort Base-Type < Builtins .
-	--- subsort Block-Item < K .
-	--- subsort Compound-Statement < K .
-	--- subsort Declaration < K .
-	--- subsort Declarator < K .
-	--- subsort Direct-Declarator < K .
-	--- subsort Expression < K .
-	--- subsort Floating-Constant < K .
-	--- subsort Init-Declarator < K .
-	--- subsort Init-Declarator-List < K .
-	--- subsort Integer-Constant < K .
-	--- subsort Iteration-Statement < K .
-	--- subsort Labeled-Statement < K .
-	--- subsort List{Expression} < K .
-	--- subsort List{Parameter} < K .
-	--- subsort Parameter-Declaration < K .
-	--- subsort Parameter-Type-List < K .
-	--- subsort SeqList < K .
-	--- subsort Statement < K .
-	--- subsort Storage-Class-Specifier < K .
-	--- subsort Struct-Declaration < K .
-	--- subsort Struct-Or-Union-Specifier < K .
-	--- subsort Type-Name < K .
-	--- subsort Type-Specifier < K .
-	--- subsort Typedef-Name < Builtins .
 	
 	subsort Id Int String Float Bool < K .
 	subsort String < Builtins .
 	
 	subsort C < K .
 	subsort List{C} < K .
-	
-	--- subsort TypeSpecifier < K .
-	--- subsort CabsLoc < K .
-	--- subsort SingleName < K .
-	--- subsort Block < K .
-	--- subsort InitNameGroup < K .
-	--- subsort Specifier < K .
-	--- subsort Definition < K .
-	--- subsort SpecifierElem < K .
-	--- subsort Name < K .
-	--- subsort DeclType < K .
-	--- subsort InitName < K .
-	--- subsort Attribute < K .
-	--- --- subsort AttributeList < K .
-	--- subsort InitExpression < K .
-	--- subsort Program < K .
-	--- subsort NameGroup < K .
 endm
