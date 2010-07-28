@@ -37,8 +37,8 @@ kmod DYNAMIC-C-SEMANTICS is
 --- int main(int argc, char *argv[]) { /* ... */ }
 --- or equivalent;9) or in some other implementation-defined manner
 
-	op unclutterConfiguration : Bag -> Bag
-	op stripConfiguration : Bag -> Bag
+	--- op unclutterConfiguration : Bag -> Bag
+	--- op stripConfiguration : Bag -> Bag
 	
 	--- doesn't [owise] rules :(
 	---eq unclutterConfiguration(B:Bag) = stripConfiguration(B:Bag) [owise] .
@@ -88,11 +88,9 @@ kmod DYNAMIC-C-SEMANTICS is
 		< T >
 			< threads >
 				< thread >
-					< k > P:Program 
+					< k > P:Program
 						--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
 						~> incomingArguments(L:List{K})
-						--- ~> incomingArgumentArray[0] := Cast(Pointer(char), Name:String) ; 
-						--- ~> incomingArgumentArray[1] := Cast(Pointer(char), NULL) ; 
 						~> Call(Variable(Identifier("printf")), (
 							(Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
 							:: (incomingArgumentArray)

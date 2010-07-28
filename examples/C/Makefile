@@ -22,7 +22,14 @@ FILES_TO_DIST = \
 
 all: cparser
 
-dist: $(DIST_DIR)/dist.tested
+dist: demo
+
+demo: $(DIST_DIR)/dist.done 
+	@rm -f ./a.out
+	kcc -o ./a.out -d -s $(C_DIR)/simplest.c
+	@DEBUG=1 ./a.out
+
+#$(DIST_DIR)/dist.tested
 
 $(DIST_DIR)/dist.done: Makefile cparser kcompile $(FILES_TO_DIST)
 	@mkdir -p $(DIST_DIR)

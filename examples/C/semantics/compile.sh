@@ -140,7 +140,7 @@ if [ ! "$compileOnlyFlag" ]; then
 	exec="echo erew in C-program-linked : $term . >> $runner"
 	mDebug="echo break select debug . >> $runner; echo set break on . >> $runner"
 	maude="maude -no-wrap \$0 $runner"
-	debug="$mStart; $mDebug; echo erew in C-program-linked : unclutterConfiguration\\($term\\) . >> $runner"
+	debug="$mStart; $mDebug; echo erew in C-program-linked : \\($term\\) . >> $runner"
 	run="$mStart; $exec; echo q >> $runner"
 	prelude="--- &> /dev/null; if [ -t 0 ]; then stdin=\"\"; else stdin=\$(cat); fi; FSL_C_RUNNER=$freshFilename"
 	echo "$prelude; if [ \$DEBUG ]; then $debug; $maude -ansi-color; else $run; $maude | perl $myDirectory/wrapper.pl; fi; retval=\$?; rm -f $runner; exit \$retval" > $programTemp
