@@ -53,6 +53,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op memblock : Nat Map -> K . --- length and an array from offsets to bytes
 	
+	op listToK : K -> K .
+	op klistToK : List{K} -> K .
+	op UnknownCabsLoc : -> K .
+	
 	--- sort State .
 	--- subsort String < State .
 	
@@ -936,8 +940,8 @@ endm
 --- load common-c-statements
 --- load common-c-standard-lib
 
---- mod C-SEMANTICS-MISC is
-	--- including COMMON-INCLUDE .
+mod C-SEMANTICS-MISC is
+	including COMMON-INCLUDE .
 	
 	--- --- fixme can do a much better job than this
 	--- eq 0 |Nat N:Nat = N:Nat .
@@ -1139,13 +1143,29 @@ endm
 		--- if lengthString(S:String) <=Nat Offset:Nat
 		--- : KSentence [metadata "structural"] .
 
---- endm
+	eq listToK(K:K) = klistToK(getList{K}(K:K)) .
+	eq klistToK((K':NeK,, K:K)) = K':NeK ~> klistToK(K:K) .
+	eq klistToK((K':NeK)) = K':NeK .
+	eq klistToK(.) = . .
+	
+	eq CabsLoc("cabs loc unknown", -10, -10, 0) = UnknownCabsLoc .
+	
+	eq Program(K:C) = listToK(K:C) .
+	eq 'Program(K:K) = listToK(K:K) .
+
+	eq _`(_`)(('Program).KProperLabel,_`(_`)(('_::_).KHybridLabel,K:K))= _`(_`)(('listToK).KProperLabel,K:K).	
+	eq _`(_`)(('Program).KProperLabel,K:K)= _`(_`)(('listToK).KProperLabel,K:K).
+
+	
+endm
 
 mod COMMON-C-SEMANTICS is
 	including COMMON-INCLUDE .
+	including C-SEMANTICS-MISC .
 	
 	op eval : Program -> Bag .
 	op eval : Program List{K} String -> Bag .
+	
 	***(
 	including COMMON-GLOBAL-DECLARATION .
 	including COMMON-LOCAL-DECLARATION .

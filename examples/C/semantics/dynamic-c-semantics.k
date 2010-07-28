@@ -88,7 +88,7 @@ kmod DYNAMIC-C-SEMANTICS is
 		< T >
 			< threads >
 				< thread >
-					< k > P:Program
+					< k > listToK(P:Program)
 						--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
 						~> incomingArguments(L:List{K})
 						~> Call(Variable(Identifier("printf")), (
