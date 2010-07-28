@@ -1151,8 +1151,15 @@ mod C-SEMANTICS-MISC is
 	eq CabsLoc("cabs loc unknown", -10, -10, 0) = UnknownCabsLoc .
 	
 	mb rule
-		< k > Program(S:String, L:List{C}) => listToK(L:List{C}) ...</ k >
-		< currentTranslationUnit > ? => S:String </ currentTranslationUnit >
+		< k > Program(Name:String, L:List{C}, P:String) => listToK(L:List{C}) ...</ k >
+		< currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
+		< programText > M:Map => M:Map[P:String / Name:String] </ programText >
+		: KSentence .
+		
+	--- TODO nicely handle loc range
+	mb rule
+		< k > DefinitionLocRange(K:PureDefinition, L1:CabsLoc, L2:CabsLoc) => K:PureDefinition ...</ k >
+		< currentProgramLoc > ? => L1:CabsLoc </ currentProgramLoc >
 		: KSentence .
 	
 endm

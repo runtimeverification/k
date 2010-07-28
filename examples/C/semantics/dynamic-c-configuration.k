@@ -18,6 +18,8 @@ kmod C-CONFIGURATION is
 			< openFiles > .Map </ openFiles >
 			< busy > .Bag </ busy >
 			< currentTranslationUnit > "" </ currentTranslationUnit >
+			< currentProgramLoc > .K </ currentProgramLoc >
+			< programText > .Map </ programText >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >

@@ -41,6 +41,8 @@ mod COMMON-C-CONFIGURATION is
 	op busy : -> CellLabel .
 	op locsWrittenTo : -> CellLabel .
 	op currentTranslationUnit : -> CellLabel .
+	op programText : -> CellLabel .
+	op currentProgramLoc : -> CellLabel .
 	
 	subsort Id Int String Float Bool < K .
 	subsort String < Builtins .

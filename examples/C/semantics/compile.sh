@@ -26,6 +26,7 @@ function die {
 function cleanup {
 	rm -f $baseMaterial
 	rm -f $programTemp
+	rm -f $linkTemp
 }
 function getoptsFunc {
 	while getopts ':cdg:o:vsw' OPTION

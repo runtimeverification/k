@@ -53,10 +53,14 @@ if [ ! -e $directoryname$filename.c ]; then
 	die "$filename.c not found" 4
 fi
 
-perl $myDirectory/embed.pl -d=ML -o=$filename.prepre.gen $directoryname$filename.c
-if [ "$?" -ne 0 ]; then 
-	die "Error generating ML annotations." 5
-fi
+# perl $myDirectory/embed.pl -d=ML -o=$filename.prepre.gen $directoryname$filename.c
+# if [ "$?" -ne 0 ]; then 
+	# die "Error generating ML annotations." 5
+# fi
+
+# this instead of above
+cp $directoryname$filename.c $filename.prepre.gen
+
 #gcc $PEDANTRY_OPTIONS $GCC_OPTIONS -E -iquote "." -iquote "$directoryname" -I "$myDirectory/includes" $filename.prepre.gen $myDirectory/includes/clib.h > $filename.pre.gen 2> $filename.warnings.log
 gcc $PEDANTRY_OPTIONS $GCC_OPTIONS -E -iquote "." -iquote "$directoryname" -I "$myDirectory/includes" $filename.prepre.gen > $filename.pre.gen 2> $filename.warnings.log
 if [ "$?" -ne 0 ]; then 
@@ -81,9 +85,9 @@ fi
 if [ ! "$nowarn" ]; then
 	cat $filename.warnings.log >&2
 fi
-rm -f $filename.warnings.log
 #echo "done with cil"
 if [ ! "$dflag" ]; then
+	rm -f $filename.warnings.log
 	rm -f $filename.pre.gen
 fi
 mv $filename.gen.maude.tmp $filename.gen.maude

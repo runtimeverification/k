@@ -110,34 +110,40 @@ and interpret_character_constant char_list =
 let printFlatList f x =
 	paren (List.fold_left (fun aux arg -> aux ^ " :: " ^ paren (f arg)) "Nil" x)
 
-let rec cabsToString ((fname, defs) : file) = 
-	wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: []) "Program"
+let toString s =
+	"\"" ^ String.escaped s ^ "\""
+	
+let rec cabsToString ((fname, defs) : file) (fileContents : string) = 
+		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "Program"
 
 and printDefs defs =
 	printFlatList printDef defs
 
 and printDef def =
-	(match def with
+	 (match def with
 		| FUNDEF (a, b, c, d) -> 
-			wrap ((printSingleName a) :: (printBlock b) :: (printCabsLoc c) :: (printCabsLoc d) :: []) "FunDef"
+			printDefinitionLocRange (wrap ((printSingleName a) :: (printBlock b) :: []) "FunDef") c d
 		| DECDEF (a, b) -> 
-			wrap ((printInitNameGroup a) :: (printCabsLoc b) :: []) "DecDef"
+			printDefinitionLoc (wrap ((printInitNameGroup a) :: []) "DecDef") b
 		| TYPEDEF (a, b) ->
-			wrap ((printNameGroup a) :: (printCabsLoc b) :: []) "TypeDef"
+			printDefinitionLoc (wrap ((printNameGroup a) :: []) "TypeDef") b
 		| ONLYTYPEDEF (a, b) -> 
-			wrap ((printSpecifier a) :: (printCabsLoc b) :: []) "OnlyTypeDef"
+			printDefinitionLoc (wrap ((printSpecifier a) :: []) "OnlyTypeDef") b
 		| GLOBASM (a, b) ->
-			wrap (a :: (printCabsLoc b) :: []) "GlobAsm"
+			printDefinitionLoc (wrap (a :: []) "GlobAsm") b
 		| PRAGMA (a, b) ->
-			wrap ((printExpression a) :: (printCabsLoc b) :: []) "Pragma"
+			printDefinitionLoc (wrap ((printExpression a) :: []) "Pragma") b
 		| LINKAGE (a, b, c) ->
-			wrap (a :: (printCabsLoc b) :: (printDefs c) :: []) "OnlyTypeDef"
+			printDefinitionLoc (wrap (a :: (printDefs c) :: []) "OnlyTypeDef") b
 		| TRANSFORMER (a, b, c) ->
-			wrap ((printDef a) :: (printDefs b) :: (printCabsLoc c) :: []) "Transformer"
+			printDefinitionLoc (wrap ((printDef a) :: (printDefs b) :: []) "Transformer") c
 		| EXPRTRANSFORMER (a, b, c) ->
-			wrap ((printExpression a) :: (printExpression b) :: (printCabsLoc c) :: []) "ExprTransformer"
+			printDefinitionLoc (wrap ((printExpression a) :: (printExpression b) :: []) "ExprTransformer") c
 		) ^ "\n"
-		
+and printDefinitionLoc a b =
+	wrap (a :: (printCabsLoc b) :: []) "DefinitionLoc"
+and printDefinitionLocRange a b c =
+	wrap (a :: (printCabsLoc b) :: (printCabsLoc c) :: []) "DefinitionLocRange"		
 and printSingleName (a, b) = 
 	wrap ((printSpecifier a) :: (printName b) :: []) "SingleName"
 	(* commas ((printSpecifier a) :: (printName b) :: []) *) 
@@ -271,7 +277,7 @@ and printExpression exp =
 	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Dot"
 	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Arrow"
 	| GNU_BODY block -> wrap ((printBlock block) :: []) "GnuBody"
-	| EXPR_PATTERN s -> wrap (("\"" ^ (String.escaped s) ^ "\"") :: []) "ExpressionPattern"
+	| EXPR_PATTERN s -> wrap ((toString s) :: []) "ExpressionPattern"
 and getUnaryOperator op =
 	let name = (
 	match op with

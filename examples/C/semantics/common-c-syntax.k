@@ -81,6 +81,7 @@ kmod COMMON-C-SYNTAX is
 	sort IntConstant
 	sort InitFragment
 	sort FieldName
+	sort PureDefinition
 	
 	sort C
 	sort List{C} 
@@ -119,7 +120,8 @@ kmod COMMON-C-SYNTAX is
 	subsort IntConstant < C
 	subsort InitFragment < C
 	subsort FieldName < C
-
+	subsort PureDefinition < C
+	
 	subsort Id < C	
 
 	op Nil : -> List{C}
@@ -313,21 +315,24 @@ and enum_item = string * expression * cabsloc
 	 (* expression transformer: source and destination *)
 	 | EXPRTRANSFORMER of expression * expression * cabsloc
 ***)
-	op FunDef : SingleName Block CabsLoc CabsLoc -> Definition
-	op DecDef : InitNameGroup CabsLoc -> Definition
-	op TypeDef : NameGroup CabsLoc -> Definition
-	op OnlyTypeDef : Specifier CabsLoc -> Definition
-	op GlobAsm : String CabsLoc -> Definition
-	op Pragma : Expression CabsLoc -> Definition
-	op Linkage : String CabsLoc List{C} -> Definition
-	op Transformer : Definition List{C} CabsLoc -> Definition
-	op ExpressionTransformer : Expression Expression CabsLoc -> Definition
+	op FunDef : SingleName Block -> PureDefinition
+	op DecDef : InitNameGroup -> PureDefinition
+	op TypeDef : NameGroup -> PureDefinition
+	op OnlyTypeDef : Specifier -> PureDefinition
+	op GlobAsm : String -> PureDefinition
+	op Pragma : Expression -> PureDefinition
+	op Linkage : String List{C} -> PureDefinition
+	op Transformer : Definition List{C} -> PureDefinition
+	op ExpressionTransformer : Expression Expression -> PureDefinition
+	
+	op DefinitionLoc : PureDefinition CabsLoc -> Definition
+	op DefinitionLocRange : PureDefinition CabsLoc CabsLoc -> Definition
 
 ***(
 (* the string is a file name, and then the list of toplevel forms *)
 and file = string * definition list
 ***)
-	op Program : String List{C} -> Program
+	op Program : String List{C} String -> Program
 
 ***(
 	(* A block contains a list of local label declarations ( GCC's ({ __label__ 

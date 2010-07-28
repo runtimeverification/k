@@ -63,6 +63,7 @@ let replace input output =
 let noscores s = 
 	(replace "_" "u" s)
 
+let fileContents : string ref = ref ""
 
 let parseOneFile (fname: string) =
   (* PARSE *)
@@ -73,14 +74,27 @@ let parseOneFile (fname: string) =
   
   
 let rec processOneFile (cabs: Cabs.file) =
+	fileContents := "";
   begin
     (match !outChannel with
       None -> ()
     | Some c -> (
+		let (inputFilename, _) = cabs in
+		let ic = open_in inputFilename in (
+		try
+			while true do
+				let line = input_line ic in  (* read line from in_channel and discard \n *)
+				if (String.length line < 5 or Str.first_chars line 5 <> "# 1 \"") then
+					fileContents := (!fileContents ^ line);
+			done
+		with e ->                      (* some unexpected exception occurs *)
+			close_in_noerr ic;           (* emergency closing *)
+		);
 		let programName = 
 		Filename.basename (replace "-gen-maude-tmp" "" (replace "." "-" ("program-" ^ (noscores c.fname)))) in
 			fprintf c.fchan "%s\n" ("op " ^ programName ^ " : -> Program .");
-			fprintf c.fchan "eq %s = (%s) .\n" programName (cabsToString cabs); 
+			let maude = (cabsToString cabs !fileContents) in
+				(fprintf c.fchan "eq %s = (%s) .\n" programName maude); 
 	));
 
     if !E.hadErrors then
