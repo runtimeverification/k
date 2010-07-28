@@ -210,17 +210,24 @@ and printInitExpression a =
 	| SINGLE_INIT exp -> wrap ((printExpression exp) :: []) "SingleInit"
 	| COMPOUND_INIT a ->wrap ((printCompoundInit a) :: []) "CompoundInit"
 and printCompoundInit a =
-	"CompoundInit"
-	(* paren (printFlatListWithSep printOneCompoundInit a ", ") *)
+	wrapString (printFlatList printOneCompoundInit a) "CompoundInit"
 and printOneCompoundInit (a, b) =
-	"OneCompoundInitTODO"
+	wrap ((printInitWhat a) :: (printInitExpression b) :: []) "InitFragment"
+and printInitWhat a = 
+	match a with
+	| NEXT_INIT -> "NextInit"
+	| INFIELD_INIT (id, what) -> wrap ((printIdentifier id) :: (printInitWhat what) :: []) "InFieldInit"
+	| ATINDEX_INIT (exp, what) -> wrap ((printExpression exp) :: (printInitWhat what) :: []) "AtIndexInit"
+	| ATINDEXRANGE_INIT (exp1, exp2) -> wrap ((printExpression exp1) :: (printExpression exp2) :: []) "AtIndexRangeInit"
 and printDeclType a =
 	match a with
 	| JUSTBASE -> "JustBase"
-	| PARENTYPE (_, _, _) -> "ParenType"
+	| PARENTYPE (a, b, c) -> printParenType a b c
 	| ARRAY (a, b, c) -> printArrayType a b c
 	| PTR (a, b) -> printPointerType a b
 	| PROTO (a, b, c) -> printProtoType a b c
+and printParenType a b c =
+	wrap ((printAttributeList a) :: (printDeclType b) :: (printAttributeList c) :: []) "ParenType"
 and printArrayType a b c = 
 	wrap ((printDeclType a) :: (printAttributeList b) :: (printExpression c) :: []) "ArrayType"
 and printPointerType a b = 
@@ -244,7 +251,7 @@ and printConstant const =
 	| CONST_FLOAT r -> wrap (r :: []) "FloatLiteral"
 	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
-	| CONST_STRING s -> wrap (("\"" ^ s ^ "\"") :: []) "StringLiteral"
+	| CONST_STRING s -> wrap (("\"" ^ String.escaped s ^ "\"") :: []) "StringLiteral"
 	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
 and printIntLiteral i =
 	let firstTwo = if (String.length i > 2) then (Str.first_chars i 2) else ("xx") in
@@ -266,25 +273,24 @@ and printExpression exp =
 	| PAREN (exp1) -> wrap ((printExpression exp1) :: []) ""
 	| LABELADDR (s) -> wrap (s :: []) "GCCLabelOperator"
 	| QUESTION (exp1, exp2, exp3) -> wrap ((printExpression exp1) :: (printExpression exp2) :: (printExpression exp3) :: []) "_?_:_"
-	| CAST ((spec, declType), initExp) -> "Cast"
-	(* wrap ((printSpec exp1) :: []) "Cast" (* (specifier * decl_type) * init_expression *) *)
+	| CAST ((spec, declType), initExp) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: (printInitExpression initExp) :: []) "Cast" 
 		(* A CAST can actually be a constructor expression *)
 	| CALL (exp1, expList) -> wrap ((printExpression exp1) :: (printExpressionList expList) :: []) "Call"
 		(* There is a special form of CALL in which the function called is
 		__builtin_va_arg and the second argument is sizeof(T). This 
 		should be printed as just T *)
-	| COMMA (expList) -> wrap ((printExpressionList expList) :: []) "ExpSeq"
+	| COMMA (expList) -> wrap ((printExpressionList expList) :: []) "Comma"
 	| CONSTANT (const) -> wrap (printConstant const :: []) "Constant"
 	| VARIABLE name -> wrap ((printIdentifier name) :: []) "Variable"
-	| EXPR_SIZEOF exp1 -> wrap ((printExpression exp1) :: []) "ExpSizeof"
-	| TYPE_SIZEOF (spec, declType) -> "TypeSizeofTODO"
-	| EXPR_ALIGNOF exp -> "ExprAlignofTODO"
-	| TYPE_ALIGNOF _ -> "TypeAlignofTODO"
+	| EXPR_SIZEOF exp1 -> wrap ((printExpression exp1) :: []) "SizeofExpression"
+	| TYPE_SIZEOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "SizeofType"
+	| EXPR_ALIGNOF exp -> wrap ((printExpression exp) :: []) "AlignofExpression"
+	| TYPE_ALIGNOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "AlignofType"
 	| INDEX (exp, idx) -> wrap ((printExpression exp) :: (printExpression idx) :: []) "ArrayIndex"
-	| MEMBEROF (exp, fld) -> "DotTODO"
-	| MEMBEROFPTR (exp, fld) -> "ArrowTODO"
-	| GNU_BODY _ -> "GCCBlockExpressionTODO"
-	| EXPR_PATTERN _ -> "ExpressionPatternTODO"     (* sm: not sure about this *)
+	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Dot"
+	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Arrow"
+	| GNU_BODY block -> wrap ((printBlock block) :: []) "GnuBody"
+	| EXPR_PATTERN s -> wrap (("\"" ^ (String.escaped s) ^ "\"") :: []) "ExpressionPattern"
 and getUnaryOperator op =
 	let name = (
 	match op with

@@ -368,7 +368,7 @@ and statement =
 	| DOWHILE of expression * statement * cabsloc
 	| FOR of for_clause * expression * expression * statement * cabsloc
 ***)
-	op If : Expression Statement Statement -> PureStatement
+	op IfThenElse : Expression Statement Statement -> PureStatement
 	op While : Expression Statement -> PureStatement
 	op DoWhile : Expression Statement -> PureStatement
 	op For : ForClause Expression Expression Statement -> PureStatement
@@ -497,7 +497,7 @@ and unary_operator =
 ***(
 	| COMMA of expression list
 ***)
-	op SeqExp : List{C} -> Expression
+	op Comma : List{C} -> Expression
 ***(
 	| CONSTANT of constant
 	| PAREN of expression
@@ -511,14 +511,27 @@ and unary_operator =
 	| TYPE_SIZEOF of specifier * decl_type
 	| EXPR_ALIGNOF of expression
 	| TYPE_ALIGNOF of specifier * decl_type
+***)
+	op SizeofExpression : Expression -> Expression
+	op SizeofType : Specifier DeclType -> Expression
+	op AlignofExpression : Expression -> Expression
+	op AlignofType : Specifier DeclType -> Expression
+***(
 	| INDEX of expression * expression
+***)
+	op ArrayIndex : Expression Expression -> Expression
+***(
 	| MEMBEROF of expression * string
 	| MEMBEROFPTR of expression * string
+***)
+	op Dot : Expression Id -> Expression
+	op Arrow : Expression Id -> Expression
+***(
 	| GNU_BODY of block
 	| EXPR_PATTERN of string     (* pattern variable, and name *)
 ***)
-	op ArrayIndex : Expression Expression -> Expression
-	--- TODO a number of cases
+	op GnuBody : Block -> Expression
+	op ExpressionPattern : String -> Expression
 	
 ***(
 and constant =
@@ -550,6 +563,7 @@ and init_expression =
 	op NoInit : -> InitExpression
 	op SingleInit : Expression -> InitExpression
 	op CompoundInit : List{C} -> InitExpression
+	op InitFragment : InitWhat InitExpression -> InitFragment
 	
 ***(
 and initwhat =
