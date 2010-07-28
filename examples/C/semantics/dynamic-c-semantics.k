@@ -105,6 +105,7 @@ kmod DYNAMIC-C-SEMANTICS is
 					< currentFunction > File-Scope </ currentFunction >
 				</ thread >
 			</ threads >
+			< currentTranslationUnit > "" </ currentTranslationUnit >
 			< busy > .Bag </ busy >
 			< aLabelMap > .Map </ aLabelMap > 
 			< sizes > .Map </ sizes >

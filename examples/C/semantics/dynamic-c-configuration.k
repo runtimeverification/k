@@ -17,6 +17,7 @@ kmod C-CONFIGURATION is
 			< structs > .Map </ structs >
 			< openFiles > .Map </ openFiles >
 			< busy > .Bag </ busy >
+			< currentTranslationUnit > "" </ currentTranslationUnit >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >

@@ -97,6 +97,7 @@ let wrapString d1 d2 = d2 ^ paren(d1)
  * values, turn it into a CIL constant.  Multi-character constants are
  * treated as multi-digit numbers with radix given by the bit width of
  * the specified type (either char or wchar_t). *)
+(* CME: actually, this is based on the code in CIL *)
 let rec reduce_multichar typ : int64 list -> int64 =
   let radix = 256 in
   List.fold_left
@@ -105,32 +106,12 @@ let rec reduce_multichar typ : int64 list -> int64 =
 and interpret_character_constant char_list =
   let value = reduce_multichar () char_list in
   Int64.to_int value
-  (* if value < (Int64.of_int 256) then  
-    (* ISO C 6.4.4.4.10: single-character constants have type int *)
-    Int64.to_int value
-  else begin
-    let orig_rep = None (* Some("'" ^ (String.escaped str) ^ "'") *) in
-    if value <= (Int64.of_int32 Int32.max_int) then
-      (CInt64(value,IULong,orig_rep)),(TInt(IULong,[]))
-    else 
-      (CInt64(value,IULongLong,orig_rep)),(TInt(IULongLong,[]))
-  end	
-  *)
-
-
-(*
-** FrontC Pretty printer
-*)
-let out = ref stdout
-
-let printList f x =
-	paren (commas (List.map f x))
 
 let printFlatList f x =
 	paren (List.fold_left (fun aux arg -> aux ^ " :: " ^ paren (f arg)) "Nil" x)
 
 let rec cabsToString ((fname, defs) : file) = 
-	wrapString (printDefs defs) "Program"
+	wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: []) "Program"
 
 and printDefs defs =
 	printFlatList printDef defs
@@ -441,24 +422,23 @@ and printSingleNameList a =
 	printFlatList printSingleName a
 and printSpecElem a =
 	match a with
-    | SpecTypedef -> "SpecTypedef"
-    | SpecInline -> "Inline"
-    | SpecStorage sto ->
-        (match sto with
-        | NO_STORAGE -> "NoStorage"
-        | AUTO -> "Auto"
-        | STATIC -> "Static"
-        | EXTERN -> "Extern"
-        | REGISTER -> "Register")
-    | SpecCV cv -> 
-        (match cv with
-        | CV_CONST -> "Const"
-        | CV_VOLATILE -> "Volatile"
-        | CV_RESTRICT -> "Restrict")
-    | SpecAttr al -> "Attribute" (* print_attribute al;*)
-    | SpecType bt -> printTypeSpec bt
-    (*| SpecPattern name -> printl ["@specifier";"(";name;")"]*)
-	| _ -> "UnknownElem"
+	| SpecTypedef -> "SpecTypedef"
+	| SpecCV cv -> 
+		(match cv with
+		| CV_CONST -> "Const"
+		| CV_VOLATILE -> "Volatile"
+		| CV_RESTRICT -> "Restrict")
+	| SpecAttr al -> "Attribute" (* print_attribute al;*)
+	| SpecStorage sto ->
+		(match sto with
+		| NO_STORAGE -> "NoStorage"
+		| AUTO -> "Auto"
+		| STATIC -> "Static"
+		| EXTERN -> "Extern"
+		| REGISTER -> "Register")
+	| SpecInline -> "Inline"
+	| SpecType bt -> printTypeSpec bt
+	| SpecPattern name -> wrap ((printIdentifier name) :: []) "SpecPattern"
 	
 and printTypeSpec = function
 	Tvoid -> "Void"
@@ -476,8 +456,8 @@ and printTypeSpec = function
 	| Tstruct (a, b, c) -> printStructType a b c
 	| Tunion (a, b, c) -> printUnionType a b c
 	| Tenum (a, b, c) -> printEnumType a b c
-	(* | TtypeofE e -> printl ["__typeof__";"("]; print_expression e; print ") "
-	| TtypeofT (s,d) -> printl ["__typeof__";"("]; print_onlytype (s, d); print ") " *)
+	| TtypeofE e -> wrap ((printExpression e) :: []) "TypeofExpression"
+	| TtypeofT (s, d) -> wrap ((printSpecifier s) :: (printDeclType d) :: []) "TypeofType"
 and printStructType a b c =
 	match b with
 	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "StructRef"
@@ -490,101 +470,3 @@ and printEnumType a b c =
 	match b with
 	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "EnumRef"
 	| Some b -> wrap ((printIdentifier a) :: (printEnumItemList b) :: (printAttributeList c) :: []) "EnumDef"
-
-	
-(* 
-and print_def def =
-  match def with
-    FUNDEF (proto, body, loc, _) ->
-      comprint "fundef";
-      if !printCounters then begin
-        try
-          let fname =
-            match proto with
-              (_, (n, _, _, _)) -> n
-          in
-          print_def (DECDEF (([SpecType Tint],
-                              [(fname ^ "__counter", JUSTBASE, [], cabslu),
-                                NO_INIT]), loc));
-        with Not_found -> print "/* can't print the counter */"
-      end;
-      setLoc(loc);
-      print_single_name proto;
-      print_block body;
-      force_new_line ();
-
-  | DECDEF (names, loc) ->
-      comprint "decdef";
-      setLoc(loc);
-      print_init_name_group names;
-      print ";";
-      new_line ()
-
-  | TYPEDEF (names, loc) ->
-      comprint "typedef";
-      setLoc(loc);
-      print_name_group names;
-      print ";";
-      new_line ();
-      force_new_line ()
-
-  | ONLYTYPEDEF (specs, loc) ->
-      comprint "onlytypedef";
-      setLoc(loc);
-      print_specifiers specs;
-      print ";";
-      new_line ();
-      force_new_line ()
-
-  | GLOBASM (asm, loc) ->
-      setLoc(loc);
-      printl ["__asm__";"("];  print_string asm; print ");";
-      new_line ();
-      force_new_line ()
-
-  | PRAGMA (a,loc) ->
-      setLoc(loc);
-      force_new_line ();
-      print "#pragma ";
-      let oldwidth = !width in
-      width := 1000000;  (* Do not wrap pragmas *)
-      print_expression a;
-      width := oldwidth;
-      force_new_line ()
-
-  | LINKAGE (n, loc, dl) -> 
-      setLoc (loc);
-      force_new_line ();
-      print "extern "; print_string n; print_string "  {";
-      List.iter print_def dl;
-      print_string "}";
-      force_new_line ()
-
-  | TRANSFORMER(srcdef, destdeflist, loc) ->
-      setLoc(loc);
-      print "@transform {";
-      force_new_line();
-      print "{";
-        force_new_line();
-        indent ();
-        print_def srcdef;
-        unindent();
-      print "}";
-      force_new_line();
-      print "to {";
-        force_new_line();
-        indent();
-        List.iter print_def destdeflist;
-        unindent();
-      print "}";
-      force_new_line()
-
-  | EXPRTRANSFORMER(srcexpr, destexpr, loc) ->
-      setLoc(loc);
-      print "@transformExpr { ";
-      print_expression srcexpr;
-      print " } to { ";
-      print_expression destexpr;
-      print " }";
-      force_new_line()
-*)

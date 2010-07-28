@@ -1144,18 +1144,16 @@ mod C-SEMANTICS-MISC is
 		--- : KSentence [metadata "structural"] .
 
 	eq listToK(K:K) = klistToK(getList{K}(K:K)) .
-	eq klistToK((K':NeK,, K:K)) = K':NeK ~> klistToK(K:K) .
-	eq klistToK((K':NeK)) = K':NeK .
+	eq klistToK((K:K,, L:List{K})) = K:K ~> klistToK(L:List{K}) .
+	eq klistToK((K:K)) = K:K .
 	eq klistToK(.) = . .
 	
 	eq CabsLoc("cabs loc unknown", -10, -10, 0) = UnknownCabsLoc .
 	
-	eq Program(K:C) = listToK(K:C) .
-	eq 'Program(K:K) = listToK(K:K) .
-
-	eq _`(_`)(('Program).KProperLabel,_`(_`)(('_::_).KHybridLabel,K:K))= _`(_`)(('listToK).KProperLabel,K:K).	
-	eq _`(_`)(('Program).KProperLabel,K:K)= _`(_`)(('listToK).KProperLabel,K:K).
-
+	mb rule
+		< k > Program(S:String, L:List{C}) => listToK(L:List{C}) ...</ k >
+		< currentTranslationUnit > ? => S:String </ currentTranslationUnit >
+		: KSentence .
 	
 endm
 

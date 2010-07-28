@@ -52,7 +52,7 @@ kmod COMMON-C-SYNTAX is
 	sort CabsLoc
 	sort TypeSpecifier
 	sort Storage
-	sort FunSpecifier
+	--- sort FunSpecifier --- not used
 	sort CVSpecifier
 	sort SpecifierElem
 	sort Specifier
@@ -90,7 +90,7 @@ kmod COMMON-C-SYNTAX is
 	subsort CabsLoc < C
 	subsort TypeSpecifier < C
 	subsort Storage < C
-	subsort FunSpecifier < C
+	--- subsort FunSpecifier < C --- not used
 	subsort CVSpecifier < C
 	subsort SpecifierElem < C
 	subsort Specifier < C
@@ -174,8 +174,8 @@ type typeSpecifier = (* Merge all specifiers into one type *)
 	op UnionDef : Id List{C} List{C} -> TypeSpecifier [ctor]
 	op EnumRef : Id List{C} -> TypeSpecifier [ctor]
 	op EnumDef : Id List{C} List{C} -> TypeSpecifier [ctor]
-	op TypeOfE : Expression -> TypeSpecifier [ctor]
-	op TypeOfT : Specifier DeclType -> TypeSpecifier [ctor]
+	op TypeofExpression : Expression -> TypeSpecifier [ctor]
+	op TypeofType : Specifier DeclType -> TypeSpecifier [ctor]
 
 ***(
 and storage =
@@ -212,7 +212,7 @@ and spec_elem =
 	subsort Storage < SpecifierElem
 	op Inline : -> SpecifierElem
 	subsort TypeSpecifier < SpecifierElem
-	--- TODO not representing SpecPattern
+	op SpecPattern : Id -> SpecifierElem
 	
 ***(
 	and specifier = spec_elem list
@@ -327,7 +327,7 @@ and enum_item = string * expression * cabsloc
 (* the string is a file name, and then the list of toplevel forms *)
 and file = string * definition list
 ***)
-	op Program : List{C} -> Program
+	op Program : String List{C} -> Program
 
 ***(
 	(* A block contains a list of local label declarations ( GCC's ({ __label__ 
