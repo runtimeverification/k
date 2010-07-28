@@ -140,10 +140,10 @@ ceq lists2kOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
  op lists2kEq : Equation Module OpDeclSet CTORSMap ~> Equation .
  eq lists2kEq((eq T1 = T2 [AS] .), M, OPDS, CTORS)
   = (eq lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) 
-      = lists2kT(T2, (leastSort(M,T1)), M, OPDS, CTORS) [lists2kAS(M, OPDS, CTORS, AS)] .) .
+      = lists2kT(T2, (leastSort(M,T2)), M, OPDS, CTORS) [lists2kAS(M, OPDS, CTORS, AS)] .) .
  eq lists2kEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, CTORS)
   = (ceq lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) 
-       = lists2kT(T2, (leastSort(M,T1)), M, OPDS, CTORS) 
+       = lists2kT(T2, (leastSort(M,T2)), M, OPDS, CTORS) 
       if lists2kC(Cond, M, OPDS, CTORS) [lists2kAS(M, OPDS, CTORS, AS)] .) .
 
  op lists2kRls : Module OpDeclSet CTORSMap RuleSet ~> RuleSet .
@@ -154,27 +154,27 @@ ceq lists2kOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
  op lists2kRl : Rule Module OpDeclSet CTORSMap ~> Rule .
  eq lists2kRl((rl T1 => T2 [AS] .), M, OPDS, CTORS)
   = (rl lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) 
-     => lists2kT(T2, (leastSort(M,T1)), M, OPDS, CTORS) [lists2kAS(M, OPDS, CTORS, AS)] .) .
+     => lists2kT(T2, (leastSort(M,T2)), M, OPDS, CTORS) [lists2kAS(M, OPDS, CTORS, AS)] .) .
  eq lists2kRl((crl T1 => T2 if Cond [AS] .), M, OPDS, CTORS)
   = (crl lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) 
-      => lists2kT(T2, (leastSort(M,T1)), M, OPDS, CTORS) 
+      => lists2kT(T2, (leastSort(M,T2)), M, OPDS, CTORS) 
       if lists2kC(Cond, M, OPDS, CTORS) [lists2kAS(M, OPDS, CTORS, AS)] .) .
 
   op lists2kC : Condition Module OpDeclSet CTORSMap ~> Condition .
   eq lists2kC(T1 = T2 /\ Cond, M, OPDS, CTORS)
    = (lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) 
-     = lists2kT(T2, (leastSort(M,T1)), M, OPDS, CTORS))
+     = lists2kT(T2, (leastSort(M,T2)), M, OPDS, CTORS))
      /\  lists2kC(Cond, M, OPDS, CTORS) .
   eq lists2kC(T1 := T2 /\ Cond, M, OPDS, CTORS)
    = (lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) 
-     := lists2kT(T2, (leastSort(M,T1)), M, OPDS, CTORS))
+     := lists2kT(T2, (leastSort(M,T2)), M, OPDS, CTORS))
      /\  lists2kC(Cond, M, OPDS, CTORS) .
   eq lists2kC(T1 : T /\ Cond, M, OPDS, CTORS)
    = (lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) : lists2kTypes(T,CTORS))
      /\  lists2kC(Cond, M, OPDS, CTORS) .
   eq lists2kC(T1 => T2 /\ Cond, M, OPDS, CTORS)
    = (lists2kT(T1, (leastSort(M,T1)), M, OPDS, CTORS) 
-     => lists2kT(T2, (leastSort(M,T1)), M, OPDS, CTORS))
+     => lists2kT(T2, (leastSort(M,T2)), M, OPDS, CTORS))
      /\  lists2kC(Cond, M, OPDS, CTORS) .
   eq lists2kC(nil, M, OPDS, CTORS) = nil .
 
