@@ -38,19 +38,21 @@ foreach my $program (@programs){
 
 print "op linked-program : -> K .\n";
 print "eq linked-program = ";
+print '(\'_::_).KHybridLabel(';
 printNested(@programNames);
+print ')';
 
 sub printNested {
 	my ($name, @rest) = (@_);
-	print '_`(_`)((\'__).KProperLabel,_`,`,_(';
-	print "$name, ";
+
+	print "$name,, ";
 	#print @rest;
 	if ($name != @rest) {
 		printNested(@rest);
 	} else {
-		print '.K';
+		print '.List{K}';
 	}
-	print '))';
+
 }
 
 # foreach my $name (@programNames){
