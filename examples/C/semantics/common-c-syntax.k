@@ -501,7 +501,7 @@ and unary_operator =
 	   should be printed as just T *)
 	| CALL of expression * expression list
 ***)
-	op Call : K List{C} -> Expression
+	op Call : K List{C} -> Expression [strict]
 ***(
 	| COMMA of expression list
 ***)
@@ -511,9 +511,10 @@ and unary_operator =
 	| PAREN of expression
 	| VARIABLE of string
 ***)
-	op Constant : K -> Expression
+	op Constant : K -> Expression [strict]
 	--- for paren, just putting parentheses
-	op Variable : Id -> Expression
+	--- op Variable : Id -> Expression
+	subsort Id < Expression
 ***(
 	| EXPR_SIZEOF of expression
 	| TYPE_SIZEOF of specifier * decl_type
@@ -554,7 +555,7 @@ and constant =
 	op OctalConstant : Int -> IntConstant
 	op HexConstant : String -> IntConstant
 	
-	op IntLiteral : K -> Constant
+	op IntLiteral : K -> Constant [strict]
 	op FloatLiteral : Float -> Constant
 	op CharLiteral : Int -> Constant
 	op WCharLiteral : Int -> Constant

@@ -196,7 +196,14 @@ mod COMMON-C-TYPING is
 	mb rule [long => long-int] : KSentence [metadata "structural"] .
 	mb rule [long-long => long-long-int] : KSentence [metadata "structural"] .
 	***)
-	
+			
+	eq hasArrayType(arrayType(?, ?)) = true .
+	ceq hasArrayType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'arrayType .
+	eq hasFunctionType(functionType(?, ?)) = true .
+	ceq hasFunctionType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'functionType .	
+		
 	op evalToType : -> K .
 	op HOLE : -> K .
 	mb rule

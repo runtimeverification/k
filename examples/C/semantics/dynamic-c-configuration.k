@@ -4,7 +4,7 @@ kmod C-CONFIGURATION is
 
 	configuration 
 		< T > 
-			< aLabelMap > .Map </ aLabelMap >
+			< gotoMap > .Map </ gotoMap >
 			< genv > .Map </ genv >
 			< mem > .Map </ mem >
 			< nextLoc > 0 </ nextLoc >

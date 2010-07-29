@@ -91,17 +91,17 @@ kmod DYNAMIC-C-SEMANTICS is
 					< local >
 						< k > listToK(P:Program)
 							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
-							~> incomingArguments(L:List{K})
-							~> Call(Variable(Identifier("printf")), (
-								(Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
-								:: (incomingArgumentArray)
+							--- ~> incomingArguments(L:List{K})
+							~> Call(Identifier("main"), (Nil
+								--- (Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
+								--- :: (incomingArgumentArray)
 							)) </ k >
 						< currentFunction > File-Scope </ currentFunction >
 						< currentProgramLoc > UnknownCabsLoc </ currentProgramLoc >
 					...</ local >
 				...</ thread >
 			</ threads >
-			< nextLoc > sym(1) +Nat 0</ nextLoc >
+			< nextLoc > sym(1) +Nat 0 </ nextLoc >
 			< nextFile > 3 </ nextFile >
 			< openFiles >
 				0 |-> "stdin" --- stdin

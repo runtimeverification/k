@@ -268,7 +268,7 @@ and printExpression exp =
 		should be printed as just T *)
 	| COMMA (expList) -> wrap ((printExpressionList expList) :: []) "Comma"
 	| CONSTANT (const) -> wrap (printConstant const :: []) "Constant"
-	| VARIABLE name -> wrap ((printIdentifier name) :: []) "Variable"
+	| VARIABLE name -> wrap ((printIdentifier name) :: []) ""
 	| EXPR_SIZEOF exp1 -> wrap ((printExpression exp1) :: []) "SizeofExpression"
 	| TYPE_SIZEOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "SizeofType"
 	| EXPR_ALIGNOF exp -> wrap ((printExpression exp) :: []) "AlignofExpression"

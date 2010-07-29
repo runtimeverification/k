@@ -41,6 +41,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op debugK : -> K .
 	op discard : -> K .
 	op unnamedBitField : -> Id [ctor] .
+	--- op sizedVal : K -> K [metadata "strict"] .
 	--- op loc : Nat Nat -> Nat .
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
@@ -65,6 +66,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	ops float double long-double : -> BaseType .
 	ops signed-char unsigned-char : -> BaseType .
 	ops unsigned-short-int unsigned-int unsigned-long-int unsigned-long-long-int : -> BaseType .
+	op no-type : -> BaseType .
 	
 	--- Composite types
 	op enumType : Id -> BaseType [ctor] .
@@ -98,7 +100,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	sort BaseType .
 	subsort BaseType < Type Builtins .
 	--- --- subsort SeqList < Expression .
-	op sizeofType : K -> K [metadata "strict"] .
+	
+	
+	op calcSizeofType : K -> K [metadata "strict"] . --- generates a tv(size, cfg:sizeut)
+	op sizeofType : Type -> Nat [memo] . --- generates just a Nat
 	op sizeofExp : K -> K .
 	--- --- op HOLE : -> Expression .
 	op l : KLabel -> K [metadata "builtin wrapper"] .
@@ -129,7 +134,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op typedField : Type Id -> KResult .
 	--- op declare : K K -> K [metadata "strict(1)"] .
 	--- op converted : K K -> K .
-	op tv : BaseValue Type -> Value .
+	op tv : List{K} Type -> Value .
 	--- op atv : List{K} Type -> Value .
 	--- op concretize : Value -> K .
 	--- op addTypes : K K -> K .
@@ -166,8 +171,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op writeToFD : Nat String -> K .
 	--- op readFromFD : Nat -> K .
 	--- op readFromFD : Nat Nat -> K .
-	--- op min : Type -> Int [memo] .
-	--- op max : Type -> Int [memo] .
 
 	--- op figureOffset : Nat K Type -> K [metadata "strict(2)"] .
 	--- ---op pair : Rat Rat -> K . --- relying on this not being nat
@@ -175,12 +178,12 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op range : Nat Nat -> Bag .
 	op calculateGotoMap : Id K -> K .
 	
-	--- op hasArrayType : Type -> Bool .
-	--- op hasFunctionType : Type -> Bool .
-	--- op kpair : K K -> K .
+	op hasArrayType : Type -> Bool .
+	op hasFunctionType : Type -> Bool .
+	op kpair : K K -> K .
 	--- op kpair : K List -> K .
 	--- op promote : K -> K .
-	--- op readFromMem : Nat Type -> K .
+	op readFromMem : Nat Type -> K .
 	--- op extractField : List{K} Type Id -> K .
 	--- op allocString : Nat String -> K .
 	--- op unknownRange : Nat Nat Nat -> List{K} .
@@ -193,7 +196,9 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op defaultCase : K -> K .
 	--- op sequencePoint : -> K .
 	
-	--- op append : Nat Nat Value -> K .	
+	op min : Type -> Int [memo] .
+	op max : Type -> Int [memo] .
+	--- op append : Nat Nat Value -> K .
 	--- op store_New_atLoc_ : Nat K Nat -> K [metadata "strict(2)"] .
 	op storeNew_atLoc_ : K Nat -> K [metadata "strict(1)"] .
 	op store_atLoc_ : K Nat -> K [metadata "strict(1)"] .
@@ -240,8 +245,8 @@ mod C-SETTINGS is
 	op cfg:ptrdiffut : -> Type .
 	eq cfg:ptrdiffut = long-long-int .
 	
-	--- eq min(enumType(?)) = min(int) .
-	--- eq max(enumType(?)) = max(int) .
+	eq min(enumType(?)) = min(int) .
+	eq max(enumType(?)) = max(int) .
 		
 	--- --- might not be matching the right thing here if the types become different
 	--- eq sizeofType(T:Base-Type) = tv(numBytes(T:Base-Type), cfg:sizeut) .
@@ -324,42 +329,42 @@ mod SEMANTIC-HELPERS is
 	including COMMON-SEMANTIC-SYNTAX .
 	including C-SETTINGS .
 	
-	--- mb [discard]: rule
-		--- < k > [V:Value ~> discard => .K] ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb [discard]: rule
+		< k > V:Value ~> discard => (.).K ...</ k >
+		: KSentence [metadata "structural"] .
 	
-	--- ---- derived
-	--- eq numBytes(unsigned-char) = numBytes(signed-char) .
-	--- eq numBytes(unsigned-short-int) = numBytes(short-int) .
-	--- eq numBytes(unsigned-int) = numBytes(int) .
-	--- eq numBytes(unsigned-long-int) = numBytes(long-int) .
-	--- eq numBytes(unsigned-long-long-int) = numBytes(long-long-int) .
+	---- derived
+	eq numBytes(unsigned-char) = numBytes(signed-char) .
+	eq numBytes(unsigned-short-int) = numBytes(short-int) .
+	eq numBytes(unsigned-int) = numBytes(int) .
+	eq numBytes(unsigned-long-int) = numBytes(long-int) .
+	eq numBytes(unsigned-long-long-int) = numBytes(long-long-int) .
 	
-	--- ceq numBits(T:Type) = numBytes(T:Type) *Nat numBitsPerByte 
-		--- if getKLabel(T:Type) =/=Bool 'bitfieldType .
-	--- eq numBits(bitfieldType(?, N:Nat)) = N:Nat .
+	ceq numBits(T:Type) = numBytes(T:Type) *Nat numBitsPerByte 
+		if getKLabel(T:Type) =/=Bool 'bitfieldType .
+	eq numBits(bitfieldType(?, N:Nat)) = N:Nat .
 
-	--- eq min(signed-char) = -Int (2 ^Nat absInt(_-Int_(numBits(signed-char), 1))) .
-	--- eq max(signed-char) = _-Int_(2 ^Nat absInt(_-Int_(numBits(signed-char), 1)), 1) .
-	--- eq min(short-int) = -Int (2 ^Nat absInt(_-Int_(numBits(short-int), 1))) .
-	--- eq max(short-int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(short-int), 1)), 1) .
-	--- eq min(int) = -Int (2 ^Nat absInt(_-Int_(numBits(int), 1))) .
-	--- eq max(int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(int), 1)), 1) .
-	--- eq min(long-int) = -Int (2 ^Nat absInt(_-Int_(numBits(long-int), 1))) .
-	--- eq max(long-int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(long-int), 1)), 1) .
-	--- eq min(long-long-int) = -Int (2 ^Nat absInt(_-Int_(numBits(long-long-int), 1))) .
-	--- eq max(long-long-int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(long-long-int), 1)), 1) .
+	eq min(signed-char) = -Int (2 ^Nat absInt(_-Int_(numBits(signed-char), 1))) .
+	eq max(signed-char) = _-Int_(2 ^Nat absInt(_-Int_(numBits(signed-char), 1)), 1) .
+	eq min(short-int) = -Int (2 ^Nat absInt(_-Int_(numBits(short-int), 1))) .
+	eq max(short-int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(short-int), 1)), 1) .
+	eq min(int) = -Int (2 ^Nat absInt(_-Int_(numBits(int), 1))) .
+	eq max(int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(int), 1)), 1) .
+	eq min(long-int) = -Int (2 ^Nat absInt(_-Int_(numBits(long-int), 1))) .
+	eq max(long-int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(long-int), 1)), 1) .
+	eq min(long-long-int) = -Int (2 ^Nat absInt(_-Int_(numBits(long-long-int), 1))) .
+	eq max(long-long-int) = _-Int_(2 ^Nat absInt(_-Int_(numBits(long-long-int), 1)), 1) .
 	
-	--- eq min(unsigned-char) = 0 .
-	--- eq max(unsigned-char) = _-Int_(2 ^Nat absInt(numBits(unsigned-char)), 1) .
-	--- eq min(unsigned-short-int) = 0 .
-	--- eq max(unsigned-short-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-short-int)), 1) .
-	--- eq min(unsigned-int) = 0 .
-	--- eq max(unsigned-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-int)), 1) .
-	--- eq min(unsigned-long-int) = 0 .
-	--- eq max(unsigned-long-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-long-int)), 1) .
-	--- eq min(unsigned-long-long-int) = 0 .
-	--- eq max(unsigned-long-long-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-long-long-int)), 1) .
+	eq min(unsigned-char) = 0 .
+	eq max(unsigned-char) = _-Int_(2 ^Nat absInt(numBits(unsigned-char)), 1) .
+	eq min(unsigned-short-int) = 0 .
+	eq max(unsigned-short-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-short-int)), 1) .
+	eq min(unsigned-int) = 0 .
+	eq max(unsigned-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-int)), 1) .
+	eq min(unsigned-long-int) = 0 .
+	eq max(unsigned-long-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-long-int)), 1) .
+	eq min(unsigned-long-long-int) = 0 .
+	eq max(unsigned-long-long-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-long-long-int)), 1) .
 	
 	--- mb [firstChar]: rule
 		--- [firstChar(S:String) => substrString(S:String, 0, 1)]
@@ -657,9 +662,9 @@ mod COMMON-GLOBAL-DECLARATION is
 	mb [function-definition]: rule
 		--- < k > ['_`{_`}(typedDeclaration(T:Type, X:Id),, B:SeqList) => storeNew Closure(X:Id, T:Type, B:SeqList) atLoc Loc:Nat ~> calculateGotoMap(X:Id, B:SeqList) ~> skipval] ...</ k >
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) => 
-			storeNew functionObject(X:Id, T:Type, Block:K) atLoc Loc:Nat 
-			~> calculateGotoMap(X:Id, Block:K) 
-			~> skipval
+			storeNew tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
+			~> calculateGotoMap(X:Id, Block:K)
+			--- ~> skipval
 		...</ k >
 		< env >... (.).Map => X:Id |-> Loc:Nat ...</ env >
 		< genv >... (.).Map => X:Id |-> Loc:Nat ...</ genv >
@@ -743,20 +748,21 @@ mod MEMORY is
 		--- => concretize(atv(L:List{K}, T:Type))] ...</ k >
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb rule
-		--- < k > [alloc(loc(Block:Nat, ?), tv(Len:Nat, ?)) => .K] ...</ k >
-		--- < mem >... [.Map => Block:Nat |-> memblock(Len:Nat, .Map)] ...</ mem >
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > alloc(sym(Block:Nat) +Nat 0, tv(Len:Nat, ?)) => (.).K ...</ k >
+		< mem >... (.).Map => Block:Nat |-> memblock(Len:Nat, (.).Map) ...</ mem >
+		: KSentence [metadata "structural"] .
 		
 	--- mb rule
 		--- < k > [allocWithDefault(loc(Block:Nat, ?), tv(Len:Nat, ?), N:Nat) => .K] ...</ k >
 		--- < mem >... [.Map => Block:Nat |-> memblock(Len:Nat, (0 to Len:Nat) |-> piece(N:Nat, numBitsPerByte))] ...</ mem >
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb [store-closure]: rule
-		--- < k > [store Closure(K1:K, K2:K, K3:K) atLoc loc(Block:Nat, Offset:Nat) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(Len:Nat, [M:Map => M:Map[Closure(K1:K, K2:K, K3:K) / Offset:Nat]]) ...</ mem >
-		--- : KSentence [metadata "structural"] .
+	mb [storeAtLoc]: rule
+		< k > store tv(V:K, T:Type) atLoc sym(Block:Nat) +Nat Offset:Nat => (.).K ...</ k >
+		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[V:K / Offset:Nat])) ...</ mem >
+		if sizeofType(T:Type) <=Nat Offset:Nat +Nat Len:Nat
+		: KSentence [metadata "structural"] .
 		
 	--- mb [append-existing]: rule
 		--- < k > [append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => store V:Value atLoc loc(Block:Nat, Offset:Nat)] ...</ k >
@@ -779,7 +785,7 @@ mod MEMORY is
 		
 	
 	mb [storeNew]: rule
-		< k > storeNew V:Value atLoc Loc:Nat => alloc(Loc:Nat, sizeofExp(V:Value)) ~> store V:Value atLoc Loc:Nat ...</ k >
+		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat => alloc(Loc:Nat, calcSizeofType(T:Type)) ~> store tv(V:K, T:Type) atLoc Loc:Nat ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- mb [store-N-New]: rule
@@ -1186,7 +1192,7 @@ endm
 
 --- load common-c-conversions
 load common-c-expressions
---- load common-c-statements
+load common-c-statements
 --- load common-c-standard-lib
 load common-c-typing
 
@@ -1196,7 +1202,7 @@ mod COMMON-C-SEMANTICS is
 	including COMMON-C-TYPING .
 	including COMMON-GLOBAL-DECLARATION .
 	including MEMORY .
-	
+	including COMMON-C-STATEMENTS .
 	including COMMON-C-EXPRESSIONS .
 	
 	op eval : Program -> Bag .
@@ -1209,6 +1215,5 @@ mod COMMON-C-SEMANTICS is
 	including COMMON-PARAMETER-BINDING .
 
 	including COMMON-C-CONVERSIONS .
-	including COMMON-C-STATEMENTS .
 	***)
 endm

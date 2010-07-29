@@ -6,15 +6,16 @@ endm
 mod COMMON-SEMANTICS-SIZEOF is
 	including COMMON-INCLUDE .
 
+	eq calcSizeofType(T:Type) = tv(sizeofType(T:Type), cfg:sizeut) .
 	mb rule
-		< k > sizeofExp(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
+		< k > sizeofExp(E:Expression) => calcSizeofType(typeof(E:Expression)) ...</ k >
 		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < k > [sizeofType(arrayType(T:Type, N:Nat)) => '_*_(sizeofType(T:Type),, tv(N:Nat, cfg:sizeut))] ...</ k >
 		--- : KSentence [metadata "structural"] .
 	--- mb rule [sizeofType(bitfieldType(T:Type, N:Nat)) => tv(N:Nat /Rat 8, cfg:sizeut)] : KSentence [metadata "structural"] .
 	--- fixme not really, but used for allocating functions
-	mb rule sizeofType(functionType(?, ?)) => tv(1, cfg:sizeut) : KSentence [metadata "structural"] .
+	mb rule sizeofType(functionType(?, ?)) => 1 : KSentence [metadata "structural"] .
 	
 	--- ---C99 6.2.6.1:26 ... Each unqualified type has several qualified versions of its type,40) corresponding to the combinations of one, two, or all three of the const, volatile, and restrict qualifiers. The qualified or unqualified versions of a type are distinct types that belong to the same type category and have the same representation and alignment requirements. ...
 	--- eq sizeofType(qualifiedType(T:Type, ?)) = sizeofType(T:Type) .	
@@ -33,25 +34,19 @@ mod COMMON-SEMANTICS-SIZEOF is
 	--- : KSentence [metadata "structural"] .
 endm
 
---- mod COMMON-SEMANTICS-IDENTIFIERS is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-IDENTIFIERS is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	--- --- 6.3.2.2 Except when it is the operand of the sizeof operator, the unary & operator, the ++ operator, the -- operator, or the left operand of the . operator or an assignment operator, an lvalue that does not have an array type is converted to the value stored in the designated object (and is no longer an lvalue).
-		
-	--- eq hasArrayType(arrayType(?, ?)) = true .
-	--- ceq hasArrayType(T:Type) = false
-		--- if getKLabel(T:Type) =/=Bool 'arrayType .
-	--- eq hasFunctionType(functionType(?, ?)) = true .
-	--- ceq hasFunctionType(T:Type) = false
-		--- if getKLabel(T:Type) =/=Bool 'functionType .	
+	--- 6.3.2.2 Except when it is the operand of the sizeof operator, the unary & operator, the ++ operator, the -- operator, or the left operand of the . operator or an assignment operator, an lvalue that does not have an array type is converted to the value stored in the designated object (and is no longer an lvalue).
 
-	--- --- generic lookup
-	--- mb [lookup]: rule
-		--- < k > [X:Id => readFromMem(Loc:Nat, T:Type)] ...</ k >
-		--- < env >... X:Id |-> Loc:Nat ...</ env >
-		--- < types >... X:Id |-> T:Type ...</ types >
-		--- if notBool(hasArrayType(T:Type)) andBool notBool(hasFunctionType(T:Type))
-		--- : KSentence [metadata "structural"] . --- nondet
+
+	--- generic lookup
+	mb [lookup]: rule
+		< k > X:Id => readFromMem(Loc:Nat, T:Type) ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> T:Type ...</ types >
+		if notBool(hasArrayType(T:Type)) andBool notBool(hasFunctionType(T:Type))
+		: KSentence [metadata "structural"] . --- nondet
 		
 	--- ---C99 6.3.2.1:3 Except when it is the operand of the sizeof operator or the unary & operator, or is a string literal used to initialize an array, an expression that has type "array of type" is converted to an expression with type "pointer to type" that points to the initial element of the array object and is not an lvalue. If the array object has register storage class, the behavior is undefined.
 	--- mb [lookup-array]: rule
@@ -60,13 +55,13 @@ endm
 		--- < types >... X:Id |-> arrayType(T:Type, ?) ...</ types >
 		--- : KSentence [metadata "structural"] .
 		
-	--- ---C99 6.3.2.1:4 A function designator is an expression that has function type.  Except when it is the operand of the sizeof operator or the unary & operator, a function designator with type "function returning T" is converted to an expression that has type "pointer to a function returning T"
-	--- mb [lookup-closure]: rule
-		--- < k > [X:Id => tv(Loc:Nat, pointerType(functionType(T:Type, L:List{K})))] ...</ k >
-		--- < env >... X:Id |-> Loc:Nat ...</ env >
-		--- < types >... X:Id |-> functionType(T:Type, L:List{K}) ...</ types >
-		--- : KSentence [metadata "structural"] .
---- endm
+	---C99 6.3.2.1:4 A function designator is an expression that has function type.  Except when it is the operand of the sizeof operator or the unary & operator, a function designator with type "function returning T" is converted to an expression that has type "pointer to a function returning T"
+	mb [lookup-closure]: rule
+		< k > X:Id => tv(Loc:Nat, pointerType(functionType(T:Type, L:List{Type}))) ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> functionType(T:Type, L:List{Type}) ...</ types >
+		: KSentence [metadata "structural"] .
+endm
 
 --- mod COMMON-SEMANTICS-FUNCTION-CALLS is
 	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -124,8 +119,8 @@ endm
 	--- mb rule < k > [E1:Expression[E2:Expression] => Deref(E1:Expression + E2:Expression)] ...</ k > : KSentence [metadata "structural"] .
 --- endm
 
---- mod COMMON-SEMANTICS-LITERALS is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-LITERALS is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
 	--- --- +1 for terminating 0
 	--- mb [const-string-notfound]: rule
@@ -139,50 +134,52 @@ endm
 		--- < statics >... S:String |-> tv(N:Nat, arrayType(T:Type, ?)) ...</ statics >
 		--- : KSentence [metadata "structural"] .
 	
-	--- ---c99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented.
---- ***(
-											--- Octal or Hexadecimal 
---- Suffix			Decimal Constant			Constant
---- ------------------------------------------------------------------
---- none			int							int
-				--- long int					unsigned int
-				--- long long int				long int
-											--- unsigned long int
-											--- long long int
-											--- unsigned long long int
---- ------------------------------------------------------------------
---- u or U			unsigned int 				unsigned int
-				--- unsigned long int 			unsigned long int
-				--- unsigned long long int 		unsigned long long int
---- ------------------------------------------------------------------
---- l or L			long int 					long int
-				--- long long int 				unsigned long int
-											--- long long int
-											--- unsigned long long int
---- ------------------------------------------------------------------
---- Both u or U		unsigned long int 			unsigned long int
---- and l or L 		unsigned long long int 		unsigned long long int
---- ------------------------------------------------------------------
---- ll or LL 		long long int				long long int
-											--- unsigned long long int
---- ------------------------------------------------------------------
---- Both u or U		unsigned long long int 		unsigned long long int
---- and ll or LL
---- ------------------------------------------------------------------
---- ***)
-	--- ---c99 6.4.4.1:6 If an integer constant cannot be represented by any type in its list, it may have an extended integer type, if the extended integer type can represent its value. If all of the types in the list for the constant are signed, the extended integer type shall be signed. If all of the types in the list for the constant are unsigned, the extended integer type shall be unsigned. If the list contains both signed and unsigned types, the extended integer type may be signed or unsigned. If an integer constant cannot be represented by any type in its list and has no extended integer type, then the integer constant has no type.
-	--- ---c99 6.2.5:4 ... There may also be implementation-defined extended signed integer types. ...
+	---c99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented.
+***(
+											Octal or Hexadecimal 
+Suffix			Decimal Constant			Constant
+------------------------------------------------------------------
+none			int							int
+				long int					unsigned int
+				long long int				long int
+											unsigned long int
+											long long int
+											unsigned long long int
+------------------------------------------------------------------
+u or U			unsigned int 				unsigned int
+				unsigned long int 			unsigned long int
+				unsigned long long int 		unsigned long long int
+------------------------------------------------------------------
+l or L			long int 					long int
+				long long int 				unsigned long int
+											long long int
+											unsigned long long int
+------------------------------------------------------------------
+Both u or U		unsigned long int 			unsigned long int
+and l or L 		unsigned long long int 		unsigned long long int
+------------------------------------------------------------------
+ll or LL 		long long int				long long int
+											unsigned long long int
+------------------------------------------------------------------
+Both u or U		unsigned long long int 		unsigned long long int
+and ll or LL
+------------------------------------------------------------------
+***)
+	---c99 6.4.4.1:6 If an integer constant cannot be represented by any type in its list, it may have an extended integer type, if the extended integer type can represent its value. If all of the types in the list for the constant are signed, the extended integer type shall be signed. If all of the types in the list for the constant are unsigned, the extended integer type shall be unsigned. If the list contains both signed and unsigned types, the extended integer type may be signed or unsigned. If an integer constant cannot be represented by any type in its list and has no extended integer type, then the integer constant has no type.
+	---c99 6.2.5:4 ... There may also be implementation-defined extended signed integer types. ...
 	
-	--- mb rule < k > [I:Int => 
-		--- if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
-			--- if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
-				--- if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
-					--- tv(I:Int, no-type)
-				--- fi
-			--- fi
-		--- fi
-		--- ] ...</ k > 
-		--- : KSentence [metadata "structural"] .
+	eq IntLiteral(V:Value) = V:Value .
+	eq Constant(V:Value) = V:Value .
+	mb rule < k > DecimalConstant(I:Int) => 
+		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
+			if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
+				if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
+					tv(I:Int, no-type)
+				fi
+			fi
+		fi
+		...</ k > 
+		: KSentence [metadata "structural"] .
 		
 	--- mb rule [@U(I:Int) => 
 		--- if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
@@ -232,7 +229,7 @@ endm
 	--- mb rule [@F(F:Float) => tv(F:Float, float)]
 		--- : KSentence [metadata "structural"] .
 
---- endm
+endm
 
 --- mod COMMON-SEMANTICS-ASSIGNMENT is
 	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -628,11 +625,11 @@ endm
 mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	including COMMON-SEMANTICS-SIZEOF .
-	--- including COMMON-SEMANTICS-IDENTIFIERS .
+	including COMMON-SEMANTICS-IDENTIFIERS .
 	--- including COMMON-SEMANTICS-FUNCTION-CALLS .
 	--- including COMMON-SEMANTICS-ARRAY-SUBSCRIPTING .
 	--- including COMMON-SEMANTICS-ASSIGNMENT .
-	--- including COMMON-SEMANTICS-LITERALS .
+	including COMMON-SEMANTICS-LITERALS .
 	--- including COMMON-SEMANTICS-BITWISE .
 	--- including COMMON-SEMANTICS-ARITHMETIC .
 	--- including COMMON-SEMANTICS-MEMBERS .
