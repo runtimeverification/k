@@ -1,3 +1,4 @@
+***(
 mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	including COMMON-INCLUDE .
 	
@@ -33,7 +34,7 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	op declarators : -> Set [memo] .
 	eq declarators = Set(l('Declaration),, l('Field),, l('Parameter-Declaration),, l('Typedef),, l('Pointer)) .
 	
-	--- fixme hack for (int )(b705 + 0)->b6[0].b4.b1)
+	--- fixme hack for (int )(b705 + 0)->b6[0].b4.b1
 	mb rule 
 		< type > [X:Id + I:Int => X:Id] ...</ type >
 		: KSentence [metadata "structural"] .
@@ -59,12 +60,6 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		
 	mb rule
 		< k > ['Global(skipval) => .K ] ...</ k >
-		: KSentence [metadata "structural"] .
-	
-	--- move "Pointer" to where it belongs
-	mb rule
-		< k > [L:KLabel(T:Type,, Pointer(D:Declarator)) => L:KLabel(pointerType(T:Type),, D:Declarator)] ...</ k > 
-		if declarators contains l(L:KLabel)
 		: KSentence [metadata "structural"] .
 
 	mb rule
@@ -133,11 +128,41 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 		< type > ['Deref(Kp:KProper) => Kp:KProper ~> Deref(HOLE)] ...</ type >
 		: KSentence [metadata "structural"] .
 endm
-
+***)
 mod COMMON-C-TYPING is
-	including COMMON-SEMANTICS-TYPE-STRICTNESS .
-	including COMMON-SEMANTICS-TYPE-DECLARATIONS .
+	including COMMON-INCLUDE .
+	--- including COMMON-SEMANTICS-TYPE-STRICTNESS .
+	--- including COMMON-SEMANTICS-TYPE-DECLARATIONS .
 	
+	ops int void : -> Type .
+	mb rule
+		Int => int
+		: KSentence .
+	mb rule
+		Void => void
+		: KSentence .
+	mb rule
+		Specifier(T:Type) => T:Type
+		: KSentence .
+	
+	op TypedName : K K -> K [metadata "strict(2)"] .
+	op Type : K K -> K [metadata "hybrid strict(2)"] .
+	
+	--- mb rule
+		--- Prototype(X:Id, K:K, ?, ?) => TypedName(X:Id, Type(T:Type, K:K))
+		--- : KSentence .
+	
+	--- TODO ignoring attributes
+	mb rule
+		SingleName(T:Type, Name(X:Id, K:K, ?, ?)) => TypedName(X:Id, Type(T:Type, K:K))
+		: KSentence .
+	--- move "Pointer" to where it belongs
+	--- mb rule
+		--- < k > [SingleName(T:Type, Pointer(D:Declarator)) => L:KLabel(pointerType(T:Type),, D:Declarator)] ...</ k > 
+		--- if declarators contains l(L:KLabel)
+		--- : KSentence [metadata "structural"] .
+	
+	***(
 	op normalizeType : K K -> K .
 	op typedef : K K -> K .
 	
@@ -229,20 +254,5 @@ mod COMMON-C-TYPING is
 		< type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
 		: KSentence [metadata "structural"] .
 
-		
-	--- fixme ignoring extern
-	mb rule
-		[extern => .K]
-		: KSentence [metadata "structural"] .
-	--- fixme ignoring static
-	mb rule
-		[static => .K]
-		: KSentence [metadata "structural"] .
-	mb rule
-		[register => .K]
-		: KSentence [metadata "structural"] .
-	mb rule
-		[inline => .K]
-		: KSentence [metadata "structural"] .
-
+	***)
 endm

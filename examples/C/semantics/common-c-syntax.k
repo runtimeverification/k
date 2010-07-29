@@ -10,6 +10,7 @@ kmod COMMON-C-SYNTAX is
 	including PL-QID
 	including PL-RANDOM
 	including PL-ID
+	including K
 	
 	--- op NULL : -> Id [ctor]
 	--- op calloc : -> Id [ctor]
@@ -176,8 +177,8 @@ type typeSpecifier = (* Merge all specifiers into one type *)
 	op UnionDef : Id List{C} List{C} -> TypeSpecifier [ctor]
 	op EnumRef : Id List{C} -> TypeSpecifier [ctor]
 	op EnumDef : Id List{C} List{C} -> TypeSpecifier [ctor]
-	op TypeofExpression : Expression -> TypeSpecifier [ctor]
-	op TypeofType : Specifier DeclType -> TypeSpecifier [ctor]
+	op TypeofExpression : K -> TypeSpecifier [ctor]
+	op TypeofType : K K -> TypeSpecifier [ctor]
 
 ***(
 and storage =
@@ -219,7 +220,7 @@ and spec_elem =
 ***(
 	and specifier = spec_elem list
 ***)
-	op Specifier : List{C} -> Specifier
+	op Specifier : List{C} -> Specifier [strict]
 	
 ***(
 and decl_type =
@@ -241,31 +242,31 @@ and decl_type =
 			(* Prints "decl (args[, ...])".
 			 * decl is never a PTR.*)
 ***)
-	op JustBase : -> DeclType
-	op ParenType : List{C} DeclType List{C} -> DeclType
-	op Array : DeclType List{C} Expression -> DeclType
-	op PointerType : List{C} DeclType -> DeclType
-	op Prototype : DeclType List{C} Bool -> DeclType
+	op JustBase : -> KResult
+	op ParenType : List{C} K List{C} -> DeclType
+	op Array : K List{C} K -> DeclType
+	op PointerType : List{C} K -> DeclType
+	op Prototype : K List{C} Bool -> DeclType [strict(1 2)]
 	
 ***(
 and name_group = specifier * name list
 ***)
-	op NameGroup : Specifier List{C} -> NameGroup
+	op NameGroup : K List{C} -> NameGroup
 	
 ***(
 	(* The optional expression is the bitfield *)
 and field_group = specifier * (name * expression option) list
 ***)
-	op FieldName : Name -> FieldName
-	op BitFieldName : Name Expression -> FieldName
-	op FieldGroup : Specifier List{C} -> FieldGroup
+	op FieldName : K -> FieldName
+	op BitFieldName : K K -> FieldName
+	op FieldGroup : K List{C} -> FieldGroup
 	
 ***(
 	(* like name_group, except the declared variables are allowed to have initializers *)
 	(* e.g.: int x=1, y=2; *)
 and init_name_group = specifier * init_name list
 ***)
-	op InitNameGroup : Specifier List{C} -> InitNameGroup
+	op InitNameGroup : K List{C} -> InitNameGroup
 	
 ***(
 	(* The decl_type is in the order in which they are printed. Only the name of
@@ -275,7 +276,7 @@ and init_name_group = specifier * init_name list
 	(* the string, and decl_type will be PTR([], JUSTBASE) *)
 and name = string * decl_type * attribute list * cabsloc
 ***)
-	op Name : Id DeclType List{C} CabsLoc -> Name
+	op Name : Id K List{C} K -> Name
 	op #NoName : -> Id
 	op Identifier : String -> Id	
 
@@ -283,19 +284,19 @@ and name = string * decl_type * attribute list * cabsloc
 	(* A variable declarator ("name") with an initializer *)
 and init_name = name * init_expression
 ***)
-	op InitName : Name InitExpression -> InitName
+	op InitName : K K -> InitName
 	
 ***(
 	(* Single names are for declarations that cannot come in groups, like
 	 * function parameters and functions *)
 and single_name = specifier * name
 ***)
-	op SingleName : Specifier Name -> SingleName
+	op SingleName : K K -> SingleName [strict(1)]
 	
 ***(
 and enum_item = string * expression * cabsloc
 ***)
-	op EnumItem : Id Expression CabsLoc -> EnumItem
+	op EnumItem : Id K K -> EnumItem
 		
 ***(
 	(*
@@ -315,18 +316,18 @@ and enum_item = string * expression * cabsloc
 	 (* expression transformer: source and destination *)
 	 | EXPRTRANSFORMER of expression * expression * cabsloc
 ***)
-	op FunDef : SingleName Block -> PureDefinition
-	op DecDef : InitNameGroup -> PureDefinition
-	op TypeDef : NameGroup -> PureDefinition
-	op OnlyTypeDef : Specifier -> PureDefinition
+	op FunDef : K K -> PureDefinition [strict(1)]
+	op DecDef : K -> PureDefinition
+	op TypeDef : K -> PureDefinition
+	op OnlyTypeDef : K -> PureDefinition
 	op GlobAsm : String -> PureDefinition
-	op Pragma : Expression -> PureDefinition
+	op Pragma : K -> PureDefinition
 	op Linkage : String List{C} -> PureDefinition
-	op Transformer : Definition List{C} -> PureDefinition
-	op ExpressionTransformer : Expression Expression -> PureDefinition
+	op Transformer : K List{C} -> PureDefinition
+	op ExpressionTransformer : K K -> PureDefinition
 	
-	op DefinitionLoc : PureDefinition CabsLoc -> Definition
-	op DefinitionLocRange : PureDefinition CabsLoc CabsLoc -> Definition
+	op DefinitionLoc : K K -> Definition
+	op DefinitionLocRange : K K K -> Definition
 
 ***(
 (* the string is a file name, and then the list of toplevel forms *)
@@ -366,19 +367,19 @@ and statement =
 	| SEQUENCE of statement * statement * cabsloc
 ***)
 	op Nop : -> PureStatement
-	op Computation : Expression -> PureStatement
-	op BlockStatement : Block -> PureStatement
-	op Sequence : Statement Statement -> PureStatement
+	op Computation : K -> PureStatement
+	op BlockStatement : K -> PureStatement
+	op Sequence : K K -> PureStatement
 ***(
 	| IF of expression * statement * statement * cabsloc
 	| WHILE of expression * statement * cabsloc
 	| DOWHILE of expression * statement * cabsloc
 	| FOR of for_clause * expression * expression * statement * cabsloc
 ***)
-	op IfThenElse : Expression Statement Statement -> PureStatement
-	op While : Expression Statement -> PureStatement
-	op DoWhile : Expression Statement -> PureStatement
-	op For : ForClause Expression Expression Statement -> PureStatement
+	op IfThenElse : K K K -> PureStatement
+	op While : K K -> PureStatement
+	op DoWhile : K K -> PureStatement
+	op For : K K K K -> PureStatement
 ***(
 	| BREAK of cabsloc
 	| CONTINUE of cabsloc
@@ -386,27 +387,27 @@ and statement =
 ***)
 	op Break : -> PureStatement
 	op Continue : -> PureStatement
-	op Return : Expression -> PureStatement
+	op Return : K -> PureStatement
 ***(
 	| SWITCH of expression * statement * cabsloc
 	| CASE of expression * statement * cabsloc
 	| CASERANGE of expression * expression * statement * cabsloc
 	| DEFAULT of statement * cabsloc
 ***)
-	op Switch : Expression Statement -> PureStatement
-	op Case : Expression Statement -> PureStatement
-	op CaseRange : Expression Expression Statement -> PureStatement
-	op Default : Statement -> PureStatement
+	op Switch : K K -> PureStatement
+	op Case : K K -> PureStatement
+	op CaseRange : K K K -> PureStatement
+	op Default : K -> PureStatement
 ***(
 	| LABEL of string * statement * cabsloc
 	| GOTO of string * cabsloc
 	| COMPGOTO of expression * cabsloc (* GCC's "goto *exp" *)
 	| DEFINITION of definition (*definition or declaration of a variable or type*)
 ***)
-	op Label : Id Statement -> PureStatement
+	op Label : Id K -> PureStatement
 	op Goto : Id -> PureStatement
-	op CompGoto : Expression -> PureStatement
-	op Definition : Definition -> PureStatement
+	op CompGoto : K -> PureStatement
+	op Definition : K -> PureStatement
 ***(
 	| ASM of attribute list * (* typically only volatile and const *)
 		  string list * (* template *)
@@ -416,19 +417,19 @@ and statement =
 	| TRY_FINALLY of block * block * cabsloc
 ***)
 	--- TODO not handling Asm
-	op TryExcept : Block Expression Block -> PureStatement
-	op TryFinally : Block Block -> PureStatement
+	op TryExcept : K K K -> PureStatement
+	op TryFinally : K K -> PureStatement
 	
 	--- this wraps all statements with their location in the original file
-	op StatementLoc : PureStatement CabsLoc -> Statement
+	op StatementLoc : K K -> Statement
 	
 ***(
 and for_clause = 
 	FC_EXP of expression
 	| FC_DECL of definition
 ***)
-	op ForClauseExpression : Expression -> ForClause
-	op ForClauseDeclaration : Definition -> ForClause
+	op ForClauseExpression : K -> ForClause
+	op ForClauseDeclaration : K -> ForClause
 	
 ***(
 and binary_operator =
@@ -451,16 +452,16 @@ and unary_operator =
 	MINUS | PLUS | NOT | BNOT | MEMOF | ADDROF
 	| PREINCR | PREDECR | POSINCR | POSDECR
 ***)
-	op -_ : Expression -> Expression [prec 22]
-	op +_ : Expression -> Expression [prec 22]
-	op !_ : Expression -> Expression [prec 22]
-	op ~_ : Expression -> Expression [prec 22]
-	op *_ : Expression -> Expression [prec 22]
-	op &_ : Expression -> Expression [prec 22]
-	op ++_ : Expression -> Expression [prec 22]
-	op --_ : Expression -> Expression [prec 22]
-	op _++ : Expression -> Expression
-	op _-- : Expression -> Expression
+	op -_ : K -> Expression [prec 22]
+	op +_ : K -> Expression [prec 22]
+	op !_ : K -> Expression [prec 22]
+	op ~_ : K -> Expression [prec 22]
+	op *_ : K -> Expression [prec 22]
+	op &_ : K -> Expression [prec 22]
+	op ++_ : K -> Expression [prec 22]
+	op --_ : K -> Expression [prec 22]
+	op _++ : K -> Expression
+	op _-- : K -> Expression
 
 ***(
 	| LABELADDR of string  (* GCC's && Label *)
@@ -469,38 +470,38 @@ and unary_operator =
 ***(
 	| BINARY of binary_operator * expression * expression
 ***)
-	ops _*_ _/_ _%_ : Expression Expression -> Expression [prec 31 gather(E e) strict]
-	ops _+_ _-_ : Expression Expression -> Expression [prec 33 gather(E e) strict]
-	ops _<<_ : Expression Expression -> Expression [prec 35 gather(E e) strict]
-	ops _>>_ : Expression Expression -> Expression [prec 35 gather(E e) strict]
-	ops _<_ _<=_ : Expression Expression -> Expression [prec 37 gather(E e) strict]
-	ops _>_ _>=_ : Expression Expression -> Expression [prec 37 gather(E e) strict]
-	ops _==_ _!=_ : Expression Expression -> Expression [prec 39 gather(E e) strict]
-	op _&_ : Expression Expression -> Expression [prec 41 gather(E e) strict]
-	op _^_ : Expression Expression -> Expression [prec 43 gather(E e) strict]
-	op _|_ : Expression Expression -> Expression [prec 45 gather(E e) strict]
-	op _&&_ : Expression Expression -> Expression [prec 47 gather(E e) strict(1)]
-	op _||_ : Expression Expression -> Expression [prec 49 gather(E e) strict(1)]
+	ops _*_ _/_ _%_ : K K -> Expression [prec 31 gather(E e) strict]
+	ops _+_ _-_ : K K -> Expression [prec 33 gather(E e) strict]
+	ops _<<_ : K K -> Expression [prec 35 gather(E e) strict]
+	ops _>>_ : K K -> Expression [prec 35 gather(E e) strict]
+	ops _<_ _<=_ : K K -> Expression [prec 37 gather(E e) strict]
+	ops _>_ _>=_ : K K -> Expression [prec 37 gather(E e) strict]
+	ops _==_ _!=_ : K K -> Expression [prec 39 gather(E e) strict]
+	op _&_ : K K -> Expression [prec 41 gather(E e) strict]
+	op _^_ : K K -> Expression [prec 43 gather(E e) strict]
+	op _|_ : K K -> Expression [prec 45 gather(E e) strict]
+	op _&&_ : K K -> Expression [prec 47 gather(E e) strict(1)]
+	op _||_ : K K -> Expression [prec 49 gather(E e) strict(1)]
 	
-	ops _*=_ _/=_ _%=_ _+=_ _-=_ _<<=_ _&=_ _^=_ _|=_ : Expression Expression -> Expression [prec 53]
-	ops _>>=_ : Expression Expression -> Expression [prec 53]
-	op _:=_ : Expression Expression -> Expression [prec 53 strict(2)]
+	ops _*=_ _/=_ _%=_ _+=_ _-=_ _<<=_ _&=_ _^=_ _|=_ : K K -> Expression [prec 53]
+	ops _>>=_ : K K -> Expression [prec 53]
+	op _:=_ : K K -> Expression [prec 53 strict(2)]
 ***(
 	| QUESTION of expression * expression * expression
 ***)
-	op _?_:_ : Expression Expression Expression -> Expression [prec 51 gather(e & E)]
+	op _?_:_ : K K K -> Expression [prec 51 gather(e & E)]
 ***(
 	(* A CAST can actually be a constructor expression *)
 	| CAST of (specifier * decl_type) * init_expression
 ***)
-	op Cast : Specifier DeclType InitExpression -> Expression [strict]
+	op Cast : K K K -> Expression [strict]
 ***(
 	(* There is a special form of CALL in which the function called is
 	   __builtin_va_arg and the second argument is sizeof(T). This 
 	   should be printed as just T *)
 	| CALL of expression * expression list
 ***)
-	op Call : Expression List{C} -> Expression
+	op Call : K List{C} -> Expression
 ***(
 	| COMMA of expression list
 ***)
@@ -510,7 +511,7 @@ and unary_operator =
 	| PAREN of expression
 	| VARIABLE of string
 ***)
-	op Constant : Constant -> Expression
+	op Constant : K -> Expression
 	--- for paren, just putting parentheses
 	op Variable : Id -> Expression
 ***(
@@ -519,25 +520,25 @@ and unary_operator =
 	| EXPR_ALIGNOF of expression
 	| TYPE_ALIGNOF of specifier * decl_type
 ***)
-	op SizeofExpression : Expression -> Expression
-	op SizeofType : Specifier DeclType -> Expression
-	op AlignofExpression : Expression -> Expression
-	op AlignofType : Specifier DeclType -> Expression
+	op SizeofExpression : K -> Expression
+	op SizeofType : K K -> Expression
+	op AlignofExpression : K -> Expression
+	op AlignofType : K K -> Expression
 ***(
 	| INDEX of expression * expression
 ***)
-	op ArrayIndex : Expression Expression -> Expression
+	op ArrayIndex : K K -> Expression
 ***(
 	| MEMBEROF of expression * string
 	| MEMBEROFPTR of expression * string
 ***)
-	op Dot : Expression Id -> Expression
-	op Arrow : Expression Id -> Expression
+	op Dot : K Id -> Expression
+	op Arrow : K Id -> Expression
 ***(
 	| GNU_BODY of block
 	| EXPR_PATTERN of string     (* pattern variable, and name *)
 ***)
-	op GnuBody : Block -> Expression
+	op GnuBody : K -> Expression
 	op ExpressionPattern : String -> Expression
 	
 ***(
@@ -553,7 +554,7 @@ and constant =
 	op OctalConstant : Int -> IntConstant
 	op HexConstant : String -> IntConstant
 	
-	op IntLiteral : IntConstant -> Constant
+	op IntLiteral : K -> Constant
 	op FloatLiteral : Float -> Constant
 	op CharLiteral : Int -> Constant
 	op WCharLiteral : Int -> Constant
@@ -568,9 +569,9 @@ and init_expression =
   | COMPOUND_INIT of (initwhat * init_expression) list
 ***)
 	op NoInit : -> InitExpression
-	op SingleInit : Expression -> InitExpression
+	op SingleInit : K -> InitExpression
 	op CompoundInit : List{C} -> InitExpression
-	op InitFragment : InitWhat InitExpression -> InitFragment
+	op InitFragment : K K -> InitFragment
 	
 ***(
 and initwhat =
@@ -580,9 +581,9 @@ and initwhat =
 	| ATINDEXRANGE_INIT of expression * expression
 ***)
 	op NextInit : -> InitWhat
-	op InFieldInit : Id InitWhat -> InitWhat
-	op AtIndexInit : Expression InitWhat -> InitWhat
-	op AtIndexRangeInit : Expression Expression -> InitWhat
+	op InFieldInit : Id K -> InitWhat
+	op AtIndexInit : K K -> InitWhat
+	op AtIndexRangeInit : K K -> InitWhat
 	
 ***(
 and attribute = string * expression list
