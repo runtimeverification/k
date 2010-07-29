@@ -47,6 +47,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
+	
+	op read : K K -> K [metadata "strict(2)"] . --- location, type
 	--- fixme might not always be what I want, but it seems to work
 	--- eq loc(Block:Nat, N:Nat) <Int loc(Block:Nat, N':Nat) = N:Nat <Int N':Nat .
 	--- eq loc(Block:Nat, N:Nat) >Int loc(Block:Nat, N':Nat) = N:Nat >Int N':Nat .
@@ -182,6 +184,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op hasArrayType : Type -> Bool .
 	op hasFunctionType : Type -> Bool .
+	op hasFunctionPointerType : Type -> Bool .
 	op kpair : K K -> K .
 	--- op kpair : K List -> K .
 	--- op promote : K -> K .
@@ -193,7 +196,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op popLoop : -> K .
 	--- op giveGlobalType : Type K -> K .
 	--- op giveLocalType : Type K -> K .
-	--- op application : K List{K} -> K [metadata "strict(1)"] .
+	op application : K List{C} -> K [metadata "strict(1)"] .
 	--- op case : K BaseValue -> K .
 	--- op defaultCase : K -> K .
 	--- op sequencePoint : -> K .
@@ -251,8 +254,8 @@ mod C-SETTINGS is
 	eq max(enumType(?)) = max(int) .
 		
 	--- --- might not be matching the right thing here if the types become different
-	--- eq sizeofType(T:Base-Type) = tv(numBytes(T:Base-Type), cfg:sizeut) .
-	--- eq sizeofType(pointerType(?)) = tv(numBytes(unsigned-long-int), cfg:sizeut) .
+	eq sizeofType(T:BaseType) = numBytes(T:BaseType) .
+	eq sizeofType(pointerType(?)) = cfg:ptrsize .
 
 	--- --- — number of bits for smallest object that is not a bit-field (byte)
 	--- --- CHAR_BIT 8
@@ -738,8 +741,8 @@ mod MEMORY is
 	including COMMON-INCLUDE .
 	
 	--- --- location, result type, num bytes, result 
-	--- op readFromMem-aux : Nat Type K List{K} -> K [metadata "strict(3)"] .
-	--- eq readFromMem(N:Nat, T:Type) = readFromMem-aux(N:Nat, T:Type, sizeofType(T:Type), .List{K}) [metadata "structural"] .
+	op read : Nat Nat List{K} Type -> K . --- location, sizeof type, list of bytes read, type
+	eq read(Loc:Nat, T:Type) = read(Loc:Nat, sizeofType(T:Type), .List{K}, T:Type) [metadata "structural"] .
 	
 	eq inc(sym(N:Nat) +Nat M:Nat) = sym(N:Nat +Nat 1) +Nat M:Nat .
 	--- eq sNat(loc(N:Nat, M:Nat)) = loc(N:Nat, sNat(M:Nat)) .

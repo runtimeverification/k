@@ -10,10 +10,12 @@ mod COMMON-SEMANTICS-SIZEOF is
 	mb rule
 		< k > sizeofExp(E:Expression) => calcSizeofType(typeof(E:Expression)) ...</ k >
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [sizeofType(arrayType(T:Type, N:Nat)) => '_*_(sizeofType(T:Type),, tv(N:Nat, cfg:sizeut))] ...</ k >
+	mb rule
+		< k > sizeofType(arrayType(T:Type, N:Nat)) => sizeofType(T:Type) *Nat N:Nat ...</ k >
+		: KSentence [metadata "structural"] .
+	--- mb rule 
+		--- sizeofType(bitfieldType(T:Type, N:Nat)) => N:Nat /Rat 8
 		--- : KSentence [metadata "structural"] .
-	--- mb rule [sizeofType(bitfieldType(T:Type, N:Nat)) => tv(N:Nat /Rat 8, cfg:sizeut)] : KSentence [metadata "structural"] .
 	--- fixme not really, but used for allocating functions
 	mb rule sizeofType(functionType(?, ?)) => 1 : KSentence [metadata "structural"] .
 	
@@ -63,8 +65,8 @@ mod COMMON-SEMANTICS-IDENTIFIERS is
 		: KSentence [metadata "structural"] .
 endm
 
---- mod COMMON-SEMANTICS-FUNCTION-CALLS is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-FUNCTION-CALLS is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 
 	--- mb context application(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
 	--- ---mb context application(`[HOLE`]:K, ?) : KSentence .
@@ -73,11 +75,12 @@ endm
 		--- < k > [Apply(E:Expression, L:List{Expression}) => application(E:Expression, getList{K}(L:List{Expression}))] ...</ k >
 		--- : KSentence [metadata "structural"] .
 	
-	--- mb [function-application-pre]: rule
-		--- < k > [Call(tv(sym(Block:Nat) +Nat Offset:Nat, pointerType(functionType(?, ?))), L:List{K}) 
-		--- => application(V:Value, L:List{K})] ...</ k >
+	
+	mb [function-application-pre]: rule
+		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) => application(read(Loc:Nat, T:Type), L:List{C}) ...</ k >
 		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:Value)) ...</ mem >
-		--- : KSentence [metadata "computational rule"] .
+		if hasFunctionType(T:Type)
+		: KSentence [metadata "computational rule"] .
 		
 	--- --- fixme this is needed until we can pass a list of results to bind
 	--- --- mb context bind((?,, `[HOLE`]:K,, ?), ?) : KSentence .
@@ -107,7 +110,7 @@ endm
 			--- </ stackFrame >
 			--- )] ...</ callStack >
 		--- : KSentence [metadata "computational rule"] . --- nondet
---- endm
+endm
 
 --- mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is
 	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -622,7 +625,7 @@ mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	including COMMON-SEMANTICS-SIZEOF .
 	including COMMON-SEMANTICS-IDENTIFIERS .
-	--- including COMMON-SEMANTICS-FUNCTION-CALLS .
+	including COMMON-SEMANTICS-FUNCTION-CALLS .
 	--- including COMMON-SEMANTICS-ARRAY-SUBSCRIPTING .
 	--- including COMMON-SEMANTICS-ASSIGNMENT .
 	including COMMON-SEMANTICS-LITERALS .

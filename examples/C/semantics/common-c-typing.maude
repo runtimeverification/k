@@ -200,9 +200,16 @@ mod COMMON-C-TYPING is
 	eq hasArrayType(arrayType(?, ?)) = true .
 	ceq hasArrayType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'arrayType .
+		
 	eq hasFunctionType(functionType(?, ?)) = true .
 	ceq hasFunctionType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'functionType .	
+		if getKLabel(T:Type) =/=Bool 'functionType .
+		
+	eq hasFunctionPointerType(pointerType(functionType(?, ?))) = true .
+	ceq hasFunctionPointerType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'pointerType .
+	ceq hasFunctionPointerType(pointerType(T:Type)) = false
+		if getKLabel(T:Type) =/=Bool 'functionType .
 		
 	op evalToType : -> K .
 	op HOLE : -> K .
