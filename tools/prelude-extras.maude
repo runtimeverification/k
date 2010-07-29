@@ -240,7 +240,7 @@ fmod META-TERM-EXTRAS is
   including META-TERM .
   var V : Variable . var Trl' Trl Trl'' : TermList .  var Tr Tr' : Term .
   var C : Constant . var Nz : NzNat . var N : Nat .  var Q : Qid .
-  var Subst : Substitution .  var T : Type .
+  var Subst : Substitution .  var T : Type . 
 
   op countTerms : TermList -> Nat .
   eq countTerms(empty) = 0 .
@@ -293,6 +293,7 @@ endfm
 fmod META-MODULE-EXTRAS is
   including META-MODULE .
   including NAT-LIST-EXTRAS .
+  including META-TERM-EXTRAS .
 
   sort ViewExp .
   subsorts Sort < ViewExp < ModuleExpression NeParameterList .
@@ -733,6 +734,15 @@ fmod META-MODULE-EXTRAS is
   eq getAttrs(rl T1 => T2 [AS] .) = AS .
   eq getAttrs(crl T1 => T2 if Cond [AS] .) = AS .
 
+  op genXVars : TypeList -> TermList .
+  eq genXVars(nil) = empty .
+  eq genXVars(T Tl) = mkVariable('X,T),genXVars(Tl) .
+
+  op _#_ : TypeListSet TypeSet -> TypeListSet .
+  eq (Tl ; TlS) # (T ; TS) = (Tl T) ; (Tl # TS) ; (TlS # (T ; TS)) .
+  eq none # TS = none .
+  eq TlS # none = none .
+
   var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
   vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
   vars OPDS OPDS' : OpDeclSet .  var Op : OpDecl .
@@ -740,7 +750,7 @@ fmod META-MODULE-EXTRAS is
   vars EqS EqS' : EquationSet . var Eq : Equation .
   vars RlS RlS' : RuleSet . var Rl : Rule .
   vars SS SS' : SortSet .  var S S' : Sort .
-  vars TS TS' : TypeSet .
+  vars TS TS' : TypeSet .  var TlS : TypeListSet .
   vars IL IL' IL'' : ImportList .  var I : Import .
   vars U U' : Module .
   var  H MN MN' : Header .  vars ME ME' : ModuleExpression .
@@ -863,9 +873,9 @@ fmod META-LEVEL-EXTRAS is
   eq lubSorts(M, T, S') = T [owise] .
  ceq lubSorts(M, T, T') = completeName(M,T) if sameKind(M, T, T') [owise] .
 
-  op minimalSort : Module SortSet ~> Sort .
+  op minimalSort : Module SortSet ~> SortSet .
   ceq minimalSort(M, S ; S' ; SS) = minimalSort(M, S' ; SS) if sortLeq(M, S',S) .
-  eq minimalSort(M, S) = S .
+  eq minimalSort(M, SS) = SS [owise] .
 
   op lubSort : Module Term Term ~> Sort .
   eq lubSort(M, Trm, Trm') = lubSorts(M, leastSort(M, Trm), leastSort(M, Trm')) .

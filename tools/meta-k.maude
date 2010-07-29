@@ -525,3 +525,67 @@ fmod META-K-CONDITION-SEARCH is
   op searchS : -> Qid .
   eq searchS = 'search_ .
 endfm
+
+fmod META-K-LEAST-SORTS is
+  including META-LEVEL-EXTRAS .
+  including META-K-RULES .
+
+ op errorT : Term Type -> [Type] .
+
+ op leastSortsT : Module Term ~> Type .
+ eq leastSortsT(M,C) = leastSort(M,C) .
+ eq leastSortsT(M,V) = getType(V) .
+ eq leastSortsT(M,Q[Trms]) = leastSortsT(M,Q[Trms],leastSortsTs(M, Trms)) .
+
+ op leastSortsTs : Module TermList ~> TypeListSet .
+ op leastSortsTs : Module TermList TypeListSet ~> TypeListSet .
+ op leastSortsTs : Module TermList SortSet TypeListSet ~> TypeListSet .
+ eq leastSortsTs(M, Trms) = leastSortsTs(M, Trms, nil) .
+ eq leastSortsTs(M, empty, TlS) = TlS .
+ eq leastSortsTs(M, (Trm, Trms), TlS) = leastSortsTs(M, Trms, leastSortsT(M, Trm), TlS) .
+ eq leastSortsTs(M, Trms, errorT(Trm,T), TlS) = errorT(Trm,T) .
+ eq leastSortsTs(M, Trms, SS, TlS) = leastSortsTs(M, Trms, TlS # SS) .
+
+ op leastSortsT : Module Term TypeListSet ~> SortSet .
+ op leastSortsT : Module Term SortSet TypeListSet ~> SortSet .
+ op leastSortsT : Module Term SortSet SortSet TypeListSet ~> SortSet .
+ op $leastSortsT : Module Term TypeListSet ~> SortSet .
+
+
+ eq leastSortsT(M, Trm, TlSK) = leastSortsT(M, Trm, none, TlSK) [print "Finding sorts for " Trm] .
+ eq leastSortsT(M, Trm, SS, Tl ; TlSK) 
+  = leastSortsT(M, Trm, $leastSortsT(M, Trm, Tl), SS, TlSK) [print "Checking " Tl] . 
+ eq leastSortsT(M, Trm, SS, TlSK) = if SS == none then errorT(Trm, leastSort(M,Trm)) else SS fi [print "sorts " SS " found for " Trm " unchecked " TlSK] .
+
+ eq leastSortsT(M, Trm, SS, SS', TlSK) = leastSortsT(M, Trm, SS ; SS', TlSK) [print "found sorts " SS] .
+ eq leastSortsT(M, Trm, SS:[SortSet], SS', TlSK) 
+  = leastSortsT(M, Trm, SS', TlSK) [owise print SS:[SortSet]] .
+
+ eq $leastSortsT(M, 'if_then_else_fi[Trms], T T' T'') 
+  = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, 'Bool), lubSorts(M, T', T'')) .
+
+ eq $leastSortsT(M, 'configuration_[Trm], S) = 'KSentence .
+ eq $leastSortsT(M, 'rule_[Trm], S) = 'KSentence .
+ceq $leastSortsT(M, 'rule_if_[Trms], S T') = 'KSentence if sortLeq(M,T','Bool).
+ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
+
+ceq $leastSortsT(M, Q[T1,T2], T T') 
+  = leastSortsRed(Q[T1,T2], leastSort(M, Q[T1,T2]), lubSorts(M, T, T')) 
+ if Q == replaceS . 
+ eq $leastSortsT(M, Q[Trms], Tl) = leastSort(M, Q[genXVars(Tl)]) [owise print Q Tl] .
+
+ op leastSortsIf : Term Type Bool TypeSet ~> SortSet .
+ eq leastSortsIf(Trm, T, true, NSS) = NSS .
+ eq leastSortsIf(Trm, T, B:[Bool], TS:[TypeSet]) = errorT(Trm, T) [owise print "Trm=" Trm " B=" B:[Bool] " TS=" TS:[TypeSet]] .
+
+ op leastSortsRed : Term Type SortSet ~> SortSet .
+ eq leastSortsRed(Trm, T, NSS) = NSS .
+ eq leastSortsRed(Trm, T, none) = errorT(Trm, T) .
+
+  vars M : Module . var Q : Qid . var Trms : TermList . 
+  var Trm Trm' T1 T2 : Term .  var C : Constant . var V : Variable .
+  var T T' T'' : Type . var S : Sort .   var Tl : TypeList .
+  var SS SS' : SortSet . var NSS : NeSortSet . var TS : TypeSet .
+  var TlS : TypeListSet .  var TlSK : [TypeListSet] .
+endfm
+

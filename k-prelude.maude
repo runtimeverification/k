@@ -160,7 +160,7 @@ endm
 
 mod K-SET-EXTRAS is
   including K-TECHNIQUE .
-  including PL-BOOL .
+  including PL-IF-THEN-ELSE .
   var K : K . var Set Set' : Set . var SetItem : SetItem .
   op _in_ : K Set -> Bool .
   eq K in Set SetItem(K) = true .
@@ -177,7 +177,7 @@ endm
 
 mod K-BAG-EXTRAS is
   including K-TECHNIQUE .
-  including PL-BOOL .
+  including PL-IF-THEN-ELSE .
   var K : K . var Bag Bag' : Bag . var BagItem : BagItem .
   op _in_ : K Bag -> Bool .
   eq K in Bag BagItem(K) = true .

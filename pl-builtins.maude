@@ -32,11 +32,6 @@ mod PL-BOOL is
   subsort Bool < Builtins .
   op true : -> Bool [ctor special (id-hook SystemTrue)] .
   op false : -> Bool [ctor special (id-hook SystemFalse)] .
-  op if_then_else_fi : Bool Universal Universal -> Universal [poly (2 3 0)
-    special (
-    id-hook BranchSymbol
-    term-hook 1 (true)
-    term-hook 2 (false))] .
   op _==Bool_ : Universal Universal -> Bool [poly (1 2) prec 51  metadata "latex(renameTo _==\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
     id-hook EqualitySymbol
     term-hook equalTerm (true)
@@ -61,6 +56,18 @@ mod PL-BOOL is
   eq notBool A = A xorBool true .
   eq A orBool B = A andBool B xorBool A xorBool B .
   eq A impliesBool B = notBool(A xorBool A andBool B) .
+endm
+
+mod PL-IF-THEN-ELSE is including PL-BOOL .
+  op if_then_else_fi : Bool Universal Universal -> Universal [poly (2 3 0)] .
+endm
+
+mod MAUDE-IF-THEN-ELSE is including PL-BOOL .
+  op if_then_else_fi : Bool Universal Universal -> Universal 
+    [poly (2 3 0) special (
+    id-hook BranchSymbol
+    term-hook 1 (true)
+    term-hook 2 (false))] .
 endm
 
 mod PL-EXT-BOOL is
@@ -918,6 +925,7 @@ including PL-RANDOM .
 including PL-COUNTER .
 including PL-BOOL .
 including PL-ID .
+including PL-IF-THEN-ELSE .
 endm
 
 ---set include PL-BOOL on .

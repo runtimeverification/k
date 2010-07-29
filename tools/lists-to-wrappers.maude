@@ -7,6 +7,7 @@ fmod LISTS-TO-WRAPPERS is
  including K-META-LISTS .
  including METADATA-EXTRAS .
  including CONVERSION .
+ including META-K-LEAST-SORTS .
 
 --------------------------------------------------------------------------------
 --- What needs to be done:
@@ -191,7 +192,7 @@ fmod LISTS-TO-WRAPPERS is
  ceq lists2wT(Q[Trms],M,OPDS,OPDS', CTORS)
    = Q[lists2wTs(Trms, M, OPDS, OPDS', CTORS)] if  Q = replaceS .
  eq lists2wT(Q[Trms], M, OPDS, OPDS', CTORS)
-  = lists2wT(Q[Trms], M, OPDS, OPDS', CTORS, findOp(M, OPDS,Q, leastSorts(M, Trms), getKind(M,leastSort(M,Q[Trms])))) [owise] .
+  = lists2wT(Q[Trms], M, OPDS, OPDS', CTORS, findOp(M, OPDS,Q, leastSortsTs(M, Trms), getKind(M,leastSort(M,Q[Trms])))) [owise] .
 
  op lists2wT : Term Module OpDeclSet OpDeclSet CTORSMap OpDecl ~> Term .
  eq lists2wT(Q[Trms], M, OPDS, OPDS', CTORS, Op)
@@ -205,8 +206,8 @@ fmod LISTS-TO-WRAPPERS is
  eq lists2wTKs((Trm,Trms), T Tl, M, OPDS, OPDS', CTORS)
   = if findCtor(T, CTORS) == T 
     then listWrapperS(T)[lists2wT(Trm, M, OPDS, OPDS', CTORS)]
-    else if findCtor(leastSort(M, Trm),CTORS) :: Type then 
-    listWrapperS(leastSort(M,Trm))[lists2wT(Trm, M, OPDS, OPDS', CTORS)]
+    else if findCtor(leastSortsT(M, Trm),CTORS) :: Type then 
+    listWrapperS(leastSortsT(M,Trm))[lists2wT(Trm, M, OPDS, OPDS', CTORS)]
     else lists2wT(Trm, M, OPDS, OPDS',CTORS)
     fi fi , lists2wTKs(Trms, Tl, M, OPDS, OPDS', CTORS) .
 

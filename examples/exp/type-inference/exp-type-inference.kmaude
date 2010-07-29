@@ -4,7 +4,7 @@ in ../exp-programs.maude
 
 
 --- types stuff
-kmod TYPES is including PL-NAT 
+kmod TYPES is including PL-NAT + PL-IF-THEN-ELSE
   sorts BasicType TypeVar Type TypeSchema 
   subsort BasicType TypeVar < Builtins Type 
   subsort Type < TypeSchema 
