@@ -82,7 +82,17 @@ kmod DYNAMIC-C-SEMANTICS is
 		--- < genv > ?:Map </ genv >
 	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
 
+	--- this bit of indirection is used to check that the main prototype is correct, and to call it with the appropriate arguments
+	op callMain : Nat Id -> K
+	op callMain : K Nat Id -> K [strict(1)]
+	eq callMain(N:Nat, X:Id) = callMain(typeof(Identifier("main")), N:Nat, X:Id)
 	
+	--- eq callMain(functionType(int, ?), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	--- eq callMain(functionType(int, L':List{Type}), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	eq callMain(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	
+	
+	--- typedDeclaration(void, ?)
 	eq eval(P:Program) = eval(P:Program, .List{K}, "")
 	eq eval(P:Program, L:List{K}, Input:String) = 
 		< T >
@@ -92,10 +102,12 @@ kmod DYNAMIC-C-SEMANTICS is
 						< k > listToK(P:Program)
 							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
 							--- ~> incomingArguments(L:List{K})
-							~> Call(Identifier("main"), (Nil
+							~> callMain(length L:List{K}, incomingArgumentArray)
+						</ k >
+							--- Call(Identifier("main"), (Nil
 								--- (Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
 								--- :: (incomingArgumentArray)
-							)) </ k >
+							---xxx )) </ k >
 						< currentFunction > File-Scope </ currentFunction >
 						< currentProgramLoc > UnknownCabsLoc </ currentProgramLoc >
 					...</ local >

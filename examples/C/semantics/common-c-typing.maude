@@ -219,68 +219,67 @@ mod COMMON-C-TYPING is
 	mb rule
 		< type > functionObject(?, T:Type, ?) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
-	***(
-	mb rule
-		< type > [F:Float => double] </ type >
-		: KSentence [metadata "structural"] .
-	--- why did this suddenly become necessary?
-	mb rule
-		< type > [atv(?, T:Type) => T:Type] </ type >
-		: KSentence [metadata "structural"] .
-	--- c99 6.4.5
-	mb rule
-		< type > [S:String => arrayType(char, lengthString(S:String))] </ type >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > [E:Expression => T:Type] ...</ type >
-		< types >... E:Expression |-> T:Type ...</ types >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > [X:Id => T:Type] ...</ type >
-		< types >... typedefName(X:Id) |-> T:Type ...</ types >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > [tv(?, T:Type) => T:Type] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > [cast(T:Type, ?) => T:Type] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb [type-struct-arrow]: rule
-		< type > ['_->_(pointerType(structType(S:Id)),, X:Id) => T:Type] ...</ type >
-		< structs >... struct(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
-		: KSentence [metadata "structural"] .
-	mb [type-union-arrow]: rule
-		< type > ['_->_(pointerType(unionType(S:Id)),, X:Id) => T:Type] ...</ type >
-		< structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
-		: KSentence [metadata "structural"] .
 
-	mb [type-struct-dot]: rule
-		< type > ['_._(structType(S:Id),, X:Id) => T:Type] ...</ type >
-		< structs >... struct(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+	--- mb rule
+		--- < type > [F:Float => double] </ type >
+		--- : KSentence [metadata "structural"] .
+	--- --- why did this suddenly become necessary?
+	--- mb rule
+		--- < type > [atv(?, T:Type) => T:Type] </ type >
+		--- : KSentence [metadata "structural"] .
+	--- --- c99 6.4.5
+	--- mb rule
+		--- < type > [S:String => arrayType(char, lengthString(S:String))] </ type >
+		--- : KSentence [metadata "structural"] .
+	mb rule
+		< type > K:K => T:Type ...</ type >
+		< types >... K:K |-> T:Type ...</ types >
 		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < type > [X:Id => T:Type] ...</ type >
+		--- < types >... typedefName(X:Id) |-> T:Type ...</ types >
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < type > [tv(?, T:Type) => T:Type] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < type > [cast(T:Type, ?) => T:Type] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-struct-arrow]: rule
+		--- < type > ['_->_(pointerType(structType(S:Id)),, X:Id) => T:Type] ...</ type >
+		--- < structs >... struct(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-union-arrow]: rule
+		--- < type > ['_->_(pointerType(unionType(S:Id)),, X:Id) => T:Type] ...</ type >
+		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		--- : KSentence [metadata "structural"] .
+
+	--- mb [type-struct-dot]: rule
+		--- < type > ['_._(structType(S:Id),, X:Id) => T:Type] ...</ type >
+		--- < structs >... struct(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		--- : KSentence [metadata "structural"] .
 		
-	mb [type-union-dot]: rule
-		< type > ['_._(unionType(S:Id),, X:Id) => T:Type] ...</ type >
-		< structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
-		: KSentence [metadata "structural"] .
+	--- mb [type-union-dot]: rule
+		--- < type > ['_._(unionType(S:Id),, X:Id) => T:Type] ...</ type >
+		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		--- : KSentence [metadata "structural"] .
 
 
-	mb rule
-		< type > ['Pointer(Kp:KProper) => Kp:KProper ~> 'Pointer(HOLE)] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > [T:Type ~> 'Pointer(HOLE) => 'Pointer(T:Type)] ...</ type >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < type > ['Pointer(Kp:KProper) => Kp:KProper ~> 'Pointer(HOLE)] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < type > [T:Type ~> 'Pointer(HOLE) => 'Pointer(T:Type)] ...</ type >
+		--- : KSentence [metadata "structural"] .
 
-	mb [type-deref-value]: rule
-		< type > ['Deref(tv(?, pointerType(T:Type))) => T:Type] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb [type-deref-type]: rule
-		< type > ['Deref(pointerType(T:Type)) => T:Type] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb [type-deref-array]: rule
-		< type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
-		: KSentence [metadata "structural"] .
+	--- mb [type-deref-value]: rule
+		--- < type > ['Deref(tv(?, pointerType(T:Type))) => T:Type] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-deref-type]: rule
+		--- < type > ['Deref(pointerType(T:Type)) => T:Type] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-deref-array]: rule
+		--- < type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
+		--- : KSentence [metadata "structural"] .
 
-	***)
 endm

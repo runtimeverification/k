@@ -113,11 +113,12 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op anonymousId : -> Id .
 
 	--- op typedParameterList : List{K} -> KResult [metadata "strict"] .
-	op typedDeclaration : Type Id -> KResult .
+	op typedDeclaration : Type Id -> Type . --- would rather this be KResult, but can't get the subsorting to work
 	--- op definedType : Type K -> KResult . 
 	
 	sort List{Type} .
 	subsort List{Type} < List{C} .
+	subsort Type < List{Type} .
 	subsort Type < List{C} .
 	op _::_ : List{Type} List{Type} -> List{Type} [ditto] .
 	
