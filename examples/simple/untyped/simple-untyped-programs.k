@@ -9,7 +9,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
   syntax Stmts ::= pFactorial | pCollatz | pInsertionSort1 | pInsertionSort2
                  | pInsertionSort3 | pInsertionSort4 | pBubbleSort
-                 | pHeapSort | pSorting
+                 | pHeapSort | pSorting | pex01
 
   macro pFactorial =
        var x;
@@ -414,4 +414,18 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          map(f,x);
        }
 
+  macro pex01 =
+    var x;
+    function main() {
+      x = 3;
+      write(f());
+      return 0;
+    }
+
+    function f() {
+      var x;
+      x = 5;
+      return x;
+    }
+    
 endkm

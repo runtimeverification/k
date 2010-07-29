@@ -2,9 +2,20 @@ in ../../../k-prelude
 in simple-untyped-syntax
 in simple-untyped-programs
 
-kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K 
+---------------------
+--- configuration ---
+---------------------
+kmod SIMPLE-UNTYPED-CONFIG is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
   syntax Val ::= Int | Bool
+                | array ( Nat , Nat )
+                  --- array values are wrapped as specific values
+                | function( Nat )  
+                | lambda ( List{Id} , Stmt ) [metadata "latex(renameTo \\lambda\_.\_)"]
+                  --- function value; like arrays, functions also evaluate to 
+                  ---    their address (wrapped as a specific value)
+
+--- the values are expressions
   syntax Exp ::= Val
 
 --- We have to subsort all the syntactic categories to K, and the lists of values
@@ -25,9 +36,84 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
                      <nextLoc> 0 </nextLoc>
                 </T>
 
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
+--- List{Val}
+  syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto]
+  syntax List{Exp} ::= List{Val}
+
+--- length
+  syntax Nat ::= `| List{Id} `|
+  macro |.List{Id}| = 0  
+  macro |X:Id,Xl:List{Id}| = sNat |Xl|
+
+--- generate sequence of locations
+  syntax List{K} ::= Nat .. Nat
+  rule N1:Nat..N1 => .List{K} [structural]
+  rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
+
+--- environment recovery
+  syntax K ::= env ( Map ) 
+  rule env(_) ~> env(Env:Map) => env(Env) [structural] 
+  rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural] 
+  rule <k> V:Val ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
+
+--- the following is nedeed for stacking
+  syntax ListItem ::=  ( Map , K )
+
+---contexts
+  context var X:Id[[HOLE]];
+  context _[[HOLE]]=_;
+  context [HOLE][_]=_;
+
+endkm
+
+---------------------
+--- preprocessing ---
+---------------------
+kmod SIMPLE-UNTYPED-PREPROCESSING is including SIMPLE-UNTYPED-CONFIG
+
+--- variable declaration; in the preprocessing phase only the global variables are processed 
+--- this rule is also used process the local variables of a function
+---   as a part of the function evaluation 
+
+  rule <k> var X:Id ; => .K <_/k> 
+       <env> Env:Map => Env[L:Nat / X] </env> 
+       <store_> .Map => L |-> 0 <_/store>
+       <nextLoc> L => sNat(L) </nextLoc> 
+
+--- If an array is declared, then calculate its size; 
+
+  rule <k> var X[N:Nat]; => . <_/k> 
+       <env> Env => Env[L/X] </env>
+       <store_>. => L |-> array(sNat L, N) <_/store>
+       <nextLoc> L => sNat L +Nat N </nextLoc> 
+  rule (sizeOf(array(_,N)) => N)   
+
+  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k> 
+       <env> Env => Env[L/F] </env> 
+       <nextLoc> L => L +Nat 2 </nextLoc> 
+       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
+
+--- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
+---   call main and initialize the global environment
+  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
+endkm
+
+-------------------------------------
+--- Evaluation of the expressions ---
+-------------------------------------
+kmod SIMPLE-UNTYPED-EXPR-EVALUATION is including SIMPLE-UNTYPED-CONFIG 
+
+--- variable lookup
+
   rule <k> X:Id => V:Val <_/k>  
        <env_> X |-> L:Nat <_/env>
        <store_> L |-> V <_/store> 
+
+--- arithmetic expressions
+
   rule <k> ++X => I:Int +Int 1 <_/k>
        <env_> X |-> L <_/env>
        <store_> L |-> (I => I +Int 1) <_/store> 
@@ -47,100 +133,66 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule T1 or T2 => T1 orBool T2 
   rule not(T:Bool) => notBool(T) 
 
---- array value:
+--- array component value:
 ---    first arg. is the location of the first element in the array, and 
----    the second arg. is the array size
-  syntax Val ::= array ( Nat , Nat )  
+---    the second argument is the array size (= the index)
 
-  rule <k> array(L,_)[N:Nat] => Sigma(L +Int N) <_/k> <store> Sigma </store> .
+  rule <k> array(L,_)[N:Nat] => Sigma:Map(L +Int N) <_/k> <store> Sigma </store> .
                                 --- untyped SIMPLE does not check array bounds
+--- read expression
 
-  rule (sizeOf(array(_,N)) => N) 
-  rule <k> var X ; => .K <_/k> 
-       <env> Env:Map => Env[L / X] </env> 
-       <store_> .Map => L |-> 0 <_/store>
-       <nextLoc> L => sNat(L) </nextLoc> 
-  
---- If an array is declared, then calculate its size; 
----    then next rule gives its semantics
-  context var X[[HOLE]];
-  rule <k> var X[N]; => . <_/k> 
-       <env> Env => Env[L/X] </env>
-       <store_>. => L |-> array(sNat L, N) <_/store>
-       <nextLoc> L => sNat L +Nat N </nextLoc> 
+  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
+endkm
+
+---------------------
+--- function call ---
+---------------------
+kmod SIMPLE-UNTYPED-FUNCTION-CALL is including SIMPLE-UNTYPED-PREPROCESSING
+
+--- the environment and the computation are pushed in the stack at each function call
+
+  rule <k> _`(_`)(function(L),Vl:List`{Val`})~>K:K => S:Stmt~>return(0); </k> 
+       <fstack> .List => (Env,K) <_/fstack>
+       <env> Env => GEnv:Map[N:Nat..N+Nat|Xl| / getList{K}(Xl)] </env>
+       <genv> GEnv </genv>
+       <store_> L:Nat |-> lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
+       <nextLoc> N => N +Nat |Xl| </nextLoc>
+  rule <k> return(V:Val); ~> _ => V ~> K </k>
+       <fstack> (Env:Map,K) => . <_/fstack>
+       <env> _ => Env </env>
+endkm
+
+------------------------------
+--- instruction processing ---
+------------------------------
+kmod SIMPLE-UNTYPED-INSTR-PROCESSING is including SIMPLE-UNTYPED-CONFIG 
 
   rule {} => .
-  rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env </env> 
+  rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
   rule S1:Stmt S2:Stmt => S1~>S2 
-  rule <k> X=V; => . <_/k> <env_> X|->L <_/env> <store_> L|->(_=>V) <_/store> 
+  rule <k> X:Id = V:Val; => . <_/k> <env_> X|->L <_/env> <store_> L:Nat |->(_=>V) <_/store> 
 
  --- for array assignment, first evaluate the array and its index
-  context _[[HOLE]]=_;
-  context [HOLE][_]=_;
-  rule <k> array(L,_)[N]=V; => . <_/k>
+  rule <k> array(L,_)[N:Nat]=V; => . <_/k>
        <store> Sigma:Map => Sigma[V/(L +Int N)] </store> 
 
   rule V; => . 
-  rule if true then S:Stmt else _ => S 
+  rule if true then S:Stmt else _ => S:Stmt
   rule if false then _ else S => S 
   rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k>
-
---- function value; like arrays, functions also evaluate to 
----    their address (wrapped as a specific value)
-  syntax Val ::= function( Nat )
----  op function : Nat -> Val   
-  rule <k> function F:Id(Xl:List{Id}) S => . <_/k> 
-       <env> Env => Env[L/F] </env> 
-       <nextLoc> L => L +Nat 2 </nextLoc> 
-       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
-
---- actual function values are stored as lambda abstractions
-  syntax Val ::= lambda ( List{Id} , Stmt )
-
---- the next is used to stack the environment and the computation at each function call
-  syntax ListItem ::=  ( Map , K )
-
-  rule <k> _`(_`)(function(L),Vl:List`{Val`})~>K => S~>return(0); </k> 
-       <fstack> .List => (Env,K) <_/fstack>
-       <env> Env => GEnv:Map[N..N+Nat|Xl| / getList{K}(Xl)] </env>
-       <genv> GEnv </genv>
-       <store_> L |-> lambda(Xl,S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
-       <nextLoc> N => N +Nat |Xl| </nextLoc>
-  rule <k> return(V); ~> _ => V ~> K </k>
-       <fstack> (Env,K) => . <_/fstack>
-       <env> _ => Env </env>
-
-  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
-  rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out>
-
---- when we are done with the first pass (computation and genv are empty),
----   call main and initialize the global environment
-  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
-
-----------------------------------------------
---- Auxilliary declarations and operations ---
-----------------------------------------------
---- List{Val}
-  syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto]
-  syntax List{Exp} ::= List{Val}
-
---- length
-  syntax Nat ::= `| List{Id} `|
-  macro |.List{Id}| = 0  
-  macro |X,Xl| = sNat |Xl|
-
---- generate sequence of locations
-  syntax List{K} ::= Nat .. Nat
-  rule N1:Nat..N1 => .List{K} [structural]
-  rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
-
---- environment recovery
-  syntax K ::= env ( Map ) 
-  rule env(_) ~> env(Env) => env(Env) [structural] 
-  rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural] 
-  rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
+  rule <k> write(I:Int); => . <_/k> <out_> . => ListItem(I) </out>
 endkm
 
+-----------------
+--- semantics ---
+-----------------
+kmod SIMPLE-UNTYPED-SEMANTICS is 
+  including SIMPLE-UNTYPED-FUNCTION-CALL + SIMPLE-UNTYPED-EXPR-EVALUATION + SIMPLE-UNTYPED-INSTR-PROCESSING
+endkm
+
+-------------------
+--- main module ---
+-------------------
 kmod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS 
 --- make sure the name of the final module is the capitalized version of the file name
 

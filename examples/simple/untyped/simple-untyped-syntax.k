@@ -1,57 +1,89 @@
-kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID 
+-------------------------------------
+--- SIMPLE-UNTYPED-SYNTAX modules ---
+-------------------------------------
 
-  syntax Var ::= Id | Exp [ Exp ] [prec 1 strict]
- 
-  syntax Exp  ::= Var | Int | Bool
-                | ++ Id [prec 0]
-                | Exp + Exp [gather(E e) prec 33 strict]
-                | Exp - Exp [gather(E e) prec 33 strict]
-                | Exp * Exp [gather(E e) prec 31 strict]
-                | Exp / Exp [gather(E e) prec 31 strict]
-                | Exp % Exp [gather(E e) prec 31 strict]
-                |  - Exp [strict]
-                | Exp < Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
-                | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
-                | Exp > Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
-                | Exp >= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
-                | Exp == Exp [prec 37 strict] 
-                | Exp != Exp [prec 37 strict] 
-                | Exp and Exp [gather(E e) prec 55 strict] 
-                | Exp or Exp  [gather(E e) prec 59 strict] 
-                | not Exp [prec 53 strict]
-                | sizeOf ( Exp ) [strict]
-                | Exp ( )
-                | Exp ( List{Exp} ) [prec 2 strict]
-                | read ( )
+kmod SIMPLE-UNTYPED-SORTS is including PL-INT + PL-ID
+  sorts Var Exp Stmt Stmts
 
-  syntax Decl ::= var Var ; [prec 2]  
-                | function Id ( ) Stmt 
-                | function  Id ( List{Id} ) Stmt 
-
-  syntax Stmt ::= { } [metadata "latex(renameTo \\{\\})"]
-                | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
-                | Exp = Exp ; [prec 2 strict(2)]
-                | Exp ; [prec 50 strict]
-                | if Exp then Stmt else Stmt [strict(1)]
-                | if Exp then Stmt
-                | while Exp do Stmt
-                | for Id = Exp to Exp do Stmt
-                | return Exp ; [strict]
-                | write ( Exp ) ; [strict]
-
-  syntax Stmts ::= Decl | Stmt
-                | Stmts Stmts [prec 100 gather(e E)]
-
-  syntax Id ::= main
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
-  syntax List{Id}  ::= Id | .List{Id}
-                     | List{Id} , List{Id} [prec 70 assoc id: .List{Id}]
+  syntax List{Id}  ::= 
+                 Id 
+               | .List{Id}
+               | List{Id} , List{Id} [prec 70 assoc id: .List{Id}]
+
+
 --- List{Exp}
-  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]
+  syntax List{Exp} ::= 
+                 Exp  
+               | List{Id} 
+               | List{Exp} , List{Exp} [ditto]
 -----------------------------------------------------------------------------
+endkm
+
+
+kmod SIMPLE-UNTYPED-EXPR is including SIMPLE-UNTYPED-SORTS
+  syntax Var ::= 
+                 Id 
+               | Exp [ Exp ] [prec 1 strict]
+ 
+  syntax Exp  ::= 
+                 Var | Int | Bool
+               | ++ Id [prec 0]
+               | Exp + Exp [gather(E e) prec 33 strict]
+               | Exp - Exp [gather(E e) prec 33 strict]
+               | Exp * Exp [gather(E e) prec 31 strict]
+               | Exp / Exp [gather(E e) prec 31 strict]
+               | Exp % Exp [gather(E e) prec 31 metadata "latex(renameTo _\\ensuremath\\%_)" strict]
+               | - Exp [strict]
+               | Exp < Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
+               | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
+               | Exp > Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
+               | Exp >= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+               | Exp == Exp [prec 37 strict] 
+               | Exp != Exp [prec 37 strict] 
+               | Exp and Exp [gather(E e) prec 55 strict] 
+               | Exp or Exp  [gather(E e) prec 59 strict] 
+               | not Exp [prec 53 strict]
+               | sizeOf ( Exp ) [strict]
+               | Exp ( )
+               | Exp ( List{Exp} ) [prec 2 strict]
+               | read ( )
+endkm
+
+kmod SIMPLE-UNTYPED-DECL is including SIMPLE-UNTYPED-SORTS
+  syntax Decl ::= var Var ; [prec 2]  
+                | function Id ( ) Stmt 
+                | function  Id ( List{Id} ) Stmt 
+endkm
+
+kmod SIMPLE-UNTYPED-STMT is including SIMPLE-UNTYPED-SORTS
+  syntax Stmt ::=
+                 { } [metadata "latex(renameTo \\{\\})"]
+               | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
+               | Exp = Exp ; [prec 2 strict(2)]
+               | Exp ; [prec 50 strict]
+               | if Exp then Stmt else Stmt [strict(1)]
+               | if Exp then Stmt
+               | while Exp do Stmt
+               | for Id = Exp to Exp do Stmt
+               | return Exp ; [strict]
+               | write ( Exp ) ; [strict]
+endkm
+
+kmod SIMPLE-UNTYPED-STMTS is including SIMPLE-UNTYPED-DECL
+  syntax Stmts ::= Decl | Stmt
+                | Stmts Stmts [prec 100 gather(e E)]
+endkm
+
+
+kmod SIMPLE-UNTYPED-SYNTAX is 
+  including SIMPLE-UNTYPED-EXPR + SIMPLE-UNTYPED-STMT + SIMPLE-UNTYPED-STMTS
+
+  syntax Id ::= main 
+
 endkm
 
 
@@ -66,3 +98,4 @@ kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX
   macro function F:Id() S = function F(.List{Id}) S
   macro E() = E(.List{Id})
 endkm
+
