@@ -69,16 +69,12 @@ endm
 	--- mb context application(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
 	--- ---mb context application(`[HOLE`]:K, ?) : KSentence .
 	
-	--- --- massage application with no argument
-	--- mb rule [Apply(E:Expression) => Apply(E:Expression, .List{Expression})] : KSentence [metadata "structural"] .
-	
 	--- mb rule
 		--- < k > [Apply(E:Expression, L:List{Expression}) => application(E:Expression, getList{K}(L:List{Expression}))] ...</ k >
 		--- : KSentence [metadata "structural"] .
 	
-	--- --- fixme shouldn't access memory directly
 	--- mb [function-application-pre]: rule
-		--- < k > [application(tv(loc(Block:Nat, Offset:Nat), pointerType(functionType(?, ?))), L:List{K}) 
+		--- < k > [Call(tv(sym(Block:Nat) +Nat Offset:Nat, pointerType(functionType(?, ?))), L:List{K}) 
 		--- => application(V:Value, L:List{K})] ...</ k >
 		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:Value)) ...</ mem >
 		--- : KSentence [metadata "computational rule"] .

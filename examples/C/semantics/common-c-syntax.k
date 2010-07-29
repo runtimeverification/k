@@ -12,48 +12,13 @@ kmod COMMON-C-SYNTAX is
 	including PL-ID
 	including K
 	
-	--- op NULL : -> Id [ctor]
-	--- op calloc : -> Id [ctor]
-	--- op cos : -> Id [ctor]
-	--- op sin : -> Id [ctor]
-	--- op exit : -> Id [ctor]
-	--- op free : -> Id [ctor]
-	--- op main : -> Id [ctor]
-	--- op malloc : -> Id [ctor]
-	--- op printf : -> Id [ctor]
-	--- op putchar : -> Id [ctor]
-	--- op rand : -> Id [ctor]
-	--- op sqrt : -> Id [ctor]
-	--- op abort : -> Id [ctor]
-	--- op debug : -> Id [ctor]
-	--- op getchar : -> Id [ctor]
-	--- op exp : -> Id [ctor]
-	--- op log : -> Id [ctor]
-	--- op atan : -> Id [ctor]
-	op File-Scope : -> Id [ctor]
+	--- The resulting sorts can really be replaced with K, but i've left them in for now since they don't hurt anything and are somewhat documenting
 	
-	--- op fslOpenFile : -> Id [ctor]
-	--- op fslCloseFile : -> Id [ctor]
-	--- op fslFGetC : -> Id [ctor]
-	--- op fslPutc : -> Id [ctor]
-	
-	--- op longjmp : -> Id [ctor]
-	--- op setjmp : -> Id [ctor]
-	--- op floor : -> Id [ctor]
-	--- op tan : -> Id [ctor]
-	--- op fmod : -> Id [ctor]
-	--- op atan2 : -> Id [ctor]
-	--- op asin : -> Id [ctor]
-	
-	--- op spawn : -> Id [ctor]
-	--- op sync : -> Id [ctor]
-	--- op lock : -> Id [ctor]
-	--- op unlock : -> Id [ctor]
-	
+	--- Sorts directly from CABS
 	sort CabsLoc
 	sort TypeSpecifier
 	sort Storage
-	--- sort FunSpecifier --- not used
+	--- sort FunSpecifier --- not used, even by cabs
 	sort CVSpecifier
 	sort SpecifierElem
 	sort Specifier
@@ -71,13 +36,15 @@ kmod COMMON-C-SYNTAX is
 	sort Statement
 	sort PureStatement
 	sort ForClause
-	sort BinaryOperator
-	sort UnaryOperator
+	--- sort BinaryOperator --- not used by us
+	--- sort UnaryOperator --- not used by us
 	sort Expression
 	sort Constant
 	sort InitExpression
 	sort InitWhat
 	sort Attribute
+	
+	--- Additional sorts
 	sort Program
 	sort IntConstant
 	sort InitFragment
@@ -85,14 +52,16 @@ kmod COMMON-C-SYNTAX is
 	sort PureDefinition
 	
 	sort C
-	sort List{C} 
-	
-	--- subsort List{C} < Specifier
+	sort List{C}
+	subsort Id < C
+	op Nil : -> List{C}
+	subsort C < List{C}
+	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil]
 	
 	subsort CabsLoc < C
 	subsort TypeSpecifier < C
 	subsort Storage < C
-	--- subsort FunSpecifier < C --- not used
+	--- subsort FunSpecifier < C
 	subsort CVSpecifier < C
 	subsort SpecifierElem < C
 	subsort Specifier < C
@@ -110,8 +79,8 @@ kmod COMMON-C-SYNTAX is
 	subsort Statement < C
 	subsort PureStatement < C
 	subsort ForClause < C
-	subsort BinaryOperator < C
-	subsort UnaryOperator < C
+	--- subsort BinaryOperator < C
+	--- subsort UnaryOperator < C
 	subsort Expression < C
 	subsort Constant < C
 	subsort InitExpression < C
@@ -122,12 +91,6 @@ kmod COMMON-C-SYNTAX is
 	subsort InitFragment < C
 	subsort FieldName < C
 	subsort PureDefinition < C
-	
-	subsort Id < C	
-
-	op Nil : -> List{C}
-	subsort C < List{C}
-	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil] --- format(++nio d d o--)
 
 --- -----------------------------------------------------------------------------
 --- Below, I give the declaration as found in cabs.ml first, followed by the K version
@@ -513,7 +476,6 @@ and unary_operator =
 ***)
 	op Constant : K -> Expression [strict]
 	--- for paren, just putting parentheses
-	--- op Variable : Id -> Expression
 	subsort Id < Expression
 ***(
 	| EXPR_SIZEOF of expression
@@ -590,7 +552,5 @@ and initwhat =
 and attribute = string * expression list
 ***)
 	op Attribute : String List{C} -> Attribute
-	
-
 
 endkm
