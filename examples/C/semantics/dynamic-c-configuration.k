@@ -18,22 +18,22 @@ kmod C-CONFIGURATION is
 			< openFiles > .Map </ openFiles >
 			< busy > .Bag </ busy >
 			< currentTranslationUnit > "" </ currentTranslationUnit >
-			< currentProgramLoc > .K </ currentProgramLoc >
 			< programText > .Map </ programText >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >
-					---< local >
+					< local >
 						< k > .K </ k >
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						< holds > .Map </ holds >
 						< currentFunction > .K </ currentFunction >
-						< type > .K </ type >
+						< currentProgramLoc > .K </ currentProgramLoc >
+						< type * > .K </ type * >
 						< env > .Map </ env >
 						< loopStack > .List </ loopStack >
 						< locals > .Bag </ locals >
 						< types > .Map </ types >
-					---</ local >
+					</ local >
 				</ thread * >
 			</ threads >
 		</ T >

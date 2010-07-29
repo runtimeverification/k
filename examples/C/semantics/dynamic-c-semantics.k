@@ -88,44 +88,27 @@ kmod DYNAMIC-C-SEMANTICS is
 		< T >
 			< threads >
 				< thread >
-					< k > listToK(P:Program)
-						--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
-						~> incomingArguments(L:List{K})
-						~> Call(Variable(Identifier("printf")), (
-							(Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
-							:: (incomingArgumentArray)
-						)) </ k >
-					< locsWrittenTo > .Bag </ locsWrittenTo >
-					< holds > .Map </ holds >
-					< callStack > .List </ callStack >
-					< env > .Map </ env >
-					< loopStack > .List </ loopStack >
-					< locals > .Bag </ locals >
-					< types > .Map </ types >
-					< currentFunction > File-Scope </ currentFunction >
-				</ thread >
+					< local >
+						< k > listToK(P:Program)
+							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
+							~> incomingArguments(L:List{K})
+							~> Call(Variable(Identifier("printf")), (
+								(Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
+								:: (incomingArgumentArray)
+							)) </ k >
+						< currentFunction > File-Scope </ currentFunction >
+						< currentProgramLoc > UnknownCabsLoc </ currentProgramLoc >
+					...</ local >
+				...</ thread >
 			</ threads >
-			< programText > .Map </ programText >
-			< currentProgramLoc > UnknownCabsLoc </ currentProgramLoc >
-			< currentTranslationUnit > "" </ currentTranslationUnit >
-			< busy > .Bag </ busy >
-			< aLabelMap > .Map </ aLabelMap > 
-			< sizes > .Map </ sizes >
-			< genv > .Map </ genv > 
-			< mem > .Map </ mem >
-			< nextLoc > loc(1, 0) </ nextLoc >
+			< nextLoc > sym(1) +Nat 0</ nextLoc >
 			< nextFile > 3 </ nextFile >
-			< freshNat > 0 </ freshNat >
-			< malloced > .Map </ malloced >
-			< statics > .Map </ statics >
-			< typedefs > .Map </ typedefs >
-			< structs > .Map </ structs >
 			< openFiles >
 				0 |-> "stdin" --- stdin
 				1 |-> "stdout" --- stdout
 				2 |-> "stdout" --- stderr
 			</ openFiles >
-		</ T >
+		...</ T >
 		< files > 
 			"stdin" |-> Input:String
 			"stdout" |-> ""

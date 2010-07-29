@@ -41,7 +41,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op debugK : -> K .
 	op discard : -> K .
 	op unnamedBitField : -> Id [ctor] .
-	op loc : Nat Nat -> Nat .
+	--- op loc : Nat Nat -> Nat .
+	op sym : Nat -> Nat .
+	op byteo : Nat -> Nat .
+	op bito : Nat -> Nat .
 	--- fixme might not always be what I want, but it seems to work
 	--- eq loc(Block:Nat, N:Nat) <Int loc(Block:Nat, N':Nat) = N:Nat <Int N':Nat .
 	--- eq loc(Block:Nat, N:Nat) >Int loc(Block:Nat, N':Nat) = N:Nat >Int N':Nat .
@@ -57,6 +60,22 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op klistToK : List{K} -> K .
 	op UnknownCabsLoc : -> K .
 	
+	--- Basic types
+	ops void char short-int int long-int long-long-int : -> BaseType .
+	ops float double long-double : -> BaseType .
+	ops signed-char unsigned-char : -> BaseType .
+	ops unsigned-short-int unsigned-int unsigned-long-int unsigned-long-long-int : -> BaseType .
+	
+	--- Composite types
+	op enumType : Id -> BaseType [ctor] .
+	op arrayType : Type Nat -> Type [ctor] .
+	op bitfieldType : Type Nat -> Type [ctor] .
+	op functionType : Type List{Type} -> Type [ctor] .
+	op pointerType : Type -> Type [ctor] .
+	op structType : Id -> Type [ctor] .
+	op unionType : Id -> Type [ctor] .
+	op qualifiedType : Type K -> Type [ctor] .
+	
 	--- sort State .
 	--- subsort String < State .
 	
@@ -65,60 +84,58 @@ mod COMMON-SEMANTIC-SYNTAX is
 	subsort Type < C .
 	subsort Value < C .
 	--- sort Type .
-	--- sort BaseValue .
+	sort BaseValue .
 	--- sort Field .
 	--- subsort Field < KResult .
 
-	--- subsort Nat Int Rat Float < BaseValue .
-	--- subsort BaseValue < K .
+	subsort Nat Int Rat Float < BaseValue .
+	subsort BaseValue < C .
+	subsort BaseValue < Builtins .
 	--- --- subsort BaseValue < Expression .
 	--- --- subsort Value < Expression .
 	subsort Value < KResult K .
 	subsort Type < KResult K .
-	--- --- subsort Base-Type < Type .
+	sort BaseType .
+	subsort BaseType < Type Builtins .
 	--- --- subsort SeqList < Expression .
-	--- --- op sizeof : Type -> Expression .
+	op sizeofType : K -> K [metadata "strict"] .
+	op sizeofExp : K -> K .
 	--- --- op HOLE : -> Expression .
-	--- op l : KLabel -> K [metadata "builtin wrapper"] .
+	op l : KLabel -> K [metadata "builtin wrapper"] .
 	--- ---op l : KLabel -> K .
-	--- op _contains_ : Set K -> Bool [memo] .
+	op _contains_ : Set K -> Bool [memo] .
 	--- --- Types
-	--- --- op enumType : Id -> Base-Type [ctor] .
 	--- op anonymousId : -> Id .
 
 	--- op typedParameterList : List{K} -> KResult [metadata "strict"] .
-	--- op typedDeclaration : Type K -> KResult .
+	op typedDeclaration : Type Id -> KResult .
 	--- op definedType : Type K -> KResult . 
 	
-	op arrayType : Type Nat -> Type [ctor] .
-	op bitfieldType : Type Nat -> Type [ctor] .
-	op functionType : Type List{K} -> Type [ctor] .
-	op pointerType : Type -> Type [ctor] .
-	op structType : Id -> Type [ctor] .
-	op unionType : Id -> Type [ctor] .
-	op qualifiedType : Type K -> Type [ctor] .
+	sort List{Type} .
+	subsort List{Type} < List{C} .
+	subsort Type < List{C} .
+	op _::_ : List{Type} List{Type} -> List{Type} [ditto] .
 	
-	--- op setOfTypes : -> Set [memo] .
-	--- --- eq setOfTypes = Set(
-		--- --- l('arrayType),, 
-		--- --- l('bitfieldType),, 
-		--- --- l('functionType),, 
-		--- --- l('pointerType),, l('structType),, l('unionType),, 
-		--- --- l('qualifiedType)
-	--- --- ) .
+	op setOfTypes : -> Set [memo] .
+	eq setOfTypes = Set(
+		l('arrayType),, 
+		l('bitfieldType),, 
+		l('functionType),, 
+		l('pointerType),, l('structType),, l('unionType),, 
+		l('qualifiedType)
+	) .
 	
 	--- op bind : List{KResult} List{KResult} -> K . --- should be kresult in both arguments, but awkward kind
 	--- op typedField : Type Id -> KResult .
 	--- op declare : K K -> K [metadata "strict(1)"] .
 	--- op converted : K K -> K .
-	--- op evalToType : -> K .
-	--- op tv : BaseValue Type -> Value .
+	op tv : BaseValue Type -> Value .
 	--- op atv : List{K} Type -> Value .
 	--- op concretize : Value -> K .
 	--- op addTypes : K K -> K .
 	--- op addGlobalTypes : K K -> K .
 	--- op addGlobalTypes : K -> K .
-	--- op Closure : K K K -> Value .
+	op functionObject : Id Type K -> Value .
 	--- op putInMem : BaseValue K Type K -> K [metadata "strict(2 4)"] .
 	--- op putBytesInMem : Nat List{K} Type K -> K [metadata "strict(4)"] .
 	--- --- op sizeofType : K -> Expression [metadata "strict"] .
@@ -144,21 +161,19 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op hasIntegerType : Type -> Bool [memo] .
 	--- op hasUnsignedIntegerType : Type -> Bool [memo] .
 	--- op hasSignedIntegerType : Type -> Bool [memo] .
-	--- --- op typeof : Expression -> K .
+	op typeof : K -> K .
 	--- op writeToFD : Nat Nat -> K .
 	--- op writeToFD : Nat String -> K .
 	--- op readFromFD : Nat -> K .
 	--- op readFromFD : Nat Nat -> K .
-	--- op numBytes : Type -> Nat [memo] .
-	--- op numBits : Type -> Nat [memo] .
 	--- op min : Type -> Int [memo] .
 	--- op max : Type -> Int [memo] .
-	--- op numBitsPerByte : -> Nat .
+
 	--- op figureOffset : Nat K Type -> K [metadata "strict(2)"] .
 	--- ---op pair : Rat Rat -> K . --- relying on this not being nat
 	--- op undefRange : Map Nat Nat -> Map .
 	--- op range : Nat Nat -> Bag .
-	--- op calculateGotoMap : Id K -> K .
+	op calculateGotoMap : Id K -> K .
 	
 	--- op hasArrayType : Type -> Bool .
 	--- op hasFunctionType : Type -> Bool .
@@ -180,10 +195,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	--- op append : Nat Nat Value -> K .	
 	--- op store_New_atLoc_ : Nat K Nat -> K [metadata "strict(2)"] .
-	--- op storeNew_atLoc_ : K Nat -> K [metadata "strict(1)"] .
-	--- op store_atLoc_ : K Nat -> K [metadata "strict(1)"] .
+	op storeNew_atLoc_ : K Nat -> K [metadata "strict(1)"] .
+	op store_atLoc_ : K Nat -> K [metadata "strict(1)"] .
 	--- ---op allocate : K -> K [metadata "strict"] .
-	--- op alloc : Nat K -> K [metadata "strict(2)"] .
+	op alloc : Nat K -> K [metadata "strict(2)"] .
 	--- op allocWithDefault : Nat K Nat -> K [metadata "strict(2)"] .
 	
 endm
@@ -198,29 +213,32 @@ mod C-SETTINGS is
 	--- mb rule [NULL => tv(loc(0, 0), pointerType(void))] : KSentence [metadata "structural"] .
 	
 	--- ---C99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented
+	op numBitsPerByte : -> Nat .
+	op numBytes : Type -> Nat [memo] .
+	op numBits : Type -> Nat [memo] .
 
+	eq numBitsPerByte = 8 .
+	
+	eq numBytes(signed-char) = 1 .
+	eq numBytes(short-int) = 2 .
+	eq numBytes(int) = 4 .
+	eq numBytes(long-int) = 4 .
+	eq numBytes(long-long-int) = 8 .
+	
+	eq numBytes(float) = 4 .
+	eq numBytes(double) = 8 .
+	eq numBytes(long-double) = 16 .
+	
+	eq numBytes(enumType(X:Id)) = numBytes(int) .
+	
+	op cfg:sizeut : -> Type .
+	eq cfg:sizeut = unsigned-long-int .
 
-	--- eq numBitsPerByte = 8 .
+	op cfg:ptrsize : -> Int .
+	eq cfg:ptrsize = 8 .
 	
-	--- eq numBytes(signed-char) = 1 .
-	--- eq numBytes(short-int) = 2 .
-	--- eq numBytes(int) = 4 .
-	--- eq numBytes(long-int) = 4 .
-	--- eq numBytes(long-long-int) = 8 .
-	
-	--- eq numBytes(float) = 4 .
-	--- eq numBytes(double) = 8 .
-	--- eq numBytes(long-double) = 16 .
-	
-	--- eq numBytes(enumType(X:Id)) = numBytes(int) .
-	
-	--- op cfg:sizeut : -> Type .
-	--- eq cfg:sizeut = unsigned-long-int .
-
-	--- --- fixme unfortunate, but this is what cil assumes
-	--- --- actually, it seems to be parametric if you set the right flags
-	--- op cfg:ptrdiffut : -> Type .
-	--- eq cfg:ptrdiffut = int .
+	op cfg:ptrdiffut : -> Type .
+	eq cfg:ptrdiffut = long-long-int .
 	
 	--- eq min(enumType(?)) = min(int) .
 	--- eq max(enumType(?)) = max(int) .
@@ -362,10 +380,10 @@ mod SEMANTIC-HELPERS is
 
 
 	--- --- Note: it only makes sense to memo this if the sets are just used to represent categories
-	--- eq S:Set SetItem(K:K) contains K:K = true .
-	--- ceq S:Set SetItem(K1:K) contains K2:K = S:Set contains K2:K 
-		--- if K1:K =/=Bool K2:K .
-	--- eq .Set contains K:K = false .
+	eq S:Set SetItem(K:K) contains K:K = true .
+	ceq S:Set SetItem(K1:K) contains K2:K = S:Set contains K2:K 
+		if K1:K =/=Bool K2:K .
+	eq (.).Set contains K:K = false .
 
 	--- ceq hasIntegerType(T:Type) = true
 		--- if (integerTypes contains T:Type) .
@@ -578,8 +596,8 @@ endm
 		--- : KSentence [metadata "structural"] .	
 --- endm
 
---- mod COMMON-GLOBAL-DECLARATION is
-	--- including COMMON-INCLUDE .
+mod COMMON-GLOBAL-DECLARATION is
+	including COMMON-INCLUDE .
 			
 	--- --- c99 6.7.8:9 Except where explicitly stated otherwise, for the purposes of this subclause unnamed members of objects of structure and union type do not participate in initialization.  Unnamed members of structure objects have indeterminate value even after initialization.
 	--- --- c99 6.7.8:10 If an object that has automatic storage duration is not initialized explicitly, its value is indeterminate. If an object that has static storage duration is not initialized explicitly, then:
@@ -636,14 +654,19 @@ endm
 		--- < k > [initList(K:K, .List{K}) => .K] ...</ k >
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb [function-definition]: rule
+	mb [function-definition]: rule
 		--- < k > ['_`{_`}(typedDeclaration(T:Type, X:Id),, B:SeqList) => storeNew Closure(X:Id, T:Type, B:SeqList) atLoc Loc:Nat ~> calculateGotoMap(X:Id, B:SeqList) ~> skipval] ...</ k >
-		--- < env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		--- < genv >... [.Map => X:Id |-> Loc:Nat] ...</ genv >
-		--- < types >... [.Map => X:Id |-> T:Type] ...</ types >
-		--- < typedefs >... [.Map => X:Id |-> T:Type] ...</ typedefs >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- : KSentence [metadata "structural"] .
+		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) => 
+			storeNew functionObject(X:Id, T:Type, Block:K) atLoc Loc:Nat 
+			~> calculateGotoMap(X:Id, Block:K) 
+			~> skipval
+		...</ k >
+		< env >... (.).Map => X:Id |-> Loc:Nat ...</ env >
+		< genv >... (.).Map => X:Id |-> Loc:Nat ...</ genv >
+		< types >... (.).Map => X:Id |-> T:Type ...</ types >
+		< typedefs >... (.).Map => X:Id |-> T:Type ...</ typedefs >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		: KSentence [metadata "structural"] .
 		
 	--- --- fixme
 	--- --- this rule is necessary for now since it's possible for cil to generate two declarations inside of a pglobal (when it thinks something needs a prototype)
@@ -688,7 +711,7 @@ endm
 		--- < k > [computeStructType(K:K, T:Type, L:List{KResult}) => definedType(T:Type, K:K)] ...</ k >
 		--- < structs >... [.Map => K:K |-> L:List{KResult}] ...</ structs >
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 --- mod COMMON-LOCAL-DECLARATION is
 	--- including COMMON-INCLUDE .
@@ -704,14 +727,14 @@ endm
 		--- if M:Nat >Nat N:Nat .
 --- endm
 
---- mod MEMORY is
-	--- including COMMON-INCLUDE .
+mod MEMORY is
+	including COMMON-INCLUDE .
 	
 	--- --- location, result type, num bytes, result 
 	--- op readFromMem-aux : Nat Type K List{K} -> K [metadata "strict(3)"] .
 	--- eq readFromMem(N:Nat, T:Type) = readFromMem-aux(N:Nat, T:Type, sizeofType(T:Type), .List{K}) [metadata "structural"] .
 	
-	--- eq inc(loc(N:Nat, M:Nat)) = loc(inc(N:Nat), M:Nat) .
+	eq inc(sym(N:Nat) +Nat M:Nat) = sym(N:Nat +Nat 1) +Nat M:Nat .
 	--- eq sNat(loc(N:Nat, M:Nat)) = loc(N:Nat, sNat(M:Nat)) .
 	--- eq inc(N:Nat) = sNat(N:Nat) [owise] .
 	
@@ -754,9 +777,10 @@ endm
 		--- putBytesInMem(Loc:Nat, V:List{K}, T:Type, sizeofType(T:Type))] ...</ k >
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb [storeNew]: rule
-		--- < k > [storeNew V:Value atLoc Loc:Nat => alloc(Loc:Nat, sizeof(V:Value)) ~> store V:Value atLoc Loc:Nat] ...</ k >
-		--- : KSentence [metadata "structural"] .
+	
+	mb [storeNew]: rule
+		< k > storeNew V:Value atLoc Loc:Nat => alloc(Loc:Nat, sizeofExp(V:Value)) ~> store V:Value atLoc Loc:Nat ...</ k >
+		: KSentence [metadata "structural"] .
 		
 	--- mb [store-N-New]: rule
 		--- < k > [store Len:Nat New tv(N:Nat, ?) atLoc Loc:Nat => allocWithDefault(Loc:Nat, Len:Nat, N:Nat)] ...</ k >
@@ -935,7 +959,7 @@ endm
 		--- ) ...</ mem >
 		--- if known(Old:Nat)
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 mod C-SEMANTICS-MISC is
 	including COMMON-INCLUDE .
@@ -1161,7 +1185,7 @@ mod C-SEMANTICS-MISC is
 endm
 
 --- load common-c-conversions
---- load common-c-expressions
+load common-c-expressions
 --- load common-c-statements
 --- load common-c-standard-lib
 load common-c-typing
@@ -1170,18 +1194,21 @@ mod COMMON-C-SEMANTICS is
 	including COMMON-INCLUDE .
 	including C-SEMANTICS-MISC .
 	including COMMON-C-TYPING .
+	including COMMON-GLOBAL-DECLARATION .
+	including MEMORY .
+	
+	including COMMON-C-EXPRESSIONS .
 	
 	op eval : Program -> Bag .
 	op eval : Program List{K} String -> Bag .
 	
 	***(
-	including COMMON-GLOBAL-DECLARATION .
+	
 	including COMMON-LOCAL-DECLARATION .
 	including COMMON-C-STANDARD-LIBRARY .
 	including COMMON-PARAMETER-BINDING .
-	including MEMORY .
+
 	including COMMON-C-CONVERSIONS .
-	including COMMON-C-EXPRESSIONS .
 	including COMMON-C-STATEMENTS .
 	***)
 endm

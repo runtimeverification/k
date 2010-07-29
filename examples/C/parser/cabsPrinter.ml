@@ -122,19 +122,19 @@ and printDefs defs =
 and printDef def =
 	 (match def with
 		| FUNDEF (a, b, c, d) -> 
-			printDefinitionLocRange (wrap ((printSingleName a) :: (printBlock b) :: []) "FunDef") c d
+			printDefinitionLocRange (wrap ((printSingleName a) :: (printBlock b) :: []) "FunctionDefinition") c d
 		| DECDEF (a, b) -> 
-			printDefinitionLoc (wrap ((printInitNameGroup a) :: []) "DecDef") b
+			printDefinitionLoc (wrap ((printInitNameGroup a) :: []) "DeclarationDefinition") b
 		| TYPEDEF (a, b) ->
-			printDefinitionLoc (wrap ((printNameGroup a) :: []) "TypeDef") b
+			printDefinitionLoc (wrap ((printNameGroup a) :: []) "Typedef") b
 		| ONLYTYPEDEF (a, b) -> 
-			printDefinitionLoc (wrap ((printSpecifier a) :: []) "OnlyTypeDef") b
+			printDefinitionLoc (wrap ((printSpecifier a) :: []) "OnlyTypedef") b
 		| GLOBASM (a, b) ->
 			printDefinitionLoc (wrap (a :: []) "GlobAsm") b
 		| PRAGMA (a, b) ->
 			printDefinitionLoc (wrap ((printExpression a) :: []) "Pragma") b
 		| LINKAGE (a, b, c) ->
-			printDefinitionLoc (wrap (a :: (printDefs c) :: []) "OnlyTypeDef") b
+			printDefinitionLoc (wrap (a :: (printDefs c) :: []) "Linkage") b
 		| TRANSFORMER (a, b, c) ->
 			printDefinitionLoc (wrap ((printDef a) :: (printDefs b) :: []) "Transformer") c
 		| EXPRTRANSFORMER (a, b, c) ->

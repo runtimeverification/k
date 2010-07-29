@@ -134,7 +134,6 @@ mod COMMON-C-TYPING is
 	--- including COMMON-SEMANTICS-TYPE-STRICTNESS .
 	--- including COMMON-SEMANTICS-TYPE-DECLARATIONS .
 	
-	ops int void : -> Type .
 	mb rule
 		Int => int
 		: KSentence .
@@ -144,9 +143,25 @@ mod COMMON-C-TYPING is
 	mb rule
 		Specifier(T:Type) => T:Type
 		: KSentence .
+	mb rule
+		Type(T:Type, JustBase) => T:Type
+		: KSentence .
+	mb rule
+		Type(T:Type, functionCallType(L:List{Type})) => functionType(T:Type, L:List{Type})
+		: KSentence .
+		
+	op functionCallType : List{Type} -> Type .
+		
+	mb rule
+		Prototype(JustBase, L:List{Type}, false) => functionCallType(L:List{Type})
+		: KSentence .
+	
+	mb rule
+		TypedName(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
+		: KSentence .
 	
 	op TypedName : K K -> K [metadata "strict(2)"] .
-	op Type : K K -> K [metadata "hybrid strict(2)"] .
+	op Type : K K -> K [metadata "strict(2)"] .
 	
 	--- mb rule
 		--- Prototype(X:Id, K:K, ?, ?) => TypedName(X:Id, Type(T:Type, K:K))
@@ -162,14 +177,14 @@ mod COMMON-C-TYPING is
 		--- if declarators contains l(L:KLabel)
 		--- : KSentence [metadata "structural"] .
 	
+	op isAType_ : K -> Bool .
+	ceq isAType T:Type = true
+		if setOfTypes contains l(getKLabel(T:Type)) .
+	eq isAType T:BaseType = true .
 	***(
 	op normalizeType : K K -> K .
 	op typedef : K K -> K .
 	
-	op isAType_ : K -> Bool .
-	ceq isAType T:Type = true
-		if setOfTypes contains l(getKLabel(T:Type)) .
-	eq isAType T:Base-Type = true .
 	
 	--- fixme ignoring qualifiers
 	mb rule [qualifiedType(T:Type, ?) => T:Type] : KSentence [metadata "structural"] .
@@ -180,16 +195,24 @@ mod COMMON-C-TYPING is
 	mb rule [short => short-int] : KSentence [metadata "structural"] .
 	mb rule [long => long-int] : KSentence [metadata "structural"] .
 	mb rule [long-long => long-long-int] : KSentence [metadata "structural"] .
+	***)
 	
+	op evalToType : -> K .
+	op HOLE : -> K .
 	mb rule
-		< k > [typeof(E:Expression) => evalToType ~> typeof(HOLE)] ...</ k >
-		[.Bag => < type > E:Expression </ type >]
+		< k > typeof(E:Expression) => evalToType ~> typeof(HOLE) ...</ k >
+		((.).Bag => < type > E:Expression </ type >)
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [evalToType ~> typeof(HOLE) => T:Type] ...</ k >
-		[< type > T:Type </ type > => .Bag]
+		< k > evalToType ~> typeof(HOLE) => T:Type ...</ k >
+		(< type > T:Type </ type > => (.).Bag)
 		if isAType T:Type
 		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< type > functionObject(?, T:Type, ?) => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
+	***(
 	mb rule
 		< type > [F:Float => double] </ type >
 		: KSentence [metadata "structural"] .
@@ -234,9 +257,7 @@ mod COMMON-C-TYPING is
 		< structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
 		: KSentence [metadata "structural"] .
 
-	mb rule
-		< type > [Closure(?, T:Type, ?) => T:Type] ...</ type >
-		: KSentence [metadata "structural"] .
+
 	mb rule
 		< type > ['Pointer(Kp:KProper) => Kp:KProper ~> 'Pointer(HOLE)] ...</ type >
 		: KSentence [metadata "structural"] .

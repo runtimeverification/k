@@ -316,10 +316,10 @@ and enum_item = string * expression * cabsloc
 	 (* expression transformer: source and destination *)
 	 | EXPRTRANSFORMER of expression * expression * cabsloc
 ***)
-	op FunDef : K K -> PureDefinition [strict(1)]
-	op DecDef : K -> PureDefinition
-	op TypeDef : K -> PureDefinition
-	op OnlyTypeDef : K -> PureDefinition
+	op FunctionDefinition : K K -> PureDefinition [strict(1)]
+	op DeclarationDefinition : K -> PureDefinition
+	op Typedef : K -> PureDefinition
+	op OnlyTypedef : K -> PureDefinition
 	op GlobAsm : String -> PureDefinition
 	op Pragma : K -> PureDefinition
 	op Linkage : String List{C} -> PureDefinition
