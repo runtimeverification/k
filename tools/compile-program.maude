@@ -14,6 +14,8 @@ fmod COMPILE-PROGRAM is
   var Q : Qid .  var W : [Qid] .
   var C : Constant .
   var Tl : TypeList . var T T' T'' : Type .
+
+  op errorTrm : Term Type -> [Term] .
   
   op compileProgram : Module Module Qid ~> Module .
   eq compileProgram(Compiled, Syntax, Q)
@@ -22,7 +24,7 @@ fmod COMPILE-PROGRAM is
   op compileProgram : Module Module Qid Term ~> Module .
   eq compileProgram(Compiled, Syntax, Q, Trm)
    = addOps(missingConsts(getOps(Compiled), Trm),addImports(including getName(Compiled) .,addEqs(eq kApply(mkConstant(mkKLabel(Q), KLabel), empty) = Trm [none] ., addOps(op mkKLabel(Q) : nil -> KLabel [none] ., setName(emptySModule, qid(string(getName(Compiled)) + "-" + string(Q))))))) .
-  eq compileProgram(Compiled, Syntax, Q, error(Trm, T))
+  eq compileProgram(Compiled, Syntax, Q, errorTrm(Trm, T))
    = errorM(Trm, T, Q) .
 
 
@@ -46,14 +48,14 @@ ceq missingConsts(Ops, Q, T, Trms) = missingConsts(Ops, Trms)
 
   op compileProgram : Module Module OpDeclSet EquationSet Constant ~> Term .
   eq compileProgram(Compiled, Syntax, SyntaxOps, Eqs eq C = Trm [AS] ., C)
-   = compileProgram(Compiled, getWrappers(getOps(Compiled)), Syntax, SyntaxOps, leastSort(Syntax,Trm), sanityCheckT(Trm, Syntax)) .
+   = compileProgram(Compiled, getWrappers(getOps(Compiled)), Syntax, SyntaxOps, leastSort(Syntax,Trm), Trm, sanityCheckT(Trm, Syntax)) .
   
-  op compileProgram : Module OpDeclSet Module OpDeclSet Type Term ~> Term .
-  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm)
+  op compileProgram : Module OpDeclSet Module OpDeclSet Type Term Bool ~> Term .
+  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm, true)
    = if isListSort(T) then compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, getListConstructor(SyntaxOps, T), Trm)
      else compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T,  getWrapper(Compiled, Wrappers, leastSort(Syntax, Trm)), Trm) fi .
-  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, error(Trm, T'))
-   = error(Trm, T') .
+  eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm, error(Trm, T'))
+   = errorTrm(Trm, T') .
 
 
   op getWrapper : Module OpDeclSet Type ~> Qid .
@@ -93,7 +95,7 @@ ceq missingConsts(Ops, Q, T, Trms) = missingConsts(Ops, Trms)
                       ~> TermList .
   eq compileProgramTs(Compiled, Wrappers, Syntax, SyntaxOps, Tl T, (Trms, Trm))
    = compileProgramTs(Compiled, Wrappers, Syntax, SyntaxOps, Tl, Trms),
-     compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm) .
+     compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm, true) .
   eq compileProgramTs(Compiled, Wrappers, Syntax, SyntaxOps, nil, empty) 
    = empty .
 endfm
