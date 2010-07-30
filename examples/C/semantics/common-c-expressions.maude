@@ -78,38 +78,37 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 	
 	mb [function-application-pre]: rule
 		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) => application(read(Loc:Nat, T:Type), L:List{C}) ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:Value)) ...</ mem >
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "computational rule"] .
 		
 	--- --- fixme this is needed until we can pass a list of results to bind
 	--- --- mb context bind((?,, `[HOLE`]:K,, ?), ?) : KSentence .
 	--- --- needs to be done before call
-	
-	--- --- fixme: this must be a rule because of the rules associated with declaring local and bound variables
-	--- mb [function-application]: rule
-		--- < k > [
-			--- application(Closure(X:Id, functionType(R:Type, typedParameterList(P:List{KResult})), B:K), L:List{KResult}) ~> K:K 
-			--- => sequencePoint ~> bind(L:List{KResult}, P:List{KResult}) ~> B:K
-		--- ] </ k >
-		--- < currentFunction > [Fun:Id => X:Id] </ currentFunction >
+	op populateFromGlobal : -> K .
+	--- fixme: this must be a rule because of the rules associated with declaring local and bound variables
+	mb rule
+		< k > populateFromGlobal => (.).K ...</ k >
+		< genv > G:Map </ genv > < env > ? => G:Map </ env >
+		< typedefs > GT:Map </ typedefs > < types > ? => GT:Map </ types >
+		: KSentence [metadata "structural"] .
+		
+	mb [function-application]: rule
+		(< local >
+			< k > application(functionObject(X:Id, functionType(R:Type, P:List{Type}), B:K), L:List{C}) ~> K:K </ k >
+		C:Bag
+		</ local >
+		=>
+		< local >
+			< k > sequencePoint ~> populateFromGlobal ~> bind(L:List{C}, P:List{Type}) ~> B:K </ k >
+			< currentFunction > X:Id </ currentFunction >
+		...</ local >)
+		--- 
 		--- < env > [E:Map => G:Map] </ env >
 		--- < genv > G:Map </ genv >
-		--- < locals > [L:Bag => .Bag] </ locals >
 		--- < types > [T:Map => GT:Map] </ types >
 		--- < typedefs > GT:Map </ typedefs >
-		--- < loopStack > [LS:List => .List] </ loopStack >
-		--- < callStack > [.List => List(
-			--- < stackFrame > 
-				--- < currentFunction > Fun:Id </ currentFunction >
-				--- < continuation > K:K </ continuation >
-				--- < locals > L:Bag </ locals >
-				--- < env > E:Map </ env >
-				--- < types > T:Map </ types >
-				--- < loopStack > LS:List </ loopStack >
-			--- </ stackFrame >
-			--- )] ...</ callStack >
-		--- : KSentence [metadata "computational rule"] . --- nondet
+		< callStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ callStack >
+		: KSentence [metadata "computational rule"] . --- nondet
 endm
 
 --- mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is

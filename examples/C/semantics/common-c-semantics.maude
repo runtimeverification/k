@@ -136,7 +136,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 		l('qualifiedType)
 	) .
 	
-	--- op bind : List{KResult} List{KResult} -> K . --- should be kresult in both arguments, but awkward kind
+	op bind : List{C} List{Type} -> K .
 	--- op typedField : Type Id -> KResult .
 	--- op declare : K K -> K [metadata "strict(1)"] .
 	--- op converted : K K -> K .
@@ -201,7 +201,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op application : K List{C} -> K [metadata "strict(1)"] .
 	--- op case : K BaseValue -> K .
 	--- op defaultCase : K -> K .
-	--- op sequencePoint : -> K .
+	op sequencePoint : -> K .
 	
 	op min : Type -> Int [memo] .
 	op max : Type -> Int [memo] .
@@ -489,17 +489,19 @@ mod COMMON-INCLUDE is
 	including COMMON-SEMANTIC-SYNTAX .	
 endm
 
---- mod COMMON-PARAMETER-BINDING is
-	--- including COMMON-INCLUDE .
+mod COMMON-PARAMETER-BINDING is
+	including COMMON-INCLUDE .
 
+	--- i think technically this isn't correct; void gives additional information over empty
 	--- mb [void-to-id]: rule
 		--- [Parameter-Declaration(void) => .List{Parameter}] : KSentence [metadata "structural"] .
 	
-	--- --- empty binding
-	--- --- fixme not really a sequence point
-	--- mb [bind-empty]: rule 
-		--- < k > [bind(.List{K}, .List{K}) => sequencePoint] ...</ k > 
-		--- : KSentence [metadata "structural"] .
+	--- empty binding
+	--- fixme not really a sequence point
+	mb [bind-empty]: rule
+		< k > bind(.List{K}, typedDeclaration(void, ?)) => sequencePoint ...</ k > 
+		---x (.).K 
+		: KSentence [metadata "structural"] .
 	--- --- bind one
 	--- --- consider same variable name
 	--- mb rule
@@ -608,7 +610,7 @@ endm
 			--- bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
 		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
 		--- : KSentence [metadata "structural"] .	
---- endm
+endm
 
 mod COMMON-GLOBAL-DECLARATION is
 	including COMMON-INCLUDE .
@@ -751,32 +753,59 @@ mod MEMORY is
 	op extractBitsFromMem : Nat Nat -> K . --- loc, size in bits
 	op extractBytesFromMem : Nat Nat -> K . --- loc, size in bytes
 	op extractByteFromMem : Nat -> K .
-	op extractBitsFromList : K Nat -> K [metadata "strict(1)"] . --- data, size in bits
+	op extractBitsFromList : K Nat Nat -> K [metadata "strict(1)"] . --- data, offset in bits, size in bits
+	op getBitOffset : Nat -> Nat .
+	eq getBitOffset(? +Nat bito(M:Nat)) = M:Nat .
+	eq getBitOffset(?) = 0 [owise] .
+	
+	mb rule
+		< k > extractBitsFromList(dataList((functionObject(X:Id, T:Type, K:K))), 0, N:Nat) => functionObject(X:Id, T:Type, K:K) ...</ k >
+		if N:Nat ==Bool numBitsPerByte
+		: KSentence [metadata "structural"] .
+	
 	mb rule
 		< k > read(Loc:Nat, T:Type) => interpret(T:Type, extractBitsFromMem(Loc:Nat, bitSizeofType(T:Type))) ...</ k >
 		: KSentence [metadata "structural"] .
+	
+	eq interpret(T:Type, functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
 	
 	op floorLoc : Nat -> Nat . --- loc with possible bit offset returning base byte
 	eq floorLoc(sym(N:Nat) +Nat bito(M:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat .
 	eq floorLoc(sym(N:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat [owise] .
 	
 	mb rule
-		< k > extractBitsFromMem(Loc:Nat, Size:Nat) => extractBitsFromList(extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(Size:Nat)), Size:Nat) ...</ k >
+		< k > extractBitsFromMem(Loc:Nat, Size:Nat) => extractBitsFromList(extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(Size:Nat)), getBitOffset(Loc:Nat), Size:Nat) ...</ k >
 		: KSentence [metadata "structural"] .
 	
-	--- mb context extractBytesFromMem-aux(?, ?, (?,, `[HOLE`]:K,, ?)) : KSentence .
-	op extractBytesFromMem-aux : Nat Nat List{K} -> K . --- loc, size in bytes, aux list
+	mb context extractBytesFromMem-aux(?, ?, (?,, `[HOLE`]:K,, ?)) : KSentence .
+	--- this next op should use Nats, but the context doesn't allow it.  See issue 54
+	op extractBytesFromMem-aux : K K List{K} -> K . --- loc, size in bytes, aux list
 	
 	mb rule
 		< k > extractBytesFromMem(Loc:Nat, Size:Nat) => extractBytesFromMem-aux(Loc:Nat, Size:Nat, .List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > extractBytesFromMem-aux(Loc:Nat, sNat(Size:Nat), Aux:List{K})
 			=> extractBytesFromMem-aux(sNat(Loc:Nat), Size:Nat, (Aux:List{K},, extractByteFromMem(Loc:Nat)))
 		...</ k >
-		--- < mem >... Block:Nat |-> memblock(Size:Nat, (? Offset:Nat |-> N:Nat)) ...</ mem >
-		--- < locsWrittenTo > Locs:Bag </ locsWrittenTo >
-		--- if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
+		: KSentence [metadata "structural"] .
+		
+	---op combineData : List{KResult} -> K .
+	op dataList : List{KResult} -> KResult .
+	
+	---eq combineData(functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
+	
+	mb rule
+		< k > extractBytesFromMem-aux(?, 0, Aux:List{KResult}) => dataList(Aux:List{KResult}) ...</ k >
+		: KSentence [metadata "structural"] .
+	
+	op rawData : BaseValue Nat -> KResult .
+	mb rule
+		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => V:Value ...</ k >
+		< mem >... Block:Nat |-> memblock(Size:Nat, (? Offset:Nat |-> V:Value)) ...</ mem >
+		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
+		if notBool(sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
 		: KSentence [metadata "structural"] .
 	
 	--- mb [read-byte]: rule
@@ -1057,10 +1086,10 @@ mod C-SEMANTICS-MISC is
 		--- < types >... enum(X:Id) |-> T:Type ...</ types > 
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb rule
-		--- < k > [sequencePoint => .K] ...</ k >
-		--- < locsWrittenTo > [? => .Bag] </ locsWrittenTo >
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > sequencePoint => (.).K ...</ k >
+		< locsWrittenTo > ? => (.).Bag </ locsWrittenTo >
+		: KSentence [metadata "structural"] .
 		
 	--- --- need to be careful about simplifying these into one rule because there may be variables with the same name as a typedef?
 	--- mb rule 
@@ -1253,6 +1282,7 @@ mod COMMON-C-SEMANTICS is
 	including MEMORY .
 	including COMMON-C-STATEMENTS .
 	including COMMON-C-EXPRESSIONS .
+	including COMMON-PARAMETER-BINDING .
 	
 	op eval : Program -> Bag .
 	op eval : Program List{K} String -> Bag .
@@ -1261,8 +1291,6 @@ mod COMMON-C-SEMANTICS is
 	
 	including COMMON-LOCAL-DECLARATION .
 	including COMMON-C-STANDARD-LIBRARY .
-	including COMMON-PARAMETER-BINDING .
-
 	including COMMON-C-CONVERSIONS .
 	***)
 endm
