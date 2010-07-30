@@ -1176,8 +1176,16 @@ mod LATEX-PRINT-LOOP is including LOOP-MODE + LATEX-PRINT-META .
   eq latex-print = [nil, idle, 'Usage: 'print '<Name> '.] .
 
   op error : -> [Module] .
+---(
   rl ['print Q QIL, idle, QIL'] 
    => [QIL, idle, latexPrint(Q)] .
+---)
 
+  rl [Q QIL, idle, QIL'] 
+   => [nil, idle, handle(Q QIL)] .
+
+  op handle : QidList -> QidList .
+  eq handle('print Q QIL) = latexPrint(Q) .
+  eq handle(QIL) = QIL [owise] .
 endm
 

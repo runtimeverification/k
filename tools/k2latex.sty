@@ -13,7 +13,17 @@
 \usetikzlibrary{decorations.pathmorphing}
 \usepackage{ucs}
 \usepackage{ifthen}
+\usepackage{calc}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\setlength{\headheight}{14pt}
+\fancyhf{}
+\fancyhead[L]{\underline{\footnotesize\tt Page \thepage{}}}
+\renewcommand{\headrulewidth}{0pt} 
+\renewcommand{\footrulewidth}{0pt}
 
+
+\newlength{\syntaxlength}
 \definecolor{Grey}{rgb}{0.8,0.8,0.8}
 \newcommand{\nothing}{}
 \newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
@@ -23,7 +33,7 @@
 \newcommand{\kcontext}[2]{\par\textsc{context:
 }$#2$}
 \newcommand{\syntax}[3]{\par $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
-\newcommand{\syntaxCont}[3]{\par ${\color{white}#1::\;}\mid{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
+\newcommand{\syntaxCont}[3]{\par $\setlength{\syntaxlength}{\widthof{$#1::\;$}}\hspace{\syntaxlength}\mid{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
 \newcommand{\cellDecl}[2]{\par \textsc{cell:
 }$#1$ wraps $#2$}
 \newcommand{\nonTerminal}[1]{\textit{#1}\/}

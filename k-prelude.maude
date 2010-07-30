@@ -205,7 +205,7 @@ endm
 mod K-DESTRUCTORS is
   including K-TECHNIQUE .
   op getKLabel_ : K -> KLabel [metadata "latex(renameTo getKLabel\\mybracket{_})"] .
-  op getList`{K`}_ : K -> List{K} .
+  op getList`{K`}_ : K -> List{K} [metadata "latex(renameTo _)"]  .
   var L : KLabel .  var Ks : List{K} .
   eq getKLabel(L(Ks)) = L .
   eq getList{K}(L(Ks)) = Ks .
