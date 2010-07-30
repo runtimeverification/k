@@ -499,7 +499,7 @@ mod COMMON-PARAMETER-BINDING is
 	--- empty binding
 	--- fixme not really a sequence point
 	mb [bind-empty]: rule
-		< k > bind(.List{K}, typedDeclaration(void, ?)) => sequencePoint ...</ k > 
+		< k > bind(Nil, typedDeclaration(void, ?)) => sequencePoint ...</ k > 
 		---x (.).K 
 		: KSentence [metadata "structural"] .
 	--- --- bind one
@@ -1252,6 +1252,7 @@ mod C-SEMANTICS-MISC is
 	eq klistToK((K:K,, L:List{K})) = K:K ~> klistToK(L:List{K}) .
 	eq klistToK((K:K)) = K:K .
 	eq klistToK(.) = . .
+	eq klistToK(.List{K}) = . .
 	
 	eq CabsLoc("cabs loc unknown", -10, -10, 0) = UnknownCabsLoc .
 	
@@ -1265,6 +1266,10 @@ mod C-SEMANTICS-MISC is
 	mb rule
 		< k > DefinitionLocRange(K:K, L1:CabsLoc, L2:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L1:CabsLoc </ currentProgramLoc >
+		: KSentence .
+	mb [StatementLoc] : rule
+		< k > StatementLoc(K:K, L:CabsLoc) => K:K ...</ k >
+		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
 endm
 

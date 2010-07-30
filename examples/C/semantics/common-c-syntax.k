@@ -350,7 +350,7 @@ and statement =
 ***)
 	op Break : -> PureStatement
 	op Continue : -> PureStatement
-	op Return : K -> PureStatement
+	op Return : K -> PureStatement [strict]
 ***(
 	| SWITCH of expression * statement * cabsloc
 	| CASE of expression * statement * cabsloc

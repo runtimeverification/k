@@ -102,12 +102,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 			< k > sequencePoint ~> populateFromGlobal ~> bind(L:List{C}, P:List{Type}) ~> B:K </ k >
 			< currentFunction > X:Id </ currentFunction >
 		...</ local >)
-		--- 
-		--- < env > [E:Map => G:Map] </ env >
-		--- < genv > G:Map </ genv >
-		--- < types > [T:Map => GT:Map] </ types >
-		--- < typedefs > GT:Map </ typedefs >
-		< callStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ callStack >
+		< callStack > (.).List => List(< stackFrame > C:Bag < k > K:K </ k > </ stackFrame >) ...</ callStack >
 		: KSentence [metadata "computational rule"] . --- nondet
 endm
 

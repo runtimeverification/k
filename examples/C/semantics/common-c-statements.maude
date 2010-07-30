@@ -256,8 +256,9 @@ mod COMMON-C-STATEMENTS is
 	--- --- skip labels
 	--- mb [skip-label]: rule < k > [L:Id : S:Statement => S:Statement] ...</ k > : KSentence [metadata "structural"] .
 	
-	--- --- dissolve blocks
-	--- mb [dissolve-block]: rule < k > [Block(B:SeqList) => B:SeqList] ...</ k > : KSentence [metadata "structural"] .
+	--- dissolve blocks
+	--- FIXME need to handle scope
+	mb [dissolve-block]: rule < k > Block(?, Dec:List{C}, S:List{C}) => listToK(Dec:List{C}) ~> listToK(S:List{C}) ...</ k > : KSentence [metadata "structural"] .
 
 	--- --- dissolve expression statements that are finished evaluating
 	--- mb [value-statement]: rule < k > [V:Value ; => sequencePoint] ...</ k > : KSentence [metadata "structural"] .
