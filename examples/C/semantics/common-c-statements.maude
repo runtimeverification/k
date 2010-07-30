@@ -172,20 +172,15 @@ mod COMMON-SEMANTICS-GOTO is
 		--- : KSentence [metadata "structural"] .
 endm
 
---- mod COMMON-SEMANTICS-RETURN is
-	--- including COMMON-INCLUDE .
+mod COMMON-SEMANTICS-RETURN is
+	including COMMON-INCLUDE .
 	
-	--- --- fixme can be combined into one cleaning rule
-	--- mb [return-value-clean-local]: rule 
-		--- < k > return V:Value ; ...</ k >
-		--- < locals >... [BagItem(loc(Block:Nat, ?)) => .Bag] ...</ locals >	
-		--- < mem >... [Block:Nat |-> ? => .Map] ...</ mem >
-		--- : KSentence [metadata "structural"] .
-	--- mb [return-clean-local]: rule 
-		--- < k > return ; ...</ k >
-		--- < locals >... [BagItem(loc(Block:Nat, ?)) => .Bag] ...</ locals >	
-		--- < mem >... [Block:Nat |-> ? => .Map] ...</ mem >
-		--- : KSentence [metadata "structural"] .
+	--- fixme can be combined into one cleaning rule
+	mb [return-value-clean-local]: rule 
+		< k > Return(?) ...</ k >
+		< locals >... BagItem(sym(Block:Nat) +Nat ?) => (.).Bag ...</ locals >	
+		< mem >... Block:Nat |-> ? => (.).Map ...</ mem >
+		: KSentence [metadata "structural"] .
 
 	--- --- this is used for threads
 	--- mb [return-nostack]: rule 
@@ -194,50 +189,24 @@ endm
 		--- if L:KLabel ==Bool 'return`;
 		--- orBool L:KLabel ==Bool 'return_;
 		--- : KSentence [metadata "structural"] .
-		
-	--- --- fixme shouldn't there be sequence points here?
-	--- mb [return]: rule 
-		--- < k > [return ; ~> ? => skipval ~> K:K] </ k >
-		--- < env > [? => E:Map] </ env >
-		--- < locals > [.Bag => L:Bag] </ locals >
-		--- < loopStack > [? => LS:List] </ loopStack >
-		--- < types > [? => T:Map] </ types >
-		--- < currentFunction > [? => X:Id] </ currentFunction >
-		--- < callStack >
-			--- [List(
-				--- < stackFrame >...
-					--- < currentFunction > X:Id </ currentFunction >
-					--- < continuation > K:K </ continuation >
-					--- < locals > L:Bag </ locals >
-					--- < env > E:Map </ env >
-					--- < loopStack > LS:List </ loopStack >
-					--- < types > T:Map </ types >
-				--- </ stackFrame >
-			--- ) => .List]
-		--- ...</ callStack >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb [return-value]: rule 
-		--- < k > [return V:Value ; ~> ? => sequencePoint ~> V:Value ~> K:K] </ k >
-		--- < env > [? => E:Map] </ env >
-		--- < locals > [.Bag => L:Bag] </ locals >
-		--- < loopStack > [LS':List => LS:List] </ loopStack >
-		--- < types > [? => T:Map] </ types >
-		--- < currentFunction > [? => X:Id] </ currentFunction >
-		--- < callStack >
-			--- [List(
-				--- < stackFrame >...
-					--- < currentFunction > X:Id </ currentFunction >
-					--- < continuation > K:K </ continuation >
-					--- < locals > L:Bag </ locals >
-					--- < env > E:Map </ env >
-					--- < loopStack > LS:List </ loopStack >
-					--- < types > T:Map </ types >
-				--- </ stackFrame >
-			--- ) => .List]
-		--- ...</ callStack >
-		--- : KSentence [metadata "structural"] .
---- endm
+			
+	mb [return-value]: rule 
+		< local >
+			< k > Return(V:Value) ~> ? => sequencePoint ~> V:Value ~> K:K </ k >
+			< locals > (.).Bag => L:Bag </ locals >
+			(? => C:Bag)
+		</ local >
+		< callStack >
+			List(
+				< stackFrame >
+					C:Bag
+					< continuation > K:K </ continuation >
+					< locals > L:Bag </ locals >
+				</ stackFrame >
+			) => (.).List
+		...</ callStack >
+		: KSentence [metadata "structural"] .
+endm
 
 mod COMMON-C-STATEMENTS is
 	including COMMON-INCLUDE .
@@ -245,7 +214,7 @@ mod COMMON-C-STATEMENTS is
 	--- including COMMON-SEMANTICS-WHILE .
 	--- including COMMON-SEMANTICS-SWITCH .
 	including COMMON-SEMANTICS-GOTO .
-	--- including COMMON-SEMANTICS-RETURN .
+	including COMMON-SEMANTICS-RETURN .
 			
 	--- mb rule [EmptyStatement ; => .K] : KSentence [metadata "structural"] .
 	--- mb rule [Block`(`) => .K] : KSentence [metadata "structural"] .

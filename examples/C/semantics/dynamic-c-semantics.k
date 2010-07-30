@@ -135,14 +135,14 @@ kmod DYNAMIC-C-SEMANTICS is
 	mb [terminate-thread]: rule
 		[< thread >... < k > .K </ k > ...</ thread > => .Bag]
 		: KSentence [metadata "structural"] .
-		
-	mb [terminate]: rule 
-		[< T >... < threads > < thread >... < k > V:Value </ k > ...</ thread > </ threads > ...</ T >
-		=> < resultValue > V:Value </ resultValue >]
+	***)		
+	--- [terminate]
+	rule 
+		(< T >... < threads > < thread >... < k > V:Value </ k > ...</ thread > </ threads > ...</ T >
+		=> < resultValue > V:Value </ resultValue >)
 		< files >...
-			["stdin" |-> S1:String	"stdout" |-> S2:String => .Map]
+			"stdin" |-> S1:String	"stdout" |-> S2:String => .Map
 		...</ files >
-		[.Bag => < input > S1:String </ input >	< output > S2:String </ output >]
-		: KSentence .
-	***)
+		(.Bag => < input > S1:String </ input >	< output > S2:String </ output >)
+
 endkm
