@@ -6,18 +6,18 @@ endm
 mod COMMON-SEMANTICS-SIZEOF is
 	including COMMON-INCLUDE .
 
-	eq calcSizeofType(T:Type) = tv(sizeofType(T:Type), cfg:sizeut) .
+	eq sizeofType(T:Type) = tv(byteSizeofType(T:Type), cfg:sizeut) .
 	mb rule
-		< k > sizeofExp(E:Expression) => calcSizeofType(typeof(E:Expression)) ...</ k >
+		< k > sizeofExp(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > sizeofType(arrayType(T:Type, N:Nat)) => sizeofType(T:Type) *Nat N:Nat ...</ k >
+		< k > bitSizeofType(arrayType(T:Type, N:Nat)) => bitSizeofType(T:Type) *Nat N:Nat *Nat numBitsPerByte ...</ k >
 		: KSentence [metadata "structural"] .
 	--- mb rule 
 		--- sizeofType(bitfieldType(T:Type, N:Nat)) => N:Nat /Rat 8
 		--- : KSentence [metadata "structural"] .
 	--- fixme not really, but used for allocating functions
-	mb rule sizeofType(functionType(?, ?)) => 1 : KSentence [metadata "structural"] .
+	mb rule bitSizeofType(functionType(?, ?)) => numBitsPerByte : KSentence [metadata "structural"] .
 	
 	--- ---C99 6.2.6.1:26 ... Each unqualified type has several qualified versions of its type,40) corresponding to the combinations of one, two, or all three of the const, volatile, and restrict qualifiers. The qualified or unqualified versions of a type are distinct types that belong to the same type category and have the same representation and alignment requirements. ...
 	--- eq sizeofType(qualifiedType(T:Type, ?)) = sizeofType(T:Type) .	
