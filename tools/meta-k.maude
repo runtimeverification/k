@@ -77,8 +77,10 @@ fmod META-K-MODULE is
   eq KLabel = 'KLabel .  eq KHybridLabel = 'KHybridLabel .
   eq KProperLabel = 'KProperLabel .  eq KResultLabel = 'KResultLabel .
   eq ResultList = 'List`{KResult`} .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeList`{KResult`} .  eq KList = 'List`{K`} .  eq NeKList = 'NeList`{K`} .
-  op ksorts : -> SortSet [memo] .
+  ops ksorts klabelsorts : -> SortSet [memo] .
   eq ksorts = KProper ; KResult ; NeK ; K .
+  
+  eq klabelsorts = KProperLabel ; KResultLabel ; KLabel ; KHybridLabel .
 
   op klistSorts : -> SortSet [memo] .
   eq klistSorts = NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
@@ -97,6 +99,13 @@ fmod META-K-MODULE is
     subsort KResult < K .
     subsort NeK < K .
     subsort Builtins < NeK .
+    ) .
+
+  op klabelsubsorts : -> SubsortDeclSet [memo] .
+  eq klabelsubsorts = (
+    subsort KProperLabel < KLabel .
+    subsort KResultLabel < KLabel .
+    subsort KHybridLabel < KLabel .
     ) .
 
   op ksupersorts : -> SubsortDeclSet [memo] .
@@ -130,8 +139,10 @@ fmod META-K-MODULE is
   ) .
 
  op pseudoKSubsorts : SubsortDeclSet -> SubsortDeclSet .
- eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) . 
-
+ eq pseudoKSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,ksubsorts), ksorts) .
+ 
+ op pseudoKLabelSubsorts : SubsortDeclSet -> SubsortDeclSet .
+ eq pseudoKLabelSubsorts(SSDS) = getSubsorts(removeSubsorts(SSDS,klabelsubsorts), klabelsorts) . 
 
  op maximalKSubsorts : Module -> SubsortDeclSet .
  eq maximalKSubsorts(M)
