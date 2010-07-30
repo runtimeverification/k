@@ -566,7 +566,10 @@ fmod META-K-LEAST-SORTS is
  eq leastSortsT(M, Trm, TlSK) = leastSortsT(M, Trm, none, TlSK) [print "Finding sorts for " Trm] .
  eq leastSortsT(M, Trm, SS, Tl ; TlSK) 
   = leastSortsT(M, Trm, $leastSortsT(M, Trm, Tl), SS, TlSK) [print "Checking " Tl] . 
- eq leastSortsT(M, Trm, SS, TlSK) = if SS == none then errorT(Trm, leastSort(M,Trm)) else SS fi [print "sorts " SS " found for " Trm " unchecked " TlSK] .
+ 
+ eq leastSortsT(M, Trm, NSS, TlSK) = NSS [print "sorts " NSS " found for " Trm] .
+ eq leastSortsT(M, Trm, none, errorT(Trm',T) ; TlSK) = errorT(Trm',T) .
+ eq leastSortsT(M, Trm, none, TlSK) = errorT(Trm, leastSort(M,Trm)) [owise print "no sorts found. generating error. unchecked " TlSK] .
 
  eq leastSortsT(M, Trm, SS, SS', TlSK) = leastSortsT(M, Trm, SS ; SS', TlSK) [print "found sorts " SS] .
  eq leastSortsT(M, Trm, SS:[SortSet], SS', TlSK) 
