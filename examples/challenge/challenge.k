@@ -173,7 +173,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <agents_><k>haltSystem;<_/k><_/agents>=> <agents>.Bag</agents>
 
 --- Code generation (via reflection)
-  syntax KLabel ::= quoteit[ Nat ] [latex "{\it quote}_{\scriptsize{#1}}"]
+  syntax KLabel ::= quoteit[ Nat ] [latex "{\it quote}_{\scriptstyle{#1}}"]
                   | box ( KLabel ) [latex "\framebox{#1}"]
   syntax Val ::= code ( List{K} ) [latex "{\it code}({#1})"]
   syntax K ::= K box(~>) K [latex "{#1}\framebox{$\kra$}{#2}" strict]
