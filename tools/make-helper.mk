@@ -41,7 +41,12 @@ png: $(PNG_FILES)
 
 $(PNG_FILES): $(LATEX_FILE)
 	latex $(MAIN_FILE)
-	dvipng $(MAIN_FILE)
+	rm -f $(MAIN_FILE)-picture-*.png
+	rm -f $(MAIN_FILE)-picture-*.eps
+	dvips -E -i -D 150 $(MAIN_FILE) -o $(MAIN_FILE)-picture-
+	find . -iname "$(MAIN_FILE)-picture-*" -exec mv {} {}.eps \;
+	find . -iname "$(MAIN_FILE)-picture-*.eps" -exec gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pngalpha -r150 -sOutputFile={}.png {} \;
+	rm $(MAIN_FILE)-picture-*.eps
 
 crop-pdf: ${CROP_PDF_FILE}
 	
