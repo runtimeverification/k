@@ -34,9 +34,6 @@ $(LATEX_FILE):  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 
 pdf: $(PDF_FILE)
 	
-$(PDF_FILE): $(LATEX_FILE) 
-	pdflatex $(MAIN_FILE)
-
 png: $(PNG_FILES)
 
 $(PNG_FILES): $(LATEX_FILE)
@@ -53,9 +50,11 @@ crop-pdf: ${CROP_PDF_FILE}
 $(CROP_PDF_FILE): $(LATEX_FILE)
 	latex $(MAIN_FILE)
 	dvips -E -i $(MAIN_FILE) -o eps
-	find . -iname "eps*" -exec mv {} {}.eps \;
-	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls eps*.eps`
+	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls eps*`
 	rm eps*
+
+$(PDF_FILE): $(CROP_PDF_FILE) 
+	nice-pdf.sh $(MAIN_FILE)
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
 test: $(COMPILED_FILE) $(addprefix test-,$(TESTS))
