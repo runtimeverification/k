@@ -1,6 +1,6 @@
 --- This file needs to be processed by the K-Maude tool
 
-in ../../k-prelude
+in ../../../k-prelude
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
   syntax AExp ::= Id | Int
