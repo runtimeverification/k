@@ -6,7 +6,7 @@ mod SANITY-CHECKS-META is
   including MODULE-META-PRETTY-PRINT .
   including META-MODULE-EXTRAS .
   var NoInSane : String .  var Flat M : Module .  var MM : [Module] .
-  var Trm : Term . var T : Type .  var Mb : MembAx . var Eq : Equation . var Rl : Rule .
+  var Trm : Term . var T : Type .  var Mb : MembAx . var Eq : Equation . var Rl : Rule . var N : Nat .  var Op : OpDecl .
   var Q QNoInSane : Qid . 
   op sanityChecks : String ~> Module .
   eq sanityChecks(NoInSane) = sanityChecks(qid(NoInSane)) .
@@ -23,11 +23,17 @@ mod SANITY-CHECKS-META is
   eq error(Rule, Term, Type)
    = '\r 'Error: '\o 'The 'sanity 'checks 'phase 'of 'compilation 'failed 'for Rule '. '\n '\s '\s 'Term '\n '\t '\r Term '\o '\n '\s '\s 'does 'not 'parse 'to 'a 'sort 'but 'rather 'to 'kind '\n '\t '\r Type '\o '. '\n '\s '\s 'Please 'resolve 'that 'before 'continuing. .
 
+  op errorOp : QidList QidList -> QidList .
+  eq errorOp(Rule, Type)
+   = '\r 'Error: '\o  'The 'sanity 'checks 'phase 'of 'compilation 'failed 'for Rule 'Sort '\r Type '\o 'is 'not 'subsorted 'to 'K '. '\n '\s '\s 'Please 'resolve 'that 'before 'continuing. .
+
   op extractError : Module [Module] -> QidList .
   eq extractError(Flat, errorM(Trm, T, Q)) 
    = error('rule '\g Q '\o,  metaPrettyPrint(Flat, Trm), T) .
   eq extractError(Flat, errorMMb(Trm, T, Mb)) 
    = error('\g eMetaPrettyPrint(Flat, Mb, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
+  eq extractError(Flat, errorMOp(T, N, Op))
+   = errorOp('\n '\s eMetaPrettyPrint(Flat,Op) '\o, T) .
   eq extractError(Flat, errorMEq(Trm, T, Eq)) 
    = error('\g eMetaPrettyPrint(Flat, Eq, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
   eq extractError(Flat, errorMRl(Trm, T, Rl)) 

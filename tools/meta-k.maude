@@ -390,7 +390,8 @@ fmod META-ANONYMOUS-VARIABLE is
 endfm
 
 fmod META-K-WRAPPERS is
-  including META-LEVEL .
+  including META-LEVEL-EXTRAS .
+  including META-K-MODULE .
   vars T T' : Type . var Q : Qid . var AS : AttrSet . var OPDS : OpDeclSet .
 
   op builtin-wrappers : -> OpDeclSet [memo] .
@@ -406,6 +407,16 @@ fmod META-K-WRAPPERS is
   op mkSubsortWrapper : Type Type -> Qid .
   eq mkSubsortWrapper(T,T') 
    = qid(string(T) + "_") .
+
+  op isWrapped : Module Type -> Bool [memo] .
+  eq isWrapped(M, T) = T in (klabelsorts ; 'CellLabel ; 'Bag ; 'BagItem ; 'Set ; 'SetItem ; 'List ; 'ListItem ; 'Map ; 'MapItem ; 'List`{K`}) 
+     or-else isWrapped(getWrappers(getOps(flatten(M))), T) .
+
+  op isWrapped : OpDeclSet Type -> Bool .
+  eq isWrapped(OPDS (op Q : T -> T' [AS] .), T) = true .
+  eq isWrapped(OPDS, T) = false [owise] .
+
+  var M : Module . var Op : OpDecl . 
 endfm
 
 
