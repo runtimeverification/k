@@ -721,7 +721,7 @@ endm
 mod PL-STRING is
   protecting PL-INT .
   sorts String Char FindResult .
-  subsort Char < String . --- < Builtins .
+  subsort Char < String < Builtins .
 ---  subsort Int < FindResult .
 
 *** pseudo constructor for the infinite set of strings
