@@ -1,13 +1,13 @@
 #!/bin/bash
 MAIN_FILE=$1
-W=$(identify -format "%[fx:w/72]\n" $MAIN_FILE-crop.pdf | sort -n| tail -1)
-H=$(identify -format "%[fx:h/72]\n" $MAIN_FILE-crop.pdf | sort -n| tail -1)
+W=$(gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=bbox $MAIN_FILE-crop.pdf 2>&1 |grep %%BoundingBox |sed 's/.* \([0-9]*\) [0-9]*$/\1/' |sort -n|tail -1)
+H=$(gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=bbox $MAIN_FILE-crop.pdf 2>&1 |grep %%BoundingBox |sed 's/.* \([0-9]*\)$/\1/' |sort -n | tail -1)
 echo "
 \documentclass{article}
 \usepackage{pdfpages}
-\usepackage[papersize={${W}in,${H}in}]{geometry}
+\usepackage[papersize={${W}px,${H}px}]{geometry}
 
 \begin{document}
-\includepdf[pages=-,templatesize={${W}in}{${H}in}]{$MAIN_FILE-crop}
+\includepdf[pages=-,templatesize={${W}px}{${H}px}]{$MAIN_FILE-crop}
 \end{document}
 " | pdflatex --jobname=$MAIN_FILE
