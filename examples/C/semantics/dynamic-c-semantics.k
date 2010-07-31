@@ -136,8 +136,7 @@ kmod DYNAMIC-C-SEMANTICS is
 		[< thread >... < k > .K </ k > ...</ thread > => .Bag]
 		: KSentence [metadata "structural"] .
 	***)		
-	--- [terminate]
-	rule 
+	rule [terminate] :
 		(< T >... < threads > < thread >... < k > V:Value </ k > ...</ thread > </ threads > ...</ T >
 		=> < resultValue > V:Value </ resultValue >)
 		< files >...

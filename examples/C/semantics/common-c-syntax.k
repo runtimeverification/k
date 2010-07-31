@@ -207,14 +207,14 @@ and decl_type =
 ***)
 	op JustBase : -> KResult
 	op ParenType : List{C} K List{C} -> DeclType
-	op Array : K List{C} K -> DeclType
+	op ArrayType : K List{C} K -> DeclType
 	op PointerType : List{C} K -> DeclType
 	op Prototype : K List{C} Bool -> DeclType [strict(1 2)]
 	
 ***(
 and name_group = specifier * name list
 ***)
-	op NameGroup : K List{C} -> NameGroup
+	op NameGroup : K List{C} -> NameGroup [strict(1 2)]
 	
 ***(
 	(* The optional expression is the bitfield *)
@@ -229,7 +229,7 @@ and field_group = specifier * (name * expression option) list
 	(* e.g.: int x=1, y=2; *)
 and init_name_group = specifier * init_name list
 ***)
-	op InitNameGroup : K List{C} -> InitNameGroup
+	op InitNameGroup : K List{C} -> InitNameGroup [strict(1)]
 	
 ***(
 	(* The decl_type is in the order in which they are printed. Only the name of
@@ -247,7 +247,7 @@ and name = string * decl_type * attribute list * cabsloc
 	(* A variable declarator ("name") with an initializer *)
 and init_name = name * init_expression
 ***)
-	op InitName : K K -> InitName
+	op InitName : K K -> InitName [strict(2)]
 	
 ***(
 	(* Single names are for declarations that cannot come in groups, like
@@ -267,7 +267,7 @@ and enum_item = string * expression * cabsloc
 	*)
 	and definition =
 	   FUNDEF of single_name * block * cabsloc * cabsloc
-	 | DECDEF of init_name_group * cabsloc        (* global variable(s), or function prototype *)
+	 | DECDEF of init_name_group * cabsloc        (* variable(s), or function prototype *)
 	 | TYPEDEF of name_group * cabsloc
 	 | ONLYTYPEDEF of specifier * cabsloc
 	 | GLOBASM of string * cabsloc
@@ -531,7 +531,7 @@ and init_expression =
   | SINGLE_INIT of expression
   | COMPOUND_INIT of (initwhat * init_expression) list
 ***)
-	op NoInit : -> InitExpression
+	op NoInit : -> KResult --- InitExpression
 	op SingleInit : K -> InitExpression
 	op CompoundInit : List{C} -> InitExpression
 	op InitFragment : K K -> InitFragment

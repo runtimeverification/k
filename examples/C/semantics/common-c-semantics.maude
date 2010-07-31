@@ -615,13 +615,27 @@ endm
 mod COMMON-GLOBAL-DECLARATION is
 	including COMMON-INCLUDE .
 			
-	--- --- c99 6.7.8:9 Except where explicitly stated otherwise, for the purposes of this subclause unnamed members of objects of structure and union type do not participate in initialization.  Unnamed members of structure objects have indeterminate value even after initialization.
-	--- --- c99 6.7.8:10 If an object that has automatic storage duration is not initialized explicitly, its value is indeterminate. If an object that has static storage duration is not initialized explicitly, then:
-	--- --- — if it has pointer type, it is initialized to a null pointer;
-	--- --- — if it has arithmetic type, it is initialized to (positive or unsigned) zero;
-	--- --- if it is an aggregate, every member is initialized (recursively) according to these rules;
-	--- --- — if it is a union, the first named member is initialized (recursively) according to these rules.
-
+	--- c99 6.7.8:9 Except where explicitly stated otherwise, for the purposes of this subclause unnamed members of objects of structure and union type do not participate in initialization.  Unnamed members of structure objects have indeterminate value even after initialization.
+	--- c99 6.7.8:10 If an object that has automatic storage duration is not initialized explicitly, its value is indeterminate. If an object that has static storage duration is not initialized explicitly, then:
+	--- — if it has pointer type, it is initialized to a null pointer;
+	--- — if it has arithmetic type, it is initialized to (positive or unsigned) zero;
+	--- if it is an aggregate, every member is initialized (recursively) according to these rules;
+	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
+	op declare : Type K -> K [metadata "strict(1)"] .
+	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence . 
+	--- parser makes sure there are no uninitialized globals, so this should only do allocation
+	mb rule
+		< k > DeclarationDefinition(InitNameGroup(T:Type, (K:C :: L:List{C})))
+			=> declare(T:Type, K:C) ~> DeclarationDefinition(InitNameGroup(T:Type, L:List{C})) ...</ k >
+		: KSentence [metadata "structural"] .
+	
+	op initialize : K K -> K .
+	--- eq declare(T:Type, InitName(Name:K, Exp:K)) = declare(T:Type, Name:K) ~> initialize(Name:K, Exp:K) .
+	
+	mb rule
+		< k > DeclarationDefinition(InitNameGroup(T:Type, Nil)) => (.).K ...</ k >
+		: KSentence [metadata "structural"] .
+		
 	--- --- parser makes sure there are no uninitialized globals, so this should only do allocation
 	--- mb rule
 		--- < k > ['Global(typedDeclaration(T:Type, X:Id))
@@ -1266,6 +1280,10 @@ mod C-SEMANTICS-MISC is
 	mb rule
 		< k > DefinitionLocRange(K:K, L1:CabsLoc, L2:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L1:CabsLoc </ currentProgramLoc >
+		: KSentence .
+	mb rule
+		< k > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ k >
+		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
 	mb [StatementLoc] : rule
 		< k > StatementLoc(K:K, L:CabsLoc) => K:K ...</ k >

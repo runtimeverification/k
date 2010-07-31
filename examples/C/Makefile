@@ -26,7 +26,7 @@ dist: demo
 
 demo: $(DIST_DIR)/dist.done 
 	@rm -f ./a.out
-	kcc -o ./a.out -d -s $(C_DIR)/simplest.c
+	kcc -o ./a.out -d -s $(C_DIR)/factorial.c
 	@DEBUG=1 ./a.out
 
 #$(DIST_DIR)/dist.tested

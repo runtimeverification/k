@@ -143,12 +143,12 @@ mod COMMON-C-TYPING is
 	mb rule
 		Specifier(T:Type) => T:Type
 		: KSentence .
-	mb rule
-		Type(T:Type, JustBase) => T:Type
-		: KSentence .
-	mb rule
-		Type(T:Type, functionCallType(L:List{Type})) => functionType(T:Type, L:List{Type})
-		: KSentence .
+	--- mb rule
+		--- Type(T:Type, JustBase) => T:Type
+		--- : KSentence .
+	--- mb rule
+		--- Type(T:Type, functionCallType(L:List{Type})) => functionType(T:Type, L:List{Type})
+		--- : KSentence .
 		
 	op functionCallType : List{Type} -> Type .
 		
@@ -156,21 +156,23 @@ mod COMMON-C-TYPING is
 		Prototype(JustBase, L:List{Type}, false) => functionCallType(L:List{Type})
 		: KSentence .
 	
-	mb rule
-		TypedName(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
-		: KSentence .
+	--- mb rule
+		--- TypedName(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
+		--- : KSentence .
 	
-	op TypedName : K K -> K [metadata "strict(2)"] .
-	op Type : K K -> K [metadata "strict(2)"] .
+	--- op Type : K K -> K [metadata "strict(2)"] .
 	
 	--- mb rule
 		--- Prototype(X:Id, K:K, ?, ?) => TypedName(X:Id, Type(T:Type, K:K))
 		--- : KSentence .
 	
 	--- TODO ignoring attributes
-	mb rule
-		SingleName(T:Type, Name(X:Id, K:K, ?, ?)) => TypedName(X:Id, Type(T:Type, K:K))
-		: KSentence .
+	--- mb rule
+		--- SingleName(T:Type, Name(X:Id, K:K, ?, ?)) => TypedName(X:Id, Type(T:Type, K:K))
+		--- : KSentence .
+	--- mb rule
+		--- Name(T:Type, Name(X:Id, K:K, ?, ?)) => TypedName(X:Id, Type(T:Type, K:K))
+		--- : KSentence .
 	--- move "Pointer" to where it belongs
 	--- mb rule
 		--- < k > [SingleName(T:Type, Pointer(D:Declarator)) => L:KLabel(pointerType(T:Type),, D:Declarator)] ...</ k > 
