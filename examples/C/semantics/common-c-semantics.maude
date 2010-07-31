@@ -58,6 +58,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op bitloc : Nat Nat Nat -> Nat .
 	op inc : Nat -> Nat .
 	
+	op toType : K K -> K [metadata "strict(2)"] .
 	op memblock : Nat Map -> K . --- length and an array from offsets to bytes
 	
 	op listToK : K -> K .
@@ -621,13 +622,20 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- — if it has arithmetic type, it is initialized to (positive or unsigned) zero;
 	--- if it is an aggregate, every member is initialized (recursively) according to these rules;
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
-	op declare : Type K -> K [metadata "strict(1)"] .
+	op declare : K K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence . 
 	--- parser makes sure there are no uninitialized globals, so this should only do allocation
-	mb rule
-		< k > DeclarationDefinition(InitNameGroup(T:Type, (K:C :: L:List{C})))
-			=> declare(T:Type, K:C) ~> DeclarationDefinition(InitNameGroup(T:Type, L:List{C})) ...</ k >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > DeclarationDefinition(InitNameGroup(T:Type, (K:C :: L:List{C})))
+			--- => declare(T:Type, K:C) ~> DeclarationDefinition(InitNameGroup(T:Type, L:List{C})) ...</ k >
+		--- : KSentence [metadata "structural"] .
+	op declaration : K K -> K .	
+	op typeNamePair : K K -> K .
+	op idTypePair : K K -> K .
+	op initNameGroup : K K -> K .
+	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = DeclarationDefinition(InitNameGroup(T:Type, K:C)) ~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
+	eq InitNameGroup(T:Type, InitName(Name:K, Exp:K)) = initNameGroup(typeNamePair(T:Type, Name:K), Exp:K) .
+	eq typeNamePair(T:Type, Name(X:Id, K:K, ?, ?)) = idTypePair(X:Id, toType(T:Type, K:K)) .
 	
 	op initialize : K K -> K .
 	--- eq declare(T:Type, InitName(Name:K, Exp:K)) = declare(T:Type, Name:K) ~> initialize(Name:K, Exp:K) .

@@ -143,12 +143,12 @@ mod COMMON-C-TYPING is
 	mb rule
 		Specifier(T:Type) => T:Type
 		: KSentence .
-	--- mb rule
-		--- Type(T:Type, JustBase) => T:Type
-		--- : KSentence .
-	--- mb rule
-		--- Type(T:Type, functionCallType(L:List{Type})) => functionType(T:Type, L:List{Type})
-		--- : KSentence .
+	mb rule
+		toType(T:Type, JustBase) => T:Type
+		: KSentence .
+	mb rule
+		toType(T:Type, functionCallType(L:List{Type})) => functionType(T:Type, L:List{Type})
+		: KSentence .
 		
 	op functionCallType : List{Type} -> Type .
 		
@@ -160,7 +160,7 @@ mod COMMON-C-TYPING is
 		--- TypedName(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
 		--- : KSentence .
 	
-	--- op Type : K K -> K [metadata "strict(2)"] .
+	
 	
 	--- mb rule
 		--- Prototype(X:Id, K:K, ?, ?) => TypedName(X:Id, Type(T:Type, K:K))
