@@ -1,3 +1,10 @@
+--- This style is a hybrid between fully-labeled and fully-syntactic and may be
+--- prefered to fully-labeled.  Specifically, is uses the fully-labeled style
+--- for the non-constant language constructs, while uses the fully-syntactic style
+--- for the constants.  This way, one only needs to write "constant" instead of
+--- "constant(.Label{K})".  However, to use this style one also probably wants to
+--- have an external parser for the defined language.
+
 in ../../../k-prelude
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID + K
@@ -50,7 +57,7 @@ kmod IMP-SEMANTICS is including IMP-SYNTAX
 endkm
 
 kmod IMP is including IMP-PROGRAMS + IMP-SEMANTICS
-  syntax Bag ::= [[ KLabel ]] | pgm
+  syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"] | pgm
   macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
   macro pgm = [['sumPgm]]
 endkm

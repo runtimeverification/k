@@ -1,3 +1,12 @@
+--- This style is very basic, taking no advantage of K-Maude's parsing capabilities.
+--- The syntax of a language is given as a set of labels, including the constants.
+--- An AST is a label applied to list of labels.  The application operation is KLabel(List{K}).
+--- Recall that the unit of List{K} is .List{K}, and its binary construct is ,,
+--- The advantage of this style is that one encouunters no difficulties due to parsing
+--- or syntax in general.  One may prefer it for real or large languages for which one
+--- already has an external parser.  The disadvantage of this approach is that the ASTs
+--- look rather heavy.  One may want to try the labeled-syntax style instead.
+
 in ../../../k-prelude
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID + K
@@ -52,7 +61,7 @@ kmod IMP-SEMANTICS is including IMP-SYNTAX
 endkm
 
 kmod IMP is including IMP-PROGRAMS + IMP-SEMANTICS
-  syntax Bag ::= [[ KLabel ]] | pgm
+  syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"] | pgm
   macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
   macro pgm = [['sumPgm]]
 endkm

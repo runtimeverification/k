@@ -1,4 +1,11 @@
---- This file needs to be processed by the K-Maude tool
+--- This is the prefered style to define languages in K-Maude.
+--- The language syntax is defined as a BNF grammar,
+--- which is used to parse both programs and the semantics.
+--- The problem with this style is that K-Maude's parser, which reduces
+--- to Maude's parser, is not powerful enough to parse real languages.
+--- If one prefers to define an external parser and pass the ASTs
+--- to K-Maude, then one may want to choose a fully-labeled or a
+--- labeled-syntax style, to completely avoid any syntactic complications.
 
 in ../../../k-prelude
 
@@ -119,7 +126,7 @@ kmod IMP-SEMANTICS is including IMP-SYNTAX + K
 endkm
 
 kmod IMP is including IMP-PROGRAMS + IMP-SEMANTICS 
-  syntax Bag ::= [[ KLabel ]] | pgm
+  syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"] | pgm
   macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
   macro pgm = [['sumPgm]]
 endkm
