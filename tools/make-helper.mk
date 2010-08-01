@@ -46,7 +46,7 @@ $(DVI_FILE): $(LATEX_FILE)
 
 $(EPS_FILES): $(DVI_FILE)
 	dvips -T 1189mm,297mm -i $(MAIN_FILE) -o $(MAIN_FILE)-ps-
-	find . -name "$(MAIN_FILE)-ps-[0-9][0-9][0-9]" -exec ps2eps {} \;
+	find . -name "$(MAIN_FILE)-ps-[0-9][0-9][0-9]" -exec ps2eps -f -q -P -H {} \;
 
 crop-pdf: ${CROP_PDF_FILE}
 	
