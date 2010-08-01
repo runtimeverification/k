@@ -279,7 +279,7 @@ and enum_item = string * expression * cabsloc
 	 (* expression transformer: source and destination *)
 	 | EXPRTRANSFORMER of expression * expression * cabsloc
 ***)
-	op FunctionDefinition : K K -> PureDefinition [strict(1)]
+	op FunctionDefinition : K K -> PureDefinition --- [strict(1)]
 	op DeclarationDefinition : K -> PureDefinition
 	op Typedef : K -> PureDefinition
 	op OnlyTypedef : K -> PureDefinition

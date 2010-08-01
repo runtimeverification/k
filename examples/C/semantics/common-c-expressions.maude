@@ -224,13 +224,13 @@ and ll or LL
 
 endm
 
---- mod COMMON-SEMANTICS-ASSIGNMENT is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-ASSIGNMENT is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	--- mb context assign(Deref([HOLE]), ?) : KSentence .
-	--- mb context assign(?, [HOLE]) : KSentence .
+	mb context assign(*([HOLE]), ?) : KSentence .
+	mb context assign(?, [HOLE]) : KSentence .
 	
-	--- mb [for-assignment]: rule < k > [E1:Expression := E2:Expression => assign(Deref(&(E1:Expression)),  E2:Expression)] ...</ k > : KSentence [metadata "structural"] .
+	mb [for-assignment]: rule < k > E1:Expression := E2:Expression => assign(*(&(E1:Expression)),  E2:Expression) ...</ k > : KSentence [metadata "structural"] .
 	
 	--- --- simplify compound assignments (if E1 op= E2, need to ensure E1 only gets evaluated once to be correct)
 	--- --- fixme, should not cause side effects to happen twice.  maybe match tv() on lhs
@@ -261,6 +261,9 @@ endm
 		--- andBool hasIntegerType(T':Type) 
 		--- : KSentence [metadata "structural"] .
 	
+	mb [assign-noInit]: rule
+		< k > assign(?, NoInit) => (.).K ...</ k >
+		: KSentence [metadata "structural"] .
 	--- mb [assign]: rule
 		--- < k > [assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(V:Int, T:Type)) 
 		--- => putInMem(Loc:Nat, tv(V:Int, T:Type), T:Type, sizeofType(T:Type)) ~> tv(V:Int, T:Type)] ...</ k >
@@ -300,7 +303,7 @@ endm
 		--- => 
 		--- putBytesInMem(Loc:Nat, L:List{K}, T:Type, sizeofType(T:Type)) ~> atv(L:List{K},T:Type)] ...</ k >
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 --- mod COMMON-SEMANTICS-BITWISE is
 	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -529,10 +532,10 @@ endm
 		--- : KSentence [metadata "structural"] .
 --- endm
 
---- mod COMMON-SEMANTICS-REFERENCE is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-REFERENCE is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	--- mb context &([HOLE] -> X:Id) : KSentence .
+	mb context &(Arrow([HOLE], X:Id)) : KSentence .
 	
 	--- --- fixme this is crazy
 	--- --- if label not arrayType?
@@ -545,13 +548,13 @@ endm
 	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	
-	--- mb rule [&(Deref(E:Expression)) => E:Expression] : KSentence [metadata "structural"] .
-	--- mb rule [&(E1:Expression[E2:Expression]) => E1:Expression + E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [ref]: rule
-		--- < k > [&(X:Id) => tv(Loc:Nat, pointerType(T:Type))] ...</ k >
-		--- < env >... X:Id |-> Loc:Nat ...</ env >
-		--- < types >... X:Id |-> T:Type ...</ types >
-		--- : KSentence [metadata "structural"] .
+	mb rule &(*(E:Expression)) => E:Expression : KSentence [metadata "structural"] .
+	mb rule &(ArrayIndex(E1:Expression, E2:Expression)) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
+	mb [ref]: rule
+		< k > &(X:Id) => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> T:Type ...</ types >
+		: KSentence [metadata "structural"] .
 	--- mb [address-of-arrow-struct]: rule
 		--- < k > [&(tv(Base:Nat, pointerType(structType(S:Id))) -> X:Id) => cast(fixPointerType(T:Type), figureOffset(Base:Nat, calcStructSize-aux(L1:List{KResult}, 0), T:Type))] ...</ k >
 		--- < structs >... struct(S:Id) |-> (L1:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
@@ -564,7 +567,7 @@ endm
 	--- mb [address-of-dot]: rule
 		--- < k > [&(E:Expression . X:Id) => &((&(E:Expression)) -> X:Id)] ...</ k >
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 --- mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -621,12 +624,12 @@ mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-IDENTIFIERS .
 	including COMMON-SEMANTICS-FUNCTION-CALLS .
 	--- including COMMON-SEMANTICS-ARRAY-SUBSCRIPTING .
-	--- including COMMON-SEMANTICS-ASSIGNMENT .
+	including COMMON-SEMANTICS-ASSIGNMENT .
 	including COMMON-SEMANTICS-LITERALS .
 	--- including COMMON-SEMANTICS-BITWISE .
 	--- including COMMON-SEMANTICS-ARITHMETIC .
 	--- including COMMON-SEMANTICS-MEMBERS .
 	--- including COMMON-SEMANTICS-DEREFERENCE .
-	--- including COMMON-SEMANTICS-REFERENCE .
+	including COMMON-SEMANTICS-REFERENCE .
 	--- including COMMON-SEMANTICS-INCREMENT-AND-DECREMENT .
 endm

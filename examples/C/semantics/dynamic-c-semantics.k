@@ -89,7 +89,10 @@ kmod DYNAMIC-C-SEMANTICS is
 	
 	--- eq callMain(functionType(int, ?), N:Nat, X:Id) = Call(Identifier("main"), Nil)
 	--- eq callMain(functionType(int, L':List{Type}), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	
+	--- FIXME i think these are slightly different
 	eq callMain(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	eq callMain(functionType(int, Nil), N:Nat, X:Id) = Call(Identifier("main"), Nil)
 	
 	
 	--- typedDeclaration(void, ?)

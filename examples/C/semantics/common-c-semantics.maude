@@ -48,6 +48,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
 	
+	op allocateType : Nat Type -> K .
+	op giveType : K Type -> K .
+	op addToEnv : Id Nat -> K .
+	
 	op read : K K -> K [metadata "strict(2)"] . --- location, type
 	--- fixme might not always be what I want, but it seems to work
 	--- eq loc(Block:Nat, N:Nat) <Int loc(Block:Nat, N':Nat) = N:Nat <Int N':Nat .
@@ -58,7 +62,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op bitloc : Nat Nat Nat -> Nat .
 	op inc : Nat -> Nat .
 	
-	op toType : K K -> K [metadata "strict(2)"] .
+	op DeclType : K K -> K [metadata "strict(2)"] .
 	op memblock : Nat Map -> K . --- length and an array from offsets to bytes
 	
 	op listToK : K -> K .
@@ -127,6 +131,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	subsort Type < List{Type} .
 	subsort Type < List{C} .
 	op _::_ : List{Type} List{Type} -> List{Type} [ditto] .
+	op Nil : -> List{Type} [ditto] .
 	
 	op setOfTypes : -> Set [memo] .
 	eq setOfTypes = Set(
@@ -211,7 +216,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op storeNew_atLoc_ : K Nat -> K [metadata "strict(1)"] .
 	op store_atLoc_ : K Nat -> K [metadata "strict(1)"] .
 	--- ---op allocate : K -> K [metadata "strict"] .
-	op alloc : Nat K -> K [metadata "strict(2)"] .
+	op alloc : Nat Nat -> K .
 	--- op allocWithDefault : Nat K Nat -> K [metadata "strict(2)"] .
 	
 endm
@@ -629,15 +634,33 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < k > DeclarationDefinition(InitNameGroup(T:Type, (K:C :: L:List{C})))
 			--- => declare(T:Type, K:C) ~> DeclarationDefinition(InitNameGroup(T:Type, L:List{C})) ...</ k >
 		--- : KSentence [metadata "structural"] .
-	op declaration : K K -> K .	
-	op typeNamePair : K K -> K .
-	op idTypePair : K K -> K .
-	op initNameGroup : K K -> K .
+	---op declare : K K -> K [metadata "strict(2)"] .	
+	--- op typeNamePair : K K -> K .
+	--- op idTypePair : K K -> K .
+	--- op initNameGroup : K K -> K .
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = DeclarationDefinition(InitNameGroup(T:Type, K:C)) ~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
-	eq InitNameGroup(T:Type, InitName(Name:K, Exp:K)) = initNameGroup(typeNamePair(T:Type, Name:K), Exp:K) .
-	eq typeNamePair(T:Type, Name(X:Id, K:K, ?, ?)) = idTypePair(X:Id, toType(T:Type, K:K)) .
+	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
 	
-	op initialize : K K -> K .
+
+	mb rule
+		< k > declare(typedDeclaration(T:Type, X:Id), V:Value) => 
+			allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> X:Id := V:Value
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		: KSentence .
+		
+	mb rule
+		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
+		< env >... E:Map => E:Map[Loc:Nat / X:Id] ...</ env >
+		: KSentence .
+	
+	--- initNameGroup(typeNamePair(T:Type, Name:K), Exp:K) .
+	--- eq typeNamePair(T:Type, Name(X:Id, K:K, ?, ?)) = idTypePair(X:Id, toType(T:Type, K:K)) .
+	
+	--- op initialize : K K -> K .
 	--- eq declare(T:Type, InitName(Name:K, Exp:K)) = declare(T:Type, Name:K) ~> initialize(Name:K, Exp:K) .
 	
 	mb rule
@@ -847,9 +870,11 @@ mod MEMORY is
 		--- < k > [readFromMem-aux(?, T:Type, tv(0, ?), L:List{K}) 
 		--- => concretize(atv(L:List{K}, T:Type))] ...</ k >
 		--- : KSentence [metadata "structural"] .
-		
+	
+	eq allocateType(Loc:Nat, T:Type) = alloc(Loc:Nat, byteSizeofType(T:Type)) .
+	
 	mb rule
-		< k > alloc(sym(Block:Nat) +Nat 0, tv(Len:Nat, ?)) => (.).K ...</ k >
+		< k > alloc(sym(Block:Nat) +Nat 0, Len:Nat) => (.).K ...</ k >
 		< mem >... (.).Map => Block:Nat |-> memblock(Len:Nat, (.).Map) ...</ mem >
 		: KSentence [metadata "structural"] .
 		
@@ -885,7 +910,7 @@ mod MEMORY is
 		
 	
 	mb [storeNew]: rule
-		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat => alloc(Loc:Nat, sizeofType(T:Type)) ~> store tv(V:K, T:Type) atLoc Loc:Nat ...</ k >
+		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat => alloc(Loc:Nat, byteSizeofType(T:Type)) ~> store tv(V:K, T:Type) atLoc Loc:Nat ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- mb [store-N-New]: rule
