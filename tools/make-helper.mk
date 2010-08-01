@@ -54,7 +54,7 @@ $(CROP_PDF_FILE): $(EPS_FILES)
 	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls $(MAIN_FILE)-ps-[0-9][0-9][0-9].eps`
 
 $(PDF_FILE): $(CROP_PDF_FILE) 
-	nice-pdf.sh $(MAIN_FILE)
+	$(TOOL_DIR)/nice-pdf.sh $(MAIN_FILE)
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
 test: $(COMPILED_FILE) $(addprefix test-,$(TESTS))
