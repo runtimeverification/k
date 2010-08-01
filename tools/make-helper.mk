@@ -10,7 +10,7 @@ LATEX_FILE = $(MAIN_FILE).tex
 DVI_FILE = $(MAIN_FILE).DVI
 PDF_FILE = $(MAIN_FILE).pdf
 CROP_PDF_FILE = $(MAIN_FILE)-crop.pdf
-EPS_FILES = $(MAIN_FILE)-ps-001.epsi
+EPS_FILES = $(MAIN_FILE)-ps-001.eps
 PNG_FILES = $(EPS_FILES).png
 LATEX_STYLE ?= mm
 LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k; fi), $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi)))
@@ -39,19 +39,19 @@ pdf: $(PDF_FILE)
 png: $(PNG_FILES)
 
 $(PNG_FILES): $(EPS_FILES)
-	find . -name "$(MAIN_FILE)-ps-[0-9][0-9][0-9].epsi" -exec gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pngalpha -r150 -sOutputFile={}.png {} \;
+	find . -name "$(MAIN_FILE)-ps-[0-9][0-9][0-9].eps" -exec gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pngalpha -r150 -sOutputFile={}.png {} \;
 
 $(DVI_FILE): $(LATEX_FILE)
 	latex $(MAIN_FILE)
 
 $(EPS_FILES): $(DVI_FILE)
-	dvips -T 20in,9in -i $(MAIN_FILE) -o $(MAIN_FILE)-ps-
-	find . -name "$(MAIN_FILE)-ps-[0-9][0-9][0-9]" -exec ps2epsi {} \;
+	dvips -T 1189mm,297mm -i $(MAIN_FILE) -o $(MAIN_FILE)-ps-
+	find . -name "$(MAIN_FILE)-ps-[0-9][0-9][0-9]" -exec ps2eps {} \;
 
 crop-pdf: ${CROP_PDF_FILE}
 	
 $(CROP_PDF_FILE): $(EPS_FILES)
-	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls $(MAIN_FILE)-ps-[0-9][0-9][0-9].epsi`
+	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls $(MAIN_FILE)-ps-[0-9][0-9][0-9].eps`
 
 $(PDF_FILE): $(CROP_PDF_FILE) 
 	nice-pdf.sh $(MAIN_FILE)
