@@ -49,9 +49,10 @@ crop-pdf: ${CROP_PDF_FILE}
 	
 $(CROP_PDF_FILE): $(LATEX_FILE)
 	latex $(MAIN_FILE)
-	dvips -E -i $(MAIN_FILE) -o eps
-	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls eps*`
-	rm eps*
+	dvips -T 20in,9in -i $(MAIN_FILE) -o kompile_ps_
+	find . -iname "kompile_ps_*" -exec ps2epsi {} \;
+	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls kompile_ps_*.epsi`
+	rm kompile_ps_*
 
 $(PDF_FILE): $(CROP_PDF_FILE) 
 	nice-pdf.sh $(MAIN_FILE)
