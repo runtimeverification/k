@@ -12,6 +12,8 @@ kmod COMMON-C-SYNTAX is
 	including PL-ID
 	including K
 	
+	op AttributeWrapper : K List{C} -> K --- new
+	
 	--- The resulting sorts can really be replaced with K, but i've left them in for now since they don't hurt anything and are somewhat documenting
 	
 	--- Sorts directly from CABS
@@ -134,12 +136,12 @@ type typeSpecifier = (* Merge all specifiers into one type *)
 	| TtypeofE of expression                      (* GCC __typeof__ *)
 	| TtypeofT of specifier * decl_type       (* GCC __typeof__ *)
 ***)	
-	op StructRef : Id List{C} -> TypeSpecifier [ctor]
-	op StructDef : Id List{C} List{C} -> TypeSpecifier [ctor]
-	op UnionRef : Id List{C} -> TypeSpecifier [ctor]
-	op UnionDef : Id List{C} List{C} -> TypeSpecifier [ctor]
-	op EnumRef : Id List{C} -> TypeSpecifier [ctor]
-	op EnumDef : Id List{C} List{C} -> TypeSpecifier [ctor]
+	op StructRef : Id -> TypeSpecifier [ctor] --- new
+	op StructDef : Id List{C} -> TypeSpecifier [strict(2) ctor] --- new
+	op UnionRef : Id -> TypeSpecifier [ctor] --- new
+	op UnionDef : Id List{C} -> TypeSpecifier [ctor] --- new
+	op EnumRef : Id -> TypeSpecifier [ctor] --- new
+	op EnumDef : Id List{C} -> TypeSpecifier [ctor] --- new
 	op TypeofExpression : K -> TypeSpecifier [ctor]
 	op TypeofType : K K -> TypeSpecifier [ctor]
 
@@ -174,7 +176,7 @@ and spec_elem =
 	op SpecTypedef : -> SpecifierElem
 	--- the following are because I flattened SpecifierElem
 	subsort CVSpecifier < SpecifierElem
-	subsort Attribute < SpecifierElem
+	--- subsort Attribute < SpecifierElem
 	subsort Storage < SpecifierElem
 	op Inline : -> SpecifierElem
 	subsort TypeSpecifier < SpecifierElem
@@ -206,9 +208,9 @@ and decl_type =
 			 * decl is never a PTR.*)
 ***)
 	op JustBase : -> KResult
-	op ParenType : List{C} K List{C} -> DeclType
-	op ArrayType : K List{C} K -> DeclType
-	op PointerType : List{C} K -> DeclType
+	op ParenType : K -> DeclType
+	op ArrayType : K K -> DeclType
+	op PointerType : K -> DeclType
 	op Prototype : K List{C} Bool -> DeclType [strict(1 2)]
 	
 ***(
@@ -220,9 +222,9 @@ and name_group = specifier * name list
 	(* The optional expression is the bitfield *)
 and field_group = specifier * (name * expression option) list
 ***)
-	op FieldName : K -> FieldName
-	op BitFieldName : K K -> FieldName
-	op FieldGroup : K List{C} -> FieldGroup
+	op FieldGroup : K List{C} -> FieldGroup [strict(1)]
+	op FieldName : K -> FieldName --- new
+	op BitFieldName : K K -> FieldName --- new
 	
 ***(
 	(* like name_group, except the declared variables are allowed to have initializers *)
@@ -239,10 +241,10 @@ and init_name_group = specifier * init_name list
 	(* the string, and decl_type will be PTR([], JUSTBASE) *)
 and name = string * decl_type * attribute list * cabsloc
 ***)
-	op Name : Id K List{C} K -> Name
-	op #NoName : -> Id
-	op Identifier : String -> Id	
-
+	op Name : Id K -> Name
+	op #NoName : -> Id --- new
+	op Identifier : String -> Id --- new	
+	op NameLoc : K K -> Name --- new
 ***(
 	(* A variable declarator ("name") with an initializer *)
 and init_name = name * init_expression
@@ -282,15 +284,15 @@ and enum_item = string * expression * cabsloc
 	op FunctionDefinition : K K -> PureDefinition --- [strict(1)]
 	op DeclarationDefinition : K -> PureDefinition
 	op Typedef : K -> PureDefinition
-	op OnlyTypedef : K -> PureDefinition
+	op OnlyTypedef : K -> PureDefinition [strict]
 	op GlobAsm : String -> PureDefinition
 	op Pragma : K -> PureDefinition
 	op Linkage : String List{C} -> PureDefinition
 	op Transformer : K List{C} -> PureDefinition
 	op ExpressionTransformer : K K -> PureDefinition
 	
-	op DefinitionLoc : K K -> Definition
-	op DefinitionLocRange : K K K -> Definition
+	op DefinitionLoc : K K -> Definition --- new
+	op DefinitionLocRange : K K K -> Definition --- new
 
 ***(
 (* the string is a file name, and then the list of toplevel forms *)
@@ -307,7 +309,7 @@ and block =
 	  bstmts: statement list
 	} 
 ***)
-	op Block : List{C} List{C} List{C} -> Block
+	op Block : List{C} List{C} -> Block
 	
 ***(
 	(* GCC asm directives have lots of extra information to guide the optimizer *)
@@ -370,7 +372,7 @@ and statement =
 	op Label : Id K -> PureStatement
 	op Goto : Id -> PureStatement
 	op CompGoto : K -> PureStatement
-	op Definition : K -> PureStatement
+	op LocalDefinition : K -> PureStatement
 ***(
 	| ASM of attribute list * (* typically only volatile and const *)
 		  string list * (* template *)
@@ -384,7 +386,7 @@ and statement =
 	op TryFinally : K K -> PureStatement
 	
 	--- this wraps all statements with their location in the original file
-	op StatementLoc : K K -> Statement
+	op StatementLoc : K K -> Statement --- new
 	
 ***(
 and for_clause = 
@@ -513,9 +515,9 @@ and constant =
 	| CONST_STRING of string
 	| CONST_WSTRING of int64 list 
 ***)
-	op DecimalConstant : Int -> IntConstant
-	op OctalConstant : Int -> IntConstant
-	op HexConstant : String -> IntConstant
+	op DecimalConstant : Int -> IntConstant --- new
+	op OctalConstant : Int -> IntConstant --- new
+	op HexConstant : String -> IntConstant --- new
 	
 	op IntLiteral : K -> Constant [strict]
 	op FloatLiteral : Float -> Constant
@@ -532,9 +534,9 @@ and init_expression =
   | COMPOUND_INIT of (initwhat * init_expression) list
 ***)
 	op NoInit : -> KResult --- InitExpression
-	op SingleInit : K -> InitExpression
+	op SingleInit : K -> InitExpression [hybrid strict]
 	op CompoundInit : List{C} -> InitExpression
-	op InitFragment : K K -> InitFragment
+	op InitFragment : K K -> InitFragment --- new; (initwhat * init_expression)
 	
 ***(
 and initwhat =

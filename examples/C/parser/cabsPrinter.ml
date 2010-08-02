@@ -147,8 +147,9 @@ and printDefinitionLocRange a b c =
 and printSingleName (a, b) = 
 	wrap ((printSpecifier a) :: (printName b) :: []) "SingleName"
 	(* commas ((printSpecifier a) :: (printName b) :: []) *) 
+and printAttr a b = wrap (a :: (printAttributeList b) :: []) "AttributeWrapper"
 and printBlock a = 
-	wrap ((printBlockLabels a.blabels) :: (printAttributeList a.battrs) :: (printStatementList a.bstmts) :: []) "Block"
+	printAttr (wrap ((printBlockLabels a.blabels) :: (printStatementList a.bstmts) :: []) "Block") a.battrs
 (*	
 and block = 
     { blabels: string list;
@@ -163,10 +164,12 @@ type cabsloc = {
  byteno: int;
  ident : int;
 }	*)
+and printNameLoc s l =
+	wrap (s :: (printCabsLoc l) :: []) "NameLoc"
 and printIdentifier a =
 	wrap (("\"" ^ a ^ "\"") :: []) "Identifier"
 and printName (a, b, c, d) = (* string * decl_type * attribute list * cabsloc *)
-	wrap ((if a = "" then "#NoName" else (printIdentifier a)) :: (printDeclType b) :: (printAttributeList c) :: (printCabsLoc d) :: []) "Name"
+	printAttr (printNameLoc (wrap ((if a = "" then "#NoName" else (printIdentifier a)) :: (printDeclType b) :: []) "Name") d) c
 and printInitNameGroup (a, b) = 
 	wrap ((printSpecifier a) :: (printInitNameList b) :: []) "InitNameGroup"
 and printNameGroup (a, b) = 
@@ -214,11 +217,11 @@ and printDeclType a =
 	| PTR (a, b) -> printPointerType a b
 	| PROTO (a, b, c) -> printProtoType a b c
 and printParenType a b c =
-	wrap ((printAttributeList a) :: (printDeclType b) :: (printAttributeList c) :: []) "ParenType"
+	printAttr (wrap ((printAttr (printDeclType b) c) :: []) "ParenType") a
 and printArrayType a b c = 
-	wrap ((printDeclType a) :: (printAttributeList b) :: (printExpression c) :: []) "ArrayType"
+	printAttr (wrap ((printDeclType a) :: (printExpression c) :: []) "ArrayType") b
 and printPointerType a b = 
-	wrap ((printAttributeList a) :: (printDeclType b) :: []) "PointerType"
+	printAttr (wrap ((printDeclType b) :: []) "PointerType") a
 and printProtoType a b c =
 	wrap ((printDeclType a) :: (printSingleNameList b) :: (printBool c) :: []) "Prototype"
 and printBool a =
@@ -369,7 +372,7 @@ and printStatement a =
 	| SWITCH (exp, stat, loc) -> printStatementLoc (printSwitch exp stat) loc
 	| CASE (exp, stat, loc) -> printStatementLoc (printCase exp stat) loc
 	| GOTO (name, loc) -> printStatementLoc (printGoto name) loc
-	| DEFINITION d -> wrap ((printDef d) :: []) "Definition"
+	| DEFINITION d -> wrap ((printDef d) :: []) "LocalDefinition"
 	| _ -> "OtherStatement"
 	(* 
 	| CASERANGE (expl, exph, stat, loc) ->
@@ -465,14 +468,17 @@ and printTypeSpec = function
 	| TtypeofE e -> wrap ((printExpression e) :: []) "TypeofExpression"
 	| TtypeofT (s, d) -> wrap ((printSpecifier s) :: (printDeclType d) :: []) "TypeofType"
 and printStructType a b c =
-	match b with
-	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "StructRef"
-	| Some b -> wrap ((printIdentifier a) :: (printFieldGroupList b) :: (printAttributeList c) :: []) "StructDef"
+	printAttr (match b with
+		| None -> wrap ((printIdentifier a) :: []) "StructRef"
+		| Some b -> wrap ((printIdentifier a) :: (printFieldGroupList b) :: []) "StructDef"
+	) c
 and printUnionType a b c = 
-	match b with
-	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "UnionRef"
-	| Some b -> wrap ((printIdentifier a) :: (printFieldGroupList b) :: (printAttributeList c) :: []) "UnionDef"
+	printAttr (match b with
+		| None -> wrap ((printIdentifier a) :: []) "UnionRef"
+		| Some b -> wrap ((printIdentifier a) :: (printFieldGroupList b) :: []) "UnionDef"
+	) c
 and printEnumType a b c =
-	match b with
-	| None -> wrap ((printIdentifier a) :: (printAttributeList c) :: []) "EnumRef"
-	| Some b -> wrap ((printIdentifier a) :: (printEnumItemList b) :: (printAttributeList c) :: []) "EnumDef"
+	printAttr (match b with
+		| None -> wrap ((printIdentifier a) :: []) "EnumRef"
+		| Some b -> wrap ((printIdentifier a) :: (printEnumItemList b) :: []) "EnumDef"
+	) c
