@@ -142,10 +142,14 @@ mod COMMON-C-TYPING is
 	--- including COMMON-SEMANTICS-TYPE-STRICTNESS .
 	including COMMON-SEMANTICS-TYPE-DECLARATIONS .
 	
-	op preFunctionType : List{Type} -> Type .
-	op preBitfieldType : Value -> Type .
-	op BitFieldType : K K -> K [metadata "strict(2)"] .
-	--- op structDefType : 
+	--- op preFunctionType : List{Type} -> Type .
+	--- op preBitfieldType : Nat -> Type .
+	--- op preArrayType : Nat -> Type .
+	--- op prePointerType : -> Type .
+	op structDefType : Id List{Type} -> Type .
+	
+	op DeclType : K K -> K .
+	op BitFieldType : K K -> K [metadata "strict"] .
 	
 	mb rule
 		Int => int
@@ -156,29 +160,42 @@ mod COMMON-C-TYPING is
 	mb rule
 		Specifier(T:Type) => T:Type
 		: KSentence .
-		
 	mb rule
 		StructRef(X:Id) => structType(X:Id)
 		: KSentence .
 		
-	mb rule
-		Prototype(JustBase, L:List{Type}, false) => preFunctionType(L:List{Type})
-		: KSentence .
-	mb rule
-		BitFieldType(JustBase, V:Value) => preBitfieldType(V:Value)
-		: KSentence .
-		
-		
-	mb rule
-		DeclType(T:Type, JustBase) => T:Type
-		: KSentence .
-	mb rule
-		DeclType(T:Type, preFunctionType(L:List{Type})) => functionType(T:Type, L:List{Type})
-		: KSentence .
-	mb rule
-		DeclType(T:Type, preBitfieldType(tv(N:Nat, ?))) => bitfieldType(T:Type, N:Nat)
+	op variadic : -> Type .
+	eq Prototype(T:Type, L:List{Type}, false) = functionType(T:Type, L:List{Type}) .
+	eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
+	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
+	eq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat) .
+	eq PointerType(T:Type) = pointerType(T:Type) .
+				
+	mb rule 
+		< k > JustBase => T:Type ...</ k >
+		(< declarationTypeHolder > T:Type </ declarationTypeHolder > => (.).Bag)
 		: KSentence .
 			
+	mb rule
+		< k > DeclType(T:Type, K:K) => K:K ...</ k >
+		((.).Bag => < declarationTypeHolder > T:Type </ declarationTypeHolder >)
+		: KSentence .
+		
+	mb rule
+		< k > StructDef(X:Id, L:List{Type}) => structDefType(X:Id, L:List{Type}) ...</ k >
+		: KSentence .
+		
+	mb rule
+		< k > OnlyTypedef(structDefType(X:Id, L:List{Type})) 
+			=> addNewAggregate(X:Id, L:List{Type})
+		...</ k >
+		: KSentence .
+			
+	op addNewAggregate : Id List{Type} -> K .
+	mb rule
+		< k > addNewAggregate(X:Id, L:List{Type}) => . ...</ k >
+		< structs > M:Map => M:Map[L:List{Type} / X:Id] </ structs >
+		: KSentence .
 		
 	mb rule
 		NameAndType(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)

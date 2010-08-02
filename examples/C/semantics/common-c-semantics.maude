@@ -63,7 +63,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op bitloc : Nat Nat Nat -> Nat .
 	op inc : Nat -> Nat .
 	op initialize : Id Type K -> K .
-	op DeclType : K K -> K [metadata "strict(2)"] .
 	op memblock : Nat Map -> K . --- length and an array from offsets to bytes
 	
 	op listToK : K -> K .
@@ -1056,6 +1055,9 @@ mod C-SEMANTICS-MISC is
 		< k > StatementLoc(K:K, L:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
+		
+	eq AttributeWrapper(K:K, ?) = K:K .
+	eq NameLoc(K:K, ?) = K:K .
 endm
 
 --- load common-c-conversions

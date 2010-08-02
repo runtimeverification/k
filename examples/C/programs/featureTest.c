@@ -3,6 +3,9 @@ struct bitf {
 	int a : 2;
 	int b;
 	struct bitf* pbitf;
+	int c[3];
+	int *d[4];
+	int ***e;
 };
 int main() {
 	struct bitf s;

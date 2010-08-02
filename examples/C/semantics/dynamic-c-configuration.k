@@ -33,6 +33,7 @@ kmod C-CONFIGURATION is
 						< loopStack > .List </ loopStack >
 						< locals > .Bag </ locals >
 						< types > .Map </ types >
+						< declarationTypeHolder * > .K </ declarationTypeHolder * >
 					</ local >
 				</ thread * >
 			</ threads >

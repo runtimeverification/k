@@ -207,10 +207,10 @@ and decl_type =
 			(* Prints "decl (args[, ...])".
 			 * decl is never a PTR.*)
 ***)
-	op JustBase : -> KResult
-	op ParenType : K -> DeclType
-	op ArrayType : K K -> DeclType
-	op PointerType : K -> DeclType
+	op JustBase : -> K
+	op ParenType : K -> DeclType [strict]
+	op ArrayType : K K -> DeclType [strict(1 2)]
+	op PointerType : K -> DeclType [strict]
 	op Prototype : K List{C} Bool -> DeclType [strict(1 2)]
 	
 ***(
@@ -281,7 +281,7 @@ and enum_item = string * expression * cabsloc
 	 (* expression transformer: source and destination *)
 	 | EXPRTRANSFORMER of expression * expression * cabsloc
 ***)
-	op FunctionDefinition : K K -> PureDefinition --- [strict(1)]
+	op FunctionDefinition : K K -> PureDefinition [strict(1)]
 	op DeclarationDefinition : K -> PureDefinition
 	op Typedef : K -> PureDefinition
 	op OnlyTypedef : K -> PureDefinition [strict]
