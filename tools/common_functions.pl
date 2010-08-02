@@ -28,6 +28,18 @@ my @nodes = ();
 # explicit call for debugging.
 # syntax_common_check($ARGV[0]);
 
+# remove "kompile_warnings.txt"
+system("rm", "$warnings_file");
+
+if ($? == 0)
+{
+    print "Previous version of $warnings_file removed.\n";
+}
+else 
+{    
+    # print "Previous version of $warnings_file not removed!\n";
+}
+
 # start syntax checking.
 sub syntax_common_check
 {
