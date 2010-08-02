@@ -6,9 +6,16 @@ struct bitf {
 	int c[3];
 	int *d[4];
 	int ***e;
+	int f[2][5];
 };
+
+struct a {
+	int x;
+} * b;
+
 int main() {
 	struct bitf s;
+	struct a y;
 	s.a = 2;
 	s.b = 18;
 	int n = 10;

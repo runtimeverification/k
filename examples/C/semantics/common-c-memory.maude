@@ -17,11 +17,6 @@ mod COMMON-SEMANTICS-READING is
 	mb rule
 		< k > read(Loc:Nat, T:Type) => interpret(T:Type, extractBitsFromMem(Loc:Nat, bitSizeofType(T:Type))) ...</ k >
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > write(Loc:Nat, tv(V:BaseValue, T:Type)) 
-			--- => putBitsinMem(Loc:Nat, V:BaseValue)
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .
 	
 	eq interpret(T:Type, functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
 	
@@ -74,6 +69,33 @@ mod COMMON-SEMANTICS-WRITING is
 		< mem >... (.).Map => Block:Nat |-> memblock(Len:Nat, (.).Map) ...</ mem >
 		: KSentence [metadata "structural"] .
 		
+	op writeBytes : Nat List{K} -> K .
+	op isByteLoc : Nat -> Bool .
+	op splitBytes : Value -> List{K} .
+	
+	mb rule
+		< k > write(Loc:Nat, tv(V:K, T:Type))
+			=> writeBytes(Loc:Nat, splitBytes(tv(V:K, T:Type)))
+		...</ k >
+		if bitSizeofType(T:Type) %Nat numBitsPerByte ==Bool 0
+		andBool isByteLoc(Loc:Nat)
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > writeBytes(sym(Block:Nat) +Nat Offset:Nat, (K:K,, L:List{K}))
+			=> writeBytes(sym(Block:Nat) +Nat sNat(Offset:Nat), L:List{K})
+		...</ k >
+		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[K:K / Offset:Nat])) ...</ mem >
+		if Offset:Nat <Nat Len:Nat
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > writeBytes(?, .List{K}) => . ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	eq splitBytes(tv(functionObject(X:Id, T:Type, Body:K), T:Type)) = functionObject(X:Id, T:Type, Body:K) .
+		
+	eq isByteLoc(? +Nat bito(?)) = false .
+	eq isByteLoc(?) = true [owise] .
 endm
 
 mod COMMON-C-MEMORY-MISC is
