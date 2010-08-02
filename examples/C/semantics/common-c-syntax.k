@@ -12,7 +12,7 @@ kmod COMMON-C-SYNTAX is
 	including PL-ID
 	including K
 	
-	op AttributeWrapper : K List{C} -> K --- new
+	op AttributeWrapper : K List{C} -> C --- new
 	
 	--- The resulting sorts can really be replaced with K, but i've left them in for now since they don't hurt anything and are somewhat documenting
 	

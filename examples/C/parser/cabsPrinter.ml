@@ -218,9 +218,9 @@ and printDeclType a =
 	| PROTO (a, b, c) -> printProtoType a b c
 and printParenType a b c =
 	printAttr (wrap ((printAttr (printDeclType b) c) :: []) "ParenType") a
-and printArrayType a b c = 
+and printArrayType a b c =
 	printAttr (wrap ((printDeclType a) :: (printExpression c) :: []) "ArrayType") b
-and printPointerType a b = 
+and printPointerType a b =
 	printAttr (wrap ((printDeclType b) :: []) "PointerType") a
 and printProtoType a b c =
 	wrap ((printDeclType a) :: (printSingleNameList b) :: (printBool c) :: []) "Prototype"
