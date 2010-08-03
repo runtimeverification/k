@@ -86,22 +86,23 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 	--- --- needs to be done before call
 	op populateFromGlobal : -> K .
 	--- fixme: this must be a rule because of the rules associated with declaring local and bound variables
-	mb rule
+	mb [populateFromGlobal]: rule
 		< k > populateFromGlobal => (.).K ...</ k >
 		< genv > G:Map </ genv > < env > ? => G:Map </ env >
-		< typedefs > GT:Map </ typedefs > < types > ? => GT:Map </ types >
+		< gtypes > GT:Map </ gtypes > < types > ? => GT:Map </ types >
+		< gstructs > GS:Map </ gstructs > < structs > ? => GS:Map </ structs >
 		: KSentence [metadata "structural"] .
 		
 	mb [function-application]: rule
-		(< local >
+		(< control >
 			< k > application(functionObject(X:Id, functionType(R:Type, P:List{Type}), B:K), L:List{C}) ~> K:K </ k >
 		C:Bag
-		</ local >
+		</ control >
 		=>
-		< local >
+		< control >
 			< k > sequencePoint ~> populateFromGlobal ~> bind(L:List{C}, P:List{Type}) ~> B:K </ k >
 			< currentFunction > X:Id </ currentFunction >
-		...</ local >)
+		...</ control >)
 		< callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > </ stackFrame >) ...</ callStack >
 		: KSentence [metadata "computational rule"] . --- nondet
 endm
@@ -535,18 +536,18 @@ endm
 mod COMMON-SEMANTICS-REFERENCE is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	mb context &(Arrow([HOLE], X:Id)) : KSentence .
+	mb context &([HOLE] -> X:Id) : KSentence .
 	
-	--- --- fixme this is crazy
-	--- --- if label not arrayType?
-	--- op fixPointerType : Type -> Type .
-	--- eq fixPointerType(T:Base-Type) = pointerType(T:Base-Type) .
-	--- eq fixPointerType(arrayType(T:Type, ?)) = pointerType(T:Type) .
-	--- eq fixPointerType(structType(X:Id)) = pointerType(structType(X:Id)) .
-	--- eq fixPointerType(unionType(X:Id)) = pointerType(unionType(X:Id)) .
-	--- eq fixPointerType(pointerType(T:Type)) = pointerType(pointerType(T:Type)) .
-	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
-	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
+	--- fixme this is crazy
+	--- if label not arrayType?
+	op fixPointerType : Type -> Type .
+	eq fixPointerType(T:BaseType) = pointerType(T:BaseType) .
+	eq fixPointerType(arrayType(T:Type, ?)) = pointerType(T:Type) .
+	eq fixPointerType(structType(X:Id)) = pointerType(structType(X:Id)) .
+	eq fixPointerType(unionType(X:Id)) = pointerType(unionType(X:Id)) .
+	eq fixPointerType(pointerType(T:Type)) = pointerType(pointerType(T:Type)) .
+	eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
+	eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	
 	mb rule &(*(E:Expression)) => E:Expression : KSentence [metadata "structural"] .
 	mb rule &(ArrayIndex(E1:Expression, E2:Expression)) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
@@ -555,18 +556,44 @@ mod COMMON-SEMANTICS-REFERENCE is
 		< env >... X:Id |-> Loc:Nat ...</ env >
 		< types >... X:Id |-> T:Type ...</ types >
 		: KSentence [metadata "structural"] .
-	--- mb [address-of-arrow-struct]: rule
-		--- < k > [&(tv(Base:Nat, pointerType(structType(S:Id))) -> X:Id) => cast(fixPointerType(T:Type), figureOffset(Base:Nat, calcStructSize-aux(L1:List{KResult}, 0), T:Type))] ...</ k >
-		--- < structs >... struct(S:Id) |-> (L1:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		
+	op getFieldOffset : Id Id -> K .
+	op getStructFieldOffset : Id Id -> K .
+	op getUnionFieldOffset : Id Id -> K .
+	
+	--- mb [getFieldOffset]: rule
+		--- < k > getFieldOffset(S:Id, F:Id)
+			--- => cast(fixPointerType(T:Type), getOffset(S:Id, X:Id))
+			--- --- => tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
+		--- ...</ k >
+		--- < types >... S:Id |-> pointerType(structDefType) ...</ types >
+		--- --- < structs >... S:Id |-> Fields:List{Type} ...</ structs >
 		--- : KSentence [metadata "structural"] .
+	
+	eq getUnionFieldOffset(?, ?) = tv(0, pointerType(void)) .
+	--- FIXME should be checking pointer
+	--- mb [address-of-arrow-struct]: rule
+		--- < k > &(tv(Loc:Nat, pointerType(structType(S:Id))) -> X:Id)
+			--- => cast(fixPointerType(T:Type), getFieldOffset(S:Id, X:Id))
+			--- --- => tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
+		--- ...</ k >
+		--- --- < structs >... S:Id |-> Fields:List{Type} ...</ structs >
+		--- : KSentence [metadata "structural"] .
+	--- (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?:List{Type})
+		
 	--- mb [address-of-arrow-union]: rule
-		--- < k > [&(tv(Base:Nat, pointerType(unionType(S:Id))) -> X:Id) => cast(fixPointerType(T:Type), tv(Base:Nat, pointerType(void)))] ...</ k >
-		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		--- < k > &(tv(Loc:Nat, pointerType(unionType(S:Id))) -> X:Id) 
+			--- --- => cast(fixPointerType(T:Type), tv(Base:Nat, pointerType(void)))
+			--- => tv(Loc:Nat, fixPointerType(T:Type))
+		--- ...</ k >
+		--- < structs >... 
+			--- S:Id |-> (?:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?:List{Type}) 
+		--- ...</ structs >
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb [address-of-dot]: rule
-		--- < k > [&(E:Expression . X:Id) => &((&(E:Expression)) -> X:Id)] ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb [address-of-dot]: rule
+		< k > &(E:Expression . X:Id) => &(&(E:Expression) -> X:Id) ...</ k >
+		: KSentence [metadata "structural"] .
 endm
 
 --- mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is

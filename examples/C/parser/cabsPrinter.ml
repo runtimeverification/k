@@ -277,8 +277,8 @@ and printExpression exp =
 	| EXPR_ALIGNOF exp -> wrap ((printExpression exp) :: []) "AlignofExpression"
 	| TYPE_ALIGNOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "AlignofType"
 	| INDEX (exp, idx) -> wrap ((printExpression exp) :: (printExpression idx) :: []) "ArrayIndex"
-	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Dot"
-	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Arrow"
+	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "_._"
+	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "_->_"
 	| GNU_BODY block -> wrap ((printBlock block) :: []) "GnuBody"
 	| EXPR_PATTERN s -> wrap ((toString s) :: []) "ExpressionPattern"
 and getUnaryOperator op =

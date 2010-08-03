@@ -497,8 +497,10 @@ and unary_operator =
 	| MEMBEROF of expression * string
 	| MEMBEROFPTR of expression * string
 ***)
-	op Dot : K Id -> Expression
-	op Arrow : K Id -> Expression
+	--- op Dot : K Id -> Expression
+	op _._ : K Id -> Expression
+	--- op Arrow : K Id -> Expression
+	op _->_ : K Id -> Expression
 ***(
 	| GNU_BODY of block
 	| EXPR_PATTERN of string     (* pattern variable, and name *)

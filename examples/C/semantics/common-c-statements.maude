@@ -191,11 +191,11 @@ mod COMMON-SEMANTICS-RETURN is
 		--- : KSentence [metadata "structural"] .
 			
 	mb [return-value]: rule 
-		< local >
+		< control >
 			< k > Return(V:Value) ~> ? => sequencePoint ~> V:Value ~> K:K </ k >
 			< locals > (.).Bag => L:Bag </ locals >
 			(? => C:Bag)
-		</ local >
+		</ control >
 		< callStack >
 			List(
 				< stackFrame >
@@ -225,12 +225,17 @@ mod COMMON-C-STATEMENTS is
 	--- --- skip labels
 	--- mb [skip-label]: rule < k > [L:Id : S:Statement => S:Statement] ...</ k > : KSentence [metadata "structural"] .
 	
+	op popBlock : -> K .
 	--- dissolve blocks
 	--- FIXME need to handle scope
-	mb [dissolve-block]: rule < k > Block(?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > : KSentence [metadata "structural"] .
+	mb [dissolve-block]: rule 
+		< k > Block(?, Statements:List{C}) => listToK(Statements:List{C}) ~> popBlock ...</ k > 
+		(< local > C:Bag </ local > => < local >... (.).Bag ...</ local >)
+		< blockStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ blockStack >
+		: KSentence [metadata "structural"] .
 
-	--- --- dissolve expression statements that are finished evaluating
-	--- mb [value-statement]: rule < k > [V:Value ; => sequencePoint] ...</ k > : KSentence [metadata "structural"] .
+	--- dissolve expression statements that are finished evaluating
+	mb [expression-statement]: rule < k > Computation(K:K) => K:K ~> discard ~> sequencePoint ...</ k > : KSentence [metadata "structural"] .
 	
 	--- mb [popLoop]: rule
 		--- < k > [popLoop => .K] ...</ k >

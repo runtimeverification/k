@@ -6,15 +6,15 @@ kmod C-CONFIGURATION is
 		< T > 
 			< gotoMap > .Map </ gotoMap >
 			< genv > .Map </ genv >
+			< gtypes > .Map </ gtypes >
+			< gstructs > .Map </ gstructs >
 			< mem > .Map </ mem >
 			< nextLoc > 0 </ nextLoc >
 			< freshNat > 0 </ freshNat >
 			< nextFile > 0 </ nextFile >
 			< malloced > .Map </ malloced >
 			< statics > .Map </ statics >
-			< typedefs > .Map </ typedefs >
 			< sizes > .Map </ sizes >
-			< structs > .Map </ structs >
 			< openFiles > .Map </ openFiles >
 			< busy > .Bag </ busy >
 			< currentTranslationUnit > "" </ currentTranslationUnit >
@@ -22,19 +22,23 @@ kmod C-CONFIGURATION is
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >
-					< local >
+					< control >
+						< local > 
+							< structs > .Map </ structs >
+							< env > .Map </ env >
+							< types > .Map </ types >
+						</ local >
 						< k > .K </ k >
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						< holds > .Map </ holds >
 						< currentFunction > .K </ currentFunction >
 						< currentProgramLoc > .K </ currentProgramLoc >
 						< type * > .K </ type * >
-						< env > .Map </ env >
 						< loopStack > .List </ loopStack >
+						< blockStack > .List </ blockStack >
 						< locals > .Bag </ locals >
-						< types > .Map </ types >
 						< declarationTypeHolder * > .K </ declarationTypeHolder * >
-					</ local >
+					</ control >
 				</ thread * >
 			</ threads >
 		</ T >

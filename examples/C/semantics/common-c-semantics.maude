@@ -166,7 +166,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op calcStructSize-aux : List{KResult} Rat -> K .	
 	--- op calcUnionSize-aux : List{KResult} Rat -> K .
 	--- op necessaryBytes : K -> K [metadata "strict"] .
-	--- op cast : Type K -> K [metadata "strict(2)"] . --- as described in 6.3
+	op cast : Type K -> K [metadata "strict(2)"] . --- as described in 6.3
 	--- op arithInterpret : Type BaseValue -> K . --- interpret the result of arithmetic as in 6.5.4
 	op interpret : Type K -> K [metadata "strict(2)"] . --- interpret the values of reading from mem
 	--- op leftShiftInterpret : Type BaseValue K -> K .
@@ -184,6 +184,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op readFromFD : Nat -> K .
 	--- op readFromFD : Nat Nat -> K .
 
+	op calculateLength : List{Type} -> Nat .
 	--- op figureOffset : Nat K Type -> K [metadata "strict(2)"] .
 	--- ---op pair : Rat Rat -> K . --- relying on this not being nat
 	--- op undefRange : Map Nat Nat -> Map .
@@ -747,17 +748,17 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < k > [initList(K:K, .List{K}) => .K] ...</ k >
 		--- : KSentence [metadata "structural"] .
 		
+	--- FIXME check prototypes
 	mb [function-definition]: rule
 		--- < k > ['_`{_`}(typedDeclaration(T:Type, X:Id),, B:SeqList) => storeNew Closure(X:Id, T:Type, B:SeqList) atLoc Loc:Nat ~> calculateGotoMap(X:Id, B:SeqList) ~> skipval] ...</ k >
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) => 
 			storeNew tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
 			~> calculateGotoMap(X:Id, Block:K)
-			--- ~> skipval
 		...</ k >
-		< env >... (.).Map => X:Id |-> Loc:Nat ...</ env >
-		< genv >... (.).Map => X:Id |-> Loc:Nat ...</ genv >
-		< types >... (.).Map => X:Id |-> T:Type ...</ types >
-		< typedefs >... (.).Map => X:Id |-> T:Type ...</ typedefs >
+		< env > Env:Map => Env:Map[Loc:Nat / X:Id] </ env >
+		< genv > GEnv:Map => GEnv:Map[Loc:Nat / X:Id] </ genv >
+		< types > Types:Map => Types:Map[T:Type / X:Id] </ types >
+		< gtypes > GTypes:Map => GTypes:Map[T:Type / X:Id] </ gtypes >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		: KSentence [metadata "structural"] .
 		
@@ -906,6 +907,10 @@ mod C-SEMANTICS-MISC is
 		--- tv(bitloc(Block:Nat, absInt(Offset:Nat +Int truncRat(R:Rat)), absInt(truncRat(_-Rat_(R:Rat, truncRat(R:Rat)) *Rat 8))), pointerType(void))
 	--- if T:Type isa 'bitfieldType .
 	--- ceq figureOffset(loc(Block:Nat, Offset:Nat), tv(R:Rat, ?), T:Type) = 
+		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
+	--- if notBool(T:Type isa 'bitfieldType) .
+	
+	--- ceq calculateLength(loc(Block:Nat, Offset:Nat), tv(R:Rat, ?), T:Type) = 
 		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
 	--- if notBool(T:Type isa 'bitfieldType) .
 

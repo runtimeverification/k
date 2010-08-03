@@ -27,7 +27,7 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	mb rule
 		< k > giveGlobalType(X:Id, T:Type) => (.).K ...</ k >
 		< types > M:Map => M:Map[T:Type / X:Id] </ types >
-		< typedefs > M':Map => M':Map[T:Type / X:Id] </ typedefs >
+		< gtypes > M':Map => M':Map[T:Type / X:Id] </ gtypes >
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
@@ -161,7 +161,7 @@ mod COMMON-C-TYPING is
 		Specifier(T:Type) => T:Type
 		: KSentence .
 	mb rule
-		StructRef(X:Id) => structType(X:Id)
+		< k > StructRef(X:Id) => structType(X:Id) ...</ k >
 		: KSentence .
 		
 	op variadic : -> Type .
@@ -183,9 +183,10 @@ mod COMMON-C-TYPING is
 		
 	mb rule
 		< k > StructDef(X:Id, L:List{Type})
-			=> addNewAggregate(X:Id, L:List{Type})
+			=> addAggregate(X:Id, L:List{Type})
+			~> giveType(X:Id, structType(X:Id))
 			~> structDefType(X:Id, L:List{Type})
-		...</ k >		
+		...</ k >
 		: KSentence .
 		
 	--- mb rule
@@ -197,9 +198,26 @@ mod COMMON-C-TYPING is
 		< k > OnlyTypedef(?) => . ...</ k >
 		: KSentence .
 			
-	op addNewAggregate : Id List{Type} -> K .
+	op addAggregate : Id List{Type} -> K .
+	op addGlobalAggregate : Id List{Type} -> K .
+	op addLocalAggregate : Id List{Type} -> K .
 	mb rule
-		< k > addNewAggregate(X:Id, L:List{Type}) => . ...</ k >
+		< k > addAggregate(X:Id, L:List{Type}) 
+			=> if (F:Id ==Bool File-Scope) then 
+				(addGlobalAggregate(X:Id, L:List{Type})) 
+			else
+				(addLocalAggregate(X:Id, L:List{Type}))
+			fi
+		...</ k >
+		< currentFunction > F:Id </ currentFunction >
+		: KSentence .
+	mb rule
+		< k > addGlobalAggregate(X:Id, L:List{Type}) => . ...</ k >
+		< structs > M:Map => M:Map[L:List{Type} / X:Id] </ structs >
+		< gstructs > M:Map => M:Map[L:List{Type} / X:Id] </ gstructs >
+		: KSentence .
+	mb rule
+		< k > addLocalAggregate(X:Id, L:List{Type}) => . ...</ k >
 		< structs > M:Map => M:Map[L:List{Type} / X:Id] </ structs >
 		: KSentence .
 		

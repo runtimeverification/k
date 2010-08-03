@@ -16,6 +16,10 @@ struct a {
 int main() {
 	struct bitf s;
 	struct a y;
+	struct b {
+		int x;
+	} x;
+	struct b y;
 	s.a = 2;
 	s.b = 18;
 	int n = 10;
@@ -26,6 +30,10 @@ int main() {
 }
 
 int factorial(int n){
+	struct b {
+		int y;
+		int x;
+	} x;
 	if (n == 0 || n == 1) {
 		return 1;
 	}

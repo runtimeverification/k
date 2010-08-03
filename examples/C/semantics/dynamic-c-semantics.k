@@ -101,7 +101,7 @@ kmod DYNAMIC-C-SEMANTICS is
 		< T >
 			< threads >
 				< thread >
-					< local >
+					< control >
 						< k > listToK(P:Program)
 							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
 							--- ~> incomingArguments(L:List{K})
@@ -113,7 +113,7 @@ kmod DYNAMIC-C-SEMANTICS is
 							---xxx )) </ k >
 						< currentFunction > File-Scope </ currentFunction >
 						< currentProgramLoc > UnknownCabsLoc </ currentProgramLoc >
-					...</ local >
+					...</ control >
 				...</ thread >
 			</ threads >
 			< nextLoc > sym(1) +Nat 0 </ nextLoc >
