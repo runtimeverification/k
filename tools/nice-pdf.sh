@@ -1,9 +1,9 @@
 #!/bin/bash
 MAIN_FILE=$1
 echo "Running LaTeX to approximate height"
-cat $1.tex | sed 's/\\begin{document}/\\pagestyle{empty}\\begin{document}/ ; s/\\newpage/\\\\bigskip/g' | latex --jobname=$1 >/dev/null 
-PAGES=$(grep -o "[0-9]\+ pages, " $1.log | grep -o "[0-9]*")
-echo "We have $PAGES pages"
+cat $1.tex | sed 's/\\begin{document}/\\pagestyle{empty}\\begin{document}/ ; s/\\newpage/\\bigskip/g' | latex --jobname=$1 >/dev/null 
+PAGES=$(grep -o "[0-9]\+ pages\?, " $1.log | grep -o "[0-9]*")
+echo "We have $PAGES page(s)"
 H=$(( 9 * PAGES))
 PH=$(( H + 1))
 echo "Re-running latex with approximative height $PH inches" 
