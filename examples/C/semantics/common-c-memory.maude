@@ -46,8 +46,7 @@ mod COMMON-SEMANTICS-READING is
 		: KSentence [metadata "structural"] .
 		
 	---op combineData : List{KResult} -> K .
-	op dataList : List{KResult} -> KResult .
-	
+
 	---eq combineData(functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
 	
 	mb rule
@@ -76,7 +75,7 @@ mod COMMON-SEMANTICS-WRITING is
 		
 	op writeBytes : Nat List{K} -> K .
 	op isByteLoc : Nat -> Bool .
-	op splitBytes : Value -> List{K} .
+	op splitBytes : Value -> K .
 	
 	op write : K Value K -> K [metadata "strict(2)"] .
 	eq write(K:K, tv(V:K, T:Type)) = write(K:K, tv(V:K, T:Type), value(bitSizeofType(T:Type))) .
@@ -90,10 +89,10 @@ mod COMMON-SEMANTICS-WRITING is
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > writeBytes(sym(Block:Nat) +Nat Offset:Nat, (K:K,, L:List{K}))
-			=> writeBytes(sym(Block:Nat) +Nat sNat(Offset:Nat), L:List{K})
+		< k > writeBytes(sym(Block:Nat) +Nat Offset:Nat, dataList((V:KResult,, L:List{KResult})))
+			=> writeBytes(sym(Block:Nat) +Nat sNat(Offset:Nat), dataList(L:List{KResult}))
 		...</ k >
-		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[K:K / Offset:Nat])) ...</ mem >
+		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[V:KResult / Offset:Nat])) ...</ mem >
 		if Offset:Nat <Nat Len:Nat
 		: KSentence [metadata "structural"] .
 	mb rule
@@ -107,7 +106,7 @@ mod COMMON-SEMANTICS-WRITING is
 		if hasIntegerType(T:Type)
 		: KSentence .
 	
-	op splitIntegerBytes : K K K -> List{K} .
+	op splitIntegerBytes : K K K -> K .
 	mb context splitIntegerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
 	---eq splitIntegerBytes(I:Int, T:Type, sNat(Len:Nat)) 
 		---= splitIntegerBytes(I:Int >> numBitsPerByte, T:Type, Len:Nat),, (I:Int &Nat byteMaskSet) .
