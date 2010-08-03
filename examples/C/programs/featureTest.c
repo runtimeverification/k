@@ -1,12 +1,12 @@
 int factorial(int n);
 struct bitf {
-	int a : 2;
-	int b;
-	struct bitf* pbitf;
-	int c[3];
-	int *d[4];
-	int ***e;
-	int f[2][5];
+	int a : 2;			// 2/8
+	int b;				// 04
+	struct bitf* pbitf;	// 08
+	int c[3];			// 12
+	int *d[4];			// 08
+	int ***e;			// 08
+	int f[2][5];		// 10
 };
 
 struct a {
@@ -20,8 +20,8 @@ int main() {
 		int q;
 	} x;
 	struct b z;
-	s.a = 2;
-	s.b = 18;
+	// s.a = 2;
+	// s.b = 18;
 	int n = 10;
 	int fact = factorial(n);
 	int factorial = fact;

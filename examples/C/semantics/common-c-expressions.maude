@@ -5,14 +5,35 @@ endm
 
 mod COMMON-SEMANTICS-SIZEOF is
 	including COMMON-INCLUDE .
+	
+	eq sizeofType(T:Type) = cast(cfg:sizeut, byteSizeofType(T:Type)) .
+	op byteSizeofTypeAux : K -> K [metadata "strict"] .
+	eq byteSizeofTypeAux(tv(N:Nat, bignum)) = tv(bitsToBytes(N:Nat), bignum) .
+	eq byteSizeofType(T:Type) = byteSizeofTypeAux(bitSizeofType(T:Type)) .
 
-	eq sizeofType(T:Type) = tv(byteSizeofType(T:Type), cfg:sizeut) .
+
+	
+	--- tv(byteSizeofType(T:Type), cfg:sizeut) .
+	
 	mb rule
 		< k > sizeofExp(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
 		: KSentence [metadata "structural"] .
-		
-	eq bitSizeofType(arrayType(T:Type, N:Nat)) = bitSizeofType(T:Type) *Nat N:Nat .
+	
+	op bitSizeofList : List{Type} -> K .
+	eq bitSizeofList(T:Type :: L:List{Type}) = bitSizeofType(T:Type) + bitSizeofList(L:List{Type}) .
+	eq bitSizeofList(Nil) = 0 .
+	
+	eq bitSizeofType(arrayType(T:Type, N:Nat)) = bitSizeofType(T:Type) * N:Nat .
 	eq bitSizeofType(functionType(?, ?)) = numBitsPerByte .
+	eq bitSizeofType(T:BaseType) = numBits(T:BaseType) .
+	eq bitSizeofType(pointerType(?)) = cfg:ptrsize *Nat numBitsPerByte .
+	eq bitSizeofType(typedDeclaration(T:Type, ?)) = bitSizeofType(T:Type) .
+	eq bitSizeofType(bitfieldType(?, N:Nat)) = N:Nat .
+	mb rule
+		< k > bitSizeofType(structType(X:Id)) => bitSizeofList(L:List{Type}) ...</ k >
+		< structs >... X:Id |-> L:List{Type} ...</ structs >
+		: KSentence .
+
 	--- mb rule 
 		--- sizeofType(bitfieldType(T:Type, N:Nat)) => N:Nat /Rat 8
 		--- : KSentence [metadata "structural"] .
@@ -164,6 +185,8 @@ and ll or LL
 	
 	eq IntLiteral(V:Value) = V:Value .
 	eq Constant(V:Value) = V:Value .
+	mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence .
+	
 	mb rule < k > DecimalConstant(I:Int) => 
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
 			if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
@@ -364,8 +387,8 @@ endm
 		--- : KSentence [metadata "structural"] .
 --- endm
 
---- mod COMMON-SEMANTICS-ARITHMETIC is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-ARITHMETIC is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 
 	--- --- we have to go through this sillyness because we can't compute size functionally
 	--- --- fixme
@@ -405,18 +428,19 @@ endm
 		--- if _-Int_(Offset1:Nat, Offset2:Nat) %Int Size:Nat ==Bool 0
 		--- : KSentence [metadata "structural"] .	
 		
-	--- mb rule [tv(I1:Rat, T:Type) + tv(I2:Rat, T:Type) => arithInterpret(T:Type, (I1:Rat +Rat I2:Rat))] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [_-_(tv(I1:Int, T:Type), tv(I2:Int, T:Type)) => arithInterpret(T:Type, _-Int_(I1:Int,I2:Int))] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) * tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int *Int I2:Int)] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) / tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int /Int I2:Int)] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) + tv(I2:Int, T:Type) => arithInterpret(T:Type, (I1:Int +Int I2:Int))
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule _-_(tv(I1:Int, T:Type), tv(I2:Int, T:Type)) => arithInterpret(T:Type, _-Int_(I1:Int,I2:Int))
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) * tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int *Int I2:Int)
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) / tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int /Int I2:Int) 
+		if hasIntegerType(T:Type)
+		andBool I2:Int =/=Bool 0
+		: KSentence [metadata "structural"] .
 	--- mb rule [tv(I1:Int, T:Type) % tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int %Int I2:Int)] 
 		--- if hasIntegerType(T:Type)
 		--- : KSentence [metadata "structural"] .
@@ -457,7 +481,7 @@ endm
 	--- mb rule [!(tv(V:BaseValue, ?)) => tv(1, int)] 
 		--- if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 --- mod COMMON-SEMANTICS-MEMBERS is 
 	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -654,7 +678,7 @@ mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-ASSIGNMENT .
 	including COMMON-SEMANTICS-LITERALS .
 	--- including COMMON-SEMANTICS-BITWISE .
-	--- including COMMON-SEMANTICS-ARITHMETIC .
+	including COMMON-SEMANTICS-ARITHMETIC .
 	--- including COMMON-SEMANTICS-MEMBERS .
 	--- including COMMON-SEMANTICS-DEREFERENCE .
 	including COMMON-SEMANTICS-REFERENCE .

@@ -14,8 +14,11 @@ mod COMMON-SEMANTICS-READING is
 		if N:Nat ==Bool numBitsPerByte
 		: KSentence [metadata "structural"] .
 	
+	op read : K K K -> K .
+	mb context read(?, ?, value(`[HOLE`]:K)) : KSentence .
+	eq read(Loc:Nat, T:Type) = read(Loc:Nat, T:Type, value(bitSizeofType(T:Type))) . 
 	mb rule
-		< k > read(Loc:Nat, T:Type) => interpret(T:Type, extractBitsFromMem(Loc:Nat, bitSizeofType(T:Type))) ...</ k >
+		< k > read(Loc:Nat, T:Type, bitSize:Nat) => interpret(T:Type, extractBitsFromMem(Loc:Nat, bitSize:Nat)) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	eq interpret(T:Type, functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
@@ -62,7 +65,9 @@ endm
 
 mod COMMON-SEMANTICS-WRITING is
 	including COMMON-INCLUDE .
-	eq allocateType(Loc:Nat, T:Type) = alloc(Loc:Nat, byteSizeofType(T:Type)) .
+	mb context alloc(?, value(`[HOLE`]:K)) : KSentence .
+
+	eq allocateType(Loc:Nat, T:Type) = alloc(Loc:Nat, value(byteSizeofType(T:Type))) .
 	
 	mb rule
 		< k > alloc(sym(Block:Nat) +Nat 0, Len:Nat) => (.).K ...</ k >
@@ -73,11 +78,14 @@ mod COMMON-SEMANTICS-WRITING is
 	op isByteLoc : Nat -> Bool .
 	op splitBytes : Value -> List{K} .
 	
+	op write : K Value K -> K [metadata "strict(2)"] .
+	eq write(K:K, tv(V:K, T:Type)) = write(K:K, tv(V:K, T:Type), value(bitSizeofType(T:Type))) .
+	mb context write(?, ?, value(`[HOLE`])) : KSentence . 
 	mb rule
-		< k > write(Loc:Nat, tv(V:K, T:Type))
+		< k > write(Loc:Nat, tv(V:K, T:Type), bitSize:Nat)
 			=> writeBytes(Loc:Nat, splitBytes(tv(V:K, T:Type)))
 		...</ k >
-		if bitSizeofType(T:Type) %Nat numBitsPerByte ==Bool 0
+		if bitSize:Nat %Nat numBitsPerByte ==Bool 0
 		andBool isByteLoc(Loc:Nat)
 		: KSentence [metadata "structural"] .
 		
@@ -144,7 +152,7 @@ mod COMMON-C-MEMORY-MISC is
 		
 	
 	mb [storeNew]: rule
-		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat => alloc(Loc:Nat, byteSizeofType(T:Type)) ~> write(Loc:Nat, tv(V:K, T:Type)) ...</ k >
+		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat => alloc(Loc:Nat, value(byteSizeofType(T:Type))) ~> write(Loc:Nat, tv(V:K, T:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- mb [store-N-New]: rule

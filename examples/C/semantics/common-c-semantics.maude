@@ -42,12 +42,16 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op discard : -> K .
 	op File-Scope : -> Id [ctor] .
 	op unnamedBitField : -> Id [ctor] .
+	op bignum : -> Type .
 	--- op sizedVal : K -> K [metadata "strict"] .
 	--- op loc : Nat Nat -> Nat .
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
 	--- subsort List{KResult} < K .
+	
+	op value : K -> K .
+	eq value(tv(V:K, ?)) = V:K .
 	
 	op allocateType : Nat Type -> K .
 	op giveType : K Type -> K .
@@ -112,9 +116,9 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	
 	op sizeofType : K -> K [metadata "strict"] . --- generates a tv(size, cfg:sizeut)
-	op bitSizeofType : Type -> Nat [memo] . --- generates just a Nat
-	op byteSizeofType : Type -> Nat [memo] . --- generates just a Nat
-	op bitsToBytes : Nat -> Nat [memo] .
+	op bitSizeofType : K -> K [metadata "strict"] .
+	op byteSizeofType : K -> K [metadata "strict"] .
+	op bitsToBytes : Nat -> Nat .
 	op sizeofExp : K -> K .
 	--- --- op HOLE : -> Expression .
 	op l : KLabel -> K [metadata "builtin wrapper"] .
@@ -168,17 +172,17 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op calcUnionSize-aux : List{KResult} Rat -> K .
 	--- op necessaryBytes : K -> K [metadata "strict"] .
 	op cast : Type K -> K [metadata "strict(2)"] . --- as described in 6.3
-	--- op arithInterpret : Type BaseValue -> K . --- interpret the result of arithmetic as in 6.5.4
+	op arithInterpret : Type BaseValue -> K . --- interpret the result of arithmetic as in 6.5.4
 	op interpret : Type K -> K [metadata "strict(2)"] . --- interpret the values of reading from mem
 	--- op leftShiftInterpret : Type BaseValue K -> K .
 	--- op rightShiftInterpret : Type BaseValue -> K .
 	--- op addLocals : Nat -> K .			
-	--- op integerTypes : -> Set [memo] .
-	--- op unsignedIntegerTypes : -> Set [memo] .
-	--- op signedIntegerTypes : -> Set [memo] .
-	--- op hasIntegerType : Type -> Bool [memo] .
-	--- op hasUnsignedIntegerType : Type -> Bool [memo] .
-	--- op hasSignedIntegerType : Type -> Bool [memo] .
+	op integerTypes : -> Set [memo] .
+	op unsignedIntegerTypes : -> Set [memo] .
+	op signedIntegerTypes : -> Set [memo] .
+	op hasIntegerType : Type -> Bool [memo] .
+	op hasUnsignedIntegerType : Type -> Bool [memo] .
+	op hasSignedIntegerType : Type -> Bool [memo] .
 	op typeof : K -> K .
 	--- op writeToFD : Nat Nat -> K .
 	--- op writeToFD : Nat String -> K .
@@ -218,7 +222,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op storeNew_atLoc_ : K Nat -> K [metadata "strict(1)"] .
 	op store_atLoc_ : K Nat -> K [metadata "strict(1)"] .
 	--- ---op allocate : K -> K [metadata "strict"] .
-	op alloc : Nat Nat -> K .
+	op alloc : K K -> K . --- should be K K 
 	--- op allocWithDefault : Nat K Nat -> K [metadata "strict(2)"] .
 	
 endm
@@ -264,8 +268,6 @@ mod C-SETTINGS is
 	eq max(enumType(?)) = max(int) .
 		
 	--- --- might not be matching the right thing here if the types become different
-	eq bitSizeofType(T:BaseType) = numBits(T:BaseType) .
-	eq bitSizeofType(pointerType(?)) = cfg:ptrsize *Nat numBitsPerByte .
 
 	--- --- — number of bits for smallest object that is not a bit-field (byte)
 	--- --- CHAR_BIT 8
@@ -407,27 +409,27 @@ mod SEMANTIC-HELPERS is
 		if K1:K =/=Bool K2:K .
 	eq (.).Set contains K:K = false .
 
-	--- ceq hasIntegerType(T:Type) = true
-		--- if (integerTypes contains T:Type) .
-	--- ceq hasIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
-	--- eq hasIntegerType(bitfieldType(?, ?)) = true .
+	ceq hasIntegerType(T:Type) = true
+		if (integerTypes contains T:Type) .
+	ceq hasIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	eq hasIntegerType(bitfieldType(?, ?)) = true .
 	
-	--- ceq hasUnsignedIntegerType(T:Type) = true
-		--- if (unsignedIntegerTypes contains T:Type) .
-	--- ceq hasUnsignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
-	--- ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = true 
-		--- if hasUnsignedIntegerType(T:Type) ==Bool true .
-	--- ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = false 
-		--- if hasUnsignedIntegerType(T:Type) ==Bool false .
+	ceq hasUnsignedIntegerType(T:Type) = true
+		if (unsignedIntegerTypes contains T:Type) .
+	ceq hasUnsignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = true 
+		if hasUnsignedIntegerType(T:Type) ==Bool true .
+	ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = false 
+		if hasUnsignedIntegerType(T:Type) ==Bool false .
 	
-	--- ceq hasSignedIntegerType(T:Type) = true
-		--- if (signedIntegerTypes contains T:Type) .
-	--- eq hasIntegerType(enumType(?)) = true .
-	--- ceq hasSignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
-	--- ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = true 
-		--- if hasSignedIntegerType(T:Type) ==Bool true .
-	--- ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = false 
-		--- if hasSignedIntegerType(T:Type) ==Bool false .
+	ceq hasSignedIntegerType(T:Type) = true
+		if (signedIntegerTypes contains T:Type) .
+	eq hasIntegerType(enumType(?)) = true .
+	ceq hasSignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = true 
+		if hasSignedIntegerType(T:Type) ==Bool true .
+	ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = false 
+		if hasSignedIntegerType(T:Type) ==Bool false .
 	
 
 
@@ -751,7 +753,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	--- FIXME check prototypes
 	mb [function-definition]: rule
-		--- < k > ['_`{_`}(typedDeclaration(T:Type, X:Id),, B:SeqList) => storeNew Closure(X:Id, T:Type, B:SeqList) atLoc Loc:Nat ~> calculateGotoMap(X:Id, B:SeqList) ~> skipval] ...</ k >
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) => 
 			storeNew tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
 			~> calculateGotoMap(X:Id, Block:K)
@@ -1066,7 +1067,7 @@ mod C-SEMANTICS-MISC is
 	eq NameLoc(K:K, ?) = K:K .
 endm
 
---- load common-c-conversions
+load common-c-conversions
 load common-c-expressions
 load common-c-statements
 --- load common-c-standard-lib
@@ -1082,6 +1083,7 @@ mod COMMON-C-SEMANTICS is
 	including COMMON-C-STATEMENTS .
 	including COMMON-C-EXPRESSIONS .
 	including COMMON-PARAMETER-BINDING .
+	including COMMON-C-CONVERSIONS .
 	
 	op eval : Program -> Bag .
 	op eval : Program List{K} String -> Bag .
@@ -1090,6 +1092,5 @@ mod COMMON-C-SEMANTICS is
 	
 	including COMMON-LOCAL-DECLARATION .
 	including COMMON-C-STANDARD-LIBRARY .
-	including COMMON-C-CONVERSIONS .
 	***)
 endm

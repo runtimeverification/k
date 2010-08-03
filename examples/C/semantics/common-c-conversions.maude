@@ -1,391 +1,394 @@
-mod COMMON-SEMANTICS-PROMOTIONS is
-	including COMMON-INCLUDE .
+--- mod COMMON-SEMANTICS-PROMOTIONS is
+	--- including COMMON-INCLUDE .
 	
-	op arithConversion : KLabel K K -> K [metadata "strict"] .
-	op arithConversion-int : KLabel K K -> K [metadata "strict"] .
-	op isArithBinOp : KLabel -> Bool .
-	op isArithBinConversionOp : KLabel -> Bool .
-	op arithBinOps : -> Set [memo] .
-	op arithBinConversionOps : -> Set [memo] .
-	eq arithBinOps = arithBinConversionOps Set(l('_<<_),, l('_>>_)) .
-	eq arithBinConversionOps = Set(
-		l('_*_),, l('_/_),, l('_%_),,
-		l('_+_),, l('_-_),,
-		l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
-		l('_==_),, l('_!=_),,
-		l('_&binop_),, l('_|_)
-	) .
-	eq isArithBinOp(KL:KLabel) = if arithBinOps contains l(KL:KLabel) then true else false fi .
-	eq isArithBinConversionOp(KL:KLabel) = if arithBinConversionOps contains l(KL:KLabel)  then true else false fi .
+	--- op arithConversion : KLabel K K -> K [metadata "strict"] .
+	--- op arithConversion-int : KLabel K K -> K [metadata "strict"] .
+	--- op isArithBinOp : KLabel -> Bool .
+	--- op isArithBinConversionOp : KLabel -> Bool .
+	--- op arithBinOps : -> Set [memo] .
+	--- op arithBinConversionOps : -> Set [memo] .
+	--- eq arithBinOps = arithBinConversionOps Set(l('_<<_),, l('_>>_)) .
+	--- eq arithBinConversionOps = Set(
+		--- l('_*_),, l('_/_),, l('_%_),,
+		--- l('_+_),, l('_-_),,
+		--- l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
+		--- l('_==_),, l('_!=_),,
+		--- l('_&binop_),, l('_|_)
+	--- ) .
+	--- eq isArithBinOp(KL:KLabel) = if arithBinOps contains l(KL:KLabel) then true else false fi .
+	--- eq isArithBinConversionOp(KL:KLabel) = if arithBinConversionOps contains l(KL:KLabel)  then true else false fi .
 
-	mb rule
-		< k > L:KLabel([tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))],, ?) ...</ k > 
-		if     isArithBinOp(L:KLabel)
-		andBool rank(T:Type) <Int rank(int)
-		andBool hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > L:KLabel(?,, [tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))]) ...</ k > 
-		if     isArithBinOp(L:KLabel)
-		andBool rank(T:Type) <Int rank(int)
-		andBool hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > [L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
-		=> arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))] ...</ k > 
-		if     isArithBinConversionOp(L:KLabel)
-		andBool T:Type =/=Bool T':Type
-		andBool hasIntegerType(T:Type)
-		andBool hasIntegerType(T':Type)
-		andBool rank(T:Type) >=Int rank(int)
-		andBool rank(T':Type) >=Int rank(int)
-		: KSentence [metadata "structural"] .
-	
-	---C99 6.3.1.8
-	--- First, if the corresponding real type of either operand is long double, the other operand is converted, without change of type domain, to a type whose corresponding real type is long double.
 	--- mb rule
-		--- < k > [arithConversion(tv(V1:BaseValue, long-double), tv(V2:BaseValue, T2:Type)) => 
-		--- converted(tv(V1:BaseValue, long-double), tv(V2:BaseValue, long-double))] ...</ k >
-		--- : KSentence .
-		
-	--- Otherwise, if the corresponding real type of either operand is double, the other operand is converted, without change of type domain, to a type whose corresponding real type is double.
+		--- < k > L:KLabel([tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))],, ?) ...</ k > 
+		--- if     isArithBinOp(L:KLabel)
+		--- andBool rank(T:Type) <Int rank(int)
+		--- andBool hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	--- mb rule
-		--- < k > [arithConversion(tv(V1:BaseValue, double), tv(V2:BaseValue, T2:Type)) => 
-		--- converted(tv(V1:BaseValue, double), tv(V2:BaseValue, double))] ...</ k >
-		--- if T2:Type =/=Bool long-double
-		--- : KSentence .
-		
-	--- Otherwise, if the corresponding real type of either operand is float, the other operand is converted, without change of type domain, to a type whose corresponding real type is float. 53) For example, addition of a double _Complex and a float entails just the conversion of the float operand to double (and yields a double _Complex result).
+		--- < k > L:KLabel(?,, [tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))]) ...</ k > 
+		--- if     isArithBinOp(L:KLabel)
+		--- andBool rank(T:Type) <Int rank(int)
+		--- andBool hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	--- mb rule
-		--- < k > [arithConversion(tv(V1:BaseValue, float), tv(V2:BaseValue, T2:Type)) => 
-		--- converted(tv(V1:BaseValue, float), tv(V2:BaseValue, float))] ...</ k >
-		--- if T2:Type =/=Bool long-double
-		--- andBool T2:Type =/=Bool double
-		--- : KSentence .
+		--- < k > [L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
+		--- => arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))] ...</ k > 
+		--- if     isArithBinConversionOp(L:KLabel)
+		--- andBool T:Type =/=Bool T':Type
+		--- andBool hasIntegerType(T:Type)
+		--- andBool hasIntegerType(T':Type)
+		--- andBool rank(T:Type) >=Int rank(int)
+		--- andBool rank(T':Type) >=Int rank(int)
+		--- : KSentence [metadata "structural"] .
+	
+	--- ---C99 6.3.1.8
+	--- --- First, if the corresponding real type of either operand is long double, the other operand is converted, without change of type domain, to a type whose corresponding real type is long double.
+	--- --- mb rule
+		--- --- < k > [arithConversion(tv(V1:BaseValue, long-double), tv(V2:BaseValue, T2:Type)) => 
+		--- --- converted(tv(V1:BaseValue, long-double), tv(V2:BaseValue, long-double))] ...</ k >
+		--- --- : KSentence .
 		
-	--- Otherwise, the integer promotions are performed on both operands ...
-	
-	---C99 6.3.1.1:2 For objects or expressions with an integer type  whose integer conversion rank is less than or equal to the rank of int and unsigned int, and a bit field of type _Bool, int, signed int, or unsigned int, If an int can represent all values of the original type, the value is converted to an int; otherwise, it is converted to an unsigned int.  These are called the integer promotions.  All other types are unchanged by the integer promotions.
-	---C99 6.3.1.1:3 The integer promotions preserve value including sign. As discussed earlier, whether a "plain" char is treated as signed is implementation-defined.
-	mb rule
-		[promote(tv(V:BaseValue, T:Type)) => tv(V:BaseValue, int)]
-		if     hasIntegerType(T:Type)
-		andBool rank(T:Type) <=Int rank(int)
-		andBool min(int) <=Int min(T:Type) 
-		andBool max(int) >=Int max(T:Type)		
-		: KSentence [metadata "structural"] .
-	--- fixme unclear what 6.3.1.1:3 means
-	mb rule
-		[promote(tv(V:BaseValue, T:Type)) => cast(unsigned-int, tv(V:BaseValue, T:Type))]
-		if     hasIntegerType(T:Type)
-		andBool rank(T:Type) <=Int rank(int)
-		andBool notBool (
-			min(int) <=Int min(T:Type) 
-			andBool max(int) >=Int max(T:Type)		
-		)
-		: KSentence [metadata "structural"] .
+	--- --- Otherwise, if the corresponding real type of either operand is double, the other operand is converted, without change of type domain, to a type whose corresponding real type is double.
+	--- --- mb rule
+		--- --- < k > [arithConversion(tv(V1:BaseValue, double), tv(V2:BaseValue, T2:Type)) => 
+		--- --- converted(tv(V1:BaseValue, double), tv(V2:BaseValue, double))] ...</ k >
+		--- --- if T2:Type =/=Bool long-double
+		--- --- : KSentence .
 		
-	mb rule
-		[promote(tv(F:Float, float)) => tv(F:Float, double)] 	
-		: KSentence [metadata "structural"] .
+	--- --- Otherwise, if the corresponding real type of either operand is float, the other operand is converted, without change of type domain, to a type whose corresponding real type is float. 53) For example, addition of a double _Complex and a float entails just the conversion of the float operand to double (and yields a double _Complex result).
+	--- --- mb rule
+		--- --- < k > [arithConversion(tv(V1:BaseValue, float), tv(V2:BaseValue, T2:Type)) => 
+		--- --- converted(tv(V1:BaseValue, float), tv(V2:BaseValue, float))] ...</ k >
+		--- --- if T2:Type =/=Bool long-double
+		--- --- andBool T2:Type =/=Bool double
+		--- --- : KSentence .
+		
+	--- --- Otherwise, the integer promotions are performed on both operands ...
 	
-	--- Then the following rules are applied to the promoted operands:
+	--- ---C99 6.3.1.1:2 For objects or expressions with an integer type  whose integer conversion rank is less than or equal to the rank of int and unsigned int, and a bit field of type _Bool, int, signed int, or unsigned int, If an int can represent all values of the original type, the value is converted to an int; otherwise, it is converted to an unsigned int.  These are called the integer promotions.  All other types are unchanged by the integer promotions.
+	--- ---C99 6.3.1.1:3 The integer promotions preserve value including sign. As discussed earlier, whether a "plain" char is treated as signed is implementation-defined.
+	--- mb rule
+		--- [promote(tv(V:BaseValue, T:Type)) => tv(V:BaseValue, int)]
+		--- if     hasIntegerType(T:Type)
+		--- andBool rank(T:Type) <=Int rank(int)
+		--- andBool min(int) <=Int min(T:Type) 
+		--- andBool max(int) >=Int max(T:Type)		
+		--- : KSentence [metadata "structural"] .
+	--- --- fixme unclear what 6.3.1.1:3 means
+	--- mb rule
+		--- [promote(tv(V:BaseValue, T:Type)) => cast(unsigned-int, tv(V:BaseValue, T:Type))]
+		--- if     hasIntegerType(T:Type)
+		--- andBool rank(T:Type) <=Int rank(int)
+		--- andBool notBool (
+			--- min(int) <=Int min(T:Type) 
+			--- andBool max(int) >=Int max(T:Type)		
+		--- )
+		--- : KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- [promote(tv(F:Float, float)) => tv(F:Float, double)] 	
+		--- : KSentence [metadata "structural"] .
 	
-	--- If both operands have the same type, then no further conversion is needed.
-	mb rule
-		< k > [arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T:Type)) 
-			=> L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T:Type))
-		] ...</ k >
-		: KSentence [metadata "structural"] .
-	op maxType : Type Type -> Type .
-	ceq maxType(T:Type, T':Type) = T:Type
-		if rank(T:Type) >=Int rank(T':Type) .
-	ceq maxType(T:Type, T':Type) = T':Type
-		if rank(T':Type) >=Int rank(T:Type) .
+	--- --- Then the following rules are applied to the promoted operands:
+	
+	--- --- If both operands have the same type, then no further conversion is needed.
+	--- mb rule
+		--- < k > [arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T:Type)) 
+			--- => L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T:Type))
+		--- ] ...</ k >
+		--- : KSentence [metadata "structural"] .
+	--- op maxType : Type Type -> Type .
+	--- ceq maxType(T:Type, T':Type) = T:Type
+		--- if rank(T:Type) >=Int rank(T':Type) .
+	--- ceq maxType(T:Type, T':Type) = T':Type
+		--- if rank(T':Type) >=Int rank(T:Type) .
 			
-	--- fixme implement other rules
-	mb rule
-		< k > [arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
-			=> L:KLabel(cast(maxType(T:Type, T':Type), tv(V:BaseValue, T:Type)),, cast(maxType(T:Type, T':Type), tv(V':BaseValue, T':Type)))
-		] ...</ k >
-		if T:Type =/=Bool T':Type
-		andBool (
-			(hasSignedIntegerType(T:Type) andBool hasSignedIntegerType(T':Type))
-			orBool 
-			(hasUnsignedIntegerType(T:Type) andBool hasUnsignedIntegerType(T':Type))
-		)
-		: KSentence [metadata "structural"] .
+	--- --- fixme implement other rules
+	--- mb rule
+		--- < k > [arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			--- => L:KLabel(cast(maxType(T:Type, T':Type), tv(V:BaseValue, T:Type)),, cast(maxType(T:Type, T':Type), tv(V':BaseValue, T':Type)))
+		--- ] ...</ k >
+		--- if T:Type =/=Bool T':Type
+		--- andBool (
+			--- (hasSignedIntegerType(T:Type) andBool hasSignedIntegerType(T':Type))
+			--- orBool 
+			--- (hasUnsignedIntegerType(T:Type) andBool hasUnsignedIntegerType(T':Type))
+		--- )
+		--- : KSentence [metadata "structural"] .
 	
-	--- Otherwise, if both operands have signed integer types or both have unsigned integer types, the operand with the type of lesser integer conversion rank is converted to the type of the operand with greater rank.
+	--- --- Otherwise, if both operands have signed integer types or both have unsigned integer types, the operand with the type of lesser integer conversion rank is converted to the type of the operand with greater rank.
 	
-	--- Otherwise...
-	--- fixme left out cases
-endm
+	--- --- Otherwise...
+	--- --- fixme left out cases
+--- endm
 
-mod COMMON-SEMANTICS-CAST is 
-	including COMMON-INCLUDE .
+--- mod COMMON-SEMANTICS-CAST is 
+	--- including COMMON-INCLUDE .
 	
-	mb rule ['Cast(T:Type,, E:Expression) => cast(T:Type, E:Expression)] : KSentence [metadata "structural"] .
+	--- mb rule ['Cast(T:Type,, E:Expression) => cast(T:Type, E:Expression)] : KSentence [metadata "structural"] .
 	
-	mb rule
-		< k > [cast(T:Type, tv(B:BaseValue, T:Type)) => tv(B:BaseValue, T:Type)] ...</ k > 
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > [cast(T:Type, tv(B:BaseValue, T:Type)) => tv(B:BaseValue, T:Type)] ...</ k > 
+		--- : KSentence [metadata "structural"] .
 	
-	---c99 6.3.1.3:1 When a value with integer type is converted to another integer type other than _Bool, if the value can be represented by the new type, it is unchanged. 
-	mb rule
-		< k > [cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int, T:Type)] ...</ k > 
-		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int 
-		andBool hasIntegerType(T':Type)
-		andBool hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
+	--- ---c99 6.3.1.3:1 When a value with integer type is converted to another integer type other than _Bool, if the value can be represented by the new type, it is unchanged. 
+	--- mb rule
+		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int, T:Type)] ...</ k > 
+		--- if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int 
+		--- andBool hasIntegerType(T':Type)
+		--- andBool hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
 		
-	---c99 6.3.1.3:2 Otherwise, if the new type is unsigned, the value is converted by repeatedly adding or subtracting one more than the maximum value that can be represented in the new type until the value is in the range of the new type.
-	mb rule
-		< k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int max(T:Type) +Int 1, T':Type))] ...</ k > 
-		if unsignedIntegerTypes contains T:Type 
-		andBool I:Int <Int min(T:Type)
-		andBool hasIntegerType(T':Type)
-		: KSentence [metadata "structural"] .
+	--- ---c99 6.3.1.3:2 Otherwise, if the new type is unsigned, the value is converted by repeatedly adding or subtracting one more than the maximum value that can be represented in the new type until the value is in the range of the new type.
+	--- mb rule
+		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int max(T:Type) +Int 1, T':Type))] ...</ k > 
+		--- if unsignedIntegerTypes contains T:Type 
+		--- andBool I:Int <Int min(T:Type)
+		--- andBool hasIntegerType(T':Type)
+		--- : KSentence [metadata "structural"] .
 		
-	--- fixme does this extra check for looping need to be done elsewhere?
-	mb rule
-		< k > [cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)] ...</ k > 
-		if unsignedIntegerTypes contains T:Type 
-		andBool I:Int >Int max(T:Type)
-		andBool hasIntegerType(T':Type)
-		: KSentence [metadata "structural"] .
+	--- --- fixme does this extra check for looping need to be done elsewhere?
+	--- mb rule
+		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)] ...</ k > 
+		--- if unsignedIntegerTypes contains T:Type 
+		--- andBool I:Int >Int max(T:Type)
+		--- andBool hasIntegerType(T':Type)
+		--- : KSentence [metadata "structural"] .
 	
-	---c99 6.3.1.3:3 Otherwise, the new type is signed and the value cannot be represented in it; either the result is implementation-defined or an implementation-defined signal is raised.
-	--- choice
-	mb rule
-		< k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T':Type))] ...</ k >
-		if I:Int <Int min(T:Type)
-		andBool notBool(unsignedIntegerTypes contains T:Type)
-		andBool hasIntegerType(T:Type)
-		andBool hasIntegerType(T':Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T':Type))] ...</ k >
-		if I:Int >Int max(T:Type)
-		andBool notBool(unsignedIntegerTypes contains T:Type)
-		andBool hasIntegerType(T:Type)
-		andBool hasIntegerType(T':Type)
-		: KSentence [metadata "structural"] .
+	--- ---c99 6.3.1.3:3 Otherwise, the new type is signed and the value cannot be represented in it; either the result is implementation-defined or an implementation-defined signal is raised.
+	--- --- choice
+	--- mb rule
+		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T':Type))] ...</ k >
+		--- if I:Int <Int min(T:Type)
+		--- andBool notBool(unsignedIntegerTypes contains T:Type)
+		--- andBool hasIntegerType(T:Type)
+		--- andBool hasIntegerType(T':Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T':Type))] ...</ k >
+		--- if I:Int >Int max(T:Type)
+		--- andBool notBool(unsignedIntegerTypes contains T:Type)
+		--- andBool hasIntegerType(T:Type)
+		--- andBool hasIntegerType(T':Type)
+		--- : KSentence [metadata "structural"] .
 
 	
-	---C99 6.3.1.4:1 When a finite value of real floating type is converted to an integer type other than _Bool, the fractional part is discarded (i.e., the value is truncated toward zero). If the value of the integral part cannot be represented by the integer type, the behavior is undefined.52) The remaindering operation performed when a value of integer type is converted to unsigned type need not be performed when a value of real floating type is converted to unsigned type. Thus, the range of portable real floating values is (-1, Utype_MAX+1).
-	--- fixme
-	mb rule
-		< k > [cast(T:Type, tv(V:Float, double)) => cast(T:Type, tv(truncRat(float2ratConversion(V:Float)), long-long-int))] ...</ k > 
-		if hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > [cast(T:Type, tv(V:Float, float)) => cast(T:Type, tv(truncRat(float2ratConversion(V:Float)), long-long-int))] ...</ k > 
-		if hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > [cast(T:Type, tv(V:Float, long-double)) => cast(T:Type, tv(truncRat(float2ratConversion(V:Float)), long-long-int))] ...</ k > 
-		if hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
+	--- ---C99 6.3.1.4:1 When a finite value of real floating type is converted to an integer type other than _Bool, the fractional part is discarded (i.e., the value is truncated toward zero). If the value of the integral part cannot be represented by the integer type, the behavior is undefined.52) The remaindering operation performed when a value of integer type is converted to unsigned type need not be performed when a value of real floating type is converted to unsigned type. Thus, the range of portable real floating values is (-1, Utype_MAX+1).
+	--- --- fixme
+	--- mb rule
+		--- < k > [cast(T:Type, tv(V:Float, double)) => cast(T:Type, tv(truncRat(float2ratConversion(V:Float)), long-long-int))] ...</ k > 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > [cast(T:Type, tv(V:Float, float)) => cast(T:Type, tv(truncRat(float2ratConversion(V:Float)), long-long-int))] ...</ k > 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > [cast(T:Type, tv(V:Float, long-double)) => cast(T:Type, tv(truncRat(float2ratConversion(V:Float)), long-long-int))] ...</ k > 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	
-	---C99 6.3.1.4:2 When a value of integer type is converted to a real floating type, if the value being converted can be represented exactly in the new type, it is unchanged. If the value being converted is in the range of values that can be represented but cannot be represented exactly, the result is either the nearest higher or nearest lower representable value, chosen in an implementation-defined manner. If the value being converted is outside the range of values that can be represented, the behavior is undefined.
-	--- fixme not handling floats correctly
-	mb rule
-		< k > [cast(T':Type, tv(I:Int, T:Type)) => tv(rat2floatConversion(I:Int), T':Type)] ...</ k > 
-		if hasIntegerType(T:Type)
-		andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
-		: KSentence [metadata "structural"] .
+	--- ---C99 6.3.1.4:2 When a value of integer type is converted to a real floating type, if the value being converted can be represented exactly in the new type, it is unchanged. If the value being converted is in the range of values that can be represented but cannot be represented exactly, the result is either the nearest higher or nearest lower representable value, chosen in an implementation-defined manner. If the value being converted is outside the range of values that can be represented, the behavior is undefined.
+	--- --- fixme not handling floats correctly
+	--- mb rule
+		--- < k > [cast(T':Type, tv(I:Int, T:Type)) => tv(rat2floatConversion(I:Int), T':Type)] ...</ k > 
+		--- if hasIntegerType(T:Type)
+		--- andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
+		--- : KSentence [metadata "structural"] .
 	
-	--- fixme all floats same precision
-	mb rule
-		< k > [cast(T':Type, tv(F:Float, T:Type)) => tv(F:Float, T':Type)] ...</ k > 
-		if (T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double)
-		andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
-		: KSentence [metadata "structural"] .
+	--- --- fixme all floats same precision
+	--- mb rule
+		--- < k > [cast(T':Type, tv(F:Float, T:Type)) => tv(F:Float, T':Type)] ...</ k > 
+		--- if (T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double)
+		--- andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
+		--- : KSentence [metadata "structural"] .
 	
-	--- fixme 6.3.2.3 not handling this correctly
-	mb rule
-		< k > [cast(T:Type, tv(loc(N:Nat, M:Nat), T':Type)) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k >
-		if hasIntegerType(T:Type) andBool hasIntegerType(T':Type)
-		: KSentence [metadata "structural"] .
+	--- --- fixme 6.3.2.3 not handling this correctly
+	--- mb rule
+		--- < k > [cast(T:Type, tv(loc(N:Nat, M:Nat), T':Type)) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k >
+		--- if hasIntegerType(T:Type) andBool hasIntegerType(T':Type)
+		--- : KSentence [metadata "structural"] .
 	
-	mb rule
-		< k > [cast(pointerType(T:Type), tv(I:Int, T':Type)) => tv(I:Int, pointerType(T:Type))] ...</ k >
-		if hasIntegerType(T':Type)
-		andBool I:Int =/=Bool 0
-		: KSentence [metadata "structural"] .
-	--- fixme
-	mb rule
-		< k > [cast(T:Type, tv(loc(N:Nat, M:Nat), pointerType(T':Type))) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k > 
-		if hasIntegerType(T:Type)
-		andBool notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0)
-		: KSentence [metadata "structural"] .
-	--- fixme maybe only for void?
-	mb rule
-		< k > [cast(T:Type, tv(N:Nat, pointerType(T':Type))) => cast(T:Type, tv(N:Nat, unsigned-long-int))] ...</ k > 
-		if hasIntegerType(T:Type)
-		andBool N:Nat >Nat 0
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > [cast(pointerType(T:Type), tv(I:Int, T':Type)) => tv(I:Int, pointerType(T:Type))] ...</ k >
+		--- if hasIntegerType(T':Type)
+		--- andBool I:Int =/=Bool 0
+		--- : KSentence [metadata "structural"] .
+	--- --- fixme
+	--- mb rule
+		--- < k > [cast(T:Type, tv(loc(N:Nat, M:Nat), pointerType(T':Type))) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k > 
+		--- if hasIntegerType(T:Type)
+		--- andBool notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0)
+		--- : KSentence [metadata "structural"] .
+	--- --- fixme maybe only for void?
+	--- mb rule
+		--- < k > [cast(T:Type, tv(N:Nat, pointerType(T':Type))) => cast(T:Type, tv(N:Nat, unsigned-long-int))] ...</ k > 
+		--- if hasIntegerType(T:Type)
+		--- andBool N:Nat >Nat 0
+		--- : KSentence [metadata "structural"] .
 	
-	--- fixme special rules for null pointer
-	mb rule
-		< k > [cast(pointerType(T:Type), tv(0, T':Type)) => tv(loc(0, 0), pointerType(T:Type))] ...</ k >
-		if hasIntegerType(T':Type)
-		: KSentence [metadata "structural"] .
-	--- fixme
-	mb rule
-		< k > [cast(T:Type, tv(loc(0, 0), pointerType(T':Type))) => tv(0, T:Type)] ...</ k > 
-		if hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
+	--- --- fixme special rules for null pointer
+	--- mb rule
+		--- < k > [cast(pointerType(T:Type), tv(0, T':Type)) => tv(loc(0, 0), pointerType(T:Type))] ...</ k >
+		--- if hasIntegerType(T':Type)
+		--- : KSentence [metadata "structural"] .
+	--- --- fixme
+	--- mb rule
+		--- < k > [cast(T:Type, tv(loc(0, 0), pointerType(T':Type))) => tv(0, T:Type)] ...</ k > 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
 		
-	--- fixme
-	--- possibly not true with other endiannesses
-	--- choice
-	mb rule
-		< k > [cast(pointerType(T:Type), tv(N:Nat, pointerType(?))) => tv(N:Nat, pointerType(T:Type))] ...</ k >
-		---if min(unsigned-int) <=Int I:Int andBool max(unsigned-int) >=Int I:Int
-		: KSentence [metadata "structural"] .
+	--- --- fixme
+	--- --- possibly not true with other endiannesses
+	--- --- choice
+	--- mb rule
+		--- < k > [cast(pointerType(T:Type), tv(N:Nat, pointerType(?))) => tv(N:Nat, pointerType(T:Type))] ...</ k >
+		--- ---if min(unsigned-int) <=Int I:Int andBool max(unsigned-int) >=Int I:Int
+		--- : KSentence [metadata "structural"] .
 				
-	mb rule
-		< k > [cast(pointerType(bitfieldType(T:Type, Len:Nat)), tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(?)))
-		=> tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))] ...</ k > 
-		: KSentence [metadata "structural"] .
-endm
+	--- mb rule
+		--- < k > [cast(pointerType(bitfieldType(T:Type, Len:Nat)), tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(?)))
+		--- => tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))] ...</ k > 
+		--- : KSentence [metadata "structural"] .
+--- endm
 
 mod COMMON-C-CONVERSIONS is
-	including COMMON-SEMANTICS-CAST .
-	including COMMON-SEMANTICS-PROMOTIONS .
+	including COMMON-INCLUDE .
+	--- including COMMON-SEMANTICS-CAST .
+	--- including COMMON-SEMANTICS-PROMOTIONS .
 	
-	--- fixme not sure about this
-	--- interpret is used to "cast" values read from memory
-	--- shouldn't need to do the < min one since values start positive
-	mb rule [interpret(T:Type, I:Int) => tv(I:Int, T:Type)]
-		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
-		andBool hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		[interpret(T:Type, I:Int) => interpret(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))]
-		if I:Int >Int max(T:Type)
-		andBool hasIntegerType(T:Type)
-		andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
-		: KSentence [metadata "structural"] .
-	--- fixme not necessarily the case that pointers are unsigned-ints
-	mb rule [interpret(pointerType(T:Type), N:Nat) => tv(N:Nat, pointerType(T:Type))]
-		if min(unsigned-int) <=Int N:Nat andBool max(unsigned-int) >=Int N:Nat
-		: KSentence [metadata "structural"] .
+	--- --- fixme not sure about this
+	--- --- interpret is used to "cast" values read from memory
+	--- --- shouldn't need to do the < min one since values start positive
+	--- mb rule [interpret(T:Type, I:Int) => tv(I:Int, T:Type)]
+		--- if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
+		--- andBool hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- [interpret(T:Type, I:Int) => interpret(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))]
+		--- if I:Int >Int max(T:Type)
+		--- andBool hasIntegerType(T:Type)
+		--- andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- --- fixme not necessarily the case that pointers are unsigned-ints
+	--- mb rule [interpret(pointerType(T:Type), N:Nat) => tv(N:Nat, pointerType(T:Type))]
+		--- if min(unsigned-int) <=Int N:Nat andBool max(unsigned-int) >=Int N:Nat
+		--- : KSentence [metadata "structural"] .
 		
-	mb rule [arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type)]
-		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
-		andBool hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-		
-		
-	--- fixme there should be a more controlled way of doing this
-	--- it's also wrong
-	mb rule [tv(I:Int, bitfieldType(T:Type, N:Nat)) => tv(I:Int, T:Type)] : KSentence [metadata "structural"] .
-		
-	--- c99 6.5.7:4 The result of E1 << E2 is E1 left-shifted E2 bit positions; vacated bits are filled with zeros. If E1 has an unsigned type, the value of the result is E1 times 2^(E2), reduced modulo one more than the maximum value representable in the result type. If E1 has a signed type and nonnegative value, and E1 times 2^(E2) is representable in the result type, then that is the resulting value; otherwise, the behavior is undefined. 
-	--- e1 = 2147483647; e1 * 2^(1) = 2147483647 * 2 = 4294967294
-	mb rule [leftShiftInterpret(T:Type, I:Int, tv(E1:Int, T:Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)]
-		if unsignedIntegerTypes contains T:Type
-		: KSentence [metadata "structural"] .
-	mb rule [leftShiftInterpret(T:Type, I:Int, tv(E1:Nat, T:Type)) => interpret(T:Type, I:Int)]
-		if hasIntegerType(T:Type)
-		andBool notBool (unsignedIntegerTypes contains T:Type)
-		andBool I:Int <=Int (2 ^Nat absInt(numBits(T:Type)))
-		: KSentence [metadata "structural"] .
-		
-	--- c99 6.5.7:5 The result of E1 >> E2 is E1 right-shifted E2 bit positions. If E1 has an unsigned type or if E1 has a signed type and a nonnegative value, the value of the result is the integral part of the quotient of E1 / 2^(E2). If E1 has a signed type and a negative value, the resulting value is implementation-defined.
-	mb rule [rightShiftInterpret(T:Type, I:Int) => tv(I:Int, T:Type)]
-		if integerTypes contains T:Type
-		: KSentence [metadata "structural"] .
+	--- mb rule [arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type)]
+		--- if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
+		--- andBool hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	
-	--- fixme
-	mb rule [arithInterpret(T:Type, F:Float) => tv(F:Float, T:Type)]
-		if (T:Type ==Bool double)
-		orBool T:Type ==Bool float
-		orBool T:Type ==Bool long-double
-		: KSentence [metadata "structural"] .
-	--- signed arithmetic isn't supposed to overflow
-	mb rule
-		[arithInterpret(T:Type, I:Int) => 
-		---arithInterpret(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))
-		tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
-		]
-		if unsignedIntegerTypes contains T:Type
-		andBool I:Int >Int max(T:Type)
-		---andBool _-Int_(I:Int, (max(T:Type) +Int 1)) >=Int min(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		[arithInterpret(T:Type, I:Int) => arithInterpret(T:Type, _+Int_(I:Int, (max(T:Type) +Int 1)))]
-		if unsignedIntegerTypes contains T:Type
-		andBool I:Int <Int min(T:Type)
-		andBool _+Int_(I:Int, (max(T:Type) +Int 1)) <=Int max(T:Type)
-		: KSentence [metadata "structural"] .
-
-	op concretize-aux : Value Nat -> K .
-	ceq concretize(atv(L:List{K}, T:Type)) = concretize-aux(atv(L:List{K}, T:Type), 0) 
-		if hasIntegerType(T:Type)
-		andBool getKLabel(T:Type) =/=Bool 'pointerType .
+	mb rule arithInterpret(bignum, I:Int) => tv(I:Int, bignum)
+		: KSentence [metadata "structural"] .	
 		
-	eq concretize(atv((piece(N:Nat, Len:Nat),, L:List{K}), pointerType(T:Type))) = concretize-aux(atv((piece(N:Nat, Len:Nat),, L:List{K}), pointerType(T:Type)), 0) .
-	--- ceq concretize(atv((piece(N:Nat, Len:Nat),, L:List{K}), T:Type)) = concretize-aux(atv((piece(N:Nat, Len:Nat),, L:List{K}), T:Type), 0) 
-		--- if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
+	--- --- fixme there should be a more controlled way of doing this
+	--- --- it's also wrong
+	--- mb rule [tv(I:Int, bitfieldType(T:Type, N:Nat)) => tv(I:Int, T:Type)] : KSentence [metadata "structural"] .
+		
+	--- --- c99 6.5.7:4 The result of E1 << E2 is E1 left-shifted E2 bit positions; vacated bits are filled with zeros. If E1 has an unsigned type, the value of the result is E1 times 2^(E2), reduced modulo one more than the maximum value representable in the result type. If E1 has a signed type and nonnegative value, and E1 times 2^(E2) is representable in the result type, then that is the resulting value; otherwise, the behavior is undefined. 
+	--- --- e1 = 2147483647; e1 * 2^(1) = 2147483647 * 2 = 4294967294
+	--- mb rule [leftShiftInterpret(T:Type, I:Int, tv(E1:Int, T:Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)]
+		--- if unsignedIntegerTypes contains T:Type
+		--- : KSentence [metadata "structural"] .
+	--- mb rule [leftShiftInterpret(T:Type, I:Int, tv(E1:Nat, T:Type)) => interpret(T:Type, I:Int)]
+		--- if hasIntegerType(T:Type)
+		--- andBool notBool (unsignedIntegerTypes contains T:Type)
+		--- andBool I:Int <=Int (2 ^Nat absInt(numBits(T:Type)))
+		--- : KSentence [metadata "structural"] .
+		
+	--- --- c99 6.5.7:5 The result of E1 >> E2 is E1 right-shifted E2 bit positions. If E1 has an unsigned type or if E1 has a signed type and a nonnegative value, the value of the result is the integral part of the quotient of E1 / 2^(E2). If E1 has a signed type and a negative value, the resulting value is implementation-defined.
+	--- mb rule [rightShiftInterpret(T:Type, I:Int) => tv(I:Int, T:Type)]
+		--- if integerTypes contains T:Type
+		--- : KSentence [metadata "structural"] .
+	
+	--- --- fixme
+	--- mb rule [arithInterpret(T:Type, F:Float) => tv(F:Float, T:Type)]
+		--- if (T:Type ==Bool double)
+		--- orBool T:Type ==Bool float
+		--- orBool T:Type ==Bool long-double
+		--- : KSentence [metadata "structural"] .
+	--- --- signed arithmetic isn't supposed to overflow
+	--- mb rule
+		--- [arithInterpret(T:Type, I:Int) => 
+		--- ---arithInterpret(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))
+		--- tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
+		--- ]
+		--- if unsignedIntegerTypes contains T:Type
+		--- andBool I:Int >Int max(T:Type)
+		--- ---andBool _-Int_(I:Int, (max(T:Type) +Int 1)) >=Int min(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- [arithInterpret(T:Type, I:Int) => arithInterpret(T:Type, _+Int_(I:Int, (max(T:Type) +Int 1)))]
+		--- if unsignedIntegerTypes contains T:Type
+		--- andBool I:Int <Int min(T:Type)
+		--- andBool _+Int_(I:Int, (max(T:Type) +Int 1)) <=Int max(T:Type)
+		--- : KSentence [metadata "structural"] .
 
-	--- ceq concretize(atv(L:List{K}, bitfieldType(T:Type, ?))) = concretize-aux(atv(L:List{K}, T:Type), 0) 
+	--- op concretize-aux : Value Nat -> K .
+	--- ceq concretize(atv(L:List{K}, T:Type)) = concretize-aux(atv(L:List{K}, T:Type), 0) 
+		--- if hasIntegerType(T:Type)
+		--- andBool getKLabel(T:Type) =/=Bool 'pointerType .
+		
+	--- eq concretize(atv((piece(N:Nat, Len:Nat),, L:List{K}), pointerType(T:Type))) = concretize-aux(atv((piece(N:Nat, Len:Nat),, L:List{K}), pointerType(T:Type)), 0) .
+	--- --- ceq concretize(atv((piece(N:Nat, Len:Nat),, L:List{K}), T:Type)) = concretize-aux(atv((piece(N:Nat, Len:Nat),, L:List{K}), T:Type), 0) 
+		--- --- if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
+
+	--- --- ceq concretize(atv(L:List{K}, bitfieldType(T:Type, ?))) = concretize-aux(atv(L:List{K}, T:Type), 0) 
+		--- --- if hasIntegerType(T:Type) .
+	--- --- ceq concretize(atv(L:List{K}, bitfieldType(T:Type, N:Nat))) = concretize-aux(atv(L:List{K}, bitfieldType(T:Type, N:Nat)), 0) 
+		--- --- if hasIntegerType(T:Type) .
+		
+	--- --- we have fake floats and pointers because their details are very unknown
+	--- eq concretize(atv((F:Float,, L:List{K}), float)) = tv(F:Float, float) .
+	--- eq concretize(atv((F:Float,, L:List{K}), double)) = tv(F:Float, double) .
+	--- eq concretize(atv((F:Float,, L:List{K}), long-double)) = tv(F:Float, long-double) .
+	--- ceq concretize(atv((loc(N:Nat, M:Nat),, L:List{K}), T:Type)) = tv(loc(N:Nat, M:Nat), T:Type) 
+		--- if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
+	--- ceq concretize(atv((loc(0, 0),, L:List{K}), T:Type)) = tv(0, T:Type) 
 		--- if hasIntegerType(T:Type) .
-	--- ceq concretize(atv(L:List{K}, bitfieldType(T:Type, N:Nat))) = concretize-aux(atv(L:List{K}, bitfieldType(T:Type, N:Nat)), 0) 
-		--- if hasIntegerType(T:Type) .
+	--- eq concretize(atv((loc(0, 0),, L:List{K}), pointerType(T:Type))) = tv(loc(0, 0), T:Type) .
 		
-	--- we have fake floats and pointers because their details are very unknown
-	eq concretize(atv((F:Float,, L:List{K}), float)) = tv(F:Float, float) .
-	eq concretize(atv((F:Float,, L:List{K}), double)) = tv(F:Float, double) .
-	eq concretize(atv((F:Float,, L:List{K}), long-double)) = tv(F:Float, long-double) .
-	ceq concretize(atv((loc(N:Nat, M:Nat),, L:List{K}), T:Type)) = tv(loc(N:Nat, M:Nat), T:Type) 
-		if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
-	ceq concretize(atv((loc(0, 0),, L:List{K}), T:Type)) = tv(0, T:Type) 
-		if hasIntegerType(T:Type) .
-	eq concretize(atv((loc(0, 0),, L:List{K}), pointerType(T:Type))) = tv(loc(0, 0), T:Type) .
-		
-	--- fixme is this really necessary?
-	eq concretize(atv((piece(0, 8),, L:List{K}), pointerType(T:Type))) = tv(loc(0, 0), pointerType(T:Type)) .
+	--- --- fixme is this really necessary?
+	--- eq concretize(atv((piece(0, 8),, L:List{K}), pointerType(T:Type))) = tv(loc(0, 0), pointerType(T:Type)) .
 
-	--- fixme for now
-	eq concretize(atv(L:List{K}, structType(X:Id))) = atv(L:List{K}, structType(X:Id)) .
-	eq concretize(atv(L:List{K}, unionType(X:Id))) = atv(L:List{K}, unionType(X:Id)) .
+	--- --- fixme for now
+	--- eq concretize(atv(L:List{K}, structType(X:Id))) = atv(L:List{K}, structType(X:Id)) .
+	--- eq concretize(atv(L:List{K}, unionType(X:Id))) = atv(L:List{K}, unionType(X:Id)) .
 	
-	eq concretize-aux(atv((L:List{K},, piece(N':Nat, Len:Nat)), T:Type), N:Nat) 
-		= concretize-aux(atv(L:List{K}, T:Type), (N:Nat <<Nat Len:Nat) |Nat N':Nat) .
-	ceq concretize-aux(atv(.List{K}, T:Type), N:Nat)
-		= interpret(T:Type, N:Nat) 
-		if getKLabel(T:Type) =/=Bool 'pointerType .
-	eq concretize-aux(atv(.List{K}, pointerType(T:Type)), 0)
-		= tv(loc(0, 0), pointerType(T:Type)) .
-	--- fixme check on this, not sure if we're really allowed to have conversion.  maybe just for void?
-	ceq concretize-aux(atv(.List{K}, pointerType(T:Type)), N:Nat)
-		= tv(N:Nat, pointerType(T:Type)) 
-		if N:Nat >Nat 0 .
+	--- eq concretize-aux(atv((L:List{K},, piece(N':Nat, Len:Nat)), T:Type), N:Nat) 
+		--- = concretize-aux(atv(L:List{K}, T:Type), (N:Nat <<Nat Len:Nat) |Nat N':Nat) .
+	--- ceq concretize-aux(atv(.List{K}, T:Type), N:Nat)
+		--- = interpret(T:Type, N:Nat) 
+		--- if getKLabel(T:Type) =/=Bool 'pointerType .
+	--- eq concretize-aux(atv(.List{K}, pointerType(T:Type)), 0)
+		--- = tv(loc(0, 0), pointerType(T:Type)) .
+	--- --- fixme check on this, not sure if we're really allowed to have conversion.  maybe just for void?
+	--- ceq concretize-aux(atv(.List{K}, pointerType(T:Type)), N:Nat)
+		--- = tv(N:Nat, pointerType(T:Type)) 
+		--- if N:Nat >Nat 0 .
 		
-	--- fixme
-	ceq concretize-aux(atv(loc(N:Nat, M:Nat), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
-		= tv(loc(N:Nat, M:Nat), T:Type)
-	if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
-	ceq concretize-aux(atv(loc(0, 0), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
-		= tv(0, T:Type) 
-		if getKLabel(T:Type) =/=Bool 'pointerType .
-	ceq concretize-aux(atv(loc(N:Nat, M:Nat), T:Type), 0)
-		= tv(loc(N:Nat, M:Nat), T:Type)
-	if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
-	ceq concretize-aux(atv(loc(0, 0), T:Type), 0)
-		= tv(0, T:Type) 
-		if getKLabel(T:Type) =/=Bool 'pointerType .
+	--- --- fixme
+	--- ceq concretize-aux(atv(loc(N:Nat, M:Nat), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
+		--- = tv(loc(N:Nat, M:Nat), T:Type)
+	--- if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
+	--- ceq concretize-aux(atv(loc(0, 0), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
+		--- = tv(0, T:Type) 
+		--- if getKLabel(T:Type) =/=Bool 'pointerType .
+	--- ceq concretize-aux(atv(loc(N:Nat, M:Nat), T:Type), 0)
+		--- = tv(loc(N:Nat, M:Nat), T:Type)
+	--- if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
+	--- ceq concretize-aux(atv(loc(0, 0), T:Type), 0)
+		--- = tv(0, T:Type) 
+		--- if getKLabel(T:Type) =/=Bool 'pointerType .
 		
-	--- fixme, terribly unsafe
-	--- ceq concretize-aux(atv((?,, F:Float,, ?), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
-		--- = tv(F:Float, T:Type)
-	--- if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
+	--- --- fixme, terribly unsafe
+	--- --- ceq concretize-aux(atv((?,, F:Float,, ?), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
+		--- --- = tv(F:Float, T:Type)
+	--- --- if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
 		
 	eq integerTypes = signedIntegerTypes unsignedIntegerTypes .
 	eq unsignedIntegerTypes = Set(unsigned-char,, unsigned-short-int,, unsigned-int,, unsigned-long-int,, unsigned-long-long-int) .
-	eq signedIntegerTypes = Set(char,, signed-char,, short-int,, int,, long-int,, long-long-int) .
+	eq signedIntegerTypes = Set(char,, signed-char,, short-int,, int,, long-int,, long-long-int,, bignum) .
 endm

@@ -253,7 +253,7 @@ mod COMMON-C-TYPING is
 	mb rule [long-long => long-long-int] : KSentence [metadata "structural"] .
 	***)
 			
-	eq byteSizeofType(T:Type) = bitsToBytes(bitSizeofType(T:Type)) .
+	--- eq byteSizeofType(T:Type) = bitsToBytes(bitSizeofType(T:Type)) .
 			
 	eq hasArrayType(arrayType(?, ?)) = true .
 	ceq hasArrayType(T:Type) = false
