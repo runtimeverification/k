@@ -43,7 +43,7 @@ mod COMMON-SEMANTICS-READING is
 		: KSentence [metadata "structural"] .
 		
 	---op combineData : List{KResult} -> K .
-	op dataList : List{KResult} -> KResult .
+	op dataList : List{K} -> KResult . --- would like this to be List{KResult}
 	
 	---eq combineData(functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
 	

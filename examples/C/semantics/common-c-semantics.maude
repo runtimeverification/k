@@ -47,7 +47,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
-	subsort List{KResult} < K .
+	--- subsort List{KResult} < K .
 	
 	op allocateType : Nat Type -> K .
 	op giveType : K Type -> K .
