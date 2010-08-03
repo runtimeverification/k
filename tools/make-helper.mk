@@ -53,7 +53,7 @@ crop-pdf: ${CROP_PDF_FILE}
 $(CROP_PDF_FILE): $(EPS_FILES)
 	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls $(MAIN_FILE)-ps-[0-9][0-9][0-9].eps`
 
-$(PDF_FILE): $(CROP_PDF_FILE) 
+$(PDF_FILE): $(LATEX_FILE) 
 	$(TOOL_DIR)/nice-pdf.sh $(MAIN_FILE)
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
@@ -67,4 +67,4 @@ test-%: %
 force: ;
 	
 clean:
-	rm -f $(MAIN_FILE)-compiled.maude kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi *.png $(MAIN_FILE).tex $(CROP_PDF_FILE)
+	rm -f $(MAIN_FILE)-compiled.maude kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE)

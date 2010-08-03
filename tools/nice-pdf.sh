@@ -1,14 +1,16 @@
 #!/bin/bash
 MAIN_FILE=$1
-BBOX=$(grep -o "BoundingBox: [0-9. ]*" *.eps)
-W=$(echo "$BBOX" | sed 's/.* \([0-9.]*\) [0-9.]*$/\1/' |sort -n|tail -1)
-#H=$(echo "$BBOX" |sed 's/.* \([0-9.]*\)$/\1/' |sort -n | tail -1)
-echo "
-\documentclass{article}
-\usepackage{pdfpages}
-\usepackage[papersize={${W}px,9.05in}]{geometry}
-
-\begin{document}
-\includepdf[pages=-,noautoscale,templatesize={${W}px}{9.05in}]{$MAIN_FILE-crop}
-\end{document}
-" | pdflatex --jobname=$MAIN_FILE
+echo "Running LaTeX to approximate height"
+cat $1.tex | sed 's/\\begin{document}/\\pagestyle{empty}\\begin{document}/ ; s/\\newpage/\\\\bigskip/g' | latex --jobname=$1 >/dev/null 
+PAGES=$(grep -o "[0-9]\+ pages, " $1.log | grep -o "[0-9]*")
+echo "We have $PAGES pages"
+H=$(( 9 * PAGES))
+PH=$(( H + 1))
+echo "Re-running latex with approximative height $PH inches" 
+cat $1.tex | sed "s/\\\\begin{document}/\\\\geometry{papersize={1200mm,${PH}in},textheight=${H}in,textwidth=1180mm}\\\\pagestyle{empty}\\\\begin{document}\\\\noindent\\\\hspace{-2px}\\\\rule{1px}{1px}/ ; s/\\\\end{document}/\\\\par\\\\noindent\\\\hspace{-2px}\\\\rule{1px}{1px}\\\\end{document}/ ; s/\\\\newpage/\\\\bigskip/g" |latex --jobname=$1 |grep wide
+echo "Converting to postscript"
+dvips $MAIN_FILE -o $MAIN_FILE.ps 2>/dev/null
+echo "Converting to eps"
+ps2eps -f -q -P -H -l $MAIN_FILE.ps
+echo "Converting to pdf"
+gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$MAIN_FILE.pdf $MAIN_FILE.eps
