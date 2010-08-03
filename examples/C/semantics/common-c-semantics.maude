@@ -688,7 +688,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	mb rule
 		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
-		< env >... E:Map => E:Map[Loc:Nat / X:Id] ...</ env >
+		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
 		: KSentence .
 	
 	--- initNameGroup(typeNamePair(T:Type, Name:K), Exp:K) .

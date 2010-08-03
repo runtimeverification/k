@@ -17,9 +17,9 @@ int main() {
 	struct bitf s;
 	struct a y;
 	struct b {
-		int x;
+		int q;
 	} x;
-	struct b y;
+	struct b z;
 	s.a = 2;
 	s.b = 18;
 	int n = 10;

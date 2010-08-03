@@ -227,10 +227,12 @@ mod COMMON-C-STATEMENTS is
 	
 	op popBlock : -> K .
 	--- dissolve blocks
-	--- FIXME need to handle scope
+	--- FIXME need more default
 	mb [dissolve-block]: rule 
 		< k > Block(?, Statements:List{C}) => listToK(Statements:List{C}) ~> popBlock ...</ k > 
-		(< local > C:Bag </ local > => < local >... (.).Bag ...</ local >)
+		--- < local > C:Bag => ? </ local >
+		(< local > C:Bag </ local > => < local > < structs > (.).Map </ structs > ...</ local >)
+		--- (< local > C:Bag </ local > => < local > (.).Bag ...</ local >)
 		< blockStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ blockStack >
 		: KSentence [metadata "structural"] .
 

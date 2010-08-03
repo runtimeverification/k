@@ -185,15 +185,10 @@ mod COMMON-C-TYPING is
 		< k > StructDef(X:Id, L:List{Type})
 			=> addAggregate(X:Id, L:List{Type})
 			~> giveType(X:Id, structType(X:Id))
-			~> structDefType(X:Id, L:List{Type})
+			~> structType(X:Id)
 		...</ k >
 		: KSentence .
-		
-	--- mb rule
-		--- < k > OnlyTypedef(structDefType(X:Id, L:List{Type})) 
-			--- => addNewAggregate(X:Id, L:List{Type})
-		--- ...</ k >
-		--- : KSentence .
+
 	mb rule
 		< k > OnlyTypedef(?) => . ...</ k >
 		: KSentence .
