@@ -29,16 +29,12 @@ my @nodes = ();
 # syntax_common_check($ARGV[0]);
 
 # remove "kompile_warnings.txt"
-system("rm", "$warnings_file");
-
-if ($? == 0)
+if (-e $warnings_file)
 {
-    print "Previous version of $warnings_file removed.\n";
-}
-else 
-{    
-    # print "Previous version of $warnings_file not removed!\n";
-}
+#	system("rm", "$warnings_file");
+	unlink($warnings_file);
+	print "Previous version of $warnings_file removed.\n";
+}	
 
 # start syntax checking.
 sub syntax_common_check
