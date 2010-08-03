@@ -409,7 +409,7 @@ fmod META-K-WRAPPERS is
    = qid(string(T) + "_") .
 
   op isWrapped : Module Type -> Bool [memo] .
-  eq isWrapped(M, T) = T in (klabelsorts ; 'CellLabel ; 'Bag ; 'BagItem ; 'Set ; 'SetItem ; 'List ; 'ListItem ; 'Map ; 'MapItem ; 'List`{K`}) 
+  eq isWrapped(M, T) = T in (klabelsorts ; 'CellLabel ; 'Bag ; 'NeBag ; 'BagItem ; 'Set ; 'NeSet ; 'SetItem ; 'List ; 'NeList ; 'ListItem ; 'Map ; 'NeMap ; 'MapItem ; 'List`{K`} ; 'NeList`{K`} ; 'List`{KResult`} ; 'NeKProperList) 
      or-else isWrapped(getWrappers(getOps(flatten(M))), T) .
 
   op isWrapped : OpDeclSet Type -> Bool .
