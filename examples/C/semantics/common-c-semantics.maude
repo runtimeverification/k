@@ -916,7 +916,7 @@ mod C-SEMANTICS-MISC is
 		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
 	--- if notBool(T:Type isa 'bitfieldType) .
 	
-	--- ceq calculateLength(loc(Block:Nat, Offset:Nat), tv(R:Rat, ?), T:Type) = 
+	eq calculateLength(Nil) = 0 .
 		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
 	--- if notBool(T:Type isa 'bitfieldType) .
 

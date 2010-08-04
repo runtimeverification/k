@@ -304,6 +304,12 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 			~> tv(V:BaseValue, T:Type)
 		...</ k >
 		: KSentence [metadata "structural"] .
+	--- C99 6.5.16.1:2 In simple assignment (=), the value of the right operand is converted to the type of the assignment expression and replaces the value stored in the object designated by the left operand
+	mb rule
+		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), (tv(V:BaseValue, T':Type) => cast(T:Type, tv(V:BaseValue, T':Type))))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		: KSentence [metadata "structural"] .
 		
 	--- mb [assign-bitfield]: rule
 		--- < k > [assign(Deref(tv(bitloc(Block:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))), tv(V:Int, T:Type)) 
@@ -578,13 +584,15 @@ mod COMMON-SEMANTICS-REFERENCE is
 	--- fixme this is crazy
 	--- if label not arrayType?
 	op fixPointerType : Type -> Type .
-	eq fixPointerType(T:BaseType) = pointerType(T:BaseType) .
+	ceq fixPointerType(T:Type) = pointerType(T:Type)
+		if notBool(hasArrayType(T:Type)) .
+	--- eq fixPointerType(T:BaseType) = pointerType(T:BaseType) .
 	eq fixPointerType(arrayType(T:Type, ?)) = pointerType(T:Type) .
-	eq fixPointerType(structType(X:Id)) = pointerType(structType(X:Id)) .
-	eq fixPointerType(unionType(X:Id)) = pointerType(unionType(X:Id)) .
-	eq fixPointerType(pointerType(T:Type)) = pointerType(pointerType(T:Type)) .
-	eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
-	eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
+	--- eq fixPointerType(structType(X:Id)) = pointerType(structType(X:Id)) .
+	--- eq fixPointerType(unionType(X:Id)) = pointerType(unionType(X:Id)) .
+	--- eq fixPointerType(pointerType(T:Type)) = pointerType(pointerType(T:Type)) .
+	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
+	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	
 	mb rule &(*(E:Expression)) => E:Expression : KSentence [metadata "structural"] .
 	mb rule &(ArrayIndex(E1:Expression, E2:Expression)) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
@@ -594,29 +602,30 @@ mod COMMON-SEMANTICS-REFERENCE is
 		< types >... X:Id |-> T:Type ...</ types >
 		: KSentence [metadata "structural"] .
 		
-	op getFieldOffset : Id Id -> K .
-	op getStructFieldOffset : Id Id -> K .
-	op getUnionFieldOffset : Id Id -> K .
+	--- op getFieldOffset : Id Id -> K .
+	--- op getStructFieldOffset : Id Id -> K .
+	--- op getUnionFieldOffset : Id Id -> K .
 	
-	--- mb [getFieldOffset]: rule
-		--- < k > getFieldOffset(S:Id, F:Id)
-			--- => cast(fixPointerType(T:Type), getOffset(S:Id, X:Id))
+	--- mb [getStructFieldOffset]: rule
+		--- < k > getStructFieldOffset(S:Id, F:Id)
+			--- => cast(fixPointerType(T:Type), getOffset(S:Id, F:Id))
 			--- --- => tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
 		--- ...</ k >
 		--- < types >... S:Id |-> pointerType(structDefType) ...</ types >
 		--- --- < structs >... S:Id |-> Fields:List{Type} ...</ structs >
 		--- : KSentence [metadata "structural"] .
+	--- --- (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?:List{Type})
 	
-	eq getUnionFieldOffset(?, ?) = tv(0, pointerType(void)) .
+	--- eq getUnionFieldOffset(?, ?) = tv(0, pointerType(void)) .
+	--- op giveType : Type K -> K .
 	--- FIXME should be checking pointer
-	--- mb [address-of-arrow-struct]: rule
-		--- < k > &(tv(Loc:Nat, pointerType(structType(S:Id))) -> X:Id)
-			--- => cast(fixPointerType(T:Type), getFieldOffset(S:Id, X:Id))
-			--- --- => tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
-		--- ...</ k >
-		--- --- < structs >... S:Id |-> Fields:List{Type} ...</ structs >
-		--- : KSentence [metadata "structural"] .
-	--- (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?:List{Type})
+	mb [address-of-arrow-struct]: rule
+		< k > &(tv(Loc:Nat, pointerType(structType(S:Id))) -> X:Id)
+			=> tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
+		...</ k >
+		< structs >... S:Id |-> (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?) ...</ structs >
+		: KSentence [metadata "structural"] .
+
 		
 	--- mb [address-of-arrow-union]: rule
 		--- < k > &(tv(Loc:Nat, pointerType(unionType(S:Id))) -> X:Id) 

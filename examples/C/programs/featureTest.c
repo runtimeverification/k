@@ -20,8 +20,8 @@ int main() {
 		int q;
 	} x;
 	struct b z;
-	// s.a = 2;
-	// s.b = 18;
+	s.a = 2;
+	s.b = 18;
 	int n = 10;
 	int fact = factorial(n);
 	int factorial = fact;
