@@ -1,5 +1,5 @@
---- mod COMMON-SEMANTICS-PROMOTIONS is
-	--- including COMMON-INCLUDE .
+mod COMMON-SEMANTICS-PROMOTIONS is
+	including COMMON-INCLUDE .
 	
 	--- op arithConversion : KLabel K K -> K [metadata "strict"] .
 	--- op arithConversion-int : KLabel K K -> K [metadata "strict"] .
@@ -120,40 +120,40 @@
 	
 	--- --- Otherwise...
 	--- --- fixme left out cases
---- endm
+endm
 
---- mod COMMON-SEMANTICS-CAST is 
-	--- including COMMON-INCLUDE .
+mod COMMON-SEMANTICS-CAST is 
+	including COMMON-INCLUDE .
 	
 	--- mb rule ['Cast(T:Type,, E:Expression) => cast(T:Type, E:Expression)] : KSentence [metadata "structural"] .
 	
-	--- mb rule
-		--- < k > [cast(T:Type, tv(B:BaseValue, T:Type)) => tv(B:BaseValue, T:Type)] ...</ k > 
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > cast(T:Type, tv(B:BaseValue, T:Type)) => tv(B:BaseValue, T:Type) ...</ k > 
+		: KSentence [metadata "structural"] .
 	
-	--- ---c99 6.3.1.3:1 When a value with integer type is converted to another integer type other than _Bool, if the value can be represented by the new type, it is unchanged. 
-	--- mb rule
-		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int, T:Type)] ...</ k > 
-		--- if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int 
-		--- andBool hasIntegerType(T':Type)
-		--- andBool hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	---c99 6.3.1.3:1 When a value with integer type is converted to another integer type other than _Bool, if the value can be represented by the new type, it is unchanged. 
+	mb rule
+		< k > cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int, T:Type) ...</ k > 
+		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int 
+		andBool hasIntegerType(T':Type)
+		andBool hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 		
-	--- ---c99 6.3.1.3:2 Otherwise, if the new type is unsigned, the value is converted by repeatedly adding or subtracting one more than the maximum value that can be represented in the new type until the value is in the range of the new type.
-	--- mb rule
-		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int max(T:Type) +Int 1, T':Type))] ...</ k > 
-		--- if unsignedIntegerTypes contains T:Type 
-		--- andBool I:Int <Int min(T:Type)
-		--- andBool hasIntegerType(T':Type)
-		--- : KSentence [metadata "structural"] .
+	---c99 6.3.1.3:2 Otherwise, if the new type is unsigned, the value is converted by repeatedly adding or subtracting one more than the maximum value that can be represented in the new type until the value is in the range of the new type.
+	mb rule
+		< k > cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int max(T:Type) +Int 1, T':Type)) ...</ k > 
+		if unsignedIntegerTypes contains T:Type 
+		andBool I:Int <Int min(T:Type)
+		andBool hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
 		
-	--- --- fixme does this extra check for looping need to be done elsewhere?
-	--- mb rule
-		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)] ...</ k > 
-		--- if unsignedIntegerTypes contains T:Type 
-		--- andBool I:Int >Int max(T:Type)
-		--- andBool hasIntegerType(T':Type)
-		--- : KSentence [metadata "structural"] .
+	--- fixme does this extra check for looping need to be done elsewhere?
+	mb rule
+		< k > cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type) ...</ k > 
+		if unsignedIntegerTypes contains T:Type 
+		andBool I:Int >Int max(T:Type)
+		andBool hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
 	
 	--- ---c99 6.3.1.3:3 Otherwise, the new type is signed and the value cannot be represented in it; either the result is implementation-defined or an implementation-defined signal is raised.
 	--- --- choice
@@ -241,6 +241,7 @@
 	--- --- fixme
 	--- --- possibly not true with other endiannesses
 	--- --- choice
+	--- --- needs to handle alignment
 	--- mb rule
 		--- < k > [cast(pointerType(T:Type), tv(N:Nat, pointerType(?))) => tv(N:Nat, pointerType(T:Type))] ...</ k >
 		--- ---if min(unsigned-int) <=Int I:Int andBool max(unsigned-int) >=Int I:Int
@@ -250,12 +251,12 @@
 		--- < k > [cast(pointerType(bitfieldType(T:Type, Len:Nat)), tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(?)))
 		--- => tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))] ...</ k > 
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 mod COMMON-C-CONVERSIONS is
 	including COMMON-INCLUDE .
-	--- including COMMON-SEMANTICS-CAST .
-	--- including COMMON-SEMANTICS-PROMOTIONS .
+	including COMMON-SEMANTICS-CAST .
+	including COMMON-SEMANTICS-PROMOTIONS .
 	
 	--- fixme not sure about this
 	--- interpret is used to "cast" values read from memory

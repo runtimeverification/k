@@ -35,7 +35,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op List : BagItem -> ListItem .
 	op piece : Nat Nat -> Nat .
 	op trueUnknown : -> Nat [ctor] .
-	op unknown : Nat -> Nat [ctor] .
+	op unknown : -> Nat [ctor] .
 	op unknownF : -> Float [ctor] .
 	op skipval : -> KResult .
 	op debugK : -> K .
@@ -312,23 +312,23 @@ mod C-SETTINGS is
 	--- --- — maximum value for an object of type unsigned long long int
 	--- --- ULLONG_MAX 18446744073709551615 // 264 - 1
 	
-	--- op rank : Type -> Nat .
+	op rank : Type -> Nat .
 	
-	--- --- fixme, this is kind of cheating as it will promote bitfields smaller than int to int leave others unchanged
-	--- --- ceq rank(bitfieldType(?, N:Nat)) = 0 
-		--- --- if N:Nat < numBits(int) .
+	--- fixme, this is kind of cheating as it will promote bitfields smaller than int to int leave others unchanged
+	--- ceq rank(bitfieldType(?, N:Nat)) = 0 
+		--- if N:Nat < numBits(int) .
 		
-	--- eq rank(char) = 1 .
-	--- eq rank(signed-char) = 1 .
-	--- eq rank(unsigned-char) = 1 .
-	--- eq rank(short-int) = 2 .
-	--- eq rank(unsigned-short-int) = 2 .
-	--- eq rank(int) = 3 .
-	--- eq rank(unsigned-int) = 3 .
-	--- eq rank(long-int) = 4 .
-	--- eq rank(unsigned-long-int) = 4 .
-	--- eq rank(long-long-int) = 5 .
-	--- eq rank(unsigned-long-long-int) = 5 .
+	eq rank(char) = 1 .
+	eq rank(signed-char) = 1 .
+	eq rank(unsigned-char) = 1 .
+	eq rank(short-int) = 2 .
+	eq rank(unsigned-short-int) = 2 .
+	eq rank(int) = 3 .
+	eq rank(unsigned-int) = 3 .
+	eq rank(long-int) = 4 .
+	eq rank(unsigned-long-int) = 4 .
+	eq rank(long-long-int) = 5 .
+	eq rank(unsigned-long-long-int) = 5 .
 	
 	--- --- fixme unlikely but possible to have more than int enum values
 	--- eq rank(enumType(?)) = rank(int) .
@@ -438,15 +438,15 @@ mod SEMANTIC-HELPERS is
 
 
 
-	--- ceq min(bitfieldType(T:Type, N:Nat)) = 0
-		--- if unsignedIntegerTypes contains T:Type .
-	--- ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(N:Nat), 1)
-		--- if unsignedIntegerTypes contains T:Type .
+	ceq min(bitfieldType(T:Type, N:Nat)) = 0
+		if unsignedIntegerTypes contains T:Type .
+	ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(N:Nat), 1)
+		if unsignedIntegerTypes contains T:Type .
 	
-	--- ceq min(bitfieldType(T:Type, N:Nat)) = -Int (2 ^Nat absInt(_-Int_(N:Nat, 1)))
-		--- if signedIntegerTypes contains T:Type .
-	--- ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(_-Int_(N:Nat, 1)), 1) 
-		--- if signedIntegerTypes contains T:Type .
+	ceq min(bitfieldType(T:Type, N:Nat)) = -Int (2 ^Nat absInt(_-Int_(N:Nat, 1)))
+		if signedIntegerTypes contains T:Type .
+	ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(_-Int_(N:Nat, 1)), 1) 
+		if signedIntegerTypes contains T:Type .
 
 		
 		
@@ -946,13 +946,6 @@ mod C-SEMANTICS-MISC is
 		--- if getKLabel(T:Type) =/=Bool 'bitfieldType
 		--- : KSentence [metadata "structural"] .
 				
-	--- op explodeToBits : List{K} -> List{K} .
-	--- eq explodeToBits((K:K,, L:NeList{K})) = (explodeToBits(K:K),, explodeToBits(L:NeList{K})) .
-	--- eq explodeToBits(piece(N:Nat, sNat(Len:Nat)))
-		--- = (piece(N:Nat &Nat 1, 1),, explodeToBits(piece(N:Nat >>Nat 1, Len:Nat))) .
-	--- eq explodeToBits(piece(N:Nat, 0)) = .List{K} .
-	--- eq explodeToBits(piece(N:Nat, 0)) = .List{K} .
-	--- eq explodeToBits(.List{K}) = .List{K} .
 	
 	--- mb rule
 		--- < k > [extractField-aux((piece(?, N:Nat),, L:List{K}), T:Type, Offset:Nat, Len:Nat, .List{K})

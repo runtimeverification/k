@@ -7,10 +7,10 @@ mod COMMON-SEMANTICS-BOOLEAN is
 	including COMMON-INCLUDE .
 	
 	mb rule
-		< k > tv(0, ?) || E:Expression => E:Expression ...</ k >
+		< k > tv(0, ?) || E:Expression => sequencePoint ~> E:Expression ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > tv(N:Nat, ?) || E:Expression => tv(1, int) ...</ k >
+		< k > tv(N:Nat, ?) || E:Expression => sequencePoint ~> tv(1, int) ...</ k >
 		if N:Nat =/=Bool 0
 		: KSentence [metadata "structural"] .
 	
