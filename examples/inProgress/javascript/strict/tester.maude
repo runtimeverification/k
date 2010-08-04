@@ -1,0 +1,7 @@
+in ../../../../k-prelude
+load strict-javascript-syntax.maude
+load strict-javascript-programs.maude
+
+set print with parentheses on .
+set print mixfix off .
+

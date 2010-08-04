@@ -1,0 +1,7 @@
+mod JS-PROGRAMS 
+	is including JS-SYNTAX . 
+  
+	        op a :  -> Id .    op b :  -> Id .    op c :  -> Id .    op d :  -> Id .    op e :  -> Id .    op f :  -> Id .    op g :  -> Id .    op h :  -> Id .    op i :  -> Id .    op j :  -> Id .    op k :  -> Id .    op l :  -> Id .    op m :  -> Id .
+	                 op n :  -> Id .    op o :  -> Id .    op p :  -> Id .    op q :  -> Id .    op r :  -> Id .    op s :  -> Id .    op t :  -> Id .    op u :  -> Id .    op v :  -> Id .    op w :  -> Id .    op x :  -> Id .    op y :  -> Id .    op z :  -> Id . 
+	
+endm

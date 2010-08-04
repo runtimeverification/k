@@ -1,0 +1,151 @@
+mod STRICT-JAVASCRIPT-PROGRAMS 
+	is including STRICT-JAVASCRIPT-SYNTAX . 
+  
+	        op a :  -> Id .    op b :  -> Id .    op c :  -> Id .    op d :  -> Id .    op e :  -> Id .    op f :  -> Id .    op g :  -> Id .    op h :  -> Id .    op i :  -> Id .    op j :  -> Id .    op k :  -> Id .    op l :  -> Id .    op m :  -> Id .
+	                 op n :  -> Id .    op o :  -> Id .    op p :  -> Id .    op q :  -> Id .    op r :  -> Id .    op s :  -> Id .    op t :  -> Id .    op u :  -> Id .    op v :  -> Id .    op w :  -> Id .    op x :  -> Id .    op y :  -> Id .    op z :  -> Id . 
+	
+	   	  op length :  -> Id .    op scale :  -> Id . 
+	
+	       op te0 :  -> Exp .    op te1 :  -> Exp .    op te2 :  -> Exp .    op te3 :  -> Exp .    op te4 :  -> Exp .    op te5 :  -> Exp .    op te6 :  -> Exp .    op te7 :  -> Exp .
+				     op ie0 :  -> Exp .    op ie1 :  -> Exp .    op ie2 :  -> Exp .    op ie3 :  -> Exp .    op ie4 :  -> Exp .    op ie5 :  -> Exp .    op ie6 :  -> Exp .    op ie7 :  -> Exp .
+				     op e0 :  -> Exp .    op e1 :  -> Exp .    op e2 :  -> Exp .    op e3 :  -> Exp .    op e4 :  -> Exp .    op e5 :  -> Exp .    op e6 :  -> Exp .    op e7 :  -> Exp .    op e8 :  -> Exp .    op e9 :  -> Exp .    op e10 :  -> Exp .    op e11 :  -> Exp .    op e12 :  -> Exp .
+				     op ae0 :  -> Exp .    op ae1 :  -> Exp .    op ae2 :  -> Exp .    op ae3 :  -> Exp .    op ae4 :  -> Exp .    op ae5 :  -> Exp .    op ae6 :  -> Exp .    op ae7 :  -> Exp .
+				     op ac0 :  -> Exp .    op ac1 :  -> Exp .    op ac2 :  -> Exp .    op ac3 :  -> Exp .    op ac4 :  -> Exp .    op ac5 :  -> Exp .    op ac6 :  -> Exp .    op ac7 :  -> Exp .
+				     op l0 :  -> Exp .    op l1 :  -> Exp .    op l2 :  -> Exp .    op l3 :  -> Exp .    op l4 :  -> Exp .    op l5 :  -> Exp .    op l6 :  -> Exp .    op l7 :  -> Exp .    op l8 :  -> Exp .    op l9 :  -> Exp . 
+	      op es0 :  -> ExecutionStmts .    op es1 :  -> ExecutionStmts .    op es2 :  -> ExecutionStmts .    op es3 :  -> ExecutionStmts .    op es4 :  -> ExecutionStmts .    op es5 :  -> ExecutionStmts .    op es6 :  -> ExecutionStmts .    op es7 :  -> ExecutionStmts .    op es8 :  -> ExecutionStmts .    op es9 :  -> ExecutionStmts . 
+	      op s0 :  -> Stmt .    op s1 :  -> Stmt .    op s2 :  -> Stmt .    op s3 :  -> Stmt .    op s4 :  -> Stmt .    op s5 :  -> Stmt .    op s6 :  -> Stmt .    op s7 :  -> Stmt .    op s8 :  -> Stmt .    op s9 :  -> Stmt .    op s10 :  -> Stmt .    op s11 :  -> Stmt .
+				     op s12 :  -> Stmt .    op s13 :  -> Stmt .    op s14 :  -> Stmt .    op s15 :  -> Stmt .    op s16 :  -> Stmt .    op s17 :  -> Stmt .    op s18 :  -> Stmt .    op s19 :  -> Stmt .    op s20 :  -> Stmt .    op s21 :  -> Stmt .    op s22 :  -> Stmt . 
+	
+	      op c0 :  -> Case .    op c1 :  -> Case .    op c2 :  -> Case .    op c3 :  -> Case .    op c4 :  -> Case .    op c5 :  -> Case .    op c6 :  -> Case . 
+
+	eq te1 =  a .
+	
+	eq te2 =  b . scale .
+	
+	eq te3 =  123 . scale .
+	
+	eq te4 =  b[c] .
+	
+	    
+	
+	    
+	
+	    
+	
+	eq ie0 =  x ( ) .
+	
+	eq ie1 =  x ( .List{CommaElem}  ) .
+	
+	eq ie2 =  y(a +  3 *  c) .
+	
+	eq ie3 =  z(a,b) /  4 . 
+	
+	eq ie4 =  q(1,2,3) &&  ! r ||  v(false) .
+	
+	eq ie5 =  q(r(s(3))) .
+
+	eq ie6 =  q( r(s(3), t(5)), 2.3 ) .
+	
+	eq e0 =  t(2)(true)[g](false) .
+	
+	eq e1 =  r(1,2). u[q(3)] .
+	
+	eq e2 =  new r(true) .
+	
+	eq e3 =  delete r .
+	
+	eq e4 =  delete r . t .
+	
+	eq e5 =  delete r(1)(3.0, 4.2)[w] . 
+	
+	eq e6 =  w(3,4) .
+	
+	eq ae0 =  3 + 5 .
+
+	eq ae1 =  (3 <= 5) &&  ! (5 <= 1) .
+	
+	eq ae2 =  -3 .
+	
+	eq ae3 =  + 3.4 .
+	
+	eq ae4 =  2 -  -3 .   	
+	eq ae4 =  2 -  -_(3.1) .
+	
+	eq ae5 =  r(+ 3 +  -4, -4 -  -4) .
+	
+	eq e7 =  typeof t .
+	
+	eq e8 =  typeof r(s(2)) .
+
+	eq e9 =  typeof r(s(2), t <=  u) .
+
+	eq e10 =  typeof t ===  r .
+
+	eq e11 =  r ?  e :  f .
+
+	eq e12 =  typeof t ===  r ?  a + b :  ! c >  d +  e .
+	              
+	
+	           
+
+	eq ac0 =  (x =  y) .
+	
+	      
+	eq ac1 =  (x . r[w] =  4) .
+	
+	eq ac2 =  (x =  y +=  r(4)) .
+	
+	eq ac3 =  r[s]() . 
+
+	eq ac4 =  r[s](1,2) . 
+	
+	   
+	
+	eq es1 =  r(2);  s =  new t(true);  x =  y /  z ;  return 3 +  4 ; .  
+	
+	eq es2 =  return ; . 
+	
+	eq es3 =  throw s(2); . 
+	
+	eq es4 =  x =  y =  34 ;  break a ; . 
+	
+	eq s11 =  if (q) { if(p) { x =  y ; } } .
+	
+	eq s0 =  if (x <=  5) { throw s(2);  } .
+
+	eq s1 =  if (x <=  5 ||  y &&  z ===  3) { q =  r ;  s(2); } .
+	
+	eq s2 =  if (y) { r[s]();  } else { x =  z ;  } .
+	
+	eq s3 =  if (y) {r . s();  } else { x =  z ;  } .
+	
+	eq s4 =  if (y) {r . t[s]();  } else { x =  z ;  } .
+
+	eq s5 =  if (y) { r();  } else { x =  z ;  } .
+	
+	eq s6 =  if (y) { r();  } else if ( r >  s ) { x =  z ;  } .
+	
+	eq s7 =  if (y) { r();  } else if ( r >  s ) { x =  z ;  } else { return {x :  3, y :  4, z :  5};  } .
+	
+	eq s8 =  try { s(0);  t(0);  } catch ( x ) { return x . u(t());  } .
+	
+	eq s9 =  if (y) { r();  } else if ( r >  s ) { x =  z ;  } else { if (q) { return 3 ;  } } .
+	
+	eq s10 =  try { if (z) {s(0);  t(0); } } catch ( x ) { return x . u(t());  } .
+
+	eq s11 =  return {x :  3, y :  4, z :  5}; .  
+	
+	eq s12 =  ; . 
+	
+	eq s13 =  switch (x <  y) {case 0 :  r() ;  case 1 :  s(0)} .
+	
+	eq c0 =  case 0 :  r() ;  break n .
+
+	eq c1 =  case 0 :  r() ;  s() ;  return .
+	
+	             
+	 
+	                   
+	
+	eq c4 =  case 1 :  case 2 :  case 3 :  s() ;  t() . 
+endm

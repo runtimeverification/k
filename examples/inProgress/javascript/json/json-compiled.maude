@@ -1,0 +1,115 @@
+load ../../../../tools/../k-prelude
+
+mod JSON is including K-CONFIG .
+including K-DESTRUCTORS .
+including K-POLYMORPHIC-VARIABLES .
+including K-TECHNIQUE .
+including K-WHERE .
+including PL-BOOL .
+including PL-FLOAT .
+including PL-ID .
+including PL-INT .
+including PL-STRING .
+including K-PROPER .
+including K-WRAPPERS-LABELS .
+including MAUDE-IF-THEN-ELSE .
+including K-STRICTNESS .
+sorts Builtin . subsort Char < Builtin .
+subsort Char < Builtins .
+subsort FiniteFloat < Builtins .
+subsort NzInt < Builtins .
+subsort NzNat < Builtins .
+subsort NzNat < Int .
+subsort String < Builtin .
+subsort Zero < Builtins .
+subsort Zero < Int .
+op _in_ : BagItem Bag -> Bool .
+op _in_ : K Bag -> Bool .
+op _in_ : K Set -> Bool .
+op _in_ : SetItem Set -> Bool .
+op _|->_ : List{K}List{K}-> Map .
+op a : -> Id .
+op b : -> Id .
+op c : -> Id .
+op d : -> Id .
+op e : -> Id .
+op f : -> Id .
+op g : -> Id .
+op h : -> Id .
+op i : -> Id .
+op j : -> Id .
+op k : -> Id .
+op keys_ : Map -> Set .
+op l : -> Id .
+op m : -> Id .
+op n : -> Id .
+op o : -> Id .
+op p : -> Id .
+op q : -> Id .
+op r : -> Id .
+op s : -> Id .
+op t : -> Id .
+op u : -> Id .
+op v : -> Id .
+op w : -> Id .
+op x : -> Id .
+op y : -> Id .
+op z : -> Id .
+op $hasMapping : Map K -> Bool[metadata "latex(renameTo \$hasMapping\mybracket{_,_})"].
+op '_:_ : -> KProperLabel[metadata "arity 2"].
+op '_`,_ : -> KHybridLabel[metadata "list wrapper"].
+op '`[_`] : -> KProperLabel[metadata "arity 1 list(1:_`,_:K)"].
+op '`{_`} : -> KProperLabel[metadata "arity 1 list(1:_`,_:K)"].
+op '`{`} : -> KProperLabel[metadata "arity 0"].
+op 'null : -> KProperLabel[metadata "arity 0"].
+op 'v0 : -> KProperLabel[metadata "arity 0"].
+op 'v1 : -> KProperLabel[metadata "arity 0"].
+op 'v2 : -> KProperLabel[metadata "arity 0"].
+op 'v3 : -> KProperLabel[metadata "arity 0"].
+op 'v4 : -> KProperLabel[metadata "arity 0"].
+op 'v5 : -> KProperLabel[metadata "arity 0"].
+op 'v6 : -> KProperLabel[metadata "arity 0"].
+op 'v7 : -> KProperLabel[metadata "arity 0"].
+op Bool_ : Bool -> KResultLabel[metadata "builtin wrapper"].
+op Float_ : Float -> KResultLabel[metadata "builtin wrapper"].
+op Id_ : Id -> KProperLabel[metadata "builtin wrapper"].
+op Int_ : Int -> KResultLabel[metadata "builtin wrapper"].
+op String_ : String -> KResultLabel[metadata "builtin wrapper"].
+op _-Bag_ : Bag Bag -> Bag[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Bag}}_)"].
+op _-Set_ : Set Set -> Set[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Set}}_)"].
+op _`(_`) : Map List{K}-> List{K}[prec 0].
+op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
+op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\;}/_])"].
+eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
+eq _-Bag_(.,Bag:Bag)=(.).Bag .
+eq _-Bag_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:BagItem,Bag':Bag),_-Bag_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-Bag_(Bag:Bag,Bag':Bag))).
+eq _-Set_(.,Set:Set)=(.).Set .
+eq _-Set_(__(Set:Set,SetItem:SetItem),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-Set_(Set:Set,Set':Set),__(SetItem:SetItem,_-Set_(Set:Set,Set':Set))).
+eq _`(_`)('v0,.List`{K`})= _`(_`)('`{`},.List`{K`}).
+eq _`(_`)('v1,.List`{K`})= _`(_`)('`{_`},_`(_`)('_`,_,_`(_`)('_:_,_`,`,_(_`(_`)(String_("s"),.List`{K`}),_`(_`)(Int_(234),.List`{K`}))))).
+eq _`(_`)('v2,.List`{K`})= _`(_`)('`{_`},_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("s"),.List`{K`}),_`(_`)(Int_(234),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(String_("t"),.List`{K`}),_`(_`)(String_("d"),.List`{K`})))))).
+eq _`(_`)('v3,.List`{K`})= _`(_`)('`[_`],_`(_`)('_`,_,_`,`,_(_`(_`)(Int_(23),.List`{K`}),_`,`,_(_`(_`)(Int_(45),.List`{K`}),_`(_`)(Int_(56),.List`{K`}))))).
+eq _`(_`)('v4,.List`{K`})= _`(_`)('`[_`],_`(_`)('_`,_,_`,`,_(_`(_`)('`{`},.List`{K`}),_`(_`)('`{_`},_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("a"),.List`{K`}),_`(_`)(String_("x"),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("b"),.List`{K`}),_`(_`)(Int_(234),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("c"),.List`{K`}),_`(_`)(Bool_(true),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("d"),.List`{K`}),_`(_`)(Bool_(false),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("e"),.List`{K`}),_`(_`)('`[_`],_`(_`)('_`,_,_`,`,_(_`(_`)(Int_(1),.List`{K`}),_`,`,_(_`(_`)(Int_(2),.List`{K`}),_`(_`)(Int_(3),.List`{K`}))))))),_`(_`)('_:_,_`,`,_(_`(_`)(String_("f"),.List`{K`}),_`(_`)('`{_`},_`(_`)('_`,_,_`(_`)('_:_,_`,`,_(_`(_`)(String_("r"),.List`{K`}),_`(_`)(Int_(3),.List`{K`}))))))))))))))))).
+eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
+eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
+eq _`[_/_`](Map:Map,K2:K,_`,`,_(K1:K,NList1:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K2:K,K1:K),K2:K,NList1:NeList{K}).
+eq _`[_/_`](Map:Map,List:List{K},.List`{K`})= Map:Map .
+eq _`[_/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K1:K,K2:K),NList1:NeList{K},NList2:NeList{K}).
+eq _`[undef/_`](Map:Map,.List`{K`})= Map:Map .
+eq _`[undef/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`[undef/_`](_`[undef/_`](Map:Map,K1:K),NList1:NeList{K}).
+eq _`[undef/_`](__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= Map:Map .
+eq _in_(BagItem:BagItem,__(Bag:Bag,BagItem:BagItem))= true .
+eq _in_(K:K,__(Bag:Bag,BagItem(K:K)))= true .
+eq _in_(K:K,__(Set:Set,SetItem(K:K)))= true .
+eq _in_(SetItem:SetItem,__(Set:Set,SetItem:SetItem))= true .
+eq _|->_(.List`{K`},List:List{K})=(.).Map .
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},K2:K)).
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
+eq keys_(.)=(.).Set .
+eq keys_(__(Map:Map,_|->_(K1:K,K2:K)))= __(SetItem(K1:K),keys_(Map:Map)).
+eq $hasMapping(M:Map,D:K)= false[owise].
+eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
+eq _in_(K:K,Bag:Bag)= false[owise].
+eq _in_(K:K,Set:Set)= false[owise].
+eq _in_(SetItem:SetItem,Set:Set)= false[owise].
+endm

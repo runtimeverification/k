@@ -1,0 +1,97 @@
+mod JS-SYNTAX 
+	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID + K .
+
+	  sort Value .    op b(_) :  Bool -> Value .    op n(_) :  Number -> Value .    op s(_) :  String -> Value . 
+	
+	  sort Number .    subsort Int <  Number .    subsort Float <  Number . 
+	
+	  sort List{JS} .    subsort JS <  List{JS} .    op .List{JS} :  -> List{JS} .
+			   op __ : List{JS}  List{JS} -> List{JS} [assoc id: .List{JS}] . 
+	
+	  sort JS .    op id(_) :  String -> JS .    op label(_) :  String -> JS .
+	
+			   subsort Value <  JS .
+			
+			   op nop :  -> JS .
+			
+			   op staticAccess(_,_) :  K  K -> JS [metadata "strict"] . 		   
+			   op dynamicAccess(_,_) :  K  K -> JS [metadata "strict"] . 		    
+			   op invocation(_,_) :  K  List{JS} -> JS [metadata "strict"] . 	    
+			
+			   op new(_) :  K -> JS [metadata "strict"] .					  
+			
+			   op delete(_) :  K -> JS [metadata "strict"] .				  
+			
+			   op typeof(_) :  K -> JS [metadata "strict"] .				  
+			   op not(_) :  K -> JS [metadata "strict"] .				  
+			   op neg(_) :  K -> JS [metadata "strict"] . 				  
+			   op plus(_) :  K -> JS [metadata "strict"] . 				  
+			
+			   op mul(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			   op div(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			   op mod(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			
+			   op add(_,_) :  K  K -> JS [metadata "strict"] .			   
+			   op sub(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			
+			   op lt(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			   op lte(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			   op gt(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			   op gte(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			   op in(_,_) :  K  K -> JS [metadata "strict"] .				   
+			   op instanceof(_,_) :  K  K -> JS [metadata "strict"] . 	   
+			
+			   op sameAs(_,_) :  K  K -> JS [metadata "strict"] . 		   
+			   op notSameAs(_,_) :  K  K -> JS [metadata "strict"] . 		   
+			   op identical(_,_) :  K  K -> JS [metadata "strict"] . 		   
+			   op notIdentical(_,_) :  K  K -> JS [metadata "strict"] . 	   
+			
+			   op and(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			
+			   op or(_,_) :  K  K -> JS [metadata "strict"] . 			   
+			
+			   op ternary(_,_,_) :  K  K  K -> JS [metadata "strict(1)"] .	     
+			
+			
+			   op assignment(_,_) :  K  K -> JS [metadata "strict"] .		   
+			   op assignment(_,_,_) :  K  K  K -> JS [metadata "strict"] .    
+			
+			   op arrayLit(_) :  List{JS} -> JS [metadata "strict"] .				   
+			   op objectLit(_) :  List{JS} -> JS [metadata "strict"] .			   
+			   op propertyLit(_,_) :  K  K -> JS [metadata "strict"] .	   
+			
+			   op return(_) :  K -> JS [metadata "strict"] .				    
+			   op break(_) :  K -> JS [metadata "strict"] . 				    
+			   op throw(_) :  K -> JS [metadata "strict"] .				  
+
+			   op stmts(_) :  List{JS} -> JS [metadata "strict"] .		 
+			   op ifElse(_,_,_) :  K  K  K -> JS [metadata "strict(1)"] .	    
+			   op tryCatch(_,_,_) :  K  K  K -> JS [metadata "strict"] .	     
+			
+			   op case(_,_) :  List{JS}  K -> JS [metadata "strict(1)"] .	 
+				    
+			   op switch(_,_,_) :  K  List{JS}  K -> JS [metadata "strict(1)"] .	
+				       
+			   op for(_,_,_,_) :  K  K  K  K -> JS [metadata "strict(1)"] .		
+				         
+			   op forIn(_,_,_) :  K  K  K -> JS [metadata "strict(2)"] .
+				       
+			   op while(_,_) :  K  K -> JS .
+				     
+			   op do(_,_) :  K  K -> JS .
+				      
+				
+			   op labelledStmt(_,_) :  K  K -> JS .	
+				   
+			
+			   op varDeclarations(_) :  List{JS} -> JS [metadata "strict"] .
+			
+			   op function(_,_,_) :  K  List{JS}  K -> JS .
+				       
+				        
+
+			   op program(_) :  K -> JS . 
+				   
+endm
+			
+			

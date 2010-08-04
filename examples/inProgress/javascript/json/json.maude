@@ -1,0 +1,59 @@
+          
+
+in ../../../../k-prelude
+
+mod JSON-SYNTAX 
+	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID .
+	
+	  sort JsonName .    subsort String <  JsonName .    subsort Id <  JsonName . 
+	
+	  sort JsonValue .    op null :  -> JsonValue .    subsort JsonObject <  JsonValue .    subsort JsonArray <  JsonValue .    subsort JsonName <  JsonValue .    subsort Int <  JsonValue .    subsort Float <  JsonValue .    subsort Bool <  JsonValue . 
+	
+	  sort JsonObject .    op {} :  -> JsonObject .    op {_} :  List{JsonElem} -> JsonObject . 
+	
+	  sort JsonPair .    op _:_ : JsonName  JsonValue -> JsonPair .  
+	
+	  sort JsonElem .    subsort JsonValue <  JsonElem .    subsort JsonPair <  JsonElem .  
+	
+	  sort List{JsonElem} .    subsort JsonElem <  List{JsonElem} .    op .List{JsonElem} :  -> List{JsonElem} .
+				   op _,_ : List{JsonElem}  List{JsonElem} -> List{JsonElem} [prec 50 assoc id: .List{JsonElem}] . 
+	
+	  sort JsonArray .    op [_] :  List{JsonElem} -> JsonArray . 
+	
+endm
+
+mod JSON-PROGRAMS 
+	is including JSON-SYNTAX .
+	
+	        op a :  -> Id .    op b :  -> Id .    op c :  -> Id .    op d :  -> Id .    op e :  -> Id .    op f :  -> Id .    op g :  -> Id .    op h :  -> Id .    op i :  -> Id .    op j :  -> Id .    op k :  -> Id .    op l :  -> Id .    op m :  -> Id .
+	                 op n :  -> Id .    op o :  -> Id .    op p :  -> Id .    op q :  -> Id .    op r :  -> Id .    op s :  -> Id .    op t :  -> Id .    op u :  -> Id .    op v :  -> Id .    op w :  -> Id .    op x :  -> Id .    op y :  -> Id .    op z :  -> Id . 
+	
+	       op v0 :  -> JsonValue .    op v1 :  -> JsonValue .    op v2 :  -> JsonValue .    op v3 :  -> JsonValue .    op v4 :  -> JsonValue .    op v5 :  -> JsonValue .    op v6 :  -> JsonValue .    op v7 :  -> JsonValue . 
+	
+	eq v0 =  { } .
+	
+	eq v1 =  {"s" :  234} .
+	
+	eq v2 =  {"s" :  234, "t" :  "d"} .
+	
+	eq v3 =  [23, 45, 56] .
+	
+	eq v4 =  [{} , {"a" :  "x", "b" :  234, "c" :  true, "d" :  false, "e" :  [1,2,3], "f" :  {"r" :  3}}] .
+	
+	
+endm
+
+mod JSON-SEMANTICS is including JSON-SYNTAX + K .
+	  sort Builtin .    subsort String <  Builtin . 
+	
+	      subsort Bool <  KResult .    subsort Int <  KResult .    subsort Float <  KResult .    subsort String <  KResult . 
+	      subsort JsonValue <  K .    subsort JsonArray <  K .    subsort JsonObject <  K .    subsort JsonName <  K .    subsort JsonPair <  K .    subsort JsonElem <  K .    subsort List{JsonElem} <  K . 
+
+endm
+
+mod JSON is including JSON-PROGRAMS + JSON-SEMANTICS .
+          
+          
+      
+endm
+

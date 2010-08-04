@@ -1,0 +1,50 @@
+          
+
+in ../../../../k-prelude
+load strict-javascript-syntax.maude
+load strict-javascript-programs.maude
+
+
+mod STRICT-JAVASCRIPT-SEMANTICS is including STRICT-JAVASCRIPT-SYNTAX + K .
+	  sort Builtin .    subsort String <  Builtin . 
+	
+	      subsort Bool <  KResult .    subsort Int <  KResult .    subsort Float <  KResult .    subsort String <  KResult . 
+	      subsort Name <  K .    subsort Label <  K .
+			   subsort Exp <  K .    subsort Literal <  K .
+			   subsort CommaElem <  K .    subsort List{CommaElem} <  K .
+			   subsort ObjectLiteral <  K .    
+			   subsort PropertyName <  K .    subsort Property <  K .	
+			   subsort ArrayLiteral <  K .
+			   subsort TargetExp <  K .    subsort RefinementExp <  K .
+			   subsort InvocationExp <  K .    subsort Argument <  K .   
+			   subsort NewExp <  K .    subsort DeleteExp <  K .
+			   subsort UnaryExp <  K .    subsort BinaryExp <  K .    subsort TernaryExp <  K .
+			   subsort RValue <  K .    subsort SimpleAssignmentClause <  K .    subsort AssignmentClause <  K .
+			   subsort ActionClause <  K .    subsort Clause <  K .    subsort DisruptiveClause <  K .
+			   subsort List{Fragment} <  K .    subsort Fragment <  K .
+			   subsort ReturnClause <  K .    subsort BreakClause <  K .    subsort ThrowClause <  K . 
+			   subsort EmptyStmt <  K .    subsort ExecutionStmts <  K .
+			    
+			   subsort IfStmt <  K .    subsort TryStmt <  K .    subsort SwitchStmt <  K .    subsort Stmt <  K .
+			   subsort Case <  K .    subsort CaseMatch <  K . 
+			
+	mb configuration
+		< T > 
+			< k >  (.).K  </ k > 
+			< state >  (.).Map  </ state > 
+	    	<  I/O > 
+				< in >  (.).List  </ in > 
+				< out >  (.).List  </ out > 
+			</  I/O > 
+		</ T > : KSentence . 
+
+       
+         
+ops out I/O T state k in : -> CellLabel .  endm
+
+mod STRICT-JAVASCRIPT is including STRICT-JAVASCRIPT-PROGRAMS + STRICT-JAVASCRIPT-SEMANTICS . 
+          
+          
+      
+endm
+
