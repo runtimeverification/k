@@ -1,2 +1,0 @@
-Warning: "strict-javascript-syntax.maude", line 188 (mod STRICT-JAVASCRIPT-SYNTAX): declaration of identity .List{VarDeclarationStmt} for operator __ clashes with previously declared identity .List{ExecutionStmt} in "strict-javascript-syntax.maude", line 113 (mod STRICT-JAVASCRIPT-SYNTAX).
-Warning: "strict-javascript-syntax.maude", line 201 (mod STRICT-JAVASCRIPT-SYNTAX): declaration of identity .List{FunctionStmt} for operator __ clashes with previously declared identity .List{ExecutionStmt} in "strict-javascript-syntax.maude", line 113 (mod STRICT-JAVASCRIPT-SYNTAX).
