@@ -341,7 +341,7 @@ and statement =
 	| DOWHILE of expression * statement * cabsloc
 	| FOR of for_clause * expression * expression * statement * cabsloc
 ***)
-	op IfThenElse : K K K -> PureStatement
+	op IfThenElse : K K K -> PureStatement [strict(1)] 
 	op While : K K -> PureStatement
 	op DoWhile : K K -> PureStatement
 	op For : K K K K -> PureStatement

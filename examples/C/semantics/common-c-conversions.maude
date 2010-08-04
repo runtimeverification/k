@@ -271,10 +271,10 @@ mod COMMON-C-CONVERSIONS is
 		andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
 		: KSentence [metadata "structural"] .
 		
-	--- mb rule [arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type)]
-		--- if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
-		--- andBool hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	mb rule arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type)
+		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
+		andBool hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 	
 	mb rule arithInterpret(bignum, I:Int) => tv(I:Int, bignum)
 		: KSentence [metadata "structural"] .	
@@ -305,22 +305,19 @@ mod COMMON-C-CONVERSIONS is
 		--- orBool T:Type ==Bool float
 		--- orBool T:Type ==Bool long-double
 		--- : KSentence [metadata "structural"] .
-	--- --- signed arithmetic isn't supposed to overflow
-	--- mb rule
-		--- [arithInterpret(T:Type, I:Int) => 
-		--- ---arithInterpret(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))
-		--- tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
-		--- ]
-		--- if unsignedIntegerTypes contains T:Type
-		--- andBool I:Int >Int max(T:Type)
-		--- ---andBool _-Int_(I:Int, (max(T:Type) +Int 1)) >=Int min(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- [arithInterpret(T:Type, I:Int) => arithInterpret(T:Type, _+Int_(I:Int, (max(T:Type) +Int 1)))]
-		--- if unsignedIntegerTypes contains T:Type
-		--- andBool I:Int <Int min(T:Type)
-		--- andBool _+Int_(I:Int, (max(T:Type) +Int 1)) <=Int max(T:Type)
-		--- : KSentence [metadata "structural"] .
+	--- signed arithmetic isn't supposed to overflow
+	mb rule
+		arithInterpret(T:Type, I:Int) => 
+		tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
+		if unsignedIntegerTypes contains T:Type
+		andBool I:Int >Int max(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		arithInterpret(T:Type, I:Int) => arithInterpret(T:Type, _+Int_(I:Int, (max(T:Type) +Int 1)))
+		if unsignedIntegerTypes contains T:Type
+		andBool I:Int <Int min(T:Type)
+		andBool _+Int_(I:Int, (max(T:Type) +Int 1)) <=Int max(T:Type)
+		: KSentence [metadata "structural"] .
 
 	--- op concretize-aux : Value Nat -> K .
 	--- ceq concretize(atv(L:List{K}, T:Type)) = concretize-aux(atv(L:List{K}, T:Type), 0) 

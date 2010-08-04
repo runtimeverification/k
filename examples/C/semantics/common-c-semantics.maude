@@ -50,6 +50,9 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op bito : Nat -> Nat .
 	--- subsort List{KResult} < K .
 	
+	op popBlock : -> K .
+	op pushBlock : -> K .
+	
 	op value : K -> K .
 	eq value(tv(V:K, ?)) = V:K .
 	

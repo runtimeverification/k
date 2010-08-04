@@ -1,28 +1,28 @@
---- mod COMMON-SEMANTICS-IF-THEN is
-	--- including COMMON-INCLUDE .
+ mod COMMON-SEMANTICS-IF-THEN is
+	including COMMON-INCLUDE .
 	
-	--- --- fixme need to represent null with 0
+	--- fixme need to represent null with 0
 	--- mb [if-then-true]: rule
-		--- < k > [if (tv(V:BaseValue, ?)) S:Statement => sequencePoint ~> S:Statement] ...</ k >
-		--- if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
+		--- < k > if (tv(V:BaseValue, ?)) S:Statement => sequencePoint ~> S:Statement ...</ k >
+		--- if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool sym(0) +Nat 0 orBool V:BaseValue ==Bool 0.0)
 		--- : KSentence [metadata "computational rule"] . --- nondet
 	--- mb [if-then-false]: rule
-		--- < k > [if (tv(V:BaseValue, ?)) S:Statement => sequencePoint] ...</ k >
-		--- if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
+		--- < k > if (tv(V:BaseValue, ?)) S:Statement => sequencePoint ...</ k >
+		--- if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool sym(0) +Nat 0 orBool V:BaseValue ==Bool 0.0)
 		--- : KSentence [metadata "computational rule"] . --- nondet
 		
-	--- mb [if-then-else-true]: rule
-		--- < k > [if (tv(V:BaseValue, ?)) S:Statement else S':Statement => sequencePoint ~> S:Statement] ...</ k >
-		--- if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
-		--- : KSentence [metadata "computational rule"] . --- nondet
-	--- mb [if-then-else-false]: rule
-		--- < k > [if (tv(V:BaseValue, ?)) S:Statement else S':Statement => sequencePoint ~> S':Statement] ...</ k >
-		--- if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
-		--- : KSentence [metadata "computational rule"] . --- nondet
---- endm
+	mb [if-then-else-true]: rule
+		< k > IfThenElse(tv(V:BaseValue, ?), S:K, S':K) => sequencePoint ~> S:K ...</ k >
+		if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool sym(0) +Nat 0 orBool V:BaseValue ==Bool 0.0)
+		: KSentence [metadata "computational rule"] . --- nondet
+	mb [if-then-else-false]: rule
+		< k > IfThenElse(tv(V:BaseValue, ?), S:K, S':K) => sequencePoint ~> S':K ...</ k >
+		if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool sym(0) +Nat 0 orBool V:BaseValue ==Bool 0.0)
+		: KSentence [metadata "computational rule"] . --- nondet
+endm
 
---- mod COMMON-SEMANTICS-WHILE is
-	--- including COMMON-INCLUDE .
+mod COMMON-SEMANTICS-WHILE is
+	including COMMON-INCLUDE .
 	
 	--- mb [while-mark]: rule
 		--- < k > [while (B:Expression) S:Statement ~> K:K
@@ -36,10 +36,10 @@
 		--- 'if`(_`)_(B:Expression,, S:Statement ~> loopMarked ~> (while (B:Expression) S:Statement))
 		--- ] ...</ k >
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
---- mod COMMON-SEMANTICS-SWITCH is
-	--- including COMMON-INCLUDE .
+mod COMMON-SEMANTICS-SWITCH is
+	including COMMON-INCLUDE .
 	
 	--- --- fixme shouldn't there be sequence points here?
 	--- mb rule
@@ -71,7 +71,7 @@
 	--- mb [default-fall-through]: rule
 		--- < k > ['default`(_`):_(?,, K:K) => K:K] ...</ k >
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 mod COMMON-SEMANTICS-GOTO is
 	including COMMON-INCLUDE .
@@ -208,15 +208,32 @@ mod COMMON-SEMANTICS-RETURN is
 		: KSentence [metadata "structural"] .
 endm
 
+mod COMMON-SEMANTICS-BLOCKS is
+	including COMMON-INCLUDE .
+	
+	mb rule BlockStatement(Block:K) => pushBlock ~> Block:K ~> popBlock : KSentence .
+	
+	mb [push-block]: rule
+		< k > pushBlock => (.).K ...</ k > 
+		< local > C:Bag </ local >
+		< blockStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ blockStack >
+		: KSentence [metadata "structural"] .
+	
+	mb [dissolve-block]: rule
+		< k > Block(?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > 
+		: KSentence [metadata "structural"] .
+endm
+
 mod COMMON-C-STATEMENTS is
 	including COMMON-INCLUDE .
-	--- including COMMON-SEMANTICS-IF-THEN .
-	--- including COMMON-SEMANTICS-WHILE .
-	--- including COMMON-SEMANTICS-SWITCH .
+	including COMMON-SEMANTICS-IF-THEN .
+	including COMMON-SEMANTICS-WHILE .
+	including COMMON-SEMANTICS-SWITCH .
 	including COMMON-SEMANTICS-GOTO .
 	including COMMON-SEMANTICS-RETURN .
-			
-	--- mb rule [EmptyStatement ; => .K] : KSentence [metadata "structural"] .
+	including COMMON-SEMANTICS-BLOCKS .
+	
+	mb rule Nop => . : KSentence [metadata "structural"] .
 	--- mb rule [Block`(`) => .K] : KSentence [metadata "structural"] .
 	
 	--- --- replace sequencing with ~>
@@ -225,16 +242,6 @@ mod COMMON-C-STATEMENTS is
 	--- --- skip labels
 	--- mb [skip-label]: rule < k > [L:Id : S:Statement => S:Statement] ...</ k > : KSentence [metadata "structural"] .
 	
-	op popBlock : -> K .
-	--- dissolve blocks
-	--- FIXME need more default
-	mb [dissolve-block]: rule 
-		< k > Block(?, Statements:List{C}) => listToK(Statements:List{C}) ~> popBlock ...</ k > 
-		< local > C:Bag </ local >
-		--- (< local > C:Bag </ local > => < local > < structs > (.).Map </ structs > ...</ local >)
-		--- (< local > C:Bag </ local > => < local > (.).Bag ...</ local >)
-		< blockStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ blockStack >
-		: KSentence [metadata "structural"] .
 
 	--- dissolve expression statements that are finished evaluating
 	mb [expression-statement]: rule < k > Computation(K:K) => K:K ~> discard ~> sequencePoint ...</ k > : KSentence [metadata "structural"] .

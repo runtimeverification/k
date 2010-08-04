@@ -3,6 +3,19 @@ mod COMMON-SEMANTICS-EXPRESSIONS-INCLUDE is
 	op assign : K K -> K .
 endm
 
+mod COMMON-SEMANTICS-BOOLEAN is
+	including COMMON-INCLUDE .
+	
+	mb rule
+		< k > tv(0, ?) || E:Expression => E:Expression ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > tv(N:Nat, ?) || E:Expression => tv(1, int) ...</ k >
+		if N:Nat =/=Bool 0
+		: KSentence [metadata "structural"] .
+	
+endm
+
 mod COMMON-SEMANTICS-SIZEOF is
 	including COMMON-INCLUDE .
 	
@@ -469,12 +482,12 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 	--- mb rule [tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
 	--- mb rule [!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
 		
-	--- mb rule [tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) > tv(I2:Int, T:Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) == tv(I2:Int, T:Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 	--- mb rule [!(tv(V:BaseValue, ?)) => tv(0, int)] 
 		--- if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
 		--- : KSentence [metadata "structural"] .
@@ -670,6 +683,7 @@ endm
 --- endm
 
 mod COMMON-C-EXPRESSIONS is
+	including COMMON-SEMANTICS-BOOLEAN .
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	including COMMON-SEMANTICS-SIZEOF .
 	including COMMON-SEMANTICS-IDENTIFIERS .
