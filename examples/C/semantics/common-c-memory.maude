@@ -73,7 +73,7 @@ mod COMMON-SEMANTICS-WRITING is
 		< mem >... (.).Map => Block:Nat |-> memblock(Len:Nat, (.).Map) ...</ mem >
 		: KSentence [metadata "structural"] .
 		
-	op writeBytes : Nat List{K} -> K .
+	op writeBytes : Nat K -> K [metadata "strict(2)"] .
 	op isByteLoc : Nat -> Bool .
 	op splitBytes : Value -> K .
 	
@@ -96,10 +96,10 @@ mod COMMON-SEMANTICS-WRITING is
 		if Offset:Nat <Nat Len:Nat
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > writeBytes(?, .List{K}) => . ...</ k >
+		< k > writeBytes(?, dataList(.List{K})) => . ...</ k >
 		: KSentence [metadata "structural"] .
 		
-	eq splitBytes(tv(functionObject(X:Id, T:Type, Body:K), T:Type)) = functionObject(X:Id, T:Type, Body:K) .
+	eq splitBytes(tv(functionObject(X:Id, T:Type, Body:K), T:Type)) = dataList(functionObject(X:Id, T:Type, Body:K)) .
 	
 	
 	mb rule splitBytes(tv(I:Int, T:Type)) => splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
@@ -108,9 +108,13 @@ mod COMMON-SEMANTICS-WRITING is
 	
 	op splitIntegerBytes : K K K -> K .
 	mb context splitIntegerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
-	---eq splitIntegerBytes(I:Int, T:Type, sNat(Len:Nat)) 
-		---= splitIntegerBytes(I:Int >> numBitsPerByte, T:Type, Len:Nat),, (I:Int &Nat byteMaskSet) .
-		
+	eq splitIntegerBytes(I:Int, T:Type, sNat(Len:Nat))
+		= splitIntegerBytes(I:Int >>Int numBitsPerByte, T:Type, Len:Nat),, lowestByte(I:Int, T:Type) .
+	
+	op lowestByte : Int Type -> K .
+	ceq lowestByte(I:Int, T:Type) = I:Int &Int byteMaskSet
+		if hasIntegerType(T:Type) .
+	
 	op byteMaskSet : -> Nat .
 	eq byteMaskSet = (2 ^Nat numBitsPerByte) - 1 .
 		

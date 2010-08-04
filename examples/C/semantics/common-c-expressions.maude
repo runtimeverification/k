@@ -8,8 +8,8 @@ mod COMMON-SEMANTICS-SIZEOF is
 	
 	eq sizeofType(T:Type) = cast(cfg:sizeut, byteSizeofType(T:Type)) .
 	op byteSizeofTypeAux : K -> K [metadata "strict"] .
-	eq byteSizeofTypeAux(tv(N:Nat, bignum)) = tv(bitsToBytes(N:Nat), bignum) .
 	eq byteSizeofType(T:Type) = byteSizeofTypeAux(bitSizeofType(T:Type)) .
+	eq byteSizeofTypeAux(tv(N:Nat, bignum)) = tv(bitsToBytes(N:Nat), bignum) .
 
 
 	
