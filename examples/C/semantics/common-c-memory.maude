@@ -9,19 +9,37 @@ mod COMMON-SEMANTICS-READING is
 	eq getBitOffset(? +Nat bito(M:Nat)) = M:Nat .
 	eq getBitOffset(?) = 0 [owise] .
 	
+	--- mb rule
+		--- < k > extractBitsFromList(dataList((functionObject(X:Id, T:Type, K:K))), 0, N:Nat) => functionObject(X:Id, T:Type, K:K) ...</ k >
+		--- if N:Nat ==Bool numBitsPerByte
+		--- : KSentence [metadata "structural"] .
+	op extractBitsFromList : K Nat Nat List{K} -> K .
+	eq extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat) = extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat, .List{K}) .
 	mb rule
-		< k > extractBitsFromList(dataList((functionObject(X:Id, T:Type, K:K))), 0, N:Nat) => functionObject(X:Id, T:Type, K:K) ...</ k >
-		if N:Nat ==Bool numBitsPerByte
+		< k > extractBitsFromList(dataList((piece(N:Nat, Len:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
+			=> extractBitsFromList(dataList(L:List{K}), 0, absInt(NumBits:Nat -Int Len:Nat), (Done:List{K},, piece(N:Nat, Len:Nat)))
+		...</ k >
+		if Len:Nat <=Nat NumBits:Nat
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > extractBitsFromList(?, 0, 0, Done:List{K}) => dataList(Done:List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	op read : K K K -> K .
 	mb context read(?, ?, value(`[HOLE`]:K)) : KSentence .
-	eq read(Loc:Nat, T:Type) = read(Loc:Nat, T:Type, value(bitSizeofType(T:Type))) . 
+	ceq read(Loc:Nat, T:Type) = read(Loc:Nat, T:Type, value(bitSizeofType(T:Type))) 
+		if notBool(hasFunctionType(T:Type)) .
+	
+	--- FIXME should check types
+	mb rule
+		< k > read(Loc:Nat, functionType(?, ?)) => extractByteFromMem(Loc:Nat) ...</ k >
+		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > read(Loc:Nat, T:Type, bitSize:Nat) => interpret(T:Type, extractBitsFromMem(Loc:Nat, bitSize:Nat)) ...</ k >
 		: KSentence [metadata "structural"] .
 	
-	eq interpret(T:Type, functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
+	--- eq interpret(T:Type, functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
 	
 	op floorLoc : Nat -> Nat . --- loc with possible bit offset returning base byte
 	eq floorLoc(sym(N:Nat) +Nat bito(M:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat .
@@ -49,14 +67,17 @@ mod COMMON-SEMANTICS-READING is
 
 	---eq combineData(functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
 	
+	op values : List{K} -> List{K} .
+	eq values((tv(K:K, bignum),, L:List{KResult})) = (K:K,, values(L:List{KResult})) .
 	mb rule
-		< k > extractBytesFromMem-aux(?, 0, Aux:List{KResult}) => dataList(Aux:List{KResult}) ...</ k >
+		< k > extractBytesFromMem-aux(?, 0, Aux:List{KResult}) => dataList(values(Aux:List{KResult})) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	op rawData : BaseValue Nat -> KResult .
+	--- FIXME make sure it's a byte
 	mb rule
-		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => V:Value ...</ k >
-		< mem >... Block:Nat |-> memblock(Size:Nat, (? Offset:Nat |-> V:Value)) ...</ mem >
+		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => V:K ...</ k >
+		< mem >... Block:Nat |-> memblock(Size:Nat, (? Offset:Nat |-> V:K)) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		if notBool(sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
 		: KSentence [metadata "structural"] .
@@ -89,10 +110,10 @@ mod COMMON-SEMANTICS-WRITING is
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > writeBytes(sym(Block:Nat) +Nat Offset:Nat, dataList((V:KResult,, L:List{KResult})))
-			=> writeBytes(sym(Block:Nat) +Nat sNat(Offset:Nat), dataList(L:List{KResult}))
+		< k > writeBytes(sym(Block:Nat) +Nat Offset:Nat, dataList((V:K,, L:List{K})))
+			=> writeBytes(sym(Block:Nat) +Nat sNat(Offset:Nat), dataList(L:List{K}))
 		...</ k >
-		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[V:KResult / Offset:Nat])) ...</ mem >
+		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[V:K / Offset:Nat])) ...</ mem >
 		if Offset:Nat <Nat Len:Nat
 		: KSentence [metadata "structural"] .
 	mb rule
@@ -107,18 +128,21 @@ mod COMMON-SEMANTICS-WRITING is
 		: KSentence .
 	
 	op splitIntegerBytes : K K K -> K .
+	op splitIntegerBytes : K K K List{K} -> K .
 	mb context splitIntegerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
-	eq splitIntegerBytes(I:Int, T:Type, sNat(Len:Nat))
-		= splitIntegerBytes(I:Int >>Int numBitsPerByte, T:Type, Len:Nat),, lowestByte(I:Int, T:Type) .
-	eq splitIntegerBytes(I:Int, T:Type, 0)
-		= .List{K} .
+	eq splitIntegerBytes(I:Int, T:Type, Len:Nat) = splitIntegerBytes(I:Int, T:Type, Len:Nat, .List{K}) .
+	eq splitIntegerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K})
+		= splitIntegerBytes(I:Int >>Int numBitsPerByte, T:Type, Len:Nat, (L:List{K},, lowestByte(I:Int, T:Type))) .
+	eq splitIntegerBytes(I:Int, T:Type, 0, L:List{K})
+		= dataList(L:List{K}) .
 	
 	
 	op lowestByte : Int Type -> K .
-	ceq lowestByte(I:Int, T:Type) = I:Int &Int byteMaskSet
+	ceq lowestByte(I:Int, T:Type) = piece(I:Int &Int byteMaskSet, numBitsPerByte)
 		if hasIntegerType(T:Type) .
 	
 	op byteMaskSet : -> Nat .
+	--- FIXME why does this parse?
 	eq byteMaskSet = (2 ^Nat numBitsPerByte) -Int 1 .
 		
 	eq isByteLoc(? +Nat bito(?)) = false .

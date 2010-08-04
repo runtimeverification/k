@@ -106,7 +106,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	subsort Nat Int Rat Float < BaseValue .
 	subsort BaseValue < C .
 	subsort BaseValue < Builtins .
-		op dataList : List{KResult} -> KResult .
+	op dataList : List{K} -> KResult .
 	--- --- subsort BaseValue < Expression .
 	--- --- subsort Value < Expression .
 	subsort Value < KResult K .
