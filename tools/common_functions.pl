@@ -23,6 +23,7 @@ my $comment = join("|", (
     "\\*\\*\\*\\(.*?\\*\\*\\*\\)",                                                                                                
     "\\*\\*\\*.*?\$"                                                                                                              
 ));     
+my $verbose = 0;
 my @nodes = ();
 
 # explicit call for debugging.
@@ -33,7 +34,7 @@ if (-e $warnings_file)
 {
 #	system("rm", "$warnings_file");
 	unlink($warnings_file);
-	print "Previous version of $warnings_file removed.\n";
+	print "Previous version of $warnings_file removed.\n" if $verbose;
 }	
 
 # start syntax checking.
@@ -487,7 +488,7 @@ sub show()
     # if no reference to arguments defined, no node is known
     if(defined($p)) 
     {
-	$n = $$p;
+		$n = $$p;
     } 
 
     # add node in list if found
@@ -499,5 +500,9 @@ sub show()
     return $Tree::Nary::FALSE;
 }
 
+sub setVerbose()
+{
+	$verbose = 1;
+}
 
 1;

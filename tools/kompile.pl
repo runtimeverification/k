@@ -379,6 +379,7 @@ if (!$compile_only) {
     print_header("Maudifying $language_file_name") if $verbose;
 
 # Before maudify, check the file for syntax errors
+	setVerbose() if $verbose;
     syntax_common_check($language_file_name);
     
     maudify_file("$language_file_name","");
