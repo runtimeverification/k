@@ -154,7 +154,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op converted : K K -> K .
 	op tv : List{K} Type -> Value .
 	--- op atv : List{K} Type -> Value .
-	--- op concretize : Value -> K .
+	op concretize : Type K -> K [metadata "strict(2)"] .
 	--- op addTypes : K K -> K .
 	--- op addGlobalTypes : K K -> K .
 	--- op addGlobalTypes : K -> K .
@@ -174,7 +174,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op necessaryBytes : K -> K [metadata "strict"] .
 	op cast : Type K -> K [metadata "strict(2)"] . --- as described in 6.3
 	op arithInterpret : Type BaseValue -> K . --- interpret the result of arithmetic as in 6.5.4
-	op interpret : Type K -> K [metadata "strict(2)"] . --- interpret the values of reading from mem
+	op interpret : Type K -> K . --- interpret the values of reading from mem
 	--- op leftShiftInterpret : Type BaseValue K -> K .
 	--- op rightShiftInterpret : Type BaseValue -> K .
 	--- op addLocals : Nat -> K .			

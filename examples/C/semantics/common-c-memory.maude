@@ -36,8 +36,29 @@ mod COMMON-SEMANTICS-READING is
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > read(Loc:Nat, T:Type, bitSize:Nat) => interpret(T:Type, extractBitsFromMem(Loc:Nat, bitSize:Nat)) ...</ k >
+		< k > read(Loc:Nat, T:Type, bitSize:Nat) => concretize(T:Type, extractBitsFromMem(Loc:Nat, bitSize:Nat)) ...</ k >
 		: KSentence [metadata "structural"] .
+		
+	op joinIntegerBytes : Type List{K} -> K .
+	ceq concretize(T:Type, dataList(L:List{K})) = joinIntegerBytes(T:Type, L:List{K})
+		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) .
+		
+	--- FIXME assuming bytes?
+	op joinIntegerBytes : Type List{K} Nat -> K .
+	eq joinIntegerBytes(T:Type, L:List{K}) = joinIntegerBytes(T:Type, L:List{K}, 0) .
+	eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), M:Nat)
+		= joinIntegerBytes(T:Type, L:List{K}, ((M:Nat <<Nat Len:Nat) |Nat N:Nat)) .
+	eq joinIntegerBytes(T:Type, .List{K}, N:Nat) = interpret(T:Type, N:Nat) . 
+		
+	op isConcreteList : List{K} -> Bool .
+	op isConcreteNumber : Nat -> Bool .
+	ceq isConcreteList((N:Nat,, L:List{K})) = isConcreteList(L:List{K})
+		if isConcreteNumber(N:Nat) .
+	eq isConcreteList(.List{K}) = true .
+	eq isConcreteNumber(sym(?) +Nat ?) = false .
+	eq isConcreteNumber(bito(?) +Nat ?) = false .
+	eq isConcreteNumber(?) = true [owise] .
+	
 	
 	--- eq interpret(T:Type, functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
 	

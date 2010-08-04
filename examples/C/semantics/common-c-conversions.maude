@@ -257,23 +257,19 @@ mod COMMON-C-CONVERSIONS is
 	--- including COMMON-SEMANTICS-CAST .
 	--- including COMMON-SEMANTICS-PROMOTIONS .
 	
-	--- --- fixme not sure about this
-	--- --- interpret is used to "cast" values read from memory
-	--- --- shouldn't need to do the < min one since values start positive
-	--- mb rule [interpret(T:Type, I:Int) => tv(I:Int, T:Type)]
-		--- if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
-		--- andBool hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- [interpret(T:Type, I:Int) => interpret(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))]
-		--- if I:Int >Int max(T:Type)
-		--- andBool hasIntegerType(T:Type)
-		--- andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme not necessarily the case that pointers are unsigned-ints
-	--- mb rule [interpret(pointerType(T:Type), N:Nat) => tv(N:Nat, pointerType(T:Type))]
-		--- if min(unsigned-int) <=Int N:Nat andBool max(unsigned-int) >=Int N:Nat
-		--- : KSentence [metadata "structural"] .
+	--- fixme not sure about this
+	--- interpret is used to "cast" values read from memory
+	--- shouldn't need to do the < min one since values start positive
+	mb rule interpret(T:Type, I:Int) => tv(I:Int, T:Type)
+		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
+		andBool hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		interpret(T:Type, I:Int) => interpret(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))
+		if I:Int >Int max(T:Type)
+		andBool hasIntegerType(T:Type)
+		andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
+		: KSentence [metadata "structural"] .
 		
 	--- mb rule [arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type)]
 		--- if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
