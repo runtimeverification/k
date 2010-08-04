@@ -110,13 +110,16 @@ mod COMMON-SEMANTICS-WRITING is
 	mb context splitIntegerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
 	eq splitIntegerBytes(I:Int, T:Type, sNat(Len:Nat))
 		= splitIntegerBytes(I:Int >>Int numBitsPerByte, T:Type, Len:Nat),, lowestByte(I:Int, T:Type) .
+	eq splitIntegerBytes(I:Int, T:Type, 0)
+		= .List{K} .
+	
 	
 	op lowestByte : Int Type -> K .
 	ceq lowestByte(I:Int, T:Type) = I:Int &Int byteMaskSet
 		if hasIntegerType(T:Type) .
 	
 	op byteMaskSet : -> Nat .
-	eq byteMaskSet = (2 ^Nat numBitsPerByte) - 1 .
+	eq byteMaskSet = (2 ^Nat numBitsPerByte) -Int 1 .
 		
 	eq isByteLoc(? +Nat bito(?)) = false .
 	eq isByteLoc(?) = true [owise] .
