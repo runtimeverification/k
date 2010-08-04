@@ -31,10 +31,6 @@ mod K-TECHNIQUE is
   op _`,`,_ : List{KResult} NeList{KResult} -> NeList{KResult} [ditto] .
 
 
-  op length_ : List{K} -> Nat . 
-  eq length(.List`{K`}) = 0 .
-  eq length(K:K,,Ks) = sNat length(Ks) . 
-
   sorts KLabel KResultLabel KHybridLabel .
 
   subsorts KResultLabel KHybridLabel < KLabel .
@@ -52,14 +48,6 @@ mod K-TECHNIQUE is
   op __ : NeList List -> NeList [ditto] .
   op __ : List NeList -> NeList [ditto] .
   
-  op List_ : List{K} -> List .
-  eq List(.List{K}) = . .
-  eq List(K,, Ks) = ListItem(K) List(Ks) .
-
-  op length_ : List -> Nat .
-  eq length(.).List = 0 .
-  eq length(LItem List) = sNat length(List) .
-
   sort BagItem Bag NeBag .
   subsort BagItem < NeBag < Bag .
   subsort BagItem < Bag .
@@ -68,10 +56,6 @@ mod K-TECHNIQUE is
   op __ : Bag Bag -> Bag [assoc comm id: .] .
   op __ : NeBag Bag -> NeBag [ditto] .
 
-  op Bag_ : List{K} -> Bag .
-  eq Bag(.List{K}) = . .
-  eq Bag(K,, Ks) = BagItem(K) Bag(Ks) .
-  
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .
   subsort SetItem < Set .
@@ -79,10 +63,6 @@ mod K-TECHNIQUE is
   op SetItem : K -> SetItem [metadata "latex(renameTo _)"] .
   op __ : Set Set -> Set [assoc comm id: .] .
   op __ : NeSet Set -> NeSet [ditto] .
-
-  op Set_ : List{K} -> Set [metadata "latex(renameTo {\\it{}Set}\\mybracket{_})"] .
-  eq Set(.List{K}) = . .
-  eq Set(K,, Ks) = SetItem(K) Set(Ks) .
 
   eq SI:SetItem SI:SetItem = SI:SetItem .
 
@@ -94,19 +74,6 @@ mod K-TECHNIQUE is
   op __ : Map Map -> Map [assoc comm id: . prec 120] .
   op __ : NeMap Map -> NeMap [ditto] .
 
-  op _(_) : Map K -> K [prec 0] .
-  eq (Map K1 |-> K2)(K1) = K2 .
-
-  op _[_/_] : Map K K -> Map [prec 0] .
-
-  var Map Map' : Map .  vars K1 K2 K2' : K .
-  eq (Map K1 |-> K2)[K2' / K1] = Map K1 |-> K2' .
-  eq Map[K2 / K1] = Map K1 |-> K2 [owise] .
-
-  op _[_] : Map Map -> Map [prec 0] .
-  eq (Map K1 |-> K2)[Map' K1 |-> K2'] = Map[Map'] K1 |-> K2' .
-  eq Map[Map'] = Map Map' [owise] .
-  
   sort CellLabel .
 
   op <_>_</_> : CellLabel K CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
@@ -119,13 +86,39 @@ mod K-TECHNIQUE is
 endm
 
 --- extra stuff usefull for the K technique
+mod K-LISTK-EXTRAS is
+  including K-TECHNIQUE .
+  var Ks : List{K} .
+
+  op lengthList{K}_ : List{K} -> Nat [metadata "latex(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
+  eq lengthList{K}(.List`{K`}) = 0 .
+  eq lengthList{K}(K:K,,Ks) = sNat lengthList{K}(Ks) . 
+
+  op headList{K}_ : NeList{K} -> K [metadata "latex(renameTo head\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
+  op tailList{K}_ : NeList{K} -> List{K} [metadata "latex(renameTo tail\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
+  
+  eq headList{K}(K:K,,Ks) = K:K .
+  eq tailList{K}(K:K,,Ks) = Ks .
+endm
 
 mod K-MAP-EXTRAS is
   including K-TECHNIQUE .
   including PL-BOOL .
-  var Map : Map .  var List : List{K} . var NList1 NList2 : NeList{K} .
+  var Map Map' : Map .  var List : List{K} . var NList1 NList2 : NeList{K} .
   vars K1 K2 K2' K : K .
-  op _|->_ : List{K} List{K} -> Map [ditto] .
+
+  op _(_) : Map K -> K [prec 0] .
+  eq (Map K1 |-> K2)(K1) = K2 .
+
+  op _[_/_] : Map K K -> Map [prec 0] .
+
+  eq (Map K1 |-> K2)[K2' / K1] = Map K1 |-> K2' .
+  eq Map[K2 / K1] = Map K1 |-> K2 [owise] .
+
+  op _[_] : Map Map -> Map [prec 0] .
+  eq (Map K1 |-> K2)[Map' K1 |-> K2'] = Map[Map'] K1 |-> K2' .
+  eq Map[Map'] = Map Map' [owise] .
+    op _|->_ : List{K} List{K} -> Map [ditto] .
   eq (K1,,NList1) |-> (K2,, NList2) = (K1 |-> K2) (NList1 |-> NList2) .
   eq (K1,,NList1) |-> K2 = (K1 |-> K2) (NList1 |-> K2) .
   eq .List`{K`} |-> List = . .
@@ -161,7 +154,11 @@ endm
 mod K-SET-EXTRAS is
   including K-TECHNIQUE .
   including PL-IF-THEN-ELSE .
-  var K : K . var Set Set' : Set . var SetItem : SetItem .
+  var K : K . var Ks : List{K} . var Set Set' : Set . var SetItem : SetItem .
+  op Set_ : List{K} -> Set [metadata "latex(renameTo {\\it{}Set}\\mybracket{_})"] .
+  eq Set(.List{K}) = . .
+  eq Set(K,, Ks) = SetItem(K) Set(Ks) .
+
   op _in_ : K Set -> Bool .
   eq K in Set SetItem(K) = true .
   eq K in Set = false [owise] .
@@ -178,7 +175,11 @@ endm
 mod K-BAG-EXTRAS is
   including K-TECHNIQUE .
   including PL-IF-THEN-ELSE .
-  var K : K . var Bag Bag' : Bag . var BagItem : BagItem .
+  var K : K . var Bag Bag' : Bag . var BagItem : BagItem .  var Ks : List{K} .
+  op Bag_ : List{K} -> Bag .
+  eq Bag(.List{K}) = . .
+  eq Bag(K,, Ks) = BagItem(K) Bag(Ks) .
+  
   op _in_ : K Bag -> Bool .
   eq K in Bag BagItem(K) = true .
   eq K in Bag = false [owise] .
@@ -195,8 +196,16 @@ endm
 mod K-LIST-EXTRAS is
   including K-TECHNIQUE .
   including PL-BOOL .
-  op inKList : K K -> Bool .
+  op List_ : List{K} -> List .
+  eq List(.List{K}) = . .
+  eq List(K:K,, Ks:List{K}) = ListItem(K:K) List(Ks:List{K}) .
 
+  op lengthList_ : List -> Nat .
+  eq lengthList(.).List = 0 .
+  eq lengthList(LItem:ListItem List:List) = sNat lengthList(List:List) .
+
+  --- this does not belong here
+  op inKList : K K -> Bool .
   eq inKList(K:K, (K1:K ~> K:K ~> K2:K)) = true .
   eq inKList(K:K, K':K) = false [owise] .
 endm
@@ -394,6 +403,8 @@ mod K is
   including K-CONTEXTS .
   including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
+  including K-LISTK-EXTRAS .
+  including K-LIST-EXTRAS .
   including K-MAP-EXTRAS .          --- operations on Maps
   including K-BAG-EXTRAS .          --- operations on Bags
   including K-SET-EXTRAS .          --- operations on Sets
