@@ -1,4 +1,4 @@
-in ../../../k-prelude
+in ../../../../k-prelude
 
 kmod SUDOKU-CONFIGURATION is including K
   syntax K ::= Nat
