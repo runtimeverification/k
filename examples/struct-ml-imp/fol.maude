@@ -1,0 +1,201 @@
+load smt.maude
+
+
+mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFACE .
+--- FOL= is the proving heart of matching logic.  Provided that one had a "FOL= oracle" that can
+--- prove any implications of the form "Pattern ===> Pattern1 Pattern2 ... PatternN" (the conclusion is a disjunction of patterns),
+--- then one basically has a matching logic verifier.  Since we do not have such a magic oracle, we are going to mimic one.
+--- We do it in a few steps.
+  var Cfg Cfg' Cfg1 Cfg2 : BagItem .
+  var Cfgs CfgItems CfgItems' CfgItems1 CfgItems2 : Bag .
+  var ?Obj : ?MathObj .
+  var !Obj : !MathObj .
+  var FreeObj : FreeMathObj .
+  var Obj Obj' Obj1 Obj2 : MathObj++ .
+  var ObjList ObjList1 ObjList2 : List{MathObj++} .
+  var X Id1 Id2 : Id .
+  var field : Field .
+  var Val Val1 Val2 : Val .
+  var ET : ExpType .
+  var P Q P' : Int++ .
+  var T : KLabel .
+  var HPN : HeapLabel .
+  var Env Env1 Env2 : Map .
+  var !Env : !MapItem .
+  var FreeEnv : FreeMapItem .
+  var H H1 H2 : Map .
+  var !H : !MapItem .
+  var FreeH : FreeMapItem .
+  var Phi Phi1 Phi2 : Formula .
+  var NtPhi NtPhi1 NtPhi2 : NtFormula .
+  var K : K .
+  var ?Subst !Subst FreeSubst Subst : Subst .
+
+
+--- split the configuration if the formula is a disjunction
+---   eq < config > < form > NtPhi1 \/ NtPhi2 </ form > Cfg </ config > = < config > < form > NtPhi1 </ form > Cfg </ config >
+---                                                               < config > < form > NtPhi2 </ form > Cfg </ config > .
+
+
+--- Step -1: generate multiple cases, one for each pattern in the conclusion
+--- leads to state explosion
+  rl Cfg ===> (Cfg' Cfgs) => Cfg =subst=> Cfg' .
+  rl Cfg ===> (Cfg' Cfgs) => Cfg ===> Cfgs .
+  eq Cfg ===> (.).Bag
+   = < form > FalseFormula </ form > < subst > .Subst </ subst > .
+
+
+--- Step 0:
+  eq < config > < subst > Subst </ subst > CfgItems1 </ config >
+     =subst=> < config > CfgItems2 </ config >
+   = < config > CfgItems1 </ config >[Subst]
+     =skol=> < config > < subst > Subst </ subst > CfgItems2[Subst] </ config > .
+
+
+--- Step 1: Skolemize the bound variables in the hypothesis and discard those in the conclusion
+--- (recall that the bound variables are known to be bound from their sorts, so no need to keep them in the pattern)
+  eq < config > CfgItems < newImpl > N:Nat </ newImpl > </ config > =skol=> Cfg
+   = skolemize(N:Nat, < config > CfgItems </ config >) =env=> Cfg .
+
+
+--- Step 2: Stepwise eliminate the environment
+  eq < config > < env > X |-> [Val1 : ET] Env1 </ env > CfgItems1 </ config >
+     =env=> < config > < env > X |-> [Val2 : ET] Env2 </ env > < form > Phi2 </ form > CfgItems2 </ config >
+   = < config > < env > Env1 </ env > CfgItems1 </ config >
+     =env=> < config > < env > Env2 </ env > < form > Phi2 /\ Val1 === Val2 </ form > CfgItems2 </ config > .
+
+--- Step 2.2 : Eliminate a globally bounded variable
+  eq < config > < env > Env </ env > < subst > Subst </ subst > CfgItems1 </ config >
+     =env=> < config > < env > !Env </ env > < form > Phi2 </ form > CfgItems2 </ config >
+   = < config > < subst > (!Env <- Env) ; Subst </ subst > CfgItems1 </ config >
+     =ret=> < config > CfgItems2 </ config > .
+
+--- Step 2.3 : Eliminate a env frame
+  eq < config > < env > Env1 FreeEnv </ env > CfgItems1 </ config >
+     =env=> < config > < env > Env2 FreeEnv </ env > CfgItems2 </ config >
+   = < config > < env > Env1 </ env > CfgItems1 </ config >
+     =env=> < config > < env > Env2 </ env > CfgItems2 </ config > .
+
+--- Step 2.4 : Eliminate the environment cell
+  eq < config > < env > Env1 </ env > CfgItems1 </ config >
+     =env=> < config > < env > (.).Map </ env > CfgItems2 </ config >
+   = < config > CfgItems1 </ config >
+     =ret=> < config > CfgItems2 </ config > .
+
+
+--- Step 2.5 : Eliminate the return value (only when checking asserions at the end of function)
+  eq < config > < form > Phi1 /\ ?return(Obj1) </ form > CfgItems1 </ config >
+     =ret=> < config > < form > Phi2 /\ ?return(Obj2)</ form > CfgItems2 </ config >
+   = < config > < form > Phi1 </ form > CfgItems1 </ config >
+     =heap=> < config > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
+  eq < config > < form > Phi1 </ form > CfgItems1 </ config >
+     =ret=> < config > < form > Phi2 </ form > CfgItems2 </ config >
+   = < config > < form > Phi1 </ form > CfgItems1 </ config >
+     =heap=> < config > < form > Phi2 </ form > CfgItems2 </ config > [owise] .
+
+
+--- Step 3: Get rid of variable equalities and propagate them via substitution
+--- Step 3.0.1 : Get rid of bound variables equalities at any time
+ ceq < config > < k > K </ k > < form > Phi </ form > CfgItems </ config >
+   = < config > < k > K </ k > (< form > Phi </ form > CfgItems)[?Subst] </ config >
+  if ?Subst := get?Subst(Phi) /\ ?Subst =/=Bool .Subst .
+***(
+--- Step 3.0.2 : Get rid of unbound variable equalities at any time
+ ceq < config > < k > K </ k > < form > Phi </ form > CfgItems < subst > Subst </ subst > </ config >
+   = < config > < k > K </ k > (< form > Phi </ form > CfgItems)[FreeSubst] < subst > FreeSubst Subst </ subst > </ config >
+  if FreeSubst := getFreeSubst(Phi) /\ FreeSubst =/=Bool .Subst .
+***)
+
+--- Step 3.1 : Get rid of proof tasks for bound variables equalities in the conclusion
+ ceq Cfg =heap=> < config > < form > Phi </ form > CfgItems </ config >
+   = Cfg =heap=> < config > (< form > Phi </ form > CfgItems)[?Subst] </ config >
+  if ?Subst := get?Subst(Phi) /\ ?Subst =/=Bool .Subst .
+ ceq Cfg =form=> < config > < form > Phi </ form > CfgItems </ config >
+   = Cfg =form=> < config > (< form > Phi </ form > CfgItems)[?Subst] </ config >
+  if ?Subst := get?Subst(Phi) /\ ?Subst =/=Bool .Subst .
+
+--- Step 3.2 : Get rid of a globally bound equality in the conclusion
+ ceq Cfg =heap=> < config > < form > Phi </ form > < subst > Subst </ subst > CfgItems </ config >
+   = Cfg[!Subst] =heap=> < config > < form > Phi </ form >[!Subst] < subst > !Subst ; Subst[!Subst] </ subst > CfgItems[!Subst] </ config >
+  if !Subst := get!SubstItem(Phi) /\ !Subst =/=Bool .Subst .
+ ceq Cfg =form=> < config > < form > Phi </ form > < subst > Subst </ subst > CfgItems </ config >
+   = Cfg[!Subst] =form=> < config > < form > Phi </ form >[!Subst] < subst > !Subst ; Subst[!Subst] </ subst > CfgItems[!Subst] </ config >
+  if !Subst := get!SubstItem(Phi) /\ !Subst =/=Bool .Subst .
+
+--- Step 3.3 : Get rid of unbound variables equalities in the hypothesis
+ ceq < config > < form > Phi </ form > CfgItems1 </ config >
+     =heap=> < config > < subst > Subst </ subst > CfgItems2 </ config >
+   = < config > < form > Phi </ form > CfgItems1 </ config > [FreeSubst]
+     =heap=> < config > < subst > FreeSubst ; Subst[FreeSubst] </ subst > CfgItems2[FreeSubst] </ config >
+  if FreeSubst := getFreeSubstItem(Phi) /\ FreeSubst =/=Bool .Subst .
+ ceq < config > < form > Phi </ form > CfgItems1 </ config >
+     =form=> < config > < subst > Subst </ subst > CfgItems2 </ config >
+   = < config > < form > Phi </ form > CfgItems1 </ config > [FreeSubst]
+     =form=> < config > < subst > FreeSubst ; Subst[FreeSubst] </ subst > CfgItems2[FreeSubst] </ config >
+  if FreeSubst := getFreeSubstItem(Phi) /\ FreeSubst =/=Bool .Subst .
+
+
+--- Step 4: Stepwise, eliminate the heap, if any
+--- Step 4.1: Eliminate a heap pattern
+  eq < config > < heap > HPN(ObjList)(ObjList1) H1 </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > HPN(ObjList)(ObjList2) H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
+   = < config > < heap > H1 </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ ObjList1 === ObjList2 </ form > CfgItems2 </ config > .
+
+--- Step 4.2 : Eliminate a location
+ eq < config > < heap > P |-> Val1 : [field : ET] H1 </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > P |-> Val2 : [field : ET] H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
+   = < config > < heap > H1 </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ Val1 === Val2 </ form > CfgItems2 </ config > .
+
+--- Step 4.3 : Eliminate a globally bounded variable in the hypothesis
+  eq < config > < heap > H </ heap > CfgItems1 </ config >
+    =heap=> < config > < heap > !H </ heap > < subst > Subst </ subst > CfgItems2 </ config >
+   = < config > CfgItems1 </ config >
+     =form=> < config > < subst > (!H <- H) ; Subst </ subst > CfgItems2 </ config > .
+
+--- Step 4.4 : Eliminate a heap frame
+  eq < config > < heap > H1 FreeH </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > H2 FreeH </ heap > CfgItems2 </ config >
+   = < config > < heap > H1 </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > H2 </ heap > CfgItems2 </ config > .
+
+--- Step 4.5 : Eliminate the heap cell
+  eq < config > < heap > (.).Map </ heap > < form > Phi1 </ form > CfgItems1 </ config >
+     =heap=> < config > < heap > (.).Map </ heap > < form > Phi2 </ form > CfgItems2 </ config >
+   = < config > < form > Phi1 </ form > CfgItems1 </ config >
+     =form=> < config > < form > Phi2 </ form > CfgItems2 </ config > .
+
+
+--- Step 5: Get rid of the formula implication task
+  eq < config > < form > Phi1 </ form > </ config >
+     =form=>
+     < config > < form > Phi2 </ form > < subst > Subst </ subst > </ config >
+   = < config > < form > Phi1 ===> Phi2 </ form > < subst > Subst </ subst > </ config > [owise] .
+
+
+--- Step 6: Call external SMT solver to check the formula if the "in-house" approach failed
+ crl < config > < form > NtPhi </ form > < subst > Subst </ subst > </ config >
+  => < config > < form > TrueFormula </ form > < subst > Subst </ subst > </ config >
+  if check-sat(~ NtPhi) ==Bool "unsat" [owise] .
+
+
+--- helper operations
+  op get?Subst : Formula -> Subst .
+ ceq get?Subst(?Obj === Obj /\ Phi) = (?Obj <- Obj) ; get?Subst(Phi)
+  if notBool(?Obj :: Int++) orBool (Obj :: Int++) .
+ ceq get?Subst(Obj === ?Obj /\ Phi) = (?Obj <- Obj) ; get?Subst(Phi)
+  if notBool(?Obj :: Int++) orBool (Obj :: Int++) .
+  eq get?Subst(Phi) = .Subst [owise] .
+
+  op get!SubstItem : Formula -> Subst .
+  eq get!SubstItem(!Obj === Obj /\ Phi) = (!Obj <- Obj) ; get!SubstItem(Phi) .
+  eq get!SubstItem(Obj === !Obj /\ Phi) = (!Obj <- Obj) ; get!SubstItem(Phi) .
+  eq get!SubstItem(Phi) = .Subst [owise] .
+
+  op getFreeSubstItem : Formula -> Subst .
+  eq getFreeSubstItem(FreeObj === Obj /\ Phi) = (FreeObj <- Obj) .
+  eq getFreeSubstItem(Obj === FreeObj /\ Phi) = (FreeObj <- Obj) .
+  eq getFreeSubstItem(Phi) = .Subst [owise] .
+endm
+

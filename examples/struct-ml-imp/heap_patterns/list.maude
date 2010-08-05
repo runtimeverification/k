@@ -1,0 +1,190 @@
+mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
+  var N : Nat .
+  var P P' P1 P2 Q Q' Q1 Q2 : Int++ .
+  var I : Int++ .
+  var Alpha Beta : Seq++ .
+  var H : Map .
+  var K : K .
+  var V V' V1 V2 : Val .
+  var Sn : Id .
+  var Phi : Formula .
+  var NtPhi : NtFormula .
+  var Cfg : BagItem .
+  var CfgItems : Bag .
+  
+  ops val next : -> Id .
+  op nodeList : -> Id .
+
+*** Definition of Lists ***
+  op list : -> HeapLabel .
+
+ ceq < config >
+       < k > derive(P') ~> K </ k >
+       < heap >
+         list(P)(Alpha)
+         H
+       </ heap >
+       < form > Phi </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+   = < config >
+       < k > derive(P') ~> K </ k >
+       < heap > H </ heap > 
+       < form > Phi /\ (P === 0) /\ (Alpha === epsilon) </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+     < config >
+       < k > K </ k >
+       < heap >
+         P |-> ?Int(N) : [( nodeList . val ) : int ]
+         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : & struct nodeList]
+         list(?Int(N +Int 1))(?Seq(N +Int 2))
+         H
+       </ heap >
+       < form >
+         Phi /\ ~(P === 0) /\
+         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
+       </ form >
+       < newSym > N +Int 3 </ newSym >
+       CfgItems
+     </ config >
+  if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+
+  eq < heap > list(0)(Alpha) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ Alpha === epsilon </ form > .
+
+  rl < config >
+       < heap >
+         P |-> I : [( nodeList . val ) : int ]
+         (P +Int 1) |-> 0 : [( nodeList . next ) : & struct nodeList ]
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         list(P)([I])
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+  rl < config >
+       < heap >
+         P |-> I : [( nodeList . val ) : int ]
+         (P +Int 1) |-> P' : [( nodeList . next ) : & struct nodeList ]
+         list(P')(Alpha)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         list(P)([I] ::: Alpha)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+
+
+*** Definition of List Segments ***
+  op lseg : -> HeapLabel .
+
+ ceq < config >
+       < k > derive(P') ~> K </ k >
+       < heap >
+         lseg(P, Q)(Alpha)
+         H
+       </ heap >
+       < form > Phi </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+   = < config >
+       < k > derive(P') ~> K </ k >
+       < heap > H </ heap >
+       < form > Phi /\ (P === Q) /\ (Alpha === epsilon) </ form >
+       < newSym > N </ newSym >
+       CfgItems
+     </ config >
+     < config >
+       < k > K </ k >
+       < heap >
+         P |-> ?Int(N) : [( nodeList . val ) : int ]
+         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : & struct nodeList]
+         lseg(?Int(N +Int 1), Q)(?Seq(N +Int 2))
+         H
+       </ heap >
+       < form >
+         Phi /\ ~(P === Q) /\
+         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
+       </ form >
+       < newSym > N +Int 3 </ newSym >
+       CfgItems
+     </ config >
+  if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+
+  eq < heap > lseg(P, P)(Alpha) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ Alpha === epsilon </ form > .
+  eq < heap > lseg(P, 0)(Alpha) H </ heap >
+   = < heap > list(P)(Alpha) H </ heap > .
+
+  rl < config >
+       < heap >
+         P |-> I : [( nodeList . val ) : int]
+         (P +Int 1) |-> Q : [( nodeList . next ) : & struct nodeList]
+         H </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         lseg(P, Q)([I])
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+     
+  rl < config >
+       < heap >
+         lseg(P, P')(Alpha)
+         lseg(P', Q)(Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         lseg(P, Q)(Alpha ::: Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+     
+  rl < config >
+       < heap >
+         lseg(P, P')(Alpha)
+         list(P')(Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg
+  => < config >
+       < heap >
+         list(P)(Alpha ::: Beta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =heap=> Cfg .
+endm
+

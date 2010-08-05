@@ -1,0 +1,32 @@
+load config.maude
+load theories/sequence-theory.maude
+load theories/multiset-theory.maude
+load theories/tree-theory.maude
+load theories/domain.maude
+load heap_patterns/list.maude
+---load heap_patterns/binary_tree.maude
+
+
+mod PL-BUILTINS is
+including PL-BOOL .
+including PL-EXT-BOOL .
+including PL-NAT .
+including PL-INT .
+including PL-RAT .
+including PL-FLOAT .
+including PL-STRING .
+including PL-CONVERSION .
+including PL-QID .
+including PL-RANDOM .
+including PL-COUNTER .
+including PL-BOOL .
+including PL-ID .
+  including CONFIG .
+  including MATHEMATICAL-SEQUENCE .
+  including MATHEMATICAL-MULTISET .
+  including MATHEMATICAL-TREE .
+  including MATHEMATICAL-DOMAIN .
+  including LIST-HP .
+---  including BINARY-TREE-HP .
+endm
+

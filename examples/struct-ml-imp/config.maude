@@ -1,0 +1,122 @@
+load k-prelude.maude
+load theories/core-theory.maude
+
+
+mod SUBST is inc MATHEMATICAL-INT + K-PROPER .
+  sort SubstItem Subst .
+  subsorts SubstItem < Subst .
+  op .Subst : -> Subst .
+  op _;_ : Subst Subst -> Subst [assoc comm id: .Subst] .
+  op _<-_ : MathObj++ MathObj++ -> SubstItem .
+  op _<-_ : List List -> SubstItem .
+  op _<-_ : Bag Bag -> SubstItem .
+  op _<-_ : Set Set -> SubstItem .
+  op _<-_ : Map Map -> SubstItem .
+  op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
+  op _[_] : Bag Subst -> Bag [prec 0 strat(2 0)] .
+  op _[_] : Formula Subst -> Formula [prec 0 strat(2 0)] .
+  op _[_] : Subst Subst -> Subst [prec 0 strat(2 0)] .
+
+  var Obj Obj1 Obj2 Obj1' Obj2' : MathObj++ .
+  var ObjList ObjList' : List{MathObj++} .
+  var List : List .
+  var Bag : Bag .
+  var Set : Set .
+  var Map : Map .
+  eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
+   = (Obj1 <- Obj1') ; (Obj2 <- Obj2') ; (ObjList <- ObjList') .
+  eq .List{MathObj++} <- .List{MathObj++} = .Subst .
+  eq Obj <- Obj = .Subst .
+  eq List <- List = .Subst .
+  eq Bag <- Bag = .Subst .
+  eq Set <- Set = .Subst .
+  eq Map <- Map = .Subst .
+endm
+
+
+mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
+  sorts ?MapItem !MapItem FreeMapItem .
+  subsort ?MapItem !MapItem FreeMapItem < MapItem .
+  op ?Env : Nat -> ?MapItem .
+  op ?Heap : Nat -> ?MapItem .
+  op !Env : Nat -> !MapItem .
+  op !Heap : Nat -> !MapItem .
+  op skolem : Nat ?MapItem -> FreeMapItem .
+  op co-skolem : FreeMapItem -> !MapItem .
+
+  subsort Int++ < Builtins KResult .
+  subsort Id < Builtins KProper .
+  op <_>_</_> : CellLabel Int++ CellLabel -> BagItem
+  [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Formula CellLabel -> BagItem
+  [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Subst CellLabel -> BagItem
+  [prec 0 format(nib g b o+ -b g b o)] .
+
+  ops feasible infeasible : -> CellLabel .
+  ops config k struct env heap form subst newSym newImpl spec : -> CellLabel .
+
+  op errorBag : -> [Bag] .
+  op _===>_ : Bag Bag -> Bag [frozen] .
+  op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=skol=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=env=>_   : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=ret=>_   : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=heap=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=form=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=debug=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+
+
+  op skolemize : Nat Bag -> Bag .
+  op co-skolemize : Bag -> Bag .
+
+  sort HeapLabel .
+  sort Val Void NvExpType ExpType .
+  subsort Int++  <  Val .
+  subsort Void NvExpType <  ExpType .
+  
+  sort Field .
+  subsort Field < Id .
+
+---env
+  op _|->[_:_] : Id  Val  ExpType -> MapItem .
+---struct
+  op _|->_ : Id  List -> MapItem .
+  op [_:_+_] :  Id  ExpType  Int++ -> ListItem .
+---heap
+  op emptySn : -> Id .
+  op @scalar :  -> Field .
+  op _._ : Id Id -> Field .
+  op _|->_:[_:_] : Int++  Val Field  ExpType -> MapItem . --- field name Id.Id TBD --- the 3rd arg. needs a new sort
+--- no proof obligations
+  op noCfg : -> Bag .
+  
+  vars Map Map' : Map .
+  var I : Id .
+  vars v1 v2 : Val .
+  var t : ExpType .
+
+  eq (Map I |-> [v1 : t ])[Map' I |-> [v2 : t ]] = Map[Map'] I |-> [v2 : t ] .
+
+  op struct_ :  Id -> ExpType .
+  op &_ :  ExpType -> ExpType .
+  op int :  -> NvExpType .
+  op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
+  op derive : -> KLabel .
+
+  op ?return : MathObj++ -> Atom .
+
+  op VALID : Formula -> Bool .
+  eq VALID(TrueFormula) = true .
+
+  op IntSort : -> KLabel .
+  op _: :_ : Int++ KLabel -> Bool .
+endm
+
+
+mod ML-K is inc CONFIG + K + K-CONDITION-SEARCH .
+  op _=>_ : Int++ Int++ -> Int++ [prec 125] .
+  op _=>_ : Formula Formula -> Formula [prec 125] .
+  op _=>_ : Subst Subst -> Subst [prec 125] .
+endm
+

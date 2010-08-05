@@ -1,0 +1,46 @@
+mod P-LIST-REVERSE is including IMP-SYNTAX + LIST-HP .
+        op nodeList :  -> Id .    op next :  -> Id .    op val :  -> Id .    op x :  -> Id .    op y :  -> Id .    op p :  -> Id .    op reverse :  -> Id .    op a :  -> Id .    op n :  -> Id . 
+        op ?x :  -> ?Int .    op ?p :  -> ?Int . 
+        op ?B :  -> ?Seq .    op ?C :  -> ?Seq .     op ?A :  -> ?Seq . 
+        op A :  -> FreeSeq . 
+
+        op pListReverse :  -> Decl . 
+
+
+  eq pListReverse =  (
+
+struct nodeList {
+  int val ; 
+  struct nodeList * next ; 
+}; 
+
+
+int reverse(struct nodeList * x ; )
+/*  pre <  config >  <  env >  x |->  [?x  :  & struct nodeList] </  env >  <  heap >  list(?x )(A) </  heap >  <  form >  TrueFormula </  form >  </  config >  */ 
+/*  post <  config >  <  env >  (.).Map  </  env > 
+                   <  heap >  list(?x )(rev(A)) </  heap >  <  form >  ?return (?x ) </  form >  </  config >  */ 
+{
+  struct nodeList * p ; 
+  struct nodeList * y ; 
+  p =  0 ; 
+  /*  invariant <  config >  <  env >  p |->  [?p  :  & struct nodeList] x |->  [?x  :  & struct nodeList] </  env > 
+                          <  heap >  list(?p )(?B ) list(?x )(?C ) </  heap > 
+                          <  form >  rev(A) ===  rev(?C ) :::  ?B  </  form >  </  config >  */ 
+  while(x !=  0) {
+    y =  * (x +  1);   
+    x -> next =  p ; 
+    p =  x ; 
+    x =  y ; 
+  }
+  return p ; 
+}
+
+void main()
+{
+  /*  assume <  config >  <  env >  x |->  [?x  :  & struct nodeList] </  env >  <  heap >  list(?x )(A) </  heap >  <  form >  TrueFormula </  form >  </  config >  */ 
+  x =  reverse(x) ; 
+  /*  assert <  config >  <  env >  x |->  [?x  :  & struct nodeList] </  env >  <  heap >  list(?x )(rev(A)) </  heap >  <  form >  TrueFormula </  form >  </  config >  */ 
+}
+  ) . 
+endm
+
