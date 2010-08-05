@@ -29,6 +29,11 @@ int main() {
 	return factorial;
 }
 
+// this isn't being scoped properly
+int blah (struct zed {int a; int b; int c : 4;} c){
+	return c.a;
+}
+
 int factorial(int n){
 	struct b {
 		int y;

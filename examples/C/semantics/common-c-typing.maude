@@ -181,10 +181,32 @@ mod COMMON-C-TYPING is
 		< k > DeclType(T:Type, K:K) => K:K ...</ k >
 		((.).Bag => < declarationTypeHolder > T:Type </ declarationTypeHolder >)
 		: KSentence .
-		
+	
+	op fillBitHoles : List{Type} -> List{Type} .
+	op fillBitHoles : Nat List{Type} -> List{Type} .
+	eq fillBitHoles(Nil) = Nil .
+	--- if we haven't seen bitfields
+	ceq fillBitHoles((typedDeclaration(T:Type, X:Id) :: L:List{Type})) 
+		= typedDeclaration(T:Type, X:Id) :: fillBitHoles(L:List{Type})
+	if notBool hasBitfieldType(T:Type) .
+	
+	ceq fillBitHoles((typedDeclaration(T:Type, X:Id) :: L:List{Type})) 
+		= fillBitHoles(0, typedDeclaration(T:Type, X:Id) :: L:List{Type})
+	if hasBitfieldType(T:Type) .
+	
+	--- if we have seen bitfields
+	ceq fillBitHoles(N:Nat, (typedDeclaration(T:Type, X:Id) :: L:List{Type})) 
+		= typedDeclaration(bitfieldType(unsigned-int, absInt(numBitsPerByte -Int (N:Nat %Nat numBitsPerByte)) %Nat numBitsPerByte), #NoName)
+		:: fillBitHoles(typedDeclaration(T:Type, X:Id) :: L:List{Type})
+	if notBool hasBitfieldType(T:Type) .
+	
+	eq fillBitHoles(N:Nat, (typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id) :: L:List{Type})) 
+		= typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id)
+		:: fillBitHoles(N:Nat +Nat N':Nat, typedDeclaration(T:Type, X:Id) :: L:List{Type}) .
+	
 	mb rule
 		< k > StructDef(X:Id, L:List{Type})
-			=> addAggregate(X:Id, L:List{Type})
+			=> addAggregate(X:Id, fillBitHoles(L:List{Type}))
 			~> giveType(X:Id, structType(X:Id))
 			~> structType(X:Id)
 		...</ k >
@@ -259,6 +281,10 @@ mod COMMON-C-TYPING is
 	eq hasArrayType(arrayType(?, ?)) = true .
 	ceq hasArrayType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'arrayType .
+		
+	eq hasBitfieldType(bitfieldType(?, ?)) = true .
+	ceq hasBitfieldType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'bitfieldType .	
 		
 	eq hasFunctionType(functionType(?, ?)) = true .
 	ceq hasFunctionType(T:Type) = false

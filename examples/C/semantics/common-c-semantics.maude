@@ -203,6 +203,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op hasArrayType : Type -> Bool .
 	op hasFunctionType : Type -> Bool .
 	op hasFunctionPointerType : Type -> Bool .
+	op hasBitfieldType : Type -> Bool .
 	op kpair : K K -> K .
 	--- op kpair : K List -> K .
 	--- op promote : K -> K .
