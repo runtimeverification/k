@@ -281,7 +281,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
     send [me,l] to mergeSortAgent;
     sorting=lambda l.{
       var t;t=list2array(l);
-      selectionSort(head t, head tail t); 
+      selectionSort(head t, head tail t);
       l=array2list(head t, head tail t);
       free head t;
       return l;
