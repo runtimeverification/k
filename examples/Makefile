@@ -2,7 +2,7 @@ TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
 	    modules/tests/io modules/tests/imp modules/tests/halt \
             modules/tests/callcc modules/tests/threads modules/tests/agents \
 	    modules/tests/quote-unquote \
-	    algorithms/tests/sort algorithms/tests/dijkstra \
+	    algorithms/sort algorithms/dijkstra \
             agent lambda/simply-typed \
         challenge imp/fully-labeled imp/fully-syntactic imp/labeled-syntax imppp \
         simple/untyped simple/typed/dynamic simple/typed/static \
