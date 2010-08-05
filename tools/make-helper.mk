@@ -38,7 +38,7 @@ pdf: $(PDF_FILE)
 	
 png: $(PNG_FILES)
 
-$(PNG_FILES): $(EPS_FILES)
+$(PNG_FILES): $(CROP_PDF_FILE)
 	find . -name "$(MAIN_FILE)-ps-[0-9][0-9][0-9].eps" -exec gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pngalpha -r150 -sOutputFile={}.png {} \;
 
 $(DVI_FILE): $(LATEX_FILE)
@@ -50,8 +50,8 @@ $(EPS_FILES): $(DVI_FILE)
 
 crop-pdf: ${CROP_PDF_FILE}
 	
-$(CROP_PDF_FILE): $(EPS_FILES)
-	gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$(CROP_PDF_FILE) `ls $(MAIN_FILE)-ps-[0-9][0-9][0-9].eps`
+$(CROP_PDF_FILE): $(LATEX_FILE)
+	$(TOOL_DIR)/nice-crop-pdf.sh $(MAIN_FILE)
 
 $(PDF_FILE): $(LATEX_FILE) 
 	$(TOOL_DIR)/nice-pdf.sh $(MAIN_FILE)
