@@ -1,12 +1,12 @@
 # KCOMPILE can be set by whoever calls this file
 # e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= ../../../../tools/kompile.pl
+KCOMPILE ?= ../../../tools/kompile.pl
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = RUN
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = NAT-INF DIJKSTRA RUN
+LANGUAGE_MODULES = SORT
 
 #this is the basename of the main file
 MAIN_FILE = run

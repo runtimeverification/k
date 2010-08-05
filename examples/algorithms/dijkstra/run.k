@@ -1,6 +1,6 @@
-load ../../../../k-prelude
-load ../../nat-inf
-load ../../dijkstra
+load ../../../k-prelude
+load nat-inf
+load dijkstra
 
 load programs
 
