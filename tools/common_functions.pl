@@ -25,6 +25,7 @@ my $comment = join("|", (
 ));     
 my $verbose = 0;
 my @nodes = ();
+my $current_line = 0;
 
 # explicit call for debugging.
 # syntax_common_check($ARGV[0]);
@@ -84,9 +85,9 @@ sub append_rec_tree
     
     # find unmatched cells and report them.
     if ($temp_cfg =~ m/.*<(.+?)>.*/s)
-      {
-	  warning(" - configuration definition is not correct. Unmatched cell <$1>");
-      }
+	{
+		warning(" - configuration definition is not correct. Unmatched cell <$1>");
+	}
     
     return $root;
 }                    
@@ -97,13 +98,6 @@ sub append_rec_tree_for_rule
 {
     my ($temp_cfg, $node_name, $rule) = (shift, shift, shift);
     
-    my $l = "unavailable line";
-    if ($rule =~ m/(^[\d]\d*)\s/)
-    {
-	$l = $1;
-	$rule =~ s/(^[\d]\d*)\s//;
-    }
-    
     # create the new node
     my $root = new Tree::Nary->new($node_name);
     
@@ -112,30 +106,30 @@ sub append_rec_tree_for_rule
 
     while ($temp_cfg =~ m/<\s*(.+?)(_?)\s*>\s*(.+?)\s*<\s*(_?)\/\s*\1\s*>\s*/sg)
     {
-	if ($2 ne "_" && $4 ne "_")
-	{
-	    $node = &append_rec_tree_for_rule($3, $1 . ";;;;;closed", $rule);
-	}
-	else
-	{
-	    $node = &append_rec_tree_for_rule($3, $1, $rule);
-	}
-	
-	Tree::Nary->append($root, $node);
+		if ($2 ne "_" && $4 ne "_")
+		{
+			$node = &append_rec_tree_for_rule($3, $1 . ";;;;;closed", $rule);
+		}
+		else
+		{
+			$node = &append_rec_tree_for_rule($3, $1, $rule);
+		}
+		
+		Tree::Nary->append($root, $node);
     }
     
     # remove all children (from text) in order to find 
     # unmatched cells
     while ($temp_cfg =~ m/<\s*(.+?)(_?)\s*>\s*(.+?)\s*<\s*(_?)\/\s*\1\s*>\s*/sg)
-      {
-	  $temp_cfg =~ s/<\s*(.+?)(_?)\s*>\s*(.+?)\s*<\s*(_?)\/\s*\1\s*>\s*//sg;
-      }  
+    {
+		$temp_cfg =~ s/<\s*(.+?)(_?)\s*>\s*(.+?)\s*<\s*(_?)\/\s*\1\s*>\s*//sg;
+    }  
     
     # find unmatched cells and report them.
     if ($temp_cfg =~ m/.*<([^\'=]+?)>.*/s)
-      {
-	  warning("(@ line $l) - in expression:\n$rule\nUnmatched cell <$1>.");
-      }
+    {
+		warning("(@ line $current_line) - in expression:\n$rule\nUnmatched cell <$1>.");
+    }
     
     return $root;
 }                    
@@ -170,52 +164,45 @@ sub validate_open_cells()
 	$rule = "cannot identify rule!";;
     }
 
-    my $l = "unavailable line";
-    if ($rule =~ m/(^[\d]\d*)\s/)
-    {
-	$l = $1;
-	$rule =~ s/(^[\d]\d*)\s//;
-    }
-
     # only for closed cells
     if ( $node->{data} =~ m/;;;;;closed/sg)
     {
-	# get the coresponding node for $node in configuration tree
-	my $node_data = $node->{data};
-	# remove closed marker
-	$node_data =~ s/;;;;;closed//;
-	my $config_node = Tree::Nary->find($config_tree, $Tree::Nary::PRE_ORDER, 
-	    $Tree::Nary::TRAVERSE_ALL, $node_data);
-	
-	
-	# traverse childrens and check if they correspond to configuration definition
-	my $no_of_childrens = Tree::Nary->n_children($config_node);
-	my $i;
-	for ($i = 0; $i < $no_of_childrens; $i++)
-	{
-	    # get node i name
-	    my $child_data = Tree::Nary->nth_child($config_node, $i)->{data};
-
-	    if (!defined($iteration_cells->{$child_data}) || ($iteration_cells->{$child_data} ne 'iterated'))
-	    {
-		my $bool1 = Tree::Nary->find($node, $Tree::Nary::PRE_ORDER, 
-		    $Tree::Nary::TRAVERSE_ALL, $child_data) || $Tree::Nary::FALSE;
-		my $bool2 = Tree::Nary->find($node, $Tree::Nary::PRE_ORDER, 
-		    $Tree::Nary::TRAVERSE_ALL, $child_data . ";;;;;closed") || $Tree::Nary::FALSE;
+		# get the coresponding node for $node in configuration tree
+		my $node_data = $node->{data};
+		# remove closed marker
+		$node_data =~ s/;;;;;closed//;
+		my $config_node = Tree::Nary->find($config_tree, $Tree::Nary::PRE_ORDER, 
+			$Tree::Nary::TRAVERSE_ALL, $node_data);
 		
-		# if the child is not found then add it in the $not_found_def
-		if (($Tree::Nary::FALSE == $bool1) && ($Tree::Nary::FALSE == $bool2))
+		
+		# traverse childrens and check if they correspond to configuration definition
+		my $no_of_childrens = Tree::Nary->n_children($config_node);
+		my $i;
+		for ($i = 0; $i < $no_of_childrens; $i++)
 		{
-		    $not_found_def .= " <$child_data>";
+			# get node i name
+			my $child_data = Tree::Nary->nth_child($config_node, $i)->{data};
+
+			if (!defined($iteration_cells->{$child_data}) || ($iteration_cells->{$child_data} ne 'iterated'))
+			{
+				my $bool1 = Tree::Nary->find($node, $Tree::Nary::PRE_ORDER, 
+					$Tree::Nary::TRAVERSE_ALL, $child_data) || $Tree::Nary::FALSE;
+				my $bool2 = Tree::Nary->find($node, $Tree::Nary::PRE_ORDER, 
+					$Tree::Nary::TRAVERSE_ALL, $child_data . ";;;;;closed") || $Tree::Nary::FALSE;
+				
+				# if the child is not found then add it in the $not_found_def
+				if (($Tree::Nary::FALSE == $bool1) && ($Tree::Nary::FALSE == $bool2))
+				{
+					$not_found_def .= " <$child_data>";
+				}
+			}
 		}
-	    }
-	}
-	
-	# if there are less children in rule tree than in the configuration tree print warning message
-	if ($not_found_def ne "")
-	{
-	    warning("(@ line $l) - missing declarations of cells:$not_found_def in:\n$rule\nAre you sure cell <$node_data> should be closed?");
-	}
+		
+		# if there are less children in rule tree than in the configuration tree print warning message
+		if ($not_found_def ne "")
+		{
+			warning("(@ line $current_line) - missing declarations of cells:$not_found_def in:\n$rule\nAre you sure cell <$node_data> should be closed?");
+		}
     }
  
     return $Tree::Nary::FALSE;
@@ -247,12 +234,12 @@ sub validate_node()
 	$rule = "cannot identify rule!";;
     }
     
-    my $l = "unavailable line";
-    if ($rule =~ m/(^[\d]\d*)\s/)
-    {
-	$l = $1;
-	$rule =~ s/(^[\d]\d*)\s//;
-    }
+#    my $l = "unavailable line";
+#    if ($rule =~ m/(^[\d]\d*)\s/)
+#    {
+#	$l = $1;
+#	$rule =~ s/(^[\d]\d*)\s//;
+ #   }
 
     
     # get the coresponding for $node in configuration
@@ -266,42 +253,42 @@ sub validate_node()
 
     if (scalar @nodes == 0)
     {
-	warning("(@ line $l) - cell <" . $node_data . "> in: \n" . $rule . "\nis not defined in configuration.");
+	warning("(@ line $current_line) - cell <" . $node_data . "> in: \n" . $rule . "\nis not defined in configuration.");
     }
     
     my $flag = 0;
     for my $config_node (@nodes)
     {
-	# get the parent for $node in rule
-	my $parent_node_rule = $node->{parent};
-	my $parent_data = $parent_node_rule->{data};
-	$parent_data =~ s/;;;;;closed//;
-	
-	# get the coresponding for $parent_node_rule in configuration
-	my $parent_node_config = Tree::Nary->find($config_tree, $Tree::Nary::PRE_ORDER, 
-	    $Tree::Nary::TRAVERSE_ALL, $parent_data);
-	
-#	print "\tNode " . $config_node->{data} . "   parent: " . $parent_node_config->{data} . "\n";
+		# get the parent for $node in rule
+		my $parent_node_rule = $node->{parent};
+		my $parent_data = $parent_node_rule->{data};
+		$parent_data =~ s/;;;;;closed//;
+		
+		# get the coresponding for $parent_node_rule in configuration
+		my $parent_node_config = Tree::Nary->find($config_tree, $Tree::Nary::PRE_ORDER, 
+			$Tree::Nary::TRAVERSE_ALL, $parent_data);
+		
+	#	print "\tNode " . $config_node->{data} . "   parent: " . $parent_node_config->{data} . "\n";
 
-        # if undefined parent node in configuration: warning
-	if (!defined($parent_node_config))
-	{
-	    warning("(@ line $l) - cell <" . $node_data . "> in:\n" . $rule . "\nhas parent <" 
-		. $parent_data ."> which is not defined in configuration.");
-	}
-	
-	
-	# check if $parent_node_config is ancestor for $config_node
-	if (Tree::Nary->is_ancestor($parent_node_config, $config_node) == $Tree::Nary::TRUE
-	    || Tree::Nary->is_ancestor($config_node, $parent_node_config) == $Tree::Nary::TRUE)
-	{
-	    $flag = 1;
-	}	
+			# if undefined parent node in configuration: warning
+		if (!defined($parent_node_config))
+		{
+			warning("(@ line $current_line) - cell <" . $node_data . "> in:\n" . $rule . "\nhas parent <" 
+			. $parent_data ."> which is not defined in configuration.");
+		}
+		
+		
+		# check if $parent_node_config is ancestor for $config_node
+		if (Tree::Nary->is_ancestor($parent_node_config, $config_node) == $Tree::Nary::TRUE
+			|| Tree::Nary->is_ancestor($config_node, $parent_node_config) == $Tree::Nary::TRUE)
+		{
+			$flag = 1;
+		}	
     }
     
     if ($flag == 0)
     {
-	warning("(@ line $l) - cell structure in:\n$rule \nis not a substructure in configuration.");
+		warning("(@ line $current_line) - cell structure in:\n$rule \nis not a substructure in configuration.");
     }   
     
     # clear array
@@ -344,45 +331,37 @@ sub syntax_verification
     }
     else
     {
-#	print "INFO: File $language_file_name does not contain configuration definition.\n";
-	return;
+		warning("INFO: File $language_file_name does not contain configuration definition.\n") if $verbose;
+		return;
     }
     
     # learn configuration
     $config_tree = append_rec_tree($lines, "super-node");
-    
-    # my $s = "";
-    # Tree::Nary->traverse($config_tree, $Tree::Nary::PRE_ORDER,
-	# $Tree::Nary::TRAVERSE_ALL, -1, \&show, \$s);
-    
-    
-    
+        
     # verify each rule for errors
     my $no = 0;
     while ($source =~ m/(rule|eq|macro)(\s+)(.*?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/sg)
     {
 	my $match_line = $-[0];
-	# print "Rule at line " . (find_line($source, $-[0])) . "\n";
 	my $original_rule = $3;
-	# print "Matched: $1$2$3$4\n";
 	my $temp = $3;
 	my $expr_type = $1;
-	
+
 	$temp =~ s/top\(.*?\)//;
 	
 	# get the line number
-	my $line_no = find_line($source, $match_line);
-	
+	$current_line = find_line($source, $match_line);
+
 	# eliminate rules that not contain cell definitions
 	# also eliminate ambigous rules int < int => int
 	if ($temp =~ m/(.*?)<.*?[^=]>/)
 	{
 	    
-            # build rule tree
-	    my $exp_tree = append_rec_tree_for_rule($temp, "super-node", "$line_no rule $original_rule");
+        # build rule tree
+	    my $exp_tree = append_rec_tree_for_rule($temp, "super-node", "rule $original_rule");
 	    
 	    # $string will be used as DATA parameter for traverse function
-	    my $string = $line_no . " " . $expr_type . " " . $original_rule;
+     	my $string = $expr_type . " " . $original_rule;
 
 	    # check if rule tree tree ~ configuration tree
 	    Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
@@ -400,11 +379,11 @@ sub syntax_verification
 	    if ($top_content =~ m/(.*?)<.*?[^=]>/)
 	    {
 		# build "top" inside tree
-		my $exp_tree = append_rec_tree_for_rule($top_content, "super-node",  "$line_no rule $original_rule");
+		my $exp_tree = append_rec_tree_for_rule($top_content, "super-node",  "rule $original_rule");
 	    
 		# $string will be used as DATA parameter for traverse function
-		my $string = "$line_no top expression: $expr_type  $original_rule";
-		
+		my $string = "top expression: $expr_type  $original_rule";
+	
 		# check if rule tree tree ~ configuration tree
 		Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
 		$Tree::Nary::TRAVERSE_ALL, -1, \&validate_node, \$string);
@@ -420,7 +399,6 @@ sub syntax_verification
 
 sub warning
 {
-#    print "WARNING: " . (shift) . "\n";
     $warnings .= "WARNING" . (shift) . "\n";
 }
 
@@ -453,7 +431,6 @@ sub find_line
     my ($text, $end) = (shift, shift);
     
     my $lines = substr $text, 0, $end;
-  #  print $lines . "\n";
     
     my $l_no = 1;
     while($lines =~ m/\n/g)
