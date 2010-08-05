@@ -619,12 +619,20 @@ mod COMMON-SEMANTICS-REFERENCE is
 	--- eq getUnionFieldOffset(?, ?) = tv(0, pointerType(void)) .
 	--- op giveType : Type K -> K .
 	--- FIXME should be checking pointer
+	
+	op getOffset : K K Type -> K .
+	
+	mb context getOffset(?, value(`[HOLE`]:K), ?) : KSentence .
 	mb [address-of-arrow-struct]: rule
 		< k > &(tv(Loc:Nat, pointerType(structType(S:Id))) -> X:Id)
-			=> tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
+			=> getOffset(Loc:Nat, value(calculateLength(L1:List{Type})), fixPointerType(T:Type))
+			--- => cast(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
+			--- => tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
 		...</ k >
 		< structs >... S:Id |-> (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?) ...</ structs >
 		: KSentence [metadata "structural"] .
+		
+	eq getOffset(N:Nat, M:Nat, T:Type) = tv(N:Nat +Nat M:Nat, T:Type) .
 
 		
 	--- mb [address-of-arrow-union]: rule

@@ -193,7 +193,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op readFromFD : Nat -> K .
 	--- op readFromFD : Nat Nat -> K .
 
-	op calculateLength : List{Type} -> Nat .
+	op calculateLength : List{Type} -> K .
 	--- op figureOffset : Nat K Type -> K [metadata "strict(2)"] .
 	--- ---op pair : Rat Rat -> K . --- relying on this not being nat
 	--- op undefRange : Map Nat Nat -> Map .
@@ -915,8 +915,9 @@ mod C-SEMANTICS-MISC is
 	--- ceq figureOffset(loc(Block:Nat, Offset:Nat), tv(R:Rat, ?), T:Type) = 
 		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
 	--- if notBool(T:Type isa 'bitfieldType) .
-	
+	---op calculateLength
 	eq calculateLength(Nil) = 0 .
+	---eq calculateLength(T:Type :: L:List{Type}) = calculateLength(T:Type) + calculateLength(L:List{Type})
 		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
 	--- if notBool(T:Type isa 'bitfieldType) .
 
