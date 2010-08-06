@@ -422,7 +422,7 @@ and printBlockLabels a =
 and printAttribute (a, b) =
 	wrap (("\"" ^ a ^ "\"") :: (printExpressionList b) :: []) "Attribute"
 and printEnumItem (str, expression, cabsloc) =
-	wrap ((printIdentifier str) :: (printExpression expression) :: (printCabsLoc cabsloc) :: []) "EnumItem"
+	wrap ((wrap ((printIdentifier str) :: (printExpression expression) :: []) "EnumItem") :: (printCabsLoc cabsloc) :: []) "EnumItemLoc"
 and printSpecifier a =
 	wrapString (printSpecElemList a) "Specifier"
 and printSpecElemList a =

@@ -37,6 +37,7 @@ kmod COMMON-C-SYNTAX is
 	sort AsmDetails
 	sort Statement
 	sort PureStatement
+	sort PureEnumItem
 	sort ForClause
 	--- sort BinaryOperator --- not used by us
 	--- sort UnaryOperator --- not used by us
@@ -86,6 +87,7 @@ kmod COMMON-C-SYNTAX is
 	subsort AsmDetails < C
 	subsort Statement < C
 	subsort PureStatement < C
+	subsort PureEnumItem < C
 	subsort ForClause < C
 	--- subsort BinaryOperator < C
 	--- subsort UnaryOperator < C
@@ -145,9 +147,9 @@ type typeSpecifier = (* Merge all specifiers into one type *)
 	op StructRef : Id -> TypeSpecifier [ctor] --- new
 	op StructDef : Id List{C} -> TypeSpecifier [strict(2) ctor] --- new
 	op UnionRef : Id -> TypeSpecifier [ctor] --- new
-	op UnionDef : Id List{C} -> TypeSpecifier [ctor] --- new
+	op UnionDef : Id List{C} -> TypeSpecifier [strict(2) ctor] --- new
 	op EnumRef : Id -> TypeSpecifier [ctor] --- new
-	op EnumDef : Id List{C} -> TypeSpecifier [ctor] --- new
+	op EnumDef : Id List{C} -> TypeSpecifier [strict(2) ctor] --- new
 	op TypeofExpression : K -> TypeSpecifier [ctor]
 	op TypeofType : K K -> TypeSpecifier [ctor]
 
@@ -267,7 +269,8 @@ and single_name = specifier * name
 ***(
 and enum_item = string * expression * cabsloc
 ***)
-	op EnumItem : Id K K -> EnumItem
+	op EnumItem : Id K -> PureEnumItem [strict(2)]
+	op EnumItemLoc : K K -> EnumItem --- new
 		
 ***(
 	(*

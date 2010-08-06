@@ -48,6 +48,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
+	op typedef : Id -> Id .
 	
 	--- subsort List{KResult} < K .
 	
@@ -94,7 +95,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op structType : Id -> Type [ctor] .
 	op unionType : Id -> Type [ctor] .
 	op qualifiedType : Type K -> Type [ctor] .
-	op typedefType : Type -> Type [ctor] .
+	--- op typedefType : Type -> Type [ctor] .
 	
 	--- sort State .
 	--- subsort String < State .
@@ -644,6 +645,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- if it is an aggregate, every member is initialized (recursively) according to these rules;
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
 	op declare : K K -> K [metadata "strict"] .
+	op defineType : K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence .
 	mb context Typedef(NameGroup(`[HOLE`]:K, ?)) : KSentence .
 	eq LocalDefinition(DefinitionLoc(K:K, Loc:K)) = DefinitionLoc(K:K, Loc:K) .
@@ -659,6 +661,9 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- op initNameGroup : K K -> K .
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = DeclarationDefinition(InitNameGroup(T:Type, K:C)) ~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
 	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
+	
+	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
+	eq Typedef(NameGroup(T:Type, Name:C)) = defineType(SingleName(T:Type, Name:C)) .
 
 	op initialize-aux : Id Type K -> K .
 	op zero : Id -> K .
@@ -684,6 +689,9 @@ mod COMMON-GLOBAL-DECLARATION is
 		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[0 / 0 to Len:Nat])) ...</ mem >
 		: KSentence .
 	
+	mb rule
+		< k > defineType(typedDeclaration(T:Type, X:Id)) => giveType(typedef(X:Id), T:Type) ...</ k >
+		: KSentence .
 	mb rule
 		< k > declare(typedDeclaration(T:Type, X:Id), K:K) => 
 			allocateType(Loc:Nat, T:Type)
@@ -1059,12 +1067,16 @@ mod C-SEMANTICS-MISC is
 		< k > DefinitionLocRange(K:K, L1:CabsLoc, L2:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L1:CabsLoc </ currentProgramLoc >
 		: KSentence .
-	mb rule
+	mb [DefinitionLoc]: rule
 		< k > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
-	mb [StatementLoc] : rule
+	mb [StatementLoc]: rule
 		< k > StatementLoc(K:K, L:CabsLoc) => K:K ...</ k >
+		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
+		: KSentence .
+	mb [EnumItemLoc]: rule
+		< k > EnumItemLoc(K:K, L:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
 		
