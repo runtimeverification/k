@@ -194,10 +194,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op hasUnsignedIntegerType : Type -> Bool [memo] .
 	op hasSignedIntegerType : Type -> Bool [memo] .
 	op typeof : K -> K .
-	--- op writeToFD : Nat Nat -> K .
-	--- op writeToFD : Nat String -> K .
-	--- op readFromFD : Nat -> K .
-	--- op readFromFD : Nat Nat -> K .
+	op writeToFD : Nat Nat -> K .
+	op writeToFD : Nat String -> K .
+	op readFromFD : Nat -> K .
+	op readFromFD : Nat Nat -> K .
 
 	op calculateLength : List{Type} -> K .
 	--- op figureOffset : Nat K Type -> K [metadata "strict(2)"] .
@@ -1043,16 +1043,16 @@ mod C-SEMANTICS-MISC is
 		--- --- if N:Nat =/=Bool M:Nat .
 	--- --- eq undefRange(M:Map, N:Nat, N:Nat) = M:Map .
 		
-	--- mb [writeToFD-char] : rule
-		--- < k > [writeToFD(FD:Nat, N:Nat) => .K]  ...</ k >
-		--- < openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
-		--- < files >... Filename:String |-> [S:String => S:String +String charString(N:Nat %Nat 256)] ...</ files >
-		--- : KSentence [metadata "structural"] .
-	--- mb [writeToFD-string] : rule
-		--- < k > [writeToFD(FD:Nat, S':String) => .K] ...</ k >
-		--- < openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
-		--- < files >... Filename:String |-> [S:String => S:String +String S':String] ...</ files >
-		--- : KSentence [metadata "structural"] .
+	mb [writeToFD-char] : rule
+		< k > writeToFD(FD:Nat, N:Nat) => (.).K ...</ k >
+		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
+		< files >... Filename:String |-> (S:String => S:String +String charString(N:Nat %Nat 256)) ...</ files >
+		: KSentence [metadata "structural"] .
+	mb [writeToFD-string] : rule
+		< k > writeToFD(FD:Nat, S':String) => (.).K ...</ k >
+		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
+		< files >... Filename:String |-> (S:String => S:String +String S':String) ...</ files >
+		: KSentence [metadata "structural"] .
 	--- mb [readFromFD-char] : rule
 		--- < k > [readFromFD(FD:Nat) => tv(charToAscii(firstChar(S:String)), int)]  ...</ k >
 		--- < openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
@@ -1115,7 +1115,7 @@ endm
 load common-c-conversions
 load common-c-expressions
 load common-c-statements
---- load common-c-standard-lib
+load common-c-standard-lib
 load common-c-typing
 load common-c-memory
 
@@ -1129,13 +1129,12 @@ mod COMMON-C-SEMANTICS is
 	including COMMON-C-EXPRESSIONS .
 	including COMMON-PARAMETER-BINDING .
 	including COMMON-C-CONVERSIONS .
+	including COMMON-C-STANDARD-LIBRARY .
 	
 	op eval : Program -> Bag .
 	op eval : Program List{K} String -> Bag .
 	
 	***(
-	
 	including COMMON-LOCAL-DECLARATION .
-	including COMMON-C-STANDARD-LIBRARY .
 	***)
 endm
