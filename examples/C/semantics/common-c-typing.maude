@@ -151,15 +151,95 @@ mod COMMON-C-TYPING is
 	
 	op DeclType : K K -> K .
 	op BitFieldType : K K -> K [metadata "strict"] .
+	--- op specTypedef : -> Type .
+	--- op long : -> Type .
+	--- op signed : -> Type .
+	--- op unsigned : -> Type .
+	--- op bool : -> Type .
+	
+	--- eq Int = int .
+	--- eq Void = void .
+	--- eq SpecTypedef = specTypedef .
+	--- eq Unsigned = unsigned .
+	--- eq Long = long .
+	--- eq Signed = signed .
+	
+	op baseType : Type -> Type .
+	
+***(
+	Allowed types are:
+	char unsigned-char signed-char
+	unsigned-short-int short-int
+	unsigned-int int
+	unsigned-long-int long-int
+	unsigned-long-long-int long-long-int
+	
+***)	
+	
+	
+	--- eq unsigned :: long = unsigned-long
+	--- eq canonicalizeType(B:Bag BagItem(T:Type)) = 
+		--- canonicalizeType(B:Bag BagItem(baseType(T:Type)))
+		--- if T:Type ==Bool bool
+		--- orBool T:Type ==Bool char
+		--- orBool T:Type ==Bool int
+		--- orBool T:Type ==Bool float
+		--- orBool T:Type ==Bool double
+	
+	op canonicalizeType : Bag -> K .
+	op canonicalizeType : Bag K -> K .
+	
+	op extractBaseType : Bag -> K .
+	op extractModifiers : Bag -> Bag .
+	op extractStorage : Bag -> Bag .
+	op unknownType : -> K .
 	
 	mb rule
-		Int => int
+		< k > canonicalizeType(B:Bag) 
+			=> canonicalizeType(B:Bag, extractBaseType(B:Bag))
+		...</ k >
+		--- ((.).Bag => < typeSimplifier >... (.).Bag ...</ typeSimplifier >)
+		((.).Bag => < typeSimplifier >... < specifier > (.).Bag </ specifier > ...</ typeSimplifier >)
 		: KSentence .
+		
+	--- startbag, normal, modifiers, storage
+	
+	--- eq canonicalizeType(B:Bag BagItem(Unsigned), B1:Bag, B2:Bag, B3:Bag, K:K)
+		--- = canonicalizeType(B:Bag, B1:Bag BagItem(Unsigned), B2:Bag, B3:Bag, K:K)
+		--- if K:K =/=Bool Unsigned .
+	--- eq canonicalizeType(B:Bag BagItem(Signed), B1:Bag, B2:Bag, B3:Bag, K:K)
+		--- = canonicalizeType(B:Bag, B1:Bag BagItem(Signed), B2:Bag, B3:Bag, K:K)
+		--- if K:K =/=Bool Signed .
+	--- eq canonicalizeType(B:Bag BagItem(Short), B1:Bag, B2:Bag, B3:Bag, K:K)
+		--- = canonicalizeType(B:Bag, B1:Bag BagItem(Short), B2:Bag, B3:Bag, K:K)
+		--- if K:K =/=Bool Short .
+	--- eq canonicalizeType(B:Bag BagItem(Long), B1:Bag, B2:Bag, B3:Bag, K:K)
+		--- = canonicalizeType(B:Bag, B1:Bag BagItem(Long), B2:Bag, B3:Bag, K:K)
+		--- if K:K =/=Bool Long .
+	
+	
+	--- eq canonicalizeType(B:Bag BagItem(T:Type), B':Bag, T:Type) = canonicalizeType(B:Bag, B':Bag, T:Type) .
+	
+	--- eq extractModifiers(B:Bag BagItem(SpecTypedef)) = BagItem(SpecTypedef) extractModifiers(B:Bag) .
+	
+	--- FIXME
+	eq extractModifiers(?) = (.).Bag [owise] .
+	eq extractStorage(?) = (.).Bag [owise] .
+	
+	eq extractBaseType(B:Bag) =
+		if Bool in B:Bag then Bool else
+		if Char in B:Bag then Char else
+		if Int in B:Bag then Int else
+		if Float in B:Bag then Float else
+		if Double in B:Bag then Double else	
+		unknownType
+		fi fi fi fi fi .
+		
+	
+	
+	
 	mb rule
-		Void => void
-		: KSentence .
-	mb rule
-		Specifier(T:Type) => T:Type
+		Specifier(L:List{Type}) => canonicalizeType(Bag(getList{K}(L:List{Type})))
 		: KSentence .
 	mb rule
 		< k > StructRef(X:Id) => structType(X:Id) ...</ k >

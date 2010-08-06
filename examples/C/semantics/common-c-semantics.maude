@@ -94,6 +94,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op structType : Id -> Type [ctor] .
 	op unionType : Id -> Type [ctor] .
 	op qualifiedType : Type K -> Type [ctor] .
+	op typedefType : Type -> Type [ctor] .
 	
 	--- sort State .
 	--- subsort String < State .
@@ -635,7 +636,7 @@ endm
 
 mod COMMON-GLOBAL-DECLARATION is
 	including COMMON-INCLUDE .
-			
+
 	--- c99 6.7.8:9 Except where explicitly stated otherwise, for the purposes of this subclause unnamed members of objects of structure and union type do not participate in initialization.  Unnamed members of structure objects have indeterminate value even after initialization.
 	--- c99 6.7.8:10 If an object that has automatic storage duration is not initialized explicitly, its value is indeterminate. If an object that has static storage duration is not initialized explicitly, then:
 	--- — if it has pointer type, it is initialized to a null pointer;
@@ -644,7 +645,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
 	op declare : K K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence .
-
+	mb context Typedef(NameGroup(`[HOLE`]:K, ?)) : KSentence .
 	eq LocalDefinition(DefinitionLoc(K:K, Loc:K)) = DefinitionLoc(K:K, Loc:K) .
 	
 	--- parser makes sure there are no uninitialized globals, so this should only do allocation

@@ -60,6 +60,12 @@ kmod COMMON-C-SYNTAX is
 	subsort C < List{C}
 	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil]
 	
+	subsort SpecifierElem < KResult
+	--- sort List{SpecifierElem} 
+	--- subsort List{SpecifierElem} < KResult
+	--- op _::_ : List{SpecifierElem} List{SpecifierElem} -> List{SpecifierElem} [assoc id: Nil]
+	--- op Nil : -> List{SpecifierElem}
+	
 	subsort CabsLoc < C
 	subsort TypeSpecifier < C
 	subsort Storage < C
