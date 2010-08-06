@@ -426,11 +426,11 @@ and unary_operator =
 	MINUS | PLUS | NOT | BNOT | MEMOF | ADDROF
 	| PREINCR | PREDECR | POSINCR | POSDECR
 ***)
-	op -_ : K -> Expression [prec 22]
-	op +_ : K -> Expression [prec 22]
-	op !_ : K -> Expression [prec 22]
-	op ~_ : K -> Expression [prec 22]
-	op *_ : K -> Expression [prec 22]
+	op -_ : K -> Expression [strict prec 22]
+	op +_ : K -> Expression [strict prec 22]
+	op !_ : K -> Expression [strict prec 22]
+	op ~_ : K -> Expression [strict prec 22]
+	op *_ : K -> Expression [strict prec 22]
 	op &_ : K -> Expression [prec 22]
 	op ++_ : K -> Expression [prec 22]
 	op --_ : K -> Expression [prec 22]
@@ -463,7 +463,7 @@ and unary_operator =
 ***(
 	| QUESTION of expression * expression * expression
 ***)
-	op _?_:_ : K K K -> Expression [prec 51 gather(e & E)]
+	op _?_:_ : K K K -> Expression [strict(1) prec 51 gather(e & E)]
 ***(
 	(* A CAST can actually be a constructor expression *)
 	| CAST of (specifier * decl_type) * init_expression

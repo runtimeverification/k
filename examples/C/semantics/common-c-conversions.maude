@@ -1,35 +1,35 @@
 mod COMMON-SEMANTICS-PROMOTIONS is
 	including COMMON-INCLUDE .
 	
-	--- op arithConversion : KLabel K K -> K [metadata "strict"] .
-	--- op arithConversion-int : KLabel K K -> K [metadata "strict"] .
-	--- op isArithBinOp : KLabel -> Bool .
-	--- op isArithBinConversionOp : KLabel -> Bool .
-	--- op arithBinOps : -> Set [memo] .
-	--- op arithBinConversionOps : -> Set [memo] .
-	--- eq arithBinOps = arithBinConversionOps Set(l('_<<_),, l('_>>_)) .
-	--- eq arithBinConversionOps = Set(
-		--- l('_*_),, l('_/_),, l('_%_),,
-		--- l('_+_),, l('_-_),,
-		--- l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
-		--- l('_==_),, l('_!=_),,
-		--- l('_&binop_),, l('_|_)
-	--- ) .
-	--- eq isArithBinOp(KL:KLabel) = if arithBinOps contains l(KL:KLabel) then true else false fi .
-	--- eq isArithBinConversionOp(KL:KLabel) = if arithBinConversionOps contains l(KL:KLabel)  then true else false fi .
+	op arithConversion : KLabel K K -> K [metadata "strict"] .
+	op arithConversion-int : KLabel K K -> K [metadata "strict"] .
+	op isArithBinOp : KLabel -> Bool .
+	op isArithBinConversionOp : KLabel -> Bool .
+	op arithBinOps : -> Set [memo] .
+	op arithBinConversionOps : -> Set [memo] .
+	eq arithBinOps = arithBinConversionOps Set(l('_<<_),, l('_>>_)) .
+	eq arithBinConversionOps = Set(
+		l('_*_),, l('_/_),, l('_%_),,
+		l('_+_),, l('_-_),,
+		l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
+		l('_==_),, l('_!=_),,
+		l('_&_),, l('_|_)
+	) .
+	eq isArithBinOp(KL:KLabel) = if arithBinOps contains l(KL:KLabel) then true else false fi .
+	eq isArithBinConversionOp(KL:KLabel) = if arithBinConversionOps contains l(KL:KLabel)  then true else false fi .
 
-	--- mb rule
-		--- < k > L:KLabel([tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))],, ?) ...</ k > 
-		--- if     isArithBinOp(L:KLabel)
-		--- andBool rank(T:Type) <Int rank(int)
-		--- andBool hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > L:KLabel(?,, [tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))]) ...</ k > 
-		--- if     isArithBinOp(L:KLabel)
-		--- andBool rank(T:Type) <Int rank(int)
-		--- andBool hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > L:KLabel((tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))),, ?) ...</ k > 
+		if     isArithBinOp(L:KLabel)
+		andBool rank(T:Type) <Int rank(int)
+		andBool hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > L:KLabel(?,, (tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type)))) ...</ k > 
+		if     isArithBinOp(L:KLabel)
+		andBool rank(T:Type) <Int rank(int)
+		andBool hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < k > [L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
 		--- => arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))] ...</ k > 
@@ -65,31 +65,31 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		
 	--- --- Otherwise, the integer promotions are performed on both operands ...
 	
-	--- ---C99 6.3.1.1:2 For objects or expressions with an integer type  whose integer conversion rank is less than or equal to the rank of int and unsigned int, and a bit field of type _Bool, int, signed int, or unsigned int, If an int can represent all values of the original type, the value is converted to an int; otherwise, it is converted to an unsigned int.  These are called the integer promotions.  All other types are unchanged by the integer promotions.
-	--- ---C99 6.3.1.1:3 The integer promotions preserve value including sign. As discussed earlier, whether a "plain" char is treated as signed is implementation-defined.
-	--- mb rule
-		--- [promote(tv(V:BaseValue, T:Type)) => tv(V:BaseValue, int)]
-		--- if     hasIntegerType(T:Type)
-		--- andBool rank(T:Type) <=Int rank(int)
-		--- andBool min(int) <=Int min(T:Type) 
-		--- andBool max(int) >=Int max(T:Type)		
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme unclear what 6.3.1.1:3 means
-	--- mb rule
-		--- [promote(tv(V:BaseValue, T:Type)) => cast(unsigned-int, tv(V:BaseValue, T:Type))]
-		--- if     hasIntegerType(T:Type)
-		--- andBool rank(T:Type) <=Int rank(int)
-		--- andBool notBool (
-			--- min(int) <=Int min(T:Type) 
-			--- andBool max(int) >=Int max(T:Type)		
-		--- )
-		--- : KSentence [metadata "structural"] .
+	---C99 6.3.1.1:2 For objects or expressions with an integer type  whose integer conversion rank is less than or equal to the rank of int and unsigned int, and a bit field of type _Bool, int, signed int, or unsigned int, If an int can represent all values of the original type, the value is converted to an int; otherwise, it is converted to an unsigned int.  These are called the integer promotions.  All other types are unchanged by the integer promotions.
+	---C99 6.3.1.1:3 The integer promotions preserve value including sign. As discussed earlier, whether a "plain" char is treated as signed is implementation-defined.
+	mb rule
+		promote(tv(V:BaseValue, T:Type)) => tv(V:BaseValue, int)
+		if     hasIntegerType(T:Type)
+		andBool rank(T:Type) <=Int rank(int)
+		andBool min(int) <=Int min(T:Type) 
+		andBool max(int) >=Int max(T:Type)		
+		: KSentence [metadata "structural"] .
+	--- fixme unclear what 6.3.1.1:3 means
+	mb rule
+		promote(tv(V:BaseValue, T:Type)) => cast(unsigned-int, tv(V:BaseValue, T:Type))
+		if     hasIntegerType(T:Type)
+		andBool rank(T:Type) <=Int rank(int)
+		andBool notBool (
+			min(int) <=Int min(T:Type) 
+			andBool max(int) >=Int max(T:Type)		
+		)
+		: KSentence [metadata "structural"] .
 		
-	--- mb rule
-		--- [promote(tv(F:Float, float)) => tv(F:Float, double)] 	
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		promote(tv(F:Float, float)) => tv(F:Float, double)
+		: KSentence [metadata "structural"] .
 	
-	--- --- Then the following rules are applied to the promoted operands:
+	--- Then the following rules are applied to the promoted operands:
 	
 	--- --- If both operands have the same type, then no further conversion is needed.
 	--- mb rule

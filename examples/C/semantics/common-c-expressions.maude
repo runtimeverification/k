@@ -14,6 +14,15 @@ mod COMMON-SEMANTICS-BOOLEAN is
 		if N:Nat =/=Bool 0
 		: KSentence [metadata "structural"] .
 	
+	--- FIXME the types of these results are wrong.  The correct behavior is quite complicated.  see 6.5.15
+	mb rule
+		< k > tv(N:Nat, ?) ? E1:Expression : E2:Expression => sequencePoint ~> E1:Expression ...</ k >
+		if N:Nat =/=Bool 0
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > tv(0, ?) ? E1:Expression : E2:Expression => sequencePoint ~> E2:Expression ...</ k >
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-SIZEOF is
@@ -373,8 +382,8 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 		--- : KSentence [metadata "structural"] .
 endm
 
---- mod COMMON-SEMANTICS-BITWISE is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-BITWISE is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
 	--- --- c99 6.5.7:3 The integer promotions are performed on each of the operands. The type of the result is that of the promoted left operand. If the value of the right operand is negative or is greater than or equal to the width of the promoted left operand, the behavior is undefined.
 	--- mb rule [tv(I:Int, T:Type) << tv(N:Nat, T':Type) => leftShiftInterpret(T:Type, I:Int <<Int N:Nat, tv(I:Int, T:Type))] 
@@ -429,7 +438,7 @@ endm
 	--- mb rule [tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int xorInt I2:Int)] 
 		--- if hasIntegerType(T:Type)
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 mod COMMON-SEMANTICS-ARITHMETIC is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -471,6 +480,11 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		--- => tv(_-Int_(Offset1:Nat, Offset2:Nat) /Int Size:Nat, cfg:ptrdiffut)]
 		--- if _-Int_(Offset1:Nat, Offset2:Nat) %Int Size:Nat ==Bool 0
 		--- : KSentence [metadata "structural"] .	
+		
+	--- fixme these need to be promoted BEFORE doing arithmetic
+	mb rule - tv(I:Int, T:Type) => arithInterpret(T:Type, (-Int I:Int))
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 		
 	mb rule tv(I1:Int, T:Type) + tv(I2:Int, T:Type) => arithInterpret(T:Type, (I1:Int +Int I2:Int))
 		if hasIntegerType(T:Type)
@@ -733,7 +747,7 @@ mod COMMON-C-EXPRESSIONS is
 	--- including COMMON-SEMANTICS-ARRAY-SUBSCRIPTING .
 	including COMMON-SEMANTICS-ASSIGNMENT .
 	including COMMON-SEMANTICS-LITERALS .
-	--- including COMMON-SEMANTICS-BITWISE .
+	including COMMON-SEMANTICS-BITWISE .
 	including COMMON-SEMANTICS-ARITHMETIC .
 	--- including COMMON-SEMANTICS-MEMBERS .
 	--- including COMMON-SEMANTICS-DEREFERENCE .

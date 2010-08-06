@@ -375,16 +375,20 @@ mod COMMON-C-STANDARD-LIBRARY is
 		< k > printf-aux(0, sym(0) +Nat 0, Nil) => writeToFD(1, "(null)") ~> tv(6, int) ...</ k >
 	: KSentence [metadata "structural"] .
 	
-	--- mb [lib-printf-%]: rule
-		--- < k > [printf-aux(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => printf-%(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if (N:Nat ==Bool asciiString("%"))
-	--- : KSentence [metadata "structural"] .
-	--- mb [lib-printf-%%]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => writeToFD(1, N:Nat) ~> printf-aux(sNat(Len:Nat), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat ==Bool asciiString("%") 
-	--- : KSentence [metadata "structural"] .
+	mb [lib-printf-%]: rule
+		< k > printf-aux(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
+			=> printf-%(Len:Nat, sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if (N:Nat ==Bool asciiString("%"))
+	: KSentence [metadata "structural"] .
+	mb [lib-printf-%%]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
+			=> writeToFD(1, N:Nat) 
+			~> printf-aux(sNat(Len:Nat), sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) ...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("%") 
+	: KSentence [metadata "structural"] .
 	--- --- fixme ignoring 0 flag for now
 	--- mb [lib-printf-0]: rule
 		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => printf-%(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
@@ -416,16 +420,22 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- --- fixme might be messing things up elsewhere
 	--- eq Rat2String(loc(N:Nat, M:Nat), 16) = "loc(" +String rat2stringConversion(N:Nat, 16) +String ", " +String rat2stringConversion(M:Nat, 16) +String ")" .
 	
-	--- mb [lib-printf-%d]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(D:Int, ?),, L:List{KResult})) => writeToFD(1, rat2stringConversion(D:Int, 10)) ~> printf-aux(Len:Nat +Nat lengthString(rat2stringConversion(D:Int, 10)), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat ==Bool asciiString("d") orBool N:Nat ==Bool asciiString("u")
-	--- : KSentence [metadata "structural"] .
-	--- mb [lib-printf-%c]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(C:Nat, ?),, L:List{KResult})) => writeToFD(1, C:Nat) ~> printf-aux(Len:Nat +Nat 1, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat ==Bool asciiString("c") 
-	--- : KSentence [metadata "structural"] .
+	mb [lib-printf-%d]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(D:Int, ?) :: L:List{C})) 
+			=> writeToFD(1, Rat2String(D:Int, 10)) 
+			~> printf-aux(Len:Nat +Nat lengthString(Rat2String(D:Int, 10)), sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("d") orBool N:Nat ==Bool asciiString("u")
+	: KSentence [metadata "structural"] .
+	mb [lib-printf-%c]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(C:Nat, ?) :: L:List{C})) 
+			=> writeToFD(1, C:Nat) 
+			~> printf-aux(Len:Nat +Nat 1, sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("c") 
+	: KSentence [metadata "structural"] .
 	
 	--- mb [lib-printf-%f]: rule
 		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(D:Float, ?),, L:List{KResult})) => writeToFD(1, float2stringConversion(D:Float)) ~> printf-aux(Len:Nat +Nat lengthString(float2stringConversion(D:Float)), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
@@ -433,16 +443,18 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- if N:Nat ==Bool asciiString("f") orBool N:Nat ==Bool asciiString("g") 
 	--- : KSentence [metadata "structural"] .
 	
-	--- mb [lib-printf-%s]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(S:Nat, pointerType(?)),, L:List{KResult})) => 
-			--- printf-string(0, S:Nat)
-			--- ~> printf-aux(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat ==Bool asciiString("s") 
-	--- : KSentence [metadata "structural"] .
+	mb [lib-printf-%s]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(S:Nat, pointerType(?)) :: L:List{C})) 
+			=> printf-string(0, S:Nat)
+			~> printf-aux(Len:Nat, sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("s") 
+	: KSentence [metadata "structural"] .
 
-	--- mb [lib-printf-%s-done]: rule
-		--- < k > [tv(Len':Nat, int) ~> printf-aux(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => 
-			--- printf-aux(Len:Nat +Nat Len':Nat, loc(Block:Nat, Offset:Nat), L:List{KResult})] ...</ k >
-	--- : KSentence [metadata "structural"] .
+	mb [lib-printf-%s-done]: rule
+		< k > tv(Len':Nat, int) ~> printf-aux(Len:Nat, Loc:Nat, L:List{C}) 
+			=> printf-aux(Len:Nat +Nat Len':Nat, Loc:Nat, L:List{C}) 
+		...</ k >
+	: KSentence [metadata "structural"] .
 endm

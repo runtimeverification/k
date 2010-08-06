@@ -214,7 +214,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op kpair : K K -> K .
 	--- op kpair : K List -> K .
-	--- op promote : K -> K .
+	op promote : K -> K .
 	op readFromMem : Nat Type -> K .
 	--- op extractField : List{K} Type Id -> K .
 	op allocString : Nat String -> K .
