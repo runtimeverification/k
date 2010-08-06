@@ -319,14 +319,34 @@ mod COMMON-C-MEMORY-MISC is
 		--- < locsWrittenTo >... [BagItem(Loc:Nat) => .Bag] ...</ locsWrittenTo >
 		--- : KSentence [metadata "structural"] .
 		
-	--- --- fixme allocString is a misnomer, this actually writes the string to already-allocated memory	
+	op writeString : Nat String -> K .
+	mb [alloc-string]: rule
+		< k > allocString(Loc:Nat, S:String) 
+			=> allocateType(Loc:Nat, arrayType(char, lengthString(S:String) +Nat 1))
+			~> writeString(Loc:Nat, S:String)
+		...</ k >
+		: KSentence [metadata "structural"] .
+		
+	mb [write-string]: rule
+		< k > writeString(Loc:Nat, S:String)
+			=> *(tv(Loc:Nat, pointerType(char))) := tv(charToAscii(firstChar(S:String)), char)
+			~> discard
+			~> writeString(sNat(Loc:Nat), butFirstChar(S:String))
+		...</ k >
+		if S:String =/=Bool ""
+		: KSentence [metadata "structural"] .
+		
+	mb [write-empty-string]: rule
+		< k > writeString(Loc:Nat, "") 
+			=> *(tv(Loc:Nat, pointerType(char))) := tv(0, char) 
+			~> discard
+		...</ k >
+		: KSentence [metadata "structural"] .
 	--- mb [alloc-string]: rule
 		--- < k > [allocString(Loc:Nat, S:String) => putByteInMem(Loc:Nat, charToAscii(firstChar(S:String))) ~> dontCountWrite(Loc:Nat) ~> allocString(sNat(Loc:Nat), butFirstChar(S:String))] ...</ k >
 		--- if lengthString(S:String) >Int 0
 		--- : KSentence [metadata "structural"] .
-	--- mb [alloc-empty-string]: rule
-		--- < k > [allocString(Loc:Nat, "") => putByteInMem(Loc:Nat, 0)] ...</ k >
-		--- : KSentence [metadata "structural"] .
+	
 		
 	--- --- fixme not enough, need more rules
 	--- --- fixme is this backwards?

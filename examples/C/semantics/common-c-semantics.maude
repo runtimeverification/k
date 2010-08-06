@@ -174,7 +174,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op firstChar : String -> Char .
 	--- op nthChar : String Nat -> Char .
 	op butFirstChar : String -> String .
-	--- op charToAscii : String -> Nat .
+	op charToAscii : String -> Nat .
 	op _to_ : Nat Nat -> List{K} .
 	--- op calcStructSize : List{KResult} -> K .
 	--- op calcUnionSize : List{KResult} -> K .
@@ -217,7 +217,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op promote : K -> K .
 	op readFromMem : Nat Type -> K .
 	--- op extractField : List{K} Type Id -> K .
-	--- op allocString : Nat String -> K .
+	op allocString : Nat String -> K .
 	--- op unknownRange : Nat Nat Nat -> List{K} .
 	--- --- op loopMarked : -> Statement .
 	--- op popLoop : -> K .
@@ -246,7 +246,7 @@ mod C-SETTINGS is
 
 	--- --- S 6.2.5 p.35 i.15.  "The implementation shall define char to have the same range, representation, and behavior as either signed char or unsigned char.  37)... Irrespective of the choice made, char is a separate type from the other two and is not compatible with either
 	--- --- fixme I'm not sure what consequence being a separate type entails, so for now it will just be rewritten to the chosen type
-	--- mb rule [char => signed-char] : KSentence [metadata "structural"] .
+	mb rule char => signed-char : KSentence [metadata "structural"] .
 	--- mb rule [NULL => tv(loc(0, 0), pointerType(void))] : KSentence [metadata "structural"] .
 	
 	--- ---C99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented
@@ -404,9 +404,9 @@ mod SEMANTIC-HELPERS is
 	--- mb [nthChar]: rule
 		--- [nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1)]
 		--- : KSentence [metadata "structural"] .
-	--- mb [charToAscii]: rule
-		--- [charToAscii(C:Char) => asciiString(C:Char)]
-		--- : KSentence [metadata "structural"] .
+	mb [charToAscii]: rule
+		charToAscii(C:Char) => asciiString(C:Char)
+		: KSentence [metadata "structural"] .
 	mb [butFirstChar]: rule
 		butFirstChar(S:String) => substrString(S:String, 1, lengthString(S:String))
 		: KSentence [metadata "structural"] .

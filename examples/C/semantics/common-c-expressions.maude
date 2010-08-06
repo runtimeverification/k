@@ -151,17 +151,22 @@ endm
 mod COMMON-SEMANTICS-LITERALS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	--- --- +1 for terminating 0
-	--- mb [const-string-notfound]: rule
-		--- < k > [.K => alloc(Loc:Nat, lengthString(S:String) +Nat 1) ~> allocString(Loc:Nat, S:String)] ~> S:String ...</ k >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- < statics > M:Map [.Map => S:String |-> tv(Loc:Nat, arrayType(char, lengthString(S:String) +Nat 1))] </ statics >
-		--- if notBool($hasMapping(M:Map, S:String))
-		--- : KSentence [metadata "structural"] .
-	--- mb [const-string-found]: rule
-		--- < k > [S:String => tv(N:Nat, pointerType(T:Type))] ...</ k >
-		--- < statics >... S:String |-> tv(N:Nat, arrayType(T:Type, ?)) ...</ statics >
-		--- : KSentence [metadata "structural"] .
+	--- +1 for terminating 0
+	--- alloc(Loc:Nat, lengthString(S:String) +Nat 1) ~> 
+	mb [const-string-notfound]: rule
+		< k > (. => allocString(Loc:Nat, S:String))
+			~> StringLiteral(S:String)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< statics > M:Map (. => S:String |-> tv(Loc:Nat, arrayType(char, lengthString(S:String) +Nat 1))) </ statics >
+		if notBool($hasMapping(M:Map, S:String))
+		: KSentence [metadata "structural"] .
+		
+	--- fixme should make type const
+	mb [const-string-found]: rule
+		< k > StringLiteral(S:String) => tv(N:Nat, pointerType(T:Type)) ...</ k >
+		< statics >... S:String |-> tv(N:Nat, arrayType(T:Type, ?)) ...</ statics >
+		: KSentence [metadata "structural"] .
 	
 	---c99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented.
 ***(
