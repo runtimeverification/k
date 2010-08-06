@@ -143,19 +143,15 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	including COMMON-INCLUDE .
 	
 	op canonicalizeType : Bag -> K .
-	op canonicalizeType : Bag K -> K [metadata "strict(2)"] .
+	op canonicalizeType : Bag K Bag Bag Bag -> K [metadata "strict(2)"] .
 		
 	mb rule
-		< k > canonicalizeType(B:Bag) 
-			=> canonicalizeType(B:Bag, (.).K)
-		...</ k >
-		--- ((.).Bag => < typeSimplifier >... (.).Bag ...</ typeSimplifier >)
-		((.).Bag => < typeSimplifier >... < specifier > (.).Bag </ specifier > ...</ typeSimplifier >)
+		< k > canonicalizeType(B:Bag) => canonicalizeType(B:Bag, (.).K, (.).Bag, (.).Bag, (.).Bag) ...</ k >
 		: KSentence .
 		
+	--- specifier, modifier, storage
 	mb rule
-		< k > canonicalizeType(B:Bag (BagItem(T:K) => (.).Bag), ?) ...</ k >
-		< specifier >... (.).Bag => BagItem(T:K) ...</ specifier >
+		< k > canonicalizeType((B:Bag (BagItem(T:K) => (.).Bag)), ?, (? ((.).Bag => BagItem(T:K))), ?, ?) ...</ k >
 		if false
 		orBool (T:K ==Bool Void)
 		orBool (T:K ==Bool Char)
@@ -169,38 +165,72 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool (getKLabel(T:K) ==Bool 'StructDef)
 		orBool (getKLabel(T:K) ==Bool 'UnionDef)
 		orBool (getKLabel(T:K) ==Bool 'EnumDef)
+		orBool (getKLabel(T:K) ==Bool 'Named)
 		--- orBool (T:K ==Bool Complex)
+		: KSentence .
+	
+	mb rule
+		< k > canonicalizeType(B:Bag (BagItem(T:K) => (.).Bag), ?, ?, (? (.).Bag => BagItem(T:K)), ?) ...</ k >
+		if (T:K ==Bool SpecTypedef)
+		orBool (T:K ==Bool Inline)
+		: KSentence .
+
+	mb rule
+		< k > canonicalizeType(B:Bag (BagItem(T:K) => (.).Bag), ?, ?, ?, (? (.).Bag => BagItem(T:K))) ...</ k >
+		if (T:K ==Bool Extern)
+		: KSentence .
+		
+	mb rule
+		< k > canonicalizeType((.).Bag, (T:Type => qualifiedType(T:Type, Extern)), (.).Bag, (.).Bag, (? BagItem(Extern) => (.).Bag)) ...</ k >
+		: KSentence .
+		
+	mb rule
+		< k > canonicalizeSpecifier(BagItem(Named(X:Id)))
+			=> typedefType(X:Id, T:Type)
+		...</ k >
+		< types >... typedef(X:Id) |-> T:Type ...</ types >
+		if X:Id =/=Bool Identifier("")
 		: KSentence .
 		
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(EnumDef(X:Id, L:List{C})))
 			=> EnumDef(X:Id, L:List{C})
 			~> enumType(X:Id)
-		...</ k > 
+		...</ k >
+		if X:Id =/=Bool Identifier("")
+		: KSentence .
+	
+	mb rule
+		< k > canonicalizeSpecifier(BagItem(StructDef((X:Id => unnamed(N:Nat)), L:List{C}))) ...</ k >
+		< freshNat > N:Nat => sNat(N:Nat) </ freshNat >
+		: KSentence .
+	
+	mb rule
+		< k > canonicalizeSpecifier(BagItem(StructDef(X:Id, L:List{C})))
+			=> StructDef(X:Id, L:List{C})
+			~> structType(X:Id)
+		...</ k >
+		if X:Id =/=Bool Identifier("")
+		: KSentence .
+	mb rule
+		< k > canonicalizeSpecifier(BagItem(UnionDef(X:Id, L:List{C})))
+			=> UnionDef(X:Id, L:List{C})
+			~> unionType(X:Id)
+		...</ k >
+		if X:Id =/=Bool Identifier("")
 		: KSentence .
 		
-	mb rule
-		< k > canonicalizeType(B:Bag (BagItem(T:K) => (.).Bag), ?) ...</ k >
-		< modifier >... (.).Bag => BagItem(T:K) ...</ modifier >
-		if (T:K ==Bool SpecTypedef)
-		orBool (T:K ==Bool Inline)
-		: KSentence .
 		
 	--- FIXME what good is this?
 	eq BagItem(SpecTypedef) = (.).Bag .
-		
+	eq BagItem(Const) = (.).Bag .
+
 	mb rule 
-		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag))) ...</ k >
-		< specifier > B:Bag => (.).Bag </ specifier >
+		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag)), (B:Bag => (.).Bag), ?, ?) ...</ k >
 		: KSentence .
 		
 	mb rule
-		< k > canonicalizeType((.).Bag, T:Type) => T:Type ...</ k >
-		(< typeSimplifier > 
-			< specifier > (.).Bag </ specifier >
-			< modifier > (.).Bag </ modifier >
-			< storage > (.).Bag </ storage >
-		</ typeSimplifier > => (.).Bag)
+		< k > canonicalizeType((.).Bag, T:Type, (.).Bag, (.).Bag, (.).Bag) => T:Type ...</ k >
 		: KSentence .
 		
 	op canonicalizeSpecifier : Bag -> K .
@@ -282,12 +312,19 @@ mod COMMON-C-TYPING is
 				
 	mb rule 
 		< k > JustBase => T:Type ...</ k >
-		(< declarationTypeHolder > T:Type </ declarationTypeHolder > => (.).Bag)
+		< declarationTypeHolder > T:Type => . ...</ declarationTypeHolder >
 		: KSentence .
+		
+	--- op bah : Type Type -> K .
+	--- mb rule
+		--- < k > (. => bah(T:Type, T':Type)) ...</ k >
+		--- (< declarationTypeHolder > T:Type </ declarationTypeHolder >
+		--- < declarationTypeHolder > T':Type </ declarationTypeHolder > => (.).Bag)
+		--- : KSentence .
 			
 	mb rule
 		< k > DeclType(T:Type, K:K) => K:K ...</ k >
-		((.).Bag => < declarationTypeHolder > T:Type </ declarationTypeHolder >)
+		< declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
 		: KSentence .
 	
 	op fillBitHoles : List{Type} -> List{Type} .
@@ -308,9 +345,10 @@ mod COMMON-C-TYPING is
 		:: fillBitHoles(typedDeclaration(T:Type, X:Id) :: L:List{Type})
 	if notBool hasBitfieldType(T:Type) .
 	
-	eq fillBitHoles(N:Nat, (typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id) :: L:List{Type})) 
+	ceq fillBitHoles(N:Nat, (typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id) :: L:List{Type})) 
 		= typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id)
-		:: fillBitHoles(N:Nat +Nat N':Nat, typedDeclaration(T:Type, X:Id) :: L:List{Type}) .
+		:: fillBitHoles(N:Nat +Nat N':Nat, typedDeclaration(T:Type, X:Id) :: L:List{Type}) 
+		if N':Nat =/=Bool 0 .
 	
 	mb rule
 		< k > StructDef(X:Id, L:List{Type})
@@ -390,6 +428,10 @@ mod COMMON-C-TYPING is
 	eq hasArrayType(arrayType(?, ?)) = true .
 	ceq hasArrayType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'arrayType .
+		
+	eq hasExternType(qualifiedType(T:Type, K:K)) = if (K:K ==Bool Extern) then (true) else (hasExternType(T:Type)) fi .
+	ceq hasExternType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	eq hasBitfieldType(bitfieldType(?, ?)) = true .
 	ceq hasBitfieldType(T:Type) = false

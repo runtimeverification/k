@@ -29,11 +29,11 @@ kmod C-CONFIGURATION is
 							< types > .Map </ types >
 						</ local >
 						< k > .K </ k >
-						< typeSimplifier *> 
-							< specifier > .Bag </ specifier >
-							< storage > .Bag </ storage >
-							< modifier > .Bag </ modifier >
-						</ typeSimplifier *>
+						--- < typeSimplifier *> 
+							--- < specifier > .Bag </ specifier >
+							--- < storage > .Bag </ storage >
+							--- < modifier > .Bag </ modifier >
+						--- </ typeSimplifier *>
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						< holds > .Map </ holds >
 						< currentFunction > .K </ currentFunction >
@@ -42,7 +42,7 @@ kmod C-CONFIGURATION is
 						< loopStack > .List </ loopStack >
 						< blockStack > .List </ blockStack >
 						< locals > .Bag </ locals >
-						< declarationTypeHolder * > .K </ declarationTypeHolder * >
+						< declarationTypeHolder > .K </ declarationTypeHolder >
 					</ control >
 				</ thread * >
 			</ threads >

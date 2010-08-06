@@ -527,8 +527,8 @@ and constant =
 	| CONST_WSTRING of int64 list 
 ***)
 	op DecimalConstant : Int -> IntConstant --- new
-	op OctalConstant : Int -> IntConstant --- new
-	op HexConstant : String -> IntConstant --- new
+	op OctalConstant : K -> IntConstant --- new
+	op HexConstant : K -> IntConstant --- new --- expected to be string
 	
 	op IntLiteral : K -> Constant [strict]
 	op FloatLiteral : Float -> Constant

@@ -49,6 +49,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
 	op typedef : Id -> Id .
+	op unnamed : Nat -> Id .
 	
 	--- subsort List{KResult} < K .
 	
@@ -95,6 +96,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op structType : Id -> Type [ctor] .
 	op unionType : Id -> Type [ctor] .
 	op qualifiedType : Type K -> Type [ctor] .
+	op typedefType : Id Type -> Type [ctor] .
 	--- op typedefType : Type -> Type [ctor] .
 	
 	--- sort State .
@@ -139,6 +141,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op definedType : Type K -> KResult . 
 	
 	sort List{Type} .
+	subsort List{Type} < KResult .
 	subsort List{Type} < List{C} .
 	subsort Type < List{Type} .
 	subsort Type < List{C} .
@@ -168,9 +171,9 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op putInMem : BaseValue K Type K -> K [metadata "strict(2 4)"] .
 	--- op putBytesInMem : Nat List{K} Type K -> K [metadata "strict(4)"] .
 	--- --- op sizeofType : K -> Expression [metadata "strict"] .
-	--- op firstChar : String -> Char .
+	op firstChar : String -> Char .
 	--- op nthChar : String Nat -> Char .
-	--- op butFirstChar : String -> String .
+	op butFirstChar : String -> String .
 	--- op charToAscii : String -> Nat .
 	op _to_ : Nat Nat -> List{K} .
 	--- op calcStructSize : List{KResult} -> K .
@@ -207,6 +210,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op hasFunctionType : Type -> Bool .
 	op hasFunctionPointerType : Type -> Bool .
 	op hasBitfieldType : Type -> Bool .
+	op hasExternType : Type -> Bool .
+	
 	op kpair : K K -> K .
 	--- op kpair : K List -> K .
 	--- op promote : K -> K .
@@ -393,18 +398,18 @@ mod SEMANTIC-HELPERS is
 	eq min(unsigned-long-long-int) = 0 .
 	eq max(unsigned-long-long-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-long-long-int)), 1) .
 	
-	--- mb [firstChar]: rule
-		--- [firstChar(S:String) => substrString(S:String, 0, 1)]
-		--- : KSentence [metadata "structural"] .
+	mb [firstChar]: rule
+		firstChar(S:String) => substrString(S:String, 0, 1)
+		: KSentence [metadata "structural"] .
 	--- mb [nthChar]: rule
 		--- [nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1)]
 		--- : KSentence [metadata "structural"] .
 	--- mb [charToAscii]: rule
 		--- [charToAscii(C:Char) => asciiString(C:Char)]
 		--- : KSentence [metadata "structural"] .
-	--- mb [butFirstChar]: rule
-		--- [butFirstChar(S:String) => substrString(S:String, 1, lengthString(S:String))]
-		--- : KSentence [metadata "structural"] .
+	mb [butFirstChar]: rule
+		butFirstChar(S:String) => substrString(S:String, 1, lengthString(S:String))
+		: KSentence [metadata "structural"] .
 		
 	eq N:Nat to N:Nat = .List{K} .
 	ceq N:Nat to N':Nat = (N:Nat,,((N:Nat +Nat 1) to N':Nat))
@@ -655,16 +660,27 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < k > DeclarationDefinition(InitNameGroup(T:Type, (K:C :: L:List{C})))
 			--- => declare(T:Type, K:C) ~> DeclarationDefinition(InitNameGroup(T:Type, L:List{C})) ...</ k >
 		--- : KSentence [metadata "structural"] .
-	---op declare : K K -> K [metadata "strict(2)"] .	
+	---op declare : K K -> K [metadata "strict(2)"] .
 	--- op typeNamePair : K K -> K .
 	--- op idTypePair : K K -> K .
 	--- op initNameGroup : K K -> K .
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = DeclarationDefinition(InitNameGroup(T:Type, K:C)) ~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
 	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
+		---if notBool hasExternType(T:Type) .
+	--- FIXME does this work all the time?
+	--- ceq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = (.).K
+		--- if hasExternType(T:Type) .
 	
 	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
 	eq Typedef(NameGroup(T:Type, Name:C)) = defineType(SingleName(T:Type, Name:C)) .
 
+	eq EnumItem(X:Id, V:Value)
+		= declare(typedDeclaration(int, X:Id), SingleInit(V:Value)) ~> int .
+	
+	mb rule
+		< k > EnumDef(X:Id, L:List{Type}) => (.).K ...</ k >
+		: KSentence .
+	
 	op initialize-aux : Id Type K -> K .
 	op zero : Id -> K .
 	---eq SingleInit(K:K) = K:K .
@@ -701,6 +717,15 @@ mod COMMON-GLOBAL-DECLARATION is
 			--- X:Id := V:Value
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if notBool hasExternType(T:Type) --- external reference
+		andBool notBool (hasFunctionType(T:Type) andBool K:K ==Bool NoInit) --- prototype
+		: KSentence .
+		
+	--- FIXME is this appropriate?
+	mb rule
+		< k > declare(typedDeclaration(T:Type, X:Id), K:K) => (.).K ...</ k >
+		if hasExternType(T:Type) --- external reference
+		orBool (hasFunctionType(T:Type) andBool K:K ==Bool NoInit) --- prototype
 		: KSentence .
 		
 	mb rule

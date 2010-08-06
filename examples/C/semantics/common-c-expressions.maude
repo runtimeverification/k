@@ -42,6 +42,7 @@ mod COMMON-SEMANTICS-SIZEOF is
 	eq bitSizeofType(pointerType(?)) = cfg:ptrsize *Nat numBitsPerByte .
 	eq bitSizeofType(typedDeclaration(T:Type, ?)) = bitSizeofType(T:Type) .
 	eq bitSizeofType(bitfieldType(?, N:Nat)) = N:Nat .
+	eq bitSizeofType(qualifiedType(T:Type, ?)) = bitSizeofType(T:Type) .
 	mb rule
 		< k > bitSizeofType(structType(X:Id)) => bitSizeofList(L:List{Type}) ...</ k >
 		< structs >... X:Id |-> L:List{Type} ...</ structs >
@@ -202,12 +203,31 @@ and ll or LL
 	
 	mb rule < k > DecimalConstant(I:Int) => 
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
-			if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
-				if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
-					tv(I:Int, no-type)
-				fi
-			fi
-		fi
+		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
+		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
+			tv(I:Int, no-type)
+		fi fi fi
+		...</ k > 
+		: KSentence [metadata "structural"] .
+		
+	op simplifyForHex : String -> String .
+	ceq simplifyForHex(S:String) = simplifyForHex(butFirstChar(S:String))
+		if firstChar(S:String) ==Bool "0"
+		andBool lengthString(S:String) >Nat 1 .
+	ceq simplifyForHex(S:String) = S:String
+		if firstChar(S:String) =/=Bool "0" 
+		orBool lengthString(S:String) ==Bool 1 .
+		
+	eq HexConstant(S:String) = HexConstant(String2Rat(simplifyForHex(S:String), 16)) .
+	mb rule < k > HexConstant(I:Int) =>
+		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
+		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
+		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
+		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi fi fi fi fi fi 
 		...</ k > 
 		: KSentence [metadata "structural"] .
 		
