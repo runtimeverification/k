@@ -48,6 +48,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
+	
 	--- subsort List{KResult} < K .
 	
 	op popBlock : -> K .
@@ -918,7 +919,11 @@ mod C-SEMANTICS-MISC is
 	--- if notBool(T:Type isa 'bitfieldType) .
 	---op calculateLength
 	eq calculateLength(Nil) = 0 .
-	---eq calculateLength(T:Type :: L:List{Type}) = calculateLength(T:Type) + calculateLength(L:List{Type})
+	
+	eq calculateLength(T:Type :: L:List{Type}) = calculateLength(T:Type) + calculateLength(L:List{Type}) .
+	
+	eq calculateLength(typedDeclaration(T:Type, ?)) = bitSizeofType(T:Type) .
+	
 		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
 	--- if notBool(T:Type isa 'bitfieldType) .
 
@@ -1064,6 +1069,9 @@ mod C-SEMANTICS-MISC is
 		
 	eq AttributeWrapper(K:K, ?) = K:K .
 	eq NameLoc(K:K, ?) = K:K .
+	
+	ceq N:Nat +Nat bito(M:Nat) = N:Nat +Nat (M:Nat /Nat numBitsPerByte) +Nat bito(M:Nat %Nat numBitsPerByte)
+		if M:Nat >Nat numBitsPerByte .
 endm
 
 load common-c-conversions

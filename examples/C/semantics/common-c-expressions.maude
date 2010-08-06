@@ -632,7 +632,7 @@ mod COMMON-SEMANTICS-REFERENCE is
 		< structs >... S:Id |-> (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?) ...</ structs >
 		: KSentence [metadata "structural"] .
 		
-	eq getOffset(N:Nat, M:Nat, T:Type) = tv(N:Nat +Nat M:Nat, T:Type) .
+	eq getOffset(N:Nat, M:Nat, T:Type) = tv(N:Nat +Nat bito(M:Nat), T:Type) .
 
 		
 	--- mb [address-of-arrow-union]: rule
