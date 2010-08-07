@@ -94,12 +94,12 @@ mod COMMON-SEMANTICS-IDENTIFIERS is
 		if notBool(hasArrayType(T:Type)) andBool notBool(hasFunctionType(T:Type))
 		: KSentence [metadata "structural"] . --- nondet
 		
-	--- ---C99 6.3.2.1:3 Except when it is the operand of the sizeof operator or the unary & operator, or is a string literal used to initialize an array, an expression that has type "array of type" is converted to an expression with type "pointer to type" that points to the initial element of the array object and is not an lvalue. If the array object has register storage class, the behavior is undefined.
-	--- mb [lookup-array]: rule
-		--- < k > [X:Id => tv(Loc:Nat, pointerType(T:Type))] ...</ k >
-		--- < env >... X:Id |-> Loc:Nat ...</ env >
-		--- < types >... X:Id |-> arrayType(T:Type, ?) ...</ types >
-		--- : KSentence [metadata "structural"] .
+	---C99 6.3.2.1:3 Except when it is the operand of the sizeof operator or the unary & operator, or is a string literal used to initialize an array, an expression that has type "array of type" is converted to an expression with type "pointer to type" that points to the initial element of the array object and is not an lvalue. If the array object has register storage class, the behavior is undefined.
+	mb [lookup-array]: rule
+		< k > X:Id => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> arrayType(T:Type, ?) ...</ types >
+		: KSentence [metadata "structural"] .
 		
 	---C99 6.3.2.1:4 A function designator is an expression that has function type.  Except when it is the operand of the sizeof operator or the unary & operator, a function designator with type "function returning T" is converted to an expression that has type "pointer to a function returning T"
 	mb [lookup-closure]: rule
@@ -441,12 +441,20 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		--- if T':Type ==Bool cfg:sizeut
 		--- : KSentence [metadata "structural"] .
 		
-	--- --- needs to check offset > 0 
-	--- mb rule < k > [tv(loc(Block:Nat, Offset:Nat), pointerType(T':Type)) + tv(I2:Int, T:Type) 
-	--- => '_+_(tv(Offset:Nat, cfg:sizeut),, '_*_(sizeofType(T':Type),, tv(I2:Int, cfg:sizeut))) ~> waitingForOffset(Block:Nat, pointerType(T':Type))] ...</ k >
-		--- if hasIntegerType(T:Type)
-		--- andBool T':Type =/=Bool void
-		--- : KSentence [metadata "structural"] .
+	--- needs to check offset > 0 
+	mb rule < k > tv(Loc:Nat, pointerType(T':Type)) + tv(I2:Int, T:Type)
+				=> cast(pointerType(T':Type), cast(pointerType(unsigned-char), tv(Loc:Nat, pointerType(T':Type))) + (tv(I2:Int, T:Type) * sizeofType(T':Type)))
+		...</ k >
+		if hasIntegerType(T:Type)
+		andBool T':Type =/=Bool void
+		andBool T':Type =/=Bool unsigned-char
+		: KSentence [metadata "structural"] .
+		
+	mb rule < k > tv(Loc:Nat, pointerType(unsigned-char)) + tv(I2:Int, T:Type) 
+			=> tv(Loc:Nat +Int I2:Int, pointerType(unsigned-char))
+		...</ k >
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 		
 	--- mb rule < k > [tv(loc(Block:Nat, Offset:Nat), pointerType(T':Type)) - tv(I2:Int, T:Type) 
 	--- => '_-_(tv(Offset:Nat, cfg:sizeut),, '_*_(sizeofType(T':Type),, tv(I2:Int, cfg:sizeut))) ~> waitingForOffset(Block:Nat, pointerType(T':Type))] ...</ k >
@@ -628,7 +636,7 @@ mod COMMON-SEMANTICS-REFERENCE is
 	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	
 	mb rule &(*(E:Expression)) => E:Expression : KSentence [metadata "structural"] .
-	mb rule &(ArrayIndex(E1:Expression, E2:Expression)) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
+	mb rule &(E1:Expression[E2:Expression]) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
 	mb [ref]: rule
 		< k > &(X:Id) => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
 		< env >... X:Id |-> Loc:Nat ...</ env >

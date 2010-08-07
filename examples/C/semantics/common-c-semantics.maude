@@ -669,8 +669,33 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- op typeNamePair : K K -> K .
 	--- op idTypePair : K K -> K .
 	--- op initNameGroup : K K -> K .
-	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = DeclarationDefinition(InitNameGroup(T:Type, K:C)) ~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
-	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
+	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
+		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
+		~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
+	op completeInitializer : K Nat K -> C . --- name, offset, init
+	op completeInitializer : K Nat List{C} -> K . --- name, offset, init
+	op idOfName : K -> K .
+	eq idOfName(Name(X:Id, ?)) = X:Id .
+	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), completeInitializer(idOfName(Name:K), 0, Exp:K)) .
+	
+	eq completeInitializer(?, ?, NoInit) = NoInit .
+	eq completeInitializer(?, ?, SingleInit(K:K)) = SingleInit(K:K) .
+	eq completeInitializer(K:K, N:Nat, CompoundInit(L:List{C})) = CompoundInit(completeInitializer(K:K, N:Nat, L:List{C})) .
+	
+	eq completeInitializer(K:K, N:Nat, InitFragment(NextInit, Exp:K) :: L:List{C}) 
+		= InitFragment(K:K[tv(N:Nat, unsigned-long-int)], Exp:K)
+		:: completeInitializer(K:K, sNat(N:Nat), L:List{C}) .
+	eq completeInitializer(?, ?, Nil) = Nil .
+	
+	op completeInitializerFragment : K -> KResult .
+	mb rule
+		< k > InitFragment(K:K, SingleInit(V:Value)) => completeInitializerFragment(K:K := V:Value) ...</ k >
+		if getKLabel(K:K) =/=Bool 'NextInit
+		andBool getKLabel(K:K) =/=Bool 'InFieldInit
+		andBool getKLabel(K:K) =/=Bool 'AtIndexInit
+		andBool getKLabel(K:K) =/=Bool 'AtIndexRangeInit
+		: KSentence .
+		
 		---if notBool hasExternType(T:Type) .
 	--- FIXME does this work all the time?
 	--- ceq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = (.).K
@@ -694,6 +719,19 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence .
 	mb rule
 		< k > initialize-aux(X:Id, ?, SingleInit(V:Value)) => X:Id := V:Value ~> discard ...</ k >
+		: KSentence .
+		
+	mb rule
+		< k > initialize-aux(X:Id, T:Type, CompoundInit(K:C :: L:List{C}))
+			=> initialize-aux(X:Id, T:Type, K:C)
+			~> initialize-aux(X:Id, T:Type, CompoundInit(L:List{C}))
+		...</ k >
+		: KSentence .
+	mb rule
+		< k > initialize-aux(X:Id, T:Type, completeInitializerFragment(K:K)) => K:K ~> discard ...</ k >
+		: KSentence .
+	mb rule
+		< k > initialize-aux(X:Id, ?, CompoundInit(Nil)) => (.).K ...</ k >
 		: KSentence .
 		
 	mb rule
@@ -729,7 +767,7 @@ mod COMMON-GLOBAL-DECLARATION is
 
 	--- FIXME check type of pointer
 	mb rule
-		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(tv(StrLoc:Nat, pointerType(T:Type)))) 
+		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(tv(StrLoc:Nat, pointerType(T:Type))))
 			=> allocString(Loc:Nat, S:String)
 			--- ~> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
@@ -740,6 +778,19 @@ mod COMMON-GLOBAL-DECLARATION is
 		< statics >... S:String |-> tv(StrLoc:Nat, arrayType(T:Type, Len:Nat)) ...</ statics >
 		if notBool hasExternType(T:Type) --- external reference
 		andBool T:Type ==Bool char
+		andBool notBool hasIncompleteType(T:Type)
+		: KSentence .
+		
+	--- compound initialization of toplevel incomplete array
+	mb rule
+		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(L:List{C}))
+			=> allocateType(Loc:Nat, arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))))
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))))
+			~> initialize(X:Id, arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))), CompoundInit(L:List{C}))
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if notBool hasExternType(T:Type) --- external reference
 		andBool notBool hasIncompleteType(T:Type)
 		: KSentence .
 		
@@ -892,6 +943,11 @@ mod C-SEMANTICS-MISC is
 	
 	eq inc(sym(N:Nat) +Nat M:Nat) = sym(N:Nat +Nat 1) +Nat M:Nat .
 	eq sNat(sym(N:Nat) +Nat M:Nat) = sym(N:Nat) +Nat (M:Nat +Nat 1) .
+	ceq I:Int +Int (N:Nat +Nat sym(M:Nat))
+		= absInt(N:Nat +Int I:Int) +Nat sym(M:Nat) 
+		if I:Int >=Int 0
+		orBool (I:Int <Int 0 andBool -Int I:Int <=Int N:Nat) .
+	--- eq N:Nat +Nat bito(M:Nat) +Int I:Int = (N:Nat +Int I:Int) +Nat bito(M:Nat) .
 	
 	--- --- fixme can do a much better job than this
 	--- eq 0 |Nat N:Nat = N:Nat .

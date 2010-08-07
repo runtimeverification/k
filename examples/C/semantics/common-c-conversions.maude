@@ -257,14 +257,14 @@ mod COMMON-SEMANTICS-CAST is
 		--- if hasIntegerType(T:Type)
 		--- : KSentence [metadata "structural"] .
 		
-	--- --- fixme
-	--- --- possibly not true with other endiannesses
-	--- --- choice
-	--- --- needs to handle alignment
-	--- mb rule
-		--- < k > [cast(pointerType(T:Type), tv(N:Nat, pointerType(?))) => tv(N:Nat, pointerType(T:Type))] ...</ k >
-		--- ---if min(unsigned-int) <=Int I:Int andBool max(unsigned-int) >=Int I:Int
-		--- : KSentence [metadata "structural"] .
+	--- fixme
+	--- possibly not true with other endiannesses
+	--- choice
+	--- needs to handle alignment
+	mb rule
+		< k > cast(pointerType(T:Type), tv(N:Nat, pointerType(?))) => tv(N:Nat, pointerType(T:Type)) ...</ k >
+		---if min(unsigned-int) <=Int I:Int andBool max(unsigned-int) >=Int I:Int
+		: KSentence [metadata "structural"] .
 				
 	--- mb rule
 		--- < k > [cast(pointerType(bitfieldType(T:Type, Len:Nat)), tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(?)))

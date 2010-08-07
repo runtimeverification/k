@@ -198,10 +198,10 @@ and printInitExpression a =
 	match a with 
 	| NO_INIT -> "NoInit"
 	| SINGLE_INIT exp -> wrap ((printExpression exp) :: []) "SingleInit"
-	| COMPOUND_INIT a ->wrap ((printCompoundInit a) :: []) "CompoundInit"
-and printCompoundInit a =
-	wrapString (printFlatList printOneCompoundInit a) "CompoundInit"
-and printOneCompoundInit (a, b) =
+	| COMPOUND_INIT a -> wrap ((printInitFragmentList a) :: []) "CompoundInit"
+and printInitFragmentList a =
+	printFlatList printInitFragment a
+and printInitFragment (a, b) =
 	wrap ((printInitWhat a) :: (printInitExpression b) :: []) "InitFragment"
 and printInitWhat a = 
 	match a with
@@ -298,7 +298,7 @@ and printExpression exp =
 	| TYPE_SIZEOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "SizeofType"
 	| EXPR_ALIGNOF exp -> wrap ((printExpression exp) :: []) "AlignofExpression"
 	| TYPE_ALIGNOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "AlignofType"
-	| INDEX (exp, idx) -> wrap ((printExpression exp) :: (printExpression idx) :: []) "ArrayIndex"
+	| INDEX (exp, idx) -> wrap ((printExpression exp) :: (printExpression idx) :: []) "_`[_`]"
 	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "_._"
 	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "_->_"
 	| GNU_BODY block -> wrap ((printBlock block) :: []) "GnuBody"
