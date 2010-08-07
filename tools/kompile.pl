@@ -764,10 +764,10 @@ sub make_ops {
 		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
 		exit(1);
 	}
-    
+
 # Report error and stop if the sort name does not match $ksort
 	if ($result_sort !~ /^$ksort$/) {
-	    print "ERROR: $result_sort does not match the pattern \"$ksort\"\n";
+	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
 	    print "ERROR: Syntactic categories must currently match this pattern\n";
 	    exit(1);
 	}
