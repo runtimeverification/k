@@ -321,7 +321,7 @@ mod COMMON-C-MEMORY-MISC is
 		
 	op writeString : Nat String -> K .
 	mb [alloc-string]: rule
-		< k > allocString(Loc:Nat, S:String) 
+		< k > allocString(Loc:Nat, S:String)
 			=> allocateType(Loc:Nat, arrayType(char, lengthString(S:String) +Nat 1))
 			~> writeString(Loc:Nat, S:String)
 		...</ k >

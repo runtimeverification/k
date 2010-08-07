@@ -308,6 +308,7 @@ mod COMMON-C-TYPING is
 	eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
 	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
 	eq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat) .
+	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
 	eq PointerType(T:Type) = pointerType(T:Type) .
 				
 	mb rule 
@@ -428,6 +429,10 @@ mod COMMON-C-TYPING is
 	eq hasArrayType(arrayType(?, ?)) = true .
 	ceq hasArrayType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'arrayType .
+		
+	eq hasIncompleteType(incompleteArrayType(?)) = true .
+	ceq hasIncompleteType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'incompleteArrayType .
 		
 	eq hasExternType(qualifiedType(T:Type, K:K)) = if (K:K ==Bool Extern) then (true) else (hasExternType(T:Type)) fi .
 	ceq hasExternType(T:Type) = false

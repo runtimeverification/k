@@ -26,7 +26,7 @@ dist: demo
 
 demo: $(DIST_DIR)/dist.done 
 	@rm -f ./a.out
-	$(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/arithmetic.c
+	$(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/base64.c
 	@DEBUG=1 ./a.out
 
 #$(DIST_DIR)/dist.tested

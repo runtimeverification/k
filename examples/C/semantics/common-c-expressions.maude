@@ -747,4 +747,6 @@ mod COMMON-C-EXPRESSIONS is
 	--- including COMMON-SEMANTICS-DEREFERENCE .
 	including COMMON-SEMANTICS-REFERENCE .
 	--- including COMMON-SEMANTICS-INCREMENT-AND-DECREMENT .
+	
+	eq NothingExpression = emptyValue .
 endm

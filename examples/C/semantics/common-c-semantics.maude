@@ -51,6 +51,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op typedef : Id -> Id .
 	op unnamed : Nat -> Id .
 	
+	op emptyValue : -> Value .
 	--- subsort List{KResult} < K .
 	
 	op popBlock : -> K .
@@ -90,6 +91,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- Composite types
 	op enumType : Id -> BaseType [ctor] .
 	op arrayType : Type Nat -> Type [ctor] .
+	op incompleteArrayType : Type -> Type [ctor] .
 	op bitfieldType : Type Nat -> Type [ctor] .
 	op functionType : Type List{Type} -> Type [ctor] .
 	op pointerType : Type -> Type [ctor] .
@@ -211,6 +213,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op hasFunctionPointerType : Type -> Bool .
 	op hasBitfieldType : Type -> Bool .
 	op hasExternType : Type -> Bool .
+	op hasIncompleteType : Type -> Bool .
 	
 	op kpair : K K -> K .
 	--- op kpair : K List -> K .
@@ -651,7 +654,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- — if it has arithmetic type, it is initialized to (positive or unsigned) zero;
 	--- if it is an aggregate, every member is initialized (recursively) according to these rules;
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
-	op declare : K K -> K [metadata "strict"] .
+	op declare : K K -> K [metadata "seqstrict(2 1)"] .
 	op defineType : K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence .
 	mb context Typedef(NameGroup(`[HOLE`]:K, ?)) : KSentence .
@@ -720,7 +723,24 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		if notBool hasExternType(T:Type) --- external reference
+		andBool notBool hasIncompleteType(T:Type)
 		andBool notBool (hasFunctionType(T:Type) andBool K:K ==Bool NoInit) --- prototype
+		: KSentence .
+
+	--- FIXME check type of pointer
+	mb rule
+		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(tv(StrLoc:Nat, pointerType(T:Type)))) 
+			=> allocString(Loc:Nat, S:String)
+			--- ~> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, arrayType(T:Type, Len:Nat))
+			--- ~> initialize(X:Id, T:Type, K:K)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< statics >... S:String |-> tv(StrLoc:Nat, arrayType(T:Type, Len:Nat)) ...</ statics >
+		if notBool hasExternType(T:Type) --- external reference
+		andBool T:Type ==Bool char
+		andBool notBool hasIncompleteType(T:Type)
 		: KSentence .
 		
 	--- FIXME is this appropriate?

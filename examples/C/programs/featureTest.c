@@ -1,4 +1,6 @@
+#include <stdio.h>
 int factorial(int n);
+
 struct bitf {
 	int a : 3;			// 3/8
 	int b;				// 04
@@ -14,6 +16,12 @@ struct a {
 } * b;
 
 int main() {
+	int arr[] = L"Hello";
+	printf("&arr=\t%p\n", &arr);
+	printf("arr=\t%p\n", arr);
+	printf("hello=\t%p\n", "Hello");
+	printf("len(arr)=\t%d\n", sizeof(arr)/sizeof(arr[0]));
+
 	struct bitf s;
 	struct a y;
 	struct b {
