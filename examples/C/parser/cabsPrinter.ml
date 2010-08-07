@@ -243,18 +243,40 @@ and printConstant const =
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
 	| CONST_STRING s -> wrap (("\"" ^ String.escaped s ^ "\"") :: []) "StringLiteral"
 	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
+and splitNumber (xs, i) =
+	let lastOne = if (String.length i > 1) then String.uppercase (Str.last_chars i 1) else ("x") in
+	let newi = (Str.string_before i (String.length i - 1)) in
+	match lastOne with
+	| "x" -> (xs, i)
+	| "U" -> splitNumber("U" :: xs, newi)
+	| "L" -> splitNumber("L" :: xs, newi)
+	| _ -> (xs, i)
 and printIntLiteral i =
-	let firstTwo = if (String.length i > 2) then (Str.first_chars i 2) else ("xx") in
-	let firstOne = if (String.length i > 1) then (Str.first_chars i 1) else ("x") in
-		if (firstTwo = "0x" or firstTwo = "0X") then 
-			(wrapString ("\"" ^ Str.string_after i 2 ^ "\"") "HexConstant")
-		else (
-			if (firstOne = "0") then
-				(wrapString (Str.string_after i 1) "OctalConstant")
+	let (tag, i) = splitNumber ([], i) in
+	let num = (
+		let firstTwo = if (String.length i > 2) then (Str.first_chars i 2) else ("xx") in
+		let firstOne = if (String.length i > 1) then (Str.first_chars i 1) else ("x") in
+			if (firstTwo = "0x" or firstTwo = "0X") then 
+				(wrapString ("\"" ^ Str.string_after i 2 ^ "\"") "HexConstant")
 			else (
-				wrapString i "DecimalConstant"
+				if (firstOne = "0") then
+					(wrapString (Str.string_after i 1) "OctalConstant")
+				else (
+					wrapString i "DecimalConstant"
+				)
 			)
-		)
+	) in
+	match tag with
+	| "U" :: "L" :: "L" :: []
+	| "L" :: "L" :: "U" :: [] -> wrapString num "ULL"
+	| "L" :: "L" :: [] -> wrapString num "LL"
+	| "U" :: "L" :: []
+	| "L" :: "U" :: [] -> wrapString num "UL"
+	| "U" :: [] -> wrapString num "U"
+	| "L" :: [] -> wrapString num "L"
+	| [] -> num
+	(* | _ as z -> wrapString num (List.fold_left (fun aux arg -> aux ^ arg) "" z) *)
+	
 and printExpression exp =
 	match exp with
 	| UNARY (op, exp1) -> wrap ((printExpression exp1) :: []) (getUnaryOperator op)

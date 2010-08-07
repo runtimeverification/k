@@ -530,6 +530,12 @@ and constant =
 	op OctalConstant : K -> IntConstant --- new
 	op HexConstant : K -> IntConstant --- new --- expected to be string
 	
+	op U : K -> Constant --- new
+	op L : K -> Constant --- new
+	op LL : K -> Constant --- new
+	op UL : K -> Constant --- new
+	op ULL : K -> Constant --- new
+	
 	op IntLiteral : K -> Constant [strict]
 	op FloatLiteral : Float -> Constant
 	op CharLiteral : Int -> Constant
