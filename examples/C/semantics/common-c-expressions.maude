@@ -245,44 +245,35 @@ and ll or LL
 		...</ k > 
 		: KSentence [metadata "structural"] .
 		
-	--- mb rule [@U(I:Int) => 
-		--- if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
-			--- if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
-				--- if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else 
-					--- tv(I:Int, no-type)
-				--- fi
-			--- fi
-		--- fi
-		--- ]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [@L(I:Int) => 
-		--- if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
-			--- if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
-				--- tv(I:Int, no-type)
-			--- fi
-		--- fi
-		--- ]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [@UL(I:Int) => 
-		--- if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
-			--- if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
-				--- tv(I:Int, no-type)
-			--- fi
-		--- fi
-		--- ]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [@LL(I:Int) => 
-		--- if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
-			--- tv(I:Int, no-type)
-		--- fi
-		--- ]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [@ULL(I:Int) => 
-		--- if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
-			--- tv(I:Int, no-type)
-		--- fi
-		--- ]
-		--- : KSentence [metadata "structural"] .
+	mb rule U(DecimalConstant(I:Int)) => 
+		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
+		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else 
+			tv(I:Int, no-type)
+		fi fi fi
+		: KSentence [metadata "structural"] .
+	mb rule L(DecimalConstant(I:Int)) => 
+		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
+		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi fi
+		: KSentence [metadata "structural"] .
+	mb rule UL(DecimalConstant(I:Int)) => 
+		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
+			tv(I:Int, no-type)
+		fi fi		
+		: KSentence [metadata "structural"] .
+	mb rule LL(DecimalConstant(I:Int)) => 
+		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi
+		: KSentence [metadata "structural"] .
+	mb rule ULL(DecimalConstant(I:Int)) => 
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
+			tv(I:Int, no-type)
+		fi
+		: KSentence [metadata "structural"] .
 		
 		
 	--- ---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double.
@@ -534,12 +525,14 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	--- mb rule [!(tv(V:BaseValue, ?)) => tv(0, int)] 
+	mb rule !(tv(V:BaseValue, ?)) => tv(0, int)
+		if V:BaseValue =/=Bool 0
 		--- if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [!(tv(V:BaseValue, ?)) => tv(1, int)] 
+		: KSentence [metadata "structural"] .
+	mb rule !(tv(V:BaseValue, ?)) => tv(1, int)
+		if (V:BaseValue ==Bool 0)
 		--- if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
-		--- : KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 endm
 
 --- mod COMMON-SEMANTICS-MEMBERS is 
