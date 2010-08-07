@@ -218,6 +218,12 @@ mod COMMON-SEMANTICS-BLOCKS is
 		< local > C:Bag </ local >
 		< blockStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ blockStack >
 		: KSentence [metadata "structural"] .
+		
+	mb [pop-block]: rule
+		< k > popBlock => (.).K ...</ k > 
+		< local > ? => C:Bag </ local >
+		< blockStack > List(< stackFrame > C:Bag </ stackFrame >) => (.).List ...</ blockStack >
+		: KSentence [metadata "structural"] .
 	
 	mb [dissolve-block]: rule
 		< k > Block(?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > 

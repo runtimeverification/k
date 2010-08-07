@@ -483,27 +483,27 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		
 	--- fixme these need to be promoted BEFORE doing arithmetic
 	mb rule - tv(I:Int, T:Type) => arithInterpret(T:Type, (-Int I:Int))
-		if hasIntegerType(T:Type)
+		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		: KSentence [metadata "structural"] .
 		
 	mb rule tv(I1:Int, T:Type) + tv(I2:Int, T:Type) => arithInterpret(T:Type, (I1:Int +Int I2:Int))
-		if hasIntegerType(T:Type)
+		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		: KSentence [metadata "structural"] .
 	mb rule _-_(tv(I1:Int, T:Type), tv(I2:Int, T:Type)) => arithInterpret(T:Type, _-Int_(I1:Int,I2:Int))
-		if hasIntegerType(T:Type)
+		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) * tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int *Int I2:Int)
-		if hasIntegerType(T:Type)
+		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) / tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int /Int I2:Int) 
-		if hasIntegerType(T:Type)
+		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		andBool I2:Int =/=Bool 0
 		: KSentence [metadata "structural"] .
 	--- mb rule [tv(I1:Int, T:Type) % tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int %Int I2:Int)] 
-		--- if hasIntegerType(T:Type)
+		--- if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		--- : KSentence [metadata "structural"] .
 	--- mb rule [-un tv(I1:Int, T:Type) => arithInterpret(T:Type, -Int_(I1:Int))] 
-		--- if hasIntegerType(T:Type)
+		--- if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		--- : KSentence [metadata "structural"] .
 	
 	--- --- floats
@@ -527,6 +527,7 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 	--- mb rule [tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
 	--- mb rule [!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
 		
+	--- FIXME should also be promoting these
 	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .

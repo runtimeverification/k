@@ -1,8 +1,8 @@
 mod COMMON-SEMANTICS-PROMOTIONS is
 	including COMMON-INCLUDE .
 	
-	op arithConversion : KLabel K K -> K [metadata "strict"] .
-	op arithConversion-int : KLabel K K -> K [metadata "strict"] .
+	--- op arithConversion : KLabel K K -> K [metadata "strict"] .
+	op arithConversion-int : KLabel K K -> K . --- [metadata "strict"] .
 	op isArithBinOp : KLabel -> Bool .
 	op isArithBinConversionOp : KLabel -> Bool .
 	op arithBinOps : -> Set [memo] .
@@ -30,16 +30,17 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		andBool rank(T:Type) <Int rank(int)
 		andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
-		--- => arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))] ...</ k > 
-		--- if     isArithBinConversionOp(L:KLabel)
-		--- andBool T:Type =/=Bool T':Type
-		--- andBool hasIntegerType(T:Type)
-		--- andBool hasIntegerType(T':Type)
-		--- andBool rank(T:Type) >=Int rank(int)
-		--- andBool rank(T':Type) >=Int rank(int)
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
+			=> arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))
+		...</ k >
+		if     isArithBinConversionOp(L:KLabel)
+		andBool T:Type =/=Bool T':Type
+		andBool hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		andBool rank(T:Type) >=Int rank(int)
+		andBool rank(T':Type) >=Int rank(int)
+		: KSentence [metadata "structural"] .
 	
 	--- ---C99 6.3.1.8
 	--- --- First, if the corresponding real type of either operand is long double, the other operand is converted, without change of type domain, to a type whose corresponding real type is long double.
@@ -91,32 +92,46 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 	
 	--- Then the following rules are applied to the promoted operands:
 	
-	--- --- If both operands have the same type, then no further conversion is needed.
-	--- mb rule
-		--- < k > [arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T:Type)) 
-			--- => L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T:Type))
-		--- ] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- op maxType : Type Type -> Type .
-	--- ceq maxType(T:Type, T':Type) = T:Type
-		--- if rank(T:Type) >=Int rank(T':Type) .
-	--- ceq maxType(T:Type, T':Type) = T':Type
-		--- if rank(T':Type) >=Int rank(T:Type) .
+	--- If both operands have the same type, then no further conversion is needed.
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T:Type)) 
+			=> L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T:Type))
+		...</ k >
+		: KSentence [metadata "structural"] .
+		
+	op maxType : Type Type -> Type .
+	ceq maxType(T:Type, T':Type) = T:Type
+		if rank(T:Type) >=Int rank(T':Type) .
+	ceq maxType(T:Type, T':Type) = T':Type
+		if rank(T':Type) >=Int rank(T:Type) .
 			
-	--- --- fixme implement other rules
-	--- mb rule
-		--- < k > [arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
-			--- => L:KLabel(cast(maxType(T:Type, T':Type), tv(V:BaseValue, T:Type)),, cast(maxType(T:Type, T':Type), tv(V':BaseValue, T':Type)))
-		--- ] ...</ k >
-		--- if T:Type =/=Bool T':Type
-		--- andBool (
-			--- (hasSignedIntegerType(T:Type) andBool hasSignedIntegerType(T':Type))
-			--- orBool 
-			--- (hasUnsignedIntegerType(T:Type) andBool hasUnsignedIntegerType(T':Type))
-		--- )
-		--- : KSentence [metadata "structural"] .
+	--- Otherwise, if both operands have signed integer types or both have unsigned integer types, the operand with the type of lesser integer conversion rank is converted to the type of the operand with greater rank.
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(cast(maxType(T:Type, T':Type), tv(V:BaseValue, T:Type)),, cast(maxType(T:Type, T':Type), tv(V':BaseValue, T':Type)))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		andBool (
+			(hasSignedIntegerType(T:Type) andBool hasSignedIntegerType(T':Type))
+			orBool
+			(hasUnsignedIntegerType(T:Type) andBool hasUnsignedIntegerType(T':Type))
+		)
+		: KSentence [metadata "structural"] .
+		
+	--- Otherwise, if the operand that has unsigned integer type has rank greater or equal to the rank of the type of the other operand, then the operand with signed integer type is converted to the type of the operand with unsigned integer type.
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(cast(maxType(T:Type, T':Type), tv(V:BaseValue, T:Type)),, cast(maxType(T:Type, T':Type), tv(V':BaseValue, T':Type)))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		andBool (
+			(hasSignedIntegerType(T:Type) andBool hasUnsignedIntegerType(T':Type) andBool rank(T':Type) >=Int rank(T:Type))
+			orBool
+			(hasUnsignedIntegerType(T:Type) andBool hasSignedIntegerType(T':Type) andBool rank(T:Type) >=Int rank(T':Type))
+		)
+		: KSentence [metadata "structural"] .
 	
-	--- --- Otherwise, if both operands have signed integer types or both have unsigned integer types, the operand with the type of lesser integer conversion rank is converted to the type of the operand with greater rank.
+	--- fixme implement other rules
 	
 	--- --- Otherwise...
 	--- --- fixme left out cases
@@ -155,22 +170,26 @@ mod COMMON-SEMANTICS-CAST is
 		andBool hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
 	
-	--- ---c99 6.3.1.3:3 Otherwise, the new type is signed and the value cannot be represented in it; either the result is implementation-defined or an implementation-defined signal is raised.
-	--- --- choice
-	--- mb rule
-		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T':Type))] ...</ k >
-		--- if I:Int <Int min(T:Type)
-		--- andBool notBool(unsignedIntegerTypes contains T:Type)
-		--- andBool hasIntegerType(T:Type)
-		--- andBool hasIntegerType(T':Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T':Type))] ...</ k >
-		--- if I:Int >Int max(T:Type)
-		--- andBool notBool(unsignedIntegerTypes contains T:Type)
-		--- andBool hasIntegerType(T:Type)
-		--- andBool hasIntegerType(T':Type)
-		--- : KSentence [metadata "structural"] .
+	---c99 6.3.1.3:3 Otherwise, the new type is signed and the value cannot be represented in it; either the result is implementation-defined or an implementation-defined signal is raised.
+	--- choice
+	mb rule
+		< k > cast(T:Type, tv(I:Int, T':Type)) 
+			=> cast(T:Type, tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T':Type)) 
+		...</ k >
+		if I:Int <Int min(T:Type)
+		andBool notBool(unsignedIntegerTypes contains T:Type)
+		andBool hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > cast(T:Type, tv(I:Int, T':Type)) 
+			=> cast(T:Type, tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T':Type)) 
+		...</ k >
+		if I:Int >Int max(T:Type)
+		andBool notBool(unsignedIntegerTypes contains T:Type)
+		andBool hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
 
 	
 	--- ---C99 6.3.1.4:1 When a finite value of real floating type is converted to an integer type other than _Bool, the fractional part is discarded (i.e., the value is truncated toward zero). If the value of the integral part cannot be represented by the integer type, the behavior is undefined.52) The remaindering operation performed when a value of integer type is converted to unsigned type need not be performed when a value of real floating type is converted to unsigned type. Thus, the range of portable real floating values is (-1, Utype_MAX+1).
