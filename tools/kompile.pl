@@ -3,11 +3,9 @@ use strict;
 use File::Basename;
 use File::Spec;
 use Switch;
-use Cwd 'abs_path';
 
-my $path = abs_path($0);
-$path =~ s/kompile\.pl//;
-require $path . 'common_functions.pl';
+my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
+require $path;
 
 # next subroutine prints the usage message;
 # $0 is initially bound to the program name, as typed
@@ -572,10 +570,14 @@ sub run_maude {
 	    my $i = -1;
 	    while (<FILE>) {
 		++$i;
+		my $err_msg = "";
+		my $size = 180;
+		$err_msg = "... (check $error_file to find the complete error)\n" if length($_) > $size;
 		if ($i < 10) {
-		    print;
+		    print substr($_, 0, $size) . $err_msg;
 		}
 		else {
+		    $_ = substr($_, 0, $size) . $err_msg;
 		    last;
 		}
 	    }
