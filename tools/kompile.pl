@@ -377,7 +377,7 @@ if (!$compile_only) {
     print_header("Maudifying $language_file_name") if $verbose;
 
 # Before maudify, check the file for syntax errors
-	setVerbose() if $verbose;
+    setVerbose() if $verbose;
     syntax_common_check($language_file_name);
     
     maudify_file("$language_file_name","");
@@ -584,6 +584,7 @@ sub run_maude {
 	    if (<FILE>) {++$i;}
 	    close FILE;
 	    print "...\nCheck $error_file for the remaining errors\n" if $i==11;
+	    print printErrorFromOut();
 	    print "Aborting the compilation\n";
 	    exit(1);
 	}

@@ -472,7 +472,21 @@ sub show()
 
 sub setVerbose()
 {
-	$verbose = 1;
+    $verbose = 1;
+}
+
+sub printErrorFromOut()
+{
+    local $/=undef; open FILE,"<", "kompile_out.txt" or print ""; local $_ = <FILE>; close FILE;
+    my $content = $_;
+    close FILE;
+    my $out = "";
+    if ($content =~ m/error(.*?)\n/isg)
+    {
+	$out = "Error $1\n";
+    }
+    
+    $out;
 }
 
 1;
