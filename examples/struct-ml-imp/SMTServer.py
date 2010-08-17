@@ -4,8 +4,8 @@ import subprocess
 
 
 TIMEOUT = 0.5                   # SMT querry timeout, in seconds
-HOST = 'localhost'              # Symbolic name meaning all available interfaces
-PORT = 7072                     # Arbitrary non-privileged port
+HOST = "128.174.246.122"              # Symbolic name meaning all available interfaces
+PORT = 7074                    # Arbitrary non-privileged port
 BUFSIZ = 4096                   # Buffer size
 MAUDE_EOF = '###EOMTCP###';     # Maude querry string terminator
 
@@ -16,7 +16,7 @@ Z3_cmd_list = ["(declare-sorts (IntSeq))",
 
 
 def initZ3():
-    cmd = "z3"
+    cmd = "/home/software/SMTSolvers/z3"
     cmd += " -smtc"
     cmd += " -si"
     cmd += " -t:" + str(TIMEOUT)

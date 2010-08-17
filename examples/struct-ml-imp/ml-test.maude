@@ -7,43 +7,9 @@ endm
 
 set print attribute on .
 ---rew check('pSum) .
-rew check('pListReverse) .
----rew check('pListCopy) .
----rew check('pListAppend) .
----rew check('pTreeMirror) .
----rew check('pBstInsert) .
+---rew check('pListReverse) .
 ---rew check('ex2) .
-
-
-eof
-
-search
-< config >
-  < struct > nodeList |-> [val : int + 0] [next : & struct nodeList + 1] </ struct >
-  < env > a |->[a0 : & struct nodeList] b |->[?Int(9) : & struct nodeList] i |->[?i : int] x |->[?Int(9) : & struct nodeList] y |->[11 : & struct nodeList] </ env >
-  < heap > list(?x)(?X) lseg(?i,?b)(?B) lseg(?Int(9),?x)(?Seq(10)) ?b |-> ?v :[nodeList . val : int] ?y |-> ?Int(8) :[nodeList . val : int] a0 |->
-    ?Int(8) :[nodeList . val : int] 11 |-> 0 :[nodeList . val : int] 12 |-> 0 :[nodeList . next : & struct nodeList] ?b +Int 1 |-> ?y :[nodeList . next : & struct nodeList] ?y +Int 1 |-> 0 :[nodeList . next : & struct nodeList] a0 +Int 1 |-> ?Int(9) :[nodeList . next : & struct nodeList] </ heap >
-  < form > ~ (?x === 0) /\ ~ (a0 === 0) /\ ~ (a0 === ?x) /\ ~ (([skolem(0, ?Int(3))] ::: skolem(0, ?Seq(5))) === epsilon) /\ (?B ::: [?v]) === [
-    ?Int(8)] ::: ?Seq(10) /\ (?B ::: [?v] ::: ?X) === [skolem(0, ?Int(3))] ::: skolem(0, ?Seq(5)) </ form >
-  < subst > A <- [skolem(0, ?Int(3))] ::: skolem(0, ?Seq(5)) </ subst > 
-  CI:Bag
-  </ config >
-   
-    =heap=>
-    
-    < config >
-  < struct > nodeList |-> [val : int + 0] [next : & struct nodeList + 1] </ struct >
-  < env > a |->[a0 : & struct nodeList] b |->[?Int(9) : & struct nodeList] i |->[?i : int] x |->[?Int(9) : & struct nodeList] y |->[11 : & struct nodeList] </ env >
-  < heap > list(?x)(?X) lseg(?i,?b)(?B) lseg(a0,?x)([?Int(8)] ::: ?Seq(10)) ?b |-> ?v :[nodeList . val : int] ?y |-> ?Int(8) :[nodeList . val : int]  11 |-> 0 :[nodeList . val : int] 12 |-> 0 :[nodeList . next : & struct nodeList] ?b +Int 1 |-> ?y :[nodeList . next : & struct nodeList] ?y +Int 1 |-> 0 :[nodeList . next : & struct nodeList] </ heap >
-  < form > ~ (?x === 0) /\ ~ (a0 === 0) /\ ~ (a0 === ?x) /\ ~ (([skolem(0, ?Int(3))] ::: skolem(0, ?Seq(5))) === epsilon) /\ (?B ::: [?v]) === [
-    ?Int(8)] ::: ?Seq(10) /\ (?B ::: [?v] ::: ?X) === [skolem(0, ?Int(3))] ::: skolem(0, ?Seq(5)) </ form >
-  < subst > A <- [skolem(0, ?Int(3))] ::: skolem(0, ?Seq(5)) </ subst > 
-  CI:Bag
-  </ config >
-
-=>* CfgItems:Bag .
-
-
+rew check('test) .
 
 
 eof 

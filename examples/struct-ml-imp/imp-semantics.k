@@ -9,7 +9,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar NvT : NvExpType
   kvar F X Sn Fld : Id
   kvar Xl : List{Id}
-  kvar V : Val
+  kvar V V' : Val
   kvar Vl : List{Val}
   kvar E E' E1 E2 : Exp
   kvar El El' : List{Exp}
@@ -170,7 +170,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
 --- assignment to a simple variable
   rule
     <k> X = V ; => .K <_/k>
-    <env_> (X |-> [_: T]) => (X |-> [V : T]) <_/env>
+    <env> ( Env (X |-> [V' : T])) => ( Env (X |-> [V' : T])) [X |-> [V : T]] </env>
 
 --- assignment to a struct field
   context ( [HOLE] ->_) = _ ;
