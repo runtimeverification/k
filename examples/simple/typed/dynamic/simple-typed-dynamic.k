@@ -2,17 +2,23 @@ in ../../../../k-prelude.maude
 in simple-typed-dynamic-syntax
 in ../simple-typed-programs
 
+---------------------
+--- configuration ---
+---------------------
 kmod SIMPLE-TYPED-DYNAMIC-CONFIG is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
 
 --- We need values when we define the semantics
-  syntax Val ::= Int | Bool 
-               | function ( Type , Nat )
-               | lambda ( List{Id} , Stmt ) [metadata "latex(renameTo \\lambda\_.\_)"] 
+  syntax Val ::= Int | Bool  
                | array ( Type , Nat , Nat ) 
                  --- array value: 1st arg. is the type of the array,
                  ---              2nd arg. is the location of the first element in the array,
                  ---      and the 3rd arg. is the array size
+               | function ( Type , Nat )
+               | lambda ( List{Id} , Stmt ) [metadata "latex(renameTo \\lambda\_.\_)"]
+                 --- function value; like arrays, functions also evaluate to 
+                 ---    their address (wrapped as a specific value)
 
+--- the values are expressions
   syntax Exp ::= Val 
 
   syntax K ::= Stmts | List{Exp} | List{IdType} | List{Type} 
@@ -30,7 +36,9 @@ kmod SIMPLE-TYPED-DYNAMIC-CONFIG is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYN
                      <nextLoc> 0 </nextLoc>
                 </T> 
 
---- auxilliary declarations and operations
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
   syntax Val ::=
                  initVal ( Type )
                | none 
@@ -108,7 +116,7 @@ kmod SIMPLE-TYPED-DYNAMIC-PREPROCESSING is including SIMPLE-TYPED-DYNAMIC-CONFIG
   rule <k> function F:Id(XTl:List{IdType}) : Tp S:Stmt => .K <_/k>
        <env> Env => Env[L / F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc> 
-       <store_>(.Map => L |-> function(typeList(XTl) -> Tp,sNat L) sNat(L) |-> lambda(idList(XTl),S))<_/store> 
+       <store_>(.Map => L |-> function(typeList(XTl) -> Tp,sNat L) sNat(L) |-> lambda(idList(XTl), S))<_/store> 
 
 --- when we are done with the first pass (computation and genv are empty), call main and initialize the global environment
   rule <k> .K => main(); </k>
@@ -165,7 +173,8 @@ kmod SIMPLE-TYPED-DYNAMIC-FUNCTION-CALL is including SIMPLE-TYPED-DYNAMIC-CONFIG
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <fstack> (Env,K,Tp') => .List <_/fstack>
-       <env> _ => Env </env> <return> Tp => Tp' </return>
+       <env> _ => Env </env>
+       <return> Tp => Tp' </return>
        if typeOf(V) ==Bool Tp
 
 endkm

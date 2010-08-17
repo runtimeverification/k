@@ -28,7 +28,7 @@ kmod SIMPLE-TYPED-SORTS is including PL-INT + PL-ID
 --- List{Type}
   syntax List{Type} ::= Type | List{Bottom} 
                      | List{Type} , List{Type} [ditto] 
---- List{Id}
+--- List{IdType}
   syntax List{IdType}  ::= IdType | List{Bottom}
                      | List{IdType} , List{IdType} [ditto]
 --- List{Id}

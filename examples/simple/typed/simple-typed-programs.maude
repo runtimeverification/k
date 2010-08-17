@@ -3,20 +3,18 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
   ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
   ops main divide2 collatz dummy1 dummy2 init reverse writeArray insertionSort bubbleSort siftDown heapSort map : -> Id .
   ops done root bottom maxChild size : -> Id .
-  ops pFactorial pCollatz pSorting : -> Stmts .
+  ops pFactorial pCollatz pSorting pX01 : -> Stmts .
 
 
   eq pFactorial =
        var x : int ;
-
        function f(y : int) : int {
-         var t : int ;
+         var t : int ;  var x : bool ;
 	 t = 1 ;
          for i = 1 to y do
 	   t = t * i ;
 	 return t ;
        }
-
        function main() : void {
          x = 5 ;
 	 write(f(f(x))) ;
@@ -185,5 +183,23 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
        }
   .
 
+--- the following program passes the type system
+--- to check such anomalies the system should manage the environment
+---   structured as a stack of layers, similar to object environments  
+---   and to write a function gettype similar to getloc from SKOOL
+
+  eq pX01 =
+       var x : int ;
+       function f() : int {
+          return x ;
+       }
+       var x : bool ;
+       function f() : bool {
+          return x ;
+       }
+       function main() : void {
+          x = f() ;
+       }
+  .
 endm
 

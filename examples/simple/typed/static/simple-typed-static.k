@@ -97,7 +97,7 @@ kmod SIMPLE-TYPED-STATIC-EXPR-EVALUATION is including SIMPLE-TYPED-STATIC-CONFIG
 
 endkm
 
-kmod SIMPLE-TYPED-STATIC-INSTR-PROCESSING is including SIMPLE-TYPED-STATIC-CONFIG
+kmod SIMPLE-TYPED-STATIC-FUNCTIONS-PROCESSING is including SIMPLE-TYPED-STATIC-CONFIG
 
   rule <k> var X:Id : T:Type ; => stmt <_/k>
       <tenv> TEnv:Map => TEnv[T / X] </tenv> 
@@ -106,12 +106,13 @@ kmod SIMPLE-TYPED-STATIC-INSTR-PROCESSING is including SIMPLE-TYPED-STATIC-CONFI
        <tenv> TEnv => TEnv[_`[`](T) / X] </tenv> 
   rule {} => stmt 
 
---- the following is uused to wrap an enevironment as a computation
+--- the following is used to wrap an enevironment as a computation
   syntax K ::= tenv ( Map )
   rule <k> {S:Stmt} => S ~> tenv(TEnv) <_/k> 
        <tenv> TEnv </tenv> 
   rule <k> stmt ~> (tenv(TEnv) => .K) <_/k> 
           <tenv> _ => TEnv </tenv> 
+
   rule stmt stmt => stmt 
   rule <k> X = T ; => stmt <_/k> <tenv_> X |-> T <_/tenv>  
   context _[[HOLE]] = _ ; 
@@ -138,7 +139,7 @@ endkm
 kmod SIMPLE-TYPED-STATIC-SEMANTICS is 
   including SIMPLE-TYPED-STATIC-PREPROCESSING +
             SIMPLE-TYPED-STATIC-EXPR-EVALUATION +
-            SIMPLE-TYPED-STATIC-INSTR-PROCESSING + K 
+            SIMPLE-TYPED-STATIC-FUNCTIONS-PROCESSING + K 
 
 endkm
 
