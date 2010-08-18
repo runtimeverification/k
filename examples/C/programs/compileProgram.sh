@@ -5,25 +5,29 @@ GCC_OPTIONS="-nostdlib -nodefaultlibs -U __GNUC__"
 myDirectory=`dirname $0`
 
 if [ -e `which readlink` ]; then
-	K_MAUDE_BASE=`readlink -f $myDirectory/../../..`
+	READLINK=readlink
 else
 	if [ -e `which greadlink` ]; then
-		K_MAUDE_BASE=`greadlink -f $myDirectory/../../..`
+		READLINK=greadlink
 	else
 		die "No readlink/greadlink program found.  Cannot continue." 9
 	fi 
 fi
+
+K_MAUDE_BASE=`$READLINK -f $myDirectory/../../..`
 K_PROGRAM_COMPILE="$K_MAUDE_BASE/tools/kcompile-program.sh"
 CIL_MACHINE='short=2,1 int=4,1 long=4,1 long_long=8,1 pointer=4,1 enum=4,1 float=4,1 double=8,1 long_double=16,1 void=1 bool=1,1 fun=1,1 alignof_string=1 max_alignment=1 size_t=unsigned_long wchar_t=int char_signed=true const_string_literals=true big_endian=false __thread_is_keyword=false __builtin_va_list=false underscore_name=true'
 CIL_BASE=`readlink -f $myDirectory/../cil`
-CIL_PLATFORM=$CIL_BASE/obj/x86_LINUX
+CIL_SUBDIR=`ls --color=none $CIL_BASE/obj | sed 's/\([^ ]*\)/\1/'`
+CIL_PLATFORM=$CIL_BASE/obj/$CIL_SUBDIR
+# $CIL_BASE/obj/x86_LINUX
 ACTUAL_CIL=$CIL_PLATFORM/cilly.asm.exe
 export CIL_MACHINE
 
 set -o nounset
 #trap cleanup SIGHUP SIGINT SIGTERM
-username=`whoami`
-compilationLog=`mktemp -t $username-fsl-c.XXXXXXXXXXX`
+username=`id -un`
+compilationLog=`mktemp -t $username-fsl-c-log.XXXXXXXXXXX`
 dflag=
 gflag=
 nowarn=0

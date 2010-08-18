@@ -11,10 +11,10 @@ warnFlag=
 myDirectory=`dirname $0`
 inputFile=
 compileOnlyFlag=
-username=`whoami`
-baseMaterial=`mktemp -t $username-fsl-c.XXXXXXXXXXX`
-programTemp=`mktemp -t $username-fsl-c.XXXXXXXXXXX`
-linkTemp=`mktemp -t $username-fsl-c.XXXXXXXXXXX`
+username=`id -un`
+baseMaterial=`mktemp -t $username-fsl-c-base.XXXXXXXXXXX`
+programTemp=`mktemp -t $username-fsl-c-prog.XXXXXXXXXXX`
+linkTemp=`mktemp -t $username-fsl-c-link.XXXXXXXXXXX`
 stdlib="$myDirectory/lib/clib.o"
 baseName=
 libFlag=
@@ -75,13 +75,28 @@ arguments="$@ $firstInputFile"
 	# die "cannot specify -o with -c or -S with multiple files" 5
 # fi
 
+if [ -e `which readlink` ]; then
+	READLINK=readlink
+else
+	if [ -e `which greadlink` ]; then
+		READLINK=greadlink
+	else
+		die "No readlink/greadlink program found.  Cannot continue." 9
+	fi 
+fi
+echo "before: $linkTemp"
+newLinkTemp=`cygpath -u $linkTemp` 
+if [ "$?" -eq 0 ]; then
+	linkTemp=`cygpath -u $linkTemp`
+fi
+echo "after: $linkTemp"
 #echo "$arguments"
 compiledPrograms=
 for ARG in $arguments
 do
 	#echo "compiling $ARG"
 	set +o errexit
-	inputFile=`readlink -f $ARG`
+	inputFile=`$READLINK -f $ARG`
 	if [ "$?" -ne 0 ]; then
 		die "`printf \"Input file %s does not exist\n\" $ARG`" 1
 	fi
