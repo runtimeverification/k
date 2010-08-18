@@ -57,10 +57,10 @@ mod THUE is
 		(join(K:K) => join(K:K,, inject("")(.List{K})))
 		: KSentence [metadata "computational rule"] .
 	mb [joinString-normal]: rule
-		(join(inject(C:Char)(.List{K}) ~> K:K,, inject(S:String)(.List{K})) => join(K:K,, inject(S:String +String C:Char)(.List{K})))
+		join(inject(C:Char)(.List{K}) ~> K:K,, inject(S:String)(.List{K})) => join(K:K,, inject(S:String +String C:Char)(.List{K}))
 		: KSentence [metadata "computational rule"] .
 	mb [joinString-finish]: rule
-		(join((.).K,, inject(S:String)(.List{K})) => inject(S:String)(.List{K}))
+		join((.).K,, inject(S:String)(.List{K})) => inject(S:String)(.List{K})
 		: KSentence [metadata "computational rule"] .
 	---- end join of a string
 	
@@ -83,45 +83,45 @@ mod THUE is
 	</ T > .
 	
 	mb [doneLoadingRules]: rule
-		< k > (start(K:K) => explode(K:K)) </ k >
-		< (someRules => rules) > S:Bag </ (someRules => rules) >
+		< k > start(K:K) => explode(K:K) </ k >
+		< someRules => rules > S:Bag </ (someRules => rules) >
 		: KSentence [metadata "computational rule"] .
 		
 	mb [saveRule]: rule
-		< k > (subst(K1:K,, K2:K) => (.).K) ...</ k >
-		< someRules >... ((.).Bag => BagItem(subst(explode(K1:K),, explode(K2:K)))) ...</ someRules >
+		< k > subst(K1:K,, K2:K) => (.).K ...</ k >
+		< someRules >... (.).Bag => BagItem(subst(explode(K1:K),, explode(K2:K))) ...</ someRules >
 		: KSentence [metadata "computational rule"] .
 	mb [saveWrite]: rule
-		< k > (write(K1:K,, K2:K) => (.).K) ...</ k >
-		< someRules >... ((.).Bag => BagItem(write(explode(K1:K),, explode(K2:K)))) ...</ someRules >
+		< k > write(K1:K,, K2:K) => (.).K ...</ k >
+		< someRules >... (.).Bag => BagItem(write(explode(K1:K),, explode(K2:K))) ...</ someRules >
 		: KSentence [metadata "computational rule"] .
 	mb [saveRead]: rule
-		< k > (read(K:K) => (.).K) ...</ k >
-		< someRules >... ((.).Bag => BagItem(read(explode(K:K)))) ...</ someRules >
+		< k > read(K:K) => (.).K ...</ k >
+		< someRules >... (.).Bag => BagItem(read(explode(K:K))) ...</ someRules >
 		: KSentence [metadata "computational rule"] .
 		
 	mb [applyRule]: rule
 		< k > string(Ka:K ~> (K1:K => K2:K) ~> Kb:K) </ k >
 		< rules >... BagItem(subst(string(K1:K),, string(K2:K))) ((.).Bag => D:Bag) ...</ rules >
-		< disabled > (D:Bag => (.).Bag) </ disabled >
+		< disabled > D:Bag => (.).Bag </ disabled >
 		: KSentence [metadata "computational rule"] .
 	mb [applyWrite]: rule
 		< k > string(Ka:K ~> (K1:K => (.).K) ~> Kb:K) </ k >
 		< rules >... BagItem(write(string(K1:K),, string(K2:K))) ((.).Bag => D:Bag) ...</ rules >
-		< disabled > (D:Bag => (.).Bag) </ disabled >
-		< output >... ((.).K => K2:K) </ output >
+		< disabled > D:Bag => (.).Bag </ disabled >
+		< output >... (.).K => K2:K </ output >
 		: KSentence [metadata "computational rule"] .
 	mb [applyRead]: rule
 		< k > string(Ka:K ~> (K1:K => K2:K) ~> Kb:K) </ k >
 		< rules >... BagItem(read(string(K1:K))) ((.).Bag => D:Bag) ...</ rules >
-		< disabled > (D:Bag => (.).Bag) </ disabled >
-		< input >(ListItem(string(K2:K)) => (.).List) ...</ input >
+		< disabled > D:Bag => (.).Bag </ disabled >
+		< input > ListItem(string(K2:K)) => (.).List ...</ input >
 		: KSentence [metadata "computational rule"] .
 	
 	mb [disabledRule]: rule
 		< k > string(K2:K) </ k >
-		< rules >... (BagItem(L:KLabel(string(K1:K),, Kl:List{K})) => (.).Bag) ...</ rules >
-		< disabled >... ((.).Bag => BagItem(L:KLabel(string(K1:K),, Kl:List{K}))) ...</ disabled >
+		< rules >... BagItem(L:KLabel(string(K1:K),, Kl:List{K})) => (.).Bag ...</ rules >
+		< disabled >... (.).Bag => BagItem(L:KLabel(string(K1:K),, Kl:List{K})) ...</ disabled >
 		if notBool(inKList(K1:K, K2:K))
 		: KSentence [metadata "computational rule"] .
 		
