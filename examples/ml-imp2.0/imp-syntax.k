@@ -48,8 +48,6 @@ kmod IMP-SYNTAX is including ML-K
                | { } [metadata "latex(renameTo \\{\\})"]
                | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
                | Stmts Stmts [prec 100 gather(e E)]
----               | alloc ( List{KLabel} ) [strict]   --- see "new" operator
----               | free ( Exp ) [strict]  --- see delete (below)
                | delete Exp ; [strict]
                | breakpoint ;
                | watch ;

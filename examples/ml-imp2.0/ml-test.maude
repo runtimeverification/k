@@ -1,0 +1,17 @@
+load fol.maude
+load ml-imp.maude
+
+mod TEST is inc IMP + FOL= . 
+
+endm
+
+set print attribute on .
+rew check('test) .
+
+ eof
+
+search
+< config > < heap > list(?x)(?X) lseg(?Int(2),?x)(?Seq(3)) a0 |-> ?Int(1) :[nodeList . val : int] a0 +Int 1 |-> ?Int(2) :[nodeList . next : & struct nodeList] </ heap > CfgItems:Bag </ config > 
+===>
+< config > < heap > list(?x)(?X) lseg(a0,?x)([?Int(1)] ::: ?Seq(3))  </ heap > CfgItems:Bag </ config > 
+=>* CfgItems:Bag

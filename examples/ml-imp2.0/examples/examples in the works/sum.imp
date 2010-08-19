@@ -1,0 +1,57 @@
+  vars n s : Id;
+  var   ?n ?s   : ?Int;
+	vars n0 :  FreeInt ; 
+
+    // assume < config > < env > n |-> n0 s |-> ?s </ env > < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config >
+    s = 0 ;
+    // invariant < config > < env > n |-> ?n s |-> (((n0 +Int (-Int ?n)) *Int (n0 +Int ?n +Int 1)) /Int 2) </ env >
+                          < heap > (.).Map </ heap > < form > @(?n >=Int 0) /\ @(n0 >=Int 0) </ form > </ config >
+    while (n > 0) {
+      s = s + n ;
+      n = n - 1 ;
+    }
+    // assert < config > < env > n |-> 0 s |-> ((n0 *Int (n0 +Int 1)) /Int 2) </ env >
+                       < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config >
+
+
+kmod TEST is including IMP-SYNTAX + LIST-HP
+	syntax Id ::= a | index | sum | res
+	syntax ?Int ::= `?res | `?index
+	syntax FreeInt ::= `a0 | `b0
+	syntax ?Int ::= `?a 
+	--- syntax FreeSeq ::= none
+
+	syntax Decl ::= test
+
+	macro test = (
+ 
+ int sum(int a;)
+ /* pre <config> 
+         <env> a |-> [a0 : int] </env>
+         <heap> (.).Map </heap> 
+         <form> @(a0 >=Int 0) </form>
+         </config> */
+         
+ /* post <config> 
+                   <env> a |-> [?a : int] index |-> [a0 : int] res |-> [((a0 *Int (a0 +Int 1)) /Int 2) : int ] </env>
+                   <heap> (.).Map </heap> 
+                   <form> ?return(?res) /\ @(?a == 0) </form> 
+                   </config> */
+ {
+   int res;
+   res = 0;
+/* invariant <config> 
+                   <env> a |-> [?a : int]  res |-> [(((a0 +Int (-Int ?a)) *Int (a0 +Int ?a +Int 1)) /Int 2) : int ] </env>
+                   <heap> (.).Map </heap> 
+                   <form> @(a0 >=Int 0) </form> 
+                   </config> */
+  while (a > 0)
+  {
+    res = res + a;
+    a = a - 1;
+  }
+   return res;
+ }
+
+)
+endkm

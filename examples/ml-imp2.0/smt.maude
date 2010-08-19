@@ -245,7 +245,7 @@ mod SMT-INTERFACE is inc SMT-LIB .
   eq check-sat(Phi)
    = callSolvers(toString(toSMT(Phi)) +String "###EOMTCP###" +String "\r\n",
                  "128.174.246.122",
-                 "7074")
+                 "7073")
   [print "calling Z3 SMT solver...\n" Phi] .
 endm
 

@@ -4,6 +4,8 @@ kmod EX2 is including IMP-SYNTAX
   syntax Stmts ::= ex2
 
   syntax ?Int ::= `?a | `?b | `?b' | `?c | `?c1 | `?c2 | `?d | `?d1 | `?d2 | `?t
+  
+  syntax Decl ::= ex2
 
 macro ex2 = (
 
@@ -13,20 +15,20 @@ macro ex2 = (
 };
 
 int test()
-// pre <config> <env> (.).Map </env> <heap> (.).Map </heap> <form> TrueFormula </form> </config>
-// post  <config> 
+/* pre <config> <env> (.).Map </env> <heap> (.).Map </heap> <form> TrueFormula </form> </config> */
+/* post  <config> 
             <env> 
-                b |-> [?b , & int] 
-                c |-> [?c , & struct a]
-                t |-> [?t , int] 
+                b |-> [?b : & int] 
+                c |-> [?c : & struct a]
+                t |-> [?t : int] 
             </env> 
             <heap> 
-                ?b |-> ?b' : [@scalar , int] 
-                ?c |-> ?c1 : [x , int]
-                (?c +Int 1) |-> ?c2 : [y, & struct a]
+                ?b |-> ?b' : [@scalar : int] 
+                ?c |-> ?c1 : [a . x : int]
+                (?c +Int 1) |-> ?c2 : [a . y : & struct a]
             </heap> 
-            <form> (?b' === ?t) </form> 
-            </config>
+            <form> TrueFormula </form> 
+            </config> */
 {
   int *b;
   b = new int; --- calloc

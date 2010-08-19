@@ -1,14 +1,8 @@
 load imp-semantics
----load examples/sum.maude
----load examples/struct/ex2.k
----load examples/struct/list-reverse.k
-load examples/test.k
+load examples/test#1.k
 
 
 kmod IMP is including IMP-SEMANTICS
----  including P-SUM
----  including P-LIST-REVERSE
----  including EX2
 including TEST
 
   op check : KLabel -> BagItem

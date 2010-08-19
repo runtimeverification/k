@@ -1,13 +1,13 @@
-kmod P-LIST-COPY is including IMP-SYNTAX + LIST-HP
+kmod TEST is including IMP-SYNTAX + LIST-HP
 	syntax Id ::= a | b | next | i | x | y | copy | nodeList | val 
 	syntax ?Int ::= `?b | `?i | `?x | `?v | `?y | `?w | `?a
 	syntax FreeInt ::= `a0 
-	syntax ?Seq ::= `?A | `?B | `?X | `?A'
+	syntax ?Seq ::= `?X
 	syntax FreeSeq ::= `A 
 
-	syntax Decl ::= pListCopy
+	syntax Decl ::= test
 
-	macro pListCopy = (
+	macro test = (
  
  struct nodeList {
    int val;
@@ -15,22 +15,22 @@ kmod P-LIST-COPY is including IMP-SYNTAX + LIST-HP
  };
  
  int copy(struct nodeList *a;)
- // pre <config> 
+ /* pre <config> 
          <env> a |-> [a0 : &struct nodeList] </env>
          <heap> list(a0)(A) </heap> 
          <form> ~(a0 === 0) </form>
-         </config>
+         </config> */
          
- // post <config> 
+ /* post <config> 
                    <env> a |-> [a0 : &struct nodeList]  b |-> [?b : &struct nodeList] x |-> [?x : &struct nodeList] i |-> [?b : int] y |-> [?y : &struct nodeList] </env>
                    <heap> 
                         list(?x)(?X) 
-                        a0|-> ?v : [val : int ]  (a0 +Int 1) |-> ?x : [next : &struct nodeList] 
-                        ?b |-> ?v : [val : int ]  (?b +Int 1) |-> 0 : [next : &struct nodeList] 
-                        ?y |-> ?w : [val : int ]  (?y +Int 1) |-> 0 : [next : &struct nodeList]
+                        a0|-> ?v : [nodeList . val : int ]  (a0 +Int 1) |-> ?x : [nodeList . next : &struct nodeList] 
+                        ?b |-> ?v : [nodeList . val : int ]  (?b +Int 1) |-> 0 : [nodeList . next : &struct nodeList] 
+                        ?y |-> ?w : [nodeList . val : int ]  (?y +Int 1) |-> 0 : [nodeList . next : &struct nodeList]
                         </heap> 
                    <form> ([?v] ::: ?X === A) </form> 
-                   </config>
+                   </config> */
  {
  struct nodeList *b;
  int i ;

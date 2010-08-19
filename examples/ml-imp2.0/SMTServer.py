@@ -5,7 +5,7 @@ import subprocess
 
 TIMEOUT = 0.5                   # SMT querry timeout, in seconds
 HOST = "128.174.246.122"              # Symbolic name meaning all available interfaces
-PORT = 7074                    # Arbitrary non-privileged port
+PORT = 7073                    # Arbitrary non-privileged port
 BUFSIZ = 4096                   # Buffer size
 MAUDE_EOF = '###EOMTCP###';     # Maude querry string terminator
 
