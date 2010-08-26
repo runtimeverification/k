@@ -87,7 +87,7 @@ fi
 # echo "before: $linkTemp"
 # this helps set the path correctly on windows
 set +o errexit
-newLinkTemp=`cygpath -u $linkTemp` 
+newLinkTemp=`cygpath -u $linkTemp &> /dev/null` 
 if [ "$?" -eq 0 ]; then
 	linkTemp=`cygpath -u $linkTemp`
 fi

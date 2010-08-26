@@ -217,7 +217,7 @@ and printDeclType a =
 	| PTR (a, b) -> printPointerType a b
 	| PROTO (a, b, c) -> printProtoType a b c
 and printParenType a b c =
-	printAttr (wrap ((printAttr (printDeclType b) c) :: []) "ParenType") a
+	printAttr (wrap ((printAttr (printDeclType b) c) :: []) "FunctionType") a
 and printArrayType a b c =
 	printAttr (wrap ((printDeclType a) :: (printExpression c) :: []) "ArrayType") b
 and printPointerType a b =
@@ -274,7 +274,7 @@ and printIntLiteral i =
 	| "L" :: "U" :: [] -> wrapString num "UL"
 	| "U" :: [] -> wrapString num "U"
 	| "L" :: [] -> wrapString num "L"
-	| [] -> num
+	| [] -> wrapString num "NoSuffix"
 	(* | _ as z -> wrapString num (List.fold_left (fun aux arg -> aux ^ arg) "" z) *)
 	
 and printExpression exp =

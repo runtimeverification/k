@@ -38,8 +38,12 @@ mod COMMON-SEMANTICS-SIZEOF is
 	--- tv(byteSizeofType(T:Type), cfg:sizeut) .
 	
 	mb rule
-		< k > sizeofExp(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
+		< k > SizeofExpression(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
 		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < k > sizeofExp(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
+		--- : KSentence [metadata "structural"] .
 	
 	op bitSizeofList : List{Type} -> K .
 	eq bitSizeofList(T:Type :: L:List{Type}) = bitSizeofType(T:Type) + bitSizeofList(L:List{Type}) .
@@ -213,15 +217,17 @@ and ll or LL
 	
 	eq IntLiteral(V:Value) = V:Value .
 	eq Constant(V:Value) = V:Value .
-	mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence .
+	mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence . --- for internal computations
 	
-	mb rule < k > DecimalConstant(I:Int) => 
+	--- op createLiteralValue : K -> K .
+	--- eq Constant(K:K) = createLiteralValue(K:K) .
+	
+	mb rule NoSuffix(DecimalConstant(I:Int)) => 
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
 		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
 		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
 			tv(I:Int, no-type)
 		fi fi fi
-		...</ k > 
 		: KSentence [metadata "structural"] .
 		
 	op simplifyForHex : String -> String .
@@ -233,7 +239,7 @@ and ll or LL
 		orBool lengthString(S:String) ==Bool 1 .
 		
 	eq HexConstant(S:String) = HexConstant(String2Rat(simplifyForHex(S:String), 16)) .
-	mb rule < k > HexConstant(I:Int) =>
+	mb rule NoSuffix(HexConstant(I:Int)) =>
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
 		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
 		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
@@ -241,8 +247,7 @@ and ll or LL
 		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
 		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, long-long-int) else
 			tv(I:Int, no-type)
-		fi fi fi fi fi fi 
-		...</ k > 
+		fi fi fi fi fi fi
 		: KSentence [metadata "structural"] .
 		
 	mb rule U(DecimalConstant(I:Int)) => 

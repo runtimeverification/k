@@ -287,7 +287,7 @@ mod COMMON-C-TYPING is
 	including COMMON-SEMANTICS-TYPE-DECLARATIONS .
 	including COMMON-SEMANTICS-TYPE-CANONICALIZATION .
 	
-	--- op preFunctionType : List{Type} -> Type .
+	op preFunctionType : Type -> Type .
 	--- op preBitfieldType : Nat -> Type .
 	--- op preArrayType : Nat -> Type .
 	--- op prePointerType : -> Type .
@@ -310,7 +310,8 @@ mod COMMON-C-TYPING is
 	eq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat) .
 	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
 	eq PointerType(T:Type) = pointerType(T:Type) .
-				
+	eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
+
 	mb rule 
 		< k > JustBase => T:Type ...</ k >
 		< declarationTypeHolder > T:Type => . ...</ declarationTypeHolder >
@@ -405,9 +406,16 @@ mod COMMON-C-TYPING is
 	eq FieldName(K:K) = K:K .
 	
 	op isAType_ : K -> Bool .
+	op isABaseType_ : K -> Bool .
 	ceq isAType T:Type = true
 		if setOfTypes contains l(getKLabel(T:Type)) .
 	eq isAType T:BaseType = true .
+	ceq isAType K:K = false
+		if notBool setOfTypes contains l(getKLabel(K:K))
+		andBool notBool isABaseType K:K .
+		
+	eq isABaseType T:BaseType = true .
+	eq isABaseType ? = false [owise] .
 	***(
 	op normalizeType : K K -> K .
 	op typedef : K K -> K .
@@ -467,7 +475,29 @@ mod COMMON-C-TYPING is
 	mb rule
 		< type > functionObject(?, T:Type, ?) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
-
+	mb rule
+		< type > K:K[K':K] => K':K ~> K:K[HOLE] ...</ type >
+		if notBool isAType K':K
+		: KSentence [metadata "structural"] .
+	mb rule
+		< type > K:K[K':K] => K:K ~> HOLE[K':K] ...</ type >
+		if notBool isAType K:K
+		: KSentence [metadata "structural"] .
+	mb rule
+		< type > tv(?, T:Type) => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< type > T:Type ~> HOLE[K:K] => T:Type[K:K] ...</ type >
+		if isAType T:Type
+		: KSentence [metadata "structural"] .
+	mb rule
+		< type > T:Type ~> K:K[HOLE] => K:K[T:Type] ...</ type >
+		if isAType T:Type
+		: KSentence [metadata "structural"] .
+	mb rule
+		< type > arrayType(T:Type, ?)[T':Type] => T:Type ...</ type >
+		if hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < type > [F:Float => double] </ type >
 		--- : KSentence [metadata "structural"] .

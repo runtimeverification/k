@@ -228,6 +228,8 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule splitBytes(tv(I:Int, T:Type)) => splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
 		if hasIntegerType(T:Type)
 		: KSentence .
+	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) => splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(T:Type)))
+		: KSentence .
 	
 	op splitIntegerBytes : K K K -> K .
 	op splitIntegerBytes : K K K List{K} -> K .
@@ -237,7 +239,20 @@ mod COMMON-SEMANTICS-WRITING is
 		= splitIntegerBytes(I:Int >>Int numBitsPerByte, T:Type, Len:Nat, (L:List{K},, lowestByte(I:Int, T:Type))) .
 	eq splitIntegerBytes(I:Int, T:Type, 0, L:List{K})
 		= dataList(L:List{K}) .
-	
+		
+	op splitPointerBytes : K K K -> K .
+	op splitPointerBytes : K K K List{K} -> K .
+	mb context splitPointerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
+	op encodedPointer : Int -> Nat .
+	ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
+		= splitPointerBytes(I:Int, T:Type, Len:Nat, encodedPointer(I:Int))
+		if I:Int =/=Bool NULL .
+	ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
+		= splitPointerBytes(I:Int, T:Type, Len:Nat, NULL)
+		if I:Int ==Bool NULL .
+	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K}) = splitPointerBytes(I:Int, T:Type, Len:Nat, (L:List{K},, piece(unknown, numBitsPerByte))) .
+	eq splitPointerBytes(I:Int, T:Type, 0, L:List{K}) 
+		= dataList(L:List{K}) .
 	
 	op lowestByte : Int Type -> K .
 	ceq lowestByte(I:Int, T:Type) = piece(I:Int &Int byteMaskSet, numBitsPerByte)

@@ -216,7 +216,7 @@ and decl_type =
 			 * decl is never a PTR.*)
 ***)
 	op JustBase : -> K
-	op ParenType : K -> DeclType [strict]
+	op FunctionType : K -> DeclType [strict]
 	op ArrayType : K K -> DeclType [strict(1 2)]
 	op PointerType : K -> DeclType [strict]
 	op Prototype : K List{C} Bool -> DeclType [strict(1 2)]
@@ -536,8 +536,9 @@ and constant =
 	op LL : K -> Constant --- new
 	op UL : K -> Constant --- new
 	op ULL : K -> Constant --- new
+	op NoSuffix : K -> Constant --- new
 	
-	op IntLiteral : K -> Constant [strict]
+	op IntLiteral : K -> Constant
 	op FloatLiteral : Float -> Constant
 	op CharLiteral : Int -> Constant
 	op WCharLiteral : Int -> Constant

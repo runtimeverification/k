@@ -50,7 +50,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op bito : Nat -> Nat .
 	op typedef : Id -> Id .
 	op unnamed : Nat -> Id .
-	
+	op NULL : -> K .
+	eq NULL = 0 .
 	op emptyValue : -> Value .
 	--- subsort List{KResult} < K .
 	
@@ -130,7 +131,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op bitSizeofType : K -> K [metadata "strict"] .
 	op byteSizeofType : K -> K [metadata "strict"] .
 	op bitsToBytes : Nat -> Nat .
-	op sizeofExp : K -> K .
+	--- op sizeofExp : K -> K .
 	--- --- op HOLE : -> Expression .
 	op l : KLabel -> K [metadata "builtin wrapper"] .
 	--- ---op l : KLabel -> K .
