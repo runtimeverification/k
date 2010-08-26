@@ -1,4 +1,4 @@
-K-MAUDE-BASE = ../../..
+K-MAUDE-BASE = ../../../..
 K-COMPILE-BASE = tools/kompile.pl
 K-PROGRAM-COMPILE = $(K-MAUDE-BASE)/tools/kcompile-program.sh
 

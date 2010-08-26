@@ -84,12 +84,15 @@ else
 		die "No readlink/greadlink program found.  Cannot continue." 9
 	fi 
 fi
-echo "before: $linkTemp"
+# echo "before: $linkTemp"
+# this helps set the path correctly on windows
+set +o errexit
 newLinkTemp=`cygpath -u $linkTemp` 
 if [ "$?" -eq 0 ]; then
 	linkTemp=`cygpath -u $linkTemp`
 fi
-echo "after: $linkTemp"
+set -o errexit
+# echo "after: $linkTemp"
 #echo "$arguments"
 compiledPrograms=
 for ARG in $arguments
