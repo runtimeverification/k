@@ -312,6 +312,25 @@ mod COMMON-C-TYPING is
 	eq PointerType(T:Type) = pointerType(T:Type) .
 	eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
 
+	eq functionType(preFunctionType(pointerType(T:Type)), L:List{Type})	= pointerType(functionType(T:Type, L:List{Type})) .
+	
+	eq isTypeCompatible(T:Type, T:Type) = true .
+	eq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
+		= isTypeCompatible(T:Type, T':Type) .
+	eq isTypeCompatible(typedDeclaration(T:Type, ?), typedDeclaration(T':Type, ?))
+		= isTypeCompatible(T:Type, T':Type) .
+	eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
+		= isTypeCompatible(pointerType(T:Type), T':Type) .
+	eq isTypeCompatible(T:Type, arrayType(T':Type, ?))
+		= isTypeCompatible(T:Type, pointerType(T':Type)) .
+	eq isTypeCompatible(functionType(T1:Type, (T':Type :: L:List{Type})), functionType(T2:Type, (T'':Type :: L':List{Type})))
+		= isTypeCompatible(functionType(T1:Type, L:List{Type}), functionType(T2:Type, L':List{Type}))
+		andBool isTypeCompatible(T':Type, T'':Type) .
+	ceq isTypeCompatible(T:Type, T':Type) = true
+		if hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type) .
+		
+		
 	mb rule 
 		< k > JustBase => T:Type ...</ k >
 		< declarationTypeHolder > T:Type => . ...</ declarationTypeHolder >

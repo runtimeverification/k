@@ -73,6 +73,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- eq loc(Block:Nat, N:Nat) <=Int loc(Block:Nat, N':Nat) = N:Nat <=Int N':Nat .
 	--- eq loc(Block:Nat, N:Nat) >=Int loc(Block:Nat, N':Nat) = N:Nat >=Int N':Nat .
 	
+	op isTypeCompatible : K K -> Bool .
+	
 	op bitloc : Nat Nat Nat -> Nat .
 	op inc : Nat -> Nat .
 	op initialize : Id Type K -> K .
@@ -518,6 +520,30 @@ mod COMMON-INCLUDE is
 	including COMMON-SEMANTIC-SYNTAX .	
 endm
 
+***(
+('typedDeclaration).KResultLabel(
+	('functionType).KResultLabel(
+		('preFunctionType).KResultLabel(('pointerType).KResultLabel(BaseType int(.List{K})))
+		,,('_::_).KHybridLabel(
+			('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K}))
+			,,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K}))
+		)
+	)
+	,,Id Identifier("f")(.List{K})
+)
+
+
+('bind).KProperLabel(
+	('_::_).KHybridLabel(('tv).KResultLabel(kList("wklist_")(BaseValue 5(.List{K})),,BaseType unsigned-long-int(.List{K})),,('tv).KResultLabel(kList("wklist_")(BaseValue 0(.List{K})),,BaseType int(.List{K})),,('tv).KResultLabel(kList("wklist_")(BaseValue (0 +Nat sym(8))(.List{K}))
+	
+	,,('pointerType).KResultLabel(('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("y")(.List{K})))))))
+	,,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("length")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("start")(.List{K}))
+	
+	,,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K}))))),,Id Identifier("f")(.List{K})))
+)
+
+***)
+
 mod COMMON-PARAMETER-BINDING is
 	including COMMON-INCLUDE .
 
@@ -539,17 +565,22 @@ mod COMMON-PARAMETER-BINDING is
 		--- < k > [bind((tv(V:BaseValue, arrayType(T:Type, ?)),, L:List{KResult}), PD:List{KResult})
 			--- => bind((tv(V:BaseValue, pointerType(T:Type)),, L:List{KResult}), PD:List{KResult})] ...</ k > : KSentence [metadata "structural"] .
 
+	
+			
 	mb [bind-one]: rule
-		< k > bind((tv(V:BaseValue, T:Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+		< k > true ~> bind((tv(V:BaseValue, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 			=> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> X:Id := tv(V:BaseValue, T:Type)
+			~> X:Id := tv(V:BaseValue, T':Type)
 			~> discard
-			--- ~> addLocals(Loc:Nat)
-			--- storeNew tv(V:BaseValue, T:Type) atLoc Loc:Nat ~>
 			~> bind(L:List{C}, P:List{Type}) ...</ k > 
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if isTypeCompatible(T:Type, T':Type)
+		: KSentence [metadata "structural"] .
+	mb [bind-one]: rule
+		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind((tv(V:BaseValue, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+		...</ k > 
 		: KSentence [metadata "structural"] .
 	--- mb [bind-struct]: rule
 		--- < k > [bind((atv(V:List{K}, T:Type),, L:List{KResult}), (typedDeclaration(T:Type, X:Id),, P:List{KResult}))
