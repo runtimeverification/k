@@ -555,7 +555,7 @@ and init_expression =
 	op NoInit : -> KResult --- InitExpression
 	op SingleInit : K -> InitExpression [hybrid strict]
 	op CompoundInit : List{C} -> InitExpression [hybrid strict]
-	op InitFragment : K K -> InitFragment [strict(2)] --- new; (initwhat * init_expression)
+	op InitFragment : K K -> InitFragment --- new; (initwhat * init_expression)
 	
 ***(
 and initwhat =

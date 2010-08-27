@@ -155,11 +155,11 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		: KSentence [metadata "computational rule"] . --- nondet
 endm
 
---- mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
-	--- --- can't be done everywhere because same syntax as in declarations
-	--- mb rule < k > [E1:Expression[E2:Expression] => Deref(E1:Expression + E2:Expression)] ...</ k > : KSentence [metadata "structural"] .
---- endm
+mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	--- can't be done everywhere because same syntax as in declarations
+	--- mb rule < k > E1:Expression[E2:Expression] => *(E1:Expression + E2:Expression) ...</ k > : KSentence [metadata "structural"] .
+endm
 
 mod COMMON-SEMANTICS-LITERALS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -548,8 +548,8 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		: KSentence [metadata "structural"] .
 endm
 
---- mod COMMON-SEMANTICS-MEMBERS is 
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-MEMBERS is 
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
 	--- mb [arrow-struct]: rule
 		--- < k > [tv(Base:Int, pointerType(structType(S:Id))) -> X:Id => Deref(tv(Base:Int, pointerType(structType(S:Id)))) . X:Id] ...</ k >
@@ -589,10 +589,10 @@ endm
 	--- ---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
 		
   	--- ---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
---- endm
+endm
 
---- mod COMMON-SEMANTICS-DEREFERENCE is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-DEREFERENCE is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
 	--- ---C99 6.5.3.2:4 The unary * operator denotes indirection. If the operand points to a function, the result is a function designator; if it points to an object, the result is an lvalue designating the object. If the operand has type "pointer to type", the result has type "type". If an invalid value has been assigned to the pointer, the behavior of the unary * operator is undefined.
 	--- --- also see 6.3.2.1:3 for why i made the result a pointerType
@@ -620,7 +620,7 @@ endm
 		--- < k > [Deref(tv(Loc:Nat, pointerType(unionType(X:Id)))) => readFromMem(Loc:Nat, unionType(X:Id))
 		--- ] ...</ k >
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 mod COMMON-SEMANTICS-REFERENCE is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
@@ -696,8 +696,8 @@ mod COMMON-SEMANTICS-REFERENCE is
 		: KSentence [metadata "structural"] .
 endm
 
---- mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
-	--- including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 
 	--- op postOpRef : K KLabel -> K .
 	--- mb context postOpRef(Deref([HOLE]), ?) : KSentence .
@@ -743,7 +743,7 @@ endm
 		--- => assign(Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))), tv(I:Int, pointerType(T:Type)) - tv(1, int)) ~> discard ~> tv(I:Int, pointerType(T:Type))
 		--- ] ...</ k >
 		--- : KSentence [metadata "structural"] .
---- endm
+endm
 
 mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-BOOLEAN .
@@ -751,15 +751,15 @@ mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-SIZEOF .
 	including COMMON-SEMANTICS-IDENTIFIERS .
 	including COMMON-SEMANTICS-FUNCTION-CALLS .
-	--- including COMMON-SEMANTICS-ARRAY-SUBSCRIPTING .
+	including COMMON-SEMANTICS-ARRAY-SUBSCRIPTING .
 	including COMMON-SEMANTICS-ASSIGNMENT .
 	including COMMON-SEMANTICS-LITERALS .
 	including COMMON-SEMANTICS-BITWISE .
 	including COMMON-SEMANTICS-ARITHMETIC .
-	--- including COMMON-SEMANTICS-MEMBERS .
-	--- including COMMON-SEMANTICS-DEREFERENCE .
+	including COMMON-SEMANTICS-MEMBERS .
+	including COMMON-SEMANTICS-DEREFERENCE .
 	including COMMON-SEMANTICS-REFERENCE .
-	--- including COMMON-SEMANTICS-INCREMENT-AND-DECREMENT .
+	including COMMON-SEMANTICS-INCREMENT-AND-DECREMENT .
 	
 	eq NothingExpression = emptyValue .
 endm

@@ -686,11 +686,17 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- — if it has arithmetic type, it is initialized to (positive or unsigned) zero;
 	--- if it is an aggregate, every member is initialized (recursively) according to these rules;
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
-	op declare : K K -> K [metadata "seqstrict(2 1)"] .
+	--- op declare : K K -> K [metadata "seqstrict(2 1)"] .
+	op declare : K K -> K .
+	op declare-aux : K K -> K [metadata "seqstrict(2 1)"] .
 	op defineType : K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence .
 	mb context Typedef(NameGroup(`[HOLE`]:K, ?)) : KSentence .
 	eq LocalDefinition(DefinitionLoc(K:K, Loc:K)) = DefinitionLoc(K:K, Loc:K) .
+	
+	--- this surrounds all declarations with an instruction to complete (make verbose) the initializer
+	eq declare(SingleName(T:Type, Name:C), Kp:KProper) = declare-aux(SingleName(T:Type, Name:C), completeInitializer(idOfName(Name:C), Kp:KProper)) .
+	eq declare-aux(Kr:KResult, Kr':KResult) = declare(Kr:KResult, Kr':KResult) .
 	
 	--- parser makes sure there are no uninitialized globals, so this should only do allocation
 	--- mb rule
@@ -704,29 +710,52 @@ mod COMMON-GLOBAL-DECLARATION is
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
 		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
 		~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
-	op completeInitializer : K Nat K -> C . --- name, offset, init
-	op completeInitializer : K Nat List{C} -> K . --- name, offset, init
+	op completeInitializer : K K -> C . --- name, init
+	eq completeInitializer(K:K, K':K) = completeInitializer-aux(K:K, 0, K':K) .
+	op completeInitializer-aux : K Nat K -> C . --- name, offset, init
+	op completeInitializer-aux : K Nat List{C} -> K . --- name, offset, init
 	op idOfName : K -> K .
 	eq idOfName(Name(X:Id, ?)) = X:Id .
-	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), completeInitializer(idOfName(Name:K), 0, Exp:K)) .
+	--- eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), completeInitializer(idOfName(Name:K), Exp:K)) .
+	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
 	
-	eq completeInitializer(?, ?, NoInit) = NoInit .
-	eq completeInitializer(?, ?, SingleInit(K:K)) = SingleInit(K:K) .
-	eq completeInitializer(K:K, N:Nat, CompoundInit(L:List{C})) = CompoundInit(completeInitializer(K:K, N:Nat, L:List{C})) .
+***(
+CompoundInit(
+	(InitFragment(NextInit, CompoundInit((Nil :: (InitFragment(NextInit, SingleInit(Constant(IntLiteral(NoSuffix(DecimalConstant(1))))))) :: (InitFragment(NextInit, SingleInit(Constant(IntLiteral(NoSuffix(DecimalConstant(2))))))))))) 
+	:: (InitFragment(NextInit, CompoundInit((Nil :: (InitFragment(NextInit, SingleInit(Constant(IntLiteral(NoSuffix(DecimalConstant(3))))))) :: (InitFragment(NextInit, SingleInit(Constant(IntLiteral(NoSuffix(DecimalConstant(4))))))))))))
+***)
 	
-	eq completeInitializer(K:K, N:Nat, InitFragment(NextInit, Exp:K) :: L:List{C}) 
-		= InitFragment(K:K[tv(N:Nat, unsigned-long-int)], Exp:K)
-		:: completeInitializer(K:K, sNat(N:Nat), L:List{C}) .
-	eq completeInitializer(?, ?, Nil) = Nil .
+	eq completeInitializer-aux(?, ?, NoInit) = NoInit .
+	eq completeInitializer-aux(?, ?, SingleInit(K:K)) = SingleInit(K:K) .
+	eq completeInitializer-aux(K:K, N:Nat, CompoundInit(L:List{C})) 
+		= CompoundInit(completeInitializer-aux(K:K, N:Nat, L:List{C})) .
 	
-	op completeInitializerFragment : K -> KResult .
+	eq completeInitializer-aux(K:K, N:Nat, InitFragment(NextInit, Exp:K) :: L:List{C}) 
+		= completeInitializerFragment(K:K[tv(N:Nat, unsigned-long-int)], Exp:K)
+		:: completeInitializer-aux(K:K, sNat(N:Nat), L:List{C}) .
+	eq completeInitializer-aux(?, ?, Nil) = Nil .
+	
+	op completeInitializerFragment : K K -> C .
+	op initializerFragment : K -> KResult .
 	mb rule
-		< k > InitFragment(K:K, SingleInit(V:Value)) => completeInitializerFragment(K:K := V:Value) ...</ k >
+		< k > completeInitializerFragment(K:K, SingleInit(V:Value)) => initializerFragment(K:K := V:Value) ...</ k >
 		if getKLabel(K:K) =/=Bool 'NextInit
 		andBool getKLabel(K:K) =/=Bool 'InFieldInit
 		andBool getKLabel(K:K) =/=Bool 'AtIndexInit
 		andBool getKLabel(K:K) =/=Bool 'AtIndexRangeInit
 		: KSentence .
+	mb rule
+		< k > completeInitializerFragment(K:K, CompoundInit(L:List{C})) 
+			=> CompoundInit(completeInitializer(K:K, L:List{C}))
+		...</ k >
+		if getKLabel(K:K) =/=Bool 'NextInit
+		andBool getKLabel(K:K) =/=Bool 'InFieldInit
+		andBool getKLabel(K:K) =/=Bool 'AtIndexInit
+		andBool getKLabel(K:K) =/=Bool 'AtIndexRangeInit
+		: KSentence .
+		
+	
+	--- declare-aux(SingleName(T:Type, Name:C), completeInitializer(idOfName(Name:C), Kp:KProper)) .
 		
 		---if notBool hasExternType(T:Type) .
 	--- FIXME does this work all the time?
@@ -760,7 +789,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		: KSentence .
 	mb rule
-		< k > initialize-aux(X:Id, T:Type, completeInitializerFragment(K:K)) => K:K ~> discard ...</ k >
+		< k > initialize-aux(X:Id, T:Type, initializerFragment(K:K)) => K:K ~> discard ...</ k >
 		: KSentence .
 	mb rule
 		< k > initialize-aux(X:Id, ?, CompoundInit(Nil)) => (.).K ...</ k >
