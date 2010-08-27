@@ -6,14 +6,29 @@ use Switch;
 
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
+my $verbose = 0;
 
 # next subroutine prints the usage message;
 # $0 is initially bound to the program name, as typed
 sub terminate {
     print "\nERROR: $_[0]\n\n" if defined $_[0];
-    print "Usage:
+    print "Usage: 
   $0 (-option)* <source_file>[.kmaude|.maude] (-option)*
 
+  Options
+  -h (or -help) : print this message and exit
+  -v (or -verbose) : verbose mode
+  -m (or -maudify) : only maudify, do not kompile
+  -c (or -compile) : only compile, do not maudify
+  -l (or -lang or -language) <module_name> : start module
+  -f (or -file) : the input source file (optional)
+  -latex : maudifies/compiles for generating latex output
+    -style : useful for typesetting (optional)
+  " if $verbose == 0;
+
+    print "Usage:
+  $0 (-option)* <source_file>[.kmaude|.maude] (-option)*
+  
   This program takes a K language definition and translates
   it into a Maude executable specification.  The input K
   definition can be spread over several files and modules,
@@ -144,7 +159,7 @@ sub terminate {
   It typsets the specified modules reachable from the input
   file lang3.
 
-" ;
+" if $verbose; 
     print "\nERROR: $_[0]\n\n" if defined $_[0];
     exit(1);
 }
@@ -249,7 +264,6 @@ my @all_sorts = ();
 # @all_tokens will hold all defined tokens
 my @all_tokens = @builtin_tokens;
 
-my $verbose = 0;
 my $latex = 0;
 my $style = "bb";
 my $maudify_only = 0;
