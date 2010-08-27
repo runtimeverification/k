@@ -158,7 +158,7 @@ endm
 mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	--- can't be done everywhere because same syntax as in declarations
-	--- mb rule < k > E1:Expression[E2:Expression] => *(E1:Expression + E2:Expression) ...</ k > : KSentence [metadata "structural"] .
+	mb rule < k > E1:Expression[E2:Expression] => *(E1:Expression + E2:Expression) ...</ k > : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-LITERALS is
@@ -594,20 +594,21 @@ endm
 mod COMMON-SEMANTICS-DEREFERENCE is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	--- ---C99 6.5.3.2:4 The unary * operator denotes indirection. If the operand points to a function, the result is a function designator; if it points to an object, the result is an lvalue designating the object. If the operand has type "pointer to type", the result has type "type". If an invalid value has been assigned to the pointer, the behavior of the unary * operator is undefined.
-	--- --- also see 6.3.2.1:3 for why i made the result a pointerType
-	--- mb rule < k > [Deref(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, pointerType(T:Type))] ...</ k > : KSentence [metadata "structural"] .
+	---C99 6.5.3.2:4 The unary * operator denotes indirection. If the operand points to a function, the result is a function designator; if it points to an object, the result is an lvalue designating the object. If the operand has type "pointer to type", the result has type "type". If an invalid value has been assigned to the pointer, the behavior of the unary * operator is undefined.
+	--- also see 6.3.2.1:3 for why i made the result a pointerType
+	mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, pointerType(T:Type)) ...</ k > : KSentence [metadata "structural"] .
 	
 	--- mb [lookup-function] : rule
 		--- < k > [Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(functionType(T:Type, L:List{K})))) => V:Value] ...</ k >
 		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:Value)) ...</ mem >
 	--- : KSentence [metadata "structural"] .
 	
-	--- --- fixme, why do i need these cases?  arrays again?
-	--- mb [deref]: rule
-		--- < k > [Deref(tv(Loc:Nat, pointerType(T:Base-Type))) => readFromMem(Loc:Nat, T:Base-Type)
-		--- ] ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb [deref]: rule
+		< k > *(tv(Loc:Nat, pointerType(T:Type))) 
+			=> read(Loc:Nat, T:Type)
+		...</ k >
+		if notBool hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .
 	--- mb [deref-pointer]: rule
 		--- < k > [Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))) => readFromMem(Loc:Nat, pointerType(T:Type))
 		--- ] ...</ k >
@@ -640,13 +641,15 @@ mod COMMON-SEMANTICS-REFERENCE is
 	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	
+	--- C1X 6.5.3.2:3 The unary & operator yields the address of its operand. If the operand has type ‘‘type’’, the result has type ‘‘pointer to type’’. If the operand is the result of a unary * operator, neither that operator nor the & operator is evaluated and the result is as if both were omitted, except that the constraints on the operators still apply and the result is not an lvalue. Similarly, if the operand is the result of a [] operator, neither the & operator nor the unary * that is implied by the [] is evaluated and the result is as if the & operator were removed and the [] operator were changed to a + operator. Otherwise, the result is a pointer to the object or function designated by its operand.
+	
 	mb rule &(*(E:Expression)) => E:Expression : KSentence [metadata "structural"] .
 	mb rule &(E1:Expression[E2:Expression]) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
-	mb [ref]: rule
-		< k > &(X:Id) => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
-		< env >... X:Id |-> Loc:Nat ...</ env >
-		< types >... X:Id |-> T:Type ...</ types >
-		: KSentence [metadata "structural"] .
+	--- mb [ref]: rule
+		--- < k > &(X:Id) => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
+		--- < env >... X:Id |-> Loc:Nat ...</ env >
+		--- < types >... X:Id |-> T:Type ...</ types >
+		--- : KSentence [metadata "structural"] .
 		
 	--- op getFieldOffset : Id Id -> K .
 	--- op getStructFieldOffset : Id Id -> K .
