@@ -44,11 +44,23 @@ if (-e $warnings_file)
 sub syntax_common_check
 {
     $language_file_name = (shift);
-    
-    if ($language_file_name =~ /(?:.k|.kmaude)$/)
-    {	
-	syntax_verification();
+
+    if ($language_file_name !~ m/\.k|\.kmaude/)
+    {
+	if (-e "$language_file_name.k")
+	{
+	    $language_file_name .= ".k";
+	}
+
+	if (-e "$language_file_name.kmaude")
+	{
+	    $language_file_name .= ".kmaude";
+	}
     }
+    
+#    print "LANG: $language_file_name.\n\n";
+# exit(1);
+    syntax_verification();
     
     write_warnings();
 }
@@ -324,8 +336,8 @@ sub syntax_verification
     }
     else
     {
-		warning("INFO: File $language_file_name does not contain configuration definition.\n") if $verbose;
-		return;
+	warning("INFO: File $language_file_name does not contain configuration definition.\n") if $verbose;
+	return;
     }
     
     # learn configuration
@@ -354,7 +366,7 @@ sub syntax_verification
 	    my $exp_tree = append_rec_tree_for_rule($temp, "super-node", "rule $original_rule");
 	    
 	    # $string will be used as DATA parameter for traverse function
-     	my $string = $expr_type . " " . $original_rule;
+	    my $string = $expr_type . " " . $original_rule;
 
 	    # check if rule tree tree ~ configuration tree
 	    Tree::Nary->traverse($exp_tree, $Tree::Nary::PRE_ORDER,
