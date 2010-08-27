@@ -28,7 +28,8 @@ kmod C-CONFIGURATION is
 							< env > .Map </ env >
 							< types > .Map </ types >
 							< currentInitializerObject > .List </ currentInitializerObject >
-							< savedInitialization > .K </ savedInitialization >
+							< savedInitialization > Nil </ savedInitialization >
+							< initMaxes > .Map </ initMaxes >
 						</ local >
 						< k > .K </ k >
 						--- < typeSimplifier *> 

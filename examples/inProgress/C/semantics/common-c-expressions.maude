@@ -31,7 +31,8 @@ mod COMMON-SEMANTICS-SIZEOF is
 	eq sizeofType(T:Type) = cast(cfg:sizeut, byteSizeofType(T:Type)) .
 	op byteSizeofTypeAux : K -> K [metadata "strict"] .
 	eq byteSizeofType(T:Type) = byteSizeofTypeAux(bitSizeofType(T:Type)) .
-	eq byteSizeofTypeAux(tv(N:Nat, bignum)) = tv(bitsToBytes(N:Nat), bignum) .
+	ceq byteSizeofTypeAux(tv(N:Nat, T:Type)) = tv(bitsToBytes(N:Nat), T:Type)
+		if T:Type ==Bool cfg:largestUnsigned .
 
 
 	
@@ -217,7 +218,8 @@ and ll or LL
 	
 	eq IntLiteral(V:Value) = V:Value .
 	eq Constant(V:Value) = V:Value .
-	mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence . --- for internal computations
+	--- mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence . --- for internal computations
+	mb rule < k > N:Nat => tv(N:Nat, cfg:largestUnsigned) ...</ k > : KSentence . --- for internal computations
 	
 	--- op createLiteralValue : K -> K .
 	--- eq Constant(K:K) = createLiteralValue(K:K) .
@@ -446,7 +448,7 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		--- if T':Type ==Bool cfg:sizeut
 		--- : KSentence [metadata "structural"] .
 		
-	--- needs to check offset > 0 
+	--- FIXME needs to check offset > 0 
 	mb rule < k > tv(Loc:Nat, pointerType(T':Type)) + tv(I2:Int, T:Type)
 				=> cast(pointerType(T':Type), cast(pointerType(unsigned-char), tv(Loc:Nat, pointerType(T':Type))) + (tv(I2:Int, T:Type) * sizeofType(T':Type)))
 		...</ k >

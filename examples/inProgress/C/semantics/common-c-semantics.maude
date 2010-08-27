@@ -276,6 +276,9 @@ mod C-SETTINGS is
 	
 	op cfg:sizeut : -> Type .
 	eq cfg:sizeut = unsigned-long-int .
+	
+	op cfg:largestUnsigned : -> Type .
+	eq cfg:largestUnsigned = unsigned-long-long-int .
 
 	op cfg:ptrsize : -> Nat .
 	eq cfg:ptrsize = 8 .
@@ -709,93 +712,106 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- op getFirstObject-aux : K Type -> K .
 	op getInitializer : -> K .
 	op initializer : K -> KResult .
-	mb rule
-		< k > getInitializer => initializer(K:K) ...</ k >
-		< savedInitialization > K:K => . </ savedInitialization > 
-		< currentInitializerObject > ?:List => . </ currentInitializerObject > 
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > getInitializer => initializer(K:C) ...</ k >
+		--- < savedInitialization > K:C => Nil </ savedInitialization > 
+		--- < currentInitializerObject > ?:List => . </ currentInitializerObject > 
+		--- : KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > startInitializer(T:Type, X:Id, CompoundInit(L:List{C}))
 			=> fillInitializer(L:List{C}) ~> getInitializer
 		...</ k >
-		< currentInitializerObject > (.).List => ListItem(getFirstObject(X:Id, T:Type)) </ currentInitializerObject > 
+		< currentInitializerObject > . => ListItem(te(X:Id, T:Type)) </ currentInitializerObject > 
 		: KSentence [metadata "structural"] .
-	mb rule
-		< currentInitializerObject > ListItem(getFirstObject(K:K, arrayType(T:Type, N:Nat))) 
-			=> ListItem(getFirstObject(K:K[0], T:Type)) ListItem(te(K:K, arrayType(T:Type, N:Nat)))
-		...</ currentInitializerObject >
-		: KSentence [metadata "structural"] .
-	op beginning : K -> K .
-	mb rule
-		< currentInitializerObject > ListItem(getFirstObject(K:K, T:BaseType)) 
-			=> ListItem(te(K:K, T:BaseType))
-		...</ currentInitializerObject >
-		: KSentence [metadata "structural"] .
-		--- struct s { int a[2]; int b;};
-		--- x.a[0] ~> x.a ~> x
+	--- mb rule
+		--- < currentInitializerObject > ListItem(getFirstObject(K:K, arrayType(T:Type, N:Nat))) 
+			--- => ListItem(getFirstObject(K:K[0], T:Type)) ListItem(te(K:K, arrayType(T:Type, N:Nat)))
+		--- ...</ currentInitializerObject >
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < currentInitializerObject > ListItem(getFirstObject(K:K, incompleteArrayType(T:Type))) 
+			--- => ListItem(getFirstObject(K:K[0], T:Type)) ListItem(te(K:K, incompleteArrayType(T:Type)))
+		--- ...</ currentInitializerObject >
+		--- : KSentence [metadata "structural"] .
+	--- op beginning : K -> K .
+	--- mb rule
+		--- < currentInitializerObject > ListItem(getFirstObject(K:K, T:BaseType)) 
+			--- => ListItem(te(K:K, T:BaseType))
+		--- ...</ currentInitializerObject >
+		--- : KSentence [metadata "structural"] .
+		--- --- struct s { int a[2]; int b;};
+		--- --- x.a[0] ~> x.a ~> x
 		
-	mb rule
-		< k > initializerFragment(K:K) => .	...</ k >
-		< savedInitialization >... . => K:K </ savedInitialization > 
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > initializerFragment(K:C) => .	...</ k >
+		--- < savedInitialization >... . => K:C </ savedInitialization > 
+		--- : KSentence [metadata "structural"] .
 		
-	--- eq getFirstObject(K:K, T:Type) = getFirstObject-aux(kpair(K:K, T:Type), T:Type) .
-	--- eq getFirstObject-aux(K:K, arrayType(T:Type, N:Nat), T':Type) = getFirstObject-aux(K:K[0], T:Type, T':Type) .
-	mb rule
-		< k > fillInitializer(InitFragment(NextInit, Exp:K) :: L:List{C})
-		=> fillInitializer(InitFragment(NextInit, Exp:K)) ~> fillInitializer(L:List{C})
-		...</ k >
-		--- < currentInitializerObject > (.).List => ListItem(getFirstObject(X:Id, T:Type)) </ currentInitializerObject > 
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > fillInitializer(Nil) => . ...</ k >
-		: KSentence [metadata "structural"] .
-	--- eq completeInitializer-aux(K:K, N:Nat, InitFragment(NextInit, Exp:K) :: L:List{C}) 
-		--- = completeInitializerFragment(K:K[tv(N:Nat, unsigned-long-int)], Exp:K)
-		--- :: completeInitializer-aux(K:K, sNat(N:Nat), L:List{C}) .
-	--- eq completeInitializer-aux(?, ?, Nil) = Nil .
-	op next : -> ListItem .
-	--- eq next(beginning(K:K)) = K:K .
+	--- --- eq getFirstObject(K:K, T:Type) = getFirstObject-aux(kpair(K:K, T:Type), T:Type) .
+	--- --- eq getFirstObject-aux(K:K, arrayType(T:Type, N:Nat), T':Type) = getFirstObject-aux(K:K[0], T:Type, T':Type) .
+	--- mb rule
+		--- < k > fillInitializer(InitFragment(K:K, Exp:K) :: L:List{C})
+		--- => fillInitializer(InitFragment(K:K, Exp:K)) ~> fillInitializer(L:List{C})
+		--- ...</ k >
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > fillInitializer(Nil) => . ...</ k >
+		--- : KSentence [metadata "structural"] .
+	--- --- eq completeInitializer-aux(K:K, N:Nat, InitFragment(NextInit, Exp:K) :: L:List{C}) 
+		--- --- = completeInitializerFragment(K:K[tv(N:Nat, unsigned-long-int)], Exp:K)
+		--- --- :: completeInitializer-aux(K:K, sNat(N:Nat), L:List{C}) .
+	--- --- eq completeInitializer-aux(?, ?, Nil) = Nil .
+	--- op next : -> ListItem .
+	--- --- eq next(beginning(K:K)) = K:K .
 	
-	mb rule
-		< currentInitializerObject > 
-			next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
-			=> ListItem(getFirstObject(K:K[sNat(N:Nat)], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
-		...</ currentInitializerObject >
-		if Len:Nat >Nat sNat(N:Nat)
-		: KSentence [metadata "structural"] .
-	mb rule
-		< currentInitializerObject > 
-			next ListItem(te(beginning(K:K), T:Type))
-			=> ListItem(te(K:K, T:Type))
-		...</ currentInitializerObject >
-		: KSentence [metadata "structural"] .	
+	--- mb rule
+		--- < currentInitializerObject > 
+			--- next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+			--- => ListItem(getFirstObject(K:K[sNat(N:Nat)], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+		--- ...</ currentInitializerObject >
+		--- if Len:Nat >Nat sNat(N:Nat)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < currentInitializerObject > 
+			--- next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, incompleteArrayType(T:Type)))
+			--- => ListItem(getFirstObject(K:K[sNat(N:Nat)], T:Type)) ListItem(te(K:K, incompleteArrayType(T:Type)))
+		--- ...</ currentInitializerObject >
+		--- --- if Len:Nat >Nat sNat(N:Nat)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < currentInitializerObject > 
+			--- next ListItem(te(beginning(K:K), T:Type))
+			--- => ListItem(te(K:K, T:Type))
+		--- ...</ currentInitializerObject >
+		--- : KSentence [metadata "structural"] .	
 		
-	mb rule
-		< k > fillInitializer(InitFragment(NextInit, Exp:K))
-		=> fillInitializer(Exp:K)
-		...</ k >
-		--- < currentInitializerObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentInitializerObject >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > fillInitializer(InitFragment(NextInit, Exp:K))
+			--- => fillInitializer(Exp:K)
+		--- ...</ k >
+		--- : KSentence [metadata "structural"] .
 	op popInit : -> K .
-	mb rule
-		< k > fillInitializer(CompoundInit(L:List{C}))
-		=> fillInitializer(L:List{C}) ~> popInit
-		...</ k >
-		--- < currentInitializerObject > ListItem(te((K:K => next(K:K)), T:Type)) ...</ currentInitializerObject >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > fillInitializer(CompoundInit(L:List{C}))
+			--- => fillInitializer(L:List{C}) ~> popInit
+		--- ...</ k >
+		--- < currentInitializerObject > 
+			---xxx (. => ListItem(te(K:K[0], T:Type))) ListItem(te(K:K, L:Label(T:Type, N:Nat)))
+		--- ...</ currentInitializerObject >
+		--- : KSentence [metadata "structural"] .
 	
+	--- < initMaxes > .Map </ initMaxes >
 	
-	mb rule
-		< k > popInit => . ...</ k >
-		< currentInitializerObject > (?:ListItem => next) ...</ currentInitializerObject >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > popInit => . ...</ k >
+		--- < currentInitializerObject > (?:ListItem => next) ...</ currentInitializerObject >
+		--- : KSentence [metadata "structural"] .
 		
-	mb rule
-		< k > fillInitializer(SingleInit(V:Value)) => initializerFragment(K:K := V:Value) ...</ k >
-		< currentInitializerObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentInitializerObject >
-		: KSentence .
+	--- mb rule
+		--- < k > fillInitializer(SingleInit(V:Value)) => initializerFragment(K:K := V:Value) ...</ k >
+		--- < currentInitializerObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentInitializerObject >
+		--- : KSentence .
 		
 		
 	eq declare-aux(Kr:KResult, Kr':KResult) = declare(Kr:KResult, Kr':KResult) .

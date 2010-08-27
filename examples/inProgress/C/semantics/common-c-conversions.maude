@@ -130,6 +130,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 			(hasUnsignedIntegerType(T:Type) andBool hasSignedIntegerType(T':Type) andBool rank(T:Type) >=Int rank(T':Type))
 		)
 		: KSentence [metadata "structural"] .
+		
 	
 	--- fixme implement other rules
 	
