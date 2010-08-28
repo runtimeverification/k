@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use File::Spec;
 use File::Basename;
+use File::Temp;
 
 my $path = ".";
 
@@ -18,7 +19,7 @@ my $language_file_name = "?";
 my $config_tree;
 my $iteration_cells = {};
 my $warnings = "";
-my $warnings_file = "kompile_warnings.txt";
+my $warnings_file = "kompile_warnings" . fresh() . ".txt";
 my $comment = join("|", (
     "---\\(.*?---\\)",                                                                                                            
     "---.*?\$",                                                                                                                   
@@ -499,6 +500,13 @@ sub printErrorFromOut()
     }
     
     $out;
+}
+
+sub fresh
+{
+    my $f = File::Temp->new();
+    $f = substr $f, 5;
+    $f;
 }
 
 1;
