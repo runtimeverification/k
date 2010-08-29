@@ -255,9 +255,6 @@ my $exclude = join("|",
 		   "-\\d+"                                                  # negative integer
 		   );
 
-#print "$exclude\n";
-#exit(1);
-
 # @all_sorts will hold all defined sorts
 my @all_sorts = ();
 
@@ -298,6 +295,9 @@ my $newcommand_prefix = "ksyntax";
 my $newcommand_counter = 0;
 my $newcommand_base = 6;
 my @latexify_modules =();
+
+# clean the old temporary files
+erase_temp();
 
 # Process the command arguments
 foreach (@ARGV) {

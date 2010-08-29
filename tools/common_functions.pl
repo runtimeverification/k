@@ -509,4 +509,19 @@ sub fresh
     $f;
 }
 
+# deletes all temporary files
+sub erase_temp
+{
+    opendir(DIR, ".");
+    my @files = grep(/^(kompile_in|kompile_out|kompile_err|kompile_warnings|kompile_tmp)/,readdir(DIR));
+    closedir(DIR);
+    
+    # print "Files removed: @files\n";
+    
+    foreach my $file (@files)
+    {
+	unlink($file);
+    }
+}
+
 1;
