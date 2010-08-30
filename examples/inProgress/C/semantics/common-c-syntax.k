@@ -468,7 +468,7 @@ and unary_operator =
 	(* A CAST can actually be a constructor expression *)
 	| CAST of (specifier * decl_type) * init_expression
 ***)
-	op Cast : K K K -> Expression [strict]
+	op Cast : K K K -> Expression --- [strict]
 ***(
 	(* There is a special form of CALL in which the function called is
 	   __builtin_va_arg and the second argument is sizeof(T). This 

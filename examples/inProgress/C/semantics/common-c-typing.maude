@@ -329,6 +329,14 @@ mod COMMON-C-TYPING is
 		if hasIntegerType(T:Type)
 		andBool hasIntegerType(T':Type) .
 		
+***(
+('Cast).KProperLabel(
+	('canonicalizeType).KProperLabel(wbag BagItem(('Int).KResultLabel(.List{K}))(.List{K}))
+	,,('PointerType).KProperLabel(('JustBase).KProperLabel(.List{K}))
+	,,('SingleInit).KHybridLabel(Id Identifier("y1")(.List{K}))
+)
+***)
+		
 		
 	mb rule 
 		< k > JustBase => T:Type ...</ k >
