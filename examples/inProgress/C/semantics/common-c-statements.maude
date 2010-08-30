@@ -52,7 +52,7 @@ mod COMMON-SEMANTICS-FOR is
 		: KSentence [metadata "structural"] .
 	mb [for]: rule
 		< k > loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)
-			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)), Nop)
+			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> discard ~> loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)), Nop)
 		...</ k >
 		: KSentence [metadata "structural"] .
 endm
@@ -272,10 +272,10 @@ mod COMMON-C-STATEMENTS is
 	--- dissolve expression statements that are finished evaluating
 	mb [expression-statement]: rule < k > Computation(K:K) => K:K ~> discard ~> sequencePoint ...</ k > : KSentence [metadata "structural"] .
 	
-	--- mb [popLoop]: rule
-		--- < k > [popLoop => .K] ...</ k >
-		--- < loopStack > [Li:ListItem => .List] ...</ loopStack >
-		--- : KSentence [metadata "structural"] .
+	mb [popLoop]: rule
+		< k > (popLoop ~> ?) => K:K </ k >
+		< loopStack > ListItem(K:K) => (.).List ...</ loopStack >
+		: KSentence [metadata "structural"] .
 		
 	--- mb [break]: rule
 		--- < k > [break ; ~> ? => K:K] </ k >

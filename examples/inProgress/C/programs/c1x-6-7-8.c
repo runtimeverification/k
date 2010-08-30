@@ -5,8 +5,8 @@ int sec26(void){
 		{3, 5, 7},
 	};
 	int y2[4][3] = {1, 3, 5, 2, 4, 6, 3, 5, 7};
-	for (int i = 0; i < 4; i++){
-		for (int j = 0; j < 3; j++){
+	for (int i = 0; i < 4; i = i + 1){
+		for (int j = 0; j < 3; j = j + 1){
 			if (y1[i][j] != y2[i][j]) {
 				return 1;
 			}
