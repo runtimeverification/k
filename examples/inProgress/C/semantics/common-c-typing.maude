@@ -370,9 +370,18 @@ mod COMMON-C-TYPING is
 		:: fillBitHoles(N:Nat +Nat N':Nat, typedDeclaration(T:Type, X:Id) :: L:List{Type}) 
 		if N':Nat =/=Bool 0 .
 	
+	--- fixme chould check for some struct contraints here
+	op incompleteToFlexibleArrayMember : List{Type} -> List{Type} .
+	---eq incompleteToFlexibleArrayMember(L:List{Type} :: incompleteArrayType(T:Type)) = L:List{Type} :: flexibleArrayType(T:Type) .
+	ceq incompleteToFlexibleArrayMember(typedDeclaration(T:Type, X:Id) :: L:List{Type}) 
+		= typedDeclaration(T:Type, X:Id) :: incompleteToFlexibleArrayMember(L:List{Type}) 
+		if notBool hasIncompleteType(T:Type) .
+	eq incompleteToFlexibleArrayMember(typedDeclaration(incompleteArrayType(T:Type), X:Id)) = typedDeclaration(flexibleArrayType(T:Type), X:Id) .
+	eq incompleteToFlexibleArrayMember(Nil) = Nil .
+	
 	mb rule
 		< k > StructDef(X:Id, L:List{Type})
-			=> addAggregate(X:Id, fillBitHoles(L:List{Type}))
+			=> addAggregate(X:Id, fillBitHoles(incompleteToFlexibleArrayMember(L:List{Type})))
 			~> giveType(X:Id, structType(X:Id))
 			--- ~> structType(X:Id)
 		...</ k >

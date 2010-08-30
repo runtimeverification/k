@@ -98,6 +98,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op enumType : Id -> BaseType [ctor] .
 	op arrayType : Type Nat -> Type [ctor] .
 	op incompleteArrayType : Type -> Type [ctor] .
+	op flexibleArrayType : Type -> Type [ctor] .
 	op bitfieldType : Type Nat -> Type [ctor] .
 	op functionType : Type List{Type} -> Type [ctor] .
 	op pointerType : Type -> Type [ctor] .

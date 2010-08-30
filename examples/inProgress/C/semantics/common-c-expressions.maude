@@ -51,6 +51,7 @@ mod COMMON-SEMANTICS-SIZEOF is
 	eq bitSizeofList(Nil) = 0 .
 	
 	eq bitSizeofType(arrayType(T:Type, N:Nat)) = bitSizeofType(T:Type) * N:Nat .
+	eq bitSizeofType(flexibleArrayType(T:Type)) = 0 .
 	eq bitSizeofType(functionType(?, ?)) = numBitsPerByte .
 	eq bitSizeofType(T:BaseType) = numBits(T:BaseType) .
 	eq bitSizeofType(pointerType(?)) = cfg:ptrsize *Nat numBitsPerByte .
