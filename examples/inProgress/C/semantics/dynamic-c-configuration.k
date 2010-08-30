@@ -27,7 +27,8 @@ kmod C-CONFIGURATION is
 							< structs > .Map </ structs >
 							< env > .Map </ env >
 							< types > .Map </ types >
-							< currentInitializerObject > .List </ currentInitializerObject >
+							< currentObject > .List </ currentObject >
+							< currentSubObject > .List </ currentSubObject >
 							< savedInitialization > Nil </ savedInitialization >
 							< initMaxes > .Map </ initMaxes >
 						</ local >

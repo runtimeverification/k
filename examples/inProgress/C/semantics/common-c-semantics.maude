@@ -212,6 +212,9 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op calculateGotoMap : Id K -> K .
 	
 	op hasArrayType : Type -> Bool .
+	op hasStructType : Type -> Bool .
+	op hasUnionType : Type -> Bool .
+	op hasAggregateType : Type -> Bool .
 	op hasFunctionType : Type -> Bool .
 	op hasFunctionPointerType : Type -> Bool .
 	op hasBitfieldType : Type -> Bool .
@@ -722,8 +725,14 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > startInitializer(T:Type, X:Id, CompoundInit(L:List{C}))
 			=> fillInitializer(L:List{C}) ~> getInitializer
 		...</ k >
-		< currentInitializerObject > . => ListItem(te(X:Id, T:Type)) </ currentInitializerObject > 
+		< currentSubObject > . => ListItem(te(X:Id, T:Type)) </ currentSubObject >
+		< currentObject > . => ListItem(te(X:Id, T:Type)) </ currentObject >
+		if hasUnionType(T:Type) orBool hasAggregateType(T:Type)
 		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < currentSubObject > . => ListItem(getFirstObject(X:Id, T:Type)) </ currentSubObject > 
+		--- < currentObject > ListItem(te(K:K, arrayType(T:Type, N:Nat))) ...</ currentObject >
+		--- : KSentence [metadata "structural"] .
 	--- mb rule
 		--- < currentInitializerObject > ListItem(getFirstObject(K:K, arrayType(T:Type, N:Nat))) 
 			--- => ListItem(getFirstObject(K:K[0], T:Type)) ListItem(te(K:K, arrayType(T:Type, N:Nat)))
@@ -750,35 +759,52 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	--- --- eq getFirstObject(K:K, T:Type) = getFirstObject-aux(kpair(K:K, T:Type), T:Type) .
 	--- --- eq getFirstObject-aux(K:K, arrayType(T:Type, N:Nat), T':Type) = getFirstObject-aux(K:K[0], T:Type, T':Type) .
-	--- mb rule
-		--- < k > fillInitializer(InitFragment(K:K, Exp:K) :: L:List{C})
-		--- => fillInitializer(InitFragment(K:K, Exp:K)) ~> fillInitializer(L:List{C})
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > fillInitializer(Nil) => . ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > fillInitializer(InitFragment(K:K, Exp:K) :: L:List{C})
+		=> fillInitializer(InitFragment(K:K, Exp:K)) ~> fillInitializer(L:List{C})
+		...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > fillInitializer(Nil) => . ...</ k >
+		: KSentence [metadata "structural"] .
 	--- --- eq completeInitializer-aux(K:K, N:Nat, InitFragment(NextInit, Exp:K) :: L:List{C}) 
 		--- --- = completeInitializerFragment(K:K[tv(N:Nat, unsigned-long-int)], Exp:K)
 		--- --- :: completeInitializer-aux(K:K, sNat(N:Nat), L:List{C}) .
 	--- --- eq completeInitializer-aux(?, ?, Nil) = Nil .
-	--- op next : -> ListItem .
+	op next : -> ListItem .
 	--- --- eq next(beginning(K:K)) = K:K .
 	
-	--- mb rule
-		--- < currentInitializerObject > 
-			--- next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
-			--- => ListItem(getFirstObject(K:K[sNat(N:Nat)], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
-		--- ...</ currentInitializerObject >
-		--- if Len:Nat >Nat sNat(N:Nat)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < currentInitializerObject > 
-			--- next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, incompleteArrayType(T:Type)))
-			--- => ListItem(getFirstObject(K:K[sNat(N:Nat)], T:Type)) ListItem(te(K:K, incompleteArrayType(T:Type)))
-		--- ...</ currentInitializerObject >
-		--- --- if Len:Nat >Nat sNat(N:Nat)
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< currentSubObject > 
+			ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+			=> ListItem(te(K:K[0], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+		...</ currentSubObject >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< currentSubObject > 
+			ListItem(te(K:K, structType(S:Id)))
+			=> ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
+		...</ currentSubObject >
+		< structs >... S:Id |-> typedDeclaration(T:Type, F:Id) :: ? ...</ structs > 
+		: KSentence [metadata "structural"] .
+		
+	--- fixme should i worry about basetype here?
+	mb [init-next-array-element]: rule
+		< currentSubObject > 
+			next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+			=> ListItem(te(K:K[sNat(N:Nat)], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+		...</ currentSubObject >
+		if Len:Nat >Nat sNat(N:Nat)
+		: KSentence [metadata "structural"] .
+	mb [init-next-struct-element]: rule
+		< currentSubObject >
+			next ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
+			=> ListItem(te(K:K . F':Id, T':Type)) ListItem(te(K:K, structType(S:Id)))
+		...</ currentSubObject >
+		< structs >... 
+			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(T':Type, F':Id) :: ? 
+		...</ structs > 
+		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < currentInitializerObject > 
 			--- next ListItem(te(beginning(K:K), T:Type))
@@ -786,11 +812,11 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- ...</ currentInitializerObject >
 		--- : KSentence [metadata "structural"] .	
 		
-	--- mb rule
-		--- < k > fillInitializer(InitFragment(NextInit, Exp:K))
-			--- => fillInitializer(Exp:K)
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > fillInitializer(InitFragment(NextInit, Exp:K))
+			=> fillInitializer(Exp:K)
+		...</ k >
+		: KSentence [metadata "structural"] .
 	op popInit : -> K .
 	--- mb rule
 		--- < k > fillInitializer(CompoundInit(L:List{C}))
@@ -808,10 +834,12 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < currentInitializerObject > (?:ListItem => next) ...</ currentInitializerObject >
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb rule
-		--- < k > fillInitializer(SingleInit(V:Value)) => initializerFragment(K:K := V:Value) ...</ k >
-		--- < currentInitializerObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentInitializerObject >
-		--- : KSentence .
+	--- forces a basetype
+	mb rule
+		< k > fillInitializer(SingleInit(V:Value)) => . ...</ k >
+		< currentSubObject > (. => next) ListItem(te(K:K, T:BaseType)) ...</ currentSubObject >
+		< savedInitialization >... . => initializerFragment(K:K := V:Value) </ savedInitialization > 
+		: KSentence .
 		
 		
 	eq declare-aux(Kr:KResult, Kr':KResult) = declare(Kr:KResult, Kr':KResult) .

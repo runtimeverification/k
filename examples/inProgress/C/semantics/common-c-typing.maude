@@ -457,6 +457,16 @@ mod COMMON-C-TYPING is
 	ceq hasArrayType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'arrayType .
 		
+	eq hasAggregateType(T:Type) = hasArrayType(T:Type) orBool hasStructType(T:Type) .
+	
+	eq hasStructType(structType(?)) = true .
+	ceq hasStructType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'structType .
+		
+	eq hasUnionType(unionType(?)) = true .
+	ceq hasUnionType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'unionType .
+		
 	eq hasIncompleteType(incompleteArrayType(?)) = true .
 	ceq hasIncompleteType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'incompleteArrayType .
