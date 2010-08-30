@@ -232,8 +232,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op extractField : List{K} Type Id -> K .
 	op allocString : Nat String -> K .
 	--- op unknownRange : Nat Nat Nat -> List{K} .
-	--- --- op loopMarked : -> Statement .
-	--- op popLoop : -> K .
+	op loopMarked : -> Statement .
+	op popLoop : -> K .
 	--- op giveGlobalType : Type K -> K .
 	--- op giveLocalType : Type K -> K .
 	op application : K List{C} -> K [metadata "strict(1)"] .
@@ -701,7 +701,7 @@ mod COMMON-INITIALIZATION is
 	
 	mb rule
 		< k > getInitializer => initializer(K:C) ...</ k >
-		< savedInitialization > K:C => Nil </ savedInitialization > 
+		< savedInitialization > K:C => . </ savedInitialization > 
 		< currentObject > ?:List => . </ currentObject > 
 		< currentSubObject > ?:List => . </ currentSubObject > 
 		: KSentence [metadata "structural"] .

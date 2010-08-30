@@ -38,6 +38,25 @@ mod COMMON-SEMANTICS-WHILE is
 		--- : KSentence [metadata "structural"] .
 endm
 
+mod COMMON-SEMANTICS-FOR is
+	including COMMON-INCLUDE .
+	
+	eq ForClauseDeclaration(K:K) = K:K .
+	eq ForClauseExpression(K:K) = K:K .
+	
+	mb [for-mark]: rule
+		< k > (For(Pre:K, Control:K, Post:K, S:Statement) ~> K:K
+			=> pushBlock ~> Pre:K ~> loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement) ~> popLoop) 
+		</ k >
+		< loopStack > . => ListItem((popBlock ~> K:K)) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+	mb [for]: rule
+		< k > loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)
+			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)), Nop)
+		...</ k >
+		: KSentence [metadata "structural"] .
+endm
+
 mod COMMON-SEMANTICS-SWITCH is
 	including COMMON-INCLUDE .
 	
@@ -233,6 +252,7 @@ endm
 mod COMMON-C-STATEMENTS is
 	including COMMON-INCLUDE .
 	including COMMON-SEMANTICS-IF-THEN .
+	including COMMON-SEMANTICS-FOR .
 	including COMMON-SEMANTICS-WHILE .
 	including COMMON-SEMANTICS-SWITCH .
 	including COMMON-SEMANTICS-GOTO .
