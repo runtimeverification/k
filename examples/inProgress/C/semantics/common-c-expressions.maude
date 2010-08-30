@@ -560,6 +560,20 @@ mod COMMON-SEMANTICS-MEMBERS is
 		--- < k > [tv(Base:Int, pointerType(unionType(S:Id))) -> X:Id => Deref(tv(Base:Int, pointerType(unionType(S:Id)))) . X:Id] ...</ k >
 		--- : KSentence [metadata "structural"] .
 
+	op toEval : K -> K .
+	op toEval-aux : K K -> K [metadata "strict(2)"] .
+	
+	mb rule
+		< k > E:Expression . F:Id => toEval(E:Expression . F:Id) ...</ k >
+		: KSentence [metadata "structural"] .	
+	mb rule
+		< k > toEval(K:K) => toEval-aux(K:K, typeof(K:K))  ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > toEval-aux(K:K, arrayType(T:Type, N:Nat)) => &(K:K) ...</ k >
+		: KSentence [metadata "structural"] .
+	
 	--- op dot-aux : K Id K -> K [metadata "strict(3)"] .
 	--- mb rule
 		--- < k > [(E:Expression . F:Id) => dot-aux(E:Expression, F:Id, typeof(E:Expression . F:Id))] ...</ k >
@@ -647,11 +661,11 @@ mod COMMON-SEMANTICS-REFERENCE is
 	
 	mb rule &(*(E:Expression)) => E:Expression : KSentence [metadata "structural"] .
 	mb rule &(E1:Expression[E2:Expression]) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
-	--- mb [ref]: rule
-		--- < k > &(X:Id) => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
-		--- < env >... X:Id |-> Loc:Nat ...</ env >
-		--- < types >... X:Id |-> T:Type ...</ types >
-		--- : KSentence [metadata "structural"] .
+	mb [ref]: rule
+		< k > &(X:Id) => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> T:Type ...</ types >
+		: KSentence [metadata "structural"] .
 		
 	--- op getFieldOffset : Id Id -> K .
 	--- op getStructFieldOffset : Id Id -> K .

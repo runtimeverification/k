@@ -96,48 +96,47 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		--- if declarators contains l(L:KLabel)
 		--- : KSentence [metadata "structural"] .
 endm
-***(
+
 mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	including COMMON-INCLUDE .
 
-	mb context ?:KLabel(?,, 'Direct-Function-Declarator(D:Declarator,, `[HOLE`]:K)) : KSentence .
+	--- mb context ?:KLabel(?,, 'Direct-Function-Declarator(D:Declarator,, `[HOLE`]:K)) : KSentence .
 	
-	mb rule
-		< k > ['Parameter-Type-List(V:KResult) => typedParameterList(getList{K}(V:KResult))] ...</ k > : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > ['Parameter-Type-List(V:KResult) => typedParameterList(getList{K}(V:KResult))] ...</ k > : KSentence [metadata "structural"] .
 	
-	mb rule
-		< k > ['Parameter-Declaration(T:Type,, X:Id) => typedDeclaration(T:Type, X:Id)] ...</ k > : KSentence [metadata "structural"] .
-	mb rule
-		< k > ['Parameter-Declaration(T:Type) => typedDeclaration(T:Type, anonymousId)] ...</ k > : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > ['Parameter-Declaration(T:Type,, X:Id) => typedDeclaration(T:Type, X:Id)] ...</ k > : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > ['Parameter-Declaration(T:Type) => typedDeclaration(T:Type, anonymousId)] ...</ k > : KSentence [metadata "structural"] .
 
-	mb context 'Field(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
-	mb context 'Declaration(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
-	mb context 'Parameter-Declaration(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
-	mb context 'Typedef(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
+	--- mb context 'Field(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
+	--- mb context 'Declaration(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
+	--- mb context 'Parameter-Declaration(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
+	--- mb context 'Typedef(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
 				
-	mb [type-arrow-heat]: rule
-		< type > ['_->_(Kp:KProper,, X:Id) => Kp:KProper ~> '_->_(HOLE,, X:Id)] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb [type-arrow-cool]: rule
-		< type > [T:Type ~> '_->_(HOLE,, X:Id) => '_->_(T:Type,, X:Id)] ...</ type >
-		: KSentence [metadata "structural"] .
+	--- mb [type-arrow-heat]: rule
+		--- < type > ['_->_(Kp:KProper,, X:Id) => Kp:KProper ~> '_->_(HOLE,, X:Id)] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-arrow-cool]: rule
+		--- < type > [T:Type ~> '_->_(HOLE,, X:Id) => '_->_(T:Type,, X:Id)] ...</ type >
+		--- : KSentence [metadata "structural"] .
 	mb [type-dot-heat]: rule
-		< type > ['_._(Kp:KProper,, X:Id) => Kp:KProper ~> '_._(HOLE,, X:Id)] ...</ type >
+		< type > Kp:KProper . X:Id => Kp:KProper ~> HOLE . X:Id ...</ type >
 		: KSentence [metadata "structural"] .
 	mb [type-dot-cool]: rule
-		< type > [T:Type ~> '_._(HOLE,, X:Id) => '_._(T:Type,, X:Id)] ...</ type >
+		< type > T:Type ~> HOLE . X:Id => T:Type . X:Id ...</ type >
 		: KSentence [metadata "structural"] .
-	mb rule
-		< type > ['_`[_`](Kp:KProper,, E:Expression) => Kp:KProper ~> Deref(HOLE)] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > [T:Type ~> Deref(HOLE) => 'Deref(T:Type)] ...</ type >
-		: KSentence [metadata "structural"] .
-	mb [type-heat-deref]: rule
-		< type > ['Deref(Kp:KProper) => Kp:KProper ~> Deref(HOLE)] ...</ type >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < type > ['_`[_`](Kp:KProper,, E:Expression) => Kp:KProper ~> Deref(HOLE)] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < type > [T:Type ~> Deref(HOLE) => 'Deref(T:Type)] ...</ type >
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-heat-deref]: rule
+		--- < type > ['Deref(Kp:KProper) => Kp:KProper ~> Deref(HOLE)] ...</ type >
+		--- : KSentence [metadata "structural"] .
 endm
-***)
 
 mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	including COMMON-INCLUDE .
@@ -283,7 +282,7 @@ endm
 
 mod COMMON-C-TYPING is
 	including COMMON-INCLUDE .
-	--- including COMMON-SEMANTICS-TYPE-STRICTNESS .
+	including COMMON-SEMANTICS-TYPE-STRICTNESS .
 	including COMMON-SEMANTICS-TYPE-DECLARATIONS .
 	including COMMON-SEMANTICS-TYPE-CANONICALIZATION .
 	
@@ -561,10 +560,10 @@ mod COMMON-C-TYPING is
 		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
 		--- : KSentence [metadata "structural"] .
 
-	--- mb [type-struct-dot]: rule
-		--- < type > ['_._(structType(S:Id),, X:Id) => T:Type] ...</ type >
-		--- < structs >... struct(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
-		--- : KSentence [metadata "structural"] .
+	mb [type-struct-dot]: rule
+		< type > structType(S:Id) . F:Id => T:Type ...</ type >
+		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
+		: KSentence [metadata "structural"] .
 		
 	--- mb [type-union-dot]: rule
 		--- < type > ['_._(unionType(S:Id),, X:Id) => T:Type] ...</ type >

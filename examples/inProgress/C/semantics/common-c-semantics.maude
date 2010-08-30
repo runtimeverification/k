@@ -48,6 +48,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
+	eq bito(0) = 0 . --- FIXME need to check this is okay in all circumstances
 	op typedef : Id -> Id .
 	op unnamed : Nat -> Id .
 	op NULL : -> K .
@@ -136,7 +137,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op byteSizeofType : K -> K [metadata "strict"] .
 	op bitsToBytes : Nat -> Nat .
 	--- op sizeofExp : K -> K .
-	--- --- op HOLE : -> Expression .
+	op HOLE : -> Expression .
 	op l : KLabel -> K [metadata "builtin wrapper"] .
 	--- ---op l : KLabel -> K .
 	op _contains_ : Set K -> Bool [memo] .

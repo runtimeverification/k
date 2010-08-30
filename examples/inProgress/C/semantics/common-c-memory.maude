@@ -92,9 +92,16 @@ mod COMMON-SEMANTICS-READING is
 	---op combineData : List{KResult} -> K .
 
 	---eq combineData(functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
-	
+	***(
+explodeToBits(values((
+('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K}))
+,,('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K}))
+,,('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K}))
+,,('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K})))))
+	***)
+
 	op values : List{K} -> List{K} .
-	eq values((tv(K:K, bignum),, L:List{KResult})) = (K:K,, values(L:List{KResult})) .
+	eq values((tv(K:K, ?),, L:List{KResult})) = (K:K,, values(L:List{KResult})) .
 	eq values(.List{K}) = .List{K} .
 	mb rule
 		< k > extractBytesFromMem-aux(?, 0, Aux:List{KResult}) => dataList(values(Aux:List{KResult})) ...</ k >
@@ -202,6 +209,7 @@ mod COMMON-SEMANTICS-WRITING is
 		= (explodeToBits(piece(N:Nat >>Nat 1, Len:Nat)),, piece(N:Nat &Nat 1, 1)) .
 	eq explodeToBits(piece(N:Nat, 0)) = .List{K} .
 	eq explodeToBits(.List{K}) = .List{K} .
+	--- cmenew eq explodeToBits(piece(N:Nat, 0)) = .List{K} .
 	
 	op clearBits : Nat Nat Nat -> Nat .
 	--- eq clearBits(N:Nat, Low:Nat, High:Nat) = 
