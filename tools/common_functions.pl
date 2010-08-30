@@ -505,8 +505,14 @@ sub printErrorFromOut()
 sub fresh
 {
     my $f = File::Temp->new();
-    $f = substr $f, 5;
-    $f;
+
+    if ($f =~ m/([a-zA-Z0-9_]{10})/g)
+    {
+	return $1;
+    }
+    
+    # to be refined.
+    return rand();
 }
 
 # deletes all temporary files
