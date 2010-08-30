@@ -8,8 +8,8 @@ int main(void) {
 		} w;
 		int x[2];
 		int y;
-		int z[];
-	} s1 = {1, 2, .b =3, 4, 5, 6, 7};
+		//int z[];
+	} s1 = {1, 2, .b =3, .w.b = 4, 5, .x = {6, 7}, 8};
 	// if (s1.b != 2){
 		// return 2;
 	// }

@@ -564,10 +564,11 @@ and initwhat =
 	| ATINDEX_INIT of expression * initwhat
 	| ATINDEXRANGE_INIT of expression * expression
 ***)
-	op NextInit : -> InitWhat
-	op InFieldInit : Id K -> InitWhat
-	op AtIndexInit : K K -> InitWhat
-	op AtIndexRangeInit : K K -> InitWhat
+	op NextInit : -> KResult
+	op InFieldInit : Id K -> KResult
+	op AtIndexInit : K K -> KResult
+	op AtIndexRangeInit : K K -> KResult --- nonstandard
+	
 	
 ***(
 and attribute = string * expression list
