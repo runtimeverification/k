@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use File::Spec;
 use File::Basename;
-use File::Temp;
+use File::Temp qw / tempfile /;
 
 my $path = ".";
 
@@ -19,7 +19,7 @@ my $language_file_name = "?";
 my $config_tree;
 my $iteration_cells = {};
 my $warnings = "";
-my $warnings_file = "kompile_warnings" . fresh() . ".txt";
+my $warnings_file = fresh("kompile_warnings", ".txt");
 my $comment = join("|", (
     "---\\(.*?---\\)",                                                                                                            
     "---.*?\$",                                                                                                                   
@@ -490,7 +490,7 @@ sub setVerbose()
 
 sub printErrorFromOut()
 {
-    local $/=undef; open FILE,"<", "kompile_out.txt" or print ""; local $_ = <FILE>; close FILE;
+    local $/=undef; open FILE,"<", $warnings_file or print ""; local $_ = <FILE>; close FILE;
     my $content = $_;
     close FILE;
     my $out = "";
@@ -502,17 +502,12 @@ sub printErrorFromOut()
     $out;
 }
 
+# generate fresh names for temp files
 sub fresh
 {
-    my $f = File::Temp->new();
-
-    if ($f =~ m/([a-zA-Z0-9_]{10})/g)
-    {
-	return $1;
-    }
-    
-    # to be refined.
-    return rand();
+    my ($prefix, $suffix) = (shift, shift);
+    my ($fh, $filename) = tempfile($prefix . "XXXXXXXXXX", SUFFIX => $suffix);
+    $filename;
 }
 
 # deletes all temporary files

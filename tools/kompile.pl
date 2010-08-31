@@ -275,11 +275,12 @@ my $language_file_name = "";
 # my $error_file  = "kompile_err.txt";
 # my $output_file = "kompile_out.txt";
 # my $temp_file   = "kompile_tmp.txt";
-my $fresh = fresh();
-my $input_file  = "kompile_in$fresh.maude";
-my $error_file  = "kompile_err$fresh.txt";
-my $output_file = "kompile_out$fresh.txt";
-my $temp_file   = "kompile_tmp$fresh.txt";
+my $input_file  = fresh("kompile_in", ".maude");
+my $error_file  = fresh("kompile_err", ".txt");
+my $output_file = fresh("kompile_out", ".txt");
+my $temp_file   = fresh("kompile_tmp", ".txt");
+
+
 
 my $begin_compiled_module = "---K-MAUDE-GENERATED-OUTPUT-BEGIN---";
 my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";
