@@ -495,7 +495,7 @@ and unary_operator =
 	| TYPE_ALIGNOF of specifier * decl_type
 ***)
 	op SizeofExpression : K -> Expression
-	op SizeofType : K K -> Expression
+	op SizeofType : K K -> Expression [strict(1)]
 	op AlignofExpression : K -> Expression
 	op AlignofType : K K -> Expression
 ***(

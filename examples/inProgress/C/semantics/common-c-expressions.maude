@@ -41,6 +41,9 @@ mod COMMON-SEMANTICS-SIZEOF is
 	mb rule
 		< k > SizeofExpression(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
 		: KSentence [metadata "structural"] .
+	mb rule
+		< k > SizeofType(T:Type, K:K) => sizeofType(DeclType(T:Type, K:K)) ...</ k >
+		: KSentence [metadata "structural"] .
 		
 	--- mb rule
 		--- < k > sizeofExp(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >

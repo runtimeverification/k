@@ -319,11 +319,10 @@ mod COMMON-C-TYPING is
 	--- op prePointerType : -> Type .
 	op structDefType : Id List{Type} -> Type .
 	
-	op DeclType : K K -> K .
 	op BitFieldType : K K -> K [metadata "strict"] .
 	
 	mb rule
-		Specifier(L:List{Type}) => canonicalizeType(Bag(getList{K}(L:List{Type})))
+		< k > Specifier(L:List{Type}) => canonicalizeType(Bag(getList{K}(L:List{Type}))) ...</ k >
 		: KSentence .
 	mb rule
 		< k > StructRef(X:Id) => structType(X:Id) ...</ k >

@@ -42,7 +42,7 @@ mod COMMON-SEMANTICS-FOR is
 	including COMMON-INCLUDE .
 	
 	eq ForClauseDeclaration(K:K) = K:K .
-	eq ForClauseExpression(K:K) = K:K .
+	eq ForClauseExpression(K:K) = K:K ~> discard .
 	
 	mb [for-mark]: rule
 		< k > (For(Pre:K, Control:K, Post:K, S:Statement) ~> K:K

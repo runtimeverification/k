@@ -135,6 +135,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- --- subsort SeqList < Expression .
 	
 	
+	op DeclType : K K -> K .
 	op sizeofType : K -> K [metadata "strict"] . --- generates a tv(size, cfg:sizeut)
 	op bitSizeofType : K -> K [metadata "strict"] .
 	op byteSizeofType : K -> K [metadata "strict"] .
