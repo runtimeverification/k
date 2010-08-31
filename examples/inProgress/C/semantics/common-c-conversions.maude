@@ -229,11 +229,12 @@ mod COMMON-SEMANTICS-CAST is
 		--- if hasIntegerType(T:Type) andBool hasIntegerType(T':Type)
 		--- : KSentence [metadata "structural"] .
 	
-	--- mb rule
-		--- < k > [cast(pointerType(T:Type), tv(I:Int, T':Type)) => tv(I:Int, pointerType(T:Type))] ...</ k >
-		--- if hasIntegerType(T':Type)
-		--- andBool I:Int =/=Bool 0
-		--- : KSentence [metadata "structural"] .
+	--- fixme might lose potential of finding errors if we use 0?
+	--- choice implementation defined behavior
+	mb rule
+		< k > cast(pointerType(T:Type), tv(N:Nat, T':Type)) => tv(N:Nat, pointerType(T:Type)) ...</ k >
+		if hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
 	--- --- fixme
 	--- mb rule
 		--- < k > [cast(T:Type, tv(loc(N:Nat, M:Nat), pointerType(T':Type))) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k > 

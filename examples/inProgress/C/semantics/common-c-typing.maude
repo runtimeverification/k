@@ -164,6 +164,9 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool (getKLabel(T:K) ==Bool 'StructDef)
 		orBool (getKLabel(T:K) ==Bool 'UnionDef)
 		orBool (getKLabel(T:K) ==Bool 'EnumDef)
+		orBool (getKLabel(T:K) ==Bool 'StructRef)
+		orBool (getKLabel(T:K) ==Bool 'UnionRef)
+		orBool (getKLabel(T:K) ==Bool 'EnumRef)
 		orBool (getKLabel(T:K) ==Bool 'Named)
 		--- orBool (T:K ==Bool Complex)
 		: KSentence .
@@ -182,12 +185,32 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	mb rule
 		< k > canonicalizeType((.).Bag, (T:Type => qualifiedType(T:Type, Extern)), (.).Bag, (.).Bag, (? BagItem(Extern) => (.).Bag)) ...</ k >
 		: KSentence .
-		
+	
+	--- fixme? getting rid of typedefs here.  this seems valid by c1x 6.7.7:3
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(Named(X:Id)))
-			=> typedefType(X:Id, T:Type)
+			=> T:Type
 		...</ k >
 		< types >... typedef(X:Id) |-> T:Type ...</ types >
+		if X:Id =/=Bool Identifier("")
+		: KSentence .
+		
+	mb rule
+		< k > canonicalizeSpecifier(BagItem(StructRef(X:Id)))
+			=> structType(X:Id)
+		...</ k >
+		if X:Id =/=Bool Identifier("")
+		: KSentence .
+	mb rule
+		< k > canonicalizeSpecifier(BagItem(EnumRef(X:Id)))
+			=> enumType(X:Id)
+		...</ k >
+		if X:Id =/=Bool Identifier("")
+		: KSentence .
+	mb rule
+		< k > canonicalizeSpecifier(BagItem(UnionRef(X:Id)))
+			=> unionType(X:Id)
+		...</ k >
 		if X:Id =/=Bool Identifier("")
 		: KSentence .
 		
