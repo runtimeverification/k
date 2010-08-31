@@ -119,6 +119,7 @@ explodeToBits(values((
 		< mem >... Block:Nat |-> memblock(Size:Nat, (? Offset:Nat |-> V:K)) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		if notBool(sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
+		andBool Offset:Nat <Nat Size:Nat
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => piece(unknown, numBitsPerByte) ...</ k >
@@ -126,6 +127,7 @@ explodeToBits(values((
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		if notBool(sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
 		andBool notBool($hasMapping(M:Map, Offset:Nat))
+		andBool Offset:Nat <Nat Size:Nat
 		: KSentence [metadata "structural"] .
 endm
 
