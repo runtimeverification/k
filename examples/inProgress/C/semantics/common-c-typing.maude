@@ -310,8 +310,11 @@ mod COMMON-C-TYPING is
 	eq Prototype(T:Type, L:List{Type}, false) = functionType(T:Type, L:List{Type}) .
 	eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
 	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
-	eq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat) .
-	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
+	
+	ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
+		if notBool hasArrayType(T:Type) .
+	eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) = arrayType(arrayType(T:Type, N:Nat), M:Nat) .
+	--- eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
 	eq PointerType(T:Type) = pointerType(T:Type) .
 	eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
 
@@ -350,10 +353,40 @@ mod COMMON-C-TYPING is
 		--- < declarationTypeHolder > T':Type </ declarationTypeHolder > => (.).Bag)
 		--- : KSentence .
 			
+	--- mb rule
+		--- < k > DeclType(T:Type, K:K) => K:K ...</ k >
+		--- < declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
+		--- : KSentence .
+		
+	--- FIXME should handle all type cases
+	--- eq reverseArrayTypes-aux(T:BaseType) = T:BaseType .
+	--- ceq reverseArrayTypes-aux(T:Type) = T:Type 
+		--- if hasStructType(T:Type) 
+		--- orBool hasUnionType(T:Type)
+		--- orBool hasFunctionType(T:Type) .
+		
 	mb rule
 		< k > DeclType(T:Type, K:K) => K:K ...</ k >
 		< declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
 		: KSentence .
+	
+	--- op prepareArrayType : .
+	
+	
+	--- eq reverseArrayTypes-aux(qualifiedType(T:Type, K:K)) = qualifiedType(reverseArrayTypes-aux(T:Type), K:K) .
+	--- eq reverseArrayTypes-aux(pointerType(T:Type)) = pointerType(reverseArrayTypes-aux(T:Type)) .
+	--- ceq reverseArrayTypes-aux(arrayType(T:Type, N:Nat)) = arrayType(reverseArrayTypes-aux(T:Type), N:Nat)) .
+		--- if notBool hasArrayType(T:Type) .
+	--- eq reverseArrayTypes-aux(arrayType(arrayType(T:Type, M:Nat), N:Nat)) = 
+
+	--- eq reverseArrayTypes(T:Type) = reverseArrayTypes-aux(T:Type) .
+		
+	--- op reverseArrayTypes : K -> K [metadata "strict"] .
+	--- op reverseArrayTypes-aux : K -> Type .
+	--- mb rule
+		--- < k > DeclType(T:Type, K:K) => reverseArrayTypes(K:K) ...</ k >
+		--- < declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
+		--- : KSentence .
 	
 	op fillBitHoles : List{Type} -> List{Type} .
 	op fillBitHoles : Nat List{Type} -> List{Type} .
@@ -470,8 +503,10 @@ mod COMMON-C-TYPING is
 	--- eq byteSizeofType(T:Type) = bitsToBytes(bitSizeofType(T:Type)) .
 			
 	eq hasArrayType(arrayType(?, ?)) = true .
+	eq hasArrayType(incompleteArrayType(?)) = true .
 	ceq hasArrayType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'arrayType .
+		if getKLabel(T:Type) =/=Bool 'arrayType 
+		andBool getKLabel(T:Type) =/=Bool 'incompleteArrayType .
 		
 	eq hasAggregateType(T:Type) = hasArrayType(T:Type) orBool hasStructType(T:Type) .
 	
