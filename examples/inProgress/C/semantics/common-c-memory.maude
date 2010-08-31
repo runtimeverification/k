@@ -238,7 +238,7 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule splitBytes(tv(I:Int, T:Type)) => splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
 		if hasIntegerType(T:Type)
 		: KSentence .
-	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) => splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(T:Type)))
+	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) => splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
 		: KSentence .
 	
 	op splitIntegerBytes : K K K -> K .

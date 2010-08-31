@@ -223,7 +223,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		: KSentence .
 	
 	mb rule
-		< k > canonicalizeSpecifier(BagItem(StructDef((X:Id => unnamed(N:Nat)), L:List{C}))) ...</ k >
+		< k > canonicalizeSpecifier(BagItem(StructDef((Identifier("") => unnamed(N:Nat)), L:List{C}))) ...</ k >
 		< freshNat > N:Nat => sNat(N:Nat) </ freshNat >
 		: KSentence .
 	
