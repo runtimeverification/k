@@ -67,8 +67,9 @@ endfm
 fmod META-K-MODULE is
   including META-LEVEL-EXTRAS .
   including META-K-BUILTINS .
-  var S : Sort .  var T T' : Type .  var SSDS : SubsortDeclSet . 
-  vars OPDS : OpDeclSet .  var M : Module . var SS : SortSet .
+  var S : Sort .  var T T' T1 T2 : Type .  var SSDS : SubsortDeclSet . 
+  vars OPDS : OpDeclSet .  var Op : OpDecl .  var Q : Qid . 
+  var AS : AttrSet .  var M : Module . var SS : SortSet .  var Tl : TypeList .
 
   ops KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
   ops NeProperList ResultList NeResultList NeKList KList : -> Sort .
@@ -167,16 +168,26 @@ fmod META-K-MODULE is
   op getList2KSubsorts : Module -> SubsortDeclSet .
   eq getList2KSubsorts(M) = getList2KSubsorts(M, getSubsorts(M,K)) .
 
+  op metaAssocSorts : -> SortSet [memo] .
+  eq metaAssocSorts = klistSorts ; K ; KProper ; KResult ; NeK ; 'Bag ; 'NeBag ; 'Set ; 'NeSet ; 'List ; 'NeList ; 'Map ; 'NeMap .
+
   op getListSorts : Module -> SortSet .
-  eq getListSorts(M) = removeSorts(getListSorts(getSorts(M)), klistSorts) .
+  eq getListSorts(M) = removeSorts(getListSorts(getOps(M)), metaAssocSorts ; builtinSorts(M)) .
 
-  op isListSort : Type -> Bool .
-  eq isListSort(T) = find(string(T),"List`{",0) == 0 .
+  op isListSort : Module Type -> Bool .
+  eq isListSort(M,T) = isListSort(getListSorts(M),T) .
+  
+  op isListSort : SortSet Type -> Bool .
+  eq isListSort(SS ; S , S) = true [print S " is a list sort together with " SS] .
+  eq isListSort(SS, T) = false [owise].
 
-  op getListSorts : SortSet -> SortSet .
+  op getListSorts : OpDeclSet -> TypeSet .
   eq getListSorts(none) = none .
-  eq getListSorts( S ; SS) 
-   =  if isListSort(S) then S ; getListSorts(SS) else getListSorts(SS) fi .
+  eq getListSorts(Op OPDS) = getListSortsOp(Op) ;  getListSorts(OPDS) .
+  
+  op getListSortsOp : OpDecl -> TypeSet .
+  eq getListSortsOp(op Q : T1 T2 -> T [assoc AS] .) = T1 ; T2 ; T .
+  eq getListSortsOp(Op) = none [owise] .
 
   op getListSubsorts : Module -> SubsortDeclSet .
   eq getListSubsorts(M) = makeSubsorts(M, getListSorts(M), getMaximalSorts(M, getListSorts(M))) .
@@ -192,17 +203,17 @@ fmod META-K-MODULE is
   op getList2KSubsorts : Module SortSet -> SubsortDeclSet .
   eq getList2KSubsorts(M, none) = none .
   eq getList2KSubsorts(M, T ; SS) 
-   = if isListSort(T)
+   = if isListSort(M, T)
      then (subsort T < (if sortLeq(M,T,KResult) then KResult else K fi) .) 
         getList2KSubsorts(M, SS) 
      else getList2KSubsorts(M, SS) fi .
 
-  op getK2ListSubsorts : SubsortDeclSet -> SubsortDeclSet .
-  eq getK2ListSubsorts(none) = none .
-  eq getK2ListSubsorts((subsort T < T' .) SSDS) 
-   = if find(string(T'),"List`{",0) == 0 
-     then (subsort T < T' .)  getK2ListSubsorts(SSDS) 
-     else getK2ListSubsorts(SSDS) fi .
+  op getK2ListSubsorts : Module SubsortDeclSet -> SubsortDeclSet .
+  eq getK2ListSubsorts(M, none) = none .
+  eq getK2ListSubsorts(M, (subsort T < T' .) SSDS) 
+   = if isListSort(M, T') 
+     then (subsort T < T' .)  getK2ListSubsorts(M, SSDS) 
+     else getK2ListSubsorts(M, SSDS) fi .
 endfm
 
 fmod META-K-RULES is including K-SORTS .
@@ -392,6 +403,7 @@ endfm
 fmod META-K-WRAPPERS is
   including META-LEVEL-EXTRAS .
   including META-K-MODULE .
+  including K-META-CONFIG  .
   vars T T' : Type . var Q : Qid . var AS : AttrSet . var OPDS : OpDeclSet .
 
   op builtin-wrappers : -> OpDeclSet [memo] .

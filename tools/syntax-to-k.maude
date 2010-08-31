@@ -46,22 +46,22 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op syntax2k : Module SortSet SubsortDeclSet ~> Module .
  eq syntax2k(M, SS, SSDS)
-  = setSubsorts(setOps(setMbs(setRls(setEqs(removeSorts(M,SS), syntax2kEqs(getEqs(M), SSDS)), syntax2kRls(getRls(M), SSDS)),syntax2kMbs(getMbs(M), SSDS)),concretize(syntax2kOps(getOps(M),SSDS))),syntax2kSSs(getSubsorts(M), SS, SSDS)) .
+  = setSubsorts(setOps(setMbs(setRls(setEqs(removeSorts(M,SS), syntax2kEqs(getEqs(M), SSDS)), syntax2kRls(getRls(M), SSDS)),syntax2kMbs(getMbs(M), SSDS)),concretize(syntax2kOps(getOps(M),SSDS))),syntax2kSSs(M, getSubsorts(M), SS, SSDS)) .
  
- op syntax2kSSs : SubsortDeclSet SortSet SubsortDeclSet ~> SubsortDeclSet .
- eq syntax2kSSs(SSDS SSD, SS, SSDS')
-  =  syntax2kSSs(SSDS, SS, SSDS') syntax2kSS(SSD, SS, SSDS') .
- eq syntax2kSSs(none, SS, SSDS')  = none .
+ op syntax2kSSs : Module SubsortDeclSet SortSet SubsortDeclSet ~> SubsortDeclSet .
+ eq syntax2kSSs(M, SSDS SSD, SS, SSDS')
+  =  syntax2kSSs(M, SSDS, SS, SSDS') syntax2kSS(M, SSD, SS, SSDS') .
+ eq syntax2kSSs(M, none, SS, SSDS')  = none .
 
  op concretize : OpDeclSet ~> OpDeclSet .
 ceq concretize((op Q : Tl -> T [AS] .) (op Q : Tl -> T' [AS] .) OPDS)
   = (op Q : Tl -> T [AS] .) concretize(OPDS) 
  if T = KResult /\ T' = K .
  eq concretize(OPDS) = OPDS [owise] .
- op syntax2kSS : SubsortDecl SortSet SubsortDeclSet ~> SubsortDeclSet .
- eq syntax2kSS((subsort S < S' .), SS, SSDS')
+ op syntax2kSS : Module SubsortDecl SortSet SubsortDeclSet ~> SubsortDeclSet .
+ eq syntax2kSS(M, (subsort S < S' .), SS, SSDS')
   = if S in SS 
-    then if S' in SS or-else S' in ksorts then none else (subsort if isListSort(S') then K else syntax2kType(S, SSDS') fi < S' .) fi
+    then if S' in SS or-else S' in ksorts then none else (subsort if isListSort(M, S') then K else syntax2kType(S, SSDS') fi < S' .) fi
     else if S' in SS then (subsort S < syntax2kType(S', SSDS') .) else (subsort S < S' .) fi 
     fi .  
 

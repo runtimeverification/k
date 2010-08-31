@@ -52,7 +52,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op makeLists2wrappers : Module Module SubsortDeclSet ~> Module .
  eq makeLists2wrappers(M, Flat, SSDS) 
-  = lists2wModule(M, Flat, coGetOps(removeOps(getOps(Flat), getOps(getOps(Flat),getSubsorts(getList2KSubsorts(Flat)))),K ; getSubsorts(getList2KSubsorts(Flat))),  processSubsorts(getOps(Flat), SSDS)) .
+  = lists2wModule(M, Flat, coGetOps(removeOps(getOps(Flat), getOps(getOps(Flat),getSubsorts(getList2KSubsorts(Flat)))),K ; getSubsorts(getList2KSubsorts(Flat))),  processSubsorts(getOps(Flat), SSDS)) [print "list2w subsorts: " SSDS] .
  
  op lists2wModule : Module  Module OpDeclSet CTORSMap ~> Module .
  eq lists2wModule(M, Flat, OPDS, CTORS)
@@ -76,7 +76,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op lists2wSS : Module CTORSMap SubsortDecl ~> SubsortDeclSet .
  eq lists2wSS(M, CTORS SSD |-> Trm, SSD) = none .
- eq lists2wSS(M, CTORS, subsort S < S' .) = if isListSort(S) and-then S' in ksorts then none else (subsort S < S' .) fi  [owise] .
+ eq lists2wSS(M, CTORS, subsort S < S' .) = if isListSort(M, S) and-then S' in ksorts then none else (subsort S < S' .) fi  [owise] .
 ---( 
  eq lists2wSS(M, CTORS ((subsort S < S' .) |-> Trm) (subsort S'' < S''' .) |-> Trm, (subsort S'' < S .)) 
   = (subsort S'' < S .) [print "subsort 2: " S'' " < " S " ."] .
