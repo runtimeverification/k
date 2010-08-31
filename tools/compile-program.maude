@@ -52,7 +52,7 @@ ceq missingConsts(Ops, Q, T, Trms) = missingConsts(Ops, Trms)
   
   op compileProgram : Module OpDeclSet Module OpDeclSet Type Term Bool ~> Term .
   eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm, true)
-   = if isListSort(T) then compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, getListConstructor(SyntaxOps, T), Trm)
+   = if isListSort(Syntax,T) then compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, getListConstructor(SyntaxOps, T), Trm)
      else compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T,  getWrapper(Compiled, Wrappers, leastSort(Syntax, Trm)), Trm) fi .
   eq compileProgram(Compiled, Wrappers, Syntax, SyntaxOps, T, Trm, error(Trm, T'))
    = errorTrm(Trm, T') .
