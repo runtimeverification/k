@@ -56,6 +56,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op emptyValue : -> Value .
 	--- subsort List{KResult} < K .
 	
+	op zero : Id -> K .
+	
 	op initializer : K -> KResult .
 	op startInitializer : Type Id K -> K .
 	op popBlock : -> K .
@@ -190,7 +192,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op calcStructSize-aux : List{KResult} Rat -> K .	
 	--- op calcUnionSize-aux : List{KResult} Rat -> K .
 	--- op necessaryBytes : K -> K [metadata "strict"] .
-	op cast : Type K -> K [metadata "strict(2)"] . --- as described in 6.3
+	op cast : K K -> K [metadata "strict"] . --- as described in 6.3
 	op arithInterpret : Type BaseValue -> K . --- interpret the result of arithmetic as in 6.5.4
 	op interpret : Type K -> K . --- interpret the values of reading from mem
 	--- op leftShiftInterpret : Type BaseValue K -> K .
@@ -998,7 +1000,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence .
 	
 	op initialize-aux : Id Type K -> K .
-	op zero : Id -> K .
 	---eq SingleInit(K:K) = K:K .
 	mb rule
 		< k > initialize-aux(?, ?, NoInit) => . ...</ k >
@@ -1013,8 +1014,10 @@ mod COMMON-GLOBAL-DECLARATION is
 			~> initialize-aux(X:Id, T:Type, CompoundInit(L:List{C}))
 		...</ k >
 		: KSentence .
+	
+	--- c1x 6.7.8:21 ... the remainder of the aggregate shall be initialized implicitly the same as objects that have static storage duration
 	mb rule
-		< k > initialize-aux(X:Id, T:Type, initializer(K:K)) => K:K ...</ k >
+		< k > initialize-aux(X:Id, T:Type, initializer(K:K)) => zero(X:Id) ~> K:K ...</ k >
 		: KSentence .
 	mb rule
 		< k > initialize-aux(X:Id, ?, CompoundInit(Nil)) => (.).K ...</ k >
@@ -1031,7 +1034,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > zero(X:Id) => . ...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		< env >... X:Id |-> sym(Block:Nat) +Nat 0 ...</ env >
-		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[0 / 0 to Len:Nat])) ...</ mem >
+		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
 		: KSentence .
 	
 	mb rule
@@ -1495,11 +1498,8 @@ mod COMMON-C-SEMANTICS is
 	including COMMON-PARAMETER-BINDING .
 	including COMMON-C-CONVERSIONS .
 	including COMMON-C-STANDARD-LIBRARY .
+	---including COMMON-LOCAL-DECLARATION .
 	
 	op eval : Program -> Bag .
 	op eval : Program List{K} String -> Bag .
-	
-	***(
-	including COMMON-LOCAL-DECLARATION .
-	***)
 endm

@@ -239,6 +239,10 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	eq canonicalizeSpecifier(BagItem(Signed) BagItem(Char)) = signed-char .
 	eq canonicalizeSpecifier(BagItem(Unsigned) BagItem(Char)) = unsigned-char .
 	
+	eq canonicalizeSpecifier(BagItem(Double)) = double .
+	eq canonicalizeSpecifier(BagItem(float)) = float .
+	eq canonicalizeSpecifier(BagItem(Long) BagItem(Double)) = long-double .
+	
 	ceq canonicalizeSpecifier(B:Bag) = short-int
 		if B:Bag ==Bool BagItem(Short)
 		orBool B:Bag ==Bool BagItem(Signed) BagItem(Short)
@@ -328,15 +332,11 @@ mod COMMON-C-TYPING is
 	ceq isTypeCompatible(T:Type, T':Type) = true
 		if hasIntegerType(T:Type)
 		andBool hasIntegerType(T':Type) .
-		
-***(
-('Cast).KProperLabel(
-	('canonicalizeType).KProperLabel(wbag BagItem(('Int).KResultLabel(.List{K}))(.List{K}))
-	,,('PointerType).KProperLabel(('JustBase).KProperLabel(.List{K}))
-	,,('SingleInit).KHybridLabel(Id Identifier("y1")(.List{K}))
-)
-***)
-		
+	
+	--- op cast : K K -> K [metadata "strict"] .
+	mb rule 
+		< k > Cast(T:Type, K:K, SingleInit(V:Value)) => cast(DeclType(T:Type, K:K), V:Value) ...</ k >
+		: KSentence .
 		
 	mb rule 
 		< k > JustBase => T:Type ...</ k >
