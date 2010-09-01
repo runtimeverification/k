@@ -308,6 +308,34 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	--- --- simplify compound assignments (if E1 op= E2, need to ensure E1 only gets evaluated once to be correct)
 	--- --- fixme, should not cause side effects to happen twice.  maybe match tv() on lhs
 	--- --- 6.5.16
+	op compoundAssignment : KLabel K K -> K [metadata "strict(2 3)"] .
+	mb rule
+		L:KLabel(E1:Expression,, E2:Expression) => compoundAssignment(L:KLabel, &(E1:Expression), E2:Expression)
+		if Set(
+			l('_*=_),, l('_/=_),, l('_%=_),, l('_+=_),, l('_-=_),, 
+			l('_<<=_),, l('_>>=_),, l('_&=_),, l('_^=_),, l('_|=_)
+		) contains l(L:KLabel)
+		: KSentence [metadata "structural"] .
+	
+	op getInnerOperator : KLabel -> KLabel .
+	mb rule
+		< k > compoundAssignment(L:KLabel, V:Value, V':Value) 
+			=> *(V:Value) := getInnerOperator(L:KLabel)(*(V:Value),, V':Value) 
+		...</ k >
+		: KSentence [metadata "structural"] .
+		
+	eq getInnerOperator('_*=_) = '_*_ .
+	eq getInnerOperator('_/=_) = '_/_ .
+	eq getInnerOperator('_%=_) = '_%_ .
+	eq getInnerOperator('_+=_) = '_+_ .
+	eq getInnerOperator('_-=_) = '_-_ .
+	
+	eq getInnerOperator('_<<=_) = '_<<_ .
+	eq getInnerOperator('_>>=_) = '_>>_ .
+	eq getInnerOperator('_&=_) = '_&_ .
+	eq getInnerOperator('_^=_) = '_^_ .
+	eq getInnerOperator('_|=_) = '_|_ .
+	
 	--- mb [assign-times]: rule [E1:Expression *= E2:Expression => E1:Expression := E1:Expression * E2:Expression] : KSentence [metadata "structural"] .
 	--- mb [assign-divide]: rule [E1:Expression /= E2:Expression => E1:Expression := E1:Expression / E2:Expression] : KSentence [metadata "structural"] .
 	--- mb [assign-mod]: rule [E1:Expression %= E2:Expression => E1:Expression := E1:Expression % E2:Expression] : KSentence [metadata "structural"] .
@@ -721,6 +749,11 @@ endm
 
 mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	--- c1x 6.5.3.1:2 The value of the operand of the prefix ++ operator is incremented. The result is the new value of the operand after incrementation. The expression ++E is equivalent to (E+=1). See the discussions of additive operators and compound assignment for information on constraints, types, side effects, and conversions and the effects of operations on pointers.
+	eq ++ E:Expression = E:Expression += tv(1, int) .
+	--- c1x 6.5.3.1:3 The prefix -- operator is analogous to the prefix ++ operator, except that the value of the operand is decremented.
+	eq -- E:Expression = E:Expression -= tv(1, int) .
 
 	--- op postOpRef : K KLabel -> K .
 	--- mb context postOpRef(Deref([HOLE]), ?) : KSentence .
