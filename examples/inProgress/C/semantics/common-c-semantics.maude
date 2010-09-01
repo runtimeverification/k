@@ -51,7 +51,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	eq bito(0) = 0 . --- FIXME need to check this is okay in all circumstances
 	op typedef : Id -> Id .
 	op unnamed : Nat -> Id .
-	op NULL : -> K .
+	op NULL : -> Nat .
 	eq NULL = 0 .
 	op emptyValue : -> Value .
 	--- subsort List{KResult} < K .

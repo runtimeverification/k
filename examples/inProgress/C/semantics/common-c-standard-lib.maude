@@ -198,17 +198,18 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < k > [application(builtin(sin), tv(F:Float, double)) => tv(sinFloat(F:Float), double)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
-	--- mb [malloc-is-value]: rule
-		--- < k > [malloc => builtin(malloc)] ...</ k >
-	--- : KSentence [metadata "structural"] .
+	mb [malloc-is-value]: rule
+		< k > Identifier("malloc") => builtin(Identifier("malloc")) ...</ k >
+	: KSentence [metadata "structural"] .
 	
-	--- mb [malloc]: rule
-		--- < k > [application(builtin(malloc), tv(N:Nat, T:Type)) => alloc(Loc:Nat, tv(N:Nat, T:Type)) ~> tv(Loc:Nat, pointerType(void))] ...</ k >
-		--- ---< mem >... [.Map => Loc:Nat to (Loc:Nat +Nat N:Nat) |-> unknownRange(Fresh:Nat, Fresh:Nat +Nat N:Nat, 8)] ...</ mem >
-		--- < malloced >... [.Map => Loc:Nat |-> N:Nat] ...</ malloced >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- ---< freshNat > [Fresh:Nat => Fresh:Nat +Nat N:Nat] </ freshNat >
-	--- : KSentence [metadata "structural"] .
+	mb [malloc]: rule
+		< k > Call(builtin(Identifier("malloc")), tv(N:Nat, T:Type)) 
+			=> alloc(Loc:Nat, N:Nat) ~> tv(Loc:Nat, pointerType(void)) 
+		...</ k >
+		< malloced >... (.).Map => Loc:Nat |-> N:Nat ...</ malloced >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if T:Type ==Bool cfg:sizeut
+	: KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- --- Returns a pseudo-random integral number in the range 0 to RAND_MAX.
 	

@@ -2,6 +2,8 @@ mod COMMON-MEMORY-INCLUDE is
 	including COMMON-INCLUDE .
 	
 	op extractBytesFromMem : Nat Nat -> K . --- loc, size in bytes
+	
+	op encodedPointer : Int -> Nat .
 endm
 
 mod COMMON-SEMANTICS-READING is
@@ -26,6 +28,12 @@ mod COMMON-SEMANTICS-READING is
 		...</ k >
 		if Len:Nat <=Nat NumBits:Nat
 		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > extractBitsFromList(dataList((encodedPointer(N:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
+			--- => extractBitsFromList(dataList(L:List{K}), 0, absInt(NumBits:Nat -Int cfg:ptrsize), (Done:List{K},, encodedPointer(N:Nat)))
+		--- ...</ k >
+		--- if cfg:ptrsize <=Nat NumBits:Nat
+		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > extractBitsFromList(?, 0, 0, Done:List{K}) => dataList(Done:List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
@@ -47,6 +55,19 @@ mod COMMON-SEMANTICS-READING is
 	op joinIntegerBytes : Type List{K} -> K .
 	ceq concretize(T:Type, dataList(L:List{K})) = joinIntegerBytes(T:Type, L:List{K})
 		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) .
+		
+	--- fixme should also check sizes are appropriate
+	--- fixme very unsafe as is.  doesn't care if other bytes were overwritten
+	ceq concretize(pointerType(T:Type), dataList((piece(encodedPointer(N:Nat), Len:Nat),, L:List{K}))) 
+		= tv(N:Nat, pointerType(T:Type))
+		if Len:Nat ==Bool numBitsPerByte
+		andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
+	ceq concretize(pointerType(T:Type), dataList((piece(N:Nat, Len:Nat),, L:List{K}))) 
+		= tv(N:Nat, pointerType(T:Type))
+		if N:Nat ==Bool NULL
+		andBool Len:Nat ==Bool numBitsPerByte
+		andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
+		
 		
 	--- FIXME assuming bytes?
 	op joinIntegerBytes : Type List{K} Nat -> K .
@@ -253,12 +274,11 @@ mod COMMON-SEMANTICS-WRITING is
 	op splitPointerBytes : K K K -> K .
 	op splitPointerBytes : K K K List{K} -> K .
 	mb context splitPointerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
-	op encodedPointer : Int -> Nat .
 	ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
-		= splitPointerBytes(I:Int, T:Type, Len:Nat, encodedPointer(I:Int))
+		= splitPointerBytes(I:Int, T:Type, Len:Nat, piece(encodedPointer(I:Int), numBitsPerByte))
 		if I:Int =/=Bool NULL .
 	ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
-		= splitPointerBytes(I:Int, T:Type, Len:Nat, NULL)
+		= splitPointerBytes(I:Int, T:Type, Len:Nat, piece(NULL, numBitsPerByte))
 		if I:Int ==Bool NULL .
 	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K}) = splitPointerBytes(I:Int, T:Type, Len:Nat, (L:List{K},, piece(unknown, numBitsPerByte))) .
 	eq splitPointerBytes(I:Int, T:Type, 0, L:List{K}) 
