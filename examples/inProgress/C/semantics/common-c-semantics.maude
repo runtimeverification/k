@@ -49,6 +49,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
 	eq bito(0) = 0 . --- FIXME need to check this is okay in all circumstances
+	op bitoffset : Nat -> Nat .
+	op byteoffset : Nat -> Nat .
+	
+	op extractBitsFromList : K Nat Nat -> K [metadata "strict(1)"] . --- data, offset, size in bits
 	op typedef : Id -> Id .
 	op unnamed : Nat -> Id .
 	op NULL : -> Nat .
@@ -232,7 +236,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op kpair : K List -> K .
 	op promote : K -> K .
 	--- op readFromMem : Nat Type -> K .
-	--- op extractField : List{K} Type Id -> K .
+	op extractField : List{K} Type Id -> K .
 	op allocString : Nat String -> K .
 	--- op unknownRange : Nat Nat Nat -> List{K} .
 	op loopMarked : -> Statement .
@@ -1321,21 +1325,30 @@ mod C-SEMANTICS-MISC is
 	--- if notBool(T:Type isa 'bitfieldType) .
 	---op calculateLength
 	eq calculateLength(Nil) = 0 .
-	
 	eq calculateLength(T:Type :: L:List{Type}) = calculateLength(T:Type) + calculateLength(L:List{Type}) .
-	
 	eq calculateLength(typedDeclaration(T:Type, ?)) = bitSizeofType(T:Type) .
 	
-		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
-	--- if notBool(T:Type isa 'bitfieldType) .
-
-	--- op extractField-pre : List{K} Type K K -> K [metadata "strict(3 4)"] .
-	--- op extractField-aux : List{K} Type Nat Nat List{K} -> K .
+	op extractField-pre : List{K} Type K K -> K [metadata "strict(3 4)"] .
+	op extractField-aux : List{K} Type Nat Nat List{K} -> K .
 	
-	--- mb [extractField-from-struct-start]: rule
-		--- < k > [extractField(L:List{K}, structType(S:Id), F:Id)
-			--- => extractField-pre(L:List{K}, T:Type, figureOffset(loc(0, 0), calcStructSize-aux(L1:List{KResult}, 0), T:Type), sizeofType(T:Type))] ...</ k >
-		--- < structs >... struct(S:Id) |-> (L1:List{KResult},, typedField(T:Type, F:Id),, ?:List{KResult}) ...</ structs >
+	--- figureOffset(loc(0, 0), calcStructSize-aux(L1:List{KResult}, 0), T:Type)
+	mb [extractField-from-struct-start]: rule
+		< k > extractField(L:List{K}, structType(S:Id), F:Id)
+			=> extractField-pre(L:List{K}, T:Type, calculateLength(L:List{Type}), bitSizeofType(T:Type)) ...</ k >
+		< structs >... S:Id |-> (L:List{Type} :: typedDeclaration(T:Type, F:Id) :: ?:List{Type}) ...</ structs >
+		: KSentence [metadata "structural"] .
+
+	mb rule
+		< k > extractField-pre(L:List{K}, T:Type, tv(Offset:Nat, ?), tv(Len:Nat, ?)) 
+			=> concretize(T:Type, extractBitsFromList(dataList(L:List{K}), bitsToBytes(Offset:Nat), Len:Nat))
+		...</ k >
+		: KSentence [metadata "structural"] .
+		
+		
+	--- mb [extractField-bitfield-start]: rule
+		--- < k > extractField-pre(L:List{K}, T:Type, tv(Offset:Nat, ?),  tv(Size:Rat, ?)) 
+			--- => extractBitsFromList(L:List{K}, getBitOffset(N:Nat), Size:Rat)
+			--- extractField-aux(explodeToBits(L:List{K}), bitfieldType(T:Type, N:Nat), Offset1:Nat *Nat 8 +Nat Offset2:Nat, absInt(truncRat(Len:Rat *Rat 8)), .List{K}) ...</ k >
 		--- : KSentence [metadata "structural"] .
 		
 	--- mb [extractField-from-union-start]: rule

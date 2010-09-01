@@ -11,7 +11,6 @@ mod COMMON-SEMANTICS-READING is
 	
 	op extractBitsFromMem : Nat Nat -> K . --- loc, size in bits
 	op extractByteFromMem : Nat -> K .
-	op extractBitsFromList : K Nat Nat -> K [metadata "strict(1)"] . --- data, offset in bits, size in bits
 	op getBitOffset : Nat -> Nat .
 	eq getBitOffset(? +Nat bito(M:Nat)) = M:Nat .
 	eq getBitOffset(?) = 0 [owise] .
@@ -22,6 +21,13 @@ mod COMMON-SEMANTICS-READING is
 		--- : KSentence [metadata "structural"] .
 	op extractBitsFromList : K Nat Nat List{K} -> K .
 	eq extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat) = extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat, .List{K}) .
+	mb rule
+		< k > extractBitsFromList(dataList((piece(?, Len:Nat),, L:List{K})), Offset:Nat, NumBits:Nat, .List{K})
+			=> extractBitsFromList(dataList(L:List{K}), absInt(Offset:Nat -Int 1), NumBits:Nat, .List{K})
+		...</ k >
+		if byteoffset(Offset:Nat) =/=Bool 0
+		andBool Len:Nat >=Nat numBitsPerByte
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > extractBitsFromList(dataList((piece(N:Nat, Len:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
 			=> extractBitsFromList(dataList(L:List{K}), 0, absInt(NumBits:Nat -Int Len:Nat), (Done:List{K},, piece(N:Nat, Len:Nat)))
@@ -67,6 +73,8 @@ mod COMMON-SEMANTICS-READING is
 		if N:Nat ==Bool NULL
 		andBool Len:Nat ==Bool numBitsPerByte
 		andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
+		
+	eq concretize(structType(S:Id), dataList(L:List{K})) = tv(L:List{K}, structType(S:Id)) .
 		
 		
 	--- FIXME assuming bytes?
@@ -185,11 +193,11 @@ mod COMMON-SEMANTICS-WRITING is
 		andBool isByteLoc(Loc:Nat)
 		: KSentence [metadata "structural"] .
 		
-	op bitoffset : Nat -> Nat .
+
 	eq bitoffset(? +Nat bito(N:Nat)) = N:Nat .
 	eq bitoffset(?) = 0 [owise] .
 	
-	op byteoffset : Nat -> Nat .
+
 	eq byteoffset(N:Nat +Nat bito(?)) = N:Nat .
 	eq byteoffset(N:Nat) = N:Nat [owise] .
 	mb rule

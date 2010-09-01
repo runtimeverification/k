@@ -1,7 +1,13 @@
 --- FIXME need to automatically pad structs
+mod COMMON-SEMANTICS-TYPE-INCLUDE is
+	including COMMON-INCLUDE .
+	
+	op isAType_ : K -> Bool .
+	op isABaseType_ : K -> Bool .
+endm
 
 mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-TYPE-INCLUDE .
 	
 	--- mb rule
 		--- < k > [... => typedDeclaration(no-type, ...)] ...</ k > 
@@ -98,7 +104,7 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 endm
 
 mod COMMON-SEMANTICS-TYPE-STRICTNESS is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-TYPE-INCLUDE .
 
 	--- mb context ?:KLabel(?,, 'Direct-Function-Declarator(D:Declarator,, `[HOLE`]:K)) : KSentence .
 	
@@ -122,24 +128,28 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 		--- < type > [T:Type ~> '_->_(HOLE,, X:Id) => '_->_(T:Type,, X:Id)] ...</ type >
 		--- : KSentence [metadata "structural"] .
 	mb [type-dot-heat]: rule
-		< type > Kp:KProper . X:Id => Kp:KProper ~> HOLE . X:Id ...</ type >
+		< type > K:K . X:Id => K:K ~> HOLE . X:Id ...</ type >
+		if notBool isAType(K:K)
 		: KSentence [metadata "structural"] .
 	mb [type-dot-cool]: rule
 		< type > T:Type ~> HOLE . X:Id => T:Type . X:Id ...</ type >
+		if isAType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < type > ['_`[_`](Kp:KProper,, E:Expression) => Kp:KProper ~> Deref(HOLE)] ...</ type >
 		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < type > [T:Type ~> Deref(HOLE) => 'Deref(T:Type)] ...</ type >
-		--- : KSentence [metadata "structural"] .
-	--- mb [type-heat-deref]: rule
-		--- < type > ['Deref(Kp:KProper) => Kp:KProper ~> Deref(HOLE)] ...</ type >
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< type > T:Type ~> *(HOLE) => *(T:Type) ...</ type >
+		if isAType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb [type-heat-deref]: rule
+		< type > *(K:K) => K:K ~> *(HOLE) ...</ type >
+		if notBool isAType(K:K)
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-TYPE-INCLUDE .
 	
 	op canonicalizeType : Bag -> K .
 	op canonicalizeType : Bag K Bag Bag Bag -> K [metadata "strict(2)"] .
@@ -309,6 +319,7 @@ endm
 
 mod COMMON-C-TYPING is
 	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-TYPE-INCLUDE .
 	including COMMON-SEMANTICS-TYPE-STRICTNESS .
 	including COMMON-SEMANTICS-TYPE-DECLARATIONS .
 	including COMMON-SEMANTICS-TYPE-CANONICALIZATION .
@@ -495,8 +506,7 @@ mod COMMON-C-TYPING is
 		: KSentence .
 	eq FieldName(K:K) = K:K .
 	
-	op isAType_ : K -> Bool .
-	op isABaseType_ : K -> Bool .
+	
 	ceq isAType T:Type = true
 		if setOfTypes contains l(getKLabel(T:Type)) .
 	eq isAType T:BaseType = true .
@@ -653,11 +663,11 @@ mod COMMON-C-TYPING is
 		--- : KSentence [metadata "structural"] .
 
 	--- mb [type-deref-value]: rule
-		--- < type > ['Deref(tv(?, pointerType(T:Type))) => T:Type] ...</ type >
+		--- < type > *(tv(?, pointerType(T:Type))) => T:Type ...</ type >
 		--- : KSentence [metadata "structural"] .
-	--- mb [type-deref-type]: rule
-		--- < type > ['Deref(pointerType(T:Type)) => T:Type] ...</ type >
-		--- : KSentence [metadata "structural"] .
+	mb [type-deref-type]: rule
+		< type > *(pointerType(T:Type)) => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
 	--- mb [type-deref-array]: rule
 		--- < type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
 		--- : KSentence [metadata "structural"] .

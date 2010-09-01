@@ -585,9 +585,11 @@ endm
 mod COMMON-SEMANTICS-MEMBERS is 
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	--- mb [arrow-struct]: rule
-		--- < k > [tv(Base:Int, pointerType(structType(S:Id))) -> X:Id => Deref(tv(Base:Int, pointerType(structType(S:Id)))) . X:Id] ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb [arrow-struct]: rule
+		< k > tv(Base:Int, pointerType(structType(S:Id))) -> F:Id 
+			=> *(tv(Base:Int, pointerType(structType(S:Id)))) . F:Id 
+		...</ k >
+		: KSentence [metadata "structural"] .
 	--- mb [arrow-union]: rule
 		--- < k > [tv(Base:Int, pointerType(unionType(S:Id))) -> X:Id => Deref(tv(Base:Int, pointerType(unionType(S:Id)))) . X:Id] ...</ k >
 		--- : KSentence [metadata "structural"] .
@@ -596,8 +598,8 @@ mod COMMON-SEMANTICS-MEMBERS is
 	op toEval-aux : K K -> K [metadata "strict(2)"] .
 	
 	mb rule
-		< k > E:Expression . F:Id => toEval(E:Expression . F:Id) ...</ k >
-		: KSentence [metadata "structural"] .	
+		< k > V:Value . F:Id => toEval(V:Value . F:Id) ...</ k >
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > toEval(K:K) => toEval-aux(K:K, typeof(K:K))  ...</ k >
 		: KSentence [metadata "structural"] .
@@ -605,7 +607,26 @@ mod COMMON-SEMANTICS-MEMBERS is
 	mb rule
 		< k > toEval-aux(K:K, arrayType(T:Type, N:Nat)) => &(K:K) ...</ k >
 		: KSentence [metadata "structural"] .
-	
+		
+	mb rule
+		< k > toEval-aux(tv(L:List{K}, T:Type) . F:Id, T':Type)
+			=> extractField(L:List{K}, T:Type, F:Id) 
+		...</ k >
+		if notBool hasArrayType(T':Type)
+		: KSentence [metadata "structural"] .	
+
+	--- mb rule
+		--- < k > toEval-aux(tv(L:List{K}, structType(S:Id)) . F:Id, T:Type)
+			--- => extractField(L:List{K}, T:Type, F:Id) 
+		--- ...</ k >
+		--- --- if notBool hasArrayType(T:Type)
+		--- : KSentence [metadata "structural"] .		
+		
+	--- mb rule
+		--- < k > toEval-aux(V:Value . F:Id, T:Type) => K:K ...</ k >
+		--- if notBool hasArrayType(T:Type)
+		--- : KSentence [metadata "structural"] .
+
 	--- op dot-aux : K Id K -> K [metadata "strict(3)"] .
 	--- mb rule
 		--- < k > [(E:Expression . F:Id) => dot-aux(E:Expression, F:Id, typeof(E:Expression . F:Id))] ...</ k >

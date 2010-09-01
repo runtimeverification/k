@@ -24,18 +24,17 @@ endm
 mod COMMON-SEMANTICS-WHILE is
 	including COMMON-INCLUDE .
 	
-	--- mb [while-mark]: rule
-		--- < k > [while (B:Expression) S:Statement ~> K:K
-		--- => loopMarked ~> (while (B:Expression) S:Statement) ~> popLoop ~> K:K
-		--- ] </ k >
-		--- < loopStack > [.List => ListItem(K:K)] ...</ loopStack >
-		--- : KSentence [metadata "structural"] .
-	--- mb [while]: rule
-		--- < k > [loopMarked ~> while (B:Expression) S:Statement
-		--- => 
-		--- 'if`(_`)_(B:Expression,, S:Statement ~> loopMarked ~> (while (B:Expression) S:Statement))
-		--- ] ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb [while-mark]: rule
+		< k > While(B:Expression, S:Statement) ~> K:K
+			=> loopMarked ~> While(B:Expression, S:Statement) ~> popLoop
+		</ k >
+		< loopStack > (.).List => ListItem(K:K) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+	mb [while]: rule
+		< k > loopMarked ~> While(B:Expression, S:Statement)
+			=> IfThenElse(B:Expression, (S:Statement ~> loopMarked ~> While(B:Expression, S:Statement)), Nop)
+		...</ k >
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-FOR is
