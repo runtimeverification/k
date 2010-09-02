@@ -375,7 +375,7 @@ mod COMMON-C-MEMORY-MISC is
 	op writeString : Nat String -> K .
 	mb [alloc-string]: rule
 		< k > allocString(Loc:Nat, S:String)
-			=> allocateType(Loc:Nat, arrayType(char, lengthString(S:String) +Nat 1))
+			=> allocateType(Loc:Nat, arrayType(char, lengthString(S:String)))
 			~> writeString(Loc:Nat, S:String)
 		...</ k >
 		: KSentence [metadata "structural"] .
@@ -391,8 +391,8 @@ mod COMMON-C-MEMORY-MISC is
 		
 	mb [write-empty-string]: rule
 		< k > writeString(Loc:Nat, "") 
-			=> *(tv(Loc:Nat, pointerType(char))) := tv(0, char) 
-			~> discard
+			=> (.).K --- *(tv(Loc:Nat, pointerType(char))) := tv(0, char) 
+			--- ~> discard
 		...</ k >
 		: KSentence [metadata "structural"] .
 	--- mb [alloc-string]: rule

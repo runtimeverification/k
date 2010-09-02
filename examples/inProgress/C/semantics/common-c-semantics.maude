@@ -961,34 +961,44 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(L:List{C}))
 			=> declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
 		...</ k >
-		if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) andBool notBool hasIncompleteType(T:Type)
+		if (hasStructType(T:Type) orBool hasUnionType(T:Type)) 
+		andBool notBool hasIncompleteType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declare(typedDeclaration(arrayType(T:Type, N:Nat), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
+			=> declare(typedDeclaration(arrayType(T:Type, N:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+		...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- incomplete arrays
 	mb rule
 		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-			=> allocString(Loc:Nat, S:String)
+			=> allocString(Loc:Nat, (S:String +String "\0"))
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		if hasCharType(T:Type)
 		: KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(tv(StrLoc:Nat, pointerType(T:Type))))
-			--- => allocString(Loc:Nat, S:String)
-			--- --- ~> allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, arrayType(T:Type, Len:Nat))
-			--- --- ~> initialize(X:Id, T:Type, K:K)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- < statics >... S:String |-> tv(StrLoc:Nat, arrayType(T:Type, Len:Nat)) ...</ statics >
-		--- if notBool hasExternType(T:Type) --- external reference
-		--- andBool T:Type ==Bool char
-		--- andBool notBool hasIncompleteType(T:Type)
-		--- : KSentence .
+	mb rule
+		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
+			=> declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+		...</ k >
+		: KSentence [metadata "structural"] .
+			
+	
+	--- fixme the types of these should be different (constant?)
+	--- string initializers (not incomplete types)
+	mb rule
+		< k > declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+			=> allocString(Loc:Nat, S:String)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, arrayType(T:Type, Len:Nat))
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if hasCharType(T:Type)
+		andBool lengthString(S:String) ==Bool Len:Nat
+		: KSentence [metadata "structural"] .
 		
 		
 	--- base types
