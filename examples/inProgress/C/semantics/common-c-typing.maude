@@ -347,7 +347,7 @@ mod COMMON-C-TYPING is
 	ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
 		if notBool hasArrayType(T:Type) .
 	eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) = arrayType(arrayType(T:Type, N:Nat), M:Nat) .
-	--- eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
+	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
 	eq PointerType(T:Type) = pointerType(T:Type) .
 	eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
 
@@ -533,6 +533,16 @@ mod COMMON-C-TYPING is
 	***)
 			
 	--- eq byteSizeofType(T:Type) = bitsToBytes(bitSizeofType(T:Type)) .
+			
+	--- FIXME most of these don't take into consideration modifiers
+
+	eq hasCharType(char) = true .
+	eq hasCharType(unsigned-char) = true .
+	eq hasCharType(signed-char) = true .
+	ceq hasCharType(T:Type) = false
+		if T:Type =/=Bool char
+		andBool T:Type =/=Bool unsigned-char
+		andBool T:Type =/=Bool signed-char .
 			
 	eq hasArrayType(arrayType(?, ?)) = true .
 	eq hasArrayType(incompleteArrayType(?)) = true .

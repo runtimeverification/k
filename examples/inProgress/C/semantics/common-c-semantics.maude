@@ -222,6 +222,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op range : Nat Nat -> Bag .
 	op calculateGotoMap : Id K -> K .
 	
+	op hasCharType : Type -> Bool .
 	op hasArrayType : Type -> Bool .
 	op hasStructType : Type -> Bool .
 	op hasUnionType : Type -> Bool .
@@ -719,8 +720,21 @@ mod COMMON-INITIALIZATION is
 		...</ k >
 		< currentSubObject > . => ListItem(te(X:Id, T:Type)) </ currentSubObject >
 		< currentObject > . => ListItem(te(X:Id, T:Type)) </ currentObject >
+		< savedInitialization >... . => zero(X:Id) </ savedInitialization > 
 		if hasUnionType(T:Type) orBool hasAggregateType(T:Type)
 		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > startInitializer(T:Type, X:Id, SingleInit(K:K))
+			--- => fillInitializer(SingleInit(K:K)) ~> getInitializer
+		--- ...</ k >
+		--- < currentSubObject > . => ListItem(te(X:Id, T:Type)) </ currentSubObject >
+		--- < currentObject > . => ListItem(te(X:Id, T:Type)) </ currentObject >
+		--- --- if hasUnionType(T:Type) orBool hasAggregateType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > startInitializer(T:Type, X:Id, NoInit) => initializer((.).K) ...</ k >
+		--- : KSentence [metadata "structural"] .
+		
 	--- mb rule
 		--- < currentSubObject > . => ListItem(getFirstObject(X:Id, T:Type)) </ currentSubObject > 
 		--- < currentObject > ListItem(te(K:K, arrayType(T:Type, N:Nat))) ...</ currentObject >
@@ -909,10 +923,17 @@ mod COMMON-INITIALIZATION is
 		
 	--- forces a basetype
 	mb rule
-		< k > fillInitializer(SingleInit(V:Value)) => . ...</ k >
+		< k > fillInitializer(SingleInit(K':K)) => . ...</ k >
 		< currentSubObject > (. => next) ListItem(te(K:K, T:BaseType)) ...</ currentSubObject >
-		< savedInitialization >... . => (K:K := V:Value) ~> discard </ savedInitialization > 
+		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
 		: KSentence .
+	
+	--- mb rule
+		--- < k > fillInitializer(SingleInit(Constant(StringLiteral(S:String)))) ~> getInitializer => incompleteArrayInitializer() ...</ k >
+		--- < currentSubObject > (. => next) ListItem(te(K:K, incompleteArrayType(T:Type))) ...</ currentSubObject >
+		--- < savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
+		--- if hasCharacterType(T:Type)
+		--- : KSentence .
 endm
 
 mod COMMON-GLOBAL-DECLARATION is
@@ -935,13 +956,57 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- this surrounds all declarations with an instruction to complete (make verbose) the initializer
 	--- eq declare(SingleName(T:Type, Name:C), Kp:KProper) = declare-aux(SingleName(T:Type, Name:C), completeInitializer(idOfName(Name:C), Kp:KProper)) .
 
+	--- aggregates
 	mb rule
-		< k > declare(typedDeclaration(T:Type, X:Id), Kp:KProper)
-			=> declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, Kp:KProper)) 
+		< k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(L:List{C}))
+			=> declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
 		...</ k >
+		if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) andBool notBool hasIncompleteType(T:Type)
 		: KSentence [metadata "structural"] .
 		
-	eq declare-aux(Kr:KResult, Kr':KResult) = declare(Kr:KResult, Kr':KResult) .
+	--- incomplete arrays
+	mb rule
+		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+			=> allocString(Loc:Nat, S:String)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if hasCharType(T:Type)
+		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(tv(StrLoc:Nat, pointerType(T:Type))))
+			--- => allocString(Loc:Nat, S:String)
+			--- --- ~> allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, arrayType(T:Type, Len:Nat))
+			--- --- ~> initialize(X:Id, T:Type, K:K)
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- < statics >... S:String |-> tv(StrLoc:Nat, arrayType(T:Type, Len:Nat)) ...</ statics >
+		--- if notBool hasExternType(T:Type) --- external reference
+		--- andBool T:Type ==Bool char
+		--- andBool notBool hasIncompleteType(T:Type)
+		--- : KSentence .
+		
+		
+	--- base types
+	mb rule
+		< k > declare(typedDeclaration(T:Type, X:Id), SingleInit(K:K))
+			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((X:Id := K:K ~> discard)))
+		...</ k >
+		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
+		: KSentence [metadata "structural"] .
+	--- c1x 6.7.8:11
+	mb rule
+		< k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(InitFragment(NextInit, SingleInit(K:K))))
+			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((X:Id := K:K ~> discard)))
+		...</ k >
+		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
+		: KSentence [metadata "structural"] .
+		
+	--- eq declare-aux(Kr:KResult, Kr':KResult) = declare(Kr:KResult, Kr':KResult) .
 	
 	--- parser makes sure there are no uninitialized globals, so this should only do allocation
 	--- mb rule
@@ -1006,32 +1071,32 @@ mod COMMON-GLOBAL-DECLARATION is
 	
 	op initialize-aux : Id Type K -> K .
 	---eq SingleInit(K:K) = K:K .
-	mb rule
-		< k > initialize-aux(?, ?, NoInit) => . ...</ k >
-		: KSentence .
-	mb rule
-		< k > initialize-aux(X:Id, ?, SingleInit(V:Value)) => X:Id := V:Value ~> discard ...</ k >
-		: KSentence .
+	--- mb rule
+		--- < k > initialize-aux(?, ?, NoInit) => . ...</ k >
+		--- : KSentence .
+	--- mb rule
+		--- < k > initialize-aux(X:Id, ?, SingleInit(V:Value)) => X:Id := V:Value ~> discard ...</ k >
+		--- : KSentence .
 		
-	mb rule
-		< k > initialize-aux(X:Id, T:Type, CompoundInit(K:C :: L:List{C}))
-			=> initialize-aux(X:Id, T:Type, K:C)
-			~> initialize-aux(X:Id, T:Type, CompoundInit(L:List{C}))
-		...</ k >
-		: KSentence .
+	--- mb rule
+		--- < k > initialize-aux(X:Id, T:Type, CompoundInit(K:C :: L:List{C}))
+			--- => initialize-aux(X:Id, T:Type, K:C)
+			--- ~> initialize-aux(X:Id, T:Type, CompoundInit(L:List{C}))
+		--- ...</ k >
+		--- : KSentence .
 	
 	--- c1x 6.7.8:21 ... the remainder of the aggregate shall be initialized implicitly the same as objects that have static storage duration
-	mb rule
-		< k > initialize-aux(X:Id, T:Type, initializer(K:K)) => zero(X:Id) ~> K:K ...</ k >
-		: KSentence .
-	mb rule
-		< k > initialize-aux(X:Id, ?, CompoundInit(Nil)) => (.).K ...</ k >
-		: KSentence .
+	--- mb rule
+		--- < k > initialize-aux(X:Id, T:Type, initializer(K:K)) => zero(X:Id) ~> K:K ...</ k >
+		--- : KSentence .
+	--- mb rule
+		--- < k > initialize-aux(X:Id, ?, CompoundInit(Nil)) => (.).K ...</ k >
+		--- : KSentence .
 		
 	mb rule
 		< k > initialize(X:Id, T:Type, K:K)
 			=> if (F:Id ==Bool File-Scope) then zero(X:Id) else (.) fi 
-			~> initialize-aux(X:Id, T:Type, K:K)
+			~> K:K
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		: KSentence .
@@ -1046,19 +1111,18 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > defineType(typedDeclaration(T:Type, X:Id)) => giveType(typedef(X:Id), T:Type) ...</ k >
 		: KSentence .
 	mb rule
-		< k > declare(typedDeclaration(T:Type, X:Id), Kr:KResult) => 
+		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) => 
 			allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> initialize(X:Id, T:Type, Kr:KResult)
-			--- X:Id := V:Value
+			~> initialize(X:Id, T:Type, K:K)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		if notBool hasExternType(T:Type) --- external reference
 		andBool notBool hasIncompleteType(T:Type)
-		andBool notBool (hasFunctionType(T:Type) andBool Kr:KResult ==Bool NoInit) --- prototype
+		andBool notBool (hasFunctionType(T:Type) andBool K:K ==Bool (.).K) --- prototype
 		: KSentence .
-
+		
 	--- FIXME check type of pointer
 	--- mb rule
 		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(tv(StrLoc:Nat, pointerType(T:Type))))
@@ -1089,10 +1153,11 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- : KSentence .
 		
 	--- FIXME is this appropriate?
+	--- fixme not handling externs with declarations
 	mb rule
-		< k > declare(typedDeclaration(T:Type, X:Id), K:K) => (.).K ...</ k >
+		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K)) => . ...</ k >
 		if hasExternType(T:Type) --- external reference
-		orBool (hasFunctionType(T:Type) andBool K:K ==Bool NoInit) --- prototype
+		orBool hasFunctionType(T:Type) --- prototype
 		: KSentence .
 		
 	mb rule
@@ -1339,7 +1404,7 @@ mod C-SEMANTICS-MISC is
 		: KSentence [metadata "structural"] .
 
 	mb rule
-		< k > extractField-pre(L:List{K}, T:Type, tv(Offset:Nat, ?), tv(Len:Nat, ?)) 
+		< k > extractField-pre(L:List{K}, T:Type, tv(Offset:Nat, ?), tv(Len:Nat, ?))
 			=> concretize(T:Type, extractBitsFromList(dataList(L:List{K}), bitsToBytes(Offset:Nat), Len:Nat))
 		...</ k >
 		: KSentence [metadata "structural"] .
