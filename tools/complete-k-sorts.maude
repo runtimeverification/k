@@ -1,0 +1,14 @@
+fmod COMPLETE-K-SORTS is
+ including META-K-MODULE .
+ including K-META-CONFIG .
+
+  var Q : Qid . var M Flat : Module . var SS : SortSet .
+
+ op completeKSorts : Qid Module Module ~> Module .
+ eq completeKSorts(Q, M, Flat) 
+  = setName(completeKSorts(M, Flat, getSubsorts(Flat,  KLabel ; CellLabel ; Bag ; Set ; List ; Map ; KList ; 'KAssignments ; 'KSentence ; 'Builtins)) , Q) .
+  
+ op completeKSorts : Module Module SortSet ~> Module .
+ eq completeKSorts(M, Flat, SS) 
+  = addSubsorts(generateSubsorts(Flat,removeSorts(getSorts(Flat), SS ), K), M) [print "syntax sorts: " SS] .
+endfm

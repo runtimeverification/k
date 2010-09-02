@@ -1,4 +1,4 @@
-K_ROOTDIR = ~/k-framework
+K_ROOTDIR = ../..
 ML_ROOTDIR = $(K_ROOTDIR)/examples/ml-imp
 
 .SUFFIXES: .imp .maude

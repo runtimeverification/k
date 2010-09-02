@@ -1,0 +1,42 @@
+load resolve-ditto
+
+mod RESOLVE-DITTO-META is
+  including RESOLVE-DITTO .
+  including META-LEVEL-EXTRAS .
+  including META-K-MODULES .
+  including META-K-BUILTINS .
+  var NoResolveDitto ResolveDitto : String .
+  var Q QNoResolveDitto QResolveDitto : Qid .
+  var M : Module .
+  op resolveDitto : String String ~> Module .
+  eq resolveDitto(NoResolveDitto, ResolveDitto) = resolveDitto(qid(NoResolveDitto), qid(ResolveDitto)) .
+  op resolveDitto : Qid Qid ~> Module .
+  eq resolveDitto(QNoResolveDitto,QResolveDitto) = resolveDitto(QResolveDitto,  upModule(QNoResolveDitto, false)) .
+
+  op compileRESOLVE-DITTO : Module ~> Module .
+  eq compileRESOLVE-DITTO(M) = resolveDitto(getName(M), M) .
+endm
+
+mod RESOLVE-DITTO-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op resolve-ditto : -> System .
+  op idle : -> State .
+  var Q NoResolveDitto ResolveDitto : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq resolve-ditto = [nil, idle, 
+ 'Usage: 'resolveDitto '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveDitto NoResolveDitto ResolveDitto QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoResolveDitto,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('RESOLVE-DITTO-META),
+                        'resolveDitto[upTerm(string(NoResolveDitto)),upTerm(string(ResolveDitto))])),error) .
+endm

@@ -96,7 +96,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op lists2wKOp : OpDecl CTORSMap ~> OpDeclSet .
  eq lists2wKOp((op Q : Tl -> T [AS] .), CTORS)
-  = (op Q : lists2wKTypes(Tl, CTORS) -> T [AS lists2wMetadata(Tl,CTORS)] .) .
+  = (op Q : lists2wKTypes(Tl, CTORS) -> T [AS ---(lists2wMetadata(Tl,CTORS) ---) ] .) .
 
  op lists2wMetadata : TypeList CTORSMap ~> AttrSet .
  eq lists2wMetadata(Tl, CTORS) = lists2wMetadata(1, Tl, CTORS) .

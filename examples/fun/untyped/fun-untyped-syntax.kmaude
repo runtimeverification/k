@@ -40,10 +40,10 @@ kmod FUN-SYNTAX is including PL-INT + PL-ID
 --- List{Id}
   sort List{Id}   subsort Id < List{Id} 
   op .List{Id} : -> List{Id} 
-  op _`,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id}] 
+  op _`,_ : List{Id} List{Id} -> List{Id} [prec 70 assoc id: .List{Id} metadata "strict hybrid"] 
 --- List{Exp}
   sort List{Exp}   subsort Exp List{Id} < List{Exp} 
-  op _`,_ : List{Exp} List{Exp} -> List{Exp} [ditto] 
+  op _`,_ : List{Exp} List{Exp} -> List{Exp} [ditto metadata "ditto"] 
 -----------------------------------------------------------------------------
 endkm
 

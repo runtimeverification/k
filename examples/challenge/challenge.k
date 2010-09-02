@@ -209,7 +209,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule V ~> env(Env) => env(Env) ~> V [structural]
 
 --- List{Val}
-  syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
+  syntax List{Val} ::= Val | List{Val} , List{Val} [ditto metadata "ditto"]
   syntax List{Exp} ::= List{Val}
 
 --- length

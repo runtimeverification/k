@@ -64,7 +64,7 @@ kmod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K
 --- List{Val}
   sort List{Val} 
   subsort Val < List{Val} < List{Exp} 
-  op _`,_ : List{Val} List{Val} -> List{Val} [ditto] 
+  op _`,_ : List{Val} List{Val} -> List{Val} [ditto metadata "ditto"] 
 --- length
   op |_| : List{Id} -> Nat  [metadata "latex(renameTo \\ensuremath|_\\ensuremath|)"]
   eq | .List{Id} | = 0   eq | X,Xl | = sNat(| Xl |) 

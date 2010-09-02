@@ -12,14 +12,14 @@ kmod SIMPLE-UNTYPED-SORTS is including PL-INT + PL-ID
   syntax List{Id}  ::= 
                  Id 
                | .List{Id}
-               | List{Id} , List{Id} [prec 70 assoc id: .List{Id}]
+               | List{Id} , List{Id} [prec 70 assoc id: .List{Id} hybrid strict]
 
 
 --- List{Exp}
   syntax List{Exp} ::= 
                  Exp  
                | List{Id} 
-               | List{Exp} , List{Exp} [ditto]
+               | List{Exp} , List{Exp} [ditto metadata "ditto"]
 -----------------------------------------------------------------------------
 endkm
 

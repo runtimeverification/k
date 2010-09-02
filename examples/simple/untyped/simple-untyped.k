@@ -22,7 +22,7 @@ kmod SIMPLE-UNTYPED-CONFIG is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 --- to KResult.  Recall that the second argument of a function application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
 
-  syntax K ::= Stmts | List{Exp}
+  syntax K ::= Stmts
   syntax KResult ::= List{Val}
 
   configuration <T> 
@@ -40,7 +40,7 @@ kmod SIMPLE-UNTYPED-CONFIG is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
 --- List{Val}
-  syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto]
+  syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto metadata "ditto"]
   syntax List{Exp} ::= List{Val}
 
 --- length

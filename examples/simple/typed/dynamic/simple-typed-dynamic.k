@@ -59,7 +59,7 @@ kmod SIMPLE-TYPED-DYNAMIC-CONFIG is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYN
 
 --- List{Val}
   syntax List{Val} ::= Val | List{Bottom} 
-                     | List{Val} , List{Val} [ditto]
+                     | List{Val} , List{Val} [ditto metadata "ditto"]
 
   syntax List{Exp} ::= List{Val}  
 

@@ -720,7 +720,7 @@ endm
 
 mod PL-STRING is
   protecting PL-INT .
-  sorts String Char FindResult .
+  sorts String Char .
   subsort Char < String < Builtins .
 ---  subsort Int < FindResult .
 

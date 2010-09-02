@@ -96,9 +96,9 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
-  syntax List{Id} ::= Id | ( ) | List{Id} , List{Id} [prec 70 assoc id: ()]
+  syntax List{Id} ::= Id | ( ) | List{Id} , List{Id} [prec 70 assoc id: () strict hybrid]
 --- List{Exp}
-  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]
+  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto metadata "ditto"]
 endkm
 
 

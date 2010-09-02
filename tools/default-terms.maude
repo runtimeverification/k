@@ -155,4 +155,5 @@ fmod DEFAULT-TERMS is
   op $mkDefaultTerm : Term TermList Term ~> Term .
  ceq $mkDefaultTerm(Q[Tl],Tl',T) = mkDefaultTerm((Tl,Tl'),T)
   if Q == ctor(Bag) .
+ ceq $mkDefaultTerm(Ct, Tl, T) = mkDefaultTerm(Tl,T) if Ct = emptyCt(Bag) .
 endfm

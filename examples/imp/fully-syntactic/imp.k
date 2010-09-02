@@ -22,8 +22,8 @@ kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable
                 | Stmt Stmt [prec 60 gather (e E) format (d noi d)]
                 | if BExp then Stmt else Stmt [prec 59 format (b o bni n++i bn--i n++i --) strict(1)]
                 | while BExp do Stmt [prec 59 format (b o b n++i --)]
-  syntax Pgm ::=  var List{Id} ; Stmt [prec 70 format (nb o d ni d)]
-  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}]
+  syntax Pgm ::=  var IdList ; Stmt [prec 70 format (nb o d ni d)]
+  syntax IdList ::= Id | .IdList | IdList , IdList [assoc id: .IdList]
 endkm
 
 kmod IMP-PROGRAMS is including IMP-SYNTAX 
@@ -104,7 +104,7 @@ macro countPrimesPgm = (
 endkm
 
 kmod IMP-SEMANTICS is including IMP-SYNTAX + K
-  syntax K ::= AExp | BExp | Stmt | Pgm | List{Id}
+  syntax K ::= AExp | BExp | Stmt | Pgm | IdList
   syntax KResult ::= Int | Bool
 
   configuration <T> <k>.K</k> <state>.Map</state> </T>
@@ -122,7 +122,7 @@ kmod IMP-SEMANTICS is including IMP-SYNTAX + K
   rule if true then S:Stmt else _ => S
   rule if false then _ else S => S
   rule <k>while B do S => if B then (S while B do S) else skip; <_/k>
-  rule <k>var Xl:List{Id}; S => S</k> <state_>. => getList{K}(Xl)|->0 <_/state> [structural] 
+  rule <k>var Xl:IdList; S => S</k> <state_>. => getList{K}(Xl)|->0 <_/state> [structural] 
 endkm
 
 kmod IMP is including IMP-PROGRAMS + IMP-SEMANTICS 
@@ -130,3 +130,4 @@ kmod IMP is including IMP-PROGRAMS + IMP-SEMANTICS
   macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
   macro pgm = [['sumPgm]]
 endkm
+

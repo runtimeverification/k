@@ -331,7 +331,7 @@ fmod META-MODULE-EXTRAS is
 
   op removeSorts : SortSet SortSet -> SortSet .
   eq removeSorts(SS ; S, SS' ; S) = removeSorts(SS, SS' ; S) .
-  eq removeSorts(SS, SS') = SS [owise print "remove subsorts " SS'] .
+  eq removeSorts(SS, SS') = SS [owise print "remaining sorts: " SS] .
 
   op removeSorts : Module SortSet -> Module .
   eq removeSorts(M, SS) = setSorts(M, removeSorts(getSorts(M), SS)) .
@@ -734,6 +734,7 @@ fmod META-MODULE-EXTRAS is
   eq getAttrs(rl T1 => T2 [AS] .) = AS .
   eq getAttrs(crl T1 => T2 if Cond [AS] .) = AS .
 
+
   op genXVars : TypeList -> TermList .
   eq genXVars(nil) = empty .
   eq genXVars(T Tl) = mkVariable('X,T),genXVars(Tl) .
@@ -945,6 +946,19 @@ fmod META-LEVEL-EXTRAS is
   eq makeSubsort(M, S, S ; SS) = makeSubsort(M, S, SS) .
   eq makeSubsort(M, S, S' ; SS) 
    = if S in getSorts(M) and-then S' in getSorts(M) and-then sortLeq(M, S, S') then (subsort S < S' .) makeSubsort(M, S, SS) else makeSubsort(M,S, SS) fi
+  [owise] .
+
+  op generateSubsorts : Module SortSet SortSet ~> SubsortDeclSet .
+  eq generateSubsorts(M, none, SS) = none .
+  eq generateSubsorts(M, S ; SS, SS') 
+   = if S in getSorts(M) then generateSubsorts(M, SS, SS') generateSubsort(M, S, SS') 
+     else generateSubsorts(M, SS, SS') fi .
+
+  op generateSubsort : Module Sort SortSet ~> SubsortDeclSet .
+  eq generateSubsort(M, S, none) = none .
+  eq generateSubsort(M, S, S ; SS) = makeSubsort(M, S, SS) .
+  eq generateSubsort(M, S, S' ; SS) 
+   = if S' in getSorts(M) then (subsort S < S' .) generateSubsort(M, S, SS) else generateSubsort(M,S, SS) fi
   [owise] .
 
   op minimalOps : Module OpDeclSet ~> OpDeclSet .

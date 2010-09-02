@@ -23,20 +23,20 @@ kmod SIMPLE-TYPED-SORTS is including PL-INT + PL-ID
 --- do not add Bottom as subsort to anything else, like Id, Exp, etc
   sort Bottom
   syntax List{Bottom}  ::= Bottom | .List{Bottom}
-                     | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom}] 
+                     | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid] 
  
 --- List{Type}
   syntax List{Type} ::= Type | List{Bottom} 
-                     | List{Type} , List{Type} [ditto] 
+                     | List{Type} , List{Type} [ditto metadata "ditto"] 
 --- List{IdType}
   syntax List{IdType}  ::= IdType | List{Bottom}
-                     | List{IdType} , List{IdType} [ditto]
+                     | List{IdType} , List{IdType} [ditto metadata "ditto"]
 --- List{Id}
   syntax List{Id}  ::= Id | List{Bottom}
-                     | List{Id} , List{Id} [ditto]
+                     | List{Id} , List{Id} [ditto metadata "ditto"]
 --- List{Exp}
   syntax List{Exp} ::=  Exp | List{Id} 
-                     | List{Exp} , List{Exp} [ditto]
+                     | List{Exp} , List{Exp} [ditto metadata "ditto"]
 
 -----------------------------------------------------------------------------
 endkm
@@ -63,7 +63,7 @@ kmod SIMPLE-TYPED-EXPR is including SIMPLE-TYPED-SORTS
                 | Exp and Exp [gather(E e) prec 55 strict] 
                 | Exp or Exp  [gather(E e) prec 59 strict] 
                 | not Exp [prec 53 strict]
-                | Exp [ Exp ] [ditto strict] 
+                | Exp [ Exp ] [ditto metadata "ditto"] 
                 | sizeOf ( Exp ) [strict]
                 | Exp ( )
                 | Exp ( List{Exp} ) [prec 2 strict]

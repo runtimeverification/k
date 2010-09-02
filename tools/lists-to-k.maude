@@ -95,7 +95,7 @@ fmod LISTS-TO-K is
 
  op lists2kOp : OpDecl CTORSMap ~> OpDeclSet .
  eq lists2kOp((op Q : Tl -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
-  = (op listWrapperS(Q) : nil -> KHybridLabel [metadata("list wrapper")] .) .
+  = (op listWrapperS(Q) : nil -> mkKLabelSort(KProper,metadataString(AS)) [metadata(metadataString(AS))] .) .
 ceq lists2kOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
   = none if getName(Trm) = Q' .
  eq lists2kOp((op Q : T -> T' [AS metadata("list wrapper")] .), CTORS)
@@ -202,7 +202,7 @@ ceq lists2kOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
 
  op lists2kT : Term Type Module OpDeclSet CTORSMap OpDecl ~> Term .
  eq lists2kT(Q[Trm], T1:Type, M, OPDS, CTORS (subsort T' < T .) |-> Trm', op Q : T -> T'' [metadata("list wrapper") AS] .)
-  = wrapList(T', Trm', lists2kT(Trm, T, M, OPDS, CTORS (subsort T' < T .) |-> Trm')) .
+  = wrapList(mkKLabelSort(KProper,metadataString(getAttrs(getListConstructor(OPDS,T)))), Trm', lists2kT(Trm, T, M, OPDS, CTORS (subsort T' < T .) |-> Trm')) .
  eq lists2kT(Q[Trms], T, M, OPDS, CTORS, Op)
   = Q[lists2kTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, CTORS)] [owise] .
 

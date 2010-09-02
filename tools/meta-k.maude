@@ -340,6 +340,8 @@ fmod K-META-CONFIG is
 
   ops Map Bag List Set : -> Sort .
   eq Map = 'Map . eq Bag = 'Bag . eq List = 'List . eq Set = 'Set .
+  op CellLabel : -> Sort .
+  eq CellLabel = 'CellLabel .
 
   op emptyCt : Sort -> Constant .
   eq emptyCt(S) = if S == Bag then mkConstant('.,Bag) else if S == Map then mkConstant('.,Map) else if S == List then mkConstant('., List) else if S == K then mkConstant('., K) else if S == Set then mkConstant('., Set) else 'error.K fi fi fi fi fi .
@@ -524,10 +526,10 @@ fmod K-META-LISTS is including K-META-OPS .
   eq klistType(T) = KList [owise] .
 
   op klabelType : Type ~> Type .
-  eq klabelType(Q) = if Q == K then KLabel else if Q ==  KResult then KResultLabel else KHybridLabel fi fi .
+  eq klabelType(Q) = if Q == K then KLabel else if Q ==  KResult then KResultLabel else if Q == KProper then KProperLabel else KHybridLabel fi fi fi .
   
   op wrapList : Type Term TermList ~> Term .
-  eq wrapList(T, Q[Trm], Trms) = kApply(listWrapperT(Q,KHybridLabel),Trms) .
+  eq wrapList(T, Q[Trm], Trms) = kApply(mkConstant(listWrapperS(Q),T),Trms) [print "listWrapper " T Q Trm Trms].
 
   op listWrapperS : Qid -> Qid .
   eq listWrapperS(Q) = mkKLabel(Q) .
@@ -552,6 +554,7 @@ fmod K-META-LISTS is including K-META-OPS .
 
   op getListTerm : Type OpDeclSet ~> Term .
   eq getListTerm(T, (op Q : T T -> T [assoc id(Trm) AS] .) OPDS) = Q[Trm] .
+  eq getListTerm(T, (op Q : T T -> T [assoc AS] .) OPDS) = Q[mkConstant('dummy,T)] [owise] .
 endfm
 
 fmod META-K-CONDITION-SEARCH is
