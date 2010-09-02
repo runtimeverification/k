@@ -19,7 +19,7 @@ int main(void){
 	char x8[3] = {1, 2};
 	int x9[3] = {1, 2, 3};
 	int x10[] = {5, 6, 7};
-	//int x16[] = {5};
+	int x16[] = {5};
 	struct {int a; int b; int c[2]; int d;} x17 = {.b = 2, 3, 4, 5};
 	struct {int a; int b;} x18[2] = {{1, 2}, {3}};
 	struct {int a; int b;} x19[2] = {1, 2, 3};

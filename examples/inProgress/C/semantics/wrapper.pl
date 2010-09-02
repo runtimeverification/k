@@ -40,7 +40,7 @@ while (my $line = <STDIN>) {
 			$output =~ s/\%/\%\%/g;
 			$output =~ s/\\\\/\\\\\\\\/g;
 			print substr(`printf "x$output"`, 1);
-		} elsif ($line =~ m/< (resultValue|\(resultValue\)\.CellLabel) > \('tv\)\.KResultLabel\(Rat (-?\d+)\(\.List\{K\}\),,Base-Type int\(\.List\{K\}\)\) <\/ \1 >/){
+		} elsif ($line =~ m/< (resultValue|\(resultValue\)\.CellLabel) > \('tv\)\.KResultLabel\(kList\("wklist_"\)\(BaseValue (-?\d+)\(\.List\{K\}\)\),,BaseType int\(\.List\{K\}\)\) <\/ \1 >/){
 			$haveResult = 1;
 			$retval = $2;
 		}

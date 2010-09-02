@@ -126,6 +126,23 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	--- mb [type-arrow-cool]: rule
 		--- < type > [T:Type ~> '_->_(HOLE,, X:Id) => '_->_(T:Type,, X:Id)] ...</ type >
 		--- : KSentence [metadata "structural"] .
+	mb [type-plus-heat]: rule
+		< type > K:K + K':K => K:K ~> HOLE + K':K ...</ type >
+		if notBool isAType(K:K)
+		: KSentence [metadata "structural"] .
+	mb [type-plus-cool]: rule
+		< type > T:Type ~> HOLE + K:K => T:Type + K:K ...</ type >
+		if isAType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb [type-plus-heat]: rule
+		< type > K:K + K':K => K':K ~> K:K + HOLE ...</ type >
+		if notBool isAType(K':K)
+		: KSentence [metadata "structural"] .
+	mb [type-plus-cool]: rule
+		< type > T:Type ~> K:K + HOLE => K:K + T:Type ...</ type >
+		if isAType(T:Type)
+		: KSentence [metadata "structural"] .
+		
 	mb [type-dot-heat]: rule
 		< type > K:K . X:Id => K:K ~> HOLE . X:Id ...</ type >
 		if notBool isAType(K:K)
