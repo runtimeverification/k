@@ -223,6 +223,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op calculateGotoMap : Id K -> K .
 	
 	op hasCharType : Type -> Bool .
+	op isABaseType_ : K -> Bool .
+	op hasPointerType : Type -> Bool .
 	op hasArrayType : Type -> Bool .
 	op hasStructType : Type -> Bool .
 	op hasUnionType : Type -> Bool .
@@ -805,8 +807,7 @@ mod COMMON-INITIALIZATION is
 		: KSentence [metadata "structural"] .
 	mb [init-next-array-element-done]: rule
 		< currentSubObject >
-			next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
-			=> next ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+			next (ListItem(te(K:K[N:Nat], T:Type)) => .) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
 		...</ currentSubObject >
 		if notBool Len:Nat >Nat sNat(N:Nat)
 		: KSentence [metadata "structural"] .
@@ -818,6 +819,14 @@ mod COMMON-INITIALIZATION is
 		...</ currentSubObject >
 		< structs >... 
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(T':Type, F':Id) :: ? 
+		...</ structs > 
+		: KSentence [metadata "structural"] .
+	mb [init-next-struct-element-done]: rule
+		< currentSubObject >
+			next (ListItem(te(K:K . F:Id, T:Type)) => .) ListItem(te(K:K, structType(S:Id)))
+		...</ currentSubObject >
+		< structs >...
+			S:Id |-> ? :: typedDeclaration(T:Type, F:Id)
 		...</ structs > 
 		: KSentence [metadata "structural"] .
 	--- mb rule
@@ -922,18 +931,44 @@ mod COMMON-INITIALIZATION is
 		--- : KSentence [metadata "structural"] .
 		
 	--- forces a basetype
+	op initializeSingleInit : K -> K .
 	mb rule
-		< k > fillInitializer(SingleInit(K':K)) => . ...</ k >
-		< currentSubObject > (. => next) ListItem(te(K:K, T:BaseType)) ...</ currentSubObject >
+		< k > initializeSingleInit(K':K) => . ...</ k >
+		< currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
+		--- if getKLabel(K':K) =/=Bool 'Constant
+		if isABaseType(T:Type) orBool hasPointerType(T:Type)
 		: KSentence .
-	
-	--- mb rule
-		--- < k > fillInitializer(SingleInit(Constant(StringLiteral(S:String)))) ~> getInitializer => incompleteArrayInitializer() ...</ k >
-		--- < currentSubObject > (. => next) ListItem(te(K:K, incompleteArrayType(T:Type))) ...</ currentSubObject >
-		--- < savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
-		--- if hasCharacterType(T:Type)
-		--- : KSentence .
+	mb rule
+		< k > fillInitializer(SingleInit(K:K)) => initializeSingleInit(K:K) ...</ k >
+		if getKLabel(K:K) =/=Bool 'Constant
+		: KSentence .
+	mb rule
+		< k > fillInitializer(SingleInit(Constant(K:K))) => initializeSingleInit(Constant(K:K)) ...</ k >
+		if getKLabel(K:K) =/=Bool 'StringLiteral
+		andBool getKLabel(K:K) =/=Bool 'WStringLiteral
+		: KSentence .
+	mb rule
+		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
+			=> fillInitializer(SingleInit(tv(charToAscii(firstChar(S:String)), char))) 
+			~> fillInitializer(SingleInit(Constant(StringLiteral(butFirstChar(S:String))))) 
+		...</ k >
+		< currentSubObject > ListItem(te(K:K, T:Type)) ...</ currentSubObject >
+		if S:String =/=Bool ""
+		andBool hasCharType(T:Type)
+		: KSentence .
+	--- fixme not sure what happens in the case of   char *x = "";
+	mb rule
+		< k > fillInitializer(SingleInit(Constant(StringLiteral("")))) => . ...</ k >
+		--- if hasCharType(T:Type)
+		: KSentence .
+	mb rule
+		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
+			=> initializeSingleInit(Constant(StringLiteral(S:String)))
+		...</ k >
+		< currentSubObject > ListItem(te(K:K, T:Type)) ...</ currentSubObject >
+		if notBool hasCharType(T:Type)
+		: KSentence .
 endm
 
 mod COMMON-GLOBAL-DECLARATION is
@@ -961,16 +996,23 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(L:List{C}))
 			=> declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
 		...</ k >
-		if (hasStructType(T:Type) orBool hasUnionType(T:Type)) 
+		if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) 
 		andBool notBool hasIncompleteType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > declare(typedDeclaration(arrayType(T:Type, N:Nat), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
-			=> declare(typedDeclaration(arrayType(T:Type, N:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+		< k > declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String)))) 
+			=> declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
 		...</ k >
-		: KSentence [metadata "structural"] .
+		if hasCharType(T:Type)
+		andBool lengthString(S:String) <=Nat Len:Nat
+		: KSentence [metadata "structural"] .	
 		
 	--- incomplete arrays
+	mb rule
+		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(L:List{C}))
+			=> declare(typedDeclaration(arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))), X:Id), CompoundInit(L:List{C}))
+		...</ k >
+		: KSentence [metadata "computational"] . --- fixme we're making this computational to force evaluation after another rule below
 	mb rule
 		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
 			=> allocString(Loc:Nat, (S:String +String "\0"))
@@ -985,21 +1027,6 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
 		...</ k >
 		: KSentence [metadata "structural"] .
-			
-	
-	--- fixme the types of these should be different (constant?)
-	--- string initializers (not incomplete types)
-	mb rule
-		< k > declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-			=> allocString(Loc:Nat, S:String)
-			~> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, arrayType(T:Type, Len:Nat))
-		...</ k >
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		if hasCharType(T:Type)
-		andBool lengthString(S:String) ==Bool Len:Nat
-		: KSentence [metadata "structural"] .
-		
 		
 	--- base types
 	mb rule
@@ -1014,6 +1041,13 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((X:Id := K:K ~> discard)))
 		...</ k >
 		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
+		: KSentence [metadata "structural"] .
+		
+	--- no init
+	mb rule
+		< k > declare(typedDeclaration(T:Type, X:Id), NoInit)
+			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
+		...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- eq declare-aux(Kr:KResult, Kr':KResult) = declare(Kr:KResult, Kr':KResult) .

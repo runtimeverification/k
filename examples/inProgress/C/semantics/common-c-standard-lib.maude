@@ -360,7 +360,9 @@ mod COMMON-C-STANDARD-LIBRARY is
 	
 	--- ---fixme why do i have to have the 0--255 check?
 	mb [lib-printf-normal]: rule
-		< k > printf-aux(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) => writeToFD(1, N:Nat) ~> printf-aux(sNat(Len:Nat), sym(Block:Nat) +Nat sNat(Offset:Nat), L:List{C}) ...</ k >
+		< k > printf-aux(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
+			=> writeToFD(1, N:Nat) ~> printf-aux(sNat(Len:Nat), sym(Block:Nat) +Nat sNat(Offset:Nat), L:List{C}) 
+		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(N:Nat, 8))) ...</ mem >
 		if N:Nat =/=Bool asciiString("%") 
 		andBool N:Nat =/=Bool 0

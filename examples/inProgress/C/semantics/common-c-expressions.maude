@@ -172,7 +172,7 @@ mod COMMON-SEMANTICS-LITERALS is
 	--- +1 for terminating 0
 	--- alloc(Loc:Nat, lengthString(S:String) +Nat 1) ~> 
 	mb [const-string-notfound]: rule
-		< k > (. => allocString(Loc:Nat, S:String))
+		< k > (. => allocString(Loc:Nat, S:String +String "\0"))
 			~> StringLiteral(S:String)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
@@ -218,8 +218,10 @@ and ll or LL
 ------------------------------------------------------------------
 ***)
 	---c99 6.4.4.1:6 If an integer constant cannot be represented by any type in its list, it may have an extended integer type, if the extended integer type can represent its value. If all of the types in the list for the constant are signed, the extended integer type shall be signed. If all of the types in the list for the constant are unsigned, the extended integer type shall be unsigned. If the list contains both signed and unsigned types, the extended integer type may be signed or unsigned. If an integer constant cannot be represented by any type in its list and has no extended integer type, then the integer constant has no type.
-	---c99 6.2.5:4 ... There may also be implementation-defined extended signed integer types. ...
+	---c99 6.2.5:4 ... There may also be impleme
 	
+	--- c1x 6.4.4.4:10
+	eq CharLiteral(N:Nat) = tv(N:Nat, int) .
 	eq IntLiteral(V:Value) = V:Value .
 	eq Constant(V:Value) = V:Value .
 	--- mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence . --- for internal computations
@@ -598,7 +600,7 @@ mod COMMON-SEMANTICS-MEMBERS is
 	op toEval-aux : K K -> K [metadata "strict(2)"] .
 	
 	mb rule
-		< k > V:Value . F:Id => toEval(V:Value . F:Id) ...</ k >
+		< k > K:K . F:Id => toEval(K:K . F:Id) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > toEval(K:K) => toEval-aux(K:K, typeof(K:K))  ...</ k >
@@ -607,12 +609,16 @@ mod COMMON-SEMANTICS-MEMBERS is
 	mb rule
 		< k > toEval-aux(K:K, arrayType(T:Type, N:Nat)) => &(K:K) ...</ k >
 		: KSentence [metadata "structural"] .
-		
+	op toEval-value : K -> K .
+	mb context toEval-value(`[HOLE`]:K . ?) : KSentence .
 	mb rule
-		< k > toEval-aux(tv(L:List{K}, T:Type) . F:Id, T':Type)
+		< k > toEval-aux(K:K, T:Type) => toEval-value(K:K) ...</ k >
+		if notBool hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .	
+	mb rule
+		< k > toEval-value(tv(L:List{K}, T:Type) . F:Id)
 			=> extractField(L:List{K}, T:Type, F:Id) 
 		...</ k >
-		if notBool hasArrayType(T':Type)
 		: KSentence [metadata "structural"] .	
 
 	--- mb rule

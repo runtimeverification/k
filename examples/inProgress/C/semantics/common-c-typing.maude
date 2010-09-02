@@ -3,7 +3,6 @@ mod COMMON-SEMANTICS-TYPE-INCLUDE is
 	including COMMON-INCLUDE .
 	
 	op isAType_ : K -> Bool .
-	op isABaseType_ : K -> Bool .
 endm
 
 mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
@@ -543,7 +542,11 @@ mod COMMON-C-TYPING is
 		if T:Type =/=Bool char
 		andBool T:Type =/=Bool unsigned-char
 		andBool T:Type =/=Bool signed-char .
-			
+	
+	eq hasPointerType(pointerType(?)) = true .
+	ceq hasPointerType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'pointerType .
+	
 	eq hasArrayType(arrayType(?, ?)) = true .
 	eq hasArrayType(incompleteArrayType(?)) = true .
 	ceq hasArrayType(T:Type) = false

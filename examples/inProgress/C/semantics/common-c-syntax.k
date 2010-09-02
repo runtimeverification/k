@@ -508,7 +508,7 @@ and unary_operator =
 	| MEMBEROFPTR of expression * string
 ***)
 	--- op Dot : K Id -> Expression
-	op _._ : K Id -> Expression [strict(1)]
+	op _._ : K Id -> Expression --- [strict(1)]
 	--- op Arrow : K Id -> Expression
 	op _->_ : K Id -> Expression [strict(1)]
 ***(
