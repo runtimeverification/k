@@ -509,9 +509,12 @@ mod COMMON-C-TYPING is
 		NameAndType(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
 		: KSentence .
 	op NameAndType : K K -> K [metadata "strict(2)"] .
-	
+	mb context (?:List{C} :: `[HOLE`]:C :: ?:List{C}) : KSentence .
 	mb rule
 		SingleName(T:Type, Name(X:Id, K:K)) => NameAndType(X:Id, DeclType(T:Type, K:K))
+		: KSentence .
+	mb rule
+		FieldGroup(T:Type, (C:C :: L:List{C})) => FieldGroup(T:Type, C:C) :: FieldGroup(T:Type, L:List{C})
 		: KSentence .
 	mb rule
 		FieldGroup(T:Type, Name(X:Id, K:K)) => NameAndType(X:Id, DeclType(T:Type, K:K))
@@ -638,6 +641,10 @@ mod COMMON-C-TYPING is
 		: KSentence [metadata "structural"] .
 	mb rule
 		< type > arrayType(T:Type, ?)[T':Type] => T:Type ...</ type >
+		if hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< type > arrayType(T:Type, ?) + T':Type => pointerType(T:Type) ...</ type >
 		if hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
 	--- mb rule
