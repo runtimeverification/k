@@ -922,8 +922,9 @@ sub make_metadata {
 # Match the K specific attributes below and make them into metadata
 # Right now it assumes that no \" can appear inside the metadata string
 # Therefore, the latex attribute is expected to be outside
-    s!(structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
-      if (defined $1) {
+    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
+	my $out = "";
+	if (defined $1) {
 	  local $_ = $1;
 	  $have_k_attributes = 1;
 	  if (/^latex\s+"([^"]*?)"$/gs) {
@@ -931,19 +932,28 @@ sub make_metadata {
               push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if $latex;
           }
           else {
-              push(@k_attributes, $_);
+	      push(@k_attributes, $_);
           }
+	  $out = "ditto" if $1 =~ m/ditto/;
       }
       else {
 	  push(@k_attributes, $2);
       }
-     ""
+     $out
      !gse;
 
 #    print "K attributes: @k_attributes\n";
 
     if (@k_attributes) {
 #	print "->@k_attributes<-\n";
+	
+# ugly hack for multiple occurences of ditto => eliminate duplicates from @k_attributes
+#        my %hash = map { $_, 1 } @k_attributes;
+#	my @unique_attr = keys %hash;
+#	s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@unique_attr\"\]"!se;
+#	print "Keep: @unique_attr\nOut: $_\n";
+
+#       original version
 	s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@k_attributes\"\]"!se;
 #	print "$_\n";
     }
