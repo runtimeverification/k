@@ -509,13 +509,25 @@ mod COMMON-C-TYPING is
 		NameAndType(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
 		: KSentence .
 	op NameAndType : K K -> K [metadata "strict(2)"] .
-	mb context (?:List{C} :: `[HOLE`]:C :: ?:List{C}) : KSentence .
+	
+***(
+('StructDef).KResultLabel(Id unnamed(0)(.List{K}),,('_::_).KHybridLabel(
+('FieldGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Unsigned).KResultLabel(.List{K}),,('Long).KResultLabel(.List{K}),,('Long).KResultLabel(.List{K}),,('Int).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('Name).KProperLabel(Id Identifier("offset")(.List{K}),,('JustBase).KProperLabel(.List{K}))))
+,,('FieldGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Unsigned).KResultLabel(.List{K}),,('Short).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('Name).KProperLabel(Id Identifier("handle")(.List{K}),,('JustBase).KProperLabel(.List{K}))))
+,,('FieldGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Unsigned).KResultLabel(.List{K}),,('Char).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('Name).KProperLabel(Id Identifier("eof")(.List{K}),,('JustBase).KProperLabel(.List{K}))))))
+
+
+***)
+	--- mb context (?:List{C} :: `[HOLE`]:C :: ?:List{C}) : KSentence .
 	mb rule
 		SingleName(T:Type, Name(X:Id, K:K)) => NameAndType(X:Id, DeclType(T:Type, K:K))
 		: KSentence .
+	mb [Separate-FieldGroups]: rule
+		FieldGroup(K:K, (C:C :: C':C :: L:List{C})) => FieldGroup(K:K, C:C) :: FieldGroup(K:K, (C':C :: L:List{C}))
+		: KSentence [metadata "structural"] .
 	mb rule
-		FieldGroup(T:Type, (C:C :: L:List{C})) => FieldGroup(T:Type, C:C) :: FieldGroup(T:Type, L:List{C})
-		: KSentence .
+		FieldGroup(K:K, Nil) => Nil
+		: KSentence [metadata "structural"] .
 	mb rule
 		FieldGroup(T:Type, Name(X:Id, K:K)) => NameAndType(X:Id, DeclType(T:Type, K:K))
 		: KSentence .

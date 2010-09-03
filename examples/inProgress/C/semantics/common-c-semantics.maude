@@ -1206,7 +1206,15 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	mb rule
 		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
+		< currentFunction > File-Scope </ currentFunction >
+		< genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		: KSentence .
+	mb rule
+		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
+		< currentFunction > F:K </ currentFunction >
+		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		if F:K =/=Bool File-Scope
 		: KSentence .
 	
 	--- initNameGroup(typeNamePair(T:Type, Name:K), Exp:K) .
