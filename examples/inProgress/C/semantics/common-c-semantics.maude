@@ -35,7 +35,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op List : BagItem -> ListItem .
 	op piece : Nat Nat -> Nat .
 	op trueUnknown : -> Nat [ctor] .
-	op unknown : -> Nat [ctor] .
+	op unknown : Nat -> Nat [ctor] .
 	op unknownF : -> Float [ctor] .
 	op skipval : -> KResult .
 	op debugK : -> K .

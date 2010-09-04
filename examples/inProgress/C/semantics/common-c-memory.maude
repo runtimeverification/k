@@ -19,7 +19,50 @@ mod COMMON-SEMANTICS-READING is
 		--- < k > extractBitsFromList(dataList((functionObject(X:Id, T:Type, K:K))), 0, N:Nat) => functionObject(X:Id, T:Type, K:K) ...</ k >
 		--- if N:Nat ==Bool numBitsPerByte
 		--- : KSentence [metadata "structural"] .
-	op extractBitsFromList : K Nat Nat List{K} -> K .
+***(
+('extractBitsFromList).KProperLabel(
+('dataList).KResultLabel(kList("wklist_")(
+	BaseValue piece(unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 |Nat (2 |Nat 1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(encodedPointer(0 +Nat sym(25)), 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(encodedPointer(0 +Nat sym(27)), 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(unknown, 8)(.List{K})
+	,,BaseValue piece(0, 8)(.List{K})
+	,,BaseValue piece(0, 8)(.List{K})
+	,,BaseValue piece(0, 8)(.List{K})
+	,,BaseValue piece(0, 8)(.List{K})))
+,,BaseValue 0(.List{K}),,BaseValue 1(.List{K}),,kList("wklist_")(.List{K})
+)
+
+***)
+		
+	op extractBitsFromList : K Nat Nat List{K} -> K . --- datalist, offset into list, number of bits to extract, accumulator
 	eq extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat) = extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat, .List{K}) .
 	mb rule
 		< k > extractBitsFromList(dataList((piece(?, Len:Nat),, L:List{K})), Offset:Nat, NumBits:Nat, .List{K})
@@ -33,6 +76,14 @@ mod COMMON-SEMANTICS-READING is
 			=> extractBitsFromList(dataList(L:List{K}), 0, absInt(NumBits:Nat -Int Len:Nat), (Done:List{K},, piece(N:Nat, Len:Nat)))
 		...</ k >
 		if Len:Nat <=Nat NumBits:Nat
+		: KSentence [metadata "structural"] .
+
+	mb rule
+		< k > extractBitsFromList(dataList((piece(N:Nat, Len:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
+			=> extractBitsFromList(dataList((piece(N:Nat >>Nat 1, absInt(Len:Nat -Int 1)),, piece(N:Nat &Nat 1, 1),, L:List{K})), 0, NumBits:Nat, Done:List{K})
+		...</ k >
+		if Len:Nat >Nat NumBits:Nat
+		andBool Len:Nat >Nat 1
 		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < k > extractBitsFromList(dataList((encodedPointer(N:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
@@ -136,11 +187,6 @@ explodeToBits(values((
 		< k > extractBytesFromMem-aux(?, 0, Aux:List{KResult}) => dataList(values(Aux:List{KResult})) ...</ k >
 		: KSentence [metadata "structural"] .
 	
-	--- FIXME overly rough?
-	eq unknown >>Nat ? = unknown .
-	eq ? &Nat unknown = unknown .
-	--- |nat
-	
 	op rawData : BaseValue Nat -> KResult .
 	--- FIXME make sure it's a byte
 	mb rule
@@ -151,8 +197,8 @@ explodeToBits(values((
 		andBool Offset:Nat <Nat Size:Nat
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => piece(unknown, numBitsPerByte) ...</ k >
-		< mem >... Block:Nat |-> memblock(Size:Nat, (M:Map => M:Map[piece(unknown, numBitsPerByte) / Offset:Nat])) ...</ mem >
+		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => piece(unknown(numBitsPerByte), numBitsPerByte) ...</ k >
+		< mem >... Block:Nat |-> memblock(Size:Nat, (M:Map => M:Map[piece(unknown(numBitsPerByte), numBitsPerByte) / Offset:Nat])) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		if notBool(sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
 		andBool notBool($hasMapping(M:Map, Offset:Nat))
@@ -288,7 +334,7 @@ mod COMMON-SEMANTICS-WRITING is
 	ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
 		= splitPointerBytes(I:Int, T:Type, Len:Nat, piece(NULL, numBitsPerByte))
 		if I:Int ==Bool NULL .
-	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K}) = splitPointerBytes(I:Int, T:Type, Len:Nat, (L:List{K},, piece(unknown, numBitsPerByte))) .
+	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K}) = splitPointerBytes(I:Int, T:Type, Len:Nat, (L:List{K},, piece(unknown(numBitsPerByte), numBitsPerByte))) .
 	eq splitPointerBytes(I:Int, T:Type, 0, L:List{K}) 
 		= dataList(L:List{K}) .
 	

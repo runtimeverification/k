@@ -23,6 +23,17 @@ mod COMMON-SEMANTICS-BOOLEAN is
 	mb rule
 		< k > tv(0, ?) ? E1:Expression : E2:Expression => sequencePoint ~> E2:Expression ...</ k >
 		: KSentence [metadata "structural"] .
+	
+	mb rule !(tv(V:BaseValue, ?)) => tv(0, int)
+		if V:BaseValue =/=Bool 0
+		: KSentence [metadata "structural"] .
+	mb rule !(tv(V:BaseValue, ?)) => tv(1, int)
+		if (V:BaseValue ==Bool 0)
+		: KSentence [metadata "structural"] .
+		
+	
+	--- mb rule [!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+		
 endm
 
 mod COMMON-SEMANTICS-SIZEOF is
@@ -338,32 +349,6 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	eq getInnerOperator('_^=_) = '_^_ .
 	eq getInnerOperator('_|=_) = '_|_ .
 	
-	--- mb [assign-times]: rule [E1:Expression *= E2:Expression => E1:Expression := E1:Expression * E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-divide]: rule [E1:Expression /= E2:Expression => E1:Expression := E1:Expression / E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-mod]: rule [E1:Expression %= E2:Expression => E1:Expression := E1:Expression % E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-plus]: rule [E1:Expression += E2:Expression => E1:Expression := E1:Expression + E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-subtract]: rule [E1:Expression -= E2:Expression => E1:Expression := E1:Expression - E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-lshift]: rule [E1:Expression <<= E2:Expression => E1:Expression := E1:Expression << E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-rshift]: rule [E1:Expression >>= E2:Expression => E1:Expression := E1:Expression >> E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-bit-and]: rule [E1:Expression &binop= E2:Expression => E1:Expression := E1:Expression &binop E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-bit-xor]: rule [E1:Expression ^= E2:Expression => E1:Expression := E1:Expression ^ E2:Expression] : KSentence [metadata "structural"] .
-	--- mb [assign-bit-or]: rule [E1:Expression |= E2:Expression => E1:Expression := E1:Expression | E2:Expression] : KSentence [metadata "structural"] .
-	
-	--- --- fixme this happens due to problem with cil and zeroinit
-	--- mb [assign-fix-enum]: rule
-		--- < k > [assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), tv(V:Int, int)) 
-		--- => assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), cast(enumType(X:Id), tv(V:Int, int)))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	
-	--- --- fixme this isn't supposed to happen, but cil messes up and now we're doing some conversions and promotions, so it can
-	--- mb rule
-		--- < k > [assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(V:Int, T':Type))
-		--- => assign(Deref(tv(Loc:Nat, pointerType(T:Type))), cast(T:Type, tv(V:Int, T':Type)))] ...</ k >
-		--- if T:Type =/=Bool T':Type
-		--- andBool hasIntegerType(T:Type)
-		--- andBool hasIntegerType(T':Type) 
-		--- : KSentence [metadata "structural"] .
-
 	mb [assign]: rule
 		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), tv(V:BaseValue, T:Type)) 
 			=> write(Loc:Nat, tv(V:BaseValue, T:Type)) 
@@ -472,15 +457,47 @@ mod COMMON-SEMANTICS-BITWISE is
 		--- : KSentence [metadata "structural"] .
 endm
 
+mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	--- FIXME should also be promoting these
+	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	
+	--- fixme could check 6.5.8:2
+	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T':Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi 
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T':Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi 
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T':Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi 
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T':Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi 
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T':Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi 
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T':Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+
+	--- mb rule [tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	--- mb rule [tv(F1:Float, T:Type) <= tv(F2:Float, T:Type) => if (F1:Float <=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	--- mb rule [tv(F1:Float, T:Type) > tv(F2:Float, T:Type) => if (F1:Float >Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	--- mb rule [tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	--- mb rule [tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	--- mb rule [tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+endm
+
 mod COMMON-SEMANTICS-ARITHMETIC is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
-
-	--- --- we have to go through this sillyness because we can't compute size functionally
-	--- --- fixme
-	--- op waitingForOffset : Nat Type -> K .
-	--- mb rule < k > [tv(Offset:Nat, T':Type) ~> waitingForOffset(Base:Nat, T:Type) => tv(loc(Base:Nat, Offset:Nat), T:Type)] ...</ k > 
-		--- if T':Type ==Bool cfg:sizeut
-		--- : KSentence [metadata "structural"] .
 		
 	--- FIXME needs to check offset > 0 
 	mb rule < k > tv(Loc:Nat, pointerType(T':Type)) + tv(I2:Int, T:Type)
@@ -496,22 +513,7 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		...</ k >
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
-		
-	--- mb rule < k > [tv(loc(Block:Nat, Offset:Nat), pointerType(T':Type)) - tv(I2:Int, T:Type) 
-	--- => '_-_(tv(Offset:Nat, cfg:sizeut),, '_*_(sizeofType(T':Type),, tv(I2:Int, cfg:sizeut))) ~> waitingForOffset(Block:Nat, pointerType(T':Type))] ...</ k >
-		--- if hasIntegerType(T:Type)
-		--- andBool T':Type =/=Bool void
-		--- : KSentence [metadata "structural"] .
-		
-	--- op undefinedMessage : String -> K .
-	--- --- pointer arithmetic is undefined on void types
-	--- mb rule < k > [.K => undefinedMessage("Pointer arithmetic is undefined for void pointers (It's a constraint violation.")] ~> tv(I1:Int, pointerType(void)) + tv(I2:Int, T:Type) ...</ k >
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule < k > [.K => undefinedMessage("Pointer arithmetic is undefined for void pointers (It's a constraint violation.")] ~> tv(I1:Int, pointerType(void)) - tv(I2:Int, T:Type) ...</ k >
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-			
+					
 	--- op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
 	--- mb [start-pointer-difference]: rule [tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
 		--- => computePointerDifference(I1:Int, I2:Int, sizeofType(T:Type))]
@@ -539,12 +541,13 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		andBool I2:Int =/=Bool 0
 		: KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) % tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int %Int I2:Int)] 
-		--- if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [-un tv(I1:Int, T:Type) => arithInterpret(T:Type, -Int_(I1:Int))] 
-		--- if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
-		--- : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) % tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int %Int I2:Int) 
+		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		andBool I2:Int =/=Bool 0
+		: KSentence [metadata "structural"] .
+	mb rule - tv(I1:Int, T:Type) => arithInterpret(T:Type, -Int_(I1:Int))
+		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		: KSentence [metadata "structural"] .
 	
 	--- --- floats
 	--- --- fixme
@@ -559,29 +562,6 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 	--- mb rule [-un tv(F:Float, T:Type) => arithInterpret(T:Type, -Float_(F:Float))] 
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb rule [tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) <= tv(F2:Float, T:Type) => if (F1:Float <=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) > tv(F2:Float, T:Type) => if (F1:Float >Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-		
-	--- FIXME should also be promoting these
-	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule !(tv(V:BaseValue, ?)) => tv(0, int)
-		if V:BaseValue =/=Bool 0
-		--- if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
-		: KSentence [metadata "structural"] .
-	mb rule !(tv(V:BaseValue, ?)) => tv(1, int)
-		if (V:BaseValue ==Bool 0)
-		--- if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
-		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-MEMBERS is 
@@ -838,6 +818,7 @@ mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-ASSIGNMENT .
 	including COMMON-SEMANTICS-LITERALS .
 	including COMMON-SEMANTICS-BITWISE .
+	including COMMON-SEMANTICS-BOOLEAN-ARITHMETIC .
 	including COMMON-SEMANTICS-ARITHMETIC .
 	including COMMON-SEMANTICS-MEMBERS .
 	including COMMON-SEMANTICS-DEREFERENCE .
