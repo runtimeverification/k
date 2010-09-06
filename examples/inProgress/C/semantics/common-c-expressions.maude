@@ -164,7 +164,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		</ control >
 		=>
 		< control >
-			< k > sequencePoint ~> populateFromGlobal ~> bind(L:List{C}, P:List{Type}) ~> B:K </ k >
+			< k > sequencePoint ~> populateFromGlobal ~> bind(L:List{C}, P:List{Type}) ~> B:K ~> Return(NothingExpression) </ k >
 			< currentFunction > X:Id </ currentFunction >
 		...</ control >)
 		< callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > </ stackFrame >) ...</ callStack >

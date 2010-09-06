@@ -59,6 +59,14 @@ mod COMMON-SEMANTIC-SYNTAX is
 	eq NULL = 0 .
 	op emptyValue : -> Value .
 	--- subsort List{KResult} < K .
+	--- op bitid : -> Nat .
+	--- op _bit::_ : Nat Nat -> Nat [assoc] .
+	--- eq bitid bit:: N:Nat = N:Nat .
+	
+	--- ceq piece(N:Nat, Len:Nat) bit:: piece(N':Nat, Len':Nat)
+		--- = piece(N:Nat <<Nat Len':Nat |Nat N':Nat, Len:Nat +Nat Len':Nat)
+		--- if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
+	
 	
 	op zero : Id -> K .
 	

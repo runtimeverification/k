@@ -19,48 +19,6 @@ mod COMMON-SEMANTICS-READING is
 		--- < k > extractBitsFromList(dataList((functionObject(X:Id, T:Type, K:K))), 0, N:Nat) => functionObject(X:Id, T:Type, K:K) ...</ k >
 		--- if N:Nat ==Bool numBitsPerByte
 		--- : KSentence [metadata "structural"] .
-***(
-('extractBitsFromList).KProperLabel(
-('dataList).KResultLabel(kList("wklist_")(
-	BaseValue piece(unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 |Nat (1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 |Nat (2 |Nat 1 &Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (unknown |Nat (0 |Nat unknown) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(encodedPointer(0 +Nat sym(25)), 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(encodedPointer(0 +Nat sym(27)), 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(unknown, 8)(.List{K})
-	,,BaseValue piece(0, 8)(.List{K})
-	,,BaseValue piece(0, 8)(.List{K})
-	,,BaseValue piece(0, 8)(.List{K})
-	,,BaseValue piece(0, 8)(.List{K})))
-,,BaseValue 0(.List{K}),,BaseValue 1(.List{K}),,kList("wklist_")(.List{K})
-)
-
-***)
 		
 	op extractBitsFromList : K Nat Nat List{K} -> K . --- datalist, offset into list, number of bits to extract, accumulator
 	eq extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat) = extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat, .List{K}) .
@@ -133,6 +91,8 @@ mod COMMON-SEMANTICS-READING is
 	eq joinIntegerBytes(T:Type, L:List{K}) = joinIntegerBytes(T:Type, L:List{K}, 0) .
 	eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), M:Nat)
 		= joinIntegerBytes(T:Type, L:List{K}, ((M:Nat <<Nat Len:Nat) |Nat N:Nat)) .
+	--- eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), M:Nat)
+		--- = joinIntegerBytes(T:Type, L:List{K}, M:Nat bit:: piece(N:Nat, Len:Nat)) .
 	eq joinIntegerBytes(T:Type, .List{K}, N:Nat) = interpret(T:Type, N:Nat) . 
 		
 	op isConcreteList : List{K} -> Bool .
@@ -274,6 +234,9 @@ mod COMMON-SEMANTICS-WRITING is
 	ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
 		= joinBitsToBytes-aux(dataList((piece((N:Nat <<Nat 1) |Nat M:Nat, sNat(Len:Nat)),, L:List{K})), dataList(R:List{K}))
 		if Len:Nat <Nat numBitsPerByte .
+	--- ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
+		--- = joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat) bit:: piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
+		--- if Len:Nat <Nat numBitsPerByte .
 	ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, L:List{K})), dataList(R:List{K}))
 		= joinBitsToBytes-aux(dataList(L:List{K}), dataList((R:List{K},, piece(N:Nat, Len:Nat))))
 		if Len:Nat ==Bool numBitsPerByte .

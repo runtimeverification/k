@@ -279,37 +279,50 @@ mod COMMON-C-CONVERSIONS is
 	including COMMON-SEMANTICS-CAST .
 	including COMMON-SEMANTICS-PROMOTIONS .
 	
-***(
-('interpret-aux).KProperLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 1(.List{K})),,('bitFlatten).KProperLabel(BaseValue (0 |Nat (1 &Nat unknown(8) |Nat (1 &Nat unknown(8) >>Nat 1 |Nat (1 &Nat unknown(8) >>Nat 1 >>Nat 1 |Nat (1 &Nat unknown(8) >>Nat 1 >>Nat 1 >>Nat 1 |Nat (1 &Nat unknown(8) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 |Nat (1 &Nat unknown(8) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 |Nat (0 |Nat 1 &Nat unknown(8) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1)(.List{K})))
 
-***)
-	eq bitFlatten(N:Nat |Nat M:Nat) = bitFlatten(N:Nat) |Nat bitFlatten(M:Nat) .
-	eq bitFlatten(N:Nat &Nat M:Nat) = bitFlatten(N:Nat) &Nat bitFlatten(M:Nat) .
-	eq bitFlatten(N:Nat <<Nat M:Nat) = bitFlatten(N:Nat) <<Nat M:Nat .
-	eq bitFlatten(N:Nat >>Nat M:Nat) = bitFlatten(N:Nat) >>Nat M:Nat .
-	eq bitFlatten(unknown(Len:Nat)) = bitlist(Len:Nat, nTimes(Len:Nat, unknownBit)) .
-	eq bitFlatten(0) = bitlist(1, 0) .
-	eq bitFlatten(1) = bitlist(1, 1) .
-	ceq bitFlatten(N:Nat) = (bitFlatten(N:Nat >>Nat 1) <<Nat 1) |Nat bitlist(1, N:Nat &Nat 1)
-		if N:Nat >Int 1 .
+	--- eq bitFlatten(N:Nat |Nat M:Nat) = bitFlatten(N:Nat) |Nat bitFlatten(M:Nat) .
+	--- eq bitFlatten(N:Nat &Nat M:Nat) = bitFlatten(N:Nat) &Nat bitFlatten(M:Nat) .
+	--- eq bitFlatten(N:Nat <<Nat M:Nat) = bitFlatten(N:Nat) <<Nat M:Nat .
+	--- eq bitFlatten(N:Nat >>Nat M:Nat) = bitFlatten(N:Nat) >>Nat M:Nat .
+	--- eq bitFlatten(unknown(Len:Nat)) = bitlist(Len:Nat, nTimes(Len:Nat, unknownBit)) .
+	--- eq bitFlatten(0) = bitlist(1, 0) .
+	--- eq bitFlatten(1) = bitlist(1, 1) .
+	
+	--- eq bitUnflatten(bitlist(1, N:Nat)) = N:Nat .
+	--- eq bitUnflatten(bitlist(sNat(sNat(Len:Nat)), N:Nat)) = N:Nat .
+	--- ceq bitFlatten(N:Nat) = (bitFlatten(N:Nat >>Nat 1) <<Nat 1) |Nat bitlist(1, N:Nat &Nat 1)
+		--- if N:Nat >Int 1 .
 	
 	--- ceq bitFlatten(I:Int) = I:Int
 		--- if I:Int >=Int 0 orBool I:Int <=Int 0 .
-	--- eq 0 |Nat N:Nat = N:Nat .
-	--- ceq unknown(Len:Nat) >>Nat N:Nat = unknown(absInt(Len:Nat -Int N:Nat))
-		--- if N:Nat <=Nat Len:Nat .
-	--- eq unknown(N:Nat) |Nat (unknown(N':Nat) <<Nat N:Nat) = unknown(N':Nat +Nat N:Nat) .
+	
+	ceq unknown(Len:Nat) >>Nat N:Nat = unknown(absInt(Len:Nat -Int N:Nat))
+		if N:Nat <=Nat Len:Nat .
+		
+		
+***(
+
+((unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (2 |Nat unknown(1)) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1)
+
+
+***)
+	--- FIXME this seems ominously perilous
+	--- ceq N:Nat |Nat unknown(M:Nat) = unknown(M:Nat)
+		--- if absInt(Float2Int(logFloat(Int2Float(N:Nat)) /Float logFloat(2.0))) <=Nat M:Nat .
+	--- eq unknown(N:Nat) |Nat unknown(N':Nat) = unknown(maxNat(N:Nat, N':Nat)) .
+	--- eq unknown(N:Nat) &Nat unknown(N':Nat) = unknown(maxNat(N:Nat, N':Nat)) .
+	--- eq unknown(N:Nat) <<Nat M:Nat = unknown(N:Nat +Nat M:Nat) . --- too conservative
 	--- eq unknown(0) = 0 .
+	--- eq 0 |Nat N:Nat = N:Nat .
 	--- eq 1 &Nat unknown(Len:Nat) = unknown(1) .
 	--- eq 0 &Nat unknown(Len:Nat) = 0 .
-	
 	--- eq (N:Nat <<Nat 1) >>Nat 1 = N:Nat .
 	
-	op bitlist : Nat List{K} -> Nat .
-	op unknownBit : -> K .
-	op nTimes : Nat K -> List{K} .
-	eq nTimes(sNat(N:Nat), K:K) = (K:K,, nTimes(N:Nat, K:K)) .
-	eq nTimes(0, K:K) = .List{K} .
+	--- op bitlist : Nat List{K} -> Nat .
+	--- op unknownBit : -> K .
+	--- op nTimes : Nat K -> List{K} .
+	--- eq nTimes(sNat(N:Nat), K:K) = (K:K,, nTimes(N:Nat, K:K)) .
+	--- eq nTimes(0, K:K) = .List{K} .
 	
 	--- eq unknown(Len:Nat) = bitlist(Len:Nat, nTimes(Len:Nat, unknownBit)) .
 	--- eq unknown(Len:Nat) = bitlist(Len:Nat, innerUnknown(Len:Nat)) .
@@ -320,13 +333,27 @@ mod COMMON-C-CONVERSIONS is
 	--- interpret is used to "cast" values read from memory
 	--- shouldn't need to do the < min one since values start positive
 	op interpret-aux : Type K -> K .
-	op bitFlatten : K -> Nat .
-	op collapseBits : K K -> K .
-	mb rule < k > interpret(T:Type, I:Int) => collapseBits(bitFlatten(I:Int), 0) ~> interpret(T:Type, HOLE) ...</ k > : KSentence [metadata "structural"] .
-	mb rule < k > collapseBits(bitlist(0, .List{K}), N:Nat) ~> interpret(T:Type, HOLE) => interpret-aux(T:Type, N:Nat) ...</ k > : KSentence [metadata "structural"] .
+	--- op bitFlatten : K -> Nat .
+	--- op bitUnflatten : K -> Nat .
+	--- op collapseBits : K K -> K .
+	--- mb rule 
+		--- < k > interpret(T:Type, N:Int >>Nat M:Nat)
+			--- => interpret-aux(T:Type, I:Int)
+		--- ...</ k >
+		--- if I:Int <=Int 0 orBool I:Int >=Int 0
+		--- : KSentence [metadata "structural"] .
+	--- mb rule 
+		--- < k > interpret(T:Type, N:Nat)
+			--- => interpret-aux(T:Type, bitUnflatten(bitFlatten(N:Nat)))
+		--- ...</ k >
+		--- : KSentence [metadata "structural"] .
+	--- mb rule < k > collapseBits(bitlist(0, .List{K}), N:Nat) ~> interpret(T:Type, HOLE) => interpret-aux(T:Type, N:Nat) ...</ k > : KSentence [metadata "structural"] .
 	
 	
-	eq collapseBits(bitlist(sNat(N:Nat), (M:Nat,, L:List{K})), N:Nat) = collapseBits(bitlist(N:Nat, L:List{K}), (N:Nat <<Nat 1) |Nat M:Nat) .
+	--- eq collapseBits(bitlist(sNat(N:Nat), (M:Nat,, L:List{K})), N:Nat) = collapseBits(bitlist(N:Nat, L:List{K}), (N:Nat <<Nat 1) |Nat M:Nat) .
+	--- eq interpret(T:Type, piece(N:Nat, ?)) = interpret-aux(T:Type, N:Nat) .
+	ceq interpret(T:Type, N:Nat) = interpret-aux(T:Type, N:Nat)
+		if N:Nat >=Nat 0 .
 	
 	mb rule interpret-aux(T:Type, I:Int) => tv(I:Int, T:Type)
 		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
