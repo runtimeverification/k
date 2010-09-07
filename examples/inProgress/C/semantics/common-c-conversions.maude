@@ -302,10 +302,10 @@ mod COMMON-C-CONVERSIONS is
 		
 ***(
 
-((unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (unknown(1) |Nat (2 |Nat unknown(1)) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) <<Nat 1) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1)
-
+piece((piece(piece(piece(piece(piece(piece(piece(0, 1) bit:: piece(1 &Nat unknown(2), 1), 2) bit:: piece(1 &Nat unknown(3), 1), 3) bit:: piece(1 &Nat unknown(4), 1), 4) bit:: piece(1 &Nat unknown(5), 1), 5) bit:: piece(1 &Nat unknown(6), 1), 6) bit:: piece(1 &Nat unknown(7), 1), 7) bit:: piece(1 &Nat unknown(8), 1)) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1, 1)
 
 ***)
+	eq (N:Nat bit:: piece(?, 1)) >>Nat 1 = N:Nat .
 	--- FIXME this seems ominously perilous
 	--- ceq N:Nat |Nat unknown(M:Nat) = unknown(M:Nat)
 		--- if absInt(Float2Int(logFloat(Int2Float(N:Nat)) /Float logFloat(2.0))) <=Nat M:Nat .
@@ -352,7 +352,7 @@ mod COMMON-C-CONVERSIONS is
 	
 	--- eq collapseBits(bitlist(sNat(N:Nat), (M:Nat,, L:List{K})), N:Nat) = collapseBits(bitlist(N:Nat, L:List{K}), (N:Nat <<Nat 1) |Nat M:Nat) .
 	--- eq interpret(T:Type, piece(N:Nat, ?)) = interpret-aux(T:Type, N:Nat) .
-	ceq interpret(T:Type, N:Nat) = interpret-aux(T:Type, N:Nat)
+	ceq interpret(T:Type, piece(N:Nat, ?)) = interpret-aux(T:Type, N:Nat)
 		if N:Nat >=Nat 0 .
 	
 	mb rule interpret-aux(T:Type, I:Int) => tv(I:Int, T:Type)

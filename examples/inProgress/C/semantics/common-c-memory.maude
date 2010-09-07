@@ -87,12 +87,15 @@ mod COMMON-SEMANTICS-READING is
 		
 		
 	--- FIXME assuming bytes?
-	op joinIntegerBytes : Type List{K} Nat -> K .
-	eq joinIntegerBytes(T:Type, L:List{K}) = joinIntegerBytes(T:Type, L:List{K}, 0) .
-	eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), M:Nat)
-		= joinIntegerBytes(T:Type, L:List{K}, ((M:Nat <<Nat Len:Nat) |Nat N:Nat)) .
+	op joinIntegerBytes : Type List{K} K -> K .
+	eq joinIntegerBytes(T:Type, L:List{K}) = joinIntegerBytes(T:Type, L:List{K}, piece(0, 0)) .
+	
+	eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), piece(N':Nat, Len':Nat))
+		= joinIntegerBytes(T:Type, L:List{K}, piece(_bit::_(piece(N':Nat, Len':Nat), piece(N:Nat, Len:Nat)), Len:Nat +Nat Len':Nat)) .
 	--- eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), M:Nat)
-		--- = joinIntegerBytes(T:Type, L:List{K}, M:Nat bit:: piece(N:Nat, Len:Nat)) .
+		--- = joinIntegerBytes(T:Type, L:List{K}, ((M:Nat <<Nat Len:Nat) |Nat N:Nat)) .
+	--- eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), M:Nat)
+		--- = joinIntegerBytes(T:Type, L:List{K}, ((M:Nat <<Nat Len:Nat) |Nat N:Nat)) .	
 	eq joinIntegerBytes(T:Type, .List{K}, N:Nat) = interpret(T:Type, N:Nat) . 
 		
 	op isConcreteList : List{K} -> Bool .
@@ -231,8 +234,11 @@ mod COMMON-SEMANTICS-WRITING is
 	eq calculateNewBytes-aux(0, dataList(.List{K}), dataList(L:List{K}), Result:List{K}) = joinBitsToBytes((Result:List{K},, L:List{K})) .
 	
 	eq joinBitsToBytes(L:List{K}) = joinBitsToBytes-aux(dataList(L:List{K}), dataList(.List{K})) .
+	--- ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
+		--- = joinBitsToBytes-aux(dataList((piece((N:Nat <<Nat 1) |Nat M:Nat, sNat(Len:Nat)),, L:List{K})), dataList(R:List{K}))
+		--- if Len:Nat <Nat numBitsPerByte .
 	ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
-		= joinBitsToBytes-aux(dataList((piece((N:Nat <<Nat 1) |Nat M:Nat, sNat(Len:Nat)),, L:List{K})), dataList(R:List{K}))
+		= joinBitsToBytes-aux(dataList((piece(_bit::_(piece(N:Nat, Len:Nat), piece(M:Nat, 1)), sNat(Len:Nat)),, L:List{K})), dataList(R:List{K}))
 		if Len:Nat <Nat numBitsPerByte .
 	--- ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
 		--- = joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat) bit:: piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
@@ -371,9 +377,6 @@ mod COMMON-C-MEMORY-MISC is
 	--- i take this to mean that if i write to a location twice or read from a location after being written to, then it is a problem
 
 	
-	--- --- fixme 
-	--- eq piece(1 &Nat unknown(N:Nat), 1),,piece(1 &Nat unknown(N:Nat) >>Nat 1, 1),,piece(1 &Nat unknown(N:Nat) >>Nat 1 >>Nat 1, 1),,piece(1 &Nat unknown(N:Nat) >>Nat 1 >>Nat 1 >>Nat 1, 1),,piece(1 &Nat unknown(N:Nat) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1, 1),,piece(1 &Nat unknown(N:Nat) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1, 1),,piece(1 &Nat unknown(N:Nat) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1, 1),,piece(1 &Nat unknown(N:Nat) >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1 >>Nat 1, 1) = piece(unknown(N:Nat), 8) .
-		
 	--- --- fixme it's interesting we need this.  what do the rules say about when string allocation happens?
 	--- op dontCountWrite : Nat -> K .
 	--- mb rule
