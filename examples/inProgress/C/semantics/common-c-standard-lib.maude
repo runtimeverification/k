@@ -250,15 +250,15 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < malloced >... [.Map => Loc:Nat |-> (N:Nat *Nat Size:Nat)] ...</ malloced >
 		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
 	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [putchar-is-value]: rule
-		--- < k > [putchar => builtin(putchar)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --- fixme doesn't cast to int
-	--- mb [putchar]: rule
-		--- < k > [application(builtin(putchar), tv(N:Nat, ?)) => writeToFD(1, N:Nat) ~> tv(N:Nat, int)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
+	--------------------------------------------
+	mb [putchar-is-value]: rule
+		< k > Identifier("putchar") => builtin(Identifier("putchar")) ...</ k >
+	: KSentence [metadata "structural"] .
+	--- fixme doesn't cast to int
+	mb [putchar]: rule
+		< k > Call(builtin(Identifier("putchar")), tv(N:Nat, ?)) => writeToFD(1, N:Nat) ~> tv(N:Nat, int) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
 	--- mb [fslPutc-is-value]: rule
 		--- < k > [fslPutc => builtin(fslPutc)] ...</ k >
 	--- : KSentence [metadata "structural"] .

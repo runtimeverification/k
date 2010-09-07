@@ -205,11 +205,16 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 
 	mb rule
 		< k > canonicalizeType(B:Bag (BagItem(T:K) => (.).Bag), ?, ?, ?, (? (.).Bag => BagItem(T:K))) ...</ k >
-		if (T:K ==Bool Extern)
+		if T:K ==Bool Extern
+		orBool T:K ==Bool Static
+		orBool T:K ==Bool Const
 		: KSentence .
 		
 	mb rule
-		< k > canonicalizeType((.).Bag, (T:Type => qualifiedType(T:Type, Extern)), (.).Bag, (.).Bag, (? BagItem(Extern) => (.).Bag)) ...</ k >
+		< k > canonicalizeType((.).Bag, (T:Type => qualifiedType(T:Type, Q:K)), (.).Bag, (.).Bag, (? BagItem(Q:K) => (.).Bag)) ...</ k >
+		if Q:K ==Bool Extern
+		orBool Q:K ==Bool Static
+		orBool Q:K ==Bool Const
 		: KSentence .
 	
 	--- fixme? getting rid of typedefs here.  this seems valid by c1x 6.7.7:3
@@ -249,8 +254,11 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		: KSentence .
 	
 	mb rule
-		< k > canonicalizeSpecifier(BagItem(StructDef((Identifier("") => unnamed(N:Nat)), L:List{C}))) ...</ k >
+		< k > canonicalizeSpecifier(BagItem(L:KLabel((Identifier("") => unnamed(N:Nat)),, L:List{C}))) ...</ k >
 		< freshNat > N:Nat => sNat(N:Nat) </ freshNat >
+		if L:KLabel ==Bool 'StructDef
+		orBool L:KLabel ==Bool 'EnumDef
+		orBool L:KLabel ==Bool 'UnionDef
 		: KSentence .
 	
 	mb rule
@@ -370,8 +378,12 @@ mod COMMON-C-TYPING is
 	eq functionType(preFunctionType(pointerType(T:Type)), L:List{Type})	= pointerType(functionType(T:Type, L:List{Type})) .
 	
 	eq isTypeCompatible(T:Type, T:Type) = true .
-	eq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
-		= isTypeCompatible(T:Type, T':Type) .
+	ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
+		= isTypeCompatible(T:Type, T':Type)
+		if T:Type =/=Bool void andBool T':Type =/=Bool void .
+	ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
+		= true
+		if T:Type ==Bool void orBool T':Type ==Bool void .
 	eq isTypeCompatible(typedDeclaration(T:Type, ?), typedDeclaration(T':Type, ?))
 		= isTypeCompatible(T:Type, T':Type) .
 	eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
