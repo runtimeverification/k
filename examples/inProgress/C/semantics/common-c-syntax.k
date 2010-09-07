@@ -59,7 +59,7 @@ kmod COMMON-C-SYNTAX is
 	subsort Id < C
 	op Nil : -> List{C}
 	subsort C < List{C}
-	op _::_ : List{C} List{C} -> List{C} [assoc id: Nil]
+	op _::_ : List{C} List{C} -> List{C} [hybrid strict assoc id: Nil]
 	
 	subsort SpecifierElem < KResult
 	--- sort List{SpecifierElem} 

@@ -169,7 +169,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	subsort List{Type} < List{C} .
 	subsort Type < List{Type} .
 	subsort Type < List{C} .
-	op _::_ : List{Type} List{Type} -> List{Type} [ditto] .
+	op _::_ : List{Type} List{Type} -> List{Type} [ditto metadata "ditto"] .
 	op Nil : -> List{Type} [ditto] .
 	
 	op setOfTypes : -> Set [memo] .
