@@ -107,6 +107,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op UnknownCabsLoc : -> K .
 	
 	--- Basic types
+	ops bool : -> BaseType .
 	ops void char short-int int long-int long-long-int : -> BaseType .
 	ops float double long-double : -> BaseType .
 	ops signed-char unsigned-char : -> BaseType .

@@ -21,13 +21,13 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 	mb rule
 		< k > L:KLabel((tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))),, ?) ...</ k > 
 		if     isArithBinOp(L:KLabel)
-		andBool rank(T:Type) <Int rank(int)
+		andBool (rank(T:Type) <Int rank(int) orBool hasBitfieldType(T:Type))
 		andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > L:KLabel(?,, (tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type)))) ...</ k > 
 		if     isArithBinOp(L:KLabel)
-		andBool rank(T:Type) <Int rank(int)
+		andBool (rank(T:Type) <Int rank(int) orBool hasBitfieldType(T:Type))
 		andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
@@ -75,6 +75,12 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		andBool min(int) <=Int min(T:Type) 
 		andBool max(int) >=Int max(T:Type)		
 		: KSentence [metadata "structural"] .
+	mb rule
+		promote(tv(V:BaseValue, bitfieldType(T:Type, Len:Nat))) => tv(V:BaseValue, int)
+		if     T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int
+		andBool min(int) <=Int min(bitfieldType(T:Type, Len:Nat))
+		andBool max(int) >=Int max(bitfieldType(T:Type, Len:Nat))
+		: KSentence [metadata "structural"] .
 	--- fixme unclear what 6.3.1.1:3 means
 	mb rule
 		promote(tv(V:BaseValue, T:Type)) => cast(unsigned-int, tv(V:BaseValue, T:Type))
@@ -85,7 +91,15 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 			andBool max(int) >=Int max(T:Type)		
 		)
 		: KSentence [metadata "structural"] .
-		
+	mb rule
+		promote(tv(V:BaseValue, bitfieldType(T:Type, Len:Nat))) => cast(unsigned-int, tv(V:BaseValue, T:Type))
+		if     T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int
+		andBool notBool (
+			min(int) <=Int min(bitfieldType(T:Type, Len:Nat)) 
+			andBool max(int) >=Int max(bitfieldType(T:Type, Len:Nat))		
+		)
+		: KSentence [metadata "structural"] .
+	
 	mb rule
 		promote(tv(F:Float, float)) => tv(F:Float, double)
 		: KSentence [metadata "structural"] .
