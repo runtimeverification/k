@@ -738,7 +738,7 @@ sub maudify_module {
 
 #    print "Maudifying module with tokens @all_tokens\n";
 
-    my $decl = getKLabelDeclarations($_);
+    my $decl = getKLabelDeclarations($_) . ". ";
 # Step: Add to @all_sorts all sorts defined a la Maude, with "sort(s)"
     add_sorts($_);
     
@@ -795,7 +795,7 @@ sub maudify_module {
     # print  "Stage:\n$_\n\n";
     
 # Step: Add KLabel generated definitions
-    s!(?=endkm)!$decl!se;
+    s!(?=endk?m)!$decl!se;
 
     return $_;
 }
