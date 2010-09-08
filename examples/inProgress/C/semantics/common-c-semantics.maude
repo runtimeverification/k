@@ -602,18 +602,18 @@ mod COMMON-PARAMETER-BINDING is
 	
 			
 	mb [bind-one]: rule
-		< k > true ~> bind((tv(V:BaseValue, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+		< k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 			=> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> X:Id := tv(V:BaseValue, T':Type)
+			~> X:Id := tv(V:List{K}, T':Type)
 			~> discard
 			~> bind(L:List{C}, P:List{Type}) ...</ k > 
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		if isTypeCompatible(T:Type, T':Type)
+		--- if isTypeCompatible(T:Type, T':Type)
 		: KSentence [metadata "structural"] .
 	mb [bind-one]: rule
-		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind((tv(V:BaseValue, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 		...</ k > 
 		: KSentence [metadata "structural"] .
 	--- mb [bind-struct]: rule

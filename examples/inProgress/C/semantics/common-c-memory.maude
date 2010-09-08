@@ -187,7 +187,7 @@ mod COMMON-SEMANTICS-WRITING is
 	op calculateNewBytes : Nat K K -> K [metadata "strict(3)"] .
 	
 	op write : K Value K -> K [metadata "strict(2)"] .
-	ceq write(K:K, tv(V:K, T:Type)) = write(K:K, tv(V:K, T:Type), value(bitSizeofType(T:Type))) 
+	ceq write(K:K, tv(V:List{K}, T:Type)) = write(K:K, tv(V:List{K}, T:Type), value(bitSizeofType(T:Type))) 
 		if notBool(hasFunctionType(T:Type)) .
 	--- FIXME should check types
 	mb rule
@@ -197,6 +197,13 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule
 		< k > write(Loc:Nat, tv(V:K, T:Type), bitSize:Nat)
 			=> writeBytes(Loc:Nat, splitBytes(tv(V:K, T:Type)))
+		...</ k >
+		if bitSize:Nat %Nat numBitsPerByte ==Bool 0
+		andBool isByteLoc(Loc:Nat)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > write(Loc:Nat, tv((V:K,, V':K,, L:List{K}), T:Type), bitSize:Nat)
+			=> writeBytes(Loc:Nat, dataList((V:K,, V':K,, L:List{K})))
 		...</ k >
 		if bitSize:Nat %Nat numBitsPerByte ==Bool 0
 		andBool isByteLoc(Loc:Nat)
