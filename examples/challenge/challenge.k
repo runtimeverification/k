@@ -181,6 +181,9 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
 
   context box(Label:KLabel)(_,,`[HOLE`]:K,,_)
 
+---  op 'quote_  : -> KLabel[metadata "generated label"]
+---  op 'unquote_ : -> KLabel[metadata "generated label"]
+
   rule <k>quote E => quoteit[0](E)<_/k>
   rule quoteit[N](quote(E)) => box('quote_)(quoteit[sNat(N)](E))
   rule quoteit[0](unquote(E)) => E
@@ -209,7 +212,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule V ~> env(Env) => env(Env) ~> V [structural]
 
 --- List{Val}
-  syntax List{Val} ::= Val | List{Val} , List{Val} [ditto metadata "ditto"]
+  syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
 --- length

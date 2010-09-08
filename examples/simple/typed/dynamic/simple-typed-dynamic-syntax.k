@@ -27,16 +27,16 @@ kmod SIMPLE-TYPED-SORTS is including PL-INT + PL-ID
  
 --- List{Type}
   syntax List{Type} ::= Type | List{Bottom} 
-                     | List{Type} , List{Type} [ditto metadata "ditto"] 
+                     | List{Type} , List{Type} [ditto] 
 --- List{IdType}
   syntax List{IdType}  ::= IdType | List{Bottom}
-                     | List{IdType} , List{IdType} [ditto metadata "ditto"]
+                     | List{IdType} , List{IdType} [ditto]
 --- List{Id}
   syntax List{Id}  ::= Id | List{Bottom}
-                     | List{Id} , List{Id} [ditto metadata "ditto"]
+                     | List{Id} , List{Id} [ditto]
 --- List{Exp}
   syntax List{Exp} ::=  Exp | List{Id} 
-                     | List{Exp} , List{Exp} [ditto metadata "ditto"]
+                     | List{Exp} , List{Exp} [ditto]
 
 -----------------------------------------------------------------------------
 endkm
@@ -63,7 +63,7 @@ kmod SIMPLE-TYPED-EXPR is including SIMPLE-TYPED-SORTS
                 | Exp and Exp [gather(E e) prec 55 strict] 
                 | Exp or Exp  [gather(E e) prec 59 strict] 
                 | not Exp [prec 53 strict]
-                | Exp [ Exp ] [ditto metadata "ditto"] 
+                | Exp [ Exp ] [ditto] 
                 | sizeOf ( Exp ) [strict]
                 | Exp ( )
                 | Exp ( List{Exp} ) [prec 2 strict]

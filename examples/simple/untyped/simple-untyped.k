@@ -40,7 +40,7 @@ kmod SIMPLE-UNTYPED-CONFIG is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
 --- List{Val}
-  syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto metadata "ditto"]
+  syntax List{Val} ::= Val |  List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
 --- length

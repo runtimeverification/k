@@ -65,3 +65,6 @@ kmod IMP is including IMP-PROGRAMS + IMP-SEMANTICS
   macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
   macro pgm = [['sumPgm]]
 endkm
+
+
+set print attribute on .

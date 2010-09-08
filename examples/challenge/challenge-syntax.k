@@ -98,7 +98,7 @@ kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
 --- List{Id}
   syntax List{Id} ::= Id | ( ) | List{Id} , List{Id} [prec 70 assoc id: () strict hybrid]
 --- List{Exp}
-  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto metadata "ditto"]
+  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]
 endkm
 
 

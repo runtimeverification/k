@@ -19,7 +19,7 @@ kmod SIMPLE-UNTYPED-SORTS is including PL-INT + PL-ID
   syntax List{Exp} ::= 
                  Exp  
                | List{Id} 
-               | List{Exp} , List{Exp} [ditto metadata "ditto"]
+               | List{Exp} , List{Exp} [ditto]
 -----------------------------------------------------------------------------
 endkm
 
