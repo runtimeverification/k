@@ -676,21 +676,24 @@ sub isDeclaredKLabel
 
 sub getKLabelDeclarations
 {
+    my $mod = (shift);
     my $labels = "";
 
-    while (/rule(.*?)(?=$kmaude_keywords_pattern)/sg)
+    while ($mod =~ m/rule(.*?)(?=$kmaude_keywords_pattern)/sg)
     {
 	my $rl = $1;
 #        while ($rl =~ m/(\'$maude_backquoted\_$maude_backquoted)/g)
 #        while ($rl =~ m/(\'$klabel_body)/g)
          while ($rl =~ m/(\'$klabel_body)((?:[\Q\E\[\]\(\)\{\}\s,])|(?=\())/g)
         {
-#	    print "FOUND: $1\n"; #in rule:\n$rl\n";
+#	    print "FOUND: $1\n in rule:\n$rl\n";
 	    if (! ($labels =~ m/$1/s) )
 	    {
 		$labels .= "$1 "; # if (isDeclaredKLabel($1) == 1);
 	    }
 	}
+
+#        print "Rule:\n $rl\n\n";
     }
     if ($labels =~ m/\S\s+\S/)
     {
@@ -705,6 +708,7 @@ sub getKLabelDeclarations
 	return "";
     }
     
+#	print "$labels : -> KLabel [metadata \"generated label\"] ";
     return "$labels : -> KLabel [metadata \"generated label\"] ";
 }
 

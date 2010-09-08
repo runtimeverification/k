@@ -183,7 +183,7 @@ my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 #########
 # Maude #
 #########
-my $maude_path = "maude";
+my $maude_path = "/home/andrei/work/maude/maude.linux";
 my $maude_temp_file = "ERASE-ME-PLEASE";
 my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
@@ -752,9 +752,6 @@ sub maudify_module {
 	s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops($1)!gse;
     # print  "Stage:\n$_\n\n";
     
-# Step: Add KLabel generated definitions
-    s!(?=endkm)!$decl!se;
-
 # Step: Declare the on-the-fly variables
     $_ = on_the_fly_kvars($_);
     # print  "Stage:\n$_\n\n";
@@ -797,6 +794,9 @@ sub maudify_module {
 #    $_ = unfreeze($_);
     # print  "Stage:\n$_\n\n";
     
+# Step: Add KLabel generated definitions
+    s!(?=endkm)!$decl!se;
+
     return $_;
 }
 
