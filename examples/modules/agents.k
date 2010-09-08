@@ -1,4 +1,4 @@
-kmod AGENTS is  including SEQ + PL-NAT
+kmod AGENTS is  including SEQ + PL-INT
   configuration
       <agent*> 
           <me>0</me>
@@ -22,7 +22,7 @@ kmod AGENTS is  including SEQ + PL-NAT
              | barrier        
              | broadcast K       [strict]
              | haltAgent
-             | Nat
+             | Int
              | Bool
 
 --- Agents
