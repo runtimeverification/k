@@ -679,12 +679,13 @@ sub getKLabelDeclarations
     my $mod = (shift);
     my $labels = "";
 
-    while ($mod =~ m/rule(.*?)(?=$kmaude_keywords_pattern)/sg)
+    while ($mod =~ m/(rule|macro|context|eq|configuration)(.*?)(?=$kmaude_keywords_pattern)/sg)
     {
-	my $rl = $1;
+	my $rl = $2;
 #        while ($rl =~ m/(\'$maude_backquoted\_$maude_backquoted)/g)
 #        while ($rl =~ m/(\'$klabel_body)/g)
-         while ($rl =~ m/(\'$klabel_body)((?:[\Q\E\[\]\(\)\{\}\s,])|(?=\())/g)
+#        while ($rl =~ m/(\'$klabel_body)((?:[\Q\E\[\]\(\)\{\}\s,])|(?=\())/g)
+        while ($rl =~ m/(\'($klabel_body|$maude_backquoted))((?:[\Q\E\[\]\(\)\{\}\s,])|(?=\())/g)
         {
 #	    print "FOUND: $1\n in rule:\n$rl\n";
 	    if (! ($labels =~ m/$1/s) )
@@ -693,7 +694,7 @@ sub getKLabelDeclarations
 	    }
 	}
 
-#        print "Rule:\n $rl\n\n";
+#        print "$1:\n $rl\n\n";
     }
     if ($labels =~ m/\S\s+\S/)
     {
