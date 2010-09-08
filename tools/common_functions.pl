@@ -30,6 +30,31 @@ my $verbose = 0;
 my @nodes = ();
 my $current_line = 0;
 
+my $inclusionFileTree;
+my $inclusionModuleTree;
+my $declaredKLabels = "";
+
+# Top level patterns
+my $top_level_pattern = join("|", (
+                    "kmod(?:.*?)endkm",
+                    "mod(?:.*?)endm",
+                    "fmod(?:.*?)endfm",
+                    "set\\s.*?\$",
+                    "(?:in|load)\\s+\\S+"
+    ));
+
+my @kmaude_keywords = qw(context rule macro eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
+my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
+
+my $parentheses = "\Q{}[]()\E";
+my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\s\\,\\`])*";
+
+# Pattern matched by K variables
+my $klabel_body = "$maude_backquoted\_$maude_backquoted";
+my $klabel = "'$klabel_body(?:[$parentheses\\s\\,])|$klabel_body(?=\\()";
+my $kvar  = "[A-Za-z][A-Za-z0-9]*";
+
+
 # explicit call for debugging.
 # syntax_common_check($ARGV[0]);
 
@@ -523,6 +548,164 @@ sub erase_temp
     {
 	unlink($file);
     }
+}
+
+sub getFullName
+{
+    my $file = (shift);
+#    print "File $file\n";
+    if ($file eq "")
+    {
+	return $file;
+    }
+    
+    $file =~ s/^\.\///;
+    
+    # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
+    if ($file =~ /\.k?(maude)?$/) {
+	if (! -e $file) {
+	    print("File $file does not exist\n");
+	    exit(1);
+	}
+	return $file;
+    }
+    # If $file does not have the extension .k, .kmaude, or .maude then
+    else {
+	# Add extension .k if $file.k exists
+	if (-e "$file.k") {
+	    $file .= ".k";
+	}
+	# If not, then add extension .kmaude if $file.kmaude exists
+	elsif (-e "$file.kmaude") {
+	    $file .= ".kmaude";
+	}
+	# If not, then add extension .maude if $file.maude exists
+	elsif (-e "$file.maude") {
+	    $file .= ".maude";
+	}
+	# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
+	else {
+	    print("Neither of $file.k, $file.kmaude, or $file.maude exist\n");
+	    exit(1);
+	}
+    }
+    return $file;
+}
+
+sub appendFileInTree
+{
+    my ($child, $parent) = (shift, shift);
+    $child = getFullName($child);
+    $parent = getFullName($parent);
+    
+    if ($parent eq "")
+    {
+	# root node
+        $inclusionFileTree = new Tree::Nary->new($child);
+#	print "Root: " . $inclusionFileTree->{data} . " \n\n"
+    } 
+    else
+    {
+	# new leaf
+	my $node = Tree::Nary->new($child);
+	my $parent = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
+	    $Tree::Nary::TRAVERSE_ALL, $parent);
+	Tree::Nary->append($parent, $node);
+	
+#	print "Parent: " . $parent->{data} . "  child: " . $node->{data} . "\n\n";
+    }
+}
+
+sub recurseIntoFiles
+{
+    my $file = getFullName(shift);
+    
+    if ($file =~ m/(k\-prelude|pl\-builtins)/)
+    {
+	return;
+    }
+    
+    local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
+      
+    s/($comment)/
+    {
+	local $_=$1;
+	s!\S!!gs;
+	$_;
+    }/gsme;
+    
+    while (s/^(\s*)($top_level_pattern)(\s*)//sm) 
+    {
+	(my $before, local $_, my $after) = ($1,$2,$3);
+        if (m!^kmod\s+(\S+)!) {
+	    $declaredKLabels .= " " . getDeclaredKLabelList($_);
+#	    print "Declared: $declaredKLabels\n";
+	}
+	elsif (m!^(?:in|load)\s+(\S+)!) {
+	    my $in = File::Spec->catfile((fileparse($file))[1], $1);
+	    appendFileInTree($in,$file);
+	    recurseIntoFiles($in);
+	}
+    }
+}
+
+sub getDeclaredKLabelList
+{
+    if (/(?:syntax\s+KLabel\s+::=)(.*?\S)\s*(?:$kmaude_keywords_pattern)/s)
+    {
+	my $list = $1;
+	$list =~ s/(\[.*?\]|\n|\|)//g;
+#	$list =~ s/(\(.*?\)|\n|\|)//g;
+	$list =~ s/\s+/ /g;
+	return " $list ";
+    }
+    
+    return "";
+}
+
+sub isDeclaredKLabel
+{
+    my $label = (shift);
+    if ($declaredKLabels =~ / $label /s)
+    {
+	return 0;
+    }
+    
+    return 1;
+}
+
+sub getKLabelDeclarations
+{
+    my $labels = "";
+
+    while (/rule(.*?)(?=$kmaude_keywords_pattern)/sg)
+    {
+	my $rl = $1;
+#        while ($rl =~ m/(\'$maude_backquoted\_$maude_backquoted)/g)
+#        while ($rl =~ m/(\'$klabel_body)/g)
+         while ($rl =~ m/(\'$klabel_body)((?:[\Q\E\[\]\(\)\{\}\s,])|(?=\())/g)
+        {
+#	    print "FOUND: $1\n"; #in rule:\n$rl\n";
+	    if (! ($labels =~ m/$1/s) )
+	    {
+		$labels .= "$1 "; # if (isDeclaredKLabel($1) == 1);
+	    }
+	}
+    }
+    if ($labels =~ m/\S\s+\S/)
+    {
+	$labels = "ops $labels";
+    }
+    elsif ($labels =~ m/\S/) 
+    {
+	$labels = "op $labels";	
+    }
+    else 
+    {
+	return "";
+    }
+    
+    return "$labels : -> KLabel [metadata \"generated label\"] ";
 }
 
 1;

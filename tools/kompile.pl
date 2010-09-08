@@ -400,7 +400,14 @@ if (!$compile_only) {
     setVerbose() if $verbose;
     syntax_common_check($language_file_name);
     
+    # build inclusion trees
+    appendFileInTree("$language_file_name", "");
+    recurseIntoFiles($language_file_name);
+    
+    # maudify
     maudify_file("$language_file_name","");
+#    print "Maudification: $language_file_name\n\n";
+    
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
     print "Sorts:\n------\n@all_sorts\n\n" if $verbose;
@@ -697,6 +704,7 @@ sub maudify_file {
 	    print "DONE\n" if $verbose;
 	}
 	elsif (m!^(?:in|load)\s+(\S+)!) {
+#	    appendFileInTree(File::Spec->catfile((fileparse($file))[1],$1), $file);
 	    maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
 	    s!\.k(maude)?\s*$!\.maude!s;
 	}
@@ -730,49 +738,65 @@ sub maudify_module {
 
 #    print "Maudifying module with tokens @all_tokens\n";
 
+    my $decl = getKLabelDeclarations($_);
 # Step: Add to @all_sorts all sorts defined a la Maude, with "sort(s)"
-	add_sorts($_);
-
+    add_sorts($_);
+    
 # Step: Freeze on-the-fly anonymous variable declarations
     s!_(:$ksort)!?$1!sg;
     s!(\?:$ksort)!freeze($1,"ANONYMOUS")!ge;
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
 	s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops($1)!gse;
+    # print  "Stage:\n$_\n\n";
+    
+# Step: Add KLabel generated definitions
+    s!(?=endkm)!$decl!se;
 
 # Step: Declare the on-the-fly variables
     $_ = on_the_fly_kvars($_);
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Reduce cell notation with _ to cell notation with ...
     s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
     s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Declare cell labels as operations
     $_ = add_cell_label_ops($_);
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Add the module's newly defined tokens to @tokens
     add_tokens($_);
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Add missing spaces around tokens
     $_ = spacify($_);
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Replace remaining _ by ? (spaces were put around _ by spacify)
     s! _ ! ? !gs;
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Change K attributes to Maude metadata
     s!(\[(?:\\.|[^\]])*\])!make_metadata($1)!gse;
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Change K statements into Maude statements
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
-
+    # print  "Stage:\n$_\n\n";
+    
 # Step: Unfreeze everything still frozen
     $_ = unfreeze($_,"ANONYMOUS");
 #    $_ = unfreeze($_);
-
+    # print  "Stage:\n$_\n\n";
+    
     return $_;
 }
 
@@ -805,6 +829,7 @@ sub make_ops {
 	if ( ! (grep { "$_" eq "$result_sort" } @all_sorts) ) {
 	    $sort_decl = "sort $result_sort";
 	    push(@all_sorts, $result_sort);
+
 	}
 	my $result = "$spaces1 $sort_decl $spaces2";
 
