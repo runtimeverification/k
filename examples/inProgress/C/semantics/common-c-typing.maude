@@ -162,6 +162,16 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 		< type > *(K:K) => K:K ~> *(HOLE) ...</ type >
 		if notBool isAType(K:K)
 		: KSentence [metadata "structural"] .
+		
+	mb [type-heat-call]: rule
+		< type > Call(K:K, L:List{C}) => K:K ~> Call(HOLE, L:List{C}) ...</ type >
+		if notBool isAType(K:K)
+		: KSentence [metadata "structural"] .
+	mb [type-cool-call]: rule
+		< type > T:Type ~> Call(HOLE, L:List{C}) => Call(T:Type, L:List{C}) ...</ type >
+		if isAType(T:Type)
+		: KSentence [metadata "structural"] .
+	--- mb context Call(?:K,, (?,, `[HOLE`]:K,, ?)) : KSentence .
 endm
 
 mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
@@ -705,6 +715,11 @@ mod COMMON-C-TYPING is
 		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
 		--- : KSentence [metadata "structural"] .
 
+	mb [type-call]: rule
+		< type > Call(functionType(T:Type, ?), L:List{C}) => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
+		 
+		
 	mb [type-struct-dot]: rule
 		< type > structType(S:Id) . F:Id => T:Type ...</ type >
 		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
