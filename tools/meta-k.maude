@@ -178,7 +178,7 @@ fmod META-K-MODULE is
   eq isListSort(M,T) = isListSort(getListSorts(M),T) .
   
   op isListSort : SortSet Type -> Bool .
-  eq isListSort(SS ; S , S) = true [print S " is a list sort together with " SS] .
+  eq isListSort(SS ; S , S) = true  .
   eq isListSort(SS, T) = false [owise].
 
   op getListSorts : OpDeclSet -> TypeSet .
@@ -398,7 +398,7 @@ fmod META-ANONYMOUS-VARIABLE is
   
   op getAnonConsts : OpDecl OpDeclSet ~> SortSet .
   eq getAnonConsts(op Q : nil -> T [poly(0) AS] ., OPDS) 
-   = if T == Anonymous then Q ; getAnonConsts(OPDS) else getAnonConsts(OPDS) fi  [print "Q: " Q ", T: " T] .
+   = if T == Anonymous then Q ; getAnonConsts(OPDS) else getAnonConsts(OPDS) fi  .
   eq getAnonConsts(Op, OPDS) = getAnonConsts(OPDS) [owise] .
 endfm
 
@@ -529,7 +529,7 @@ fmod K-META-LISTS is including K-META-OPS .
   eq klabelType(Q) = if Q == K then KLabel else if Q ==  KResult then KResultLabel else if Q == KProper then KProperLabel else KHybridLabel fi fi fi .
   
   op wrapList : Type Term TermList ~> Term .
-  eq wrapList(T, Q[Trm], Trms) = kApply(mkConstant(listWrapperS(Q),T),Trms) [print "listWrapper " T Q Trm Trms].
+  eq wrapList(T, Q[Trm], Trms) = kApply(mkConstant(listWrapperS(Q),T),Trms) .
 
   op listWrapperS : Qid -> Qid .
   eq listWrapperS(Q) = mkKLabel(Q) .
@@ -589,19 +589,19 @@ fmod META-K-LEAST-SORTS is
  op $leastSortsT : Module Term TypeListSet ~> SortSet .
 
 
- eq leastSortsT(M, Trm, TlSK) = leastSortsT(M, Trm, none, TlSK) [print "Finding sorts for " Trm] .
+ eq leastSortsT(M, Trm, TlSK) = leastSortsT(M, Trm, none, TlSK) .
  eq leastSortsT(M, Trm, SS, Tl ; TlSK) 
-  = leastSortsT(M, Trm, $leastSortsT(M, Trm, Tl), SS, TlSK) [print "Checking " Tl] . 
+  = leastSortsT(M, Trm, $leastSortsT(M, Trm, Tl), SS, TlSK) . 
  
- eq leastSortsT(M, Trm, NSS, TlSK) = NSS [print "sorts " NSS " found for " Trm] .
+ eq leastSortsT(M, Trm, NSS, TlSK) = NSS .
  eq leastSortsT(M, Trm, none, errorT(Trm',T) ; TlSK) = errorT(Trm',T) .
  eq leastSortsT(M, 'context_[Trm], none, TlSK) 
   = errorT('context_[Trm],'`[All`contexts`should`have`sort`K`]) [owise] .
  eq leastSortsT(M, Trm, none, TlSK) = errorT(Trm, leastSort(M,Trm)) [owise print "no sorts found. generating error. unchecked " TlSK] .
 
- eq leastSortsT(M, Trm, SS, SS', TlSK) = leastSortsT(M, Trm, SS ; SS', TlSK) [print "found sorts " SS] .
+ eq leastSortsT(M, Trm, SS, SS', TlSK) = leastSortsT(M, Trm, SS ; SS', TlSK)  .
  eq leastSortsT(M, Trm, SS:[SortSet], SS', TlSK) 
-  = leastSortsT(M, Trm, SS', TlSK) [owise print SS:[SortSet]] .
+  = leastSortsT(M, Trm, SS', TlSK) [owise] .
 
  eq $leastSortsT(M, 'if_then_else_fi[Trms], T T' T'') 
   = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, 'Bool), lubSorts(M, T', T'')) .
@@ -614,11 +614,11 @@ ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
 ceq $leastSortsT(M, Q[T1,T2], T T') 
   = leastSortsRed(Q[T1,T2], leastSort(M, Q[T1,T2]), lubSorts(M, T, T')) 
  if Q == replaceS . 
- eq $leastSortsT(M, Q[Trms], Tl) = leastSort(M, Q[genXVars(Tl)]) [owise print Q Tl] .
+ eq $leastSortsT(M, Q[Trms], Tl) = leastSort(M, Q[genXVars(Tl)]) [owise ] .
 
  op leastSortsIf : Term Type Bool TypeSet ~> SortSet .
  eq leastSortsIf(Trm, T, true, NSS) = NSS .
- eq leastSortsIf(Trm, T, B:[Bool], TS:[TypeSet]) = errorT(Trm, T) [owise print "Trm=" Trm " B=" B:[Bool] " TS=" TS:[TypeSet]] .
+ eq leastSortsIf(Trm, T, B:[Bool], TS:[TypeSet]) = errorT(Trm, T) [owise] .
 
  op leastSortsRed : Term Type SortSet ~> SortSet .
  eq leastSortsRed(Trm, T, NSS) = NSS .
