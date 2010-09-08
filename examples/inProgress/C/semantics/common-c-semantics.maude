@@ -810,6 +810,13 @@ mod COMMON-INITIALIZATION is
 		...</ currentSubObject >
 		< structs >... S:Id |-> typedDeclaration(T:Type, F:Id) :: ? ...</ structs > 
 		: KSentence [metadata "structural"] .
+	mb rule
+		< currentSubObject > 
+			ListItem(te(K:K, unionType(S:Id)))
+			=> ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, unionType(S:Id)))
+		...</ currentSubObject >
+		< structs >... S:Id |-> typedDeclaration(T:Type, F:Id) :: ? ...</ structs > 
+		: KSentence [metadata "structural"] .
 		
 	--- fixme should i worry about basetype here?
 	mb [init-next-array-element]: rule
@@ -842,6 +849,12 @@ mod COMMON-INITIALIZATION is
 		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id)
 		...</ structs > 
+		: KSentence [metadata "structural"] .
+		
+	mb [init-next-union-element-done]: rule
+		< currentSubObject >
+			next (ListItem(te(K:K . ?, T:Type)) => .) ListItem(te(K:K, unionType(S:Id)))
+		...</ currentSubObject >
 		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < currentInitializerObject > 

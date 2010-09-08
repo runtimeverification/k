@@ -27,8 +27,14 @@ dist: demo
 demo: $(DIST_DIR)/dist.done 
 	@rm -f ./a.out
 #$(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/c1x-6-7-8.c
-	$(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge01.c
+	$(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge03.c
 	@DEBUG=1 ./a.out
+# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge03.c
+# ./a.out	
+# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge04.c
+# ./a.out	
+# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge05.c
+# ./a.out	
 # $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/schorr-waite.c
 # ./a.out
 # $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/globals.c

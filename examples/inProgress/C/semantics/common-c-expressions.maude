@@ -72,6 +72,21 @@ mod COMMON-SEMANTICS-SIZEOF is
 	eq bitSizeofList(T:Type :: L:List{Type}) = bitSizeofType(T:Type) + bitSizeofList(L:List{Type}) .
 	eq bitSizeofList(Nil) = 0 .
 	
+	op maxBitSizeofList : List{Type} -> K .
+	op maxBitSizeofList-aux : List{Type} Nat -> K .
+	eq maxBitSizeofList(L:List{Type}) = maxBitSizeofList-aux(L:List{Type}, 0) .
+	mb rule
+		< k > maxBitSizeofList-aux(T:Type :: L:List{Type}, N:Nat) 
+			=> bitSizeofType(T:Type) ~> maxBitSizeofList-aux(L:List{Type}, N:Nat) 
+		...</ k >
+		: KSentence .
+	mb rule
+		< k > (tv(N':Nat, ?) => .) ~> maxBitSizeofList-aux(L:List{Type}, (N:Nat => maxNat(N:Nat, N':Nat))) ...</ k >
+		: KSentence .
+	mb rule
+		< k > maxBitSizeofList-aux(Nil, N:Nat) => N:Nat ...</ k >
+		: KSentence .
+	
 	eq bitSizeofType(arrayType(T:Type, N:Nat)) = bitSizeofType(T:Type) * N:Nat .
 	eq bitSizeofType(flexibleArrayType(T:Type)) = 0 .
 	eq bitSizeofType(functionType(?, ?)) = numBitsPerByte .
@@ -82,6 +97,10 @@ mod COMMON-SEMANTICS-SIZEOF is
 	eq bitSizeofType(qualifiedType(T:Type, ?)) = bitSizeofType(T:Type) .
 	mb rule
 		< k > bitSizeofType(structType(X:Id)) => bitSizeofList(L:List{Type}) ...</ k >
+		< structs >... X:Id |-> L:List{Type} ...</ structs >
+		: KSentence .
+	mb rule
+		< k > bitSizeofType(unionType(X:Id)) => maxBitSizeofList(L:List{Type}) ...</ k >
 		< structs >... X:Id |-> L:List{Type} ...</ structs >
 		: KSentence .
 
@@ -738,10 +757,14 @@ mod COMMON-SEMANTICS-REFERENCE is
 	mb [address-of-arrow-struct]: rule
 		< k > &(tv(Loc:Nat, pointerType(structType(S:Id))) -> X:Id)
 			=> getOffset(Loc:Nat, value(calculateLength(L1:List{Type})), fixPointerType(T:Type))
-			--- => cast(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
-			--- => tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
 		...</ k >
 		< structs >... S:Id |-> (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?) ...</ structs >
+		: KSentence [metadata "structural"] .
+	mb [address-of-arrow-union]: rule
+		< k > &(tv(Loc:Nat, pointerType(unionType(S:Id))) -> X:Id)
+			=> getOffset(Loc:Nat, 0, fixPointerType(T:Type))
+		...</ k >
+		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, X:Id) :: ?) ...</ structs >
 		: KSentence [metadata "structural"] .
 		
 	eq getOffset(N:Nat, M:Nat, T:Type) = tv(N:Nat +Nat bito(M:Nat), T:Type) .

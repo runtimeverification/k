@@ -498,6 +498,13 @@ mod COMMON-C-TYPING is
 			--- ~> structType(X:Id)
 		...</ k >
 		: KSentence .
+	mb rule
+		< k > UnionDef(X:Id, L:List{Type})
+			=> addAggregate(X:Id, L:List{Type})
+			~> giveType(X:Id, unionType(X:Id))
+			--- ~> structType(X:Id)
+		...</ k >
+		: KSentence .
 
 	--- FIXME what good is this?
 	mb rule
@@ -724,12 +731,12 @@ mod COMMON-C-TYPING is
 		< type > structType(S:Id) . F:Id => T:Type ...</ type >
 		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
 		: KSentence [metadata "structural"] .
-		
-	--- mb [type-union-dot]: rule
-		--- < type > ['_._(unionType(S:Id),, X:Id) => T:Type] ...</ type >
-		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
-		--- : KSentence [metadata "structural"] .
+	mb [type-union-dot]: rule
+		< type > unionType(S:Id) . F:Id => T:Type ...</ type >
+		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
+		: KSentence [metadata "structural"] .
 
+	mb rule < type > N:Nat => cfg:largestUnsigned ...</ type > : KSentence .
 
 	--- mb rule
 		--- < type > ['Pointer(Kp:KProper) => Kp:KProper ~> 'Pointer(HOLE)] ...</ type >
