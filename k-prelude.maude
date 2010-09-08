@@ -399,7 +399,8 @@ mod K is
   including K-CONFIG .              --- to specify the global configuration term
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
-  including K-QUOTED-LABELS .
+---  including K-QUOTED-LABELS .   
+---Qids no longer included by default, they should be generated as constants
   including K-CONTEXTS .
   including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
