@@ -29,14 +29,14 @@ mod STRICTOPS2CXT is
  
 --- resolving lists 
   op strictOps2cxtOp : OpDecl ~> MembAxSet .
-  eq strictOps2cxtOp(op Q : nil -> Ty [AS kstrict(Ints, Q) karity(N)] .)
-   = strictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q, N, AS) .
-  eq strictOps2cxtOp(op Q : nil -> Ty [AS seqkstrict(Ints, Q) karity(N)] .)
-   = seqstrictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q, N, AS) .
-  eq strictOps2cxtOp(op Q : nil -> Ty [AS kstrict(Ints, Q)] .)
-   = strictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q, -1, AS) [owise] .
-  eq strictOps2cxtOp(op Q : nil -> Ty [AS seqkstrict(Ints, Q)] .)
-   = seqstrictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q, -1, AS) [owise] .
+  eq strictOps2cxtOp(op Q : nil -> Ty [AS kstrict(Ints, Q') karity(N)] .)
+   = strictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q', N, AS) .
+  eq strictOps2cxtOp(op Q : nil -> Ty [AS seqkstrict(Ints, Q') karity(N)] .)
+   = seqstrictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q', N, AS) .
+  eq strictOps2cxtOp(op Q : nil -> Ty [AS kstrict(Ints, Q')] .)
+   = strictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q', -1, AS) [owise] .
+  eq strictOps2cxtOp(op Q : nil -> Ty [AS seqkstrict(Ints, Q')] .)
+   = seqstrictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q', -1, AS) [owise] .
   eq strictOps2cxtOp(Op) = none [owise] .
 
   op strictOps2cxtMbs : Qid IntList Qid Int  AttrSet ~> MembAxSet .
