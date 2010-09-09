@@ -14,7 +14,8 @@ mod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING .
 
     sort Program .    op program(List{Exp}) :  -> Program .  
 
-        op eval :  -> Id .    op display :  -> Id .    op set-car! :  -> Id .    op set-cdr! :  -> Id .  
+        op eval :  -> Id .    op display :  -> Id .    op set-car! :  -> Id .    op set-cdr! :  -> Id .    op = :  -> Id .    op + :  -> Id .    op - :  -> Id .    op * :  -> Id .    op / :  -> Id .
+                 op call-with-current-continuation :  -> Id .    op call/cc :  -> Id .    op car :  -> Id .    op cdr :  -> Id . 
 
   eq [ .List{Exp}  ] =  [] .  
   eq # [ .List{Exp}  ] =  #[] . 
@@ -63,12 +64,24 @@ mod SKEME-SEMANTICS is including SKEME-INTERNAL .
                     < globalEnv > (.).Map  </ globalEnv >  
                     < env >   (.).Map  </ env >  
                     < store >  
-                       loc(0)  |->  bEval loc(1)  |->  bDisplay
+                          (.).Map 
+                           
+                          
+                           
+                          
+                           
+                          
+                           
+                           
+                           
+                           
+                          
+                          
                     </ store >  
                     < nextLoc >  0 </ nextLoc >  
                     < output >  (.).List  </ output > 
                </ T > : KSentence . 
-ops program output nextLoc env T k globalEnv store : -> CellLabel .  endm
+ops program k globalEnv store output nextLoc env T : -> CellLabel .  endm
 
 mod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS . 
         op run(_) :  List{K} -> Bag .  
@@ -79,10 +92,42 @@ mod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS .
 
        
   eq run(KL:List{K}) =  < T >...   < program >  KLtoL(KL) </ program >   ...</ T > . 
+ 
+                     
+  mb rule 
+      < globalEnv >   (.).Map  => 
+                       eval                           |->  loc(0)                         
+                       display                        |->  loc(1)  
+                       set-car!                        |->  loc(2) 
+                       set-cdr!                        |->  loc(3) 
+                       =                               |->  loc(4) 
+                       +                               |->  loc(5) 
+                       -                               |->  loc(6)  
+                       *                               |->  loc(7)  
+                       /                               |->  loc(8)  
+                       call-with-current-continuation  |->  loc(9)   
+                       call/cc                         |->  loc(9)   
+                       car                            |->  loc(10) 
+                       cdr                            |->  loc(11) 
+      </ globalEnv > 
+      < store >       (.).Map  =>  
+                       loc(0)  |->  bEval 
+                       loc(1)  |->  bDisplay 
+                       loc(2)  |->  bSetCar 
+                       loc(3)  |->  bSetCdr
+                       loc(4)  |->  bEqual 
+                       loc(5)  |->  b+ 
+                       loc(6)  |->  b-  
+                       loc(7)  |->  b*  
+                       loc(8)  |->  b/  
+                       loc(9)  |->  bCallCC 
+                       loc(10) |->  bCar 
+                       loc(11) |->  bCdr 
+      </ store >  : KSentence [metadata "structural"] .
+
 
                    
       
   mb rule < k >  (.).K  =>  K </ k >  < program >  ListItem(K) =>  (.).List   ...</ program >  : KSentence [metadata "structural"] . 
-
 var KL : List{K} .  var K : K .  endm
 

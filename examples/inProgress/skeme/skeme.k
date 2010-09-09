@@ -14,7 +14,8 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
 
   syntax Program ::= program(List{Exp}) 
 
-  syntax Id ::= eval | display | set-car! | set-cdr! 
+  syntax Id ::= eval | display | set-car! | set-cdr! | = | + | - | * | /
+              | call-with-current-continuation | call/cc | car | cdr
 
   macro [ .List{Exp} ] = [] 
   macro #[ .List{Exp} ] = #[]
@@ -63,8 +64,9 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                     <globalEnv>.Map</globalEnv> 
                     <env>  .Map </env> 
                     <store> 
-                       loc(0)  |-> bEval 
-                       loc(1)  |-> bDisplay
+                          .Map
+---                       loc(0)  |-> bEval 
+---                       loc(1)  |-> bDisplay
 ---                       loc(2)  |-> bSetCar 
 ---                       loc(3)  |-> bSetCdr
 ---                       loc(4)  |-> bEqual 
@@ -90,10 +92,42 @@ kmod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS
 
   ---intial run macro, this starts interpretation
   macro run(KL:List{K}) = <T_> <program> KLtoL(KL) </program> <_/T>
+ 
+  ---initialize the configuration.  Ideally we could do this where there configuration is declared instead of as a rule 
+  rule 
+      <globalEnv>  .Map =>
+                       eval                           |-> loc(0)                         
+                       display                        |-> loc(1)  
+                       set-car!                       |-> loc(2) 
+                       set-cdr!                       |-> loc(3) 
+                       =                              |-> loc(4) 
+                       +                              |-> loc(5) 
+                       -                              |-> loc(6)  
+                       *                              |-> loc(7)  
+                       /                              |-> loc(8)  
+                       call-with-current-continuation |-> loc(9)   
+                       call/cc                        |-> loc(9)   
+                       car                            |-> loc(10) 
+                       cdr                            |-> loc(11) 
+      </globalEnv>
+      <store>      .Map => 
+                       loc(0)  |-> bEval 
+                       loc(1)  |-> bDisplay 
+                       loc(2)  |-> bSetCar 
+                       loc(3)  |-> bSetCdr
+                       loc(4)  |-> bEqual 
+                       loc(5)  |-> b+
+                       loc(6)  |-> b- 
+                       loc(7)  |-> b* 
+                       loc(8)  |-> b/ 
+                       loc(9)  |-> bCallCC 
+                       loc(10) |-> bCar 
+                       loc(11) |-> bCdr 
+      </store> [structural]
+
 
   --- if the k cell is empty, we take the first expression in the program and put it
   --- in the k cell
   rule <k> .K => K </k> <program> ListItem(K) => .List <_/program> [structural] 
-
 endkm
 

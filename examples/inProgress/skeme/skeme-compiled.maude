@@ -29,6 +29,11 @@ subsort PosRat < Rat .
 subsort Zero < Builtins .
 subsort Zero < Int .
 subsort Zero < Rat .
+op * : -> Id .
+op + : -> Id .
+op - : -> Id .
+op / : -> Id .
+op = : -> Id .
 op Bag_ : List{K}-> Bag .
 op KLtoL : List{K}-> List .
 op List_ : List{K}-> List .
@@ -39,6 +44,10 @@ op _in_ : K Set -> Bool .
 op _in_ : SetItem Set -> Bool .
 op _|->_ : List{K}List{K}-> Map .
 op bar : -> List{K}.
+op call-with-current-continuation : -> Id .
+op call/cc : -> Id .
+op car : -> Id .
+op cdr : -> Id .
 op display : -> Id .
 op env : -> CellLabel .
 op eval : -> Id .
@@ -161,9 +170,10 @@ eq lengthList_(.)= 0 .
 eq lengthList_(__(LItem:ListItem,List:List))= sNat_(lengthList_(List:List)).
 eq lengthList`{K`}_(.List`{K`})= 0 .
 eq lengthList`{K`}_(_`,`,_(K:K,Ks:List{K}))= sNat_(lengthList`{K`}_(Ks:List{K})).
-eq run`(_`)(KL:List{K})= <_>_</_>(T,__(<_>_</_>(k,(.).K,k),__(<_>_</_>(nextLoc,_`(_`)(Rat_(0),.List`{K`}),nextLoc),__(<_>_</_>(program,KLtoL(KL:List{K}),program),__(<_>_</_>(output,(.).List,output),__(<_>_</_>(env,(.).Map,env),__(<_>_</_>(globalEnv,(.).Map,globalEnv),<_>_</_>(store,_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(0),.List`{K`}))),.List`{K`}),_`(_`)('bEval,.List`{K`})),store))))))),T).
+eq run`(_`)(KL:List{K})= <_>_</_>(T,__(<_>_</_>(k,(.).K,k),__(<_>_</_>(nextLoc,_`(_`)(Rat_(0),.List`{K`}),nextLoc),__(<_>_</_>(program,KLtoL(KL:List{K}),program),__(<_>_</_>(output,(.).List,output),__(<_>_</_>(globalEnv,(.).Map,globalEnv),__(<_>_</_>(store,(.).Map,store),<_>_</_>(env,(.).Map,env))))))),T).
 eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
 eq $hasMapping(M:Map,D:K)= false[owise].
+eq __(<_>_</_>(globalEnv,(.).Map,globalEnv),<_>_</_>(store,(.).Map,store))= __(<_>_</_>(globalEnv,__(_|->_(_`(_`)(Id_(*),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(7),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(+),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(5),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(-),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(6),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(/),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(8),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(=),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(4),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(call-with-current-continuation),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(9),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(call/cc),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(9),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(car),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(10),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(cdr),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(11),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(display),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(1),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(eval),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(0),.List`{K`}))),.List`{K`})),__(_|->_(_`(_`)(Id_(set-car!),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(2),.List`{K`}))),.List`{K`})),_|->_(_`(_`)(Id_(set-cdr!),.List`{K`}),_`(_`)(Rat_(loc(_`(_`)(Rat_(3),.List`{K`}))),.List`{K`})))))))))))))),globalEnv),<_>_</_>(store,__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(0),.List`{K`}))),.List`{K`}),_`(_`)('bEval,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(1),.List`{K`}))),.List`{K`}),_`(_`)('bDisplay,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(2),.List`{K`}))),.List`{K`}),_`(_`)('bSetCar,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(3),.List`{K`}))),.List`{K`}),_`(_`)('bSetCdr,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(4),.List`{K`}))),.List`{K`}),_`(_`)('bEqual,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(5),.List`{K`}))),.List`{K`}),_`(_`)('b+,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(6),.List`{K`}))),.List`{K`}),_`(_`)('b-,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(7),.List`{K`}))),.List`{K`}),_`(_`)('b*,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(8),.List`{K`}))),.List`{K`}),_`(_`)('b/,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(9),.List`{K`}))),.List`{K`}),_`(_`)('bCallCC,.List`{K`})),__(_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(10),.List`{K`}))),.List`{K`}),_`(_`)('bCar,.List`{K`})),_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(11),.List`{K`}))),.List`{K`}),_`(_`)('bCdr,.List`{K`}))))))))))))),store))[metadata "structural rule"].
 eq __(<_>_</_>(k,(.).K,k),<_>_</_>(program,__(ListItem(K:K),?4:List),program))= __(<_>_</_>(k,K:K,k),<_>_</_>(program,?4:List,program))[metadata "structural rule"].
 eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
 eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
