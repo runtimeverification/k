@@ -1,0 +1,79 @@
+in ../../../k-prelude
+
+mod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING . 
+
+    sort Literal .     op #t :  -> Literal .     op #f :  -> Literal .    op #unspecified :  -> Literal . 
+                       op [] :  -> Literal .     op #[] :  -> Literal .
+                       subsort Int <  Literal .    subsort Float <  Literal .    subsort Rat <  Literal .    op #\_ :  Char -> Literal .  
+
+    sort Exp .    subsort Literal <  Exp . 
+                  subsort Id <  Exp .    op {_} :  String -> Exp . 
+                  op [_] :  List{Exp} -> Exp .    op #[_] :  List{Exp} -> Exp .    op [_._] :  List{Exp}  Exp -> Exp .      
+
+    sort List{Exp} .    subsort Exp <  List{Exp} .    op .List{Exp} :  -> List{Exp} .    op __ : List{Exp}  List{Exp} -> List{Exp} [assoc id: .List{Exp}] . 
+    sort List{Id} .    subsort Id <  List{Id} .    op .List{Id} :  -> List{Id} .    op _,_ : List{Id}  List{Id} -> List{Id} [assoc id: .List{Id}] . 
+
+        op eval :  -> Id .    op display :  -> Id .    op set-car! :  -> Id .    op set-cdr! :  -> Id .  
+
+  eq [ .List{Exp}  ] =  [] .  
+  eq # [ .List{Exp}  ] =  #[] . 
+  eq [EL:List{Exp} .  [] ] =  [EL:List{Exp}] . 
+  eq [EL:List{Exp} .  [EL':List{Exp}]] =  [EL:List{Exp} EL':List{Exp}] . 
+  eq [EL:List{Exp} .  [EL':List{Exp} .  E:Exp]] =  [EL:List{Exp} EL':List{Exp} .  E:Exp] . 
+
+var EL' : List{Exp} . var EL : List{Exp} . var E : Exp .  endm
+
+mod SKEME-INTERNAL is including K + SKEME-SYNTAX .
+
+    sort Closure .       op closure(List{Id},List{Exp},Map) :  -> Closure .
+                         op varClosure(List{Id{,Id,List{Exp},Map) :  -> Closure . 
+
+    sort Continuation .    op continuation(K,Map) :  -> Continuation . 
+
+    sort Internal .      op vT :  -> Internal .    op vF :  -> Internal .    op vUnspec :  -> Internal .
+                         op vNil :  -> Internal . 
+                         op vi(Int) :  -> Internal .    op vf(Float) :  -> Internal .    op vr(Rat) :  -> Internal .    op vc(Char) :  -> Internal .
+                                            
+                         op cons(K,K) :  -> Internal .    op vec(Map) :  -> Internal .    op string(Map) :  -> Internal .   
+  
+    sort Builtin .      op bEval :  -> Builtin .    op bDisplay :  -> Builtin .    op bSetCar :  -> Builtin .    op bSetCdr :  -> Builtin .    op bEqual :  -> Builtin .    op b+ :  -> Builtin .    op b- :  -> Builtin .    op b* :  -> Builtin .    op b/ :  -> Builtin . 
+                        op bCallCC :  -> Builtin .    op bCar :  -> Builtin .    op bCdr :  -> Builtin . 
+
+        op #procedure(Closure) :  -> Literal .    op #continuation(Continuation) :  -> Literal .    op #builtin(Builtin) :  -> Literal .  
+  
+endm
+
+mod SKEME-PROGRAMS is including SKEME-SYNTAX .
+        op foo :  -> Exp .    op bar :  -> Exp . 
+
+  eq foo =  1 2 .
+  eq bar =  [1 2] .
+endm
+
+mod SKEME-SEMANTICS is including SKEME-INTERNAL .
+
+        subsort List{Exp} <  K .    subsort Exp <  K .    subsort Char <  K .    subsort String <  K . 
+        subsort Internal <  KResult . 
+  
+
+  mb configuration < T >  < k > (.).K  </ k >  
+                    < program >  .List{Exp}  </ program > 
+                    < globalEnv > (.).Map  </ globalEnv >  
+                    < env > (.).Map  </ env >  
+                    < store > (.).Map  </ store >  
+                    < nextLoc >  0 </ nextLoc >  
+                    < output >  .List{Exp}  </ output > 
+               </ T > : KSentence . 
+ops program output nextLoc env T k globalEnv store : -> CellLabel .  endm
+
+mod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS . 
+        op run(_) :  KLabel -> Bag .  
+
+       
+  eq run(KL:KLabel) =  < T >...   < program >  KL(.List{K} ) </ program >   ...</ T > . 
+
+                   
+      
+  mb rule < T >...   < k >  (.).K  =>  E:Exp </ k >  < program >  E =>  .List{Exp}   ...</ program >   ...</ T >  : KSentence [metadata "structural"] . 
+var KL : KLabel . var E : Exp .  endm
+
