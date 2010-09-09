@@ -10,8 +10,9 @@ mod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING .
                   subsort Id <  Exp .    op {_} :  String -> Exp . 
                   op [_] :  List{Exp} -> Exp .    op #[_] :  List{Exp} -> Exp .    op [_._] :  List{Exp}  Exp -> Exp .      
 
-    sort List{Exp} .    subsort Exp <  List{Exp} .    op .List{Exp} :  -> List{Exp} .    op __ : List{Exp}  List{Exp} -> List{Exp} [assoc id: .List{Exp}] . 
-    sort List{Id} .    subsort Id <  List{Id} .    op .List{Id} :  -> List{Id} .    op _,_ : List{Id}  List{Id} -> List{Id} [assoc id: .List{Id}] . 
+    sort List{Exp} .    subsort Exp <  List{Exp} .    op .List{Exp} :  -> List{Exp} .    op __ : List{Exp}  List{Exp} -> List{Exp} [assoc id: .List{Exp} metadata "hybrid"] .  
+
+    sort Program .    op program(List{Exp}) :  -> Program .  
 
         op eval :  -> Id .    op display :  -> Id .    op set-car! :  -> Id .    op set-cdr! :  -> Id .  
 
@@ -30,50 +31,58 @@ mod SKEME-INTERNAL is including K + SKEME-SYNTAX .
 
     sort Continuation .    op continuation(K,Map) :  -> Continuation . 
 
-    sort Internal .      op vT :  -> Internal .    op vF :  -> Internal .    op vUnspec :  -> Internal .
-                         op vNil :  -> Internal . 
-                         op vi(Int) :  -> Internal .    op vf(Float) :  -> Internal .    op vr(Rat) :  -> Internal .    op vc(Char) :  -> Internal .
-                                            
-                         op cons(K,K) :  -> Internal .    op vec(Map) :  -> Internal .    op string(Map) :  -> Internal .   
+    sort Internal .      op vT :  -> Internal .    op vF :  -> Internal .    op vUnspec :  -> Internal .    op vNil :  -> Internal . 
+                         op vi(Int) :  -> Internal .    op vf(Float) :  -> Internal .    op vr(Rat) :  -> Internal .    op vc(Char) :  -> Internal .                                            
+                         op cons(K,K) :  -> Internal .    op vec(Map) :  -> Internal .    op string(Map) :  -> Internal .    subsort Builtin <  Internal .  
   
     sort Builtin .      op bEval :  -> Builtin .    op bDisplay :  -> Builtin .    op bSetCar :  -> Builtin .    op bSetCdr :  -> Builtin .    op bEqual :  -> Builtin .    op b+ :  -> Builtin .    op b- :  -> Builtin .    op b* :  -> Builtin .    op b/ :  -> Builtin . 
                         op bCallCC :  -> Builtin .    op bCar :  -> Builtin .    op bCdr :  -> Builtin . 
 
-        op #procedure(Closure) :  -> Literal .    op #continuation(Continuation) :  -> Literal .    op #builtin(Builtin) :  -> Literal .  
+    sort List{Id} .    subsort Id <  List{Id} .    op .List{Id} :  -> List{Id} .    op _,_ : List{Id}  List{Id} -> List{Id} [assoc id: .List{Id} metadata "hybrid"] . 
+
+        op #procedure(Closure) :  -> Literal .    op #continuation(Continuation) :  -> Literal .    op #builtin(Builtin) :  -> Literal .    
   
 endm
 
 mod SKEME-PROGRAMS is including SKEME-SYNTAX .
-        op foo :  -> Exp .    op bar :  -> Exp . 
+        op bar :  -> List{Exp} .    op foo :  -> List{Exp} .  
 
-  eq foo =  1 2 .
+  eq foo =  [3][4] .
   eq bar =  [1 2] .
 endm
 
 mod SKEME-SEMANTICS is including SKEME-INTERNAL .
 
-        subsort List{Exp} <  K .    subsort Exp <  K .    subsort Char <  K .    subsort String <  K . 
+        subsort Program <  K .    subsort Exp <  K .    subsort Char <  K .    subsort String <  K .  
         subsort Internal <  KResult . 
-  
+
+  op loc : K -> Rat .
 
   mb configuration < T >  < k > (.).K  </ k >  
-                    < program >  .List{Exp}  </ program > 
+                    < program >  (.).List  </ program > 
                     < globalEnv > (.).Map  </ globalEnv >  
-                    < env > (.).Map  </ env >  
-                    < store > (.).Map  </ store >  
+                    < env >   (.).Map  </ env >  
+                    < store >  
+                       loc(0)  |->  bEval loc(1)  |->  bDisplay
+                    </ store >  
                     < nextLoc >  0 </ nextLoc >  
-                    < output >  .List{Exp}  </ output > 
+                    < output >  (.).List  </ output > 
                </ T > : KSentence . 
 ops program output nextLoc env T k globalEnv store : -> CellLabel .  endm
 
 mod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS . 
-        op run(_) :  KLabel -> Bag .  
+        op run(_) :  List{K} -> Bag .  
+
+     op KLtoL : List{K} -> List . 
+     eq KLtoL((K:K ,, KL:List{K})) =  ListItem(K) KLtoL(KL) .  
+     eq KLtoL(.List{K} ) =  (.).List . 
 
        
-  eq run(KL:KLabel) =  < T >...   < program >  KL(.List{K} ) </ program >   ...</ T > . 
+  eq run(KL:List{K}) =  < T >...   < program >  KLtoL(KL) </ program >   ...</ T > . 
 
                    
       
-  mb rule < T >...   < k >  (.).K  =>  E:Exp </ k >  < program >  E =>  .List{Exp}   ...</ program >   ...</ T >  : KSentence [metadata "structural"] . 
-var KL : KLabel . var E : Exp .  endm
+  mb rule < k >  (.).K  =>  K </ k >  < program >  ListItem(K) =>  (.).List   ...</ program >  : KSentence [metadata "structural"] . 
+
+var KL : List{K} .  var K : K .  endm
 

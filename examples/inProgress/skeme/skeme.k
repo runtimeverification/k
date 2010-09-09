@@ -10,8 +10,9 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
                | Id | { String } 
                | [ List{Exp} ] | #[ List{Exp} ] | [ List{Exp} . Exp ]     
 
-  syntax List{Exp} ::= Exp | .List{Exp} | List{Exp}  List{Exp} [assoc id: .List{Exp}]
-  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}]
+  syntax List{Exp} ::= Exp | .List{Exp} | List{Exp}  List{Exp} [assoc id: .List{Exp} hybrid] 
+
+  syntax Program ::= program(List{Exp}) 
 
   syntax Id ::= eval | display | set-car! | set-cdr! 
 
@@ -30,50 +31,69 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
 
   syntax Continuation ::= continuation(K, Map)
 
-  syntax Internal ::=   vT | vF | vUnspec
-                      | vNil 
-                      | vi(Int) | vf(Float) | vr(Rat) | vc(Char)
-                                            
-                      | cons(K,K) | vec(Map) | string(Map)  
+  syntax Internal ::=   vT | vF | vUnspec | vNil 
+                      | vi(Int) | vf(Float) | vr(Rat) | vc(Char)                                            
+                      | cons(K,K) | vec(Map) | string(Map) | Builtin 
   
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
                      | bCallCC | bCar | bCdr
 
-  syntax Literal ::= #procedure(Closure) | #continuation(Continuation) | #builtin(Builtin) 
+  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id} hybrid]
+
+  syntax Literal ::= #procedure(Closure) | #continuation(Continuation) | #builtin(Builtin)   
   
 endkm
 
 kmod SKEME-PROGRAMS is including SKEME-SYNTAX
-  syntax Exp ::= foo | bar
+  syntax List{Exp} ::= bar | foo 
 
-  macro foo = 1 2
+  macro foo = [3][4]
   macro bar = [1 2]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
 
-  syntax K ::= List{Exp} | Exp | Char | String
+  syntax K ::= Program | Exp | Char | String 
   syntax KResult ::= Internal
-  
+
+  op loc : K -> Rat
 
   configuration <T> <k>.K</k> 
-                    <program> .List{Exp} </program>
+                    <program> .List </program>
                     <globalEnv>.Map</globalEnv> 
-                    <env>.Map</env> 
-                    <store>.Map</store> 
+                    <env>  .Map </env> 
+                    <store> 
+                       loc(0)  |-> bEval 
+                       loc(1)  |-> bDisplay
+---                       loc(2)  |-> bSetCar 
+---                       loc(3)  |-> bSetCdr
+---                       loc(4)  |-> bEqual 
+---                       loc(5)  |-> b+
+---                       loc(6)  |-> b- 
+---                       loc(7)  |-> b* 
+---                       loc(8)  |-> b/ 
+---                       loc(9)  |-> bCallCC 
+---                       loc(10) |-> bCar 
+---                       loc(11) |-> bCdr 
+                    </store> 
                     <nextLoc> 0 </nextLoc> 
-                    <output> .List{Exp} </output>
+                    <output> .List </output>
                </T>
 endkm
 
 kmod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS 
-  syntax Bag ::= run( KLabel ) 
+  syntax Bag ::= run( List{K} ) 
+
+     op KLtoL : List{K} -> List 
+     eq KLtoL((K:K ,, KL:List{K})) = ListItem(K) KLtoL(KL)  
+     eq KLtoL(.List{K}) = .List
 
   ---intial run macro, this starts interpretation
-  macro run(KL:KLabel) = <T_> <program> KL(.List{K}) </program> <_/T>
+  macro run(KL:List{K}) = <T_> <program> KLtoL(KL) </program> <_/T>
 
   --- if the k cell is empty, we take the first expression in the program and put it
   --- in the k cell
-  rule <T_> <k> .K => E:Exp </k> <program> E => .List{Exp} <_/program> <_/T> [structural] 
+  rule <k> .K => K </k> <program> ListItem(K) => .List <_/program> [structural] 
+
 endkm
 

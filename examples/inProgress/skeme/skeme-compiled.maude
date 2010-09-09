@@ -30,6 +30,7 @@ subsort Zero < Builtins .
 subsort Zero < Int .
 subsort Zero < Rat .
 op Bag_ : List{K}-> Bag .
+op KLtoL : List{K}-> List .
 op List_ : List{K}-> List .
 op T : -> CellLabel .
 op _in_ : BagItem Bag -> Bool .
@@ -37,18 +38,21 @@ op _in_ : K Bag -> Bool .
 op _in_ : K Set -> Bool .
 op _in_ : SetItem Set -> Bool .
 op _|->_ : List{K}List{K}-> Map .
+op bar : -> List{K}.
 op display : -> Id .
 op env : -> CellLabel .
 op eval : -> Id .
+op foo : -> List{K}.
 op globalEnv : -> CellLabel .
 op inKList : K K -> Bool .
 op k : -> CellLabel .
 op keys_ : Map -> Set .
 op lengthList_ : List -> Nat .
+op loc : K -> Rat .
 op nextLoc : -> CellLabel .
 op output : -> CellLabel .
 op program : -> CellLabel .
-op run`(_`) : KLabel -> Bag .
+op run`(_`) : List{K}-> Bag .
 op set-car! : -> Id .
 op set-cdr! : -> Id .
 op store : -> CellLabel .
@@ -62,30 +66,29 @@ op '#f : -> KProperLabel[metadata "arity 0"].
 op '#procedure`(Closure`) : -> KProperLabel[metadata "arity 0"].
 op '#t : -> KProperLabel[metadata "arity 0"].
 op '#unspecified : -> KProperLabel[metadata "arity 0"].
-op '__ : -> KProperLabel[metadata ""].
-op '_`,_ : -> KProperLabel[metadata ""].
+op '__ : -> KHybridLabel[metadata "hybrid"].
+op '_`,_ : -> KHybridLabel[metadata "hybrid"].
 op '`[_._`] : -> KProperLabel[metadata "arity 2"].
 op '`[_`] : -> KProperLabel[metadata "arity 1"].
 op '`[`] : -> KProperLabel[metadata "arity 0"].
 op '`{_`} : -> KProperLabel[metadata "arity 1"].
-op 'b* : -> KProperLabel[metadata "arity 0"].
-op 'b+ : -> KProperLabel[metadata "arity 0"].
-op 'b- : -> KProperLabel[metadata "arity 0"].
-op 'b/ : -> KProperLabel[metadata "arity 0"].
-op 'bCallCC : -> KProperLabel[metadata "arity 0"].
-op 'bCar : -> KProperLabel[metadata "arity 0"].
-op 'bCdr : -> KProperLabel[metadata "arity 0"].
-op 'bDisplay : -> KProperLabel[metadata "arity 0"].
-op 'bEqual : -> KProperLabel[metadata "arity 0"].
-op 'bEval : -> KProperLabel[metadata "arity 0"].
-op 'bSetCar : -> KProperLabel[metadata "arity 0"].
-op 'bSetCdr : -> KProperLabel[metadata "arity 0"].
-op 'bar : -> KProperLabel[metadata "arity 0"].
+op 'b* : -> KResultLabel[metadata "arity 0"].
+op 'b+ : -> KResultLabel[metadata "arity 0"].
+op 'b- : -> KResultLabel[metadata "arity 0"].
+op 'b/ : -> KResultLabel[metadata "arity 0"].
+op 'bCallCC : -> KResultLabel[metadata "arity 0"].
+op 'bCar : -> KResultLabel[metadata "arity 0"].
+op 'bCdr : -> KResultLabel[metadata "arity 0"].
+op 'bDisplay : -> KResultLabel[metadata "arity 0"].
+op 'bEqual : -> KResultLabel[metadata "arity 0"].
+op 'bEval : -> KResultLabel[metadata "arity 0"].
+op 'bSetCar : -> KResultLabel[metadata "arity 0"].
+op 'bSetCdr : -> KResultLabel[metadata "arity 0"].
 op 'closure`(List`{Id`}`,List`{Exp`}`,Map`) : -> KProperLabel[metadata "arity 0"].
 op 'cons`(K`,K`) : -> KResultLabel[metadata "arity 0"].
 op 'continuation`(K`,Map`) : -> KProperLabel[metadata "arity 0"].
-op 'foo : -> KProperLabel[metadata "arity 0"].
 op 'headList`{K`}_ : -> KProperLabel[metadata "arity 1 latex(renameTo head\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op 'program`(List`{Exp`}`) : -> KProperLabel[metadata "arity 0"].
 op 'string`(Map`) : -> KResultLabel[metadata "arity 0"].
 op 'vF : -> KResultLabel[metadata "arity 0"].
 op 'vNil : -> KResultLabel[metadata "arity 0"].
@@ -112,9 +115,13 @@ op _`[_`] : Map Map -> Map[prec 0].
 op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\;}/_])"].
 op lengthList`{K`}_ : List{K}-> Nat[metadata "latex(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
 op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+eq bar = _`(_`)('`[_`],_`(_`)('__,_`,`,_(_`(_`)(Rat_(1),.List`{K`}),_`(_`)(Rat_(2),.List`{K`})))).
+eq foo = _`,`,_(_`(_`)('`[_`],_`(_`)('__,_`(_`)(Rat_(3),.List`{K`}))),_`(_`)('`[_`],_`(_`)('__,_`(_`)(Rat_(4),.List`{K`})))).
 eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
 eq Bag_(.List`{K`})=(.).Bag .
 eq Bag_(_`,`,_(K:K,Ks:List{K}))= __(BagItem(K:K),Bag_(Ks:List{K})).
+eq KLtoL(.List`{K`})=(.).List .
+eq KLtoL(_`,`,_(K:K,KL:List{K}))= __(ListItem(K:K),KLtoL(KL:List{K})).
 eq List_(.List`{K`})=(.).List .
 eq List_(_`,`,_(K:K,Ks:List{K}))= __(ListItem(K:K),List_(Ks:List{K})).
 eq Set_(.List`{K`})=(.).Set .
@@ -128,8 +135,6 @@ eq _`(_`)('`[_._`],_`,`,_(_`(_`)('__,EL:List{K}),_`(_`)('`[_._`],_`,`,_(_`(_`)('
 eq _`(_`)('`[_._`],_`,`,_(_`(_`)('__,EL:List{K}),_`(_`)('`[_`],_`(_`)('__,EL':List{K}))))= _`(_`)('`[_`],_`(_`)('__,_`,`,_(EL:List{K},EL':List{K}))).
 eq _`(_`)('`[_._`],_`,`,_(_`(_`)('__,EL:List{K}),_`(_`)('`[`],.List`{K`})))= _`(_`)('`[_`],_`(_`)('__,EL:List{K})).
 eq _`(_`)('`[_`],_`(_`)('__,.List`{K`}))= _`(_`)('`[`],.List`{K`}).
-eq _`(_`)('bar,.List`{K`})= _`(_`)('`[_`],_`(_`)('__,_`,`,_(_`(_`)(Rat_(1),.List`{K`}),_`(_`)(Rat_(2),.List`{K`})))).
-eq _`(_`)('foo,.List`{K`})= _`,`,_(_`(_`)(Rat_(1),.List`{K`}),_`(_`)(Rat_(2),.List`{K`})).
 eq _`(_`)('headList`{K`}_,_`(_`)(kList("wklist_"),_`,`,_(K:K,Ks:List{K})))= K:K .
 eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
 eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
@@ -156,10 +161,10 @@ eq lengthList_(.)= 0 .
 eq lengthList_(__(LItem:ListItem,List:List))= sNat_(lengthList_(List:List)).
 eq lengthList`{K`}_(.List`{K`})= 0 .
 eq lengthList`{K`}_(_`,`,_(K:K,Ks:List{K}))= sNat_(lengthList`{K`}_(Ks:List{K})).
-eq run`(_`)(KL:KLabel)= <_>_</_>(T,__(<_>_</_>(k,(.).K,k),__(<_>_</_>(program,_`(_`)(KL:KLabel,.List`{K`}),program),__(<_>_</_>(output,_`(_`)('__,.List`{K`}),output),__(<_>_</_>(nextLoc,_`(_`)(Rat_(0),.List`{K`}),nextLoc),__(<_>_</_>(env,(.).Map,env),__(<_>_</_>(globalEnv,(.).Map,globalEnv),<_>_</_>(store,(.).Map,store))))))),T).
+eq run`(_`)(KL:List{K})= <_>_</_>(T,__(<_>_</_>(k,(.).K,k),__(<_>_</_>(nextLoc,_`(_`)(Rat_(0),.List`{K`}),nextLoc),__(<_>_</_>(program,KLtoL(KL:List{K}),program),__(<_>_</_>(output,(.).List,output),__(<_>_</_>(env,(.).Map,env),__(<_>_</_>(globalEnv,(.).Map,globalEnv),<_>_</_>(store,_|->_(_`(_`)(Rat_(loc(_`(_`)(Rat_(0),.List`{K`}))),.List`{K`}),_`(_`)('bEval,.List`{K`})),store))))))),T).
 eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
 eq $hasMapping(M:Map,D:K)= false[owise].
-eq <_>_</_>(T,__(?5:Bag,__(<_>_</_>(k,(.).K,k),<_>_</_>(program,_~>_(E:K,?6:K),program))),T)= <_>_</_>(T,__(?5:Bag,__(<_>_</_>(k,E:K,k),<_>_</_>(program,_~>_(_`(_`)('__,.List`{K`}),?6:K),program))),T)[metadata "structural rule"].
+eq __(<_>_</_>(k,(.).K,k),<_>_</_>(program,__(ListItem(K:K),?4:List),program))= __(<_>_</_>(k,K:K,k),<_>_</_>(program,?4:List,program))[metadata "structural rule"].
 eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
 eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
 eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
