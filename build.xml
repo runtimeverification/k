@@ -1,0 +1,16 @@
+<project name="K Framework" default="build" basedir=".">
+	<!-- set global properties for this build -->
+	<property name="examplesDir" location="examples"/>
+	<!-- <property name="build" location="build"/>
+	<property name="dist"  location="dist"/> -->
+	<target name="build">
+		<exec dir="." executable="make">
+			<arg line="-C ${examplesDir}"/>
+		</exec>
+	</target>
+	<target name="test">
+		<exec dir="." executable="make">
+			<arg line="-C ${examplesDir} test"/>
+		</exec>
+	</target>
+</project>
