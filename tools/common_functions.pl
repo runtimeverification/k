@@ -679,37 +679,70 @@ sub getKLabelDeclarations
     my $mod = (shift);
     my $labels = "";
 
+	# consider each statement
     while ($mod =~ m/(rule|macro|context|eq|configuration)(.*?)(?=$kmaude_keywords_pattern)/sg)
     {
-	my $rl = $2;
-#        while ($rl =~ m/(\'$maude_backquoted\_$maude_backquoted)/g)
-#        while ($rl =~ m/(\'$klabel_body)/g)
-#        while ($rl =~ m/(\'$klabel_body)((?:[\Q\E\[\]\(\)\{\}\s,])|(?=\())/g)
-        while ($rl =~ m/(\'($klabel_body|$maude_backquoted))((?:[\Q\E\[\]\(\)\{\}\s,])|(?=\())/g)
-        {
-#	    print "FOUND: $1\n in rule:\n$rl\n";
-	    if (! ($labels =~ m/$1/s) )
-	    {
-		$labels .= "$1 "; # if (isDeclaredKLabel($1) == 1);
-	    }
-	}
+		my $statement = $2;
+		
+		# extract KLabel candidate from current statement
+        # the candidate is anything which ends with non-escaped []{}()\s 
+		while($statement =~ m/(.)(.)((\'.*?)([^`])([\(\)\{\}\[\]\s]))/sg)
+		{
 
-#        print "$1:\n $rl\n\n";
-    }
-    if ($labels =~ m/\S\s+\S/)
+			my $candidate = "$4$5";
+            my $prefix = "$1$2";
+			
+			if ($candidate =~ m/[^`][\[\]\{\}\(\)\s]/)
+			{
+				# the candidate still contains a separator char -> throw it away
+				$candidate = "";
+			}
+			else # the candidate body is ok
+			{
+				if ($prefix =~ m/[^`][\[\]\{\}\(\)\s]/)
+				{
+					# prefix is a separator 
+					# print "		Candidate: $candidate\n";					
+				}
+				else
+				{
+					# prefix is a non separator
+					$candidate = "";
+				}
+			}
+
+			if ($declaredKLabels =~ m/ $candidate /s)
+			{
+				# label cannot be declared if it is already declared
+			}
+			else
+			{	
+				if ($labels =~ m/$candidate /s)
+				{
+					# candidate is already in labels list
+				}
+				else
+				{
+					$labels .= "$candidate ";
+				}
+			}
+		}
+	}
+    
+	if ($labels =~ m/\S\s+\S/)
     {
-	$labels = "ops $labels";
+		$labels = "ops $labels";
     }
-    elsif ($labels =~ m/\S/) 
+    	elsif ($labels =~ m/\S/) 
     {
-	$labels = "op $labels";	
+		$labels = "op $labels";	
     }
     else 
     {
-	return "";
+		return "";
     }
     
-#	print "$labels : -> KLabel [metadata \"generated label\"] ";
+	# print "$labels : -> KLabel [metadata \"generated label\"] ";
     return "$labels : -> KLabel [metadata \"generated label\"] . ";
 }
 
