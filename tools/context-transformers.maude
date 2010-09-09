@@ -70,6 +70,7 @@ fmod CONTEXT-TRANSFORMERS is
    = getName(SC) ; $getCellNames(Tl) 
   if SC := splitKCell(T) .
   eq getCellNames(T) = default(T) [owise] .
+  eq getCellNames(T,Tl) = default(ctor(Bag)[Tl]) [owise] .
 
   op $getCellNames_ : TermList ~> SortSet .
  ceq $getCellNames(T, Tl) 
