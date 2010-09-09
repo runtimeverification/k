@@ -1,6 +1,6 @@
 load strict-ops2cxt
 
-mod STRICT-METADATA-META is
+mod STRICTOPS2CXT-METADATA-META is
   including STRICTOPS2CXT .
   including PARSE-METADATA .
   var Q : Qid . var AS : AttrSet . var Str : String . var Ty : Type .
@@ -10,7 +10,7 @@ endm
 
 mod STRICTOPS2CXT-META is
   including STRICTOPS2CXT .
-  including  STRICT-METADATA-META .
+  including  STRICTOPS2CXT-METADATA-META .
   including META-LEVEL-EXTRAS .
   var Syntax CxtStrict : String .  var M : Module .
   var QSyntax QCxtStrict : Qid .

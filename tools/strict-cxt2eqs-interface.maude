@@ -1,6 +1,15 @@
 load strict-cxt2eqs
 
+mod STRICTCXT2EQS-METADATA-META is
+  including STRICTCXT2EQS .
+  including PARSE-METADATA .
+  var M : Module . var AS : AttrSet . var Str : String . var T : Term . var Sort : Type .
+  eq strictCxt2eq(M, (mb 'context_[T] : Sort [AS metadata(Str)] .))
+   = strictCxt2eq(M, (mb 'context_[T] : Sort [AS metadataParse(Str)] .)) .
+endm
+
 mod STRICTCXT2EQS-META is
+  including STRICTCXT2EQS-METADATA-META .
   including STRICTCXT2EQS .
   including META-LEVEL-EXTRAS .
   var StrictCxt StrictEqs : String .  var M : Module .

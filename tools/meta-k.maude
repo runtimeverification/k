@@ -16,18 +16,10 @@ fmod K-META-OPS is including META-TERM .
   eq kra(T) = T [owise] .
   eq kra(Trl) = '_~>_[Trl] [owise] .
  
-  op klabel : -> Constant .
-  eq klabel = 'k.CellLabel .
+  op klabel : -> Qid .
+  eq klabel = 'k .
  
   var T : Term .  var Trl Trl1 Trl2 : TermList . 
-
-  op kcell : Term -> Term .
-  eq kcell(T) = '<_>_</_>[klabel,T,klabel] .
-  
-  op kWrap : Term -> Term .
-  eq kWrap(T) = kcell(kra(T,'Rest:K)) .
---- replace the line above with the one below to get unrestricted strictness
----  eq kWrap(T) = T .
 
   op kList : TermList -> Term .
   eq kList(T) = T .
@@ -460,7 +452,8 @@ endfm
 
 fmod K-STRICTNESS-OPS is including META-LEVEL .
   including K-META-OPS .
-  var S : String .  var T : Term . var Trl : TermList .
+  including K-META-CONFIG .
+  var S : String .  var T : Term . var Trl : TermList . var Q : Qid .
 
   op hole : -> Term .
   eq hole = '`[HOLE`]:K .
@@ -474,19 +467,29 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
 
   op freezeVariable : String Term -> Term .
   eq freezeVariable(S, V:Term) = kApply('freezeVar[upTerm(S)],V:Term) .
+
+  op kWrap : Term -> Term .
+  eq kWrap(T) = kWrap(klabel,T) .
+
+   op kWrap : Qid Term -> Term .
+   eq kWrap(Q, T) = mkCell(Q, kra(T,'Rest:K)) .
+--- replace the line above with the one below to get unrestricted strictness
+---  eq kWrap(T) = T .
 endfm
 
+---(
 fmod LIST-ATTRS is
   including META-MODULE .
   op klist : Nat Qid Type -> Attr .
   op klist : Nat Term -> Attr .
 endfm
+---)
 
 fmod STRICT-ATTRS is
   including META-MODULE .
   including NAT-LIST-EXTRAS .
-  including LIST-ATTRS .
-  ops kstrict seqkstrict : IntList -> Attr .
+---  including LIST-ATTRS .
+  ops kstrict seqkstrict : IntList QidList -> Attr .
   op karity : Nat -> Attr .
   op khybrid : -> Attr .
 endfm
@@ -514,7 +517,7 @@ endfm
 fmod K-META-LISTS is including K-META-OPS .
   including META-K-MODULE .
   including META-TERM-EXTRAS .
-  including LIST-ATTRS .
+---  including LIST-ATTRS .
   including META-K-LABELS .
 
   var Q : Qid . var T : Type . var Tl : TypeList . var AS : AttrSet .
@@ -536,7 +539,7 @@ fmod K-META-LISTS is including K-META-OPS .
   op listWrapperT : Qid Type -> Constant .
   eq listWrapperT(Q,T) = mkConstant(listWrapperS(Q),klabelType(T)) .
 
-  eq klist(N,Q,T) = klist(N, listWrapperT(Q,T)) .
+  ---eq klist(N,Q,T) = klist(N, listWrapperT(Q,T)) .
 
 
   op getListConstructor : OpDeclSet Type ~> OpDecl .

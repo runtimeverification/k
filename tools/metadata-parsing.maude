@@ -57,6 +57,7 @@ endfm
 fmod PARSE-METADATA-STRICT is
   including PARSE-METADATA-BASIC .
   including STRICT-ATTRS .
+  including K-META-OPS .
   var Q : Qid . var AS : AttrSet . var Nl : IntList .
   var A : Attr . var S S' S1 S2  S3 : String . var F : FindResult .
   var P P' P'' : Nat .  var T : Type .
@@ -66,18 +67,18 @@ fmod PARSE-METADATA-STRICT is
    /\ S' := (substr(S,length("hybrid"),length(S))) 
    /\ S' == "" or-else substr(S',0,1) == " " .
 
- ceq metadataStrippedParse(S) = klist(N,Q,T) metadataParse(S')
-   if "list(" = substr(S,0,length("list(")) 
-   /\ S1 := stripSpaces(substr(S,length("list("),length(S))) 
-   /\ P :=   find(S1,")", 0)
-   /\ S2 := substr(S1, 0, P) 
-   /\ P' := find(S2,":",0)
-   /\ N := rat(stripSpaces(substr(S2,0, P')), 10)
-   /\ S3 := substr(S2,P' + 1, length(S2))
-   /\ P'' := rfind(S3,":",length(S3))
-   /\ Q := qid(stripSpaces(substr(S3,0,P'')))
-   /\ T := qid(stripSpaces(substr(S3,P'' + 1, length(S3))))
-   /\ S' := stripSpaces(substr(S1, P + 1,length(S1)))  .
+--- ceq metadataStrippedParse(S) = klist(N,Q,T) metadataParse(S')
+---   if "list(" = substr(S,0,length("list(")) 
+---   /\ S1 := stripSpaces(substr(S,length("list("),length(S))) 
+---   /\ P :=   find(S1,")", 0)
+---   /\ S2 := substr(S1, 0, P) 
+---   /\ P' := find(S2,":",0)
+---   /\ N := rat(stripSpaces(substr(S2,0, P')), 10)
+---   /\ S3 := substr(S2,P' + 1, length(S2))
+---   /\ P'' := rfind(S3,":",length(S3))
+---   /\ Q := qid(stripSpaces(substr(S3,0,P'')))
+---   /\ T := qid(stripSpaces(substr(S3,P'' + 1, length(S3))))
+---   /\ S' := stripSpaces(substr(S1, P + 1,length(S1)))  .
 
  ceq metadataStrippedParse(S) = karity(N) metadataParse(S')
    if "arity " = substr(S,0,length("arity ")) 
@@ -86,15 +87,25 @@ fmod PARSE-METADATA-STRICT is
    /\ N := rat(if (F == notFound) then  S1 else substr(S1, 0,F) fi,10)
    /\ S' := if (F == notFound) then "" 
             else stripSpaces(substr(S1, find(S1," ",0),length(S1))) fi .
+
   ceq metadataStrippedParse(S) = A metadataParse(S')
    if  "strict" = substr(S,0,length("strict")) 
-   /\ {A, S'} := strictParse(stripSpaces(substr(S, length("strict"), length(S))))  .
+   /\ {A, S'} := lookForCellMarkers(strictParse(stripSpaces(substr(S, length("strict"), length(S)))))  .
   ceq metadataStrippedParse(S) = conv2SeqStrict(A) metadataParse(S')
    if  "seqstrict" = substr(S,0,length("seqstrict")) 
-   /\ {A, S'} := strictParse(stripSpaces(substr(S, length("seqstrict"), length(S)))) .
+   /\ {A, S'} := lookForCellMarkers(strictParse(stripSpaces(substr(S, length("seqstrict"), length(S))))) .
   ops conv2SeqStrict : Attr -> Attr .
-  eq conv2SeqStrict(kstrict(Nl)) = seqkstrict(Nl) .
+  eq conv2SeqStrict(kstrict(Nl, Ql)) = seqkstrict(Nl, Ql) .
 ---  eq conv2SeqStrict(vstrict(Ql)) = seqvstrict(Ql) .
+
+  op lookForCellMarkers : AttrStringPair -> AttrStringPair .
+  ceq lookForCellMarkers({kstrict(Nl,nil),S}) = {kstrict(Nl, tokenize(stripSpaces(substr(S1,1,N)))), substr(S1,N + 2, length(S1))}
+   if S2 := stripSpaces(S)
+   /\ "in" = substr(S2,0, length("in"))
+   /\ S1 := stripSpaces(substr(S2,length("in"),length(S2)))
+   /\ "(" = substr(S1,0,1)
+   /\ s(N) := find(S1,")",0) .
+   eq lookForCellMarkers({kstrict(Nl,nil),S}) = {kstrict(Nl,klabel),S} [owise print S] .
 
   op strictParse : String -> AttrStringPair .
   var N : Int . var Ql : QidList .
@@ -102,10 +113,10 @@ fmod PARSE-METADATA-STRICT is
     = {strictListParse(tokenize(stripSpaces(substr(S,1,N)))), substr(S, N + 2, length(S))}
    if "(" = substr(S, 0, 1)
    /\ s(N) := find(S, ")", 0)  .
-  eq strictParse(S) = {kstrict(nil), S} [owise] .
+  eq strictParse(S) = {kstrict(nil, nil), S} [owise] .
 
   op strictListParse : QidList -> Attr .
-  ceq strictListParse(Q Ql) = kstrict(parseIntList(Q Ql)) 
+  ceq strictListParse(Q Ql) = kstrict(parseIntList(Q Ql), nil) 
    if (rat(string(Q),10) :: Int) .
   eq strictListParse(Ql) = none [owise print "error parsing strict arguments" Ql] .
 ---     else vstrict(Q Ql) fi .
@@ -142,7 +153,7 @@ red metadataParse("  strict   (  1  3  2   )   ") .
 red metadataParse("strict(1 3 2)") .
 red metadataParse("strict(ala bala portocala)") .
 red metadataParse("aux") .
-red metadataParse("strict seqstrict(1) strict(1 3 2) seqstrict  seqstrict   (  1  3  2   )   ") .
+red metadataParse("strict seqstrict(1) in (state) strict(1 3 2) seqstrict  seqstrict   (  1  3  2   )   ") .
 red metadataParse("strict seqstrict(1)   seqstrict   (  1  3  2   )   ") .
 red metadataParse("disolve renameTo _ana") .
 red metadataParse("strict disolve renameTo _are") .

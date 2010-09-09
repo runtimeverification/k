@@ -1,6 +1,7 @@
 mod STRICTCXT2EQS is
   including K-SORTS .
   including K-META-OPS .
+  including STRICT-ATTRS .
   including K-STRICTNESS-OPS .
   including META-TERM-EXTRAS .
   including STRING-EXTRAS .
@@ -15,16 +16,24 @@ mod STRICTCXT2EQS is
   op strictCxt2eqs : Module MembAxSet ~> MASEqsPair .
   eq strictCxt2eqs(M,MAS) = strictCxt2eqs(M, MAS, none) .
   op strictCxt2eqs : Module MembAxSet EquationSet ~> MASEqsPair . 
- ceq strictCxt2eqs(M, (mb 'context_[T] : Sort [AS] .) MAS,Eqs)
-   = strictCxt2eqs(M, MAS, Eqs
-     ((eq kWrap(T[hole <- mkVariable('Kcxt,KProper)])  
-        = kWrap(kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))) 
-       [metadata("heating")] .)
-      (eq kWrap(kra(mkVariable('Kcxt,KResult), freezeTerm(M, T)))
-        = kWrap(T[hole <- mkVariable('Kcxt,KResult)])
-       [metadata("cooling")] .))) 
+ ceq strictCxt2eqs(M, (mb 'context_[T] : Sort [AS] .) MAS, Eqs)
+   = strictCxt2eqs(M, MAS, Eqs strictCxt2eq(M, (mb 'context_[T] : Sort [AS] .)))
   if Sort = KSentence .
   eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
+
+  op strictCxt2eq : Module MembAx ~> EquationSet .
+  eq strictCxt2eq(M, (mb 'context_[T] : Sort [kstrict(nil,Q)] .))
+    =  ((eq kWrap(Q, T[hole <- mkVariable('Kcxt,KProper)])  
+        = kWrap(Q, kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))) 
+       [metadata("heating")] .)
+      (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T)))
+        = kWrap(Q, T[hole <- mkVariable('Kcxt,KResult)])
+       [metadata("cooling")] .)) .
+  eq strictCxt2eq(M, (mb 'context_[T] : Sort [none] .))
+   = strictCxt2eq(M, (mb 'context_[T] : Sort [kstrict(nil,klabel)] .)) .
+
+
+
 
 
   op freezeTerm : Module Term -> Term .
