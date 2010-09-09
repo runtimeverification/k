@@ -1019,13 +1019,14 @@ sub on_the_fly_kvars {
     {
 	if ($kvar_decls{$1}) {
 	    if ($kvar_decls{$1} ne $2) {
-		print "ERROR: Variable $1 declared with two distinct sorts ($kvar_decls{$1} and $2)\n";
-		exit(1);
+		print "WARNING: Variable $1 declared with two distinct sorts ($kvar_decls{$1} and $2)\n" if $verbose; 
+#		exit(1);
 	    }
-	} else {
+	} 
+#    else {
 	    $kvar_decls{$1} = $2;
-	}
-	$1;
+#	}
+	"$1:$2";
     }
     /gse;
     my $kvars = "";
