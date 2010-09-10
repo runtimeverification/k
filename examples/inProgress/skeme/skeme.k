@@ -7,7 +7,7 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
                     | Int | Float | Rat | #\ Char 
 
   syntax Exp ::= Literal 
-               | Id | { String } 
+               | Id | String  
                | [ List{Exp} ] | #[ List{Exp} ] | [ List{Exp} . Exp ]     
 
   syntax List{Exp} ::= Exp | .List{Exp} | List{Exp}  List{Exp} [assoc id: .List{Exp} hybrid] 
@@ -15,7 +15,7 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
   syntax Program ::= program(List{Exp}) 
 
   syntax Id ::= eval | display | set-car! | set-cdr! | = | + | - | * | /
-              | call-with-current-continuation | call/cc | car | cdr
+              | call-with-current-continuation | call/cc | car | cdr | if
 
   macro [ .List{Exp} ] = [] 
   macro #[ .List{Exp} ] = #[]
@@ -33,8 +33,8 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
   syntax Continuation ::= continuation(K, Map)
 
   syntax Internal ::=   vT | vF | vUnspec | vNil 
-                      | vi(Int) | vf(Float) | vr(Rat) | vc(Char)                                            
-                      | cons(K,K) | vec(Map) | string(Map) | Builtin 
+                      | vi( Int ) | vf( Float ) | vr( Rat ) | vc( Char )                                            
+                      | cons( K . K ) | vec( Map # Int) | string( Map # Int ) | Builtin 
   
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
                      | bCallCC | bCar | bCdr
@@ -48,8 +48,8 @@ endkm
 kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   syntax List{Exp} ::= bar | foo 
 
-  macro foo = [3][4]
-  macro bar = [1 2]
+  macro foo = [3][4][5]
+  macro bar = [if #t "true" #\"f"]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -60,30 +60,68 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
   op loc : K -> Rat
 
   configuration <T> <k>.K</k> 
-                    <program> .List </program>
-                    <globalEnv>.Map</globalEnv> 
-                    <env>  .Map </env> 
-                    <store> 
-                          .Map
----                       loc(0)  |-> bEval 
----                       loc(1)  |-> bDisplay
----                       loc(2)  |-> bSetCar 
----                       loc(3)  |-> bSetCdr
----                       loc(4)  |-> bEqual 
----                       loc(5)  |-> b+
----                       loc(6)  |-> b- 
----                       loc(7)  |-> b* 
----                       loc(8)  |-> b/ 
----                       loc(9)  |-> bCallCC 
----                       loc(10) |-> bCar 
----                       loc(11) |-> bCdr 
-                    </store> 
-                    <nextLoc> 0 </nextLoc> 
-                    <output> .List </output>
+                    <program>   .List </program>
+                    <globalEnv> .Map  </globalEnv> 
+                    <env>       .Map  </env> 
+                    <store>     .Map  </store> 
+                    <nextLoc>   0     </nextLoc> 
+                    <output>    .List </output>
                </T>
 endkm
 
-kmod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS 
+kmod INTERN is including SKEME-SEMANTICS
+  op intern  : K                  -> KResult
+  op internS : KResult String Nat -> KResult  
+
+  --- interning for literals
+  rule intern(#t)           => vT      [structural]
+  rule intern(#f)           => vF      [structural]
+  rule intern(#unspecified) => vUnspec [structural]
+  rule intern(I:Int)        => vi(I)   [structural]
+  rule intern(F:Float)      => vf(F)   [structural]
+  rule intern(R:Rat)        => vr(R)   [structural]
+  rule intern(#\C:Char)     => vc(C)   [structural]
+
+  --- interning Strings
+  rule intern( Str:String ) => internS(string(.Map # lengthString(Str)), Str, 0) [structural]  
+
+  rule <k_> 
+           internS(
+             string(
+               (M:Map => M:Map Pos:Nat |-> loc(Loc:Rat)) # _
+             ), 
+             (Str => substrString(Str, 1, lengthString(Str))), 
+             (Pos => Pos +Nat 1)
+           )
+       <_/k>   
+       <nextLoc> Loc => Loc +Rat 1 </nextLoc>
+       <store> .Map => loc(Loc) |-> substrString(Str, 0, 1) <_/store> 
+       if lengthString(Str) =/=Bool 0 [structural] 
+
+  rule <k_> internS(KR:KResult, Str, _) => KR <_/k> 
+       if lengthString(Str) ==Bool 0 [structural]
+
+endkm
+
+--- I don't like how I have to essentially rewrite intern for all literals here,
+--- but we can't match on sort in K.  Is there a better way to do this?
+--- I'd like to say any Literal on the top of the K rewrites to intern of that Literal
+kmod LITERAL-SEMANTICS is including INTERN
+
+  rule <k> #t => vT <_/k>                [structural]
+  rule <k> #f => vF <_/k>                [structural]
+  rule <k> #unspecified => vUnspec <_/k> [structural]
+  rule <k> I:Int => vi(I) <_/k>          [structural]
+  rule <k> F:Float => vf(F) <_/k>        [structural]
+  rule <k> R:Rat => vr(R) <_/k>          [structural]
+  rule <k> #\C:Char => vc(C) <_/k>       [structural]
+endkm
+
+kmod STRING-SEMANTICS is including LITERAL-SEMANTICS
+  rule <k> Str:String => intern(Str) <_/k>  [structural]
+endkm
+
+kmod SKEME is including STRING-SEMANTICS + SKEME-PROGRAMS 
   syntax Bag ::= run( List{K} ) 
 
      op KLtoL : List{K} -> List 
@@ -94,6 +132,9 @@ kmod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS
   macro run(KL:List{K}) = <T_> <program> KLtoL(KL) </program> <_/T>
  
   ---initialize the configuration.  Ideally we could do this where there configuration is declared instead of as a rule 
+  ---We just set nextLoc to be non-zero here rather than in the config until the config is finished.  That
+  ---way if I want to add more builtins I only have to modify in one place rather than remembering
+  ---to change the initial nextLoc somewhere else
   rule 
       <globalEnv>  .Map =>
                        eval                           |-> loc(0)                         
@@ -110,7 +151,7 @@ kmod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS
                        car                            |-> loc(10) 
                        cdr                            |-> loc(11) 
       </globalEnv>
-      <store>      .Map => 
+      <store>     .Map => 
                        loc(0)  |-> bEval 
                        loc(1)  |-> bDisplay 
                        loc(2)  |-> bSetCar 
@@ -123,11 +164,23 @@ kmod SKEME is including SKEME-SEMANTICS + SKEME-PROGRAMS
                        loc(9)  |-> bCallCC 
                        loc(10) |-> bCar 
                        loc(11) |-> bCdr 
-      </store> [structural]
+      </store> 
+      <nextLoc> 0 => 12 </nextLoc> 
+      [structural]
 
+
+  --- end condition
+ 
 
   --- if the k cell is empty, we take the first expression in the program and put it
   --- in the k cell
   rule <k> .K => K </k> <program> ListItem(K) => .List <_/program> [structural] 
+
+  --- if
+  op if_$_$_ : K K K -> K [strict(1)]
+     
+  rule <k> [if E1:Exp E2:Exp E3:Exp] => if E1 $ E2 $ E3  <_/k> [structural]
+  rule if vT $ E1 $ E2 => E1
+  rule if vF $ E1 $ E2 => E2
 endkm
 
