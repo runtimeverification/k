@@ -550,6 +550,49 @@ sub erase_temp
     }
 }
 
+# unquote maude metadata in order to speedup the tool
+sub unquote 
+{
+    my ($input) = @_;
+    my @values = split('\n', $input);
+    my $result = "";
+    foreach my $line (@values) 
+    {
+	chomp($line);
+	# first adjust whitespace and colors
+	$line =~ s/'\\n /\n/g;
+	$line =~ s/'\\t /\t/g;
+	$line =~ s/'\\r /\r/g;
+	$line =~ s/'\\[ogb] //g;
+	$line =~ s/'\\s / /g;
+
+	$line =~ s/metadata\((".*?")\)/metadata $1/; # removes parens from metadata
+	$line =~ s/label\((.*?)\)/label $1/; # removes parens from label
+	$line =~ s/prec\((\d*)\)/prec $1/; # removes parens from prec
+	$line =~ s/^\s*none//; # removes none sections
+	$line =~ s/nil -> /-> /; # removes nil op arguments
+	my $operatorClass = '(?:(?:[\(\)\[\]\{\},])|[^\(\)\[\]\{\}, ])';
+	my $sortClass = '(?:(?:[\{\}])|[^_\(\)\[\]\{\},\. ])';
+	my $containerClass = '(?:List\{K\}|Set|Bag|Map|K|List)';
+	my $sortTerminator = '(?:[ ,\]])';
+
+	$line =~ s/'($operatorClass+)\.($containerClass)($sortTerminator)/\(\(`$1\).$2\)$3/g; # quoted constants
+	$line =~ s/'($operatorClass+)\.($sortClass+)/\(`$1\)\.$2/g; # quoted constants
+	$line =~ s/'"(([^"]|([\\]["]))*?)"\.([^ ,\]])/\("$1"\)\.$4/g; # string constants
+	$line =~ s/([^ `])\[/$1\(/g; # changes [ into (
+	$line =~ s/\] \./FSLENDLQQQ/; # saves attribute brackets
+	while ($line =~ s/([^`])\]/$1\)/g){ } # changes ] into )
+	while ($line =~ s/sorts ([^ ]*?) ;/sort $1 . sorts/g){ } # separates out sorts
+	$line =~ s/FSLENDLQQQ/\] \./; # replaces attribute brackets
+	$line =~ s/\[none\]//g; # remove [none] attributes
+	$line =~ s/'([^ \)\(,\[\]\{\}]+)/$1/g; # removes all other quotes
+        $result .= "$line\n";
+    }
+   
+    return $result;
+}
+
+
 sub getFullName
 {
     my $file = (shift);
@@ -745,5 +788,7 @@ sub getKLabelDeclarations
 	# print "$labels : -> KLabel [metadata \"generated label\"] ";
     return "$labels : -> KLabel [metadata \"generated label\"] . ";
 }
+
+
 
 1;
