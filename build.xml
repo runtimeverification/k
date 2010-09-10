@@ -1,4 +1,4 @@
-<project name="K Framework" default="build" basedir=".">
+<project name="K Framework" default="build" basedir="."> 
 	<!-- set global properties for this build -->
 	<property name="examplesDir" location="examples"/>
 	<!-- <property name="build" location="build"/>
