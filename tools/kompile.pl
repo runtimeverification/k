@@ -37,7 +37,7 @@ sub terminate {
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
   -f (or -file) : the input source file (optional)
-  -u (or -unquote : unquote the maude meta-terms
+  -u (or -unquote : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
     -style : useful for typesetting (optional)
 
@@ -85,7 +85,7 @@ sub terminate {
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
   -f (or -file) : the input source file (optional)
-  -u (or -unquote : unquote the maude meta-terms
+  -u (or -unquote : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
     -style : useful for typesetting (optional)
 
@@ -196,7 +196,7 @@ my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 #########
 # Maude #
 #########
-my $maude_path = "/home/andrei/work/maude/maude.linux";
+my $maude_path = "maude";
 my $maude_temp_file = "ERASE-ME-PLEASE";
 my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
