@@ -9,20 +9,26 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
   syntax Exp ::= Literal 
                | Id | String  
                | [ List{Exp} ] | #[ List{Exp} ] | [ List{Exp} . Exp ]     
+               | `! Exp
 
   syntax List{Exp} ::= Exp | .List{Exp} | List{Exp}  List{Exp} [assoc id: .List{Exp} hybrid] 
+  
+  op length : List{Exp} -> Int
+  eq length(E:Exp EL:List{Exp}) = 1 +Int length(EL)
+  eq length(.List{Exp}) = 0 
 
   syntax Program ::= program(List{Exp}) 
 
   syntax Id ::= eval | display | set-car! | set-cdr! | = | + | - | * | /
               | call-with-current-continuation | call/cc | car | cdr | if
+              | quote
 
   macro [ .List{Exp} ] = [] 
   macro #[ .List{Exp} ] = #[]
   macro [EL:List{Exp} . []] = [EL:List{Exp}] 
   macro [EL:List{Exp} . [EL':List{Exp}]] = [EL:List{Exp} EL':List{Exp}] 
   macro [EL:List{Exp} . [EL':List{Exp} . E:Exp]] = [EL:List{Exp} EL':List{Exp} . E:Exp] 
-
+  macro ! E:Exp = [quote E]
 endkm
 
 kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
@@ -33,8 +39,8 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
   syntax Continuation ::= continuation(K, Map)
 
   syntax Internal ::=   vT | vF | vUnspec | vNil 
-                      | vi( Int ) | vf( Float ) | vr( Rat ) | vc( Char )                                            
-                      | cons( K . K ) | vec( Map # Int) | string( Map # Int ) | Builtin 
+                      | vi( Int ) | vf( Float ) | vr( Rat ) | vc( Char ) | vn( Id )                                           
+                      | cons( K . K ) | vec( Map # Int ) | string( Map # Int ) | Builtin 
   
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
                      | bCallCC | bCar | bCdr
@@ -46,10 +52,13 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
 endkm
 
 kmod SKEME-PROGRAMS is including SKEME-SYNTAX
-  syntax List{Exp} ::= bar | foo 
+  syntax List{Exp} ::= bar | foo | baz | chaz | kraz 
 
   macro foo = [3][4][5]
   macro bar = [if #t "true" #\"f"]
+  macro baz = #[#[#[3]] "true"]
+  macro chaz = [quote if]
+  macro kraz = ![42 43 44]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -61,30 +70,72 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
 
   configuration <T> <k>.K</k> 
                     <program>   .List </program>
-                    <globalEnv> .Map  </globalEnv> 
-                    <env>       .Map  </env> 
-                    <store>     .Map  </store> 
-                    <nextLoc>   0     </nextLoc> 
-                    <output>    .List </output>
+                    <globalEnv> 
+                       eval                           |-> loc(0)                         
+                       display                        |-> loc(1)  
+                       set-car!                       |-> loc(2) 
+                       set-cdr!                       |-> loc(3) 
+                       =                              |-> loc(4) 
+                       +                              |-> loc(5) 
+                       -                              |-> loc(6)  
+                       *                              |-> loc(7)  
+                       /                              |-> loc(8)  
+                       call-with-current-continuation |-> loc(9)   
+                       call/cc                        |-> loc(9)   
+                       car                            |-> loc(10) 
+                       cdr                            |-> loc(11) 
+                    </globalEnv> 
+                    <env> .Map </env> 
+                    <store>     
+                       loc(0)  |-> bEval 
+                       loc(1)  |-> bDisplay 
+                       loc(2)  |-> bSetCar 
+                       loc(3)  |-> bSetCdr
+                       loc(4)  |-> bEqual 
+                       loc(5)  |-> b+
+                       loc(6)  |-> b- 
+                       loc(7)  |-> b* 
+                       loc(8)  |-> b/ 
+                       loc(9)  |-> bCallCC 
+                       loc(10) |-> bCar 
+                       loc(11) |-> bCdr 
+                    </store> 
+                    <nextLoc> 12 </nextLoc> 
+                    <output> .List </output>
                </T>
 endkm
 
 kmod INTERN is including SKEME-SEMANTICS
   op intern  : K                  -> KResult
   op internS : KResult String Nat -> KResult  
+  op internV : KResult K Nat      -> KResult
 
-  --- interning for literals
-  rule intern(#t)           => vT      [structural]
-  rule intern(#f)           => vF      [structural]
-  rule intern(#unspecified) => vUnspec [structural]
-  rule intern(I:Int)        => vi(I)   [structural]
-  rule intern(F:Float)      => vf(F)   [structural]
-  rule intern(R:Rat)        => vr(R)   [structural]
-  rule intern(#\C:Char)     => vc(C)   [structural]
+  --- interning for literals    
+  rule intern(#t)           => vT            [structural]
+  rule intern(#f)           => vF            [structural]
+  rule intern(#unspecified) => vUnspec       [structural]
+  rule intern(ID:Id)        => vn(ID)        [structural]
+  rule intern(I:Int)        => vi(I)         [structural]
+  rule intern(F:Float)      => vf(F)         [structural]
+  rule intern(R:Rat)        => vr(R)         [structural]
+  rule intern(#\C:Char)     => vc(C)         [structural]
+  rule intern([])           => vNil          [structural]
+  rule intern(#[])          => vec(.Map # 0) [structural]
 
-  --- interning Strings
+  --- interning String
   rule intern( Str:String ) => internS(string(.Map # lengthString(Str)), Str, 0) [structural]  
+  
+  --- unfortunately we need two versions of this because my 'if' ID confuses things between whether
+  --- or not this should be a conditional rule or if 'if' is the ID.  The only way to fix this is
+  --- to mention cells explicitly... or perhaps rename 'if'
+  --- leaving out of k level v. store level because I want a better way to do this
+  rule <k_> internS(KR:KResult, Str, _) => KR <_/k>
+    if lengthString(Str) ==Bool 0 [structural]
 
+  rule <store> loc(Loc:Rat) |-> (internS(KR:KResult, Str, _) => KR) <_/store>
+    if lengthString(Str) ==Bool 0 [structural]
+
+  --- k level interning String
   rule <k_> 
            internS(
              string(
@@ -98,9 +149,66 @@ kmod INTERN is including SKEME-SEMANTICS
        <store> .Map => loc(Loc) |-> substrString(Str, 0, 1) <_/store> 
        if lengthString(Str) =/=Bool 0 [structural] 
 
-  rule <k_> internS(KR:KResult, Str, _) => KR <_/k> 
-       if lengthString(Str) ==Bool 0 [structural]
+  --- store level interning String
+  rule <store>
+         loc(Loc':Rat) |->  
+           internS(
+             string(
+               (M:Map => M:Map Pos:Nat |-> loc(Loc:Rat)) # _
+             ), 
+             (Str => substrString(Str, 1, lengthString(Str))), 
+             (Pos => Pos +Nat 1)
+           )
+         (.Map => loc(Loc) |-> substrString(Str, 0, 1))
+       <_/store> 
+       <nextLoc> Loc => Loc +Rat 1 </nextLoc>
+       if lengthString(Str) =/=Bool 0 [structural] 
 
+  --- interning Vectors
+  rule intern( #[EL:List{Exp}] ) => internV(vec(.Map # length(EL)), EL, 0) [structural]
+
+  rule internV(KR:KResult, .List{Exp}, _) => KR [structural]
+
+  --- k level interning Vectors
+  rule <k_> 
+           internV(
+             vec(
+               (M:Map => M:Map Pos:Nat |-> loc(Loc:Rat)) # _
+             ), 
+             (E:Exp EL:List{Exp} => EL), 
+             (Pos => Pos +Nat 1)
+           )
+       <_/k>   
+       <nextLoc> Loc => Loc +Rat 1 </nextLoc>
+       <store> .Map => loc(Loc) |-> intern(E) <_/store> [structural] 
+
+  --- store level interning Vectors
+  rule <store>
+         loc(Loc':Rat) |->  
+           internV(
+             vec(
+               (M:Map => M:Map Pos:Nat |-> loc(Loc:Rat)) # _
+             ), 
+             (E:Exp EL:List{Exp} => EL), 
+             (Pos => Pos +Nat 1)
+           )
+         (.Map => loc(Loc) |-> intern(E))
+       <_/store> 
+       <nextLoc> Loc => Loc +Rat 1 </nextLoc> [structural] 
+
+  --- interning Lists
+  rule <k_>
+         intern([E:Exp EL:List{Exp}]) => cons(Loc . Loc +Rat 1)
+       <_/k>
+       <nextLoc> Loc => Loc +Rat 2 </nextLoc>
+       <store> .Map => loc(Loc) |-> intern(E) loc(Loc +Rat 1) |-> intern([EL]) <_/store> [structural] 
+  
+  rule <store>
+         loc(Loc':Rat) |->
+           (intern([E:Exp EL:List{Exp}]) => cons(Loc . Loc +Rat 1))
+         (.Map => loc(Loc) |-> intern(E) loc(Loc +Rat 1) |-> intern([EL]))
+       <_/store>
+       <nextLoc> Loc => Loc +Rat 2 </nextLoc> [structural]
 endkm
 
 --- I don't like how I have to essentially rewrite intern for all literals here,
@@ -117,12 +225,31 @@ kmod LITERAL-SEMANTICS is including INTERN
   rule <k> #\C:Char => vc(C) <_/k>       [structural]
 endkm
 
-kmod STRING-SEMANTICS is including LITERAL-SEMANTICS
-  rule <k> Str:String => intern(Str) <_/k>  [structural]
+kmod STRING-SEMANTICS is including INTERN
+  rule <k> Str:String => intern(Str) <_/k>  
 endkm
 
-kmod SKEME is including STRING-SEMANTICS + SKEME-PROGRAMS 
-  syntax Bag ::= run( List{K} ) 
+kmod VECTOR-SEMANTICS is including INTERN
+  rule <k> #[EL:List{Exp}] => intern(#[EL]) <_/k>  
+endkm
+
+kmod QUOTE-SEMANTICS is including INTERN
+  rule <k> [quote E:Exp] => intern(E) <_/k>
+endkm 
+
+kmod IF-SEMANTICS is including SKEME-SEMANTICS
+  op if_$_$_ : K K K -> K [strict(1)]
+     
+  rule <k> [if E1:Exp E2:Exp E3:Exp] => if E1 $ E2 $ E3  <_/k> [structural]
+  rule if vT $ E1 $ E2 => E1
+  rule if vF $ E1 $ E2 => E2
+endkm
+
+kmod SKEME is including 
+    LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
+  + QUOTE-SEMANTICS + IF-SEMANTICS + SKEME-PROGRAMS 
+  
+  syntax Bag ::= run( List{K} ) | out( List ) 
 
      op KLtoL : List{K} -> List 
      eq KLtoL((K:K ,, KL:List{K})) = ListItem(K) KLtoL(KL)  
@@ -130,57 +257,23 @@ kmod SKEME is including STRING-SEMANTICS + SKEME-PROGRAMS
 
   ---intial run macro, this starts interpretation
   macro run(KL:List{K}) = <T_> <program> KLtoL(KL) </program> <_/T>
- 
-  ---initialize the configuration.  Ideally we could do this where there configuration is declared instead of as a rule 
-  ---We just set nextLoc to be non-zero here rather than in the config until the config is finished.  That
-  ---way if I want to add more builtins I only have to modify in one place rather than remembering
-  ---to change the initial nextLoc somewhere else
-  rule 
-      <globalEnv>  .Map =>
-                       eval                           |-> loc(0)                         
-                       display                        |-> loc(1)  
-                       set-car!                       |-> loc(2) 
-                       set-cdr!                       |-> loc(3) 
-                       =                              |-> loc(4) 
-                       +                              |-> loc(5) 
-                       -                              |-> loc(6)  
-                       *                              |-> loc(7)  
-                       /                              |-> loc(8)  
-                       call-with-current-continuation |-> loc(9)   
-                       call/cc                        |-> loc(9)   
-                       car                            |-> loc(10) 
-                       cdr                            |-> loc(11) 
-      </globalEnv>
-      <store>     .Map => 
-                       loc(0)  |-> bEval 
-                       loc(1)  |-> bDisplay 
-                       loc(2)  |-> bSetCar 
-                       loc(3)  |-> bSetCdr
-                       loc(4)  |-> bEqual 
-                       loc(5)  |-> b+
-                       loc(6)  |-> b- 
-                       loc(7)  |-> b* 
-                       loc(8)  |-> b/ 
-                       loc(9)  |-> bCallCC 
-                       loc(10) |-> bCar 
-                       loc(11) |-> bCdr 
-      </store> 
-      <nextLoc> 0 => 12 </nextLoc> 
-      [structural]
+  
+   
+  --- silly test
+---  rule <k> [3] => .K <_/k> [structural]
+---  rule <k> [4] => .K <_/k> [structural]
+---  rule <k> [5] => .K <_/k> [structural]
 
-
-  --- end condition
- 
 
   --- if the k cell is empty, we take the first expression in the program and put it
   --- in the k cell
-  rule <k> .K => K </k> <program> ListItem(K) => .List <_/program> [structural] 
-
-  --- if
-  op if_$_$_ : K K K -> K [strict(1)]
-     
-  rule <k> [if E1:Exp E2:Exp E3:Exp] => if E1 $ E2 $ E3  <_/k> [structural]
-  rule if vT $ E1 $ E2 => E1
-  rule if vF $ E1 $ E2 => E2
-endkm
+  rule <k> .K => K </k> 
+       <program> ListItem(K) => .List <_/program> [structural] 
+  
+  --- end condition
+  rule <T_> <k> .K </k> 
+            <program> .List </program> 
+            <output> L:List </output> 
+       <_/T> => out(L) [structural] 
+ endkm
 

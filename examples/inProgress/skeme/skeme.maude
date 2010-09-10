@@ -8,21 +8,27 @@ mod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING .
 
     sort Exp .    subsort Literal <  Exp . 
                   subsort Id <  Exp .    subsort String <  Exp .  
-                  op [_] :  List{Exp} -> Exp .    op #[_] :  List{Exp} -> Exp .    op [_._] :  List{Exp}  Exp -> Exp .      
+                  op [_] :  List{Exp} -> Exp .    op #[_] :  List{Exp} -> Exp .    op [_._] :  List{Exp}  Exp -> Exp .     
+                  op !_ :  Exp -> Exp . 
 
     sort List{Exp} .    subsort Exp <  List{Exp} .    op .List{Exp} :  -> List{Exp} .    op __ : List{Exp}  List{Exp} -> List{Exp} [assoc id: .List{Exp} metadata "hybrid"] .  
+  
+  op length : List{Exp} -> Int .
+  eq length(E:Exp EL:List{Exp}) =  1 +Int  length(EL) .
+  eq length(.List{Exp} ) =  0 . 
 
     sort Program .    op program(List{Exp}) :  -> Program .  
 
         op eval :  -> Id .    op display :  -> Id .    op set-car! :  -> Id .    op set-cdr! :  -> Id .    op = :  -> Id .    op + :  -> Id .    op - :  -> Id .    op * :  -> Id .    op / :  -> Id .
-                 op call-with-current-continuation :  -> Id .    op call/cc :  -> Id .    op car :  -> Id .    op cdr :  -> Id .    op if :  -> Id . 
+                 op call-with-current-continuation :  -> Id .    op call/cc :  -> Id .    op car :  -> Id .    op cdr :  -> Id .    op if :  -> Id .
+                 op quote :  -> Id . 
 
   eq [ .List{Exp}  ] =  [] .  
   eq # [ .List{Exp}  ] =  #[] . 
   eq [EL:List{Exp} .  [] ] =  [EL:List{Exp}] . 
   eq [EL:List{Exp} .  [EL':List{Exp}]] =  [EL:List{Exp} EL':List{Exp}] . 
   eq [EL:List{Exp} .  [EL':List{Exp} .  E:Exp]] =  [EL:List{Exp} EL':List{Exp} .  E:Exp] . 
-
+  eq !  E:Exp =  [quote E] .
 var EL' : List{Exp} . var EL : List{Exp} . var E : Exp .  endm
 
 mod SKEME-INTERNAL is including K + SKEME-SYNTAX .
@@ -33,8 +39,8 @@ mod SKEME-INTERNAL is including K + SKEME-SYNTAX .
     sort Continuation .    op continuation(K,Map) :  -> Continuation . 
 
     sort Internal .      op vT :  -> Internal .    op vF :  -> Internal .    op vUnspec :  -> Internal .    op vNil :  -> Internal . 
-                         op vi(_) :  Int -> Internal .    op vf(_) :  Float -> Internal .    op vr(_) :  Rat -> Internal .    op vc(_) :  Char -> Internal .                                            
-                         op cons(_._) :  K  K -> Internal .    op vec(_#`Int) :  Map -> Internal .    op string(_#_) :  Map  Int -> Internal .    subsort Builtin <  Internal .  
+                         op vi(_) :  Int -> Internal .    op vf(_) :  Float -> Internal .    op vr(_) :  Rat -> Internal .    op vc(_) :  Char -> Internal .    op vn(_) :  Id -> Internal .                                           
+                         op cons(_._) :  K  K -> Internal .    op vec(_#_) :  Map  Int -> Internal .    op string(_#_) :  Map  Int -> Internal .    subsort Builtin <  Internal .  
   
     sort Builtin .      op bEval :  -> Builtin .    op bDisplay :  -> Builtin .    op bSetCar :  -> Builtin .    op bSetCdr :  -> Builtin .    op bEqual :  -> Builtin .    op b+ :  -> Builtin .    op b- :  -> Builtin .    op b* :  -> Builtin .    op b/ :  -> Builtin . 
                         op bCallCC :  -> Builtin .    op bCar :  -> Builtin .    op bCdr :  -> Builtin . 
@@ -46,10 +52,13 @@ mod SKEME-INTERNAL is including K + SKEME-SYNTAX .
 endm
 
 mod SKEME-PROGRAMS is including SKEME-SYNTAX .
-        op bar :  -> List{Exp} .    op foo :  -> List{Exp} .  
+        op bar :  -> List{Exp} .    op foo :  -> List{Exp} .    op baz :  -> List{Exp} .    op chaz :  -> List{Exp} .    op kraz :  -> List{Exp} .  
 
   eq foo =  [3][4][5] .
   eq bar =  [if #t  "true" #\ "f"] .
+  eq baz =  # [# [# [3]] "true"] .
+  eq chaz =  [quote if] .
+  eq kraz =  ! [42 43 44] .
 endm
 
 mod SKEME-SEMANTICS is including SKEME-INTERNAL .
@@ -61,30 +70,71 @@ mod SKEME-SEMANTICS is including SKEME-INTERNAL .
 
   mb configuration < T >  < k > (.).K  </ k >  
                     < program >    (.).List  </ program > 
-                    < globalEnv >  (.).Map   </ globalEnv >  
-                    < env >        (.).Map   </ env >  
-                    < store >      (.).Map   </ store >  
-                    < nextLoc >    0     </ nextLoc >  
-                    < output >     (.).List  </ output > 
+                    < globalEnv >  
+                       eval                           |->  loc(0)                         
+                       display                        |->  loc(1)  
+                       set-car!                        |->  loc(2) 
+                       set-cdr!                        |->  loc(3) 
+                       =                               |->  loc(4) 
+                       +                               |->  loc(5) 
+                       -                               |->  loc(6)  
+                       *                               |->  loc(7)  
+                       /                               |->  loc(8)  
+                       call-with-current-continuation  |->  loc(9)   
+                       call/cc                         |->  loc(9)   
+                       car                            |->  loc(10) 
+                       cdr                            |->  loc(11) 
+                    </ globalEnv >  
+                    < env >  (.).Map  </ env >  
+                    < store >      
+                       loc(0)  |->  bEval 
+                       loc(1)  |->  bDisplay 
+                       loc(2)  |->  bSetCar 
+                       loc(3)  |->  bSetCdr
+                       loc(4)  |->  bEqual 
+                       loc(5)  |->  b+ 
+                       loc(6)  |->  b-  
+                       loc(7)  |->  b*  
+                       loc(8)  |->  b/  
+                       loc(9)  |->  bCallCC 
+                       loc(10) |->  bCar 
+                       loc(11) |->  bCdr 
+                    </ store >  
+                    < nextLoc >  12 </ nextLoc >  
+                    < output >  (.).List  </ output > 
                </ T > : KSentence . 
 ops program output nextLoc env T k globalEnv store : -> CellLabel .  endm
 
 mod INTERN is including SKEME-SEMANTICS .
   op intern  : K                  -> KResult .
   op internS : KResult String Nat -> KResult .  
+  op internV : KResult K Nat      -> KResult .
 
-     
-  mb rule intern(#t )           =>  vT      : KSentence [metadata "structural"] .
-  mb rule intern(#f )           =>  vF      : KSentence [metadata "structural"] .
-  mb rule intern(#unspecified ) =>  vUnspec : KSentence [metadata "structural"] .
-  mb rule intern(I:Int)        =>  vi(I)   : KSentence [metadata "structural"] .
-  mb rule intern(F:Float)      =>  vf(F)   : KSentence [metadata "structural"] .
-  mb rule intern(R:Rat)        =>  vr(R)   : KSentence [metadata "structural"] .
-  mb rule intern(#\ C:Char)     =>  vc(C)   : KSentence [metadata "structural"] .
+         
+  mb rule intern(#t )           =>  vT            : KSentence [metadata "structural"] .
+  mb rule intern(#f )           =>  vF            : KSentence [metadata "structural"] .
+  mb rule intern(#unspecified ) =>  vUnspec       : KSentence [metadata "structural"] .
+  mb rule intern(ID:Id)        =>  vn(ID)        : KSentence [metadata "structural"] .
+  mb rule intern(I:Int)        =>  vi(I)         : KSentence [metadata "structural"] .
+  mb rule intern(F:Float)      =>  vf(F)         : KSentence [metadata "structural"] .
+  mb rule intern(R:Rat)        =>  vr(R)         : KSentence [metadata "structural"] .
+  mb rule intern(#\ C:Char)     =>  vc(C)         : KSentence [metadata "structural"] .
+  mb rule intern(#[] )          =>  vec((.).Map  #  0) : KSentence [metadata "structural"] .
 
     
   mb rule intern( Str:String ) =>  internS(string((.).Map  #  lengthString(Str)), Str, 0) : KSentence [metadata "structural"] .  
+  
+                 
+                        
+          
+                   
+  mb rule < k >...   internS(KR:KResult, Str,  ? ) =>  KR  ...</ k > 
+    if lengthString(Str) ==Bool  0 : KSentence [metadata "structural"] .
 
+  mb rule < store >  loc(Loc:Rat) |->  (internS(KR:KResult, Str,  ? ) =>  KR)  ...</ store > 
+    if lengthString(Str) ==Bool  0 : KSentence [metadata "structural"] .
+
+      
   mb rule < k >...   
            internS(
              string(
@@ -98,10 +148,69 @@ mod INTERN is including SKEME-SEMANTICS .
        < store >  (.).Map  =>  loc(Loc) |->  substrString(Str, 0, 1)  ...</ store >  
        if lengthString(Str) =/=Bool  0 : KSentence [metadata "structural"] . 
 
-  mb rule < k >...   internS(KR:KResult, Str,  ? ) =>  KR  ...</ k >  
-       if lengthString(Str) ==Bool  0 : KSentence [metadata "structural"] .
+      
+  mb rule < store > 
+         loc(Loc':Rat) |->   
+           internS(
+             string(
+               (M:Map =>  M:Map Pos:Nat |->  loc(Loc:Rat)) #   ? 
+             ), 
+             (Str =>  substrString(Str, 1, lengthString(Str))), 
+             (Pos =>  Pos +Nat  1)
+           )
+         ((.).Map  =>  loc(Loc) |->  substrString(Str, 0, 1))
+        ...</ store >  
+       < nextLoc >  Loc =>  Loc +Rat  1 </ nextLoc > 
+       if lengthString(Str) =/=Bool  0 : KSentence [metadata "structural"] . 
 
-var F : Float . var Str : String . var Pos : Nat . var Loc : Rat . var KR : KResult . var M : Map . var C : Char . var I : Int . var R : Rat .  endm
+    
+  mb rule intern( # [EL:List{Exp}] ) =>  internV(vec((.).Map  #  length(EL)), EL, 0) : KSentence [metadata "structural"] .
+
+  mb rule internV(KR:KResult, .List{Exp} ,  ? ) =>  KR : KSentence [metadata "structural"] .
+
+      
+  mb rule < k >...   
+           internV(
+             vec(
+               (M:Map =>  M:Map Pos:Nat |->  loc(Loc:Rat)) #   ? 
+             ), 
+             (E:Exp EL:List{Exp} =>  EL), 
+             (Pos =>  Pos +Nat  1)
+           )
+        ...</ k >    
+       < nextLoc >  Loc =>  Loc +Rat  1 </ nextLoc > 
+       < store >  (.).Map  =>  loc(Loc) |->  intern(E)  ...</ store >  : KSentence [metadata "structural"] . 
+
+      
+  mb rule < store > 
+         loc(Loc':Rat) |->   
+           internV(
+             vec(
+               (M:Map =>  M:Map Pos:Nat |->  loc(Loc:Rat)) #   ? 
+             ), 
+             (E:Exp EL:List{Exp} =>  EL), 
+             (Pos =>  Pos +Nat  1)
+           )
+         ((.).Map  =>  loc(Loc) |->  intern(E))
+        ...</ store >  
+       < nextLoc >  Loc =>  Loc +Rat  1 </ nextLoc >  : KSentence [metadata "structural"] . 
+
+    
+  mb rule intern([] ) =>  vNil : KSentence [metadata "structural"] .
+
+  mb rule < k >...  
+         intern([E:Exp EL:List{Exp}]) =>  cons(Loc .  Loc +Rat  1)
+        ...</ k > 
+       < nextLoc >  Loc =>  Loc +Rat  2 </ nextLoc > 
+       < store >  (.).Map  =>  loc(Loc) |->  intern(E) loc(Loc +Rat  1) |->  intern([EL])  ...</ store >  : KSentence [metadata "structural"] . 
+  
+  mb rule < store > 
+         loc(Loc':Rat) |-> 
+           (intern([E:Exp EL:List{Exp}]) =>  cons(Loc .  Loc +Rat  1))
+         ((.).Map  =>  loc(Loc) |->  intern(E) loc(Loc +Rat  1) |->  intern([EL]))
+        ...</ store > 
+       < nextLoc >  Loc =>  Loc +Rat  2 </ nextLoc >  : KSentence [metadata "structural"] .
+var F : Float . var ID : Id . var EL : List{Exp} . var Str : String . var E : Exp . var Pos : Nat . var Loc : Rat . var KR : KResult . var M : Map . var C : Char . var I : Int . var R : Rat . var Loc' : Rat .  endm
 
               
                  
@@ -117,12 +226,31 @@ mod LITERAL-SEMANTICS is including INTERN .
   mb rule < k >  #\ C:Char =>  vc(C)  ...</ k >        : KSentence [metadata "structural"] .
 var F : Float . var C : Char . var R : Rat . var I : Int .  endm
 
-mod STRING-SEMANTICS is including LITERAL-SEMANTICS .
-  mb rule < k >  Str:String =>  intern(Str)  ...</ k >   : KSentence [metadata "structural"] .
+mod STRING-SEMANTICS is including INTERN .
+  mb rule < k >  Str:String =>  intern(Str)  ...</ k > : KSentence .   
 var Str : String .  endm
 
-mod SKEME is including STRING-SEMANTICS + SKEME-PROGRAMS . 
-        op run(_) :  List{K} -> Bag .  
+mod VECTOR-SEMANTICS is including INTERN .
+  mb rule < k >  # [EL:List{Exp}] =>  intern(# [EL])  ...</ k > : KSentence .   
+var EL : List{Exp} .  endm
+
+mod QUOTE-SEMANTICS is including INTERN .
+  mb rule < k >  [quote E:Exp] =>  intern(E)  ...</ k > : KSentence . 
+var E : Exp .  endm 
+
+mod IF-SEMANTICS is including SKEME-SEMANTICS .
+  op if_$_$_ : K K K -> K [metadata "strict(1)"] .
+     
+  mb rule < k >  [if E1:Exp E2:Exp E3:Exp] =>  if E1 $  E2 $  E3   ...</ k >  : KSentence [metadata "structural"] .
+  mb rule if vT $  E1 $  E2 =>  E1 : KSentence .
+  mb rule if vF $  E1 $  E2 =>  E2 : KSentence .
+var E1 : Exp . var E2 : Exp . var E3 : Exp .  endm
+
+mod SKEME is including 
+    LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
+  + QUOTE-SEMANTICS + IF-SEMANTICS + SKEME-PROGRAMS . 
+  
+        op run(_) :  List{K} -> Bag .    op out(_) :  List -> Bag .  
 
      op KLtoL : List{K} -> List . 
      eq KLtoL((K:K ,, KL:List{K})) =  ListItem(K) KLtoL(KL) .  
@@ -130,57 +258,23 @@ mod SKEME is including STRING-SEMANTICS + SKEME-PROGRAMS .
 
        
   eq run(KL:List{K}) =  < T >...   < program >  KLtoL(KL) </ program >   ...</ T > . 
- 
-                     
-                     
-                    
-        
-  mb rule 
-      < globalEnv >   (.).Map  => 
-                       eval                           |->  loc(0)                         
-                       display                        |->  loc(1)  
-                       set-car!                        |->  loc(2) 
-                       set-cdr!                        |->  loc(3) 
-                       =                               |->  loc(4) 
-                       +                               |->  loc(5) 
-                       -                               |->  loc(6)  
-                       *                               |->  loc(7)  
-                       /                               |->  loc(8)  
-                       call-with-current-continuation  |->  loc(9)   
-                       call/cc                         |->  loc(9)   
-                       car                            |->  loc(10) 
-                       cdr                            |->  loc(11) 
-      </ globalEnv > 
-      < store >      (.).Map  =>  
-                       loc(0)  |->  bEval 
-                       loc(1)  |->  bDisplay 
-                       loc(2)  |->  bSetCar 
-                       loc(3)  |->  bSetCdr
-                       loc(4)  |->  bEqual 
-                       loc(5)  |->  b+ 
-                       loc(6)  |->  b-  
-                       loc(7)  |->  b*  
-                       loc(8)  |->  b/  
-                       loc(9)  |->  bCallCC 
-                       loc(10) |->  bCar 
-                       loc(11) |->  bCdr 
-      </ store >  
-      < nextLoc >  0 =>  12 </ nextLoc >  
-      : KSentence [metadata "structural"] .
-
-
+  
+   
     
- 
+        
+        
+        
+
 
                    
       
-  mb rule < k >  (.).K  =>  K </ k >  < program >  ListItem(K) =>  (.).List   ...</ program >  : KSentence [metadata "structural"] . 
-
-   
-  op if_$_$_ : K K K -> K [metadata "strict(1)"] .
-     
-  mb rule < k >  [if E1:Exp E2:Exp E3:Exp] =>  if E1 $  E2 $  E3   ...</ k >  : KSentence [metadata "structural"] .
-  mb rule if vT $  E1 $  E2 =>  E1 : KSentence .
-  mb rule if vF $  E1 $  E2 =>  E2 : KSentence .
-var K : K . var E1 : Exp . var KL : List{K} .  var E2 : Exp . var E3 : Exp .  endm
+  mb rule < k >  (.).K  =>  K </ k >  
+       < program >  ListItem(K) =>  (.).List   ...</ program >  : KSentence [metadata "structural"] . 
+  
+    
+  mb rule < T >...   < k >  (.).K  </ k >  
+            < program >  (.).List  </ program >  
+            < output >  L:List </ output >  
+        ...</ T >  =>  out(L) : KSentence [metadata "structural"] . 
+ var K : K . var KL : List{K} .  var L : List .  endm
 
