@@ -1,4 +1,4 @@
-load ../../../k-prelude
+load ../../../k-prelude 
 load ../../modules/k-visitor
 load ../../modules/substitution
 load pi-syntax
