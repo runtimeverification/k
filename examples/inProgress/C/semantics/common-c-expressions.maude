@@ -378,7 +378,7 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	
 	mb [assign]: rule
 		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), tv(V:List{K}, T:Type)) 
-			=> write(Loc:Nat, tv(V:List{K}, T:Type)) 
+			=> write(Loc:Nat, tv(V:List{K}, T:Type))
 			~> tv(V:List{K}, T:Type)
 		...</ k >
 		: KSentence [metadata "structural"] .
@@ -387,6 +387,11 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), (tv(V:List{K}, T':Type) => cast(T:Type, tv(V:List{K}, T':Type))))
 		...</ k >
 		if T:Type =/=Bool T':Type
+		andBool notBool hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > assign(*(tv(Loc:Nat, pointerType((arrayType(T:Type, ?) => pointerType(T:Type))))), ?)
+		...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- mb [assign-bitfield]: rule
@@ -839,9 +844,19 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 		--- : KSentence [metadata "structural"] .
 endm
 
-mod COMMON-C-EXPRESSIONS is
-	including COMMON-SEMANTICS-BOOLEAN .
+mod COMMON-SEMANTICS-SEQUENCING is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	mb rule < k > Comma(K:C :: K'::C :: L:List{C}) => K:C ~> discard ~> Comma(K'::C :: L:List{C}) ...</ k >
+		: KSentence .
+	mb rule < k > Comma(K:C) => K:C ...</ k >
+		: KSentence .
+endm
+
+mod COMMON-C-EXPRESSIONS is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+
+	including COMMON-SEMANTICS-BOOLEAN .
 	including COMMON-SEMANTICS-SIZEOF .
 	including COMMON-SEMANTICS-IDENTIFIERS .
 	including COMMON-SEMANTICS-FUNCTION-CALLS .
@@ -855,6 +870,7 @@ mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-DEREFERENCE .
 	including COMMON-SEMANTICS-REFERENCE .
 	including COMMON-SEMANTICS-INCREMENT-AND-DECREMENT .
+	including COMMON-SEMANTICS-SEQUENCING .
 	
 	eq NothingExpression = emptyValue .
 endm

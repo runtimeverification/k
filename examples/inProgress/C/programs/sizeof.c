@@ -93,7 +93,7 @@ int main(void){
 
 	if ((char*)&mys1b[3] != (char*)&mys1b + sizeof(struct s1) * 3) { printf("Error: 30\n"); }
 	
-
+	if (sizeof(mys1b) != sizeof((struct s1[7])tpint)) { printf("Error 31\n"); }
 	// printf("sizeof(char) = %d\n", sizeof(char));
 	// printf("sizeof(short int) = %d\n", sizeof(short int));
 	// printf("sizeof(int) = %d\n", sizeof(int));

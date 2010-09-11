@@ -249,6 +249,12 @@ mod COMMON-SEMANTICS-CAST is
 		< k > cast(pointerType(T:Type), tv(N:Nat, T':Type)) => tv(N:Nat, pointerType(T:Type)) ...</ k >
 		if hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
+
+	--- fixme there should only be casts to scalars, but these are generated when assigning to array types
+	--- mb rule
+		--- < k > cast((arrayType(T:Type, N:Nat) => pointerType(T:Type)), ?) ...</ k >
+		--- : KSentence [metadata "structural"] .
+	
 	--- --- fixme
 	--- mb rule
 		--- < k > [cast(T:Type, tv(loc(N:Nat, M:Nat), pointerType(T':Type))) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k > 
