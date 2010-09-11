@@ -215,9 +215,14 @@ mod K-DESTRUCTORS is
   including K-TECHNIQUE .
   op getKLabel_ : K -> KLabel [metadata "latex(renameTo getKLabel\\mybracket{_})"] .
   op getList`{K`}_ : K -> List{K} [metadata "latex(renameTo _)"]  .
-  var L : KLabel .  var Ks : List{K} .
+  op eraseKLabel : KLabel List{K} -> List{K} .
+  var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .
   eq getKLabel(L(Ks)) = L .
   eq getList{K}(L(Ks)) = Ks .
+  eq eraseKLabel(L, L(Ks)) = eraseKLabel(L,Ks) .
+  eq eraseKLabel(L,L'(Ks)) = L'(eraseKLabel(L,Ks)) [owise] .
+  eq eraseKLabel(L, (NeKs1,,NeKs2)) = eraseKLabel(L, NeKs1),,eraseKLabel(L, NeKs2) .
+  eq eraseKLabel(L,.List{K}) = .List{K} .
 endm
 
 --- K notation starts from here on

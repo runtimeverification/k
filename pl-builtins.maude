@@ -113,7 +113,8 @@ mod PL-NAT is
   op _/Nat_ : Nat NzNat -> Nat
         [prec 31 gather (E e)
          special (id-hook NumberOpSymbol (quo)
-                  op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
+                  op-hook succSymbol (sNat_ : Nat ~> NzNat))
+         metadata "latex(renameTo _\\ensuremath{/}\\subscript{{\\scriptstyle\\it{}Nat}}_)" ] .
 
   op _%Nat_ : Nat NzNat -> Nat
         [prec 31 gather (E e)
