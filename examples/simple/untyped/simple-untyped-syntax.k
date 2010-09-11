@@ -2,7 +2,7 @@
 --- SIMPLE-UNTYPED-SYNTAX modules ---
 -------------------------------------
 
-kmod SIMPLE-UNTYPED-SORTS is including PL-INT + PL-ID
+kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
   sorts Var Exp Stmt Stmts
 
 -----------------------------------------------------------------------------
@@ -20,15 +20,13 @@ kmod SIMPLE-UNTYPED-SORTS is including PL-INT + PL-ID
                  Exp  
                | List{Id} 
                | List{Exp} , List{Exp} [ditto]
------------------------------------------------------------------------------
-endkm
 
-
-kmod SIMPLE-UNTYPED-EXPR is including SIMPLE-UNTYPED-SORTS
+--- variable names
   syntax Var ::= 
                  Id 
                | Exp [ Exp ] [prec 1 strict]
  
+--- expressions
   syntax Exp  ::= 
                  Var | Int | Bool
                | ++ Id [prec 0]
@@ -51,15 +49,13 @@ kmod SIMPLE-UNTYPED-EXPR is including SIMPLE-UNTYPED-SORTS
                | Exp ( )
                | Exp ( List{Exp} ) [prec 2 strict]
                | read ( )
-endkm
 
-kmod SIMPLE-UNTYPED-DECL is including SIMPLE-UNTYPED-SORTS
+--- declarations
   syntax Decl ::= var Var ; [prec 2]  
                 | function Id ( ) Stmt 
                 | function  Id ( List{Id} ) Stmt 
-endkm
 
-kmod SIMPLE-UNTYPED-STMT is including SIMPLE-UNTYPED-SORTS
+--- statements
   syntax Stmt ::=
                  { } [metadata "latex(renameTo \\{\\})"]
                | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
@@ -71,17 +67,11 @@ kmod SIMPLE-UNTYPED-STMT is including SIMPLE-UNTYPED-SORTS
                | for Id = Exp to Exp do Stmt
                | return Exp ; [strict]
                | write ( Exp ) ; [strict]
-endkm
 
-kmod SIMPLE-UNTYPED-STMTS is including SIMPLE-UNTYPED-DECL
   syntax Stmts ::= Decl | Stmt
                 | Stmts Stmts [prec 100 gather(e E)]
-endkm
 
-
-kmod SIMPLE-UNTYPED-SYNTAX is 
-  including SIMPLE-UNTYPED-EXPR + SIMPLE-UNTYPED-STMT + SIMPLE-UNTYPED-STMTS
-
+--- main function
   syntax Id ::= main 
 
 endkm

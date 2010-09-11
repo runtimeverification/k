@@ -2,10 +2,11 @@ in ../../../k-prelude
 in simple-untyped-syntax
 in simple-untyped-programs
 
+kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
+
 ---------------------
 --- configuration ---
 ---------------------
-kmod SIMPLE-UNTYPED-CONFIG is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
   syntax Val ::= Int | Bool
                 | array ( Nat , Nat )
@@ -67,12 +68,10 @@ kmod SIMPLE-UNTYPED-CONFIG is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   context _[[HOLE]]=_;
   context [HOLE][_]=_;
 
-endkm
 
----------------------
---- preprocessing ---
----------------------
-kmod SIMPLE-UNTYPED-PREPROCESSING is including SIMPLE-UNTYPED-CONFIG
+-------------------------------
+--- declarations processing ---
+-------------------------------
 
 --- variable declaration; in the preprocessing phase only the global variables are processed 
 --- this rule is also used process the local variables of a function
@@ -99,12 +98,10 @@ kmod SIMPLE-UNTYPED-PREPROCESSING is including SIMPLE-UNTYPED-CONFIG
 --- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
 ---   call main and initialize the global environment
   rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
-endkm
 
 -------------------------------------
 --- Evaluation of the expressions ---
 -------------------------------------
-kmod SIMPLE-UNTYPED-EXPR-EVALUATION is including SIMPLE-UNTYPED-CONFIG 
 
 --- variable lookup
 
@@ -142,12 +139,10 @@ kmod SIMPLE-UNTYPED-EXPR-EVALUATION is including SIMPLE-UNTYPED-CONFIG
 --- read expression
 
   rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
-endkm
 
 ---------------------
 --- function call ---
 ---------------------
-kmod SIMPLE-UNTYPED-FUNCTION-CALL is including SIMPLE-UNTYPED-PREPROCESSING
 
 --- the environment and the computation are pushed in the stack at each function call
 
@@ -160,12 +155,10 @@ kmod SIMPLE-UNTYPED-FUNCTION-CALL is including SIMPLE-UNTYPED-PREPROCESSING
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <fstack> (Env:Map,K) => . <_/fstack>
        <env> _ => Env </env>
-endkm
 
 ------------------------------
 --- instruction processing ---
 ------------------------------
-kmod SIMPLE-UNTYPED-INSTR-PROCESSING is including SIMPLE-UNTYPED-CONFIG 
 
   rule {} => .
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
@@ -181,13 +174,7 @@ kmod SIMPLE-UNTYPED-INSTR-PROCESSING is including SIMPLE-UNTYPED-CONFIG
   rule if false then _ else S => S 
   rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k>
   rule <k> write(I:Int); => . <_/k> <out_> . => ListItem(I) </out>
-endkm
 
------------------
---- semantics ---
------------------
-kmod SIMPLE-UNTYPED-SEMANTICS is 
-  including SIMPLE-UNTYPED-FUNCTION-CALL + SIMPLE-UNTYPED-EXPR-EVALUATION + SIMPLE-UNTYPED-INSTR-PROCESSING
 endkm
 
 -------------------
