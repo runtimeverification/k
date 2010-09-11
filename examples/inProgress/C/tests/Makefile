@@ -10,45 +10,26 @@ PARSER ?= ../dist/cparser
 GOOD_DIRECTORIES = unitTests
 SHOULD_FAIL = 
 
-ALL_FILES = $(foreach var, $(GOOD_DIRECTORIES), $(wildcard $(var)/*.c))
-ALL_PROGRAMS_BASIC = $(basename $(ALL_FILES))
-ALL_PROGRAMS = $(filter-out $(DONT_WORK), $(ALL_PROGRAMS_BASIC))
-ALL_TARGETS = $(foreach var,  $(filter-out $(DONT_RUN), $(ALL_PROGRAMS)), $(dir $(var))compare-$(notdir $(var)).pass)
+#ALL_FILES = $(foreach var, $(GOOD_DIRECTORIES), $(wildcard $(var)/*.c))
+#ALL_PROGRAMS_BASIC = $(basename $(ALL_FILES))
+#ALL_PROGRAMS = $(filter-out $(DONT_WORK), $(ALL_PROGRAMS_BASIC))
+#ALL_TARGETS = $(foreach var,  $(filter-out $(DONT_RUN), $(ALL_PROGRAMS)), $(dir $(var))compare-$(notdir $(var)).pass)
+GOOD_TARGETS = $(foreach var,  $(GOOD_DIRECTORIES), results-$(var).xml)
+CLEAN_TARGETS = $(foreach var, $(GOOD_DIRECTORIES), clean-$(var))
 
 all: test $(PARSER)
 
 .INTERMEDIATE: test-%.kcc test-%.gcc output-% retval-%
 .PRECIOUS: test-%.kcc test-%.gcc output-% retval-% compare-%.pass
-
 .PHONY: all test clean prepare fast-test working
 
-test: $(ALL_TARGETS)
-	@echo "SUCCESS: Tests completed successfully."
-
-fast-test: $(FAST_TARGETS)
-	@echo "SUCCESS: Tests completed successfully."
-
-slow-test: $(SLOW_TARGETS) $(ALL_TARGETS) 
-	@echo "SUCCESS: Tests completed successfully."
-
-test-%.kcc: %.c $(KCC) $(PARSER)
-	@echo "Compiling $@..."
-	@$(COMMAND_PREFIX) $(KCC) -o $@ $<
+test: $(GOOD_TARGETS)
+	@echo "Tests finished running."
 	
-test-%.gcc: %.c
-	@echo "Compiling $@..."
-	@$(GCC) -o $@ $< 2> /dev/null
-	
-output-%: test-%
-	@echo "Running $< ..."
-	@trap "" SIGABRT; $(COMMAND_PREFIX) ./$< 2>&1 > $@.tmp; RETURN_VALUE=$$?; echo $$RETURN_VALUE >> $@.tmp
-	@mv $@.tmp $@
-	
-compare-%.pass: output-%.gcc output-%.kcc
-	@echo "Comparing $*..."
-	@diff -y --suppress-common-lines -I '^VOLATILE' $+
-	@touch $@
+results-%.xml:
+	@perl runtest.pl $*
 		
-clean:
-#rm -f *.gcc *.kcc *.tmp *.pass *-information.log compilation.log *-gen.maude *.pre.gen *.prepre.gen *.gen.maude a.out kcompile_* program-*-compiled.maude *.o *.cil
-	rm -f ./*.gcc ./*.kcc ./*.pass ./*.tmp ./*.log ./*.cil ./*-gen.maude ./*.gen.maude ./*.pre.gen ./*.prepre.gen ./a.out
+clean: $(CLEAN_TARGETS)
+	
+clean-%: 
+	rm -f ./$*/*.gcc ./$*/*.kcc ./$*/*.pass ./$*/*.tmp ./$*/*.log ./$*/*.cil ./$*/*-gen.maude ./$*/*.gen.maude ./$*/*.pre.gen ./$*/*.prepre.gen ./$*/*.xml ./$*/a.out
