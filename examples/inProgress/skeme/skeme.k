@@ -292,7 +292,7 @@ kmod LITERAL-SEMANTICS is including INTERN
   rule <k> #\C:Char  => vc(C)         <_/k> [structural]
   rule <k> []        => vNil          <_/k> [structural]
   rule <k> #[]       => vec(.Map # 0) <_/k> [structural]
-  rule <k> [* E:Exp] => intern(E)     <_/k> [structural]
+  rule <k> [* E:Exp] => E             <_/k> [structural]
 endkm
 
 kmod STRING-SEMANTICS is including INTERN
