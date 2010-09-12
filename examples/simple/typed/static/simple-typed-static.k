@@ -2,7 +2,7 @@ in ../../../../k-prelude.maude
 in simple-typed-static-syntax
 in ../simple-typed-programs
 
-kmod SIMPLE-TYPED-STATIC-CONFIG is including SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX + K 
+kmod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX + K 
 
 --- the result of the computation is a list of types
   syntax KResult ::= List{Type}
@@ -38,9 +38,6 @@ kmod SIMPLE-TYPED-STATIC-CONFIG is including SIMPLE-TYPED-STATIC-DESUGARED-SYNTA
                    <gtenv> .Map </gtenv>
                 </T> 
 
-endkm
-
-kmod SIMPLE-TYPED-STATIC-PREPROCESSING is including SIMPLE-TYPED-STATIC-CONFIG
  
 --- first pass: collect function prototypes in gtenv 
   rule <T> <k> S:Stmt ~> (.K => doneGlobals ~> S) </k> 
@@ -66,11 +63,7 @@ kmod SIMPLE-TYPED-STATIC-PREPROCESSING is including SIMPLE-TYPED-STATIC-CONFIG
             ) 
        </T> 
 
-endkm
-
-
-kmod SIMPLE-TYPED-STATIC-EXPR-EVALUATION is including SIMPLE-TYPED-STATIC-CONFIG
-
+--- expressions evaluation
   rule I:Int => int 
   rule B:Bool => bool 
   rule <k> X:Id => T:Type <_/k>
@@ -95,10 +88,7 @@ kmod SIMPLE-TYPED-STATIC-EXPR-EVALUATION is including SIMPLE-TYPED-STATIC-CONFIG
   rule _`[`](T)[int] => T 
   rule sizeOf(T []) => int 
 
-endkm
-
-kmod SIMPLE-TYPED-STATIC-FUNCTIONS-PROCESSING is including SIMPLE-TYPED-STATIC-CONFIG
-
+--- variable declaration processing
   rule <k> var X:Id : T:Type ; => stmt <_/k>
       <tenv> TEnv:Map => TEnv[T / X] </tenv> 
   context var X[[HOLE]] : T ; 
@@ -133,13 +123,6 @@ kmod SIMPLE-TYPED-STATIC-FUNCTIONS-PROCESSING is including SIMPLE-TYPED-STATIC-C
        <return> T </return> 
   rule read() => int 
   rule write(int) ; => stmt   
-
-endkm
-
-kmod SIMPLE-TYPED-STATIC-SEMANTICS is 
-  including SIMPLE-TYPED-STATIC-PREPROCESSING +
-            SIMPLE-TYPED-STATIC-EXPR-EVALUATION +
-            SIMPLE-TYPED-STATIC-FUNCTIONS-PROCESSING + K 
 
 endkm
 

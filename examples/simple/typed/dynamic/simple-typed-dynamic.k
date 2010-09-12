@@ -2,10 +2,8 @@ in ../../../../k-prelude.maude
 in simple-typed-dynamic-syntax
 in ../simple-typed-programs
 
----------------------
---- configuration ---
----------------------
-kmod SIMPLE-TYPED-DYNAMIC-CONFIG is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
+
+kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
 
 --- We need values when we define the semantics
   syntax Val ::= Int | Bool  
@@ -98,11 +96,8 @@ kmod SIMPLE-TYPED-DYNAMIC-CONFIG is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYN
   context var X[[HOLE]] : Tp[] ; 
   context _[[HOLE]] = _ ; 
   context [HOLE][_] = _ ; 
-endkm
 
-
-kmod SIMPLE-TYPED-DYNAMIC-PREPROCESSING is including SIMPLE-TYPED-DYNAMIC-CONFIG
-
+--- declarations processing
   rule <k> var X:Id : Tp:Type ; => .K <_/k>
        <env> Env:Map => Env[L:Nat / X] </env>
        <store_> (.Map => L |-> initVal(Tp)) <_/store>
@@ -123,9 +118,7 @@ kmod SIMPLE-TYPED-DYNAMIC-PREPROCESSING is including SIMPLE-TYPED-DYNAMIC-CONFIG
        <env> Env </env>
        <genv> .Map => Env </genv> 
 
-endkm
-
-kmod SIMPLE-TYPED-DYNAMIC-EXPR-EVALUATION is including SIMPLE-TYPED-DYNAMIC-CONFIG
+--- expressions evaluation
 
   rule <k> X:Id => V:Val <_/k>
        <env_> X |-> L:Nat <_/env>
@@ -155,10 +148,8 @@ kmod SIMPLE-TYPED-DYNAMIC-EXPR-EVALUATION is including SIMPLE-TYPED-DYNAMIC-CONF
   rule sizeOf(array(_,_,N)) => N 
   rule <k> read() => I <_/k>
        <in> ListItem(I) => .List <_/in> 
-endkm
 
-kmod SIMPLE-TYPED-DYNAMIC-FUNCTION-CALL is including SIMPLE-TYPED-DYNAMIC-CONFIG
-
+--- function call processing
  rule <k> _`(_`)(function(Tpl:List`{Type`} -> Tp:Type, L:Nat),Vl:List{Val})  ~> K:K
           =>
           S:Stmt ~> return(initVal(Tp));
@@ -177,10 +168,7 @@ kmod SIMPLE-TYPED-DYNAMIC-FUNCTION-CALL is including SIMPLE-TYPED-DYNAMIC-CONFIG
        <return> Tp => Tp' </return>
        if typeOf(V) ==Bool Tp
 
-endkm
-
-kmod SIMPLE-TYPED-DYNAMIC-INSTR-PROCESSING is including SIMPLE-TYPED-DYNAMIC-CONFIG
-
+--- instructions processing
   rule {} => .K 
   rule <k> {Ss:Stmts} => Ss ~> env(Env) <_/k>
        <env> Env:Map </env> 
@@ -198,14 +186,6 @@ kmod SIMPLE-TYPED-DYNAMIC-INSTR-PROCESSING is including SIMPLE-TYPED-DYNAMIC-CON
   rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k> 
   rule <k> write(I:Int) ; => .K <_/k>
        <out_> .List => ListItem(I) </out>  
-
-endkm
-
-kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is 
-  including SIMPLE-TYPED-DYNAMIC-PREPROCESSING +
-            SIMPLE-TYPED-DYNAMIC-EXPR-EVALUATION +
-            SIMPLE-TYPED-DYNAMIC-FUNCTION-CALL +
-            SIMPLE-TYPED-DYNAMIC-INSTR-PROCESSING
 
 endkm
 

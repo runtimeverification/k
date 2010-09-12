@@ -1,6 +1,6 @@
 ---in ../../../../k-prelude
 
-kmod SIMPLE-TYPED-SORTS is including PL-INT + PL-ID 
+kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
 
   sorts Var Exp Decl Stmt Stmts
 
@@ -38,14 +38,12 @@ kmod SIMPLE-TYPED-SORTS is including PL-INT + PL-ID
   syntax List{Exp} ::=  Exp | List{Id} 
                      | List{Exp} , List{Exp} [ditto]
 
------------------------------------------------------------------------------
-endkm
-
-kmod SIMPLE-TYPED-EXPR is including SIMPLE-TYPED-SORTS
+--- variable names 
 
   syntax Var ::= Id 
                 | Id [ Exp ] [prec 1 strict]
 
+--- expressions
   syntax Exp ::=   Var | Int | Bool            
                 | ++ Id [prec 0]
                 | Exp + Exp [gather(E e) prec 33 strict]
@@ -68,18 +66,14 @@ kmod SIMPLE-TYPED-EXPR is including SIMPLE-TYPED-SORTS
                 | Exp ( )
                 | Exp ( List{Exp} ) [prec 2 strict]
                 | read ( )
-endkm
 
-kmod SIMPLE-TYPED-DECL is including SIMPLE-TYPED-SORTS
-
+--- declarations
   syntax Decl ::=
                 | var Var : Type ; [prec 2] 
                 | function Id ( ) : Type Stmt 
                 | function  Id ( List{IdType} ) : Type Stmt 
 
-endkm
-
-kmod SIMPLE-TYPED-STMT is including SIMPLE-TYPED-SORTS
+--- instructions
   syntax Stmt ::= 
                   { } [metadata "latex(renameTo \\{\\})"]
                 | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
@@ -91,16 +85,10 @@ kmod SIMPLE-TYPED-STMT is including SIMPLE-TYPED-SORTS
                 | for Id = Exp to Exp do Stmt
                 | return Exp ; [strict]
                 | write ( Exp ) ; [strict]
-endkm
 
-kmod SIMPLE-TYPED-STMTS is including SIMPLE-TYPED-DECL
-
+--- statements
   syntax Stmts ::= Decl | Stmt
                 | Stmts Stmts [prec 100 gather(e E)]
-endkm
-
-
-kmod SIMPLE-TYPED-SYNTAX is including  SIMPLE-TYPED-EXPR + SIMPLE-TYPED-STMT + SIMPLE-TYPED-STMTS
 
   syntax Id ::= main
 
