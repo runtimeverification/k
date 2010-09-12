@@ -246,6 +246,12 @@ mod DECL-META-LATEX-PRINT is
   ceq printTerm(U, '_`(_`)[Q,'_`,`,_[NeTl]]) = printTerm(U,Q'[NeTl])
    if getType(Q) = 'Qid 
    /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) .
+---(
+  ceq printTerm(U, '_`(_`)[Ct,T]) = printTerm(U,Ct)
+   if sortLeq(U,getType(Ct),KLabel) /\ T = nilKList .
+  ceq printTerm(U, '_`(_`)[V,T]) = printTerm(U,V)
+   if sortLeq(U,getType(V),KLabel) /\ T = nilKList .
+---)
   ceq printTerm(U, '_`(_`)[Q,T]) = printTerm(U,Q'[T])
    if getType(Q) = 'Qid 
    /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise] .
@@ -342,6 +348,9 @@ mod DECL-META-LATEX-PRINT is
   eq eMetaLatexPrint(M, (OPDS' (op F : nil -> 'CellLabel [AS] .) OPDS))
    = ---(eMetaLatexPrint(M, \cellLabel{F}{metadataParse(St)}) '\o)
        eMetaLatexPrint(M, OPDS' OPDS)  .
+  eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadata("generated label") AS] .) OPDS)) 
+   = eMetaLatexPrint(M, (OPDS' OPDS))  .
+
   eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadata(St) AS] .) OPDS)) 
    = eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadataParse(St) AS] .) OPDS)) [owise] .
 ---(
@@ -578,18 +587,24 @@ mod DECL-META-LATEX-PRINT is
   eq getRenamedKOp(Q, AS metadata(Str) AS') 
    = getName(Q, metadataParse(Str)) [owise] .
 
-  var NNL : NeNatList .
-  eq eMetaLatexPrint(M, (kstrict(nil) AtS))
-    = ('strict eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (kaux AtS))
     = ('aux eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (kstrict(NNL) AtS))
-    = ('strict '`( eMetaLatexPrint(NNL) '`) 
+
+  op strictCells : QidList -> QidList .
+  eq strictCells('k) = nil .
+  eq strictCells(nil) = nil .
+  eq strictCells(QIL) = 'in '`( QIL '`) [owise] .
+
+  var NNL : NeNatList .
+  eq eMetaLatexPrint(M, (kstrict(nil,QIL) AtS))
+    = ('strict strictCells(QIL) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (kstrict(NNL, QIL) AtS))
+    = ('strict '`( eMetaLatexPrint(NNL) '`) strictCells(QIL)
        eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (seqkstrict(nil) AtS))
-    = ('seqstrict eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (seqkstrict(NNL) AtS))
-    = ('seqstrict '`( eMetaLatexPrint(NNL) '`) 
+  eq eMetaLatexPrint(M, (seqkstrict(nil,QIL) AtS))
+    = ('seqstrict strictCells(QIL) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (seqkstrict(NNL,QIL) AtS))
+    = ('seqstrict '`( eMetaLatexPrint(NNL) '`) strictCells(QIL)
        eMetaLatexPrint(M, AtS)) .
   eq eMetaLatexPrint(M, (khybrid AtS))   
     = ('hybrid eMetaLatexPrint(M, AtS)) .

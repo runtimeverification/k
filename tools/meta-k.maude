@@ -5,7 +5,7 @@ endfm
 
 fmod K-META-OPS is including META-TERM .
   op nilKList : -> Qid .
-  eq nilKList = '.List`{K`}.List`{K`} .
+  eq nilKList = '.List`{K`}.List`{KResult`} .
 
   op nilK : -> Qid .
   eq nilK = '..K .
