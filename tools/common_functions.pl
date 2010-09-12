@@ -729,20 +729,20 @@ sub getKLabelDeclarations
 		
 		# extract KLabel candidate from current statement
         # the candidate is anything which ends with non-escaped []{}()\s 
-		while($statement =~ m/(.)(.)((\'.*?)([^`])([\(\)\{\}\[\]\s]))/sg)
+		while($statement =~ m/(.)(.)((\'.*?)([^`])([\(\)\{\}\[\]\s,]))/sg)
 		{
 
-			my $candidate = "$4$5";
-            my $prefix = "$1$2";
-			
-			if ($candidate =~ m/[^`][\[\]\{\}\(\)\s]/)
+		    my $candidate = "$4$5";
+		    my $prefix = "$1$2";
+		    
+		    if ($candidate =~ m/[^`][\[\]\{\}\(\)\s,]/)
 			{
 				# the candidate still contains a separator char -> throw it away
 				$candidate = "";
 			}
 			else # the candidate body is ok
 			{
-				if ($prefix =~ m/[^`][\[\]\{\}\(\)\s]/)
+				if ($prefix =~ m/[^`][\[\]\{\}\(\)\s,]/)
 				{
 					# prefix is a separator 
 					# print "		Candidate: $candidate\n";					
@@ -772,20 +772,20 @@ sub getKLabelDeclarations
 		}
 	}
     
-	if ($labels =~ m/\S\s+\S/)
+    if ($labels =~ m/\S\s+\S/)
     {
-		$labels = "ops $labels";
+	$labels = "ops $labels";
     }
-    	elsif ($labels =~ m/\S/) 
+    elsif ($labels =~ m/\S/) 
     {
-		$labels = "op $labels";	
+	$labels = "op $labels";	
     }
     else 
     {
-		return "";
+	return "";
     }
     
-	# print "$labels : -> KLabel [metadata \"generated label\"] ";
+    # print "$labels : -> KLabel [metadata \"generated label\"] ";
     return "$labels : -> KLabel [metadata \"generated label\"] . ";
 }
 
