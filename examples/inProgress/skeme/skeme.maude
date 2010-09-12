@@ -56,8 +56,8 @@ mod SKEME-PROGRAMS is including SKEME-SYNTAX .
         op bar :  -> List{Exp} .    op foo :  -> List{Exp} .    op baz :  -> List{Exp} .    op chaz :  -> List{Exp} .    op kraz :  -> List{Exp} .  
 
         
-  eq foo =  [eval # [1]] .
-  eq bar =  [eval # [1 2 3]] .
+  eq foo =  #[] . 
+  eq bar =  [] . 
         
   eq baz =  # [# [# [3]] "true"] .
   eq chaz =  [eval ! [1 *  [2]]] .

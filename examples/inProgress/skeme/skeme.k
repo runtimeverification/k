@@ -56,8 +56,8 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   syntax List{Exp} ::= bar | foo | baz | chaz | kraz 
 
   ---macro foo = [eval ![1 * 2]]
-  macro foo = [eval #[1]]
-  macro bar = [eval #[1 2 3]]
+  macro foo = #[]
+  macro bar = []
   ---macro bar = [if #t "true" "false"]
   macro baz = #[#[#[3]] "true"]
   macro chaz = [eval ![1 * [2]]]

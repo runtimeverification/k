@@ -142,10 +142,10 @@ op _`[_`] : Map Map -> Map[prec 0].
 op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\;}/_])"].
 op lengthList`{K`}_ : List{K}-> Nat[metadata "latex(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
 op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
-eq bar = _`(_`)('`[_`],_`(_`)('__,_`,`,_(_`(_`)(Id_(eval),.List`{K`}),_`(_`)('#`[_`],_`(_`)('__,_`,`,_(_`(_`)(Rat_(1),.List`{K`}),_`,`,_(_`(_`)(Rat_(2),.List`{K`}),_`(_`)(Rat_(3),.List`{K`})))))))).
+eq bar = _`(_`)('`[`],.List`{K`}).
 eq baz = _`(_`)('#`[_`],_`(_`)('__,_`,`,_(_`(_`)('#`[_`],_`(_`)('__,_`(_`)('#`[_`],_`(_`)('__,_`(_`)(Rat_(3),.List`{K`}))))),_`(_`)(String_("true"),.List`{K`})))).
 eq chaz = _`(_`)('`[_`],_`(_`)('__,_`,`,_(_`(_`)(Id_(eval),.List`{K`}),_`(_`)('!_,_`(_`)('`[_*_`],_`,`,_(_`(_`)('__,_`(_`)(Rat_(1),.List`{K`})),_`(_`)('`[_`],_`(_`)('__,_`(_`)(Rat_(2),.List`{K`}))))))))).
-eq foo = _`(_`)('`[_`],_`(_`)('__,_`,`,_(_`(_`)(Id_(eval),.List`{K`}),_`(_`)('#`[_`],_`(_`)('__,_`(_`)(Rat_(1),.List`{K`})))))).
+eq foo = _`(_`)('#`[`],.List`{K`}).
 eq kraz = _`(_`)('!_,_`(_`)('`[_`],_`(_`)('__,_`,`,_(_`(_`)('#`[_`],_`(_`)('__,_`,`,_(_`(_`)(Rat_(42),.List`{K`}),_`(_`)('`[_`],_`(_`)('__,_`(_`)(Rat_(43),.List`{K`})))))),_`(_`)(String_("44"),.List`{K`}))))).
 eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
 eq Bag_(.List`{K`})=(.).Bag .
