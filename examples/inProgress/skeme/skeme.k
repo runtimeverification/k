@@ -8,7 +8,7 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
 
   syntax Exp ::= Literal 
                | Id | String  
-               | [ List{Exp} ] | #[ List{Exp} ] | [ List{Exp} . Exp ]     
+               | [ List{Exp} ] | #[ List{Exp} ] | [ List{Exp} * Exp ] | [* Exp ]  
                | `! Exp
 
   syntax List{Exp} ::= Exp | .List{Exp} | List{Exp}  List{Exp} [assoc id: .List{Exp} hybrid] 
@@ -19,15 +19,16 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
 
   syntax Program ::= program(List{Exp}) 
 
-  syntax Id ::= eval | display | set-car! | set-cdr! | = | + | - | * | /
+  syntax Id ::= eval | display | set-car! | set-cdr! | o= | o+ | o- | o* | o/
               | call-with-current-continuation | call/cc | car | cdr | if
               | quote
 
   macro [ .List{Exp} ] = [] 
+  macro [ .List{Exp} * E:Exp ] = [* E] 
   macro #[ .List{Exp} ] = #[]
-  macro [EL:List{Exp} . []] = [EL:List{Exp}] 
-  macro [EL:List{Exp} . [EL':List{Exp}]] = [EL:List{Exp} EL':List{Exp}] 
-  macro [EL:List{Exp} . [EL':List{Exp} . E:Exp]] = [EL:List{Exp} EL':List{Exp} . E:Exp] 
+  macro [EL:List{Exp} * []] = [EL:List{Exp}] 
+  macro [EL:List{Exp} * [EL':List{Exp}]] = [EL:List{Exp} EL':List{Exp}] 
+  macro [EL:List{Exp} * [EL':List{Exp} * E:Exp]] = [EL:List{Exp} EL':List{Exp} * E:Exp] 
   macro ! E:Exp = [quote E]
 endkm
 
@@ -40,7 +41,7 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
 
   syntax Internal ::=   vT | vF | vUnspec | vNil 
                       | vi( Int ) | vf( Float ) | vr( Rat ) | vc( Char ) | vn( Id )                                           
-                      | cons( K . K ) | vec( Map # Int ) | string( Map # Int ) | Builtin 
+                      | cons( K * K ) | vec( Map # Int ) | string( Map # Int ) | Builtin 
   
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
                      | bCallCC | bCar | bCdr
@@ -54,11 +55,13 @@ endkm
 kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   syntax List{Exp} ::= bar | foo | baz | chaz | kraz 
 
-  macro foo = [3][4][5]
-  macro bar = [if #t "true" #\"f"]
+  ---macro foo = [eval ![1 * 2]]
+  macro foo = [eval #[1]]
+  macro bar = [eval #[1 2 3]]
+  ---macro bar = [if #t "true" "false"]
   macro baz = #[#[#[3]] "true"]
-  macro chaz = [quote if]
-  macro kraz = ![42 43 44]
+  macro chaz = [eval ![1 * [2]]]
+  macro kraz = ![#[42 [43]] "44"]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -66,7 +69,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
   syntax K ::= Program | Exp | Char | String 
   syntax KResult ::= Internal
 
-  op loc : K -> Rat
+  op loc : K -> K
 
   configuration <T> <k>.K</k> 
                     <program>   .List </program>
@@ -75,11 +78,11 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                        display                        |-> loc(1)  
                        set-car!                       |-> loc(2) 
                        set-cdr!                       |-> loc(3) 
-                       =                              |-> loc(4) 
-                       +                              |-> loc(5) 
-                       -                              |-> loc(6)  
-                       *                              |-> loc(7)  
-                       /                              |-> loc(8)  
+                       o=                             |-> loc(4) 
+                       o+                             |-> loc(5) 
+                       o-                             |-> loc(6)  
+                       o*                             |-> loc(7)  
+                       o/                             |-> loc(8)  
                        call-with-current-continuation |-> loc(9)   
                        call/cc                        |-> loc(9)   
                        car                            |-> loc(10) 
@@ -121,6 +124,7 @@ kmod INTERN is including SKEME-SEMANTICS
   rule intern(#\C:Char)     => vc(C)         [structural]
   rule intern([])           => vNil          [structural]
   rule intern(#[])          => vec(.Map # 0) [structural]
+  rule intern([* E:Exp])    => intern(E)     [structural]
 
   --- interning String
   rule intern( Str:String ) => internS(string(.Map # lengthString(Str)), Str, 0) [structural]  
@@ -198,17 +202,80 @@ kmod INTERN is including SKEME-SEMANTICS
 
   --- interning Lists
   rule <k_>
-         intern([E:Exp EL:List{Exp}]) => cons(Loc . Loc +Rat 1)
+         intern([E:Exp EL:List{Exp}]) => cons(loc(Loc) * loc(Loc +Rat 1))
        <_/k>
        <nextLoc> Loc => Loc +Rat 2 </nextLoc>
        <store> .Map => loc(Loc) |-> intern(E) loc(Loc +Rat 1) |-> intern([EL]) <_/store> [structural] 
   
   rule <store>
          loc(Loc':Rat) |->
-           (intern([E:Exp EL:List{Exp}]) => cons(Loc . Loc +Rat 1))
+           (intern([E:Exp EL:List{Exp}]) => cons(loc(Loc) * loc(Loc +Rat 1)))
          (.Map => loc(Loc) |-> intern(E) loc(Loc +Rat 1) |-> intern([EL]))
        <_/store>
        <nextLoc> Loc => Loc +Rat 2 </nextLoc> [structural]
+
+
+  --- interning imperfect Lists
+  rule <k_>
+         intern([E:Exp EL:List{Exp} * E':Exp]) => cons(loc(Loc) * loc(Loc +Rat 1))
+       <_/k>
+       <nextLoc> Loc => Loc +Rat 2 </nextLoc>
+       <store> .Map => loc(Loc) |-> intern(E) loc(Loc +Rat 1) |-> intern([EL * E']) <_/store> [structural] 
+  
+  rule <store>
+         loc(Loc':Rat) |->
+           (intern([E:Exp EL:List{Exp} * E':Exp]) => cons(loc(Loc) * loc(Loc +Rat 1)))
+         (.Map => loc(Loc) |-> intern(E) loc(Loc +Rat 1) |-> intern([EL * E']))
+       <_/store>
+       <nextLoc> Loc => Loc +Rat 2 </nextLoc> [structural]
+
+endkm
+
+kmod EXTERN is including SKEME-SEMANTICS
+  op extern  : K Map -> Exp
+  op externS : String Map Map Int -> String
+  op externV : List{Exp} Map Map Int -> Exp 
+  op _+StringK_ : K String -> String
+
+  eq Str1:String +StringK Str2:String = Str1 +String Str2
+
+ 
+  --- externing for literals    
+  rule extern(vT, M:Map)           => #t            [structural]
+  rule extern(vF, M)               => #f            [structural]
+  rule extern(vUnspec, M)          => #unspecified  [structural]
+  rule extern(vn(ID:Id), M)        => ID            [structural]
+  rule extern(vi(I:Int), M)        => I             [structural]
+  rule extern(vf(F:Float), M)      => F             [structural]
+  rule extern(vr(R:Rat), M)        => R             [structural]
+  rule extern(vc(C), M)            => #\C:Char      [structural]
+  rule extern(vNil, M)             => []            [structural]
+  rule extern(string(.Map # 0), M) => ""            [structural]
+  rule extern(vec(.Map # 0), M)    => #[]           [structural]
+
+  --- externing for Strings
+  rule extern(string( M:Map # Len:NzInt ), Store:Map)
+    => externS("", M, Store, (-Int 1) +Int Len) [structural] 
+
+  rule externS(Str:String, M, Store, 0)  
+    => Store(M(0)) +StringK Str [structural]
+
+  rule externS(Str:String, M, Store, Nz:NzInt) 
+    => externS(Store(M(Nz)) +StringK Str, M, Store, (-Int 1) +Int Nz) [structural]
+
+  --- externing for Vectors
+  rule extern(vec( M:Map # Len:NzInt ), Store:Map)
+    => externV(.List{Exp}, M, Store, (-Int 1) +Int Len) [structural] 
+
+  rule externV(EL:List{Exp}, M, Store, 0)  
+    => #[extern(Store(M(0)), Store) EL] [structural]
+
+  rule externV(EL, M, Store, Nz:NzInt) 
+    => externV(extern(Store(M(Nz)), Store) EL, M, Store, (-Int 1) +Int Nz) [structural]
+
+  --- externing for Lists
+  rule extern(cons(loc(R1:Rat) * loc(R2:Rat)), M)
+    => [extern(M(loc(R1)), M) * extern(M(loc(R2)), M)] [structural]
 endkm
 
 --- I don't like how I have to essentially rewrite intern for all literals here,
@@ -237,6 +304,14 @@ kmod QUOTE-SEMANTICS is including INTERN
   rule <k> [quote E:Exp] => intern(E) <_/k>
 endkm 
 
+kmod EVAL-SEMANTICS is including EXTERN
+  --- TEST!!!  eval should be treated as a function!
+  op e : -> K 
+  rule <k> [eval E:Exp] => E ~> e <_/k> 
+  
+  rule <k> (KR:KResult ~> e) => extern(KR, M:Map) <_/k> <store> M </store> 
+endkm
+
 kmod IF-SEMANTICS is including SKEME-SEMANTICS
   op if_$_$_ : K K K -> K [strict(1)]
      
@@ -248,6 +323,7 @@ endkm
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
   + QUOTE-SEMANTICS + IF-SEMANTICS + SKEME-PROGRAMS 
+  + EVAL-SEMANTICS
   
   syntax Bag ::= run( List{K} ) | out( List ) 
 
