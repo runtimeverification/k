@@ -283,14 +283,17 @@ var F : Float . var ID : Id . var R1 : Rat . var Store : Map . var EL : List{Exp
                   
 mod LITERAL-SEMANTICS is including INTERN .
 
-  mb rule < k >  #t  =>  vT  ...</ k >                 : KSentence [metadata "structural"] .
-  mb rule < k >  #f  =>  vF  ...</ k >                 : KSentence [metadata "structural"] .
-  mb rule < k >  #unspecified  =>  vUnspec  ...</ k >  : KSentence [metadata "structural"] .
-  mb rule < k >  I:Int =>  vi(I)  ...</ k >           : KSentence [metadata "structural"] .
-  mb rule < k >  F:Float =>  vf(F)  ...</ k >         : KSentence [metadata "structural"] .
-  mb rule < k >  R:Rat =>  vr(R)  ...</ k >           : KSentence [metadata "structural"] .
-  mb rule < k >  #\ C:Char =>  vc(C)  ...</ k >        : KSentence [metadata "structural"] .
-var F : Float . var C : Char . var R : Rat . var I : Int .  endm
+  mb rule < k >  #t  =>  vT                    ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  #f  =>  vF                    ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  #unspecified  =>  vUnspec     ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  I:Int =>  vi(I)              ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  F:Float =>  vf(F)            ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  R:Rat =>  vr(R)              ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  #\ C:Char  =>  vc(C)          ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  []         =>  vNil           ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  #[]        =>  vec((.).Map  #  0)  ...</ k >  : KSentence [metadata "structural"] .
+  mb rule < k >  [*  E:Exp] =>  intern(E)      ...</ k >  : KSentence [metadata "structural"] .
+var F : Float . var E : Exp . var C : Char . var R : Rat . var I : Int .  endm
 
 mod STRING-SEMANTICS is including INTERN .
   mb rule < k >  Str:String =>  intern(Str)  ...</ k > : KSentence .   

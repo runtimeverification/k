@@ -283,13 +283,16 @@ endkm
 --- I'd like to say any Literal on the top of the K rewrites to intern of that Literal
 kmod LITERAL-SEMANTICS is including INTERN
 
-  rule <k> #t => vT <_/k>                [structural]
-  rule <k> #f => vF <_/k>                [structural]
-  rule <k> #unspecified => vUnspec <_/k> [structural]
-  rule <k> I:Int => vi(I) <_/k>          [structural]
-  rule <k> F:Float => vf(F) <_/k>        [structural]
-  rule <k> R:Rat => vr(R) <_/k>          [structural]
-  rule <k> #\C:Char => vc(C) <_/k>       [structural]
+  rule <k> #t => vT                   <_/k> [structural]
+  rule <k> #f => vF                   <_/k> [structural]
+  rule <k> #unspecified => vUnspec    <_/k> [structural]
+  rule <k> I:Int => vi(I)             <_/k> [structural]
+  rule <k> F:Float => vf(F)           <_/k> [structural]
+  rule <k> R:Rat => vr(R)             <_/k> [structural]
+  rule <k> #\C:Char  => vc(C)         <_/k> [structural]
+  rule <k> []        => vNil          <_/k> [structural]
+  rule <k> #[]       => vec(.Map # 0) <_/k> [structural]
+  rule <k> [* E:Exp] => intern(E)     <_/k> [structural]
 endkm
 
 kmod STRING-SEMANTICS is including INTERN
