@@ -5,7 +5,7 @@ in ../../../k-prelude
 --- SKOOL-UNTYPED-SYNTAX modules ---
 ------------------------------------
 
-kmod SKOOL-UNTYPED-SORTS is including PL-INT + PL-ID
+kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
   sorts Var Exp Stmt Stmts
 
 -----------------------------------------------------------------------------
@@ -15,7 +15,7 @@ kmod SKOOL-UNTYPED-SORTS is including PL-INT + PL-ID
   syntax List{Id}  ::= 
                  Id 
                | .List{Id}
-               | List{Id} , List{Id} [prec 70 assoc id: .List{Id}]
+               | List{Id} , List{Id} [prec 70 assoc id: .List{Id} strict hybrid]
 
 --- <SKOOL modified>
 --- List{Var}
@@ -30,14 +30,13 @@ kmod SKOOL-UNTYPED-SORTS is including PL-INT + PL-ID
                | List{Var} 
                | List{Exp} , List{Exp} [ditto]
 --- </SKOOL modified>
------------------------------------------------------------------------------
-endkm
 
-kmod SKOOL-UNTYPED-EXPR is including SKOOL-UNTYPED-SORTS
+--- variable names
   syntax Var ::= 
                  Id 
                | Exp [ Exp ] [prec 1 strict]
- 
+
+--- expresions
   syntax Exp  ::= 
                  Var | Int | Bool
                | ++ Id [prec 0]
@@ -70,9 +69,8 @@ kmod SKOOL-UNTYPED-EXPR is including SKOOL-UNTYPED-SORTS
                | super Id ( List{Exp} ) [prec 1 strict(2)]
                | Exp instanceOf Id [prec 0 strict(1)]
              --- </SKOOL added>
-endkm
 
-kmod SKOOL-UNTYPED-DECL is including SKOOL-UNTYPED-SORTS
+--- variable declarations
   syntax VarDecl ::= 
                  var Var ; [prec 2] 
 
@@ -90,9 +88,8 @@ kmod SKOOL-UNTYPED-DECL is including SKOOL-UNTYPED-SORTS
                  class Id { Stmts }
                | class Id extends Id { Stmts }
 --- </SKOOL added>
-endkm
 
-kmod SKOOL-UNTYPED-STMT is including SKOOL-UNTYPED-SORTS
+--- instructions
   syntax Stmt ::=
                  { } [metadata "latex(renameTo \\{\\})"]
                | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
@@ -104,9 +101,8 @@ kmod SKOOL-UNTYPED-STMT is including SKOOL-UNTYPED-SORTS
                | for Id = Exp to Exp do Stmt
                | return Exp ; [strict]
                | write ( Exp ) ; [strict]
-endkm
 
-kmod SKOOL-UNTYPED-STMTS is including SKOOL-UNTYPED-DECL
+--- statements
   syntax Stmts ::= 
                  VarDecl 
              --- <SKOOL modified>
@@ -117,12 +113,8 @@ kmod SKOOL-UNTYPED-STMTS is including SKOOL-UNTYPED-DECL
              --- </SKOOL modified>
                | Stmt
                | Stmts Stmts [prec 100 gather(e E)]
-endkm
 
-
-kmod SKOOL-UNTYPED-SYNTAX is
-  including SKOOL-UNTYPED-EXPR + SKOOL-UNTYPED-STMT + SKOOL-UNTYPED-STMTS
-
+--- reserved class names
   syntax Id ::= 
                  main 
              --- <SKOOL added>

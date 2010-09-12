@@ -3,16 +3,17 @@
 --------------------------------------
 
 
----------------------
---- configuration ---
----------------------
-kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K 
+kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K 
+
+--------------
+--- values ---
+--------------
 
   syntax Val ::= Int | Bool
 
 ---<SKOOL added>
   syntax Val ::= Object
-  syntax Object ::= oenv ( List )
+  syntax Object ::= obj ( List )
 ---</SK00L added>
 
 --- array values are wrapped as specific values
@@ -26,6 +27,10 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 
 --- the values are expressions
   syntax Exp ::= Val
+
+---------------------
+--- configuration ---
+---------------------
 
 --- We have to subsort all the syntactic categories to K, and the lists of values
 --- to KResult.  Recall that the second argument of a method application is a list
@@ -44,14 +49,15 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
                      <out> .List </out>
                      <nextLoc> 1 </nextLoc>
 ---<SKOOL added>
-                     <obj> .List </obj>
-                     <class> main </class>
+                     <crntObj> .List </crntObj>
+                     <crntClass> main </crntClass>
                      <pgm>
-                           <classes*>
+                           <class*>
                                     <className> Id:Id </className>
                                     <extends> Id:Id </extends>
                                     <fields> .K </fields>
-                           </classes*>
+                                    <methods> .Map </methods>
+                           </class*>
                      </pgm>
 ---</SKOOL added>
                 </T>
@@ -87,9 +93,9 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
   syntax Nat ::= null | getloc ( Id , List ) [strict]
   rule null => 0 [structural]
 
-  rule getloc(X, ( ( C:Id :: .) Oenv:List )) => getloc(X, Oenv ) [structural]
-  rule getloc(X, ( ( C :: ( Y:Id |-> L:Nat Env )) Oenv ))
-       => if (X ==Bool Y) then L else getloc(X,  ((C ::  Env )Oenv)) fi [structural]
+  rule getloc(X, ( ( C:Id :: .) Obj:List )) => getloc(X, Obj ) [structural]
+  rule getloc(X, ( ( C :: ( Y:Id |-> L:Nat Env )) Obj ))
+       => if (X ==Bool Y) then L else getloc(X,  ((C ::  Env )Obj)) fi [structural]
   rule getloc(X, .) => null [structural]
 
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
@@ -103,16 +109,13 @@ kmod SKOOL-UNTYPED-CONFIG is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
   syntax Id ::= @local | @global
 ---   the internal name of a method is a pair [class, method-name], in order to be unique
 ---   (we assume that the name of a class in a program is unique)
-  syntax Id ::= [ Id , Id ]
+---  syntax Id ::= [ Id , Id ]
 
 ---</SKOOL added>
 
-endkm
-
----------------------
---- preprocessing ---
----------------------
-kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
+-------------------------------
+--- declarations processing ---
+-------------------------------
 
 --- variable declaration; in the preprocessing phase only the global variables are processed 
 --- this rule is also used process the local variables of a function
@@ -146,52 +149,52 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
 
 --- a class traversal
   --- the following is used to know where a class preprocessing is finished
-  syntax K ::= preprocessClass ( Id ) | preprocessClassDone
-  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => preprocessClass (C1) <_/k>
-       <pgm_> . => <classes_>
+  syntax K ::= classProcessing ( Id ) | classProcessingDone
+  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => classProcessing (C1) <_/k>
+       <pgm_> . => <class_>
                            <className> C1 </className>          
                            <extends> C2 </extends>
-                           <fields> Ss ~> preprocessClassDone </fields>
-                   <_/classes>
+                           <fields> Ss ~> classProcessingDone </fields>
+                   <_/class>
        <_/pgm>
 
 --- variable member declaration 
-  rule <k> preprocessClass(C:Id) <_/k>
+  rule <k> classProcessing(C:Id) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <fields> var X:Id; ~> K:K => K ~> var X:Id; </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
        
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <fields> var X[ N:Nat ]; ~> K => K ~> var X[ N ]; </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
  
 --- method declaration
 
-  rule <k> preprocessClass(C:Id) <_/k>
+  rule <k> classProcessing(C:Id) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <fields> method F:Id(Xl:List{Id}) S:Stmt => . <_/fields>
-            <_/classes>
-       <_/pgm>
-       <env> Env:Map => Env[L/[C, F]] </env>  
+                     <methods> Env:Map => Env[L/F] </methods>
+            <_/class>
+       <_/pgm>  
        <nextLoc> L:Nat => L +Nat 2 </nextLoc> 
        <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
 
 --- finish processing a class
 
-  rule <k> preprocessClass(C) => .K <_/k>
-       <classes_>
+  rule <k> classProcessing(C) => .K <_/k>
+       <class_>
                 <className> C </className>
-                <fields> preprocessClassDone => . <_/fields>
-       <_/classes>
+                <fields> classProcessingDone => . <_/fields>
+       <_/class>
 
 --- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
 ---   call main and initialize the global environment
@@ -202,16 +205,13 @@ kmod SKOOL-UNTYPED-PREPROCESSING is including SKOOL-UNTYPED-CONFIG
   rule <k> . => new_`(_`)(main, .List{Id}) </k>
        <env> Env => . </env>
        <genv> . => Env </genv>
-       <class> _ => main </class>
+       <crntClass> _ => main </crntClass>
 
 ---</SKOOL modified>
-
-endkm
 
 -------------------------------------
 --- Evaluation of the expressions ---
 -------------------------------------
-kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG 
 
 --- variable lookup
 
@@ -220,14 +220,14 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
 ---       <env_> X |-> L:Nat <_/env>
 ---       <store_> L |-> V <_/store> 
 
-  rule <k> X:Id => Store(getloc(X, ((@local :: Env) ((C :: Env1) Oenv)(@global :: GEnv)))) <_/k>
+  rule <k> X:Id => Store(getloc(X, ((@local :: Env) ((C :: Env1) Obj)(@global :: GEnv)))) <_/k>
        <env> Env:Map </env>
        <genv> GEnv:Map </genv>
-       <obj_> (C:Id :: Env1:Map) Oenv:List </obj>
-       <class> C </class>
+       <crntObj_> (C:Id :: Env1:Map) Obj:List </crntObj>
+       <crntClass> C </crntClass>
        <store> Store:Map </store>  
-  rule <k> this =>  oenv(Oenv) <_/k>
-       <obj> Oenv </obj>
+  rule <k> this =>  obj(Obj) <_/k>
+       <crntObj> Obj </crntObj>
 ---</SKOOL modified>
 
 --- arithmetic expressions
@@ -269,16 +269,9 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
 
   rule <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C)~>invoke(_`(_`)(C, Vl))</k>
        <env> Env:Map => . </env>
-       <obj> Oenv:List => . </obj>
-       <class> C1:Id => C </class>
-       <fstack> . => [ C1, Env, (discard ~> this ~> restore(Oenv)~>K) ] <_/fstack>
-       if C =/=Bool main
-  rule <k> (new_`(_`)(C:Id, Vl))~>K => create(C)~>invoke(_`(_`)(C, Vl))</k>
-       <env> Env => . </env>
-       <obj> Oenv:List => . </obj>
-       <class> C1:Id => C </class>
-       <fstack> . => [ C1, Env, (restore(Oenv)~>K) ] <_/fstack>
-       if (C ==Bool main) andBool (K ==Bool .) 
+       <crntObj> Obj:List => . </crntObj>
+       <crntClass> C1:Id => C </crntClass>
+       <fstack> . => [ C1, Env, (discard ~> this ~> restore(Obj)~>K) ] <_/fstack>
 
 --- create a new object (memory allocation)
 ---   usually, an object is an instance of a class from an hierarchy
@@ -287,48 +280,46 @@ kmod SKOOL-UNTYPED-EXPR-EVALUATION is including SKOOL-UNTYPED-CONFIG
 ---   allocation for the variable members of that class
   rule <k> create(C) => Fs ~> addOEnvLayer(C:Id) ~> create(C1) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                    <className> C </className>
                    <extends> C1 </extends>
                    <fields> Fs:Stmts </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
        if C1 =/=Bool object
   rule <k> create(C) => Fs ~> addOEnvLayer(C:Id) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                    <className> C </className>
                    <extends> object </extends>
                    <fields> Fs:Stmts </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
 --- add a new tagged environment layer to the  current object
   rule <k> addOEnvLayer(C) => . <_/k>
        <env> Env => . </env>
-       <obj_> . => (C :: Env) </obj>
+       <crntObj_> . => (C :: Env) </crntObj>
 
 --- discards the value (item?) from the top of the computation
   rule <k> V:Val ~> discard => . <_/k>     
 
 --- restore the current object
-  rule <k> V ~> restore(Oenv) => V <_/k> 
-       <obj> _ => Oenv </obj>
+  rule <k> V ~> restore(Obj) => V <_/k> 
+       <crntObj> _ => Obj </crntObj>
 
 --- instanceOf operator
 
-  rule <k> _instanceOf_(oenv( (C :: Env) Oenv), C1) => true <_/k> if (C ==Bool C1)
-  rule <k> _instanceOf_(oenv( (C :: Env) Oenv), C1) => _instanceOf_(oenv(Oenv), C1) <_/k>
+  rule <k> _instanceOf_(obj( (C :: Env) Obj), C1) => true <_/k> if (C ==Bool C1)
+  rule <k> _instanceOf_(obj( (C :: Env) Obj), C1) => _instanceOf_(obj(Obj), C1) <_/k>
        if (C =/=Bool C1) 
-  rule <k> _instanceOf_( oenv(.), C1) => false <_/k>
+  rule <k> _instanceOf_( obj(.), C1) => false <_/k>
 
 ---</SKOOL added>
-endkm
 
 ---------------------
 --- method call ---
 ---------------------
-kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
 
 ---<SKOOL modified>
 
@@ -347,67 +338,65 @@ kmod SKOOL-UNTYPED-FUNCTION-CALL is including SKOOL-UNTYPED-CONFIG
 ---       <env> _ => Env </env> 
 
 --- method call: preprocessing
-  rule <k> (_._`(_`)(oenv((C:Id :: Env:Map) Oenv:List), F:Id, Vl:List{Val})) ~> K:K 
+  rule <k> (_._`(_`)(obj((C:Id :: Env:Map) Obj:List), F:Id, Vl:List{Val})) ~> K:K 
            =>
            invoke(_`(_`)(F:Id, Vl)) </k>
-       <class> C1:Id => C:Id </class>
-       <obj> Oenv1:List => (C :: Env) Oenv </obj>
+       <crntClass> C1:Id => C:Id </crntClass>
+       <crntObj> Obj1:List => (C :: Env) Obj </crntObj>
        <env> Env1:Map => . </env>
-       <fstack> .List => [ C1, Env1, (restore(Oenv1)~>K) ] <_/fstack>
+       <fstack> .List => [ C1, Env1, (restore(Obj1)~>K) ] <_/fstack>
   rule <k> super_`(_`)(F, Vl) ~> K => invoke(_`(_`)(F:Id, Vl)) </k>
-       <class> C => C1 </class>
+       <crntClass> C => C1 </crntClass>
        <env> Env1 => . </env>
        <fstack> .List => [ C, Env1, K ] <_/fstack>
        <pgm_>
-            <classes_>
+            <class_>
                    <className> C </className>
                    <extends> C1 </extends>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
   rule <k> invoke(_`(_`)(F:Id, Vl))
            =>
-           (_`(_`)(function(sNat getloc( [C, F], ( @global :: GEnv:Map ))), Vl))
+           (_`(_`)(function(sNat L), Vl))
        <_/k>
-       <class> C </class>
-       <genv> GEnv </genv>
-       if getloc( [C, F], ( @global :: GEnv )) =/=Bool null 
-  rule <k> invoke(_`(_`)(F:Id, Vl))
-           =>
-           invoke(_`(_`)(F:Id, Vl))
-       <_/k>
-       <class> C => C1 </class>
+       <crntClass> C </crntClass>
        <pgm_>
-            <classes_>
+            <class_>
+                   <className> C </className>
+                   <methods_> F |-> L:Nat <_/methods>
+            <_/class>
+       <_/pgm> 
+  rule <k> invoke(_`(_`)(F:Id, Vl)) <_/k>
+       <crntClass> C => C1 </crntClass>
+       <pgm_>
+            <class_>
                    <className> C </className>
                    <extends> C1 </extends>
-            <_/classes>
+                   <methods> CEnv:Map </methods>
+            <_/class>
        <_/pgm>
-       <genv> GEnv </genv>
-       if getloc( [C, F], ( @global :: GEnv )) ==Bool null 
+       if $hasMapping( CEnv, F ) ==Bool false
 
 --- method call: function value loading 
---- <OO modified>: the global environment not longer included in the loacl function call environment
----                    because the global variables are noe data members in the object class
+--- <OO modified>: the global environment not longer included in the local function call environment
+---                    because the global variables are not data members in the object class
   rule <k> (_`(_`)(function(L),Vl:List{Val})) => S:Stmt~>return(0); </k> 
        <env> _ => .Map[N..N+Nat|Xl| / getList{K}(Xl:List{Id})] </env>
-       <genv> GEnv </genv>
        <store_> L:Nat |-> lambda(Xl,S) (. => N:Nat..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
 
 --- returning from a method call
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <fstack> [ C, Env, K ] => . <_/fstack>
-       <class> _ => C </class>
+       <crntClass> _ => C </crntClass>
        <env> _ => Env </env>
 
 ---</SKOOL modified>
-endkm
 
 ------------------------------
 --- instruction processing ---
 ------------------------------
-kmod SKOOL-UNTYPED-INSTR-PROCESSING is including SKOOL-UNTYPED-CONFIG 
 
   rule {} => .
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
@@ -417,9 +406,9 @@ kmod SKOOL-UNTYPED-INSTR-PROCESSING is including SKOOL-UNTYPED-CONFIG
   rule <k> _=_;(X:Id, V:Val) => . <_/k> 
        <env> Env:Map </env>
        <genv> GEnv:Map </genv>
-       <obj_> (C:Id :: Env1:Map) Oenv:List </obj>
-       <class> C </class>
-       <store> Store:Map => Store [ V / getloc(X, ((@local :: Env) ((C :: Env1) Oenv)(@global :: GEnv))) ] </store>
+       <crntObj_> (C:Id :: Env1:Map) Obj:List </crntObj>
+       <crntClass> C </crntClass>
+       <store> Store:Map => Store [ V / getloc(X, ((@local :: Env) ((C :: Env1) Obj)(@global :: GEnv))) ] </store>
 ---</SKOOL modified>
 
  --- for array assignment, first evaluate the array and its index
@@ -433,16 +422,7 @@ kmod SKOOL-UNTYPED-INSTR-PROCESSING is including SKOOL-UNTYPED-CONFIG
   rule if false then _ else S => S 
   rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k>
   rule <k> write(I:Int); => . <_/k> <out_> . => ListItem(I) </out>
-endkm
 
------------------
---- semantics ---
------------------
-kmod SKOOL-UNTYPED-SEMANTICS is 
-  including SKOOL-UNTYPED-PREPROCESSING +
-            SKOOL-UNTYPED-FUNCTION-CALL +
-            SKOOL-UNTYPED-EXPR-EVALUATION +
-            SKOOL-UNTYPED-INSTR-PROCESSING
 endkm
 
 

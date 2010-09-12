@@ -6,13 +6,13 @@
 ---------------------
 --- configuration ---
 ---------------------
-kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
+kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
 
   syntax Val ::= Int | Bool
 
 ---<SKOOL added>
   syntax Val ::= Object
-  syntax Object ::= oenv ( List )
+  syntax Object ::= obj ( List )
 ---</SK00L added>
 
 --- array values are wrapped as specific values
@@ -45,14 +45,15 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
                      <return> none </return>
                      <nextLoc> 1 </nextLoc>
 ---<SKOOL added>
-                     <obj> .List </obj>
-                     <class> main </class>
+                     <crntObj> .List </crntObj>
+                     <crntClass> main </crntClass>
                      <pgm>
-                           <classes*>
+                           <class*> 
                                     <className> Id:Id </className>
                                     <extends> Id:Id </extends>
                                     <fields> .K </fields>
-                           </classes*>
+                                    <methods> .Map </methods>
+                           </class*>
                            <subClassRel> .Set </subClassRel>
                      </pgm>
 ---</SKOOL added>
@@ -85,7 +86,7 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
   macro typeOf(.List{Bottom}) = .List{Bottom} 
 ---<SKOOL added>
   macro typeOf(initVal(type(C:Id))) = type(C:Id)
-  macro typeOf(oenv((C :: Env:Map) OEnv:List)) = type(C)
+  macro typeOf(obj((C :: Env:Map) OEnv:List)) = type(C)
 ---</SKOOL added>
   syntax List{Id} ::= idList ( List{IdType} ) 
   macro idList(.List{Bottom}) = .List{Bottom} 
@@ -103,7 +104,7 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
 --- length
   syntax Nat ::= `| List{Id} `|
   macro |.List{Bottom}| = 0  
-  macro |X:Id,Xl:List{Bottom}| = sNat |Xl|
+  macro |X:Id, Xl:List{Id}| = sNat |Xl|
 
 --- generate sequence of locations
   syntax List{K} ::= Nat .. Nat
@@ -122,9 +123,9 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
   syntax Nat ::= null | getloc ( Id , List ) [strict]
   rule null => 0 [structural]
 
-  rule getloc(X, ( ( C:Id :: .) Oenv:List )) => getloc(X, Oenv ) [structural]
-  rule getloc(X, ( ( C :: ( Y:Id |-> L:Nat Env )) Oenv ))
-       => if (X ==Bool Y) then L else getloc(X,  ((C ::  Env )Oenv)) fi [structural]
+  rule getloc(X, ( ( C:Id :: .) Obj:List )) => getloc(X, Obj ) [structural]
+  rule getloc(X, ( ( C :: ( Y:Id |-> L:Nat Env )) Obj ))
+       => if (X ==Bool Y) then L else getloc(X,  ((C ::  Env )Obj)) fi [structural]
   rule getloc(X, .) => null [structural]
 
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
@@ -136,9 +137,6 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
   syntax KLabel ::= create | invoke | addOEnvLayer 
 --- the names for the local environment and the global environments for an object
   syntax Id ::= @local | @global
----   the internal name of a method is a pair [class, method-name], in order to be unique
----   (we assume that the name of a class in a program is unique)
-  syntax Id ::= [ Id , Id ]
 
 --- subtype relationship
 
@@ -169,12 +167,9 @@ kmod SKOOL-TYPED-DYNAMIC-CONFIG is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTA
 
 ---</SKOOL added>
 
-endkm
-
----------------------
---- preprocessing ---
----------------------
-kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
+-------------------------------
+--- declarations processing ---
+-------------------------------
 
 --- variable declaration; in the preprocessing phase only the global variables are processed 
 --- this rule is also used process the local variables of a function
@@ -206,54 +201,54 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
 
 --- a class traversal
   --- the following is used to know where a class preprocessing is finished
-  syntax K ::= preprocessClass ( Id ) | preprocessClassDone
-  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => preprocessClass (C1) <_/k>
-       <pgm_> (. => <classes_>
+  syntax K ::= classProcessing ( Id ) | classProcessingDone
+  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => classProcessing (C1) <_/k>
+       <pgm_> (. => <class_>
                            <className> C1 </className>          
                            <extends> C2 </extends>
-                           <fields> Ss ~> preprocessClassDone </fields>
-                   <_/classes>)
+                           <fields> Ss ~> classProcessingDone </fields>
+                   <_/class>)
                <subClassRel_> . => C1 <: C2 <_/subClassRel>
        <_/pgm>
 
 --- variable member declaration
  
-  rule <k> preprocessClass(C:Id) <_/k>
+  rule <k> classProcessing(C:Id) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <fields> var X:Id : T; ~> K:K => K ~> var X:Id : T; </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <fields> var X[ N:Nat ] : _`[`](T); ~> K => K ~> var X[ N ] : _`[`](T); </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
 --- method declaration
 
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <fields> method F:Id(XTl:List{IdType}) : T S:Stmt => .K <_/fields>
-            <_/classes>
-       <_/pgm>
-       <env> Env:Map => Env[L/[C, F]] </env>  
+                     <methods> Env:Map => Env[L/F] </methods>
+            <_/class>
+       <_/pgm>  
        <nextLoc> L:Nat => L +Nat 2 </nextLoc> 
        <store_>(.Map => L |-> function(typeList(XTl) -> T, sNat L) sNat(L) |-> lambda(idList(XTl), S))<_/store>
 
 --- finish processing a class
 
-  rule <k> preprocessClass(C) => .K <_/k>
-        <classes_>
+  rule <k> classProcessing(C) => .K <_/k>
+        <class_>
                 <className> C </className>
-                <fields> preprocessClassDone => . <_/fields>
-       <_/classes>
+                <fields> classProcessingDone => . <_/fields>
+       <_/class>
 
 --- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
 ---   call main and initialize the global environment
@@ -264,17 +259,14 @@ kmod SKOOL-TYPED-DYNAMIC-PREPROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG
   rule <k> . => new_`(_`)(main, .List{Bottom}) </k>
        <env> Env => . </env>
        <genv> . => Env </genv>
-       <class> _ => main </class>
+       <crntClass> _ => main </crntClass>
 
 
 ---</SKOOL modified>
 
-endkm
-
 -------------------------------------
 --- Evaluation of the expressions ---
 -------------------------------------
-kmod SKOOL-TYPED-DYNAMIC-EXPR-EVALUATION is including SKOOL-TYPED-DYNAMIC-CONFIG 
 
 --- variable lookup
 
@@ -283,14 +275,14 @@ kmod SKOOL-TYPED-DYNAMIC-EXPR-EVALUATION is including SKOOL-TYPED-DYNAMIC-CONFIG
 ---       <env_> X |-> L:Nat <_/env>
 ---       <store_> L |-> V <_/store> 
 
-  rule <k> X:Id => Store(getloc(X, ((@local :: Env) ((C :: Env1) Oenv)(@global :: GEnv)))) <_/k>
+  rule <k> X:Id => Store(getloc(X, ((@local :: Env) ((C :: Env1) Obj)(@global :: GEnv)))) <_/k>
        <env> Env:Map </env>
        <genv> GEnv:Map </genv>
-       <obj_> (C:Id :: Env1:Map) Oenv:List </obj>
-       <class> C </class>
+       <crntObj_> (C:Id :: Env1:Map) Obj:List </crntObj>
+       <crntClass> C </crntClass>
        <store> Store:Map </store>  
-  rule <k> this =>  oenv(Oenv) <_/k>
-       <obj> Oenv </obj>
+  rule <k> this =>  obj(Obj) <_/k>
+       <crntObj> Obj </crntObj>
 ---</SKOOL modified>
 
 --- arithmetic expressions
@@ -330,18 +322,10 @@ kmod SKOOL-TYPED-DYNAMIC-EXPR-EVALUATION is including SKOOL-TYPED-DYNAMIC-CONFIG
 
   rule <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C)~>invoke(_`(_`)(C, Vl))</k>
        <env> Env:Map => . </env>
-       <obj> Oenv:List => . </obj>
-       <class> C1:Id => C </class>
+       <crntObj> Obj:List => . </crntObj>
+       <crntClass> C1:Id => C </crntClass>
        <return> T:Type => type(C) </return>
-       <fstack> . => [ C1, Env, (discard ~> this ~> restore(Oenv)~>K), T ] <_/fstack>
-       if C =/=Bool main
-  rule <k> (new_`(_`)(C:Id, Vl))~>K => create(C)~>invoke(_`(_`)(C, Vl))</k>
-       <env> Env => . </env>
-       <obj> Oenv:List => . </obj>
-       <class> C1:Id => C </class>
-       <return> T => type(C) </return>
-       <fstack> . => [ C1, Env, (restore(Oenv)~>K), type(C) ] <_/fstack>
-       if (C ==Bool main) andBool (K ==Bool .) 
+       <fstack> . => [ C1, Env, (discard ~> this ~> restore(Obj)~>K), T ] <_/fstack>
 
 --- create a new object (memory allocation)
 ---   usually, an object is an instance of a class from an hierarchy
@@ -350,49 +334,46 @@ kmod SKOOL-TYPED-DYNAMIC-EXPR-EVALUATION is including SKOOL-TYPED-DYNAMIC-CONFIG
 ---   allocation for the variable members of that class
   rule <k> create(C) => Fs ~> addOEnvLayer(C:Id) ~> create(C1) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                    <className> C </className>
                    <extends> C1 </extends>
                    <fields> Fs:Stmts </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
        if C1 =/=Bool object
   rule <k> create(C) => Fs ~> addOEnvLayer(C:Id) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                    <className> C </className>
                    <extends> object </extends>
                    <fields> Fs:Stmts </fields>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
 --- add a new tagged environment layer to the  current object
   rule <k> addOEnvLayer(C) => . <_/k>
        <env> Env => . </env>
-       <obj_> . => (C :: Env) </obj>
+       <crntObj_> . => (C :: Env) </crntObj>
 
 --- discards the value (item?) from the top of the computation
   rule <k> V:Val ~> discard => . <_/k>     
 
 --- restore the current object
-  rule <k> V ~> restore(Oenv) => V <_/k> 
-       <obj> _ => Oenv </obj>
+  rule <k> V ~> restore(Obj) => V <_/k> 
+       <crntObj> _ => Obj </crntObj>
 
 --- instanceOf operator
 
-  rule <k> _instanceOf_(oenv( (C :: Env) Oenv), C1) => true <_/k> if (C ==Bool C1)
-  rule <k> _instanceOf_(oenv( (C :: Env) Oenv), C1) => _instanceOf_(oenv(Oenv), C1) <_/k>
+  rule <k> _instanceOf_(obj( (C :: Env) Obj), C1) => true <_/k> if (C ==Bool C1)
+  rule <k> _instanceOf_(obj( (C :: Env) Obj), C1) => _instanceOf_(obj(Obj), C1) <_/k>
        if (C =/=Bool C1) 
-  rule <k> _instanceOf_( oenv(.), C1) => false <_/k>
+  rule <k> _instanceOf_( obj(.), C1) => false <_/k>
 
 ---</SKOOL added>
-endkm
 
 ---------------------
 --- method call ---
 ---------------------
-kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
-
 
 ---<SKOOL modified>
 
@@ -411,53 +392,59 @@ kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
 ---       <env> _ => Env </env> 
 
 --- method call: preprocessing
-  rule <k> (_._`(_`)(oenv((C:Id :: Env:Map) Oenv:List), F:Id, Vl:List{Val})) ~> K:K 
+  rule <k> (_._`(_`)(obj((C:Id :: Env:Map) Obj:List), F:Id, Vl:List{Val})) ~> K:K 
            =>
            invoke(_`(_`)(F:Id, Vl)) </k>
-       <class> C1:Id => C:Id </class>
-       <obj> Oenv1:List => (C :: Env) Oenv </obj>
+       <crntClass> C1:Id => C:Id </crntClass>
+       <crntObj> Obj1:List => (C :: Env) Obj </crntObj>
        <return> T:Type </return>
        <env> Env1:Map => . </env>
-       <fstack> .List => [ C1, Env1, (restore(Oenv1)~>K), T ] <_/fstack>
+       <fstack> .List => [ C1, Env1, (restore(Obj1)~>K), T ] <_/fstack>
   rule <k> super_`(_`)(F, Vl) ~> K => invoke(_`(_`)(F:Id, Vl)) </k>
-       <class> C => C1 </class>
+       <crntClass> C => C1 </crntClass>
        <env> Env1 => . </env>
        <fstack> .List => [ C, Env1, K, type(C) ] <_/fstack>
        <pgm_>
-            <classes_>
+            <class_>
                    <className> C </className>
                    <extends> C1 </extends>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
-  syntax K ::= floc ( Nat , List{Val} )
+---  syntax K ::= floc ( Nat , List{Val} )
   rule <k> invoke(_`(_`)(F:Id, Vl))
-           =>
-           floc(getloc( [C, F], ( @global :: GEnv:Map )), Vl)
-       <_/k>
-       <class> C </class>
-       <genv> GEnv </genv>
-       if getloc( [C, F], ( @global :: GEnv )) =/=Bool null 
-  rule <k> floc(L:Nat, Vl)
+---           =>
+---           floc(getloc( [C, F], ( @global :: GEnv:Map )), Vl)
+---       <_/k>
+---       <crntClass> C </crntClass>
+---       <genv> GEnv </genv>
+---       if getloc( [C, F], ( @global :: GEnv )) =/=Bool null 
+---  rule <k> floc(L:Nat, Vl)
            =>
            (_`(_`)(function(Tl:List{Type} -> T, sNat L), Vl))
        <_/k>
-       <class> C </class>
+       <crntClass> C </crntClass>
+       <pgm_>
+            <class_>
+                   <className> C </className>
+                   <methods_> F |-> L <_/methods>
+            <_/class>
+       <_/pgm>
        <return> T':Type => T </return>
        <store_> L |->  function(Tl:List{Type} -> T, sNat L) <_/store>
   rule <k> invoke(_`(_`)(F:Id, Vl))
            =>
            invoke(_`(_`)(F:Id, Vl))
        <_/k>
-       <class> C => C1 </class>
+       <crntClass> C => C1 </crntClass>
        <pgm_>
-            <classes_>
+            <class_>
                    <className> C </className>
                    <extends> C1 </extends>
-            <_/classes>
+                   <methods> Env </methods>
+            <_/class>
        <_/pgm>
-       <genv> GEnv </genv>
-       if getloc( [C, F], ( @global :: GEnv )) ==Bool null 
+       if $hasMapping( Env, F) ==Bool false 
 
 --- method call: function value loading 
 --- <OO modified>: the global environment not longer included in the local function call environment
@@ -476,19 +463,16 @@ kmod SKOOL-TYPED-DYNAMIC-FUNCTION-CALL is including SKOOL-TYPED-DYNAMIC-CONFIG
 --- returning from a method call
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <fstack> [ C, Env, K, T':Type ] => .List <_/fstack>
-       <class> _ => C </class>
+       <crntClass> _ => C </crntClass>
        <env> _ => Env </env>
        <return> T => T' </return>
        <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
        if subType(typeOf(V),  T, R) ==Bool true
 ---</SKOOL modified>
-endkm
 
 ------------------------------
 --- instruction processing ---
 ------------------------------
-kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFIG 
-
   rule {} => .
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
   rule S1:Stmt S2:Stmt => S1~>S2 
@@ -497,13 +481,13 @@ kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFI
   syntax Val ::= leftValue ( Nat )
   rule <k> _=_;(X:Id, V:Val)
            =>
-           _=_;(leftValue(getloc(X, ((@local :: Env) ((C :: Env1) Oenv)(@global :: GEnv)))), V:Val) <_/k> 
+           _=_;(leftValue(getloc(X, ((@local :: Env) ((C :: Env1) Obj)(@global :: GEnv)))), V:Val) <_/k> 
        <env> Env:Map </env> 
        <genv> GEnv:Map </genv>
-       <obj_> (C:Id :: Env1:Map) Oenv:List </obj>
-       <class> C </class>
+       <crntObj_> (C:Id :: Env1:Map) Obj:List </crntObj>
+       <crntClass> C </crntClass>
   rule <k> (_=_;(leftValue(L:Nat), V:Val)) => . <_/k> 
-       <class> C </class>
+       <crntClass> C </crntClass>
        <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
        <store_>  L |-> (V1:Val => V) <_/store>
        if  (typeOf(V) ==Bool typeOf(V1)) orBool (subType(typeOf(V), type(C), R) ==Bool true)
@@ -522,18 +506,9 @@ kmod SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING is including SKOOL-TYPED-DYNAMIC-CONFI
   rule V; => . 
   rule if true then S:Stmt else _ => S:Stmt
   rule if false then _ else S => S 
-  rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k>
+  rule <k> while E:Exp do S  => if E then {S while E do S} else {} <_/k>
   rule <k> write(I:Int); => . <_/k> <out_> . => ListItem(I) </out>
 endkm
 
------------------
---- semantics ---
------------------
-kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is 
-  including SKOOL-TYPED-DYNAMIC-PREPROCESSING +
-            SKOOL-TYPED-DYNAMIC-FUNCTION-CALL +
-            SKOOL-TYPED-DYNAMIC-EXPR-EVALUATION +
-            SKOOL-TYPED-DYNAMIC-INSTR-PROCESSING
-endkm
 
 

@@ -1,6 +1,6 @@
 ---in ../../../../k-prelude
 
-kmod SKOOL-TYPED-SORTS is including PL-INT + PL-ID 
+kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID 
 
   sorts Var Exp Decl Stmt Stmts
 ---<SKOOL added>
@@ -30,7 +30,7 @@ kmod SKOOL-TYPED-SORTS is including PL-INT + PL-ID
 --- do not add Bottom as subsort to anything else, like Id, Exp, etc
   sort Bottom 
   syntax List{Bottom}  ::= Bottom | .List{Bottom}
-                     | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom}] 
+                     | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid] 
  
 --- List{Type}
   syntax List{Type} ::= Type | List{Bottom} 
@@ -49,14 +49,11 @@ kmod SKOOL-TYPED-SORTS is including PL-INT + PL-ID
                      | List{Exp} , List{Exp} [ditto]
 
 
------------------------------------------------------------------------------
-endkm
-
-kmod SKOOL-TYPED-EXPR is including SKOOL-TYPED-SORTS
-
+--- variable names
   syntax Var ::= Id 
                 | Id [ Exp ] [prec 1 strict]
 
+--- expressions
   syntax Exp ::=   Var | Int | Bool         
                 | ++ Id [prec 0]
                 | Exp + Exp [gather(E e) prec 33 strict]
@@ -89,10 +86,8 @@ kmod SKOOL-TYPED-EXPR is including SKOOL-TYPED-SORTS
                | super Id ( List{Exp} ) [prec 1 strict(2)]
                | Exp instanceOf Id [prec 0 strict(1)]
              --- </SKOOL added>
-endkm
 
-kmod SKOOL-TYPED-DECL is including SKOOL-TYPED-SORTS
-
+--- declarations
   syntax VarDecl ::=
                 | var Var : Type ; [prec 2] 
                 | var Var : Id ; [prec 2] 
@@ -109,9 +104,7 @@ kmod SKOOL-TYPED-DECL is including SKOOL-TYPED-SORTS
                | class Id extends Id { Stmts }
 --- </SKOOL modified>
 
-endkm
-
-kmod SKOOL-TYPED-STMT is including SKOOL-TYPED-SORTS
+--- instructions
   syntax Stmt ::= 
                   { } [metadata "latex(renameTo \\{\\})"]
                 | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
@@ -123,10 +116,8 @@ kmod SKOOL-TYPED-STMT is including SKOOL-TYPED-SORTS
                 | for Id = Exp to Exp do Stmt
                 | return Exp ; [strict]
                 | write ( Exp ) ; [strict]
-endkm
 
-kmod SKOOL-TYPED-STMTS is including SKOOL-TYPED-DECL
-
+--- statements
   syntax Stmts ::=
                  VarDecl 
              --- <SKOOL modified>
@@ -136,12 +127,6 @@ kmod SKOOL-TYPED-STMTS is including SKOOL-TYPED-DECL
              --- </SKOOL modified>
                | Stmt
                | Stmts Stmts [prec 100 gather(e E) seqstrict]
-endkm
-
-
-kmod SKOOL-TYPED-SYNTAX is
-  including  SKOOL-TYPED-EXPR + SKOOL-TYPED-DECL + SKOOL-TYPED-STMT + SKOOL-TYPED-STMTS
-
 endkm
 
 

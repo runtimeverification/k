@@ -1,20 +1,20 @@
 # KCOMPILE can be set by whoever calls this file
 # e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= ../../../tools/kompile.pl
+KCOMPILE ?= ../../../../tools/kompile.pl
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = SKOOL-UNTYPED
+LANGUAGE_NAME = SKOOL-TYPED-STATIC
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = SKOOL-UNTYPED-SYNTAX SKOOL-UNTYPED-SEMANTICS SKOOL-UNTYPED
+LANGUAGE_MODULES = SKOOL-TYPED-SYNTAX SKOOL-TYPED-STATIC-SEMANTICS SKOOL-TYPED-STATIC
 
 LATEX_STYLE = bb
 
 #this is the basename of the main file
-MAIN_FILE = skool-untyped
+MAIN_FILE = skool-typed-static
 
 # this is a space-separated list of basename maude files to run
-TESTS = skool-untyped-test.m
+TESTS = skool-typed-static-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

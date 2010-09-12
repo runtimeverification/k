@@ -2,7 +2,7 @@ in ../../../../k-prelude.maude
 in skool-typed-static-syntax
 in ../skool-typed-programs
 
-kmod SKOOL-TYPED-STATIC-CONFIG is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX + K 
+kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX + K 
 
 --- the result of the computation is a list of types
   syntax KResult ::= List{Type}
@@ -17,7 +17,6 @@ kmod SKOOL-TYPED-STATIC-CONFIG is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX 
 
 --- any type is also a statement
   syntax Stmt ::= Type  
-
 
   syntax K ::= Stmts | List{Exp} | List{IdType}
 
@@ -136,9 +135,7 @@ kmod SKOOL-TYPED-STATIC-CONFIG is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX 
   context var X[[HOLE]] : T ; 
   context _[[HOLE]] = _ ; 
   context [HOLE][_] = _ ; 
-endkm
 
-kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
 
 ---<SKOOL modified>
 
@@ -167,11 +164,11 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
 
 --- a class traversal
   --- the following is used to know when a class preprocessing is finished
-  syntax Stmts ::= preprocessClass ( Id ) | compType
+  syntax Stmts ::= classProcessing ( Id ) | compType
 
 --- starts a class preprocessing: a new <classes> cell is created  and the class name
 ---   is added in the <opis> cell (this is used in the second processing of the class)
-  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => preprocessClass (C1) <_/k>
+  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => classProcessing (C1) <_/k>
        <pgm_> (. => <classes_>
                            <className> C1 </className>          
                            <extends> C2 </extends>
@@ -181,7 +178,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
        <_/pgm>
 
 --- simple variable member declaration: we have two cases, according to inductive definition of Stmts 
-  rule <k> preprocessClass(C:Id) <_/k>
+  rule <k> classProcessing(C:Id) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
@@ -189,7 +186,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
                      <tfields> TEnv:Map => TEnv[T/X] </tfields>
             <_/classes>
        <_/pgm>
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
@@ -198,7 +195,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
             <_/classes>
        <_/pgm>   
 --- array member declaration: we have two cases, similar to simple members
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
@@ -206,7 +203,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
                      <tfields> TEnv => TEnv[T[] / X] </tfields>
             <_/classes>
        <_/pgm>
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
@@ -216,7 +213,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
        <_/pgm>
 --- method declaration: two cases again
 
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
@@ -225,7 +222,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
             <_/classes>
        <_/pgm>
 
-  rule <k> preprocessClass(C) <_/k>
+  rule <k> classProcessing(C) <_/k>
        <pgm_>
             <classes_>
                      <className> C </className>
@@ -236,7 +233,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
 
 --- finish preprocessing a class: the empty cell <stmts> is removed 
 
-  rule <k> preprocessClass(C) => stmt <_/k>
+  rule <k> classProcessing(C) => stmt <_/k>
         <classes_>
                 <className> C </className>
                 ( <stmts> .K </stmts> => .Bag )
@@ -357,10 +354,7 @@ kmod SKOOL-TYPED-STATIC-PREPROCESSING is including SKOOL-TYPED-STATIC-CONFIG
 
 ---</SKOOL modified>
 
-endkm
-
-
-kmod SKOOL-TYPED-STATIC-EXPR-EVALUATION is including SKOOL-TYPED-STATIC-CONFIG
+--- expression evaluation
 
   rule I:Int => int 
   rule B:Bool => bool 
@@ -441,10 +435,6 @@ kmod SKOOL-TYPED-STATIC-EXPR-EVALUATION is including SKOOL-TYPED-STATIC-CONFIG
 
 ---</SKOOL added>
 
-endkm
-
-kmod SKOOL-TYPED-STATIC-METHODS-PROCESSING is including SKOOL-TYPED-STATIC-CONFIG
-
 --- local variables declarations
 
   rule <k> var X:Id : T:Type ; => stmt <_/k>
@@ -511,15 +501,6 @@ kmod SKOOL-TYPED-STATIC-METHODS-PROCESSING is including SKOOL-TYPED-STATIC-CONFI
        <return> T </return> 
 
   rule write(int) ; => stmt   
-
-endkm
-
-
-
-kmod SKOOL-TYPED-STATIC-SEMANTICS is 
-  including SKOOL-TYPED-STATIC-PREPROCESSING +
-            SKOOL-TYPED-STATIC-EXPR-EVALUATION +
-            SKOOL-TYPED-STATIC-METHODS-PROCESSING + K 
 
 endkm
 
