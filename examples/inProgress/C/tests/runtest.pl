@@ -2,6 +2,7 @@ use strict;
 use Time::HiRes qw(gettimeofday tv_interval);
 use File::Basename;
 use Text::Diff;
+# use XML::Writer;
 
 my $numArgs = $#ARGV + 1;
 if ($numArgs != 1) {
@@ -66,8 +67,8 @@ sub performTest {
 		my $msg = "Results were not identical.\n";
 		$msg .= "kcc retval=$kccRunRetval\n";
 		$msg .= "gcc retval=$gccRunRetval\n";
-		my $diff = diff(\$gccRunOutput, \$kccRunOutput, { STYLE => "Unified" });
-		$msg .= "$diff\n";
+		#my $diff = diff(\$gccRunOutput, \$kccRunOutput, { STYLE => "Unified" });
+		$msg .= "(actual output elided)\n";
 		return reportFailure($fullFilename, $timer, $msg);
 	}
 	
