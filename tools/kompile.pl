@@ -22,7 +22,9 @@ sub terminate {
   -m (or -maudify) : only maudify, do not kompile
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
-  -f (or -file) : the input source file (optional)
+  -file : the input source file (optional)
+  -flat : slurp all k files into one file 
+  -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
     -style : useful for typesetting (optional)
   \n" if (!$verbose && !$help);
@@ -36,8 +38,9 @@ sub terminate {
   -m (or -maudify) : only maudify, do not kompile
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
-  -f (or -file) : the input source file (optional)
-  -u (or -unquote : unquote the maude meta-terms to increase speed
+  -file : the input source file (optional)
+  -flat : slurp all k files into one file 
+  -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
     -style : useful for typesetting (optional)
 
@@ -410,12 +413,7 @@ if ($latex && !@latexify_modules) {
 	$language_module_name =~ s/\.K$|\.KMAUDE$|\.MAUDE$|\.M$//;
     }
 
-# Following is executed whenever the option -c was not selected
-if (!$compile_only) {
-# Maudify the .k|.kmaude files reachable from file "$language_file_name"
-    print_header("Maudifying $language_file_name") if $verbose;
-
-# Before maudify, check the file for syntax errors
+# Check the file for syntax errors
     setVerbose() if $verbose;
     syntax_common_check($language_file_name);
     
@@ -423,6 +421,11 @@ if (!$compile_only) {
     appendFileInTree("$language_file_name", "");
     recurseIntoFiles($language_file_name);
     
+# Following is executed whenever the option -c was not selected
+if (!$compile_only) {
+# Maudify the .k|.kmaude files reachable from file "$language_file_name"
+    print_header("Maudifying $language_file_name") if $verbose;
+
     # maudify
     maudify_file("$language_file_name","");
 #    print "Maudification: $language_file_name\n\n";
