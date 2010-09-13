@@ -22,7 +22,7 @@ FILES_TO_DIST = \
 
 all: cparser
 
-dist: demo
+dist: $(DIST_DIR)/dist.done
 
 demo: $(DIST_DIR)/dist.done 
 	@rm -f ./a.out
@@ -64,7 +64,7 @@ $(DIST_DIR)/dist.tested: $(DIST_DIR)/dist.done
 	@touch $(DIST_DIR)/dist.tested
 	
 test: dist
-	@make -C $(C_DIR) test
+	@make -C tests
 	
 fix: 
 	maude $(SEMANTICS_DIR)/programs-gen.maude
@@ -89,4 +89,5 @@ clean:
 	make -C $(PARSER_DIR) clean
 	make -C $(SEMANTICS_DIR) clean
 	make -C gcc-test clean
+	make -C tests clean
 	rm -rf $(DIST_DIR)

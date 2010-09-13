@@ -17,7 +17,7 @@ SHOULD_FAIL =
 GOOD_TARGETS = $(foreach var,  $(GOOD_DIRECTORIES), results-$(var).xml)
 CLEAN_TARGETS = $(foreach var, $(GOOD_DIRECTORIES), clean-$(var))
 
-all: test $(PARSER)
+all: $(PARSER) test 
 
 .INTERMEDIATE: test-%.kcc test-%.gcc output-% retval-%
 .PRECIOUS: test-%.kcc test-%.gcc output-% retval-% compare-%.pass
@@ -29,7 +29,7 @@ test: $(GOOD_TARGETS)
 results-%.xml:
 	@perl runtest.pl $*
 		
-clean: $(CLEAN_TARGETS)
+clean: $(CLEAN_TARGETS) clean-./
 	
-clean-%: 
+clean-%:
 	rm -f ./$*/*.gcc ./$*/*.kcc ./$*/*.pass ./$*/*.tmp ./$*/*.log ./$*/*.cil ./$*/*-gen.maude ./$*/*.gen.maude ./$*/*.pre.gen ./$*/*.prepre.gen ./$*/*.xml ./$*/a.out
