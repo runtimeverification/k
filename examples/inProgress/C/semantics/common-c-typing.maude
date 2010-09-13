@@ -358,7 +358,7 @@ mod COMMON-C-TYPING is
 	including COMMON-SEMANTICS-TYPE-DECLARATIONS .
 	including COMMON-SEMANTICS-TYPE-CANONICALIZATION .
 	
-	op preFunctionType : Type -> Type .
+	--- op preFunctionType : Type -> Type .
 	--- op preBitfieldType : Nat -> Type .
 	--- op preArrayType : Nat -> Type .
 	--- op prePointerType : -> Type .
@@ -382,10 +382,13 @@ mod COMMON-C-TYPING is
 		if notBool hasArrayType(T:Type) .
 	eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) = arrayType(arrayType(T:Type, N:Nat), M:Nat) .
 	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
-	eq PointerType(T:Type) = pointerType(T:Type) .
-	eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
+	ceq PointerType(T:Type) = pointerType(T:Type)
+		if notBool hasFunctionType(T:Type) .
+	eq PointerType(functionType(T:Type, L:List{Type})) = functionType(pointerType(T:Type), L:List{Type}) .
+	--- eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
 
-	eq functionType(preFunctionType(pointerType(T:Type)), L:List{Type})	= pointerType(functionType(T:Type, L:List{Type})) .
+	--- FIXME where did this come from?
+	--- eq functionType(preFunctionType(pointerType(T:Type)), L:List{Type})	= pointerType(functionType(T:Type, L:List{Type})) .
 	
 	eq isTypeCompatible(T:Type, T:Type) = true .
 	ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
