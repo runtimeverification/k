@@ -645,7 +645,7 @@ sub appendFileInTree
     {
 	# root node
         $inclusionFileTree = new Tree::Nary->new($child);
-#	print "Root: " . $inclusionFileTree->{data} . " \n\n"
+#	print "Root: " . $inclusionFileTree-> . " \n\n"
     } 
     else
     {
@@ -789,6 +789,67 @@ sub getKLabelDeclarations
     return "$labels : -> KLabel [metadata \"generated label\"] . ";
 }
 
+my $flatten = "";
+my $include = "";
+sub flattening
+{
+	#~ get file name
+	my $file = (shift);
 
+	#~ get the flat content
+	recurseFlat($inclusionFileTree);
+	my $out = "$include\n$flatten\n";
+	
+	#~ prepare for kompile
+	#~ my $cap = uc($file);
+	#~ $out =~ s/$cap/$cap-FLAT/g;
+		
+	#~ print to file-flat.k the result
+	my $output_file = "$file-flat.k";
+	open FILE,">",$output_file or die "Cannot create $output_file\n";
+	print FILE $out;
+	close FILE;
+	
+#	print "$include\n $flatten\n";
+}
+
+
+sub recurseFlat
+{
+	my $current_node = (shift);
+	my $file = getFullName($current_node->{data});
+	my $out = "";
+	
+	if ($file =~ /\.k(maude)?$/)
+	{
+		#~ go to leaves first
+		Tree::Nary->children_foreach($current_node, $Tree::Nary::TRAVERSE_ALL, \&recurseFlat);
+	}
+	else {return;}
+
+	local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
+
+	$out = "\n--------- File: $file -----------------\n\n";
+	while (s/^(\s*)($top_level_pattern)(\s*)//sm) 
+	{
+		(my $before, local $_, my $after) = ($1,$2,$3);
+		if (m!^(?:in|load)\s+(\S+)!) 
+		{
+			#~ do nothing;
+			my $line = $_;
+			my $decl = getFullName($1);
+			if ($decl =~ /\.m(aude)?$/)
+			{
+				$include .= "$line\n";
+			}
+		}
+		else 
+		{
+			$out .= "$before$_$after";
+		}
+	}
+	
+	$flatten .= $out;
+}
 
 1;
