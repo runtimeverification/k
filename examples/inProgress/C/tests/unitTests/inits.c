@@ -1,15 +1,15 @@
 #include <stdio.h>
 
 int main(void) {
-	static int x[] = {1,3,5};
-	static float y0[] = {1,3,5,2,4,6,3,5,7,0,0,0};
-	static float y1[4][3] = {
+	int x[] = {1,3,5};
+	float y0[] = {1,3,5,2,4,6,3,5,7,0,0,0};
+	float y1[4][3] = {
 		{1,3,5},
 		{2,4,6},
 		{3,5,7},
 	};
-	static float y2[4][3] = {1,3,5,2,4,6,3,5,7};
-	static float y3[4][3] = {
+	float y2[4][3] = {1,3,5,2,4,6,3,5,7};
+	float y3[4][3] = {
 		{1},{2},{3},{4}
 	};
 

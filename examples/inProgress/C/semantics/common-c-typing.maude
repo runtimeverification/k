@@ -307,7 +307,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	eq canonicalizeSpecifier(BagItem(Unsigned) BagItem(Char)) = unsigned-char .
 	
 	eq canonicalizeSpecifier(BagItem(Double)) = double .
-	eq canonicalizeSpecifier(BagItem(float)) = float .
+	eq canonicalizeSpecifier(BagItem(Float)) = float .
 	eq canonicalizeSpecifier(BagItem(Long) BagItem(Double)) = long-double .
 	
 	ceq canonicalizeSpecifier(B:Bag) = short-int
