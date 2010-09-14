@@ -110,8 +110,8 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq latexify(Q) = qid(latexify(string(Q))) .
   
   op latexify : String -> String .
-  eq latexify(S) = replaceAll(S,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&" |-> "\\&", ---("_" |-> "\\_",---)
- "'" |-> "", "`" |-> "", "{" |-> "\\{", "}" |-> "\\}", ---("\\" |-> "$\\backslash$",---) "~" |-> "\\verb$~$", "^" |-> "\\verb$^$")) .
+  eq latexify(S) = replaceAll(replaceAll(S,( "{" |-> "\\{", "}" |-> "\\}")),("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&" |-> "\\&", ---("_" |-> "\\_",---)
+ "'" |-> "", "`" |-> "", ---("\\" |-> "$\\backslash$",---) "~" |-> "\\mbox{\\~{}}", "^" |-> "\\mbox{\\^{}}")) .
  
 
   var Q : Qid . var QIL : QidList .
