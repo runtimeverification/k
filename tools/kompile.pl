@@ -14,7 +14,7 @@ my $help = 0;
 sub terminate {
     print "\nERROR: $_[0]\n\n" if defined $_[0];
     print "Usage: 
-  $0 (-option)* <source_file>[.kmaude|.maude] (-option)*
+  $0 (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
 
   Options
   -h (or -help) : print this message and exit
@@ -23,48 +23,37 @@ sub terminate {
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
-  -flat : slurp all k files into one file 
+  -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
     -style : useful for typesetting (optional)
   \n" if (!$verbose && !$help);
 
     print "Usage:
-  $0 (-option)* <source_file>[.kmaude|.maude] (-option)*
+  $0 (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
   
-  Options
-  -h (or -help) : print this message and exit
-  -v (or -verbose) : verbose mode
-  -m (or -maudify) : only maudify, do not kompile
-  -c (or -compile) : only compile, do not maudify
-  -l (or -lang or -language) <module_name> : start module
-  -file : the input source file (optional)
-  -flat : slurp all k files into one file 
-  -u (or -unquote) : unquote the maude meta-terms to increase speed
-  -latex : maudifies/compiles for generating latex output
-    -style : useful for typesetting (optional)
-
   This program takes a K language definition and translates
   it into a Maude executable specification.  The input K
   definition can be spread over several files and modules,
-  all reachable from <source_file>[.kmaude|.maude], and the
+  all reachable from <source_file>[.k|.kmaude|.maude], and the
   generated output will be saved in <source_file>-compiled.maude.
 
   <source_file> must be a K-Maude or a Maude file, expected
   to directly or indirectly (by loading other files) include
   the entire definition of the language.  It is highly
-  recommended that one omits the (.maude or .kmaude) extension
+  recommended that one omits the (.maude or .kmaude or .k) extension
   of the loaded files, to let this program choose the appropriate
   one depending upon the compilation stage or parameters.
 
   <source_file> is assumed to be a K-Maude file whenever it
-  has the extension \".kmaude\" and a Maude file whenever
+  has the extension \".kmaude\" or \".k\" and a Maude file whenever
   it has the extension \".maude\".  If none of these extensions
-  is provided, then the K-Maude file <source_file>.kmaude is
-  considered if it exists; if <source_file>.kmaude does not exist,
-  then the Maude file <source_file>.maude is considered instead.
-  If none of the files <source_file>.kmaude or <source_file>.maude
-  is found, then this program stops with an error message.
+  is provided, then the K-Maude file <source_file>.kmaude (or 
+  <source_file>.k) is  considered if it exists; if <source_file>.kmaude 
+  (or <source_file>.k) does not exist, then the Maude file 
+  <source_file>.maude is considered instead.
+  If none of the files <source_file>.kmaude (<source_file>.k) or 
+  <source_file>.maude is found, then this program stops with an error message.
 
   The same name resolution principle as above is recursively
   applied on files directly or indirectly loaded by <source_file>.
@@ -81,14 +70,15 @@ sub terminate {
   error/warning messages reported by Maude.  Files containing
   intermediate compilation results are also kept for debugging.
 
-  Options
+Options
   -h (or -help) : print this message and exit
   -v (or -verbose) : verbose mode
   -m (or -maudify) : only maudify, do not kompile
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
-  -f (or -file) : the input source file (optional)
-  -u (or -unquote : unquote the maude meta-terms to increase speed
+  -file : the input source file (optional)
+  -flat : slurp all k or kmaude files into one k file 
+  -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
     -style : useful for typesetting (optional)
 
@@ -425,7 +415,7 @@ if ($latex && !@latexify_modules) {
     appendFileInTree("$language_file_name", "");
     recurseIntoFiles($language_file_name);
 
-#flatten if $flat is set
+# flatten if $flat is set
 if ($flat)
 {
 	flattening($language_file_name);
