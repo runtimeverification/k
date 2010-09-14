@@ -358,11 +358,11 @@ endkm
 kmod BEGIN-SEMANTICS is including SKEME-SEMANTICS
   op beg : List{Exp} -> K
 
-  rule <k> [begin EL:List{Exp}] => beg(EL) <_/k> [structural]
-  rule beg(E:Exp EL:List{Exp}) 
-    => E ~> beg(EL)
+  rule <k> [begin E:Exp EL:List{Exp}] => E ~> beg(EL) <_/k> [structural]
+---  rule beg(E:Exp EL:List{Exp}) 
+ ---   => E ~> beg(EL)
   rule I:Internal ~> beg(E:Exp EL:List{Exp}) 
-    => beg(E EL)
+    => E ~> beg(EL)
   rule I:Internal ~> beg(.List{Exp})
     => I 
 endkm
