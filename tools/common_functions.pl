@@ -571,13 +571,13 @@ sub unquote
 	$line =~ s/prec\((\d*)\)/prec $1/; # removes parens from prec
 	$line =~ s/^\s*none//; # removes none sections
 	$line =~ s/nil -> /-> /; # removes nil op arguments
-	my $operatorClass = '(?:(?:[\(\)\[\]\{\},])|[^\(\)\[\]\{\}, ])';
-	my $sortClass = '(?:(?:[\{\}])|[^_\(\)\[\]\{\},\. ])';
-	my $containerClass = '(?:List\{K\}|Set|Bag|Map|K|List)';
+	my $operatorClass = '(?:(?:`[\(\)\[\]\{\},])|[^\(\)\[\]\{\}, ])';
+	my $sortClass = '(?:(?:`[\{\}])|[^_\(\)\[\]\{\},\. `])';
+	my $containerClass = '(?:List`\{K`\}|Set|Bag|Map|K|List)';
 	my $sortTerminator = '(?:[ ,\]])';
 
-	$line =~ s/'($operatorClass+)\.($containerClass)($sortTerminator)/\(\(`$1\).$2\)$3/g; # quoted constants
-	$line =~ s/'($operatorClass+)\.($sortClass+)/\(`$1\)\.$2/g; # quoted constants
+	$line =~ s/'($operatorClass+)\.($containerClass)($sortTerminator)/\('$1\)\.$2$3/g; # quoted constants
+	$line =~ s/'($operatorClass+)\.($sortClass+)/\('$1\)\.$2/g; # quoted constants
 	$line =~ s/'"(([^"]|([\\]["]))*?)"\.([^ ,\]])/\("$1"\)\.$4/g; # string constants
 	$line =~ s/([^ `])\[/$1\(/g; # changes [ into (
 	$line =~ s/\] \./FSLENDLQQQ/; # saves attribute brackets
