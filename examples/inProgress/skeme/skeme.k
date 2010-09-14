@@ -46,10 +46,15 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
                      | bCallCC | bCar | bCdr
 
-  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id} hybrid]
+  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}]
   
+  syntax List{Internal} ::= Internal | .List{Internal} | List{Internal} :: List{Internal} [assoc id: .List{Internal}]
+ 
   syntax Literal ::= #procedure(Closure) | #continuation(Continuation) | #builtin(Builtin)   
   
+  syntax Exp ::= Internal
+  syntax List{Exp} ::= List{Internal}
+
 endkm
 
 kmod SKEME-PROGRAMS is including SKEME-SYNTAX
@@ -68,6 +73,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
+
 
   syntax K ::= Program | Exp | Char | String 
   syntax KResult ::= Internal
