@@ -411,15 +411,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
             <_/class>
        <_/pgm>
 
----  syntax K ::= floc ( Nat , List{Val} )
   rule <k> invoke(_`(_`)(F:Id, Vl))
----           =>
----           floc(getloc( [C, F], ( @global :: GEnv:Map )), Vl)
----       <_/k>
----       <crntClass> C </crntClass>
----       <genv> GEnv </genv>
----       if getloc( [C, F], ( @global :: GEnv )) =/=Bool null 
----  rule <k> floc(L:Nat, Vl)
            =>
            (_`(_`)(function(Tl:List{Type} -> T, sNat L), Vl))
        <_/k>

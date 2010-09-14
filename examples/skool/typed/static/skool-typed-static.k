@@ -26,9 +26,9 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                    <return> stmt </return>
                    <gtenv> .Map </gtenv>
 ---<SKOOL added>
-                     <class> main </class>
+                     <crntClass> main </crntClass>
                      <pgm>
-                           <classes*>
+                           <class*>
                                     <className> Id:Id </className>
                                     <extends> Id:Id </extends>
                                     <stmts> Ss:Stmts </stmts>
@@ -36,8 +36,8 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                                     <tfields> .Map </tfields>
                                     <tmethods> .Map </tmethods>
                                     <methods> .K </methods>
-                           </classes*>
-                           <opis> .List{Id} </opis> 
+                           </class*>
+                           <classRegister> .List{Id} </classRegister> 
                      </pgm>
                      <error> Id:Id </error>
 ---</SKOOL added>
@@ -57,15 +57,14 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   macro typeList(.List{Bottom}) = .List{Bottom} 
   macro typeList(X : T,XTl) = T,typeList(XTl) 
 
----  syntax K ::= doneGlobals  --- to mark when the collection of globals completed
 
 ---<SKOOL added>
 --- gettype: returns the type (abstract value) of an object X 
   syntax Type ::= gettype ( Id , List ) [ strict ]
 
-  rule gettype(X, ( ( C:Id :: .) OTEnv:List )) => gettype(X, OTEnv ) [structural]
-  rule gettype(X, ( ( C :: ( Y:Id |-> T:Type TEnv:Map )) OTEnv ) )
-       => if (X ==Bool Y) then T else gettype(X,  ((C ::  TEnv )OTEnv)) fi [structural]
+  rule gettype(X, ( ( C:Id :: .) TObj:List )) => gettype(X, TObj ) [structural]
+  rule gettype(X, ( ( C :: ( Y:Id |-> T:Type TEnv:Map )) TObj ) )
+       => if (X ==Bool Y) then T else gettype(X,  ((C ::  TEnv )TObj)) fi [structural]
   rule gettype(X, .) => void [structural]
 
 --- the next is needed for class types; a class type is a bag of maps "methodName |-> Type"
@@ -87,7 +86,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- the names for the local environment and the global environments for an object
   syntax Id ::= @local | @global
 
---- successor - ancestor relationship
+--- successor - ancestor (subclass) relationship
   syntax  Exp ::= Type <: Type [ strict ]
 
   rule <k> T <: T => bool <_/k>
@@ -97,20 +96,20 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
            bool
        <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C1 </className>
                      <extends> C2 </extends>
-            <_/classes>
+            <_/class>
        <_/pgm>
   rule <k> (type(C1) <: type(C2)) 
            =>
           (type(C11) <: type(C2))
        <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C1 </className>
                      <extends> C11:Id </extends>
-            <_/classes>
+            <_/class>
        <_/pgm>
        if C1 =/=Bool C2 andBool C1 =/=Bool C2
 
@@ -123,9 +122,9 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   rule <T_> 
           (. => <error> error </error>)
           <pgm_>
-               <classes_>
+               <class_>
                   <tmethods_> (throwError(Map:Map) => catch(Map)) <_/tmethods>
-               <_/classes>             
+               <_/class>             
           <_/pgm>
        <_/T>
 
@@ -166,78 +165,80 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   --- the following is used to know when a class preprocessing is finished
   syntax Stmts ::= classProcessing ( Id ) | compType
 
---- starts a class preprocessing: a new <classes> cell is created  and the class name
----   is added in the <opis> cell (this is used in the second processing of the class)
+--- starts a class preprocessing: a new <class> cell is created  and the class name
+---   is added in the <classRegister> cell (this is used in the second processing of the class)
   rule <k> class C1:Id extends C2:Id { Ss:Stmts } => classProcessing (C1) <_/k>
-       <pgm_> (. => <classes_>
+       <pgm_> (. => <class_>
                            <className> C1 </className>          
                            <extends> C2 </extends>
                            <stmts> Ss </stmts>
-                   <_/classes>)
-              <opis_> . => C1 </opis>
+                   <_/class>)
+              <classRegister_> . => C1 </classRegister>
        <_/pgm>
 
 --- simple variable member declaration: we have two cases, according to inductive definition of Stmts 
   rule <k> classProcessing(C:Id) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <stmts> (var X:Id : T:Type ;) Ss => Ss <_/stmts>
                      <tfields> TEnv:Map => TEnv[T/X] </tfields>
-            <_/classes>
+            <_/class>
        <_/pgm>
   rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <stmts> (var X:Id : T:Type ;)  => . <_/stmts>
                      <tfields> TEnv => TEnv[T/X] </tfields>
-            <_/classes>
+            <_/class>
        <_/pgm>   
+
 --- array member declaration: we have two cases, similar to simple members
   rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <stmts> (var X[ N:Nat ] : T[];) Ss => Ss <_/stmts>
                      <tfields> TEnv => TEnv[T[] / X] </tfields>
-            <_/classes>
+            <_/class>
        <_/pgm>
   rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <stmts> (var X[ N:Nat ] : T[];) Ss => Ss <_/stmts>
                      <tfields> TEnv => TEnv[T[] / X] </tfields>
-            <_/classes>
+            <_/class>
        <_/pgm>
+
 --- method declaration: two cases again
 
   rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <stmts> (method F:Id(XTl:List{IdType}) : T S:Stmt) Ss => Ss <_/stmts>
                      <methods_> .K => method F:Id(XTl:List{IdType}) : T S:Stmt </methods>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
   rule <k> classProcessing(C) <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <stmts> (method F:Id(XTl:List{IdType}) : T S:Stmt)  => . <_/stmts>
                      <methods_> .K => method F:Id(XTl:List{IdType}) : T S:Stmt </methods>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
 --- finish preprocessing a class: the empty cell <stmts> is removed 
 
   rule <k> classProcessing(C) => stmt <_/k>
-        <classes_>
+        <class_>
                 <className> C </className>
                 ( <stmts> .K </stmts> => .Bag )
-       <_/classes>
+       <_/class>
 
 
 --- when we are done with the first pass (doneGlobals mark),
@@ -256,35 +257,35 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- we start with a class directly deriving from object; 
 ---   the fields are wrapped as an environment (list element class-name |-> fields-types)
 ---   typeMap() returns a multiset of maps meth-name |-> meth-type
----   once processed, a class is removed from the opis
+---   once processed, a class is removed from the classRegister
   rule <T_>
          <k> stmt => compType </k>
          <pgm_>
-              <classes_>
+              <class_>
                        <className> C </className>
                        <extends> object </extends>
                        (<tfields> FTs:Map </tfields> => .) 
                        <obj> . => (C :: FTs) </obj>
                        <methods> Ms:K </methods>
                        <tmethods> . => typeMap(Ms) </tmethods> 
-              <_/classes>
-              <opis_> C => . <_/opis>
+              <_/class>
+              <classRegister_> C => . <_/classRegister>
          <_/pgm>
        <_/T>
 
---- induction base case: similar to the start case
+--- (induction) base case: similar to the start case
   rule <T_>
          <k> compType </k>
          <pgm_>
-              <classes_>
+              <class_>
                        <className> C </className>
                        <extends> object </extends>
                        (<tfields> FTs:Map </tfields> => .) 
                        <obj> . => (C :: FTs) </obj>
                        <methods> Ms:K </methods>
                        <tmethods> . => typeMap(Ms) </tmethods> 
-              <_/classes>
-              <opis_> C => . <_/opis>
+              <_/class>
+              <classRegister_> C => . <_/classRegister>
          <_/pgm>
        <_/T>
 
@@ -292,28 +293,29 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 ---   the instance structure is obtained from the that of the parent by adding current class fields
 ---   the class type is obtained by merging the methods types of the current class with the type
 ---   o the parrent; note that the merge operation is partial, it is not defined (error)
----   if there are two methods with the same name and different types
+---   if there are two methods with the same name and different types (the overloading is not
+---   allowed yet)
 
-  rule <T>
+  rule <T_>
          <k> compType </k>
          <pgm_>
-              <classes_>
+              <class_>
                        <className> C1 </className>
                        <extends> C2 </extends>
                        (<tfields> FTs1:Map </tfields> => .) 
-                       <obj> . => (C1 :: FTs1) OTEnv2 </obj>
+                       <obj> . => (C1 :: FTs1) TObj2 </obj>
                        <methods> Ms:K </methods>
                        <tmethods> . => mergeMethTypes(typeMap(Ms), TC2) </tmethods> 
-              <_/classes>
-              <classes_>
+              <_/class>
+              <class_>
                        <className> C2 </className>
-                       <obj> OTEnv2:List </obj>
+                       <obj> TObj2:List </obj>
                        <tmethods> TC2:Map </tmethods> 
-              <_/classes>
-              <opis_> C1 => . <_/opis>
+              <_/class>
+              <classRegister_> C1 => . <_/classRegister>
          <_/pgm>
          <gtenv> TEnv </gtenv>
-       </T>
+       <_/T>
 
 --- the definition for the  merge operation
   syntax Map ::= mergeMethTypes ( Map , Map )
@@ -337,19 +339,19 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
        [structural]
 --- 
 
---- finishing the class type computation (the <opis> cell is empty)
----   the <opis> cell is removed and added the other cells needed for the second processing
+--- finishing the class type computation (the <classRegister> cell is empty)
+---   the <classRegister> cell is removed and added the other cells needed for the second processing
 
-  rule <T>
+  rule <T_>
          <k> compType => stmt </k>
-         ( .Bag => (<class> object </class>
+         ( .Bag => (<crntClass> object </crntClass>
                     <tenv> .Map </tenv>
                     <return> stmt </return>
                    )
          )
-         <pgm_> <opis> .List{Id} </opis> => .Bag <_/pgm>
+         <pgm_> <classRegister> .List{Id} </classRegister> => .Bag <_/pgm>
          <gtenv> TEnv  </gtenv>
-       </T> 
+       <_/T> 
 
 
 ---</SKOOL modified>
@@ -365,13 +367,13 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 
 --- the type of variable name is computed with the gettype function, which 
 ---   searches between local variables, variable members, and global variables
-  rule <k> X:Id => gettype(X, ((@local :: TEnv) OTEnv (@global :: GTEnv))) <_/k>
-       <class> C:Id </class>
+  rule <k> X:Id => gettype(X, ((@local :: TEnv) TObj (@global :: GTEnv))) <_/k>
+       <crntClass> C:Id </crntClass>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
-                     <obj> OTEnv:List </obj>
-            <_/classes>
+                     <obj> TObj:List </obj>
+            <_/class>
        <_/pgm>
        <tenv> TEnv:Map </tenv>
        <gtenv> GTEnv:Map </gtenv>
@@ -380,14 +382,14 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 ---       <tenv_> X |-> int <_/tenv> 
 
 
---- the following should be conditional (see Issue 58
-  rule <k> ++ X => gettype(X, ((@local :: TEnv) OTEnv (@global :: GTEnv))) <_/k>
-       <class> C </class>
+--- the following should be conditional (see Issue 58)
+  rule <k> ++ X => gettype(X, ((@local :: TEnv) TObj (@global :: GTEnv))) <_/k>
+       <crntClass> C </crntClass>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
-                     <obj> OTEnv </obj>
-            <_/classes>
+                     <obj> TObj </obj>
+            <_/class>
        <_/pgm>
        <tenv> TEnv </tenv>
        <gtenv> GTEnv </gtenv>
@@ -397,10 +399,10 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- method call
   rule <k> _._`(_`)(type(C), F:Id, Tl) => T <_/k>
        <pgm_>
-            <classes_>
+            <class_>
                      <className> C </className>
                      <tmethods_> F |-> Tl2:List{Type} -> T <_/tmethods>
-            <_/classes>
+            <_/class>
        <_/pgm>
 
 ---</SKOOL modified>
@@ -478,21 +480,21 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- method processing
 
   rule <k> stmt => S ~> tenv(TEnv) </k>
-       <class> _ => C1 </class>
+       <crntClass> _ => C1 </crntClass>
        <pgm_>  
-            <classes_>
+            <class_>
                     <className> C1:Id </className>
                     <methods> (method F:Id(XTl:List{IdType}) : T S:Stmt) => .  <_/methods>
-            <_/classes>
+            <_/class>
        <_/pgm>
        <return> _ => T </return>
        <tenv> TEnv => .Map[getList{K}(typeList(XTl)) / getList{K}(idList(XTl))] </tenv>
 
   rule <k> stmt </k>
        <pgm_>  
-            <classes_>
+            <class_>
                     (<methods> .K  <_/methods>) => .Bag
-            <_/classes>
+            <_/class>
        <_/pgm>
 
 ---</SKOOL modified>
@@ -509,7 +511,7 @@ kmod SKOOL-TYPED-STATIC is including SKOOL-TYPED-STATIC-SEMANTICS + SKOOL-TYPED-
   macro run(K:KLabel) = <T>
                            <k> K(.List{K}) </k>
                            <gtenv> .Map </gtenv>
-                           <pgm> .Bag <opis> .List{Id} </opis> </pgm>
+                           <pgm> .Bag <classRegister> .List{Id} </classRegister> </pgm>
                         </T> 
 endkm
 
