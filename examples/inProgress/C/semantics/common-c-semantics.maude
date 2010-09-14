@@ -222,6 +222,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op unsignedIntegerTypes : -> Set [memo] .
 	op signedIntegerTypes : -> Set [memo] .
 	op hasIntegerType : Type -> Bool [memo] .
+	op hasFloatType : Type -> Bool [memo] .
 	op hasUnsignedIntegerType : Type -> Bool [memo] .
 	op hasSignedIntegerType : Type -> Bool [memo] .
 	op typeof : K -> K .
@@ -465,6 +466,11 @@ mod SEMANTIC-HELPERS is
 		if K1:K =/=Bool K2:K .
 	eq (.).Set contains K:K = false .
 
+	ceq hasIntegerType(T:Type) = true
+		if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
+	ceq hasIntegerType(T:Type) = false
+		if setOfTypes contains l(getKLabel(T:Type)) .
+	
 	ceq hasIntegerType(T:Type) = true
 		if (integerTypes contains T:Type) .
 	ceq hasIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
@@ -735,6 +741,7 @@ mod COMMON-INITIALIZATION is
 		< k > startInitializer(T:Type, X:Id, CompoundInit(L:List{C}))
 			=> fillInitializer(L:List{C}) ~> getInitializer
 		...</ k >
+		< incompleteLength > ? => 0 </ incompleteLength >
 		< currentSubObject > . => ListItem(te(X:Id, T:Type)) </ currentSubObject >
 		< currentObject > . => ListItem(te(X:Id, T:Type)) </ currentObject >
 		< savedInitialization >... . => zero(X:Id) </ savedInitialization > 
@@ -822,18 +829,26 @@ mod COMMON-INITIALIZATION is
 	--- fixme should i worry about basetype here?
 	mb [init-next-array-element]: rule
 		< currentSubObject > 
-			next ListItem(te(K:K[N:Nat], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
-			=> ListItem(te(K:K[sNat(N:Nat)], T:Type)) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+			(next ListItem(te(K:K[N:Nat], T:Type)) => ListItem(te(K:K[sNat(N:Nat)], T:Type)))
+			ListItem(te(K:K, arrayType(?, Len:Nat)))
 		...</ currentSubObject >
 		if Len:Nat >Nat sNat(N:Nat)
 		: KSentence [metadata "structural"] .
 	mb [init-next-array-element-done]: rule
 		< currentSubObject >
-			next (ListItem(te(K:K[N:Nat], T:Type)) => .) ListItem(te(K:K, arrayType(T:Type, Len:Nat)))
+			next (ListItem(te(K:K[N:Nat], T:Type)) => .) ListItem(te(K:K, arrayType(?, Len:Nat)))
 		...</ currentSubObject >
 		if notBool Len:Nat >Nat sNat(N:Nat)
 		: KSentence [metadata "structural"] .
-		
+	
+	mb [init-next-incomplete-array-element]: rule
+		< currentSubObject >
+			(next ListItem(te(K:K[N:Nat], T:Type)) => ListItem(te(K:K[sNat(N:Nat)], T:Type))) 
+			ListItem(te(K:K, incompleteArrayType(?)))
+		...</ currentSubObject >
+		< incompleteLength > N':Nat => maxNat(sNat(N:Nat), N':Nat) </ incompleteLength >
+		: KSentence [metadata "structural"] .
+	
 	mb [init-next-struct-element]: rule
 		< currentSubObject >
 			next ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
@@ -912,6 +927,7 @@ mod COMMON-INITIALIZATION is
 		: KSentence [metadata "structural"] .
 		
 	
+	--- fixme these are also too restrictive on type.  if we try to assign an int to a long-int field, it will fail
 	--- fixme need to handle unions
 	mb rule
 		< k > buildDesignator(InFieldInit(F:Id, More:K)) 
@@ -924,6 +940,19 @@ mod COMMON-INITIALIZATION is
 		< k > buildDesignator(NextInit) => NextInit ...</ k >
 		< currentSubObject > (block => .) ...</ currentSubObject >
 		: KSentence [metadata "structural"] .
+		
+	op innerType : Type -> Type .
+	eq innerType(arrayType(T:Type, ?)) = T:Type .
+	eq innerType(incompleteArrayType(T:Type)) = T:Type .
+		
+	mb rule
+		< k > buildDesignator(AtIndexInit(tv(N:Nat, ?), More:K)) 
+			=> buildDesignator(More:K)
+		...</ k >
+		< currentSubObject > block (. => ListItem(te(K:K[N:Nat], innerType(T:Type)))) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
+		if hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .
+		
 	--- mb rule
 		--- < k > buildDesignator(K:K, AtIndexInit(Index:K, More:K)) => buildDesignator(K:K[Index:K], More:K) .
 	--- mb rule
@@ -1025,7 +1054,7 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
 		...</ k >
 		if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) 
-		andBool notBool hasIncompleteType(T:Type)
+		---andBool notBool hasIncompleteType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String)))) 
@@ -1036,11 +1065,12 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence [metadata "structural"] .	
 		
 	--- incomplete arrays
-	mb rule
-		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(L:List{C}))
-			=> declare(typedDeclaration(arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))), X:Id), CompoundInit(L:List{C}))
-		...</ k >
-		: KSentence [metadata "computational"] . --- fixme we're making this computational to force evaluation after another rule below
+	--- this doesn't work due to things like [3] = blah
+	--- mb rule
+		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(L:List{C}))
+			--- => declare(typedDeclaration(arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))), X:Id), CompoundInit(L:List{C}))
+		--- ...</ k >
+		--- : KSentence [metadata "computational"] . --- fixme we're making this computational to force evaluation after another rule below
 	mb rule
 		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
 			=> allocString(Loc:Nat, (S:String +String "\0"))
@@ -1194,6 +1224,14 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool notBool hasIncompleteType(T:Type)
 		andBool notBool (hasFunctionType(T:Type) andBool K:K ==Bool (.).K) --- prototype
 		: KSentence .
+	
+	--- fixme computational so it will happen after incomplete length is finished updating from any pending nexts
+	mb rule
+		< k > declare-aux(typedDeclaration((incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), X:Id), initializer(K:K))
+		...</ k >
+		< incompleteLength > N:Nat </ incompleteLength >
+		if notBool hasExternType(T:Type) --- external reference
+		: KSentence [metadata "computational rule"] .
 		
 	--- FIXME check type of pointer
 	--- mb rule

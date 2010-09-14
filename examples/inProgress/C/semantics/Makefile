@@ -37,7 +37,7 @@ c-compiled.maude: c.maude $(K-MAUDE-BASE)/k-prelude.maude $(K-MAUDE) \
 common-c-syntax.k common-c-configuration.maude common-c-semantics.maude common-c-standard-lib.maude common-c-expressions.maude common-c-memory.maude common-c-statements.maude common-c-conversions.maude common-c-typing.maude \
 match-c-syntax.maude match-c-semantics.maude match-c-configuration.maude \
 dynamic-c-semantics.k dynamic-c-configuration.k
-	$(K-MAUDE) c.maude -language C
+	$(K-MAUDE) c.maude -u -language C
 	
 c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude
 #echo adds a newline

@@ -29,6 +29,7 @@ kmod C-CONFIGURATION is
 							< types > .Map </ types >
 							< currentObject > .List </ currentObject >
 							< currentSubObject > .List </ currentSubObject >
+							< incompleteLength > 0 </ incompleteLength >
 							< savedInitialization > .K </ savedInitialization >
 							< initMaxes > .Map </ initMaxes >
 						</ local >

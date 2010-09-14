@@ -21,13 +21,9 @@ while(my $line = <STDIN>) {
 	my $containerClass = '(?:List`\{K`\}|Set|Bag|Map|K|List)';
 	my $sortTerminator = '(?:[ ,\]])';
 	
-	$line =~ s/'($operatorClass+)\.$containerClass($sortTerminator)/\('$1\)$2/g; # quoted constants
-	# 'arithBinConversionOps.Set
-	#  op ''_._ 
+	$line =~ s/'($operatorClass+)\.($containerClass)($sortTerminator)/\('$1\)\.$2$3/g; # quoted constants
 	$line =~ s/'($operatorClass+)\.($sortClass+)/\('$1\)\.$2/g; # quoted constants
-	#$line =~ s/'([^ '"(),\]\[]+)\.([^ ,.\]\[]+)/('$1)/g; # quoted constants
 	$line =~ s/'"(([^"]|([\\]["]))*?)"\.([^ ,\]])/\("$1"\)\.$4/g; # string constants
-	#$line =~ s/'"(([^\\"]|([\\]["])|([\\][^"]))*?)"\.[^ ,.\]\[]+/"$1"/g; # string constants
 	$line =~ s/([^ `])\[/$1\(/g; # changes [ into (
 	$line =~ s/\] \./FSLENDLQQQ/; # saves attribute brackets
 	while ($line =~ s/([^`])\]/$1\)/g){ } # changes ] into )

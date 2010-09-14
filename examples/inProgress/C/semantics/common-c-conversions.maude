@@ -222,24 +222,24 @@ mod COMMON-SEMANTICS-CAST is
 		--- if hasIntegerType(T:Type)
 		--- : KSentence [metadata "structural"] .
 	
-	--- ---C99 6.3.1.4:2 When a value of integer type is converted to a real floating type, if the value being converted can be represented exactly in the new type, it is unchanged. If the value being converted is in the range of values that can be represented but cannot be represented exactly, the result is either the nearest higher or nearest lower representable value, chosen in an implementation-defined manner. If the value being converted is outside the range of values that can be represented, the behavior is undefined.
-	--- --- fixme not handling floats correctly
-	--- mb rule
-		--- < k > [cast(T':Type, tv(I:Int, T:Type)) => tv(rat2floatConversion(I:Int), T':Type)] ...</ k > 
-		--- if hasIntegerType(T:Type)
-		--- andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
-		--- : KSentence [metadata "structural"] .
+	---C99 6.3.1.4:2 When a value of integer type is converted to a real floating type, if the value being converted can be represented exactly in the new type, it is unchanged. If the value being converted is in the range of values that can be represented but cannot be represented exactly, the result is either the nearest higher or nearest lower representable value, chosen in an implementation-defined manner. If the value being converted is outside the range of values that can be represented, the behavior is undefined.
+
+	mb rule
+		< k > cast(T':Type, tv(I:Int, T:Type)) => tv(Rat2Float(I:Int), T':Type) ...</ k > 
+		if hasIntegerType(T:Type)
+		andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
+		: KSentence [metadata "structural"] .
 	
-	--- --- fixme all floats same precision
-	--- mb rule
-		--- < k > [cast(T':Type, tv(F:Float, T:Type)) => tv(F:Float, T':Type)] ...</ k > 
-		--- if (T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double)
-		--- andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
-		--- : KSentence [metadata "structural"] .
+	--- fixme all floats same precision
+	mb rule
+		< k > cast(T':Type, tv(F:Float, T:Type)) => tv(F:Float, T':Type) ...</ k > 
+		if (T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double)
+		andBool (T':Type ==Bool float orBool T':Type ==Bool double orBool T':Type ==Bool long-double)
+		: KSentence [metadata "structural"] .
 	
 	--- --- fixme 6.3.2.3 not handling this correctly
 	--- mb rule
-		--- < k > [cast(T:Type, tv(loc(N:Nat, M:Nat), T':Type)) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k >
+		--- < k > cast(T:Type, tv(loc(N:Nat, M:Nat), T':Type)) => tv(loc(N:Nat, M:Nat), T:Type) ...</ k >
 		--- if hasIntegerType(T:Type) andBool hasIntegerType(T':Type)
 		--- : KSentence [metadata "structural"] .
 	
