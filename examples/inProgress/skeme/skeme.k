@@ -48,7 +48,7 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
 
   syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}]
   
-  syntax List{Internal} ::= Internal | .List{Internal} | List{Internal} :: List{Internal} [assoc id: .List{Internal}]
+  syntax List{Internal} ::= Internal | List{Internal} List{Internal} [ditto]
  
   syntax Literal ::= #procedure(Closure) | #continuation(Continuation) | #builtin(Builtin)   
   
