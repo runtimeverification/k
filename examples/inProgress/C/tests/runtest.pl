@@ -99,6 +99,7 @@ sub reportAny {
 	my $elapsed = tv_interval( $timer, [gettimeofday]);
 	$globalTotalTime += $elapsed;
 	$globalTests .= "\t<testcase name='$name' time='$elapsed'>\n";
+	$globalTests .= "\t\t<measurement><name>Time</name><value>$elapsed</value></measurement>\n";
 	$globalTests .= "\t\t$inner\n";
 	$globalTests .= "\t</testcase>\n";
 }
