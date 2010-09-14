@@ -501,6 +501,7 @@ fmod SYNTAX-ATTRS is
   op ksyntax : -> Attr .
   op klatex : AttrSet -> Attr .
   op kcolor : Qid -> Attr .
+  op kditto : -> Attr .
 endfm
 
 fmod CONFIGURATION-ATTRS is

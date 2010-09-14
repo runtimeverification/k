@@ -18,6 +18,10 @@ fmod PARSE-METADATA-SYNTAX is
   including SYNTAX-ATTRS .
   var S S' S1 : String . var F : FindResult .  var Q : Qid .
   var N : Nat .  var AS : AttrSet .
+  ceq metadataStrippedParse(S) = kditto  metadataParse(stripSpaces(S'))
+   if "ditto" = substr(S,0,length("ditto")) 
+   /\ S' := (substr(S,length("ditto"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
   ceq metadataStrippedParse(S) = kaux  metadataParse(stripSpaces(S'))
    if "aux" = substr(S,0,length("aux")) 
    /\ S' := (substr(S,length("aux"),length(S))) 

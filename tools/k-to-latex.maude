@@ -589,6 +589,9 @@ mod DECL-META-LATEX-PRINT is
 
   eq eMetaLatexPrint(M, (kaux AtS))
     = ('aux eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (kditto AtS))
+    = ('ditto eMetaLatexPrint(M, AtS)) .
+
 
   op strictCells : QidList -> QidList .
   eq strictCells('k) = nil .
@@ -997,7 +1000,7 @@ mod LATEX-PRINT-META is
      else printStr(string(Q)) fi fi .
  
   op printStr : String -> QidList .
-  eq printStr(Str) = string2qidList(Str ---replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))
+  eq printStr(Str) = string2qidList(replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))
 ) .
  
   eq printTerm(M, \kprefix{Ct}{T}) = '\kprefix '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
