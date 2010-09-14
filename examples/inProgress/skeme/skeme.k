@@ -1,10 +1,10 @@
 in ../../../k-prelude
 
-kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING 
+kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID 
 
   syntax Literal ::=  #t  | #f | #unspecified 
                     | []  | #[]
-                    | Int | Float | Rat | #\ Char 
+                    | Float | Rat | #\ Char 
 
   syntax Exp ::= Literal 
                | Id | String  
@@ -19,7 +19,7 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
 
   syntax Id ::= eval | display | set-car! | set-cdr! | o= | o+ | o- | o* | o/
               | call-with-current-continuation | call/cc | car | cdr 
-              | if | quote | begin | define
+              | oif | quote | begin | define
               | x | id( String )
 
   macro [ .List{Exp} ] = [] 
@@ -39,7 +39,7 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
   syntax Continuation ::= continuation(K, Map)
 
   syntax Internal ::=   vT | vF | vUnspec | vNil 
-                      | vi( Int ) | vf( Float ) | vr( Rat ) | vc( Char ) | vn( Id )                                           
+                      | vf( Float ) | vr( Rat ) | vc( Char ) | vn( Id )                                           
                       | cons( K * K ) | vec( Map # Int ) | string( Map # Int ) | Builtin 
   
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
@@ -58,12 +58,13 @@ endkm
 
 kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   syntax List{Exp} ::= bar | foo | baz | chaz | kraz | apply | apply2 | id-test 
-                      | begintest
+                      | begintest | plustest | plustest2 | timestest
+                      | subtest | subtest2
 
   ---macro foo = [eval ![1 * 2]]
   macro foo = #[]
 ---  macro bar = []
-  macro bar = [display [if #t "true" "false"]]
+  macro bar = [display [oif #t "true" "false"]]
   macro baz = #[#[#[3]] "true"]
   macro chaz = [eval ![1 * [2]]]
   macro kraz = ![#[42 [43]] "44"]
@@ -71,6 +72,11 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   macro apply2 = [display "true"][display "false"] [display 16]
   macro begintest = [display [begin [display "true"][display "false"] [display 16]]]
   macro id-test = eval
+  macro plustest = [display [o+ 1 2 3.4 5]]
+  macro plustest2 = [display [o+]]
+  macro timestest = [display [o* 1 2 3.4 5]]
+  macro subtest = [display [o- 1]]
+  macro subtest2 = [display [o- 1 3.4]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -116,7 +122,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                     <nextLoc> 12 </nextLoc> 
                     <output> .List </output>
                     <keywords> 
-                       SetItem(if) 
+                       SetItem(oif) 
                        SetItem(quote) 
                        SetItem(begin) 
                        SetItem(define) 
@@ -134,7 +140,6 @@ kmod INTERN is including SKEME-SEMANTICS
   rule intern(#f)           => vF            [structural]
   rule intern(#unspecified) => vUnspec       [structural]
   rule intern(ID:Id)        => vn(ID)        [structural]
-  rule intern(I:Int)        => vi(I)         [structural]
   rule intern(F:Float)      => vf(F)         [structural]
   rule intern(R:Rat)        => vr(R)         [structural]
   rule intern(#\C:Char)     => vc(C)         [structural]
@@ -144,16 +149,8 @@ kmod INTERN is including SKEME-SEMANTICS
 
   --- interning String
   rule intern( Str:String ) => internS(string(.Map # lengthString(Str)), Str, 0) [structural]  
-  
-  --- unfortunately we need two versions of this because my 'if' ID confuses things between whether
-  --- or not this should be a conditional rule or if 'if' is the ID.  The only way to fix this is
-  --- to mention cells explicitly... or perhaps rename 'if'
-  --- leaving out of k level v. store level because I want a better way to do this
-  rule <k_> internS(KR:KResult, Str, _) => KR <_/k>
-    if lengthString(Str) ==Bool 0 [structural]
 
-  rule <store> loc(Loc:Rat) |-> (internS(KR:KResult, Str, _) => KR) <_/store>
-    if lengthString(Str) ==Bool 0 [structural]
+  rule internS(KR:KResult, Str, _) => KR if lengthString(Str) ==Bool 0 [structural]
 
   --- k level interning String
   rule <k_> 
@@ -261,7 +258,6 @@ kmod EXTERN is including SKEME-SEMANTICS
   rule extern(vF, M)               => #f            [structural]
   rule extern(vUnspec, M)          => #unspecified  [structural]
   rule extern(vn(ID:Id), M)        => ID            [structural]
-  rule extern(vi(I:Int), M)        => I             [structural]
   rule extern(vf(F:Float), M)      => F             [structural]
   rule extern(vr(R:Rat), M)        => R             [structural]
   rule extern(vc(C), M)            => #\C:Char      [structural]
@@ -302,7 +298,6 @@ kmod LITERAL-SEMANTICS is including SKEME-SEMANTICS
   rule <k> #t => vT                   <_/k> [structural]
   rule <k> #f => vF                   <_/k> [structural]
   rule <k> #unspecified => vUnspec    <_/k> [structural]
-  rule <k> I:Int => vi(I)             <_/k> [structural]
   rule <k> F:Float => vf(F)           <_/k> [structural]
   rule <k> R:Rat => vr(R)             <_/k> [structural]
   rule <k> #\C:Char  => vc(C)         <_/k> [structural]
@@ -350,7 +345,7 @@ endkm
 kmod IF-SEMANTICS is including SKEME-SEMANTICS
   op ite : Exp Exp Exp -> K [strict(1)]
      
-  rule <k> [if E1:Exp E2:Exp E3:Exp] => ite(E1, E2, E3)  <_/k> [structural]
+  rule <k> [oif E1:Exp E2:Exp E3:Exp] => ite(E1, E2, E3)  <_/k> [structural]
   rule ite(vT, E1, E2) => E1
   rule ite(vF, E1, E2) => E2
 endkm
@@ -359,8 +354,6 @@ kmod BEGIN-SEMANTICS is including SKEME-SEMANTICS
   op beg : List{Exp} -> K
 
   rule <k> [begin E:Exp EL:List{Exp}] => E ~> beg(EL) <_/k> [structural]
----  rule beg(E:Exp EL:List{Exp}) 
- ---   => E ~> beg(EL)
   rule I:Internal ~> beg(E:Exp EL:List{Exp}) 
     => E ~> beg(EL)
   rule I:Internal ~> beg(.List{Exp})
@@ -385,11 +378,94 @@ kmod DISPLAY-SEMANTICS is including APPLY-SEMANTICS + EXTERN
           <store> Store </store> 
 endkm
 
+kmod ARITHMETIC-SEMANTICS is including APPLY-SEMANTICS
+  op plus : List{Internal} -> K
+  op plusf : List{Internal} -> K
+
+  rule apply(b+ IL:List{Internal}) => plus(vr(0) IL) [structural]
+  rule plus(vr(R1:Rat) vr(R2:Rat) IL:List{Internal})
+    => plus(vr(R1 +Rat R2) IL)
+  rule plus(vr(R1:Rat) vf(F2:Float) IL:List{Internal})
+    => plusf(vf(Rat2Float(R1) +Float F2) IL)
+  rule plus(vr(R1:Rat))
+    => vr(R1) 
+  rule plusf(vf(F1:Float) vr(R2:Rat) IL:List{Internal})
+    => plusf(vf(F1 +Float Rat2Float(R2)) IL)
+  rule plusf(vf(F1:Float) vf(F2:Float) IL:List{Internal})
+    => plusf(vf(F1 +Float F2) IL)
+  rule plusf(vf(F1:Float))
+    => vf(F1) [structural]
+
+  op times : List{Internal} -> K
+  op timesf : List{Internal} -> K
+
+  rule apply(b* IL:List{Internal}) => times(vr(1) IL) [structural]
+  rule times(vr(R1:Rat) vr(R2:Rat) IL:List{Internal})
+    => times(vr(R1 *Rat R2) IL)
+  rule times(vr(R1:Rat) vf(F2:Float) IL:List{Internal})
+    => timesf(vf(Rat2Float(R1) *Float F2) IL)
+  rule times(vr(R1:Rat))
+    => vr(R1) 
+  rule timesf(vf(F1:Float) vr(R2:Rat) IL:List{Internal})
+    => timesf(vf(F1 *Float Rat2Float(R2)) IL)
+  rule timesf(vf(F1:Float) vf(F2:Float) IL:List{Internal})
+    => timesf(vf(F1 *Float F2) IL)
+  rule timesf(vf(F1:Float))
+    => vf(F1) [structural]
+
+  --- applying - to no arguments should
+  --- provoke an error, add when we do
+  --- error messages
+
+  op sub : List{Internal} -> K
+  op subf : List{Internal} -> K
+
+  rule apply(b- vr(R1:Rat)) => vr(-Rat R1) [structural]
+  rule apply(b- vf(F1:Float)) => vf(-Float F1) [structural] 
+  rule apply(b- vr(R1:Rat) IL:List{Internal}) => sub(vr(R1) IL) if IL =/=Bool .List{Internal} [structural] 
+  rule apply(b- vf(F1:Float) IL:List{Internal}) => subf(vf(F1) IL) if IL =/=Bool .List{Internal} [structural]
+
+  rule sub(vr(R1:Rat) vr(R2:Rat) IL:List{Internal})
+    => sub(vr(R1 +Rat (-Rat R2)) IL)
+  rule sub(vr(R1:Rat) vf(F2:Float) IL:List{Internal})
+    => subf(vf(Rat2Float(R1) +Float (-Float F2)) IL)
+  rule sub(vr(R1:Rat))
+    => vr(R1) 
+  rule subf(vf(F1:Float) vr(R2:Rat) IL:List{Internal})
+    => subf(vf(F1 +Float (-Float Rat2Float(R2))) IL)
+  rule subf(vf(F1:Float) vf(F2:Float) IL:List{Internal})
+    => subf(vf(F1 +Float (-Float F2)) IL)
+  rule subf(vf(F1:Float))
+    => vf(F1) [structural]
+
+  op div : List{Internal} -> K
+  op divf : List{Internal} -> K
+
+--- --- rule apply(b/ vr(R1:Rat)) => vr((1 /Rat R1)) [structural]
+---  rule apply(b/ vf(F1:Float)) => vf(1.0 /Float F1) [structural] 
+---  rule apply(b/ vr(R1:Rat) IL:List{Internal}) => div(vr(R1) IL) if IL =/=Bool .List{Internal} [structural] 
+---  rule apply(b/ vf(F1:Float) IL:List{Internal}) => divf(vf(F1) IL) if IL =/=Bool .List{Internal} [structural]
+---
+---  rule div(vr(R1:Rat) vr(R2:Rat) IL:List{Internal})
+---    => div(vr(R1 /Rat R2) IL)
+---  rule div(vr(R1:Rat) vf(F2:Float) IL:List{Internal})
+---    => divf(vf(Rat2Float(R1) /Float F2) IL)
+---  rule div(vr(R1:Rat))
+---    => vr(R1) 
+---  rule divf(vf(F1:Float) vr(R2:Rat) IL:List{Internal})
+---    => divf(vf(F1 /Float Rat2Float(R2)) IL)
+---  rule divf(vf(F1:Float) vf(F2:Float) IL:List{Internal})
+---    => divf(vf(F1 /Float F2) IL)
+---  rule divf(vf(F1:Float))
+---    => vf(F1) [structural]
+endkm
+
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
   + ID-SEMANTICS + DEFINE-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
   + SKEME-PROGRAMS 
   + APPLY-SEMANTICS + EVAL-SEMANTICS + DISPLAY-SEMANTICS
+  + ARITHMETIC-SEMANTICS
   
   syntax Bag ::= run( List{K} ) | out( List ) 
 
