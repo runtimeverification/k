@@ -15,13 +15,12 @@ kmod SKEME-SYNTAX is including PL-INT + PL-RAT + PL-FLOAT + PL-ID + PL-STRING
   
   op length : List{Exp} -> Int
   eq length(E:Exp EL:List{Exp}) = 1 +Int length(EL)
-  eq length(.List{Exp}) = 0 
-
-  syntax Program ::= program(List{Exp}) 
+  eq length(.List{Exp}) = 0  
 
   syntax Id ::= eval | display | set-car! | set-cdr! | o= | o+ | o- | o* | o/
               | call-with-current-continuation | call/cc | car | cdr 
-              | if | quote | begin
+              | if | quote | begin | define
+              | x | id( String )
 
   macro [ .List{Exp} ] = [] 
   macro [ .List{Exp} * E:Exp ] = [* E] 
@@ -59,23 +58,25 @@ endkm
 
 kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   syntax List{Exp} ::= bar | foo | baz | chaz | kraz | apply | apply2 | id-test 
+                      | begintest
 
   ---macro foo = [eval ![1 * 2]]
   macro foo = #[]
 ---  macro bar = []
-  macro bar = [if #t "true" "false"]
+  macro bar = [display [if #t "true" "false"]]
   macro baz = #[#[#[3]] "true"]
   macro chaz = [eval ![1 * [2]]]
   macro kraz = ![#[42 [43]] "44"]
-  macro apply = [1 2 3 4]
-  macro apply2 = [1]
+  macro apply = [display [define x 3]][display x]
+  macro apply2 = [display "true"][display "false"] [display 16]
+  macro begintest = [display [begin [display "true"][display "false"] [display 16]]]
   macro id-test = eval
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
 
 
-  syntax K ::= Program | Exp | Char | String 
+  syntax K ::= List{Exp} | Char | String 
   syntax KResult ::= Internal
 
   op loc : K -> K
@@ -114,7 +115,12 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                     </store> 
                     <nextLoc> 12 </nextLoc> 
                     <output> .List </output>
-                    <keywords> SetItem(if) SetItem(quote) SetItem(begin) </keywords>
+                    <keywords> 
+                       SetItem(if) 
+                       SetItem(quote) 
+                       SetItem(begin) 
+                       SetItem(define) 
+                    </keywords>
                </T>
 endkm
 
@@ -291,7 +297,7 @@ endkm
 --- I don't like how I have to essentially rewrite intern for all literals here,
 --- but we can't match on sort in K.  Is there a better way to do this?
 --- I'd like to say any Literal on the top of the K rewrites to intern of that Literal
-kmod LITERAL-SEMANTICS is including INTERN
+kmod LITERAL-SEMANTICS is including SKEME-SEMANTICS
 
   rule <k> #t => vT                   <_/k> [structural]
   rule <k> #f => vF                   <_/k> [structural]
@@ -326,43 +332,64 @@ kmod ID-SEMANTICS is including SKEME-SEMANTICS
   if notBool($hasMapping(Env, ID))
 endkm
 
+kmod DEFINE-SEMANTICS is including SKEME-SEMANTICS
+  op def : Exp Exp -> K [strict(2)]
+
+  rule <k> [define ID:Id E:Exp] => def(ID,E) <_/k> [structural]
+  
+  rule <k> def(ID:Id, I:Internal) => vUnspec  <_/k> 
+       <globalEnv_> .Map => ID |-> loc(N:Rat) </globalEnv> 
+       <store_>     .Map => loc(N) |-> I      </store>
+       <nextLoc>     N => N +Rat 1            </nextLoc>   
+endkm
+
 kmod QUOTE-SEMANTICS is including INTERN
   rule <k> [quote E:Exp] => intern(E) <_/k>
 endkm 
 
 kmod IF-SEMANTICS is including SKEME-SEMANTICS
-  op ite : K K K -> K [strict(1)]
+  op ite : Exp Exp Exp -> K [strict(1)]
      
   rule <k> [if E1:Exp E2:Exp E3:Exp] => ite(E1, E2, E3)  <_/k> [structural]
   rule ite(vT, E1, E2) => E1
   rule ite(vF, E1, E2) => E2
 endkm
 
+kmod BEGIN-SEMANTICS is including SKEME-SEMANTICS
+  op beg : List{Exp} -> K
+
+  rule <k> [begin EL:List{Exp}] => beg(EL) <_/k> [structural]
+  rule beg(E:Exp EL:List{Exp}) 
+    => E ~> beg(EL)
+  rule I:Internal ~> beg(E:Exp EL:List{Exp}) 
+    => beg(E EL)
+  rule I:Internal ~> beg(.List{Exp})
+    => I 
+endkm
+
 kmod APPLY-SEMANTICS is including SKEME-SEMANTICS
-  op apply : List{K} -> K 
-
-  context apply((? ,, `[HOLE`]:K ,, ?))
-
-  rule <k> [E:Exp EL:List{Exp}] => apply((E ,, getList{K}(EL))) <_/k> <keywords> S:Set </keywords>
+  op apply : List{Exp} -> K [strict] 
+  
+  rule <k> [E:Exp EL:List{Exp}] => apply(E EL) <_/k> <keywords> S:Set </keywords>
     if notBool(SetItem(E) in S) [structural] 
 endkm
 
 kmod EVAL-SEMANTICS is including APPLY-SEMANTICS + EXTERN
-  --- TEST!!!  eval should be treated as a function!
----  op e : -> K 
----  rule <k> [eval E:Exp] => E ~> e <_/k> 
----  
----  rule <k> (KR:KResult ~> e) => extern(KR, M:Map) <_/k> <store> M </store> 
+     rule <k> apply(bEval I:Internal) => extern(I, M:Map) <_/k> <store> M </store> 
+endkm
 
-     rule <k> apply((bEval ,, KR:KResult)) => extern(KR, M:Map) <_/k> <store> M </store> [structural]
+kmod DISPLAY-SEMANTICS is including APPLY-SEMANTICS + EXTERN
 
-     rule <k> apply((vi(1) ,, vi(2))) => vi(1) <_/k> [structural]
+     rule <k> apply(bDisplay I:Internal) => vUnspec <_/k> 
+          <output_> .List => ListItem(extern(I, Store:Map)) </output> 
+          <store> Store </store> 
 endkm
 
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
-  + ID-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + SKEME-PROGRAMS 
-  + APPLY-SEMANTICS + EVAL-SEMANTICS
+  + ID-SEMANTICS + DEFINE-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
+  + SKEME-PROGRAMS 
+  + APPLY-SEMANTICS + EVAL-SEMANTICS + DISPLAY-SEMANTICS
   
   syntax Bag ::= run( List{K} ) | out( List ) 
 
@@ -373,12 +400,8 @@ kmod SKEME is including
   ---intial run macro, this starts interpretation
   macro run(KL:List{K}) = <T_> <program> KLtoL(KL) </program> <_/T>
   
-   
-  --- silly test
----  rule <k> [3] => .K <_/k> [structural]
----  rule <k> [4] => .K <_/k> [structural]
----  rule <k> [5] => .K <_/k> [structural]
-
+  --- if all that remains is a value, dissolve it
+  rule <k> KR:KResult => .K </k> 
 
   --- if the k cell is empty, we take the first expression in the program and put it
   --- in the k cell
