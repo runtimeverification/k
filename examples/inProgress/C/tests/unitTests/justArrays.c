@@ -8,7 +8,7 @@ int main(void) {
 	z[0][1][0] = z[1][0][1];
 	w[0][1][0] = w[1][0][1];
 	if (x[7] != 14) {return 1;}
-	if (y[1][0] != 2) {return 3;}
+	if (y[1][0] != 2) {return 2;}
 	if (z[0][1][0] != 6) {return 3;}
 	if (w[0][1][0] != 6) {return 4;}
 	if (sizeof(x)/sizeof(x[0]) != 9) {return 50;}

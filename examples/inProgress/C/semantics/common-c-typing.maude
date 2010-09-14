@@ -381,6 +381,7 @@ mod COMMON-C-TYPING is
 	ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
 		if notBool hasArrayType(T:Type) .
 	eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) = arrayType(arrayType(T:Type, N:Nat), M:Nat) .
+	eq ArrayType(incompleteArrayType(T:Type), tv(N:Nat, ?)) = incompleteArrayType(arrayType(T:Type, N:Nat)) .
 	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
 	ceq PointerType(T:Type) = pointerType(T:Type)
 		if notBool hasFunctionType(T:Type) .

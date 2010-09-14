@@ -813,6 +813,12 @@ mod COMMON-INITIALIZATION is
 		: KSentence [metadata "structural"] .
 	mb rule
 		< currentSubObject > 
+			ListItem(te(K:K, incompleteArrayType(T:Type)))
+			=> ListItem(te(K:K[0], T:Type)) ListItem(te(K:K, incompleteArrayType(T:Type)))
+		...</ currentSubObject >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< currentSubObject > 
 			ListItem(te(K:K, structType(S:Id)))
 			=> ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
 		...</ currentSubObject >
@@ -886,9 +892,9 @@ mod COMMON-INITIALIZATION is
 	op finishCompoundInit : List -> K .
 	mb rule
 		< k > fillInitializer(CompoundInit(L:List{C})) 
-			=> fillInitializer(L:List{C}) ~> finishCompoundInit(next ListItem(te(K:K, T:Type)) Remainder:List)
+			=> fillInitializer(L:List{C}) ~> finishCompoundInit(next ListItem(te(K:K, T:Type)) Remainder:ListItem)
 		...</ k >
-		< currentSubObject > (?:ListItem => .) ListItem(te(K:K, T:Type)) (Remainder:List => .) </ currentSubObject >
+		< currentSubObject > (?:List => .) ListItem(te(K:K, T:Type)) (Remainder:ListItem => .) </ currentSubObject >
 		< currentObject > (. => ListItem(te(K:K, T:Type))) ...</ currentObject >
 		if hasAggregateType(T:Type) orBool hasUnionType(T:Type)
 		: KSentence [metadata "structural"] .
