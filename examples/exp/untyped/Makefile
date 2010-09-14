@@ -5,6 +5,9 @@ KCOMPILE ?= ../../../tools/kompile.pl
 # this is the name of the main maude module 
 LANGUAGE_NAME = EXP-UNTYPED
 
+# this are all interesting modules (used to latexify)
+LANGUAGE_MODULES = EXP-SYNTAX EXP-DESUGARED-SYNTAX EXP-UNTYPED-SEMANTICS 
+
 #this is the basename of the main file
 MAIN_FILE = exp-untyped
 

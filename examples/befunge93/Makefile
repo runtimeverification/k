@@ -5,6 +5,8 @@ KCOMPILE ?= ../../tools/kompile.pl
 # this is the name of the main maude module 
 LANGUAGE_NAME = BEFUNGE
 
+LANGUAGE_MODULES = BEFUNGE
+
 #this is the basename of the main file
 MAIN_FILE = befunge
 

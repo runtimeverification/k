@@ -5,6 +5,9 @@ KCOMPILE ?= ../../tools/kompile.pl
 # this is the name of the main maude module 
 LANGUAGE_NAME = THUE
 
+# this are all interesting modules (used to latexify)
+LANGUAGE_MODULES = THUE
+
 #this is the basename of the main file
 MAIN_FILE = thue
 

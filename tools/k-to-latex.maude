@@ -206,9 +206,10 @@ mod DECL-META-LATEX-PRINT is
   eq getName(OPDS' (op Q : nil -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS, Q, Ty) = '_ .
   eq getName(OPDS' (op Q : nil -> Ty [AS metadata(Str) AS'] .) OPDS, Q, Ty)
    = getName(Q, metadataParse(Str)) [owise] .
-  eq getName(OPDS, Q, 'Qid) = getLabelName(OPDS, qid(substr(string(Q),1,length(string(Q))))) .
+ ceq getName(OPDS, Q, Ty) 
+   = getLabelName(OPDS, qid(substr(string(Q),1,length(string(Q))))) 
+  if substr(string(Q),0,1) = "'" .
   eq getName(OPDS, Q, Ty) = Q [owise] .
-
 
   op getLabelName : OpDeclSet Qid -> Qid .
   eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS, Q) = '_ .
@@ -217,7 +218,7 @@ mod DECL-META-LATEX-PRINT is
   eq getLabelName(OPDS, Q) = Q [owise] .
    
   op addParams : Qid Nat -> Qid .
-  eq addParams(Q, N) = if latexCmd(Q) then qidList2Qid('\ensuremath '`{ qid(string(Q)+ "NoSpace") genQids(N, '`{ '\_ '`}) '`}) else Q fi .
+  eq addParams(Q, N) = if latexCmd(Q) then qidList2Qid('\ensuremath '`{ qid(string(Q)+ "NoSpace") genQids(N, '`{ '\_ '`}) '`}) else qid(replaceAll(string(Q),"_" |-> "\\_")) fi .
 
   var Q' : Qid . var AS' AS1 AS2 : AttrSet .
   op getName : Qid AttrSet -> Qid .
@@ -244,7 +245,7 @@ mod DECL-META-LATEX-PRINT is
   ceq printTerm(U, Q['0.Zero]) = printTerm(U, qid(string(N,10) + ".Nat")) 
    if N := getNat(string(Q)) .
   ceq printTerm(U, '_`(_`)[Q,'_`,`,_[NeTl]]) = printTerm(U,Q'[NeTl])
-   if getType(Q) = 'Qid 
+   if substr(string(getName(Q)),0,1) = "'" 
    /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) .
 ---(
   ceq printTerm(U, '_`(_`)[Ct,T]) = printTerm(U,Ct)
@@ -253,7 +254,7 @@ mod DECL-META-LATEX-PRINT is
    if sortLeq(U,getType(V),KLabel) /\ T = nilKList .
 ---)
   ceq printTerm(U, '_`(_`)[Q,T]) = printTerm(U,Q'[T])
-   if getType(Q) = 'Qid 
+   if substr(string(getName(Q)),0,1) = "'" 
    /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise] .
 
   op getNat : String -> [Nat] .
@@ -549,6 +550,11 @@ mod DECL-META-LATEX-PRINT is
   eq eMetaLatexPrint(M, (poly(NL) AtS))
     = ('poly '`( eMetaLatexPrint(NL) '`) 
        eMetaLatexPrint(M, AtS)) .
+
+  eq eMetaLatexPrint(M, (karity(N) AtS))
+    = ('arity eMetaLatexPrint(N)  
+       eMetaLatexPrint(M, AtS)) .
+
 ---(
   eq eMetaLatexPrint(M, (vstrict(QIL) AtS))
     = ('strict '`( QIL '`) 
@@ -1000,7 +1006,7 @@ mod LATEX-PRINT-META is
      else printStr(string(Q)) fi fi .
  
   op printStr : String -> QidList .
-  eq printStr(Str) = string2qidList(replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))
+  eq printStr(Str) = string2qidList(Str ---replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))
 ) .
  
   eq printTerm(M, \kprefix{Ct}{T}) = '\kprefix '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .

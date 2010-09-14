@@ -4,6 +4,10 @@ CROP_PDF_FILE=$MAIN_FILE-crop.pdf
 RUNDIRECTORY="${0%/*}"
 $RUNDIRECTORY/approx-pdf.sh $MAIN_FILE
 PAGES=$?
+if [ "$PAGES" -eq 0 ] ; then 
+  echo "There are errors in the tex file please check $MAIN_FILE.tex"
+  exit 1 
+fi
 H=$(( 9 * PAGES))
 PH=$(( H + 1))
 echo "Re-running latex with approximative height $PH inches" 
