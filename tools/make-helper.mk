@@ -26,7 +26,7 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -u
 
 # this should build the latex
 latex: $(LATEX_FILE)
