@@ -135,7 +135,6 @@ kmod HASKELL-SYNTAX is
 	op ModuleName : String -> ModuleName [ctor] .
 
 (***
-
     -- | Constructors with special syntax.
     -- These names are never qualified, and always refer to builtin type or
     -- data constructors.
@@ -158,7 +157,6 @@ kmod HASKELL-SYNTAX is
   op UnboxedSingleCon : -> SpecialCon .
 
 ***(
-
     -- | This type is used to represent qualified variables, and also
     --   qualified constructors.
     data QName
@@ -173,7 +171,6 @@ kmod HASKELL-SYNTAX is
   op Special : SpecialCon -> QName .
 
 ***(
-
     -- | This type is used to represent variables, and also constructors.
     data Name
         = Ident String    -- ^ /varid/ or /conid/.
@@ -185,32 +182,52 @@ kmod HASKELL-SYNTAX is
   op Symbol : String -> Name .
 
 ***(
-
     -- | An implicit parameter name.
     data IPName
         = IPDup String -- ^ ?/ident/, non-linear implicit parameter
         | IPLin String -- ^ %/ident/, linear implicit parameter
+***)
 
+
+
+***(
     -- | Possibly qualified infix operators (/qop/), appearing in expressions.
     data QOp
         = QVarOp QName  -- ^ variable operator (/qvarop/)
         | QConOp QName  -- ^ constructor operator (/qconop/)
 
+***)
+
+
+
+***(
     -- | Operators appearing in @infix@ declarations are never qualified.
     data Op
         = VarOp Name    -- ^ variable operator (/varop/)
         | ConOp Name    -- ^ constructor operator (/conop/)
+***)
 
+
+
+***(
     -- | A name (/cname/) of a component of a class or data type in an @import@
     --   or export specification.
     data CName
         = VarName Name  -- ^ name of a method or field
         | ConName Name  -- ^ name of a data constructor
+***)
 
+
+
+***(
     -- | A complete Haskell source module.
     data Module = Module SrcLoc ModuleName [ModulePragma] (Maybe WarningText)
                             (Maybe [ExportSpec]) [ImportDecl] [Decl]
+***)
 
+
+
+***(
     -- | An item in a module's export specification.
     data ExportSpec
          = EVar QName                   -- ^ variable
@@ -225,7 +242,11 @@ kmod HASKELL-SYNTAX is
                                         --   a datatype exported with some of its constructors.
          | EModuleContents ModuleName   -- ^ @module M@:
                                         --   re-export a module.
+***)
 
+
+
+***(
     -- | An import declaration.
     data ImportDecl = ImportDecl
         { importLoc :: SrcLoc           -- ^ position of the @import@ keyword.
@@ -239,7 +260,11 @@ kmod HASKELL-SYNTAX is
                 -- The 'Bool' is 'True' if the names are excluded
                 -- by @hiding@.
         }
+***)
 
+
+
+***(
     -- | An import specification, representing a single explicit item imported
     --   (or hidden) from a module.
     data ImportSpec
@@ -252,16 +277,28 @@ kmod HASKELL-SYNTAX is
          | IThingWith Name [CName]  -- ^ @T(C_1,...,C_n)@:
                                     --   a class imported with some of its methods, or
                                     --   a datatype imported with some of its constructors.
+***)
 
+
+
+***(
     -- | Associativity of an operator.
     data Assoc
          = AssocNone  -- ^ non-associative operator (declared with @infix@)
          | AssocLeft  -- ^ left-associative operator (declared with @infixl@).
          | AssocRight -- ^ right-associative operator (declared with @infixr@)
+***)
 
+
+
+***(
     -- | A single derived instance, which may have arguments since it may be a MPTC.
     type Deriving = (QName, [Type])
+***)
 
+
+
+***(
     -- | A top-level declaration.
     data Decl
          = TypeDecl     SrcLoc Name [TyVarBind] Type
@@ -321,7 +358,11 @@ kmod HASKELL-SYNTAX is
          -- ^ A SPECIALISE instance pragma
          | AnnPragma        SrcLoc Annotation
          -- ^ An ANN pragma
+***)
 
+
+
+***(
     -- | An annotation through an ANN pragma.
     data Annotation
         = Ann       Name Exp
@@ -330,29 +371,53 @@ kmod HASKELL-SYNTAX is
         -- ^ An annotation for a declared type.
         | ModuleAnn      Exp
         -- ^ An annotation for the defining module.
+***)
 
+
+
+***(
     -- | A flag stating whether a declaration is a data or newtype declaration.
     data DataOrNew = DataType | NewType
+***)
 
+
+
+***(
     -- | A binding group inside a @let@ or @where@ clause.
     data Binds
         = BDecls [Decl]     -- ^ An ordinary binding group
         | IPBinds [IPBind]  -- ^ A binding group for implicit parameters
+***)
 
+
+
+***(
     -- | A binding of an implicit parameter.
     data IPBind = IPBind SrcLoc IPName Exp
+***)
 
+
+
+***(
     -- | Clauses of a function binding.
     data Match
          = Match SrcLoc Name [Pat] (Maybe Type) Rhs {-where-} Binds
+***)
 
+
+
+***(
     -- | A single constructor declaration within a data type declaration,
     --   which may have an existential quantification binding.
     data QualConDecl
         = QualConDecl SrcLoc
             {-forall-} [TyVarBind] {- . -} Context
             {- => -} ConDecl
+***)
 
+
+
+***(
     -- | Declaration of an ordinary data constructor.
     data ConDecl
          = ConDecl Name [BangType]
@@ -361,11 +426,19 @@ kmod HASKELL-SYNTAX is
                     -- ^ infix data constructor
          | RecDecl Name [([Name],BangType)]
                     -- ^ record constructor
+***)
 
+
+
+***(
     -- | A single constructor declaration in a GADT data type declaration.
     data GadtDecl
         = GadtDecl SrcLoc Name Type
+***)
 
+
+
+***(
     -- | Declarations inside a class declaration.
     data ClassDecl
         = ClsDecl    Decl
@@ -376,7 +449,11 @@ kmod HASKELL-SYNTAX is
                 -- ^ declaration of an associated type synonym
         | ClsTyDef   SrcLoc Type    Type
                 -- ^ default choice for an associated type synonym
+***)
 
+
+
+***(
     -- | Declarations inside an instance declaration.
     data InstDecl
         = InsDecl   Decl
@@ -387,26 +464,42 @@ kmod HASKELL-SYNTAX is
                 -- ^ an associated data type implementation
         | InsGData  SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl] [Deriving]
                 -- ^ an associated data type implemented using GADT style
+***)
 
+
+
+***(
     -- | The type of a constructor argument or field, optionally including
     --   a strictness annotation.
     data BangType
          = BangedTy   Type  -- ^ strict component, marked with \"@!@\"
          | UnBangedTy Type  -- ^ non-strict component
          | UnpackedTy Type  -- ^ unboxed component, marked with an UNPACK pragma
+***)
 
+
+
+***(
     -- | The right hand side of a function or pattern binding.
     data Rhs
          = UnGuardedRhs Exp -- ^ unguarded right hand side (/exp/)
          | GuardedRhss  [GuardedRhs]
                             -- ^ guarded right hand side (/gdrhs/)
+***)
 
+
+
+***(
     -- | A guarded right hand side @|@ /stmts/ @=@ /exp/.
     --   The guard is a series of statements when using pattern guards,
     --   otherwise it will be a single qualifier expression.
     data GuardedRhs
          = GuardedRhs SrcLoc [Stmt] Exp
+***)
 
+
+
+***(
     -- | A type qualified with a context.
     --   An unqualified type has an empty context.
     data Type
@@ -423,12 +516,20 @@ kmod HASKELL-SYNTAX is
          | TyParen Type             -- ^ type surrounded by parentheses
          | TyInfix Type QName Type  -- ^ infix type constructor
          | TyKind  Type Kind        -- ^ type with explicit kind signature
+***)
 
+
+
+***(
     -- | A type variable declaration, optionally with an explicit kind annotation.
     data TyVarBind
         = KindedVar Name Kind   -- ^ variable binding with kind annotation
         | UnkindedVar Name      -- ^ ordinary variable binding
+***)
 
+
+
+***(
     -- | An explicit kind annotation.
     data Kind
         = KindStar          -- ^ @*@, the kind of types
@@ -436,16 +537,27 @@ kmod HASKELL-SYNTAX is
         | KindFn Kind Kind  -- ^ @->@, the kind of a type constructor
         | KindParen Kind    -- ^ a kind surrounded by parentheses
         | KindVar Name      -- ^ a kind variable (as of yet unsupported by compilers)
+***)
 
 
+
+***(
     -- | A functional dependency, given on the form
     --   l1 l2 ... ln -> r2 r3 .. rn
     data FunDep
         = FunDep [Name] [Name]
+***)
 
+
+
+***(
     -- | A context is a set of assertions
     type Context = [Asst]
+***)
 
+
+
+***(
     -- | Class assertions.
     --   In Haskell 98, the argument would be a /tyvar/, but this definition
     --   allows multiple parameters, and allows them to be /type/s.
@@ -454,7 +566,11 @@ kmod HASKELL-SYNTAX is
               | InfixA Type QName Type  -- ^ class assertion where the class name is given infix
               | IParam IPName Type      -- ^ implicit parameter assertion
               | EqualP Type   Type      -- ^ type equality constraint
+***)
 
+
+
+***(
     -- | /literal/
     -- Values of this type hold the abstract value of the literal, not the
     -- precise string representation used.  For example, @10@, @0o12@ and @0xa@
@@ -470,7 +586,11 @@ kmod HASKELL-SYNTAX is
         | PrimDouble Rational   -- ^ unboxed double literal
         | PrimChar   Char       -- ^ unboxed character literal
         | PrimString String     -- ^ unboxed string literal
+***)
 
+
+
+***(
     -- | Haskell expressions.
     data Exp
         = Var QName                 -- ^ variable
@@ -537,38 +657,66 @@ kmod HASKELL-SYNTAX is
         | RightArrApp     Exp Exp   -- ^ arrow application (from right): /exp/ @>-@ /exp/
         | LeftArrHighApp  Exp Exp   -- ^ higher-order arrow application (from left): /exp/ @-<<@ /exp/
         | RightArrHighApp Exp Exp   -- ^ higher-order arrow application (from right): /exp/ @>>-@ /exp/
+***)
 
+
+
+***(
     -- | The name of an xml element or attribute,
     --   possibly qualified with a namespace.
     data XName
         = XName String              -- <name ...
         | XDomName String String    -- <dom:name ...
+***)
 
+
+
+***(
     -- | An xml attribute, which is a name-expression pair.
     data XAttr = XAttr XName Exp
+***)
 
+
+
+***(
     -- | A template haskell bracket expression.
     data Bracket
         = ExpBracket Exp        -- ^ expression bracket: @[| ... |]@
         | PatBracket Pat        -- ^ pattern bracket: @[p| ... |]@
         | TypeBracket Type      -- ^ type bracket: @[t| ... |]@
         | DeclBracket [Decl]    -- ^ declaration bracket: @[d| ... |]@
+***)
 
+
+
+***(
     -- | A template haskell splice expression
     data Splice
         = IdSplice String       -- ^ variable splice: @$var@
         | ParenSplice Exp       -- ^ parenthesised expression splice: @$(/exp/)@
+***)
 
+
+
+***(
     -- | The safety of a foreign function call.
     data Safety
         = PlayRisky         -- ^ unsafe
         | PlaySafe Bool     -- ^ safe ('False') or threadsafe ('True')
+***)
 
+
+
+***(
     -- | The calling convention of a foreign function call.
     data CallConv
         = StdCall
         | CCall
+***)
 
+
+
+***(
     -- | A top level options pragma, preceding the module header.
     data ModulePragma
         = LanguagePragma   SrcLoc [Name]    -- ^ LANGUAGE pragma
@@ -576,29 +724,48 @@ kmod HASKELL-SYNTAX is
                             -- ^ OPTIONS pragma, possibly qualified with a tool, e.g. OPTIONS_GHC
         | AnnModulePragma  SrcLoc Annotation
                             -- ^ ANN pragma with module scope
+***)
 
+
+
+***(
     -- | Activation clause of a RULES pragma.
     data Activation
         = AlwaysActive
         | ActiveFrom  Int
         | ActiveUntil Int
+***)
 
+
+
+***(
     -- | The body of a RULES pragma.
     data Rule
         = Rule String Activation (Maybe [RuleVar]) Exp Exp
+***)
 
+
+
+***(
     -- | Variables used in a RULES pragma, optionally annotated with types
     data RuleVar
         = RuleVar Name
         | TypedRuleVar Name Type
+***)
 
+
+
+***(
     -- | Warning text to optionally use in the module header of e.g.
     --   a deprecated module.
     data WarningText
         = DeprText String
         | WarnText String
+***)
 
 
+
+***(
     -- | A pattern, to be matched against a value.
     data Pat
         = PVar Name                     -- ^ variable
@@ -627,10 +794,18 @@ kmod HASKELL-SYNTAX is
         | PExplTypeArg QName Type       -- ^ Explicit generics style type argument e.g. @f {| Int |} x = ...@
         | PQuasiQuote String String     -- ^ quasi quote patter: @[$/name/| /string/ |]@
         | PBangPat Pat                  -- ^ strict (bang) pattern: @f !x = ...@
+***)
 
+
+
+***(
     -- | An XML attribute in a pattern.
     data PXAttr = PXAttr XName Pat
+***)
 
+
+
+***(
     -- | A regular pattern operator.
     data RPatOp
         = RPStar    -- ^ @*@ = 0 or more
@@ -639,7 +814,11 @@ kmod HASKELL-SYNTAX is
         | RPPlusG   -- ^ @+!@ = 1 or more, greedy
         | RPOpt     -- ^ @?@ = 0 or 1
         | RPOptG    -- ^ @?!@ = 0 or 1, greedy
+***)
 
+
+
+***(
     -- | An entity in a regular pattern.
     data RPat
         = RPOp RPat RPatOp      -- ^ operator pattern, e.g. pat*
@@ -650,13 +829,21 @@ kmod HASKELL-SYNTAX is
         | RPAs Name RPat        -- ^ linear variable binding, e.g. foo\@(1 | 2)
         | RPParen RPat          -- ^ parenthesised pattern, e.g. (2*)
         | RPPat Pat             -- ^ an ordinary pattern
+***)
 
+
+
+***(
     -- | An /fpat/ in a labeled record pattern.
     data PatField
         = PFieldPat QName Pat       -- ^ ordinary label-pattern pair
         | PFieldPun Name            -- ^ record field pun
         | PFieldWildcard            -- ^ record field wildcard
+***)
 
+
+
+***(
     -- | A statement, representing both a /stmt/ in a @do@-expression,
     --   an ordinary /qual/ in a list comprehension, as well as a /stmt/
     --   in a pattern guard.
@@ -669,7 +856,11 @@ kmod HASKELL-SYNTAX is
                             --   a guard expression
         | LetStmt Binds     -- ^ local bindings
         | RecStmt [Stmt]    -- ^ a recursive binding group for arrows
+***)
 
+
+
+***(
     -- | A general /transqual/ in a list comprehension,
     --   which could potentially be a transform of the kind
     --   enabled by TransformListComp.
@@ -680,28 +871,48 @@ kmod HASKELL-SYNTAX is
         | GroupBy      Exp          -- ^ @then@ @group@ @by@ /exp/
         | GroupUsing   Exp          -- ^ @then@ @group@ @using@ /exp/
         | GroupByUsing Exp Exp      -- ^ @then@ @group@ @by@ /exp/ @using@ /exp/
+***)
 
+
+
+***(
     -- | An /fbind/ in a labeled construction or update expression.
     data FieldUpdate
         = FieldUpdate QName Exp     -- ^ ordinary label-expresion pair
         | FieldPun Name             -- ^ record field pun
         | FieldWildcard             -- ^ record field wildcard
+***)
 
+
+
+***(
     -- | An /alt/ alternative in a @case@ expression.
     data Alt
         = Alt SrcLoc Pat GuardedAlts Binds
+***)
 
+
+
+***(
     -- | The right-hand sides of a @case@ alternative,
     --   which may be a single right-hand side or a
     --   set of guarded ones.
     data GuardedAlts
         = UnGuardedAlt Exp          -- ^ @->@ /exp/
         | GuardedAlts  [GuardedAlt] -- ^ /gdpat/
+***)
 
+
+
+***(
     -- | A guarded case alternative @|@ /stmts/ @->@ /exp/.
     data GuardedAlt
         = GuardedAlt SrcLoc [Stmt] Exp
+***)
 
+
+
+***(
     -----------------------------------------------------------------------------
     -- Builtin names.
 
@@ -767,5 +978,4 @@ kmod HASKELL-SYNTAX is
 
     tuple_tycon :: Boxed -> Int -> Type
     tuple_tycon b i = TyCon (tuple_tycon_name b i)
-
 ***)
