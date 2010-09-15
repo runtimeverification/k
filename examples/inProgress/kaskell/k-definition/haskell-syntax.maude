@@ -1,16 +1,16 @@
 kmod HASKELL-SYNTAX is
-	including PL-BOOL
-	including PL-EXT-BOOL
-	including PL-NAT
-	including PL-INT
-	including PL-RAT
-	including PL-FLOAT
-	including PL-STRING
-	including PL-CONVERSION
-	including PL-QID
-	including PL-RANDOM
-	including PL-ID
-	including K
+	including PL-BOOL .
+	including PL-EXT-BOOL .
+	including PL-NAT .
+	including PL-INT .
+	including PL-RAT .
+	including PL-FLOAT .
+	including PL-STRING .
+	including PL-CONVERSION .
+	including PL-QID .
+	including PL-RANDOM .
+	including PL-ID .
+	including K .
 
 ***(
     Haskell syntax, as defined in Language.Haskell.Exts.Syntax
@@ -128,11 +128,13 @@ kmod HASKELL-SYNTAX is
 
     -- | The name of a Haskell module.
     newtype ModuleName = ModuleName String
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
+
+***)
+
+  sort ModuleName .
+	op ModuleName : String -> ModuleName [ctor] .
+
+(***
 
     -- | Constructors with special syntax.
     -- These names are never qualified, and always refer to builtin type or
@@ -145,11 +147,17 @@ kmod HASKELL-SYNTAX is
                                 --   constructors @(,)@ etc, possibly boxed @(\#,\#)@
         | Cons                  -- ^ list data constructor @(:)@
         | UnboxedSingleCon      -- ^ unboxed singleton tuple constructor @(\# \#)@
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
+***)
+
+  sort SpecialCon .
+  op UnitCon : -> SpecialCon .
+  op ListCon : -> SpecialCon .
+  op FunCon : -> SpecialCon .
+  op TupleCon : Boxed Int -> SpecialCon .
+  op Cons : -> SpecialCon .
+  op UnboxedSingleCon : -> SpecialCon .
+
+***(
 
     -- | This type is used to represent qualified variables, and also
     --   qualified constructors.
@@ -157,71 +165,51 @@ kmod HASKELL-SYNTAX is
         = Qual ModuleName Name    -- ^ name qualified with a module name
         | UnQual Name             -- ^ unqualified local name
         | Special SpecialCon      -- ^ built-in constructor with special syntax
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
+***)
+
+  sort QName .
+  op Qual : ModuleName Name -> QName .
+  op UnQual : Name -> QName .
+  op Special : SpecialCon -> QName .
+
+***(
 
     -- | This type is used to represent variables, and also constructors.
     data Name
         = Ident String    -- ^ /varid/ or /conid/.
         | Symbol String   -- ^ /varsym/ or /consym/
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
+***)
+
+  sort Name .
+  op Ident : String -> Name .
+  op Symbol : String -> Name .
+
+***(
 
     -- | An implicit parameter name.
     data IPName
         = IPDup String -- ^ ?/ident/, non-linear implicit parameter
         | IPLin String -- ^ %/ident/, linear implicit parameter
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Possibly qualified infix operators (/qop/), appearing in expressions.
     data QOp
         = QVarOp QName  -- ^ variable operator (/qvarop/)
         | QConOp QName  -- ^ constructor operator (/qconop/)
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Operators appearing in @infix@ declarations are never qualified.
     data Op
         = VarOp Name    -- ^ variable operator (/varop/)
         | ConOp Name    -- ^ constructor operator (/conop/)
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A name (/cname/) of a component of a class or data type in an @import@
     --   or export specification.
     data CName
         = VarName Name  -- ^ name of a method or field
         | ConName Name  -- ^ name of a data constructor
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A complete Haskell source module.
     data Module = Module SrcLoc ModuleName [ModulePragma] (Maybe WarningText)
                             (Maybe [ExportSpec]) [ImportDecl] [Decl]
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An item in a module's export specification.
     data ExportSpec
@@ -237,11 +225,6 @@ kmod HASKELL-SYNTAX is
                                         --   a datatype exported with some of its constructors.
          | EModuleContents ModuleName   -- ^ @module M@:
                                         --   re-export a module.
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An import declaration.
     data ImportDecl = ImportDecl
@@ -256,11 +239,6 @@ kmod HASKELL-SYNTAX is
                 -- The 'Bool' is 'True' if the names are excluded
                 -- by @hiding@.
         }
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An import specification, representing a single explicit item imported
     --   (or hidden) from a module.
@@ -274,22 +252,12 @@ kmod HASKELL-SYNTAX is
          | IThingWith Name [CName]  -- ^ @T(C_1,...,C_n)@:
                                     --   a class imported with some of its methods, or
                                     --   a datatype imported with some of its constructors.
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Associativity of an operator.
     data Assoc
          = AssocNone  -- ^ non-associative operator (declared with @infix@)
          | AssocLeft  -- ^ left-associative operator (declared with @infixl@).
          | AssocRight -- ^ right-associative operator (declared with @infixr@)
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A single derived instance, which may have arguments since it may be a MPTC.
     type Deriving = (QName, [Type])
@@ -353,11 +321,6 @@ kmod HASKELL-SYNTAX is
          -- ^ A SPECIALISE instance pragma
          | AnnPragma        SrcLoc Annotation
          -- ^ An ANN pragma
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An annotation through an ANN pragma.
     data Annotation
@@ -367,46 +330,21 @@ kmod HASKELL-SYNTAX is
         -- ^ An annotation for a declared type.
         | ModuleAnn      Exp
         -- ^ An annotation for the defining module.
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A flag stating whether a declaration is a data or newtype declaration.
     data DataOrNew = DataType | NewType
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A binding group inside a @let@ or @where@ clause.
     data Binds
         = BDecls [Decl]     -- ^ An ordinary binding group
         | IPBinds [IPBind]  -- ^ A binding group for implicit parameters
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A binding of an implicit parameter.
     data IPBind = IPBind SrcLoc IPName Exp
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Clauses of a function binding.
     data Match
          = Match SrcLoc Name [Pat] (Maybe Type) Rhs {-where-} Binds
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A single constructor declaration within a data type declaration,
     --   which may have an existential quantification binding.
@@ -414,11 +352,6 @@ kmod HASKELL-SYNTAX is
         = QualConDecl SrcLoc
             {-forall-} [TyVarBind] {- . -} Context
             {- => -} ConDecl
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Declaration of an ordinary data constructor.
     data ConDecl
@@ -428,20 +361,10 @@ kmod HASKELL-SYNTAX is
                     -- ^ infix data constructor
          | RecDecl Name [([Name],BangType)]
                     -- ^ record constructor
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A single constructor declaration in a GADT data type declaration.
     data GadtDecl
         = GadtDecl SrcLoc Name Type
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Declarations inside a class declaration.
     data ClassDecl
@@ -453,11 +376,6 @@ kmod HASKELL-SYNTAX is
                 -- ^ declaration of an associated type synonym
         | ClsTyDef   SrcLoc Type    Type
                 -- ^ default choice for an associated type synonym
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Declarations inside an instance declaration.
     data InstDecl
@@ -469,11 +387,6 @@ kmod HASKELL-SYNTAX is
                 -- ^ an associated data type implementation
         | InsGData  SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl] [Deriving]
                 -- ^ an associated data type implemented using GADT style
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | The type of a constructor argument or field, optionally including
     --   a strictness annotation.
@@ -481,33 +394,18 @@ kmod HASKELL-SYNTAX is
          = BangedTy   Type  -- ^ strict component, marked with \"@!@\"
          | UnBangedTy Type  -- ^ non-strict component
          | UnpackedTy Type  -- ^ unboxed component, marked with an UNPACK pragma
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | The right hand side of a function or pattern binding.
     data Rhs
          = UnGuardedRhs Exp -- ^ unguarded right hand side (/exp/)
          | GuardedRhss  [GuardedRhs]
                             -- ^ guarded right hand side (/gdrhs/)
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A guarded right hand side @|@ /stmts/ @=@ /exp/.
     --   The guard is a series of statements when using pattern guards,
     --   otherwise it will be a single qualifier expression.
     data GuardedRhs
          = GuardedRhs SrcLoc [Stmt] Exp
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A type qualified with a context.
     --   An unqualified type has an empty context.
@@ -525,21 +423,11 @@ kmod HASKELL-SYNTAX is
          | TyParen Type             -- ^ type surrounded by parentheses
          | TyInfix Type QName Type  -- ^ infix type constructor
          | TyKind  Type Kind        -- ^ type with explicit kind signature
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A type variable declaration, optionally with an explicit kind annotation.
     data TyVarBind
         = KindedVar Name Kind   -- ^ variable binding with kind annotation
         | UnkindedVar Name      -- ^ ordinary variable binding
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An explicit kind annotation.
     data Kind
@@ -548,22 +436,12 @@ kmod HASKELL-SYNTAX is
         | KindFn Kind Kind  -- ^ @->@, the kind of a type constructor
         | KindParen Kind    -- ^ a kind surrounded by parentheses
         | KindVar Name      -- ^ a kind variable (as of yet unsupported by compilers)
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
 
     -- | A functional dependency, given on the form
     --   l1 l2 ... ln -> r2 r3 .. rn
     data FunDep
         = FunDep [Name] [Name]
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A context is a set of assertions
     type Context = [Asst]
@@ -576,11 +454,6 @@ kmod HASKELL-SYNTAX is
               | InfixA Type QName Type  -- ^ class assertion where the class name is given infix
               | IParam IPName Type      -- ^ implicit parameter assertion
               | EqualP Type   Type      -- ^ type equality constraint
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | /literal/
     -- Values of this type hold the abstract value of the literal, not the
@@ -597,11 +470,6 @@ kmod HASKELL-SYNTAX is
         | PrimDouble Rational   -- ^ unboxed double literal
         | PrimChar   Char       -- ^ unboxed character literal
         | PrimString String     -- ^ unboxed string literal
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Haskell expressions.
     data Exp
@@ -669,30 +537,15 @@ kmod HASKELL-SYNTAX is
         | RightArrApp     Exp Exp   -- ^ arrow application (from right): /exp/ @>-@ /exp/
         | LeftArrHighApp  Exp Exp   -- ^ higher-order arrow application (from left): /exp/ @-<<@ /exp/
         | RightArrHighApp Exp Exp   -- ^ higher-order arrow application (from right): /exp/ @>>-@ /exp/
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | The name of an xml element or attribute,
     --   possibly qualified with a namespace.
     data XName
         = XName String              -- <name ...
         | XDomName String String    -- <dom:name ...
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An xml attribute, which is a name-expression pair.
     data XAttr = XAttr XName Exp
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A template haskell bracket expression.
     data Bracket
@@ -700,41 +553,21 @@ kmod HASKELL-SYNTAX is
         | PatBracket Pat        -- ^ pattern bracket: @[p| ... |]@
         | TypeBracket Type      -- ^ type bracket: @[t| ... |]@
         | DeclBracket [Decl]    -- ^ declaration bracket: @[d| ... |]@
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A template haskell splice expression
     data Splice
         = IdSplice String       -- ^ variable splice: @$var@
         | ParenSplice Exp       -- ^ parenthesised expression splice: @$(/exp/)@
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | The safety of a foreign function call.
     data Safety
         = PlayRisky         -- ^ unsafe
         | PlaySafe Bool     -- ^ safe ('False') or threadsafe ('True')
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | The calling convention of a foreign function call.
     data CallConv
         = StdCall
         | CCall
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A top level options pragma, preceding the module header.
     data ModulePragma
@@ -743,52 +576,27 @@ kmod HASKELL-SYNTAX is
                             -- ^ OPTIONS pragma, possibly qualified with a tool, e.g. OPTIONS_GHC
         | AnnModulePragma  SrcLoc Annotation
                             -- ^ ANN pragma with module scope
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Activation clause of a RULES pragma.
     data Activation
         = AlwaysActive
         | ActiveFrom  Int
         | ActiveUntil Int
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | The body of a RULES pragma.
     data Rule
         = Rule String Activation (Maybe [RuleVar]) Exp Exp
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Variables used in a RULES pragma, optionally annotated with types
     data RuleVar
         = RuleVar Name
         | TypedRuleVar Name Type
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | Warning text to optionally use in the module header of e.g.
     --   a deprecated module.
     data WarningText
         = DeprText String
         | WarnText String
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
 
     -- | A pattern, to be matched against a value.
@@ -819,19 +627,9 @@ kmod HASKELL-SYNTAX is
         | PExplTypeArg QName Type       -- ^ Explicit generics style type argument e.g. @f {| Int |} x = ...@
         | PQuasiQuote String String     -- ^ quasi quote patter: @[$/name/| /string/ |]@
         | PBangPat Pat                  -- ^ strict (bang) pattern: @f !x = ...@
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An XML attribute in a pattern.
     data PXAttr = PXAttr XName Pat
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A regular pattern operator.
     data RPatOp
@@ -841,11 +639,6 @@ kmod HASKELL-SYNTAX is
         | RPPlusG   -- ^ @+!@ = 1 or more, greedy
         | RPOpt     -- ^ @?@ = 0 or 1
         | RPOptG    -- ^ @?!@ = 0 or 1, greedy
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An entity in a regular pattern.
     data RPat
@@ -857,22 +650,12 @@ kmod HASKELL-SYNTAX is
         | RPAs Name RPat        -- ^ linear variable binding, e.g. foo\@(1 | 2)
         | RPParen RPat          -- ^ parenthesised pattern, e.g. (2*)
         | RPPat Pat             -- ^ an ordinary pattern
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An /fpat/ in a labeled record pattern.
     data PatField
         = PFieldPat QName Pat       -- ^ ordinary label-pattern pair
         | PFieldPun Name            -- ^ record field pun
         | PFieldWildcard            -- ^ record field wildcard
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A statement, representing both a /stmt/ in a @do@-expression,
     --   an ordinary /qual/ in a list comprehension, as well as a /stmt/
@@ -886,11 +669,6 @@ kmod HASKELL-SYNTAX is
                             --   a guard expression
         | LetStmt Binds     -- ^ local bindings
         | RecStmt [Stmt]    -- ^ a recursive binding group for arrows
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A general /transqual/ in a list comprehension,
     --   which could potentially be a transform of the kind
@@ -902,31 +680,16 @@ kmod HASKELL-SYNTAX is
         | GroupBy      Exp          -- ^ @then@ @group@ @by@ /exp/
         | GroupUsing   Exp          -- ^ @then@ @group@ @using@ /exp/
         | GroupByUsing Exp Exp      -- ^ @then@ @group@ @by@ /exp/ @using@ /exp/
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An /fbind/ in a labeled construction or update expression.
     data FieldUpdate
         = FieldUpdate QName Exp     -- ^ ordinary label-expresion pair
         | FieldPun Name             -- ^ record field pun
         | FieldWildcard             -- ^ record field wildcard
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | An /alt/ alternative in a @case@ expression.
     data Alt
         = Alt SrcLoc Pat GuardedAlts Binds
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | The right-hand sides of a @case@ alternative,
     --   which may be a single right-hand side or a
@@ -934,20 +697,10 @@ kmod HASKELL-SYNTAX is
     data GuardedAlts
         = UnGuardedAlt Exp          -- ^ @->@ /exp/
         | GuardedAlts  [GuardedAlt] -- ^ /gdpat/
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -- | A guarded case alternative @|@ /stmts/ @->@ /exp/.
     data GuardedAlt
         = GuardedAlt SrcLoc [Stmt] Exp
-    #ifdef __GLASGOW_HASKELL__
-      deriving (Eq,Ord,Show,Typeable,Data)
-    #else
-      deriving (Eq,Ord,Show)
-    #endif
 
     -----------------------------------------------------------------------------
     -- Builtin names.
