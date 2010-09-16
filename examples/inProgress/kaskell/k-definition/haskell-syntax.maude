@@ -1,20 +1,42 @@
-kmod HASKELL-SYNTAX is
-	including PL-BOOL .
-	including PL-EXT-BOOL .
-	including PL-NAT .
-	including PL-INT .
-	including PL-RAT .
-	including PL-FLOAT .
-	including PL-STRING .
-	including PL-CONVERSION .
-	including PL-QID .
-	including PL-RANDOM .
-	including PL-ID .
-	including K .
+mod HASKELL-SYNTAX is
+	---- including PL-BOOL .
+	---- including PL-EXT-BOOL .
+	---- including PL-NAT .
+	---- including PL-INT .
+	---- including PL-RAT .
+	---- including PL-FLOAT .
+	---- including PL-STRING .
+	---- including PL-CONVERSION .
+	---- including PL-QID .
+	---- including PL-RANDOM .
+	---- including PL-ID .
+	---- including K .
 
+--- Some base Haskell sorts
+  sorts String Int Char Integer Rational .
+
+--- Sort present in annotated Haskell syntax
 ***(
-    Haskell syntax, as defined in Language.Haskell.Exts.Syntax
+    data Boxed = Boxed | Unboxed
+***)
 
+  sort Boxed .
+  ops Boxed Unboxed : -> Boxed [ctor] .
+
+--- Sort present in SrcLoc
+***(
+data SrcLoc = SrcLoc
+    { srcFilename :: String
+    , srcLine :: Int
+    , srcColumn :: Int
+    }
+***)
+
+  sort SrcLoc .
+  op SrcLoc : String Int Int -> SrcLoc .
+
+--- The rest is the abstract Haskell syntax, as defined in Language.Haskell.Exts.Syntax
+***(
     {-# LANGUAGE CPP, DeriveDataTypeable #-}
     -----------------------------------------------------------------------------
     -- |
@@ -132,9 +154,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ModuleName .
-	op ModuleName : String -> ModuleName [ctor] .
+	op ModuleName : String -> ModuleName .
 
-(***
+***(
     -- | Constructors with special syntax.
     -- These names are never qualified, and always refer to builtin type or
     -- data constructors.
@@ -301,7 +323,7 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ImportSpec .
-  op IVar Name -> ImportSpec .
+  op IVar : Name -> ImportSpec .
   op IAbs : Name -> ImportSpec .
   op IThingAll : Name -> ImportSpec .
 ***( TODO: implement type synonyms, lists, Maybe, tuples, etc
@@ -880,7 +902,9 @@ kmod HASKELL-SYNTAX is
 ***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Tuple : [Exp] -> Exp .
 ***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op TupleSection : [Maybe Exp] -> Exp .
+***)
 ***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op List : [Exp] -> Exp .
 ***)
@@ -939,26 +963,6 @@ kmod HASKELL-SYNTAX is
   sort XName .
   op XName : String -> XName .
   op XDomName : String String -> XName .
-
-***(
-    -- | An xml attribute, which is a name-expression pair.
-    data XAttr = XAttr XName Exp
-***)
-
-  sort XAttr .
-  op XAttr : XName Exp -> XAttr .
-
-***(
-    -- | A template haskell bracket expression.
-    data Bracket
-        = ExpBracket Exp        -- ^ expression bracket: @[| ... |]@
-        | PatBracket Pat        -- ^ pattern bracket: @[p| ... |]@
-        | TypeBracket Type      -- ^ type bracket: @[t| ... |]@
-        | DeclBracket [Decl]    -- ^ declaration bracket: @[d| ... |]@
-***)
-
-  sort Bracket .
-  op ExpBracket : Exp -> XName .
 
 ***(
     -- | An xml attribute, which is a name-expression pair.
@@ -1380,3 +1384,5 @@ kmod HASKELL-SYNTAX is
     tuple_tycon :: Boxed -> Int -> Type
     tuple_tycon b i = TyCon (tuple_tycon_name b i)
 ***)
+
+endm
