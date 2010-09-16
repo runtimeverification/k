@@ -73,6 +73,8 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
                       | setcdrtest
                       | setcdrtest2
                       | constest
+                      | settest
+                      | settest2 --- for when we have local bindings
 
   macro foo = #[]
   macro bar = [display [oif #t "true" "false"]]
@@ -98,6 +100,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   macro setcdrtest = [define x ![1 2 3]][display [set-cdr! x 4]][display x]
   macro setcdrtest2 = [define x ![1 2 3]][display [set-cdr! x ![4 5]]][display x]
   macro constest = [display [cons 1 2]] [define x ![1 2 3]] [display [cons 42 x]]
+  macro settest = [define x ![1 2 3]][display [set! x 3]][display x]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -363,6 +366,26 @@ kmod DEFINE-SEMANTICS is including SKEME-SEMANTICS
        <nextLoc>     N => N +Rat 1            </nextLoc>   
 endkm
 
+kmod SET!-SEMANTICS is including SKEME-SEMANTICS
+  op set : Exp Exp -> K [strict(2)]
+
+  rule <k> [set! ID:Id E:Exp] => set(ID,E) <_/k> [structural]
+
+  ---check local env first  
+  ---if it exists in local set the local copy
+  rule <k> set(ID:Id, I:Internal) => vUnspec  <_/k> 
+       <env_>        ID |-> loc(N:Rat)        </env> 
+       <store_>      loc(N) |-> (_ => I)      </store>
+
+  ---if it does not exist in lcoal we assume (for now)
+  ---that it must exist in global.  Set that copy
+  rule <k> set(ID:Id, I:Internal) => vUnspec  <_/k> 
+       <env_>        Env:Map                  </env>
+       <globalEnv_>  ID |-> loc(N:Rat)        </globalEnv> 
+       <store_>      loc(N) |-> (_ => I)      </store>
+    if notBool($hasMapping(Env, ID))
+endkm
+
 kmod QUOTE-SEMANTICS is including INTERN
   rule <k> [quote E:Exp] => intern(E) <_/k>
 endkm 
@@ -508,7 +531,7 @@ endkm
 
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
-  + ID-SEMANTICS + DEFINE-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
+  + ID-SEMANTICS + DEFINE-SEMANTICS + SET!-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
   + SKEME-PROGRAMS 
   + APPLY-SEMANTICS + EVAL-SEMANTICS + DISPLAY-SEMANTICS
   + ARITHMETIC-SEMANTICS
