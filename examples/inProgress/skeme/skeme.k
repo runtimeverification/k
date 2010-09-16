@@ -36,30 +36,29 @@ endkm
 
 kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
 
-  syntax Closure  ::=   closure(List{Id}, List{Exp}, Map)
-                      | varClosure(List{Id{, Id, List{Exp}, Map)
+  syntax Closure  ::=   closure( List{Exp} , List{Exp} , Map )
+                      | varClosure( List{Exp} , Id , List{Exp} , Map )
 
   syntax Continuation ::= continuation(K, Map)
 
   syntax Internal ::=   vT | vF | vUnspec | vNil 
                       | vf( Float ) | vr( Rat ) | vc( Char ) | vn( Id )                                           
                       | cons( K * K ) | vec( Map # Int ) | string( Map # Int ) | Builtin 
+                      | Closure | Continuation
   
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
                      | bCallCC | bCar | bCdr | bCons
-
-  syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}]
   
   syntax List{Internal} ::= Internal | List{Internal} List{Internal} [ditto]
  
-  syntax Literal ::= #procedure(Closure) | #continuation(Continuation) | #builtin(Builtin)   
+  syntax Literal ::= #procedure( Closure ) | #continuation( Continuation ) | #builtin( Builtin )   
   
   syntax Exp ::= Internal
   syntax List{Exp} ::= List{Internal}
 
 endkm
 
-kmod SKEME-PROGRAMS is including SKEME-SYNTAX
+kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
   syntax List{Exp} ::= bar | foo | baz | chaz | kraz | apply | apply2 | id-test 
                       | begintest | plustest | plustest2 | timestest
                       | subtest | subtest2
@@ -75,6 +74,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
                       | constest
                       | settest
                       | settest2 --- for when we have local bindings
+                      | lambdatest
 
   macro foo = #[]
   macro bar = [display [oif #t "true" "false"]]
@@ -101,6 +101,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   macro setcdrtest2 = [define x ![1 2 3]][display [set-cdr! x ![4 5]]][display x]
   macro constest = [display [cons 1 2]] [define x ![1 2 3]] [display [cons 42 x]]
   macro settest = [define x ![1 2 3]][display [set! x 3]][display x]
+  macro lambdatest = [display [lambda [x] [o+ x 3][o+ x 3]]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -174,6 +175,9 @@ kmod INTERN is including SKEME-SEMANTICS
   rule intern([])           => vNil          [structural]
   rule intern(#[])          => vec(.Map # 0) [structural]
   rule intern([* E:Exp])    => intern(E)     [structural]
+
+  --- intern Closure
+  rule intern(#procedure(Cl:Closure)) => Cl    [structural]
 
   --- interning String
   rule intern( Str:String ) => internS(string(.Map # lengthString(Str)), Str, 0) [structural]  
@@ -293,6 +297,9 @@ kmod EXTERN is including SKEME-SEMANTICS
   rule extern(string(.Map # 0), M) => ""            [structural]
   rule extern(vec(.Map # 0), M)    => #[]           [structural]
 
+  --- externing Closures
+  rule extern(Cl:Closure, M)        => #procedure(Cl) [structural]
+
   --- externing for Strings
   rule extern(string( M:Map # Len:NzInt ), Store:Map)
     => externS("", M, Store, (-Int 1) +Int Len) [structural] 
@@ -408,11 +415,22 @@ kmod BEGIN-SEMANTICS is including SKEME-SEMANTICS
     => I 
 endkm
 
+kmod LAMBDA-SEMANTICS is including SKEME-SEMANTICS
+  rule <k> [lambda [EL1:List{Exp}] EL2:List{Exp}] => closure(EL1, EL2, Env:Map) <_/k>
+       <env> Env </env>
+  
+  rule <k> [lambda [] EL2:List{Exp}] => closure(.List{Exp}, EL2, Env:Map) <_/k>
+       <env> Env </env>
+endkm
+
 kmod APPLY-SEMANTICS is including SKEME-SEMANTICS
   op apply : List{Exp} -> K [strict] 
   
   rule <k> [E:Exp EL:List{Exp}] => apply(E EL) <_/k> <keywords> S:Set </keywords>
     if notBool(SetItem(E) in S) [structural] 
+endkm
+
+kmod CLOSURE-SEMANTICS is including APPLY-SEMANTICS
 endkm
 
 kmod EVAL-SEMANTICS is including APPLY-SEMANTICS + EXTERN
@@ -532,7 +550,7 @@ endkm
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
   + ID-SEMANTICS + DEFINE-SEMANTICS + SET!-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
-  + SKEME-PROGRAMS 
+  + SKEME-PROGRAMS + LAMBDA-SEMANTICS 
   + APPLY-SEMANTICS + EVAL-SEMANTICS + DISPLAY-SEMANTICS
   + ARITHMETIC-SEMANTICS
   + LIST-OPS
