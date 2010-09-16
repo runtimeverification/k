@@ -215,7 +215,6 @@ kmod HASKELL-SYNTAX is
   op VarOp : Name -> Op .
   op ConOp : Name -> Op .
 
-
 ***(
     -- | A name (/cname/) of a component of a class or data type in an @import@
     --   or export specification.
@@ -228,8 +227,6 @@ kmod HASKELL-SYNTAX is
   op VarName : Name -> CName .
   op ConName : Name -> CName .
 
-
-
 ***(
     -- | A complete Haskell source module.
     data Module = Module SrcLoc ModuleName [ModulePragma] (Maybe WarningText)
@@ -237,7 +234,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Module .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Module : SrcLoc ModuleName [ModulePragma] (Maybe WarningText) (Maybe [ExportSpec]) [ImportDecl] [Decl] -> Module .
+***)
 
 ***(
     -- | An item in a module's export specification.
@@ -260,7 +259,9 @@ kmod HASKELL-SYNTAX is
   op EVar : QName -> ExportSpec .
   op EAbs : QName -> ExportSpec .
   op EThingAll : QName -> ExportSpec .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op EThingWith : QName [CName] -> ExportSpec .
+***)
   op EModuleContents : ModuleName -> ExportSpec .
 
 ***(
@@ -280,7 +281,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ImportDecl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ImportDecl : SrcLoc ModuleName Bool Bool (Maybe String) (Maybe ModuleName) (Maybe (Bool,[ImportSpec])) -> ImportDecl .
+***)
 
 ***(
     -- | An import specification, representing a single explicit item imported
@@ -301,7 +304,9 @@ kmod HASKELL-SYNTAX is
   op IVar Name -> ImportSpec .
   op IAbs : Name -> ImportSpec .
   op IThingAll : Name -> ImportSpec .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op IThingWith : Name [CName] -> ImportSpec .
+***)
 
 ***(
     -- | Associativity of an operator.
@@ -318,10 +323,14 @@ kmod HASKELL-SYNTAX is
 
 ***(
     -- | A single derived instance, which may have arguments since it may be a MPTC.
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
     type Deriving = (QName, [Type])
 ***)
+***)
 
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Deriving : -> (QName, [Type]) [ctor] .
+***)
 
 ***(
     -- | A top-level declaration.
@@ -386,33 +395,77 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Decl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op TypeDecl     SrcLoc Name [TyVarBind] Type -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op TypeFamDecl :  SrcLoc Name [TyVarBind] (Maybe Kind) -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op DataDecl :     SrcLoc DataOrNew Context Name [TyVarBind]              [QualConDecl] [Deriving] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op GDataDecl :    SrcLoc DataOrNew Context Name [TyVarBind] (Maybe Kind) [GadtDecl]    [Deriving] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op DataFamDecl :  SrcLoc {-data-}  Context Name [TyVarBind] (Maybe Kind) -> Decl .
+***)
   op TypeInsDecl :  SrcLoc Type Type -> Decl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op DataInsDecl :  SrcLoc DataOrNew Type              [QualConDecl] [Deriving] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op GDataInsDecl : SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl]    [Deriving] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ClassDecl :    SrcLoc Context Name [TyVarBind] [FunDep] [ClassDecl] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op InstDecl :     SrcLoc Context QName [Type] [InstDecl] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op DerivDecl :    SrcLoc Context QName [Type] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op InfixDecl :    SrcLoc Assoc Int [Op] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op DefaultDecl :  SrcLoc [Type] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op SpliceDecl :   SrcLoc Exp -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op TypeSig :      SrcLoc [Name] Type -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op FunBind :      [Match] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PatBind :      SrcLoc Pat (Maybe Type) Rhs {-where-} Binds -> Decl .
+***)
   op ForImp :   SrcLoc CallConv Safety String Name Type -> Decl .
   op ForExp :   SrcLoc CallConv          String Name Type -> Decl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op RulePragmaDecl :   SrcLoc [Rule] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op DeprPragmaDecl :   SrcLoc [([Name], String)] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op WarnPragmaDecl :   SrcLoc [([Name], String)] -> Decl .
+***)
   op InlineSig :        SrcLoc Bool Activation QName -> Decl .
   op InlineConlikeSig : SrcLoc      Activation QName -> Decl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op SpecSig :          SrcLoc                 QName [Type] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op SpecInlineSig :    SrcLoc Bool Activation QName [Type] -> Decl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op InstSig :          SrcLoc Context         QName [Type] -> Decl .
+***)
   op AnnPragma :        SrcLoc Annotation -> Decl .
 
 ***(
@@ -448,8 +501,12 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Binds .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op BDecls : [Decl] -> Binds .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op IPBinds : [IPBind] -> Binds .
+***)
 
 ***(
     -- | A binding of an implicit parameter.
@@ -466,7 +523,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Match .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Match : SrcLoc Name [Pat] (Maybe Type) Rhs Binds -> Match .
+***)
 
 ***(
     -- | A single constructor declaration within a data type declaration,
@@ -478,7 +537,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort QualConDecl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op QualConDecl : SrcLoc [TyVarBind] Context ConDecl -> QualConDecl .
+***)
 
 ***(
     -- | Declaration of an ordinary data constructor.
@@ -492,9 +553,13 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ConDecl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ConDecl : Name [BangType] -> ConDecl .
+***)
   op InfixConDecl : BangType Name BangType -> ConDecl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op RecDecl : Name [([Name],BangType)] -> ConDecl .
+***)
 
 ***(
     -- | A single constructor declaration in a GADT data type declaration.
@@ -520,8 +585,12 @@ kmod HASKELL-SYNTAX is
 
   sort ClassDecl .
   op ClsDecl :   Decl -> ClassDecl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ClsDataFam : SrcLoc Context Name [TyVarBind] (Maybe Kind) -> ClassDecl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ClsTyFam :   SrcLoc         Name [TyVarBind] (Maybe Kind) -> ClassDecl .
+***)
   op ClsTyDef :   SrcLoc Type    Type -> ClassDecl .
 
 ***(
@@ -540,8 +609,12 @@ kmod HASKELL-SYNTAX is
   sort InstDecl .
   op InsDecl :   Decl -> InstDecl .
   op InsType :   SrcLoc Type Type -> InstDecl .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op InsData :   SrcLoc DataOrNew Type [QualConDecl] [Deriving] -> InstDecl .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op InsGData :  SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl] [Deriving] -> InstDecl .
+***)
 
 ***(
     -- | The type of a constructor argument or field, optionally including
@@ -553,7 +626,7 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort BangType .
-  op BangedTy   Type -> BangType .
+  op BangedTy :  Type -> BangType .
   op UnBangedTy : Type -> BangType .
   op UnpackedTy : Type -> BangType .
 
@@ -567,7 +640,9 @@ kmod HASKELL-SYNTAX is
 
   sort Rhs .
   op UnGuardedRhs : Exp -> Rhs .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op GuardedRhss :  [GuardedRhs] -> Rhs .
+***)
 
 ***(
     -- | A guarded right hand side @|@ /stmts/ @=@ /exp/.
@@ -578,7 +653,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort GuardedRhs .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
 	op GuardedRhs : SrcLoc [Stmt] Exp -> GuardedRhs .
+***)
 
 ***(
     -- | A type qualified with a context.
@@ -600,9 +677,13 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Type .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op TyForall : (Maybe [TyVarBind]) Context Type -> Type .
+***)
   op TyFun :   Type Type -> Type .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op TyTuple : Boxed [Type] -> Type .
+***)
   op TyList :  Type -> Type .
   op TyApp :   Type Type -> Type .
   op TyVar :   Name -> Type .
@@ -647,7 +728,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort FunDep .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
 	op FunDep : [Name] [Name] -> FunDep .
+***)
 
 ***(
     -- | A context is a set of assertions
@@ -668,7 +751,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Asst .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ClassA : QName [Type] -> Asst .
+***)
   op InfixA : Type QName Type -> Asst .
   op IParam : IPName Type -> Asst .
   op EqualP : Type   Type -> Asst .
@@ -783,36 +868,60 @@ kmod HASKELL-SYNTAX is
   op Lambda : SrcLoc [Pat] Exp -> Exp .
   op Let : Binds Exp -> Exp .
   op If : Exp Exp Exp -> Exp .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Case : Exp [Alt] -> Exp .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Do : [Stmt] -> Exp .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op MDo : [Stmt] -> Exp .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Tuple : [Exp] -> Exp .
+***)
   op TupleSection : [Maybe Exp] -> Exp .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op List : [Exp] -> Exp .
+***)
   op Paren : Exp -> Exp .
   op LeftSection : Exp QOp -> Exp .
   op RightSection : QOp Exp -> Exp .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op RecConstr : QName [FieldUpdate] -> Exp .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op RecUpdate : Exp [FieldUpdate] -> Exp .
+***)
   op EnumFrom : Exp -> Exp .
   op EnumFromTo : Exp Exp -> Exp .
   op EnumFromThen : Exp Exp -> Exp .
   op EnumFromThenTo : Exp Exp Exp -> Exp .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ListComp : Exp  [QualStmt] -> Exp .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op ParComp :  Exp [[QualStmt]] -> Exp .
+***)
   op ExpTypeSig : SrcLoc Exp Type -> Exp .
   op VarQuote : QName -> Exp .
   op TypQuote : QName -> Exp .
   op BracketExp : Bracket -> Exp .
   op SpliceExp : Splice -> Exp .
   op QuasiQuote : String String -> Exp .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op XTag : SrcLoc XName [XAttr] (Maybe Exp) [Exp] -> Exp .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op XETag : SrcLoc XName [XAttr] (Maybe Exp) -> Exp .
+***)
   op XPcdata : String -> Exp .
   op XExpTag : Exp -> Exp .
   op CorePragma :        String Exp -> Exp .
   op SCCPragma :         String Exp -> Exp .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op GenPragma :         String (Int, Int) (Int, Int) Exp -> Exp .
+***)
   op Proc : SrcLoc     Pat Exp -> Exp .
   op LeftArrApp :      Exp Exp -> Exp .
   op RightArrApp :     Exp Exp -> Exp .
@@ -871,7 +980,9 @@ kmod HASKELL-SYNTAX is
   sort Bracket .
   op PatBracket : Pat -> Bracket .
   op TypeBracket : Type -> Bracket .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op DeclBracket : [Decl] -> Bracket .
+***)
 
 ***(
     -- | A template haskell splice expression
@@ -917,8 +1028,12 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ModulePragma .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op LanguagePragma :   SrcLoc [Name] -> ModulePragma .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op OptionsPragma :    SrcLoc (Maybe Tool) String -> ModulePragma .
+***)
   op AnnModulePragma :  SrcLoc Annotation -> ModulePragma .
 
 ***(
@@ -941,7 +1056,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Rule .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op Rule : String Activation (Maybe [RuleVar]) Exp Exp -> Rule .
+***)
 
 ***(
     -- | Variables used in a RULES pragma, optionally annotated with types
@@ -1003,22 +1120,38 @@ kmod HASKELL-SYNTAX is
   op PNeg : Pat -> Pat .
   op PNPlusK : Name Integer -> Pat .
   op PInfixApp : Pat QName Pat -> Pat .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PApp : QName [Pat] -> Pat .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PTuple : [Pat] -> Pat .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PList : [Pat] -> Pat .
+***)
   op PParen : Pat -> Pat .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PRec : QName [PatField] -> Pat .
+***)
   op PAsPat : Name Pat -> Pat .
   op PWildCard : -> Pat .
   op PIrrPat : Pat -> Pat .
   op PatTypeSig : SrcLoc Pat Type -> Pat .
   op PViewPat : Exp Pat -> Pat .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PRPat : [RPat] -> Pat .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PXTag : SrcLoc XName [PXAttr] (Maybe Pat) [Pat] -> Pat .
+***)
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PXETag : SrcLoc XName [PXAttr] (Maybe Pat) -> Pat .
+***)
   op PXPcdata : String -> Pat .
   op PXPatTag : Pat -> Pat .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op PXRPats : [RPat] -> Pat .
+***)
   op PExplTypeArg : QName Type -> Pat .
   op PQuasiQuote : String String -> Pat .
   op PBangPat : Pat -> Pat .
@@ -1066,7 +1199,9 @@ kmod HASKELL-SYNTAX is
   sort RPat .
   op RPOp : RPat RPatOp -> RPat .
   op RPEither : RPat RPat -> RPat .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op RPSeq : [RPat] -> RPat .
+***)
   op RPGuard : Pat [Stmt] -> RPat .
   op RPCAs : Name RPat -> RPat .
   op RPAs : Name RPat -> RPat .
@@ -1105,7 +1240,9 @@ kmod HASKELL-SYNTAX is
   op Generator : SrcLoc Pat Exp -> Stmt .
   op Qualifier : Exp -> Stmt .
   op LetStmt : Binds -> Stmt .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op RecStmt : [Stmt] -> Stmt .
+***)
 
 ***(
     -- | A general /transqual/ in a list comprehension,
@@ -1161,7 +1298,9 @@ kmod HASKELL-SYNTAX is
 
   sort GuardedAlts .
   op UnGuardedAlt : Exp -> GuardedAlts .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op GuardedAlts :  [GuardedAlt] -> GuardedAlts .
+***)
 
 ***(
     -- | A guarded case alternative @|@ /stmts/ @->@ /exp/.
@@ -1170,7 +1309,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort GuardedAlt .
+***( TODO: implement type synonyms, lists, Maybe, tuples, etc
   op GuardedAlt : SrcLoc [Stmt] Exp -> GuardedAlt .
+***)
 
 ***(
     -----------------------------------------------------------------------------
