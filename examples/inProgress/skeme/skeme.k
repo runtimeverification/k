@@ -32,6 +32,8 @@ kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID
   macro [EL:List{Exp} * [EL':List{Exp}]] = [EL:List{Exp} EL':List{Exp}] 
   macro [EL:List{Exp} * [EL':List{Exp} * E:Exp]] = [EL:List{Exp} EL':List{Exp} * E:Exp] 
   macro ! E:Exp = [quote E]
+  macro [define [X:Id EL1:List{Exp}] EL2:List{Exp}]
+      = [define X [lambda [EL1] EL2]]
 endkm
 
 kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
@@ -77,6 +79,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                       | lambdatest
                       | closuretest
                       | fac
+                      | fac2
 
 
   macro foo = #[]
@@ -117,6 +120,11 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                                  [oif [o= x 0]
                                       1
                                       [o* x [id("fac") [o- x 1]]]]]]
+              [display [id("fac") 6]]
+  macro fac2 = [define [id("fac") x] 
+                                 [oif [o= x 0]
+                                      1
+                                      [o* x [id("fac") [o- x 1]]]]]
               [display [id("fac") 6]]
 endkm
 
