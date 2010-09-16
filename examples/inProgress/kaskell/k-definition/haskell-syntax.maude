@@ -12,8 +12,15 @@ mod HASKELL-SYNTAX is
 	---- including PL-ID .
 	---- including K .
 
+***(TODO: Include K properly, and make all sorts be subsorted from K. Until then, use the below:
+***)
+sort K .
+***(***)
+
+
 --- Some base Haskell sorts
   sorts String Int Char Integer Rational .
+	sorts HsMaybe HsList HsTuple .
 
 --- Sort present in annotated Haskell syntax
 ***(
@@ -219,7 +226,7 @@ data SrcLoc = SrcLoc
     -- | Possibly qualified infix operators (/qop/), appearing in expressions.
     data QOp
         = QVarOp QName  -- ^ variable operator (/qvarop/)
-        | QConOp QName  -- ^ constructor operator (/qconop/)
+        | QConOp QName  -- ^ constructor operator (/canopy/)
 ***)
 
   sort QOp .
@@ -256,8 +263,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort Module .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op Module : SrcLoc ModuleName [ModulePragma] (Maybe WarningText) (Maybe [ExportSpec]) [ImportDecl] [Decl] -> Module .
+  op Module : SrcLoc ModuleName HsList HsMaybe HsMaybe HsList HsList -> Module .
 ***)
 
 ***(
@@ -281,9 +287,7 @@ data SrcLoc = SrcLoc
   op EVar : QName -> ExportSpec .
   op EAbs : QName -> ExportSpec .
   op EThingAll : QName -> ExportSpec .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op EThingWith : QName [CName] -> ExportSpec .
-***)
+  op EThingWith : QName HsList -> ExportSpec .
   op EModuleContents : ModuleName -> ExportSpec .
 
 ***(
@@ -303,9 +307,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort ImportDecl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ImportDecl : SrcLoc ModuleName Bool Bool (Maybe String) (Maybe ModuleName) (Maybe (Bool,[ImportSpec])) -> ImportDecl .
-***)
+  op ImportDecl : SrcLoc ModuleName Bool Bool HsMaybe HsMaybe HsMaybe -> ImportDecl .
 
 ***(
     -- | An import specification, representing a single explicit item imported
@@ -326,9 +328,7 @@ data SrcLoc = SrcLoc
   op IVar : Name -> ImportSpec .
   op IAbs : Name -> ImportSpec .
   op IThingAll : Name -> ImportSpec .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op IThingWith : Name [CName] -> ImportSpec .
-***)
+  op IThingWith : Name HsList -> ImportSpec .
 
 ***(
     -- | Associativity of an operator.
@@ -345,14 +345,10 @@ data SrcLoc = SrcLoc
 
 ***(
     -- | A single derived instance, which may have arguments since it may be a MPTC.
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
     type Deriving = (QName, [Type])
 ***)
-***)
 
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op Deriving : -> (QName, [Type]) [ctor] .
-***)
+  sort Deriving .
 
 ***(
     -- | A top-level declaration.
@@ -417,77 +413,33 @@ data SrcLoc = SrcLoc
 ***)
 
   sort Decl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op TypeDecl     SrcLoc Name [TyVarBind] Type -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op TypeFamDecl :  SrcLoc Name [TyVarBind] (Maybe Kind) -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op DataDecl :     SrcLoc DataOrNew Context Name [TyVarBind]              [QualConDecl] [Deriving] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op GDataDecl :    SrcLoc DataOrNew Context Name [TyVarBind] (Maybe Kind) [GadtDecl]    [Deriving] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op DataFamDecl :  SrcLoc {-data-}  Context Name [TyVarBind] (Maybe Kind) -> Decl .
-***)
+  op TypeDecl : SrcLoc Name HsList Type -> Decl .
+  op TypeFamDecl :  SrcLoc Name HsList HsMaybe -> Decl .
+  op DataDecl :     SrcLoc DataOrNew Context Name HsList HsList HsList -> Decl .
+  op GDataDecl :    SrcLoc DataOrNew Context Name HsList HsMaybe HsList HsList -> Decl .
+  op DataFamDecl :  SrcLoc Context Name HsList HsMaybe -> Decl .
   op TypeInsDecl :  SrcLoc Type Type -> Decl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op DataInsDecl :  SrcLoc DataOrNew Type              [QualConDecl] [Deriving] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op GDataInsDecl : SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl]    [Deriving] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ClassDecl :    SrcLoc Context Name [TyVarBind] [FunDep] [ClassDecl] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op InstDecl :     SrcLoc Context QName [Type] [InstDecl] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op DerivDecl :    SrcLoc Context QName [Type] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op InfixDecl :    SrcLoc Assoc Int [Op] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op DefaultDecl :  SrcLoc [Type] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
+  op DataInsDecl :  SrcLoc DataOrNew Type HsList HsList -> Decl .
+  op GDataInsDecl : SrcLoc DataOrNew Type HsMaybe HsList HsList -> Decl .
+  op ClassDecl :    SrcLoc Context Name HsList HsList HsList -> Decl .
+  op InstDecl :     SrcLoc Context QName HsList HsList -> Decl .
+  op DerivDecl :    SrcLoc Context QName HsList -> Decl .
+  op InfixDecl :    SrcLoc Assoc Int HsList -> Decl .
+  op DefaultDecl :  SrcLoc HsList -> Decl .
   op SpliceDecl :   SrcLoc Exp -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op TypeSig :      SrcLoc [Name] Type -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
+  op TypeSig :      SrcLoc HsList Type -> Decl .
   op FunBind :      [Match] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PatBind :      SrcLoc Pat (Maybe Type) Rhs {-where-} Binds -> Decl .
-***)
+  op PatBind :      SrcLoc Pat HsMaybe Rhs Binds -> Decl .
   op ForImp :   SrcLoc CallConv Safety String Name Type -> Decl .
   op ForExp :   SrcLoc CallConv          String Name Type -> Decl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op RulePragmaDecl :   SrcLoc [Rule] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op DeprPragmaDecl :   SrcLoc [([Name], String)] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op WarnPragmaDecl :   SrcLoc [([Name], String)] -> Decl .
-***)
+  op RulePragmaDecl :   SrcLoc HsList -> Decl .
+  op DeprPragmaDecl :   SrcLoc HsList -> Decl .
+  op WarnPragmaDecl :   SrcLoc HsList -> Decl .
   op InlineSig :        SrcLoc Bool Activation QName -> Decl .
   op InlineConlikeSig : SrcLoc      Activation QName -> Decl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op SpecSig :          SrcLoc                 QName [Type] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op SpecInlineSig :    SrcLoc Bool Activation QName [Type] -> Decl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op InstSig :          SrcLoc Context         QName [Type] -> Decl .
-***)
+  op SpecSig :          SrcLoc                 QName HsList -> Decl .
+  op SpecInlineSig :    SrcLoc Bool Activation QName HsList -> Decl .
+  op InstSig :          SrcLoc Context         QName HsList -> Decl .
   op AnnPragma :        SrcLoc Annotation -> Decl .
 
 ***(
@@ -511,9 +463,9 @@ data SrcLoc = SrcLoc
     data DataOrNew = DataType | NewType
 ***)
 
-  sort NewType .
-  op DataType : -> NewType .
-  op NewType : -> NewType .
+  sort DataOrNew .
+  op DataType : -> DataOrNew .
+  op NewType : -> DataOrNew .
 
 ***(
     -- | A binding group inside a @let@ or @where@ clause.
@@ -523,12 +475,8 @@ data SrcLoc = SrcLoc
 ***)
 
   sort Binds .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op BDecls : [Decl] -> Binds .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op IPBinds : [IPBind] -> Binds .
-***)
+  op BDecls : HsList -> Binds .
+  op IPBinds : HsList -> Binds .
 
 ***(
     -- | A binding of an implicit parameter.
@@ -545,9 +493,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort Match .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op Match : SrcLoc Name [Pat] (Maybe Type) Rhs Binds -> Match .
-***)
+  op Match : SrcLoc Name HsList HsMaybe Rhs Binds -> Match .
 
 ***(
     -- | A single constructor declaration within a data type declaration,
@@ -559,9 +505,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort QualConDecl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op QualConDecl : SrcLoc [TyVarBind] Context ConDecl -> QualConDecl .
-***)
+  op QualConDecl : SrcLoc HsList Context ConDecl -> QualConDecl .
 
 ***(
     -- | Declaration of an ordinary data constructor.
@@ -575,13 +519,9 @@ data SrcLoc = SrcLoc
 ***)
 
   sort ConDecl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ConDecl : Name [BangType] -> ConDecl .
-***)
+  op ConDecl : Name HsList -> ConDecl .
   op InfixConDecl : BangType Name BangType -> ConDecl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op RecDecl : Name [([Name],BangType)] -> ConDecl .
-***)
+  op RecDecl : Name HsList -> ConDecl .
 
 ***(
     -- | A single constructor declaration in a GADT data type declaration.
@@ -606,13 +546,9 @@ data SrcLoc = SrcLoc
 ***)
 
   sort ClassDecl .
-  op ClsDecl :   Decl -> ClassDecl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ClsDataFam : SrcLoc Context Name [TyVarBind] (Maybe Kind) -> ClassDecl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ClsTyFam :   SrcLoc         Name [TyVarBind] (Maybe Kind) -> ClassDecl .
-***)
+  op ClsDecl : Decl -> ClassDecl .
+  op ClsDataFam : SrcLoc Context Name HsList HsMaybe -> ClassDecl .
+  op ClsTyFam :   SrcLoc         Name HsList HsMaybe -> ClassDecl .
   op ClsTyDef :   SrcLoc Type    Type -> ClassDecl .
 
 ***(
@@ -631,12 +567,8 @@ data SrcLoc = SrcLoc
   sort InstDecl .
   op InsDecl :   Decl -> InstDecl .
   op InsType :   SrcLoc Type Type -> InstDecl .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op InsData :   SrcLoc DataOrNew Type [QualConDecl] [Deriving] -> InstDecl .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op InsGData :  SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl] [Deriving] -> InstDecl .
-***)
+  op InsData :   SrcLoc DataOrNew Type HsList HsList -> InstDecl .
+  op InsGData :  SrcLoc DataOrNew Type HsMaybe HsList HsList -> InstDecl .
 
 ***(
     -- | The type of a constructor argument or field, optionally including
@@ -662,9 +594,7 @@ data SrcLoc = SrcLoc
 
   sort Rhs .
   op UnGuardedRhs : Exp -> Rhs .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op GuardedRhss :  [GuardedRhs] -> Rhs .
-***)
+  op GuardedRhss :  HsList -> Rhs .
 
 ***(
     -- | A guarded right hand side @|@ /stmts/ @=@ /exp/.
@@ -675,9 +605,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort GuardedRhs .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-	op GuardedRhs : SrcLoc [Stmt] Exp -> GuardedRhs .
-***)
+	op GuardedRhs : SrcLoc HsList Exp -> GuardedRhs .
 
 ***(
     -- | A type qualified with a context.
@@ -699,13 +627,9 @@ data SrcLoc = SrcLoc
 ***)
 
   sort Type .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op TyForall : (Maybe [TyVarBind]) Context Type -> Type .
-***)
+  op TyForall : HsMaybe Context Type -> Type .
   op TyFun :   Type Type -> Type .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op TyTuple : Boxed [Type] -> Type .
-***)
+  op TyTuple : Boxed HsList -> Type .
   op TyList :  Type -> Type .
   op TyApp :   Type Type -> Type .
   op TyVar :   Name -> Type .
@@ -750,16 +674,14 @@ data SrcLoc = SrcLoc
 ***)
 
   sort FunDep .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-	op FunDep : [Name] [Name] -> FunDep .
-***)
+	op FunDep : HsList HsList -> FunDep .
 
 ***(
     -- | A context is a set of assertions
     type Context = [Asst]
 ***)
 
-	op Context : -> [Asst] .
+	sort Context .
 
 ***(
     -- | Class assertions.
@@ -773,9 +695,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort Asst .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ClassA : QName [Type] -> Asst .
-***)
+  op ClassA : QName HsList -> Asst .
   op InfixA : Type QName Type -> Asst .
   op IParam : IPName Type -> Asst .
   op EqualP : Type   Type -> Asst .
@@ -890,62 +810,36 @@ data SrcLoc = SrcLoc
   op Lambda : SrcLoc [Pat] Exp -> Exp .
   op Let : Binds Exp -> Exp .
   op If : Exp Exp Exp -> Exp .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op Case : Exp [Alt] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op Do : [Stmt] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op MDo : [Stmt] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op Tuple : [Exp] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op TupleSection : [Maybe Exp] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op List : [Exp] -> Exp .
-***)
+  op Case : Exp HsList -> Exp .
+  op Do : HsList -> Exp .
+  op MDo : HsList -> Exp .
+  op Tuple : HsList -> Exp .
+  op TupleSection : HsList -> Exp .
+  op List : HsList -> Exp .
   op Paren : Exp -> Exp .
   op LeftSection : Exp QOp -> Exp .
   op RightSection : QOp Exp -> Exp .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op RecConstr : QName [FieldUpdate] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op RecUpdate : Exp [FieldUpdate] -> Exp .
-***)
+  op RecConstr : QName HsList -> Exp .
+  op RecUpdate : Exp HsList -> Exp .
   op EnumFrom : Exp -> Exp .
   op EnumFromTo : Exp Exp -> Exp .
   op EnumFromThen : Exp Exp -> Exp .
   op EnumFromThenTo : Exp Exp Exp -> Exp .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ListComp : Exp  [QualStmt] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op ParComp :  Exp [[QualStmt]] -> Exp .
-***)
+  op ListComp : Exp  HsList -> Exp .
+  op ParComp :  Exp HsList -> Exp .
   op ExpTypeSig : SrcLoc Exp Type -> Exp .
   op VarQuote : QName -> Exp .
   op TypQuote : QName -> Exp .
   op BracketExp : Bracket -> Exp .
   op SpliceExp : Splice -> Exp .
   op QuasiQuote : String String -> Exp .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op XTag : SrcLoc XName [XAttr] (Maybe Exp) [Exp] -> Exp .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op XETag : SrcLoc XName [XAttr] (Maybe Exp) -> Exp .
-***)
+  op XTag : SrcLoc XName HsList HsMaybe HsList -> Exp .
+  op XETag : SrcLoc XName HsList HsMaybe -> Exp .
   op XPcdata : String -> Exp .
   op XExpTag : Exp -> Exp .
   op CorePragma :        String Exp -> Exp .
   op SCCPragma :         String Exp -> Exp .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op GenPragma :         String (Int, Int) (Int, Int) Exp -> Exp .
-***)
+  op GenPragma :         String HsTuple HsTuple Exp -> Exp .
   op Proc : SrcLoc     Pat Exp -> Exp .
   op LeftArrApp :      Exp Exp -> Exp .
   op RightArrApp :     Exp Exp -> Exp .
@@ -984,9 +878,7 @@ data SrcLoc = SrcLoc
   sort Bracket .
   op PatBracket : Pat -> Bracket .
   op TypeBracket : Type -> Bracket .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op DeclBracket : [Decl] -> Bracket .
-***)
+  op DeclBracket : HsList -> Bracket .
 
 ***(
     -- | A template haskell splice expression
@@ -1032,12 +924,8 @@ data SrcLoc = SrcLoc
 ***)
 
   sort ModulePragma .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op LanguagePragma :   SrcLoc [Name] -> ModulePragma .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op OptionsPragma :    SrcLoc (Maybe Tool) String -> ModulePragma .
-***)
+  op LanguagePragma :   SrcLoc HsList -> ModulePragma .
+  op OptionsPragma :    SrcLoc HsMaybe String -> ModulePragma .
   op AnnModulePragma :  SrcLoc Annotation -> ModulePragma .
 
 ***(
@@ -1060,9 +948,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort Rule .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op Rule : String Activation (Maybe [RuleVar]) Exp Exp -> Rule .
-***)
+  op Rule : String Activation HsMaybe Exp Exp -> Rule .
 
 ***(
     -- | Variables used in a RULES pragma, optionally annotated with types
@@ -1124,38 +1010,22 @@ data SrcLoc = SrcLoc
   op PNeg : Pat -> Pat .
   op PNPlusK : Name Integer -> Pat .
   op PInfixApp : Pat QName Pat -> Pat .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PApp : QName [Pat] -> Pat .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PTuple : [Pat] -> Pat .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PList : [Pat] -> Pat .
-***)
+  op PApp : QName HsList -> Pat .
+  op PTuple : HsList -> Pat .
+  op PList : HsList -> Pat .
   op PParen : Pat -> Pat .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PRec : QName [PatField] -> Pat .
-***)
+  op PRec : QName HsList -> Pat .
   op PAsPat : Name Pat -> Pat .
   op PWildCard : -> Pat .
   op PIrrPat : Pat -> Pat .
   op PatTypeSig : SrcLoc Pat Type -> Pat .
   op PViewPat : Exp Pat -> Pat .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PRPat : [RPat] -> Pat .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PXTag : SrcLoc XName [PXAttr] (Maybe Pat) [Pat] -> Pat .
-***)
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PXETag : SrcLoc XName [PXAttr] (Maybe Pat) -> Pat .
-***)
+  op PRPat : HsList -> Pat .
+  op PXTag : SrcLoc XName HsList HsMaybe HsList -> Pat .
+  op PXETag : SrcLoc XName HsList HsMaybe -> Pat .
   op PXPcdata : String -> Pat .
   op PXPatTag : Pat -> Pat .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op PXRPats : [RPat] -> Pat .
-***)
+  op PXRPats : HsList -> Pat .
   op PExplTypeArg : QName Type -> Pat .
   op PQuasiQuote : String String -> Pat .
   op PBangPat : Pat -> Pat .
@@ -1203,9 +1073,7 @@ data SrcLoc = SrcLoc
   sort RPat .
   op RPOp : RPat RPatOp -> RPat .
   op RPEither : RPat RPat -> RPat .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op RPSeq : [RPat] -> RPat .
-***)
+  op RPSeq : HsList -> RPat .
   op RPGuard : Pat [Stmt] -> RPat .
   op RPCAs : Name RPat -> RPat .
   op RPAs : Name RPat -> RPat .
@@ -1244,9 +1112,7 @@ data SrcLoc = SrcLoc
   op Generator : SrcLoc Pat Exp -> Stmt .
   op Qualifier : Exp -> Stmt .
   op LetStmt : Binds -> Stmt .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op RecStmt : [Stmt] -> Stmt .
-***)
+  op RecStmt : HsList -> Stmt .
 
 ***(
     -- | A general /transqual/ in a list comprehension,
@@ -1302,9 +1168,7 @@ data SrcLoc = SrcLoc
 
   sort GuardedAlts .
   op UnGuardedAlt : Exp -> GuardedAlts .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op GuardedAlts :  [GuardedAlt] -> GuardedAlts .
-***)
+  op GuardedAlts :  HsList -> GuardedAlts .
 
 ***(
     -- | A guarded case alternative @|@ /stmts/ @->@ /exp/.
@@ -1313,9 +1177,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort GuardedAlt .
-***( TODO: implement type synonyms, lists, Maybe, tuples, etc
-  op GuardedAlt : SrcLoc [Stmt] Exp -> GuardedAlt .
-***)
+  op GuardedAlt : SrcLoc HsList Exp -> GuardedAlt .
 
 ***(
     -----------------------------------------------------------------------------
