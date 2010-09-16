@@ -5,6 +5,7 @@ kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID
   syntax Literal ::=  #t  | #f | #unspecified 
                     | []  | #[]
                     | Float | Rat | #\ Char 
+                    | Rat / Rat
 
   syntax Exp ::= Literal 
                | Id | String  
@@ -22,6 +23,7 @@ kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID
               | oif | quote | begin | define
               | x | id( String )
 
+  macro R:Rat / NzR:NzRat = R /Rat NzR
   macro [ .List{Exp} ] = [] 
   macro [ .List{Exp} * E:Exp ] = [* E] 
   macro #[ .List{Exp} ] = #[]
@@ -60,6 +62,10 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   syntax List{Exp} ::= bar | foo | baz | chaz | kraz | apply | apply2 | id-test 
                       | begintest | plustest | plustest2 | timestest
                       | subtest | subtest2
+                      | divtest
+                      | divtest2
+                      | divtest3
+                      | divtest4
 
   ---macro foo = [eval ![1 * 2]]
   macro foo = #[]
@@ -77,6 +83,10 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   macro timestest = [display [o* 1 2 3.4 5]]
   macro subtest = [display [o- 1]]
   macro subtest2 = [display [o- 1 3.4]]
+  macro divtest = [display [o/ 3.4]]
+  macro divtest2 = [display [o/ 3]]
+  macro divtest3 = [display [o/ 10 2 2.1 1]]
+  macro divtest4 = [display [o/ (1/3) (1/3)]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -441,23 +451,27 @@ kmod ARITHMETIC-SEMANTICS is including APPLY-SEMANTICS
   op div : List{Internal} -> K
   op divf : List{Internal} -> K
 
---- --- rule apply(b/ vr(R1:Rat)) => vr((1 /Rat R1)) [structural]
----  rule apply(b/ vf(F1:Float)) => vf(1.0 /Float F1) [structural] 
----  rule apply(b/ vr(R1:Rat) IL:List{Internal}) => div(vr(R1) IL) if IL =/=Bool .List{Internal} [structural] 
----  rule apply(b/ vf(F1:Float) IL:List{Internal}) => divf(vf(F1) IL) if IL =/=Bool .List{Internal} [structural]
----
----  rule div(vr(R1:Rat) vr(R2:Rat) IL:List{Internal})
----    => div(vr(R1 /Rat R2) IL)
----  rule div(vr(R1:Rat) vf(F2:Float) IL:List{Internal})
----    => divf(vf(Rat2Float(R1) /Float F2) IL)
----  rule div(vr(R1:Rat))
----    => vr(R1) 
----  rule divf(vf(F1:Float) vr(R2:Rat) IL:List{Internal})
----    => divf(vf(F1 /Float Rat2Float(R2)) IL)
----  rule divf(vf(F1:Float) vf(F2:Float) IL:List{Internal})
----    => divf(vf(F1 /Float F2) IL)
----  rule divf(vf(F1:Float))
----    => vf(F1) [structural]
+  --- applying / to no arguments should
+  --- provoke an error, add when we do
+  --- error messages
+
+  rule apply(b/ vr(NzR1:NzRat)) => vr((1 /Rat NzR1)) [structural]
+  rule apply(b/ vf(F1:Float)) => vf(1.0 /Float F1) [structural] 
+  rule apply(b/ vr(NzR1:NzRat) IL:List{Internal}) => div(vr(NzR1) IL) if IL =/=Bool .List{Internal} [structural] 
+  rule apply(b/ vf(F1:Float) IL:List{Internal}) => divf(vf(F1) IL) if IL =/=Bool .List{Internal} [structural]
+
+  rule div(vr(R1:Rat) vr(NzR2:NzRat) IL:List{Internal})
+    => div(vr(R1 /Rat NzR2) IL)
+  rule div(vr(R1:Rat) vf(F2:Float) IL:List{Internal})
+    => divf(vf(Rat2Float(R1) /Float F2) IL)
+  rule div(vr(R1:Rat))
+    => vr(R1) 
+  rule divf(vf(F1:Float) vr(NzR2:NzRat) IL:List{Internal})
+    => divf(vf(F1 /Float Rat2Float(NzR2)) IL)
+  rule divf(vf(F1:Float) vf(F2:Float) IL:List{Internal})
+    => divf(vf(F1 /Float F2) IL)
+  rule divf(vf(F1:Float))
+    => vf(F1) [structural]
 endkm
 
 kmod SKEME is including 
