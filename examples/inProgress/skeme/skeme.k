@@ -20,7 +20,8 @@ kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID
 
   syntax Id ::= eval | display | set-car! | set-cdr! | o= | o+ | o- | o* | o/
               | call-with-current-continuation | call/cc | car | cdr 
-              | oif | quote | begin | define
+              | cons
+              | oif | quote | begin | define | lambda | set!
               | x | id( String )
 
   macro R:Rat / NzR:NzRat = R /Rat NzR
@@ -45,7 +46,7 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
                       | cons( K * K ) | vec( Map # Int ) | string( Map # Int ) | Builtin 
   
   syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
-                     | bCallCC | bCar | bCdr
+                     | bCallCC | bCar | bCdr | bCons
 
   syntax List{Id} ::= Id | .List{Id} | List{Id} , List{Id} [assoc id: .List{Id}]
   
@@ -66,10 +67,14 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
                       | divtest2
                       | divtest3
                       | divtest4
+                      | cartest
+                      | cdrtest
+                      | setcartest
+                      | setcdrtest
+                      | setcdrtest2
+                      | constest
 
-  ---macro foo = [eval ![1 * 2]]
   macro foo = #[]
----  macro bar = []
   macro bar = [display [oif #t "true" "false"]]
   macro baz = #[#[#[3]] "true"]
   macro chaz = [eval ![1 * [2]]]
@@ -87,6 +92,12 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX
   macro divtest2 = [display [o/ 3]]
   macro divtest3 = [display [o/ 10 2 2.1 1]]
   macro divtest4 = [display [o/ (1/3) (1/3)]]
+  macro cartest = [display [car ![1 2 3]]]
+  macro cdrtest = [display [cdr ![1 2 3]]]
+  macro setcartest = [define x ![1 2 3]][display [set-car! x 4]][display x]
+  macro setcdrtest = [define x ![1 2 3]][display [set-cdr! x 4]][display x]
+  macro setcdrtest2 = [define x ![1 2 3]][display [set-cdr! x ![4 5]]][display x]
+  macro constest = [display [cons 1 2]] [define x ![1 2 3]] [display [cons 42 x]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -100,42 +111,46 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
   configuration <T> <k>.K</k> 
                     <program>   .List </program>
                     <globalEnv> 
-                       eval                           |-> loc(0)                         
-                       display                        |-> loc(1)  
-                       set-car!                       |-> loc(2) 
-                       set-cdr!                       |-> loc(3) 
-                       o=                             |-> loc(4) 
-                       o+                             |-> loc(5) 
-                       o-                             |-> loc(6)  
-                       o*                             |-> loc(7)  
-                       o/                             |-> loc(8)  
-                       call-with-current-continuation |-> loc(9)   
-                       call/cc                        |-> loc(9)   
-                       car                            |-> loc(10) 
-                       cdr                            |-> loc(11) 
+                       eval                           |-> loc(-Rat 1)                         
+                       display                        |-> loc(-Rat 2)  
+                       set-car!                       |-> loc(-Rat 3) 
+                       set-cdr!                       |-> loc(-Rat 4) 
+                       o=                             |-> loc(-Rat 5) 
+                       o+                             |-> loc(-Rat 6) 
+                       o-                             |-> loc(-Rat 7)  
+                       o*                             |-> loc(-Rat 8)  
+                       o/                             |-> loc(-Rat 9)  
+                       call-with-current-continuation |-> loc(-Rat 10)    
+                       call/cc                        |-> loc(-Rat 10)   
+                       car                            |-> loc(-Rat 11) 
+                       cdr                            |-> loc(-Rat 12) 
+                       cons                           |-> loc(-Rat 13) 
                     </globalEnv> 
                     <env> .Map </env> 
                     <store>     
-                       loc(0)  |-> bEval 
-                       loc(1)  |-> bDisplay 
-                       loc(2)  |-> bSetCar 
-                       loc(3)  |-> bSetCdr
-                       loc(4)  |-> bEqual 
-                       loc(5)  |-> b+
-                       loc(6)  |-> b- 
-                       loc(7)  |-> b* 
-                       loc(8)  |-> b/ 
-                       loc(9)  |-> bCallCC 
-                       loc(10) |-> bCar 
-                       loc(11) |-> bCdr 
+                       loc(-Rat 1)  |-> bEval 
+                       loc(-Rat 2)  |-> bDisplay 
+                       loc(-Rat 3)  |-> bSetCar 
+                       loc(-Rat 4)  |-> bSetCdr
+                       loc(-Rat 5)  |-> bEqual 
+                       loc(-Rat 6)  |-> b+
+                       loc(-Rat 7)  |-> b- 
+                       loc(-Rat 8)  |-> b* 
+                       loc(-Rat 9)  |-> b/ 
+                       loc(-Rat 10) |-> bCallCC 
+                       loc(-Rat 11) |-> bCar 
+                       loc(-Rat 12) |-> bCdr 
+                       loc(-Rat 13) |-> bCons 
                     </store> 
-                    <nextLoc> 12 </nextLoc> 
+                    <nextLoc> 0 </nextLoc> 
                     <output> .List </output>
                     <keywords> 
                        SetItem(oif) 
                        SetItem(quote) 
                        SetItem(begin) 
                        SetItem(define) 
+                       SetItem(lambda) 
+                       SetItem(set!) 
                     </keywords>
                </T>
 endkm
@@ -474,12 +489,30 @@ kmod ARITHMETIC-SEMANTICS is including APPLY-SEMANTICS
     => vf(F1) [structural]
 endkm
 
+kmod LIST-OPS is including APPLY-SEMANTICS
+
+  rule <k> apply(bCons I1:Internal I2:Internal) => cons(loc(Loc:Rat) * loc(Loc +Rat 1)) <_/k>
+       <store_> .Map => loc(Loc) |-> I1 loc(Loc +Rat 1) |-> I2 </store>
+       <nextLoc> Loc => Loc +Rat 2 </nextLoc> 
+
+  rule <k> apply(bCar cons(L1:K * L2:K)) => Store:Map(L1) <_/k> 
+       <store> Store </store>
+  rule <k> apply(bCdr cons(L1:K * L2:K)) => Store:Map(L2) <_/k> 
+       <store> Store </store>
+
+  rule <k> apply(bSetCar cons(L1:K * L2:K) I:Internal) => vUnspec <_/k> 
+       <store_> L1 |-> (_ => I) </store>
+  rule <k> apply(bSetCdr cons(L1:K * L2:K) I:Internal) => vUnspec <_/k> 
+       <store_> L2 |-> (_ => I) </store>
+endkm
+
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
   + ID-SEMANTICS + DEFINE-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
   + SKEME-PROGRAMS 
   + APPLY-SEMANTICS + EVAL-SEMANTICS + DISPLAY-SEMANTICS
   + ARITHMETIC-SEMANTICS
+  + LIST-OPS
   
   syntax Bag ::= run( List{K} ) | out( List ) 
 
