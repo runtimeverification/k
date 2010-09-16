@@ -1,4 +1,7 @@
 mod HASKELL-SYNTAX is
+  including HASKELL-SYNTAX-STRUCTS .
+  including K .
+
   ---- including PL-BOOL .
   ---- including PL-EXT-BOOL .
   ---- including PL-NAT .
@@ -10,19 +13,9 @@ mod HASKELL-SYNTAX is
   ---- including PL-QID .
   ---- including PL-RANDOM .
   ---- including PL-ID .
-  ---- including K .
-
-***(TODO: Include K properly, and make all sorts be subsorted from K. Until then, use the below:
-***)
-sort K .
-***(***)
-
 
 --- Some base Haskell sorts
   sorts String Int Char Integer Rational .
-
-  --- Parameterized sorts are a lot of trouble in Maude, so here's some monosorted versions of haskell constructs
-  sorts HsMaybe HsList HsTuple .
 
 --- Sort present in annotated Haskell syntax
 ***(
@@ -1182,7 +1175,7 @@ data SrcLoc = SrcLoc
   op GuardedAlt : SrcLoc HsList Exp     -> GuardedAlt [ctor] .
 
 --- Everything is subsorted to K, that is, underlying it all everything is really monosorted
-  subsorts String Int Char Integer Rational HsMaybe HsList HsTuple Boxed SrcLoc ModuleName SpecialCon QName Name IPName QOp Op CName Module ExportSpec ImportDecl ImportSpec Assoc Deriving Decl Annotation DataOrNew Binds IPBind Match QualConDecl ConDecl GadtDecl ClassDecl InstDecl BangType Rhs GuardedRhs Type TyVarBind Kind FunDep Context Asst Literal Exp XName XAttr Bracket Splice Safety CallConv ModulePragma Activation Rule RuleVar WarningText Pat PXAttr RPatOp RPat PatField Stmt QualStmt FieldUpdate Alt GuardedAlts GuardedAlt < K .
+  subsorts String Int Char Integer Rational Boxed SrcLoc ModuleName SpecialCon QName Name IPName QOp Op CName Module ExportSpec ImportDecl ImportSpec Assoc Deriving Decl Annotation DataOrNew Binds IPBind Match QualConDecl ConDecl GadtDecl ClassDecl InstDecl BangType Rhs GuardedRhs Type TyVarBind Kind FunDep Context Asst Literal Exp XName XAttr Bracket Splice Safety CallConv ModulePragma Activation Rule RuleVar WarningText Pat PXAttr RPatOp RPat PatField Stmt QualStmt FieldUpdate Alt GuardedAlts GuardedAlt < K .
 
 --- End of syntax, rest of this file is the remainder of Language.Haskell.Exts.Syntax
 
