@@ -1,16 +1,16 @@
 mod HASKELL-SYNTAX is
-	---- including PL-BOOL .
-	---- including PL-EXT-BOOL .
-	---- including PL-NAT .
-	---- including PL-INT .
-	---- including PL-RAT .
-	---- including PL-FLOAT .
-	---- including PL-STRING .
-	---- including PL-CONVERSION .
-	---- including PL-QID .
-	---- including PL-RANDOM .
-	---- including PL-ID .
-	---- including K .
+  ---- including PL-BOOL .
+  ---- including PL-EXT-BOOL .
+  ---- including PL-NAT .
+  ---- including PL-INT .
+  ---- including PL-RAT .
+  ---- including PL-FLOAT .
+  ---- including PL-STRING .
+  ---- including PL-CONVERSION .
+  ---- including PL-QID .
+  ---- including PL-RANDOM .
+  ---- including PL-ID .
+  ---- including K .
 
 ***(TODO: Include K properly, and make all sorts be subsorted from K. Until then, use the below:
 ***)
@@ -20,7 +20,9 @@ sort K .
 
 --- Some base Haskell sorts
   sorts String Int Char Integer Rational .
-	sorts HsMaybe HsList HsTuple .
+
+  --- Parameterized sorts are a lot of trouble in Maude, so here's some unsorted versions of haskell constructs
+  sorts HsMaybe HsList HsTuple .
 
 --- Sort present in annotated Haskell syntax
 ***(
@@ -161,7 +163,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort ModuleName .
-	op ModuleName : String -> ModuleName .
+  op ModuleName : String -> ModuleName .
 
 ***(
     -- | Constructors with special syntax.
@@ -484,7 +486,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort IPBind .
-	op IPBind : SrcLoc IPName Exp -> IPBind .
+  op IPBind : SrcLoc IPName Exp -> IPBind .
 
 ***(
     -- | Clauses of a function binding.
@@ -605,7 +607,7 @@ data SrcLoc = SrcLoc
 ***)
 
   sort GuardedRhs .
-	op GuardedRhs : SrcLoc HsList Exp -> GuardedRhs .
+  op GuardedRhs : SrcLoc HsList Exp -> GuardedRhs .
 
 ***(
     -- | A type qualified with a context.
@@ -674,14 +676,14 @@ data SrcLoc = SrcLoc
 ***)
 
   sort FunDep .
-	op FunDep : HsList HsList -> FunDep .
+  op FunDep : HsList HsList -> FunDep .
 
 ***(
     -- | A context is a set of assertions
     type Context = [Asst]
 ***)
 
-	sort Context .
+  sort Context .
 
 ***(
     -- | Class assertions.
@@ -1178,6 +1180,11 @@ data SrcLoc = SrcLoc
 
   sort GuardedAlt .
   op GuardedAlt : SrcLoc HsList Exp -> GuardedAlt .
+
+--- Everything is subsorted to K, that is, underlying it all everything is really monosorted
+  subsorts String Int Char Integer Rational HsMaybe HsList HsTuple Boxed SrcLoc ModuleName SpecialCon QName Name IPName QOp Op CName Module ExportSpec ImportDecl ImportSpec Assoc Deriving Decl Annotation DataOrNew Binds IPBind Match QualConDecl ConDecl GadtDecl ClassDecl InstDecl BangType Rhs GuardedRhs Type TyVarBind Kind FunDep Context Asst Literal Exp XName XAttr Bracket Splice Safety CallConv ModulePragma Activation Rule RuleVar WarningText Pat PXAttr RPatOp RPat PatField Stmt QualStmt FieldUpdate Alt GuardedAlts GuardedAlt < K .
+
+--- End of syntax, rest of this file is the remainder of Language.Haskell.Exts.Syntax
 
 ***(
     -----------------------------------------------------------------------------
