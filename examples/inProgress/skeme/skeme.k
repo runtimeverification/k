@@ -18,7 +18,7 @@ kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID
   eq length(E:Exp EL:List{Exp}) = 1 +Int length(EL)
   eq length(.List{Exp}) = 0  
 
-  syntax Id ::= eval | display | set-car! | set-cdr! | o= | o+ | o- | o* | o/
+  syntax Id ::= eval | display | set-car! | set-cdr! | o= | o+ | o- | o* | o/ | o=
               | call-with-current-continuation | call/cc | car | cdr 
               | cons
               | oif | quote | begin | define | lambda | set!
@@ -46,7 +46,7 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
                       | cons( K * K ) | vec( Map # Int ) | string( Map # Int ) | Builtin 
                       | Closure | Continuation
   
-  syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | bEqual | b+ | b- | b* | b/ 
+  syntax Builtin ::=   bEval | bDisplay | bSetCar | bSetCdr | b+ | b- | b* | b/ | b= 
                      | bCallCC | bCar | bCdr | bCons
   
   syntax List{Internal} ::= Internal | List{Internal} List{Internal} [ditto]
@@ -75,6 +75,9 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                       | settest
                       | settest2 --- for when we have local bindings
                       | lambdatest
+                      | closuretest
+                      | fac
+
 
   macro foo = #[]
   macro bar = [display [oif #t "true" "false"]]
@@ -101,7 +104,20 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
   macro setcdrtest2 = [define x ![1 2 3]][display [set-cdr! x ![4 5]]][display x]
   macro constest = [display [cons 1 2]] [define x ![1 2 3]] [display [cons 42 x]]
   macro settest = [define x ![1 2 3]][display [set! x 3]][display x]
-  macro lambdatest = [display [lambda [x] [o+ x 3][o+ x 3]]]
+  macro lambdatest = [display [lambda [x] [o+ x 3][o+ x 3]]] 
+  macro closuretest = [define id("a") 42]
+                      [[lambda [id("a") id("b")]  [display [o+ id("a") id("b")]]
+                                                  [set! id("a") 50]
+                                                  [display id("a")]] 
+                        15 10]
+                      [display id("a")]
+
+  macro fac = [define id("fac") 
+                      [lambda [x] 
+                                 [oif [o= x 0]
+                                      1
+                                      [o* x [id("fac") [o- x 1]]]]]]
+              [display [id("fac") 6]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -136,7 +152,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                        loc(-Rat 2)  |-> bDisplay 
                        loc(-Rat 3)  |-> bSetCar 
                        loc(-Rat 4)  |-> bSetCdr
-                       loc(-Rat 5)  |-> bEqual 
+                       loc(-Rat 5)  |-> b= 
                        loc(-Rat 6)  |-> b+
                        loc(-Rat 7)  |-> b- 
                        loc(-Rat 8)  |-> b* 
@@ -145,6 +161,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                        loc(-Rat 11) |-> bCar 
                        loc(-Rat 12) |-> bCdr 
                        loc(-Rat 13) |-> bCons 
+                       loc(-Rat 14) |-> b=
                     </store> 
                     <nextLoc> 0 </nextLoc> 
                     <output> .List </output>
@@ -157,6 +174,37 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                        SetItem(set!) 
                     </keywords>
                </T>
+
+  op bind : List{Exp} List{Internal} -> K
+  op restore : Map -> K
+
+  rule <k>       bind(X:Id XL:List{Exp}, I:Internal IL:List{Internal}) 
+             =>  bind(XL, IL)
+       <_/k>
+       <env_>   .Map => X |-> loc(Loc:Rat) </env>
+       <store_> .Map => loc(Loc) |-> I   </store> 
+       <nextLoc> Loc => Loc +Rat 1     </nextLoc> [structural]
+ 
+  --- why the heck can't I have two nil lists next to each other without a kind error?  
+  rule bind(.List{Exp}, IL:List{Internal}) => .K [structural]
+
+  syntax Bag ::= bindtest | restoretest
+  macro bindtest = <k> bind(id("a") id("b") id("c"), vr(1) vr(2) vr(3)) </k>
+                   <env>   .Map     </env>
+                   <store> .Map   </store>
+                   <nextLoc> 0  </nextLoc>
+
+  ---might need one where restore is at beginning of k?
+  rule <k> I:Internal ~> (restore(Env:Map) => .K) <_/k>
+       <env> _ => Env </env> [structural]
+
+  --- this is a nonsense k cell
+  macro restoretest = <k> vr(1) ~> restore(.Map) ~> vr(2) </k>
+                      <env> 
+                        id("a") |-> loc(0) 
+                        id("b") |-> loc(1) 
+                        id("c") |-> loc(2) 
+                      </env>
 endkm
 
 kmod INTERN is including SKEME-SEMANTICS
@@ -298,7 +346,8 @@ kmod EXTERN is including SKEME-SEMANTICS
   rule extern(vec(.Map # 0), M)    => #[]           [structural]
 
   --- externing Closures
-  rule extern(Cl:Closure, M)        => #procedure(Cl) [structural]
+  rule extern(closure(EL1:List{Exp}, EL2:List{Exp}, CEnv:Map), M)        
+    => #procedure(closure(EL1, EL2, CEnv)) [structural]
 
   --- externing for Strings
   rule extern(string( M:Map # Len:NzInt ), Store:Map)
@@ -431,6 +480,9 @@ kmod APPLY-SEMANTICS is including SKEME-SEMANTICS
 endkm
 
 kmod CLOSURE-SEMANTICS is including APPLY-SEMANTICS
+     rule <k> apply(closure(EL1:List{Exp}, EL2:List{Exp}, CEnv:Map) IL:List{Internal})
+           => bind(EL1, IL) ~> [begin EL2] ~> restore(Env:Map) <_/k>
+          <env> Env => CEnv </env>
 endkm
 
 kmod EVAL-SEMANTICS is including APPLY-SEMANTICS + EXTERN
@@ -442,6 +494,11 @@ kmod DISPLAY-SEMANTICS is including APPLY-SEMANTICS + EXTERN
      rule <k> apply(bDisplay I:Internal) => vUnspec <_/k> 
           <output_> .List => ListItem(extern(I, Store:Map)) </output> 
           <store> Store </store> 
+endkm
+
+kmod EQUALITY-SEMANTICS is including APPLY-SEMANTICS
+  rule apply(b= I1:Internal I2:Internal) => #t if I1 ==Bool I2
+  rule apply(b= I1:Internal I2:Internal) => #f if I1 =/=Bool I2
 endkm
 
 kmod ARITHMETIC-SEMANTICS is including APPLY-SEMANTICS
@@ -550,9 +607,9 @@ endkm
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
   + ID-SEMANTICS + DEFINE-SEMANTICS + SET!-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
-  + SKEME-PROGRAMS + LAMBDA-SEMANTICS 
+  + SKEME-PROGRAMS + LAMBDA-SEMANTICS + CLOSURE-SEMANTICS 
   + APPLY-SEMANTICS + EVAL-SEMANTICS + DISPLAY-SEMANTICS
-  + ARITHMETIC-SEMANTICS
+  + EQUALITY-SEMANTICS + ARITHMETIC-SEMANTICS
   + LIST-OPS
   
   syntax Bag ::= run( List{K} ) | out( List ) 
