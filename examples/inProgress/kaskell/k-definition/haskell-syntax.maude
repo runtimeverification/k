@@ -212,8 +212,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Op .
-  op VarOp : Name    -- ^ variable operator (/varop/)
-  op ConOp : Name    -- ^ constructor operator (/conop/)
+  op VarOp : Name .
+  op ConOp : Name .
 
 
 ***(
@@ -225,8 +225,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort CName .
-  op VarName : Name  -- ^ name of a method or field
-  op ConName : Name  -- ^ name of a data constructor
+  op VarName : Name .
+  op ConName : Name .
 
 
 
@@ -261,9 +261,9 @@ kmod HASKELL-SYNTAX is
   sort ExportSpec .
   op EVar : QName .
   op EAbs : QName .
-  op EThingAll : QName              -- ^ @T(..)@:
-  op EThingWith : QName [CName]     -- ^ @T(C_1,...,C_n)@:
-  op EModuleContents : ModuleName   -- ^ @module M@:
+  op EThingAll : QName .
+  op EThingWith : QName [CName] .
+  op EModuleContents : ModuleName .
 
 ***(
     -- | An import declaration.
@@ -300,10 +300,10 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ImportSpec .
-  op IVar Name                -- ^ variable
-  op IAbs : Name                -- ^ @T@:
-  op IThingAll : Name           -- ^ @T(..)@:
-  op IThingWith : Name [CName]  -- ^ @T(C_1,...,C_n)@:
+  op IVar Name .
+  op IAbs : Name .
+  op IThingAll : Name .
+  op IThingWith : Name [CName] .
 
 ***(
     -- | Associativity of an operator.
@@ -314,18 +314,16 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Assoc .
-  op AssocNone  -- ^ non-associative operator (declared with @infix@)
-  op AssocLeft :  -- ^ left-associative operator (declared with @infixl@)
-  op AssocRight : -- ^ right-associative operator (declared with @infixr@)
-
-
+  op AssocNone : -> Assoc .
+  op AssocLeft : -> Assoc .
+  op AssocRight : -> Assoc .
 
 ***(
     -- | A single derived instance, which may have arguments since it may be a MPTC.
     type Deriving = (QName, [Type])
 ***)
 
-  op Deriving : -> (QName, [Type]) [ctor]
+  op Deriving : -> (QName, [Type]) [ctor] .
 
 ***(
     -- | A top-level declaration.
@@ -390,34 +388,34 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Decl .
-  op TypeDecl     SrcLoc Name [TyVarBind] Type
-  op TypeFamDecl :  SrcLoc Name [TyVarBind] (Maybe Kind)
-  op DataDecl :     SrcLoc DataOrNew Context Name [TyVarBind]              [QualConDecl] [Deriving]
-  op GDataDecl :    SrcLoc DataOrNew Context Name [TyVarBind] (Maybe Kind) [GadtDecl]    [Deriving]
-  op DataFamDecl :  SrcLoc {-data-}  Context Name [TyVarBind] (Maybe Kind)
-  op TypeInsDecl :  SrcLoc Type Type
-  op DataInsDecl :  SrcLoc DataOrNew Type              [QualConDecl] [Deriving]
-  op GDataInsDecl : SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl]    [Deriving]
-  op ClassDecl :    SrcLoc Context Name [TyVarBind] [FunDep] [ClassDecl]
-  op InstDecl :     SrcLoc Context QName [Type] [InstDecl]
-  op DerivDecl :    SrcLoc Context QName [Type]
-  op InfixDecl :    SrcLoc Assoc Int [Op]
-  op DefaultDecl :  SrcLoc [Type]
-  op SpliceDecl :   SrcLoc Exp
-  op TypeSig :      SrcLoc [Name] Type
-  op FunBind :      [Match]
-  op PatBind :      SrcLoc Pat (Maybe Type) Rhs {-where-} Binds
-  op ForImp :   SrcLoc CallConv Safety String Name Type
-  op ForExp :   SrcLoc CallConv          String Name Type
-  op RulePragmaDecl :   SrcLoc [Rule]
-  op DeprPragmaDecl :   SrcLoc [([Name], String)]
-  op WarnPragmaDecl :   SrcLoc [([Name], String)]
-  op InlineSig :        SrcLoc Bool Activation QName
-  op InlineConlikeSig : SrcLoc      Activation QName
-  op SpecSig :          SrcLoc                 QName [Type]
-  op SpecInlineSig :    SrcLoc Bool Activation QName [Type]
-  op InstSig :          SrcLoc Context         QName [Type]
-  op AnnPragma :        SrcLoc Annotation
+  op TypeDecl     SrcLoc Name [TyVarBind] Type .
+  op TypeFamDecl :  SrcLoc Name [TyVarBind] (Maybe Kind) .
+  op DataDecl :     SrcLoc DataOrNew Context Name [TyVarBind]              [QualConDecl] [Deriving] .
+  op GDataDecl :    SrcLoc DataOrNew Context Name [TyVarBind] (Maybe Kind) [GadtDecl]    [Deriving] .
+  op DataFamDecl :  SrcLoc {-data-}  Context Name [TyVarBind] (Maybe Kind) .
+  op TypeInsDecl :  SrcLoc Type Type .
+  op DataInsDecl :  SrcLoc DataOrNew Type              [QualConDecl] [Deriving] .
+  op GDataInsDecl : SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl]    [Deriving] .
+  op ClassDecl :    SrcLoc Context Name [TyVarBind] [FunDep] [ClassDecl] .
+  op InstDecl :     SrcLoc Context QName [Type] [InstDecl] .
+  op DerivDecl :    SrcLoc Context QName [Type] .
+  op InfixDecl :    SrcLoc Assoc Int [Op] .
+  op DefaultDecl :  SrcLoc [Type] .
+  op SpliceDecl :   SrcLoc Exp .
+  op TypeSig :      SrcLoc [Name] Type .
+  op FunBind :      [Match] .
+  op PatBind :      SrcLoc Pat (Maybe Type) Rhs {-where-} Binds .
+  op ForImp :   SrcLoc CallConv Safety String Name Type .
+  op ForExp :   SrcLoc CallConv          String Name Type .
+  op RulePragmaDecl :   SrcLoc [Rule] .
+  op DeprPragmaDecl :   SrcLoc [([Name], String)] .
+  op WarnPragmaDecl :   SrcLoc [([Name], String)] .
+  op InlineSig :        SrcLoc Bool Activation QName .
+  op InlineConlikeSig : SrcLoc      Activation QName .
+  op SpecSig :          SrcLoc                 QName [Type] .
+  op SpecInlineSig :    SrcLoc Bool Activation QName [Type] .
+  op InstSig :          SrcLoc Context         QName [Type] .
+  op AnnPragma :        SrcLoc Annotation .
 
 ***(
     -- | An annotation through an ANN pragma.
@@ -431,9 +429,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Annotation .
-  op Ann :       Name Exp
-  op TypeAnn :   Name Exp
-  op ModuleAnn :      Exp
+  op Ann :       Name Exp .
+  op TypeAnn :   Name Exp .
+  op ModuleAnn :      Exp .
 
 ***(
     -- | A flag stating whether a declaration is a data or newtype declaration.
@@ -441,8 +439,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort NewType .
-  op DataType
-  op NewType
+  op DataType : -> NewType .
+  op NewType : -> NewType .
 
 ***(
     -- | A binding group inside a @let@ or @where@ clause.
@@ -452,8 +450,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Binds .
-  op BDecls : [Decl]     -- ^ An ordinary binding group
-  op IPBinds : [IPBind]  -- ^ A binding group for implicit parameters
+  op BDecls : [Decl] .
+  op IPBinds : [IPBind] .
 
 
 
@@ -498,9 +496,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ConDecl .
-  op ConDecl : Name [BangType]
-  op InfixConDecl : BangType Name BangType
-  op RecDecl : Name [([Name],BangType)]
+  op ConDecl : Name [BangType] .
+  op InfixConDecl : BangType Name BangType .
+  op RecDecl : Name [([Name],BangType)] .
 
 ***(
     -- | A single constructor declaration in a GADT data type declaration.
@@ -525,10 +523,10 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ClassDecl .
-  op ClsDecl    Decl
-  op ClsDataFam : SrcLoc Context Name [TyVarBind] (Maybe Kind)
-  op ClsTyFam :   SrcLoc         Name [TyVarBind] (Maybe Kind)
-  op ClsTyDef :   SrcLoc Type    Type
+  op ClsDecl :   Decl .
+  op ClsDataFam : SrcLoc Context Name [TyVarBind] (Maybe Kind) .
+  op ClsTyFam :   SrcLoc         Name [TyVarBind] (Maybe Kind) .
+  op ClsTyDef :   SrcLoc Type    Type .
 
 ***(
     -- | Declarations inside an instance declaration.
@@ -544,10 +542,10 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort InstDecl .
-  op InsDecl :   Decl
-  op InsType :   SrcLoc Type Type
-  op InsData :   SrcLoc DataOrNew Type [QualConDecl] [Deriving]
-  op InsGData :  SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl] [Deriving]
+  op InsDecl :   Decl .
+  op InsType :   SrcLoc Type Type .
+  op InsData :   SrcLoc DataOrNew Type [QualConDecl] [Deriving] .
+  op InsGData :  SrcLoc DataOrNew Type (Maybe Kind) [GadtDecl] [Deriving] .
 
 ***(
     -- | The type of a constructor argument or field, optionally including
@@ -559,9 +557,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort BangType .
-  op BangedTy   Type  -- ^ strict component, marked with \"@!@\"
-  op UnBangedTy : Type  -- ^ non-strict component
-  op UnpackedTy : Type  -- ^ unboxed component, marked with an UNPACK pragma
+  op BangedTy   Type .
+  op UnBangedTy : Type .
+  op UnpackedTy : Type .
 
 ***(
     -- | The right hand side of a function or pattern binding.
@@ -572,8 +570,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Rhs .
-  op UnGuardedRhs : Exp -- ^ unguarded right hand side (/exp/)
-  op GuardedRhss :  [GuardedRhs]
+  op UnGuardedRhs : Exp .
+  op GuardedRhss :  [GuardedRhs] .
 
 ***(
     -- | A guarded right hand side @|@ /stmts/ @=@ /exp/.
@@ -606,16 +604,16 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Type .
-  op TyForall : (Maybe [TyVarBind]) Context Type
-  op TyFun :   Type Type        -- ^ function type
-  op TyTuple : Boxed [Type]     -- ^ tuple type, possibly boxed
-  op TyList :  Type             -- ^ list syntax, e.g. [a], as opposed to [] a
-  op TyApp :   Type Type        -- ^ application of a type constructor
-  op TyVar :   Name             -- ^ type variable
-  op TyCon :   QName            -- ^ named type or type constructor
-  op TyParen : Type             -- ^ type surrounded by parentheses
-  op TyInfix : Type QName Type  -- ^ infix type constructor
-  op TyKind :  Type Kind        -- ^ type with explicit kind signature
+  op TyForall : (Maybe [TyVarBind]) Context Type .
+  op TyFun :   Type Type .
+  op TyTuple : Boxed [Type] .
+  op TyList :  Type .
+  op TyApp :   Type Type .
+  op TyVar :   Name .
+  op TyCon :   QName .
+  op TyParen : Type .
+  op TyInfix : Type QName Type .
+  op TyKind :  Type Kind .
 
 ***(
     -- | A type variable declaration, optionally with an explicit kind annotation.
@@ -625,8 +623,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort TyVarBind .
-  op KindedVar : Name Kind   -- ^ variable binding with kind annotation
-  op UnkindedVar : Name      -- ^ ordinary variable binding
+  op KindedVar : Name Kind .
+  op UnkindedVar : Name .
 
 ***(
     -- | An explicit kind annotation.
@@ -639,11 +637,11 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Kind .
-  op KindStar :          -- ^ @*@, the kind of types
-  op KindBang :          -- ^ @!@, the kind of unboxed types
-  op KindFn : Kind Kind  -- ^ @->@, the kind of a type constructor
-  op KindParen : Kind    -- ^ a kind surrounded by parentheses
-  op KindVar : Name      -- ^ a kind variable (as of yet unsupported by compilers)
+  op KindStar : .
+  op KindBang : .
+  op KindFn : Kind Kind .
+  op KindParen : Kind .
+  op KindVar : Name .
 
 ***(
     -- | A functional dependency, given on the form
@@ -673,11 +671,11 @@ kmod HASKELL-SYNTAX is
               | EqualP Type   Type      -- ^ type equality constraint
 ***)
 
-  sort Asst
-  op ClassA : QName [Type]     -- ^ ordinary class assertion
-  op InfixA : Type QName Type  -- ^ class assertion where the class name is given infix
-  op IParam : IPName Type      -- ^ implicit parameter assertion
-  op EqualP : Type   Type      -- ^ type equality constraint
+  sort Asst .
+  op ClassA : QName [Type] .
+  op InfixA : Type QName Type .
+  op IParam : IPName Type .
+  op EqualP : Type   Type .
 
 ***(
     -- | /literal/
@@ -698,16 +696,16 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Literal .
-  op Char :    Char          -- ^ character literal
-  op String :  String        -- ^ string literal
-  op Int :     Integer       -- ^ integer literal
-  op Frac :    Rational      -- ^ floating point literal
-  op PrimInt :    Integer    -- ^ unboxed integer literal
-  op PrimWord :   Integer    -- ^ unboxed word literal
-  op PrimFloat :  Rational   -- ^ unboxed float literal
-  op PrimDouble : Rational   -- ^ unboxed double literal
-  op PrimChar :   Char       -- ^ unboxed character literal
-  op PrimString : String     -- ^ unboxed string literal
+  op Char :    Char .
+  op String :  String .
+  op Int :     Integer .
+  op Frac :    Rational .
+  op PrimInt :    Integer .
+  op PrimWord :   Integer .
+  op PrimFloat :  Rational .
+  op PrimDouble : Rational .
+  op PrimChar :   Char .
+  op PrimString : String .
 
 ***(
     -- | Haskell expressions.
@@ -779,51 +777,51 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Exp .
-  op Var : QName                 -- ^ variable
-  op IPVar : IPName              -- ^ implicit parameter variable
-  op Con : QName                 -- ^ data constructor
-  op Lit : Literal               -- ^ literal constant
-  op InfixApp : Exp QOp Exp      -- ^ infix application
-  op App : Exp Exp               -- ^ ordinary application
-  op NegApp : Exp                -- ^ negation expression @-/exp/@ (unary minus)
-  op Lambda : SrcLoc [Pat] Exp   -- ^ lambda expression
-  op Let : Binds Exp             -- ^ local declarations with @let@ ... @in@ ...
-  op If : Exp Exp Exp            -- ^ @if@ /exp/ @then@ /exp/ @else@ /exp/
-  op Case : Exp [Alt]            -- ^ @case@ /exp/ @of@ /alts/
-  op Do : [Stmt]                 -- ^ @do@-expression:
-  op MDo : [Stmt]                -- ^ @mdo@-expression
-  op Tuple : [Exp]               -- ^ tuple expression
-  op TupleSection : [Maybe Exp]  -- ^ tuple section expression, e.g. @(,,3)@
-  op List : [Exp]                -- ^ list expression
-  op Paren : Exp                 -- ^ parenthesised expression
-  op LeftSection : Exp QOp       -- ^ left section @(@/exp/ /qop/@)@
-  op RightSection : QOp Exp      -- ^ right section @(@/qop/ /exp/@)@
-  op RecConstr : QName [FieldUpdate]
-  op RecUpdate : Exp [FieldUpdate]
-  op EnumFrom : Exp              -- ^ unbounded arithmetic sequence,
-  op EnumFromTo : Exp Exp        -- ^ bounded arithmetic sequence,
-  op EnumFromThen : Exp Exp      -- ^ unbounded arithmetic sequence,
-  op EnumFromThenTo : Exp Exp Exp
-  op ListComp : Exp  [QualStmt]    -- ^ ordinary list comprehension
-  op ParComp :  Exp [[QualStmt]]   -- ^ parallel list comprehension
-  op ExpTypeSig : SrcLoc Exp Type  -- ^ expression with explicit type signature
-  op VarQuote : QName            -- ^ @'x@ for template haskell reifying of expressions
-  op TypQuote : QName            -- ^ @''T@ for template haskell reifying of types
-  op BracketExp : Bracket        -- ^ template haskell bracket expression
-  op SpliceExp : Splice          -- ^ template haskell splice expression
-  op QuasiQuote : String String  -- ^ quasi-quotaion: @[$/name/| /string/ |]@
-  op XTag : SrcLoc XName [XAttr] (Maybe Exp) [Exp]
-  op XETag : SrcLoc XName [XAttr] (Maybe Exp)
-  op XPcdata : String            -- ^ PCDATA child element
-  op XExpTag : Exp               -- ^ escaped haskell expression inside xml
-  op CorePragma :        String Exp      -- ^ CORE pragma
-  op SCCPragma :         String Exp      -- ^ SCC pragma
-  op GenPragma :         String (Int, Int) (Int, Int) Exp
-  op Proc : SrcLoc     Pat Exp   -- ^ arrows proc: @proc@ /pat/ @->@ /exp/
-  op LeftArrApp :      Exp Exp   -- ^ arrow application (from left): /exp/ @-<@ /exp/
-  op RightArrApp :     Exp Exp   -- ^ arrow application (from right): /exp/ @>-@ /exp/
-  op LeftArrHighApp :  Exp Exp   -- ^ higher-order arrow application (from left): /exp/ @-<<@ /exp/
-  op RightArrHighApp : Exp Exp   -- ^ higher-order arrow application (from right): /exp/ @>>-@ /exp/
+  op Var : QName .
+  op IPVar : IPName .
+  op Con : QName .
+  op Lit : Literal .
+  op InfixApp : Exp QOp Exp .
+  op App : Exp Exp .
+  op NegApp : Exp .
+  op Lambda : SrcLoc [Pat] Exp .
+  op Let : Binds Exp .
+  op If : Exp Exp Exp .
+  op Case : Exp [Alt] .
+  op Do : [Stmt] .
+  op MDo : [Stmt] .
+  op Tuple : [Exp] .
+  op TupleSection : [Maybe Exp] .
+  op List : [Exp] .
+  op Paren : Exp .
+  op LeftSection : Exp QOp .
+  op RightSection : QOp Exp .
+  op RecConstr : QName [FieldUpdate] .
+  op RecUpdate : Exp [FieldUpdate] .
+  op EnumFrom : Exp .
+  op EnumFromTo : Exp Exp .
+  op EnumFromThen : Exp Exp .
+  op EnumFromThenTo : Exp Exp Exp .
+  op ListComp : Exp  [QualStmt] .
+  op ParComp :  Exp [[QualStmt]] .
+  op ExpTypeSig : SrcLoc Exp Type .
+  op VarQuote : QName .
+  op TypQuote : QName .
+  op BracketExp : Bracket .
+  op SpliceExp : Splice .
+  op QuasiQuote : String String .
+  op XTag : SrcLoc XName [XAttr] (Maybe Exp) [Exp] .
+  op XETag : SrcLoc XName [XAttr] (Maybe Exp) .
+  op XPcdata : String .
+  op XExpTag : Exp .
+  op CorePragma :        String Exp .
+  op SCCPragma :         String Exp .
+  op GenPragma :         String (Int, Int) (Int, Int) Exp .
+  op Proc : SrcLoc     Pat Exp .
+  op LeftArrApp :      Exp Exp .
+  op RightArrApp :     Exp Exp .
+  op LeftArrHighApp :  Exp Exp .
+  op RightArrHighApp : Exp Exp .
 
 ***(
     -- | The name of an xml element or attribute,
@@ -834,8 +832,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort XName .
-  op XName : String              -- <name ...
-  op XDomName : String String    -- <dom:name ...
+  op XName : String .
+  op XDomName : String String .
 
 ***(
     -- | An xml attribute, which is a name-expression pair.
@@ -855,10 +853,10 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Bracket .
-  op ExpBracket : Exp        -- ^ expression bracket: @[| ... |]@
-  op PatBracket : Pat        -- ^ pattern bracket: @[p| ... |]@
-  op TypeBracket : Type      -- ^ type bracket: @[t| ... |]@
-  op DeclBracket : [Decl]    -- ^ declaration bracket: @[d| ... |]@
+  op ExpBracket : Exp .
+  op PatBracket : Pat .
+  op TypeBracket : Type .
+  op DeclBracket : [Decl] .
 
 ***(
     -- | A template haskell splice expression
@@ -868,8 +866,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Splice .
-  op IdSplice : String       -- ^ variable splice: @$var@
-  op ParenSplice : Exp       -- ^ parenthesised expression splice: @$(/exp/)@
+  op IdSplice : String .
+  op ParenSplice : Exp .
 
 ***(
     -- | The safety of a foreign function call.
@@ -879,8 +877,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Safety .
-  op PlayRisky :         -- ^ unsafe
-  op PlaySafe : Bool     -- ^ safe ('False') or threadsafe ('True')
+  op PlayRisky : .
+  op PlaySafe : Bool .
 
 ***(
     -- | The calling convention of a foreign function call.
@@ -890,8 +888,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort CallConv .
-  op StdCall :
-  op CCall :
+  op StdCall : -> CallConv .
+  op CCall : -> CallConv .
 
 ***(
     -- | A top level options pragma, preceding the module header.
@@ -904,9 +902,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort ModulePragma .
-  op LanguagePragma :   SrcLoc [Name]    -- ^ LANGUAGE pragma
-  op OptionsPragma :    SrcLoc (Maybe Tool) String
-  op AnnModulePragma :  SrcLoc Annotation
+  op LanguagePragma :   SrcLoc [Name] .
+  op OptionsPragma :    SrcLoc (Maybe Tool) String .
+  op AnnModulePragma :  SrcLoc Annotation .
 
 ***(
     -- | Activation clause of a RULES pragma.
@@ -917,9 +915,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Activation .
-  op AlwaysActive :
-  op ActiveFrom :  Int
-  op ActiveUntil : Int
+  op AlwaysActive : -> Activation .
+  op ActiveFrom :  Int -> Activation .
+  op ActiveUntil : Int -> Activation .
 
 ***(
     -- | The body of a RULES pragma.
@@ -938,8 +936,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort RuleVar .
-  op RuleVar : Name
-  op TypedRuleVar : Name Type
+  op RuleVar : Name .
+  op TypedRuleVar : Name Type .
 
 ***(
     -- | Warning text to optionally use in the module header of e.g.
@@ -950,8 +948,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort WarningText .
-  op DeprText : String
-  op WarnText : String
+  op DeprText : String .
+  op WarnText : String .
 
 ***(
     -- | A pattern, to be matched against a value.
@@ -985,30 +983,30 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Pat .
-  op PVar : Name                     -- ^ variable
-  op PLit : Literal                  -- ^ literal constant
-  op PNeg : Pat                      -- ^ negated pattern
-  op PNPlusK : Name Integer          -- ^ n+k pattern
-  op PInfixApp : Pat QName Pat       -- ^ pattern with an infix data constructor
-  op PApp : QName [Pat]              -- ^ data constructor and argument patterns
-  op PTuple : [Pat]                  -- ^ tuple pattern
-  op PList : [Pat]                   -- ^ list pattern
-  op PParen : Pat                    -- ^ parenthesized pattern
-  op PRec : QName [PatField]         -- ^ labelled pattern, record style
-  op PAsPat : Name Pat               -- ^ @\@@-pattern
-  op PWildCard :                     -- ^ wildcard pattern: @_@
-  op PIrrPat : Pat                   -- ^ irrefutable pattern: @~/pat/@
-  op PatTypeSig : SrcLoc Pat Type    -- ^ pattern with type signature
-  op PViewPat : Exp Pat              -- ^ view patterns of the form @(/exp/ -> /pat/)@
-  op PRPat : [RPat]                  -- ^ regular list pattern
-  op PXTag : SrcLoc XName [PXAttr] (Maybe Pat) [Pat]
-  op PXETag : SrcLoc XName [PXAttr] (Maybe Pat)
-  op PXPcdata : String               -- ^ XML PCDATA pattern
-  op PXPatTag : Pat                  -- ^ XML embedded pattern
-  op PXRPats : [RPat]                -- ^ XML regular list pattern
-  op PExplTypeArg : QName Type       -- ^ Explicit generics style type argument e.g. @f {| Int |} x = ...@
-  op PQuasiQuote : String String     -- ^ quasi quote patter: @[$/name/| /string/ |]@
-  op PBangPat : Pat                  -- ^ strict (bang) pattern: @f !x = ...@
+  op PVar : Name .
+  op PLit : Literal .
+  op PNeg : Pat .
+  op PNPlusK : Name Integer .
+  op PInfixApp : Pat QName Pat .
+  op PApp : QName [Pat] .
+  op PTuple : [Pat] .
+  op PList : [Pat] .
+  op PParen : Pat .
+  op PRec : QName [PatField] .
+  op PAsPat : Name Pat .
+  op PWildCard : .
+  op PIrrPat : Pat .
+  op PatTypeSig : SrcLoc Pat Type .
+  op PViewPat : Exp Pat .
+  op PRPat : [RPat] .
+  op PXTag : SrcLoc XName [PXAttr] (Maybe Pat) [Pat] .
+  op PXETag : SrcLoc XName [PXAttr] (Maybe Pat) .
+  op PXPcdata : String .
+  op PXPatTag : Pat .
+  op PXRPats : [RPat] .
+  op PExplTypeArg : QName Type .
+  op PQuasiQuote : String String .
+  op PBangPat : Pat .
 
 ***(
     -- | An XML attribute in a pattern.
@@ -1030,12 +1028,12 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort RPatOp .
-  op RPStar :    -- ^ @*@ = 0 or more
-  op RPStarG :   -- ^ @*!@ = 0 or more, greedy
-  op RPPlus :    -- ^ @+@ = 1 or more
-  op RPPlusG :   -- ^ @+!@ = 1 or more, greedy
-  op RPOpt :     -- ^ @?@ = 0 or 1
-  op RPOptG :    -- ^ @?!@ = 0 or 1, greedy
+  op RPStar : .
+  op RPStarG : .
+  op RPPlus : .
+  op RPPlusG : .
+  op RPOpt : .
+  op RPOptG : .
 
 ***(
     -- | An entity in a regular pattern.
@@ -1051,14 +1049,14 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort RPat .
-  op RPOp : RPat RPatOp      -- ^ operator pattern, e.g. pat*
-  op RPEither : RPat RPat    -- ^ choice pattern, e.g. (1 | 2)
-  op RPSeq : [RPat]          -- ^ sequence pattern, e.g. (| 1, 2, 3 |)
-  op RPGuard : Pat [Stmt]    -- ^ guarded pattern, e.g. (| p | p < 3 |)
-  op RPCAs : Name RPat       -- ^ non-linear variable binding, e.g. (foo\@:(1 | 2))*
-  op RPAs : Name RPat        -- ^ linear variable binding, e.g. foo\@(1 | 2)
-  op RPParen : RPat          -- ^ parenthesised pattern, e.g. (2*)
-  op RPPat : Pat             -- ^ an ordinary pattern
+  op RPOp : RPat RPatOp .
+  op RPEither : RPat RPat .
+  op RPSeq : [RPat] .
+  op RPGuard : Pat [Stmt] .
+  op RPCAs : Name RPat .
+  op RPAs : Name RPat .
+  op RPParen : RPat .
+  op RPPat : Pat .
 
 ***(
     -- | An /fpat/ in a labeled record pattern.
@@ -1069,9 +1067,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort PatField .
-  op PFieldPat : QName Pat       -- ^ ordinary label-pattern pair
-  op PFieldPun : Name            -- ^ record field pun
-  op PFieldWildcard :            -- ^ record field wildcard
+  op PFieldPat : QName Pat .
+  op PFieldPun : Name .
+  op PFieldWildcard : .
 
 ***(
     -- | A statement, representing both a /stmt/ in a @do@-expression,
@@ -1089,10 +1087,10 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort Stmt .
-  op Generator : SrcLoc Pat Exp
-  op Qualifier : Exp     -- ^ an /exp/ by itself: in a @do@-expression,
-  op LetStmt : Binds     -- ^ local bindings
-  op RecStmt : [Stmt]    -- ^ a recursive binding group for arrows
+  op Generator : SrcLoc Pat Exp .
+  op Qualifier : Exp .
+  op LetStmt : Binds .
+  op RecStmt : [Stmt] .
 
 ***(
     -- | A general /transqual/ in a list comprehension,
@@ -1108,12 +1106,12 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort QualStmt .
-  op QualStmt :     Stmt         -- ^ an ordinary statement
-  op ThenTrans :    Exp          -- ^ @then@ /exp/
-  op ThenBy :       Exp Exp      -- ^ @then@ /exp/ @by@ /exp/
-  op GroupBy :      Exp          -- ^ @then@ @group@ @by@ /exp/
-  op GroupUsing :   Exp          -- ^ @then@ @group@ @using@ /exp/
-  op GroupByUsing : Exp Exp      -- ^ @then@ @group@ @by@ /exp/ @using@ /exp/
+  op QualStmt :     Stmt .
+  op ThenTrans :    Exp .
+  op ThenBy :       Exp Exp .
+  op GroupBy :      Exp .
+  op GroupUsing :   Exp .
+  op GroupByUsing : Exp Exp .
 
 ***(
     -- | An /fbind/ in a labeled construction or update expression.
@@ -1124,9 +1122,9 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort FieldUpdate .
-  op FieldUpdate : QName Exp     -- ^ ordinary label-expresion pair
-  op FieldPun : Name             -- ^ record field pun
-  op FieldWildcard :             -- ^ record field wildcard
+  op FieldUpdate : QName Exp .
+  op FieldPun : Name .
+  op FieldWildcard : .
 
 ***(
     -- | An /alt/ alternative in a @case@ expression.
@@ -1147,8 +1145,8 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort GuardedAlts .
-  op UnGuardedAlt : Exp          -- ^ @->@ /exp/
-  op GuardedAlts :  [GuardedAlt] -- ^ /gdpat/
+  op UnGuardedAlt : Exp .
+  op GuardedAlts :  [GuardedAlt] .
 
 ***(
     -- | A guarded case alternative @|@ /stmts/ @->@ /exp/.
@@ -1157,7 +1155,7 @@ kmod HASKELL-SYNTAX is
 ***)
 
   sort GuardedAlt .
-  op GuardedAlt : SrcLoc [Stmt] Exp
+  op GuardedAlt : SrcLoc [Stmt] Exp .
 
 ***(
     -----------------------------------------------------------------------------
