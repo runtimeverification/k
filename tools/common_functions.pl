@@ -727,32 +727,23 @@ sub getKLabelDeclarations
     {
 		my $statement = $2;
 		
-		# extract KLabel candidate from current statement
-        # the candidate is anything which ends with non-escaped []{}()\s 
-		while($statement =~ m/(.)(.)((\'.*?)([^`])([\(\)\{\}\[\]\s,]))/sg)
+		# extract KLabels from current statement
+                # Explaining regexp (^|\s|(?<!`)[\(\)\{\}\[\],])([']([^`\(\)\{\}\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))
+                # First part:  (^|\s|(?<!`)[\(\)\{\}\[\],])  describes what can be before a KLabel
+                # before a KLabel we can either have the beginning of the string,
+                # a space, or one of the (nonescaped) characters { } ( ) [ ] ,
+                # note that we use negative lookahead for ` so that only one char is consumed for 
+                # the prefix
+                # Second part: ([']([^`\(\)\{\}\[\],\s]*(`[^`\s])?)*)  describes the KLabel itself
+                # it must start with '  then it has some chars distinct from ` ( ) { } [ ] , \s
+                # and then it can have a ` followed by any (non-space) char, and, if so, iterate
+                # Final part: (?=($|[\(\)\{\}\[\],\s])  describes what ends a KLabel
+                # since we know that the KLabel cannot end with ` we need to look ahead and check 
+                # that the following character is either end of line, or one of the separators.
+		while($statement =~ m/(^|\s|(?<!`)[\(\)\{\}\[\],])([']([^`\(\)\{\}\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))/sg)
 		{
 
-		    my $candidate = "$4$5";
-		    my $prefix = "$1$2";
-		    
-		    if ($candidate =~ m/[^`][\[\]\{\}\(\)\s,]/)
-			{
-				# the candidate still contains a separator char -> throw it away
-				$candidate = "";
-			}
-			else # the candidate body is ok
-			{
-				if ($prefix =~ m/[^`][\[\]\{\}\(\)\s,]/)
-				{
-					# prefix is a separator 
-					# print "		Candidate: $candidate\n";					
-				}
-				else
-				{
-					# prefix is a non separator
-					$candidate = "";
-				}
-			}
+		    my $candidate = "$2";
 
 			if ($declaredKLabels =~ m/ $candidate /s)
 			{

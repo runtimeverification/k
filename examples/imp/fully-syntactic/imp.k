@@ -110,7 +110,7 @@ kmod IMP-SEMANTICS is including IMP-SYNTAX + K
   configuration <T> <k>.K</k> <state>.Map</state> </T>
 
   rule <k>X:Id => I:Int<_/k> <state_>X|->I<_/state> 
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule '_+_(I1:Int,,I2:Int) => I1 +Int I2
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
   rule I1 <= I2 => I1 <=Int I2  
   rule not(T:Bool) => notBool T  
