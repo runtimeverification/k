@@ -40,7 +40,7 @@ my $top_level_pattern = join("|", (
                     "mod(?:.*?)endm",
                     "fmod(?:.*?)endfm",
                     "set\\s.*?\$",
-                    "(?:in|load)\\s+\\S+"
+                    "(?:in|load|require)\\s+\\S+"
     ));
 
 my @kmaude_keywords = qw(context rule macro eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
@@ -640,7 +640,7 @@ sub appendFileInTree
     my ($child, $parent) = (shift, shift);
     $child = getFullName($child);
     $parent = getFullName($parent);
-    
+
     if ($parent eq "")
     {
 	# root node
@@ -656,13 +656,21 @@ sub appendFileInTree
 	Tree::Nary->append($parent, $node);
 	
 #	print "Parent: " . $parent->{data} . "  child: " . $node->{data} . "\n\n";
-    }
+    }    
+}
+
+sub display_node()
+{
+    # get current node and ref to arguments
+    my $node = (shift);
+    print $node->{data} . "\n";
+    return $Tree::Nary::FALSE;
 }
 
 sub recurseIntoFiles
 {
     my $file = getFullName(shift);
-    
+
     if ($file =~ m/(k\-prelude|pl\-builtins)/)
     {
 	return;
@@ -684,12 +692,28 @@ sub recurseIntoFiles
 	    $declaredKLabels .= " " . getDeclaredKLabelList($_);
 #	    print "Declared: $declaredKLabels\n";
 	}
-	elsif (m!^(?:in|load)\s+(\S+)!) {
+	elsif (m!^(?:in|load|require)\s+(\S+)!) {
 	    my $in = File::Spec->catfile((fileparse($file))[1], $1);
-	    appendFileInTree($in,$file);
-	    recurseIntoFiles($in);
+	    my $v_node = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
+	    $Tree::Nary::TRAVERSE_ALL, getFullName($in));
+#	    print "\nFile $in \n\n";
+	    if (!$v_node)
+	    {
+#		print "IF $in\n";
+		appendFileInTree($in,$file);
+		recurseIntoFiles($in);
+	    }
+#	    printTree();
 	}
     }
+}
+
+sub printTree
+{
+    print "=======Tree========\n";
+    Tree::Nary->traverse($inclusionFileTree,, $Tree::Nary::PRE_ORDER,
+	$Tree::Nary::TRAVERSE_ALL, -1, \&display_node);
+    print "\n=======End=======\n";
 }
 
 sub getDeclaredKLabelList
@@ -841,6 +865,26 @@ sub recurseFlat
 	}
 	
 	$flatten .= $out;
+}
+
+# determine whether a file can include other files
+sub required()
+{
+#    printTree();
+    my ($p, $c) = (shift, shift);
+    
+    $p = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
+	$Tree::Nary::TRAVERSE_ALL, getFullName($p));
+    
+    my $n = Tree::Nary->find_child($p, $Tree::Nary::TRAVERSE_ALL, getFullName($c));
+    # print "\n NODE: " . $n->{data} . "\n\n";
+    
+    if (!$n)
+    {
+	return 0;
+    }
+#    print "Found! " . $p->{data} . " parent for " . getFullName($c) . "\n\n\n";
+    return 1;
 }
 
 1;

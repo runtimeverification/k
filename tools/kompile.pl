@@ -189,7 +189,7 @@ my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 #########
 # Maude #
 #########
-my $maude_path = "maude";
+my $maude_path = "/home/andrei/work/maude/maude.linux";
 my $maude_temp_file = "ERASE-ME-PLEASE";
 my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
@@ -245,12 +245,12 @@ my $top_level_pattern = join("|", (
 		"mod(?:.*?)endm",
 		"fmod(?:.*?)endfm",
 		"set\\s.*?\$",
-		"(?:in|load)\\s+\\S+"
+		"(?:in|load|require)\\s+\\S+"
 ));
 
 # Configuration pattern: excludes, for the spacing, from the above all those substrings matching $exclude
 my $exclude = join("|",
-		   "\^\\s*(?:in|load)\\s+\\S+\\s*\$",                       # in/load of a file
+		   "\^\\s*(?:in|load|require)\\s+\\S+\\s*\$",                       # in/load of a file
 		   "kmod\\s+(?:\\S*(?=\\s))",                               # kmodule name
 		   "including(?:.*?(?=\\s+(?=$kmaude_keywords_pattern)))",  # included module expressions
 		   ":$ksort",                                               # sort declarations for other than ordinary $kvar
@@ -411,7 +411,7 @@ if ($latex && !@latexify_modules) {
     setVerbose() if $verbose;
     syntax_common_check($language_file_name);
     
-    # build inclusion trees
+# build inclusion trees
     appendFileInTree("$language_file_name", "");
     recurseIntoFiles($language_file_name);
 
@@ -777,9 +777,21 @@ sub maudify_file {
 	    print "DONE\n" if $verbose;
 	}
 	elsif (m!^(?:in|load)\s+(\S+)!) {
-#	    appendFileInTree(File::Spec->catfile((fileparse($file))[1],$1), $file);
 	    maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
 	    s!\.k(maude)?\s*$!\.maude!s;
+	}
+	elsif (m!^(?:require)\s+(\S+)!) {
+	    # print "File $file require: $1\n";
+	    if (required($file, $1))
+	    {
+		maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
+		s!\.k(maude)?\s*$!\.maude!s;
+		s!require!in!;
+	    }
+	    else
+	    {
+		s!require\s+\S+!!;
+	    }
 	}
 	else {
 
