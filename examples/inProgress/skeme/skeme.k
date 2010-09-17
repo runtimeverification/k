@@ -39,7 +39,7 @@ endkm
 kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
 
   syntax Closure  ::=   closure( List{Exp} , List{Exp} , Map )
-                      | varClosure( List{Exp} , Id , List{Exp} , Map )
+                      | varClosure( List{Exp} , Exp , List{Exp} , Map )
 
   syntax Continuation ::= continuation(K, Map)
 
@@ -78,8 +78,10 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                       | settest2 --- for when we have local bindings
                       | lambdatest
                       | closuretest
+                      | varclosuretest
                       | fac
                       | fac2
+                      | envcap
 
 
   macro foo = #[]
@@ -114,7 +116,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                                                   [display id("a")]] 
                         15 10]
                       [display id("a")]
-
+  macro varclosuretest = [define x [lambda [id("z") * id("y")] id("y")]] [display [x 1 2 3]]
   macro fac = [define id("fac") 
                       [lambda [x] 
                                  [oif [o= x 0]
@@ -126,6 +128,13 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                                       1
                                       [o* x [id("fac") [o- x 1]]]]]
               [display [id("fac") 6]]
+
+  macro envcap = [define id("nilarg") 0]
+                 [define x [lambda [id("y")] [set! id("nilarg") [lambda [] id("y")]]]]
+                 [display [x 42]]  
+                 [display [id("nilarg")]]
+                 [x 512]
+                 [display [id("nilarg")]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -169,7 +178,6 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                        loc(-Rat 11) |-> bCar 
                        loc(-Rat 12) |-> bCdr 
                        loc(-Rat 13) |-> bCons 
-                       loc(-Rat 14) |-> b=
                     </store> 
                     <nextLoc> 0 </nextLoc> 
                     <output> .List </output>
@@ -184,6 +192,8 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                </T>
 
   op bind : List{Exp} List{Internal} -> K
+  op varBind : List{Exp} Exp List{Internal} -> K
+  op consify : List{Internal} -> Internal
   op restore : Map -> K
 
   rule <k>       bind(X:Id XL:List{Exp}, I:Internal IL:List{Internal}) 
@@ -201,6 +211,21 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                    <env>   .Map     </env>
                    <store> .Map   </store>
                    <nextLoc> 0  </nextLoc>
+  
+  rule <k>       varBind(X:Id XL:List{Exp}, X':Id, I:Internal IL:List{Internal}) 
+             =>  varBind(XL, X', IL)
+       <_/k>
+       <env_>   .Map => X |-> loc(Loc:Rat) </env>
+       <store_> .Map => loc(Loc) |-> I   </store> 
+       <nextLoc> Loc => Loc +Rat 1     </nextLoc> [structural]
+
+  rule varBind(.List{Exp}, X:Id, IL:List{Internal}) => bind(X, consify(IL)) [structural]
+
+  rule consify(.List{Internal}) => vNil [structural]
+
+---  rule <k> bind(X:Id, (consify(I1:Internal I2:Internal IL:List{Internal}) =>     )) <_/k>
+   ---    <store_>            </store> 
+     ---  <nextLoc>           </nextLoc>
 
   ---might need one where restore is at beginning of k?
   rule <k> I:Internal ~> (restore(Env:Map) => .K) <_/k>
@@ -357,6 +382,9 @@ kmod EXTERN is including SKEME-SEMANTICS
   rule extern(closure(EL1:List{Exp}, EL2:List{Exp}, CEnv:Map), M)        
     => #procedure(closure(EL1, EL2, CEnv)) [structural]
 
+  rule extern(varClosure(EL1:List{Exp}, E:Exp, EL2:List{Exp}, CEnv:Map), M)        
+    => #procedure(varClosure(EL1, E, EL2, CEnv)) [structural]
+
   --- externing for Strings
   rule extern(string( M:Map # Len:NzInt ), Store:Map)
     => externS("", M, Store, (-Int 1) +Int Len) [structural] 
@@ -476,7 +504,17 @@ kmod LAMBDA-SEMANTICS is including SKEME-SEMANTICS
   rule <k> [lambda [EL1:List{Exp}] EL2:List{Exp}] => closure(EL1, EL2, Env:Map) <_/k>
        <env> Env </env>
   
+  --- this rule is unfortunately necessary because of [.List{Exp}] = [] macro
+  --- though in all other respects that macro makes life easier
   rule <k> [lambda [] EL2:List{Exp}] => closure(.List{Exp}, EL2, Env:Map) <_/k>
+       <env> Env </env>
+
+  rule <k> [lambda [EL:List{Exp} * E:Exp] EL':List{Exp}] => varClosure(EL, E, EL', Env:Map) <_/k>  
+       <env> Env </env>
+  
+  --- this rule is unfortunately necessary because of [.List{Exp} * Exp] = [* Exp] macro
+  --- though in all other respects that macro makes life easier
+  rule <k> [lambda [* E:Exp] EL':List{Exp}] => varClosure(.List{Exp}, E, EL', Env:Map) <_/k>  
        <env> Env </env>
 endkm
 
@@ -490,6 +528,11 @@ endkm
 kmod CLOSURE-SEMANTICS is including APPLY-SEMANTICS
      rule <k> apply(closure(EL1:List{Exp}, EL2:List{Exp}, CEnv:Map) IL:List{Internal})
            => bind(EL1, IL) ~> [begin EL2] ~> restore(Env:Map) <_/k>
+          <env> Env => CEnv </env>
+
+    
+     rule <k> apply(varClosure(EL1:List{Exp}, E:Exp, EL2:List{Exp}, CEnv:Map) IL:List{Internal})
+           => varBind(EL1, E, IL) ~> [begin EL2] ~> restore(Env:Map) <_/k>
           <env> Env => CEnv </env>
 endkm
 
