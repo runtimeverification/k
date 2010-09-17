@@ -87,8 +87,9 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op emptySn : -> Id .
   op @scalar :  -> Field .
   op _._ : Id Id -> Field .
-  op _|->_:[_:_] : Int++  Val Field  ExpType -> MapItem . --- field name Id.Id TBD --- the 3rd arg. needs a new sort
---- no proof obligations
+  op _|->_:[_:_] : Int++  Val Field  ExpType -> MapItem . 
+  op struct_* : Id -> ExpType .
+  --- no proof obligations
   op noCfg : -> Bag .
   
   vars Map Map' : Map .
@@ -98,8 +99,6 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
 
   eq (Map I |-> [v1 : t ])[Map' I |-> [v2 : t ]] = Map[Map'] I |-> [v2 : t ] .
 
-  op struct_ :  Id -> ExpType .
-  op &_ :  ExpType -> ExpType .
   op int :  -> NvExpType .
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op derive : -> KLabel .

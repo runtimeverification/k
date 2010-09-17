@@ -4,7 +4,7 @@ kmod IMP-SYNTAX is including ML-K
   syntax Val    ::= Int++
   syntax NvExpType ::= int
   syntax Void   ::= void
-  syntax ExpType   ::= Void | NvExpType | struct Id | & ExpType 
+  syntax ExpType   ::= Void | NvExpType | struct Id * | ExpType *
   syntax Struct ::= struct Id { Stmts } ; 
 
   syntax Var ::= Id | 
@@ -120,5 +120,5 @@ kmod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX
   macro __`(_`)`{_`}(T, F, Sss:Stmts, Ss ) = __`(_`)_`{_`}(T, F, Sss, noAnnot, Ss )
   macro _`(`)(F) = _`(_`)(F,.List{Id})
 
-  macro __;(T, *F) = __;(&T, F)   
+  --- macro __;(T, *F) = __;(&T, F)   
 endkm

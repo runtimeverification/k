@@ -39,7 +39,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        < k > K </ k >
        < heap >
          P |-> ?Int(N) : [( nodeList . val ) : int ]
-         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : & struct nodeList]
+         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : (struct nodeList *)]
          list(?Int(N +Int 1))(?Seq(N +Int 2))
          H
        </ heap >
@@ -58,7 +58,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   rl < config >
        < heap >
          P |-> I : [( nodeList . val ) : int ]
-         (P +Int 1) |-> 0 : [( nodeList . next ) : & struct nodeList ]
+         (P +Int 1) |-> 0 : [( nodeList . next ) : struct nodeList * ]
          H
        </ heap >
        CfgItems
@@ -75,7 +75,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   rl < config >
        < heap >
          P |-> I : [( nodeList . val ) : int ]
-         (P +Int 1) |-> P' : [( nodeList . next ) : & struct nodeList ]
+         (P +Int 1) |-> P' : [( nodeList . next ) : struct nodeList * ]
          list(P')(Alpha)
          H
        </ heap >
@@ -116,7 +116,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        < k > K </ k >
        < heap >
          P |-> ?Int(N) : [( nodeList . val ) : int ]
-         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : & struct nodeList]
+         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : struct nodeList *]
          lseg(?Int(N +Int 1), Q)(?Seq(N +Int 2))
          H
        </ heap >
@@ -137,7 +137,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   rl < config >
        < heap >
          P |-> I : [( nodeList . val ) : int]
-         (P +Int 1) |-> Q : [( nodeList . next ) : & struct nodeList]
+         (P +Int 1) |-> Q : [( nodeList . next ) : struct nodeList *]
          H </ heap >
        CfgItems
      </ config >

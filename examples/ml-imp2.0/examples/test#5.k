@@ -17,7 +17,7 @@ struct nodeList {
 
 int reverse(struct nodeList *x;)
 /* pre < config > 
-          < env > x |-> [?x : &struct nodeList] </ env > 
+          < env > x |-> [?x : struct nodeList *] </ env > 
           < heap > list(?x)(A) </ heap > 
           < form > TrueFormula </ form > 
           </ config > */
@@ -31,7 +31,7 @@ int reverse(struct nodeList *x;)
   struct nodeList *y;
   p = 0 ;
   /* invariant < config > 
-                      < env > p |-> [?p : &struct nodeList] x |-> [?x : &struct nodeList] </ env >
+                      < env > p |-> [?p : struct nodeList *] x |-> [?x : struct nodeList *] </ env >
                       < heap > list(?p)(?B) list(?x)(?C) </ heap >
                       < form > rev(A) === rev(?C) ::: ?B </ form > 
                       </ config > */
@@ -46,9 +46,9 @@ int reverse(struct nodeList *x;)
 
 void main()
 {
-  /* assume < config > < env > x |-> [?x : &struct nodeList] </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
+  /* assume < config > < env > x |-> [?x : struct nodeList *] </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
-  /* assert < config > < env > x |-> [?x : &struct nodeList] </ env > < heap > list(?x)(rev(A)) </ heap > < form > TrueFormula </ form > </ config > */
+  /* assert < config > < env > x |-> [?x : struct nodeList *] </ env > < heap > list(?x)(rev(A)) </ heap > < form > TrueFormula </ form > </ config > */
 }
   ) 
 endkm

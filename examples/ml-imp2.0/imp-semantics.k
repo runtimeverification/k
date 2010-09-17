@@ -43,13 +43,13 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
 --- scalar types
   syntax Bool ::= isScalar ( ExpType )
   macro isScalar(int) = true
-  macro isScalar(& T) = true 
-  macro isScalar(struct Sn) = false
+  macro isScalar(T *) = true 
+  macro isScalar(struct Sn *) = false
 
 --- default values
   syntax Val ::= defaultVal ( ExpType )
   macro defaultVal(int) = 0
-  macro defaultVal(& T) = 0
+  macro defaultVal(T *) = 0
 
 --- heap allocation/deallocation
   syntax K ::= allocHeap ( Id , List ) | deallocHeap ( Int++ , Int++ )
@@ -58,9 +58,9 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   syntax Map ::= map ( Stmts , List{Exp} )
   macro map(noneStmts, .List{Id}) = .Map
   macro map(__;(T, X), V) = (X |-> [V : T])
-  macro map(__;(T, *X), V) = (X |-> [V : &T])
+  macro map(__;(T, *X), V) = (X |-> [V : T*])
   macro map((__;(T, X)  TXl:Stmts), (V ,,, Vl)) = (X |-> [V : T]) map(TXl, Vl)
-  macro map((__;(T, *X)  TXl:Stmts), (V ,,, Vl)) = (X |-> [V : &T]) map(TXl, Vl)
+  macro map((__;(T, *X)  TXl:Stmts), (V ,,, Vl)) = (X |-> [V : T*]) map(TXl, Vl)
 
 
   rule I1 + I2 => I1 +Int I2
@@ -135,7 +135,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
 ---      declarations of the form "struct name *v;" are allowed
   rule
     <k> Var:Var->Fld => *(I +Int J) <_/k> 
-    <env_> X |-> [I : &struct Sn] <_/env>
+    <env_> X |-> [I : struct Sn *] <_/env>
         <struct_> Sn |-> (_ `[_:_+_`](Fld, T, J) _) <_/struct>
 
 --- the evaluation of the new operator
@@ -144,7 +144,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
     <newSym> N </newSym>
     if isScalar(T) ==Bool true
   rule
-    <k> new struct Sn => allocHeap(Sn , Fl) ~> N <_/k>
+    <k> new struct Sn * => allocHeap(Sn , Fl) ~> N <_/k>
     <struct_> Sn |-> Fl <_/struct>
     <newSym> N </newSym>
   rule
@@ -157,7 +157,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
 --- delete statement processing
   rule
     <k> delete I; => deallocHeap(I, length(Fl)) <_/k>
-    <env_> _ |-> [(I => 0) : &struct Sn] <_/env>
+    <env_> _ |-> [(I => 0) : struct Sn *] <_/env>
     <struct_> Sn |-> Fl <_/struct>
   rule
     <k> deallocHeap(I, M) => deallocHeap(I +Int 1, M +Int -1) <_/k>
@@ -176,7 +176,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   context ( [HOLE] ->_) = _ ;
   rule
     <k> (I->Fld = V ;) => *(I+J) = V; <_/k>
-    <env_> _ |-> [I : &struct Sn] <_/env>
+    <env_> _ |-> [I : struct Sn *] <_/env>
     <struct_> Sn |-> (_ `[_:_+_`](Fld, T, J) _) <_/struct>
 
 --- dereferencing 

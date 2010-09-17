@@ -1,5 +1,5 @@
 K_ROOTDIR = ~/k-framework
-ML_ROOTDIR = $(K_ROOTDIR)/examples/struct-ml-imp
+ML_ROOTDIR = $(K_ROOTDIR)/examples/ml-imp2.0
 
 .SUFFIXES: .imp .maude
 LANG_NAME = imp
