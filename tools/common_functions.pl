@@ -519,23 +519,16 @@ sub printErrorFromOut()
     {
 	local $/=undef; open FILE,"<", $warnings_file or print ""; local $_ = <FILE>; close FILE;
     
-	if ($_)
+	if (/error(.*?)\n/isg)
 	{
-	    my $content = $_;
-	    close FILE;
-	    my $out = "";
-	    if ($content =~ m/error(.*?)\n/isg)
-	    {
-		$out = "Error $1\n";
-	    }
-	    
-	    $out;
+	    "Error $1";
 	}
     }
-     
-    "";
+    else 
+    {
+	"";
+    }
 }
-
 # generate fresh names for temp files
 sub fresh
 {
