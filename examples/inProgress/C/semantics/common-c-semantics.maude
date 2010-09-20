@@ -52,6 +52,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	eq bito(0) = 0 . --- FIXME need to check this is okay in all circumstances
 	op bitoffset : Nat -> Nat .
 	op byteoffset : Nat -> Nat .
+	op declare : K K -> K [metadata "strict(1)"] .
+	op enumItem : Id Value -> Value .
 	
 	ceq _bit::_(piece(N:Nat, Len:Nat), piece(N':Nat, Len':Nat)) 
 		= piece((N:Nat <<Nat Len':Nat) |Nat N':Nat, Len:Nat +Nat Len':Nat)
@@ -952,7 +954,7 @@ mod COMMON-INITIALIZATION is
 	eq innerType(arrayType(T:Type, ?)) = T:Type .
 	eq innerType(incompleteArrayType(T:Type)) = T:Type .
 		
-	--- fixme does this need to worry about incompleteLength?
+	mb context buildDesignator(AtIndexInit(`[HOLE`]:K, ?)) : KSentence .
 	mb rule
 		< k > buildDesignator(AtIndexInit(tv(N:Nat, ?), More:K)) 
 			=> buildDesignator(More:K)
@@ -1055,7 +1057,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- if it is an aggregate, every member is initialized (recursively) according to these rules;
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
 	--- op declare : K K -> K [metadata "seqstrict(2 1)"] .
-	op declare : K K -> K [metadata "strict(1)"] .
+
 	op declare-aux : K K -> K [metadata "strict(2)"] .
 	op defineType : K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence .
@@ -1181,12 +1183,15 @@ mod COMMON-GLOBAL-DECLARATION is
 	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
 	eq Typedef(NameGroup(T:Type, Name:C)) = defineType(SingleName(T:Type, Name:C)) .
 
+	--- eq EnumItem(X:Id, V:Value)
+		--- = declare(typedDeclaration(int, X:Id), SingleInit(V:Value)) ~> int .
+
 	eq EnumItem(X:Id, V:Value)
-		= declare(typedDeclaration(int, X:Id), SingleInit(V:Value)) ~> int .
+		= enumItem(X:Id, V:Value) .
 	
-	mb rule
-		< k > EnumDef(X:Id, L:List{Type}) => (.).K ...</ k >
-		: KSentence .
+	--- mb rule
+		--- < k > EnumDef(X:Id, L:List{Type}) => (.).K ...</ k >
+		--- : KSentence .
 	
 	op initialize-aux : Id Type K -> K .
 	---eq SingleInit(K:K) = K:K .
@@ -1691,6 +1696,29 @@ mod C-SEMANTICS-MISC is
 	
 	ceq N:Nat +Nat bito(M:Nat) = N:Nat +Nat (M:Nat /Nat numBitsPerByte) +Nat bito(M:Nat %Nat numBitsPerByte)
 		if M:Nat >Nat numBitsPerByte .
+		
+	
+	--- op enumDef : Id List{C} -> K .
+	op fillEnums : K -> K .
+	op fillEnums : K Nat -> K .
+	mb rule
+		< k > EnumDef(X:Id, L:List{C}) => fillEnums(EnumDef(X:Id, L:List{C})) ...</ k >
+		: KSentence .
+	mb rule < k > fillEnums(K:K) => fillEnums(K:K, 0) ...</ k > : KSentence .
+	mb rule
+		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, emptyValue) :: L:List{C}), N:Nat) 
+			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(N:Nat, int)))
+			~> fillEnums(EnumDef(X:Id, L:List{C}), sNat(N:Nat)) 
+		...</ k >
+		: KSentence .
+	mb rule
+		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, tv(N:Nat, int)) :: L:List{C}), ?) 
+			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(N:Nat, int)))
+			~> fillEnums(EnumDef(X:Id, L:List{C}), sNat(N:Nat))
+		...</ k >
+		: KSentence .
+	mb rule
+		< k > fillEnums(EnumDef(X:Id, Nil), ?) => (.).K ...</ k > : KSentence .
 endm
 
 load common-c-conversions

@@ -221,6 +221,7 @@ and decl_type =
 	op PointerType : K -> DeclType [strict]
 	op Prototype : K List{C} Bool -> DeclType [strict(1 2)]
 	
+	
 ***(
 and name_group = specifier * name list
 ***)

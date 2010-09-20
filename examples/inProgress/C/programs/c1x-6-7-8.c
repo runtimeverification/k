@@ -82,21 +82,32 @@
 	// return 0;
 // }
 
-int sec32(void){
-	char s1[] = "abc", t1[3] = "abc";
-	char s2[] = {'a', 'b', 'c', '\0'};
-	char t2[] = {'a', 'b', 'c'};
-	char* s3 = "abc";
+// int sec32(void){
+	// char s1[] = "abc", t1[3] = "abc";
+	// char s2[] = {'a', 'b', 'c', '\0'};
+	// char t2[] = {'a', 'b', 'c'};
+	// char* s3 = "abc";
 	
-	for (int i = 0; i < 4; i = i + 1){
-		printf("s1[%d]=%d\n", i, s1[i]);
-		if (s1[i] != s2[i]) { return 1; }
-		if (s2[i] != s3[i]) { return 1; }
-	}
-	for (int i = 0; i < 3; i = i + 1){
-		printf("t1[%d]=%d\n", i, t1[i]);
-		if (t1[i] != t2[i]) { return 1; }
-	}
+	// for (int i = 0; i < 4; i = i + 1){
+		// printf("s1[%d]=%d\n", i, s1[i]);
+		// if (s1[i] != s2[i]) { return 1; }
+		// if (s2[i] != s3[i]) { return 1; }
+	// }
+	// for (int i = 0; i < 3; i = i + 1){
+		// printf("t1[%d]=%d\n", i, t1[i]);
+		// if (t1[i] != t2[i]) { return 1; }
+	// }
+	// return 0;
+// }
+
+int sec33(void){
+	enum {member_one, member_two};
+	char *nm[] = {
+		[member_two] = "member two",
+		[member_one] = "member one",
+	};
+	printf("%s\n", nm[0]);
+	printf("%s\n", nm[1]);
 	return 0;
 }
 
@@ -106,6 +117,7 @@ int main(void){
 	//if (sec28()) {return 28;}
 	//if (sec29()) {return 29;}
 	//if (sec31()) {return 31;}
-	if (sec32()) {return 32;}
+	//if (sec32()) {return 32;}
+	if (sec33()) {return 33;}
 	return 0;
 }

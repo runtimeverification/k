@@ -376,25 +376,43 @@ mod COMMON-C-TYPING is
 	op variadic : -> Type .
 	eq Prototype(T:Type, L:List{Type}, false) = functionType(T:Type, L:List{Type}) .
 	eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
-	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
+	--- eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
 	
-	op helpReverseArrayTypes : Type Nat -> Type .
-	eq helpReverseArrayTypes(arrayType(T:Type, N:Nat), N':Nat) = arrayType(helpReverseArrayTypes(T:Type, N':Nat), N:Nat) .
-	ceq helpReverseArrayTypes(T:Type, N:Nat) = arrayType(T:Type, N:Nat)
-		if notBool hasArrayType(T:Type) .
+	--- op helpReverseArrayTypes : Type Nat -> Type .
+	--- eq helpReverseArrayTypes(arrayType(T:Type, N:Nat), N':Nat) = arrayType(helpReverseArrayTypes(T:Type, N':Nat), N:Nat) .
+	--- ceq helpReverseArrayTypes(T:Type, N:Nat) = arrayType(T:Type, N:Nat)
+		--- if notBool hasArrayType(T:Type) .
 	
-	ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
-		if notBool hasArrayType(T:Type) .
-	eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) 
-		= helpReverseArrayTypes(arrayType(T:Type, M:Nat), N:Nat) .
+	--- eq ArrayType(T:BaseType, N:Nat) = arrayType(T:Type, N:Nat) .
+	
+	op makeArrayType : Nat -> KLabel .
+	op pushTypeDown : Type KLabel -> Type .
+	
+	eq ArrayType(T:Type, tv(N:Nat, ?)) = pushTypeDown(T:Type, makeArrayType(N:Nat)) .
+	eq ArrayType(T:Type, emptyValue) = pushTypeDown(T:Type, 'incompleteArrayType) .
+	eq PointerType(T:Type) = pushTypeDown(T:Type, 'pointerType) .
+	eq FunctionType(T:Type) = pushTypeDown(T:Type, 'preFunctionType) .
+	
+	eq pushTypeDown(arrayType(T:Type, N:Nat), K:KLabel) = arrayType(pushTypeDown(T:Type, K:KLabel), N:Nat) .
+	eq pushTypeDown(incompleteArrayType(T:Type), K:KLabel) = incompleteArrayType(pushTypeDown(T:Type, K:KLabel)) .
+	eq pushTypeDown(pointerType(T:Type), K:KLabel) = pointerType(pushTypeDown(T:Type, K:KLabel)) .
+	eq pushTypeDown(preFunctionType(T:Type), K:KLabel) = preFunctionType(pushTypeDown(T:Type, K:KLabel)) .
+	eq pushTypeDown(T:BaseType, K:KLabel) = K:KLabel(T:BaseType) .
+	
+	eq makeArrayType(N:Nat)(T:Type) = arrayType(T:Type, N:Nat) .
+	
+	--- ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
+		--- if notBool hasArrayType(T:Type) .
+	--- eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) 
+		--- = helpReverseArrayTypes(arrayType(T:Type, M:Nat), N:Nat) .
 		
 	
-	eq ArrayType(incompleteArrayType(T:Type), tv(N:Nat, ?)) = incompleteArrayType(arrayType(T:Type, N:Nat)) .
-	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
-	ceq PointerType(T:Type) = pointerType(T:Type)
-		if notBool hasFunctionType(T:Type) .
-	eq PointerType(functionType(T:Type, L:List{Type})) = functionType(pointerType(T:Type), L:List{Type}) .
-	eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
+	--- eq ArrayType(incompleteArrayType(T:Type), tv(N:Nat, ?)) = incompleteArrayType(arrayType(T:Type, N:Nat)) .
+	--- eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
+	--- ceq PointerType(T:Type) = pointerType(T:Type)
+		--- if notBool hasFunctionType(T:Type) .
+	--- eq PointerType(functionType(T:Type, L:List{Type})) = functionType(pointerType(T:Type), L:List{Type}) .
+	--- eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
 
 	--- FIXME where did this come from?
 	--- eq functionType(preFunctionType(pointerType(T:Type)), L:List{Type})	= pointerType(functionType(T:Type, L:List{Type})) .
