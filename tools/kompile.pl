@@ -824,7 +824,7 @@ sub maudify_module {
 #    print "Maudifying module with tokens @all_tokens\n";
 
 # Step: Add whitespace between cell and Klabel
-    s!(<\s*\/?\s*[^\s<]+\s*>)! $1 !g;
+    s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
 
     # get KLabels
     my $decl = getKLabelDeclarations($_);
