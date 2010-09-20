@@ -515,16 +515,25 @@ sub setVerbose()
 
 sub printErrorFromOut()
 {
-    local $/=undef; open FILE,"<", $warnings_file or print ""; local $_ = <FILE>; close FILE;
-    my $content = $_;
-    close FILE;
-    my $out = "";
-    if ($content =~ m/error(.*?)\n/isg)
+    if (-e $warnings_file)
     {
-	$out = "Error $1\n";
-    }
+	local $/=undef; open FILE,"<", $warnings_file or print ""; local $_ = <FILE>; close FILE;
     
-    $out;
+	if ($_)
+	{
+	    my $content = $_;
+	    close FILE;
+	    my $out = "";
+	    if ($content =~ m/error(.*?)\n/isg)
+	    {
+		$out = "Error $1\n";
+	    }
+	    
+	    $out;
+	}
+    }
+     
+    "";
 }
 
 # generate fresh names for temp files
