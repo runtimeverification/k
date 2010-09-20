@@ -823,7 +823,12 @@ sub maudify_module {
 
 #    print "Maudifying module with tokens @all_tokens\n";
 
+# Step: Add whitespace between cell and Klabel
+    s!(<\s*\/?\s*[^\s<]+\s*>)! $1 !g;
+
+    # get KLabels
     my $decl = getKLabelDeclarations($_);
+
 # Step: Add to @all_sorts all sorts defined a la Maude, with "sort(s)"
     add_sorts($_);
     
