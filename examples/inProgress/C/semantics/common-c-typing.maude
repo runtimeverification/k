@@ -378,9 +378,17 @@ mod COMMON-C-TYPING is
 	eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
 	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
 	
+	op helpReverseArrayTypes : Type Nat -> Type .
+	eq helpReverseArrayTypes(arrayType(T:Type, N:Nat), N':Nat) = arrayType(helpReverseArrayTypes(T:Type, N':Nat), N:Nat) .
+	ceq helpReverseArrayTypes(T:Type, N:Nat) = arrayType(T:Type, N:Nat)
+		if notBool hasArrayType(T:Type) .
+	
 	ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
 		if notBool hasArrayType(T:Type) .
-	eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) = arrayType(arrayType(T:Type, N:Nat), M:Nat) .
+	eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) 
+		= helpReverseArrayTypes(arrayType(T:Type, M:Nat), N:Nat) .
+		
+	
 	eq ArrayType(incompleteArrayType(T:Type), tv(N:Nat, ?)) = incompleteArrayType(arrayType(T:Type, N:Nat)) .
 	eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
 	ceq PointerType(T:Type) = pointerType(T:Type)

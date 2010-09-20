@@ -852,7 +852,7 @@ mod COMMON-INITIALIZATION is
 			(next ListItem(te(K:K[N:Nat], T:Type)) => ListItem(te(K:K[sNat(N:Nat)], T:Type))) 
 			ListItem(te(K:K, incompleteArrayType(?)))
 		...</ currentSubObject >
-		< incompleteLength > N':Nat => maxNat(sNat(N:Nat), N':Nat) </ incompleteLength >
+		---< incompleteLength > N':Nat => maxNat(sNat(N:Nat), N':Nat) </ incompleteLength >
 		: KSentence [metadata "structural"] .
 	
 	mb [init-next-struct-element]: rule
@@ -923,6 +923,7 @@ mod COMMON-INITIALIZATION is
 		< currentSubObject > ?:List => block ListItem(te(K:K, T:Type)) </ currentSubObject >
 		if hasStructType(T:Type) orBool hasUnionType(T:Type)
 		: KSentence [metadata "structural"] .
+	--- fixme does this need to worry about incompleteLength?
 	mb rule
 		< k > fillInitializer(InitFragment(AtIndexInit(Index:K, K':K), Exp:K))
 			=> fillInitializer(InitFragment(buildDesignator(AtIndexInit(Index:K, K':K)), Exp:K))
@@ -951,6 +952,7 @@ mod COMMON-INITIALIZATION is
 	eq innerType(arrayType(T:Type, ?)) = T:Type .
 	eq innerType(incompleteArrayType(T:Type)) = T:Type .
 		
+	--- fixme does this need to worry about incompleteLength?
 	mb rule
 		< k > buildDesignator(AtIndexInit(tv(N:Nat, ?), More:K)) 
 			=> buildDesignator(More:K)
@@ -993,11 +995,20 @@ mod COMMON-INITIALIZATION is
 		--- < currentInitializerObject > (?:ListItem => next) ...</ currentInitializerObject >
 		--- : KSentence [metadata "structural"] .
 		
-	--- forces a basetype
+	
+	op getTopArrayUse : K -> Nat .
+	eq getTopArrayUse(X:Id) = 0 .
+	eq getTopArrayUse(X:Id[N:Nat]) = sNat(N:Nat) . --- +1 for length instead of index
+	eq getTopArrayUse(K:K . F:Id) = getTopArrayUse(K:K) .
+	eq getTopArrayUse((K:K[N:Nat])[?]) = getTopArrayUse(K:K[N:Nat]) .
+	eq getTopArrayUse((K:K . F:Id)[?]) = getTopArrayUse(K:K) .
+	
 	op initializeSingleInit : K -> K .
+	--- forces a basetype
 	mb rule
 		< k > initializeSingleInit(K':K) => . ...</ k >
 		< currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
+		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
 		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
 		--- if getKLabel(K':K) =/=Bool 'Constant
 		if isABaseType(T:Type) orBool hasPointerType(T:Type)

@@ -683,7 +683,16 @@ mod COMMON-SEMANTICS-DEREFERENCE is
 	
 	---C99 6.5.3.2:4 The unary * operator denotes indirection. If the operand points to a function, the result is a function designator; if it points to an object, the result is an lvalue designating the object. If the operand has type "pointer to type", the result has type "type". If an invalid value has been assigned to the pointer, the behavior of the unary * operator is undefined.
 	--- also see 6.3.2.1:3 for why i made the result a pointerType
-	mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, pointerType(T:Type)) ...</ k > : KSentence [metadata "structural"] .
+	---- fixme this seems wrong
+	--- mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, pointerType(T:Type)) ...</ k > : KSentence [metadata "structural"] .
+	mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, arrayType(T:Type, N:Nat)) ...</ k > : KSentence [metadata "structural"] .
+	
+	--- FIXME this rule is super dangerous because if the value ends up inside any helper operator, it will match
+	mb rule KL:KLabel((?,, tv(?, (arrayType(T:Type, ?) => pointerType(T:Type))),, ?))
+		if KL:KLabel =/=Bool 'SizeofExpression
+		andBool KL:KLabel =/=Bool 'SizeofType
+		andBool KL:KLabel =/=Bool '&_
+		: KSentence .
 	
 	--- mb [lookup-function] : rule
 		--- < k > [Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(functionType(T:Type, L:List{K})))) => V:Value] ...</ k >
@@ -715,18 +724,10 @@ mod COMMON-SEMANTICS-REFERENCE is
 	
 	mb context &([HOLE] -> X:Id) : KSentence .
 	
-	--- fixme this is crazy
-	--- if label not arrayType?
 	op fixPointerType : Type -> Type .
 	ceq fixPointerType(T:Type) = pointerType(T:Type)
 		if notBool(hasArrayType(T:Type)) .
-	--- eq fixPointerType(T:BaseType) = pointerType(T:BaseType) .
 	eq fixPointerType(arrayType(T:Type, ?)) = pointerType(T:Type) .
-	--- eq fixPointerType(structType(X:Id)) = pointerType(structType(X:Id)) .
-	--- eq fixPointerType(unionType(X:Id)) = pointerType(unionType(X:Id)) .
-	--- eq fixPointerType(pointerType(T:Type)) = pointerType(pointerType(T:Type)) .
-	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
-	--- eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
 	
 	--- C1X 6.5.3.2:3 The unary & operator yields the address of its operand. If the operand has type ‘‘type’’, the result has type ‘‘pointer to type’’. If the operand is the result of a unary * operator, neither that operator nor the & operator is evaluated and the result is as if both were omitted, except that the constraints on the operators still apply and the result is not an lvalue. Similarly, if the operand is the result of a [] operator, neither the & operator nor the unary * that is implied by the [] is evaluated and the result is as if the & operator were removed and the [] operator were changed to a + operator. Otherwise, the result is a pointer to the object or function designated by its operand.
 	
@@ -737,24 +738,6 @@ mod COMMON-SEMANTICS-REFERENCE is
 		< env >... X:Id |-> Loc:Nat ...</ env >
 		< types >... X:Id |-> T:Type ...</ types >
 		: KSentence [metadata "structural"] .
-		
-	--- op getFieldOffset : Id Id -> K .
-	--- op getStructFieldOffset : Id Id -> K .
-	--- op getUnionFieldOffset : Id Id -> K .
-	
-	--- mb [getStructFieldOffset]: rule
-		--- < k > getStructFieldOffset(S:Id, F:Id)
-			--- => cast(fixPointerType(T:Type), getOffset(S:Id, F:Id))
-			--- --- => tv(Loc:Nat +Nat calculateLength(L1:List{Type}), fixPointerType(T:Type))
-		--- ...</ k >
-		--- < types >... S:Id |-> pointerType(structDefType) ...</ types >
-		--- --- < structs >... S:Id |-> Fields:List{Type} ...</ structs >
-		--- : KSentence [metadata "structural"] .
-	--- --- (L1:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?:List{Type})
-	
-	--- eq getUnionFieldOffset(?, ?) = tv(0, pointerType(void)) .
-	--- op giveType : Type K -> K .
-	--- FIXME should be checking pointer
 	
 	op getOffset : K K Type -> K .
 	
