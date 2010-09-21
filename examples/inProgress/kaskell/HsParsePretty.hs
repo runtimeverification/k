@@ -69,7 +69,7 @@ module HsParsePretty where
                           ParseFailed loc s -> error s
             putStrLn . prettyPrint $ parseM
             putStrLn "\nParses as:"
-            putStrLn . show $ parseM
+            putStrLn . gshow $ parseM
             putStrLn "\nParsecs as:"
             let parsecOut = case parse astP "" (gshow parseM) of Right a -> a
             parseTest astP $ gshow parseM
