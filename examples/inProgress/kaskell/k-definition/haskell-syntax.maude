@@ -1,31 +1,43 @@
 mod HASKELL-SYNTAX is
-  including HASKELL-SYNTAX-STRUCTS .
----  including STRING-UTILS .
-  including K .
-  including PL-STRING .
+    including HASKELL-SYNTAX-STRUCTS .
+    --- Import the K-stuff
+    including K-TECHNIQUE .
+    including K-RULES .               --- to write k rules with in-place rewriting
+    including K-CONFIG .              --- to specify the global configuration term
+    including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
+    including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_>
+    including K-CONTEXTS .
+    including K-WHERE .
+    including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
+    including K-LISTK-EXTRAS .
+  --- Do not want: including K-LIST-EXTRAS, clobers our List constructor .
+    including K-MAP-EXTRAS .          --- operations on Maps
+    including K-BAG-EXTRAS .          --- operations on Bags
+    including K-SET-EXTRAS .          --- operations on Sets
+    including PL-STRING .
 
-  ---- including PL-BOOL .
-  ---- including PL-EXT-BOOL .
-  ---- including PL-NAT .
-  ---- including PL-INT .
-  ---- including PL-RAT .
-  ---- including PL-FLOAT .
-  ---- including PL-STRING .
-  ---- including PL-CONVERSION .
-  ---- including PL-QID .
-  ---- including PL-RANDOM .
-  ---- including PL-ID .
+    ---- including PL-BOOL .
+    ---- including PL-EXT-BOOL .
+    ---- including PL-NAT .
+    ---- including PL-INT .
+    ---- including PL-RAT .
+    ---- including PL-FLOAT .
+    ---- including PL-STRING .
+    ---- including PL-CONVERSION .
+    ---- including PL-QID .
+    ---- including PL-RANDOM .
+    ---- including PL-ID .
 
---- Some base Haskell sorts
-  sorts HsString HsInt HsChar HsInteger HsRational .
+  --- Some base Haskell sorts
+    sorts HsString HsInt HsChar HsInteger HsRational .
 
 --- Sort present in annotated Haskell syntax
 ***(
     data Boxed = Boxed | Unboxed
 ***)
 
-  sort Boxed .
-  ops Boxed Unboxed : -> Boxed [ctor] .
+    sort Boxed .
+    ops Boxed Unboxed : -> Boxed [ctor] .
 
 --- Sort present in SrcLoc
 ***(
@@ -36,8 +48,8 @@ data SrcLoc = SrcLoc
     }
 ***)
 
-  sort SrcLoc .
-  op SrcLoc _ _ _ : String HsInt HsInt -> SrcLoc [ctor] .
+    sort SrcLoc .
+    op SrcLoc _ _ _ : String HsInt HsInt -> SrcLoc [ctor] .
 
 --- The rest is the abstract Haskell syntax, as defined in Language.Haskell.Exts.Syntax
 ***(
@@ -157,8 +169,8 @@ data SrcLoc = SrcLoc
 
 ***)
 
-  sort ModuleName .
-  op ModuleName _ : HsString -> ModuleName [ctor] .
+    sort ModuleName .
+    op ModuleName _ : HsString -> ModuleName [ctor] .
 
 ***(
     -- | Constructors with special syntax.
@@ -174,13 +186,13 @@ data SrcLoc = SrcLoc
         | UnboxedSingleCon      -- ^ unboxed singleton tuple constructor @(\# \#)@
 ***)
 
-  sort SpecialCon .
-  op UnitCon          :             -> SpecialCon [ctor] .
-  op ListCon          :             -> SpecialCon [ctor] .
-  op FunCon           :             -> SpecialCon [ctor] .
-  op TupleCon _ _     : Boxed HsInt -> SpecialCon [ctor] .
-  op Cons             :             -> SpecialCon [ctor] .
-  op UnboxedSingleCon :             -> SpecialCon [ctor] .
+    sort SpecialCon .
+    op UnitCon          :             -> SpecialCon [ctor] .
+    op ListCon          :             -> SpecialCon [ctor] .
+    op FunCon           :             -> SpecialCon [ctor] .
+    op TupleCon _ _     : Boxed HsInt -> SpecialCon [ctor] .
+    op Cons             :             -> SpecialCon [ctor] .
+    op UnboxedSingleCon :             -> SpecialCon [ctor] .
 
 ***(
     -- | This type is used to represent qualified variables, and also
@@ -191,10 +203,10 @@ data SrcLoc = SrcLoc
         | Special SpecialCon      -- ^ built-in constructor with special syntax
 ***)
 
-  sort QName .
-  op Qual _ _  : ModuleName Name -> QName [ctor] .
-  op UnQual _  : Name            -> QName [ctor] .
-  op Special _ : SpecialCon      -> QName [ctor] .
+    sort QName .
+    op Qual _ _  : ModuleName Name -> QName [ctor] .
+    op UnQual _  : Name            -> QName [ctor] .
+    op Special _ : SpecialCon      -> QName [ctor] .
 
 ***(
     -- | This type is used to represent variables, and also constructors.
@@ -203,9 +215,9 @@ data SrcLoc = SrcLoc
         | Symbol String   -- ^ /varsym/ or /consym/
 ***)
 
-  sort Name .
-  op Ident _  : HsString -> Name [ctor] .
-  op Symbol _ : HsString -> Name [ctor] .
+    sort Name .
+    op Ident _  : HsString -> Name [ctor] .
+    op Symbol _ : HsString -> Name [ctor] .
 
 ***(
     -- | An implicit parameter name.
@@ -214,9 +226,9 @@ data SrcLoc = SrcLoc
         | IPLin String -- ^ %/ident/, linear implicit parameter
 ***)
 
-  sort IPName .
-  op IPDup _ : HsString -> IPName [ctor] .
-  op IPLin _ : HsString -> IPName [ctor] .
+    sort IPName .
+    op IPDup _ : HsString -> IPName [ctor] .
+    op IPLin _ : HsString -> IPName [ctor] .
 
 
 ***(
@@ -226,9 +238,9 @@ data SrcLoc = SrcLoc
         | QConOp QName  -- ^ constructor operator (/canopy/)
 ***)
 
-  sort QOp .
-  op QVarOp _ : QName -> QOp [ctor] .
-  op QConOp _ : QName -> QOp [ctor] .
+    sort QOp .
+    op QVarOp _ : QName -> QOp [ctor] .
+    op QConOp _ : QName -> QOp [ctor] .
 
 ***(
     -- | Operators appearing in @infix@ declarations are never qualified.
@@ -237,9 +249,9 @@ data SrcLoc = SrcLoc
         | ConOp Name    -- ^ constructor operator (/conop/)
 ***)
 
-  sort Op .
-  op VarOp _ : Name -> Op [ctor] .
-  op ConOp _ : Name -> Op [ctor] .
+    sort Op .
+    op VarOp _ : Name -> Op [ctor] .
+    op ConOp _ : Name -> Op [ctor] .
 
 ***(
     -- | A name (/cname/) of a component of a class or data type in an @import@
@@ -249,9 +261,9 @@ data SrcLoc = SrcLoc
         | ConName Name  -- ^ name of a data constructor
 ***)
 
-  sort CName .
-  op VarName _ : Name -> CName [ctor] .
-  op ConName _ : Name -> CName [ctor] .
+    sort CName .
+    op VarName _ : Name -> CName [ctor] .
+    op ConName _ : Name -> CName [ctor] .
 
 ***(
     -- | A complete Haskell source module.
@@ -259,9 +271,8 @@ data SrcLoc = SrcLoc
                             (Maybe [ExportSpec]) [ImportDecl] [Decl]
 ***)
 
-  sort Module .
-  op Module _ _ _ _ _ _ _ : SrcLoc ModuleName HsList HsMaybe HsMaybe HsList HsList -> Module [ctor] .
-***)
+    sort Module .
+    op Module _ _ _ _ _ _ _ : SrcLoc ModuleName HsList HsMaybe HsMaybe HsList HsList -> Module [ctor] .
 
 ***(
     -- | An item in a module's export specification.
@@ -280,12 +291,12 @@ data SrcLoc = SrcLoc
                                         --   re-export a module.
 ***)
 
-  sort ExportSpec .
-  op EVar _            : QName        -> ExportSpec [ctor] .
-  op EAbs _            : QName        -> ExportSpec [ctor] .
-  op EThingAll _       : QName        -> ExportSpec [ctor] .
-  op EThingWith _ _    : QName HsList -> ExportSpec [ctor] .
-  op EModuleContents _ : ModuleName   -> ExportSpec [ctor] .
+    sort ExportSpec .
+    op EVar _            : QName        -> ExportSpec [ctor] .
+    op EAbs _            : QName        -> ExportSpec [ctor] .
+    op EThingAll _       : QName        -> ExportSpec [ctor] .
+    op EThingWith _ _    : QName HsList -> ExportSpec [ctor] .
+    op EModuleContents _ : ModuleName   -> ExportSpec [ctor] .
 
 ***(
     -- | An import declaration.
@@ -303,8 +314,8 @@ data SrcLoc = SrcLoc
         }
 ***)
 
-  sort ImportDecl .
-  op ImportDecl _ _ _ _ _ _ _ : SrcLoc ModuleName Bool Bool HsMaybe HsMaybe HsMaybe -> ImportDecl [ctor] .
+    sort ImportDecl .
+    op ImportDecl _ _ _ _ _ _ _ : SrcLoc ModuleName Bool Bool HsMaybe HsMaybe HsMaybe -> ImportDecl [ctor] .
 
 ***(
     -- | An import specification, representing a single explicit item imported
@@ -321,11 +332,11 @@ data SrcLoc = SrcLoc
                                     --   a datatype imported with some of its constructors.
 ***)
 
-  sort ImportSpec .
-  op IVar _         : Name        -> ImportSpec [ctor] .
-  op IAbs _         : Name        -> ImportSpec [ctor] .
-  op IThingAll _    : Name        -> ImportSpec [ctor] .
-  op IThingWith _ _ : Name HsList -> ImportSpec [ctor] .
+    sort ImportSpec .
+    op IVar _         : Name        -> ImportSpec [ctor] .
+    op IAbs _         : Name        -> ImportSpec [ctor] .
+    op IThingAll _    : Name        -> ImportSpec [ctor] .
+    op IThingWith _ _ : Name HsList -> ImportSpec [ctor] .
 
 ***(
     -- | Associativity of an operator.
@@ -335,17 +346,17 @@ data SrcLoc = SrcLoc
          | AssocRight -- ^ right-associative operator (declared with @infixr@)
 ***)
 
-  sort Assoc .
-  op AssocNone  : -> Assoc [ctor] .
-  op AssocLeft  : -> Assoc [ctor] .
-  op AssocRight : -> Assoc [ctor] .
+    sort Assoc .
+    op AssocNone  : -> Assoc [ctor] .
+    op AssocLeft  : -> Assoc [ctor] .
+    op AssocRight : -> Assoc [ctor] .
 
 ***(
     -- | A single derived instance, which may have arguments since it may be a MPTC.
     type Deriving = (QName, [Type])
 ***)
 
-  sort Deriving .
+    sort Deriving .
 
 ***(
     -- | A top-level declaration.
@@ -409,35 +420,35 @@ data SrcLoc = SrcLoc
          -- ^ An ANN pragma
 ***)
 
-  sort Decl .
-  op TypeDecl _ _ _ _          : SrcLoc Name HsList Type                                    -> Decl [ctor] .
-  op TypeFamDecl _ _ _ _       : SrcLoc Name HsList HsMaybe                                 -> Decl [ctor] .
-  op DataDecl _ _ _ _ _ _ _    : SrcLoc DataOrNew Context Name HsList HsList HsList         -> Decl [ctor] .
-  op GDataDecl _ _ _ _ _ _ _ _ : SrcLoc DataOrNew Context Name HsList HsMaybe HsList HsList -> Decl [ctor] .
-  op DataFamDecl _ _ _ _ _     : SrcLoc Context Name HsList HsMaybe                         -> Decl [ctor] .
-  op TypeInsDecl _ _ _         : SrcLoc Type Type                                           -> Decl [ctor] .
-  op DataInsDecl _ _ _ _ _     : SrcLoc DataOrNew Type HsList HsList                        -> Decl [ctor] .
-  op GDataInsDecl _ _ _ _ _ _  : SrcLoc DataOrNew Type HsMaybe HsList HsList                -> Decl [ctor] .
-  op ClassDecl _ _ _ _ _ _     : SrcLoc Context Name HsList HsList HsList                   -> Decl [ctor] .
-  op InstDecl _ _ _ _ _        : SrcLoc Context QName HsList HsList                         -> Decl [ctor] .
-  op DerivDecl _ _ _ _         : SrcLoc Context QName HsList                                -> Decl [ctor] .
-  op InfixDecl _ _ _ _         : SrcLoc Assoc HsInt HsList                                  -> Decl [ctor] .
-  op DefaultDecl _ _           : SrcLoc HsList                                              -> Decl [ctor] .
-  op SpliceDecl _ _            : SrcLoc Exp                                                 -> Decl [ctor] .
-  op TypeSig _ _ _             : SrcLoc HsList Type                                         -> Decl [ctor] .
-  op FunBind _                 : HsList                                                     -> Decl [ctor] .
-  op PatBind _ _ _ _ _         : SrcLoc Pat HsMaybe Rhs Binds                               -> Decl [ctor] .
-  op ForImp _ _ _ _ _ _        : SrcLoc CallConv Safety HsString Name Type                  -> Decl [ctor] .
-  op ForExp _ _ _ _ _          : SrcLoc CallConv HsString Name Type                         -> Decl [ctor] .
-  op RulePragmaDecl _ _        : SrcLoc HsList                                              -> Decl [ctor] .
-  op DeprPragmaDecl _ _        : SrcLoc HsList                                              -> Decl [ctor] .
-  op WarnPragmaDecl _ _        : SrcLoc HsList                                              -> Decl [ctor] .
-  op InlineSig _ _ _ _         : SrcLoc Bool Activation QName                               -> Decl [ctor] .
-  op InlineConlikeSig _ _ _    : SrcLoc Activation QName                                    -> Decl [ctor] .
-  op SpecSig _ _ _             : SrcLoc QName HsList                                        -> Decl [ctor] .
-  op SpecInlineSig _ _ _ _ _   : SrcLoc Bool Activation QName HsList                        -> Decl [ctor] .
-  op InstSig _ _ _ _           : SrcLoc Context QName HsList                                -> Decl [ctor] .
-  op AnnPragma _ _             : SrcLoc Annotation                                          -> Decl [ctor] .
+    sort Decl .
+    op TypeDecl _ _ _ _          : SrcLoc Name HsList Type                                    -> Decl [ctor] .
+    op TypeFamDecl _ _ _ _       : SrcLoc Name HsList HsMaybe                                 -> Decl [ctor] .
+    op DataDecl _ _ _ _ _ _ _    : SrcLoc DataOrNew Context Name HsList HsList HsList         -> Decl [ctor] .
+    op GDataDecl _ _ _ _ _ _ _ _ : SrcLoc DataOrNew Context Name HsList HsMaybe HsList HsList -> Decl [ctor] .
+    op DataFamDecl _ _ _ _ _     : SrcLoc Context Name HsList HsMaybe                         -> Decl [ctor] .
+    op TypeInsDecl _ _ _         : SrcLoc Type Type                                           -> Decl [ctor] .
+    op DataInsDecl _ _ _ _ _     : SrcLoc DataOrNew Type HsList HsList                        -> Decl [ctor] .
+    op GDataInsDecl _ _ _ _ _ _  : SrcLoc DataOrNew Type HsMaybe HsList HsList                -> Decl [ctor] .
+    op ClassDecl _ _ _ _ _ _     : SrcLoc Context Name HsList HsList HsList                   -> Decl [ctor] .
+    op InstDecl _ _ _ _ _        : SrcLoc Context QName HsList HsList                         -> Decl [ctor] .
+    op DerivDecl _ _ _ _         : SrcLoc Context QName HsList                                -> Decl [ctor] .
+    op InfixDecl _ _ _ _         : SrcLoc Assoc HsInt HsList                                  -> Decl [ctor] .
+    op DefaultDecl _ _           : SrcLoc HsList                                              -> Decl [ctor] .
+    op SpliceDecl _ _            : SrcLoc Exp                                                 -> Decl [ctor] .
+    op TypeSig _ _ _             : SrcLoc HsList Type                                         -> Decl [ctor] .
+    op FunBind _                 : HsList                                                     -> Decl [ctor] .
+    op PatBind _ _ _ _ _         : SrcLoc Pat HsMaybe Rhs Binds                               -> Decl [ctor] .
+    op ForImp _ _ _ _ _ _        : SrcLoc CallConv Safety HsString Name Type                  -> Decl [ctor] .
+    op ForExp _ _ _ _ _          : SrcLoc CallConv HsString Name Type                         -> Decl [ctor] .
+    op RulePragmaDecl _ _        : SrcLoc HsList                                              -> Decl [ctor] .
+    op DeprPragmaDecl _ _        : SrcLoc HsList                                              -> Decl [ctor] .
+    op WarnPragmaDecl _ _        : SrcLoc HsList                                              -> Decl [ctor] .
+    op InlineSig _ _ _ _         : SrcLoc Bool Activation QName                               -> Decl [ctor] .
+    op InlineConlikeSig _ _ _    : SrcLoc Activation QName                                    -> Decl [ctor] .
+    op SpecSig _ _ _             : SrcLoc QName HsList                                        -> Decl [ctor] .
+    op SpecInlineSig _ _ _ _ _   : SrcLoc Bool Activation QName HsList                        -> Decl [ctor] .
+    op InstSig _ _ _ _           : SrcLoc Context QName HsList                                -> Decl [ctor] .
+    op AnnPragma _ _             : SrcLoc Annotation                                          -> Decl [ctor] .
 
 ***(
     -- | An annotation through an ANN pragma.
@@ -450,19 +461,19 @@ data SrcLoc = SrcLoc
         -- ^ An annotation for the defining module.
 ***)
 
-  sort Annotation .
-  op Ann _ _     : Name Exp -> Annotation [ctor] .
-  op TypeAnn _ _ : Name Exp -> Annotation [ctor] .
-  op ModuleAnn _ : Exp      -> Annotation [ctor] .
+    sort Annotation .
+    op Ann _ _     : Name Exp -> Annotation [ctor] .
+    op TypeAnn _ _ : Name Exp -> Annotation [ctor] .
+    op ModuleAnn _ : Exp      -> Annotation [ctor] .
 
 ***(
     -- | A flag stating whether a declaration is a data or newtype declaration.
     data DataOrNew = DataType | NewType
 ***)
 
-  sort DataOrNew .
-  op DataType : -> DataOrNew [ctor] .
-  op NewType  : -> DataOrNew [ctor] .
+    sort DataOrNew .
+    op DataType : -> DataOrNew [ctor] .
+    op NewType  : -> DataOrNew [ctor] .
 
 ***(
     -- | A binding group inside a @let@ or @where@ clause.
@@ -471,17 +482,17 @@ data SrcLoc = SrcLoc
         | IPBinds [IPBind]  -- ^ A binding group for implicit parameters
 ***)
 
-  sort Binds .
-  op BDecls _  : HsList -> Binds [ctor] .
-  op IPBinds _ : HsList -> Binds [ctor] .
+    sort Binds .
+    op BDecls _  : HsList -> Binds [ctor] .
+    op IPBinds _ : HsList -> Binds [ctor] .
 
 ***(
     -- | A binding of an implicit parameter.
     data IPBind = IPBind SrcLoc IPName Exp
 ***)
 
-  sort IPBind .
-  op IPBind _ _ _ : SrcLoc IPName Exp -> IPBind [ctor] .
+    sort IPBind .
+    op IPBind _ _ _ : SrcLoc IPName Exp -> IPBind [ctor] .
 
 ***(
     -- | Clauses of a function binding.
@@ -489,8 +500,8 @@ data SrcLoc = SrcLoc
          = Match SrcLoc Name [Pat] (Maybe Type) Rhs {-where-} Binds
 ***)
 
-  sort Match .
-  op Match _ _ _ _ _ _ : SrcLoc Name HsList HsMaybe Rhs Binds -> Match [ctor] .
+    sort Match .
+    op Match _ _ _ _ _ _ : SrcLoc Name HsList HsMaybe Rhs Binds -> Match [ctor] .
 
 ***(
     -- | A single constructor declaration within a data type declaration,
@@ -501,8 +512,8 @@ data SrcLoc = SrcLoc
             {- => -} ConDecl
 ***)
 
-  sort QualConDecl .
-  op QualConDecl _ _ _ _ : SrcLoc HsList Context ConDecl -> QualConDecl [ctor] .
+    sort QualConDecl .
+    op QualConDecl _ _ _ _ : SrcLoc HsList Context ConDecl -> QualConDecl [ctor] .
 
 ***(
     -- | Declaration of an ordinary data constructor.
@@ -515,10 +526,10 @@ data SrcLoc = SrcLoc
                     -- ^ record constructor
 ***)
 
-  sort ConDecl .
-  op ConDecl _ _        : Name HsList            -> ConDecl [ctor] .
-  op InfixConDecl _ _ _ : BangType Name BangType -> ConDecl [ctor] .
-  op RecDecl _ _        : Name HsList            -> ConDecl [ctor] .
+    sort ConDecl .
+    op ConDecl _ _        : Name HsList            -> ConDecl [ctor] .
+    op InfixConDecl _ _ _ : BangType Name BangType -> ConDecl [ctor] .
+    op RecDecl _ _        : Name HsList            -> ConDecl [ctor] .
 
 ***(
     -- | A single constructor declaration in a GADT data type declaration.
@@ -526,8 +537,8 @@ data SrcLoc = SrcLoc
         = GadtDecl SrcLoc Name Type
 ***)
 
-  sort GadtDecl .
-  op GadtDecl _ _ _ : SrcLoc Name Type -> GadtDecl [ctor] .
+    sort GadtDecl .
+    op GadtDecl _ _ _ : SrcLoc Name Type -> GadtDecl [ctor] .
 
 ***(
     -- | Declarations inside a class declaration.
@@ -542,11 +553,11 @@ data SrcLoc = SrcLoc
                 -- ^ default choice for an associated type synonym
 ***)
 
-  sort ClassDecl .
-  op ClsDecl _            : Decl                               -> ClassDecl [ctor] .
-  op ClsDataFam _ _ _ _ _ : SrcLoc Context Name HsList HsMaybe -> ClassDecl [ctor] .
-  op ClsTyFam _ _ _ _     : SrcLoc Name HsList HsMaybe         -> ClassDecl [ctor] .
-  op ClsTyDef _ _ _       : SrcLoc Type    Type                -> ClassDecl [ctor] .
+    sort ClassDecl .
+    op ClsDecl _            : Decl                               -> ClassDecl [ctor] .
+    op ClsDataFam _ _ _ _ _ : SrcLoc Context Name HsList HsMaybe -> ClassDecl [ctor] .
+    op ClsTyFam _ _ _ _     : SrcLoc Name HsList HsMaybe         -> ClassDecl [ctor] .
+    op ClsTyDef _ _ _       : SrcLoc Type    Type                -> ClassDecl [ctor] .
 
 ***(
     -- | Declarations inside an instance declaration.
@@ -561,11 +572,11 @@ data SrcLoc = SrcLoc
                 -- ^ an associated data type implemented using GADT style
 ***)
 
-  sort InstDecl .
-  op InsDecl _            : Decl                                        -> InstDecl [ctor] .
-  op InsType _ _ _        : SrcLoc Type Type                            -> InstDecl [ctor] .
-  op InsData _ _ _ _ _    : SrcLoc DataOrNew Type HsList HsList         -> InstDecl [ctor] .
-  op InsGData _ _ _ _ _ _ : SrcLoc DataOrNew Type HsMaybe HsList HsList -> InstDecl [ctor] .
+    sort InstDecl .
+    op InsDecl _            : Decl                                        -> InstDecl [ctor] .
+    op InsType _ _ _        : SrcLoc Type Type                            -> InstDecl [ctor] .
+    op InsData _ _ _ _ _    : SrcLoc DataOrNew Type HsList HsList         -> InstDecl [ctor] .
+    op InsGData _ _ _ _ _ _ : SrcLoc DataOrNew Type HsMaybe HsList HsList -> InstDecl [ctor] .
 
 ***(
     -- | The type of a constructor argument or field, optionally including
@@ -576,10 +587,10 @@ data SrcLoc = SrcLoc
          | UnpackedTy Type  -- ^ unboxed component, marked with an UNPACK pragma
 ***)
 
-  sort BangType .
-  op BangedTy _   : Type -> BangType [ctor] .
-  op UnBangedTy _ : Type -> BangType [ctor] .
-  op UnpackedTy _ : Type -> BangType [ctor] .
+    sort BangType .
+    op BangedTy _   : Type -> BangType [ctor] .
+    op UnBangedTy _ : Type -> BangType [ctor] .
+    op UnpackedTy _ : Type -> BangType [ctor] .
 
 ***(
     -- | The right hand side of a function or pattern binding.
@@ -589,9 +600,9 @@ data SrcLoc = SrcLoc
                             -- ^ guarded right hand side (/gdrhs/)
 ***)
 
-  sort Rhs .
-  op UnGuardedRhs _ : Exp    -> Rhs [ctor] .
-  op GuardedRhss _  : HsList -> Rhs [ctor] .
+    sort Rhs .
+    op UnGuardedRhs _ : Exp    -> Rhs [ctor] .
+    op GuardedRhss _  : HsList -> Rhs [ctor] .
 
 ***(
     -- | A guarded right hand side @|@ /stmts/ @=@ /exp/.
@@ -601,8 +612,8 @@ data SrcLoc = SrcLoc
          = GuardedRhs SrcLoc [Stmt] Exp
 ***)
 
-  sort GuardedRhs .
-  op GuardedRhs _ _ _ : SrcLoc HsList Exp -> GuardedRhs [ctor] .
+    sort GuardedRhs .
+    op GuardedRhs _ _ _ : SrcLoc HsList Exp -> GuardedRhs [ctor] .
 
 ***(
     -- | A type qualified with a context.
@@ -623,17 +634,17 @@ data SrcLoc = SrcLoc
          | TyKind  Type Kind        -- ^ type with explicit kind signature
 ***)
 
-  sort Type .
-  op TyForall _ _ _ : HsMaybe Context Type -> Type [ctor] .
-  op TyFun _ _      : Type Type            -> Type [ctor] .
-  op TyTuple _ _    : Boxed HsList         -> Type [ctor] .
-  op TyList _       : Type                 -> Type [ctor] .
-  op TyApp _ _      : Type Type            -> Type [ctor] .
-  op TyVar _        : Name                 -> Type [ctor] .
-  op TyCon _        : QName                -> Type [ctor] .
-  op TyParen _      : Type                 -> Type [ctor] .
-  op TyInfix _ _ _  : Type QName Type      -> Type [ctor] .
-  op TyKind _ _     : Type Kind            -> Type [ctor] .
+    sort Type .
+    op TyForall _ _ _ : HsMaybe Context Type -> Type [ctor] .
+    op TyFun _ _      : Type Type            -> Type [ctor] .
+    op TyTuple _ _    : Boxed HsList         -> Type [ctor] .
+    op TyList _       : Type                 -> Type [ctor] .
+    op TyApp _ _      : Type Type            -> Type [ctor] .
+    op TyVar _        : Name                 -> Type [ctor] .
+    op TyCon _        : QName                -> Type [ctor] .
+    op TyParen _      : Type                 -> Type [ctor] .
+    op TyInfix _ _ _  : Type QName Type      -> Type [ctor] .
+    op TyKind _ _     : Type Kind            -> Type [ctor] .
 
 ***(
     -- | A type variable declaration, optionally with an explicit kind annotation.
@@ -642,9 +653,9 @@ data SrcLoc = SrcLoc
         | UnkindedVar Name      -- ^ ordinary variable binding
 ***)
 
-  sort TyVarBind .
-  op KindedVar _ _ : Name Kind -> TyVarBind [ctor] .
-  op UnkindedVar _ : Name      -> TyVarBind [ctor] .
+    sort TyVarBind .
+    op KindedVar _ _ : Name Kind -> TyVarBind [ctor] .
+    op UnkindedVar _ : Name      -> TyVarBind [ctor] .
 
 ***(
     -- | An explicit kind annotation.
@@ -656,12 +667,12 @@ data SrcLoc = SrcLoc
         | KindVar Name      -- ^ a kind variable (as of yet unsupported by compilers)
 ***)
 
-  sort Kind .
-  op KindStar    :           -> Kind [ctor] .
-  op KindBang    :           -> Kind [ctor] .
-  op KindFn _ _  : Kind Kind -> Kind [ctor] .
-  op KindParen _ : Kind      -> Kind [ctor] .
-  op KindVar _   : Name      -> Kind [ctor] .
+    sort Kind .
+    op KindStar    :           -> Kind [ctor] .
+    op KindBang    :           -> Kind [ctor] .
+    op KindFn _ _  : Kind Kind -> Kind [ctor] .
+    op KindParen _ : Kind      -> Kind [ctor] .
+    op KindVar _   : Name      -> Kind [ctor] .
 
 ***(
     -- | A functional dependency, given on the form
@@ -670,15 +681,15 @@ data SrcLoc = SrcLoc
         = FunDep [Name] [Name]
 ***)
 
-  sort FunDep .
-  op FunDep _ _ : HsList HsList -> FunDep [ctor] .
+    sort FunDep .
+    op FunDep _ _ : HsList HsList -> FunDep [ctor] .
 
 ***(
     -- | A context is a set of assertions
     type Context = [Asst]
 ***)
 
-  sort Context .
+    sort Context .
 
 ***(
     -- | Class assertions.
@@ -691,11 +702,11 @@ data SrcLoc = SrcLoc
               | EqualP Type   Type      -- ^ type equality constraint
 ***)
 
-  sort Asst .
-  op ClassA _ _   : QName HsList    -> Asst [ctor] .
-  op InfixA _ _ _ : Type QName Type -> Asst [ctor] .
-  op IParam _ _   : IPName Type     -> Asst [ctor] .
-  op EqualP _ _   : Type Type       -> Asst [ctor] .
+    sort Asst .
+    op ClassA _ _   : QName HsList    -> Asst [ctor] .
+    op InfixA _ _ _ : Type QName Type -> Asst [ctor] .
+    op IParam _ _   : IPName Type     -> Asst [ctor] .
+    op EqualP _ _   : Type Type       -> Asst [ctor] .
 
 ***(
     -- | /literal/
@@ -715,17 +726,17 @@ data SrcLoc = SrcLoc
         | PrimString String     -- ^ unboxed string literal
 ***)
 
-  sort Literal .
-  op Char _       : Char       -> Literal [ctor] .
-  op String _     : HsString   -> Literal [ctor] .
-  op Int _        : HsInteger  -> Literal [ctor] .
-  op Frac _       : HsRational -> Literal [ctor] .
-  op PrimInt _    : HsInteger  -> Literal [ctor] .
-  op PrimWord _   : HsInteger  -> Literal [ctor] .
-  op PrimFloat _  : HsRational -> Literal [ctor] .
-  op PrimDouble _ : HsRational -> Literal [ctor] .
-  op PrimChar _   : Char       -> Literal [ctor] .
-  op PrimString _ : HsString   -> Literal [ctor] .
+    sort Literal .
+    op Char _       : Char       -> Literal [ctor] .
+    op String _     : HsString   -> Literal [ctor] .
+    op Int _        : HsInteger  -> Literal [ctor] .
+    op Frac _       : HsRational -> Literal [ctor] .
+    op PrimInt _    : HsInteger  -> Literal [ctor] .
+    op PrimWord _   : HsInteger  -> Literal [ctor] .
+    op PrimFloat _  : HsRational -> Literal [ctor] .
+    op PrimDouble _ : HsRational -> Literal [ctor] .
+    op PrimChar _   : Char       -> Literal [ctor] .
+    op PrimString _ : HsString   -> Literal [ctor] .
 
 ***(
     -- | Haskell expressions.
@@ -796,52 +807,52 @@ data SrcLoc = SrcLoc
         | RightArrHighApp Exp Exp   -- ^ higher-order arrow application (from right): /exp/ @>>-@ /exp/
 ***)
 
-  sort Exp .
-  op Var _                : QName                              -> Exp [ctor] .
-  op IPVar _              : IPName                             -> Exp [ctor] .
-  op Con _                : QName                              -> Exp [ctor] .
-  op Lit _                : Literal                            -> Exp [ctor] .
-  op InfixApp _ _ _       : Exp QOp Exp                        -> Exp [ctor] .
-  op App _ _              : Exp Exp                            -> Exp [ctor] .
-  op NegApp _             : Exp                                -> Exp [ctor] .
-  op Lambda _ _ _         : SrcLoc HsList Exp                  -> Exp [ctor] .
-  op Let _ _              : Binds Exp                          -> Exp [ctor] .
-  op If _ _ _             : Exp Exp Exp                        -> Exp [ctor] .
-  op Case _ _             : Exp HsList                         -> Exp [ctor] .
-  op Do _                 : HsList                             -> Exp [ctor] .
-  op MDo _                : HsList                             -> Exp [ctor] .
-  op Tuple _              : HsList                             -> Exp [ctor] .
-  op TupleSection _       : HsList                             -> Exp [ctor] .
-  op HsList _             : HsList                             -> Exp [ctor] .
-  op Paren _              : Exp                                -> Exp [ctor] .
-  op LeftSection _ _      : Exp QOp                            -> Exp [ctor] .
-  op RightSection _ _     : QOp Exp                            -> Exp [ctor] .
-  op RecConstr _ _        : QName HsList                       -> Exp [ctor] .
-  op RecUpdate _ _        : Exp HsList                         -> Exp [ctor] .
-  op EnumFrom _           : Exp                                -> Exp [ctor] .
-  op EnumFromTo _ _       : Exp Exp                            -> Exp [ctor] .
-  op EnumFromThen _ _     : Exp Exp                            -> Exp [ctor] .
-  op EnumFromThenTo _ _ _ : Exp Exp Exp                        -> Exp [ctor] .
-  op ListComp _ _         : Exp HsList                         -> Exp [ctor] .
-  op ParComp _ _          : Exp HsList                         -> Exp [ctor] .
-  op ExpTypeSig _ _ _     : SrcLoc Exp Type                    -> Exp [ctor] .
-  op VarQuote _           : QName                              -> Exp [ctor] .
-  op TypQuote _           : QName                              -> Exp [ctor] .
-  op BracketExp _         : Bracket                            -> Exp [ctor] .
-  op SpliceExp _          : Splice                             -> Exp [ctor] .
-  op QuasiQuote _ _       : HsString HsString                  -> Exp [ctor] .
-  op XTag _ _ _ _ _       : SrcLoc XName HsList HsMaybe HsList -> Exp [ctor] .
-  op XETag _ _ _ _        : SrcLoc XName HsList HsMaybe        -> Exp [ctor] .
-  op XPcdata _            : HsString                           -> Exp [ctor] .
-  op XExpTag _            : Exp                                -> Exp [ctor] .
-  op CorePragma _ _       : HsString Exp                       -> Exp [ctor] .
-  op SCCPragma _ _        : HsString Exp                       -> Exp [ctor] .
-  op GenPragma _ _ _ _    : HsString HsTuple HsTuple Exp       -> Exp [ctor] .
-  op Proc _ _ _           : SrcLoc Pat Exp                     -> Exp [ctor] .
-  op LeftArrApp _ _       : Exp Exp                            -> Exp [ctor] .
-  op RightArrApp _ _      : Exp Exp                            -> Exp [ctor] .
-  op LeftArrHighApp _ _   : Exp Exp                            -> Exp [ctor] .
-  op RightArrHighApp _ _  : Exp Exp                            -> Exp [ctor] .
+    sort Exp .
+    op Var _                : QName                              -> Exp [ctor] .
+    op IPVar _              : IPName                             -> Exp [ctor] .
+    op Con _                : QName                              -> Exp [ctor] .
+    op Lit _                : Literal                            -> Exp [ctor] .
+    op InfixApp _ _ _       : Exp QOp Exp                        -> Exp [ctor] .
+    op App _ _              : Exp Exp                            -> Exp [ctor] .
+    op NegApp _             : Exp                                -> Exp [ctor] .
+    op Lambda _ _ _         : SrcLoc HsList Exp                  -> Exp [ctor] .
+    op Let _ _              : Binds Exp                          -> Exp [ctor] .
+    op If _ _ _             : Exp Exp Exp                        -> Exp [ctor] .
+    op Case _ _             : Exp HsList                         -> Exp [ctor] .
+    op Do _                 : HsList                             -> Exp [ctor] .
+    op MDo _                : HsList                             -> Exp [ctor] .
+    op Tuple _              : HsList                             -> Exp [ctor] .
+    op TupleSection _       : HsList                             -> Exp [ctor] .
+    op List _               : HsList                             -> Exp [ctor] .
+    op Paren _              : Exp                                -> Exp [ctor] .
+    op LeftSection _ _      : Exp QOp                            -> Exp [ctor] .
+    op RightSection _ _     : QOp Exp                            -> Exp [ctor] .
+    op RecConstr _ _        : QName HsList                       -> Exp [ctor] .
+    op RecUpdate _ _        : Exp HsList                         -> Exp [ctor] .
+    op EnumFrom _           : Exp                                -> Exp [ctor] .
+    op EnumFromTo _ _       : Exp Exp                            -> Exp [ctor] .
+    op EnumFromThen _ _     : Exp Exp                            -> Exp [ctor] .
+    op EnumFromThenTo _ _ _ : Exp Exp Exp                        -> Exp [ctor] .
+    op ListComp _ _         : Exp HsList                         -> Exp [ctor] .
+    op ParComp _ _          : Exp HsList                         -> Exp [ctor] .
+    op ExpTypeSig _ _ _     : SrcLoc Exp Type                    -> Exp [ctor] .
+    op VarQuote _           : QName                              -> Exp [ctor] .
+    op TypQuote _           : QName                              -> Exp [ctor] .
+    op BracketExp _         : Bracket                            -> Exp [ctor] .
+    op SpliceExp _          : Splice                             -> Exp [ctor] .
+    op QuasiQuote _ _       : HsString HsString                  -> Exp [ctor] .
+    op XTag _ _ _ _ _       : SrcLoc XName HsList HsMaybe HsList -> Exp [ctor] .
+    op XETag _ _ _ _        : SrcLoc XName HsList HsMaybe        -> Exp [ctor] .
+    op XPcdata _            : HsString                           -> Exp [ctor] .
+    op XExpTag _            : Exp                                -> Exp [ctor] .
+    op CorePragma _ _       : HsString Exp                       -> Exp [ctor] .
+    op SCCPragma _ _        : HsString Exp                       -> Exp [ctor] .
+    op GenPragma _ _ _ _    : HsString HsTuple HsTuple Exp       -> Exp [ctor] .
+    op Proc _ _ _           : SrcLoc Pat Exp                     -> Exp [ctor] .
+    op LeftArrApp _ _       : Exp Exp                            -> Exp [ctor] .
+    op RightArrApp _ _      : Exp Exp                            -> Exp [ctor] .
+    op LeftArrHighApp _ _   : Exp Exp                            -> Exp [ctor] .
+    op RightArrHighApp _ _  : Exp Exp                            -> Exp [ctor] .
 
 ***(
     -- | The name of an xml element or attribute,
@@ -851,17 +862,17 @@ data SrcLoc = SrcLoc
         | XDomName String String    -- <dom:name ...
 ***)
 
-  sort XName .
-  op XName _      : HsString          -> XName [ctor] .
-  op XDomName _ _ : HsString HsString -> XName [ctor] .
+    sort XName .
+    op XName _      : HsString          -> XName [ctor] .
+    op XDomName _ _ : HsString HsString -> XName [ctor] .
 
 ***(
     -- | An xml attribute, which is a name-expression pair.
     data XAttr = XAttr XName Exp
 ***)
 
-  sort XAttr .
-  op XAttr _ _ : XName Exp -> XAttr [ctor] .
+    sort XAttr .
+    op XAttr _ _ : XName Exp -> XAttr [ctor] .
 
 ***(
     -- | A template haskell bracket expression.
@@ -872,10 +883,10 @@ data SrcLoc = SrcLoc
         | DeclBracket [Decl]    -- ^ declaration bracket: @[d| ... |]@
 ***)
 
-  sort Bracket .
-  op PatBracket _  : Pat    -> Bracket [ctor] .
-  op TypeBracket _ : Type   -> Bracket [ctor] .
-  op DeclBracket _ : HsList -> Bracket [ctor] .
+    sort Bracket .
+    op PatBracket _  : Pat    -> Bracket [ctor] .
+    op TypeBracket _ : Type   -> Bracket [ctor] .
+    op DeclBracket _ : HsList -> Bracket [ctor] .
 
 ***(
     -- | A template haskell splice expression
@@ -884,9 +895,9 @@ data SrcLoc = SrcLoc
         | ParenSplice Exp       -- ^ parenthesised expression splice: @$(/exp/)@
 ***)
 
-  sort Splice .
-  op IdSplice _    : HsString -> Splice [ctor] .
-  op ParenSplice _ : Exp      -> Splice [ctor] .
+    sort Splice .
+    op IdSplice _    : HsString -> Splice [ctor] .
+    op ParenSplice _ : Exp      -> Splice [ctor] .
 
 ***(
     -- | The safety of a foreign function call.
@@ -895,9 +906,9 @@ data SrcLoc = SrcLoc
         | PlaySafe Bool     -- ^ safe ('False') or threadsafe ('True')
 ***)
 
-  sort Safety .
-  op PlayRisky  :      -> Safety [ctor] .
-  op PlaySafe _ : Bool -> Safety [ctor] .
+    sort Safety .
+    op PlayRisky  :      -> Safety [ctor] .
+    op PlaySafe _ : Bool -> Safety [ctor] .
 
 ***(
     -- | The calling convention of a foreign function call.
@@ -906,9 +917,9 @@ data SrcLoc = SrcLoc
         | CCall
 ***)
 
-  sort CallConv .
-  op StdCall : -> CallConv [ctor] .
-  op CCall   : -> CallConv [ctor] .
+    sort CallConv .
+    op StdCall : -> CallConv [ctor] .
+    op CCall   : -> CallConv [ctor] .
 
 ***(
     -- | A top level options pragma, preceding the module header.
@@ -920,10 +931,10 @@ data SrcLoc = SrcLoc
                             -- ^ ANN pragma with module scope
 ***)
 
-  sort ModulePragma .
-  op LanguagePragma _ _  : SrcLoc HsList           -> ModulePragma [ctor] .
-  op OptionsPragma _ _ _ : SrcLoc HsMaybe HsString -> ModulePragma [ctor] .
-  op AnnModulePragma _ _ : SrcLoc Annotation       -> ModulePragma [ctor] .
+    sort ModulePragma .
+    op LanguagePragma _ _  : SrcLoc HsList           -> ModulePragma [ctor] .
+    op OptionsPragma _ _ _ : SrcLoc HsMaybe HsString -> ModulePragma [ctor] .
+    op AnnModulePragma _ _ : SrcLoc Annotation       -> ModulePragma [ctor] .
 
 ***(
     -- | Activation clause of a RULES pragma.
@@ -933,10 +944,10 @@ data SrcLoc = SrcLoc
         | ActiveUntil Int
 ***)
 
-  sort Activation .
-  op AlwaysActive  :       -> Activation [ctor] .
-  op ActiveFrom _  : HsInt -> Activation [ctor] .
-  op ActiveUntil _ : HsInt -> Activation [ctor] .
+    sort Activation .
+    op AlwaysActive  :       -> Activation [ctor] .
+    op ActiveFrom _  : HsInt -> Activation [ctor] .
+    op ActiveUntil _ : HsInt -> Activation [ctor] .
 
 ***(
     -- | The body of a RULES pragma.
@@ -944,8 +955,8 @@ data SrcLoc = SrcLoc
         = Rule String Activation (Maybe [RuleVar]) Exp Exp
 ***)
 
-  sort Rule .
-  op Rule _ _ _ _ _ : HsString Activation HsMaybe Exp Exp -> Rule [ctor] .
+    sort Rule .
+    op Rule _ _ _ _ _ : HsString Activation HsMaybe Exp Exp -> Rule [ctor] .
 
 ***(
     -- | Variables used in a RULES pragma, optionally annotated with types
@@ -954,9 +965,9 @@ data SrcLoc = SrcLoc
         | TypedRuleVar Name Type
 ***)
 
-  sort RuleVar .
-  op RuleVar _        : Name      -> RuleVar [ctor] .
-  op TypedRuleVar _ _ : Name Type -> RuleVar [ctor] .
+    sort RuleVar .
+    op RuleVar _        : Name      -> RuleVar [ctor] .
+    op TypedRuleVar _ _ : Name Type -> RuleVar [ctor] .
 
 ***(
     -- | Warning text to optionally use in the module header of e.g.
@@ -966,9 +977,9 @@ data SrcLoc = SrcLoc
         | WarnText String
 ***)
 
-  sort WarningText .
-  op DeprText _ : HsString -> WarningText [ctor] .
-  op WarnText _ : HsString -> WarningText [ctor] .
+    sort WarningText .
+    op DeprText _ : HsString -> WarningText [ctor] .
+    op WarnText _ : HsString -> WarningText [ctor] .
 
 ***(
     -- | A pattern, to be matched against a value.
@@ -1001,39 +1012,39 @@ data SrcLoc = SrcLoc
         | PBangPat Pat                  -- ^ strict (bang) pattern: @f !x = ...@
 ***)
 
-  sort Pat .
-  op PVar _           : Name                               -> Pat [ctor] .
-  op PLit _           : Literal                            -> Pat [ctor] .
-  op PNeg _           : Pat                                -> Pat [ctor] .
-  op PNPlusK _ _      : Name HsInteger                     -> Pat [ctor] .
-  op PInfixApp _ _ _  : Pat QName Pat                      -> Pat [ctor] .
-  op PApp _ _         : QName HsList                       -> Pat [ctor] .
-  op PTuple _         : HsList                             -> Pat [ctor] .
-  op PList _          : HsList                             -> Pat [ctor] .
-  op PParen _         : Pat                                -> Pat [ctor] .
-  op PRec _ _         : QName HsList                       -> Pat [ctor] .
-  op PAsPat _ _       : Name Pat                           -> Pat [ctor] .
-  op PWildCard        :                                    -> Pat [ctor] .
-  op PIrrPat _        : Pat                                -> Pat [ctor] .
-  op PatTypeSig _ _ _ : SrcLoc Pat Type                    -> Pat [ctor] .
-  op PViewPat _ _     : Exp Pat                            -> Pat [ctor] .
-  op PRPat _          : HsList                             -> Pat [ctor] .
-  op PXTag _ _ _ _ _  : SrcLoc XName HsList HsMaybe HsList -> Pat [ctor] .
-  op PXETag _ _ _ _   : SrcLoc XName HsList HsMaybe        -> Pat [ctor] .
-  op PXPcdata _       : HsString                           -> Pat [ctor] .
-  op PXPatTag _       : Pat                                -> Pat [ctor] .
-  op PXRPats _        : HsList                             -> Pat [ctor] .
-  op PExplTypeArg _ _ : QName Type                         -> Pat [ctor] .
-  op PQuasiQuote _ _  : HsString HsString                  -> Pat [ctor] .
-  op PBangPat _       : Pat                                -> Pat [ctor] .
+    sort Pat .
+    op PVar _           : Name                               -> Pat [ctor] .
+    op PLit _           : Literal                            -> Pat [ctor] .
+    op PNeg _           : Pat                                -> Pat [ctor] .
+    op PNPlusK _ _      : Name HsInteger                     -> Pat [ctor] .
+    op PInfixApp _ _ _  : Pat QName Pat                      -> Pat [ctor] .
+    op PApp _ _         : QName HsList                       -> Pat [ctor] .
+    op PTuple _         : HsList                             -> Pat [ctor] .
+    op PList _          : HsList                             -> Pat [ctor] .
+    op PParen _         : Pat                                -> Pat [ctor] .
+    op PRec _ _         : QName HsList                       -> Pat [ctor] .
+    op PAsPat _ _       : Name Pat                           -> Pat [ctor] .
+    op PWildCard        :                                    -> Pat [ctor] .
+    op PIrrPat _        : Pat                                -> Pat [ctor] .
+    op PatTypeSig _ _ _ : SrcLoc Pat Type                    -> Pat [ctor] .
+    op PViewPat _ _     : Exp Pat                            -> Pat [ctor] .
+    op PRPat _          : HsList                             -> Pat [ctor] .
+    op PXTag _ _ _ _ _  : SrcLoc XName HsList HsMaybe HsList -> Pat [ctor] .
+    op PXETag _ _ _ _   : SrcLoc XName HsList HsMaybe        -> Pat [ctor] .
+    op PXPcdata _       : HsString                           -> Pat [ctor] .
+    op PXPatTag _       : Pat                                -> Pat [ctor] .
+    op PXRPats _        : HsList                             -> Pat [ctor] .
+    op PExplTypeArg _ _ : QName Type                         -> Pat [ctor] .
+    op PQuasiQuote _ _  : HsString HsString                  -> Pat [ctor] .
+    op PBangPat _       : Pat                                -> Pat [ctor] .
 
 ***(
     -- | An XML attribute in a pattern.
     data PXAttr = PXAttr XName Pat
 ***)
 
-  sort PXAttr .
-  op PXAttr _ _ : XName Pat -> PXAttr [ctor] .
+    sort PXAttr .
+    op PXAttr _ _ : XName Pat -> PXAttr [ctor] .
 
 ***(
     -- | A regular pattern operator.
@@ -1046,13 +1057,13 @@ data SrcLoc = SrcLoc
         | RPOptG    -- ^ @?!@ = 0 or 1, greedy
 ***)
 
-  sort RPatOp .
-  op RPStar  : -> RPatOp [ctor] .
-  op RPStarG : -> RPatOp [ctor] .
-  op RPPlus  : -> RPatOp [ctor] .
-  op RPPlusG : -> RPatOp [ctor] .
-  op RPOpt   : -> RPatOp [ctor] .
-  op RPOptG  : -> RPatOp [ctor] .
+    sort RPatOp .
+    op RPStar  : -> RPatOp [ctor] .
+    op RPStarG : -> RPatOp [ctor] .
+    op RPPlus  : -> RPatOp [ctor] .
+    op RPPlusG : -> RPatOp [ctor] .
+    op RPOpt   : -> RPatOp [ctor] .
+    op RPOptG  : -> RPatOp [ctor] .
 
 ***(
     -- | An entity in a regular pattern.
@@ -1067,15 +1078,15 @@ data SrcLoc = SrcLoc
         | RPPat Pat             -- ^ an ordinary pattern
 ***)
 
-  sort RPat .
-  op RPOp _ _     : RPat RPatOp -> RPat [ctor] .
-  op RPEither _ _ : RPat RPat   -> RPat [ctor] .
-  op RPSeq _      : HsList      -> RPat [ctor] .
-  op RPGuard _ _  : Pat HsList  -> RPat [ctor] .
-  op RPCAs _ _    : Name RPat   -> RPat [ctor] .
-  op RPAs _ _     : Name RPat   -> RPat [ctor] .
-  op RPParen _    : RPat        -> RPat [ctor] .
-  op RPPat _      : Pat         -> RPat [ctor] .
+    sort RPat .
+    op RPOp _ _     : RPat RPatOp -> RPat [ctor] .
+    op RPEither _ _ : RPat RPat   -> RPat [ctor] .
+    op RPSeq _      : HsList      -> RPat [ctor] .
+    op RPGuard _ _  : Pat HsList  -> RPat [ctor] .
+    op RPCAs _ _    : Name RPat   -> RPat [ctor] .
+    op RPAs _ _     : Name RPat   -> RPat [ctor] .
+    op RPParen _    : RPat        -> RPat [ctor] .
+    op RPPat _      : Pat         -> RPat [ctor] .
 
 ***(
     -- | An /fpat/ in a labeled record pattern.
@@ -1085,10 +1096,10 @@ data SrcLoc = SrcLoc
         | PFieldWildcard            -- ^ record field wildcard
 ***)
 
-  sort PatField .
-  op PFieldPat _ _  : QName Pat -> PatField [ctor] .
-  op PFieldPun _    : Name      -> PatField [ctor] .
-  op PFieldWildcard :           -> PatField [ctor] .
+    sort PatField .
+    op PFieldPat _ _  : QName Pat -> PatField [ctor] .
+    op PFieldPun _    : Name      -> PatField [ctor] .
+    op PFieldWildcard :           -> PatField [ctor] .
 
 ***(
     -- | A statement, representing both a /stmt/ in a @do@-expression,
@@ -1105,11 +1116,11 @@ data SrcLoc = SrcLoc
         | RecStmt [Stmt]    -- ^ a recursive binding group for arrows
 ***)
 
-  sort Stmt .
-  op Generator _ _ _ : SrcLoc Pat Exp -> Stmt [ctor] .
-  op Qualifier _     : Exp            -> Stmt [ctor] .
-  op LetStmt _       : Binds          -> Stmt [ctor] .
-  op RecStmt _       : HsList         -> Stmt [ctor] .
+    sort Stmt .
+    op Generator _ _ _ : SrcLoc Pat Exp -> Stmt [ctor] .
+    op Qualifier _     : Exp            -> Stmt [ctor] .
+    op LetStmt _       : Binds          -> Stmt [ctor] .
+    op RecStmt _       : HsList         -> Stmt [ctor] .
 
 ***(
     -- | A general /transqual/ in a list comprehension,
@@ -1124,13 +1135,13 @@ data SrcLoc = SrcLoc
         | GroupByUsing Exp Exp      -- ^ @then@ @group@ @by@ /exp/ @using@ /exp/
 ***)
 
-  sort QualStmt .
-  op QualStmt _       : Stmt    -> QualStmt [ctor] .
-  op ThenTrans _      : Exp     -> QualStmt [ctor] .
-  op ThenBy _ _       : Exp Exp -> QualStmt [ctor] .
-  op GroupBy _        : Exp     -> QualStmt [ctor] .
-  op GroupUsing _     : Exp     -> QualStmt [ctor] .
-  op GroupByUsing _ _ : Exp Exp -> QualStmt [ctor] .
+    sort QualStmt .
+    op QualStmt _       : Stmt    -> QualStmt [ctor] .
+    op ThenTrans _      : Exp     -> QualStmt [ctor] .
+    op ThenBy _ _       : Exp Exp -> QualStmt [ctor] .
+    op GroupBy _        : Exp     -> QualStmt [ctor] .
+    op GroupUsing _     : Exp     -> QualStmt [ctor] .
+    op GroupByUsing _ _ : Exp Exp -> QualStmt [ctor] .
 
 ***(
     -- | An /fbind/ in a labeled construction or update expression.
@@ -1140,10 +1151,10 @@ data SrcLoc = SrcLoc
         | FieldWildcard             -- ^ record field wildcard
 ***)
 
-  sort FieldUpdate .
-  op FieldUpdate _ _ : QName Exp -> FieldUpdate [ctor] .
-  op FieldPun _      : Name      -> FieldUpdate [ctor] .
-  op FieldWildcard   :           -> FieldUpdate [ctor] .
+    sort FieldUpdate .
+    op FieldUpdate _ _ : QName Exp -> FieldUpdate [ctor] .
+    op FieldPun _      : Name      -> FieldUpdate [ctor] .
+    op FieldWildcard   :           -> FieldUpdate [ctor] .
 
 ***(
     -- | An /alt/ alternative in a @case@ expression.
@@ -1151,8 +1162,8 @@ data SrcLoc = SrcLoc
         = Alt SrcLoc Pat GuardedAlts Binds
 ***)
 
-  sort Alt .
-  op Alt _ _ _ _ : SrcLoc Pat GuardedAlts Binds -> Alt [ctor] .
+    sort Alt .
+    op Alt _ _ _ _ : SrcLoc Pat GuardedAlts Binds -> Alt [ctor] .
 
 ***(
     -- | The right-hand sides of a @case@ alternative,
@@ -1163,9 +1174,9 @@ data SrcLoc = SrcLoc
         | GuardedAlts  [GuardedAlt] -- ^ /gdpat/
 ***)
 
-  sort GuardedAlts .
-  op UnGuardedAlt _ : Exp    -> GuardedAlts [ctor] .
-  op GuardedAlts _  : HsList -> GuardedAlts [ctor] .
+    sort GuardedAlts .
+    op UnGuardedAlt _ : Exp    -> GuardedAlts [ctor] .
+    op GuardedAlts _  : HsList -> GuardedAlts [ctor] .
 
 ***(
     -- | A guarded case alternative @|@ /stmts/ @->@ /exp/.
@@ -1173,13 +1184,13 @@ data SrcLoc = SrcLoc
         = GuardedAlt SrcLoc [Stmt] Exp
 ***)
 
-  sort GuardedAlt .
-  op GuardedAlt _ _ _ : SrcLoc HsList Exp -> GuardedAlt [ctor] .
+    sort GuardedAlt .
+    op GuardedAlt _ _ _ : SrcLoc HsList Exp -> GuardedAlt [ctor] .
 
---- Everything is subsorted to K, that is, underlying it all everything is really monosorted
-  subsorts HsString HsInt Char HsInteger HsRational Boxed SrcLoc ModuleName SpecialCon QName Name IPName QOp Op CName Module ExportSpec ImportDecl ImportSpec Assoc Deriving Decl Annotation DataOrNew Binds IPBind Match QualConDecl ConDecl GadtDecl ClassDecl InstDecl BangType Rhs GuardedRhs Type TyVarBind Kind FunDep Context Asst Literal Exp XName XAttr Bracket Splice Safety CallConv ModulePragma Activation Rule RuleVar WarningText Pat PXAttr RPatOp RPat PatField Stmt QualStmt FieldUpdate Alt GuardedAlts GuardedAlt < K .
+    --- Everything is subsorted to K, that is, underlying it all everything is really monosorted
+    subsorts HsString HsInt Char HsInteger HsRational Boxed SrcLoc ModuleName SpecialCon QName Name IPName QOp Op CName Module ExportSpec ImportDecl ImportSpec Assoc Deriving Decl Annotation DataOrNew Binds IPBind Match QualConDecl ConDecl GadtDecl ClassDecl InstDecl BangType Rhs GuardedRhs Type TyVarBind Kind FunDep Context Asst Literal Exp XName XAttr Bracket Splice Safety CallConv ModulePragma Activation Rule RuleVar WarningText Pat PXAttr RPatOp RPat PatField Stmt QualStmt FieldUpdate Alt GuardedAlts GuardedAlt < K .
 
---- End of syntax, rest of this file is the remainder of Language.Haskell.Exts.Syntax
+    --- End of syntax, rest of this file is the remainder of Language.Haskell.Exts.Syntax
 
 ***(
     -----------------------------------------------------------------------------

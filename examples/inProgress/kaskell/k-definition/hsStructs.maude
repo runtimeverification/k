@@ -1,26 +1,39 @@
 ---- Syntactic structures that exist in Haskell
 mod HASKELL-SYNTAX-STRUCTS is
-  including K .
+    --- Import the K-stuff
+    including K-TECHNIQUE .
+    including K-RULES .               --- to write k rules with in-place rewriting
+    including K-CONFIG .              --- to specify the global configuration term
+    including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
+    including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_>
+    including K-CONTEXTS .
+    including K-WHERE .
+    including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
+    including K-LISTK-EXTRAS .
+  --- Do not want: including K-LIST-EXTRAS, clobers our List constructor .
+    including K-MAP-EXTRAS .          --- operations on Maps
+    including K-BAG-EXTRAS .          --- operations on Bags
+    including K-SET-EXTRAS .          --- operations on Sets
 
-  --- Parameterized sorts are a lot of trouble in Maude, so here's some monosorted versions of haskell constructs
-  sorts HsMaybe HsList HsTuple .
+    --- Parameterized sorts are a lot of trouble in Maude, so here's some monosorted versions of haskell constructs
+    sorts HsMaybe HsList HsTuple .
 
-  op []      :          -> HsList [ctor] .
-  op (:) _ _ : K HsList -> HsList [ctor] .
+    op []      :          -> HsList [ctor] .
+    op (:) _ _ : K HsList -> HsList [ctor] .
 
-  --- tuples, hardcoded up to arity 9
-  op (,)        _ _               : K K               -> HsTuple [ctor] .
-  op (,,)       _ _ _             : K K K             -> HsTuple [ctor] .
-  op (,,,)      _ _ _ _           : K K K K           -> HsTuple [ctor] .
-  op (,,,,)     _ _ _ _ _         : K K K K K         -> HsTuple [ctor] .
-  op (,,,,,)    _ _ _ _ _ _       : K K K K K K       -> HsTuple [ctor] .
-  op (,,,,,,)   _ _ _ _ _ _ _     : K K K K K K K     -> HsTuple [ctor] .
-  op (,,,,,,,)  _ _ _ _ _ _ _ _   : K K K K K K K K   -> HsTuple [ctor] .
-  op (,,,,,,,,) _ _ _ _ _ _ _ _ _ : K K K K K K K K K -> HsTuple [ctor] .
+    --- tuples, hardcoded up to arity 9
+    op (,)        _ _               : K K               -> HsTuple [ctor] .
+    op (,,)       _ _ _             : K K K             -> HsTuple [ctor] .
+    op (,,,)      _ _ _ _           : K K K K           -> HsTuple [ctor] .
+    op (,,,,)     _ _ _ _ _         : K K K K K         -> HsTuple [ctor] .
+    op (,,,,,)    _ _ _ _ _ _       : K K K K K K       -> HsTuple [ctor] .
+    op (,,,,,,)   _ _ _ _ _ _ _     : K K K K K K K     -> HsTuple [ctor] .
+    op (,,,,,,,)  _ _ _ _ _ _ _ _   : K K K K K K K K   -> HsTuple [ctor] .
+    op (,,,,,,,,) _ _ _ _ _ _ _ _ _ : K K K K K K K K K -> HsTuple [ctor] .
 
-  op Just _  : K -> HsMaybe [ctor] .
-  op Nothing :   -> HsMaybe [ctor] .
+    op Just _  : K -> HsMaybe [ctor] .
+    op Nothing :   -> HsMaybe [ctor] .
 
-  subsorts HsList HsMaybe HsTuple < K .
+    subsorts HsList HsMaybe HsTuple < K .
 
 endm

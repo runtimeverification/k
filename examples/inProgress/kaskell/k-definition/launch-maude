@@ -10,5 +10,8 @@ SCRIPT_DIR=`dirname "$SCRIPT_DIR"`
 K_ROOT="$SCRIPT_DIR/../../../../"
 
 pushd $SCRIPT_DIR
-maude "$K_ROOT/k-prelude.maude" hsStructs.maude haskell-syntax.maude
+
+HASKELL_SOURCES=(hsStructs.maude haskell-syntax.maude translations.maude case-semantics.maude)
+
+maude "$K_ROOT/k-prelude.maude" $HASKELL_SOURCES
 popd $SCRIPT_DIR
