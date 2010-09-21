@@ -5,7 +5,7 @@
  -}
 
 module HsParsePretty where
-  import Language.Haskell.Exts.Parser hiding (parse)
+  import qualified Language.Haskell.Exts.Parser as Hs
   import Language.Haskell.Exts.Pretty
   import System.Environment
   import Text.PrettyPrint.ANSI.Leijen as PP hiding (char, string, space)
@@ -64,9 +64,9 @@ module HsParsePretty where
   main = do args <- getArgs
             fname <- if length args == 0 then getProgName else return (head args)
             contents <- readFile fname
-            let parseM = case parseModule contents of
-                          ParseOk r -> r
-                          ParseFailed loc s -> error s
+            let parseM = case Hs.parseModule contents of
+                          Hs.ParseOk r -> r
+                          Hs.ParseFailed loc s -> error s
             putStrLn . prettyPrint $ parseM
             putStrLn "\nParses as:"
             putStrLn . gshow $ parseM
@@ -75,4 +75,11 @@ module HsParsePretty where
             parseTest astP $ gshow parseM
             putStrLn "\nPretty:"
             putDoc . ppAst $ parsecOut
+
+  outputParseExp :: String -> IO()
+  outputParseExp s = do let parseM = case Hs.parseExp s of
+                                       Hs.ParseOk r -> r
+                                       Hs.ParseFailed loc s -> error s
+                        putStrLn . gshow $ parseM
+
 
