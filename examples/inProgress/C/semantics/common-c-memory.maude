@@ -15,12 +15,7 @@ mod COMMON-SEMANTICS-READING is
 	op getBitOffset : Nat -> Nat .
 	eq getBitOffset(? +Nat bito(M:Nat)) = M:Nat .
 	eq getBitOffset(?) = 0 [owise] .
-	
-	--- mb rule
-		--- < k > extractBitsFromList(dataList((functionObject(X:Id, T:Type, K:K))), 0, N:Nat) => functionObject(X:Id, T:Type, K:K) ...</ k >
-		--- if N:Nat ==Bool numBitsPerByte
-		--- : KSentence [metadata "structural"] .
-		
+			
 	op extractBitsFromList : K Nat Nat List{K} -> K . --- datalist, offset into list, number of bits to extract, accumulator
 	eq extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat) = extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat, .List{K}) .
 	mb rule
@@ -59,11 +54,16 @@ mod COMMON-SEMANTICS-READING is
 	ceq read(Loc:Nat, T:Type) = read(Loc:Nat, T:Type, value(bitSizeofType(T:Type))) 
 		if notBool(hasFunctionType(T:Type)) .
 	
+	
 	--- FIXME should check types
+	--- mb rule
+		--- < k > read(Loc:Nat, functionType(?, ?)) => extractByteFromMem(Loc:Nat) ...</ k >
+		--- : KSentence [metadata "structural"] .
 	mb rule
-		< k > read(Loc:Nat, functionType(?, ?)) => extractByteFromMem(Loc:Nat) ...</ k >
+		< k > readFunction(Loc:Nat) => extractByteFromMem(Loc:Nat) ...</ k >
 		: KSentence [metadata "structural"] .
-		
+
+	
 	mb rule
 		< k > read(Loc:Nat, T:Type, bitSize:Nat) => concretize(T:Type, extractBitsFromMem(Loc:Nat, bitSize:Nat)) ...</ k >
 		: KSentence [metadata "structural"] .
@@ -115,9 +115,6 @@ mod COMMON-SEMANTICS-READING is
 	eq isConcreteNumber(bito(?) +Nat ?) = false .
 	eq isConcreteNumber(?) = true [owise] .
 	
-	
-	--- eq interpret(T:Type, functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
-	
 	op floorLoc : Nat -> Nat . --- loc with possible bit offset returning base byte
 	eq floorLoc(sym(N:Nat) +Nat bito(M:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat .
 	eq floorLoc(sym(N:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat [owise] .
@@ -139,18 +136,7 @@ mod COMMON-SEMANTICS-READING is
 			=> extractBytesFromMem-aux(sNat(Loc:Nat), Size:Nat, (Aux:List{K},, extractByteFromMem(Loc:Nat)))
 		...</ k >
 		: KSentence [metadata "structural"] .
-		
-	---op combineData : List{KResult} -> K .
-
-	---eq combineData(functionObject(X:Id, T:Type, K:K)) = functionObject(X:Id, T:Type, K:K) .
-	***(
-explodeToBits(values((
-('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K}))
-,,('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K}))
-,,('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K}))
-,,('tv).KResultLabel(kList("wklist_")(BaseValue piece(unknown, 8)(.List{K})),,BaseType unsigned-long-long-int(.List{K})))))
-	***)
-
+	
 	op values : List{K} -> List{K} .
 	eq values((tv(K:K, ?),, L:List{KResult})) = (K:K,, values(L:List{KResult})) .
 	eq values(.List{K}) = .List{K} .
@@ -291,9 +277,6 @@ mod COMMON-SEMANTICS-WRITING is
 		< k > writeBytes(?, dataList(.List{K})) => . ...</ k >
 		: KSentence [metadata "structural"] .
 		
-	--- eq splitBytes(tv(functionObject(X:Id, T:Type, Body:K), T:Type)) = dataList(functionObject(X:Id, T:Type, Body:K)) .
-	
-	
 	mb rule splitBytes(tv(I:Int, T:Type)) => splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
 		if hasIntegerType(T:Type)
 		: KSentence .
@@ -395,6 +378,9 @@ mod COMMON-C-MEMORY-MISC is
 	
 	mb [storeNew]: rule
 		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat => alloc(Loc:Nat, value(byteSizeofType(T:Type))) ~> write(Loc:Nat, tv(V:K, T:Type)) ...</ k >
+		: KSentence [metadata "structural"] .
+	mb [storeAt]: rule
+		< k > store tv(V:K, T:Type) atLoc Loc:Nat => write(Loc:Nat, tv(V:K, T:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- mb [store-N-New]: rule

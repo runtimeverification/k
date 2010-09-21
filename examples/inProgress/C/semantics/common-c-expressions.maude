@@ -167,11 +167,16 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		--- : KSentence [metadata "structural"] .
 	
 	
+	--- mb [function-application-pre]: rule
+		--- < k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) => application(read(Loc:Nat, T:Type), L:List{C}) ...</ k >
+		--- if hasFunctionType(T:Type)
+		--- : KSentence [metadata "computational rule"] .
 	mb [function-application-pre]: rule
-		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) => application(read(Loc:Nat, T:Type), L:List{C}) ...</ k >
+		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) => application(readFunction(Loc:Nat), L:List{C}) ...</ k >
 		if hasFunctionType(T:Type)
-		: KSentence [metadata "computational rule"] .
-		
+		: KSentence [metadata "computational rule"] .	
+
+	
 	--- --- fixme this is needed until we can pass a list of results to bind
 	--- --- mb context bind((?,, `[HOLE`]:K,, ?), ?) : KSentence .
 	--- --- needs to be done before call
@@ -687,7 +692,14 @@ mod COMMON-SEMANTICS-DEREFERENCE is
 	--- also see 6.3.2.1:3 for why i made the result a pointerType
 	---- fixme this seems wrong
 	--- mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, pointerType(T:Type)) ...</ k > : KSentence [metadata "structural"] .
-	mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, arrayType(T:Type, N:Nat)) ...</ k > : KSentence [metadata "structural"] .
+	
+	--- fixme these are both pretty fishy
+	mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) 
+		=> tv(Loc:Nat, arrayType(T:Type, N:Nat)) 
+	...</ k > : KSentence [metadata "structural"] .
+	mb rule < k > *(tv(Loc:Nat, pointerType(functionType(T:Type, L:List{Type})))) 
+		=> tv(Loc:Nat, pointerType(functionType(T:Type, L:List{Type}))) 
+	...</ k > : KSentence [metadata "structural"] .
 	
 	--- FIXME this rule is super dangerous because if the value ends up inside any helper operator, it will match
 	mb rule KL:KLabel((?,, tv(?, (arrayType(T:Type, ?) => pointerType(T:Type))),, ?))
@@ -695,30 +707,14 @@ mod COMMON-SEMANTICS-DEREFERENCE is
 		andBool KL:KLabel =/=Bool 'SizeofType
 		andBool KL:KLabel =/=Bool '&_
 		: KSentence .
-	
-	--- mb [lookup-function] : rule
-		--- < k > [Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(functionType(T:Type, L:List{K})))) => V:Value] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:Value)) ...</ mem >
-	--- : KSentence [metadata "structural"] .
-	
+		
 	mb [deref]: rule
 		< k > *(tv(Loc:Nat, pointerType(T:Type))) 
 			=> read(Loc:Nat, T:Type)
 		...</ k >
 		if notBool hasArrayType(T:Type)
+		andBool notBool hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb [deref-pointer]: rule
-		--- < k > [Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))) => readFromMem(Loc:Nat, pointerType(T:Type))
-		--- ] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb [deref-struct]: rule
-		--- < k > [Deref(tv(Loc:Nat, pointerType(structType(X:Id)))) => readFromMem(Loc:Nat, structType(X:Id))
-		--- ] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb [deref-union]: rule
-		--- < k > [Deref(tv(Loc:Nat, pointerType(unionType(X:Id)))) => readFromMem(Loc:Nat, unionType(X:Id))
-		--- ] ...</ k >
-		--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-REFERENCE is

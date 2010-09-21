@@ -55,6 +55,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op declare : K K -> K [metadata "strict(1)"] .
 	op enumItem : Id Value -> Value .
 	
+	op readFunction : Nat -> K .
+	
 	ceq _bit::_(piece(N:Nat, Len:Nat), piece(N':Nat, Len':Nat)) 
 		= piece((N:Nat <<Nat Len':Nat) |Nat N':Nat, Len:Nat +Nat Len':Nat)
 		if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
@@ -722,48 +724,7 @@ mod COMMON-INITIALIZATION is
 		< savedInitialization >... . => zero(X:Id) </ savedInitialization > 
 		if hasUnionType(T:Type) orBool hasAggregateType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > startInitializer(T:Type, X:Id, SingleInit(K:K))
-			--- => fillInitializer(SingleInit(K:K)) ~> getInitializer
-		--- ...</ k >
-		--- < currentSubObject > . => ListItem(te(X:Id, T:Type)) </ currentSubObject >
-		--- < currentObject > . => ListItem(te(X:Id, T:Type)) </ currentObject >
-		--- --- if hasUnionType(T:Type) orBool hasAggregateType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > startInitializer(T:Type, X:Id, NoInit) => initializer((.).K) ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < currentSubObject > . => ListItem(getFirstObject(X:Id, T:Type)) </ currentSubObject > 
-		--- < currentObject > ListItem(te(K:K, arrayType(T:Type, N:Nat))) ...</ currentObject >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < currentInitializerObject > ListItem(getFirstObject(K:K, arrayType(T:Type, N:Nat))) 
-			--- => ListItem(getFirstObject(K:K[0], T:Type)) ListItem(te(K:K, arrayType(T:Type, N:Nat)))
-		--- ...</ currentInitializerObject >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < currentInitializerObject > ListItem(getFirstObject(K:K, incompleteArrayType(T:Type))) 
-			--- => ListItem(getFirstObject(K:K[0], T:Type)) ListItem(te(K:K, incompleteArrayType(T:Type)))
-		--- ...</ currentInitializerObject >
-		--- : KSentence [metadata "structural"] .
-	--- op beginning : K -> K .
-	--- mb rule
-		--- < currentInitializerObject > ListItem(getFirstObject(K:K, T:BaseType)) 
-			--- => ListItem(te(K:K, T:BaseType))
-		--- ...</ currentInitializerObject >
-		--- : KSentence [metadata "structural"] .
-		--- --- struct s { int a[2]; int b;};
-		--- --- x.a[0] ~> x.a ~> x
-		
-	--- mb rule
-		--- < k > initializerFragment(K:C) => .	...</ k >
-		--- < savedInitialization >... . => K:C </ savedInitialization > 
-		--- : KSentence [metadata "structural"] .
-		
-	--- --- eq getFirstObject(K:K, T:Type) = getFirstObject-aux(kpair(K:K, T:Type), T:Type) .
-	--- --- eq getFirstObject-aux(K:K, arrayType(T:Type, N:Nat), T':Type) = getFirstObject-aux(K:K[0], T:Type, T':Type) .
+	
 	mb rule
 		< k > fillInitializer(InitFragment(K:K, Exp:K) :: L:List{C})
 		=> fillInitializer(InitFragment(K:K, Exp:K)) ~> fillInitializer(L:List{C})
@@ -772,13 +733,9 @@ mod COMMON-INITIALIZATION is
 	mb rule
 		< k > fillInitializer(Nil) => . ...</ k >
 		: KSentence [metadata "structural"] .
-	--- --- eq completeInitializer-aux(K:K, N:Nat, InitFragment(NextInit, Exp:K) :: L:List{C}) 
-		--- --- = completeInitializerFragment(K:K[tv(N:Nat, unsigned-long-int)], Exp:K)
-		--- --- :: completeInitializer-aux(K:K, sNat(N:Nat), L:List{C}) .
-	--- --- eq completeInitializer-aux(?, ?, Nil) = Nil .
+	
 	op next : -> ListItem .
 	op block : -> ListItem .
-	--- --- eq next(beginning(K:K)) = K:K .
 	
 	mb rule
 		< currentSubObject > 
@@ -853,12 +810,6 @@ mod COMMON-INITIALIZATION is
 			next (ListItem(te(K:K . ?, T:Type)) => .) ListItem(te(K:K, unionType(S:Id)))
 		...</ currentSubObject >
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < currentInitializerObject > 
-			--- next ListItem(te(beginning(K:K), T:Type))
-			--- => ListItem(te(K:K, T:Type))
-		--- ...</ currentInitializerObject >
-		--- : KSentence [metadata "structural"] .	
 		
 	mb rule
 		< k > fillInitializer(InitFragment(NextInit, Exp:K)) => fillInitializer(Exp:K) ...</ k >
@@ -878,14 +829,7 @@ mod COMMON-INITIALIZATION is
 		< currentObject > (ListItem(te(K:K, T:Type)) => .) ...</ currentObject >
 		< currentSubObject > (? => L:List) </ currentSubObject >
 		: KSentence [metadata "structural"] .	
-		
-	--- mb rule
-		--- < k > fillInitializer(InitFragment(Designator(K:K), Exp:K))
-			--- => fillInitializer(Exp:K)
-		--- ...</ k >
-		--- < currentSubObject > ? => ListItem(K:K) </ currentSubObject >
-		--- : KSentence [metadata "structural"] .
-	
+			
 	mb context fillInitializer(InitFragment(`[HOLE`]:K, ?)) : KSentence .
 	op buildDesignator : K -> K .
 	
@@ -937,41 +881,8 @@ mod COMMON-INITIALIZATION is
 		< currentSubObject > block (. => ListItem(te(K:K[N:Nat], innerType(T:Type)))) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		if hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > buildDesignator(K:K, AtIndexInit(Index:K, More:K)) => buildDesignator(K:K[Index:K], More:K) .
-	--- mb rule
-		--- < k > buildDesignator(K:K, NextInit) => Designator(K:K) 
 	
-	--- op designation : K -> C
-	--- eq InFieldInit(K:K, NextInit) = K:K .
-	
-	--- ceq InFieldInit(K:K, InFieldInit(K':K, More:K)) = 
-		--- if getKLabel(More:K) =/=Bool 'NextInit
-		
-	--- mb rule
-		--- < k > fillInitializer(InitFragment(InFieldInit(F:Id), Exp:K))
-			--- => fillInitializer(Exp:K)
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .	
-	
-	op popInit : -> K .
-	--- mb rule
-		--- < k > fillInitializer(CompoundInit(L:List{C}))
-			--- => fillInitializer(L:List{C}) ~> popInit
-		--- ...</ k >
-		--- < currentInitializerObject > 
-			---xxx (. => ListItem(te(K:K[0], T:Type))) ListItem(te(K:K, L:Label(T:Type, N:Nat)))
-		--- ...</ currentInitializerObject >
-		--- : KSentence [metadata "structural"] .
-	
-	--- < initMaxes > .Map </ initMaxes >
-	
-	--- mb rule
-		--- < k > popInit => . ...</ k >
-		--- < currentInitializerObject > (?:ListItem => next) ...</ currentInitializerObject >
-		--- : KSentence [metadata "structural"] .
-		
+	op popInit : -> K .		
 	
 	op getTopArrayUse : K -> Nat .
 	eq getTopArrayUse(X:Id) = 0 .
@@ -1058,13 +969,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool lengthString(S:String) <=Nat Len:Nat
 		: KSentence [metadata "structural"] .	
 		
-	--- incomplete arrays
-	--- this doesn't work due to things like [3] = blah
-	--- mb rule
-		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(L:List{C}))
-			--- => declare(typedDeclaration(arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))), X:Id), CompoundInit(L:List{C}))
-		--- ...</ k >
-		--- : KSentence [metadata "computational"] . --- fixme we're making this computational to force evaluation after another rule below
 	mb rule
 		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
 			=> allocString(Loc:Nat, (S:String +String "\0"))
@@ -1102,96 +1006,22 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		: KSentence [metadata "structural"] .
 		
-	--- eq declare-aux(Kr:KResult, Kr':KResult) = declare(Kr:KResult, Kr':KResult) .
-	
-	--- parser makes sure there are no uninitialized globals, so this should only do allocation
-	--- mb rule
-		--- < k > DeclarationDefinition(InitNameGroup(T:Type, (K:C :: L:List{C})))
-			--- => declare(T:Type, K:C) ~> DeclarationDefinition(InitNameGroup(T:Type, L:List{C})) ...</ k >
-		--- : KSentence [metadata "structural"] .
-	---op declare : K K -> K [metadata "strict(2)"] .
-	--- op typeNamePair : K K -> K .
-	--- op idTypePair : K K -> K .
-	--- op initNameGroup : K K -> K .
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
 		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
 		~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
-	--- op completeInitializer : K K -> C . --- name, init
-	--- eq completeInitializer(K:K, K':K) = completeInitializer-aux(K:K, 0, K':K) .
-	--- op completeInitializer-aux : K Nat K -> C . --- name, offset, init
-	--- op completeInitializer-aux : K Nat List{C} -> K . --- name, offset, init
 	op idOfName : K -> K .
 	eq idOfName(Name(X:Id, ?)) = X:Id .
-	--- eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), completeInitializer(idOfName(Name:K), Exp:K)) .
 	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
 		
-	--- eq completeInitializer-aux(?, ?, NoInit) = NoInit .
-	--- eq completeInitializer-aux(?, ?, SingleInit(K:K)) = SingleInit(K:K) .
-	--- eq completeInitializer-aux(K:K, N:Nat, CompoundInit(L:List{C})) 
-		--- = CompoundInit(completeInitializer-aux(K:K, N:Nat, L:List{C})) .
-	
-	--- mb rule
-		--- < k > completeInitializerFragment(K:K, SingleInit(V:Value)) => initializerFragment(K:K := V:Value) ...</ k >
-		--- if getKLabel(K:K) =/=Bool 'NextInit
-		--- andBool getKLabel(K:K) =/=Bool 'InFieldInit
-		--- andBool getKLabel(K:K) =/=Bool 'AtIndexInit
-		--- andBool getKLabel(K:K) =/=Bool 'AtIndexRangeInit
-		--- : KSentence .
-	--- mb rule
-		--- < k > completeInitializerFragment(K:K, CompoundInit(L:List{C})) 
-			--- => CompoundInit(completeInitializer(K:K, L:List{C}))
-		--- ...</ k >
-		--- if getKLabel(K:K) =/=Bool 'NextInit
-		--- andBool getKLabel(K:K) =/=Bool 'InFieldInit
-		--- andBool getKLabel(K:K) =/=Bool 'AtIndexInit
-		--- andBool getKLabel(K:K) =/=Bool 'AtIndexRangeInit
-		--- : KSentence .
-		
-	
-	--- declare-aux(SingleName(T:Type, Name:C), completeInitializer(idOfName(Name:C), Kp:KProper)) .
-		
-		---if notBool hasExternType(T:Type) .
-	--- FIXME does this work all the time?
-	--- ceq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = (.).K
-		--- if hasExternType(T:Type) .
-	
 	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
 	eq Typedef(NameGroup(T:Type, Name:C)) = defineType(SingleName(T:Type, Name:C)) .
 
-	--- eq EnumItem(X:Id, V:Value)
-		--- = declare(typedDeclaration(int, X:Id), SingleInit(V:Value)) ~> int .
-
 	eq EnumItem(X:Id, V:Value)
 		= enumItem(X:Id, V:Value) .
-	
-	--- mb rule
-		--- < k > EnumDef(X:Id, L:List{Type}) => (.).K ...</ k >
-		--- : KSentence .
-	
+		
 	op initialize-aux : Id Type K -> K .
-	---eq SingleInit(K:K) = K:K .
-	--- mb rule
-		--- < k > initialize-aux(?, ?, NoInit) => . ...</ k >
-		--- : KSentence .
-	--- mb rule
-		--- < k > initialize-aux(X:Id, ?, SingleInit(V:Value)) => X:Id := V:Value ~> discard ...</ k >
-		--- : KSentence .
 		
-	--- mb rule
-		--- < k > initialize-aux(X:Id, T:Type, CompoundInit(K:C :: L:List{C}))
-			--- => initialize-aux(X:Id, T:Type, K:C)
-			--- ~> initialize-aux(X:Id, T:Type, CompoundInit(L:List{C}))
-		--- ...</ k >
-		--- : KSentence .
-	
 	--- c1x 6.7.8:21 ... the remainder of the aggregate shall be initialized implicitly the same as objects that have static storage duration
-	--- mb rule
-		--- < k > initialize-aux(X:Id, T:Type, initializer(K:K)) => zero(X:Id) ~> K:K ...</ k >
-		--- : KSentence .
-	--- mb rule
-		--- < k > initialize-aux(X:Id, ?, CompoundInit(Nil)) => (.).K ...</ k >
-		--- : KSentence .
-		
 	mb rule
 		< k > initialize(X:Id, T:Type, K:K)
 			=> if (F:Id ==Bool File-Scope) then zero(X:Id) else (.) fi 
@@ -1245,15 +1075,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
 		< env >... X:Id |-> ? ...</ env >
 		: KSentence .
-	
-	
-	--- fixme could this be fixed using the thing that reverses types?
-	--- mb rule
-		--- < k > declare-aux(typedDeclaration(functionType(pointerType(preFunctionType(T:Type)), L:List{Type}), X:Id), K:K)
-			--- => declare-aux(typedDeclaration(pointerType(functionType(T:Type, L:List{Type})), X:Id), K:K)
-		--- ...</ k >
-		--- : KSentence .
-	
+		
 	--- fixme computational so it will happen after incomplete length is finished updating from any pending nexts
 	mb rule
 		< k > declare-aux(typedDeclaration((incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), X:Id), initializer(K:K))
@@ -1261,44 +1083,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< incompleteLength > N:Nat </ incompleteLength >
 		if notBool hasExternType(T:Type) --- external reference
 		: KSentence [metadata "computational rule"] .
-		
-	--- FIXME check type of pointer
-	--- mb rule
-		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(tv(StrLoc:Nat, pointerType(T:Type))))
-			--- => allocString(Loc:Nat, S:String)
-			--- --- ~> allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, arrayType(T:Type, Len:Nat))
-			--- --- ~> initialize(X:Id, T:Type, K:K)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- < statics >... S:String |-> tv(StrLoc:Nat, arrayType(T:Type, Len:Nat)) ...</ statics >
-		--- if notBool hasExternType(T:Type) --- external reference
-		--- andBool T:Type ==Bool char
-		--- andBool notBool hasIncompleteType(T:Type)
-		--- : KSentence .
-		
-	--- compound initialization of toplevel incomplete array
-	--- mb rule
-		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(L:List{C}))
-			--- => allocateType(Loc:Nat, arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))))
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))))
-			--- ~> initialize(X:Id, arrayType(T:Type, lengthList{K}(getList{K}(L:List{C}))), CompoundInit(L:List{C}))
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if notBool hasExternType(T:Type) --- external reference
-		--- andBool notBool hasIncompleteType(T:Type)
-		--- : KSentence .
-		
-	--- FIXME is this appropriate?
-	--- fixme not handling externs with declarations
-	--- mb rule
-		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K)) => . ...</ k >
-		--- if hasExternType(T:Type) --- external reference
-		--- orBool hasFunctionType(T:Type) --- prototype
-		--- : KSentence .
-		
+				
 	mb rule
 		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
 		< currentFunction > File-Scope </ currentFunction >
@@ -1311,12 +1096,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
 		if F:K =/=Bool File-Scope
 		: KSentence .
-	
-	--- initNameGroup(typeNamePair(T:Type, Name:K), Exp:K) .
-	--- eq typeNamePair(T:Type, Name(X:Id, K:K, ?, ?)) = idTypePair(X:Id, toType(T:Type, K:K)) .
-	
-	--- op initialize : K K -> K .
-	--- eq declare(T:Type, InitName(Name:K, Exp:K)) = declare(T:Type, Name:K) ~> initialize(Name:K, Exp:K) .
 	
 	mb rule
 		< k > DeclarationDefinition(InitNameGroup(T:Type, Nil)) => (.).K ...</ k >
@@ -1332,7 +1111,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence [metadata "structural"] .
 	mb [function-definition]: rule
 		< k > defineUsingOldDeclaration(T:Type, X:Id, Block:K)
-			=> storeNew tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
+			=> store tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
 			~> calculateGotoMap(X:Id, Block:K)
 		...</ k >
 		< env >... X:Id |-> Loc:Nat ...</ env >
@@ -1341,66 +1120,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < gtypes > GTypes:Map => GTypes:Map[T:Type / X:Id] </ gtypes >
 		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		: KSentence [metadata "structural"] .
-		
-	--- --- fixme
-	--- --- this rule is necessary for now since it's possible for cil to generate two declarations inside of a pglobal (when it thinks something needs a prototype)
-	--- mb rule 
-		--- < k > ['Global(K1:NeK ~> K2:NeK) => 'Global(K1:NeK) ~> 'Global(K2:NeK)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- --- --- fixme this isn't how things are, but it seems to work out
-	--- --- ---C99 6.7.2.2:3 The identifiers in an enumerator list are declared as constants that have type int and may appear wherever such are permitted
-	--- mb rule
-		--- < k > [enum(X:Id, ((X':Id := E:Expression) .,. L:List{Expression})) => 'Global('_=_('Declaration(int,, X':Id),, InitItem(E:Expression))) ~> enum(X:Id, L:List{Expression})] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [enum(X:Id, .List{Expression}) => definedType(enumType(X:Id), enum(X:Id))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule 
-		--- < k > ['Field(T:Type,, X:Id) => typedField(T:Type, X:Id)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- op computeStructType : K Type List{K} -> K .
-	--- mb context computeStructType(?, ?, (?,, `[HOLE`]:K,, ?)) : KSentence .
-	
-	--- mb rule
-		--- < k > ['structDef(X:Id) => definedType(structType(X:Id), struct(X:Id))] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > ['unionDef(X:Id) => definedType(unionType(X:Id), union(X:Id))] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	
-	--- --- here we add "incomplete" types for the tag we're defining
-	--- mb rule
-		--- < k > ['structDef(X:Id,, K:K) => giveGlobalType(structType(X:Id), struct(X:Id)) ~>
-		--- computeStructType(struct(X:Id), structType(X:Id), getList{K}(K:K))] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > ['unionDef(X:Id,, K:K) => giveGlobalType(unionType(X:Id), union(X:Id)) ~>
-		--- computeStructType(union(X:Id), unionType(X:Id), getList{K}(K:K))] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb rule
-		--- < k > [computeStructType(K:K, T:Type, L:List{KResult}) => definedType(T:Type, K:K)] ...</ k >
-		--- < structs >... [.Map => K:K |-> L:List{KResult}] ...</ structs >
-		--- : KSentence [metadata "structural"] .
 endm
-
---- mod COMMON-LOCAL-DECLARATION is
-	--- including COMMON-INCLUDE .
-		
-	--- --- fixme: problem if threads come in and don't do this sequentially
-	--- mb rule
-		--- < k > [addLocals(Loc:Nat) => .K] ...</ k >
-		--- < locals >... [.Bag => BagItem(Loc:Nat)] ...</ locals >
-		--- : KSentence [metadata "structural"] .
-			
-	--- eq unknownRange(N:Nat, N:Nat, Size:Nat) = .List{K} .
-	--- ceq unknownRange(N:Nat, M:Nat, Size:Nat) = (piece(unknown(N:Nat), Size:Nat),, unknownRange(sNat(N:Nat), M:Nat, Size:Nat))
-		--- if M:Nat >Nat N:Nat .
---- endm
-
 
 mod C-SEMANTICS-MISC is
 	including COMMON-INCLUDE .
@@ -1457,44 +1177,10 @@ mod C-SEMANTICS-MISC is
 		< locsWrittenTo > ? => (.).Bag </ locsWrittenTo >
 		: KSentence [metadata "structural"] .
 		
-	--- --- need to be careful about simplifying these into one rule because there may be variables with the same name as a typedef?
-	--- mb rule 
-		--- < k > [T:Typedef-Name => T:Type] ...</ k >
-		--- < types >... T:Typedef-Name |-> T:Type ...</ types > 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- < k > [struct(X:Id) => T:Type] ...</ k > 
-		--- < types >... struct(X:Id) |-> T:Type ...</ types > 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- < k > [union(X:Id) => T:Type] ...</ k > 
-		--- < types >... union(X:Id) |-> T:Type ...</ types > 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- < k > [enum(X:Id) => T:Type] ...</ k > 
-		--- < types >... enum(X:Id) |-> T:Type ...</ types > 
-		--- : KSentence [metadata "structural"] .
-		
-	--- eq hex(S:String) = string2ratConversion(S:String, 16) .
-	--- eq Parameter-Type-List() = Parameter-Type-List(.List{Parameter}) .		
-		
 	--- ---C99 6.5.3.2 (p79) footnote 90) Thus, &*E == E; &(E1[E2]) == (E1 + E2)
 	
 	--- ---C99 6.5.3.2 90) ... It is always true that if E is a function designator or an lvalue that is a valid operand of the u of the unary & operator, *&E is a function designator or an lvalue equal to E.
 
-
-	--- --- remove empty global
-	--- mb [remove-global-marker-empty]: rule [Global() => .K] : KSentence [metadata "structural"] .
-	
-	--- --- fixme: super horrible
-	--- --- some of the truncs and abs are just to get the sorts right
-	--- ceq figureOffset(loc(Block:Nat, Offset:Nat), tv(R:Rat, ?), T:Type) = 
-		--- tv(bitloc(Block:Nat, absInt(Offset:Nat +Int truncRat(R:Rat)), absInt(truncRat(_-Rat_(R:Rat, truncRat(R:Rat)) *Rat 8))), pointerType(void))
-	--- if T:Type isa 'bitfieldType .
-	--- ceq figureOffset(loc(Block:Nat, Offset:Nat), tv(R:Rat, ?), T:Type) = 
-		--- tv(loc(Block:Nat, absInt(truncRat((Offset:Nat +Rat R:Rat) +Rat (7 /Rat 8)))), pointerType(void))
-	--- if notBool(T:Type isa 'bitfieldType) .
-	---op calculateLength
 	eq calculateLength(Nil) = 0 .
 	eq calculateLength(T:Type :: L:List{Type}) = calculateLength(T:Type) + calculateLength(L:List{Type}) .
 	eq calculateLength(typedDeclaration(T:Type, ?)) = bitSizeofType(T:Type) .
@@ -1520,87 +1206,7 @@ mod C-SEMANTICS-MISC is
 			=> concretize(T:Type, extractBitsFromList(dataList(L:List{K}), bitsToBytes(Offset:Nat), Len:Nat))
 		...</ k >
 		: KSentence [metadata "structural"] .
-		
-		
-	--- mb [extractField-bitfield-start]: rule
-		--- < k > extractField-pre(L:List{K}, T:Type, tv(Offset:Nat, ?),  tv(Size:Rat, ?)) 
-			--- => extractBitsFromList(L:List{K}, getBitOffset(N:Nat), Size:Rat)
-			--- extractField-aux(explodeToBits(L:List{K}), bitfieldType(T:Type, N:Nat), Offset1:Nat *Nat 8 +Nat Offset2:Nat, absInt(truncRat(Len:Rat *Rat 8)), .List{K}) ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb [extractField-from-union-start]: rule
-		--- < k > [extractField(L:List{K}, unionType(S:Id), F:Id) 
-			--- => extractField-pre(L:List{K}, T:Type, tv(loc(0, 0), cfg:sizeut), sizeofType(T:Type))] ...</ k >
-		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, F:Id),, ?:List{KResult}) ...</ structs >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb [extractField-bitfield-start]: rule
-		--- < k > [extractField-pre(L:List{K}, bitfieldType(T:Type, N:Nat), tv(bitloc(?, Offset1:Nat, Offset2:Nat), ?),  tv(Len:Rat, ?)) 
-			--- => extractField-aux(explodeToBits(L:List{K}), bitfieldType(T:Type, N:Nat), Offset1:Nat *Nat 8 +Nat Offset2:Nat, absInt(truncRat(Len:Rat *Rat 8)), .List{K})] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb [extractField-normal-start]: rule
-		--- < k > [extractField-pre(L:List{K}, T:Type, tv(loc(?, Offset:Nat), ?), tv(Len:Rat, ?)) 
-			--- => extractField-aux(explodeToBits(L:List{K}), T:Type, Offset:Nat *Nat 8, absInt(truncRat(Len:Rat *Rat 8)), .List{K})] ...</ k >
-		--- if getKLabel(T:Type) =/=Bool 'bitfieldType
-		--- : KSentence [metadata "structural"] .
 				
-	
-	--- mb rule
-		--- < k > [extractField-aux((piece(?, N:Nat),, L:List{K}), T:Type, Offset:Nat, Len:Nat, .List{K})
-		--- => extractField-aux(L:List{K}, T:Type, absInt(_-Int_(Offset:Nat, N:Nat)), Len:Nat, .List{K})] ...</ k >
-		--- if N:Nat <=Nat Offset:Nat
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme CHOICE assumes lengths of floats and pointers here
-	--- mb [explode-skip-floats]: rule
-		--- < k > [extractField-aux((explodeToBits(?:Float),, L:List{K}), T:Type, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Offset:Nat)))))))), Len:Nat, .List{K})
-		--- => extractField-aux(L:List{K}, T:Type, Offset:Nat, Len:Nat, .List{K})] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb [explode-skip-locs]: rule
-		--- < k > [extractField-aux((explodeToBits(loc(?, ?)),, L:List{K}), T:Type, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Offset:Nat)))))))), Len:Nat, .List{K})
-		--- => extractField-aux(L:List{K}, T:Type, Offset:Nat, Len:Nat, .List{K})] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > [extractField-aux((piece(N:Nat, Size:Nat),, L:List{K}), T:Type, 0, Len:Nat, L':List{K})
-		--- => extractField-aux(L:List{K}, T:Type, 0, absInt(_-Int_(Len:Nat, Size:Nat)), (L':List{K},, piece(N:Nat, Size:Nat)))] ...</ k >
-		--- if Size:Nat <=Nat Len:Nat
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme :(
-	--- mb [explode-read-float]: rule
-		--- < k > [extractField-aux((explodeToBits(F:Float),, L:List{K}), T:Type, 0, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Len:Nat)))))))), L':List{K})
-		--- => extractField-aux(L:List{K}, T:Type, 0, Len:Nat, (L':List{K},, F:Float))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb [explode-read-loc]: rule
-		--- < k > [extractField-aux((explodeToBits(loc(N:Nat, M:Nat)),, L:List{K}), T:Type, 0, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Len:Nat)))))))), L':List{K})
-		--- => extractField-aux(L:List{K}, T:Type, 0, Len:Nat, (L':List{K},, loc(N:Nat, M:Nat)))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [extractField-aux((explodeToBits(F:Float),, L:List{K}), float, 0, ?, .List{K})
-		--- => tv(F:Float, float)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [extractField-aux((F:Float,, L:List{K}), double, 0, ?, .List{K})
-		--- => tv(F:Float, double)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [extractField-aux((F:Float,, L:List{K}), float, 0, ?, .List{K})
-		--- => tv(F:Float, float)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [extractField-aux((F:Float,, L:List{K}), long-double, 0, ?, .List{K})
-		--- => tv(F:Float, long-double)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [extractField-aux(?, T:Type, 0, 0, L:List{K})
-		--- => concretize(atv(L:List{K}, T:Type))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	
-	
-	--- --- ceq undefRange(((N:Nat |-> ?) M:Map), N:Nat, M:Nat) = undefRange(M:Map, sNat(N:Nat), M:Nat)
-		--- --- if N:Nat =/=Bool M:Nat .
-	--- --- eq undefRange(M:Map, N:Nat, N:Nat) = M:Map .
-		
 	mb [writeToFD-char] : rule
 		< k > writeToFD(FD:Nat, N:Nat) => (.).K ...</ k >
 		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
