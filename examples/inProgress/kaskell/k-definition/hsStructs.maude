@@ -5,13 +5,21 @@ mod HASKELL-SYNTAX-STRUCTS is
   --- Parameterized sorts are a lot of trouble in Maude, so here's some monosorted versions of haskell constructs
   sorts HsMaybe HsList HsTuple .
 
-  op emptyList :	     -> HsList [ctor] .
-  op _ :: _ : K HsList -> HsList [ctor] .
+  op emptyList :    -> HsList [ctor] .
+  op (:) : K HsList -> HsList [ctor] .
 
-  op Just _ : K	 -> HsMaybe [ctor] .
-  op Nothing :   -> HsMaybe [ctor] .
+  --- tuples, hardcoded up to arity 9
+  op (,)        _ _               : K K               -> HsTuple [ctor] .
+  op (,,)       _ _ _             : K K K             -> HsTuple [ctor] .
+  op (,,,)      _ _ _ _           : K K K K           -> HsTuple [ctor] .
+  op (,,,,)     _ _ _ _ _         : K K K K K         -> HsTuple [ctor] .
+  op (,,,,,)    _ _ _ _ _ _       : K K K K K K       -> HsTuple [ctor] .
+  op (,,,,,,)   _ _ _ _ _ _ _     : K K K K K K K     -> HsTuple [ctor] .
+  op (,,,,,,,)  _ _ _ _ _ _ _ _   : K K K K K K K K   -> HsTuple [ctor] .
+  op (,,,,,,,,) _ _ _ _ _ _ _ _ _ : K K K K K K K K K -> HsTuple [ctor] .
 
-  op mkTuple : List{K} -> HsTuple [ctor] .
+  op Just _ : K -> HsMaybe [ctor] .
+  op Nothing :  -> HsMaybe [ctor] .
 
   subsorts HsList HsMaybe HsTuple < K .
 

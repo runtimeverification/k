@@ -11,6 +11,7 @@ module HsParsePretty where
   import Text.PrettyPrint.ANSI.Leijen as PP hiding (char, string, space)
   import Text.ParserCombinators.Parsec
   import Control.Monad
+  import Data.Generics
 
   -- Parse the string representing the Ast
   -- Structs, such as tuples, lists, or just parens, consist of the insides, surrounded by two characters
@@ -70,8 +71,8 @@ module HsParsePretty where
             putStrLn "\nParses as:"
             putStrLn . show $ parseM
             putStrLn "\nParsecs as:"
-            let parsecOut = case parse astP "" (show parseM) of Right a -> a
-            parseTest astP $ show parseM
+            let parsecOut = case parse astP "" (gshow parseM) of Right a -> a
+            parseTest astP $ gshow parseM
             putStrLn "\nPretty:"
             putDoc . ppAst $ parsecOut
 
