@@ -128,7 +128,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op structType : Id -> Type [ctor] .
 	op unionType : Id -> Type [ctor] .
 	op qualifiedType : Type K -> Type [ctor] .
+	
+	--- these aren't real types
 	op typedefType : Id Type -> Type [ctor] .
+	op preFunctionType : Type -> Type .
 	--- op typedefType : Type -> Type [ctor] .
 	
 	--- sort State .
@@ -556,30 +559,6 @@ mod COMMON-INCLUDE is
 	including C-SETTINGS .
 	including COMMON-SEMANTIC-SYNTAX .	
 endm
-
-***(
-('typedDeclaration).KResultLabel(
-	('functionType).KResultLabel(
-		('preFunctionType).KResultLabel(('pointerType).KResultLabel(BaseType int(.List{K})))
-		,,('_::_).KHybridLabel(
-			('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K}))
-			,,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K}))
-		)
-	)
-	,,Id Identifier("f")(.List{K})
-)
-
-
-('bind).KProperLabel(
-	('_::_).KHybridLabel(('tv).KResultLabel(kList("wklist_")(BaseValue 5(.List{K})),,BaseType unsigned-long-int(.List{K})),,('tv).KResultLabel(kList("wklist_")(BaseValue 0(.List{K})),,BaseType int(.List{K})),,('tv).KResultLabel(kList("wklist_")(BaseValue (0 +Nat sym(8))(.List{K}))
-	
-	,,('pointerType).KResultLabel(('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("y")(.List{K})))))))
-	,,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("length")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("start")(.List{K}))
-	
-	,,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id #NoName(.List{K}))))),,Id Identifier("f")(.List{K})))
-)
-
-***)
 
 mod COMMON-PARAMETER-BINDING is
 	including COMMON-INCLUDE .
@@ -1240,8 +1219,40 @@ mod COMMON-GLOBAL-DECLARATION is
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		if notBool hasExternType(T:Type) --- external reference
 		andBool notBool hasIncompleteType(T:Type)
-		andBool notBool (hasFunctionType(T:Type) andBool K:K ==Bool (.).K) --- prototype
+		andBool notBool hasFunctionType(T:Type)
 		: KSentence .
+	op allocateIfAbsent : Type Id -> K .
+	mb rule
+		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
+			=> allocateIfAbsent(T:Type, X:Id)
+		...</ k >
+		if hasExternType(T:Type) --- external reference
+		orBool hasFunctionType(T:Type) --- prototype
+		: KSentence .
+		
+	mb rule
+		< k > allocateIfAbsent(T:Type, X:Id)
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< env > E:Map </ env >
+		if notBool $hasMapping(E:Map, X:Id)
+		: KSentence .
+	--- fixme can use this opportunity to check types
+	mb rule
+		< k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
+		< env >... X:Id |-> ? ...</ env >
+		: KSentence .
+	
+	
+	--- fixme could this be fixed using the thing that reverses types?
+	--- mb rule
+		--- < k > declare-aux(typedDeclaration(functionType(pointerType(preFunctionType(T:Type)), L:List{Type}), X:Id), K:K)
+			--- => declare-aux(typedDeclaration(pointerType(functionType(T:Type, L:List{Type})), X:Id), K:K)
+		--- ...</ k >
+		--- : KSentence .
 	
 	--- fixme computational so it will happen after incomplete length is finished updating from any pending nexts
 	mb rule
@@ -1282,11 +1293,11 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	--- FIXME is this appropriate?
 	--- fixme not handling externs with declarations
-	mb rule
-		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K)) => . ...</ k >
-		if hasExternType(T:Type) --- external reference
-		orBool hasFunctionType(T:Type) --- prototype
-		: KSentence .
+	--- mb rule
+		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K)) => . ...</ k >
+		--- if hasExternType(T:Type) --- external reference
+		--- orBool hasFunctionType(T:Type) --- prototype
+		--- : KSentence .
 		
 	mb rule
 		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
@@ -1310,66 +1321,25 @@ mod COMMON-GLOBAL-DECLARATION is
 	mb rule
 		< k > DeclarationDefinition(InitNameGroup(T:Type, Nil)) => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
-		
-	--- --- parser makes sure there are no uninitialized globals, so this should only do allocation
-	--- mb rule
-		--- < k > ['Global(typedDeclaration(T:Type, X:Id))
-			--- => giveGlobalType(T:Type, X:Id) ~> alloc(Loc:Nat, sizeofType(T:Type))
-			--- ] ...</ k >
-		--- < env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		--- < genv >... [.Map => X:Id |-> Loc:Nat] ...</ genv >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- if getKLabel(T:Type)=/=Bool 'functionType
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > ['Local(typedDeclaration(T:Type, X:Id))
-			--- => giveLocalType(T:Type, X:Id) ~> alloc(Loc:Nat, sizeofType(T:Type)) ~> addLocals(Loc:Nat)
-			--- ] ...</ k >
-		--- < env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb [function-prototype]: rule 
-		--- < k > ['Global(typedDeclaration(functionType(?, ?), ?)) => .K] ...</ k >
-		--- : KSentence [metadata "structural"] .
-			
-	--- op initialize : K K -> K .
-	--- mb [global-variable-declaration-init]: rule
-		--- < k > ['_=_(typedDeclaration(T:Type, X:Id),, E:Expression)
-		--- => 'Global(typedDeclaration(T:Type, X:Id)) ~> initialize(X:Id, E:Expression) ~> skipval] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- op initList : K List{K} -> K .
-	--- mb rule
-		--- < k > [initialize(K:K, InitList(L:List{Expression}))
-		--- => initList(K:K, getList{K}(L:List{Expression}))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [initialize(K:Expression, InitItem(E:Expression))
-		--- => (Deref(&(K:Expression)) := E:Expression);] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [initList(K:K, (Designation(ArrayDesignator(N:Nat), E:Expression),, L:List{K}))
-		--- => initialize('_`[_`](K:K,, N:Nat), E:Expression) ~> initList(K:K, L:List{K})] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [initList(K:K, (Designation(FieldDesignator(F:Id), E:Expression),, L:List{K}))
-		--- => initialize('_._(K:K,, F:Id), E:Expression) ~> initList(K:K, L:List{K})] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [initList(K:K, .List{K}) => .K] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
+				
+	op defineUsingOldDeclaration : Type Id K -> K .
 	--- FIXME check prototypes
 	mb [function-definition]: rule
-		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) => 
-			storeNew tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
+		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
+			=> allocateIfAbsent(T:Type, X:Id)
+			~> defineUsingOldDeclaration(T:Type, X:Id, Block:K)
+		...</ k >
+		: KSentence [metadata "structural"] .
+	mb [function-definition]: rule
+		< k > defineUsingOldDeclaration(T:Type, X:Id, Block:K)
+			=> storeNew tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
 			~> calculateGotoMap(X:Id, Block:K)
 		...</ k >
-		< env > Env:Map => Env:Map[Loc:Nat / X:Id] </ env >
-		< genv > GEnv:Map => GEnv:Map[Loc:Nat / X:Id] </ genv >
-		< types > Types:Map => Types:Map[T:Type / X:Id] </ types >
-		< gtypes > GTypes:Map => GTypes:Map[T:Type / X:Id] </ gtypes >
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		--- < genv > GEnv:Map => GEnv:Map[Loc:Nat / X:Id] </ genv >
+		--- < types > Types:Map => Types:Map[T:Type / X:Id] </ types >
+		--- < gtypes > GTypes:Map => GTypes:Map[T:Type / X:Id] </ gtypes >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		: KSentence [metadata "structural"] .
 		
 	--- --- fixme
