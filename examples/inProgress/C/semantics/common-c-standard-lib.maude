@@ -422,6 +422,17 @@ mod COMMON-C-STANDARD-LIBRARY is
 	
 	--- --- fixme might be messing things up elsewhere
 	--- eq Rat2String(loc(N:Nat, M:Nat), 16) = "loc(" +String rat2stringConversion(N:Nat, 16) +String ", " +String rat2stringConversion(M:Nat, 16) +String ")" .
+	op pointerToString : Nat -> String .
+	eq pointerToString(sym(N:Nat) +Nat M:Nat) = "[sym(" +String Rat2String(N:Nat, 10) +String ") + " +String Rat2String(M:Nat, 10) +String "]" .
+	mb [lib-printf-%p]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(N':Nat, ?) :: L:List{C})) 
+			=> writeToFD(1, pointerToString(N':Nat))
+			~> printf-aux(Len:Nat +Nat lengthString(pointerToString(N':Nat)), sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("p")
+	: KSentence [metadata "structural"] .
+	
 	
 	mb [lib-printf-%d]: rule
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(D:Int, ?) :: L:List{C})) 

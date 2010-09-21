@@ -584,7 +584,10 @@ mod COMMON-PARAMETER-BINDING is
 			--- => bind((tv(V:BaseValue, pointerType(T:Type)),, L:List{KResult}), PD:List{KResult})] ...</ k > : KSentence [metadata "structural"] .
 
 	
-			
+	mb [bind-coerce-array]: rule
+		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
+		: KSentence [metadata "structural"] .
+		
 	mb [bind-one]: rule
 		< k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 			=> allocateType(Loc:Nat, T:Type)
@@ -595,6 +598,7 @@ mod COMMON-PARAMETER-BINDING is
 			~> bind(L:List{C}, P:List{Type}) ...</ k > 
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		--- if isTypeCompatible(T:Type, T':Type)
+		if notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb [bind-one]: rule
 		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
