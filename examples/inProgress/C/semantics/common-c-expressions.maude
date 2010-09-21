@@ -588,18 +588,18 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
 		: KSentence [metadata "structural"] .
 	
-	--- --- floats
-	--- --- fixme
-	--- mb rule [tv(F1:Float, T:Type) + tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float +Float F2:Float)] 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [_-_(tv(F1:Float, T:Type), tv(F2:Float, T:Type)) => arithInterpret(T:Type, _-Float_(F1:Float, F2:Float))]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) * tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float *Float F2:Float)] 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) / tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float /Float F2:Float)] 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [-un tv(F:Float, T:Type) => arithInterpret(T:Type, -Float_(F:Float))] 
-		--- : KSentence [metadata "structural"] .
+	--- floats
+	--- fixme
+	mb rule tv(F1:Float, T:Type) + tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float +Float F2:Float) 
+		: KSentence [metadata "structural"] .
+	mb rule _-_(tv(F1:Float, T:Type), tv(F2:Float, T:Type)) => arithInterpret(T:Type, _-Float_(F1:Float, F2:Float))
+		: KSentence [metadata "structural"] .
+	mb rule tv(F1:Float, T:Type) * tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float *Float F2:Float) 
+		: KSentence [metadata "structural"] .
+	mb rule tv(F1:Float, T:Type) / tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float /Float F2:Float) 
+		: KSentence [metadata "structural"] .
+	mb rule - tv(F:Float, T:Type) => arithInterpret(T:Type, -Float_(F:Float))
+		: KSentence [metadata "structural"] .
 		
 endm
 

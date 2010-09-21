@@ -989,7 +989,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > declare(typedDeclaration(T:Type, X:Id), SingleInit(K:K))
 			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((X:Id := K:K ~> discard)))
 		...</ k >
-		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
+		if notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- c1x 6.7.8:11
 	mb rule

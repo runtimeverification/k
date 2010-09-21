@@ -472,12 +472,12 @@ piece((piece(piece(piece(piece(piece(piece(piece(0, 1) bit:: piece(1 &Nat unknow
 		--- if integerTypes contains T:Type
 		--- : KSentence [metadata "structural"] .
 	
-	--- --- fixme
-	--- mb rule [arithInterpret(T:Type, F:Float) => tv(F:Float, T:Type)]
-		--- if (T:Type ==Bool double)
-		--- orBool T:Type ==Bool float
-		--- orBool T:Type ==Bool long-double
-		--- : KSentence [metadata "structural"] .
+	--- fixme
+	mb rule arithInterpret(T:Type, F:Float) => tv(F:Float, T:Type)
+		if (T:Type ==Bool double)
+		orBool T:Type ==Bool float
+		orBool T:Type ==Bool long-double
+		: KSentence [metadata "structural"] .
 	--- signed arithmetic isn't supposed to overflow
 	mb rule
 		arithInterpret(T:Type, I:Int) => 
