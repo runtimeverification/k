@@ -1273,7 +1273,7 @@ mod C-SEMANTICS-MISC is
 	eq NameLoc(K:K, ?) = K:K .
 	
 	ceq N:Nat +Nat bito(M:Nat) = N:Nat +Nat (M:Nat /Nat numBitsPerByte) +Nat bito(M:Nat %Nat numBitsPerByte)
-		if M:Nat >Nat numBitsPerByte .
+		if M:Nat >=Nat numBitsPerByte .
 		
 	
 	--- op enumDef : Id List{C} -> K .

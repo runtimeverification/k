@@ -23,17 +23,29 @@ struct {
 };
 
 /* The tests.  */
-struct {
+// this is nonconforming
+// struct {
+  // char a3c;
+  // char a3p[];
+// } a3 = {
+  // 'o',
+  // "wx"
+// };
+struct sa3 {
   char a3c;
   char a3p[];
+};
+struct sa3b {
+	struct sa3 sa3;
+	char a3p[3];
 } a3 = {
-  'o',
+  {'o'},
   "wx"
 };
 
 struct {
   char a4c;
-  char a4p[];
+  char a4p[2];
 } a4 = {
   '9',
   { 'e', 'b' }
@@ -79,13 +91,13 @@ int main(void) {
   if (a2.a2p[1] != 'q')
     printf("FAIL");
 
-  if (a3.a3c != 'o')
+  if (a3.sa3.a3c != 'o')
     printf("FAIL");
   if (a3.a3p[0] != 'w')
     printf("FAIL");
   if (a3.a3p[1] != 'x')
     printf("FAIL");
-
+	
   if (a4.a4c != '9')
     printf("FAIL");
   if (a4.a4p[0] != 'e')
