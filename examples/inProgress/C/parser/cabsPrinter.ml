@@ -238,7 +238,7 @@ and printExpressionList defs =
 and printConstant const =
 	match const with
 	| CONST_INT i -> wrap ((printIntLiteral i) :: []) "IntLiteral"
-	| CONST_FLOAT r -> wrap (r :: []) "FloatLiteral"
+	| CONST_FLOAT r -> wrap ((printFloatLiteral r) :: []) "FloatLiteral"
 	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
 	| CONST_STRING s -> wrap (("\"" ^ String.escaped s ^ "\"") :: []) "StringLiteral"
@@ -250,7 +250,16 @@ and splitNumber (xs, i) =
 	| "x" -> (xs, i)
 	| "U" -> splitNumber("U" :: xs, newi)
 	| "L" -> splitNumber("L" :: xs, newi)
+	| "F" -> splitNumber("F" :: xs, newi)
 	| _ -> (xs, i)
+and printFloatLiteral r =
+	let (tag, r) = splitNumber ([], r) in
+	let num = (wrapString r "FloatConstant")
+	in
+	match tag with
+	| "F" :: [] -> wrapString num "F"
+	| "L" :: [] -> wrapString num "L"
+	| [] -> wrapString num "NoSuffix"
 and printIntLiteral i =
 	let (tag, i) = splitNumber ([], i) in
 	let num = (

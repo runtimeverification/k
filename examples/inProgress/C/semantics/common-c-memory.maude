@@ -4,6 +4,7 @@ mod COMMON-MEMORY-INCLUDE is
 	op extractBytesFromMem : Nat Nat -> K . --- loc, size in bytes
 	
 	op encodedPointer : Int -> Nat .
+	op encodedFloat : Float -> Nat .
 endm
 
 mod COMMON-SEMANTICS-READING is
@@ -71,6 +72,12 @@ mod COMMON-SEMANTICS-READING is
 	ceq concretize(T:Type, dataList(L:List{K})) = joinIntegerBytes(T:Type, L:List{K})
 		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) .
 		
+	--- FIXME very unsafe, not checking size of list or its contents
+	ceq concretize(T:Type, dataList((piece(encodedFloat(F:Float), Len:Nat),, L:List{K}))) 
+		= tv(F:Float, T:Type)
+		if hasFloatType(T:Type)
+		andBool Len:Nat ==Bool numBitsPerByte .
+		--- andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
 	--- fixme should also check sizes are appropriate
 	--- fixme very unsafe as is.  doesn't care if other bytes were overwritten
 	ceq concretize(pointerType(T:Type), dataList((piece(encodedPointer(N:Nat), Len:Nat),, L:List{K}))) 
@@ -84,6 +91,7 @@ mod COMMON-SEMANTICS-READING is
 		andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
 		
 	eq concretize(structType(S:Id), dataList(L:List{K})) = tv(L:List{K}, structType(S:Id)) .
+	eq concretize(unionType(S:Id), dataList(L:List{K})) = tv(L:List{K}, unionType(S:Id)) .
 		
 		
 	--- FIXME assuming bytes?
@@ -295,7 +303,6 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) => splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
 		: KSentence .
 	
-	op splitFloatBytes : K K K -> K .
 	op splitIntegerBytes : K K K -> K .
 	op splitIntegerBytes : K K K List{K} -> K .
 	mb context splitIntegerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
@@ -317,6 +324,17 @@ mod COMMON-SEMANTICS-WRITING is
 	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K}) = splitPointerBytes(I:Int, T:Type, Len:Nat, (L:List{K},, piece(unknown(numBitsPerByte), numBitsPerByte))) .
 	eq splitPointerBytes(I:Int, T:Type, 0, L:List{K}) 
 		= dataList(L:List{K}) .
+		
+		
+	op splitFloatBytes : K K K -> K .
+	op splitFloatBytes : K K K List{K} -> K .
+	mb context splitFloatBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
+	eq splitFloatBytes(F:Float, T:Type, sNat(Len:Nat)) 
+		= splitFloatBytes(F:Float, T:Type, Len:Nat, piece(encodedFloat(F:Float), numBitsPerByte)) .
+	eq splitFloatBytes(F:Float, T:Type, sNat(Len:Nat), L:List{K}) = splitFloatBytes(F:Float, T:Type, Len:Nat, (L:List{K},, piece(unknown(numBitsPerByte), numBitsPerByte))) .
+	eq splitFloatBytes(F:Float, T:Type, 0, L:List{K}) 
+		= dataList(L:List{K}) .
+		
 	
 	op lowestByte : Int Type -> K .
 	ceq lowestByte(I:Int, T:Type) = piece(I:Int &Int byteMaskSet, numBitsPerByte)

@@ -397,6 +397,13 @@ mod COMMON-C-TYPING is
 	eq pushTypeDown(incompleteArrayType(T:Type), K:KLabel) = incompleteArrayType(pushTypeDown(T:Type, K:KLabel)) .
 	eq pushTypeDown(pointerType(T:Type), K:KLabel) = pointerType(pushTypeDown(T:Type, K:KLabel)) .
 	eq pushTypeDown(preFunctionType(T:Type), K:KLabel) = preFunctionType(pushTypeDown(T:Type, K:KLabel)) .
+	eq pushTypeDown(qualifiedType(T:Type, K:K), K:KLabel) = qualifiedType(pushTypeDown(T:Type, K:KLabel), K:K) .
+	eq pushTypeDown(functionType(T:Type, L:List{Type}), K:KLabel) = functionType(pushTypeDown(T:Type, K:KLabel), L:List{Type}) .
+	eq pushTypeDown(flexibleArrayType(T:Type), K:KLabel) = flexibleArrayType(pushTypeDown(T:Type, K:KLabel)) .
+	eq pushTypeDown(structType(X:Id), K:KLabel) = K:KLabel(structType(X:Id)) .
+	eq pushTypeDown(unionType(X:Id), K:KLabel) = K:KLabel(unionType(X:Id)) .
+	eq pushTypeDown(enumType(X:Id), K:KLabel) = K:KLabel(enumType(X:Id)) .
+	
 	eq pushTypeDown(T:BaseType, K:KLabel) = K:KLabel(T:BaseType) .
 	
 	eq makeArrayType(N:Nat)(T:Type) = arrayType(T:Type, N:Nat) .
@@ -626,6 +633,14 @@ mod COMMON-C-TYPING is
 			
 	--- FIXME most of these don't take into consideration modifiers
 
+	eq hasFloatType(float) = true .
+	eq hasFloatType(double) = true .
+	eq hasFloatType(long-double) = true .
+	ceq hasFloatType(T:Type) = false
+		if T:Type =/=Bool float
+		andBool T:Type =/=Bool double
+		andBool T:Type =/=Bool long-double .
+	
 	eq hasCharType(char) = true .
 	eq hasCharType(unsigned-char) = true .
 	eq hasCharType(signed-char) = true .

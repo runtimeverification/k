@@ -469,11 +469,6 @@ mod SEMANTIC-HELPERS is
 	eq (.).Set contains K:K = false .
 
 	ceq hasIntegerType(T:Type) = true
-		if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
-	ceq hasIntegerType(T:Type) = false
-		if setOfTypes contains l(getKLabel(T:Type)) .
-	
-	ceq hasIntegerType(T:Type) = true
 		if (integerTypes contains T:Type) .
 	ceq hasIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
 	eq hasIntegerType(bitfieldType(?, ?)) = true .
@@ -937,14 +932,16 @@ mod COMMON-INITIALIZATION is
 		
 	
 	--- fixme these are also too restrictive on type.  if we try to assign an int to a long-int field, it will fail
-	--- fixme need to handle unions
 	mb rule
 		< k > buildDesignator(InFieldInit(F:Id, More:K)) 
 			=> buildDesignator(More:K)
 		...</ k >
-		< currentSubObject > block (. => ListItem(te(K:K . F:Id, T:Type))) ListItem(te(K:K, structType(S:Id))) ...</ currentSubObject >
+		< currentSubObject > block (. => ListItem(te(K:K . F:Id, T:Type))) ListItem('te(K:K,, KL:KLabel(S:Id))) ...</ currentSubObject >
 		< structs >... S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: ? ...</ structs >
+		if KL:KLabel ==Bool 'structType 
+		orBool KL:KLabel ==Bool 'unionType
 		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > buildDesignator(NextInit) => NextInit ...</ k >
 		< currentSubObject > (block => .) ...</ currentSubObject >
@@ -953,7 +950,7 @@ mod COMMON-INITIALIZATION is
 	op innerType : Type -> Type .
 	eq innerType(arrayType(T:Type, ?)) = T:Type .
 	eq innerType(incompleteArrayType(T:Type)) = T:Type .
-		
+
 	mb context buildDesignator(AtIndexInit(`[HOLE`]:K, ?)) : KSentence .
 	mb rule
 		< k > buildDesignator(AtIndexInit(tv(N:Nat, ?), More:K)) 
@@ -1542,7 +1539,13 @@ mod C-SEMANTICS-MISC is
 			=> extractField-pre(L:List{K}, T:Type, calculateLength(L:List{Type}), bitSizeofType(T:Type)) ...</ k >
 		< structs >... S:Id |-> (L:List{Type} :: typedDeclaration(T:Type, F:Id) :: ?:List{Type}) ...</ structs >
 		: KSentence [metadata "structural"] .
-
+		
+	mb [extractField-from-union-start]: rule
+		< k > extractField(L:List{K}, unionType(S:Id), F:Id)
+			=> extractField-pre(L:List{K}, T:Type, tv(0, unsigned-long-int), bitSizeofType(T:Type)) ...</ k >
+		< structs >... S:Id |-> (?:List{Type} :: typedDeclaration(T:Type, F:Id) :: ?:List{Type}) ...</ structs >
+		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > extractField-pre(L:List{K}, T:Type, tv(Offset:Nat, ?), tv(Len:Nat, ?))
 			=> concretize(T:Type, extractBitsFromList(dataList(L:List{K}), bitsToBytes(Offset:Nat), Len:Nat))

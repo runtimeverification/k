@@ -42,6 +42,58 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		andBool rank(T':Type) >=Int rank(int)
 		: KSentence [metadata "structural"] .
 	
+	--- fixme these could be done more cleanly
+	--- long-double
+	mb rule
+		< k > L:KLabel(tv(V:BaseValue, long-double),, tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(tv(V:BaseValue, long-double),, cast(long-double, tv(V':BaseValue, T':Type))) 
+		...</ k >
+		if     isArithBinConversionOp(L:KLabel)
+		andBool long-double =/=Bool T':Type
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, long-double)) 
+			=> L:KLabel(cast(long-double, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, long-double)) 
+		...</ k >
+		if     isArithBinConversionOp(L:KLabel)
+		andBool long-double =/=Bool T:Type
+		: KSentence [metadata "structural"] .
+	--- double
+	mb rule
+		< k > L:KLabel(tv(V:BaseValue, double),, tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(tv(V:BaseValue, double),, cast(double, tv(V':BaseValue, T':Type))) 
+		...</ k >
+		if     isArithBinConversionOp(L:KLabel)
+		andBool long-double =/=Bool T':Type
+		andBool double =/=Bool T':Type
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, double)) 
+			=> L:KLabel(cast(double, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, double)) 
+		...</ k >
+		if     isArithBinConversionOp(L:KLabel)
+		andBool long-double =/=Bool T:Type
+		andBool double =/=Bool T:Type
+		: KSentence [metadata "structural"] .
+	--- float
+	mb rule
+		< k > L:KLabel(tv(V:BaseValue, float),, tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(tv(V:BaseValue, float),, cast(float, tv(V':BaseValue, T':Type))) 
+		...</ k >
+		if     isArithBinConversionOp(L:KLabel)
+		andBool long-double =/=Bool T':Type
+		andBool double =/=Bool T':Type
+		andBool float =/=Bool T':Type
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, float)) 
+			=> L:KLabel(cast(float, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, float)) 
+		...</ k >
+		if     isArithBinConversionOp(L:KLabel)
+		andBool long-double =/=Bool T:Type
+		andBool double =/=Bool T:Type
+		andBool float =/=Bool T:Type
+		: KSentence [metadata "structural"] .
 	--- ---C99 6.3.1.8
 	--- --- First, if the corresponding real type of either operand is long double, the other operand is converted, without change of type domain, to a type whose corresponding real type is long double.
 	--- --- mb rule

@@ -261,6 +261,7 @@ and ll or LL
 	--- c1x 6.4.4.4:10
 	eq CharLiteral(N:Nat) = tv(N:Nat, int) .
 	eq IntLiteral(V:Value) = V:Value .
+	eq FloatLiteral(V:Value) = V:Value .
 	eq Constant(V:Value) = V:Value .
 	--- mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence . --- for internal computations
 	mb rule < k > N:Nat => tv(N:Nat, cfg:largestUnsigned) ...</ k > : KSentence . --- for internal computations
@@ -327,13 +328,13 @@ and ll or LL
 		: KSentence [metadata "structural"] .
 		
 		
-	--- ---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double.
-	--- mb rule < k > [F:Float => tv(F:Float, double)] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [@L(F:Float) => tv(F:Float, long-double)]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [@F(F:Float) => tv(F:Float, float)]
-		--- : KSentence [metadata "structural"] .
+	---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double.
+	mb rule NoSuffix(FloatConstant(F:Float)) => tv(F:Float, double)
+		: KSentence [metadata "structural"] .
+	mb rule L(FloatConstant(F:Float)) => tv(F:Float, long-double)
+		: KSentence [metadata "structural"] .
+	mb rule F(FloatConstant(F:Float)) => tv(F:Float, float)
+		: KSentence [metadata "structural"] .
 
 endm
 
@@ -520,12 +521,13 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
 
-	--- mb rule [tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) <= tv(F2:Float, T:Type) => if (F1:Float <=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) > tv(F2:Float, T:Type) => if (F1:Float >Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-	--- mb rule [tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	--- floats
+	mb rule tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(F1:Float, T:Type) <= tv(F2:Float, T:Type) => if (F1:Float <=Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(F1:Float, T:Type) > tv(F2:Float, T:Type) => if (F1:Float >Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-ARITHMETIC is
