@@ -385,9 +385,8 @@ mod C-SETTINGS is
 	
 	eq rank(bignum) = 100 . --- used for internal calculation.  should be bigger than all other ranks
 	
-	--- --- fixme unlikely but possible to have more than int enum values
-	--- eq rank(enumType(?)) = rank(int) .
-	--- ---C99 6.3.1.1
+	eq rank(enumType(?)) = rank(int) .
+	---C99 6.3.1.1
 	
 	--- ***(
 	--- --- no two signed are the same
@@ -1722,6 +1721,7 @@ mod C-SEMANTICS-MISC is
 		: KSentence .
 	mb rule
 		< k > fillEnums(EnumDef(X:Id, Nil), ?) => (.).K ...</ k > : KSentence .
+	--- eq tv(L:List{K}, enumType(?)) = tv(L:List{K}, int) .
 endm
 
 load common-c-conversions

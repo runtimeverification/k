@@ -27,7 +27,7 @@ dist: $(DIST_DIR)/dist.done
 demo: $(DIST_DIR)/dist.done 
 	@rm -f ./a.out
 #$(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/c1x-6-7-8.c
-	$(DIST_DIR)/kcc -o ./a.out -s -d $(C_DIR)/c1x-6-7-8.c
+	$(DIST_DIR)/kcc -o ./a.out -s -d $(C_DIR)/enums.c
 	@DEBUG=1 ./a.out
 # $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge03.c
 # ./a.out	

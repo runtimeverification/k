@@ -31,6 +31,12 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
+		arithConversion-int(?, tv(?, (enumType(?) => int)), ?)
+		: KSentence .
+	mb rule
+		arithConversion-int(?, ?, tv(?, (enumType(?) => int)))
+		: KSentence .
+	mb rule
 		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
 			=> arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))
 		...</ k >
