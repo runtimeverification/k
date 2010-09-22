@@ -74,7 +74,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op emptyValue : -> Value .
 	--- subsort List{KResult} < K .
 	op _bit::_ : Nat Nat -> Nat [assoc] .
-	
+	op allocateIfAbsent : Type Id -> K .
 	--- ceq piece(N:Nat, Len:Nat) bit:: piece(N':Nat, Len':Nat)
 		--- = piece(N:Nat <<Nat Len':Nat |Nat N':Nat, Len:Nat +Nat Len':Nat)
 		--- if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
@@ -543,6 +543,15 @@ mod COMMON-PARAMETER-BINDING is
 		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
 		: KSentence [metadata "structural"] .
 		
+	mb [bind-one]: rule
+		< k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+			=> allocateIfAbsent(T:Type, X:Id)
+			~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
+			~> bind(L:List{C}, P:List{Type}) ...</ k > 
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if isTypeCompatible(T:Type, T':Type)
+		if notBool hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .
 	--- mb [bind-one]: rule
 		--- < k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 			--- => allocateType(Loc:Nat, T:Type)
@@ -1028,7 +1037,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- andBool notBool hasFunctionType(T:Type)
 		--- : KSentence .
 		
-	op allocateIfAbsent : Type Id -> K .
+	
 	op allocateAndZeroIfAbsent : Type Id -> K .
 	--- mb rule
 		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
