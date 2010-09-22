@@ -167,7 +167,11 @@ mod COMMON-SEMANTICS-WRITING is
 	including COMMON-MEMORY-INCLUDE .
 	mb context alloc(?, value(`[HOLE`]:K)) : KSentence .
 
-	eq allocateType(Loc:Nat, T:Type) = alloc(Loc:Nat, value(byteSizeofType(T:Type))) .
+	--- ceq allocateType(Loc:Nat, T:Type) = alloc(Loc:Nat, value(byteSizeofType(T:Type))) 
+		--- if notBool hasStaticType(T:Type) .
+	--- mb rule allocateType(Loc:Nat, (qualifiedType(T:Type, Static) => T:Type)) : KSentence [metadata "structural"] .
+	mb rule allocateType(Loc:Nat, T:Type) => alloc(Loc:Nat, value(byteSizeofType(T:Type))) : KSentence [metadata "structural"] .
+	
 	
 	mb rule
 		< k > alloc(sym(Block:Nat) +Nat 0, Len:Nat) => (.).K ...</ k >

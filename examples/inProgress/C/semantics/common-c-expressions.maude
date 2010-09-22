@@ -381,18 +381,19 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	eq getInnerOperator('_&=_) = '_&_ .
 	eq getInnerOperator('_^=_) = '_^_ .
 	eq getInnerOperator('_|=_) = '_|_ .
-	
+
 	mb [assign]: rule
-		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), tv(V:List{K}, T:Type)) 
+		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), tv(V:List{K}, T':Type)) 
 			=> write(Loc:Nat, tv(V:List{K}, T:Type))
-			~> tv(V:List{K}, T:Type)
+			~> tv(V:List{K}, T':Type)
 		...</ k >
+		if unqualifyType(T:Type) ==Bool T':Type
 		: KSentence [metadata "structural"] .
 	--- C99 6.5.16.1:2 In simple assignment (=), the value of the right operand is converted to the type of the assignment expression and replaces the value stored in the object designated by the left operand
 	mb rule
-		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), (tv(V:List{K}, T':Type) => cast(T:Type, tv(V:List{K}, T':Type))))
+		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), (tv(V:List{K}, T':Type) => cast(unqualifyType(T:Type), tv(V:List{K}, T':Type))))
 		...</ k >
-		if T:Type =/=Bool T':Type
+		if unqualifyType(T:Type) =/=Bool T':Type
 		andBool notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule

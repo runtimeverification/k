@@ -8,14 +8,15 @@ GCC ?= gcc -lm -Wall -Wextra -x c -O0 -U __GNUC__ -pedantic -std=c99
 PARSER ?= ../dist/cparser
 
 GOOD_DIRECTORIES = unitTests
-SHOULD_FAIL = 
+FAIL_DIRECTORIES = shouldFail
 
 #ALL_FILES = $(foreach var, $(GOOD_DIRECTORIES), $(wildcard $(var)/*.c))
 #ALL_PROGRAMS_BASIC = $(basename $(ALL_FILES))
 #ALL_PROGRAMS = $(filter-out $(DONT_WORK), $(ALL_PROGRAMS_BASIC))
 #ALL_TARGETS = $(foreach var,  $(filter-out $(DONT_RUN), $(ALL_PROGRAMS)), $(dir $(var))compare-$(notdir $(var)).pass)
-GOOD_TARGETS = $(foreach var,  $(GOOD_DIRECTORIES), results-$(var).xml)
-CLEAN_TARGETS = $(foreach var, $(GOOD_DIRECTORIES), clean-$(var))
+GOOD_TARGETS = $(foreach var,  $(GOOD_DIRECTORIES), results-pass-$(var).xml)
+FAIL_TARGETS = $(foreach var,  $(FAIL_DIRECTORIES), results-fail-$(var).xml)
+CLEAN_TARGETS = $(foreach var, $(GOOD_DIRECTORIES) $(FAIL_DIRECTORIES), clean-$(var))
 
 all: $(PARSER) test 
 
@@ -23,11 +24,18 @@ all: $(PARSER) test
 .PRECIOUS: test-%.kcc test-%.gcc output-% retval-% compare-%.pass
 .PHONY: all test clean prepare fast-test working
 
-test: $(GOOD_TARGETS)
+test: good fail
 	@echo "Tests finished running."
 	
-results-%.xml:
-	@perl runtest.pl $*
+good: $(GOOD_TARGETS)
+
+fail: $(FAIL_TARGETS)
+
+results-pass-%.xml:
+	@perl runtest.pl -p $*
+	
+results-fail-%.xml:
+	@perl runtest.pl -f $*
 		
 clean: $(CLEAN_TARGETS) clean-./
 	

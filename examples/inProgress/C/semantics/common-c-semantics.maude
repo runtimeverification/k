@@ -54,6 +54,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op byteoffset : Nat -> Nat .
 	op declare : K K -> K [metadata "strict(1)"] .
 	op enumItem : Id Value -> Value .
+	--- op t : Type -> Type .
+	--- op t : Type Set -> Type .
 	
 	op readFunction : Nat -> K .
 	
@@ -130,6 +132,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op structType : Id -> Type [ctor] .
 	op unionType : Id -> Type [ctor] .
 	op qualifiedType : Type K -> Type [ctor] .
+	
+	op unqualifyType : Type -> Type .
 	
 	--- these aren't real types
 	op typedefType : Id Type -> Type [ctor] .
@@ -239,10 +243,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op readFromFD : Nat Nat -> K .
 
 	op calculateLength : List{Type} -> K .
-	--- op figureOffset : Nat K Type -> K [metadata "strict(2)"] .
-	--- ---op pair : Rat Rat -> K . --- relying on this not being nat
-	--- op undefRange : Map Nat Nat -> Map .
-	--- op range : Nat Nat -> Bag .
 	op calculateGotoMap : Id K -> K .
 	
 	op hasCharType : Type -> Bool .
@@ -256,6 +256,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op hasFunctionPointerType : Type -> Bool .
 	op hasBitfieldType : Type -> Bool .
 	op hasExternType : Type -> Bool .
+	op hasStaticType : Type -> Bool .
 	op hasIncompleteType : Type -> Bool .
 	
 	op kpair : K K -> K .
@@ -507,52 +508,6 @@ mod SEMANTIC-HELPERS is
 	ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(_-Int_(N:Nat, 1)), 1) 
 		if signedIntegerTypes contains T:Type .
 
-		
-		
-	--- eq necessaryBytes(tv(R:Rat, T:Type)) = tv(truncRat(R:Rat +Rat (7 /Rat 8)), T:Type) .
-	
-	--- mb [calcStructSize]: rule
-		--- < k > [calcStructSize(L:List{KResult}) => necessaryBytes(calcStructSize-aux(L:List{KResult}, 0))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb [calcUnionSize]: rule
-		--- < k > [calcUnionSize(L:List{KResult}) => necessaryBytes(calcUnionSize-aux(L:List{KResult}, 0))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb [calcStructSize]: rule
-		--- < k > [calcStructSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat) 
-			--- => sizeofType(T:Type) ~> calcStructSize-aux(L:List{KResult}, R:Rat)] ...</ k >
-		--- if T:Type isa 'bitfieldType
-		--- : KSentence [metadata "structural"] .
-	--- mb [calcStructSize]: rule
-		--- < k > [calcStructSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat)
-			--- => sizeofType(T:Type) ~> calcStructSize-aux(L:List{KResult}, truncRat(R:Rat +Rat (7 /Rat 8)))] ...</ k >
-		--- if notBool(T:Type isa 'bitfieldType)
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb [calcUnionSize]: rule
-		--- < k > [calcUnionSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat) 
-			--- => sizeofType(T:Type) ~> calcUnionSize-aux(L:List{KResult}, R:Rat)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-
-	--- mb [calcStructSize-cool]: rule
-		--- < k > [tv(R':Rat, ?) ~> calcStructSize-aux(L:List{KResult}, R:Rat) 
-			--- => calcStructSize-aux(L:List{KResult}, R:Rat +Rat R':Rat)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb [calcUnionSize-cool]: rule
-		--- < k > [tv(R':Rat, ?) ~> calcUnionSize-aux(L:List{KResult}, R:Rat) 
-			--- => calcUnionSize-aux(L:List{KResult}, maxRat(R:Rat, R':Rat))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb [calcStructSize-done]: rule
-		--- < k > [calcStructSize-aux(.List{K}, R:Rat) => tv(R:Rat, cfg:sizeut)] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	--- mb [calcUnionSize-done]: rule
-		--- < k > [calcUnionSize-aux(.List{K}, R:Rat) => tv(R:Rat, cfg:sizeut)] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-		
-	--- op _isa _ : K KLabel -> Bool .
-	--- eq KL:KLabel(?) isa KL:KLabel = true .
-	--- eq ? isa ? = false [owise] .
 endm
 
 mod COMMON-INCLUDE is
@@ -588,35 +543,22 @@ mod COMMON-PARAMETER-BINDING is
 		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
 		: KSentence [metadata "structural"] .
 		
-	mb [bind-one]: rule
-		< k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
-			=> allocateType(Loc:Nat, T:Type)
-			~> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, T:Type)
-			~> X:Id := tv(V:List{K}, T':Type)
-			~> discard
-			~> bind(L:List{C}, P:List{Type}) ...</ k > 
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if isTypeCompatible(T:Type, T':Type)
-		if notBool hasArrayType(T:Type)
-		: KSentence [metadata "structural"] .
+	--- mb [bind-one]: rule
+		--- < k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+			--- ~> X:Id := tv(V:List{K}, T':Type)
+			--- ~> discard
+			--- ~> bind(L:List{C}, P:List{Type}) ...</ k > 
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- --- if isTypeCompatible(T:Type, T':Type)
+		--- if notBool hasArrayType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	mb [bind-one]: rule
 		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 		...</ k > 
 		: KSentence [metadata "structural"] .
-	--- mb [bind-struct]: rule
-		--- < k > [bind((atv(V:List{K}, T:Type),, L:List{KResult}), (typedDeclaration(T:Type, X:Id),, P:List{KResult}))
-			--- => 
-			--- giveLocalType(T:Type, X:Id) ~> 
-			--- storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
-			--- ---allocate(sizeofType(T:Type)) ~> 
-			--- addLocals(Loc:Nat) ~> 
-			--- ---putBytesInMem(Loc:Nat, V:List{K}, T:Type, sizeofType(T:Type)) ~> 
-			--- bind(L:List{KResult}, P:List{KResult})] ...</ k > 
-		--- ---< env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		--- < env > [M:Map => M:Map[Loc:Nat / X:Id]] </ env >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- : KSentence [metadata "structural"] .
 		
 	--- op bindVariadic : K List{KResult} -> K .
 	--- op bindVariadic-pre : K List{K} -> K .
@@ -971,17 +913,17 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		if hasCharType(T:Type)
 		andBool lengthString(S:String) <=Nat Len:Nat
-		: KSentence [metadata "structural"] .	
-		
-	mb rule
-		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-			=> allocString(Loc:Nat, (S:String +String "\0"))
-			~> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
-		...</ k >
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		if hasCharType(T:Type)
 		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+			--- => allocString(Loc:Nat, (S:String +String "\0"))
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if hasCharType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
 			=> declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
@@ -1043,78 +985,131 @@ mod COMMON-GLOBAL-DECLARATION is
 	mb rule
 		< k > defineType(typedDeclaration(T:Type, X:Id)) => giveType(typedef(X:Id), T:Type) ...</ k >
 		: KSentence .
+		
+	--- op defineUsingOldDeclaration : Type Id K -> K .
+	--- allocateIfAbsent(T:Type, X:Id)
 	mb rule
-		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) => 
-			allocateType(Loc:Nat, T:Type)
-			~> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, T:Type)
+		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
+			=> allocateIfAbsent(T:Type, X:Id)
 			~> initialize(X:Id, T:Type, K:K)
 		...</ k >
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		if notBool hasExternType(T:Type) --- external reference
-		andBool notBool hasIncompleteType(T:Type)
-		andBool notBool hasFunctionType(T:Type)
-		: KSentence .
-	op allocateIfAbsent : Type Id -> K .
+		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		: KSentence [metadata "structural"] .
 	mb rule
-		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
-			=> allocateIfAbsent(T:Type, X:Id)
+		< k > declare-aux(typedDeclaration((incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), X:Id), initializer(K:K))
 		...</ k >
-		if hasExternType(T:Type) --- external reference
-		orBool hasFunctionType(T:Type) --- prototype
-		: KSentence .
+		< incompleteLength > N:Nat </ incompleteLength >
+		: KSentence [metadata "structural"] .
+				
+	--- mb rule
+		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) => 
+			--- allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+			--- ~> initialize(X:Id, T:Type, K:K)
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if notBool hasExternType(T:Type) --- external reference
+		--- andBool notBool hasStaticType(T:Type)
+		--- andBool notBool hasIncompleteType(T:Type)
+		--- andBool notBool hasFunctionType(T:Type)
+		--- : KSentence .
+		
+	--- mb rule
+		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) => 
+			--- allocateType(Loc:Nat, T:Type)
+			--- ~> addToGlobalEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+			--- ~> initialize(X:Id, T:Type, K:K)
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if hasStaticType(T:Type)
+		--- andBool notBool hasIncompleteType(T:Type)
+		--- andBool notBool hasFunctionType(T:Type)
+		--- : KSentence .
+		
+	op allocateIfAbsent : Type Id -> K .
+	op allocateAndZeroIfAbsent : Type Id -> K .
+	--- mb rule
+		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
+			--- => allocateIfAbsent(T:Type, X:Id)
+		--- ...</ k >
+		--- if hasExternType(T:Type) --- external reference
+		--- orBool hasFunctionType(T:Type) --- prototype
+		--- : KSentence .
 		
 	mb rule
 		< k > allocateIfAbsent(T:Type, X:Id)
 			=> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, T:Type)
+			~> giveType(X:Id, unqualifyType(T:Type))
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< env > E:Map </ env >
 		if notBool $hasMapping(E:Map, X:Id)
+		andBool notBool hasStaticType(T:Type)
+		---andBool notBool hasExternType(T:Type)
 		: KSentence .
+		
 	--- fixme can use this opportunity to check types
 	mb rule
 		< k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
 		< env >... X:Id |-> ? ...</ env >
 		: KSentence .
 		
-	--- fixme computational so it will happen after incomplete length is finished updating from any pending nexts
+
+	op addToGlobalEnv : Id Nat -> K .
+	op addToLocalEnv : Id Nat -> K .
+	
 	mb rule
-		< k > declare-aux(typedDeclaration((incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), X:Id), initializer(K:K))
-		...</ k >
-		< incompleteLength > N:Nat </ incompleteLength >
-		if notBool hasExternType(T:Type) --- external reference
-		: KSentence [metadata "computational rule"] .
-				
-	mb rule
-		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
+		< k > addToEnv(X:Id, Loc:Nat) => addToGlobalEnv(X:Id, Loc:Nat) ...</ k >
 		< currentFunction > File-Scope </ currentFunction >
+		: KSentence .
+	mb rule
+		< k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
+		< currentFunction > F:K </ currentFunction >
+		if F:K =/=Bool File-Scope
+		: KSentence .
+		
+	mb rule
+		< k > addToGlobalEnv(X:Id, Loc:Nat) => . ...</ k >
 		< genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
 		: KSentence .
 	mb rule
-		< k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
-		< currentFunction > F:K </ currentFunction >
+		< k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		if F:K =/=Bool File-Scope
 		: KSentence .
+		
+	--- mb rule
+		--- < k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
+		--- < currentFunction > File-Scope </ currentFunction >
+		--- < genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
+		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		--- : KSentence .
+	--- mb rule
+		--- < k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
+		--- < currentFunction > F:K </ currentFunction >
+		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		--- if F:K =/=Bool File-Scope
+		--- : KSentence .
 	
 	mb rule
 		< k > DeclarationDefinition(InitNameGroup(T:Type, Nil)) => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
-				
+	
 	op defineUsingOldDeclaration : Type Id K -> K .
+	
+	op defineFunctionUsingOldDeclaration : Type Id K -> K .
 	--- FIXME check prototypes
 	mb [function-definition]: rule
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
 			=> allocateIfAbsent(T:Type, X:Id)
-			~> defineUsingOldDeclaration(T:Type, X:Id, Block:K)
+			~> defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)
 		...</ k >
 		: KSentence [metadata "structural"] .
 	mb [function-definition]: rule
-		< k > defineUsingOldDeclaration(T:Type, X:Id, Block:K)
+		< k > defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)
 			=> store tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
 			~> calculateGotoMap(X:Id, Block:K)
 		...</ k >

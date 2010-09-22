@@ -51,6 +51,7 @@ kmod C-CONFIGURATION is
 					</ control >
 				</ thread * >
 			</ threads >
+			< unfinishedComputation > .K </ unfinishedComputation >
 		</ T >
 		< files > .Map </ files > --- filenames to strings
 		< input > "" </ input >

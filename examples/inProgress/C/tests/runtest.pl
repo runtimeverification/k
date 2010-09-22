@@ -5,14 +5,23 @@ use Text::Diff;
 # use XML::Writer;
 
 my $numArgs = $#ARGV + 1;
-if ($numArgs != 1) {
+if ($numArgs != 2) {
 	die "Not enough command line arguments"
 }
 
 my $kcc = "../dist/compile.sh";
 my $gcc = "gcc -lm -Wall -Wextra -x c -O0 -U __GNUC__ -pedantic -std=c99";
 
-my $directory = $ARGV[0];
+my $flag = $ARGV[0];
+my $shouldFail;
+if ($flag eq "-f") {
+	$shouldFail = 1;
+} elsif ($flag eq "-p"){
+	$shouldFail = 0;
+} else {
+	die "use either -f or -p";
+}
+my $directory = $ARGV[1];
 my $testSuite = $directory;
 my $outputFilename = "$directory.xml";
 
@@ -49,17 +58,31 @@ sub performTest {
 	my $kccCompileOutput = `$kcc -o $kccFilename $fullFilename 2>&1`;
 	my $kccCompileRetval = $?;
 	if ($kccCompileRetval) {
-		return reportFailure($fullFilename, $timer, "kcc failed to compile $fullFilename.\n\n$kccCompileOutput");
+		if ($shouldFail) {
+			return reportSuccess($fullFilename, $timer, "Success---didn't compile with kcc");
+		} else {
+			return reportFailure($fullFilename, $timer, "Failure---kcc failed to compile $fullFilename.\n\n$kccCompileOutput");
+		}
 	}
 	
 	my $gccCompileOutput = `$gcc -o $gccFilename $fullFilename 2>&1`;
 	my $gccCompileRetval = $?;
 	if ($gccCompileRetval) {
-		return reportError($fullFilename, $timer, "gcc failed to compile $fullFilename.\n\n$gccCompileOutput");
+		if (!$shouldFail) {
+			return reportError($fullFilename, $timer, "gcc failed to compile $fullFilename.\n\n$gccCompileOutput");
+		}
 	}
 	
 	my $kccRunOutput = `$kccFilename 2>&1`;
 	my $kccRunRetval = $?;
+	if ($shouldFail) {
+		if (index($kccRunOutput, "unfinishedComputation") == -1) {
+			return reportFailure($fullFilename, $timer, "Failure---Program seemed to run to completion");
+		} else {
+			return reportSuccess($fullFilename, $timer, "Success---Core dumped");
+		}
+	}
+	
 	
 	my $gccRunOutput = `$gccFilename 2>&1`;
 	my $gccRunRetval = $?;

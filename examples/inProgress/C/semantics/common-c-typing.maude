@@ -24,12 +24,25 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	op giveGlobalType : Id Type -> K .
 	op giveLocalType : Id Type -> K .
 	
+	--- FIXME these are here until I decide how to handle qualified types
+	eq qualifiedType(T:Type, Volatile) = T:Type .
+	eq qualifiedType(T:Type, Restrict) = T:Type .
+	eq qualifiedType(T:Type, Const) = T:Type .
+	eq qualifiedType(T:Type, Auto) = T:Type .
+	eq qualifiedType(T:Type, Register) = T:Type .
+	
+	
 	mb rule
 		< k > giveType(X:Id, T:Type) => 
 			if (Fun:Id ==Bool File-Scope) then giveGlobalType(X:Id, T:Type) else giveLocalType(X:Id, T:Type) fi
 			...</ k >
 		< currentFunction > Fun:Id </ currentFunction >
+		if notBool hasStaticType(T:Type)
 		: KSentence [metadata "structural"] .
+	mb rule
+		< k > giveType(X:Id, (qualifiedType(T:Type, Static) => T:Type)) ...</ k >
+		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > giveGlobalType(X:Id, T:Type) => (.).K ...</ k >
 		< types > M:Map => M:Map[T:Type / X:Id] </ types >
@@ -218,6 +231,10 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		if T:K ==Bool Extern
 		orBool T:K ==Bool Static
 		orBool T:K ==Bool Const
+		orBool T:K ==Bool Volatile
+		orBool T:K ==Bool Restrict
+		orBool T:K ==Bool Auto
+		orBool T:K ==Bool Register
 		: KSentence .
 		
 	mb rule
@@ -225,6 +242,10 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		if Q:K ==Bool Extern
 		orBool Q:K ==Bool Static
 		orBool Q:K ==Bool Const
+		orBool Q:K ==Bool Volatile
+		orBool Q:K ==Bool Restrict
+		orBool Q:K ==Bool Auto
+		orBool Q:K ==Bool Register
 		: KSentence .
 	
 	--- fixme? getting rid of typedefs here.  this seems valid by c1x 6.7.7:3
@@ -289,7 +310,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		
 	--- FIXME what good is this?
 	eq BagItem(SpecTypedef) = (.).Bag .
-	eq BagItem(Const) = (.).Bag .
+	--- eq BagItem(Const) = (.).Bag .
 
 	mb rule 
 		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag)), (B:Bag => (.).Bag), ?, ?) ...</ k >
@@ -671,11 +692,17 @@ mod COMMON-C-TYPING is
 		if getKLabel(T:Type) =/=Bool 'unionType .
 		
 	eq hasIncompleteType(incompleteArrayType(?)) = true .
+	eq hasIncompleteType(qualifiedType(T:Type, ?)) = hasIncompleteType(T:Type) .
 	ceq hasIncompleteType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'incompleteArrayType .
+		if getKLabel(T:Type) =/=Bool 'incompleteArrayType
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	eq hasExternType(qualifiedType(T:Type, K:K)) = if (K:K ==Bool Extern) then (true) else (hasExternType(T:Type)) fi .
 	ceq hasExternType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'qualifiedType .
+		
+	eq hasStaticType(qualifiedType(T:Type, K:K)) = if (K:K ==Bool Static) then (true) else (hasExternType(T:Type)) fi .
+	ceq hasStaticType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	eq hasBitfieldType(bitfieldType(?, ?)) = true .
@@ -801,4 +828,8 @@ mod COMMON-C-TYPING is
 		--- < type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
 		--- : KSentence [metadata "structural"] .
 
+	eq unqualifyType(qualifiedType(T:Type, ?)) = T:Type .
+	ceq unqualifyType(T:Type) = T:Type
+		if getKLabel(T:Type) =/=Bool 'qualifiedType .
+	
 endm
