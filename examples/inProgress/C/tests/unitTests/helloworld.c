@@ -1,6 +1,4 @@
 #include <stdio.h>
-
-int __attribute__((const)) main(void)  {
-
+int main(void)  {
 	return printf("Hello world\n");
 }
