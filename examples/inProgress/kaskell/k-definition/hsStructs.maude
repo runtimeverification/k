@@ -1,4 +1,7 @@
----- Syntactic structures that exist in Haskell
+***(
+    Syntactic structures existent in Haskell's abstract syntax that need to be marshalled into Maude
+***)
+
 mod HASKELL-SYNTAX-STRUCTS is
     --- Import the K-stuff
     including K-TECHNIQUE .

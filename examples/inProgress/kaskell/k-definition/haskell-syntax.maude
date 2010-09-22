@@ -1,3 +1,7 @@
+***(
+    Definition of Haskell's abstract syntax in Maude, as based off of Language.Haskell.Exts.Syntax
+***)
+
 mod HASKELL-SYNTAX is
     including HASKELL-SYNTAX-STRUCTS .
     --- Import the K-stuff
