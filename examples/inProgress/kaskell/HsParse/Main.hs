@@ -58,6 +58,7 @@ hsparse = HsParse
     , inputFile  = def   &= typFile    &= argPos 0
     } &= help "A command-line utility for parsing Haskell"
       &= summary "hsparse v0.0.1"
+      &= details ["See the Haddock documentation for help on different modes."]
 
 -- | Entry point for the utility.
 main :: IO ()
