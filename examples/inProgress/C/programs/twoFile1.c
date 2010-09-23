@@ -5,6 +5,7 @@ static int w = 7;
 int q = 3;
 int c = 32;
 int r = 77;
+// i think there will be a problem with constant expressions using other internal globals
 int main(void){
 	int q = 4;
 	printf("1z = %d\n", z);

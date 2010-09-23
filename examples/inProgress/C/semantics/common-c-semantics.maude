@@ -82,7 +82,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 		--- if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
 	
 	
-	op zero : Id -> K .
+	op zero : K -> K .
 	
 	op initializer : K -> KResult .
 	op startInitializer : Type Id K -> K .
@@ -108,7 +108,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op bitloc : Nat Nat Nat -> Nat .
 	op inc : Nat -> Nat .
-	op initialize : Id Type K -> K .
+	op initialize : K Type K -> K .
 	op memblock : Nat Map -> K . --- length and an array from offsets to bytes
 	
 	op listToK : K -> K .
@@ -980,16 +980,16 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	--- c1x 6.7.8:21 ... the remainder of the aggregate shall be initialized implicitly the same as objects that have static storage duration
 	mb rule
-		< k > initialize(X:Id, T:Type, K:K)
-			=> if (F:Id ==Bool File-Scope) then zero(X:Id) else (.) fi 
+		< k > initialize(Name:K, T:Type, K:K)
+			=> if (F:Id ==Bool File-Scope) then zero(Name:K) else (.) fi 
 			~> K:K
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		: KSentence .
 	mb rule
-		< k > zero(X:Id) => . ...</ k >
+		< k > zero(Name:K) => . ...</ k >
 		< currentFunction > F:Id </ currentFunction >
-		< env >... X:Id |-> sym(Block:Nat) +Nat 0 ...</ env >
+		< env >... Name:K |-> sym(Block:Nat) +Nat 0 ...</ env >
 		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
 		: KSentence .
 	
@@ -1254,10 +1254,10 @@ mod COMMON-GLOBAL-DECLARATION is
 	op addToGlobalEnv : K Nat -> K .
 	op addToLocalEnv : K Nat -> K .
 	
-	mb rule
-		< k > addToEnv(K:K, Loc:Nat) => addToGlobalEnv(K:K, Loc:Nat) ...</ k >
-		< currentFunction > File-Scope </ currentFunction >
-		: KSentence .
+	--- mb rule
+		--- < k > addToEnv(K:K, Loc:Nat) => addToGlobalEnv(K:K, Loc:Nat) ...</ k >
+		--- < currentFunction > File-Scope </ currentFunction >
+		--- : KSentence .
 	--- mb rule
 		--- < k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
 		--- < currentFunction > F:K </ currentFunction >
@@ -1269,11 +1269,11 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
 		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
 		--- : KSentence .
-	mb rule
-		< k > addToGlobalEnv(K:K, Loc:Nat) => . ...</ k >
-		< genv > GE:Map => GE:Map[Loc:Nat / K:K] </ genv >
-		< env > E:Map => E:Map[Loc:Nat / K:K] </ env >
-		: KSentence .
+	--- mb rule
+		--- < k > addToGlobalEnv(K:K, Loc:Nat) => . ...</ k >
+		--- < genv > GE:Map => GE:Map[Loc:Nat / K:K] </ genv >
+		--- < env > E:Map => E:Map[Loc:Nat / K:K] </ env >
+		--- : KSentence .
 	--- mb rule
 		--- < k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
 		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
@@ -1469,16 +1469,29 @@ mod C-SEMANTICS-MISC is
 		--- < externalDefinitions > Ext:Map </ externalDefinitions >
 		--- < internalDefinitions > Int:Map </ internalDefinitions >
 		--- : KSentence .	
-	mb rule
-		< k > (. 
-				=> allocate(T:Type, X:Id)
-				~> initialize(X:Id, T:Type, K:K)
-			) 
-			~> resolveReferences
-		...</ k >
-		< externalDefinitions >... (X:Id |-> declarationObject(T:Type, K:K) => .) ...</ externalDefinitions >
-		: KSentence .
 		
+	--- need to worry about things that don't have definitions that may override externs
+	--- want to make it so env is always correct local env, so need to have a set of global envs, one for each tu
+	--- mb rule
+		--- < k > (. 
+				--- => allocate(T:Type, X:Id)
+				--- ~> initialize(X:Id, T:Type, K:K)
+			--- ) 
+			--- ~> resolveReferences
+		--- ...</ k >
+		--- < currentTranslationUnit > ? => (.).K </ currentTranslationUnit >
+		--- < externalDefinitions >... (X:Id |-> declarationObject(T:Type, K:K) => .) ...</ externalDefinitions >
+		--- : KSentence .
+	--- mb rule
+		--- < k > (. 
+				--- => allocate(T:Type, kpair(X:Id, Tu:K))
+				--- ~> initialize(kpair(X:Id, Tu:K), T:Type, K:K)
+			--- ) 
+			--- ~> resolveReferences
+		--- ...</ k >
+		--- < currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+		--- < internalDefinitions >... (kpair(X:Id, Tu:K) |-> declarationObject(T:Type, K:K) => .) ...</ internalDefinitions >
+		--- : KSentence .	
 		
 				--- => allocateIfAbsent(T:Type, X:Id)
 			--- ~> initialize(X:Id, T:Type, K:K)
