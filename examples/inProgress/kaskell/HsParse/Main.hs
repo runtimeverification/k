@@ -15,9 +15,6 @@
 
 module Main where
 
-import Control.Arrow ((&&&))
-import Control.Monad
-import Data.Char (toLower)
 import Data.Generics
 import Data.Tree
 
