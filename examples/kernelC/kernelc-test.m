@@ -1,5 +1,3 @@
-load kernelc-compiled
-
 rew run('pSum) .
 rew run('pCollatz) .
 rew run('pAllocatePrintFree) .

@@ -1,7 +1,7 @@
-load ../../k-prelude
-load kernelc-syntax
-load kernelc-programs
-load basic-kernelc-semantics
+load ../../../k-prelude
+load ../kernelc-syntax
+load ../kernelc-programs
+load ../basic-kernelc-semantics
 load standard-malloc-semantics
 
 kmod KERNELC is including STANDARD-MALLOC-SEMANTICS + KERNELC-PROGRAMS 

@@ -1,12 +1,12 @@
 # KCOMPILE can be set by whoever calls this file
 # e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= ../../tools/kompile.pl
+KCOMPILE ?= ../../../tools/kompile.pl
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = KERNELC
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = KERNELC-SYNTAX KERNELC-DESUGARED-SYNTAX KERNELC-SEMANTICS
+LANGUAGE_MODULES = KERNELC-SYNTAX KERNELC-DESUGARED-SYNTAX BASIC-KERNELC-SEMANTICS STANDARD-MALLOC-SEMANTICS
 
 #this is the basename of the main file
 MAIN_FILE = kernelc
