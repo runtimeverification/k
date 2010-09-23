@@ -31,14 +31,6 @@ data OutputMode
     | Maude       -- ^ in a way parseable by Maude
     deriving (Eq, Show, Data, Typeable)
 
--- | Read @OutputMode@ from string case-insensitively.
-readOutputMode :: String -> Maybe OutputMode
-readOutputMode s = lookup (lowercase s) modeMap
-    where
-        modeMap   = map (lowercase . showConstr &&& fromConstr) ctors
-        ctors     = dataTypeConstrs (dataTypeOf (undefined :: OutputMode))
-        lowercase = map toLower
-
 -- | Show a module according to the given @OutputMode@.
 showModule :: OutputMode -> Module -> String
 showModule Standard   = show
