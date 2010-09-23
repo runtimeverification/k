@@ -391,6 +391,14 @@ mod PL-INT is
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
+
+  op _==Int_ : Int Int -> Bool [prec 37] .
+  op _!=Int_ : Int Int -> Bool [prec 37] .
+  ceq I1 ==Int I2 = true if I1 >=Int I2 andBool I2 >=Int I1 .
+  ceq I1 ==Int I2 = false if I1 >Int I2 orBool I2 >Int I1 .
+  eq I1 !=Int I2 = notBool(I1 ==Int I2) .
+
+  vars I1 I2 : Int .
 endm
 
 
@@ -805,6 +813,11 @@ mod PL-CONVERSION is
   sort DecFloat .
   subsort DecFloat < Builtins .
   op <_,_,_>Conversion : Int String Int -> DecFloat [ctor] .
+
+
+  op Bool2Int : Bool -> Int .
+  eq Bool2Int(true) = 1 . 
+  eq Bool2Int(false) = 0 .
 
   op Rat2Float : Rat -> Float
         [special (id-hook FloatOpSymbol (float)
