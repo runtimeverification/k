@@ -26,6 +26,22 @@ including TEST
                            <newImpl> 0 </newImpl>
                          </config>
                        </T>
+
+
+rule <T>
+<feasible> N </feasible>
+<infeasible> M </infeasible>
+<spec> Mp:Map </spec>
+</T>
+    =>
+<T>
+<feasible> N </feasible>
+<infeasible> M </infeasible>
+</T>
+
+
+
+
   rule
     <T>
       <feasible> N </feasible>
