@@ -54,6 +54,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op byteoffset : Nat -> Nat .
 	op declare : K K -> K [metadata "strict(1)"] .
 	op enumItem : Id Value -> Value .
+	op resolveReferences : -> K .
 	--- op t : Type -> Type .
 	--- op t : Type Set -> Type .
 	
@@ -75,6 +76,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- subsort List{KResult} < K .
 	op _bit::_ : Nat Nat -> Nat [assoc] .
 	op allocateIfAbsent : Type Id -> K .
+	op allocate : Type Id -> K .
 	--- ceq piece(N:Nat, Len:Nat) bit:: piece(N':Nat, Len':Nat)
 		--- = piece(N:Nat <<Nat Len':Nat |Nat N':Nat, Len:Nat +Nat Len':Nat)
 		--- if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
@@ -543,15 +545,15 @@ mod COMMON-PARAMETER-BINDING is
 		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
 		: KSentence [metadata "structural"] .
 		
-	mb [bind-one]: rule
-		< k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
-			=> allocateIfAbsent(T:Type, X:Id)
-			~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
-			~> bind(L:List{C}, P:List{Type}) ...</ k > 
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if isTypeCompatible(T:Type, T':Type)
-		if notBool hasArrayType(T:Type)
-		: KSentence [metadata "structural"] .
+	--- mb [bind-one]: rule
+		--- < k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+			--- => allocate(T:Type, X:Id)
+			--- ~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
+			--- ~> bind(L:List{C}, P:List{Type}) ...</ k > 
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- --- if isTypeCompatible(T:Type, T':Type)
+		--- if notBool hasArrayType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	--- mb [bind-one]: rule
 		--- < k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 			--- => allocateType(Loc:Nat, T:Type)
@@ -997,13 +999,53 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	--- op defineUsingOldDeclaration : Type Id K -> K .
 	--- allocateIfAbsent(T:Type, X:Id)
+	
+	op declareFunction : Id Type K -> K .
+	op declareExternalVariable : Id Type K -> K .
+	op declareInternalVariable : Id Type K -> K .
 	mb rule
 		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
-			=> allocateIfAbsent(T:Type, X:Id)
-			~> initialize(X:Id, T:Type, K:K)
+			=> declareFunction(X:Id, T:Type, K:K)
 		...</ k >
+		< currentFunction > File-Scope </ currentFunction >
 		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		andBool hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
+			=> declareExternalVariable(X:Id, T:Type, K:K)
+		...</ k >
+		< currentFunction > File-Scope </ currentFunction >
+		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		andBool notBool hasFunctionType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
+			=> declareInternalVariable(X:Id, T:Type, K:K)
+		...</ k >
+		< currentFunction > F:K </ currentFunction >
+		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		andBool notBool hasFunctionType(T:Type)
+		andBool F:K =/=Bool File-Scope
+		: KSentence [metadata "structural"] .
+		
+	--- external variables
+	--- mb rule
+		--- < k > declareExternalVariable(X:Id, T:Type, K:K)
+			--- =>
+		--- ...</ k >
+		--- < externalDefinitions >... ...</ externalDefinitions >
+		--- if K:K =/=Bool (.).K
+		--- : KSentence [metadata "structural"] .
+
+	--- mb rule
+		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
+			--- => allocateIfAbsent(T:Type, X:Id)
+			--- ~> initialize(X:Id, T:Type, K:K)
+		--- ...</ k >
+		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		--- andBool notBool hasExternType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > declare-aux(typedDeclaration((incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), X:Id), initializer(K:K))
 		...</ k >
@@ -1047,24 +1089,55 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- orBool hasFunctionType(T:Type) --- prototype
 		--- : KSentence .
 		
-	mb rule
-		< k > allocateIfAbsent(T:Type, X:Id)
-			=> allocateType(Loc:Nat, T:Type)
-			~> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, unqualifyType(T:Type))
-		...</ k >
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		< env > E:Map </ env >
-		if notBool $hasMapping(E:Map, X:Id)
-		andBool notBool hasStaticType(T:Type)
-		---andBool notBool hasExternType(T:Type)
-		: KSentence .
+	--- mb rule
+		--- < k > allocateIfAbsent(T:Type, X:Id) => allocate(T:Type, X:Id) ...</ k >
+		--- < env > E:Map </ env >
+		--- if notBool $hasMapping(E:Map, X:Id)
+		--- andBool notBool hasStaticType(T:Type)
+		--- : KSentence .
 		
 	--- fixme can use this opportunity to check types
 	mb rule
 		< k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
 		< env >... X:Id |-> ? ...</ env >
 		: KSentence .
+		
+	--- mb rule
+		--- < k > allocate(T:Type, X:Id)
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> addToLinkage(X:Id, T:Type)
+			--- ~> giveType(X:Id, unqualifyType(T:Type))
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if notBool hasStaticType(T:Type)
+		--- : KSentence .
+		
+	op addToLinkage : Id Type -> K .
+	op external : -> K .
+	op internal : -> K .
+	--- mb rule
+		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
+		--- < linkage > E:Env => E:Env[external / X:Id] </ linkage >
+		--- < currentFunction > File-Scope </ currentFunction >
+		--- if notBool hasStaticType(T:Type)
+		--- andBool notBool $hasMapping(E:Env, X:Id)
+		--- : KSentence .
+	--- mb rule
+		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
+		--- < linkage > E:Env => E:Env[internal / X:Id] </ linkage >
+		--- < currentFunction > File-Scope </ currentFunction >
+		--- if hasStaticType(T:Type)
+		--- andBool notBool $hasMapping(E:Env, X:Id)
+		--- : KSentence .
+	--- mb rule
+		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
+		--- < linkage > E:Env => E:Env[external / X:Id] </ linkage >
+		--- < currentFunction > F:K </ currentFunction >
+		--- if F:K =/=Bool File-Scope
+		--- andBool notBool hasStaticType(T:Type)
+		--- andBool notBool $hasMapping(E:Env, X:Id)
+		--- : KSentence .
 		
 
 	op addToGlobalEnv : Id Nat -> K .
@@ -1254,7 +1327,7 @@ mod C-SEMANTICS-MISC is
 	eq CabsLoc("cabs loc unknown", -10, -10, 0) = UnknownCabsLoc .
 	
 	mb rule
-		< k > Program(Name:String, L:List{C}, P:String) => listToK(L:List{C}) ...</ k >
+		< k > TranslationUnit(Name:String, L:List{C}, P:String) => listToK(L:List{C}) ...</ k >
 		< currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
 		< programText > M:Map => M:Map[P:String / Name:String] </ programText >
 		: KSentence .

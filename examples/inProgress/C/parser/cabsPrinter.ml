@@ -114,7 +114,7 @@ let toString s =
 	"\"" ^ String.escaped s ^ "\""
 	
 let rec cabsToString ((fname, defs) : file) (fileContents : string) = 
-		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "Program"
+		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "TranslationUnit"
 
 and printDefs defs =
 	printFlatList printDef defs

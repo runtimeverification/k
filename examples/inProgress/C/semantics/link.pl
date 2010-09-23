@@ -38,8 +38,10 @@ foreach my $program (@programs){
 
 print "op linked-program : -> K .\n";
 print "eq linked-program = ";
-print '(\'_::_).KHybridLabel(';
+print "('Program).KProperLabel(";
+print "('_::_).KHybridLabel(";
 printNested(@programNames);
+print ')';
 print ')';
 
 sub printNested {

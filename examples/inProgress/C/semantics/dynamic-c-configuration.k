@@ -19,13 +19,16 @@ kmod C-CONFIGURATION is
 			< busy > .Bag </ busy >
 			< currentTranslationUnit > "" </ currentTranslationUnit >
 			< programText > .Map </ programText >
+			< externalDefinitions > .Map </ externalDefinitions >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >
 					< control >
-						< local > 
+						< local >
+							< nestingDepth > 0 </ nestingDepth >
 							< structs > .Map </ structs >
 							< env > .Map </ env >
+							< linkage > .Map </ linkage >
 							< types > .Map </ types >
 							< currentObject > .List </ currentObject >
 							< currentSubObject > .List </ currentSubObject >

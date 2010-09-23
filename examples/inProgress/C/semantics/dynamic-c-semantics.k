@@ -105,6 +105,7 @@ kmod DYNAMIC-C-SEMANTICS is
 						< k > listToK(P:Program)
 							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
 							--- ~> incomingArguments(L:List{K})
+							~> resolveReferences
 							~> callMain(lengthList{K}(L:List{K}), incomingArgumentArray)
 						</ k >
 							--- Call(Identifier("main"), (Nil

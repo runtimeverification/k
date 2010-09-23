@@ -172,7 +172,9 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		--- if hasFunctionType(T:Type)
 		--- : KSentence [metadata "computational rule"] .
 	mb [function-application-pre]: rule
-		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) => application(readFunction(Loc:Nat), L:List{C}) ...</ k >
+		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) 
+			=> application(readFunction(Loc:Nat), L:List{C}) 
+		...</ k >
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "computational rule"] .	
 
@@ -189,6 +191,12 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		< gstructs > GS:Map </ gstructs > < structs > ? => GS:Map </ structs >
 		: KSentence [metadata "structural"] .
 		
+	op resetNestingDepth : -> K .
+	mb [push-block]: rule
+		< k > resetNestingDepth => (.).K ...</ k > 
+		< nestingDepth > ? => 1 </ nestingDepth >
+		: KSentence [metadata "structural"] .
+
 	mb [function-application]: rule
 		(< control >
 			< k > application(functionObject(X:Id, functionType(R:Type, P:List{Type}), B:K), L:List{C}) ~> K:K </ k >
@@ -196,7 +204,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		</ control >
 		=>
 		< control >
-			< k > sequencePoint ~> populateFromGlobal ~> bind(L:List{C}, P:List{Type}) ~> B:K ~> Return(NothingExpression) </ k >
+			< k > sequencePoint ~> populateFromGlobal ~> resetNestingDepth ~> bind(L:List{C}, P:List{Type}) ~> B:K ~> Return(NothingExpression) </ k >
 			< currentFunction > X:Id </ currentFunction >
 		...</ control >)
 		< callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > </ stackFrame >) ...</ callStack >

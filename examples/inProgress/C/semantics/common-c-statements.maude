@@ -233,7 +233,10 @@ mod COMMON-SEMANTICS-BLOCKS is
 	
 	mb [push-block]: rule
 		< k > pushBlock => (.).K ...</ k > 
-		< local > C:Bag </ local >
+		< local >
+			C:Bag
+			< nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
+		</ local >
 		< blockStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ blockStack >
 		: KSentence [metadata "structural"] .
 		

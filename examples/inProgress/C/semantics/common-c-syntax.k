@@ -49,6 +49,7 @@ kmod COMMON-C-SYNTAX is
 	
 	--- Additional sorts
 	sort Program
+	sort TranslationUnit
 	sort IntConstant
 	sort InitFragment
 	sort FieldName
@@ -97,6 +98,7 @@ kmod COMMON-C-SYNTAX is
 	subsort InitWhat < C
 	subsort Attribute < C
 	subsort Program < C
+	subsort TranslationUnit < C
 	subsort IntConstant < C
 	subsort InitFragment < C
 	subsort FieldName < C
@@ -308,7 +310,9 @@ and enum_item = string * expression * cabsloc
 (* the string is a file name, and then the list of toplevel forms *)
 and file = string * definition list
 ***)
-	op Program : String List{C} String -> Program
+	--- name, code, source
+	op TranslationUnit : String List{C} String -> TranslationUnit --- new
+	op Program : List{C} -> Program --- new
 
 ***(
 	(* A block contains a list of local label declarations ( GCC's ({ __label__ 

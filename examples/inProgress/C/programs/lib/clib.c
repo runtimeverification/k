@@ -4,7 +4,7 @@
 #include <stdlib.h>
 typedef unsigned long int size_t;
 // nice public domain implementations at http://en.wikibooks.org/wiki/C_Programming/Strings
-
+static int x = 32;
 int getc(FILE *stream){
 	return fgetc(stream);
 }

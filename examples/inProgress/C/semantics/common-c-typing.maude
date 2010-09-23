@@ -701,7 +701,7 @@ mod COMMON-C-TYPING is
 	ceq hasExternType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
-	eq hasStaticType(qualifiedType(T:Type, K:K)) = if (K:K ==Bool Static) then (true) else (hasExternType(T:Type)) fi .
+	eq hasStaticType(qualifiedType(T:Type, K:K)) = if (K:K ==Bool Static) then (true) else (hasStaticType(T:Type)) fi .
 	ceq hasStaticType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
@@ -710,8 +710,10 @@ mod COMMON-C-TYPING is
 		if getKLabel(T:Type) =/=Bool 'bitfieldType .	
 		
 	eq hasFunctionType(functionType(?, ?)) = true .
+	eq hasFunctionType(qualifiedType(T:Type, ?)) = hasFunctionType(T:Type) .
 	ceq hasFunctionType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'functionType .
+		if getKLabel(T:Type) =/=Bool 'functionType
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	eq hasFunctionPointerType(pointerType(functionType(?, ?))) = true .
 	ceq hasFunctionPointerType(T:Type) = false
