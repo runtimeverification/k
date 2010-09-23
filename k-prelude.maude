@@ -308,11 +308,13 @@ mod K-RULES is
   including K-SENTENCE .
   including PL-BOOL .
   including K-TECHNIQUE .
+  ops rule_ : KLabel -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : List{K} -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Map -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : List -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Bag -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Set -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_if_ : KLabel Bool -> [KSentence] [prec 126 format(b o b o d)] .
   ops rule_if_ : List{K} Bool -> [KSentence] [prec 126 format(b o b o d)] .
   ops rule_if_ : Map Bool -> [KSentence] [prec 126 format(b o b o d)] .
   ops rule_if_ : List Bool -> [KSentence] [prec 126 format(b o b o d)] .
