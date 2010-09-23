@@ -96,13 +96,13 @@ kmod DYNAMIC-C-SEMANTICS is
 	
 	
 	--- typedDeclaration(void, ?)
-	eq eval(P:Program) = eval(P:Program, .List{K}, "")
-	eq eval(P:Program, L:List{K}, Input:String) = 
+	eq eval(K:K) = eval(K:K, .List{K}, "")
+	eq eval(Program(P:List{C}), L:List{K}, Input:String) = 
 		< T >
 			< threads >
 				< thread >
 					< control >
-						< k > listToK(P:Program)
+						< k > listToK(P:List{C})
 							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
 							--- ~> incomingArguments(L:List{K})
 							~> resolveReferences

@@ -1,3 +1,4 @@
+#include <stdio.h>
 int z;
 static int w = 13;
 static int r = 15;

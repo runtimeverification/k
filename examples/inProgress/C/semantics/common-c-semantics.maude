@@ -1029,13 +1029,76 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool F:K =/=Bool File-Scope
 		: KSentence [metadata "structural"] .
 		
+	--- op declareAndDefineExternalVariable : Id Type K -> K .
 	--- external variables
+	--- nice to have MapList
+	
+	mb rule
+		< k > declareFunction(X:Id, T:Type, K:K)
+			=> declareWithLinkage(X:Id, T:Type, K:K, external)
+		...</ k >
+		if notBool hasStaticType(T:Type)
+		: KSentence [metadata "structural"] .
+	
+	op declareWithLinkage : Id Type K K -> K . --- id, type, possible init, linkage (external, internal, noLinkage)
+	mb rule
+		< k > declareExternalVariable(X:Id, T:Type, K:K)
+			=> declareWithLinkage(X:Id, T:Type, K:K, external)
+		...</ k >
+		if notBool hasStaticType(T:Type)
+		andBool notBool hasExternType(T:Type)
+		--- andBool notBool $hasMapping(Ext:Map, X:Id)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareExternalVariable(X:Id, T:Type, K:K)
+			=> declareWithLinkage(X:Id, T:Type, K:K, external)
+		...</ k >
+		< linkage > Linkage:Map </ linkage >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if notBool hasStaticType(T:Type)
+		andBool hasExternType(T:Type)
+		andBool notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K))
+		: KSentence [metadata "structural"] .
+		
+	op declareOnly : Id Type K -> K .
+	op declareAndDefine : Id Type K K -> K .
+	mb rule
+		< k > declareWithLinkage(X:Id, T:Type, (.).K, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
+		if K:K =/=Bool (.).K
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > declareAndDefine(X:Id, T:Type, K:K, external)
+			=> (.).K
+		...</ k >
+		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
+		< externalDefinitions > Ext:Map => Ext:Map[K:K / X:Id] </ externalDefinitions >
+		< linkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ linkage >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if notBool $hasMapping(Ext:Map, X:Id)
+		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external)
+		: KSentence [metadata "structural"] .
+		
 	--- mb rule
-		--- < k > declareExternalVariable(X:Id, T:Type, K:K)
-			--- =>
+		--- < k > declareWithLinkage(X:Id, T:Type, (.).K, L:K)
+			
 		--- ...</ k >
-		--- < externalDefinitions >... ...</ externalDefinitions >
-		--- if K:K =/=Bool (.).K
+		--- --- < externalDefinitions > Ext:Map => Ext:Map[K:K / pair(X:Id, Tu:K)] </ externalDefinitions >
+		--- --- < linkage > Linkage:Map => Linkage:Map[K:K / pair(X:Id, Tu:K)] </ linkage > 
+		--- --- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- if notBool hasStaticType(T:Type)
+		--- andBool notBool hasExternType(T:Type)
+		--- andBool notBool $hasMapping(Ext:Map, X:Id)
+		--- : KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < k > declareAndDefineExternalVariable(X:Id, T:Type, K:K)
+			--- => 
+		--- ...</ k >
+
 		--- : KSentence [metadata "structural"] .
 
 	--- mb rule
@@ -1116,6 +1179,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	op addToLinkage : Id Type -> K .
 	op external : -> K .
 	op internal : -> K .
+	op noLinkage : -> K .
 	--- mb rule
 		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
 		--- < linkage > E:Env => E:Env[external / X:Id] </ linkage >
@@ -1143,25 +1207,25 @@ mod COMMON-GLOBAL-DECLARATION is
 	op addToGlobalEnv : Id Nat -> K .
 	op addToLocalEnv : Id Nat -> K .
 	
-	mb rule
-		< k > addToEnv(X:Id, Loc:Nat) => addToGlobalEnv(X:Id, Loc:Nat) ...</ k >
-		< currentFunction > File-Scope </ currentFunction >
-		: KSentence .
-	mb rule
-		< k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
-		< currentFunction > F:K </ currentFunction >
-		if F:K =/=Bool File-Scope
-		: KSentence .
+	--- mb rule
+		--- < k > addToEnv(X:Id, Loc:Nat) => addToGlobalEnv(X:Id, Loc:Nat) ...</ k >
+		--- < currentFunction > File-Scope </ currentFunction >
+		--- : KSentence .
+	--- mb rule
+		--- < k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
+		--- < currentFunction > F:K </ currentFunction >
+		--- if F:K =/=Bool File-Scope
+		--- : KSentence .
 		
-	mb rule
-		< k > addToGlobalEnv(X:Id, Loc:Nat) => . ...</ k >
-		< genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
-		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		: KSentence .
-	mb rule
-		< k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
-		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		: KSentence .
+	--- mb rule
+		--- < k > addToGlobalEnv(X:Id, Loc:Nat) => . ...</ k >
+		--- < genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
+		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		--- : KSentence .
+	--- mb rule
+		--- < k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
+		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		--- : KSentence .
 		
 	--- mb rule
 		--- < k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
@@ -1186,10 +1250,16 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- FIXME check prototypes
 	mb [function-definition]: rule
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
-			=> allocateIfAbsent(T:Type, X:Id)
-			~> defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)
+			=> declareFunction(X:Id, T:Type, (X:Id := tv(functionObject(X:Id, T:Type, Block:K), T:Type) ~> discard))
 		...</ k >
 		: KSentence [metadata "structural"] .
+	--- mb [function-definition]: rule
+		--- < k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
+			--- => allocateIfAbsent(T:Type, X:Id)
+			--- ~> defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)
+		--- ...</ k >
+		--- : KSentence [metadata "structural"] .
+		
 	mb [function-definition]: rule
 		< k > defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)
 			=> store tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
@@ -1320,17 +1390,31 @@ mod C-SEMANTICS-MISC is
 
 	eq listToK(K:K) = klistToK(getList{K}(K:K)) .
 	eq klistToK((K:K,, L:List{K})) = K:K ~> klistToK(L:List{K}) .
-	eq klistToK((K:K)) = K:K .
-	eq klistToK(.) = . .
+	--- eq klistToK((K:K)) = K:K .
+	--- eq klistToK(.) = . .
 	eq klistToK(.List{K}) = . .
 	
 	eq CabsLoc("cabs loc unknown", -10, -10, 0) = UnknownCabsLoc .
 	
+	op canonicalizeTranslationUnitVariables : -> K .
 	mb rule
-		< k > TranslationUnit(Name:String, L:List{C}, P:String) => listToK(L:List{C}) ...</ k >
+		< k > TranslationUnit(Name:String, L:List{C}, P:String) 
+			=> listToK(L:List{C})
+			--- ~> canonicalizeTranslationUnitVariables
+		...</ k >
 		< currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
 		< programText > M:Map => M:Map[P:String / Name:String] </ programText >
 		: KSentence .
+	
+	--- mb rule
+		--- < k > resolveReferences
+			--- => 
+		--- ...</ k >
+		--- < currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
+		--- < declarations >... X:Id ...</ declarations >
+		--- < programText > M:Map => M:Map[P:String / Name:String] </ programText >
+		--- : KSentence .	
+	
 
 	--- TODO nicely handle loc range instead of ignoring L2
 	mb rule
@@ -1402,6 +1486,6 @@ mod COMMON-C-SEMANTICS is
 	including COMMON-C-STANDARD-LIBRARY .
 	---including COMMON-LOCAL-DECLARATION .
 	
-	op eval : Program -> Bag .
-	op eval : Program List{K} String -> Bag .
+	op eval : K -> Bag .
+	op eval : K List{K} String -> Bag .
 endm

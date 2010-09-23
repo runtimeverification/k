@@ -184,12 +184,12 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 	--- --- needs to be done before call
 	op populateFromGlobal : -> K .
 	--- fixme: this must be a rule because of the rules associated with declaring local and bound variables
-	mb [populateFromGlobal]: rule
-		< k > populateFromGlobal => (.).K ...</ k >
-		< genv > G:Map </ genv > < env > ? => G:Map </ env >
-		< gtypes > GT:Map </ gtypes > < types > ? => GT:Map </ types >
-		< gstructs > GS:Map </ gstructs > < structs > ? => GS:Map </ structs >
-		: KSentence [metadata "structural"] .
+	--- mb [populateFromGlobal]: rule
+		--- < k > populateFromGlobal => (.).K ...</ k >
+		--- < genv > G:Map </ genv > < env > ? => G:Map </ env >
+		--- < gtypes > GT:Map </ gtypes > < types > ? => GT:Map </ types >
+		--- < gstructs > GS:Map </ gstructs > < structs > ? => GS:Map </ structs >
+		--- : KSentence [metadata "structural"] .
 		
 	op resetNestingDepth : -> K .
 	mb [push-block]: rule
@@ -197,18 +197,18 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		< nestingDepth > ? => 1 </ nestingDepth >
 		: KSentence [metadata "structural"] .
 
-	mb [function-application]: rule
-		(< control >
-			< k > application(functionObject(X:Id, functionType(R:Type, P:List{Type}), B:K), L:List{C}) ~> K:K </ k >
-		C:Bag
-		</ control >
-		=>
-		< control >
-			< k > sequencePoint ~> populateFromGlobal ~> resetNestingDepth ~> bind(L:List{C}, P:List{Type}) ~> B:K ~> Return(NothingExpression) </ k >
-			< currentFunction > X:Id </ currentFunction >
-		...</ control >)
-		< callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > </ stackFrame >) ...</ callStack >
-		: KSentence [metadata "computational rule"] . --- nondet
+	--- mb [function-application]: rule
+		--- (< control >
+			--- < k > application(functionObject(X:Id, functionType(R:Type, P:List{Type}), B:K), L:List{C}) ~> K:K </ k >
+		--- C:Bag
+		--- </ control >
+		--- =>
+		--- < control >
+			--- < k > sequencePoint ~> populateFromGlobal ~> resetNestingDepth ~> bind(L:List{C}, P:List{Type}) ~> B:K ~> Return(NothingExpression) </ k >
+			--- < currentFunction > X:Id </ currentFunction >
+		--- ...</ control >)
+		--- < callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > </ stackFrame >) ...</ callStack >
+		--- : KSentence [metadata "computational rule"] . --- nondet
 endm
 
 mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is

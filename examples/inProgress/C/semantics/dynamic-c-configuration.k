@@ -20,6 +20,8 @@ kmod C-CONFIGURATION is
 			< currentTranslationUnit > "" </ currentTranslationUnit >
 			< programText > .Map </ programText >
 			< externalDefinitions > .Map </ externalDefinitions >
+			< internalDefinitions > .Map </ internalDefinitions >
+			< declarations > .Set </ declarations >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >

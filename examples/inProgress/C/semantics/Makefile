@@ -60,6 +60,6 @@ match: semantics
 semantics: c-total.maude
 
 clean:
-	rm -f program-*-gen.maude program-*-compiled.maude program-*-compiled.maude.tmp c-syntax.maude c-compiled.maude c.maude test.maude programs-gen.maude test-benchmark.maude kcompile_* quoted.maude c-total.maude
+	rm -f dynamic-c-semantics.maude dynamic-c-configuration.maude common-c-syntax.maude program-*-gen.maude program-*-compiled.maude program-*-compiled.maude.tmp c-syntax.maude c-compiled.maude c.maude test.maude programs-gen.maude test-benchmark.maude kcompile_* quoted.maude c-total.maude
 
 force: ;
