@@ -5,9 +5,10 @@ kmod KERNELC-SYNTAX is
                | Exp == Exp [prec 37 strict] | Exp != Exp [prec 37 strict] 
                | Exp <= Exp [prec 37 strict] 
                | `! Exp | Exp && Exp | Exp `|| Exp | Exp `? Exp : Exp [prec 39] 
-               | Exp = Exp [strict(2) prec 40 gather (e E)] | * Exp [prec 25 strict] 
-               | malloc ( Exp ) [strict] | printf ( "%d;" , Exp ) [strict]
-               | null | free ( Exp ) [strict]
+               | Exp = Exp [strict(2) prec 40 gather (e E)] | printf ( "%d;" , Exp ) [strict]
+
+--- malloc additions
+  syntax Exp ::= null | free ( Exp ) [strict] | * Exp [prec 25 strict] | malloc ( Exp ) [strict]
 
   syntax Stmt ::= ; | Exp ; [prec 45 strict] | { } | { StmtList } | if ( Exp ) Stmt [prec 47]
                 | if ( Exp ) Stmt else Stmt [prec 46 strict(1)]
