@@ -22,6 +22,8 @@ kmod C-CONFIGURATION is
 			< externalDefinitions > .Map </ externalDefinitions >
 			< internalDefinitions > .Map </ internalDefinitions >
 			< declarations > .Set </ declarations >
+			< preLinkage > .Map </ preLinkage >
+			< linkage > .Map </ linkage >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >
@@ -30,7 +32,6 @@ kmod C-CONFIGURATION is
 							< nestingDepth > 0 </ nestingDepth >
 							< structs > .Map </ structs >
 							< env > .Map </ env >
-							< linkage > .Map </ linkage >
 							< types > .Map </ types >
 							< currentObject > .List </ currentObject >
 							< currentSubObject > .List </ currentSubObject >

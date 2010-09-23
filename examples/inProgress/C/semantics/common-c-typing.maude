@@ -21,8 +21,8 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		--- --- < types >... [.Map => X:Typedef-Name |-> T:Type] ...</ types >
 		--- --- < typedefs >... [.Map => X:Typedef-Name |-> T:Type] ...</ typedefs >
 		--- : KSentence [metadata "structural"] .
-	op giveGlobalType : Id Type -> K .
-	op giveLocalType : Id Type -> K .
+	op giveGlobalType : K Type -> K .
+	op giveLocalType : K Type -> K .
 	
 	--- FIXME these are here until I decide how to handle qualified types
 	eq qualifiedType(T:Type, Volatile) = T:Type .
@@ -39,19 +39,19 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		< currentFunction > Fun:Id </ currentFunction >
 		if notBool hasStaticType(T:Type)
 		: KSentence [metadata "structural"] .
-	mb rule
-		< k > giveType(X:Id, (qualifiedType(T:Type, Static) => T:Type)) ...</ k >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > giveType(X:Id, (qualifiedType(T:Type, Static) => T:Type)) ...</ k >
+		--- : KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > giveGlobalType(X:Id, T:Type) => (.).K ...</ k >
-		< types > M:Map => M:Map[T:Type / X:Id] </ types >
-		< gtypes > M':Map => M':Map[T:Type / X:Id] </ gtypes >
+		< k > giveGlobalType(K:K, T:Type) => (.).K ...</ k >
+		< types > M:Map => M:Map[T:Type / K:K] </ types >
+		< gtypes > M':Map => M':Map[T:Type / K:K] </ gtypes >
 		: KSentence [metadata "structural"] .
-	mb rule
-		< k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
-		< types > M:Map => M:Map[T:Type / X:Id] </ types >
-		: KSentence [metadata "structural"] .		
+	--- mb rule
+		--- < k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
+		--- < types > M:Map => M:Map[T:Type / X:Id] </ types >
+		--- : KSentence [metadata "structural"] .		
 		
 	--- mb [global-declaration] : rule
 		--- < k > ['Global(definedType(T:Type, X:K)) => giveGlobalType(T:Type, X:K)] ...</ k >

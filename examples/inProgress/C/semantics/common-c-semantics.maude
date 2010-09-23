@@ -65,7 +65,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 		if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
 	eq _bit::_(piece(0, 0), N:Nat) = N:Nat .
 	eq piece(piece(N:Nat, Len:Nat), Len:Nat) = piece(N:Nat, Len:Nat) .
-	
+	op declarationObject : Type K -> K .
 	
 	op extractBitsFromList : K Nat Nat -> K [metadata "strict(1)"] . --- data, offset, size in bits
 	op typedef : Id -> Id .
@@ -76,7 +76,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- subsort List{KResult} < K .
 	op _bit::_ : Nat Nat -> Nat [assoc] .
 	op allocateIfAbsent : Type Id -> K .
-	op allocate : Type Id -> K .
+	op allocate : Type K -> K .
 	--- ceq piece(N:Nat, Len:Nat) bit:: piece(N':Nat, Len':Nat)
 		--- = piece(N:Nat <<Nat Len':Nat |Nat N':Nat, Len:Nat +Nat Len':Nat)
 		--- if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
@@ -94,7 +94,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op allocateType : Nat Type -> K .
 	op giveType : K Type -> K .
-	op addToEnv : Id Nat -> K .
+	op addToEnv : K Nat -> K .
 	
 	op read : K K -> K [metadata "strict(2)"] . --- location, type
 	op write : K K -> K [metadata "strict(2)"] . --- location, value
@@ -1053,7 +1053,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > declareExternalVariable(X:Id, T:Type, K:K)
 			=> declareWithLinkage(X:Id, unqualifyType(T:Type), K:K, external)
 		...</ k >
-		< linkage > Linkage:Map </ linkage >
+		< preLinkage > Linkage:Map </ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool hasStaticType(T:Type)
 		andBool hasExternType(T:Type)
@@ -1063,7 +1063,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > declareExternalVariable(X:Id, T:Type, K:K)
 			=> declareWithLinkage(X:Id, unqualifyType(T:Type), K:K, Linkage:Map(kpair(X:Id, Tu:K)))
 		...</ k >
-		< linkage > Linkage:Map </ linkage >
+		< preLinkage > Linkage:Map </ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool hasStaticType(T:Type)
 		andBool hasExternType(T:Type)
@@ -1092,19 +1092,20 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> (.).K
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		< linkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ linkage >
+		< preLinkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
 		orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
 		: KSentence [metadata "structural"] .
+	
 	
 	mb rule
 		< k > declareAndDefine(X:Id, T:Type, K:K, external)
 			=> (.).K
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		< externalDefinitions > Def:Map => Def:Map[K:K / X:Id] </ externalDefinitions >
-		< linkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ linkage >
+		< externalDefinitions > Def:Map => Def:Map[declarationObject(T:Type, K:K) / X:Id] </ externalDefinitions >
+		< preLinkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Def:Map, X:Id)
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external)
@@ -1115,8 +1116,8 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> (.).K
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		< internalDefinitions > Def:Map => Def:Map[K:K / kpair(X:Id, Tu:K)] </ internalDefinitions >
-		< linkage > Linkage:Map => Linkage:Map[internal / kpair(X:Id, Tu:K)] </ linkage >
+		< internalDefinitions > Def:Map => Def:Map[declarationObject(T:Type, K:K) / kpair(X:Id, Tu:K)] </ internalDefinitions >
+		< preLinkage > Linkage:Map => Linkage:Map[internal / kpair(X:Id, Tu:K)] </ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Def:Map, kpair(X:Id, Tu:K))
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal)
@@ -1198,23 +1199,29 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- if notBool $hasMapping(E:Map, X:Id)
 		--- andBool notBool hasStaticType(T:Type)
 		--- : KSentence .
+	--- mb rule
+		--- < k > allocateIfAbsent(T:Type, X:Id) => allocate(T:Type, X:Id) ...</ k >
+		--- < env > E:Map </ env >
+		--- if notBool $hasMapping(E:Map, X:Id)
+		--- andBool notBool hasStaticType(T:Type)
+		--- : KSentence .
 		
 	--- fixme can use this opportunity to check types
-	mb rule
-		< k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
-		< env >... X:Id |-> ? ...</ env >
-		: KSentence .
-		
 	--- mb rule
-		--- < k > allocate(T:Type, X:Id)
-			--- => allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> addToLinkage(X:Id, T:Type)
-			--- ~> giveType(X:Id, unqualifyType(T:Type))
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if notBool hasStaticType(T:Type)
+		--- < k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
+		--- < env >... X:Id |-> ? ...</ env >
 		--- : KSentence .
+		
+	mb rule
+		< k > allocate(T:Type, K:K)
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(K:K, Loc:Nat)
+			~> giveType(K:K, T:Type)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< env > E:Map </ env >
+		if notBool $hasMapping(E:Map, K:K)
+		: KSentence .
 		
 	op addToLinkage : Id Type -> K .
 	op external : -> K .
@@ -1244,13 +1251,13 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- : KSentence .
 		
 
-	op addToGlobalEnv : Id Nat -> K .
-	op addToLocalEnv : Id Nat -> K .
+	op addToGlobalEnv : K Nat -> K .
+	op addToLocalEnv : K Nat -> K .
 	
-	--- mb rule
-		--- < k > addToEnv(X:Id, Loc:Nat) => addToGlobalEnv(X:Id, Loc:Nat) ...</ k >
-		--- < currentFunction > File-Scope </ currentFunction >
-		--- : KSentence .
+	mb rule
+		< k > addToEnv(K:K, Loc:Nat) => addToGlobalEnv(K:K, Loc:Nat) ...</ k >
+		< currentFunction > File-Scope </ currentFunction >
+		: KSentence .
 	--- mb rule
 		--- < k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
 		--- < currentFunction > F:K </ currentFunction >
@@ -1262,6 +1269,11 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
 		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
 		--- : KSentence .
+	mb rule
+		< k > addToGlobalEnv(K:K, Loc:Nat) => . ...</ k >
+		< genv > GE:Map => GE:Map[Loc:Nat / K:K] </ genv >
+		< env > E:Map => E:Map[Loc:Nat / K:K] </ env >
+		: KSentence .
 	--- mb rule
 		--- < k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
 		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
@@ -1446,12 +1458,30 @@ mod C-SEMANTICS-MISC is
 		< programText > M:Map => M:Map[P:String / Name:String] </ programText >
 		: KSentence .
 	
+	--- op resolve : Id -> K .
 	--- mb rule
-		--- < k > (. => ) ~> resolveReferences ...</ k >
-		--- < currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
-		--- < linkage >... kpair(X:Id, ) |->  ...</ linkage >
-		--- < declarations >... SetItem(X:Id) ...</ declarations >
+		--- < k > (. => resolve(X:Id)) ~> resolveReferences ...</ k >
+		--- --- < preLinkage >... kpair(X:Id, ) |->  ...</ preLinkage >
+		--- < declarations >... SetItem(X:Id) => (.).Set ...</ declarations >
+		--- : KSentence .
+	--- mb rule
+		--- < k > resolve(X:Id) ...</ k >
+		--- < externalDefinitions > Ext:Map </ externalDefinitions >
+		--- < internalDefinitions > Int:Map </ internalDefinitions >
 		--- : KSentence .	
+	mb rule
+		< k > (. 
+				=> allocate(T:Type, X:Id)
+				~> initialize(X:Id, T:Type, K:K)
+			) 
+			~> resolveReferences
+		...</ k >
+		< externalDefinitions >... (X:Id |-> declarationObject(T:Type, K:K) => .) ...</ externalDefinitions >
+		: KSentence .
+		
+		
+				--- => allocateIfAbsent(T:Type, X:Id)
+			--- ~> initialize(X:Id, T:Type, K:K)
 	
 
 	--- TODO nicely handle loc range instead of ignoring L2
