@@ -1051,13 +1051,30 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareExternalVariable(X:Id, T:Type, K:K)
-			=> declareWithLinkage(X:Id, T:Type, K:K, external)
+			=> declareWithLinkage(X:Id, unqualifyType(T:Type), K:K, external)
 		...</ k >
 		< linkage > Linkage:Map </ linkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool hasStaticType(T:Type)
 		andBool hasExternType(T:Type)
 		andBool notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K))
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareExternalVariable(X:Id, T:Type, K:K)
+			=> declareWithLinkage(X:Id, unqualifyType(T:Type), K:K, Linkage:Map(kpair(X:Id, Tu:K)))
+		...</ k >
+		< linkage > Linkage:Map </ linkage >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if notBool hasStaticType(T:Type)
+		andBool hasExternType(T:Type)
+		andBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K))
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareExternalVariable(X:Id, T:Type, K:K)
+			=> declareWithLinkage(X:Id, unqualifyType(T:Type), K:K, internal)
+		...</ k >
+		if hasStaticType(T:Type)
+		andBool notBool hasExternType(T:Type)
 		: KSentence [metadata "structural"] .
 		
 	op declareOnly : Id Type K -> K .
@@ -1069,17 +1086,40 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
 		if K:K =/=Bool (.).K
 		: KSentence [metadata "structural"] .
-		
+	
+	mb rule
+		< k > declareOnly(X:Id, T:Type, external)
+			=> (.).K
+		...</ k >
+		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
+		< linkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ linkage >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
+		orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
+		: KSentence [metadata "structural"] .
+	
 	mb rule
 		< k > declareAndDefine(X:Id, T:Type, K:K, external)
 			=> (.).K
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		< externalDefinitions > Ext:Map => Ext:Map[K:K / X:Id] </ externalDefinitions >
+		< externalDefinitions > Def:Map => Def:Map[K:K / X:Id] </ externalDefinitions >
 		< linkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ linkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		if notBool $hasMapping(Ext:Map, X:Id)
+		if notBool $hasMapping(Def:Map, X:Id)
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external)
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > declareAndDefine(X:Id, T:Type, K:K, internal)
+			=> (.).K
+		...</ k >
+		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
+		< internalDefinitions > Def:Map => Def:Map[K:K / kpair(X:Id, Tu:K)] </ internalDefinitions >
+		< linkage > Linkage:Map => Linkage:Map[internal / kpair(X:Id, Tu:K)] </ linkage >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if notBool $hasMapping(Def:Map, kpair(X:Id, Tu:K))
+		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal)
 		: KSentence [metadata "structural"] .
 		
 	--- mb rule
@@ -1407,12 +1447,10 @@ mod C-SEMANTICS-MISC is
 		: KSentence .
 	
 	--- mb rule
-		--- < k > resolveReferences
-			--- => 
-		--- ...</ k >
+		--- < k > (. => ) ~> resolveReferences ...</ k >
 		--- < currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
-		--- < declarations >... X:Id ...</ declarations >
-		--- < programText > M:Map => M:Map[P:String / Name:String] </ programText >
+		--- < linkage >... kpair(X:Id, ) |->  ...</ linkage >
+		--- < declarations >... SetItem(X:Id) ...</ declarations >
 		--- : KSentence .	
 	
 

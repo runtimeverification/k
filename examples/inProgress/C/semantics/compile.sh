@@ -68,7 +68,8 @@ firstInputFile=$1
 shift 1
 getoptsFunc "$@"
 #echo $(($# + 1)) 
-shift $(($OPTIND - 1))
+#echo "$@"
+#shift $(($OPTIND - 1))
 arguments="$@ $firstInputFile"
 
 # if [ $(($# + 1)) -gt 1 ] && [ "$oval" ] && [ "$compileOnlyFlag" ]; then 
@@ -110,9 +111,10 @@ do
 
 	maudeInput=$inputDirectory/$baseName.gen.maude
 	
-	if [ ! "$oflag" ]; then
-		oval="$baseName.o"
-	fi
+	# if [ ! "$oflag" ]; then
+		# oval="$baseName.o"
+	# fi
+	localOval="$baseName.o"
 	
 	if [ "$gflag" ]; then
 		garg="-g $gval"
@@ -126,9 +128,14 @@ do
 		die "compilation failed" 3
 	fi
 	
-	mv program-$baseName-compiled.maude $oval
-	compiledPrograms="$compiledPrograms $oval" 
+	mv program-$baseName-compiled.maude $localOval
+	compiledPrograms="$compiledPrograms $localOval"
 	set -o errexit
+	if [ "$compileOnlyFlag" ]; then
+		if [ "$oflag" ]; then
+			mv $localOval $oval
+		fi
+	fi
 done
 
 #echo $compiledPrograms
