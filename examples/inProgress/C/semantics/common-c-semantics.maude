@@ -34,6 +34,7 @@ endm
 mod COMMON-SEMANTIC-SYNTAX is
 	including INCOMING-MODULES .
 	op List : BagItem -> ListItem .
+	op Map : Map -> K .
 	op piece : Nat Nat -> Nat .
 	op trueUnknown : -> Nat [ctor] .
 	op unknown : Nat -> Nat [ctor] .
@@ -66,6 +67,11 @@ mod COMMON-SEMANTIC-SYNTAX is
 	eq _bit::_(piece(0, 0), N:Nat) = N:Nat .
 	eq piece(piece(N:Nat, Len:Nat), Len:Nat) = piece(N:Nat, Len:Nat) .
 	op declarationObject : Type K -> K .
+	
+	
+	op external : -> K .
+	op internal : -> K .
+	op noLinkage : -> K .
 	
 	op extractBitsFromList : K Nat Nat -> K [metadata "strict(1)"] . --- data, offset, size in bits
 	op typedef : Id -> Id .
@@ -1087,12 +1093,14 @@ mod COMMON-GLOBAL-DECLARATION is
 		if K:K =/=Bool (.).K
 		: KSentence [metadata "structural"] .
 	
+	---  
 	mb rule
 		< k > declareOnly(X:Id, T:Type, external)
 			=> (.).K
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		< preLinkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ preLinkage >
+		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[external / X:Id])) ...</ preLinkage >
+		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
 		orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
@@ -1105,7 +1113,9 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
 		< externalDefinitions > Def:Map => Def:Map[declarationObject(T:Type, K:K) / X:Id] </ externalDefinitions >
-		< preLinkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ preLinkage >
+		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[external / X:Id])) ...</ preLinkage >
+		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
+		--- < preLinkage > Linkage:Map => Linkage:Map[external / kpair(X:Id, Tu:K)] </ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Def:Map, X:Id)
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external)
@@ -1116,8 +1126,10 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> (.).K
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		< internalDefinitions > Def:Map => Def:Map[declarationObject(T:Type, K:K) / kpair(X:Id, Tu:K)] </ internalDefinitions >
-		< preLinkage > Linkage:Map => Linkage:Map[internal / kpair(X:Id, Tu:K)] </ preLinkage >
+		< internalDefinitions >... Tu:K |-> Map((Def:Map => Def:Map[declarationObject(T:Type, K:K) / X:Id])) ...</ internalDefinitions >
+		--- < preLinkage > Linkage:Map => Linkage:Map[internal / kpair(X:Id, Tu:K)] </ preLinkage >
+		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[internal / X:Id])) ...</ preLinkage >
+		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Def:Map, kpair(X:Id, Tu:K))
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal)
@@ -1211,22 +1223,19 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- < k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
 		--- < env >... X:Id |-> ? ...</ env >
 		--- : KSentence .
-		
-	mb rule
-		< k > allocate(T:Type, K:K)
-			=> allocateType(Loc:Nat, T:Type)
-			~> addToEnv(K:K, Loc:Nat)
-			~> giveType(K:K, T:Type)
-		...</ k >
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		< env > E:Map </ env >
-		if notBool $hasMapping(E:Map, K:K)
-		: KSentence .
+	
+	--- mb rule
+		--- < k > allocate(T:Type, K:K)
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(K:K, Loc:Nat)
+			--- ~> giveType(K:K, T:Type)
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- < env > E:Map </ env >
+		--- if notBool $hasMapping(E:Map, K:K)
+		--- : KSentence .
 		
 	op addToLinkage : Id Type -> K .
-	op external : -> K .
-	op internal : -> K .
-	op noLinkage : -> K .
 	--- mb rule
 		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
 		--- < linkage > E:Env => E:Env[external / X:Id] </ linkage >
@@ -1254,30 +1263,31 @@ mod COMMON-GLOBAL-DECLARATION is
 	op addToGlobalEnv : K Nat -> K .
 	op addToLocalEnv : K Nat -> K .
 	
-	--- mb rule
-		--- < k > addToEnv(K:K, Loc:Nat) => addToGlobalEnv(K:K, Loc:Nat) ...</ k >
-		--- < currentFunction > File-Scope </ currentFunction >
-		--- : KSentence .
-	--- mb rule
-		--- < k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
-		--- < currentFunction > F:K </ currentFunction >
-		--- if F:K =/=Bool File-Scope
-		--- : KSentence .
+	mb rule
+		< k > addToEnv(K:K, Loc:Nat) => addToGlobalEnv(K:K, Loc:Nat) ...</ k >
+		< currentFunction > File-Scope </ currentFunction >
+		: KSentence .
+	mb rule
+		< k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
+		< currentFunction > F:K </ currentFunction >
+		if F:K =/=Bool File-Scope
+		: KSentence .
 		
-	--- mb rule
-		--- < k > addToGlobalEnv(X:Id, Loc:Nat) => . ...</ k >
-		--- < genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
-		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		--- : KSentence .
+	mb rule
+		< k > addToGlobalEnv(X:Id, Loc:Nat) => . ...</ k >
+		< genv >... Tu:K |-> Map((M':Map => M':Map[Loc:Nat / X:Id])) ...</ genv >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		: KSentence .
 	--- mb rule
 		--- < k > addToGlobalEnv(K:K, Loc:Nat) => . ...</ k >
 		--- < genv > GE:Map => GE:Map[Loc:Nat / K:K] </ genv >
 		--- < env > E:Map => E:Map[Loc:Nat / K:K] </ env >
 		--- : KSentence .
-	--- mb rule
-		--- < k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
-		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		--- : KSentence .
+	mb rule
+		< k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
+		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
+		: KSentence .
 		
 	--- mb rule
 		--- < k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
@@ -1455,20 +1465,146 @@ mod C-SEMANTICS-MISC is
 			--- ~> canonicalizeTranslationUnitVariables
 		...</ k >
 		< currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
+		< translationUnits >... . => BagItem(Name:String) ...</ translationUnits >
+		< preLinkage > Linkage:Map => Linkage:Map[Map(.) / Name:String] </ preLinkage >
+		< preTypes > Types:Map => Types:Map[Map(.) / Name:String] </ preTypes >
+		< internalDefinitions > Def:Map => Def:Map[Map(.) / Name:String] </ internalDefinitions >
+		< genv > Env:Map => Env:Map[Map(.) / Name:String] </ genv >
+		< gtypes > Gtypes:Map => Gtypes:Map[Map(.) / Name:String]</ gtypes >
 		< programText > M:Map => M:Map[P:String / Name:String] </ programText >
+		if notBool $hasMapping(Env:Map, Name:String)
 		: KSentence .
 	
-	--- op resolve : Id -> K .
-	--- mb rule
-		--- < k > (. => resolve(X:Id)) ~> resolveReferences ...</ k >
-		--- --- < preLinkage >... kpair(X:Id, ) |->  ...</ preLinkage >
+	op resolve : K -> K .
+	mb rule
+		< k > (. => resolve(Tu:K)) ~> resolveReferences ...</ k >
+		< translationUnits >... BagItem(Tu:K) => . ...</ translationUnits >
+		--- < preLinkage >... kpair(X:Id, ) |->  ...</ preLinkage >
 		--- < declarations >... SetItem(X:Id) => (.).Set ...</ declarations >
+		: KSentence .
+	--- < k > allocate(T:Type, K:K)
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(K:K, Loc:Nat)
+			--- ~> giveType(K:K, T:Type)
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- < env > E:Map </ env >
+		--- if notBool $hasMapping(E:Map, K:K)
+		--- : KSentence .
+	op resolveInternal : Id K K -> K .
+	op resolveExternal : Id K Bag K -> K .
+	op resolveExternal-aux : Id K Bag K Nat -> K .
+	mb rule
+		< k > resolveInternal(X:Id, Tu:K, declarationObject(T:Type, K:K))
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> initialize(X:Id, T:Type, K:K)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+		: KSentence .
+	mb rule
+		< k > resolveExternal(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, K:K))
+			=> allocateType(Loc:Nat, T:Type)
+			~> resolveExternal-aux(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, K:K), Loc:Nat)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		: KSentence .
+	--- mb rule
+		--- < k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => (.).Bag) ?), ?, Loc:Nat)
+			--- => addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+		--- ...</ k >
+		--- < currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
+		--- : KSentence .
+	mb rule
+		< k > resolveExternal-aux(X:Id, Tu:K, (BagItem(Tu':K) Units:Bag), declarationObject(T:Type, K:K), Loc:Nat)
+			=> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> resolveExternal-aux(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, K:K), Loc:Nat)
+		...</ k >
+		< currentTranslationUnit > ? => Tu':K </ currentTranslationUnit >
+		< preLinkage >... Tu':K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
+		: KSentence .
+	mb rule
+		< k > resolveExternal-aux(X:Id, Tu:K, (.).Bag, declarationObject(T:Type, K:K), Loc:Nat)
+			=> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> initialize(X:Id, T:Type, K:K)
+		...</ k >
+		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+		: KSentence .
+	mb rule
+		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
+		< preLinkage >... Tu:K |-> Map(M:Map) ...</ preLinkage >
+		if notBool $hasMapping(M:Map, X:Id)
+		: KSentence .
+	mb rule
+		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
+		< preLinkage >... Tu:K |-> Map((? X:Id |-> internal)) ...</ preLinkage >
+		: KSentence .
+	
+		
+	mb rule
+		< k > (. => resolveInternal(X:Id, Tu:K, K:K)) ~> resolve(Tu:K) ...</ k >
+		< preLinkage >... Tu:K |-> Map((? (X:Id |-> internal => .))) ...</ preLinkage >
+		< internalDefinitions >... Tu:K |-> Map((? (X:Id |-> K:K => .))) ...</ internalDefinitions >
+		: KSentence .
+		
+	mb rule
+		< k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, K:K)) ~> resolve(Tu:K) ...</ k >
+		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
+		< externalDefinitions >... X:Id |-> K:K => . ...</ externalDefinitions >
+		< translationUnits > Units:Bag </ translationUnits >
+		: KSentence .
+	op toString : K -> K .
+	eq toString(Identifier(S:String)) = S:String .
+	eq toString(S:String) = S:String .
+	--- < messages >... . => ListItem(toString(Tu:K) +String ": undefined reference to `" +String toString(X:Id) +String "'") </ messages >
+	mb rule
+		< k > resolve(Tu:K) ...</ k >
+		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
+		< preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
+		< externalDefinitions > Defs:Map </ externalDefinitions >
+		if hasFunctionType(T:Type)
+		andBool notBool $hasMapping(Defs:Map, X:Id)
+		: KSentence .
+	--- mb rule --- maybe unnecessary if i always init internals
+		--- < k > resolve(Tu:K) ...</ k >
+		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> internal => .))) ...</ preLinkage >
+		--- < preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
+		--- < internalDefinitions > Tu:K |-> Map((Defs:Map)) </ internalDefinitions >
+		--- if hasFunctionType(T:Type)
+		--- andBool notBool $hasMapping(Defs:Map, X:Id)
 		--- : KSentence .
 	--- mb rule
-		--- < k > resolve(X:Id) ...</ k >
-		--- < externalDefinitions > Ext:Map </ externalDefinitions >
-		--- < internalDefinitions > Int:Map </ internalDefinitions >
-		--- : KSentence .	
+		--- < k > resolve(Tu:K)
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+			--- ~> X:Id := tv(0, int)
+		--- ...</ k >
+		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
+		--- < preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
+		--- < externalDefinitions > Defs:Map </ externalDefinitions >
+		--- if notBool hasFunctionType(T:Type)
+		--- andBool notBool $hasMapping(Defs:Map, X:Id)
+		--- : KSentence .
+		
+	--- mb rule
+		--- < k > resolve(Tu:K) ...</ k >
+		--- < preLinkage >... Tu:K |-> Map(.) ...</ preLinkage >
+		--- < internalDefinitions >... Tu:K |-> Map(.) ...</ internalDefinitions >
+		--- : KSentence .
+		
+	--- mb rule
+		--- < k > resolve(Tu:K) ...</ k >
+		--- < preLinkage >... (kpair(X:Id, Tu:K) |-> internal => .) ...</ preLinkage >
+		--- --- < externalDefinitions > Ext:Map </ externalDefinitions >
+		--- < internalDefinitions >... (kpair(X:Id, Tu:K) |-> K:K => .) ...</ internalDefinitions >
+		--- : KSentence .
 		
 	--- need to worry about things that don't have definitions that may override externs
 	--- want to make it so env is always correct local env, so need to have a set of global envs, one for each tu

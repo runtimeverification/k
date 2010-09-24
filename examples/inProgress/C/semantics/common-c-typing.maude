@@ -32,22 +32,24 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	eq qualifiedType(T:Type, Register) = T:Type .
 	
 	
-	--- mb rule
-		--- < k > giveType(K:K, T:Type) => 
-			--- if (Fun:Id ==Bool File-Scope) then giveGlobalType(K:K, T:Type) else giveLocalType(K:K, T:Type) fi
-			--- ...</ k >
-		--- < currentFunction > Fun:Id </ currentFunction >
-		--- if notBool hasStaticType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > giveType(K:K, T:Type) => 
+			if (Fun:Id ==Bool File-Scope) then giveGlobalType(K:K, T:Type) else giveLocalType(K:K, T:Type) fi
+			...</ k >
+		< currentFunction > Fun:Id </ currentFunction >
+		if notBool hasStaticType(T:Type)
+		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < k > giveType(X:Id, (qualifiedType(T:Type, Static) => T:Type)) ...</ k >
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb rule
-		--- < k > giveGlobalType(K:K, T:Type) => (.).K ...</ k >
-		--- < types > M:Map => M:Map[T:Type / K:K] </ types >
+	mb rule
+		< k > giveGlobalType(K:K, T:Type) => (.).K ...</ k >
+		< types > M:Map => M:Map[T:Type / K:K] </ types >
 		--- < gtypes > M':Map => M':Map[T:Type / K:K] </ gtypes >
-		--- : KSentence [metadata "structural"] .
+		< gtypes >... Tu:K |-> Map((M':Map => M':Map[T:Type / K:K])) ...</ gtypes >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		: KSentence [metadata "structural"] .
 	--- mb rule
 		--- < k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
 		--- < types > M:Map => M:Map[T:Type / X:Id] </ types >
