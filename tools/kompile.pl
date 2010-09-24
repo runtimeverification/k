@@ -997,6 +997,7 @@ sub make_ops {
 		    my $counter = 0;
 		    $latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
 		    $latex_text =~ s/_/$counter++;"{#$counter}"/ges;
+		    $latex_text =~ s/"/&!&!&!/g;
 		    if ($attributes eq "") {
 			$attributes = "[]";
 		    }
@@ -1065,16 +1066,12 @@ sub make_metadata {
 # Match the K specific attributes below and make them into metadata
 # Right now it assumes that no \" can appear inside the metadata string
 # Therefore, the latex attribute is expected to be outside
-#    print "Stat:\n$_\n\n";
-#    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
-    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+".*")|metadata\s+"([^"]*?)"!
-	my $out = "";
+    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
+    my $out = "";
 	if (defined $1) {
 	    local $_ = $1;
-	    $have_k_attributes = 1;
-#	    print "VALUE: $_\n";
-#	    if (/^latex\s+\"([^\"]*?)\"$/gs) 
-	    if (/^latex\s+"(.*)"$/gs) 
+            $have_k_attributes = 1;
+	    if (/^latex\s+"([^"]*?)"$/gs) 
 	    {
 #		print "Latex attribute $1\n";
 		push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if $latex;
@@ -1114,6 +1111,7 @@ sub make_metadata {
 
 sub get_newcommand {
     local ($_) = @_;
+    s/&!&!&!/"/g;
 #    print "Recv: $_\n";
     my $n = $newcommand_counter++;
     my $newcommand = $newcommand_prefix.chr(65 + $n % $newcommand_base);
