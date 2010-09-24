@@ -956,8 +956,36 @@ sub make_ops {
 		$production =~ s/(?:^|\s)$ksort(?=\s|$)/_/g;
 		$production =~ s/\s*_\s*/_/gs;
 
+#	    print "==============================\n";
+#	    print "Production1:\n$production\n";
+	    
 # Replacing spaces in the production by "`"
-		$production =~ s/\s+/`/gs;
+#	        $production =~ s/\s+/`/gs;
+	        
+	    # Ugly hack: replace all strings with !&!&! 
+	    # to avoid replacing spaces inside strings
+	    my $strings = "";
+	    $production =~ s/(\".*?\")/ { 
+		$strings .= "!&!&!$1"; 
+	    }
+	    "!&!&!"
+	    /gse;
+	    
+	    # replace spaces
+	    $production =~ s/\s+/`/gs;
+
+#	    print "Production2:\n$production\n";
+	    # put the strings back
+	    while ($strings =~ m/!&!&!(\".*?\")/g)
+	    {
+		my $str = $1;
+		$production =~ s/!&!&!/$str/;
+	    }
+	    
+	    
+#	    print "Production3:\n$production\n";
+#	    print "String:\n$strings\n";
+#	    print "==============================\n";
 
 # Removing unnecessary `
 		$production =~ s/(^|$maude_special)`/$1/gs;
@@ -1037,27 +1065,32 @@ sub make_metadata {
 # Match the K specific attributes below and make them into metadata
 # Right now it assumes that no \" can appear inside the metadata string
 # Therefore, the latex attribute is expected to be outside
-    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
+#    print "Stat:\n$_\n\n";
+#    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
+    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+".*")|metadata\s+"([^"]*?)"!
 	my $out = "";
 	if (defined $1) {
-	  local $_ = $1;
-	  $have_k_attributes = 1;
-	  if (/^latex\s+"([^"]*?)"$/gs) {
-#              print "Latex attribute $1\n";
-              push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if $latex;
-          }
-          else {
-	      push(@k_attributes, $_);
-          }
-	  $out = "ditto" if $1 =~ m/ditto/;
+	    local $_ = $1;
+	    $have_k_attributes = 1;
+#	    print "VALUE: $_\n";
+#	    if (/^latex\s+\"([^\"]*?)\"$/gs) 
+	    if (/^latex\s+"(.*)"$/gs) 
+	    {
+#		print "Latex attribute $1\n";
+		push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if $latex;
+	    }
+	    else {
+		push(@k_attributes, $_);
+	    }
+	    $out = "ditto" if $1 =~ m/ditto/;
+	}
+    else {
+	push(@k_attributes, $2);
       }
-      else {
-	  push(@k_attributes, $2);
-      }
-     $out
-     !gse;
-
-#    print "K attributes: @k_attributes\n";
+    $out
+      !gse;
+    
+#    print "K attributes: @k_attributes\n==============\n\n";
 
     if (@k_attributes) {
 #	print "->@k_attributes<-\n";
@@ -1075,12 +1108,13 @@ sub make_metadata {
     elsif ($have_k_attributes) {
         s/^\s*\[\s*\]\s*$//gs;
     }
-    return $_;
+   return $_;
 }
 
 
 sub get_newcommand {
     local ($_) = @_;
+#    print "Recv: $_\n";
     my $n = $newcommand_counter++;
     my $newcommand = $newcommand_prefix.chr(65 + $n % $newcommand_base);
     while ($n >= $newcommand_base) {
@@ -1097,6 +1131,7 @@ sub get_newcommand {
     s/terminal/terminalNoSpace/gs;
     my $newcommandNoSpace = $newcommand."NoSpace";
     push(@newcommands, "\\newcommand\{\\$newcommandNoSpace\}$args\{$_\}");
+#    print "Comanda: $newcommand\n";
     return $newcommand;
 }
 
