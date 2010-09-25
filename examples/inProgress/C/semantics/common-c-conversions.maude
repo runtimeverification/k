@@ -215,8 +215,22 @@ mod COMMON-SEMANTICS-CAST is
 	
 	--- mb rule ['Cast(T:Type,, E:Expression) => cast(T:Type, E:Expression)] : KSentence [metadata "structural"] .
 	
+	--- fixme just temporarily, until we handle qualifiers properly
 	mb rule
-		< k > cast(T:Type, tv(B:BaseValue, T:Type)) => tv(B:BaseValue, T:Type) ...</ k > 
+		< k > cast(T:Type, tv(L:List{K}, T':Type)) => cast(T:Type, tv(L:List{K}, unqualifyType(T':Type))) ...</ k > 
+		if hasStaticType(T':Type)
+		: KSentence [metadata "structural"] .
+***(
+('cast).KProperLabel(
+('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K}))))
+,,('tv).KResultLabel(kList("wklist_")(
+	('functionObject).KResultLabel(Id Identifier("g")(.List{K}),,('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K})))),,('Block).KProperLabel(('_::_).KHybridLabel(.List{K}),,('_::_).KHybridLabel(('StatementLoc).KProperLabel(('Return).KProperLabel(Id Identifier("x")(.List{K})),,('CabsLoc).KProperLabel(String "twoFile1.prepre.gen"(.List{K}),,BaseValue 13(.List{K}),,BaseValue 915(.List{K}),,BaseValue 422(.List{K})))))))
+	,,('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K}))))))
+
+***)
+	
+	mb rule
+		< k > cast(T:Type, tv(L:List{K}, T:Type)) => tv(L:List{K}, T:Type) ...</ k > 
 		: KSentence [metadata "structural"] .
 	
 	---c99 6.3.1.3:1 When a value with integer type is converted to another integer type other than _Bool, if the value can be represented by the new type, it is unchanged. 

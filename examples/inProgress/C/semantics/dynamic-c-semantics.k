@@ -84,15 +84,22 @@ kmod DYNAMIC-C-SEMANTICS is
 
 	--- this bit of indirection is used to check that the main prototype is correct, and to call it with the appropriate arguments
 	op callMain : Nat Id -> K
-	op callMain : K Nat Id -> K [strict(1)]
-	eq callMain(N:Nat, X:Id) = callMain(typeof(Identifier("main")), N:Nat, X:Id)
+	op callMain-aux : K Nat Id -> K [strict(1)]
+	
+	rule < k > callMain(N:Nat, X:Id) 
+		=> callMain-aux(typeof(Identifier("main")), N:Nat, X:Id)
+	...</ k >
+	< functionTranslationUnits >... Tu:K |-> Map((? Identifier("main") |-> Tu:K)) ...</ functionTranslationUnits >
+	< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+	
+	--- < genv >... Tu:K |-> Map(? (Identifier("main") |-> )) ...</ genv> 
 	
 	--- eq callMain(functionType(int, ?), N:Nat, X:Id) = Call(Identifier("main"), Nil)
 	--- eq callMain(functionType(int, L':List{Type}), N:Nat, X:Id) = Call(Identifier("main"), Nil)
 	
 	--- FIXME i think these are slightly different
-	eq callMain(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
-	eq callMain(functionType(int, Nil), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	eq callMain-aux(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	eq callMain-aux(functionType(int, Nil), N:Nat, X:Id) = Call(Identifier("main"), Nil)
 	
 	
 	--- typedDeclaration(void, ?)

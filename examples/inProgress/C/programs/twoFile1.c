@@ -5,9 +5,14 @@ static int w = 7;
 int q = 3;
 int c = 32;
 int r = 77;
-extern int s;
 typedef int myvar;
 // i think there will be a problem with constant expressions using other internal globals
+// also look for problems with structs having the same name in two files, etc
+
+static int g(int x) {
+	return x;
+}
+
 int main(void){
 	int q = 4;
 	myvar v = 15; 
@@ -16,7 +21,8 @@ int main(void){
 	printf("1q = %d\n", q);
 	printf("1r = %d\n", r);
 	printf("1v = %d\n", v);
-	printf("1s = %d\n", s);
+	//printf("1s = %d\n", s);
+	printf("1g(5) = %d\n", g(5));
 	printf("f(2, 3)==%d\n", f(2, 3));
 	printf("f(2, 3)==%d\n", f(2, 3));
 	printf("f(2, 3) should be 7\n");
