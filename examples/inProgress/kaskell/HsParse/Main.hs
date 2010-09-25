@@ -34,7 +34,7 @@ showModule Standard   = show
 showModule PrettyTree = showAsTree
 showModule Maude      = gshow
 
--- | Show @Data@ as a nice 2-dimentional tree.
+-- | Show @Data@ as a nice 2-dimensional tree.
 showAsTree :: (Data a) => a -> String
 showAsTree = drawTree . data2tree
 
