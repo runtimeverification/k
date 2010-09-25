@@ -1053,6 +1053,34 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence [metadata "structural"] .
 	
 	op declareWithLinkage : Id Type K K -> K . --- id, type, possible init, linkage (external, internal, noLinkage)
+	
+	---- internal variables
+	
+	--- fixme need to look for bad use
+	mb rule
+		< k > declareInternalVariable(X:Id, T:Type, K:K)
+			=> declareWithLinkage(X:Id, T:Type, K:K, noLinkage)
+		...</ k >
+		if notBool hasStaticType(T:Type)
+		andBool notBool hasExternType(T:Type)
+		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > declareInternalVariable(X:Id, T:Type, K:K)
+			--- => declareWithLinkage(X:Id, T:Type, K:K, internal)
+		--- ...</ k >
+		--- if hasStaticType(T:Type)
+		--- andBool notBool hasExternType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > declareInternalVariable(X:Id, T:Type, K:K)
+			--- => declareWithLinkage(X:Id, T:Type, K:K, external)
+		--- ...</ k >
+		--- if notBool hasStaticType(T:Type)
+		--- andBool hasExternType(T:Type)
+		--- : KSentence [metadata "structural"] .
+		
+	
+	---- external variables
 	mb rule
 		< k > declareExternalVariable(X:Id, T:Type, K:K)
 			=> declareWithLinkage(X:Id, T:Type, K:K, external)
@@ -1110,6 +1138,31 @@ mod COMMON-GLOBAL-DECLARATION is
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
 		orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
+		: KSentence [metadata "structural"] .
+	--- fixme haven't thought about this much, is it right?
+	mb rule
+		< k > declareOnly(X:Id, T:Type, internal)
+			=> (.).K
+		...</ k >
+		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
+		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[internal / X:Id])) ...</ preLinkage >
+		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
+		orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareOnly(X:Id, T:Type, noLinkage)
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- < declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
+		--- < preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[noLinkage / X:Id])) ...</ preLinkage >
+		--- < preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K))
 		: KSentence [metadata "structural"] .
 	
 	
