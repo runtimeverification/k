@@ -935,15 +935,20 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool lengthString(S:String) <=Nat Len:Nat
 		: KSentence [metadata "structural"] .
 		
-	--- --- mb rule
-		--- --- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-			--- --- => allocString(Loc:Nat, (S:String +String "\0"))
-			--- --- ~> addToEnv(X:Id, Loc:Nat)
-			--- --- ~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
-		--- --- ...</ k >
-		--- --- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- --- if hasCharType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+			--- => allocString(Loc:Nat, (S:String +String "\0"))
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if hasCharType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > figureInitializer(X:Id, (incompleteArrayType(T:Type) => arrayType(T:Type, lengthString(S:String) +Nat 1)), SingleInit(Constant(StringLiteral(S:String)))) ...</ k >
+		if hasCharType(T:Type)
+		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > figureInitializer(X:Id, incompleteArrayType(T:Type), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
 			=> figureInitializer(X:Id, incompleteArrayType(T:Type), SingleInit(Constant(StringLiteral(S:String))))
@@ -963,23 +968,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > figureInitializer-aux(X:Id, T:Type, initializer(K:K), false)
-			--- => giveType(X:Id, T:Type)
-			--- ~> initialize(X:Id, T:Type, K:K)
-		--- ...</ k >
-		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > figureInitializer-aux(X:Id, T:Type, initializer(K:K), true)
-			--- => allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, T:Type)
-			--- ~> initialize(X:Id, T:Type, K:K)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
-		--- : KSentence [metadata "structural"] .
 	
 	--- base types
 	mb rule
@@ -1029,10 +1017,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	mb rule
 		< k > defineType(typedDeclaration(T:Type, X:Id)) => giveType(typedef(X:Id), T:Type) ...</ k >
 		: KSentence .
-		
-	--- op defineUsingOldDeclaration : Type Id K -> K .
-	--- allocateIfAbsent(T:Type, X:Id)
-	
+			
 	op declareFunction : Id Type K -> K .
 	op declareExternalVariable : Id Type K -> K .
 	op declareInternalVariable : Id Type K -> K .
