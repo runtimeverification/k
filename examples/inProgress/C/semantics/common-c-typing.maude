@@ -33,8 +33,8 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	
 	
 	mb rule
-		< k > giveType(K:K, T:Type) => 
-			if (Fun:Id ==Bool File-Scope) then giveGlobalType(K:K, T:Type) else giveLocalType(K:K, T:Type) fi
+		< k > giveType(X:Id, T:Type) => 
+			if (Fun:Id ==Bool File-Scope) then giveGlobalType(X:Id, T:Type) else giveLocalType(X:Id, T:Type) fi
 			...</ k >
 		< currentFunction > Fun:Id </ currentFunction >
 		if notBool hasStaticType(T:Type)
@@ -44,10 +44,10 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		--- : KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > giveGlobalType(K:K, T:Type) => (.).K ...</ k >
-		< types > M:Map => M:Map[T:Type / K:K] </ types >
+		< k > giveGlobalType(X:Id, T:Type) => (.).K ...</ k >
+		< types > M:Map => M:Map[T:Type / X:Id] </ types >
 		--- < gtypes > M':Map => M':Map[T:Type / K:K] </ gtypes >
-		< gtypes >... Tu:K |-> Map((M':Map => M':Map[T:Type / K:K])) ...</ gtypes >
+		< gtypes >... Tu:K |-> Map((M':Map => M':Map[T:Type / X:Id])) ...</ gtypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		: KSentence [metadata "structural"] .
 	--- mb rule
@@ -69,51 +69,6 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		--- : KSentence [metadata "structural"] .
 	--- mb rule 
 		--- < type > [X:Id - I:Int => X:Id] ...</ type >
-		--- : KSentence [metadata "structural"] .
-	
-	--- --- these happen during casts to int* or int[5]
-	--- --- not at < k > because these happen in < type > too
-	--- mb rule 
-		--- ['_`[_`](T:Type,, N:Nat) => arrayType(T:Type, N:Nat)]
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme there should really be many different pointers
-	--- mb rule 
-		--- ['Pointer(T:Type) => pointerType(T:Type)]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- ['Pointer(T:Type,, ?:Id) => pointerType(T:Type)]
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- ['Direct-Function-Declarator(PTL:Parameter-Type-List) => 'Direct-Function-Declarator(anonymousId,, PTL:Parameter-Type-List)]
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > ['Global(skipval) => .K ] ...</ k >
-		--- : KSentence [metadata "structural"] .
-
-	--- mb rule
-		--- < k > [L:KLabel(T:Type,, 'Direct-Function-Declarator(D:Declarator,, PTL:KResult))
-		--- => L:KLabel(functionType(T:Type, PTL:KResult),, D:Declarator)] ...</ k > 
-		--- if declarators contains l(L:KLabel)
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb rule
-		--- < k > L:KLabel([X:Id => T:Type],, D:Declarator) ...</ k >
-		--- < typedefs >... typedefName(X:Id) |-> T:Type ...</ typedefs >
-		--- if declarators contains l(L:KLabel)
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb rule 
-		--- < k > [L:KLabel(T:Type,, '_`[_`](K:K,, tv(N:Nat, ?:Base-Type))) => L:KLabel(arrayType(T:Type, N:Nat),, K:K)] ...</ k >
-		--- if declarators contains l(L:KLabel)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- [L:KLabel(T:Type,, 'BitField(D:K,, N:Nat)) => L:KLabel(bitfieldType(T:Type, N:Nat),, D:K)]
-		--- if declarators contains l(L:KLabel)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- [L:KLabel(T:Type,, 'BitField(N:Nat)) => L:KLabel(bitfieldType(T:Type, N:Nat),, unnamedBitField)]
-		--- if declarators contains l(L:KLabel)
 		--- : KSentence [metadata "structural"] .
 endm
 

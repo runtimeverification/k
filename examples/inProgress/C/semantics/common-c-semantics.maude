@@ -45,8 +45,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op File-Scope : -> Id [ctor] .
 	op unnamedBitField : -> Id [ctor] .
 	op bignum : -> Type .
-	--- op sizedVal : K -> K [metadata "strict"] .
-	--- op loc : Nat Nat -> Nat .
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
@@ -59,6 +57,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op t : Type -> Type .
 	--- op t : Type Set -> Type .
 	
+	op figureInitializer : K K K -> K [metadata "strict(3)"] .  --- id, type, initializer
 	op readFunction : Nat -> K .
 	
 	ceq _bit::_(piece(N:Nat, Len:Nat), piece(N':Nat, Len':Nat)) 
@@ -98,8 +97,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	eq value(tv(V:K, ?)) = V:K .
 	
 	op allocateType : Nat Type -> K .
-	op giveType : K Type -> K .
-	op addToEnv : K Nat -> K .
+	op giveType : Id Type -> K .
+	op addToEnv : Id Nat -> K .
 	
 	op read : K K -> K [metadata "strict(2)"] . --- location, type
 	op write : K K -> K [metadata "strict(2)"] . --- location, value
@@ -113,7 +112,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op bitloc : Nat Nat Nat -> Nat .
 	op inc : Nat -> Nat .
-	op initialize : K Type K -> K .
+	op initialize : Id Type K -> K .
 	op memblock : Nat Map -> K . --- length and an array from offsets to bytes
 	
 	op listToK : K -> K .
@@ -906,7 +905,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
 	--- op declare : K K -> K [metadata "seqstrict(2 1)"] .
 
-	op declare-aux : K K -> K [metadata "strict(2)"] .
+	--- op declare-aux : K K -> K [metadata "strict(2)"] .
 	op defineType : K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence .
 	mb context Typedef(NameGroup(`[HOLE`]:K, ?)) : KSentence .
@@ -915,58 +914,65 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- this surrounds all declarations with an instruction to complete (make verbose) the initializer
 	--- eq declare(SingleName(T:Type, Name:C), Kp:KProper) = declare-aux(SingleName(T:Type, Name:C), completeInitializer(idOfName(Name:C), Kp:KProper)) .
 
-	--- aggregates
-	mb rule
-		< k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(L:List{C}))
-			=> declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
-		...</ k >
-		if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) 
-		---andBool notBool hasIncompleteType(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String)))) 
-			=> declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
-		...</ k >
-		if hasCharType(T:Type)
-		andBool lengthString(S:String) <=Nat Len:Nat
-		: KSentence [metadata "structural"] .
-		
+	--- --- aggregates
 	--- mb rule
-		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-			--- => allocString(Loc:Nat, (S:String +String "\0"))
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
+		--- < k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(L:List{C}))
+			--- => declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
 		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if hasCharType(T:Type)
+		--- if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) 
+		--- ---andBool notBool hasIncompleteType(T:Type)
 		--- : KSentence [metadata "structural"] .
-	mb rule
-		< k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
-			=> declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-		...</ k >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String)))) 
+			--- => declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
+		--- ...</ k >
+		--- if hasCharType(T:Type)
+		--- andBool lengthString(S:String) <=Nat Len:Nat
+		--- : KSentence [metadata "structural"] .
 		
+	--- --- mb rule
+		--- --- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+			--- --- => allocString(Loc:Nat, (S:String +String "\0"))
+			--- --- ~> addToEnv(X:Id, Loc:Nat)
+			--- --- ~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
+		--- --- ...</ k >
+		--- --- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- --- if hasCharType(T:Type)
+		--- --- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
+			--- => declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
+		--- ...</ k >
+		--- : KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > figureInitializer(X:Id, T:Type, initializer(K:K))
+			=> initialize(X:Id, T:Type, K:K)
+		...</ k >
+		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		: KSentence [metadata "structural"] .	
+	
 	--- base types
 	mb rule
-		< k > declare(typedDeclaration(T:Type, X:Id), SingleInit(K:K))
-			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((X:Id := K:K ~> discard)))
+		< k > figureInitializer(X:Id, T:Type, SingleInit(K:K))
+			=> figureInitializer(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
 		...</ k >
 		if notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- c1x 6.7.8:11
 	mb rule
-		< k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(InitFragment(NextInit, SingleInit(K:K))))
-			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((X:Id := K:K ~> discard)))
+		< k > figureInitializer(X:Id, T:Type, CompoundInit(InitFragment(NextInit, SingleInit(K:K))))
+			=> figureInitializer(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
 		...</ k >
 		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
 		: KSentence [metadata "structural"] .
 		
-	--- no init
-	mb rule
-		< k > declare(typedDeclaration(T:Type, X:Id), NoInit)
-			=> declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
-		...</ k >
-		: KSentence [metadata "structural"] .
+	--- --- no init
+	--- mb rule
+		--- < k > declare(typedDeclaration(T:Type, X:Id), NoInit)
+			--- => declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
+		--- ...</ k >
+		--- : KSentence [metadata "structural"] .
 		
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
 		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
@@ -985,8 +991,8 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	--- c1x 6.7.8:21 ... the remainder of the aggregate shall be initialized implicitly the same as objects that have static storage duration
 	mb rule
-		< k > initialize(Name:K, T:Type, K:K)
-			=> if (F:Id ==Bool File-Scope) then zero(Name:K) else (.) fi 
+		< k > initialize(X:Id, T:Type, K:K)
+			=> if (F:Id ==Bool File-Scope) then zero(X:Id) else (.) fi 
 			~> K:K
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
@@ -1009,7 +1015,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	op declareExternalVariable : Id Type K -> K .
 	op declareInternalVariable : Id Type K -> K .
 	mb rule
-		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
+		< k > declare(typedDeclaration(T:Type, X:Id), K:K) 
 			=> declareFunction(X:Id, T:Type, K:K)
 		...</ k >
 		< currentFunction > File-Scope </ currentFunction >
@@ -1017,7 +1023,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
+		< k > declare(typedDeclaration(T:Type, X:Id), K:K)
 			=> declareExternalVariable(X:Id, T:Type, K:K)
 		...</ k >
 		< currentFunction > File-Scope </ currentFunction >
@@ -1025,7 +1031,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool notBool hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
+		< k > declare(typedDeclaration(T:Type, X:Id), K:K) 
 			=> declareInternalVariable(X:Id, T:Type, K:K)
 		...</ k >
 		< currentFunction > F:K </ currentFunction >
@@ -1120,11 +1126,11 @@ mod COMMON-GLOBAL-DECLARATION is
 	op declareOnly : Id Type K -> K .
 	op declareAndDefine : Id Type K K -> K .
 	mb rule
-		< k > declareWithLinkage(X:Id, T:Type, (.).K, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
+		< k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
-		if K:K =/=Bool (.).K
+		if K:K =/=Bool NoInit
 		: KSentence [metadata "structural"] .
 	
 	---  
@@ -1192,118 +1198,19 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal)
 		: KSentence [metadata "structural"] .
 		
-
-	--- mb rule
-		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) 
-			--- => allocateIfAbsent(T:Type, X:Id)
-			--- ~> initialize(X:Id, T:Type, K:K)
-		--- ...</ k >
-		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
-		--- andBool notBool hasExternType(T:Type)
-		--- : KSentence [metadata "structural"] .
 	mb rule
-		< k > declare-aux(typedDeclaration((incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), X:Id), initializer(K:K))
+		< k > figureInitializer(X:Id, (incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), initializer(K:K))
 		...</ k >
 		< incompleteLength > N:Nat </ incompleteLength >
 		: KSentence [metadata "structural"] .
-				
-	--- mb rule
-		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) => 
-			--- allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, T:Type)
-			--- ~> initialize(X:Id, T:Type, K:K)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if notBool hasExternType(T:Type) --- external reference
-		--- andBool notBool hasStaticType(T:Type)
-		--- andBool notBool hasIncompleteType(T:Type)
-		--- andBool notBool hasFunctionType(T:Type)
-		--- : KSentence .
-		
-	--- mb rule
-		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer(K:K)) => 
-			--- allocateType(Loc:Nat, T:Type)
-			--- ~> addToGlobalEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, T:Type)
-			--- ~> initialize(X:Id, T:Type, K:K)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if hasStaticType(T:Type)
-		--- andBool notBool hasIncompleteType(T:Type)
-		--- andBool notBool hasFunctionType(T:Type)
-		--- : KSentence .
-		
-	
-	op allocateAndZeroIfAbsent : Type Id -> K .
-	--- mb rule
-		--- < k > declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
-			--- => allocateIfAbsent(T:Type, X:Id)
-		--- ...</ k >
-		--- if hasExternType(T:Type) --- external reference
-		--- orBool hasFunctionType(T:Type) --- prototype
-		--- : KSentence .
-		
-	--- mb rule
-		--- < k > allocateIfAbsent(T:Type, X:Id) => allocate(T:Type, X:Id) ...</ k >
-		--- < env > E:Map </ env >
-		--- if notBool $hasMapping(E:Map, X:Id)
-		--- andBool notBool hasStaticType(T:Type)
-		--- : KSentence .
-	--- mb rule
-		--- < k > allocateIfAbsent(T:Type, X:Id) => allocate(T:Type, X:Id) ...</ k >
-		--- < env > E:Map </ env >
-		--- if notBool $hasMapping(E:Map, X:Id)
-		--- andBool notBool hasStaticType(T:Type)
-		--- : KSentence .
-		
-	--- fixme can use this opportunity to check types
-	--- mb rule
-		--- < k > allocateIfAbsent(T:Type, X:Id) => (.).K ...</ k >
-		--- < env >... X:Id |-> ? ...</ env >
-		--- : KSentence .
-	
-	--- mb rule
-		--- < k > allocate(T:Type, K:K)
-			--- => allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(K:K, Loc:Nat)
-			--- ~> giveType(K:K, T:Type)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- < env > E:Map </ env >
-		--- if notBool $hasMapping(E:Map, K:K)
-		--- : KSentence .
-		
-	op addToLinkage : Id Type -> K .
-	--- mb rule
-		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
-		--- < linkage > E:Env => E:Env[external / X:Id] </ linkage >
-		--- < currentFunction > File-Scope </ currentFunction >
-		--- if notBool hasStaticType(T:Type)
-		--- andBool notBool $hasMapping(E:Env, X:Id)
-		--- : KSentence .
-	--- mb rule
-		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
-		--- < linkage > E:Env => E:Env[internal / X:Id] </ linkage >
-		--- < currentFunction > File-Scope </ currentFunction >
-		--- if hasStaticType(T:Type)
-		--- andBool notBool $hasMapping(E:Env, X:Id)
-		--- : KSentence .
-	--- mb rule
-		--- < k > addToLinkage(X:Id, T:Type) => (.).K ...</ k >
-		--- < linkage > E:Env => E:Env[external / X:Id] </ linkage >
-		--- < currentFunction > F:K </ currentFunction >
-		--- if F:K =/=Bool File-Scope
-		--- andBool notBool hasStaticType(T:Type)
-		--- andBool notBool $hasMapping(E:Env, X:Id)
-		--- : KSentence .
-		
 
+	op allocateAndZeroIfAbsent : Type Id -> K .
+	op addToLinkage : Id Type -> K .
 	op addToGlobalEnv : K Nat -> K .
 	op addToLocalEnv : K Nat -> K .
 	
 	mb rule
-		< k > addToEnv(K:K, Loc:Nat) => addToGlobalEnv(K:K, Loc:Nat) ...</ k >
+		< k > addToEnv(X:Id, Loc:Nat) => addToGlobalEnv(X:Id, Loc:Nat) ...</ k >
 		< currentFunction > File-Scope </ currentFunction >
 		: KSentence .
 	mb rule
@@ -1351,7 +1258,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- FIXME check prototypes
 	mb [function-definition]: rule
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
-			=> declareFunction(X:Id, T:Type, (X:Id := tv(functionObject(X:Id, unqualifyType(T:Type), Block:K), T:Type) ~> discard))
+			=> declareFunction(X:Id, T:Type, initializer((X:Id := tv(functionObject(X:Id, unqualifyType(T:Type), Block:K), T:Type) ~> discard)))
 		...</ k >
 		: KSentence [metadata "structural"] .
 	--- mb [function-definition]: rule
@@ -1540,17 +1447,17 @@ mod C-SEMANTICS-MISC is
 		if notBool hasFunctionType(T:Type)
 		: KSentence .
 	
-	mb rule
-		< k > resolveInternal(X:Id, Tu:K, declarationObject(T:Type, Tu:K, K:K))
-			=> allocateType(Loc:Nat, T:Type)
-			~> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, T:Type)
-			~> initialize(X:Id, T:Type, K:K)
-			~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, Tu:K)
-		...</ k >
-		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
-		: KSentence .
+	--- mb rule
+		--- < k > resolveInternal(X:Id, Tu:K, declarationObject(T:Type, Tu:K, K:K))
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+			--- ~> initialize(X:Id, T:Type, K:K)
+			--- ~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, Tu:K)
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- < currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+		--- : KSentence .
 	mb rule
 		< k > resolveExternal(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K))
 			=> allocateType(Loc:Nat, T:Type)
@@ -1580,7 +1487,8 @@ mod C-SEMANTICS-MISC is
 		< k > resolveExternal-aux(X:Id, Tu:K, (.).Bag, declarationObject(T:Type, DefTu:K, K:K), Loc:Nat)
 			=> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> initialize(X:Id, T:Type, K:K)
+			~> figureInitializer(X:Id, T:Type, K:K)
+			--- ~> initialize(X:Id, T:Type, K:K)
 			~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, DefTu:K)
 		...</ k >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
@@ -1629,12 +1537,14 @@ mod C-SEMANTICS-MISC is
 		--- andBool notBool $hasMapping(Defs:Map, X:Id)
 		--- : KSentence .
 		
+	--- c1x 6.9.2:2 A declaration of an identifier for an object that has file scope without an initializer, and without a storage-class specifier or with the storage-class specifier static, constitutes a tentative definition. If a translation unit contains one or more tentative definitions for an identifier, and the translation unit contains no external definition for that identifier, then the behavior is exactly as if the translation unit contains a file scope declaration of that identifier, with the composite type as of the end of the translation unit, with an initializer equal to 0.
 	mb rule
 		< k > (. 
 			=> allocateType(Loc:Nat, unqualifyType(T:Type))
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, unqualifyType(T:Type))
 			~> X:Id := Constant(IntLiteral(NoSuffix(DecimalConstant(0))))
+			~> discard
 			) ~> resolve(Tu:K)
 		...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
