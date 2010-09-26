@@ -201,15 +201,16 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 	mb [function-application]: rule
 		(< control >
 			< k > application(functionObject(X:Id, functionType(R:Type, P:List{Type}), B:K), L:List{C}) ~> K:K </ k >
+			< currentTranslationUnit > OldTu:K </ currentTranslationUnit >
 		C:Bag
 		</ control >
 		=>
 		< control >
 			< k > sequencePoint ~> populateFromGlobal ~> resetNestingDepth ~> bind(L:List{C}, P:List{Type}) ~> B:K ~> Return(NothingExpression) </ k >
 			< currentFunction > X:Id </ currentFunction >
+			< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		...</ control >)
-		< callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > </ stackFrame >) ...</ callStack >
-		< currentTranslationUnit > OldTu:K => Tu:K </ currentTranslationUnit >
+		< callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > < currentTranslationUnit > OldTu:K </ currentTranslationUnit > </ stackFrame >) ...</ callStack >
 		< functionTranslationUnits >... OldTu:K |-> Map((? X:Id |-> Tu:K)) ...</ functionTranslationUnits >
 		: KSentence [metadata "computational rule"] . --- nondet
 endm
@@ -565,14 +566,14 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 					
-	--- op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
-	--- mb [start-pointer-difference]: rule [tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
-		--- => computePointerDifference(I1:Int, I2:Int, sizeofType(T:Type))]
-		--- : KSentence [metadata "structural"] .
-	--- mb [pointer-difference]: rule [computePointerDifference(loc(Block:Nat, Offset1:Nat), loc(Block:Nat, Offset2:Nat), tv(Size:Nat, ?))
-		--- => tv(_-Int_(Offset1:Nat, Offset2:Nat) /Int Size:Nat, cfg:ptrdiffut)]
-		--- if _-Int_(Offset1:Nat, Offset2:Nat) %Int Size:Nat ==Bool 0
-		--- : KSentence [metadata "structural"] .	
+	op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
+	mb [start-pointer-difference]: rule tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
+		=> computePointerDifference(I1:Int, I2:Int, sizeofType(T:Type))
+		: KSentence [metadata "structural"] .
+	mb [pointer-difference]: rule computePointerDifference(sym(Block:Nat) +Nat Offset1:Nat, sym(Block:Nat) +Nat Offset2:Nat, tv(Size:Nat, ?))
+		=> tv(_-Int_(Offset1:Nat, Offset2:Nat) /Int Size:Nat, cfg:ptrdiffut)
+		if _-Int_(Offset1:Nat, Offset2:Nat) %Int Size:Nat ==Bool 0
+		: KSentence [metadata "structural"] .	
 		
 	--- fixme these need to be promoted BEFORE doing arithmetic
 	mb rule - tv(I:Int, T:Type) => arithInterpret(T:Type, (-Int I:Int))

@@ -17,7 +17,6 @@ kmod C-CONFIGURATION is
 			< sizes > .Map </ sizes >
 			< openFiles > .Map </ openFiles >
 			< busy > .Bag </ busy >
-			< currentTranslationUnit > "" </ currentTranslationUnit >
 			< programText > .Map </ programText >
 			< externalDefinitions > .Map </ externalDefinitions >
 			< internalDefinitions > .Map </ internalDefinitions >
@@ -45,6 +44,7 @@ kmod C-CONFIGURATION is
 							< initMaxes > .Map </ initMaxes >
 						</ local >
 						< k > .K </ k >
+						< currentTranslationUnit > "" </ currentTranslationUnit >
 						--- < typeSimplifier *> 
 							--- < specifier > .Bag </ specifier >
 							--- < storage > .Bag </ storage >
