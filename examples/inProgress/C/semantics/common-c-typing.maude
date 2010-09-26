@@ -50,10 +50,10 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		< gtypes >... Tu:K |-> Map((M':Map => M':Map[T:Type / X:Id])) ...</ gtypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
-		--- < types > M:Map => M:Map[T:Type / X:Id] </ types >
-		--- : KSentence [metadata "structural"] .		
+	mb rule
+		< k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
+		< types > M:Map => M:Map[T:Type / X:Id] </ types >
+		: KSentence [metadata "structural"] .		
 		
 	--- mb [global-declaration] : rule
 		--- < k > ['Global(definedType(T:Type, X:K)) => giveGlobalType(T:Type, X:K)] ...</ k >

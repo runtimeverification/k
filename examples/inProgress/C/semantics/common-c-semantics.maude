@@ -7,6 +7,7 @@
 --- casting from unsigned long long int to int is super slow
 --- pr34099.c checks if anding unknown with 0 is 0.  need to add named unknowns and better interpret
 
+--- extern inside block that shadows variable in a function that shadows global extern
 
 ---C99 6.7.8:10 If an object has static duration ... if it has pointer type, it is NULL, if it is arithmetic, 0, aggregate, recursively these, union, first member by these
 
@@ -551,15 +552,17 @@ mod COMMON-PARAMETER-BINDING is
 		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
 		: KSentence [metadata "structural"] .
 		
-	--- mb [bind-one]: rule
-		--- < k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
-			--- => allocate(T:Type, X:Id)
-			--- ~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
-			--- ~> bind(L:List{C}, P:List{Type}) ...</ k > 
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- --- if isTypeCompatible(T:Type, T':Type)
-		--- if notBool hasArrayType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	mb [bind-one]: rule
+		< k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
+			~> bind(L:List{C}, P:List{Type}) ...</ k > 
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if isTypeCompatible(T:Type, T':Type)
+		if notBool hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .
 	--- mb [bind-one]: rule
 		--- < k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 			--- => allocateType(Loc:Nat, T:Type)
@@ -1201,6 +1204,15 @@ mod COMMON-GLOBAL-DECLARATION is
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool $hasMapping(Def:Map, kpair(X:Id, Tu:K))
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareAndDefine(X:Id, T:Type, K:K, noLinkage)
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> figureInitializer(X:Id, T:Type, K:K)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
