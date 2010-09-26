@@ -69,7 +69,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	eq _bit::_(piece(0, 0), N:Nat) = N:Nat .
 	eq piece(piece(N:Nat, Len:Nat), Len:Nat) = piece(N:Nat, Len:Nat) .
 	op declarationObject : Type K K -> K . --- type, translation unit it was defined in, definition
-	
+	op initializerValue : Id Type K -> KResult .
 	op external : -> K .
 	op internal : -> K .
 	op noLinkage : -> K .
@@ -956,12 +956,30 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> figureInitializer-aux(X:Id, T:Type, initializer(K:K))
 		...</ k >
 		: KSentence [metadata "structural"] .
+
 	mb rule
 		< k > figureInitializer-aux(X:Id, T:Type, initializer(K:K))
-			=> initialize(X:Id, T:Type, K:K)
+			=> initializerValue(X:Id, T:Type, K:K)
 		...</ k >
 		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
-		: KSentence [metadata "structural"] .	
+		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > figureInitializer-aux(X:Id, T:Type, initializer(K:K), false)
+			--- => giveType(X:Id, T:Type)
+			--- ~> initialize(X:Id, T:Type, K:K)
+		--- ...</ k >
+		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > figureInitializer-aux(X:Id, T:Type, initializer(K:K), true)
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+			--- ~> initialize(X:Id, T:Type, K:K)
+		--- ...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		--- : KSentence [metadata "structural"] .
 	
 	--- base types
 	mb rule
@@ -1031,16 +1049,16 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> declareExternalVariable(X:Id, T:Type, K:K)
 		...</ k >
 		< currentFunction > File-Scope </ currentFunction >
-		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
-		andBool notBool hasFunctionType(T:Type)
+		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		if notBool hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declare(typedDeclaration(T:Type, X:Id), K:K) 
 			=> declareInternalVariable(X:Id, T:Type, K:K)
 		...</ k >
 		< currentFunction > F:K </ currentFunction >
-		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
-		andBool notBool hasFunctionType(T:Type)
+		--- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		if notBool hasFunctionType(T:Type)
 		andBool F:K =/=Bool File-Scope
 		: KSentence [metadata "structural"] .
 		
@@ -1172,6 +1190,7 @@ mod COMMON-GLOBAL-DECLARATION is
 			~> giveType(X:Id, T:Type)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if notBool hasIncompleteType(T:Type)
 		--- < declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
 		--- < preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[noLinkage / X:Id])) ...</ preLinkage >
 		--- < preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
@@ -1205,18 +1224,31 @@ mod COMMON-GLOBAL-DECLARATION is
 		if notBool $hasMapping(Def:Map, kpair(X:Id, Tu:K))
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal)
 		: KSentence [metadata "structural"] .
+	op defineAndInit : Id Type K -> K [metadata "strict(3)"] .
 	mb rule
 		< k > declareAndDefine(X:Id, T:Type, K:K, noLinkage)
+			=> defineAndInit(X:Id, T:Type, figureInitializer(X:Id, T:Type, K:K))
+			--- => --- defineAndInit(X:Id, T:Type, figureInitializer(X:Id, T:Type, K:K))
+			--- => allocateType(Loc:Nat, T:Type)
+			--- ~> addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, T:Type)
+			--- ~> figureInitializer(X:Id, T:Type, K:K)
+			--- ~> initialize
+		...</ k >
+		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > defineAndInit(X:Id, ?, initializerValue(X:Id, T:Type, K:K))
 			=> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> figureInitializer(X:Id, T:Type, K:K)
+			~> initialize(X:Id, T:Type, K:K)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > figureInitializer-aux(X:Id, (incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), initializer(K:K))
+		< k > figureInitializer-aux(?, (incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), initializer(K:K))
 		...</ k >
 		< incompleteLength > N:Nat </ incompleteLength >
 		: KSentence [metadata "structural"] .
@@ -1452,7 +1484,8 @@ mod C-SEMANTICS-MISC is
 		
 	op resolveInternal : Id K K -> K .
 	op resolveExternal : Id K Bag K -> K .
-	op resolveExternal-aux : Id K Bag K Nat -> K .
+	op resolveExternal-aux : Id K Bag K Nat K -> K [metadata "strict(6)"] .
+	--- op resolveExternal-alloc : Id K Bag K Nat K -> K [metadata "strict(6)"] .
 	
 	op recordFunctionTranslationUnitInformation : K Type K K -> K . --- name, type, context, where defined
 	mb rule
@@ -1468,53 +1501,62 @@ mod C-SEMANTICS-MISC is
 	--- fixme
 	--- should be adding to env after figuring initializer
 	--- should be changing env to be correct env before figuring initializer
+	op allocateWithInit : K Nat -> K [metadata "strict"] .
+	op noAllocateWithInit : K Nat -> K [metadata "strict"] .
+	op resolveInternal-aux : Id K K K -> K [metadata "strict(4)"] .
 	mb rule
 		< k > resolveInternal(X:Id, Tu:K, declarationObject(T:Type, Tu:K, K:K))
+			=> resolveInternal-aux(X:Id, Tu:K, declarationObject(T:Type, Tu:K, K:K), figureInitializer(X:Id, T:Type, K:K))
+		...</ k >
+		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+		: KSentence .
+	mb rule
+		< k > resolveInternal-aux(X:Id, Tu:K, declarationObject(?, Tu:K, ?), initializerValue(X:Id, T:Type, K:K))
 			=> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> figureInitializer(X:Id, T:Type, K:K)
+			~> initialize(X:Id, T:Type, K:K)
 			~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, Tu:K)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		: KSentence .
+		
 	mb rule
 		< k > resolveExternal(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K))
-			=> allocateType(Loc:Nat, T:Type)
-			~> resolveExternal-aux(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K), Loc:Nat)
+			=> resolveExternal-aux(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K), Loc:Nat, figureInitializer(X:Id, T:Type, K:K))
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		: KSentence .
 	mb rule
-		< k > resolveExternal-aux(X:Id, Tu:K, (BagItem(Tu':K) Units:Bag), declarationObject(T:Type, DefTu:K, K:K), Loc:Nat)
+		< k > (.
 			=> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
 			~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu':K, DefTu:K)
-			~> resolveExternal-aux(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K), Loc:Nat)
+			) ~> resolveExternal-aux(X:Id, Tu:K, ((BagItem(Tu':K) => .) Units:Bag), declarationObject(?, DefTu:K, ?), Loc:Nat, initializerValue(X:Id, T:Type, K:K))
 		...</ k >
 		< currentTranslationUnit > ? => Tu':K </ currentTranslationUnit >
 		< preLinkage >... Tu':K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
 		: KSentence .
 	mb rule
-		< k > resolveExternal-aux(X:Id, Tu:K, (.).Bag, declarationObject(T:Type, DefTu:K, K:K), Loc:Nat)
-			=> addToEnv(X:Id, Loc:Nat)
+		< k > resolveExternal-aux(X:Id, Tu:K, (.).Bag, declarationObject(?, DefTu:K, ?), Loc:Nat, initializerValue(X:Id, T:Type, K:K))
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> figureInitializer(X:Id, T:Type, K:K)
-			--- ~> initialize(X:Id, T:Type, K:K)
+			~> initialize(X:Id, T:Type, K:K)
 			~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, DefTu:K)
 		...</ k >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		: KSentence .
-	mb rule
-		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
-		< preLinkage >... Tu:K |-> Map(M:Map) ...</ preLinkage >
-		if notBool $hasMapping(M:Map, X:Id)
-		: KSentence .
-	mb rule
-		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
-		< preLinkage >... Tu:K |-> Map((? X:Id |-> internal)) ...</ preLinkage >
-		: KSentence .
+	--- mb rule
+		--- < k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
+		--- < preLinkage >... Tu:K |-> Map(M:Map) ...</ preLinkage >
+		--- if notBool $hasMapping(M:Map, X:Id)
+		--- : KSentence .
+	--- mb rule
+		--- < k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
+		--- < preLinkage >... Tu:K |-> Map((? X:Id |-> internal)) ...</ preLinkage >
+		--- : KSentence .
 	
 	--- 
 	mb rule
@@ -1585,6 +1627,7 @@ mod C-SEMANTICS-MISC is
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		if notBool hasFunctionType(T:Type)
+		andBool notBool hasIncompleteType(T:Type)
 		andBool notBool hasExternType(T:Type)
 		andBool notBool $hasMapping(Defs:Map, X:Id)
 		: KSentence .

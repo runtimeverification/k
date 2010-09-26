@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+int x = 7;
 int main(void) {
 	int x[] = {1,3,5};
 	int y0[] = {1,3,5,2,4,6,3,5,7,0,0,0};

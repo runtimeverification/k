@@ -237,7 +237,7 @@ mod COMMON-SEMANTICS-BLOCKS is
 			C:Bag
 			< nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
 		</ local >
-		< blockStack > (.).List => List(< stackFrame > C:Bag </ stackFrame >) ...</ blockStack >
+		< blockStack > (.).List => List(< stackFrame > C:Bag < nestingDepth > N:Nat </ nestingDepth > </ stackFrame >) ...</ blockStack >
 		: KSentence [metadata "structural"] .
 		
 	mb [pop-block]: rule
