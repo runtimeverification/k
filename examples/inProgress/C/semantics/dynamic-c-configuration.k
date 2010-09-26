@@ -25,7 +25,8 @@ kmod C-CONFIGURATION is
 			< preLinkage > .Map </ preLinkage >
 			< preTypes > .Map </ preTypes >
 			< translationUnits > .Bag </ translationUnits >
-			< functionTranslationUnits > .Map </ functionTranslationUnits > 
+			< functionTranslationUnits > .Map </ functionTranslationUnits >
+			< declarationOrder > .Map </ declarationOrder >
 			< messages > .List </ messages >
 			< linkage > .Map </ linkage >
 			< threads >

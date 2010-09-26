@@ -34,6 +34,7 @@ endm
 mod COMMON-SEMANTIC-SYNTAX is
 	including INCOMING-MODULES .
 	op List : BagItem -> ListItem .
+	op ListToK : List -> K .
 	op Map : Map -> K .
 	op piece : Nat Nat -> Nat .
 	op trueUnknown : -> Nat [ctor] .
@@ -57,7 +58,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op t : Type -> Type .
 	--- op t : Type Set -> Type .
 	
-	op figureInitializer : K K K -> K [metadata "strict(3)"] .  --- id, type, initializer
+	op figureInitializer : Id Type K -> K .  --- id, type, initializer
+	op figureInitializer-aux : Id Type K -> K [metadata "strict(3)"] .  --- id, type, initializer
 	op readFunction : Nat -> K .
 	
 	ceq _bit::_(piece(N:Nat, Len:Nat), piece(N':Nat, Len':Nat)) 
@@ -914,21 +916,21 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- this surrounds all declarations with an instruction to complete (make verbose) the initializer
 	--- eq declare(SingleName(T:Type, Name:C), Kp:KProper) = declare-aux(SingleName(T:Type, Name:C), completeInitializer(idOfName(Name:C), Kp:KProper)) .
 
-	--- --- aggregates
-	--- mb rule
-		--- < k > declare(typedDeclaration(T:Type, X:Id), CompoundInit(L:List{C}))
-			--- => declare-aux(typedDeclaration(T:Type, X:Id), startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
-		--- ...</ k >
-		--- if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) 
-		--- ---andBool notBool hasIncompleteType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), SingleInit(Constant(StringLiteral(S:String)))) 
-			--- => declare(typedDeclaration(arrayType(T:Type, Len:Nat), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
-		--- ...</ k >
-		--- if hasCharType(T:Type)
-		--- andBool lengthString(S:String) <=Nat Len:Nat
-		--- : KSentence [metadata "structural"] .
+	--- aggregates
+	mb rule
+		< k > figureInitializer(X:Id, T:Type, CompoundInit(L:List{C}))
+			=> figureInitializer-aux(X:Id, T:Type, startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
+		...</ k >
+		if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) 
+		---andBool notBool hasIncompleteType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > figureInitializer(X:Id, arrayType(T:Type, Len:Nat), SingleInit(Constant(StringLiteral(S:String)))) 
+			=> figureInitializer(X:Id, arrayType(T:Type, Len:Nat), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
+		...</ k >
+		if hasCharType(T:Type)
+		andBool lengthString(S:String) <=Nat Len:Nat
+		: KSentence [metadata "structural"] .
 		
 	--- --- mb rule
 		--- --- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
@@ -939,14 +941,20 @@ mod COMMON-GLOBAL-DECLARATION is
 		--- --- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		--- --- if hasCharType(T:Type)
 		--- --- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
-			--- => declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > figureInitializer(X:Id, incompleteArrayType(T:Type), CompoundInit(InitFragment(NextInit, SingleInit(Constant(StringLiteral(S:String))))))
+			=> figureInitializer(X:Id, incompleteArrayType(T:Type), SingleInit(Constant(StringLiteral(S:String))))
+		...</ k >
+		: KSentence [metadata "structural"] .
 		
+	--- this comes from function declarations.  should probably adjust this
 	mb rule
 		< k > figureInitializer(X:Id, T:Type, initializer(K:K))
+			=> figureInitializer-aux(X:Id, T:Type, initializer(K:K))
+		...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > figureInitializer-aux(X:Id, T:Type, initializer(K:K))
 			=> initialize(X:Id, T:Type, K:K)
 		...</ k >
 		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
@@ -955,24 +963,17 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- base types
 	mb rule
 		< k > figureInitializer(X:Id, T:Type, SingleInit(K:K))
-			=> figureInitializer(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
+			=> figureInitializer-aux(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
 		...</ k >
 		if notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- c1x 6.7.8:11
 	mb rule
 		< k > figureInitializer(X:Id, T:Type, CompoundInit(InitFragment(NextInit, SingleInit(K:K))))
-			=> figureInitializer(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
+			=> figureInitializer-aux(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
 		...</ k >
 		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
 		: KSentence [metadata "structural"] .
-		
-	--- --- no init
-	--- mb rule
-		--- < k > declare(typedDeclaration(T:Type, X:Id), NoInit)
-			--- => declare-aux(typedDeclaration(T:Type, X:Id), initializer((.).K))
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .
 		
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
 		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
@@ -1127,9 +1128,13 @@ mod COMMON-GLOBAL-DECLARATION is
 	op declareAndDefine : Id Type K K -> K .
 	mb rule
 		< k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
+		< declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
+		< declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if K:K =/=Bool NoInit
 		: KSentence [metadata "structural"] .
 	
@@ -1199,7 +1204,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > figureInitializer(X:Id, (incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), initializer(K:K))
+		< k > figureInitializer-aux(X:Id, (incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), initializer(K:K))
 		...</ k >
 		< incompleteLength > N:Nat </ incompleteLength >
 		: KSentence [metadata "structural"] .
@@ -1411,6 +1416,7 @@ mod C-SEMANTICS-MISC is
 			--- ~> canonicalizeTranslationUnitVariables
 		...</ k >
 		< currentTranslationUnit > ? => Name:String </ currentTranslationUnit >
+		< declarationOrder > DeclOrder:Map => DeclOrder:Map[ListToK((.).List) / Name:String] </ declarationOrder >
 		< functionTranslationUnits > Funs:Map => Funs:Map[Map(.) / Name:String] </ functionTranslationUnits > 
 		< translationUnits >... . => BagItem(Name:String) ...</ translationUnits >
 		< preLinkage > Linkage:Map => Linkage:Map[Map(.) / Name:String] </ preLinkage >
@@ -1447,17 +1453,20 @@ mod C-SEMANTICS-MISC is
 		if notBool hasFunctionType(T:Type)
 		: KSentence .
 	
-	--- mb rule
-		--- < k > resolveInternal(X:Id, Tu:K, declarationObject(T:Type, Tu:K, K:K))
-			--- => allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, T:Type)
-			--- ~> initialize(X:Id, T:Type, K:K)
-			--- ~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, Tu:K)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- < currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
-		--- : KSentence .
+	--- fixme
+	--- should be adding to env after figuring initializer
+	--- should be changing env to be correct env before figuring initializer
+	mb rule
+		< k > resolveInternal(X:Id, Tu:K, declarationObject(T:Type, Tu:K, K:K))
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> figureInitializer(X:Id, T:Type, K:K)
+			~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, Tu:K)
+		...</ k >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+		: KSentence .
 	mb rule
 		< k > resolveExternal(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K))
 			=> allocateType(Loc:Nat, T:Type)
@@ -1465,14 +1474,6 @@ mod C-SEMANTICS-MISC is
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		: KSentence .
-	--- mb rule
-		--- < k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => (.).Bag) ?), ?, Loc:Nat)
-			--- => addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, T:Type)
-		--- ...</ k >
-		--- < currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
-		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
-		--- : KSentence .
 	mb rule
 		< k > resolveExternal-aux(X:Id, Tu:K, (BagItem(Tu':K) Units:Bag), declarationObject(T:Type, DefTu:K, K:K), Loc:Nat)
 			=> addToEnv(X:Id, Loc:Nat)
@@ -1503,27 +1504,44 @@ mod C-SEMANTICS-MISC is
 		< preLinkage >... Tu:K |-> Map((? X:Id |-> internal)) ...</ preLinkage >
 		: KSentence .
 	
-		
+	--- 
 	mb rule
 		< k > (. => resolveInternal(X:Id, Tu:K, K:K)) ~> resolve(Tu:K) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> internal => .))) ...</ preLinkage >
 		< internalDefinitions >... Tu:K |-> Map((? (X:Id |-> K:K => .))) ...</ internalDefinitions >
+		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		: KSentence .
 		
 	mb rule
 		< k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, K:K)) ~> resolve(Tu:K) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
 		< externalDefinitions >... X:Id |-> K:K => . ...</ externalDefinitions >
+		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< translationUnits > Units:Bag </ translationUnits >
 		: KSentence .
 	op toString : K -> K .
 	eq toString(Identifier(S:String)) = S:String .
 	eq toString(S:String) = S:String .
 	--- < messages >... . => ListItem(toString(Tu:K) +String ": undefined reference to `" +String toString(X:Id) +String "'") </ messages >
+	
+	--- fixme this means we've declared it twice (like a prototype maybe?), but already handled it.  happening with getc in clib.c
+	mb rule
+		< k > resolve(Tu:K) ...</ k >
+		< preLinkage >... Tu:K |-> Map(Linkage:Map) ...</ preLinkage >
+		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
+		< externalDefinitions > ExtDefs:Map </ externalDefinitions >
+		< internalDefinitions > IntDefs:Map </ internalDefinitions >
+		if notBool $hasMapping(Linkage:Map, X:Id)
+		andBool notBool $hasMapping(ExtDefs:Map, X:Id)
+		andBool notBool $hasMapping(IntDefs:Map, X:Id)
+		: KSentence .
+	
+	--- function prototypes
 	mb rule
 		< k > resolve(Tu:K) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
+		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< externalDefinitions > Defs:Map </ externalDefinitions >
 		if hasFunctionType(T:Type)
 		andBool notBool $hasMapping(Defs:Map, X:Id)
@@ -1549,6 +1567,7 @@ mod C-SEMANTICS-MISC is
 		...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
+		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< externalDefinitions > Defs:Map </ externalDefinitions >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
@@ -1560,6 +1579,7 @@ mod C-SEMANTICS-MISC is
 		< k > resolve(Tu:K) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
+		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< externalDefinitions > Defs:Map </ externalDefinitions >
 		if notBool hasFunctionType(T:Type)
 		andBool hasExternType(T:Type)
@@ -1570,6 +1590,7 @@ mod C-SEMANTICS-MISC is
 		< k > resolve(Tu:K) => . ...</ k >
 		< preLinkage >... Tu:K |-> Map(.) ...</ preLinkage >
 		< internalDefinitions >... Tu:K |-> Map(.) ...</ internalDefinitions >
+		< declarationOrder >... Tu:K |-> ListToK((.).List) ...</ declarationOrder >
 		: KSentence .
 				
 	--- need to worry about things that don't have definitions that may override externs
