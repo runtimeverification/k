@@ -1573,8 +1573,9 @@ mod C-SEMANTICS-MISC is
 			=> allocateType(Loc:Nat, unqualifyType(T:Type))
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, unqualifyType(T:Type))
-			~> X:Id := Constant(IntLiteral(NoSuffix(DecimalConstant(0))))
-			~> discard
+			--- ~> X:Id := Constant(IntLiteral(NoSuffix(DecimalConstant(0))))
+			--- ~> discard
+			~> zero(X:Id)
 			) ~> resolve(Tu:K)
 		...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
