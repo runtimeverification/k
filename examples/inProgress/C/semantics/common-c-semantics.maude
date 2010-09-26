@@ -1548,15 +1548,15 @@ mod C-SEMANTICS-MISC is
 		...</ k >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		: KSentence .
-	--- mb rule
-		--- < k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
-		--- < preLinkage >... Tu:K |-> Map(M:Map) ...</ preLinkage >
-		--- if notBool $hasMapping(M:Map, X:Id)
-		--- : KSentence .
-	--- mb rule
-		--- < k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?) ...</ k >
-		--- < preLinkage >... Tu:K |-> Map((? X:Id |-> internal)) ...</ preLinkage >
-		--- : KSentence .
+	mb rule
+		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?, ?) ...</ k >
+		< preLinkage >... Tu:K |-> Map(M:Map) ...</ preLinkage >
+		if notBool $hasMapping(M:Map, X:Id)
+		: KSentence .
+	mb rule
+		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?, ?) ...</ k >
+		< preLinkage >... Tu:K |-> Map((? X:Id |-> internal)) ...</ preLinkage >
+		: KSentence .
 	
 	--- 
 	mb rule
