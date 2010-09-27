@@ -148,6 +148,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
  
   macro var2 = [define [id("list") * id("x")] id("x")]
                [display [id("list") 1 2 3 4 5]]
+               [display [id("list")]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
