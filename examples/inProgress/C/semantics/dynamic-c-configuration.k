@@ -43,6 +43,7 @@ kmod C-CONFIGURATION is
 							< currentSubObject > .List </ currentSubObject >
 							< incompleteLength > 0 </ incompleteLength >
 							< savedInitialization > .K </ savedInitialization >
+							< localVariables > .Set </ localVariables >
 							--- < initMaxes > .Map </ initMaxes >
 						</ local >
 						< k > .K </ k >

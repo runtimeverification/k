@@ -1212,9 +1212,11 @@ mod COMMON-GLOBAL-DECLARATION is
 			~> giveType(X:Id, T:Type)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< localVariables > Vars:Set (. => SetItem(X:Id)) </ localVariables >
 		if notBool hasIncompleteType(T:Type)
 		andBool notBool hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
+		andBool notBool X:Id in Vars:Set
 		: KSentence [metadata "structural"] .
 		
 	--- mb rule
