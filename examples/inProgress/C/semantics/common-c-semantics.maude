@@ -670,6 +670,7 @@ mod COMMON-INITIALIZATION is
 	--- op getFirstObject-aux : K Type -> K .
 	op getInitializer : -> K .
 	op fillInitializer : K -> K .
+	op fillInitializer-aux : K -> K .
 	op fillInitializer : List{C} -> K .
 	op completeInitializerFragment : K K -> C .
 	op initializerFragment : K -> KResult .
@@ -877,10 +878,35 @@ mod COMMON-INITIALIZATION is
 		if getKLabel(K:K) =/=Bool 'StringLiteral
 		andBool getKLabel(K:K) =/=Bool 'WStringLiteral
 		: KSentence .
+		
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
+			=> fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String))))
+		...</ k >
+		< currentSubObject > ListItem(te(K:K, T:Type)) ListItem(te(?, arrayType(T:Type, Len:Nat))) ...</ currentSubObject >
+		if hasCharType(T:Type)
+		andBool lengthString(S:String) ==Bool Len:Nat
+		: KSentence .
+	mb rule
+		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
+			=> fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String +String "\0"))))
+		...</ k >
+		< currentSubObject > ListItem(te(K:K, T:Type)) ListItem(te(?, arrayType(T:Type, Len:Nat))) ...</ currentSubObject >
+		if hasCharType(T:Type)
+		andBool sNat(lengthString(S:String)) ==Bool Len:Nat
+		: KSentence .
+	mb rule
+		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
+			=> fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String +String "\0"))))
+		...</ k >
+		< currentSubObject > ListItem(te(K:K, T:Type)) ListItem(te(?, incompleteArrayType(T:Type))) ...</ currentSubObject >
+		if hasCharType(T:Type)
+		: KSentence .
+		
+	mb rule
+		< k > fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String))))
 			=> fillInitializer(SingleInit(tv(charToAscii(firstChar(S:String)), char))) 
-			~> fillInitializer(SingleInit(Constant(StringLiteral(butFirstChar(S:String))))) 
+			~> fillInitializer-aux(SingleInit(Constant(StringLiteral(butFirstChar(S:String))))) 
 		...</ k >
 		< currentSubObject > ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		if S:String =/=Bool ""
@@ -888,7 +914,7 @@ mod COMMON-INITIALIZATION is
 		: KSentence .
 	--- fixme not sure what happens in the case of   char *x = "";
 	mb rule
-		< k > fillInitializer(SingleInit(Constant(StringLiteral("")))) => . ...</ k >
+		< k > fillInitializer-aux(SingleInit(Constant(StringLiteral("")))) => . ...</ k >
 		--- if hasCharType(T:Type)
 		: KSentence .
 	mb rule

@@ -22,6 +22,8 @@ int main(void){
 	(*p)++; // x == 3
 	(**pp)++; // x == 4;
 	//int* q = ap[1];
+	
+	printf("w%d\n",x);
 	(**(ap + data[0]))++; // x == 5;
 	(*(ap[data[1]]))++; // x == 6;
 	
@@ -35,11 +37,14 @@ int main(void){
 	s.f = 6;
 	s.p = &(s.b);
 	s.this = &s;
+	
+	printf("y%d\n",x);
 	x += *((s.this)->p); // x == 8;
 	x += s.b + s.e + s.f; // x == 21;
 	(*((s.this)->p)) ++; // s.b == 3;
 	x += (&s)->b; // x == 24
 	
+	printf("zc%d\n",x);
 	static const int pad[64] = {
 	0x80, 5, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -59,9 +64,15 @@ int main(void){
 		"12345678901234567890123456789012345678901234567890123456789012345678901234567890", "57edf4a22be3c955ac49da2e2107b67a"
 	    };
 	
+	printf("za%d\n",x);
+	printf("%s\n", arrayOfStrings[0]);
+	printf("%s\n", arrayOfStrings[1]);
+	printf("%s\n", arrayOfStrings[2]);
 	if (arrayOfStrings[1][0] == 'd'){
 		x++; // x == 27
 	}
+	
+	printf("zb%d\n",x);
 	
 	int (*fpArray[])(void)  = {main, main, main, main, main, main, main, main, main, main, main, main};
 	
