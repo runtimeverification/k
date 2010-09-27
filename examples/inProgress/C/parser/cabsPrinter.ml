@@ -82,6 +82,16 @@ let printLnComment = ref false
 let printCounters = ref false
 let printComments = ref false
 *)
+
+let counter = ref 0
+
+(* why doesn't this work? *)
+(*let counterpp =
+	let retval = !counter in
+		counter := (retval + 1);
+		retval
+*)
+
 let rec commas lst = 
 	match lst with
 		| x::y::xs -> x ^ ", " ^ (commas (y::xs))
@@ -149,7 +159,7 @@ and printSingleName (a, b) =
 	(* commas ((printSpecifier a) :: (printName b) :: []) *) 
 and printAttr a b = wrap (a :: (printAttributeList b) :: []) "AttributeWrapper"
 and printBlock a = 
-	printAttr (wrap ((printBlockLabels a.blabels) :: (printStatementList a.bstmts) :: []) "Block") a.battrs
+	printAttr (wrap ((string_of_int (counter := (!counter + 1); !counter)) :: (printBlockLabels a.blabels) :: (printStatementList a.bstmts) :: []) "Block") a.battrs
 (*	
 and block = 
     { blabels: string list;

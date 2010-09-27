@@ -323,7 +323,7 @@ and block =
 	  bstmts: statement list
 	} 
 ***)
-	op Block : List{C} List{C} -> Block
+	op Block : Nat List{C} List{C} -> Block
 	
 ***(
 	(* GCC asm directives have lots of extra information to guide the optimizer *)

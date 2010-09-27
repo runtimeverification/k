@@ -34,6 +34,7 @@ kmod C-CONFIGURATION is
 					< control >
 						< local >
 							< nestingDepth > 0 </ nestingDepth >
+							< currentBlock > 0 </ currentBlock >
 							< structs > .Map </ structs >
 							< env > .Map </ env >
 							< types > .Map </ types >

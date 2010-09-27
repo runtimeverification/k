@@ -30,7 +30,7 @@ demo: $(DIST_DIR)/dist.done
 #$(DIST_DIR)/kcc -o ./a.out -s -d tests/unitTests/tesetQualifiers.c
 #$(DIST_DIR)/kcc -o ./a.out -s $(C_DIR)/twoFile1.c $(C_DIR)/twoFile2.c
 #@DEBUG=1 ./a.out
-	$(DIST_DIR)/kcc -s -o ./a.out tests/unitTests/hexNums.c
+	$(DIST_DIR)/kcc -d -s -o ./a.out programs/testStatic.c
 	@DEBUG=1 ./a.out
 # $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge03.c
 # ./a.out	
@@ -94,3 +94,4 @@ clean:
 	make -C gcc-test clean
 	make -C tests clean
 	rm -rf $(DIST_DIR)
+	rm -f ./*.tmp ./*.log ./*.cil ./*-gen.maude ./*.gen.maude ./*.pre.gen ./*.prepre.gen ./a.out

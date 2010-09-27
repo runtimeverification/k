@@ -247,7 +247,8 @@ mod COMMON-SEMANTICS-BLOCKS is
 		: KSentence [metadata "structural"] .
 	
 	mb [dissolve-block]: rule
-		< k > Block(?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > 
+		< k > Block(BlockNum:Nat, ?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > 
+		< currentBlock > ? => BlockNum:Nat </ currentBlock >
 		: KSentence [metadata "structural"] .
 endm
 
