@@ -211,7 +211,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                     </keywords>
                </T>
 
-  op bind : List{Exp} List{Internal} -> K
+  op bind : List{Exp} List{Exp} -> K
   op varBind : List{Exp} Exp List{Exp} -> K
   op consify : List{Exp} -> Internal
   op restore : Map -> K
@@ -223,8 +223,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
        <store_> .Map => loc(Loc) |-> I   </store> 
        <nextLoc> Loc => Loc +Rat 1     </nextLoc> [structural]
  
-  --- why the heck can't I have two nil lists next to each other without a kind error?  
-  rule bind(.List{Exp}, IL:List{Internal}) => .K [structural]
+  rule bind(.List{Exp}, .List{Exp}) => .K [structural]
   
   rule <k>       varBind(X:Id XL:List{Exp}, X':Id, I:Internal IL:List{Internal}) 
              =>  varBind(XL, X', IL)
