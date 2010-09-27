@@ -34,6 +34,8 @@ kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID
   macro ! E:Exp = [quote E]
   macro [define [X:Id EL1:List{Exp}] EL2:List{Exp}]
       = [define X [lambda [EL1] EL2]]
+  macro [define [X:Id EL1:List{Exp} * E:Exp] EL2:List{Exp}]
+      = [define X [lambda [EL1 * E] EL2]]
 endkm
 
 kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
@@ -82,6 +84,8 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                       | fac
                       | fac2
                       | envcap
+                      | var
+                      | var2
 
 
   macro foo = #[]
@@ -135,6 +139,15 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                  [display [id("nilarg")]]
                  [x 512]
                  [display [id("nilarg")]]
+  
+  macro var = [define [id("foo") id("x") * id("y")] 
+                         [display id("x")]
+                         [display id("y")]
+              ]
+              [id("foo") 1 2 3 ![4 5]]
+ 
+  macro var2 = [define [id("list") * id("x")] id("x")]
+               [display [id("list") 1 2 3 4 5]]
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -192,8 +205,8 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
                </T>
 
   op bind : List{Exp} List{Internal} -> K
-  op varBind : List{Exp} Exp List{Internal} -> K
-  op consify : List{Internal} -> Internal
+  op varBind : List{Exp} Exp List{Exp} -> K
+  op consify : List{Exp} -> Internal
   op restore : Map -> K
 
   rule <k>       bind(X:Id XL:List{Exp}, I:Internal IL:List{Internal}) 
@@ -219,14 +232,35 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
        <store_> .Map => loc(Loc) |-> I   </store> 
        <nextLoc> Loc => Loc +Rat 1     </nextLoc> [structural]
 
-  rule varBind(.List{Exp}, X:Id, IL:List{Internal}) => bind(X, consify(IL)) [structural]
+  rule <k> varBind(.List{Exp}, X:Id, .List{Exp}) => .K <_/k>
+       <env_>   .Map => X        |-> loc(Loc)  </env>
+       <store_>  .Map => loc(Loc) |-> vNil      </store>
+       <nextLoc>  Loc => Loc +Rat 1  </nextLoc>
+       [structural]
 
-  rule consify(.List{Internal}) => vNil [structural]
+  rule <k> varBind(.List{Exp}, X:Id, I:Internal IL:List{Internal}) => .K <_/k>
+       <env_>     .Map => X |-> loc(Loc)  </env>
+       <store_>   .Map => 
+            loc(Loc)        |-> cons(loc(Loc +Rat 1) * loc(Loc +Rat 2))
+            loc(Loc +Rat 1) |-> I       
+            loc(Loc +Rat 2) |-> consify(IL)      
+       </store>
+       <nextLoc>  Loc => Loc +Rat 3  </nextLoc>
+       [structural]
 
----  rule <k> bind(X:Id, (consify(I1:Internal I2:Internal IL:List{Internal}) =>     )) <_/k>
-   ---    <store_>            </store> 
-     ---  <nextLoc>           </nextLoc>
+  rule consify(.List{Exp}) => vNil [structural]
+  
+  rule <store_> loc(Loc':Rat)    |-> consify(I:Internal IL:List{Internal}) 
+             =>
+                loc(Loc')        |-> cons(loc(Loc) * loc(Loc +Rat 1))
+                loc(Loc)         |-> I       
+                loc(Loc +Rat 1)  |-> consify(IL) 
+       </store>
+       <nextLoc>  Loc => Loc +Rat 2  </nextLoc>  
+       [structural]  
 
+
+  --- restoring the environment
   ---might need one where restore is at beginning of k?
   rule <k> I:Internal ~> (restore(Env:Map) => .K) <_/k>
        <env> _ => Env </env> [structural]
