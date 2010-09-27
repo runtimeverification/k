@@ -43,7 +43,7 @@ kmod SKEME-INTERNAL is including K + SKEME-SYNTAX
   syntax Closure  ::=   closure( List{Exp} , List{Exp} , Map )
                       | varClosure( List{Exp} , Exp , List{Exp} , Map )
 
-  syntax Continuation ::= continuation(K, Map)
+  syntax Continuation ::= continuation( K , Map )
 
   syntax Internal ::=   vT | vF | vUnspec | vNil 
                       | vf( Float ) | vr( Rat ) | vc( Char ) | vn( Id )                                           
@@ -86,6 +86,7 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
                       | envcap
                       | var
                       | var2
+                      | call-cc-test
 
 
   macro foo = #[]
@@ -149,6 +150,11 @@ kmod SKEME-PROGRAMS is including SKEME-SYNTAX + SKEME-INTERNAL
   macro var2 = [define [id("list") * id("x")] id("x")]
                [display [id("list") 1 2 3 4 5]]
                [display [id("list")]]
+ 
+  macro call-cc-test = [define id("k") #f]
+                       [display [o+ 1 1 1 [call/cc [lambda[id("c")] [set! id("k") id("c")] 0]]]]
+                       [id("k") 3]
+
 endkm
 
 kmod SKEME-SEMANTICS is including SKEME-INTERNAL
@@ -295,6 +301,9 @@ kmod INTERN is including SKEME-SEMANTICS
   --- intern Closure
   rule intern(#procedure(Cl:Closure)) => Cl    [structural]
 
+  --- intern Continuation
+  rule intern(#continuation(Co:Continuation)) => Co    [structural]
+
   --- interning String
   rule intern( Str:String ) => internS(string(.Map # lengthString(Str)), Str, 0) [structural]  
 
@@ -419,6 +428,10 @@ kmod EXTERN is including SKEME-SEMANTICS
 
   rule extern(varClosure(EL1:List{Exp}, E:Exp, EL2:List{Exp}, CEnv:Map), M)        
     => #procedure(varClosure(EL1, E, EL2, CEnv)) [structural]
+
+  --- externing Continuation
+  rule extern(continuation(K:K, CEnv:Map), M)        
+    => #continuation(continuation(K, CEnv)) [structural]
 
   --- externing for Strings
   rule extern(string( M:Map # Len:NzInt ), Store:Map)
@@ -561,14 +574,23 @@ kmod APPLY-SEMANTICS is including SKEME-SEMANTICS
 endkm
 
 kmod CLOSURE-SEMANTICS is including APPLY-SEMANTICS
-     rule <k> apply(closure(EL1:List{Exp}, EL2:List{Exp}, CEnv:Map) IL:List{Internal})
+  rule <k> apply(closure(EL1:List{Exp}, EL2:List{Exp}, CEnv:Map) IL:List{Internal})
            => bind(EL1, IL) ~> [begin EL2] ~> restore(Env:Map) <_/k>
-          <env> Env => CEnv </env>
-
+       <env> Env => CEnv </env>
     
-     rule <k> apply(varClosure(EL1:List{Exp}, E:Exp, EL2:List{Exp}, CEnv:Map) IL:List{Internal})
+  rule <k> apply(varClosure(EL1:List{Exp}, E:Exp, EL2:List{Exp}, CEnv:Map) IL:List{Internal})
            => varBind(EL1, E, IL) ~> [begin EL2] ~> restore(Env:Map) <_/k>
-          <env> Env => CEnv </env>
+       <env> Env => CEnv </env>
+endkm
+
+kmod CALL-CC-SEMANTICS is including APPLY-SEMANTICS
+  rule <k>   apply(bCallCC I:Internal) ~> K:K => apply(I:Internal continuation(K, Env:Map)) ~> K </k>
+       <env> Env </env>
+
+  rule <k> apply(continuation(K':K, Env':Map) I:Internal) ~> K:K
+           => I ~> K' 
+       </k>
+       <env> _ => Env' </env>
 endkm
 
 kmod EVAL-SEMANTICS is including APPLY-SEMANTICS + EXTERN
@@ -693,7 +715,7 @@ endkm
 kmod SKEME is including 
     LITERAL-SEMANTICS + STRING-SEMANTICS + VECTOR-SEMANTICS 
   + ID-SEMANTICS + DEFINE-SEMANTICS + SET!-SEMANTICS + QUOTE-SEMANTICS + IF-SEMANTICS + BEGIN-SEMANTICS
-  + SKEME-PROGRAMS + LAMBDA-SEMANTICS + CLOSURE-SEMANTICS 
+  + SKEME-PROGRAMS + LAMBDA-SEMANTICS + CLOSURE-SEMANTICS + CALL-CC-SEMANTICS 
   + APPLY-SEMANTICS + EVAL-SEMANTICS + DISPLAY-SEMANTICS
   + EQUALITY-SEMANTICS + ARITHMETIC-SEMANTICS
   + LIST-OPS
