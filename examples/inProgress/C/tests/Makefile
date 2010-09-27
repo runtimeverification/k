@@ -20,9 +20,9 @@ CLEAN_TARGETS = $(foreach var, $(GOOD_DIRECTORIES) $(FAIL_DIRECTORIES), clean-$(
 
 all: $(PARSER) test 
 
-.INTERMEDIATE: test-%.kcc test-%.gcc output-% retval-%
-.PRECIOUS: test-%.kcc test-%.gcc output-% retval-% compare-%.pass
-.PHONY: all test clean prepare fast-test working
+#.INTERMEDIATE: test-%.kcc test-%.gcc output-% retval-%
+#.PRECIOUS: test-%.kcc test-%.gcc output-% retval-% compare-%.pass
+.PHONY: all test clean good fail clean-%
 
 test: good fail
 	@echo "Tests finished running."

@@ -2,6 +2,9 @@ use strict;
 use Time::HiRes qw(gettimeofday tv_interval);
 use File::Basename;
 use Text::Diff;
+use HTML::Entities;
+
+
 # use XML::Writer;
 
 my $numArgs = $#ARGV + 1;
@@ -86,12 +89,21 @@ sub performTest {
 	
 	my $gccRunOutput = `$gccFilename 2>&1`;
 	my $gccRunRetval = $?;
-	if (($kccRunRetval != $gccRunRetval) || ($kccRunOutput ne $gccRunOutput)){
-		my $msg = "Results were not identical.\n";
+	if (($kccRunRetval != $gccRunRetval)) {
+		my $msg = "Return values were not identical.\n";
 		$msg .= "kcc retval=$kccRunRetval\n";
 		$msg .= "gcc retval=$gccRunRetval\n";
-		#my $diff = diff(\$gccRunOutput, \$kccRunOutput, { STYLE => "Unified" });
-		$msg .= "(actual output elided)\n";
+		return reportFailure($fullFilename, $timer, $msg);
+	} elsif ($kccRunOutput ne $gccRunOutput) {
+		my $msg = "Outputs were not identical.\n";
+		my $diff = diff(\$gccRunOutput, \$kccRunOutput, { STYLE => "Unified" });
+		my $encodedDiff = HTML::Entities::encode_entities($diff);
+		# my $text = new XML::Code('=');
+		# $text->set_text($diff);
+		$msg .= "-----------------------------------------------\n";
+		$msg .= "$encodedDiff\n";
+		$msg .= "-----------------------------------------------\n";
+		#$msg .= "(actual output elided)\n";
 		return reportFailure($fullFilename, $timer, $msg);
 	}
 	
