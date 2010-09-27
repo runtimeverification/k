@@ -48,11 +48,6 @@ kmod C-CONFIGURATION is
 						</ local >
 						< k > .K </ k >
 						< currentTranslationUnit > "" </ currentTranslationUnit >
-						--- < typeSimplifier *> 
-							--- < specifier > .Bag </ specifier >
-							--- < storage > .Bag </ storage >
-							--- < modifier > .Bag </ modifier >
-						--- </ typeSimplifier *>
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						--- < holds > .Map </ holds >
 						< currentFunction > .K </ currentFunction >
@@ -65,7 +60,7 @@ kmod C-CONFIGURATION is
 					</ control >
 				</ thread * >
 			</ threads >
-			--- < unfinishedComputation > .K </ unfinishedComputation >
+			< unfinishedComputation > .K </ unfinishedComputation > --- this is here to make it easy to check if we've terminated.  it disappears when we terminate
 		</ T >
 		< files > .Map </ files > --- filenames to strings
 		< input > "" </ input >

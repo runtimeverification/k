@@ -1268,6 +1268,8 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> defineAndInit(X:Id, T:Type, figureInitializer(X:Id, T:Type, K:K), Loc:Nat)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< localVariables > Vars:Set (. => SetItem(X:Id)) </ localVariables >
+		if notBool X:Id in Vars:Set
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > defineAndInit(X:Id, ?, initializerValue(X:Id, T:Type, K:K), Loc:Nat)
