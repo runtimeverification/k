@@ -225,12 +225,6 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
  
   --- why the heck can't I have two nil lists next to each other without a kind error?  
   rule bind(.List{Exp}, IL:List{Internal}) => .K [structural]
-
-  syntax Bag ::= bindtest | restoretest
-  macro bindtest = <k> bind(id("a") id("b") id("c"), vr(1) vr(2) vr(3)) </k>
-                   <env>   .Map     </env>
-                   <store> .Map   </store>
-                   <nextLoc> 0  </nextLoc>
   
   rule <k>       varBind(X:Id XL:List{Exp}, X':Id, I:Internal IL:List{Internal}) 
              =>  varBind(XL, X', IL)
@@ -271,14 +265,6 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
   ---might need one where restore is at beginning of k?
   rule <k> I:Internal ~> (restore(Env:Map) => .K) <_/k>
        <env> _ => Env </env> [structural]
-
-  --- this is a nonsense k cell
-  macro restoretest = <k> vr(1) ~> restore(.Map) ~> vr(2) </k>
-                      <env> 
-                        id("a") |-> loc(0) 
-                        id("b") |-> loc(1) 
-                        id("c") |-> loc(2) 
-                      </env>
 endkm
 
 kmod INTERN is including SKEME-SEMANTICS
