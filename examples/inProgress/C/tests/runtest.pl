@@ -89,21 +89,21 @@ sub performTest {
 	
 	my $gccRunOutput = `$gccFilename 2>&1`;
 	my $gccRunRetval = $?;
-	if (($kccRunRetval != $gccRunRetval)) {
+	if (($kccRunRetval != $gccRunRetval) || ($kccRunOutput ne $gccRunOutput)) {
 		my $msg = "Return values were not identical.\n";
 		$msg .= "kcc retval=$kccRunRetval\n";
 		$msg .= "gcc retval=$gccRunRetval\n";
-		return reportFailure($fullFilename, $timer, $msg);
-	} elsif ($kccRunOutput ne $gccRunOutput) {
-		my $msg = "Outputs were not identical.\n";
-		my $diff = diff(\$gccRunOutput, \$kccRunOutput, { STYLE => "Unified" });
-		my $encodedDiff = HTML::Entities::encode_entities($diff);
-		# my $text = new XML::Code('=');
-		# $text->set_text($diff);
-		$msg .= "-----------------------------------------------\n";
-		$msg .= "$encodedDiff\n";
-		$msg .= "-----------------------------------------------\n";
-		#$msg .= "(actual output elided)\n";
+		if ($kccRunOutput ne $gccRunOutput) {
+			$msg .= "Outputs were not identical.\n";
+			my $diff = diff(\$gccRunOutput, \$kccRunOutput, { STYLE => "Unified" });
+			my $encodedDiff = HTML::Entities::encode_entities($diff);
+			# my $text = new XML::Code('=');
+			# $text->set_text($diff);
+			$msg .= "-----------------------------------------------\n";
+			$msg .= "$encodedDiff\n";
+			$msg .= "-----------------------------------------------\n";
+			#$msg .= "(actual output elided)\n";
+		}
 		return reportFailure($fullFilename, $timer, $msg);
 	}
 	

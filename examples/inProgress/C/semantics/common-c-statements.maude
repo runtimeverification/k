@@ -235,10 +235,12 @@ mod COMMON-SEMANTICS-BLOCKS is
 		< k > pushBlock => (.).K ...</ k > 
 		< local >
 			C:Bag
+			< localVariables > Vars:Set => (.).Set </ localVariables >
 			--- < nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
 		</ local >
 		< blockStack > (.).List => List(< stackFrame > C:Bag 
 		--- < nestingDepth > N:Nat </ nestingDepth > 
+		< localVariables > Vars:Set </ localVariables >
 		</ stackFrame >) ...</ blockStack >
 		: KSentence [metadata "structural"] .
 		
