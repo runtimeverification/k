@@ -171,6 +171,15 @@ mod COMMON-SEMANTICS-WRITING is
 		--- if notBool hasStaticType(T:Type) .
 	--- mb rule allocateType(Loc:Nat, (qualifiedType(T:Type, Static) => T:Type)) : KSentence [metadata "structural"] .
 	mb rule allocateType(Loc:Nat, T:Type) => alloc(Loc:Nat, value(byteSizeofType(T:Type))) : KSentence [metadata "structural"] .
+	mb rule 
+		< k > allocateTypeIfAbsent(Loc:Nat, T:Type) => alloc(Loc:Nat, value(byteSizeofType(T:Type))) ...</ k >
+		< mem > Mem:Map </ mem >
+		if notBool $hasMapping(Mem:Map, Loc:Nat)
+		: KSentence [metadata "structural"] .
+	mb rule 
+		< k > allocateTypeIfAbsent(Loc:Nat, T:Type) => (.).K ...</ k >
+		< mem >... Loc:Nat |-> ? ...</ mem >
+		: KSentence [metadata "structural"] .
 	
 	
 	mb rule

@@ -4,19 +4,21 @@ kmod C-CONFIGURATION is
 
 	configuration 
 		< T > 
-			< gotoMap > .Map </ gotoMap >
+			--- < gotoMap > .Map </ gotoMap >
 			< genv > .Map </ genv >
 			< gtypes > .Map </ gtypes >
 			< gstructs > .Map </ gstructs >
 			< mem > .Map </ mem >
 			< nextLoc > 0 </ nextLoc >
 			< freshNat > 0 </ freshNat >
-			< nextFile > 0 </ nextFile >
-			< malloced > .Map </ malloced >
+			--- < nextFile > 0 </ nextFile >
+			--- < malloced > .Map </ malloced >
 			< statics > .Map </ statics >
-			< sizes > .Map </ sizes >
+			< internalLocations > .Map </ internalLocations >
+			< externalLocations > .Map </ externalLocations >
+			--- < sizes > .Map </ sizes >
 			< openFiles > .Map </ openFiles >
-			< busy > .Bag </ busy >
+			--- < busy > .Bag </ busy >
 			< programText > .Map </ programText >
 			< externalDefinitions > .Map </ externalDefinitions >
 			< internalDefinitions > .Map </ internalDefinitions >
@@ -26,14 +28,13 @@ kmod C-CONFIGURATION is
 			< translationUnits > .Bag </ translationUnits >
 			< functionTranslationUnits > .Map </ functionTranslationUnits >
 			< declarationOrder > .Map </ declarationOrder >
-			< messages > .List </ messages >
-			--- < linkage > .Map </ linkage >
+			--- < messages > .List </ messages >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack >
 					< control >
 						< local >
-							< nestingDepth > 0 </ nestingDepth >
+							--- < nestingDepth > 0 </ nestingDepth >
 							< currentBlock > 0 </ currentBlock >
 							< structs > .Map </ structs >
 							< env > .Map </ env >
@@ -42,7 +43,7 @@ kmod C-CONFIGURATION is
 							< currentSubObject > .List </ currentSubObject >
 							< incompleteLength > 0 </ incompleteLength >
 							< savedInitialization > .K </ savedInitialization >
-							< initMaxes > .Map </ initMaxes >
+							--- < initMaxes > .Map </ initMaxes >
 						</ local >
 						< k > .K </ k >
 						< currentTranslationUnit > "" </ currentTranslationUnit >
@@ -52,7 +53,7 @@ kmod C-CONFIGURATION is
 							--- < modifier > .Bag </ modifier >
 						--- </ typeSimplifier *>
 						< locsWrittenTo > .Bag </ locsWrittenTo >
-						< holds > .Map </ holds >
+						--- < holds > .Map </ holds >
 						< currentFunction > .K </ currentFunction >
 						< currentProgramLoc > .K </ currentProgramLoc >
 						< type * > .K </ type * >
@@ -63,7 +64,7 @@ kmod C-CONFIGURATION is
 					</ control >
 				</ thread * >
 			</ threads >
-			< unfinishedComputation > .K </ unfinishedComputation >
+			--- < unfinishedComputation > .K </ unfinishedComputation >
 		</ T >
 		< files > .Map </ files > --- filenames to strings
 		< input > "" </ input >
