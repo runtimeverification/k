@@ -216,6 +216,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
   op consify : List{Exp} -> Internal
   op restore : Map -> K
 
+  --- rules for binding variables for closure application
   rule <k>       bind(X:Id XL:List{Exp}, I:Internal IL:List{Internal}) 
              =>  bind(XL, IL)
        <_/k>
@@ -225,6 +226,7 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
  
   rule bind(.List{Exp}, .List{Exp}) => .K [structural]
   
+  --- rules for variardic binding
   rule <k>       varBind(X:Id XL:List{Exp}, X':Id, I:Internal IL:List{Internal}) 
              =>  varBind(XL, X', IL)
        <_/k>
@@ -261,7 +263,6 @@ kmod SKEME-SEMANTICS is including SKEME-INTERNAL
 
 
   --- restoring the environment
-  ---might need one where restore is at beginning of k?
   rule <k> I:Internal ~> (restore(Env:Map) => .K) <_/k>
        <env> _ => Env </env> [structural]
 endkm
