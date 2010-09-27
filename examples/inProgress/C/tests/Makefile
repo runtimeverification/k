@@ -7,7 +7,7 @@ GCC ?= gcc -lm -Wall -Wextra -x c -O0 -U __GNUC__ -pedantic -std=c99
 #-Werror 
 PARSER ?= ../dist/cparser
 
-GOOD_DIRECTORIES = unitTests
+GOOD_DIRECTORIES = unitTests integration
 FAIL_DIRECTORIES = shouldFail
 
 #ALL_FILES = $(foreach var, $(GOOD_DIRECTORIES), $(wildcard $(var)/*.c))
