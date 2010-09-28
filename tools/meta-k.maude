@@ -286,37 +286,39 @@ fmod K-META-CONFIG is
   eq symbol none = '<_>_</_> .
 
   sort SplitCell .
-  op {_,_,_,_} : Constant Term Bool Ellipses -> SplitCell .
+  op {_,_,_,_} : Term Term Bool Ellipses -> SplitCell .
 
   op splitKCell : Term ~> SplitCell .
   eq splitKCell(Q[Label,Contents,Label]) = {Label, Contents,false, getEllipses(Q)} .
   eq splitKCell(Q[Q'[Label],Contents,Q'[Label]]) = {Label, Contents,true, getEllipses(Q)} .
+ ceq splitKCell(Q[Q'[Label,Label'],Contents,Q'[Label,Label']]) = {Q'[Label,Label'], Contents,false, getEllipses(Q)} if Q' = replaceS .
 
   op getEllipses : Qid -> Ellipses .
   ceq getEllipses(Q) = none if Q = symbol none .
 
   op getEllipses : SplitCell -> Ellipses .
-  eq getEllipses({Label,Contents,B,E}) = E .
+  eq getEllipses({T,Contents,B,E}) = E .
   op setEllipses : SplitCell Ellipses -> SplitCell .
-  eq setEllipses({Label,Contents,B,E}, E') = {Label,Contents,B,E'} .
+  eq setEllipses({T,Contents,B,E}, E') = {T,Contents,B,E'} .
 
   op getName : SplitCell -> Qid .
   eq getName({Label,Contents,B,E}) = getName(Label) .
+ ceq getName({Q'[Label,Label'],Contents,B,E}) = getName(Label) if Q' = replaceS .
   op setName : SplitCell Qid -> SplitCell .
-  eq setName({Label,Contents,B,E},Q) = {mkCellLabel(Q),Contents,B,E} .
+  eq setName({T,Contents,B,E},Q) = {mkCellLabel(Q),Contents,B,E} .
 
   op getContents : SplitCell -> Term .
-  eq getContents({Label,Contents,B,E}) = Contents .
+  eq getContents({T,Contents,B,E}) = Contents .
   op setContents : SplitCell Term -> SplitCell .
-  eq setContents({Label,Contents,B,E}, Contents') = {Label,Contents',B,E} .
+  eq setContents({T,Contents,B,E}, Contents') = {T,Contents',B,E} .
 
   op getMultiplicity : SplitCell -> Bool .
-  eq getMultiplicity({Label,Contents,B,E}) = B .
+  eq getMultiplicity({T,Contents,B,E}) = B .
   op setMultiplicity : SplitCell Bool -> SplitCell .
-  eq setMultiplicity({Label,Contents,B,E}, B') = {Label,Contents,B',E} .
+  eq setMultiplicity({T,Contents,B,E}, B') = {T,Contents,B',E} .
 
   op plugCell : SplitCell -> Term .
-  eq plugCell({Label,Contents,B,E}) = symbol E[cellLabel(Label,B),Contents,cellLabel(Label,B)] .
+  eq plugCell({T,Contents,B,E}) = symbol E[cellLabel(T,B),Contents,cellLabel(T,B)] .
 
   op mkCell : Qid Term -> Term .
   eq mkCell(Q,Contents) = plugCell({mkCellLabel(Q),Contents,false,none}) .
@@ -327,8 +329,8 @@ fmod K-META-CONFIG is
   op multiCellS : -> Qid .
   eq multiCellS = '_* .  
 
-  op cellLabel : Constant Bool -> Term .
-  eq cellLabel(Label,B) = if B then multiCellS[Label] else Label fi .
+  op cellLabel : Term Bool -> Term .
+  eq cellLabel(T,B) = if B then multiCellS[T] else T fi .
 
   ops Map Bag List Set : -> Sort .
   eq Map = 'Map . eq Bag = 'Bag . eq List = 'List . eq Set = 'Set .
