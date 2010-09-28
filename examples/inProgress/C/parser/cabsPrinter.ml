@@ -332,17 +332,17 @@ and printExpression exp =
 and getUnaryOperator op =
 	let name = (
 	match op with
-	| MINUS -> "-"
-	| PLUS -> "+"
-	| NOT -> "!"
-	| BNOT -> "~"
-	| MEMOF -> "*"
-	| ADDROF -> "&"
-	| PREINCR -> "++"
-	| PREDECR -> "--"
-	| POSINCR -> "++"
-	| POSDECR -> "--"
-	) in name ^ "_"
+	| MINUS -> "-" ^ "_"
+	| PLUS -> "+" ^ "_"
+	| NOT -> "!" ^ "_"
+	| BNOT -> "~" ^ "_"
+	| MEMOF -> "*" ^ "_"
+	| ADDROF -> "&" ^ "_"
+	| PREINCR -> "++" ^ "_"
+	| PREDECR -> "--" ^ "_"
+	| POSINCR -> "_" ^ "++"
+	| POSDECR -> "_" ^ "--"
+	) in name 	
 and getBinaryOperator op =
 	let name = (
 	match op with

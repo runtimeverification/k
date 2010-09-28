@@ -302,8 +302,12 @@ and ll or LL
 		if firstChar(S:String) =/=Bool "0" 
 		orBool lengthString(S:String) ==Bool 1 .
 		
-	eq HexConstant(S:String) = HexConstant(String2Rat(simplifyForHex(S:String), 16)) .
-	mb rule NoSuffix(HexConstant(I:Int)) =>
+		
+	op hexOrOctalConstant : K -> K .
+	eq HexConstant(S:String) = hexOrOctalConstant(String2Rat(simplifyForHex(S:String), 16)) .
+	eq OctalConstant(I:Int) = hexOrOctalConstant(truncRat(String2Rat(Rat2String(I:Int, 10), 8))) .
+	
+	mb rule NoSuffix(hexOrOctalConstant(I:Int)) =>
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
 		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
 		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
@@ -313,6 +317,44 @@ and ll or LL
 			tv(I:Int, no-type)
 		fi fi fi fi fi fi
 		: KSentence [metadata "structural"] .
+
+	mb rule U(hexOrOctalConstant(I:Int)) =>
+		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
+		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi fi fi
+		: KSentence [metadata "structural"] .
+		
+	mb rule L(hexOrOctalConstant(I:Int)) =>
+		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
+		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi fi fi fi
+		: KSentence [metadata "structural"] .
+		
+	mb rule UL(hexOrOctalConstant(I:Int)) =>
+		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi fi
+		: KSentence [metadata "structural"] .
+		
+	mb rule LL(hexOrOctalConstant(I:Int)) =>
+		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi fi
+		: KSentence [metadata "structural"] .
+	
+	mb rule ULL(hexOrOctalConstant(I:Int)) =>
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi
+		: KSentence [metadata "structural"] .
+		
 		
 	mb rule U(DecimalConstant(I:Int)) => 
 		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
