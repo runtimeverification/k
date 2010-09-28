@@ -19,7 +19,7 @@ foreach my $filename (@ARGV) {
 			# push(@programNames, "$1");
 			next;
 		}
-		if ($line =~ m/^eq (.*?)= /) { # if we have an equation, we're done with operators
+		if ($line =~ m/^eq(.*?)=/) { # if we have an equation, we're done with operators
 			push(@programNames, $1);
 			push(@programs, $line);
 			last;
@@ -47,7 +47,7 @@ print ')';
 sub printNested {
 	my ($name, @rest) = (@_);
 
-	print "$name,, ";
+	print "($name),, ";
 	#print @rest;
 	if ($name != @rest) {
 		printNested(@rest);
