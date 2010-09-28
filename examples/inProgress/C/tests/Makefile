@@ -18,7 +18,7 @@ ALL_DIRECTORIES = $(GOOD_DIRECTORIES) $(FAIL_DIRECTORIES) $(INTEGRATION_DIRECTOR
 #ALL_TARGETS = $(foreach var,  $(filter-out $(DONT_RUN), $(ALL_PROGRAMS)), $(dir $(var))compare-$(notdir $(var)).pass)
 GOOD_TARGETS = $(foreach var,  $(GOOD_DIRECTORIES), results-pass-$(var).xml)
 FAIL_TARGETS = $(foreach var,  $(FAIL_DIRECTORIES), results-fail-$(var).xml)
-INTEGRATION_TARGETS = $(foreach var, $INTEGRATION_DIRECTORIES), results-pass-$(var).xml)
+INTEGRATION_TARGETS = $(foreach var, $(INTEGRATION_DIRECTORIES), results-pass-$(var).xml)
 CLEAN_TARGETS = $(foreach var, $(ALL_DIRECTORIES), clean-$(var))
 
 all: $(PARSER) test 
