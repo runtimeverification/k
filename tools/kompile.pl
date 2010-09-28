@@ -208,7 +208,7 @@ my $latex_special = '[\\#\\$\\{\\}\\[\\]\\&\\^\\_\\%\\~\\\\]';
 my $kvar  = "[A-Za-z][A-Za-z0-9]*[']*";
 
 # Pattern matched by K sorts
-my $ksort = "[A-Z\\?\\!][A-Za-z0-9\\`\\+\\?\\!]*(?:\\{[A-Za-z0-9\\`\\+\\?\\!]*\\})?";
+my $ksort = "[A-Z][A-Za-z0-9\\`\\+\\?\\!]*(?:\\{[A-Za-z0-9\\`\\+\\?\\!]*\\})?";
 
 # Pattern matched by K variables
 my $klabel_body = "$maude_backquoted\_$maude_backquoted";
