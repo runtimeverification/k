@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+# Tool to load up all the kaskell files and launch maude in interpretive mode
+
 
 # Get the directory of this script (works even in Mac OSX)
 SCRIPT_DIR=$(

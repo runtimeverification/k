@@ -32,18 +32,17 @@ mod HASKELL-SYNTAX is
     ---- including PL-RANDOM .
     ---- including PL-ID .
 
-  --- Some base Haskell sorts
+    --- Some base Haskell sorts
     sorts HsString HsInt HsChar HsInteger HsRational .
 
---- Sort present in annotated Haskell syntax
 ***(
     data Boxed = Boxed | Unboxed
 ***)
-
+    --- Sort present in annotated Haskell syntax
     sort Boxed .
     ops Boxed Unboxed : -> Boxed [ctor] .
 
---- Sort present in SrcLoc
+
 ***(
 data SrcLoc = SrcLoc
     { srcFilename :: String
@@ -51,7 +50,7 @@ data SrcLoc = SrcLoc
     , srcColumn :: Int
     }
 ***)
-
+    --- Sort present in SrcLoc
     sort SrcLoc .
     op SrcLoc _ _ _ : String HsInt HsInt -> SrcLoc [ctor] .
 
@@ -95,82 +94,11 @@ data SrcLoc = SrcLoc
     --   * HSP-style XML expressions and patterns (XmlSyntax)
     --
     -----------------------------------------------------------------------------
+***)
 
-    module Language.Haskell.Exts.Syntax (
-        -- * Modules
-        Module(..), WarningText(..), ExportSpec(..),
-        ImportDecl(..), ImportSpec(..), Assoc(..),
-        -- * Declarations
-        Decl(..), Binds(..), IPBind(..),
-        -- ** Type classes and instances
-        ClassDecl(..), InstDecl(..), Deriving,
-        -- ** Data type declarations
-        DataOrNew(..), ConDecl(..), QualConDecl(..), GadtDecl(..), BangType(..),
-        -- ** Function bindings
-        Match(..), Rhs(..), GuardedRhs(..),
-        -- * Class Assertions and Contexts
-        Context, FunDep(..), Asst(..),
-        -- * Types
-        Type(..), Boxed(..), Kind(..), TyVarBind(..),
-        -- * Expressions
-        Exp(..), Stmt(..), QualStmt(..), FieldUpdate(..),
-        Alt(..), GuardedAlts(..), GuardedAlt(..), XAttr(..),
-        -- * Patterns
-        Pat(..), PatField(..), PXAttr(..), RPat(..), RPatOp(..),
-        -- * Literals
-        Literal(..),
-        -- * Variables, Constructors and Operators
-        ModuleName(..), QName(..), Name(..), QOp(..), Op(..),
-        SpecialCon(..), CName(..), IPName(..), XName(..),
-
-        -- * Template Haskell
-        Bracket(..), Splice(..),
-
-        -- * FFI
-        Safety(..), CallConv(..),
-
-        -- * Pragmas
-        ModulePragma(..), Tool(..),
-        Rule(..), RuleVar(..), Activation(..),
-        Annotation(..),
-
-        -- * Builtin names
-
-        -- ** Modules
-        prelude_mod, main_mod,
-        -- ** Main function of a program
-        main_name,
-        -- ** Constructors
-        unit_con_name, tuple_con_name, list_cons_name, unboxed_singleton_con_name,
-        unit_con, tuple_con, unboxed_singleton_con,
-        -- ** Special identifiers
-        as_name, qualified_name, hiding_name, minus_name, bang_name, dot_name, star_name,
-        export_name, safe_name, unsafe_name, threadsafe_name, stdcall_name, ccall_name,
-        -- ** Type constructors
-        unit_tycon_name, fun_tycon_name, list_tycon_name, tuple_tycon_name, unboxed_singleton_tycon_name,
-        unit_tycon, fun_tycon, list_tycon, tuple_tycon, unboxed_singleton_tycon,
-
-        -- * Source coordinates
-        SrcLoc(..),
-      ) where
-
-
-    #ifdef __GLASGOW_HASKELL__
-    #ifdef BASE4
-    import Data.Data
-    #else
-    import Data.Generics (Data(..),Typeable(..))
-    #endif
-    #endif
-
-    import Language.Haskell.Exts.SrcLoc (SrcLoc(..))
-
-    import Language.Haskell.Exts.Annotated.Syntax (Boxed(..), Tool(..))
-
-
+***(
     -- | The name of a Haskell module.
     newtype ModuleName = ModuleName String
-
 ***)
 
     sort ModuleName .
