@@ -1181,13 +1181,31 @@ sub add_tokens {
 # Put all operations in one string
     $_ = "@ops";
 
+    # Exclude strings because they can contain whitespaces
+    my $strings = "";
+    s/(\".*?\")/{$strings .= "$1!&!&!"; } "!&!&!"/gse;
+    my @strs = split(/!&!&!/, $strings);
+    
 # Keep those operation names which have no _ or ` as tokens
     my @tokens = grep(!/[_`]/,split(/\s+/s));
 
+#    print "TOKENS: @tokens\n";
 # Extract all tokens that appear in operations
     @tokens = (@tokens, /$maude_special?($maude_unspecial+)/g) ;
 
-# Add all meaningful tokens in @tokens to @all_tokens
+    # Put the strings back
+    my $index = 0;
+    foreach my $token (@tokens)
+    {
+	while ($token =~ /!&!&!/g)
+	{
+	    $token =~ s/!&!&!/$strs[$index]/;
+	    $index ++;
+	}
+    }
+    
+    
+# Add allmeaningful tokens in @tokens to @all_tokens
     @all_tokens = set(@all_tokens, grep(/\W/, set(@tokens)));
 }
 
