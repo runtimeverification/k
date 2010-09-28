@@ -68,6 +68,9 @@ $(DIST_DIR)/dist.tested: $(DIST_DIR)/dist.done
 	
 test: dist
 	@make -C tests
+
+integration-test: dist
+	@make -C tests integration
 	
 fix: 
 	maude $(SEMANTICS_DIR)/programs-gen.maude
