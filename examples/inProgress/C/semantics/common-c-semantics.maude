@@ -1056,6 +1056,18 @@ mod COMMON-GLOBAL-DECLARATION is
 		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
 		andBool hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
+	--- fixme there are still no nested functions though, right?
+	mb rule
+		< k > declare(typedDeclaration(T:Type, X:Id), NoInit) 
+			=> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, unqualifyType(T:Type))
+		...</ k >
+		< externalLocations >... X:Id |-> Loc:Nat ...</ externalLocations > 
+		< currentFunction > F:K </ currentFunction >
+		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		andBool hasFunctionType(T:Type)
+		andBool F:K =/=Bool File-Scope
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declare(typedDeclaration(T:Type, X:Id), K:K)
 			=> declareExternalVariable(X:Id, T:Type, K:K)

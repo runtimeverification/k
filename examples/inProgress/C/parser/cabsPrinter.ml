@@ -108,13 +108,13 @@ let wrapString d1 d2 = d2 ^ paren(d1)
  * treated as multi-digit numbers with radix given by the bit width of
  * the specified type (either char or wchar_t). *)
 (* CME: actually, this is based on the code in CIL *)
-let rec reduce_multichar typ : int64 list -> int64 =
+let rec reduce_multichar : int64 list -> int64 =
   let radix = 256 in
   List.fold_left
     (fun acc -> Int64.add (Int64.shift_left acc radix))
     Int64.zero
 and interpret_character_constant char_list =
-  let value = reduce_multichar () char_list in
+  let value = reduce_multichar char_list in
   Int64.to_int value
 
 let printFlatList f x =
@@ -253,17 +253,24 @@ and printConstant const =
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
 	| CONST_STRING s -> wrap (("\"" ^ String.escaped s ^ "\"") :: []) "StringLiteral"
 	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
-and splitNumber (xs, i) =
+and splitFloat (xs, i) =
 	let lastOne = if (String.length i > 1) then String.uppercase (Str.last_chars i 1) else ("x") in
 	let newi = (Str.string_before i (String.length i - 1)) in
 	match lastOne with
 	| "x" -> (xs, i)
-	| "U" -> splitNumber("U" :: xs, newi)
-	| "L" -> splitNumber("L" :: xs, newi)
-	| "F" -> splitNumber("F" :: xs, newi)
+	| "L" -> splitFloat("L" :: xs, newi)
+	| "F" -> splitFloat("F" :: xs, newi)
+	| _ -> (xs, i)
+and splitInt (xs, i) =
+	let lastOne = if (String.length i > 1) then String.uppercase (Str.last_chars i 1) else ("x") in
+	let newi = (Str.string_before i (String.length i - 1)) in
+	match lastOne with
+	| "x" -> (xs, i)
+	| "U" -> splitInt("U" :: xs, newi)
+	| "L" -> splitInt("L" :: xs, newi)
 	| _ -> (xs, i)
 and printFloatLiteral r =
-	let (tag, r) = splitNumber ([], r) in
+	let (tag, r) = splitFloat ([], r) in
 	let num = (wrapString r "FloatConstant")
 	in
 	match tag with
@@ -271,7 +278,7 @@ and printFloatLiteral r =
 	| "L" :: [] -> wrapString num "L"
 	| [] -> wrapString num "NoSuffix"
 and printIntLiteral i =
-	let (tag, i) = splitNumber ([], i) in
+	let (tag, i) = splitInt ([], i) in
 	let num = (
 		let firstTwo = if (String.length i > 2) then (Str.first_chars i 2) else ("xx") in
 		let firstOne = if (String.length i > 1) then (Str.first_chars i 1) else ("x") in
@@ -369,7 +376,7 @@ and getBinaryOperator op =
 	| SHL_ASSIGN -> "<<="
 	| SHR_ASSIGN -> ">>="
 	) in "_" ^ name ^ "_"
-and printSeq s1 s2 =
+and printSeq _ _ =
 	"Seq"
 and printIf exp s1 s2 =
 	wrap ((printExpression exp) :: (printStatement s1) :: (printStatement s2) :: []) "IfThenElse"
@@ -478,7 +485,7 @@ and printSpecElem a =
 		| CV_CONST -> "Const"
 		| CV_VOLATILE -> "Volatile"
 		| CV_RESTRICT -> "Restrict")
-	| SpecAttr al -> "Attribute" (* print_attribute al;*)
+	| SpecAttr _ -> "Attribute" (* print_attribute al;*)
 	| SpecStorage sto ->
 		(match sto with
 		| NO_STORAGE -> "NoStorage"

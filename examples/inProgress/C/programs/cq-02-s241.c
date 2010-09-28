@@ -1,9 +1,8 @@
 #include "cq-header.h"
 
 
-sec(pd0)                   /* 2.4.1 Integer constants
+sec(struct defs *pd0)                   /* 2.4.1 Integer constants
                                2.4.2 Explicit long constants  */
-struct defs *pd0;
 {
    long pow2();
    static char s241er[] = "s241,er%d\n";

@@ -30,7 +30,6 @@ int zerofill(char* x) {
    int j;
 
    for (j=0; j<256; j++) *x++ = 0;
-   return 0;
 }
 int sumof(char* x) {
    char *p;
@@ -172,7 +171,6 @@ testev(){
 setev(){                  /* Sets an external variable. Used  */
    extern int extvar;     /* by s4, and should be compiled    */
    extvar = 1066;         /* separately from s4.              */
-   return 0;
 }
 
 
@@ -187,5 +185,4 @@ int x, *y;
 {
    x = 3;
    *y = 2;
-   return 0;
 }
