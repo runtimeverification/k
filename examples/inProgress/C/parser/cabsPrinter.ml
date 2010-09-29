@@ -102,6 +102,29 @@ let parenList l = paren(commas(l))
 let wrap (d1) (d2)  = d2 ^ parenList d1
 let wrapString d1 d2 = d2 ^ paren(d1)
 
+(* this is from cil *)
+let escape_char = function
+  | '\007' -> "\\a"
+  | '\b' -> "\\b"
+  | '\t' -> "\\t"
+  | '\n' -> "\\n"
+  | '\011' -> "\\v"
+  | '\012' -> "\\f"
+  | '\r' -> "\\r"
+  | '"' -> "\\\""
+  | '\'' -> "\\'"
+  | '\\' -> "\\\\"
+  | ' ' .. '~' as printable -> String.make 1 printable
+  | unprintable -> Printf.sprintf "\\%03o" (Char.code unprintable)
+
+(* this is from cil *)
+let escape_string str =
+  let length = String.length str in
+  let buffer = Buffer.create length in
+  for index = 0 to length - 1 do
+    Buffer.add_string buffer (escape_char (String.get str index))
+  done;
+  Buffer.contents buffer
 
 (* Given a character constant (like 'a' or 'abc') as a list of 64-bit
  * values, turn it into a CIL constant.  Multi-character constants are
@@ -121,7 +144,7 @@ let printFlatList f x =
 	paren (List.fold_left (fun aux arg -> aux ^ " :: " ^ paren (f arg)) "Nil" x)
 
 let toString s =
-	"\"" ^ String.escaped s ^ "\""
+	"\"" ^ (escape_string s) ^ "\""
 	
 let rec cabsToString ((fname, defs) : file) (fileContents : string) = 
 		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "TranslationUnit"
@@ -251,7 +274,7 @@ and printConstant const =
 	| CONST_FLOAT r -> wrap ((printFloatLiteral r) :: []) "FloatLiteral"
 	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
 	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
-	| CONST_STRING s -> wrap (("\"" ^ String.escaped s ^ "\"") :: []) "StringLiteral"
+	| CONST_STRING s -> wrap (("\"" ^ escape_string s ^ "\"") :: []) "StringLiteral"
 	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
 and splitFloat (xs, i) =
 	let lastOne = if (String.length i > 1) then String.uppercase (Str.last_chars i 1) else ("x") in

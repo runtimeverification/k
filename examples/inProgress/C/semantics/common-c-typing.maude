@@ -727,10 +727,10 @@ mod COMMON-C-TYPING is
 	--- mb rule
 		--- < type > [atv(?, T:Type) => T:Type] </ type >
 		--- : KSentence [metadata "structural"] .
-	--- --- c99 6.4.5
-	--- mb rule
-		--- < type > [S:String => arrayType(char, lengthString(S:String))] </ type >
-		--- : KSentence [metadata "structural"] .
+	--- c99 6.4.5
+	mb rule
+		< type > Constant(StringLiteral(S:String)) => arrayType(char, lengthString(S:String) +Nat 1) </ type >
+		: KSentence [metadata "structural"] .
 	mb rule
 		< type > K:K => T:Type ...</ type >
 		< types >... K:K |-> T:Type ...</ types >
