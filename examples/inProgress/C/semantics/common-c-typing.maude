@@ -414,6 +414,8 @@ mod COMMON-C-TYPING is
 		= isTypeCompatible(T:Type, T':Type) .
 	eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
 		= isTypeCompatible(pointerType(T:Type), T':Type) .
+	eq isTypeCompatible(incompleteArrayType(T:Type), T':Type)
+		= isTypeCompatible(pointerType(T:Type), T':Type) .
 	eq isTypeCompatible(T:Type, arrayType(T':Type, ?))
 		= isTypeCompatible(T:Type, pointerType(T':Type)) .
 	eq isTypeCompatible(functionType(T1:Type, (T':Type :: L:List{Type})), functionType(T2:Type, (T'':Type :: L':List{Type})))

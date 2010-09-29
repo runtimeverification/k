@@ -85,7 +85,7 @@ let rec processOneFile (cabs: Cabs.file) =
 			while true do
 				let line = input_line ic in  (* read line from in_channel and discard \n *)
 				if (String.length line < 5 or Str.first_chars line 5 <> "# 1 \"") then
-					fileContents := (!fileContents ^ line);
+					fileContents := (!fileContents ^ line ^ "\n");
 			done
 		with e ->                      (* some unexpected exception occurs *)
 			close_in_noerr ic;           (* emergency closing *)

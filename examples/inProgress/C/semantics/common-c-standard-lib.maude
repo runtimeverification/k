@@ -210,21 +210,21 @@ mod COMMON-C-STANDARD-LIBRARY is
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		if T:Type ==Bool cfg:sizeut
 	: KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- --- Returns a pseudo-random integral number in the range 0 to RAND_MAX.
+	--------------------------------------------
+	--- Returns a pseudo-random integral number in the range 0 to RAND_MAX.
 	
-	--- mb [rand-is-value]: rule
-		--- < k > [rand => builtin(rand)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --- unsignedIntegerTypes contains T:Type
-	--- --- (2 ^Nat absInt(numBits(int)))
-	--- --- fixme should use RAND_MAX
-	--- mb [rand]: rule
-		--- < k > [application(builtin(rand), .List{K}) => 
-		--- tv(absInt(randomRandom(Fresh:Nat)) %Int max(int), int)
-		--- ] ...</ k >
-		--- < freshNat > [Fresh:Nat => sNat(Fresh:Nat)] </ freshNat >
-	--- : KSentence [metadata "structural"] .
+	mb [rand-is-value]: rule
+		< k > Identifier("rand") => builtin(Identifier("rand")) ...</ k >
+	: KSentence [metadata "structural"] .
+	--- unsignedIntegerTypes contains T:Type
+	--- (2 ^Nat absInt(numBits(int)))
+	--- fixme should use RAND_MAX
+	mb [rand]: rule
+		< k > Call(builtin(Identifier("rand")), Nil) 
+			=> tv(absInt(randomRandom(Fresh:Nat)) %Int max(int), int)
+		...</ k >
+		< freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
+	: KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [free-is-value]: rule
 		--- < k > [free => builtin(free)] ...</ k >

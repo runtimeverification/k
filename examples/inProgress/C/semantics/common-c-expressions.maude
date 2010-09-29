@@ -495,17 +495,17 @@ endm
 mod COMMON-SEMANTICS-BITWISE is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	--- --- c99 6.5.7:3 The integer promotions are performed on each of the operands. The type of the result is that of the promoted left operand. If the value of the right operand is negative or is greater than or equal to the width of the promoted left operand, the behavior is undefined.
-	--- mb rule [tv(I:Int, T:Type) << tv(N:Nat, T':Type) => leftShiftInterpret(T:Type, I:Int <<Int N:Nat, tv(I:Int, T:Type))] 
-		--- if hasIntegerType(T:Type)
-		--- andBool hasIntegerType(T':Type)
-		--- andBool N:Nat <Int numBits(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [tv(I:Int, T:Type) >> tv(N:Nat, T':Type) => rightShiftInterpret(T:Type, I:Int >>Int N:Nat)] 
-		--- if hasIntegerType(T:Type)
-		--- andBool hasIntegerType(T':Type)
-		--- andBool N:Nat <Int numBits(T:Type)
-		--- : KSentence [metadata "structural"] .
+	--- c99 6.5.7:3 The integer promotions are performed on each of the operands. The type of the result is that of the promoted left operand. If the value of the right operand is negative or is greater than or equal to the width of the promoted left operand, the behavior is undefined.
+	mb rule tv(I:Int, T:Type) << tv(N:Nat, T':Type) => leftShiftInterpret(T:Type, I:Int <<Int N:Nat, tv(I:Int, T:Type))
+		if hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		andBool N:Nat <Int numBits(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I:Int, T:Type) >> tv(N:Nat, T':Type) => rightShiftInterpret(T:Type, I:Int >>Int N:Nat) 
+		if hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		andBool N:Nat <Int numBits(T:Type)
+		: KSentence [metadata "structural"] .
 		
 	--- --- fixme As best I can tell, these bitwise operations cannot overflow.  I can't figure out where in the standard it says this though.
 	--- --- fixme result will be heated and may turn into a different kind of value
@@ -536,18 +536,18 @@ mod COMMON-SEMANTICS-BITWISE is
 		--- --- if hasIntegerType(T:Type)
 		--- --- : KSentence [metadata "structural"] .
 		
-	--- mb rule [tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int |Int I2:Int)] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int &Int I2:Int)] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [~ tv(I:Int, T:Type) => arithInterpret(T:Type, ~Int I:Int)] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int xorInt I2:Int)] 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int |Int I2:Int)
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) & tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int &Int I2:Int) 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule ~ tv(I:Int, T:Type) => arithInterpret(T:Type, ~Int I:Int)
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int xorInt I2:Int) 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is

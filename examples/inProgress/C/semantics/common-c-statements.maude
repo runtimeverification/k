@@ -37,6 +37,22 @@ mod COMMON-SEMANTICS-WHILE is
 		: KSentence [metadata "structural"] .
 endm
 
+mod COMMON-SEMANTICS-DO-WHILE is
+	including COMMON-INCLUDE .
+	
+	mb [do-while-mark]: rule
+		< k > DoWhile(B:Expression, S:Statement) ~> K:K
+			=> loopMarked ~> DoWhile(B:Expression, S:Statement) ~> popLoop
+		</ k >
+		< loopStack > (.).List => ListItem(K:K) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+	mb [do-while]: rule
+		< k > loopMarked ~> DoWhile(B:Expression, S:Statement)
+			=> S:Statement ~> IfThenElse(B:Expression, (loopMarked ~> DoWhile(B:Expression, S:Statement)), Nop)
+		...</ k >
+		: KSentence [metadata "structural"] .
+endm
+
 mod COMMON-SEMANTICS-FOR is
 	including COMMON-INCLUDE .
 	
@@ -265,6 +281,7 @@ mod COMMON-C-STATEMENTS is
 	including COMMON-SEMANTICS-GOTO .
 	including COMMON-SEMANTICS-RETURN .
 	including COMMON-SEMANTICS-BLOCKS .
+	including COMMON-SEMANTICS-DO-WHILE .
 	
 	mb rule Nop => . : KSentence [metadata "structural"] .
 	--- mb rule [Block`(`) => .K] : KSentence [metadata "structural"] .
@@ -284,10 +301,10 @@ mod COMMON-C-STATEMENTS is
 		< loopStack > ListItem(K:K) => (.).List ...</ loopStack >
 		: KSentence [metadata "structural"] .
 		
-	--- mb [break]: rule
-		--- < k > [break ; ~> ? => K:K] </ k >
-		--- < loopStack > [ListItem(K:K) => .List] ...</ loopStack >
-		--- : KSentence [metadata "computational rule"] . --- nondet
+	mb [break]: rule
+		< k > Break ~> ? => K:K </ k >
+		< loopStack > ListItem(K:K) => (.).List ...</ loopStack >
+		: KSentence [metadata "computational rule"] . --- nondet
 	
 	--- --- fixme not sure about this, isn't it possible for K:K to grab greedily?
 	--- mb [continue]: rule

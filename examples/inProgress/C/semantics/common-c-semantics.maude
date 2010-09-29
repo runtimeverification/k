@@ -236,8 +236,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op cast : K K -> K [metadata "strict"] . --- as described in 6.3
 	op arithInterpret : Type BaseValue -> K . --- interpret the result of arithmetic as in 6.5.4
 	op interpret : Type K -> K . --- interpret the values of reading from mem
-	--- op leftShiftInterpret : Type BaseValue K -> K .
-	--- op rightShiftInterpret : Type BaseValue -> K .
+	op leftShiftInterpret : Type BaseValue K -> K .
+	op rightShiftInterpret : Type BaseValue -> K .
 	--- op addLocals : Nat -> K .			
 	op integerTypes : -> Set [memo] .
 	op unsignedIntegerTypes : -> Set [memo] .
@@ -551,6 +551,9 @@ mod COMMON-PARAMETER-BINDING is
 	
 	mb [bind-coerce-array]: rule
 		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
+		: KSentence [metadata "structural"] .
+	mb [bind-coerce-incompleteArray]: rule
+		bind(L:List{C}, (?:List{Type} :: typedDeclaration((incompleteArrayType(T:Type) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
 		: KSentence [metadata "structural"] .
 		
 	mb [bind-one]: rule

@@ -12,7 +12,7 @@ kmod C-CONFIGURATION is
 			< nextLoc > 0 </ nextLoc >
 			< freshNat > 0 </ freshNat >
 			--- < nextFile > 0 </ nextFile >
-			--- < malloced > .Map </ malloced >
+			< malloced > .Map </ malloced >
 			< statics > .Map </ statics >
 			< internalLocations > .Map </ internalLocations >
 			< externalLocations > .Map </ externalLocations >

@@ -470,21 +470,21 @@ piece((piece(piece(piece(piece(piece(piece(piece(0, 1) bit:: piece(1 &Nat unknow
 	--- --- it's also wrong
 	--- mb rule [tv(I:Int, bitfieldType(T:Type, N:Nat)) => tv(I:Int, T:Type)] : KSentence [metadata "structural"] .
 		
-	--- --- c99 6.5.7:4 The result of E1 << E2 is E1 left-shifted E2 bit positions; vacated bits are filled with zeros. If E1 has an unsigned type, the value of the result is E1 times 2^(E2), reduced modulo one more than the maximum value representable in the result type. If E1 has a signed type and nonnegative value, and E1 times 2^(E2) is representable in the result type, then that is the resulting value; otherwise, the behavior is undefined. 
-	--- --- e1 = 2147483647; e1 * 2^(1) = 2147483647 * 2 = 4294967294
-	--- mb rule [leftShiftInterpret(T:Type, I:Int, tv(E1:Int, T:Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)]
-		--- if unsignedIntegerTypes contains T:Type
-		--- : KSentence [metadata "structural"] .
-	--- mb rule [leftShiftInterpret(T:Type, I:Int, tv(E1:Nat, T:Type)) => interpret(T:Type, I:Int)]
-		--- if hasIntegerType(T:Type)
-		--- andBool notBool (unsignedIntegerTypes contains T:Type)
-		--- andBool I:Int <=Int (2 ^Nat absInt(numBits(T:Type)))
-		--- : KSentence [metadata "structural"] .
+	--- c99 6.5.7:4 The result of E1 << E2 is E1 left-shifted E2 bit positions; vacated bits are filled with zeros. If E1 has an unsigned type, the value of the result is E1 times 2^(E2), reduced modulo one more than the maximum value representable in the result type. If E1 has a signed type and nonnegative value, and E1 times 2^(E2) is representable in the result type, then that is the resulting value; otherwise, the behavior is undefined. 
+	--- e1 = 2147483647; e1 * 2^(1) = 2147483647 * 2 = 4294967294
+	mb rule leftShiftInterpret(T:Type, I:Int, tv(E1:Int, T:Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
+		if unsignedIntegerTypes contains T:Type
+		: KSentence [metadata "structural"] .
+	mb rule leftShiftInterpret(T:Type, I:Int, tv(E1:Nat, T:Type)) => interpret(T:Type, I:Int)
+		if hasIntegerType(T:Type)
+		andBool notBool (unsignedIntegerTypes contains T:Type)
+		andBool I:Int <=Int (2 ^Nat absInt(numBits(T:Type)))
+		: KSentence [metadata "structural"] .
 		
-	--- --- c99 6.5.7:5 The result of E1 >> E2 is E1 right-shifted E2 bit positions. If E1 has an unsigned type or if E1 has a signed type and a nonnegative value, the value of the result is the integral part of the quotient of E1 / 2^(E2). If E1 has a signed type and a negative value, the resulting value is implementation-defined.
-	--- mb rule [rightShiftInterpret(T:Type, I:Int) => tv(I:Int, T:Type)]
-		--- if integerTypes contains T:Type
-		--- : KSentence [metadata "structural"] .
+	--- c99 6.5.7:5 The result of E1 >> E2 is E1 right-shifted E2 bit positions. If E1 has an unsigned type or if E1 has a signed type and a nonnegative value, the value of the result is the integral part of the quotient of E1 / 2^(E2). If E1 has a signed type and a negative value, the resulting value is implementation-defined.
+	mb rule rightShiftInterpret(T:Type, I:Int) => tv(I:Int, T:Type)
+		if integerTypes contains T:Type
+		: KSentence [metadata "structural"] .
 	
 	--- fixme
 	mb rule arithInterpret(T:Type, F:Float) => tv(F:Float, T:Type)
