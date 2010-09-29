@@ -12,13 +12,22 @@
 		--- : KSentence [metadata "computational rule"] . --- nondet
 		
 	mb [if-then-else-true]: rule
-		< k > IfThenElse(tv(V:BaseValue, ?), S:K, S':K) => sequencePoint ~> S:K ...</ k >
-		if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool sym(0) +Nat 0 orBool V:BaseValue ==Bool 0.0)
+		< k > IfThenElse(tv(1, int), S:K, ?) => sequencePoint ~> S:K ...</ k >
 		: KSentence [metadata "computational rule"] . --- nondet
 	mb [if-then-else-false]: rule
-		< k > IfThenElse(tv(V:BaseValue, ?), S:K, S':K) => sequencePoint ~> S':K ...</ k >
-		if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool sym(0) +Nat 0 orBool V:BaseValue ==Bool 0.0)
+		< k > IfThenElse(tv(0, int), ?, S:K) => sequencePoint ~> S:K ...</ k >
 		: KSentence [metadata "computational rule"] . --- nondet
+		
+	mb [if-then-else]: rule
+		< k > IfThenElse(tv(V:BaseValue, T:Type), S:K, S':K)
+			=>  IfThenElse(tv(V:BaseValue, T:Type) != tv(0, int), S:K, S':K) 
+		...</ k >
+		if T:Type =/=Bool int
+		orBool (
+			V:BaseValue =/=Bool 0
+			andBool V:BaseValue =/=Bool 1 
+		)
+		: KSentence [metadata "structural rule"] .
 endm
 
 mod COMMON-SEMANTICS-WHILE is

@@ -327,6 +327,15 @@ mod COMMON-SEMANTICS-CAST is
 		--- < k > cast((arrayType(T:Type, N:Nat) => pointerType(T:Type)), ?) ...</ k >
 		--- : KSentence [metadata "structural"] .
 	
+	--- fixme needs to check size
+	mb rule
+		< k > cast(T:Type, tv(N:Nat, pointerType(?)))
+			=> tv(N:Nat, T:Type)
+		...</ k > 
+		if hasIntegerType(T:Type)
+		--- andBool notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0)
+		: KSentence [metadata "structural"] .
+	
 	--- --- fixme
 	--- mb rule
 		--- < k > [cast(T:Type, tv(loc(N:Nat, M:Nat), pointerType(T':Type))) => tv(loc(N:Nat, M:Nat), T:Type)] ...</ k > 

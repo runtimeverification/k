@@ -562,6 +562,7 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 	
 	--- fixme could check 6.5.8:2
+	--- fixme there are further restrictions on pointers
 	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T':Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi 
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
@@ -580,6 +581,34 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T':Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
+	
+	--- fixme there are further restrictions on pointers
+	mb rule tv(N:Nat, T:Type) == tv(I2:Int, T':Type) 
+		=> tv(sym(0) +Nat 0, T':Type) == tv(I2:Int, T':Type) 
+	if hasIntegerType(T:Type) andBool hasPointerType(T':Type)
+	andBool N:Nat ==Bool NULL
+	: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) == tv(N:Nat, T':Type) 
+		=> tv(I1:Int, T:Type) == tv(sym(0) +Nat 0, T:Type) 
+	if hasPointerType(T:Type) andBool hasIntegerType(T':Type)
+	andBool N:Nat ==Bool NULL
+	: KSentence [metadata "structural"] .
+	
+	mb rule tv(N:Nat, T:Type) != tv(I2:Int, T':Type) 
+		=> tv(sym(0) +Nat 0, T':Type) != tv(I2:Int, T':Type) 
+	if hasIntegerType(T:Type) andBool hasPointerType(T':Type)
+	andBool N:Nat ==Bool NULL
+	: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) != tv(N:Nat, T':Type) 
+		=> tv(I1:Int, T:Type) != tv(sym(0) +Nat 0, T:Type) 
+	if hasPointerType(T:Type) andBool hasIntegerType(T':Type)
+	andBool N:Nat ==Bool NULL
+	: KSentence [metadata "structural"] .
+	
+	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T':Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	
 
 	--- floats
 	mb rule tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .

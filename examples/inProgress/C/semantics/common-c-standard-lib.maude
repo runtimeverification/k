@@ -38,7 +38,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- mb [longjmp]: rule
 		--- < thread >
 		--- [?
-		--- < k > application(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))),, tv(I:Int, int))) ~> ? </ k >
+		--- < k > application(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))):: tv(I:Int, int))) ~> ? </ k >
 		--- => B:Bag
 		--- < k > tv(if I:Int ==Bool 0 then 1 else I:Int fi, int) ~> K:K </ k >
 		--- ]
@@ -56,7 +56,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < thread > 
 			--- C:Bag 
 			--- < callStack > ?:List </ callStack >
-			--- < k > [application(builtin(spawn), (Fun:Value,, L:List{KResult})) => skipval] ...</ k > 
+			--- < k > [application(builtin(spawn), (Fun:Value :: L:List{KResult})) => skipval] ...</ k > 
 		--- </ thread >
 		--- [.Bag => 
 		--- < thread > 
@@ -160,7 +160,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < k > [atan2 => builtin(atan2)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- mb [atan2]: rule
-		--- < k > [application(builtin(atan2), (tv(F:Float, double),, tv(F':Float, double))) => tv(atanFloat(F:Float, F':Float), double)] ...</ k >
+		--- < k > [application(builtin(atan2), (tv(F:Float, double) :: tv(F':Float, double))) => tv(atanFloat(F:Float, F':Float), double)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [tan-is-value]: rule
@@ -188,7 +188,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < k > [fmod => builtin(fmod)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- mb [fmod]: rule
-		--- < k > [application(builtin(fmod), (tv(F:Float, double),, tv(F':Float, double))) => tv(F:Float %Float F':Float, double)] ...</ k >
+		--- < k > [application(builtin(fmod), (tv(F:Float, double) :: tv(F':Float, double))) => tv(F:Float %Float F':Float, double)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [sin-is-value]: rule
@@ -245,7 +245,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- : KSentence [metadata "structural"] .
 	
 	--- mb [calloc]: rule
-		--- < k > [application(builtin(calloc), (tv(N:Nat, ?),, tv(Size:Nat, ?))) => store (N:Nat *Nat Size:Nat) New tv(0, char) atLoc Loc:Nat ~> tv(Loc:Nat, pointerType(void))] ...</ k >
+		--- < k > [application(builtin(calloc), (tv(N:Nat, ?) :: tv(Size:Nat, ?))) => store (N:Nat *Nat Size:Nat) New tv(0, char) atLoc Loc:Nat ~> tv(Loc:Nat, pointerType(void))] ...</ k >
 		--- ---< mem >... [.Map => Loc:Nat to (Loc:Nat +Nat (N:Nat *Nat Size:Nat)) |-> piece(0, 8)] ...</ mem >
 		--- < malloced >... [.Map => Loc:Nat |-> (N:Nat *Nat Size:Nat)] ...</ malloced >
 		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
@@ -264,7 +264,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- : KSentence [metadata "structural"] .
 	--- --- fixme doesn't cast to int
 	--- mb [fslPutc]: rule
-		--- < k > [application(builtin(fslPutc), (tv(N:Nat, ?),, tv(H:Nat, ?))) => writeToFD(H:Nat, N:Nat) ~> tv(N:Nat, int)] ...</ k >
+		--- < k > [application(builtin(fslPutc), (tv(N:Nat, ?) :: tv(H:Nat, ?))) => writeToFD(H:Nat, N:Nat) ~> tv(N:Nat, int)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [getchar-is-value]: rule
@@ -280,7 +280,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- : KSentence [metadata "structural"] .
 	--- --- fixme doesn't cast to int
 	--- mb [fslFGetC]: rule
-		--- < k > [application(builtin(fslFGetC), (tv(FD:Nat, ?),, tv(Offset:Nat, ?))) => readFromFD(FD:Nat, Offset:Nat)] ...</ k >
+		--- < k > [application(builtin(fslFGetC), (tv(FD:Nat, ?) :: tv(Offset:Nat, ?))) => readFromFD(FD:Nat, Offset:Nat)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [fslCloseFile-is-value]: rule
@@ -295,7 +295,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < k > [fslOpenFile => builtin(fslOpenFile)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- mb [fslOpenFile]: rule
-		--- < k > [application(builtin(fslOpenFile), (Loc:Value,, tv(FD:Nat, int))) 
+		--- < k > [application(builtin(fslOpenFile), (Loc:Value :: tv(FD:Nat, int))) 
 		--- => fsl-open-file(getString(Loc:Value), FD:Nat)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	
@@ -392,33 +392,39 @@ mod COMMON-C-STANDARD-LIBRARY is
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiString("%") 
 	: KSentence [metadata "structural"] .
-	--- --- fixme ignoring 0 flag for now
-	--- mb [lib-printf-0]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => printf-%(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat ==Bool asciiString("0") 
-	--- : KSentence [metadata "structural"] .
-	--- --- ignoring num width
-	--- mb [lib-printf-width]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => printf-%(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat >Int asciiString("0") 
-		--- andBool N:Nat <=Int asciiString("9")
-	--- : KSentence [metadata "structural"] .
+	--- fixme ignoring 0 flag for now
+	mb [lib-printf-0]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
+			=> printf-%(Len:Nat, sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("0") 
+	: KSentence [metadata "structural"] .
+	--- ignoring num width
+	mb [lib-printf-width]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
+			=> printf-%(Len:Nat, sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat >Int asciiString("0") 
+		andBool N:Nat <=Int asciiString("9")
+	: KSentence [metadata "structural"] .
 	
-	--- mb [lib-printf-%x]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(D:Int, ?),, L:List{KResult})) => writeToFD(1, (if (lengthString(rat2stringConversion(D:Int, 16)) ==Bool 1) then
-				--- "0" +String rat2stringConversion(D:Int, 16)
-			--- else 
-				--- rat2stringConversion(D:Int, 16)
-			--- fi)) ~> printf-aux(Len:Nat +Nat lengthString((if (lengthString(rat2stringConversion(D:Int, 16)) ==Bool 1) then
-				--- "0" +String rat2stringConversion(D:Int, 16)
-			--- else 
-				--- rat2stringConversion(D:Int, 16)
-			--- fi)), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p")
-	--- : KSentence [metadata "structural"] .
+	mb [lib-printf-%x]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(D:Int, ?) :: L:List{C})) 
+			=> writeToFD(1, (if (lengthString(Rat2String(D:Int, 16)) ==Bool 1) then
+				"0" +String Rat2String(D:Int, 16)
+			else 
+				Rat2String(D:Int, 16)
+			fi)) ~> printf-aux(Len:Nat +Nat lengthString((if (lengthString(Rat2String(D:Int, 16)) ==Bool 1) then
+				"0" +String Rat2String(D:Int, 16)
+			else 
+				Rat2String(D:Int, 16)
+			fi)), sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p")
+	: KSentence [metadata "structural"] .
 	
 	--- --- fixme might be messing things up elsewhere
 	--- eq Rat2String(loc(N:Nat, M:Nat), 16) = "loc(" +String rat2stringConversion(N:Nat, 16) +String ", " +String rat2stringConversion(M:Nat, 16) +String ")" .
@@ -451,11 +457,14 @@ mod COMMON-C-STANDARD-LIBRARY is
 		if N:Nat ==Bool asciiString("c") 
 	: KSentence [metadata "structural"] .
 	
-	--- mb [lib-printf-%f]: rule
-		--- < k > [printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(D:Float, ?),, L:List{KResult})) => writeToFD(1, float2stringConversion(D:Float)) ~> printf-aux(Len:Nat +Nat lengthString(float2stringConversion(D:Float)), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		--- if N:Nat ==Bool asciiString("f") orBool N:Nat ==Bool asciiString("g") 
-	--- : KSentence [metadata "structural"] .
+	mb [lib-printf-%f]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(D:Float, ?) :: L:List{C})) 
+			=> writeToFD(1, Float2String(D:Float)) 
+			~> printf-aux(Len:Nat +Nat lengthString(Float2String(D:Float)), sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("f") orBool N:Nat ==Bool asciiString("g") 
+	: KSentence [metadata "structural"] .
 	
 	mb [lib-printf-%s]: rule
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(S:Nat, pointerType(?)) :: L:List{C})) 
