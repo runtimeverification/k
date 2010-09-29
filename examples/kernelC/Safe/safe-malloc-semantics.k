@@ -17,7 +17,12 @@ mod SYMBOLIC-INT is extending PL-INT .
   if N''':Nat := N':Nat -Int N'':Nat .
   eq N:Nat <=Int N':Nat = N':Nat -Int N:Nat >=Int 0 .
   eq N:Nat <Int N':Nat = N':Nat -Int N:Nat >Int 0 .
-  eq symNzNat(N:Nat) -Int symNzNat(N':Nat) >=Int 0 = N:Nat -Int N':Nat >=Int 0 .
+---  eq symNzNat(N:Nat) -Int symNzNat(N':Nat) >=Int 0 = N:Nat -Int N':Nat >=Int 0 .
+
+ ceq N:Nat >=Int N':Nat = true if N':Nat <=Int N:Nat .
+ ceq N:Nat >=Int N':Nat = false if N':Nat <=Int N:Nat = false .
+ ceq N:Nat >Int N':Nat = true if N':Nat <Int N:Nat .
+ ceq N:Nat >Int N':Nat = false if N':Nat <Int N:Nat = false .
 endm
 
 kmod STRONG-MEMORY-SAFETY-SEMANTICS is including BASIC-KERNELC-SEMANTICS  + SYMBOLIC-INT

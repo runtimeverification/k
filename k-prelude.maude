@@ -394,8 +394,9 @@ mod K-CONFIG is
   including K-TECHNIQUE .
   including K-SENTENCE .
   op configuration_ : Bag -> [KSentence] [prec 127] .
---- TODO: rename to "configuration_"
   op _* : CellLabel -> CellLabel .
+  op _? : CellLabel -> CellLabel .
+  op _+ : CellLabel -> CellLabel .
 endm
 
 

@@ -1,20 +1,22 @@
 kmod KERNELC-PROGRAMS is including KERNELC-SYNTAX 
   syntax Pgm ::= pSum | pCollatz | pBufferOverflow | pSimpTest  | pStrErr | pStrTest
                | pAllocateBadPrint | pAllocatePrintReversePrintFree | pAllocatePrintFree
-  syntax Stmt ::= pPrint  | pAllocateLoop | pAllocateGood | pAllocateBad | pReverse
-                    | pFree | pStrLen | pStrCpy | pStrPrint | pStrDup | pString | pString2
-  syntax Id ::= a | b | c | d | e | i | l | limit | nr | nn | n | p | q | r | s | steps | t | x | y | z 
+  syntax Stmt ::= pPrint.c  | pAllocateLoop.c | pAllocateGood.c | pAllocateBad.c | pReverse.c
+                    | pFree.c | pStrLen.c | pStrCpy.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c
+  syntax Id ::= a | b | c | d | e | i | l 
+          | limit | nr | nn | n | p | q | r | s | steps | t | t1 | t2 | x | y | z 
 
   syntax Id ::= print | allocateLoop | reverse | quickSort
+
+syntax Id ::= strDup | strprint | strCpy | strLen | string | string2 | freeList 
 
   macro pSum = 
     #include<stdio.h>
     #include<stdlib.h>
-    void main() {
-         int i,n,s;
-         n = 1000 ;
-	 s = 0 ;
-         i = n ;
+    int main() {
+         int n = 1000 ;
+	 int s = 0 ;
+         int i = n ;
          while (!(i <= 0)) {
            s = s + i ;
            i = i - 1 ;
@@ -25,10 +27,10 @@ kmod KERNELC-PROGRAMS is including KERNELC-SYNTAX
   macro pCollatz = 
     #include<stdio.h>
     #include<stdlib.h>
-    void main() {
-         int limit,steps,nr,n,d,nn;
-         limit = 10 ;
-         steps = 0 ; nr = 2 ;
+    int main() {
+         int limit = 10 ;
+         int steps = 0 ; int nr = 2 ;
+         int n; int d; int nn;
          while (nr <= limit) {
            n = nr ; nr = nr + 1 ;
            while (!(n <= 1)) {
@@ -45,22 +47,21 @@ kmod KERNELC-PROGRAMS is including KERNELC-SYNTAX
          printf("%d;",steps);
   } 
 
-  macro pPrint =
-void print(a) {
-  int p;
- p = a ;
+  macro pPrint.c =
+void print(int *a) {
+  int * p = a ;
  while (p) {
   printf("%d;",* p);
   p = * (p + 1) ;
  }
 }
  
-  macro pAllocateLoop = 
-int allocateLoop(a,p) {
- int n,q ;
- n = 0 ;
+  macro pAllocateLoop.c = 
+int allocateLoop(int a,int * p) {
+ int n = 0 ;
+ int * q ;
  while (n != a) {
-  q = malloc(2) ;
+  q = (int *)malloc(2 * sizeof(int)) ;
   * q = n ;
   * (q + 1) = p ;
   p = q ;
@@ -73,11 +74,11 @@ int allocateLoop(a,p) {
 
 ---  macro pAllocateBad = allocateLoop(a, malloc(2), o) ;
 
-  macro pReverse = int reverse(p) {
-  int x,y;
+  macro pReverse.c = int reverse(int *p) {
+  int * x ; int * y ;
  if (p) {
   x = *(p + 1) ;
-  *(p + 1) = null ;
+  *(p + 1) = NULL ;
   while (x) {
    y = *(x + 1);
    *(x + 1) = p ;
@@ -88,8 +89,8 @@ int allocateLoop(a,p) {
  return p ;
 }
 
-  macro pFree = void freeList(p) {
-int q;
+  macro pFree.c = void freeList(int * p) {
+int * q;
  while (p) {
   q = * (p + 1) ;
   free(p) ;
@@ -97,8 +98,8 @@ int q;
  }
 }
 
-  macro pStrLen = int strlen(a) {
-   int l ; l = 0;
+  macro pStrLen.c = int strLen(int * a) {
+   int l = 0;
    while(* a) {
      a = a + 1;
      l = l + 1;
@@ -106,68 +107,60 @@ int q;
    return l;
 }
 
-  macro pStrCpy = void strcpy(a,b) {
-   while (* a) {
-     * b = * a ;
-     a = a + 1 ;
+  macro pStrCpy.c = void strCpy(int * a, int * b) {
+   while (* b) {
+     * a = * b ;
      b = b + 1 ;
+     a = a + 1 ;
    }
-   * b = 0 ;
+   * a = 0 ;
 }
 
-  macro pStrDup = int strdup(a) {
-    int p;
-    p = malloc(strlen(a)+1) ;
-    strcpy(a,p);
+  macro pStrDup.c = int * strDup(int * a) {
+    int * p = (int *)malloc((strLen(a)+1)*sizeof(int)) ;
+    strCpy(p,a);
     return p;
   }
 
-  macro pString = int string() {
-    int p;
-    p = malloc(5) ;
-    * p = 1 ;
-    * (p + 1) = 2 ;
-    * (p + 2) = 3 ;
-    * (p + 3) = 4 ;
-    * (p + 4) = 0 ;
+  macro pString.c = int * string() {
+    int * p =  (int *)malloc(5*sizeof(int));
+    p[0] = 1; p[1] = 2 ; p[2] = 3 ; p[3] = 4 ; p[4] = 0 ;
     return p;
 }
 
-  macro pString2 =  int string2() {
-    int p;
-    p = malloc(7) ;
-    * p = 5 ;
-    * (p + 1) = 6 ;
-    * (p + 2) = 7 ;
-    * (p + 3) = 8 ;
-    * (p + 4) = 9 ;
-    * (p + 5) = 10 ;
-    * (p + 6) = 0 ;
+  macro pString2.c =  int * string2() {
+    int * p =  (int *)malloc(100*sizeof(int));
+    int i = 0 ;
+    while (i <= 98) {
+      p[i] = i + 5 ;
+      i = i + 1 ;
+    }
+    p[99] = 0 ;
     return p;
 }
 
   macro pBufferOverflow =
     #include<stdio.h>
     #include<stdlib.h>
-    pString
-    pString2
-    pStrCpy
-    pStrPrint
-    void main() {
-      x = string();
+    #include<pString.c>
+    #include<pString2.c>
+    #include<pStrCpy.c>
+    #include<pStrPrint.c>
+    int main() {
+      int * x = string();
       strprint(x);
-      y = string();
+      int * y = string();
       strprint(y);
-      z = string2();
+      int * z = string2();
       strprint(z);
-      strcpy(z,x);
+      strCpy(x,z);
       printf("%d;", -1) ; strprint(x);
       printf("%d;", -1) ; strprint(y);
       printf("%d;", -1) ; strprint(z);
     }
 
   
-  macro pStrPrint =  void strprint(a) {
+  macro pStrPrint.c =  void strprint(int *a) {
    while (* a) {
      printf("%d;",* a);
      a = a + 1 ;
@@ -177,29 +170,27 @@ int q;
   macro pStrTest  = 
     #include<stdio.h>
     #include<stdlib.h>
-    pString
-    pStrCpy
-    pStrLen
-    pStrDup
-    pStrPrint
-    void main() {
-   x = string(); 
-   y = strdup(x);
+    #include<pString.c>
+    #include<pStrCpy.c>
+    #include<pStrLen.c>
+    #include<pStrDup.c>
+    #include<pStrPrint.c>
+    int main() {
+   int * x = string(); 
+   int * y = strDup(x);
    strprint(y);
    free(x);
    free(y);
 }
 
-syntax Id ::= strdup | strprint | strcpy | strlen | string | string2 | freeList 
-
   macro pStrErr =
     #include<stdio.h>
     #include<stdlib.h>
-   pString
-   pStrPrint
-    void main() {
-   x = string();
-   y = string();
+   #include<pString.c>
+   #include<pStrPrint.c>
+    int main() {
+   int * x = string();
+   int * y = string();
    * (y - 1) = 5 ;
    strprint(x);
    free(x);
@@ -209,100 +200,98 @@ syntax Id ::= strdup | strprint | strcpy | strlen | string | string2 | freeList
 macro pAllocatePrintFree =
     #include<stdio.h>
     #include<stdlib.h>
-    pAllocateLoop
-    pPrint
-    void main() {
-      int a ; a = allocateLoop(5,null); print(a); free(a);
+    #include<pAllocateLoop.c>
+    #include<pPrint.c>
+    #include<pFree.c>
+    int main() {
+      int * a = allocateLoop(5,NULL); print(a); freeList(a);
     } 
 
 macro pAllocatePrintReversePrintFree =
     #include<stdio.h>
     #include<stdlib.h>
-    pAllocateLoop
-    pPrint
-    pReverse
-    void main() {
-      int a ; a = allocateLoop(7,null); print(a); a = reverse(a); print(a); free(a);
+    #include<pAllocateLoop.c>
+    #include<pPrint.c>
+    #include<pFree.c>
+    #include<pReverse.c>
+    int main() {
+      int * a = allocateLoop(7,NULL); print(a); a = reverse(a); print(a); free(a);
     } 
 
 macro pAllocateBadPrint =
     #include<stdio.h>
     #include<stdlib.h>
-    pAllocateLoop
-    pPrint
-    void main() {
-      int a ; a = allocateLoop(2,malloc(2)); print(a); free(a);
+    #include<pAllocateLoop.c>
+    #include<pPrint.c>
+    #include<pFree.c>
+    int main() {
+      int * a = allocateLoop(2,(int *)malloc(2*sizeof(int))); print(a); free(a);
     } 
 
 macro pSimpTest =
  #include<stdio.h>
     #include<stdlib.h>
-    void main() {
-     int x,y,z;
-x = malloc(3) ;
-y = malloc(4) ;
-if (x == 0 && y == 1) z = 1 ;
-else z = x + y ;
-printf("%d;",z) ;
+    int main() {
+     int * x = (int *)malloc(3*sizeof(int));
+     if (x == NULL) printf("%d;",-1); else printf("%d;",x);
 } 
 
-syntax StmtList ::= split
-macro split =
-    p = *(a+b);
-    l = b+1;
-    r = e;
-    while (l+1<= r) {
-      if (*(a+l) <= p) {
-        l = l + 1;
-      } else { 
-        r = r - 1;
-        t=*(a+l);*(a+l)=*(a+r);*(a+r)=t;
-      }
-    }
-    l = l - 1;
-    t=*(a+l);*(a+l)=*(a+b);*(a+b)=t;
-
-syntax Stmt ::= fNewArray  | fPrintArray
+ 
+syntax Stmt ::= fNewArray.c  | fPrintArray.c
 syntax Id ::= newArray | printArray
-macro fNewArray = 
-int newArray() {
-  int n,a,p;
+macro fNewArray.c = 
+int * newArray() {
+  int n ;
   scanf("%d",&n);
-  p = a = malloc(n);
-  while (p+1 <= a+n) {
-    scanf("%d",p);
-    p = p + 1;
+  int * a = (int *)malloc((n+1)*sizeof(int));
+  a[0]=n;
+  int i = 1;
+  while (i <= n) {
+    scanf("%d",a+i);
+    i = i + 1;
   }
   return a;
 }
 
-macro fPrintArray = 
-void printArray(a) {
-  int e; e = a + sizeof(a) - 1;
-  while (a <= e) { 
-    printf("%d;",*a);
-    a = a+1;
+macro fPrintArray.c = 
+void printArray(int * a) {
+  int i = 1;
+  while (i <= a[0]) { 
+    printf("%d;",a[i]);
+    i = i+1;
   }
 }
 
-syntax Pgm ::= pSeqQuickSort | pConcQuickSort
+syntax Pgm ::= pSeqQuickSort |  pConcQuickSort
+
 macro pSeqQuickSort = 
     #include<stdio.h>
     #include<stdlib.h>
-void quickSort(a,b,e) {
-  int p,l,r,t ;
-  if (!(e <= b + 1)) {
-    split
-    quickSort(a,b,l); 
-    quickSort(a,r,e);
+    #include<fNewArray.c>
+    #include<fPrintArray.c>
+void quickSort(int *b,int *e) {
+  int t ;
+  if (! (e <= b + 1)) {
+    int p = *b;
+    int *l = b+1;
+    int *r = e;
+    while  (l+1<= r) {
+      if (*l <= p) {
+        l = l + 1;
+      } else { 
+        r = r - 1;
+        t=*l;*l=*r;*r=t;
+      }
+    }
+    l = l - 1;
+    t=*l;*l=*b;*b=t;
+    quickSort(b,l); 
+    quickSort(r,e);
   }
 }
-fNewArray
-fPrintArray
-void main() {
-  int a;
-  a = newArray();
-  quickSort(a,0,sizeof(a));
+int main() {
+  int * a = newArray();
+  quickSort(a+1,a+a[0]);
   printArray(a);
   free(a);
 }
@@ -310,78 +299,79 @@ void main() {
 macro pConcQuickSort = 
     #include<stdio.h>
     #include<stdlib.h>
-void quickSort(a,b,e) {
-  int p,l,r,t ;
+    #include<fNewArray.c>
+    #include<fPrintArray.c>
+void quickSort(int *b,int *e) {
+  int t ;
   if (! (e <= b + 1)) {
-    split
-    spawn(quickSort(a,b,l)); 
-    spawn(quickSort(a,r,e));
+    int p = *b;
+    int *l = b+1;
+    int *r = e;
+    while  (l+1<= r) {
+      if (*l <= p) {
+        l = l + 1;
+      } else { 
+        r = r - 1;
+        t=*l;*l=*r;*r=t;
+      }
+    }
+    l = l - 1;
+    t=*l;*l=*b;*b=t;
+    int t1 = spawn(quickSort(b,l)); 
+    int t2 = spawn(quickSort(r,e));
+    join(t1);
+    join(t2);
   }
 }
-fNewArray
-fPrintArray
-void main() {
-  int a;
-  a = newArray();
-  quickSort(a,0,sizeof(a));
+int main() {
+  int * a = newArray();
+  quickSort(a+1,a+a[0]);
   printArray(a);
   free(a);
 }
-
 
 syntax Pgm ::= pRace1 | pRace2 | pRace3 
 syntax Id ::= inc
 macro pRace1 =
 #include<stdio.h>
 #include<stdlib.h>
-void inc(a) {
+void inc(int *a) {
   * a = * a + 1;
 }
-void main() {
-  a = malloc(1);
-  spawn(inc(a));
-  spawn(inc(a));
+int main() {
+  int * a = (int *)malloc(1*sizeof(int));
+  * a = 0;
+  int t1 = spawn(inc(a));
+  int t2 = spawn(inc(a));
+  join(t1);
+  join(t2);
+  printf("%d;",*a);
 }
 
-macro pRace2 =
-#include<stdio.h>
-#include<stdlib.h>
-void inc(a,b,t) {
-  printf("%d;",t);
-  * a = * a + 1;
-  * b = * b + 1;
-}
-void main() {
-  a = malloc(1);
-  b = malloc(1);
-  spawn(inc(a,b,1));
-  spawn(inc(b,a,2));
-}
 
 syntax StmtList ::= cSynchronizedAccount | cDSynchronizedAccount | cGSynchronizedAccount 
                   | cSynchAcc ( StmtList ) | cBasicAccount
 macro cBasicAccount =
-int newAccount(m) {
-  int a;
-  a = malloc(1);
+int * newAccount(int m) {
+  int * a = (int *)malloc(1*sizeof(int));
   *a = m;
   return a;
 }
 
-void deposit(a,m) {
+void deposit(int * a,int m) {
   *a = *a+m;
 }
 
-void withdraw(a,m) {
+void withdraw(int *a, int m) {
   *a = *a-m;
 }
 
-void transfer(a,b,m) {
+void transfer(int *a,int *b,int m) {
   *a = *a-m;
   *b = *b+m;
 }
 
-void print(a) {
+void print(int *a) {
   printf("%d;",*a);
 }
 
@@ -394,20 +384,19 @@ macro cDSynchronizedAccount = cSynchAcc(fDTransfer)
 macro cGSynchronizedAccount = cSynchAcc(fGTransfer)
 
 macro cSynchAcc(Sts) =
-int newAccount(m) {
-  int a;
-  a = malloc(1);
+int *newAccount(int m) {
+  int *a = (int *)malloc(1*sizeof(int));
   *a = m;
   return a;
 }
 
-void deposit(a,m) {
+void deposit(int *a,int m) {
   acquire(a);
   *a = *a+m;
   release(a);
 }
 
-void withdraw(a,m) {
+void withdraw(int *a,int m) {
   acquire(a);
   *a = *a-m;
   release(a);
@@ -415,14 +404,14 @@ void withdraw(a,m) {
 
 Sts
 
-void print(a) {
+void print(int *a) {
   acquire(a);
   printf("%d;",*a);
   release(a);
 }
 
 macro fTransfer =
-void transfer(a,b,m) {
+void transfer(int *a,int *b,int m) {
   acquire(a);
   *a = *a-m;
   *b = *b+m;
@@ -430,7 +419,7 @@ void transfer(a,b,m) {
 }
 
 macro fDTransfer = 
-void transfer(a,b,m) {
+void transfer(int *a,int *b,int m) {
   acquire(a);
   acquire(b);
   *a = *a-m;
@@ -440,7 +429,7 @@ void transfer(a,b,m) {
 }
 
 macro fGTransfer = 
-void transfer(a,b,m) {
+void transfer(int *a,int *b,int m) {
   if (!(a <= b)) {
     acquire(a);
     acquire(b);
@@ -463,18 +452,19 @@ macro pAccountDriver1(Sts:StmtList) =
 #include<stdio.h>
 #include<stdlib.h>
 Sts
-void run(a,b) {
+void run(int *a,int *b) {
   deposit(a,300);
   withdraw(b,300);
 }
-void main() {
-  int a,b;
-  a = newAccount(100);
-  b = newAccount(20);
+int main() {
+  int *a = newAccount(100);
+  int *b = newAccount(20);
   print(a);
   print(b);
-  spawn(run(a,b));
-  spawn(run(b,a));
+  int t1 = spawn(run(a,b));
+  int t2 = spawn(run(b,a));
+  join(t1);
+  join(t2);
   print(a);
   print(b);
 }
@@ -487,25 +477,27 @@ macro  pAccountDriver2(Sts) =
 #include<stdio.h>
 #include<stdlib.h>
 Sts
-void run1(a,b) {
+void run1(int *a,int *b) {
   deposit(a,300);
   withdraw(b,300);
   transfer(a,b,50);
 }
-void run2(a,b) {
+void run2(int *a,int *b) {
   transfer(a,b,50);
   deposit(a,300);
   withdraw(b,300);
 }
 void main() {
-  int a,b,c;
-  a = newAccount(100);
-  b = newAccount(20);
+  int *a = newAccount(100);
+  int *b = newAccount(20);
   print(a);
   print(b);
-  spawn(run1(a,b));
-  spawn(run2(b,a));
+  int t1 = spawn(run1(a,b));
+  int t2 = spawn(run2(b,a));
+  join(t1);
+  join(t2);
+  print(a);
+  print(b);
 }
-
 endkm
 

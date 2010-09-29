@@ -3,7 +3,7 @@ load ../kernelc-syntax
 load ../kernelc-programs
 load ../basic-kernelc-semantics
 load safe-malloc-semantics
-load kernelc-race-detection
+load ../kernelc-race-detection
 
 kmod KERNELC is including STRONG-MEMORY-SAFETY-SEMANTICS + KERNELC-PROGRAMS + KERNELC-RACE-DETECTION
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
