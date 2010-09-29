@@ -80,7 +80,7 @@ fmod CONTEXT-TRANSFORMERS is
 
   op getConfL : Qid Nat TermList -> KConf .
  ceq getConfL(Q, N, (T, Tl))
-   = getConf(getName(SC), getMultiplicity(SC), N, Q, getConfList(getContents(SC))) getConfL(Q, N, Tl) 
+   = getConf(getName(SC), getMultiplicity(SC) == some or getMultiplicity(SC) == any, N, Q, getConfList(getContents(SC))) getConfL(Q, N, Tl) 
   if SC := splitKCell(T) .
   eq getConfL(Q, N, Tl) = none [owise] .
 

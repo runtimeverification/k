@@ -265,7 +265,7 @@ fmod K-META-CONFIG is
   including META-LEVEL .
   including INT .
   var Label Label' : Constant . var Contents Contents' T : Term .
-  var Q Q' : Qid .  var B B' : Bool . var E E' : Ellipses .  var M : Module .  
+  var Q Q' : Qid .  var B B' : Multiplicity . var E E' : Ellipses .  var M : Module .  
   var AS : AttrSet .  var MAS : MembAxSet .  var S : Sort .
 
   op extractConfTerm : Module ~> Term .
@@ -285,13 +285,28 @@ fmod K-META-CONFIG is
   op symbol_ : Ellipses -> Qid .
   eq symbol none = '<_>_</_> .
 
+
+  sort Multiplicity .
+  ops maybe one some any : -> Multiplicity .
+
+  op symbol_ : Multiplicity ~> Qid .
+  eq symbol maybe = '_? .
+  eq symbol some = '_+ .
+  eq symbol any = '_* .  
+  op error : -> [Multiplicity] .
+
+
+  op getMultiplicity_ : Qid -> Multiplicity .
+  eq getMultiplicity(Q) = if Q == symbol maybe then maybe else if Q == symbol some then some else if Q == symbol any then any else error fi fi fi .
+
   sort SplitCell .
-  op {_,_,_,_} : Term Term Bool Ellipses -> SplitCell .
+  op {_,_,_,_} : Term Term Multiplicity Ellipses -> SplitCell .
 
   op splitKCell : Term ~> SplitCell .
-  eq splitKCell(Q[Label,Contents,Label]) = {Label, Contents,false, getEllipses(Q)} .
-  eq splitKCell(Q[Q'[Label],Contents,Q'[Label]]) = {Label, Contents,true, getEllipses(Q)} .
- ceq splitKCell(Q[Q'[Label,Label'],Contents,Q'[Label,Label']]) = {Q'[Label,Label'], Contents,false, getEllipses(Q)} if Q' = replaceS .
+  eq splitKCell(Q[Label,Contents,Label]) = {Label, Contents, one, getEllipses(Q)} .
+  eq splitKCell(Q[Q'[Label],Contents,Q'[Label]]) 
+   = {Label, Contents,getMultiplicity(Q'), getEllipses(Q)} .
+ ceq splitKCell(Q[Q'[Label,Label'],Contents,Q'[Label,Label']]) = {Q'[Label,Label'], Contents,one, getEllipses(Q)} if Q' = replaceS .
 
   op getEllipses : Qid -> Ellipses .
   ceq getEllipses(Q) = none if Q = symbol none .
@@ -312,16 +327,16 @@ fmod K-META-CONFIG is
   op setContents : SplitCell Term -> SplitCell .
   eq setContents({T,Contents,B,E}, Contents') = {T,Contents',B,E} .
 
-  op getMultiplicity : SplitCell -> Bool .
+  op getMultiplicity : SplitCell -> Multiplicity .
   eq getMultiplicity({T,Contents,B,E}) = B .
-  op setMultiplicity : SplitCell Bool -> SplitCell .
+  op setMultiplicity : SplitCell Multiplicity -> SplitCell .
   eq setMultiplicity({T,Contents,B,E}, B') = {T,Contents,B',E} .
 
   op plugCell : SplitCell -> Term .
   eq plugCell({T,Contents,B,E}) = symbol E[cellLabel(T,B),Contents,cellLabel(T,B)] .
 
   op mkCell : Qid Term -> Term .
-  eq mkCell(Q,Contents) = plugCell({mkCellLabel(Q),Contents,false,none}) .
+  eq mkCell(Q,Contents) = plugCell({mkCellLabel(Q),Contents,one,none}) .
 
   op mkCellLabel : Qid -> Constant . 
   eq mkCellLabel(Q) = qid(string(Q) + ".CellLabel") .
@@ -329,8 +344,8 @@ fmod K-META-CONFIG is
   op multiCellS : -> Qid .
   eq multiCellS = '_* .  
 
-  op cellLabel : Term Bool -> Term .
-  eq cellLabel(T,B) = if B then multiCellS[T] else T fi .
+  op cellLabel : Term Multiplicity -> Term .
+  eq cellLabel(T,B) = if B == one then T else symbol B[T] fi .
 
   ops Map Bag List Set : -> Sort .
   eq Map = 'Map . eq Bag = 'Bag . eq List = 'List . eq Set = 'Set .

@@ -40,7 +40,7 @@ fmod DEFAULT-TERMS is
   op $substitute : SplitCell TermBool -> TermBool .
   eq $substitute(SC,{T,false}) = {plugCell(SC),false} .
   eq $substitute(SC,{T,true}) 
-   = {plugCell(setMultiplicity(setContents(SC,T),false)),true} .
+   = {plugCell(setMultiplicity(setContents(SC,T),one)),true} .
 
   op $substitute : Qid TermBool -> TermBool .
   eq $substitute(Q,{Tl,B}) = {Q[Tl],B} .
@@ -61,8 +61,8 @@ fmod DEFAULT-TERMS is
   eq cleanConf(T) = cleanConf(T,splitKCell(T)) .
   op cleanConf : Term [SplitCell] -> Term .
   eq cleanConf(T, SC')
-   = if SC' :: SplitCell then if getMultiplicity(SC') then emptyCt(Bag)
-     else plugCell(setContents(SC',cleanConf(getContents(SC')))) fi
+   = if SC' :: SplitCell then if getMultiplicity(SC') == maybe or  getMultiplicity(SC') == any then emptyCt(Bag)
+     else plugCell(setMultiplicity(setContents(SC',cleanConf(getContents(SC'))),one)) fi
      else $cleanConf(T) fi .
   op $cleanConf : Term -> Term .
   eq $cleanConf(Ct) = Ct .
