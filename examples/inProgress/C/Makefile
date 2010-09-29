@@ -72,6 +72,9 @@ test: dist
 integration-test: dist
 	@make -C tests integration
 	
+unit-test: dist
+	@make -C tests unit
+	
 fix: 
 	maude $(SEMANTICS_DIR)/programs-gen.maude
 fixnew:

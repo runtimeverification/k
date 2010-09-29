@@ -7,10 +7,11 @@ GCC ?= gcc -lm -Wall -Wextra -x c -O0 -U __GNUC__ -pedantic -std=c99
 #-Werror 
 PARSER ?= ../dist/cparser
 
-GOOD_DIRECTORIES = unitTests
+GOOD_DIRECTORIES = buildTests
 FAIL_DIRECTORIES = shouldFail
 INTEGRATION_DIRECTORIES = integration
-ALL_DIRECTORIES = $(GOOD_DIRECTORIES) $(FAIL_DIRECTORIES) $(INTEGRATION_DIRECTORIES)
+UNIT_DIRECTORIES = unitTests
+ALL_DIRECTORIES = $(GOOD_DIRECTORIES) $(FAIL_DIRECTORIES) $(INTEGRATION_DIRECTORIES) $(UNIT_DIRECTORIES)
 
 #ALL_FILES = $(foreach var, $(GOOD_DIRECTORIES), $(wildcard $(var)/*.c))
 #ALL_PROGRAMS_BASIC = $(basename $(ALL_FILES))
@@ -19,11 +20,16 @@ ALL_DIRECTORIES = $(GOOD_DIRECTORIES) $(FAIL_DIRECTORIES) $(INTEGRATION_DIRECTOR
 GOOD_TARGETS = $(foreach var,  $(GOOD_DIRECTORIES), results-pass-$(var).xml)
 FAIL_TARGETS = $(foreach var,  $(FAIL_DIRECTORIES), results-fail-$(var).xml)
 INTEGRATION_TARGETS = $(foreach var, $(INTEGRATION_DIRECTORIES), results-pass-$(var).xml)
+UNIT_TARGETS = $(foreach var, $(UNIT_DIRECTORIES), results-pass-$(var).xml)
+
 CLEAN_TARGETS = $(foreach var, $(ALL_DIRECTORIES), clean-$(var))
 
 all: $(PARSER) test 
 
 integration: $(INTEGRATION_TARGETS)
+
+unit: $(UNIT_TARGETS)
+
 
 #.INTERMEDIATE: test-%.kcc test-%.gcc output-% retval-%
 #.PRECIOUS: test-%.kcc test-%.gcc output-% retval-% compare-%.pass
