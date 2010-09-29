@@ -12,7 +12,7 @@ if ($numArgs != 2) {
 	die "Not enough command line arguments"
 }
 
-my $kcc = "../dist/compile.sh";
+my $kcc = "../dist/kcc";
 my $gcc = "gcc -lm -Wall -Wextra -x c -O0 -U __GNUC__ -pedantic -std=c99";
 
 my $flag = $ARGV[0];
