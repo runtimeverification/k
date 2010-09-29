@@ -745,65 +745,68 @@ sub isDeclaredKLabel
 
 sub getKLabelDeclarations
 {
-    my $mod = (shift);
-    my $labels = "";
+  my $mod = (shift);
+  my $labels = "";
+  my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 
-	# consider each statement
-    while ($mod =~ m/(rule|macro|context|eq|configuration)(.*?)(?=$kmaude_keywords_pattern)/sg)
-    {
-		my $statement = $2;
-		
-		# extract KLabels from current statement
-                # Explaining regexp (^|\s|(?<!`)[\(\)\{\}\[\],])([']([^`\(\)\{\}\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))
-                # First part:  (^|\s|(?<!`)[\(\)\{\}\[\],])  describes what can be before a KLabel
-                # before a KLabel we can either have the beginning of the string,
-                # a space, or one of the (nonescaped) characters { } ( ) [ ] ,
-                # note that we use negative lookahead for ` so that only one char is consumed for 
-                # the prefix
-                # Second part: ([']([^`\(\)\{\}\[\],\s]*(`[^`\s])?)*)  describes the KLabel itself
-                # it must start with '  then it has some chars distinct from ` ( ) { } [ ] , \s
-                # and then it can have a ` followed by any (non-space) char, and, if so, iterate
-                # Final part: (?=($|[\(\)\{\}\[\],\s])  describes what ends a KLabel
-                # since we know that the KLabel cannot end with ` we need to look ahead and check 
-                # that the following character is either end of line, or one of the separators.
-		while($statement =~ m/(^|\s|(?<!`)[\(\)\{\}\[\],])([']([^`\(\)\{\}\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))/sg)
-		{
 
-		    my $candidate = "$2";
+  # consider each statement
+  while ($mod =~ m/(rule|macro|context|eq|configuration)(.*?)(?=$kmaude_keywords_pattern)/sg)
+  {
+    my $statement = $2;
 
-			if ($declaredKLabels =~ m/ $candidate /s)
-			{
-				# label cannot be declared if it is already declared
-			}
-			else
-			{	
-				if ($labels =~ m/$candidate /s)
-				{
-					# candidate is already in labels list
-				}
-				else
-				{
-					$labels .= "$candidate ";
-				}
-			}
-		}
-	}
-    
-    if ($labels =~ m/\S\s+\S/)
+    # extract KLabels from current statement
+    # Explaining regexp (^|\s|(?<!`)[\(\)\{\}\[\],])([']([^`\(\)\{\}\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))
+    # First part:  (^|\s|(?<!`)[\(\)\{\}\[\],])  describes what can be before a KLabel
+    # before a KLabel we can either have the beginning of the string,
+    # a space, or one of the (nonescaped) characters { } ( ) [ ] ,
+    # note that we use negative lookahead for ` so that only one char is consumed for 
+    # the prefix
+    # Second part: ([']([^`\(\)\{\}\[\],\s]*(`[^`\s])?)*)  describes the KLabel itself
+    # it must start with '  then it has some chars distinct from ` ( ) { } [ ] , \s
+    # and then it can have a ` followed by any (non-space) char, and, if so, iterate
+    # Final part: (?=($|[\(\)\{\}\[\],\s])  describes what ends a KLabel
+    # since we know that the KLabel cannot end with ` we need to look ahead and check 
+    # that the following character is either end of line, or one of the separators.
+    while($statement =~ m/(^|\s|(?<!`)[\(\)\{\}\[\],])([']([^`\(\)\{\}\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))/sg)
     {
-	$labels = "ops $labels";
+
+      my $candidate = "$2";
+      (my $token_pattern = $candidate) =~ s/([$special_perl_chars])/\\$1/g;
+
+      if ($declaredKLabels =~ m/ $token_pattern /s)
+      {
+        # label cannot be declared if it is already declared
+      }
+      else
+      {	
+        if ($labels =~ m/$token_pattern /s)
+        {
+          # candidate is already in labels list
+        }
+        else
+        {
+          $labels .= "$candidate ";
+        }
+      }
     }
-    elsif ($labels =~ m/\S/) 
-    {
-	$labels = "op $labels";	
-    }
-    else 
-    {
-	return "";
-    }
-    
-    # print "$labels : -> KLabel [metadata \"generated label\"] ";
-    return "$labels : -> KLabel [metadata \"generated label\"] . ";
+  }
+
+  if ($labels =~ m/\S\s+\S/)
+  {
+    $labels = "ops $labels";
+  }
+  elsif ($labels =~ m/\S/) 
+  {
+    $labels = "op $labels";	
+  }
+  else 
+  {
+    return "";
+  }
+
+  # print "$labels : -> KLabel [metadata \"generated label\"] ";
+  return "$labels : -> KLabel [metadata \"generated label\"] . ";
 }
 
 my $flatten = "";
