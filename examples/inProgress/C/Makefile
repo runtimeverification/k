@@ -69,10 +69,10 @@ $(DIST_DIR)/dist.tested: $(DIST_DIR)/dist.done
 test: dist
 	@make -C tests
 
-integration-test: dist
+integration-test:
 	@make -C tests integration
 	
-unit-test: dist
+unit-test:
 	@make -C tests unit
 	
 fix: 
