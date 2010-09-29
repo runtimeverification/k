@@ -58,7 +58,8 @@ $(DIST_DIR)/dist.done: Makefile cparser kcompile $(FILES_TO_DIST)
 	@cp $(FILES_TO_DIST) $(DIST_DIR)
 	@mv $(DIST_DIR)/*.h $(DIST_DIR)/includes
 	@mv $(DIST_DIR)/clib.c $(DIST_DIR)/lib
-	@ln -s -f compile.sh $(DIST_DIR)/kcc
+#@ln -s -f compile.sh $(DIST_DIR)/kcc
+	@mv $(DIST_DIR)/compile.sh $(DIST_DIR)/kcc
 	@$(DIST_DIR)/kcc -c -o $(DIST_DIR)/lib/clib.o $(DIST_DIR)/lib/clib.c
 	@touch $(DIST_DIR)/dist.done
 
