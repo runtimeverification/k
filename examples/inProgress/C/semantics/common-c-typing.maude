@@ -471,9 +471,9 @@ mod COMMON-C-TYPING is
 		: KSentence .
 
 	--- FIXME what good is this?
-	--- mb rule
-		--- < k > OnlyTypedef(?) => . ...</ k >
-		--- : KSentence .
+	mb rule
+		< k > OnlyTypedef(?) => . ...</ k >
+		: KSentence .
 			
 	op addAggregate : Id List{Type} -> K .
 	op addGlobalAggregate : Id List{Type} -> K .
