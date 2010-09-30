@@ -3,24 +3,12 @@ mod COMMON-SEMANTICS-TYPE-INCLUDE is
 	including COMMON-INCLUDE .
 	
 	op isAType_ : K -> Bool .
+	op extractActualType : Type -> Type . --- rules that use specifier should be careful to use extractActualType if going to be used in a typed name
 endm
 
 mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	including COMMON-SEMANTICS-TYPE-INCLUDE .
-	
-	--- mb rule
-		--- < k > [... => typedDeclaration(no-type, ...)] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > ['Declaration(T:Type,, X:Id) => typedDeclaration(T:Type, X:Id)] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb [typedef-declaration] : rule
-		--- < k > ['Typedef(T:Type,, X:Typedef-Name) => definedType(T:Type, X:Typedef-Name)] ...</ k >
-		--- --- < types >... [.Map => X:Typedef-Name |-> T:Type] ...</ types >
-		--- --- < typedefs >... [.Map => X:Typedef-Name |-> T:Type] ...</ typedefs >
-		--- : KSentence [metadata "structural"] .
+
 	op giveGlobalType : K Type -> K .
 	op giveLocalType : K Type -> K .
 	
@@ -54,15 +42,7 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		< k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
 		< types > M:Map => M:Map[T:Type / X:Id] </ types >
 		: KSentence [metadata "structural"] .		
-		
-	--- mb [global-declaration] : rule
-		--- < k > ['Global(definedType(T:Type, X:K)) => giveGlobalType(T:Type, X:K)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	
-	
-	--- op declarators : -> Set [memo] .
-	--- eq declarators = Set(l('Declaration),, l('Field),, l('Parameter-Declaration),, l('Typedef),, l('Pointer)) .
-	
+			
 	--- --- fixme hack for (int )(b705 + 0)->b6[0].b4.b1
 	--- mb rule 
 		--- < type > [X:Id + I:Int => X:Id] ...</ type >
@@ -75,21 +55,6 @@ endm
 mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	including COMMON-SEMANTICS-TYPE-INCLUDE .
 
-	--- mb context ?:KLabel(?,, 'Direct-Function-Declarator(D:Declarator,, `[HOLE`]:K)) : KSentence .
-	
-	--- mb rule
-		--- < k > ['Parameter-Type-List(V:KResult) => typedParameterList(getList{K}(V:KResult))] ...</ k > : KSentence [metadata "structural"] .
-	
-	--- mb rule
-		--- < k > ['Parameter-Declaration(T:Type,, X:Id) => typedDeclaration(T:Type, X:Id)] ...</ k > : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > ['Parameter-Declaration(T:Type) => typedDeclaration(T:Type, anonymousId)] ...</ k > : KSentence [metadata "structural"] .
-
-	--- mb context 'Field(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
-	--- mb context 'Declaration(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
-	--- mb context 'Parameter-Declaration(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
-	--- mb context 'Typedef(?,, '_`[_`](?,, `[HOLE`]:K)) : KSentence .
-				
 	--- mb [type-arrow-heat]: rule
 		--- < type > ['_->_(Kp:KProper,, X:Id) => Kp:KProper ~> '_->_(HOLE,, X:Id)] ...</ type >
 		--- : KSentence [metadata "structural"] .
@@ -206,9 +171,16 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		: KSentence .
 	
 	--- fixme? getting rid of typedefs here.  this seems valid by c1x 6.7.7:3
+	--- mb rule
+		--- < k > canonicalizeSpecifier(BagItem(Named(X:Id)))
+			--- => T:Type
+		--- ...</ k >
+		--- < types >... typedef(X:Id) |-> T:Type ...</ types >
+		--- if X:Id =/=Bool Identifier("")
+		--- : KSentence .
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(Named(X:Id)))
-			=> T:Type
+			=> typedefType(X:Id, T:Type)
 		...</ k >
 		< types >... typedef(X:Id) |-> T:Type ...</ types >
 		if X:Id =/=Bool Identifier("")
@@ -267,7 +239,6 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		
 	--- FIXME what good is this?
 	eq BagItem(SpecTypedef) = (.).Bag .
-	--- eq BagItem(Const) = (.).Bag .
 
 	mb rule 
 		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag)), (B:Bag => (.).Bag), ?, ?) ...</ k >
@@ -362,7 +333,7 @@ mod COMMON-C-TYPING is
 	--- eq ArrayType(T:BaseType, N:Nat) = arrayType(T:Type, N:Nat) .
 	
 	op makeArrayType : Nat -> KLabel .
-	--- op makeFunctionType : List{Type} -> KLabel .
+	op makeFunctionType : List{Type} -> KLabel .
 	op pushTypeDown : Type KLabel -> Type .
 	
 	eq ArrayType(T:Type, tv(N:Nat, ?)) = pushTypeDown(T:Type, makeArrayType(N:Nat)) .
@@ -371,10 +342,10 @@ mod COMMON-C-TYPING is
 	--- eq FunctionType(T:Type) = pushTypeDown(T:Type, 'preFunctionType) .
 	--- fixme I'm assuming functiontype is always below a prototype 
 	eq FunctionType(T:Type) = T:Type .
-	--- eq Prototype(T:Type, L:List{Type}, false) = pushTypeDown(T:Type, makeFunctionType(L:List{Type})) .
-	--- eq Prototype(T:Type, L:List{Type}, true) = pushTypeDown(T:Type, makeFunctionType((L:List{Type} :: variadic))) .
-	eq Prototype(T:Type, L:List{Type}, false) = functionType(T:Type, L:List{Type}) .
-	eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
+	eq Prototype(T:Type, L:List{Type}, false) = pushTypeDown(T:Type, makeFunctionType(L:List{Type})) .
+	eq Prototype(T:Type, L:List{Type}, true) = pushTypeDown(T:Type, makeFunctionType((L:List{Type} :: variadic))) .
+	--- eq Prototype(T:Type, L:List{Type}, false) = functionType(T:Type, L:List{Type}) .
+	--- eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
 
 	
 	eq pushTypeDown(arrayType(T:Type, N:Nat), K:KLabel) = arrayType(pushTypeDown(T:Type, K:KLabel), N:Nat) .
@@ -388,10 +359,12 @@ mod COMMON-C-TYPING is
 	eq pushTypeDown(unionType(X:Id), K:KLabel) = K:KLabel(unionType(X:Id)) .
 	eq pushTypeDown(enumType(X:Id), K:KLabel) = K:KLabel(enumType(X:Id)) .
 	
+	eq pushTypeDown(typedefType(X:Id, T:Type), K:KLabel) = K:KLabel(T:Type) .
+	
 	eq pushTypeDown(T:BaseType, K:KLabel) = K:KLabel(T:BaseType) .
 	
 	eq makeArrayType(N:Nat)(T:Type) = arrayType(T:Type, N:Nat) .
-	--- eq makeFunctionType(L:List{Type})(T:Type) = functionType(T:Type, L:List{Type}) .
+	eq makeFunctionType(L:List{Type})(T:Type) = functionType(T:Type, L:List{Type}) .
 	
 	--- ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
 		--- if notBool hasArrayType(T:Type) .
@@ -437,49 +410,19 @@ mod COMMON-C-TYPING is
 		< k > JustBase => T:Type ...</ k >
 		< declarationTypeHolder > T:Type => . ...</ declarationTypeHolder >
 		: KSentence .
-		
-	--- op bah : Type Type -> K .
-	--- mb rule
-		--- < k > (. => bah(T:Type, T':Type)) ...</ k >
-		--- (< declarationTypeHolder > T:Type </ declarationTypeHolder >
-		--- < declarationTypeHolder > T':Type </ declarationTypeHolder > => (.).Bag)
-		--- : KSentence .
-			
-	--- mb rule
-		--- < k > DeclType(T:Type, K:K) => K:K ...</ k >
-		--- < declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
-		--- : KSentence .
-		
-	--- FIXME should handle all type cases
-	--- eq reverseArrayTypes-aux(T:BaseType) = T:BaseType .
-	--- ceq reverseArrayTypes-aux(T:Type) = T:Type 
-		--- if hasStructType(T:Type) 
-		--- orBool hasUnionType(T:Type)
-		--- orBool hasFunctionType(T:Type) .
-		
+
+	op extractActualTypeFreezer : -> K .
 	mb rule
-		< k > DeclType(T:Type, K:K) => K:K ...</ k >
+		< k > DeclType(T:Type, K:K) => K:K ~> extractActualTypeFreezer ...</ k >
 		< declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
 		: KSentence .
 	
-	--- op prepareArrayType : .
-	
-	
-	--- eq reverseArrayTypes-aux(qualifiedType(T:Type, K:K)) = qualifiedType(reverseArrayTypes-aux(T:Type), K:K) .
-	--- eq reverseArrayTypes-aux(pointerType(T:Type)) = pointerType(reverseArrayTypes-aux(T:Type)) .
-	--- ceq reverseArrayTypes-aux(arrayType(T:Type, N:Nat)) = arrayType(reverseArrayTypes-aux(T:Type), N:Nat)) .
-		--- if notBool hasArrayType(T:Type) .
-	--- eq reverseArrayTypes-aux(arrayType(arrayType(T:Type, M:Nat), N:Nat)) = 
-
-	--- eq reverseArrayTypes(T:Type) = reverseArrayTypes-aux(T:Type) .
+	mb rule
+		< k > T:Type ~> extractActualTypeFreezer 
+			=> extractActualType(T:Type)
+		...</ k >
+		: KSentence .
 		
-	--- op reverseArrayTypes : K -> K [metadata "strict"] .
-	--- op reverseArrayTypes-aux : K -> Type .
-	--- mb rule
-		--- < k > DeclType(T:Type, K:K) => reverseArrayTypes(K:K) ...</ k >
-		--- < declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
-		--- : KSentence .
-	
 	op fillBitHoles : List{Type} -> List{Type} .
 	op fillBitHoles : Nat List{Type} -> List{Type} .
 	eq fillBitHoles(Nil) = Nil .
@@ -528,9 +471,9 @@ mod COMMON-C-TYPING is
 		: KSentence .
 
 	--- FIXME what good is this?
-	mb rule
-		< k > OnlyTypedef(?) => . ...</ k >
-		: KSentence .
+	--- mb rule
+		--- < k > OnlyTypedef(?) => . ...</ k >
+		--- : KSentence .
 			
 	op addAggregate : Id List{Type} -> K .
 	op addGlobalAggregate : Id List{Type} -> K .
@@ -557,18 +500,21 @@ mod COMMON-C-TYPING is
 		
 	mb rule
 		NameAndType(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
+		--- if notBool hasTypedefType(T:Type)
 		: KSentence .
+	--- mb rule
+		--- NameAndType(X:Id, T:Type) => typedDeclaration(extractActualType(T:Type), X:Id)
+		--- if hasTypedefType(T:Type)
+		--- : KSentence .	
+	
+	eq extractActualType(typedefType(?, T:Type)) = T:Type .
+	eq extractActualType(qualifiedType(T:Type, K:K)) = qualifiedType(extractActualType(T:Type), K:K) .
+	ceq extractActualType(T:Type) = T:Type 
+		if getKLabel(T:Type) =/=Bool 'typedefType
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
+		
 	op NameAndType : K K -> K [metadata "strict(2)"] .
 	
-***(
-('StructDef).KResultLabel(Id unnamed(0)(.List{K}),,('_::_).KHybridLabel(
-('FieldGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Unsigned).KResultLabel(.List{K}),,('Long).KResultLabel(.List{K}),,('Long).KResultLabel(.List{K}),,('Int).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('Name).KProperLabel(Id Identifier("offset")(.List{K}),,('JustBase).KProperLabel(.List{K}))))
-,,('FieldGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Unsigned).KResultLabel(.List{K}),,('Short).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('Name).KProperLabel(Id Identifier("handle")(.List{K}),,('JustBase).KProperLabel(.List{K}))))
-,,('FieldGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Unsigned).KResultLabel(.List{K}),,('Char).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('Name).KProperLabel(Id Identifier("eof")(.List{K}),,('JustBase).KProperLabel(.List{K}))))))
-
-
-***)
-	--- mb context (?:List{C} :: `[HOLE`]:C :: ?:List{C}) : KSentence .
 	mb rule
 		SingleName(T:Type, Name(X:Id, K:K)) => NameAndType(X:Id, DeclType(T:Type, K:K))
 		: KSentence .
@@ -637,11 +583,19 @@ mod COMMON-C-TYPING is
 	ceq hasPointerType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'pointerType .
 	
+	eq hasTypedefType(typedefType(?, ?)) = true .
+	eq hasTypedefType(qualifiedType(T:Type, ?)) = hasTypedefType(T:Type) .
+	ceq hasTypedefType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'typedefType 
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
+	
 	eq hasArrayType(arrayType(?, ?)) = true .
 	eq hasArrayType(incompleteArrayType(?)) = true .
+	eq hasArrayType(qualifiedType(T:Type, ?)) = hasArrayType(T:Type) .
 	ceq hasArrayType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'arrayType 
-		andBool getKLabel(T:Type) =/=Bool 'incompleteArrayType .
+		andBool getKLabel(T:Type) =/=Bool 'incompleteArrayType 
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	eq hasAggregateType(T:Type) = hasArrayType(T:Type) orBool hasStructType(T:Type) .
 	
@@ -740,30 +694,11 @@ mod COMMON-C-TYPING is
 		< type > K:K => T:Type ...</ type >
 		< types >... K:K |-> T:Type ...</ types >
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < type > [X:Id => T:Type] ...</ type >
-		--- < types >... typedefName(X:Id) |-> T:Type ...</ types >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < type > [tv(?, T:Type) => T:Type] ...</ type >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < type > [cast(T:Type, ?) => T:Type] ...</ type >
-		--- : KSentence [metadata "structural"] .
-	--- mb [type-struct-arrow]: rule
-		--- < type > ['_->_(pointerType(structType(S:Id)),, X:Id) => T:Type] ...</ type >
-		--- < structs >... struct(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
-		--- : KSentence [metadata "structural"] .
-	--- mb [type-union-arrow]: rule
-		--- < type > ['_->_(pointerType(unionType(S:Id)),, X:Id) => T:Type] ...</ type >
-		--- < structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
-		--- : KSentence [metadata "structural"] .
 
 	mb [type-call]: rule
 		< type > Call(functionType(T:Type, ?), L:List{C}) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
-		 
-		
+		 		
 	mb [type-struct-dot]: rule
 		< type > structType(S:Id) . F:Id => T:Type ...</ type >
 		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
