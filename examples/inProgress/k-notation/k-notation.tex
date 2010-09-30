@@ -1,0 +1,383 @@
+\documentclass[draft]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage[a0paper,left=10mm,right=10mm,top=20mm, bottom=20mm]{geometry}
+
+\newcommand{\CellContents}{{\it CellContents}}
+\newcommand{\Sort}{{\it Sort}}
+\newcommand{\List}{{\it List}}
+\newcommand{\ListItem}{{\it ListItem}}
+\newcommand{\Set}{{\it Set}}
+\newcommand{\SetItem}{{\it SetItem}}
+\newcommand{\Map}{{\it Map}}
+\newcommand{\MapItem}{{\it MapItem}}
+\newcommand{\Bag}{{\it Bag}}
+\newcommand{\BagItem}{{\it BagItem}}
+\newcommand{\KLabel}{{\it KLabel}}
+\newcommand{\Cell}{{\it Cell}}
+
+\newcommand{\kra}{\curvearrowright}
+
+\newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
+
+\newcommand{\mprefixa}[3]{\mall{#1}{#2}{{#3}\ \ \_}}
+\newcommand{\mprefixb}[3]{\mall{#1}{#2}{{#3}\ \ {\cdot}{\cdot}{\cdot}}}
+
+\newcommand{\msuffixa}[3]{\mall{#1}{#2}{\_\ \ {#3}}}
+\newcommand{\msuffixb}[3]{\mall{#1}{#2}{{\cdot}{\cdot}{\cdot}\ \ {#3}}}
+
+\newcommand{\mmiddlea}[3]{\mall{#1}{#2}{\_ \ \ {#3}\ \ \_}}
+\newcommand{\mmiddleb}[3]{\mall{#1}{#2}{{\cdot}{\cdot}{\cdot} \ \ {#3}\ \ {\cdot}{\cdot}{\cdot}}}
+
+\newcommand{\mdot}{\cdot}
+\newcommand{\mAnyVar}{\_}
+\newcommand{\reduce}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hline{#2}\end{array}}
+
+\newcommand{\klsep}{\mbox{\,,\!,\,}}
+
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\section{Cell contents}
+
+$\CellContents ::= K \mid \List \mid\Set\mid\Map\mid \Bag$
+
+\noindent
+$K ::= \KLabel(\List\{K\})\mid\List_{\kra}$
+
+\noindent
+$\List ::= .\List\mid\ListItem\mid \List~\List$
+
+\noindent
+$\List\{K\} ::= .\List\{K\}\mid K\mid \List\{K\} \klsep\List\{K\}$
+
+\noindent
+$\List_{\kra} ::= .K\mid K\mid \List\{K\}\kra\List\{K\}$
+
+\noindent
+$\Set ::= .\Set\mid\SetItem\mid \Set~\Set$
+
+\noindent
+$\Map ::= .\Map\mid\MapItem\mid \Map~\Map$
+
+\noindent
+$\MapItem ::= K \mapsto K$
+
+\noindent
+\textbf{Remark.} May be we should consider ${\it MapKey} \mapsto {\it MapValue}$.
+
+\noindent
+$\Bag ::= .\Bag\mid\BagItem\mid \Bag~\Bag$
+
+\noindent
+$\BagItem ::= \Cell$
+
+\paragraph{Constraints}
+1) \ListItem, \SetItem, \MapItem, \BagItem\ are pairwise disjoint.
+
+\section{Cells}
+
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline
+Cell type 
+&
+\multicolumn{2}{l|}{ASCII notation}
+&
+ASCII desugared syntax
+&
+\multicolumn{2}{l|}{Math notation}
+&
+Math desugared syntax
+&
+Semantics
+\\
+\hline
+&
+~~~~~a
+&
+~~~~~b
+&
+&
+~~~~~a
+&
+~~~~~b
+&
+&
+\\
+\hline
+closed cell 
+&
+\verb'<cell> X </cell>'
+&
+&
+&
+$\mall{}{cell}{X}$
+&
+&
+&
+$\langle {\sf cell} \rangle X\langle/ {\sf cell} \rangle$
+\\
+\hline
+left open cell
+&
+\verb'<cell_> X </cell>'
+&
+\verb'<cell>... X </cell>'
+&
+\verb'<cell> _ X </cell>'
+&
+$\msuffixa{}{cell}{X}$
+&
+$\msuffixb{}{cell}{X}$
+&
+$\mall{}{cell}{~\mAnyVar~X~}$
+&
+$\langle {\sf cell} \rangle~ ?1{:}s~X~\langle/ {\sf cell} \rangle$
+\\
+
+&
+\verb'<k_> X </k>'
+&
+\verb'<k>... X </k>'
+&
+\verb'<k> _~>X </k>'
+&
+$\msuffixa{}{k}{X}$
+&
+$\msuffixb{}{k}{X}$
+&
+$\mall{}{k}{~\mAnyVar\kra X~}$
+&
+$\langle {\sf cell} \rangle~ ?1{:}K\kra X~\langle/ {\sf cell} \rangle$
+\\
+\hline
+right open cell
+&
+\verb'<cell> X <_/cell>'
+&
+\verb'<cell> X ...</cell>'
+&
+\verb'<cell> X _ </cell>'
+&
+$\mprefixa{}{cell}{X}$
+&
+$\mprefixb{}{cell}{X}$
+&
+$\mall{}{cell}{~X~\mAnyVar~~}$
+&
+$\langle {\sf cell} \rangle~X~ ?1{:}s~\langle/ {\sf cell} \rangle$
+\\
+
+&
+\verb'<k> X <_/k>'
+&
+\verb'<k> X ...</k>'
+&
+\verb'<k> X~>_ </>'
+&
+$\mprefixa{}{k}{X}$
+&
+$\mprefixb{}{k}{X}$
+&
+$\mall{}{k}{~X\kra\mAnyVar~~}$
+&
+$\langle{\sf k} \rangle~ X\kra ?1{:}K~\langle/ {\sf k} \rangle$
+\\
+\hline
+
+open cell
+&
+\verb'<cell_> X <_/cell>'
+&
+\verb'<cell>... X ...</cell>'
+&
+\verb'<cell> _ X _ </cell>'
+&
+$\mmiddlea{}{cell}{X}$
+&
+$\mmiddleb{}{cell}{X}$
+&
+$\mall{}{cell}{~\mAnyVar~X~\mAnyVar~~}$
+&
+$\langle {\sf cell} \rangle~ ?1{:}s~X~ ?2{:}s~\langle/ {\sf cell} \rangle$
+\\
+
+&
+\verb'<k_> X <_/k>'
+&
+\verb'<k>... X ...</k>'
+&
+\verb'<k> _ X _ </k>'
+&
+$\mmiddlea{}{k}{X}$
+&
+$\mmiddleb{}{k}{X}$
+&
+$\mall{}{k}{~\mAnyVar\kra X\kra\mAnyVar~~}$
+&
+$\langle {\sf k} \rangle~  ?1{:}K\kra X\kra ?2{:}K~\langle/ {\sf k} \rangle$
+\\
+\hline
+\end{tabular}
+\\
+\\
+where $s\in\{\List,\Set,\Map,\Bag\}$ is the sort of the {\sf cell} content (the sort $K$ is separately treated).
+
+
+\begin{definition}
+Two patterns are \textbf{equivalent} iff they have the same set of instances (a term $t$ is an instance of a pattern $p$ iff there is a substitution $\theta$, defined over the variables of $p$, such that $\theta(p)=t$).
+\end{definition}
+
+\section{Examples of rules}
+
+$\it Rule ::= Term ~\texttt{=>}~ Term \mid Context[Rule]$
+
+\medskip
+
+\noindent
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\multicolumn{2}{|l|}{ASCII notation}
+&
+\multicolumn{2}{l|}{Math notation}
+&
+Remarks
+\\
+\hline
+~~~~~a
+&
+~~~~~b
+&
+~~~~~a
+&
+~~~~~b
+&
+\\
+\hline
+\verb'<cell> skip => . </cell>'
+&
+&
+$\mall{}{cell}{skip\Rightarrow\mdot}$
+&
+&
+\\
+\hline
+\verb'<cell_> skip => . </cell>'
+&
+\verb'<cell>... skip => . </cell>'
+&
+$\msuffixa{}{cell}{\reduce{skip}{\mdot}}$
+&
+$\msuffixb{}{cell}{\reduce{skip}{\mdot}}$
+&
+\\
+\hline
+\verb'<cell> skip => . <_/cell>'
+&
+\verb'<cell> (skip => .) ...</cell>'
+&
+$\mprefixa{}{cell}{\reduce{skip}{\mdot}}$
+&
+$\mprefixb{}{cell}{\reduce{skip}{\mdot}}$
+&
+\\
+\hline
+\verb'<cell_> skip => . <_/cell>'
+&
+\verb'<cell>... (skip => .) ...<cell>'
+&
+$\mmiddlea{}{cell}{\reduce{skip}{\mdot}}$
+&
+$\mmiddleb{}{cell}{\reduce{skip}{\mdot}}$
+&
+\\
+\hline
+\verb'<cellA_> (skip => .) <cellB_> u => v </cellB> </cellA>'
+&
+\verb'<cellA>... (skip => .) <cellB>... u => v </cellB> </cellA>'
+&
+$\msuffixa{}{cellA}{\reduce{skip}{\mdot}~\msuffixa{}{cellB}{\reduce{u}{v}}}$
+&
+$\msuffixb{}{cellA}{\reduce{skip}{\mdot}~\msuffixb{}{cellB}{\reduce{u}{v}}}$
+&
+\\
+\hline
+\verb'<cellA> (skip => .) <cellB> u => v <_/cellB> <_/cellA>'
+&
+\verb'<cellA> (skip => .) <cellB> u => v ...</cellB>...</cellA>'
+&
+$\mprefixa{}{cellA}{\reduce{skip}{\mdot}~\mprefixa{}{cellB}{\reduce{u}{v}}}$
+&
+$\mprefixb{}{cellA}{\reduce{skip}{\mdot}~\mprefixb{}{cellB}{\reduce{u}{v}}}$
+&
+\\
+\hline
+\verb'<cellA_> (skip => .)  <cellB_> u => v <_/cellB><_/cellA>'
+&
+\verb'<cellA>... (skip => .) <cellB>... u => v ...</cellB> ...</cellA>'
+&
+$\mmiddlea{}{cellA}{\reduce{skip}{\mdot}~\mmiddlea{}{cellB}{u\Rightarrow v}}$
+&
+$\mmiddleb{}{cellA}{\reduce{skip}{\mdot}~\mmiddleb{}{cellB}{u\Rightarrow v}}$
+&
+\\
+\hline
+\verb'<k> while(E:Exp) St => if (E) {St while(E) St} else . <_/k>'
+&
+\verb'<k> while(E:Exp) St => if (E) {St while(E) St} else . ...</k>'
+&
+$\mprefixa{}{k}{\reduce{\tt while(E{:}Exp)~ St}{\tt if~(E) \{St~while(E)~St\}~else~.}}$
+&
+$\mprefixb{}{k}{\reduce{\tt while(E{:}Exp)~ St}{\tt if~(E) \{St~while(E)~St\}~else~.}}$
+&
+\\
+\hline
+\end{tabular}
+
+\section{Inconsistencies}
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Notation & Greedy semantics & K semantics & Remarks \\
+\hline
+\verb'<cell_>skip=>.</cell>'
+&
+\verb'??? '
+&
+\verb'<cell> ?1:s  skip </cell> => <cell> ?1:s </cell>'
+&
+\\
+\verb'<cell> _ skip=>.</cell>'
+&
+\verb'??? '
+&
+\verb'<cell> ?1:s  skip </cell> => <cell> . </cell>'
+&
+\\
+\verb'<k_>skip=>.</k>'
+&
+\verb'??? '
+&
+\verb'<k> ?1:K'$\kra$\verb'skip </k> => <k> ?1:K </k>'
+&
+\\
+\verb'<k> _'$\kra$\verb'skip => . </k>'
+&
+\verb'??? '
+&
+\verb'<k> ?1:K'$\kra$\verb'skip </k> => <k> .  </k>'
+&
+\\
+\hline
+&
+&
+&
+\\
+\hline
+\end{tabular}
+
+ 
+\end{document}
