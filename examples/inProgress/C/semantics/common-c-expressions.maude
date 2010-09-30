@@ -553,62 +553,85 @@ endm
 mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
+	---- comparison of integers
 	--- FIXME should also be promoting these
-	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) 
+		=> if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) 
+		=> if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) 
+		=> if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) 
+		=> if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) 
+		=> if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) 
+		=> if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 	
+	---- comparison of pointers
 	--- fixme could check 6.5.8:2
 	--- fixme there are further restrictions on pointers
-	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T':Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi 
+	mb rule tv(sym(Base:Nat) +Nat N:Nat, T:Type) < tv(sym(Base:Nat) +Nat M:Nat, T':Type) 
+		=> if (N:Nat <Int M:Nat) then tv(1, int) else tv(0, int) fi 
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T':Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi 
+	mb rule tv(sym(Base:Nat) +Nat N:Nat, T:Type) <= tv(sym(Base:Nat) +Nat M:Nat, T':Type) 
+		=> if (N:Nat <=Int M:Nat) then tv(1, int) else tv(0, int) fi 
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T':Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi 
+	mb rule tv(sym(Base:Nat) +Nat N:Nat, T:Type) > tv(sym(Base:Nat) +Nat M:Nat, T':Type) 
+		=> if (N:Nat >Int M:Nat) then tv(1, int) else tv(0, int) fi 
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T':Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi 
-	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
-	: KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T':Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi 
-	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
-	: KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T':Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
+	mb rule tv(sym(Base:Nat) +Nat N:Nat, T:Type) >= tv(sym(Base:Nat) +Nat M:Nat, T':Type) 
+		=> if (N:Nat >=Int M:Nat) then tv(1, int) else tv(0, int) fi 
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
 	
+	mb rule tv(N:Nat, T:Type) == tv(M:Nat, T':Type) 
+		=> if (N:Nat ==Bool M:Nat) then tv(1, int) else tv(0, int) fi 
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	mb rule tv(N:Nat, T:Type) != tv(M:Nat, T':Type) 
+		=> if (N:Nat =/=Bool M:Nat) then tv(1, int) else tv(0, int) fi
+	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	: KSentence [metadata "structural"] .
+	
+	--- mb rule tv(I1:Int, T:Type) != tv(I2:Int, T':Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
+	--- if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+	--- : KSentence [metadata "structural"] .
+	
+	---- comparison of ints with pointers
 	--- fixme there are further restrictions on pointers
-	mb rule tv(N:Nat, T:Type) == tv(I2:Int, T':Type) 
-		=> tv(sym(0) +Nat 0, T':Type) == tv(I2:Int, T':Type) 
+	mb rule (tv(N:Nat, T:Type) => tv(NullPointer, T':Type)) == tv(?, T':Type)
 	if hasIntegerType(T:Type) andBool hasPointerType(T':Type)
-	andBool N:Nat ==Bool NULL
+	andBool N:Nat ==Bool NullPointerConstant
 	: KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) == tv(N:Nat, T':Type) 
-		=> tv(I1:Int, T:Type) == tv(sym(0) +Nat 0, T:Type) 
+	mb rule tv(?, T:Type) == (tv(N:Nat, T':Type) => tv(NullPointer, T:Type))
 	if hasPointerType(T:Type) andBool hasIntegerType(T':Type)
-	andBool N:Nat ==Bool NULL
+	andBool N:Nat ==Bool NullPointerConstant
 	: KSentence [metadata "structural"] .
 	
-	mb rule tv(N:Nat, T:Type) != tv(I2:Int, T':Type) 
-		=> tv(sym(0) +Nat 0, T':Type) != tv(I2:Int, T':Type) 
+	mb rule (tv(N:Nat, T:Type) => tv(NullPointer, T':Type)) != tv(?, T':Type)
 	if hasIntegerType(T:Type) andBool hasPointerType(T':Type)
-	andBool N:Nat ==Bool NULL
+	andBool N:Nat ==Bool NullPointerConstant
 	: KSentence [metadata "structural"] .
-	mb rule tv(I1:Int, T:Type) != tv(N:Nat, T':Type) 
-		=> tv(I1:Int, T:Type) != tv(sym(0) +Nat 0, T:Type) 
+	mb rule tv(?, T:Type) != (tv(N:Nat, T':Type) => tv(NullPointer, T:Type))
 	if hasPointerType(T:Type) andBool hasIntegerType(T':Type)
-	andBool N:Nat ==Bool NULL
-	: KSentence [metadata "structural"] .
-	
-	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T':Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
-	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
-	: KSentence [metadata "structural"] .
-	
+	andBool N:Nat ==Bool NullPointerConstant
+	: KSentence [metadata "structural"] .	
 
 	--- floats
 	mb rule tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
@@ -792,9 +815,10 @@ mod COMMON-SEMANTICS-DEREFERENCE is
 		andBool KL:KLabel =/=Bool '&_
 		: KSentence .
 		
+	--- matching the sym in order to catch instances of dereferencing a non-pointer
 	mb [deref]: rule
-		< k > *(tv(Loc:Nat, pointerType(T:Type))) 
-			=> read(Loc:Nat, T:Type)
+		< k > *(tv(sym(Block:Nat) +Nat Offset:Nat, pointerType(T:Type))) 
+			=> read(sym(Block:Nat) +Nat Offset:Nat, T:Type)
 		...</ k >
 		if notBool hasArrayType(T:Type)
 		andBool notBool hasFunctionType(T:Type)

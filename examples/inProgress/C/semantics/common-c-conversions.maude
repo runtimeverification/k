@@ -220,14 +220,6 @@ mod COMMON-SEMANTICS-CAST is
 		< k > cast(T:Type, tv(L:List{K}, T':Type)) => cast(T:Type, tv(L:List{K}, unqualifyType(T':Type))) ...</ k > 
 		if hasStaticType(T':Type)
 		: KSentence [metadata "structural"] .
-***(
-('cast).KProperLabel(
-('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K}))))
-,,('tv).KResultLabel(kList("wklist_")(
-	('functionObject).KResultLabel(Id Identifier("g")(.List{K}),,('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K})))),,('Block).KProperLabel(('_::_).KHybridLabel(.List{K}),,('_::_).KHybridLabel(('StatementLoc).KProperLabel(('Return).KProperLabel(Id Identifier("x")(.List{K})),,('CabsLoc).KProperLabel(String "twoFile1.prepre.gen"(.List{K}),,BaseValue 13(.List{K}),,BaseValue 915(.List{K}),,BaseValue 422(.List{K})))))))
-	,,('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("x")(.List{K}))))))
-
-***)
 	
 	mb rule
 		< k > cast(T:Type, tv(L:List{K}, T:Type)) => tv(L:List{K}, T:Type) ...</ k > 
@@ -320,6 +312,12 @@ mod COMMON-SEMANTICS-CAST is
 	mb rule
 		< k > cast(pointerType(T:Type), tv(N:Nat, T':Type)) => tv(N:Nat, pointerType(T:Type)) ...</ k >
 		if hasIntegerType(T':Type)
+		andBool N:Nat =/=Bool NullPointerConstant
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > cast(pointerType(T:Type), tv(N:Nat, T':Type)) => tv(NullPointer, pointerType(T:Type)) ...</ k >
+		if hasIntegerType(T':Type)
+		andBool N:Nat ==Bool NullPointerConstant
 		: KSentence [metadata "structural"] .
 
 	--- fixme there should only be casts to scalars, but these are generated when assigning to array types
@@ -331,10 +329,17 @@ mod COMMON-SEMANTICS-CAST is
 	mb rule
 		< k > cast(T:Type, tv(N:Nat, pointerType(?)))
 			=> tv(N:Nat, T:Type)
-		...</ k > 
+		...</ k >
 		if hasIntegerType(T:Type)
-		--- andBool notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0)
 		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < k > cast(T:Type, tv(N:Nat, pointerType(?)))
+			--- => tv(N:Nat, T:Type)
+		--- ...</ k >
+		--- if hasIntegerType(T:Type)
+		--- --- andBool notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0)
+		--- : KSentence [metadata "structural"] .
 	
 	--- --- fixme
 	--- mb rule

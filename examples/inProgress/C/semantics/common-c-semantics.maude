@@ -77,8 +77,11 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op extractBitsFromList : K Nat Nat -> K [metadata "strict(1)"] . --- data, offset, size in bits
 	op typedef : Id -> Id .
 	op unnamed : Nat -> Id .
-	op NULL : -> Nat .
-	eq NULL = 0 .
+	
+	op NullPointerConstant : -> Nat .
+	eq NullPointerConstant = 0 .
+	op NullPointer : -> Nat .
+	
 	op emptyValue : -> Value .
 	--- subsort List{KResult} < K .
 	op _bit::_ : Nat Nat -> Nat [assoc] .

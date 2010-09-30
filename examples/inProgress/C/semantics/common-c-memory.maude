@@ -84,11 +84,11 @@ mod COMMON-SEMANTICS-READING is
 		= tv(N:Nat, pointerType(T:Type))
 		if Len:Nat ==Bool numBitsPerByte
 		andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
-	ceq concretize(pointerType(T:Type), dataList((piece(N:Nat, Len:Nat),, L:List{K}))) 
-		= tv(N:Nat, pointerType(T:Type))
-		if N:Nat ==Bool NULL
-		andBool Len:Nat ==Bool numBitsPerByte
-		andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
+	--- ceq concretize(pointerType(T:Type), dataList((piece(N:Nat, Len:Nat),, L:List{K}))) 
+		--- = tv(N:Nat, pointerType(T:Type))
+		--- if N:Nat ==Bool NULL
+		--- andBool Len:Nat ==Bool numBitsPerByte
+		--- andBool lengthList{K}(L:List{K}) ==Bool cfg:ptrsize -Int 1 .
 		
 	eq concretize(structType(S:Id), dataList(L:List{K})) = tv(L:List{K}, structType(S:Id)) .
 	eq concretize(unionType(S:Id), dataList(L:List{K})) = tv(L:List{K}, unionType(S:Id)) .
@@ -311,12 +311,11 @@ mod COMMON-SEMANTICS-WRITING is
 	op splitPointerBytes : K K K -> K .
 	op splitPointerBytes : K K K List{K} -> K .
 	mb context splitPointerBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
-	ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
-		= splitPointerBytes(I:Int, T:Type, Len:Nat, piece(encodedPointer(I:Int), numBitsPerByte))
-		if I:Int =/=Bool NULL .
-	ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
-		= splitPointerBytes(I:Int, T:Type, Len:Nat, piece(NULL, numBitsPerByte))
-		if I:Int ==Bool NULL .
+	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
+		= splitPointerBytes(I:Int, T:Type, Len:Nat, piece(encodedPointer(I:Int), numBitsPerByte)) .
+	--- ceq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
+		--- = splitPointerBytes(I:Int, T:Type, Len:Nat, piece(NULL, numBitsPerByte))
+		--- if I:Int ==Bool NULL .
 	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K}) = splitPointerBytes(I:Int, T:Type, Len:Nat, (L:List{K},, piece(unknown(numBitsPerByte), numBitsPerByte))) .
 	eq splitPointerBytes(I:Int, T:Type, 0, L:List{K}) 
 		= dataList(L:List{K}) .

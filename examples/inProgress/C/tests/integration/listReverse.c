@@ -6,10 +6,10 @@ int* listAppend(int* p, int n);
 int listSum(int* p);
 
 int main(void){
-	int* head = malloc(2*sizeof(int));
+	int* head = malloc(sizeof(int) + sizeof(int*));
 	*head = 20; 
-	*(head + 1) = NULL;
-	
+	*((int**)(head + 1)) = NULL;
+	// printf("%p\n", head);
 	listAppend(head, 25);
 	listAppend(head, 15);
 	listAppend(head, 30);
@@ -19,7 +19,7 @@ int main(void){
 	int* curr = head;
 	while (curr != NULL){
 		printf("%d,", *curr);
-		curr = *(curr + 1);
+		curr = *((int**)(curr + 1));
 	}
 	printf("\n");
 	
@@ -29,7 +29,7 @@ int main(void){
 	curr = head;
 	while (curr != NULL){
 		printf("%d,", *curr);
-		curr = *(curr + 1);
+		curr = *((int**)(curr + 1));
 	}
 	printf("\n");	
 	int last = *head;
@@ -39,16 +39,16 @@ int main(void){
 
 int* listAppend(int* p, int n){
 	int* x;
-
+	// printf("%p\n", p);
     if (p != NULL) {
         x = p;
-        while (*(x + 1) != NULL) {
-            x = *(x + 1);
+        while (*((int**)(x + 1)) != NULL) {
+            x = *((int**)(x + 1));
         }		
-		int* next = malloc(2 * sizeof(int));
-        *(x + 1) = next;
+		int* next = malloc(sizeof(int) + sizeof(int*));
+        *((int**)(x + 1)) = next;
 		*next = n;
-		*(next + 1) = NULL;
+		*((int**)(next + 1)) = NULL;
     }
 	return p;
 }
@@ -59,8 +59,8 @@ int listSum(int* p){
     if (p != NULL) {
         x = p;
 		sum += *x;
-        while (*(x + 1) != NULL) {
-            x = *(x + 1);
+        while (*((int**)(x + 1)) != NULL) {
+            x = *((int**)(x + 1));
 			sum += *x;
         }		
 	}
@@ -69,11 +69,11 @@ int listSum(int* p){
 
 int* listReverse(int* p){
     if (p != NULL) {
-		int* x = *(p + 1);
-        *(p + 1) = NULL;
+		int* x = *((int**)(p + 1));
+        *((int**)(p + 1)) = NULL;
         while(x != NULL) {
-            int* tmp = *(x + 1);
-            *(x + 1) = p;
+            int* tmp = *((int**)(x + 1));
+            *((int**)(x + 1)) = p;
             p = x;
             x = tmp;
         }
