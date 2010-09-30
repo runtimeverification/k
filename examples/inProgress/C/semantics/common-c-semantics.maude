@@ -1386,7 +1386,15 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
 			=> declareFunction(X:Id, T:Type, initializer((X:Id := tv(functionObject(X:Id, unqualifyType(T:Type), Block:K), T:Type) ~> discard)))
 		...</ k >
+		if hasFunctionType(T:Type)
+		--- X:Id =/=Bool Identifier("createNode")
+		--- andBool X:Id =/=Bool Identifier("schorr_waite")
 		: KSentence [metadata "structural"] .
+		
+***(
+('FunctionDefinition).KProperLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('functionType).KResultLabel(('structType).KResultLabel(Id Identifier("struct_node")(.List{K})),,('_::_).KHybridLabel(.List{K}))),,Id Identifier("createNode")(.List{K})),,('Block).KProperLabel(BaseValue 7(.List{K}),,('_::_).KHybridLabel(.List{K}),,('_::_).KHybridLabel(('StatementLoc).KProperLabel(('Computation).KProperLabel(('Call).KProperLabel(Id Identifier("printf")(.List{K}),,('_::_).KHybridLabel(('Constant).KProperLabel(('StringLiteral).KProperLabel(String "creating new node %d\n"(.List{K}))),,Id Identifier("counter")(.List{K})))),,('CabsLoc).KProperLabel(String "schorr-waite.prepre.g)))))
+***)
+		
 	--- mb [function-definition]: rule
 		--- < k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
 			--- => allocateIfAbsent(T:Type, X:Id)
