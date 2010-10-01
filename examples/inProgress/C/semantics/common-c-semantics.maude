@@ -93,6 +93,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	
 	op zero : K -> K .
+	op zeroBlock : Nat -> K .
 	
 	op initializer : K -> KResult .
 	op startInitializer : Type Id K -> K .
@@ -1047,6 +1048,10 @@ mod COMMON-GLOBAL-DECLARATION is
 		< env >... Name:K |-> sym(Block:Nat) +Nat 0 ...</ env >
 		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
 		: KSentence .
+	mb rule
+		< k > zeroBlock(sym(Block:Nat) +Nat 0) => . ...</ k >
+		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
+		: KSentence .
 	
 	mb rule
 		< k > defineType(typedDeclaration(T:Type, X:Id)) => giveType(typedef(X:Id), T:Type) ...</ k >
@@ -1418,8 +1423,11 @@ mod C-SEMANTICS-MISC is
 	eq sNat(sym(N:Nat) +Nat M:Nat) = sym(N:Nat) +Nat (M:Nat +Nat 1) .
 	ceq I:Int +Int (N:Nat +Nat sym(M:Nat))
 		= absInt(N:Nat +Int I:Int) +Nat sym(M:Nat) 
-		if I:Int >=Int 0
-		orBool (I:Int <Int 0 andBool -Int I:Int <=Int N:Nat) .
+		if N:Nat +Int I:Int >=Int 0 .
+		
+	ceq (N:Nat +Nat sym(M:Nat)) -Int I:Int
+		= absInt(N:Nat -Int I:Int) +Nat sym(M:Nat) 
+		if N:Nat -Int I:Int >=Int 0 .
 	--- eq N:Nat +Nat bito(M:Nat) +Int I:Int = (N:Nat +Int I:Int) +Nat bito(M:Nat) .
 	
 	--- --- fixme can do a much better job than this

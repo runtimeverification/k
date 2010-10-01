@@ -65,8 +65,10 @@ SkipNode* make_node(int level, int value)
 {
     SkipNode* sn = (SkipNode*)malloc(sizeof(SkipNode));
 
-    sn->forward = (SkipNode**)calloc(level + 1, sizeof(SkipNode *));
-
+    sn->forward = (SkipNode**)malloc((level + 1) * sizeof(SkipNode *));
+	for (int i = 0; i < level + 1; i++) {
+		sn->forward[i] = NULL;
+	}
  
     sn->value = value;
     return sn;

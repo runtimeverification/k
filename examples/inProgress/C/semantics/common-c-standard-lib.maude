@@ -225,31 +225,32 @@ mod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
 	: KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [free-is-value]: rule
-		--- < k > [free => builtin(free)] ...</ k >
-	--- : KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [free-is-value]: rule
+		< k > Identifier("free") => builtin(Identifier("free")) ...</ k >
+	: KSentence [metadata "structural"] .
 	
-	--- mb [free]: rule
-		--- < k > [application(builtin(free), tv(loc(Block:Nat, Offset:Nat), pointerType(T:Type))) => skipval] ...</ k >
-		--- < mem >... [Block:Nat |-> memblock(N:Nat, ?) => .Map] ...</ mem >
-		--- < malloced >... [loc(Block:Nat, Offset:Nat) |-> N:Nat => .Map] ...</ malloced >
-	--- : KSentence [metadata "structural"] .
-	--- --- mb [free-done]: rule
-		--- --- < k > [application(builtin(free), tv(Loc:Nat, pointerType(T:Type))) => skipval] ...</ k >
-		--- --- < malloced >... [Loc:Nat |-> 0 => .Map] ...</ malloced >
-	--- --- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [calloc-is-value]: rule
-		--- < k > [calloc => builtin(calloc)] ...</ k >
-	--- : KSentence [metadata "structural"] .
+	mb [free]: rule
+		< k > Call(builtin(Identifier("free")), tv(sym(Block:Nat) +Nat Offset:Nat, pointerType(?))) 
+			=> skipval 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(N:Nat, ?) => (.).Map ...</ mem >
+		< malloced >... sym(Block:Nat) +Nat Offset:Nat |-> N:Nat => (.).Map ...</ malloced >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [calloc-is-value]: rule
+		< k > Identifier("calloc") => builtin(Identifier("calloc")) ...</ k >
+	: KSentence [metadata "structural"] .
 	
-	--- mb [calloc]: rule
-		--- < k > [application(builtin(calloc), (tv(N:Nat, ?) :: tv(Size:Nat, ?))) => store (N:Nat *Nat Size:Nat) New tv(0, char) atLoc Loc:Nat ~> tv(Loc:Nat, pointerType(void))] ...</ k >
-		--- ---< mem >... [.Map => Loc:Nat to (Loc:Nat +Nat (N:Nat *Nat Size:Nat)) |-> piece(0, 8)] ...</ mem >
-		--- < malloced >... [.Map => Loc:Nat |-> (N:Nat *Nat Size:Nat)] ...</ malloced >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-	--- : KSentence [metadata "structural"] .
+	mb [calloc]: rule
+		< k > Call(builtin(Identifier("calloc")), (tv(N:Nat, ?) :: tv(Size:Nat, ?))) 
+			=> alloc(Loc:Nat, (N:Nat *Nat Size:Nat)) 
+			~> zeroBlock(Loc:Nat)
+			~> tv(Loc:Nat, pointerType(void)) 
+		...</ k >
+		< malloced >... (.).Map => Loc:Nat |-> (N:Nat *Nat Size:Nat) ...</ malloced >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+	: KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [putchar-is-value]: rule
 		< k > Identifier("putchar") => builtin(Identifier("putchar")) ...</ k >

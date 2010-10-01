@@ -645,6 +645,8 @@ endm
 mod COMMON-SEMANTICS-ARITHMETIC is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 		
+	--- fixme not handling int + pointer?
+	
 	--- FIXME needs to check offset > 0 
 	mb rule < k > tv(Loc:Nat, pointerType(T':Type)) + tv(I2:Int, T:Type)
 				=> cast(pointerType(T':Type), cast(pointerType(unsigned-char), tv(Loc:Nat, pointerType(T':Type))) + (tv(I2:Int, T:Type) * sizeofType(T':Type)))
@@ -659,6 +661,22 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		...</ k >
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
+		
+		
+	mb rule < k > tv(Loc:Nat, pointerType(T':Type)) - tv(I2:Int, T:Type)
+				=> cast(pointerType(T':Type), cast(pointerType(unsigned-char), tv(Loc:Nat, pointerType(T':Type))) - (tv(I2:Int, T:Type) * sizeofType(T':Type)))
+		...</ k >
+		if hasIntegerType(T:Type)
+		andBool T':Type =/=Bool void
+		andBool T':Type =/=Bool unsigned-char
+		: KSentence [metadata "structural"] .
+		
+	mb rule < k > tv(Loc:Nat, pointerType(unsigned-char)) - tv(I2:Int, T:Type) 
+			=> tv(Loc:Nat -Int I2:Int, pointerType(unsigned-char))
+		...</ k >
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .	
+		
 					
 	op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
 	mb [start-pointer-difference]: rule tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
