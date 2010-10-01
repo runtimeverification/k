@@ -242,6 +242,11 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 
 	mb rule 
 		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag)), (B:Bag => (.).Bag), ?, ?) ...</ k >
+		if B:Bag =/=Bool (.).Bag
+		: KSentence .
+	--- fixme not sure where this is specified, but if i say "static x;" i think it means int
+	mb rule 
+		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(BagItem(Int))), (.).Bag, ?, ?) ...</ k >
 		: KSentence .
 		
 	mb rule
