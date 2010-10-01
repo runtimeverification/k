@@ -1651,6 +1651,16 @@ mod C-SEMANTICS-MISC is
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		: KSentence .
 		
+	--- static variable without an initializer
+	mb rule
+		< k > (. => resolveInternal(X:Id, Tu:K, declarationObject(unqualifyType(T:Type), Tu:K, initializer(zero(X:Id))))) ~> resolve(Tu:K) ...</ k >
+		< preLinkage >... Tu:K |-> Map((? (X:Id |-> internal => .))) ...</ preLinkage >
+		< internalDefinitions >... Tu:K |-> Map(Defs:Map) ...</ internalDefinitions >
+		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
+		< preTypes >... Tu:K |-> Map((? (X:Id |-> T:Type => .))) ...</ preTypes >
+		if notBool $hasMapping(Defs:Map, X:Id)
+		: KSentence .
+		
 	mb rule
 		< k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, K:K)) ~> resolve(Tu:K) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
