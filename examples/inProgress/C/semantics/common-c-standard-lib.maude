@@ -103,13 +103,13 @@ mod COMMON-C-STANDARD-LIBRARY is
 			--- ...</ thread >
 		--- </ threads >
 	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [exit-is-value]: rule
-		--- < k > [exit => builtin(exit)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [exit]: rule
-		--- < k > [application(builtin(exit), tv(I:Int, int)) ~> ? => tv(I:Int, int)] </ k >
-	--- : KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [exit-is-value]: rule
+		< k > Identifier("exit") => builtin(Identifier("exit")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [exit]: rule
+		< k > Call(builtin(Identifier("exit")), tv(I:Int, int)) ~> ? => tv(I:Int, int) </ k >
+	: KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- --- mb [abort-is-debug]: rule
 		--- --- < k > [abort => debug] ...</ k >

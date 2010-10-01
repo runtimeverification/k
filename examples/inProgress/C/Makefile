@@ -76,6 +76,9 @@ integration-test:
 unit-test:
 	@make -C tests unit
 	
+torture-test:
+	@make -C tests torture
+	
 fix: 
 	maude $(SEMANTICS_DIR)/programs-gen.maude
 fixnew:
