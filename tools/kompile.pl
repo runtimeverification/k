@@ -845,9 +845,13 @@ sub make_eps
 
     
     # Generate postscript
-    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-eps -o $language_file_name-eps.eps 2>/dev/null");
-    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-eps -o $language_file_name-eps.ps 2>/dev/null");
+    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
     
+    # Generate eps
+    $status = system("ps2eps -f -q -P -H -l $language_file_name-eps.ps");
+    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+
     # rename eps file
     rename("$language_file_name-eps.eps", "$language_file_name.eps");
     print "Generated $language_file_name.eps which contains modules: @eps_modules\n";
@@ -858,6 +862,57 @@ sub make_eps
     unlink("$language_file_name-eps.dvi") if !$verbose;
     unlink("$language_file_name-eps.log") if !$verbose;
     unlink("$language_file_name-eps.ps") if !$verbose;
+    unlink("out");
+}
+
+sub make_png
+{
+    latexify("png", @png_modules);
+
+    # Find number of pages
+    my $pages = run_latex("$language_file_name-png");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+    
+    my $latex_out = get_file_content("$language_file_name-png.tex");
+    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    $latex_out =~ s/\\begin{document}/$settings/;
+    $latex_out =~ s/\\newpage/\\bigskip/g;
+    
+    open FILE,">", "$language_file_name-png.tex" or die "Cannot create $language_file_name-png.tex\n";
+    print FILE $latex_out;
+    close FILE;
+
+    # Generate tex
+    my $status = system("latex $language_file_name-png.tex > out");
+    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    
+    # Generate postscript
+    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-png -o $language_file_name-png.ps 2>/dev/null");
+    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
+    
+   
+    # Generate eps
+    $status = system("ps2eps -f -q -P -H -l $language_file_name-png.ps");
+    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    # Generate png
+    $status = system("gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pngalpha -r150 -sOutputFile=$language_file_name-png.png $language_file_name-png.eps");
+    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    # rename png file
+    rename("$language_file_name-png.png", "$language_file_name.png");
+    print "Generated $language_file_name.png which contains modules: @png_modules\n";
+
+    # delete auxialiary files if not verbose
+    unlink("$language_file_name-png.tex") if !$verbose;
+    unlink("$language_file_name-png.aux") if !$verbose;
+    unlink("$language_file_name-png.dvi") if !$verbose;
+    unlink("$language_file_name-png.log") if !$verbose;
+    unlink("$language_file_name-png.ps") if !$verbose;
+    unlink("$language_file_name-png.eps") if !$verbose;
     unlink("out");
 }
 
