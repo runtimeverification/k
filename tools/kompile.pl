@@ -486,7 +486,7 @@ if (!$maudify_only) {
 # Calling either the maude compiler or the latex/pdf compiler, depending upon $latex/$pdf
     if ($latex || $pdf) 
     {
-	latexify() if $latex;
+	make_latexify() if $latex;
 	make_pdf() if $pdf;
     }
     else {
@@ -507,9 +507,12 @@ sub print_header {
 
 
 sub latexify {
+    
+    my ($format, @modules) = @_;
+    
 # Assumes $language_file_name is a file name with no extension
 
-    print_header("Latex-ifying module $language_module_name from language definition $language_file_name") if $verbose;
+    print_header("Generate $format version for module $language_module_name from language definition $language_file_name") if $verbose;
 
 # 
     $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
@@ -537,7 +540,7 @@ sub latexify {
 		  "load $k_to_latex\n",
 		  "set print attribute on .\n",
 		  "loop latex-print .\n",
-		  map("(print $_ .)\n", @latexify_modules),
+		  map("(print $_ .)\n", @modules),
 #		  "(print $language_module_name .)\n",
 		  "quit\n");
 
@@ -547,7 +550,7 @@ sub latexify {
 	print "Latex style used: $style\n" if $verbose;
 	
 # File name where the compiled output will be stored:
-	my $output_file_name = "$language_file_name.tex";
+	my $output_file_name = "$language_file_name-$format.tex";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	print FILE "\\documentclass[landscape]{article}\n";
 	print FILE "\\usepackage{import}\n";
@@ -574,97 +577,111 @@ sub latexify {
     }
 }
 
-sub make_pdf {
-# Assumes $language_file_name is a file name with no extension
-    print_header("Make pdf module $language_module_name from language definition $language_file_name") if $verbose;
-
-# 
-    $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
-		   "load $k_prelude\n",
-		   "show module META-MODULE .\n",
-		   "show module K-TECHNIQUE .\n",
-		   "quit\n");
+sub get_file_content
+{
+    my $filename = shift;
     
-    s/^Bye.//gms;
-    s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
-
-    open FILE,">",$temp_file or die "Cannot create $temp_file\n";
-    print FILE;
+    open FILE, "<", $filename or die "Could not open $filename:\n$!";
+    my @input = <FILE>;
     close FILE;
-    print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
-
-    my $latex_output = $_ =
-	run_maude("Calling the Maude Latex-ifier ... ",
-		  "load $language_file_name\n",
-		  "set show advisories off .\n",
-		  "load $temp_file\n",
-		  "select META-LEVEL .\n",
-		  "select $language_module_name .\n",
-		  "set show advisories on .\n",
-		  "load $k_to_latex\n",
-		  "set print attribute on .\n",
-		  "loop latex-print .\n",
-		  map("(print $_ .)\n", @pdf_modules),
-#		  "(print $language_module_name .)\n",
-		  "quit\n");
-
-    s/\\begin{module}.*?\\end{module}//gms;
-    my @latex_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
-    if (@latex_modules && !/\\begin{module}/) {
-	print "Latex style used: $style\n" if $verbose;
-	
-# File name where the compiled output will be stored:
-	my $output_file_name = "$language_file_name-pdf.tex";
-	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
-	print FILE "\\documentclass[landscape]{article}\n";
-	print FILE "\\usepackage{import}\n";
-	print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
-        if (-e "$language_file_name.sty") {
-	   print FILE "\\input{$language_file_name.sty}\n";
-        }
-	print FILE join("\n",@newcommands)."\n";
-	print FILE "\\begin{document}\n";
-	print FILE join("\\newpage", @latex_modules)."\n";
-	print FILE "\\end{document}\n";
-	close FILE;
-	print "Latex version written in $output_file_name\n" if $verbose;
-    }
-    else {
-	print "ERROR: \\begin{module} ... \\end{module} not found in generated output\n";
-	print "This error most likely due to wrong latex attributes\n";
-	print "Check generated output in $output_file\n";
-	open FILE,">",$output_file or die "Cannot create $output_file\n";
-	print FILE $latex_output;
-	close FILE;
-	print "Aborting the compilation\n";
-	exit(1);
-    }
     
-# Generate pdf file 
-    # PLATFORM DEPENDEND - UNIX
+    return "@input";
+}
+# generates latex if $latex
+sub make_latexify
+{
+    latexify("latex", @latexify_modules);
     
-    my $status = system($k_nice_pdf, "$language_file_name-pdf");
+    rename("$language_file_name-latex.tex", "$language_file_name.tex");
+}
+
+
+sub run_latex
+{
+    my $tex_file = shift;
+    
+    # get approx pdf file
+    my $latex_out = get_file_content("$tex_file.tex");
+    # $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    # $latex_out =~ s/\\begin{document}/\\geometry{papersize={1200mm,11in},textwidth=1180mm}\\pagestyle{empty}\\begin{document}/;
+    # $latex_out =~ s/\\newpage/\\bigskip/g;
+    # print $latex_out;
+    
+    open FILE,">", "$tex_file.tex" or die "Cannot create $tex_file-temp.tex\n";
+    print FILE $latex_out;
+    close FILE;
+    
+    # create pdf
+    my $status = system("latex $tex_file.tex > out");
     if (($status >>= 8) != 0)
     {
-	print "Failed to run $k_nice_pdf. Exit status $status.\n";
+	print "Failed to run latex. Exit status $status.\n";
     }
+    # get number of pages
+    my $pages = 0;
+    my $log = get_file_content("$tex_file.log");
+    if ($log =~ /(\d+)\s+pages/)
+    {
+	$pages = $1;
+    }
+    unlink("out");
+    unlink("$tex_file-temp.tex");    
+    return $pages;
+}
+
+# generates pdf if $pdf
+sub make_pdf 
+{
+    print "Running latex ... \n";
+
+    latexify("pdf", @pdf_modules);
+
+    # Find number of pages
+    my $pages = run_latex("$language_file_name-pdf");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+
+    # modify page and save it
+    print "We have $pages page(s).\n";
+    my $latex_out = get_file_content("$language_file_name-pdf.tex");
+    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    $latex_out =~ s/\\begin{document}/$settings/;
+    $latex_out =~ s/\\newpage/\\bigskip/g;
     
+    open FILE,">", "$language_file_name-pdf.tex" or die "Cannot create $language_file_name-pdf.tex\n";
+    print FILE $latex_out;
+    close FILE;
+
+    # Generate tex
+    my $status = system("latex $language_file_name-pdf.tex > out");
+    print "Failed to run pdflatex. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    
+    # Generate postscript
+    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-pdf -o $language_file_name-pdf.ps 2>/dev/null");
+    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
+    
+    # Generate eps
+    $status = system("ps2eps -f -q -P -H -l $language_file_name-pdf.ps");
+    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+    
+    # Generate pdf
+    $status = system("gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$language_file_name-pdf.pdf $language_file_name-pdf.eps");
+    print "Failed to generate pdf. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    # rename pdf file
     rename("$language_file_name-pdf.pdf", "$language_file_name.pdf");
-    rename("$language_file_name-pdf.ps", "$language_file_name.ps");
-    rename("$language_file_name-pdf.tex", "$language_file_name.tex");
-    rename("$language_file_name-pdf.aux", "$language_file_name.aux");
-    rename("$language_file_name-pdf.dvi", "$language_file_name.dvi");
-    rename("$language_file_name-pdf.eps", "$language_file_name.eps");
-    rename("$language_file_name-pdf.log", "$language_file_name.log");
+    print "Generated $language_file_name.pdf.\n";
     
     # delete auxialiary files if not verbose
-    unlink("$language_file_name.tex") if !$verbose;
-    unlink("$language_file_name.aux") if !$verbose;
-    unlink("$language_file_name.dvi") if !$verbose;
-#    unlink("$language_file_name.eps") if !$verbose;
-    unlink("$language_file_name.log") if !$verbose;
-
-
+    unlink("$language_file_name-pdf.tex") if !$verbose;
+    unlink("$language_file_name-pdf.aux") if !$verbose;
+    unlink("$language_file_name-pdf.dvi") if !$verbose;
+    unlink("$language_file_name-pdf.eps") if !$verbose;
+    unlink("$language_file_name-pdf.ps") if !$verbose;
+    unlink("$language_file_name-pdf.log") if !$verbose;
+    unlink("out");
 }
 
 
