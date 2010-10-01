@@ -820,6 +820,47 @@ sub make_ps
     unlink("out");
 }
 
+sub make_eps
+{
+    latexify("eps", @eps_modules);
+
+    # Find number of pages
+    my $pages = run_latex("$language_file_name-eps");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+    
+    my $latex_out = get_file_content("$language_file_name-eps.tex");
+    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    $latex_out =~ s/\\begin{document}/$settings/;
+    $latex_out =~ s/\\newpage/\\bigskip/g;
+    
+    open FILE,">", "$language_file_name-eps.tex" or die "Cannot create $language_file_name-eps.tex\n";
+    print FILE $latex_out;
+    close FILE;
+
+    # Generate tex
+    my $status = system("latex $language_file_name-eps.tex > out");
+    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    
+    # Generate postscript
+    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-eps -o $language_file_name-eps.eps 2>/dev/null");
+    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+    
+    # rename eps file
+    rename("$language_file_name-eps.eps", "$language_file_name.eps");
+    print "Generated $language_file_name.eps which contains modules: @eps_modules\n";
+    
+    # delete auxialiary files if not verbose
+    unlink("$language_file_name-eps.tex") if !$verbose;
+    unlink("$language_file_name-eps.aux") if !$verbose;
+    unlink("$language_file_name-eps.dvi") if !$verbose;
+    unlink("$language_file_name-eps.log") if !$verbose;
+    unlink("$language_file_name-eps.ps") if !$verbose;
+    unlink("out");
+}
+
 # Next routine compiles the language definition in $language_file_name
 # It also performs some sanity checks
 sub compile {
