@@ -15,7 +15,7 @@ mod DECL-META-LATEX-PRINT is
 
   var  St Pattern OpenPar ClosingPar : String .
   vars Left R N OpenPars ClosingPars : Nat .
-  var Label : Qid .  var Contents : Term . var B : Bool .
+  var Label : Qid .  var Contents : Term . var B : Multiplicity .
 
   ---- finds a pattern out of balanced parentheses 
   ---- findOut("S{P1, P2{P21, P22}, P3}", ",", "{", "}", 6) returns 18, not 12
@@ -1093,8 +1093,15 @@ mod LATEX-PRINT-META is
    var C : Constant .  var V : Variable . var SC : SplitCell .
    op printConfig : Module Term -> QidList .
   ceq  printConfig(M,T)
-    =  printConfig(M,\kall{qid(string(getName(SC)) + if getMultiplicity(SC) then "*" else "" fi)}{getContents(SC)})
+    =  printConfig(M,\kall{qid(string(getName(SC)) + printMultiplicity(getMultiplicity(SC)))}{getContents(SC)})
     if SC := splitKCell(T)  .
+
+   op printMultiplicity : Multiplicity -> String .
+   eq printMultiplicity(one) = "" .
+   eq printMultiplicity(any) = "*" .
+   eq printMultiplicity(some) = "+" .
+   eq printMultiplicity(maybe) = "?" .
+
 ---(
    eq printConfig(M, \kall{Q}{C}) 
     = '\kall '`{ getColor(M,Q) '`} '`{ Q '`} '`{ \sort{printTerm(M,C)} '`} .
