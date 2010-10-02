@@ -685,7 +685,7 @@ sub run_latex
     close FILE;
 
     # create pdf
-    my $status = system("latex $tex_file-temp.tex > out");
+    my $status = system("latex -interaction=nonstopmode $tex_file-temp.tex > out");
     if (($status >>= 8) != 0)
     {
 	print "Failed to run latex. Exit status $status.\n";
@@ -749,7 +749,7 @@ sub make_pdf
     close FILE;
 
     # Generate tex
-    my $status = system("latex $language_file_name-pdf.tex > out");
+    my $status = system("latex -interaction=nonstopmode $language_file_name-pdf.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
     
@@ -800,7 +800,7 @@ sub make_ps
     close FILE;
 
     # Generate tex
-    my $status = system("latex $language_file_name-ps.tex > out");
+    my $status = system("latex -interaction=nonstopmode $language_file_name-ps.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
     
@@ -840,7 +840,7 @@ sub make_eps
     close FILE;
 
     # Generate tex
-    my $status = system("latex $language_file_name-eps.tex > out");
+    my $status = system("latex -interaction=nonstopmode $language_file_name-eps.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
     
@@ -885,7 +885,7 @@ sub make_png
     close FILE;
 
     # Generate tex
-    my $status = system("latex $language_file_name-png.tex > out");
+    my $status = system("latex -interaction=nonstopmode $language_file_name-png.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
     
@@ -937,7 +937,7 @@ sub make_crop
      print FILE $latex_out;
      close FILE;
     # Generate tex
-    my $status = system("latex $language_file_name-crop.tex > out");
+    my $status = system("latex -interaction=nonstopmode $language_file_name-crop.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
     
