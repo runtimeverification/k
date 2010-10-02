@@ -57,21 +57,25 @@ function getoptsFunc {
 	done
 }
 
+#echo "0thatVariable=$@"
 getoptsFunc "$@"
 shift $(($OPTIND - 1))
+#echo "after optshift=$@"
 set +o nounset
+#echo "now one=$1"
 if [ -z "$1" ]; then # if after reading a round of arguments there isn't anything left that could be a filename...
 	die "`printf \"$usage\" $(basename $0)`" 2
 fi
 set -o nounset
 firstInputFile=$1
 shift 1
-getoptsFunc "$@"
-#echo $(($# + 1)) 
-#echo "$@"
-#shift $(($OPTIND - 1))
-arguments="$@ $firstInputFile"
+#echo "after shift 1=$@"
 
+getoptsFunc "$@"
+shift $(($OPTIND - 1))
+#echo "after second optshift=$@"
+arguments="$@ $firstInputFile"
+#echo "arguments=$arguments"
 # if [ $(($# + 1)) -gt 1 ] && [ "$oval" ] && [ "$compileOnlyFlag" ]; then 
 	# die "cannot specify -o with -c or -S with multiple files" 5
 # fi
@@ -104,17 +108,11 @@ do
 	if [ "$?" -ne 0 ]; then
 		die "`printf \"Input file %s does not exist\n\" $ARG`" 1
 	fi
-	set -o errexit
-
 	inputDirectory=`dirname $inputFile`
 	baseName=`basename $inputFile .c`
-
 	maudeInput=$inputDirectory/$baseName.gen.maude
-	
-	# if [ ! "$oflag" ]; then
-		# oval="$baseName.o"
-	# fi
 	localOval="$baseName.o"
+	set -o errexit
 	
 	if [ "$gflag" ]; then
 		garg="-g $gval"
