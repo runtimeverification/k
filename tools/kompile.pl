@@ -916,6 +916,85 @@ sub make_png
     unlink("out");
 }
 
+# generates pdf if $pdf
+sub make_crop
+{
+    latexify("crop", @crop_modules);
+
+    # Find number of pages
+    my $pages = run_latex("$language_file_name-crop");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+
+    # modify page and save it
+     my $latex_out = get_file_content("$language_file_name-crop.tex");
+     my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+     $latex_out =~ s/\\begin{document}/$settings/;
+     $latex_out =~ s/\\end{document}/\\par\\noindent\\hspace{-2px}\\rule{1px}{1px}\\end{document}/;
+     $latex_out =~ s/\\newpage/\\par\\noindent\\hspace{-2px}\\rule{1px}{1px}\\newpage\\noindent\\hspace{-2px}\\rule{1px}{1px}/g;
+    
+     open FILE,">", "$language_file_name-crop.tex" or die "Cannot create $language_file_name-crop.tex\n";
+     print FILE $latex_out;
+     close FILE;
+    # Generate tex
+    my $status = system("latex $language_file_name-crop.tex > out");
+    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    
+    # Generate postscript
+    $status = system("dvips $language_file_name-crop -i -o in  -o $language_file_name-crop- 2>/dev/null");
+    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    # Generate eps
+    opendir(DIR, ".");
+    my @all_files = readdir(DIR);
+    closedir(DIR);
+    foreach (@all_files)
+    {
+	if (/$language_file_name-crop-[0-9][0-9][0-9]/)
+	{
+	    $status = system("ps2eps -f -q -P -H -l $_");
+	    print "Failed to generate eps for $_. Exit status $status.\n" if (($status >>= 8) != 0);
+	}
+    }
+    
+    
+    # refresh files from . folder
+    opendir(DIR, ".");
+    @all_files = readdir(DIR);
+    closedir(DIR);
+    my @eps_files = ();
+    foreach (@all_files)
+    {
+	if (/$language_file_name-crop-[0-9][0-9][0-9].eps/)
+	{
+	    push(@eps_files, $_);
+	}
+    }
+    # Generate pdf
+    $status = system("gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$language_file_name-crop.pdf @eps_files");
+    print "Failed to generate pdf. Exit status $status.\n" if (($status >>= 8) != 0);
+    
+    # print message
+    print "Generated $language_file_name-crop.pdf which contains modules: @crop_modules\n";
+    
+    # delete auxialiary files if not verbose
+    unlink("$language_file_name-crop.tex") if !$verbose;
+    unlink("$language_file_name-crop.aux") if !$verbose;
+    unlink("$language_file_name-crop.dvi") if !$verbose;
+    unlink("$language_file_name-crop.log") if !$verbose;
+    unlink("out");
+    
+    foreach (@all_files)
+    {
+	if (/$language_file_name-crop-[0-9][0-9][0-9]/)
+	{
+	    unlink($_) if !$verbose;
+	}
+    }
+
+}
+
 # Next routine compiles the language definition in $language_file_name
 # It also performs some sanity checks
 sub compile {
