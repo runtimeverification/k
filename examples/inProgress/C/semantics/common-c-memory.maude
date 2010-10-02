@@ -104,7 +104,7 @@ mod COMMON-SEMANTICS-READING is
 		--- = joinIntegerBytes(T:Type, L:List{K}, ((M:Nat <<Nat Len:Nat) |Nat N:Nat)) .
 	--- eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), M:Nat)
 		--- = joinIntegerBytes(T:Type, L:List{K}, ((M:Nat <<Nat Len:Nat) |Nat N:Nat)) .	
-	eq joinIntegerBytes(T:Type, .List{K}, N:Nat) = interpret(T:Type, N:Nat) . 
+	eq joinIntegerBytes(T:Type, .List{K}, piece(N:Nat, Len:Nat)) = interpret(T:Type, piece(N:Nat, Len:Nat)) . 
 		
 	op isConcreteList : List{K} -> Bool .
 	op isConcreteNumber : Nat -> Bool .

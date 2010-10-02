@@ -13,7 +13,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		l('_+_),, l('_-_),,
 		l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
 		l('_==_),, l('_!=_),,
-		l('_&_),, l('_|_)
+		l('_&_),, l('_|_),, l('_^_) 
 	) .
 	eq isArithBinOp(KL:KLabel) = if arithBinOps contains l(KL:KLabel) then true else false fi .
 	eq isArithBinConversionOp(KL:KLabel) = if arithBinConversionOps contains l(KL:KLabel)  then true else false fi .
@@ -193,21 +193,76 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 	--- Otherwise, if the operand that has unsigned integer type has rank greater or equal to the rank of the type of the other operand, then the operand with signed integer type is converted to the type of the operand with unsigned integer type.
 	mb rule
 		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
-			=> L:KLabel(cast(maxType(T:Type, T':Type), tv(V:BaseValue, T:Type)),, cast(maxType(T:Type, T':Type), tv(V':BaseValue, T':Type)))
+			=> L:KLabel(cast(T':Type, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, T':Type))
 		...</ k >
 		if T:Type =/=Bool T':Type
-		andBool (
-			(hasSignedIntegerType(T:Type) andBool hasUnsignedIntegerType(T':Type) andBool rank(T':Type) >=Int rank(T:Type))
-			orBool
-			(hasUnsignedIntegerType(T:Type) andBool hasSignedIntegerType(T':Type) andBool rank(T:Type) >=Int rank(T':Type))
-		)
+		andBool hasSignedIntegerType(T:Type) 
+		andBool hasUnsignedIntegerType(T':Type) 
+		andBool rank(T':Type) >=Int rank(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(tv(V:BaseValue, T:Type),, cast(T:Type, tv(V':BaseValue, T':Type)))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		andBool hasUnsignedIntegerType(T:Type) 
+		andBool hasSignedIntegerType(T':Type) 
+		andBool rank(T:Type) >=Int rank(T':Type)
 		: KSentence [metadata "structural"] .
 		
+	--- Otherwise, if the type of the operand with signed integer type can represent all of the values of the type of the operand with unsigned integer type, then the operand with unsigned integer type is converted to the type of the operand with signed integer type.
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(tv(V:BaseValue, T:Type),, cast(T:Type, tv(V':BaseValue, T':Type)))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		andBool hasSignedIntegerType(T:Type) 
+		andBool hasUnsignedIntegerType(T':Type) 
+		andBool rank(T':Type) <Int rank(T:Type)
+		andBool min(T:Type) <=Int min(T':Type)
+		andBool max(T:Type) >=Int max(T':Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(cast(T':Type, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, T':Type))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		andBool hasUnsignedIntegerType(T:Type) 
+		andBool hasSignedIntegerType(T':Type) 
+		andBool rank(T:Type) <Int rank(T':Type)
+		andBool min(T':Type) <=Int min(T:Type)
+		andBool max(T':Type) >=Int max(T:Type)
+		: KSentence [metadata "structural"] .
+		
+	--- Otherwise, both operands are converted to the unsigned integer type corresponding to the type of the operand with signed integer type.
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(cast(correspondingUnsignedType(T:Type), tv(V:BaseValue, T:Type)),, cast(correspondingUnsignedType(T:Type), tv(V':BaseValue, T':Type)))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		andBool hasSignedIntegerType(T:Type) 
+		andBool hasUnsignedIntegerType(T':Type) 
+		andBool rank(T':Type) <Int rank(T:Type)
+		andBool (min(T:Type) >Int min(T':Type) orBool max(T:Type) <Int max(T':Type))
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type)) 
+			=> L:KLabel(cast(correspondingUnsignedType(T':Type), tv(V:BaseValue, T:Type)),, cast(correspondingUnsignedType(T':Type), tv(V':BaseValue, T':Type)))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		andBool hasUnsignedIntegerType(T:Type) 
+		andBool hasSignedIntegerType(T':Type) 
+		andBool rank(T:Type) <Int rank(T':Type)
+		andBool (min(T':Type) >Int min(T:Type) orBool max(T':Type) <Int max(T:Type))
+		: KSentence [metadata "structural"] .
+		
+		
+	op correspondingUnsignedType : Type -> Type .
 	
-	--- fixme implement other rules
+	eq correspondingUnsignedType(int) = unsigned-int .
+	eq correspondingUnsignedType(long-int) = unsigned-long-int .
+	eq correspondingUnsignedType(long-long-int) = unsigned-long-long-int .
 	
-	--- --- Otherwise...
-	--- --- fixme left out cases
 endm
 
 mod COMMON-SEMANTICS-CAST is 
@@ -489,7 +544,7 @@ piece((piece(piece(piece(piece(piece(piece(piece(0, 1) bit:: piece(1 &Nat unknow
 	mb rule leftShiftInterpret(T:Type, I:Int, tv(E1:Int, T:Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
 		if unsignedIntegerTypes contains T:Type
 		: KSentence [metadata "structural"] .
-	mb rule leftShiftInterpret(T:Type, I:Int, tv(E1:Nat, T:Type)) => interpret(T:Type, I:Int)
+	mb rule leftShiftInterpret(T:Type, I:Int, tv(E1:Nat, T:Type)) => interpret-aux(T:Type, I:Int)
 		if hasIntegerType(T:Type)
 		andBool notBool (unsignedIntegerTypes contains T:Type)
 		andBool I:Int <=Int (2 ^Nat absInt(numBits(T:Type)))
