@@ -32,16 +32,19 @@ mod COMMON-SEMANTICS-BOOLEAN is
 		< k > tv(0, ?) ? E1:Expression : E2:Expression => sequencePoint ~> E2:Expression ...</ k >
 		: KSentence [metadata "structural"] .
 	
-	mb rule !(tv(V:BaseValue, ?)) => tv(0, int)
-		if V:BaseValue =/=Bool 0
-		: KSentence [metadata "structural"] .
-	mb rule !(tv(V:BaseValue, ?)) => tv(1, int)
-		if (V:BaseValue ==Bool 0)
-		: KSentence [metadata "structural"] .
+	--- mb rule !(tv(V:BaseValue, ?)) => tv(0, int)
+		--- if V:BaseValue =/=Bool 0
+		--- : KSentence [metadata "structural"] .
+	--- mb rule !(tv(V:BaseValue, ?)) => tv(1, int)
+		--- if (V:BaseValue ==Bool 0)
+		--- : KSentence [metadata "structural"] .
 		
-	
-	--- mb rule [!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
-		
+	--- c1x 6.5.3.3:5 The expression !E is equivalent to (0==E).
+	mb rule !(E:K) => tv(0, int) == E:K
+		: KSentence [metadata "structural"] .
+	--- mb rule !(tv(V:BaseValue, ?)) => tv(1, int)
+		--- if (V:BaseValue ==Bool 0)
+		--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-SIZEOF is
@@ -52,10 +55,6 @@ mod COMMON-SEMANTICS-SIZEOF is
 	eq byteSizeofType(T:Type) = byteSizeofTypeAux(bitSizeofType(T:Type)) .
 	ceq byteSizeofTypeAux(tv(N:Nat, T:Type)) = tv(bitsToBytes(N:Nat), T:Type)
 		if T:Type ==Bool cfg:largestUnsigned .
-
-
-	
-	--- tv(byteSizeofType(T:Type), cfg:sizeut) .
 	
 	mb rule
 		< k > SizeofExpression(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
@@ -63,10 +62,6 @@ mod COMMON-SEMANTICS-SIZEOF is
 	mb rule
 		< k > SizeofType(T:Type, K:K) => sizeofType(DeclType(T:Type, K:K)) ...</ k >
 		: KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > sizeofExp(E:Expression) => sizeofType(typeof(E:Expression)) ...</ k >
-		--- : KSentence [metadata "structural"] .
 	
 	op bitSizeofList : List{Type} -> K .
 	eq bitSizeofList(T:Type :: L:List{Type}) = bitSizeofType(T:Type) + bitSizeofList(L:List{Type}) .
@@ -103,35 +98,16 @@ mod COMMON-SEMANTICS-SIZEOF is
 		< k > bitSizeofType(unionType(X:Id)) => maxBitSizeofList(L:List{Type}) ...</ k >
 		< structs >... X:Id |-> L:List{Type} ...</ structs >
 		: KSentence .
-
-	--- mb rule 
-		--- sizeofType(bitfieldType(T:Type, N:Nat)) => N:Nat /Rat 8
-		--- : KSentence [metadata "structural"] .
-	--- fixme not really, but used for allocating functions
-	
 	
 	--- ---C99 6.2.6.1:26 ... Each unqualified type has several qualified versions of its type,40) corresponding to the combinations of one, two, or all three of the const, volatile, and restrict qualifiers. The qualified or unqualified versions of a type are distinct types that belong to the same type category and have the same representation and alignment requirements. ...
 	--- eq sizeofType(qualifiedType(T:Type, ?)) = sizeofType(T:Type) .	
 
-	--- --- fixme 6.4.4.2 and other
-	--- mb [sizeof-struct]: rule
-		--- < k > [sizeofType(structType(X:Id)) => calcStructSize(L:List{KResult})] ...</ k >
-		--- < structs >... struct(X:Id) |-> L:List{KResult} ...</ structs >
-	--- : KSentence [metadata "structural"] .
-	--- mb [sizeof-union]: rule
-		--- < k > [sizeofType(unionType(X:Id)) => calcUnionSize(L:List{KResult})] ...</ k >
-		--- < structs >... union(X:Id) |-> L:List{KResult} ...</ structs >
-	--- : KSentence [metadata "structural"] .
-	--- mb [sizeof-enum]: rule
-		--- < k > [sizeofType(enumType(X:Id)) => tv(1, cfg:sizeut)] ...</ k >
-	--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-IDENTIFIERS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
 	--- 6.3.2.2 Except when it is the operand of the sizeof operator, the unary & operator, the ++ operator, the -- operator, or the left operand of the . operator or an assignment operator, an lvalue that does not have an array type is converted to the value stored in the designated object (and is no longer an lvalue).
-
 
 	--- generic lookup
 	mb [lookup]: rule
@@ -159,18 +135,6 @@ endm
 mod COMMON-SEMANTICS-FUNCTION-CALLS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 
-	--- mb context application(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
-	--- ---mb context application(`[HOLE`]:K, ?) : KSentence .
-	
-	--- mb rule
-		--- < k > [Apply(E:Expression, L:List{Expression}) => application(E:Expression, getList{K}(L:List{Expression}))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	
-	
-	--- mb [function-application-pre]: rule
-		--- < k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) => application(read(Loc:Nat, T:Type), L:List{C}) ...</ k >
-		--- if hasFunctionType(T:Type)
-		--- : KSentence [metadata "computational rule"] .
 	mb [function-application-pre]: rule
 		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) 
 			=> application(readFunction(Loc:Nat), L:List{C}) 
@@ -178,10 +142,6 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "computational rule"] .	
 
-	
-	--- --- fixme this is needed until we can pass a list of results to bind
-	--- --- mb context bind((?,, `[HOLE`]:K,, ?), ?) : KSentence .
-	--- --- needs to be done before call
 	op populateFromGlobal : -> K .
 	--- fixme: this must be a rule because of the rules associated with declaring local and bound variables
 	mb [populateFromGlobal]: rule
@@ -282,10 +242,7 @@ and ll or LL
 	eq Constant(V:Value) = V:Value .
 	--- mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence . --- for internal computations
 	mb rule < k > N:Nat => tv(N:Nat, cfg:largestUnsigned) ...</ k > : KSentence . --- for internal computations
-	
-	--- op createLiteralValue : K -> K .
-	--- eq Constant(K:K) = createLiteralValue(K:K) .
-	
+		
 	mb rule NoSuffix(DecimalConstant(I:Int)) => 
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
 		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
@@ -405,9 +362,7 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	
 	mb [for-assignment]: rule < k > E1:Expression := E2:Expression => assign(*(&(E1:Expression)),  E2:Expression) ...</ k > : KSentence [metadata "structural"] .
 	
-	--- --- simplify compound assignments (if E1 op= E2, need to ensure E1 only gets evaluated once to be correct)
-	--- --- fixme, should not cause side effects to happen twice.  maybe match tv() on lhs
-	--- --- 6.5.16
+	--- 6.5.16
 	op compoundAssignment : KLabel K K -> K [metadata "strict(2 3)"] .
 	mb rule
 		L:KLabel(E1:Expression,, E2:Expression) => compoundAssignment(L:KLabel, &(E1:Expression), E2:Expression)
@@ -445,7 +400,8 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 		: KSentence [metadata "structural"] .
 	--- C99 6.5.16.1:2 In simple assignment (=), the value of the right operand is converted to the type of the assignment expression and replaces the value stored in the object designated by the left operand
 	mb rule
-		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), (tv(V:List{K}, T':Type) => cast(unqualifyType(T:Type), tv(V:List{K}, T':Type))))
+		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), (tv(V:List{K}, T':Type) 
+			=> cast(unqualifyType(T:Type), tv(V:List{K}, T':Type))))
 		...</ k >
 		if unqualifyType(T:Type) =/=Bool T':Type
 		andBool notBool hasArrayType(T:Type)
@@ -454,42 +410,6 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 		< k > assign(*(tv(Loc:Nat, pointerType((arrayType(T:Type, ?) => pointerType(T:Type))))), ?)
 		...</ k >
 		: KSentence [metadata "structural"] .
-		
-	--- mb [assign-bitfield]: rule
-		--- < k > [assign(Deref(tv(bitloc(Block:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))), tv(V:Int, T:Type)) 
-		--- => putInMem(bitloc(Block:Nat, N:Nat, O:Nat), tv(V:Int, T:Type), T:Type, tv(Len:Nat, cfg:sizeut)) ~> tv(V:Int, T:Type)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-
-	--- --- fixme this is to get around L:List{K} not comparing equal
-	--- mb [assign-fp]: rule
-		--- < k > [assign(Deref(tv(Loc:Nat, pointerType(pointerType(functionType(T:Type, L:List{K}))))), tv(V:Int, pointerType(functionType(T:Type, L':List{K})))) 
-		--- => putInMem(Loc:Nat, tv(V:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L:List{K})), sizeofType(pointerType(functionType(T:Type, L:List{K})))) ~> tv(V:Int, pointerType(functionType(T:Type, L:List{K})))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- --- fixme floats might have requirements
-	--- mb [assign-double]: rule
-		--- < k > [assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(double))), tv(V:Float, double)) 
-		--- => tv(V:Float, double)] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:Float / Offset:Nat]]) ...</ mem > 
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme
-	--- mb [assign-float]: rule
-		--- < k > [assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(float))), tv(V:Float, float)) 
-		--- => tv(V:Float, float)] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:Float / Offset:Nat]]) ...</ mem > 
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme
-	--- mb [assign-long-double]: rule
-		--- < k > [assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(long-double))), tv(V:Float, long-double)) 
-		--- => tv(V:Float, long-double)] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:Float / Offset:Nat]]) ...</ mem > 
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb [assign-struct]: rule
-		--- < k > [assign(Deref(tv(Loc:Nat, pointerType(T:Type))), atv(L:List{K}, T:Type))
-		--- => 
-		--- putBytesInMem(Loc:Nat, L:List{K}, T:Type, sizeofType(T:Type)) ~> atv(L:List{K},T:Type)] ...</ k >
-		--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-BITWISE is
@@ -506,36 +426,7 @@ mod COMMON-SEMANTICS-BITWISE is
 		andBool hasIntegerType(T':Type)
 		andBool N:Nat <Int numBits(T:Type)
 		: KSentence [metadata "structural"] .
-		
-	--- --- fixme As best I can tell, these bitwise operations cannot overflow.  I can't figure out where in the standard it says this though.
-	--- --- fixme result will be heated and may turn into a different kind of value
-	
-	--- --- mb rule [tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => cast(T:Type, I1:Int |Int I2:Int)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-	--- --- mb rule [tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => cast(T:Type, I1:Int &Int I2:Int)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-	--- --- mb rule [~ tv(I:Int, T:Type) => cast(T:Type, ~Int I:Int)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-	--- --- mb rule [tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => cast(T:Type, I1:Int xorInt I2:Int)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-		
-	--- --- mb rule [tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => tv(I1:Int |Int I2:Int, T:Type)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-	--- --- mb rule [tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => tv(I1:Int &Int I2:Int, T:Type)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-	--- --- mb rule [~ tv(I:Int, T:Type) => tv(~Int I:Int, T:Type)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-	--- --- mb rule [tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => tv(I1:Int xorInt I2:Int, T:Type)] 
-		--- --- if hasIntegerType(T:Type)
-		--- --- : KSentence [metadata "structural"] .
-		
+				
 	mb rule tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int |Int I2:Int)
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
@@ -608,11 +499,7 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 		=> if (N:Nat =/=Bool M:Nat) then tv(1, int) else tv(0, int) fi
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
-	
-	--- mb rule tv(I1:Int, T:Type) != tv(I2:Int, T':Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
-	--- if hasPointerType(T:Type) andBool hasPointerType(T':Type)
-	--- : KSentence [metadata "structural"] .
-	
+		
 	---- comparison of ints with pointers
 	--- fixme there are further restrictions on pointers
 	mb rule (tv(N:Nat, T:Type) => tv(NullPointer, T':Type)) == tv(?, T':Type)
@@ -765,49 +652,10 @@ mod COMMON-SEMANTICS-MEMBERS is
 		...</ k >
 		: KSentence [metadata "structural"] .	
 
-	--- mb rule
-		--- < k > toEval-aux(tv(L:List{K}, structType(S:Id)) . F:Id, T:Type)
-			--- => extractField(L:List{K}, T:Type, F:Id) 
-		--- ...</ k >
-		--- --- if notBool hasArrayType(T:Type)
-		--- : KSentence [metadata "structural"] .		
-		
-	--- mb rule
-		--- < k > toEval-aux(V:Value . F:Id, T:Type) => K:K ...</ k >
-		--- if notBool hasArrayType(T:Type)
-		--- : KSentence [metadata "structural"] .
-
-	--- op dot-aux : K Id K -> K [metadata "strict(3)"] .
-	--- mb rule
-		--- < k > [(E:Expression . F:Id) => dot-aux(E:Expression, F:Id, typeof(E:Expression . F:Id))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [dot-aux(E:Expression, F:Id, arrayType(?, ?)) => &(E:Expression . F:Id)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [dot-aux(E:Expression, F:Id, T:Base-Type) => E:Expression ~> dot-aux(HOLE, F:Id, T:Base-Type)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [dot-aux(E:Expression, F:Id, pointerType(T:Type)) => E:Expression ~> dot-aux(HOLE, F:Id, pointerType(T:Type))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme is this right?  not tested
-	--- mb rule
-		--- < k > [dot-aux(E:Expression, F:Id, structType(X:Id)) => E:Expression ~> dot-aux(HOLE, F:Id, structType(X:Id))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [dot-aux(E:Expression, F:Id, unionType(X:Id)) => E:Expression ~> dot-aux(HOLE, F:Id, unionType(X:Id))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [dot-aux(E:Expression, F:Id, bitfieldType(T:Type, N:Nat)) => E:Expression ~> dot-aux(HOLE, F:Id, bitfieldType(T:Type, N:Nat))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > [atv(L:List{K}, T:Type) ~> dot-aux(HOLE, F:Id, ?) => extractField(L:List{K}, T:Type, F:Id)] ...</ k >
-		--- : KSentence [metadata "structural"] .	
 					
-	--- ---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
+	---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
 		
-  	--- ---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
+  	---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
 endm
 
 mod COMMON-SEMANTICS-DEREFERENCE is
@@ -880,17 +728,6 @@ mod COMMON-SEMANTICS-REFERENCE is
 		: KSentence [metadata "structural"] .
 		
 	eq getOffset(N:Nat, M:Nat, T:Type) = tv(N:Nat +Nat bito(M:Nat), T:Type) .
-
-		
-	--- mb [address-of-arrow-union]: rule
-		--- < k > &(tv(Loc:Nat, pointerType(unionType(S:Id))) -> X:Id) 
-			--- --- => cast(fixPointerType(T:Type), tv(Base:Nat, pointerType(void)))
-			--- => tv(Loc:Nat, fixPointerType(T:Type))
-		--- ...</ k >
-		--- < structs >... 
-			--- S:Id |-> (?:List{Type} :: typedDeclaration(T:Type, X:Id) :: ?:List{Type}) 
-		--- ...</ structs >
-		--- : KSentence [metadata "structural"] .
 		
 	mb [address-of-dot]: rule
 		< k > &(E:Expression . X:Id) => &(&(E:Expression) -> X:Id) ...</ k >
@@ -938,28 +775,6 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 			~> tv(I:Int, T:Type)
 		...</ k >
 		: KSentence [metadata "structural"] .
-		
-		
-	--- --- fixme would be simpler if i did integer promotions etc.
-	--- mb [post-increment]: rule
-		--- < k > postInc(Loc:Nat, tv(I:Int, pointerType(T:Type)), pointerType(T:Type))
-		--- => assign(Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))), tv(I:Int, pointerType(T:Type)) + tv(1, int)) ~> discard ~> tv(I:Int, pointerType(T:Type))
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
-		
-	--- mb [post-decrement]: rule
-		--- < k > [postDec(Loc:Nat, tv(I:Int, T:Type), T:Type)
-		--- => assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(I:Int, T:Type) - tv(1, T:Type)) ~> discard ~> tv(I:Int, T:Type)
-		--- ] ...</ k >
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme would be simpler if i did integer promotions etc.
-	--- mb [post-decrement]: rule
-		--- < k > [postDec(Loc:Nat, tv(I:Int, pointerType(T:Type)), pointerType(T:Type))
-		--- => assign(Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))), tv(I:Int, pointerType(T:Type)) - tv(1, int)) ~> discard ~> tv(I:Int, pointerType(T:Type))
-		--- ] ...</ k >
-		--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-SEQUENCING is

@@ -86,11 +86,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- subsort List{KResult} < K .
 	op _bit::_ : Nat Nat -> Nat [assoc] .
 	--- op allocateIfAbsent : Type Id -> K .
-	op allocate : Type K -> K .
-	--- ceq piece(N:Nat, Len:Nat) bit:: piece(N':Nat, Len':Nat)
-		--- = piece(N:Nat <<Nat Len':Nat |Nat N':Nat, Len:Nat +Nat Len':Nat)
-		--- if N:Nat >=Nat 0 andBool N':Nat >=Nat 0 .
-	
+	op allocate : Type K -> K .	
 	
 	op zero : K -> K .
 	op zeroBlock : Nat -> K .
@@ -228,14 +224,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op putBytesInMem : Nat List{K} Type K -> K [metadata "strict(4)"] .
 	--- --- op sizeofType : K -> Expression [metadata "strict"] .
 	op firstChar : String -> Char .
-	--- op nthChar : String Nat -> Char .
+	op nthChar : String Nat -> Char .
 	op butFirstChar : String -> String .
 	op charToAscii : String -> Nat .
 	op _to_ : Nat Nat -> List{K} .
-	--- op calcStructSize : List{KResult} -> K .
-	--- op calcUnionSize : List{KResult} -> K .
-	--- op calcStructSize-aux : List{KResult} Rat -> K .	
-	--- op calcUnionSize-aux : List{KResult} Rat -> K .
 	--- op necessaryBytes : K -> K [metadata "strict"] .
 	op cast : K K -> K [metadata "strict"] . --- as described in 6.3
 	op arithInterpret : Type BaseValue -> K . --- interpret the result of arithmetic as in 6.5.4
@@ -292,13 +284,9 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op min : Type -> Int [memo] .
 	op max : Type -> Int [memo] .
-	--- op append : Nat Nat Value -> K .
-	--- op store_New_atLoc_ : Nat K Nat -> K [metadata "strict(2)"] .
 	op storeNew_atLoc_ : K Nat -> K [metadata "strict(1)"] .
 	op store_atLoc_ : K Nat -> K [metadata "strict(1)"] .
-	--- ---op allocate : K -> K [metadata "strict"] .
 	op alloc : K K -> K . --- should be K K 
-	--- op allocWithDefault : Nat K Nat -> K [metadata "strict(2)"] .
 	
 endm
 
@@ -306,12 +294,10 @@ mod C-SETTINGS is
 	including INCOMING-MODULES .
 	including COMMON-SEMANTIC-SYNTAX .
 
-	--- --- S 6.2.5 p.35 i.15.  "The implementation shall define char to have the same range, representation, and behavior as either signed char or unsigned char.  37)... Irrespective of the choice made, char is a separate type from the other two and is not compatible with either
-	--- --- fixme I'm not sure what consequence being a separate type entails, so for now it will just be rewritten to the chosen type
+	--- S 6.2.5 p.35 i.15.  "The implementation shall define char to have the same range, representation, and behavior as either signed char or unsigned char.  37)... Irrespective of the choice made, char is a separate type from the other two and is not compatible with either
+	--- fixme I'm not sure what consequence being a separate type entails, so for now it will just be rewritten to the chosen type
 	mb rule char => signed-char : KSentence [metadata "structural"] .
-	--- mb rule [NULL => tv(loc(0, 0), pointerType(void))] : KSentence [metadata "structural"] .
-	
-	--- ---C99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented
+
 	op numBitsPerByte : -> NzNat .
 	op numBytes : Type -> Nat [memo] .
 	op numBits : Type -> Nat [memo] .
@@ -344,47 +330,45 @@ mod C-SETTINGS is
 	
 	eq min(enumType(?)) = min(int) .
 	eq max(enumType(?)) = max(int) .
-		
-	--- --- might not be matching the right thing here if the types become different
-
-	--- --- — number of bits for smallest object that is not a bit-field (byte)
-	--- --- CHAR_BIT 8
-	--- --- — minimum value for an object of type signed char
-	--- --- SCHAR_MIN -127 // -(27 - 1)
-	--- --- — maximum value for an object of type signed char
-	--- --- SCHAR_MAX +127 // 27 - 1
-	--- --- — maximum value for an object of type unsigned char
-	--- --- UCHAR_MAX 255 // 28 - 1
-	--- --- — minimum value for an object of type char
-	--- --- CHAR_MIN see below
-	--- --- — maximum value for an object of type char
-	--- --- CHAR_MAX see below
-	--- --- — maximum number of bytes in a multibyte character, for any supported locale
-	--- --- MB_LEN_MAX 1
-	--- --- — minimum value for an object of type short int
-	--- --- SHRT_MIN -32767 // -(215 - 1)
-	--- --- — maximum value for an object of type short int
-	--- --- SHRT_MAX +32767 // 215 - 1
-	--- --- — maximum value for an object of type unsigned short int
-	--- --- USHRT_MAX 65535 // 216 - 1
-	--- --- — minimum value for an object of type int
-	--- --- INT_MIN -32767 // -(215 - 1)
-	--- --- — maximum value for an object of type int
-	--- --- INT_MAX +32767 // 215 - 1
-	--- --- — maximum value for an object of type unsigned int
-	--- --- UINT_MAX 65535 // 216 - 1
-	--- --- — minimum value for an object of type long int
-	--- --- LONG_MIN -2147483647 // -(231 - 1)
-	--- --- — maximum value for an object of type long int
-	--- --- LONG_MAX +2147483647 // 231 - 1
-	--- --- — maximum value for an object of type unsigned long int
-	--- --- ULONG_MAX 4294967295 // 232 - 1
-	--- --- — minimum value for an object of type long long int
-	--- --- LLONG_MIN -9223372036854775807 // -(263 - 1)
-	--- --- — maximum value for an object of type long long int
-	--- --- LLONG_MAX +9223372036854775807 // 263 - 1
-	--- --- — maximum value for an object of type unsigned long long int
-	--- --- ULLONG_MAX 18446744073709551615 // 264 - 1
+	
+	--- — number of bits for smallest object that is not a bit-field (byte)
+	--- CHAR_BIT 8
+	--- — minimum value for an object of type signed char
+	--- SCHAR_MIN -127 // -(27 - 1)
+	--- — maximum value for an object of type signed char
+	--- SCHAR_MAX +127 // 27 - 1
+	--- — maximum value for an object of type unsigned char
+	--- UCHAR_MAX 255 // 28 - 1
+	--- — minimum value for an object of type char
+	--- CHAR_MIN see below
+	--- — maximum value for an object of type char
+	--- CHAR_MAX see below
+	--- — maximum number of bytes in a multibyte character, for any supported locale
+	--- MB_LEN_MAX 1
+	--- — minimum value for an object of type short int
+	--- SHRT_MIN -32767 // -(215 - 1)
+	--- — maximum value for an object of type short int
+	--- SHRT_MAX +32767 // 215 - 1
+	--- — maximum value for an object of type unsigned short int
+	--- USHRT_MAX 65535 // 216 - 1
+	--- — minimum value for an object of type int
+	--- INT_MIN -32767 // -(215 - 1)
+	--- — maximum value for an object of type int
+	--- INT_MAX +32767 // 215 - 1
+	--- — maximum value for an object of type unsigned int
+	--- UINT_MAX 65535 // 216 - 1
+	--- — minimum value for an object of type long int
+	--- LONG_MIN -2147483647 // -(231 - 1)
+	--- — maximum value for an object of type long int
+	--- LONG_MAX +2147483647 // 231 - 1
+	--- — maximum value for an object of type unsigned long int
+	--- ULONG_MAX 4294967295 // 232 - 1
+	--- — minimum value for an object of type long long int
+	--- LLONG_MIN -9223372036854775807 // -(263 - 1)
+	--- — maximum value for an object of type long long int
+	--- LLONG_MAX +9223372036854775807 // 263 - 1
+	--- — maximum value for an object of type unsigned long long int
+	--- ULLONG_MAX 18446744073709551615 // 264 - 1
 	
 	op rank : Type -> Nat .
 	
@@ -409,16 +393,16 @@ mod C-SETTINGS is
 	eq rank(enumType(?)) = rank(int) .
 	---C99 6.3.1.1
 	
-	--- ***(
-	--- --- no two signed are the same
-	--- rank of signed shall be greater than rank of signed with less precision
-	--- rank(long-long-int) > rank(long int) > rank(int) > rank(short int) > rank(signed-char)
-	--- rank unsigned is same as signed
-	--- rank(char) == rank(signed char) == rank(unsigned-char)
-	--- rank(_Bool) < rank(char)
-	--- rank(enumType) == rank compatible int type
-	--- transitive
-	--- ***)
+	***(
+	--- no two signed are the same
+	rank of signed shall be greater than rank of signed with less precision
+	rank(long-long-int) > rank(long int) > rank(int) > rank(short int) > rank(signed-char)
+	rank unsigned is same as signed
+	rank(char) == rank(signed char) == rank(unsigned-char)
+	rank(_Bool) < rank(char)
+	rank(enumType) == rank compatible int type
+	transitive
+	***)
 endm
 
 mod SEMANTIC-HELPERS is 
@@ -467,9 +451,9 @@ mod SEMANTIC-HELPERS is
 	mb [firstChar]: rule
 		firstChar(S:String) => substrString(S:String, 0, 1)
 		: KSentence [metadata "structural"] .
-	--- mb [nthChar]: rule
-		--- [nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1)]
-		--- : KSentence [metadata "structural"] .
+	mb [nthChar]: rule
+		nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1)
+		: KSentence [metadata "structural"] .
 	mb [charToAscii]: rule
 		charToAscii(C:Char) => asciiString(C:Char)
 		: KSentence [metadata "structural"] .
@@ -481,8 +465,7 @@ mod SEMANTIC-HELPERS is
 	ceq N:Nat to N':Nat = (N:Nat,,((N:Nat +Nat 1) to N':Nat))
 		if N:Nat <Nat N':Nat .
 
-
-	--- --- Note: it only makes sense to memo this if the sets are just used to represent categories
+	--- Note: it only makes sense to memo this if the sets are just used to represent categories
 	eq S:Set SetItem(K:K) contains K:K = true .
 	ceq S:Set SetItem(K1:K) contains K2:K = S:Set contains K2:K 
 		if K1:K =/=Bool K2:K .
@@ -535,10 +518,6 @@ endm
 mod COMMON-PARAMETER-BINDING is
 	including COMMON-INCLUDE .
 
-	--- i think technically this isn't correct; void gives additional information over empty
-	--- mb [void-to-id]: rule
-		--- [Parameter-Declaration(void) => .List{Parameter}] : KSentence [metadata "structural"] .
-	
 	--- empty binding
 	--- fixme not really a sequence point
 	mb [bind-empty]: rule
@@ -547,12 +526,6 @@ mod COMMON-PARAMETER-BINDING is
 	mb [bind-empty]: rule
 		< k > bind(Nil, Nil) => sequencePoint ...</ k > 
 		: KSentence [metadata "structural"] .
-	--- --- bind one
-	--- --- consider same variable name
-	--- mb rule
-		--- < k > [bind((tv(V:BaseValue, arrayType(T:Type, ?)),, L:List{KResult}), PD:List{KResult})
-			--- => bind((tv(V:BaseValue, pointerType(T:Type)),, L:List{KResult}), PD:List{KResult})] ...</ k > : KSentence [metadata "structural"] .
-
 	
 	mb [bind-coerce-array]: rule
 		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
@@ -572,18 +545,7 @@ mod COMMON-PARAMETER-BINDING is
 		--- if isTypeCompatible(T:Type, T':Type)
 		if notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb [bind-one]: rule
-		--- < k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
-			--- => allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, T:Type)
-			--- ~> X:Id := tv(V:List{K}, T':Type)
-			--- ~> discard
-			--- ~> bind(L:List{C}, P:List{Type}) ...</ k > 
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- --- if isTypeCompatible(T:Type, T':Type)
-		--- if notBool hasArrayType(T:Type)
-		--- : KSentence [metadata "structural"] .
+		
 	mb [bind-one]: rule
 		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 		...</ k > 
@@ -674,8 +636,6 @@ mod COMMON-INITIALIZATION is
 	including COMMON-INCLUDE .
 	
 	op te : K Type -> K .
-	op getFirstObject : K Type -> K .
-	--- op getFirstObject-aux : K Type -> K .
 	op getInitializer : -> K .
 	op fillInitializer : K -> K .
 	op fillInitializer-aux : K -> K .
@@ -943,17 +903,12 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- — if it has arithmetic type, it is initialized to (positive or unsigned) zero;
 	--- if it is an aggregate, every member is initialized (recursively) according to these rules;
 	--- — if it is a union, the first named member is initialized (recursively) according to these rules.
-	--- op declare : K K -> K [metadata "seqstrict(2 1)"] .
 
-	--- op declare-aux : K K -> K [metadata "strict(2)"] .
 	op defineType : K -> K [metadata "strict"] .
 	mb context DeclarationDefinition(InitNameGroup(`[HOLE`]:K, ?)) : KSentence .
 	mb context Typedef(NameGroup(`[HOLE`]:K, ?)) : KSentence .
 	eq LocalDefinition(DefinitionLoc(K:K, Loc:K)) = DefinitionLoc(K:K, Loc:K) .
 	
-	--- this surrounds all declarations with an instruction to complete (make verbose) the initializer
-	--- eq declare(SingleName(T:Type, Name:C), Kp:KProper) = declare-aux(SingleName(T:Type, Name:C), completeInitializer(idOfName(Name:C), Kp:KProper)) .
-
 	--- aggregates
 	mb rule
 		< k > figureInitializer(X:Id, T:Type, CompoundInit(L:List{C}))
@@ -1098,9 +1053,8 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool F:K =/=Bool File-Scope
 		: KSentence [metadata "structural"] .
 		
-	--- op declareAndDefineExternalVariable : Id Type K -> K .
-	--- external variables
-	--- nice to have MapList
+	---- external variables
+	--- feature request : nice to have MapList
 	
 	mb rule
 		< k > declareFunction(X:Id, T:Type, K:K)
@@ -1268,24 +1222,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool notBool hasExternType(T:Type)
 		andBool notBool X:Id in Vars:Set
 		: KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > declareOnly(X:Id, T:Type, noLinkage)
-			--- => allocateType(Loc:Nat, T:Type)
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, T:Type)
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- < internalLocations >... Tu:K |-> Map(? ) ...</ internalLocations >
-		
-		--- if notBool hasIncompleteType(T:Type)
-		--- --- < declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		--- --- < preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[noLinkage / X:Id])) ...</ preLinkage >
-		--- --- < preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
-		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		--- --- if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K))
-		--- : KSentence [metadata "structural"] .
-	
 	
 	mb rule
 		< k > declareAndDefine(X:Id, T:Type, K:K, external)
@@ -1357,29 +1293,11 @@ mod COMMON-GLOBAL-DECLARATION is
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
 		: KSentence .
-	--- mb rule
-		--- < k > addToGlobalEnv(K:K, Loc:Nat) => . ...</ k >
-		--- < genv > GE:Map => GE:Map[Loc:Nat / K:K] </ genv >
-		--- < env > E:Map => E:Map[Loc:Nat / K:K] </ env >
-		--- : KSentence .
 	mb rule
 		< k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
 		: KSentence .
-		
-	--- mb rule
-		--- < k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
-		--- < currentFunction > File-Scope </ currentFunction >
-		--- < genv > GE:Map => GE:Map[Loc:Nat / X:Id] </ genv >
-		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		--- : KSentence .
-	--- mb rule
-		--- < k > addToEnv(X:Id, Loc:Nat) => . ...</ k >
-		--- < currentFunction > F:K </ currentFunction >
-		--- < env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		--- if F:K =/=Bool File-Scope
-		--- : KSentence .
-	
+			
 	mb rule
 		< k > DeclarationDefinition(InitNameGroup(T:Type, Nil)) => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
@@ -1394,13 +1312,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
-			
-	--- mb [function-definition]: rule
-		--- < k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
-			--- => allocateIfAbsent(T:Type, X:Id)
-			--- ~> defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)
-		--- ...</ k >
-		--- : KSentence [metadata "structural"] .
 		
 	--- mb [function-definition]: rule
 		--- < k > defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)

@@ -217,7 +217,6 @@ and statement =
  | GOTO of string * cabsloc
  | COMPGOTO of expression * cabsloc (* GCC's "goto *exp" *)
  | DEFINITION of definition (*definition or declaration of a variable or type*)
-
  | ASM of attribute list * (* typically only volatile and const *)
           string list * (* template *)
           asm_details option * (* extra details to guide GCC's optimizer *)

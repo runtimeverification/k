@@ -423,8 +423,16 @@ and printSwitch exp stat =
 	wrap ((printExpression exp) :: (printStatement stat) :: []) "Switch"
 and printCase exp stat =
 	wrap ((printExpression exp) :: (printStatement stat) :: []) "Case"
+and printCaseRange exp1 exp2 stat =
+	wrap ((printExpression exp1) :: (printExpression exp2) :: (printStatement stat) :: []) "CaseRange"
+and printDefault stat =
+	wrap ((printStatement stat) :: []) "Default"
+and printLabel str stat =
+	wrap ((printIdentifier str) :: (printStatement stat) :: []) "Label"	
 and printGoto name =
 	wrap ((printIdentifier name) :: []) "Goto"
+and printCompGoto exp =
+	wrap ((printExpression exp) :: []) "CompGoto"
 and printBlockStatement block =
 	wrap ((printBlock block) :: []) "BlockStatement"
 and printStatement a =
@@ -442,36 +450,20 @@ and printStatement a =
 	| RETURN (exp, loc) -> printStatementLoc (printReturn exp) loc
 	| SWITCH (exp, stat, loc) -> printStatementLoc (printSwitch exp stat) loc
 	| CASE (exp, stat, loc) -> printStatementLoc (printCase exp stat) loc
+	| CASERANGE (exp1, exp2, stat, loc) -> printStatementLoc (printCaseRange exp1 exp2 stat) loc (* GCC's extension *)
+	| DEFAULT (stat, loc) -> printStatementLoc (printDefault stat) loc
+	| LABEL (str, stat, loc) -> printStatementLoc (printLabel str stat) loc
 	| GOTO (name, loc) -> printStatementLoc (printGoto name) loc
+	| COMPGOTO (exp, loc) -> printStatementLoc (printCompGoto exp) loc (* GCC's "goto *exp" *)
 	| DEFINITION d -> wrap ((printDef d) :: []) "LocalDefinition"
 	| _ -> "OtherStatement"
 	(* 
-	| CASERANGE (expl, exph, stat, loc) ->
-	setLoc(loc);
-	unindent ();
-	print "case ";
-	print_expression expl;
-	print " ... ";
-	print_expression exph;
-	print ":";
-	indent ();
-	print_substatement stat
-	| DEFAULT (stat, loc) ->
-	setLoc(loc);
-	unindent ();
-	print "default :";
-	indent ();
-	print_substatement stat
-	| LABEL (name, stat, loc) ->
-	setLoc(loc);
-	printl [name;":"];
-	space ();
-	print_substatement stat
-	| COMPGOTO (exp, loc) -> 
-	setLoc(loc);
-	print ("goto *"); print_expression exp; print ";"; new_line ()
-	| ASM (attrs, tlist, details, loc) ->
-	"Assembly" *)
+	| ASM (attrs, tlist, details, loc) -> "Assembly" 
+	*)
+	(* 
+	 | TRY_EXCEPT of block * expression * block * cabsloc
+	 | TRY_FINALLY of block * block * cabsloc
+	*)
 and printStatementLoc s l =
 	wrap (s :: (printCabsLoc l) :: []) "StatementLoc"
 and printStatementList a =
