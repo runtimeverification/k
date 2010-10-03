@@ -86,6 +86,19 @@ sub performTest {
 		}
 	}
 	
+	# hack
+	if ($testSuite eq "gcc-torture"){
+		if (($kccRunRetval != 0) || ($kccRunOutput ne "")) {
+			my $msg = "";
+			$msg .= "kcc retval=$kccRunRetval\n";
+			$msg .= "-----------------------------------------------\n";
+			$msg .= "$kccRunOutput\n";
+			$msg .= "-----------------------------------------------\n";
+			return reportFailure($fullFilename, $timer, $msg);
+		} else {
+			return reportSuccess($fullFilename, $timer, "Success");
+		}
+	}
 	
 	my $gccRunOutput = `$gccFilename 2>&1`;
 	my $gccRunRetval = $?;
@@ -114,18 +127,21 @@ sub reportFailure {
 	my ($name, $timer, $message) = (@_);
 	$globalNumFailed++;
 	my $inner = "<failure>$message</failure>";
+	print "$name failed\n";
 	return reportAny($name, $timer, $inner);	
 }
 sub reportError {
 	my ($name, $timer, $message) = (@_);
 	$globalNumError++;
 	my $inner = "<error>$message</error>";
+	print "$name errored\n";
 	return reportAny($name, $timer, $inner);	
 }
 sub reportSuccess {
 	my ($name, $timer, $message) = (@_);
 	$globalNumPassed++;
 	my $inner = "$message";
+	print "$name passed\n";
 	return reportAny($name, $timer, $inner);	
 }
 
