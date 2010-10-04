@@ -25,9 +25,13 @@ sub terminate {
   -file : the input source file (optional)
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
-  -pdf : converts k definition to pdf
   -latex : maudifies/compiles for generating latex output
-    -style : useful for typesetting (optional)
+  -pdf : maudifies/compiles for generating pdf output
+  -ps : maudifies/compiles for generating pdf output
+  -eps : maudifies/compiles for generating pdf output
+  -png : maudifies/compiles for generating pdf output
+  -crop : maudifies/compiles for generating a nice crop-pdf output
+     -style : useful for typesetting (optional)
   \n" if (!$verbose && !$help);
 
     print "Usage:
@@ -71,7 +75,7 @@ sub terminate {
   error/warning messages reported by Maude.  Files containing
   intermediate compilation results are also kept for debugging.
 
-Options
+  Options
   -h (or -help) : print this message and exit
   -v (or -verbose) : verbose mode
   -m (or -maudify) : only maudify, do not kompile
@@ -80,8 +84,12 @@ Options
   -file : the input source file (optional)
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
-  -pdf : converts k definition to pdf
   -latex : maudifies/compiles for generating latex output
+  -pdf : maudifies/compiles for generating pdf output
+  -ps : maudifies/compiles for generating pdf output
+  -eps : maudifies/compiles for generating pdf output
+  -png : maudifies/compiles for generating pdf output
+  -crop : maudifies/compiles for generating a nice crop-pdf output
     -style : useful for typesetting (optional)
 
   The option -m generates all the Maude files file.maude
@@ -167,12 +175,9 @@ Options
   It typsets the specified modules reachable from the input
   file lang3.
   
-  kompile -pdf LANG LANG-SEMANTICS LANG-SYNTAX -f lang3
-  or
-  kompile lang3 -pdf LANG LANG-SEMANTICS LANG-SYNTAX
-  It generates a pdf file (lang3.pdf) which contains 
-  the specified modules reachable from the input file lang3.
-
+  The -pdf, -png, -ps, -eps and -crop options can be used in 
+  the same way the -latex option is used in the example above.
+  
 " if ($verbose || $help); 
     print "\nERROR: $_[0]\n\n" if defined $_[0];
     exit(1);
