@@ -575,68 +575,6 @@ piece((piece(piece(piece(piece(piece(piece(piece(0, 1) bit:: piece(1 &Nat unknow
 		andBool _+Int_(I:Int, (max(T:Type) +Int 1)) <=Int max(T:Type)
 		: KSentence [metadata "structural"] .
 
-	--- op concretize-aux : Value Nat -> K .
-	--- ceq concretize(atv(L:List{K}, T:Type)) = concretize-aux(atv(L:List{K}, T:Type), 0) 
-		--- if hasIntegerType(T:Type)
-		--- andBool getKLabel(T:Type) =/=Bool 'pointerType .
-		
-	--- eq concretize(atv((piece(N:Nat, Len:Nat),, L:List{K}), pointerType(T:Type))) = concretize-aux(atv((piece(N:Nat, Len:Nat),, L:List{K}), pointerType(T:Type)), 0) .
-	--- --- ceq concretize(atv((piece(N:Nat, Len:Nat),, L:List{K}), T:Type)) = concretize-aux(atv((piece(N:Nat, Len:Nat),, L:List{K}), T:Type), 0) 
-		--- --- if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
-
-	--- --- ceq concretize(atv(L:List{K}, bitfieldType(T:Type, ?))) = concretize-aux(atv(L:List{K}, T:Type), 0) 
-		--- --- if hasIntegerType(T:Type) .
-	--- --- ceq concretize(atv(L:List{K}, bitfieldType(T:Type, N:Nat))) = concretize-aux(atv(L:List{K}, bitfieldType(T:Type, N:Nat)), 0) 
-		--- --- if hasIntegerType(T:Type) .
-		
-	--- --- we have fake floats and pointers because their details are very unknown
-	--- eq concretize(atv((F:Float,, L:List{K}), float)) = tv(F:Float, float) .
-	--- eq concretize(atv((F:Float,, L:List{K}), double)) = tv(F:Float, double) .
-	--- eq concretize(atv((F:Float,, L:List{K}), long-double)) = tv(F:Float, long-double) .
-	--- ceq concretize(atv((loc(N:Nat, M:Nat),, L:List{K}), T:Type)) = tv(loc(N:Nat, M:Nat), T:Type) 
-		--- if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
-	--- ceq concretize(atv((loc(0, 0),, L:List{K}), T:Type)) = tv(0, T:Type) 
-		--- if hasIntegerType(T:Type) .
-	--- eq concretize(atv((loc(0, 0),, L:List{K}), pointerType(T:Type))) = tv(loc(0, 0), T:Type) .
-		
-	--- --- fixme is this really necessary?
-	--- eq concretize(atv((piece(0, 8),, L:List{K}), pointerType(T:Type))) = tv(loc(0, 0), pointerType(T:Type)) .
-
-	--- --- fixme for now
-	--- eq concretize(atv(L:List{K}, structType(X:Id))) = atv(L:List{K}, structType(X:Id)) .
-	--- eq concretize(atv(L:List{K}, unionType(X:Id))) = atv(L:List{K}, unionType(X:Id)) .
-	
-	--- eq concretize-aux(atv((L:List{K},, piece(N':Nat, Len:Nat)), T:Type), N:Nat) 
-		--- = concretize-aux(atv(L:List{K}, T:Type), (N:Nat <<Nat Len:Nat) |Nat N':Nat) .
-	--- ceq concretize-aux(atv(.List{K}, T:Type), N:Nat)
-		--- = interpret(T:Type, N:Nat) 
-		--- if getKLabel(T:Type) =/=Bool 'pointerType .
-	--- eq concretize-aux(atv(.List{K}, pointerType(T:Type)), 0)
-		--- = tv(loc(0, 0), pointerType(T:Type)) .
-	--- --- fixme check on this, not sure if we're really allowed to have conversion.  maybe just for void?
-	--- ceq concretize-aux(atv(.List{K}, pointerType(T:Type)), N:Nat)
-		--- = tv(N:Nat, pointerType(T:Type)) 
-		--- if N:Nat >Nat 0 .
-		
-	--- --- fixme
-	--- ceq concretize-aux(atv(loc(N:Nat, M:Nat), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
-		--- = tv(loc(N:Nat, M:Nat), T:Type)
-	--- if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
-	--- ceq concretize-aux(atv(loc(0, 0), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
-		--- = tv(0, T:Type) 
-		--- if getKLabel(T:Type) =/=Bool 'pointerType .
-	--- ceq concretize-aux(atv(loc(N:Nat, M:Nat), T:Type), 0)
-		--- = tv(loc(N:Nat, M:Nat), T:Type)
-	--- if notBool(N:Nat ==Bool 0 andBool M:Nat ==Bool 0) .
-	--- ceq concretize-aux(atv(loc(0, 0), T:Type), 0)
-		--- = tv(0, T:Type) 
-		--- if getKLabel(T:Type) =/=Bool 'pointerType .
-		
-	--- --- fixme, terribly unsafe
-	--- --- ceq concretize-aux(atv((?,, F:Float,, ?), T:Type), (unknown(?) |Nat (unknown(?) |Nat unknown(?) <<Nat 8) <<Nat 8))
-		--- --- = tv(F:Float, T:Type)
-	--- --- if T:Type ==Bool float orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
-		
 	eq integerTypes = signedIntegerTypes unsignedIntegerTypes .
 	eq unsignedIntegerTypes = Set(unsigned-char,, unsigned-short-int,, unsigned-int,, unsigned-long-int,, unsigned-long-long-int) .
 	eq signedIntegerTypes = Set(char,, signed-char,, short-int,, int,, long-int,, long-long-int,, bignum) .

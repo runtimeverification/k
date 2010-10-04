@@ -59,6 +59,11 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op t : Type -> Type .
 	--- op t : Type Set -> Type .
 	
+	op bitRange : Nat Nat Nat -> Nat . --- original number, from, to inclusive
+	
+	op fillToBytes : K -> K [metadata "strict(1)"] .
+	
+	op floorLoc : Nat -> Nat . --- loc with possible bit offset returning base byte	
 	op figureInitializer : Id Type K -> K .  --- id, type, initializer
 	op figureInitializer-aux : Id Type K -> K [metadata "strict(3)"] .  --- id, type, initializer
 	op readFunction : Nat -> K .
@@ -1410,7 +1415,7 @@ mod C-SEMANTICS-MISC is
 		
 	mb rule
 		< k > extractField-pre(L:List{K}, T:Type, tv(Offset:Nat, ?), tv(Len:Nat, ?))
-			=> concretize(T:Type, extractBitsFromList(dataList(L:List{K}), bitsToBytes(Offset:Nat), Len:Nat))
+			=> concretize(T:Type, fillToBytes(extractBitsFromList(dataList(L:List{K}), Offset:Nat, Len:Nat)))
 		...</ k >
 		: KSentence [metadata "structural"] .
 				
@@ -1714,7 +1719,44 @@ mod C-SEMANTICS-MISC is
 		: KSentence .
 	mb rule
 		< k > fillEnums(EnumDef(X:Id, Nil), ?) => (.).K ...</ k > : KSentence .
-	--- eq tv(L:List{K}, enumType(?)) = tv(L:List{K}, int) .
+	
+	op fillToBytes-aux : K List{K} -> K .
+	eq fillToBytes(dataList(L:List{K})) = fillToBytes-aux(dataList(L:List{K}), .List{K}) .
+	ceq fillToBytes-aux(dataList((L:List{K},, piece(N:Nat, Len:Nat))), L':List{K}) 
+		= fillToBytes-aux(dataList(L:List{K}), (piece(N:Nat, Len:Nat),, L':List{K}))
+		if Len:Nat ==Bool numBitsPerByte .
+	
+	ceq fillToBytes-aux(dataList(piece(N:Nat, Len:Nat)), L':List{K})
+		= fillToBytes-aux(dataList((piece(0, 1),, piece(N:Nat, Len:Nat))), L':List{K})
+		if Len:Nat <Nat numBitsPerByte .
+		
+	ceq fillToBytes-aux(dataList((L:List{K},, piece(N:Nat, Len:Nat),, piece(N':Nat, Len':Nat))), L':List{K}) 
+		= fillToBytes-aux(dataList((L:List{K},, _bit::_(piece(N:Nat, Len:Nat), piece(N':Nat, Len':Nat)))), L':List{K})
+		if Len:Nat +Nat Len':Nat <=Nat numBitsPerByte 
+		andBool N:Nat >=Nat 0
+		andBool N':Nat >=Nat 0 .
+	
+	--- fixme could add more checking on this rule
+	ceq fillToBytes-aux(
+			dataList((
+				L:List{K}
+				,, piece(bitRange(N:Nat, sNat(To:Nat), To':Nat), Len:Nat)
+				,, piece(bitRange(N:Nat, From:Nat, To:Nat), Len':Nat)
+			))
+			, L':List{K}
+		)
+			= fillToBytes-aux(
+			dataList((
+				L:List{K}
+				,, piece(bitRange(N:Nat, From:Nat, To':Nat), Len:Nat +Nat Len':Nat)
+			))
+			, L':List{K}
+		)
+		if Len:Nat +Nat Len':Nat <=Nat numBitsPerByte .	
+		
+	eq fillToBytes-aux(dataList(.List{K}), L:List{K})
+		= dataList(L:List{K}) .
+	
 endm
 
 load common-c-conversions

@@ -15,7 +15,7 @@
 */
 #include <stdio.h>
 
-int main(int argc, char *argv[])
+int main(void)
 {
   struct x { signed int i : 7; unsigned int u : 7; } bit;
 

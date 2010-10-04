@@ -448,8 +448,10 @@ mod COMMON-C-TYPING is
 	
 	ceq fillBitHoles(N:Nat, (typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id) :: L:List{Type})) 
 		= typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id)
-		:: fillBitHoles(N:Nat +Nat N':Nat, typedDeclaration(T:Type, X:Id) :: L:List{Type}) 
+		:: fillBitHoles(N:Nat +Nat N':Nat, L:List{Type})
 		if N':Nat =/=Bool 0 .
+	
+	eq fillBitHoles(N:Nat, Nil) = typedDeclaration(bitfieldType(unsigned-int, absInt(numBitsPerByte -Int (N:Nat %Nat numBitsPerByte)) %Nat numBitsPerByte), #NoName) .
 	
 	--- fixme chould check for some struct contraints here
 	op incompleteToFlexibleArrayMember : List{Type} -> List{Type} .

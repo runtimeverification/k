@@ -5,6 +5,8 @@ mod COMMON-MEMORY-INCLUDE is
 	
 	op encodedPointer : Int -> Nat .
 	op encodedFloat : Float -> Nat .
+	
+	op explodeToBits : List{K} -> List{K} .
 endm
 
 mod COMMON-SEMANTICS-READING is
@@ -15,30 +17,36 @@ mod COMMON-SEMANTICS-READING is
 	op getBitOffset : Nat -> Nat .
 	eq getBitOffset(? +Nat bito(M:Nat)) = M:Nat .
 	eq getBitOffset(?) = 0 [owise] .
+	
 			
-	op extractBitsFromList : K Nat Nat List{K} -> K . --- datalist, offset into list, number of bits to extract, accumulator
-	eq extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat) = extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat, .List{K}) .
+	--- 1100 1100
+
+***(
+	('extractBitsFromList).KProperLabel(('dataList).KResultLabel(kList("wklist_")(BaseValue piece(204, 8)(.List{K}),,BaseValue piece(7, 8)(.List{K}),,BaseValue piece(0, 8)(.List{K}),,BaseValue piece(0, 8)(.List{K}),,BaseValue piece(0, 8)(.List{K}))),,BaseValue 0(.List{K}),,BaseValue 40(.List{K}))
+***)
+	--- 0100 0000
+	
+	op extractBitsFromList : K Nat Nat List{K} -> K . --- datalist, offset in bits into list, number of bits to extract, accumulator
+	eq extractBitsFromList(dataList(L:List{K}), N:Nat, M:Nat) 
+		= extractBitsFromList(dataList(explodeToBits(L:List{K})), N:Nat, M:Nat, .List{K}) .
 	mb rule
-		< k > extractBitsFromList(dataList((piece(?, Len:Nat),, L:List{K})), Offset:Nat, NumBits:Nat, .List{K})
-			=> extractBitsFromList(dataList(L:List{K}), absInt(Offset:Nat -Int 1), NumBits:Nat, .List{K})
+		< k > extractBitsFromList(dataList((piece(?, 1),, L:List{K})), sNat(Offset:Nat), NumBits:Nat, .List{K})
+			=> extractBitsFromList(dataList(L:List{K}), Offset:Nat, NumBits:Nat, .List{K})
 		...</ k >
-		if byteoffset(Offset:Nat) =/=Bool 0
-		andBool Len:Nat >=Nat numBitsPerByte
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > extractBitsFromList(dataList((piece(N:Nat, Len:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
-			=> extractBitsFromList(dataList(L:List{K}), 0, absInt(NumBits:Nat -Int Len:Nat), (Done:List{K},, piece(N:Nat, Len:Nat)))
+		< k > extractBitsFromList(dataList((piece(N:Nat, 1),, L:List{K})), 0, sNat(NumBits:Nat), Done:List{K})
+			=> extractBitsFromList(dataList(L:List{K}), 0, NumBits:Nat, (Done:List{K},, piece(N:Nat, 1)))
 		...</ k >
-		if Len:Nat <=Nat NumBits:Nat
 		: KSentence [metadata "structural"] .
 
-	mb rule
-		< k > extractBitsFromList(dataList((piece(N:Nat, Len:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
-			=> extractBitsFromList(dataList((piece(N:Nat >>Nat 1, absInt(Len:Nat -Int 1)),, piece(N:Nat &Nat 1, 1),, L:List{K})), 0, NumBits:Nat, Done:List{K})
-		...</ k >
-		if Len:Nat >Nat NumBits:Nat
-		andBool Len:Nat >Nat 1
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > extractBitsFromList(dataList((piece(N:Nat, Len:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
+			--- => extractBitsFromList(dataList((piece(N:Nat >>Nat 1, absInt(Len:Nat -Int 1)),, piece(N:Nat &Nat 1, 1),, L:List{K})), 0, NumBits:Nat, Done:List{K})
+		--- ...</ k >
+		--- if Len:Nat >Nat NumBits:Nat
+		--- andBool Len:Nat >Nat 1
+		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > extractBitsFromList(?, 0, 0, Done:List{K}) => dataList(Done:List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
@@ -54,7 +62,9 @@ mod COMMON-SEMANTICS-READING is
 
 	
 	mb rule
-		< k > read(Loc:Nat, T:Type, bitSize:Nat) => concretize(T:Type, extractBitsFromMem(Loc:Nat, bitSize:Nat)) ...</ k >
+		< k > read(Loc:Nat, T:Type, bitSize:Nat)
+			=> concretize(T:Type, fillToBytes(extractBitsFromMem(Loc:Nat, bitSize:Nat))) 
+		...</ k >
 		: KSentence [metadata "structural"] .
 		
 	op joinIntegerBytes : Type List{K} -> K .
@@ -82,8 +92,9 @@ mod COMMON-SEMANTICS-READING is
 	op joinIntegerBytes : Type List{K} K -> K .
 	eq joinIntegerBytes(T:Type, L:List{K}) = joinIntegerBytes(T:Type, L:List{K}, piece(0, 0)) .
 	
-	eq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), piece(N':Nat, Len':Nat))
-		= joinIntegerBytes(T:Type, L:List{K}, piece(_bit::_(piece(N':Nat, Len':Nat), piece(N:Nat, Len:Nat)), Len:Nat +Nat Len':Nat)) .
+	ceq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), piece(N':Nat, Len':Nat))
+		= joinIntegerBytes(T:Type, L:List{K}, piece(_bit::_(piece(N':Nat, Len':Nat), piece(N:Nat, Len:Nat)), Len:Nat +Nat Len':Nat))
+		if Len:Nat ==Bool numBitsPerByte .
 	eq joinIntegerBytes(T:Type, .List{K}, piece(N:Nat, Len:Nat)) = interpret(T:Type, piece(N:Nat, Len:Nat)) . 
 		
 	op isConcreteList : List{K} -> Bool .
@@ -95,12 +106,14 @@ mod COMMON-SEMANTICS-READING is
 	eq isConcreteNumber(bito(?) +Nat ?) = false .
 	eq isConcreteNumber(?) = true [owise] .
 	
-	op floorLoc : Nat -> Nat . --- loc with possible bit offset returning base byte
 	eq floorLoc(sym(N:Nat) +Nat bito(M:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat .
 	eq floorLoc(sym(N:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat [owise] .
 	
 	mb rule
-		< k > extractBitsFromMem(Loc:Nat, Size:Nat) => extractBitsFromList(extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(Size:Nat)), getBitOffset(Loc:Nat), Size:Nat) ...</ k >
+		< k > extractBitsFromMem(Loc:Nat, Size:Nat)
+			=> extractBitsFromList(extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(Size:Nat)), getBitOffset(Loc:Nat), Size:Nat) 
+		...</ k >
+		if floorLoc(Loc:Nat) ==Bool Loc:Nat
 		: KSentence [metadata "structural"] .
 	
 	mb context extractBytesFromMem-aux(?, ?, (?,, `[HOLE`]:K,, ?)) : KSentence .
@@ -170,11 +183,14 @@ mod COMMON-SEMANTICS-WRITING is
 	op calculateNewBytes : Nat K K -> K [metadata "strict(3)"] .
 	
 	op write : K Value K -> K [metadata "strict(2)"] .
-	ceq write(K:K, tv(V:List{K}, T:Type)) = write(K:K, tv(V:List{K}, T:Type), value(bitSizeofType(T:Type))) 
+	ceq write(K:K, tv(V:List{K}, T:Type)) 
+		= write(K:K, tv(V:List{K}, T:Type), value(bitSizeofType(T:Type))) 
 		if notBool(hasFunctionType(T:Type)) .
 	--- FIXME should check types
 	mb rule
-		< k > write(Loc:Nat, tv(V:K, functionType(?, ?))) => writeByte(Loc:Nat, V:K) ...</ k >
+		< k > write(Loc:Nat, tv(V:K, functionType(?, ?))) 
+			=> writeByte(Loc:Nat, V:K) 
+		...</ k >
 		: KSentence [metadata "structural"] .	
 	mb context write(?, ?, value(`[HOLE`])) : KSentence . 
 	mb rule
@@ -199,9 +215,16 @@ mod COMMON-SEMANTICS-WRITING is
 
 	eq byteoffset(N:Nat +Nat bito(?)) = N:Nat .
 	eq byteoffset(N:Nat) = N:Nat [owise] .
+	--- mb rule
+		--- < k > write(Loc:Nat, tv(N:Nat, T:Type), bitSize:Nat)
+			--- => writeBitfield(Loc:Nat, T:Type, calculateNewBytes(bitoffset(Loc:Nat), piece(N:Nat, bitSize:Nat), extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(bitSize:Nat))))
+		--- ...</ k >
+		--- if bitSize:Nat %Nat numBitsPerByte =/=Bool 0
+		--- orBool notBool(isByteLoc(Loc:Nat))
+		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > write(Loc:Nat, tv(N:Nat, T:Type), bitSize:Nat)
-			=> writeBitfield(Loc:Nat, T:Type, calculateNewBytes(bitoffset(Loc:Nat), piece(N:Nat, bitSize:Nat), extractBytesFromMem(Loc:Nat, bitsToBytes(bitSize:Nat))))
+			=> writeBitfield(Loc:Nat, T:Type, calculateNewBytes(bitoffset(Loc:Nat), piece(N:Nat, bitSize:Nat), extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(bitSize:Nat +Nat bitoffset(Loc:Nat)))))
 		...</ k >
 		if bitSize:Nat %Nat numBitsPerByte =/=Bool 0
 		orBool notBool(isByteLoc(Loc:Nat))
@@ -213,15 +236,27 @@ mod COMMON-SEMANTICS-WRITING is
 		...</ k >
 		: KSentence [metadata "structural"] .
 		
-	op explodeToBits : List{K} -> List{K} .
 	op calculateNewBytes-aux : Nat K K List{K} -> K .
 	eq calculateNewBytes(Len:Nat, N:Nat, dataList(L:List{K})) = calculateNewBytes-aux(Len:Nat, dataList(explodeToBits(N:Nat)), dataList(explodeToBits(L:List{K})), .List{K}) .
 	
 	op joinBitsToBytes : List{K} -> K .
 	op joinBitsToBytes-aux : K K -> K .
 	
-	eq calculateNewBytes-aux(0, dataList((piece(N:Nat, 1),, L:List{K})), dataList((piece(?, 1),, L':List{K})), Result:List{K}) = calculateNewBytes-aux(0, dataList(L:List{K}), dataList(L':List{K}), (Result:List{K},, piece(N:Nat, 1))) .
-	eq calculateNewBytes-aux(0, dataList(.List{K}), dataList(L:List{K}), Result:List{K}) = joinBitsToBytes((Result:List{K},, L:List{K})) .
+***(
+	('calculateNewBytes-aux).KProperLabel(
+		BaseValue 0(.List{K})
+		,,('dataList).KResultLabel(kList("wklist_")(BaseValue piece(1, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K}),,BaseValue piece(0, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K})))
+		,,('dataList).KResultLabel(kList("wklist_")(.List{K}))
+		,,kList("wklist_")(BaseValue piece(bitRange(unknown(8), 7, 7), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 6, 6), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 5, 5), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 4, 4), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 3, 3), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 2, 2), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 1, 1), 1)(.List{K}),,BaseValue piece(0, 1)(.List{K})))
+***)
+	
+	eq calculateNewBytes-aux(sNat(N:Nat), K:K, dataList((piece(Bit:Nat, 1),, L:List{K})), Result:List{K}) 
+		= calculateNewBytes-aux(N:Nat, K:K, dataList(L:List{K}), (Result:List{K},, piece(Bit:Nat, 1))) .
+	
+	eq calculateNewBytes-aux(0, dataList((piece(N:Nat, 1),, L:List{K})), dataList((piece(?, 1),, L':List{K})), Result:List{K}) 
+		= calculateNewBytes-aux(0, dataList(L:List{K}), dataList(L':List{K}), (Result:List{K},, piece(N:Nat, 1))) .
+	eq calculateNewBytes-aux(0, dataList(.List{K}), dataList(L:List{K}), Result:List{K}) 
+		= joinBitsToBytes((Result:List{K},, L:List{K})) .
 	
 	eq joinBitsToBytes(L:List{K}) = joinBitsToBytes-aux(dataList(L:List{K}), dataList(.List{K})) .
 	ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
@@ -233,12 +268,28 @@ mod COMMON-SEMANTICS-WRITING is
 	eq joinBitsToBytes-aux(dataList(.List{K}), dataList(R:List{K}))
 		= dataList(R:List{K}) .
 	
+	
 	eq explodeToBits((K:K,, L:NeList{K})) = (explodeToBits(K:K),, explodeToBits(L:NeList{K})) .
 	eq explodeToBits(piece(N:Nat, sNat(Len:Nat)))
-		= (explodeToBits(piece(N:Nat >>Nat 1, Len:Nat)),, piece(N:Nat &Nat 1, 1)) .
+		= splinter(N:Nat, sNat(Len:Nat)) .
+		--- = (explodeToBits(piece(N:Nat >>Nat 1, Len:Nat)),, piece(N:Nat &Nat 1, 1)) .
 	eq explodeToBits(piece(N:Nat, 0)) = .List{K} .
 	eq explodeToBits(.List{K}) = .List{K} .
-			
+	
+	op splinter : Nat Nat -> List{K} .
+	op splinter-aux : Nat Nat Nat -> List{K} .
+	eq splinter(N:Nat, Len:Nat) = splinter-aux(N:Nat, Len:Nat, 0) .
+	eq splinter-aux(?, Len:Nat, Len:Nat) = .List{K} .
+	ceq splinter-aux(N:Nat, Len:Nat, Pos:Nat)
+		= splinter-aux(N:Nat, Len:Nat, sNat(Pos:Nat)),, piece(bitRange(N:Nat, Pos:Nat, Pos:Nat), 1)
+		if Pos:Nat <Nat Len:Nat .
+	
+	ceq bitRange(N:Nat, Pos:Nat, Pos:Nat) = 1 &Nat (N:Nat >>Nat Pos:Nat)
+		if N:Nat >=Nat 0 .
+		
+	ceq bitRange(N:Nat, 0, To:Nat) = N:Nat
+		if sNat(To:Nat) ==Bool numBitsPerByte .
+		
 	op writeByte : Nat K -> K .
 	mb rule
 		< k > writeBytes(sym(Block:Nat) +Nat Offset:Nat, dataList((V:K,, L:List{K})))
@@ -255,13 +306,16 @@ mod COMMON-SEMANTICS-WRITING is
 		< k > writeBytes(?, dataList(.List{K})) => . ...</ k >
 		: KSentence [metadata "structural"] .
 		
-	mb rule splitBytes(tv(I:Int, T:Type)) => splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
+	mb rule splitBytes(tv(I:Int, T:Type)) 
+		=> splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
 		if hasIntegerType(T:Type)
 		: KSentence .
-	mb rule splitBytes(tv(F:Float, T:Type)) => splitFloatBytes(F:Float, T:Type, value(byteSizeofType(T:Type)))
+	mb rule splitBytes(tv(F:Float, T:Type)) 
+		=> splitFloatBytes(F:Float, T:Type, value(byteSizeofType(T:Type)))
 		if hasFloatType(T:Type)
 		: KSentence .
-	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) => splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
+	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) 
+		=> splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
 		: KSentence .
 	
 	op splitIntegerBytes : K K K -> K .
@@ -309,10 +363,15 @@ mod COMMON-C-MEMORY-MISC is
 	including COMMON-MEMORY-INCLUDE .
 
 	mb [storeNew]: rule
-		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat => alloc(Loc:Nat, value(byteSizeofType(T:Type))) ~> write(Loc:Nat, tv(V:K, T:Type)) ...</ k >
+		< k > storeNew tv(V:K, T:Type) atLoc Loc:Nat 
+			=> alloc(Loc:Nat, value(byteSizeofType(T:Type))) 
+			~> write(Loc:Nat, tv(V:K, T:Type)) 
+		...</ k >
 		: KSentence [metadata "structural"] .
 	mb [storeAt]: rule
-		< k > store tv(V:K, T:Type) atLoc Loc:Nat => write(Loc:Nat, tv(V:K, T:Type)) ...</ k >
+		< k > store tv(V:K, T:Type) atLoc Loc:Nat 
+			=> write(Loc:Nat, tv(V:K, T:Type)) 
+		...</ k >
 		: KSentence [metadata "structural"] .
 	
 	--- c99 6.5:2 If a side effect on a scalar object is unsequenced relative to either a different side effect on the same scalar object or a value computation using the value of the same scalar object, the behavior is undefined. If there are multiple allowable orderings of the subexpressions of an expression, the behavior is undefined if such an unsequenced side effect occurs in any of the orderings
