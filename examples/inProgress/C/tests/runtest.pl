@@ -90,9 +90,10 @@ sub performTest {
 	if ($testSuite eq "gcc-torture"){
 		if (($kccRunRetval != 0) || ($kccRunOutput ne "")) {
 			my $msg = "";
+			my $encodedOut = HTML::Entities::encode_entities($kccRunOutput);
 			$msg .= "kcc retval=$kccRunRetval\n";
 			$msg .= "-----------------------------------------------\n";
-			$msg .= "$kccRunOutput\n";
+			$msg .= "$encodedOut\n";
 			$msg .= "-----------------------------------------------\n";
 			return reportFailure($fullFilename, $timer, $msg);
 		} else {
