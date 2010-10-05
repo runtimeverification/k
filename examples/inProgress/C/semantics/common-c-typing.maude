@@ -385,20 +385,33 @@ mod COMMON-C-TYPING is
 	--- eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
 	
 	eq isTypeCompatible(T:Type, T:Type) = true .
-	ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
-		= isTypeCompatible(T:Type, T':Type)
-		if T:Type =/=Bool void andBool T':Type =/=Bool void .
-	ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
-		= true
-		if T:Type ==Bool void orBool T':Type ==Bool void .
+	eq isTypeCompatible(pointerType(?), pointerType(?))
+		= true .
+	--- ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
+		--- = isTypeCompatible(T:Type, T':Type)
+		--- if T:Type =/=Bool void andBool T':Type =/=Bool void
+		--- andBool notBool hasArrayType(T:Type)
+		--- andBool notBool hasArrayType(T':Type) .
+	--- ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
+		--- = true
+		--- if T:Type ==Bool void orBool T':Type ==Bool void .
 	eq isTypeCompatible(typedDeclaration(T:Type, ?), typedDeclaration(T':Type, ?))
 		= isTypeCompatible(T:Type, T':Type) .
-	eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
-		= isTypeCompatible(pointerType(T:Type), T':Type) .
-	eq isTypeCompatible(incompleteArrayType(T:Type), T':Type)
-		= isTypeCompatible(pointerType(T:Type), T':Type) .
+	--- eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
+		--- = isTypeCompatible(pointerType(T:Type), T':Type) .
+	--- eq isTypeCompatible(incompleteArrayType(T:Type), T':Type)
+		--- = isTypeCompatible(pointerType(T:Type), T':Type) .
+		
+	--- eq isTypeCompatible(T:Type, pointerType(arrayType(T':Type, ?)))
+		--- = isTypeCompatible(T:Type, pointerType(T':Type)) .
+	--- eq isTypeCompatible(T:Type, arrayType(arrayType(T':Type, ?), ?))
+		--- = isTypeCompatible(T:Type, arrayType(T':Type, 0)) .
+	--- ceq isTypeCompatible(T:Type, arrayType(T':Type, ?))
+		--- = isTypeCompatible(T:Type, pointerType(T':Type))
+		--- if notBool hasArrayType(T':Type) .
 	eq isTypeCompatible(T:Type, arrayType(T':Type, ?))
 		= isTypeCompatible(T:Type, pointerType(T':Type)) .
+		
 	eq isTypeCompatible(functionType(T1:Type, (T':Type :: L:List{Type})), functionType(T2:Type, (T'':Type :: L':List{Type})))
 		= isTypeCompatible(functionType(T1:Type, L:List{Type}), functionType(T2:Type, L':List{Type}))
 		andBool isTypeCompatible(T':Type, T'':Type) .

@@ -379,6 +379,13 @@ mod COMMON-SEMANTICS-CAST is
 	--- mb rule
 		--- < k > cast((arrayType(T:Type, N:Nat) => pointerType(T:Type)), ?) ...</ k >
 		--- : KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > cast(?, tv(?, (arrayType(T:Type, ?) => pointerType(T:Type)))) ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > cast(?, tv(?, (incompleteArrayType(T:Type) => pointerType(T:Type)))) ...</ k >
+		: KSentence [metadata "structural"] .
 	
 	--- fixme needs to check size
 	mb rule
@@ -440,6 +447,22 @@ mod COMMON-C-CONVERSIONS is
 	including COMMON-SEMANTICS-CAST .
 	including COMMON-SEMANTICS-PROMOTIONS .
 	
+	
+	
+	--- fixme generalize this should be done generically
+	mb rule < k > *(tv(?, (arrayType(T:Type, ?) => pointerType(T:Type)))) ...</ k > 
+		: KSentence [metadata "structural"] .
+	mb rule < k > *(tv(?, (incompleteArrayType(T:Type) => pointerType(T:Type)))) ...</ k > 
+		: KSentence [metadata "structural"] .
+		
+	mb rule < k > _+_(tv(?, (incompleteArrayType(T:Type) => pointerType(T:Type))), ?) ...</ k > 
+		: KSentence [metadata "structural"] .
+	mb rule < k > _+_(?, tv(?, (incompleteArrayType(T:Type) => pointerType(T:Type)))) ...</ k > 
+		: KSentence [metadata "structural"] .
+	mb rule < k > _+_(tv(?, (arrayType(T:Type, ?) => pointerType(T:Type))), ?) ...</ k > 
+		: KSentence [metadata "structural"] .
+	mb rule < k > _+_(?, tv(Loc:Nat, (arrayType(T:Type, ?) => pointerType(T:Type)))) ...</ k > 
+		: KSentence [metadata "structural"] .	
 
 	--- eq bitFlatten(N:Nat |Nat M:Nat) = bitFlatten(N:Nat) |Nat bitFlatten(M:Nat) .
 	--- eq bitFlatten(N:Nat &Nat M:Nat) = bitFlatten(N:Nat) &Nat bitFlatten(M:Nat) .
