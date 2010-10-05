@@ -224,6 +224,20 @@ mod COMMON-SEMANTICS-WRITING is
 		--- if bitSize:Nat %Nat numBitsPerByte =/=Bool 0
 		--- orBool notBool(isByteLoc(Loc:Nat))
 		--- : KSentence [metadata "structural"] .
+		
+	--- op justBits : Int Type -> Value .
+	--- ceq justBits(I:Int, ?) = I:Int
+		--- if I:Int >=Int 0 .
+	
+	--- mb rule
+		--- < k > write(Loc:Nat, tv(I:Int, T:Type), bitSize:Nat)
+			--- => write(Loc:Nat, tv(justBits(I:Int, T:Type), T:Type), bitSize:Nat)
+		--- ...</ k >
+		--- if (bitSize:Nat %Nat numBitsPerByte =/=Bool 0
+		--- orBool notBool(isByteLoc(Loc:Nat)))
+		--- andBool I:Int <Int 0
+		--- : KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > write(Loc:Nat, tv(N:Nat, T:Type), bitSize:Nat)
 			=> writeBitfield(Loc:Nat, T:Type, calculateNewBytes(bitoffset(Loc:Nat), piece(N:Nat, bitSize:Nat), extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(bitSize:Nat +Nat bitoffset(Loc:Nat)))))
@@ -233,7 +247,7 @@ mod COMMON-SEMANTICS-WRITING is
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > writeBitfield(Loc:Nat, T:Type, dataList(L:List{K}))
+		< k > writeBitfield(Loc:Nat, ?, dataList(L:List{K}))
 			=> writeBytes(byteoffset(Loc:Nat), dataList(L:List{K}))
 		...</ k >
 		: KSentence [metadata "structural"] .
@@ -243,14 +257,6 @@ mod COMMON-SEMANTICS-WRITING is
 	
 	op joinBitsToBytes : List{K} -> K .
 	op joinBitsToBytes-aux : K K -> K .
-	
-***(
-	('calculateNewBytes-aux).KProperLabel(
-		BaseValue 0(.List{K})
-		,,('dataList).KResultLabel(kList("wklist_")(BaseValue piece(1, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K}),,BaseValue piece(0, 1)(.List{K}),,BaseValue piece(1, 1)(.List{K})))
-		,,('dataList).KResultLabel(kList("wklist_")(.List{K}))
-		,,kList("wklist_")(BaseValue piece(bitRange(unknown(8), 7, 7), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 6, 6), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 5, 5), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 4, 4), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 3, 3), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 2, 2), 1)(.List{K}),,BaseValue piece(bitRange(unknown(8), 1, 1), 1)(.List{K}),,BaseValue piece(0, 1)(.List{K})))
-***)
 	
 	eq calculateNewBytes-aux(sNat(N:Nat), K:K, dataList((piece(Bit:Nat, 1),, L:List{K})), Result:List{K}) 
 		= calculateNewBytes-aux(N:Nat, K:K, dataList(L:List{K}), (Result:List{K},, piece(Bit:Nat, 1))) .
@@ -289,6 +295,8 @@ mod COMMON-SEMANTICS-WRITING is
 		if Pos:Nat <Nat Len:Nat .
 	
 	ceq bitRange(N:Nat, Pos:Nat, Pos:Nat) = 1 &Nat (N:Nat >>Nat Pos:Nat)
+		if N:Nat >=Nat 0 .
+	ceq bitRange(piece(N:Nat, 1), Pos:Nat, Pos:Nat) = 1 &Nat (N:Nat >>Nat Pos:Nat)
 		if N:Nat >=Nat 0 .
 		
 	ceq bitRange(N:Nat, 0, To:Nat) = N:Nat
