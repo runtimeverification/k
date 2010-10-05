@@ -1,4 +1,4 @@
-\usepackage[letterpaper,landscape]{geometry}
+\usepackage{geometry}
 \usepackage{fullpage}
 \usepackage{arydshln}
 \usepackage{amsmath}
@@ -116,8 +116,9 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 
 \newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
 \newcommand{\mallLarge}[3]{\left\langle\begin{array}{c}#3\end{array}\right\rangle_{{\sf #2}}}
-\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ \ \_}}
-\newcommand{\msuffix}[3]{\mall{#1}{#2}{\_\ \ {#3}}}
-\newcommand{\mmiddle}[3]{\mall{#1}{#2}{\_ \ \ {#3}\ \ \_}}
+\newcommand{\ellipses}{\mathrel{\cdot\!\!\cdot\!\!\cdot}}
+\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ \ellipses}}
+\newcommand{\msuffix}[3]{\mall{#1}{#2}{\ellipses\ {#3}}}
+\newcommand{\mmiddle}[3]{\mall{#1}{#2}{\ellipses\ {#3}\ \ellipses}}
 \newcommand{\mdot}{\cdot}
 \newcommand{\mAnyVar}{\_}
