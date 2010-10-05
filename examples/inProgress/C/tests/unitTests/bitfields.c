@@ -157,13 +157,13 @@ int testTwos(){
 	// 01 00 10 11 => 01001011
 	// 01 00 10 11 => 11100001
 	unsigned char firstChar = (char)*(((char*)&(s))+1);
-	if (firstChar == 135){
+	if (firstChar == 135 || firstChar == 75 || firstChar == 225){
 		// printf("VOLATILE: top bits are MSB\n");
-		printf("byte interp OK\n");
-	} else if (firstChar == 75) {
+		//printf("byte interp OK\n");
+	//} else if (firstChar == 75) {
 		// printf("VOLATILE: top bits are LSB\n");
 		printf("byte interp OK\n");
-	} else if (firstChar == 225) {
+	//} else if (firstChar == 225) {
 	} else {
 		printf("BUG: b5: %d\n", firstChar);
 	}

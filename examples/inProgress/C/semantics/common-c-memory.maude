@@ -94,7 +94,9 @@ mod COMMON-SEMANTICS-READING is
 	
 	ceq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), piece(N':Nat, Len':Nat))
 		= joinIntegerBytes(T:Type, L:List{K}, piece(_bit::_(piece(N':Nat, Len':Nat), piece(N:Nat, Len:Nat)), Len:Nat +Nat Len':Nat))
-		if Len:Nat ==Bool numBitsPerByte .
+		if Len:Nat ==Bool numBitsPerByte
+		andBool N':Nat >=Nat 0
+		andBool N:Nat >=Nat 0 .
 	eq joinIntegerBytes(T:Type, .List{K}, piece(N:Nat, Len:Nat)) = interpret(T:Type, piece(N:Nat, Len:Nat)) . 
 		
 	op isConcreteList : List{K} -> Bool .
@@ -262,6 +264,8 @@ mod COMMON-SEMANTICS-WRITING is
 	ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, piece(M:Nat, 1),, L:List{K})), dataList(R:List{K}))
 		= joinBitsToBytes-aux(dataList((piece(_bit::_(piece(N:Nat, Len:Nat), piece(M:Nat, 1)), sNat(Len:Nat)),, L:List{K})), dataList(R:List{K}))
 		if Len:Nat <Nat numBitsPerByte .
+		--- andBool N:Nat >=Nat 0
+		--- andBool M:Nat >=Nat 0 .
 	ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, L:List{K})), dataList(R:List{K}))
 		= joinBitsToBytes-aux(dataList(L:List{K}), dataList((R:List{K},, piece(N:Nat, Len:Nat))))
 		if Len:Nat ==Bool numBitsPerByte .
