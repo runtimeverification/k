@@ -1,3 +1,4 @@
+require basic-kernelc-semantics
 kmod KERNELC-RACE-DETECTION is  including  BASIC-KERNELC-SEMANTICS
   syntax CellLabel ::= raceDetected
   configuration <T> <threads> <thread*> < k ? > .K </ k ? > < race ? > .K </ race ? > <env> .Map </env> <id> 0 </id> </thread*> 

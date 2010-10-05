@@ -1,4 +1,4 @@
-
+require ../basic-kernelc-semantics
 kmod STANDARD-MALLOC-SEMANTICS is including BASIC-KERNELC-SEMANTICS  
   rule initialLoc => 1 [structural]
   rule initial => 0 [structural] 

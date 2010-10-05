@@ -1,4 +1,5 @@
-
+require ../../k-prelude
+require kernelc-syntax
 kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION 
   syntax Val ::= Int | void | & Id
   syntax Exp ::= Val 

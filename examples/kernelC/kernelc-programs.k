@@ -1,3 +1,4 @@
+require kernelc-syntax
 kmod KERNELC-PROGRAMS is including KERNELC-SYNTAX 
   syntax Pgm ::= pSum | pCollatz | pBufferOverflow | pSimpTest  | pStrErr | pStrTest
                | pAllocateBadPrint | pAllocatePrintReversePrintFree | pAllocatePrintFree
