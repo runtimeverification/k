@@ -86,8 +86,10 @@ mod COMMON-SEMANTICS-READING is
 		
 	eq concretize(structType(S:Id), dataList(L:List{K})) = tv(L:List{K}, structType(S:Id)) .
 	eq concretize(unionType(S:Id), dataList(L:List{K})) = tv(L:List{K}, unionType(S:Id)) .
-		
-		
+
+	---  -13 == 1110011
+	---   51 == 0110011
+	---  115 == 1110011
 	--- FIXME assuming bytes?
 	op joinIntegerBytes : Type List{K} K -> K .
 	eq joinIntegerBytes(T:Type, L:List{K}) = joinIntegerBytes(T:Type, L:List{K}, piece(0, 0)) .
@@ -225,18 +227,25 @@ mod COMMON-SEMANTICS-WRITING is
 		--- orBool notBool(isByteLoc(Loc:Nat))
 		--- : KSentence [metadata "structural"] .
 		
-	--- op justBits : Int Type -> Value .
-	--- ceq justBits(I:Int, ?) = I:Int
-		--- if I:Int >=Int 0 .
+	op justBits : Int Type -> Value .
+	op justBits-aux : Int Type -> Value .
+	ceq justBits(I:Int, ?) = I:Int
+		if I:Int >=Int 0 .
+		
+	ceq justBits(I:Int, T:Type) = justBits-aux(I:Int, T:Type)
+		if I:Int <Int 0 .
+	ceq justBits-aux(I:Int, T:Type) = justBits-aux((I:Int +Int max(T:Type) +Int 1), T:Type)
+		if I:Int <Int 0 .
+	eq justBits-aux(N:Nat, bitfieldType(T:Type, sNat(Len:Nat))) = N:Nat +Nat (1 <<Nat Len:Nat) .
 	
-	--- mb rule
-		--- < k > write(Loc:Nat, tv(I:Int, T:Type), bitSize:Nat)
-			--- => write(Loc:Nat, tv(justBits(I:Int, T:Type), T:Type), bitSize:Nat)
-		--- ...</ k >
-		--- if (bitSize:Nat %Nat numBitsPerByte =/=Bool 0
-		--- orBool notBool(isByteLoc(Loc:Nat)))
-		--- andBool I:Int <Int 0
-		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > write(Loc:Nat, tv(I:Int, T:Type), bitSize:Nat)
+			=> write(Loc:Nat, tv(justBits(I:Int, T:Type), T:Type), bitSize:Nat)
+		...</ k >
+		if (bitSize:Nat %Nat numBitsPerByte =/=Bool 0
+		orBool notBool(isByteLoc(Loc:Nat)))
+		andBool I:Int <Int 0
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > write(Loc:Nat, tv(N:Nat, T:Type), bitSize:Nat)

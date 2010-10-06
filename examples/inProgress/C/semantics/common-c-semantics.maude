@@ -545,7 +545,8 @@ mod COMMON-PARAMETER-BINDING is
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
 			~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
-			~> bind(L:List{C}, P:List{Type}) ...</ k > 
+			~> bind(L:List{C}, P:List{Type}) 
+		...</ k > 
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		--- if isTypeCompatible(T:Type, T':Type)
 		if notBool hasArrayType(T:Type)

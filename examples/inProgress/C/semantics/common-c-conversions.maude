@@ -135,7 +135,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		: KSentence [metadata "structural"] .
 	mb rule
 		promote(tv(V:BaseValue, bitfieldType(T:Type, Len:Nat))) => tv(V:BaseValue, int)
-		if     T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int
+		if     (T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int)
 		andBool min(int) <=Int min(bitfieldType(T:Type, Len:Nat))
 		andBool max(int) >=Int max(bitfieldType(T:Type, Len:Nat))
 		: KSentence [metadata "structural"] .
@@ -151,10 +151,10 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		: KSentence [metadata "structural"] .
 	mb rule
 		promote(tv(V:BaseValue, bitfieldType(T:Type, Len:Nat))) => cast(unsigned-int, tv(V:BaseValue, T:Type))
-		if     T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int
+		if     (T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int)
 		andBool notBool (
-			min(int) <=Int min(bitfieldType(T:Type, Len:Nat)) 
-			andBool max(int) >=Int max(bitfieldType(T:Type, Len:Nat))		
+			min(int) <=Int min(bitfieldType(T:Type, Len:Nat))
+			andBool max(int) >=Int max(bitfieldType(T:Type, Len:Nat))	
 		)
 		: KSentence [metadata "structural"] .
 	
@@ -536,17 +536,20 @@ mod COMMON-C-CONVERSIONS is
 	mb rule interpret-aux(T:Type, I:Int) => tv(I:Int, T:Type)
 		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
 		andBool hasIntegerType(T:Type)
+		--- andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		interpret-aux(T:Type, I:Int) => interpret-aux(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))
 		if I:Int >Int max(T:Type)
 		andBool hasIntegerType(T:Type)
 		andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
+		--- andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 		
 	mb rule arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type)
 		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
 		andBool hasIntegerType(T:Type)
+		--- andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 	
 	mb rule arithInterpret(bignum, I:Int) => tv(I:Int, bignum)
