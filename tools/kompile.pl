@@ -244,7 +244,7 @@ my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
 my $k_prelude = File::Spec->catfile(File::Spec->catfile($k_tools_dir,".."),"k-prelude");
 my $k_nice_pdf = File::Spec->catfile($k_tools_dir, "nice-pdf.sh");
 
-my @kmaude_keywords = qw(context rule macro eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
+my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 my $comment = join("|", (
