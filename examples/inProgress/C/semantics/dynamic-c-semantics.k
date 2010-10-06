@@ -21,12 +21,19 @@ kmod DYNAMIC-C-SEMANTICS is
 --- — The parameters argc and argv and the strings pointed to by the argv array shall
 --- be modifiable by the program, and retain their last-stored values between program
 --- startup and program termination.	
-	op incomingArgumentArray : -> Id [ctor]
+	--- op #incomingArgumentArray : -> Id [ctor]
 	op incomingArguments : List{K} -> K
 	op incomingArguments-aux : List{K} Nat -> K
-	***( eq incomingArguments(L:List{K}) = incomingArguments-aux(L:List{K}, 0) .
-	eq incomingArguments-aux((E:Expression,, L:List{K}), N:Nat) = ((incomingArgumentArray[N:Nat] := Cast(Pointer(char), E:Expression) ;) ~> incomingArguments-aux(L:List{K}, sNat(N:Nat))) .
-	eq incomingArguments-aux(.List{K}, N:Nat) = (incomingArgumentArray[N:Nat] := Cast(Pointer(char), NULL) ;) . ***)
+	
+	eq incomingArguments(L:List{K}) = incomingArguments-aux(L:List{K}, 0)
+	eq incomingArguments-aux((S:String,, L:List{K}), N:Nat) 
+		= (Identifier("#incomingArgumentsArray")[N:Nat] := StringLiteral(S:String))
+			~> discard
+			~> incomingArguments-aux(L:List{K}, sNat(N:Nat))
+	eq incomingArguments-aux(.List{K}, N:Nat) 
+		= (Identifier("#incomingArgumentsArray")[N:Nat] := NullPointer)
+			~> discard
+
 ---C99 5.1.2.2.1:1
 --- The function called at program startup is named main. The implementation declares no
 --- prototype for this function. It shall be defined with a return type of int and with no
@@ -92,17 +99,20 @@ kmod DYNAMIC-C-SEMANTICS is
 	< functionTranslationUnits >... Tu:K |-> Map((? Identifier("main") |-> Tu:K)) ...</ functionTranslationUnits >
 	< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 	
-	--- < genv >... Tu:K |-> Map(? (Identifier("main") |-> )) ...</ genv> 
-	
-	--- eq callMain(functionType(int, ?), N:Nat, X:Id) = Call(Identifier("main"), Nil)
-	--- eq callMain(functionType(int, L':List{Type}), N:Nat, X:Id) = Call(Identifier("main"), Nil)
-	
 	--- FIXME i think these are slightly different
+	--- fixme void isn't supposed to have a name
+	--- fixme figure out type of string
 	eq callMain-aux(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
 	eq callMain-aux(functionType(int, Nil), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	eq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(incompleteArrayType(pointerType(signed-char)), ?))), N:Nat, X:Id)
+		= Call(Identifier("main"), N:Nat :: X:Id)
+		
+***(
+('callMain-aux).KProperLabel(('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("argc")(.List{K})),,('typedDeclaration).KResultLabel(('incompleteArrayType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K}))),,Id Identifier("argv")(.List{K})))),,BaseValue 1(.List{K}),,Id Identifier("#incomingArgumentsArray")(.List{K}))
+***)
+	op syntaxNat : Nat -> K
+	eq syntaxNat(N:Nat) = Constant(IntLiteral(NoSuffix(DecimalConstant(N:Nat))))
 	
-	
-	--- typedDeclaration(void, ?)
 	eq eval(K:K) = eval(K:K, .List{K}, "")
 	eq eval(Program(P:List{C}), L:List{K}, Input:String) = 
 		< T >
@@ -110,10 +120,11 @@ kmod DYNAMIC-C-SEMANTICS is
 				< thread >
 					< control >
 						< k > listToK(P:List{C})
+							~> DeclarationDefinition(InitNameGroup(Specifier(Char), (InitName(AttributeWrapper(NameLoc(Name(Identifier("#incomingArgumentsArray"), AttributeWrapper(PointerType(AttributeWrapper(ArrayType(JustBase, syntaxNat(sNat(lengthList{K} L:List{K}))), Nil)), Nil)), UnknownCabsLoc), Nil), NoInit))))
 							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
-							--- ~> incomingArguments(L:List{K})
-							~> resolveReferences
-							~> callMain(lengthList{K}(L:List{K}), incomingArgumentArray)
+							~> resolveReferences							
+							~> incomingArguments(L:List{K})
+							~> callMain(lengthList{K}(L:List{K}), Identifier("#incomingArgumentsArray"))
 						</ k >
 							--- Call(Identifier("main"), (Nil
 								--- (Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
