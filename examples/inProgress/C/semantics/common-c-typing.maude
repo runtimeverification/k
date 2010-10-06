@@ -743,6 +743,9 @@ mod COMMON-C-TYPING is
 	mb [type-deref-type]: rule
 		< type > *(pointerType(T:Type)) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
+	mb [type-deref-type]: rule
+		< type > *(arrayType(T:Type, ?)) => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
 	--- mb [type-deref-array]: rule
 		--- < type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
 		--- : KSentence [metadata "structural"] .

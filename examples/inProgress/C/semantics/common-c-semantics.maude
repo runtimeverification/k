@@ -278,7 +278,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op extractField : List{K} Type Id -> K .
 	op allocString : Nat String -> K .
 	--- op unknownRange : Nat Nat Nat -> List{K} .
-	op loopMarked : -> Statement .
 	op popLoop : -> K .
 	--- op giveGlobalType : Type K -> K .
 	--- op giveLocalType : Type K -> K .

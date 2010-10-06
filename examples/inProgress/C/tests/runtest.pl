@@ -88,7 +88,7 @@ sub performTest {
 	
 	# hack
 	if ($testSuite eq "gcc-torture"){
-		if (($kccRunRetval != 0) || ($kccRunOutput ne "")) {
+		if ($kccRunRetval != 0) {
 			my $msg = "";
 			my $encodedOut = HTML::Entities::encode_entities($kccRunOutput);
 			$msg .= "kcc retval=$kccRunRetval\n";

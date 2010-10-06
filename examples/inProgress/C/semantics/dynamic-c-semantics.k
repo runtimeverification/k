@@ -104,8 +104,12 @@ kmod DYNAMIC-C-SEMANTICS is
 	--- fixme figure out type of string
 	eq callMain-aux(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
 	eq callMain-aux(functionType(int, Nil), N:Nat, X:Id) = Call(Identifier("main"), Nil)
-	eq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(incompleteArrayType(pointerType(signed-char)), ?))), N:Nat, X:Id)
+	ceq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(incompleteArrayType(pointerType(T:Type)), ?))), N:Nat, X:Id)
 		= Call(Identifier("main"), N:Nat :: X:Id)
+		if T:Type ==Bool char
+	ceq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(pointerType(pointerType(T:Type)), ?))), N:Nat, X:Id)
+		= Call(Identifier("main"), N:Nat :: X:Id)
+		if T:Type ==Bool char
 		
 ***(
 ('callMain-aux).KProperLabel(('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("argc")(.List{K})),,('typedDeclaration).KResultLabel(('incompleteArrayType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K}))),,Id Identifier("argv")(.List{K})))),,BaseValue 1(.List{K}),,Id Identifier("#incomingArgumentsArray")(.List{K}))

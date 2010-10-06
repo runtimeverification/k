@@ -1,5 +1,10 @@
- mod COMMON-SEMANTICS-IF-THEN is
+mod COMMON-SEMANTICS-STATEMENTS-INCLUDE is
 	including COMMON-INCLUDE .
+	op loopMarked : -> Statement .
+endm 
+ 
+mod COMMON-SEMANTICS-IF-THEN is
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	--- fixme need to represent null with 0
 	--- mb [if-then-true]: rule
@@ -31,7 +36,7 @@
 endm
 
 mod COMMON-SEMANTICS-WHILE is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	mb [while-mark]: rule
 		< k > While(B:Expression, S:Statement) ~> K:K
@@ -47,7 +52,7 @@ mod COMMON-SEMANTICS-WHILE is
 endm
 
 mod COMMON-SEMANTICS-DO-WHILE is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	mb [do-while-mark]: rule
 		< k > DoWhile(B:Expression, S:Statement) ~> K:K
@@ -63,7 +68,7 @@ mod COMMON-SEMANTICS-DO-WHILE is
 endm
 
 mod COMMON-SEMANTICS-FOR is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	eq ForClauseDeclaration(K:K) = K:K .
 	eq ForClauseExpression(K:K) = K:K ~> discard .
@@ -82,7 +87,7 @@ mod COMMON-SEMANTICS-FOR is
 endm
 
 mod COMMON-SEMANTICS-SWITCH is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	--- --- fixme shouldn't there be sequence points here?
 	--- mb rule
@@ -117,7 +122,7 @@ mod COMMON-SEMANTICS-SWITCH is
 endm
 
 mod COMMON-SEMANTICS-GOTO is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	--- mb context 'calculateGotoMap(?,, ('case`(_`)_:_(?:K,,`[HOLE`]:K,, ?) ~> ?),, ?,, ?) : KSentence .
 	
@@ -216,7 +221,7 @@ mod COMMON-SEMANTICS-GOTO is
 endm
 
 mod COMMON-SEMANTICS-RETURN is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	--- fixme can be combined into one cleaning rule
 	mb [return-value-clean-local]: rule 
@@ -252,7 +257,7 @@ mod COMMON-SEMANTICS-RETURN is
 endm
 
 mod COMMON-SEMANTICS-BLOCKS is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	mb rule BlockStatement(Block:K) => pushBlock ~> Block:K ~> popBlock : KSentence .
 	
@@ -282,7 +287,7 @@ mod COMMON-SEMANTICS-BLOCKS is
 endm
 
 mod COMMON-C-STATEMENTS is
-	including COMMON-INCLUDE .
+	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	including COMMON-SEMANTICS-IF-THEN .
 	including COMMON-SEMANTICS-FOR .
 	including COMMON-SEMANTICS-WHILE .
@@ -316,11 +321,17 @@ mod COMMON-C-STATEMENTS is
 		: KSentence [metadata "computational rule"] . --- nondet
 	
 	--- --- fixme not sure about this, isn't it possible for K:K to grab greedily?
-	--- mb [continue]: rule
-		--- < k > [continue ; ~> K:K => continue ;] ...</ k >
-		--- if K:K =/=Bool loopMarked
-		--- : KSentence [metadata "structural"] . --- nondet
-	--- mb [continue-done]: rule
-		--- < k > [continue ; => .K] ~> loopMarked ...</ k >
-		--- : KSentence [metadata "structural"] . --- nondet
+	mb [continue]: rule
+		--- < k > Continue ~> K:K => Continue ...</ k >
+		< k > Continue ~> ((L:KLabel)(?) => .) ...</ k >
+		if L:KLabel =/=Bool 'loopMarked
+		--- andBool K:K =/=Bool (.).K
+		: KSentence [metadata "structural"] . --- nondet
+	mb [continue-done]: rule
+		< k > (Continue => Post:K ~> discard) ~> loopMarked ~> For(?, ?, Post:K, ?) ...</ k >
+		: KSentence [metadata "structural"] . --- nondet
+	mb [continue-done]: rule
+		< k > (Continue => .) ~> loopMarked ~> L:KLabel(?) ...</ k >
+		if L:KLabel =/=Bool 'For
+		: KSentence [metadata "structural"] . --- nondet
 endm
