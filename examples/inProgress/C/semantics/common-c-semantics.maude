@@ -102,7 +102,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op pushBlock : -> K .
 	
 	op value : K -> K .
-	eq value(tv(V:K, ?)) = V:K .
+	eq value(tv(V:List{K}, ?)) = V:List{K} .
+	
+	op type : K -> Type .
+	eq type(tv(?, T:Type)) = T:Type .
 	
 	op allocateType : Nat Type -> K .
 	op allocateTypeIfAbsent : Nat Type -> K .
@@ -136,6 +139,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	ops unsigned-short-int unsigned-int unsigned-long-int unsigned-long-long-int : -> BaseType .
 	op no-type : -> BaseType .
 	
+	
 	--- Composite types
 	op enumType : Id -> BaseType [ctor] .
 	op arrayType : Type Nat -> Type [ctor] .
@@ -150,9 +154,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op unqualifyType : Type -> Type .
 	
-	--- these aren't real types
+	--- these aren't real types, but are values that can appear in type contexts
 	op typedefType : Id Type -> Type [ctor] .
 	op preFunctionType : Type -> Type .
+	op variadic : -> Type .
 	--- op typedefType : Type -> Type [ctor] .
 	
 	--- sort State .
@@ -524,27 +529,33 @@ mod COMMON-PARAMETER-BINDING is
 
 	--- empty binding
 	--- fixme not really a sequence point
+	
+	op bind-aux : Nat List{C} List{Type} -> K .
+	mb rule
+		< k > bind(L:List{C}, L':List{Type}) => bind-aux(NullPointer, L:List{C}, L':List{Type}) ...</ k > 
+		: KSentence [metadata "structural"] .
+	
 	mb [bind-empty]: rule
-		< k > bind(Nil, typedDeclaration(void, ?)) => sequencePoint ...</ k > 
+		< k > bind-aux(?, Nil, typedDeclaration(void, ?)) => sequencePoint ...</ k > 
 		: KSentence [metadata "structural"] .
 	mb [bind-empty]: rule
-		< k > bind(Nil, Nil) => sequencePoint ...</ k > 
+		< k > bind-aux(?, Nil, Nil) => sequencePoint ...</ k > 
 		: KSentence [metadata "structural"] .
 	
 	mb [bind-coerce-array]: rule
-		bind(L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
+		bind-aux(?, L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
 		: KSentence [metadata "structural"] .
 	mb [bind-coerce-incompleteArray]: rule
-		bind(L:List{C}, (?:List{Type} :: typedDeclaration((incompleteArrayType(T:Type) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
+		bind-aux(?, L:List{C}, (?:List{Type} :: typedDeclaration((incompleteArrayType(T:Type) => pointerType(T:Type)), X:Id) :: ?:List{Type}))
 		: KSentence [metadata "structural"] .
 		
 	mb [bind-one]: rule
-		< k > true ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+		< k > true ~> bind-aux(?, (tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 			=> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
 			~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
-			~> bind(L:List{C}, P:List{Type}) 
+			~> bind-aux(Loc:Nat, L:List{C}, P:List{Type}) 
 		...</ k > 
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		--- if isTypeCompatible(T:Type, T':Type)
@@ -552,53 +563,67 @@ mod COMMON-PARAMETER-BINDING is
 		: KSentence [metadata "structural"] .
 		
 	mb [bind-one]: rule
-		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind((tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
+		< k > (. => isTypeCompatible(T:Type, T':Type)) ~> bind-aux(?, (tv(V:List{K}, T':Type) :: L:List{C}), (typedDeclaration(T:Type, X:Id) :: P:List{Type}))
 		...</ k > 
 		: KSentence [metadata "structural"] .
-		
-	--- op bindVariadic : K List{KResult} -> K .
-	--- op bindVariadic-pre : K List{K} -> K .
-	--- --- the idea here is that there should have been a previous argument, so we can use its address to append all of the variadic arguments
-	--- op promoteList : List{K} -> List{K} .
-	--- ceq promoteList((tv(V:BaseValue, T:Type),, L:List{K})) = (promote(tv(V:BaseValue, T:Type)),, promoteList(L:List{K}))
-		--- if (rank(T:Type) <Int rank(int) andBool hasIntegerType(T:Type)) 
-		--- orBool T:Type ==Bool float .
-	--- ceq promoteList((tv(V:BaseValue, T:Type),, L:List{K})) = (tv(V:BaseValue, T:Type),, promoteList(L:List{K}))
-		--- if (notBool(hasIntegerType(T:Type)) orBool rank(T:Type) >=Int rank(int))
-		--- orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
-	--- eq promoteList((atv(LV:List{K}, T:Type),, L:List{K})) = (atv(LV:List{K}, T:Type),, promoteList(L:List{K})) .
-
-	--- eq promoteList(.List{K}) = .List{K} .
-	--- --- fixme report bug: this context doesn't work
-	--- --- op bindVariadic : Nat List{K} -> K .
-	--- ---mb context bindVariadic(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
-	--- --- mb context bindVariadic(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
 	
-	--- mb [bind-variadic-start]: rule
-		--- < k > [bind(L:List{KResult}, typedDeclaration(no-type, ...)) => bindVariadic-pre(loc(Block:Nat, Offset:Nat +Nat Len:Nat), promoteList(L:List{KResult}))] ...</ k > 
-		--- < mem >... Block:Nat |-> memblock(Len:Nat, ?) ...</ mem > 
-		--- < nextLoc > loc(sNat(Block:Nat), Offset:Nat) </ nextLoc >
+	op append : Nat Nat Value -> K .	
+	mb [append-existing]: rule
+		< k > append(sym(Block:Nat) +Nat 0, Len:Nat, V:Value) 
+			=> write(sym(Block:Nat) +Nat OldLen:Nat, V:Value)
+		...</ k >
+		< mem >... Block:Nat |-> memblock((OldLen:Nat => OldLen:Nat +Nat Len:Nat), M:Map) ...</ mem >
+		: KSentence [metadata "structural"] .
+	--- mb [append-new]: rule
+		--- < k > append(sym(Block:Nat, Offset:Nat), Len:Nat, V:Value) 
+			--- => storeNew V:Value atLoc loc(Block:Nat, Offset:Nat) 
+		--- ...</ k >
+		--- < mem > M:Map </ mem >
+		--- if notBool($hasMapping(M:Map, Block:Nat))
 		--- : KSentence [metadata "structural"] .
 		
-	--- mb [bind-variadic-start]: rule
-		--- < k > [bindVariadic-pre(N:Nat, L:List{KResult}) => bindVariadic(N:Nat, L:List{KResult})] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb [bind-variadic]: rule
-		--- < k > [bindVariadic(Loc:Nat, (V:Value,, L:List{KResult}))
-			--- => sizeof(V:Value) ~> bindVariadic(Loc:Nat, (V:Value,, L:List{KResult}))
-			--- ] ...</ k > 
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb [bind-variadic-done]: rule
-		--- < k > [bindVariadic(?, .List{K}) => sequencePoint] ...</ k > 
-		--- : KSentence [metadata "structural"] .
+	op bindVariadic : K List{KResult} -> K .
+	op bindVariadic-pre : K List{K} -> K .
+	--- the idea here is that there should have been a previous argument, so we can use its address to append all of the variadic arguments
+	op promoteList : List{C} -> List{K} .
+	ceq promoteList((tv(V:List{K}, T:Type) :: L:List{C})) = (promote(tv(V:List{K}, T:Type)),, promoteList(L:List{C}))
+		if (rank(T:Type) <Int rank(int) andBool hasIntegerType(T:Type)) 
+		orBool T:Type ==Bool float .
+	ceq promoteList((tv(V:List{K}, T:Type) :: L:List{C})) = (tv(V:List{K}, T:Type),, promoteList(L:List{C}))
+		if (notBool(hasIntegerType(T:Type)) orBool rank(T:Type) >=Int rank(int))
+		orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
+	--- eq promoteList((atv(LV:List{K}, T:Type) :: L:List{K})) = (atv(LV:List{K}, T:Type),, promoteList(L:List{K})) .
 
-	--- mb [bind-variadic-withSize]: rule
-		--- < k > [tv(Len:Nat, ?) ~> bindVariadic(loc(Block:Nat, Offset:Nat), (V:Value,, L:List{KResult}))
-			--- => append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) ~> bindVariadic(loc(Block:Nat, Offset:Nat +Nat Len:Nat), L:List{KResult})
-			--- ] ...</ k > 
-		--- : KSentence [metadata "structural"] .
+	eq promoteList(Nil) = .List{K} .
+	--- fixme report bug: this context doesn't work
+	--- op bindVariadic : Nat List{K} -> K .
+	---mb context bindVariadic(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
+	--- mb context bindVariadic(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
+	
+	mb [bind-variadic-start]: rule
+		< k > bind-aux(Loc:Nat, L:List{C}, variadic)
+			=> bindVariadic-pre(Loc:Nat, promoteList(L:List{C}))
+		...</ k >
+		--- < mem >... Block:Nat |-> memblock(Len:Nat, ?) ...</ mem >
+		: KSentence [metadata "structural"] .
+		
+	mb [bind-variadic-start]: rule
+		< k > bindVariadic-pre(Loc:Nat, L:List{KResult}) => bindVariadic(Loc:Nat, L:List{KResult}) ...</ k > 
+		: KSentence [metadata "structural"] .
+	
+	mb [bind-variadic]: rule
+		< k > (. => bitSizeofType(type(V:Value))) ~> bindVariadic(?, (V:Value,, ?:List{KResult})) ...</ k > 
+		: KSentence [metadata "structural"] .
+	
+	mb [bind-variadic-done]: rule
+		< k > bindVariadic(?, .List{K}) => sequencePoint ...</ k > 
+		: KSentence [metadata "structural"] .
+
+	mb [bind-variadic-withSize]: rule
+		< k > (tv(Len:Nat, ?) => append(Loc:Nat, Len:Nat /Nat numBitsPerByte, V:Value)) 
+			~> bindVariadic(Loc:Nat, ((V:Value => .List{K}),, L:List{KResult}))
+		...</ k > 
+		: KSentence [metadata "structural"] .
 		
 	--- --- mb [bind-variadic]: rule
 		--- --- < k > [bind((tv(V:BaseValue, T:Type),, L:List{KResult}), typedDeclaration(no-type, ...))

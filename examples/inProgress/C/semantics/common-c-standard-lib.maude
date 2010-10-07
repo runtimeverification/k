@@ -13,7 +13,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < k > [debug => builtin(debug)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- mb [debug]: rule
-		--- < k > [application(builtin(debug), ?) => skipval] ...</ k >
+		--- < k > [Call(builtin(debug), ?) => skipval] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [setjmp-is-value]: rule
@@ -26,7 +26,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- mb [setjmp]: rule
 		--- < thread > 
 			--- B:Bag
-			--- < k > [application(builtin(setjmp), tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?)))) => tv(0, int)] ~> K:K </ k >
+			--- < k > [Call(builtin(setjmp), tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?)))) => tv(0, int)] ~> K:K </ k >
 		--- </ thread >
 		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[Bag(B:Bag < k > K:K </ k >) / Offset:Nat]]) ...</ mem >
 	--- : KSentence [metadata "structural"] .
@@ -38,7 +38,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- mb [longjmp]: rule
 		--- < thread >
 		--- [?
-		--- < k > application(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))):: tv(I:Int, int))) ~> ? </ k >
+		--- < k > Call(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))):: tv(I:Int, int))) ~> ? </ k >
 		--- => B:Bag
 		--- < k > tv(if I:Int ==Bool 0 then 1 else I:Int fi, int) ~> K:K </ k >
 		--- ]
@@ -56,13 +56,13 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < thread > 
 			--- C:Bag 
 			--- < callStack > ?:List </ callStack >
-			--- < k > [application(builtin(spawn), (Fun:Value :: L:List{KResult})) => skipval] ...</ k > 
+			--- < k > [Call(builtin(spawn), (Fun:Value :: L:List{KResult})) => skipval] ...</ k > 
 		--- </ thread >
 		--- [.Bag => 
 		--- < thread > 
 			--- C:Bag
 			--- < callStack > .List </ callStack > 
-			--- < k > application(Fun:Value, L:List{KResult}) ~> discard </ k > 
+			--- < k > Call(Fun:Value, L:List{KResult}) ~> discard </ k > 
 		--- </ thread >]
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
@@ -70,13 +70,13 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < k > [lock => builtin(lock)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- mb [lock]: rule
-		--- < k > [application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		--- < k > [Call(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
 		--- < busy > Busy:Bag [.Bag => BagItem(Loc:Nat)] </ busy >
 		--- < holds >... [.Map => Loc:Nat |-> 0] ...</ holds >
 		--- if notBool Loc:Nat in Busy:Bag
 	--- : KSentence [metadata "computational rule"] . --- nondet
 	--- mb [lock]: rule
-		--- < k > [application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		--- < k > [Call(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
 		--- < holds >... Loc:Nat |-> [N:Nat => sNat(N:Nat)] ...</ holds >
 	--- : KSentence [metadata "computational rule"] . --- nondet
 	--- --------------------------------------------
@@ -84,12 +84,12 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- < k > [unlock => builtin(unlock)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- mb [unlock]: rule
-		--- < k > [application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		--- < k > [Call(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
 		--- < busy >...[BagItem(Loc:Nat) => .Bag] ...</ busy >
 		--- < holds >... [Loc:Nat |-> 0 => .Map] ...</ holds >
 	--- : KSentence [metadata "structural"] .
 	--- mb [unlock]: rule
-		--- < k > [application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		--- < k > [Call(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
 		--- < holds >... Loc:Nat |-> [sNat(N:Nat) => N:Nat] ...</ holds >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
@@ -99,7 +99,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- mb [sync]: rule
 		--- < threads >
 			--- < thread >...
-				--- < k > [application(builtin(sync), .List{K}) => skipval] ...</ k > 
+				--- < k > [Call(builtin(sync), .List{K}) => skipval] ...</ k > 
 			--- ...</ thread >
 		--- </ threads >
 	--- : KSentence [metadata "structural"] .
@@ -118,85 +118,85 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- --- < k > [abort => builtin(abort)] ...</ k >
 	--- --- : KSentence .
 	--- --- mb [abort]: rule
-		--- --- < k > [application(builtin(abort), .List{K}) ~> ? => tv(134, int)] </ k >
+		--- --- < k > [Call(builtin(abort), .List{K}) ~> ? => tv(134, int)] </ k >
 	--- --- : KSentence .
-	--- --------------------------------------------
-	--- mb [sqrt-is-value]: rule
-		--- < k > [sqrt => builtin(sqrt)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [sqrt]: rule
-		--- < k > [application(builtin(sqrt), tv(F:Float, double)) => tv(sqrtFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [log-is-value]: rule
-		--- < k > [log => builtin(log)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [log]: rule
-		--- < k > [application(builtin(log), tv(F:Float, double)) => tv(logFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [exp-is-value]: rule
-		--- < k > [exp => builtin(exp)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [exp]: rule
-		--- < k > [application(builtin(exp), tv(F:Float, double)) => tv(expFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [atan-is-value]: rule
-		--- < k > [atan => builtin(atan)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [atan]: rule
-		--- < k > [application(builtin(atan), tv(F:Float, double)) => tv(atanFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [asin-is-value]: rule
-		--- < k > [asin => builtin(asin)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [asin]: rule
-		--- < k > [application(builtin(asin), tv(F:Float, double)) => tv(asinFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [atan2-is-value]: rule
-		--- < k > [atan2 => builtin(atan2)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [atan2]: rule
-		--- < k > [application(builtin(atan2), (tv(F:Float, double) :: tv(F':Float, double))) => tv(atanFloat(F:Float, F':Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [tan-is-value]: rule
-		--- < k > [tan => builtin(tan)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [tan]: rule
-		--- < k > [application(builtin(tan), tv(F:Float, double)) => tv(tanFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [floor-is-value]: rule
-		--- < k > [floor => builtin(floor)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --- mb [floor]: rule
-		--- --- < k > [application(builtin(floor), tv(F:Float, double)) => tv(floorFloat(F:Float), double)] ...</ k >
-	--- --- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [cos-is-value]: rule
-		--- < k > [cos => builtin(cos)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [cos]: rule
-		--- < k > [application(builtin(cos), tv(F:Float, double)) => tv(cosFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [fmod-is-value]: rule
-		--- < k > [fmod => builtin(fmod)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [fmod]: rule
-		--- < k > [application(builtin(fmod), (tv(F:Float, double) :: tv(F':Float, double))) => tv(F:Float %Float F':Float, double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [sin-is-value]: rule
-		--- < k > [sin => builtin(sin)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [sin]: rule
-		--- < k > [application(builtin(sin), tv(F:Float, double)) => tv(sinFloat(F:Float), double)] ...</ k >
-	--- : KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [sqrt-is-value]: rule
+		< k > Identifier("sqrt") => builtin(Identifier("sqrt")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [sqrt]: rule
+		< k > Call(builtin(Identifier("sqrt")), tv(F:Float, double)) => tv(sqrtFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [log-is-value]: rule
+		< k > Identifier("log") => builtin(Identifier("log")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [log]: rule
+		< k > Call(builtin(Identifier("log")), tv(F:Float, double)) => tv(logFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [exp-is-value]: rule
+		< k > Identifier("exp") => builtin(Identifier("exp")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [exp]: rule
+		< k > Call(builtin(Identifier("exp")), tv(F:Float, double)) => tv(expFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [atan-is-value]: rule
+		< k > Identifier("atan") => builtin(Identifier("atan")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [atan]: rule
+		< k > Call(builtin(Identifier("atan")), tv(F:Float, double)) => tv(atanFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [asin-is-value]: rule
+		< k > Identifier("asin") => builtin(Identifier("asin")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [asin]: rule
+		< k > Call(builtin(Identifier("asin")), tv(F:Float, double)) => tv(asinFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [atan2-is-value]: rule
+		< k > Identifier("atan2") => builtin(Identifier("atan2")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [atan2]: rule
+		< k > Call(builtin(Identifier("atan2")), (tv(F:Float, double) :: tv(F':Float, double))) => tv(atanFloat(F:Float, F':Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [tan-is-value]: rule
+		< k > Identifier("tan") => builtin(Identifier("tan")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [tan]: rule
+		< k > Call(builtin(Identifier("tan")), tv(F:Float, double)) => tv(tanFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [floor-is-value]: rule
+		< k > Identifier("floor") => builtin(Identifier("floor")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [floor]: rule
+		< k > Call(builtin(Identifier("floor")), tv(F:Float, double)) => tv(floorFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [cos-is-value]: rule
+		< k > Identifier("cos") => builtin(Identifier("cos")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [cos]: rule
+		< k > Call(builtin(Identifier("cos")), tv(F:Float, double)) => tv(cosFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [fmod-is-value]: rule
+		< k > Identifier("fmod") => builtin(Identifier("fmod")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [fmod]: rule
+		< k > Call(builtin(Identifier("fmod")), (tv(F:Float, double) :: tv(F':Float, double))) => tv(F:Float %Float F':Float, double) ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [sin-is-value]: rule
+		< k > Identifier("sin") => builtin(Identifier("sin")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [sin]: rule
+		< k > Call(builtin(Identifier("sin")), tv(F:Float, double)) => tv(sinFloat(F:Float), double) ...</ k >
+	: KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	mb [malloc-is-value]: rule
 		< k > Identifier("malloc") => builtin(Identifier("malloc")) ...</ k >
@@ -259,21 +259,24 @@ mod COMMON-C-STANDARD-LIBRARY is
 	mb [putchar]: rule
 		< k > Call(builtin(Identifier("putchar")), tv(N:Nat, ?)) => writeToFD(1, N:Nat) ~> tv(N:Nat, int) ...</ k >
 	: KSentence [metadata "structural"] .
-	--------------------------------------------
-	--- mb [fslPutc-is-value]: rule
-		--- < k > [fslPutc => builtin(fslPutc)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- --- fixme doesn't cast to int
-	--- mb [fslPutc]: rule
-		--- < k > [application(builtin(fslPutc), (tv(N:Nat, ?) :: tv(H:Nat, ?))) => writeToFD(H:Nat, N:Nat) ~> tv(N:Nat, int)] ...</ k >
-	--- : KSentence [metadata "structural"] .
+	-----------------------------------------
+	mb [fslPutc-is-value]: rule
+		< k > Identifier("fslPutc") => builtin(Identifier("fslPutc")) ...</ k >
+	: KSentence [metadata "structural"] .
+	--- fixme doesn't cast to int
+	mb [fslPutc]: rule
+		< k > Call(builtin(Identifier("fslPutc")), (tv(N:Nat, ?) :: tv(H:Nat, ?))) 
+			=> writeToFD(H:Nat, N:Nat) 
+			~> tv(N:Nat, int)
+		...</ k >
+	: KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [getchar-is-value]: rule
 		--- < k > [getchar => builtin(getchar)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --- fixme doesn't cast to int
 	--- mb [getchar]: rule
-		--- < k > [application(builtin(getchar), .List{K}) => readFromFD(0)] ...</ k >
+		--- < k > [Call(builtin(getchar), .List{K}) => readFromFD(0)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [fslFGetC-is-value]: rule
@@ -281,22 +284,22 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- : KSentence [metadata "structural"] .
 	--- --- fixme doesn't cast to int
 	--- mb [fslFGetC]: rule
-		--- < k > [application(builtin(fslFGetC), (tv(FD:Nat, ?) :: tv(Offset:Nat, ?))) => readFromFD(FD:Nat, Offset:Nat)] ...</ k >
+		--- < k > [Call(builtin(fslFGetC), (tv(FD:Nat, ?) :: tv(Offset:Nat, ?))) => readFromFD(FD:Nat, Offset:Nat)] ...</ k >
 	--- : KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- mb [fslCloseFile-is-value]: rule
-		--- < k > [fslCloseFile => builtin(fslCloseFile)] ...</ k >
-	--- : KSentence [metadata "structural"] .
-	--- mb [fslCloseFile]: rule
-		--- < k > [application(builtin(fslCloseFile), tv(FD:Nat, int)) => tv(0, int)] ...</ k >
-		--- < openFiles >... [FD:Nat |-> ? => .Map] ...</ openFiles >
-	--- : KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [fslCloseFile-is-value]: rule
+		< k > Identifier("fslCloseFile") => builtin(Identifier("fslCloseFile")) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [fslCloseFile]: rule
+		< k > Call(builtin(Identifier("fslCloseFile")), tv(FD:Nat, int)) => tv(0, int) ...</ k >
+		< openFiles >... FD:Nat |-> ? => (.).Map ...</ openFiles >
+	: KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [fslOpenFile-is-value]: rule
 		--- < k > [fslOpenFile => builtin(fslOpenFile)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- mb [fslOpenFile]: rule
-		--- < k > [application(builtin(fslOpenFile), (Loc:Value :: tv(FD:Nat, int))) 
+		--- < k > [Call(builtin(fslOpenFile), (Loc:Value :: tv(FD:Nat, int))) 
 		--- => fsl-open-file(getString(Loc:Value), FD:Nat)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	
@@ -343,13 +346,12 @@ mod COMMON-C-STANDARD-LIBRARY is
 	mb [lib-printf-start]: rule
 		< k > Call(builtin(Identifier("printf")), (tv(Loc:Nat, pointerType(?)) :: L:List{C})) => printf-aux(0, Loc:Nat, L:List{C}) ...</ k >
 	: KSentence [metadata "structural"] .
-	
-	--- --- op memLookupByte : Map Nat -> Nat .
-	--- --- eq memLookupByte((M:Map Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(N:Nat, 8)))), loc(Block:Nat, Offset:Nat)) = N:Nat .
-	--- --- eq memLookupByte(?, ?) = trueUnknown [owise] .
-	
+		
 	mb [lib-printf-string]: rule
-		< k > printf-string(Len:Nat, sym(Block:Nat) +Nat Offset:Nat) => writeToFD(1, N:Nat) ~> printf-string(sNat(Len:Nat), sym(Block:Nat) +Nat sNat(Offset:Nat)) ...</ k >
+		< k > printf-string(Len:Nat, sym(Block:Nat) +Nat Offset:Nat) 
+			=> writeToFD(1, N:Nat) 
+			~> printf-string(sNat(Len:Nat), sym(Block:Nat) +Nat sNat(Offset:Nat)) 
+		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(N:Nat, 8))) ...</ mem >
 		if N:Nat =/=Bool 0
 	: KSentence [metadata "structural"] .
@@ -359,7 +361,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(0, 8))) ...</ mem >
 	: KSentence [metadata "structural"] .
 	
-	--- ---fixme why do i have to have the 0--255 check?
+	---fixme why do i have to have the 0--255 check?
 	mb [lib-printf-normal]: rule
 		< k > printf-aux(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
 			=> writeToFD(1, N:Nat) ~> printf-aux(sNat(Len:Nat), sym(Block:Nat) +Nat sNat(Offset:Nat), L:List{C}) 
@@ -427,8 +429,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		if N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p")
 	: KSentence [metadata "structural"] .
 	
-	--- --- fixme might be messing things up elsewhere
-	--- eq Rat2String(loc(N:Nat, M:Nat), 16) = "loc(" +String rat2stringConversion(N:Nat, 16) +String ", " +String rat2stringConversion(M:Nat, 16) +String ")" .
+	--- fixme might be messing things up elsewhere
 	op pointerToString : Nat -> String .
 	eq pointerToString(sym(N:Nat) +Nat M:Nat) = "[sym(" +String Rat2String(N:Nat, 10) +String ") + " +String Rat2String(M:Nat, 10) +String "]" .
 	mb [lib-printf-%p]: rule
@@ -439,7 +440,6 @@ mod COMMON-C-STANDARD-LIBRARY is
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiString("p")
 	: KSentence [metadata "structural"] .
-	
 	
 	mb [lib-printf-%d]: rule
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(D:Int, ?) :: L:List{C})) 

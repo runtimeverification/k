@@ -269,6 +269,9 @@ mod COMMON-SEMANTICS-CAST is
 	including COMMON-INCLUDE .
 	
 	--- mb rule ['Cast(T:Type,, E:Expression) => cast(T:Type, E:Expression)] : KSentence [metadata "structural"] .
+	mb rule 
+		cast(void, ?) => skipval
+		: KSentence [metadata "structural"] .
 	
 	--- fixme just temporarily, until we handle qualifiers properly
 	mb rule

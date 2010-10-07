@@ -8,34 +8,37 @@ struct s {
 	int y;
 };
  
-void printargs(int arg1, ...) /* print all int type args, finishing with -1 */
-{
-  va_list ap;
-  int i;
- 
-  va_start(ap, arg1); 
-  for (i = arg1; i != -1; i = va_arg(ap, int))
-    printf("%d, ", i);
-  va_end(ap);
-  putchar('\n');
+void printargs(int arg1, ...) { /* print all int type args, finishing with -1 */
+	va_list ap;
+	int i;
+	printf("arg1 = %d\n", arg1);
+
+	va_start(ap, arg1); 
+	for (i = arg1; i != -1; i = va_arg(ap, int)) {
+		printf("%d, ", i);
+	}
+	va_end(ap);
+	putchar('\n');
 }
  
 
-char *vstrcat(const char *first, ...)
-{
+char *vstrcat(const char *first, ...) {
 	size_t len;
 	char *retbuf;
 	va_list argp;
 	char *p;
 
-	if(first == NULL)
+	if(first == NULL) {
+		printf("first == NULL\n");
 		return NULL;
+	}
 
 	len = strlen(first);
 	va_start(argp, first);
 
-	while((p = va_arg(argp, char *)) != NULL)
+	while((p = va_arg(argp, char *)) != NULL) {
 		len += strlen(p);
+	}
 
 	va_end(argp);
 	retbuf = malloc(len + 1);	/* +1 for trailing \0 */
@@ -46,8 +49,9 @@ char *vstrcat(const char *first, ...)
 	(void)strcpy(retbuf, first);
 	va_start(argp, first);		/* restart; 2nd scan */
 
-	while((p = va_arg(argp, char *)) != NULL)
+	while((p = va_arg(argp, char *)) != NULL) {
 		(void)strcat(retbuf, p);
+	}
 
 	va_end(argp);
 	return retbuf;
@@ -79,7 +83,7 @@ int main(void) {
 	printargs(1, -1);
 
 	char *str = vstrcat("Hello, ", "world!", "1", "23", "456", "789", (char *)NULL);
-	puts(str);
+	printf("%s\n", str);
 	
 	struct s mys;
 	mys.x = 100;

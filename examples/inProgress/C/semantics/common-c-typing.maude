@@ -239,6 +239,8 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		
 	--- FIXME what good is this?
 	eq BagItem(SpecTypedef) = (.).Bag .
+	--- fixme ignoring inlines since they shouldn't change the semantics?
+	eq BagItem(Inline) = (.).Bag .
 
 	mb rule 
 		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag)), (B:Bag => (.).Bag), ?, ?) ...</ k >
@@ -326,7 +328,6 @@ mod COMMON-C-TYPING is
 		< k > StructRef(X:Id) => structType(X:Id) ...</ k >
 		: KSentence .
 		
-	op variadic : -> Type .
 
 	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
 	
