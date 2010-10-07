@@ -459,7 +459,6 @@ mod COMMON-SEMANTICS-CAST is
 	--- needs to handle alignment
 	mb rule
 		< k > cast(pointerType(T:Type), tv(N:Nat, pointerType(?))) => tv(N:Nat, pointerType(T:Type)) ...</ k >
-		---if min(unsigned-int) <=Int I:Int andBool max(unsigned-int) >=Int I:Int
 		: KSentence [metadata "structural"] .
 				
 	--- mb rule

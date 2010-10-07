@@ -763,7 +763,7 @@ mod COMMON-INITIALIZATION is
 			next ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
 			=> ListItem(te(K:K . F':Id, T':Type)) ListItem(te(K:K, structType(S:Id)))
 		...</ currentSubObject >
-		< structs >... 
+		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(T':Type, F':Id) :: ? 
 		...</ structs > 
 		: KSentence [metadata "structural"] .
@@ -870,7 +870,7 @@ mod COMMON-INITIALIZATION is
 		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
 		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
 		--- if getKLabel(K':K) =/=Bool 'Constant
-		if isABaseType(T:Type) orBool hasPointerType(T:Type)
+		if isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type)
 		: KSentence .
 	mb rule
 		< k > fillInitializer(SingleInit(K:K)) => initializeSingleInit(K:K) ...</ k >

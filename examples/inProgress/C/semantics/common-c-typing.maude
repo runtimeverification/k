@@ -467,8 +467,20 @@ mod COMMON-C-TYPING is
 		= typedDeclaration(bitfieldType(T:Type, N':Nat), X:Id)
 		:: fillBitHoles(N:Nat +Nat N':Nat, L:List{Type})
 		if N':Nat =/=Bool 0 .
+		
+	ceq fillBitHoles(N:Nat, (typedDeclaration(bitfieldType(T:Type, N':Nat), ?) :: L:List{Type})) 
+		= typedDeclaration(bitfieldType(unsigned-int, absInt(numBitsPerByte -Int (N:Nat %Nat numBitsPerByte)) %Nat numBitsPerByte), #NoName)
+		:: fillBitHoles(N:Nat +Nat N':Nat, L:List{Type})
+		if N':Nat ==Bool 0 .
 	
 	eq fillBitHoles(N:Nat, Nil) = typedDeclaration(bitfieldType(unsigned-int, absInt(numBitsPerByte -Int (N:Nat %Nat numBitsPerByte)) %Nat numBitsPerByte), #NoName) .
+
+***(
+	fillBitHoles(16, (
+		('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 0(.List{K})),,Id Identifier("___missing_field_name")(.List{K}))
+		,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 4(.List{K})),,Id Identifier("___missing_field_name")(.List{K}))
+		,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K})))))
+***)
 	
 	--- fixme chould check for some struct contraints here
 	op incompleteToFlexibleArrayMember : List{Type} -> List{Type} .

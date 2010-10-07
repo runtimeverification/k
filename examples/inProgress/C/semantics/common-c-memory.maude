@@ -180,6 +180,12 @@ mod COMMON-SEMANTICS-WRITING is
 		< mem >... (.).Map => Block:Nat |-> memblock(Len:Nat, (.).Map) ...</ mem >
 		: KSentence [metadata "structural"] .
 		
+		
+	
+	--- problem is that we're not reading the bytes in the same order we're writing them
+	--- 0000 0000  0011 is turning into 0011 0000 0000 
+		
+		
 	op writeBytes : Nat K -> K [metadata "strict(2)"] .
 	op writeBitfield : Nat Type K -> K [metadata "strict(3)"] .
 	op isByteLoc : Nat -> Bool .

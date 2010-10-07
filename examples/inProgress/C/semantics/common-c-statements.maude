@@ -75,7 +75,7 @@ mod COMMON-SEMANTICS-FOR is
 	
 	mb [for-mark]: rule
 		< k > (For(Pre:K, Control:K, Post:K, S:Statement) ~> K:K
-			=> pushBlock ~> Pre:K ~> loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement) ~> popLoop) 
+			=> pushBlock ~> Pre:K ~> loopMarked ~> For(Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:Statement) ~> popLoop)
 		</ k >
 		< loopStack > . => ListItem((popBlock ~> K:K)) ...</ loopStack >
 		: KSentence [metadata "structural"] .
@@ -298,14 +298,11 @@ mod COMMON-C-STATEMENTS is
 	including COMMON-SEMANTICS-DO-WHILE .
 	
 	mb rule Nop => . : KSentence [metadata "structural"] .
-	--- mb rule [Block`(`) => .K] : KSentence [metadata "structural"] .
-	
-	--- --- replace sequencing with ~>
-	--- mb rule [S1:Statement S2:Statement => S1:Statement ~> S2:Statement] : KSentence [metadata "structural"] .
-		
-	--- --- skip labels
-	--- mb [skip-label]: rule < k > [L:Id : S:Statement => S:Statement] ...</ k > : KSentence [metadata "structural"] .
-	
+
+	--- skip labels
+	mb [skip-label]: 
+		rule < k > Label(L:Id, K:K) => K:K ...</ k >
+		: KSentence [metadata "structural"] .
 
 	--- dissolve expression statements that are finished evaluating
 	mb [expression-statement]: rule < k > Computation(K:K) => K:K ~> discard ~> sequencePoint ...</ k > : KSentence [metadata "structural"] .

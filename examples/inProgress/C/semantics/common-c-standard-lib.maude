@@ -99,69 +99,69 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- mb [sync]: rule
 		--- < threads >
 			--- < thread >...
-				--- < k > [Call(builtin(sync), .List{K}) => skipval] ...</ k > 
+				--- < k > [Call(builtin(sync), Nil) => skipval] ...</ k > 
 			--- ...</ thread >
 		--- </ threads >
 	--- : KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [exit-is-value]: rule
 		< k > Identifier("exit") => builtin(Identifier("exit")) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	mb [exit]: rule
 		< k > Call(builtin(Identifier("exit")), tv(I:Int, int)) ~> ? => tv(I:Int, int) </ k >
-	: KSentence [metadata "structural"] .
-	--- --------------------------------------------
-	--- --- mb [abort-is-debug]: rule
-		--- --- < k > [abort => debug] ...</ k >
-	--- --- : KSentence .
-	--- --- mb [abort-is-value]: rule
-		--- --- < k > [abort => builtin(abort)] ...</ k >
-	--- --- : KSentence .
-	--- --- mb [abort]: rule
-		--- --- < k > [Call(builtin(abort), .List{K}) ~> ? => tv(134, int)] </ k >
-	--- --- : KSentence .
+		: KSentence [metadata "structural"] .
+	--------------------------------------------
+	--- mb [abort-is-debug]: rule
+		--- < k > [abort => debug] ...</ k >
+	--- : KSentence .
+	mb [abort-is-value]: rule
+		< k > Identifier("abort") => builtin(Identifier("abort")) ...</ k >
+		: KSentence .
+	mb [abort]: rule
+		< k > Call(builtin(Identifier("abort")), Nil) ~> ? => tv(134, int) </ k >
+		: KSentence .
 	--------------------------------------------
 	mb [sqrt-is-value]: rule
 		< k > Identifier("sqrt") => builtin(Identifier("sqrt")) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	mb [sqrt]: rule
 		< k > Call(builtin(Identifier("sqrt")), tv(F:Float, double)) => tv(sqrtFloat(F:Float), double) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [log-is-value]: rule
 		< k > Identifier("log") => builtin(Identifier("log")) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	mb [log]: rule
 		< k > Call(builtin(Identifier("log")), tv(F:Float, double)) => tv(logFloat(F:Float), double) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [exp-is-value]: rule
 		< k > Identifier("exp") => builtin(Identifier("exp")) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	mb [exp]: rule
 		< k > Call(builtin(Identifier("exp")), tv(F:Float, double)) => tv(expFloat(F:Float), double) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [atan-is-value]: rule
 		< k > Identifier("atan") => builtin(Identifier("atan")) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	mb [atan]: rule
 		< k > Call(builtin(Identifier("atan")), tv(F:Float, double)) => tv(atanFloat(F:Float), double) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [asin-is-value]: rule
 		< k > Identifier("asin") => builtin(Identifier("asin")) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	mb [asin]: rule
 		< k > Call(builtin(Identifier("asin")), tv(F:Float, double)) => tv(asinFloat(F:Float), double) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [atan2-is-value]: rule
 		< k > Identifier("atan2") => builtin(Identifier("atan2")) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	mb [atan2]: rule
 		< k > Call(builtin(Identifier("atan2")), (tv(F:Float, double) :: tv(F':Float, double))) => tv(atanFloat(F:Float, F':Float), double) ...</ k >
-	: KSentence [metadata "structural"] .
+		: KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [tan-is-value]: rule
 		< k > Identifier("tan") => builtin(Identifier("tan")) ...</ k >
@@ -276,7 +276,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- : KSentence [metadata "structural"] .
 	--- --- fixme doesn't cast to int
 	--- mb [getchar]: rule
-		--- < k > [Call(builtin(getchar), .List{K}) => readFromFD(0)] ...</ k >
+		--- < k > [Call(builtin(getchar), Nil) => readFromFD(0)] ...</ k >
 	--- : KSentence [metadata "structural"] .
 	--- --------------------------------------------
 	--- mb [fslFGetC-is-value]: rule
