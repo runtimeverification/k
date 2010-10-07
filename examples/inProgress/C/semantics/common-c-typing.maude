@@ -55,12 +55,12 @@ endm
 mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	including COMMON-SEMANTICS-TYPE-INCLUDE .
 
-	--- mb [type-arrow-heat]: rule
-		--- < type > ['_->_(Kp:KProper,, X:Id) => Kp:KProper ~> '_->_(HOLE,, X:Id)] ...</ type >
-		--- : KSentence [metadata "structural"] .
-	--- mb [type-arrow-cool]: rule
-		--- < type > [T:Type ~> '_->_(HOLE,, X:Id) => '_->_(T:Type,, X:Id)] ...</ type >
-		--- : KSentence [metadata "structural"] .
+	mb [type-arrow-heat]: rule
+		< type > Kp:KProper -> F:Id => Kp:KProper ~> HOLE -> F:Id ...</ type >
+		: KSentence [metadata "structural"] .
+	mb [type-arrow-cool]: rule
+		< type > T:Type ~> HOLE -> F:Id => T:Type -> F:Id ...</ type >
+		: KSentence [metadata "structural"] .
 	mb [type-plus-heat]: rule
 		< type > K:K + K':K => K:K ~> HOLE + K':K ...</ type >
 		if notBool isAType(K:K)
@@ -139,6 +139,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool (getKLabel(T:K) ==Bool 'UnionRef)
 		orBool (getKLabel(T:K) ==Bool 'EnumRef)
 		orBool (getKLabel(T:K) ==Bool 'Named)
+		orBool (getKLabel(T:K) ==Bool 'AttributeValue)
 		--- orBool (T:K ==Bool Complex)
 		: KSentence .
 	
@@ -241,6 +242,8 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	eq BagItem(SpecTypedef) = (.).Bag .
 	--- fixme ignoring inlines since they shouldn't change the semantics?
 	eq BagItem(Inline) = (.).Bag .
+	--- fixme should save these for later use
+	eq BagItem(AttributeValue(?, ?)) = (.).Bag .
 
 	mb rule 
 		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag)), (B:Bag => (.).Bag), ?, ?) ...</ k >
@@ -417,8 +420,8 @@ mod COMMON-C-TYPING is
 		= isTypeCompatible(functionType(T1:Type, L:List{Type}), functionType(T2:Type, L':List{Type}))
 		andBool isTypeCompatible(T':Type, T'':Type) .
 	ceq isTypeCompatible(T:Type, T':Type) = true
-		if hasIntegerType(T:Type)
-		andBool hasIntegerType(T':Type) .
+		if (hasIntegerType(T:Type) orBool hasFloatType(T:Type))
+		andBool (hasIntegerType(T':Type) orBool hasFloatType(T':Type)) .
 	
 	--- op cast : K K -> K [metadata "strict"] .
 	mb rule 
@@ -673,6 +676,10 @@ mod COMMON-C-TYPING is
 	mb rule
 		< type > functionObject(?, T:Type, ?) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < type > Cast(, ?) =>  ...</ type >
+		--- : KSentence [metadata "structural"] .	
 	mb rule
 		< type > K:K[K':K] => K':K ~> K:K[HOLE] ...</ type >
 		if notBool isAType K':K

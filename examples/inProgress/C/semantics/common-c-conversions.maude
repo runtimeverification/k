@@ -1,6 +1,10 @@
 mod COMMON-SEMANTICS-PROMOTIONS is
 	including COMMON-INCLUDE .
 	
+	--- "integer promotions" are used when doing arithmetic conversions, and for unary ~, +, -.
+	--- "usual arithmetic conversions" are used when doing binary arithmetic on numbers, and are used to find a common type
+	--- there is another set of promotions called "default argument promotions" used when calling functions where the type information is not complete.  This is equivalent to integer promotions + (float => double) .
+	
 	--- op arithConversion : KLabel K K -> K [metadata "strict"] .
 	op arithConversion-int : KLabel K K -> K . --- [metadata "strict"] .
 	op isArithBinOp : KLabel -> Bool .
@@ -13,11 +17,30 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		l('_+_),, l('_-_),,
 		l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
 		l('_==_),, l('_!=_),,
-		l('_&_),, l('_|_),, l('_^_) 
+		l('_&_),, l('_|_),, l('_^_)
 	) .
+	
 	eq isArithBinOp(KL:KLabel) = if arithBinOps contains l(KL:KLabel) then true else false fi .
 	eq isArithBinConversionOp(KL:KLabel) = if arithBinConversionOps contains l(KL:KLabel)  then true else false fi .
 
+	op arithUnaryOps : -> Set [memo] .
+	eq arithUnaryOps = Set(l('-_),, l('+_),, l('~_)) .
+	op isArithUnaryOp : KLabel -> Bool .
+	eq isArithUnaryOp(KL:KLabel) = if arithUnaryOps contains l(KL:KLabel) then true else false fi .
+	
+	ceq hasBeenPromoted(T:Type) = true
+		if rank(T:Type) >=Int rank(int)
+		andBool notBool hasBitfieldType(T:Type) .
+	ceq hasBeenPromoted(T:Type) = false
+		if rank(T:Type) <Int rank(int)
+		orBool hasBitfieldType(T:Type) .
+	
+	mb rule
+		< k > L:KLabel((tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type)))) ...</ k > 
+		if     isArithUnaryOp(L:KLabel)
+		andBool (rank(T:Type) <Int rank(int) orBool hasBitfieldType(T:Type))
+		andBool hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > L:KLabel((tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))),, ?) ...</ k > 
 		if     isArithBinOp(L:KLabel)

@@ -418,26 +418,34 @@ mod COMMON-SEMANTICS-BITWISE is
 	--- c99 6.5.7:3 The integer promotions are performed on each of the operands. The type of the result is that of the promoted left operand. If the value of the right operand is negative or is greater than or equal to the width of the promoted left operand, the behavior is undefined.
 	mb rule tv(I:Int, T:Type) << tv(N:Nat, T':Type) => leftShiftInterpret(T:Type, I:Int <<Int N:Nat, tv(I:Int, T:Type))
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
+		andBool hasBeenPromoted(T':Type)
 		andBool hasIntegerType(T':Type)
 		andBool N:Nat <Int numBits(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I:Int, T:Type) >> tv(N:Nat, T':Type) => rightShiftInterpret(T:Type, I:Int >>Int N:Nat) 
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
+		andBool hasBeenPromoted(T':Type)
 		andBool hasIntegerType(T':Type)
 		andBool N:Nat <Int numBits(T:Type)
 		: KSentence [metadata "structural"] .
 				
 	mb rule tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int |Int I2:Int)
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) & tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int &Int I2:Int) 
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule ~ tv(I:Int, T:Type) => arithInterpret(T:Type, ~Int I:Int)
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int xorInt I2:Int) 
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 endm
 
@@ -449,26 +457,32 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) 
 		=> if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi 
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) 
 		=> if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) 
 		=> if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) 
 		=> if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) 
 		=> if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) 
 		=> if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
 		if hasIntegerType(T:Type)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	
 	---- comparison of pointers
@@ -504,29 +518,45 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	--- fixme there are further restrictions on pointers
 	mb rule (tv(N:Nat, T:Type) => tv(NullPointer, T':Type)) == tv(?, T':Type)
 	if hasIntegerType(T:Type) andBool hasPointerType(T':Type)
+	andBool hasBeenPromoted(T:Type)
 	andBool N:Nat ==Bool NullPointerConstant
 	: KSentence [metadata "structural"] .
 	mb rule tv(?, T:Type) == (tv(N:Nat, T':Type) => tv(NullPointer, T:Type))
 	if hasPointerType(T:Type) andBool hasIntegerType(T':Type)
+	andBool hasBeenPromoted(T':Type)
 	andBool N:Nat ==Bool NullPointerConstant
 	: KSentence [metadata "structural"] .
 	
 	mb rule (tv(N:Nat, T:Type) => tv(NullPointer, T':Type)) != tv(?, T':Type)
 	if hasIntegerType(T:Type) andBool hasPointerType(T':Type)
+	andBool hasBeenPromoted(T:Type)
 	andBool N:Nat ==Bool NullPointerConstant
 	: KSentence [metadata "structural"] .
 	mb rule tv(?, T:Type) != (tv(N:Nat, T':Type) => tv(NullPointer, T:Type))
 	if hasPointerType(T:Type) andBool hasIntegerType(T':Type)
+	andBool hasBeenPromoted(T':Type)
 	andBool N:Nat ==Bool NullPointerConstant
 	: KSentence [metadata "structural"] .	
 
 	--- floats
-	mb rule tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(F1:Float, T:Type) <= tv(F2:Float, T:Type) => if (F1:Float <=Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(F1:Float, T:Type) > tv(F2:Float, T:Type) => if (F1:Float >Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
-	mb rule tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
+	mb rule 
+		tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi
+		: KSentence [metadata "structural"] .
+	mb rule 
+		tv(F1:Float, T:Type) <= tv(F2:Float, T:Type) => if (F1:Float <=Float F2:Float) then tv(1, int) else tv(0, int) fi 
+		: KSentence [metadata "structural"] .
+	mb rule 
+		tv(F1:Float, T:Type) > tv(F2:Float, T:Type) => if (F1:Float >Float F2:Float) then tv(1, int) else tv(0, int) fi
+		: KSentence [metadata "structural"] .
+	mb rule 
+		tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi
+		: KSentence [metadata "structural"] .
+	mb rule 
+		tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi
+		: KSentence [metadata "structural"] .
+	mb rule 
+		tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-ARITHMETIC is
@@ -549,7 +579,6 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 		
-		
 	mb rule < k > tv(Loc:Nat, pointerType(T':Type)) - tv(I2:Int, T:Type)
 				=> cast(pointerType(T':Type), cast(pointerType(unsigned-char), tv(Loc:Nat, pointerType(T':Type))) - (tv(I2:Int, T:Type) * sizeofType(T':Type)))
 		...</ k >
@@ -564,7 +593,6 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .	
 		
-					
 	op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
 	mb [start-pointer-difference]: rule tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
 		=> computePointerDifference(I1:Int, I2:Int, sizeofType(T:Type))
@@ -574,45 +602,57 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if _-Int_(Offset1:Nat, Offset2:Nat) %Int Size:Nat ==Bool 0
 		: KSentence [metadata "structural"] .	
 		
-	--- fixme these need to be promoted BEFORE doing arithmetic
 	mb rule - tv(I:Int, T:Type) => arithInterpret(T:Type, (-Int I:Int))
-		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		if hasIntegerType(T:Type) 
+		andBool rank(T:Type) >=Int rank(int)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 		
 	mb rule tv(I1:Int, T:Type) + tv(I2:Int, T:Type) => arithInterpret(T:Type, (I1:Int +Int I2:Int))
-		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		if hasIntegerType(T:Type) 
+		andBool rank(T:Type) >=Int rank(int)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule _-_(tv(I1:Int, T:Type), tv(I2:Int, T:Type)) => arithInterpret(T:Type, _-Int_(I1:Int,I2:Int))
-		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		if hasIntegerType(T:Type) 
+		andBool rank(T:Type) >=Int rank(int)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) * tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int *Int I2:Int)
-		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		if hasIntegerType(T:Type) 
+		andBool rank(T:Type) >=Int rank(int)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) / tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int /Int I2:Int) 
-		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		if hasIntegerType(T:Type) 
+		andBool rank(T:Type) >=Int rank(int)
+		andBool hasBeenPromoted(T:Type)
 		andBool I2:Int =/=Bool 0
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) % tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int %Int I2:Int) 
-		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		if hasIntegerType(T:Type) 
+		andBool rank(T:Type) >=Int rank(int)
+		andBool hasBeenPromoted(T:Type)
 		andBool I2:Int =/=Bool 0
 		: KSentence [metadata "structural"] .
 	mb rule - tv(I1:Int, T:Type) => arithInterpret(T:Type, -Int_(I1:Int))
-		if hasIntegerType(T:Type) andBool rank(T:Type) >=Int rank(int)
+		if hasIntegerType(T:Type) 
+		andBool rank(T:Type) >=Int rank(int)
+		andBool hasBeenPromoted(T:Type)
 		: KSentence [metadata "structural"] .
 	
 	--- floats
 	--- fixme
-	mb rule tv(F1:Float, T:Type) + tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float +Float F2:Float) 
+	mb rule tv(F1:Float, T:Type) + tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float +Float F2:Float)
 		: KSentence [metadata "structural"] .
 	mb rule _-_(tv(F1:Float, T:Type), tv(F2:Float, T:Type)) => arithInterpret(T:Type, _-Float_(F1:Float, F2:Float))
 		: KSentence [metadata "structural"] .
-	mb rule tv(F1:Float, T:Type) * tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float *Float F2:Float) 
+	mb rule tv(F1:Float, T:Type) * tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float *Float F2:Float)
 		: KSentence [metadata "structural"] .
-	mb rule tv(F1:Float, T:Type) / tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float /Float F2:Float) 
+	mb rule tv(F1:Float, T:Type) / tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float /Float F2:Float)
 		: KSentence [metadata "structural"] .
 	mb rule - tv(F:Float, T:Type) => arithInterpret(T:Type, -Float_(F:Float))
 		: KSentence [metadata "structural"] .
-		
 endm
 
 mod COMMON-SEMANTICS-MEMBERS is 

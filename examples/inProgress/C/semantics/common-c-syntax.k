@@ -45,7 +45,7 @@ kmod COMMON-C-SYNTAX is
 	sort Constant
 	sort InitExpression
 	sort InitWhat
-	sort Attribute
+	--- sort Attribute
 	
 	--- Additional sorts
 	sort Program
@@ -61,7 +61,6 @@ kmod COMMON-C-SYNTAX is
 	op Nil : -> List{C}
 	subsort C < List{C}
 	op _::_ : List{C} List{C} -> List{C} [hybrid strict assoc id: Nil]
-	
 	subsort SpecifierElem < KResult
 	--- sort List{SpecifierElem} 
 	--- subsort List{SpecifierElem} < KResult
@@ -96,7 +95,7 @@ kmod COMMON-C-SYNTAX is
 	subsort Constant < C
 	subsort InitExpression < C
 	subsort InitWhat < C
-	subsort Attribute < C
+	--- subsort Attribute < C
 	subsort Program < C
 	subsort TranslationUnit < C
 	subsort IntConstant < C
@@ -581,6 +580,5 @@ and initwhat =
 ***(
 and attribute = string * expression list
 ***)
-	op Attribute : String List{C} -> Attribute
-
+	op Attribute : String List{C} -> C
 endkm

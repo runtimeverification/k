@@ -500,7 +500,7 @@ and printSpecElem a =
 		| CV_CONST -> "Const"
 		| CV_VOLATILE -> "Volatile"
 		| CV_RESTRICT -> "Restrict")
-	| SpecAttr _ -> "Attribute" (* print_attribute al;*)
+	| SpecAttr al -> printAttribute al
 	| SpecStorage sto ->
 		(match sto with
 		| NO_STORAGE -> "NoStorage"

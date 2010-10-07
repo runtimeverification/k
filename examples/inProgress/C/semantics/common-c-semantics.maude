@@ -79,6 +79,9 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op internal : -> K .
 	op noLinkage : -> K .
 	
+	
+	op AttributeValue : String List{C} -> KResult .
+	
 	op extractBitsFromList : K Nat Nat -> K [metadata "strict(1)"] . --- data, offset, size in bits
 	op typedef : Id -> Id .
 	op unnamed : Nat -> Id .
@@ -121,6 +124,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- eq loc(Block:Nat, N:Nat) >=Int loc(Block:Nat, N':Nat) = N:Nat >=Int N':Nat .
 	
 	op isTypeCompatible : K K -> Bool .
+	
+	op hasBeenPromoted : Type -> Bool .
 	
 	op bitloc : Nat Nat Nat -> Nat .
 	op inc : Nat -> Nat .
@@ -1715,6 +1720,10 @@ mod C-SEMANTICS-MISC is
 		< k > EnumItemLoc(K:K, L:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
+		
+	mb [Attributes]: rule
+		< k > Attribute(S:String, L:List{C}) => AttributeValue(S:String, L:List{C}) ...</ k >
+		: KSentence .	
 		
 	eq AttributeWrapper(K:K, ?) = K:K .
 	eq NameLoc(K:K, ?) = K:K .
