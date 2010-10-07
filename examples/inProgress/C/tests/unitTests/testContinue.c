@@ -3,4 +3,5 @@ int main(void){
 		if (i == 5) { continue; }
 		printf("%d\n", i);
 	}
+	return 0;
 }

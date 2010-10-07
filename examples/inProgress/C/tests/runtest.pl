@@ -77,6 +77,7 @@ sub performTest {
 	}
 	
 	my $kccRunOutput = `$kccFilename 2>&1`;
+	$kccRunOutput =~ s/^VOLATILE.*//mg;
 	my $kccRunRetval = $?;
 	if ($shouldFail) {
 		if (index($kccRunOutput, "unfinishedComputation") == -1) {
@@ -102,6 +103,8 @@ sub performTest {
 	}
 	
 	my $gccRunOutput = `$gccFilename 2>&1`;
+	$gccRunOutput =~ s/^VOLATILE.*//mg;
+	# print $gccRunOutput;
 	my $gccRunRetval = $?;
 	if (($kccRunRetval != $gccRunRetval) || ($kccRunOutput ne $gccRunOutput)) {
 		my $msg = "Return values were not identical.\n";
