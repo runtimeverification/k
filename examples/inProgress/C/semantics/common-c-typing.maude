@@ -475,12 +475,9 @@ mod COMMON-C-TYPING is
 	
 	eq fillBitHoles(N:Nat, Nil) = typedDeclaration(bitfieldType(unsigned-int, absInt(numBitsPerByte -Int (N:Nat %Nat numBitsPerByte)) %Nat numBitsPerByte), #NoName) .
 
-***(
-	fillBitHoles(16, (
-		('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 0(.List{K})),,Id Identifier("___missing_field_name")(.List{K}))
-		,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 4(.List{K})),,Id Identifier("___missing_field_name")(.List{K}))
-		,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K})))))
-***)
+	
+	eq typedDeclaration(bitfieldType(?, N:Nat), #NoName) :: typedDeclaration(bitfieldType(?, N':Nat), #NoName) 
+		= typedDeclaration(bitfieldType(unsigned-int, N:Nat +Nat N':Nat), #NoName) .
 	
 	--- fixme chould check for some struct contraints here
 	op incompleteToFlexibleArrayMember : List{Type} -> List{Type} .

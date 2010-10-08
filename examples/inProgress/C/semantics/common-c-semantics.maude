@@ -766,13 +766,46 @@ mod COMMON-INITIALIZATION is
 		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(T':Type, F':Id) :: ? 
 		...</ structs > 
+		if F':Id =/=Bool #NoName
 		: KSentence [metadata "structural"] .
+		
+***(
+	 ('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("a")(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("b")(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 12(.List{K})),,Id Identifier("x")(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 4(.List{K})),,Id Identifier("y")(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 0(.List{K})),,Id #NoName(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 4(.List{K})),,Id #NoName(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 3(.List{K})),,Id Identifier("z")(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 1(.List{K})),,Id #NoName(.List{K}))
+	 ,,('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("c")(.List{K}))
+***)
+
+	 
+	mb [init-next-struct-element]: rule
+		< currentSubObject >
+			next ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
+			=> ListItem(te(K:K . F':Id, T':Type)) ListItem(te(K:K, structType(S:Id)))
+		...</ currentSubObject >
+		< structs >...
+			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(?, #NoName) :: typedDeclaration(T':Type, F':Id) :: ? 
+		...</ structs >
+		: KSentence [metadata "structural"] .
+		
 	mb [init-next-struct-element-done]: rule
 		< currentSubObject >
 			next (ListItem(te(K:K . F:Id, T:Type)) => .) ListItem(te(K:K, structType(S:Id)))
 		...</ currentSubObject >
 		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id)
+		...</ structs > 
+		: KSentence [metadata "structural"] .
+	mb [init-next-struct-element-done]: rule
+		< currentSubObject >
+			next (ListItem(te(K:K . F:Id, T:Type)) => .) ListItem(te(K:K, structType(S:Id)))
+		...</ currentSubObject >
+		< structs >...
+			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(?, #NoName)
 		...</ structs > 
 		: KSentence [metadata "structural"] .
 		
@@ -1817,7 +1850,7 @@ mod C-SEMANTICS-MISC is
 		--- = piece(N:Nat bit:: N':Nat bit:: M:Nat, Len'':Nat)
 	--- if Len:Nat +Nat Len':Nat ==Bool Len'':Nat .
 		
-	
+	eq Identifier("___missing_field_name") = #NoName .
 endm
 
 load common-c-conversions
