@@ -470,7 +470,7 @@ mod COMMON-C-TYPING is
 		
 	ceq fillBitHoles(N:Nat, (typedDeclaration(bitfieldType(T:Type, N':Nat), ?) :: L:List{Type})) 
 		= typedDeclaration(bitfieldType(unsigned-int, absInt(numBitsPerByte -Int (N:Nat %Nat numBitsPerByte)) %Nat numBitsPerByte), #NoName)
-		:: fillBitHoles(N:Nat +Nat N':Nat, L:List{Type})
+		:: fillBitHoles(L:List{Type})
 		if N':Nat ==Bool 0 .
 	
 	eq fillBitHoles(N:Nat, Nil) = typedDeclaration(bitfieldType(unsigned-int, absInt(numBitsPerByte -Int (N:Nat %Nat numBitsPerByte)) %Nat numBitsPerByte), #NoName) .

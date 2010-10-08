@@ -19,7 +19,12 @@ struct bfs {
 	unsigned int d : 8; // boundary
 	unsigned int e : 16; // boundary
 	unsigned int f : 6;	// 6
-	// implicit :2 since next is not a bit field
+	unsigned int : 0;
+	unsigned int i : 13; // boundary
+	unsigned int j : 3;
+	unsigned int : 0 ;
+	unsigned int k : 11;
+	unsigned int : 0 ;
 	unsigned char g;
 	// unsigned long long h:40;
 };
@@ -232,6 +237,51 @@ int testPartial(void){
 	return 0;
 }
 
+int testBigPartial(void){
+	s.i = 45;
+	s.j = 2;
+	if (s.i != 45){ printf("BUG: i0a : %d\n", s.i); }
+	if (s.j != 2){ printf("BUG: i0b : %d\n", s.j); }
+	s.j = 7;
+	if (s.i != 45){ printf("BUG: i1a : %d\n", s.i); }
+	if (s.j != 7){ printf("BUG: i1b : %d\n", s.j); }	
+	s.i = 3073;
+	if (s.i != 3073){ printf("BUG: i2a : %d\n", s.i); }
+	if (s.j != 7){ printf("BUG: i2b : %d\n", s.j); }
+	
+	// unsigned char firstChar = *(&(s.j));
+	// if (firstChar == 75){
+		// printf("ok\n");
+	// } else {
+		// printf("BUG: i3: %d\n", firstChar);
+	// }
+	p->i = 2000;
+	if (p->i != 2000){ printf("BUG: i4 : %d, %d\n", p->i, s.i); }
+	return 0;
+}
+
+
+int testJustBigPartial(void){
+	s.k = 45;
+	if (s.k != 45){ printf("BUG: k0 : %d\n", s.k); }
+	s.k = 7;
+	if (s.k != 7){ printf("BUG: k1 : %d\n", s.k); }	
+	s.k = 1137;
+	if (s.k != 1137){ printf("BUG: k2 : %d\n", s.k); }
+	s.k = 601;
+	if (s.k != 601){ printf("BUG: k3 : %d\n", s.k); }
+	
+	// unsigned char firstChar = *(&(s.j));
+	// if (firstChar == 75){
+		// printf("ok\n");
+	// } else {
+		// printf("BUG: i3: %d\n", firstChar);
+	// }
+	p->k = 1025;
+	if (p->k != 1025){ printf("BUG: k4 : %d, %d\n", p->k, s.k); }
+	return 0;
+}
+
 // int testForty(void){
 	// s.h = 0x0100;
 	// if (s.h != 0x0100){ printf("BUG: h0"); }
@@ -251,6 +301,11 @@ int main(void){
 	testSixteens();
 	printf("finished sixteens\n");
 	testPartial();
+	printf("finished partial\n");
+	testJustBigPartial();
+	printf("finished just big partial\n");
+	testBigPartial();
+	printf("finished big partial\n");
 	//testForty();
 	return 0;
 }

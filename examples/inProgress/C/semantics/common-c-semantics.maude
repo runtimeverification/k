@@ -1754,6 +1754,7 @@ mod C-SEMANTICS-MISC is
 	mb rule
 		< k > fillEnums(EnumDef(X:Id, Nil), ?) => (.).K ...</ k > : KSentence .
 	
+	--- this maintains byte order
 	op fillToBytes-aux : K List{K} -> K .
 	eq fillToBytes(dataList(L:List{K})) = fillToBytes-aux(dataList(L:List{K}), .List{K}) .
 	ceq fillToBytes-aux(dataList((L:List{K},, piece(N:Nat, Len:Nat))), L':List{K}) 
@@ -1767,7 +1768,10 @@ mod C-SEMANTICS-MISC is
 	ceq fillToBytes-aux(dataList((L:List{K},, piece(N:Nat, Len:Nat),, piece(N':Nat, Len':Nat))), L':List{K}) 
 		= fillToBytes-aux(dataList((L:List{K},, piece(_bit::_(piece(N:Nat, Len:Nat), piece(N':Nat, Len':Nat)), Len:Nat +Nat Len':Nat))), L':List{K})
 		if Len:Nat +Nat Len':Nat <=Nat numBitsPerByte .
-						
+				
+	eq fillToBytes-aux(dataList(.List{K}), L:List{K})
+		= dataList(L:List{K}) .
+		
 	ceq _bit::_(piece(bitRange(N:Nat, sNat(To:Nat), To':Nat), Len:Nat), piece(bitRange(N:Nat, From:Nat, To:Nat), Len':Nat)) 
 		= piece(bitRange(N:Nat, From:Nat, To':Nat), Len:Nat +Nat Len':Nat) 
 		if Len:Nat +Nat Len':Nat <=Nat numBitsPerByte .
@@ -1813,8 +1817,6 @@ mod C-SEMANTICS-MISC is
 		--- = piece(N:Nat bit:: N':Nat bit:: M:Nat, Len'':Nat)
 	--- if Len:Nat +Nat Len':Nat ==Bool Len'':Nat .
 		
-	eq fillToBytes-aux(dataList(.List{K}), L:List{K})
-		= dataList(L:List{K}) .
 	
 endm
 

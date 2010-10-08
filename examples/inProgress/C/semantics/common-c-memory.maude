@@ -1,12 +1,15 @@
 mod COMMON-MEMORY-INCLUDE is
 	including COMMON-INCLUDE .
 	
+	--- returns the bytes in the order in which they are in memory
 	op extractBytesFromMem : Nat Nat -> K . --- loc, size in bytes
 	
 	op encodedPointer : Int -> Nat .
 	op encodedFloat : Float -> Nat .
 	
 	op explodeToBits : List{K} -> List{K} .
+	
+	op reverseList : List{K} -> List{K} .
 endm
 
 mod COMMON-SEMANTICS-READING is
@@ -40,13 +43,6 @@ mod COMMON-SEMANTICS-READING is
 		...</ k >
 		: KSentence [metadata "structural"] .
 
-	--- mb rule
-		--- < k > extractBitsFromList(dataList((piece(N:Nat, Len:Nat),, L:List{K})), 0, NumBits:Nat, Done:List{K})
-			--- => extractBitsFromList(dataList((piece(N:Nat >>Nat 1, absInt(Len:Nat -Int 1)),, piece(N:Nat &Nat 1, 1),, L:List{K})), 0, NumBits:Nat, Done:List{K})
-		--- ...</ k >
-		--- if Len:Nat >Nat NumBits:Nat
-		--- andBool Len:Nat >Nat 1
-		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > extractBitsFromList(?, 0, 0, Done:List{K}) => dataList(Done:List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
@@ -69,7 +65,11 @@ mod COMMON-SEMANTICS-READING is
 		
 	op joinIntegerBytes : Type List{K} -> K .
 	ceq concretize(T:Type, dataList(L:List{K})) = joinIntegerBytes(T:Type, L:List{K})
-		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) .
+		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) 
+		andBool notBool hasBitfieldType(T:Type) .
+	ceq concretize(T:Type, dataList(L:List{K})) = joinIntegerBytes(T:Type, reverseList(L:List{K}))
+		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) 
+		andBool hasBitfieldType(T:Type) .
 		
 	--- FIXME very unsafe, not checking size of list or its contents
 	ceq concretize(T:Type, dataList((piece(encodedFloat(F:Float), Len:Nat),, L:List{K}))) 
@@ -225,13 +225,6 @@ mod COMMON-SEMANTICS-WRITING is
 
 	eq byteoffset(N:Nat +Nat bito(?)) = N:Nat .
 	eq byteoffset(N:Nat) = N:Nat [owise] .
-	--- mb rule
-		--- < k > write(Loc:Nat, tv(N:Nat, T:Type), bitSize:Nat)
-			--- => writeBitfield(Loc:Nat, T:Type, calculateNewBytes(bitoffset(Loc:Nat), piece(N:Nat, bitSize:Nat), extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(bitSize:Nat))))
-		--- ...</ k >
-		--- if bitSize:Nat %Nat numBitsPerByte =/=Bool 0
-		--- orBool notBool(isByteLoc(Loc:Nat))
-		--- : KSentence [metadata "structural"] .
 		
 	op justBits : Int Type -> Value .
 	op justBits-aux : Int Type -> Value .
@@ -270,6 +263,9 @@ mod COMMON-SEMANTICS-WRITING is
 	op calculateNewBytes-aux : Nat K K List{K} -> K .
 	eq calculateNewBytes(Len:Nat, N:Nat, dataList(L:List{K})) = calculateNewBytes-aux(Len:Nat, dataList(explodeToBits(N:Nat)), dataList(explodeToBits(L:List{K})), .List{K}) .
 	
+	eq reverseList(.List{K}) = .List{K} .
+	eq reverseList((K:K,, L:List{K})) = reverseList(L:List{K}),, K:K .
+	
 	op joinBitsToBytes : List{K} -> K .
 	op joinBitsToBytes-aux : K K -> K .
 	
@@ -290,6 +286,9 @@ mod COMMON-SEMANTICS-WRITING is
 	ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, L:List{K})), dataList(R:List{K}))
 		= joinBitsToBytes-aux(dataList(L:List{K}), dataList((R:List{K},, piece(N:Nat, Len:Nat))))
 		if Len:Nat ==Bool numBitsPerByte .
+	--- ceq joinBitsToBytes-aux(dataList((piece(N:Nat, Len:Nat),, L:List{K})), dataList(R:List{K}))
+		--- = joinBitsToBytes-aux(dataList(L:List{K}), dataList((piece(N:Nat, Len:Nat),, R:List{K})))
+		--- if Len:Nat ==Bool numBitsPerByte .
 	eq joinBitsToBytes-aux(dataList(.List{K}), dataList(R:List{K}))
 		= dataList(R:List{K}) .
 	
