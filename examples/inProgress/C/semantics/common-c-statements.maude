@@ -237,19 +237,26 @@ mod COMMON-SEMANTICS-RETURN is
 		--- if L:KLabel ==Bool 'return`;
 		--- orBool L:KLabel ==Bool 'return_;
 		--- : KSentence [metadata "structural"] .
-			
+
 	mb [return-value]: rule 
 		< control >
-			< k > Return(V:Value) ~> ? => sequencePoint ~> V:Value ~> K:K </ k >
-			< locals > (.).Bag => L:Bag </ locals >
+			< k > Return(V:Value) ~> ? 
+				=> sequencePoint 
+				~> cast(T:Type, V:Value) 
+				~> K:K 
+			</ k >
+			--- these cells get replaced by the ones in C:Bag, so we can delete them when we match them
+			(< locals > (.).Bag </ locals > => (.).Bag)
+			(< currentFunction > F:Id </ currentFunction > => (.).Bag)
+			(< currentTranslationUnit > Tu:K </ currentTranslationUnit > => (.).Bag)
 			(? => C:Bag)
 		</ control >
+		< gtypes >... Tu:K |-> Map((? (F:Id |-> functionType(T:Type, ?)))) ...</ gtypes >
 		< callStack >
 			List(
 				< stackFrame >
 					C:Bag
 					< continuation > K:K </ continuation >
-					< locals > L:Bag </ locals >
 				</ stackFrame >
 			) => (.).List
 		...</ callStack >

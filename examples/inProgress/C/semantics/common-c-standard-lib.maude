@@ -432,6 +432,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- fixme might be messing things up elsewhere
 	op pointerToString : Nat -> String .
 	eq pointerToString(sym(N:Nat) +Nat M:Nat) = "[sym(" +String Rat2String(N:Nat, 10) +String ") + " +String Rat2String(M:Nat, 10) +String "]" .
+	eq pointerToString(NullPointer) = "NullPointer" .
 	mb [lib-printf-%p]: rule
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (tv(N':Nat, ?) :: L:List{C})) 
 			=> writeToFD(1, pointerToString(N':Nat))

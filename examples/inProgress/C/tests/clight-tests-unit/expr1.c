@@ -12,7 +12,9 @@ int main(int argc, char ** argv)
   struct list l;
   l.tl = &l;
   f(&(l.tl));
-  //printf("Result: %p\n", l.tl); // cme
-  printf("Result: %d\n", (int)l.tl);
+  printf("VOLATILE Result: %p\n", l.tl);
+  if (l.tl != NULL){
+	printf("BUG\n");
+  }
   return 0;
 }
