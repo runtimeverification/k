@@ -209,6 +209,7 @@ mod COMMON-SEMANTICS-WRITING is
 		...</ k >
 		if bitSize:Nat %Nat numBitsPerByte ==Bool 0
 		andBool isByteLoc(Loc:Nat)
+		andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > write(Loc:Nat, tv((V:K,, V':K,, L:List{K}), T:Type), bitSize:Nat)
@@ -216,6 +217,7 @@ mod COMMON-SEMANTICS-WRITING is
 		...</ k >
 		if bitSize:Nat %Nat numBitsPerByte ==Bool 0
 		andBool isByteLoc(Loc:Nat)
+		andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 		
 
@@ -252,6 +254,7 @@ mod COMMON-SEMANTICS-WRITING is
 		...</ k >
 		if bitSize:Nat %Nat numBitsPerByte =/=Bool 0
 		orBool notBool(isByteLoc(Loc:Nat))
+		orBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 		
 	mb rule

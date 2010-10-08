@@ -204,7 +204,7 @@ int testSixteens(void){
 	if (s.e != (unsigned int)23213){ printf("BUG: e1\n"); }
 
 	uint16_t firstChar = (uint16_t)*((uint16_t*)(((char*)&(s))+4));
-	if (firstChar == 23213){
+	if (firstChar == 23213 || firstChar == 44378){ // bitfields don't have to work like normal types
 		printf("short interp OK\n");
 	} else {
 		printf("BUG: e2: %d\n", firstChar);
