@@ -12,7 +12,7 @@ main() {
 }
 
 /* putd - output decimal number */
-putd(n) {
+void putd(n) {
 	if (n < 0) {
 		putchar('-');
 		n = -n;
@@ -25,12 +25,12 @@ putd(n) {
 int *xx;
 
 /* sort - sort a[0..n-1] into increasing order */
-sort(a, n) int a[]; {
+void sort(a, n) int a[]; {
 	quick(xx = a, 0, --n);
 }
 
 /* quick - quicksort a[lb..ub] */
-quick(a, lb, ub) int a[]; {
+void quick(a, lb, ub) int a[]; {
 	int k, partition();
 
 	if (lb >= ub)
@@ -57,7 +57,7 @@ int partition(a, i, j) int a[]; {
 }
 
 /* exchange - exchange *x and *y */
-exchange(x, y) int *x, *y; {
+void exchange(x, y) int *x, *y; {
 	int t;
 
 	printf("exchange(%d,%d)\n", x - xx, y - xx);

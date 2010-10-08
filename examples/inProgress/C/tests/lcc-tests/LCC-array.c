@@ -19,7 +19,7 @@ main() {
 	return 0;
 }
 
-f() {
+void f() {
 	int i, j;
 
 	for (i = 0; i < 3; i++)
@@ -32,7 +32,7 @@ f() {
 	printf("\n");
 }
 
-g(x, y)
+void g(x, y)
 int x[][4], *y[];
 {
 	int i, j;

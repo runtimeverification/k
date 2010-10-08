@@ -21,14 +21,14 @@ main()
 	return 0;
 }
 
-f1(struct baz *p) {
+void f1(struct baz *p) {
 	p->a = p->b = 0;
 	if (p->b)
 		printf("p->b != 0!\n");
 	p->a = 0x3; p->b = 0xf;
 	printf("p->a = 0x%02x, p->b = 0x%02x\n", p->a, p->b);
 }
-f2(struct baz *p) {
+void f2(struct baz *p) {
 	p->a = (i==0);
 	p->b = (f1(p),0);
 }

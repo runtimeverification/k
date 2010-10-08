@@ -26,7 +26,7 @@ long pow2(long n) {        /* Calculate 2**n by multiplying, not shifting  */
 }
 
 
-int zerofill(char* x) {
+void zerofill(char* x) {
    int j;
 
    for (j=0; j<256; j++) *x++ = 0;
@@ -168,7 +168,7 @@ testev(){
    else return 0;
 }
 
-setev(){                  /* Sets an external variable. Used  */
+void setev(){                  /* Sets an external variable. Used  */
    extern int extvar;     /* by s4, and should be compiled    */
    extvar = 1066;         /* separately from s4.              */
 }
@@ -180,9 +180,10 @@ int x;
    if(x>100) return x-10;
    else return McCarthy( McCarthy(x+11));
 }
-clobber(x,y)
+int clobber(x,y)
 int x, *y;
 {
    x = 3;
    *y = 2;
+   return 0;
 }
