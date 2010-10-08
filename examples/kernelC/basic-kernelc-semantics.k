@@ -1,5 +1,3 @@
-require ../../k-prelude
-require kernelc-syntax
 kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION 
   syntax Val ::= Int | void | & Id
   syntax Exp ::= Val 
@@ -35,9 +33,9 @@ kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   rule <k> scanf("%d",N) => void <_/k> <mem_> N |-> (_ => I) <_/mem> <in> ListItem(I) => . <_/in>
   rule <k> scanf("%d",&X) => void <_/k> <env_> X |-> (_ => I) <_/env> <in> ListItem(I) => . <_/in>
 
-  rule #include<stdio.h> #include<stdlib.h> Sts:StmtList => Sts:StmtList 
-      [structural]
-  rule {Sts} => Sts  [structural]
+---  rule #include<stdio.h> #include<stdlib.h> Sts:StmtList => Sts:StmtList 
+---      [structural]
+  rule {Sts:StmtList} => Sts  [structural]
   rule {} => .  [structural]
   rule St Sts => St ~> Sts [structural]
 

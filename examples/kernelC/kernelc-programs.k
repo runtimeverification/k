@@ -1,15 +1,17 @@
-require kernelc-syntax
 kmod KERNELC-PROGRAMS is including KERNELC-SYNTAX 
   syntax Pgm ::= pSum | pCollatz | pBufferOverflow | pSimpTest  | pStrErr | pStrTest
                | pAllocateBadPrint | pAllocatePrintReversePrintFree | pAllocatePrintFree
   syntax Stmt ::= pPrint.c  | pAllocateLoop.c | pAllocateGood.c | pAllocateBad.c | pReverse.c
-                    | pFree.c | pStrLen.c | pStrCpy.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c
+                    | pFree.c | pStrLen.c | pStrCpy.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c | stdio.h | stdlib.h
   syntax Id ::= a | b | c | d | e | i | l 
           | limit | nr | nn | n | p | q | r | s | steps | t | t1 | t2 | x | y | z 
 
   syntax Id ::= print | allocateLoop | reverse | quickSort
 
 syntax Id ::= strDup | strprint | strCpy | strLen | string | string2 | freeList 
+
+  macro stdio.h = {}
+  macro stdlib.h = {}
 
   macro pSum = 
     #include<stdio.h>

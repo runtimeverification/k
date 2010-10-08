@@ -1,3 +1,4 @@
+load ../../k-prelude
 kmod KERNELC-SYNTAX is
   including PL-INT +  PL-ID
   syntax PointerId ::= Id | * PointerId [prec 25 strict]
@@ -31,7 +32,7 @@ kmod KERNELC-SYNTAX is
 
   syntax StmtList ::= Stmt | StmtList StmtList [prec 100 gather (e E)]
 
-  syntax Pgm ::= #include <stdio.h> #include <stdlib.h> StmtList [prec 120] 
+  syntax Pgm ::= StmtList 
 
   sort Bottom 
   syntax List{Bottom} ::= () | Bottom | List{Bottom} , List{Bottom}  [assoc id: () strict hybrid prec 45]

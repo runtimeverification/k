@@ -1,6 +1,8 @@
-require standard-malloc-semantics
-require ../kernelc-programs
-require ../kernelc-race-detection
+load ../kernelc-syntax
+load ../basic-kernelc-semantics
+load standard-malloc-semantics
+load ../kernelc-programs
+load ../kernelc-race-detection
 
 kmod KERNELC is including STANDARD-MALLOC-SEMANTICS + KERNELC-PROGRAMS + KERNELC-RACE-DETECTION 
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
