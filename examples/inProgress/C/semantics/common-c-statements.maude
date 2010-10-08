@@ -322,7 +322,15 @@ mod COMMON-C-STATEMENTS is
 		--- < k > Continue ~> K:K => Continue ...</ k >
 		< k > Continue ~> ((L:KLabel)(?) => .) ...</ k >
 		if L:KLabel =/=Bool 'loopMarked
-		--- andBool K:K =/=Bool (.).K
+		andBool L:KLabel =/=Bool 'popBlock
+		andBool L:KLabel =/=Bool 'pushBlock
+		andBool L:KLabel =/=Bool 'popLoop
+		: KSentence [metadata "structural"] . --- nondet
+	mb [continue]: rule
+		< k > Continue ~> popBlock 
+			=> popBlock 
+			~> Continue
+		...</ k >
 		: KSentence [metadata "structural"] . --- nondet
 	mb [continue-done]: rule
 		< k > (Continue => Post:K ~> discard) ~> loopMarked ~> For(?, ?, Post:K, ?) ...</ k >
