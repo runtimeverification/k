@@ -598,14 +598,13 @@ sub unquote
 sub getFullName
 {
     my $file = (shift);
-#    print "File $file\n";
     if ($file eq "")
     {
 	return $file;
     }
     
     $file =~ s/^\.\///;
-    
+
     # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
     if ($file =~ /\.k?(maude)?$/) {
 	if (! -e $file) {
@@ -877,12 +876,22 @@ sub required()
 {
 #    printTree();
     my ($p, $c) = (shift, shift);
+#    print "P: $p C: $c\n";
+
+    $p =~ s/^\.\///;
     
     $p = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
 	$Tree::Nary::TRAVERSE_ALL, getFullName($p));
     
+    while ($p->{data} =~ m/(\.\.\/)/g)
+    {
+	$c = $1 . $c;
+    }
+    
+#    my $c = File::Spec->catfile((fileparse($file))[1], $c);
+#    print "Child: $c\n";
     my $n = Tree::Nary->find_child($p, $Tree::Nary::TRAVERSE_ALL, getFullName($c));
-    # print "\n NODE: " . $n->{data} . "\n\n";
+#    print "\n NODE: " . $n->{data} . "\n\n";
     
     if (!$n)
     {
