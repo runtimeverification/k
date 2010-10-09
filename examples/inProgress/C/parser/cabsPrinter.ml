@@ -273,9 +273,9 @@ and printConstant const =
 	| CONST_INT i -> wrap ((printIntLiteral i) :: []) "IntLiteral"
 	| CONST_FLOAT r -> wrap ((printFloatLiteral r) :: []) "FloatLiteral"
 	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
-	| CONST_WCHAR c -> wrap (("L'" ^ escape_wstring c ^ "'") :: []) "WCharLiteral"
+	| CONST_WCHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "WCharLiteral"
 	| CONST_STRING s -> wrap (("\"" ^ escape_string s ^ "\"") :: []) "StringLiteral"
-	| CONST_WSTRING ws -> wrap (("L\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
+	| CONST_WSTRING ws -> wrap (("\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
 and splitFloat (xs, i) =
 	let lastOne = if (String.length i > 1) then String.uppercase (Str.last_chars i 1) else ("x") in
 	let newi = (Str.string_before i (String.length i - 1)) in
@@ -294,8 +294,15 @@ and splitInt (xs, i) =
 	| _ -> (xs, i)
 and printFloatLiteral r =
 	let (tag, r) = splitFloat ([], r) in
-	let num = (wrapString r "FloatConstant")
-	in
+	let num = (
+		let firstTwo = if (String.length r > 2) then (Str.first_chars r 2) else ("xx") in
+			if (firstTwo = "0x" or firstTwo = "0X") then 
+				let nonPrefix = Str.string_after r 2 in
+					(wrapString ("\"" ^ nonPrefix ^ "\"") "HexFloatConstant")
+			else (
+				(wrapString r "DecimalFloatConstant")
+			)
+	) in
 	match tag with
 	| "F" :: [] -> wrapString num "F"
 	| "L" :: [] -> wrapString num "L"

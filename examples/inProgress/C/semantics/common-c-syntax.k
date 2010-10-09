@@ -535,7 +535,8 @@ and constant =
 	op OctalConstant : K -> IntConstant --- new
 	op HexConstant : K -> IntConstant --- new --- expected to be string
 	
-	op FloatConstant : Float -> IntConstant --- new
+	op DecimalFloatConstant : Float -> IntConstant --- new
+	op HexFloatConstant : K -> IntConstant --- new
 	
 	op U : K -> Constant --- new
 	op L : K -> Constant --- new

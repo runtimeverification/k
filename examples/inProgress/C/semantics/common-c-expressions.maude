@@ -345,11 +345,11 @@ and ll or LL
 		
 		
 	---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double.
-	mb rule NoSuffix(FloatConstant(F:Float)) => tv(F:Float, double)
+	mb rule NoSuffix(DecimalFloatConstant(F:Float)) => tv(F:Float, double)
 		: KSentence [metadata "structural"] .
-	mb rule L(FloatConstant(F:Float)) => tv(F:Float, long-double)
+	mb rule L(DecimalFloatConstant(F:Float)) => tv(F:Float, long-double)
 		: KSentence [metadata "structural"] .
-	mb rule F(FloatConstant(F:Float)) => tv(F:Float, float)
+	mb rule F(DecimalFloatConstant(F:Float)) => tv(F:Float, float)
 		: KSentence [metadata "structural"] .
 
 endm
