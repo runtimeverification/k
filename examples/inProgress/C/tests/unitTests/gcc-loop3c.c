@@ -30,8 +30,8 @@ main ()
   a[0x10] = 0;
   a[0x08] = 0;
   f (INT_MAX/2 + 1);
-  printf("a[0x10]=%p\n", a[0x10]);
-  printf("a[0x08]=%p\n", a[0x08]);
+  //printf("a[0x10]=%p\n", a[0x10]);
+  //printf("a[0x08]=%p\n", a[0x08]);
   printf("a[0x10] || a[0x08] == %d\n", a[0x10] || a[0x08]);
   if (! a[0x10] || a[0x08])
     abort ();
