@@ -1,4 +1,4 @@
-void int f (char *p) { }
+void f (char *p) { }
 
 main ()
 {

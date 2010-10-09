@@ -1,21 +1,21 @@
 #include <limits.h>
 
-void gt (a, b)
+int gt (a, b)
 {
   return a > b;
 }
 
-void ge (a, b)
+int ge (a, b)
 {
   return a >= b;
 }
 
-void lt (a, b)
+int lt (a, b)
 {
   return a < b;
 }
 
-void le (a, b)
+int le (a, b)
 {
   return a <= b;
 }
