@@ -1,4 +1,4 @@
-f (c)
+void f (c)
     unsigned char c;
 {
   if (c != 0xFF)

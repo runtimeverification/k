@@ -8,7 +8,7 @@ main ()
   exit (0);
 }
 
-f (a)
+void f (a)
      unsigned long a;
 {
   if (a != 0xdeadbeefL)

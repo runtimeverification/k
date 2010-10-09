@@ -13,7 +13,7 @@ ffs (x)
   return bit;
 }
 
-f (x)
+void f (x)
      int x;
 {
   int y;

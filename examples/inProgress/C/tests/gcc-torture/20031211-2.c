@@ -12,7 +12,7 @@ int main()
   exit (0);
 }
 
-foo(unsigned int z)
+void foo(unsigned int z)
 {
   if (z != 3)
     abort ();

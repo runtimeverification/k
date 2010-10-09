@@ -13,6 +13,7 @@ static int va1(int nargs,...)
     if(pts[i].x!=pi.x||pts[i].y!=pi.y)abort();
   }
   va_end(args);
+  return 0;
 }
 
 typedef struct{int x,y;}ipoint;
@@ -28,6 +29,7 @@ static int va2(int nargs,...)
     if(ipts[i].x!=pi.x||ipts[i].y!=pi.y)abort();
   }
   va_end(args);
+  return 0;
 }
 
 main()

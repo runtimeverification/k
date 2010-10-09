@@ -47,7 +47,7 @@ g (c)
 }
 
 
-f ()
+void f ()
 {
   char c;
   g (&c);

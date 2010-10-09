@@ -8,6 +8,7 @@ int t1 (float *f, int i,
   f1 (3.0);
   f[i] = f[i + 1];
   f2 (2.5f, 3.5f);
+  return 0;
 }
 
 int t2 (float *f, int i,
@@ -19,6 +20,7 @@ int t2 (float *f, int i,
   f1 (3.0);
   f[i] = f[i + 1];
   f2 (2.5f, 3.5f);
+  return 0;
 }
 
 void f1 (double d)

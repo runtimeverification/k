@@ -1,6 +1,6 @@
 int w[2][2];
 
-f ()
+void f ()
 {
   int i, j;
 

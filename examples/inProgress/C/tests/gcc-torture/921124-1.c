@@ -4,7 +4,7 @@ f(x, d1, d2, d3)
    return x;
 }
 
-g(b,s,x,y,i,j)
+void g(b,s,x,y,i,j)
      char *b,*s;
      double x,y;
 {

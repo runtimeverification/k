@@ -6,7 +6,7 @@ g (x)
   return 0;
 }
 
-f (x)
+void f (x)
 {
   int a = ~x;
   while (a)

@@ -8,6 +8,7 @@ int bar (int a, int b)
 {
   if (b != 1)
     abort ();
+return 0;
 }
 
 void foo(int, int) __attribute__((noinline));

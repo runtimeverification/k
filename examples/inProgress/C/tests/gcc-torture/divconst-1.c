@@ -3,7 +3,7 @@ typedef struct
   unsigned a, b, c, d;
 } t1;
 
-f (t1 *ps)
+void f (t1 *ps)
 {
     ps->a = 10000;
     ps->b = ps->a / 3;

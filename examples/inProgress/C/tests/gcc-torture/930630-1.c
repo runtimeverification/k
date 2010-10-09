@@ -20,7 +20,7 @@ main ()
   exit (0);
 }
 
-f (x)
+void f (x)
      int x;
 {
   if (x != 7)

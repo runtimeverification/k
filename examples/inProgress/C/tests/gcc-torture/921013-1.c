@@ -1,4 +1,4 @@
-f(d,x,y,n)
+void f(d,x,y,n)
 int*d;
 float*x,*y;
 int n;

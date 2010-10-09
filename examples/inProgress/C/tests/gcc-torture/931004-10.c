@@ -6,7 +6,7 @@ struct tiny
   char d;
 };
 
-f (int n, ...)
+void f (int n, ...)
 {
   struct tiny x;
   int i;

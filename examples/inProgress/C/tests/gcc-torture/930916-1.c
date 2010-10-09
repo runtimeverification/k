@@ -1,4 +1,4 @@
-f (n)
+void f (n)
      unsigned n;
 {
   if ((int) n >= 0)

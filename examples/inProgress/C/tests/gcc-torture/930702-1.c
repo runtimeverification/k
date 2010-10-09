@@ -1,4 +1,4 @@
-fp (double a, int b)
+void fp (double a, int b)
 {
   if (a != 33 || b != 11)
     abort ();

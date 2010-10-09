@@ -3,7 +3,7 @@ struct tiny
   short c;
 };
 
-f (int n, struct tiny x, struct tiny y, struct tiny z, long l)
+void f (int n, struct tiny x, struct tiny y, struct tiny z, long l)
 {
   if (x.c != 10)
     abort();

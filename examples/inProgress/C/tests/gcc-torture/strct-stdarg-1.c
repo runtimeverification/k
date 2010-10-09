@@ -9,7 +9,7 @@ struct tiny
   char g;
 };
 
-f (int n, ...)
+void f (int n, ...)
 {
   struct tiny x;
   int i;

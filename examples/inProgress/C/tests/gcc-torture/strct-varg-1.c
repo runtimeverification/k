@@ -2,7 +2,7 @@
 
 struct s { int x, y; };
 
-f (int attr, ...)
+void f (int attr, ...)
 {
   struct s va_values;
   va_list va;

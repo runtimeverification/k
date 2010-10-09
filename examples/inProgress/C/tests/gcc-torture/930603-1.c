@@ -19,4 +19,4 @@ main ()
 
 float inita () { return 3.0; }
 float initc () { return 4.0; }
-f () {}
+void f () {}

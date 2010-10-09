@@ -1,4 +1,4 @@
-f (char *x)
+void f (char *x)
 {
   *x = 'x';
 }

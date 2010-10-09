@@ -1,11 +1,11 @@
 long long acc;
 
-addhi (short a)
+void addhi (short a)
 {
   acc += (long long) a << 32;
 }
 
-subhi (short a)
+void subhi (short a)
 {
   acc -= (long long) a << 32;
 }

@@ -1,6 +1,6 @@
 int v = 3;
 
-f ()
+void f ()
 {
   int v = 4;
   {

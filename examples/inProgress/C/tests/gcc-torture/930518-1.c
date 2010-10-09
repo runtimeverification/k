@@ -1,6 +1,6 @@
 int bar = 0;
 
-f (p)
+void f (p)
      int *p;
 {
   int foo = 2;

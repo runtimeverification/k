@@ -1,6 +1,6 @@
 #include <stdarg.h>
 
-va_double (int n, ...)
+void va_double (int n, ...)
 {
   va_list args;
 
@@ -18,7 +18,7 @@ va_double (int n, ...)
   va_end (args);
 }
 
-va_long_double (int n, ...)
+void va_long_double (int n, ...)
 {
   va_list args;
 

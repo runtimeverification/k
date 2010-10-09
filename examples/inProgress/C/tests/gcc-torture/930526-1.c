@@ -1,4 +1,4 @@
-inline
+void inline
 f (x)
 {
   int *(p[25]);

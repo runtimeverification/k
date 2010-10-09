@@ -1,6 +1,6 @@
 int a[2];
 
-f (b)
+void f (b)
 {
   unsigned int i;
   for (i = 0; i < b; i++)

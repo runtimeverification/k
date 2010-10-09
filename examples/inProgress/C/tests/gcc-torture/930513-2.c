@@ -1,9 +1,9 @@
-sub3 (i)
+void sub3 (i)
      const int *i;
 {
 }
 
-eq (a, b)
+void eq (a, b)
 {
   static int i = 0;
   if (a != i)

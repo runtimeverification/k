@@ -1,14 +1,14 @@
 char *a = 0;
 char *b = 0;
 
-g (x)
+void g (x)
      int x;
 {
   if ((!!a) != (!!b))
     abort ();
 }
 
-f (x)
+void f (x)
      int x;
 {
   g (x * x);

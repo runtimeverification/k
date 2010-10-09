@@ -1,6 +1,6 @@
 #include <stdarg.h>
 
-f (int n, ...)
+void f (int n, ...)
 {
   va_list args;
 

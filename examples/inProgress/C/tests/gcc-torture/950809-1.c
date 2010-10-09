@@ -3,7 +3,7 @@ struct S
   int *sp, fc, *sc, a[2];
 };
 
-f (struct S *x)
+void f (struct S *x)
 {
   int *t = x->sc;
   int t1 = t[0];

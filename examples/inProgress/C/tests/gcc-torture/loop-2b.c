@@ -2,7 +2,7 @@
 
 int a[2];
 
-f (int i)
+void f (int i)
 {
   for (; i < INT_MAX; i++)
     {

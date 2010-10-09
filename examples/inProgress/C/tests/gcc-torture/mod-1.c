@@ -1,4 +1,4 @@
-f (x, y)
+void f (x, y)
 {
   if (x % y != 0)
     abort ();

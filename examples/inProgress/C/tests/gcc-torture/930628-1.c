@@ -1,4 +1,4 @@
-f (double x[2], double y[2])
+void f (double x[2], double y[2])
 {
   if (x == y)
     abort ();

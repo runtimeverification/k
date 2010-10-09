@@ -1,11 +1,11 @@
 int var = 0;
 
-g ()
+void g ()
 {
   var = 1;
 }
 
-f ()
+void f ()
 {
   int f2 = 0;
 

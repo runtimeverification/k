@@ -1,4 +1,4 @@
-f (double *ty)
+void f (double *ty)
 {
   *ty = -1.0;
 }

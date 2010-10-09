@@ -17,6 +17,7 @@ int func1()
       abort ();
     if (test.v[3] != 40)
       abort ();
+	return 0;
 }
 
 Test1 func2()

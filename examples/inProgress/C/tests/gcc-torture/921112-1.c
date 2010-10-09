@@ -3,7 +3,7 @@ union u {
   double d;
 } x[2], v;
 
-f (x, v)
+void f (x, v)
      union u *x, v;
 {
   *++x = v;

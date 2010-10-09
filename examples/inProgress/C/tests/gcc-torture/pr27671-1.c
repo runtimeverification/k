@@ -11,6 +11,7 @@ foo (int a, int b)
   int c = a ^ b;
   if (c == a)
     abort ();
+return 0;
 }
 
 int

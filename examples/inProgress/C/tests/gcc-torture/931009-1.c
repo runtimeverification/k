@@ -4,7 +4,7 @@ main ()
   exit (0);
 }
 
-static
+void static
 g (out, size, lo, hi)
      int *out, size, lo, hi;
 {
@@ -15,7 +15,7 @@ g (out, size, lo, hi)
 }
 
 
-f ()
+void f ()
 {
   int a[2];
 

@@ -1,6 +1,6 @@
 double glob_dbl;
 
-f (pdbl, value)
+void f (pdbl, value)
      double *pdbl;
      double value;
 {
