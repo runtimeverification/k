@@ -64,4 +64,5 @@ int main() {
     cbuffer_retrieve_int8(buf, &(a2.a8));
 
     assert(a1.a8 == a2.a8);
+	return 0;
 }

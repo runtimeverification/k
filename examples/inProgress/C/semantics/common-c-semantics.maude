@@ -1805,10 +1805,11 @@ mod C-SEMANTICS-MISC is
 	eq fillToBytes-aux(dataList(.List{K}), L:List{K})
 		= dataList(L:List{K}) .
 		
+	--- coallesce bitranges that are adjacent
 	ceq _bit::_(piece(bitRange(N:Nat, sNat(To:Nat), To':Nat), Len:Nat), piece(bitRange(N:Nat, From:Nat, To:Nat), Len':Nat)) 
 		= piece(bitRange(N:Nat, From:Nat, To':Nat), Len:Nat +Nat Len':Nat) 
 		if Len:Nat +Nat Len':Nat <=Nat numBitsPerByte .
-		
+	
 	eq piece(N:Nat bit:: N':Nat, Len:Nat) bit:: piece(N'':Nat, Len':Nat)
 		= piece(N:Nat bit:: N':Nat bit:: piece(N'':Nat, Len':Nat), Len:Nat +Nat Len':Nat) .
 	--- eq piece(N':Nat, Len:Nat) bit:: piece(N'':Nat, Len':Nat)
@@ -1833,7 +1834,29 @@ mod C-SEMANTICS-MISC is
 		andBool Pos:Nat -Int Len:Nat >=Int 0 .
 		
 	eq bitRange(? bit:: piece(N:Nat, 1), 0, 0) = piece(N:Nat, 1) .
-	eq bitRange(piece(N:Nat, 1), 0, 0) = piece(N:Nat, 1) .	
+	eq bitRange(piece(N:Nat, 1), 0, 0) = piece(N:Nat, 1) .
+	--- ceq bitRange(piece(N:Nat, Len:Nat), 0, 0) 
+		--- = bitRange(piece(N:Nat, Len:Nat), 0, 0) piece(N:Nat, 1) 
+		--- if Len:Nat >=Nat 1 .
+		
+	ceq bitRange(piece(bitRange(N:Nat, Start:Nat, End:Nat), Len:Nat), 0, 0)
+		= bitRange(piece(bitRange(N:Nat, Start:Nat, Start:Nat), 1), 0, 0) 
+		if Start:Nat +Nat Len:Nat ==Bool sNat(End:Nat) .
+	
+	ceq bitRange(N:Nat, Pos:Nat, Pos:Nat) = 1 &Nat (N:Nat >>Nat Pos:Nat)
+		if N:Nat >=Nat 0 .
+	ceq bitRange(piece(N:Nat, 1), Pos:Nat, Pos:Nat) = 1 &Nat (N:Nat >>Nat Pos:Nat)
+		if N:Nat >=Nat 0 .
+		
+	ceq bitRange(N:Nat, 0, To:Nat) = N:Nat
+		if sNat(To:Nat) ==Bool numBitsPerByte .
+	
+	ceq bitRange(? bit:: piece(N:Nat, Len:Nat), Start:Nat, End:Nat) 
+		= bitRange(piece(N:Nat, Len:Nat), Start:Nat, End:Nat)
+		if sNat(End:Nat) <=Nat Len:Nat .
+***(
+piece(bitRange(piece(3, 2) bit:: piece(bitRange(unknown(8), 5, 5), 1) bit:: piece(15, 4), 0, 0), 1)
+***)
 	
 	eq bitRange(piece(N:Nat, sNat(End:Nat)), 0, End:Nat)
 		= piece(N:Nat, sNat(End:Nat)) .

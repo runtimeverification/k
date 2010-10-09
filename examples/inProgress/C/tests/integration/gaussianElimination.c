@@ -36,6 +36,7 @@ main()
   {
     printf("%d\n", (int)((x[i])*10000));
   }
+  return 0;
 }
 
 void legs (a,n,b,x,indx)

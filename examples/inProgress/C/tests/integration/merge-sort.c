@@ -40,7 +40,7 @@ int* fsl_mergesort(int* l) {
 	int* e;
 	int* t;
 	int* h;
-    if (l != NULL && *(l + 1)) {
+    if (l != NULL && *(int**)(l + 1)) {
         // split the list in two
         a = NULL ;
         b = NULL ;

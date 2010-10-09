@@ -65,10 +65,12 @@ mod COMMON-SEMANTICS-READING is
 		
 	op joinIntegerBytes : Type List{K} -> K .
 	ceq concretize(T:Type, dataList(L:List{K})) = joinIntegerBytes(T:Type, L:List{K})
-		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) 
+		if hasIntegerType(T:Type) 
+		--- andBool isConcreteList(L:List{K}) 
 		andBool notBool hasBitfieldType(T:Type) .
 	ceq concretize(T:Type, dataList(L:List{K})) = joinIntegerBytes(T:Type, reverseList(L:List{K}))
-		if hasIntegerType(T:Type) andBool isConcreteList(L:List{K}) 
+		if hasIntegerType(T:Type) 
+		--- andBool isConcreteList(L:List{K}) 
 		andBool hasBitfieldType(T:Type) .
 		
 	--- FIXME very unsafe, not checking size of list or its contents
@@ -97,10 +99,20 @@ mod COMMON-SEMANTICS-READING is
 	ceq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), piece(N':Nat, Len':Nat))
 		= joinIntegerBytes(T:Type, L:List{K}, piece(_bit::_(piece(N':Nat, Len':Nat), piece(N:Nat, Len:Nat)), Len:Nat +Nat Len':Nat))
 		if Len:Nat ==Bool numBitsPerByte
-		andBool N':Nat >=Nat 0
-		andBool N:Nat >=Nat 0 .
-	eq joinIntegerBytes(T:Type, .List{K}, piece(N:Nat, Len:Nat)) = interpret(T:Type, piece(N:Nat, Len:Nat)) . 
-		
+		andBool N':Nat >=Nat 0 .
+		--- andBool N:Nat >=Nat 0 .
+	ceq joinIntegerBytes(T:Type, .List{K}, piece(N:Nat, Len:Nat)) 
+		= interpret(T:Type, piece(N:Nat, Len:Nat)) 
+		if N:Nat >=Nat 0 .
+
+***(	
+    < k > ('joinIntegerBytes).KProperLabel(
+	('bitfieldType).KResultLabel(BaseType int(.List{K}),,BaseValue 1(.List{K}))
+	,,kList("wklist_")(.List{K})
+	,,BaseValue piece(piece(0, 7) bit:: piece(bitRange(piece(3, 2) b
+it:: piece(bitRange(unknown(8), 5, 5), 1) bit:: piece(15, 4), 0, 0), 1), 8)(.List{K}))
+***)
+	
 	op isConcreteList : List{K} -> Bool .
 	op isConcreteNumber : Nat -> Bool .
 	ceq isConcreteList((N:Nat,, L:List{K})) = isConcreteList(L:List{K})
@@ -311,13 +323,6 @@ mod COMMON-SEMANTICS-WRITING is
 		= splinter-aux(N:Nat, Len:Nat, sNat(Pos:Nat)),, piece(bitRange(N:Nat, Pos:Nat, Pos:Nat), 1)
 		if Pos:Nat <Nat Len:Nat .
 	
-	ceq bitRange(N:Nat, Pos:Nat, Pos:Nat) = 1 &Nat (N:Nat >>Nat Pos:Nat)
-		if N:Nat >=Nat 0 .
-	ceq bitRange(piece(N:Nat, 1), Pos:Nat, Pos:Nat) = 1 &Nat (N:Nat >>Nat Pos:Nat)
-		if N:Nat >=Nat 0 .
-		
-	ceq bitRange(N:Nat, 0, To:Nat) = N:Nat
-		if sNat(To:Nat) ==Bool numBitsPerByte .
 		
 	op writeByte : Nat K -> K .
 	mb rule

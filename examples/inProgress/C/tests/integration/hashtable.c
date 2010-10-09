@@ -78,6 +78,10 @@ HASHTBL *hashtbl_create(hash_size size, hash_size (*hashfunc)(const char *)) {
 		free(hashtbl);
 		return NULL;
 	}
+	// added because calloc's 0s are not necessarily NULL
+	for (int i = 0; i < size; i++){
+		hashtbl->nodes[i] = NULL;
+	}
 
 	hashtbl->size=size;
 
@@ -173,6 +177,10 @@ int hashtbl_resize(HASHTBL *hashtbl, hash_size size) {
 	newtbl.hashfunc=hashtbl->hashfunc;
 
 	if(!(newtbl.nodes=calloc(size, sizeof(struct hashnode_s*)))) return -1;
+	// added because calloc's 0s are not necessarily NULL
+	for (int i = 0; i < size; i++){
+		newtbl.nodes[i] = NULL;
+	}
 
 	for(n=0; n<hashtbl->size; ++n) {
 		for(node=hashtbl->nodes[n]; node; node=next) {

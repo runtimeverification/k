@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     // N = argc < 2 ? 16 : atol(argv[1]);
 	N = argc < 2 ? 2 : atol(argv[1]);
 
-    minDepth = 4;
+    minDepth = 2;
 
     if ((minDepth + 2) > N)
         maxDepth = minDepth + 2;
