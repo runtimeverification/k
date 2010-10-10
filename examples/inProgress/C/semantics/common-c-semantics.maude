@@ -1766,6 +1766,7 @@ mod C-SEMANTICS-MISC is
 		
 	
 	--- op enumDef : Id List{C} -> K .
+	--- fixme can you have enums be negative?
 	op fillEnums : K -> K .
 	op fillEnums : K Nat -> K .
 	mb rule

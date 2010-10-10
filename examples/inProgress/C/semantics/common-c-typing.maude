@@ -713,6 +713,10 @@ mod COMMON-C-TYPING is
 		if hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
 	mb rule
+		< type > pointerType(T:Type)[T':Type] => T:Type ...</ type >
+		if hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
+	mb rule
 		< type > arrayType(T:Type, ?) + T':Type => pointerType(T:Type) ...</ type >
 		if hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
