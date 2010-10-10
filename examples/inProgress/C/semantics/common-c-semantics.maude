@@ -1246,12 +1246,29 @@ mod COMMON-GLOBAL-DECLARATION is
 		< k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
 		< declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if L:K =/=Bool noLinkage
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
 		< declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if K:K =/=Bool NoInit
+		andBool L:K =/=Bool noLinkage
+		: KSentence [metadata "structural"] .
+		
+	--- fixme this terribly needs to be refactored.  I'm duplicating the above two rules so I don't add locals to the declaration order
+	mb rule
+		< k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
+		--- < declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if L:K ==Bool noLinkage
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
+		--- < declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if K:K =/=Bool NoInit
+		andBool L:K ==Bool noLinkage
 		: KSentence [metadata "structural"] .
 	
 	---  

@@ -30,7 +30,7 @@ all: $(PARSER) test
 
 integration: $(INTEGRATION_TARGETS)
 
-unit: $(UNIT_TARGETS)
+unit: $(UNIT_TARGETS) fail
 
 torture: $(TORTURE_TARGETS)
 
@@ -38,7 +38,7 @@ torture: $(TORTURE_TARGETS)
 #.PRECIOUS: test-%.kcc test-%.gcc output-% retval-% compare-%.pass
 .PHONY: all test clean good fail clean-%
 
-test: good fail
+test: good
 	@echo "Tests finished running."
 	
 good: $(GOOD_TARGETS)

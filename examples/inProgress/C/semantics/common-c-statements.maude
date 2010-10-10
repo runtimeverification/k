@@ -127,7 +127,7 @@ mod COMMON-SEMANTICS-GOTO is
 	
 	--- mb context 'calculateGotoMap(?,, ('case`(_`)_:_(?:K,,`[HOLE`]:K,, ?) ~> ?),, ?,, ?) : KSentence .
 	
-	--- CONFIRM It seems there are no sequence points for a goto
+	--- fixme CONFIRM It seems there are no sequence points for a goto
 	--- mb rule 
 		--- < k > goto(X:Id); ~> ? => K:K </ k >
 		--- < currentFunction > F:Id </ currentFunction >
@@ -140,16 +140,19 @@ mod COMMON-SEMANTICS-GOTO is
 	mb rule 
 		< k > calculateGotoMap(?, (.).K, ?, ?) => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
-
-	--- fixme this is just temporary
-	mb rule 
-		< k > calculateGotoMap(?, ?, ?, ?) => (.).K ...</ k >
-		: KSentence [metadata "structural"] .
 	
 ***(
 	things I have to keep track of:
-		remaining computation
-		...
+		in goto map:
+			remaining computation
+			which variables are allocated on the path
+			...
+		in blocks:
+			which variables i've allocated so far
+	
+	I need to adjust the block stack, 
+		
+	When we goto, we need to take the variables on the goto path and subtract the variables we've already allocated in the real history.  Then we need to declare the remaining variables.
 		
 ***)
 	

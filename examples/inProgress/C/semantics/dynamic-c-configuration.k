@@ -4,14 +4,14 @@ kmod C-CONFIGURATION is
 
 	configuration 
 		< T > 
-			--- < gotoMap > .Map </ gotoMap >
+			< gotoMap > .Map </ gotoMap >
 			< genv > .Map </ genv >
 			< gtypes > .Map </ gtypes >
 			< gstructs > .Map </ gstructs >
 			< mem > .Map </ mem >
 			< nextLoc > 0 </ nextLoc >
 			< freshNat > 0 </ freshNat >
-			--- < nextFile > 0 </ nextFile >
+			< nextFile > 0 </ nextFile >
 			< malloced > .Map </ malloced >
 			< statics > .Map </ statics >
 			< internalLocations > .Map </ internalLocations >
@@ -35,19 +35,25 @@ kmod C-CONFIGURATION is
 					< control >
 						< blockStack > .List </ blockStack > --- stack of "local" cells
 						< local >
-							< nestingDepth > 0 </ nestingDepth >
-							< currentBlock > 0 </ currentBlock >
-							< structs > .Map </ structs >
+							--- maps from Ids
 							< env > .Map </ env >
 							< types > .Map </ types >
-							< currentObject > .List </ currentObject >
-							< currentSubObject > .List </ currentSubObject >
-							< incompleteLength > 0 </ incompleteLength >
-							< savedInitialization > .K </ savedInitialization >
-							< localVariables > .Set </ localVariables >
-							< localAddresses > .Set </ localAddresses >
+							< structs > .Map </ structs >
+
+							--- information about the block we're in
+							< nestingDepth > 0 </ nestingDepth >
+							< currentBlock > 0 </ currentBlock >
+							< localVariables > .Set </ localVariables > --- used to make sure we don't declare a variable twice in the same scope
+							< localAddresses > .Set </ localAddresses > --- used to deallocate memory on leaving a block
 						</ local >
 						< k > .K </ k >
+						
+						--- used to figure initializers
+						< currentObject > .List </ currentObject >
+						< currentSubObject > .List </ currentSubObject >
+						< incompleteLength > 0 </ incompleteLength >
+						< savedInitialization > .K </ savedInitialization >
+						
 						< currentTranslationUnit > "" </ currentTranslationUnit >
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						--- < holds > .Map </ holds >
@@ -56,7 +62,6 @@ kmod C-CONFIGURATION is
 						< type * > .K </ type * >
 						< loopStack > .List </ loopStack >
 						< declarationTypeHolder > .K </ declarationTypeHolder >
-						--- < allLocalAddresses > .Set </ allLocalAddresses >
 					</ control >
 				</ thread * >
 			</ threads >

@@ -20,8 +20,7 @@ kmod DYNAMIC-C-SEMANTICS is
 --- represent the program parameters.
 --- — The parameters argc and argv and the strings pointed to by the argv array shall
 --- be modifiable by the program, and retain their last-stored values between program
---- startup and program termination.	
-	--- op #incomingArgumentArray : -> Id [ctor]
+--- startup and program termination.
 	op incomingArguments : List{K} -> K
 	op incomingArguments-aux : List{K} Nat -> K
 	
@@ -43,6 +42,82 @@ kmod DYNAMIC-C-SEMANTICS is
 --- used, as they are local to the function in which they are declared):
 --- int main(int argc, char *argv[]) { /* ... */ }
 --- or equivalent;9) or in some other implementation-defined manner
+
+	--- this bit of indirection is used to check that the main prototype is correct, and to call it with the appropriate arguments
+	op callMain : Nat Id -> K
+	op callMain-aux : K Nat Id -> K [strict(1)]
+	
+	rule < k > callMain(N:Nat, X:Id) 
+		=> callMain-aux(typeof(Identifier("main")), N:Nat, X:Id)
+	...</ k >
+	< functionTranslationUnits >... Tu:K |-> Map((? Identifier("main") |-> Tu:K)) ...</ functionTranslationUnits >
+	< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+	
+	--- FIXME i think these are slightly different
+	--- fixme void isn't supposed to have a name
+	--- fixme figure out type of string
+	eq callMain-aux(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	eq callMain-aux(functionType(int, Nil), N:Nat, X:Id) = Call(Identifier("main"), Nil)
+	ceq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(incompleteArrayType(pointerType(T:Type)), ?))), N:Nat, X:Id)
+		= Call(Identifier("main"), N:Nat :: X:Id)
+		if T:Type ==Bool char
+	ceq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(pointerType(pointerType(T:Type)), ?))), N:Nat, X:Id)
+		= Call(Identifier("main"), N:Nat :: X:Id)
+		if T:Type ==Bool char
+
+	op syntaxNat : Nat -> K
+	eq syntaxNat(N:Nat) = Constant(IntLiteral(NoSuffix(DecimalConstant(N:Nat))))
+	
+	eq eval(K:K) = eval(K:K, .List{K}, "")
+	eq eval(Program(P:List{C}), L:List{K}, Input:String) = 
+		< T >
+			< threads >
+				< thread >
+					< control >
+						< k > listToK(P:List{C})
+							~> DeclarationDefinition(InitNameGroup(Specifier(Char), (InitName(AttributeWrapper(NameLoc(Name(Identifier("#incomingArgumentsArray"), AttributeWrapper(PointerType(AttributeWrapper(ArrayType(JustBase, syntaxNat(sNat(lengthList{K} L:List{K}))), Nil)), Nil)), UnknownCabsLoc), Nil), NoInit))))
+							~> resolveReferences							
+							~> incomingArguments(L:List{K})
+							~> callMain(lengthList{K}(L:List{K}), Identifier("#incomingArgumentsArray"))
+						</ k >
+						< currentFunction > File-Scope </ currentFunction >
+						< currentProgramLoc > UnknownCabsLoc </ currentProgramLoc >
+					...</ control >
+				...</ thread >
+			</ threads >
+			< nextLoc > sym(1) +Nat 0 </ nextLoc >
+			< nextFile > 3 </ nextFile >
+			< openFiles >
+				0 |-> "stdin" --- stdin
+				1 |-> "stdout" --- stdout
+				2 |-> "stdout" --- stderr
+			</ openFiles >
+		...</ T >
+		< files > 
+			"stdin" |-> Input:String
+			"stdout" |-> ""
+		</ files >
+		
+	***(
+	--- throw away annotations
+	mb [no-annotations]: rule [annotation(?); => .K] : KSentence [metadata "structural"] .
+	
+	--- fixme I'm not sure threads clean up their memory
+	
+	--- this shouldn't happen for normal programs (functions end in a return).  it is only used for threads
+	mb [terminate-thread]: rule
+		[< thread >... < k > .K </ k > ...</ thread > => .Bag]
+		: KSentence [metadata "structural"] .
+	***)		
+	rule [terminate] :
+		(< T >... < threads > < thread >... < k > V:Value </ k > ...</ thread > </ threads > ...</ T >
+		=> < resultValue > V:Value </ resultValue >)
+		< files >...
+			"stdin" |-> S1:String	"stdout" |-> S2:String => .Map
+		...</ files >
+		(.Bag => < input > S1:String </ input >	< output > S2:String </ output >)
+
+		
 
 	--- op unclutterConfiguration : Bag -> Bag
 	--- op stripConfiguration : Bag -> Bag
@@ -89,85 +164,5 @@ kmod DYNAMIC-C-SEMANTICS is
 		--- < genv > ?:Map </ genv >
 	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
 
-	--- this bit of indirection is used to check that the main prototype is correct, and to call it with the appropriate arguments
-	op callMain : Nat Id -> K
-	op callMain-aux : K Nat Id -> K [strict(1)]
-	
-	rule < k > callMain(N:Nat, X:Id) 
-		=> callMain-aux(typeof(Identifier("main")), N:Nat, X:Id)
-	...</ k >
-	< functionTranslationUnits >... Tu:K |-> Map((? Identifier("main") |-> Tu:K)) ...</ functionTranslationUnits >
-	< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
-	
-	--- FIXME i think these are slightly different
-	--- fixme void isn't supposed to have a name
-	--- fixme figure out type of string
-	eq callMain-aux(functionType(int, typedDeclaration(void, ?)), N:Nat, X:Id) = Call(Identifier("main"), Nil)
-	eq callMain-aux(functionType(int, Nil), N:Nat, X:Id) = Call(Identifier("main"), Nil)
-	ceq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(incompleteArrayType(pointerType(T:Type)), ?))), N:Nat, X:Id)
-		= Call(Identifier("main"), N:Nat :: X:Id)
-		if T:Type ==Bool char
-	ceq callMain-aux(functionType(int, (typedDeclaration(int, ?) :: typedDeclaration(pointerType(pointerType(T:Type)), ?))), N:Nat, X:Id)
-		= Call(Identifier("main"), N:Nat :: X:Id)
-		if T:Type ==Bool char
 		
-***(
-('callMain-aux).KProperLabel(('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("argc")(.List{K})),,('typedDeclaration).KResultLabel(('incompleteArrayType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K}))),,Id Identifier("argv")(.List{K})))),,BaseValue 1(.List{K}),,Id Identifier("#incomingArgumentsArray")(.List{K}))
-***)
-	op syntaxNat : Nat -> K
-	eq syntaxNat(N:Nat) = Constant(IntLiteral(NoSuffix(DecimalConstant(N:Nat))))
-	
-	eq eval(K:K) = eval(K:K, .List{K}, "")
-	eq eval(Program(P:List{C}), L:List{K}, Input:String) = 
-		< T >
-			< threads >
-				< thread >
-					< control >
-						< k > listToK(P:List{C})
-							~> DeclarationDefinition(InitNameGroup(Specifier(Char), (InitName(AttributeWrapper(NameLoc(Name(Identifier("#incomingArgumentsArray"), AttributeWrapper(PointerType(AttributeWrapper(ArrayType(JustBase, syntaxNat(sNat(lengthList{K} L:List{K}))), Nil)), Nil)), UnknownCabsLoc), Nil), NoInit))))
-							--- ~> (Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
-							~> resolveReferences							
-							~> incomingArguments(L:List{K})
-							~> callMain(lengthList{K}(L:List{K}), Identifier("#incomingArgumentsArray"))
-						</ k >
-							--- Call(Identifier("main"), (Nil
-								--- (Constant(IntLiteral(DecimalConstant(length L:List{K})))) 
-								--- :: (incomingArgumentArray)
-							---xxx )) </ k >
-						< currentFunction > File-Scope </ currentFunction >
-						< currentProgramLoc > UnknownCabsLoc </ currentProgramLoc >
-					...</ control >
-				...</ thread >
-			</ threads >
-			< nextLoc > sym(1) +Nat 0 </ nextLoc >
-			< nextFile > 3 </ nextFile >
-			< openFiles >
-				0 |-> "stdin" --- stdin
-				1 |-> "stdout" --- stdout
-				2 |-> "stdout" --- stderr
-			</ openFiles >
-		...</ T >
-		< files > 
-			"stdin" |-> Input:String
-			"stdout" |-> ""
-		</ files >
-	***(
-	--- throw away annotations
-	mb [no-annotations]: rule [annotation(?); => .K] : KSentence [metadata "structural"] .
-	
-	--- fixme I'm not sure threads clean up their memory
-	
-	--- this shouldn't happen for normal programs (functions end in a return).  it is only used for threads
-	mb [terminate-thread]: rule
-		[< thread >... < k > .K </ k > ...</ thread > => .Bag]
-		: KSentence [metadata "structural"] .
-	***)		
-	rule [terminate] :
-		(< T >... < threads > < thread >... < k > V:Value </ k > ...</ thread > </ threads > ...</ T >
-		=> < resultValue > V:Value </ resultValue >)
-		< files >...
-			"stdin" |-> S1:String	"stdout" |-> S2:String => .Map
-		...</ files >
-		(.Bag => < input > S1:String </ input >	< output > S2:String </ output >)
-
 endkm

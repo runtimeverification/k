@@ -2,50 +2,8 @@ mod COMMON-C-CONFIGURATION is
 	including C-SYNTAX .
 	including MATCH-C-SYNTAX .
 	
-	op k : -> CellLabel .
-	op nextFile : -> CellLabel .
-	op openFiles : -> CellLabel .
-	op output : -> CellLabel .
-	op input : -> CellLabel .
-	op error : -> CellLabel .
-	op env : -> CellLabel .
-	op genv : -> CellLabel .
-	op mem : -> CellLabel .
-	op nextLoc : -> CellLabel .
-	op resultValue : -> CellLabel .
-	op resultOutput : -> CellLabel .
-	op callStack : -> CellLabel .
 	op stackFrame : -> CellLabel .
 	op continuation : -> CellLabel .
-	op locals : -> CellLabel .
-	op sizes : -> CellLabel .
-	op loopStack : -> CellLabel .
-	op malloced : -> CellLabel .
-	op local : -> CellLabel .
-	op statics : -> CellLabel .
-	op typedefs : -> CellLabel .
-	op global : -> CellLabel .
-	op types : -> CellLabel .
-	op type : -> CellLabel .
-	op structs : -> CellLabel .
-	op pad : -> CellLabel .
-	op width : -> CellLabel .
-	op files : -> CellLabel .
-	op currentFunction : -> CellLabel .
-	op s-currentFunction : -> CellLabel .
-	op aLabelMap : -> CellLabel .
-	op threads : -> CellLabel .
-	op thread : -> CellLabel .
-	op freshNat : -> CellLabel .
-	op holds : -> CellLabel .
-	op busy : -> CellLabel .
-	op locsWrittenTo : -> CellLabel .
-	op currentTranslationUnit : -> CellLabel .
-	op programText : -> CellLabel .
-	op currentProgramLoc : -> CellLabel .
-	op control : -> CellLabel .
-	op declarationTypeHolder : -> CellLabel .
-	--- ops structs files resultValue freshNat genv currentTranslationUnit aLabelMap k currentProgramLoc currentFunction programText thread type nextFile locals input holds malloced callStack locsWrittenTo output nextLoc env loopStack sizes T openFiles statics mem busy types typedefs threads : -> CellLabel .  
 	
 	subsort Id Int String Float Bool Rat < K .
 	subsort String < Builtins .

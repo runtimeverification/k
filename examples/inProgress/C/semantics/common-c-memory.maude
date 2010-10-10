@@ -104,14 +104,6 @@ mod COMMON-SEMANTICS-READING is
 	ceq joinIntegerBytes(T:Type, .List{K}, piece(N:Nat, Len:Nat)) 
 		= interpret(T:Type, piece(N:Nat, Len:Nat)) 
 		if N:Nat >=Nat 0 .
-
-***(	
-    < k > ('joinIntegerBytes).KProperLabel(
-	('bitfieldType).KResultLabel(BaseType int(.List{K}),,BaseValue 1(.List{K}))
-	,,kList("wklist_")(.List{K})
-	,,BaseValue piece(piece(0, 7) bit:: piece(bitRange(piece(3, 2) b
-it:: piece(bitRange(unknown(8), 5, 5), 1) bit:: piece(15, 4), 0, 0), 1), 8)(.List{K}))
-***)
 	
 	op isConcreteList : List{K} -> Bool .
 	op isConcreteNumber : Nat -> Bool .
