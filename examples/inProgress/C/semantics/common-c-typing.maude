@@ -744,6 +744,15 @@ mod COMMON-C-TYPING is
 		< type > unionType(S:Id) . F:Id => T:Type ...</ type >
 		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
 		: KSentence [metadata "structural"] .
+		
+	mb [type-struct-arrow]: rule
+		< type > pointerType(structType(S:Id)) -> F:Id => T:Type ...</ type >
+		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
+		: KSentence [metadata "structural"] .
+	mb [type-union-arrow]: rule
+		< type > pointerType(unionType(S:Id)) -> F:Id => T:Type ...</ type >
+		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
+		: KSentence [metadata "structural"] .
 
 	mb rule < type > N:Nat => cfg:largestUnsigned ...</ type > : KSentence .
 
