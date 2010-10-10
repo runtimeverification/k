@@ -31,10 +31,11 @@ kmod C-CONFIGURATION is
 			--- < messages > .List </ messages >
 			< threads >
 				< thread * >
-					< callStack > .List </ callStack >
+					< callStack > .List </ callStack > --- stack of "control" cells
 					< control >
+						< blockStack > .List </ blockStack > --- stack of "local" cells
 						< local >
-							--- < nestingDepth > 0 </ nestingDepth >
+							< nestingDepth > 0 </ nestingDepth >
 							< currentBlock > 0 </ currentBlock >
 							< structs > .Map </ structs >
 							< env > .Map </ env >
@@ -44,7 +45,7 @@ kmod C-CONFIGURATION is
 							< incompleteLength > 0 </ incompleteLength >
 							< savedInitialization > .K </ savedInitialization >
 							< localVariables > .Set </ localVariables >
-							--- < initMaxes > .Map </ initMaxes >
+							< localAddresses > .Set </ localAddresses >
 						</ local >
 						< k > .K </ k >
 						< currentTranslationUnit > "" </ currentTranslationUnit >
@@ -54,9 +55,8 @@ kmod C-CONFIGURATION is
 						< currentProgramLoc > .K </ currentProgramLoc >
 						< type * > .K </ type * >
 						< loopStack > .List </ loopStack >
-						< blockStack > .List </ blockStack >
-						< locals > .Bag </ locals >
 						< declarationTypeHolder > .K </ declarationTypeHolder >
+						--- < allLocalAddresses > .Set </ allLocalAddresses >
 					</ control >
 				</ thread * >
 			</ threads >

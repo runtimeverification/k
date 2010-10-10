@@ -563,6 +563,7 @@ mod COMMON-PARAMETER-BINDING is
 			~> bind-aux(Loc:Nat, L:List{C}, P:List{Type}) 
 		...</ k > 
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		< localAddresses >... (.).Set => SetItem(Loc:Nat) ...</ localAddresses >
 		--- if isTypeCompatible(T:Type, T':Type)
 		if notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
@@ -1285,6 +1286,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< localVariables > Vars:Set (. => SetItem(X:Id)) </ localVariables >
+		< localAddresses >... (.).Set => SetItem(Loc:Nat) ...</ localAddresses >
 		if notBool hasIncompleteType(T:Type)
 		andBool notBool hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
@@ -1323,6 +1325,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< localVariables > Vars:Set (. => SetItem(X:Id)) </ localVariables >
+		< localAddresses >... (.).Set => SetItem(Loc:Nat) ...</ localAddresses >
 		if notBool X:Id in Vars:Set
 		: KSentence [metadata "structural"] .
 	mb rule

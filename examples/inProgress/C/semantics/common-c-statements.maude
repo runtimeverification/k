@@ -1,6 +1,7 @@
 mod COMMON-SEMANTICS-STATEMENTS-INCLUDE is
 	including COMMON-INCLUDE .
 	op loopMarked : -> Statement .
+	op deleteLoc : Nat -> K . --- deletes the base object from memory, given a location
 endm 
  
 mod COMMON-SEMANTICS-IF-THEN is
@@ -139,10 +140,20 @@ mod COMMON-SEMANTICS-GOTO is
 	mb rule 
 		< k > calculateGotoMap(?, (.).K, ?, ?) => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
-	--- FIXME this is totally wrong, just for now
+
+	--- fixme this is just temporary
 	mb rule 
 		< k > calculateGotoMap(?, ?, ?, ?) => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
+	
+***(
+	things I have to keep track of:
+		remaining computation
+		...
+		
+***)
+	
+		
 	--- mb rule 
 		--- < k > [calculateGotoMap(X:Id, (L:KLabel(Args:List{K}) ~> K:K), S:List, Tail:K) 
 		--- => calculateGotoMap(X:Id, K:K, S:List, Tail:K)] ...</ k >
@@ -223,11 +234,25 @@ endm
 mod COMMON-SEMANTICS-RETURN is
 	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
-	--- fixme can be combined into one cleaning rule
-	mb [return-value-clean-local]: rule 
-		< k > Return(?) ...</ k >
-		< locals >... BagItem(sym(Block:Nat) +Nat ?) => (.).Bag ...</ locals >	
+	mb [erase-loc]: rule
+		< k > deleteLoc(sym(Block:Nat) +Nat ?) => (.).K ...</ k >
 		< mem >... Block:Nat |-> ? => (.).Map ...</ mem >
+		: KSentence [metadata "structural"] .
+	
+	mb [return-clean-local]: rule
+		< k > (. => deleteLoc(Loc:Nat)) ~> Return(?) ...</ k >
+		< localAddresses >... SetItem(Loc:Nat) => (.).Set ...</ localAddresses >	
+		: KSentence [metadata "structural"] .
+		
+	mb [fetch-all-locals]: rule
+		< k > Return(?) ...</ k >
+		< localAddresses > (.).Set => Addresses:Set </ localAddresses >
+		< blockStack > List(< stackFrame > 
+			?
+			< localAddresses > Addresses:Set </ localAddresses >
+			</ stackFrame >)
+			=> (.).List
+		...</ blockStack >
 		: KSentence [metadata "structural"] .
 
 	--- --- this is used for threads
@@ -238,17 +263,21 @@ mod COMMON-SEMANTICS-RETURN is
 		--- orBool L:KLabel ==Bool 'return_;
 		--- : KSentence [metadata "structural"] .
 
-	mb [return-value]: rule 
+	--- this is used for returns with no return value as well, since we return "emptyValue", which will hopefully be cast to void
+	mb [return]: rule 
 		< control >
 			< k > Return(V:Value) ~> ? 
 				=> sequencePoint 
 				~> cast(T:Type, V:Value) 
-				~> K:K 
+				~> K:K
 			</ k >
 			--- these cells get replaced by the ones in C:Bag, so we can delete them when we match them
-			(< locals > (.).Bag </ locals > => (.).Bag)
+			(< local >... < localAddresses > (.).Set </ localAddresses > ...</ local > => (.).Bag)
+			--- i can't say the below line alone, but i want to :(
+			--- (< localAddresses > (.).Set </ localAddresses > => (.).Bag)
 			(< currentFunction > F:Id </ currentFunction > => (.).Bag)
 			(< currentTranslationUnit > Tu:K </ currentTranslationUnit > => (.).Bag)
+			(< blockStack > (.).List </ blockStack > => (.).Bag)
 			(? => C:Bag)
 		</ control >
 		< gtypes >... Tu:K |-> Map((? (F:Id |-> functionType(T:Type, ?)))) ...</ gtypes >
@@ -273,19 +302,32 @@ mod COMMON-SEMANTICS-BLOCKS is
 		< local >
 			C:Bag
 			< localVariables > Vars:Set => (.).Set </ localVariables >
-			--- < nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
+			< localAddresses > Addresses:Set => (.).Set </ localAddresses >
+			< nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
 		</ local >
-		< blockStack > (.).List => List(< stackFrame > C:Bag 
-		--- < nestingDepth > N:Nat </ nestingDepth > 
-		< localVariables > Vars:Set </ localVariables >
-		</ stackFrame >) ...</ blockStack >
+		< blockStack > (.).List 
+			=> List(< stackFrame > C:Bag 
+			< nestingDepth > N:Nat </ nestingDepth > 
+			< localVariables > Vars:Set </ localVariables >
+			< localAddresses > Addresses:Set </ localAddresses >
+			</ stackFrame >)
+		...</ blockStack >
+		: KSentence [metadata "structural"] .
+		
+	mb [pop-block-free-memory]: rule
+		< k > (. => deleteLoc(Loc:Nat)) ~> popBlock ...</ k >
+		< localAddresses >... (SetItem(Loc:Nat) => (.).Set) ...</ localAddresses >
 		: KSentence [metadata "structural"] .
 		
 	mb [pop-block]: rule
-		< k > popBlock => (.).K ...</ k > 
-		< local > ? => C:Bag </ local >
+		< k > popBlock => (.).K ...</ k >
+		< local > 
+			(? => C:Bag)
+			(< localAddresses > (.).Set </ localAddresses > => (.).Bag)
+		</ local >
 		< blockStack > List(< stackFrame > C:Bag </ stackFrame >) => (.).List ...</ blockStack >
 		: KSentence [metadata "structural"] .
+	
 	
 	mb [dissolve-block]: rule
 		< k > Block(BlockNum:Nat, ?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > 
