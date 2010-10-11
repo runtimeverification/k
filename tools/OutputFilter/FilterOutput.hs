@@ -46,21 +46,54 @@ module FilterOutput where
   ppKOutput :: Configuration -> KOutput -> Doc
   ppKOutput conf (String s) = text s
   ppKOutput conf (Cell name contents) | shouldShow conf name = linebreak <> (hang 1 $ ppBeginCell name
-                                                               <> handleContents contents
-                                                               <+> ppEndCell name)
-                                      | otherwise = handleContents $ filter isCell contents
-    where handleContents cs = (hcat . map (ppKOutput conf)) (cleanupStrings cs)
-          isCell (Cell _ _) = True
-          isCell _ = False
+                                                                         <> handleContents contents
+                                                                        <+> ppEndCell name)
+                                      | otherwise            = handleContents $ filter isCell contents
+    where handleContents cs = (hcat . map (ppKOutput conf) . pruneStrings conf name . cleanupStrings) cs
+
+
+  isCell (Cell _ _) = True
+  isCell _          = False
+
+  isString (String _ ) = True
+  isString _           = False
+
+
+
+  -- Prune off lines after the user-specified break
+  pruneStrings :: Configuration -> CellName -> [KOutput] -> [KOutput]
+  pruneStrings conf cn ks | shouldPrune conf cn = map (prune conf cn) (filter isString ks)
+                          | otherwise           = ks
+
+
+  prune conf cn (String s) = String $ (stripr . unlines . take toKeep) intermediate ++ more
+    where toKeep = getPruneNumber conf cn
+          intermediate = lines s
+          more = " [..." ++ show (length intermediate - 1) ++ " more...]"
+
+
+
+  -- Fetch the number of lines to keep from the configuration
+
 
   -- Should a cell be shown?
-  -- Todo: Extend later to handle default behaviors etc
   shouldShow :: Configuration -> CellName -> Bool
-  shouldShow list cname = case find ((cname ==) . fst) list of
-                            Just (_, Yes) -> True
-                            _             -> False
+  shouldShow conf cn = case find ((cn ==) . fst) conf of
+                         Just (_, No) -> False
+                         Nothing      -> False
+                         _            -> True
+
+  -- Should a cell be pruned?
+  shouldPrune :: Configuration -> CellName -> Bool
+  shouldPrune conf cn = case find ((cn ==) . fst) conf of
+                          Just (_, Lines _) -> True
+                          _                 -> False
 
 
+  getPruneNumber :: Configuration -> CellName -> Int
+  getPruneNumber conf cn = case find ((cn ==) . fst) conf of
+                             Just (_, Lines n) -> n
+                             _ -> error "internal error: shouldPrune approved a prune candidate incorrectly"
 
   -- Convert to string
   stringifyDoc :: Doc -> String

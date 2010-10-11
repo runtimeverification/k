@@ -13,6 +13,7 @@ module ParseConfig where
   import Data.Yaml.Syck
   import Control.Applicative
   import Data.Char
+  import Control.Arrow
 
   type CellName = String
   type Configuration = [CellConfig]
@@ -22,6 +23,7 @@ module ParseConfig where
   -- add more to this to support more customizations
   data CellConfigRhs = Yes
                      | No
+                     | Lines Int
     deriving (Show)
 
   -- A Yaml tree without superfluous info and types
@@ -48,14 +50,27 @@ module ParseConfig where
   extractConfiguration :: YamlLite -> Configuration
   extractConfiguration = (map extractCellConfig . unMap)
 
+  -- I use arrows because I'm awesome. See the commented out version for the more clear version
   extractCellConfig :: (YamlLite, YamlLite) -> CellConfig
-  extractCellConfig yl = ((unStr . fst) yl, (readConfig . unStr . snd) yl)
+  extractCellConfig = arr unStr *** arr readConfig
+  -- extractCellConfig (l,r) = (unStr l, readConfig r)
 
-  readConfig :: String -> CellConfigRhs
-  readConfig s | canonicalize s `elem` ["yes", "y"] = Yes
-               | canonicalize s `elem` ["no", "n"]  = No
-               | otherwise                          = error $ "Unknown value: " ++ s
+
+  -- Extend the below function to add more functionality
+  readConfig :: YamlLite -> CellConfigRhs
+  readConfig (Str s) | compareStr s ["yes", "y"] = Yes
+                     | compareStr s ["no", "n"]  = No
+                     | otherwise                 = error $ "Unknown value: " ++ s
+  readConfig (Map [(Str key, Str val)]) | compareStr key ["lines", "keep"] && areNumbers val = Lines (read val)
+  readConfig (Map _) = Yes
+
+  -- Compare the contents of the config item to see if it occurs in passed strings.
+  compareStr :: String -> [String] -> Bool
+  compareStr s ss = canonicalize s `elem` map canonicalize ss
     where canonicalize = map toLower
+
+  areNumbers :: String -> Bool
+  areNumbers = and . map isDigit
 
   getConfig :: FilePath -> IO Configuration
   getConfig fp = extractConfiguration <$> parseYamlFileLite fp

@@ -1,11 +1,20 @@
 # Whitelist the following cells
-T: y
-k: y
-env: y
-threads: y
-thread: y
-callStack: y
-mem: y
+T: yes
+k:
+  keep: 5
+env: yes
+threads: yes
+thread: yes
+callStack: yes
+#mem: yes
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. blacklisting <thread> wont blacklist all of its children
+
+
+# Upcoming features:
+#   recursive show/hide
+#   colors
+#   environment/memory lookup
+#   regular-expression based line-based show/hide
+#   arbitrary global and local string-replacement rules
