@@ -1,0 +1,18 @@
+# Since we're currently working off a blacklist pattern, the below "y" flags are redundant
+- k: y
+- env: y
+- T: y
+- threads: y
+- thread: y
+- callStack: y
+
+# Blacklist the following cells:
+- files: no
+- structs: no
+- continuation: no
+- callstack: no
+- declarations: no
+- gstructs: no
+- programText: no
+- types: no
+
