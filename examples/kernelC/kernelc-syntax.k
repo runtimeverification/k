@@ -10,10 +10,13 @@ kmod KERNELC-SYNTAX is
                | Exp <= Exp [prec 37 strict] 
                | `! Exp | Exp && Exp | Exp `|| Exp | Exp `? Exp : Exp [prec 39] 
                | Exp = Exp [strict(2) prec 40 gather (e E)] | printf ( "%d;" , Exp ) [strict] 
-               | scanf ( "%d" , Exp ) [strict] | & Id
+               | scanf ( "%d" , Exp ) [strict] | scanf ( "%d" , & Exp )
                | Id ( List{Exp} ) [prec 0 strict(2)] | Id ( ) [prec 0]
                | DeclId
-               | Exp ++
+               | ++ Exp [prec 0]
+               | Exp ++ [prec 0]
+               | -- Exp [prec 0]
+               | Exp -- [prec 0]
 
 --- malloc additions
   syntax Exp ::= `NULL | free ( Exp ) [strict] | * Exp [ditto] | ( int * ) malloc ( Exp * sizeof ( int ) ) [strict] | Exp [ Exp ] [prec 0]
@@ -23,7 +26,7 @@ kmod KERNELC-SYNTAX is
 
   syntax Stmt ::= Exp ; [prec 45 strict] | { } | { StmtList } | if ( Exp ) Stmt [prec 47]
                 | if ( Exp ) Stmt else Stmt [prec 46 strict(1)]
-                | while ( Exp ) Stmt
+                | while ( Exp ) Stmt 
                 | DeclId List{DeclId} { StmtList }
                 | DeclId List{DeclId} { StmtList return Exp ; }
                 | #include < StmtList >
@@ -48,14 +51,17 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro if(E) St:Stmt = if(E) St else {}
   macro NULL = 0
   macro I:Id () = I (())
-  macro DI:DeclId(L:List{DeclId}) { Sts:StmtList } = DI:DeclId(L:List{DeclId}) { Sts:StmtList return 0 ;}  
+  macro DI:DeclId(DIL:List{DeclId}) { Sts:StmtList } = DI(DIL) { Sts return 0 ;}  
 
   macro void PI:PointerId = int PI
   macro int * PI = int PI
   macro #include<Sts> = Sts
   macro E1[E2] = *(E1 + E2)
+  macro scanf("%d", & * E) = scanf("%d", E)
   macro (int * PI = E) = (int PI = E)
-  macro E ++ = (E = E + 1)
+  macro (int X:Id = E ;) = int X ; X = E ;
+  macro ++ E = (E = E + 1)
+  macro -- E = (E = E + 1)
 endkm
 
 

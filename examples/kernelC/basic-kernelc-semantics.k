@@ -1,5 +1,5 @@
 kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION 
-  syntax Val ::= Int | void | & Id
+  syntax Val ::= Int | void 
   syntax Exp ::= Val 
   syntax List{Val} ::= Val | List{Val} , List{Val} [ditto] 
   syntax List{Exp} ::= List{Val} 
@@ -7,12 +7,17 @@ kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   syntax K ::= List{Exp} | List{PointerId} | List{DeclId} | StmtList | Pgm | String | initial | restore ( Map ) | increment ( Nat , Nat )
   syntax KResult ::= List{Val} 
 
-  configuration <T> <threads> <thread*> <k> .K </k> <env> .Map </env> <id> 0 </id> </thread*> 
+  configuration <T ?> <threads> <thread*> <k> .K </k> <env> .Map </env> <id> 0 </id> </thread*> 
                     </threads> <cthreads> .Set </cthreads>
                     <funs> .Map </funs> <in> .List </in> <out> "" </out> 
                    <mem> .Map </mem> <ptr> .Map </ptr> 
-                   <locks> .Map </locks> <next> initialLoc </next> </T> 
-                <result> "" </result>
+                   <locks> .Map </locks> <next> initialLoc </next> </T ?> 
+                <result ?> "" </result ?>
+
+  syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
+  rule run ( L:KLabel ) => <T_> <k> L(.List{K}) ~> '_`(`)(main) </k> <_/T> [structural]
+  rule run ( L:KLabel , Il:List{K} ) => <T_> <k> L(.List{K}) ~> '_`(`)(main) </k> <in> List(Il) </in> <_/T> [structural]
+
   context *[HOLE]=_
   
   rule I1:Int == I2:Int => Bool2Int(I1 ==Int I2) [structural] 
@@ -25,6 +30,8 @@ kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   rule if(I:Int) St else _ => St if notBool(I ==Int 0) [structural]
   rule V:Val ; => . [structural]
   rule <k> X:Id => V <_/k>  <env_> X |-> V <_/env> [structural]
+  rule <k> X:Id ++ => I <_/k>  <env_> X |-> (I => I +Int 1) <_/env> [structural]
+  rule <k> X:Id -- => I <_/k>  <env_> X |-> (I => _-Int_(I,1)) <_/env> [structural]
   rule <k> X = V => V <_/k> <env_> X |-> (_ => V) <_/env> [structural]
   rule <k> while(E:Exp) St => if (E) {St while(E) St} else {} <_/k> [structural]
 
@@ -32,6 +39,7 @@ kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
        <out> S:String => S +String Int2String(I) +String ";" </out>
   rule <k> scanf("%d",N) => void <_/k> <mem_> N |-> (_ => I) <_/mem> <in> ListItem(I) => . <_/in>
   rule <k> scanf("%d",&X) => void <_/k> <env_> X |-> (_ => I) <_/env> <in> ListItem(I) => . <_/in>
+  [structural]
 
 ---  rule #include<stdio.h> #include<stdlib.h> Sts:StmtList => Sts:StmtList 
 ---      [structural]
@@ -51,7 +59,6 @@ kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
 
   context int _ = [HOLE]
   rule <k> int X => 0 <_/k> <env_> . => (X |-> initial) <_/env>
-  rule <k> int X = V => V <_/k> <env_> . => (X |-> V) <_/env>
  
   rule <k> V ~> (restore(Env) => .) <_/k> <env> _ => Env </env> [structural]
 

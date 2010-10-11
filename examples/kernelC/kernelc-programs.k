@@ -2,13 +2,13 @@ kmod KERNELC-PROGRAMS is including KERNELC-SYNTAX
   syntax Pgm ::= pSum | pCollatz | pBufferOverflow | pSimpTest  | pStrErr | pStrTest
                | pAllocateBadPrint | pAllocatePrintReversePrintFree | pAllocatePrintFree
   syntax Stmt ::= pPrint.c  | pAllocateLoop.c | pAllocateGood.c | pAllocateBad.c | pReverse.c
-                    | pFree.c | pStrLen.c | pStrCpy.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c | stdio.h | stdlib.h
+                    | pFree.c | pStrLen.c | pStrCpy.c | pStrRead.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c | stdio.h | stdlib.h
   syntax Id ::= a | b | c | d | e | i | l 
           | limit | nr | nn | n | p | q | r | s | steps | t | t1 | t2 | x | y | z 
 
   syntax Id ::= print | allocateLoop | reverse | quickSort
 
-syntax Id ::= strDup | strprint | strCpy | strLen | string | string2 | freeList 
+syntax Id ::= strDup | strRead | strPrint | strCpy | strLen | string | string2 | freeList 
 
   macro stdio.h = {}
   macro stdlib.h = {}
@@ -103,20 +103,12 @@ int * q;
 
   macro pStrLen.c = int strLen(int * a) {
    int l = 0;
-   while(* a) {
-     a = a + 1;
-     l = l + 1;
-   }
+   while(* a++) {l++;}
    return l;
 }
 
   macro pStrCpy.c = void strCpy(int * a, int * b) {
-   while (* b) {
-     * a = * b ;
-     b = b + 1 ;
-     a = a + 1 ;
-   }
-   * a = 0 ;
+   while (*a++=*b++) {} 
 }
 
   macro pStrDup.c = int * strDup(int * a) {
@@ -142,31 +134,44 @@ int * q;
     return p;
 }
 
+
+macro pStrRead.c =
+int * strRead() {
+  int n ;
+  scanf("%d",&n);
+  int * a = (int *)malloc((n+1)*sizeof(int));
+  int i = 0;
+  while (i != n) {
+    scanf("%d",a+i);
+    i++;
+  }
+  a[n]=0;
+  return a;
+}
+
   macro pBufferOverflow =
     #include<stdio.h>
     #include<stdlib.h>
-    #include<pString.c>
-    #include<pString2.c>
+    #include<pStrRead.c>
     #include<pStrCpy.c>
     #include<pStrPrint.c>
     int main() {
-      int * x = string();
-      strprint(x);
-      int * y = string();
-      strprint(y);
-      int * z = string2();
-      strprint(z);
-      strCpy(x,z);
-      printf("%d;", -1) ; strprint(x);
-      printf("%d;", -1) ; strprint(y);
-      printf("%d;", -1) ; strprint(z);
+      int * x = strRead(); strPrint(x);
+      int * y = strRead(); strPrint(y);
+      strCpy(x,y);
+      strPrint(x); strPrint(y);
     }
 
+  syntax List{Exp} ::= pBufferOverflow.in1 | pBufferOverflow.in2 | pBufferOverflow.in3 
+
+  macro pBufferOverflow.in1 = (4,10,11,12,13,2,20,21) 
+  macro pBufferOverflow.in2 = (4,10,11,12,13,0)
+  macro pBufferOverflow.in3 = (4,10,11,12,13,6,20,21,22,23,24,25) 
+
   
-  macro pStrPrint.c =  void strprint(int *a) {
+  macro pStrPrint.c =  void strPrint(int *a) {
    while (* a) {
-     printf("%d;",* a);
-     a = a + 1 ;
+     printf("%d;",* a++);
    }
 }
 
@@ -181,7 +186,7 @@ int * q;
     int main() {
    int * x = string(); 
    int * y = strDup(x);
-   strprint(y);
+   strPrint(y);
    free(x);
    free(y);
 }
@@ -195,7 +200,7 @@ int * q;
    int * x = string();
    int * y = string();
    * (y - 1) = 5 ;
-   strprint(x);
+   strPrint(x);
    free(x);
    free(y);
 }
@@ -268,10 +273,11 @@ void printArray(int * a) {
 syntax Pgm ::= pSeqQuickSort |  pConcQuickSort
 
 macro pSeqQuickSort = 
-    #include<stdio.h>
-    #include<stdlib.h>
-    #include<fNewArray.c>
-    #include<fPrintArray.c>
+#include<stdio.h>
+#include<stdlib.h>
+#include<pStrRead.c>
+#include<pStrPrint.c>
+#include<pStrLen.c>
 void quickSort(int *b,int *e) {
   int t ;
   if (! (e <= b + 1)) {
@@ -293,11 +299,15 @@ void quickSort(int *b,int *e) {
   }
 }
 int main() {
-  int * a = newArray();
-  quickSort(a+1,a+a[0]);
-  printArray(a);
+  int * a = strRead();
+  quickSort(a,a+strLen(a));
+  strPrint(a);
   free(a);
 }
+
+syntax List{Exp} ::= pSeqQuickSort.in
+
+macro  pSeqQuickSort.in = (7,5,9,10,3,8,4,1,0)
 
 macro pConcQuickSort = 
     #include<stdio.h>
@@ -322,13 +332,12 @@ void quickSort(int *b,int *e) {
     t=*l;*l=*b;*b=t;
     int t1 = spawn(quickSort(b,l)); 
     int t2 = spawn(quickSort(r,e));
-    join(t1);
-    join(t2);
+    join(t1); join(t2);
   }
 }
 int main() {
   int * a = newArray();
-  quickSort(a+1,a+a[0]);
+  quickSort(a+1,a+a[0]+1);
   printArray(a);
   free(a);
 }
@@ -378,7 +387,7 @@ void print(int *a) {
   printf("%d;",*a);
 }
 
-syntax Id ::= newAccount | deposit | withdraw | transfer | m | run | run1 | run2
+syntax Id ::= newAccount | deposit | withdraw | transfer | balance | m | run | run1 | run2
 
 syntax Stmt ::= fTransfer | fDTransfer | fGTransfer
 
@@ -393,55 +402,64 @@ int *newAccount(int m) {
   return a;
 }
 
-void deposit(int *a,int m) {
+void deposit(int *a, int m) {
   acquire(a);
   *a = *a+m;
   release(a);
 }
 
-void withdraw(int *a,int m) {
+void withdraw(int *a, int m) {
   acquire(a);
-  *a = *a-m;
+  if (m <= *a) {
+    *a = *a - m;
+  }
   release(a);
 }
 
 Sts
 
-void print(int *a) {
+int balance(int *a) {
   acquire(a);
-  printf("%d;",*a);
+  int b = * a;
   release(a);
+  return b;
 }
 
 macro fTransfer =
-void transfer(int *a,int *b,int m) {
+void transfer(int *a, int *b, int m) {
   acquire(a);
-  *a = *a-m;
-  *b = *b+m;
+  if (m <= *a) {
+    *a = *a-m;
+    *b = *b+m;
+  }
   release(a);
 }
 
 macro fDTransfer = 
-void transfer(int *a,int *b,int m) {
+void transfer(int *a, int *b, int m) {
   acquire(a);
   acquire(b);
-  *a = *a-m;
-  *b = *b+m;
+  if (m <= *a) {
+    *a = *a-m;
+    *b = *b+m;
+  }
   release(a);
   release(b);
 }
 
 macro fGTransfer = 
-void transfer(int *a,int *b,int m) {
-  if (!(a <= b)) {
+void transfer(int *a, int *b, int m) {
+  if (a <= b) {
     acquire(a);
     acquire(b);
   } else {
     acquire(b);
     acquire(a);
   }
-  *a = *a-m;
-  *b = *b+m;
+  if (m <= *a) {
+    *a = *a-m;
+    *b = *b+m;
+  }
   release(a);
   release(b);
 }
@@ -455,26 +473,28 @@ macro pAccountDriver1(Sts:StmtList) =
 #include<stdio.h>
 #include<stdlib.h>
 Sts
-void run(int *a,int *b) {
-  deposit(a,300);
-  withdraw(b,300);
+
+void run(int *a, int *b) {
+  deposit(a, 300);
+  withdraw(a, 100);
+  transfer(a, b, 100);
 }
+
 int main() {
   int *a = newAccount(100);
   int *b = newAccount(20);
-  print(a);
-  print(b);
-  int t1 = spawn(run(a,b));
-  int t2 = spawn(run(b,a));
-  join(t1);
-  join(t2);
-  print(a);
-  print(b);
+  printf("%d;", balance(a));
+  printf("%d;", balance(b));
+  int t1 = spawn(run(a, b));
+  int t2 = spawn(run(b, a));
+  join(t1); join(t2);
+  printf("%d;", balance(a));
+  printf("%d;", balance(b));
 }
 
-macro pAccount3 = pAccountDriver2(cSynchronizedAccount)
-macro pAccount4 = pAccountDriver2(cDSynchronizedAccount)
-macro pAccount5 = pAccountDriver2(cGSynchronizedAccount)
+macro pAccount3 = pAccountDriver1(cSynchronizedAccount)
+macro pAccount4 = pAccountDriver1(cDSynchronizedAccount)
+macro pAccount5 = pAccountDriver1(cGSynchronizedAccount)
 
 macro  pAccountDriver2(Sts) =
 #include<stdio.h>
@@ -485,11 +505,13 @@ void run1(int *a,int *b) {
   withdraw(b,300);
   transfer(a,b,50);
 }
+
 void run2(int *a,int *b) {
   transfer(a,b,50);
   deposit(a,300);
   withdraw(b,300);
 }
+
 void main() {
   int *a = newAccount(100);
   int *b = newAccount(20);

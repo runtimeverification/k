@@ -1,7 +1,6 @@
-void strprint(int *a) {
+void arrPrint(int *a) {
    while (* a) {
-     printf("%d;",* a);
-     a = a + 1 ;
+     printf("%d;",* a++);
    }
 }
 
