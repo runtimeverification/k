@@ -5,12 +5,12 @@ kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
              | [ Id ] K [latex "{#1}.{#2}"]
              | K [ K / Id ] [prec 0]
              | beta K [ K / Id ]
-               [prec 0 latex "{#1}\sqbracket{{#2}^\square/{#3}}"]
+               [prec 0 latex "{#1}\sqbracket{\framebox{${#2}$}/{#3}}"]
              | eval K , then apply [ K / Id ]  
-               [prec 0 strict(1) latex "eval({#1})\sqbracket{{#2}^\square/{#3}}"]
+               [prec 0 strict(1) latex "eval({#1})\sqbracket{\framebox{${#2}$}/{#3}}"]
                
   syntax KLabel ::= beta [ K / Id ] 
-               [prec 0 latex "\sqbracket{{#1}^\square/{#2}}"]
+               [prec 0 latex "\sqbracket{\framebox{${#1}$}/{#2}}"]
                
   syntax Id ::= id Nat [latex "{\it id}_{\mbox{\scriptsize \ensuremath{#1}}}"] --- to generate fresh names
   configuration <k> .K </k> <nextId> 0 </nextId>
