@@ -1,25 +1,8 @@
 < T >
- < freshNat > BaseValue 6(.List{K}) </ freshNat >
- < nextLoc > BaseValue (0 +Nat sym(40))(.List{K}) </ nextLoc >
- < unfinishedComputation > (.).K </ unfinishedComputation >
  < threads >
   < thread >
    < callStack > List(
-    < stackFrame >
-     < currentFunction > Id Identifier("main")(.List{K}) </ currentFunction >
-     < currentProgramLoc > ('CabsLoc).KProperLabel(String "bitfields.prepre.gen"(.List{K}),,BaseValue 245(.List{K}),,BaseValue 6814(.List{K}),,BaseValue 3856(.List{K})) </ currentProgramLoc >
-     < currentTranslationUnit > String "bitfields.pre.gen"(.List{K}) </ currentTranslationUnit >
-     < declarationTypeHolder > (.).K </ declarationTypeHolder >
-     < blockStack > (.).List </ blockStack >
-     < loopStack > (.).List </ loopStack >
-     < local >
-      < currentBlock > BaseValue 86(.List{K}) </ currentBlock >
-      < incompleteLength > BaseValue 0(.List{K}) </ incompleteLength >
-      < savedInitialization > (.).K </ savedInitialization >
-      < currentObject > (.).List </ currentObject >
-      < currentSubObject > (.).List </ currentSubObject >
-      < localVariables > (.).Set </ localVariables >
-      < env >
+    < env >
          Id Identifier("atoi")(.List{K}) |-> BaseValue (0 +Nat sym(14))(.List{K})
          Id Identifier("fclose")(.List{K}) |-> BaseValue (0 +Nat sym(11))(.List{K})
          Id Identifier("feof")(.List{K}) |-> BaseValue (0 +Nat sym(9))(.List{K})
@@ -41,25 +24,9 @@
          Id Identifier("testOnes")(.List{K}) |-> BaseValue (0 +Nat sym(17))(.List{K})
          Id Identifier("testPartial")(.List{K}) |-> BaseValue (0 +Nat sym(21))(.List{K})
          Id Identifier("testSixteens")(.List{K}) |-> BaseValue (0 +Nat sym(20))(.List{K})
-         Id Identifier("testTwos")(.List{K}) |-> BaseValue (0 +Nat sym(18))(.List{K}) </ env > </ local >
-     < locals > (.).Bag </ locals >
-     < locsWrittenTo > (.).Bag </ locsWrittenTo > </ stackFrame >)
+         Id Identifier("testTwos")(.List{K}) |-> BaseValue (0 +Nat sym(18))(.List{K}) </ env >)
       List(
-    < stackFrame >
-     < currentFunction > Id File-Scope(.List{K}) </ currentFunction >
-     < currentProgramLoc > ('CabsLoc).KProperLabel(String "clib.prepre.gen"(.List{K}),,BaseValue 239(.List{K}),,BaseValue 5664(.List{K}),,BaseValue 3152(.List{K})) </ currentProgramLoc >
-     < currentTranslationUnit > String "bitfields.pre.gen"(.List{K}) </ currentTranslationUnit >
-     < declarationTypeHolder > (.).K </ declarationTypeHolder >
-     < blockStack > (.).List </ blockStack >
-     < loopStack > (.).List </ loopStack >
-     < local >
-      < currentBlock > BaseValue 0(.List{K}) </ currentBlock >
-      < incompleteLength > BaseValue 0(.List{K}) </ incompleteLength >
-      < savedInitialization > (.).K </ savedInitialization >
-      < currentObject > (.).List </ currentObject >
-      < currentSubObject > (.).List </ currentSubObject >
-      < localVariables > (.).Set </ localVariables >
-      < env >
+    < env >
          Id Identifier("abs")(.List{K}) |-> BaseValue (0 +Nat sym(23))(.List{K})
          Id Identifier("atoi")(.List{K}) |-> BaseValue (0 +Nat sym(14))(.List{K})
          Id Identifier("fabs")(.List{K}) |-> BaseValue (0 +Nat sym(24))(.List{K})
@@ -98,11 +65,8 @@
          Id Identifier("testPartial")(.List{K}) |-> BaseValue (0 +Nat sym(21))(.List{K})
          Id Identifier("testSixteens")(.List{K}) |-> BaseValue (0 +Nat sym(20))(.List{K})
          Id Identifier("testTwos")(.List{K}) |-> BaseValue (0 +Nat sym(18))(.List{K})
-         Id Identifier("x")(.List{K}) |-> BaseValue (0 +Nat sym(26))(.List{K}) </ env > </ local >
-     < locals > (.).Bag </ locals >
-     < locsWrittenTo > (.).Bag </ locsWrittenTo > </ stackFrame >) </ callStack >
-   < control >
-    < k > ('calculateNewBytes-aux).KProperLabel(BaseValue 0(.List{K}),,('dataList).KResultLabel(kList("wklist_")(splinter-aux(0, 1, 0))),,('dataList).KResultLabel(kList("wklist_")(splinter-aux(0, 8, 0))),,kList("wklist_")(.List{K}))
+         Id Identifier("x")(.List{K}) |-> BaseValue (0 +Nat sym(26))(.List{K}) </ env >) </ callStack >
+   < k > ('calculateNewBytes-aux).KProperLabel(BaseValue 0(.List{K}),,('dataList).KResultLabel(kList("wklist_")(splinter-aux(0, 1, 0))),,('dataList).KResultLabel(kList("wklist_")(splinter-aux(0, 8, 0))),,kList("wklist_")(.List{K}))
        ~> freezer("(writeBitfield).KProperLabel(K1:K,,K2:K,,`[HOLE`]:K)")(freezeVar("K1:K")(BaseValue (0 +Nat sym(15))(.List{K})),,freezeVar("K2:K")(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 1(.List{K}))))
        ~> ('tv).KResultLabel(kList("wklist_")(BaseValue 0(.List{K})),,('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 1(.List{K})))
        ~> ('discard).KProperLabel(.List{K})
@@ -244,20 +208,7 @@
        ~> ('popBlock).KProperLabel(.List{K}),,('CabsLoc).KProperLabel(String "bitfields.prepre.gen"(.List{K}),,BaseValue 110(.List{K}),,BaseValue 4035(.List{K}),,BaseValue 2125(.List{K}))),,('StatementLoc).KProperLabel(.,,('CabsLoc).KProperLabel(String "bitfields.prepre.gen"(.List{K}),,BaseValue 110(.List{K}),,BaseValue 4020(.List{K}),,BaseValue 2112(.List{K})))),,('CabsLoc).KProperLabel(String "bitfields.prepre.gen"(.List{K}),,BaseValue 110(.List{K}),,BaseValue 4020(.List{K}),,BaseValue 2112(.List{K})))
        ~> ('StatementLoc).KProperLabel(('Return).KProperLabel(('tv).KResultLabel(kList("wklist_")(BaseValue 0(.List{K})),,BaseType int(.List{K}))),,('CabsLoc).KProperLabel(String "bitfields.prepre.gen"(.List{K}),,BaseValue 111(.List{K}),,BaseValue 4061(.List{K}),,BaseValue 2138(.List{K})))
        ~> ('Return).KProperLabel(('emptyValue).KResultLabel(.List{K})) </ k >
-    < currentFunction > Id Identifier("testOnes")(.List{K}) </ currentFunction >
-    < currentProgramLoc > ('CabsLoc).KProperLabel(String "bitfields.prepre.gen"(.List{K}),,BaseValue 30(.List{K}),,BaseValue 2153(.List{K}),,BaseValue 885(.List{K})) </ currentProgramLoc >
-    < currentTranslationUnit > String "bitfields.pre.gen"(.List{K}) </ currentTranslationUnit >
-    < declarationTypeHolder > (.).K </ declarationTypeHolder >
-    < blockStack > (.).List </ blockStack >
-    < loopStack > (.).List </ loopStack >
-    < local >
-     < currentBlock > BaseValue 37(.List{K}) </ currentBlock >
-     < incompleteLength > BaseValue 0(.List{K}) </ incompleteLength >
-     < savedInitialization > (.).K </ savedInitialization >
-     < currentObject > (.).List </ currentObject >
-     < currentSubObject > (.).List </ currentSubObject >
-     < localVariables > (.).Set </ localVariables >
-     < env >
+   < env >
         Id Identifier("atoi")(.List{K}) |-> BaseValue (0 +Nat sym(14))(.List{K})
         Id Identifier("fclose")(.List{K}) |-> BaseValue (0 +Nat sym(11))(.List{K})
         Id Identifier("feof")(.List{K}) |-> BaseValue (0 +Nat sym(9))(.List{K})
@@ -279,235 +230,7 @@
         Id Identifier("testOnes")(.List{K}) |-> BaseValue (0 +Nat sym(17))(.List{K})
         Id Identifier("testPartial")(.List{K}) |-> BaseValue (0 +Nat sym(21))(.List{K})
         Id Identifier("testSixteens")(.List{K}) |-> BaseValue (0 +Nat sym(20))(.List{K})
-        Id Identifier("testTwos")(.List{K}) |-> BaseValue (0 +Nat sym(18))(.List{K}) </ env > </ local >
-    < locals > (.).Bag </ locals >
-    < locsWrittenTo > (.).Bag </ locsWrittenTo > </ control > </ thread > </ threads >
- < translationUnits > (.).Bag </ translationUnits >
- < declarationOrder >
-    String "bitfields.pre.gen"(.List{K}) |-> ('ListToK).KProperLabel(wlist .(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('ListToK).KProperLabel(wlist .(.List{K})) </ declarationOrder >
- < externalDefinitions > (.).Map </ externalDefinitions >
- < externalLocations >
-    Id Identifier("abs")(.List{K}) |-> BaseValue (0 +Nat sym(23))(.List{K})
-    Id Identifier("atoi")(.List{K}) |-> BaseValue (0 +Nat sym(14))(.List{K})
-    Id Identifier("fabs")(.List{K}) |-> BaseValue (0 +Nat sym(24))(.List{K})
-    Id Identifier("fclose")(.List{K}) |-> BaseValue (0 +Nat sym(11))(.List{K})
-    Id Identifier("feof")(.List{K}) |-> BaseValue (0 +Nat sym(9))(.List{K})
-    Id Identifier("fgetc")(.List{K}) |-> BaseValue (0 +Nat sym(12))(.List{K})
-    Id Identifier("fgets")(.List{K}) |-> BaseValue (0 +Nat sym(13))(.List{K})
-    Id Identifier("fopen")(.List{K}) |-> BaseValue (0 +Nat sym(10))(.List{K})
-    Id Identifier("fsl_next_fd")(.List{K}) |-> BaseValue (0 +Nat sym(38))(.List{K})
-    Id Identifier("getc")(.List{K}) |-> BaseValue (0 +Nat sym(8))(.List{K})
-    Id Identifier("main")(.List{K}) |-> BaseValue (0 +Nat sym(22))(.List{K})
-    Id Identifier("memchr")(.List{K}) |-> BaseValue (0 +Nat sym(30))(.List{K})
-    Id Identifier("memcmp")(.List{K}) |-> BaseValue (0 +Nat sym(36))(.List{K})
-    Id Identifier("memcpy")(.List{K}) |-> BaseValue (0 +Nat sym(35))(.List{K})
-    Id Identifier("memset")(.List{K}) |-> BaseValue (0 +Nat sym(29))(.List{K})
-    Id Identifier("p")(.List{K}) |-> BaseValue (0 +Nat sym(16))(.List{K})
-    Id Identifier("pow")(.List{K}) |-> BaseValue (0 +Nat sym(25))(.List{K})
-    Id Identifier("putc")(.List{K}) |-> BaseValue (0 +Nat sym(39))(.List{K})
-    Id Identifier("puts")(.List{K}) |-> BaseValue (0 +Nat sym(7))(.List{K})
-    Id Identifier("s")(.List{K}) |-> BaseValue (0 +Nat sym(15))(.List{K})
-    Id Identifier("stderr")(.List{K}) |-> BaseValue (0 +Nat sym(6))(.List{K})
-    Id Identifier("stderr_file")(.List{K}) |-> BaseValue (0 +Nat sym(3))(.List{K})
-    Id Identifier("stdin")(.List{K}) |-> BaseValue (0 +Nat sym(4))(.List{K})
-    Id Identifier("stdin_file")(.List{K}) |-> BaseValue (0 +Nat sym(1))(.List{K})
-    Id Identifier("stdout")(.List{K}) |-> BaseValue (0 +Nat sym(5))(.List{K})
-    Id Identifier("stdout_file")(.List{K}) |-> BaseValue (0 +Nat sym(2))(.List{K})
-    Id Identifier("strcat")(.List{K}) |-> BaseValue (0 +Nat sym(37))(.List{K})
-    Id Identifier("strchr")(.List{K}) |-> BaseValue (0 +Nat sym(32))(.List{K})
-    Id Identifier("strcmp")(.List{K}) |-> BaseValue (0 +Nat sym(31))(.List{K})
-    Id Identifier("strcpy")(.List{K}) |-> BaseValue (0 +Nat sym(27))(.List{K})
-    Id Identifier("strlen")(.List{K}) |-> BaseValue (0 +Nat sym(28))(.List{K})
-    Id Identifier("strncmp")(.List{K}) |-> BaseValue (0 +Nat sym(33))(.List{K})
-    Id Identifier("strrchr")(.List{K}) |-> BaseValue (0 +Nat sym(34))(.List{K})
-    Id Identifier("testEights")(.List{K}) |-> BaseValue (0 +Nat sym(19))(.List{K})
-    Id Identifier("testOnes")(.List{K}) |-> BaseValue (0 +Nat sym(17))(.List{K})
-    Id Identifier("testPartial")(.List{K}) |-> BaseValue (0 +Nat sym(21))(.List{K})
-    Id Identifier("testSixteens")(.List{K}) |-> BaseValue (0 +Nat sym(20))(.List{K})
-    Id Identifier("testTwos")(.List{K}) |-> BaseValue (0 +Nat sym(18))(.List{K}) </ externalLocations >
- < functionTranslationUnits >
-    String "bitfields.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("atoi")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fclose")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("feof")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fgetc")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fgets")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fopen")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("getc")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("main")(.List{K}) |-> String "bitfields.pre.gen"(.List{K})
-      Id Identifier("puts")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("testEights")(.List{K}) |-> String "bitfields.pre.gen"(.List{K})
-      Id Identifier("testOnes")(.List{K}) |-> String "bitfields.pre.gen"(.List{K})
-      Id Identifier("testPartial")(.List{K}) |-> String "bitfields.pre.gen"(.List{K})
-      Id Identifier("testSixteens")(.List{K}) |-> String "bitfields.pre.gen"(.List{K})
-      Id Identifier("testTwos")(.List{K}) |-> String "bitfields.pre.gen"(.List{K}))(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("abs")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("atoi")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fabs")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fclose")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("feof")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fgetc")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fgets")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("fopen")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("getc")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("memchr")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("memcmp")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("memcpy")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("memset")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("pow")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("putc")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("puts")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("strcat")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("strchr")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("strcmp")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("strcpy")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("strlen")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("strncmp")(.List{K}) |-> String "clib.pre.gen"(.List{K})
-      Id Identifier("strrchr")(.List{K}) |-> String "clib.pre.gen"(.List{K}))(.List{K})) </ functionTranslationUnits >
- < genv >
-    String "bitfields.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("atoi")(.List{K}) |-> BaseValue (0 +Nat sym(14))(.List{K})
-      Id Identifier("fclose")(.List{K}) |-> BaseValue (0 +Nat sym(11))(.List{K})
-      Id Identifier("feof")(.List{K}) |-> BaseValue (0 +Nat sym(9))(.List{K})
-      Id Identifier("fgetc")(.List{K}) |-> BaseValue (0 +Nat sym(12))(.List{K})
-      Id Identifier("fgets")(.List{K}) |-> BaseValue (0 +Nat sym(13))(.List{K})
-      Id Identifier("fopen")(.List{K}) |-> BaseValue (0 +Nat sym(10))(.List{K})
-      Id Identifier("getc")(.List{K}) |-> BaseValue (0 +Nat sym(8))(.List{K})
-      Id Identifier("main")(.List{K}) |-> BaseValue (0 +Nat sym(22))(.List{K})
-      Id Identifier("p")(.List{K}) |-> BaseValue (0 +Nat sym(16))(.List{K})
-      Id Identifier("puts")(.List{K}) |-> BaseValue (0 +Nat sym(7))(.List{K})
-      Id Identifier("s")(.List{K}) |-> BaseValue (0 +Nat sym(15))(.List{K})
-      Id Identifier("stderr")(.List{K}) |-> BaseValue (0 +Nat sym(6))(.List{K})
-      Id Identifier("stderr_file")(.List{K}) |-> BaseValue (0 +Nat sym(3))(.List{K})
-      Id Identifier("stdin")(.List{K}) |-> BaseValue (0 +Nat sym(4))(.List{K})
-      Id Identifier("stdin_file")(.List{K}) |-> BaseValue (0 +Nat sym(1))(.List{K})
-      Id Identifier("stdout")(.List{K}) |-> BaseValue (0 +Nat sym(5))(.List{K})
-      Id Identifier("stdout_file")(.List{K}) |-> BaseValue (0 +Nat sym(2))(.List{K})
-      Id Identifier("testEights")(.List{K}) |-> BaseValue (0 +Nat sym(19))(.List{K})
-      Id Identifier("testOnes")(.List{K}) |-> BaseValue (0 +Nat sym(17))(.List{K})
-      Id Identifier("testPartial")(.List{K}) |-> BaseValue (0 +Nat sym(21))(.List{K})
-      Id Identifier("testSixteens")(.List{K}) |-> BaseValue (0 +Nat sym(20))(.List{K})
-      Id Identifier("testTwos")(.List{K}) |-> BaseValue (0 +Nat sym(18))(.List{K}))(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("abs")(.List{K}) |-> BaseValue (0 +Nat sym(23))(.List{K})
-      Id Identifier("atoi")(.List{K}) |-> BaseValue (0 +Nat sym(14))(.List{K})
-      Id Identifier("fabs")(.List{K}) |-> BaseValue (0 +Nat sym(24))(.List{K})
-      Id Identifier("fclose")(.List{K}) |-> BaseValue (0 +Nat sym(11))(.List{K})
-      Id Identifier("feof")(.List{K}) |-> BaseValue (0 +Nat sym(9))(.List{K})
-      Id Identifier("fgetc")(.List{K}) |-> BaseValue (0 +Nat sym(12))(.List{K})
-      Id Identifier("fgets")(.List{K}) |-> BaseValue (0 +Nat sym(13))(.List{K})
-      Id Identifier("fopen")(.List{K}) |-> BaseValue (0 +Nat sym(10))(.List{K})
-      Id Identifier("fsl_next_fd")(.List{K}) |-> BaseValue (0 +Nat sym(38))(.List{K})
-      Id Identifier("getc")(.List{K}) |-> BaseValue (0 +Nat sym(8))(.List{K})
-      Id Identifier("memchr")(.List{K}) |-> BaseValue (0 +Nat sym(30))(.List{K})
-      Id Identifier("memcmp")(.List{K}) |-> BaseValue (0 +Nat sym(36))(.List{K})
-      Id Identifier("memcpy")(.List{K}) |-> BaseValue (0 +Nat sym(35))(.List{K})
-      Id Identifier("memset")(.List{K}) |-> BaseValue (0 +Nat sym(29))(.List{K})
-      Id Identifier("pow")(.List{K}) |-> BaseValue (0 +Nat sym(25))(.List{K})
-      Id Identifier("putc")(.List{K}) |-> BaseValue (0 +Nat sym(39))(.List{K})
-      Id Identifier("puts")(.List{K}) |-> BaseValue (0 +Nat sym(7))(.List{K})
-      Id Identifier("stderr")(.List{K}) |-> BaseValue (0 +Nat sym(6))(.List{K})
-      Id Identifier("stderr_file")(.List{K}) |-> BaseValue (0 +Nat sym(3))(.List{K})
-      Id Identifier("stdin")(.List{K}) |-> BaseValue (0 +Nat sym(4))(.List{K})
-      Id Identifier("stdin_file")(.List{K}) |-> BaseValue (0 +Nat sym(1))(.List{K})
-      Id Identifier("stdout")(.List{K}) |-> BaseValue (0 +Nat sym(5))(.List{K})
-      Id Identifier("stdout_file")(.List{K}) |-> BaseValue (0 +Nat sym(2))(.List{K})
-      Id Identifier("strcat")(.List{K}) |-> BaseValue (0 +Nat sym(37))(.List{K})
-      Id Identifier("strchr")(.List{K}) |-> BaseValue (0 +Nat sym(32))(.List{K})
-      Id Identifier("strcmp")(.List{K}) |-> BaseValue (0 +Nat sym(31))(.List{K})
-      Id Identifier("strcpy")(.List{K}) |-> BaseValue (0 +Nat sym(27))(.List{K})
-      Id Identifier("strlen")(.List{K}) |-> BaseValue (0 +Nat sym(28))(.List{K})
-      Id Identifier("strncmp")(.List{K}) |-> BaseValue (0 +Nat sym(33))(.List{K})
-      Id Identifier("strrchr")(.List{K}) |-> BaseValue (0 +Nat sym(34))(.List{K})
-      Id Identifier("x")(.List{K}) |-> BaseValue (0 +Nat sym(26))(.List{K}))(.List{K})) </ genv >
- < gtypes >
-    String "bitfields.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("atoi")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("c")(.List{K}))))
-      Id Identifier("bfs")(.List{K}) |-> ('structType).KResultLabel(Id Identifier("bfs")(.List{K}))
-      Id Identifier("fclose")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("feof")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgetc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgets")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("size")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fopen")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("filename")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("mode")(.List{K}))))
-      Id Identifier("getc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("main")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("p")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id Identifier("bfs")(.List{K})))
-      Id Identifier("puts")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K}))))
-      Id Identifier("s")(.List{K}) |-> ('structType).KResultLabel(Id Identifier("bfs")(.List{K}))
-      Id Identifier("stderr")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stderr_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("stdin")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stdin_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("stdout")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stdout_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("testEights")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testOnes")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testPartial")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testSixteens")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testTwos")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(.List{K}))
-      Id typedef(Identifier("FILE"))(.List{K}) |-> ('structType).KResultLabel(Id unnamed(0)(.List{K}))
-      Id typedef(Identifier("div_t"))(.List{K}) |-> ('structType).KResultLabel(Id unnamed(1)(.List{K}))
-      Id typedef(Identifier("int16_t"))(.List{K}) |-> BaseType short-int(.List{K})
-      Id typedef(Identifier("int32_t"))(.List{K}) |-> BaseType int(.List{K})
-      Id typedef(Identifier("int64_t"))(.List{K}) |-> BaseType long-long-int(.List{K})
-      Id typedef(Identifier("int8_t"))(.List{K}) |-> BaseType signed-char(.List{K})
-      Id typedef(Identifier("ldiv_t"))(.List{K}) |-> ('structType).KResultLabel(Id unnamed(2)(.List{K}))
-      Id typedef(Identifier("size_t"))(.List{K}) |-> BaseType unsigned-long-int(.List{K})
-      Id typedef(Identifier("uint16_t"))(.List{K}) |-> BaseType unsigned-short-int(.List{K})
-      Id typedef(Identifier("uint32_t"))(.List{K}) |-> BaseType unsigned-int(.List{K})
-      Id typedef(Identifier("uint64_t"))(.List{K}) |-> BaseType unsigned-long-long-int(.List{K})
-      Id typedef(Identifier("uint8_t"))(.List{K}) |-> BaseType unsigned-char(.List{K})
-      Id unnamed(0)(.List{K}) |-> ('structType).KResultLabel(Id unnamed(0)(.List{K}))
-      Id unnamed(1)(.List{K}) |-> ('structType).KResultLabel(Id unnamed(1)(.List{K}))
-      Id unnamed(2)(.List{K}) |-> ('structType).KResultLabel(Id unnamed(2)(.List{K})))(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("abs")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("num")(.List{K}))))
-      Id Identifier("atoi")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("c")(.List{K}))))
-      Id Identifier("fabs")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("num")(.List{K}))))
-      Id Identifier("fclose")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("feof")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgetc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgets")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("size")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fopen")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("filename")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("mode")(.List{K}))))
-      Id Identifier("fsl_next_fd")(.List{K}) |-> BaseType int(.List{K})
-      Id Identifier("getc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("memchr")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("s")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("c")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("n")(.List{K}))))
-      Id Identifier("memcmp")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("s1")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("s2")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("n")(.List{K}))))
-      Id Identifier("memcpy")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("src")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("count")(.List{K}))))
-      Id Identifier("memset")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("value")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("len")(.List{K}))))
-      Id Identifier("pow")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K})),,('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("y")(.List{K}))))
-      Id Identifier("putc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("c")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("puts")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K}))))
-      Id Identifier("stderr")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stderr_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("stdin")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stdin_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("stdout")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stdout_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("strcat")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("src")(.List{K}))))
-      Id Identifier("strchr")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("c")(.List{K}))))
-      Id Identifier("strcmp")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s1")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s2")(.List{K}))))
-      Id Identifier("strcpy")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("src")(.List{K}))))
-      Id Identifier("strlen")(.List{K}) |-> ('functionType).KResultLabel(BaseType unsigned-long-int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K}))))
-      Id Identifier("strncmp")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s1")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s2")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("n")(.List{K}))))
-      Id Identifier("strrchr")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("c")(.List{K}))))
-      Id Identifier("x")(.List{K}) |-> BaseType int(.List{K})
-      Id typedef(Identifier("FILE"))(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id typedef(Identifier("div_t"))(.List{K}) |-> ('structType).KResultLabel(Id unnamed(4)(.List{K}))
-      Id typedef(Identifier("ldiv_t"))(.List{K}) |-> ('structType).KResultLabel(Id unnamed(5)(.List{K}))
-      Id typedef(Identifier("size_t"))(.List{K}) |-> BaseType unsigned-long-int(.List{K})
-      Id unnamed(3)(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id unnamed(4)(.List{K}) |-> ('structType).KResultLabel(Id unnamed(4)(.List{K}))
-      Id unnamed(5)(.List{K}) |-> ('structType).KResultLabel(Id unnamed(5)(.List{K})))(.List{K})) </ gtypes >
- < internalDefinitions >
-    String "bitfields.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap .(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap .(.List{K})) </ internalDefinitions >
- < internalLocations >
-    String "bitfields.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap .(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap .(.List{K})) </ internalLocations >
- < malloced > (.).Map </ malloced >
+        Id Identifier("testTwos")(.List{K}) |-> BaseValue (0 +Nat sym(18))(.List{K}) </ env > </ thread > </ threads >
  < mem >
     BaseValue 1(.List{K}) |-> ('memblock).KProperLabel(BaseValue 11(.List{K}),,wmap (
       BaseValue 0(.List{K}) |-> BaseValue piece(0, 8)(.List{K})
@@ -880,106 +603,5 @@
       BaseValue 2(.List{K}) |-> BaseValue piece(0, 8)(.List{K})
       BaseValue 3(.List{K}) |-> BaseValue piece(0, 8)(.List{K}))(.List{K}))
     BaseValue 39(.List{K}) |-> ('memblock).KProperLabel(BaseValue 1(.List{K}),,wmap (
-      BaseValue 0(.List{K}) |-> ('functionObject).KResultLabel(Id Identifier("putc")(.List{K}),,('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("c")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K})))),,('Block).KProperLabel(BaseValue 23(.List{K}),,('_::_).KHybridLabel(.List{K}),,('_::_).KHybridLabel(('StatementLoc).KProperLabel(('Return).KProperLabel(('Call).KProperLabel(Id Identifier("fslPutc")(.List{K}),,('_::_).KHybridLabel(Id Identifier("c")(.List{K}),,('_->_).KProperLabel(Id Identifier("stream")(.List{K}),,Id Identifier("handle")(.List{K}))))),,('CabsLoc).KProperLabel(String "clib.prepre.gen"(.List{K}),,BaseValue 144(.List{K}),,BaseValue 4133(.List{K}),,BaseValue 2288(.List{K})))))))(.List{K})) </ mem >
- < openFiles >
-    BaseValue 0(.List{K}) |-> String "stdin"(.List{K})
-    BaseValue 1(.List{K}) |-> String "stdout"(.List{K})
-    BaseValue 2(.List{K}) |-> String "stdout"(.List{K}) </ openFiles >
- < preLinkage >
-    String "bitfields.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap .(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap .(.List{K})) </ preLinkage >
- < preTypes >
-    String "bitfields.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("abort")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("atoi")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K}))))
-      Id Identifier("calloc")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("nelem")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("elsize")(.List{K}))))
-      Id Identifier("debug")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("i")(.List{K}))))
-      Id Identifier("exit")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("status")(.List{K}))))
-      Id Identifier("fclose")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("feof")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgetc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgets")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("size")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fopen")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("filename")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("mode")(.List{K}))))
-      Id Identifier("free")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("pointer")(.List{K}))))
-      Id Identifier("getc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("getchar")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("main")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("malloc")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("size")(.List{K}))))
-      Id Identifier("p")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id Identifier("bfs")(.List{K})))
-      Id Identifier("printf")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("format")(.List{K})),,('variadic).KResultLabel(.List{K})))
-      Id Identifier("putchar")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("character")(.List{K}))))
-      Id Identifier("puts")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K}))))
-      Id Identifier("rand")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("s")(.List{K}) |-> ('structType).KResultLabel(Id Identifier("bfs")(.List{K}))
-      Id Identifier("srand")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType unsigned-int(.List{K}),,Id Identifier("seed")(.List{K}))))
-      Id Identifier("stderr")(.List{K}) |-> ('qualifiedType).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,('Extern).KResultLabel(.List{K}))
-      Id Identifier("stderr_file")(.List{K}) |-> ('qualifiedType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K})),,('Extern).KResultLabel(.List{K}))
-      Id Identifier("stdin")(.List{K}) |-> ('qualifiedType).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,('Extern).KResultLabel(.List{K}))
-      Id Identifier("stdin_file")(.List{K}) |-> ('qualifiedType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K})),,('Extern).KResultLabel(.List{K}))
-      Id Identifier("stdout")(.List{K}) |-> ('qualifiedType).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K}))),,('Extern).KResultLabel(.List{K}))
-      Id Identifier("stdout_file")(.List{K}) |-> ('qualifiedType).KResultLabel(('structType).KResultLabel(Id unnamed(0)(.List{K})),,('Extern).KResultLabel(.List{K}))
-      Id Identifier("testEights")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testOnes")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testPartial")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testSixteens")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("testTwos")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(.List{K})))(.List{K}))
-    String "clib.pre.gen"(.List{K}) |-> ('Map).KProperLabel(wmap (
-      Id Identifier("abort")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("abs")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("num")(.List{K}))))
-      Id Identifier("asin")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("atan")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("atan2")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("y")(.List{K})),,('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("atoi")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("c")(.List{K}))))
-      Id Identifier("calloc")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("nelem")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("elsize")(.List{K}))))
-      Id Identifier("cos")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("debug")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("i")(.List{K}))))
-      Id Identifier("exit")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("status")(.List{K}))))
-      Id Identifier("exp")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("fabs")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("num")(.List{K}))))
-      Id Identifier("fclose")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("feof")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgetc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("fgets")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("size")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("floor")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("fmod")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K})),,('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("y")(.List{K}))))
-      Id Identifier("fopen")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("filename")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("mode")(.List{K}))))
-      Id Identifier("free")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("pointer")(.List{K}))))
-      Id Identifier("fslCloseFile")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("handle")(.List{K}))))
-      Id Identifier("fslFGetC")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("handle")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-long-int(.List{K}),,Id Identifier("offset")(.List{K}))))
-      Id Identifier("fslOpenFile")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("filename")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("handle")(.List{K}))))
-      Id Identifier("fslPutc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("c")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("handle")(.List{K}))))
-      Id Identifier("fsl_next_fd")(.List{K}) |-> BaseType int(.List{K})
-      Id Identifier("getc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("getchar")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("log")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("malloc")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("size")(.List{K}))))
-      Id Identifier("memchr")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("s")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("c")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("n")(.List{K}))))
-      Id Identifier("memcmp")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("s1")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("s2")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("n")(.List{K}))))
-      Id Identifier("memcpy")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("src")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("count")(.List{K}))))
-      Id Identifier("memset")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType void(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("value")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("len")(.List{K}))))
-      Id Identifier("pow")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K})),,('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("y")(.List{K}))))
-      Id Identifier("printf")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("format")(.List{K})),,('variadic).KResultLabel(.List{K})))
-      Id Identifier("putc")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("c")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K}))))
-      Id Identifier("putchar")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("character")(.List{K}))))
-      Id Identifier("puts")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K}))))
-      Id Identifier("rand")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType void(.List{K}),,Id #NoName(.List{K}))))
-      Id Identifier("sin")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("sqrt")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("srand")(.List{K}) |-> ('functionType).KResultLabel(BaseType void(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType unsigned-int(.List{K}),,Id Identifier("seed")(.List{K}))))
-      Id Identifier("stderr")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stderr_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("stdin")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stdin_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("stdout")(.List{K}) |-> ('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K})))
-      Id Identifier("stdout_file")(.List{K}) |-> ('structType).KResultLabel(Id unnamed(3)(.List{K}))
-      Id Identifier("strcat")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("src")(.List{K}))))
-      Id Identifier("strchr")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("c")(.List{K}))))
-      Id Identifier("strcmp")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s1")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s2")(.List{K}))))
-      Id Identifier("strcpy")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("dest")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("src")(.List{K}))))
-      Id Identifier("strlen")(.List{K}) |-> ('functionType).KResultLabel(BaseType unsigned-long-int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("str")(.List{K}))))
-      Id Identifier("strncmp")(.List{K}) |-> ('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s1")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s2")(.List{K})),,('typedDeclaration).KResultLabel(BaseType unsigned-long-int(.List{K}),,Id Identifier("n")(.List{K}))))
-      Id Identifier("strrchr")(.List{K}) |-> ('functionType).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(('pointerType).KResultLabel(BaseType signed-char(.List{K})),,Id Identifier("s")(.List{K})),,('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("c")(.List{K}))))
-      Id Identifier("tan")(.List{K}) |-> ('functionType).KResultLabel(BaseType double(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType double(.List{K}),,Id Identifier("x")(.List{K}))))
-      Id Identifier("x")(.List{K}) |-> ('qualifiedType).KResultLabel(BaseType int(.List{K}),,('Static).KResultLabel(.List{K})))(.List{K})) </ preTypes >
- < statics > (.).Map </ statics > </ T >
+      BaseValue 0(.List{K}) |-> ('functionObject).KResultLabel(Id Identifier("putc")(.List{K}),,('functionType).KResultLabel(BaseType int(.List{K}),,('_::_).KHybridLabel(('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("c")(.List{K})),,('typedDeclaration).KResultLabel(('pointerType).KResultLabel(('structType).KResultLabel(Id unnamed(3)(.List{K}))),,Id Identifier("stream")(.List{K})))),,('Block).KProperLabel(BaseValue 23(.List{K}),,('_::_).KHybridLabel(.List{K}),,('_::_).KHybridLabel(('StatementLoc).KProperLabel(('Return).KProperLabel(('Call).KProperLabel(Id Identifier("fslPutc")(.List{K}),,('_::_).KHybridLabel(Id Identifier("c")(.List{K}),,('_->_).KProperLabel(Id Identifier("stream")(.List{K}),,Id Identifier("handle")(.List{K}))))),,('CabsLoc).KProperLabel(String "clib.prepre.gen"(.List{K}),,BaseValue 144(.List{K}),,BaseValue 4133(.List{K}),,BaseValue 2288(.List{K})))))))(.List{K})) </ mem > </ T >
 

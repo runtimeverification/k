@@ -46,17 +46,19 @@ module FilterOutput where
   ppKOutput :: Configuration -> KOutput -> Doc
   ppKOutput conf (String s) = text s
   ppKOutput conf (Cell name contents) | shouldShow conf name = linebreak <> (hang 1 $ ppBeginCell name
-                                                               <>  (hcat . map . ppKOutput conf) (cleanupStrings contents)
+                                                               <> handleContents contents
                                                                <+> ppEndCell name)
-                                      | otherwise = empty
+                                      | otherwise = handleContents $ filter isCell contents
+    where handleContents cs = (hcat . map (ppKOutput conf)) (cleanupStrings cs)
+          isCell (Cell _ _) = True
+          isCell _ = False
 
   -- Should a cell be shown?
   -- Todo: Extend later to handle default behaviors etc
   shouldShow :: Configuration -> CellName -> Bool
   shouldShow list cname = case find ((cname ==) . fst) list of
-                            Just (_, No) -> False
-                            _            -> True
-
+                            Just (_, Yes) -> True
+                            _             -> False
 
 
 

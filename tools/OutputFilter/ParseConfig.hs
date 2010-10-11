@@ -5,8 +5,8 @@
     ...
   to configure whether to display that cell.
   See examples/example.yml
-  If a cell is flagged as "no", then it will not be shown (neither will its children)
-  Current default behavior is to show anything not explicitly told to be hidden
+  If a cell is flagged as "yes", then it will be shown (this has no effect on its children)
+  Current default behavior is to not show anything not explicitly told to be shown
 -}
 
 module ParseConfig where
@@ -19,7 +19,7 @@ module ParseConfig where
 
   type CellConfig = (String, CellConfigRhs)
 
-   -- add more to this to support more customizations
+  -- add more to this to support more customizations
   data CellConfigRhs = Yes
                      | No
     deriving (Show)
@@ -31,6 +31,7 @@ module ParseConfig where
                 | Nil
     deriving (Show)
 
+  -- Convert to the lighter representation
   yamlNodeToLite :: YamlNode -> YamlLite
   yamlNodeToLite = yamlElemToLite . n_elem
 
@@ -42,11 +43,13 @@ module ParseConfig where
 
   parseYamlFileLite fp = yamlNodeToLite <$> parseYamlFile fp
 
-  extractConfiguration :: YamlLite -> Configuration
-  extractConfiguration = (map extractCellConfig . unSeq)
 
-  extractCellConfig :: YamlLite -> CellConfig
-  extractCellConfig yl = ((unStr . fst . head . unMap) yl, (readConfig . unStr . snd . head . unMap) yl)
+  -- Get the configuration
+  extractConfiguration :: YamlLite -> Configuration
+  extractConfiguration = (map extractCellConfig . unMap)
+
+  extractCellConfig :: (YamlLite, YamlLite) -> CellConfig
+  extractCellConfig yl = ((unStr . fst) yl, (readConfig . unStr . snd) yl)
 
   readConfig :: String -> CellConfigRhs
   readConfig s | canonicalize s `elem` ["yes", "y"] = Yes

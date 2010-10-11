@@ -1,18 +1,11 @@
-# Since we're currently working off a blacklist pattern, the below "y" flags are redundant
-- k: y
-- env: y
-- T: y
-- threads: y
-- thread: y
-- callStack: y
+# Whitelist the following cells
+T: y
+k: y
+env: y
+threads: y
+thread: y
+callStack: y
+mem: y
 
-# Blacklist the following cells:
-- files: no
-- structs: no
-- continuation: no
-- callstack: no
-- declarations: no
-- gstructs: no
-- programText: no
-- types: no
-
+# Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
+# recursive, e.g. blacklisting <thread> wont blacklist all of its children
