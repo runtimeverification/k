@@ -135,11 +135,19 @@ mod COMMON-SEMANTICS-GOTO is
 		--- < gotoMap >... kpair(F:Id, X:Id) |-> kpair(K:K, S:List) ...</ gotoMap >
 		--- : KSentence [metadata "computational rule"] .
 		
-	op calculateGotoMap : Id K List K -> K . --- func name, body, loop stack, tail
-	eq calculateGotoMap(X:Id, K:K) = calculateGotoMap(X:Id, K:K, (.).List, (.).K) .
+	op calculateGotoMap : Id K Map List K -> K . --- func name, body, variables, loop stack, tail
+	
+	op waitingOnGotoMap : -> K .
 	mb rule 
-		< k > calculateGotoMap(?, (.).K, ?, ?) => (.).K ...</ k >
-		: KSentence [metadata "structural"] .
+		< k > calculateGotoMap(X:Id, K:K) => waitingOnGotoMap ...</ k >
+		< computation > ? => K:K </ computation >
+		< computationTail > ? => (.).K </ computationTail >
+		< loopStack > ? => (.).List </ loopStack >
+		< declarationStack > ? => (.).List </ declarationStack >
+		: KSentence .
+	--- mb rule
+		--- < k > calculateGotoMap(?, (.).K, ?, ?, ?) => (.).K ...</ k >
+		--- : KSentence [metadata "structural"] .
 	
 ***(
 	things I have to keep track of:
@@ -169,9 +177,54 @@ mod COMMON-SEMANTICS-GOTO is
 		--- orBool L:KLabel ==Bool 'return_;
 		--- ---orBool L:KLabel ==Bool 'default`:_
 		--- : KSentence [metadata "structural"] .
+	
+	--- mb rule
+		--- < k > calculateGotoMap(?, (.).K, ?, ?, ?) => (.).K ...</ k >
+		--- : KSentence [metadata "structural"] .
+	mb rule
+		< k > waitingOnGotoMap => (.).K ...</ k >
+		< computation > (.).K </ computation >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< computation > Block(Num:Nat, ?, L:List{C}) => listToK(L:List{C}) ...</ computation > 
+		< nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
+		< currentBlock > ? => Num:Nat </ currentBlock >
+		: KSentence [metadata "structural"] .
+		
+	mb [StatementLoc]: rule
+		< computation > StatementLoc(K:K, L:CabsLoc) => K:K ...</ computation >
+		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
+		: KSentence .
+	mb [DefinitionLoc]: rule
+		< computation > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ computation >
+		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
+		: KSentence .
+		
+	mb rule 
+		< computation > L:KLabel(Args:List{K}) => (.).K ...</ computation >
+		if false
+		--- orBool L:KLabel ==Bool 'Local
+		--- orBool L:KLabel ==Bool '_; --- assumes we don't put '_; around actual statements
+		--- orBool L:KLabel ==Bool 'goto_;
+		--- orBool L:KLabel ==Bool 'continue`;
+		--- orBool L:KLabel ==Bool 'break`;
+		orBool L:KLabel ==Bool 'Return
+		---orBool L:KLabel ==Bool 'default`:_
+		: KSentence [metadata "structural"] .
+	
 	--- mb rule 
-		--- < k > [calculateGotoMap(X:Id, ('Block`(`)(.List{K}) ~> K:K), S:List, Tail:K) 
-		--- => calculateGotoMap(X:Id, K:K, S:List, Tail:K)] ...</ k >
+		--- < computation > DeclarationDefinition(Args:List{K}) => (.).K ...</ computation >
+		--- < declarationStack > </ declarationStack >
+		--- : KSentence [metadata "structural"] .
+	
+		
+	--- mb rule 
+		--- < k > calculateGotoMap(X:Id, (Block(Num:Nat, L:List{K}) ~> K:K), M:Map, S:List, Tail:K) 
+			--- => calculateGotoMap(X:Id, (listToK(L:List{K}) ~> K:K), M:Map, S:List, Tail:K) 
+		--- ...</ k >
+		--- < nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
+		--- < currentBlock > ? => Num:Nat </ currentBlock >
 		--- : KSentence [metadata "structural"] .
 	--- mb rule 
 		--- < k > [calculateGotoMap(X:Id, ('Block(Arg:K) ~> K:K), S:List, Tail:K) 
@@ -369,9 +422,7 @@ mod COMMON-C-STATEMENTS is
 		< loopStack > ListItem(K:K) => (.).List ...</ loopStack >
 		: KSentence [metadata "computational rule"] . --- nondet
 	
-	--- --- fixme not sure about this, isn't it possible for K:K to grab greedily?
 	mb [continue]: rule
-		--- < k > Continue ~> K:K => Continue ...</ k >
 		< k > Continue ~> ((L:KLabel)(?) => .) ...</ k >
 		if L:KLabel =/=Bool 'loopMarked
 		andBool L:KLabel =/=Bool 'popBlock

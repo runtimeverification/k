@@ -1,7 +1,7 @@
 kmod C-CONFIGURATION is
 	including C-SYNTAX
 	including COMMON-C-CONFIGURATION
-
+	op nextFile : -> CellLabel
 	configuration 
 		< T > 
 			< gotoMap > .Map </ gotoMap >
@@ -53,15 +53,23 @@ kmod C-CONFIGURATION is
 						< currentSubObject > .List </ currentSubObject >
 						< incompleteLength > 0 </ incompleteLength >
 						< savedInitialization > .K </ savedInitialization >
-						
-						< currentTranslationUnit > "" </ currentTranslationUnit >
+
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						--- < holds > .Map </ holds >
+						< type * > .K </ type * > --- used for typing expressions
+						< declarationTypeHolder > .K </ declarationTypeHolder > --- holds the innermost type while we unroll the type around it
+						
+						--- general information
+						< currentTranslationUnit > "" </ currentTranslationUnit >
 						< currentFunction > .K </ currentFunction >
 						< currentProgramLoc > .K </ currentProgramLoc >
-						< type * > .K </ type * >
+						
 						< loopStack > .List </ loopStack >
-						< declarationTypeHolder > .K </ declarationTypeHolder >
+						< calculateGotoMap >
+							< computation > .K </ computation >
+							< computationTail > .K </ computationTail >
+							< declarationStack > .List </ declarationStack >
+						</ calculateGotoMap >
 					</ control >
 				</ thread * >
 			</ threads >

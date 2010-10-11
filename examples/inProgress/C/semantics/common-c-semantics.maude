@@ -1242,6 +1242,20 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	op declareOnly : Id Type K -> K .
 	op declareAndDefine : Id Type K K -> K .
+	--- mb rule
+		--- < k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
+		--- < declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- --- if L:K =/=Bool noLinkage
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
+		--- < declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- if K:K =/=Bool NoInit
+		--- --- andBool L:K =/=Bool noLinkage
+		--- : KSentence [metadata "structural"] .
+
 	mb rule
 		< k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
 		< declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
@@ -1397,6 +1411,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	mb [function-definition]: rule
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
 			=> declareFunction(X:Id, T:Type, initializer((X:Id := tv(functionObject(X:Id, unqualifyType(T:Type), Block:K), T:Type) ~> discard)))
+			--- ~> calculateGotoMap(X:Id, Block:K)
 		...</ k >
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
@@ -1757,6 +1772,7 @@ mod C-SEMANTICS-MISC is
 	--- want to make it so env is always correct local env, so need to have a set of global envs, one for each tu
 	
 	--- TODO nicely handle loc range instead of ignoring L2
+	--- fixme feature i'd like to say ? instead of k, but context transformers don't work that way
 	mb rule
 		< k > DefinitionLocRange(K:K, L1:CabsLoc, L2:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L1:CabsLoc </ currentProgramLoc >
