@@ -1,11 +1,12 @@
 load ml-prelude.maude
 
 kmod IMP-SYNTAX is including ML-K 
-  syntax Val    ::= Int++
-  syntax NvExpType ::= int
-  syntax Void   ::= void
-  syntax ExpType   ::= Void | NvExpType | struct Id | & ExpType 
-  syntax Struct ::= struct Id { Stmts } ; 
+  syntax Val       ::= Int++
+  syntax NvExpType ::= int | struct Id *
+  syntax Void      ::= void
+  syntax ExpType   ::= Void | NvExpType | ExpType *
+  syntax Struct    ::= struct Id { Stmts } ; 
+  syntax Include   ::= #include Id
 
   syntax Var ::= Id | 
                | Exp -> Id
@@ -24,7 +25,7 @@ kmod IMP-SYNTAX is including ML-K
                | Exp >= Exp [prec 35 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
                | Exp == Exp [prec 35 strict] 
                | Exp != Exp [prec 35 strict] 
-               | sizeOf ( Exp ) [strict]
+               | sizeof ( struct Id ) [strict]
                | Id ( )
                | Id ( List{Exp} ) [prec 2 strict(2)]
                | * Exp [prec 10 strict]
@@ -33,7 +34,8 @@ kmod IMP-SYNTAX is including ML-K
                | Exp || Exp [prec 57 gather(E e) strict(1) metadata "latex(renameTo _\\ensuremath\\parallel_)"]
                | Exp `? Exp : Exp [prec 59 strict(1)]
                | getReturnValue ExpType
-               | new ExpType
+               | ( ExpType ) malloc ( Exp )
+               --- instead of new
 
 
   syntax Stmt ::= Decl | StmtAnnot
@@ -48,8 +50,6 @@ kmod IMP-SYNTAX is including ML-K
                | { } [metadata "latex(renameTo \\{\\})"]
                | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
                | Stmts Stmts [prec 100 gather(e E)]
----               | alloc ( List{KLabel} ) [strict]   --- see "new" operator
----               | free ( Exp ) [strict]  --- see delete (below)
                | delete Exp ; [strict]
                | breakpoint ;
                | watch ;
@@ -60,21 +60,26 @@ kmod IMP-SYNTAX is including ML-K
 
   ---op __ : DeclAnnots DeclAnnots -> DeclAnnots [prec 100 gather(e E)]
 
-  syntax Decl  ::= ExpType List{Exp} ; | Struct
+  syntax Decl  ::= ExpType List{Exp} ; | Struct | Include
 ---  syntax Decls ::= Decl
 ---                 | Decls Decls [ditto]
 
   syntax StmtAnnot  ::=
-                        //`assume Bag    [prec 99 strat(0)]
-                      | //`assert Bag    [prec 99 strat(0)]
-                      | //`invariant Bag [prec 99 strat(0)]
+                        /*`assume Bag */   [prec 99 strat(0)]
+                      | /*`assert Bag */   [prec 99 strat(0)]
+                      | /*`invariant Bag */ [prec 99 strat(0)]
 
   syntax DeclAnnot  ::=  
-                        //`pre Bag //`post Bag [prec 99 strat(0)]
+                        /*`pre Bag */ /*`post Bag */ [prec 99 strat(0)]
+                        | noAnnot
 
   syntax Decl ::= DeclAnnot
                       | ExpType Id ( ) DeclAnnot { Stmts }
                       | ExpType Id ( Stmts ) DeclAnnot { Stmts }
+                      | ExpType Id ( ) { Stmts }
+                      | ExpType Id ( Stmts ) { Stmts }
+                      | int main ( ) DeclAnnot { Stmts }
+                      | int main ( ) { Stmts }
 
 --- lists
 
@@ -88,20 +93,16 @@ kmod IMP-SYNTAX is including ML-K
   syntax List{Exp} ::= Exp | List{Id} | List{Val}
                     | List{Exp} ,,, List{Exp} [ditto]
 
---- auxiliary definitions
---- an elements of the <env> cell
-  syntax MapItem ::= Id |-> [ Val , ExpType ]   --- enriched type
-
---- the structure of a "struct" cell
----  struct-name |->  [field1, type1, 0] [field2, type2, 1] ...
-  syntax MapItem ::= Id |-> List
-  syntax ListItem ::= [ Id , ExpType , Int++ ]
-
---- the structure of a "heap" cell 
----   location |-> value : [ fieldname, type ]
---- simple variables have associated the fieldname "@scalar"
-  syntax Id ::= @scalar ---[metadata "latex(renameTo \\ensuremath{\\@\\terminal{scalar}})"]
-  syntax MapItem ::= Int++ |-> Val : [ Id , ExpType ]
+---env
+  op _|->[_:_] : Id  Val  ExpType -> MapItem
+---struct
+  op _|->_ : Id  List -> MapItem
+  op [_:_+_] :  Id  ExpType  Int++ -> ListItem
+---heap
+  op emptySn : -> Id
+  op @scalar :  -> Field
+  op _._ : Id Id -> Field 
+  op _|->_:[_:_] : Int++  Val Field  ExpType -> MapItem
 
 endkm
 
@@ -118,8 +119,9 @@ kmod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX
 
   syntax Stmts ::= noneStmts  --- empty sequence of statements
   macro __`(`)_`{_`}(T:ExpType, F:Id, DA:DeclAnnot, Ss:Stmts ) = __`(_`)_`{_`}(T, F, noneStmts, DA, Ss )
+  macro __`(`)`{_`}(T, F, Ss ) = __`(_`)_`{_`}(T, F, noneStmts, noAnnot, Ss )
+  macro __`(_`)`{_`}(T, F, Sss:Stmts, Ss ) = __`(_`)_`{_`}(T, F, Sss, noAnnot, Ss )
   macro _`(`)(F) = _`(_`)(F,.List{Id})
 
-  macro __;(T, *F) = __;(&T, F)   
+  --- macro __;(T, *F) = __;(&T, F)   
 endkm
-

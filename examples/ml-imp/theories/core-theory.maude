@@ -24,6 +24,12 @@ mod FORMULA is inc PL-BOOL + PL-STRING .
 
   eq  @ true =  TrueFormula .
   eq @ false = FalseFormula .
+  
+  --- junk
+  op form-to-bool : Formula -> Bool .
+  eq form-to-bool(TrueFormula) = true .
+  eq form-to-bool(FalseFormula) = false .
+  --- end-of-junk
 
   eq  ~(TrueFormula) = FalseFormula .
   eq ~(FalseFormula) =  TrueFormula .
@@ -167,5 +173,6 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   eq (1 === ?(B)) = @ B .
 
   eq (I:Int === J:Int) = @(I:Int ==Bool J:Int) .
+
 endm
 

@@ -41,6 +41,7 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
 
   op rev : Seq++ -> NeSeq++ .
   op len : Seq++ -> Int++ .
+  op maximum : Seq++ -> Int++ .
 
 
   var Obj Obj1 Obj2 : MathObj++ .

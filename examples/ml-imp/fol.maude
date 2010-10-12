@@ -13,7 +13,10 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
   var FreeObj : FreeMathObj .
   var Obj Obj' Obj1 Obj2 : MathObj++ .
   var ObjList ObjList1 ObjList2 : List{MathObj++} .
-  var X : Id .
+  var X Id1 Id2 : Id .
+  var field : Field .
+  var Val Val1 Val2 : Val .
+  var ET : ExpType .
   var P Q P' : Int++ .
   var T : KLabel .
   var HPN : HeapLabel .
@@ -56,10 +59,10 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
 
 
 --- Step 2: Stepwise eliminate the environment
-  eq < config > < env > X |-> Obj1 Env1 </ env > CfgItems1 </ config >
-     =env=> < config > < env > X |-> Obj2 Env2 </ env > < form > Phi2 </ form > CfgItems2 </ config >
+  eq < config > < env > X |-> [Val1 : ET] Env1 </ env > CfgItems1 </ config >
+     =env=> < config > < env > X |-> [Val2 : ET] Env2 </ env > < form > Phi2 </ form > CfgItems2 </ config >
    = < config > < env > Env1 </ env > CfgItems1 </ config >
-     =env=> < config > < env > Env2 </ env > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
+     =env=> < config > < env > Env2 </ env > < form > Phi2 /\ Val1 === Val2 </ form > CfgItems2 </ config > .
 
 --- Step 2.2 : Eliminate a globally bounded variable
   eq < config > < env > Env </ env > < subst > Subst </ subst > CfgItems1 </ config >
@@ -81,8 +84,8 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
 
 
 --- Step 2.5 : Eliminate the return value (only when checking asserions at the end of function)
-  eq < config > < form > Phi1 /\ ?return(Obj1) </ form > CfgItems1 </ config >
-     =ret=> < config > < form > Phi2 /\ ?return(Obj2)</ form > CfgItems2 </ config >
+  eq < config > < form > Phi1 /\ returns(Obj1) </ form > CfgItems1 </ config >
+     =ret=> < config > < form > Phi2 /\ returns(Obj2)</ form > CfgItems2 </ config >
    = < config > < form > Phi1 </ form > CfgItems1 </ config >
      =heap=> < config > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
   eq < config > < form > Phi1 </ form > CfgItems1 </ config >
@@ -140,14 +143,14 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
      =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ ObjList1 === ObjList2 </ form > CfgItems2 </ config > .
 
 --- Step 4.2 : Eliminate a location
-  eq < config > < heap > P |-> Obj1 : T H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > P |-> Obj2 : T H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
+ eq < config > < heap > P |-> Val1 : [field : ET] H1 </ heap > CfgItems1 </ config >
+     =heap=> < config > < heap > P |-> Val2 : [field : ET] H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
    = < config > < heap > H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
+     =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ Val1 === Val2 </ form > CfgItems2 </ config > .
 
 --- Step 4.3 : Eliminate a globally bounded variable in the hypothesis
   eq < config > < heap > H </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > !H </ heap > < subst > Subst </ subst > CfgItems2 </ config >
+    =heap=> < config > < heap > !H </ heap > < subst > Subst </ subst > CfgItems2 </ config >
    = < config > CfgItems1 </ config >
      =form=> < config > < subst > (!H <- H) ; Subst </ subst > CfgItems2 </ config > .
 

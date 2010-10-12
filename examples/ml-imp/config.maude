@@ -54,7 +54,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   [prec 0 format(nib g b o+ -b g b o)] .
 
   ops feasible infeasible : -> CellLabel .
-  ops config k env heap form subst newSym newImpl spec : -> CellLabel .
+  ops config k struct env heap form subst newSym newImpl spec : -> CellLabel .
 
   op errorBag : -> [Bag] .
   op _===>_ : Bag Bag -> Bag [frozen] .
@@ -71,12 +71,40 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op co-skolemize : Bag -> Bag .
 
   sort HeapLabel .
-  op node : -> KLabel .
-  op _|->_:_ : Int++ Int++ KLabel -> MapItem .
+  sort Val Void NvExpType ExpType .
+  subsort Int++  <  Val .
+  subsort Void NvExpType <  ExpType .
+  
+  sort Field .
+  subsort Field < Id .
+
+---env
+  op _|->[_:_] : Id  Val  ExpType -> MapItem .
+---struct
+  op _|->_ : Id  List -> MapItem .
+  op [_:_+_] :  Id  ExpType  Int++ -> ListItem .
+---heap
+  op emptySn : -> Id .
+  op @scalar :  -> Field .
+  op _._ : Id Id -> Field .
+  op _|->_:[_:_] : Int++  Val Field  ExpType -> MapItem . 
+  op struct_* : Id -> ExpType .
+  --- no proof obligations
+  op noCfg : -> Bag .
+  
+  vars Map Map' : Map .
+  var I : Id .
+  vars v1 v2 : Val .
+  var t : ExpType .
+
+  eq (Map I |-> [v1 : t ])[Map' I |-> [v2 : t ]] = Map[Map'] I |-> [v2 : t ] .
+  --- eq (Map)[(.).Map] = (.).Map . --- for the assume .Map
+
+  op int :  -> NvExpType .
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op derive : -> KLabel .
 
-  op ?return : MathObj++ -> Atom .
+  op returns_ : MathObj++ -> Atom .
 
   op VALID : Formula -> Bool .
   eq VALID(TrueFormula) = true .

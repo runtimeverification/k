@@ -1,34 +1,38 @@
 load fol.maude
 load ml-imp.maude
 
-mod TEST is inc IMP + FOL= . endm
+mod TEST is inc IMP + FOL= . 
+	      op a :  -> Id .    op b :  -> Id .    op c :  -> Id .    op d :  -> Id .    op res :  -> Id .    op res2 :  -> Id .    op maximum :  -> Id .    op minimum :  -> Id . 
+	      op ?res :  -> ?Int .    op ?res2 :  -> ?Int . 
+	      op a0 :  -> FreeInt .    op b0 :  -> FreeInt .    op c0 :  -> FreeInt .    op d0 :  -> FreeInt . 
+endm
 
 set print attribute on .
-rew check('pSum) .
----rew check('pListReverse) .
----rew check('pListAppend) .
----rew check('pTreeMirror) .
----rew check('pBstInsert) .
-
+rew check('test) .
 
 eof
 
 search
 < config >
-  < newImpl > 1 </ newImpl >
-  < env > a |-> a0 b |-> b0 x |-> ?x </ env >
-  < heap > ?x |-> ?Int(1) : node ?x +Int 1 |-> b0 : next list(b0)(B) lseg(a0,
-    ?x)(?A) </ heap >
-  < form > ~ (?x === 0) /\ ~ (a0 === 0) /\ ?return === a0 </ form >
-  < subst > !H <- list(b0)(B) </ subst >
-</ config >
+  < k >('functionEnd).KProperLabel(.List{K}) ~> .K </ k >
+  < newSym > 1 </ newSym >
+  < newImpl > 0 </ newImpl >
+  < struct > (.).Map </ struct >
+  < env > res |->[a0 : int] </ env >
+  < heap > (.).Map </ heap >
+  < form > @ (a0 +Int -Int b0 +Int -1 >=Int 0) /\ returns(a0) </ form >
+  < subst > .Subst </ subst > 
+</ config > 
 ===>
 < config >
-    < env > a |-> ?a </ env >
-    < heap > list(?a)(A ::: B) </ heap >
-    < form > (~ (a0 === 0) /\ ?a === a0 \/ ?a === b0 /\ a0 === 0) /\ ?return
-    === ?a </ form >
-</ config >
+  < k > functionEnd ~> .K </ k >
+  < newSym > 1 </ newSym >
+  < newImpl > 0 </ newImpl >
+  < struct > (.).Map </ struct >
+  < env > (.).Map </ env >
+  < heap > (.).Map </ heap >
+  < form > @ (a0 +Int -Int b0 +Int -1 >=Int 0) /\ returns(a0) </ form >
+  < subst > .Subst </ subst > 
+</ config > 
 =>* CfgItems:Bag
 .
-
