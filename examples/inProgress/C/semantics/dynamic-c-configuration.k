@@ -54,6 +54,7 @@ kmod C-CONFIGURATION is
 						< incompleteLength > 0 </ incompleteLength >
 						< savedInitialization > .K </ savedInitialization >
 
+						< loopStack > .List </ loopStack >
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						--- < holds > .Map </ holds >
 						< type * > .K </ type * > --- used for typing expressions
@@ -64,11 +65,15 @@ kmod C-CONFIGURATION is
 						< currentFunction > .K </ currentFunction >
 						< currentProgramLoc > .K </ currentProgramLoc >
 						
-						< loopStack > .List </ loopStack >
 						< calculateGotoMap >
-							< computation > .K </ computation >
-							< computationTail > .K </ computationTail >
-							< declarationStack > .List </ declarationStack >
+							< gotoCalculation * >
+								< computation > .K </ computation >
+								< computationTail > .K </ computationTail >
+								< declarationStack > .List </ declarationStack >
+								< nestingDepth > 0 </ nestingDepth >
+								< currentBlock > 0 </ currentBlock >
+								< loopStack > .List </ loopStack >
+							</ gotoCalculation * >
 						</ calculateGotoMap >
 					</ control >
 				</ thread * >

@@ -125,8 +125,6 @@ endm
 mod COMMON-SEMANTICS-GOTO is
 	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
-	--- mb context 'calculateGotoMap(?,, ('case`(_`)_:_(?:K,,`[HOLE`]:K,, ?) ~> ?),, ?,, ?) : KSentence .
-	
 	--- fixme CONFIRM It seems there are no sequence points for a goto
 	--- mb rule 
 		--- < k > goto(X:Id); ~> ? => K:K </ k >
@@ -135,16 +133,21 @@ mod COMMON-SEMANTICS-GOTO is
 		--- < gotoMap >... kpair(F:Id, X:Id) |-> kpair(K:K, S:List) ...</ gotoMap >
 		--- : KSentence [metadata "computational rule"] .
 		
-	op calculateGotoMap : Id K Map List K -> K . --- func name, body, variables, loop stack, tail
+	--- op calculateGotoMap : Id K Map List K -> K . --- func name, body, variables, loop stack, tail
 	
 	op waitingOnGotoMap : -> K .
 	mb rule 
-		< k > calculateGotoMap(X:Id, K:K) => waitingOnGotoMap ...</ k >
-		< computation > ? => K:K </ computation >
-		< computationTail > ? => (.).K </ computationTail >
-		< loopStack > ? => (.).List </ loopStack >
-		< declarationStack > ? => (.).List </ declarationStack >
+		< k > calculateGotoMap(F:Id, K:K) => waitingOnGotoMap ...</ k >
+		< currentFunction > ? => F:Id </ currentFunction >
+		< calculateGotoMap >
+			. => (< gotoCalculation >... < computation > K:K </ computation > ...</ gotoCalculation >)
+		</ calculateGotoMap >
 		: KSentence .
+		
+	mb rule
+		(< gotoCalculation > < computation > (.).K </ computation > ...</ gotoCalculation >) => (.).Bag
+		: KSentence [metadata "structural"] .
+		
 	--- mb rule
 		--- < k > calculateGotoMap(?, (.).K, ?, ?, ?) => (.).K ...</ k >
 		--- : KSentence [metadata "structural"] .
@@ -163,32 +166,30 @@ mod COMMON-SEMANTICS-GOTO is
 	When we goto, we need to take the variables on the goto path and subtract the variables we've already allocated in the real history.  Then we need to declare the remaining variables.
 		
 ***)
-	
-		
-	--- mb rule 
-		--- < k > [calculateGotoMap(X:Id, (L:KLabel(Args:List{K}) ~> K:K), S:List, Tail:K) 
-		--- => calculateGotoMap(X:Id, K:K, S:List, Tail:K)] ...</ k >
-		--- if L:KLabel ==Bool 'Local
-		--- orBool L:KLabel ==Bool '_; --- assumes we don't put '_; around actual statements
-		--- orBool L:KLabel ==Bool 'goto_;
-		--- orBool L:KLabel ==Bool 'continue`;
-		--- orBool L:KLabel ==Bool 'break`;
-		--- orBool L:KLabel ==Bool 'return`;
-		--- orBool L:KLabel ==Bool 'return_;
-		--- ---orBool L:KLabel ==Bool 'default`:_
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb rule
-		--- < k > calculateGotoMap(?, (.).K, ?, ?, ?) => (.).K ...</ k >
-		--- : KSentence [metadata "structural"] .
+
 	mb rule
 		< k > waitingOnGotoMap => (.).K ...</ k >
-		< computation > (.).K </ computation >
+		< calculateGotoMap > (.).Bag </ calculateGotoMap >
+		< currentFunction > ? => File-Scope </ currentFunction >
+		: KSentence [metadata "structural"] .
+
+	op endBlockForGoto : Nat -> K .
+	mb rule 
+		< computation > BlockStatement(Block:K)
+			=> Block:K ~> endBlockForGoto(OldNum:Nat)
+		...</ computation >
+		< nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
+		< currentBlock > OldNum:Nat </ currentBlock >
+		: KSentence .
+	mb rule
+		< computation > Block(Num:Nat, ?, L:List{C}) => listToK(L:List{C}) ...</ computation > 
+		< currentBlock > ? => Num:Nat </ currentBlock >
+		< declarationStack > . => ListItem((.).K) ...</ declarationStack >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< computation > Block(Num:Nat, ?, L:List{C}) => listToK(L:List{C}) ...</ computation > 
-		< nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
+		< computation > endBlockForGoto(Num:Nat) => (.).K ...</ computation >
+		< nestingDepth > sNat(N:Nat) => N:Nat </ nestingDepth >
 		< currentBlock > ? => Num:Nat </ currentBlock >
 		: KSentence [metadata "structural"] .
 		
@@ -200,36 +201,124 @@ mod COMMON-SEMANTICS-GOTO is
 		< computation > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ computation >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
+
+	op frozenDeclaration : Nat Nat K -> K . --- nestingDepth, currentBlock, decl
+	mb rule
+		< computation > 'DeclarationDefinition(Args:List{K}) => (.).K ...</ computation >
+		< declarationStack > ListItem(((. => frozenDeclaration(Depth:Nat, BlockNum:Nat, 'DeclarationDefinition(Args:List{K}))) ~> ?)) ...</ declarationStack >
+		< nestingDepth > Depth:Nat </ nestingDepth >
+		< currentBlock > BlockNum:Nat </ currentBlock >
+		: KSentence [metadata "structural"] .
 		
 	mb rule 
 		< computation > L:KLabel(Args:List{K}) => (.).K ...</ computation >
 		if false
-		--- orBool L:KLabel ==Bool 'Local
-		--- orBool L:KLabel ==Bool '_; --- assumes we don't put '_; around actual statements
-		--- orBool L:KLabel ==Bool 'goto_;
-		--- orBool L:KLabel ==Bool 'continue`;
-		--- orBool L:KLabel ==Bool 'break`;
+		orBool L:KLabel ==Bool 'Nop
+		orBool L:KLabel ==Bool 'Computation
+		orBool L:KLabel ==Bool 'Break
+		orBool L:KLabel ==Bool 'Continue
 		orBool L:KLabel ==Bool 'Return
-		---orBool L:KLabel ==Bool 'default`:_
+		orBool L:KLabel ==Bool 'Goto
+		orBool L:KLabel ==Bool 'CompGoto
+		: KSentence [metadata "structural"] .
+		
+***(
+	op Switch : K K -> PureStatement
+	op Case : K K -> PureStatement
+	op Default : K -> PureStatement
+	op Label : Id K -> PureStatement
+	
+	op LocalDefinition : K -> PureStatement --- handled because it gets turned into a normal decl
+	op Sequence : K K -> PureStatement --- still don't know what this is
+	
+	--- gcc specific
+	op CaseRange : K K K -> PureStatement
+	op CompGoto : K -> PureStatement
+	op TryExcept : K K K -> PureStatement
+	op TryFinally : K K -> PureStatement	
+***)
+
+	---- dowhile, while, and for are all basically the same here
+	mb rule
+		< computation > (. => S:K ~> loopMarked) ~> For(E1:K, E2:K, E3:K, S:K) ~> K:K </ computation >
+		< computationTail > Tail:K </ computationTail >
+		< loopStack > (. => ListItem((K:K ~> Tail:K))) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< computation > (loopMarked ~> For(E1:K, E2:K, E3:K, S:K) => (.).K) ~> K:K </ computation >
+		< computationTail > Tail:K </ computationTail >
+		< loopStack > (ListItem((K:K ~> Tail:K)) => .) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< computation > (. => S:K ~> loopMarked) ~> DoWhile(E:K, S:K) ~> K:K </ computation >
+		< computationTail > Tail:K </ computationTail >
+		< loopStack > (. => ListItem((K:K ~> Tail:K))) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< computation > (loopMarked ~> DoWhile(E:K, S:K) => (.).K) ~> K:K </ computation >
+		< computationTail > Tail:K </ computationTail >
+		< loopStack > (ListItem((K:K ~> Tail:K)) => .) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< computation > (. => S:K ~> loopMarked) ~> While(E:K, S:K) ~> K:K </ computation >
+		< computationTail > Tail:K </ computationTail >
+		< loopStack > (. => ListItem((K:K ~> Tail:K))) ...</ loopStack >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< computation > (loopMarked ~> While(E:K, S:K) => (.).K) ~> K:K </ computation >
+		< computationTail > Tail:K </ computationTail >
+		< loopStack > (ListItem((K:K ~> Tail:K)) => .) ...</ loopStack >
 		: KSentence [metadata "structural"] .
 	
-	--- mb rule 
-		--- < computation > DeclarationDefinition(Args:List{K}) => (.).K ...</ computation >
-		--- < declarationStack > </ declarationStack >
-		--- : KSentence [metadata "structural"] .
-	
+	mb rule
+		< gotoCalculation >
+			< computation > (IfThenElse(?, S1:K, S2:K) => (.).K) ~> K:K </ computation >
+			< computationTail > Tail:K </ computationTail >
+			B:Bag
+		</ gotoCalculation >
+		(. =>
+			< gotoCalculation > 
+				< computation > S1:K </ computation > 
+				< computationTail > Tail:K ~> K:K </ computationTail >
+				B:Bag 
+			</ gotoCalculation >
+		)
+		(. =>
+			< gotoCalculation > 
+				< computation > S2:K </ computation >
+				< computationTail > Tail:K ~> K:K </ computationTail >
+				B:Bag 
+			</ gotoCalculation >
+		)
+		
+		: KSentence [metadata "structural"] .
 		
 	--- mb rule 
-		--- < k > calculateGotoMap(X:Id, (Block(Num:Nat, L:List{K}) ~> K:K), M:Map, S:List, Tail:K) 
-			--- => calculateGotoMap(X:Id, (listToK(L:List{K}) ~> K:K), M:Map, S:List, Tail:K) 
-		--- ...</ k >
-		--- < nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
-		--- < currentBlock > ? => Num:Nat </ currentBlock >
+		--- < k > [calculateGotoMap(X:Id, ('if`(_`)_else_(?,, Arg1:K,, Arg2:K) ~> K:K), S:List, Tail:K) 
+		--- => calculateGotoMap(X:Id, Arg1:K, S:List, (Tail:K ~> K:K))
+		--- ~> calculateGotoMap(X:Id, Arg2:K, S:List, (Tail:K ~> K:K))
+		--- ~> calculateGotoMap(X:Id, K:K, S:List, Tail:K)
+		--- ] ...</ k >
+		--- : KSentence [metadata "structural"] .	
+		
+	--- mb rule 
+		--- < k > [calculateGotoMap(X:Id, 
+				---x (loopMarked ~> (while (B:Expression) S:Statement) ~> K:K), 
+				---x (ListItem( (K:K ~> Tail:K)) S':List), 
+				--- Tail:K)
+		--- => calculateGotoMap(X:Id, K:K, S':List, Tail:K)] ...</ k >
 		--- : KSentence [metadata "structural"] .
 	--- mb rule 
-		--- < k > [calculateGotoMap(X:Id, ('Block(Arg:K) ~> K:K), S:List, Tail:K) 
-		--- => calculateGotoMap(X:Id, (Arg:K ~> K:K), S:List, Tail:K)] ...</ k >
+		--- < k > [calculateGotoMap(X:Id, ('while`(_`)_(B:Expression,, S:Statement) ~> K:K), S':List, Tail:K) 
+		--- => calculateGotoMap(X:Id, 
+			---x (S:Statement ~> loopMarked ~> (while (B:Expression) S:Statement) ~> K:K),
+			---x (ListItem((K:K ~> Tail:K)) S':List),
+			--- Tail:K)] ...</ k >
 		--- : KSentence [metadata "structural"] .
+	
+	
 	--- mb rule 
 		--- < k > [calculateGotoMap(X:Id, (L:KLabel(?,, Arg:K) ~> K:K), S:List, Tail:K) 
 		--- => calculateGotoMap(X:Id, (Arg:K ~> K:K), S:List, Tail:K)] ...</ k >
@@ -261,17 +350,6 @@ mod COMMON-SEMANTICS-GOTO is
 		--- < gotoMap >... [.Map => kpair(X:Id, defaultCase(SN:Nat)) |-> kpair((Arg:K ~> K:K ~> Tail:K), S:List)] ...</ gotoMap >
 		--- : KSentence [metadata "structural"] .
 
-	--- mb rule 
-		--- < k > [calculateGotoMap(X:Id, ('while`(_`)_(B:Expression,, S:Statement) ~> K:K), S':List, Tail:K) 
-		--- => calculateGotoMap(X:Id, 
-			---xxx (S:Statement ~> loopMarked ~> (while (B:Expression) S:Statement) ~> K:K),
-			---xxx (ListItem((K:K ~> Tail:K)) S':List),
-			--- Tail:K)] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- < k > [calculateGotoMap(X:Id, (loopMarked ~> (while (B:Expression) S:Statement) ~> K:K), (ListItem( (K:K ~> Tail:K)) S':List), Tail:K)
-		--- => calculateGotoMap(X:Id, K:K, S':List, Tail:K)] ...</ k >
-		--- : KSentence [metadata "structural"] .
 		
 	--- mb rule 
 		--- < k > [calculateGotoMap(X:Id, ('switch`(_`)`(_`)_(?,, B:Expression,, S:Statement) ~> K:K), S:List, Tail:K) 
@@ -351,7 +429,11 @@ endm
 mod COMMON-SEMANTICS-BLOCKS is
 	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
-	mb rule BlockStatement(Block:K) => pushBlock ~> Block:K ~> popBlock : KSentence .
+	mb rule 
+		< k > BlockStatement(Block:K)
+			=> pushBlock ~> Block:K ~> popBlock
+		...</ k >
+		: KSentence .
 	
 	mb [push-block]: rule
 		< k > pushBlock => (.).K ...</ k > 

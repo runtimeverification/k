@@ -385,7 +385,7 @@ and statement =
 	op Label : Id K -> PureStatement
 	op Goto : Id -> PureStatement
 	op CompGoto : K -> PureStatement
-	op LocalDefinition : K -> PureStatement
+	op LocalDefinition : K -> PureStatement  --- renamed from "DEFINITION"
 ***(
 	| ASM of attribute list * (* typically only volatile and const *)
 		  string list * (* template *)

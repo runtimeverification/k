@@ -1411,7 +1411,7 @@ mod COMMON-GLOBAL-DECLARATION is
 	mb [function-definition]: rule
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
 			=> declareFunction(X:Id, T:Type, initializer((X:Id := tv(functionObject(X:Id, unqualifyType(T:Type), Block:K), T:Type) ~> discard)))
-			--- ~> calculateGotoMap(X:Id, Block:K)
+			~> calculateGotoMap(X:Id, Block:K)
 		...</ k >
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
