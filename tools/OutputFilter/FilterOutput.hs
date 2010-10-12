@@ -20,6 +20,7 @@ module FilterOutput where
   import Control.Monad.State
   import Control.Monad.List
   import Data.List
+  import Data.Maybe
 
   -- Strip off surrounding whitespaces, remove empty strings, remove those blasted DOS carriage returns
   cleanupStrings :: [KOutput] -> [KOutput]
@@ -101,15 +102,17 @@ module FilterOutput where
   -- Should a cell be pruned?
   shouldPrune :: Configuration -> CellName -> Bool
   shouldPrune conf cn = case lookupCell conf cn of
-                          Just (Lines _) -> True
-                          _              -> False
+                          Just (Configs (Just _) _ _) -> True
+                          _                           -> False
 
 
   -- Fetch the number of lines to keep from the configuration
   getPruneNumber :: Configuration -> CellName -> Int
-  getPruneNumber conf cn = case lookupCell conf cn of
-                             Just (Lines n) -> n
-                             _ -> error "internal error: shouldPrune approved a prune candidate incorrectly"
+  getPruneNumber conf cn = case lookupCell conf cn >>= keepLines of
+                             Just n -> n
+                             _      -> error "internal error: shouldPrune approved a prune candidate incorrectly"
+
+  -- Whether a maybe is something
 
   -- Convert to string
   stringifyDoc :: Doc -> String

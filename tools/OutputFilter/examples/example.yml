@@ -14,9 +14,10 @@ callStack: recursively-hide
 # Current features:
 #   whitelisting
 #   keep only a certain number of lines
+#   recursive hide
+
 
 # Upcoming features:
-#   recursive hide
 #   colors
 #   environment/memory lookup
 #   regular-expression based line-based show/hide
