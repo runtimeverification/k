@@ -13,7 +13,8 @@ module FilterOutput where
   import ParseConfig
   import System.Environment
   import Useful.String
-  import Text.PrettyPrint.ANSI.Leijen
+  import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
+  import Control.Applicative hiding (empty)
   import Control.Monad
   import Control.Monad.Identity
   import Control.Monad.State
@@ -48,7 +49,9 @@ module FilterOutput where
   ppKOutput conf (Cell name contents) | shouldShow conf name = linebreak <> (hang 1 $ ppBeginCell name
                                                                          <> handleContents contents
                                                                         <+> ppEndCell name)
+                                      | shouldRecHide conf name = empty
                                       | otherwise            = handleContents $ filter isCell contents
+
     where handleContents cs = (hcat . map (ppKOutput conf) . pruneStrings conf name . cleanupStrings) cs
 
 
@@ -73,26 +76,39 @@ module FilterOutput where
 
 
 
-  -- Fetch the number of lines to keep from the configuration
 
+
+
+  -- Lookup the config for the cell
+  lookupCell :: Configuration -> CellName -> Maybe CellConfigRhs
+  lookupCell conf cn = snd <$> find ((cn ==) . fst) conf
 
   -- Should a cell be shown?
   shouldShow :: Configuration -> CellName -> Bool
-  shouldShow conf cn = case find ((cn ==) . fst) conf of
-                         Just (_, No) -> False
-                         Nothing      -> False
-                         _            -> True
+  shouldShow conf cn = case lookupCell conf cn of
+                         Just Hide          -> False
+                         Just RecursiveHide -> False
+                         Nothing            -> False
+                         _                  -> True
+
+   -- Should a cell be recursively hidden?
+  shouldRecHide :: Configuration -> CellName -> Bool
+  shouldRecHide conf cn = case lookupCell conf cn of
+                            Just RecursiveHide -> True
+                            _                  -> False
+
 
   -- Should a cell be pruned?
   shouldPrune :: Configuration -> CellName -> Bool
-  shouldPrune conf cn = case find ((cn ==) . fst) conf of
-                          Just (_, Lines _) -> True
-                          _                 -> False
+  shouldPrune conf cn = case lookupCell conf cn of
+                          Just (Lines _) -> True
+                          _              -> False
 
 
+  -- Fetch the number of lines to keep from the configuration
   getPruneNumber :: Configuration -> CellName -> Int
-  getPruneNumber conf cn = case find ((cn ==) . fst) conf of
-                             Just (_, Lines n) -> n
+  getPruneNumber conf cn = case lookupCell conf cn of
+                             Just (Lines n) -> n
                              _ -> error "internal error: shouldPrune approved a prune candidate incorrectly"
 
   -- Convert to string

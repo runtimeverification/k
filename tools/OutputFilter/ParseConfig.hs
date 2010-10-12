@@ -21,9 +21,11 @@ module ParseConfig where
   type CellConfig = (String, CellConfigRhs)
 
   -- add more to this to support more customizations
-  data CellConfigRhs = Yes
-                     | No
+  data CellConfigRhs = Show
+                     | Hide
                      | Lines Int
+                     | RecursiveShow
+                     | RecursiveHide
     deriving (Show)
 
   -- A Yaml tree without superfluous info and types
@@ -58,11 +60,18 @@ module ParseConfig where
 
   -- Extend the below function to add more functionality
   readConfig :: YamlLite -> CellConfigRhs
-  readConfig (Str s) | compareStr s ["yes", "y"] = Yes
-                     | compareStr s ["no", "n"]  = No
-                     | otherwise                 = error $ "Unknown value: " ++ s
+  readConfig (Str s) | compareStr s doShow    = Show
+                     | compareStr s doHide    = Hide
+                     | compareStr s doHideRec = RecursiveHide
+                     | compareStr s doShowRec = RecursiveShow
+                     | otherwise              = error $ "Unknown value: " ++ s
+    where doShow    = ["yes", "y", "show", "true", "t"]
+          doHide    = ["no", "n", "hide", "false", "f"]
+          doHideRec = ["hide-recursive", "recursive-hide", "recursively-hide", "hide-recursively"]
+          doShowRec = ["show-recursive", "recursive-show", "recursively-show", "show-recursively"]
+
   readConfig (Map [(Str key, Str val)]) | compareStr key ["lines", "keep"] && areNumbers val = Lines (read val)
-  readConfig (Map _) = Yes
+  readConfig (Map _) = Show
 
   -- Compare the contents of the config item to see if it occurs in passed strings.
   compareStr :: String -> [String] -> Bool
