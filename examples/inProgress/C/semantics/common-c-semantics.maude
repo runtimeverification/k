@@ -9,6 +9,9 @@
 
 --- extern inside block that shadows variable in a function that shadows global extern
 
+--- c1x 6.7.9:5 If the declaration of an identifier has block scope, and the identifier has external or internal linkage, the declaration shall have no initializer for the identifier.
+--- this means you can't have initializers for static variables??
+
 ---C99 6.7.8:10 If an object has static duration ... if it has pointer type, it is NULL, if it is arithmetic, 0, aggregate, recursively these, union, first member by these
 
 ***( 
@@ -422,6 +425,15 @@ endm
 mod SEMANTIC-HELPERS is 
 	including COMMON-SEMANTIC-SYNTAX .
 	including C-SETTINGS .
+	
+	
+	--- this should probably go in the k prelude
+	op _in_ : K List -> Bool .
+	eq K:K in (ListItem(K:K) ?) = true .
+	eq K:K in (.).List = false .
+	ceq K:K in (ListItem(K':K) L:List) = K:K in L:List
+		if K:K =/=Bool K':K .
+	
 	
 	mb [discard]: rule
 		< k > V:Value ~> discard => (.).K ...</ k >
@@ -1049,8 +1061,6 @@ mod COMMON-GLOBAL-DECLARATION is
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
 		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
 		~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
-	op idOfName : K -> K .
-	eq idOfName(Name(X:Id, ?)) = X:Id .
 	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
 		
 	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
@@ -1160,7 +1170,7 @@ mod COMMON-GLOBAL-DECLARATION is
 			~> giveType(X:Id, unqualifyType(T:Type))
 		...</ k >
 		< internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
-		< currentBlock > BlockNum:Nat </ currentBlock >
+		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
 		< currentTranslationUnit >... Tu:K ...</ currentTranslationUnit >
 		if hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
@@ -1174,7 +1184,7 @@ mod COMMON-GLOBAL-DECLARATION is
 			~> zero(X:Id)
 		...</ k >
 		< internalLocations >... Tu:K |-> Map((Locs:Map => Locs:Map[Loc:Nat / kpair(X:Id, BlockNum:Nat)])) ...</ internalLocations >
-		< currentBlock > BlockNum:Nat </ currentBlock >
+		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< currentTranslationUnit >... Tu:K ...</ currentTranslationUnit >
 		if hasStaticType(T:Type)
@@ -1186,7 +1196,7 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> defineAndInit(X:Id, unqualifyType(T:Type), figureInitializer(X:Id, unqualifyType(T:Type), K:K), Loc:Nat)
 		...</ k >
 		< internalLocations >... Tu:K |-> Map((Locs:Map => Locs:Map[Loc:Nat / kpair(X:Id, BlockNum:Nat)])) ...</ internalLocations >
-		< currentBlock > BlockNum:Nat </ currentBlock >
+		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< currentTranslationUnit >... Tu:K ...</ currentTranslationUnit >
 		if hasStaticType(T:Type)
@@ -1319,12 +1329,12 @@ mod COMMON-GLOBAL-DECLARATION is
 			~> giveType(X:Id, T:Type)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		< localVariables > Vars:Set (. => SetItem(X:Id)) </ localVariables >
+		< localVariables > Vars:List (. => ListItem(X:Id)) </ localVariables >
 		< localAddresses >... (.).Set => SetItem(Loc:Nat) ...</ localAddresses >
 		if notBool hasIncompleteType(T:Type)
 		andBool notBool hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
-		andBool notBool X:Id in Vars:Set
+		andBool notBool X:Id in Vars:List
 		: KSentence [metadata "structural"] .
 	
 	mb rule
@@ -1358,9 +1368,9 @@ mod COMMON-GLOBAL-DECLARATION is
 			=> defineAndInit(X:Id, T:Type, figureInitializer(X:Id, T:Type, K:K), Loc:Nat)
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		< localVariables > Vars:Set (. => SetItem(X:Id)) </ localVariables >
+		< localVariables > Vars:List (. => ListItem(X:Id)) </ localVariables >
 		< localAddresses >... (.).Set => SetItem(Loc:Nat) ...</ localAddresses >
-		if notBool X:Id in Vars:Set
+		if notBool X:Id in Vars:List
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > defineAndInit(X:Id, ?, initializerValue(X:Id, T:Type, K:K), Loc:Nat)

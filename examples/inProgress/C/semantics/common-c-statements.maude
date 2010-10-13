@@ -132,6 +132,128 @@ mod COMMON-SEMANTICS-GOTO is
 		--- < loopStack > ? => S:List </ loopStack >
 		--- < gotoMap >... kpair(F:Id, X:Id) |-> kpair(K:K, S:List) ...</ gotoMap >
 		--- : KSentence [metadata "computational rule"] .
+	
+--- c1x 6.2.4:6 For such an object that does not have a variable length array type, its lifetime extends from entry into the block with which it is associated until execution of that block ends in any way. (Entering an enclosed block or calling a function suspends, but does not end, execution of the current block.) If the block is entered recursively, a new instance of the object is created each time. The initial value of the object is indeterminate. If an initialization is specified for the object, it is performed each time the declaration or compound literal is reached in the execution of the block; otherwise, the value becomes indeterminate each time the declaration is reached.
+		
+***(
+	things I have to keep track of:
+		in goto map:
+			remaining computation
+			which variables are allocated on the path
+			...
+		in blocks:
+			which variables i've allocated so far
+	
+	I need to adjust the block stack, 
+		
+	When we goto, we need to take the variables on the goto path and subtract the variables we've already allocated in the real history.  Then we need to declare the remaining variables.
+		
+***)
+
+	***( 
+		To do the actual goto:
+			- Case 1: We are in the same block as the target.
+				1. We might be jumping forwards or backwards, across declarations, so we need to figure out which variables should be left alone, allocated but not initialized, or deallocated.
+					a. Skip any entries in the frozen declarationStack where the nestingDepth is smaller than our current nestingDepth
+					b. All that remains should be variables in the same block as the target.
+					c. As we step through the variables in the frozen declarationStack
+						i. any variables we see that we have already declared stay allocated and keep their old value.
+						ii. any variables that are in the declarationStack but have not been declared are variables we must allocate but not initialize
+						iii. any variables that have been declared but are not in the declarationStack need to be deallocated
+			- Case 2: We are in a different block than the target.
+				1. We need to unwind blocks from the blockstack until we're in at nestingDepth 1 less than the nesting depth of the target.
+					a. for each block we pop, we need to unallocate the memory
+					b. once we're at the right place, we enter the block and then proceed similarly to case 1, except all the cases will be to allocate and not initialize
+		
+		The variables mentioned above are meant to be those with automatic storage duration.  Variables with external or static storage duration have their own rules.
+				
+	***)
+	--- mb rule
+		--- < k > Goto(Label:Id) ~> ? => K:K </ k >
+		--- < currentFunction > F:Id </ currentFunction >
+		--- < loopStack > ? => S:List </ loopStack >
+		--- < gotoMap >... kpair(F:Id, X:Id) |-> kpair(K:K, S:List) ...</ gotoMap >
+		--- : KSentence [metadata "computational rule"] .
+***(
+< gotoMap >
+('kpair).KProperLabel(String "simplestGoto.pre.gen"(.List{K}),,Id Identifier("main")(.List{K})) 
+|-> ('Map).KProperLabel(wmap (
+	Id Identifier("jump")(.List{K}) 
+	|->
+	('gotoObject).KProperLabel(('StatementLoc).KProperLabel(('Return).KProperLabel(Id Identifier("x")(.List{K})),,('CabsLoc).KProperLabel(String "simplestGoto.prepre.gen"(.List{K}),,BaseValue 6(.List{K}),,BaseValue 152(.List{K}),,BaseValue 38(.List{K})))
+	,,wlist .(.List{K})
+	,,wlist ListItem(
+		('frozenDeclaration).KProperLabel(
+			BaseValue 0(.List{K})
+			,,BaseValue 1(.List{K})				,,('LocalDefinition).KProperLabel(('DefinitionLoc).KProperLabel(('DeclarationDefinition).KProperLabel(('InitNameGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Int).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('InitName).KProperLabel(('Name).KProperLabel(Id Identifier("x")(.List{K}),,('JustBase).KProperLabel(.List{K})),,('SingleInit).KHybridLabel(('tv).KResultLabel(kList("wklist_")(BaseValue 5(.List{K})),,BaseType int(.List{K}))))))),,('CabsLoc).KProperLabel(String "simplestGoto.prepre.gen"(.List{K}),,BaseValue 2(.List{K}),,BaseValue 115(.List{K}),,BaseValue 13(.List{K}))))))(.List{K})))(.List{K})) </ gotoMap >
+***)
+	op processGoto : K -> K .
+	op gotoObject : Nat List K List List -> K . --- nestingDepth, block history, continuation, loop stack, decl stack
+	op frozenDeclaration : Nat Nat K -> K . --- nestingDepth, currentBlock, decl
+	op processGotoSameBlock : List List -> K .  --- declaration stack, actual local variables
+	mb rule
+		< k > Goto(Label:Id) ~> ? => processGoto(GotoInfo:K) </ k >
+		< currentFunction > F:Id </ currentFunction >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((? (Label:Id |-> GotoInfo:K))) ...</ gotoMap >
+		: KSentence [metadata "structural"] .
+		
+	--- first case, when we're in the same block
+	mb rule
+		< k > processGoto(gotoObject(Depth:Nat, BlockHistory:List, K:K, LoopStack:List, DeclStack:List)) 
+			=> processGotoSameBlock(DeclStack:List, Vars:List)
+			~> K:K
+		...</ k >
+		< nestingDepth > Depth:Nat </ nestingDepth >
+		< blockHistory > BlockHistory:List </ blockHistory >
+		< loopStack > ? => LoopStack:List </ loopStack >
+		< localVariables > Vars:List </ localVariables >
+		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < k > processGoto(gotoObject(TargetDepth:Nat, TargetNum:Nat, K:K, LoopStack:List, DeclStack:List))
+			--- => cleanBlockForGoto
+			--- ~> processGoto(gotoObject(TargetDepth:Nat, TargetNum:Nat, K:K, LoopStack:List, DeclStack:List))
+		--- ...</ k >
+		--- < nestingDepth > ActualDepth:Nat </ nestingDepth >
+		--- if ActualDepth:Nat >Nat TargetDepth:Nat
+		--- : KSentence [metadata "structural"] .
+		
+	--- if we're at a less deep 
+	--- mb rule
+		--- < k > processGoto(gotoObject(TargetDepth:Nat, TargetNum:Nat, K:K, LoopStack:List, DeclStack:List)) 
+			--- => processGotoFromHigherBlock((ListItem(frozenDeclaration(Depth:Nat, Num:Nat, Decl:K)) DeclStack:List), (ListItem(X:Id) Vars:List))
+		--- ...</ k >
+		--- < nestingDepth > ActualDepth:Nat </ nestingDepth >
+		--- < currentBlock > ActualNum:Nat </ currentBlock >
+		--- < loopStack > ? => LoopStack:List </ loopStack >
+		--- < localVariables > Vars:List </ localVariables >
+		--- if ActualDepth:Num <Nat TargetDepth
+		--- : KSentence [metadata "structural"] .
+	
+	--- skip over variables that are in the actual past and in the target's past
+	mb rule
+		< k > processGotoSameBlock((ListItem(frozenDeclaration(Depth:Nat, Num:Nat, Decl:K)) DeclStack:List), (ListItem(X:Id) Vars:List))
+			=> processGotoSameBlock(DeclStack:List, Vars:List)
+		...</ k >
+		< nestingDepth > Depth:Nat </ nestingDepth >
+		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
+		if getIdOfDeclaration(Decl:K) ==Bool X:Id
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > processGotoSameBlock((.).List, (.).List) => (.).K ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	op getIdOfDeclaration : K -> K .
+	op getIdOfName : K -> K .
+	eq getIdOfDeclaration(LocalDefinition(K:K)) = getIdOfDeclaration(K:K) .
+	eq getIdOfDeclaration(DefinitionLoc(K:K, ?)) = getIdOfDeclaration(K:K) .
+	eq getIdOfDeclaration(DeclarationDefinition(InitNameGroup(?, K:C))) = getIdOfName(K:C) .
+	eq getIdOfName(InitName(K:K, ?)) = getIdOfName(K:K) .
+	eq getIdOfName(SingleName(?, K:K)) = getIdOfName(K:K) .
+	eq getIdOfName(Name(X:Id, ?)) = X:Id .
+***(	('LocalDefinition).KProperLabel(('DefinitionLoc).KProperLabel(('DeclarationDefinition).KProperLabel(('InitNameGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Int).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('InitName).KProperLabel(('Name).KProperLabel(Id Identifier("x")(.List{K}),,('JustBase).KProperLabel(.List{K})),,('SingleInit).KHybridLabel(('tv).KResultLabel(kList("wklist_")(BaseValue 5(.List{K})),,BaseType int(.List{K}))))))),,('CabsLoc).KProperLabel(String "simplestGoto.prepre.gen"(.List{K}),,BaseValue 2(.List{K}),,BaseValue 115(.List{K}),,BaseValue 13(.List{K}))))
+***)
 		
 	--- op calculateGotoMap : Id K Map List K -> K . --- func name, body, variables, loop stack, tail
 	
@@ -149,25 +271,7 @@ mod COMMON-SEMANTICS-GOTO is
 	mb rule
 		(< gotoCalculation > < computation > (.).K </ computation > ...</ gotoCalculation >) => (.).Bag
 		: KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > calculateGotoMap(?, (.).K, ?, ?, ?) => (.).K ...</ k >
-		--- : KSentence [metadata "structural"] .
-	
-***(
-	things I have to keep track of:
-		in goto map:
-			remaining computation
-			which variables are allocated on the path
-			...
-		in blocks:
-			which variables i've allocated so far
-	
-	I need to adjust the block stack, 
-		
-	When we goto, we need to take the variables on the goto path and subtract the variables we've already allocated in the real history.  Then we need to declare the remaining variables.
-		
-***)
+
 
 	mb rule
 		< k > waitingOnGotoMap => (.).K ...</ k >
@@ -176,23 +280,24 @@ mod COMMON-SEMANTICS-GOTO is
 		: KSentence [metadata "structural"] .
 
 	op endBlockForGoto : Nat -> K .
+	--- fixme now that i have history, can fix this
 	mb rule 
 		< computation > BlockStatement(Block:K)
 			=> Block:K ~> endBlockForGoto(OldNum:Nat)
 		...</ computation >
 		< nestingDepthGoto > N:Nat => sNat(N:Nat) </ nestingDepthGoto >
-		< currentBlockGoto > OldNum:Nat </ currentBlockGoto >
+		< blockHistoryGoto > ListItem(OldNum:Nat) ...</ blockHistoryGoto >
 		: KSentence .
 	mb rule
 		< computation > Block(Num:Nat, ?, L:List{C}) => listToK(L:List{C}) ...</ computation > 
-		< currentBlockGoto > ? => Num:Nat </ currentBlockGoto >
+		< blockHistoryGoto > . => ListItem(Num:Nat) ...</ blockHistoryGoto >
 		< declarationStack > . => ListItem((.).K) ...</ declarationStack >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< computation > endBlockForGoto(Num:Nat) => (.).K ...</ computation >
 		< nestingDepthGoto > sNat(N:Nat) => N:Nat </ nestingDepthGoto >
-		< currentBlockGoto > ? => Num:Nat </ currentBlockGoto >
+		< blockHistoryGoto > (?:ListItem => (.).List) ListItem(Num:Nat) ...</ blockHistoryGoto >
 		: KSentence [metadata "structural"] .
 		
 	mb [StatementLoc]: rule
@@ -204,13 +309,11 @@ mod COMMON-SEMANTICS-GOTO is
 		--- < currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		--- : KSentence .
 
-	op frozenDeclaration : Nat Nat K -> K . --- nestingDepth, currentBlock, decl
-	
 	mb rule
 		< computation > LocalDefinition(K:K) => (.).K ...</ computation >
 		< declarationStack > ListItem(((. => frozenDeclaration(Depth:Nat, BlockNum:Nat, LocalDefinition(K:K))) ~> ?)) ...</ declarationStack >
 		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
-		< currentBlockGoto > BlockNum:Nat </ currentBlockGoto >
+		< blockHistoryGoto > ListItem(BlockNum:Nat) ...</ blockHistoryGoto >
 		: KSentence [metadata "structural"] .
 		
 	mb rule 
@@ -240,6 +343,8 @@ mod COMMON-SEMANTICS-GOTO is
 	op TryFinally : K K -> PureStatement	
 ***)
 
+
+	--- c1x 6.8.5:4 Code jumped over is not executed. In particular, the controlling expression of a for or while statement is not evaluated before entering the loop body, nor is clause-1 of a for statement
 	---- dowhile, while, and for are all basically the same here
 	mb rule
 		< computation > (. => S:K ~> loopMarked) ~> For(E1:K, E2:K, E3:K, S:K) ~> K:K </ computation >
@@ -285,15 +390,16 @@ mod COMMON-SEMANTICS-GOTO is
 		< loopStackGoto > (?:ListItem => .) ...</ loopStackGoto >
 		: KSentence [metadata "structural"] .
 		
-	op gotoObject : K List List -> K . --- continuation, loop stack, decl stack
 	mb rule
 		< computation > (Label(Target:Id, S:K) => S:K) ~> K:K </ computation >
 		< computationTail > Tail:K </ computationTail >
 		< loopStackGoto > LoopStack:List </ loopStackGoto >
 		< declarationStack > DeclStack:List </ declarationStack >
-		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((M:Map => M:Map[gotoObject((S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / Target:Id])) ...</ gotoMap >
+		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((M:Map => M:Map[gotoObject(Depth:Nat, BlockHistory:List, (S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / Target:Id])) ...</ gotoMap >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
+		< blockHistoryGoto > BlockHistory:List </ blockHistoryGoto >
 		if notBool $hasMapping(M:Map, Target:Id)
 		: KSentence [metadata "structural"] .	
 		
@@ -442,14 +548,14 @@ mod COMMON-SEMANTICS-BLOCKS is
 		< k > pushBlock => (.).K ...</ k > 
 		< local >
 			C:Bag
-			< localVariables > Vars:Set => (.).Set </ localVariables >
+			< localVariables > Vars:List => (.).List </ localVariables >
 			< localAddresses > Addresses:Set => (.).Set </ localAddresses >
 			< nestingDepth > N:Nat => sNat(N:Nat) </ nestingDepth >
 		</ local >
 		< blockStack > (.).List 
 			=> List(< stackFrame > C:Bag 
 			< nestingDepth > N:Nat </ nestingDepth > 
-			< localVariables > Vars:Set </ localVariables >
+			< localVariables > Vars:List </ localVariables >
 			< localAddresses > Addresses:Set </ localAddresses >
 			</ stackFrame >)
 		...</ blockStack >
@@ -472,7 +578,7 @@ mod COMMON-SEMANTICS-BLOCKS is
 	
 	mb [dissolve-block]: rule
 		< k > Block(BlockNum:Nat, ?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > 
-		< currentBlock > ? => BlockNum:Nat </ currentBlock >
+		< blockHistory > (.).List => ListItem(BlockNum:Nat) ...</ blockHistory >
 		: KSentence [metadata "structural"] .
 endm
 

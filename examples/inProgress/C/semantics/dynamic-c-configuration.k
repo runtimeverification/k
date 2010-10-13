@@ -42,8 +42,8 @@ kmod C-CONFIGURATION is
 
 							--- information about the block we're in
 							< nestingDepth > 0 </ nestingDepth >
-							< currentBlock > 0 </ currentBlock >
-							< localVariables > .Set </ localVariables > --- used to make sure we don't declare a variable twice in the same scope
+							< blockHistory > .List </ blockHistory >
+							< localVariables > .List </ localVariables > --- used to make sure we don't declare a variable twice in the same scope
 							< localAddresses > .Set </ localAddresses > --- used to deallocate memory on leaving a block
 						</ local >
 						< k > .K </ k >
@@ -71,7 +71,7 @@ kmod C-CONFIGURATION is
 								< computationTail > .K </ computationTail >
 								< declarationStack > .List </ declarationStack >
 								< nestingDepthGoto > 0 </ nestingDepthGoto >
-								< currentBlockGoto > 0 </ currentBlockGoto >
+								< blockHistoryGoto > .List </ blockHistoryGoto >
 								< loopStackGoto > .List </ loopStackGoto >
 							</ gotoCalculation * >
 						</ calculateGotoMap >
