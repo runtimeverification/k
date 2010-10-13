@@ -188,6 +188,7 @@ mod COMMON-SEMANTICS-GOTO is
 			,,BaseValue 1(.List{K})				,,('LocalDefinition).KProperLabel(('DefinitionLoc).KProperLabel(('DeclarationDefinition).KProperLabel(('InitNameGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Int).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('InitName).KProperLabel(('Name).KProperLabel(Id Identifier("x")(.List{K}),,('JustBase).KProperLabel(.List{K})),,('SingleInit).KHybridLabel(('tv).KResultLabel(kList("wklist_")(BaseValue 5(.List{K})),,BaseType int(.List{K}))))))),,('CabsLoc).KProperLabel(String "simplestGoto.prepre.gen"(.List{K}),,BaseValue 2(.List{K}),,BaseValue 115(.List{K}),,BaseValue 13(.List{K}))))))(.List{K})))(.List{K})) </ gotoMap >
 ***)
 	op processGoto : K -> K .
+	op processGotoDown : K -> K .
 	op gotoObject : Nat List K List List -> K . --- nestingDepth, block history, continuation, loop stack, decl stack
 	op frozenDeclaration : Nat Nat K -> K . --- nestingDepth, currentBlock, decl
 	op processGotoSameBlock : List List -> K .  --- declaration stack, actual local variables
@@ -198,26 +199,107 @@ mod COMMON-SEMANTICS-GOTO is
 		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((? (Label:Id |-> GotoInfo:K))) ...</ gotoMap >
 		: KSentence [metadata "structural"] .
 		
-	--- first case, when we're in the same block
+	---- first case, when we're in the same block
 	mb rule
-		< k > processGoto(gotoObject(Depth:Nat, BlockHistory:List, K:K, LoopStack:List, DeclStack:List)) 
-			=> processGotoSameBlock(DeclStack:List, Vars:List)
+		< k > processGoto(gotoObject(Depth:Nat, (ListItem(CurrentBlock:Nat) BlockHistory:List), K:K, LoopStack:List, DeclStack:List)) ~> ? 
+			=> addVariablesForBlock(CurrentBlock:Nat, DeclStack:List)
 			~> K:K
-		...</ k >
+		</ k >
 		< nestingDepth > Depth:Nat </ nestingDepth >
-		< blockHistory > BlockHistory:List </ blockHistory >
+		< blockHistory > ListItem(CurrentBlock:Nat) BlockHistory:List </ blockHistory >
 		< loopStack > ? => LoopStack:List </ loopStack >
 		< localVariables > Vars:List </ localVariables >
 		: KSentence [metadata "structural"] .
 		
-	--- mb rule
-		--- < k > processGoto(gotoObject(TargetDepth:Nat, TargetNum:Nat, K:K, LoopStack:List, DeclStack:List))
-			--- => cleanBlockForGoto
-			--- ~> processGoto(gotoObject(TargetDepth:Nat, TargetNum:Nat, K:K, LoopStack:List, DeclStack:List))
-		--- ...</ k >
-		--- < nestingDepth > ActualDepth:Nat </ nestingDepth >
-		--- if ActualDepth:Nat >Nat TargetDepth:Nat
-		--- : KSentence [metadata "structural"] .
+	---- second case, we're in a different block
+	
+	--- as long as there are entries in the actual block history that differ from the target block history, we need to pop
+	mb rule
+		< k > (. => popBlock) 
+			~> processGoto(gotoObject(TargetDepth:Nat, TargetBlockHistory:List, K:K, LoopStack:List, DeclStack:List))
+		...</ k >
+		< blockHistory > ListItem(BlockNum:Nat) ActualHistory:List </ blockHistory >
+		if notBool BlockNum:Nat in TargetBlockHistory:List
+		: KSentence [metadata "structural"] .
+		
+	--- once we share a history, we start to push
+	mb rule
+		< k > processGoto(gotoObject(TargetDepth:Nat, (Prefix:List ListItem(TargetBlock:Nat) ActualHistory:List), K:K, LoopStack:List, DeclStack:List))
+			=> addVariablesForBlock(CurrentBlock:Nat, DeclStack:List)
+			~> processGotoDown(gotoObject(TargetDepth:Nat, (Prefix:List ListItem(CurrentBlock:Nat) ActualHistory:List), K:K, LoopStack:List, DeclStack:List))
+		...</ k >
+		< nestingDepth > ActualDepth:Nat </ nestingDepth >
+		< blockHistory > ListItem(CurrentBlock:Nat) ActualHistory:List </ blockHistory >
+		if sNat(ActualDepth:Nat) =/=Bool TargetDepth:Nat
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > ( . 
+				=> pushBlock
+				~> addVariablesForBlock(TargetBlock:Nat, DeclStack:List)
+			)
+			~> processGotoDown(gotoObject(TargetDepth:Nat, (? ListItem(TargetBlock:Nat) ActualHistory:List), ?, ?, DeclStack:List))
+		...</ k >
+		< nestingDepth > ActualDepth:Nat </ nestingDepth >
+		< blockHistory > (. => ListItem(TargetBlock:Nat)) ActualHistory:List </ blockHistory >
+		if sNat(ActualDepth:Nat) =/=Bool TargetDepth:Nat
+		: KSentence [metadata "structural"] .
+	
+	--- We've made it to the block above the target
+	mb rule
+		< k > L:KLabel(gotoObject(sNat(Depth:Nat), 
+				(ListItem(TargetBlock:Nat) BlockHistory:List),
+				K:K, 
+				LoopStack:List, 
+				DeclStack:List)
+			) ~> ?
+			=> pushBlock
+			~> addVariablesForBlock(TargetBlock:Nat, DeclStack:List)
+			~> K:K
+		</ k >
+		< nestingDepth > Depth:Nat </ nestingDepth >
+		< blockHistory > (. => ListItem(TargetBlock:Nat)) BlockHistory:List </ blockHistory >
+		< loopStack > ? => LoopStack:List </ loopStack >
+		if L:KLabel ==Bool 'processGoto
+		orBool L:KLabel ==Bool 'processGotoDown
+		: KSentence [metadata "structural"] .
+		
+	op addVariablesForBlock : Nat List -> K .
+	
+	--- skip variables from other blocks
+	mb rule
+		< k > addVariablesForBlock(TargetBlock:Nat, 
+				((ListItem(frozenDeclaration(?, BlockNum:Nat, ?)) => .) DeclStack:List)
+			)
+		...</ k >
+		< blockHistory > ListItem(TargetBlock:Nat) ...</ blockHistory >
+		if BlockNum:Nat =/=Bool TargetBlock:Nat
+		: KSentence [metadata "structural"] .
+		
+	--- skip variables in the real history
+	mb rule
+		< k > addVariablesForBlock(TargetBlock:Nat,
+				((ListItem(frozenDeclaration(?, TargetBlock:Nat, Decl:K)) => .) DeclStack:List)
+			)
+		...</ k >
+		< localVariables > Vars:List </ localVariables >
+		< blockHistory > ListItem(TargetBlock:Nat) ...</ blockHistory >
+		if getIdOfDeclaration(Decl:K) in Vars:List
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > (. => Decl:K) ~> addVariablesForBlock(TargetBlock:Nat, 
+				((ListItem(frozenDeclaration(?, TargetBlock:Nat, Decl:K)) => (.).List) ?)
+			)
+		...</ k >
+		< localVariables > Vars:List </ localVariables >
+		< blockHistory > ListItem(TargetBlock:Nat) ...</ blockHistory >
+		if notBool getIdOfDeclaration(Decl:K) in Vars:List
+		: KSentence [metadata "structural"] .
+	--- fixme this is wrong
+	mb rule
+		< k > addVariablesForBlock(?, (.).List) => (.).K ...</ k >
+		: KSentence [metadata "structural"] .
 		
 	--- if we're at a less deep 
 	--- mb rule
@@ -231,18 +313,18 @@ mod COMMON-SEMANTICS-GOTO is
 		--- if ActualDepth:Num <Nat TargetDepth
 		--- : KSentence [metadata "structural"] .
 	
-	--- skip over variables that are in the actual past and in the target's past
-	mb rule
-		< k > processGotoSameBlock((ListItem(frozenDeclaration(Depth:Nat, Num:Nat, Decl:K)) DeclStack:List), (ListItem(X:Id) Vars:List))
-			=> processGotoSameBlock(DeclStack:List, Vars:List)
-		...</ k >
-		< nestingDepth > Depth:Nat </ nestingDepth >
-		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
-		if getIdOfDeclaration(Decl:K) ==Bool X:Id
-		: KSentence [metadata "structural"] .
-	mb rule
-		< k > processGotoSameBlock((.).List, (.).List) => (.).K ...</ k >
-		: KSentence [metadata "structural"] .
+	--- skip over variables that are in both the actual past and in the target's past
+	--- mb rule
+		--- < k > processGotoSameBlock((ListItem(frozenDeclaration(Depth:Nat, Num:Nat, Decl:K)) DeclStack:List), (ListItem(X:Id) Vars:List))
+			--- => processGotoSameBlock(DeclStack:List, Vars:List)
+		--- ...</ k >
+		--- < nestingDepth > Depth:Nat </ nestingDepth >
+		--- < blockHistory > ListItem(Num:Nat) ...</ blockHistory >
+		--- if getIdOfDeclaration(Decl:K) ==Bool X:Id
+		--- : KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > processGotoSameBlock((.).List, (.).List) => (.).K ...</ k >
+		--- : KSentence [metadata "structural"] .
 		
 	op getIdOfDeclaration : K -> K .
 	op getIdOfName : K -> K .
@@ -283,7 +365,7 @@ mod COMMON-SEMANTICS-GOTO is
 	--- fixme now that i have history, can fix this
 	mb rule 
 		< computation > BlockStatement(Block:K)
-			=> Block:K ~> endBlockForGoto(OldNum:Nat)
+			=> Block:K ~> popBlock
 		...</ computation >
 		< nestingDepthGoto > N:Nat => sNat(N:Nat) </ nestingDepthGoto >
 		< blockHistoryGoto > ListItem(OldNum:Nat) ...</ blockHistoryGoto >
@@ -291,11 +373,11 @@ mod COMMON-SEMANTICS-GOTO is
 	mb rule
 		< computation > Block(Num:Nat, ?, L:List{C}) => listToK(L:List{C}) ...</ computation > 
 		< blockHistoryGoto > . => ListItem(Num:Nat) ...</ blockHistoryGoto >
-		< declarationStack > . => ListItem((.).K) ...</ declarationStack >
+		--- < declarationStack >... (.).List => ListItem((.).K) </ declarationStack >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< computation > endBlockForGoto(Num:Nat) => (.).K ...</ computation >
+		< computation > popBlock => (.).K ...</ computation >
 		< nestingDepthGoto > sNat(N:Nat) => N:Nat </ nestingDepthGoto >
 		< blockHistoryGoto > (?:ListItem => (.).List) ListItem(Num:Nat) ...</ blockHistoryGoto >
 		: KSentence [metadata "structural"] .
@@ -311,7 +393,7 @@ mod COMMON-SEMANTICS-GOTO is
 
 	mb rule
 		< computation > LocalDefinition(K:K) => (.).K ...</ computation >
-		< declarationStack > ListItem(((. => frozenDeclaration(Depth:Nat, BlockNum:Nat, LocalDefinition(K:K))) ~> ?)) ...</ declarationStack >
+		< declarationStack >... (.).List => ListItem(frozenDeclaration(Depth:Nat, BlockNum:Nat, LocalDefinition(K:K))) </ declarationStack >
 		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
 		< blockHistoryGoto > ListItem(BlockNum:Nat) ...</ blockHistoryGoto >
 		: KSentence [metadata "structural"] .
