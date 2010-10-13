@@ -140,7 +140,7 @@ module ParseConfig where
   readSingleEntry s | compareStr s doShow    = Show
                     | compareStr s doHide    = Hide
                     | compareStr s doHideRec = RecursiveHide
-                    | compareStr s doShowRec = RecursiveShow
+--                    | compareStr s doShowRec = RecursiveShow
                     | otherwise              = error $ "Unknown value: " ++ s
     where doShow    = doTrue ++ ["show"]
           doHide    = doFalse ++ ["hide"]

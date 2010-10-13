@@ -47,21 +47,19 @@ module FilterOutput where
 
   ppKOutput :: Configuration -> KOutput -> Doc
   ppKOutput conf (String s) = text s
-  ppKOutput conf (Cell name contents) | shouldShow conf name = linebreak <> (hang 1 $ ppBeginCell name
-                                                                         <> handleContents contents
-                                                                        <+> ppEndCell name)
+  ppKOutput conf (Cell name contents) | shouldShow conf name    = linebreak <> (hang 1 $ ppBeginCell name
+                                                                            <> handleContents contents
+                                                                           <+> ppEndCell name)
                                       | shouldRecHide conf name = empty
-                                      | otherwise            = handleContents $ filter isCell contents
+                                      | otherwise               = handleContents $ filter isCell contents
 
     where handleContents cs = (hcat . map (ppKOutput conf) . pruneStrings conf name . cleanupStrings) cs
-
 
   isCell (Cell _ _) = True
   isCell _          = False
 
   isString (String _ ) = True
   isString _           = False
-
 
 
   -- Prune off lines after the user-specified break
@@ -74,8 +72,6 @@ module FilterOutput where
     where toKeep = getPruneNumber conf cn
           intermediate = lines s
           more = " [..." ++ show (length intermediate - 1) ++ " more...]"
-
-
 
 
 
@@ -125,7 +121,12 @@ module FilterOutput where
             (fname, configFile) <- case args of
                        (x:y:xs) -> return (x,y)
                        -- []  -> error "Please specify a file to filter"
-                       _   -> error "Use like this: runhaskell <prog> <outputfile> <configfile>"
+                       _   -> error usage
             parsedOut <- parseKOutFile fname
             config <- getConfig configFile
             putStrLn . stringifyDoc . cat . map (ppKOutput config) $ parsedOut
+
+  usage = "\nUsage:\n" ++ "  If you have built the tool using 'make', then run:\n"
+                     ++ "    filterOutput <output-file> <yaml-config-file>\n"
+                     ++ "  To run the tool without building it, run:\n"
+                     ++ "    runhaskell FilterOutput.hs <output-file> <yaml-config-file>\n"

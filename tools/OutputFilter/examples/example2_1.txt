@@ -1,4 +1,0 @@
-< t > blah
-  <newcell> foo < bar </ newcell >
-  <othercell> other>more </othercell>
-  <more> <inner> foo </inner> </more> </ t >

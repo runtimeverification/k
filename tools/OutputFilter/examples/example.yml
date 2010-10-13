@@ -6,7 +6,7 @@ k:
   keep: 5
   cell-style:
     underlined: yes
-    background: dullblue
+    background: dullblue  # colors not yet fully implemented
 env:
   text-style:
     foreground: green
