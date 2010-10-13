@@ -70,9 +70,9 @@ kmod C-CONFIGURATION is
 								< computation > .K </ computation >
 								< computationTail > .K </ computationTail >
 								< declarationStack > .List </ declarationStack >
-								< nestingDepth > 0 </ nestingDepth >
-								< currentBlock > 0 </ currentBlock >
-								< loopStack > .List </ loopStack >
+								< nestingDepthGoto > 0 </ nestingDepthGoto >
+								< currentBlockGoto > 0 </ currentBlockGoto >
+								< loopStackGoto > .List </ loopStackGoto >
 							</ gotoCalculation * >
 						</ calculateGotoMap >
 					</ control >
