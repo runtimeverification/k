@@ -31,7 +31,7 @@ module FilterOutput where
           remEmpty (x:xs) = x : remEmpty xs
           remEmpty [] = []
 
-  -- Delete all occurances
+  -- Delete all occurrences
   deleteAll :: Eq a => a -> [a] -> [a]
   deleteAll x = filter ((/=) x)
 

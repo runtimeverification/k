@@ -1,8 +1,15 @@
 # Whitelist the following cells
-T: show
+T:
+  cell-style:
+    bold: yes
 k:
   keep: 5
-env: show
+  cell-style:
+    underlined: yes
+    background: dullblue
+env:
+  text-style:
+    foreground: green
 threads: show
 thread: show
 callStack: recursively-hide
@@ -22,3 +29,4 @@ callStack: recursively-hide
 #   environment/memory lookup
 #   regular-expression based line-based show/hide
 #   arbitrary global and local string-replacement rules
+#   local and global regular-expression based styling (bold, underline, color, etc)
