@@ -1,4 +1,9 @@
-kmod KERNELC-CONSISTENT-THREADS is including KERNELC-BASIC-SEMANTICS 
+kmod KERNELC-CONSISTENT-THREADS is including KERNELC-BASIC-SEMANTICS + KERNELC-CONSISTENT-MEMORY
+  configuration <T ?> <threads> <thread*> <k> .K </k> <env> .Map </env> <id> 0 </id> </thread*> 
+                    </threads> <locks> .Map </locks>  <cthreads> .Set </cthreads> @latex("\\\\\\")                     <funs> .Map </funs> <in> .List </in> <out> "" </out> 
+                   <mem> .Map </mem> <ptr> .Map </ptr> 
+                   <next> initialLoc </next> </T ?> 
+                <result ?> "" </result ?>
 
   context 'spawn_('_`(_`)(_,,`[HOLE`]:K)) 
   rule <k> 'spawn_('_`(_`)(X:Id,,Vl:List{Val})) => N <_/k> <next> N:Nat => increment(N,1) </next> (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> N </id> <_/thread>) 
@@ -10,7 +15,4 @@ kmod KERNELC-CONSISTENT-THREADS is including KERNELC-BASIC-SEMANTICS
   rule <k> release(N) => void <_/k> <id> N' </id> <locks_> N |-> (N' => -1) <_/locks>
   rule <k> acquire(N) => void <_/k> <id> N' </id> <locks> Locks:Map (. => N |-> N') </locks>
     if notBool(N in keys(Locks))
-
-  rule <k> *N:Nat => V:Val <_/k> <mem_> N |-> V <_/mem>
-  rule <k> *N=V => V <_/k> <mem_> N |-> (_ => V) <_/mem>
 endkm

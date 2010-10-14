@@ -12,12 +12,12 @@ kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   syntax K ::= List{Exp} | List{PointerId} | List{DeclId} | StmtList | Pgm | String | initial | restore ( Map ) | increment ( Nat , Nat )
   syntax KResult ::= List{Val} 
 
-  configuration <T ?> <threads> <thread*> <k> .K </k> <env> .Map </env> <id> 0 </id> </thread*> 
-                    </threads> <cthreads> .Set </cthreads>
-                    <funs> .Map </funs> <in> .List </in> <out> "" </out> 
-                   <mem> .Map </mem> <ptr> .Map </ptr> 
+
+  configuration <T ?> <k> .K </k> <env> .Map </env> <funs> .Map </funs> @latex("\\kBR")
+                   <in> .List </in> <out> "" </out> <mem> .Map </mem> <ptr> .Map </ptr> 
                    <locks> .Map </locks> <next> initialLoc </next> </T ?> 
                 <result ?> "" </result ?>
+
 
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
   rule run ( L:KLabel ) => <T_> <k> L(.List{K}) ~> '_`(`)(main) </k> <_/T> [structural]
@@ -57,16 +57,19 @@ kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
        <funs_> . => X |-> int X(Xl:List{DeclId}) { Sts  return E ;} <_/funs> [structural]
 
   rule <k> '_`(_`)(X,,Vl:List{Val}) => Sts ~> E ~> restore(Env:Map) <_/k> 
-       <env> Env => (eraseKLabel('int_,getList{K}(Xl)) |-> getList{K}(Vl)) </env>
-       <funs_> X |->  int X(Xl) { Sts  return E ;} <_/funs> [structural]
+       <env> Env => (eraseKLabel('int_,getList{K}(Xl)) |-> getList{K}(Vl)) </env>  @latex("\\kBR")
+       <funs_> X |->  int X(Xl) { Sts  return E ;} <_/funs> [structural large]
 
   context int _ = [HOLE]
-  rule <k> int X => 0 <_/k> <env_> . => (X |-> initial) <_/env>
+  rule <k> int X => void <_/k> <env_> . => (X |-> initial) <_/env> [structural]
  
   rule <k> V ~> (restore(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
-  rule <k> (int *)malloc(N:Nat*sizeof(int)) => N':Nat <_/k>  <ptr_> . => N' |-> N <_/ptr> 
-       <mem_> . => N'..N' +Nat N |-> initial <_/mem> <next> N' => increment(N', N) </next> [structural]
+  rule 
+     <k> (int *)malloc(N:Nat*sizeof(int)) => N':Nat <_/k>  <ptr_> . => N' |-> N <_/ptr> @latex("\\kBR")
+       <mem_> . => N'..N' +Nat N |-> initial <_/mem> <next> N' => increment(N', N) </next>  
+      
+   [structural large]
 
   rule <k> free(N) => void <_/k> <ptr_> N |-> N' => . <_/ptr>
        <mem> Mem:Map => Mem[undef/N..N'+Nat N] </mem> [structural]
@@ -76,4 +79,9 @@ kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   syntax List{K} ::= Nat .. Nat
   rule N1:Nat..N1 => .List{K} [structural]
   rule N1..sNat(N) => N,,N1..N [structural]
+endkm
+
+kmod KERNELC-CONSISTENT-MEMORY is including KERNELC-BASIC-SEMANTICS 
+  rule <k> *N:Nat => V:Val <_/k> <mem_> N |-> V <_/mem>
+  rule <k> *N=V => V <_/k> <mem_> N |-> (_ => V) <_/mem>
 endkm
