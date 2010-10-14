@@ -1,6 +1,6 @@
-What is does:
+What it does:
   Filters the output of the k-framework such that only desired information is
-  shown. Control over the process is specified in the yaml configuration file,
+  shown. Control over this process is specified in the yaml configuration file,
   which is the second command-line argument. See example.yml
 How to build:
   make clean ; make
@@ -12,8 +12,9 @@ Configuration file format:
   <cellname>: <cell-config>
   Where <cell-config> may be be a single command, or a set of options.
   Available single commands are:
-    hide              -- This is the default behavior if a cell is not specified. Hide the cell and
-                         its immediate content (but proceed as normal for the cell's children)
+    hide              -- This is the default behavior if a cell is not specified.
+                         Hide the cell and its immediate content (but proceed as
+                         normal for the cell's children)
     show              -- Show the cell and it's content (but says nothing about its children)
     recursively-hide  -- Hide the cell, and forcefully hide its children (undoing any explic shows)
   Available options in the set of options:

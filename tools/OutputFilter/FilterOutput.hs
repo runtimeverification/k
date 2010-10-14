@@ -14,53 +14,99 @@ module FilterOutput where
   import System.Environment
   import Useful.String
   import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
-  import Control.Applicative hiding (empty)
+  import Control.Applicative ((<$>))
   import Control.Monad
   import Control.Monad.Identity
   import Control.Monad.State
   import Control.Monad.List
   import Data.List
   import Data.Maybe
+  import qualified Data.Map as Map
+  import Control.Monad.Reader
+
+  type CellReader a  = Configuration -> CellName -> a
+  type KOutReader a  = Configuration -> KOutput -> a
+  type StyleReader a = CellReader ((CellConfigRhs -> Maybe Style) -> a)
+
+  type KOutPrinter = KOutReader Doc
+  type CellPrinter = CellReader ([KOutput] -> Doc)
+  type Query = CellReader Bool
+
 
   -- Strip off surrounding whitespaces, remove empty strings, remove those blasted DOS carriage returns
   cleanupStrings :: [KOutput] -> [KOutput]
   cleanupStrings = remEmpty . map stripStrs
-    where stripStrs (String s) = String (stripr (deleteAll '\r' s))
-          stripStrs x = x
-          remEmpty (String "" : xs) = remEmpty xs
-          remEmpty (x:xs) = x : remEmpty xs
-          remEmpty [] = []
+    where stripStrs (String n s) = String n (stripr (deleteAll '\r' s))
+          stripStrs x            = x
+          remEmpty (String _ "" : xs) = remEmpty xs
+          remEmpty (x:xs)             = x : remEmpty xs
+          remEmpty []                 = []
 
   -- Delete all occurrences
   deleteAll :: Eq a => a -> [a] -> [a]
   deleteAll x = filter ((/=) x)
 
+  handleCell :: KOutPrinter
+  handleCell conf (Cell name contents) | shouldShow conf name    = ppCell conf name contents
+                                       | shouldRecHide conf name = empty
+                                       | otherwise               = ppHiddenCell conf name contents
+  handleCell _ (String n s) = error $ "Internal error: handleCell called in cell: " ++ n ++ "on string: " ++ s
+
+  ppCell :: CellPrinter
+  ppCell conf name contents = linebreak <> (hang 1 $ ppBeginCell conf name
+                                                  <> handleContents conf name contents
+                                                 <+> ppEndCell conf name)
+
+  ppHiddenCell :: CellPrinter
+  ppHiddenCell conf name contents = hcat $ map (handleCell conf) onlyCells
+    where onlyCells = filter isCell contents
+
+  handleContents :: CellPrinter
+  handleContents conf name cs = hcat $ (map (ppKOutput conf) . pruneStrings conf name . cleanupStrings)  cs
+
+
+  handleString :: KOutPrinter
+  handleString conf (String n s) = text s
   {-
     Pretty Printing
    -}
 
-  ppBeginCell :: String -> Doc
-  ppBeginCell n = text $ "< " ++ n ++ " >"
+  ppBeginCell :: CellReader Doc
+  ppBeginCell conf n = handleStyle conf n cellStyle . text $ "< " ++ n ++ " >"
 
-  ppEndCell :: String -> Doc
-  ppEndCell n = text $ "</ " ++ n ++ " >"
+  ppEndCell :: CellReader Doc
+  ppEndCell conf n = handleStyle conf n cellStyle . text $ "</ " ++ n ++ " >"
 
   ppKOutput :: Configuration -> KOutput -> Doc
-  ppKOutput conf (String s) = text s
-  ppKOutput conf (Cell name contents) | shouldShow conf name    = linebreak <> (hang 1 $ ppBeginCell name
-                                                                            <> handleContents contents
-                                                                           <+> ppEndCell name)
-                                      | shouldRecHide conf name = empty
-                                      | otherwise               = handleContents $ filter isCell contents
-
-    where handleContents cs = (hcat . map (ppKOutput conf) . pruneStrings conf name . cleanupStrings) cs
+  ppKOutput conf str@(String _ _) = handleString conf str
+  ppKOutput conf cell@(Cell _ _) = handleCell conf cell
 
   isCell (Cell _ _) = True
   isCell _          = False
 
-  isString (String _ ) = True
-  isString _           = False
+  isString (String _ _ ) = True
+  isString _             = False
 
+
+  handleStyle :: StyleReader (Doc -> Doc)
+  handleStyle conf name f doc | hasStyle conf name f = stylize (fetchStyle conf name f) doc
+                              | otherwise            = doc
+
+  stylize :: Style -> Doc -> Doc
+  stylize (Style fore back isUnder isBold) = doUnder isUnder . doBold isBold . doFore fore . doBack back
+    where doUnder Nothing            = id
+          doUnder (Just Underline)   = underline
+          doUnder (Just DeUnderline) = deunderline
+          doBold Nothing       = id
+          doBold (Just Bold)   = bold
+          doBold (Just DeBold) = debold
+          doFore Nothing  = id
+          doFore (Just c) = colorize c Foreground
+          doBack Nothing  = id
+          doBack (Just c) = colorize c Background
+
+  colorize :: Color -> ColorPlace -> (Doc -> Doc)
+  colorize c p = id
 
   -- Prune off lines after the user-specified break
   pruneStrings :: Configuration -> CellName -> [KOutput] -> [KOutput]
@@ -68,8 +114,8 @@ module FilterOutput where
                           | otherwise           = ks
 
 
-  prune conf cn (String s) = String $ (stripr . unlines . take toKeep) intermediate ++ more
-    where toKeep = getPruneNumber conf cn
+  prune conf cn (String n s) = String n $ (stripr . unlines . take toKeep) intermediate ++ more
+    where toKeep = fetchPruneNumber conf cn
           intermediate = lines s
           more = " [..." ++ show (length intermediate - 1) ++ " more...]"
 
@@ -77,36 +123,45 @@ module FilterOutput where
 
 
   -- Lookup the config for the cell
-  lookupCell :: Configuration -> CellName -> Maybe CellConfigRhs
-  lookupCell conf cn = snd <$> find ((cn ==) . fst) conf
+  lookupCell :: CellReader (Maybe CellConfigRhs)
+  lookupCell = flip Map.lookup
+
 
   -- Should a cell be shown?
-  shouldShow :: Configuration -> CellName -> Bool
-  shouldShow conf cn = case lookupCell conf cn of
+  shouldShow :: Query
+  shouldShow cn conf = case lookupCell cn conf of
                          Just Hide          -> False
                          Just RecursiveHide -> False
                          Nothing            -> False
                          _                  -> True
 
    -- Should a cell be recursively hidden?
-  shouldRecHide :: Configuration -> CellName -> Bool
+  shouldRecHide :: Query
   shouldRecHide conf cn = case lookupCell conf cn of
                             Just RecursiveHide -> True
                             _                  -> False
 
-
   -- Should a cell be pruned?
-  shouldPrune :: Configuration -> CellName -> Bool
+  shouldPrune :: Query
   shouldPrune conf cn = case lookupCell conf cn of
                           Just (Configs (Just _) _ _) -> True
                           _                           -> False
 
+  hasStyle :: StyleReader Bool
+  hasStyle conf cn f = case lookupCell conf cn of
+                           Just c@(Configs _ _ _) -> isJust (f c)
+                           _                      -> False
+
+  fetchStyle :: StyleReader Style
+  fetchStyle conf cn f = case lookupCell conf cn >>= f of
+                         Just s -> s
+                         _      -> error "Internal Error: hasStyle approved a cell incorrectly"
 
   -- Fetch the number of lines to keep from the configuration
-  getPruneNumber :: Configuration -> CellName -> Int
-  getPruneNumber conf cn = case lookupCell conf cn >>= keepLines of
+  fetchPruneNumber :: CellReader Int
+  fetchPruneNumber conf cn = case lookupCell conf cn >>= keepLines of
                              Just n -> n
-                             _      -> error "internal error: shouldPrune approved a prune candidate incorrectly"
+                             _      -> error "Internal Error: shouldPrune approved a prune candidate incorrectly"
 
   -- Whether a maybe is something
 

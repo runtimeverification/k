@@ -8,11 +8,12 @@
 
 module ParseKOutput where
   import Text.Parsec
+  import Control.Applicative ((<$>))
 
   type Name = String
   type CellStack = [String]
 
-  data KOutput = Cell Name [KOutput] | String String
+  data KOutput = Cell Name [KOutput] | String Name String
     deriving (Show, Read, Eq)
 
   -- A string parser that has a stack of cell names for state (currenty unused), and outputs a KOutput
@@ -42,14 +43,14 @@ module ParseKOutput where
   parseInternals = try parseCell <|> parseString
 
   parseString :: KOutputParser
-  parseString =  (many1 (noneOf "<") >>= return . String)
-             <|> (char '<' >> parseString >>= \k -> case k of String s -> return (String ('<' : s)))
+  parseString = peek >>= \name -> (String name <$> many1 (noneOf "<"))
+                              <|> (char '<' >> parseString >>= \k -> case k of String _ s -> return (String name ('<' : s)))
 
 
   beginCell :: Parsec String CellStack String
   beginCell = do char '<' >> spaces
                  name <- many1 alphaNum
-                 -- push name
+                 push name
                  spaces >> char '>'
                  return name
 
@@ -58,14 +59,14 @@ module ParseKOutput where
                  char '<' >> spaces >> char '/' >> spaces
                  string s >> spaces
                  char '>'
-                 -- pop
+                 pop
                  return ()
 
   -- Combine strings when they were split due to a literal '<'
   -- When a '<' is parsed as part of the text (as opposed to a cell), everything before and everything after
   -- it will be in seperate Strings.
   combineStrings :: [KOutput] -> [KOutput]
-  combineStrings (String s1 : String ('<':s2) : ks) = String (s1 ++ "<" ++ s2) : combineStrings ks
+  combineStrings (String n s1 : String _ ('<':s2) : ks) = String n (s1 ++ "<" ++ s2) : combineStrings ks
   combineStrings (x:xs) = x : combineStrings xs
   combineStrings [] = []
 
@@ -77,7 +78,7 @@ module ParseKOutput where
   pop = modifyState $ \s -> (dropLast s)
 
   peek :: Parsec String [String] String
-  peek = getState >>= return . head
+  peek = head <$> getState
 
   dropLast = reverse . drop 1 . reverse
 

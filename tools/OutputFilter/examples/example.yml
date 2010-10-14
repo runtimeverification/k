@@ -13,7 +13,7 @@ env:
 threads: show
 thread: show
 callStack: recursively-hide
-#mem: yes
+#mem: show
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. blacklisting <thread> wont blacklist all of its children

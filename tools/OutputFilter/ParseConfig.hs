@@ -15,11 +15,13 @@ module ParseConfig where
   import Data.Char
   import Control.Arrow
   import Data.List
+  import qualified Data.Map as Map
 
   type CellName = String
-  type Configuration = [CellConfig]
+  type Configuration = Map CellName CellConfigRhs
+  type Map = Map.Map
 
-  type CellConfig = (String, CellConfigRhs)
+  type CellConfig = (CellName, CellConfigRhs)
 
   -- add more to this to support more customizations
   data CellConfigRhs = Show
@@ -34,7 +36,7 @@ module ParseConfig where
   data Style = Style { foreground :: Maybe Color
                      , background :: Maybe Color
                      , underlined :: Maybe Underline
-                     , bold       :: Maybe Bold
+                     , bolded       :: Maybe Bold
                      }
     deriving Show
 
@@ -48,6 +50,8 @@ module ParseConfig where
              | Dullblack |Dullred | Dullgreen | Dullyellow | Dullblue | Dullmagenta
              | Dullcyan | Dullwhite
     deriving (Show, Read)
+
+  data ColorPlace = Background | Foreground
 
   -- A Yaml tree without superfluous info and types
   data YamlLite = Map [(YamlLite, YamlLite)]
@@ -72,7 +76,7 @@ module ParseConfig where
 
   -- Get the configuration
   extractConfiguration :: YamlLite -> Configuration
-  extractConfiguration = (map extractCellConfig . unMap)
+  extractConfiguration = Map.fromList . map extractCellConfig . unMap
 
   -- I use arrows because I'm awesome. See the commented out version for the more clear version
   extractCellConfig :: (YamlLite, YamlLite) -> CellConfig
@@ -117,14 +121,14 @@ module ParseConfig where
   getUnderline (Str s) | s `compareStr` doUnderline   = Underline
                        | s `compareStr` doDeUnderline = DeUnderline
                        | otherwise                    = error $ "Unable to parse: " ++ s ++ " as an underline style"
-    where doUnderline   = ["underline", "under-line", "underlined"]
+    where doUnderline   = ["underline", "under-line", "underlined"] ++ doTrue
           doDeUnderline = ["deunderline", "de-underline", "de-under-line"]
 
   getBold :: YamlLite -> Bold
   getBold (Str s) | s `compareStr` doBold   = Bold
                   | s `compareStr` doDeBold = DeBold
                   | otherwise               = error $ "Unable to parse: " ++ s ++ " as an underline style"
-    where doBold   = ["bold", "embolden"]
+    where doBold   = ["bold", "embolden", "bolded"] ++ doTrue
           doDeBold = ["debold", "de-bold", "un-bold", "unbold"]
 
 
