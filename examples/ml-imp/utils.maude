@@ -53,14 +53,14 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
         term-hook falseTerm		(false))] .
 
 
-  op downTerm : Term Universal -> Universal
+  op downTerm : Term IntUniversal -> IntUniversal
         [poly (2 0)
          special (
            id-hook MetaLevelOpSymbol	(metaDownTerm)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
 
-  op upTerm : Universal -> Term
+  op upTerm : IntUniversal -> Term
         [poly (1) strat(0)
          special (
            id-hook MetaLevelOpSymbol	(metaUpTerm)
