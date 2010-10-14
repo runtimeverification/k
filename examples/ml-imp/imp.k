@@ -1,5 +1,5 @@
 load imp-semantics
-load examples/append.k
+load examples/test5.k
 
 
 kmod IMP is including IMP-SEMANTICS
