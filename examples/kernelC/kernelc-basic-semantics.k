@@ -1,4 +1,9 @@
-kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION 
+---(
+require pl-builtins
+require k-prelude
+require kernelc-syntax
+---)
+kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION 
   syntax Val ::= Int | void 
   syntax Exp ::= Val 
   syntax List{Val} ::= Val | List{Val} , List{Val} [ditto] 
@@ -47,8 +52,6 @@ kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   rule {} => .  [structural]
   rule St Sts => St ~> Sts [structural]
 
-  rule <k> *N:Nat => V:Val <_/k> <mem_> N |-> V <_/mem>
-  rule <k> *N=V => V <_/k> <mem_> N |-> (_ => V) <_/mem>
 
   rule <k> int X(Xl:List{DeclId}) {  Sts  return E ; } => . <_/k> 
        <funs_> . => X |-> int X(Xl:List{DeclId}) { Sts  return E ;} <_/funs> [structural]
@@ -67,18 +70,6 @@ kmod BASIC-KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
 
   rule <k> free(N) => void <_/k> <ptr_> N |-> N' => . <_/ptr>
        <mem> Mem:Map => Mem[undef/N..N'+Nat N] </mem> [structural]
-
-  context 'spawn_('_`(_`)(_,,`[HOLE`]:K)) 
-  rule <k> 'spawn_('_`(_`)(X,,Vl)) => N <_/k> <next> N => increment(N,1) </next> (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> N </id> <_/thread>) 
-  rule (<thread_> <k> V </k> <id> N </id> <_/thread> => .) <cthreads_> . => SetItem(N) <_/cthreads> [structural]
-
-  rule <k> join(N) => 0 <_/k> <cthreads_> SetItem(N) <_/cthreads> [structural]
-
-
-  rule <k> acquire(N) => void <_/k> <id> N' </id> <locks_> N |-> (-1 => N') <_/locks>
-  rule <k> release(N) => void <_/k> <id> N' </id> <locks_> N |-> (N' => -1) <_/locks>
-  rule <k> acquire(N) => void <_/k> <id> N' </id> <locks> Locks:Map (. => N |-> N') </locks>
-    if notBool(N in keys(Locks))
 
 
 --- auxiliary functions

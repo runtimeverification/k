@@ -1,4 +1,4 @@
-kmod INSTRUMENT-PROGRAM is including BASIC-KERNELC-SEMANTICS
+kmod INSTRUMENT-PROGRAM is including KERNELC-BASIC-SEMANTICS
   syntax Event ::=  write ( Nat : Nat <- Int ) | read ( Nat : Nat |-> Int ) | spwn ( Nat : Nat ) | acq ( Nat : Nat ) | rel ( Nat : Nat ) 
   syntax PreEvent ::= rea ( Nat : Nat ) | spw ( Nat )
   syntax Builtins ::= Event
