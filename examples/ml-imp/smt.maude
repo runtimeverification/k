@@ -5,7 +5,7 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
 --- Define a SMT formula
 --- Use SMT only for integer theory
   sort SMTVar .
-  subsort ?MathObj FreeMathObj < SMTVar .
+  subsort MathObjPatternExistential MathObjUniversal < SMTVar .
   sort SMTQuantVar SMTQuantVarSet .
   subsort SMTQuantVar < SMTQuantVarSet .
   sort SMTTerm .
@@ -56,25 +56,25 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
 
 --- Convert a ML integer formula into a SMT formula
   op toSMT_ : Formula -> SMTQuerry [strat(1)].
-  op mkSMTQuantVar : MathObj++ -> SMTQuantVar .
-  op mkSMTQuantVarSet : Set{MathObj++} -> SMTQuantVarSet .
-  op mkSMTTerm : Int++ -> SMTTerm .
+  op mkSMTQuantVar : MathObjSymbolic -> SMTQuantVar .
+  op mkSMTQuantVarSet : Set{MathObjSymbolic} -> SMTQuantVarSet .
+  op mkSMTTerm : IntSymbolic -> SMTTerm .
   op mkSMTFormula : Formula -> SMTFormula .
   op mkSMTFreeVarSet : Formula -> SMTQuerry .
 
-  var N : Nat .  vars I I1 I2 : Int++ .
+  var N : Nat .  vars I I1 I2 : IntSymbolic .
   var NtPhi1 NtPhi2 : NtFormula .  var Phi : Formula .
-  var ?Obj : ?MathObj .  var FreeObj : FreeMathObj .  var Obj : MathObj++ .
-  var ?ObjSet FreeObjSet ObjSet : Set{MathObj++} .
+  var ?Obj : MathObjPatternExistential .  var FreeObj : MathObjUniversal .  var Obj : MathObjSymbolic .
+  var ?ObjSet FreeObjSet ObjSet : Set{MathObjSymbolic} .
 
  ceq toSMT(Phi) =
-    if FreeObjSet =/=Bool .Set{MathObj++} then
+    if FreeObjSet =/=Bool .Set{MathObjSymbolic} then
       (declare-funs (mkSMTQuantVarSet(FreeObjSet)))
     else
       .emptyQuerry
     fi
     (assert
-      if ?ObjSet =/=Bool .Set{MathObj++} then
+      if ?ObjSet =/=Bool .Set{MathObjSymbolic} then
         (exists mkSMTQuantVarSet(?ObjSet) mkSMTFormula(Phi))
       else
         mkSMTFormula(Phi)
@@ -83,27 +83,27 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
     (check-sat)
   if FreeObjSet := getFreeVarSet(Phi) /\ ?ObjSet := get?VarSet(Phi) .
 
-  eq mkSMTQuantVar(?Obj:?Int) = (?Obj:?Int Int) .
+  eq mkSMTQuantVar(?Obj:IntPatternExistential) = (?Obj:IntPatternExistential Int) .
 ***(
-  eq mkSMTQuantVar(?Obj:?IntSeq) = (?Obj:?IntSeq IntSeq) .
-  eq mkSMTQuantVar(?Obj:?IntTree) = (?Obj:?IntTree IntTree) .
-  eq mkSMTQuantVar(?Obj:?IntTreeSeq) = (?Obj:?IntTreeSeq IntTreeSeq) .
-  eq mkSMTQuantVar(?Obj:?IntBag) = (?Obj:?IntBag IntBag) .
----   mkSMTQuantVar(?Obj:?Graph) = (?Obj:?Graph Graph) .
+  eq mkSMTQuantVar(?Obj:IntPatternExistentialSeq) = (?Obj:IntPatternExistentialSeq IntSeq) .
+  eq mkSMTQuantVar(?Obj:IntPatternExistentialTree) = (?Obj:IntPatternExistentialTree IntTree) .
+  eq mkSMTQuantVar(?Obj:IntPatternExistentialTreeSeq) = (?Obj:IntPatternExistentialTreeSeq IntTreeSeq) .
+  eq mkSMTQuantVar(?Obj:IntPatternExistentialBag) = (?Obj:IntPatternExistentialBag IntBag) .
+---   mkSMTQuantVar(?Obj:GraphPatternExistential) = (?Obj:GraphPatternExistential Graph) .
 ***)
 
-  eq mkSMTQuantVar(FreeObj:FreeInt) = (FreeObj:FreeInt Int) .
+  eq mkSMTQuantVar(FreeObj:IntUniversal) = (FreeObj:IntUniversal Int) .
 ***(
-  eq mkSMTQuantVar(FreeObj:FreeIntSeq) = (FreeObj:FreeIntSeq IntSeq) .
-  eq mkSMTQuantVar(FreeObj:FreeIntTree) = (FreeObj:FreeIntTree IntTree) .
-  eq mkSMTQuantVar(FreeObj:FreeIntTreeSeq) = (FreeObj:FreeIntTreeSeq IntTreeSeq) .
-  eq mkSMTQuantVar(FreeObj:FreeIntBag) = (FreeObj:FreeIntBag IntBag) .
----   mkSMTQuantVar(FreeObj:FreeGraph) = (FreeObj:FreeGraph Graph) .
+  eq mkSMTQuantVar(FreeObj:IntUniversalSeq) = (FreeObj:IntUniversalSeq IntSeq) .
+  eq mkSMTQuantVar(FreeObj:IntUniversalTree) = (FreeObj:IntUniversalTree IntTree) .
+  eq mkSMTQuantVar(FreeObj:IntUniversalTreeSeq) = (FreeObj:IntUniversalTreeSeq IntTreeSeq) .
+  eq mkSMTQuantVar(FreeObj:IntUniversalBag) = (FreeObj:IntUniversalBag IntBag) .
+---   mkSMTQuantVar(FreeObj:GraphUniversal) = (FreeObj:GraphUniversal Graph) .
 ***)
 
  ceq mkSMTQuantVarSet(Obj & ObjSet)
    = mkSMTQuantVar(Obj) mkSMTQuantVarSet(ObjSet)
-  if ObjSet =/=Bool .Set{MathObj++} .
+  if ObjSet =/=Bool .Set{MathObjSymbolic} .
   eq mkSMTQuantVarSet(Obj) = mkSMTQuantVar(Obj) .
 
   eq mkSMTTerm(-Int I) = `(~_`)(mkSMTTerm(I)) .
@@ -144,13 +144,13 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
   var SMTVar : SMTVar .  var SMTQuantVar : SMTQuantVar .  var SMTQuantVarSet : SMTQuantVarSet .
   vars T T1 T2 : SMTTerm .  vars F F1 F2 : SMTFormula .  var Q Q' : SMTQuerry .
 
-  eq toString(?Int(N)) = "?t__" +String Rat2String(N, 10) .
+  eq toString(IntPatternExistential(N)) = "?t__" +String Rat2String(N, 10) .
 ***(
-  eq toString(?IntSeq(N)) = "?t__" +String Rat2String(N, 10) .
-  eq toString(?IntTree(N)) = "?t__" +String Rat2String(N, 10) .
-  eq toString(?IntTreeSeq(N)) = "?t__" +String Rat2String(N, 10) .
-  eq toString(?IntBag(N)) = "?t__" +String Rat2String(N, 10) .
----   eq toString(?Graph(N)) = "?t__" +String Rat2String(N, 10) .
+  eq toString(IntPatternExistentialSeq(N)) = "?t__" +String Rat2String(N, 10) .
+  eq toString(IntPatternExistentialTree(N)) = "?t__" +String Rat2String(N, 10) .
+  eq toString(IntPatternExistentialTreeSeq(N)) = "?t__" +String Rat2String(N, 10) .
+  eq toString(IntPatternExistentialBag(N)) = "?t__" +String Rat2String(N, 10) .
+---   eq toString(GraphPatternExistential(N)) = "?t__" +String Rat2String(N, 10) .
 ***)
   eq toString(?Obj) = string(getName(upTerm(?Obj))) [owise] .
 

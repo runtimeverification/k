@@ -3,8 +3,8 @@ load ml-imp.maude
 
 mod TEST is inc IMP + FOL= . 
 	      op a :  -> Id .    op b :  -> Id .    op c :  -> Id .    op d :  -> Id .    op res :  -> Id .    op res2 :  -> Id .    op maximum :  -> Id .    op minimum :  -> Id . 
-	      op ?res :  -> ?Int .    op ?res2 :  -> ?Int . 
-	      op a0 :  -> FreeInt .    op b0 :  -> FreeInt .    op c0 :  -> FreeInt .    op d0 :  -> FreeInt . 
+	      op ?res :  -> IntPatternExistential .    op ?res2 :  -> IntPatternExistential . 
+	      op a0 :  -> IntUniversal .    op b0 :  -> IntUniversal .    op c0 :  -> IntUniversal .    op d0 :  -> IntUniversal . 
 endm
 
 set print attribute on .

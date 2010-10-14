@@ -8,24 +8,24 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
 --- We do it in a few steps.
   var Cfg Cfg' Cfg1 Cfg2 : BagItem .
   var Cfgs CfgItems CfgItems' CfgItems1 CfgItems2 : Bag .
-  var ?Obj : ?MathObj .
-  var !Obj : !MathObj .
-  var FreeObj : FreeMathObj .
-  var Obj Obj' Obj1 Obj2 : MathObj++ .
-  var ObjList ObjList1 ObjList2 : List{MathObj++} .
+  var ?Obj : MathObjPatternExistential .
+  var !Obj : MathObjFunctionExistential .
+  var FreeObj : MathObjUniversal .
+  var Obj Obj' Obj1 Obj2 : MathObjSymbolic .
+  var ObjList ObjList1 ObjList2 : List{MathObjSymbolic} .
   var X Id1 Id2 : Id .
   var field : Field .
   var Val Val1 Val2 : Val .
   var ET : ExpType .
-  var P Q P' : Int++ .
+  var P Q P' : IntSymbolic .
   var T : KLabel .
   var HPN : HeapLabel .
   var Env Env1 Env2 : Map .
-  var !Env : !MapItem .
-  var FreeEnv : FreeMapItem .
+  var !Env : MapItemFunctionExistential .
+  var FreeEnv : MapItemUniversal .
   var H H1 H2 : Map .
-  var !H : !MapItem .
-  var FreeH : FreeMapItem .
+  var !H : MapItemFunctionExistential .
+  var FreeH : MapItemUniversal .
   var Phi Phi1 Phi2 : Formula .
   var NtPhi NtPhi1 NtPhi2 : NtFormula .
   var K : K .
@@ -183,9 +183,9 @@ mod FOL= is inc CONFIG + CONFIG-UTILS + APPLY-SUBST + MB-CONDITION + SMT-INTERFA
 --- helper operations
   op get?Subst : Formula -> Subst .
  ceq get?Subst(?Obj === Obj /\ Phi) = (?Obj <- Obj) ; get?Subst(Phi)
-  if notBool(?Obj :: Int++) orBool (Obj :: Int++) .
+  if notBool(?Obj :: IntSymbolic) orBool (Obj :: IntSymbolic) .
  ceq get?Subst(Obj === ?Obj /\ Phi) = (?Obj <- Obj) ; get?Subst(Phi)
-  if notBool(?Obj :: Int++) orBool (Obj :: Int++) .
+  if notBool(?Obj :: IntSymbolic) orBool (Obj :: IntSymbolic) .
   eq get?Subst(Phi) = .Subst [owise] .
 
   op get!SubstItem : Formula -> Subst .

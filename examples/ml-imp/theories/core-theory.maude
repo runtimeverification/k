@@ -73,66 +73,66 @@ FreeSort stands for unbound symbolic mathematical objects
 Sort stands for ground, non-symbolic mathematical objects
 Sort++ stands for all the above
 ***)
-  sorts ?MathObj !MathObj FreeMathObj MathObj MathObj++ .
-  sorts List{MathObj++} Set{MathObj++} .
-  subsort ?MathObj !MathObj FreeMathObj MathObj < MathObj++ .
-  subsort MathObj++ < List{MathObj++} Set{MathObj++} .
-  op skolem : Nat ?MathObj -> FreeMathObj [strat(0)] .
-  op co-skolem : FreeMathObj -> !MathObj [strat(0)] .
+  sorts MathObjPatternExistential MathObjFunctionExistential MathObjUniversal MathObj MathObjSymbolic .
+  sorts List{MathObjSymbolic} Set{MathObjSymbolic} .
+  subsort MathObjPatternExistential MathObjFunctionExistential MathObjUniversal MathObj < MathObjSymbolic .
+  subsort MathObjSymbolic < List{MathObjSymbolic} Set{MathObjSymbolic} .
+  op skolem : Nat MathObjPatternExistential -> MathObjUniversal [strat(0)] .
+  op co-skolem : MathObjUniversal -> MathObjFunctionExistential [strat(0)] .
 
-  op .List{MathObj++} : -> List{MathObj++} .
-  op _`,_ : List{MathObj++} List{MathObj++} -> List{MathObj++}
-  [assoc id: .List{MathObj++}] .
+  op .List{MathObjSymbolic} : -> List{MathObjSymbolic} .
+  op _`,_ : List{MathObjSymbolic} List{MathObjSymbolic} -> List{MathObjSymbolic}
+  [assoc id: .List{MathObjSymbolic}] .
 
-  op .Set{MathObj++} : -> Set{MathObj++} .
-  op _&_ : Set{MathObj++} Set{MathObj++} -> Set{MathObj++}
-  [assoc comm id: .Set{MathObj++}] .
+  op .Set{MathObjSymbolic} : -> Set{MathObjSymbolic} .
+  op _&_ : Set{MathObjSymbolic} Set{MathObjSymbolic} -> Set{MathObjSymbolic}
+  [assoc comm id: .Set{MathObjSymbolic}] .
   eq Obj & Obj = Obj .
 
-  op errorObj : -> [MathObj++] .
+  op errorObj : -> [MathObjSymbolic] .
 
 
   --- must not be comm 
-  op _===_ : MathObj++ MathObj++ -> Atom .
-  op _===_ : List{MathObj++} List{MathObj++} -> Atom [ditto] .
+  op _===_ : MathObjSymbolic MathObjSymbolic -> Atom .
+  op _===_ : List{MathObjSymbolic} List{MathObjSymbolic} -> Atom [ditto] .
 
-  vars Obj Obj1 Obj1' Obj2 Obj2' : MathObj++ .
-  vars ObjList1 ObjList2 : List{MathObj++} .
+  vars Obj Obj1 Obj1' Obj2 Obj2' : MathObjSymbolic .
+  vars ObjList1 ObjList2 : List{MathObjSymbolic} .
 
   eq Obj === Obj = TrueFormula .
   eq (Obj1, Obj1', ObjList1) === (Obj2, Obj2', ObjList2)
    = (Obj1 === Obj2) /\ (Obj1' === Obj2') /\ (ObjList1 === ObjList2) .
-  eq .List{MathObj++} === .List{MathObj++} = TrueFormula .
+  eq .List{MathObjSymbolic} === .List{MathObjSymbolic} = TrueFormula .
 endm
 
 
 mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
 --- define sorts, subsorts and skolem as below for each new mathematical object
-  sorts ?Int !Int FreeInt Int++ .   --- sort Int already defined
-  subsort ?Int !Int FreeInt Int < Int++ .
-  subsort ?Int < ?MathObj .
-  subsort !Int < !MathObj .
-  subsort FreeInt < FreeMathObj .
+  sorts IntPatternExistential IntFunctionExistential IntUniversal IntSymbolic .   --- sort Int already defined
+  subsort IntPatternExistential IntFunctionExistential IntUniversal Int < IntSymbolic .
+  subsort IntPatternExistential < MathObjPatternExistential .
+  subsort IntFunctionExistential < MathObjFunctionExistential .
+  subsort IntUniversal < MathObjUniversal .
   subsort Int < MathObj .
-  subsort Int++ < MathObj++ .
+  subsort IntSymbolic < MathObjSymbolic .
 
-  op ?Int : Nat -> ?Int .
-  op !Int : Nat -> !Int .
-  op skolem : Nat ?Int -> FreeInt [ditto] .
-  op co-skolem : FreeInt -> !Int [ditto] .
+  op IntPatternExistential : Nat -> IntPatternExistential .
+  op IntFunctionExistential : Nat -> IntFunctionExistential .
+  op skolem : Nat IntPatternExistential -> IntUniversal [ditto] .
+  op co-skolem : IntUniversal -> IntFunctionExistential [ditto] .
 
 --- define operations to be used symbolically, as well as desired properties
-  ops _+Int_ _-Int_ _*Int_ _/Int_ _%Int_ : Int++ Int++ -> Int++ [ditto] .
-  ops _<=Int_ _<Int_ _>=Int_ _>Int_ : Int++ Int++ -> Bool [ditto] .
-  op -Int_ : Int++ -> Int++ [ditto] .
-  op _==Int_ : Int++ Int++ -> Bool .
+  ops _+Int_ _-Int_ _*Int_ _/Int_ _%Int_ : IntSymbolic IntSymbolic -> IntSymbolic [ditto] .
+  ops _<=Int_ _<Int_ _>=Int_ _>Int_ : IntSymbolic IntSymbolic -> Bool [ditto] .
+  op -Int_ : IntSymbolic -> IntSymbolic [ditto] .
+  op _==Int_ : IntSymbolic IntSymbolic -> Bool [ditto] .
 
-  op ?_ : Bool -> Int++ .
+  op ?_ : Bool -> IntSymbolic .
   eq ?_(true) = 1 .
   eq ?_(false) = 0 .
 
   var B : Bool .
-  vars I J K I1 I2 J1 J2 N : Int++ .
+  vars I J K I1 I2 J1 J2 N : IntSymbolic .
   vars Phi Phi1 Phi2 : Formula .
 
   eq @ (I ==Int J) = I === J .

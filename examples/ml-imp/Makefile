@@ -1,4 +1,4 @@
-K_ROOTDIR = ../..
+K_ROOTDIR = ~/k-framework
 ML_ROOTDIR = $(K_ROOTDIR)/examples/ml-imp
 
 .SUFFIXES: .imp .maude
@@ -11,11 +11,11 @@ ANTLR_MAKEFILE = Makefile.antlr
 MLC = $(ML_ROOTDIR)/mlc.sh
 TARGET = run
 MAIN_CLASS = unwrapBuiltinsMain
-MAUDE = smt-maude
+MAUDE = maude
 
-K_SYNTAX_FILE = $(LANG_NAME)-syntax.kmaude
-K_SEMANTICS_FILE = $(LANG_NAME)-semantics.kmaude
-K_MAIN_FILE = $(LANG_NAME).kmaude
+K_SYNTAX_FILE = $(LANG_NAME)-syntax.k
+K_SEMANTICS_FILE = $(LANG_NAME)-semantics.k
+K_MAIN_FILE = $(LANG_NAME).k
 MAUDE_SYNTAX_FILE = $(LANG_NAME)-syntax.maude
 MAUDE_SEMANTICS_FILE = $(LANG_NAME)-semantics.maude
 MAUDE_MAIN_FILE = $(LANG_NAME).maude

@@ -1,54 +1,54 @@
 mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
-  sorts ?MSet !MSet FreeMSet NeMSet MSet MSet++ NeMSet++ . 
+  sorts MSetPatternExistential MSetFunctionExistential MSetUniversal NeMSet MSet MSetSymbolic NeMSetSymbolic . 
   subsort NeMSet < MSet .
-  subsort NeMSet++ MSet < MSet++ .
-  subsort ?MSet !MSet FreeMSet NeMSet < NeMSet++ .
-  subsort ?MSet < ?MathObj .
-  subsort !MSet < !MathObj .
-  subsort FreeMSet < FreeMathObj .
+  subsort NeMSetSymbolic MSet < MSetSymbolic .
+  subsort MSetPatternExistential MSetFunctionExistential MSetUniversal NeMSet < NeMSetSymbolic .
+  subsort MSetPatternExistential < MathObjPatternExistential .
+  subsort MSetFunctionExistential < MathObjFunctionExistential .
+  subsort MSetUniversal < MathObjUniversal .
   subsort MSet < MathObj .
-  subsort MSet++ < MathObj++ .
+  subsort MSetSymbolic < MathObjSymbolic .
  
-  op ?MSet : Nat -> ?MSet .
-  op skolem : Nat ?MSet -> FreeMSet [ditto] .
+  op MSetPatternExistential : Nat -> MSetPatternExistential .
+  op skolem : Nat MSetPatternExistential -> MSetUniversal [ditto] .
 
   op empty : -> MSet .
-  op `{|_|`} : List{MathObj++} -> NeMSet++ [gather(&)] .
-  op `{|_|`} : ?MathObj -> ?MSet [ditto] .
-  op `{|_|`} : !MathObj -> !MSet [ditto] .
-  op `{|_|`} : FreeMathObj -> FreeMSet [ditto] .
+  op `{|_|`} : List{MathObjSymbolic} -> NeMSetSymbolic [gather(&)] .
+  op `{|_|`} : MathObjPatternExistential -> MSetPatternExistential [ditto] .
+  op `{|_|`} : MathObjFunctionExistential -> MSetFunctionExistential [ditto] .
+  op `{|_|`} : MathObjUniversal -> MSetUniversal [ditto] .
   op `{|_|`} : MathObj -> NeMSet [ditto] .
-  op `{|_|`} : MathObj++ -> NeMSet++ [ditto] .
-  op _U_ : MSet++ MSet++ -> MSet++ [assoc comm id: empty] .
-  op _U_ : NeMSet++ MSet++ -> NeMSet++ [ditto] .
-  op _U_ : MSet++ NeMSet++ -> NeMSet++ [ditto] .
-  ---op _U_ : ?MSet ?MSet -> ?MSet [ditto] .
-  ---op _U_ : !MSet !MSet -> !MSet [ditto] .
-  ---op _U_ : FreeMSet FreeMSet -> FreeMSet [ditto] .
+  op `{|_|`} : MathObjSymbolic -> NeMSetSymbolic [ditto] .
+  op _U_ : MSetSymbolic MSetSymbolic -> MSetSymbolic [assoc comm id: empty] .
+  op _U_ : NeMSetSymbolic MSetSymbolic -> NeMSetSymbolic [ditto] .
+  op _U_ : MSetSymbolic NeMSetSymbolic -> NeMSetSymbolic [ditto] .
+  ---op _U_ : MSetPatternExistential MSetPatternExistential -> MSetPatternExistential [ditto] .
+  ---op _U_ : MSetFunctionExistential MSetFunctionExistential -> MSetFunctionExistential [ditto] .
+  ---op _U_ : MSetUniversal MSetUniversal -> MSetUniversal [ditto] .
   op _U_ : MSet MSet -> MSet [ditto] .
   op _U_ : NeMSet MSet -> NeMSet [ditto] .
   op _U_ : MSet NeMSet -> NeMSet [ditto] .
-  op _U_ : NeMSet MSet++ -> NeMSet++ [ditto] .
-  op _U_ : MSet++ NeMSet -> NeMSet++ [ditto] .
-  op _U_ : NeMSet++ MSet -> NeMSet++ [ditto] .
-  op _U_ : MSet NeMSet++ -> NeMSet++ [ditto] .
-  op _U_ : MSet++ MSet -> MSet++ [ditto] .
-  op _U_ : MSet MSet++ -> MSet++ [ditto] .
-  op _U_ : NeMSet++ NeMSet -> NeMSet++ [ditto] .
-  op _U_ : NeMSet NeMSet++ -> NeMSet++ [ditto] . 
+  op _U_ : NeMSet MSetSymbolic -> NeMSetSymbolic [ditto] .
+  op _U_ : MSetSymbolic NeMSet -> NeMSetSymbolic [ditto] .
+  op _U_ : NeMSetSymbolic MSet -> NeMSetSymbolic [ditto] .
+  op _U_ : MSet NeMSetSymbolic -> NeMSetSymbolic [ditto] .
+  op _U_ : MSetSymbolic MSet -> MSetSymbolic [ditto] .
+  op _U_ : MSet MSetSymbolic -> MSetSymbolic [ditto] .
+  op _U_ : NeMSetSymbolic NeMSet -> NeMSetSymbolic [ditto] .
+  op _U_ : NeMSet NeMSetSymbolic -> NeMSetSymbolic [ditto] . 
 
-  op size : MSet++ -> Int++ . 
-  ops min max : MSet++ -> Int++ .
+  op size : MSetSymbolic -> IntSymbolic . 
+  ops min max : MSetSymbolic -> IntSymbolic .
 
 
-  var I : Int++ .
-  var Obj Obj1 Obj2 : MathObj++ .
-  var ObjList : List{MathObj++} .
-  var A A1 A2 : MSet++ .
-  var NeA NeA1 NeA2 : NeMSet++ .
+  var I : IntSymbolic .
+  var Obj Obj1 Obj2 : MathObjSymbolic .
+  var ObjList : List{MathObjSymbolic} .
+  var A A1 A2 : MSetSymbolic .
+  var NeA NeA1 NeA2 : NeMSetSymbolic .
 
   eq {| Obj1, Obj2, ObjList |} = {| Obj1 |} U {| Obj2 |} U {| ObjList |} .
-  eq {| .List{MathObj++} |} = empty .
+  eq {| .List{MathObjSymbolic} |} = empty .
   eq NeA U A1 === NeA U A2 = A1 === A2 .
   eq size(NeA1 U NeA2) = size(NeA1) +Int size(NeA2) .
   eq size(empty) = 0 .

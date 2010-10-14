@@ -1,7 +1,7 @@
 load ml-prelude.maude
 
 kmod IMP-SYNTAX is including ML-K 
-  syntax Val       ::= Int++
+  syntax Val       ::= IntSymbolic
   syntax NvExpType ::= int | struct Id *
   syntax Void      ::= void
   syntax ExpType   ::= Void | NvExpType | ExpType *
@@ -97,12 +97,12 @@ kmod IMP-SYNTAX is including ML-K
   op _|->[_:_] : Id  Val  ExpType -> MapItem
 ---struct
   op _|->_ : Id  List -> MapItem
-  op [_:_+_] :  Id  ExpType  Int++ -> ListItem
+  op [_:_+_] :  Id  ExpType  IntSymbolic -> ListItem
 ---heap
   op emptySn : -> Id
   op @scalar :  -> Field
   op _._ : Id Id -> Field 
-  op _|->_:[_:_] : Int++  Val Field  ExpType -> MapItem
+  op _|->_:[_:_] : IntSymbolic  Val Field  ExpType -> MapItem
 
 endkm
 

@@ -1,24 +1,24 @@
 mod MATHEMATICAL-TREE is inc MATHEMATICAL-INT .
-  sorts ?Tree !Tree FreeTree Tree Tree++ .
-  subsort ?Tree !Tree FreeTree Tree < Tree++ .
-  subsort ?Tree < ?MathObj .
-  subsort !Tree < !MathObj .
-  subsort FreeTree < FreeMathObj .
+  sorts TreePatternExistential TreeFunctionExistential TreeUniversal Tree TreeSymbolic .
+  subsort TreePatternExistential TreeFunctionExistential TreeUniversal Tree < TreeSymbolic .
+  subsort TreePatternExistential < MathObjPatternExistential .
+  subsort TreeFunctionExistential < MathObjFunctionExistential .
+  subsort TreeUniversal < MathObjUniversal .
   subsort Tree < MathObj .
-  subsort Tree++ < MathObj++ .
+  subsort TreeSymbolic < MathObjSymbolic .
 
-  op ?Tree : Nat -> ?Tree .
-  op !Tree : Nat -> !Tree .
-  op skolem : Nat ?Tree -> FreeTree [ditto] .
-  op co-skolem : FreeTree -> !Tree [ditto] .
+  op TreePatternExistential : Nat -> TreePatternExistential .
+  op TreeFunctionExistential : Nat -> TreeFunctionExistential .
+  op skolem : Nat TreePatternExistential -> TreeUniversal [ditto] .
+  op co-skolem : TreeUniversal -> TreeFunctionExistential [ditto] .
 
   op upsilon : -> Tree .
-  op _`[_`]_ : Tree++ MathObj++ Tree++ -> Tree++ .
+  op _`[_`]_ : TreeSymbolic MathObjSymbolic TreeSymbolic -> TreeSymbolic .
 
-  op mirror : Tree++ -> Tree++ .
+  op mirror : TreeSymbolic -> TreeSymbolic .
 
-  var Obj Obj' : MathObj++ .
-  var TL TR TL' TR' : Tree++ .
+  var Obj Obj' : MathObjSymbolic .
+  var TL TR TL' TR' : TreeSymbolic .
 
   eq TL [Obj] TR === TL' [Obj'] TR'
    = Obj === Obj' /\ TL === TL' /\ TR === TR' .

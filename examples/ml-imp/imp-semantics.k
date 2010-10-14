@@ -3,7 +3,7 @@ load imp-syntax
 
 kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar M N N1 N2 : Nat
-  kvar I J I1 I2 : Int++
+  kvar I J I1 I2 : IntSymbolic
   kvar NzI : NzInt
   kvar T : ExpType
   kvar NvT : NvExpType
@@ -25,12 +25,12 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar Cfg : BagItem
   kvar Cfgs Cfgs' CfgItems : Bag
 
-  syntax Builtins ::= Int++ | ExpType
-  syntax KResult ::= Int++ | List{Val} | ExpType 
+  syntax Builtins ::= IntSymbolic | ExpType
+  syntax KResult ::= IntSymbolic | List{Val} | ExpType 
   syntax K ::= DeclAnnot | Stmts | List{Exp} 
 
-  syntax Exp ::= load ( Int++ ) | store ( Exp , Exp ) [strict]
----               | store ( Int++ , Exp ) [strict]
+  syntax Exp ::= load ( IntSymbolic ) | store ( Exp , Exp ) [strict]
+---               | store ( IntSymbolic , Exp ) [strict]
                
 ---  op __`(_`):_=>_ : ExpType Id List{Id} Bag Bag -> MapItem
 
@@ -53,7 +53,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   macro defaultVal(struct Sn *) = 0
 
 --- heap allocation/deallocation
-  syntax K ::= allocHeap ( Id , List ) | deallocHeap ( Int++ , Int++ )
+  syntax K ::= allocHeap ( Id , List ) | deallocHeap ( IntSymbolic , IntSymbolic )
 
 --- translate a pair (TXl, Vl) into a map Xi |-> [Vi, Ti]
   syntax Map ::= map ( Stmts , List{Exp} )
@@ -161,7 +161,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
 
 --- delete statement processing
   rule
-    <k> delete I; => deallocHeap(I, length(Fl)) <_/k>
+    <k> delete I; => deallocHeap(I, lengthList(Fl)) <_/k>
     <env_> _ |-> [(I => 0) : struct Sn *] <_/env>
     <struct_> Sn |-> Fl <_/struct>
   rule
@@ -445,7 +445,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   rule length,,,(.List{Id}) => 0 [structural]
 
   op range : Nat Nat -> List{Val}
-  rule range(N, sNat(M)) => ?Int(N),,, range(sNat N, M) [structural]
+  rule range(N, sNat(M)) => IntPatternExistential(N),,, range(sNat N, M) [structural]
   rule range(N, 0) => .List{Id} [structural]
 endkm
 
