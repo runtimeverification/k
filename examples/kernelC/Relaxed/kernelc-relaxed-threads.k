@@ -45,7 +45,7 @@ memory does contain v at a ;
     if notBool(N in keys(Locks))
 
   rule <k> *N => V <_/k> <buffer_> bwrite(N, V) Mem:List </buffer> if notBool(N in locations(Mem)) [structural]
-  rule <k> *N=V => V <_/k> <buffer_> .List => bwrite(N, V) <_/buffer> [structural]
+  rule <k> *N=V => V <_/k> <buffer_> .List => bwrite(N, V) </buffer> [structural]
 
   rule <k> *N => V <_/k> <buffer> Mem </buffer> <mem_> N |-> V <_/mem> if notBool(N in locations(Mem))
   rule <blocked> false </blocked> <buffer> bwrite(N, V) => . <_/buffer> <mem_> N |-> (_ => V) <_/mem>

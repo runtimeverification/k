@@ -536,8 +536,8 @@ void peterson(int *flag, int *turn, int t) {
   flag[t] = 1;
   *turn = 1-t;
   while (flag[1-t] && *turn == 1-t) {}
-  printf("%d;",t);
-  printf("%d;",t);
+  printf("%d;",-1-t);
+  printf("%d;", 1+t);
   flag[t] = 0;
 }
 
