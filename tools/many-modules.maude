@@ -15,8 +15,13 @@ fmod MANY-MODULES is
    = setName(manyModules(emptySModule, MS,  kModules ; builtinModules, none, 'noConfig), O) .
 
   op manyModules : Module ModuleSet  SortSet SortSet Term ~> Module .
+----  Hack for K-LATEX.  maybe it should be moved somewhere else
+ ceq manyModules(M, M' MS, SS, SS', T) = manyModules(M, MS, SS, SS', T)
+  if getName(M') = 'K-LATEX .
+  eq '@latex[Ct:Constant] = empty .
+---- 
   eq manyModules(M, M' MS, SS, SS', T) 
-   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS,  SS, getImportNames(M') ; SS', T) else manyModules(addModule(setImports(M',nil),M), MS,  SS, getImportNames(M') ; SS', extractConfTerm(M')) fi [print T] .
+   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS,  SS, getImportNames(M') ; SS', T) else manyModules(addModule(setImports(M',nil),M), MS,  SS, getImportNames(M') ; SS', extractConfTerm(M')) fi [owise print T] .
   eq manyModules(M, empty, SS, SS', T) = addImports(generateImports(intersection(SS', SS)),M) .
 endfm
 

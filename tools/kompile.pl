@@ -648,7 +648,7 @@ sub latexify {
 # File name where the compiled output will be stored:
 	my $output_file_name = "$language_file_name-$format.tex";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
-	print FILE "\\documentclass[landscape]{article}\n";
+	print FILE "\\documentclass{article}\n";
 	print FILE "\\usepackage{import}\n";
 	print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
         if (-e "$language_file_name.sty") {
@@ -1521,7 +1521,7 @@ sub make_metadata {
 # Match the K specific attributes below and make them into metadata
 # Right now it assumes that no \" can appear inside the metadata string
 # Therefore, the latex attribute is expected to be outside
-    s!(ditto|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
+    s!(ditto|large|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
     my $out = "";
 	if (defined $1) {
 	    local $_ = $1;

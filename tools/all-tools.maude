@@ -3,6 +3,7 @@ set include BOOL on .
 load prelude-extras
 load meta-k
 load printing
+load metadata-parsing
 load many-modules-interface
 load resolve-ditto-interface
 load complete-k-sorts-interface
@@ -22,7 +23,6 @@ load lists-to-k-interface
 load subsorts-to-wrappers-interface
 load homogenous-arguments-interface
 load make-all-labels-interface
-load metadata-parsing
 load strict-ops2cxt-interface
 load strict-cxt2eqs-interface
 load compile-program

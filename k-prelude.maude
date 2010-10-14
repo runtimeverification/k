@@ -399,6 +399,13 @@ mod K-CONFIG is
   op _+ : CellLabel -> CellLabel .
 endm
 
+--- Latex Annotations
+
+mod K-LATEX is
+  including K-TECHNIQUE .
+  including PL-STRING .
+  op @latex : String -> BagItem .
+endm
 
 
 mod K is 
@@ -417,6 +424,7 @@ mod K is
   including K-MAP-EXTRAS .          --- operations on Maps
   including K-BAG-EXTRAS .          --- operations on Bags
   including K-SET-EXTRAS .          --- operations on Sets
+  including K-LATEX .
 endm
 
 

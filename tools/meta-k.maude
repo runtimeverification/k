@@ -526,10 +526,16 @@ fmod CONFIGURATION-ATTRS is
   op kwrapping : Qid -> Attr .
 endfm
 
+fmod RULES-ATTRS is
+  including META-MODULE .
+  ops kstructural klarge : -> Attr . 
+endfm
+
 fmod K-ATTRS is 
   including SYNTAX-ATTRS .
   including STRICT-ATTRS .
   including CONFIGURATION-ATTRS .
+  including RULES-ATTRS .
 endfm
 
 fmod K-META-LISTS is including K-META-OPS .
@@ -582,6 +588,13 @@ fmod META-K-CONDITION-SEARCH is
   including QID .
   op searchS : -> Qid .
   eq searchS = 'search_ .
+endfm
+
+
+fmod META-K-LATEX is
+  including QID .
+  op latexS : -> Qid .
+  eq latexS = '@latex .
 endfm
 
 fmod META-K-LEAST-SORTS is

@@ -11,6 +11,16 @@ fmod PARSE-METADATA-BASIC  is
   eq metadataParse(S) = metadataStrippedParse(stripSpaces(S)) .
   op metadataStrippedParse : String -> AttrSet .
   eq metadataStrippedParse("") = none .
+
+  op metadataParse : MembAx -> MembAx .
+  op metadataParse : OpDecl -> OpDecl .
+  eq metadataParse(mb Trm : Sort [AS metadata(S) AS'] .) = (mb Trm : Sort [AS metadataParse(S) AS'] .) .
+  eq metadataParse(op Q : TyL -> Ty [AS metadata(S) AS'] .) =  (op Q : TyL -> Ty [AS metadataParse(S) AS'] .).
+  eq metadataParse(Max) = Max [owise] .
+  eq metadataParse(Op) = Op [owise] .
+
+  var Trm : Term . var Sort : Sort . var AS AS' : AttrSet . var TyL : TypeList . var Ty : Type . 
+  var Q : Qid .  var Max : MembAx . var Op : OpDecl .
 endfm
 
 fmod PARSE-METADATA-SYNTAX is
@@ -143,10 +153,26 @@ fmod PARSE-METADATA-CONFIGURATION is
    /\ S1 := substr(S', N, length(S')) .
 endfm
 
+fmod PARSE-METADATA-RULES is
+  including PARSE-METADATA-BASIC .
+  including RULES-ATTRS .
+  ceq metadataStrippedParse(S) = kstructural  metadataParse(stripSpaces(S'))
+   if "structural" = substr(S,0,length("structural")) 
+   /\ S' := (substr(S,length("structural"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) = klarge  metadataParse(stripSpaces(S'))
+   if "large" = substr(S,0,length("large")) 
+   /\ S' := (substr(S,length("large"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+
+  var S S' : String .
+endfm
+
 fmod PARSE-METADATA is
   including PARSE-METADATA-STRICT .
   including PARSE-METADATA-CONFIGURATION .
   including PARSE-METADATA-SYNTAX .
+  including PARSE-METADATA-RULES .
 endfm
 ---(
 red metadataParse("") .

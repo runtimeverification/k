@@ -38,6 +38,9 @@
 \newcommand{\cellDecl}[2]{\par \textsc{cell:
 }$#1$ wraps $#2$}
 \newcommand{\nonTerminal}[1]{\textit{#1}\/}
+\newcommand{\somespace}{\mathbin{}}
+\newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
+\newcommand{\kBR}{\\}
 \newcommand{\terminal}[1]{\ensuremath\mathrel{\texttt{#1}}}
 \newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\texttt{#1}}}
 \newcommand{\sort}[1]{\textit{#1}}
@@ -67,7 +70,7 @@
 \vskip-1ex
 \hbox{
 \begin{tikzpicture}
-  \node[draw=#1!50!black,line width=1pt,name=cell,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=#5,/pgf/rounded rectangle west arc=#4,fill=#1!20,minimum height=4ex,minimum width=3em]{$#3$};
+  \node[draw=#1!50!black,line width=1pt,name=cell,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=#5,/pgf/rounded rectangle west arc=#4,fill=#1!20,minimum height=4ex,minimum width=3em]{#3};
 \draw[shift=(cell.north east)]plot coordinates{(-.1pt,-.5pt)} node[name=ce,minimum size=0pt,inner sep=0pt]{};
 \draw[shift=(cell.north west)]plot coordinates{(.1pt,-.5pt)} node[name=cw,     minimum size=0pt,inner sep=0pt]{};
 \draw[color=white,line width=1.2pt](cw.east)--(ce.west);
@@ -106,7 +109,8 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\constant}[1]{\textsf{#1}}
 
 
-\newcommand{\ball}[3]{\kcell{#1}{#2}{#3}{convex}{convex}}
+\newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
+\newcommand{\ballLarge}[3]{\kcell{#1}{#2}{$\begin{array}{@{}c@{}}#3\end{array}$}{convex}{convex}}
 \newcommand{\bprefix}[3]{\kcell{#1}{#2}{#3}{convex}{none}}
 \newcommand{\bsuffix}[3]{\kcell{#1}{#2}{#3}{none}{convex}}
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{#3}{none}{none}}

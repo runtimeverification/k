@@ -392,8 +392,8 @@ mod PL-INT is
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
-  op _==Int_ : Int Int -> Bool [prec 37] .
-  op _!=Int_ : Int Int -> Bool [prec 37] .
+  op _==Int_ : Int Int -> Bool [prec 37 metadata "latex(renameTo _==\\subscript{{\\scriptstyle\\it{}Int}}_)"] .
+  op _!=Int_ : Int Int -> Bool [prec 37 metadata "latex(renameTo _!=\\subscript{{\\scriptstyle\\it{}Int}}_)"] .
   ceq I1 ==Int I2 = true if I1 >=Int I2 andBool I2 >=Int I1 .
   ceq I1 ==Int I2 = false if I1 >Int I2 orBool I2 >Int I1 .
   eq I1 !=Int I2 = notBool(I1 ==Int I2) .
@@ -750,7 +750,7 @@ mod PL-STRING is
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
   op _+String_ : String String -> String
-        [prec 33 gather (E e)
+        [prec 33 gather (E e) metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}String}}_)"
          special (id-hook StringOpSymbol (+)
                   op-hook stringSymbol (<Strings> : ~> String))] .
 
