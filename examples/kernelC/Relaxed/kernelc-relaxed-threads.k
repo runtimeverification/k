@@ -1,4 +1,21 @@
-kmod KERNELC-RELAXED-THREADS is including KERNELC-BASIC-SEMANTICS 
+kmod KERNELC-RELAXED-THREADS is including KERNELC-BASIC-SEMANTICS
+
+---(
+Implementing a x86-TSO-like memory model inspired from the paper introducing x86-TSO (Scott Owens, Susmit Sarkar, Peter Sewell: A Better x86 Memory Model: x86-TSO. TPHOLs 2009: 391-407)
+
+In reading the following natural language description taken verbatim from the paper, think about p as being a thread instead of a processor, and replace registers by local variables.  All synchronization operations (spawn, acquire, release, thread end, join) require the write buffer to be empty to proceed.  we have no meaning for ?FENCE ops.
+
+1. p can read v from memory at address a if p is not blocked, has no buﬀered writes to a , and the 
+memory does contain v at a ; 
+2. p can read v from its write buﬀer for address a if p is not blocked and has v as the newest write to a in its buﬀer; 
+3. p can read the stored value v from its register r at any time; 
+4. p can write v to its write buﬀer for address a at any time; 
+5. if p is not blocked, it can silently dequeue the oldest write from its write buﬀer to memory; 
+6. p can write value v to one of its registers r at any time; 
+7. if p’s write buﬀer is empty, it can execute an MFENCE (so an MFENCE cannot proceed until all writes have been dequeued, modelling buﬀer ﬂushing); LFENCE and SFENCE can occur at any time, making them no-ops; 
+8. if the lock is not held, and p’s write buﬀer is empty, it can begin a LOCK’d instruction; and 
+9. if p holds the lock, and its write buﬀer is empty, it can end a LOCK’d instruction. 
+---) 
 
   configuration <T ?> <threads> <thread*> <k> .K </k> <env> .Map </env> <buffer> .List </buffer> <id> 0 </id> <blocked> false </blocked> </thread*> 
                     </threads> <cthreads> .Set </cthreads>
