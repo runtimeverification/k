@@ -62,7 +62,7 @@ content
 
 
 BUILTIN
-  : 'Int++'
+  : 'IntSymbolic'
   | 'Id'
 ;
 
