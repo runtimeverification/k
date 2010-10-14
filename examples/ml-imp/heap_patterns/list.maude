@@ -1,8 +1,8 @@
 mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var N : Nat .
-  var P P' P1 P2 Q Q' Q1 Q2 incP : Int++ .
-  var I : Int++ .
-  var Alpha Beta : Seq++ .
+  var P P' P1 P2 Q Q' Q1 Q2 incP : IntSymbolic .
+  var I : IntSymbolic .
+  var Alpha Beta : SeqSymbolic .
   var H : Map .
   var K : K .
   var V V' V1 V2 : Val .
@@ -38,14 +38,14 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      < config >
        < k > K </ k >
        < heap >
-         P |-> ?Int(N) : [( nodeList . val ) : int ]
-         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : (struct nodeList *)]
-         list(?Int(N +Int 1))(?Seq(N +Int 2))
+         P |-> IntPatternExistential(N) : [( nodeList . val ) : int ]
+         (P +Int 1) |-> IntPatternExistential(N +Int 1) : [( nodeList . next ) : (struct nodeList *)]
+         list(IntPatternExistential(N +Int 1))(SeqPatternExistential(N +Int 2))
          H
        </ heap >
        < form >
          Phi /\ ~(P === 0) /\
-         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
+         (Alpha === [IntPatternExistential(N)] ::: SeqPatternExistential(N +Int 2))
        </ form >
        < newSym > N +Int 3 </ newSym >
        CfgItems
@@ -119,14 +119,14 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      < config >
        < k > K </ k >
        < heap >
-         P |-> ?Int(N) : [( nodeList . val ) : int ]
-         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : struct nodeList *]
-         lseg(?Int(N +Int 1), Q)(?Seq(N +Int 2))
+         P |-> IntPatternExistential(N) : [( nodeList . val ) : int ]
+         (P +Int 1) |-> IntPatternExistential(N +Int 1) : [( nodeList . next ) : struct nodeList *]
+         lseg(IntPatternExistential(N +Int 1), Q)(SeqPatternExistential(N +Int 2))
          H
        </ heap >
        < form >
          Phi /\ ~(P === Q) /\
-         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
+         (Alpha === [IntPatternExistential(N)] ::: SeqPatternExistential(N +Int 2))
        </ form >
        < newSym > N +Int 3 </ newSym >
        CfgItems
