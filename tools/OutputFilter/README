@@ -11,13 +11,34 @@ Configuration file format:
   Configuration is specified in a yaml document, and has the form:
   <cellname>: <cell-config>
   Where <cell-config> may be be a single command, or a set of options.
+
   Available single commands are:
-    hide              -- This is the default behavior if a cell is not specified.
-                         Hide the cell and its immediate content (but proceed as
-                         normal for the cell's children)
-    show              -- Show the cell and it's content (but says nothing about its children)
-    recursively-hide  -- Hide the cell, and forcefully hide its children (undoing any explic shows)
+    hide                         -- This is the default behavior if a cell is
+                                    not specified. Hide the cell and its
+                                    immediate content (but proceed as normal for
+                                    the cell's children)
+    show                         -- Show the cell and it's content (but says
+                                    nothing about its children)
+    recursively-hide             -- Hide the cell and forcefully hide its
+                                    children, undoing any explic shows
+
   Available options in the set of options:
-    keep: <int>       -- keep only the first <int> number of lines in the content-text
+    keep: <int>                  -- keep only the first <int> number of lines
+                                    in the content-text
+    cell-style: <cell-style>     -- specify a style for the cell (see below)
+    text-style: <text-style>     -- specify a style for the text (see below)
+
+  <cell-style> or <text-style> is a set of any of the following:
+    bold: <bold-value>           -- If a true value or "bold", will bold the
+                                    cell/text. This can also be "debold", which
+                                    will (recursively) undo any previously set
+                                    boldening
+    underline: <underline-value> -- If a true value or "underline", will
+                                    underline the cell/text. This can also be
+                                    "deunderline", which will (recursively) undo
+                                    any previously set underlineing
+
+
+
 
   See example.yml in the examples directory
