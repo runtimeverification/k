@@ -168,25 +168,7 @@ mod COMMON-SEMANTICS-GOTO is
 		The variables mentioned above are meant to be those with automatic storage duration.  Variables with external or static storage duration have their own rules.
 				
 	***)
-	--- mb rule
-		--- < k > Goto(Label:Id) ~> ? => K:K </ k >
-		--- < currentFunction > F:Id </ currentFunction >
-		--- < loopStack > ? => S:List </ loopStack >
-		--- < gotoMap >... kpair(F:Id, X:Id) |-> kpair(K:K, S:List) ...</ gotoMap >
-		--- : KSentence [metadata "computational rule"] .
-***(
-< gotoMap >
-('kpair).KProperLabel(String "simplestGoto.pre.gen"(.List{K}),,Id Identifier("main")(.List{K})) 
-|-> ('Map).KProperLabel(wmap (
-	Id Identifier("jump")(.List{K}) 
-	|->
-	('gotoObject).KProperLabel(('StatementLoc).KProperLabel(('Return).KProperLabel(Id Identifier("x")(.List{K})),,('CabsLoc).KProperLabel(String "simplestGoto.prepre.gen"(.List{K}),,BaseValue 6(.List{K}),,BaseValue 152(.List{K}),,BaseValue 38(.List{K})))
-	,,wlist .(.List{K})
-	,,wlist ListItem(
-		('frozenDeclaration).KProperLabel(
-			BaseValue 0(.List{K})
-			,,BaseValue 1(.List{K})				,,('LocalDefinition).KProperLabel(('DefinitionLoc).KProperLabel(('DeclarationDefinition).KProperLabel(('InitNameGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLabel(('Int).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('InitName).KProperLabel(('Name).KProperLabel(Id Identifier("x")(.List{K}),,('JustBase).KProperLabel(.List{K})),,('SingleInit).KHybridLabel(('tv).KResultLabel(kList("wklist_")(BaseValue 5(.List{K})),,BaseType int(.List{K}))))))),,('CabsLoc).KProperLabel(String "simplestGoto.prepre.gen"(.List{K}),,BaseValue 2(.List{K}),,BaseValue 115(.List{K}),,BaseValue 13(.List{K}))))))(.List{K})))(.List{K})) </ gotoMap >
-***)
+
 	op processGoto : K -> K .
 	op processGotoDown : K -> K .
 	op gotoObject : Nat List K List List -> K . --- nestingDepth, block history, continuation, loop stack, decl stack
@@ -201,7 +183,7 @@ mod COMMON-SEMANTICS-GOTO is
 		
 	---- first case, when we're in the same block
 	mb rule
-		< k > processGoto(gotoObject(Depth:Nat, (ListItem(CurrentBlock:Nat) BlockHistory:List), K:K, LoopStack:List, DeclStack:List)) ~> ? 
+		< k > L:KLabel(gotoObject(Depth:Nat, (ListItem(CurrentBlock:Nat) BlockHistory:List), K:K, LoopStack:List, DeclStack:List)) ~> ? 
 			=> addVariablesForBlock(CurrentBlock:Nat, DeclStack:List)
 			~> K:K
 		</ k >
@@ -209,6 +191,8 @@ mod COMMON-SEMANTICS-GOTO is
 		< blockHistory > ListItem(CurrentBlock:Nat) BlockHistory:List </ blockHistory >
 		< loopStack > ? => LoopStack:List </ loopStack >
 		< localVariables > Vars:List </ localVariables >
+		if L:KLabel ==Bool 'processGoto
+		orBool L:KLabel ==Bool 'processGotoDown
 		: KSentence [metadata "structural"] .
 		
 	---- second case, we're in a different block
@@ -287,13 +271,32 @@ mod COMMON-SEMANTICS-GOTO is
 		if getIdOfDeclaration(Decl:K) in Vars:List
 		: KSentence [metadata "structural"] .
 		
+	--- op stripInit : K -> K .
+	
+	    --- < k > ('stripInit).KProperLabel(('LocalDefinition).KProperLabel(('DefinitionLoc).KProperLabel(('DeclarationDefinition).KProperLabel(('InitNameGroup).KProperLabel(('Specifier).KProperLabel(('_::_).KHybridLab
+--- el(('Int).KResultLabel(.List{K}))),,('_::_).KHybridLabel(('InitName).KProperLabel(('Name).KProperLabel(Id Identifier("x")(.List{K}),,('JustBase).KProperLabel(.List{K})),,('SingleInit).KHybridLabel(('tv).KResult
+--- Label(kList("wklist_")(BaseValue 0(.List{K})),,BaseType int(.List{K}))))))),,('CabsLoc).KProperLabel(String "testBadGoto.prepre.gen"(.List{K}),,BaseValue 5(.List{K}),,BaseValue 130(.List{K}),,BaseValue 19(.List
+--- {K})))))
+
+	--- mb rule
+		--- < k > stripInit(LocalDefinition(DefinitionLoc(DeclarationDefinition(Decl:K, Loc:K)))
+		--- ...</ k >
+		--- : KSentence [metadata "structural"] .
+	
+	op enableInits : -> K .
 	mb rule
-		< k > (. => Decl:K) ~> addVariablesForBlock(TargetBlock:Nat, 
+		< k > enableInits => (.).K ...</ k >
+		< shouldInit > ? => true </ shouldInit >
+		: KSentence [metadata "structural"] .
+	
+	mb rule
+		< k > (. => Decl:K ~> enableInits) ~> addVariablesForBlock(TargetBlock:Nat, 
 				((ListItem(frozenDeclaration(?, TargetBlock:Nat, Decl:K)) => (.).List) ?)
 			)
 		...</ k >
 		< localVariables > Vars:List </ localVariables >
 		< blockHistory > ListItem(TargetBlock:Nat) ...</ blockHistory >
+		< shouldInit > ? => false </ shouldInit >
 		if notBool getIdOfDeclaration(Decl:K) in Vars:List
 		: KSentence [metadata "structural"] .
 	--- fixme this is wrong

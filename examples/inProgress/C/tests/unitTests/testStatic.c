@@ -2,13 +2,15 @@ int x = 17;
 int y = 5;
 int f(void){
 	static int x;
+	int y;
 	x++;
 	{
 		static int x; 
-		x = 12;
+		x = x + 2;
+		y = x;
 	}
 	
-	return x;
+	return y * 2 + x * 3;
 }
 
 int g(void){

@@ -47,6 +47,7 @@ kmod C-CONFIGURATION is
 							< localAddresses > .Set </ localAddresses > --- used to deallocate memory on leaving a block
 						</ local >
 						< k > .K </ k >
+						< shouldInit > true </ shouldInit > --- used to control initialization when gotoing
 						
 						--- used to figure initializers
 						< currentObject > .List </ currentObject >

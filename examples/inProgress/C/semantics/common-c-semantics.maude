@@ -1372,6 +1372,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< localAddresses >... (.).Set => SetItem(Loc:Nat) ...</ localAddresses >
 		if notBool X:Id in Vars:List
 		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > defineAndInit(X:Id, ?, initializerValue(X:Id, T:Type, K:K), Loc:Nat)
 			=> allocateTypeIfAbsent(Loc:Nat, T:Type)
@@ -1379,7 +1380,19 @@ mod COMMON-GLOBAL-DECLARATION is
 			~> giveType(X:Id, T:Type)
 			~> initialize(X:Id, T:Type, K:K)
 		...</ k >
+		< shouldInit > true </ shouldInit >
 		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > defineAndInit(X:Id, ?, initializerValue(X:Id, T:Type, ?), Loc:Nat)
+			=> allocateTypeIfAbsent(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			--- ~> initialize(X:Id, T:Type, K:K)
+		...</ k >
+		< shouldInit > false </ shouldInit >
+		: KSentence [metadata "structural"] .	
+		
 		
 	mb rule
 		< k > figureInitializer-aux(?, (incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), initializer(K:K))
