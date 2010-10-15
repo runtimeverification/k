@@ -212,7 +212,6 @@ module FilterOutput where
                        _   -> error usage
             parsedOut <- parseKOutFile fname
             config <- getConfig configFile
-            putStrLn . show $ hasStyle config "env" textStyle
             putDoc . cat . map (ppKOutput config) $ parsedOut
 
   usage = "\nUsage:\n" ++ "  If you have built the tool using 'make', then run:\n"
