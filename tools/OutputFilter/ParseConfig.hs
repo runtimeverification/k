@@ -47,7 +47,7 @@ module ParseConfig where
     deriving Show
 
   data Color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
-             | Dullblack |Dullred | Dullgreen | Dullyellow | Dullblue | Dullmagenta
+             | Dullblack | Dullred | Dullgreen | Dullyellow | Dullblue | Dullmagenta
              | Dullcyan | Dullwhite
     deriving (Show, Read)
 
@@ -132,8 +132,6 @@ module ParseConfig where
           doDeBold = ["debold", "de-bold", "un-bold", "unbold"]
 
 
-  getTextStyle yl = []
-
   isColor :: String -> Bool
   isColor = flip compareStr $ [ "Black", "Red", "Green", "Yellow", "Blue", "Magenta", "Cyan"
                               , "White", "Dullblack", "Dullred", "Dullgreen", "Dullyellow"
@@ -159,7 +157,9 @@ module ParseConfig where
   compareStr :: String -> [String] -> Bool
   compareStr s ss = canonicalize s `elem` map canonicalize ss
 
-  canonicalize = map toLower
+  -- Canonical form, also is in a form ready to be read in
+  canonicalize (c:cs) = toUpper c : map toLower cs
+  canonicalize []     = []
 
   areNumbers :: String -> Bool
   areNumbers = and . map isDigit
@@ -180,4 +180,4 @@ module ParseConfig where
 
   -- Read utilities
   tryRead :: Read a => (String -> Bool) -> String -> String -> a
-  tryRead p s err = if p s then read s else error err
+  tryRead p s err = if p s then read (canonicalize s) else error err

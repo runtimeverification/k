@@ -37,8 +37,13 @@ Configuration file format:
                                     underline the cell/text. This can also be
                                     "deunderline", which will (recursively) undo
                                     any previously set underlineing
+    foreground <color>           -- Make the text have <color> as foreground (see
+                                    below)
+    background <color>           -- Make the text have <color> as background (see
+                                    below)
 
-
-
+  <color> can be any of the following:
+     Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, Dullblack, Dullred,
+     Dullgreen, Dullyellow, Dullblue, Dullmagenta, Dullcyan, Dullwhite
 
   See example.yml in the examples directory

@@ -66,7 +66,7 @@ module FilterOutput where
 
 
   handleString :: KOutPrinter
-  handleString conf (String n s) = text s
+  handleString conf (String n s) = handleStyle conf n textStyle . text $ s
   {-
     Pretty Printing
    -}
@@ -89,11 +89,11 @@ module FilterOutput where
 
 
   handleStyle :: StyleReader (Doc -> Doc)
-  handleStyle conf name f doc | hasStyle conf name f = stylize (fetchStyle conf name f) doc
-                              | otherwise            = doc
+  handleStyle conf name f | hasStyle conf name f = stylize (fetchStyle conf name f)
+                          | otherwise            = id
 
   stylize :: Style -> Doc -> Doc
-  stylize (Style fore back isUnder isBold) = doUnder isUnder . doBold isBold . doFore fore . doBack back
+  stylize (Style fore back isUnder isBold) d = doUnder isUnder . doBold isBold . doFore fore . doBack back $ d
     where doUnder Nothing            = id
           doUnder (Just Underline)   = underline
           doUnder (Just DeUnderline) = deunderline
@@ -106,7 +106,40 @@ module FilterOutput where
           doBack (Just c) = colorize c Background
 
   colorize :: Color -> ColorPlace -> (Doc -> Doc)
-  colorize c p = id
+  colorize c Foreground = case c of
+                            Black       -> black
+                            Red         -> red
+                            Green       -> green
+                            Yellow      -> yellow
+                            Blue        -> blue
+                            Magenta     -> magenta
+                            Cyan        -> cyan
+                            White       -> white
+                            Dullblack   -> dullblack
+                            Dullred     -> dullred
+                            Dullgreen   -> dullgreen
+                            Dullyellow  -> dullyellow
+                            Dullblue    -> dullblue
+                            Dullmagenta -> dullmagenta
+                            Dullcyan    -> dullcyan
+                            Dullwhite   -> dullwhite
+  colorize c Background = case c of
+                            Black       -> onblack
+                            Red         -> onred
+                            Green       -> ongreen
+                            Yellow      -> onyellow
+                            Blue        -> onblue
+                            Magenta     -> onmagenta
+                            Cyan        -> oncyan
+                            White       -> onwhite
+                            Dullblack   -> ondullblack
+                            Dullred     -> ondullred
+                            Dullgreen   -> ondullgreen
+                            Dullyellow  -> ondullyellow
+                            Dullblue    -> ondullblue
+                            Dullmagenta -> ondullmagenta
+                            Dullcyan    -> ondullcyan
+                            Dullwhite   -> ondullwhite
 
   -- Prune off lines after the user-specified break
   pruneStrings :: Configuration -> CellName -> [KOutput] -> [KOutput]
@@ -166,8 +199,8 @@ module FilterOutput where
   -- Whether a maybe is something
 
   -- Convert to string
-  stringifyDoc :: Doc -> String
-  stringifyDoc doc = tail $ (displayS $ renderPretty 1.0 80 doc) ""
+  -- stringifyDoc :: Doc -> String
+  -- stringifyDoc doc = tail $ (displayS $ renderPretty 1.0 80 doc) ""
 
 
   -- Todo: implement real argument parsing, and real error handling
@@ -179,7 +212,8 @@ module FilterOutput where
                        _   -> error usage
             parsedOut <- parseKOutFile fname
             config <- getConfig configFile
-            putStrLn . stringifyDoc . cat . map (ppKOutput config) $ parsedOut
+            putStrLn . show $ hasStyle config "env" textStyle
+            putDoc . cat . map (ppKOutput config) $ parsedOut
 
   usage = "\nUsage:\n" ++ "  If you have built the tool using 'make', then run:\n"
                      ++ "    filterOutput <output-file> <yaml-config-file>\n"

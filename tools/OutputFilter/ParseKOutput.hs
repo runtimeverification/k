@@ -72,14 +72,13 @@ module ParseKOutput where
 
   -- Stack-based operations on the state.
   push :: String -> Parsec String [String] ()
-  push s = modifyState (\l -> l ++ [s])
+  push s = modifyState (\l -> s : l)
 
   pop :: Parsec String [String] ()
-  pop = modifyState $ \s -> (dropLast s)
+  pop = modifyState $ \s -> (drop 1 s)
 
   peek :: Parsec String [String] String
   peek = head <$> getState
 
-  dropLast = reverse . drop 1 . reverse
 
 

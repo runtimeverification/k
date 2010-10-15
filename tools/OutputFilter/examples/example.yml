@@ -2,18 +2,32 @@
 T:
   cell-style:
     bold: yes
+    background: dullcyan
+  text-styel:
+    foreground: green
 k:
   keep: 5
+  text-style:
+    bold: yes
   cell-style:
     underlined: yes
-    background: dullblue  # colors not yet fully implemented
+    bold: yes
 env:
   text-style:
-    foreground: green
-threads: show
-thread: show
+    foreground: black
+  cell-style:
+    foreground: dullyellow
+
+threads:
+  cell-style:
+    foreground: black
+thread:
+  cell-style:
+    foreground: black
 callStack: recursively-hide
-#mem: show
+# mem:
+#   text-style:
+#     foreground: black
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. blacklisting <thread> wont blacklist all of its children
