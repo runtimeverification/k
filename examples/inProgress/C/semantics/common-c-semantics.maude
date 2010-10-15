@@ -14,6 +14,8 @@
 
 ---C99 6.7.8:10 If an object has static duration ... if it has pointer type, it is NULL, if it is arithmetic, 0, aggregate, recursively these, union, first member by these
 
+--- switch on enum :(
+
 ***( 
 not handling this type:
 static union {
@@ -62,6 +64,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op t : Type -> Type .
 	--- op t : Type Set -> Type .
 	
+	op toString : K -> String .
+	
 	op bitRange : Nat Nat Nat -> Nat . --- original number, from, to inclusive
 	
 	op fillToBytes : K -> K [metadata "strict(1)"] .
@@ -104,8 +108,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op initializer : K -> KResult .
 	op startInitializer : Type Id K -> K .
-	op popBlock : -> K .
-	op pushBlock : -> K .
 	
 	op value : K -> K .
 	eq value(tv(V:List{K}, ?)) = V:List{K} .
@@ -291,7 +293,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op extractField : List{K} Type Id -> K .
 	op allocString : Nat String -> K .
 	--- op unknownRange : Nat Nat Nat -> List{K} .
-	op popLoop : -> K .
 	--- op giveGlobalType : Type K -> K .
 	--- op giveLocalType : Type K -> K .
 	op application : K List{C} -> K [metadata "strict(1)"] .
@@ -1716,9 +1717,10 @@ mod C-SEMANTICS-MISC is
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< translationUnits > Units:Bag </ translationUnits >
 		: KSentence .
-	op toString : K -> K .
+
 	eq toString(Identifier(S:String)) = S:String .
 	eq toString(S:String) = S:String .
+	eq toString(Num:Nat) = Int2String(Num:Nat) .
 	--- < messages >... . => ListItem(toString(Tu:K) +String ": undefined reference to `" +String toString(X:Id) +String "'") </ messages >
 	
 	--- fixme this means we've declared it twice (like a prototype maybe?), but already handled it.  happening with getc in clib.c

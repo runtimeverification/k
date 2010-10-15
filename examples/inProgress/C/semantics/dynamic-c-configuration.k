@@ -81,6 +81,7 @@ kmod C-CONFIGURATION is
 			</ threads >
 			< unfinishedComputation > .K </ unfinishedComputation > --- this is here to make it easy to check if we've terminated.  it disappears when we terminate
 		</ T >
+		--- < xmessages > .K </ xmessages >
 		< files > .Map </ files > --- filenames to strings
 		< input > "" </ input >
 		< output > "" </ output >

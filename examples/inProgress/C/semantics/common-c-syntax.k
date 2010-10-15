@@ -372,10 +372,10 @@ and statement =
 	| CASERANGE of expression * expression * statement * cabsloc
 	| DEFAULT of statement * cabsloc
 ***)
-	op Switch : K K -> PureStatement
-	op Case : K K -> PureStatement
-	op CaseRange : K K K -> PureStatement
-	op Default : K -> PureStatement
+	op Switch : Nat K K -> PureStatement [strict(2)] --- unique switch id
+	op Case : Nat K K -> PureStatement --- unique switch id, exp, statement
+	op CaseRange : K K K -> PureStatement --- gcc extension
+	op Default : Nat K -> PureStatement --- unique switch id, statement
 ***(
 	| LABEL of string * statement * cabsloc
 	| GOTO of string * cabsloc

@@ -84,6 +84,8 @@ let printComments = ref false
 *)
 
 let counter = ref 0
+let currentSwitchId = ref 0
+let switchStack = ref [0]
 
 (* why doesn't this work? *)
 (*let counterpp =
@@ -91,6 +93,7 @@ let counter = ref 0
 		counter := (retval + 1);
 		retval
 *)
+
 
 let rec commas lst = 
 	match lst with
@@ -183,7 +186,8 @@ and printSingleName (a, b) =
 and printAttr a b = wrap (a :: (printAttributeList b) :: []) "AttributeWrapper"
 and printBlock a = 
 	printAttr (wrap ((string_of_int (counter := (!counter + 1); !counter)) :: (printBlockLabels a.blabels) :: (printStatementList a.bstmts) :: []) "Block") a.battrs
-(*	
+
+	(*	
 and block = 
     { blabels: string list;
       battrs: attribute list;
@@ -410,12 +414,24 @@ and printSeq _ _ =
 	"Seq"
 and printIf exp s1 s2 =
 	wrap ((printExpression exp) :: (printStatement s1) :: (printStatement s2) :: []) "IfThenElse"
+
+and makeBlockStatement stat =
+	{ blabels = []; battrs = []; bstmts = stat :: []}
 and printWhile exp stat =
 	wrap ((printExpression exp) :: (printStatement stat) :: []) "While"
 and printDoWhile exp stat =
 	wrap ((printExpression exp) :: (printStatement stat) :: []) "DoWhile"
 and printFor fc1 exp2 exp3 stat =
 	wrap ((printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printStatement stat) :: []) "For"
+(* these would wrap loop bodies with blocks *)
+(* 
+and printWhile exp stat =
+	wrap ((printExpression exp) :: (printBlockStatement (makeBlockStatement stat)) :: []) "While"
+and printDoWhile exp stat =
+	wrap ((printExpression exp) :: (printBlockStatement (makeBlockStatement stat)) :: []) "DoWhile"
+and printFor fc1 exp2 exp3 stat =
+	wrap ((printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printBlockStatement (makeBlockStatement stat)) :: []) "For"
+*)
 and printForClause fc = 
 	match fc with
 	| FC_EXP exp1 -> wrapString (printExpression exp1) "ForClauseExpression"
@@ -427,13 +443,28 @@ and printContinue =
 and printReturn exp =
 	wrap ((printExpression exp) :: []) "Return"
 and printSwitch exp stat =
-	wrap ((printExpression exp) :: (printStatement stat) :: []) "Switch"
+	let newSwitchId = ((counter := (!counter + 1)); !counter) in
+	switchStack := newSwitchId :: !switchStack;
+	currentSwitchId := newSwitchId;
+	let retval = wrap ((string_of_int newSwitchId) :: (printExpression exp) :: (printStatement stat) :: []) "Switch" in
+	switchStack := List.tl !switchStack;
+	currentSwitchId := List.hd !switchStack;
+	retval 
+(* and printSwitch exp stat =
+	let newSwitchId = ((counter := (!counter + 1)); !counter) in
+	switchStack := newSwitchId :: !switchStack;
+	currentSwitchId := newSwitchId;
+	let retval = wrap ((string_of_int newSwitchId) :: (printExpression exp) :: (printBlockStatement (makeBlockStatement stat)) :: []) "Switch" in
+	switchStack := List.tl !switchStack;
+	currentSwitchId := List.hd !switchStack;
+	retval 
+*)
 and printCase exp stat =
-	wrap ((printExpression exp) :: (printStatement stat) :: []) "Case"
+	wrap ((string_of_int !currentSwitchId) :: (printExpression exp) :: (printStatement stat) :: []) "Case"
 and printCaseRange exp1 exp2 stat =
 	wrap ((printExpression exp1) :: (printExpression exp2) :: (printStatement stat) :: []) "CaseRange"
 and printDefault stat =
-	wrap ((printStatement stat) :: []) "Default"
+	wrap ((string_of_int !currentSwitchId) :: (printStatement stat) :: []) "Default"
 and printLabel str stat =
 	wrap ((printIdentifier str) :: (printStatement stat) :: []) "Label"	
 and printGoto name =
