@@ -70,19 +70,31 @@ mod COMMON-SEMANTICS-FOR is
 	eq ForClauseDeclaration(K:K) = K:K .
 	eq ForClauseExpression(K:K) = K:K ~> discard .
 	
+	op addToHistory : Nat -> K .
+	mb rule
+		< k > addToHistory(Num:Nat) => (.).K ...</ k >
+		< blockHistory > . => ListItem(Num:Nat) ...</ blockHistory >
+		--- < xmessages >... (. => "For: adding " +String toString(Num:Nat) +String " to history") </ xmessages >
+		: KSentence [metadata "structural"] .
+	
 	--- fixme should these blocks be here?
 	--- fixme fishy interaction with continue i think
 	mb [for-mark]: rule
 		< k > (For(Pre:K, Control:K, Post:K, S:Statement) ~> K:K
-			=> pushBlock ~> Pre:K ~> loopMarked ~> For(Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:Statement) ~> popLoop)
+			=> pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> Pre:K ~> loopMarked ~> For(Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:Statement) ~> popLoop)
 		</ k >
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		< loopStack > . => ListItem(kpair(Num:Nat, K:K)) ...</ loopStack >
+		< freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
+		--- < xmessages >... (. => "For: loop in " +String toString(Num:Nat) +String ", creating " +String toString(sym(Fresh:Nat))) </ xmessages >
 		: KSentence [metadata "structural"] .
+		
 	mb [for]: rule
 		< k > loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)
 			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> discard ~> loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)), Nop)
 		...</ k >
+		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
+		--- < xmessages >... (. => "For: finished a loop, in " +String toString(Num:Nat) +String ", looping...") </ xmessages >
 		: KSentence [metadata "structural"] .
 endm
 
@@ -91,6 +103,15 @@ mod COMMON-SEMANTICS-SWITCH is
 	
 	--- fixme shouldn't there be sequence points here?
 
+--- < k > (For(Pre:K, Control:K, Post:K, S:Statement) ~> K:K
+	--- => pushBlock 
+	--- ~> Pre:K 
+	--- ~> loopMarked 
+	--- ~> For(Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:Statement) ~> popLoop)
+--- </ k >
+--- < blockHistory > ListItem(Num:Nat) ...</ blockHistory >
+--- < loopStack > . => ListItem(kpair(Num:Nat, K:K)) ...</ loopStack >
+	
 	--- fixme not doing promoting or conversion
 	mb rule
 		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, tv(V:BaseValue, T:Type))) ...</ k >
@@ -646,7 +667,7 @@ mod COMMON-SEMANTICS-BLOCKS is
 	
 	
 	mb [dissolve-block]: rule
-		< k > Block(BlockNum:Nat, ?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k > 
+		< k > Block(BlockNum:Nat, ?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k >
 		< blockHistory > (.).List => ListItem(BlockNum:Nat) ...</ blockHistory >
 		: KSentence [metadata "structural"] .
 endm

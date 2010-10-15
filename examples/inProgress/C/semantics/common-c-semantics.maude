@@ -1721,6 +1721,7 @@ mod C-SEMANTICS-MISC is
 	eq toString(Identifier(S:String)) = S:String .
 	eq toString(S:String) = S:String .
 	eq toString(Num:Nat) = Int2String(Num:Nat) .
+	eq Rat2String(sym(N:Nat), M:NzNat) = "sym(" +String Rat2String(N:Nat, M:NzNat) +String ")" .
 	--- < messages >... . => ListItem(toString(Tu:K) +String ": undefined reference to `" +String toString(X:Id) +String "'") </ messages >
 	
 	--- fixme this means we've declared it twice (like a prototype maybe?), but already handled it.  happening with getc in clib.c

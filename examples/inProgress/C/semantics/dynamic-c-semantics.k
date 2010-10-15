@@ -97,7 +97,7 @@ kmod DYNAMIC-C-SEMANTICS is
 			"stdin" |-> Input:String
 			"stdout" |-> ""
 		</ files >
-		--- < xmessages > .K </ xmessages >
+		< xmessages > .K </ xmessages >
 		
 	***(
 	--- throw away annotations

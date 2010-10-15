@@ -13,11 +13,11 @@ int main(void){
 	// switch(x)
 		// case 5: retval *= 2;
 		
-	switch(x) {
-		case 4: retval *= 2; break;
-		default : retval *= 3;
-		case 6 : retval *= 5;
-	}
+	// switch(x) {
+		// case 4: retval *= 2; break;
+		// default : retval *= 3;
+		// case 6 : retval *= 5;
+	// }
 		
 	return retval;
 }
