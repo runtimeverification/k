@@ -21,4 +21,5 @@ int main(void) {
 			puts("sneaky four");
 		}
 	}
+	return 0;
 }

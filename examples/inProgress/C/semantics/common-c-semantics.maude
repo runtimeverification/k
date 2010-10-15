@@ -1059,10 +1059,17 @@ mod COMMON-GLOBAL-DECLARATION is
 		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
 		: KSentence [metadata "structural"] .
 		
+	--- fixme this was fast, but I want the transformation
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
 		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
 		~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
 	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
+	--- eq DeclarationDefinition(InitNameGroup(T:K, (K:C :: K':C :: L:List{C}))) 
+		--- = DeclarationDefinition(InitNameGroup(T:K, K:C)) 
+		--- ~> DeclarationDefinition(InitNameGroup(T:K, K':C :: L:List{C})) .
+	--- eq DeclarationDefinition(InitNameGroup(T:K, InitName(Name:K, Exp:K))) = declare(SingleName(T:K, Name:K), Exp:K) .
+	
+	
 		
 	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
 	eq Typedef(NameGroup(T:Type, Name:C)) = defineType(SingleName(T:Type, Name:C)) .
