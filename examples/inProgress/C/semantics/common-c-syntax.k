@@ -357,7 +357,7 @@ and statement =
 	op IfThenElse : K K K -> PureStatement [strict(1)] 
 	op While : K K -> PureStatement
 	op DoWhile : K K -> PureStatement
-	op For : K K K K -> PureStatement
+	op For : Nat K K K K -> PureStatement --- id, ...
 ***(
 	| BREAK of cabsloc
 	| CONTINUE of cabsloc

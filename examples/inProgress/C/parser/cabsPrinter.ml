@@ -422,7 +422,7 @@ and printWhile exp stat =
 and printDoWhile exp stat =
 	wrap ((printExpression exp) :: (printStatement stat) :: []) "DoWhile"
 and printFor fc1 exp2 exp3 stat =
-	wrap ((printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printStatement stat) :: []) "For"
+	wrap ((string_of_int ((counter := (!counter + 1)); !counter)) :: (printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printStatement stat) :: []) "For"
 (* these would wrap loop bodies with blocks *)
 (* 
 and printWhile exp stat =

@@ -1,24 +1,25 @@
-#include <stdio.h>
+//#include <stdio.h>
 int main(void) {
+	int inMain = 2;
 	for (int i = 0; i < 5; i++) {
 		if (i != 4) {
 			switch (i) {
 			case 1: {
-				puts("one");
+				printf("one\n");
 				break;
 				}
 			case 2:
-				puts("two");
+				printf("two\n");
 				break;
 			default:
-				puts("default");
+				printf("default\n");
 				break;
 			case 3:
-				puts("three");
+				printf("three\n");
 				break;
 			}
 		} else {
-			puts("sneaky four");
+			printf("sneaky four\n");
 		}
 	}
 	return 0;

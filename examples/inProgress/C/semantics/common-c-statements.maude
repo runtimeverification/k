@@ -1,3 +1,5 @@
+--- problem with sym(n) being different, so goto variables mess up.  maybe just generate it based on surrounding block?
+
 mod COMMON-SEMANTICS-STATEMENTS-INCLUDE is
 	including COMMON-INCLUDE .
 	op loopMarked : -> Statement .
@@ -80,18 +82,18 @@ mod COMMON-SEMANTICS-FOR is
 	--- fixme should these blocks be here?
 	--- fixme fishy interaction with continue i think
 	mb [for-mark]: rule
-		< k > (For(Pre:K, Control:K, Post:K, S:Statement) ~> K:K
-			=> pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> Pre:K ~> loopMarked ~> For(Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:Statement) ~> popLoop)
+		< k > (For(ForNum:Nat, Pre:K, Control:K, Post:K, S:Statement) ~> K:K
+			=> pushBlock ~> addToHistory(ForNum:Nat) ~> Pre:K ~> loopMarked ~> For(ForNum:Nat, Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:Statement) ~> popLoop)
 		</ k >
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		< loopStack > . => ListItem(kpair(Num:Nat, K:K)) ...</ loopStack >
-		< freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
-		--- < xmessages >... (. => "For: loop in " +String toString(Num:Nat) +String ", creating " +String toString(sym(Fresh:Nat))) </ xmessages >
+		--- < freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
+		--- < xmessages >... (. => "For: loop in " +String toString(Num:Nat) +String ", creating " +String toString(ForNum:Nat)) </ xmessages >
 		: KSentence [metadata "structural"] .
 		
 	mb [for]: rule
-		< k > loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)
-			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> discard ~> loopMarked ~> For(Pre:K, Control:K, Post:K, S:Statement)), Nop)
+		< k > loopMarked ~> For(ForNum:Nat, Pre:K, Control:K, Post:K, S:Statement)
+			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> discard ~> loopMarked ~> For(ForNum:Nat, Pre:K, Control:K, Post:K, S:Statement)), Nop)
 		...</ k >
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		--- < xmessages >... (. => "For: finished a loop, in " +String toString(Num:Nat) +String ", looping...") </ xmessages >
@@ -102,16 +104,6 @@ mod COMMON-SEMANTICS-SWITCH is
 	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	--- fixme shouldn't there be sequence points here?
-
---- < k > (For(Pre:K, Control:K, Post:K, S:Statement) ~> K:K
-	--- => pushBlock 
-	--- ~> Pre:K 
-	--- ~> loopMarked 
-	--- ~> For(Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:Statement) ~> popLoop)
---- </ k >
---- < blockHistory > ListItem(Num:Nat) ...</ blockHistory >
---- < loopStack > . => ListItem(kpair(Num:Nat, K:K)) ...</ loopStack >
-	
 	--- fixme not doing promoting or conversion
 	mb rule
 		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, tv(V:BaseValue, T:Type))) ...</ k >
@@ -226,13 +218,23 @@ mod COMMON-SEMANTICS-GOTO is
 	--- as long as there are entries in the actual block history that differ from the target block history, we need to pop
 	mb rule
 		< k > (. => popBlock) 
-			~> processGoto(gotoObject(TargetDepth:Nat, TargetBlockHistory:List, K:K, LoopStack:List, DeclStack:List))
+			~> processGoto(gotoObject(TargetDepth:Nat, TargetBlockHistory:List, ?, ?, ?))
 		...</ k >
 		< blockHistory > ListItem(BlockNum:Nat) ActualHistory:List </ blockHistory >
 		--- < xmessages >... (. => "Gotoing: popping to find common history, " +String toString(BlockNum:Nat)) </ xmessages >
 		if notBool BlockNum:Nat in TargetBlockHistory:List
 		: KSentence [metadata "structural"] .
 		
+	--- same
+	mb rule
+		< k > (. => popBlock) 
+			~> processGoto(gotoObject(TargetDepth:Nat, Prefix:List ListItem(BlockNum:Nat) TargetBlockHistory:List, ?, ?, ?))
+		...</ k >
+		< blockHistory > ListItem(BlockNum:Nat) ActualHistory:List </ blockHistory >
+		--- < xmessages >... (. => "Gotoing: popping to find common history, " +String toString(BlockNum:Nat)) </ xmessages >
+		if TargetBlockHistory:List =/=Bool ActualHistory:List
+		: KSentence [metadata "structural"] .
+			
 	--- once we share a history, we start to push
 	mb rule
 		< k > processGoto(gotoObject(TargetDepth:Nat, (Prefix:List ListItem(TargetBlock:Nat) ActualHistory:List), K:K, LoopStack:List, DeclStack:List))
@@ -325,47 +327,18 @@ mod COMMON-SEMANTICS-GOTO is
 		--- < xmessages >... (. => "Goto: couldn't find variable " +String getString(getIdOfDeclaration(Decl:K))) </ xmessages >
 		if notBool getIdOfDeclaration(Decl:K) in Vars:List
 		: KSentence [metadata "computational"] .
+		
 	--- fixme this is wrong
 	mb rule
 		< k > addVariablesForBlock(?, (.).List) => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
-		
-	--- if we're at a less deep 
-	--- mb rule
-		--- < k > processGoto(gotoObject(TargetDepth:Nat, TargetNum:Nat, K:K, LoopStack:List, DeclStack:List)) 
-			--- => processGotoFromHigherBlock((ListItem(frozenDeclaration(Depth:Nat, Num:Nat, Decl:K)) DeclStack:List), (ListItem(X:Id) Vars:List))
-		--- ...</ k >
-		--- < nestingDepth > ActualDepth:Nat </ nestingDepth >
-		--- < currentBlock > ActualNum:Nat </ currentBlock >
-		--- < loopStack > ? => LoopStack:List </ loopStack >
-		--- < localVariables > Vars:List </ localVariables >
-		--- if ActualDepth:Num <Nat TargetDepth
-		--- : KSentence [metadata "structural"] .
-	
-	--- skip over variables that are in both the actual past and in the target's past
-	--- mb rule
-		--- < k > processGotoSameBlock((ListItem(frozenDeclaration(Depth:Nat, Num:Nat, Decl:K)) DeclStack:List), (ListItem(X:Id) Vars:List))
-			--- => processGotoSameBlock(DeclStack:List, Vars:List)
-		--- ...</ k >
-		--- < nestingDepth > Depth:Nat </ nestingDepth >
-		--- < blockHistory > ListItem(Num:Nat) ...</ blockHistory >
-		--- if getIdOfDeclaration(Decl:K) ==Bool X:Id
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > processGotoSameBlock((.).List, (.).List) => (.).K ...</ k >
-		--- : KSentence [metadata "structural"] .
-		
+				
 	op getIdOfDeclaration : K -> K .
 	op getIdOfName : K -> K .
-	eq getIdOfDeclaration(LocalDefinition(K:K)) = getIdOfDeclaration(K:K) .
-	eq getIdOfDeclaration(declare(K:K, ?)) = getIdOfName(K:K) .
-	eq getIdOfDeclaration(DefinitionLoc(K:K, ?)) = getIdOfDeclaration(K:K) .
 	eq getIdOfDeclaration(DeclarationDefinition(InitNameGroup(?, K:C))) = getIdOfName(K:C) .
 	eq getIdOfName(InitName(K:K, ?)) = getIdOfName(K:K) .
 	eq getIdOfName(SingleName(?, K:K)) = getIdOfName(K:K) .
 	eq getIdOfName(Name(X:Id, ?)) = X:Id .
-		
-	--- op calculateGotoMap : Id K Map List K -> K . --- func name, body, variables, loop stack, tail
 	
 	op waitingOnGotoMap : -> K .
 	mb rule 
@@ -413,14 +386,28 @@ mod COMMON-SEMANTICS-GOTO is
 		< computation > StatementLoc(K:K, L:CabsLoc) => K:K ...</ computation >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
 		: KSentence .
-	--- mb [DefinitionLoc]: rule
-		--- < computation > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ computation >
-		--- < currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
-		--- : KSentence .
 
+	---- fixme i hate that i have to do this twice.  once here, once in the dynamic semantics
 	mb rule
-		< computation > LocalDefinition(K:K) => (.).K ...</ computation >
-		< declarationStack >... (.).List => ListItem(frozenDeclaration(Depth:Nat, BlockNum:Nat, LocalDefinition(K:K))) </ declarationStack >
+		< computation > LocalDefinition(DefinitionLoc(K:K, Loc:K)) => DefinitionLoc(K:K, Loc:K) ...</ computation >
+		: KSentence [metadata "structural"] .
+	mb [DefinitionLoc]: rule
+		< computation > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ computation >
+		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
+		: KSentence .
+		
+	--- eq getIdOfDeclaration(DeclarationDefinition(InitNameGroup(?, K:C))) = getIdOfName(K:C) .
+		
+	mb rule
+		< computation > DeclarationDefinition(InitNameGroup(T:K, (K:C :: K':C :: L:List{C}))) 
+			=> DeclarationDefinition(InitNameGroup(T:K, K:C))
+			~> DeclarationDefinition(InitNameGroup(T:K, K':C :: L:List{C})) 
+		...</ computation >
+		: KSentence .
+		
+	mb rule
+		< computation > DeclarationDefinition(InitNameGroup(T:K, K:C)) => (.).K ...</ computation >
+		< declarationStack >... (.).List => ListItem(frozenDeclaration(Depth:Nat, BlockNum:Nat, DeclarationDefinition(InitNameGroup(T:K, K:C)))) </ declarationStack >
 		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
 		< blockHistoryGoto > ListItem(BlockNum:Nat) ...</ blockHistoryGoto >
 		: KSentence [metadata "structural"] .
@@ -438,34 +425,73 @@ mod COMMON-SEMANTICS-GOTO is
 		: KSentence [metadata "structural"] .
 		
 ***(
-	op Switch : K K -> PureStatement
-	op Case : K K -> PureStatement
-	op Default : K -> PureStatement
-	op Label : Id K -> PureStatement
-	
 	op Sequence : K K -> PureStatement --- still don't know what this is
-	
 	--- gcc specific
 	op CaseRange : K K K -> PureStatement
-	op CompGoto : K -> PureStatement
 	op TryExcept : K K K -> PureStatement
 	op TryFinally : K K -> PureStatement	
 ***)
 
-
 	--- c1x 6.8.5:4 Code jumped over is not executed. In particular, the controlling expression of a for or while statement is not evaluated before entering the loop body, nor is clause-1 of a for statement
-	---- dowhile, while, and for are all basically the same here
-	mb rule
-		< computation > (. => S:K ~> loopMarked) ~> For(E1:K, E2:K, E3:K, S:K) ~> (. => popLoop) ~> K:K </ computation >
-		< computationTail > Tail:K </ computationTail >
-		< blockHistoryGoto > ListItem(Num:Nat) ...</ blockHistoryGoto >
-		< loopStackGoto > (. => ListItem(kpair(Num:Nat, (K:K ~> Tail:K)))) ...</ loopStackGoto >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< computation > (loopMarked ~> For(E1:K, E2:K, E3:K, S:K) => (.).K) ~> popLoop ~> K:K </ computation >
+	---- dowhile and while, are basically the same here
+	--- mb rule
+		--- < computation > (. => S:K ~> loopMarked) ~> For(ForNum:Nat, E1:K, (Control:K => (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi)), E3:K, S:K) ~> (. => popLoop) ~> K:K </ computation >
 		--- < computationTail > Tail:K </ computationTail >
-		--- < loopStackGoto > (ListItem((K:K ~> Tail:K)) => .) ...</ loopStackGoto >
+		--- < nestingDepthGoto > N:Nat => sNat(N:Nat) </ nestingDepthGoto >
+		--- < blockHistoryGoto > (. => ListItem(ForNum:Nat)) ListItem(Num:Nat) ...</ blockHistoryGoto >
+		--- < loopStackGoto > (. => ListItem(kpair(Num:Nat, (K:K ~> Tail:K)))) ...</ loopStackGoto >
+		--- : KSentence [metadata "structural"] .
+		
+	---- should do this with a split
+	mb rule
+		< gotoCalculation >
+			< computation > (For(ForNum:Nat, Pre:K, Control:K, Post:K, S:K) => (.).K) ~> K:K </ computation >
+			< computationTail > Tail:K </ computationTail >
+			B:Bag
+			< nestingDepthGoto > N:Nat </ nestingDepthGoto >
+			< blockHistoryGoto > ListItem(Num:Nat) OldBlockHistory:List </ blockHistoryGoto >
+			< loopStackGoto > OldLoopStack:List </ loopStackGoto >
+		</ gotoCalculation >
+		(. =>
+			< gotoCalculation > 
+				< computation > S:K </ computation > 
+				< computationTail >
+					Post:K
+					~> discard
+					~> loopMarked
+					~> For(ForNum:Nat, Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:K)
+					~> popLoop
+					~> K:K 
+					~> Tail:K 
+				</ computationTail >
+				B:Bag
+				< nestingDepthGoto > sNat(N:Nat) </ nestingDepthGoto >
+				< blockHistoryGoto > ListItem(ForNum:Nat) ListItem(Num:Nat) OldBlockHistory:List </ blockHistoryGoto >
+				< loopStackGoto > ListItem(kpair(Num:Nat, (K:K ~> Tail:K))) OldLoopStack:List </ loopStackGoto >
+			</ gotoCalculation >
+		)
 		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- < computation > (For(ForNum:Nat, Pre:K, Control:K, Post:K, S:K) 
+			--- => S:K
+			--- ~> Post:K
+			--- ~> discard
+			--- ~> loopMarked
+			--- ~> For(ForNum:Nat, Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:K)
+			--- ~> popLoop
+			--- )
+		--- ~> K:K </ computation >
+		--- < computationTail > Tail:K </ computationTail >
+		--- < nestingDepthGoto > N:Nat => sNat(N:Nat) </ nestingDepthGoto >
+		--- < blockHistoryGoto > (. => ListItem(ForNum:Nat)) ListItem(Num:Nat) ...</ blockHistoryGoto >
+		--- < loopStackGoto > (. => ListItem(kpair(Num:Nat, (K:K ~> Tail:K)))) ...</ loopStackGoto >
+		--- : KSentence [metadata "structural"] .
+
+	
+	--- mb rule
+		--- < computation > (loopMarked ~> For(ForNum:Nat, E1:K, E2:K, E3:K, S:K) => (.).K) ~> popLoop ~> K:K </ computation >
+		--- : KSentence [metadata "structural"] .
 		
 	mb rule
 		< computation > (. => S:K ~> loopMarked) ~> DoWhile(E:K, S:K) ~> (. => popLoop) ~> K:K </ computation >
@@ -475,8 +501,6 @@ mod COMMON-SEMANTICS-GOTO is
 		: KSentence [metadata "structural"] .
 	mb rule
 		< computation > (loopMarked ~> DoWhile(E:K, S:K) => (.).K) ~> popLoop ~> K:K </ computation >
-		--- < computationTail > Tail:K </ computationTail >
-		--- < loopStackGoto > (ListItem((K:K ~> Tail:K)) => .) ...</ loopStackGoto >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
@@ -487,8 +511,6 @@ mod COMMON-SEMANTICS-GOTO is
 		: KSentence [metadata "structural"] .
 	mb rule
 		< computation > (loopMarked ~> While(E:K, S:K) => (.).K) ~> popLoop ~> K:K </ computation >
-		--- < computationTail > Tail:K </ computationTail >
-		--- < loopStackGoto > (ListItem((K:K ~> Tail:K)) => .) ...</ loopStackGoto >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
@@ -500,14 +522,14 @@ mod COMMON-SEMANTICS-GOTO is
 		(. =>
 			< gotoCalculation > 
 				< computation > S1:K </ computation > 
-				< computationTail > Tail:K ~> K:K </ computationTail >
+				< computationTail > K:K ~> Tail:K </ computationTail >
 				B:Bag 
 			</ gotoCalculation >
 		)
 		(. =>
 			< gotoCalculation > 
 				< computation > S2:K </ computation >
-				< computationTail > Tail:K ~> K:K </ computationTail >
+				< computationTail > K:K ~> Tail:K </ computationTail >
 				B:Bag 
 			</ gotoCalculation >
 		)
@@ -760,7 +782,7 @@ mod COMMON-C-STATEMENTS is
 		--- if L:KLabel =/=Bool 'loopMarked
 		--- : KSentence [metadata "structural"] .
 	mb [continue-done]: rule
-		< k > (Continue => Post:K ~> discard) ~> loopMarked ~> For(?, ?, Post:K, ?) ...</ k >
+		< k > (Continue => Post:K ~> discard) ~> loopMarked ~> For(?, ?, ?, Post:K, ?) ...</ k >
 		: KSentence [metadata "structural"] . --- nondet
 	mb [continue-done]: rule
 		< k > (Continue => .) ~> loopMarked ~> L:KLabel(?) ...</ k >

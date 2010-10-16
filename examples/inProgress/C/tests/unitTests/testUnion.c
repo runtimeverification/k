@@ -22,7 +22,7 @@ void do_something(struct S *s) {
 
 		case 1:  // do something with s->s_floats
 			printf("This S has type FLOATS.\n");
-			printf("VOLATILE %f, %f\n", s->u.s_floats[0], s->u.s_floats[1]);
+			printf("%d, %d\n", (int)(10000*s->u.s_floats[0]), (int)(10000*s->u.s_floats[1]));
 			if (s->u.s_floats[0] != - s->u.s_floats[1]){
 				printf("s->u.s_floats[0] != - s->u.s_floats[1]: %f, %f\n",s->u.s_floats[0], - s->u.s_floats[1]);
 			}
@@ -30,7 +30,7 @@ void do_something(struct S *s) {
 
 		case 2:  // do something with s->s_double
 			printf("This S has type DOUBLE.\n");
-			printf("VOLATILE %f\n", s->u.s_double);
+			printf("%d\n", (int)(10000*s->u.s_double));
 			if (s->u.s_double > 1.57080 || s->u.s_double < 1.57079){
 				printf("s->u.s_double is off: %f\n", s->u.s_double);
 			}

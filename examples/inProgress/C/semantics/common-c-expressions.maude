@@ -173,7 +173,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		: KSentence [metadata "structural"] .
 		
 	op resetNestingDepth : -> K .
-	mb [push-block]: rule
+	mb rule
 		< k > resetNestingDepth => (.).K ...</ k > 
 		--- < nestingDepth > ? => 1 </ nestingDepth >
 		: KSentence [metadata "structural"] .
