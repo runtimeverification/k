@@ -162,7 +162,7 @@ mod COMMON-SEMANTICS-SWITCH is
 	
 	--- when the type is wrong, convert it and save the original value
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), (? => tv(V:BaseValue, T':Type)), (? genLabel(SN:Nat, 
+		< k > handleSwitch-aux(SN:Nat, tv(?, T:Type), (? => tv(V:BaseValue, T':Type)), (? genLabel(SN:Nat, 
 					(tv(V:BaseValue, T':Type) => cast(T:Type, tv(V:BaseValue, T':Type)))
 				) |-> ?))
 		...</ k >

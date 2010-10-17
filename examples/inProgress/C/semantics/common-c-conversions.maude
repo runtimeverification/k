@@ -156,6 +156,14 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		andBool min(int) <=Int min(T:Type) 
 		andBool max(int) >=Int max(T:Type)		
 		: KSentence [metadata "structural"] .
+
+	mb rule
+		promote(tv(V:BaseValue, T:Type)) => tv(V:BaseValue, T:Type)
+		if     hasIntegerType(T:Type)
+		andBool rank(T:Type) >Int rank(int)
+		andBool notBool hasBitfieldType(T:Type)
+		: KSentence [metadata "structural"] .		
+
 	mb rule
 		promote(tv(V:BaseValue, bitfieldType(T:Type, Len:Nat))) => tv(V:BaseValue, int)
 		if     (T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int)
