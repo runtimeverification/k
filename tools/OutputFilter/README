@@ -25,6 +25,8 @@ Configuration file format:
   Available options in the set of options:
     keep: <int>                  -- keep only the first <int> number of lines
                                     in the content-text
+    keep-chars: <int>            -- keep only the first <int> characters in a
+                                    line in the content-text
     cell-style: <cell-style>     -- specify a style for the cell (see below)
     text-style: <text-style>     -- specify a style for the text (see below)
 

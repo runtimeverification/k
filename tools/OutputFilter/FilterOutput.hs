@@ -64,7 +64,7 @@ module FilterOutput where
     where onlyCells = filter isCell contents
 
   handleContents :: CellPrinter
-  handleContents conf name cs = hcat $ (map (ppKOutput conf) . pruneStrings conf name . cleanupStrings)  cs
+  handleContents conf name cs = hcat $ (map (ppKOutput conf) . doPrune conf name . cleanupStrings)  cs
 
   handleString :: KOutPrinter
   handleString conf (String n s) = handleStyle conf n textStyle . text . handleSubstitutions conf n $ s
@@ -161,18 +161,26 @@ module FilterOutput where
                             Dullwhite   -> ondullwhite
 
   -- Prune off lines after the user-specified break
-  pruneStrings :: Configuration -> CellName -> [KOutput] -> [KOutput]
-  pruneStrings conf cn ks | shouldPrune conf cn = map (prune conf cn) (filter isString ks)
-                          | otherwise           = ks
+  doPrune :: Configuration -> CellName -> [KOutput] -> [KOutput]
+  doPrune conf cn = pruneChars conf cn . pruneLines conf cn
+
+  pruneLines :: Configuration -> CellName -> [KOutput] -> [KOutput]
+  pruneLines conf cn ks | shouldPrune conf cn = map (pruneL conf cn) (filter isString ks)
+                        | otherwise           = ks
+
+  pruneChars :: Configuration -> CellName -> [KOutput] -> [KOutput]
+  pruneChars conf cn ks | shouldPruneChars conf cn = map (pruneC conf cn) (filter isString ks)
+                        | otherwise                = ks
 
 
-  prune conf cn (String n s) = String n $ (stripr . unlines . take toKeep) intermediate ++ more
+  pruneL conf cn (String n s) = String n $ (stripr . unlines . take toKeep) intermediate ++ more
     where toKeep = fetchPruneNumber conf cn
           intermediate = lines s
           more = " [..." ++ show (length intermediate - 1) ++ " more...]"
 
-
-
+  pruneC conf cn (String n s) = String n $ (stripr . unlines . map (take toKeep)) intermediate
+    where toKeep = fetchPruneCharNumber conf cn
+          intermediate = lines s
 
   -- Lookup the config for the cell
   lookupCell :: CellReader (Maybe CellConfigRhs)
@@ -196,14 +204,20 @@ module FilterOutput where
   -- Should a cell be pruned?
   shouldPrune :: Query
   shouldPrune conf cn = case lookupCell conf cn of
-                          Just (Configs (Just _) _ _ _ ) -> True
-                          _                              -> False
+                          Just (Configs (Just _) _ _ _ _ ) -> True
+                          _                                -> False
+
+  shouldPruneChars :: Query
+  shouldPruneChars conf cn = case lookupCell conf cn of
+                               Just (Configs _ (Just _) _ _ _ ) -> True
+                               _                                -> False
+
 
   hasSubs :: Query
   hasSubs conf cn = if hasGlobalSubs conf then True
                     else case lookupCell conf cn of
-                           Just (Configs _ _ _ (Just _)) -> True
-                           _                             -> False
+                           Just (Configs _ _ _ _ (Just _)) -> True
+                           _                               -> False
     where hasGlobalSubs conf = case lookupCell conf "global-substitutions" of
                                  Nothing -> False
                                  _       -> True
@@ -212,8 +226,8 @@ module FilterOutput where
 
   hasStyle :: StyleReader Bool
   hasStyle conf cn f = case lookupCell conf cn of
-                           Just c@(Configs _ _ _ _) -> isJust (f c)
-                           _                        -> False
+                           Just c@(Configs _ _ _ _ _) -> isJust (f c)
+                           _                          -> False
 
   fetchStyle :: StyleReader Style
   fetchStyle conf cn f = case lookupCell conf cn >>= f of
@@ -226,10 +240,16 @@ module FilterOutput where
                              Just n -> n
                              _      -> error "Internal Error: shouldPrune approved a prune candidate incorrectly"
 
+  fetchPruneCharNumber :: CellReader Int
+  fetchPruneCharNumber conf cn = case lookupCell conf cn >>= keepChars of
+                                   Just n -> n
+                                   _      -> error "Internal Error: shouldPruneChar approved a prune candidate incorrectly"
+
+
   -- Extend me to do local subs
   fetchSubs :: CellReader [Substitution]
   fetchSubs conf cn = case lookupCell conf "global-substitutions" of
-                        Just (Configs _ _ _ (Just subs)) -> subs
+                        Just (Configs _ _ _ _ (Just subs)) -> subs
                         Nothing -> error "Internal Error: hasSubs approved a match incorrectly"
                         _       -> error "Unable to find the global-substitutions cell"
 

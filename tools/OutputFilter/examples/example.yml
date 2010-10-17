@@ -7,6 +7,7 @@ T:
     foreground: green
 k:
   keep: 5
+  keep-chars: 170
   text-style:
     bold: yes
   cell-style:
@@ -44,6 +45,7 @@ global-substitutions:
 #   global string replacement
 
 # Upcoming features:
+#   yaml parse errors
 #   keepChars - keep only so many characters per line
 #   environment/memory lookup
 #   regular-expression based line-based show/hide

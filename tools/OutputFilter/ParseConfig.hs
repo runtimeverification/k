@@ -31,6 +31,7 @@ module ParseConfig where
                      | Hide
                      | RecursiveHide
                      | Configs { keepLines     :: Maybe Int
+                               , keepChars     :: Maybe Int
                                , cellStyle     :: Maybe Style
                                , textStyle     :: Maybe Style
                                , substitutions :: Maybe [Substitution]
@@ -98,7 +99,7 @@ module ParseConfig where
   mkSubstitution :: (YamlLite, YamlLite) -> Substitution
   mkSubstitution (key,val) = Substitution (unStr key) (unStr val)
 
-  readSubstitution (Map xs) = Configs Nothing Nothing Nothing (Just (map mkSubstitution xs))
+  readSubstitution (Map xs) = Configs Nothing Nothing Nothing Nothing (Just (map mkSubstitution xs))
 
   isGlobalSub (key, val) = unStr key == "global-substitutions"
 
@@ -109,11 +110,13 @@ module ParseConfig where
 
   readMap :: [(YamlLite,YamlLite)] -> CellConfigRhs
   readMap xs = Configs (getLines        <$> (lookup doKeep))
+                       (getChars        <$> (lookup doKeepChars))
                        (getStyle        <$> (lookup doCellStyle))
                        (getStyle        <$> (lookup doTextStyle))
                        Nothing -- extend me to do local substitutions
     where lookup ss       = snd <$> (find ((flip compareStr) ss . unStr . fst) $ xs)
           doKeep          = ["lines", "keep"]
+          doKeepChars     = ["characters", "chars", "keepChars", "keep-chars"]
           doCellStyle     = ["cell-color", "cell-style"]
           doTextStyle     = ["text-color", "text-style"]
           doSubstitutions = ["local-substitutions", "substitutions"]
@@ -121,6 +124,10 @@ module ParseConfig where
   getLines :: YamlLite -> Int
   getLines (Str s) = tryRead areNumbers s $ "Unable to parse: " ++ s ++ " as a number"
   getLines _ = error $ "Internal error: getLines called on non-terminal value"
+
+  getChars :: YamlLite -> Int
+  getChars (Str s) = tryRead areNumbers s $ "Unable to parse: " ++ s ++ " as a number"
+  getChars _ = error $ "Internal error: getLines called on non-terminal value"
 
   getStyle :: YamlLite -> Style
   getStyle (Map map) = Style (getColor     <$> (lookup doForeground))
