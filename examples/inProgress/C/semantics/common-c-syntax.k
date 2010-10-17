@@ -383,7 +383,7 @@ and statement =
 	| DEFINITION of definition (*definition or declaration of a variable or type*)
 ***)
 	op Label : Id K -> PureStatement
-	op Goto : Id -> PureStatement
+	op Goto : K -> PureStatement --- Id
 	op CompGoto : K -> PureStatement
 	op LocalDefinition : K -> PureStatement  --- renamed from "DEFINITION"
 ***(

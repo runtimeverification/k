@@ -4,7 +4,7 @@ mod COMMON-SEMANTICS-STATEMENTS-INCLUDE is
 	including COMMON-INCLUDE .
 	op loopMarked : -> Statement .
 	op deleteLoc : Nat -> K . --- deletes the base object from memory, given a location
-	op genLabel : Nat K -> Id . --- switchid, value (tv or 'Default)
+	op genLabel : Nat K -> K . --- switchid, value (tv or 'Default)
 	op popLoop : -> K .
 	op popBlock : -> K .
 	op pushBlock : -> K .
@@ -105,37 +105,96 @@ mod COMMON-SEMANTICS-SWITCH is
 	
 	--- fixme shouldn't there be sequence points here?
 	--- fixme not doing promoting or conversion
-	mb rule
-		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, tv(V:BaseValue, T:Type))) ...</ k >
-		< currentFunction > F:Id </ currentFunction >
-		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> ?)) ...</ gotoMap >
-		< blockHistory > ListItem(Num:Nat)...</ blockHistory >
-		--- < xmessages >... (. => "Switch: in block " +String toString(Num:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages >
-		if hasIntegerType(T:Type)
-		: KSentence [metadata "computational rule"] .
-	--- fixme this is wrong if the arguments/types would match if we promoted
+	
+	op handleSwitch : Nat K Value -> K [metadata "strict(2)"] . --- switch num, promoted value of controlling exp, int value of exp
+	op handleSwitch-aux : Nat Value Value Map -> K .
 	
 	mb rule
-		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, l('Default))) ...</ k >
-		< currentFunction > F:Id </ currentFunction >
-		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((M:Map genLabel(SN:Nat, l('Default)) |-> ?)) ...</ gotoMap >
-		--- < xmessages >... (. => "Switch: gotoing to Default") </ xmessages >
+		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => handleSwitch(SN:Nat, promote(tv(V:BaseValue, T:Type)), tv(V:BaseValue, T:Type)) ...</ k >
 		if hasIntegerType(T:Type)
-		andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, tv(V:BaseValue, T:Type)))
 		: KSentence [metadata "computational rule"] .
 		
 	mb rule
-		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => (.).K ...</ k >
+		< k > handleSwitch(SN:Nat, V:Value, V':Value) => handleSwitch-aux(SN:Nat, V:Value, V':Value, M:Map) ...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		< gotoMap >... kpair(Tu:K, F:Id) |-> Map(M:Map) ...</ gotoMap >
-		--- < xmessages >... (. => "Switch: no matching values") </ xmessages >
-		if hasIntegerType(T:Type)
-		andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, tv(V:BaseValue, T:Type)))
-		andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, l('Default)))
 		: KSentence [metadata "computational rule"] .
+		
+	--- fixme feature can't do this :(
+	--- mb context handleSwitch-aux(?, ?, (? genLabel(?, `[HOLE`]) |-> ?)) : KSentence .
+	
+	--- match fount in value and type, goto it
+	mb rule
+		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), V':Value, (? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> ?)) 
+			=> Goto(genLabel(SN:Nat, V':Value)) 
+		...</ k >
+		--- < xmessages >... (. => "Switch: in block " +String toString(Num:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages > < blockHistory > ListItem(Num:Nat) ...</ blockHistory >
+		: KSentence [metadata "computational rule"] .
+		
+	--- if all that's left is a default, do it
+	mb rule
+		< k > handleSwitch-aux(SN:Nat, ?, ?, (genLabel(SN:Nat, l('Default)) |-> ?)) 
+			=> Goto(genLabel(SN:Nat, l('Default))) 
+		...</ k >
+		: KSentence [metadata "computational rule"] .
+	
+	--- if there's nothing left, no case matches
+	mb rule
+		< k > handleSwitch-aux(?, ?, ?, (.).Map) => (.).K ...</ k >
+		: KSentence [metadata "structural rule"] .
+		
+	mb rule
+		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), ?, (? ((genLabel(SN:Nat, tv(V':BaseValue, T:Type)) |-> ?) => (.).Map))) ...</ k >
+		if V:BaseValue =/=Bool V':BaseValue
+		: KSentence [metadata "structural rule"] .
+		
+	mb rule
+		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), ?, (? ((L:KLabel(Args:List{K}) |-> ?) => (.).Map))) ...</ k >
+		if L:KLabel =/=Bool 'genLabel
+		: KSentence [metadata "structural rule"] .
+	
+	
+	--- when the type is wrong, convert it and save the original value
+	mb rule
+		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), (? => tv(V:BaseValue, T':Type)), (? genLabel(SN:Nat, 
+					(tv(V:BaseValue, T':Type) => cast(T:Type, tv(V:BaseValue, T':Type)))
+				) |-> ?))
+		...</ k >
+		if T:Type =/=Bool T':Type
+		: KSentence [metadata "structural rule"] .
+	
+	--- mb rule
+		--- < k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, tv(V:BaseValue, T:Type))) ...</ k >
+		--- < currentFunction > F:Id </ currentFunction >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- < gotoMap >... kpair(Tu:K, F:Id) |-> Map((? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> ?)) ...</ gotoMap >
+		--- < blockHistory > ListItem(Num:Nat)...</ blockHistory >
+		--- --- < xmessages >... (. => "Switch: in block " +String toString(Num:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages >
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "computational rule"] .
+	--- fixme this is wrong if the arguments/types would match if we promoted
+	
+	--- mb rule
+		--- < k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, l('Default))) ...</ k >
+		--- < currentFunction > F:Id </ currentFunction >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- < gotoMap >... kpair(Tu:K, F:Id) |-> Map((M:Map genLabel(SN:Nat, l('Default)) |-> ?)) ...</ gotoMap >
+		--- --- < xmessages >... (. => "Switch: gotoing to Default") </ xmessages >
+		--- if hasIntegerType(T:Type)
+		--- andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, tv(V:BaseValue, T:Type)))
+		--- : KSentence [metadata "computational rule"] .
+		
+	--- mb rule
+		--- < k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => (.).K ...</ k >
+		--- < currentFunction > F:Id </ currentFunction >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- < gotoMap >... kpair(Tu:K, F:Id) |-> Map(M:Map) ...</ gotoMap >
+		--- --- < xmessages >... (. => "Switch: no matching values") </ xmessages >
+		--- if hasIntegerType(T:Type)
+		--- andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, tv(V:BaseValue, T:Type)))
+		--- andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, l('Default)))
+		--- : KSentence [metadata "computational rule"] .
 
 	mb [case-fall-through]: rule
 		< k > Case(?, ?, K:K) => K:K ...</ k >
@@ -192,10 +251,10 @@ mod COMMON-SEMANTICS-GOTO is
 	op frozenDeclaration : Nat Nat K -> K . --- nestingDepth, currentBlock, decl
 	op processGotoSameBlock : List List -> K .  --- declaration stack, actual local variables
 	mb rule
-		< k > Goto(Label:Id) ~> ? => processGoto(GotoInfo:K) </ k >
+		< k > Goto(Label:K) ~> ? => processGoto(GotoInfo:K) </ k >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((? (Label:Id |-> GotoInfo:K))) ...</ gotoMap >
+		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((? (Label:K |-> GotoInfo:K))) ...</ gotoMap >
 		: KSentence [metadata "structural"] .
 		
 	---- first case, when we're in the same block
@@ -404,10 +463,31 @@ mod COMMON-SEMANTICS-GOTO is
 			~> DeclarationDefinition(InitNameGroup(T:K, K':C :: L:List{C})) 
 		...</ computation >
 		: KSentence .
+	mb rule
+		< computation > Typedef(NameGroup(T:K, (K:C :: K':C :: L:List{C}))) 
+			=> Typedef(NameGroup(T:K, K:C))
+			~> Typedef(NameGroup(T:K, K':C :: L:List{C})) 
+		...</ computation >
+		: KSentence .
 		
+	--- fixme would like to combine the below rules
 	mb rule
 		< computation > DeclarationDefinition(InitNameGroup(T:K, K:C)) => (.).K ...</ computation >
 		< declarationStack >... (.).List => ListItem(frozenDeclaration(Depth:Nat, BlockNum:Nat, DeclarationDefinition(InitNameGroup(T:K, K:C)))) </ declarationStack >
+		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
+		< blockHistoryGoto > ListItem(BlockNum:Nat) ...</ blockHistoryGoto >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< computation > OnlyTypedef(K:K) => (.).K ...</ computation >
+		< declarationStack >... (.).List => ListItem(frozenDeclaration(Depth:Nat, BlockNum:Nat, OnlyTypedef(K:K))) </ declarationStack >
+		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
+		< blockHistoryGoto > ListItem(BlockNum:Nat) ...</ blockHistoryGoto >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< computation > Typedef(K:K) => (.).K ...</ computation >
+		< declarationStack >... (.).List => ListItem(frozenDeclaration(Depth:Nat, BlockNum:Nat, Typedef(K:K))) </ declarationStack >
 		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
 		< blockHistoryGoto > ListItem(BlockNum:Nat) ...</ blockHistoryGoto >
 		: KSentence [metadata "structural"] .
