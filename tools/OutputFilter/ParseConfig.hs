@@ -116,7 +116,7 @@ module ParseConfig where
                        Nothing -- extend me to do local substitutions
     where lookup ss       = snd <$> (find ((flip compareStr) ss . unStr . fst) $ xs)
           doKeep          = ["lines", "keep"]
-          doKeepChars     = ["characters", "chars", "keepChars", "keep-chars"]
+          doKeepChars     = ["characters", "chars", "keepChars", "keep-chars", "keep-characters"]
           doCellStyle     = ["cell-color", "cell-style"]
           doTextStyle     = ["text-color", "text-style"]
           doSubstitutions = ["local-substitutions", "substitutions"]
