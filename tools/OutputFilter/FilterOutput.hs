@@ -23,6 +23,8 @@ module FilterOutput where
   import Data.Maybe
   import qualified Data.Map as Map
   import Control.Monad.Reader
+  import Data.String.Utils
+  import Text.Regex.PCRE.Light.Char8
 
   type CellReader a  = Configuration -> CellName -> a
   type KOutReader a  = Configuration -> KOutput -> a
@@ -64,9 +66,8 @@ module FilterOutput where
   handleContents :: CellPrinter
   handleContents conf name cs = hcat $ (map (ppKOutput conf) . pruneStrings conf name . cleanupStrings)  cs
 
-
   handleString :: KOutPrinter
-  handleString conf (String n s) = handleStyle conf n textStyle . text $ s
+  handleString conf (String n s) = handleStyle conf n textStyle . text . handleSubstitutions conf n $ s
   {-
     Pretty Printing
    -}
@@ -91,6 +92,24 @@ module FilterOutput where
   handleStyle :: StyleReader (Doc -> Doc)
   handleStyle conf name f | hasStyle conf name f = stylize (fetchStyle conf name f)
                           | otherwise            = id
+
+  -- extend me to do local substitutions as well
+  handleSubstitutions :: CellReader (String -> String)
+  handleSubstitutions conf n s | hasSubs conf n = performSubs s $ fetchSubs conf n
+                               | otherwise = s
+
+  performSubs :: String -> [Substitution] -> String
+  performSubs s (Substitution re repl : subs) = performSubs (performReplacement re repl s) subs
+  performSubs s [] = s
+
+  -- performReplacement re repl s = case match re s [] of
+  --                                  Just ss -> replace (head ss) repl s
+  --                                  Nothing -> s
+  performReplacement = replace
+
+
+  -- getMatch :: Regex -> String -> Maybe String
+  -- getMatch re s = head <$> match re s []
 
   stylize :: Style -> Doc -> Doc
   stylize (Style fore back isUnder isBold) d = doUnder isUnder . doBold isBold . doFore fore . doBack back $ d
@@ -177,13 +196,24 @@ module FilterOutput where
   -- Should a cell be pruned?
   shouldPrune :: Query
   shouldPrune conf cn = case lookupCell conf cn of
-                          Just (Configs (Just _) _ _) -> True
-                          _                           -> False
+                          Just (Configs (Just _) _ _ _ ) -> True
+                          _                              -> False
+
+  hasSubs :: Query
+  hasSubs conf cn = if hasGlobalSubs conf then True
+                    else case lookupCell conf cn of
+                           Just (Configs _ _ _ (Just _)) -> True
+                           _                             -> False
+    where hasGlobalSubs conf = case lookupCell conf "global-substitutions" of
+                                 Nothing -> False
+                                 _       -> True
+
+
 
   hasStyle :: StyleReader Bool
   hasStyle conf cn f = case lookupCell conf cn of
-                           Just c@(Configs _ _ _) -> isJust (f c)
-                           _                      -> False
+                           Just c@(Configs _ _ _ _) -> isJust (f c)
+                           _                        -> False
 
   fetchStyle :: StyleReader Style
   fetchStyle conf cn f = case lookupCell conf cn >>= f of
@@ -195,6 +225,13 @@ module FilterOutput where
   fetchPruneNumber conf cn = case lookupCell conf cn >>= keepLines of
                              Just n -> n
                              _      -> error "Internal Error: shouldPrune approved a prune candidate incorrectly"
+
+  -- Extend me to do local subs
+  fetchSubs :: CellReader [Substitution]
+  fetchSubs conf cn = case lookupCell conf "global-substitutions" of
+                        Just (Configs _ _ _ (Just subs)) -> subs
+                        Nothing -> error "Internal Error: hasSubs approved a match incorrectly"
+                        _       -> error "Unable to find the global-substitutions cell"
 
   -- Whether a maybe is something
 
@@ -208,10 +245,10 @@ module FilterOutput where
   main = do args <- getArgs
             (fname, configFile) <- case args of
                        (x:y:xs) -> return (x,y)
-                       -- []  -> error "Please specify a file to filter"
                        _   -> error usage
             parsedOut <- parseKOutFile fname
             config <- getConfig configFile
+            print config
             putDoc . cat . map (ppKOutput config) $ parsedOut
 
   usage = "\nUsage:\n" ++ "  If you have built the tool using 'make', then run:\n"

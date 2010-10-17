@@ -6,8 +6,10 @@
   to configure whether to display that cell.
   See examples/example.yml
   If a cell is flagged as "yes", then it will be shown (this has no effect on its children)
-  Current default behavior is to not show anything not explicitly told to be shown
+g  Current default behavior is to not show anything not explicitly told to be shown
 -}
+
+{-# LANGUAGE OverloadedStrings #-}
 
 module ParseConfig where
   import Data.Yaml.Syck
@@ -16,6 +18,7 @@ module ParseConfig where
   import Control.Arrow
   import Data.List
   import qualified Data.Map as Map
+  import Text.Regex.PCRE.Light.Char8
 
   type CellName = String
   type Configuration = Map CellName CellConfigRhs
@@ -27,16 +30,17 @@ module ParseConfig where
   data CellConfigRhs = Show
                      | Hide
                      | RecursiveHide
-                     | Configs { keepLines :: Maybe Int
-                               , cellStyle :: Maybe Style
-                               , textStyle :: Maybe Style
+                     | Configs { keepLines     :: Maybe Int
+                               , cellStyle     :: Maybe Style
+                               , textStyle     :: Maybe Style
+                               , substitutions :: Maybe [Substitution]
                                }
     deriving (Show)
 
   data Style = Style { foreground :: Maybe Color
                      , background :: Maybe Color
                      , underlined :: Maybe Underline
-                     , bolded       :: Maybe Bold
+                     , bolded     :: Maybe Bold
                      }
     deriving Show
 
@@ -52,6 +56,12 @@ module ParseConfig where
     deriving (Show, Read)
 
   data ColorPlace = Background | Foreground
+
+  -- data Substitution = Substitution Regex String
+  --   deriving (Show, Eq)
+
+  data Substitution = Substitution String String
+    deriving (Show, Eq)
 
   -- A Yaml tree without superfluous info and types
   data YamlLite = Map [(YamlLite, YamlLite)]
@@ -79,10 +89,18 @@ module ParseConfig where
   extractConfiguration = Map.fromList . map extractCellConfig . unMap
 
   -- I use arrows because I'm awesome. See the commented out version for the more clear version
+  -- There is a special-case cell called "global-substitutions" for its namesake
   extractCellConfig :: (YamlLite, YamlLite) -> CellConfig
-  extractCellConfig = arr unStr *** arr readConfig
+  extractCellConfig pair | isGlobalSub pair = (arr unStr *** arr readSubstitution) pair
+                         | otherwise        = (arr unStr *** arr readConfig) pair
   -- extractCellConfig (l,r) = (unStr l, readConfig r)
 
+  mkSubstitution :: (YamlLite, YamlLite) -> Substitution
+  mkSubstitution (key,val) = Substitution (unStr key) (unStr val)
+
+  readSubstitution (Map xs) = Configs Nothing Nothing Nothing (Just (map mkSubstitution xs))
+
+  isGlobalSub (key, val) = unStr key == "global-substitutions"
 
   -- Extend the below function to add more functionality
   readConfig :: YamlLite -> CellConfigRhs
@@ -90,13 +108,15 @@ module ParseConfig where
   readConfig (Map map) = readMap map
 
   readMap :: [(YamlLite,YamlLite)] -> CellConfigRhs
-  readMap xs = Configs (getLines <$> (lookup doKeep))
-                       (getStyle <$> (lookup doCellStyle))
-                       (getStyle <$> (lookup doTextStyle))
-    where lookup ss   = snd <$> (find ((flip compareStr) ss . unStr . fst) $ xs)
-          doKeep      = ["lines", "keep"]
-          doCellStyle = ["cell-color", "cell-style"]
-          doTextStyle = ["text-color", "text-style"]
+  readMap xs = Configs (getLines        <$> (lookup doKeep))
+                       (getStyle        <$> (lookup doCellStyle))
+                       (getStyle        <$> (lookup doTextStyle))
+                       Nothing -- extend me to do local substitutions
+    where lookup ss       = snd <$> (find ((flip compareStr) ss . unStr . fst) $ xs)
+          doKeep          = ["lines", "keep"]
+          doCellStyle     = ["cell-color", "cell-style"]
+          doTextStyle     = ["text-color", "text-style"]
+          doSubstitutions = ["local-substitutions", "substitutions"]
 
   getLines :: YamlLite -> Int
   getLines (Str s) = tryRead areNumbers s $ "Unable to parse: " ++ s ++ " as a number"

@@ -29,6 +29,11 @@ callStack: recursively-hide
 #   text-style:
 #     foreground: black
 
+# Global substitutions
+global-substitutions:
+  ".List{K}": "*"
+
+
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. blacklisting <thread> wont blacklist all of its children
 
@@ -36,10 +41,10 @@ callStack: recursively-hide
 #   whitelisting
 #   keep only a certain number of lines
 #   recursive hide
+#   colors
 
 
 # Upcoming features:
-#   colors
 #   environment/memory lookup
 #   regular-expression based line-based show/hide
 #   arbitrary global and local string-replacement rules
