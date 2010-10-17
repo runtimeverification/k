@@ -67,7 +67,7 @@ module FilterOutput where
   handleContents conf name cs = hcat $ (map (ppKOutput conf) . doPrune conf name . cleanupStrings)  cs
 
   handleString :: KOutPrinter
-  handleString conf (String n s) = handleStyle conf n textStyle . text . handleSubstitutions conf n $ s
+  handleString conf (String n s) = handleStyle conf n textStyle . text . pruneChars conf n $ handleSubstitutions conf n $ s
   {-
     Pretty Printing
    -}
@@ -162,15 +162,15 @@ module FilterOutput where
 
   -- Prune off lines after the user-specified break
   doPrune :: Configuration -> CellName -> [KOutput] -> [KOutput]
-  doPrune conf cn = pruneChars conf cn . pruneLines conf cn
+  doPrune conf cn = pruneLines conf cn
 
   pruneLines :: Configuration -> CellName -> [KOutput] -> [KOutput]
   pruneLines conf cn ks | shouldPrune conf cn = map (pruneL conf cn) (filter isString ks)
                         | otherwise           = ks
 
-  pruneChars :: Configuration -> CellName -> [KOutput] -> [KOutput]
-  pruneChars conf cn ks | shouldPruneChars conf cn = map (pruneC conf cn) (filter isString ks)
-                        | otherwise                = ks
+  pruneChars :: Configuration -> CellName -> String -> String
+  pruneChars conf cn s | shouldPruneChars conf cn = pruneC conf cn s
+                       | otherwise                = s
 
 
   pruneL conf cn (String n s) = String n $ (stripr . unlines . take toKeep) intermediate ++ more
@@ -178,7 +178,7 @@ module FilterOutput where
           intermediate = lines s
           more = " [..." ++ show (length intermediate - 1) ++ " more...]"
 
-  pruneC conf cn (String n s) = String n $ (stripr . unlines . map (take toKeep)) intermediate
+  pruneC conf cn s = (stripr . unlines . map (take toKeep)) intermediate
     where toKeep = fetchPruneCharNumber conf cn
           intermediate = lines s
 
