@@ -24,7 +24,7 @@ module FilterOutput where
   import qualified Data.Map as Map
   import Control.Monad.Reader
   import Data.String.Utils
-  import Text.Regex.PCRE.Light.Char8
+--  import Text.Regex.PCRE.Light.Char8
 
   type CellReader a  = Configuration -> CellName -> a
   type KOutReader a  = Configuration -> KOutput -> a
