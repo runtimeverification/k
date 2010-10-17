@@ -3,7 +3,7 @@ T:
   cell-style:
     bold: yes
     background: dullcyan
-  text-styel:
+  text-style:
     foreground: green
 k:
   keep: 5
@@ -33,7 +33,6 @@ callStack: recursively-hide
 global-substitutions:
   ".List{K}": "*"
 
-
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. blacklisting <thread> wont blacklist all of its children
 
@@ -42,9 +41,10 @@ global-substitutions:
 #   keep only a certain number of lines
 #   recursive hide
 #   colors
-
+#   global string replacement
 
 # Upcoming features:
+#   keepChars - keep only so many characters per line
 #   environment/memory lookup
 #   regular-expression based line-based show/hide
 #   arbitrary global and local string-replacement rules

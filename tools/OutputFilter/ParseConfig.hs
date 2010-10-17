@@ -147,7 +147,7 @@ module ParseConfig where
   getBold :: YamlLite -> Bold
   getBold (Str s) | s `compareStr` doBold   = Bold
                   | s `compareStr` doDeBold = DeBold
-                  | otherwise               = error $ "Unable to parse: " ++ s ++ " as an underline style"
+                  | otherwise               = error $ "Unable to parse: " ++ s ++ " as an bold style"
     where doBold   = ["bold", "embolden", "bolded"] ++ doTrue
           doDeBold = ["debold", "de-bold", "un-bold", "unbold"]
 

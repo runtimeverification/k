@@ -19,6 +19,11 @@ module ParseKOutput where
   -- A string parser that has a stack of cell names for state (currenty unused), and outputs a KOutput
   type KOutputParser = Parsec String CellStack KOutput
 
+  -- Get rid of the maude header and stuff
+  header :: Parsec String CellStack ()
+  header = manyTill anyChar (try (lookAhead beginCell)) >> return ()
+
+
   -- Open the file, and parse it. Return a list of parses (e.g. if there are multiple cells at the top level)
   parseKOutFile :: FilePath -> IO [KOutput]
   parseKOutFile fp = do input <- readFile fp
@@ -27,7 +32,7 @@ module ParseKOutput where
                           Right res -> return res
 
   parseTop :: Parsec String CellStack [KOutput]
-  parseTop = many (try parseKOutput)
+  parseTop = header >> many (try parseKOutput)
 
   -- Start parsing
   parseKOutput :: KOutputParser
