@@ -163,7 +163,7 @@ if [ ! "$compileOnlyFlag" ]; then
 	term="eval\\(linked-program, \\(\`for i in \$0 \"\$@\"; do echo \"String \\\"\$i\\\"(.List{K}),,\" ; done\` .List{K}\\), \\\"\$stdin\\\"\\)"
 	exec="echo erew in C-program-linked : $term . >> $runner"
 	mDebug="echo break select debug . >> $runner; echo set break on . >> $runner"
-	maude="maude -no-wrap \$0 $runner"
+	maude="maude -no-wrap -no-banner \$0 $runner"
 	debug="$mStart; $mDebug; echo erew in C-program-linked : \\($term\\) . >> $runner"
 	run="$mStart; $exec; echo q >> $runner"
 	prelude="--- &> /dev/null; if [ -t 0 ]; then stdin=\"\"; else stdin=\$(cat); fi; FSL_C_RUNNER=$freshFilename"

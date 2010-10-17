@@ -1,0 +1,92 @@
+# Whitelist the following cells
+# T:
+  # cell-style:
+    # bold: yes
+    # background: dullcyan
+  # text-styel:
+    # foreground: green
+k:
+  keep: 3
+  keep-chars: 135
+  
+  # text-style:
+    # bold: no
+  # cell-style:
+    # # underlined: no
+    # bold: no
+	
+# features:
+# limit the length of lines you keep the same way you limit the number of lines
+# ordering of cells in output (e.g., move k to end, move env to beginning)
+# color the cell name only, not the brackets
+# ability to color the brackets < > differently
+# give colors to a pattern, (e.g., look for "('promote).KProperLabel" and color the promote red) (looks like this is in your todo)
+# replace "('foo).K.*?Label( properly nested contents )" with "foo( properly nested contents )"
+# replace "('_foo_).K.*?Label(first,, second)" with "first foo first"
+# conditional show and hide, (e.g., if "foo" is the top element of < k >, then show the < bar > cell, otherwise don't)
+# split contents of a cell based on something
+# match lines/characters from a string based on numbers in other cells (i know what line i 
+	
+env: 
+  show
+    # foreground: green
+ 
+nestingDepth:
+  show
+	
+blockHistory:
+  show
+  
+localVariables:
+  show
+  
+type:
+  show
+
+  # cell-style:
+    # foreground: dullyellow
+
+# threads:
+  # cell-style:
+    # foreground: black
+# thread:
+  # cell-style:
+    # foreground: black
+callStack: recursively-hide
+# mem:
+  # show
+  # text-style:
+    # foreground: black
+	
+currentTranslationUnit: show
+currentFunction: show
+currentProgramLoc: show
+# programText: show
+	
+global-substitutions:
+  (': ""
+  ).KProperLabel: ""
+  ).KHybridLabel: ""
+  ).KResultLabel: ""
+  "BaseValue ": ""
+  "Id ": ""
+  "BaseType ": ""
+  "kList(\"wklist_\")": ""
+  "(.List{K})": ""
+  ",,": ", "
+
+# Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
+# recursive, e.g. blacklisting <thread> wont blacklist all of its children
+
+# Current features:
+#   whitelisting
+#   keep only a certain number of lines
+#   recursive hide
+
+
+# Upcoming features:
+#   colors
+#   environment/memory lookup
+#   regular-expression based line-based show/hide
+#   arbitrary global and local string-replacement rules
+#   local and global regular-expression based styling (bold, underline, color, etc)

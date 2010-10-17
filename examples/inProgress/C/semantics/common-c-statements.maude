@@ -124,7 +124,7 @@ mod COMMON-SEMANTICS-SWITCH is
 	--- fixme feature can't do this :(
 	--- mb context handleSwitch-aux(?, ?, (? genLabel(?, `[HOLE`]) |-> ?)) : KSentence .
 	
-	--- match fount in value and type, goto it
+	--- match found in value and type, goto it
 	mb rule
 		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), V':Value, (? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> ?)) 
 			=> Goto(genLabel(SN:Nat, V':Value)) 
@@ -147,6 +147,11 @@ mod COMMON-SEMANTICS-SWITCH is
 	mb rule
 		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), ?, (? ((genLabel(SN:Nat, tv(V':BaseValue, T:Type)) |-> ?) => (.).Map))) ...</ k >
 		if V:BaseValue =/=Bool V':BaseValue
+		: KSentence [metadata "structural rule"] .
+		
+	mb rule
+		< k > handleSwitch-aux(SN:Nat, ?, ?, (? ((genLabel(SN':Nat, ?) |-> ?) => (.).Map))) ...</ k >
+		if SN:Nat =/=Bool SN':Nat
 		: KSentence [metadata "structural rule"] .
 		
 	mb rule

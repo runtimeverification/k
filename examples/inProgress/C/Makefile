@@ -3,6 +3,9 @@ SEMANTICS_DIR = semantics
 PARSER_DIR = parser
 PARSER = $(PARSER_DIR)/cparser
 DIST_DIR = dist
+OUTPUT_FILTER_DIR = ../../../tools/OutputFilter
+OUTPUT_FILTER = $(OUTPUT_FILTER_DIR)/filterOutput
+FILTER = $(SEMANTICS_DIR)/outputFilter.yml
 #VPATH = programs
 
 FILES_TO_DIST = \
@@ -51,11 +54,16 @@ demo: $(DIST_DIR)/dist.done
 
 #$(DIST_DIR)/dist.tested
 
-$(DIST_DIR)/dist.done: Makefile cparser kcompile $(FILES_TO_DIST)
+$(OUTPUT_FILTER):
+	make -C $(OUTPUT_FILTER_DIR)
+
+$(DIST_DIR)/dist.done: Makefile $(OUTPUT_FILTER) cparser kcompile $(FILES_TO_DIST)
 	@mkdir -p $(DIST_DIR)
 	@mkdir -p $(DIST_DIR)/includes
 	@mkdir -p $(DIST_DIR)/lib
 	@cp $(FILES_TO_DIST) $(DIST_DIR)
+	@cp $(OUTPUT_FILTER) $(DIST_DIR)
+	@cp $(FILTER) $(DIST_DIR)
 	@mv $(DIST_DIR)/*.h $(DIST_DIR)/includes
 	@mv $(DIST_DIR)/clib.c $(DIST_DIR)/lib
 #@ln -s -f compile.sh $(DIST_DIR)/kcc
