@@ -1,9 +1,9 @@
 all:
 	ghc --make Main -o filterOutput -O2 -H14m
-	rm *.hi
-	rm *.o
+	rm -f *.hi
+	rm -f *.o
 
 clean:
-	rm *.hi
-	rm *.o
-	rm filterOutput
+	rm -f *.hi
+	rm -f *.o
+	rm -f filterOutput
