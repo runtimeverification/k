@@ -93,9 +93,8 @@ while (1)
     # stop if there are no labels left
     last if (!defined($temp));
     
-    print "Temp: $temp\n";
     # replace old labels with processed labels
-    s/(\Q$temp\E)/my $tmp = rew($temp);print "Tmp: $tmp\n";"$tmp"/se;
+    s/(\Q$temp\E)/my $tmp = rew($temp);"$tmp"/se;
     
     # loop, but move forward :-)
     $rest =~ s/(\Q$temp\E)//;
