@@ -1,6 +1,7 @@
 all:
-	cabal install
-	ln -sf dist/build/filterOutput/filterOutput ./
-#ghc --make Main -o filterOutput -O2 -H14m
+	ghc --make Main -o filterOutput -O2 -H14m
+
 clean:
-	cabal clean
+	rm *.hi
+	rm *.o
+	rm filterOutput
