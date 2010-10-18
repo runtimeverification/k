@@ -77,7 +77,7 @@ mod COMMON-SEMANTICS-FOR is
 	mb rule
 		< k > addToHistory(Num:Nat) => (.).K ...</ k >
 		< blockHistory > . => ListItem(Num:Nat) ...</ blockHistory >
-		--- < xmessages >... (. => "Adding " +String toString(Num:Nat) +String " to history") </ xmessages >
+		< xmessages >... (. => "Adding " +String toString(Num:Nat) +String " to history") </ xmessages >
 		: KSentence [metadata "structural"] .
 	
 	--- fixme should these blocks be here?
@@ -89,7 +89,7 @@ mod COMMON-SEMANTICS-FOR is
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		< loopStack > . => ListItem(kpair(Num:Nat, K:K)) ...</ loopStack >
 		--- < freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
-		--- < xmessages >... (. => "For: loop in " +String toString(Num:Nat) +String ", creating " +String toString(ForNum:Nat)) </ xmessages >
+		< xmessages >... (. => "For: loop in " +String toString(Num:Nat) +String ", creating " +String toString(ForNum:Nat)) </ xmessages >
 		: KSentence [metadata "structural"] .
 		
 	mb [for]: rule
@@ -97,7 +97,7 @@ mod COMMON-SEMANTICS-FOR is
 			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> discard ~> loopMarked ~> For(ForNum:Nat, Pre:K, Control:K, Post:K, S:Statement)), Nop)
 		...</ k >
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
-		--- < xmessages >... (. => "For: finished a loop, in " +String toString(Num:Nat) +String ", looping...") </ xmessages >
+		< xmessages >... (. => "For: finished a loop, in " +String toString(Num:Nat) +String ", looping...") </ xmessages >
 		: KSentence [metadata "structural"] .
 endm
 
@@ -130,7 +130,7 @@ mod COMMON-SEMANTICS-SWITCH is
 		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), V':Value, (? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> caseHelper(Num:Nat))) 
 			=> Goto(caseHelper(Num:Nat))
 		...</ k >
-		--- < xmessages >... (. => "Switch: in block " +String toString(Num:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages > < blockHistory > ListItem(Num:Nat) ...</ blockHistory >
+		< xmessages >... (. => "Switch: in block " +String toString(BlockNum:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages > < blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
 		: KSentence [metadata "computational rule"] .
 		
 	--- if all that's left is a default, do it
@@ -170,38 +170,6 @@ mod COMMON-SEMANTICS-SWITCH is
 		if T:Type =/=Bool T':Type
 		: KSentence [metadata "structural rule"] .
 	
-	--- mb rule
-		--- < k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, tv(V:BaseValue, T:Type))) ...</ k >
-		--- < currentFunction > F:Id </ currentFunction >
-		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		--- < gotoMap >... kpair(Tu:K, F:Id) |-> Map((? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> ?)) ...</ gotoMap >
-		--- < blockHistory > ListItem(Num:Nat)...</ blockHistory >
-		--- --- < xmessages >... (. => "Switch: in block " +String toString(Num:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages >
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "computational rule"] .
-	--- fixme this is wrong if the arguments/types would match if we promoted
-	
-	--- mb rule
-		--- < k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => Goto(genLabel(SN:Nat, l('Default))) ...</ k >
-		--- < currentFunction > F:Id </ currentFunction >
-		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		--- < gotoMap >... kpair(Tu:K, F:Id) |-> Map((M:Map genLabel(SN:Nat, l('Default)) |-> ?)) ...</ gotoMap >
-		--- --- < xmessages >... (. => "Switch: gotoing to Default") </ xmessages >
-		--- if hasIntegerType(T:Type)
-		--- andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, tv(V:BaseValue, T:Type)))
-		--- : KSentence [metadata "computational rule"] .
-		
-	--- mb rule
-		--- < k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => (.).K ...</ k >
-		--- < currentFunction > F:Id </ currentFunction >
-		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		--- < gotoMap >... kpair(Tu:K, F:Id) |-> Map(M:Map) ...</ gotoMap >
-		--- --- < xmessages >... (. => "Switch: no matching values") </ xmessages >
-		--- if hasIntegerType(T:Type)
-		--- andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, tv(V:BaseValue, T:Type)))
-		--- andBool notBool $hasMapping(M:Map, genLabel(SN:Nat, l('Default)))
-		--- : KSentence [metadata "computational rule"] .
-
 	mb [case-fall-through]: rule
 		< k > Case(?, ?, ?, K:K) => K:K ...</ k >
 		: KSentence [metadata "structural"] .
@@ -273,7 +241,7 @@ mod COMMON-SEMANTICS-GOTO is
 		< blockHistory > ListItem(CurrentBlock:Nat) BlockHistory:List </ blockHistory >
 		< loopStack > ? => LoopStack:List </ loopStack >
 		< localVariables > Vars:List </ localVariables >
-		--- < xmessages >... (. => "Gotoing: in same block " +String toString(CurrentBlock:Nat)) </ xmessages >
+		< xmessages >... (. => "Gotoing: in same block " +String toString(CurrentBlock:Nat)) </ xmessages >
 		if L:KLabel ==Bool 'processGoto
 		orBool L:KLabel ==Bool 'processGotoDown
 		: KSentence [metadata "structural"] .
@@ -286,7 +254,7 @@ mod COMMON-SEMANTICS-GOTO is
 			~> processGoto(gotoObject(TargetDepth:Nat, TargetBlockHistory:List, ?, ?, ?))
 		...</ k >
 		< blockHistory > ListItem(BlockNum:Nat) ActualHistory:List </ blockHistory >
-		--- < xmessages >... (. => "Gotoing: popping to find common history, " +String toString(BlockNum:Nat)) </ xmessages >
+		< xmessages >... (. => "Gotoing: popping to find common history, " +String toString(BlockNum:Nat)) </ xmessages >
 		if notBool BlockNum:Nat in TargetBlockHistory:List
 		: KSentence [metadata "structural"] .
 		
@@ -296,7 +264,7 @@ mod COMMON-SEMANTICS-GOTO is
 			~> processGoto(gotoObject(TargetDepth:Nat, Prefix:List ListItem(BlockNum:Nat) TargetBlockHistory:List, ?, ?, ?))
 		...</ k >
 		< blockHistory > ListItem(BlockNum:Nat) ActualHistory:List </ blockHistory >
-		--- < xmessages >... (. => "Gotoing: popping to find common history, " +String toString(BlockNum:Nat)) </ xmessages >
+		< xmessages >... (. => "Gotoing: popping to find common history, " +String toString(BlockNum:Nat)) </ xmessages >
 		if TargetBlockHistory:List =/=Bool ActualHistory:List
 		: KSentence [metadata "structural"] .
 			
@@ -308,20 +276,21 @@ mod COMMON-SEMANTICS-GOTO is
 		...</ k >
 		< nestingDepth > ActualDepth:Nat </ nestingDepth >
 		< blockHistory > ListItem(CurrentBlock:Nat) ActualHistory:List </ blockHistory >
-		--- < xmessages >... (. => "Gotoing: Have common history, handling " +String toString(CurrentBlock:Nat)) </ xmessages >
+		< xmessages >... (. => "Gotoing: Have common history, handling " +String toString(CurrentBlock:Nat)) </ xmessages >
 		if sNat(ActualDepth:Nat) =/=Bool TargetDepth:Nat
 		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > ( . 
 				=> pushBlock
+				~> addToHistory(TargetBlock:Nat)
 				~> addVariablesForBlock(TargetBlock:Nat, DeclStack:List)
 			)
 			~> processGotoDown(gotoObject(TargetDepth:Nat, (? ListItem(TargetBlock:Nat) ActualHistory:List), ?, ?, DeclStack:List))
 		...</ k >
 		< nestingDepth > ActualDepth:Nat </ nestingDepth >
-		< blockHistory > (. => ListItem(TargetBlock:Nat)) ActualHistory:List </ blockHistory >
-		--- < xmessages >... (. => "Gotoing: Have common history, pushing " +String toString(TargetBlock:Nat)) </ xmessages >
+		< blockHistory > ActualHistory:List </ blockHistory > --- (. => ListItem(TargetBlock:Nat)) 
+		< xmessages >... (. => "Gotoing: Have common history, pushing " +String toString(TargetBlock:Nat)) </ xmessages >
 		if sNat(ActualDepth:Nat) =/=Bool TargetDepth:Nat
 		: KSentence [metadata "structural"] .
 	
@@ -342,7 +311,7 @@ mod COMMON-SEMANTICS-GOTO is
 		--- < blockHistory > (. => ListItem(TargetBlock:Nat)) BlockHistory:List </ blockHistory >
 		< blockHistory > BlockHistory:List </ blockHistory >
 		< loopStack > ? => LoopStack:List </ loopStack >
-		--- < xmessages >... (. => "Gotoing: above target, pushing " +String toString(TargetBlock:Nat)) </ xmessages >
+		< xmessages >... (. => "Gotoing: above target, pushing " +String toString(TargetBlock:Nat)) </ xmessages >
 		if L:KLabel ==Bool 'processGoto
 		orBool L:KLabel ==Bool 'processGotoDown
 		: KSentence [metadata "structural"] .
@@ -368,7 +337,7 @@ mod COMMON-SEMANTICS-GOTO is
 		...</ k >
 		< localVariables > Vars:List </ localVariables >
 		< blockHistory > ListItem(TargetBlock:Nat) ...</ blockHistory >
-		--- < xmessages >... (. => "Goto: skipping variable declaration " +String getString(getIdOfDeclaration(Decl:K))) </ xmessages >
+		< xmessages >... (. => "Goto: skipping variable declaration " +String getString(getIdOfDeclaration(Decl:K))) </ xmessages >
 		if getIdOfDeclaration(Decl:K) in Vars:List
 		: KSentence [metadata "computational"] .
 		
@@ -389,7 +358,7 @@ mod COMMON-SEMANTICS-GOTO is
 		< localVariables > Vars:List </ localVariables >
 		< blockHistory > ListItem(TargetBlock:Nat) ...</ blockHistory >
 		< shouldInit > ? => false </ shouldInit >
-		--- < xmessages >... (. => "Goto: couldn't find variable " +String getString(getIdOfDeclaration(Decl:K))) </ xmessages >
+		< xmessages >... (. => "Goto: couldn't find variable " +String getString(getIdOfDeclaration(Decl:K))) </ xmessages >
 		if notBool getIdOfDeclaration(Decl:K) in Vars:List
 		: KSentence [metadata "computational"] .
 		
@@ -559,35 +528,39 @@ mod COMMON-SEMANTICS-GOTO is
 		: KSentence [metadata "structural"] .
 		
 	--- mb rule
-		--- < computation > (For(ForNum:Nat, Pre:K, Control:K, Post:K, S:K) 
-			--- => S:K
-			--- ~> Post:K
-			--- ~> discard
-			--- ~> loopMarked
-			--- ~> For(ForNum:Nat, Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:K)
-			--- ~> popLoop
-			--- )
-		--- ~> K:K </ computation >
+		--- < computation > (. => S:K ~> loopMarked) ~> DoWhile(E:K, S:K) ~> (. => popLoop) ~> K:K </ computation >
 		--- < computationTail > Tail:K </ computationTail >
-		--- < nestingDepthGoto > N:Nat => sNat(N:Nat) </ nestingDepthGoto >
-		--- < blockHistoryGoto > (. => ListItem(ForNum:Nat)) ListItem(Num:Nat) ...</ blockHistoryGoto >
+		--- < blockHistoryGoto > ListItem(Num:Nat) ...</ blockHistoryGoto >
 		--- < loopStackGoto > (. => ListItem(kpair(Num:Nat, (K:K ~> Tail:K)))) ...</ loopStackGoto >
 		--- : KSentence [metadata "structural"] .
-
-	
+		
 	--- mb rule
-		--- < computation > (loopMarked ~> For(ForNum:Nat, E1:K, E2:K, E3:K, S:K) => (.).K) ~> popLoop ~> K:K </ computation >
+		--- < computation > (loopMarked ~> DoWhile(E:K, S:K) => (.).K) ~> popLoop ~> K:K </ computation >
 		--- : KSentence [metadata "structural"] .
 		
 	mb rule
-		< computation > (. => S:K ~> loopMarked) ~> DoWhile(E:K, S:K) ~> (. => popLoop) ~> K:K </ computation >
-		< computationTail > Tail:K </ computationTail >
-		< blockHistoryGoto > ListItem(Num:Nat) ...</ blockHistoryGoto >
-		< loopStackGoto > (. => ListItem(kpair(Num:Nat, (K:K ~> Tail:K)))) ...</ loopStackGoto >
-		: KSentence [metadata "structural"] .
-	mb rule
-		< computation > (loopMarked ~> DoWhile(E:K, S:K) => (.).K) ~> popLoop ~> K:K </ computation >
-		: KSentence [metadata "structural"] .
+		< gotoCalculation >
+			< computation > (DoWhile(E:K, S:K) => (.).K) ~> K:K </ computation >
+			< computationTail > Tail:K </ computationTail >
+			B:Bag
+			< blockHistoryGoto > ListItem(Num:Nat) OldBlockHistory:List </ blockHistoryGoto >
+			< loopStackGoto > OldLoopStack:List </ loopStackGoto >
+		</ gotoCalculation >
+		(. =>
+			< gotoCalculation > 
+				< computation > S:K </ computation >
+				< computationTail >
+					IfThenElse(E:K, (loopMarked ~> DoWhile(E:K, S:K)), Nop)
+					~> popLoop
+					~> K:K 
+					~> Tail:K 
+				</ computationTail >
+				B:Bag
+				< blockHistoryGoto > ListItem(Num:Nat) OldBlockHistory:List </ blockHistoryGoto >
+				< loopStackGoto > ListItem(kpair(Num:Nat, (K:K ~> Tail:K))) OldLoopStack:List </ loopStackGoto >
+			</ gotoCalculation >
+		)
+		: KSentence [metadata "structural"] .	
 		
 	mb rule
 		< computation > (. => S:K ~> loopMarked) ~> While(E:K, S:K) ~> (. => popLoop) ~> K:K </ computation >
@@ -646,14 +619,15 @@ mod COMMON-SEMANTICS-GOTO is
 		if notBool $hasMapping(M:Map, Target:Id)
 		: KSentence [metadata "structural"] .	
 		
+	--- pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> 
 	mb rule
 		< computation > (Case(SwitchNum:Nat, CaseNum:Nat, tv(I:Int, T:Type), S:K) => S:K) ~> K:K </ computation >
 		< computationTail > Tail:K </ computationTail >
 		< loopStackGoto > LoopStack:List </ loopStackGoto >
 		< declarationStack > DeclStack:List </ declarationStack >
-		< freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
+		--- < freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
 		< gotoMap >... kpair(Tu:K, F:Id) |-> Map(
-			(M:Map => (M:Map[caseHelper(CaseNum:Nat) / genLabel(SwitchNum:Nat, tv(I:Int, T:Type))])[gotoObject(Depth:Nat, BlockHistory:List, (pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / caseHelper(CaseNum:Nat)])
+			(M:Map => (M:Map[caseHelper(CaseNum:Nat) / genLabel(SwitchNum:Nat, tv(I:Int, T:Type))])[gotoObject(Depth:Nat, BlockHistory:List, (S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / caseHelper(CaseNum:Nat)])
 		) ...</ gotoMap >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
@@ -667,8 +641,8 @@ mod COMMON-SEMANTICS-GOTO is
 		< computationTail > Tail:K </ computationTail >
 		< loopStackGoto > LoopStack:List </ loopStackGoto >
 		< declarationStack > DeclStack:List </ declarationStack >
-		< freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
-		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((M:Map => M:Map[gotoObject(Depth:Nat, BlockHistory:List, (pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / genLabel(SwitchNum:Nat, l('Default))])) ...</ gotoMap >
+		--- < freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
+		< gotoMap >... kpair(Tu:K, F:Id) |-> Map((M:Map => M:Map[gotoObject(Depth:Nat, BlockHistory:List, (S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / genLabel(SwitchNum:Nat, l('Default))])) ...</ gotoMap >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
@@ -749,7 +723,6 @@ mod COMMON-SEMANTICS-BLOCKS is
 	
 	mb [push-block]: rule
 		< k > pushBlock => (.).K ...</ k >
-		--- < loopStack > ListItem(((. => popBlock) ~> ?)) ...</ loopStack >
 		< local >
 			C:Bag
 			< localVariables > Vars:List => (.).List </ localVariables >
@@ -778,7 +751,7 @@ mod COMMON-SEMANTICS-BLOCKS is
 			(< blockHistory > ListItem(Num:Nat) ...</ blockHistory > => (< blockHistory > ListItem(NewNum:Nat) L:List </ blockHistory >)) ***( (.).Bag ***)
 			(< localAddresses > (.).Set </ localAddresses > => (.).Bag)
 		</ local >
-		--- < xmessages >... (. => "Popblock: popping " +String toString(Num:Nat) +String " to return to " +String toString(NewNum:Nat)) </ xmessages >
+		< xmessages >... (. => "Popblock: popping " +String toString(Num:Nat) +String " to return to " +String toString(NewNum:Nat)) </ xmessages >
 		< blockStack > List(< stackFrame > C:Bag < blockHistory > ListItem(NewNum:Nat) L:List </ blockHistory > </ stackFrame >) => (.).List ...</ blockStack >
 		: KSentence [metadata "structural"] .
 	
@@ -786,7 +759,7 @@ mod COMMON-SEMANTICS-BLOCKS is
 	mb [dissolve-block]: rule
 		< k > Block(BlockNum:Nat, ?, Statements:List{C}) => listToK(Statements:List{C}) ...</ k >
 		< blockHistory > (.).List => ListItem(BlockNum:Nat) ...</ blockHistory >
-		--- < xmessages >... (. => "Real block: pushing " +String toString(BlockNum:Nat)) </ xmessages >
+		< xmessages >... (. => "Real block: pushing " +String toString(BlockNum:Nat)) </ xmessages >
 		: KSentence [metadata "structural"] .
 endm
 
@@ -815,14 +788,14 @@ mod COMMON-C-STATEMENTS is
 		< k > popLoop ~> ? => K:K </ k >
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		< loopStack > ListItem(kpair(Num:Nat, K:K)) => (.).List ...</ loopStack >
-		--- < xmessages >... (. => "Poplooping in " +String toString(Num:Nat)) </ xmessages >
+		< xmessages >... (. => "Poplooping in " +String toString(Num:Nat)) </ xmessages >
 		: KSentence [metadata "structural"] .
 
 	mb [popLoop]: rule
 		< k > (. => popBlock) ~> popLoop ...</ k >
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		< loopStack > ListItem(kpair(Num':Nat, ?)) ...</ loopStack >
-		--- < xmessages >... (. => "Adding a popBlock to get rid of " +String toString(Num:Nat) +String ".  Looking for " +String toString(Num':Nat)) </ xmessages >
+		< xmessages >... (. => "Adding a popBlock to get rid of " +String toString(Num:Nat) +String ".  Looking for " +String toString(Num':Nat)) </ xmessages >
 		if Num':Nat =/=Bool Num:Nat
 		: KSentence [metadata "structural"] .
 	
@@ -834,7 +807,7 @@ mod COMMON-C-STATEMENTS is
 		--- : KSentence [metadata "computational rule"] . --- nondet
 	mb [break]: rule
 		< k > Break => popLoop ...</ k >
-		--- < xmessages >... (. => "Break encountered, turning into popLoop") </ xmessages >
+		< xmessages >... (. => "Break encountered, turning into popLoop") </ xmessages >
 		: KSentence [metadata "structural"] .
 		
 	--- mb [break]: rule

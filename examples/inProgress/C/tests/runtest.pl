@@ -81,7 +81,8 @@ sub performTest {
 	my $kccRunRetval = $?;
 	if ($shouldFail) {
 		if (index($kccRunOutput, "unfinishedComputation") == -1) {
-			return reportFailure($fullFilename, $timer, "Failure---Program seemed to run to completion");
+			my $encodedOut = HTML::Entities::encode_entities($kccRunOutput);
+			return reportFailure($fullFilename, $timer, "Failure---Program seemed to run to completion\n$encodedOut\n");
 		} else {
 			return reportSuccess($fullFilename, $timer, "Success---Core dumped");
 		}

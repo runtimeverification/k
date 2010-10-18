@@ -8,4 +8,5 @@ int main(void){
 			//printf("%f ^ %f == %f\n", (double)i, (double)j, pow(i, j));
 		}
 	}
+	return 0;
 }

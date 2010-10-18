@@ -602,7 +602,8 @@ mod COMMON-C-TYPING is
 	ceq hasFloatType(T:Type) = false
 		if T:Type =/=Bool float
 		andBool T:Type =/=Bool double
-		andBool T:Type =/=Bool long-double .
+		andBool T:Type =/=Bool long-double
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 	
 	eq hasCharType(char) = true .
 	eq hasCharType(unsigned-char) = true .
@@ -610,11 +611,14 @@ mod COMMON-C-TYPING is
 	ceq hasCharType(T:Type) = false
 		if T:Type =/=Bool char
 		andBool T:Type =/=Bool unsigned-char
-		andBool T:Type =/=Bool signed-char .
+		andBool T:Type =/=Bool signed-char
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 	
 	eq hasPointerType(pointerType(?)) = true .
+	eq hasPointerType(qualifiedType(T:Type, ?)) = hasPointerType(T:Type) .
 	ceq hasPointerType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'pointerType .
+		if getKLabel(T:Type) =/=Bool 'pointerType
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 	
 	eq hasTypedefType(typedefType(?, ?)) = true .
 	eq hasTypedefType(qualifiedType(T:Type, ?)) = hasTypedefType(T:Type) .
@@ -631,15 +635,19 @@ mod COMMON-C-TYPING is
 		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	eq hasAggregateType(T:Type) = hasArrayType(T:Type) orBool hasStructType(T:Type) .
-	
+		
 	eq hasStructType(structType(?)) = true .
+	eq hasStructType(qualifiedType(T:Type, ?)) = hasStructType(T:Type) .
 	ceq hasStructType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'structType .
+		if getKLabel(T:Type) =/=Bool 'structType
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	eq hasUnionType(unionType(?)) = true .
+	eq hasUnionType(qualifiedType(T:Type, ?)) = hasUnionType(T:Type) .
 	ceq hasUnionType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'unionType .
-		
+		if getKLabel(T:Type) =/=Bool 'unionType
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
+				
 	eq hasIncompleteType(incompleteArrayType(?)) = true .
 	eq hasIncompleteType(qualifiedType(T:Type, ?)) = hasIncompleteType(T:Type) .
 	ceq hasIncompleteType(T:Type) = false
@@ -738,6 +746,9 @@ mod COMMON-C-TYPING is
 
 	mb [type-call]: rule
 		< type > Call(functionType(T:Type, ?), L:List{C}) => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
+	mb [type-call]: rule
+		< type > Call(pointerType(functionType(T:Type, ?)), ?) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
 		 		
 	mb [type-struct-dot]: rule

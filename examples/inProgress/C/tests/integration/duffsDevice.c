@@ -9,9 +9,11 @@ int main() {
 	int* origDest = dest;
 	for (int i = 0; i < count; i++){
 		src[i] = i * 2 + 1;
+		dest[i] = 0;
 	}
 
 	int n = (count+7)/8;
+	
 	switch(count%8) {
 		case 0:	do{	*dest++ = *src++;
 		case 7:		*dest++ = *src++;

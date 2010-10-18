@@ -1087,12 +1087,68 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		: KSentence .
+		
+
 	mb rule
-		< k > zero(Name:K) => . ...</ k >
-		< currentFunction > F:Id </ currentFunction >
-		< env >... Name:K |-> sym(Block:Nat) +Nat 0 ...</ env >
-		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
+		< k > zero(Name:K) => zeroType(Name:K, unqualifyType(T:Type)) ...</ k >
+		< types >... Name:K |-> T:Type ...</ types >
+		--- < currentFunction > F:Id </ currentFunction >
+		--- < env >... Name:K |-> sym(Block:Nat) +Nat 0 ...</ env >
+		--- < mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
 		: KSentence .
+		
+	op zeroType : K Type -> K .
+	
+	mb rule
+		< k > zeroType(Name:K, T:Type) => Name:K := tv(0, int) ~> discard ...</ k >
+		if hasIntegerType(T:Type)
+		: KSentence .
+	mb rule
+		< k > zeroType(Name:K, T:Type) => Name:K := tv(0.0, float) ~> discard ...</ k >
+		if hasFloatType(T:Type)
+		: KSentence .
+		
+	op zeroStruct : K List{C} -> K .
+	
+	mb rule
+		< k > zeroType(Name:K, structType(S:Id)) 
+			=> zeroStruct(Name:K, Fields:List{C})
+		...</ k >
+		< structs >... S:Id |-> Fields:List{C} ...</ structs > 
+		: KSentence .
+		
+	mb rule
+		< k > zeroStruct(Name:K, (typedDeclaration(T:Type, F:Id) :: L:List{C})) 
+			=> zeroType(Name:K . F:Id, T:Type)
+			~> zeroStruct(Name:K, L:List{C}) 
+		...</ k >
+		: KSentence .
+	mb rule
+		< k > zeroStruct(Name:K, Nil) => (.).K ...</ k >
+		: KSentence .
+		
+	mb rule
+		< k > zeroType(Name:K, T:Type) => Name:K := tv(NullPointer, T:Type) ~> discard  ...</ k >
+		if hasFunctionType(T:Type) 
+		orBool hasPointerType(T:Type)
+		: KSentence .
+		
+	mb rule
+		< k > zeroType(Name:K, arrayType(T:Type, sNat(Len:Nat))) 
+			=> zeroType(Name:K[Len:Nat], T:Type)
+			~> zeroType(Name:K, arrayType(T:Type, Len:Nat)) 
+		...</ k >
+		: KSentence .
+	mb rule
+		< k > zeroType(Name:K, arrayType(T:Type, 0)) => (.).K ...</ k >
+		: KSentence .
+		
+		--- < types >... Name:K |-> T:Type ...</ types >
+	--- < currentFunction > F:Id </ currentFunction >
+	--- < env >... Name:K |-> sym(Block:Nat) +Nat 0 ...</ env >
+	--- < mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
+	
+		
 	mb rule
 		< k > zeroBlock(sym(Block:Nat) +Nat 0) => . ...</ k >
 		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
@@ -1768,8 +1824,6 @@ mod C-SEMANTICS-MISC is
 			=> allocateType(Loc:Nat, unqualifyType(T:Type))
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, unqualifyType(T:Type))
-			--- ~> X:Id := Constant(IntLiteral(NoSuffix(DecimalConstant(0))))
-			--- ~> discard
 			~> zero(X:Id)
 			) ~> resolve(Tu:K)
 		...</ k >

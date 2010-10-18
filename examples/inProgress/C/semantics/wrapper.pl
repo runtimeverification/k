@@ -4,6 +4,13 @@ use File::Spec::Functions qw(rel2abs);
 use File::Basename;
 my $distDir = dirname(rel2abs($0));
 my $outputFilter = "filterOutput";
+
+my $plainOutput = 0;
+my $numArgs = $#ARGV + 1;
+if ($numArgs > 0) {
+	$plainOutput = $ARGV[0];
+}
+
 my $state = "start";
 my $retval = -1;
 my $reduced = 0;
@@ -81,12 +88,14 @@ while (my $line = <STDIN>) {
 }
 if ($reduced == 0||$haveResult == 0) {
 	#print "$buffer\n";
-	my ($fh, $filename) = tempfile();
-	print $fh "$buffer\n";
-	# print "$distDir\n";
-	# print "$filename\n";
-	print `$distDir/$outputFilter $filename $distDir/outputFilter.yml`;
-	close $fh;
+	if ($plainOutput) {
+		print "$buffer\n";
+	} else {
+		my ($fh, $filename) = tempfile();
+		print $fh "$buffer\n";
+		print `$distDir/$outputFilter $filename $distDir/outputFilter.yml`;
+		close $fh;
+	}
 	# print "-------------------------------------\n";
 	# # $kCell =~ s/\(.List{K}\)//g;
 	# # $kCell =~ s/Rat //g;

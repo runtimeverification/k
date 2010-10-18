@@ -6,12 +6,16 @@
   # text-styel:
     # foreground: green
 k:
-  keep: 3
-  keep-chars: 135
+  keep: 4
+  keep-chars: 136
   
 unfinishedComputation:
-  keep
-  # text-style:
+  show
+  
+xmessages: show
+
+
+# text-style:
     # bold: no
   # cell-style:
     # # underlined: no
@@ -33,49 +37,60 @@ env:
   show
     # foreground: green
  
-nestingDepth:
-  show
-	
-blockHistory:
-  show
-  
-localVariables:
-  show
-  
-type:
-  show
+nestingDepth: show
+blockHistory: show
+localVariables: show
+type: show
+files: show
+currentTranslationUnit: show
+currentFunction: show
+currentProgramLoc: show
 
-  # cell-style:
+callStack: recursively-hide
+blockStack: show
+#blockStack: recursively-hide
+
+# cell-style:
     # foreground: dullyellow
-
+    # foreground: black
 # threads:
   # cell-style:
     # foreground: black
 # thread:
   # cell-style:
-    # foreground: black
-callStack: recursively-hide
+
 # mem:
   # show
   # text-style:
     # foreground: black
 	
-currentTranslationUnit: show
-currentFunction: show
-currentProgramLoc: show
 # programText: show
 	
-global-substitutions:
-  (': ""
-  ).KProperLabel: ""
-  ).KHybridLabel: ""
-  ).KResultLabel: ""
-  "BaseValue ": ""
-  "Id ": ""
-  "BaseType ": ""
-  "kList(\"wklist_\")": ""
-  "(.List{K})": ""
-  ",,": ", "
+# global-substitutions:
+  # # (': ""
+  # # ).KProperLabel: ""
+  # # ).KHybridLabel: ""
+  # # ).KResultLabel: ""
+  # "BaseValue ": ""
+  # "Id ": ""
+  # "BaseType ": ""
+  # "kList(\"wklist_\")": ""
+  # # "(.List{K})": ""
+  # ",,": ", "
+  
+options:
+  global-substitutions:
+    "(.List{K})": ""
+    #".List{K}": "."
+    "BaseValue ": ""
+    "Id ": ""
+    "BaseType ": ""
+    "kList(\"wklist_\")": ""
+    # "(.List{K})": ""
+    ",,": ", "
+  spaceless-cells: no
+  infixify: yes
+
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. blacklisting <thread> wont blacklist all of its children

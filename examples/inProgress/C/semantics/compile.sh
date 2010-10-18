@@ -167,7 +167,7 @@ if [ ! "$compileOnlyFlag" ]; then
 	debug="$mStart; $mDebug; echo erew in C-program-linked : \\($term\\) . >> $runner"
 	run="$mStart; $exec; echo q >> $runner"
 	prelude="--- &> /dev/null; if [ -t 0 ]; then stdin=\"\"; else stdin=\$(cat); fi; FSL_C_RUNNER=$freshFilename"
-	echo "$prelude; if [ \$DEBUG ]; then $debug; $maude -ansi-color; else $run; $maude | perl $myDirectory/wrapper.pl; fi; retval=\$?; rm -f $runner; exit \$retval" > $programTemp
+	echo "$prelude; if [ \$DEBUG ]; then $debug; $maude -ansi-color; else $run; $maude | perl $myDirectory/wrapper.pl \$PLAIN; fi; retval=\$?; rm -f $runner; exit \$retval" > $programTemp
 	cat $baseMaterial | perl $myDirectory/slurp.pl >> $programTemp
 	if [ ! "$dumpFlag" ]; then
 		rm -f $linkTemp
