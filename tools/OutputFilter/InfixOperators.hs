@@ -105,7 +105,7 @@ module InfixOperators where
   contentToString :: Content -> String
   contentToString (StringContent s) = s
   contentToString (Operator name cs) | shouldInfix name = join (" " ++ init (tail name) ++ " ")  innards
-                                     | otherwise        = name ++ " [" ++ join " ,, " innards ++ "]"
+                                     | otherwise        = name ++ "(" ++ join ",," innards ++ ")"
     where innards = map contentToString cs
 
   shouldInfix ('_':cs) = last cs == '_'
