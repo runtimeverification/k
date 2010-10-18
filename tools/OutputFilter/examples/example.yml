@@ -24,6 +24,9 @@ thread:
   cell-style:
     foreground: black
 callStack: recursively-hide
+blockStack: recursively-hide
+local: show
+#control: recursively-hide
 # mem:
 #   keep-chars: 170
 
