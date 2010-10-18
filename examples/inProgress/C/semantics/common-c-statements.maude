@@ -9,6 +9,7 @@ mod COMMON-SEMANTICS-STATEMENTS-INCLUDE is
 	op popBlock : -> K .
 	op pushBlock : -> K .
 	op addToHistory : Nat -> K .
+	op caseHelper : Nat -> K .
 endm 
  
 mod COMMON-SEMANTICS-IF-THEN is
@@ -126,8 +127,8 @@ mod COMMON-SEMANTICS-SWITCH is
 	
 	--- match found in value and type, goto it
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), V':Value, (? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> ?)) 
-			=> Goto(genLabel(SN:Nat, V':Value)) 
+		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), V':Value, (? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> caseHelper(Num:Nat))) 
+			=> Goto(caseHelper(Num:Nat))
 		...</ k >
 		--- < xmessages >... (. => "Switch: in block " +String toString(Num:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages > < blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		: KSentence [metadata "computational rule"] .
@@ -202,7 +203,7 @@ mod COMMON-SEMANTICS-SWITCH is
 		--- : KSentence [metadata "computational rule"] .
 
 	mb [case-fall-through]: rule
-		< k > Case(?, ?, K:K) => K:K ...</ k >
+		< k > Case(?, ?, ?, K:K) => K:K ...</ k >
 		: KSentence [metadata "structural"] .
 	mb [default-fall-through]: rule
 		< k > Default(?, K:K) => K:K ...</ k >
@@ -644,15 +645,15 @@ mod COMMON-SEMANTICS-GOTO is
 		< blockHistoryGoto > BlockHistory:List </ blockHistoryGoto >
 		if notBool $hasMapping(M:Map, Target:Id)
 		: KSentence [metadata "structural"] .	
-			
+		
 	mb rule
-		< computation > (Case(SwitchNum:Nat, tv(I:Int, T:Type), S:K) => S:K) ~> K:K </ computation >
+		< computation > (Case(SwitchNum:Nat, CaseNum:Nat, tv(I:Int, T:Type), S:K) => S:K) ~> K:K </ computation >
 		< computationTail > Tail:K </ computationTail >
 		< loopStackGoto > LoopStack:List </ loopStackGoto >
 		< declarationStack > DeclStack:List </ declarationStack >
 		< freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
 		< gotoMap >... kpair(Tu:K, F:Id) |-> Map(
-			(M:Map => M:Map[gotoObject(Depth:Nat, BlockHistory:List, (pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / genLabel(SwitchNum:Nat, tv(I:Int, T:Type))])
+			(M:Map => (M:Map[caseHelper(CaseNum:Nat) / genLabel(SwitchNum:Nat, tv(I:Int, T:Type))])[gotoObject(Depth:Nat, BlockHistory:List, (pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / caseHelper(CaseNum:Nat)])
 		) ...</ gotoMap >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >

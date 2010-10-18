@@ -460,7 +460,7 @@ and printSwitch exp stat =
 	retval 
 *)
 and printCase exp stat =
-	wrap ((string_of_int !currentSwitchId) :: (printExpression exp) :: (printStatement stat) :: []) "Case"
+	wrap ((string_of_int !currentSwitchId) :: (string_of_int (counter := (!counter + 1); !counter)) :: (printExpression exp) :: (printStatement stat) :: []) "Case"
 and printCaseRange exp1 exp2 stat =
 	wrap ((printExpression exp1) :: (printExpression exp2) :: (printStatement stat) :: []) "CaseRange"
 and printDefault stat =

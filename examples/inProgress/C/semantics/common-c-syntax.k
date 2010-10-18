@@ -373,7 +373,7 @@ and statement =
 	| DEFAULT of statement * cabsloc
 ***)
 	op Switch : Nat K K -> PureStatement [strict(2)] --- unique switch id
-	op Case : Nat K K -> PureStatement --- unique switch id, exp, statement
+	op Case : Nat Nat K K -> PureStatement --- unique switch id, unique case id, exp, statement
 	op CaseRange : K K K -> PureStatement --- gcc extension
 	op Default : Nat K -> PureStatement --- unique switch id, statement
 ***(

@@ -9,6 +9,8 @@ k:
   keep: 3
   keep-chars: 135
   
+unfinishedComputation:
+  keep
   # text-style:
     # bold: no
   # cell-style:
