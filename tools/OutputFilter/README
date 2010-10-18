@@ -48,13 +48,15 @@ Configuration file format:
      Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, Dullblack, Dullred,
      Dullgreen, Dullyellow, Dullblue, Dullmagenta, Dullcyan, Dullwhite
 
-  Global substitutions can be defined by the special-case cellname:
-  "global-substitutions", where you can provide a mapping for string
-  replacement, as below:
-    global-substitutions:
-      old1: new1
+  Global options can be defined in the special-case cellname: "options", where
+  you can specify the following:
+    global-substitutions:        -- substitute oldn with newn wherever it may
+      old1: new1                    arise
       old2: new2
       old3: new3
       ...
+    spaceless-cells: yes         -- Don't wrap cell names in spaces
+    infixify: yes                -- Parse operators, and represent the infix
+                                    ones as infix
 
   See example.yml in the examples directory

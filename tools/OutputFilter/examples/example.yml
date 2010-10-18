@@ -7,9 +7,7 @@ T:
     foreground: green
 k:
   keep: 5
-  keep-chars: 170
-  text-style:
-    bold: yes
+#  keep-chars: 170
   cell-style:
     underlined: yes
     bold: yes
@@ -27,12 +25,16 @@ thread:
     foreground: black
 callStack: recursively-hide
 # mem:
-#   text-style:
-#     foreground: black
+#   keep-chars: 170
 
-# Global substitutions
-global-substitutions:
-  ".List{K}": "*"
+# Options (special cell)
+options:
+  global-substitutions:
+    "(.List{K})": "."
+    ".List{K}": "."
+  spaceless-cells: yes
+  infixify: yes
+
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. whitelisting <thread> wont whitelist all of its children
@@ -44,10 +46,12 @@ global-substitutions:
 #   colors
 #   global string replacement
 #   keepChars - keep only so many characters per line
+#   option to remove spaces in the cell membranes
+#   operator parsing, and pretty printing
+#   infixify
 
 # Upcoming features:
 #   yaml parse errors
-
 #   environment/memory lookup
 #   regular-expression based line-based show/hide
 #   arbitrary global and local string-replacement rules

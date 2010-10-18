@@ -68,20 +68,22 @@ module FilterOutput where
   handleContents conf name cs = hcat $ (map (ppKOutput conf) . doPrune conf name . cleanupStrings)  cs
 
   handleString :: KOutPrinter
-  handleString conf (String n s) = handleStyle conf n textStyle . text . pruneChars conf n $ handleSubstitutions conf n $ s
+  handleString conf (String n s) = handleStyle conf n textStyle . text . pruneChars conf n $ handleSubstitutions conf n $ handleInfix conf $ s
   {-
     Pretty Printing
    -}
 
   ppBeginCell :: CellReader Doc
-  ppBeginCell conf n = handleStyle conf n cellStyle . text $ "< " ++ n ++ " >"
+  ppBeginCell conf n = handleStyle conf n cellStyle . text $ if shouldSpacelessCells conf then "<" ++ n ++ ">"
+                                                             else "< " ++ n ++ " >"
 
   ppEndCell :: CellReader Doc
-  ppEndCell conf n = handleStyle conf n cellStyle . text $ "</ " ++ n ++ " >"
+  ppEndCell conf n = handleStyle conf n cellStyle . text $  if shouldSpacelessCells conf then "</" ++ n ++ ">"
+                                                             else "</ " ++ n ++ " >"
 
   ppKOutput :: Configuration -> KOutput -> Doc
   ppKOutput conf str@(String _ _) = handleString conf str
-  ppKOutput conf cell@(Cell _ _) = handleCell conf cell
+  ppKOutput conf cell@(Cell _ _)  = handleCell conf cell
 
   isCell (Cell _ _) = True
   isCell _          = False
@@ -89,6 +91,9 @@ module FilterOutput where
   isString (String _ _ ) = True
   isString _             = False
 
+  handleInfix :: Configuration -> String -> String
+  handleInfix conf s | shouldInfixify conf = makeInfix s
+                     | otherwise           = s
 
   handleStyle :: StyleReader (Doc -> Doc)
   handleStyle conf name f | hasStyle conf name f = stylize (fetchStyle conf name f)
@@ -187,6 +192,16 @@ module FilterOutput where
   lookupCell :: CellReader (Maybe CellConfigRhs)
   lookupCell = flip Map.lookup
 
+  queryOptions :: Configuration -> (CellConfigRhs -> Maybe Bool) -> Bool
+  queryOptions conf f = case f <$> Map.lookup "options" conf of
+                          Just (Just True) -> True
+                          _                -> False
+
+  shouldSpacelessCells :: Configuration -> Bool
+  shouldSpacelessCells conf = queryOptions conf spacelessCells
+
+  shouldInfixify :: Configuration -> Bool
+  shouldInfixify conf = queryOptions conf infixify
 
   -- Should a cell be shown?
   shouldShow :: Query
@@ -219,9 +234,10 @@ module FilterOutput where
                     else case lookupCell conf cn of
                            Just (Configs _ _ _ _ (Just _)) -> True
                            _                               -> False
-    where hasGlobalSubs conf = case lookupCell conf "global-substitutions" of
-                                 Nothing -> False
-                                 _       -> True
+    where hasGlobalSubs conf = case lookupCell conf "options" of
+                                 Nothing                    -> False
+                                 Just (Options Nothing _ _) -> False
+                                 _                          -> True
 
 
 
@@ -249,10 +265,10 @@ module FilterOutput where
 
   -- Extend me to do local subs
   fetchSubs :: CellReader [Substitution]
-  fetchSubs conf cn = case lookupCell conf "global-substitutions" of
-                        Just (Configs _ _ _ _ (Just subs)) -> subs
-                        Nothing -> error "Internal Error: hasSubs approved a match incorrectly"
-                        _       -> error "Unable to find the global-substitutions cell"
+  fetchSubs conf cn = case globalSubstitutions <$> lookupCell conf "options" of
+                        Just (Just subs) -> subs
+                        Nothing          -> error "Internal Error: hasSubs approved a match incorrectly"
+
 
   -- Whether a maybe is something
 

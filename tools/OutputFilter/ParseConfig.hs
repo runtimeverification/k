@@ -36,6 +36,11 @@ module ParseConfig where
                                , textStyle     :: Maybe Style
                                , substitutions :: Maybe [Substitution]
                                }
+                     | Options { globalSubstitutions :: Maybe [Substitution]
+                               , spacelessCells      :: Maybe Bool
+                               , infixify            :: Maybe Bool
+                               }
+
     deriving (Show)
 
   data Style = Style { foreground :: Maybe Color
@@ -92,16 +97,30 @@ module ParseConfig where
   -- I use arrows because I'm awesome. See the commented out version for the more clear version
   -- There is a special-case cell called "global-substitutions" for its namesake
   extractCellConfig :: (YamlLite, YamlLite) -> CellConfig
-  extractCellConfig pair | isGlobalSub pair = (arr unStr *** arr readSubstitution) pair
-                         | otherwise        = (arr unStr *** arr readConfig) pair
+  extractCellConfig pair | isOptionsCell pair = (arr unStr *** arr readOptions) pair
+                         | otherwise          = (arr unStr *** arr readConfig) pair
   -- extractCellConfig (l,r) = (unStr l, readConfig r)
 
   mkSubstitution :: (YamlLite, YamlLite) -> Substitution
   mkSubstitution (key,val) = Substitution (unStr key) (unStr val)
 
-  readSubstitution (Map xs) = Configs Nothing Nothing Nothing Nothing (Just (map mkSubstitution xs))
+  readOptions (Map xs) = Options (getGlobalSubs     <$> (lookupConf doGlobalSubs xs))
+                                 (getBool           <$> (lookupConf doSpacelessCells xs))
+                                 (getBool           <$> (lookupConf doInfixity xs))
+    where doGlobalSubs     = ["global-substitutions", "global-subs"] ++ doSubstitutions
+          doSpacelessCells = ["spaceless-cells", "spaceless", "spacelessCells"]
+          doInfixity       = ["infixity", "infixify", "infix"]
 
-  isGlobalSub (key, val) = unStr key == "global-substitutions"
+  doSubstitutions = ["subs", "subst", "substitutions", "sub"]
+
+  getGlobalSubs (Map xs) = map mkSubstitution xs
+
+  getBool (Str s) = readBool s
+
+
+  isOptionsCell (key, _) = unStr key == "options"
+
+  --isGlobalSub (key, val) = unStr key == "global-substitutions"
 
   -- Extend the below function to add more functionality
   readConfig :: YamlLite -> CellConfigRhs
@@ -109,17 +128,18 @@ module ParseConfig where
   readConfig (Map map) = readMap map
 
   readMap :: [(YamlLite,YamlLite)] -> CellConfigRhs
-  readMap xs = Configs (getLines        <$> (lookup doKeep))
-                       (getChars        <$> (lookup doKeepChars))
-                       (getStyle        <$> (lookup doCellStyle))
-                       (getStyle        <$> (lookup doTextStyle))
+  readMap xs = Configs (getLines <$> (lookupConf doKeep xs))
+                       (getChars <$> (lookupConf doKeepChars xs))
+                       (getStyle <$> (lookupConf doCellStyle xs))
+                       (getStyle <$> (lookupConf doTextStyle xs))
                        Nothing -- extend me to do local substitutions
-    where lookup ss       = snd <$> (find ((flip compareStr) ss . unStr . fst) $ xs)
-          doKeep          = ["lines", "keep"]
+    where doKeep          = ["lines", "keep"]
           doKeepChars     = ["characters", "chars", "keepChars", "keep-chars", "keep-characters"]
           doCellStyle     = ["cell-color", "cell-style"]
           doTextStyle     = ["text-color", "text-style"]
           doSubstitutions = ["local-substitutions", "substitutions"]
+
+  lookupConf ss map = snd <$> (find ((flip compareStr) ss . unStr . fst) $ map)
 
   getLines :: YamlLite -> Int
   getLines (Str s) = tryRead areNumbers s $ "Unable to parse: " ++ s ++ " as a number"
@@ -127,15 +147,14 @@ module ParseConfig where
 
   getChars :: YamlLite -> Int
   getChars (Str s) = tryRead areNumbers s $ "Unable to parse: " ++ s ++ " as a number"
-  getChars _ = error $ "Internal error: getLines called on non-terminal value"
+  getChars _ = error $ "Internal error: getChars called on non-terminal value"
 
   getStyle :: YamlLite -> Style
-  getStyle (Map map) = Style (getColor     <$> (lookup doForeground))
-                             (getColor     <$> (lookup doBackground))
-                             (getUnderline <$> (lookup doUnderline))
-                             (getBold      <$> (lookup doBold))
-    where lookup ss = snd <$> (find ((flip compareStr) ss . unStr . fst) $ map)
-          doForeground = ["foreground"]
+  getStyle (Map xs) = Style (getColor      <$> (lookupConf doForeground xs))
+                             (getColor     <$> (lookupConf doBackground xs))
+                             (getUnderline <$> (lookupConf doUnderline xs))
+                             (getBold      <$> (lookupConf doBold xs))
+    where doForeground = ["foreground"]
           doBackground = ["background"]
           doUnderline  = ["underline", "underlined"]
           doBold       = ["bold"]
@@ -194,6 +213,11 @@ module ParseConfig where
   getConfig :: FilePath -> IO Configuration
   getConfig fp = extractConfiguration <$> parseYamlFileLite fp
 
+  readBool :: String -> Bool
+  readBool s | compareStr s doTrue  = True
+             | compareStr s doFalse = False
+             | otherwise            = error $ "Unable to read " ++ s ++ " as a truth value"
+
   -- Data "destructors", not so safe and meant to be expanded with ones raising more useful errors
   -- Todo: implement a more robust solution using generics
   unSeq :: YamlLite -> [YamlLite]
@@ -208,3 +232,9 @@ module ParseConfig where
   -- Read utilities
   tryRead :: Read a => (String -> Bool) -> String -> String -> a
   tryRead p s err = if p s then read (canonicalize s) else error err
+
+  -- tryReadBool :: String -> String -> Bool
+  -- tryReadBool = tryRead isBool
+
+  tryReadInt :: String -> String -> Int
+  tryReadInt = tryRead areNumbers

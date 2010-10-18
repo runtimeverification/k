@@ -6,7 +6,7 @@ module InfixOperators where
   import Control.Applicative ((<$>))
   import Data.List.Utils
 
-  data Content = Operator Name [Content] | StringContent String
+  data Content = Operator Name [Content] | StringContent String | ParenedContent [Content]
     deriving (Show)
 
   type ContentState = Int
@@ -29,9 +29,9 @@ module InfixOperators where
 
   parseNonOpParens :: ContentParser Content
   parseNonOpParens = do openParen
-                        StringContent s <- parseStringContent
+                        innards <- parseContentsTop
                         endParen
-                        return . StringContent $ wrap '(' s ')'
+                        return . ParenedContent $ innards
 
 
   beginOperator :: ContentParser Name
@@ -71,9 +71,17 @@ module InfixOperators where
   -- todo: do the below with generics
 
   postProcess :: [Content] -> [Content]
-  postProcess = eliminateEmptySCs . seperateSCs . globSCs
+  postProcess = eliminateEmptySCs . seperateSCs . globSCs . flattenParenContent
 
-  -- Condense adjacent StringContents together. Use this before seperating on ,, and not after
+  -- Concat paren content down
+  flattenParenContent :: [Content] -> [Content]
+  flattenParenContent (ParenedContent pcs : cs) = [StringContent "("] ++ flattenParenContent pcs ++ [StringContent ")"] ++ flattenParenContent cs
+  flattenParenContent (Operator n ocs : cs)     = Operator n (flattenParenContent ocs) : flattenParenContent cs
+  flattenParenContent (c : cs)                  = c : flattenParenContent cs
+  flattenParenContent []                        = []
+
+  -- Condense adjacent StringContents together.
+  -- Use this before seperating on ,, and not after
   globSCs :: [Content] -> [Content]
   globSCs (StringContent s : StringContent s2 : xs) = globSCs (StringContent (s ++ s2) : xs)
   globSCs (StringContent s : xs)                    = StringContent s : globSCs xs
@@ -92,3 +100,19 @@ module InfixOperators where
   eliminateEmptySCs (Operator n cs : rest)  = Operator n (eliminateEmptySCs cs) : eliminateEmptySCs rest
   eliminateEmptySCs (c : cs)                = c : eliminateEmptySCs cs
   eliminateEmptySCs []                      = []
+
+  -- Convert back into a string
+  contentToString :: Content -> String
+  contentToString (StringContent s) = s
+  contentToString (Operator name cs) | shouldInfix name = join (" " ++ init (tail name) ++ " ")  innards
+                                     | otherwise        = name ++ " [" ++ join " ,, " innards ++ "]"
+    where innards = map contentToString cs
+
+  shouldInfix ('_':cs) = last cs == '_'
+  shouldInfix _ = False
+
+  -- Do the whole shebang
+  makeInfix :: String -> String
+  makeInfix s = case runParser parseContentsTop 0 "" s of
+                  Left err -> error $ show err
+                  Right cs -> join " " . map contentToString $ postProcess cs
