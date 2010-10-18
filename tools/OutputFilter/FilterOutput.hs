@@ -45,9 +45,6 @@ module FilterOutput where
           remEmpty (x:xs)             = x : remEmpty xs
           remEmpty []                 = []
 
-  -- Delete all occurrences
-  deleteAll :: Eq a => a -> [a] -> [a]
-  deleteAll x = filter ((/=) x)
 
   handleCell :: KOutPrinter
   handleCell conf (Cell name contents) | shouldShow conf name    = ppCell conf name contents
