@@ -35,7 +35,7 @@ global-substitutions:
   ".List{K}": "*"
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
-# recursive, e.g. blacklisting <thread> wont blacklist all of its children
+# recursive, e.g. whitelisting <thread> wont whitelist all of its children
 
 # Current features:
 #   whitelisting
@@ -43,10 +43,11 @@ global-substitutions:
 #   recursive hide
 #   colors
 #   global string replacement
+#   keepChars - keep only so many characters per line
 
 # Upcoming features:
 #   yaml parse errors
-#   keepChars - keep only so many characters per line
+
 #   environment/memory lookup
 #   regular-expression based line-based show/hide
 #   arbitrary global and local string-replacement rules

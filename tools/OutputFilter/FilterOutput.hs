@@ -11,6 +11,7 @@
 module FilterOutput where
   import ParseKOutput
   import ParseConfig
+  import InfixOperators
   import System.Environment
   import Useful.String
   import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
