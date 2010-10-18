@@ -43,7 +43,7 @@ Build-type:          Simple
 Cabal-version:       >=1.2
 
 
-Executable OutputFilter
+Executable filterOutput
   -- .hs or .lhs file containing the Main module.
   Main-is: Main.hs
 

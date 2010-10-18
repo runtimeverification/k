@@ -105,7 +105,7 @@ module InfixOperators where
   contentToString :: Content -> String
   contentToString (StringContent s) = s
   contentToString (Operator name cs) | shouldInfix name  = join (" " ++ init (tail name) ++ " ")  innards
-                                     | shouldMixfix name = undefined
+                                     | shouldMixfix name = join " " $ intermix (seperateMixfix name) innards
                                      | otherwise         = name ++ "(" ++ join ",," innards ++ ")"
     where innards = map contentToString cs
 
@@ -113,12 +113,14 @@ module InfixOperators where
     where x `notIn` xs = not $ x `elem` xs
   shouldInfix _ = False
 
-  shouldMixfix s = False
+  shouldMixfix s = '_' `elem` s
 
   seperateMixfix :: String -> [String]
   seperateMixfix s = "_" `split` (deleteAll '`' s)
 
-  -- Intermix two strings. The first argument should be of size one greater than the second
+
+
+  -- Intermix two string lists. The first argument should be of size one greater than the second
   intermix :: [a] -> [a] -> [a]
   intermix (l:ls) (r:rs) = l : r : intermix ls rs
   intermix [left] [] = [left]

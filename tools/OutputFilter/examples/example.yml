@@ -39,7 +39,6 @@ options:
   spaceless-cells: yes
   infixify: yes
 
-
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. whitelisting <thread> wont whitelist all of its children
 
