@@ -841,18 +841,18 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 		: KSentence [metadata "structural"] .
 		
 	mb [post-increment]: rule
-		< k > postInc(Loc:Nat, tv(I:Int, T:Type), T:Type)
-			=> *(tv(Loc:Nat, pointerType(T:Type))) := tv(I:Int, T:Type) + tv(1, int)
+		< k > postInc(Loc:Nat, tv(V:BaseValue, T:Type), T:Type)
+			=> *(tv(Loc:Nat, pointerType(T:Type))) := tv(V:BaseValue, T:Type) + tv(1, int)
 			~> discard
-			~> tv(I:Int, T:Type)
+			~> tv(V:BaseValue, T:Type)
 		...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb [post-decrement]: rule
-		< k > postDec(Loc:Nat, tv(I:Int, T:Type), T:Type)
-			=> *(tv(Loc:Nat, pointerType(T:Type))) := tv(I:Int, T:Type) - tv(1, int)
+		< k > postDec(Loc:Nat, tv(V:BaseValue, T:Type), T:Type)
+			=> *(tv(Loc:Nat, pointerType(T:Type))) := tv(V:BaseValue, T:Type) - tv(1, int)
 			~> discard
-			~> tv(I:Int, T:Type)
+			~> tv(V:BaseValue, T:Type)
 		...</ k >
 		: KSentence [metadata "structural"] .
 endm

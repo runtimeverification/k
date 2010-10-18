@@ -1118,6 +1118,13 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence .
 		
 	mb rule
+		< k > zeroType(Name:K, unionType(S:Id)) 
+			=> zeroType(Name:K . F:Id, T:Type)
+		...</ k >
+		< structs >... S:Id |-> (typedDeclaration(T:Type, F:Id) :: ?) ...</ structs > 
+		: KSentence .
+		
+	mb rule
 		< k > zeroStruct(Name:K, (typedDeclaration(T:Type, F:Id) :: L:List{C})) 
 			=> zeroType(Name:K . F:Id, T:Type)
 			~> zeroStruct(Name:K, L:List{C}) 
@@ -1128,7 +1135,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence .
 		
 	mb rule
-		< k > zeroType(Name:K, T:Type) => Name:K := tv(NullPointer, T:Type) ~> discard  ...</ k >
+		< k > zeroType(Name:K, T:Type) => Name:K := tv(NullPointer, T:Type) ~> discard ...</ k >
 		if hasFunctionType(T:Type) 
 		orBool hasPointerType(T:Type)
 		: KSentence .
@@ -1141,6 +1148,17 @@ mod COMMON-GLOBAL-DECLARATION is
 		: KSentence .
 	mb rule
 		< k > zeroType(Name:K, arrayType(T:Type, 0)) => (.).K ...</ k >
+		: KSentence .
+		
+	--- mb rule
+		--- < k > zeroType(Name:K, flexibleArrayType(T:Type))
+			--- => zeroType(*(cast(pointerType(T:Type), &(Name:K))), T:Type)
+		--- ...</ k >
+		--- : KSentence .
+	mb rule
+		< k > zeroType(Name:K, flexibleArrayType(T:Type))
+			=> (.).K
+		...</ k >
 		: KSentence .
 		
 		--- < types >... Name:K |-> T:Type ...</ types >
