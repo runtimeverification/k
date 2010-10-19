@@ -41,7 +41,6 @@ module ParseConfig where
                                , spacelessCells      :: Maybe Bool
                                , infixify            :: Maybe Bool
                                }
-
     deriving (Show)
 
   data Style = Style { foreground :: Maybe Color
@@ -98,8 +97,8 @@ module ParseConfig where
   -- I use arrows because I'm awesome. See the commented out version for the more clear version
   -- There is a special-case cell called "global-substitutions" for its namesake
   extractCellConfig :: (YamlLite, YamlLite) -> CellConfig
-  extractCellConfig pair | isOptionsCell pair = (arr unStr *** arr readOptions) pair
-                         | otherwise          = (arr unStr *** arr readConfig) pair
+  extractCellConfig pair | isOptionsCell pair = (unStr *** readOptions) pair
+                         | otherwise          = (unStr *** readConfig) pair
   -- extractCellConfig (l,r) = (unStr l, readConfig r)
 
   mkSubstitution :: (YamlLite, YamlLite) -> Substitution

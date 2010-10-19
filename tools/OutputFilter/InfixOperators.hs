@@ -20,12 +20,14 @@ module InfixOperators where
   parseOperator = do name     <- beginOperator
                      contents <- manyTill parseContents (try endOperator)
                      return $ Operator name contents
+              <?> "an operator"
 
   parseContents :: ContentParser Content
-  parseContents = (try parseOperator) <|> try parseStringContent
+  parseContents = (try parseOperator) <|> try parseStringContent <|> try acceptRest
 
   parseStringContent = StringContent <$> many1 (noneOf "()")
                    <|> parseNonOpParens
+                   <?> "string content"
 
   parseNonOpParens :: ContentParser Content
   parseNonOpParens = do openParen
@@ -41,9 +43,16 @@ module InfixOperators where
                      parseLabel
                      openParen
                      return name
+               <?> "beginning of operator"
 
   endOperator :: ContentParser ()
   endOperator = endParen <?> "end of operator"
+
+  -- Just accept the rest of the input as a StringContent
+  -- This is because text and cells may be intermixed, e.g. "List ( <cell> <cell> )" would be split into two seperate
+  -- strings with the cells in them, e.g. ["List ( ", Cell, Cell, " ) "]
+  acceptRest = StringContent <$> many1 anyChar
+
 
   parseLabel :: ContentParser Name
   parseLabel = anyChar `manyTill` string "Label"
