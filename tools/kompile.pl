@@ -265,7 +265,7 @@ my $top_level_pattern = join("|", (
 
 # Configuration pattern: excludes, for the spacing, from the above all those substrings matching $exclude
 my $exclude = join("|",
-		   "\^\\s*(?:in|load|require)\\s+\\S+\\s*\$",                       # in/load of a file
+		   "\^\\s*(?:in|load|require)\\s+\\S+\\s*\$",               # in/load of a file
 		   "kmod\\s+(?:\\S*(?=\\s))",                               # kmodule name
 		   "including(?:.*?(?=\\s+(?=$kmaude_keywords_pattern)))",  # included module expressions
 		   ":$ksort",                                               # sort declarations for other than ordinary $kvar
@@ -1316,7 +1316,7 @@ sub maudify_module {
     
 # Step: Add missing spaces around tokens
     $_ = spacify($_);
-    # print  "Stage:\n$_\n\n";
+#    print  "Stage:\n$_\n\n";
     
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
@@ -1619,7 +1619,7 @@ sub on_the_fly_kvars {
 sub add_cell_label_ops {
     local ($_) = @_;
     my $ops = (/configuration\s+(.*?)(?:$kmaude_keywords_pattern)/s
-	       ? "ops ".join(" ",set($1 =~ /<\s*\/?\s*(.*?)\s*\*?\s*>/gs))." : -> CellLabel " : "");
+	       ? "ops ".join(" ",set($1 =~ /<\s*\/?\s*(.*?)\s*[\*\+\?]?\s*>/gs))." : -> CellLabel " : "");
     s/(?=endkm)/$ops?"$ops ":""/se;
     return $_;
 }
