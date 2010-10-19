@@ -5,6 +5,7 @@ module InfixOperators where
   import ParseKOutput
   import Control.Applicative ((<$>))
   import Data.List.Utils
+  import Control.Monad.Identity (Identity)
 
   data Content = Operator Name [Content] | StringContent String | ParenedContent [Content]
     deriving (Show)
@@ -14,7 +15,7 @@ module InfixOperators where
   type ContentParser = Parsec String ContentState
 
   parseContentsTop :: ContentParser [Content]
-  parseContentsTop = many1 parseContents
+  parseContentsTop = many1 parseContentsNotAll
 
   parseOperator :: ContentParser Content
   parseOperator = do name     <- beginOperator
@@ -23,7 +24,11 @@ module InfixOperators where
               <?> "an operator"
 
   parseContents :: ContentParser Content
-  parseContents = (try parseOperator) <|> try parseStringContent <|> try acceptRest
+  parseContents = (try parseOperator) <|> try parseStringContent  <|> try acceptRest
+
+  parseContentsNotAll :: ContentParser Content
+  parseContentsNotAll = (try parseOperator) <|> try parseStringContent
+
 
   parseStringContent = StringContent <$> many1 (noneOf "()")
                    <|> parseNonOpParens
@@ -51,7 +56,8 @@ module InfixOperators where
   -- Just accept the rest of the input as a StringContent
   -- This is because text and cells may be intermixed, e.g. "List ( <cell> <cell> )" would be split into two seperate
   -- strings with the cells in them, e.g. ["List ( ", Cell, Cell, " ) "]
-  acceptRest = StringContent <$> manyTill anyChar (lookAhead (try parseOperator))
+  acceptRest :: ContentParser Content
+  acceptRest = StringContent <$> many1 anyChar -- many1 (anyChar >>= \c -> (notFollowedBy parseOperator >> return c))
 
 
   parseLabel :: ContentParser Name
