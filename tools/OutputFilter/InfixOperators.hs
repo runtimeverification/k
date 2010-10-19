@@ -51,7 +51,7 @@ module InfixOperators where
   -- Just accept the rest of the input as a StringContent
   -- This is because text and cells may be intermixed, e.g. "List ( <cell> <cell> )" would be split into two seperate
   -- strings with the cells in them, e.g. ["List ( ", Cell, Cell, " ) "]
-  acceptRest = StringContent <$> many1 anyChar
+  acceptRest = StringContent <$> manyTill anyChar (lookAhead (try parseOperator))
 
 
   parseLabel :: ContentParser Name
