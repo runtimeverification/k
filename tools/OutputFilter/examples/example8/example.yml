@@ -1,0 +1,37 @@
+# Whitelist the following cells
+T:
+  cell-style:
+    background: black
+k:
+  keep-lines: 3
+#  keep-chars: 500
+  cell-style:
+    underlined: yes
+    bold: yes
+env:
+  text-style:
+    foreground: black
+  cell-style:
+    foreground: dullyellow
+threads:
+  cell-style:
+    foreground: black
+thread:
+  cell-style:
+    foreground: black
+callStack: recursively-hide
+blockStack: recursively-hide
+local:
+  cell-style:
+    foreground: black
+
+# Options (special cell)
+options:
+  global-substitutions:
+    "(.List{K})": "."
+    ".List{K}": "."
+    ",,": ", "
+    ".,": ","
+    ").": ")"
+  spaceless-cells: yes
+  infixify: true

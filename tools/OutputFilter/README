@@ -39,10 +39,10 @@ Configuration file format:
                                     underline the cell/text. This can also be
                                     "deunderline", which will (recursively) undo
                                     any previously set underlineing
-    foreground <color>           -- Make the text have <color> as foreground (see
-                                    below)
-    background <color>           -- Make the text have <color> as background (see
-                                    below)
+    foreground <color>           -- Make the text have <color> as foreground
+                                    (see below)
+    background <color>           -- Make the text have <color> as background
+                                    (see below)
 
   <color> can be any of the following:
      Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, Dullblack, Dullred,
@@ -57,6 +57,8 @@ Configuration file format:
       ...
     spaceless-cells: yes         -- Don't wrap cell names in spaces
     infixify: yes                -- Parse operators, and represent the infix
-                                    ones as infix
+                                    ones as infix, prefix as prefix, and mixfix
+                                    as mixfix. For mixfix, this enforces the
+                                    arity of the operator.
 
   See example.yml in the examples directory

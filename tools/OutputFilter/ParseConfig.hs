@@ -14,6 +14,7 @@ g  Current default behavior is to not show anything not explicitly told to be sh
 module ParseConfig where
   import Data.Yaml.Syck
   import Control.Applicative
+  import Control.Monad
   import Data.Char
   import Control.Arrow
   import Data.List
@@ -104,7 +105,7 @@ module ParseConfig where
   mkSubstitution :: (YamlLite, YamlLite) -> Substitution
   mkSubstitution (key,val) = Substitution (unStr key) (unStr val)
 
-  readOptions (Map xs) = Options (getGlobalSubs     <$> (lookupConf doGlobalSubs xs))
+  readOptions (Map xs) = Options (getGlobalSubs     =<< (lookupConf doGlobalSubs xs))
                                  (getBool           <$> (lookupConf doSpacelessCells xs))
                                  (getBool           <$> (lookupConf doInfixity xs))
     where doGlobalSubs     = ["global-substitutions", "global-subs"] ++ doSubstitutions
@@ -113,7 +114,8 @@ module ParseConfig where
 
   doSubstitutions = ["subs", "subst", "substitutions", "sub"]
 
-  getGlobalSubs (Map xs) = map mkSubstitution xs
+  getGlobalSubs (Map xs) = Just $ map mkSubstitution xs
+  getGlobalSubs _        = Nothing
 
   getBool (Str s) = readBool s
 
@@ -133,7 +135,7 @@ module ParseConfig where
                        (getStyle <$> (lookupConf doCellStyle xs))
                        (getStyle <$> (lookupConf doTextStyle xs))
                        Nothing -- extend me to do local substitutions
-    where doKeep          = ["lines", "keep"]
+    where doKeep          = ["lines", "keep", "keep-lines", "keepLines"]
           doKeepChars     = ["characters", "chars", "keepChars", "keep-chars", "keep-characters"]
           doCellStyle     = ["cell-color", "cell-style"]
           doTextStyle     = ["text-color", "text-style"]

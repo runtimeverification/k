@@ -124,6 +124,7 @@ module InfixOperators where
   intermix :: [a] -> [a] -> [a]
   intermix (l:ls) (r:rs) = l : r : intermix ls rs
   intermix [left] [] = [left]
+  intermix _ _ =  error "Output contains the wrong number of arguments for a mixfix operator"
 
   -- Do the whole shebang
   makeInfix :: String -> String
