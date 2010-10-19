@@ -1,5 +1,5 @@
 int up[15], down[15], rows[8], x[8];
-int queens(), print();
+void queens(), print();
 
 main()
 {
@@ -13,7 +13,7 @@ main()
 	return 0;
 }
 
-queens(c)
+void queens(c)
 {
 	int r;
 
@@ -29,7 +29,7 @@ queens(c)
 		}
 }
 
-print()
+void print()
 {
 	int k;
 

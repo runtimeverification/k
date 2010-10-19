@@ -32,7 +32,7 @@ backslash(c)
 	return c;
 }
 
-f() {
+void f() {
 	int i, x = 0, y;
 
 	printf("f:\n");
@@ -54,7 +54,7 @@ f() {
 	}
 }
 
-g() {
+void g() {
 	int i;
 
 	printf("g:\n");
@@ -72,7 +72,7 @@ g() {
 	}
 }
 
-h()
+void h()
 {
 	int i, n=0;
 
@@ -96,7 +96,7 @@ h()
 	printf("%d defaults\n", n);
 }
 
-big(x) unsigned x; {
+void big(x) unsigned x; {
 	switch(x&0x6000000){
 	case -1:
 	case -2:
@@ -113,7 +113,7 @@ big(x) unsigned x; {
 
 #include <limits.h>
 
-limit() {
+void limit() {
 	int i;
 
 	for (i = INT_MIN; i <= INT_MIN+5; i++)

@@ -43,7 +43,7 @@ int ptinrect(point p, rect r) {		/* is p in r? */
 
 struct odd {char a[3]; } y = {'a', 'b', 0};
 
-odd(struct odd y) {
+void odd(struct odd y) {
 	struct odd x = y;
 	printf("%s\n", x.a);
 }

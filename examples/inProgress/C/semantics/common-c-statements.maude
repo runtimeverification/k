@@ -107,66 +107,67 @@ mod COMMON-SEMANTICS-SWITCH is
 	--- fixme shouldn't there be sequence points here?
 	--- fixme not doing promoting or conversion
 	
-	op handleSwitch : Nat K Value -> K [metadata "strict(2)"] . --- switch num, promoted value of controlling exp, int value of exp
-	op handleSwitch-aux : Nat Value Value Map -> K .
+	op handleSwitch : Nat K -> K [metadata "strict(2)"] . --- switch num, promoted value of controlling exp, int value of exp
+	op handleSwitch-aux : K Value K -> K .
 	
 	mb rule
-		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => handleSwitch(SN:Nat, promote(tv(V:BaseValue, T:Type)), tv(V:BaseValue, T:Type)) ...</ k >
+		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => handleSwitch(SN:Nat, promote(tv(V:BaseValue, T:Type))) ...</ k >
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "computational rule"] .
 		
 	mb rule
-		< k > handleSwitch(SN:Nat, V:Value, V':Value) => handleSwitch-aux(SN:Nat, V:Value, V':Value, M:Map) ...</ k >
+		< k > handleSwitch(SN:Nat, V:Value) => handleSwitch-aux(SN:Nat, V:Value, Map(M:Map)) ...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		< gotoMap >... kpair(Tu:K, F:Id) |-> Map(M:Map) ...</ gotoMap >
 		: KSentence [metadata "computational rule"] .
 		
 	--- fixme feature can't do this :(
-	--- mb context handleSwitch-aux(?, ?, (? genLabel(?, `[HOLE`]) |-> ?)) : KSentence .
+	--- mb context handleSwitch-aux(?, ?, ?, Map((? (genLabel(?, `[HOLE`]:K) |-> ?)))) : KSentence .
+	--- mb context handleSwitch-aux(`[HOLE`]:K, ?, ?, ?) : KSentence .
 	
 	--- match found in value and type, goto it
+	--- don't need to erase the rest of K since we're GOTOing
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), V':Value, (? genLabel(SN:Nat, tv(V:BaseValue, T:Type)) |-> caseHelper(Num:Nat))) 
-			=> Goto(caseHelper(Num:Nat))
+		< k > tryCase(V:Value, V:Value, CaseHelper:K) => Goto(CaseHelper:K) ...</ k >
+		: KSentence [metadata "computational rule"] .
+		
+	op tryCase : K Value K -> K [metadata "strict(1)"] . --- K to be evaluated, val it should be, casehelper
+	mb rule
+		< k > (. => tryCase(Exp:K, V:Value, CaseHelper:K)) ~> handleSwitch-aux(SN:Nat, V:Value, Map((? ((genLabel(SN:Nat, Exp:K) |-> CaseHelper:K) => .))))
 		...</ k >
-		--- < xmessages >... (. => "Switch: in block " +String toString(BlockNum:Nat) +String ", gotoing to case " +String toString(V:BaseValue)) </ xmessages > < blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
+		if Exp:K =/=Bool l('Default)
 		: KSentence [metadata "computational rule"] .
 		
 	--- if all that's left is a default, do it
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, ?, ?, (genLabel(SN:Nat, l('Default)) |-> ?)) 
-			=> Goto(genLabel(SN:Nat, l('Default))) 
+		< k > handleSwitch-aux(SN:Nat, ?, Map((genLabel(SN:Nat, l('Default)) |-> ?))) 
+			=> Goto(genLabel(SN:Nat, l('Default)))
 		...</ k >
 		: KSentence [metadata "computational rule"] .
 	
 	--- if there's nothing left, no case matches
 	mb rule
-		< k > handleSwitch-aux(?, ?, ?, (.).Map) => (.).K ...</ k >
+		< k > handleSwitch-aux(?, ?, Map((.).Map)) => (.).K ...</ k >
 		: KSentence [metadata "structural rule"] .
-		
+
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), ?, (? ((genLabel(SN:Nat, tv(V':BaseValue, T:Type)) |-> ?) => (.).Map))) ...</ k >
+		< k > tryCase(tv(V':BaseValue, T:Type), tv(V:BaseValue, T:Type), CaseHelper:K) => (.).K ...</ k >
 		if V:BaseValue =/=Bool V':BaseValue
 		: KSentence [metadata "structural rule"] .
 		
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, ?, ?, (? ((genLabel(SN':Nat, ?) |-> ?) => (.).Map))) ...</ k >
+		< k > handleSwitch-aux(SN:Nat, ?, Map((? ((genLabel(SN':Nat, ?) |-> ?) => (.).Map)))) ...</ k >
 		if SN:Nat =/=Bool SN':Nat
 		: KSentence [metadata "structural rule"] .
 		
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, tv(V:BaseValue, T:Type), ?, (? ((L:KLabel(Args:List{K}) |-> ?) => (.).Map))) ...</ k >
+		< k > handleSwitch-aux(SN:Nat, ?, Map((? ((L:KLabel(?) |-> ?) => (.).Map)))) ...</ k >
 		if L:KLabel =/=Bool 'genLabel
 		: KSentence [metadata "structural rule"] .
-	
-	
-	--- when the type is wrong, convert it and save the original value
+			
 	mb rule
-		< k > handleSwitch-aux(SN:Nat, tv(?, T:Type), (? => tv(V:BaseValue, T':Type)), (? genLabel(SN:Nat, 
-					(tv(V:BaseValue, T':Type) => cast(T:Type, tv(V:BaseValue, T':Type)))
-				) |-> ?))
-		...</ k >
+		< k > tryCase((tv(V:BaseValue, T':Type) => cast(T:Type, tv(V:BaseValue, T':Type))), tv(?, T:Type), ?) ...</ k >
 		if T:Type =/=Bool T':Type
 		: KSentence [metadata "structural rule"] .
 	
@@ -620,21 +621,22 @@ mod COMMON-SEMANTICS-GOTO is
 		: KSentence [metadata "structural"] .	
 		
 	--- pushBlock ~> addToHistory(sym(Fresh:Nat)) ~> 
+	--- (Case(SwitchNum:Nat, CaseNum:Nat, tv(I:Int, T:Type), S:K) => S:K)
 	mb rule
-		< computation > (Case(SwitchNum:Nat, CaseNum:Nat, tv(I:Int, T:Type), S:K) => S:K) ~> K:K </ computation >
+		< computation > (Case(SwitchNum:Nat, CaseNum:Nat, Val:K, S:K) => S:K) ~> K:K </ computation >
 		< computationTail > Tail:K </ computationTail >
 		< loopStackGoto > LoopStack:List </ loopStackGoto >
 		< declarationStack > DeclStack:List </ declarationStack >
 		--- < freshNat > Fresh:Nat => sNat(Fresh:Nat) </ freshNat >
 		< gotoMap >... kpair(Tu:K, F:Id) |-> Map(
-			(M:Map => (M:Map[caseHelper(CaseNum:Nat) / genLabel(SwitchNum:Nat, tv(I:Int, T:Type))])[gotoObject(Depth:Nat, BlockHistory:List, (S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / caseHelper(CaseNum:Nat)])
+			(M:Map => (M:Map[caseHelper(CaseNum:Nat) / genLabel(SwitchNum:Nat, Val:K)])[gotoObject(Depth:Nat, BlockHistory:List, (S:K ~> K:K ~> Tail:K), LoopStack:List, DeclStack:List) / caseHelper(CaseNum:Nat)])
 		) ...</ gotoMap >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		< nestingDepthGoto > Depth:Nat </ nestingDepthGoto >
 		< blockHistoryGoto > BlockHistory:List </ blockHistoryGoto >
-		if notBool $hasMapping(M:Map, genLabel(SwitchNum:Nat, tv(I:Int, T:Type)))
-		andBool hasIntegerType(T:Type)
+		if notBool $hasMapping(M:Map, genLabel(SwitchNum:Nat, Val:K))
+		--- andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< computation > (Default(SwitchNum:Nat, S:K) => S:K) ~> K:K </ computation >

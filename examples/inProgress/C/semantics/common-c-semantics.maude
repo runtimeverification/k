@@ -16,6 +16,8 @@
 
 --- switch on enum :(
 
+--- enums should probably be handled more generically so that they can be evaluated anywhere
+
 ***( 
 not handling this type:
 static union {
@@ -1110,6 +1112,12 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	op zeroStruct : K List{C} -> K .
 	
+	--- c1x 6.7.9:10 If an object that has automatic storage duration is not initialized explicitly, its value is indeterminate. If an object that has static or thread storage duration is not initialized explicitly, then:
+	--- — if it has pointer type, it is initialized to a null pointer;
+	--- — if it has arithmetic type, it is initialized to (positive or unsigned) zero;
+	--- — if it is an aggregate, every member is initialized (recursively) according to these rules, and any padding is initialized to zero bits;
+	--- — if it is a union, the first named member is initialized (recursively) according to these rules, and any padding is initialized to zero bits;
+	
 	mb rule
 		< k > zeroType(Name:K, structType(S:Id)) 
 			=> zeroStruct(Name:K, Fields:List{C})
@@ -1149,23 +1157,12 @@ mod COMMON-GLOBAL-DECLARATION is
 	mb rule
 		< k > zeroType(Name:K, arrayType(T:Type, 0)) => (.).K ...</ k >
 		: KSentence .
-		
-	--- mb rule
-		--- < k > zeroType(Name:K, flexibleArrayType(T:Type))
-			--- => zeroType(*(cast(pointerType(T:Type), &(Name:K))), T:Type)
-		--- ...</ k >
-		--- : KSentence .
+
 	mb rule
 		< k > zeroType(Name:K, flexibleArrayType(T:Type))
 			=> (.).K
 		...</ k >
 		: KSentence .
-		
-		--- < types >... Name:K |-> T:Type ...</ types >
-	--- < currentFunction > F:Id </ currentFunction >
-	--- < env >... Name:K |-> sym(Block:Nat) +Nat 0 ...</ env >
-	--- < mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
-	
 		
 	mb rule
 		< k > zeroBlock(sym(Block:Nat) +Nat 0) => . ...</ k >

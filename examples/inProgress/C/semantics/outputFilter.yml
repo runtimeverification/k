@@ -6,42 +6,22 @@
   # text-styel:
     # foreground: green
 k:
-  keep: 4
-  keep-chars: 136
+  keep: 5
+  #keep-chars: 140
   
-unfinishedComputation:
-  show
+# mem: show
   
+unfinishedComputation: show
 xmessages: show
-
-
-# text-style:
-    # bold: no
-  # cell-style:
-    # # underlined: no
-    # bold: no
-	
-# features:
-# limit the length of lines you keep the same way you limit the number of lines
-# ordering of cells in output (e.g., move k to end, move env to beginning)
-# color the cell name only, not the brackets
-# ability to color the brackets < > differently
-# give colors to a pattern, (e.g., look for "('promote).KProperLabel" and color the promote red) (looks like this is in your todo)
-# replace "('foo).K.*?Label( properly nested contents )" with "foo( properly nested contents )"
-# replace "('_foo_).K.*?Label(first,, second)" with "first foo first"
-# conditional show and hide, (e.g., if "foo" is the top element of < k >, then show the < bar > cell, otherwise don't)
-# split contents of a cell based on something
-# match lines/characters from a string based on numbers in other cells (i know what line i 
-	
-env: 
-  show
-    # foreground: green
- 
+env: show
 nestingDepth: show
 blockHistory: show
 localVariables: show
 type: show
 files: show
+computation: 
+  keep: 4
+  keep-chars: 131
 currentTranslationUnit: show
 currentFunction: show
 currentProgramLoc: show

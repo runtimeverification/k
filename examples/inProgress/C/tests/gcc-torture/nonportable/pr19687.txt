@@ -1,0 +1,1 @@
+This program assumes that the array t.j will be initialized to zero when the standard says that only the first element of the union will be initialized to zero.
