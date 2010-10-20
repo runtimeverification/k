@@ -197,7 +197,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- --- subsort SeqList < Expression .
 	
 	
-	op DeclType : K K -> K .
 	op sizeofType : K -> K [metadata "strict"] . --- generates a tv(size, cfg:sizeut)
 	op bitSizeofType : K -> K [metadata "strict"] .
 	op byteSizeofType : K -> K [metadata "strict"] .
@@ -245,6 +244,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op putInMem : BaseValue K Type K -> K [metadata "strict(2 4)"] .
 	--- op putBytesInMem : Nat List{K} Type K -> K [metadata "strict(4)"] .
 	--- --- op sizeofType : K -> Expression [metadata "strict"] .
+	op DeclType : K K -> K [metadata "strict(1)"] .  --- represents a type before canonicalization.  as in "int *x", first arg is "Int", second arg is "PointerType(JustBase)"
 	op firstChar : String -> Char .
 	op nthChar : String Nat -> Char .
 	op butFirstChar : String -> String .

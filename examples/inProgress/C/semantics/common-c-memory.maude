@@ -343,6 +343,10 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) 
 		=> splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
 		: KSentence .
+	mb rule splitBytes(tv(L:List{K}, T:Type)) 
+		=> splitStructBytes(dataList(L:List{K}), T:Type, value(byteSizeofType(T:Type)))
+		if hasStructType(T:Type)
+		: KSentence .
 	
 	op splitIntegerBytes : K K K -> K .
 	op splitIntegerBytes : K K K List{K} -> K .
@@ -350,8 +354,19 @@ mod COMMON-SEMANTICS-WRITING is
 	eq splitIntegerBytes(I:Int, T:Type, Len:Nat) = splitIntegerBytes(I:Int, T:Type, Len:Nat, .List{K}) .
 	eq splitIntegerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K})
 		= splitIntegerBytes(I:Int >>Int numBitsPerByte, T:Type, Len:Nat, (L:List{K},, lowestByte(I:Int, T:Type))) .
-	eq splitIntegerBytes(I:Int, T:Type, 0, L:List{K})
+	eq splitIntegerBytes(?, ?, 0, L:List{K})
 		= dataList(L:List{K}) .
+		
+	op splitStructBytes : K K K -> K .
+	op splitStructBytes : K K K List{K} -> K .
+	mb context splitStructBytes(?, ?, value(`[HOLE`]:K)) : KSentence .
+	eq splitStructBytes(dataList(L:List{K}), T:Type, Len:Nat) = splitStructBytes(dataList(L:List{K}), T:Type, Len:Nat, .List{K}) .
+	ceq splitStructBytes(dataList((piece(N:Nat, PieceLen:Nat),, Rest:List{K})), T:Type, sNat(Len:Nat), L:List{K})
+		= splitStructBytes(dataList(Rest:List{K}), T:Type, Len:Nat, (L:List{K},, piece(N:Nat, PieceLen:Nat))) 
+		if PieceLen:Nat ==Bool numBitsPerByte .
+	eq splitStructBytes(?, ?, 0, L:List{K})
+		= dataList(L:List{K}) .
+		
 		
 	op splitPointerBytes : K K K -> K .
 	op splitPointerBytes : K K K List{K} -> K .
@@ -359,7 +374,7 @@ mod COMMON-SEMANTICS-WRITING is
 	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat)) 
 		= splitPointerBytes(I:Int, T:Type, Len:Nat, piece(encodedPointer(I:Int), numBitsPerByte)) .
 	eq splitPointerBytes(I:Int, T:Type, sNat(Len:Nat), L:List{K}) = splitPointerBytes(I:Int, T:Type, Len:Nat, (L:List{K},, piece(unknown(numBitsPerByte), numBitsPerByte))) .
-	eq splitPointerBytes(I:Int, T:Type, 0, L:List{K}) 
+	eq splitPointerBytes(?, ?, 0, L:List{K}) 
 		= dataList(L:List{K}) .
 		
 		
@@ -369,7 +384,7 @@ mod COMMON-SEMANTICS-WRITING is
 	eq splitFloatBytes(F:Float, T:Type, sNat(Len:Nat)) 
 		= splitFloatBytes(F:Float, T:Type, Len:Nat, piece(encodedFloat(F:Float), numBitsPerByte)) .
 	eq splitFloatBytes(F:Float, T:Type, sNat(Len:Nat), L:List{K}) = splitFloatBytes(F:Float, T:Type, Len:Nat, (L:List{K},, piece(unknown(numBitsPerByte), numBitsPerByte))) .
-	eq splitFloatBytes(F:Float, T:Type, 0, L:List{K}) 
+	eq splitFloatBytes(?, T:Type, 0, L:List{K}) 
 		= dataList(L:List{K}) .
 		
 	

@@ -4,6 +4,7 @@ mod COMMON-SEMANTICS-TYPE-INCLUDE is
 	
 	op isAType_ : K -> Bool .
 	op extractActualType : Type -> Type . --- rules that use specifier should be careful to use extractActualType if going to be used in a typed name
+	op evalToType : -> K .
 endm
 
 mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
@@ -54,7 +55,18 @@ endm
 
 mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	including COMMON-SEMANTICS-TYPE-INCLUDE .
-
+	
+	op waitingOnDeclType : -> K .
+	mb [type-Cast-heat]: rule
+		< k > (. => DeclType(Specifier:K, DeclType:K)) ~> evalToType ...</ k >
+		< type > Cast(Specifier:K, DeclType:K, ?) => waitingOnDeclType ...</ type >
+		: KSentence [metadata "structural"] .
+		
+	mb [type-Cast-cool]: rule
+		< k > (T:Type => .) ~> evalToType ...</ k >
+		< type > waitingOnDeclType => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
+	
 	mb [type-arrow-heat]: rule
 		< type > Kp:KProper -> F:Id => Kp:KProper ~> HOLE -> F:Id ...</ type >
 		: KSentence [metadata "structural"] .
@@ -678,7 +690,6 @@ mod COMMON-C-TYPING is
 	ceq hasFunctionPointerType(pointerType(T:Type)) = false
 		if getKLabel(T:Type) =/=Bool 'functionType .
 		
-	op evalToType : -> K .
 	op HOLE : -> K .
 	mb rule
 		< k > typeof(E:Expression) => evalToType ~> typeof(HOLE) ...</ k >
