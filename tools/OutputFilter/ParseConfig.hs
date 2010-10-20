@@ -6,7 +6,7 @@
   to configure whether to display that cell.
   See examples/example.yml
   If a cell is flagged as "yes", then it will be shown (this has no effect on its children)
-g  Current default behavior is to not show anything not explicitly told to be shown
+  Current default behavior is to not show anything not explicitly told to be shown
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
@@ -31,10 +31,7 @@ module ParseConfig
   type Configuration = Map CellName CellConfigRhs
   type Map = Map.Map
 
---  type CellConfig = (CellName, CellConfigRhs)
-
-
-  -- add more to this to support more customizations
+  -- Add more to this to support more customizations
   data CellConfigRhs = Show
                      | Hide
                      | RecursiveHide
@@ -72,7 +69,6 @@ module ParseConfig
 
   -- data Substitution = Substitution Regex String
   --   deriving (Show, Eq)
-
   data Substitution = Substitution ByteString ByteString
     deriving (Show, Eq)
 
@@ -161,7 +157,6 @@ module ParseConfig
 --                    | compareStr s doShowRec = RecursiveShow
                     | otherwise              = error $ "Unknown value: " ++ unpack s
 
-
   -- In the yaml file, there are many acceptable ways to say something, the following are for expressing those
   -- ways
   doGlobalSubs     = ["global-substitutions", "global-subs"] ++ doSubstitutions
@@ -207,15 +202,9 @@ module ParseConfig
 
   readColor s = tryRead isColor s $ "Unable to parse: " ++ unpack s ++ " as a color"
 
-  -- Data "destructors", not so safe and meant to be expanded with ones raising more useful errors
-  -- Todo: implement a more robust solution using generics
-
   -- Read utilities
   tryRead :: Read a => (ByteString -> Bool) -> ByteString -> String -> a
   tryRead p s err = if p s then read (unpack (canonicalize s)) else error err
-
-  -- tryReadBool :: ByteString -> ByteString -> Bool
-  -- tryReadBool = tryRead isBool
 
   tryReadInt :: ByteString -> String -> Int
   tryReadInt = tryRead areNumbers
