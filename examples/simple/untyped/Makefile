@@ -6,7 +6,7 @@ KCOMPILE ?= ../../../tools/kompile.pl
 LANGUAGE_NAME = SIMPLE-UNTYPED
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = SIMPLE-UNTYPED-SYNTAX SIMPLE-UNTYPED-SEMATICS SIMPLE-UNTYPED
+LANGUAGE_MODULES = SIMPLE-UNTYPED-SYNTAX SIMPLE-UNTYPED-SEMANTICS SIMPLE-UNTYPED
 
 
 LATEX_STYLE = bb
@@ -19,4 +19,3 @@ TESTS = simple-untyped-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk
-	

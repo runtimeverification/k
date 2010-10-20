@@ -5,41 +5,23 @@
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
   sorts Var Exp Stmt Stmts
 
------------------------------------------------------------------------------
---- Lists should be eventually builtin; for now, they need to be declared ---
------------------------------------------------------------------------------
---- List{Id}
-  syntax List{Id}  ::= 
-                 Id 
-               | .List{Id}
-               | List{Id} , List{Id} [prec 70 assoc id: .List{Id} hybrid strict]
-
-
---- List{Exp}
-  syntax List{Exp} ::= 
-                 Exp  
-               | List{Id} 
-               | List{Exp} , List{Exp} [ditto]
-
 --- variable names
-  syntax Var ::= 
-                 Id 
+  syntax Var ::= Id 
                | Exp [ Exp ] [prec 1 strict]
  
 --- expressions
-  syntax Exp  ::= 
-                 Var | Int | Bool
+  syntax Exp ::= Var | Int | Bool
                | ++ Id [prec 0]
                | Exp + Exp [gather(E e) prec 33 strict]
                | Exp - Exp [gather(E e) prec 33 strict]
                | Exp * Exp [gather(E e) prec 31 strict]
                | Exp / Exp [gather(E e) prec 31 strict]
-               | Exp % Exp [gather(E e) prec 31 metadata "latex(renameTo _\\ensuremath\\%_)" strict]
+               | Exp % Exp [gather(E e) prec 31 latex "{#1}\%{#2}" strict]
                | - Exp [strict]
-               | Exp < Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
-               | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
-               | Exp > Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
-               | Exp >= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+               | Exp < Exp [prec 37 latex "{#1}<{#2}" strict] 
+               | Exp <= Exp [prec 37 latex "{#1}\leq{#2}" strict] 
+               | Exp > Exp [prec 37 latex "{#1}>{#2}" strict] 
+               | Exp >= Exp [prec 37 latex "{#1}\geq{#2}" strict] 
                | Exp == Exp [prec 37 strict] 
                | Exp != Exp [prec 37 strict] 
                | Exp and Exp [gather(E e) prec 55 strict] 
@@ -56,24 +38,36 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
                 | function  Id ( List{Id} ) Stmt 
 
 --- statements
-  syntax Stmt ::=
-                 { } [metadata "latex(renameTo \\{\\})"]
-               | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
-               | Exp = Exp ; [prec 2 strict(2)]
-               | Exp ; [prec 50 strict]
-               | if Exp then Stmt else Stmt [strict(1)]
-               | if Exp then Stmt
-               | while Exp do Stmt
-               | for Id = Exp to Exp do Stmt
-               | return Exp ; [strict]
-               | write ( Exp ) ; [strict]
+  syntax Stmt ::= { }
+                | { Stmts } [gather(&)]
+                | Exp = Exp ; [prec 2 strict(2)]
+                | Exp ; [prec 50 strict]
+                | if Exp then Stmt else Stmt [strict(1)]
+                | if Exp then Stmt
+                | while Exp do Stmt
+                | for Id = Exp to Exp do Stmt
+                | return Exp ; [strict]
+                | write ( Exp ) ; [strict]
 
   syntax Stmts ::= Decl | Stmt
-                | Stmts Stmts [prec 100 gather(e E)]
+                 | Stmts Stmts [prec 100 gather(e E)]
 
 --- main function
   syntax Id ::= main 
 
+
+-----------------------------------------------------------------------------
+--- Lists should be eventually builtin; for now, they need to be declared ---
+-----------------------------------------------------------------------------
+--- List{Id}
+  syntax List{Id} ::= Id
+                    | .List{Id}
+                    | List{Id} , List{Id} [prec 70 assoc id: .List{Id} hybrid strict]
+
+--- List{Exp}
+  syntax List{Exp} ::= Exp  
+                     | List{Id}
+                     | List{Exp} , List{Exp} [ditto]
 endkm
 
 
