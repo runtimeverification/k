@@ -1,6 +1,6 @@
 load ../../../k-prelude
 
-kmod PRIMES is including K + PL-INT
+kmod PRIMES is including K + PL-NAT
   configuration <primes> .Bag </primes>
   syntax K ::= NzNat
   rule <primes_> BagItem(N:NzNat) (BagItem(M:NzNat)=>.) <_/primes>

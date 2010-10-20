@@ -5,10 +5,10 @@
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
   sorts Var Exp Stmt Stmts
 
---- variable names
+--- variables; we include arrays here as well
   syntax Var ::= Id 
                | Exp [ Exp ] [prec 1 strict]
- 
+
 --- expressions
   syntax Exp ::= Var | Int | Bool
                | ++ Id [prec 0]
@@ -59,13 +59,13 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
---- List{Id}
+--- List{Id}; the hybrid attribute says that a list of results becomes itself a result
   syntax List{Id} ::= Id
                     | .List{Id}
                     | List{Id} , List{Id} [prec 70 assoc id: .List{Id} hybrid strict]
 
 --- List{Exp}
-  syntax List{Exp} ::= Exp  
+  syntax List{Exp} ::= Exp
                      | List{Id}
                      | List{Exp} , List{Exp} [ditto]
 endkm
@@ -82,4 +82,3 @@ kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX
   macro function F:Id() S = function F(.List{Id}) S
   macro E() = E(.List{Id})
 endkm
-
