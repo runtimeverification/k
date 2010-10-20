@@ -34,8 +34,8 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
 --- declarations
   syntax Decl ::= var Var ; [prec 2]  
-                | function Id ( ) Stmt 
-                | function  Id ( List{Id} ) Stmt 
+                | function Id ( ) Stmt
+                | function Id ( List{Id} ) Stmt
 
 --- statements
   syntax Stmt ::= { }

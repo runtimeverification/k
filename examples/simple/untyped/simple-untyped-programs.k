@@ -123,8 +123,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
            v = x[i];
            j = i - 1 ;
            while (j >= 0) do {
-             if x[j] > v then
-               x[j+1] = x[j];
+             if x[j] > v then x[j+1] = x[j];
              j = j - 1;
            }
            x[j + 1] = v ;
@@ -157,8 +156,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
            v = x[i];
            j = i - 1;
            while (j >= 0) do {
-             if x[j] > v then
-               x[j+1] = x[j];
+             if x[j] > v then x[j+1] = x[j];
              j = j - 1;
            }
            x[j+1] = v;
@@ -193,8 +191,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
            v = x[i];
            j = i - 1;
            while (j >= 0) do {
-             if x[j] > v then
-               x[j+1] = x[j];
+             if x[j] > v then x[j+1] = x[j];
              j = j - 1;
            }
            x[j+1] = v;
@@ -413,19 +410,4 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          f[10] = writeArray;
          map(f,x);
        }
-
-  macro pex01 =
-    var x;
-    function main() {
-      x = 3;
-      write(f());
-      return 0;
-    }
-
-    function f() {
-      var x;
-      x = 5;
-      return x;
-    }
-    
 endkm

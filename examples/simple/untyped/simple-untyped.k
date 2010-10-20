@@ -9,12 +9,12 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 ---------------------
 
   syntax Val ::= Int | Bool
-                | array ( Nat , Nat )
-                  --- array values are wrapped as specific values
-                | function( Nat )  
-                | lambda ( List{Id} , Stmt ) [metadata "latex(renameTo \\lambda\_.\_)"]
-                  --- function value; like arrays, functions also evaluate to 
-                  ---    their address (wrapped as a specific value)
+               | array ( Nat , Nat )
+                 --- array values are wrapped as specific values
+               | function( Nat )
+               | lambda ( List{Id} , Stmt )
+                 --- function value; like arrays, functions also evaluate to
+                 ---   their address (wrapped as a specific value)
 
 --- the values are expressions
   syntax Exp ::= Val
