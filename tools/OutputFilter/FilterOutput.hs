@@ -284,6 +284,7 @@ module FilterOutput where
             config <- getConfig configFile
 --            print config
             putDoc . cat . map (ppKOutput config) $ parsedOut
+            putDoc (string "\n")
 
   usage = "\nUsage:\n" ++ "  If you have built the tool using 'make', then run:\n"
                      ++ "    filterOutput <output-file> <yaml-config-file>\n"
