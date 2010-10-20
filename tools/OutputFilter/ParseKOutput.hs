@@ -8,30 +8,33 @@
 
 module ParseKOutput where
   import Text.Parsec
+  import Text.Parsec.ByteString
   import Control.Applicative ((<$>))
+  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
+  import qualified Data.ByteString.Char8 as B
 
-  type Name = String
-  type CellStack = [String]
+  type Name = ByteString
+  type CellStack = [ByteString]
 
-  data KOutput = Cell Name [KOutput] | String Name String
+  data KOutput = Cell Name [KOutput] | String Name ByteString
     deriving (Show, Read, Eq)
 
   -- A string parser that has a stack of cell names for state (currenty unused), and outputs a KOutput
-  type KOutputParser = Parsec String CellStack KOutput
+  type KOutputParser = Parsec ByteString CellStack KOutput
 
   -- Get rid of the maude header and stuff
-  header :: Parsec String CellStack ()
+  header :: Parsec ByteString CellStack ()
   header = manyTill anyChar (try (lookAhead beginCell)) >> return ()
 
 
   -- Open the file, and parse it. Return a list of parses (e.g. if there are multiple cells at the top level)
   parseKOutFile :: FilePath -> IO [KOutput]
-  parseKOutFile fp = do input <- readFile fp
+  parseKOutFile fp = do input <- B.readFile fp
                         case runParser parseTop [] "" input of
                           Left err -> error $ show err
                           Right res -> return res
 
-  parseTop :: Parsec String CellStack [KOutput]
+  parseTop :: Parsec ByteString CellStack [KOutput]
   parseTop = header >> many (try parseKOutput)
 
   -- Start parsing
@@ -48,21 +51,21 @@ module ParseKOutput where
   parseInternals = try parseCell <|> parseString
 
   parseString :: KOutputParser
-  parseString = peek >>= \name -> (String name <$> many1 (noneOf "<"))
-                              <|> (char '<' >> parseString >>= \k -> case k of String _ s -> return (String name ('<' : s)))
+  parseString = peek >>= \name -> (String name . pack <$> many1 (noneOf "<"))
+                              <|> (char '<' >> parseString >>= \k -> case k of String _ s -> return (String name (cons '<' s)))
 
 
-  beginCell :: Parsec String CellStack String
+  beginCell :: Parsec ByteString CellStack ByteString
   beginCell = do char '<' >> spaces
-                 name <- many1 alphaNum
+                 name <- pack <$> many1 alphaNum
                  push name
                  spaces >> char '>'
                  return name
 
-  endCell :: Name -> Parsec String CellStack ()
+  endCell :: Name -> Parsec ByteString CellStack ()
   endCell s = do spaces
                  char '<' >> spaces >> char '/' >> spaces
-                 string s >> spaces
+                 string (unpack s) >> spaces
                  char '>'
                  pop
                  return ()
@@ -71,18 +74,19 @@ module ParseKOutput where
   -- When a '<' is parsed as part of the text (as opposed to a cell), everything before and everything after
   -- it will be in seperate Strings.
   combineStrings :: [KOutput] -> [KOutput]
-  combineStrings (String n s1 : String _ ('<':s2) : ks) = String n (s1 ++ "<" ++ s2) : combineStrings ks
+  combineStrings (String n s1 : String _ s2 : ks) | B.head s2 == '<'
+    = String n (s1 `append` (singleton '<') `append` s2) : combineStrings ks
   combineStrings (x:xs) = x : combineStrings xs
   combineStrings [] = []
 
   -- Stack-based operations on the state.
-  push :: String -> Parsec String [String] ()
+  push :: ByteString -> Parsec ByteString [ByteString] ()
   push s = modifyState (\l -> s : l)
 
-  pop :: Parsec String [String] ()
+  pop :: Parsec ByteString [ByteString] ()
   pop = modifyState $ \s -> (drop 1 s)
 
-  peek :: Parsec String [String] String
+  peek :: Parsec ByteString [ByteString] ByteString
   peek = head <$> getState
 
 

@@ -1,18 +1,22 @@
 {- Module that parses the cell-content strings and infixifies the operators -}
 
 module InfixOperators where
-  import Text.Parsec
   import ParseKOutput
+  import ByteStringUtils
+  import Text.Parsec
+  import Text.Parsec.ByteString
   import Control.Applicative ((<$>))
-  import Data.List.Utils
+  import qualified Data.List.Utils as MH
   import Control.Monad.Identity (Identity)
+  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
+  import qualified Data.ByteString.Char8 as B
 
-  data Content = Operator Name [Content] | StringContent String | ParenedContent [Content]
+  data Content = Operator Name [Content] | StringContent ByteString | ParenedContent [Content]
     deriving (Show)
 
   type ContentState = Int
 
-  type ContentParser = Parsec String ContentState
+  type ContentParser = Parsec ByteString ContentState
 
   parseContentsTop :: ContentParser [Content]
   parseContentsTop = many1 parseContentsNotAll
@@ -29,8 +33,8 @@ module InfixOperators where
   parseContentsNotAll :: ContentParser Content
   parseContentsNotAll = (try parseOperator) <|> try parseStringContent
 
-
-  parseStringContent = StringContent <$> many1 (noneOf "()")
+  parseStringContent :: ContentParser Content
+  parseStringContent = StringContent . pack <$> many1 (noneOf "()")
                    <|> parseNonOpParens
                    <?> "string content"
 
@@ -47,21 +51,21 @@ module InfixOperators where
                      string ")."
                      parseLabel
                      openParen
-                     return name
+                     return $ pack name
                <?> "beginning of operator"
 
   endOperator :: ContentParser ()
   endOperator = endParen <?> "end of operator"
 
   -- Just accept the rest of the input as a StringContent
-  -- This is because text and cells may be intermixed, e.g. "List ( <cell> <cell> )" would be split into two seperate
-  -- strings with the cells in them, e.g. ["List ( ", Cell, Cell, " ) "]
+  -- This is because text and cells may be intermixed, e.g. "List ( <cell> <cell> )" would be split into two
+  -- seperate strings with the cells in them, e.g. ["List ( ", Cell, Cell, " ) "]
   acceptRest :: ContentParser Content
-  acceptRest = StringContent <$> many1 anyChar -- many1 (anyChar >>= \c -> (notFollowedBy parseOperator >> return c))
+  acceptRest = StringContent . pack <$> many1 anyChar
 
 
   parseLabel :: ContentParser Name
-  parseLabel = anyChar `manyTill` string "Label"
+  parseLabel = pack <$> anyChar `manyTill` string "Label"
 
   commaCommaSep p = p `sepBy` string ",,"
 
@@ -75,12 +79,12 @@ module InfixOperators where
   decr = modifyState $ \i -> i - 1
 
   test :: String -> IO ()
-  test s = case runParser parseContentsTop 0 "" s of
+  test s = case runParser parseContentsTop 0 "" (pack s) of
              Left err -> print err
              Right cs  -> print $ postProcess cs
 
-  wrap :: Char -> String -> Char -> String
-  wrap l s r = l : (s ++ [r])
+  wrap :: Char -> ByteString -> Char -> ByteString
+  wrap l s r = cons l $ s `append` singleton r
 
 
   -- todo: do the below with generics
@@ -90,7 +94,7 @@ module InfixOperators where
 
   -- Concat paren content down
   flattenParenContent :: [Content] -> [Content]
-  flattenParenContent (ParenedContent pcs : cs) = [StringContent "("] ++ flattenParenContent pcs ++ [StringContent ")"] ++ flattenParenContent cs
+  flattenParenContent (ParenedContent pcs : cs) = [StringContent (pack "(")] ++ flattenParenContent pcs ++ [StringContent (pack ")")] ++ flattenParenContent cs
   flattenParenContent (Operator n ocs : cs)     = Operator n (flattenParenContent ocs) : flattenParenContent cs
   flattenParenContent (c : cs)                  = c : flattenParenContent cs
   flattenParenContent []                        = []
@@ -98,7 +102,7 @@ module InfixOperators where
   -- Condense adjacent StringContents together.
   -- Use this before seperating on ,, and not after
   globSCs :: [Content] -> [Content]
-  globSCs (StringContent s : StringContent s2 : xs) = globSCs (StringContent (s ++ s2) : xs)
+  globSCs (StringContent s : StringContent s2 : xs) = globSCs (StringContent (s `append` s2) : xs)
   globSCs (StringContent s : xs)                    = StringContent s : globSCs xs
   globSCs (Operator n cs : xs)                      = Operator n (globSCs cs) : globSCs xs
   globSCs []                                        = []
@@ -111,26 +115,29 @@ module InfixOperators where
 
   -- the name says it all
   eliminateEmptySCs :: [Content] -> [Content]
-  eliminateEmptySCs (StringContent "" : cs) = eliminateEmptySCs cs
+  eliminateEmptySCs (StringContent s : cs) | s == pack "" = eliminateEmptySCs cs
   eliminateEmptySCs (Operator n cs : rest)  = Operator n (eliminateEmptySCs cs) : eliminateEmptySCs rest
   eliminateEmptySCs (c : cs)                = c : eliminateEmptySCs cs
   eliminateEmptySCs []                      = []
 
   -- Convert back into a string
-  contentToString :: Content -> String
+  contentToString :: Content -> ByteString
   contentToString (StringContent s) = s
-  contentToString (Operator name cs) | shouldInfix name  = join (" " ++ init (tail name) ++ " ")  innards
+  contentToString (Operator name cs) | shouldInfix name  = join (" " ++ init (tail (unpack name)) ++ " ")  innards
                                      | shouldMixfix name = join " " $ intermix (seperateMixfix name) innards
-                                     | otherwise         = name ++ "(" ++ join ",," innards ++ ")"
+                                     | otherwise         = name `append` pack "(" `append` join ",," innards `append` pack ")"
     where innards = map contentToString cs
 
-  shouldInfix ('_':cs) = last cs == '_' && '_' `notIn` init cs
-    where x `notIn` xs = not $ x `elem` xs
-  shouldInfix _ = False
+  shouldInfix :: ByteString -> Bool
+  shouldInfix s = case B.uncons s of
+                    Just ('_',cs) -> B.last cs == '_' && '_' `notIn` B.init cs
+                    _             -> False
+    where x `notIn` xs = not $ x `B.elem` xs
 
-  shouldMixfix s = '_' `elem` s
+  shouldMixfix :: ByteString -> Bool
+  shouldMixfix s = '_' `B.elem` s
 
-  seperateMixfix :: String -> [String]
+  seperateMixfix :: ByteString -> [ByteString]
   seperateMixfix s = "_" `split` (deleteAll '`' s)
 
 
@@ -142,12 +149,9 @@ module InfixOperators where
   intermix _ _ =  error "Output contains the wrong number of arguments for a mixfix operator"
 
   -- Do the whole shebang
-  makeInfix :: String -> String
+  makeInfix :: ByteString -> ByteString
   makeInfix s = case runParser parseContentsTop 0 "" s of
                   Left err -> error $ show err
                   Right cs -> join " " . map contentToString $ postProcess cs
 
 
-  -- Delete all occurrences
-  deleteAll :: Eq a => a -> [a] -> [a]
-  deleteAll x = filter ((/=) x)

@@ -12,9 +12,12 @@ module FilterOutput where
   import ParseKOutput
   import ParseConfig
   import InfixOperators
+  import ByteStringUtils
   import System.Environment
-  import Useful.String
+--  import Useful.String
   import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
+  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
+  import qualified Data.ByteString.Char8 as B
   import Control.Applicative ((<$>))
   import Control.Monad
   import Control.Monad.Identity
@@ -24,7 +27,7 @@ module FilterOutput where
   import Data.Maybe
   import qualified Data.Map as Map
   import Control.Monad.Reader
-  import Data.String.Utils
+--  import Data.String.Utils
 --  import Text.Regex.PCRE.Light.Char8
 
   type CellReader a  = Configuration -> CellName -> a
@@ -39,18 +42,18 @@ module FilterOutput where
   -- Strip off surrounding whitespaces, remove empty strings, remove those blasted DOS carriage returns
   cleanupStrings :: [KOutput] -> [KOutput]
   cleanupStrings = remEmpty . map stripStrs
-    where stripStrs (String n s) = String n (stripr (deleteAll '\r' s))
+    where stripStrs (String n s) = String n (rstrip (deleteAll '\r' s))
           stripStrs x            = x
-          remEmpty (String _ "" : xs) = remEmpty xs
-          remEmpty (x:xs)             = x : remEmpty xs
-          remEmpty []                 = []
+          remEmpty (String _ s : xs) | s == (pack "") = remEmpty xs
+          remEmpty (x:xs)                           = x : remEmpty xs
+          remEmpty []                               = []
 
 
   handleCell :: KOutPrinter
   handleCell conf (Cell name contents) | shouldShow conf name    = ppCell conf name contents
                                        | shouldRecHide conf name = empty
                                        | otherwise               = ppHiddenCell conf name contents
-  handleCell _ (String n s) = error $ "Internal error: handleCell called in cell: " ++ n ++ "on string: " ++ s
+  handleCell _ (String n s) = error $ "Internal error: handleCell called in cell: " ++ unpack n ++ "on string: " ++ unpack s
 
   ppCell :: CellPrinter
   ppCell conf name contents = linebreak <> (hang 1 $ ppBeginCell conf name
@@ -65,18 +68,18 @@ module FilterOutput where
   handleContents conf name cs = hcat $ (map (ppKOutput conf) . cleanupStrings)  cs
 
   handleString :: KOutPrinter
-  handleString conf (String n s) = handleStyle conf n textStyle . text . doPrunes conf n $ handleSubstitutions conf n $ handleInfix conf $ s
+  handleString conf (String n s) = handleStyle conf n textStyle . text . unpack . doPrunes conf n $ handleSubstitutions conf n $ handleInfix conf $ s
   {-
     Pretty Printing
    -}
 
   ppBeginCell :: CellReader Doc
-  ppBeginCell conf n = handleStyle conf n cellStyle . text $ if shouldSpacelessCells conf then "<" ++ n ++ ">"
-                                                             else "< " ++ n ++ " >"
+  ppBeginCell conf n = handleStyle conf n cellStyle . text $ if shouldSpacelessCells conf then "<" ++ unpack n ++ ">"
+                                                             else "< " ++ unpack n ++ " >"
 
   ppEndCell :: CellReader Doc
-  ppEndCell conf n = handleStyle conf n cellStyle . text $  if shouldSpacelessCells conf then "</" ++ n ++ ">"
-                                                             else "</ " ++ n ++ " >"
+  ppEndCell conf n = handleStyle conf n cellStyle . text $  if shouldSpacelessCells conf then "</" ++ unpack n ++ ">"
+                                                             else "</ " ++ unpack n ++ " >"
 
   ppKOutput :: Configuration -> KOutput -> Doc
   ppKOutput conf str@(String _ _) = handleString conf str
@@ -88,7 +91,7 @@ module FilterOutput where
   isString (String _ _ ) = True
   isString _             = False
 
-  handleInfix :: Configuration -> String -> String
+  handleInfix :: Configuration -> ByteString -> ByteString
   handleInfix conf s | shouldInfixify conf = makeInfix s
                      | otherwise           = s
 
@@ -97,17 +100,15 @@ module FilterOutput where
                           | otherwise            = id
 
   -- extend me to do local substitutions as well
-  handleSubstitutions :: CellReader (String -> String)
+  handleSubstitutions :: CellReader (ByteString -> ByteString)
   handleSubstitutions conf n s | hasSubs conf n = performSubs s $ fetchSubs conf n
                                | otherwise = s
 
-  performSubs :: String -> [Substitution] -> String
+  performSubs :: ByteString -> [Substitution] -> ByteString
   performSubs s (Substitution re repl : subs) = performSubs (performReplacement re repl s) subs
   performSubs s [] = s
 
-  -- performReplacement re repl s = case match re s [] of
-  --                                  Just ss -> replace (head ss) repl s
-  --                                  Nothing -> s
+  performReplacement :: ByteString -> ByteString -> ByteString -> ByteString
   performReplacement = replace
 
 
@@ -164,33 +165,34 @@ module FilterOutput where
                             Dullwhite   -> ondullwhite
 
   -- Prune off lines after the user-specified break
-  doPrunes :: Configuration -> CellName -> String -> String
+  doPrunes :: Configuration -> CellName -> ByteString -> ByteString
   doPrunes conf cn = pruneLines conf cn . pruneChars conf cn
 
-  pruneLines :: Configuration -> CellName -> String -> String
+  pruneLines :: Configuration -> CellName -> ByteString -> ByteString
   pruneLines conf cn s | shouldPrune conf cn = pruneL conf cn s
                        | otherwise           = s
 
-  pruneChars :: Configuration -> CellName -> String -> String
+  pruneChars :: Configuration -> CellName -> ByteString -> ByteString
   pruneChars conf cn s | shouldPruneChars conf cn = pruneC conf cn s
                        | otherwise                = s
 
-
-  pruneL conf cn s = (stripr . unlines . take toKeep) intermediate ++ more
+  pruneL :: Configuration -> CellName -> ByteString -> ByteString
+  pruneL conf cn s = (rstrip . B.unlines . take toKeep) intermediate `append` more
     where toKeep = fetchPruneNumber conf cn
-          intermediate = lines s
-          more = " [..." ++ show (length intermediate - 1) ++ " more...]"
+          intermediate = B.lines s
+          more = pack $ " [..." ++ show (length intermediate - 1) ++ " more...]"
 
-  pruneC conf cn s = (stripr . unlines . map (take toKeep)) intermediate
+  pruneC :: Configuration -> CellName -> ByteString -> ByteString
+  pruneC conf cn s = (rstrip . B.unlines . map (B.take toKeep)) intermediate
     where toKeep = fetchPruneCharNumber conf cn
-          intermediate = lines s
+          intermediate = B.lines s
 
   -- Lookup the config for the cell
   lookupCell :: CellReader (Maybe CellConfigRhs)
   lookupCell = flip Map.lookup
 
   queryOptions :: Configuration -> (CellConfigRhs -> Maybe Bool) -> Bool
-  queryOptions conf f = case f <$> Map.lookup "options" conf of
+  queryOptions conf f = case f <$> Map.lookup (pack "options") conf of
                           Just (Just True) -> True
                           _                -> False
 
@@ -231,7 +233,7 @@ module FilterOutput where
                     else case lookupCell conf cn of
                            Just (Configs _ _ _ _ (Just _)) -> True
                            _                               -> False
-    where hasGlobalSubs conf = case lookupCell conf "options" of
+    where hasGlobalSubs conf = case lookupCell conf (pack "options") of
                                  Nothing                    -> False
                                  Just (Options Nothing _ _) -> False
                                  _                          -> True
@@ -262,7 +264,7 @@ module FilterOutput where
 
   -- Extend me to do local subs
   fetchSubs :: CellReader [Substitution]
-  fetchSubs conf cn = case globalSubstitutions <$> lookupCell conf "options" of
+  fetchSubs conf cn = case globalSubstitutions <$> lookupCell conf (pack "options") of
                         Just (Just subs) -> subs
                         Nothing          -> error "Internal Error: hasSubs approved a match incorrectly"
 
@@ -282,11 +284,10 @@ module FilterOutput where
                        _   -> error usage
             parsedOut <- parseKOutFile fname
             config <- getConfig configFile
---            print config
             putDoc . cat . map (ppKOutput config) $ parsedOut
-            putDoc (string "\n")
+            putStrLn ""
 
   usage = "\nUsage:\n" ++ "  If you have built the tool using 'make', then run:\n"
-                     ++ "    filterOutput <output-file> <yaml-config-file>\n"
-                     ++ "  To run the tool without building it, run:\n"
-                     ++ "    runhaskell FilterOutput.hs <output-file> <yaml-config-file>\n"
+                       ++ "    filterOutput <output-file> <yaml-config-file>\n"
+                       ++ "  To run the tool without building it, run:\n"
+                       ++ "    runhaskell FilterOutput.hs <output-file> <yaml-config-file>\n"
