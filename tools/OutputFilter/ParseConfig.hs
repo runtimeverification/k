@@ -11,8 +11,12 @@ g  Current default behavior is to not show anything not explicitly told to be sh
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module ParseConfig where
-  import Data.Yaml.Syck
+module ParseConfig
+  ( getConfig
+  , Configuration, CellName, CellConfigRhs(..), Style(..), Color(..), Substitution(..), ColorPlace(..)
+  , Underline(..), Bold(..)
+  )where
+  import Data.Yaml.YamlLight
   import Control.Applicative
   import Control.Monad
   import Data.Char
@@ -27,7 +31,8 @@ module ParseConfig where
   type Configuration = Map CellName CellConfigRhs
   type Map = Map.Map
 
-  type CellConfig = (CellName, CellConfigRhs)
+--  type CellConfig = (CellName, CellConfigRhs)
+
 
   -- add more to this to support more customizations
   data CellConfigRhs = Show
@@ -72,114 +77,76 @@ module ParseConfig where
     deriving (Show, Eq)
 
   -- A Yaml tree without superfluous info and types
-  data YamlLite = Map [(YamlLite, YamlLite)]
-                | Seq [YamlLite]
-                | Str ByteString
-                | Nil
-    deriving (Show)
 
-
-  -- Convert to the lighter representation
-  yamlNodeToLite :: YamlNode -> YamlLite
-  yamlNodeToLite = yamlElemToLite . n_elem
-
-  yamlElemToLite :: YamlElem -> YamlLite
-  yamlElemToLite (EMap ms)  = Map $ map (\(a,b) -> (yamlNodeToLite a, yamlNodeToLite b)) ms
-  yamlElemToLite (ESeq s)   = Seq $ map yamlNodeToLite s
-  yamlElemToLite (EStr buf) = Str buf
-  yamlElemToLite (ENil)     = Nil
-
-  parseYamlFileLite fp = yamlNodeToLite <$> parseYamlFile fp
+  -- | Given a filename, will read that file, parse it as yaml, and extract a configuration from it.
+  getConfig :: FilePath -> IO Configuration
+  getConfig fp = do conf <- extractConfiguration <$> parseYamlFile fp
+                    case conf of
+                      Just c  -> return c
+                      Nothing -> error $ "Unable to extract a configuration from " ++ fp
 
 
   -- Get the configuration
-  extractConfiguration :: YamlLite -> Configuration
-  extractConfiguration = Map.fromList . map extractCellConfig . unMap
-
-  -- I use arrows because I'm awesome. See the commented out version for the more clear version
-  -- There is a special-case cell called "global-substitutions" for its namesake
-  extractCellConfig :: (YamlLite, YamlLite) -> CellConfig
-  extractCellConfig pair | isOptionsCell pair = (unStr *** readOptions) pair
-                         | otherwise          = (unStr *** readConfig) pair
-  -- extractCellConfig (l,r) = (unStr l, readConfig r)
-
-  mkSubstitution :: (YamlLite, YamlLite) -> Substitution
-  mkSubstitution (key,val) = Substitution (unStr key) (unStr val)
-
-  readOptions (Map xs) = Options (getGlobalSubs     =<< (lookupConf doGlobalSubs xs))
-                                 (getBool           <$> (lookupConf doSpacelessCells xs))
-                                 (getBool           <$> (lookupConf doInfixity xs))
-    where doGlobalSubs     = ["global-substitutions", "global-subs"] ++ doSubstitutions
-          doSpacelessCells = ["spaceless-cells", "spaceless", "spacelessCells"]
-          doInfixity       = ["infixity", "infixify", "infix"]
-
-  doSubstitutions = ["subs", "subst", "substitutions", "sub"]
-
-  getGlobalSubs (Map xs) = Just $ map mkSubstitution xs
-  getGlobalSubs _        = Nothing
-
-  getBool (Str s) = readBool s
+  extractConfiguration :: YamlLight -> Maybe Configuration
+  extractConfiguration yl = Map.mapKeys unsafeUnStr <$> Map.mapWithKey convertToCellRhs <$> unMap yl
 
 
-  isOptionsCell (key, _) = unStr key == "options"
+  -- Convert the second argument from a YamlLight to a CellConfigRhs. There is a special-case cell
+  -- called "options" for its namesake, hence the key being passed in as well
+  convertToCellRhs :: YamlLight -> YamlLight -> CellConfigRhs
+  convertToCellRhs key val | unsafeUnStr key == "options" = readOptions val
+                           | otherwise                    = readConfig val
 
-  --isGlobalSub (key, val) = unStr key == "global-substitutions"
+  readOptions m = Options (getGlobalSubs <$> lookupConf doGlobalSubs m)
+                          (getBool       <$> lookupConf doSpacelessCells m)
+                          (getBool       <$> lookupConf doInfixity m)
 
-  -- Extend the below function to add more functionality
-  readConfig :: YamlLite -> CellConfigRhs
-  readConfig (Str s) = readSingleEntry s
-  readConfig (Map map) = readMap map
+  readConfig :: YamlLight -> CellConfigRhs
+  readConfig (YStr s)   = readSingleEntry s
+  readConfig m@(YMap _) = readMap m
 
-  readMap :: [(YamlLite,YamlLite)] -> CellConfigRhs
-  readMap xs = Configs (getLines <$> (lookupConf doKeep xs))
-                       (getChars <$> (lookupConf doKeepChars xs))
-                       (getStyle <$> (lookupConf doCellStyle xs))
-                       (getStyle <$> (lookupConf doTextStyle xs))
-                       Nothing -- extend me to do local substitutions
-    where doKeep          = ["lines", "keep", "keep-lines", "keepLines"]
-          doKeepChars     = ["characters", "chars", "keepChars", "keep-chars", "keep-characters"]
-          doCellStyle     = ["cell-color", "cell-style"]
-          doTextStyle     = ["text-color", "text-style"]
-          doSubstitutions = ["local-substitutions", "substitutions"]
+  readMap :: YamlLight -> CellConfigRhs
+  readMap m = Configs (getNum   <$> lookupConf doKeep m)
+                      (getNum   <$> lookupConf doKeepChars m)
+                      (getStyle <$> lookupConf doCellStyle m)
+                      (getStyle <$> lookupConf doTextStyle m)
+                      Nothing -- extend me to do local substitutions
 
-  lookupConf ss map = snd <$> (find ((flip compareStr) ss . unStr . fst) $ map)
+  lookupConf :: [ByteString] -> YamlLight -> Maybe YamlLight
+  lookupConf ss = lookupYLWith ((flip compareStr) ss . unsafeUnStr)
 
-  getLines :: YamlLite -> Int
-  getLines (Str s) = tryRead areNumbers s $ "Unable to parse: " ++ unpack s ++ " as a number"
-  getLines _ = error $ "Internal error: getLines called on non-terminal value"
 
-  getChars :: YamlLite -> Int
-  getChars (Str s) = tryRead areNumbers s $ "Unable to parse: " ++ unpack s ++ " as a number"
-  getChars _ = error $ "Internal error: getChars called on non-terminal value"
+  {- Functions to read the value and construct the desired part of the end configuration -}
 
-  getStyle :: YamlLite -> Style
-  getStyle (Map xs) = Style (getColor      <$> (lookupConf doForeground xs))
-                             (getColor     <$> (lookupConf doBackground xs))
-                             (getUnderline <$> (lookupConf doUnderline xs))
-                             (getBold      <$> (lookupConf doBold xs))
-    where doForeground = ["foreground"]
-          doBackground = ["background"]
-          doUnderline  = ["underline", "underlined"]
-          doBold       = ["bold"]
+  getGlobalSubs :: YamlLight -> [Substitution]
+  getGlobalSubs = tryMapApply (Map.elems . Map.mapWithKey mkSubstitution)
+                              "User error: please specify substitutions as key:value pairs"
+    where mkSubstitution key val = Substitution (unsafeUnStr key) (unsafeUnStr val)
 
-  getColor :: YamlLite -> Color
-  getColor (Str s) = tryRead isColor s $ "Unable to parse: " ++ unpack s ++ " as a color"
-  getColor _ = error $ "Internal error: getColor called on non-terminal value"
+  getBool :: YamlLight -> Bool
+  getBool = tryTerminalApply readBool "Internal error: getBool called on non-terminal value"
 
-  getUnderline :: YamlLite -> Underline
-  getUnderline (Str s) | s `compareStr` doUnderline   = Underline
-                       | s `compareStr` doDeUnderline = DeUnderline
-                       | otherwise                    = error $ "Unable to parse: " ++ unpack s ++ " as an underline style"
-    where doUnderline   = ["underline", "under-line", "underlined"] ++ doTrue
-          doDeUnderline = ["deunderline", "de-underline", "de-under-line"]
+  getNum :: YamlLight -> Int
+  getNum = tryTerminalApply readNumber "Internal error: getNum called on non-terminal value"
 
-  getBold :: YamlLite -> Bold
-  getBold (Str s) | s `compareStr` doBold   = Bold
-                  | s `compareStr` doDeBold = DeBold
-                  | otherwise               = error $ "Unable to parse: " ++ unpack s ++ " as an bold style"
-    where doBold   = ["bold", "embolden", "bolded"] ++ doTrue
-          doDeBold = ["debold", "de-bold", "un-bold", "unbold"]
+  getColor :: YamlLight -> Color
+  getColor = tryTerminalApply readColor "Internal error: getColor called on non-terminal value"
 
+  getStyle :: YamlLight -> Style
+  getStyle m = Style (getColor     <$> lookupConf doForeground m)
+                     (getColor     <$> lookupConf doBackground m)
+                     (getUnderline <$> lookupConf doUnderline m)
+                     (getBold      <$> lookupConf doBold m)
+
+  getUnderline :: YamlLight -> Underline
+  getUnderline (YStr s) | s `compareStr` doUnderline   = Underline
+                        | s `compareStr` doDeUnderline = DeUnderline
+                        | otherwise                    = error $ "Unable to parse: " ++ unpack s ++ " as an underline style"
+
+  getBold :: YamlLight -> Bold
+  getBold (YStr s) | s `compareStr` doBold   = Bold
+                   | s `compareStr` doDeBold = DeBold
+                   | otherwise               = error $ "Unable to parse: " ++ unpack s ++ " as an bold style"
 
   isColor :: ByteString -> Bool
   isColor = flip compareStr $ [ "Black", "Red", "Green", "Yellow", "Blue", "Magenta", "Cyan"
@@ -193,14 +160,30 @@ module ParseConfig where
                     | compareStr s doHideRec = RecursiveHide
 --                    | compareStr s doShowRec = RecursiveShow
                     | otherwise              = error $ "Unknown value: " ++ unpack s
-    where doShow    = doTrue ++ ["show"]
-          doHide    = doFalse ++ ["hide"]
-          doHideRec = ["hide-recursive", "recursive-hide", "recursively-hide", "hide-recursively"]
-          doShowRec = ["show-recursive", "recursive-show", "recursively-show", "show-recursively"]
 
-  doTrue  = ["yes", "y", "t", "true"]
-  doFalse = ["no", "n", "f", "false"]
 
+  -- In the yaml file, there are many acceptable ways to say something, the following are for expressing those
+  -- ways
+  doGlobalSubs     = ["global-substitutions", "global-subs"] ++ doSubstitutions
+  doSpacelessCells = ["spaceless-cells", "spaceless", "spacelessCells"]
+  doInfixity       = ["infixity", "infixify", "infix"]
+  doKeep           = ["lines", "keep", "keep-lines", "keepLines"]
+  doKeepChars      = ["characters", "chars", "keepChars", "keep-chars", "keep-characters"]
+  doCellStyle      = ["cell-color", "cell-style"]
+  doTextStyle      = ["text-color", "text-style"]
+  doUnderline      = ["underline", "under-line", "underlined"] ++ doTrue
+  doDeUnderline    = ["deunderline", "de-underline", "de-under-line"] ++ doFalse
+  doForeground     = ["foreground"]
+  doBackground     = ["background"]
+  doBold           = ["bold", "embolden", "bolded"] ++ doTrue
+  doDeBold         = ["debold", "de-bold", "un-bold", "unbold"] ++ doFalse
+  doShow           = doTrue ++ ["show"]
+  doHide           = doFalse ++ ["hide"]
+  doHideRec        = ["hide-recursive", "recursive-hide", "recursively-hide", "hide-recursively"]
+  doTrue           = ["yes", "y", "t", "true"]
+  doFalse          = ["no", "n", "f", "false"]
+  doShowRec        = ["show-recursive", "recursive-show", "recursively-show", "show-recursively"]
+  doSubstitutions  = ["subs", "subst", "substitutions", "sub"]
 
   -- Compare the contents of the config item to see if it occurs in passed strings.
   compareStr :: ByteString -> [ByteString] -> Bool
@@ -214,24 +197,18 @@ module ParseConfig where
   areNumbers :: ByteString -> Bool
   areNumbers = B.all isDigit
 
-  getConfig :: FilePath -> IO Configuration
-  getConfig fp = extractConfiguration <$> parseYamlFileLite fp
 
   readBool :: ByteString -> Bool
   readBool s | compareStr s doTrue  = True
              | compareStr s doFalse = False
              | otherwise            = error $ "Unable to read " ++ unpack s ++ " as a truth value"
 
+  readNumber s = tryRead areNumbers s $ "Unable to parse: " ++ unpack s ++ " as a number"
+
+  readColor s = tryRead isColor s $ "Unable to parse: " ++ unpack s ++ " as a color"
+
   -- Data "destructors", not so safe and meant to be expanded with ones raising more useful errors
   -- Todo: implement a more robust solution using generics
-  unSeq :: YamlLite -> [YamlLite]
-  unSeq (Seq s) = s
-
-  unMap :: YamlLite -> [(YamlLite,YamlLite)]
-  unMap (Map m) = m
-
-  unStr :: YamlLite -> ByteString
-  unStr (Str s) = s
 
   -- Read utilities
   tryRead :: Read a => (ByteString -> Bool) -> ByteString -> String -> a
@@ -242,3 +219,15 @@ module ParseConfig where
 
   tryReadInt :: ByteString -> String -> Int
   tryReadInt = tryRead areNumbers
+
+  -- Try to run f on a YamlLight's String (if it is a terminal), else error out with errStr
+  tryTerminalApply :: (ByteString -> a) -> String -> YamlLight -> a
+  tryTerminalApply f errStr (YStr s) = f s
+  tryTerminalApply _ errStr _        = error errStr
+
+  tryMapApply :: ((Map.Map YamlLight YamlLight) -> a) -> String -> YamlLight -> a
+  tryMapApply f _ (YMap m) = f m
+  tryMapApply _ errStr _  = error errStr
+
+  unsafeUnStr (YStr s) = s
+  unsafeUnStr _        = error "Expecting a terminal"

@@ -7,6 +7,7 @@
 
 {-# OPTIONS -fglasgow-exts #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module FilterOutput where
   import ParseKOutput
@@ -44,9 +45,9 @@ module FilterOutput where
   cleanupStrings = remEmpty . map stripStrs
     where stripStrs (String n s) = String n (rstrip (deleteAll '\r' s))
           stripStrs x            = x
-          remEmpty (String _ s : xs) | s == (pack "") = remEmpty xs
-          remEmpty (x:xs)                           = x : remEmpty xs
-          remEmpty []                               = []
+          remEmpty (String _ s : xs) | s == "" = remEmpty xs
+          remEmpty (x:xs)                      = x : remEmpty xs
+          remEmpty []                          = []
 
 
   handleCell :: KOutPrinter
@@ -192,7 +193,7 @@ module FilterOutput where
   lookupCell = flip Map.lookup
 
   queryOptions :: Configuration -> (CellConfigRhs -> Maybe Bool) -> Bool
-  queryOptions conf f = case f <$> Map.lookup (pack "options") conf of
+  queryOptions conf f = case f <$> Map.lookup "options" conf of
                           Just (Just True) -> True
                           _                -> False
 
@@ -233,7 +234,7 @@ module FilterOutput where
                     else case lookupCell conf cn of
                            Just (Configs _ _ _ _ (Just _)) -> True
                            _                               -> False
-    where hasGlobalSubs conf = case lookupCell conf (pack "options") of
+    where hasGlobalSubs conf = case lookupCell conf "options" of
                                  Nothing                    -> False
                                  Just (Options Nothing _ _) -> False
                                  _                          -> True
@@ -264,7 +265,7 @@ module FilterOutput where
 
   -- Extend me to do local subs
   fetchSubs :: CellReader [Substitution]
-  fetchSubs conf cn = case globalSubstitutions <$> lookupCell conf (pack "options") of
+  fetchSubs conf cn = case globalSubstitutions <$> lookupCell conf "options" of
                         Just (Just subs) -> subs
                         Nothing          -> error "Internal Error: hasSubs approved a match incorrectly"
 

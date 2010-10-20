@@ -1,5 +1,7 @@
 {- Module that parses the cell-content strings and infixifies the operators -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module InfixOperators where
   import ParseKOutput
   import ByteStringUtils
@@ -93,7 +95,7 @@ module InfixOperators where
 
   -- Concat paren content down
   flattenParenContent :: [Content] -> [Content]
-  flattenParenContent (ParenedContent pcs : cs) = [StringContent (pack "(")] ++ flattenParenContent pcs ++ [StringContent (pack ")")] ++ flattenParenContent cs
+  flattenParenContent (ParenedContent pcs : cs) = [StringContent "("] ++ flattenParenContent pcs ++ [StringContent ")"] ++ flattenParenContent cs
   flattenParenContent (Operator n ocs : cs)     = Operator n (flattenParenContent ocs) : flattenParenContent cs
   flattenParenContent (c : cs)                  = c : flattenParenContent cs
   flattenParenContent []                        = []
@@ -114,7 +116,7 @@ module InfixOperators where
 
   -- the name says it all
   eliminateEmptySCs :: [Content] -> [Content]
-  eliminateEmptySCs (StringContent s : cs) | s == pack "" = eliminateEmptySCs cs
+  eliminateEmptySCs (StringContent s : cs) | s == "" = eliminateEmptySCs cs
   eliminateEmptySCs (Operator n cs : rest)  = Operator n (eliminateEmptySCs cs) : eliminateEmptySCs rest
   eliminateEmptySCs (c : cs)                = c : eliminateEmptySCs cs
   eliminateEmptySCs []                      = []
@@ -122,9 +124,9 @@ module InfixOperators where
   -- Convert back into a string
   contentToString :: Content -> ByteString
   contentToString (StringContent s) = s
-  contentToString (Operator name cs) | shouldInfix name  = join (" " ++ init (tail (unpack name)) ++ " ")  innards
+  contentToString (Operator name cs) | shouldInfix name  = join (" " `append` B.init (B.tail name) `append` " ")  innards
                                      | shouldMixfix name = join " " $ intermix (seperateMixfix name) innards
-                                     | otherwise         = name `append` pack "(" `append` join ",," innards `append` pack ")"
+                                     | otherwise         = name `append` "(" `append` join ",," innards `append` ")"
     where innards = map contentToString cs
 
   shouldInfix :: ByteString -> Bool

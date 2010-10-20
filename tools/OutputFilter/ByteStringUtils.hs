@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module ByteStringUtils where
   import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
   import qualified Data.ByteString.Char8 as B
@@ -10,11 +12,11 @@ module ByteStringUtils where
 
   -- Bytestring versions of split and join
   -- todo, make this more efficient (i.e. do it natively rather than pack/unpack)
-  split :: String -> ByteString -> [ByteString]
-  split delim s = map pack $ delim `MH.split` unpack s
+  split :: ByteString -> ByteString -> [ByteString]
+  split delim s = map pack $ unpack delim `MH.split` unpack s
 
-  join :: String -> [ByteString] -> ByteString
-  join delim ss = pack $ delim `MH.join` map unpack ss
+  join :: ByteString -> [ByteString] -> ByteString
+  join delim ss = pack $ unpack delim `MH.join` map unpack ss
 
   rstrip :: ByteString -> ByteString
   rstrip = pack . MH.rstrip . unpack
