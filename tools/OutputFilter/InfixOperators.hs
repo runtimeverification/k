@@ -14,7 +14,8 @@ module InfixOperators where
   data Content = Operator Name [Content] | StringContent ByteString | ParenedContent [Content]
     deriving (Show)
 
-  type ContentState = Int
+--  type ContentState = Int
+  type ContentState = ()
 
   type ContentParser = Parsec ByteString ContentState
 
@@ -67,19 +68,17 @@ module InfixOperators where
   parseLabel :: ContentParser Name
   parseLabel = pack <$> anyChar `manyTill` string "Label"
 
-  commaCommaSep p = p `sepBy` string ",,"
+  --  commaCommaSep p = p `sepBy` string ",,"
 
-  openParen = do char '('
-                 incr
+  openParen = char '(' >> {- incr >> -} return ()
 
-  endParen = do char ')'
-                decr
+  endParen  = char ')' >> {- decr >> -} return ()
 
-  incr = modifyState $ \i -> i + 1
-  decr = modifyState $ \i -> i - 1
+  -- incr = modifyState $ \i -> i + 1
+  -- decr = modifyState $ \i -> i - 1
 
   test :: String -> IO ()
-  test s = case runParser parseContentsTop 0 "" (pack s) of
+  test s = case runParser parseContentsTop () "" (pack s) of
              Left err -> print err
              Right cs  -> print $ postProcess cs
 
@@ -150,7 +149,7 @@ module InfixOperators where
 
   -- Do the whole shebang
   makeInfix :: ByteString -> ByteString
-  makeInfix s = case runParser parseContentsTop 0 "" s of
+  makeInfix s = case runParser parseContentsTop () "" s of
                   Left err -> error $ show err
                   Right cs -> join " " . map contentToString $ postProcess cs
 
