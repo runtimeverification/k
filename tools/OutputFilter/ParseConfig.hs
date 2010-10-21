@@ -44,6 +44,7 @@ module ParseConfig
                      | Options { globalSubstitutions :: Maybe [Substitution]
                                , spacelessCells      :: Maybe Bool
                                , infixify            :: Maybe Bool
+                               , lineEnd             :: Maybe ByteString
                                }
     deriving (Show)
 
@@ -96,6 +97,7 @@ module ParseConfig
   readOptions m = Options (getGlobalSubs <$> lookupConf doGlobalSubs m)
                           (getBool       <$> lookupConf doSpacelessCells m)
                           (getBool       <$> lookupConf doInfixity m)
+                          (getString     <$> lookupConf doLineEnd m)
 
   readConfig :: YamlLight -> CellConfigRhs
   readConfig (YStr s)   = readSingleEntry s
@@ -117,7 +119,7 @@ module ParseConfig
   getGlobalSubs :: YamlLight -> [Substitution]
   getGlobalSubs = tryMapApply (Map.elems . Map.mapWithKey mkSubstitution)
                               "User error: please specify substitutions as key:value pairs"
-    where mkSubstitution key val = Substitution (unsafeUnStr key) (unsafeUnStr val)
+    where mkSubstitution key val = Substitution (getString key) (getString val)
 
   getBool :: YamlLight -> Bool
   getBool = tryTerminalApply readBool "Internal error: getBool called on non-terminal value"
@@ -127,6 +129,9 @@ module ParseConfig
 
   getColor :: YamlLight -> Color
   getColor = tryTerminalApply readColor "Internal error: getColor called on non-terminal value"
+
+  getString :: YamlLight -> ByteString
+  getString = tryTerminalApply id "Internal error: getString called on non-terminal value"
 
   getStyle :: YamlLight -> Style
   getStyle m = Style (getColor     <$> lookupConf doForeground m)
@@ -179,6 +184,7 @@ module ParseConfig
   doFalse          = ["no", "n", "f", "false"]
   doShowRec        = ["show-recursive", "recursive-show", "recursively-show", "show-recursively"]
   doSubstitutions  = ["subs", "subst", "substitutions", "sub"]
+  doLineEnd        = ["lineend", "line-end", "line-end-str", "line-end-string", "lineendstr", "lineendstring"]
 
   -- Compare the contents of the config item to see if it occurs in passed strings.
   compareStr :: ByteString -> [ByteString] -> Bool

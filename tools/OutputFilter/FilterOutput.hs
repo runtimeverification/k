@@ -102,7 +102,7 @@ module FilterOutput where
 
   -- extend me to do local substitutions as well
   handleSubstitutions :: CellReader (ByteString -> ByteString)
-  handleSubstitutions conf n s | hasSubs conf n = performSubs s $ fetchSubs conf n
+  handleSubstitutions conf n s | hasSubs conf n = performSubs s $ fetchSubs conf
                                | otherwise = s
 
   performSubs :: ByteString -> [Substitution] -> ByteString
@@ -117,7 +117,7 @@ module FilterOutput where
   -- getMatch re s = head <$> match re s []
 
   stylize :: Style -> Doc -> Doc
-  stylize (Style fore back isUnder isBold) d = doUnder isUnder . doBold isBold . doFore fore . doBack back $ d
+  stylize (Style fore back isUnder isBold) = doUnder isUnder . doBold isBold . doFore fore . doBack back
     where doUnder Nothing            = id
           doUnder (Just Underline)   = underline
           doUnder (Just DeUnderline) = deunderline
@@ -181,26 +181,34 @@ module FilterOutput where
   pruneL conf cn s = B.unlines takenLines `append` more
     where takenLines = take (fetchPruneNumber conf cn) intermediate
           intermediate = B.lines s
-          more = pack $ indentation takenLines ++ " [..." ++ show (length intermediate - length takenLines) ++ " more...]"
+          more = pack $ indentation takenLines ++ " [..." ++ show (length intermediate - length takenLines)
+                     ++ " more...]"
           indentation (s:s2:ss) = replicate (B.length (B.takeWhile (== ' ') s2)) ' '
-          indentation _         = replicate 8 ' '
+          indentation _         = replicate 8 ' ' -- Otherwise just use 8 space indentation
 
   pruneC :: Configuration -> CellName -> ByteString -> ByteString
   pruneC conf cn = rstrip . B.unlines . map truncAndAdd . B.lines
     where toKeep = fetchPruneCharNumber conf cn
           truncAndAdd s = if B.length s > toKeep then B.take toKeep s `append` lineEndStr
                           else s
-
-  lineEndStr = " #"
+          lineEndStr | hasOption conf lineEnd = fetchLineEnd conf
+                     | otherwise              = ""
 
   -- Lookup the config for the cell
   lookupCell :: CellReader (Maybe CellConfigRhs)
   lookupCell = flip Map.lookup
 
+  lookupOptions = Map.lookup "options"
+
   queryOptions :: Configuration -> (CellConfigRhs -> Maybe Bool) -> Bool
-  queryOptions conf f = case f <$> Map.lookup "options" conf of
+  queryOptions conf f = case f <$> lookupOptions conf of
                           Just (Just True) -> True
                           _                -> False
+
+  hasOption :: Configuration -> (CellConfigRhs -> Maybe a) -> Bool
+  hasOption conf f = case f <$> lookupOptions conf of
+                       Just (Just _) -> True
+                       _             -> False
 
   shouldSpacelessCells :: Configuration -> Bool
   shouldSpacelessCells conf = queryOptions conf spacelessCells
@@ -240,9 +248,9 @@ module FilterOutput where
                            Just (Configs _ _ _ _ (Just _)) -> True
                            _                               -> False
     where hasGlobalSubs conf = case lookupCell conf "options" of
-                                 Nothing                    -> False
-                                 Just (Options Nothing _ _) -> False
-                                 _                          -> True
+                                 Nothing                      -> False
+                                 Just (Options Nothing _ _ _) -> False
+                                 _                            -> True
 
 
 
@@ -269,11 +277,17 @@ module FilterOutput where
 
 
   -- Extend me to do local subs
-  fetchSubs :: CellReader [Substitution]
-  fetchSubs conf cn = case globalSubstitutions <$> lookupCell conf "options" of
-                        Just (Just subs) -> subs
-                        Nothing          -> error "Internal Error: hasSubs approved a match incorrectly"
+  fetchSubs :: Configuration -> [Substitution]
+  fetchSubs = (flip fetchOption) globalSubstitutions
 
+  fetchLineEnd :: Configuration -> ByteString
+  fetchLineEnd = (flip fetchOption) lineEnd
+
+  fetchOption :: Configuration -> (CellConfigRhs -> Maybe a) -> a
+  fetchOption conf f = case f <$> lookupOptions conf of
+                         Just (Just a) -> a
+                         Just Nothing  -> error "Internal Error: option not found"
+                         Nothing       -> error "Internal Error: option cell not specified"
 
   -- Whether a maybe is something
 
