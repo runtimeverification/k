@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 double f (double a) {}
 double (* const a[]) (double) = {&f};
 

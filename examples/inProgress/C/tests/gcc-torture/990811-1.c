@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct s {long a; int b;};
 
 int foo(int x, void *y)

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* This tests an insn length of sign extension on h8300 port.  */
 
 extern void exit (int);

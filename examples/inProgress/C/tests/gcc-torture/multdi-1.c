@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR target/9348 */
 
 #define u_l_l unsigned long long

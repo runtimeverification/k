@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void adjust_xy (short *, short *);
 
 struct adjust_template

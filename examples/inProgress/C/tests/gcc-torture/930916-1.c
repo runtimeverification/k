@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void f (n)
      unsigned n;
 {

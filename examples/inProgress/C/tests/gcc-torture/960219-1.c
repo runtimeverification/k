@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void f (int i)
 {
   if (((1 << i) & 1) == 0)

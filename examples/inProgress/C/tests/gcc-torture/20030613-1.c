@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR optimization/10955 */
 /* Originator: <heinrich.brand@fujitsu-siemens.com> */
 

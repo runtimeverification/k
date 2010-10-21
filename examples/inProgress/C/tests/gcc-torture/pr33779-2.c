@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int foo(int i)
 {
   return ((int)((unsigned)(i + 1) * 4)) / 4;

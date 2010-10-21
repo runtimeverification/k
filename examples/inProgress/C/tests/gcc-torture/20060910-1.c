@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR rtl-optimization/28636 */
 /* Origin: Andreas Schwab <schwab@suse.de> */
 

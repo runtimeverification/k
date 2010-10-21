@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void abort (void);
 
 int bar (void) {  return -1;  }

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 extern void exit (int);
 extern void abort (void);
 extern unsigned short f (short a) __attribute__((__noinline__));

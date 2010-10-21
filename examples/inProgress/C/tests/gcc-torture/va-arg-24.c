@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* The purpose of this code is to test argument passing of a tuple of
    11 integers, with the break point between named and unnamed arguments
    at every possible position.	*/

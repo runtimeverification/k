@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Leaf functions with many arguments.  */
 
 int

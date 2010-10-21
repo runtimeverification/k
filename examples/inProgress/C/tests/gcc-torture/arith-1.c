@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 unsigned
 sat_add (unsigned i)
 {

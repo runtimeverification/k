@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 // reduced testcase, compile with -O2. Also, with --disable-checking
 // gcc produces wrong code.
 

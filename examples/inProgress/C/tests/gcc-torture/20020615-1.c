@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR target/7042.  When reorg.c changed branches into return insns, it
    completely forgot about any current_function_epilogue_delay_list and
    dropped those insns.  Uncovered on cris-axis-elf, where an insn in an

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR rtl-optimization/28386 */
 /* Origin: Volker Reichelt <reichelt@gcc.gnu.org> */
 

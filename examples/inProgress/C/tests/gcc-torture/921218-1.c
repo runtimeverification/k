@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 f()
 {
   return (unsigned char)("\377"[0]);

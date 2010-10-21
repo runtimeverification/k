@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 f1 (unsigned int x, unsigned int y)
 {
   if (x == 0)

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 typedef struct trio { int a, b, c; } trio;
 
 int

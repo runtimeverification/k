@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR 19515 */
 
 typedef union {

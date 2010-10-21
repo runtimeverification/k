@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Source: PR 321 modified for test suite by Neil Booth 14 Jan 2001.  */
 
 typedef unsigned long long uint64;

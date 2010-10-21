@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct F { int i; };
 
 void f1(struct F *x, struct F *y)

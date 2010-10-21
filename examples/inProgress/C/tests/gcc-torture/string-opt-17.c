@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Copyright (C) 2003  Free Software Foundation.
 
    Test strcpy optimizations don't evaluate side-effects twice.

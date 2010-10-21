@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 extern unsigned long aa[], bb[];
 
 int seqgt (unsigned long a, unsigned short win, unsigned long b);

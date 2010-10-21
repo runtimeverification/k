@@ -236,6 +236,11 @@ and printInitExpression a =
 	| NO_INIT -> "NoInit"
 	| SINGLE_INIT exp -> wrap ((printExpression exp) :: []) "SingleInit"
 	| COMPOUND_INIT a -> wrap ((printInitFragmentList a) :: []) "CompoundInit"
+and printInitExpressionForCast a castPrinter compoundLiteralPrinter = (* this is used when we are printing an init inside a cast, i.e., possibly a compound literal *)
+	match a with 
+	| NO_INIT -> "Error(\"cast with a NO_INIT inside doesn't make sense\")"
+	| SINGLE_INIT exp -> castPrinter (printExpression exp)
+	| COMPOUND_INIT a -> compoundLiteralPrinter (wrap ((printInitFragmentList a) :: []) "CompoundInit")
 and printInitFragmentList a =
 	printFlatList printInitFragment a
 and printInitFragment (a, b) =
@@ -345,7 +350,11 @@ and printExpression exp =
 	| PAREN (exp1) -> wrap ((printExpression exp1) :: []) ""
 	| LABELADDR (s) -> wrap (s :: []) "GCCLabelOperator"
 	| QUESTION (exp1, exp2, exp3) -> wrap ((printExpression exp1) :: (printExpression exp2) :: (printExpression exp3) :: []) "_?_:_"
-	| CAST ((spec, declType), initExp) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: (printInitExpression initExp) :: []) "Cast" 
+	(* special case below for the compound literals.  i don't know why this isn't in the ast... *)
+	| CAST ((spec, declType), initExp) -> 
+		let castPrinter x = wrap ((printSpecifier spec) :: (printDeclType declType) :: x :: []) "Cast" in
+		let compoundLiteralPrinter x = wrap ((printSpecifier spec) :: (printDeclType declType) :: x :: []) "CompoundLiteral"
+		in printInitExpressionForCast initExp castPrinter compoundLiteralPrinter
 		(* A CAST can actually be a constructor expression *)
 	| CALL (exp1, expList) -> wrap ((printExpression exp1) :: (printExpressionList expList) :: []) "Call"
 		(* There is a special form of CALL in which the function called is

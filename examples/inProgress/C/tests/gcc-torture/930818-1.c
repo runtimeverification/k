@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 static double one = 1.0;
 
 f()

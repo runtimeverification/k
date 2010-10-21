@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 double glob_dbl;
 
 void f (pdbl, value)

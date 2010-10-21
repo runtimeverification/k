@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* This test was miscompiled when using sibling call optimization,
    because X ? Y : Y - 1 optimization changed X into !X in place
    and haven't reverted it if do_store_flag was successful, so

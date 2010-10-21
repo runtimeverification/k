@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR opt/7130 */
 #define TYPE long
 

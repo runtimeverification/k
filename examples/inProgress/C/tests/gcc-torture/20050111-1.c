@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR middle-end/19084, rtl-optimization/19348 */
 
 unsigned int

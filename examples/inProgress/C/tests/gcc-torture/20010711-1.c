@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void foo (int *a) {}
 
 int main ()

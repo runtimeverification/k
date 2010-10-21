@@ -11,5 +11,8 @@ int mysub2 (unsigned int i) {
 int main(void) {
 	mysub1(0x80000000);
 	mysub2(0x80000000);
+	
+	int* p = (int[]) {2, 4};
+	
 	return 0;
 }

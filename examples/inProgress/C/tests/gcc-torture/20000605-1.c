@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 typedef struct _RenderInfo RenderInfo;
 struct _RenderInfo
 {

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct {
   int a:4;
   int :4;

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct a;
 
 extern int baz (struct a *__restrict x);

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int a[2] = { 18, 6 };
 
 int main ()

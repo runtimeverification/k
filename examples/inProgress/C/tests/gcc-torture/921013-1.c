@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void f(d,x,y,n)
 int*d;
 float*x,*y;

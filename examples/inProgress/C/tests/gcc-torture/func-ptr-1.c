@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 static double f (float a);
 static double (*fp) (float a);
 

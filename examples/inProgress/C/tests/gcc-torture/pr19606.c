@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR c/19606
    The C front end used to shorten the type of a division to a type
    that does not preserve the semantics of the original computation.

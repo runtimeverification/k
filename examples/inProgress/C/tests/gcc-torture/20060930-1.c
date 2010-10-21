@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR rtl-optimization/28096 */
 /* Origin: Jan Stein <jan@gatespacetelematics.com> */
 

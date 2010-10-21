@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 
 static int next_buffer = 0;
 void bar (void);

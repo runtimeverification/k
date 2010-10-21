@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int w[2][2];
 
 void f ()

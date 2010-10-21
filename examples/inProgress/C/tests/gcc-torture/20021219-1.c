@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR optimization/8988 */
 /* Contributed by Kevin Easton */
 

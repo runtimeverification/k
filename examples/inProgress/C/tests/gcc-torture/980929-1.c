@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void f(int i)
 {
   if (i != 1000)

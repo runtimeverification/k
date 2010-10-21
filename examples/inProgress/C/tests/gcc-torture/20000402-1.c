@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 #include <limits.h>
 
 #if ULONG_LONG_MAX != 18446744073709551615ull && ULONG_MAX != 18446744073709551615ull

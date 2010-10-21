@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void *foo[]={(void *)&("X"[0])};
 
 main ()

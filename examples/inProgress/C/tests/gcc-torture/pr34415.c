@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 const char *__attribute__((noinline))
 foo (const char *p)
 {

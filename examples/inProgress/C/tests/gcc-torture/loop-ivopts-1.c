@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* From PR 18977.  */
 void foo(float * x);
 

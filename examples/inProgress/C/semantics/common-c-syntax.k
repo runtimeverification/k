@@ -473,6 +473,7 @@ and unary_operator =
 	| CAST of (specifier * decl_type) * init_expression
 ***)
 	op Cast : K K K -> Expression [strict(1 3)]
+	op CompoundLiteral : K K K -> Expression [strict(1)] --- new
 ***(
 	(* There is a special form of CALL in which the function called is
 	   __builtin_va_arg and the second argument is sizeof(T). This 

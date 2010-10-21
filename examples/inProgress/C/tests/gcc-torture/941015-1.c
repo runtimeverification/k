@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int
 foo1 (value)
      long long value;

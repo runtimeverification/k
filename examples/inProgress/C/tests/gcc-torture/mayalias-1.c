@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Tests that the may_alias attribute works as expected.
    Author: Osku Salerma <osku@iki.fi> Apr 2002.  */
  

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct foo { int i; int j; };
 
 int bar (struct foo *k, int k2, int f, int f2)

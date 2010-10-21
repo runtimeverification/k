@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int bar = 0;
 
 void f (p)

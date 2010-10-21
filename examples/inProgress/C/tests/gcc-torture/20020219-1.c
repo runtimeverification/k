@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR c/4308
    This testcase failed because 0x8000000000000000 >> 0
    was incorrectly folded into 0xffffffff00000000.  */

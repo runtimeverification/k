@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 #include <limits.h>
 
 int __attribute__((noinline)) nge(int a, int b) {return -(a >= b);}

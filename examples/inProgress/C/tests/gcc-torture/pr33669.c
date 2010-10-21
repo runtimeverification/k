@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 extern void abort (void);
 
 typedef struct foo_t

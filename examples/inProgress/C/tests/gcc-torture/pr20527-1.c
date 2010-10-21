@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR rtl-optimization/20527
    Mishandled postincrement.  This test-case is derived from the
    function BZ2_hbCreateDecodeTables in the file huffman.c from

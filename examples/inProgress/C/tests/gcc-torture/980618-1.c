@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void func(int, int);
 
 int main()

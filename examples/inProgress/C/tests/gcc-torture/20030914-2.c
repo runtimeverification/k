@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* On IRIX 6, PA is passed partially in registers and partially on the
    stack.  We therefore have two potential uses of pretend_args_size:
    one for the partial argument and one for the varargs save area.

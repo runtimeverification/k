@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 double
 foo (void)
 {

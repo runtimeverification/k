@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 static int f (int a)
 {
   if (a == 0)

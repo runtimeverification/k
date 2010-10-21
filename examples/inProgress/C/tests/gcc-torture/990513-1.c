@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 #include <string.h>
 
 void foo (int *BM_tab, int j)

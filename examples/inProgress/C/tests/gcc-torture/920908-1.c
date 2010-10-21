@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* REPRODUCED:RUN:SIGNAL MACHINE:mips OPTIONS: */
 
 #include <stdarg.h>

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int x;
 
 void __attribute__((noinline)) foo (void)

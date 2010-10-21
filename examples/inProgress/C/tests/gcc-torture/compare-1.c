@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Copyright (C) 2002 Free Software Foundation.
 
    Test for correctness of composite comparisons.

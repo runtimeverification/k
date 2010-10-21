@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* This used to fail on h8300.  */
 
 extern void abort (void);

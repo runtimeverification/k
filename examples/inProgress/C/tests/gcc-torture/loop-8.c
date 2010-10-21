@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 double a[3] = { 0.0, 1.0, 2.0 };
 
 void bar (int x, double *y)

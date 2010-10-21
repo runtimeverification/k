@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* The FR-V port used to fail this test because the andcc patterns
    wrongly claimed to set the C and V flags.  */
 #include <limits.h>

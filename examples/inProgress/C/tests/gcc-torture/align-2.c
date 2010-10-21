@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Simple alignment checks;
    looking for compiler/assembler alignment disagreements,
    agreement between struct initialization and access.  */

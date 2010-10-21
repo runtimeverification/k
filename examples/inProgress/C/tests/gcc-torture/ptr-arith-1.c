@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 char *
 f (char *s, unsigned int i)
 {

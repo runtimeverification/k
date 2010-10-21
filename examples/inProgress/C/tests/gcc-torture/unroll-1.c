@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 inline int
 f (int x)
 {

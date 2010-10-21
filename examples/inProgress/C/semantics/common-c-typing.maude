@@ -437,7 +437,7 @@ mod COMMON-C-TYPING is
 	
 	--- op cast : K K -> K [metadata "strict"] .
 	mb rule 
-		< k > Cast(T:Type, K:K, SingleInit(V:Value)) => cast(DeclType(T:Type, K:K), V:Value) ...</ k >
+		< k > Cast(T:Type, K:K, V:Value) => cast(DeclType(T:Type, K:K), V:Value) ...</ k >
 		: KSentence .
 		
 	mb rule 

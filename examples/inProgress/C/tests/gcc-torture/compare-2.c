@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Copyright (C) 2002 Free Software Foundation.
 
    Ensure that the composite comparison optimization doesn't misfire

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int f (int **, int *, int *, int **, int **) __attribute__ ((__noinline__));
 int
 f (int **ipp, int *i1p, int *i2p, int **i3, int **i4)

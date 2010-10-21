@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR c/7102 */
 
 /* Verify that GCC zero-extends integer constants

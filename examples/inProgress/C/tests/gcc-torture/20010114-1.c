@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Origin: PR c/1540 from Mattias Lampe <lampe@tu-harburg.de>,
    adapted to a testcase by Joseph Myers <jsm28@cam.ac.uk>.
    GCC 2.95.2 fails, CVS GCC of 2001-01-13 passes.  */

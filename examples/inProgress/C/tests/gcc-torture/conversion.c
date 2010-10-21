@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Test front-end conversions, optimizer conversions, and run-time
    conversions between different arithmetic types.
 

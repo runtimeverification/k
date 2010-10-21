@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 static int f(int) __attribute__((const));
 int main()
 {

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR tree-optimization/18694
 
    The dominator optimization didn't take the PHI evaluation order

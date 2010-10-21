@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int foo(int i)
 {
   if (((unsigned)(i + 1)) * 4 == 0)

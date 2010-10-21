@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR24716, scalar evolution returning the wrong result
    for pdest.  */
 

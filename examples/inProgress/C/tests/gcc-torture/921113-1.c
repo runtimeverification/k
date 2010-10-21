@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 #define STACK_REQUIREMENT (128 * 128 * 4 + 1024)
 #if defined (STACK_SIZE) && STACK_SIZE < STACK_REQUIREMENT
 main () { exit (0); }

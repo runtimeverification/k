@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 typedef enum foo E;
 enum foo { e0, e1 };
 

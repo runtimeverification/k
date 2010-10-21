@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int foo (int, int, int);
 int bar (int, int, int);
 

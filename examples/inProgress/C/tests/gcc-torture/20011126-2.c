@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Problem originally visible on ia64.
 
    There is a partial redundancy of "in + 1" that makes GCSE want to

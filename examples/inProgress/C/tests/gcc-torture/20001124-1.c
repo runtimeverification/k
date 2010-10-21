@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 
 struct inode {
 	long long		i_size;

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 extern int f2(void);
 extern int f3(void);
 extern void f1(void);

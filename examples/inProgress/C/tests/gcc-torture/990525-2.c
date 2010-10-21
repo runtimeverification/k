@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 typedef struct {
     int v[4];
 } Test1;

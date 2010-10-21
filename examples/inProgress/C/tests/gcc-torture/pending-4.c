@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 
 void dummy (x, y)
      int *x;

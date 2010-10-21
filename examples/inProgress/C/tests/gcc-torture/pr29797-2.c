@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 extern void abort(void);
 
 unsigned long bar(void) { return 32768; }

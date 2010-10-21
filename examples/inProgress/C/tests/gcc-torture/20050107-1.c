@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 typedef enum { C = 1, D = 2 } B;
 extern void abort (void);
 

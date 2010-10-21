@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 double d;
 
 __inline__ double foo (void)

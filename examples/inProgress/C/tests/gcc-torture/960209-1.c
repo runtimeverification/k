@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct a_struct
 {
   unsigned char a_character;

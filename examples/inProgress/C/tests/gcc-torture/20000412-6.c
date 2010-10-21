@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 unsigned bug (unsigned short value, unsigned short *buffer,
               unsigned short *bufend);
 

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void f (int value, int expect)
 {
   if (value != expect)

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 static int which_alternative = 3;
 
 static const char *i960_output_ldconst (void);

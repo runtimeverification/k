@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* submitted by kenneth zadeck */
 
 static int test_var;

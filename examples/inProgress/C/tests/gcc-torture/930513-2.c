@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void sub3 (i)
      const int *i;
 {

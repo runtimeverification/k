@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void f (double *ty)
 {
   *ty = -1.0;

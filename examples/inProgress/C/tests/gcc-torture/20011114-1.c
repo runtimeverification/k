@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 char foo(char bar[])
 {
   return bar[1];

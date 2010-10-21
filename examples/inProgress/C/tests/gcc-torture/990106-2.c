@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 unsigned calc_mp(unsigned mod)
 {
       unsigned a,b,c;

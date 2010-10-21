@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR target/14209.  Bug in cris.md, shrinking access size of
    postincrement.
    Origin: <hp@axis.com>.  */

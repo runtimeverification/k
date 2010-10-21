@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 #include <stdarg.h>
 
 double f (float f1, float f2, float f3, float f4,

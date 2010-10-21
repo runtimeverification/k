@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 int compare(x, y)
 unsigned int x;
 unsigned int y;

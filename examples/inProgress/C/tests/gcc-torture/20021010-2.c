@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* cse.c failure on x86 target.
    Contributed by Stuart Hastings 10 Oct 2002 <stuart@apple.com> */
 #include <stdlib.h>

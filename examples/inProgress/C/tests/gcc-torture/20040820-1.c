@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR rtl-optimization/17099 */
 
 extern void exit (int);

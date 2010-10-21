@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 const int *p;
 
 int bar (void)

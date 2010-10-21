@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 #include <stdarg.h>
 
 void va_double (int n, ...)

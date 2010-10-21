@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Source: Neil Booth, from PR # 115.  */
 
 int false()

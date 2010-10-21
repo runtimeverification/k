@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 static inline
 p (int *p)
 {

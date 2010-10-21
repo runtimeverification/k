@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 void foo (unsigned int n)
 {
   int i, j = -1;

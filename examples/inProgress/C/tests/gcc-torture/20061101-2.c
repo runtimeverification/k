@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR rtl-optimization/28970 */
 /* Origin: Peter Bergner <bergner@vnet.ibm.com> */
 

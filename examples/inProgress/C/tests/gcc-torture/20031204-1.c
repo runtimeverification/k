@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* PR optimization/13260 */
 
 #include <string.h>

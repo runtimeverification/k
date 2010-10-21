@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 unsigned test(unsigned one , unsigned  bit)
 {
     unsigned val=  bit & 1;

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 main()
 {
   if (wwrite((long long) 0) != 123)

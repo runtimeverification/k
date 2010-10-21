@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Checks that pure functions are not treated as const.  */
 
 char *p;

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Test va_arg when the result is ignored and only the pointer increment
    side effect is used.  */
 #include <stdarg.h>

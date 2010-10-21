@@ -61,6 +61,6 @@ int partition(a, i, j) int a[]; {
 void exchange(x, y) int *x, *y; {
 	int t;
 
-	printf("exchange(%d,%d)\n", x - xx, y - xx);
+	printf("exchange(%d,%d)\n", (int)(x - xx), (int)(y - xx));
 	t = *x; *x = *y; *y = t;
 }

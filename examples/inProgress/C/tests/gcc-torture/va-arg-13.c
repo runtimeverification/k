@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* derived from mozilla source code */
 
 #include <stdarg.h>

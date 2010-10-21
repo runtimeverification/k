@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct foo {
   unsigned : 12;
   unsigned field : 4;

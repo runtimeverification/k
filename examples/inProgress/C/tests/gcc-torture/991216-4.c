@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Test against a problem with loop reversal.  */
 static void bug(int size, int tries)
 {

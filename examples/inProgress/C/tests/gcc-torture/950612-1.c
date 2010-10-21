@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 unsigned int
 f1 (int diff)
 {

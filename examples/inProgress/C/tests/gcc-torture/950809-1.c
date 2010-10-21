@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 struct S
 {
   int *sp, fc, *sc, a[2];

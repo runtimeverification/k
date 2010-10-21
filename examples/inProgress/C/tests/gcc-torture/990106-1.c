@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 foo(bufp)
 char *bufp;
 {

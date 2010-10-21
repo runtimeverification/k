@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 long a = 1;
 
 foo ()

@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Copyright (C) 2000  Free Software Foundation  */
 /* by Alexandre Oliva <aoliva@redhat.com> */
 

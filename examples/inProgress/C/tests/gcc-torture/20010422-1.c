@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 unsigned int foo(unsigned int x)
 {
   if (x < 5)

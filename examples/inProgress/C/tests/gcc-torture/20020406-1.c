@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 // Origin: abbott@dima.unige.it
 // PR c/5120
 

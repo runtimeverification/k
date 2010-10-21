@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* Reduced from PR optimization/5076, PR optimization/2847 */
 
 static int count = 0;

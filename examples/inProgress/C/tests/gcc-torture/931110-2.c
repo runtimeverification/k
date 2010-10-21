@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 main ()
 {
   static int a[] = {3, 4};

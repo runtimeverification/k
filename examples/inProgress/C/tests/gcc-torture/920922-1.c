@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 unsigned long*
 f(p)unsigned long*p;
 {

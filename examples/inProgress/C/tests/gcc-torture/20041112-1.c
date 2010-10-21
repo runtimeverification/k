@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 /* This was failing on Alpha because the comparison (p != -1) was rewritten
    as (p+1 != 0) and p+1 isn't allowed to wrap for pointers.  */
 

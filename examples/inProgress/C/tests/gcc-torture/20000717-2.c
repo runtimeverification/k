@@ -1,3 +1,4 @@
+#include "fsl-header.h"
 static void
 compare (long long foo)
 {
