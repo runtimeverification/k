@@ -75,7 +75,7 @@ module ParseKOutput where
   -- it will be in seperate Strings.
   combineStrings :: [KOutput] -> [KOutput]
   combineStrings (String n s1 : String _ s2 : ks) | B.head s2 == '<'
-    = String n (s1 `append` (singleton '<') `append` s2) : combineStrings ks
+    = combineStrings (String n (s1 `append` s2) : ks)
   combineStrings (x:xs) = x : combineStrings xs
   combineStrings [] = []
 
@@ -89,5 +89,10 @@ module ParseKOutput where
   peek :: Parsec ByteString [ByteString] ByteString
   peek = head <$> getState
 
+  -- Test the parser
+  testParser :: String -> IO ()
+  testParser s = case runParser parseTop [] "" (pack s) of
+                   Left err -> error $ show err
+                   Right cs -> print cs
 
 

@@ -155,4 +155,7 @@ module InfixOperators where
                   Left err -> error $ show err
                   Right cs -> join " " . map contentToString $ postProcess cs
 
+  makeInfixStr :: String -> ByteString
+  makeInfixStr = makeInfix . pack
+
 
