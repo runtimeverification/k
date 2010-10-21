@@ -1,3 +1,4 @@
+#include <stdio.h>
 signed char c;
 signed short s;
 signed int i;

@@ -70,7 +70,7 @@ int testDifferent(int x, ...){
 	int y6a = y6 * 10000;
 	int y7a = y7 * 10000;
 	struct s mys = va_arg(argp, struct s);
-	printf("%d, %d, %d, %d, %d, %d, %d, %d, %d\n", y1, y2, y3, y4, y5, y6a, y7a, (&mys)->x, (&mys)->y);
+	printf("%d, %d, %d, %d, %d, %d, %d, %d, %d\n", y1, y2, y3, (int)y4, (int)y5, y6a, y7a, (&mys)->x, (&mys)->y);
 	va_end(argp);
 	return 0;
 }

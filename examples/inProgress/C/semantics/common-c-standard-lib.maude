@@ -38,8 +38,11 @@ mod COMMON-C-STANDARD-LIBRARY is
 	op prepareBuiltin : Id List{C} -> K [metadata "strict(2)"] .
 	op idsFromDeclList : List{C} -> List{C} .
 	
-	eq idsFromDeclList(L:List{C} :: typedDeclaration(?, X:Id)) 
-		= idsFromDeclList(L:List{C}) :: X:Id .
+	ceq idsFromDeclList(L:List{C} :: typedDeclaration(T:Type, X:Id)) 
+		= idsFromDeclList(L:List{C}) :: X:Id
+		if T:Type =/=Bool void .
+	eq idsFromDeclList(L:List{C} :: typedDeclaration(void, X:Id)) 
+		= idsFromDeclList(L:List{C}) .
 	eq idsFromDeclList(L:List{C} :: typedDeclaration(T:Type, X:Id) :: variadic)
 		= idsFromDeclList(L:List{C} :: typedDeclaration(T:Type, X:Id)) :: vararg(cast(pointerType(unsigned-char), &(X:Id)) + byteSizeofType(T:Type)) .
 	eq idsFromDeclList(Nil) = Nil .
@@ -532,7 +535,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 			=> printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, nextvarg(Loc:Nat, int))
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		if N:Nat ==Bool asciiString("d") orBool N:Nat ==Bool asciiString("u")
+		if N:Nat ==Bool asciiString("d")
 	: KSentence [metadata "structural"] .
 	mb [lib-printf-%d]: rule
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vpair(tv(D:Int, int), V:Value) :: ?) 
@@ -540,8 +543,25 @@ mod COMMON-C-STANDARD-LIBRARY is
 			~> printf-aux(Len:Nat +Nat lengthString(Rat2String(D:Int, 10)), sNat(sym(Block:Nat) +Nat Offset:Nat), V:Value) 
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		if N:Nat ==Bool asciiString("d") orBool N:Nat ==Bool asciiString("u")
+		if N:Nat ==Bool asciiString("d")
 	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-%u]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vararg(tv(Loc:Nat, ?)))
+			=> printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, nextvarg(Loc:Nat, unsigned-int))
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("u")
+	: KSentence [metadata "structural"] .
+	mb [lib-printf-%u]: rule
+		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vpair(tv(D:Int, unsigned-int), V:Value) :: ?) 
+			=> writeToFD(1, Rat2String(D:Int, 10))
+			~> printf-aux(Len:Nat +Nat lengthString(Rat2String(D:Int, 10)), sNat(sym(Block:Nat) +Nat Offset:Nat), V:Value) 
+		...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("u")
+	: KSentence [metadata "structural"] .
+	
 	
 	mb [lib-printf-%c]: rule
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vararg(tv(Loc:Nat, ?))) 

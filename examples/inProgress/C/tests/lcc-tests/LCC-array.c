@@ -1,3 +1,4 @@
+#include <stdio.h>
 int x[3][4], *y[3];
 
 main() {

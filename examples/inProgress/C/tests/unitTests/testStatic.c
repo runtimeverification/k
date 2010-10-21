@@ -1,3 +1,4 @@
+#include <stdio.h>
 int x = 17;
 int y = 5;
 int f(void){

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int main(void){
 	int x1 = 0;
 	int x2 = {0};

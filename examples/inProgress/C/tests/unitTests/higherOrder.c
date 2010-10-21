@@ -1,4 +1,4 @@
-// #include <stdio.h>
+#include <stdio.h>
 typedef int* intp;
 intp g();
 int* f();

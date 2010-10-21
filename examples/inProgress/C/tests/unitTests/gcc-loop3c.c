@@ -1,6 +1,8 @@
 // based on loop-3c.c from gcc torture tests
 
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void * a[255];
 
