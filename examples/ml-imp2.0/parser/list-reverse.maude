@@ -1,0 +1,23 @@
+mod P-LIST-REVERSE is including IMP-SYNTAX + LIST-HP .
+  ops nodeList next val  x  y  p lrev a n main : -> Id .
+  ops ?x ?p ?y ?z ?a ?b ?c : -> ?Int .
+  ops x0 p0 y0 z0 a0 b0 c0 : -> FreeInt .  
+  ops ?B ?C ?A ?X ?Y : -> ?Seq .
+  ops A B C : -> FreeSeq .
+  ops ?rho : -> ?MapItem .
+
+  op pT : -> TranslationUnit .
+
+
+  eq pT = (
+
+translationUnit_(_~>_(struct_`{_`};(nodeList,_`,`,_(__;(int,val),__;(_*(struct_(nodeList)),next))),_~>_(__`(_`)___(int,lrev,__;(_*(struct_(nodeList)),x),/*@ pre < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */,/*@ post < config > < env > ?rho </ env >
+                   < heap > list(?x)(rev(A)) </ heap > < form > returns ?x </ form > </ config > */,block_(_~>_(__;(_*(struct_(nodeList)),p),_~>_(__;(_*(struct_(nodeList)),y),_~>_(_;(_=_(p,tv(int,0))),_~>_(/*@ invariant < config > < env > p |-> ?p x |-> ?x ?rho </ env >
+                          < heap > list(?p)(?B) list(?x)(?C) </ heap >
+                          < form > rev(A) === rev(?C) ::: ?B </ form > </ config > */,_~>_(while`(_`)_(_!=_(x,tv(int,0)),block_(_~>_(_;(_=_(y,_->_(x,next))),_~>_(_;(_=_(_->_(x,next),p)),_~>_(_;(_=_(p,x)),_;(_=_(x,y))))))),return_(p)))))))),__`(_`)___(void,main,.List{K},/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */,/*@ post < config > < env > (.).Map </ env >
+                   < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */,block_(_~>_(/*@ assume < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */,_~>_(_;(_=_(x,_`(_`)(lrev,x))),/*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)(rev(A)) </ heap > < form > TrueFormula </ form > </ config > */)))))))
+
+
+  ) . 
+endm
+
