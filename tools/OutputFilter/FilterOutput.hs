@@ -17,7 +17,7 @@ module FilterOutput where
   import System.Environment
 --  import Useful.String
   import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
-  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
+  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton, snoc)
   import qualified Data.ByteString.Char8 as B
   import Control.Applicative ((<$>))
   import Control.Monad
@@ -178,15 +178,20 @@ module FilterOutput where
                        | otherwise                = s
 
   pruneL :: Configuration -> CellName -> ByteString -> ByteString
-  pruneL conf cn s = (rstrip . B.unlines . take toKeep) intermediate `append` more
-    where toKeep = fetchPruneNumber conf cn
+  pruneL conf cn s = B.unlines takenLines `append` more
+    where takenLines = take (fetchPruneNumber conf cn) intermediate
           intermediate = B.lines s
-          more = pack $ " [..." ++ show (length intermediate - 1) ++ " more...]"
+          more = pack $ indentation takenLines ++ " [..." ++ show (length intermediate - length takenLines) ++ " more...]"
+          indentation (s:s2:ss) = replicate (B.length (B.takeWhile (== ' ') s2)) ' '
+          indentation _         = replicate 8 ' '
 
   pruneC :: Configuration -> CellName -> ByteString -> ByteString
-  pruneC conf cn s = (rstrip . B.unlines . map (B.take toKeep)) intermediate
+  pruneC conf cn = rstrip . B.unlines . map truncAndAdd . B.lines
     where toKeep = fetchPruneCharNumber conf cn
-          intermediate = B.lines s
+          truncAndAdd s = if B.length s > toKeep then B.take toKeep s `append` lineEndStr
+                          else s
+
+  lineEndStr = " #"
 
   -- Lookup the config for the cell
   lookupCell :: CellReader (Maybe CellConfigRhs)
