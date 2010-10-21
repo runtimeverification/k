@@ -679,10 +679,12 @@ mod COMMON-C-TYPING is
 		if getKLabel(T:Type) =/=Bool 'bitfieldType .	
 		
 	eq hasFunctionType(functionType(?, ?)) = true .
+	eq hasFunctionType(prototype(T:Type)) = hasFunctionType(T:Type) .
 	eq hasFunctionType(qualifiedType(T:Type, ?)) = hasFunctionType(T:Type) .
 	ceq hasFunctionType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'functionType
-		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType
+		andBool getKLabel(T:Type) =/=Bool 'prototype .
 		
 	eq hasFunctionPointerType(pointerType(functionType(?, ?))) = true .
 	ceq hasFunctionPointerType(T:Type) = false

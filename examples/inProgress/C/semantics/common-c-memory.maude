@@ -202,9 +202,10 @@ mod COMMON-SEMANTICS-WRITING is
 		if notBool(hasFunctionType(T:Type)) .
 	--- FIXME should check types
 	mb rule
-		< k > write(Loc:Nat, tv(V:K, functionType(?, ?))) 
+		< k > write(Loc:Nat, tv(V:K, T:Type)) 
 			=> writeByte(Loc:Nat, V:K) 
 		...</ k >
+		if hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .	
 	mb context write(?, ?, value(`[HOLE`])) : KSentence . 
 	mb rule

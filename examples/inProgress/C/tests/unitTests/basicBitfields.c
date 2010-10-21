@@ -1,3 +1,4 @@
+#include <stdio.h>
 struct {
 	unsigned int x1 : 1;
 	unsigned int x2 : 2;

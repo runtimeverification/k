@@ -3,6 +3,8 @@ int z;
 static int w = 13;
 static int r = 15;
 
+// int foo(int x){}
+
 static int g(int x) {
 	return x * x;
 }

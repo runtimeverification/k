@@ -13,6 +13,8 @@ static int g(int x) {
 	return x;
 }
 
+// int foo(void);
+
 int main(void){
 	int q = 4;
 	myvar v = 15; 

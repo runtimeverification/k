@@ -167,10 +167,11 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op unqualifyType : Type -> Type .
 	
 	--- these aren't real types, but are values that can appear in type contexts
-	op typedefType : Id Type -> Type [ctor] .
+	op prototype : Type -> Type .
+	op typedefType : Id Type -> Type .
 	op preFunctionType : Type -> Type .
 	op variadic : -> Type .
-	--- op typedefType : Type -> Type [ctor] .
+	--- op typedefType : Type -> Type .
 	
 	--- sort State .
 	--- subsort String < State .
@@ -241,6 +242,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op addGlobalTypes : K K -> K .
 	--- op addGlobalTypes : K -> K .
 	op functionObject : Id Type K -> Value .
+	op functionPrototype : Id Type -> Value .
 	--- op putInMem : BaseValue K Type K -> K [metadata "strict(2 4)"] .
 	--- op putBytesInMem : Nat List{K} Type K -> K [metadata "strict(4)"] .
 	--- --- op sizeofType : K -> Expression [metadata "strict"] .
@@ -297,10 +299,11 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op unknownRange : Nat Nat Nat -> List{K} .
 	--- op giveGlobalType : Type K -> K .
 	--- op giveLocalType : Type K -> K .
-	op application : K List{C} -> K [metadata "strict(1)"] .
 	--- op case : K BaseValue -> K .
 	--- op defaultCase : K -> K .
 	op sequencePoint : -> K .
+	
+	op handleBuiltin : Id Type -> K .
 	
 	op min : Type -> Int [memo] .
 	op max : Type -> Int [memo] .
@@ -314,6 +317,42 @@ mod C-SETTINGS is
 	including INCOMING-MODULES .
 	including COMMON-SEMANTIC-SYNTAX .
 
+	op IdentifierSet : List{K} -> Set .
+	eq IdentifierSet((S:String,, L:List{K})) = SetItem(Identifier(S:String)) IdentifierSet(L:List{K}) .
+	op builtinIdentifiers : -> Set [memo] .
+	
+	--- fixme bug why can't i use (.).List{K} here?
+	eq builtinIdentifiers = IdentifierSet((
+		"abort"
+		,, "asin"
+		,, "atan"
+		,, "atan2"
+		,, "calloc"
+		,, "cos"
+		,, "debug"
+		,, "exit"
+		,, "exp"
+		,, "floor"
+		,, "fmod"
+		,, "free"
+		,, "fslCloseFile"
+		,, "fslFGetC"
+		,, "fslOpenFile"
+		,, "fslPutc"
+		,, "getchar"
+		,, "log"
+		,, "longjmp"
+		,, "malloc"
+		,, "printf"
+		,, "putchar"
+		,, "rand"
+		,, "setjmp"
+		,, "sin"
+		,, "sqrt"
+		,, "tan"
+	)) .
+	
+	
 	--- S 6.2.5 p.35 i.15.  "The implementation shall define char to have the same range, representation, and behavior as either signed char or unsigned char.  37)... Irrespective of the choice made, char is a separate type from the other two and is not compatible with either
 	--- fixme I'm not sure what consequence being a separate type entails, so for now it will just be rewritten to the chosen type
 	mb rule char => signed-char : KSentence [metadata "structural"] .
@@ -608,7 +647,7 @@ mod COMMON-PARAMETER-BINDING is
 	--- the idea here is that there should have been a previous argument, so we can use its address to append all of the variadic arguments
 	op promoteList : List{C} -> List{K} .
 	ceq promoteList((tv(V:List{K}, T:Type) :: L:List{C})) = (promote(tv(V:List{K}, T:Type)),, promoteList(L:List{C}))
-		if (rank(T:Type) <Int rank(int) andBool hasIntegerType(T:Type)) 
+		if ((rank(T:Type) <Int rank(int) orBool hasBitfieldType(T:Type)) andBool hasIntegerType(T:Type)) 
 		orBool T:Type ==Bool float .
 	ceq promoteList((tv(V:List{K}, T:Type) :: L:List{C})) = (tv(V:List{K}, T:Type),, promoteList(L:List{C}))
 		if (notBool(hasIntegerType(T:Type)) orBool rank(T:Type) >=Int rank(int))
@@ -645,42 +684,6 @@ mod COMMON-PARAMETER-BINDING is
 			~> bindVariadic(Loc:Nat, ((V:Value => .List{K}),, L:List{KResult}))
 		...</ k > 
 		: KSentence [metadata "structural"] .
-		
-	--- --- mb [bind-variadic]: rule
-		--- --- < k > [bind((tv(V:BaseValue, T:Type),, L:List{KResult}), typedDeclaration(no-type, ...))
-			--- --- => 
-			--- --- addLocals(Loc:Nat) ~> 
-			--- --- storeNew tv(V:BaseValue, T:Type) atLoc Loc:Nat ~>
-			--- --- bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
-		--- --- < nextLoc > Loc:Nat </ nextLoc >
-		--- --- : KSentence [metadata "structural"] .
-		
-	--- --- mb [bind-struct-variadic]: rule
-		--- --- < k > [bind((atv(V:List{K}, T:Type),, L:List{KResult}), typedDeclaration(no-type, ...))
-			--- --- => 
-			--- --- addLocals(Loc:Nat) ~> 
-			--- --- storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
-			--- --- bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
-		--- --- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- --- : KSentence [metadata "structural"] .
-		
-	--- --- --- fixme todo this happens when we don't have the right prototype
-	--- mb [bind-bad-prototype]: rule
-		--- < k > [bind((tv(V:BaseValue, T:Type),, L:List{KResult}), .List{K})
-			--- => 
-			--- addLocals(Loc:Nat) ~> 
-			--- storeNew tv(V:BaseValue, T:Type) atLoc Loc:Nat ~>
-			--- bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- : KSentence [metadata "structural"] .
-	--- mb [bind-bad-prototype-struct]: rule
-		--- < k > [bind((atv(V:List{K}, T:Type),, L:List{KResult}), .List{K})
-			--- => 
-			--- addLocals(Loc:Nat) ~> 
-			--- storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
-			--- bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
-		--- : KSentence [metadata "structural"] .	
 endm
 
 mod COMMON-INITIALIZATION is
@@ -1176,6 +1179,8 @@ mod COMMON-GLOBAL-DECLARATION is
 	op declareFunction : Id Type K -> K .
 	op declareExternalVariable : Id Type K -> K .
 	op declareInternalVariable : Id Type K -> K .
+	
+	--- function definition
 	mb rule
 		< k > declare(typedDeclaration(T:Type, X:Id), K:K) 
 			=> declareFunction(X:Id, T:Type, K:K)
@@ -1183,7 +1188,20 @@ mod COMMON-GLOBAL-DECLARATION is
 		< currentFunction > File-Scope </ currentFunction >
 		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
 		andBool hasFunctionType(T:Type)
+		--- andBool K:K =/=Bool NoInit
 		: KSentence [metadata "structural"] .
+		
+	--- --- function prototype
+	--- --- mb rule
+		--- --- < k > declare(typedDeclaration(T:Type, X:Id), K:K) 
+			--- --- => declareFunction(X:Id, T:Type, K:K)
+		--- --- ...</ k >
+		--- --- < currentFunction > File-Scope </ currentFunction >
+		--- --- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
+		--- --- andBool hasFunctionType(T:Type)
+		--- --- : KSentence [metadata "structural"] .	
+		
+		
 	--- fixme there are still no nested functions though, right?
 	mb rule
 		< k > declare(typedDeclaration(T:Type, X:Id), NoInit) 
@@ -1217,12 +1235,29 @@ mod COMMON-GLOBAL-DECLARATION is
 	---- external variables
 	--- feature request : nice to have MapList
 	
+	--- function definition
 	mb rule
 		< k > declareFunction(X:Id, T:Type, K:K)
 			=> declareWithLinkage(X:Id, T:Type, K:K, external)
 		...</ k >
 		if notBool hasStaticType(T:Type)
+		andBool K:K =/=Bool NoInit
 		: KSentence [metadata "structural"] .
+	--- function prototype
+	--- mb rule
+		--- < k > declareFunction(X:Id, T:Type, NoInit)
+			--- => declareWithLinkage(X:Id, prototype(T:Type), initializer((X:Id := tv(functionPrototype(X:Id, T:Type), T:Type) ~> discard)), external)
+		--- ...</ k >
+		--- if notBool hasStaticType(T:Type)
+		--- : KSentence [metadata "structural"] .	
+	mb rule
+		< k > declareFunction(X:Id, T:Type, NoInit)
+			=> declareWithLinkage(X:Id, prototype(T:Type), NoInit, external)
+		...</ k >
+		if notBool hasStaticType(T:Type)
+		: KSentence [metadata "structural"] .
+		
+	--- fixme not handling internal prototypes
 	mb rule
 		< k > declareFunction(X:Id, T:Type, K:K)
 			=> declareWithLinkage(X:Id, T:Type, K:K, internal)
@@ -1230,6 +1265,8 @@ mod COMMON-GLOBAL-DECLARATION is
 		< currentFunction > File-Scope </ currentFunction >
 		if hasStaticType(T:Type)
 		: KSentence [metadata "structural"] .
+		
+		
 	
 	op declareWithLinkage : Id Type K K -> K . --- id, type, possible init, linkage (external, internal, noLinkage)
 	
@@ -1334,19 +1371,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	op declareOnly : Id Type K -> K .
 	op declareAndDefine : Id Type K K -> K .
-	--- mb rule
-		--- < k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
-		--- < declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
-		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		--- --- if L:K =/=Bool noLinkage
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > declareWithLinkage(X:Id, T:Type, K:K, L:K) => declareAndDefine(X:Id, T:Type, K:K, L:K) ...</ k >
-		--- < declarationOrder >... Tu:K |-> ListToK(? (. => ListItem(X:Id))) ...</ declarationOrder >
-		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		--- if K:K =/=Bool NoInit
-		--- --- andBool L:K =/=Bool noLinkage
-		--- : KSentence [metadata "structural"] .
 
 	mb rule
 		< k > declareWithLinkage(X:Id, T:Type, NoInit, L:K) => declareOnly(X:Id, T:Type, L:K) ...</ k >
@@ -1377,7 +1401,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool L:K ==Bool noLinkage
 		: KSentence [metadata "structural"] .
 	
-	---  
+	--- fixme clean these up, they are so redundant
 	mb rule
 		< k > declareOnly(X:Id, T:Type, external)
 			=> (.).K
@@ -1386,9 +1410,29 @@ mod COMMON-GLOBAL-DECLARATION is
 		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[external / X:Id])) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
-		orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
+		if (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
+				orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
+			)
+			andBool (
+				notBool $hasMapping(Types:Map, X:Id)
+				--- orBool Types:Map(X:Id) ==Bool prototype(T:Type)
+				orBool Types:Map(X:Id) ==Bool T:Type
+			)
 		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > declareOnly(X:Id, prototype(T:Type), external)
+			=> (.).K
+		...</ k >
+		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[external / X:Id])) ...</ preLinkage >
+		< preTypes >... Tu:K |-> Map(Types:Map) ...</ preTypes >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
+				orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
+			)
+			andBool Types:Map(X:Id) ==Bool T:Type
+		: KSentence [metadata "structural"] .	
+	
 	--- fixme haven't thought about this much, is it right?
 	mb rule
 		< k > declareOnly(X:Id, T:Type, internal)
@@ -1416,16 +1460,18 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool notBool X:Id in Vars:List
 		: KSentence [metadata "structural"] .
 	
+	--- exception to multiple definitions for functions since we consider prototypes to be definitions to some extent
 	mb rule
 		< k > declareAndDefine(X:Id, T:Type, K:K, external)
 			=> (.).K
 		...</ k >
 		< declarations >... (.).Set => SetItem(X:Id) ...</ declarations >
-		< externalDefinitions > Def:Map => Def:Map[declarationObject(unqualifyType(T:Type), Tu:K, K:K) / X:Id] </ externalDefinitions >
+		--- < externalDefinitions > Def:Map => Def:Map[declarationObject(unqualifyType(T:Type), Tu:K, K:K) / X:Id] </ externalDefinitions >
+		< externalDefinitions > Def:Map => Def:Map (X:Id |-> declarationObject(unqualifyType(T:Type), Tu:K, K:K)) </ externalDefinitions >
 		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[external / X:Id])) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		if notBool $hasMapping(Def:Map, X:Id)
+		if (notBool $hasMapping(Def:Map, X:Id) orBool hasFunctionType(T:Type))
 		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external)
 		: KSentence [metadata "structural"] .
 		
@@ -1471,7 +1517,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		< shouldInit > false </ shouldInit >
 		: KSentence [metadata "structural"] .	
-		
 		
 	mb rule
 		< k > figureInitializer-aux(?, (incompleteArrayType(T:Type) => arrayType(T:Type, N:Nat)), initializer(K:K))
@@ -1520,18 +1565,6 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "structural"] .
-		
-	--- mb [function-definition]: rule
-		--- < k > defineFunctionUsingOldDeclaration(T:Type, X:Id, Block:K)
-			--- => store tv(functionObject(X:Id, T:Type, Block:K), T:Type) atLoc Loc:Nat 
-			--- ~> calculateGotoMap(X:Id, Block:K)
-		--- ...</ k >
-		--- < env >... X:Id |-> Loc:Nat ...</ env >
-		--- --- < genv > GEnv:Map => GEnv:Map[Loc:Nat / X:Id] </ genv >
-		--- --- < types > Types:Map => Types:Map[T:Type / X:Id] </ types >
-		--- --- < gtypes > GTypes:Map => GTypes:Map[T:Type / X:Id] </ gtypes >
-		--- --- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- : KSentence [metadata "structural"] .
 endm
 
 mod C-SEMANTICS-MISC is
@@ -1791,10 +1824,22 @@ mod C-SEMANTICS-MISC is
 	mb rule
 		< k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, K:K)) ~> resolve(Tu:K) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
-		< externalDefinitions >... X:Id |-> K:K => . ...</ externalDefinitions >
+		--- < externalDefinitions >... X:Id |-> K:K => . ...</ externalDefinitions >
+		< externalDefinitions > ExtDefs:Map (X:Id |-> K:K => .) </ externalDefinitions >
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< translationUnits > Units:Bag </ translationUnits >
+		if notBool $hasMapping(ExtDefs:Map, X:Id)
 		: KSentence .
+		
+	--- fixme need to ensure the types are compatible
+	--- fixme this is super hackish
+	--- mb rule
+		--- < k > resolve(Tu:K) ...</ k >
+		--- < externalDefinitions >... 
+			--- (X:Id |-> declarationObject(prototype(T:Type), ?, ?) => .) 
+			--- X:Id |-> declarationObject(T:Type, ?, ?) 
+		--- ...</ externalDefinitions >
+		--- : KSentence .
 
 	eq toString(Identifier(S:String)) = S:String .
 	eq toString(S:String) = S:String .
@@ -1816,19 +1861,35 @@ mod C-SEMANTICS-MISC is
 	
 	--- function prototypes
 	mb rule
-		< k > resolve(Tu:K) ...</ k >
+		< k > (. => 
+				giveType(X:Id, T:Type)
+				~> recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, Tu:K)  --- fixme fake Tu
+			)
+			~> resolve(Tu:K) 
+		...</ k >
+		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
-		< preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
+		< preTypes >... Tu:K |-> Map((? X:Id |-> prototype(T:Type))) ...</ preTypes >
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< externalDefinitions > Defs:Map </ externalDefinitions >
+		
 		if hasFunctionType(T:Type)
 		andBool notBool $hasMapping(Defs:Map, X:Id)
 		: KSentence .
-	--- mb rule --- maybe unnecessary if i always init internals
-		--- < k > resolve(Tu:K) ...</ k >
-		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> internal => .))) ...</ preLinkage >
+	--- mb rule
+		--- < k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, K:K)) ~> resolve(Tu:K) ...</ k >
+		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
+		--- < externalDefinitions >... X:Id |-> K:K => . ...</ externalDefinitions >
+		--- < declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
+		--- < translationUnits > Units:Bag </ translationUnits >
+		--- : KSentence .
+	--- mb rule
+		--- < k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, functionPrototype(X:Id, T:Type))) ~> resolve(Tu:K) ...</ k >
+		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
 		--- < preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
-		--- < internalDefinitions > Tu:K |-> Map((Defs:Map)) </ internalDefinitions >
+		--- < declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
+		--- < externalDefinitions > Defs:Map </ externalDefinitions >
+		--- < translationUnits > Units:Bag </ translationUnits >
 		--- if hasFunctionType(T:Type)
 		--- andBool notBool $hasMapping(Defs:Map, X:Id)
 		--- : KSentence .

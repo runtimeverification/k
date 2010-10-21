@@ -110,6 +110,7 @@ mod COMMON-SEMANTICS-SIZEOF is
 	eq bitSizeofType(typedDeclaration(T:Type, ?)) = bitSizeofType(T:Type) .
 	eq bitSizeofType(bitfieldType(?, N:Nat)) = N:Nat .
 	eq bitSizeofType(qualifiedType(T:Type, ?)) = bitSizeofType(T:Type) .
+	--- eq bitSizeofType(prototype(T:Type)) = bitSizeofType(T:Type) .
 	mb rule
 		< k > bitSizeofType(structType(X:Id)) => bitSizeofList(L:List{Type}) ...</ k >
 		< structs >... X:Id |-> L:List{Type} ...</ structs >
@@ -150,17 +151,34 @@ mod COMMON-SEMANTICS-IDENTIFIERS is
 		< env >... X:Id |-> Loc:Nat ...</ env >
 		< types >... X:Id |-> functionType(T:Type, L:List{Type}) ...</ types >
 		: KSentence [metadata "structural"] .
+		
+	mb [lookup-builtin-function]: rule
+		< k > X:Id => tv(functionPrototype(X:Id, functionType(T:Type, L:List{Type})), functionType(T:Type, L:List{Type})) ...</ k >
+		< env > Env:Map </ env >
+		< types >... X:Id |-> functionType(T:Type, L:List{Type}) ...</ types >
+		if notBool $hasMapping(Env:Map, X:Id)
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-FUNCTION-CALLS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 
+	op application : K List{C} -> K [metadata "strict(1)"] .
+	
 	mb [function-application-pre]: rule
 		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) 
 			=> application(readFunction(Loc:Nat), L:List{C}) 
 		...</ k >
 		if hasFunctionType(T:Type)
-		: KSentence [metadata "computational rule"] .	
+		: KSentence [metadata "computational rule"] .
+		
+	mb [function-application-builtin-pre]: rule
+		< k > Call(tv(functionPrototype(X:Id, T:Type), T:Type), L:List{C})
+			=> application(functionPrototype(X:Id, T:Type), L:List{C}) 
+		...</ k >
+		if hasFunctionType(T:Type)
+		andBool builtinIdentifiers contains X:Id
+		: KSentence [metadata "computational rule"] .
 
 	op populateFromGlobal : -> K .
 	--- fixme: this must be a rule because of the rules associated with declaring local and bound variables
@@ -178,6 +196,13 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		--- < nestingDepth > ? => 1 </ nestingDepth >
 		: KSentence [metadata "structural"] .
 
+	mb [builtin-application]: rule
+		< k > application(functionPrototype(X:Id, T:Type), L:List{C})
+			=> application(functionObject(X:Id, T:Type, handleBuiltin(X:Id, T:Type)), L:List{C})
+		...</ k >
+		: KSentence [metadata "structural"] .
+		
+		
 	mb [function-application]: rule
 		(< control >
 			< k > application(functionObject(X:Id, functionType(R:Type, P:List{Type}), B:K), L:List{C}) ~> K:K </ k >
