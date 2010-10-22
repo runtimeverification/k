@@ -71,7 +71,7 @@ module FilterOutput where
   handleContents conf name cs = hcat $ (map (ppKOutput conf) . cleanupStrings)  cs
 
   handleString :: KOutPrinter
-  handleString conf (String n s) = handleStyle conf n textStyle . text . unpack . doPrunes conf n $ handleSubstitutions conf n $ handleInfix conf $ s
+  handleString conf (String n s) = handleStyle conf n textStyle . text . unpack . pruneChars conf n . handleSubstitutions conf n . pruneLines conf n . handleInfix conf $ s
   {-
     Pretty Printing
    -}
@@ -175,8 +175,8 @@ module FilterOutput where
                             Dullwhite   -> ondullwhite
 
   -- Prune off lines after the user-specified break
-  doPrunes :: Configuration -> CellName -> ByteString -> ByteString
-  doPrunes conf cn = pruneLines conf cn . pruneChars conf cn
+  -- doPrunes :: Configuration -> CellName -> ByteString -> ByteString
+  -- doPrunes conf cn = pruneLines conf cn . pruneChars conf cn
 
   pruneLines :: Configuration -> CellName -> ByteString -> ByteString
   pruneLines conf cn s | shouldPrune conf cn = pruneL conf cn s
