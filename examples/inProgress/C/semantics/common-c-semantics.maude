@@ -73,7 +73,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op fillToBytes : K -> K [metadata "strict(1)"] .
 	
 	op floorLoc : Nat -> Nat . --- loc with possible bit offset returning base byte	
-	op figureInitializer : Id Type K -> K .  --- id, type, initializer
+	op figureInitializer : Id K K -> K [metadata "strict(2)"] .  --- id, type, initializer
 	op figureInitializer-aux : Id Type K -> K [metadata "strict(3)"] .  --- id, type, initializer
 	op readFunction : Nat -> K .
 	
@@ -164,7 +164,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op unionType : Id -> Type [ctor] .
 	op qualifiedType : Type K -> Type [ctor] .
 	
-	op unqualifyType : Type -> Type .
+	op unqualifyType : K -> Type . --- takes a type, but sometimes things like maps give K
 	
 	--- these aren't real types, but are values that can appear in type contexts
 	op prototype : Type -> Type .
@@ -1407,6 +1407,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		if hasFunctionType(T:Type) .
 	
 	--- fixme clean these up, they are so redundant
+	--- fixme unqualifying these is probably unsafe
 	mb rule
 		< k > declareOnly(X:Id, T:Type, external)
 			=> (.).K
@@ -1421,7 +1422,7 @@ mod COMMON-GLOBAL-DECLARATION is
 			andBool (
 				notBool $hasMapping(Types:Map, X:Id)
 				--- orBool Types:Map(X:Id) ==Bool prototype(T:Type)
-				orBool isTypeCompatible(Types:Map(X:Id), T:Type)
+				orBool isTypeCompatible(unqualifyType(Types:Map(X:Id)), unqualifyType(T:Type))
 			)
 		: KSentence [metadata "structural"] .
 		
@@ -1435,7 +1436,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		if (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
 				orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
 			)
-			andBool isTypeCompatible(Types:Map(X:Id), T:Type)
+			andBool isTypeCompatible(unqualifyType(Types:Map(X:Id)), unqualifyType(T:Type))
 		: KSentence [metadata "structural"] .	
 	
 	--- fixme haven't thought about this much, is it right?

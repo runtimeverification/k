@@ -79,6 +79,7 @@ kmod C-CONFIGURATION is
 					</ control >
 				</ thread * >
 			</ threads >
+			< compoundLiteralMap > .Map </ compoundLiteralMap >
 			< unfinishedComputation > .K </ unfinishedComputation > --- this is here to make it easy to check if we've terminated.  it disappears when we terminate
 		</ T >
 		< xmessages > .K </ xmessages >

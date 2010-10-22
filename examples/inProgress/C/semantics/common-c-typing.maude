@@ -386,54 +386,35 @@ mod COMMON-C-TYPING is
 	
 	eq makeArrayType(N:Nat)(T:Type) = arrayType(T:Type, N:Nat) .
 	eq makeFunctionType(L:List{Type})(T:Type) = functionType(T:Type, L:List{Type}) .
-	
-	--- ceq ArrayType(T:Type, tv(N:Nat, ?)) = arrayType(T:Type, N:Nat)
-		--- if notBool hasArrayType(T:Type) .
-	--- eq ArrayType(arrayType(T:Type, M:Nat), tv(N:Nat, ?)) 
-		--- = helpReverseArrayTypes(arrayType(T:Type, M:Nat), N:Nat) .
-		
-	
-	--- eq ArrayType(incompleteArrayType(T:Type), tv(N:Nat, ?)) = incompleteArrayType(arrayType(T:Type, N:Nat)) .
-	--- eq ArrayType(T:Type, emptyValue) = incompleteArrayType(T:Type) .
-	--- ceq PointerType(T:Type) = pointerType(T:Type)
-		--- if notBool hasFunctionType(T:Type) .
-	--- eq PointerType(functionType(T:Type, L:List{Type})) = functionType(pointerType(T:Type), L:List{Type}) .
-	--- eq FunctionType(T:Type) = preFunctionType(T:Type) . --- FIXME looks a little weird
-	
+			
 	eq isTypeCompatible(T:Type, T:Type) = true .
 	eq isTypeCompatible(pointerType(?), pointerType(?))
 		= true .
-	--- ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
-		--- = isTypeCompatible(T:Type, T':Type)
-		--- if T:Type =/=Bool void andBool T':Type =/=Bool void
-		--- andBool notBool hasArrayType(T:Type)
-		--- andBool notBool hasArrayType(T':Type) .
-	--- ceq isTypeCompatible(pointerType(T:Type), pointerType(T':Type))
-		--- = true
-		--- if T:Type ==Bool void orBool T':Type ==Bool void .
+		
 	eq isTypeCompatible(typedDeclaration(T:Type, ?), typedDeclaration(T':Type, ?))
 		= isTypeCompatible(T:Type, T':Type) .
 	eq isTypeCompatible(prototype(T:Type), prototype(T':Type)) 
 		= isTypeCompatible(T:Type, T':Type) .
-		
-	--- eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
-		--- = isTypeCompatible(pointerType(T:Type), T':Type) .
-	--- eq isTypeCompatible(incompleteArrayType(T:Type), T':Type)
-		--- = isTypeCompatible(pointerType(T:Type), T':Type) .
-		
-	--- eq isTypeCompatible(T:Type, pointerType(arrayType(T':Type, ?)))
-		--- = isTypeCompatible(T:Type, pointerType(T':Type)) .
-	--- eq isTypeCompatible(T:Type, arrayType(arrayType(T':Type, ?), ?))
-		--- = isTypeCompatible(T:Type, arrayType(T':Type, 0)) .
-	--- ceq isTypeCompatible(T:Type, arrayType(T':Type, ?))
-		--- = isTypeCompatible(T:Type, pointerType(T':Type))
-		--- if notBool hasArrayType(T':Type) .
+
 	eq isTypeCompatible(T:Type, arrayType(T':Type, ?))
 		= isTypeCompatible(T:Type, pointerType(T':Type)) .
-		
+	eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
+		= isTypeCompatible(pointerType(T:Type), T':Type) .
+	
+	eq isTypeCompatible(T:Type, incompleteArrayType(T':Type))
+		= isTypeCompatible(T:Type, pointerType(T':Type)) .
+	eq isTypeCompatible(incompleteArrayType(T:Type), T':Type)
+		= isTypeCompatible(pointerType(T:Type), T':Type) .
+
+	eq isTypeCompatible(functionType(T1:Type, typedDeclaration(void, ?)), functionType(T2:Type, Nil))
+		= isTypeCompatible(T1:Type, T2:Type) .
+	eq isTypeCompatible(functionType(T1:Type, Nil), functionType(T2:Type, typedDeclaration(void, ?)))
+		= isTypeCompatible(T1:Type, T2:Type) .
 	eq isTypeCompatible(functionType(T1:Type, (T':Type :: L:List{Type})), functionType(T2:Type, (T'':Type :: L':List{Type})))
 		= isTypeCompatible(functionType(T1:Type, L:List{Type}), functionType(T2:Type, L':List{Type}))
 		andBool isTypeCompatible(T':Type, T'':Type) .
+	eq isTypeCompatible(functionType(T1:Type, Nil), functionType(T2:Type, Nil))
+		= isTypeCompatible(T1:Type, T2:Type) .
 	ceq isTypeCompatible(T:Type, T':Type) = true
 		if (hasIntegerType(T:Type) orBool hasFloatType(T:Type))
 		andBool (hasIntegerType(T':Type) orBool hasFloatType(T':Type)) .

@@ -353,7 +353,7 @@ and printExpression exp =
 	(* special case below for the compound literals.  i don't know why this isn't in the ast... *)
 	| CAST ((spec, declType), initExp) -> 
 		let castPrinter x = wrap ((printSpecifier spec) :: (printDeclType declType) :: x :: []) "Cast" in
-		let compoundLiteralPrinter x = wrap ((printSpecifier spec) :: (printDeclType declType) :: x :: []) "CompoundLiteral"
+		let compoundLiteralPrinter x = wrap ((string_of_int ((counter := (!counter + 1)); !counter)) :: (printSpecifier spec) :: (printDeclType declType) :: x :: []) "CompoundLiteral"
 		in printInitExpressionForCast initExp castPrinter compoundLiteralPrinter
 		(* A CAST can actually be a constructor expression *)
 	| CALL (exp1, expList) -> wrap ((printExpression exp1) :: (printExpressionList expList) :: []) "Call"

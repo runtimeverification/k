@@ -3,6 +3,23 @@ mod COMMON-SEMANTICS-EXPRESSIONS-INCLUDE is
 	op assign : K K -> K .
 endm
 
+mod COMMON-SEMANTICS-COMPOUND-LITERAL is
+	including COMMON-INCLUDE .
+	op freshId : Nat -> Id .
+	op handleCompoundLiteral : K -> K [metadata "strict"] .
+	
+	--- comes back from figureInit as initializerValue(id, type, inits)
+	mb rule
+		< k > CompoundLiteral(N:Nat, T:Type, K:K, Init:K)
+			=> handleCompoundLiteral(figureInitializer(freshId(N:Nat), DeclType(T:Type, K:K), Init:K))
+			--- ~> freshId(N:Nat)
+		...</ k >
+		--- < compoundLiteralMap > M:Map </ compoundLiteralMap >
+		--- if notBool $hasMapping(M:Map, N:Nat)
+		: KSentence [metadata "structural"] .
+	--- figureInitializer(X:Id, T:Type, CompoundInit(L:List{C}))
+endm
+
 mod COMMON-SEMANTICS-BOOLEAN is
 	including COMMON-INCLUDE .
 	
@@ -894,6 +911,7 @@ endm
 mod COMMON-C-EXPRESSIONS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 
+	including COMMON-SEMANTICS-COMPOUND-LITERAL .
 	including COMMON-SEMANTICS-BOOLEAN .
 	including COMMON-SEMANTICS-SIZEOF .
 	including COMMON-SEMANTICS-IDENTIFIERS .
