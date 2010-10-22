@@ -5,6 +5,7 @@ module ByteStringUtils where
   import qualified Data.ByteString.Char8 as B
   import qualified Data.String.Utils as MH
   import qualified Data.List.Utils as MH
+  import Text.Regex.Less.Quackers
 
   -- Delete all occurrences
   deleteAll :: Char -> ByteString -> ByteString
@@ -23,3 +24,7 @@ module ByteStringUtils where
 
   replace :: ByteString -> ByteString -> ByteString -> ByteString
   replace old new s = pack $ MH.replace (unpack old) (unpack new) (unpack s)
+
+  -- Make an instance of ByteStrings for the pcre-less package's Quackers
+  instance QLR ByteString where
+    compile = compile . unpack

@@ -25,6 +25,7 @@ module ParseConfig
   import Control.Arrow
   import Data.List
   import qualified Data.Map as Map
+  import Text.Regex.Less
 --  import Text.Regex.PCRE.Light.Char8
 
   type CellName = ByteString
@@ -68,8 +69,6 @@ module ParseConfig
 
   data ColorPlace = Background | Foreground
 
-  -- data Substitution = Substitution Regex String
-  --   deriving (Show, Eq)
   data Substitution = Substitution ByteString ByteString
     deriving (Show, Eq)
 
@@ -116,10 +115,12 @@ module ParseConfig
 
   {- Functions to read the value and construct the desired part of the end configuration -}
 
-  getGlobalSubs :: YamlLight -> [Substitution]
-  getGlobalSubs = tryMapApply (Map.elems . Map.mapWithKey mkSubstitution)
-                              "User error: please specify substitutions as key:value pairs"
-    where mkSubstitution key val = Substitution (getString key) (getString val)
+  getGlobalSubs ys = case combineSequencedMaps ys of
+                       Just subs -> map mkSubstitution subs
+                       Nothing   -> error "User error: please specify substitutions as a (yaml) sequnce of key:value pairs"
+
+  mkSubstitution (key,val) = Substitution (getString key) (getString val)
+
 
   getBool :: YamlLight -> Bool
   getBool = tryTerminalApply readBool "Internal error: getBool called on non-terminal value"
@@ -184,7 +185,8 @@ module ParseConfig
   doFalse          = ["no", "n", "f", "false"]
   doShowRec        = ["show-recursive", "recursive-show", "recursively-show", "show-recursively"]
   doSubstitutions  = ["subs", "subst", "substitutions", "sub"]
-  doLineEnd        = ["lineend", "line-end", "line-end-str", "line-end-string", "lineendstr", "lineendstring"]
+  doLineEnd        = ["lineend", "line-end", "line-end-str", "line-end-string", "lineendstr", "lineendstring"
+                     ,"endline", "end-line"]
 
   -- Compare the contents of the config item to see if it occurs in passed strings.
   compareStr :: ByteString -> [ByteString] -> Bool

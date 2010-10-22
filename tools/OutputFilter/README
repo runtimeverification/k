@@ -50,15 +50,16 @@ Configuration file format:
 
   Global options can be defined in the special-case cellname: "options", where
   you can specify the following:
-    global-substitutions:        -- substitute oldn with newn wherever it may
-      old1: new1                    arise
-      old2: new2
-      old3: new3
-      ...
+    global-substitutions:        -- Substitute oldn with newn wherever it may
+      - old1: new1                  arise. This now uses perl-compatible regular
+      - old2: new2                  expressions. The patterns use ` instead of \
+      - old3: new3                  for escape, and backreferences in the
+      ...                           replacement are supported (`1,`2,...)
     spaceless-cells: yes         -- Don't wrap cell names in spaces
     infixify: yes                -- Parse operators, and represent the infix
                                     ones as infix, prefix as prefix, and mixfix
                                     as mixfix. For mixfix, this enforces the
                                     arity of the operator.
-
+    line-end: <string>           -- If a line is truncated, will put <string> at
+                                    the end of the line
   See example.yml in the examples directory

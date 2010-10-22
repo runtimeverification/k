@@ -28,6 +28,8 @@ module FilterOutput where
   import Data.Maybe
   import qualified Data.Map as Map
   import Control.Monad.Reader
+  import Text.Regex.Less
+  import qualified Text.Regex.PCRE as PCRE
 --  import Data.String.Utils
 --  import Text.Regex.PCRE.Light.Char8
 
@@ -110,8 +112,17 @@ module FilterOutput where
   performSubs s [] = s
 
   performReplacement :: ByteString -> ByteString -> ByteString -> ByteString
-  performReplacement = replace
+  performReplacement old new s = case (unpack s =~ old) of
+                                   m@(_,x:xs) -> pack $ subg m (unpack new)
+                                   _          -> s
 
+  testReplace :: String -> String -> String -> ByteString
+  testReplace old new s = performReplacement (pack old) (pack new) (pack s)
+
+
+  m s match = s =~ match
+
+  maker s = PCRE.makeRegex s
 
   -- getMatch :: Regex -> String -> Maybe String
   -- getMatch re s = head <$> match re s []
@@ -304,6 +315,7 @@ module FilterOutput where
                        _   -> error usage
             parsedOut <- parseKOutFile fname
             config <- getConfig configFile
+--            print config
             putDoc . cat . map (ppKOutput config) $ parsedOut
             putStrLn ""
 

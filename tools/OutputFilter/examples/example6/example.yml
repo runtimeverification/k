@@ -28,7 +28,12 @@ local:
 # Options (special cell)
 options:
   global-substitutions:
-    "(.List{K})": "."
-    ".List{K}": "."
-    ",,": ", "
-    ".,": ","
+    - "`(`.List{K}`)": ""                   # Get rid of (.List{K})
+    - "Id Identifier`(\"([^`)]+)\"`)": "`1" # Get rid of the stuff surrounding keys
+    - "`(BaseValue (`d+)`)": " `1 "         # make (BaseValue n) be just n, for any number
+    - "BaseValue|BaseType|Id ": ""          # Remove BaseValue and BaseType
+    - "Id ": ""                             # Remove Id
+    - ",,": ", "                            # Condence commas
+    - " , " : ", "                          # Remove a preceeding whitespace, e.g. for the BaseValue conversion
+    - "`(0 `+Nat sym`((`d+)`)`)": "`1"      # Change the destination field of the values in a map
+    - "kList`(\"wklist_\"`)": ""            # Get rid of the wklist
