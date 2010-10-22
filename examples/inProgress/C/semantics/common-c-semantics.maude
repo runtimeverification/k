@@ -1401,6 +1401,11 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool L:K ==Bool noLinkage
 		: KSentence [metadata "structural"] .
 	
+	--- extern functions are no different than functions
+	--- fixme dangerous if someone marks it as static and extern.  can't tell
+	ceq qualifiedType(T:Type, Extern) = T:Type
+		if hasFunctionType(T:Type) .
+	
 	--- fixme clean these up, they are so redundant
 	mb rule
 		< k > declareOnly(X:Id, T:Type, external)
@@ -1416,7 +1421,7 @@ mod COMMON-GLOBAL-DECLARATION is
 			andBool (
 				notBool $hasMapping(Types:Map, X:Id)
 				--- orBool Types:Map(X:Id) ==Bool prototype(T:Type)
-				orBool Types:Map(X:Id) ==Bool T:Type
+				orBool isTypeCompatible(Types:Map(X:Id), T:Type)
 			)
 		: KSentence [metadata "structural"] .
 		
@@ -1430,7 +1435,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		if (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
 				orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
 			)
-			andBool Types:Map(X:Id) ==Bool T:Type
+			andBool isTypeCompatible(Types:Map(X:Id), T:Type)
 		: KSentence [metadata "structural"] .	
 	
 	--- fixme haven't thought about this much, is it right?

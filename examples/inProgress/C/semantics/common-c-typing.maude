@@ -413,6 +413,9 @@ mod COMMON-C-TYPING is
 		--- if T:Type ==Bool void orBool T':Type ==Bool void .
 	eq isTypeCompatible(typedDeclaration(T:Type, ?), typedDeclaration(T':Type, ?))
 		= isTypeCompatible(T:Type, T':Type) .
+	eq isTypeCompatible(prototype(T:Type), prototype(T':Type)) 
+		= isTypeCompatible(T:Type, T':Type) .
+		
 	--- eq isTypeCompatible(arrayType(T:Type, ?), T':Type)
 		--- = isTypeCompatible(pointerType(T:Type), T':Type) .
 	--- eq isTypeCompatible(incompleteArrayType(T:Type), T':Type)
