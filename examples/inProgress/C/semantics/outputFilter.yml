@@ -14,6 +14,7 @@ k:
 unfinishedComputation: show
 xmessages: show
 env: show
+currentSubObject: show
 nestingDepth: show
 blockHistory: show
 localVariables: show
@@ -70,7 +71,8 @@ options:
     - "`(0 `+Nat sym`((`d+)`)`)": "`1"      # Change the destination field of the values in a map
     - "kList`(\"wklist_\"`)": ""            # Get rid of the wklist
   # spaceless-cells: no
-  # infixify: yes
+  infixify: yes
+  
   # line-end: " $"
   # syntax-highlighting: # Coming soon
     # - "::": yellow

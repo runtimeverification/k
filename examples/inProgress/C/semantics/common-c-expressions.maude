@@ -17,7 +17,20 @@ mod COMMON-SEMANTICS-COMPOUND-LITERAL is
 		--- < compoundLiteralMap > M:Map </ compoundLiteralMap >
 		--- if notBool $hasMapping(M:Map, N:Nat)
 		: KSentence [metadata "structural"] .
-	--- figureInitializer(X:Id, T:Type, CompoundInit(L:List{C}))
+		
+	mb rule
+		< k > handleCompoundLiteral(initializerValue(X:Id, T:Type, Init:K))
+			=> allocateType(Loc:Nat, T:Type)
+			~> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+			~> initialize(X:Id, T:Type, Init:K)
+			~> X:Id
+		...</ k >
+		< compoundLiteralMap > M:Map => M:Map[Loc:Nat / X:Id] </ compoundLiteralMap >
+		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
+		if notBool $hasMapping(M:Map, X:Id)
+		
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-BOOLEAN is
@@ -63,7 +76,7 @@ mod COMMON-SEMANTICS-BOOLEAN is
 		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > E:K ? E1:Expression : E2:Expression 
-			=> sequencePoint 
+			=> sequencePoint
 			~> IfThenElse(E:K, E1:Expression, E2:Expression) 
 		...</ k >
 		: KSentence [metadata "structural"] .	

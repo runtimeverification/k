@@ -316,12 +316,26 @@ mod COMMON-SEMANTICS-CAST is
 		cast(T:Type, tv(L:List{K}, T:Type)) => tv(L:List{K}, T:Type)
 		: KSentence [metadata "structural"] .
 	
+	---c99 6.3.1.2:1 to _Bool
+	--- fixme worried about qualifiers
+	mb rule
+		cast(T:Type, tv(I:Int, T':Type)) => if I:Int ==Bool 0 then tv(0, bool) else tv(1, bool) fi
+		if hasBoolType (T:Type)
+		andBool hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		cast(T:Type, tv(I:Int, T':Type)) => cast(bool, tv(0, int) == tv(I:Int, T':Type))
+		if hasBoolType (T:Type)
+		andBool notBool hasIntegerType(T':Type)
+		: KSentence [metadata "structural"] .
+	
 	---c99 6.3.1.3:1 When a value with integer type is converted to another integer type other than _Bool, if the value can be represented by the new type, it is unchanged. 
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int, T:Type)
 		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int 
 		andBool hasIntegerType(T':Type)
 		andBool hasIntegerType(T:Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 		
 	---c99 6.3.1.3:2 Otherwise, if the new type is unsigned, the value is converted by repeatedly adding or subtracting one more than the maximum value that can be represented in the new type until the value is in the range of the new type.
@@ -330,6 +344,7 @@ mod COMMON-SEMANTICS-CAST is
 		if unsignedIntegerTypes contains T:Type 
 		andBool I:Int <Int min(T:Type)
 		andBool hasIntegerType(T':Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 		
 	--- fixme does this extra check for looping need to be done elsewhere?
@@ -338,6 +353,7 @@ mod COMMON-SEMANTICS-CAST is
 		if unsignedIntegerTypes contains T:Type 
 		andBool I:Int >Int max(T:Type)
 		andBool hasIntegerType(T':Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 	
 	---c99 6.3.1.3:3 Otherwise, the new type is signed and the value cannot be represented in it; either the result is implementation-defined or an implementation-defined signal is raised.
@@ -349,6 +365,7 @@ mod COMMON-SEMANTICS-CAST is
 		andBool notBool(unsignedIntegerTypes contains T:Type)
 		andBool hasIntegerType(T:Type)
 		andBool hasIntegerType(T':Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) 
@@ -357,6 +374,7 @@ mod COMMON-SEMANTICS-CAST is
 		andBool notBool(unsignedIntegerTypes contains T:Type)
 		andBool hasIntegerType(T:Type)
 		andBool hasIntegerType(T':Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 
 	
@@ -365,14 +383,17 @@ mod COMMON-SEMANTICS-CAST is
 	mb rule
 		cast(T:Type, tv(V:Float, double)) => cast(T:Type, tv(truncRat(Float2Rat(V:Float)), long-long-int))
 		if hasIntegerType(T:Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		cast(T:Type, tv(V:Float, float)) => cast(T:Type, tv(truncRat(Float2Rat(V:Float)), long-long-int))
 		if hasIntegerType(T:Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		cast(T:Type, tv(V:Float, long-double)) => cast(T:Type, tv(truncRat(Float2Rat(V:Float)), long-long-int))
 		if hasIntegerType(T:Type)
+		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 	
 	---C99 6.3.1.4:2 When a value of integer type is converted to a real floating type, if the value being converted can be represented exactly in the new type, it is unchanged. If the value being converted is in the range of values that can be represented but cannot be represented exactly, the result is either the nearest higher or nearest lower representable value, chosen in an implementation-defined manner. If the value being converted is outside the range of values that can be represented, the behavior is undefined.
@@ -628,6 +649,6 @@ mod COMMON-C-CONVERSIONS is
 		: KSentence [metadata "structural"] .
 
 	eq integerTypes = signedIntegerTypes unsignedIntegerTypes .
-	eq unsignedIntegerTypes = Set(unsigned-char,, unsigned-short-int,, unsigned-int,, unsigned-long-int,, unsigned-long-long-int) .
+	eq unsignedIntegerTypes = Set(bool,, unsigned-char,, unsigned-short-int,, unsigned-int,, unsigned-long-int,, unsigned-long-long-int) .
 	eq signedIntegerTypes = Set(char,, signed-char,, short-int,, int,, long-int,, long-long-int,, bignum) .
 endm

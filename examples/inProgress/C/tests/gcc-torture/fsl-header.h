@@ -8,6 +8,7 @@ void* malloc(size_t);
 void* malloc(size_t);
 void free(void*);
 int strcmp(const char *, const char *);
+size_t strlen(const char *);
 void* memset(void *, int, size_t);
 int printf(const char *, ...);
 #undef size_t

@@ -136,6 +136,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		< k > canonicalizeType((B:Bag (BagItem(T:K) => (.).Bag)), ?, (? ((.).Bag => BagItem(T:K))), ?, ?) ...</ k >
 		if false
 		orBool (T:K ==Bool Void)
+		orBool (T:K ==Bool Bool)
 		orBool (T:K ==Bool Char)
 		orBool (T:K ==Bool Short)
 		orBool (T:K ==Bool Int)
@@ -183,14 +184,6 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool Q:K ==Bool Register
 		: KSentence .
 	
-	--- fixme? getting rid of typedefs here.  this seems valid by c1x 6.7.7:3
-	--- mb rule
-		--- < k > canonicalizeSpecifier(BagItem(Named(X:Id)))
-			--- => T:Type
-		--- ...</ k >
-		--- < types >... typedef(X:Id) |-> T:Type ...</ types >
-		--- if X:Id =/=Bool Identifier("")
-		--- : KSentence .
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(Named(X:Id)))
 			=> typedefType(X:Id, T:Type)
@@ -273,6 +266,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	op canonicalizeSpecifier : Bag -> K .
 	--- C99 6.7.2:2
 	eq canonicalizeSpecifier(BagItem(Void)) = void .
+	eq canonicalizeSpecifier(BagItem(Bool)) = bool .
 	eq canonicalizeSpecifier(BagItem(Char)) = char .
 	eq canonicalizeSpecifier(BagItem(Signed) BagItem(Char)) = signed-char .
 	eq canonicalizeSpecifier(BagItem(Unsigned) BagItem(Char)) = unsigned-char .
@@ -620,6 +614,12 @@ mod COMMON-C-TYPING is
 	eq hasTypedefType(qualifiedType(T:Type, ?)) = hasTypedefType(T:Type) .
 	ceq hasTypedefType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'typedefType 
+		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
+	
+	eq hasBoolType(bool) = true .
+	eq hasBoolType(qualifiedType(T:Type, ?)) = hasBoolType(T:Type) .
+	ceq hasBoolType(T:Type) = false
+		if T:Type =/=Bool bool 
 		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 	
 	eq hasArrayType(arrayType(?, ?)) = true .

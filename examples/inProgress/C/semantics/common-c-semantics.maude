@@ -145,7 +145,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	--- Basic types
 	ops bool : -> BaseType .
-	ops void char short-int int long-int long-long-int : -> BaseType .
+	ops void bool char short-int int long-int long-long-int : -> BaseType .
 	ops float double long-double : -> BaseType .
 	ops signed-char unsigned-char : -> BaseType .
 	ops unsigned-short-int unsigned-int unsigned-long-int unsigned-long-long-int : -> BaseType .
@@ -279,6 +279,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op isABaseType_ : K -> Bool .
 	op hasPointerType : Type -> Bool .
 	op hasArrayType : Type -> Bool .
+	op hasBoolType : Type -> Bool .
 	op hasStructType : Type -> Bool .
 	op hasUnionType : Type -> Bool .
 	op hasAggregateType : Type -> Bool .
@@ -363,6 +364,7 @@ mod C-SETTINGS is
 
 	eq numBitsPerByte = 8 .
 	
+	eq numBytes(bool) = 1 .
 	eq numBytes(signed-char) = 1 .
 	eq numBytes(short-int) = 2 .
 	eq numBytes(int) = 4 .
@@ -429,12 +431,13 @@ mod C-SETTINGS is
 	--- — maximum value for an object of type unsigned long long int
 	--- ULLONG_MAX 18446744073709551615 // 264 - 1
 	
-	op rank : Type -> Nat .
+	op rank : Type -> Int .
 	
 	--- fixme, this is kind of cheating as it will promote bitfields smaller than int to int leave others unchanged
 	--- ceq rank(bitfieldType(?, N:Nat)) = 0 
 		--- if N:Nat < numBits(int) .
 		
+	eq rank(bool) = 0 .
 	eq rank(char) = 1 .
 	eq rank(signed-char) = 1 .
 	eq rank(unsigned-char) = 1 .
@@ -494,6 +497,9 @@ mod SEMANTIC-HELPERS is
 		if getKLabel(T:Type) =/=Bool 'bitfieldType .
 	eq numBits(bitfieldType(?, N:Nat)) = N:Nat .
 
+	eq min(bool) = 0 .
+	eq max(bool) = 1 .
+	
 	eq min(signed-char) = -Int (2 ^Nat absInt(_-Int_(numBits(signed-char), 1))) .
 	eq max(signed-char) = _-Int_(2 ^Nat absInt(_-Int_(numBits(signed-char), 1)), 1) .
 	eq min(short-int) = -Int (2 ^Nat absInt(_-Int_(numBits(short-int), 1))) .
@@ -944,11 +950,11 @@ mod COMMON-INITIALIZATION is
 		: KSentence .
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
-			=> fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String +String "\0"))))
+			=> fillInitializer(SingleInit(Constant(StringLiteral(S:String +String "\0"))))
 		...</ k >
 		< currentSubObject > ListItem(te(K:K, T:Type)) ListItem(te(?, arrayType(T:Type, Len:Nat))) ...</ currentSubObject >
 		if hasCharType(T:Type)
-		andBool sNat(lengthString(S:String)) ==Bool Len:Nat
+		andBool lengthString(S:String) <Int Len:Nat
 		: KSentence .
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))

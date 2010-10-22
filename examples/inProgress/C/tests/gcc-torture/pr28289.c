@@ -1,6 +1,6 @@
 #include "fsl-header.h"
 extern int ok (int);
-extern void exit ();
+extern void exit (int);
 static int gen_x86_64_shrd (int);
 static int
 gen_x86_64_shrd(int a __attribute__ ((__unused__)))
