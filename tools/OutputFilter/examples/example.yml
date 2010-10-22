@@ -15,7 +15,7 @@ env:
   text-style:
     foreground: black
   cell-style:
-    foreground: dullyellow
+    foreground: yellow
 
 threads:
   cell-style:
@@ -42,6 +42,15 @@ options:
   spaceless-cells: yes
   infixify: yes
   line-end: " $"
+  syntax-highlighting: # Coming soon
+    - "::": yellow
+    - "==": yellow
+    - ":=": yellow
+    - ">>": yellow
+    - "<<": yellow
+    - "?": yellow
+    - "`+": yellow
+    - "`[`.`.`. `d+ more `.`.`.`]": black
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. whitelisting <thread> wont whitelist all of its children

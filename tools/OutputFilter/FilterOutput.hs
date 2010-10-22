@@ -112,20 +112,18 @@ module FilterOutput where
   performSubs s [] = s
 
   performReplacement :: ByteString -> ByteString -> ByteString -> ByteString
-  performReplacement old new s = case (unpack s =~ old) of
-                                   m@(_,x:xs) -> pack $ subg m (unpack new)
-                                   _          -> s
-
-  testReplace :: String -> String -> String -> ByteString
-  testReplace old new s = performReplacement (pack old) (pack new) (pack s)
+  performReplacement old new s = pack $ mySubG (unpack old) (unpack new) (unpack s)
 
 
-  m s match = s =~ match
-
-  maker s = PCRE.makeRegex s
-
-  -- getMatch :: Regex -> String -> Maybe String
-  -- getMatch re s = head <$> match re s []
+  -- Perform a substitution
+  mySub :: String -> String -> String -> String
+  mySub old new s = case s =~ old of
+                      m@(_,x:xs) -> subs m new
+                      _          -> s
+  -- Performa all substitutions, pcre-less seems to have several bugs in it with their subg
+  mySubG :: String -> String -> String -> String
+  mySubG old new s = if s == mySub old new s then s
+                     else mySubG old new (mySub old new s)
 
   stylize :: Style -> Doc -> Doc
   stylize (Style fore back isUnder isBold) = doUnder isUnder . doBold isBold . doFore fore . doBack back
