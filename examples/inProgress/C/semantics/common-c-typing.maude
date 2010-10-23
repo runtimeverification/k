@@ -55,7 +55,7 @@ endm
 
 mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	including COMMON-SEMANTICS-TYPE-INCLUDE .
-	
+
 	op waitingOnDeclType : -> K .
 	mb [type-Cast-heat]: rule
 		< k > (. => DeclType(Specifier:K, DeclType:K)) ~> evalToType ...</ k >
@@ -788,6 +788,13 @@ mod COMMON-C-TYPING is
 		--- < type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
 		--- : KSentence [metadata "structural"] .
 
+	mb [type-compound-literal]: rule
+		< type > CompoundLiteral(?, Specifier:K, DeclType:K, ?)
+			=> Cast(Specifier:K, DeclType:K, emptyValue)  --- sort of hackish, assumes cast will evaluate to type
+		...</ type >
+		: KSentence [metadata "structural"] .
+		
+		
 	eq unqualifyType(qualifiedType(T:Type, ?)) = T:Type .
 	ceq unqualifyType(T:Type) = T:Type
 		if getKLabel(T:Type) =/=Bool 'qualifiedType .

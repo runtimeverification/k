@@ -121,7 +121,7 @@ mod COMMON-SEMANTICS-READING is
 		< k > extractBitsFromMem(Loc:Nat, Size:Nat)
 			=> extractBitsFromList(extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(Size:Nat)), getBitOffset(Loc:Nat), Size:Nat) 
 		...</ k >
-		if floorLoc(Loc:Nat) ==Bool Loc:Nat
+		--- if floorLoc(Loc:Nat) ==Bool Loc:Nat
 		: KSentence [metadata "structural"] .
 	
 	mb context extractBytesFromMem-aux(?, ?, (?,, `[HOLE`]:K,, ?)) : KSentence .
