@@ -306,6 +306,12 @@ mod COMMON-SEMANTICS-CAST is
 		cast(void, ?) => skipval
 		: KSentence [metadata "structural"] .
 	
+	--- fixme not sure about this, doesn't concretize, and in turn interpret, assume things about the list?
+	mb rule
+		cast(T:Type, tv(L:List{K}, structType(?))) 
+			=> concretize(T:Type, dataList(L:List{K}))
+		: KSentence [metadata "structural"] .
+	
 	--- fixme just temporarily, until we handle qualifiers properly
 	mb rule
 		cast(T:Type, tv(L:List{K}, T':Type)) => cast(T:Type, tv(L:List{K}, unqualifyType(T':Type)))

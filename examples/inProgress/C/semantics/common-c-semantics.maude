@@ -793,19 +793,6 @@ mod COMMON-INITIALIZATION is
 		...</ structs > 
 		if F':Id =/=Bool #NoName
 		: KSentence [metadata "structural"] .
-		
-***(
-	 ('typedDeclaration).KResultLabel(BaseType int(.List{K}),,Id Identifier("a")(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("b")(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 12(.List{K})),,Id Identifier("x")(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 4(.List{K})),,Id Identifier("y")(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 0(.List{K})),,Id #NoName(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 4(.List{K})),,Id #NoName(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 3(.List{K})),,Id Identifier("z")(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(('bitfieldType).KResultLabel(BaseType unsigned-int(.List{K}),,BaseValue 1(.List{K})),,Id #NoName(.List{K}))
-	 ,,('typedDeclaration).KResultLabel(BaseType signed-char(.List{K}),,Id Identifier("c")(.List{K}))
-***)
-
 	 
 	mb [init-next-struct-element]: rule
 		< currentSubObject >
@@ -883,6 +870,7 @@ mod COMMON-INITIALIZATION is
 		
 	
 	--- fixme these are also too restrictive on type.  if we try to assign an int to a long-int field, it will fail
+	--- i don't think this is true anymore
 	mb rule
 		< k > buildDesignator(InFieldInit(F:Id, More:K)) 
 			=> buildDesignator(More:K)
@@ -922,14 +910,61 @@ mod COMMON-INITIALIZATION is
 	
 	op initializeSingleInit : K -> K .
 	--- forces a basetype
+	--- mb rule
+		--- < k > initializeSingleInit(K':K) => . ...</ k >
+		--- < currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
+		--- < incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
+		--- < savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
+		--- --- if getKLabel(K':K) =/=Bool 'Constant
+		--- if isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type)
+		--- : KSentence .
+		
 	mb rule
-		< k > initializeSingleInit(K':K) => . ...</ k >
+		< k > (. => typeof(K:K)) ~> initializeSingleInit(K:K) ...</ k >
+		: KSentence .
+		
+	mb rule
+		< k > T':Type ~> initializeSingleInit(K':K) => . ...</ k >
 		< currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
 		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
 		--- if getKLabel(K':K) =/=Bool 'Constant
-		if isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type)
+		if (isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type))
+		andBool notBool hasAggregateType(T':Type)
+		andBool notBool hasUnionType(T':Type)
 		: KSentence .
+		
+	--- this is used to have an aggregate on the RHS of a compound init
+	op initFromAggregateRHS : K Type -> K .
+	mb rule
+		< k > T:Type ~> initializeSingleInit(K:K) => initFromAggregateRHS(K:K, T:Type) ...</ k >
+		if hasAggregateType(T:Type) 
+		orBool hasUnionType(T:Type)
+		: KSentence .
+		
+	op initFromStructRHS : K List{C} -> K .
+	mb rule
+		< k > initFromAggregateRHS(K:K, structType(S:Id)) 
+			=> initFromStructRHS(K:K, L:List{Type}) 
+		...</ k >
+		< structs >...
+			S:Id |-> L:List{Type}
+		...</ structs > 
+		: KSentence .
+		
+	mb rule
+		< k > (. => initializeSingleInit(K:K . F:Id)) 
+			~> initFromStructRHS(K:K, ((typedDeclaration(T:Type, F:Id) => Nil) :: ?))
+		...</ k >
+		if F:Id =/=Bool #NoName
+		: KSentence .
+	mb rule
+		< k > initFromStructRHS(K:K, ((typedDeclaration(?, #NoName) => Nil) :: ?)) ...</ k >
+		: KSentence .
+	mb rule
+		< k > initFromStructRHS(?, Nil) => (.).K ...</ k >
+		: KSentence .
+		
 	mb rule
 		< k > fillInitializer(SingleInit(K:K)) => initializeSingleInit(K:K) ...</ k >
 		if getKLabel(K:K) =/=Bool 'Constant
