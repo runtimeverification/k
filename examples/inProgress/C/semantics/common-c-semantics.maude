@@ -922,7 +922,8 @@ mod COMMON-INITIALIZATION is
 	mb rule
 		< k > (. => typeof(K:K)) ~> initializeSingleInit(K:K) ...</ k >
 		: KSentence .
-		
+	
+	--- fixme want to exclude strings, but not normal arrays
 	mb rule
 		< k > T':Type ~> initializeSingleInit(K':K) => . ...</ k >
 		< currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
@@ -930,15 +931,18 @@ mod COMMON-INITIALIZATION is
 		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
 		--- if getKLabel(K':K) =/=Bool 'Constant
 		if (isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type))
-		andBool notBool hasAggregateType(T':Type)
+		--- andBool notBool hasAggregateType(T':Type)
+		andBool notBool hasStructType(T':Type)
 		andBool notBool hasUnionType(T':Type)
 		: KSentence .
 		
 	--- this is used to have an aggregate on the RHS of a compound init
+	--- fixme want to exclude strings, but not normal arrays
 	op initFromAggregateRHS : K Type -> K .
 	mb rule
 		< k > T:Type ~> initializeSingleInit(K:K) => initFromAggregateRHS(K:K, T:Type) ...</ k >
-		if hasAggregateType(T:Type) 
+		--- if hasAggregateType(T:Type) 		
+		if hasStructType(T:Type)
 		orBool hasUnionType(T:Type)
 		: KSentence .
 		
