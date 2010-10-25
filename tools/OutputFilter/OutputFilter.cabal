@@ -48,7 +48,7 @@ Executable filterOutput
   Main-is: Main.hs
 
   -- Packages needed in order to build this package.
-  Build-depends: base >= 4, MissingH, mtl, parsec >3, containers, ansi-wl-pprint, Useful, HsSyck
+  Build-depends: base >= 4, MissingH, mtl, parsec >3, containers, ansi-wl-pprint, bytestring, HsSyck, regex-pcre, pcre-less, yaml-light
 
   -- Modules not exported by this package.
   -- Other-modules:
