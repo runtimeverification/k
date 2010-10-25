@@ -287,14 +287,15 @@ Memory new/delete
     <struct_> X |-> fieldList(KernelCList) <_/struct>
   rule
     <k> deleteObject(I, (sNat N => N)) <_/k>
-    <heap_> I +Int N |-> _ => .Map <_/heap>
+    <heap_> I +Int N |-> _ : _ => .Map <_/heap>
   rule
-    <k> deleteObject(I, 0) => .K <_/k>
+    <k> deleteObject(I, 1) => tv(void, unit) <_/k>
+    <heap_> I |-> _ : _ => .Map <_/heap>
   rule
-    <k> delete tv(int *, I) => .K <_/k>
+    <k> delete tv(int *, I) => tv(void, unit) <_/k>
     <heap_> I |-> _ => .Map <_/heap>
   rule
-    <k> delete tv(T **, I) => .K <_/k>
+    <k> delete tv(T **, I) => tv(void, unit) <_/k>
     <heap_> I |-> _ => .Map <_/heap>
 
 

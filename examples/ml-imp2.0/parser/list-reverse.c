@@ -35,6 +35,8 @@ void main()
 {
   struct nodeList *x;
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  free(x);
+  free(x);
   /*@ assume < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
   /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)(rev(A)) </ heap > < form > TrueFormula </ form > </ config > */
