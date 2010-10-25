@@ -27,6 +27,8 @@ int reverse(struct nodeList *x)
   return p;
 }
 
+
+
 void main()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */

@@ -9,8 +9,8 @@ options {
 }
 
 tokens {
-  KLIST;
-  KARROW;
+  LIST;
+  SEQ;
   TRANS_UNIT;
   FUN_DEF;
   FUN_DECL;
@@ -54,7 +54,7 @@ tokens {
 // Declarations
 //
 translation_unit
-  : definition_declaration+ -> ^(TRANS_UNIT ^(KARROW definition_declaration+))
+  : definition_declaration+ -> ^(TRANS_UNIT ^(SEQ definition_declaration+))
   ;
 
 definition_declaration
@@ -94,7 +94,7 @@ struct_declaration
 
 struct_field_list
   : declaration+
-    -> ^(KLIST declaration+)
+    -> ^(LIST declaration+)
   ;
 
 variable_declaration
@@ -103,8 +103,8 @@ variable_declaration
 
 parameter_list
   : parameter (',' parameter)* 
-    -> ^(KLIST parameter+)
-  | -> KLIST
+    -> ^(LIST parameter+)
+  | -> LIST
   ;
 
 parameter
@@ -149,7 +149,7 @@ statement
 
 compound_statement
   : '{' declaration* statement_list '}'
-    -> ^(BLOCK ^(KARROW declaration* statement_list))
+    -> ^(BLOCK ^(SEQ declaration* statement_list))
   ;
 
 //
@@ -157,8 +157,8 @@ compound_statement
 //
 argument_expression_list
   : assignment_expression (',' assignment_expression)*
-    -> ^(KLIST assignment_expression+)
-  | -> KLIST
+    -> ^(LIST assignment_expression+)
+  | -> LIST
   ;
 
 expression

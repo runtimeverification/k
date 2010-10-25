@@ -23,7 +23,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar Cfgs CfgItems CfgItems1 CfgItems2 PreCfgs PostCfgs : Bag
   kvar Map Env Env1 Env2 TEnv H : Map
 
-
+  syntax K ::= KernelC
   syntax K ::= checkContracts | checkContracts ( Map ) | checkContract ( Id )
   syntax K ::= fieldList ( List{KernelC} )
   syntax TypedValue ::= newObject
@@ -52,7 +52,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
 Translation unit (top rule)
 ***)
   rule
-    <k> translationUnit(K) => K ~> checkContracts <_/k>
+    <k> translationUnit(KernelC) => KernelC ~> checkContracts <_/k>
   [structural]
   rule
     <k> checkContracts => checkContracts(Map) <_/k>
@@ -120,9 +120,8 @@ Variable declaration
 ***(
 Statements
 ***)
-  rule nop => .K [structural]
   rule TV ; => .K [structural]
-  rule block(K) => K [structural]
+  rule block(KernelC) => KernelC [structural]
   rule if (tv(int, I) => tv(int, I) ? tv(int, 1) : tv(int, 0)) S1 else S2
   if notBool(I :: Int) [structural]
   rule if(tv(int, NzI)) S1 else S2 => S1 [structural]
@@ -271,12 +270,32 @@ Memory malloc/free
 Memory new/delete
 ***)
   rule
-    <k> new struct X => tv(struct X *, ?Int(N)) <_/k>
+    <k> new struct X => tv(struct X *, FreeInt(N)) <_/k>
     <heap_> .Map => initObject(FreeInt(N), X, KernelCList, sNat N) <_/heap>
     <struct_> X |-> fieldList(KernelCList) <_/struct>
     <counter> N => sNat N +Nat listLen(KernelCList) </counter>
   rule
-    <k> delete tv(T, I) => .K <_/k>
+    <k> new int => tv(int *, FreeInt(N)) <_/k>
+    <heap_> .Map => FreeInt(N) |-> FreeInt(sNat N) <_/heap>
+    <counter> N => sNat sNat N </counter>
+  rule
+    <k> new (T *) => tv(T **, FreeInt(N)) <_/k>
+    <heap_> .Map => FreeInt(N) |-> FreeInt(sNat N) <_/heap>
+    <counter> N => sNat sNat N </counter>
+  rule
+    <k> delete tv(struct X *, I) => deleteObject(I, listLen(KernelCList)) <_/k>
+    <struct_> X |-> fieldList(KernelCList) <_/struct>
+  rule
+    <k> deleteObject(I, (sNat N => N)) <_/k>
+    <heap_> I +Int N |-> _ => .Map <_/heap>
+  rule
+    <k> deleteObject(I, 0) => .K <_/k>
+  rule
+    <k> delete tv(int *, I) => .K <_/k>
+    <heap_> I |-> _ => .Map <_/heap>
+  rule
+    <k> delete tv(T **, I) => .K <_/k>
+    <heap_> I |-> _ => .Map <_/heap>
 
 
 --------------------------------------------------------------------------------

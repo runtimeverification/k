@@ -2,18 +2,10 @@ load ml-prelude.maude
 
 
 kmod IMP-SYNTAX is including ML-K
-***(
-KernelC is a top sort
-***)
-  syntax K ::= KernelC
-  syntax KernelC ::= TranslationUnit
-                   | FunctionDefinition
-                   | Declaration
-                   | arg ExpressionType Expression
-                   | ExpressionType
-                   | Statement
-                   | Expression
-  syntax Id ::= malloc | free
+  subsorts Formula Subst MathObj++ < Builtins KResult
+  subsorts List{MathObj++} Set{MathObj++} < Builtins KResult
+  subsort Id Field < Builtins KProper
+  subsort Value TypedValue ExpressionType < Builtins KResult
 
 ***(
 imp type system
@@ -52,7 +44,7 @@ declarations, function definitions and top level constructs
                                   ( List{KernelC} )
                                   Statement
 
-  syntax TranslationUnit ::= translationUnit K
+  syntax TranslationUnit ::= translationUnit KernelC
 
 
 ***(
@@ -61,7 +53,7 @@ imp statements
   syntax Statement ::= nop
                      | Annotation 
                      | Expression ; [strict]
-                     | block K
+                     | block KernelC
                      | if ( Expression ) Statement else Statement [strict(1)]
                      | while ( Expression ) Statement
                      | return Expression [strict]
@@ -142,6 +134,7 @@ imp Expressions
                             | offset ( ExpressionType , Id )
                             | new ExpressionType
                             | detele TypedValue
+                            | deleteObject ( Value , Nat )
 
 
 ***(
@@ -155,12 +148,27 @@ matching logic annotations
                       | /*@`post Bag */ ---[strat(0)]
 
 
+***(
+KernelC is a top sort
+***)
+  syntax KernelC ::= TranslationUnit
+                   | FunctionDefinition
+                   | Declaration
+                   | arg ExpressionType Expression
+                   | ExpressionType
+                   | Statement
+                   | Expression
+  syntax Id ::= malloc | free
+
+*** arrow
+  syntax KernelC ::= .KernelC
+                   | KernelC ~~> KernelC
+
 *** list
   syntax List{KernelC} ::= .List{KernelC}
                          | KernelC
                          | List{KernelC} ,,, List{KernelC}
                            [assoc id: .List{KernelC} hybrid strict]
-
 endkm
 
 
@@ -171,5 +179,8 @@ kmod IMP-DESUGARED-SYNTAX is including IMP-SYNTAX
 --- so we get rid of the derived ones before we start the semantics          ---
 --------------------------------------------------------------------------------
   ---macro NULL = 0
+  rule nop => .K [structural]
+  rule .KernelC => .K [structural]
+  rule KC1:KernelC ~~> KC2:KernelC => KC1:KernelC ~> KC2:KernelC [structural]
 endkm
 

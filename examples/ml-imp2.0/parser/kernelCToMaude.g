@@ -16,13 +16,13 @@ root : node;
 
 node
   : ^(operator node_list)
-  | KLIST
-    ( -> OP[".List{KernelC}"]
-    | DOWN klist_node_list UP -> klist_node_list
+  | LIST
+    ( -> CT[".List{KernelC}"]
+    | DOWN list_node_list UP -> list_node_list
     )
-  | KARROW
-    ( -> OP["(.).K"]
-    | DOWN karrow_node_list UP -> karrow_node_list
+  | SEQ
+    ( -> CT[".KernelC"]
+    | DOWN seq_node_list UP -> seq_node_list
     )
   | constant
   ;
@@ -31,17 +31,17 @@ node_list
   : node+
   ;
 
-klist_node_list
+list_node_list
   : node
     ( -> node
-    | klist_node_list -> ^(OP["_`,`,`,_"] node klist_node_list)
+    | list_node_list -> ^(OP["_`,`,`,_"] node list_node_list)
     )
   ;
 
-karrow_node_list
+seq_node_list
   : node
     ( -> node
-    | karrow_node_list -> ^(OP["_~>_"] node karrow_node_list)
+    | seq_node_list -> ^(OP["_~~>_"] node seq_node_list)
     )
   ;
 
