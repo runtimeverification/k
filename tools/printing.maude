@@ -253,8 +253,7 @@ fmod DECL-META-PRETTY-PRINT is
   eq metaPrettyPrint(M, T, POS:PrintOptionSet) 
     = 'Module getName(M) 'contains 'errors. .
 
-  eq eMetaPrettyPrint(U, T, false) = metaPrettyPrint(U, T,  mixfix flat 
-format number rat) .
+  eq eMetaPrettyPrint(U, T, false) = metaPrettyPrint(U, T, format number rat) .
   eq eMetaPrettyPrint(U, T, true) = metaPrettyPrint(U, T) .
  
   op eMetaPrettyPrint : Module AttrSet -> QidList .
