@@ -7,13 +7,11 @@ public class unwrapBuiltinsMain {
   public static void main (String[] args) {
     try {
       ANTLRInputStream input = new ANTLRInputStream(System.in);
-      unwrapBuiltinsLexer lexer = new unwrapBuiltinsLexer(input);
+      unwrapBuiltins lexer = new unwrapBuiltins(input);
       CommonTokenStream tokens = new CommonTokenStream(lexer);
-      unwrapBuiltinsParser parser = new unwrapBuiltinsParser(tokens);
-      parser.module();
+      tokens.getTokens();
     }
     catch (IOException e) {}
-    catch (RecognitionException e) {}
   }
 }
 

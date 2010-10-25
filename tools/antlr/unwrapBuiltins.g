@@ -1,73 +1,39 @@
-grammar unwrapBuiltins;
+lexer grammar unwrapBuiltins;
 
+options { filter = true; }
 
-tokens {
-    CONTENT;
-    BUILTIN;
-    APP = '_`(_`)';
-    UNIT = '.List`{K`}';
-    LPAREN = '(';
-    RPAREN = ')';
-    COMMA = ',';
-    USCORE = '_';
-}
-
-
-
-@members {
-  boolean isWrapper = false;
-  int count;
-  String wrappedBuiltin;
-}
-
-module : (begin | end | content)* ;
-
-begin
-  : APP '(' BUILTIN '_' '('
-  { isWrapper = true; count = 0; wrappedBuiltin = ""; }
-  | APP (~'(' | '(' ~BUILTIN)
-  {
-    if (isWrapper) wrappedBuiltin += $text;
-    else System.out.print($text);
-  }
-;
-
-end
-  : { isWrapper && count == 0 }? ')' ',' UNIT ')'
-  { isWrapper  = false; System.out.print(wrappedBuiltin + " "); }
-  | { !(isWrapper && count == 0) }? ')'
-  {
-    if (isWrapper)
-    {
-      count--;
-      wrappedBuiltin += $text;
-    }
-    else System.out.print($text);
-  }
-;
-
-content
-@after
-{
-  if (isWrapper) wrappedBuiltin += $text;
-  else System.out.print($text);
-}
-  : '(' { if (isWrapper) count++; }
-  | BUILTIN
-  | CONTENT
-  | UNIT
-  | '_'
-  | ','
-;
-
-
+fragment
 BUILTIN
-  : 'IntSymbolic'
+  : 'MathObj++'
+  | 'List`{MathObj++`}'
+  | 'Formula'
+  | 'Subst'
+  | 'ExpressionType'
+  | 'TypedValue'
+  | 'Value'
   | 'Id'
+  | 'Field'
+  | 'HeapLabel'
 ;
 
-CONTENT
-  : '_'?  ~('(' | ')' | ',' | '_')*
-  | '_`(`)'
-;
+BUILTIN_WRAPPER
+  : APP '(' BUILTIN '_' '(' BUILTIN_CONTENT ')' ',' UNIT ')'
+    { System.out.print($BUILTIN_CONTENT.text); }
+  ;
 
+CHAR
+  : . { System.out.print($text); }
+  ;
+
+fragment
+BUILTIN_CONTENT
+  : ( ('(')=> '(' BUILTIN_CONTENT ')'
+    | (~')')=> .
+    )*
+  ;
+
+fragment
+APP : '_`(_`)' ;
+
+fragment
+UNIT : '.List`{K`}' ;
