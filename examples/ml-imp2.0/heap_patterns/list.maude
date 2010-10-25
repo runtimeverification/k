@@ -43,7 +43,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        < form >
          Phi /\ ~(P === 0) /\
-         (Alpha === [FreeInt(N)] ::: FreeSeq(N +Int 2))
+         (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2))
        </ form >
        CfgItems
      </ config >
@@ -82,7 +82,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =heap=> Cfg
   => < config >
        < heap >
-         list(P)([I] ::: Alpha)
+         list(P)([I] @ Alpha)
          H
        </ heap >
        CfgItems
@@ -119,7 +119,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        < form >
          Phi /\ ~(P === Q) /\
-         (Alpha === [FreeInt(N)] ::: FreeSeq(N +Int 2))
+         (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2))
        </ form >
        CfgItems
      </ config >
@@ -159,7 +159,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =heap=> Cfg
   => < config >
        < heap >
-         lseg(P, Q)(Alpha ::: Beta)
+         lseg(P, Q)(Alpha @ Beta)
          H
        </ heap >
        CfgItems
@@ -177,7 +177,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =heap=> Cfg
   => < config >
        < heap >
-         list(P)(Alpha ::: Beta)
+         list(P)(Alpha @ Beta)
          H
        </ heap >
        CfgItems

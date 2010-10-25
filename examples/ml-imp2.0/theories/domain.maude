@@ -12,7 +12,7 @@ mod MATHEMATICAL-DOMAIN is
   op tree2seq : FreeTree -> FreeSeq [ditto] .
   op tree2seq : Tree -> NeSeq [ditto] .
 ***)
-  eq tree2seq(TL [ Obj ] TR) = tree2seq(TL) ::: [Obj] ::: tree2seq(TR) .
+  eq tree2seq(TL [ Obj ] TR) = tree2seq(TL) @ [Obj] @ tree2seq(TR) .
   eq tree2seq(upsilon) = epsilon .
   op tree2mset : Tree++ -> NeMSet++ .
 ***(
@@ -38,12 +38,12 @@ mod MATHEMATICAL-DOMAIN is
   op seq2mset : FreeSeq -> FreeMSet [ditto] .
   op seq2mset : Seq -> NeMSet [ditto] .
 ***)
-  eq seq2mset(NeA ::: NeA') = seq2mset(NeA) U seq2mset(NeA') .
+  eq seq2mset(NeA @ NeA') = seq2mset(NeA) U seq2mset(NeA') .
   eq seq2mset([Obj]) = {| Obj |} .
   eq seq2mset(epsilon) = empty .
 
   op isSorted : Seq++ -> Atom .
-  eq isSorted(NeA ::: NeA')
+  eq isSorted(NeA @ NeA')
    = @(min(seq2mset(NeA')) >=Int max(seq2mset(NeA))) /\
      isSorted(NeA) /\ isSorted(NeA') .
   eq isSorted([I]) = TrueFormula .
