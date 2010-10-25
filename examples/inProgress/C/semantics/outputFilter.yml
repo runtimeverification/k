@@ -29,6 +29,7 @@ currentProgramLoc: show
 declarationTypeHolder: show
 callStack: recursively-hide
 blockStack: show
+savedInitialization: show
 #blockStack: recursively-hide
 
 # cell-style:

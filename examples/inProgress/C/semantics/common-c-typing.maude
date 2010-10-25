@@ -5,6 +5,24 @@ mod COMMON-SEMANTICS-TYPE-INCLUDE is
 	op isAType_ : K -> Bool .
 	op extractActualType : Type -> Type . --- rules that use specifier should be careful to use extractActualType if going to be used in a typed name
 	op evalToType : -> K .
+	
+	op typeStrictBinaryOperators : -> Set [memo] .
+	eq typeStrictBinaryOperators = Set(
+		l('_*_),, l('_/_),, l('_%_),,
+		l('_+_),, l('_-_),,
+		l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
+		--- l('_==_),, l('_!=_),,
+		l('_&_),, l('_|_),, l('_^_),,
+		l('_`[_`])
+	) .
+	
+	op typeStrictLeftBinaryOperators : -> Set [memo] .
+	eq typeStrictLeftBinaryOperators = Set(
+		l('_<<_),, l('_>>_),,
+		l('_*=_),, l('_/=_),, l('_%=_),, l('_+=_),, l('_-=_),, 
+		l('_<<=_),, l('_>>=_),, l('_&=_),, l('_^=_),, l('_|=_),,
+		l('_++),, l('_--),, l('--_),, l('++_)
+	) .
 endm
 
 mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
@@ -43,16 +61,9 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		< k > giveLocalType(X:Id, T:Type) => (.).K ...</ k >
 		< types > M:Map => M:Map[T:Type / X:Id] </ types >
 		: KSentence [metadata "structural"] .		
-			
-	--- --- fixme hack for (int )(b705 + 0)->b6[0].b4.b1
-	--- mb rule 
-		--- < type > [X:Id + I:Int => X:Id] ...</ type >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- < type > [X:Id - I:Int => X:Id] ...</ type >
-		--- : KSentence [metadata "structural"] .
 endm
 
+--- fixme tool comment what would it take to have different kinds of values in different cells?
 mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	including COMMON-SEMANTICS-TYPE-INCLUDE .
 
@@ -68,27 +79,89 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 		: KSentence [metadata "structural"] .
 	
 	mb [type-arrow-heat]: rule
-		< type > Kp:KProper -> F:Id => Kp:KProper ~> HOLE -> F:Id ...</ type >
+		< type > K:K -> F:Id => K:K ~> HOLE -> F:Id ...</ type >
+		if notBool isAType(K:K)
 		: KSentence [metadata "structural"] .
 	mb [type-arrow-cool]: rule
 		< type > T:Type ~> HOLE -> F:Id => T:Type -> F:Id ...</ type >
 		: KSentence [metadata "structural"] .
-	mb [type-plus-heat]: rule
-		< type > K:K + K':K => K:K ~> HOLE + K':K ...</ type >
+		
+	mb [type-address-heat]: rule
+		< type > & K:K => K:K ~> & HOLE ...</ type >
 		if notBool isAType(K:K)
 		: KSentence [metadata "structural"] .
-	mb [type-plus-cool]: rule
-		< type > T:Type ~> HOLE + K:K => T:Type + K:K ...</ type >
+	mb [type-address-cool]: rule
+		< type > T:Type ~> & HOLE => & T:Type ...</ type >
+		: KSentence [metadata "structural"] .
+		
+	mb [type-ternary-heat]: rule
+		< type > K1:K ? K2:K : K3:K => K2:K ~> K1:K ? HOLE : K3:K ...</ type >
+		if notBool isAType(K2:K)
+		: KSentence [metadata "structural"] .
+	mb [type-ternary-cool]: rule
+		< type > T:Type ~> K1:K ? HOLE : K3:K => K1:K ? T:Type : K3:K ...</ type >
 		if isAType(T:Type)
 		: KSentence [metadata "structural"] .
-	mb [type-plus-heat]: rule
-		< type > K:K + K':K => K':K ~> K:K + HOLE ...</ type >
+	mb [type-ternary-heat]: rule
+		< type > K1:K ? K2:K : K3:K => K3:K ~> K1:K ? K2:K : HOLE ...</ type >
+		if notBool isAType(K3:K)
+		: KSentence [metadata "structural"] .
+	mb [type-ternary-cool]: rule
+		< type > T:Type ~> K1:K ? K2:K : HOLE => K1:K ? K2:K : T:Type ...</ type >
+		if isAType(T:Type)
+		: KSentence [metadata "structural"] .
+	
+	--- mb [type-plus-heat]: rule
+		--- < type > K:K + K':K => K:K ~> HOLE + K':K ...</ type >
+		--- if notBool isAType(K:K)
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-plus-cool]: rule
+		--- < type > T:Type ~> HOLE + K:K => T:Type + K:K ...</ type >
+		--- if isAType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-plus-heat]: rule
+		--- < type > K:K + K':K => K':K ~> K:K + HOLE ...</ type >
+		--- if notBool isAType(K':K)
+		--- : KSentence [metadata "structural"] .
+	--- mb [type-plus-cool]: rule
+		--- < type > T:Type ~> K:K + HOLE => K:K + T:Type ...</ type >
+		--- if isAType(T:Type)
+		--- : KSentence [metadata "structural"] .
+
+	
+	mb [type-bin-arith-heat]: rule
+		< type > L:KLabel(K:K,, K':K) => K:K ~> L:KLabel(HOLE,, K':K) ...</ type >
+		if notBool isAType(K:K)
+		andBool typeStrictBinaryOperators contains l(L:KLabel)
+		: KSentence [metadata "structural"] .
+	mb [type-bin-arith-cool]: rule
+		< type > T:Type ~> L:KLabel(HOLE,, K:K) => L:KLabel(T:Type,, K:K) ...</ type >
+		if isAType(T:Type)
+		andBool typeStrictBinaryOperators contains l(L:KLabel)
+		: KSentence [metadata "structural"] .
+	mb [type-bin-arith-heat]: rule
+		< type > L:KLabel(K:K,, K':K) => K':K ~> L:KLabel(K:K,, HOLE) ...</ type >
 		if notBool isAType(K':K)
+		andBool typeStrictBinaryOperators contains l(L:KLabel)
 		: KSentence [metadata "structural"] .
-	mb [type-plus-cool]: rule
-		< type > T:Type ~> K:K + HOLE => K:K + T:Type ...</ type >
+	mb [type-bin-arith-cool]: rule
+		< type > T:Type ~> L:KLabel(K:K,, HOLE) => L:KLabel(K:K,, T:Type) ...</ type >
 		if isAType(T:Type)
+		andBool typeStrictBinaryOperators contains l(L:KLabel)
 		: KSentence [metadata "structural"] .
+		
+		
+	mb [type-bin-left-arith-heat]: rule
+		< type > L:KLabel(K:K,, Args:List{K}) => K:K ~> L:KLabel(HOLE,, Args:List{K}) ...</ type >
+		if notBool isAType(K:K)
+		andBool typeStrictLeftBinaryOperators contains l(L:KLabel)
+		: KSentence [metadata "structural"] .
+	mb [type-bin-left-arith-cool]: rule
+		< type > T:Type ~> L:KLabel(HOLE,, Args:List{K}) => L:KLabel(T:Type,, Args:List{K}) ...</ type >
+		if isAType(T:Type)
+		andBool typeStrictLeftBinaryOperators contains l(L:KLabel)
+		: KSentence [metadata "structural"] .
+
 		
 	mb [type-dot-heat]: rule
 		< type > K:K . X:Id => K:K ~> HOLE . X:Id ...</ type >
@@ -101,20 +174,20 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 	--- mb rule
 		--- < type > ['_`[_`](Kp:KProper,, E:Expression) => Kp:KProper ~> Deref(HOLE)] ...</ type >
 		--- : KSentence [metadata "structural"] .
-	mb rule
+	mb [type-deref-cool]: rule
 		< type > T:Type ~> *(HOLE) => *(T:Type) ...</ type >
 		if isAType(T:Type)
 		: KSentence [metadata "structural"] .
-	mb [type-heat-deref]: rule
+	mb [type-deref-heat]: rule
 		< type > *(K:K) => K:K ~> *(HOLE) ...</ type >
 		if notBool isAType(K:K)
 		: KSentence [metadata "structural"] .
 		
-	mb [type-heat-call]: rule
+	mb [type-call-heat]: rule
 		< type > Call(K:K, L:List{C}) => K:K ~> Call(HOLE, L:List{C}) ...</ type >
 		if notBool isAType(K:K)
 		: KSentence [metadata "structural"] .
-	mb [type-cool-call]: rule
+	mb [type-call-cool]: rule
 		< type > T:Type ~> Call(HOLE, L:List{C}) => Call(T:Type, L:List{C}) ...</ type >
 		if isAType(T:Type)
 		: KSentence [metadata "structural"] .
@@ -690,29 +763,18 @@ mod COMMON-C-TYPING is
 	mb rule
 		< type > functionObject(?, T:Type, ?) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
+
+	mb rule
+		< type > T:Type << ? => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< type > T:Type >> ? => T:Type ...</ type >
+		: KSentence [metadata "structural"] .
 		
-	--- mb rule
-		--- < type > Cast(, ?) =>  ...</ type >
-		--- : KSentence [metadata "structural"] .	
-	mb rule
-		< type > K:K[K':K] => K':K ~> K:K[HOLE] ...</ type >
-		if notBool isAType K':K
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > K:K[K':K] => K:K ~> HOLE[K':K] ...</ type >
-		if notBool isAType K:K
-		: KSentence [metadata "structural"] .
 	mb rule
 		< type > tv(?, T:Type) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
-	mb rule
-		< type > T:Type ~> HOLE[K:K] => T:Type[K:K] ...</ type >
-		if isAType T:Type
-		: KSentence [metadata "structural"] .
-	mb rule
-		< type > T:Type ~> K:K[HOLE] => K:K[T:Type] ...</ type >
-		if isAType T:Type
-		: KSentence [metadata "structural"] .
+
 	mb rule
 		< type > arrayType(T:Type, ?)[T':Type] => T:Type ...</ type >
 		if hasIntegerType(T':Type)
@@ -725,13 +787,7 @@ mod COMMON-C-TYPING is
 		< type > arrayType(T:Type, ?) + T':Type => pointerType(T:Type) ...</ type >
 		if hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < type > [F:Float => double] </ type >
-		--- : KSentence [metadata "structural"] .
-	--- --- why did this suddenly become necessary?
-	--- mb rule
-		--- < type > [atv(?, T:Type) => T:Type] </ type >
-		--- : KSentence [metadata "structural"] .
+
 	--- c99 6.4.5
 	mb rule
 		< type > Constant(StringLiteral(S:String)) => arrayType(char, lengthString(S:String) +Nat 1) </ type >
@@ -794,6 +850,32 @@ mod COMMON-C-TYPING is
 		...</ type >
 		: KSentence [metadata "structural"] .
 		
+	mb rule 
+		< type > L:KLabel(T:Type,, T':Type) => maxType(T:Type, T':Type) ...</ type >
+		if typeStrictBinaryOperators contains l(L:KLabel)
+		: KSentence [metadata "structural"] .
+		
+	mb rule 
+		< type > ?:K ? T:Type : T':Type => maxType(T:Type, T':Type) ...</ type >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< type > L:KLabel(?:K,, ?:K) => int ...</ type >
+		if L:KLabel ==Bool '_==_
+		orBool L:KLabel ==Bool '_!=_
+		orBool L:KLabel ==Bool '_&&_
+		orBool L:KLabel ==Bool '_||_
+		: KSentence [metadata "structural"] .
+		
+	mb [type-address]: rule
+		< type > & T:Type => pointerType(T:Type) ...</ type >
+		if isAType(T:Type)
+		: KSentence [metadata "structural"] .
+		
+	mb rule 
+		< type > L:KLabel(T:Type,, ?:List{K}) => T:Type ...</ type >
+		if typeStrictLeftBinaryOperators contains l(L:KLabel)
+		: KSentence [metadata "structural"] .
 		
 	eq unqualifyType(qualifiedType(T:Type, ?)) = T:Type .
 	ceq unqualifyType(T:Type) = T:Type

@@ -54,6 +54,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op File-Scope : -> Id [ctor] .
 	op unnamedBitField : -> Id [ctor] .
 	op bignum : -> Type .
+	op debug : -> K .
 	op sym : Nat -> Nat .
 	op byteo : Nat -> Nat .
 	op bito : Nat -> Nat .
@@ -67,6 +68,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- op t : Type Set -> Type .
 	
 	op toString : K -> String .
+	
+	op maxType : Type Type -> Type .
 	
 	op bitRange : Nat Nat Nat -> Nat . --- original number, from, to inclusive
 	
@@ -834,7 +837,9 @@ mod COMMON-INITIALIZATION is
 	op finishCompoundInit : List -> K .
 	mb rule
 		< k > fillInitializer(CompoundInit(L:List{C})) 
-			=> fillInitializer(L:List{C}) ~> finishCompoundInit(next ListItem(te(K:K, T:Type)) Remainder:ListItem)
+			=> fillInitializer(L:List{C}) 
+			--- ~> debug
+			~> finishCompoundInit(next ListItem(te(K:K, T:Type)) Remainder:ListItem)
 		...</ k >
 		< currentSubObject > (?:List => .) ListItem(te(K:K, T:Type)) (Remainder:ListItem => .) </ currentSubObject >
 		< currentObject > (. => ListItem(te(K:K, T:Type))) ...</ currentObject >
@@ -1047,7 +1052,8 @@ mod COMMON-GLOBAL-DECLARATION is
 	--- aggregates
 	mb rule
 		< k > figureInitializer(X:Id, T:Type, CompoundInit(L:List{C}))
-			=> figureInitializer-aux(X:Id, T:Type, startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
+			=> giveType(X:Id, T:Type)
+			~> figureInitializer-aux(X:Id, T:Type, startInitializer(T:Type, X:Id, CompoundInit(L:List{C})))
 		...</ k >
 		if (hasAggregateType(T:Type) orBool hasUnionType(T:Type)) 
 		---andBool notBool hasIncompleteType(T:Type)
@@ -1059,16 +1065,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		if hasCharType(T:Type)
 		andBool lengthString(S:String) <=Nat Len:Nat
 		: KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > declare(typedDeclaration(incompleteArrayType(T:Type), X:Id), SingleInit(Constant(StringLiteral(S:String))))
-			--- => allocString(Loc:Nat, (S:String +String "\0"))
-			--- ~> addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, arrayType(T:Type, lengthString(S:String) +Nat 1))
-		--- ...</ k >
-		--- < nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		--- if hasCharType(T:Type)
-		--- : KSentence [metadata "structural"] .
+	
 	mb rule
 		< k > figureInitializer(X:Id, (incompleteArrayType(T:Type) => arrayType(T:Type, lengthString(S:String) +Nat 1)), SingleInit(Constant(StringLiteral(S:String)))) ...</ k >
 		if hasCharType(T:Type)

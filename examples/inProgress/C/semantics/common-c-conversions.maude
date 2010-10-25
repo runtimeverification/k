@@ -202,7 +202,6 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		...</ k >
 		: KSentence [metadata "structural"] .
 		
-	op maxType : Type Type -> Type .
 	ceq maxType(T:Type, T':Type) = T:Type
 		if rank(T:Type) >=Int rank(T':Type) .
 	ceq maxType(T:Type, T':Type) = T':Type

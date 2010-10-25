@@ -54,10 +54,12 @@ demo: $(DIST_DIR)/dist.done
 
 #$(DIST_DIR)/dist.tested
 
-$(OUTPUT_FILTER):
+filter: $(OUTPUT_FILTER)
+
+$(OUTPUT_FILTER): $(wildcard $(OUTPUT_FILTER_DIR)/*.hs)
 	make -C $(OUTPUT_FILTER_DIR)
 
-$(DIST_DIR)/dist.done: Makefile $(OUTPUT_FILTER) cparser kcompile $(FILES_TO_DIST)
+$(DIST_DIR)/dist.done: Makefile filter cparser kcompile $(FILES_TO_DIST)
 	@mkdir -p $(DIST_DIR)
 	@mkdir -p $(DIST_DIR)/includes
 	@mkdir -p $(DIST_DIR)/lib
