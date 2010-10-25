@@ -557,8 +557,8 @@ if (!$compile_only) {
     $language_file_name =~ s/(\.k|\.kmaude)$//;
     print "\n" if $verbose;
 
-    print_header("New commands that will be added to the generated latex file") if $verbose && $latex;
-    print join("\n",@newcommands)."\n" if $verbose && $latex;
+    print_header("New commands that will be added to the generated latex file") if $verbose && ($latex || $pdf || $crop || $ps || $eps || $png);
+    print join("\n",@newcommands)."\n" if $verbose && ($latex || $pdf || $crop || $ps || $eps || $png);
 }
 
 # Following is executed whenever the option -m was not selected
@@ -605,7 +605,7 @@ sub print_header {
 sub latexify {
     
     my ($format, @modules) = @_;
-    
+  
 # Assumes $language_file_name is a file name with no extension
 
     print_header("Generate $format version for module $language_module_name from language definition $language_file_name") if $verbose;
@@ -641,10 +641,11 @@ sub latexify {
 		  "quit\n");
 
     s/\\begin{module}.*?\\end{module}//gms;
-    my @latex_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
-    if (@latex_modules && !/\\begin{module}/) {
+    my @l_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
+    if (@l_modules && !/\\begin{module}/) {
 	print "Latex style used: $style\n" if $verbose;
 	
+
 # File name where the compiled output will be stored:
 	my $output_file_name = "$language_file_name-$format.tex";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
@@ -656,7 +657,7 @@ sub latexify {
         }
 	print FILE join("\n",@newcommands)."\n";
 	print FILE "\\begin{document}\n";
-	print FILE join("\\newpage", @latex_modules)."\n";
+	print FILE join("\\newpage", @l_modules)."\n";
 	print FILE "\\end{document}\n";
 	close FILE;
 	print "Latex version written in $output_file_name\n" if $verbose;
@@ -727,7 +728,6 @@ sub get_file_content
 sub make_latexify
 {
     latexify("latex", @latexify_modules);
-    
     rename("$language_file_name-latex.tex", "$language_file_name.tex");
     print "Generated $language_file_name.tex which contains modules: @latexify_modules\n";
 }
@@ -736,50 +736,33 @@ sub make_latexify
 sub make_pdf 
 {
     latexify("pdf", @pdf_modules);
+    print "Generated $language_file_name.pdf which contains modules: @pdf_modules\n";
 
-    # Find number of pages
-    my $pages = run_latex("$language_file_name-pdf");
-    my $h = 9 * $pages;
-    my $ph = $h + 1;
 
     # modify page and save it
     my $latex_out = get_file_content("$language_file_name-pdf.tex");
-    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
-    $latex_out =~ s/\\begin{document}/$settings/;
-    $latex_out =~ s/\\newpage/\\bigskip/g;
+
+    # initial settings
+    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
+    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
+    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
     
     open FILE,">", "$language_file_name-pdf.tex" or die "Cannot create $language_file_name-pdf.tex\n";
     print FILE $latex_out;
     close FILE;
 
     # Generate tex
-    my $status = system("latex -interaction=nonstopmode $language_file_name-pdf.tex > out");
+    my $status = system("pdflatex $language_file_name-pdf.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
-    
-    # Generate postscript
-    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-pdf -o $language_file_name-pdf.ps 2>/dev/null");
-    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
-    
-    # Generate eps
-    $status = system("ps2eps -f -q -P -H -l $language_file_name-pdf.ps");
-    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
-    
-    # Generate pdf
-    $status = system("gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pdfwrite -sOutputFile=$language_file_name-pdf.pdf $language_file_name-pdf.eps");
-    print "Failed to generate pdf. Exit status $status.\n" if (($status >>= 8) != 0);
-
-    # rename pdf file
-    rename("$language_file_name-pdf.pdf", "$language_file_name.pdf");
-    print "Generated $language_file_name.pdf which contains modules: @pdf_modules\n";
+    rename ("$language_file_name-pdf.pdf", "$language_file_name.pdf");
     
     # delete auxialiary files if not verbose
     unlink("$language_file_name-pdf.tex") if !$verbose;
     unlink("$language_file_name-pdf.aux") if !$verbose;
-    unlink("$language_file_name-pdf.dvi") if !$verbose;
-    unlink("$language_file_name-pdf.eps") if !$verbose;
-    unlink("$language_file_name-pdf.ps") if !$verbose;
+#    unlink("$language_file_name-pdf.dvi") if !$verbose;
+#    unlink("$language_file_name-pdf.eps") if !$verbose;
+#    unlink("$language_file_name-pdf.ps") if !$verbose;
     unlink("$language_file_name-pdf.log") if !$verbose;
     unlink("out");
 }
@@ -1312,7 +1295,7 @@ sub maudify_module {
     
 # Step: Add the module's newly defined tokens to @tokens
     add_tokens($_);
-    # print  "Stage:\n$_\n\n";
+#     print  "Stage:\n$_\n\n";
     
 # Step: Add missing spaces around tokens
     $_ = spacify($_);
@@ -1320,7 +1303,7 @@ sub maudify_module {
     
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
-    # print  "Stage:\n$_\n\n";
+#    print  "Stage:\n$_\n\n";
     
 # Step: Replace remaining _ by ? (spaces were put around _ by spacify)
     s! _ ! ? !gs;
@@ -1447,7 +1430,7 @@ sub make_ops {
 		$production =~ s/`($|$maude_special)/$1/gs;
 
 # Add a latex attribute in case $latex and there is not already a user-defined one
-		if ($latex && ($attributes !~ /latex/)) {
+		if (($latex || $pdf || $png || $ps || $eps || $crop) && ($attributes !~ /latex/)) {
 		    my $latex_text = $production;
 		    my $counter = 0;
 		    $latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
@@ -1465,7 +1448,7 @@ sub make_ops {
 					: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
         }
 
-#print "Done\n";
+# print "Done\n";
 	return "$result$spaces3";
 }
 
@@ -1514,7 +1497,6 @@ sub rule_attribute {
 # Extract the K attributes and make them Maude metadata
 sub make_metadata {
     local ($_) = @_;
-
     my @k_attributes = ();
     my $have_k_attributes = 0;
 
@@ -1529,7 +1511,7 @@ sub make_metadata {
 	    if (/^latex\s+"([^"]*?)"$/gs) 
 	    {
 #		print "Latex attribute $1\n";
-		push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if $latex;
+		push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if ($latex || $pdf || $crop || $ps || $eps || $png);
 	    }
 	    else {
 		push(@k_attributes, $_);
@@ -1564,10 +1546,11 @@ sub make_metadata {
 }
 
 
-sub get_newcommand {
+sub get_newcommand 
+{
     local ($_) = @_;
     s/&!&!&!/"/g;
-#    print "Recv: $_\n";
+#    print "Apelat.\n";
     my $n = $newcommand_counter++;
     my $newcommand = $newcommand_prefix.chr(65 + $n % $newcommand_base);
     while ($n >= $newcommand_base) {
