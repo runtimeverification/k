@@ -2,12 +2,11 @@ grammar kernelC;
 
 options {
   output = AST;
-  ASTLabelType = CommonTree/*KernelCTree*/;
+  ASTLabelType = CommonTree;
   backtrack = true;
   memoize = true;
   k = 2;
 }
-
 
 tokens {
   KLIST;
@@ -39,6 +38,18 @@ tokens {
   ANNOT;
 }
 
+@lexer::header {
+  import java.util.Set;
+  import java.util.HashSet;
+}
+
+@lexer::members {
+  HashSet<String> ids = new HashSet<String>();
+  HashSet<String> annots = new HashSet<String>();
+}
+
+
+
 //
 // Declarations
 //
@@ -51,6 +62,7 @@ options { k = 1; }
   : ( type IDENTIFIER '(' parameter_list ')' ANNOTATION ANNOTATION '{' )=>
     function_definition
   | declaration
+  | ANNOTATION!
   ;
 
 function_definition
@@ -236,7 +248,7 @@ unary_expression
   | '--'^ unary_expression
   | unary_operator^ cast_expression
   | 'sizeof'^ unary_expression
-  | 'sizeof'^ '('! /* type_name */ ')'!
+  | 'sizeof'^ '('! type ')'!
   ;
 
 unary_operator
@@ -289,7 +301,7 @@ arithmetic_constant
 //
 // Tokens
 //
-IDENTIFIER : LETTER (LETTER | DIGIT)* ;
+IDENTIFIER : LETTER (LETTER | DIGIT)* { ids.add($text); } ;
   
 fragment
 LETTER
@@ -313,8 +325,12 @@ HexDigit : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 
 ANNOTATION
   : ('/*@')=> '/*@' (options { greedy = false; } : .)* '*/'
-  | COMMENT
+    {
+      int len = $text.length();
+      annots.add($text.substring(3, len).substring(0, len - 5));
+    }
   | ('//@')=> '//@' ~('\n' | '\r')* '\r'? '\n'
+  | COMMENT
   | LINE_COMMENT
   ;
 

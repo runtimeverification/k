@@ -1,17 +1,25 @@
 load fol.maude
-load ml-imp.maude
+---load ml-imp.maude
 
-mod TEST is inc IMP + FOL= . 
-
-endm
+---mod TEST is inc IMP + FOL= . 
+mod TEST is inc FOL= . endm
 
 set print attribute on .
-rew check('test) .
+rew check('prog) .
 
- eof
+eof
 
 search
-< config > < heap > list(?x)(?X) lseg(?Int(2),?x)(?Seq(3)) a0 |-> ?Int(1) :[nodeList . val : int] a0 +Int 1 |-> ?Int(2) :[nodeList . next : & struct nodeList] </ heap > CfgItems:Bag </ config > 
-===>
-< config > < heap > list(?x)(?X) lseg(a0,?x)([?Int(1)] ::: ?Seq(3))  </ heap > CfgItems:Bag </ config > 
-=>* CfgItems:Bag
+ < config >
+  < form > TrueFormula </ form >
+  < subst > .Subst </ subst >
+  < env > p |-> 0 x |-> skolem(1, ?x) y |-> ?Int(3) </ env >
+  < heap > list(skolem(1, ?x))(A) </ heap >
+ </ config > 
+ ===>
+ < config >
+  < form > rev(A) === rev(?C) ::: ?B </ form >
+  < env > p |-> ?p x |-> ?x y |-> ?y </ env >
+  < heap > list(?p)(?B) list(?x)(?C) </ heap >
+ </ config >
+=>* CfgItems:Bag .

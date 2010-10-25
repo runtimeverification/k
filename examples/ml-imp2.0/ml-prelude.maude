@@ -5,8 +5,7 @@ load theories/tree-theory.maude
 load theories/domain.maude
 load heap_patterns/list.maude
 
-
-
+***(
 mod PL-BUILTINS is
 including PL-BOOL .
 including PL-EXT-BOOL .
@@ -22,10 +21,12 @@ including PL-COUNTER .
 including PL-BOOL .
 including PL-ID .
   including CONFIG .
+  including MATHEMATICAL-INT .
   including MATHEMATICAL-SEQUENCE .
   including MATHEMATICAL-MULTISET .
   including MATHEMATICAL-TREE .
   including MATHEMATICAL-DOMAIN .
   including LIST-HP .
 endm
+***)
 

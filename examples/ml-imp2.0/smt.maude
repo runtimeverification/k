@@ -232,7 +232,6 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
   eq toString(.emptyQuerry) = "" .
 
   eq toString(len SMTVar) = "(len " +String toString(SMTVar) +String ")" .
-
 endm
 
 mod SMT-INTERFACE is inc SMT-LIB .

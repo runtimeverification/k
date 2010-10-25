@@ -16,8 +16,22 @@ public class kernelCPreK {
       CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
       kernelCToMaude maudifier = new kernelCToMaude(nodes);
       CommonTree maudifiedTree = (CommonTree) maudifier.root().getTree();
-      System.out.println(treeToString(tree, 0));
-      System.out.println(toMaudeString(maudifiedTree));
+
+      //System.out.println(treeToString(tree, 0));
+      for (String annot : lexer.annots) {
+        annot = annot.trim();
+        if (annot.startsWith("var")) {
+          annot = annot.replace("var ", "  ops ").replace(":", ": ->") + " .";
+          System.out.println(annot); 
+        }
+      }
+      System.out.print("  ops ");
+      for (String id : lexer.ids) {
+        System.out.print(id + " "); 
+      }
+      System.out.println(": -> Id .");
+      System.out.println("  op prog : -> TranslationUnit .");
+      System.out.println("  eq prog = (" + toMaudeString(maudifiedTree) + ") .");
     }
     catch (IOException e) {}
     catch (RecognitionException e) {}
@@ -27,8 +41,9 @@ public class kernelCPreK {
     String s = "";
     if (t != null) {
       StringBuffer sb = new StringBuffer(indent);
-      for (int i = 0; i < indent; i++)
-        sb = sb.append("  ");
+      for (int i = 0; i < indent; i++) {
+        sb = sb.append("  "); 
+      }
       s += sb.toString() + t.toString() + "\n";
       for (int i = 0; i < t.getChildCount(); i++) {
         s += treeToString((CommonTree) t.getChild(i), indent + 1);

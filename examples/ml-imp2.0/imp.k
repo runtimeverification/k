@@ -1,9 +1,8 @@
 load imp-semantics
-load examples/test#5.k
+load parser/list-reverse.maude
 
 
-kmod IMP is including IMP-SEMANTICS
-including TEST
+kmod IMP is including IMP-SEMANTICS + P-LIST-REVERSE
 
   op check : KLabel -> BagItem
   op (_feasible and_infeasible paths) : Nat Nat -> BagItem
@@ -11,44 +10,44 @@ including TEST
 
   kvar N M : Nat
 
-  eq check(K:KLabel) = <T>
-                         <feasible> 0 </feasible>
-                         <infeasible> 0 </infeasible>
-                         <spec> mkSpec(K(.List{K})) </spec>
-                         <config>
-                           <k> K(.List{K}) </k>
-                           <env> .Map </env>
-                           <struct> .Map </struct>
-                           <heap> .Map </heap>
-                           <form> TrueFormula </form>
-                           <subst> .Subst </subst>
-                           <newSym>  1 </newSym>
-                           <newImpl> 0 </newImpl>
-                         </config>
-                       </T>
-
-
-rule <T>
-<feasible> N </feasible>
-<infeasible> M </infeasible>
-<spec> Mp:Map </spec>
-</T>
-    =>
-<T>
-<feasible> N </feasible>
-<infeasible> M </infeasible>
-</T>
-
-
+  eq check(Kl:KLabel) = <T>
+                          <feasible> 0 </feasible>
+                          <infeasible> 0 </infeasible>
+                          <spec> .Map </spec>
+                          <struct> .Map </struct>
+                          <fun> .Map </fun>
+                          <counter> 0 </counter>
+                          <config>
+                            <k> Kl(.List{K}) </k>
+                            <tenv> .Map </tenv>
+                            <env> .Map </env>
+                            <heap> .Map </heap>
+                            <form> TrueFormula </form>
+                            <subst> .Subst </subst>
+                          </config>
+                        </T>
 
 
   rule
     <T>
       <feasible> N </feasible>
       <infeasible> M </infeasible>
+      (
+        <spec> _:Map </spec>
+        <struct> _:Map </struct>
+        <fun> _:Map </fun>
+        <counter> _:Nat </counter>
+      =>
+        .Bag
+      )
     </T>
+  rule
+      <T>
+        <feasible> N </feasible>
+        <infeasible> M </infeasible>
+      </T>
     =>
-    N feasible and M infeasible paths
+      N feasible and M infeasible paths
   [metadata "structural"]
   rule
     <feasible> N => N +Int 1 </feasible>

@@ -10,7 +10,10 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
   subsort MSet++ < MathObj++ .
  
   op ?MSet : Nat -> ?MSet .
+  op !MSet : Nat -> !MSet .
+  op FreeMSet : Nat -> FreeMSet .
   op skolem : Nat ?MSet -> FreeMSet [ditto] .
+  op co-skolem : FreeMSet -> !MSet [ditto] .
 
   op empty : -> MSet .
   op `{|_|`} : List{MathObj++} -> NeMSet++ [gather(&)] .

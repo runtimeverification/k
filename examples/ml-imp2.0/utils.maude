@@ -1,4 +1,5 @@
-load ml-prelude.maude
+---load ml-prelude.maude
+load ml-imp.maude
 
 
 mod PL-META-TERM is including PL-BOOL + PL-QID .
@@ -66,11 +67,11 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
            id-hook MetaLevelOpSymbol	(metaUpTerm)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair)
 ) ] .
-
 endm
 
 
-mod VAR-UTILS is inc CONFIG + PL-META-TERM .
+---mod VAR-UTILS is inc CONFIG + PL-META-TERM + MAUDE-IF-THEN-ELSE .
+mod VAR-UTILS is inc IMP + PL-META-TERM + MAUDE-IF-THEN-ELSE .
   op get?VarSet : Formula -> Set{MathObj++} .
   op get?VarSet : Bag -> Set{MathObj++} .
   op get?VarSet : TermList -> Set{MathObj++} .
@@ -129,7 +130,7 @@ mod VAR-UTILS is inc CONFIG + PL-META-TERM .
 endm
 
 
-mod CONFIG-UTILS is inc CONFIG + VAR-UTILS .
+mod CONFIG-SCOLEM is inc VAR-UTILS .
   op skolemTerm : Term TermList -> TermList .
   op co-skolemTerm : TermList -> TermList .
 
@@ -178,7 +179,8 @@ mod CONFIG-UTILS is inc CONFIG + VAR-UTILS .
 endm
 
 
-mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
+---mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
+mod APPLY-SUBST is inc IMP + PL-META-TERM .
   sort MetaSubst .
   op .MetaSubst : -> MetaSubst .
   op _;_ : MetaSubst MetaSubst -> MetaSubst [assoc comm id: .MetaSubst] .
@@ -225,19 +227,18 @@ mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
   var Cfgs : Bag .
   var Phi : Formula .
   --- apply substitution on a configuration
-  eq Cfgs[Subst]
+  eq applySubst(Cfgs, Subst)
    = downTerm(substTerm(upTerm(Cfgs), upSubst(Subst)), errorBag) .
   --- apply substitution on a substitution
-  eq Phi[Subst]
+  eq applySubst(Phi, Subst)
    = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), FalseFormula) .
   --- apply substitution on a substitution
-  eq Subst[Subst']
+  eq applySubst(Subst, Subst')
    = downTerm(substTerm(upTerm(Subst), upSubst(Subst')), .Subst) .
 endm
 
 
-mod MB-CONDITION is inc CONFIG .
+mod CONFIG-UTILS is inc APPLY-SUBST + CONFIG-SCOLEM .
   var I : Int++ .
   eq I : : IntSort = I :: Int .
 endm
-

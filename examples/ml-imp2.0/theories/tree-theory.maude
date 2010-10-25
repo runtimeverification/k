@@ -9,6 +9,7 @@ mod MATHEMATICAL-TREE is inc MATHEMATICAL-INT .
 
   op ?Tree : Nat -> ?Tree .
   op !Tree : Nat -> !Tree .
+  op FreeTree : Nat -> FreeTree .
   op skolem : Nat ?Tree -> FreeTree [ditto] .
   op co-skolem : FreeTree -> !Tree [ditto] .
 

@@ -5,7 +5,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var Alpha Beta : Seq++ .
   var H : Map .
   var K : K .
-  var V V' V1 V2 : Val .
+  var V : Value .
   var Sn : Id .
   var Phi : Formula .
   var NtPhi : NtFormula .
@@ -17,7 +17,6 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
 
 *** Definition of Lists ***
   op list : -> HeapLabel .
-
  ceq < config >
        < k > derive(P') ~> K </ k >
        < heap >
@@ -25,31 +24,30 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
          H
        </ heap >
        < form > Phi </ form >
-       < newSym > N </ newSym >
        CfgItems
      </ config >
+     < counter > N </ counter >
    = < config >
        < k > derive(P') ~> K </ k >
        < heap > H </ heap > 
        < form > Phi /\ (P === 0) /\ (Alpha === epsilon) </ form >
-       < newSym > N </ newSym >
        CfgItems
      </ config >
      < config >
        < k > K </ k >
        < heap >
-         P |-> ?Int(N) : [( nodeList . val ) : int ]
-         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : (struct nodeList *)]
-         list(?Int(N +Int 1))(?Seq(N +Int 2))
+         P |-> FreeInt(N) : nodeList . val
+         (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+         list(FreeInt(N +Int 1))(FreeSeq(N +Int 2))
          H
        </ heap >
        < form >
          Phi /\ ~(P === 0) /\
-         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
+         (Alpha === [FreeInt(N)] ::: FreeSeq(N +Int 2))
        </ form >
-       < newSym > N +Int 3 </ newSym >
        CfgItems
      </ config >
+     < counter > N +Int 3 </ counter >
   if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
 
   eq < heap > list(0)(Alpha) H </ heap > < form > Phi </ form >
@@ -57,8 +55,8 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
 
   rl < config >
        < heap >
-         P |-> I : [( nodeList . val ) : int ]
-         (P +Int 1) |-> 0 : [( nodeList . next ) : struct nodeList * ]
+         P |-> I : nodeList . val
+         (P +Int 1) |-> 0 : nodeList . next
          H
        </ heap >
        CfgItems
@@ -74,8 +72,8 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =heap=> Cfg .
   rl < config >
        < heap >
-         P |-> I : [( nodeList . val ) : int ]
-         (P +Int 1) |-> P' : [( nodeList . next ) : struct nodeList * ]
+         P |-> I : nodeList . val
+         (P +Int 1) |-> P' : nodeList . next
          list(P')(Alpha)
          H
        </ heap >
@@ -102,31 +100,30 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
          H
        </ heap >
        < form > Phi </ form >
-       < newSym > N </ newSym >
        CfgItems
      </ config >
+     < counter > N </ counter >
    = < config >
        < k > derive(P') ~> K </ k >
        < heap > H </ heap >
        < form > Phi /\ (P === Q) /\ (Alpha === epsilon) </ form >
-       < newSym > N </ newSym >
        CfgItems
      </ config >
      < config >
        < k > K </ k >
        < heap >
-         P |-> ?Int(N) : [( nodeList . val ) : int ]
-         (P +Int 1) |-> ?Int(N +Int 1) : [( nodeList . next ) : struct nodeList *]
-         lseg(?Int(N +Int 1), Q)(?Seq(N +Int 2))
+         P |-> FreeInt(N) : nodeList . val
+         (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+         lseg(FreeInt(N +Int 1), Q)(FreeSeq(N +Int 2))
          H
        </ heap >
        < form >
          Phi /\ ~(P === Q) /\
-         (Alpha === [?Int(N)] ::: ?Seq(N +Int 2))
+         (Alpha === [FreeInt(N)] ::: FreeSeq(N +Int 2))
        </ form >
-       < newSym > N +Int 3 </ newSym >
        CfgItems
      </ config >
+     < counter > N +Int 3 </ counter >
   if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
 
   eq < heap > lseg(P, P)(Alpha) H </ heap > < form > Phi </ form >
@@ -136,8 +133,8 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
 
   rl < config >
        < heap >
-         P |-> I : [( nodeList . val ) : int]
-         (P +Int 1) |-> Q : [( nodeList . next ) : struct nodeList *]
+         P |-> I : nodeList . val
+         (P +Int 1) |-> Q : nodeList . next
          H </ heap >
        CfgItems
      </ config >
@@ -187,4 +184,3 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      </ config >
      =heap=> Cfg .
 endm
-

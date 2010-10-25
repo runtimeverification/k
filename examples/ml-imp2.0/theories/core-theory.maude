@@ -1,8 +1,7 @@
 mod FORMULA is inc PL-BOOL + PL-STRING .
   sorts Truth Atom NtFormula Formula .
   subsort Atom < NtFormula .
-  subsort Truth NtFormula < Formula .
-  
+  subsort Truth NtFormula < Formula .  
 
   ops TrueFormula FalseFormula : -> Truth .
   op @_ : Bool -> Atom [prec 0] .
@@ -112,22 +111,25 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
 
   op ?Int : Nat -> ?Int .
   op !Int : Nat -> !Int .
+  op FreeInt : Nat -> FreeInt .
   op skolem : Nat ?Int -> FreeInt [ditto] .
   op co-skolem : FreeInt -> !Int [ditto] .
 
 --- define operations to be used symbolically, as well as desired properties
   ops _+Int_ _-Int_ _*Int_ _/Int_ _%Int_ : Int++ Int++ -> Int++ [ditto] .
   ops _<=Int_ _<Int_ _>=Int_ _>Int_ : Int++ Int++ -> Bool [ditto] .
-  op -Int_ : Int++ -> Int++ [ditto] .
-  op _==Int_ : Int++ Int++ -> Bool .
+  ops _<<Int_ _>>Int_ : Int++ Int++ -> Int++ [ditto] .
+  ops -Int_ ~Int_ : Int++ -> Int++ [ditto] .
+  op _==Int_ : Int++ Int++ -> Bool [ditto] .
 
-  op ?_ : Bool -> Int++ .
-  eq ?_(true) = 1 .
-  eq ?_(false) = 0 .
+  op bool2int : Bool -> Int++ .
+  eq bool2int(true) = 1 .
+  eq bool2int(false) = 0 .
 
   var B : Bool .
-  vars I J K I1 I2 J1 J2 N : Int++ .
-  vars Phi Phi1 Phi2 : Formula .
+  var I J K I1 I2 J1 J2 N : Int++ .
+  var NzI : NzInt . 
+  var Phi Phi1 Phi2 : Formula .
 
   eq @ (I ==Int J) = I === J .
 
@@ -161,10 +163,10 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
    = @(I >=Int 0) /\ @(J >=Int 0) /\ Phi1 ===> Phi2
   if (-Int I) +Int (-Int J) +Int K >=Int 0 .
 
-  eq (?(B) === 0) = ~(@ B) .
-  eq (?(B) === 1) = @ B .
-  eq (0 === ?(B)) = ~(@ B) .
-  eq (1 === ?(B)) = @ B .
+  eq (bool2int(B) === 0) = ~(@ B) .
+  eq (bool2int(B) === NzI) = @ B .
+  eq (0 === bool2int(B)) = ~(@ B) .
+  eq (NzI === bool2int(B)) = @ B .
 
   eq (I:Int === J:Int) = @(I:Int ==Bool J:Int) .
 

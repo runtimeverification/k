@@ -2,406 +2,457 @@ load imp-syntax
 
 
 kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
-  kvar M N N1 N2 : Nat
+  kvar N M N1 N2 : Nat
   kvar I J I1 I2 : Int++
-  kvar NzI : NzInt
-  kvar T : ExpType
-  kvar NvT : NvExpType
-  kvar F X Sn Fld : Id
-  kvar Xl : List{Id}
-  kvar V V' : Val
-  kvar Vl : List{Val}
-  kvar E E' E1 E2 : Exp
-  kvar El El' : List{Exp}
-  kvar S S1 S2 : Stmt
-  kvar Ss : Stmts
-  kvar K : K
-  kvar NeK : NeK
-  kvar L : KLabel
-  kvar Phi Phi' : Formula
+  kvar Phi Phi1 Phi2 Psi Psi1 Psi2 : Formula
   kvar NtPhi : NtFormula
-  kvar Subst Subst' : Subst
-  kvar Env Env' : Map
+  kvar Subst Subst1 Subst2 : Subst
+  kvar NzI : NzInt
+  kvar V : Value
+  kvar TV : TypedValue
+  kvar X F : Id
+  kvar E E1 E2 : Expression
+  kvar T : ExpressionType
+  kvar NvT : NvExpressionType
+  kvar S S1 S2 : Statement
+  kvar A A1 A2 : Annotation
+  kvar K : K
+  kvar KernelC : KernelC
+  kvar KernelCList KernelCList1 KernelCList2 : List{KernelC}
   kvar Cfg : BagItem
-  kvar Cfgs Cfgs' CfgItems : Bag
-
-  syntax Builtins ::= Int++ | ExpType
-  syntax KResult ::= Int++ | List{Val} | ExpType 
-  syntax K ::= DeclAnnot | Stmts | List{Exp} 
-
-  syntax Exp ::= load ( Int++ ) | store ( Exp , Exp ) [strict]
----               | store ( Int++ , Exp ) [strict]
-               
----  op __`(_`):_=>_ : ExpType Id List{Id} Bag Bag -> MapItem
-
-  syntax MapItem ::= ExpType Id ( Stmts ) : Bag => Bag 
---- computing the list of fields 
-  syntax List ::= struct2list ( K , Int )
-  macro struct2list(T Fld; ~> Ss, Offset:Int) = [Fld : T + Offset] struct2list(Ss, Offset +Int 1)
-  macro struct2list(T Fld;, Offset) = [Fld : T + Offset]
-
---- scalar types
-  syntax Bool ::= isScalar ( ExpType )
-  macro isScalar(int) = true
-  macro isScalar(T *) = true 
-  macro isScalar(struct Sn *) = false
-
---- default values
-  syntax Val ::= defaultVal ( ExpType )
-  macro defaultVal(int) = 0
-  macro defaultVal(T *) = 0
-
---- heap allocation/deallocation
-  syntax K ::= allocHeap ( Id , List ) | deallocHeap ( Int++ , Int++ )
-
---- translate a pair (TXl, Vl) into a map Xi |-> [Vi, Ti]
-  syntax Map ::= map ( Stmts , List{Exp} )
-  macro map(noneStmts, .List{Id}) = .Map
-  macro map(__;(T, X), V) = (X |-> [V : T])
-  macro map(__;(T, *X), V) = (X |-> [V : T*])
-  macro map((__;(T, X)  TXl:Stmts), (V ,,, Vl)) = (X |-> [V : T]) map(TXl, Vl)
-  macro map((__;(T, *X)  TXl:Stmts), (V ,,, Vl)) = (X |-> [V : T*]) map(TXl, Vl)
+  kvar Cfgs CfgItems CfgItems1 CfgItems2 PreCfgs PostCfgs : Bag
+  kvar Map Env Env1 Env2 TEnv H : Map
 
 
-  rule I1 + I2 => I1 +Int I2
-  rule _-_(I1, I2) => _-Int_(I1, I2)
-  rule _*_(I1, I2) => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2
-  rule I1 % I2 => I1 %Int I2
-  rule - I => -Int I
-  rule I1 >= I2 => ?_(I1 >=Int I2)
-  rule I1 > I2 => ?_(I1 >Int I2)
-  rule I1 <= I2 => ?_(I1 <=Int I2)
-  rule I1 < I2 => ?_(I1 <Int I2)
-  rule I1 == I2 => ?_(I1 ==Int I2)
+  syntax K ::= checkContracts | checkContracts ( Map ) | checkContract ( Id )
+  syntax K ::= fieldList ( List{KernelC} )
+  syntax TypedValue ::= newObject
+  syntax MapItem ::= ExpressionType Id ( List{KernelC} ) : Bag => Bag
 
-  rule I && E => (I ? 1 : 0) && E if notBool(I :: Int) [structural]
-  rule NzI && E => E
-  rule 0 && E => 0
-  rule I || E => (I ? 1 : 0) || E if notBool(I :: Int) [structural]
-  rule NzI || E => NzI
-  rule 0 || E => E
-  rule ! I => I ? 0 : 1 if notBool(I :: Int) [structural]
-  rule ! NzI => 1
-  rule ! 0 => 1
 
+  configuration <T> 
+                  <feasible> 0 </feasible>
+                  <infeasible> 0 </infeasible>
+                  <spec> .Map </spec>
+                  <struct> .Map </struct>
+                  <fun> .Map </fun>
+                  <counter> 0 </counter>
+                  <config>
+                    <k> .K </k>
+                    <tenv> .Map </tenv>
+                    <env> .Map </env>
+                    <heap> .Map </heap>
+                    <form> TrueFormula </form>
+                    <subst> .Subst </subst>
+                  </config>
+                </T>
+
+
+***(
+Translation unit (top rule)
+***)
   rule
-    < config >
-      < k > (I ? E1 : E2) ~> K </ k >
-      < form > Phi </ form >
-      CfgItems
-    </ config >
-  =>
-    < config >
-      < k > E1 ~> K </ k >
-      < form > Phi /\ ~(I === 0) </ form >
-      CfgItems
-    </ config >
-    < config >
-      < k > E2 ~> K </ k >
-      < form > Phi /\ I === 0 </ form >
+    <k> translationUnit(K) => K ~> checkContracts <_/k>
+  [structural]
+  rule
+    <k> checkContracts => checkContracts(Map) <_/k>
+    <fun> Map </fun>
+  [structural]
+  rule
+    checkContracts((X |-> _) Map) => checkContract(X) ~> checkContracts(Map)
+  [structural]
+  rule checkContracts(.Map) => .K [structural]
+
+
+***(
+Function definition/declaration
+***)
+  rule
+    <k> T F(KernelCList) /*@ pre PreCfgs */ /*@ post PostCfgs */ => .K <_/k>
+    <spec_> .Map => T F(KernelCList) : PreCfgs => PostCfgs <_/spec>
+  rule
+    <k> T F(KernelCList) /*@ pre PreCfgs */ /*@ post PostCfgs */ S => .K <_/k>
+    <spec_> .Map => T F(KernelCList) : PreCfgs => PostCfgs <_/spec>
+    <fun_> .Map => F |-> T F(KernelCList) S <_/fun>    
+
+
+***(
+Structure declaration
+***)
+  rule
+    <k> struct X { KernelCList } ; => .K <_/k>
+    <struct_>
+      .Map => X |-> fieldList(KernelCList)
+    <_/struct>
+
+***(
+Function entry
+***)
+  rule
+    <k>
+        checkContract(F)
+      =>
+        /*@ assume PreCfgs */
+        ~> S
+        ~> functionEnd
+        ~> /*@ assert PostCfgs */
+    <_/k>
+    <tenv> _ => bindTEnv(KernelCList) </tenv>
+    <env> _ => .Map </env>
+    <heap> _ => .Map </heap>
+    <form> _ => TrueFormula </form>
+    <subst> _ => .Subst </subst>
+    <fun_> F |-> T F(KernelCList) S <_/fun>
+    <spec_> T F(KernelCList) : PreCfgs => PostCfgs <_/spec>
+  [structural]
+
+***(
+Variable declaration
+***)
+  rule
+    <k> T X ; => .K <_/k>
+    <env_> .Map => X |-> ?Int(N) <_/env>
+    <tenv_> .Map =>  X |-> T <_/tenv>
+    <counter> N => sNat N </counter>
+  [structural]
+ 
+
+***(
+Statements
+***)
+  rule nop => .K [structural]
+  rule TV ; => .K [structural]
+  rule block(K) => K [structural]
+  rule if (tv(int, I) => tv(int, I) ? tv(int, 1) : tv(int, 0)) S1 else S2
+  if notBool(I :: Int) [structural]
+  rule if(tv(int, NzI)) S1 else S2 => S1 [structural]
+  rule if(tv(int, 0)) S1 else S2 => S2 [structural]
+  rule
+    <k> return tv(_, V) ~> K ~> functionEnd => .K <_/k>
+    <form> Phi => returns V /\ Phi </form>
+  rule
+    <k> functionEnd => .K <_/k>
+    <form> Phi => returns unit /\ Phi </form>
+
+
+***(
+Expressions
+***)
+*** variable lookup
+  rule
+    <k> X => tv(T, V) <_/k>
+    <env_> X |-> V <_/env>
+    <tenv_> X |-> T <_/tenv>
+  [structural]
+
+*** unary expressions
+  rule -tv(T, I) => tv(T, -Int I) [structural]
+  rule !TV => TV ? tv(int, 0) : tv(int, 1) [structural]
+
+*** referencing
+  rule
+    <k> &(tv(struct X *, I)->F) => tv(T *, I +Int listLen(KernelCList1) )<_/k>
+    <struct_>
+      X |-> fieldList(KernelCList1,,, (T F;) ,,, KernelCList2)
+    <_/struct>
+  [structural]
+
+*** dereferencing
+  rule
+    <k> *tv(T *, I) => derive(I) ~> load(T, I) <_/k> [structural]
+  rule
+    <k> tv(T, I)->F => *&(tv(T, I)->F) <_/k> [structural]
+  
+*** binary expressions
+  rule tv(T, I1) + tv(T, I2) => tv(T, I1 +Int I2) [structural]
+  rule tv(T *, I1) + tv(int, I2) => tv(T *, I1 +Int I2) [structural]
+  rule tv(int, I1) + tv(T *, I2) => tv(T *, I1 +Int I2) [structural]
+  rule tv(T, I1) - tv(T, I2) => tv(T, I1 -Int I2) [structural]
+  rule tv(T *, I1) - tv(int, I2) => tv(T *, I1 -Int I2) [structural]
+  rule tv(T *, I1) - tv(T *, I2) => tv(int, I1 -Int I2) [structural]  
+  rule tv(T, I1) * tv(T, I2) => tv(T, I1 *Int I2) [structural]
+  rule tv(T, I1) / tv(T, I2) => tv(T, I1 /Int I2) [structural]
+  rule tv(T, I1) % tv(T, I2) => tv(T, I1 %Int I2) [structural]
+  rule tv(T, I) << tv(int, N) => tv(T, I <<Int N) [structural]
+  rule tv(T, I) >> tv(int, N) => tv(T, I >>Int N) [structural]
+  rule tv(T, I1) >= tv(T, I2) => tv(int, bool2int(I1 >=Int I2)) [structural]
+  rule tv(T, I1) > tv(T, I2) => tv(int, bool2int(I1 >Int I2)) [structural]
+  rule tv(T, I1) <= tv(T, I2) => tv(int, bool2int(I1 <=Int I2)) [structural]
+  rule tv(T, I1) < tv(T, I2) => tv(int, bool2int(I1 <Int I2)) [structural]
+  rule tv(_, I1) == tv(_, I2) => tv(int, bool2int(I1 ==Int I2)) [structural]
+  rule E1 != E2 => !(E1 == E2) [structural]
+  rule TV && E => (TV ? tv(int, 0) : tv(int, 1)) && E
+  [structural]
+  rule TV || E => (TV ? tv(int, 0) : tv(int, 1)) || E
+  [structural]
+
+*** assignment expressions
+  rule
+    <k> X = tv(T, V) => tv(T, V) <_/k>
+    <env_> X |-> (_ => V) <_/env>
+  [structural]
+  context (* [HOLE]) = _
+  rule
+    <k> *tv(T *, I) = tv(_, V) => derive(I) ~> store(T, I, V) <_/k>
+  context ([HOLE] ->_) = _
+  rule
+    <k> tv(T, I)->F = E => *&(tv(T, I)->F) = E <_/k>
+  [structural]
+  rule E1 += E2 => E1 = (E1 + E2) [structural]
+  rule E1 -= E2 => E1 = (E1 - E2) [structural]
+  rule E1 *= E2 => E1 = (E1 * E2) [structural]
+  rule E1 /= E2 => E1 = (E1 / E2) [structural]
+  rule E1 %= E2 => E1 = (E1 % E2) [structural]
+  rule E1 <<= E2 => E1 = (E1 << E2) [structural]
+  rule E1 >>= E2 => E1 = (E1 >> E2) [structural]
+
+*** choice
+  rule
+    <config>
+      <k> (tv(int, I) ? E1 : E2) ~> K </k>
+      <form> Phi </form>
       CfgItems
     </config>
-  rule NzI ? E1 : E2 => E1
-  rule 0 ? E1 : E2 => E2
+  =>
+    <config>
+      <k> E1 ~> K </k>
+      <form> Phi /\ ~(I === 0) </form>
+      CfgItems
+    </config>
+    <config >
+      <k > E2 ~> K </k>
+      <form> Phi /\ I === 0 </form>
+      CfgItems
+    </config>
+  --- FIXME
+  if notBool(I :: Int) [structural]
+  rule tv(int, NzI) ? E1 : E2 => E1 [structural]
+  rule tv(int, 0) ? E1 : E2 => E2 [structural]
 
---- struct declaration
+*** cast
+  rule (T) tv(_, V) => tv(T, V) [structural]
 
-  rule <k> struct_`{_`};(Sn, Ss) => .K <_/k>
-       <struct_> .Map => (Sn |-> struct2list(Ss, 0)) <_/struct>
+*** sizeof
+  rule sizeof int => tv(int, 1) [structural]
+  rule sizeof (T *) => tv(int, 1) [structural]
+  rule
+    <k> sizeof (struct X) => tv(int, listLen(KernelCList)) <_/k>
+    <struct_> X |-> fieldList(KernelCList) <_/struct>
+    [structural]
 
---- variable declaration
- 
-  rule
----    <k> int Xl ; => .K <_/k>
----    <env_> .Map => Xl |-> range(N, length,,,(Xl)) <_/env>
----    <newSym> N => N +Int length,,,(Xl) </newSym>
-    <k> T X; => .K <_/k>
-    <env> .Map => X |-> [defaultVal(T) : T] <_/env>
-
-  rule I ; => .K [structural]
-  rule {} => .K [structural]
-  rule { Ss } => Ss [structural]
-  rule S1 S2 => S1 ~> S2 [structural]
-
---- simple variable evaluation
-  rule
-    <k> X => I <_/k> 
----    <env_> X |-> I <_/env>
-    <env_> X |-> [I : T] <_/env>
---- struct field evaluation 
----    the struct values are stored only in the heap
----    for the moment we do not consider "static" struct values", i.e., only
----      declarations of the form "struct name *v;" are allowed
-  rule
-    <k> Var:Var->Fld => *(I +Int J) <_/k> 
-    <env_> X |-> [I : struct Sn *] <_/env>
-        <struct_> Sn |-> (_ `[_:_+_`](Fld, T, J) _) <_/struct>
-
---- the evaluation of the new operator
-  rule
-    <k> new T => allocHeap(emptySn , [@scalar : T + 0]) ~> N <_/k>
-    <newSym> N </newSym>
-    if isScalar(T) ==Bool true
-  rule
-    <k> new struct Sn * => allocHeap(Sn , Fl) ~> N <_/k>
-    <struct_> Sn |-> Fl <_/struct>
-    <newSym> N </newSym>
-  rule
-    <k> allocHeap(Sn , .List) => . <_/k>
-  rule
-    <k> allocHeap(Sn , [Fld : T + J] Fl:List) => allocHeap( Sn , Fl) <_/k>
-    <heap_> . => _|->_:`[_:_`](N, defaultVal`(_`)(T), _._(Sn, Fld), T) </heap> --- <heap_> . => N |-> defaultVal(T) : [(Sn . Fld) : T] </heap> 
-    <newSym> N => N +Int 1 </newSym>
-
---- delete statement processing
-  rule
-    <k> delete I; => deallocHeap(I, length(Fl)) <_/k>
-    <env_> _ |-> [(I => 0) : struct Sn *] <_/env>
-    <struct_> Sn |-> Fl <_/struct>
-  rule
-    <k> deallocHeap(I, M) => deallocHeap(I +Int 1, M +Int -1) <_/k>
-    <heap_> (I |-> _:[_: _]) => . </heap>
-    if M >Int 0 
-  rule
-    <k> deallocHeap(I, 0) => . <_/k>
-    
-
---- assignment to a simple variable
-  rule
-    <k> X = V ; => .K <_/k>
-    <env> ( Env (X |-> [V' : T])) => ( Env (X |-> [V' : T])) [X |-> [V : T]] </env>
-
---- assignment to a struct field
-  context ( [HOLE] ->_) = _ ;
-  rule
-    <k> (I->Fld = V ;) => *(I+J) = V; <_/k>
-    <env_> _ |-> [I : struct Sn *] <_/env>
-    <struct_> Sn |-> (_ `[_:_+_`](Fld, T, J) _) <_/struct>
-
---- dereferencing 
-  rule <k> * I => derive(I) ~> load(I) <_/k>
-      [structural]
-  context (* [HOLE]) = _ ;
-  rule <k> (* I) = J ; => derive(I) ~> store(I, J) <_/k>
-  [structural]
+***(
+Memory load, store and rearrangement
+***)
   rule
     <k> derive(I) => .K <_/k>
-    <heap_> _|->_:`[_:_`](I, J, _._(Sn, Fld), T) </heap> --- <heap_> I |-> J : [Sn . Fld : T] <_/heap>
+    <heap_> I |-> _ : _ <_/heap>
   [structural]
+***(
   rule
     <k> derive(I) <_/k>
     <form> NtPhi => FalseFormula </form>
-  if check-sat(NtPhi) ==Bool "unsat" 
+  if check-sat(NtPhi) ==Bool "unsat"
+***)
   rule
-    <k> load(I) => J <_/k>
-    <heap_> _|->_:`[_:_`](I, J, _._(Sn, Fld), T) <_/heap> --- <heap_> I |-> J:[Fld : T] <_/heap>
+    <k> load(T, I) => tv(T, V) <_/k>
+    <heap_> I |-> V : _ <_/heap>
   rule
-    <k> store(I, J) => .K <_/k>
-    <heap_> ( _|->_:`[_:_`](I, ?, _._(Sn, Fld), T) ) => ( _|->_:`[_:_`](I, J, _._(Sn, Fld), T) ) <_/heap> --- <heap_> (I |-> _:[Sn . Fld : T]) => (I |-> J:[ Sn . Fld : T]) <_/heap>
-  rule
-    <k> return; ~> K ~> functionEnd => .K <_/k>
-  rule
-    <k> return I ; ~> K ~> functionEnd => .K <_/k>
-    <form> Phi => Phi /\ ?return(I) </form>
-  rule
-    <k> functionEnd => .K <_/k>
+    <k> store(T, I, V) => tv(T, V) <_/k>
+    <heap_> I |-> (_ => V) : _ <_/heap>
 
-  rule if (I) S1 else S2 => if (I ? 1 : 0) S1 else S2 if notBool(I :: Int)
-  [structural]
-  rule if (NzI) S else _ => S
-  rule if (0) _ else S => S
+***(
+Memory malloc/free
+***)
+  rule malloc(TV) => newObject [structural]
+  rule (T *) newObject => new T [structural]
+  rule free(TV) => delete TV [structural]
 
+***(
+Memory new/delete
+***)
+  rule
+    <k> new struct X => tv(struct X *, ?Int(N)) <_/k>
+    <heap_> .Map => initObject(FreeInt(N), X, KernelCList, sNat N) <_/heap>
+    <struct_> X |-> fieldList(KernelCList) <_/struct>
+    <counter> N => sNat N +Nat listLen(KernelCList) </counter>
+  rule
+    <k> delete tv(T, I) => .K <_/k>
+
+
+--------------------------------------------------------------------------------
+--- Matching logic annotations                                               ---
+--------------------------------------------------------------------------------
+***(
+loop invariants
+  1. must be proven on every path to the loop header, that is, before entering 
+     the loop for the first time, and after executing the loop body before
+     jumping back at the condition
+  2. may be assumed correct after checking the loop condition
+***)
   rule
     <k>
-      (/* invariant Cfgs */ ~> while (E) S ~> K)
-    =>
-      (/* assert Cfgs */ ~> 'if`(_`)_else_(E,, { S /* assert Cfgs */ },, K))
+        /*@ invariant Cfgs */ ~> while (E) S ~> K
+      =>
+        /*@ assert Cfgs */ ~> 'if`(_`)_else_(E,, (S ~> /*@ assert Cfgs */),, K)
     </k>
-  [structural]
 
+***(
+assumed patterns are merged with the current configuration
+multiple patterns generate splitting
+***) 
   rule
     <config_> 
       <k>
-        /* assume
-          <config>
-            <env> Env' </env>
-            <form> Phi' </form>
-            CfgItems
-          </config>
-          Cfgs
-         */
-        ~> K
-      =>
-        /* assume Cfgs */ ~> K
+          /*@ assume
+            <config>
+              <form> Phi2 </form>
+              CfgItems
+            </config>
+            Cfgs
+          */
+          ~> K
+        =>
+          /*@ assume Cfgs */ ~> K
       </k>
-      <struct > Map:Map </struct>
-      <env> Env </env>
-      <form> Phi </form>
+      <form> Phi1 </form>
       <subst> Subst </subst>
-      <newSym> M </newSym>
-      <newImpl> N </newImpl>
+      <tenv> TEnv </tenv>
     <_/config>
     (
       .Bag
     =>
       <config>
         <k> K </k>
-        (
-          <env> Env[Env'] </env>
-          <form> Phi /\ Phi' </form>
-          CfgItems
-        )[Subst]
-        <struct > Map </struct>
-        <subst> Subst </subst>
-        <newSym> M </newSym>
-        <newImpl> N </newImpl>
+        ---applySubst(skolemize(N, <form> Phi1 /\ Phi2 </form> CfgItems), Subst)
+        skolemize(N, applySubst(<form> Phi1 /\ Phi2 </form> CfgItems, Subst))
+        skolemize(N, <subst> Subst </subst>)
+        <tenv> TEnv </tenv>
       </config>
     )
-  [structural]
-  rule <config_> <k> /* assume .Bag */ <_/k> <_/config> => .Bag
-  [structural]
-
+    <counter> N </counter>
   rule
-    <config>
-      <k> /* assert Cfgs */ => /* assume Cfgs */ <_/k>
-      <subst> Subst => Subst' </subst>
-      <struct> Map </struct>
-      <newSym> M </newSym>
-      <newImpl> N => sNat N </newImpl>
-      (CfgItems => skolemize(N, CfgItems))
-    </config>
+    (
+      <config_>
+        <k> /*@ assume .Bag */ <_/k>
+      <_/config>
+    =>
+      .Bag
+    )
+    <counter> N => sNat N </counter>
+
+***(
+asserted patterns
+  1. must be matched the current configuration, that is, the implication
+     current configuration ===> asserted patterns can rewrite to true (the rule
+     searches for the existance of a proof in the side condition, and also
+     returns facts found out to be true during the search for a proof)
+  2. may be assumed correct afterward
+***)
+  rule
+    <config_>
+      <k> /*@ assert Cfgs */ => /*@ assume Cfgs */ <_/k>
+      <env> Env </env>
+      <heap> H </heap>
+      <form> Phi </form>
+      ---(<subst> Subst1 </subst> => skolemize(N, <subst> Subst2 </subst>))
+      <subst> Subst1 => Subst2 </subst>
+    <_/config>
+    <counter> N </counter>
+  if search(
+      <config>
+        <env> Env </env>
+        <heap> H </heap>
+        <form> Phi </form>
+        <subst> Subst1 </subst>
+      </config>
+      ===>
+      Cfgs
+    =>
+      <config>
+        <form> TrueFormula </form>
+        <subst> Subst2 </subst>
+      </config>
+    )
+
+***(
+function calls
+***)
+  rule
+    <spec_> T F(KernelCList1) : PreCfgs => PostCfgs <_/spec>
+    <config_>
+      <k>
+          _`(_`)(F, KernelCList2)
+        =>
+          /*@ assert co-skolemize(PreCfgs) */
+          ~> /*@ assume co-skolemize(PostCfgs) */
+          ~> restoreContext(TEnv, Env, Subst)
+          ~> getReturnValue(T)
+      <_/k>
+      <tenv> TEnv => bindTEnv(KernelCList1) </tenv>
+      <env> Env => bindEnv(KernelCList1, KernelCList2) </env>
+      <heap> H </heap>
+      <form> Phi </form> 
+      <subst> Subst </subst>  
+    <_/config>
+***(
   if search(
     <config>
-      <subst> Subst </subst>
+      <env> bindEnv(KernelCList1, KernelCList2) </env>
+      <heap> H </heap>
+      <form> Phi </form>
+      <subst> Subst1 </subst>
       <newImpl> N </newImpl>
-      CfgItems
     </config>
     ===>
-    Cfgs
+    co-skolemize(PreCfgs)
   =>
     <config>
       <form> TrueFormula </form>
-      <subst> Subst' </subst>
+      <subst> Subst2 </subst>
     </config>
   )
-  
-  ---rule <config>
-     ---   <k> /* assume noCfg */ => .Bag <_/k>
-        ---CfgItems
----        </config>
-  ---[structural]
-  ---rule  <config>
-     ---   <k> /* assert noCfg */ => .Bag <_/k>
-        ---CfgItems
----        </config>
-  ---[structural]
-
+***)
   rule
-    <spec_> T F(TXl) : Cfgs => Cfgs' <_/spec>
-    <config>
-      <k> _`(_`)(F, Vl) => /* assume Cfgs'[Subst'] */ ~> getReturnValue(T) <_/k>
-      <struct> Map </struct>
-      (<env> Env </env> => skolemize(N, <env> Env </env>))
-      <subst> Subst </subst>
-      <newSym> M </newSym>
-      <newImpl> N => sNat N </newImpl>
-      (CfgItems => skolemize(N, CfgItems))
-    </config>
-  if search(
-    <config>
-      <env> map(TXl, Vl) </env>
-      <subst> Subst </subst>
-      <newImpl> N </newImpl>
-      CfgItems
-    </config>
-    ===>
-    Cfgs
-  =>
-    <config>
-      <form> TrueFormula </form>
-      <subst> Subst' </subst>
-    </config>
-  )
-  
-  rule
-    <spec_> T F(TXl) : noCfg => noCfg <_/spec>
-    <config>
-      <k> _`(_`)(F, Vl) ~> K => K </k>
-      (CfgItems)
-    </config>
-  
-  rule
-    <k> getReturnValue(NvT) => I <_/k>
-    <form> Phi /\ ?return(I) => Phi </form>
+    <k> restoreContext(TEnv, Env, Subst) => .K <_/k>
+    <tenv> _ => TEnv </tenv>
+    <env> _ => Env </env>
+    <subst> _ => Subst </subst>
   [structural]
-  rule <k> getReturnValue(void) => NULL <_/k> [structural]
 
+***(
+retrieve the return value
+***)  
   rule
-    <k>
-        __`(_`)_`{_`}(T, F, TXl, (/*pre Cfgs */ /*post Cfgs' */), Ss)
-      =>
-        /* assume Cfgs */ ~> Ss ~> functionEnd ~> /* assert Cfgs' */
-    <_/k>
+    <k> getReturnValue(NvT) => tv(NvT, V) <_/k>
+    <form> Phi /\ returns V => Phi </form>
+  [structural]
+  rule getReturnValue(void) => tv(void, unit) [structural]
 
-   rule
-    <k>
-        __`(_`)_`{_`}(T, F, TXl, noAnnot, Ss)
-      =>
-        .
-    <_/k>
 
+  syntax Nat ::= listLen ( List{KernelC} )
+  rule listLen(_,,, KernelCList) => sNat listLen(KernelCList)
+  [structural]
+  rule listLen(.List{KernelC}) => 0 [structural]
+
+  syntax Map ::= bindTEnv ( List{KernelC} )
+  rule bindTEnv((T X;),,, KernelCList) => X |-> T bindTEnv(KernelCList)
+  [structural]
+  rule bindTEnv(.List{KernelC}) => .Map [structural]
+
+  syntax Map ::= bindEnv ( List{KernelC} , List{KernelC} )
   rule
-    <k>
-        void`main`(`)`{_`}(Ss)
-      =>
-       Ss
-    <_/k>
-    
-  op mkSpec : K -> Map
-  rule
-      mkSpec((__`(_`)_`{_`}(T, F, TXl, (/*pre Cfgs */ /* post Cfgs' */), Ss) ~> K))
+      bindEnv(((T X;),,, KernelCList1), (tv(_, V),,, KernelCList2))
     =>
-      T F(TXl) : co-skolemize(Cfgs) => co-skolemize(rmEnv(Cfgs')) mkSpec(K)
+      X |-> V bindEnv(KernelCList1, KernelCList2)
   [structural]
-  
-  rule
-      mkSpec((__`(_`)_`{_`}(T, F, TXl, noAnnot, Ss) ~> K))
-    =>
-      T F(TXl) : noCfg => noCfg mkSpec(K)
-  [structural]
-  
-  rule
-      mkSpec((void`main`(`)`{_`}(Ss) ~> K))
-    =>
-      mkSpec(K)
-  [structural]
-  
-  rule
-      mkSpec((struct_`{_`};(Sn, Ss) ~> K))
-    =>
-      mkSpec(K)
-  [structural]
-  
-  rule mkSpec(.K) => .Map [structural]
+  rule bindEnv(.List{KernelC}, .List{KernelC}) => .Map [structural]
 
-  op rmEnv : Bag -> Bag
+  syntax Map ::= initObject ( Int++ , Id , List{KernelC} , Nat )
   rule
-      rmEnv(<config> <env> Env </env> CfgItems </config> Cfgs)
+      initObject(I, X , (_ F;),,, KernelCList, N)
     =>
-      <config> <env> .Map </env> CfgItems </config> rmEnv(Cfgs)
+      I |-> FreeInt(N) : X . F initObject(I +Int 1, X , KernelCList, sNat N)
   [structural]
-  rule rmEnv(.Bag) => .Bag [structural]
-
-  rule (E,,, El) |-> (E',,, El') => (E |-> E') (El |-> El') [structural]
-  rule .List{Id} |-> .List{Id} => .Map [structural]
-
-  op length`,`,`,_ : List{Exp} -> Nat
-  rule length,,,(X,,, Xl) => sNat length,,,(Xl) [structural]
-  rule length,,,(.List{Id}) => 0 [structural]
-
-  op range : Nat Nat -> List{Val}
-  rule range(N, sNat(M)) => ?Int(N),,, range(sNat N, M) [structural]
-  rule range(N, 0) => .List{Id} [structural]
+  rule initObject(_, _ , .List{KernelC}, _) => .Map [structural]
 endkm
 

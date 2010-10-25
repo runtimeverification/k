@@ -17,7 +17,7 @@ root : node;
 node
   : ^(operator node_list)
   | KLIST
-    ( -> OP[".List{K}"]
+    ( -> OP[".List{KernelC}"]
     | DOWN klist_node_list UP -> klist_node_list
     )
   | KARROW
@@ -34,7 +34,7 @@ node_list
 klist_node_list
   : node
     ( -> node
-    | klist_node_list -> ^(OP["_`,`,_"] node klist_node_list)
+    | klist_node_list -> ^(OP["_`,`,`,_"] node klist_node_list)
     )
   ;
 
@@ -49,6 +49,7 @@ operator
   : unary_operator
   | binary_operator
   | '?' -> OP["_?_:_"]
+  | CAST -> OP["`(_`)_"]
   | CALL -> OP["_`(_`)"]
   | INDEX -> OP["_`[_`]"]
   | 'sizeof' -> OP["sizeof_"]

@@ -11,6 +11,7 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
  
   op ?Seq : Nat -> ?Seq .
   op !Seq : Nat -> !Seq .
+  op FreeSeq : Nat -> FreeSeq .
   op skolem : Nat ?Seq -> FreeSeq [ditto] .
   op co-skolem : FreeSeq -> !Seq [ditto] .
 
