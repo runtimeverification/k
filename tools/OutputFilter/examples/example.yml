@@ -2,11 +2,11 @@
 T:
   cell-style:
     bold: yes
-    background: dullcyan
+    background: black
   text-style:
     foreground: green
 k:
-  keep: 5
+  keep: 15
 #  keep-chars: 170
   cell-style:
     underlined: yes
@@ -16,6 +16,8 @@ env:
     foreground: black
   cell-style:
     foreground: yellow
+
+files: show
 
 threads:
   cell-style:
@@ -39,18 +41,34 @@ options:
     - " , " : ", "                          # Remove a preceeding whitespace, e.g. for the BaseValue conversion
     - "`(0 `+Nat sym`((`d+)`)`)": "`1"      # Change the destination field of the values in a map
     - "kList`(\"wklist_\"`)": ""            # Get rid of the wklist
+    - "String (\"[^\"]*\")": "`1"           # Get rid of the stuff surrounding strings
   spaceless-cells: yes
   infixify: yes
   line-end: " $"
   syntax-highlighting: # Coming soon
-    - "::": yellow
-    - "==": yellow
-    - ":=": yellow
-    - ">>": yellow
-    - "<<": yellow
-    - "?": yellow
-    - "`+": yellow
-    - "`[`.`.`. `d+ more `.`.`.`]": black
+    foreground:
+      yellow:
+        - "::"
+        - "=="
+        - "!="
+        - ":="
+        - ">>"
+        - "<<"
+        - "<"
+        - ">"
+        - ">="
+        - "<="
+        - "?"
+        - "`+"
+        - "`*"
+      black:
+        - "`[`.`.`. `d+ more `.`.`.`]"
+    bold:
+      - "\"goto`.prepre`.gen\""
+      - "printf"
+    underline:
+      - "`Wint`W"
+
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. whitelisting <thread> wont whitelist all of its children

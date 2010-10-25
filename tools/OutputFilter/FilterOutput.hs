@@ -71,7 +71,7 @@ module FilterOutput where
   handleContents conf name cs = hcat $ (map (ppKOutput conf) . cleanupStrings)  cs
 
   handleString :: KOutPrinter
-  handleString conf (String n s) = handleStyle conf n textStyle . text . unpack . pruneChars conf n . handleSubstitutions conf n . pruneLines conf n . handleInfix conf $ s
+  handleString conf (String n s) = handleHilighting conf $ handleStyle conf n textStyle . text . unpack . pruneChars conf n . handleSubstitutions conf n . pruneLines conf n . handleInfix conf $ s
   {-
     Pretty Printing
    -}
@@ -101,6 +101,10 @@ module FilterOutput where
   handleStyle :: StyleReader (Doc -> Doc)
   handleStyle conf name f | hasStyle conf name f = stylize (fetchStyle conf name f)
                           | otherwise            = id
+
+  handleHilighting :: Configuration -> Doc -> Doc
+  handleHilighting conf doc | False              = undefined
+                            | otherwise          = doc
 
   -- extend me to do local substitutions as well
   handleSubstitutions :: CellReader (ByteString -> ByteString)
@@ -188,10 +192,12 @@ module FilterOutput where
 
   pruneL :: Configuration -> CellName -> ByteString -> ByteString
   pruneL conf cn s = B.unlines takenLines `append` more
-    where takenLines = take (fetchPruneNumber conf cn) intermediate
+    where takenLines = take toTake intermediate
           intermediate = B.lines s
-          more = pack $ indentation takenLines ++ " [..." ++ show (length intermediate - length takenLines)
-                     ++ " more...]"
+          toTake = fetchPruneNumber conf cn
+          more = if toTake >= length intermediate then ""
+                 else pack $ indentation takenLines ++ " [..." ++ show (length intermediate - length takenLines)
+                          ++ " more...]"
           indentation (s:s2:ss) = replicate (B.length (B.takeWhile (== ' ') s2)) ' '
           indentation _         = replicate 8 ' ' -- Otherwise just use 8 space indentation
 
@@ -257,9 +263,9 @@ module FilterOutput where
                            Just (Configs _ _ _ _ (Just _)) -> True
                            _                               -> False
     where hasGlobalSubs conf = case lookupCell conf "options" of
-                                 Nothing                      -> False
-                                 Just (Options Nothing _ _ _) -> False
-                                 _                            -> True
+                                 Nothing                         -> False
+                                 Just (Options Nothing _ _ _ _ ) -> False
+                                 _                               -> True
 
 
 

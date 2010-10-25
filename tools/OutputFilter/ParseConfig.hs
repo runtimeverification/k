@@ -46,6 +46,7 @@ module ParseConfig
                                , spacelessCells      :: Maybe Bool
                                , infixify            :: Maybe Bool
                                , lineEnd             :: Maybe ByteString
+                               , hilighting          :: Maybe [(ByteString, Style)]
                                }
     deriving (Show)
 
@@ -97,6 +98,7 @@ module ParseConfig
                           (getBool       <$> lookupConf doSpacelessCells m)
                           (getBool       <$> lookupConf doInfixity m)
                           (getString     <$> lookupConf doLineEnd m)
+                          Nothing -- extend me to do hilighting
 
   readConfig :: YamlLight -> CellConfigRhs
   readConfig (YStr s)   = readSingleEntry s
@@ -165,6 +167,7 @@ module ParseConfig
 
   -- In the yaml file, there are many acceptable ways to say something, the following are for expressing those
   -- ways
+  doHighlighting   = ["syntax-highlighting", "highlighting", "highlights", "syntax-highlights"]
   doGlobalSubs     = ["global-substitutions", "global-subs"] ++ doSubstitutions
   doSpacelessCells = ["spaceless-cells", "spaceless", "spacelessCells"]
   doInfixity       = ["infixity", "infixify", "infix"]

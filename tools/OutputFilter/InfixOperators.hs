@@ -22,7 +22,7 @@ module InfixOperators where
   type ContentParser = Parsec ByteString ContentState
 
   parseContentsTop :: ContentParser [Content]
-  parseContentsTop = many1 parseContentsNotAll
+  parseContentsTop = many parseContentsNotAll
 
   parseOperator :: ContentParser Content
   parseOperator = do name     <- beginOperator
