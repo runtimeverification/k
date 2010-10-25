@@ -15,7 +15,6 @@ module FilterOutput where
   import InfixOperators
   import ByteStringUtils
   import System.Environment
---  import Useful.String
   import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
   import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton, snoc)
   import qualified Data.ByteString.Char8 as B
@@ -28,10 +27,6 @@ module FilterOutput where
   import Data.Maybe
   import qualified Data.Map as Map
   import Control.Monad.Reader
-  import Text.Regex.Less
-  import qualified Text.Regex.PCRE as PCRE
---  import Data.String.Utils
---  import Text.Regex.PCRE.Light.Char8
 
   type CellReader a  = Configuration -> CellName -> a
   type KOutReader a  = Configuration -> KOutput -> a
@@ -119,15 +114,6 @@ module FilterOutput where
   performReplacement old new s = pack $ mySubG (unpack old) (unpack new) (unpack s)
 
 
-  -- Perform a substitution
-  mySub :: String -> String -> String -> String
-  mySub old new s = case s =~ old of
-                      m@(_,x:xs) -> subs m new
-                      _          -> s
-  -- Performa all substitutions, pcre-less seems to have several bugs in it with their subg
-  mySubG :: String -> String -> String -> String
-  mySubG old new s = if s == mySub old new s then s
-                     else mySubG old new (mySub old new s)
 
   stylize :: Style -> Doc -> Doc
   stylize (Style fore back isUnder isBold) = doUnder isUnder . doBold isBold . doFore fore . doBack back

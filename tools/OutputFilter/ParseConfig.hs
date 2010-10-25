@@ -17,6 +17,7 @@ module ParseConfig
   , Underline(..), Bold(..)
   )where
   import Data.Yaml.YamlLight
+  import ByteStringUtils
   import Control.Applicative
   import Control.Monad
   import Data.Char

@@ -8,7 +8,6 @@ module InfixOperators where
   import Text.Parsec
   import Text.Parsec.ByteString
   import Control.Applicative ((<$>))
-  import qualified Data.List.Utils as MH
   import Control.Monad.Identity (Identity)
   import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
   import qualified Data.ByteString.Char8 as B
