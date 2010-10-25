@@ -15,6 +15,7 @@ unfinishedComputation: show
 xmessages: show
 env: show
 currentSubObject: show
+currentObject: show
 nestingDepth: show
 blockHistory: show
 localVariables: show
@@ -63,6 +64,9 @@ savedInitialization: show
 options:
   global-substitutions:
     - "`(`.List{K}`)": ""                   # Get rid of (.List{K})
+    # - "`(`'functionObject`)": ""
+    # #`.KResultLabel`(Id (.*),,.*`)" : "functionObject(`1)"
+    # - "`(`'functionPrototype`)`.KResultLabel`(Id (.*),,.*`)" : "functionPrototype(`1)"
     - "Id Identifier`(\"([^`)]+)\"`)": "`1" # Get rid of the stuff surrounding keys
     - "`(BaseValue (`d+)`)": " `1 "         # make (BaseValue n) be just n, for any number
     - "BaseValue |BaseType |Id ": ""          # Remove BaseValue and BaseType

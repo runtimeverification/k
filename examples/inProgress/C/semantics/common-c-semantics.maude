@@ -795,6 +795,7 @@ mod COMMON-INITIALIZATION is
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(T':Type, F':Id) :: ? 
 		...</ structs > 
 		if F':Id =/=Bool #NoName
+		--- andBool F:Id =/=Bool Identifier("c")
 		: KSentence [metadata "structural"] .
 	 
 	mb [init-next-struct-element]: rule
@@ -837,19 +838,22 @@ mod COMMON-INITIALIZATION is
 	op finishCompoundInit : List -> K .
 	mb rule
 		< k > fillInitializer(CompoundInit(L:List{C})) 
-			=> fillInitializer(L:List{C}) 
+			=> fillInitializer(L:List{C})
 			--- ~> debug
 			~> finishCompoundInit(next ListItem(te(K:K, T:Type)) Remainder:ListItem)
 		...</ k >
 		< currentSubObject > (?:List => .) ListItem(te(K:K, T:Type)) (Remainder:ListItem => .) </ currentSubObject >
 		< currentObject > (. => ListItem(te(K:K, T:Type))) ...</ currentObject >
 		if hasAggregateType(T:Type) orBool hasUnionType(T:Type)
-		: KSentence [metadata "structural"] .
+		: KSentence [metadata "computational"] . --- fixme computational to make sure all the other equations have applied first
 	mb rule
-		< k > finishCompoundInit(L:List) => . ...</ k >
+		< k > finishCompoundInit(L:List) => 
+			. 
+			--- debug
+		...</ k >
 		< currentObject > (ListItem(te(K:K, T:Type)) => .) ...</ currentObject >
 		< currentSubObject > (? => L:List) </ currentSubObject >
-		: KSentence [metadata "structural"] .	
+		: KSentence [metadata "structural"] .
 			
 	mb context fillInitializer(InitFragment(`[HOLE`]:K, ?)) : KSentence .
 	op buildDesignator : K -> K .
@@ -914,15 +918,6 @@ mod COMMON-INITIALIZATION is
 	eq getTopArrayUse((K:K . F:Id)[?]) = getTopArrayUse(K:K) .
 	
 	op initializeSingleInit : K -> K .
-	--- forces a basetype
-	--- mb rule
-		--- < k > initializeSingleInit(K':K) => . ...</ k >
-		--- < currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
-		--- < incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
-		--- < savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
-		--- --- if getKLabel(K':K) =/=Bool 'Constant
-		--- if isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type)
-		--- : KSentence .
 		
 	mb rule
 		< k > (. => typeof(K:K)) ~> initializeSingleInit(K:K) ...</ k >
@@ -1322,17 +1317,17 @@ mod COMMON-GLOBAL-DECLARATION is
 		if notBool hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
 		: KSentence [metadata "structural"] .
-	mb rule
-		< k > declareInternalVariable(X:Id, T:Type, K:K)
-			=> addToEnv(X:Id, Loc:Nat)
-			~> giveType(X:Id, unqualifyType(T:Type))
-		...</ k >
-		< internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
-		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
-		< currentTranslationUnit >... Tu:K ...</ currentTranslationUnit >
-		if hasStaticType(T:Type)
-		andBool notBool hasExternType(T:Type)
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > declareInternalVariable(X:Id, T:Type, K:K)
+			--- => addToEnv(X:Id, Loc:Nat)
+			--- ~> giveType(X:Id, unqualifyType(T:Type))
+		--- ...</ k >
+		--- < internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
+		--- < blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- if hasStaticType(T:Type)
+		--- andBool notBool hasExternType(T:Type)
+		--- : KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > declareInternalVariable(X:Id, T:Type, NoInit)
@@ -1344,7 +1339,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< internalLocations >... Tu:K |-> Map((Locs:Map => Locs:Map[Loc:Nat / kpair(X:Id, BlockNum:Nat)])) ...</ internalLocations >
 		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		< currentTranslationUnit >... Tu:K ...</ currentTranslationUnit >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
 		andBool notBool $hasMapping(Locs:Map, kpair(X:Id, BlockNum:Nat))
@@ -1356,12 +1351,25 @@ mod COMMON-GLOBAL-DECLARATION is
 		< internalLocations >... Tu:K |-> Map((Locs:Map => Locs:Map[Loc:Nat / kpair(X:Id, BlockNum:Nat)])) ...</ internalLocations >
 		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		< currentTranslationUnit >... Tu:K ...</ currentTranslationUnit >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
 		andBool K:K =/=Bool NoInit
 		andBool notBool $hasMapping(Locs:Map, kpair(X:Id, BlockNum:Nat))
 		: KSentence [metadata "structural"] .
+	mb rule
+		< k > declareInternalVariable(X:Id, T:Type, K:K)
+			=> defineAndInit(X:Id, unqualifyType(T:Type), figureInitializer(X:Id, unqualifyType(T:Type), K:K), Loc:Nat)
+		...</ k >
+		< internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
+		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if hasStaticType(T:Type)
+		andBool notBool hasExternType(T:Type)
+		andBool K:K =/=Bool NoInit
+		: KSentence [metadata "structural"] .
+		
+		
 	mb rule
 		< k > declareInternalVariable(X:Id, T:Type, NoInit)
 			=> addToEnv(X:Id, Loc:Nat)
@@ -2018,21 +2026,21 @@ mod C-SEMANTICS-MISC is
 	--- op enumDef : Id List{C} -> K .
 	--- fixme can you have enums be negative?
 	op fillEnums : K -> K .
-	op fillEnums : K Nat -> K .
+	op fillEnums : K Int -> K .
 	mb rule
 		< k > EnumDef(X:Id, L:List{C}) => fillEnums(EnumDef(X:Id, L:List{C})) ...</ k >
 		: KSentence .
 	mb rule < k > fillEnums(K:K) => fillEnums(K:K, 0) ...</ k > : KSentence .
 	mb rule
-		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, emptyValue) :: L:List{C}), N:Nat) 
-			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(N:Nat, int)))
-			~> fillEnums(EnumDef(X:Id, L:List{C}), sNat(N:Nat)) 
+		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, emptyValue) :: L:List{C}), I:Int) 
+			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(I:Int, int)))
+			~> fillEnums(EnumDef(X:Id, L:List{C}), I:Int +Int 1)
 		...</ k >
 		: KSentence .
 	mb rule
-		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, tv(N:Nat, int)) :: L:List{C}), ?) 
-			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(N:Nat, int)))
-			~> fillEnums(EnumDef(X:Id, L:List{C}), sNat(N:Nat))
+		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, tv(I:Int, int)) :: L:List{C}), ?) 
+			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(I:Int, int)))
+			~> fillEnums(EnumDef(X:Id, L:List{C}), I:Int +Int 1)
 		...</ k >
 		: KSentence .
 	mb rule
