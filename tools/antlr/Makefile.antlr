@@ -3,7 +3,7 @@
 .SUFFIXES: .java .class .g .tokens
 
 # generic 
-ANTLR_ROOT_DIR = ~/antlr
+ANTLR_ROOT_DIR = .
 ANTLR_TOOL = org.antlr.Tool
 JC = javac
 JVM = java
