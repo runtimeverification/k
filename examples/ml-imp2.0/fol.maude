@@ -191,7 +191,7 @@ mod FOL= is inc CONFIG-UTILS .
 --- Step 6: Call external SMT solver to check the formula if the "in-house" approach failed
  crl < config > < form > NtPhi </ form > < subst > Subst </ subst > </ config >
   => < config > < form > TrueFormula </ form > < subst > Subst </ subst > </ config >
-  if check-sat(~ NtPhi) ==Bool "unsat" [owise] .
+  if check-sat(~ NtPhi) ==Bool "unsat" .
 
 
 --- helper operations
