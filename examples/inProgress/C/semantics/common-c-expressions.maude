@@ -178,8 +178,16 @@ mod COMMON-SEMANTICS-IDENTIFIERS is
 		: KSentence [metadata "structural"] . --- nondet
 		
 	---C99 6.3.2.1:3 Except when it is the operand of the sizeof operator or the unary & operator, or is a string literal used to initialize an array, an expression that has type "array of type" is converted to an expression with type "pointer to type" that points to the initial element of the array object and is not an lvalue. If the array object has register storage class, the behavior is undefined.
+	
+	--- fixme i wish i didn't have to make this a pointertype directly.  
+	--- mb [lookup-array]: rule
+		--- < k > X:Id => tv(Loc:Nat, T:Type) ...</ k >
+		--- < env >... X:Id |-> Loc:Nat ...</ env >
+		--- < types >... X:Id |-> T:Type ...</ types >
+		--- if hasArrayType(T:Type)
+		--- : KSentence [metadata "structural"] .
 	mb [lookup-array]: rule
-		< k > X:Id => tv(Loc:Nat, T:Type) ...</ k >
+		< k > X:Id => tv(Loc:Nat, pointerType(innerType(T:Type))) ...</ k >
 		< env >... X:Id |-> Loc:Nat ...</ env >
 		< types >... X:Id |-> T:Type ...</ types >
 		if hasArrayType(T:Type)

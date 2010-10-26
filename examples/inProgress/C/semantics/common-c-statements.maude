@@ -345,7 +345,10 @@ mod COMMON-SEMANTICS-GOTO is
 	op getString : K -> String .
 	eq getString(Identifier(S:String)) = S:String .
 	
+	
 	op enableInits : -> K .
+	
+	
 	mb rule
 		< k > enableInits => (.).K ...</ k >
 		< shouldInit > ? => true </ shouldInit >

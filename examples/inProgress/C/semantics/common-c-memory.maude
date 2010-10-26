@@ -344,6 +344,9 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) 
 		=> splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
 		: KSentence .
+	mb rule splitBytes(tv(I:Int, arrayType(T:Type, ?))) 
+		=> splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
+		: KSentence .
 	mb rule splitBytes(tv(L:List{K}, T:Type)) 
 		=> splitStructBytes(dataList(L:List{K}), T:Type, value(byteSizeofType(T:Type)))
 		if hasStructType(T:Type)

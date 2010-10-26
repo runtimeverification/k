@@ -91,6 +91,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op internal : -> K .
 	op noLinkage : -> K .
 	
+	op innerType : Type -> Type .	
 	
 	op AttributeValue : String List{C} -> KResult .
 	
@@ -895,9 +896,9 @@ mod COMMON-INITIALIZATION is
 		< currentSubObject > (block => .) ...</ currentSubObject >
 		: KSentence [metadata "structural"] .
 		
-	op innerType : Type -> Type .
 	eq innerType(arrayType(T:Type, ?)) = T:Type .
 	eq innerType(incompleteArrayType(T:Type)) = T:Type .
+	eq innerType(qualifiedType(T:Type, ?)) = innerType(T:Type) .
 
 	mb context buildDesignator(AtIndexInit(`[HOLE`]:K, ?)) : KSentence .
 	mb rule
@@ -1317,18 +1318,18 @@ mod COMMON-GLOBAL-DECLARATION is
 		if notBool hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > declareInternalVariable(X:Id, T:Type, K:K)
-			--- => addToEnv(X:Id, Loc:Nat)
-			--- ~> giveType(X:Id, unqualifyType(T:Type))
-		--- ...</ k >
-		--- < internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
-		--- < blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
-		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		--- if hasStaticType(T:Type)
-		--- andBool notBool hasExternType(T:Type)
-		--- : KSentence [metadata "structural"] .
 		
+	mb rule
+		< k > declareInternalVariable(X:Id, T:Type, NoInit)
+			=> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, unqualifyType(T:Type))
+		...</ k >
+		< internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
+		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
+		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		if hasStaticType(T:Type)
+		andBool notBool hasExternType(T:Type)
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareInternalVariable(X:Id, T:Type, NoInit)
 			=> allocateType(Loc:Nat, T:Type)
@@ -1344,6 +1345,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool notBool hasExternType(T:Type)
 		andBool notBool $hasMapping(Locs:Map, kpair(X:Id, BlockNum:Nat))
 		: KSentence [metadata "structural"] .
+		
 	mb rule
 		< k > declareInternalVariable(X:Id, T:Type, K:K)
 			=> defineAndInit(X:Id, unqualifyType(T:Type), figureInitializer(X:Id, unqualifyType(T:Type), K:K), Loc:Nat)
@@ -1357,9 +1359,33 @@ mod COMMON-GLOBAL-DECLARATION is
 		andBool K:K =/=Bool NoInit
 		andBool notBool $hasMapping(Locs:Map, kpair(X:Id, BlockNum:Nat))
 		: KSentence [metadata "structural"] .
+		
+	op restoreShouldInit : Bool -> K .
+	mb rule
+		< k > restoreShouldInit(OldShouldValue:Bool) => . ...</ k >
+		< shouldInit > ? => OldShouldValue:Bool </ shouldInit >
+		: KSentence [metadata "structural"] .
+		
+	--- statics should only be initialized once.  if we've already seen it, we still need to calculate type, but don't init
+	--- mb rule
+		--- < k > declareInternalVariable(X:Id, T:Type, K:K)
+			--- => defineAndInit(X:Id, unqualifyType(T:Type), figureInitializer(X:Id, unqualifyType(T:Type), K:K), Loc:Nat)
+			--- ~> restoreShouldInit(OldShouldValue:Bool)
+		--- ...</ k >
+		--- < internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
+		--- < blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
+		--- < currentTranslationUnit > Tu:K </ currentTranslationUnit >
+		--- < shouldInit > OldShouldValue:Bool => false </ shouldInit >
+		--- if hasStaticType(T:Type)
+		--- andBool notBool hasExternType(T:Type)
+		--- andBool K:K =/=Bool NoInit
+		--- : KSentence [metadata "structural"] .
+		
+	--- this is essentially defineandinit, but that checks if type has been seen for allocation
+	op reseenStatic : Id Type K Nat -> K [metadata "strict(3)"] .
 	mb rule
 		< k > declareInternalVariable(X:Id, T:Type, K:K)
-			=> defineAndInit(X:Id, unqualifyType(T:Type), figureInitializer(X:Id, unqualifyType(T:Type), K:K), Loc:Nat)
+			=> reseenStatic(X:Id, unqualifyType(T:Type), figureInitializer(X:Id, unqualifyType(T:Type), K:K), Loc:Nat)
 		...</ k >
 		< internalLocations >... Tu:K |-> Map((? kpair(X:Id, BlockNum:Nat) |-> Loc:Nat)) ...</ internalLocations >
 		< blockHistory > ListItem(BlockNum:Nat) ...</ blockHistory >
@@ -1367,6 +1393,13 @@ mod COMMON-GLOBAL-DECLARATION is
 		if hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
 		andBool K:K =/=Bool NoInit
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > reseenStatic(X:Id, ?, initializerValue(X:Id, T:Type, ?), Loc:Nat)
+			=> addToEnv(X:Id, Loc:Nat)
+			~> giveType(X:Id, T:Type)
+		...</ k >
 		: KSentence [metadata "structural"] .
 		
 		
