@@ -3,18 +3,23 @@ struct nodeList {
   struct nodeList *next;
 };
 
-/*@ var ?x ?y ?p : ?Int */
-/*@ var ?B ?C : ?Seq */
+/*@ var ?x ?y ?z ?v : ?Int */
+/*@ var i0 : FreeInt */
+/*@ var ?A ?B ?C : ?Seq */
 /*@ var A : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
 
 struct nodeList* filter(struct nodeList* x, int i)
-/*@ pre < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
+/*@ pre < config > < env > x |-> ?x i |-> i0 </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) </ heap > < form > returns ?x </ form > </ config > */
 {
 	struct nodeList* y;
 	struct nodeList* z;
 	y = x;
+/*@ invariant < config > 
+              < env > x |-> ?x y |-> ?x z |-> 0 i |-> i0 </ env > 
+              < heap > list(?x)(A) </ heap > 
+              < form > TrueFormula </ form > </ config > */
 	while ((y->val == i) && (y != 0))
 	{
 		x = y->next;
@@ -23,6 +28,15 @@ struct nodeList* filter(struct nodeList* x, int i)
 	}
 	z = y;
 	y = y->next;
+/*@ invariant < config > 
+              < env > x |-> ?x y |-> ?y z |-> ?z i |-> i0 </ env > 
+              < heap > 
+                  lseg(?x,?z)(?A) 
+                  ?z |-> ?v : (nodeList . val)
+                  (?z +Int 1) |-> ?y : (nodeList . next)
+                  list(?y)(?B)
+              </ heap > 
+              < form > ~(contain(?A, i0)) /\ ~(?v === i0) /\ ~(z === 0) </ form > </ config > */
 	while(y != 0)
 	{
 		if(y->val == i)
