@@ -804,29 +804,26 @@ sub make_eps
 {
     latexify("eps", @eps_modules);
 
-    # Find number of pages
-    my $pages = run_latex("$language_file_name-eps");
-    my $h = 9 * $pages;
-    my $ph = $h + 1;
-    
     my $latex_out = get_file_content("$language_file_name-eps.tex");
-    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
-    $latex_out =~ s/\\begin{document}/$settings/;
-    $latex_out =~ s/\\newpage/\\bigskip/g;
+    
+    # initial settings
+    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
+    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
+    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
     
     open FILE,">", "$language_file_name-eps.tex" or die "Cannot create $language_file_name-eps.tex\n";
     print FILE $latex_out;
     close FILE;
 
-    # Generate tex
-    my $status = system("latex -interaction=nonstopmode $language_file_name-eps.tex > out");
+    # Generate dvi
+    my $status = system("latex -interaction=nonstopmode -output-format=pdf $language_file_name-eps.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
-    
     # Generate postscript
-    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-eps -o $language_file_name-eps.ps 2>/dev/null");
+    $status = system("pdftops $language_file_name-eps.pdf 2>/dev/null");
     print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
+    
+
     
     # Generate eps
     $status = system("ps2eps -f -q -P -H -l $language_file_name-eps.ps");
@@ -842,6 +839,7 @@ sub make_eps
     unlink("$language_file_name-eps.dvi") if !$verbose;
     unlink("$language_file_name-eps.log") if !$verbose;
     unlink("$language_file_name-eps.ps") if !$verbose;
+    unlink("$language_file_name-eps.pdf") if !$verbose;
     unlink("out");
 }
 
@@ -912,6 +910,8 @@ sub make_crop
     unlink("$language_file_name-crop.aux") if !$verbose;
     unlink("$language_file_name-crop.dvi") if !$verbose;
     unlink("$language_file_name-crop.log") if !$verbose;
+    unlink("$language_file_name-crop.pdf") if !$verbose;
+    unlink("$language_file_name-crop.tex") if !$verbose;
     unlink("out");
     
 }
