@@ -16,7 +16,6 @@ module FilterOutput where
   import ByteStringUtils
   import System.Environment
   import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
-  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton, snoc)
   import qualified Data.ByteString.Char8 as B
   import Control.Applicative ((<$>))
   import Control.Monad

@@ -44,8 +44,8 @@ options:
     - "String (\"[^\"]*\")": "`1"           # Get rid of the stuff surrounding strings
   spaceless-cells: yes
   infixify: yes
-  line-end: " $"
-  syntax-highlighting: # Coming soon
+  line-end: " $"                            # What we want to be displayed at the end of truncated lines
+  syntax-highlighting:                      # Syntax highlighting: Coming soon
     foreground:
       yellow:
         - "::"

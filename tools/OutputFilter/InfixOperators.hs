@@ -9,7 +9,6 @@ module InfixOperators where
   import Text.Parsec.ByteString
   import Control.Applicative ((<$>))
   import Control.Monad.Identity (Identity)
-  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
   import qualified Data.ByteString.Char8 as B
 
   data Content = Operator Name [Content] | StringContent ByteString | ParenedContent [Content]

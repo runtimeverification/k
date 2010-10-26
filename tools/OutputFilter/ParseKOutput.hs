@@ -7,10 +7,10 @@
  -}
 
 module ParseKOutput where
+  import ByteStringUtils
   import Text.Parsec
   import Text.Parsec.ByteString
   import Control.Applicative ((<$>))
-  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
   import qualified Data.ByteString.Char8 as B
 
   type Name = ByteString

@@ -13,16 +13,16 @@
 
 module ParseConfig
   ( getConfig
-  , Configuration, CellName, CellConfigRhs(..), Style(..), Color(..), Substitution(..), ColorPlace(..)
-  , Underline(..), Bold(..)
+  , Configuration, CellName, CellConfigRhs(..)
+  , Style(..), Color(..), Substitution(..), ColorPlace(..), Underline(..), Bold(..)
   )where
-  import Data.Yaml.YamlLight
+  import Style
   import ByteStringUtils
+  import Data.Yaml.YamlLight
   import Control.Applicative
   import Control.Monad
   import Data.Char
   import qualified Data.ByteString.Char8 as B
-  import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons)
   import Control.Arrow
   import Data.List
   import qualified Data.Map as Map
@@ -58,18 +58,6 @@ module ParseConfig
                      }
     deriving Show
 
-  data Underline = Underline | DeUnderline
-    deriving Show
-
-  data Bold = Bold | DeBold
-    deriving Show
-
-  data Color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
-             | Dullblack | Dullred | Dullgreen | Dullyellow | Dullblue | Dullmagenta
-             | Dullcyan | Dullwhite
-    deriving (Show, Read)
-
-  data ColorPlace = Background | Foreground
 
   data Substitution = Substitution ByteString ByteString
     deriving (Show, Eq)
@@ -153,11 +141,6 @@ module ParseConfig
                    | s `compareStr` doDeBold = DeBold
                    | otherwise               = error $ "Unable to parse: " ++ unpack s ++ " as an bold style"
 
-  isColor :: ByteString -> Bool
-  isColor = flip compareStr $ [ "Black", "Red", "Green", "Yellow", "Blue", "Magenta", "Cyan"
-                              , "White", "Dullblack", "Dullred", "Dullgreen", "Dullyellow"
-                              , "Dullblue", "Dullmagenta", "Dullcyan", "Dullwhite"
-                              ]
 
   readSingleEntry :: ByteString -> CellConfigRhs
   readSingleEntry s | compareStr s doShow    = Show
@@ -192,34 +175,7 @@ module ParseConfig
   doLineEnd        = ["lineend", "line-end", "line-end-str", "line-end-string", "lineendstr", "lineendstring"
                      ,"endline", "end-line"]
 
-  -- Compare the contents of the config item to see if it occurs in passed strings.
-  compareStr :: ByteString -> [ByteString] -> Bool
-  compareStr s ss = canonicalize s `elem` map canonicalize ss
 
-  -- Canonical form, also is in a form ready to be read in
-  canonicalize :: ByteString -> ByteString
-  canonicalize s = case uncons s of Just (c, cs) -> toUpper c `cons` B.map toLower cs
-                                    Nothing      -> B.empty
-
-  areNumbers :: ByteString -> Bool
-  areNumbers = B.all isDigit
-
-
-  readBool :: ByteString -> Bool
-  readBool s | compareStr s doTrue  = True
-             | compareStr s doFalse = False
-             | otherwise            = error $ "Unable to read " ++ unpack s ++ " as a truth value"
-
-  readNumber s = tryRead areNumbers s $ "Unable to parse: " ++ unpack s ++ " as a number"
-
-  readColor s = tryRead isColor s $ "Unable to parse: " ++ unpack s ++ " as a color"
-
-  -- Read utilities
-  tryRead :: Read a => (ByteString -> Bool) -> ByteString -> String -> a
-  tryRead p s err = if p s then read (unpack (canonicalize s)) else error err
-
-  tryReadInt :: ByteString -> String -> Int
-  tryReadInt = tryRead areNumbers
 
   -- Try to run f on a YamlLight's String (if it is a terminal), else error out with errStr
   tryTerminalApply :: (ByteString -> a) -> String -> YamlLight -> a
