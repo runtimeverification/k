@@ -27,9 +27,9 @@ sub terminate {
   -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
   -pdf : maudifies/compiles for generating pdf output
-  -ps : maudifies/compiles for generating pdf output
-  -eps : maudifies/compiles for generating pdf output
-  -png : maudifies/compiles for generating pdf output
+  -ps : maudifies/compiles for generating ps output
+  -eps : maudifies/compiles for generating eps output
+  -png : maudifies/compiles for generating png output
   -crop : maudifies/compiles for generating a nice crop-pdf output
      -style : useful for typesetting (optional)
   \n" if (!$verbose && !$help);
@@ -86,9 +86,9 @@ sub terminate {
   -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
   -pdf : maudifies/compiles for generating pdf output
-  -ps : maudifies/compiles for generating pdf output
-  -eps : maudifies/compiles for generating pdf output
-  -png : maudifies/compiles for generating pdf output
+  -ps : maudifies/compiles for generating ps output
+  -eps : maudifies/compiles for generating eps output
+  -png : maudifies/compiles for generating png output
   -crop : maudifies/compiles for generating a nice crop-pdf output
     -style : useful for typesetting (optional)
 
@@ -202,7 +202,7 @@ my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 #########
 # Maude #
 #########
-my $maude_path = "maude";
+my $maude_path = "/home/andrei/work/maude/maude.linux";
 my $maude_temp_file = "ERASE-ME-PLEASE";
 my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
@@ -750,8 +750,8 @@ sub make_pdf
     close FILE;
 
     # Generate pdf
-    my $status = system("latex  -output-format=pdf -interaction=nonstopmode $language_file_name-pdf.tex> out");
-    print "Failed to run pdflatex. Exit status $status.\n" if (($status >>= 8) != 0);
+    my $status = system("latex -output-format=pdf -interaction=nonstopmode $language_file_name-pdf.tex> out");
+    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
     rename ("$language_file_name-pdf.pdf", "$language_file_name.pdf");
     print "Generated $language_file_name.pdf which contains modules: @pdf_modules\n";
@@ -900,7 +900,7 @@ sub make_crop
     close FILE;    
     
     my $status = system("latex -output-format=pdf $language_file_name-crop.tex > out");
-    print "Failed to run pdflatex. Exit status $status.\n" if (($status >>= 8) != 0);
+    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
     
     # print message
     print "Generated $language_file_name-crop.pdf which contains modules: @crop_modules\n";
