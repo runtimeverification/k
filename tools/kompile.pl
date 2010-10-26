@@ -740,8 +740,17 @@ sub make_pdf
     # modify page and save it
     my $latex_out = get_file_content("$language_file_name-pdf.tex");
 
+    # Find number of pages
+#    my $pages = run_latex("$language_file_name-pdf");
+#    my $h = 9 * $pages;
+#    my $ph = $h + 1;
+#    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+#    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+#    $latex_out =~ s/\\begin{document}/$settings/;
+#    $latex_out =~ s/\\newpage/\\bigskip/g;
+
     # initial settings
-    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
+    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{10pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
     $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
     $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
     
@@ -865,7 +874,7 @@ sub make_png
     # Generate tex
     my $status = system("latex -interaction=nonstopmode -output-format=pdf $language_file_name-png.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
-
+# exit(1);
     # Generate png
     $status = system("gs -q -dNOPAUSE -sDEVICE=pngalpha -dBATCH -dEPSCrop -r150 -sOutputFile=$language_file_name-png.png $language_file_name-png.pdf");
     print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
@@ -910,7 +919,7 @@ sub make_crop
     unlink("$language_file_name-crop.aux") if !$verbose;
     unlink("$language_file_name-crop.dvi") if !$verbose;
     unlink("$language_file_name-crop.log") if !$verbose;
-    unlink("$language_file_name-crop.pdf") if !$verbose;
+#    unlink("$language_file_name-crop.pdf") if !$verbose;
     unlink("$language_file_name-crop.tex") if !$verbose;
     unlink("out");
     
