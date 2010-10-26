@@ -141,11 +141,15 @@ module InfixOperators where
 
 
 
-  -- Intermix two string lists. The first argument should be of size one greater than the second
-  intermix :: [a] -> [a] -> [a]
+  -- Intermix two string lists. The first argument should be of size one greater than the second, or both should
+  -- be empty
+  intermix  :: Show a => [a] -> [a] -> [a]
   intermix (l:ls) (r:rs) = l : r : intermix ls rs
   intermix [left] [] = [left]
-  intermix _ _ =  error "Output contains the wrong number of arguments for a mixfix operator"
+  intermix [] [] = []
+  intermix left right = error $  "Output contains the wrong number of arguments for a mixfix operator: \n left:  "
+                             ++  show left ++ "\n right: " ++ show right
+
 
   -- Do the whole shebang
   makeInfix :: ByteString -> ByteString
