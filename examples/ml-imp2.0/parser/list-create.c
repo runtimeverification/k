@@ -7,9 +7,9 @@ struct nodeList {
 /*@ var ?A : ?Seq */
 /*@ var ?rho ?H : ?MapItem */
 
-void main()
+struct nodeList* create()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > list(?x)([5] @ [6] @ [7]) </ heap > < form > returns ?x </ form > </ config > */
 {
   struct nodeList *x;
   struct nodeList *y;
@@ -24,5 +24,13 @@ void main()
   y->val = 5;
   y->next = x;
   x = y;
-/*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([5] @ [6] @ [7]) </ heap > < form > TrueFormula </ form > </ config > */
+  return x;
+}
+
+void main()
+/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
+{
+  struct nodeList *x;
+  x = create();
 }
