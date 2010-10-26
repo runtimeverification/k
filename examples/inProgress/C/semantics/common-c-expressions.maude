@@ -1,18 +1,18 @@
 mod COMMON-SEMANTICS-EXPRESSIONS-INCLUDE is
 	including COMMON-INCLUDE .
 	op assign : K K -> K .
+	op compoundLiteral : Nat -> Id .
 endm
 
 mod COMMON-SEMANTICS-COMPOUND-LITERAL is
-	including COMMON-INCLUDE .
-	op freshId : Nat -> Id .
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
 	op handleCompoundLiteral : K -> K [metadata "strict"] .
 	
 	--- comes back from figureInit as initializerValue(id, type, inits)
 	mb rule
 		< k > CompoundLiteral(N:Nat, T:Type, K:K, Init:K)
-			=> handleCompoundLiteral(figureInitializer(freshId(N:Nat), DeclType(T:Type, K:K), Init:K))
-			--- ~> freshId(N:Nat)
+			=> handleCompoundLiteral(figureInitializer(compoundLiteral(N:Nat), DeclType(T:Type, K:K), Init:K))
 		...</ k >
 		--- < compoundLiteralMap > M:Map </ compoundLiteralMap >
 		--- if notBool $hasMapping(M:Map, N:Nat)
@@ -884,6 +884,15 @@ mod COMMON-SEMANTICS-REFERENCE is
 		
 	mb [address-of-dot]: rule
 		< k > &(E:Expression . X:Id) => &(&(E:Expression) -> X:Id) ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	--- fixme is there any more general way to do this?  it seems awful awkward.
+	mb [address-of-compound]: rule
+		< k > & CompoundLiteral(N:Nat, Spec:K, Decl:K, Init:K) 
+			=> CompoundLiteral(N:Nat, Spec:K, Decl:K, Init:K) 
+			~> discard
+			~> & compoundLiteral(N:Nat)
+		...</ k >
 		: KSentence [metadata "structural"] .
 endm
 

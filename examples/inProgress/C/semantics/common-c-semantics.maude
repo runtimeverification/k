@@ -947,28 +947,46 @@ mod COMMON-INITIALIZATION is
 		orBool hasUnionType(T:Type)
 		: KSentence .
 		
-	op initFromStructRHS : K List{C} -> K .
+	op initFromStructRHS : K Type List{C} -> K .
 	mb rule
 		< k > initFromAggregateRHS(K:K, structType(S:Id)) 
-			=> initFromStructRHS(K:K, L:List{Type}) 
+			=> initFromStructRHS(K:K, structType(S:Id), L:List{Type}) 
 		...</ k >
+		< currentSubObject > . => findStruct(structType(S:Id)) ...</ currentSubObject >
 		< structs >...
 			S:Id |-> L:List{Type}
-		...</ structs > 
+		...</ structs >
 		: KSentence .
 		
+	op findStruct : Type -> ListItem .
+		
 	mb rule
-		< k > (. => initializeSingleInit(K:K . F:Id)) 
-			~> initFromStructRHS(K:K, ((typedDeclaration(T:Type, F:Id) => Nil) :: ?))
+		< currentSubObject > findStruct(T:Type) (ListItem(te(?, T':Type)) => .) ...</ currentSubObject >
+		if T:Type =/=Bool T':Type
+		: KSentence .	
+		
+	--- fixme unsafe, might have started to initialize other things
+	mb rule
+		< k > initFromStructRHS(K':K, structType(S:Id), ?)
+			=> .
 		...</ k >
-		if F:Id =/=Bool #NoName
+		< currentSubObject > findStruct(structType(S:Id)) ListItem(te(K:K, structType(S:Id))) => next ...</ currentSubObject >
+		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
+		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
 		: KSentence .
-	mb rule
-		< k > initFromStructRHS(K:K, ((typedDeclaration(?, #NoName) => Nil) :: ?)) ...</ k >
-		: KSentence .
-	mb rule
-		< k > initFromStructRHS(?, Nil) => (.).K ...</ k >
-		: KSentence .
+		
+	--- mb rule
+		--- < k > (. => initializeSingleInit(K:K . F:Id)) 
+			--- ~> initFromStructRHS(K:K, ((typedDeclaration(T:Type, F:Id) => Nil) :: ?))
+		--- ...</ k >
+		--- if F:Id =/=Bool #NoName
+		--- : KSentence .
+	--- mb rule
+		--- < k > initFromStructRHS(K:K, ((typedDeclaration(?, #NoName) => Nil) :: ?)) ...</ k >
+		--- : KSentence .
+	--- mb rule
+		--- < k > initFromStructRHS(?, Nil) => (.).K ...</ k >
+		--- : KSentence .
 		
 	mb rule
 		< k > fillInitializer(SingleInit(K:K)) => initializeSingleInit(K:K) ...</ k >
