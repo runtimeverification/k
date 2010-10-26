@@ -1,5 +1,0 @@
-LEVEL = ..
-
-
-include $(LEVEL)/Makefile
-
