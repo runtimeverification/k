@@ -1,12 +1,10 @@
 /*@ var ?s ?n : ?Int */
 /*@ var n0 : FreeInt */
-/*@ var ?B ?C : ?Seq */
-/*@ var A : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
 
 int sum(int n)
 /*@ pre < config > < env > n |-> n0 </ env > < heap > (.).Map </ heap > < form > @(n0 >=Int 0) </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > (.).Map </ heap > < form > returns ?s /\ @(?n ==Int 0) /\ @(n0 >=Int 0) </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > (.).Map </ heap > < form > returns ((2 *Int n0 + 1) /Int 2) /\ @(?n ==Int 0) /\ @(n0 >=Int 0) </ form > </ config > */
 {
   int s;
   s = 0;
