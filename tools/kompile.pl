@@ -736,8 +736,6 @@ sub make_latexify
 sub make_pdf 
 {
     latexify("pdf", @pdf_modules);
-    print "Generated $language_file_name.pdf which contains modules: @pdf_modules\n";
-
 
     # modify page and save it
     my $latex_out = get_file_content("$language_file_name-pdf.tex");
@@ -751,11 +749,13 @@ sub make_pdf
     print FILE $latex_out;
     close FILE;
 
-    # Generate tex
-    my $status = system("pdflatex $language_file_name-pdf.tex > out");
+    # Generate pdf
+    my $status = system("latex  -output-format=pdf -interaction=nonstopmode $language_file_name-pdf.tex> out");
     print "Failed to run pdflatex. Exit status $status.\n" if (($status >>= 8) != 0);
 
     rename ("$language_file_name-pdf.pdf", "$language_file_name.pdf");
+    print "Generated $language_file_name.pdf which contains modules: @pdf_modules\n";
+
     
     # delete auxialiary files if not verbose
     unlink("$language_file_name-pdf.tex") if !$verbose;
@@ -768,29 +768,24 @@ sub make_pdf
 sub make_ps
 {
     latexify("ps", @ps_modules);
-
-    # Find number of pages
-    my $pages = run_latex("$language_file_name-ps");
-    my $h = 9 * $pages;
-    my $ph = $h + 1;
     
     my $latex_out = get_file_content("$language_file_name-ps.tex");
-    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
-    $latex_out =~ s/\\begin{document}/$settings/;
-    $latex_out =~ s/\\newpage/\\bigskip/g;
+    
+    # initial settings
+    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
+    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
+    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
     
     open FILE,">", "$language_file_name-ps.tex" or die "Cannot create $language_file_name-ps.tex\n";
     print FILE $latex_out;
     close FILE;
 
-    # Generate tex
-    my $status = system("latex -interaction=nonstopmode $language_file_name-ps.tex > out");
+    # Generate dvi
+    my $status = system("latex -interaction=nonstopmode -output-format=pdf $language_file_name-ps.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
-    
     # Generate postscript
-    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-ps -o $language_file_name-ps.ps 2>/dev/null");
+    $status = system("pdftops $language_file_name-ps.pdf 2>/dev/null");
     print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
     
     # rename ps file
@@ -800,8 +795,8 @@ sub make_ps
     # delete auxialiary files if not verbose
     unlink("$language_file_name-ps.tex") if !$verbose;
     unlink("$language_file_name-ps.aux") if !$verbose;
-    unlink("$language_file_name-ps.dvi") if !$verbose;
     unlink("$language_file_name-ps.log") if !$verbose;
+    unlink("$language_file_name-ps.pdf") if !$verbose;
     unlink("out");
 }
 
@@ -870,21 +865,11 @@ sub make_png
     close FILE;
 
     # Generate tex
-    my $status = system("latex -interaction=nonstopmode $language_file_name-png.tex > out");
+    my $status = system("latex -interaction=nonstopmode -output-format=pdf $language_file_name-png.tex > out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
-    
-    # Generate postscript
-    $status = system("dvips -T 1200mm,".$ph."in $language_file_name-png -o $language_file_name-png.ps 2>/dev/null");
-    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
-    
-   
-    # Generate eps
-    $status = system("ps2eps -f -q -P -H -l $language_file_name-png.ps");
-    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
-
     # Generate png
-    $status = system("gs -q -dNOPAUSE -dEPSCrop -dBATCH -sDEVICE=pngalpha -r150 -sOutputFile=$language_file_name-png.png $language_file_name-png.eps");
+    $status = system("gs -q -dNOPAUSE -sDEVICE=pngalpha -dBATCH -dEPSCrop -r150 -sOutputFile=$language_file_name-png.png $language_file_name-png.pdf");
     print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
 
     # rename png file
@@ -894,10 +879,10 @@ sub make_png
     # delete auxialiary files if not verbose
     unlink("$language_file_name-png.tex") if !$verbose;
     unlink("$language_file_name-png.aux") if !$verbose;
-    unlink("$language_file_name-png.dvi") if !$verbose;
+    unlink("$language_file_name-png.pdf") if !$verbose;
     unlink("$language_file_name-png.log") if !$verbose;
-    unlink("$language_file_name-png.ps") if !$verbose;
-    unlink("$language_file_name-png.eps") if !$verbose;
+#    unlink("$language_file_name-png.ps") if !$verbose;
+#    unlink("$language_file_name-png.eps") if !$verbose;
     unlink("out");
 }
 
@@ -916,7 +901,7 @@ sub make_crop
     print FILE $latex_out;
     close FILE;    
     
-    my $status = system("pdflatex $language_file_name-crop.tex > out");
+    my $status = system("latex -output-format=pdf $language_file_name-crop.tex > out");
     print "Failed to run pdflatex. Exit status $status.\n" if (($status >>= 8) != 0);
     
     # print message
