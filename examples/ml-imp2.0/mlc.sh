@@ -10,8 +10,8 @@ K_TOOLS_DIR=${K_ROOT_DIR}/tools
 ANTLR_ROOT_DIR=${K_TOOLS_DIR}/antlr
 LANG_PARSER_DIR=${ML_ROOT_DIR}/parser
 
-KC=${K_TOOLS_DIR}/kompile.pl
-KFLAGS="-c -l ${LANG_MODULE}"
+KC=${K_TOOLS_DIR}/kcompile-program.sh
+#KFLAGS="-c -l ${LANG_MODULE}"
 
 JVM=java
 CLASSPATH=${ANTLR_ROOT_DIR}/antlrworks-1.4.jar:${ANTLR_ROOT_DIR}:${LANG_PARSER_DIR}
@@ -32,36 +32,32 @@ fi
 
 PROG=`basename $1 ${LANG_SUFFIX} | tr [:upper:] [:lower:]`
 PROG_DIR=`dirname $1`
+PROG_MODULE=PROG
+PROG_MACRO=prog
 MAUDE_PROG=${PROG}.maude
-COMPILED_PROG=${PROG}-compiled.maude
+COMPILED_PROG=prog-compiled.maude
 ML_PROG=${PROG}-ml.maude
 
 ${JVM} ${JFLAGS} ${PARSER_MAIN} <$1 >${MAUDE_PROG}
 if [ "$?" -ne 0 ]; then exit $?; fi
 
-sed -i -e "1i load ${ML_ROOT_DIR}/${LANG_NAME}-semantics.maude" ${MAUDE_PROG}
-echo -e "mod ${LANG_MODULE} is inc ${LANG_MODULE}-SEMANTICS + PROG . endm" >>${MAUDE_PROG}
+sed -i -e "1i load ${ML_ROOT_DIR}/${LANG_NAME}-syntax.maude" ${MAUDE_PROG}
+sed -i -e "2i load ${ML_ROOT_DIR}/${LANG_NAME}-compiled.maude" ${MAUDE_PROG}
 
-${KC} ${KFLAGS} ${MAUDE_PROG}
+${KC} ${MAUDE_PROG} ${LANG_MODULE} ${PROG_MODULE} ${PROG_MACRO}
 if [ "$?" -ne 0 ]; then exit $?; fi
 
 ${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} >${ML_PROG}
 if [ "$?" -ne 0 ]; then exit $?; fi
 
-sed -i -e "/^mod ${LANG_MODULE} is/a \
-subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} Value TypedValue ExpressionType < Builtins KResult . \
-subsort Id Field < Builtins KProper ." ${ML_PROG}
-echo -e "load ${ML_ROOT_DIR}/fol.maude\n\
-mod TEST is inc FOL= . endm\n\
-rew check('prog) .
-q" >>${ML_PROG}
+sed -i -e "1i load ${K_ROOT_DIR}/k-prelude.maude" ${ML_PROG}
+sed -i -e "2c load ${ML_ROOT_DIR}/ml-${LANG_NAME}.maude" ${ML_PROG}
+sed -i -e "3i load ${ML_ROOT_DIR}/fol.maude" ${ML_PROG}
+echo -e "mod TEST is inc ${LANG_MODULE}-${PROG_MACRO} + FOL= . endm" >>${ML_PROG}
+echo -e "rew check('prog) ." >>${ML_PROG}
+echo -e "q" >>${ML_PROG}
 
 ${MAUDE} ${ML_PROG}
 if [ "$?" -ne 0 ]; then exit $?; fi
 
-rm ${MAUDE_PROG} ${COMPILED_PROG} #${ML_PROG}
-
-#${KC} ${SRC_PROG} ${LANG_MOD} ${PROG_MOD} ${PROG_NAME}
-#if [ "$?" -ne 0 ]; then 
-#  exit $?
-#fi
+rm ${MAUDE_PROG} ${COMPILED_PROG} ${ML_PROG}

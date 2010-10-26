@@ -1,11 +1,10 @@
+load ../../k-prelude
 load ml-imp.maude
 load fol.maude
 
----mod TEST is inc IMP + FOL= . 
-mod TEST is inc FOL= . endm
+mod TEST is inc IMP + FOL= . endm 
 
 set print attribute on .
-rew check('prog) .
 
 eof
 

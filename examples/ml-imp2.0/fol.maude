@@ -25,6 +25,7 @@ mod FOL= is inc CONFIG-UTILS .
   var !Env : !MapItem .
   var FreeEnv : FreeMapItem .
   var H H1 H2 : Map .
+  var ?H : ?MapItem .
   var !H : !MapItem .
   var FreeH : FreeMapItem .
   var Set : Set .
@@ -151,7 +152,7 @@ mod FOL= is inc CONFIG-UTILS .
      =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ ObjList1 === ObjList2 </ form > CfgItems2 </ config > .
 
 --- Step 4.2 : Eliminate a location
- eq < config > < heap > P |-> Obj1 : F H1 </ heap > CfgItems1 </ config >
+  eq < config > < heap > P |-> Obj1 : F H1 </ heap > CfgItems1 </ config >
      =heap=> < config > < heap > P |-> Obj2 : F H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
    = < config > < heap > H1 </ heap > CfgItems1 </ config >
      =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .

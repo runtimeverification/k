@@ -5,8 +5,6 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var Alpha Beta : Seq++ .
   var H : Map .
   var K : K .
-  var V : Value .
-  var Sn : Id .
   var Phi : Formula .
   var NtPhi : NtFormula .
   var Cfg : BagItem .

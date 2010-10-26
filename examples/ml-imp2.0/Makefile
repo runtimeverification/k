@@ -51,23 +51,19 @@ configure:
 
 $(ML_MAIN): $(COMPILED_FILE)
 	$(MAKE) -C $(ANTLR_ROOTDIR) -f $(ANTLR_MAKEFILE) $(TARGET) MAIN=$(UNWRAP) <$(PWD)/$(COMPILED_FILE) >$(PWD)/$(ML_MAIN)
-	@sed -i '/^make/d' $(ML_MAIN)
-	@sed -i '/^java/d' $(ML_MAIN)
-	@sed -i '/^mod IMP is/a \
-    subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} Value TypedValue ExpressionType < Builtins KResult . \
-    subsort Id Field < Builtins KProper .' $(ML_MAIN)
+	@sed -i -e '/^make/d' -e '/^java/d' $(ML_MAIN)
 
 $(COMPILED_FILE): $(MAUDE_MAIN) $(MAUDE_SYNTAX) $(MAUDE_SEMANTICS)
 	$(KC) -c $(LANG_NAME)
+	@sed -i -e '1d' -e '/^mod IMP is/a \
+    subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} Value TypedValue ExpressionType < Builtins KResult . \
+    subsort Id Field < Builtins KProper .' $(COMPILED_FILE)
 
 $(MAUDE_MAIN) $(MAUDE_SYNTAX) $(MAUDE_SEMANTICS): $(K_MAIN) $(K_SYNTAX) $(K_SEMANTICS)
 	$(KC) -m $(LANG_NAME)
-	@sed -i 's/\: : Int/: : IntSort/g' $(MAUDE_MAIN)
-	@sed -i 's/\: : Int/: : IntSort/g' $(MAUDE_SYNTAX)
-	@sed -i 's/\: : Int/: : IntSort/g' $(MAUDE_SEMANTICS)
-	@sed -i 's/Int + +/Int++/g' $(MAUDE_MAIN)
-	@sed -i 's/Int + +/Int++/g' $(MAUDE_SYNTAX)
-	@sed -i 's/Int + +/Int++/g' $(MAUDE_SEMANTICS)
+	@sed -i -e 's/\: : Int/: : IntSort/g' -e 's/Int + +/Int++/g' $(MAUDE_MAIN)
+	@sed -i -e 's/\: : Int/: : IntSort/g' -e 's/Int + +/Int++/g' $(MAUDE_SYNTAX)
+	@sed -i -e 's/\: : Int/: : IntSort/g' -e 's/Int + +/Int++/g' $(MAUDE_SEMANTICS)
 
 clean:
 	rm -f $(MAUDE_SYNTAX) $(MAUDE_SEMANTICS) $(MAUDE_MAIN) $(COMPILED_FILE) $(ML_MAIN) kcompile_*

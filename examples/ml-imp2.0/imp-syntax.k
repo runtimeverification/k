@@ -2,11 +2,12 @@ load ml-prelude.maude
 
 
 kmod IMP-SYNTAX is including ML-K
+***(
   subsorts Formula Subst MathObj++ < Builtins KResult
   subsorts List{MathObj++} Set{MathObj++} < Builtins KResult
   subsort Id Field < Builtins KProper
   subsort Value TypedValue ExpressionType < Builtins KResult
-
+***)
 ***(
 imp type system
 ***)

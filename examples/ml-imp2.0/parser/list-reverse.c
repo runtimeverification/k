@@ -6,9 +6,9 @@ struct nodeList {
 /*@ var ?x ?y ?p : ?Int */
 /*@ var ?B ?C : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
+/*@ var ?rho ?h : ?MapItem */
 
-int reverse(struct nodeList *x)
+struct nodeList *reverse(struct nodeList *x)
 /*@ pre < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) </ heap > < form > returns ?x </ form > </ config > */
 {
@@ -31,7 +31,7 @@ int reverse(struct nodeList *x)
 
 void main()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > ?h </ heap > < form > TrueFormula </ form > </ config > */
 {
   struct nodeList *x;
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
