@@ -245,9 +245,9 @@ Expressions
   rule tv(T, I1) < tv(T, I2) => tv(int, bool2int(I1 <Int I2)) [structural]
   rule tv(_, I1) == tv(_, I2) => tv(int, bool2int(I1 ==Int I2)) [structural]
   rule E1 != E2 => !(E1 == E2) [structural]
-  rule TV && E => (TV ? tv(int, 0) : tv(int, 1)) && E
+  rule TV && E => (TV ? E : tv(int, 0))
   [structural]
-  rule TV || E => (TV ? tv(int, 0) : tv(int, 1)) || E
+  rule TV || E => (TV ? tv(int, 1) : E)
   [structural]
 
 *** assignment expressions
