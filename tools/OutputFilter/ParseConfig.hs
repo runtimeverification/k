@@ -112,7 +112,6 @@ module ParseConfig
 
   mkSubstitution (key,val) = Substitution (getString key) (getString val)
 
-
   getBool :: YamlLight -> Bool
   getBool = tryTerminalApply readBool "Internal error: getBool called on non-terminal value"
 
@@ -169,12 +168,11 @@ module ParseConfig
   doHide           = doFalse ++ ["hide"]
   doHideRec        = ["hide-recursive", "recursive-hide", "recursively-hide", "hide-recursively"]
   doTrue           = ["yes", "y", "t", "true"]
-  doFalse          = ["no", "n", "f", "false"]
+  doFalse          = ["no", "n", "f", "false", "nil"]
   doShowRec        = ["show-recursive", "recursive-show", "recursively-show", "show-recursively"]
   doSubstitutions  = ["subs", "subst", "substitutions", "sub"]
   doLineEnd        = ["lineend", "line-end", "line-end-str", "line-end-string", "lineendstr", "lineendstring"
                      ,"endline", "end-line"]
-
 
 
   -- Try to run f on a YamlLight's String (if it is a terminal), else error out with errStr

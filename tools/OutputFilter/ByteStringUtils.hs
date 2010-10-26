@@ -1,16 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module ByteStringUtils
-  ( mySub, mySubG                                             -- pcre-less wrappers and reimplementations
+  ( deleteAll, readBool, readNumber, readColor, compareStr
   , split, join, rstrip, replace                              -- MissingH wrappers
-  , deleteAll, readBool, readNumber, readColor, compareStr
+  , mySub, mySubG                                             -- pcre-less wrappers and reimplementations
   , ByteString, unpack, pack, cons, uncons, append, singleton -- ByteString exports
   ) where
   import Style
   import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
+  import Data.List
   import qualified Data.ByteString.Char8 as B
-  import qualified Data.String.Utils as MH -- todo: get rid of me
-  import qualified Data.List.Utils as MH -- todo: get rid of me
   import Data.Char
   import Text.Regex.Less.Quackers
   import Text.Regex.Less
@@ -77,17 +76,76 @@ module ByteStringUtils
   mySubG old new s = if s == mySub old new s then s
                      else mySubG old new (mySub old new s)
 
-  {- MissingH functions. Todo: redefine them locally to increase efficiency and remove dependencies -}
-  split :: ByteString -> ByteString -> [ByteString]
-  split delim s = map pack $ unpack delim `MH.split` unpack s
+  {- | Given a delimiter and a ByteString, join the items by using the delimiter.
 
+       Example:
+
+         > join "|" ["foo", "bar", "baz"] -> "foo|bar|baz"
+
+       Adapted from MissingH
+  -}
   join :: ByteString -> [ByteString] -> ByteString
-  join delim ss = pack $ unpack delim `MH.join` map unpack ss
+  join delim l = B.concat (intersperse delim l)
 
+  {- | Given a delimiter and a bytestring, split into components.
+
+       Example:
+
+         > split "," "foo,bar,,baz," -> ["foo", "bar", "", "baz", ""]
+
+         > split "ba" ",foo,bar,,baz," -> [",foo,","r,,","z,"]
+
+       Adapted from MissingH
+  -}
+  split :: ByteString -> ByteString -> [ByteString]
+  split delim str | str == B.empty = []
+                  | otherwise      =
+                    let (first, rem) = breakList (startswith delim) str in
+                    first : case uncons rem of
+                              Nothing -> []
+                              Just (a,b) | rem == delim -> []
+                                         | otherwise          -> split delim (B.drop (B.length delim) rem)
+
+  startswith :: ByteString -> ByteString -> Bool
+  startswith = B.isPrefixOf
+
+  breakList :: (ByteString -> Bool) -> ByteString -> (ByteString, ByteString)
+  breakList func = spanList (not . func)
+
+  spanList :: (ByteString -> Bool) -> ByteString -> (ByteString, ByteString)
+  spanList func bs = case uncons bs of
+                         Nothing                      -> ("","")
+                         Just (x,xs) | func (cons x xs) -> (cons x ys, zs)
+                                     | otherwise -> ("", cons x xs)
+                           where (ys,zs) = spanList func xs
+
+  -- | Same as 'strip', but applies only to the right side of the string. Adapted from MissingH
   rstrip :: ByteString -> ByteString
-  rstrip = pack . MH.rstrip . unpack
+  rstrip = B.reverse . lstrip . B.reverse
+
+  wschars :: ByteString
+  wschars = " \t\r\n"
+
+  lstrip :: ByteString -> ByteString
+  lstrip s = case uncons s of
+               Nothing -> ""
+               Just (x,xs) -> if B.elem x wschars
+                              then lstrip xs
+                              else s
+
+  {- | Given a list and a replacement list, replaces each occurance of the search
+       list with the replacement list in the operation list.
+
+         Example:
+
+           >replace "," "." "127,0,0,1" -> "127.0.0.1"
+
+        This could logically be thought of as:
+
+          >replace old new l = join new . split old $ l
+   -}
 
   replace :: ByteString -> ByteString -> ByteString -> ByteString
-  replace old new s = pack $ MH.replace (unpack old) (unpack new) (unpack s)
+  replace old new s = join new . split old $ s
 
 
