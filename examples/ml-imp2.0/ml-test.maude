@@ -1,5 +1,5 @@
+load ml-imp.maude
 load fol.maude
----load ml-imp.maude
 
 ---mod TEST is inc IMP + FOL= . 
 mod TEST is inc FOL= . endm

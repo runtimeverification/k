@@ -1,14 +1,25 @@
 #!/bin/bash
 
-K_ROOTDIR=~/k-framework
-K_TOOLSDIR=${K_ROOTDIR}/tools
-KC=${K_TOOLSDIR}/kcompile-program.sh
-
-ML_ROOTDIR=${K_ROOTDIR}/examples/ml-imp2.0
+K_ROOT_DIR=~/k-framework
+ML_ROOT_DIR=${K_ROOT_DIR}/examples/ml-imp2.0
 LANG_NAME=imp
 LANG_SUFFIX=.c
-LANG_NAME_UPPER=`echo ${LANG_NAME} | tr [:lower:] [:upper:]`
-LANG_PARSERDIR=${ML_ROOTDIR}/parser
+LANG_MODULE=`echo ${LANG_NAME} | tr [:lower:] [:upper:]`
+
+K_TOOLS_DIR=${K_ROOT_DIR}/tools
+ANTLR_ROOT_DIR=${K_TOOLS_DIR}/antlr
+LANG_PARSER_DIR=${ML_ROOT_DIR}/parser
+
+KC=${K_TOOLS_DIR}/kompile.pl
+KFLAGS="-c -l ${LANG_MODULE}"
+
+JVM=java
+CLASSPATH=${ANTLR_ROOT_DIR}/antlrworks-1.4.jar:${ANTLR_ROOT_DIR}:${LANG_PARSER_DIR}
+JFLAGS="-classpath ${CLASSPATH}"
+UNWRAP_MAIN=unwrapBuiltinsMain
+PARSER_MAIN=kernelCPreK
+
+MAUDE=maude
 
 if [ ! "$1" ]; then
   echo "mlc: no input file"
@@ -21,38 +32,36 @@ fi
 
 PROG=`basename $1 ${LANG_SUFFIX} | tr [:upper:] [:lower:]`
 PROG_DIR=`dirname $1`
-PROG_NAME=prog-${PROG}
-PROG_MOD=`echo ${LANG_NAME_UPPER}-${PROG_NAME} | tr [:lower:] [:upper:]`
-SRC_PROG=${PROG}.maude
+MAUDE_PROG=${PROG}.maude
+COMPILED_PROG=${PROG}-compiled.maude
+ML_PROG=${PROG}-ml.maude
 
-USES=`cat $1 | expand -t 2 | grep "^ *using " | sed -e "s/^ *using /including /" -e "s/; *\r\?$/ ./"`
-DECLS=`cat $1 | expand -t 2 | grep "^ *vars\? " | sed -e "s/^ *vars\? /ops /" -e "s/ : / : -> /" -e "s/; *\r\?$/ ./"`
-STMTS=`cat $1 | expand -t 2 | grep -v '^ *using ' | grep -v '^ *vars\? '`
+${JVM} ${JFLAGS} ${PARSER_MAIN} <$1 >${MAUDE_PROG}
+if [ "$?" -ne 0 ]; then exit $?; fi
 
-echo -e
-"
-load ${ML_ROOTDIR}/${LANG_NAME}-syntax.k\n\
-load ${ML_ROOTDIR}/${LANG_NAME}-compiled.maude\n\
-\n\
-kmod ${PROG_MOD} is\n\
-including ${LANG_NAME_UPPER}-SYNTAX .\n\
-${USES}\n\
-\n\
-${DECLS}\n\
-\n\
-syntax TranslationUnit ::= ${PROG_NAME}\n\
-macro ${PROG_NAME} = (\n\
-${STMTS}\n\
-)\n\
-endkm\n\
-"
->${SRC_PROG}
+sed -i -e "1i load ${ML_ROOT_DIR}/${LANG_NAME}-semantics.maude" ${MAUDE_PROG}
+echo -e "mod ${LANG_MODULE} is inc ${LANG_MODULE}-SEMANTICS + PROG . endm" >>${MAUDE_PROG}
 
-${KC} ${SRC_PROG} ${LANG_MOD} ${PROG_MOD} ${PROG_NAME}
-if [ "$?" -ne 0 ]; then 
-  exit $?
-fi
+${KC} ${KFLAGS} ${MAUDE_PROG}
+if [ "$?" -ne 0 ]; then exit $?; fi
 
-rm ${SRC_PROG}
-mv ${PROG_NAME}-compiled.maude ${PROG}.maude
+${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} >${ML_PROG}
+if [ "$?" -ne 0 ]; then exit $?; fi
 
+sed -i -e "/^mod ${LANG_MODULE} is/a \
+subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} Value TypedValue ExpressionType < Builtins KResult . \
+subsort Id Field < Builtins KProper ." ${ML_PROG}
+echo -e "load ${ML_ROOT_DIR}/fol.maude\n\
+mod TEST is inc FOL= . endm\n\
+rew check('prog) .
+q" >>${ML_PROG}
+
+${MAUDE} ${ML_PROG}
+if [ "$?" -ne 0 ]; then exit $?; fi
+
+rm ${MAUDE_PROG} ${COMPILED_PROG} #${ML_PROG}
+
+#${KC} ${SRC_PROG} ${LANG_MOD} ${PROG_MOD} ${PROG_NAME}
+#if [ "$?" -ne 0 ]; then 
+#  exit $?
+#fi

@@ -8,6 +8,8 @@ K_TOOLSDIR = $(K_ROOTDIR)/tools
 KC = $(K_TOOLSDIR)/kompile.pl
 ANTLR_ROOTDIR = $(K_TOOLSDIR)/antlr
 ANTLR_MAKEFILE = Makefile.antlr
+PARSER_DIR = $(ML_ROOTDIR)/parser
+PARSER_MAKEFILE = Makefile
 MLC = $(ML_ROOTDIR)/mlc.sh
 TARGET = run
 UNWRAP = unwrapBuiltinsMain
@@ -41,10 +43,11 @@ run: build
 
 build: $(ML_MAIN)
 
-maudify: $(MAUDE_MAIN)
+maudify: $(MAUDE_MAIN) $(MAUDE_SYNTAX) $(MAUDE_SEMANTICS)
 
 configure:
 	$(MAKE) -C $(ANTLR_ROOTDIR) -f $(ANTLR_MAKEFILE)
+	$(MAKE) -C $(PARSER_DIR) -f $(PARSER_MAKEFILE)
 
 $(ML_MAIN): $(COMPILED_FILE)
 	$(MAKE) -C $(ANTLR_ROOTDIR) -f $(ANTLR_MAKEFILE) $(TARGET) MAIN=$(UNWRAP) <$(PWD)/$(COMPILED_FILE) >$(PWD)/$(ML_MAIN)

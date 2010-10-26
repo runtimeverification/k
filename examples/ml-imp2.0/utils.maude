@@ -1,5 +1,5 @@
 ---load ml-prelude.maude
-load ml-imp.maude
+---load ml-imp.maude
 
 
 mod PL-META-TERM is including PL-BOOL + PL-QID .

@@ -18,6 +18,7 @@ public class kernelCPreK {
       CommonTree maudifiedTree = (CommonTree) maudifier.root().getTree();
 
       //System.out.println(treeToString(tree, 0));
+      System.out.println("mod PROG is inc IMP-SYNTAX + LIST-HP .");
       for (String annot : lexer.annots) {
         annot = annot.trim();
         if (annot.startsWith("var")) {
@@ -32,6 +33,7 @@ public class kernelCPreK {
       System.out.println(": -> Id .");
       System.out.println("  op prog : -> TranslationUnit .");
       System.out.println("  eq prog = (" + toMaudeString(maudifiedTree) + ") .");
+      System.out.println("endm");
     }
     catch (IOException e) {}
     catch (RecognitionException e) {}
