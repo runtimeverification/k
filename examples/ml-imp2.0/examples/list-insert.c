@@ -55,6 +55,5 @@ void main()
   /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)([5]) </ heap > < form > TrueFormula </ form > </ config > */
   x = insert(x,8) ;
   x = insert(x,3) ;
-  /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)(?A) </ heap > < form > (seq2mset(?A) === seq2mset([5] @ [8] @ [3])) </ form > </ config > */
 }
 
