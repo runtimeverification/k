@@ -28,6 +28,7 @@ struct nodeList* filter(struct nodeList* x, int i)
 	}
 	z = y;
 	y = y->next;
+  
 /*@ invariant < config > 
               < env > x |-> ?x y |-> ?y z |-> ?z i |-> i0 </ env > 
               < heap > 
@@ -36,7 +37,7 @@ struct nodeList* filter(struct nodeList* x, int i)
                   (?z +Int 1) |-> ?y : (nodeList . next)
                   list(?y)(?B)
               </ heap > 
-              < form > ~(contain(?A, i0)) /\ ~(?v === i0) /\ ~(z === 0) </ form > </ config > */
+              < form > ~(contain(?A, i0)) /\ ~(?v === i0) /\ ~(?z === 0) </ form > </ config >  */
 	while(y != 0)
 	{
 		if(y->val == i)
@@ -47,9 +48,10 @@ struct nodeList* filter(struct nodeList* x, int i)
 		}
 		else
 		{
-			z = z->next;
+			z = y;
 			y = y ->next;
 		}
 	}
+  int test;  
 	return x;
 }
