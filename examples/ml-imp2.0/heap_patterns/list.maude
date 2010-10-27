@@ -1,4 +1,4 @@
-mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
+mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE + MATHEMATICAL-DOMAIN  .
   var N : Nat .
   var P P' P1 P2 Q Q' Q1 Q2 : Int++ .
   var I : Int++ .
