@@ -758,6 +758,8 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		: KSentence [metadata "structural"] .
 	mb rule - tv(F:Float, T:Type) => arithInterpret(T:Type, -Float_(F:Float))
 		: KSentence [metadata "structural"] .
+	mb rule + tv(F:Float, T:Type) => tv(F:Float, T:Type)
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-MEMBERS is 

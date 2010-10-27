@@ -6,7 +6,8 @@ int foo(int i, int j) {
 }
 
 
-int main(int level) {
+int main(void) {
+	int level = 5;
     int i;
     int fval[4];
     //for (i = 3; i < 10; i--)

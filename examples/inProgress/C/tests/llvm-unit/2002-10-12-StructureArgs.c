@@ -3,7 +3,7 @@
 struct vec2 { double X, Y; };
 
 void print(struct vec2 S, struct vec2 T) {
-	printf("%f, %f, %f, %f\n", S.X, S.Y, T.X, T.Y);
+	printf("%d, %d, %d, %d\n", (int)(10000 * S.X), (int)(10000 * S.Y), (int)(10000 * T.X), (int)(10000 * T.Y));
 }
 
 int main() {

@@ -1,5 +1,5 @@
 // PR594
-
+#include <stdio.h>
 struct X {
   int Q :6;
    int A : 4;

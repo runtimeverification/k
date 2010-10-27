@@ -1,3 +1,4 @@
+#include <stdio.h>
 void test(double X) {
   printf("%f %f\n", -0.0 - X, -X);
 }
