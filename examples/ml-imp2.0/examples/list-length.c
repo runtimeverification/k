@@ -32,6 +32,8 @@ int length(struct nodeList* a)
 }
 
 int main()
+/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
   int l;
   struct nodeList* x;
