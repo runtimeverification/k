@@ -29,7 +29,7 @@ struct nodeList* copy(struct nodeList *x)
                    (x0 +Int 1) |-> ?ix : (nodeList . next)
                    list(?ix)(?A) 
                    list(?y)(?B) </ heap >
-          < form > A === ([?v] @ ?A) /\ ([?v] === ?C) </ form > 
+          < form > A === ([?v] @ ?A) /\ ([?v] === ?B) </ form > 
           </ config > */
           
 /*@ assert < config > 
