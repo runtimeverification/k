@@ -762,6 +762,19 @@ sub make_pdf
     my $status = system("latex -output-format=pdf -interaction=nonstopmode $language_file_name-pdf.tex> out");
     print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
 
+   # Generate postscript
+    $status = system("pdftops $language_file_name-pdf.pdf 2>/dev/null");
+    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
+    
+  
+    # Generate eps
+    $status = system("ps2eps -f -q -P -H -l $language_file_name-pdf.ps");
+    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+
+    # Generate eps
+    $status = system("epspdf $language_file_name-pdf.eps");
+    print "Failed to generate pdf. Exit status $status.\n" if (($status >>= 8) != 0);
+
     rename ("$language_file_name-pdf.pdf", "$language_file_name.pdf");
     print "Generated $language_file_name.pdf which contains modules: @pdf_modules\n";
 
@@ -780,6 +793,15 @@ sub make_ps
     
     my $latex_out = get_file_content("$language_file_name-ps.tex");
     
+    # Find number of pages
+    my $pages = run_latex("$language_file_name-ps");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    $latex_out =~ s/\\begin{document}/$settings/;
+    $latex_out =~ s/\\newpage/\\bigskip/g;
+
     # initial settings
     $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
     $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
@@ -814,6 +836,16 @@ sub make_eps
     latexify("eps", @eps_modules);
 
     my $latex_out = get_file_content("$language_file_name-eps.tex");
+    
+    # Find number of pages
+    my $pages = run_latex("$language_file_name-eps");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    $latex_out =~ s/\\begin{document}/$settings/;
+    $latex_out =~ s/\\newpage/\\bigskip/g;
+
     
     # initial settings
     $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
@@ -855,6 +887,7 @@ sub make_eps
 sub make_png
 {
     latexify("png", @png_modules);
+
 
     # Find number of pages
     my $pages = run_latex("$language_file_name-png");
@@ -901,6 +934,15 @@ sub make_crop
     # modify page and save it
     my $latex_out = get_file_content("$language_file_name-crop.tex");
 
+    # Find number of pages
+    my $pages = run_latex("$language_file_name-crop");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    $latex_out =~ s/\\begin{document}/$settings/;
+#    $latex_out =~ s/\\newpage/\\bigskip/g;
+    
     # initial settings
     $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%/;
     $latex_out =~ s/\\begin{document}/\\PreviewEnvironment{module}\n\\begin{document}\n\\pagestyle{empty}/;
