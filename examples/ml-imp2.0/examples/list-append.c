@@ -9,12 +9,12 @@ struct nodeList {
 struct nodeList* append(struct nodeList *x, struct nodeList *y)  
 /*@ pre < config >
          < env > x |-> ?x  y |-> ?y  </ env >
-         < heap > list(?x)(A) list(?y)(B) </ heap >
+         < heap > list(?x)(A) list(?y)(B) ?H </ heap >
          < form > TrueFormula </ form >
          </ config > */
 /*@ post < config > 
           < env >  ?rho </ env >
-          < heap > list(?x)(A @ B) </ heap > 
+          < heap > list(?x)(A @ B) ?H </ heap > 
           < form > returns ?x </ form > 
           </ config > */
 {
@@ -32,6 +32,7 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
                   (?p +Int 1) |-> ?i :  (nodeList . next)
                   list(?i)(?B)  
                   list(?y)(B) 
+                  ?H
          </ heap > 
          < form > (?A @ [?v] @ ?B) === A </ form > 
          </ config > */
@@ -72,7 +73,7 @@ int main()
   x = append(x,y);
 /*@ assert < config > 
            < env > x |-> ?x y |-> ?y </ env > 
-           < heap > list(?x)(?A) </ heap > 
+           < heap > list(?x)(?A) ?H </ heap > 
            < form > ?A === (!A @ !B) </ form > </ config > */
   return 0;
 }
