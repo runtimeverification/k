@@ -15,8 +15,8 @@ int length(struct nodeList* a)
          < heap > ?H </ heap > 
          < form > ?l === len(A) /\ returns ?l </ form > </ config > */
 {
-  struct nodeList* x;
   int l;
+  struct nodeList* x;
   x = a;
   l = 0;
 /*@ invariant < config > 
@@ -33,11 +33,11 @@ int length(struct nodeList* a)
 
 int main()
 {
+  int l;
   struct nodeList* x;
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
   x->val = 5;
   x->next = 0;
-  int l;
   l = length(x);
   return 0;
 }
