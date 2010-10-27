@@ -210,7 +210,7 @@ mod SMT-INTERFACE is inc SMT-LIB .
    = callSolvers(toString(toSMT(Phi)) +String "###EOMTCP###" +String "\r\n",
                  "128.174.246.122",
                  "7073")
-  if S:String := toString(toSMT(Phi))
-  [print "calling Z3 SMT solver...\n" Phi "\n" S:String] .
+  if S:String := toString(toSMT(Phi)) .
+  ---[print "calling Z3 SMT solver...\n" Phi "\n" S:String] .
 endm
 

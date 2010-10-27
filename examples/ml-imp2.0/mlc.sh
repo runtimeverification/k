@@ -19,8 +19,11 @@ JFLAGS="-classpath ${CLASSPATH}"
 UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=kernelCPreK
 
-MAUDE=maude
+MAUDE=smt-maude
 MFLAGS=-no-banner
+
+TMP_OUT=.tmp_out_file
+TMP_ERR=.tmp_err_file
 
 if [ ! "$1" ]; then
   echo "mlc: no input file"
@@ -45,8 +48,8 @@ if [ "$?" -ne 0 ]; then exit $?; fi
 sed -i -e "1i load ${ML_ROOT_DIR}/${LANG_NAME}-syntax.maude" ${MAUDE_PROG}
 sed -i -e "2i load ${ML_ROOT_DIR}/${LANG_NAME}-compiled.maude" ${MAUDE_PROG}
 
-${KC} ${KFLAGS} ${MAUDE_PROG} ${LANG_MODULE} ${PROG_MODULE} ${PROG_MACRO} >/dev/null
-if [ "$?" -ne 0 ]; then exit $?; fi
+${KC} ${KFLAGS} ${MAUDE_PROG} ${LANG_MODULE} ${PROG_MODULE} ${PROG_MACRO} >${TMP_ERR}
+if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
 ${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} >${ML_PROG}
 if [ "$?" -ne 0 ]; then exit $?; fi
@@ -59,7 +62,8 @@ echo -e "set print attribute on ." >>${ML_PROG}
 echo -e "rew check('prog) ." >>${ML_PROG}
 echo -e "q" >>${ML_PROG}
 
-${MAUDE} ${MFLAGS} ${ML_PROG} 2>/dev/null | sed '1,2d' | sed '$d' 
-if [ "$?" -ne 0 ]; then exit $?; fi
+${MAUDE} ${MFLAGS} ${ML_PROG} >${TMP_OUT} 2>${TMP_ERR}
+if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
-rm ${MAUDE_PROG} ${COMPILED_PROG} #${ML_PROG}
+sed -e '1,2d' -e '$d' ${TMP_OUT}
+rm -f ${TMP_OUT} ${TMP_ERR}  ${MAUDE_PROG} ${COMPILED_PROG} ${ML_PROG}
