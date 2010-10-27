@@ -853,10 +853,14 @@ mod COMMON-C-TYPING is
 	mb rule 
 		< type > L:KLabel(T:Type,, T':Type) => maxType(T:Type, T':Type) ...</ type >
 		if typeStrictBinaryOperators contains l(L:KLabel)
+		andBool hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
 		
 	mb rule 
 		< type > ?:K ? T:Type : T':Type => maxType(T:Type, T':Type) ...</ type >
+		if hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
 		
 	mb rule

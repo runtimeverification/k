@@ -10,7 +10,7 @@ PARSER ?= ../dist/cparser
 GOOD_DIRECTORIES = buildTests
 FAIL_DIRECTORIES = shouldFail
 INTEGRATION_DIRECTORIES = integration
-UNIT_DIRECTORIES = unitTests lcc-tests clight-tests-unit
+UNIT_DIRECTORIES = unitTests lcc-tests clight-tests-unit cil
 TORTURE_DIRECTORIES = gcc-torture
 ALL_DIRECTORIES = $(GOOD_DIRECTORIES) $(FAIL_DIRECTORIES) $(INTEGRATION_DIRECTORIES) $(UNIT_DIRECTORIES) $(TORTURE_DIRECTORIES)
 

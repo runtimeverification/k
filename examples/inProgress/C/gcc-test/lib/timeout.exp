@@ -49,7 +49,7 @@ proc timeout_value { args } {
     } else {
 	# This is really, REALLY ugly, but this is the default from
 	# remote.exp deep within DejaGnu.
-	set val 60
+	set val 15
     }
 
     # If the test specified a timeout factor, adjust by that.

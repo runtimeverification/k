@@ -22,20 +22,20 @@ prepare:
 default: prepare
 	
 test-gcc-full: default
-	-$(RUNTEST) gcc.full/exp.exp $(GCC_FLAGS)
+	-$(RUNTEST) gcc.full/execute.exp $(GCC_FLAGS)
 #echo "test,tool,phase,status,timeout" > gcc.full.csv
 	@cat results/out.gcc/gcc.sum | sed -n 's/^\(.*\):/\1,:/p' | sed '/timed out\./{N;s/WARNING: program timed out\.\n\(.*\):/\1,TIMEOUT:/}' | sed -n 's/^\(.*\): gcc\..*\/\(.*\) \(.*\),/\2,gcc,\3,\1/p' > gcc.full.csv
 test-gcc34-full: default
-	-$(RUNTEST) gcc.full/exp.exp $(GCC34_FLAGS)
+	-$(RUNTEST) gcc.full/execute.exp $(GCC34_FLAGS)
 	@cat results/out.gcc34/gcc.sum | sed -n 's/^\(.*\):/\1,:/p' | sed '/timed out\./{N;s/WARNING: program timed out\.\n\(.*\):/\1,TIMEOUT:/}' | sed -n 's/^\(.*\): gcc\..*\/\(.*\) \(.*\),/\2,gcc34,\3,\1/p' > gcc34.full.csv
 test-icc-full: default
-	-$(RUNTEST) gcc.full/exp.exp $(ICC_FLAGS)
+	-$(RUNTEST) gcc.full/execute.exp $(ICC_FLAGS)
 	@cat results/out.icc/gcc.sum | sed -n 's/^\(.*\):/\1,:/p' | sed '/timed out\./{N;s/WARNING: program timed out\.\n\(.*\):/\1,TIMEOUT:/}' | sed -n 's/^\(.*\): gcc\..*\/\(.*\) \(.*\),/\2,icc,\3,\1/p' > icc.full.csv
 test-cilcc-full: default
-	-$(RUNTEST) gcc.full/exp.exp $(CIL_FLAGS)
+	-$(RUNTEST) gcc.full/execute.exp $(CIL_FLAGS)
 	@cat results/out.cilcc/gcc.sum | sed -n 's/^\(.*\):/\1,:/p' | sed '/timed out\./{N;s/WARNING: program timed out\.\n\(.*\):/\1,TIMEOUT:/}' | sed -n 's/^\(.*\): gcc\..*\/\(.*\) \(.*\),/\2,cilcc,\3,\1/p' > cilcc.full.csv
 test-kcc-full: default
-	-$(RUNTEST) gcc.full/exp.exp $(KCC_FLAGS)
+	-$(RUNTEST) gcc.full/execute.exp $(KCC_FLAGS)
 	@cat results/out.kcc/gcc.sum | sed -n 's/^\(.*\):/\1,:/p' | sed '/timed out\./{N;s/WARNING: program timed out\.\n\(.*\),:/\1,TIMEOUT:/}' | sed -n 's/^\(.*\): gcc\..*\/\(.*\) \(.*\),/\2,kcc,\3,\1/p' > kcc.full.csv
 	
 spreadsheet:
