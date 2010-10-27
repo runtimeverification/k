@@ -179,9 +179,9 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 endkm
 
 
--------------------
---- Main module ---
--------------------
+-----------------------------------------
+--- Main module, including everything ---
+-----------------------------------------
 
 kmod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS 
 --- make sure the name of the final module is the capitalized version of the file name

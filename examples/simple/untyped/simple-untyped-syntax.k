@@ -5,11 +5,12 @@
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
   sorts Var Exp Stmt Stmts
 
---- variables; we include arrays here as well
-  syntax Var ::= Id 
+--- Variables; we include arrays here as well, so that, e.g., a[x][y][z]
+--- can appear anywhere a variable can appear (declarations, lookup, assignment)
+  syntax Var ::= Id
                | Exp [ Exp ] [prec 1 strict]
 
---- expressions
+--- Expressions
   syntax Exp ::= Var | Int | Bool
                | ++ Id [prec 0]
                | Exp + Exp [gather(E e) prec 33 strict]
@@ -32,12 +33,12 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | Exp ( List{Exp} ) [prec 2 strict]
                | read ( )
 
---- declarations
+--- Declarations
   syntax Decl ::= var Var ; [prec 2]  
                 | function Id ( ) Stmt
                 | function Id ( List{Id} ) Stmt
 
---- statements
+--- Statements
   syntax Stmt ::= { }
                 | { Stmts } [gather(&)]
                 | Exp = Exp ; [prec 2 strict(2)]
@@ -52,8 +53,8 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts [prec 100 gather(e E)]
 
---- main function
-  syntax Id ::= main 
+--- Function "main"
+  syntax Id ::= main
 
 
 -----------------------------------------------------------------------------
