@@ -25,7 +25,7 @@ mod MATHEMATICAL-DOMAIN is
   eq tree2mset(upsilon) = empty .
   op isBst : Tree++ -> Atom .
   eq isBst(TL [I] TR) = @(max(tree2mset(TL)) <=Int I) /\
-                        @(I <Int min(tree2mset(TR))) /\
+                        @(I <=Int min(tree2mset(TR))) /\
                         isBst(TL) /\ isBst(TR) .
   eq isBst(upsilon) = TrueFormula .
 
@@ -50,9 +50,14 @@ mod MATHEMATICAL-DOMAIN is
   eq isSorted(epsilon) = TrueFormula .
 
   vars Phi Phi1 Phi2 : Formula .
-  var A : Seq++ .
+  var A A1 A2 : Seq++ .
 
   eq @(1 +Int (-Int len(A)) >=Int 0) /\ Phi1 ===> isSorted(A) /\ Phi2
    = @(1 +Int (-Int len(A)) >=Int 0) /\ Phi1 ===> Phi2 .
+
+  op seq{tree}2seq_ : Seq++ -> Seq++ .
+  eq seq{tree}2seq(A1 @ [T] @ A2)
+   = seq{tree}2seq(A1) @ tree2seq(T) @ seq{tree}2seq(A2) .
+  eq seq{tree}2seq(epsilon) = epsilon .
 endm
 

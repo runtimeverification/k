@@ -9,9 +9,6 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var NtPhi : NtFormula .
   var Cfg : BagItem .
   var CfgItems : Bag .
-  
-  ops val next : -> Id .
-  op nodeList : -> Id .
 
 *** Definition of Lists ***
   op list : -> HeapLabel .
@@ -59,7 +56,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg
+     =match=> Cfg
   => < config >
        < heap >
          list(P)([I])
@@ -67,7 +64,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg .
+     =match=> Cfg .
   rl < config >
        < heap >
          P |-> I : nodeList . val
@@ -77,7 +74,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg
+     =match=> Cfg
   => < config >
        < heap >
          list(P)([I] @ Alpha)
@@ -85,7 +82,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg .
+     =match=> Cfg .
 
 
 *** Definition of List Segments ***
@@ -136,7 +133,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
          H </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg
+     =match=> Cfg
   => < config >
        < heap >
          lseg(P, Q)([I])
@@ -144,7 +141,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg .
+     =match=> Cfg .
      
   rl < config >
        < heap >
@@ -154,7 +151,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg
+     =match=> Cfg
   => < config >
        < heap >
          lseg(P, Q)(Alpha @ Beta)
@@ -162,7 +159,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg .
+     =match=> Cfg .
      
   rl < config >
        < heap >
@@ -172,7 +169,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg
+     =match=> Cfg
   => < config >
        < heap >
          list(P)(Alpha @ Beta)
@@ -180,5 +177,5 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
        </ heap >
        CfgItems
      </ config >
-     =heap=> Cfg .
+     =match=> Cfg .
 endm

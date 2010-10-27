@@ -18,7 +18,9 @@ public class kernelCPreK {
       CommonTree maudifiedTree = (CommonTree) maudifier.root().getTree();
 
       //System.out.println(treeToString(tree, 0));
-      System.out.println("mod PROG is inc IMP-SYNTAX + LIST-HP .");
+      String includeList = "mod PROG is inc IMP-SYNTAX + MATHEMATICAL-DOMAIN ";
+      includeList += "+ LIST-HP + BINARY-TREE-HP .";
+      System.out.println(includeList);
       for (String annot : lexer.annots) {
         annot = annot.trim();
         if (annot.startsWith("var")) {

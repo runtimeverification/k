@@ -84,6 +84,8 @@ mod VAR-UTILS is inc IMP + PL-META-TERM + MAUDE-IF-THEN-ELSE .
 
   op getFreeMap : Bag -> Map .
   op getFreeMap : TermList -> Map .
+  op getFreeBag : Bag -> Bag .
+  op getFreeBag : TermList -> Bag .
 
   var Obj : MathObj++ .
   var Phi : Formula .
@@ -97,6 +99,7 @@ mod VAR-UTILS is inc IMP + PL-META-TERM + MAUDE-IF-THEN-ELSE .
   eq getFreeVarSet(Phi) = getFreeVarSet(upTerm(Phi)) .
 
   eq getFreeMap(Cfgs) = getFreeMap(upTerm(Cfgs)) .
+  eq getFreeBag(Cfgs) = getFreeBag(upTerm(Cfgs)) .
 
   var Q : Qid .
   var QC : Constant .

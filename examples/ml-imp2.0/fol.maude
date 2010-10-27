@@ -28,6 +28,9 @@ mod FOL= is inc CONFIG-UTILS .
   var ?H : ?MapItem .
   var !H : !MapItem .
   var FreeH : FreeMapItem .
+  var ?CfgItems : ?BagItem .
+  var !CfgItems : !BagItem .
+  var FreeCfgItems : FreeBagItem .
   var Set : Set .
   var Phi Phi1 Phi2 : Formula .
   var NtPhi NtPhi1 NtPhi2 : NtFormula .
@@ -54,54 +57,52 @@ mod FOL= is inc CONFIG-UTILS .
   eq < config > < subst > Subst </ subst > CfgItems1 </ config >
      =subst=> < config > CfgItems2 </ config >
    = < config > applySubst(CfgItems1, Subst) </ config >
-     =env=> < config > < subst > Subst </ subst > applySubst(CfgItems2, Subst) </ config > .
+     =match=> < config > < subst > Subst </ subst > applySubst(CfgItems2, Subst) </ config > .
 
 --- Step 2: Eliminate the environment and the return value
 --- Step 2.1: Stepwise eliminate the environment 
   eq < config > < env > X |-> Obj1 Env1 </ env > CfgItems1 </ config >
-     =env=> < config > < env > X |-> Obj2 Env2 </ env > < form > Phi2 </ form > CfgItems2 </ config >
+     =match=> < config > < env > X |-> Obj2 Env2 </ env > < form > Phi2 </ form > CfgItems2 </ config >
    = < config > < env > Env1 </ env > CfgItems1 </ config >
-     =env=> < config > < env > Env2 </ env > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
+     =match=> < config > < env > Env2 </ env > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
 
---- Step 2.2 : Eliminate a locally bounded variable
-  eq < config > < env > Env </ env > CfgItems1 </ config >
-     =env=> < config > < env > ?Env </ env > CfgItems2 </ config >
-   = < config > CfgItems1 </ config >
-     =ret=> < config > CfgItems2 </ config > .
-
---- Step 2.2 : Eliminate a globally bounded variable
-  eq < config > < env > Env </ env > < subst > Subst </ subst > CfgItems1 </ config >
-     =env=> < config > < env > !Env </ env > CfgItems2 </ config >
-   = < config > < subst > (!Env <- Env) ; Subst </ subst > CfgItems1 </ config >
-     =ret=> < config > CfgItems2 </ config > .
-
---- Step 2.3 : Eliminate a env frame
+--- Step 2.2 : Eliminate a env frame
   eq < config > < env > Env1 FreeEnv </ env > CfgItems1 </ config >
-     =env=> < config > < env > Env2 FreeEnv </ env > CfgItems2 </ config >
+     =match=> < config > < env > Env2 FreeEnv </ env > CfgItems2 </ config >
    = < config > < env > Env1 </ env > CfgItems1 </ config >
-     =env=> < config > < env > Env2 </ env > CfgItems2 </ config > .
+     =match=> < config > < env > Env2 </ env > CfgItems2 </ config > .
 
---- Step 2.4 : Eliminate the environment cell
-  eq < config > < env > (.).Map </ env > CfgItems1 </ config >
-     =env=> < config > < env > (.).Map </ env > CfgItems2 </ config >
+--- Step 2.3 : Eliminate a locally bounded variable
+  eq < config > < env > Env </ env > CfgItems1 </ config >
+     =match=> < config > < env > ?Env </ env > CfgItems2 </ config >
    = < config > CfgItems1 </ config >
-     =ret=> < config > CfgItems2 </ config > .
+     =match=> < config > CfgItems2 </ config > .
 
---- Step 2.5 : Eliminate the return value (only when checking asserions at the end of function)
+--- Step 2.4 : Eliminate a globally bounded variable
+  eq < config > < env > Env </ env > < subst > Subst </ subst > CfgItems1 </ config >
+     =match=> < config > < env > !Env </ env > CfgItems2 </ config >
+   = < config > < subst > (!Env <- Env) ; Subst </ subst > CfgItems1 </ config >
+     =match=> < config > CfgItems2 </ config > .
+
+--- Step 2.5 : Eliminate the environment cell
+  eq < config > < env > (.).Map </ env > CfgItems1 </ config >
+     =match=> < config > < env > (.).Map </ env > CfgItems2 </ config >
+   = < config > CfgItems1 </ config >
+     =match=> < config > CfgItems2 </ config > .
+
+
+--- Step 2.6 : Eliminate the return value (only when checking asserions at the end of function)
   eq < config > < form > Phi1 /\ returns(Obj1) </ form > CfgItems1 </ config >
-     =ret=> < config > < form > Phi2 /\ returns(Obj2) </ form > CfgItems2 </ config >
+     =match=>  < config > < form > Phi2 /\ returns(Obj2) </ form > CfgItems2 </ config >
    = < config > < form > Phi1 </ form > CfgItems1 </ config >
-     =heap=> < config > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
-  eq Cfg1 =ret=> Cfg2 = Cfg1 =heap=> Cfg2 [owise] .
+     =match=>  < config > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
+  eq < config > < form > Phi /\ returns(Obj) </ form > CfgItems </ config >
+     =match=> Cfg
+   = < config > < form > Phi </ form > CfgItems </ config >
+     =match=> Cfg [owise] .
 
 
 --- Step 3: Get rid of variable equalities and propagate them via substitution
---- Step 3.0.1 : Get rid of bound variables equalities at any time
-***(
- ceq < config > < k > K </ k > < form > Phi </ form > CfgItems </ config >
-   = < config > < k > K </ k > applySubst(< form > Phi </ form > CfgItems, NeSubst) </ config >
-  if NeSubst := get?SubstItem(Phi) .
-***)
 --- Step 3.0.2 : Get rid of unbound variable equalities at any time
  ceq < config > < k > K </ k > < form > Phi </ form > CfgItems < subst > Subst </ subst > </ config >
    = < config > < k > K </ k > applySubst(< form > Phi </ form > CfgItems, NeSubst) < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > </ config >
@@ -114,77 +115,73 @@ mod FOL= is inc CONFIG-UTILS .
 ***)
 
 --- Step 3.1 : Get rid of proof tasks for bound variables equalities in the conclusion
- ceq Cfg =heap=> < config > < form > Phi </ form > CfgItems < subst > Subst </ subst > </ config >
-   = Cfg =heap=> < config > applySubst(< form > Phi </ form > CfgItems, NeSubst) < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > </ config >
-  if NeSubst := get?SubstItem(Phi) .
- ceq Cfg =form=> < config > < form > Phi </ form > CfgItems < subst > Subst </ subst > </ config >
-   = Cfg =form=> < config > applySubst(< form > Phi </ form > CfgItems, NeSubst) < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > </ config >
+ ceq Cfg =match=> < config > < form > Phi </ form > CfgItems </ config >
+   = Cfg =match=> < config > applySubst(< form > Phi </ form > CfgItems, NeSubst) </ config >
   if NeSubst := get?SubstItem(Phi) .
 
 --- Step 3.2 : Get rid of unbound variables equalities in the hypothesis
  ceq < config > < form > Phi </ form > CfgItems1 </ config >
-     =heap=> < config > < subst > Subst </ subst > CfgItems2 </ config >
+     =match=> < config > < subst > Subst </ subst > CfgItems2 </ config >
    = applySubst(< config > < form > Phi </ form > CfgItems1 </ config >, NeSubst)
-     =heap=> < config > < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > applySubst(CfgItems2, NeSubst) </ config >
-  if NeSubst := getFreeSubstItem(Phi) .
- ceq < config > < form > Phi </ form > CfgItems1 </ config >
-     =form=> < config > < subst > Subst </ subst > CfgItems2 </ config >
-   = applySubst(< config > < form > Phi </ form > CfgItems1 </ config >, NeSubst)
-     =form=> < config > < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > applySubst(CfgItems2, NeSubst) </ config >
+     =match=> < config > < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > applySubst(CfgItems2, NeSubst) </ config >
   if NeSubst := getFreeSubstItem(Phi) .
 
 --- Step 3.3 : Get rid of a globally bound equality in the conclusion
- ceq Cfg =heap=> < config > < form > Phi </ form > < subst > Subst </ subst > CfgItems </ config >
+ ceq Cfg =match=> < config > < form > Phi </ form > < subst > Subst </ subst > CfgItems </ config >
    = applySubst(Cfg, NeSubst)
-     =heap=> < config > < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > applySubst(< form > Phi </ form > CfgItems, NeSubst) </ config >
-  if NeSubst := get!SubstItem(Phi) .
- ceq Cfg =form=> < config > < form > Phi </ form > < subst > Subst </ subst > CfgItems </ config >
-   = applySubst(Cfg, NeSubst)
-     =form=> < config > < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > applySubst(< form > Phi </ form > CfgItems, NeSubst) </ config >
+     =match=> < config > < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > applySubst(< form > Phi </ form > CfgItems, NeSubst) </ config >
   if NeSubst := get!SubstItem(Phi) .
 
 
 --- Step 4: Stepwise, eliminate the heap, if any
 --- Step 4.1: Eliminate a heap pattern
   eq < config > < heap > HPN(ObjList)(ObjList1) H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > HPN(ObjList)(ObjList2) H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
+     =match=> < config > < heap > HPN(ObjList)(ObjList2) H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
    = < config > < heap > H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ ObjList1 === ObjList2 </ form > CfgItems2 </ config > .
+     =match=> < config > < heap > H2 </ heap > < form > Phi2 /\ ObjList1 === ObjList2 </ form > CfgItems2 </ config > .
 
 --- Step 4.2 : Eliminate a location
   eq < config > < heap > P |-> Obj1 : F H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > P |-> Obj2 : F H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
+     =match=> < config > < heap > P |-> Obj2 : F H2 </ heap > < form > Phi2 </ form > CfgItems2 </ config >
    = < config > < heap > H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > H2 </ heap > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
+     =match=> < config > < heap > H2 </ heap > < form > Phi2 /\ Obj1 === Obj2 </ form > CfgItems2 </ config > .
 
---- Step 4.3 : Eliminate a globally bounded variable in the hypothesis
-  eq < config > < heap > H </ heap > CfgItems1 </ config >
-    =heap=> < config > < heap > ?H </ heap > CfgItems2 </ config >
-   = < config > CfgItems1 </ config >
-     =form=> < config > CfgItems2 </ config > .
+--- Step 4.3 : Eliminate a heap frame
+  eq < config > < heap > H1 FreeH </ heap > CfgItems1 </ config >
+     =match=> < config > < heap > H2 FreeH </ heap > CfgItems2 </ config >
+   = < config > < heap > H1 </ heap > CfgItems1 </ config >
+     =match=> < config > < heap > H2 </ heap > CfgItems2 </ config > .
 
 --- Step 4.4 : Eliminate a globally bounded variable in the hypothesis
   eq < config > < heap > H </ heap > CfgItems1 </ config >
-    =heap=> < config > < heap > !H </ heap > < subst > Subst </ subst > CfgItems2 </ config >
+    =match=> < config > < heap > ?H </ heap > CfgItems2 </ config >
    = < config > CfgItems1 </ config >
-     =form=> < config > < subst > (!H <- H) ; Subst </ subst > CfgItems2 </ config > .
+    =match=> < config > CfgItems2 </ config > .
 
---- Step 4.5 : Eliminate a heap frame
-  eq < config > < heap > H1 FreeH </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > H2 FreeH </ heap > CfgItems2 </ config >
-   = < config > < heap > H1 </ heap > CfgItems1 </ config >
-     =heap=> < config > < heap > H2 </ heap > CfgItems2 </ config > .
+--- Step 4.5 : Eliminate a globally bounded variable in the hypothesis
+  eq < config > < heap > H </ heap > CfgItems1 </ config >
+    =match=> < config > < heap > !H </ heap > < subst > Subst </ subst > CfgItems2 </ config >
+   = < config > CfgItems1 </ config >
+    =match=> < config > < subst > (!H <- H) ; Subst </ subst > CfgItems2 </ config > .
 
 --- Step 4.6 : Eliminate the heap cell
-  eq < config > < heap > (.).Map </ heap > < form > Phi1 </ form > CfgItems1 </ config >
-     =heap=> < config > < heap > (.).Map </ heap > < form > Phi2 </ form > CfgItems2 </ config >
-   = < config > < form > Phi1 </ form > CfgItems1 </ config >
-     =form=> < config > < form > Phi2 </ form > CfgItems2 </ config > .
+  eq < config > < heap > (.).Map </ heap > CfgItems1 </ config > =match=> < config > < heap > (.).Map </ heap > CfgItems2 </ config >
+   = < config > CfgItems1 </ config > =match=> < config > CfgItems2 </ config > .
 
 
 --- Step 5: Get rid of the formula implication task
+  eq < config > CfgItems1 FreeCfgItems </ config > =match=> < config > CfgItems2 FreeCfgItems </ config >
+   = < config > CfgItems1 </ config > =match=> < config > CfgItems2 </ config > .
+  eq < config > < form > Phi1 </ form > CfgItems </ config >
+     =match=>
+     < config > < form > Phi2 </ form > < subst > Subst </ subst > ?CfgItems </ config >
+   = < config > < form > Phi1 ===> Phi2 </ form > < subst > Subst </ subst > </ config > [owise] .
+  eq < config > < form > Phi1 </ form > CfgItems </ config >
+     =match=>
+     < config > < form > Phi2 </ form > < subst > Subst </ subst > !CfgItems </ config >
+   = < config > < form > Phi1 ===> Phi2 </ form > < subst > (!CfgItems <- CfgItems) ; Subst </ subst > </ config > [owise] .
   eq < config > < form > Phi1 </ form > </ config >
-     =form=>
+     =match=>
      < config > < form > Phi2 </ form > < subst > Subst </ subst > </ config >
    = < config > < form > Phi1 ===> Phi2 </ form > < subst > Subst </ subst > </ config > [owise] .
 

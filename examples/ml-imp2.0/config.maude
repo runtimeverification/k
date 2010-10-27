@@ -35,6 +35,8 @@ endm
 
 
 mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
+  sorts ?BagItem !BagItem FreeBagItem .
+  subsort ?BagItem !BagItem FreeBagItem < BagItem .
   sorts ?MapItem !MapItem FreeMapItem .
   subsort ?MapItem !MapItem FreeMapItem < MapItem .
   op ?Env : Nat -> ?MapItem .
@@ -66,13 +68,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op errorBag : -> [Bag] .
   op _===>_ : Bag Bag -> Bag [frozen] .
   op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op _=skol=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op _=env=>_   : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op _=ret=>_   : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op _=heap=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op _=form=>_  : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op _=debug=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-
+  op _=match=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op skolemize : Nat Bag -> Bag .
   op co-skolemize : Bag -> Bag .
 
@@ -95,6 +91,13 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op IntSort : -> KLabel .
   op _: :_ : Int++ KLabel -> Bool .
 
+  ops val next : -> Id .
+  ops nodeList : -> Id .
+
+  ops val left right : -> Id .
+  ops treeNode : -> Id .
+
+  ops treeNodeList : -> Id .
 ***(
   op <_>_</_> : CellLabel Int++ CellLabel -> BagItem
   [prec 0 format(nib g b o+ -b g b o)] .

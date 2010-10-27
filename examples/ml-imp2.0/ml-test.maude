@@ -2,23 +2,46 @@ load ../../k-prelude
 load ml-imp.maude
 load fol.maude
 
-mod TEST is inc IMP + FOL= . endm 
+mod TEST is inc IMP + FOL= .
+ops t v : -> Id .
+ops ?n ?root : -> ?Int .
+ops v0 : -> FreeInt .
+ops ?rho : -> ?MapItem .
+ops h0 : -> FreeMapItem .
+ops ?T : -> ?Tree .
+ops Tree : -> FreeTree .
+endm 
 
 set print attribute on .
 
-eof
-
 search
  < config >
-  < form > TrueFormula </ form >
-  < subst > .Subst </ subst >
-  < env > p |-> 0 x |-> skolem(1, ?x) y |-> ?Int(3) </ env >
-  < heap > list(skolem(1, ?x))(A) </ heap >
- </ config > 
+  < form > isBst(FreeTree(3)) /\ isBst(FreeTree(4)) /\ isBst(skolem(17, ?T)) /\
+    returns skolem(0, ?root) /\ @ (v0 +Int -Int FreeInt(0) >=Int 0) /\ @ (-Int
+    max(tree2mset(FreeTree(3))) +Int FreeInt(0) >=Int 0) /\ @ (-1 +Int -Int
+    FreeInt(0) +Int min(tree2mset(FreeTree(4))) >=Int 0) /\ ~ (skolem(0, ?root)
+    === 0) /\ tree2mset(skolem(17, ?T)) === tree2mset(FreeTree(4)) U {| v0 |}
+    </ form >
+  < subst > Tree <- (FreeTree(3)[FreeInt(0)]FreeTree(4)) </ subst >
+  < env > t |-> skolem(0, ?root) v |-> v0 </ env >
+  < heap > h0 tree(FreeInt(1))(FreeTree(3)) tree(skolem(17, ?root))(skolem(17,
+    ?T)) 1 +Int skolem(0, ?root) |-> FreeInt(1) : (treeNode . left) 2 +Int
+    skolem(0, ?root) |-> skolem(17, ?root) : (treeNode . right) skolem(0,
+    ?root) |-> FreeInt(0) : (treeNode . val) </ heap >
+ </ config >
  ===>
  < config >
-  < form > rev(A) === rev(?C) ::: ?B </ form >
-  < env > p |-> ?p x |-> ?x y |-> ?y </ env >
-  < heap > list(?p)(?B) list(?x)(?C) </ heap >
+    < form > isBst(?T) /\ returns ?root /\ tree2mset(?T) === tree2mset(Tree) U
+    {| v0 |} </ form >
+    < env > ?rho </ env >
+    < heap > h0 tree(?root)(?T) </ heap >
  </ config >
-=>* CfgItems:Bag .
+=>* < config > < form > F:Formula </ form > CfgItems:Bag </ config > .
+---=>* CfgItems:Bag .
+
+red
+    @ (-Int max(tree2mset(FreeTree(3))) +Int FreeInt(0) >=Int 0) /\
+    @ (-Int v0 +Int -1 +Int FreeInt(0) >=Int 0) /\
+    tree2mset(skolem(15, ?T)) === tree2mset(FreeTree(3)) U {| v0 |}
+    ===> @ (-Int max(tree2mset(skolem(15, ?T))) +Int FreeInt(0) >=Int 0)
+.

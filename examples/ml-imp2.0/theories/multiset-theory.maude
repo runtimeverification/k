@@ -44,7 +44,8 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
   ops min max : MSet++ -> Int++ .
 
 
-  var I : Int++ .
+  var Phi1 Phi2 : Formula .
+  var I J : Int++ .
   var Obj Obj1 Obj2 : MathObj++ .
   var ObjList : List{MathObj++} .
   var A A1 A2 : MSet++ .
@@ -64,5 +65,18 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
      @((-Int max(NeA2)) +Int I >=Int 0) .
   eq max({| I |}) = I .
   eq (-Int max(empty)) +Int I >=Int 0 = true .
+
+  eq A1 === A2 U {| J |} /\ @(-Int max(A2) +Int I >=Int 0) /\
+     @(-Int J +Int -1 +Int I >=Int 0) /\ Phi1
+     ===> @(-Int max(A1) +Int I >=Int 0) /\ Phi2
+   = A1 === A2 U {| J |} /\ @(-Int max(A2) +Int I >=Int 0) /\
+     @(-Int J +Int -1 +Int I >=Int 0) /\ Phi1
+     ===> Phi2 .
+  eq A1 === A2 U {| J |} /\ @(min(A2) +Int -Int I >=Int 0) /\
+     @(J +Int -Int I >=Int 0) /\ Phi1
+     ===> @(min(A1) +Int -Int I >=Int 0) /\ Phi2
+   = A1 === A2 U {| J |} /\ @(min(A2) +Int -Int I >=Int 0) /\
+     @(J +Int -Int I >=Int 0) /\ Phi1
+     ===> Phi2 .
 endm
 
