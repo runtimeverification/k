@@ -30,9 +30,13 @@ int main()
   y = (struct nodeList*)malloc(sizeof(struct nodeList));
   y->val = 678;
   y->next = 0;
+
 /*@ assert < config >
            < env > x |-> ?x y |-> ?y </ env >
-           < heap > list(?x)(!A) list(?y)(!B) </ heap >
+           < heap > list(?x)(!A) 
+                    ?y |-> ?v : (nodeList . val)
+                    (?y +Int 1) |-> 0 : (nodeList . next)
+           </ heap >
            < form > TrueFormula </ form >
            </ config > */
   free(y);
@@ -45,7 +49,7 @@ int main()
 }
 
 
-/*@ var ?x ?y : ?Int */
+/*@ var ?x ?y ?v : ?Int */
 /*@ var ?A : ?Seq */
 /*@ var !A !B : !Seq */
 /*@ var ?rho ?H : ?MapItem */
