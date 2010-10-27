@@ -83,3 +83,4 @@ int main()
 /*@ var !A !B : !Seq */
 /*@ var A B : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
+/*@ var heapFrame : FreeMapItem */
