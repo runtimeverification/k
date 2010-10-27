@@ -1,4 +1,4 @@
-#include <stdlib.h >
+#include <stdlib.h>
 
 struct nodeList {
   int val;
@@ -29,6 +29,17 @@ int length(struct nodeList* a)
         l = l + 1 ;
     }
   return l;
+}
+
+int main()
+{
+  struct nodeList* x;
+  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  x->val = 5;
+  x->next = 0;
+  int l;
+  l = length(x);
+  return 0;
 }
 
 /*@ var ?x ?l : ?Int */
