@@ -83,11 +83,11 @@ module ParseConfig
   convertToCellRhs key val | unsafeUnStr key == "options" = readOptions val
                            | otherwise                    = readConfig val
 
-  readOptions m = Options (getGlobalSubs <$> lookupConf doGlobalSubs m)
-                          (getBool       <$> lookupConf doSpacelessCells m)
-                          (getBool       <$> lookupConf doInfixity m)
-                          (getString     <$> lookupConf doLineEnd m)
-                          Nothing -- extend me to do hilighting
+  readOptions m = Options (getGlobalSubs   <$> lookupConf doGlobalSubs m)
+                          (getBool         <$> lookupConf doSpacelessCells m)
+                          (getBool         <$> lookupConf doInfixity m)
+                          (getString       <$> lookupConf doLineEnd m)
+                          Nothing -- extend me to do highlighting
 
   readConfig :: YamlLight -> CellConfigRhs
   readConfig (YStr s)   = readSingleEntry s
@@ -111,6 +111,9 @@ module ParseConfig
                        Nothing   -> error "User error: please specify substitutions as a (yaml) sequnce of key:value pairs"
 
   mkSubstitution (key,val) = Substitution (getString key) (getString val)
+
+  -- getHighlighting :: YamlLight -> [(ByteString, Style)]
+  -- getHighlighting =
 
   getBool :: YamlLight -> Bool
   getBool = tryTerminalApply readBool "Internal error: getBool called on non-terminal value"
