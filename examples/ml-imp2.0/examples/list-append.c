@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 struct nodeList {
   int val;
   struct nodeList *next;
@@ -43,7 +45,12 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
   return x;
 }
 
-
+int main()
+/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
+{
+  return 0;
+}
 
 /*@ var ?x ?y ?p ?i ?v : ?Int */
 /*@ var ?A ?B : ?Seq */

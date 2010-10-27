@@ -11,10 +11,12 @@ struct nodeList* filter(struct nodeList* x, int i)
 	struct nodeList* y;
 	struct nodeList* z;
 	y = x;
+  
 /*@ invariant < config > 
               < env > x |-> ?x y |-> ?x z |-> 0 i |-> i0 </ env > 
               < heap > list(?x)(A) </ heap > 
-              < form > TrueFormula </ form > </ config > */
+              < form > TrueFormula </ form > 
+              </ config > */
 	while ((y->val == i) && (y != 0))
 	{
 		x = y->next;
@@ -47,9 +49,17 @@ struct nodeList* filter(struct nodeList* x, int i)
 			y = y ->next;
 		}
 	}
-  int test;  
 	return x;
 }
+
+int main()
+/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
+{
+  return 0;
+}
+
+
 /*@ var ?x ?y ?z ?v : ?Int */
 /*@ var i0 : FreeInt */
 /*@ var ?A ?B ?C : ?Seq */

@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 struct nodeList {
   int val;
   struct nodeList *next;
@@ -23,12 +25,13 @@ struct nodeList* create()
   return x;
 }
 
-void main()
+int main()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
   struct nodeList *x;
   x = create();
+  return 0;
 }
 
 

@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 struct nodeList {
   int val;
   struct nodeList *next;
@@ -14,7 +16,7 @@ struct nodeList* prefix(struct nodeList* x, int i)
 	return y;
 }
 
-void main()
+int main()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
@@ -24,6 +26,7 @@ void main()
   x->next = 0;
   /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)([6]) </ heap > < form > TrueFormula </ form > </ config > */
   x = prefix(x,5) ;
+  return 0;
 }
 
 

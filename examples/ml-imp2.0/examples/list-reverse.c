@@ -1,10 +1,13 @@
+#include <stdlib.h>
+
+
 struct nodeList {
   int val;
   struct nodeList *next;
 };
 
 
-int reverse(struct nodeList *x)
+struct nodeList* reverse(struct nodeList *x)
 /*@ pre < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) </ heap > < form > returns ?x </ form > </ config > */
 {
@@ -25,7 +28,7 @@ int reverse(struct nodeList *x)
 
 
 
-void main()
+int main()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
@@ -35,6 +38,7 @@ void main()
   /*@ assume < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
   /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)(rev(A)) </ heap > < form > TrueFormula </ form > </ config > */
+  return 0;
 }
 
 
