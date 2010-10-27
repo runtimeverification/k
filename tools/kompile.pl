@@ -741,18 +741,18 @@ sub make_pdf
     my $latex_out = get_file_content("$language_file_name-pdf.tex");
 
     # Find number of pages
-#    my $pages = run_latex("$language_file_name-pdf");
-#    my $h = 9 * $pages;
-#    my $ph = $h + 1;
-#    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-#    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
-#    $latex_out =~ s/\\begin{document}/$settings/;
-#    $latex_out =~ s/\\newpage/\\bigskip/g;
+    my $pages = run_latex("$language_file_name-pdf");
+    my $h = 9 * $pages;
+    my $ph = $h + 1;
+    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
+    my $settings = "\\geometry{papersize={500mm,".$ph."in},textheight=".$h."in,textwidth=480mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    $latex_out =~ s/\\begin{document}/$settings/;
+    $latex_out =~ s/\\newpage/\\bigskip/g;
 
     # initial settings
-    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{10pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
-    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
-    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
+#    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{10pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
+#    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
+#    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
     
     open FILE,">", "$language_file_name-pdf.tex" or die "Cannot create $language_file_name-pdf.tex\n";
     print FILE $latex_out;
