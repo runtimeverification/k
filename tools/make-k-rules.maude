@@ -23,15 +23,20 @@ fmod MAKE-K-RULES is
   if Split := splitKRule(metadataParse(Max)) .
   eq resolveReplace(Flat, M, Max, Mas) = resolveReplace(Flat, addMbs(Max, M), Mas) [owise] .
 
+
+---------  Hack to get rid of the potential attribute large
+  eq klarge = none . 
+---------
+
   op addReplace : Module Module KRuleSplit ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural})
-   = addEqs((eq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) [metadata("structural rule")] .), M) . 
+   = addEqs((eq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) [metadata("structural rule") AS] .), M) . 
   eq addReplace(Flat, M, {kcrl, T, C, AS kstructural})
-   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) if C = trueCt [metadata("structural rule")] .), M) .
+   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) if C = trueCt [metadata("structural rule") AS] .), M) .
   eq addReplace(Flat, M, {krl, T, empty, AS})
-    = addRls((rl normalize(Flat,splitReplace(T,1)) => normalize(Flat,splitReplace(T,2)) [metadata("computational rule")] .), M) [owise] .
+    = addRls((rl normalize(Flat,splitReplace(T,1)) => normalize(Flat,splitReplace(T,2)) [metadata("computational rule") AS] .), M) [owise] .
   eq addReplace(Flat, M, {kcrl, T, C, AS}) 
-    = addRls((crl normalize(Flat,splitReplace(T,1)) => normalize(Flat, splitReplace(T,2)) if makeCondition(C)  [metadata("computational rule")] .), M) [owise] .
+    = addRls((crl normalize(Flat,splitReplace(T,1)) => normalize(Flat, splitReplace(T,2)) if makeCondition(C)  [metadata("computational rule") AS] .), M) [owise] .
 
 
   op makeCondition : Term -> Condition .
