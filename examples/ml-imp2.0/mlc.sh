@@ -19,7 +19,7 @@ JFLAGS="-classpath ${CLASSPATH}"
 UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=kernelCPreK
 
-MAUDE=smt-maude
+MAUDE=maude
 MFLAGS=-no-banner
 
 if [ ! "$1" ]; then
