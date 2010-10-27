@@ -32,20 +32,20 @@ struct nodeList* iNode;
     < config > 
     < env > x |-> ?x 
             i |-> ?i
-            iNode |-> ?iNode
+            iNode |-> ?in
             iterator |-> ?it
             placement |-> ?p
     </ env >
     < heap > lseg(?x,?p)(?B)
-             ?p |-> ?v1 : nodeList . val
-             (?p +Int 1) : ?it : nodeList . next
-             ?it |-> ?v2 : nodeList . val
-             (?it +Int 1) : ?aux : nodeList . next
+             ?p |-> ?v1 : (nodeList . val)
+             (?p +Int 1) |-> ?it : (nodeList . next)
+             ?it |-> ?v2 : (nodeList . val)
+             (?it +Int 1) |-> ?aux : (nodeList . next)
              list(?aux)(?C)  
-             ?iNode |-> ?i : (nodeList . val)
-             (?iNode +Int 1) |-> 0 : (nodeList . next)
+             ?in |-> ?i : (nodeList . val)
+             (?in +Int 1) |-> 0 : (nodeList . next)
     </ heap >
-    < form > A === (?B @ [?v1] @ [?v2] ?C) </ form > </ config > */
+    < form > A === (?B @ [?v1] @ [?v2] @ ?C) </ form > </ config > */
 			while (iterator!=0)
 			{
 				if(iterator->val > i)
