@@ -783,6 +783,8 @@ sub make_pdf
     unlink("$language_file_name-pdf.tex") if !$verbose;
     unlink("$language_file_name-pdf.aux") if !$verbose;
     unlink("$language_file_name-pdf.log") if !$verbose;
+    unlink("$language_file_name-pdf.ps") if !$verbose;
+    unlink("$language_file_name-pdf.eps") if !$verbose;
     unlink("out");
 }
 
