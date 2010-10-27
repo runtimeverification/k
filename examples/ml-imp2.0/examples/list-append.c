@@ -49,10 +49,36 @@ int main()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
+  struct nodeList* x;
+  struct nodeList* y;
+  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  x->val = 5;
+  x->next = 0;
+  
+/*@ assert < config > 
+           < env > x |-> ?x y |-> ?y </ env > 
+           < heap > list(?x)(!A) </ heap > 
+           < form > TrueFormula </ form > </ config > */
+           
+  
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 6;
+  y->next = 0;
+
+/*@ assert < config > 
+           < env > x |-> ?x y |-> ?y </ env > 
+           < heap > list(?x)(!A) list(?y)(!B) </ heap > 
+           < form > TrueFormula </ form > </ config > */
+  x = append(x,y);
+/*@ assert < config > 
+           < env > x |-> ?x y |-> ?y </ env > 
+           < heap > list(?x)(?A) </ heap > 
+           < form > ?A === (!A @ !B) </ form > </ config > */
   return 0;
 }
 
 /*@ var ?x ?y ?p ?i ?v : ?Int */
 /*@ var ?A ?B : ?Seq */
+/*@ var !A !B : !Seq */
 /*@ var A B : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
