@@ -22,11 +22,12 @@ int sum(int n)
 
 
 
-void main()
+int main()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
   int s;
   s = sum(5);
+  return 0;
 }
 
