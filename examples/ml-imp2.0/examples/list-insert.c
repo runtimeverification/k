@@ -26,8 +26,8 @@ struct nodeList* iNode;
 		{
 			struct nodeList* placement;
 			struct nodeList* iterator;
-			iterator = x->next;
-			placement = x;
+			placement = x->next;
+      iterator = placement->next;
 /*@ invariant 
     < config > 
     < env > x |-> ?x 
