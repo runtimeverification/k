@@ -1,7 +1,8 @@
 load utils.maude
 
 
-mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
+---mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
+mod SMT-LIB is inc VAR-UTILS + PL-STRING + PL-CONVERSION .
 --- Define a SMT formula
 --- Use SMT only for integer theory
   sort SMTVar .
@@ -14,11 +15,8 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
   sort SMTQuerry .
   
   op `(_Int`) : SMTVar -> SMTQuantVar .
-  op `(_IntSeq`) : SMTVar -> SMTQuantVar .
-  op `(_IntTree`) : SMTVar -> SMTQuantVar .
-  op `(_IntTreeSeq`) : SMTVar -> SMTQuantVar .
-  op `(_IntBag`) : SMTVar -> SMTQuantVar .
----   op `(_Graph`) : SMTVar -> SMTQuantVar .
+  op `(_Seq`) : SMTVar -> SMTQuantVar .
+  op `(_Tree`) : SMTVar -> SMTQuantVar .
   op __ : SMTQuantVarSet SMTQuantVarSet -> SMTQuantVarSet [assoc comm] .
   
   op `(~_`) : SMTTerm -> SMTTerm .
@@ -60,46 +58,28 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
   op mkSMTQuantVarSet : Set{MathObj++} -> SMTQuantVarSet .
   op mkSMTTerm : Int++ -> SMTTerm .
   op mkSMTFormula : Formula -> SMTFormula .
-  op mkSMTFreeVarSet : Formula -> SMTQuerry .
 
-  var N : Nat .  vars I I1 I2 : Int++ .
-  var NtPhi1 NtPhi2 : NtFormula .  var Phi : Formula .
-  var ?Obj : ?MathObj .  var FreeObj : FreeMathObj .  var Obj : MathObj++ .
-  var ?ObjSet FreeObjSet ObjSet : Set{MathObj++} .
+  var N : Nat .
+  vars I I1 I2 : Int++ .
+  var NtPhi1 NtPhi2 : NtFormula .
+  var Phi : Formula .
+  var ?Obj : ?MathObj .
+  var FreeObj : FreeMathObj .
+  var Obj : MathObj++ .
+  var ObjSet : Set{MathObj++} .
 
  ceq toSMT(Phi) =
-    if FreeObjSet =/=Bool .Set{MathObj++} then
-      (declare-funs (mkSMTQuantVarSet(FreeObjSet)))
+    if ObjSet =/=Bool .Set{MathObj++} then
+      (declare-funs (mkSMTQuantVarSet(ObjSet)))
     else
       .emptyQuerry
     fi
-    (assert
-      if ?ObjSet =/=Bool .Set{MathObj++} then
-        (exists mkSMTQuantVarSet(?ObjSet) mkSMTFormula(Phi))
-      else
-        mkSMTFormula(Phi)
-      fi
-    )
+    (assert mkSMTFormula(Phi))
     (check-sat)
-  if FreeObjSet := getFreeVarSet(Phi) /\ ?ObjSet := get?VarSet(Phi) .
+  if ObjSet := getFreeVarSet(Phi) & get?VarSet(Phi) .
 
   eq mkSMTQuantVar(?Obj:?Int) = (?Obj:?Int Int) .
-***(
-  eq mkSMTQuantVar(?Obj:?IntSeq) = (?Obj:?IntSeq IntSeq) .
-  eq mkSMTQuantVar(?Obj:?IntTree) = (?Obj:?IntTree IntTree) .
-  eq mkSMTQuantVar(?Obj:?IntTreeSeq) = (?Obj:?IntTreeSeq IntTreeSeq) .
-  eq mkSMTQuantVar(?Obj:?IntBag) = (?Obj:?IntBag IntBag) .
----   mkSMTQuantVar(?Obj:?Graph) = (?Obj:?Graph Graph) .
-***)
-
   eq mkSMTQuantVar(FreeObj:FreeInt) = (FreeObj:FreeInt Int) .
-***(
-  eq mkSMTQuantVar(FreeObj:FreeIntSeq) = (FreeObj:FreeIntSeq IntSeq) .
-  eq mkSMTQuantVar(FreeObj:FreeIntTree) = (FreeObj:FreeIntTree IntTree) .
-  eq mkSMTQuantVar(FreeObj:FreeIntTreeSeq) = (FreeObj:FreeIntTreeSeq IntTreeSeq) .
-  eq mkSMTQuantVar(FreeObj:FreeIntBag) = (FreeObj:FreeIntBag IntBag) .
----   mkSMTQuantVar(FreeObj:FreeGraph) = (FreeObj:FreeGraph Graph) .
-***)
 
  ceq mkSMTQuantVarSet(Obj & ObjSet)
    = mkSMTQuantVar(Obj) mkSMTQuantVarSet(ObjSet)
@@ -145,30 +125,15 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
   vars T T1 T2 : SMTTerm .  vars F F1 F2 : SMTFormula .  var Q Q' : SMTQuerry .
 
   eq toString(?Int(N)) = "?t__" +String Rat2String(N, 10) .
-***(
-  eq toString(?IntSeq(N)) = "?t__" +String Rat2String(N, 10) .
-  eq toString(?IntTree(N)) = "?t__" +String Rat2String(N, 10) .
-  eq toString(?IntTreeSeq(N)) = "?t__" +String Rat2String(N, 10) .
-  eq toString(?IntBag(N)) = "?t__" +String Rat2String(N, 10) .
----   eq toString(?Graph(N)) = "?t__" +String Rat2String(N, 10) .
-***)
   eq toString(?Obj) = string(getName(upTerm(?Obj))) [owise] .
 
   eq toString(skolem(N, ?Obj))
    = "t__" +String Rat2String(N, 10) +String
      "__" +String toString(?Obj) .
+  eq toString(FreeInt(N)) = "t__" +String Rat2String(N, 10) .
   eq toString(FreeObj) = string(getName(upTerm(FreeObj))) [owise] .
 
   eq toString(SMTVar Int) = "(" +String toString(SMTVar) +String " Int)" .
-  eq toString(SMTVar IntSeq)
-   = "(" +String toString(SMTVar) +String " IntSeq)" .
-  eq toString(SMTVar IntTree)
-   = "(" +String toString(SMTVar) +String " IntTree)" .
-  eq toString(SMTVar IntTreeSeq)
-   = "(" +String toString(SMTVar) +String " IntTreeSeq)" .
-  eq toString(SMTVar IntBag)
-   = "(" +String toString(SMTVar) +String " IntBag)" .
----   eq toString(SMTVar Graph) = "(" +String toString(SMTVar) +String " Int)" .
   eq toString(SMTQuantVar SMTQuantVarSet)
    = toString(SMTQuantVar) +String " " +String toString(SMTQuantVarSet) .
 
@@ -228,7 +193,7 @@ mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
   eq toString(check-sat) = "(check-sat)" .
 
  ceq toString(Q Q') = toString(Q) +String "\n" +String toString(Q')
-  if Q =/=Bool .emptyQuerry /\ Q' =/=Bool .emptyQuerry .
+  if Q =/=Bool .emptyQuerry andBool Q' =/=Bool .emptyQuerry .
   eq toString(.emptyQuerry) = "" .
 
   eq toString(len SMTVar) = "(len " +String toString(SMTVar) +String ")" .
@@ -241,10 +206,11 @@ mod SMT-INTERFACE is inc SMT-LIB .
 
   var Phi : Formula .
 
-  eq check-sat(Phi)
+ ceq check-sat(Phi)
    = callSolvers(toString(toSMT(Phi)) +String "###EOMTCP###" +String "\r\n",
                  "128.174.246.122",
                  "7073")
-  [print "calling Z3 SMT solver...\n" Phi] .
+  if S:String := toString(toSMT(Phi))
+  [print "calling Z3 SMT solver...\n" Phi "\n" S:String] .
 endm
 

@@ -19,7 +19,7 @@ JFLAGS="-classpath ${CLASSPATH}"
 UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=kernelCPreK
 
-MAUDE=maude
+MAUDE=smt-maude
 MFLAGS=-no-banner
 
 if [ ! "$1" ]; then
@@ -55,10 +55,11 @@ sed -i -e "1i load ${K_ROOT_DIR}/k-prelude.maude" ${ML_PROG}
 sed -i -e "2c load ${ML_ROOT_DIR}/ml-${LANG_NAME}.maude" ${ML_PROG}
 sed -i -e "3i load ${ML_ROOT_DIR}/fol.maude" ${ML_PROG}
 echo -e "mod TEST is inc ${LANG_MODULE}-${PROG_MACRO} + FOL= . endm" >>${ML_PROG}
+echo -e "set print attribute on ." >>${ML_PROG}
 echo -e "rew check('prog) ." >>${ML_PROG}
 echo -e "q" >>${ML_PROG}
 
 ${MAUDE} ${MFLAGS} ${ML_PROG} 2>/dev/null | sed '1,2d' | sed '$d' 
 if [ "$?" -ne 0 ]; then exit $?; fi
 
-rm ${MAUDE_PROG} ${COMPILED_PROG} ${ML_PROG}
+rm ${MAUDE_PROG} ${COMPILED_PROG} #${ML_PROG}

@@ -14,6 +14,7 @@ endm
 
 set print attribute on .
 
+eof
 search
  < config >
   < form > isBst(FreeTree(3)) /\ isBst(FreeTree(4)) /\ isBst(skolem(17, ?T)) /\

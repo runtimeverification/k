@@ -1,9 +1,7 @@
----load smt.maude
-load utils.maude
+load smt.maude
 
 
----mod FOL= is inc CONFIG-UTILS + SMT-INTERFACE .
-mod FOL= is inc CONFIG-UTILS .
+mod FOL= is inc CONFIG-UTILS + SMT-INTERFACE .
 --- FOL= is the proving heart of matching logic.  Provided that one had a "FOL= oracle" that can
 --- prove any implications of the form "Pattern ===> Pattern1 Pattern2 ... PatternN" (the conclusion is a disjunction of patterns),
 --- then one basically has a matching logic verifier.  Since we do not have such a magic oracle, we are going to mimic one.

@@ -44,7 +44,9 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op !Env : Nat -> !MapItem .
   op !Heap : Nat -> !MapItem .
   op skolem : Nat ?MapItem -> FreeMapItem .
+  op skolem : Nat ?BagItem -> FreeMapItem .
   op co-skolem : FreeMapItem -> !MapItem .
+  op co-skolem : FreeBagItem -> !BagItem .
 
   sort Value TypedValue .
   sort Void NvExpressionType ExpressionType .  

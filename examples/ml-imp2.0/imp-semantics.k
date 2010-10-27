@@ -434,20 +434,16 @@ asserted patterns
   2. may be assumed correct afterward
 ***)
   rule
-    <config_>
+    <config>
       <k> /*@ assert Cfgs */ => /*@ assume Cfgs */ <_/k>
-      <env> Env </env>
-      <heap> H </heap>
-      <form> Phi </form>
-      ---(<subst> Subst1 </subst> => skolemize(N, <subst> Subst2 </subst>))
+      CfgItems
       <subst> Subst1 => Subst2 </subst>
-    <_/config>
+      <tenv> TEnv </tenv>
+    </config>
     <counter> N </counter>
   if search(
       <config>
-        <env> Env </env>
-        <heap> H </heap>
-        <form> Phi </form>
+        CfgItems
         <subst> Subst1 </subst>
       </config>
       ===>
