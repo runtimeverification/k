@@ -89,6 +89,9 @@ unit-test:
 torture-test:
 	@make -C tests torture
 	
+thirdParty-test:
+	@make -C tests thirdParty
+	
 fix: 
 	maude $(SEMANTICS_DIR)/programs-gen.maude
 fixnew:
