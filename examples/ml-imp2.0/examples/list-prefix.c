@@ -3,10 +3,6 @@ struct nodeList {
   struct nodeList *next;
 };
 
-/*@ var ?x ?i : ?Int */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-
 struct nodeList* prefix(struct nodeList* x, int i)
 /*@ pre < config > < env > x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)([?i] @ A) </ heap > < form > returns ?x </ form > </ config > */
@@ -30,3 +26,8 @@ void main()
   x = prefix(x,5) ;
 }
 
+
+
+/*@ var ?x ?i : ?Int */
+/*@ var A : FreeSeq */
+/*@ var ?rho ?H : ?MapItem */

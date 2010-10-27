@@ -3,10 +3,6 @@ struct nodeList {
   struct nodeList *next;
 };
 
-/*@ var ?x ?y ?p : ?Int */
-/*@ var ?B ?C : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
 
 int reverse(struct nodeList *x)
 /*@ pre < config > < env > x |-> ?x </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
@@ -41,3 +37,8 @@ void main()
   /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)(rev(A)) </ heap > < form > TrueFormula </ form > </ config > */
 }
 
+
+/*@ var ?x ?y ?p : ?Int */
+/*@ var ?B ?C : ?Seq */
+/*@ var A : FreeSeq */
+/*@ var ?rho ?H : ?MapItem */

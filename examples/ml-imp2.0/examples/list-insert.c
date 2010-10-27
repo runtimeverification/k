@@ -3,11 +3,6 @@ struct nodeList {
   struct nodeList *next;
 };
 
-/*@ var ?x ?y ?iterator ?i ?iNode ?aux ?v : ?Int */
-/*@ var ?A ?B ?C ?D : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-
 struct nodeList* insert(struct nodeList* x, int i)
 /*@ pre < config > < env > x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)(?A) </ heap > < form > returns ?x /\ (seq2mset(?A) === seq2mset(A @ [?i])) </ form > </ config > */
@@ -57,3 +52,9 @@ void main()
   x = insert(x,3) ;
 }
 
+
+
+/*@ var ?x ?y ?iterator ?i ?iNode ?aux ?v : ?Int */
+/*@ var ?A ?B ?C ?D : ?Seq */
+/*@ var A : FreeSeq */
+/*@ var ?rho ?H : ?MapItem */

@@ -3,11 +3,6 @@ struct nodeList {
   struct nodeList *next;
 };
 
-/*@ var ?x ?y ?z ?v : ?Int */
-/*@ var i0 : FreeInt */
-/*@ var ?A ?B ?C : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
 
 struct nodeList* filter(struct nodeList* x, int i)
 /*@ pre < config > < env > x |-> ?x i |-> i0 </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
@@ -55,3 +50,8 @@ struct nodeList* filter(struct nodeList* x, int i)
   int test;  
 	return x;
 }
+/*@ var ?x ?y ?z ?v : ?Int */
+/*@ var i0 : FreeInt */
+/*@ var ?A ?B ?C : ?Seq */
+/*@ var A : FreeSeq */
+/*@ var ?rho ?H : ?MapItem */

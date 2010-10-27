@@ -3,10 +3,6 @@ struct nodeList {
   struct nodeList *next;
 };
 
-/*@ var ?x ?y ?p ?i ?v : ?Int */
-/*@ var ?A ?B : ?Seq */
-/*@ var A B : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
 
 struct nodeList* append(struct nodeList *x, struct nodeList *y)  
 /*@ pre < config >
@@ -46,3 +42,10 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
   }
   return x;
 }
+
+
+
+/*@ var ?x ?y ?p ?i ?v : ?Int */
+/*@ var ?A ?B : ?Seq */
+/*@ var A B : FreeSeq */
+/*@ var ?rho ?H : ?MapItem */

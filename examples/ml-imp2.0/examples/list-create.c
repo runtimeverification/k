@@ -3,10 +3,6 @@ struct nodeList {
   struct nodeList *next;
 };
 
-/*@ var ?x ?y : ?Int */
-/*@ var ?A : ?Seq */
-/*@ var ?rho ?H : ?MapItem */
-
 struct nodeList* create()
 /*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)([5] @ [6] @ [7]) </ heap > < form > returns ?x </ form > </ config > */
@@ -34,3 +30,8 @@ void main()
   struct nodeList *x;
   x = create();
 }
+
+
+/*@ var ?x ?y : ?Int */
+/*@ var ?A : ?Seq */
+/*@ var ?rho ?H : ?MapItem */
