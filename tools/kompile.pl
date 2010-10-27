@@ -772,7 +772,7 @@ sub make_pdf
     print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
 
     # Generate eps
-    $status = system("epspdf $language_file_name-pdf.eps");
+    $status = system("epstopdf $language_file_name-pdf.eps");
     print "Failed to generate pdf. Exit status $status.\n" if (($status >>= 8) != 0);
 
     rename ("$language_file_name-pdf.pdf", "$language_file_name.pdf");
