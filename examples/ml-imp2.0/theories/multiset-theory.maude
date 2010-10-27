@@ -17,9 +17,9 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
 
   op empty : -> MSet .
   op `{|_|`} : List{MathObj++} -> NeMSet++ [gather(&)] .
-  op `{|_|`} : ?MathObj -> ?MSet [ditto] .
-  op `{|_|`} : !MathObj -> !MSet [ditto] .
-  op `{|_|`} : FreeMathObj -> FreeMSet [ditto] .
+  ---op `{|_|`} : ?MathObj -> ?MSet [ditto] .
+  ---op `{|_|`} : !MathObj -> !MSet [ditto] .
+  ---op `{|_|`} : FreeMathObj -> FreeMSet [ditto] .
   op `{|_|`} : MathObj -> NeMSet [ditto] .
   op `{|_|`} : MathObj++ -> NeMSet++ [ditto] .
   op _U_ : MSet++ MSet++ -> MSet++ [assoc comm id: empty] .

@@ -144,6 +144,7 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
 ---  stack overflow
 ---  eq I +Int (J /Int 2) = (I +Int I +Int J) /Int 2 .
 
+  eq -Int I === 0 = I === 0 .
   eq I +Int K === J +Int K = I === J .
  ceq I1 === J1 /\ Phi1 ===> I2 === J2 /\ Phi2 = I1 === J1 /\ Phi1 ===> Phi2
   if (-Int I1) +Int (-Int I2) +Int J1 +Int J2 ==Bool 0 .

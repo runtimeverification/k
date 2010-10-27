@@ -17,9 +17,9 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
 
   op epsilon : -> Seq .
   op `[_`] : List{MathObj++} -> NeSeq++ .
-  op `[_`] : ?MathObj -> ?Seq [ditto] .
-  op `[_`] : !MathObj -> !Seq [ditto] .
-  op `[_`] : FreeMathObj -> FreeSeq [ditto] .
+  ---op `[_`] : ?MathObj -> ?Seq [ditto] .
+  ---op `[_`] : !MathObj -> !Seq [ditto] .
+  ---op `[_`] : FreeMathObj -> FreeSeq [ditto] .
   op `[_`] : MathObj -> NeSeq [ditto] .
   op `[_`] : MathObj++ -> NeSeq++ [ditto] .
   op _@_ : Seq++ Seq++ -> Seq++ [assoc id: epsilon] .
