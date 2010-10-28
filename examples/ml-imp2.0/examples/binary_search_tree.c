@@ -17,10 +17,10 @@ struct treeNode* newNode(int v)
 
 struct treeNode* insert(struct treeNode *t, int v)
 /*@ pre  < config > < env > t |-> ?root  v |-> v0 </ env >
-                    < heap > tree(?root)(T) H </ heap > 
+                    < heap > tree(?root)(T) H </ heap >
                     < form > isBst(T) </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < heap > tree(?root)(?T) H </ heap > 
+                    < heap > tree(?root)(?T) H </ heap >
                     < form >
                       isBst(?T) /\ tree2mset(?T) === tree2mset(T) U {| v0 |}
                       /\ returns ?root

@@ -15,7 +15,8 @@ mod K-TECHNIQUE is
   op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
 
   sorts List{KResult} NeList{KResult} List{K} NeList{K} .
-  op .List{K} : -> List{K} [metadata "latex(renameTo \\ensuremath{\\kdot}{\\it{}List\\{K\\}})"] .
+
+  op .List{K} : -> List{K} [metadata "latex(renameTo $\\kdot$\\subscript{{\\scriptstyle\\it{}List\\{K\\}}})"] .
   subsort K < NeList{K} < List{K} .
   op .List{K} : -> List{KResult} [metadata "latex(renameTo \\ensuremath{\\kdot}{\\it{}List\\{K\\}})"] .
   subsort List{KResult} < List{K} .

@@ -202,4 +202,3 @@ mod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX .
        }
   .
 endm
-

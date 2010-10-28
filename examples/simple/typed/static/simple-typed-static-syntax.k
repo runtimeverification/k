@@ -101,5 +101,3 @@ kmod SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX
   macro function F:Id() : Tp:Type S  = function F(.List{Bottom}) : Tp S
   macro E() = E(.List{Bottom})
 endkm
-
-

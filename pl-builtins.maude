@@ -32,19 +32,19 @@ mod PL-BOOL is
   subsort Bool < Builtins .
   op true : -> Bool [ctor special (id-hook SystemTrue)] .
   op false : -> Bool [ctor special (id-hook SystemFalse)] .
-  op _==Bool_ : Universal Universal -> Bool [poly (1 2) prec 51  metadata "latex(renameTo _==\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
+  op _==Bool_ : Universal Universal -> Bool [poly (1 2) prec 51  metadata "latex(renameTo _$=$\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
     id-hook EqualitySymbol
     term-hook equalTerm (true)
     term-hook notEqualTerm (false))] .
-  op _=/=Bool_ : Universal Universal -> Bool [poly (1 2) prec 51 metadata "latex(renameTo _=/=\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
+  op _=/=Bool_ : Universal Universal -> Bool [poly (1 2) prec 51 metadata "latex(renameTo _$\\neq$\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
     id-hook EqualitySymbol
     term-hook equalTerm (false)
     term-hook notEqualTerm (true))] .
 
-  op _andBool_ : Bool Bool -> Bool [assoc comm prec 55  metadata "latex(renameTo _and\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
-  op _orBool_ : Bool Bool -> Bool [assoc comm prec 59   metadata "latex(renameTo _or\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
+  op _andBool_ : Bool Bool -> Bool [assoc comm prec 55  metadata "latex(renameTo _$\\wedge$\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
+  op _orBool_ : Bool Bool -> Bool [assoc comm prec 59   metadata "latex(renameTo _$\\vee$\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
   op _xorBool_ : Bool Bool -> Bool [assoc comm prec 57] .
-  op notBool_ : Bool -> Bool [prec 53 metadata "latex(renameTo not\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
+  op notBool_ : Bool -> Bool [prec 53 metadata "latex(renameTo $\\neg$\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
   op _impliesBool_ : Bool Bool -> Bool [gather (e E) prec 61] .
   vars A B C : Bool .
   eq true andBool A = A .
@@ -224,7 +224,7 @@ mod PL-INT is
   subsorts NzNat < NzInt Nat < Int < Builtins .
 
   op -Int_ : NzNat -> NzInt
-        [ctor
+        [ctor metadata "latex(renameTo -\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook MinusSymbol
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .

@@ -10,7 +10,7 @@ kmod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SY
 --- statement value
   syntax Type ::= stmt
 
---- with types we can make epressions now
+--- with types we can make expressions now
   syntax Exp ::= Type
 --- ... and any list of types is a list of expressions
   syntax List{Exp} ::= List{Type} 
@@ -18,16 +18,6 @@ kmod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SY
 --- any type is also a statement
   syntax Stmt ::= Type  
 
-
---- translation of a list of typed names into a list of the corresponding untyped names
-  syntax List{Id} ::= idList ( List{IdType} ) 
-  macro idList(.List{Bottom}) = .List{Bottom} 
-  macro idList(X:Id : T:Type, XTl:List`{IdType`}) = X, idList(XTl) 
-
---- translation of a lists of typed names into a list of the corresponding types
-  syntax List{Type} ::= typeList ( List{IdType} ) 
-  macro typeList(.List{Bottom}) = .List{Bottom} 
-  macro typeList(X : T,XTl) = T,typeList(XTl) 
 
   syntax K ::= Stmts | List{Exp} | List{IdType}
 
@@ -46,12 +36,12 @@ kmod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SY
  
   syntax K ::= doneGlobals  --- to mark when the collection of globals completed
 
---- global variable declaration 
-  rule <k> var X:Id : T:Type ; => stmt <_/k> 
+--- global variable declaration
+  rule <k> var X:Id : T:Type ; => stmt <_/k>
        <gtenv> TEnv:Map => TEnv[T / X] </gtenv>
 
---- function declaration (and definition) 
-  rule <k> function F:Id(XTl:List`{IdType`}) : T S => stmt <_/k> 
+--- function declaration (and definition)
+  rule <k> function F:Id(XTl:List{IdType}) : T S => stmt <_/k>
        <gtenv> TEnv => TEnv[typeList(XTl) -> T / F] </gtenv> [structural] 
 
 --- when we are done with the first pass (doneGlobals mark), replace gtenv by tenv and start typing the bodies of functions
@@ -116,13 +106,24 @@ kmod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SY
        <tenv> TEnv => TEnv[getList{K}(typeList(XTl)) / getList{K}(idList(XTl))] </tenv> 
        <return> _ => T </return>
   
-  rule <k> stmt ~> (tenv(TEnv) => .K)<_/k> 
-       <tenv> _ => TEnv </tenv> . 
-  rule _`(_`)(Tl:List`{Type`} -> T,Tl) => T 
+  rule <k> stmt ~> (tenv(TEnv) => .K)<_/k>
+       <tenv> _ => TEnv </tenv> .
+  rule _`(_`)(Tl:List`{Type`} -> T,Tl) => T
   rule <k> return(T); => stmt <_/k>
        <return> T </return> 
   rule read() => int 
   rule write(int) ; => stmt   
+
+
+--- translation of a list of typed names into a list of the corresponding untyped names
+  syntax List{Id} ::= idList ( List{IdType} ) 
+  macro idList(.List{Bottom}) = .List{Bottom} 
+  macro idList(X:Id : T:Type, XTl:List`{IdType`}) = X, idList(XTl) 
+
+--- translation of a lists of typed names into a list of the corresponding types
+  syntax List{Type} ::= typeList ( List{IdType} ) 
+  macro typeList(.List{Bottom}) = .List{Bottom} 
+  macro typeList(X : T,XTl) = T,typeList(XTl) 
 
 endkm
 

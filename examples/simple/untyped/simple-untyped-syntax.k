@@ -1,57 +1,59 @@
--------------------------------------
---- SIMPLE-UNTYPED-SYNTAX modules ---
--------------------------------------
+------------------------------------
+--- SIMPLE-UNTYPED-SYNTAX module ---
+------------------------------------
 
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
-  sorts Var Exp Stmt Stmts
+
+--- Declarations
+--- There are two types of declarations: for variables (including arrays) and for functions
+  syntax Decl ::= var Var ; [prec 2]
+                | function Id ( ) Stmt
+                | function Id ( List{Id} ) Stmt
 
 --- Variables; we include arrays here as well, so that, e.g., a[x][y][z]
 --- can appear anywhere a variable can appear (declarations, lookup, assignment)
   syntax Var ::= Id
-               | Exp [ Exp ] [prec 1 strict]
+               | Var [ Exp ] [strict prec 1]
 
 --- Expressions
-  syntax Exp ::= Var | Int | Bool
-               | ++ Id [prec 0]
-               | Exp + Exp [gather(E e) prec 33 strict]
-               | Exp - Exp [gather(E e) prec 33 strict]
-               | Exp * Exp [gather(E e) prec 31 strict]
-               | Exp / Exp [gather(E e) prec 31 strict]
-               | Exp % Exp [gather(E e) prec 31 latex "{#1}\%{#2}" strict]
-               | - Exp [strict]
-               | Exp < Exp [prec 37 latex "{#1}<{#2}" strict] 
-               | Exp <= Exp [prec 37 latex "{#1}\leq{#2}" strict] 
-               | Exp > Exp [prec 37 latex "{#1}>{#2}" strict] 
-               | Exp >= Exp [prec 37 latex "{#1}\geq{#2}" strict] 
-               | Exp == Exp [prec 37 strict] 
-               | Exp != Exp [prec 37 strict] 
-               | Exp and Exp [gather(E e) prec 55 strict] 
-               | Exp or Exp  [gather(E e) prec 59 strict] 
-               | not Exp [prec 53 strict]
-               | sizeOf ( Exp ) [strict]
+  syntax Exp ::= Int | Bool
+               | Var
+               | ++ Id             [prec 0]
+               | Exp + Exp         [strict prec 33]
+               | Exp - Exp         [strict prec 33 gather(E e)]
+               | Exp * Exp         [strict prec 31]
+               | Exp / Exp         [strict prec 31]
+               | Exp % Exp         [strict prec 31]
+               | - Exp             [strict]
+               | Exp < Exp         [strict prec 37]
+               | Exp <= Exp        [strict prec 37]
+               | Exp > Exp         [strict prec 37]
+               | Exp >= Exp        [strict prec 37]
+               | Exp == Exp        [strict prec 37]
+               | Exp != Exp        [strict prec 37]
+               | Exp and Exp       [strict prec 55]
+               | Exp or Exp        [strict prec 59]
+               | not Exp           [strict prec 53]
+               | Exp [ Exp ]       [ditto]
+               | sizeOf ( Exp )    [strict]
                | Exp ( )
-               | Exp ( List{Exp} ) [prec 2 strict]
+               | Exp ( List{Exp} ) [strict prec 2]
                | read ( )
-
---- Declarations
-  syntax Decl ::= var Var ; [prec 2]  
-                | function Id ( ) Stmt
-                | function Id ( List{Id} ) Stmt
 
 --- Statements
   syntax Stmt ::= { }
-                | { Stmts } [gather(&)]
-                | Exp = Exp ; [prec 2 strict(2)]
-                | Exp ; [prec 50 strict]
+                | { Stmts }
+                | Exp = Exp ;                [strict(2)]
+                | Exp ;                      [strict]
                 | if Exp then Stmt else Stmt [strict(1)]
                 | if Exp then Stmt
                 | while Exp do Stmt
                 | for Id = Exp to Exp do Stmt
-                | return Exp ; [strict]
-                | write ( Exp ) ; [strict]
+                | return Exp ;               [strict]
+                | write ( Exp ) ;            [strict]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts [prec 100 gather(e E)]
+                 | Stmts Stmts               [prec 100 gather(e E)]
 
 --- Function "main"
   syntax Id ::= main
@@ -62,8 +64,8 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 -----------------------------------------------------------------------------
 --- List{Id}; the hybrid attribute says that a list of results becomes itself a result
   syntax List{Id} ::= Id
-                    | .List{Id}
-                    | List{Id} , List{Id} [prec 70 assoc id: .List{Id} hybrid strict]
+                    | .List{Id} [latex "\kdot{\it List\{Id\}}"]
+                    | List{Id} , List{Id} [strict hybrid assoc id: .List{Id} prec 70]
 
 --- List{Exp}
   syntax List{Exp} ::= Exp
