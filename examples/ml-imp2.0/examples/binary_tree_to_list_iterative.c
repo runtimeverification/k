@@ -97,13 +97,13 @@ int main()
   tl->right = 0;
   tr->left = 0;
   tr->right = 0;
-  /*@ assert  < config > < env > root |-> ?root </ env >
+  /*@ assert  < config > < env > root |-> ?root tl |-> ?tl tr |-> ?tr </ env >
                     < heap > tree(?root)(?T) </ heap >
                     < form > TrueFormula </ form > </ config > */
 }
 
 
-/*@ var ?root ?a ?stack ?t ?x ?node : ?Int */
+/*@ var ?root ?a ?stack ?t ?x ?node ?tl ?tr : ?Int */
 /*@ var ?TS ?A : ?Seq */
 /*@ var T : FreeTree */
 /*@ var ?T : ?Tree */
