@@ -51,12 +51,40 @@ int main()
   /*@ assert < config > < env > x |-> ?x y |-> ?x </ env > < heap > list(?x)([5] @ [6] @ [7]) </ heap > < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
   /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([7] @ [6] @ [5]) </ heap > < form > TrueFormula </ form > </ config > */
+  y = x;
+  x = x->next;
+  free(y);
+  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([6] @ [5]) </ heap > < form > TrueFormula </ form > </ config > */
+  y = x;
+  x = x->next;
+  free(y);
+  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([5]) </ heap > < form > TrueFormula </ form > </ config > */
+  y = x;
+  x = x->next;
+  free(y);
+  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(0)(epsilon) </ heap > < form > TrueFormula </ form > </ config > */
+  
+  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  x->val = 7;
+  x->next = 0;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 6;
+  y->next = x;
+  x = y;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 5;
+  y->next = x;
+  x = y;
+  /*@ assert < config > < env > x |-> ?x y |-> ?x </ env > < heap > list(?x)(!A) </ heap > < form > TrueFormula </ form > </ config > */
+  x = reverse(x) ;
+  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)(rev(!A)) </ heap > < form > TrueFormula </ form > </ config > */
   return 0;
 }
 
 
 /*@ var ?x ?y ?p : ?Int */
 /*@ var ?B ?C : ?Seq */
+/*@ var !A : !Seq */
 /*@ var A : FreeSeq */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */
