@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <stdio.h>
 
 struct nodeList {
   int val;
@@ -74,8 +74,10 @@ int main()
   y->val = 5;
   y->next = x;
   x = y;
+  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
   /*@ assert < config > < env > x |-> ?x y |-> ?x </ env > < heap > list(?x)(!A) </ heap > < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
+  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
   /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)(rev(!A)) </ heap > < form > TrueFormula </ form > </ config > */
   return 0;
 }

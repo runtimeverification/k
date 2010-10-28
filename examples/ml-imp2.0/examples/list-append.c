@@ -61,7 +61,7 @@ int main()
              < env > x |-> ?x y |-> ?x z |-> ?z </ env > 
              < heap > list(?x)([5] @ [6] @ [7]) </ heap > 
              < form > TrueFormula </ form > </ config > */
-  printf("%d %d %d",x->val, x->next->val, x->next->next->val);
+  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
   z = (struct nodeList*)malloc(sizeof(struct nodeList));
   z->val = 5;
   z->next = 0;
@@ -73,11 +73,13 @@ int main()
   y->val = 1;
   y->next = z;
   z = y;
+  printf("z: %d %d %d\n",z->val, z->next->val, z->next->next->val);
   /*@ assert < config > 
              < env > x |-> ?x z |-> ?z y |-> ?z </ env > 
              < heap > list(?x)([5] @ [6] @ [7]) list(?z)([1] @ [3] @ [5]) </ heap > 
              < form > TrueFormula </ form > </ config > */
   x = append(x,z);
+  printf("x: %d %d %d %d %d %d\n",x->val, x->next->val, x->next->next->val, x->next->next->next->val, x->next->next->next->next->val, x->next->next->next->next->next->val);
   /*@ assert < config > 
              < env > x |-> ?x z |-> ?z y |-> ?z </ env > 
              < heap > list(?x)([5,6,7,1,3,5]) </ heap > 
