@@ -8,15 +8,18 @@ struct nodeList {
 
 
 struct nodeList* reverse(struct nodeList *x)
-/*@ pre < config > < env > x |-> ?x ?env </ env > < heap > list(?x)(A) heapFrame </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) heapFrame </ heap > < form > returns ?x </ form > </ config > */
+/*@ pre  < config > < env > x |-> ?x </ env > < heap > list(?x)(A) H </ heap >
+                    < form > TrueFormula </ form > C </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) H </ heap >
+                    < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *p;
   struct nodeList *y;
   p = 0 ;
-  /*@ invariant < config > < env > p |-> ?p x |-> ?x y |-> ?y ?env  </ env >
-                          < heap > list(?p)(?B) list(?x)(?C) heapFrame </ heap >
-                          < form > rev(A) === rev(?C) @ ?B </ form > </ config > */
+  /*@ invariant < config > < env > p |-> ?p x |-> ?x y |-> ?y </ env >
+                           < heap > list(?p)(?B) list(?x)(?C) H </ heap >
+                           < form > rev(A) === rev(?C) @ ?B </ form >
+                           C </ config > */
   while(x != 0) {
     y = x->next;
     x->next = p;
@@ -29,8 +32,6 @@ struct nodeList* reverse(struct nodeList *x)
 
 
 int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
   struct nodeList *x;
   struct nodeList *y;
@@ -57,5 +58,6 @@ int main()
 /*@ var ?x ?y ?p : ?Int */
 /*@ var ?B ?C : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var ?rho ?H ?env : ?MapItem */
-/*@ var envFrame heapFrame invarFrame : FreeMapItem */
+/*@ var ?rho : ?MapItem */
+/*@ var H : FreeMapItem */
+/*@ var C : FreeBagItem */

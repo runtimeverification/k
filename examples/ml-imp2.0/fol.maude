@@ -77,10 +77,10 @@ mod FOL= is inc CONFIG-UTILS + SMT-INTERFACE .
      =match=> < config > CfgItems2 </ config > .
 
 --- Step 2.4 : Eliminate a globally bounded variable
-  eq < config > < env > Env </ env > < subst > Subst </ subst > CfgItems1 </ config >
-     =match=> < config > < env > !Env </ env > CfgItems2 </ config >
-   = < config > < subst > (!Env <- Env) ; Subst </ subst > CfgItems1 </ config >
-     =match=> < config > CfgItems2 </ config > .
+  eq < config > < env > Env </ env > CfgItems1 </ config >
+     =match=> < config > < env > !Env </ env > < subst > Subst </ subst > CfgItems2 </ config >
+   = < config > CfgItems1 </ config >
+     =match=> < config > < subst > (!Env <- Env) ; Subst </ subst > CfgItems2 </ config > .
 
 --- Step 2.5 : Eliminate the environment cell
   eq < config > < env > (.).Map </ env > CfgItems1 </ config >

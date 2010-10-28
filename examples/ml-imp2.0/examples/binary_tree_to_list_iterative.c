@@ -18,12 +18,12 @@ struct treeNodeList {
 
 
 struct nodeList *toListIterative(struct treeNode *root)
-/*@ pre < config > < env > root |-> ?root </ env >
-                   < heap > tree(?root)(Tree) heapFrame </ heap >
-                   < form > TrueFormula </ form > </ config > */
+/*@ pre  < config > < env > root |-> ?root </ env >
+                    < heap > tree(?root)(T) H </ heap >
+                    < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < heap > list(?a)(tree2seq(Tree)) heapFrame </ heap >
-                    < form > returns ?a </ form > </ config > */
+                    < heap > list(?a)(tree2seq(T)) H </ heap >
+                    < form > returns ?a </ form > C </ config > */
 {
   struct nodeList *a;
   struct nodeList *node;
@@ -43,8 +43,9 @@ struct nodeList *toListIterative(struct treeNode *root)
             root |-> ?root a |-> ?a stack |-> ?stack
             t |-> ?t x |-> ?x node |-> ?node
           </ env >
-          < heap > list{tree}(?stack)(?TS) list(?a)(?A) heapFrame </ heap >
-          < form > tree2seq(Tree) === seq{tree}2seq(rev(?TS)) @ ?A </ form >
+          < heap > list{tree}(?stack)(?TS) list(?a)(?A) H </ heap >
+          < form > tree2seq(T) === seq{tree}2seq(rev(?TS)) @ ?A </ form >
+          C
         </ config > */
   while (stack != 0) {
     x = stack;
@@ -81,8 +82,9 @@ struct nodeList *toListIterative(struct treeNode *root)
 
 
 /*@ var ?root ?a ?stack ?t ?x ?node : ?Int */
-/*@ var ?rho : ?MapItem */
-/*@ var heapFrame : FreeMapItem */
-/*@ var Tree : FreeTree */
 /*@ var ?TS ?A : ?Seq */
+/*@ var T : FreeTree */
+/*@ var ?rho : ?MapItem */
+/*@ var H : FreeMapItem */
+/*@ var C : FreeBagItem */
 

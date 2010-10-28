@@ -7,16 +7,12 @@ struct nodeList {
 
 
 struct nodeList* append(struct nodeList *x, struct nodeList *y)  
-/*@ pre < config >
-         < env > x |-> ?x  y |-> ?y  </ env >
-         < heap > list(?x)(A) list(?y)(B) heapFrame </ heap >
-         < form > TrueFormula </ form >
-         </ config > */
-/*@ post < config > 
-          < env >  ?rho </ env >
-          < heap > list(?x)(A @ B) heapFrame </ heap > 
-          < form > returns ?x </ form > 
-          </ config > */
+/*@ pre  < config > < env > x |-> ?x  y |-> ?y  </ env >
+                    < heap > list(?x)(A) list(?y)(B) H </ heap >
+                    < form > TrueFormula </ form > C </ config > */
+/*@ post < config > < env >  ?rho </ env >
+                    < heap > list(?x)(A @ B) H </ heap > 
+                    < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *p;
   struct nodeList *i;
@@ -25,17 +21,15 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
   {
     p = x ;
     i = x->next; 
-/*@ invariant < config > 
-         < env > x |-> ?x  y |-> ?y  i |-> ?i  p |-> ?p </ env >
-         < heap > lseg(?x , ?p)(?A) 
-                  ?p |-> ?v : (nodeList . val)
-                  (?p +Int 1) |-> ?i :  (nodeList . next)
-                  list(?i)(?B)  
-                  list(?y)(B) 
-                  heapFrame
-         </ heap > 
-         < form > (?A @ [?v] @ ?B) === A </ form > 
-         </ config > */
+    /*@ invariant < config > < env > x |-> ?x i |-> ?i p |-> ?p !rho </ env >
+                             < heap > lseg(?x , ?p)(?A) 
+                               ?p |-> ?v : (nodeList . val)
+                               (?p +Int 1) |-> ?i :  (nodeList . next)
+                                list(?i)(?B)  
+                               !H
+                             </ heap > 
+                             < form > (?A @ [?v] @ ?B) === A </ form > 
+                             C </ config > */
     while (i != 0)
     {
         p = i ;
@@ -47,34 +41,30 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
 }
 
 int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
   struct nodeList* x;
   struct nodeList* y;
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
   x->val = 5;
   x->next = 0;
-  
-/*@ assert < config > 
-           < env > x |-> ?x y |-> ?y </ env > 
-           < heap > list(?x)(!A) </ heap > 
-           < form > TrueFormula </ form > </ config > */
+  /*@ assert < config > 
+             < env > x |-> ?x y |-> ?y </ env > 
+             < heap > list(?x)(!A) </ heap > 
+             < form > TrueFormula </ form > </ config > */
            
   
   y = (struct nodeList*)malloc(sizeof(struct nodeList));
   y->val = 6;
   y->next = 0;
-
-/*@ assert < config > 
-           < env > x |-> ?x y |-> ?y </ env > 
-           < heap > list(?x)(!A) list(?y)(!B) </ heap > 
-           < form > TrueFormula </ form > </ config > */
+  /*@ assert < config > 
+             < env > x |-> ?x y |-> ?y </ env > 
+             < heap > list(?x)(!A) list(?y)(!B) </ heap > 
+             < form > TrueFormula </ form > </ config > */
   x = append(x,y);
-/*@ assert < config > 
-           < env > x |-> ?x y |-> ?y </ env > 
-           < heap > list(?x)(!A @ !B) ?H </ heap > 
-           < form > TrueFormula </ form > </ config > */
+  /*@ assert < config > 
+             < env > x |-> ?x y |-> ?y </ env > 
+             < heap > list(?x)(!A @ !B) ?H </ heap > 
+             < form > TrueFormula </ form > </ config > */
   return 0;
 }
 
@@ -83,5 +73,6 @@ int main()
 /*@ var !A !B : !Seq */
 /*@ var A B : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
-/*@ var !rho : !MapItem */
-/*@ var rho heapFrame : FreeMapItem */
+/*@ var !rho !H : !MapItem */
+/*@ var H : FreeMapItem */
+/*@ var C : FreeBagItem */

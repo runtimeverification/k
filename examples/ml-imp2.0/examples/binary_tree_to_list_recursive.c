@@ -13,12 +13,12 @@ struct nodeList {
 };
   
 struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
-/*@ pre < config > < env > root |-> ?root x |-> ?x </ env >
-                   < heap > tree(?root)(Tree) list(?x)(A) heapFrame </ heap >
-                   < form > TrueFormula </ form > </ config > */
+/*@ pre  < config > < env > root |-> ?root x |-> ?x </ env >
+                    < heap > tree(?root)(T) list(?x)(A) H </ heap >
+                    < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < heap > list(?x)(tree2seq(Tree) @ A) heapFrame </ heap >
-                    < form > returns ?x </ form > </ config > */
+                    < heap > list(?x)(tree2seq(T) @ A) H </ heap >
+                    < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *node;
   if (root == 0)
@@ -32,9 +32,10 @@ struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
 }
 
 /*@ var ?root ?x : ?Int */
-/*@ var ?rho : ?MapItem */
-/*@ var heapFrame : FreeMapItem */
-/*@ var Tree : FreeTree */
+/*@ var T : FreeTree */
 /*@ var ?T : ?Tree */
 /*@ var A : FreeSeq */
+/*@ var ?rho : ?MapItem */
+/*@ var H : FreeMapItem */
+/*@ var C : FreeBagItem */
 

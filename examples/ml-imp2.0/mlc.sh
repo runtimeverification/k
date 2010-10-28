@@ -9,6 +9,7 @@ LANG_MODULE=`echo ${LANG_NAME} | tr [:lower:] [:upper:]`
 K_TOOLS_DIR=${K_ROOT_DIR}/tools
 ANTLR_ROOT_DIR=${K_TOOLS_DIR}/antlr
 LANG_PARSER_DIR=${ML_ROOT_DIR}/parser
+SMT_MAUDE_DIR=${K_TOOLS_DIR}/smt_maude
 
 KC=${K_TOOLS_DIR}/kcompile-program.sh
 KFLAGS=
@@ -19,7 +20,7 @@ JFLAGS="-classpath ${CLASSPATH}"
 UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=kernelCPreK
 
-MAUDE=smt-maude
+MAUDE=${SMT_MAUDE_DIR}/maude
 MFLAGS=-no-banner
 
 TMP_OUT=.tmp_out_file
@@ -66,4 +67,4 @@ ${MAUDE} ${MFLAGS} ${ML_PROG} >${TMP_OUT} 2>${TMP_ERR}
 if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
 sed -e '1,2d' -e '$d' ${TMP_OUT}
-rm -f ${TMP_OUT} ${TMP_ERR}  ${MAUDE_PROG} ${COMPILED_PROG} ${ML_PROG}
+rm -f ${TMP_OUT} ${TMP_ERR}  ${MAUDE_PROG} ${COMPILED_PROG} #${ML_PROG}

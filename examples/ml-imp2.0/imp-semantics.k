@@ -24,7 +24,7 @@ kmod IMP-SEMANTICS is including IMP-DESUGARED-SYNTAX
   kvar Map Env Env1 Env2 TEnv H : Map
 
   syntax K ::= KernelC
-  syntax K ::= checkContracts | checkContracts ( Map ) | checkContract ( Id )
+  syntax K ::= checkContracts | checkContract ( Id )
   syntax K ::= fieldList ( List{KernelC} )
   syntax TypedValue ::= newObject
   syntax MapItem ::= ExpressionType Id ( List{KernelC} ) : Bag => Bag
@@ -77,10 +77,6 @@ Translation unit (top rule)
     <k> checkContracts => checkContracts(Map) <_/k>
     <fun> Map </fun>
   [structural]
-  rule
-    checkContracts((X |-> _) Map) => checkContract(X) ~> checkContracts(Map)
-  [structural]
-  rule checkContracts(.Map) => .K [structural]
 
 
 ***(
@@ -92,7 +88,11 @@ Function definition/declaration
   rule
     <k> T F(KernelCList) /*@ pre PreCfgs */ /*@ post PostCfgs */ S => .K <_/k>
     <spec_> .Map => T F(KernelCList) : PreCfgs => PostCfgs <_/spec>
-    <fun_> .Map => F |-> T F(KernelCList) S <_/fun>    
+    <fun_> .Map => F |-> T F(KernelCList) S <_/fun>
+  rule
+    <k> T F(KernelCList) S => .K <_/k>
+    <spec_> .Map => T F(KernelCList) |-> S <_/spec>
+    <fun_> .Map => F |-> T F(KernelCList) S <_/fun>
 
 
 ***(
@@ -108,21 +108,43 @@ Structure declaration
 Function entry
 ***)
   rule
-    <k>
-        checkContract(F)
-      =>
-        /*@ assume PreCfgs */
-        ~> S
-        ~> functionEnd
-        ~> /*@ assert PostCfgs */
-    <_/k>
-    <tenv> _ => bindTEnv(KernelCList) </tenv>
-    <env> _ => .Map </env>
-    <heap> _ => .Map </heap>
-    <form> _ => TrueFormula </form>
-    <subst> _ => .Subst </subst>
+    <k> checkContract(F) => .K <_/k>
+    (
+      .Bag
+    =>
+      <config>
+        <k>
+          /*@ assume PreCfgs */
+          ~> S
+          ~> functionEnd
+          ~> /*@ assert PostCfgs */
+        </k>
+        <tenv> bindTEnv(KernelCList) </tenv>
+        <env> .Map </env>
+        <heap> .Map </heap>
+        <form> TrueFormula </form>
+        <subst> .Subst </subst>
+      </config>
+    )
     <fun_> F |-> T F(KernelCList) S <_/fun>
     <spec_> T F(KernelCList) : PreCfgs => PostCfgs <_/spec>
+  [structural]
+  rule
+    <k> checkContract(F) => .K <_/k>
+    (
+      .Bag
+    =>
+      <config>
+        <k> S ~> functionEnd </k>
+        <tenv> bindTEnv(KernelCList) </tenv>
+        <env> .Map </env>
+        <heap> .Map </heap>
+        <form> TrueFormula </form>
+        <subst> .Subst </subst>
+      </config>
+    )
+    <fun_> F |-> T F(KernelCList) S <_/fun>
+    <spec_> T F(KernelCList) |-> S <_/spec>
   [structural]
 
 ***(
@@ -288,7 +310,6 @@ Expressions
       <form> Phi /\ I === 0 </form>
       CfgItems
     </config>
-  --- FIXME
   if notBool(I :: Int) [structural]
   rule tv(int, NzI) ? E1 : E2 => E1 [structural]
   rule tv(int, 0) ? E1 : E2 => E2 [structural]
@@ -408,7 +429,6 @@ multiple patterns generate splitting
     =>
       <config>
         <k> K </k>
-        ---applySubst(skolemize(N, <form> Phi1 /\ Phi2 </form> CfgItems), Subst)
         skolemize(N, applySubst(<form> Phi1 /\ Phi2 </form> CfgItems, Subst))
         skolemize(N, <subst> Subst </subst>)
         <tenv> TEnv </tenv>
@@ -475,24 +495,20 @@ function calls
       <form> Phi </form> 
       <subst> Subst </subst>  
     <_/config>
-***(
-  if search(
-    <config>
-      <env> bindEnv(KernelCList1, KernelCList2) </env>
+  rule
+    <spec_> T F(KernelCList1) |-> S <_/spec>
+    <config_>
+      <k>
+          _`(_`)(F, KernelCList2)
+        =>
+          S ~> restoreContext(TEnv, Env, Subst) ~> getReturnValue(T)
+      <_/k>
+      <tenv> TEnv => bindTEnv(KernelCList1) </tenv>
+      <env> Env => bindEnv(KernelCList1, KernelCList2) </env>
       <heap> H </heap>
-      <form> Phi </form>
-      <subst> Subst1 </subst>
-      <newImpl> N </newImpl>
-    </config>
-    ===>
-    co-skolemize(PreCfgs)
-  =>
-    <config>
-      <form> TrueFormula </form>
-      <subst> Subst2 </subst>
-    </config>
-  )
-***)
+      <form> Phi </form> 
+      <subst> Subst </subst>  
+    <_/config>
   rule
     <k> restoreContext(TEnv, Env, Subst) => .K <_/k>
     <tenv> _ => TEnv </tenv>
@@ -509,6 +525,12 @@ retrieve the return value
   [structural]
   rule getReturnValue(void) => tv(void, unit) [structural]
 
+
+  syntax K ::= checkContracts ( Map )
+  rule
+    checkContracts((X |-> _) Map) => checkContract(X) ~> checkContracts(Map)
+  [structural]
+  rule checkContracts(.Map) => .K [structural]
 
   syntax Nat ::= listLen ( List{KernelC} )
   rule listLen(_,,, KernelCList) => sNat listLen(KernelCList)
