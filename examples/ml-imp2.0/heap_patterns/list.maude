@@ -47,6 +47,8 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
 
   eq < heap > list(0)(Alpha) H </ heap > < form > Phi </ form >
    = < heap > H </ heap > < form > Phi /\ Alpha === epsilon </ form > .
+  eq < heap > list(P)(epsilon) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ P === 0 </ form > .
 
   rl < config >
        < heap >

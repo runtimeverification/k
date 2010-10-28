@@ -53,6 +53,7 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
 
   eq {| Obj1, Obj2, ObjList |} = {| Obj1 |} U {| Obj2 |} U {| ObjList |} .
   eq {| .List{MathObj++} |} = empty .
+  eq {| Obj |} @ A === empty = FalseFormula .
   eq NeA U A1 === NeA U A2 = A1 === A2 .
   eq size(NeA1 U NeA2) = size(NeA1) +Int size(NeA2) .
   eq size(empty) = 0 .

@@ -51,6 +51,8 @@ mod BINARY-TREE-HP is inc CONFIG + MATHEMATICAL-TREE + MATHEMATICAL-SEQUENCE .
 
   eq < heap > tree(0)(Tau) H </ heap > < form > Phi </ form >
    = < heap > H </ heap > < form > Phi /\ Tau === upsilon </ form > .
+  eq < heap > tree(P)(upsilon) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ P === 0 </ form > .
 
   rl < config >
        < heap >
