@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 struct treeNode {
   int val;
@@ -104,6 +105,7 @@ int main()
              </ env >
              < heap > tree(?root)(!T) </ heap >
              < form > TrueFormula </ form > </ config > */
+  printf("Left root right:\n  %d   %d   %d\n", tl->val, root->val, tr->val);
   test = toListIterative(root);
   /*@ assert < config >
              < env >
