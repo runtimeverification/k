@@ -15,9 +15,9 @@ int sum(int n)
                   n |-> ?n
                   s |-> ((n0 +Int (-Int ?n)) *Int (n0 +Int ?n +Int 1)) /Int 2
                 </ env >
-                < form > @(?n >=Int 0) /\ @(n0 >=Int 0) </ form >
+                < form > @(?n >=Int 0) </ form >
                 C </ config > */
-  while (n)
+  while (n > 0)
   {
     s += n;
     n -= 1;
