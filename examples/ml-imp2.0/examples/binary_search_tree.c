@@ -7,16 +7,6 @@ struct treeNode {
 };
 
 struct treeNode* newNode(int v)
-/*@ pre  < config > < env > v |-> v0 </ env > < heap > H </ heap > 
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < heap >
-                      ?n |-> v0 : treeNode . val
-                      ?n +Int 1 |-> 0 : treeNode . left
-                      ?n +Int 2 |-> 0 : treeNode . right
-                      H
-                    </ heap >
-                    < form > returns ?n </ form > C </ config > */
 {
   struct treeNode *node;
   node = (struct treeNode *)malloc(sizeof(struct treeNode));

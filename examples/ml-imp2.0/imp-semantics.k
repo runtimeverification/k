@@ -135,7 +135,7 @@ Function entry
       .Bag
     =>
       <config>
-        <k> S ~> functionEnd </k>
+        <k> declArgs(KernelCList) ~> S ~> functionEnd </k>
         <tenv> bindTEnv(KernelCList) </tenv>
         <env> .Map </env>
         <heap> .Map </heap>
@@ -531,6 +531,12 @@ retrieve the return value
     checkContracts((X |-> _) Map) => checkContract(X) ~> checkContracts(Map)
   [structural]
   rule checkContracts(.Map) => .K [structural]
+
+  syntax K ::= declArgs ( List{KernelC} )
+  rule
+    declArgs(KernelC,,, KernelCList) => KernelC ~> declArgs(KernelCList)
+  [structural]
+  rule declArgs(.List{KernelC}) => .K [structural]
 
   syntax Nat ::= listLen ( List{KernelC} )
   rule listLen(_,,, KernelCList) => sNat listLen(KernelCList)
