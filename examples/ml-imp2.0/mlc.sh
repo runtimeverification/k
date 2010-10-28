@@ -43,7 +43,7 @@ MAUDE_PROG=${PROG}.maude
 COMPILED_PROG=prog-compiled.maude
 ML_PROG=${PROG}-ml.maude
 
-grep -v '^#include' $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN} >${MAUDE_PROG}
+grep -v '^#include' $1 | grep -v 'printf(' | ${JVM} ${JFLAGS} ${PARSER_MAIN} >${MAUDE_PROG}
 if [ "$?" -ne 0 ]; then exit $?; fi
 
 sed -i -e "1i load ${ML_ROOT_DIR}/${LANG_NAME}-syntax.maude" ${MAUDE_PROG}
