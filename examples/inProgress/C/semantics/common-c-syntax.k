@@ -150,7 +150,7 @@ type typeSpecifier = (* Merge all specifiers into one type *)
 	op UnionRef : Id -> TypeSpecifier [ctor] --- new
 	op UnionDef : Id List{C} -> TypeSpecifier [strict(2) ctor] --- new
 	op EnumRef : Id -> TypeSpecifier [ctor] --- new
-	op EnumDef : Id List{C} -> TypeSpecifier [strict(2) ctor] --- new
+	op EnumDef : Id List{C} -> TypeSpecifier [ctor] --- new
 	op TypeofExpression : K -> TypeSpecifier [ctor]
 	op TypeofType : K K -> TypeSpecifier [ctor]
 
@@ -271,7 +271,8 @@ and single_name = specifier * name
 ***(
 and enum_item = string * expression * cabsloc
 ***)
-	op EnumItem : Id K -> PureEnumItem [strict(2)]
+	--- op EnumItem : Id K -> PureEnumItem [strict(2)]
+	op EnumItem : Id K -> PureEnumItem
 	op EnumItemLoc : K K -> EnumItem --- new
 		
 ***(
@@ -295,7 +296,7 @@ and enum_item = string * expression * cabsloc
 	op FunctionDefinition : K K -> PureDefinition [strict(1)]
 	op DeclarationDefinition : K -> PureDefinition
 	op Typedef : K -> PureDefinition
-	op OnlyTypedef : K -> PureDefinition [strict]
+	op OnlyTypedef : K -> PureDefinition
 	op GlobAsm : String -> PureDefinition
 	op Pragma : K -> PureDefinition
 	op Linkage : String List{C} -> PureDefinition

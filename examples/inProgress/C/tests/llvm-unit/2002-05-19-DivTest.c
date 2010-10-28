@@ -2,7 +2,8 @@
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
 #endif
-#include <inttypes.h>
+//#include <inttypes.h>
+#include <stdint.h>
 
 extern int printf(const char *, ...);
 

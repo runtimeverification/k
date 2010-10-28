@@ -766,13 +766,12 @@ mod COMMON-SEMANTICS-MEMBERS is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
 	mb [arrow-struct]: rule
-		< k > tv(Base:Int, pointerType(structType(S:Id))) -> F:Id 
-			=> *(tv(Base:Int, pointerType(structType(S:Id)))) . F:Id 
+		< k > tv(Base:Int, pointerType(T:Type)) -> F:Id 
+			=> *(tv(Base:Int, pointerType(T:Type))) . F:Id 
 		...</ k >
+		if hasStructType(T:Type)
+		orBool hasUnionType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb [arrow-union]: rule
-		--- < k > [tv(Base:Int, pointerType(unionType(S:Id))) -> X:Id => Deref(tv(Base:Int, pointerType(unionType(S:Id)))) . X:Id] ...</ k >
-		--- : KSentence [metadata "structural"] .
 
 	op toEval : K -> K .
 	op toEval-aux : K K -> K [metadata "strict(2)"] .

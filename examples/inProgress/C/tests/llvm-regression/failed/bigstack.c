@@ -68,11 +68,11 @@ main(int argc, char** argv)
   int i;
   
   InitializeMixed(&M, 100);
-  printf("Sum(M)  = %.2f\n", AddMixed(&M));
+  printf("Sum(M)  = %d\n", (int)(10000*AddMixed(&M)));
   
   for (i=0; i < 4; i++) {
     InitializeMixed(&MA[i], 100 * (i+2));
-    printf("Sum(MA[%d]) = %.2f\n", i, AddMixed(&MA[i]));
+    printf("Sum(MA[%d]) = %d\n", i, (int)(10000*AddMixed(&MA[i])));
   }
 
   return 0;

@@ -505,7 +505,8 @@ mod COMMON-C-CONVERSIONS is
 	including COMMON-SEMANTICS-CAST .
 	including COMMON-SEMANTICS-PROMOTIONS .
 	
-	
+	--- this seems implementation defined at best
+	--- eq bitfieldType(enumType(X:Id), N:Nat) = bitfieldType(int, N:Nat) .
 	
 	--- fixme generalize this should be done generically
 	mb rule < k > *(tv(?, (arrayType(T:Type, ?) => pointerType(T:Type)))) ...</ k > 

@@ -89,7 +89,7 @@ return 1; \
 }
 
 // The higher the number the better the testing. 
-#define ITERATIONS 100
+#define ITERATIONS 1
 
 int main(int argc, char **argv) {
     // Since the test vectors are printed out anyways, I suggest leaving

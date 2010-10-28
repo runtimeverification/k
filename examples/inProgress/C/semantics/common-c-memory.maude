@@ -249,10 +249,11 @@ mod COMMON-SEMANTICS-WRITING is
 			=> write(Loc:Nat, tv(justBits(I:Int, T:Type), T:Type), bitSize:Nat)
 		...</ k >
 		if (bitSize:Nat %Nat numBitsPerByte =/=Bool 0
-		orBool notBool(isByteLoc(Loc:Nat)))
+		orBool notBool(isByteLoc(Loc:Nat))
+		orBool hasBitfieldType(T:Type))
 		andBool I:Int <Int 0
 		: KSentence [metadata "structural"] .
-		
+	
 	mb rule
 		< k > write(Loc:Nat, tv(N:Nat, T:Type), bitSize:Nat)
 			=> writeBitfield(Loc:Nat, T:Type, calculateNewBytes(bitoffset(Loc:Nat), piece(N:Nat, bitSize:Nat), extractBytesFromMem(floorLoc(Loc:Nat), bitsToBytes(bitSize:Nat +Nat bitoffset(Loc:Nat)))))

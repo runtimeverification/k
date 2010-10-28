@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define SIZE 100
+#define SIZE 10
 
 static int SumArray(int *Array, unsigned Num) {
   int Result = 0;

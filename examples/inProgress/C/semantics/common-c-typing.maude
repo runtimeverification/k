@@ -566,10 +566,8 @@ mod COMMON-C-TYPING is
 		...</ k >
 		: KSentence .
 
-	--- FIXME what good is this?
-	mb rule
-		< k > OnlyTypedef(?) => . ...</ k >
-		: KSentence .
+	--- the K will resolve to a type, so throw it away
+	eq OnlyTypedef(K:K) = K:K ~> discard .
 			
 	op addAggregate : Id List{Type} -> K .
 	op addGlobalAggregate : Id List{Type} -> K .

@@ -1,3 +1,4 @@
+#include <stdio.h>
 struct test_empty {
 } e;
 int Esize = sizeof(e);

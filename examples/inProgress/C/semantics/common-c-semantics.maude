@@ -1135,8 +1135,8 @@ mod COMMON-GLOBAL-DECLARATION is
 	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
 	eq Typedef(NameGroup(T:Type, Name:C)) = defineType(SingleName(T:Type, Name:C)) .
 
-	eq EnumItem(X:Id, V:Value)
-		= enumItem(X:Id, V:Value) .
+	--- eq EnumItem(X:Id, V:Value)
+		--- = enumItem(X:Id, V:Value) .
 		
 	op initialize-aux : Id Type K -> K .
 		
@@ -2075,27 +2075,30 @@ mod C-SEMANTICS-MISC is
 		
 	
 	--- op enumDef : Id List{C} -> K .
-	--- fixme can you have enums be negative?
 	op fillEnums : K -> K .
-	op fillEnums : K Int -> K .
+	op fillEnums : K K -> K .
 	mb rule
 		< k > EnumDef(X:Id, L:List{C}) => fillEnums(EnumDef(X:Id, L:List{C})) ...</ k >
 		: KSentence .
 	mb rule < k > fillEnums(K:K) => fillEnums(K:K, 0) ...</ k > : KSentence .
 	mb rule
-		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, emptyValue) :: L:List{C}), I:Int) 
-			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(I:Int, int)))
-			~> fillEnums(EnumDef(X:Id, L:List{C}), I:Int +Int 1)
+		< k > fillEnums(EnumDef(X:Id, EnumItemLoc(EnumItem(E:Id, emptyValue), Loc:K) :: L:List{C}), K:K) 
+			=> EnumItemLoc(declare(typedDeclaration(int, E:Id), SingleInit(K:K)), Loc:K)
+			~> fillEnums(EnumDef(X:Id, L:List{C}), K:K + tv(1, int))
 		...</ k >
 		: KSentence .
 	mb rule
-		< k > fillEnums(EnumDef(X:Id, enumItem(E:Id, tv(I:Int, int)) :: L:List{C}), ?) 
-			=> declare(typedDeclaration(int, E:Id), SingleInit(tv(I:Int, int)))
-			~> fillEnums(EnumDef(X:Id, L:List{C}), I:Int +Int 1)
+		< k > fillEnums(EnumDef(X:Id, EnumItemLoc(EnumItem(E:Id, Exp:K), Loc:K) :: L:List{C}), ?) 
+			=> EnumItemLoc(declare(typedDeclaration(int, E:Id), SingleInit(Exp:K)), Loc:K)
+			~> fillEnums(EnumDef(X:Id, L:List{C}), Exp:K + 1)
 		...</ k >
+		if Exp:K =/=Bool NothingExpression
 		: KSentence .
 	mb rule
-		< k > fillEnums(EnumDef(X:Id, Nil), ?) => (.).K ...</ k > : KSentence .
+		< k > fillEnums(EnumDef(X:Id, Nil), ?) 
+			--- => giveType(X:Id, enumType(X:Id)) 
+			=> .
+		...</ k > : KSentence .
 	
 	--- this maintains byte order
 	op fillToBytes-aux : K List{K} -> K .

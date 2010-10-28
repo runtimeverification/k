@@ -6,8 +6,8 @@ int sum(int n);
 int main(int argc, char* argv[]) {
 	//if (argc != 2){ printf("Usage: %s <N>\n", argv[0]); return 1;}
 	
-	//int input = atoi(argv[1]);
-	int input = atoi("10");
+	int input = atoi(argv[1]);
+	//int input = atoi("10");
 	int result = sum(input);
 	printf("sum(%d)==%d\n", input, result);
 	return result;

@@ -31,7 +31,7 @@ int main(int argc, char **argv)
        A[i] = i;
        sum = sum + A[i];
      }
-     printf("Checksum before = %lf\n", sum);
+     printf("Checksum before = %d\n", (int)(10*sum));
     
      for (i = 0; i < 10; ++i) {
        complex_transpose(A, A+1, 32, 2, 64);
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
      sum = 0.0;
      for (i = 0; i < 2048; ++i)
        sum = sum + A[i];
-     printf("Checksum  after = %lf\n", sum);
+     printf("Checksum  after = %d\n", (int)(10*sum));
 
      return 0;
 }

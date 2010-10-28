@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-	sum(to, from, count)
+	void sum(to, from, count)
 	register short *to, *from;
 	register count;
 	{
