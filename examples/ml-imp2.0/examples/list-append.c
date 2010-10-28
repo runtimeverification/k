@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 struct nodeList {
   int val;
@@ -60,6 +61,7 @@ int main()
              < env > x |-> ?x y |-> ?x z |-> ?z </ env > 
              < heap > list(?x)([5] @ [6] @ [7]) </ heap > 
              < form > TrueFormula </ form > </ config > */
+  printf("%d %d %d",x->val, x->next->val, x->next->next->val);
   z = (struct nodeList*)malloc(sizeof(struct nodeList));
   z->val = 5;
   z->next = 0;
