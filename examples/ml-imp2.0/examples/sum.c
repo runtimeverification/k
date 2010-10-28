@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <stdio.h>
+
 int sum(int n)
 /*@ pre  < config > < env > n |-> n0 </ env >
                     < form > @(n0 >=Int 0) </ form > C </ config > */
@@ -26,6 +29,7 @@ int main()
 {
   int s;
   s = sum(10);
+  printf("The sum for the first 10 natural numbers: %d\n", sum(10));
   return 0;
 }
 
