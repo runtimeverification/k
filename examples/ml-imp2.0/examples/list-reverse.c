@@ -38,12 +38,10 @@ int main()
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
   x->val = 7;
   x->next = 0;
-  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([7]) </ heap > < form > TrueFormula </ form > </ config > */
   y = (struct nodeList*)malloc(sizeof(struct nodeList));
   y->val = 6;
   y->next = x;
   x = y;
-  /*@ assert < config > < env > x |-> ?x y |-> ?x </ env > < heap > list(?x)([6] @ [7]) </ heap > < form > TrueFormula </ form > </ config > */
   y = (struct nodeList*)malloc(sizeof(struct nodeList));
   y->val = 5;
   y->next = x;
@@ -54,11 +52,9 @@ int main()
   y = x;
   x = x->next;
   free(y);
-  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([6] @ [5]) </ heap > < form > TrueFormula </ form > </ config > */
   y = x;
   x = x->next;
   free(y);
-  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([5]) </ heap > < form > TrueFormula </ form > </ config > */
   y = x;
   x = x->next;
   free(y);
