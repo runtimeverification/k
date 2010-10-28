@@ -22,28 +22,17 @@ struct nodeList* copy(struct nodeList *x)
 	iterx = x->next;
 	itery = y;
 
-/*@ assert < config > 
-          < env > iterx |-> ?ix itery |-> ?iy x |-> x0 y |-> ?y </ env >
-          < heap > 
-                   x0  |-> ?v : (nodeList . val)
-                   (x0 +Int 1) |-> ?ix : (nodeList . next)
-                   list(?ix)(?A) 
-                   list(?y)(?B) </ heap >
-          < form > A === ([?v] @ ?A) /\ ([?v] === ?B) </ form > 
-          </ config > */
-          
-/*@ assert < config > 
-          < env > iterx |-> ?ix itery |-> ?iy x |-> x0 y |-> ?y </ env >
-          < heap > 
-                   lseg(x0,?ix)(?A)
-                   list(?ix)(?B) 
-                   list(?y)(?C) </ heap >
-          < form > A === (?A @ ?B) /\ (?A === ?C) </ form > 
-          </ config > */
+  /*@ assert < config > 
+              < env > iterx |-> ?ix itery |-> ?y x |-> x0 y |-> ?y </ env >
+              < heap > lseg(x0,?ix)(?A) list(?ix)(?B) lseg(?y,0)(?C)
+              </ heap >
+              < form > A === (?A @ ?B) /\ (?A === ?C) </ form > 
+              </ config > */
     
 /*@ invariant < config > 
               < env > iterx |-> ?ix itery |-> ?iy x |-> x0 y |-> ?y </ env >
-              < heap > lseg(x0,?ix)(?A) list(?ix)(?B) list(?y)(?C) </ heap >
+              < heap > lseg(x0,?ix)(?A) list(?ix)(?B) lseg(?y,?iy)(?C)
+              </ heap >
               < form > A === (?A @ ?B) /\ (?A === ?C) </ form > 
               </ config > */
     while(iterx != 0) {
@@ -55,6 +44,16 @@ struct nodeList* copy(struct nodeList *x)
       itery = newnode;
       iterx = iterx->next;
     }
+
+/*@ assert < config > < env > iterx |-> ?ix itery |-> ?iy x |-> x0 y |-> ?y </ env > 
+           < heap > list(x0)(A) 
+                    lseg(?y,?iy)(?A)
+                    ?iy |-> ?vit : (nodeList . val)
+                    (?iy +Int 1) |-> 0 : (nodeList . next)
+           </ heap > 
+           < form > A === (?A @ [?vit]) </ form > </ config > */
+    
+    /*@ assert < config > < env > iterx |-> ?ix itery |-> ?iy x |-> x0 y |-> ?y </ env > < heap > list(x0)(A) list(?y)(A) </ heap > < form > TrueFormula </ form > </ config > */
   }
   return y;
 }
@@ -72,7 +71,7 @@ int main()
 }
 
 
-/*@ var ?y ?ix ?iy ?nn ?v : ?Int */
+/*@ var ?y ?ix ?iy ?vit ?v : ?Int */
 /*@ var x0 : FreeInt */
 /*@ var ?A ?B ?C : ?Seq */
 /*@ var A : FreeSeq */

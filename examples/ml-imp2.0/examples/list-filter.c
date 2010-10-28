@@ -6,7 +6,7 @@ struct nodeList {
 
 struct nodeList* filter(struct nodeList* x, int i)
 /*@ pre < config > < env > x |-> ?x i |-> i0 </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) </ heap > < form > returns ?x </ form > </ config > */
+/*@ post < config > < env > ?rho </ env > < heap > list(?x)(?A) </ heap > < form > returns ?x /\ ~(contain(?A, i0)) </ form > </ config > */
 {
 	struct nodeList* y;
 	struct nodeList* z;
