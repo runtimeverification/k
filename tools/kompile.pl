@@ -787,7 +787,7 @@ sub make_ps
     get_pdf_crop("ps", @ps_modules);
 
     # Generate ps
-    my $status = system("pdftops $language_file_name-ps.pdf 2>/dev/null");
+    my $status = system("pdf2ps $language_file_name-ps.pdf 2>/dev/null");
     throw_error("Failed to generate ps. Exit status $status.\n") if (($status >>= 8) != 0);
     
     # rename ps file
@@ -803,7 +803,7 @@ sub make_eps
     get_pdf_crop("eps", @eps_modules);
 
     # Generate ps
-    my $status = system("pdftops $language_file_name-eps.pdf 2>/dev/null");
+    my $status = system("pdf2ps $language_file_name-eps.pdf 2>/dev/null");
     throw_error("Failed to generate ps temporary file for generating eps. Exit status $status.\n") if (($status >>= 8) != 0);
 
     # Generate eps
