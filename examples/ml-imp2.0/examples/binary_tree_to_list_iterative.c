@@ -80,10 +80,33 @@ struct nodeList *toListIterative(struct treeNode *root)
   return a;
 }
 
+int main()
+{
+  struct treeNode* root;
+  struct treeNode* tl;
+  struct treeNode* tr;
+  root = (struct treeNode*)malloc(sizeof(struct treeNode));
+  tl = (struct treeNode*)malloc(sizeof(struct treeNode));
+  tr = (struct treeNode*)malloc(sizeof(struct treeNode));
+  root->val = 8;
+  tl->val = 4;
+  tr->val = 12;
+  root->left = tl;
+  root->right = tr;
+  tl->left = 0;
+  tl->right = 0;
+  tr->left = 0;
+  tr->right = 0;
+  /*@ assert  < config > < env > root |-> ?root </ env >
+                    < heap > tree(?root)(?T) </ heap >
+                    < form > TrueFormula </ form > </ config > */
+}
+
 
 /*@ var ?root ?a ?stack ?t ?x ?node : ?Int */
 /*@ var ?TS ?A : ?Seq */
 /*@ var T : FreeTree */
+/*@ var ?T : ?Tree */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */
 /*@ var C : FreeBagItem */
