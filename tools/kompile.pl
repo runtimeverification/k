@@ -694,7 +694,7 @@ sub run_latex
     my $status = system("latex -interaction=nonstopmode $tex_file-temp.tex > out");
     if (($status >>= 8) != 0)
     {
-	print "Failed to run latex. Exit status $status.\n";
+	throw_error("Failed to run latex. Exit status $status.\n");
     }
     # get number of pages
     my $pages = 0;
@@ -732,16 +732,18 @@ sub make_latexify
     print "Generated $language_file_name.tex which contains modules: @latexify_modules\n";
 }
 
-# generates pdf if $pdf
-sub make_pdf 
+sub get_pdf_crop
 {
-    latexify("pdf", @pdf_modules);
+    
+    my ($format, @modules) = @_;
+
+    latexify("$format", @modules);
 
     # modify page and save it
-    my $latex_out = get_file_content("$language_file_name-pdf.tex");
+    my $latex_out = get_file_content("$language_file_name-$format.tex");
 
     # Find number of pages
-    my $pages = run_latex("$language_file_name-pdf");
+    my $pages = run_latex("$language_file_name-$format");
     my $h = 9 * $pages;
     my $ph = $h + 1;
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
@@ -749,186 +751,91 @@ sub make_pdf
     $latex_out =~ s/\\begin{document}/$settings/;
     $latex_out =~ s/\\newpage/\\bigskip/g;
 
-    # initial settings
-    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{10pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
-    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
-    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
-    
-    open FILE,">", "$language_file_name-pdf.tex" or die "Cannot create $language_file_name-pdf.tex\n";
+    open FILE,">", "$language_file_name-$format.tex" or die "Cannot create $language_file_name-$format.tex\n";
     print FILE $latex_out;
     close FILE;
 
     # Generate pdf
-    my $status = system("latex -output-format=pdf -interaction=nonstopmode $language_file_name-pdf.tex> out");
-    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
-
-   # Generate postscript
-    $status = system("pdftops $language_file_name-pdf.pdf 2>/dev/null");
-    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
+    my $status = system("latex -output-format=pdf -interaction=nonstopmode $language_file_name-$format.tex> out");
+    # print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
+    throw_error("Failed to run latex. Exit status $status.\n") if (($status >>= 8) != 0);
+   
     
-  
-    # Generate eps
-    $status = system("ps2eps -f -q -P -H -l $language_file_name-pdf.ps");
-    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
-
-    # Generate eps
-    $status = system("epstopdf $language_file_name-pdf.eps");
-    print "Failed to generate pdf. Exit status $status.\n" if (($status >>= 8) != 0);
-
-    rename ("$language_file_name-pdf.pdf", "$language_file_name.pdf");
-    print "Generated $language_file_name.pdf which contains modules: @pdf_modules\n";
-
+   # Generate pdf crop
+    $status = system("pdfcrop $language_file_name-$format.pdf > out");
+    throw_error("Failed to generate crop version for pdf. Exit status $status.\n") if (($status >>= 8) != 0);
     
-    # delete auxialiary files if not verbose
-    unlink("$language_file_name-pdf.tex") if !$verbose;
-    unlink("$language_file_name-pdf.aux") if !$verbose;
-    unlink("$language_file_name-pdf.log") if !$verbose;
-    unlink("$language_file_name-pdf.ps") if !$verbose;
-    unlink("$language_file_name-pdf.eps") if !$verbose;
+    rename("$language_file_name-$format-crop.pdf", "$language_file_name-$format.pdf");
+
+    unlink("$language_file_name-$format.aux") if !$verbose;
+    unlink("$language_file_name-$format.log") if !$verbose;
+    unlink("$language_file_name-$format.tex") if !$verbose;
     unlink("out");
+}
+
+# generates pdf if $pdf
+sub make_pdf 
+{
+    # Generate eps
+    get_pdf_crop("pdf", @pdf_modules);
+    rename("$language_file_name-pdf.pdf", "$language_file_name.pdf");
 }
 
 # generate ps if $ps
 sub make_ps
 {
-    latexify("ps", @ps_modules);
-    
-    my $latex_out = get_file_content("$language_file_name-ps.tex");
-    
-    # Find number of pages
-    my $pages = run_latex("$language_file_name-ps");
-    my $h = 9 * $pages;
-    my $ph = $h + 1;
-    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
-    $latex_out =~ s/\\begin{document}/$settings/;
-    $latex_out =~ s/\\newpage/\\bigskip/g;
+    get_pdf_crop("ps", @ps_modules);
 
-    # initial settings
-    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
-    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
-    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
-    
-    open FILE,">", "$language_file_name-ps.tex" or die "Cannot create $language_file_name-ps.tex\n";
-    print FILE $latex_out;
-    close FILE;
-
-    # Generate dvi
-    my $status = system("latex -interaction=nonstopmode -output-format=pdf $language_file_name-ps.tex > out");
-    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
-
-    # Generate postscript
-    $status = system("pdftops $language_file_name-ps.pdf 2>/dev/null");
-    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
+    # Generate ps
+    my $status = system("pdftops $language_file_name-ps.pdf 2>/dev/null");
+    throw_error("Failed to generate ps. Exit status $status.\n") if (($status >>= 8) != 0);
     
     # rename ps file
     rename("$language_file_name-ps.ps", "$language_file_name.ps");
     print "Generated $language_file_name.ps which contains modules: @ps_modules\n";
     
     # delete auxialiary files if not verbose
-    unlink("$language_file_name-ps.tex") if !$verbose;
-    unlink("$language_file_name-ps.aux") if !$verbose;
-    unlink("$language_file_name-ps.log") if !$verbose;
     unlink("$language_file_name-ps.pdf") if !$verbose;
-    unlink("out");
 }
 
 sub make_eps
 {
-    latexify("eps", @eps_modules);
+    get_pdf_crop("eps", @eps_modules);
 
-    my $latex_out = get_file_content("$language_file_name-eps.tex");
-    
-    # Find number of pages
-    my $pages = run_latex("$language_file_name-eps");
-    my $h = 9 * $pages;
-    my $ph = $h + 1;
-    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
-    $latex_out =~ s/\\begin{document}/$settings/;
-    $latex_out =~ s/\\newpage/\\bigskip/g;
+    # Generate ps
+    my $status = system("pdftops $language_file_name-eps.pdf 2>/dev/null");
+    throw_error("Failed to generate ps temporary file for generating eps. Exit status $status.\n") if (($status >>= 8) != 0);
 
-    
-    # initial settings
-    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%\n\\newenvironment{kdefinition}{}{}\n\\PreviewEnvironment{kdefinition}/;
-    $latex_out =~ s/\\begin{document}/\\begin{document}\n\\pagestyle{empty}\n\\begin{kdefinition}/;
-    $latex_out =~ s/\\end{document}/\\end{kdefinition}\n\\end{document}/;
-    
-    open FILE,">", "$language_file_name-eps.tex" or die "Cannot create $language_file_name-eps.tex\n";
-    print FILE $latex_out;
-    close FILE;
-
-    # Generate dvi
-    my $status = system("latex -interaction=nonstopmode -output-format=pdf $language_file_name-eps.tex > out");
-    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
-
-    # Generate postscript
-    $status = system("pdftops $language_file_name-eps.pdf 2>/dev/null");
-    print "Failed to generate ps. Exit status $status.\n" if (($status >>= 8) != 0);
-    
-
-    
     # Generate eps
-    $status = system("ps2eps -f -q -P -H -l $language_file_name-eps.ps");
-    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
-
+    $status = system("ps2eps $language_file_name-eps.ps 2>/dev/null");
+    throw_error("Failed to generate eps. Exit status $status.\n") if (($status >>= 8) != 0);
+    
     # rename eps file
     rename("$language_file_name-eps.eps", "$language_file_name.eps");
     print "Generated $language_file_name.eps which contains modules: @eps_modules\n";
-    
-    # delete auxialiary files if not verbose
-    unlink("$language_file_name-eps.tex") if !$verbose;
-    unlink("$language_file_name-eps.aux") if !$verbose;
-    unlink("$language_file_name-eps.dvi") if !$verbose;
-    unlink("$language_file_name-eps.log") if !$verbose;
-    unlink("$language_file_name-eps.ps") if !$verbose;
+
     unlink("$language_file_name-eps.pdf") if !$verbose;
-    unlink("out");
+    unlink("$language_file_name-eps.ps") if !$verbose;
 }
 
 sub make_png
 {
-    latexify("png", @png_modules);
+    get_pdf_crop("png", @png_modules);
 
-
-    # Find number of pages
-    my $pages = run_latex("$language_file_name-png");
-    my $h = 9 * $pages;
-    my $ph = $h + 1;
-    
-    my $latex_out = get_file_content("$language_file_name-png.tex");
-    $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
-    $latex_out =~ s/\\begin{document}/$settings/;
-    $latex_out =~ s/\\newpage/\\bigskip/g;
-    
-    open FILE,">", "$language_file_name-png.tex" or die "Cannot create $language_file_name-png.tex\n";
-    print FILE $latex_out;
-    close FILE;
-
-    # Generate tex
-    my $status = system("latex -interaction=nonstopmode -output-format=pdf $language_file_name-png.tex > out");
-    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
-# exit(1);
     # Generate png
-    $status = system("gs -q -dNOPAUSE -sDEVICE=pngalpha -dBATCH -dEPSCrop -r150 -sOutputFile=$language_file_name-png.png $language_file_name-png.pdf");
-    print "Failed to generate eps. Exit status $status.\n" if (($status >>= 8) != 0);
+    my $status = system("gs -q -dNOPAUSE -sDEVICE=pngalpha -dBATCH -dEPSCrop -r150 -sOutputFile=$language_file_name-png.png $language_file_name-png.pdf");
+    throw_error("Failed to generate png. Exit status $status.\n") if (($status >>= 8) != 0);
 
     # rename png file
     rename("$language_file_name-png.png", "$language_file_name.png");
     print "Generated $language_file_name.png which contains modules: @png_modules\n";
 
     # delete auxialiary files if not verbose
-    unlink("$language_file_name-png.tex") if !$verbose;
-    unlink("$language_file_name-png.aux") if !$verbose;
+    unlink("$language_file_name-png.eps") if !$verbose;
     unlink("$language_file_name-png.pdf") if !$verbose;
-    unlink("$language_file_name-png.log") if !$verbose;
-#    unlink("$language_file_name-png.ps") if !$verbose;
-#    unlink("$language_file_name-png.eps") if !$verbose;
-    unlink("out");
 }
 
-# generates pdf if $pdf
+# generates a nice - pdf if $crop
 sub make_crop
 {
     latexify("crop", @crop_modules);
@@ -943,27 +850,29 @@ sub make_crop
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
     my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
     $latex_out =~ s/\\begin{document}/$settings/;
-#    $latex_out =~ s/\\newpage/\\bigskip/g;
     
     # initial settings
-    $latex_out =~ s/\\usepackage{import}/\\usepackage{import}\n\\usepackage[active,tightpage,pdftex]{preview}\n\\setlength\\PreviewBorder{5pt}%/;
-    $latex_out =~ s/\\begin{document}/\\PreviewEnvironment{module}\n\\begin{document}\n\\pagestyle{empty}/;
     open FILE,">", "$language_file_name-crop.tex" or die "Cannot create $language_file_name-crop.tex\n";
     print FILE $latex_out;
     close FILE;    
-    
+
+    # Generate pdf
     my $status = system("latex -output-format=pdf $language_file_name-crop.tex > out");
-    print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
+    throw_error("Failed to run latex. Exit status $status.\n") if (($status >>= 8) != 0);
     
+    # Generate pdf-crop
+    $status = system("pdfcrop $language_file_name-crop.pdf > out");
+    throw_error("Failed to generate crop pdf. Exit status $status.\n") if (($status >>= 8) != 0);
+
     # print message
+    rename("$language_file_name-crop-crop.pdf", "$language_file_name-crop.pdf");
     print "Generated $language_file_name-crop.pdf which contains modules: @crop_modules\n";
     
     # delete auxialiary files if not verbose
-#    unlink("$language_file_name-crop.tex") if !$verbose;
+    unlink("$language_file_name-crop.tex") if !$verbose;
     unlink("$language_file_name-crop.aux") if !$verbose;
     unlink("$language_file_name-crop.dvi") if !$verbose;
     unlink("$language_file_name-crop.log") if !$verbose;
-#    unlink("$language_file_name-crop.pdf") if !$verbose;
     unlink("$language_file_name-crop.tex") if !$verbose;
     unlink("out");
     
@@ -1761,4 +1670,13 @@ sub unfreeze {
 sub set {
     my %hash = map { $_,1 } @_;
     return keys %hash;
+}
+
+
+# Report error and exit
+sub throw_error
+{
+    my $err = shift;
+    print "$err\n";
+    exit(1);
 }
