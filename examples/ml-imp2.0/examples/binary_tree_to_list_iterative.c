@@ -85,6 +85,7 @@ int main()
   struct treeNode* root;
   struct treeNode* tl;
   struct treeNode* tr;
+  struct nodeList *test;
   root = (struct treeNode*)malloc(sizeof(struct treeNode));
   tl = (struct treeNode*)malloc(sizeof(struct treeNode));
   tr = (struct treeNode*)malloc(sizeof(struct treeNode));
@@ -97,16 +98,21 @@ int main()
   tl->right = 0;
   tr->left = 0;
   tr->right = 0;
-  /*@ assert  < config > < env > root |-> ?root tl |-> ?tl tr |-> ?tr </ env >
-                    < heap > tree(?root)(?T) </ heap >
+  /*@ assert  < config > < env > root |-> ?root tl |-> ?tl tr |-> ?tr test |-> ?test </ env >
+                    < heap > tree(?root)(!T) </ heap >
                     < form > TrueFormula </ form > </ config > */
+  test = toListIterative(root);
+  /*@ assert  < config > < env > root |-> ?root tl |-> ?tl tr |-> ?tr test |-> ?test </ env >
+                    < heap > list(?test)(tree2seq(!T)) </ heap >
+                    < form > TrueFormula </ form > </ config > */
+  return 0;
 }
 
 
-/*@ var ?root ?a ?stack ?t ?x ?node ?tl ?tr : ?Int */
+/*@ var ?root ?a ?stack ?t ?x ?node ?tl ?tr ?test : ?Int */
 /*@ var ?TS ?A : ?Seq */
 /*@ var T : FreeTree */
-/*@ var ?T : ?Tree */
+/*@ var !T : !Tree */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */
 /*@ var C : FreeBagItem */
