@@ -40,8 +40,8 @@ struct nodeList *toListIterative(struct treeNode *root)
   /*@ invariant
         < config >
           < env >
-            root |-> ?root a |-> ?a stack |-> ?stack
-            t |-> ?t x |-> ?x node |-> ?node
+            root |-> ?root  a |-> ?a  stack |-> ?stack
+            t |-> ?t  x |-> ?x  node |-> ?node
           </ env >
           < heap > list{tree}(?stack)(?TS) list(?a)(?A) H </ heap >
           < form > tree2seq(T) === seq{tree}2seq(rev(?TS)) @ ?A </ form >
@@ -98,13 +98,19 @@ int main()
   tl->right = 0;
   tr->left = 0;
   tr->right = 0;
-  /*@ assert  < config > < env > root |-> ?root tl |-> ?tl tr |-> ?tr test |-> ?test </ env >
-                    < heap > tree(?root)(!T) </ heap >
-                    < form > TrueFormula </ form > </ config > */
+  /*@ assert < config >
+             < env >
+               root |-> ?root  tl |-> ?tl  tr |-> ?tr  test |-> ?test
+             </ env >
+             < heap > tree(?root)(!T) </ heap >
+             < form > TrueFormula </ form > </ config > */
   test = toListIterative(root);
-  /*@ assert  < config > < env > root |-> ?root tl |-> ?tl tr |-> ?tr test |-> ?test </ env >
-                    < heap > list(?test)(tree2seq(!T)) </ heap >
-                    < form > TrueFormula </ form > </ config > */
+  /*@ assert < config >
+             < env >
+               root |-> ?root  tl |-> ?tl  tr |-> ?tr  test |-> ?test
+             </ env >
+             < heap > list(?test)(tree2seq(!T)) </ heap >
+             < form > TrueFormula </ form > </ config > */
   return 0;
 }
 

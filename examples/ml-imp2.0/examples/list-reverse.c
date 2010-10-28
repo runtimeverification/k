@@ -16,7 +16,7 @@ struct nodeList* reverse(struct nodeList *x)
   struct nodeList *p;
   struct nodeList *y;
   p = 0 ;
-  /*@ invariant < config > < env > p |-> ?p x |-> ?x y |-> ?y </ env >
+  /*@ invariant < config > < env > p |-> ?p  x |-> ?x  y |-> ?y </ env >
                            < heap > list(?p)(?B) list(?x)(?C) H </ heap >
                            < form > rev(A) === rev(?C) @ ?B </ form >
                            C </ config > */
@@ -47,11 +47,14 @@ int main()
   y->next = x;
   x = y;
   /*@ assert < config > 
-             < env > x |-> ?x y |-> ?x </ env > 
-             < heap > list(?x)([5] @ [6] @ [7]) </ heap > 
+             < env > x |-> ?x  y |-> ?x </ env > 
+             < heap > list(?x)([5, 6, 7]) </ heap > 
              < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
-  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([7] @ [6] @ [5]) </ heap > < form > TrueFormula </ form > </ config > */
+  /*@ assert < config >
+             < env > x |-> ?x  y |-> ?y </ env >
+             < heap > list(?x)([7, 6, 5]) </ heap >
+             < form > TrueFormula </ form > </ config > */
   y = x;
   x = x->next;
   free(y);
@@ -61,7 +64,10 @@ int main()
   y = x;
   x = x->next;
   free(y);
-  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(0)(epsilon) </ heap > < form > TrueFormula </ form > </ config > */
+  /*@ assert < config >
+             < env > x |-> ?x  y |-> ?y </ env >
+             < heap > (.).Map </ heap >
+             < form > TrueFormula </ form > </ config > */
   
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
   x->val = 7;
@@ -75,10 +81,14 @@ int main()
   y->next = x;
   x = y;
   printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
-  /*@ assert < config > < env > x |-> ?x y |-> ?x </ env > < heap > list(?x)(!A) </ heap > < form > TrueFormula </ form > </ config > */
+  /*@ assert < config > < env > x |-> ?x  y |-> ?x </ env >
+                        < heap > list(?x)(!A) </ heap >
+                        < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
   printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
-  /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)(rev(!A)) </ heap > < form > TrueFormula </ form > </ config > */
+  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
+                        < heap > list(?x)(rev(!A)) </ heap >
+                        < form > TrueFormula </ form > </ config > */
   return 0;
 }
 

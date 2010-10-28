@@ -13,7 +13,7 @@ struct nodeList {
 };
   
 struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
-/*@ pre  < config > < env > root |-> ?root x |-> ?x </ env >
+/*@ pre  < config > < env > root |-> ?root  x |-> ?x </ env >
                     < heap > tree(?root)(T) list(?x)(A) H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >

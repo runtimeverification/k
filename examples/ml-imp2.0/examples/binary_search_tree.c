@@ -26,7 +26,7 @@ struct treeNode* newNode(int v)
 }
 
 struct treeNode* insert(struct treeNode *t, int v)
-/*@ pre  < config > < env > t |-> ?root v |-> v0 </ env >
+/*@ pre  < config > < env > t |-> ?root  v |-> v0 </ env >
                     < heap > tree(?root)(T) H </ heap > 
                     < form > isBst(T) </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >

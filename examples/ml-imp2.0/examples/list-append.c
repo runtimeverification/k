@@ -9,10 +9,10 @@ struct nodeList {
 
 struct nodeList* append(struct nodeList *x, struct nodeList *y)  
 /*@ pre  < config > < env > x |-> ?x  y |-> ?y  </ env >
-                    < heap > list(?x)(A1) list(?y)(A2) H </ heap >
+                    < heap > list(?x)(A) list(?y)(B) H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env >  ?rho </ env >
-                    < heap > list(?x)(A1 @ A2) H </ heap > 
+                    < heap > list(?x)(A @ B) H </ heap > 
                     < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *p;
@@ -22,14 +22,15 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
   {
     p = x ;
     i = x->next; 
-    /*@ invariant < config > < env > x |-> ?x i |-> ?i p |-> ?p !rho </ env >
-                             < heap > lseg(?x , ?p)(?A1) 
+    /*@ invariant < config > < env > x |-> ?x  i |-> ?i  p |-> ?p  !rho </ env >
+                             < heap >
+                               lseg(?x , ?p)(?A1) 
                                ?p |-> ?v : (nodeList . val)
                                (?p +Int 1) |-> ?i :  (nodeList . next)
                                 list(?i)(?A2)  
                                !H
                              </ heap > 
-                             < form > (?A1 @ [?v] @ ?A2) === A1 </ form > 
+                             < form > (?A1 @ [?v] @ ?A2) === A </ form > 
                              C </ config > */
     while (i != 0)
     {
@@ -58,8 +59,8 @@ int main()
   y->next = x;
   x = y;
   /*@ assert < config > 
-             < env > x |-> ?x y |-> ?x z |-> ?z </ env > 
-             < heap > list(?x)([5] @ [6] @ [7]) </ heap > 
+             < env > x |-> ?x  y |-> ?x  z |-> ?z </ env > 
+             < heap > list(?x)([5, 6, 7]) </ heap > 
              < form > TrueFormula </ form > </ config > */
   printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
   z = (struct nodeList*)malloc(sizeof(struct nodeList));
@@ -75,14 +76,14 @@ int main()
   z = y;
   printf("z: %d %d %d\n",z->val, z->next->val, z->next->next->val);
   /*@ assert < config > 
-             < env > x |-> ?x z |-> ?z y |-> ?z </ env > 
-             < heap > list(?x)([5] @ [6] @ [7]) list(?z)([1] @ [3] @ [5]) </ heap > 
+             < env > x |-> ?x  z |-> ?z  y |-> ?z </ env > 
+             < heap > list(?x)([5, 6, 7]) list(?z)([1, 3, 5]) </ heap > 
              < form > TrueFormula </ form > </ config > */
   x = append(x,z);
   printf("x: %d %d %d %d %d %d\n",x->val, x->next->val, x->next->next->val, x->next->next->next->val, x->next->next->next->next->val, x->next->next->next->next->next->val);
   /*@ assert < config > 
-             < env > x |-> ?x z |-> ?z y |-> ?z </ env > 
-             < heap > list(?x)([5,6,7,1,3,5]) </ heap > 
+             < env > x |-> ?x  z |-> ?z  y |-> ?z </ env > 
+             < heap > list(?x)([5, 6, 7, 1, 3, 5]) </ heap > 
              < form > TrueFormula </ form > </ config > */
   y = x;
   x = x->next;
@@ -102,7 +103,9 @@ int main()
   y = x;
   x = x->next;
   free(y);
-  /*@ assert < config > < env > x |-> ?x y |-> ?y z |-> ?z </ env > < heap > list(0)(epsilon) </ heap > < form > TrueFormula </ form > </ config > */
+  /*@ assert < config > < env > x |-> ?x  y |-> ?y  z |-> ?z </ env >
+                        < heap > (.).Map </ heap >
+                        < form > TrueFormula </ form > </ config > */
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
   x->val = 7;
   x->next = 0;
@@ -144,7 +147,7 @@ int main()
 /*@ var ?x ?y ?p ?i ?v ?z : ?Int */
 /*@ var ?A1 ?A2 : ?Seq */
 /*@ var !A1 !A2 : !Seq */
-/*@ var A1 A2 : FreeSeq */
+/*@ var A B : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
 /*@ var !rho !H : !MapItem */
 /*@ var H : FreeMapItem */
