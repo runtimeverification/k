@@ -62,4 +62,6 @@ Configuration file format:
                                     arity of the operator.
     line-end: <string>           -- If a line is truncated, will put <string> at
                                     the end of the line
+    indent: <int>                -- Indent cells by <int> spaces (default 1)
+    end-cell-linebreak: yes      -- Put a linebreak before closing a cell
   See example.yml in the examples directory

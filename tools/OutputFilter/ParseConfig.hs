@@ -47,6 +47,8 @@ module ParseConfig
                                , spacelessCells      :: Maybe Bool
                                , infixify            :: Maybe Bool
                                , lineEnd             :: Maybe ByteString
+                               , cellLineBreak       :: Maybe Bool
+                               , indentLvl           :: Maybe Int
                                , hilighting          :: Maybe [(ByteString, Style)]
                                }
     deriving (Show)
@@ -87,6 +89,8 @@ module ParseConfig
                           (getBool         <$> lookupConf doSpacelessCells m)
                           (getBool         <$> lookupConf doInfixity m)
                           (getString       <$> lookupConf doLineEnd m)
+                          (getBool         <$> lookupConf doCellLineBreak m)
+                          (getNum          <$> lookupConf doIndentLvl m)
                           Nothing -- extend me to do highlighting
 
   readConfig :: YamlLight -> CellConfigRhs
@@ -176,6 +180,9 @@ module ParseConfig
   doSubstitutions  = ["subs", "subst", "substitutions", "sub"]
   doLineEnd        = ["lineend", "line-end", "line-end-str", "line-end-string", "lineendstr", "lineendstring"
                      ,"endline", "end-line"]
+  doCellLineBreak  = ["cell-linebreak", "cell-line-break","celllinebreak", "end-cell-linebreak"
+                     , "end-cell-line-break","endcelllinebreak"]
+  doIndentLvl      = ["indent-lvl", "indent-level", "indent", "indentation"]
 
 
   -- Try to run f on a YamlLight's String (if it is a terminal), else error out with errStr

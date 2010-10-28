@@ -53,9 +53,13 @@ module FilterOutput where
   handleCell _ (String n s) = error $ "Internal error: handleCell called in cell: " ++ unpack n ++ "on string: " ++ unpack s
 
   ppCell :: CellPrinter
-  ppCell conf name contents = linebreak <> (hang 1 $ ppBeginCell conf name
-                                                  <> handleContents conf name contents
-                                                 <+> ppEndCell conf name)
+  ppCell conf name contents = linebreak <> (hang iLvl $ ppBeginCell conf name <> handleContents conf name contents)
+                                        <> cellBreak
+                                       <+> ppEndCell conf name
+    where iLvl | hasOption conf indentLvl = fetchIndentLvl conf
+               | otherwise                = 1
+          cellBreak | shouldCellLineBreak conf = linebreak
+                    | otherwise                = empty
 
   ppHiddenCell :: CellPrinter
   ppHiddenCell conf name contents = hcat $ map (handleCell conf) onlyCells
@@ -216,6 +220,10 @@ module FilterOutput where
   shouldInfixify :: Configuration -> Bool
   shouldInfixify conf = queryOptions conf infixify
 
+  shouldCellLineBreak :: Configuration -> Bool
+  shouldCellLineBreak conf = queryOptions conf cellLineBreak
+
+
   -- Should a cell be shown?
   shouldShow :: Query
   shouldShow cn conf = case lookupCell cn conf of
@@ -248,9 +256,9 @@ module FilterOutput where
                            Just (Configs _ _ _ _ (Just _)) -> True
                            _                               -> False
     where hasGlobalSubs conf = case lookupCell conf "options" of
-                                 Nothing                         -> False
-                                 Just (Options Nothing _ _ _ _ ) -> False
-                                 _                               -> True
+                                 Nothing                             -> False
+                                 Just (Options Nothing _ _ _ _ _ _ ) -> False
+                                 _                                   -> True
 
 
 
@@ -282,6 +290,10 @@ module FilterOutput where
 
   fetchLineEnd :: Configuration -> ByteString
   fetchLineEnd = (flip fetchOption) lineEnd
+
+  fetchIndentLvl :: Configuration -> Int
+  fetchIndentLvl = (flip fetchOption) indentLvl
+
 
   fetchOption :: Configuration -> (CellConfigRhs -> Maybe a) -> a
   fetchOption conf f = case f <$> lookupOptions conf of
