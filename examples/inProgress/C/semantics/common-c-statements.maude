@@ -448,6 +448,12 @@ mod COMMON-SEMANTICS-GOTO is
 			~> Typedef(NameGroup(T:K, K':C :: L:List{C})) 
 		...</ computation >
 		: KSentence .
+	mb rule
+		< computation > Typedef(NameGroup(T:K, (K:C :: K':C :: L:List{C}))) 
+			=> Typedef(NameGroup(T:K, K:C))
+			~> Typedef(NameGroup(T:K, K':C :: L:List{C})) 
+		...</ computation >
+		: KSentence .
 		
 	--- fixme would like to combine the below rules
 	mb rule
