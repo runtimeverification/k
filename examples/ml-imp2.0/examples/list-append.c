@@ -9,10 +9,10 @@ struct nodeList {
 
 struct nodeList* append(struct nodeList *x, struct nodeList *y)  
 /*@ pre  < config > < env > x |-> ?x  y |-> ?y  </ env >
-                    < heap > list(?x)(A) list(?y)(B) H </ heap >
+                    < heap > list(?x)(A1) list(?y)(A2) H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env >  ?rho </ env >
-                    < heap > list(?x)(A @ B) H </ heap > 
+                    < heap > list(?x)(A1 @ A2) H </ heap > 
                     < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *p;
@@ -23,13 +23,13 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
     p = x ;
     i = x->next; 
     /*@ invariant < config > < env > x |-> ?x i |-> ?i p |-> ?p !rho </ env >
-                             < heap > lseg(?x , ?p)(?A) 
+                             < heap > lseg(?x , ?p)(?A1) 
                                ?p |-> ?v : (nodeList . val)
                                (?p +Int 1) |-> ?i :  (nodeList . next)
-                                list(?i)(?B)  
+                                list(?i)(?A2)  
                                !H
                              </ heap > 
-                             < form > (?A @ [?v] @ ?B) === A </ form > 
+                             < form > (?A1 @ [?v] @ ?A2) === A1 </ form > 
                              C </ config > */
     while (i != 0)
     {
@@ -116,7 +116,7 @@ int main()
   x = y;
   /*@ assert < config > 
              < env > x |-> ?x y |-> ?x z |-> ?z </ env > 
-             < heap > list(?x)(!A) </ heap > 
+             < heap > list(?x)(!A1) </ heap > 
              < form > TrueFormula </ form > </ config > */
   z = (struct nodeList*)malloc(sizeof(struct nodeList));
   z->val = 5;
@@ -131,20 +131,20 @@ int main()
   z = y;
   /*@ assert < config > 
              < env > x |-> ?x z |-> ?z y |-> ?y </ env > 
-             < heap > list(?x)(!A) list(?z)(!B) </ heap > 
+             < heap > list(?x)(!A1) list(?z)(!A2) </ heap > 
              < form > TrueFormula </ form > </ config > */
   x = append(x,z);
   /*@ assert < config > 
              < env > x |-> ?x z |-> ?z y |-> ?y </ env > 
-             < heap > list(?x)(!A @ !B) </ heap > 
+             < heap > list(?x)(!A1 @ !A2) </ heap > 
              < form > TrueFormula </ form > </ config > */
   return 0;
 }
 
 /*@ var ?x ?y ?p ?i ?v ?z : ?Int */
-/*@ var ?A ?B : ?Seq */
-/*@ var !A !B : !Seq */
-/*@ var A B : FreeSeq */
+/*@ var ?A1 ?A2 : ?Seq */
+/*@ var !A1 !A2 : !Seq */
+/*@ var A1 A2 : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
 /*@ var !rho !H : !MapItem */
 /*@ var H : FreeMapItem */
