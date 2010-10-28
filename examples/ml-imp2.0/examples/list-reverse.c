@@ -46,7 +46,10 @@ int main()
   y->val = 5;
   y->next = x;
   x = y;
-  /*@ assert < config > < env > x |-> ?x y |-> ?x </ env > < heap > list(?x)([5] @ [6] @ [7]) </ heap > < form > TrueFormula </ form > </ config > */
+  /*@ assert < config > 
+             < env > x |-> ?x y |-> ?x </ env > 
+             < heap > list(?x)([5] @ [6] @ [7]) </ heap > 
+             < form > TrueFormula </ form > </ config > */
   x = reverse(x) ;
   /*@ assert < config > < env > x |-> ?x y |-> ?y </ env > < heap > list(?x)([7] @ [6] @ [5]) </ heap > < form > TrueFormula </ form > </ config > */
   y = x;

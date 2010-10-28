@@ -42,33 +42,102 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
 
 int main()
 {
-  struct nodeList* x;
-  struct nodeList* y;
+  struct nodeList *x;
+  struct nodeList *y;
+  struct nodeList *z;
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 5;
+  x->val = 7;
   x->next = 0;
-  /*@ assert < config > 
-             < env > x |-> ?x y |-> ?y </ env > 
-             < heap > list(?x)(!A) </ heap > 
-             < form > TrueFormula </ form > </ config > */
-           
-  
   y = (struct nodeList*)malloc(sizeof(struct nodeList));
   y->val = 6;
-  y->next = 0;
+  y->next = x;
+  x = y;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 5;
+  y->next = x;
+  x = y;
   /*@ assert < config > 
-             < env > x |-> ?x y |-> ?y </ env > 
-             < heap > list(?x)(!A) list(?y)(!B) </ heap > 
+             < env > x |-> ?x y |-> ?x z |-> ?z </ env > 
+             < heap > list(?x)([5] @ [6] @ [7]) </ heap > 
              < form > TrueFormula </ form > </ config > */
-  x = append(x,y);
+  z = (struct nodeList*)malloc(sizeof(struct nodeList));
+  z->val = 5;
+  z->next = 0;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 3;
+  y->next = z;
+  z = y;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 1;
+  y->next = z;
+  z = y;
   /*@ assert < config > 
-             < env > x |-> ?x y |-> ?y </ env > 
-             < heap > list(?x)(!A @ !B) ?H </ heap > 
+             < env > x |-> ?x z |-> ?z y |-> ?z </ env > 
+             < heap > list(?x)([5] @ [6] @ [7]) list(?z)([1] @ [3] @ [5]) </ heap > 
+             < form > TrueFormula </ form > </ config > */
+  x = append(x,z);
+  /*@ assert < config > 
+             < env > x |-> ?x z |-> ?z y |-> ?z </ env > 
+             < heap > list(?x)([5,6,7,1,3,5]) </ heap > 
+             < form > TrueFormula </ form > </ config > */
+  y = x;
+  x = x->next;
+  free(y);
+  y = x;
+  x = x->next;
+  free(y);
+  y = x;
+  x = x->next;
+  free(y);
+  y = x;
+  x = x->next;
+  free(y);
+  y = x;
+  x = x->next;
+  free(y);
+  y = x;
+  x = x->next;
+  free(y);
+  /*@ assert < config > < env > x |-> ?x y |-> ?y z |-> ?z </ env > < heap > list(0)(epsilon) </ heap > < form > TrueFormula </ form > </ config > */
+  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  x->val = 7;
+  x->next = 0;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 6;
+  y->next = x;
+  x = y;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 5;
+  y->next = x;
+  x = y;
+  /*@ assert < config > 
+             < env > x |-> ?x y |-> ?x z |-> ?z </ env > 
+             < heap > list(?x)(!A) </ heap > 
+             < form > TrueFormula </ form > </ config > */
+  z = (struct nodeList*)malloc(sizeof(struct nodeList));
+  z->val = 5;
+  z->next = 0;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 3;
+  y->next = z;
+  z = y;
+  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y->val = 1;
+  y->next = z;
+  z = y;
+  /*@ assert < config > 
+             < env > x |-> ?x z |-> ?z y |-> ?y </ env > 
+             < heap > list(?x)(!A) list(?z)(!B) </ heap > 
+             < form > TrueFormula </ form > </ config > */
+  x = append(x,z);
+  /*@ assert < config > 
+             < env > x |-> ?x z |-> ?z y |-> ?y </ env > 
+             < heap > list(?x)(!A @ !B) </ heap > 
              < form > TrueFormula </ form > </ config > */
   return 0;
 }
 
-/*@ var ?x ?y ?p ?i ?v : ?Int */
+/*@ var ?x ?y ?p ?i ?v ?z : ?Int */
 /*@ var ?A ?B : ?Seq */
 /*@ var !A !B : !Seq */
 /*@ var A B : FreeSeq */
