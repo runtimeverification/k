@@ -454,9 +454,20 @@ mod COMMON-C-TYPING is
 	eq makeArrayType(N:Nat)(T:Type) = arrayType(T:Type, N:Nat) .
 	eq makeFunctionType(L:List{Type})(T:Type) = functionType(T:Type, L:List{Type}) .
 			
-	eq isTypeCompatible(T:Type, T:Type) = true .
+	eq isTypeCompatible(T:Type, T:Type) 
+		= true .
+	ceq isTypeCompatible(T:Type, T':Type) 
+		= true 
+		if hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type) .
 	eq isTypeCompatible(pointerType(?), pointerType(?))
 		= true .
+	ceq isTypeCompatible(pointerType(?), T:Type)
+		= true
+		if hasIntegerType(T:Type) .
+	ceq isTypeCompatible(T:Type, pointerType(?))
+		= true
+		if hasIntegerType(T:Type) .
 		
 	eq isTypeCompatible(typedDeclaration(T:Type, ?), typedDeclaration(T':Type, ?))
 		= isTypeCompatible(T:Type, T':Type) .

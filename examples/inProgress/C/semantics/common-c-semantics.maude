@@ -388,10 +388,10 @@ mod C-SETTINGS is
 	eq cfg:largestUnsigned = unsigned-long-long-int .
 
 	op cfg:ptrsize : -> Nat .
-	eq cfg:ptrsize = 8 .
+	eq cfg:ptrsize = 4 .
 	
 	op cfg:ptrdiffut : -> Type .
-	eq cfg:ptrdiffut = long-long-int .
+	eq cfg:ptrdiffut = int .
 	
 	eq min(enumType(?)) = min(int) .
 	eq max(enumType(?)) = max(int) .
@@ -644,13 +644,6 @@ mod COMMON-PARAMETER-BINDING is
 		...</ k >
 		< mem >... Block:Nat |-> memblock((OldLen:Nat => OldLen:Nat +Nat Len:Nat), M:Map) ...</ mem >
 		: KSentence [metadata "structural"] .
-	--- mb [append-new]: rule
-		--- < k > append(sym(Block:Nat, Offset:Nat), Len:Nat, V:Value) 
-			--- => storeNew V:Value atLoc loc(Block:Nat, Offset:Nat) 
-		--- ...</ k >
-		--- < mem > M:Map </ mem >
-		--- if notBool($hasMapping(M:Map, Block:Nat))
-		--- : KSentence [metadata "structural"] .
 		
 	op bindVariadic : K List{KResult} -> K .
 	op bindVariadic-pre : K List{K} -> K .
@@ -1440,27 +1433,26 @@ mod COMMON-GLOBAL-DECLARATION is
 		...</ k >
 		if notBool hasStaticType(T:Type)
 		andBool notBool hasExternType(T:Type)
-		--- andBool notBool $hasMapping(Ext:Map, X:Id)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareExternalVariable(X:Id, T:Type, K:K)
 			=> declareWithLinkage(X:Id, T:Type, K:K, external)
 		...</ k >
-		< preLinkage > Linkage:Map </ preLinkage >
+		< preLinkage >... Tu:K |-> Map(Linkage:Map) ...</ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool hasStaticType(T:Type)
 		andBool hasExternType(T:Type)
-		andBool notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K))
+		andBool notBool $hasMapping(Linkage:Map, X:Id)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareExternalVariable(X:Id, T:Type, K:K)
-			=> declareWithLinkage(X:Id, T:Type, K:K, Linkage:Map(kpair(X:Id, Tu:K)))
+			=> declareWithLinkage(X:Id, T:Type, K:K, Linkage:Map(X:Id))
 		...</ k >
-		< preLinkage > Linkage:Map </ preLinkage >
+		< preLinkage >... Tu:K |-> Map(Linkage:Map) ...</ preLinkage >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if notBool hasStaticType(T:Type)
 		andBool hasExternType(T:Type)
-		andBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K))
+		andBool $hasMapping(Linkage:Map, X:Id)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareExternalVariable(X:Id, T:Type, K:K)
@@ -1517,8 +1509,8 @@ mod COMMON-GLOBAL-DECLARATION is
 		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[external / X:Id])) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		if (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
-				orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
+		if (notBool $hasMapping(Linkage:Map, X:Id) 
+				orBool Linkage:Map(X:Id) ==Bool external
 			)
 			andBool (
 				notBool $hasMapping(Types:Map, X:Id)
@@ -1534,8 +1526,8 @@ mod COMMON-GLOBAL-DECLARATION is
 		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[external / X:Id])) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map(Types:Map) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		if (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
-				orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external
+		if (notBool $hasMapping(Linkage:Map, X:Id) 
+				orBool Linkage:Map(X:Id) ==Bool external
 			)
 			andBool isTypeCompatible(unqualifyType(Types:Map(X:Id)), unqualifyType(T:Type))
 		: KSentence [metadata "structural"] .	
@@ -1549,8 +1541,8 @@ mod COMMON-GLOBAL-DECLARATION is
 		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[internal / X:Id])) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		if notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) 
-		orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal
+		if notBool $hasMapping(Linkage:Map, X:Id) 
+		orBool Linkage:Map(X:Id) ==Bool internal
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > declareOnly(X:Id, T:Type, noLinkage)
@@ -1579,7 +1571,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		if (notBool $hasMapping(Def:Map, X:Id) orBool hasFunctionType(T:Type))
-		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool external)
+		andBool (notBool $hasMapping(Linkage:Map, X:Id) orBool Linkage:Map(X:Id) ==Bool external)
 		: KSentence [metadata "structural"] .
 		
 	mb rule
@@ -1591,8 +1583,8 @@ mod COMMON-GLOBAL-DECLARATION is
 		< preLinkage >... Tu:K |-> Map((Linkage:Map => Linkage:Map[internal / X:Id])) ...</ preLinkage >
 		< preTypes >... Tu:K |-> Map((Types:Map => Types:Map[T:Type / X:Id])) ...</ preTypes >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
-		if notBool $hasMapping(Def:Map, kpair(X:Id, Tu:K))
-		andBool (notBool $hasMapping(Linkage:Map, kpair(X:Id, Tu:K)) orBool Linkage:Map(kpair(X:Id, Tu:K)) ==Bool internal)
+		if notBool $hasMapping(Def:Map, X:Id)
+		andBool (notBool $hasMapping(Linkage:Map, X:Id) orBool Linkage:Map(X:Id) ==Bool internal)
 		: KSentence [metadata "structural"] .
 	op defineAndInit : Id Type K Nat -> K [metadata "strict(3)"] .
 	mb rule
@@ -1869,9 +1861,7 @@ mod C-SEMANTICS-MISC is
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		: KSentence .
-		
-		--- < internalLocations >... Tu:K |-> Map((Locs:Map => Locs:Map[Loc:Nat / kpair(X:Id, BlockNum:Nat)])) ...</ internalLocations > 		--- < currentBlock > BlockNum:Nat </ currentBlock > 		--- if notBool $hasMapping(Locs:Map, kpair(X:Id, BlockNum:Nat))
-		
+			
 	mb rule
 		< k > resolveExternal(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K))
 			=> resolveExternal-aux(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K), Loc:Nat, figureInitializer(X:Id, T:Type, K:K))
@@ -1983,23 +1973,6 @@ mod C-SEMANTICS-MISC is
 		if hasFunctionType(T:Type)
 		andBool notBool $hasMapping(Defs:Map, X:Id)
 		: KSentence .
-	--- mb rule
-		--- < k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, K:K)) ~> resolve(Tu:K) ...</ k >
-		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
-		--- < externalDefinitions >... X:Id |-> K:K => . ...</ externalDefinitions >
-		--- < declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
-		--- < translationUnits > Units:Bag </ translationUnits >
-		--- : KSentence .
-	--- mb rule
-		--- < k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, functionPrototype(X:Id, T:Type))) ~> resolve(Tu:K) ...</ k >
-		--- < preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
-		--- < preTypes >... Tu:K |-> Map((? X:Id |-> T:Type)) ...</ preTypes >
-		--- < declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
-		--- < externalDefinitions > Defs:Map </ externalDefinitions >
-		--- < translationUnits > Units:Bag </ translationUnits >
-		--- if hasFunctionType(T:Type)
-		--- andBool notBool $hasMapping(Defs:Map, X:Id)
-		--- : KSentence .
 		
 	--- c1x 6.9.2:2 A declaration of an identifier for an object that has file scope without an initializer, and without a storage-class specifier or with the storage-class specifier static, constitutes a tentative definition. If a translation unit contains one or more tentative definitions for an identifier, and the translation unit contains no external definition for that identifier, then the behavior is exactly as if the translation unit contains a file scope declaration of that identifier, with the composite type as of the end of the translation unit, with an initializer equal to 0.
 	mb rule
