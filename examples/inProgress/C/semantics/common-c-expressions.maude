@@ -549,33 +549,33 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	--- FIXME should also be promoting these
 	mb rule tv(I1:Int, T:Type) < tv(I2:Int, T:Type) 
 		=> if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi 
-		if hasIntegerType(T:Type)
-		andBool hasBeenPromoted(T:Type)
+		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) 
 		=> if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi
-		if hasIntegerType(T:Type)
-		andBool hasBeenPromoted(T:Type)
+		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) > tv(I2:Int, T:Type) 
 		=> if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi
-		if hasIntegerType(T:Type)
-		andBool hasBeenPromoted(T:Type)
+		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) 
 		=> if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi
-		if hasIntegerType(T:Type)
-		andBool hasBeenPromoted(T:Type)
+		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) 
 		=> if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi
-		if hasIntegerType(T:Type)
-		andBool hasBeenPromoted(T:Type)
+		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) 
 		=> if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
-		if hasIntegerType(T:Type)
-		andBool hasBeenPromoted(T:Type)
+		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
 		: KSentence [metadata "structural"] .
 	
 	---- comparison of pointers
@@ -600,12 +600,12 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	
 	mb rule tv(N:Nat, T:Type) == tv(M:Nat, T':Type) 
 		=> if (N:Nat ==Bool M:Nat) then tv(1, int) else tv(0, int) fi 
-	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
-	: KSentence [metadata "structural"] .
+		if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+		: KSentence [metadata "structural"] .
 	mb rule tv(N:Nat, T:Type) != tv(M:Nat, T':Type) 
 		=> if (N:Nat =/=Bool M:Nat) then tv(1, int) else tv(0, int) fi
-	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
-	: KSentence [metadata "structural"] .
+		if hasPointerType(T:Type) andBool hasPointerType(T':Type)
+		: KSentence [metadata "structural"] .
 		
 	---- comparison of ints with pointers
 	--- fixme there are further restrictions on pointers

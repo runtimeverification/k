@@ -173,7 +173,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- these aren't real types, but are values that can appear in type contexts
 	op prototype : Type -> Type .
 	op typedefType : Id Type -> Type .
-	op preFunctionType : Type -> Type .
 	op variadic : -> Type .
 	--- op typedefType : Type -> Type .
 	
@@ -475,6 +474,11 @@ mod SEMANTIC-HELPERS is
 	including COMMON-SEMANTIC-SYNTAX .
 	including C-SETTINGS .
 	
+	op isConcreteNumber : Int -> Bool .
+	eq isConcreteNumber(sym(?) +Nat ?) = false .
+	eq isConcreteNumber(bito(?) +Nat ?) = false .
+	ceq isConcreteNumber(I:Int) = true
+		if  I:Int <=Int 0 orBool I:Int >Int 0 .
 	
 	--- this should probably go in the k prelude
 	op _in_ : K List -> Bool .
@@ -549,14 +553,20 @@ mod SEMANTIC-HELPERS is
 		if K1:K =/=Bool K2:K .
 	eq (.).Set contains K:K = false .
 
-	ceq hasIntegerType(T:Type) = true
-		if (integerTypes contains T:Type) .
-	ceq hasIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
-	eq hasIntegerType(bitfieldType(?, ?)) = true .
+	eq hasIntegerType(T:Type) = hasUnsignedIntegerType(T:Type) orBool hasSignedIntegerType(T:Type) .
+	--- ceq hasIntegerType(T:Type) = true
+		--- if (integerTypes contains T:Type) .
+	--- ceq hasIntegerType(T:Type) = false 
+		--- if getKLabel(T:Type) =/=Bool 'bitfieldType
+		--- --- andBool getKLabel(T:Type) =/=Bool 'enumType
+		--- andBool setOfTypes contains l(getKLabel(T:Type)) .
 	
 	ceq hasUnsignedIntegerType(T:Type) = true
 		if (unsignedIntegerTypes contains T:Type) .
-	ceq hasUnsignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	ceq hasUnsignedIntegerType(T:Type) = false 
+		if getKLabel(T:Type) =/=Bool 'bitfieldType
+		--- andBool getKLabel(T:Type) =/=Bool 'enumType
+		andBool setOfTypes contains l(getKLabel(T:Type)) .
 	ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = true 
 		if hasUnsignedIntegerType(T:Type) ==Bool true .
 	ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = false 
@@ -564,8 +574,11 @@ mod SEMANTIC-HELPERS is
 	
 	ceq hasSignedIntegerType(T:Type) = true
 		if (signedIntegerTypes contains T:Type) .
-	eq hasIntegerType(enumType(?)) = true .
-	ceq hasSignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	eq hasSignedIntegerType(enumType(?)) = true . --- choice fixme
+	ceq hasSignedIntegerType(T:Type) = false 
+		if getKLabel(T:Type) =/=Bool 'bitfieldType
+		--- andBool getKLabel(T:Type) =/=Bool 'enumType
+		andBool setOfTypes contains l(getKLabel(T:Type)) .
 	ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = true 
 		if hasSignedIntegerType(T:Type) ==Bool true .
 	ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = false 
@@ -575,14 +588,14 @@ mod SEMANTIC-HELPERS is
 
 
 	ceq min(bitfieldType(T:Type, N:Nat)) = 0
-		if unsignedIntegerTypes contains T:Type .
+		if hasUnsignedIntegerType(T:Type) .
 	ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(N:Nat), 1)
-		if unsignedIntegerTypes contains T:Type .
+		if hasUnsignedIntegerType(T:Type) .
 	
 	ceq min(bitfieldType(T:Type, N:Nat)) = -Int (2 ^Nat absInt(_-Int_(N:Nat, 1)))
-		if signedIntegerTypes contains T:Type .
+		if hasSignedIntegerType(T:Type) .
 	ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(_-Int_(N:Nat, 1)), 1) 
-		if signedIntegerTypes contains T:Type .
+		if hasSignedIntegerType(T:Type) .
 
 endm
 

@@ -106,13 +106,10 @@ mod COMMON-SEMANTICS-READING is
 		if N:Nat >=Nat 0 .
 	
 	op isConcreteList : List{K} -> Bool .
-	op isConcreteNumber : Nat -> Bool .
 	ceq isConcreteList((N:Nat,, L:List{K})) = isConcreteList(L:List{K})
 		if isConcreteNumber(N:Nat) .
 	eq isConcreteList(.List{K}) = true .
-	eq isConcreteNumber(sym(?) +Nat ?) = false .
-	eq isConcreteNumber(bito(?) +Nat ?) = false .
-	eq isConcreteNumber(?) = true [owise] .
+
 	
 	eq floorLoc(sym(N:Nat) +Nat bito(M:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat .
 	eq floorLoc(sym(N:Nat) +Nat R:Nat) = sym(N:Nat) +Nat R:Nat [owise] .

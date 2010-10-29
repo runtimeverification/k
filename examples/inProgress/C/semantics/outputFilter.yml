@@ -77,6 +77,7 @@ options:
     - "kList`(\"wklist_\"`)": ""            # Get rid of the wklist
   # spaceless-cells: no
   infixify: yes
+  #end-cell-linebreak: yes
   
   # line-end: " $"
   # syntax-highlighting: # Coming soon

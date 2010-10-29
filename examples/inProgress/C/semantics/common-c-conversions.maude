@@ -307,7 +307,7 @@ mod COMMON-SEMANTICS-CAST is
 	
 	--- fixme not sure about this, doesn't concretize, and in turn interpret, assume things about the list?
 	mb rule
-		cast(T:Type, tv(L:List{K}, structType(?))) 
+		cast(T:Type, tv(L:List{K}, structType(?)))
 			=> concretize(T:Type, dataList(L:List{K}))
 		: KSentence [metadata "structural"] .
 	
@@ -325,7 +325,7 @@ mod COMMON-SEMANTICS-CAST is
 	--- fixme worried about qualifiers
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) => if I:Int ==Bool 0 then tv(0, bool) else tv(1, bool) fi
-		if hasBoolType (T:Type)
+		if hasBoolType(T:Type)
 		andBool hasIntegerType(T':Type)
 		: KSentence [metadata "structural"] .
 	mb rule
@@ -346,7 +346,7 @@ mod COMMON-SEMANTICS-CAST is
 	---c99 6.3.1.3:2 Otherwise, if the new type is unsigned, the value is converted by repeatedly adding or subtracting one more than the maximum value that can be represented in the new type until the value is in the range of the new type.
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) => cast(T:Type, tv(I:Int +Int max(T:Type) +Int 1, T':Type))
-		if unsignedIntegerTypes contains T:Type 
+		if hasUnsignedIntegerType(T:Type)
 		andBool I:Int <Int min(T:Type)
 		andBool hasIntegerType(T':Type)
 		andBool notBool hasBoolType (T:Type)
@@ -355,7 +355,7 @@ mod COMMON-SEMANTICS-CAST is
 	--- fixme does this extra check for looping need to be done elsewhere?
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
-		if unsignedIntegerTypes contains T:Type 
+		if hasUnsignedIntegerType(T:Type)
 		andBool I:Int >Int max(T:Type)
 		andBool hasIntegerType(T':Type)
 		andBool notBool hasBoolType (T:Type)
@@ -367,8 +367,7 @@ mod COMMON-SEMANTICS-CAST is
 		cast(T:Type, tv(I:Int, T':Type)) 
 			=> cast(T:Type, tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T':Type)) 
 		if I:Int <Int min(T:Type)
-		andBool notBool(unsignedIntegerTypes contains T:Type)
-		andBool hasIntegerType(T:Type)
+		andBool hasSignedIntegerType(T:Type)
 		andBool hasIntegerType(T':Type)
 		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
@@ -376,7 +375,7 @@ mod COMMON-SEMANTICS-CAST is
 		cast(T:Type, tv(I:Int, T':Type)) 
 			=> cast(T:Type, tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T':Type)) 
 		if I:Int >Int max(T:Type)
-		andBool notBool(unsignedIntegerTypes contains T:Type)
+		andBool hasSignedIntegerType(T:Type)
 		andBool hasIntegerType(T:Type)
 		andBool hasIntegerType(T':Type)
 		andBool notBool hasBoolType (T:Type)
@@ -493,11 +492,7 @@ mod COMMON-SEMANTICS-CAST is
 	mb rule
 		cast(pointerType(T:Type), tv(N:Nat, pointerType(?))) => tv(N:Nat, pointerType(T:Type))
 		: KSentence [metadata "structural"] .
-				
-	--- mb rule
-		--- < k > [cast(pointerType(bitfieldType(T:Type, Len:Nat)), tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(?)))
-		--- => tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))] ...</ k > 
-		--- : KSentence [metadata "structural"] .
+
 endm
 
 mod COMMON-C-CONVERSIONS is
@@ -595,20 +590,17 @@ mod COMMON-C-CONVERSIONS is
 	mb rule interpret-aux(T:Type, I:Int) => tv(I:Int, T:Type)
 		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
 		andBool hasIntegerType(T:Type)
-		--- andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		interpret-aux(T:Type, I:Int) => interpret-aux(T:Type, _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))))
 		if I:Int >Int max(T:Type)
 		andBool hasIntegerType(T:Type)
 		andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
-		--- andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 		
 	mb rule arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type)
 		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int
 		andBool hasIntegerType(T:Type)
-		--- andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .
 	
 	mb rule arithInterpret(bignum, I:Int) => tv(I:Int, bignum)
@@ -621,17 +613,16 @@ mod COMMON-C-CONVERSIONS is
 	--- c99 6.5.7:4 The result of E1 << E2 is E1 left-shifted E2 bit positions; vacated bits are filled with zeros. If E1 has an unsigned type, the value of the result is E1 times 2^(E2), reduced modulo one more than the maximum value representable in the result type. If E1 has a signed type and nonnegative value, and E1 times 2^(E2) is representable in the result type, then that is the resulting value; otherwise, the behavior is undefined. 
 	--- e1 = 2147483647; e1 * 2^(1) = 2147483647 * 2 = 4294967294
 	mb rule leftShiftInterpret(T:Type, I:Int, tv(E1:Int, T:Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
-		if unsignedIntegerTypes contains T:Type
+		if hasUnsignedIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule leftShiftInterpret(T:Type, I:Int, tv(E1:Nat, T:Type)) => interpret-aux(T:Type, I:Int)
-		if hasIntegerType(T:Type)
-		andBool notBool (unsignedIntegerTypes contains T:Type)
+		if hasSignedIntegerType(T:Type)
 		andBool I:Int <=Int (2 ^Nat absInt(numBits(T:Type)))
 		: KSentence [metadata "structural"] .
 		
 	--- c99 6.5.7:5 The result of E1 >> E2 is E1 right-shifted E2 bit positions. If E1 has an unsigned type or if E1 has a signed type and a nonnegative value, the value of the result is the integral part of the quotient of E1 / 2^(E2). If E1 has a signed type and a negative value, the resulting value is implementation-defined.
 	mb rule rightShiftInterpret(T:Type, I:Int) => tv(I:Int, T:Type)
-		if integerTypes contains T:Type
+		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	
 	--- fixme
@@ -644,12 +635,12 @@ mod COMMON-C-CONVERSIONS is
 	mb rule
 		arithInterpret(T:Type, I:Int) => 
 		tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
-		if unsignedIntegerTypes contains T:Type
+		if hasUnsignedIntegerType(T:Type)
 		andBool I:Int >Int max(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		arithInterpret(T:Type, I:Int) => arithInterpret(T:Type, _+Int_(I:Int, (max(T:Type) +Int 1)))
-		if unsignedIntegerTypes contains T:Type
+		if hasUnsignedIntegerType(T:Type)
 		andBool I:Int <Int min(T:Type)
 		andBool _+Int_(I:Int, (max(T:Type) +Int 1)) <=Int max(T:Type)
 		: KSentence [metadata "structural"] .

@@ -427,19 +427,14 @@ mod COMMON-C-TYPING is
 	eq ArrayType(T:Type, tv(N:Nat, ?)) = pushTypeDown(T:Type, makeArrayType(N:Nat)) .
 	eq ArrayType(T:Type, emptyValue) = pushTypeDown(T:Type, 'incompleteArrayType) .
 	eq PointerType(T:Type) = pushTypeDown(T:Type, 'pointerType) .
-	--- eq FunctionType(T:Type) = pushTypeDown(T:Type, 'preFunctionType) .
 	--- fixme I'm assuming functiontype is always below a prototype 
 	eq FunctionType(T:Type) = T:Type .
 	eq Prototype(T:Type, L:List{Type}, false) = pushTypeDown(T:Type, makeFunctionType(L:List{Type})) .
 	eq Prototype(T:Type, L:List{Type}, true) = pushTypeDown(T:Type, makeFunctionType((L:List{Type} :: variadic))) .
-	--- eq Prototype(T:Type, L:List{Type}, false) = functionType(T:Type, L:List{Type}) .
-	--- eq Prototype(T:Type, L:List{Type}, true) = functionType(T:Type, (L:List{Type} :: variadic)) .
-
 	
 	eq pushTypeDown(arrayType(T:Type, N:Nat), K:KLabel) = arrayType(pushTypeDown(T:Type, K:KLabel), N:Nat) .
 	eq pushTypeDown(incompleteArrayType(T:Type), K:KLabel) = incompleteArrayType(pushTypeDown(T:Type, K:KLabel)) .
 	eq pushTypeDown(pointerType(T:Type), K:KLabel) = pointerType(pushTypeDown(T:Type, K:KLabel)) .
-	--- eq pushTypeDown(preFunctionType(T:Type), K:KLabel) = preFunctionType(pushTypeDown(T:Type, K:KLabel)) .
 	eq pushTypeDown(qualifiedType(T:Type, K:K), K:KLabel) = qualifiedType(pushTypeDown(T:Type, K:KLabel), K:K) .
 	eq pushTypeDown(functionType(T:Type, L:List{Type}), K:KLabel) = functionType(pushTypeDown(T:Type, K:KLabel), L:List{Type}) .
 	eq pushTypeDown(flexibleArrayType(T:Type), K:KLabel) = flexibleArrayType(pushTypeDown(T:Type, K:KLabel)) .
@@ -607,18 +602,27 @@ mod COMMON-C-TYPING is
 		
 	mb rule
 		NameAndType(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
-		--- if notBool hasTypedefType(T:Type)
 		: KSentence .
-	--- mb rule
-		--- NameAndType(X:Id, T:Type) => typedDeclaration(extractActualType(T:Type), X:Id)
-		--- if hasTypedefType(T:Type)
-		--- : KSentence .	
-	
-	eq extractActualType(typedefType(?, T:Type)) = T:Type .
+		
+	eq extractActualType(T:BaseType) = T:BaseType .
+	eq extractActualType(enumType(X:Id)) = enumType(X:Id) .
+	eq extractActualType(structType(X:Id)) = structType(X:Id) .
+	eq extractActualType(unionType(X:Id)) = unionType(X:Id) .
+	eq extractActualType(arrayType(T:Type, N:Nat)) = arrayType(extractActualType(T:Type), N:Nat) .
+	eq extractActualType(incompleteArrayType(T:Type)) = incompleteArrayType(extractActualType(T:Type)) .
+	eq extractActualType(flexibleArrayType(T:Type)) = flexibleArrayType(extractActualType(T:Type)) .
+	eq extractActualType(bitfieldType(T:Type, N:Nat)) = bitfieldType(extractActualType(T:Type), N:Nat) .	
+	eq extractActualType(functionType(T:Type, List:List{Type})) = functionType(extractActualType(T:Type), List:List{Type}) .
+	eq extractActualType(pointerType(T:Type)) = pointerType(extractActualType(T:Type)) .
 	eq extractActualType(qualifiedType(T:Type, K:K)) = qualifiedType(extractActualType(T:Type), K:K) .
-	ceq extractActualType(T:Type) = T:Type 
-		if getKLabel(T:Type) =/=Bool 'typedefType
-		andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
+	eq extractActualType(prototype(T:Type)) = prototype(extractActualType(T:Type)) .
+	eq extractActualType(typedefType(?, T:Type)) = extractActualType(T:Type) .
+	
+	
+	
+	--- ceq extractActualType(T:Type) = T:Type 
+		--- if getKLabel(T:Type) =/=Bool 'typedefType
+		--- andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	op NameAndType : K K -> K [metadata "strict(2)"] .
 	
