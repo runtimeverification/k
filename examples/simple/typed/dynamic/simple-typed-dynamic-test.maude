@@ -3,3 +3,4 @@ rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
 
+q

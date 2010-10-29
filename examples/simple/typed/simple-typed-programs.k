@@ -6,26 +6,26 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
 
 
   macro pFactorial =
-       var x : int;
-       function f(y : int) : int {
-         var t : int;  var x : bool;
+       var x:int;
+       function f(y:int):int {
+         var t:int;  var x:bool;
 	 t = 1;
          for i = 1 to y do
 	   t = t * i;
 	 return t;
        }
-       function main() : void {
+       function main():void {
          x = 5;
 	 write(f(f(x)));
        }
 
 
   macro pCollatz =
-       var n : int;
-       var m : int;
+       var n:int;
+       var m:int;
 
-       function divide2(dummy1 : int, r : int, dummy2 : bool) : int {
-         var q : int;
+       function divide2(dummy1:int, r:int, dummy2:bool):int {
+         var q:int;
 	 q = 0;
 	 while not r <= 1 do {
 	   r = r - 2;
@@ -34,8 +34,8 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
 	 return q;
        }
 
-       function collatz() : int {
-         var s : int;
+       function collatz():int {
+         var s:int;
          s = 0;
 	 write(n);
          while n > 1 do {
@@ -47,7 +47,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
 	 return s;
        }
 
-       function main() : void {
+       function main():void {
          m = 10;
          for i = 1 to m do {
 	   n = i;
@@ -57,40 +57,40 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
 
 
   macro pSorting =
-       function init(n : int) : int[] {
-         var x[n] : int[];
+       function init(n:int):int[] {
+         var x[n]:int[];
          for i = 0 to n - 1 do
            x[i] = i;
          return x;
        }
 
-       function writeArray(x : int[]) : void {
+       function writeArray(x:int[]):void {
          for i = 0 to sizeOf(x) - 1 do
            write(x[i]);
        }
 
-       function reverse(x : int[]) : void {
-         var n : int;
+       function reverse(x:int[]):void {
+         var n:int;
          n = sizeOf(x);
          for i = 0 to n / 2 - 1 do {
-           var t : int;
+           var t:int;
            t = x[i];
            x[i] = x[n - i - 1];
            x[n - i - 1] = t;
          }
        }
 
-       function map(f : (int[] -> void)[], x : int[]) : void {
+       function map(f:(int[] -> void)[], x:int[]):void {
          for i = 0 to sizeOf(f) - 1 do {
            f[i](x);
          }
        }
 
-       function insertionSort(x : int[]) : void {
+       function insertionSort(x:int[]):void {
          for i = 1 to sizeOf(x) - 1 do {
-           var v : int;
+           var v:int;
            v = x[i];
-           var j : int;
+           var j:int;
            j = i - 1;
            while (j >= 0) do {
              if x[j] > v then
@@ -101,23 +101,23 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          }
        }
 
-       function bubbleSort(v : int[]) : void {
-         var n : int;
+       function bubbleSort(v:int[]):void {
+         var n:int;
          n = sizeOf(v);
          for i = 0 to n - 1 do
            for j = 0 to n - 2 do
              if v[j] > v[j + 1] then {
-               var t : int;
+               var t:int;
                t = v[j + 1];
                v[j + 1] = v[j];
                v[j] = t;
              }
        }
 
-       function siftDown(x : int[], root : int, bottom : int) : void {
-         var done : bool;
+       function siftDown(x:int[], root:int, bottom:int):void {
+         var done:bool;
          done = false;
-         var maxChild : int;
+         var maxChild:int;
          while (root * 2 <= bottom and not done) do {
            if (root * 2 == bottom) then {
              maxChild = root * 2;
@@ -129,7 +129,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
                   maxChild = root * 2 + 1;
                 }
            if (x[root] < x[maxChild]) then {
-             var t : int;
+             var t:int;
              t = x[root];
              x[root] = x[maxChild];
              x[maxChild] = t;
@@ -141,10 +141,10 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          }
        }
 
-       function heapSort(x : int[]) : void {
-         var n : int;
+       function heapSort(x:int[]):void {
+         var n:int;
          n = sizeOf(x);
-         var i : int;
+         var i:int;
          i = n / 2 - 1;
          while (i >= 0) do {
            siftDown(x, i, n - 1);
@@ -152,7 +152,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          }
          i = n - 1;
          while (i >= 1 ) do {
-           var t : int;
+           var t:int;
            t = x[0];
            x[0] = x[i];
            x[i] = t;
@@ -161,12 +161,12 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          }
        }
 
-       function main() : void {
-         var x : int[];
-         var n : int;
+       function main():void {
+         var x:int[];
+         var n:int;
          n = 10;
          x = init(n);
-         var f[11] : (int[] -> void)[];
+         var f[11]:(int[] -> void)[];
          f[ 0] = writeArray;
          f[ 1] = reverse;
          f[ 2] = writeArray;
@@ -188,15 +188,15 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
 ---   and to write a function gettype similar to getloc from SKOOL
 
   macro pX01 =
-       var x : int;
-       function f() : int {
+       var x:int;
+       function f():int {
           return x;
        }
-       var x : bool;
-       function f() : bool {
+       var x:bool;
+       function f():bool {
           return x;
        }
-       function main() : void {
+       function main():void {
           x = f();
        }
  
