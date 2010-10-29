@@ -1,12 +1,11 @@
 in ../../../k-prelude
 
 
-------------------------------------
---- SKOOL-UNTYPED-SYNTAX modules ---
-------------------------------------
+-----------------------------------
+--- SKOOL-UNTYPED-SYNTAX module ---
+-----------------------------------
 
 kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
-  sorts Var Exp Stmt Stmts
 
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
