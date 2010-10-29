@@ -37,7 +37,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 	 q = 0;
 	 while not r <= 1 do {
 	   r = r - 2;
-	   q = q+1;
+	   q = q + 1;
 	 }
 	 return q;
        }
@@ -50,9 +50,9 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 	   s = s+1;
            if n == (n/2)*2
 	   then n = divide2(3+n, n, true or false);
-	   else n = 3*n + 1;
+	   else n = 3*n+1;
          }
-	 return s ;
+	 return s;
        }
 
        function main() {
@@ -64,7 +64,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
        }
 
 
---- following does not run, because "and" is not shortcut in SIMPLE, but it types!
+--- following does not run, because "and" is not shortcut in SIMPLE (though it types)
   macro pInsertionSort1 =
        var x[10];
 
@@ -126,7 +126,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
              if x[j] > v then x[j+1] = x[j];
              j = j - 1;
            }
-           x[j + 1] = v ;
+           x[j+1] = v ;
          }
          printAll(n);
        }
@@ -305,8 +305,8 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          for i = 0 to n/2 - 1 do {
            var t;
            t = x[i];
-           x[i] = x[n-i- 1];
-           x[n-i- 1] = t;
+           x[i] = x[n - i - 1];
+           x[n - i - 1] = t;
          }
        }
 
@@ -321,11 +321,11 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
            var v;
            v = x[i];
            var j;
-           j = i- 1;
+           j = i - 1;
            while (j >= 0) do {
              if x[j] > v then
                x[j+1] = x[j];
-             j = j- 1;
+             j = j - 1;
            }
            x[j+1] = v;
          }
@@ -334,8 +334,8 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
        function bubbleSort(v) {
          var n;
          n = sizeOf(v);
-         for i = 0 to n- 1 do
-           for j = 0 to n- 2 do
+         for i = 0 to n - 1 do
+           for j = 0 to n - 2 do
              if v[j] > v[j+1] then {
                var t;
                t = v[j+1];
@@ -377,17 +377,17 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          var i;
          i = n/2 - 1;
          while (i >= 0) do {
-           siftDown(x, i, n- 1);
-           i = i- 1;
+           siftDown(x, i, n - 1);
+           i = i - 1;
          }
-         i = n- 1;
+         i = n - 1;
          while (i >= 1 ) do {
            var t;
            t = x[0];
            x[0] = x[i] ;
            x[i] = t;
-           siftDown(x, 0, i- 1);
-           i = i- 1;
+           siftDown(x, 0, i - 1);
+           i = i - 1;
          }
        }
 

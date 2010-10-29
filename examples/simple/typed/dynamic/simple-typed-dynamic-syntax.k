@@ -4,35 +4,6 @@
 
 kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
 
---- Variables; we include arrays here as well, so that, e.g., a[x][y][z]
---- can appear anywhere a variable can appear (declarations, lookup, assignment)
-  syntax Var ::= Id
-               | Var [ Exp ] [prec 1 strict]
-
---- Expressions
-  syntax Exp ::= Var | Int | Bool
-               | ++ Id [prec 0]
-               | Exp + Exp [gather(E e) prec 33 strict]
-               | Exp - Exp [gather(E e) prec 33 strict]
-               | Exp * Exp [gather(E e) prec 31 strict]
-               | Exp / Exp [gather(E e) prec 31 strict]
-               | Exp % Exp [gather(E e) prec 31 latex "{#1}\%{#2}" strict]
-               | - Exp [strict]
-               | Exp < Exp [prec 37 latex "{#1}<{#2}" strict]
-               | Exp <= Exp [prec 37 latex "{#1}\leq{#2}" strict]
-               | Exp > Exp [prec 37 latex "{#1}>{#2}" strict]
-               | Exp >= Exp [prec 37 latex "{#1}\geq{#2}" strict]
-               | Exp == Exp [prec 37 strict]
-               | Exp != Exp [prec 37 strict]
-               | Exp and Exp [gather(E e) prec 55 strict]
-               | Exp or Exp  [gather(E e) prec 59 strict]
-               | not Exp [prec 53 strict]
-               | Exp [ Exp ] [ditto]
-               | sizeOf ( Exp ) [strict]
-               | Exp ( )
-               | Exp ( List{Exp} ) [prec 2 strict]
-               | read ( )
-
 --- Types; we declare here all the types that we will need for declarations
   syntax Type ::= int | bool | void                                 --- basic types
                 | Type [ ] [prec 0]                                 --- array types
@@ -43,24 +14,55 @@ kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
   syntax IdType ::= Id : Type
 
 --- Declarations
-  syntax Decl ::= var Var : Type ; [prec 2]
+--- There are two types of declarations: for typed variables (including arrays) and for typed functions
+  syntax Decl ::= var Var : Type ;
                 | function Id ( ) : Type Stmt
                 | function Id ( List{IdType} ) : Type Stmt
 
+--- Variables; we include arrays here as well, so that, e.g., a[x][y][z]
+--- can appear anywhere a variable can appear (declarations, lookup, assignment)
+  syntax Var ::= Id
+               | Var [ Exp ]       [strict prec 1]
+
+--- Expressions
+  syntax Exp ::= Int | Bool
+               | Var
+               | ++ Id             [prec 0]
+               | Exp + Exp         [strict prec 33]
+               | Exp - Exp         [strict prec 33 gather(E e)]
+               | Exp * Exp         [strict prec 31]
+               | Exp / Exp         [strict prec 31]
+               | Exp % Exp         [strict prec 31]
+               | - Exp             [strict]
+               | Exp < Exp         [strict prec 37]
+               | Exp <= Exp        [strict prec 37]
+               | Exp > Exp         [strict prec 37]
+               | Exp >= Exp        [strict prec 37]
+               | Exp == Exp        [strict prec 37]
+               | Exp != Exp        [strict prec 37]
+               | Exp and Exp       [strict prec 55]
+               | Exp or Exp        [strict prec 59]
+               | not Exp           [strict prec 53]
+               | Exp [ Exp ]       [ditto]
+               | sizeOf ( Exp )    [strict]
+               | Exp ( )
+               | Exp ( List{Exp} ) [strict prec 2]
+               | read ( )
+
 --- Statements
   syntax Stmt ::= { }
-                | { Stmts } [gather(&)]
-                | Exp = Exp ; [prec 2 strict(2)]
-                | Exp ; [prec 50 strict]
+                | { Stmts }
+                | Exp = Exp ;                [strict(2)]
+                | Exp ;                      [strict]
                 | if Exp then Stmt else Stmt [strict(1)]
                 | if Exp then Stmt
                 | while Exp do Stmt
                 | for Id = Exp to Exp do Stmt
-                | return Exp ; [strict]
-                | write ( Exp ) ; [strict]
+                | return Exp ;               [strict]
+                | write ( Exp ) ;            [strict]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts [prec 100 gather(e E)]
+                 | Stmts Stmts               [prec 100 gather(e E)]
 
 --- Function "main"
   syntax Id ::= main
@@ -72,7 +74,7 @@ kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
 --- List{Bottom}  (needed for consistencies)
 --- do not add Bottom as subsort to anything else, like Id, Exp, etc
   sort Bottom
-  syntax List{Bottom}  ::= Bottom | .List{Bottom}
+  syntax List{Bottom}  ::= Bottom | .List{Bottom} [latex "\kdot{\it List\{Bottom\}}"]
                      | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid]
  
 --- List{Type}

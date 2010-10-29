@@ -56,8 +56,8 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 --- Variable declaration
   rule <k> var X:Id; => . <_/k>
-       <env> Env:Map => Env[L:Nat / X] </env>
-       <store_> . => L |-> 0 <_/store>
+       <env> Env:Map => Env[L:Nat/X] </env>
+       <store_> . => L|->0 <_/store>
        <nextLoc> L => sNat(L) </nextLoc> 
 
 --- Array declaration
@@ -68,7 +68,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
        <nextLoc> L => sNat L +Nat N </nextLoc>
 
 --- Function declaration
-  rule <k> function F:Id(Xl) S:Stmt => . <_/k>
+  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc>
        <store_> . => L|->function(sNat L)  sNat(L)|->lambda(Xl,S) <_/store>
@@ -109,7 +109,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 --- Array lookup.  Untyped SIMPLE does not check array bounds
 --- We prefer to use a helper computation item, lookup, to avoid locking the store
-  rule <k> array(L,_)[N] => lookup (L +Int N) <_/k> [structural]
+  rule <k> array(L,_)[N] => lookup(L +Int N) <_/k> [structural]
   syntax K ::= lookup Nat
   rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
@@ -123,7 +123,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
        <genv> GEnv:Map </genv>
        <store_> L |-> lambda(Xl,S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
-  rule <k> return(V:Val); ~> _ => V ~> K </k>
+  rule <k> return(V); ~> _ => V ~> K </k>
        <fstack> (Env,K) => . <_/fstack>
        <env> _ => Env </env>
 
@@ -185,19 +185,19 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 --- Length
   syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
   macro |.List{Id}| = 0  
-  macro |X,Xl:List{Id}| = sNat |Xl|
+  macro |X,Xl| = sNat |Xl|
 
 --- Sequences of locations
   syntax List{K} ::= Nat .. Nat
   rule N1:Nat..N1 => .List{K} [structural]
   rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
 
---- environment recovery
+--- Environment recovery
   syntax K ::= env ( Map )
   rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
   rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
---- the following is nedeed for stacking
+--- Pairing construct nedeed for stacking
   syntax ListItem ::=  ( Map , K )
 endkm
 
@@ -207,18 +207,10 @@ endkm
 -----------------------------------------
 
 kmod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS 
---- make sure the name of the final module is the capitalized version of the file name
-
   syntax Bag ::= run ( KLabel )
-
---- After loading simple-untyped-compiled into maude, type "rew run('program) .",
---- where 'program is the program you want to execute (among those in simple-untyped-programs.k)
-  macro run(KL:KLabel)
-        =
-        <T_> 
-           <k> KL(.List{K}) </k>
-           <in>
-              List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576)
-           </in>
-        <_/T> 
+  macro run(PgmName:KLabel) =
+          <T_>
+             <k> PgmName(.List{K}) </k>
+             <in> List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576) </in>
+          <_/T>
 endkm

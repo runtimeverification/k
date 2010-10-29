@@ -2,7 +2,7 @@ in ../../../../k-prelude.maude
 in simple-typed-dynamic-syntax
 in ../simple-typed-programs
 
-kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
+kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-SYNTAX + K
 
 -------------------------------------------------------------
 --- Values that various fragments of programs evaluate to ---
@@ -52,175 +52,199 @@ kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-
                 </T>
 
 
---------------------
---- Declarations ---
---------------------
+---------------------------------------
+--- Declarations and initialization ---
+---------------------------------------
 
 --- Variable declaration
   rule <k> var X:Id : Tp:Type ; => .K <_/k>
-       <env> Env:Map => Env[L:Nat / X] </env>
-       <store_> . => L |-> initVal(Tp) <_/store>     --- intialized with default value for its type
+       <env> Env:Map => Env[L:Nat/X] </env>
+       <store_> . => L|->initVal(Tp) <_/store>     --- intialized with default value for its type
        <nextLoc> L => sNat(L) </nextLoc>
 
 --- Array declaration
   context var X[[HOLE]] : Tp[];
   rule <k> var X[N:Nat] : Tp[]; => .K <_/k>
        <env> Env => Env[L/X] </env>
-       <store_> . => L |-> array(_`[`](Tp), sNat L, N) <_/store>
+       <store_> . => L |-> array(Tp[], sNat L, N) <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc>
 
+--- Function declaration
   rule <k> function F:Id(XTl:List{IdType}) : Tp S:Stmt => .K <_/k>
-       <env> Env => Env[L / F] </env>
-       <nextLoc> L => L +Nat 2 </nextLoc> 
-       <store_>(.Map => L |-> function(typeList(XTl) -> Tp,sNat L) sNat(L) |-> lambda(idList(XTl), S))<_/store> 
+       <env> Env => Env[L/F] </env>
+       <nextLoc> L => L +Nat 2 </nextLoc>
+       <store_> . => L|->function(typeList(XTl)->Tp,sNat(L))  sNat(L)|->lambda(idList(XTl),S) <_/store>
 
---- when we are done with the first pass (computation and genv are empty), call main and initialize the global environment
-  rule <k> .K => main(); </k>
-       <env> Env </env>
-       <genv> .Map => Env </genv> 
+--- When we are done with the first pass (preprocessing), i.e., the computation
+--- and genv are empty, call main() and initialize the global environment
+  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
---- expressions evaluation
 
-  rule <k> X:Id => V:Val <_/k>
-       <env_> X |-> L:Nat <_/env>
-       <store_> L:Nat |-> V <_/store> 
-  rule <k> ++ X => I:Int +Int 1 <_/k>
+-------------------
+--- Expressions ---
+-------------------
+
+--- Variable lookup
+  rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store>
+
+--- Variable increment
+  rule <k> ++X => I:Int +Int 1 <_/k>
        <env_> X |-> L <_/env>
-       <store_> L |-> (I => I +Int 1) <_/store> 
-  rule I1:Int + I2:Int => I1 +Int I2 
-  rule _-_(I1,I2) => _-Int_(I1,I2) 
-  rule I1 * I2 => I1 *Int I2 
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0 
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0 
-  rule - I => -Int I 
-  rule I1 < I2 => I1 <Int I2 
-  rule I1 <= I2 => I1 <=Int I2 
-  rule I1 > I2 => I1 >Int I2 
-  rule I1 >= I2 => I1 >=Int I2 
-  rule V1:Val == V2:Val => V1 ==Bool V2 
-  rule V1 != V2 => V1 =/=Bool V2 
-  rule T1:Bool and T2:Bool => T1 andBool T2 
-  rule T1 or T2 => T1 orBool T2 
-  rule not(T:Bool) => notBool(T) 
-  --- array component
-  rule <k> array(_,L,M:Nat)[N:Nat] => Sigma(L +Int N) <_/k>
-       <store> Sigma:Map </store> 
-       if N >=Nat 0 andBool N <=Nat M 
-  rule sizeOf(array(_,_,N)) => N 
-  rule <k> read() => I <_/k>
-       <in> ListItem(I) => .List <_/in> 
+       <store_> L |-> (I => I +Int 1) <_/store>
 
---- function call processing
- rule <k> _`(_`)(function(Tpl:List`{Type`} -> Tp:Type, L:Nat),Vl:List{Val})  ~> K:K
-          =>
-          S:Stmt ~> return(initVal(Tp));
-      </k>
-      <fstack> .List => (Env:Map,K,Tp') <_/fstack>
-      <env> Env =>  GEnv[| Xl:List{Id} | from N / getList{K}(Xl)] </env>
-      <genv> GEnv:Map </genv>
-      <return> Tp':Type => Tp </return>
-      <store_> L |-> lambda(Xl, S) (.Map => | Xl | from N |-> getList{K}(Vl)) <_/store>
-      <nextLoc> N:Nat => N +Nat | Xl | </nextLoc> 
-      if typeOf(Vl) ==Bool Tpl 
+--- Arithmetic operators
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule _-_(I1,I2) => _-Int_(I1,I2)
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule - I => -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
+  rule V1:Val == V2:Val => V1 ==Bool V2
+  rule V1 != V2 => V1 =/=Bool V2
+  rule T1:Bool and T2:Bool => T1 andBool T2
+  rule T1 or T2 => T1 orBool T2
+  rule not(T:Bool) => notBool(T)
 
-  rule <k> return(V:Val); ~> _ => V ~> K </k>
-       <fstack> (Env,K,Tp') => .List <_/fstack>
+--- Array lookup.  Note that we check the array bounds now
+--- We prefer to use a helper computation item, lookup, to avoid locking the store
+  rule <k> array(_,L,M:Nat)[N] => lookup(L +Int N) <_/k> if N >=Nat 0 andBool N <=Nat M [structural]
+  syntax K ::= lookup Nat
+  rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
+
+--- Size of array
+  rule sizeOf(array(_,_,N)) => N
+
+--- Function call. The environment, the computation and current return type are pushed onto the stack
+  rule <k> _`(_`)(function(Tpl:List{Type}->Tp,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
+       <fstack> . => (Env,K,Tp') <_/fstack>
+       <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
+       <genv> GEnv:Map </genv>
+       <return> Tp':Type => Tp </return>
+       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
+       <nextLoc> N => N +Nat |Xl| </nextLoc>
+    if typeOf(Vl) ==Bool Tpl
+  rule <k> return(V); ~> _ => V ~> K </k>
+       <fstack> (Env,K,Tp') => . <_/fstack>
        <env> _ => Env </env>
        <return> Tp => Tp' </return>
-       if typeOf(V) ==Bool Tp
+    if typeOf(V) ==Bool Tp
 
---- instructions processing
-  rule {} => .K 
-  rule <k> {Ss:Stmts} => Ss ~> env(Env) <_/k>
-       <env> Env:Map </env> 
-  rule S1:Stmt S2:Stmt => S1 ~> S2 
-  rule <k> X:Id = V2:Val ; => .K <_/k>
-       <env_> X |-> L:Nat <_/env>
-       <store_> L |-> (V1:Val => V2) <_/store>
-       if typeOf(V1) ==Bool typeOf(V2) 
+--- Read
+  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
 
-  context _[[HOLE]] = _ ; 
-  context [HOLE][_] = _ ; 
-  rule <k> array(_`[`](Tp:Type),L,M:Nat)[N:Nat] = V:Val ; => .K <_/k>
-       <store> Sigma:Map => Sigma[V / (L +Int N)] </store> 
-       if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp 
-  rule V ; => .K 
-  rule if true then S:Stmt else _ => S 
-  rule if false then _ else S => S 
-  rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k> 
-  rule <k> write(I:Int) ; => .K <_/k>
-       <out_> .List => ListItem(I) </out>  
+
+------------------
+--- Statements ---
+------------------
+
+--- Empty blocks. One can make the rule below structural, if one doesn't want it to count as step
+  rule {} => .
+
+--- Nonempty Blocks. Make sure the environment is recovered after the block executes
+--- This rule can also be structural if one does not want entering a block to count as step
+  rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env </env>
+
+--- Sequential composition.  Desugared into K's sequentialization.  Can also be structural
+  rule S1:Stmt S2:Stmt => S1~>S2
+
+--- Variable assignment
+  rule <k> X=V1; => . <_/k> <env_> X|->L <_/env> <store_> L|->(V2=>V1) <_/store>
+    if typeOf(V1) ==Bool typeOf(V2) 
+
+--- Array assignment
+--- We grab the whole store here, because we need to block it when writing a location
+--- for the first time, to avoid conflicts with other threads that may also want to write it.
+--- This happens because we deliberately decided NOT to allocate/initialize the array locations
+--- when the array is created, to save time/computation.  Thus, the first write to a location acts
+--- as "allocation" of that location.  To avoid such an aggressive locking of the store (which
+--- inhibits true concurrency, since other threads may want to concurrently read/write other
+--- locations), one would need to explicitly "allocate" all the array locations at declaration time
+  context _[[HOLE]]=_;
+  context [HOLE][_]=_;
+  rule <k> array(Tp[],L,M)[N] = V; => . <_/k> <store> Sigma:Map => Sigma[V/(L +Int N)] </store>
+    if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp 
+
+--- Expression statements.  They are only used for their side effects, so their result is descarded
+  rule V; => .
+
+--- Conditional
+  rule if true then S else _ => S
+  rule if false then _ else S => S
+
+--- While loop unrolled only at the top of the computation (to avoid non-termination)
+  rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k>
+
+--- Write
+  rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out>
 
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
-  syntax Val ::=
-                 initVal ( Type )
-               | none
+
+--- Initial value for each type
+  syntax Val ::= none | initVal ( Type )
   macro initVal(int) = 0
   macro initVal(bool) = false
   macro initVal(void) = none
-  macro initVal(_`[`](Tp:Type)) = array(_`[`](Tp),0,0)
+  macro initVal(Tp[]) = array(Tp[],0,0)
+  macro initVal(Tpl->Tp) = function(Tpl->Tp,0)
 
+--- Type of each value and of list of values
   syntax List{Type} ::= typeOf ( List{Val} )  
-  macro typeOf(function(Tp, _)) = Tp 
-  macro typeOf(array(Tp,_,_)) = Tp 
-  macro typeOf(I:Int) = int 
-  macro typeOf(T:Bool) = bool 
-  macro typeOf(none) = void 
-  macro typeOf(V1:Val,V2:Val,Vl:List{Val}) = typeOf(V1),typeOf(V2,Vl) 
-  macro typeOf(.List{Bottom}) = .List{Bottom} 
+  macro typeOf(I) = int
+  macro typeOf(T) = bool
+  macro typeOf(none) = void
+  macro typeOf(function(Tp, _)) = Tp
+  macro typeOf(array(Tp,_,_)) = Tp
+  macro typeOf(V1,V2,Vl) = typeOf(V1),typeOf(V2,Vl)
+  macro typeOf(.List{Bottom}) = .List{Bottom}
 
+--- Lists of values
+  syntax List{Val} ::= Val | List{Bottom} | List{Val} , List{Val} [ditto]
+  syntax List{Exp} ::= List{Val}
 
---- List{Val}
-  syntax List{Val} ::= Val | List{Bottom} 
-                     | List{Val} , List{Val} [ditto]
+--- Extracting lists of corresponding untyped names and of types from a list of typed names
+  syntax List{Id} ::= idList ( List{IdType} )
+  syntax List{Type} ::= typeList ( List{IdType} )
+  macro idList(.List{Bottom}) = .List{Bottom}
+  macro idList(X : Tp, XTl) = X, idList(XTl)
+  macro typeList(.List{Bottom}) = .List{Bottom}
+  macro typeList(X : Tp, XTl) = Tp, typeList(XTl)
 
-  syntax List{Exp} ::= List{Val}  
-
---- translation of a list of typed names into a list of the corresponding untyped names
-  syntax List{Id} ::= idList ( List{IdType} ) 
-  macro idList(.List{Bottom}) = .List{Bottom} 
-  macro idList(X:Id : Tp:Type, XTl:List`{IdType`}) = X, idList(XTl) 
-
---- translation of a lists of typed names into a list of the corresponding types
-  syntax List{Type} ::= typeList ( List{IdType} ) 
-  macro typeList(.List{Bottom}) = .List{Bottom} 
-  macro typeList(X : Tp, XTl) = Tp,typeList(XTl) 
-
---- length
-  syntax Nat ::= `| List{Id} `|
+--- Length
+  syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
   macro |.List{Bottom}| = 0  
-  macro |X:Id,Xl:List{Id}| = sNat |Xl|
+  macro |X,Xl| = sNat |Xl|
 
---- from
-  syntax List{K} ::= Nat from Nat 
-  macro 0 from N1:Nat = .List{K} 
-  macro sNat N2:Nat from N1 = N1,,(N2 from sNat N1)
+--- Sequences of locations
+  syntax List{K} ::= Nat .. Nat
+  rule N1:Nat..N1 => .List{K} [structural]
+  rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
 
---- environment recovery
-  syntax K ::= env ( Map ) 
-  rule (env(_) ~> env(Env:Map) => env(Env)) [structural] 
-  rule <k> (env(Env) => .K) <_/k>
-      <env> (_ => Env) </env> [structural] 
-  rule <k> V:Val ~> (env(Env) => .K) <_/k>
-       <env> (_ => Env) </env> [structural] 
+--- Environment recovery
+  syntax K ::= env ( Map )
+  rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
+  rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
---- the following is nedeed for stacking
- syntax ListItem ::=  ( Map , K , Type )  
+--- Tripling construct nedeed for stacking
+  syntax ListItem ::=  ( Map , K , Type )
 endkm
 
-kmod SIMPLE-TYPED-DYNAMIC is 
-  including SIMPLE-TYPED-DYNAMIC-SEMANTICS 
-  including SIMPLE-TYPED-PROGRAMS 
-  syntax Bag ::= run ( KLabel ) 
+
+-----------------------------------------
+--- Main module, including everything ---
+-----------------------------------------
+
+kmod SIMPLE-TYPED-DYNAMIC is including SIMPLE-TYPED-DYNAMIC-SEMANTICS + SIMPLE-TYPED-PROGRAMS 
+  syntax Bag ::= run ( KLabel )
   macro run(PgmName:KLabel) =
-          <T_> 
+          <T_>
              <k> PgmName(.List{K}) </k>
              <in> List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576) </in>
-          <_/T> 
+          <_/T>
 endkm
-
-
-

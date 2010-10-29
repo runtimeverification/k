@@ -6,14 +6,14 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
 --- Declarations
 --- There are two types of declarations: for variables (including arrays) and for functions
-  syntax Decl ::= var Var ; [prec 2]
+  syntax Decl ::= var Var ;
                 | function Id ( ) Stmt
                 | function Id ( List{Id} ) Stmt
 
 --- Variables; we include arrays here as well, so that, e.g., a[x][y][z]
 --- can appear anywhere a variable can appear (declarations, lookup, assignment)
   syntax Var ::= Id
-               | Var [ Exp ] [strict prec 1]
+               | Var [ Exp ]       [strict prec 1]
 
 --- Expressions
   syntax Exp ::= Int | Bool
