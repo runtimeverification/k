@@ -1,7 +1,9 @@
 kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
-
-  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z |
-                main | divide2 | collatz | dummy1 | dummy2 | init | reverse | writeArray | insertionSort | bubbleSort | siftDown | heapSort | map | done | root | bottom | maxChild | size
+  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n 
+              | o | p | q | r | s | t | u | v | w | x | y | z 
+              | main | divide2 | collatz | dummy1 | dummy2 | init 
+              | reverse | writeArray | insertionSort | bubbleSort 
+              | siftDown | heapSort | map | done | root | bottom | maxChild | size
   syntax Stmts ::= pFactorial | pCollatz | pSorting | pX01
 
 
@@ -11,7 +13,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          var t:int;  var x:bool;
 	 t = 1;
          for i = 1 to y do
-	   t = t * i;
+	   t = t*i;
 	 return t;
        }
        function main():void {
@@ -39,10 +41,10 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          s = 0;
 	 write(n);
          while n > 1 do {
-	   s = s + 1;
-           if n == (n / 2) * 2
-	   then n = divide2(3 + n, n, true or false);
-	   else n = 3 * n + 1;
+	   s = s+1;
+           if n==(n/2)*2
+	   then n = divide2(3+n, n, true or false);
+	   else n = 3*n+1;
          }
 	 return s;
        }
@@ -72,7 +74,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
        function reverse(x:int[]):void {
          var n:int;
          n = sizeOf(x);
-         for i = 0 to n / 2 - 1 do {
+         for i = 0 to n/2 - 1 do {
            var t:int;
            t = x[i];
            x[i] = x[n - i - 1];
@@ -94,10 +96,10 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
            j = i - 1;
            while (j >= 0) do {
              if x[j] > v then
-               x[j + 1] = x[j];
+               x[j+1] = x[j];
              j = j - 1;
            }
-           x[j + 1] = v;
+           x[j+1] = v;
          }
        }
 
@@ -106,10 +108,10 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          n = sizeOf(v);
          for i = 0 to n - 1 do
            for j = 0 to n - 2 do
-             if v[j] > v[j + 1] then {
+             if v[j] > v[j+1] then {
                var t:int;
-               t = v[j + 1];
-               v[j + 1] = v[j];
+               t = v[j+1];
+               v[j+1] = v[j];
                v[j] = t;
              }
        }
@@ -118,15 +120,15 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          var done:bool;
          done = false;
          var maxChild:int;
-         while (root * 2 <= bottom and not done) do {
-           if (root * 2 == bottom) then {
-             maxChild = root * 2;
+         while (root*2 <= bottom and not done) do {
+           if (root*2 == bottom) then {
+             maxChild = root*2;
            }
-           else if (x[root * 2] > x[root * 2 + 1]) then {
-                  maxChild = root * 2;
+           else if (x[root*2] > x[root*2+1]) then {
+                  maxChild = root*2;
                 }
 	        else {
-                  maxChild = root * 2 + 1;
+                  maxChild = root*2+1;
                 }
            if (x[root] < x[maxChild]) then {
              var t:int;
@@ -151,7 +153,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
            i = i - 1;
          }
          i = n - 1;
-         while (i >= 1 ) do {
+         while (i>=1 ) do {
            var t:int;
            t = x[0];
            x[0] = x[i];
@@ -166,7 +168,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
          var n:int;
          n = 10;
          x = init(n);
-         var f[11]:(int[] -> void)[];
+         var f[11]:(int[]->void)[];
          f[ 0] = writeArray;
          f[ 1] = reverse;
          f[ 2] = writeArray;
@@ -199,5 +201,4 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
        function main():void {
           x = f();
        }
- 
 endkm
