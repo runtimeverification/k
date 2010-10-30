@@ -1,5 +1,5 @@
 #!/bin/bash
-CIL_FLAGS="--noWrap --decil --noPrintLn --warnall --strictcheck --nokeepunused --envmachine"
+# CIL_FLAGS="--noWrap --decil --noPrintLn --warnall --strictcheck --nokeepunused --envmachine"
 PEDANTRY_OPTIONS="-Wall -Wextra -Werror -Wmissing-prototypes -pedantic -x c -std=c99"
 GCC_OPTIONS="-nostdlib -nodefaultlibs -U __GNUC__"
 myDirectory=`dirname "$0"`
@@ -16,12 +16,12 @@ fi
 
 K_MAUDE_BASE=`$READLINK -f $myDirectory/../../../..`
 K_PROGRAM_COMPILE="$K_MAUDE_BASE/tools/kcompile-program.sh"
-CIL_MACHINE='short=2,1 int=4,1 long=4,1 long_long=8,1 pointer=4,1 enum=4,1 float=4,1 double=8,1 long_double=16,1 void=1 bool=1,1 fun=1,1 alignof_string=1 max_alignment=1 size_t=unsigned_long wchar_t=int char_signed=true const_string_literals=true big_endian=false __thread_is_keyword=false __builtin_va_list=false underscore_name=true'
-CIL_BASE=`readlink -f $myDirectory/../cil`
-CIL_SUBDIR=`ls --color=none $CIL_BASE/obj | sed 's/\([^ ]*\)/\1/'`
-CIL_PLATFORM=$CIL_BASE/obj/$CIL_SUBDIR
+# CIL_MACHINE='short=2,1 int=4,1 long=4,1 long_long=8,1 pointer=4,1 enum=4,1 float=4,1 double=8,1 long_double=16,1 void=1 bool=1,1 fun=1,1 alignof_string=1 max_alignment=1 size_t=unsigned_long wchar_t=int char_signed=true const_string_literals=true big_endian=false __thread_is_keyword=false __builtin_va_list=false underscore_name=true'
+# CIL_BASE=`readlink -f $myDirectory/../cil`
+# CIL_SUBDIR=`ls --color=none $CIL_BASE/obj | sed 's/\([^ ]*\)/\1/'`
+# CIL_PLATFORM=$CIL_BASE/obj/$CIL_SUBDIR
 # $CIL_BASE/obj/x86_LINUX
-ACTUAL_CIL=$CIL_PLATFORM/cilly.asm.exe
+# ACTUAL_CIL=$CIL_PLATFORM/cilly.asm.exe
 export CIL_MACHINE
 
 set -o nounset
@@ -85,13 +85,13 @@ fi
 #echo "done with gcc"
 if [ ! "$dflag" ]; then
 	rm -f $filename.prepre.gen
-else
-	$ACTUAL_CIL $CIL_FLAGS --out $filename.cil $filename.pre.gen
+# else
+#	$ACTUAL_CIL $CIL_FLAGS --out $filename.cil $filename.pre.gen
 fi
-$myDirectory/cparser $CIL_FLAGS --out $filename.gen.maude.tmp $filename.pre.gen 2> $filename.warnings.log
+$myDirectory/cparser --out $filename.gen.maude.tmp $filename.pre.gen 2> $filename.warnings.log
 if [ "$?" -ne 0 ]; then 
 	rm -f $filename.gen.maude.tmp
-	msg="Error running cil: `cat $filename.warnings.log`"
+	msg="Error running C parser: `cat $filename.warnings.log`"
 	rm -f $filename.warnings.log
 	die "$msg" 7
 fi

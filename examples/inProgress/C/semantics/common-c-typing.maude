@@ -413,13 +413,6 @@ mod COMMON-C-TYPING is
 
 	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
 	
-	--- op helpReverseArrayTypes : Type Nat -> Type .
-	--- eq helpReverseArrayTypes(arrayType(T:Type, N:Nat), N':Nat) = arrayType(helpReverseArrayTypes(T:Type, N':Nat), N:Nat) .
-	--- ceq helpReverseArrayTypes(T:Type, N:Nat) = arrayType(T:Type, N:Nat)
-		--- if notBool hasArrayType(T:Type) .
-	
-	--- eq ArrayType(T:BaseType, N:Nat) = arrayType(T:Type, N:Nat) .
-	
 	op makeArrayType : Nat -> KLabel .
 	op makeFunctionType : List{Type} -> KLabel .
 	op pushTypeDown : Type KLabel -> Type .
@@ -550,7 +543,6 @@ mod COMMON-C-TYPING is
 	
 	--- fixme chould check for some struct contraints here
 	op incompleteToFlexibleArrayMember : List{Type} -> List{Type} .
-	---eq incompleteToFlexibleArrayMember(L:List{Type} :: incompleteArrayType(T:Type)) = L:List{Type} :: flexibleArrayType(T:Type) .
 	ceq incompleteToFlexibleArrayMember(typedDeclaration(T:Type, X:Id) :: L:List{Type}) 
 		= typedDeclaration(T:Type, X:Id) :: incompleteToFlexibleArrayMember(L:List{Type}) 
 		if notBool hasIncompleteType(T:Type) .
@@ -617,12 +609,6 @@ mod COMMON-C-TYPING is
 	eq extractActualType(qualifiedType(T:Type, K:K)) = qualifiedType(extractActualType(T:Type), K:K) .
 	eq extractActualType(prototype(T:Type)) = prototype(extractActualType(T:Type)) .
 	eq extractActualType(typedefType(?, T:Type)) = extractActualType(T:Type) .
-	
-	
-	
-	--- ceq extractActualType(T:Type) = T:Type 
-		--- if getKLabel(T:Type) =/=Bool 'typedefType
-		--- andBool getKLabel(T:Type) =/=Bool 'qualifiedType .
 		
 	op NameAndType : K K -> K [metadata "strict(2)"] .
 	
@@ -644,7 +630,6 @@ mod COMMON-C-TYPING is
 		: KSentence .
 	eq FieldName(K:K) = K:K .
 	
-	
 	ceq isAType T:Type = true
 		if setOfTypes contains l(getKLabel(T:Type)) .
 	eq isAType T:BaseType = true .
@@ -654,24 +639,8 @@ mod COMMON-C-TYPING is
 		
 	eq isABaseType T:BaseType = true .
 	eq isABaseType ? = false [owise] .
-	***(
-	op normalizeType : K K -> K .
-	op typedef : K K -> K .
-	
-	
-	--- fixme ignoring qualifiers
-	mb rule [qualifiedType(T:Type, ?) => T:Type] : KSentence [metadata "structural"] .
-	
-	mb rule [unsigned-short => unsigned-short-int] : KSentence [metadata "structural"] .
-	mb rule [unsigned-long => unsigned-long-int] : KSentence [metadata "structural"] .
-	mb rule [unsigned-long-long => unsigned-long-long-int] : KSentence [metadata "structural"] .
-	mb rule [short => short-int] : KSentence [metadata "structural"] .
-	mb rule [long => long-int] : KSentence [metadata "structural"] .
-	mb rule [long-long => long-long-int] : KSentence [metadata "structural"] .
-	***)
 			
-	--- eq byteSizeofType(T:Type) = bitsToBytes(bitSizeofType(T:Type)) .
-			
+
 	--- FIXME most of these don't take into consideration modifiers
 
 	eq hasFloatType(float) = true .
@@ -839,32 +808,29 @@ mod COMMON-C-TYPING is
 
 	mb rule < type > N:Nat => cfg:largestUnsigned ...</ type > : KSentence .
 
-	--- mb rule
-		--- < type > ['Pointer(Kp:KProper) => Kp:KProper ~> 'Pointer(HOLE)] ...</ type >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < type > [T:Type ~> 'Pointer(HOLE) => 'Pointer(T:Type)] ...</ type >
-		--- : KSentence [metadata "structural"] .
-
-	--- mb [type-deref-value]: rule
-		--- < type > *(tv(?, pointerType(T:Type))) => T:Type ...</ type >
-		--- : KSentence [metadata "structural"] .
 	mb [type-deref-type]: rule
 		< type > *(pointerType(T:Type)) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
 	mb [type-deref-type]: rule
 		< type > *(arrayType(T:Type, ?)) => T:Type ...</ type >
 		: KSentence [metadata "structural"] .
-	--- mb [type-deref-array]: rule
-		--- < type > ['Deref(arrayType(T:Type, ?)) => T:Type] ...</ type >
-		--- : KSentence [metadata "structural"] .
 
 	mb [type-compound-literal]: rule
 		< type > CompoundLiteral(?, Specifier:K, DeclType:K, ?)
 			=> Cast(Specifier:K, DeclType:K, emptyValue)  --- sort of hackish, assumes cast will evaluate to type
 		...</ type >
 		: KSentence [metadata "structural"] .
-		
+	
+	mb [type-assignment]: rule
+		< k > L:KLabel(K:K,, ?) 
+			=> K:K
+		...</ k >
+		if Set(
+			l('_:=_),, l('_*=_),, l('_/=_),, l('_%=_),, l('_+=_),, l('_-=_),, 
+			l('_<<=_),, l('_>>=_),, l('_&=_),, l('_^=_),, l('_|=_)
+		) contains l(L:KLabel)
+		: KSentence [metadata "structural"] .	
+	
 	mb rule 
 		< type > L:KLabel(T:Type,, T':Type) => maxType(T:Type, T':Type) ...</ type >
 		if typeStrictBinaryOperators contains l(L:KLabel)

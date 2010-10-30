@@ -14,8 +14,6 @@ mod COMMON-SEMANTICS-COMPOUND-LITERAL is
 		< k > CompoundLiteral(N:Nat, T:Type, K:K, Init:K)
 			=> handleCompoundLiteral(figureInitializer(compoundLiteral(N:Nat), DeclType(T:Type, K:K), Init:K))
 		...</ k >
-		--- < compoundLiteralMap > M:Map </ compoundLiteralMap >
-		--- if notBool $hasMapping(M:Map, N:Nat)
 		: KSentence [metadata "structural"] .
 		
 	mb rule
@@ -458,7 +456,9 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	--- 6.5.16
 	op compoundAssignment : KLabel K K -> K [metadata "strict(2 3)"] .
 	mb rule
-		L:KLabel(E1:Expression,, E2:Expression) => compoundAssignment(L:KLabel, &(E1:Expression), E2:Expression)
+		< k > L:KLabel(E1:Expression,, E2:Expression) 
+			=> compoundAssignment(L:KLabel, &(E1:Expression), E2:Expression) 
+		...</ k >
 		if Set(
 			l('_*=_),, l('_/=_),, l('_%=_),, l('_+=_),, l('_-=_),, 
 			l('_<<=_),, l('_>>=_),, l('_&=_),, l('_^=_),, l('_|=_)
