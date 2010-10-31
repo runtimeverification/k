@@ -538,7 +538,7 @@ and constant =
 	op HexConstant : K -> IntConstant --- new --- expected to be string
 	
 	op DecimalFloatConstant : Float -> IntConstant --- new
-	op HexFloatConstant : K -> IntConstant --- new
+	op HexFloatConstant : K K K K -> IntConstant --- new --- wholeSignificand, fractionalSignificand, exponent, suggested answer.
 	
 	op U : K -> Constant --- new
 	op L : K -> Constant --- new

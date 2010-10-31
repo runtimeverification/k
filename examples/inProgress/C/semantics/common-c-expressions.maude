@@ -435,6 +435,24 @@ and ll or LL
 		: KSentence [metadata "structural"] .
 		
 		
+		
+	--- FloatLiteral(L(HexFloatConstant(256, 46117495616, 2)))
+	
+	--- op _^Rat_ : NzRat Int -> NzRat [ditto] .
+	--- op _^Rat_ : Rat Int -> Rat [ditto] .
+	--- ceq R:NzRat ^Rat I:Int = 1 /Rat (R:NzRat ^Rat absInt(I:Int))
+		--- if I:Int <Int 0 .
+	--- ceq 0 ^Rat I:Int = 0
+		--- if I:Int <Int 0 .
+	
+	eq HexFloatConstant(?, ?, ?, F:Float) = DecimalFloatConstant(F:Float) .
+	--- ceq HexFloatConstant(SigWhole:Nat, SigFrac:NzNat, Exp:Int) 
+		--- = DecimalFloatConstant(Rat2Float((SigWhole:Nat +Rat (1 /Rat SigFrac:NzNat)) *Rat (2 ^Rat Exp:Int)))
+		--- if SigFrac:NzNat =/=Bool 0 .
+		
+	--- ceq HexFloatConstant(SigWhole:Nat, SigFrac:Nat, Exp:Int) = DecimalFloatConstant(Rat2Float(SigWhole:Nat *Rat (2 ^Rat Exp:Int)))
+		--- if SigFrac:Nat ==Bool 0 .
+	
 	---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double.
 	mb rule NoSuffix(DecimalFloatConstant(F:Float)) => tv(F:Float, double)
 		: KSentence [metadata "structural"] .

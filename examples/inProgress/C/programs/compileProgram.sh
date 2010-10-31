@@ -1,7 +1,7 @@
 #!/bin/bash
 # CIL_FLAGS="--noWrap --decil --noPrintLn --warnall --strictcheck --nokeepunused --envmachine"
 PEDANTRY_OPTIONS="-Wall -Wextra -Werror -Wmissing-prototypes -pedantic -x c -std=c99"
-GCC_OPTIONS="-nostdlib -nodefaultlibs -U __GNUC__"
+GCC_OPTIONS="-std=c99 -nostdlib -nodefaultlibs -U __GNUC__"
 myDirectory=`dirname "$0"`
 
 if [ -e `which readlink` ]; then

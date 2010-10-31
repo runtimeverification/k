@@ -301,13 +301,31 @@ and splitInt (xs, i) =
 	| "U" -> splitInt("U" :: xs, newi)
 	| "L" -> splitInt("L" :: xs, newi)
 	| _ -> (xs, i)
+and printHexFloat f = 
+	let significand :: exponent :: [] = Str.split (Str.regexp "[pP]") f in
+	let wholeSignificand :: fractionalSignificand = Str.split_delim (Str.regexp "\.") significand in
+	let wholeSignificand = (if wholeSignificand = "" then "0" else wholeSignificand) in
+	let fractionalSignificand =
+		(match fractionalSignificand with
+		| [] -> "0"
+		| "" :: [] -> "0"
+		| x :: [] -> x
+		) in
+	let exponent :: [] = Str.split (Str.regexp "[+]") exponent in
+	let exponent = int_of_string exponent in
+	let wholeSignificand = float_of_string ("0x" ^ wholeSignificand) in
+	let fractionalSignificand = float_of_string ("0x." ^ fractionalSignificand) in
+	let significand = wholeSignificand +. fractionalSignificand in
+	let result = significand *. (2. ** (float_of_int exponent)) in
+	wrap ((string_of_int (int_of_float wholeSignificand)) :: (string_of_float fractionalSignificand) :: (string_of_int exponent) :: (string_of_float result) :: []) "HexFloatConstant"
+	(* (wrapString ("\"" ^ f ^ "\"") "HexFloatConstant") *)
 and printFloatLiteral r =
 	let (tag, r) = splitFloat ([], r) in
 	let num = (
 		let firstTwo = if (String.length r > 2) then (Str.first_chars r 2) else ("xx") in
 			if (firstTwo = "0x" or firstTwo = "0X") then 
 				let nonPrefix = Str.string_after r 2 in
-					(wrapString ("\"" ^ nonPrefix ^ "\"") "HexFloatConstant")
+					printHexFloat nonPrefix					
 			else (
 				(wrapString r "DecimalFloatConstant")
 			)

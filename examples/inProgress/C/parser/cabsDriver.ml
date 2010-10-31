@@ -43,19 +43,15 @@
 
 module F = Frontc
 module C = Cil
-module CK = Check
+(* module CK = Check *)
 module E = Errormsg
 open Printf
 open CabsPrinter
-
-(* let printerForCabs = new cabsPrinter*) 
 
 type outfile = 
     { fname: string;
       fchan: out_channel } 
 let outChannel : outfile option ref = ref None
-let mergedChannel : outfile option ref = ref None
-
 
 let replace input output =
     Str.global_replace (Str.regexp_string input) output
@@ -104,7 +100,7 @@ let rec processOneFile (cabs: Cabs.file) =
         
 (***** MAIN *****)  
 let theMain () =
-  let usageMsg = "Usage: cilly [options] source-files" in
+  let usageMsg = "Usage: cparser [options] source-files" in
   (* Processign of output file arguments *)
   let openFile (what: string) (takeit: outfile -> unit) (fl: string) = 
     if !E.verboseFlag then
@@ -119,7 +115,7 @@ let theMain () =
    * want 'cilly' transformations to preserve annotations; I
    * can easily add a command-line flag if someone sometimes
    * wants these suppressed *)
-  C.print_CIL_Input := true;
+  (* C.print_CIL_Input := true; *)
 
   (*********** COMMAND LINE ARGUMENTS *****************)
   (* Construct the arguments for the features configured from the Makefile *)
@@ -129,60 +125,38 @@ let theMain () =
         [ 
           "--out", Arg.String (openFile "output" 
                                  (fun oc -> outChannel := Some oc)),
-              " the name of the output CIL file.\n\t\t\t\tThe cilly script sets this for you.";
-          "--mergedout", Arg.String (openFile "merged output"
-                                       (fun oc -> mergedChannel := Some oc)),
-              " specify the name of the merged file";
+              " the name of the output AST.";
         ]
         @ F.args in
-  begin
-    (* this point in the code is the program entry point *)
+	begin
+		(* this point in the code is the program entry point *)
 
-    Stats.reset Stats.HardwareIfAvail;
+		(* Stats.reset Stats.HardwareIfAvail; *)
 
-    (* parse the command-line arguments *)
-    Arg.parse (Arg.align argDescr) Ciloptions.recordFile usageMsg;
-    Cil.initCIL ();
+		(* parse the command-line arguments *)
+		Arg.parse (Arg.align argDescr) Ciloptions.recordFile usageMsg;
+		(* Cil.initCIL (); *)
 
-    Ciloptions.fileNames := List.rev !Ciloptions.fileNames;
+		Ciloptions.fileNames := List.rev !Ciloptions.fileNames;
 
-    if !Cilutil.testcil <> "" then begin
-      Testcil.doit !Cilutil.testcil
-    end else
-      (* parse each of the files named on the command line, to CIL *)
-      let files = Util.list_map parseOneFile !Ciloptions.fileNames in
+		(* parse each of the files named on the command line, to CIL *)
+		let files = Util.list_map parseOneFile !Ciloptions.fileNames in
 
-      (* if there's more than one source file, merge them together; *)
-      (* now we have just one CIL "file" to deal with *)
-      let one =
-        match files with
-          [one] -> one
-        | [] -> E.s (E.error "No arguments for CIL")
-        | _ -> E.s (E.error "Can only handle one input file")
-            (* let merged =
-              Stats.time "merge" (Mergecil.merge files)
-                (if !outName = "" then "stdout" else !outName) in
-            if !E.hadErrors then
-              E.s (E.error "There were errors during merging");
-            (* See if we must save the merged file *)
-            (match !mergedChannel with
-              None -> ()
-            | Some mc -> begin
-                let oldpci = !C.print_CIL_Input in
-                C.print_CIL_Input := true;
-                Stats.time "printMerged"
-                  (C.dumpFile !C.printerForMaincil mc.fchan mc.fname) merged;
-                C.print_CIL_Input := oldpci
-            end);
-            merged *)
-      in
+		(* if there's more than one source file, merge them together; *)
+		(* now we have just one CIL "file" to deal with *)
+		let one =
+			match files with
+			  [one] -> one
+			| [] -> E.s (E.error "No arguments for CIL")
+			| _ -> E.s (E.error "Can only handle one input file")
+		in
 
-      if !E.hadErrors then
-        E.s (E.error "Cabs2cil had some errors");
-
-      (* process the CIL file (merged if necessary) *)
-      processOneFile one
-  end
+		if !E.hadErrors then
+			E.s (E.error "Cabs2cil had some errors");
+				
+		(* process the CIL file (merged if necessary) *)
+		processOneFile one
+	end
 ;;
                                         (* Define a wrapper for main to 
                                          * intercept the exit *)
