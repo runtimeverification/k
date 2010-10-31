@@ -711,6 +711,7 @@ sub recurseIntoFiles
 
 sub printTree
 {
+    my $inclusionFileTree = shift;
     print "=======Tree========\n";
     Tree::Nary->traverse($inclusionFileTree,, $Tree::Nary::PRE_ORDER,
 	$Tree::Nary::TRAVERSE_ALL, -1, \&display_node);
@@ -900,5 +901,180 @@ sub required()
 #    print "Found! " . $p->{data} . " parent for " . getFullName($c) . "\n\n\n";
     return 1;
 }
+
+
+# builds a configuration tree without considering ? or * or + in cells
+sub build_config_tree
+{
+    my ($temp_cfg, $node_name) = (shift, shift);
+
+    # get rid of * ? +
+    $node_name =~ s/\s*\*\s*//g;
+    $node_name =~ s/\s*\?\s*//g;
+    $node_name =~ s/\s*\+\s*//g;
+
+    # create the new node
+    my $root = new Tree::Nary->new($node_name);
+    
+    # append to the created node its children
+    while ($temp_cfg =~ m/<\s*(.+?)\s*_?\s*>\s*(.+?)\s*<\s*_?\s*\/\s*\1>\s*/sg)
+    {
+	my $cell_name = $1;
+	my $cell_content = $2;
+
+	my $node = &build_config_tree($cell_content, $cell_name);
+	Tree::Nary->append($root, $node);
+    }
+
+    # keep content too
+    if ($temp_cfg !~ m/<\s*(.+?)\s*_?\s*>\s*(.+?)\s*<\s*_?\s*\/\s*\1>\s*/sg)
+    {	
+	my $node = new Tree::Nary->new($temp_cfg);
+	Tree::Nary->append($root, $node);
+    }
+
+    
+    # remove all children (from text) in order to find
+    # unmatched cells
+    $temp_cfg =~ s/<\s*(.+?)\s*_?\s*>\s*(.+?)\s*<\s*_?\s*\/\s*\1>\s*//sg;  
+    
+    return $root;
+}                    
+
+###############################################
+#   replacing dots                            #
+###############################################
+
+my $rule_leafs = "";
+my $config_leafs = "";
+my $configuration_tree;
+my $cfgNode;
+my $configSubtree;
+
+sub replace_dots
+{
+    local $_ = shift;
+    my $ret = $_;
+    my $rule;
+    my $rule1;
+    my $temp_rule;
+    my $rule_tree; 
+    my $nn;
+    my $chno;
+    my $tmp_cfg;
+
+#    print "GOT: $_\n";
+    
+    my $config = "";
+    
+# Getting rid of comments, maintaining the line numbers of the remaining code
+    s/($comment)/
+    {
+	local $_=$1;
+	s!\S!!gs;
+	$_;
+    }/gsme;
+    
+    if (/configuration\s+(<(.*?)>.*?<\/\2>)/gs) { $config = $1; }
+    # print "Config: $config\n";
+    
+    $configuration_tree = build_config_tree($config, "super-node");
+
+#    printTree($configuration_tree);
+
+    while (/(rule.*?(?=($kmaude_keywords_pattern)))/gs)
+    {
+	$rule = $1;
+	$rule1 = $rule;
+	
+	$rule_tree = build_config_tree($rule, "super-rule-node");
+	$nn = Tree::Nary->n_nodes($rule_tree, $Tree::Nary::TRAVERSE_ALL);
+	if ($nn > 2)
+	{
+#	    print "Rule: $rule\nTREE:\n";
+#	    printTree($rule_tree);
+	    
+	    $chno = Tree::Nary->n_children($rule_tree);
+	    
+	    my $i = 0;
+	    for ($i = 0; $i < $chno; $i++)
+	    {
+		$temp_rule = Tree::Nary->nth_child($rule_tree, $i);
+		$tmp_cfg = Tree::Nary->find($configuration_tree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $temp_rule->{data});
+		$configSubtree = $tmp_cfg;
+		
+		if (Tree::Nary->n_nodes($tmp_cfg, $Tree::Nary::TRAVERSE_ALL) > 0)  
+		{
+		    Tree::Nary->traverse($temp_rule, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, -1, \&collect_rule_leaf);
+		}
+		else
+		{
+		    $rule_leafs = "";
+		    $config_leafs = "";
+		}
+	    }
+	    
+	    if ($rule_leafs ne "" && $config_leafs ne "")
+	    {
+		my @rule_ls = split(/&&&&/, $rule_leafs);
+		my @rule_ls1 = split(/&&&&/, $rule_leafs);
+		my @cfg_ls = split(/&&&&/, $config_leafs);
+		
+		foreach (@rule_ls)
+		{
+		    if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/)
+		    {
+			
+			if (m/\.\s*\=>/)
+			{
+			    s/\Q$&\E/$cfg_ls[0] =>/;
+			}
+			
+			if (m/(\=>\s*\.)(?:[^LMBSK])/ || m/(\=>\s*\.$)/)
+			{
+			    s/\Q$1\E/=> $cfg_ls[0]/;
+			}		
+		    }
+		    shift(@cfg_ls);
+		}
+		foreach(@rule_ls1)
+		{		
+		    $rule1 =~ s/\Q$_\E/$rule_ls[0]/;
+		    shift(@rule_ls);
+		}
+		
+		$rule_leafs = "";
+		$config_leafs = "";
+	    }
+	}
+	$ret =~ s/\Q$rule\E/$rule1/s;
+    }
+    
+    return $ret;
+}
+
+sub collect_rule_leaf
+{
+    my $node = (shift);
+    
+    if (Tree::Nary->is_leaf($node))
+    {
+	$rule_leafs .= $node->{data} . "&&&&";
+	$cfgNode = Tree::Nary->nth_child($cfgNode, 0);
+	$config_leafs .= $cfgNode->{data} . "&&&&";
+    }
+    else 
+    {
+	$cfgNode = Tree::Nary->find($configSubtree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $node->{data});
+    }
+
+#    print "Step: Rule: $rule_leafs\n      Cfg: $config_leafs\n";
+    return $Tree::Nary::FALSE;
+}
+
+###############################################
+#   end replacing dots                        #
+###############################################
+
 
 1;
