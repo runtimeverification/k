@@ -28,6 +28,11 @@ mod COMMON-SEMANTICS-DECLARATIONS-BINDING is
 	mb [bind-empty]: rule
 		< k > bind-aux(?, Nil, Nil) => sequencePoint ...</ k > 
 		: KSentence [metadata "structural"] .
+		
+		
+	--- n1494 6.5.2.2:6 If the expression that denotes the called function has a type that does not include a prototype, the integer promotions are performed on each argument, and arguments that have type float are promoted to double. These are called the default argument promotions. If the number of arguments does not equal the number of parameters, the behavior is undefined. If the function is defined with a type that includes a prototype, and either the prototype ends with an ellipsis (, ...) or the types of the arguments after promotion are not compatible with the types of the parameters, the behavior is undefined. If the function is defined with a type that does not include a prototype, and the types of the arguments after promotion are not compatible with those of the parameters after promotion, the behavior is undefined, except for the following cases: 
+	--- — one promoted type is a signed integer type, the other promoted type is the corresponding unsigned integer type, and the value is representable in both types;
+	--- — both types are pointers to qualified or unqualified versions of a character type or void.
 	
 	mb [bind-coerce-array]: rule
 		bind-aux(?, L:List{C}, (?:List{Type} :: typedDeclaration((arrayType(T:Type, ?) => pointerType(T:Type)), X:Id) :: ?:List{Type}))

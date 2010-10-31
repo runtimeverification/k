@@ -96,6 +96,12 @@ mod COMMON-SEMANTICS-READING is
 	op joinIntegerBytes : Type List{K} K -> K .
 	eq joinIntegerBytes(T:Type, L:List{K}) = joinIntegerBytes(T:Type, L:List{K}, piece(0, 0)) .
 	
+	--- fixme may want to consider restricting further, or loosening
+	ceq joinIntegerBytes(T:Type, piece(unknown(Len:Nat), Len:Nat), piece(0, 0))
+		= tv(piece(unknown(Len:Nat), Len:Nat), T:Type)
+		if Len:Nat ==Bool numBitsPerByte
+		andBool hasCharType(T:Type) .
+	
 	ceq joinIntegerBytes(T:Type, (L:List{K},, piece(N:Nat, Len:Nat)), piece(N':Nat, Len':Nat))
 		= joinIntegerBytes(T:Type, L:List{K}, piece(_bit::_(piece(N':Nat, Len':Nat), piece(N:Nat, Len:Nat)), Len:Nat +Nat Len':Nat))
 		if Len:Nat ==Bool numBitsPerByte

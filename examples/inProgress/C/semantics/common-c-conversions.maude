@@ -1,6 +1,22 @@
 mod COMMON-SEMANTICS-PROMOTIONS is
 	including COMMON-INCLUDE .
 	
+	
+	mb rule
+		< k > L:KLabel(tv(L':List{K}, T:Type),, V:Value)
+			=> L:KLabel(cast(pointerType(innerType(T:Type)), tv(L':List{K}, T:Type)),, V:Value) 
+		...</ k >
+		if isArithBinConversionOp(L:KLabel)
+		andBool hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .
+		mb rule
+		< k > L:KLabel(V:Value,, tv(L':List{K}, T:Type))
+			=> L:KLabel(V:Value,, cast(pointerType(innerType(T:Type)), tv(L':List{K}, T:Type)))
+		...</ k >
+		if isArithBinConversionOp(L:KLabel)
+		andBool hasArrayType(T:Type)
+		: KSentence [metadata "structural"] .
+	
 	--- "integer promotions" are used when doing arithmetic conversions, and for unary ~, +, -.
 	--- "usual arithmetic conversions" are used when doing binary arithmetic on numbers, and are used to find a common type
 	--- there is another set of promotions called "default argument promotions" used when calling functions where the type information is not complete.  This is equivalent to integer promotions + (float => double) .
@@ -37,19 +53,19 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 	
 	mb rule
 		< k > L:KLabel((tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type)))) ...</ k > 
-		if     isArithUnaryOp(L:KLabel)
+		if isArithUnaryOp(L:KLabel)
 		andBool (rank(T:Type) <Int rank(int) orBool hasBitfieldType(T:Type))
 		andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > L:KLabel((tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type))),, ?) ...</ k > 
-		if     isArithBinOp(L:KLabel)
+		if isArithBinOp(L:KLabel)
 		andBool (rank(T:Type) <Int rank(int) orBool hasBitfieldType(T:Type))
 		andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > L:KLabel(?,, (tv(V:BaseValue, T:Type) => promote(tv(V:BaseValue, T:Type)))) ...</ k > 
-		if     isArithBinOp(L:KLabel)
+		if isArithBinOp(L:KLabel)
 		andBool (rank(T:Type) <Int rank(int) orBool hasBitfieldType(T:Type))
 		andBool hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
@@ -63,7 +79,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
 			=> arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))
 		...</ k >
-		if     isArithBinConversionOp(L:KLabel)
+		if isArithBinConversionOp(L:KLabel)
 		andBool T:Type =/=Bool T':Type
 		andBool hasIntegerType(T:Type)
 		andBool hasIntegerType(T':Type)
@@ -77,14 +93,14 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		< k > L:KLabel(tv(V:BaseValue, long-double),, tv(V':BaseValue, T':Type)) 
 			=> L:KLabel(tv(V:BaseValue, long-double),, cast(long-double, tv(V':BaseValue, T':Type))) 
 		...</ k >
-		if     isArithBinConversionOp(L:KLabel)
+		if isArithBinConversionOp(L:KLabel)
 		andBool long-double =/=Bool T':Type
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, long-double)) 
 			=> L:KLabel(cast(long-double, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, long-double)) 
 		...</ k >
-		if     isArithBinConversionOp(L:KLabel)
+		if isArithBinConversionOp(L:KLabel)
 		andBool long-double =/=Bool T:Type
 		: KSentence [metadata "structural"] .
 	--- double
@@ -92,7 +108,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		< k > L:KLabel(tv(V:BaseValue, double),, tv(V':BaseValue, T':Type)) 
 			=> L:KLabel(tv(V:BaseValue, double),, cast(double, tv(V':BaseValue, T':Type))) 
 		...</ k >
-		if     isArithBinConversionOp(L:KLabel)
+		if isArithBinConversionOp(L:KLabel)
 		andBool long-double =/=Bool T':Type
 		andBool double =/=Bool T':Type
 		: KSentence [metadata "structural"] .
@@ -100,7 +116,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, double)) 
 			=> L:KLabel(cast(double, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, double)) 
 		...</ k >
-		if     isArithBinConversionOp(L:KLabel)
+		if isArithBinConversionOp(L:KLabel)
 		andBool long-double =/=Bool T:Type
 		andBool double =/=Bool T:Type
 		: KSentence [metadata "structural"] .
@@ -109,7 +125,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		< k > L:KLabel(tv(V:BaseValue, float),, tv(V':BaseValue, T':Type)) 
 			=> L:KLabel(tv(V:BaseValue, float),, cast(float, tv(V':BaseValue, T':Type))) 
 		...</ k >
-		if     isArithBinConversionOp(L:KLabel)
+		if isArithBinConversionOp(L:KLabel)
 		andBool long-double =/=Bool T':Type
 		andBool double =/=Bool T':Type
 		andBool float =/=Bool T':Type
@@ -118,7 +134,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, float)) 
 			=> L:KLabel(cast(float, tv(V:BaseValue, T:Type)),, tv(V':BaseValue, float)) 
 		...</ k >
-		if     isArithBinConversionOp(L:KLabel)
+		if isArithBinConversionOp(L:KLabel)
 		andBool long-double =/=Bool T:Type
 		andBool double =/=Bool T:Type
 		andBool float =/=Bool T:Type
@@ -151,7 +167,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 	---C99 6.3.1.1:3 The integer promotions preserve value including sign. As discussed earlier, whether a "plain" char is treated as signed is implementation-defined.
 	mb rule
 		promote(tv(V:BaseValue, T:Type)) => tv(V:BaseValue, int)
-		if     hasIntegerType(T:Type)
+		if hasIntegerType(T:Type)
 		andBool rank(T:Type) <=Int rank(int)
 		andBool min(int) <=Int min(T:Type) 
 		andBool max(int) >=Int max(T:Type)		
@@ -159,21 +175,21 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 
 	mb rule
 		promote(tv(V:BaseValue, T:Type)) => tv(V:BaseValue, T:Type)
-		if     hasIntegerType(T:Type)
+		if hasIntegerType(T:Type)
 		andBool rank(T:Type) >Int rank(int)
 		andBool notBool hasBitfieldType(T:Type)
 		: KSentence [metadata "structural"] .		
 
 	mb rule
 		promote(tv(V:BaseValue, bitfieldType(T:Type, Len:Nat))) => tv(V:BaseValue, int)
-		if     (T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int)
+		if (T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int)
 		andBool min(int) <=Int min(bitfieldType(T:Type, Len:Nat))
 		andBool max(int) >=Int max(bitfieldType(T:Type, Len:Nat))
 		: KSentence [metadata "structural"] .
 	--- fixme unclear what 6.3.1.1:3 means
 	mb rule
 		promote(tv(V:BaseValue, T:Type)) => cast(unsigned-int, tv(V:BaseValue, T:Type))
-		if     hasIntegerType(T:Type)
+		if hasIntegerType(T:Type)
 		andBool rank(T:Type) <=Int rank(int)
 		andBool notBool (
 			min(int) <=Int min(T:Type) 
@@ -182,7 +198,7 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		: KSentence [metadata "structural"] .
 	mb rule
 		promote(tv(V:BaseValue, bitfieldType(T:Type, Len:Nat))) => cast(unsigned-int, tv(V:BaseValue, T:Type))
-		if     (T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int)
+		if (T:Type ==Bool bool orBool T:Type ==Bool int orBool T:Type ==Bool unsigned-int)
 		andBool notBool (
 			min(int) <=Int min(bitfieldType(T:Type, Len:Nat))
 			andBool max(int) >=Int max(bitfieldType(T:Type, Len:Nat))	

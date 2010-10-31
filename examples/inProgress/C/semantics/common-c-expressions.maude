@@ -585,16 +585,28 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
 		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
 		: KSentence [metadata "structural"] .
+		
 	mb rule tv(I1:Int, T:Type) == tv(I2:Int, T:Type) 
 		=> if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi
-		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
-		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
+		if (
+			(hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+			orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
+		) andBool notBool (isUnknown(I1:Int) orBool isUnknown(I2:Int))
 		: KSentence [metadata "structural"] .
 	mb rule tv(I1:Int, T:Type) != tv(I2:Int, T:Type) 
 		=> if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi
-		if (hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
-		orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
+		if (
+			(hasIntegerType(T:Type) andBool hasBeenPromoted(T:Type))
+			orBool (hasPointerType(T:Type) andBool isConcreteNumber(I1:Int) andBool isConcreteNumber(I2:Int))
+		) andBool notBool (isUnknown(I1:Int) orBool isUnknown(I2:Int))
 		: KSentence [metadata "structural"] .
+		
+	op isUnknown : K -> Bool .
+	eq isUnknown(piece(?, ?)) = true .
+	eq isUnknown(sym(?) +Nat ?) = false .
+	eq isUnknown(bito(?) +Nat ?) = false .
+	ceq isUnknown(I:Int) = false
+		if  I:Int <=Int 0 orBool I:Int >Int 0 .
 	
 	---- comparison of pointers
 	--- fixme could check 6.5.8:2
@@ -616,7 +628,7 @@ mod COMMON-SEMANTICS-BOOLEAN-ARITHMETIC is
 	if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 	: KSentence [metadata "structural"] .
 	
-	mb rule tv(N:Nat, T:Type) == tv(M:Nat, T':Type) 
+	mb rule tv(N:Nat, T:Type) == tv(M:Nat, T':Type)
 		=> if (N:Nat ==Bool M:Nat) then tv(1, int) else tv(0, int) fi 
 		if hasPointerType(T:Type) andBool hasPointerType(T':Type)
 		: KSentence [metadata "structural"] .

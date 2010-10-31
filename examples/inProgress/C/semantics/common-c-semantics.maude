@@ -56,7 +56,12 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op Map : Map -> K .
 	op piece : Nat Nat -> Nat .
 	op trueUnknown : -> Nat [ctor] .
+	
 	op unknown : Nat -> Nat [ctor] .
+	
+	--- fixme could presumably have more of these to simulate behavior, but you usually don't know what.  for example, 1 & unknown = unknown
+	--- eq 1 |Int piece(unknown(Len:Nat), Len:Nat)) = 1 .  --- bad, bitwise
+	
 	op unknownF : -> Float [ctor] .
 	op skipval : -> KResult .
 	op debugK : -> K .
