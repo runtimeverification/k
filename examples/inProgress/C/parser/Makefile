@@ -13,7 +13,7 @@ OCAML_LINK = ocamlopt $(OCAMLOPT_FLAGS) -I $(CIL) -ccopt -L$(CIL)
 .PHONY: all cleanOnMakefileChange clean
 all: cparser 
 
-$(CIL)/cil.cmxa:
+$(CIL)/cil.cmxa: $(CIL_BASE)/src/frontc/clexer.mll
 	cd $(CIL_BASE) && autoconf && ./configure
 	make -C $(CIL_BASE)
 	
