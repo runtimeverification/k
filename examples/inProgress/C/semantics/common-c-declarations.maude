@@ -182,23 +182,13 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
 		: KSentence [metadata "structural"] .
 		
-	--- fixme this was fast, but I want the transformation
 	eq DeclarationDefinition(InitNameGroup(T:Type, (K:C :: K':C :: L:List{C}))) 
 		= DeclarationDefinition(InitNameGroup(T:Type, K:C)) 
 		~> DeclarationDefinition(InitNameGroup(T:Type, K':C :: L:List{C})) .
 	eq DeclarationDefinition(InitNameGroup(T:Type, InitName(Name:K, Exp:K))) = declare(SingleName(T:Type, Name:K), Exp:K) .
-	--- eq DeclarationDefinition(InitNameGroup(T:K, (K:C :: K':C :: L:List{C}))) 
-		--- = DeclarationDefinition(InitNameGroup(T:K, K:C)) 
-		--- ~> DeclarationDefinition(InitNameGroup(T:K, K':C :: L:List{C})) .
-	--- eq DeclarationDefinition(InitNameGroup(T:K, InitName(Name:K, Exp:K))) = declare(SingleName(T:K, Name:K), Exp:K) .
-	
-	
-		
+			
 	eq Typedef(NameGroup(T:Type, (K:C :: K':C :: L:List{C}))) = Typedef(NameGroup(T:Type, K:C)) ~> Typedef(NameGroup(T:Type, K':C :: L:List{C})) .
 	eq Typedef(NameGroup(T:Type, Name:C)) = defineType(SingleName(T:Type, Name:C)) .
-
-	--- eq EnumItem(X:Id, V:Value)
-		--- = enumItem(X:Id, V:Value) .
 		
 	op initialize-aux : Id Type K -> K .
 		
@@ -210,7 +200,6 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		: KSentence .
-		
 
 	mb rule
 		< k > zero(Name:K) => zeroType(Name:K, unqualifyType(T:Type)) ...</ k >
@@ -306,19 +295,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 		< currentFunction > File-Scope </ currentFunction >
 		if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
 		andBool hasFunctionType(T:Type)
-		--- andBool K:K =/=Bool NoInit
 		: KSentence [metadata "structural"] .
-		
-	--- --- function prototype
-	--- --- mb rule
-		--- --- < k > declare(typedDeclaration(T:Type, X:Id), K:K) 
-			--- --- => declareFunction(X:Id, T:Type, K:K)
-		--- --- ...</ k >
-		--- --- < currentFunction > File-Scope </ currentFunction >
-		--- --- if notBool hasIncompleteType(T:Type) --- I'd like to get rid of this cleanly
-		--- --- andBool hasFunctionType(T:Type)
-		--- --- : KSentence [metadata "structural"] .	
-		
 		
 	--- fixme there are still no nested functions though, right?
 	mb rule
@@ -361,13 +338,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 		if notBool hasStaticType(T:Type)
 		andBool K:K =/=Bool NoInit
 		: KSentence [metadata "structural"] .
-	--- function prototype
-	--- mb rule
-		--- < k > declareFunction(X:Id, T:Type, NoInit)
-			--- => declareWithLinkage(X:Id, prototype(T:Type), initializer((X:Id := tv(functionPrototype(X:Id, T:Type), T:Type) ~> discard)), external)
-		--- ...</ k >
-		--- if notBool hasStaticType(T:Type)
-		--- : KSentence [metadata "structural"] .	
+
 	mb rule
 		< k > declareFunction(X:Id, T:Type, NoInit)
 			=> declareWithLinkage(X:Id, prototype(T:Type), NoInit, external)

@@ -18,6 +18,22 @@ char *strcpy(char *dest, const char *src) {
 	return dest;
 }
 
+// from http://clc-wiki.net/wiki/strncpy, public domain
+
+char* strncpy(char* restrict dest, const char* restrict src, size_t n) {
+	char *ret = dest;
+	do {
+		if (!n--) {
+			return ret;
+		}
+	} while (*dest++ = *src++);
+	while (n--) {
+		*dest++ = 0;
+	}
+	return ret;
+}
+
+
 size_t strlen(const char * str) {
     const char *s;
     for (s = str; *s; ++s);

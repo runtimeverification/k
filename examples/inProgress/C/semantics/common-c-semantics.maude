@@ -7,6 +7,22 @@
 --- casting from unsigned long long int to int is super slow
 --- pr34099.c checks if anding unknown with 0 is 0.  need to add named unknowns and better interpret
 
+***(
+--- fixme
+union U
+{
+  int i, j[4];
+} u = {};
+
+what are j bits?  spec says padding bits are zeroed, but doesn't say about bits not in first id
+***)
+
+
+--- fixme not handling this
+--- N1494 6.7.2.1:13 An unnamed member of structure type with no tag is called an anonymous structure; an unnamed member of union type with no tag is called an anonymous union. The members of an anonymous struct or union are considered to be members of the containing structure or union. This applies recursively if the containing structure or union is also an anonymous structure or union.
+
+--- take address of builtins
+
 --- extern inside block that shadows variable in a function that shadows global extern
 
 --- c1x 6.7.9:5 If the declaration of an identifier has block scope, and the identifier has external or internal linkage, the declaration shall have no initializer for the identifier.

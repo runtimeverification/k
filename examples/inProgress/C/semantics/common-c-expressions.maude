@@ -722,7 +722,7 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .	
 		
-	op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
+	op computePointerDifference : Int Int K -> K [metadata "strict(3)"] . --- ptr1, ptr2, size of ptr type
 	mb [start-pointer-difference]: rule tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
 		=> computePointerDifference(I1:Int, I2:Int, sizeofType(T:Type))
 		: KSentence [metadata "structural"] .
