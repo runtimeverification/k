@@ -1,0 +1,13 @@
+load a.out
+--- load ../../../model-checker
+mod MODEL-CHECK-TEST is
+	including C-program-linked .
+	including PL-MODEL-CHECKER .
+	op modelBag : -> Bag .
+	eq modelBag = eval(linked-program, String "a.out"(.List{K}), "") .
+	op Start : -> Model-Checker-State .
+	op state : Bag -> Model-Checker-State .
+	eq Start = state(modelBag) .
+endm
+search modelBag =>! B:Bag . --- mutual exclusion and no deadlock
+q

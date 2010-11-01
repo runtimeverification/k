@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Clist.html">
+<link rel="next" href="Cil.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of class methods" rel=Appendix href="index_methods.html">
+<link title="Index of classes" rel=Appendix href="index_classes.html">
+<link title="Index of class types" rel=Appendix href="index_class_types.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Pretty" rel="Chapter" href="Pretty.html">
+<link title="Errormsg" rel="Chapter" href="Errormsg.html">
+<link title="Clist" rel="Chapter" href="Clist.html">
+<link title="Stats" rel="Chapter" href="Stats.html">
+<link title="Cil" rel="Chapter" href="Cil.html">
+<link title="Formatcil" rel="Chapter" href="Formatcil.html">
+<link title="Alpha" rel="Chapter" href="Alpha.html">
+<link title="Cillower" rel="Chapter" href="Cillower.html">
+<link title="Cfg" rel="Chapter" href="Cfg.html">
+<link title="Dataflow" rel="Chapter" href="Dataflow.html">
+<link title="Dominators" rel="Chapter" href="Dominators.html"><title>CIL API Documentation (version 1.3.7) : Stats</title>
+</head>
+<body>
+<div class="navbar"><a href="Clist.html">Previous</a>
+&nbsp;<a href="index.html">Up</a>
+&nbsp;<a href="Cil.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Stats.html">Stats</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Stats: <code class="code">sig</code> <a href="Stats.html">..</a> <code class="code">end</code></pre>Utilities for maintaining timing statistics<br>
+<hr width="100%">
+<br><code><span class="keyword">type</span> <a name="TYPEtimerModeEnum"></a><code class="type"></code>timerModeEnum = </code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span class="constructor">Disabled</span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Do not collect timing information</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span class="constructor">SoftwareTimer</span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Use OCaml's <code class="code">Unix.time</code> for timing information</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span class="constructor">HardwareTimer</span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Use the Pentium's cycle counter to time code</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span class="constructor">HardwareIfAvail</span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Use the hardware cycle counter if availible; 
+                        otherwise use SoftwareTimer</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info">
+Whether to use the performance counters (on Pentium only)<br>
+</div>
+
+<pre><span class="keyword">val</span> <a name="VALreset"></a>reset : <code class="type"><a href="Stats.html#TYPEtimerModeEnum">timerModeEnum</a> -> unit</code></pre><div class="info">
+Resets all the timings and specifies the method to use for future timings.
+  Call this before doing any timing.
+<p>
+
+ You will get an exception if you pass HardwareTimer to reset and the
+ hardware counters are not available<br>
+</div>
+<pre><span class="keyword">exception</span> <a name="EXCEPTIONNoPerfCount"></a>NoPerfCount</pre>
+<pre><span class="keyword">val</span> <a name="VALcountCalls"></a>countCalls : <code class="type">bool ref</code></pre><div class="info">
+Flag to indicate whether or not to count the number of calls of
+    to <a href="Stats.html#VALrepeattime"><code class="code">Stats.repeattime</code></a> or <a href="Stats.html#VALtime"><code class="code">Stats.time</code></a> for each label.
+    (default: false)<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALhas_performance_counters"></a>has_performance_counters : <code class="type">unit -> bool</code></pre><div class="info">
+Check if we have performance counters<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALsample_pentium_perfcount_20"></a>sample_pentium_perfcount_20 : <code class="type">unit -> int</code></pre><div class="info">
+Sample the current cycle count, in megacycles.<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALsample_pentium_perfcount_10"></a>sample_pentium_perfcount_10 : <code class="type">unit -> int</code></pre><div class="info">
+Sample the current cycle count, in kilocycles.<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALtime"></a>time : <code class="type">string -> ('a -> 'b) -> 'a -> 'b</code></pre><div class="info">
+Time a function and associate the time with the given string. If some
+    timing information is already associated with that string, then accumulate
+    the times. If this function is invoked within another timed function then
+    you can have a hierarchy of timings<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALrepeattime"></a>repeattime : <code class="type">float -> string -> ('a -> 'b) -> 'a -> 'b</code></pre><div class="info">
+repeattime is like time but runs the function several times until the total
+    running time is greater or equal to the first argument. The total time is
+    then divided by the number of times the function was run.<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALprint"></a>print : <code class="type">out_channel -> string -> unit</code></pre><div class="info">
+Print the current stats preceeded by a message<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALlookupTime"></a>lookupTime : <code class="type">string -> float</code></pre><div class="info">
+Return the cumulative time of all calls to <a href="Stats.html#VALtime"><code class="code">Stats.time</code></a> and
+  <a href="Stats.html#VALrepeattime"><code class="code">Stats.repeattime</code></a> with the given label.<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALtimethis"></a>timethis : <code class="type">('a -> 'b) -> 'a -> 'b</code></pre><div class="info">
+Time a function and set lastTime to the time it took<br>
+</div>
+<pre><span class="keyword">val</span> <a name="VALlastTime"></a>lastTime : <code class="type">float ref</code></pre></body></html>

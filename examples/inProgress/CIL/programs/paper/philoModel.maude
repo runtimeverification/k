@@ -1,0 +1,61 @@
+load a.out
+--- load ../../../model-checker
+mod MODEL-CHECK-TEST is
+	including C-program-linked .
+	including PL-MODEL-CHECKER .
+	op philo : String -> Bag .
+	eq philo(S:String) = eval(linked-program, (String "a.out"(.List{K}),, String S:String(.List{K})), "") .
+	op Start : String -> Model-Checker-State .
+	op state : Bag -> Model-Checker-State .
+	eq Start(S:String) = state(philo(S:String)) .
+	
+	op set : Id -> Prop .
+	eq state(
+		B0:Bag
+		< T > 
+			B1:Bag
+			< genv > 
+				M0:Map
+				Id X:Id(.List{K}) |-> Loc:K
+			</ genv >
+			< mem > 
+				M1:Map  
+				Loc:K |-> Rat piece(1, 8)(.List{K})
+			</ mem >
+		</ T >	
+	) |= set(X:Id) = true .
+	
+	op enabled : Id -> Prop .
+	eq state(
+		B0:Bag
+		< T > 
+			B1:Bag
+			< threads >
+				B2:Bag
+				< thread >
+					B3:Bag
+					< k > 'Apply('Closure(Id X:Id(.List{K}),, K0:K,, K1:K),, K3:K) ~> K:K </ k >
+				</ thread >
+			</ threads >
+		</ T >
+	) |= enabled(X:Id) = true .
+	
+	op finishWith : Nat -> Prop .
+	eq state(
+		B0:Bag
+		< resultValue > 'tv(Rat N:Nat(.List{K}),, Base-Type int(.List{K})) </ resultValue >	
+	) |= finishWith(N:Nat) = true .
+
+endm
+search[1] philo("5") =>! B:Bag . --- no deadlock
+--- red modelCheck(state(philo("3")), [] ~ deadlock ) .
+--- red modelCheck(Start, <> (set(done1) /\ set(done2))) .
+--- red modelCheck(Start, <> (set(done1) )) .
+--- red modelCheck(Start, <> enabled(critical)) .
+--- red modelCheck(Start, <> enabled(dekker1)) .
+--- red modelCheck(Start, [] ~ (enabled(critical1) /\ enabled(critical2))) .
+--- red modelCheck(Start, <> finishWith(10)) .
+--- red modelCheck(Start, (<> enabled(dekker1) /\ <> enabled(dekker2)) -> (<> enabled(critical1) /\ <> enabled(critical2))) .
+
+q
+

@@ -1,0 +1,4025 @@
+\documentclass[letterpaper]{article} 
+
+\setlength{\pdfpagewidth}{\paperwidth}
+\setlength{\pdfpageheight}{\paperheight}
+
+\usepackage{hevea}
+\usepackage{fullpage}
+\usepackage{longtable}
+
+
+% cilversion.tex is generated automatically to define \cilversion
+\include{cil.version}
+
+\def\secref#1{Section~\ref{sec-#1}}
+\def\chref#1{Chapter~\ref{ch-#1}}
+
+\def\apiref#1#2#3{\ahref{api/#1.html\##2#3}{#1.#3}}
+\def\moduleref#1{\ahref{api/#1.html}{#1}}
+
+% Use this to refer to a Cil type/val
+\def\ciltyperef#1{\apiref{Cil}{TYPE}{#1}}
+\def\cilvalref#1{\apiref{Cil}{VAL}{#1}}
+\def\cilvisit#1{\apiref{Cil.cilVisitor}{#1}}
+\def\cilprinter#1{\apiref{Cil.cilPrinter}{#1}}
+
+% Use this to refer to a type/val in the Pretty module
+\def\ptyperef#1{\apiref{Pretty}{TYPE}{#1}}
+\def\pvalref#1{\apiref{Pretty}{VAL}{#1}}
+
+% Use this to refer to a type/val in the Errormsg module
+\def\etyperef#1{\apiref{Errormsg}{TYPE}{#1}}
+\def\evalref#1{\apiref{Errormsg}{VAL}{#1}}
+
+\def\formatcilvalref#1{\apiref{Formatcil}{VAL}{#1}}
+\def\cfgref#1{\apiref{Cfg}{VAL}{#1}}
+
+
+%----------------------------------------------------------------------
+% MACROS
+
+\newcommand{\hsp}{\hspace{0.5in}}
+\def\t#1{{\tt #1}}
+\newcommand\codecolor{\ifhevea\blue\else\fi}
+\renewcommand\c[1]{{\codecolor #1}} % Use for code fragments
+
+%%% Define an environment for code
+%% Unfortunately since hevea is not quite TeX you have to use this as follows
+%\begin{code}
+% ...
+%\end{verbatim}\end{code}
+\def\code{\begingroup\codecolor\begin{verbatim}}
+\def\endcode{\endgroup}
+
+%use this for links to external pages.  It will open pages in the
+%top frame.
+\newcommand\ahreftop[2]{{\ahref{javascript:loadTop('#1')}{#2}}}
+
+%----------------------------------------------------------------------
+
+% Make sure that most documents show up in the main frame,
+% and define javascript:loadTop for those links that should fill the window.
+\makeatletter
+\let\oldmeta=\@meta
+\def\@meta{%
+\oldmeta
+\begin{rawhtml}
+<base target="main">
+<script language="JavaScript">
+<!-- Begin
+function loadTop(url) {
+  parent.location.href= url;
+}
+// -->
+</script>
+\end{rawhtml}}
+\makeatother
+
+\begin{document}
+\begin{latexonly}
+\title{CIL: Infrastructure for C Program Analysis and Transformation}
+\end{latexonly}
+\maketitle
+
+
+\section{Introduction}
+
+CIL has a Source Forge page: 
+   \ahreftop{http://sourceforge.net/projects/cil}
+            {http://sourceforge.net/projects/cil}. 
+
+ CIL ({\bf C} {\bf I}ntermediate {\bf L}anguage) is a high-level representation
+along with a set of tools that permit easy analysis and source-to-source
+transformation of C programs.
+
+ CIL is both lower-level than abstract-syntax trees, by clarifying ambiguous
+constructs and removing redundant ones, and also higher-level than typical
+intermediate languages designed for compilation, by maintaining types and a
+close relationship with the source program. The main advantage of CIL is that
+it compiles all valid C programs into a few core constructs with a very clean
+semantics. Also CIL has a syntax-directed type system that makes it easy to
+analyze and manipulate C programs. Furthermore, the CIL front-end is able to
+process not only ANSI-C programs but also those using Microsoft C or GNU C
+extensions. If you do not use CIL and want instead to use just a C parser and
+analyze programs expressed as abstract-syntax trees then your analysis will
+have to handle a lot of ugly corners of the language (let alone the fact that
+parsing C itself is not a trivial task). See \secref{simplec} for some
+examples of such extreme programs that CIL simplifies for you.
+
+ In essence, CIL is a highly-structured, ``clean'' subset of C. CIL features a
+reduced number of syntactic and conceptual forms. For example, all looping
+constructs are reduced to a single form, all function bodies are given
+explicit {\tt return} statements, syntactic sugar like {\tt "->"} is
+eliminated and function arguments with array types become pointers. (For an
+extensive list of how CIL simplifies C programs, see \secref{cabs2cil}.)
+This reduces the number of cases that must be considered when manipulating a C
+program. CIL also separates type declarations from code and flattens scopes
+within function bodies. This structures the program in a manner more amenable
+to rapid analysis and transformation. CIL computes the types of all program
+expressions, and makes all type promotions and casts explicit. CIL supports
+all GCC and MSVC extensions except for nested functions and complex numbers.
+Finally, CIL organizes C's imperative features into expressions, instructions
+and statements based on the presence and absence of side-effects and
+control-flow. Every statement can be annotated with successor and predecessor
+information. Thus CIL provides an integrated program representation that can
+be used with routines that require an AST (e.g. type-based analyses and
+pretty-printers), as well as with routines that require a CFG (e.g., dataflow
+analyses). CIL also supports even lower-level representations (e.g.,
+three-address code), see \secref{Extension}. 
+
+ CIL comes accompanied by a number of Perl scripts that perform generally
+useful operations on code:
+\begin{itemize}
+\item A \ahrefloc{sec-driver}{driver} which behaves as either the \t{gcc} or
+Microsoft VC compiler and can invoke the preprocessor followed by the CIL
+application. The advantage of this script is that you can easily use CIL and
+the analyses written for CIL with existing make files.
+\item A \ahrefloc {sec-merger}{whole-program merger} that you can use as a
+replacement for your compiler and it learns all the files you compile when you
+make a project and merges all of the preprocessed source files into a single
+one. This makes it easy to do whole-program analysis.
+\item A \ahrefloc{sec-patcher}{patcher} makes it easy to create modified
+copies of the system include files. The CIL driver can then be told to use
+these patched copies instead of the standard ones.
+\end{itemize}
+
+ CIL has been tested very extensively. It is able to process the SPECINT95
+benchmarks, the Linux kernel, GIMP and other open-source projects. All of
+these programs are compiled to the simple CIL and then passed to \t{gcc} and
+they still run! We consider the compilation of Linux a major feat especially
+since Linux contains many of the ugly GCC extensions (see \secref{ugly-gcc}).
+This adds to about 1,000,000 lines of code that we tested it on. It is also
+able to process the few Microsoft NT device drivers that we have had access
+to. CIL was tested against GCC's c-torture testsuite and (except for the tests
+involving complex numbers and inner functions, which CIL does not currently
+implement) CIL passes most of the tests. Specifically CIL fails 23 tests out
+of the 904 c-torture tests that it should pass. GCC itself fails 19 tests. A
+total of 1400 regression test cases are run automatically on each change to
+the CIL sources.
+
+ CIL is relatively independent on the underlying machine and compiler. When
+you build it CIL will configure itself according to the underlying compiler.
+However, CIL has only been tested on Intel x86 using the gcc compiler on Linux
+and cygwin and using the MS Visual C compiler. (See below for specific
+versions of these compilers that we have used CIL for.)
+
+ The largest application we have used CIL for is
+\ahreftop{../ccured/index.html}{CCured}, a compiler that compiles C code into
+type-safe code by analyzing your pointer usage and inserting runtime checks in
+the places that cannot be guaranteed statically to be type safe.  
+
+ You can also use CIL to ``compile'' code that uses GCC extensions (e.g. the
+Linux kernel) into standard C code.
+
+ CIL also comes accompanies by a growing library of extensions (see
+\secref{Extension}). You can use these for your projects or as examples of
+using CIL. 
+
+\t{PDF} versions of \ahref{CIL.pdf}{this manual} and the
+\ahref{CIL-API.pdf}{CIL API} are available. However, we recommend the
+\t{HTML} versions because the postprocessed code examples are easier to
+view. 
+
+ If you use CIL in your project, we would appreciate letting us know. If you
+want to cite CIL in your research writings, please refer to the paper ``CIL:
+Intermediate Language and Tools for Analysis and Transformation of C
+Programs'' by George C. Necula, Scott McPeak, S.P. Rahul and Westley Weimer,
+in ``Proceedings of Conference on Compilier Construction'', 2002.
+
+\section{Installation}
+
+ You need the following tools to build CIL:
+\begin{itemize}
+\item A Unix-like shell environment (with bash, perl, make, mv, cp,
+  etc.). On Windows, you will need cygwin with those packages.
+\item An ocaml compiler. You will need OCaml release 3.08 or higher to build
+CIL. CIL has been tested on Linux and on Windows (where it can behave as
+either Microsoft Visual C or gcc). On Windows, you can build CIL both with the
+cygwin version of ocaml (preferred) and with the Win32 version of ocaml.
+\item An underlying C compiler, which can be either gcc or Microsoft Visual C.
+\end{itemize}
+
+\begin{enumerate}
+\item Get the source code.
+\begin{itemize}
+\item {\em Official distribution} (Recommended):
+\begin{enumerate}
+\item Download the CIL \ahref{distrib}{distribution} (latest version is
+\ahrefurl{distrib/cil-\cilversion.tar.gz}). See the \secref{changes} for recent changes to the CIL distribution.
+\item Unzip and untar the source distribution. This will create a directory
+      called \t{cil} whose structure is explained below. \\
+      \t{~~~~tar xvfz cil-\cilversion.tar.gz}
+\end{enumerate}
+\item {\em Subversion Repository}: \\
+  Alternately, you can download an up to the minute version of CIL
+  from our Subversion repository at:
+\begin{verbatim}
+    svn co svn://hal.cs.berkeley.edu/home/svn/projects/trunk/cil
+\end{verbatim}
+However, the Subversion version may be less stable than the released
+version.  See the Changes section of doc/cil.tex to see what's
+changed since the last release.  There may be changes that aren't yet
+documented in the .tex file or this website.
+
+For those who were using the CVS server before we switched to
+Subversion, revision 8603 in Subversion corresponds to the last CVS
+version.
+
+\end{itemize}
+\item Enter the \t{cil} directory and run the \t{configure} script and then 
+      GNU make to build the distribution. If you are on Windows, at least the
+      \t{configure} step must be run from within \t{bash}. \\
+      \hsp\verb!cd cil!\\
+      \hsp\verb!./configure!\\
+      \hsp\verb!make!\\
+      \hsp\verb!make quicktest!\\
+
+\item You should now find \t{cilly.asm.exe} in a subdirectory of \t{obj}. The
+name of the subdirectory is either \t{x86\_WIN32} if you are using \t{cygwin}
+on Windows or \t{x86\_LINUX} if you are using Linux (although you should be
+using instead the Perl wrapper \t{bin/cilly}). Note that we do not have an
+\t{install} make target and you should use Cil from the development directory.
+\item If you decide to use CIL, {\bf please}
+\ahref{mailto:necula@cs.berkeley.edu}{send us a note}. This will help recharge
+our batteries after a few years of development. And of course, do send us
+your bug reports as well.
+\end{enumerate}
+
+ The \t{configure} script tries to find appropriate defaults for your system.
+You can control its actions by passing the following arguments:
+\begin{itemize}
+\item \t{CC=foo} Specifies the path for the \t{gcc} executable. By default
+whichever version is in the PATH is used. If \t{CC} specifies the Microsoft
+\t{cl} compiler, then that compiler will be set as the default one. Otherwise,
+the \t{gcc} compiler will be the default.
+\end{itemize}
+
+ CIL requires an underlying C compiler and preprocessor. CIL depends on the
+underlying compiler and machine for the sizes and alignment of types. The
+installation procedure for CIL queries the underlying compiler for
+architecture and compiler dependent configuration parameters, such as the size
+of a pointer or the particular alignment rules for structure fields. (This
+means, of course, that you should re-run \t{./configure} when you move CIL to
+another machine.)
+
+We have tested CIL on the following compilers:
+
+\begin{itemize}
+\item On Windows, \t{cl} compiler version 12.00.8168 (MSVC 6),
+  13.00.9466 (MSVC .Net), and 13.10.3077 (MSVC .Net 2003).  Run \t{cl}
+  with no arguments to get the compiler version.  
+\item On Windows, using \t{cygwin} and \t{gcc} version 2.95.3, 3.0,
+  3.2, 3.3, and 3.4.
+\item On Linux, using \t{gcc} version 2.95.3, 3.0, 3.2, 3.3, 4.0, and 4.1.
+\end{itemize}
+
+Others have successfully used CIL on x86 processors with Mac OS X,
+FreeBSD and OpenBSD; on amd64 processors with FreeBSD; on SPARC
+processors with Solaris; and on PowerPC processors with Mac OS X.  If
+you make any changes to the build system in order to run CIL on your
+platform, please send us a patch.
+
+  \subsection{Building CIL on Windows with Microsoft Visual C}
+
+ Some users might want to build a standalone CIL executable on Windows (an
+executable that does not require cygwin.dll to run). You will need cygwin for
+the build process only. Here is how we do it
+
+\begin{enumerate}
+\item Start with a clean CIL directory
+\item Start a command-line window setup with the environment variables for
+  Microsoft Visual Studio. You can do this by choosing Programs/Microsoft
+  Visual Studio/Tools/Command Prompt. Check that you can run \t{cl}. 
+\item Ensure that \t{ocamlc} refers to a Win32 version of ocaml. Run \t{ocamlc
+  -v} and look at the path to the standard library. If you have several
+  versions of ocaml, you must set the following variables:
+   \begin{verbatim}
+      set OCAMLWIN=C:/Programs/ocaml-win
+
+      set OCAMLLIB=%OCAMLWIN%/lib
+      set PATH=%OCAMLWIN%/bin;%PATH%
+      set INCLUDE=%INCLUDE%;%OCAMLWIN%/inc
+      set LIB=%LIB%;%OCAMLWIN%/lib;obj/x86_WIN32
+   \end{verbatim}
+
+\item Run \t{bash -c "./configure CC=cl"}.
+\item Run \t{bash -c "make WIN32=1 quickbuild"}
+\item Run \t{bash -c "make WIN32=1 NATIVECAML=1 cilly}
+\item Run \t{bash -c "make WIN32=1 doc}
+\item Run \t{bash -c "make WIN32=1 bindistrib-nocheck}
+\end{enumerate}
+
+ The above steps do not build the CIL library, but just the executable. The
+last step will create a subdirectory \t{TEMP\_cil-bindistrib} that contains
+everything that you need to run CIL on another machine. You will have to edit
+manually some of the files in the \t{bin} directory to replace \t{CILHOME}.
+The resulting CIL can be run with ActiveState Perl also. 
+
+
+  \section{Distribution Contents}
+
+The file \ahrefurl{distrib/cil-\cilversion.tar.gz} 
+contains the complete source CIL distribution, 
+consisting of the following files:
+
+\begin{longtable}{lp{4in}}
+\emph{Filename}   & \emph{Description} \\
+\endhead
+\endfoot
+\t{Makefile.in}                 & \t{configure} source for the 
+                                  Makefile that builds CIL/ \\
+\t{configure}                   & The configure script. \\
+\t{configure.in}                & The \t{autoconf} source for \t{configure}. \\
+\t{config.guess} 		& Stuff required by \t{configure}. \\
+\t{config.sub} 			& idem \\
+\t{install-sh}	 		& idem \\
+\\
+\t{doc/}                        & HTML documentation of the CIL API. \\
+\t{obj/}                        & Directory that will contain the compiled
+                                   CIL modules and executables.\\
+\t{bin/cilly.in}                & The \t{configure} source for a Perl script 
+                                  that can be invoked with the 
+                                  same arguments as either \t{gcc} or
+                                  Microsoft Visual C and will convert the
+                                  program to CIL, perform some simple
+                                  transformations, emit it and compile it as
+                                  usual. \\
+\t{lib/CompilerStub.pm}         & A Perl class that can be used to write code
+                                  that impersonates a compiler. \t{cilly}
+                                  uses it.  \\
+\t{lib/Merger.pm}               &  A subclass of \t{CompilerStub.pm} that can
+                                  be used to merge source files into a single
+                                  source file.\t{cilly}
+                                  uses it. \\
+\t{bin/patcher.in}              & A Perl script that applies specified patches
+                                  to standard include files.\\
+\\
+\t{src/check.ml,mli}            & Checks the well-formedness of a CIL file. \\
+\t{src/cil.ml,mli}              & Definition of CIL abstract syntax and
+                                   utilities for manipulating it.\\
+\t{src/clist.ml,mli}            & Utilities for efficiently managing lists
+                                   that need to be concatenated often.\\
+\t{src/errormsg.ml,mli}         & Utilities for error reporting. \\
+\t{src/ext/heapify.ml}          & A CIL transformation that moves array local
+                                   variables from the stack to the heap. \\
+\t{src/ext/logcalls.ml,mli}     & A CIL transformation that logs every
+                                   function call. \\
+\t{src/ext/sfi.ml}              & A CIL transformation that can log every
+                                   memory read and write. \\
+\t{src/frontc/clexer.mll}       & The lexer. \\
+\t{src/frontc/cparser.mly}      & The parser. \\
+\t{src/frontc/cabs.ml}          & The abstract syntax. \\
+\t{src/frontc/cprint.ml}        & The pretty printer for CABS. \\
+\t{src/frontc/cabs2cil.ml}      & The elaborator to CIL. \\
+\t{src/main.ml}                 & The \t{cilly} application. \\
+\t{src/pretty.ml,mli}           & Utilities for pretty printing. \\
+\t{src/rmtmps.ml,mli}           & A CIL tranformation that removes unused
+                                  types, variables and inlined functions. \\
+\t{src/stats.ml,mli}            & Utilities for maintaining timing statistics.
+\\
+\t{src/testcil.ml}              & A random test of CIL (against the resident 
+                                  C compiler).\\
+\t{src/trace.ml,mli}            & Utilities useful for printing debugging
+                                   information.\\
+\\
+\t{ocamlutil/}                  & Miscellaneous libraries that are not
+                                  specific to CIL. \\
+\t{ocamlutil/Makefile.ocaml}    & A file that is included by \t{Makefile}. \\
+\t{ocamlutil/perfcount.c}       & C code that links with src/stats.ml
+                                  and reads Intel performance
+                                  counters. \\
+\\
+\t{obj/@ARCHOS@/feature\_config.ml}  & File generated by the Makefile
+                                      describing which extra ``features''
+                                      to compile. See \secref{cil}. \\
+\t{obj/@ARCHOS@/machdep.ml}     & File generated by the Makefile containing
+                                  information about your architecture,
+                                  such as the size of a pointer. \\
+\t{src/machdep-ml.c}            & C program that generates
+                                  \t{machdep.ml} files. \\
+\end{longtable}
+
+
+\section{Compiling C to CIL}\label{sec-cabs2cil}
+
+ In this section we try to describe a few of the many transformations that are
+applied to a C program to convert it to CIL. The module that implements this
+conversion is about 5000 lines of OCaml code. In contrast a simple program
+transformation that instruments all functions to keep a shadow stack of the
+true return address (thus preventing stack smashing) is only 70 lines of code.
+This example shows that the analysis is so much simpler because it has to
+handle only a few simple C constructs and also because it can leverage on CIL
+infrastructure such as visitors and pretty-printers.
+
+ In no particular order these are a few of the most significant ways in which
+C programs are compiled into CIL:
+\begin{enumerate}
+\item CIL will eliminate all declarations for unused entities. This means that
+just because your hello world program includes \t{stdio.h} it does not mean
+that your analysis has to handle all the ugly stuff from \t{stdio.h}.
+
+\item Type specifiers are interpreted and normalized:
+\begin{cilcode}[global]
+int long signed x;
+signed long extern x;
+long static int long y;
+
+// Some code that uses these declaration, so that CIL does not remove them
+int main() { return x + y; }
+\end{cilcode}
+
+\item Anonymous structure and union declarations are given a name. 
+\begin{cilcode}[global]
+ struct { int x; } s;
+\end{cilcode}
+
+\item Nested structure tag definitions are pulled apart. This means that all
+structure tag definitions can be found by a simple scan of the globals.
+
+\begin{cilcode}[global]
+struct foo {
+   struct bar {
+      union baz { 
+          int x1; 
+          double x2;
+      } u1;
+      int y;
+   } s1;
+   int z;
+} f;
+\end{cilcode}
+
+\item All structure, union, enumeration definitions and the type definitions
+from inners scopes are moved to global scope (with appropriate renaming). This
+facilitates moving around of the references to these entities.
+
+\begin{cilcode}[global]
+int main() {
+  struct foo { 
+        int x; } foo; 
+  {
+     struct foo { 
+        double d;
+     };
+     return foo.x;
+  }      
+}
+\end{cilcode}
+
+\item Prototypes are added for those functions that are called before being
+defined. Furthermore, if a prototype exists but does not specify the type of
+parameters that is fixed. But CIL will not be able to add prototypes for those
+functions that are neither declared nor defined (but are used!).
+\begin{cilcode}[global]
+  int f();  // Prototype without arguments
+  int f(double x) {
+      return g(x);
+  }
+  int g(double x) {
+     return x;
+  } 
+\end{cilcode}
+
+\item Array lengths are computed based on the initializers or by constant
+folding.
+\begin{cilcode}[global]
+  int a1[] = {1,2,3};
+  int a2[sizeof(int) >= 4 ? 8 : 16];
+\end{cilcode}
+
+\item Enumeration tags are computed using constant folding:
+\begin{cilcode}[global]
+int main() {
+  enum { 
+     FIVE = 5, 
+     SIX, SEVEN, 
+     FOUR = FIVE - 1, 
+     EIGHT = sizeof(double)
+  } x = FIVE;
+ return x;
+}
+
+\end{cilcode}
+
+\item Initializers are normalized to include specific initialization for the
+missing elements:
+\begin{cilcode}[global]
+  int a1[5] = {1,2,3};
+  struct foo { int x, y; } s1 = { 4 };
+\end{cilcode}
+
+\item Initializer designators are interpreted and eliminated. Subobjects are
+properly marked with braces. CIL implements
+the whole ISO C99 specification for initializer (neither GCC nor MSVC do) and
+a few GCC extensions. 
+\begin{cilcode}[global]
+  struct foo { 
+     int x, y; 
+     int a[5];
+     struct inner {
+        int z;
+     } inner;
+  } s = { 0, .inner.z = 3, .a[1 ... 2] = 5, 4, y : 8 };
+\end{cilcode}
+
+\item String initializers for arrays of characters are processed
+
+\begin{cilcode}[global]
+char foo[] = "foo plus bar";
+\end{cilcode}
+
+\item String constants are concatenated
+
+\begin{cilcode}[global]
+char *foo = "foo " " plus " " bar ";
+\end{cilcode}
+
+\item Initializers for local variables are turned into assignments. This is in
+order to separate completely the declarative part of a function body from the
+statements. This has the unfortunate effect that we have to drop the \t{const}
+qualifier from local variables !
+
+\begin{cilcode}[local]
+  int x = 5; 
+  struct foo { int f1, f2; } a [] = {1, 2, 3, 4, 5 };
+\end{cilcode}
+
+\item Local variables in inner scopes are pulled to function scope (with
+appropriate renaming). Local scopes thus disappear. This makes it easy to find
+and operate on all local variables in a function.
+
+\begin{cilcode}[global]
+  int x = 5; 
+  int main() {
+    int x = 6;
+    { 
+      int x = 7;
+      return x;
+    }
+    return x;
+  } 
+\end{cilcode}
+
+\item Global declarations in local scopes are moved to global scope:
+\begin{cilcode}[global]
+  int x = 5; 
+  int main() {
+    int x = 6;
+    { 
+      static int x = 7;
+      return x;
+    }
+    return x;
+  } 
+\end{cilcode}
+
+\item Return statements are added for functions that are missing them. If the
+return type is not a base type then a \t{return} without a value is added.
+The guaranteed presence of return statements makes it easy to implement a
+transformation that inserts some code to be executed immediately before
+returning from a function.
+\begin{cilcode}[global]
+  int foo() {
+    int x = 5;
+  } 
+\end{cilcode}
+
+\item One of the most significant transformations is that expressions that
+contain side-effects are separated into statements. 
+
+\begin{cilcode}[local]
+   int x, f(int);
+   return (x ++ + f(x));
+\end{cilcode}
+
+ Internally, the \t{x ++} statement is turned into an assignment which the
+pretty-printer prints like the original. CIL has only three forms of basic
+statements: assignments, function calls and inline assembly.
+
+\item Shortcut evaluation of boolean expressions and the \t{?:} operator are
+compiled into explicit conditionals:
+\begin{cilcode}[local]
+  int x;
+  int y = x ? 2 : 4;
+  int z = x || y;
+  // Here we duplicate the return statement
+  if(x && y) { return 0; } else { return 1; }
+  // To avoid excessive duplication, CIL uses goto's for 
+  // statement that have more than 5 instructions
+  if(x && y || z) { x ++; y ++; z ++; x ++; y ++; return z; }
+\end{cilcode}
+
+\item GCC's conditional expression with missing operands are also compiled
+into conditionals:
+\begin{cilcode}[local]
+  int f();;
+  return f() ? : 4;
+\end{cilcode}
+
+\item All forms of loops (\t{while}, \t{for} and \t{do}) are compiled
+internally as a single \t{while(1)} looping construct with explicit \t{break}
+statement for termination. For simple \t{while} loops the pretty printer is
+able to print back the original:
+\begin{cilcode}[local]
+   int x, y;
+   for(int i = 0; i<5; i++) {
+      if(i == 5) continue;
+      if(i == 4) break;
+      i += 2;
+   } 
+   while(x < 5) {
+     if(x == 3) continue;
+     x ++;
+   }
+\end{cilcode}
+
+\item GCC's block expressions are compiled away. (That's right there is an
+infinite loop in this code.)
+
+\begin{cilcode}[local]
+   int x = 5, y = x;
+   int z = ({ x++; L: y -= x; y;});
+   return ({ goto L; 0; });
+\end{cilcode}
+
+\item CIL contains support for both MSVC and GCC inline assembly (both in one
+internal construct)
+
+\item CIL compiles away the GCC extension that allows many kinds of constructs
+to be used as lvalues:
+
+\begin{cilcode}[local]
+   int x, y, z;
+   return &(x ? y : z) - & (x ++, x);
+\end{cilcode}
+
+\item All types are computed and explicit casts are inserted for all
+promotions and conversions that a compiler must insert:
+
+\item CIL will turn old-style function definition (without prototype) into
+new-style definitions. This will make the compiler less forgiving when
+checking function calls, and will catch for example cases when a function is
+called with too few arguments. This happens in old-style code for the purpose
+of implementing variable argument functions.
+ 
+\item Since CIL sees the source after preprocessing the code after CIL does
+not contain the comments and the preprocessing directives.
+
+\item CIL will remove from the source file those type declarations, local
+variables and inline functions that are not used in the file. This means that
+your analysis does not have to see all the ugly stuff that comes from the
+header files: 
+\begin{cilcode}[global]
+#include <stdio.h>
+
+typedef int unused_type;
+
+static char unused_static (void) { return 0; }
+
+int main() {
+  int unused_local;
+  printf("Hello world\n"); // Only printf will be kept from stdio.h     
+}
+\end{cilcode}
+
+\end{enumerate}
+
+\section{How to Use CIL}\label{sec-cil}\cutname{cilly.html}
+
+There are two predominant ways to use CIL to write a program analysis or
+transformation. The first is to phrase your analysis as a module that is
+called by our existing driver. The second is to use CIL as a stand-alone
+library. We highly recommend that you use \t{cilly}, our driver. 
+
+\subsection{Using \t{cilly}, the CIL driver}
+
+The most common way to use CIL is to write an Ocaml module containing your
+analysis and transformation, which you then link into our boilerplate
+driver application called \t{cilly}. \t{cilly} is a Perl script that
+processes and mimics \t{GCC} and \t{MSVC} command-line arguments and then
+calls \t{cilly.byte.exe} or \t{cilly.asm.exe} (CIL's Ocaml executable). 
+
+An example of such module is \t{logwrites.ml}, a transformation that is
+distributed with CIL and whose purpose is to instrument code to print the
+addresses of memory locations being written. (We plan to release a
+C-language interface to CIL so that you can write your analyses in C
+instead of Ocaml.) See \secref{Extension} for a survey of other example
+modules. 
+
+Assuming that you have written \t{/home/necula/logwrites.ml}, 
+here is how you use it: 
+
+ \begin{enumerate}
+
+ \item Modify \t{logwrites.ml} so that it includes a CIL ``feature
+ descriptor'' like this: 
+\begin{verbatim}
+let feature : featureDescr = 
+  { fd_name = "logwrites";              
+    fd_enabled = ref false;
+    fd_description = "generation of code to log memory writes";
+    fd_extraopt = [];
+    fd_doit = 
+    (function (f: file) -> 
+      let lwVisitor = new logWriteVisitor in
+      visitCilFileSameGlobals lwVisitor f)
+  } 
+\end{verbatim}
+  The \t{fd\_name} field names the feature and its associated
+  command-line arguments. The \t{fd\_enabled} field is a \t{bool ref}.
+  ``\t{fd\_doit}'' will be invoked if \t{!fd\_enabled} is true after
+  argument parsing, so initialize the ref cell to true if you want
+  this feature to be enabled by default.
+  
+  When the user passes the \t{-{}-{}dologwrites}
+  command-line option to \t{cilly}, the variable associated with the
+  \t{fd\_enabled} flag is set and the \t{fd\_doit} function is called
+  on the \t{Cil.file} that represents the merger (see \secref{merger}) of
+  all C files listed as arguments. 
+
+ \item Invoke \t{configure} with the arguments
+\begin{verbatim}
+./configure EXTRASRCDIRS=/home/necula EXTRAFEATURES=logwrites
+\end{verbatim}
+
+ This step works if each feature is packaged into its own ML file, and the
+name of the entry point in the file is \t{feature}.
+
+ An alternative way to specify the new features is to change the build files
+yourself, as explained below.  You'll need to use this method if a single
+feature is split across multiple files.
+
+\begin{enumerate}
+ \item Put \t{logwrites.ml} in the \t{src} or \t{src/ext} directory. This
+ will make sure that \t{make} can find it. If you want to put it in some
+ other directory, modify \t{Makefile.in} and add to \t{SOURCEDIRS} your
+ directory.  Alternately, you can create a symlink from \t{src} or
+ \t{src/ext} to your file.
+
+ \item Modify the \t{Makefile.in} and add your module to the 
+ \t{CILLY\_MODULES} or
+ \t{CILLY\_LIBRARY\_MODULES} variables. The order of the modules matters. Add
+ your modules somewhere after \t{cil} and before \t{main}.
+
+ \item If you have any helper files for your module, add those to
+ the makefile in the same way.  e.g.:
+
+\begin{verbatim}
+CILLY_MODULES = $(CILLY_LIBRARY_MODULES) \
+                myutilities1 myutilities2 logwrites \
+                main
+\end{verbatim}
+  % $  <- emacs hack
+
+ Again, order is important: \t{myutilities2.ml} will be able to refer
+ to Myutilities1 but not Logwrites.  If you have any ocamllex or ocamlyacc
+ files, add them to both \t{CILLY\_MODULES} and either \t{MLLS} or
+ \t{MLYS}.
+
+ \item Modify \t{main.ml} so that your new feature descriptor appears in
+ the global list of CIL features. 
+\begin{verbatim}
+let features : C.featureDescr list = 
+  [ Logcalls.feature;
+    Oneret.feature;    
+    Heapify.feature1;  
+    Heapify.feature2;
+    makeCFGFeature; 
+    Partial.feature;
+    Simplemem.feature;
+    Logwrites.feature;  (* add this line to include the logwrites feature! *)
+  ] 
+  @ Feature_config.features 
+\end{verbatim}
+
+ Features are processed in the order they appear on this list.  Put
+ your feature last on the list if you plan to run any of CIL's
+ built-in features (such as makeCFGfeature) before your own.
+
+\end{enumerate}
+
+ Standard code in \t{cilly} takes care of adding command-line arguments,
+ printing the description, and calling your function automatically. 
+ Note: do not worry about introducing new bugs into CIL by adding a single
+ line to the feature list. 
+
+ \item Now you can invoke the \t{cilly} application on a preprocessed file, or
+ instead use the \t{cilly} driver which provides a convenient compiler-like
+ interface to \t{cilly}. See \secref{driver} for details using \t{cilly}.
+ Remember to enable your analysis by passing the right argument (e.g.,
+ \t{-{}-{}dologwrites}).   
+
+\end{enumerate}
+
+\subsection{Using CIL as a library}
+
+CIL can also be built as a library that is called from your stand-alone
+application. Add \t{cil/src}, \t{cil/src/frontc}, \t{cil/obj/x86\_LINUX}
+(or \t{cil/obj/x86\_WIN32}) to your Ocaml project \t{-I} include paths.
+Building CIL will also build the library \t{cil/obj/*/cil.cma} (or
+\t{cil/obj/*/cil.cmxa}). You can then link your application against that
+library. 
+
+You can call the \t{Frontc.parse: string -> unit -> Cil.file} function with
+the name of a file containing the output of the C preprocessor.
+The \t{Mergecil.merge: Cil.file list -> string -> Cil.file} function merges
+multiple files. You can then invoke your analysis function on the resulting
+\t{Cil.file} data structure.  You might want to call
+\t{Rmtmps.removeUnusedTemps} first to clean up the prototypes and variables
+that are not used. Then you can call the function \t{Cil.dumpFile:
+cilPrinter -> out\_channel -> Cil.file -> unit} to print the file to a
+given output channel. A good \t{cilPrinter} to use is
+\t{defaultCilPrinter}. 
+
+Check out \t{src/main.ml} and \t{bin/cilly} for other good ideas
+about high-level file processing. Again, we highly recommend that you just
+our \t{cilly} driver so that you can avoid spending time re-inventing the
+wheel to provide drop-in support for standard \t{makefile}s. 
+
+Here is a concrete example of compiling and linking your project against
+CIL. Imagine that your program analysis or transformation is contained in
+the single file \t{main.ml}. 
+
+\begin{verbatim}
+$ ocamlopt -c -I $(CIL)/obj/x86_LINUX/ main.ml
+$ ocamlopt -ccopt -L$(CIL)/obj/x86_LINUX/ -o main unix.cmxa str.cmxa \ 
+        $(CIL)/obj/x86_LINUX/cil.cmxa main.cmx
+\end{verbatim} % $
+
+The first line compiles your analysis, the second line links it against CIL
+(as a library) and the Ocaml Unix library. For more information about
+compiling and linking Ocaml programs, see the Ocaml home page
+at \ahreftop{http://caml.inria.fr/ocaml/}{http://caml.inria.fr/ocaml/}. 
+
+In the next section we give an overview of the API that you can use
+to write your analysis and transformation. 
+ 
+\section{CIL API Documentation}\label{sec-api} 
+
+ The CIL API is documented in the file \t{src/cil.mli}. We also have an
+\ahref{api/index.html}{online documentation} extracted from
+\t{cil.mli} and other useful modules. We
+index below the main types that are used to represent C programs in CIL: 
+
+\begin{itemize}
+\item \ahref{api/index\_types.html}{An index of all types}
+\item \ahref{api/index\_values.html}{An index of all values}
+\item \ciltyperef{file} is the representation of a file.
+\item \ciltyperef{global} is the representation of a global declaration or
+definitions. Values for \ahref{api/Cil.html\#VALemptyFunction}{operating on globals}.
+\item \ciltyperef{typ} is the representation of a type.  
+Values for \ahref{api/Cil.html\#VALvoidType}{operating on types}.
+\item \ciltyperef{compinfo} is the representation of a structure or a union
+type
+\item \ciltyperef{fieldinfo} is the representation of a field in a structure
+or a union
+\item \ciltyperef{enuminfo} is the representation of an enumeration type. 
+\item \ciltyperef{varinfo} is the representation of a variable 
+\item \ciltyperef{fundec} is the representation of a function
+\item \ciltyperef{lval} is the representation of an lvalue.
+Values for \ahref{api/Cil.html\#VALmakeVarinfo}{operating on lvalues}.
+\item \ciltyperef{exp} is the representation of an expression without
+side-effects. 
+Values for \ahref{api/Cil.html\#VALzero}{operating on expressions}.
+\item \ciltyperef{instr} is the representation of an instruction (with
+side-effects but without control-flow)
+\item \ciltyperef{stmt} is the representation of a control-flow statements. 
+Values for \ahref{api/Cil.html\#VALmkStmt}{operating on statements}.
+\item \ciltyperef{attribute} is the representation of attributes. 
+Values for \ahref{api/Cil.html\#TYPEattributeClass}{operating on attributes}.
+\end{itemize}
+
+
+ \subsection{Using the visitor}\label{sec-visitor}
+
+ One of the most useful tools exported by the CIL API is an implementation of
+the visitor pattern for CIL programs. The visiting engine scans depth-first
+the structure of a CIL program and at each node is queries a user-provided
+visitor structure whether it should do one of the following operations: 
+\begin{itemize}
+\item Ignore this node and all its descendants
+\item Descend into all of the children and when done rebuild the node if any
+of the children have changed. 
+\item Replace the subtree rooted at the node with another tree.
+\item Replace the subtree with another tree, then descend into the children
+and rebuild the node if necessary and then invoke a user-specified function. 
+\item In addition to all of the above actions then visitor can specify that
+some instructions should be queued to be inserted before the current
+instruction or statement being visited. 
+\end{itemize}
+
+ By writing visitors you can customize the program traversal and
+transformation. One major limitation of the visiting engine is that it does
+not propagate information from one node to another. Each visitor must use its
+own private data to achieve this effect if necessary. 
+
+ Each visitor is an object that is an instance of a class of type \cilvisit{}.
+The most convenient way to obtain such classes is to specialize the
+\apiref{Cil.nopCilVisitor}{} class (which just traverses the tree doing
+nothing). Any given specialization typically overrides only a few of the
+methods. Take a look for example at the visitor defined in the module
+\t{logwrites.ml}. Another, more elaborate example of a visitor is the
+[copyFunctionVisitor] defined in \t{cil.ml}.
+
+ Once you have defined a visitor you can invoke it with one of the functions:
+\begin{itemize}
+\item \cilvalref{visitCilFile} or \cilvalref{visitCilFileSameGlobals} - visit a file
+\item \cilvalref{visitCilGlobal} - visit a global
+\item \cilvalref{visitCilFunction} - visit a function definition
+\item \cilvalref{visitCilExp} - visit an expression
+\item \cilvalref{visitCilLval} - visit an lvalue
+\item \cilvalref{visitCilInstr} - visit an instruction
+\item \cilvalref{visitCilStmt} - visit a statement
+\item \cilvalref{visitCilType} - visit a type. Note that this does not visit
+the files of a composite type. use visitGlobal to visit the [GCompTag] that
+defines the fields.
+\end{itemize}
+
+Some transformations may want to use visitors to insert additional
+instructions before statements and instructions. To do so, pass a list of
+instructions to the  \cilvalref{queueInstr} method of the specialized
+object. The instructions will automatically be inserted before that
+instruction in the transformed code. The \cilvalref{unqueueInstr} method
+should not normally be called by the user. 
+
+ \subsection{Interpreted Constructors and Deconstructors}
+
+ Interpreted constructors and deconstructors are a facility for constructing
+and deconstructing CIL constructs using a pattern with holes that can be
+filled with a variety of kinds of elements. The pattern is a string that uses
+the C syntax to represent C language elements. For example, the following
+code:
+\begin{code}
+Formatcil.cType "void * const (*)(int x)"
+\end{verbatim}\end{code}
+
+ is an alternative way to construct the internal representation of the type of pointer to function
+with an integer argument and a {void * const} as result: 
+\begin{code}
+TPtr(TFun(TVoid [Attr("const", [])],
+          [ ("x", TInt(IInt, []), []) ], false, []), [])
+\end{verbatim}\end{code}
+
+ The advantage of the interpreted constructors is that you can use familiar C
+syntax to construct CIL abstract-syntax trees. 
+
+ You can construct this way types, lvalues, expressions, instructions and
+statements. The pattern string can also contain a number of placeholders that
+are replaced during construction with CIL items passed as additional argument
+to the construction function. For example, the \t{\%e:id} placeholder means
+that the argument labeled ``id'' (expected to be of form \t{Fe exp}) will
+supply the expression to replace the placeholder. For example, the following
+code constructs an increment instruction at location \t{loc}:
+\begin{code}
+Formatcil.cInstr "%v:x = %v:x + %e:something"
+        loc
+        [ ("something", Fe some_exp);
+          ("x", Fv some_varinfo) ]
+\end{verbatim}\end{code}
+
+ An alternative way to construct the same CIL instruction is:
+\begin{code}
+Set((Var some_varinfo, NoOffset),
+    BinOp(PlusA, Lval (Var some_varinfo, NoOffset),
+          some_exp, intType), 
+    loc)
+\end{verbatim}\end{code}
+
+ See \ciltyperef{formatArg} for a definition of the placeholders that are
+understood.
+
+ A dual feature is the interpreted deconstructors. This can be used to test
+whether a CIL construct has a certain form:
+\begin{code}
+Formatcil.dType "void * const (*)(int x)" t
+\end{verbatim}\end{code}
+
+ will test whether the actual argument \t{t} is indeed a function pointer of
+the required type. If it is then the result is \t{Some []} otherwise it is
+\t{None}. Furthermore, for the purpose of the interpreted deconstructors
+placeholders in patterns match anything of the right type. For example, 
+\begin{code}
+Formatcil.dType "void * (*)(%F:t)" t
+\end{verbatim}\end{code}
+
+ will match any function pointer type, independent of the type and number of
+the formals. If the match succeeds the result is \t{Some [ FF forms ]} where
+\t{forms} is a list of names and types of the formals. Note that each member
+in the resulting list corresponds positionally to a placeholder in the
+pattern.
+
+ The interpreted constructors and deconstructors do not support the complete C
+syntax, but only a substantial fragment chosen to simplify the parsing. The
+following is the syntax that is supported:
+\begin{verbatim}
+Expressions:
+  E ::= %e:ID | %d:ID | %g:ID | n | L | ( E ) | Unop E | E Binop E 
+        | sizeof E | sizeof ( T ) | alignof E  | alignof ( T ) 
+        | & L | ( T ) E 
+
+Unary operators:
+  Unop ::= + | - | ~ | %u:ID
+
+Binary operators:
+  Binop ::= + | - | * | / | << | >> | & | ``|'' | ^ 
+          | == | != | < | > | <= | >= | %b:ID
+
+Lvalues:
+  L ::= %l:ID | %v:ID Offset | * E | (* E) Offset | E -> ident Offset 
+
+Offsets:
+  Offset ::= empty | %o:ID | . ident Offset | [ E ] Offset
+
+Types:
+  T ::= Type_spec Attrs Decl
+
+Type specifiers:
+  Type_spec ::= void | char | unsigned char | short | unsigned short
+            | int | unsigned int | long | unsigned long | %k:ID | float 
+            | double | struct %c:ID | union %c:ID 
+
+
+Declarators:
+  Decl ::= * Attrs Decl | Direct_decl
+
+
+Direct declarators:
+  Direct_decl ::= empty | ident | ( Attrs Decl ) 
+                 | Direct_decl [ Exp_opt ]
+                 | ( Attrs Decl )( Parameters )
+
+Optional expressions
+  Exp_opt ::= empty | E | %eo:ID
+
+Formal parameters
+  Parameters ::= empty | ... | %va:ID | %f:ID | T | T , Parameters
+
+List of attributes
+  Attrs ::= empty | %A:ID | Attrib Attrs
+
+Attributes
+  Attrib ::= const | restrict | volatile | __attribute__ ( ( GAttr ) )
+
+GCC Attributes
+  GAttr ::= ident | ident ( AttrArg_List )
+
+Lists of GCC Attribute arguments:
+  AttrArg_List ::= AttrArg | %P:ID | AttrArg , AttrArg_List
+
+GCC Attribute arguments  
+  AttrArg ::= %p:ID | ident | ident ( AttrArg_List )
+
+Instructions
+  Instr ::= %i:ID ; | L = E ; | L Binop= E | Callres L ( Args )
+
+Actual arguments
+   Args ::= empty | %E:ID | E | E , Args
+
+Call destination
+   Callres ::= empty | L = | %lo:ID
+
+Statements
+  Stmt ::= %s:ID | if ( E ) then Stmt ; | if ( E ) then Stmt else Stmt ;
+       | return Exp_opt | break ; | continue ; | { Stmt_list } 
+       | while (E ) Stmt | Instr_list 
+
+Lists of statements
+   Stmt_list ::= empty | %S:ID | Stmt Stmt_list  
+                | Type_spec Attrs Decl ; Stmt_list
+                | Type_spec Attrs Decl = E ; Stmt_list
+                | Type_spec Attrs Decl = L (Args) ; Stmt_list
+
+List of instructions
+   Instr_list ::= Instr | %I:ID | Instr Instr_list
+\end{verbatim}
+
+Notes regarding the syntax:
+\begin{itemize}
+\item In the grammar description above non-terminals are written with
+uppercase initial
+
+\item All of the patterns consist of the \t{\%} character followed by one or
+two letters, followed by ``:'' and an indentifier. For each such
+pattern there is a corresponding constructor of the \ciltyperef{formatArg}
+type, whose name is the letter 'F' followed by the same one or two letters as
+in the pattern. That constructor is used by the user code to pass a
+\ciltyperef{formatArg} actual argument to the interpreted constructor and by
+the interpreted deconstructor to return what was matched for a pattern.
+
+\item If the pattern name is uppercase, it designates a list of the elements
+designated by the corresponding lowercase pattern. E.g. \%E designated lists
+of expressions (as in the actual arguments of a call).
+
+\item The two-letter patterns whose second letter is ``o'' designate an
+optional element. E.g. \%eo designates an optional expression (as in the
+length of an array). 
+
+\item Unlike in calls to \t{printf}, the pattern \%g is used for strings. 
+
+\item The usual precedence and associativity rules as in C apply 
+
+\item The pattern string can contain newlines and comments, using both the
+\t{/* ... */} style as well as the \t{//} one. 
+
+\item When matching a ``cast'' pattern of the form \t{( T ) E}, the
+deconstructor will match even expressions that do not have the actual cast but
+in that case the type is matched against the type of the expression. E.g. the
+patters \t{"(int)\%e"} will match any expression of type \t{int} whether it
+has an explicit cast or not. 
+
+\item The \%k pattern is used to construct and deconstruct an integer type of
+any kind. 
+
+\item Notice that the syntax of types and declaration are the same (in order
+to simplify the parser). This means that technically you can write a whole
+declaration instead of a type in the cast. In this case the name that you
+declare is ignored.
+
+\item In lists of formal parameters and lists of attributes, an empty list in
+the pattern matches any formal parameters or attributes. 
+
+\item When matching types, uses of named types are unrolled to expose a real
+type before matching. 
+
+\item The order of the attributes is ignored during matching. The the pattern
+for a list of attributes contains \%A then the resulting \t{formatArg} will be
+bound to {\bf all} attributes in the list. For example, the pattern \t{"const
+\%A"} matches any list of attributes that contains \t{const} and binds the
+corresponding placeholder to the entire list of attributes, including
+\t{const}. 
+ 
+\item All instruction-patterns must be terminated by semicolon
+
+\item The autoincrement and autodecrement instructions are not supported. Also
+not supported are complex expressions, the \t{\&\&} and \t{||} shortcut
+operators, and a number of other more complex instructions or statements. In
+general, the patterns support only constructs that can be represented directly
+in CIL.
+
+\item The pattern argument identifiers are not used during deconstruction.
+Instead, the result contains a sequence of values in the same order as the
+appearance of pattern arguments in the pattern.
+
+\item You can mix statements with declarations. For each declaration a new
+  temporary will be constructed (using a function you provive). You can then
+  refer to that temporary by name in the rest of the pattern.
+
+\item The \t{\%v:} pattern specifier is optional.
+\end{itemize}
+
+ The following function are defined in the \t{Formatcil} module for
+constructing and deconstructing:
+\begin{itemize}
+\item \formatcilvalref{cExp} constructs \ciltyperef{exp}.
+\item \formatcilvalref{cType} constructs \ciltyperef{typ}.
+\item \formatcilvalref{cLval} constructs \ciltyperef{lval}.
+\item \formatcilvalref{cInstr} constructs \ciltyperef{instr}.
+\item \formatcilvalref{cStmt} and \formatcilvalref{cStmts} construct \ciltyperef{stmt}.
+\item \formatcilvalref{dExp} deconstructs \ciltyperef{exp}.
+\item \formatcilvalref{dType} deconstructs \ciltyperef{typ}.
+\item \formatcilvalref{dLval} deconstructs \ciltyperef{lval}.
+\item \formatcilvalref{dInstr} deconstructs \ciltyperef{lval}.
+\end{itemize}
+
+ Below is an example using interpreted constructors. This example generates
+the CIL representation of code that scans an array backwards and initializes
+every even-index element with an expression:
+\begin{code}
+Formatcil.cStmts
+  loc
+  "int idx = sizeof(array) / sizeof(array[0]) - 1;
+   while(idx >= 0) {
+     // Some statements to be run for all the elements of the array
+     %S:init
+     if(! (idx & 1)) 
+       array[idx] = %e:init_even;
+     /* Do not forget to decrement the index variable */
+     idx = idx - 1;
+   }"
+  (fun n t -> makeTempVar myfunc ~name:n t)
+  [ ("array", Fv myarray); 
+    ("init", FS [stmt1; stmt2; stmt3]);
+    ("init_even", Fe init_expr_for_even_elements) ]
+\end{verbatim}\end{code}
+
+ To write the same CIL statement directly in CIL would take much more effort.
+Note that the pattern is parsed only once and the result (a function that
+takes the arguments and constructs the statement) is memoized. 
+
+  \subsubsection{Performance considerations for interpreted constructors}
+ 
+ Parsing the patterns is done with a LALR parser and it takes some time. To
+improve performance the constructors and deconstructors memoize the parsed
+patterns and will only compile a pattern once. Also all construction and
+deconstruction functions can be applied partially to the pattern string to
+produce a function that can be later used directly to construct or
+deconstruct. This function appears to be about two times slower than if the
+construction is done using the CIL constructors (without memoization the
+process would be one order of magnitude slower.) However, the convenience of
+interpreted constructor might make them a viable choice in many situations
+when performance is not paramount (e.g. prototyping).
+
+
+ \subsection{Printing and Debugging support}
+ 
+The Modules \moduleref{Pretty} and \moduleref{Errormsg} contain respectively
+utilities for pretty printing and reporting errors and provide a convenient
+\t{printf}-like interface. 
+
+ Additionally, CIL defines for each major type a pretty-printing function that
+you can use in conjunction with the \moduleref{Pretty} interface. The
+following are some of the pretty-printing functions:
+\begin{itemize}
+\item \cilvalref{d\_exp} - print an expression
+\item \cilvalref{d\_type} - print a type
+\item \cilvalref{d\_lval} - print an lvalue
+\item \cilvalref{d\_global} - print a global
+\item \cilvalref{d\_stmt} - print a statment
+\item \cilvalref{d\_instr} - print an instruction
+\item \cilvalref{d\_init} - print an initializer
+\item \cilvalref{d\_attr} - print an attribute
+\item \cilvalref{d\_attrlist} - print a set of attributes
+\item \cilvalref{d\_loc} - print a location
+\item \cilvalref{d\_ikind} - print an integer kind
+\item \cilvalref{d\_fkind} - print a floating point kind
+\item \cilvalref{d\_const} - print a constant
+\item \cilvalref{d\_storage} - print a storage specifier
+\end{itemize}
+
+ You can even customize the pretty-printer by creating instances of
+\cilprinter{}. Typically such an instance extends
+\cilvalref{defaultCilPrinter}. Once you have a customized pretty-printer you
+can use the following printing functions:
+\begin{itemize}
+\item \cilvalref{printExp} - print an expression
+\item \cilvalref{printType} - print a type
+\item \cilvalref{printLval} - print an lvalue
+\item \cilvalref{printGlobal} - print a global
+\item \cilvalref{printStmt} - print a statment
+\item \cilvalref{printInstr} - print an instruction
+\item \cilvalref{printInit} - print an initializer
+\item \cilvalref{printAttr} - print an attribute
+\item \cilvalref{printAttrs} - print a set of attributes
+\end{itemize}
+
+
+ CIL has certain internal consistency invariants. For example, all references
+to a global variable must point to the same \t{varinfo} structure. This
+ensures that one can rename the variable by changing the name in the
+\t{varinfo}. These constraints are mentioned in the API documentation. There
+is also a consistency checker in file \t{src/check.ml}. If you suspect that
+your transformation is breaking these constraints then you can pass the
+\t{-{}-check} option to cilly and this will ensure that the consistency checker
+is run after each transformation. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\subsection{Attributes}\label{sec-attrib}\cutname{attributes.html}
+
+ In CIL you can attach attributes to types and to names (variables, functions
+and fields). Attributes are represented using the type \ciltyperef{attribute}.
+An attribute consists of a name and a number of arguments (represented using
+the type \ciltyperef{attrparam}). Almost any expression can be used as an
+attribute argument. Attributes are stored in lists sorted by the name of the
+attribute. To maintain list ordering, use the functions
+\cilvalref{typeAttrs} to retrieve the attributes of a type and the functions
+\cilvalref{addAttribute} and \cilvalref{addAttributes} to add attributes.
+Alternatively you can use \cilvalref{typeAddAttributes} to add an attribute to
+a type (and return the new type).
+
+ GCC already has extensive support for attributes, and CIL extends this
+support to user-defined attributes. A GCC attribute has the syntax:
+ 
+\begin{verbatim}
+ gccattribute ::= __attribute__((attribute))    (Note the double parentheses)
+\end{verbatim}
+
+ Since GCC and MSVC both support various flavors of each attribute (with or
+without leading or trailing \_) we first strip ALL leading and trailing \_
+from the attribute name (but not the identified in [ACons] parameters in
+\ciltyperef{attrparam}). When we print attributes, for GCC we add two leading
+and two trailing \_; for MSVC we add just two leading \_.
+ 
+ There is support in CIL so that you can control the printing of attributes
+(see \cilvalref{setCustomPrintAttribute} and
+\cilvalref{setCustomPrintAttributeScope}). This custom-printing support is now
+used to print the "const" qualifier as "\t{const}" and not as
+"\t{\_\_attribute\_\_((const))}".
+
+
+ The attributes are specified in declarations. This is unfortunate since the C
+syntax for declarations is already quite complicated and after writing the
+parser and elaborator for declarations I am convinced that few C programmers
+understand it completely. Anyway, this seems to be the easiest way to support
+attributes. 
+
+ Name attributes must be specified at the very end of the declaration, just
+before the \t{=} for the initializer or before the \t{,} that separates a
+declaration in a group of declarations or just before the \t{;} that
+terminates the declaration. A name attribute for a function being defined can
+be specified just before the brace that starts the function body.
+
+ For example (in the following examples \t{A1},...,\t{An} are type attributes
+and \t{N} is a name attribute (each of these uses the \t{\_\_attribute\_\_} syntax):
+
+\begin{code}
+ int x N;
+ int x N, * y N = 0, z[] N;
+ extern void exit() N;
+ int fact(int x) N { ... }
+\end{verbatim}\end{code}
+
+
+ Type attributes can be specified along with the type using the following
+ rules: 
+\begin{enumerate}
+ \item The type attributes for a base type (int, float, named type, reference
+    to struct or union or enum) must be specified immediately following the
+    type (actually it is Ok to mix attributes with the specification of the
+    type, in between unsigned and int for example).
+
+  For example:
+\begin{code}
+  int A1 x N;  /* A1 applies to the type int. An example is an attribute
+                   "even" restricting the type int to even values. */
+  struct foo A1 A2 x; // Both A1 and A2 apply to the struct foo type
+\end{verbatim}\end{code}
+ 
+ \item The type attributes for a pointer type must be specified immediately
+ after the * symbol.
+\begin{code}
+ /* A pointer (A1) to an int (A2) */
+ int A2 * A1 x;
+ /* A pointer (A1) to a pointer (A2) to a float (A3) */
+ float A3 * A2 * A1 x;
+\end{verbatim}\end{code}
+
+
+ Note: The attributes for base types and for pointer types are a strict
+ extension of the ANSI C type qualifiers (const, volatile and restrict). In
+ fact CIL treats these qualifiers as attributes. 
+
+  \item The attributes for a function type or for an array type can be
+     specified using parenthesized declarators.
+
+   For example:
+\begin{code}
+   /* A function (A1) from int (A2) to float (A3) */
+   float A3 (A1 f)(int A2);
+
+   /* A pointer (A1) to a function (A2) that returns an int (A3) */
+   int A3 (A2 * A1 pfun)(void);
+
+   /* An array (A1) of int (A2) */
+   int A2 (A1 x0)[]
+
+   /* Array (A1) of pointers (A2) to functions (A3) that take an int (A4) and 
+    * return a pointer (A5) to int (A6)  */
+   int A6 * A5 (A3 * A2 (A1 x1)[5])(int A4);
+
+
+   /* A function (A4) that takes a float (A5) and returns a pointer (A6) to an 
+    * int (A7) */
+   extern int A7 * A6 (A4 x2)(float A5 x);
+
+   /* A function (A1) that takes a int (A2) and that returns a pointer (A3) to 
+    * a function (A4) that takes a float (A5) and returns a pointer (A6) to an 
+    * int (A7) */
+   int A7 * A6 (A4 * A3 (A1 x3)(int A2 x))(float A5) {
+      return & x2;
+   }
+\end{verbatim}\end{code}
+
+\end{enumerate}
+
+ Note: ANSI C does not allow the specification of type qualifiers for function
+and array types, although it allows for the parenthesized declarator. With
+just a bit of thought (looking at the first few examples above) I hope that
+the placement of attributes for function and array types will seem intuitive.
+
+ This extension is not without problems however. If you want to refer just to
+a type (in a cast for example) then you leave the name out. But this leads to
+strange conflicts due to the parentheses that we introduce to scope the
+attributes. Take for example the type of x0 from above. It should be written
+as: 
+ 
+\begin{code}
+        int A2 (A1 )[]
+\end{verbatim}\end{code}
+
+ But this will lead most C parsers into deep confusion because the parentheses
+around A1 will be confused for parentheses of a function designator. To push
+this problem around (I don't know a solution) whenever we are about to print a
+parenthesized declarator with no name but with attributes, we comment out the
+attributes so you can see them (for whatever is worth) without confusing the
+compiler. For example, here is how we would print the above type:
+
+\begin{code}
+        int A2 /*(A1 )*/[]
+\end{verbatim}\end{code}
+
+ \paragraph{Handling of predefined GCC attributes}
+
+ GCC already supports attributes in a lot of places in declarations. The only
+place where we support attributes and GCC does not is right before the \{ that
+starts a function body. 
+
+ GCC classifies its attributes in attributes for functions, for variables and
+for types, although the latter category is only usable in definition of struct
+or union types and is not nearly as powerful as the CIL type attributes. We
+have made an effort to reclassify GCC attributes as name and type attributes
+(they only apply for function types). Here is what we came up with:
+
+\begin{itemize}
+  \item GCC name attributes:
+   
+   section, constructor, destructor, unused, weak, no\_instrument\_function,
+   noreturn, alias, no\_check\_memory\_usage, dllinport, dllexport, exception,
+   model
+
+      Note: the "noreturn" attribute would be more appropriately qualified as a
+      function type attribute. But we classify it as a name attribute to make
+      it easier to support a similarly named MSVC attribute. 
+  
+  \item GCC function type attributes:
+
+    fconst (printed as "const"), format, regparm, stdcall,
+    cdecl, longcall
+
+  I was not able to completely decipher the position in which these attributes
+  must go. So, the CIL elaborator knows these names and applies the following
+  rules: 
+  \begin{itemize}
+  \item All of the name attributes that appear in the specifier part (i.e. at
+  the beginning) of a declaration are associated with all declared names. 
+
+  \item All of the name attributes that appear at the end of a declarator are
+  associated with the particular name being declared.
+
+  \item More complicated is the handling of the function type attributes, since
+     there can be more than one function in a single declaration (a function
+     returning a pointer to a function). Lacking any real understanding of how
+     GCC handles this, I attach the function type attribute to the "nearest"
+     function. This means that if a pointer to a function is "nearby" the
+     attribute will be correctly associated with the function. In truth I pray
+     that nobody uses declarations as that of x3 above. 
+  \end{itemize}
+\end{itemize}
+
+\paragraph{Handling of predefined MSVC attributes}
+
+  MSVC has two kinds of attributes, declaration modifiers to be printed before
+  the storage specifier using the notation "\t{\_\_declspec(...)}" and a few
+  function type attributes, printed almost as our CIL function type
+  attributes. 
+
+   The following are the name attributes that are printed using
+   \t{\_\_declspec} right before the storage designator of the declaration:
+   thread, naked, dllimport, dllexport, noreturn
+
+
+   The following are the function type attributes supported by MSVC: 
+   fastcall, cdecl, stdcall
+
+   It is not worth going into the obscure details of where MSVC accepts these
+   type attributes. The parser thinks it knows these details and it pulls
+   these attributes from wherever they might be placed. The important thing
+   is that MSVC will accept if we print them according to the rules of the CIL
+   attributes ! 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The CIL Driver}\label{sec-driver}
+
+ We have packaged CIL as an application \t{cilly} that contains certain
+example modules, such as \t{logwrites.ml} (a module
+that instruments code to print the addresses of memory locations being
+written). Normally, you write another module like that, add command-line
+options and an invocation of your module in \t{src/main.ml}. Once you compile
+CIL you will obtain the file \t{obj/cilly.asm.exe}. 
+
+ We wrote a driver for this executable that makes it easy to invoke your
+analysis on existing C code with very little manual intervention. This driver
+is \t{bin/cilly} and is quite powerful. Note that the \t{cilly} script
+is configured during installation with the path where CIL resides. This means
+that you can move it to any place you want. 
+
+ A simple use of the driver is:
+\begin{verbatim}
+bin/cilly --save-temps -D HAPPY_MOOD -I myincludes hello.c -o hello
+\end{verbatim}
+
+\c{-{}-save-temps} tells CIL to save the resulting output files in the
+current directory.  Otherwise, they'll be put in \t{/tmp} and deleted
+automatically.  Not that this is the only CIL-specific flag in the
+list -- the other flags use \t{gcc}'s syntax.
+
+This performs the following actions: 
+\begin{itemize}
+\item preprocessing using the -D and -I arguments with the resulting 
+  file left in \t{hello.i}, 
+\item the invocation of the \t{cilly.asm} application which parses \t{hello.i}
+  converts it to CIL and the pretty-prints it to \t{hello.cil.c}
+\item another round of preprocessing with the result placed in \t{hello.cil.i}
+\item the true compilation with the result in \t{hello.cil.o}
+\item a linking phase with the result in \t{hello}
+\end{itemize}
+ 
+ Note that \t{cilly} behaves like the \t{gcc} compiler. This makes it
+easy to use it with existing \t{Makefiles}:
+\begin{verbatim}
+make CC="bin/cilly" LD="bin/cilly"
+\end{verbatim}
+
+ \t{cilly} can also behave as the Microsoft Visual C compiler, if the first
+ argument is \t{-{}-mode=MSVC}:
+\begin{verbatim}
+bin/cilly --mode=MSVC /D HAPPY_MOOD /I myincludes hello.c /Fe hello.exe
+\end{verbatim}
+
+ (This in turn will pass a \t{-{}-MSVC} flag to the underlying \t{cilly.asm}
+ process which will make it understand the Microsoft Visual C extensions)
+
+ \t{cilly} can also behave as the archiver \t{ar}, if it is passed an
+ argument \t{-{}-mode=AR}. Note that only the \t{cr} mode is supported
+ (create a new archive and replace all files in there).  Therefore the
+ previous version of the archive is lost. You will also need to remove
+ any other commands that operate on the generated library
+ (e.g. \t{ranlib}, \t{lorder}), as the .a file is no longer an actual
+ binary library.
+
+ Furthermore, \t{cilly} allows you to pass some arguments on to the
+underlying \t{cilly.asm} process. As a general rule all arguments that start
+with \t{-{}-} and that \t{cilly} itself does not process, are passed on. For
+example, 
+\begin{verbatim}
+bin/cilly --dologwrites -D HAPPY_MOOD -I myincludes hello.c -o hello.exe
+\end{verbatim}
+
+ will produce a file \t{hello.cil.c} that prints all the memory addresses
+written by the application. 
+
+ The most powerful feature of \t{cilly} is that it can collect all the
+sources in your project, merge them into one file and then apply CIL. This
+makes it a breeze to do whole-program analysis and transformation. All you
+have to do is to pass the \t{-{}-merge} flag to \t{cilly}:
+\begin{verbatim}
+make CC="bin/cilly --save-temps --dologwrites --merge"
+\end{verbatim}
+
+ You can even leave some files untouched:
+\begin{verbatim}
+make CC="bin/cilly --save-temps --dologwrites --merge --leavealone=foo --leavealone=bar"
+\end{verbatim}
+
+ This will merge all the files except those with the basename \t{foo} and
+\t{bar}. Those files will be compiled as usual and then linked in at the very
+end. 
+
+ The sequence of actions performed by \t{cilly} depends on whether merging
+is turned on or not:
+\begin{itemize}
+\item If merging is off
+  \begin{enumerate}
+    \item For every file \t{file.c} to compile
+         \begin{enumerate}
+            \item Preprocess the file with the given arguments to 
+                  produce \t{file.i}
+            \item Invoke \t{cilly.asm} to produce a \t{file.cil.c}
+            \item Preprocess to \t{file.cil.i}
+            \item Invoke the underlying compiler to produce \t{file.cil.o}
+         \end{enumerate}
+    \item Link the resulting objects
+  \end{enumerate}
+\item If merging is on
+  \begin{enumerate}
+    \item For every file \t{file.c} to compile
+         \begin{enumerate}
+            \item Preprocess the file with the given arguments to 
+                  produce \t{file.i}
+            \item Save the preprocessed source as \t{file.o}
+         \end{enumerate}
+    \item When linking executable \t{hello.exe}, look at every object 
+          file that must be linked and see if it actually 
+          contains preprocessed source. Pass all those files to a 
+          special merging application (described in
+          \secref{merger}) to produce \t{hello.exe\_comb.c}
+    \item Invoke \t{cilly.asm} to produce a \t{hello.exe\_comb.cil.c}
+    \item Preprocess to \t{hello.exe\_comb.cil.i}
+    \item Invoke the underlying compiler to produce \t{hello.exe\_comb.cil.o}
+    \item Invoke the actual linker to produce \t{hello.exe}
+  \end{enumerate}
+\end{itemize}
+
+ Note that files that you specify with \t{-{}-leavealone} are not merged and
+never presented to CIL. They are compiled as usual and then are linked in at
+the end. 
+
+ And a final feature of \t{cilly} is that it can substitute copies of the
+system's include files:
+
+\begin{verbatim}
+make CC="bin/cilly --includedir=myinclude"
+\end{verbatim}
+
+ This will force the preprocessor to use the file \t{myinclude/xxx/stdio.h}
+(if it exists) whenever it encounters \t{\#include <stdio.h>}. The \t{xxx} is
+a string that identifies the compiler version you are using. This modified
+include files should be produced with the patcher script (see
+\secref{patcher}).
+
+  \subsection{\t{cilly} Options}
+
+ Among the options for the \t{cilly} you can put anything that can normally
+go in the command line of the compiler that \t{cilly} is impersonating.
+\t{cilly} will do its best to pass those options along to the appropriate
+subprocess. In addition, the following options are supported (a complete and
+up-to-date list can always be obtained by running \t{cilly -{}-help}):
+
+\begin{itemize}
+\item \t{-{}-gcc=command} Tell \t{cilly} to use \t{command} to invoke
+  gcc, e.g.  \t{-{}-gcc=arm-elf-gcc} to use a cross-compiler. See also
+  the \t{-{}-envmachine} option below that tells CIL to assume a
+  different machine model.
+\item \t{-{}-mode=mode} This must be the first argument if present. It makes
+\t{cilly} behave as a given compiled. The following modes are recognized: 
+     \begin{itemize}
+        \item GNUCC - the GNU C Compiler. This is the default.
+        \item MSVC - the Microsoft Visual C compiler. Of course, you should
+                     pass only MSVC valid options in this case. 
+        \item AR - the archiver \t{ar}. Only the mode \t{cr} is supported and
+                   the original version of the archive is lost. 
+     \end{itemize}
+\item \t{-{}-help} Prints a list of the options supported.
+\item \t{-{}-verbose} Prints lots of messages about what is going on.
+\item \t{-{}-stages} Less than \t{-{}-verbose} but lets you see what \t{cilly}
+                   is doing. 
+\item \t{-{}-merge} This tells \t{cilly} to first attempt to collect into one
+source file all of the sources that make your application, and then to apply
+\t{cilly.asm} on the resulting source. The sequence of actions in this case is
+described above and the merger itself is described in \secref{merger}.
+
+\item \t{-{}-leavealone=xxx}. Do not merge and do not present to CIL the files
+whose basename is "xxx". These files are compiled as usual and linked in at
+the end. 
+\item \t{-{}-includedir=xxx}. Override the include files with those in the given
+directory. The given directory is the same name that was given an an argument
+to the patcher (see \secref{patcher}). In particular this means that
+that directory contains subdirectories named based on the current compiler
+version. The patcher creates those directories. 
+\item \t{-{}-usecabs}. Do not CIL, but instead just parse the source and print
+its AST out. This should looked like the preprocessed file. This is useful
+when you suspect that the conversion to CIL phase changes the meaning of the
+program. 
+\item \t{-{}-save-temps=xxx}. Temporary files are preserved in the xxx
+  directory.  For example, the output of CIL will be put in a file
+  named \t{*.cil.c}.
+\item \t{-{}-save-temps}. Temporay files are preserved in the current directory.
+\end{itemize}
+ 
+ 
+  \subsection{\t{cilly.asm} Options}
+  \label{sec-cilly-asm-options}
+
+ All of the options that start with \t{-{}-} and are not understood by
+\t{cilly} are passed on to \t{cilly.asm}.   \t{cilly} also passes along to
+\t{cilly.asm} flags such as \t{-{}-MSVC} that both need to know
+about.  The following options are supported.  Many of these flags also
+have corresponding ``\t{-{}-no}*'' versions if you need to go back to
+the default, as in ``\t{-{}-nowarnall}''.
+
+\hspace*{2cm} {\bf General Options:}
+\begin{itemize}
+  \item \t{-{}-version} output version information and exit
+  \item \t{-{}-verbose} Print lots of random stuff. This is passed on from cilly
+  \item \t{-{}-warnall} Show all warnings.
+  \item \t{-{}-debug=xxx} turns on debugging flag xxx
+  \item \t{-{}-nodebug=xxx} turns off debugging flag xxx
+  \item \t{-{}-flush} Flush the output streams often (aids debugging).
+  \item \t{-{}-check} Run a consistency check over the CIL after every operation.
+  \item \t{-{}-strictcheck} Same as \t{-{}-check}, but it treats
+    consistency problems as errors instead of warnings.
+  \item \t{-{}-nocheck} turns off consistency checking of CIL.
+  \item \t{-{}-noPrintLn} Don't output \#line directives in the output.
+  \item \t{-{}-commPrintLn} Print \#line directives in the output, but
+    put them in comments.
+  \item \t{-{}-commPrintLnSparse} Like \t{-{}-commPrintLn} but print only new
+         line numbers.
+  \item \t{-{}-log=xxx} Set the name of the log file.  By default stderr is used
+  \item \t{-{}-MSVC} Enable MSVC compatibility. Default is GNU.
+  %\item \t{-{}-testcil} test CIL using the given compiler
+  \item \t{-{}-ignore-merge-conflicts} ignore merging conflicts.
+  %\item \t{-{}-sliceGlobal} output is the slice of #pragma cilnoremove(sym) symbols
+  %\item \t{-{}-tr <sys>}: subsystem to show debug printfs for
+  %\item \t{-{}-pdepth=n}: set max print depth (default: 5)
+  \item \t{-{}-extrafiles=filename}: the name of a file that contains
+    a list of additional files to process, separated by whitespace.
+  \item \t{-{}-stats} Print statistics about the running time of the
+    parser, conversion to CIL, etc.  Also prints memory-usage
+    statistics.  You can time parts of your own code as well.  Calling
+    (\t{Stats.time ``label'' func arg}) will evaluate \t{(func arg)}
+    and remember how long this takes.  If you call \t{Stats.time}
+    repeatedly with the same label, CIL will report the aggregate
+    time.
+
+    If available, CIL uses the x86 performance counters for these
+    stats.  This is very precise, but results in ``wall-clock time.''
+    To report only user-mode time, find the call to \t{Stats.reset} in
+    \t{main.ml}, and change it to \t{Stats.reset Stats.SoftwareTimer}.
+  
+  \item \t{-{}-envmachine}. Use machine model specified in
+    \t{CIL\_MACHINE} environment variable, rather than the one
+    compiled into CIL. Note that you should not pass gcc's 32/64-bit
+    \t{-m32} and \t{-m64} options to \t{cilly} if you use
+    \t{-{}-envmachine} (they use \t{-{}-envmachine} under the hood).
+    See \secref{cilmachine} for a description of \t{CIL\_MACHINE}'s
+    format.
+
+   {\bf Lowering Options}
+  \item \t{-{}-noLowerConstants} do not lower constant expressions.
+  \item \t{-{}-noInsertImplicitCasts} do not insert implicit casts.
+  \item \t{-{}-forceRLArgEval} Forces right to left evaluation of function arguments.
+  %\item \t{-{}-nocil=n} Do not compile to CIL the global with the given index.
+  \item \t{-{}-disallowDuplication} Prevent small chunks of code from being duplicated.
+  \item \t{-{}-keepunused} Do not remove the unused variables and types.
+  \item \t{-{}-rmUnusedInlines} Delete any unused inline functions.  This is the default in MSVC mode.
+   
+  {\bf Output Options:}
+  \item \t{-{}-printCilAsIs} Do not try to simplify the CIL when
+  printing.  Without this flag, CIL will attempt to produce prettier
+  output by e.g. changing \t{while(1)} into more meaningful loops.
+  \item \t{-{}-noWrap} do not wrap long lines when printing
+  \item \t{-{}-out=xxx} the name of the output CIL file.  \t{cilly}
+  sets this for you.
+  \item \t{-{}-mergedout=xxx} specify the name of the merged file
+  \item \t{-{}-cabsonly=xxx} CABS output file name
+%%   \item \t{-{}-printComments : print cabs tree structure in comments in cabs output
+%%   \item \t{-{}-patchFile <fname>: name the file containing patching transformations
+%%   \item \t{-{}-printPatched : print patched CABS files after patching, to *.patched
+%%   \item \t{-{}-printProtos : print prototypes to safec.proto.h after parsing
+
+  {\bf Selected features.}  See \secref{Extension} for more information.
+\item \t{-{}-dologcalls}. Insert code in the processed source to print the name of
+functions as are called. Implemented in \t{src/ext/logcalls.ml}.
+\item \t{-{}-dologwrites}. Insert code in the processed source to print the
+address of all memory writes. Implemented in \t{src/ext/logwrites.ml}.
+\item \t{-{}-dooneRet}. Make each function have at most one 'return'.
+Implemented in \t{src/ext/oneret.ml}. 
+\item \t{-{}-dostackGuard}. Instrument function calls and returns to
+maintain a separate stack for return addresses. Implemeted in
+\t{src/ext/heapify.ml}. 
+\item \t{-{}-domakeCFG}. Make the program look more like a CFG. Implemented
+in \t{src/cil.ml}. 
+\item \t{-{}-dopartial}. Do interprocedural partial evaluation and
+constant folding. Implemented in \t{src/ext/partial.ml}. 
+\item \t{-{}-dosimpleMem}. Simplify all memory expressions. Implemented in
+\t{src/ext/simplemem.ml}. 
+
+For an up-to-date list of available options, run \t{cilly.asm -{}-help}. 
+
+\end{itemize}
+
+\subsection{Internal Options}
+\label{sec-cilly-internal-options}
+
+All of the \t{cilly.asm} options described above can be set
+programmatically -- see \t{src/ciloptions.ml} or the individual
+extensions to see how.  Some options should be set before parsing to
+be effective.  
+
+Additionally, a few CIL options have no command-line flag and can only
+be set programmatically.  These options may be useful for certain
+analyses:
+
+\begin{itemize}
+\item \t{Cabs2cil.doCollapseCallCast}:This is false by default.  Set
+to true to replicate the behavior of CIL 1.3.5 and earlier.
+
+When false, all casts in the program are made explicit using the
+\t{CastE} expression. Accordingly, the destination of a Call
+instruction will always have the same type as the function's return
+type.
+
+If true, the destination type of a Call may differ from the return type, so
+there is an implicit cast.  This is useful for analyses involving
+\t{malloc}.  Without this option, CIL converts ``\t{T* x = malloc(n);}''
+into ``\t{void* tmp = malloc(n); T* x = (T*)tmp;}''.  If you don't
+need all casts to be made explicit, you can set
+\t{Cabs2cil.doCollapseCallCast} to true so that CIL won't insert a
+temporary and you can more easily determine the allocation type from
+calls to \t{malloc}.
+
+
+\end{itemize}
+
+\subsection{Specifying a machine model}
+\label{sec-cilmachine}
+
+The \t{-{}-envmachine} option tells CIL to get its machine model from
+the \t{CIL\_MACHINE} environment variable, rather than use the model
+compiled in to CIL itself. This is necessary when using CIL as part of
+a cross-compilation setup, and to handle gcc's \t{-m32} and \t{-m64}
+which select between a 32-bit and 64-bit machine model.
+
+\t{CIL\_MACHINE} is a space-separated list of key=value pairs. Unknown
+keys are ignored. The following keys must be defined:
+\begin{center}
+  \begin{tabular}{|l|l|} \hline
+    Key & Value \\ \hline
+    bool            & sizeof(\_Bool),alignof(\_Bool) \\
+    short           & sizeof(short),alignof(short) \\
+    int             & sizeof(int),alignof(int) \\
+    long            & sizeof(long),alignof(long) \\
+    long\_long      & sizeof(long long),alignof(long long) \\
+    float           & sizeof(float),alignof(float) \\
+    double          & sizeof(double),alignof(double) \\
+    long\_double    & sizeof(long double),alignof(long double) \\
+    pointer         & sizeof(all pointers),alignof(all pointers) \\
+    enum            & sizeof(all enums),alignof(all enums) \\
+    fun             & sizeof(all fn ptrs),alignof(all fn ptrs) \\
+    alignof\_string & alignof(all string constants) \\
+    max\_alignment  & maximum alignment for any type \\
+    size\_t         & the definition of size\_t \\
+    wchar\_t        & the definition of wchar\_t \\
+    char\_signed    & true if char is signed \\
+    big\_endian     & true for big-endian machine models \\
+    const\_string\_literals & true if string constants are const \\
+    \_\_thread\_is\_keyword & true if \t{\_\_thread} is a keyword \\
+    \_\_builtin\_va\_list & true if \t{\_\_builtin\_va\_list} is a builtin type \\
+    underscore\_name & true if generated symbols preceded by \_ \\ \hline
+  \end{tabular}
+\end{center}
+
+Some notes:
+\begin{itemize}
+\item Values cannot contain spaces as spaces separate key/value pairs. 
+\item The value of size\_t is the text for the type defined as
+  size\_t, e.g. \t{unsigned long}. As spaces are not allowed in values,
+  CIL will replace underscores by spaces: \t{size\_t=unsigned\_long}.
+\item sizeof(t) and alignof(t) are respectively the size and alignment of
+  type t.
+\item The boolean-valued keys expect \t{true} for true, and \t{false}
+  for false.
+\item The \t{src/machdep-ml.c} program will print a \t{CIL\_MACHINE} value
+  when run with the \t{-{}-env} option.
+\end{itemize}
+
+As an example, here's the \t{CIL\_MACHINE} value for 64-bit targets on
+an x86-based Mac OS X machine:
+\begin{verbatim}
+  short=2,2 int=4,4 long=8,8 long_long=8,8 pointer=8,8 enum=4,4
+  float=4,4 double=8,8 long_double=16,16 void=1 bool=1,1 fun=1,1
+  alignof_string=1 max_alignment=16 size_t=unsigned_long 
+  wchar_t=int char_signed=true const_string_literals=true 
+  big_endian=false __thread_is_keyword=true 
+  __builtin_va_list=true underscore_name=true
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Library of CIL Modules} \label{sec-Extension}\cutname{ext.html}
+
+ We are developing a suite of modules that use CIL for program analyses and
+transformations that we have found useful. You can use these modules directly
+on your code, or generally as inspiration for writing similar modules. A
+particularly big and complex application written on top of CIL is CCured
+(\ahrefurl{../ccured/index.html}).
+
+\subsection{Control-Flow Graphs} \label{sec-cfg}
+
+The \ciltyperef{stmt} datatype includes fields for intraprocedural
+control-flow information: the predecessor and successor statements of
+the current statement.  This information is not computed by default.
+If you want to use the control-flow graph, or any of the extensions in
+this section that require it, you have to explicitly ask CIL to
+compute the CFG using one of these two methods:
+
+\subsubsection{The CFG module (new in CIL 1.3.5)}
+
+The best way to compute the CFG is with the CFG module.  Just invoke
+\cfgref{computeFileCFG} on your file. The \moduleref{Cfg} API
+describes the rest of actions you can take with this module, including
+computing the CFG for one function at a time, or printing the CFG in
+\t{dot} form.
+
+
+\subsubsection{Simplified control flow}
+
+CIL can reduce high-level C control-flow constructs like \t{switch} and
+\t{continue} to lower-level \t{goto}s. This completely eliminates some
+possible classes of statements from the program and may make the result
+easier to analyze (e.g., it simplifies data-flow analysis).
+
+You can invoke this transformation on the command line with
+\t{-{}-domakeCFG} or programatically with \cilvalref{prepareCFG}.
+After calling Cil.prepareCFG, you can use \cilvalref{computeCFGInfo}
+to compute the CFG information and find the successor and predecessor
+of each statement.
+
+For a concrete example, you can see how \t{cilly -{}-domakeCFG}
+transforms the following code (note the fall-through in case 1): 
+
+\begin{cilcode}[global] --domakeCFG
+  int foo (int predicate) {
+    int x = 0;
+    switch (predicate) {
+      case 0: return 111;
+      case 1: x = x + 1;
+      case 2: return (x+3);
+      case 3: break;
+      default: return 222;
+    }
+    return 333;
+  }
+\end{cilcode}
+
+\subsection{Data flow analysis framework}
+
+ The \moduleref{Dataflow} module (click for the ocamldoc) contains a
+parameterized framework for forward and backward data flow
+analyses. You provide the transfer functions and this module does the
+analysis.  You must compute control-flow information (\secref{cfg})
+before invoking the Dataflow module.
+
+
+\subsection{Inliner}
+
+ The file ext/inliner.ml contains a function inliner. 
+
+\subsection{Dominators} 
+ 
+ The module \moduleref{Dominators} contains the computation of immediate
+ dominators. It uses the \moduleref{Dataflow} module. 
+
+\subsection{Points-to Analysis}
+
+The module \t{ptranal.ml} contains two interprocedural points-to
+analyses for CIL: \t{Olf} and \t{Golf}.  \t{Olf} is the default.
+(Switching from \t{olf.ml} to \t{golf.ml} requires a change in
+\t{Ptranal} and a recompiling \t{cilly}.)
+
+The analyses have the following characteristics:
+\begin{itemize}
+\item Not based on C types (inferred pointer relationships are sound
+  despite most kinds of C casts)
+\item One level of subtyping 
+\item One level of context sensitivity (Golf only)
+\item Monomorphic type structures
+\item Field insensitive (fields of structs are conflated)
+\item Demand-driven (points-to queries are solved on demand)
+\item Handle function pointers
+\end{itemize}
+
+The analysis itself is factored into two components: \t{Ptranal},
+which walks over the CIL file and generates constraints, and \t{Olf}
+or \t{Golf}, which solve the constraints.  The analysis is invoked
+with the function \t{Ptranal.analyze\_file: Cil.file ->
+  unit}.  This function builds the points-to graph for the CIL file
+and stores it internally.  There is currently no facility for clearing
+internal state, so \t{Ptranal.analyze\_file} should only be called
+once.
+
+%%% Interface for querying the points-to graph...
+The constructed points-to graph supports several kinds of queries,
+including alias queries (may two expressions be aliased?) and
+points-to queries (to what set of locations may an expression point?).
+
+%%% Main Interface
+The main interface with the alias analysis is as follows:
+\begin{itemize}
+\item \t{Ptranal.may\_alias: Cil.exp -> Cil.exp -> bool}. If
+  \t{true}, the two expressions may have the same value.
+\item \t{Ptranal.resolve\_lval: Cil.lval -> (Cil.varinfo
+    list)}.  Returns the list of variables to which the given
+  left-hand value may point.
+\item \t{Ptranal.resolve\_exp: Cil.exp -> (Cil.varinfo list)}.
+  Returns the list of variables to which the given expression may
+  point.
+\item \t{Ptranal.resolve\_funptr: Cil.exp -> (Cil.fundec
+    list)}. Returns the list of functions to which the given
+  expression may point.
+\end{itemize}
+
+%%% Controlling the analysis
+The precision of the analysis can be customized by changing the values
+of several flags:
+
+\begin{itemize}
+\item \t{Ptranal.no\_sub: bool ref}.
+  If \t{true}, subtyping is disabled.  Associated commandline option:
+  {\bf -{}-ptr\_unify}.
+\item \t{Ptranal.analyze\_mono: bool ref}.
+  (Golf only) If \t{true}, context sensitivity is disabled and the
+  analysis is effectively monomorphic.  Commandline option:
+  {\bf -{}-ptr\_mono}.
+\item \t{Ptranal.smart\_aliases: bool ref}.
+  (Golf only) If \t{true}, ``smart'' disambiguation of aliases is
+  enabled.  Otherwise, aliases are computed by intersecting points-to
+  sets.  This is an experimental feature.
+\item \t{Ptranal.model\_strings: bool ref}.
+  Make the alias analysis model string constants by treating them as
+  pointers to chars.  Commandline option: {\bf -{}-ptr\_model\_strings}
+\item \t{Ptranal.conservative\_undefineds: bool ref}.
+  Make the most pessimistic assumptions about globals if an undefined
+  function is present.  Such a function can write to every global
+  variable.  Commandline option: {\bf -{}-ptr\_conservative}
+\end{itemize}
+
+In practice, the best precision/efficiency tradeoff is achieved by
+setting 
+\begin{verbatim}
+  Ptranal.no_sub = false
+  Ptranal.analyze_mono = true
+  Ptranal.smart_aliases = false
+\end{verbatim}
+These are the
+default values of the flags.
+
+%%% Debug output
+There are also a few flags that can be used to inspect or serialize
+the results of the analysis.
+\begin{itemize}
+%%\item \t{Ptranal.ptrResults}.
+%%  Commandline option: {\bf -{}-ptr\_results}.  A no-op!
+%%
+%%\item \t{Ptranal.ptrTypes}.
+%%  Commandline option: {\bf -{}-ptr\_types}.  A no-op!
+%%
+\item \t{Ptranal.debug\_may\_aliases}.
+  Print the may-alias relationship of each pair of expressions in the
+  program.  Commandline option: {\bf -{}-ptr\_may\_aliases}.
+\item \t{Ptranal.print\_constraints: bool ref}.
+  If \t{true}, the analysis will print each constraint as it is
+  generated.
+\item \t{Ptranal.print\_types: bool ref}.
+  If \t{true}, the analysis will print the inferred type of each
+  variable in the program.
+
+  If \t{Ptranal.analyze\_mono} and \t{Ptranal.no\_sub} are both
+  \t{true}, this output is sufficient to reconstruct the points-to
+  graph.  One nice feature is that there is a pretty printer for
+  recursive types, so the print routine does not loop.
+\item \t{Ptranal.compute\_results: bool ref}.
+  If \t{true}, the analysis will print out the points-to set of each
+  variable in the program.  This will essentially serialize the
+  points-to graph.
+\end{itemize}
+
+\subsection{StackGuard}
+
+The module \t{heapify.ml} contains a transformation similar to the one
+described in ``StackGuard: Automatic Adaptive Detection and Prevention of
+Buffer-Overflow Attacks'', {\em Proceedings of the 7th USENIX Security
+Conference}. In essence it modifies the program to maintain a separate
+stack for return addresses. Even if a buffer overrun attack occurs the
+actual correct return address will be taken from the special stack. 
+
+Although it does work, this CIL module is provided mainly as an example of
+how to perform a simple source-to-source program analysis and
+transformation. As an optimization only functions that contain a dangerous
+local array make use of the special return address stack. 
+
+For a concrete example, you can see how \t{cilly -{}-dostackGuard}
+transforms the following dangerous code: 
+
+\begin{cilcode}[global] --dostackGuard
+  int dangerous() {
+    char array[10];
+    scanf("%s",array); // possible buffer overrun!
+  }
+
+  int main () {
+    return dangerous();
+  }
+\end{cilcode}
+
+
+\subsection{Heapify}
+ 
+The module \t{heapify.ml} also contains a transformation that moves all
+dangerous local arrays to the heap. This also prevents a number of buffer
+overruns. 
+
+For a concrete example, you can see how \t{cilly -{}-doheapify}
+transforms the following dangerous code: 
+
+\begin{cilcode}[global] --doheapify
+  int dangerous() {
+    char array[10];
+    scanf("%s",array); // possible buffer overrun!
+  }
+
+  int main () {
+    return dangerous();
+  }
+\end{cilcode}
+
+\subsection{One Return}
+
+The module \t{oneret.ml} contains a transformation the ensures that all
+function bodies have at most one return statement. This simplifies a number
+of analyses by providing a canonical exit-point. 
+
+For a concrete example, you can see how \t{cilly -{}-dooneRet}
+transforms the following code: 
+
+\begin{cilcode}[global] --dooneRet
+  int foo (int predicate) {
+    if (predicate <= 0) {
+      return 1;
+    } else {
+      if (predicate > 5)
+        return 2;
+      return 3;
+    }
+  }
+\end{cilcode}
+
+\subsection{Partial Evaluation and Constant Folding}
+
+The \t{partial.ml} module provides a simple interprocedural partial
+evaluation and constant folding data-flow analysis and transformation.
+This transformation always requires the \t{-{}-domakeCFG} option.  It
+performs:
+\begin{itemize}
+\item Constant folding even of compiler-dependent constants as, for
+  example \t{sizeof(T)}.
+\item \t{if}-statement simplification for conditional expressions that
+  evaluate to a constant.  The \t{if}-statement gets replaced with the
+  taken branch.
+\item Call elimination for
+  \begin{enumerate}
+  \item\label{enum:partial-empty-proc} empty functions and
+  \item\label{enum:partial-const-func} functions that return a
+    constant.
+  \end{enumerate}
+  In case~\ref{enum:partial-empty-proc} the call disappears completely
+  and in case~\ref{enum:partial-const-func} it is replaced by the
+  constant the function returns.
+\end{itemize}
+
+Several commandline options control the behavior of the feature.
+\begin{itemize}
+\item \t{-{}-partial\_no\_global\_const}:
+ Treat global constants as unknown values.  This is the default.
+\item \t{-{}-partial\_global\_const}:
+ Treat global constants as initialized.  Let global constants
+ participate in the partial evaluation.
+\item \t{-{}-partial\_root\_function} \i{function-name}:
+  Name of the function where the simplification starts.  Default:
+  \t{main}.
+\item \t{-{}-partial\_use\_easy\_alias}
+  Use Partial's built-in easy alias to analyze pointers.  This is the
+  default.
+\item \t{-{}-partial\_use\_ptranal\_alias}
+  Use feature Ptranal to analyze pointers.  Setting this option
+  requires \t{-{}-doptranal}.
+\end{itemize}
+
+For a concrete example, you can see how \t{cilly -{}-domakeCFG -{}-dopartial}
+transforms the following code (note the eliminated \t{if}-branch and the
+partial optimization of \t{foo}):
+
+\begin{cilcode}[global] --domakeCFG --dopartial
+  int foo(int x, int y) {
+    int unknown;
+    if (unknown)
+      return y + 2;
+    return x + 3;
+  }
+
+  int bar(void) {
+    return -1;
+  }
+
+  int main(void) {
+    int a, b, c;
+    a = foo(5, 7) + foo(6, 7) + bar();
+    b = 4;
+    c = b * b;
+    if (b > c)
+      return b - c;
+    else
+      return b + c;
+  }
+\end{cilcode}
+
+\subsection{Reaching Definitions}
+
+The \t{reachingdefs.ml} module uses the dataflow framework and CFG
+information to calculate the definitions that reach each
+statement. After computing the CFG (\secref{cfg}) and calling
+\t{computeRDs} on a 
+function declaration, \t{ReachingDef.stmtStartData} will contain a
+mapping from statement IDs to data about which definitions reach each
+statement. In particular, it is a mapping from statement IDs to a
+triple the first two members of which are used internally. The third
+member is a mapping from variable IDs to Sets of integer options. If
+the set contains \t{Some(i)}, then the definition of that variable
+with ID \t{i} reaches that statement. If the set contains \t{None},
+then there is a path to that statement on which there is no definition
+of that variable.  Also, if the variable ID is unmapped at a
+statement, then no definition of that variable reaches that statement.
+
+To summarize, reachingdefs.ml has the following interface:
+\begin{itemize}
+\item \t{computeRDs} -- Computes reaching definitions. Requires that
+CFG information has already been computed for each statement.
+\item \t{ReachingDef.stmtStartData} -- contains reaching
+definition data after \t{computeRDs} is called.
+\item \t{ReachingDef.defIdStmtHash} -- Contains a mapping
+from definition IDs to the ID of the statement in which
+the definition occurs.
+\item \t{getRDs} -- Takes a statement ID and returns
+reaching definition data for that statement.
+\item \t{instrRDs} -- Takes a list of instructions and the
+definitions that reach the first instruction, and for
+each instruction calculates the definitions that reach
+either into or out of that instruction.
+\item \t{rdVisitorClass} -- A subclass of nopCilVisitor that
+can be extended such that the current reaching definition
+data is available when expressions are visited through
+the \t{get\_cur\_iosh} method of the class.
+\end{itemize}
+
+\subsection{Available Expressions}
+
+The \t{availexps.ml} module uses the dataflow framework and CFG
+information to calculate something similar to a traditional available
+expressions analysis. After \t{computeAEs} is called following a CFG
+calculation (\secref{cfg}), \t{AvailableExps.stmtStartData} will
+contain a mapping
+from statement IDs to data about what expressions are available at
+that statement. The data for each statement is a mapping for each
+variable ID to the whole expression available at that point(in the
+traditional sense) which the variable was last defined to be. So,
+this differs from a traditional available expressions analysis in that
+only whole expressions from a variable definition are considered rather
+than all expressions.
+
+The interface is as follows:
+\begin{itemize}
+\item \t{computeAEs} -- Computes available expressions. Requires
+that CFG information has already been comptued for each statement.
+\item \t{AvailableExps.stmtStartData} -- Contains available
+expressions data for each statement after \t{computeAEs} has been
+called.
+\item \t{getAEs} -- Takes a statement ID and returns
+available expression data for that statement.
+\item \t{instrAEs} -- Takes a list of instructions and
+the availalbe expressions at the first instruction, and
+for each instruction calculates the expressions available
+on entering or exiting each instruction.
+\item \t{aeVisitorClass} -- A subclass of nopCilVisitor that
+can be extended such that the current available expressions
+data is available when expressions are visited through the
+\t{get\_cur\_eh} method of the class.
+\end{itemize}
+
+\subsection{Liveness Analysis}
+
+The \t{liveness.ml} module uses the dataflow framework and
+CFG information to calculate which variables are live at
+each program point. After \t{computeLiveness} is called
+following a CFG calculation (\secref{cfg}), \t{LiveFlow.stmtStartData} will
+contain a mapping for each statement ID to a set of \t{varinfo}s
+for varialbes live at that program point.
+
+The interface is as follows:
+\begin{itemize}
+\item \t{computeLiveness} -- Computes live variables. Requires
+that CFG information has already been computed for each statement.
+\item \t{LiveFlow.stmtStartData} -- Contains live variable data
+for each statement after \t{computeLiveness} has been called.
+\end{itemize}
+
+Also included in this module is a command line interface that
+will cause liveness data to be printed to standard out for
+a particular function or label.
+
+\begin{itemize}
+\item \t{-{}-doliveness} -- Instructs cilly to comptue liveness
+information and to print on standard out the variables live
+at the points specified by \t{-{}-live\_func} and \t{live\_label}.
+If both are ommitted, then nothing is printed.
+\item \t{-{}-live\_func} -- The name of the function whose
+liveness data is of interest. If \t{-{}-live\_label} is ommitted,
+then data for each statement is printed.
+\item \t{-{}-live\_label} -- The name of the label at which
+the liveness data will be printed.
+\end{itemize}
+
+\subsection{Dead Code Elimination}
+
+The module \t{deadcodeelim.ml} uses the reaching definitions
+analysis to eliminate assignment instructions whose results
+are not used. The interface is as follows:
+
+\begin{itemize}
+\item \t{elim\_dead\_code} -- Performs dead code elimination
+on a function. Requires that CFG information has already
+been computed (\secref{cfg}).
+\item \t{dce} -- Performs dead code elimination on an
+entire file. Requires that CFG information has already
+been computed.
+\end{itemize}
+
+\subsection{Simple Memory Operations} 
+
+The \t{simplemem.ml} module allows CIL lvalues that contain memory
+accesses to be even futher simplified via the introduction of
+well-typed temporaries. After this transformation all lvalues involve
+at most one memory reference.
+
+For a concrete example, you can see how \t{cilly -{}-dosimpleMem} 
+transforms the following code:
+
+\begin{cilcode}[global] --dosimpleMem
+  int main () {
+    int ***three;
+    int **two;
+    ***three = **two; 
+  } 
+\end{cilcode}
+
+\subsection{Simple Three-Address Code} 
+
+The \t{simplify.ml} module further reduces the complexity of program
+expressions and gives you a form of three-address code. After this
+transformation all expressions will adhere to the following grammar: 
+\begin{verbatim}
+ basic::=
+    Const _ 
+    Addrof(Var v, NoOffset)
+    StartOf(Var v, NoOffset)
+    Lval(Var v, off), where v is a variable whose address is not taken
+                      and off contains only "basic"
+
+ exp::=
+    basic
+    Lval(Mem basic, NoOffset)
+    BinOp(bop, basic, basic)
+    UnOp(uop, basic)
+    CastE(t, basic)
+   
+ lval ::= 
+    Mem basic, NoOffset
+    Var v, off, where v is a variable whose address is not taken and off
+                contains only "basic"
+\end{verbatim}
+In addition, all \t{sizeof} and \t{alignof} forms are turned into
+constants. Accesses to arrays and variables whose address is taken are
+turned into "Mem" accesses. All field and index computations are turned
+into address arithmetic.
+
+For a concrete example, you can see how \t{cilly -{}-dosimplify} 
+transforms the following code:
+
+\begin{cilcode}[global] --dosimplify
+  int main() {
+    struct mystruct {
+      int a;
+      int b;
+    } m;
+    int local;
+    int arr[3];
+    int *ptr;
+
+    ptr = &local;
+    m.a = local + sizeof(m) + arr[2];
+    return m.a; 
+  } 
+\end{cilcode}
+
+\subsection{Converting C to C++}
+
+The module canonicalize.ml performs several transformations to correct
+differences between C and C++, so that the output is (hopefully) valid
+C++ code.  This may be incomplete --- certain fixes which are necessary
+for some programs are not yet implemented.
+
+Using the \t{-{}-doCanonicalize} option with CIL will perform the
+following changes to your program:
+
+\begin{enumerate}
+\item Any variables that use C++ keywords as identifiers are renamed.
+\item C allows global variables to have multiple declarations and
+      multiple (equivalent) definitions.  This transformation removes
+      all but one declaration and all but one definition.
+\item \t{\_\_inline} is \#defined to \t{inline}, and \t{\_\_restrict} 
+      is \#defined to nothing.
+\item C allows function pointers with no specified arguments to be used on
+      any argument list.  To make C++ accept this code, we insert a cast
+      from the function pointer to a type that matches the arguments.  Of
+      course, this does nothing to guarantee that the pointer actually has
+      that type.
+\item Makes casts from int to enum types explicit.  (CIL changes enum
+      constants to int constants, but doesn't use a cast.)
+\end{enumerate}
+
+
+\subsection{Generating LLVM code (new in 1.3.7)}
+
+The llvm.ml module generates LLVM (``Low Level Virtual Machine'',
+\ahreftop{http://llvm.org}{http://llvm.org}) code from a CIL file. The
+current version only targets 32-bit x86 code (as of version 2.5,
+LLVM's 64-bit x86 support is still incomplete), and has a few significant
+limitations:
+\begin{itemize}
+\item No support for bitfields.
+\item No support for inline assembly.
+\item Ignores gcc pragmas and attributes (except those explicitly handled by CIL).
+\item No support for variable-sized types.
+\end{itemize}
+
+LLVM support is enabled by running \t{configure} with the
+\t{--with-llvm} option before compiling CIL. You can then convert C
+code to LLVM assembly with \t{cilly --dollvm somefile.c}. Or you can
+call \t{Llvm.generate} on a CIL file to get LLVM assembly as a \t{doc}
+string.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Controlling CIL}
+
+ In the process of converting a C file to CIL we drop the unused prototypes
+and even inline function definitions. This results in much smaller files. If
+you do not want this behavior then you must pass the \t{-{}-keepunused} argument
+to the CIL application. 
+
+ Alternatively you can put the following pragma in the code (instructing CIL
+to specifically keep the declarations and definitions of the function
+\t{func1} and variable \t{var2}, the definition of type \t{foo} and of
+structure \t{bar}):
+\begin{code}
+#pragma cilnoremove("func1", "var2", "type foo", "struct bar")
+\end{verbatim}\end{code}
+
+
+
+\section{GCC Extensions}
+
+ The CIL parser handles most of the \t{gcc}
+\ahreftop{http://gcc.gnu.org/onlinedocs/gcc-3.0.2/gcc\_5.html#SEC67}{extensions}
+and compiles them to CIL. The following extensions are not handled (note that
+we are able to compile a large number of programs, including the Linux kernel,
+without encountering these):
+
+\begin{enumerate}
+\item Nested function definitions.
+\item Constructing function calls.
+\item Naming an expression's type.
+\item Complex numbers
+\item Hex floats
+\item Subscripts on non-lvalue arrays.
+\item Forward function parameter declarations
+\end{enumerate}
+
+ The following extensions are handled, typically by compiling them away:
+\begin{enumerate}
+\item Attributes for functions, variables and types. In fact, we have a clear
+specification (see \secref{attrib}) of how attributes are interpreted. The
+specification extends that of \t{gcc}.
+\item Old-style function definitions and prototypes. These are translated to
+new-style. 
+\item Locally-declared labels. As part of the translation to CIL, we generate
+new labels as needed. 
+\item Labels as values and computed goto. This allows a program to take the
+address of a label and to manipulate it as any value and also to perform a
+computed goto. We compile this by assigning each label whose address is taken
+a small integer that acts as its address. Every computed \t{goto} in the body
+of the function is replaced with a \t{switch} statement. If you want to invoke
+the label from another function, you are on your own (the \t{gcc}
+documentation says the same.)
+\item Generalized lvalues. You can write code like \t{(a, b) += 5} and it gets
+translated to CIL. 
+\item Conditionals with omitted operands. Things like \t{x ? : y} are
+translated to CIL.
+\item Double word integers. The type \t{long long} and the \t{LL} suffix on
+constants is understood. This is currently interpreted as 64-bit integers.
+\item Local arrays of variable length. These are converted to uses of
+\t{alloca}, the array variable is replaced with a pointer to the allocated
+array and the instances of \t{sizeof(a)} are adjusted to return the size of
+the array and not the size of the pointer. 
+\item Non-constant local initializers. Like all local initializers these are
+compiled into assignments. 
+\item Compound literals. These are also turned into assignments.
+\item Designated initializers. The CIL parser actually supports the full ISO
+syntax for initializers, which is more than both \t{gcc} and \t{MSVC}. I
+(George) think that this is the most complicated part of the C language and
+whoever designed it should be banned from ever designing languages again.
+\item Case ranges. These are compiled into separate cases. There is no code
+duplication, just a larger number of \t{case} statements.
+\item Transparent unions. This is a strange feature that allows you to define
+a function whose formal argument has a (tranparent) union type, but the
+argument is called as if it were the first element of the union. This is
+compiled away by saying that the type of the formal argument is that of the
+first field, and the first thing in the function body we copy the formal into
+a union. 
+
+\item Inline assembly-language. The full syntax is supported and it is carried
+as such in CIL.
+
+\item Function names as strings. The identifiers \t{\_\_FUNCTION\_\_} and
+\t{\_\_PRETTY\_FUNCTION\_\_} are replaced with string literals. 
+
+\item Keywords \t{typeof}, \t{alignof}, \t{inline} are supported. 
+\end{enumerate}
+
+\section{CIL Limitations}
+
+ There are several implementation details of CIL that might make it unusable
+ or less than ideal for certain tasks:
+
+\begin{itemize}
+\item CIL operates after preprocessing. If you need to see comments, for
+example, you cannot use CIL. But you can use attributes and pragmas instead.
+And there is some support to help you patch the include files before they are
+seen by the preprocessor. For example, this is how we turn some
+\t{\#define}s that we don't like into function calls. 
+
+\item CIL does transform the code in a non-trivial way. This is done in order
+to make most analyses easier. But if you want to see the code \t{e1, e2++}
+exactly as it appears in the code, then you should not use CIL. 
+
+\item CIL removes all local scopes and moves all variables to function
+scope. It also separates a declaration with an initializer into a declaration
+plus an assignment. The unfortunate effect of this transformation is that
+local variables cannot have the \t{const} qualifier.
+
+\end{itemize}
+ 
+\section{Known Bugs and Limitations}
+
+\subsection{Code that CIL won't compile}
+\begin{itemize}
+\item We do not support tri-graph sequences (ISO 5.2.1.1).
+
+\item CIL cannot parse arbitrary \t{\#pragma} directives.  Their
+  syntax must follow gcc's attribute syntax to be understood.  If you
+  need a pragma that does not follow gcc syntax, add that pragma's name
+  to \t{no\_parse\_pragma} in \t{src/frontc/clexer.mll} to indicate that
+  CIL should treat that pragma as a monolithic string rather than try
+  to parse its arguments.
+
+  CIL cannot parse a line containing an empty \t{\#pragma}.
+
+\item CIL only parses \t{\#pragma} directives at the "top level", this is,
+  outside of any enum, structure, union, or function definitions.
+
+  If your compiler uses pragmas in places other than the top-level,
+  you may have to preprocess the sources in a special way (sed, perl,
+  etc.) to remove pragmas from these locations.
+
+\item CIL cannot parse the following code (fixing this problem would require
+  extensive hacking of the LALR grammar):
+\begin{code}
+int bar(int ()); // This prototype cannot be parsed
+int bar(int x()); // If you add a name to the function, it works
+int bar(int (*)()); // This also works (and it is more appropriate)
+\end{verbatim}\end{code}
+
+\item CIL also cannot parse certain K\&R old-style prototypes with missing
+  return type:
+\begin{code}
+g(); // This cannot be parsed
+int g(); // This is Ok
+\end{verbatim}\end{code}
+
+\item CIL does not understand some obscure combinations of type
+  specifiers (``signed'' and ``unsigned'' applied to typedefs that
+  themselves contain a sign specification; you could argue that this
+  should not be allowed anyway):
+\begin{code}
+typedef signed char __s8;
+__s8 unsigned uchartest; // This is unsigned char for gcc
+\end{verbatim}\end{code}
+
+\item CIL does not support constant-folding of floating-point values,
+  because it is difficult to simulate the behavior of various
+  C floating-point implementations in Ocaml.  Therefore, code such as
+  this will not compile:
+\begin{code}
+int globalArray[(1.0 < 2.0) ? 5 : 50]
+\end{verbatim}\end{code}
+
+\item CIL uses Ocaml ints to represent the size of an object.
+  Therefore, it can't compute the size of any object that is larger
+  than $2^{30}$ bits (134 MB) on 32-bit computers, or $2^{62}$ bits on
+  64-bit computers.
+
+\end{itemize}
+
+\subsection{Code that behaves differently under CIL}
+
+\begin{itemize}
+\item GCC has a strange feature called ``extern inline''. Such a function can
+be defined twice: first with the ``extern inline'' specifier and the second
+time without it. If optimizations are turned off then the ``extern inline''
+definition is considered a prototype (its body is ignored). 
+
+With old versions of gcc, if optimizations
+are turned on then the extern inline function is inlined at all of its
+occurrences from the point of its definition all the way to the point where the
+(optional) second definition appears. No body is generated for an extern
+inline function. A body is generated for the real definition and that one is
+used in the rest of the file. 
+
+With new versions of gcc, the extern inline function is used only if there is no
+actual (non-extern) second definition (i.e. the second definition is used in the
+whole file, even for calls between the extern inline definition and the second
+definition).
+
+By default, CIL follows the current gcc behavior for extern
+inline. However, if you set \t{oldstyleExternInline} to true, you will
+get an emulation of gcc's old behaviour (under the assumption that
+optimizations are enabled): CIL will rename your extern inline
+function (and its uses) with the suffix \t{\_\_extinline}. This means
+that if you have two such definition, that do different things and the
+optimizations are not on, then the CIL version might compute a
+different answer! Also, if you have multiple extern inline
+declarations then CIL will ignore but the first one. This is not so
+bad because GCC itself would not like it.
+
+\item The implementation of \t{bitsSizeOf} does not take into account the
+  packing pragmas. However it was tested to be accurate on cygwin/gcc-2.95.3,
+  Linux/gcc-2.95.3 and on Windows/MSVC.
+
+\item \t{-malign-double} is ignored.
+
+\item The statement \t{x = 3 + x ++} will perform the increment of \t{x}
+  before the assignment, while \t{gcc} delays the increment after the
+  assignment. It turned out that this behavior is much easier to implement
+  than gcc's one, and either way is correct (since the behavior is unspecified
+  in this case). Similarly, if you write \t{x = x ++;} then CIL will perform
+  the increment before the assignment, whereas GCC and MSVC will perform it
+  after the assignment. 
+
+\item Because CIL uses 64-bit floating point numbers in its internal
+  representation of floating point numbers, \t{long double} constants
+  are parsed as if they were \t{double} constants.
+
+\end{itemize}
+
+\subsection{Effects of the CIL translation}
+\begin{itemize}
+\item CIL cleans up C code in various ways that may suppress compiler
+  warnings.  For example, CIL will add casts where they are needed
+  while \t{gcc} might print a warning for the missing cast.  It is
+  not a goal of CIL to emit such warnings --- we support several
+  versions of several different compilers, and mimicking the warnings
+  of each is simply not possible.  If you want to see compiler
+  warnings, compile your program with your favorite compiler before
+  using CIL.
+
+\item When you use variable-length arrays, CIL turns them into calls
+  to \t{alloca}. This means that they are deallocated when the
+  function returns and not when the local scope ends.
+
+  Variable-length arrays are not supported as fields of a struct or union.
+
+\item In the new versions of \t{glibc} there is a function
+  \t{\_\_builtin\_va\_arg} that takes a type as its second argument. CIL
+  handles that through a slight trick. As it parses the function it changes a
+  call like:
+\begin{verbatim}
+  mytype x = __builtin_va_arg(marker, mytype)
+\end{verbatim}
+ into 
+\begin{verbatim}
+ mytype x;
+ __builtin_va_arg(marker, sizeof(mytype), &x);
+\end{verbatim}
+
+ The latter form is used internally in CIL. However, the CIL pretty printer
+ will try to emit the original code. 
+
+ Similarly, \t{\_\_builtin\_types\_compatible\_p(t1, t2)}, which takes
+ types as arguments, is represented internally as
+ \t{\_\_builtin\_types\_compatible\_p(sizeof t1, sizeof t2)}, but the
+ sizeofs are removed when printing.
+
+\end{itemize}
+
+
+
+
+
+  \section{Using the merger}\label{sec-merger}\cutname{merger.html}
+
+ There are many program analyses that are more effective when
+done on the whole program.
+
+ The merger is a tool that combines all of the C source files in a project
+into a single C file. There are two tasks that a merger must perform:
+\begin{enumerate}
+\item Detect what are all the sources that make a project and with what
+compiler arguments they are compiled.
+
+\item Merge all of the source files into a single file. 
+\end{enumerate}
+
+ For the first task the merger impersonates a compiler and a linker (both a
+GCC and a Microsoft Visual C mode are supported) and it expects to be invoked
+(from a build script or a Makefile) on all sources of the project. When
+invoked to compile a source the merger just preprocesses the source and saves
+the result using the name of the requested object file. By preprocessing at
+this time the merger is able to take into account variations in the command
+line arguments that affect preprocessing of different source files.
+
+ When the merger is invoked to link a number of object files it collects the
+preprocessed sources that were stored with the names of the object files, and
+invokes the merger proper. Note that arguments that affect the compilation or
+linking must be the same for all source files.
+
+ For the second task, the merger essentially concatenates the preprocessed
+sources with care to rename conflicting file-local declarations (we call this
+process alpha-conversion of a file). The merger also attempts to remove
+duplicate global declarations and definitions. Specifically the following
+actions are taken: 
+
+\begin{itemize}
+\item File-scope names (\t{static} globals, names of types defined with
+\t{typedef}, and structure/union/enumeration tags) are given new names if they
+conflict with declarations from previously processed sources. The new name is
+formed by appending the suffix \t{\_\_\_n}, where \t{n} is a unique integer
+identifier. Then the new names are applied to their occurrences in the file. 
+
+\item Non-static declarations and definitions of globals are never renamed.
+But we try to remove duplicate ones. Equality of globals is detected by
+comparing the printed form of the global (ignoring the line number directives)
+after the body has been alpha-converted. This process is intended to remove
+those declarations (e.g. function prototypes) that originate from the same
+include file. Similarly, we try to eliminate duplicate definitions of
+\t{inline} functions, since these occasionally appear in include files.
+
+\item The types of all global declarations with the same name from all files
+are compared for type isomorphism. During this process, the merger detects all
+those isomorphisms between structures and type definitions that are {\bf
+required} for the merged program to be legal. Such structure tags and
+typenames are coalesced and given the same name. 
+
+\item Besides the structure tags and type names that are required to be
+isomorphic, the merger also tries to coalesce definitions of structures and
+types with the same name from different file. However, in this case the merger
+will not give an error if such definitions are not isomorphic; it will just
+use different names for them. 
+
+\item In rare situations, it can happen that a file-local global in
+encountered first and it is not renamed, only to discover later when
+processing another file that there is an external symbol with the same name.
+In this case, a second pass is made over the merged file to rename the
+file-local symbol. 
+\end{itemize}
+
+ Here is an example of using the merger:
+
+ The contents of \t{file1.c} is:
+\begin{code}
+struct foo; // Forward declaration
+extern struct foo *global;
+\end{verbatim}\end{code}
+
+ The contents of \t{file2.c} is:
+
+\begin{code}
+struct bar {
+ int x;
+ struct bar *next;
+};
+extern struct bar *global;
+struct foo {
+ int y;
+};
+extern struct foo another;
+void main() {
+}
+\end{verbatim}\end{code}
+
+ There are several ways in which one might create an executable from these
+files:
+\begin{itemize}
+\item
+\begin{verbatim}
+gcc file1.c file2.c -o a.out
+\end{verbatim}
+
+\item 
+\begin{verbatim}
+gcc -c file1.c -o file1.o
+gcc -c file2.c -o file2.o
+ld file1.o file2.o -o a.out
+\end{verbatim}
+
+\item 
+\begin{verbatim}
+gcc -c file1.c -o file1.o
+gcc -c file2.c -o file2.o
+ar r libfile2.a file2.o
+gcc file1.o libfile2.a -o a.out
+\end{verbatim}
+
+\item 
+\begin{verbatim}
+gcc -c file1.c -o file1.o
+gcc -c file2.c -o file2.o
+ar r libfile2.a file2.o
+gcc file1.o -lfile2 -o a.out
+\end{verbatim}
+\end{itemize}
+
+ In each of the cases above you must replace all occurrences of \t{gcc} and
+\t{ld} with \t{cilly -{}-merge}, and all occurrences of \t{ar} with \t{cilly
+-{}-merge -{}-mode=AR}. It is very important that the \t{-{}-merge} flag be used
+throughout the build process. If you want to see the merged source file you
+must also pass the \t{-{}-keepmerged} flag to the linking phase. 
+
+ The result of merging file1.c and file2.c is:
+\begin{code}
+// from file1.c
+struct foo; // Forward declaration
+extern struct foo *global;
+
+// from file2.c
+struct foo {
+ int x;
+ struct foo *next;
+};
+struct foo___1 {
+ int y;
+};
+extern struct foo___1 another;
+\end{verbatim}\end{code}
+
+    \section{Using the patcher}\label{sec-patcher}\cutname{patcher.html}
+
+ Occasionally we have needed to modify slightly the standard include files.
+So, we developed a simple mechanism that allows us to create modified copies
+of the include files and use them instead of the standard ones. For this
+purpose we specify a patch file and we run a program caller Patcher which
+makes modified copies of include files and applies the patch.
+
+ The patcher is invoked as follows: 
+\begin{verbatim}
+bin/patcher [options]
+
+Options:
+  --help       Prints this help message
+  --verbose    Prints a lot of information about what is being done
+  --mode=xxx   What tool to emulate: 
+                GNUCC     - GNU CC
+                MSVC      - MS VC cl compiler
+
+  --dest=xxx   The destination directory. Will make one if it does not exist
+  --patch=xxx  Patch file (can be specified multiple times)
+  --ppargs=xxx An argument to be passed to the preprocessor (can be specified
+               multiple times)
+
+  --ufile=xxx  A user-include file to be patched (treated as \#include "xxx")
+  --sfile=xxx  A system-include file to be patched (treated as \#include <xxx>)
+ 
+  --clean       Remove all files in the destination directory
+  --dumpversion Print the version name used for the current compiler
+
+ All of the other arguments are passed to the preprocessor. You should pass
+ enough arguments (e.g., include directories) so that the patcher can find the
+ right include files to be patched.
+\end{verbatim}
+
+ Based on the given \t{mode} and the current version of the compiler (which
+the patcher can print when given the \t{dumpversion} argument) the patcher
+will create a subdirectory of the \t{dest} directory, such as:
+\begin{verbatim}
+  /usr/home/necula/cil/include/gcc_2.95.3-5
+\end{verbatim}
+
+ In that file the patcher will copy the modified versions of the include files
+specified with the \t{ufile} and \t{sfile} options. Each of these options can
+be specified multiple times. 
+
+ The patch file (specified with the \t{patch} option) has a format inspired by
+the Unix \t{patch} tool. The file has the following grammar:
+
+\begin{verbatim}
+  <<< flags
+  patterns
+  ===
+  replacement
+  >>>
+\end{verbatim}
+
+ The flags are a comma separated, case-sensitive, sequence of keywords or
+keyword = value. The following flags are supported:
+\begin{itemize}
+\item \t{file=foo.h} - will only apply the patch on files whose name is
+                       \t{foo.h}. 
+\item \t{optional} - this means that it is Ok if the current patch does not
+match any of the processed files. 
+\item \t{group=foo} - will add this patch to the named group. If this is not
+specified then a unique group is created to contain just the current patch.
+When all files specified in the command line have been patched, an error
+message is generated for all groups for whom no member patch was used. We use
+this mechanism to receive notice when the patch triggers are out-dated with
+respect to the new include files. 
+\item \t{system=sysname} - will only consider this pattern on a given
+operating system. The ``sysname'' is reported by the ``\$\^O'' variable in
+Perl, except that Windows is always considered to have sysname
+``cygwin.'' For Linux use ``linux'' (capitalization matters).
+\item \t{ateof} - In this case the patterns are ignored and the replacement
+text is placed at the end of the patched file. Use the \t{file} flag if you
+want to restrict the files in which this replacement is performed. 
+\item \t{atsof} - The patterns are ignored and the replacement text is placed
+at the start of the patched file. Uf the \t{file} flag to restrict the
+application of this patch to a certain file. 
+\item \t{disabled} - Use this flag if you want to disable the pattern.
+\end{itemize}
+
+
+ The patterns can consist of several groups of lines separated by the \t{|||}
+marker. Each of these group of lines is a multi-line pattern that if found in
+the file will be replaced with the text given at the end of the block. 
+
+ The matching is space-insensitive.
+
+ All of the markers \t{<<<}, \t{|||}, \t{===} and \t{>>>} must appear at the
+beginning of a line but they can be followed by arbitrary text (which is
+ignored).
+
+ The replacement text can contain the special keyword \t{@\_\_pattern\_\_@},
+which is substituted with the pattern that matched. 
+
+
+\section{Debugging support}\label{sec-debugger}
+
+ Most of the time we debug our code using the Errormsg module along with the
+pretty printer. But if you want to use the Ocaml debugger here is an easy way
+to do it. Say that you want to debug the invocation of cilly that arises out
+of the following command:
+\begin{verbatim}
+cilly -c hello.c 
+\end{verbatim}
+
+ You must follow the installation \ahref{../ccured/setup.html}{instructions}
+to install the Elist support files for ocaml and to extend your .emacs
+appropriately. Then from within Emacs you do
+\begin{verbatim}
+ALT-X my-camldebug
+\end{verbatim}
+
+ This will ask you for the command to use for running the Ocaml debugger
+(initially the default will be ``ocamldebug'' or the last command you
+introduced). You use the following command:
+\begin{verbatim}
+cilly --ocamldebug -c hello.c 
+\end{verbatim}
+
+ This will run \t{cilly} as usual and invoke the Ocaml debugger when the cilly
+engine starts. The advantage of this way of invoking the debugger is that the
+directory search paths are set automatically and the right set or arguments is
+passed to the debugger. 
+
+
+\section{Who Says C is Simple?}\label{sec-simplec}
+
+ When I (George) started to write CIL I thought it was going to take two weeks.
+Exactly a year has passed since then and I am still fixing bugs in it. This
+gross underestimate was due to the fact that I thought parsing and making
+sense of C is simple. You probably think the same. What I did not expect was
+how many dark corners this language has, especially if you want to parse
+real-world programs such as those written for GCC or if you are more ambitious
+and you want to parse the Linux or Windows NT sources (both of these were
+written without any respect for the standard and with the expectation that
+compilers will be changed to accommodate the program). 
+
+ The following examples were actually encountered either in real programs or
+are taken from the ISO C99 standard or from the GCC's testcases. My first
+reaction when I saw these was: {\em Is this C?}. The second one was : {\em
+What the hell does it mean?}. 
+
+ If you are contemplating doing program analysis for C on abstract-syntax
+trees then your analysis ought to be able to handle these things. Or, you can
+use CIL and let CIL translate them into clean C code. 
+
+%
+% Note: the cilcode environment is bogus. You should preprocess this source
+% with cilcode.pl !!!
+%
+%
+ \subsection{Standard C}
+
+\begin{enumerate}
+
+\item Why does the following code return 0 for most values of \t{x}? (This
+should be easy.)
+
+\begin{cilcode}[local]
+  int x;
+  return x == (1 && x);
+\end{cilcode}
+
+\item Why does the following code return 0 and not -1? (Answer: because
+\t{sizeof} is unsigned, thus the result of the subtraction is unsigned, thus
+the shift is logical.)
+
+\begin{cilcode}[local]
+ return ((1 - sizeof(int)) >> 32);
+\end{cilcode}
+
+\item Scoping rules can be tricky. This function returns 5.
+
+\begin{cilcode}[global]
+int x = 5;
+int f() {
+  int x = 3;
+  {
+    extern int x;
+    return x;
+  }
+}
+\end{cilcode}
+
+\item Functions and function pointers are implicitly converted to each other. 
+
+\begin{cilcode}[global]
+int (*pf)(void);
+int f(void) {
+
+   pf = &f; // This looks ok
+   pf = ***f; // Dereference a function?
+   pf(); // Invoke a function pointer?     
+   (****pf)();  // Looks strange but Ok
+   (***************f)(); // Also Ok             
+}
+\end{cilcode}
+
+\item Initializer with designators are one of the hardest parts about ISO C.
+Neither MSVC or GCC implement them fully. GCC comes close though. What is the
+final value of \t{i.nested.y} and \t{i.nested.z}? (Answer: 2 and respectively
+6). 
+
+\begin{cilcode}[global]
+struct { 
+   int x; 
+   struct { 
+       int y, z; 
+   } nested;
+} i = { .nested.y = 5, 6, .x = 1, 2 };               
+\end{cilcode}
+
+\item This is from c-torture. This function returns 1.
+
+\begin{cilcode}[global]
+typedef struct
+{
+  char *key;
+  char *value;
+} T1;
+
+typedef struct
+{
+  long type;
+  char *value;
+} T3;
+
+T1 a[] =
+{
+  {
+    "",
+    ((char *)&((T3) {1, (char *) 1}))
+  }
+};
+int main() {
+   T3 *pt3 = (T3*)a[0].value;
+   return pt3->value;
+}
+\end{cilcode}
+
+\item Another one with constructed literals. This one is legal according to
+the GCC documentation but somehow GCC chokes on (it works in CIL though). This
+code returns 2.
+
+\begin{cilcode}[local]
+ return ((int []){1,2,3,4})[1];
+\end{cilcode}
+
+\item In the example below there is one copy of ``bar'' and two copies of
+  ``pbar'' (static prototypes at block scope have file scope, while for all
+  other types they have block scope).  
+
+\begin{cilcode}[global]
+  int foo() {
+     static bar();
+     static (*pbar)() = bar;
+
+  }
+
+  static bar() { 
+    return 1;
+  }
+
+  static (*pbar)() = 0;
+\end{cilcode}
+
+
+\item Two years after heavy use of CIL, by us and others, I discovered a bug
+  in the parser. The return value of the following function depends on what
+  precedence you give to casts and unary minus:
+\begin{cilcode}[global]
+  unsigned long foo() {
+    return (unsigned long) - 1 / 8;
+  }
+\end{cilcode}
+
+  The correct interpretation is \t{((unsigned long) - 1) / 8}, which is a
+  relatively large number, as opposed to \t{(unsigned long) (- 1 / 8)}, which
+  is 0. 
+
+\end{enumerate}
+
+\item An example with \t{typedef} wierdness. Example due to James Cheney. 
+\begin{cilcode}[global]
+typedef int int_t;
+typedef int int2_t;
+
+int_t f(int2_t int2_t[]) {
+  int_t int_t = int2_t[0];
+  {
+    int int2_t = 2*int_t;
+    return int2_t;
+  }
+}
+\end{cilcode}
+
+ \subsection{GCC ugliness}\label{sec-ugly-gcc}
+
+\begin{enumerate}
+
+\item GCC has generalized lvalues. You can take the address of a lot of
+strange things:
+
+\begin{cilcode}[local]
+  int x, y, z;
+  return &(x ? y : z) - & (x++, x);
+\end{cilcode}
+
+\item GCC lets you omit the second component of a conditional expression.
+
+\begin{cilcode}[local]
+  extern int f();
+  return f() ? : -1; // Returns the result of f unless it is 0
+\end{cilcode}
+
+\item Computed jumps can be tricky. CIL compiles them away in a fairly clean
+way but you are on your own if you try to jump into another function this way.
+
+\begin{cilcode}[global]
+static void *jtab[2]; // A jump table
+static int doit(int x){
+ 
+  static int jtab_init = 0;
+  if(!jtab_init) { // Initialize the jump table
+    jtab[0] = &&lbl1;
+    jtab[1] = &&lbl2;
+    jtab_init = 1;
+  }
+  goto *jtab[x]; // Jump through the table
+lbl1:
+  return 0;
+lbl2:
+  return 1;
+}
+ 
+int main(void){
+  if (doit(0) != 0) exit(1);
+  if (doit(1) != 1) exit(1);
+  exit(0);
+}
+\end{cilcode}
+
+
+\item A cute little example that we made up. What is the returned value?
+(Answer: 1); 
+\begin{cilcode}[local]
+ return ({goto L; 0;}) && ({L: 5;});
+\end{cilcode}
+
+\item \t{extern inline} is a strange feature of GNU C. Can you guess what the
+following code computes?
+
+\begin{cilcode}[global]
+extern inline foo(void) { return 1; }
+int firstuse(void) { return foo(); }
+
+// A second, incompatible definition of foo
+int foo(void) { return 2; }
+
+int main() {
+    return foo() + firstuse();
+}
+\end{cilcode}
+
+ The answer depends on whether the optimizations are turned on. If they are
+then the answer is 3 (the first definition is inlined at all occurrences until
+the second definition). If the optimizations are off, then the first
+definition is ignore (treated like a prototype) and the answer is 4. 
+
+ CIL will misbehave on this example, if the optimizations are turned off (it
+ always returns 3).
+
+\item GCC allows you to cast an object of a type T into a union as long as the
+union has a field of that type:
+\begin{cilcode}[global]
+union u { 
+   int i; 
+   struct s { 
+      int i1, i2;
+   } s;
+};
+
+union u x = (union u)6;
+
+int main() {
+  struct s y = {1, 2};
+  union u  z = (union u)y;
+}
+\end{cilcode}
+
+\item GCC allows you to use the \t{\_\_mode\_\_} attribute to specify the size
+of the integer instead of the standard \t{char}, \t{short} and so on:
+\begin{cilcode}[global]
+int __attribute__ ((__mode__ (  __QI__ ))) i8;
+int __attribute__ ((__mode__ (  __HI__ ))) i16;
+int __attribute__ ((__mode__ (  __SI__ ))) i32;
+int __attribute__ ((__mode__ (  __DI__ ))) i64;
+\end{cilcode}
+
+\item The ``alias'' attribute on a function declaration tells the
+  linker to treat this declaration as another name for the specified
+  function.  CIL will replace the declaration with a trampoline
+  function pointing to the specified target.
+\begin{cilcode}[global]
+    static int bar(int x, char y) {
+      return x + y;
+    }
+
+    //foo is considered another name for bar.
+    int foo(int x, char y) __attribute__((alias("bar")));
+\end{cilcode}
+
+\end{enumerate}
+
+ \subsection{Microsoft VC ugliness}
+
+ This compiler has few extensions, so there is not much to say here.
+
+\begin{enumerate}
+\item Why does the following code return 0 and not -1? (Answer: because of a
+bug in Microsoft Visual C. It thinks that the shift is unsigned just because
+the second operator is unsigned. CIL reproduces this bug when in MSVC mode.)
+
+\begin{code}
+ return -3 >> (8 * sizeof(int));
+\end{verbatim}\end{code}
+
+\item Unnamed fields in a structure seem really strange at first. It seems
+that Microsoft Visual C introduced this extension, then GCC picked it up (but
+in the process implemented it wrongly: in GCC the field \t{y} overlaps with
+\t{x}!).
+
+\begin{cilcode}[local]
+struct {
+  int x;
+  struct {
+     int y, z;
+     struct {
+       int u, v;
+     };
+ };
+} a;
+return a.x + a.y + a.z + a.u + a.v;
+\end{cilcode}
+
+
+\end{enumerate}
+
+\section{Authors}
+
+ The CIL parser was developed starting from Hugues Casse's \t{frontc}
+front-end for C although all the files from the \t{frontc} distribution have
+been changed very extensively. The intermediate language and the elaboration
+stage are all written from scratch. The main author is
+\ahref{mailto:necula@cs.berkeley.edu}{George Necula}, with significant
+contributions from \ahref{mailto:smcpeak@cs.berkeley.edu}{Scott McPeak},
+\ahref{mailto:weimer@cs.berkeley.edu}{Westley Weimer},
+\ahref{mailto:liblit@cs.wisc.edu}{Ben Liblit},
+\ahreftop{http://www.cs.berkeley.edu/\~{}matth/}{Matt Harren}, 
+Raymond To and Aman Bhargava.
+
+ This work is based upon work supported in part by the National Science
+Foundation under Grants No. 9875171, 0085949 and 0081588, and gifts from
+Microsoft Research. Any opinions, findings, and conclusions or recommendations
+expressed in this material are those of the author(s) and do not necessarily
+reflect the views of the National Science Foundation or the other sponsors.
+
+\section{License}
+
+Copyright (c) 2001-2007, 
+\begin{itemize}
+\item George C. Necula    <necula@cs.berkeley.edu>
+\item Scott McPeak        <smcpeak@cs.berkeley.edu>
+\item Wes Weimer          <weimer@cs.berkeley.edu>
+\item Ben Liblit          <liblit@cs.wisc.edu>
+\item Matt Harren         <matth@cs.berkeley.edu>
+\end{itemize}
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+3. The names of the contributors may not be used to endorse or promote
+products derived from this software without specific prior written
+permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+\section{Bug reports}
+ 
+ We are certain that there are still some remaining bugs in CIL. If you find
+one please file a bug report in our Source Forge space 
+\ahreftop{http://sourceforge.net/projects/cil}
+         {http://sourceforge.net/projects/cil}. 
+
+  You can find there the latest announcements, a source distribution,
+bug report submission instructions and a mailing list: cil-users[at
+sign]lists.sourceforge.net. Please use this list to ask questions about CIL,
+as it will ensure your message is viewed by a broad audience. 
+
+\section{Changes}\label{sec-changes}\cutname{changes.html}
+\begin{itemize}
+\item {\bf May 28, 2009}: Improved 64-bit int support (large constants
+  no longer cause a CIL failure). There's a new cilint type that
+  should be used to handle integer C values - cilint is essentially a
+  big\_int so will be able to handle future expansion. To get the value
+  represented by a CInt64(n, ik, \_) constant, call \t{mkCilint ik n}
+  --- this will give you the correct value for unsigned 64-bit C
+  constants stored in a signed OCaml int64.
+
+  In a related move, the already deprecated \t{unbox\_int\_exp},
+  \t{box\_int\_to\_exp} and \t{cil\_to\_ocaml\_int} functions have
+  been removed.  And \t{convertInts}, \t{isInteger},
+  \t{truncateInteger64} are now deprecated and will be removed in a
+  future release.
+
+\item {\bf April 24, 2009}: {\bf Released version 1.3.7} (Subversion
+  revision 10727). Includes change below and other miscellaneous bug fixes.
+\item {\bf April 22, 2009}: \t{ocamlbuild} make target added (thanks
+  to Gabriel Kerneis).
+\item {\bf April 21, 2009}: \t{\_\_builtin\_va\_arg\_pack} support:
+  calls to this builtin need to remain as the last argument to a
+  function call. So to prevent CIL's usual rewriting, we internally
+  represent calls to \t{\_\_builtin\_va\_arg\_pack} as
+  \t{sizeof(\_\_builtin\_va\_arg\_pack)}\ldots
+  
+\item {\bf April 21, 2009}: \t{\_Bool} support, thanks to patches
+  from Christopher Ian Stern (Sourceforge bug \#1497763).
+
+  This leads to the addition of a new integer kind, \t{IBool} 
+  which you might have to handle in some of your patterns. Note also, for
+  those not familiar with \t{\_Bool}, that casts/conversion to \t{\_Bool}
+  give the value 1 for non-zero values, and 0 otherwise (i.e. 
+  \t{(\_Bool)x} behaves like \t{x $\!=$ 0}).
+  
+\item {\bf April 20, 2009}: Update builtin support, including
+  \_\_builtin\_strlen (Sourceforge bug \#1873374), \_\_builtin\_choose\_expr,
+  \_\_builtin\_types\_compatible\_p (Sourceforge bug \#1852730).
+  For the latter two, we evaluate them in CIL (in line with the earlier handling
+  of \_\_builtin\_constant\_p).
+
+  Note that as part of these fixes, mkAddrOf no longer replaces
+  \t{\&a[0]} with \t{a}, as this can break \t{typeof} (Sourceforge bug
+  \#1852730 involves a use of \t{typeof(\&a[0])}).
+
+  Typo fixes from Gabriel Kerneis.
+  
+\item {\bf April 17, 2009}: Update extern inline handling to match
+  current gcc versions (Sourceforge bug \#1689503): the actual
+  definition is always preferred over the extern inline one. CIL
+  handles this by suppressing the extern inline definition (replacing
+  it by a declaration) if it sees a real definition. However, if no
+  real definition exists, you will get a CIL varinfo for an inline
+  function with storage class extern\ldots
+
+  You can revert to CIL's previous handling of extern inline by setting
+  \t{oldstyleExternInline} to true.
+\item {\bf April 16, 2009}: Add allStmts function to cfg.ml, and
+  remove public visibility of nodeList and numNodes (Sourceforge bug
+  \#1819746).
+\item {\bf April 15, 2009}: Fix Sourceforge bugs \#2265867 (bad constant
+  folding of unary minus), \#2134504 (truncation warning), \#1811676 (typo).
+\item {\bf April 13, 2009}: Recognize gcc's -m32 and -m64 flags that select
+  between 32 and 64 bit targets.
+\item {\bf April 8, 2009}: Rename libcil.a to libcil.o (ocaml 3.11 forces
+  us to use the correct extension).
+\item {\bf April 7, 2009}: Add LLVM bitcode generator (partial C support, target
+  32-bit x86 only).
+\item {\bf April 7, 2009}: Support enums over greater-than-int types (gcc
+  extension).
+\item {\bf September 19, 2008}: Remove excess newlines in warnings and errors.
+\item {\bf August 30, 2008}: Added an install-findlib Make target for
+  ocamlfind.  Thanks to ploc for the patch.
+\item {\bf May 28, 2008}: Cross-compilation support: ability to
+  select a machine model specified in an environment variable (CIL\_MACHINE).
+  See \secref{cilmachine} for details.
+\item {\bf July 2, 2008}: Add a \t{-{}-gcc} option to cilly to tell it to use
+  a particular version of gcc (useful for cross-compilation environments).
+\item {\bf February 14, 2008}: Fixed a bug in temporary file
+  creation.  Thanks to J. Aaron Pendergrass for the patch.
+\item {\bf November 30, 2007}: Fixed a bug in assignment to lvalues that
+      depend on themselves.
+\item {\bf April 4, 2007}: Benjamin Monate fixed a bug in
+  \moduleref{Cfg} for empty loop bodies.
+\item {\bf March 29, 2007}: Polyvios Pratikakis fixed a bug in 
+  \t{src/ext/pta/uref.ml}.
+\item {\bf March 15, 2007}: Added support for
+  \t{\_\_attribute\_\_((aligned))} and
+  \t{\_\_attribute\_\_((packed))}.
+\item {\bf March 7, 2007}: \t{typeOf(StartOf \_)} now preserves the
+  attributes of the array.
+\item {\bf February 22, 2007}: Added an inliner (ext/inliner.ml)
+\item {\bf February 21, 2007}:  We now constant-fold bitfield
+  expressions.  Thanks to Virgile Prevosto for the patch.
+\item {\bf February 13, 2007}:  gcc preprocessor arguments passed
+  using \t{-Wp} are now used only during initial preproccessing, not
+  for the preprocessing after CIL.  This fixes problems in the Linux
+  makefiles with dependency generation.
+\item {\bf February 6, 2007}:  Fixed \cilvalref{parseInt} for non-32
+  bit architectures.
+\item {\bf February 5, 2007}:  {\bf Released version 1.3.6} (Subversion
+  revision 9211)
+\item {\bf February 2, 2007}: Improved the way CIL gets configured for the
+  actual definitions of \t{size\_t} and \t{wchar\_t}. 
+\item {\bf February 1, 2007}: Fixed the parser to support the unused
+  attribute on labels.  For now, we just drop this attribute since
+  Rmtmps will remove unused labels anyways.  Thanks to Peter Hawkins
+  for the patch.
+\item {\bf January 18, 2007}: Require the destination of a \t{Call} to
+  have the same type as the function's return type, even if it means
+  inserting a temporary.  To get the old behavior, set
+  \t{Cabs2cil.doCollapseCallCast} to true as described in
+  \secref{cilly-internal-options}.
+\item {\bf January 17, 2007}: Fix for \t{\_\_builtin\_offsetof} when
+  the field name is also a typedef name.
+\item {\bf January 17, 2007}: Fixed \cilvalref{loadBinaryFile}
+  (Sourceforge bug \#1548894).
+  You should only use loadBinaryFile if no other code has been loaded
+  or generated in the current CIL process, since loadBinaryFile needs
+  to load some global state.
+\item {\bf December 18, 2006}: The \t{-{}-stats} flag now gets the CPU
+  speed at runtime rather than configure-time, so binary executables
+  can be moved to different computers.
+\item {\bf December 14, 2006}: Fixed various warnings and errors on
+  64-bit architectures.
+\item {\bf November 26, 2006}: Christoph Spiel added ``\t{-{}-no}''
+  options to many of CIL's command-line flags.
+\item {\bf November 21, 2006}: Merged \t{gccBuiltins} and
+  \t{msvcBuiltins} into a single table \cilvalref{builtinFunctions}
+  that is initialized by \cilvalref{initCIL}.
+\item {\bf October 28, 2006}: Added the field \t{vdescr} to the
+  \ciltyperef{varinfo} struct to remember what value is stored in
+  certain CIL-introduced temporary variables.  For example, if CIL
+  adds a temporary to store the result of \t{foo(a,b)}, then the
+  description will be ``foo(a,b)''.  The new printer
+  \cilvalref{descriptiveCilPrinter} will substitute descriptions for
+  the names of temporaries.  The result is not necessarily valid C,
+  but it may let you produce more helpful error messages in your
+  analysis tools: ``The value foo(a,b) may be tainted'' vs. ``The
+  value \_\_cil\_tmp29 may be tainted.''
+\item {\bf October 27, 2006}: Fixed a bug with duplicate entries in
+  the statement list of Switch nodes, and forbade duplicate
+  \t{default} cases.
+%% October 26, 2006: Moved the CIL source repository from CVS
+%%  to Subversion.  Subversion revision 8603 is the switchover point.
+\item {\bf October 12, 2006}: Added a new function \cilvalref{expToAttrParam}
+that attempts to convert an expression into a attribute parameter. 
+\item {\bf October 12, 2006}: Added an attribute with the length of the array,
+ when array types of formal arguments are converted to pointer types.
+\item {\bf September 29, 2006}: Benjamin Monate fixed a bug in compound
+  local initializers that was causing duplicate code to be added.
+\item {\bf August 9, 2006}: Changed the patcher to print ``\t{\#line
+  nnn}'' directives instead of ``\t{\# nnn}''.
+\item {\bf August 6, 2006}: Joseph Koshy patched \t{./configure} for
+  FreeBSD on amd64.
+\item {\bf July 27, 2006}: CIL files now include the prototypes of
+  builtin functions (such as \t{\_\_builtin\_va\_arg}).  This
+  preserves the invariant that every function call has a corresponding
+  function or function prototype in the file.  However, the prototypes
+  of builtins are not printed in the output files.
+\item {\bf July 23, 2006}: Incorporated some fixes for the constant folding
+ for lvalues, and fixed grammatical errors. Thanks to Christian Stork.
+\item {\bf July 23, 2006}: Changed the way ./configure works. We now generate
+  the file Makefile.features to record the configuration features. This is
+  because autoconf does not work properly with multiline substitutions.
+\item {\bf July 21, 2006}: Cleaned up the printing of some Lvals. Things that
+  were printed as ``(*i)'' before are now printed simply as ``*i'' (no
+  parentheses). However, this means that when you use pLval to print lvalues
+  inside expressions, you must take care about parentheses yourself. Thanks to
+  Benjamin Monate for pointing this out. 
+\item {\bf July 21, 2006}: Added new hooks to the Usedef and 
+  Dataflow.BackwardsTransfer APIs.  Code that uses these will need to
+  be changed slightly.  Also, updated the \moduleref{Cfg} code to
+  handle noreturn functions.
+\item {\bf July 17, 2006}: Fix parsing of attributes on bitfields and
+  empty attribute lists.  Thanks to Peter Hawkins.
+\item {\bf July 10, 2006}: Fix Makefile problem for FreeBSD.  Thanks
+  to Joseph Koshy for the patch.
+\item {\bf June 25, 2006}: Extended the inline assembly to support named
+  arguments, as added in gcc 3.0.  This changes the types of the input
+  and output lists from ``\t{(string * lval) list}'' to 
+  ``\t{(string option * string * lval) list}''.  Some existing code
+  will need to be modified accordingly.
+\item {\bf June 11, 2006}: Removed the function \t{Cil.foldLeftCompoundAll}.
+Use instead \cilvalref{foldLeftCompound} with \t{~implicit:true}. 
+\item {\bf June 9, 2006}: Extended the definition of the cilVisitor for
+initializers to pass more information around. This might result in backward
+incompatibilities with code that uses the visitor for initializers. 
+\item {\bf June 2, 2006}: Added \t{-{}-commPrintLnSparse} flag.
+\item {\bf June 1, 2006}: Christian Stork provided some fixes for the handling
+  of variable argument functions. 
+\item {\bf June 1, 2006}: Added support for x86 performance counters
+  on 64-bit processors.  Thanks to tbergen for the patch.
+\item {\bf May 23, 2006}: Benjamin Monate fixed a lexer bug when a
+  preprocessed file is missing a final newline.
+\item {\bf May 23, 2006}: Fix for \t{typeof($e$)} when $e$ has type
+  \t{void}.
+\item {\bf May 20, 2006}:  {\bf Released version 1.3.5} (Subversion
+  revision 8093)
+\item {\bf May 19, 2006}: \t{Makefile.cil.in}/\t{Makefile.cil} have
+  been renamed \t{Makefile.in}/\t{Makefile}.  And \t{maincil.ml} has
+  been renamed \t{main.ml}.
+\item {\bf May 18, 2006}: Added a new module \moduleref{Cfg} to compute the
+  control-flow graph.  Unlike the older \cilvalref{computeCFGInfo},
+  the new version does not modify the code.  
+\item {\bf May 18, 2006}: Added several new analyses: reaching
+  definitions, available expressions, liveness analysis, and dead code
+  elimination.  See \secref{Extension}.
+\item {\bf May 2, 2006}: Added a flag \t{-{}-noInsertImplicitCasts}.
+  When this flag is used, CIL code will only include casts inserted by
+  the programmer.  Implicit coercions are not changed to explicit casts.
+\item {\bf April 16, 2006}: Minor improvements to the \t{-{}-stats}
+  flag (\secref{cilly-asm-options}). We now use Pentium performance
+  counters by default, if your processor supports them.
+\item {\bf April 10, 2006}: Extended \t{machdep.c} to support
+  microcontroller compilers where the struct alignment of integer
+  types does not match the size of the type.  Thanks to Nathan
+  Cooprider for the patch.
+\item {\bf April 6, 2006}: Fix for global initializers of unions when
+  the union field being initialized is not the first one, and for
+  missing initializers of unions when the first field is not the
+  largest field.
+\item {\bf April 6, 2006}: Fix for bitfields in the SFI module.
+\item {\bf April 6, 2006}: Various fixes for gcc attributes.
+  \t{packed}, \t{section}, and \t{always\_inline} attributes are now
+  parsed correctly.  Also fixed printing of attributes on enum types.
+\item {\bf March 30, 2006}: Fix for \t{rmtemps.ml}, which deletes
+  unused inline functions.  When in \t{gcc} mode CIL now leaves all
+  inline functions in place, since \t{gcc} treats these as externally
+  visible. 
+\item {\bf March 3, 2006}: Assume inline assembly instructions can
+  fall through for the purposes of adding return statements.  Thanks to
+  Nathan Cooprider for the patch.
+\item {\bf February 27, 2006}: Fix for extern inline functions when
+  the output of CIL is fed back into CIL.
+\item {\bf January 30, 2006}: Fix parsing of \t{switch} without braces.
+\item {\bf January 30, 2006}: Allow `\$' to appear in identifiers.
+\item {\bf January 13, 2006}: Added support for gcc's alias attribute
+  on functions.  See \secref{ugly-gcc}, item 8.  
+\item {\bf December 9, 2005}: Christoph Spiel fixed the Golf and
+  Olf modules so that Golf can be used with the points-to analysis.
+  He also added performance fixes and cleaned up the documentation.
+\item {\bf December 1, 2005}: Major rewrite of the ext/callgraph module. 
+\item {\bf December 1, 2005}: Preserve enumeration constants in CIL. Default
+is the old behavior to replace them with integers.
+\item {\bf November 30, 2005}: Added support for many GCC \t{\_\_builtin}
+  functions. 
+\item {\bf November 30, 2005}: Added the EXTRAFEATURES configure
+  option, making it easier to add Features to the build process.
+\item {\bf November 23, 2005}: In MSVC mode do not remove any locals whose name
+  appears as a substring in an inline assembly. 
+\item {\bf November 23, 2005}: Do not add a return to functions that have the
+  noreturn attribute. 
+\item {\bf November 22, 2005}: {\bf Released version 1.3.4}
+\item {\bf November 21, 2005}: Performance and correctness fixes for
+  the Points-to Analysis module.  Thanks to Christoph Spiel for the
+  patches.
+\item {\bf October 5, 2005}: CIL now builds on SPARC/Solaris.  Thanks
+  to Nick Petroni and Remco van Engelen for the patches.
+\item {\bf September 26, 2005}: CIL no longer uses the `\t{-I-}' flag
+  by default when preprocessing with gcc.
+\item {\bf August 24, 2005}: Added a command-line option
+  ``-{}-forceRLArgEval'' that forces function arguments to be evaluated
+  right-to-left.  This is the default behavior in unoptimized gcc and
+  MSVC, but the order of evaluation is undefined when using
+  optimizations, unless you apply this CIL transformation.  This flag
+  does not affect the order of evaluation of e.g. binary operators,
+  which remains undefined.  Thanks to Nathan Cooprider for the patch.
+\item {\bf August 9, 2005}: Fixed merging when there are more than 20
+  input files.
+\item {\bf August 3, 2005}: When merging, it is now an error to
+  declare the same global variable twice with different initializers.
+\item {\bf July 27, 2005}: Fixed bug in transparent unions.
+\item {\bf July 27, 2005}: Fixed bug in collectInitializer.  Thanks to
+  Benjamin Monate for the patch.
+\item {\bf July 26, 2005}: Better support for extended inline assembly
+  in gcc.
+\item {\bf July 26, 2005}: Added many more gcc \_\_builtin* functions
+  to CIL.  Most are treated as Call instructions, but a few are
+  translated into expressions so that they can be used in global
+  initializers.  For example, ``\t{\_\_builtin\_offsetof(t, field)}'' is
+  rewritten as ``\t{\&((t*)0)->field}'', the traditional way of calculating
+  an offset.
+\item {\bf July 18, 2005}: Fixed bug in the constant folding of shifts
+  when the second argument was negative or too large.
+\item {\bf July 18, 2005}: Fixed bug where casts were not always
+  inserted in function calls.
+\item {\bf June 10, 2005}: Fixed bug in the code that makes implicit
+  returns explicit.  We weren't handling switch blocks correctly.
+\item {\bf June 1, 2005}: {\bf Released version 1.3.3}
+\item {\bf May 31, 2005}: Fixed handling of noreturn attribute for function
+  pointers. 
+\item {\bf May 30, 2005}: Fixed bugs in the handling of constructors in gcc.
+\item {\bf May 30, 2005}: Fixed bugs in the generation of global variable IDs.
+\item {\bf May 27, 2005}: Reimplemented the translation of function calls so
+  that we can intercept some builtins. This is important for the uses of
+  \_\_builtin\_constant\_p in constants. 
+\item {\bf May 27, 2005}: Export the plainCilPrinter, for debugging.
+\item {\bf May 27, 2005}: Fixed bug with printing of const attribute for
+  arrays. 
+\item {\bf May 27, 2005}: Fixed bug in generation of type signatures. Now they
+  should not contain expressions anymore, so you can use structural equality.
+  This used to lead to Out\_of\_Memory exceptions.
+\item {\bf May 27, 2005}: Fixed bug in type comparisons using
+  TBuiltin\_va\_list.
+\item {\bf May 27, 2005}: Improved the constant folding in array lengths and
+  case expressions. 
+\item {\bf May 27, 2005}: Added the \t{\_\_builtin\_frame\_address} to the set
+  of gcc builtins.
+\item {\bf May 27, 2005}: Added the CIL project to SourceForge.
+\item {\bf April 23, 2005}: The cattr field was not visited.
+\item {\bf March 6, 2005}: Debian packaging support
+\item {\bf February 16, 2005}: Merger fixes.
+\item {\bf February 11, 2005}: Fixed a bug in \t{-{}-dopartial}. Thanks to
+Nathan Cooprider for this fix. 
+\item {\bf January 31, 2005}: Make sure the input file is closed even if a
+  parsing error is encountered. 
+\item {\bf January 11, 2005}: {\bf Released version 1.3.2}
+\item {\bf January 11, 2005}: Fixed printing of integer constants whose
+  integer kind is shorter than an int. 
+\item {\bf January 11, 2005}: Added checks for negative size arrays and arrays
+  too big. 
+\item {\bf January 10, 2005}: Added support for GCC attribute ``volatile'' for
+  tunctions (as a synonim for noreturn). 
+\item {\bf January 10, 2005}: Improved the comparison of array sizes when
+  comparing array types. 
+\item {\bf January 10, 2005}: Fixed handling of shell metacharacters in the
+  cilly command lione.
+\item {\bf January 10, 2005}: Fixed dropping of cast in initialization of
+  local variable with the result of a function call.
+\item {\bf January 10, 2005}: Fixed some structural comparisons that were
+  broken in the Ocaml 3.08.
+\item {\bf January 10, 2005}: Fixed the \t{unrollType} function to not forget
+  attributes. 
+\item {\bf January 10, 2005}: Better keeping track of locations of function
+  prototypes and definitions. 
+\item {\bf January 10, 2005}: Fixed bug with the expansion of enumeration
+  constants in attributes.
+\item {\bf October 18, 2004}: Fixed a bug in cabsvisit.ml. CIl would wrap a
+  BLOCK around a single atom unnecessarily. 
+\item {\bf August 7, 2004}: {\bf Released version 1.3.1}
+\item {\bf August 4, 2004}: Fixed a bug in splitting of structs using 
+  \t{-{}-dosimplify}
+\item {\bf July 29, 2004}: Minor changes to the type typeSig (type signatures)
+  to ensure that they do not contain types, so that you can do structural
+  comparison without danger of nontermination. 
+\item {\bf July 28, 2004}: Ocaml version 3.08 is required. Numerous small 
+  changes while porting to Ocaml 3.08. 
+\item {\bf July 7, 2004}: {\bf Released version 1.2.6}
+\item {\bf July 2, 2004}:  Character constants such as \t{'c'} should
+  have type \t{int}, not \t{char}.  Added a utility function
+  \t{Cil.charConstToInt} that sign-extends chars greater than 128, if needed.
+\item {\bf July 2, 2004}: Fixed a bug that was casting values to int
+  before applying the logical negation operator !.  This caused
+  problems for floats, and for integer types bigger than \t{int}.
+\item {\bf June 13, 2004}: Added the field \t{sallstmts} to a function
+  description, to hold all statements in the function.
+\item {\bf June 13, 2004}: Added new extensions for data flow analyses, and
+  for computing dominators.
+\item {\bf June 10, 2004}: Force initialization of CIL at the start of
+Cabs2cil. 
+\item {\bf June 9, 2004}: Added support for GCC \t{\_\_attribute\_used\_\_}
+\item {\bf April 7, 2004}: {\bf Released version 1.2.5}
+\item {\bf April 7, 2004}: Allow now to run ./configure CC=cl and set the MSVC
+compiler to be the default. The MSVC driver will now select the default name
+of the .exe file like the CL compiler. 
+\item {\bf April 7, 2004}: Fixed a bug in the driver. The temporary files are
+deleted by the Perl script before the CL compiler gets to them?
+\item {\bf April 7, 2004}: Added the - form of arguments to the MSVC driver.
+\item {\bf April 7, 2004}: Added a few more GCC-specific string escapes, (, [,
+\{, \%, E. 
+\item {\bf April 7, 2004}: Fixed bug with continuation lines in MSVC.
+\item {\bf April 6, 2004}: Fixed embarassing bug in the parser: the precedence
+  of casts and unary operators was switched. 
+\item {\bf April 5, 2004}: Fixed a bug involving statements mixed between
+declarations containing initializers. Now we make sure that the initializers
+are run in the proper order with respect to the statements.
+\item {\bf April 5, 2004}: Fixed a bug in the merger. The merger was keeping
+separate alpha renaming talbes (namespaces) for variables and types. This
+means that it might end up with a type and a variable named the same way, if
+they come from different files, which breaks an important CIL invariant.
+\item {\bf March 11, 2004} : Fixed a bug in the Cil.copyFunction function. The
+new local variables were not getting fresh IDs. 
+\item {\bf March 5, 2004}: Fixed a bug in the handling of static function
+  prototypes in a block scope. They used to be renamed. Now we just consider
+  them global. 
+\item {\bf February 20, 2004}: {\bf Released version 1.2.4}
+\item {\bf February 15, 2004}: Changed the parser to allow extra semicolons
+  after field declarations.
+\item {\bf February 14, 2004}: Changed the Errormsg functions: error, unimp,
+bug to not raise an exception. Instead they just set Errormsg.hadErrors. 
+\item {\bf February 13, 2004}: Change the parsing of attributes to recognize
+  enumeration constants.
+\item {\bf February 10, 2004}: In some versions of \t{gcc} the identifier
+  {\_\{thread} is an identifier and in others it is a keyword. Added code
+  during configuration to detect which is the case. 
+\item {\bf January 7, 2004}: {\bf Released version 1.2.3}
+\item {\bf January 7, 2004}: Changed the alpha renamer to be less
+conservative. It will remember all versions of a name that were seen and will
+only create a new name if we have not seen one. 
+\item {\bf December 30, 2003} : Extended the \t{cilly} command to understand
+  better linker command options \t{-lfoo}. 
+\item {\bf December 5, 2003}: Added markup commands to the pretty-printer
+module. Also, changed the ``@<'' left-flush command into ``@\^''.
+\item {\bf December 4, 2003}: Wide string literals are now handled
+directly by Cil (rather than being exploded into arrays). This is
+apparently handy for Microsoft Device Driver APIs that use intrinsic
+functions that require literal constant wide-string arguments. 
+\item {\bf December 3, 2003}: Added support for structured exception handling
+  extensions for the Microsoft compilers.
+\item {\bf December 1, 2003}: Fixed a Makefile bug in the generation of the 
+Cil library (e.g., \t{cil.cma}) that was causing it to be unusable. Thanks
+to KEvin Millikin for pointing out this bug. 
+\item {\bf November 26, 2003}: Added support for linkage specifications
+       (extern ``C''). 
+\item {\bf November 26, 2003}: Added the ocamlutil directory to contain some
+utilities shared with other projects. 
+\item {\bf November 25, 2003}: {\bf Released version 1.2.2}
+\item {\bf November 24, 2003}: Fixed a bug that allowed a static local to
+  conflict with a global with the same name that is declared later in the
+  file. 
+\item {\bf November 24, 2003}: Removed the \t{-{}-keep} option of the \t{cilly}
+  driver and replaced it with \t{-{}-save-temps}.
+\item {\bf November 24, 2003}: Added printing of what CIL features are being
+  run.
+\item {\bf November 24, 2003}: Fixed a bug that resulted in attributes being
+  dropped for integer types. 
+\item {\bf November 11, 2003}: Fixed a bug in the visitor for enumeration
+  definitions. 
+\item {\bf October 24, 2003}: Fixed a problem in the configuration script. It
+  was not recognizing the Ocaml version number for beta versions. 
+\item {\bf October 15, 2003}: Fixed a problem in version 1.2.1 that was
+  preventing compilation on OCaml 3.04.
+\item {\bf September 17, 2003: Released version 1.2.1.}
+\item {\bf September 7, 2003}: Redesigned the interface for choosing
+  \texttt{\#line} directive printing styles.  Cil.printLn and
+  Cil.printLnComment have been merged into Cil.lineDirectiveStyle.
+\item {\bf August 8, 2003}: Do not silently pad out functions calls with
+arguments to match the prototype. 
+\item {\bf August 1, 2003}: A variety of fixes suggested by Steve Chamberlain:
+initializers for externs, prohibit float literals in enum, initializers for
+unsized arrays were not working always, an overflow problem in Ocaml, changed
+the processing of attributes before struct specifiers
+
+\item {\bf July 14, 2003}: Add basic support for GCC's "\_\_thread" storage
+qualifier. If given, it will appear as a "thread" attribute at the top of the
+type of the declared object. Treatment is very similar to "\_\_declspec(...)"
+in MSVC
+
+\item {\bf July 8, 2003}: Fixed some of the \_\_alignof computations. Fixed
+  bug in the designated initializers for arrays (Array.get error).
+\item {\bf July 8, 2003}: Fixed infinite loop bug (Stack Overflow) in the
+  visitor for \_\_alignof.
+\item {\bf July 8, 2003}: Fixed bug in the conversion to CIL. A function or
+  array argument of
+  the GCC \_\_typeof() was being converted to pointer type. Instead, it should
+  be left alone, just like for sizeof.  
+\item {\bf July 7, 2003}: New Escape module provides utility functions
+  for escaping characters and strings in accordance with C lexical
+  rules.
+
+\item {\bf July 2, 2003}: Relax CIL's rules for when two enumeration types are
+considered compatible. Previously CIL considered two enums to be compatible if
+they were the same enum. Now we follow the C99 standard.
+
+
+\item {\bf June 28, 2003}: In the Formatparse module, Eric Haugh found and
+  fixed a bug in the handling of lvalues of the form ``lv->field.more''.
+
+\item {\bf June 28, 2003}: Extended the handling of gcc command lines
+arguments in the Perl scripts. 
+
+\item {\bf June 23, 2003}: In Rmtmps module, simplified the API for
+  customizing the root set.  Clients may supply a predicate that
+  returns true for each root global.  Modifying various
+  ``\texttt{referenced}'' fields directly is no longer supported.
+
+\item {\bf June 17, 2003}: Reimplement internal utility routine
+           \t{Cil.escape\_char}. Faster and better. 
+
+\item {\bf June 14, 2003}: Implemented support for \t{\_\_attribute\_\_s}
+appearing between "struct" and the struct tag name (also for unions and
+enums), since gcc supports this as documented in section 4.30 of the gcc
+(2.95.3) manual
+
+\item {\bf May 30, 2003}: Released the regression tests. 
+\item {\bf May 28, 2003}: {\bf Released version 1.1.2}
+\item {\bf May 26, 2003}: Add the \t{simplify} module that compiles CIL
+expressions into simpler expressions, similar to those that appear in a
+3-address intermediate language.
+\item {\bf May 26, 2003}: Various fixes and improvements to the pointer
+analysis modules. 
+\item {\bf May 26, 2003}: Added optional consistency checking for
+transformations.
+\item {\bf May 25, 2003}: Added configuration support for big endian machines.
+Now \cilvalref{little\_endian} can be used to test whether the machine is
+little endian or not. 
+\item {\bf May 22, 2003}: Fixed a bug in the handling of inline functions. The
+CIL merger used to turn these functions into ``static'', which is incorrect. 
+\item {\bf May 22, 2003}: Expanded the CIL consistency checker to verify
+undesired sharing relationships between data structures. 
+\item {\bf May 22, 2003}: Fixed bug in the \t{oneret} CIL module: it was
+mishandling certain labeled return statements. 
+\item {\bf May 5, 2003}: {\bf Released version 1.0.11}
+\item {\bf May 5, 2003}: OS X (powerpc/darwin) support for CIL. Special 
+thanks to Jeff Foster, Andy Begel and Tim Leek. 
+\item {\bf April 30, 2003}: Better description of how to use CIL for your
+analysis. 
+\item {\bf April 28, 2003}: Fixed a bug with \texttt{-{}-dooneRet} and
+\texttt{-{}-doheapify}. Thanks, Manos Renieris.
+\item {\bf April 16, 2003}: Reworked management of
+  temporary/intermediate output files in Perl driver scripts.  Default
+  behavior is now to remove all such files.  To keep intermediate
+  files, use one of the following existing flags:
+  \begin{itemize}
+  \item \texttt{-{}-keepmerged} for the single-file merge of all sources
+  \item \texttt{-{}-keep=<\textit{dir}>} for various other CIL and
+    CCured output files
+  \item \texttt{-{}-save-temps} for various gcc intermediate files; MSVC
+    has no equivalent option
+  \end{itemize}
+  As part of this change, some intermediate files have changed their
+  names slightly so that new suffixes are always preceded by a
+  period.  For example, CCured output that used to appear in
+  ``\texttt{foocured.c}'' now appears in ``\texttt{foo.cured.c}''.
+\item {\bf April 7, 2003}: Changed the representation of the \cilvalref{GVar}
+global constructor. Now it is possible to update the initializer without
+reconstructing the global (which in turn it would require reconstructing the
+list of globals that make up a program). We did this because it is often
+tempting to use \cilvalref{visitCilFileSameGlobals} and the \cilvalref{GVar}
+was the only global that could not be updated in place. 
+\item {\bf April 6, 2003}: Reimplemented parts of the cilly.pl script to make
+it more robust in the presence of complex compiler arguments. 
+\item {\bf March 10, 2003}: {\bf Released version 1.0.9}
+\item {\bf March 10, 2003}: Unified and documented a large number of CIL
+Library Modules: oneret, simplemem, makecfg, heapify, stackguard, partial.
+Also documented the main client interface for the pointer analysis. 
+\item {\bf February 18, 2003}: Fixed a bug in logwrites that was causing it
+to produce invalid C code on writes to bitfields. Thanks, David Park. 
+\item {\bf February 15, 2003}: {\bf Released version 1.0.8}
+\item {\bf February 15, 2003}: PDF versions of the manual and API are
+available for those who would like to print them out. 
+\item {\bf February 14, 2003}: CIL now comes bundled with alias analyses. 
+\item {\bf February 11, 2003}: Added support for adding/removing options from
+  \t{./configure}. 
+\item {\bf February 3, 2003}: {\bf Released version 1.0.7}
+\item {\bf February 1, 2003}: Some bug fixes in the handling of variable
+argument functions in new versions of \t{gcc} And \t{glibc}. 
+\item {\bf January 29, 2003}: Added the logical AND and OR operators.
+Exapanded the translation to CIL to handle more complicated initializers
+(including those that contain logical operators).
+\item {\bf January 28, 2003}: {\bf Released version 1.0.6}
+\item {\bf January 28, 2003}: Added support for the new handling of
+variable-argument functions in new versions of \t{glibc}. 
+\item {\bf January 19, 2003}: Added support for declarations in interpreted
+  constructors. Relaxed the semantics of the patterns for variables. 
+\item {\bf January 17, 2003}: Added built-in prototypes for the gcc built-in
+  functions. Changed the \t{pGlobal} method in the printers to print the
+  carriage return as well.
+\item {\bf January 9, 2003}: Reworked lexer and parser's strategy for
+  tracking source file names and line numbers to more closely match
+  typical native compiler behavior.  The visible CIL interface is
+  unchanged.
+\item {\bf January 9, 2003}: Changed the interface to the alpha convertor. Now
+you can pass a list where it will record undo information that you can use to
+revert the changes that it makes to the scope tables.
+\item {\bf January 6, 2003}: {\bf Released version 1.0.5}
+\item {\bf January 4, 2003}: Changed the interface for the Formatcil module.
+  Now the placeholders in the pattern have names. Also expanded the
+  documentation of the Formatcil module.
+  Now the placeholders in the pattern have names.
+\item {\bf January 3, 2003}: Extended the \t{rmtmps} module to also remove
+  unused labels that are generated in the conversion to CIL. This reduces the
+  number of warnings that you get from \t{cgcc} afterwards.
+\item {\bf December 17, 2002}: Fixed a few bugs in CIL related to the
+  representation of string literals. The standard says that a string literal
+  is an array. In CIL, a string literal has type pointer to character. This is
+  Ok, except as an argument of sizeof. To support this exception, we have
+  added to CIL the expression constructor SizeOfStr. This allowed us to fix
+  bugs with computing \t{sizeof("foo bar")} and \t{sizeof((char*)"foo bar")}
+  (the former is 8 and the latter is 4).
+
+\item {\bf December 8, 2002}: Fixed a few bugs in the lexer and parser
+  relating to hex and octal escapes in string literals.  Also fixed
+  the dependencies between the lexer and parser.
+\item {\bf December 5, 2002}: Fixed visitor bugs that were causing
+  some attributes not to be visited and some queued instructions to be
+  dropped.
+\item {\bf December 3, 2002}: Added a transformation to catch stack
+  overflows.  Fixed the heapify transformation.
+\item {\bf October 14, 2002}: CIL is now available under the BSD license
+(see the License section or the file LICENSE).  {\bf Released version 1.0.4}
+\item {\bf October 9, 2002}: More FreeBSD configuration changes, support
+for the GCC-ims {\tt \_\_signed} and {\tt \_\_volatile}. Thanks to Axel
+Simon for pointing out these problems. {\bf Released version 1.0.3}
+\item {\bf October 8, 2002}: FreeBSD configuration and porting fixes.
+Thanks to Axel Simon for pointing out these problems. 
+\item {\bf September 10, 2002}: Fixed bug in conversion to CIL. Now we drop
+all ``const'' qualifiers from the types of locals, even from the fields of
+local structures or elements of arrays.
+\item {\bf September 7, 2002}: Extended visitor interface to distinguish visitng
+  offsets inside lvalues from offsets inside initializer lists.
+\item {\bf September 7, 2002}: {\bf Released version 1.0.1}
+\item {\bf September 6, 2002}: Extended the patcher with the \t{ateof} flag.
+\item {\bf September 4, 2002}: Fixed bug in the elaboration to CIL. In some
+cases constant folding of \t{||} and \t{\&\&} was computed wrong.
+\item {\bf September 3, 2002}: Fixed the merger documentation. 
+\item {\bf August 29, 2002}: {\bf Released version 1.0.0.}
+\item {\bf August 29, 2002}: Started numbering versions with a major nubmer,
+minor and revisions. Released version 1.0.0.
+\item {\bf August 25, 2002}: Fixed the implementation of the unique
+identifiers for global variables and composites. Now those identifiers are
+globally unique.
+\item {\bf August 24, 2002}: Added to the machine-dependent configuration the
+\t{sizeof{void}}. It is 1 on gcc and 0 on MSVC. Extended the implementation of
+\t{Cil.bitsSizeOf} to handle this (it was previously returning an error when
+trying to compute the size of \t{void}).
+\item {\bf August 24, 2002}: Changed the representation of structure and
+unions to distinguish between undefined structures and those that are defined
+to be empty (allowed on gcc). The sizeof operator is undefined for the former
+and returns 0 for the latter.
+\item {\bf August 22, 2002}: Apply a patch from Richard H. Y. to support
+FreeBSD installations. Thanks, Richard!
+\item {\bf August 12, 2002}: Fixed a bug in the translation of wide-character
+strings. Now this translation matches that of the underlying compiler. Changed
+the implementation of the compiler dependencies.
+\item {\bf May 25, 2002}: Added interpreted constructors and destructors.
+\item {\bf May 17, 2002}: Changed the representation of functions to move the
+``inline'' information to the varinfo. This way we can print the ``inline''
+even in declarations which is what gcc does. 
+\item {\bf May 15, 2002}: Changed the visitor for initializers to make two
+tail-recursive passes (the second is a \t{List.rev} and only done if one of
+the initializers change). This prevents \t{Stack\_Overflow} for large
+initializers. Also improved the processing of initializers when converting to
+CIL. 
+\item {\bf May 15, 2002}: Changed the front-end to allow the use of \t{MSVC}
+mode even on machines that do not have MSVC. The machine-dependent parameters
+for GCC will be used in that case. 
+\item {\bf May 11, 2002}: Changed the representation of formals in function
+types. Now the function type is purely functional. 
+\item {\bf May 4, 2002}: Added the function
+\cilvalref{visitCilFileSameGlobals} and changed \cilvalref{visitCilFile} to be
+tail recursive. This prevents stack overflow on huge files.
+\item {\bf February 28, 2002}: Changed the significance of the
+\t{CompoundInit} in \ciltyperef{init} to allow for missing initializers at the
+end of an array initializer. Added the API function
+\cilvalref{foldLeftCompoundAll}.
+\end{itemize}
+
+\end{document}
+
+
+
+% LocalWords:  CIL intraprocedural datatype CIL's html Dataflow ocamldoc cilly
+% LocalWords:  Dominators tbergen bitfield

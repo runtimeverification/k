@@ -1,0 +1,229 @@
+This file is meant to collect the various "here's how to do X" advice
+we like to send around in emails and then promptly forget.
+
+
+----------------------- slicer for globals ----------------------
+
+I (Scott) just implemented a simple extension to cilly.asm.exe
+(really, just a small modification to 'rmtmps') which lets you slice a
+given C file so that it only contains things which contribute to a
+given global's type (actually, you can name as many root globals as
+you want).  I think this will be useful for tracking down merger
+problems in big programs.
+
+To use this, just add
+
+  #pragma cilnoremove("my_symbol")
+
+to the file in question, and then run
+
+  $cil/obj/x86_LINUX/cilly.asm.exe \
+    --sliceGlobal --out file.cil.c file.i
+
+(where file.i is preprocessed file.c).  This will slice file.i so it only
+contains things which are needed for 'my_symbol' to compile successfully,
+and write the output to file.cil.c.
+
+The symbol in question can be a function, enum tag, struct tag, typedef
+name, or global variable.  Add more #pragma cilnoremove's to add more
+things to the root set.
+
+Update: It doesn't work very well for types.  Instead, if you want to
+slice on a type, add at the end of the file
+
+  #pragma cilnoremove("myGlobalVar")
+  struct typeOfInterest myGlobalVar;
+
+then the slicer will retain 'typeOfInterest'.
+
+
+------------------- trusted expressions ------------------
+
+> Here's another idea: can we mark certain expressions as "trusted"?
+
+Yes. Enclose the expression (say, "x=a;") as follows:
+
+        { __NOBOXBLOCK x=a; }
+
+This causes markptr to ignore the expression (so no edges/flags are
+generated and thus the solver won't become upset by anything that happens
+there) and boxing to ... do the best it can, with everything in there lean.
+
+
+--------------------- invoking the Ocaml debugger ----------------------
+
+I have just written some Elisp code that allows you to enter the
+debugger very easily:
+
+First the usage:
+ Say you want to debug the ccured invocation for the command
+
+  make test/array1 INFERBOX=infer
+
+ You start emacs, go to directory cil/test (in which the above command
+makes sense) and then do
+
+ M-x my-camldebug
+ This will ask you how to run the debugger. You write the following
+
+  make test/array1 INFERBOX=infer OCAMLDEBUG=1
+
+ This will call ocamldebug when appropriately with the right arguments
+and with proper setting of source directories.
+
+ After that it feels like gdb (see the manual though). The time travel
+(i.e. backwards stepping) is great.
+
+ Now the Lisp magic. Put this in your .emacs:
+
+(defvar ocamldebug-history nil)
+(defun my-camldebug (command-line)
+  "Run camldebug on program FILE in buffer *camldebug-FILE*. The directory containing FILE becomes the initial working directory and source-file directory for camldebug.  If you wish to change this, use the camldebug commands `cd DIR' and `directory'."
+  (interactive
+   (list (read-from-minibuffer "Run ocamldebug (like this): "
+			       (if (consp ocamldebug-history)
+				   (car ocamldebug-history)
+				 "ocamldebug")
+                                 nil
+                               nil
+			       '(ocamldebug-history . 1))))
+  ; call something from camldebug.el to make sure it is loaded
+  (camldebug-numeric-arg 1)
+  (pop-to-buffer (concat "*camldebug*"))
+  (setq words (gud-chop-words command-line)) 
+  (message "Current directory is %s" default-directory)
+  (apply 'make-comint (cons "camldebug"
+                      (cons (car words)
+                      (cons nil (cdr words)))))
+  (set-process-filter (get-buffer-process (current-buffer))
+                      'camldebug-filter)
+  (set-process-sentinel (get-buffer-process (current-buffer))
+                        'camldebug-sentinel)
+  (camldebug-mode)
+  (camldebug-set-buffer))
+
+  
+--------------------- mapping backwards through #line -------------------
+by Scott 6/18/02 02:41
+
+The typical CCured build involves many source translation steps.
+Usually, we use the --commPrintLn flag to emit #line directives, but
+commented-out, so we see the final translation product in gdb.
+
+However, it's often useful to see the original source also, or the
+intermediate stages, when debugging.  I've written an elisp macro
+to look backwards in the current file for the #line directives which
+tell the file/line from which the current one came, and then open that
+file and position the cursor at the right line.  It's called 
+"map-hashline-back", and is among those defined below.
+
+; search backwards in a file for the nearest #line directive that
+; mentions the filename
+(defun find-enclosing-hashline ()
+  "Search backwards for #line directive with filename"
+  (interactive)
+  (re-search-backward "^/?/?#\\(line\\)? [0-9]+ ")
+)
+
+(defun find-enclosing-hashline-any ()
+  "Search backwards for any #line directive"
+  (interactive)
+  (re-search-backward "^/?/?#\\(line\\)? [0-9]+")
+)
+
+(defun match-string (n)
+  "Return string matched by most recent search; 'n' is parethesis
+   grouping number, where 0 means entire search string."
+  (buffer-substring (match-beginning n) (match-end n))
+)
+
+(defun current-hashline-line ()
+  "Extract and return line number of #line directive at cursor."
+  (re-search-forward "#\\(line\\)? \\([0-9]+\\)")
+  (string-to-number (match-string 2))
+)
+
+(defun current-hashline-file ()
+  "Extract and return file name of #line directive at cursor."
+  (re-search-forward "#\\(line\\)? [0-9]+ \"\\(.*\\)\"")
+  (match-string 2)
+)
+
+(defun map-hashline-back ()
+  "Given a #line directive at cursor, open file it refers to, at
+   the line position given."
+  (interactive)
+  (let ((curPosn (point)))        ; save current cursor position
+    (find-enclosing-hashline-any)
+    (let ((lineNumber (current-hashline-line)))
+      (goto-char curPosn)         ; restore original buffer's position
+      (find-enclosing-hashline)
+      (let ((fileName (current-hashline-file)))
+        (goto-char curPosn)       ; restore original buffer's position
+
+        (if (file-exists-p fileName)
+            (find-file fileName)      ; open the named file
+            ; try one level up, which is needed for our current
+            ; C++/CCured build process where we move files around
+            ; after translation
+            (if (file-exists-p (concat "../" fileName))
+                (find-file (concat "../" fileName))
+                (error "File does not exist: %s" fileName)
+            ))
+        (goto-line lineNumber)    ; go to right line
+
+        ; print where we went
+        (princ fileName)
+        (princ ":")
+        (princ lineNumber)
+      )
+    )
+  )
+)
+
+; this doesn't work as advertised, but it's close enough
+(defun run-previous-M-x-command ()
+  "Run the last command interactively entered with M-x."
+  (interactive)
+  (let ((prevCmd (car command-history)))
+    (princ prevCmd)
+    (eval prevCmd)
+  )
+)
+
+; after doing M-x map-hashline-back once, now ctl+alt+p will
+; go back through successive layers
+(global-set-key [(control meta p)] 'run-previous-M-x-command )
+
+
+--------------------- navigating .infer files ------------------
+by Scott 6/18/02 02:42
+
+(George had a different way of doing this; how does his work?)
+
+When I use .infer files, it's always to do one thing: given a
+WILD node, trace backwards to the cast which caused it.  The
+macro goto-prev-wild will do one step of the mapping.  Then, use
+ctl+alt+p (above) to go more steps.
+
+(defun get-wild-source ()
+  "Search forward to the next WILD/<reason>(<id>) string, and
+   extract and return that node id."
+  (re-search-forward "WILD/[A-Za-z_]+(\\([0-9]+\\))")
+  (string-to-number (match-string 1))
+)
+
+(defun goto-infer-node (n)
+  "Find the information section for node 'n'."
+  (goto-char 0)
+  (re-search-forward (format "^%d :" n))
+)
+
+(defun goto-prev-wild ()
+  "Go to the node which caused this one to be WILD."
+  (interactive)
+  (let ((source (get-wild-source)))
+    (princ (format "Node %d" source))
+    (goto-infer-node source)
+  )
+)

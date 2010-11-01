@@ -1,0 +1,172 @@
+\documentclass{article}
+\usepackage{hevea}
+
+\def\t#1{{\tt #1}}
+\def\DYNAMIC{\t{DYNAMIC}}
+\title{Setting Up cygwin and OCaml}
+\author{Scott McPeak \and George Necula}
+
+\begin{document}
+\maketitle
+
+ This document is intended to get you started with OCAML and the other tools
+that are necessary for CCured and other projects of ours. These tools work on
+Linux and Windows (NT4.0, 2000, XP and also less reliably on 95/98/Me).
+
+ If you use Linux then you can go directly to Section~\ref{sec-ocaml}.
+
+\section{If you want to use Windows}
+
+ \subsection{Get \t{cygwin}}
+
+ You must have a bunch of Unix tools installed on your machine. (In the future
+we might be able to avoid these but for now you are better off with them.).
+Here is what I (George) do to install Cygwin. You need a good network
+connection for this. 
+\begin{itemize}
+\item Create a directory \t{C:\backslash Download\backslash cygwin}
+\item Go to \ahrefurl{http://sources.redhat.com/cygwin} and click \t{Install
+cygwin} icon. Download \t{setup.exe} to the directory you just created.
+\item Run \t{setup.exe} and select ``Download to local directory''. Select all
+the packages. This will take a while (~ 30 minutes)
+\item Run \t{setup.exe} again and not select to ``Install from local
+directory''. It is best to {\bf deselect} the \t{tetex} package since I found
+it to interfere with other installations of Latex.
+\item I choose \t{C:\backslash Programs\backslash cygwin} 
+as the home for \t{cygwin}, I use \t{DOS} as the default text file and I
+choose ``Install for All''. 
+\item Add \t{C:\backslash Programs\backslash cygwin\backslash bin} to your
+PATH. You must put it first in the ``System Variables'' PATH (In Control Panel/System/Advanced/Environment
+Variables'' and {\bf put it first} so that it comes before the default
+c:/WinNT/system32. You can verify that you got it right if you get
+\t{/usr/bin/find} when you run \t{which find}. 
+\item Verify that you can run \t{/usr/bin/perl} from the command line within
+\t{bash}. 
+\end{itemize}
+
+
+\section{Get OCaml}\label{sec-ocaml}
+
+The next step for most people is to download and install the Ocaml
+compiler system.  This is available at:
+
+  \ahrefurl{http://caml.inria.fr/ocaml/}
+
+At the time of writing, the current version is 3.07. The following
+instructions assume that you will build from sources even on Windows (instead
+of using the Native compiler provided). Here the rough sequence of steps:
+\begin{itemize}
+\item Download and unpack the sources
+\item Go in that directory, start \t{bash} if on Windows, and run
+\begin{verbatim}
+% ./configure
+% make world
+% make opt
+% make install
+\end{verbatim}
+
+ The first command might fail to configure some libraries but that's Ok. 
+\end{itemize}
+
+To test your ocaml distribution, try:
+
+\begin{verbatim}
+  % which ocaml
+  /usr/local/bin/ocaml
+
+  % ocaml
+        Objective Caml version 3.07
+
+  # exit 0;;    <-- you type "exit 0;;", and press enter
+\end{verbatim}
+
+ If you intend to program in Ocaml then you should also install the emacs
+support files for ocaml. This will give you nice fontification and
+indentation. If you check in code that is not indented nicely some members of
+the project will not be pleased!
+
+ \subsection{Debugging Support Ocaml}
+
+ If you expect to need to run the debugger our projects are set up in such a
+way that they will invoke the debugger for you. How to do that is described in
+each project's documentation. But for that support to work you must add the
+following code to your .emacs file. Also, if you are using GNU-emacs then you
+must set the Coding style for your files to ``unix'' (CTRL-X RET F).
+
+\begin{verbatim}
+(defvar ocamldebug-history nil)
+(defun my-camldebug (command-line)
+  "Run camldebug on program FILE in buffer *camldebug-FILE*.
+The directory containing FILE becomes the initial working directory
+and source-file directory for camldebug.  If you wish to change this, use
+the camldebug commands `cd DIR' and `directory'."
+  (interactive
+   (list (read-from-minibuffer "Run ocamldebug (like this): "
+          (if (consp ocamldebug-history)
+       (car ocamldebug-history)
+     "ocamldebug")
+                                 nil
+                               nil
+          '(ocamldebug-history . 1))))
+  ; call something from camldebug.el to make sure it is loaded
+  (camldebug-numeric-arg 1)
+
+  ; We must override the camldebug-display-line
+  (if (not (fboundp 'original-camldebug-display-line))
+      (fset 'original-camldebug-display-line 
+            (symbol-function 'camldebug-display-line)))
+  (defun camldebug-display-line (true-file character kind)
+    ; See if true-file exists
+    (if (not (file-exists-p true-file))
+        ; Try to run cygpath to convert the file name
+        (with-temp-buffer
+          (if (equal 0 
+                     (call-process "cygpath" nil t t "-m" true-file))
+              (progn
+                ; Drop the end of line
+                (when (bolp)
+                  (backward-delete-char 1))
+                (setq true-file (buffer-string))))))
+    (original-camldebug-display-line true-file character kind))
+
+
+  (pop-to-buffer (concat "*camldebug*"))
+  (setq words (split-string command-line)) 
+  (message "Current directory is %s" default-directory)
+  (apply 'make-comint (cons "camldebug"
+                      (cons (car words)
+                      (cons nil (cdr words)))))
+  (set-process-filter (get-buffer-process (current-buffer))
+                      'camldebug-filter)
+  (set-process-sentinel (get-buffer-process (current-buffer))
+                        'camldebug-sentinel)
+  (camldebug-mode)
+  (camldebug-set-buffer))
+\end{verbatim}
+
+
+\section{Set the environment variables}
+
+ Make sure that /usr/local/lib in in your path. If you are on Windows this
+ means ``C:/Programs/cygwin/usr/local/lib''. 
+
+
+\section{If you need CVS access} 
+
+ See the \ahref{cvssetup.html}{separate instructions}.
+
+
+\section{Useful Links}
+\begin{itemize}
+ \item  Tutorial on ML: 
+   \ahrefurl{http://www.dcs.napier.ac.uk/course-notes/sml/manual.html}
+  \item Documentation and sources for Ocaml: 
+        \ahrefurl{http://caml.inria.fr/ocaml/} 
+  \item Manual for GNU make:
+        \ahrefurl{http://www.gnu.org/manual/make/html\_chapter/make\_toc.html}
+
+    
+ \end{itemize}
+
+
+\end{document}
