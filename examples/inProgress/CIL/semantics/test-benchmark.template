@@ -1,9 +1,0 @@
-load c-compiled
-mod C-TEST is
-	including C .
-endm
-set clear profile off .
-set profile on .
-%s
-show profile .
-q
