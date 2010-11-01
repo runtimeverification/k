@@ -61,11 +61,15 @@ let noscores s =
 
 let fileContents : string ref = ref ""
 
+let parse_helper fname =
+  let cabs = F.parse_to_cabs fname in
+  cabs
+
 let parseOneFile (fname: string) =
   (* PARSE *)
   if !Cilutil.printStages then ignore (E.log "Parsing %s\n" fname);
   (*let cil = F.parse fname () in *)
-  let cabs = fst(F.parse_with_cabs fname ()) in
+  let cabs = parse_helper fname in
   cabs
   
   

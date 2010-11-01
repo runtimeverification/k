@@ -54,3 +54,5 @@ val args: (string * Arg.spec * string) list
 val parse: string -> (unit -> Cil.file)
 
 val parse_with_cabs: string -> (unit -> Cabs.file * Cil.file)
+
+val parse_to_cabs: string -> Cabs.file

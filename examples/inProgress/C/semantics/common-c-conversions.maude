@@ -368,7 +368,6 @@ mod COMMON-SEMANTICS-CAST is
 		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 		
-	--- fixme does this extra check for looping need to be done elsewhere?
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) => tv(I:Int %Int (max(T:Type) +Int 1), T:Type)
 		if hasUnsignedIntegerType(T:Type)
@@ -381,18 +380,29 @@ mod COMMON-SEMANTICS-CAST is
 	--- choice
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) 
-			=> cast(T:Type, tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T':Type)) 
+			=> cast(T:Type, tv(I:Int %Int (2 ^Nat absInt(numBits(T:Type))), T':Type)) 
+		if absInt(I:Int) >Int (2 ^Nat absInt(numBits(T:Type)))
+		andBool hasSignedIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		andBool notBool hasBoolType (T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule
+		cast(T:Type, tv(I:Int, T':Type))
+			--- => cast(T:Type, tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T':Type)) 
+			=> tv(I:Int +Int (2 ^Nat absInt(numBits(T:Type))), T:Type)
 		if I:Int <Int min(T:Type)
+		andBool absInt(I:Int) <=Int (2 ^Nat absInt(numBits(T:Type)))
 		andBool hasSignedIntegerType(T:Type)
 		andBool hasIntegerType(T':Type)
 		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
 		cast(T:Type, tv(I:Int, T':Type)) 
-			=> cast(T:Type, tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T':Type)) 
+			--- => cast(T:Type, tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T':Type)) 
+			=> tv(_-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))), T:Type)
 		if I:Int >Int max(T:Type)
+		andBool absInt(I:Int) <=Int (2 ^Nat absInt(numBits(T:Type)))
 		andBool hasSignedIntegerType(T:Type)
-		andBool hasIntegerType(T:Type)
 		andBool hasIntegerType(T':Type)
 		andBool notBool hasBoolType (T:Type)
 		: KSentence [metadata "structural"] .
