@@ -52,6 +52,7 @@ kmod DYNAMIC-C-SEMANTICS is
 	...</ k >
 	< functionTranslationUnits >... Tu:K |-> Map((? Identifier("main") |-> Tu:K)) ...</ functionTranslationUnits >
 	< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
+	[structural]
 	
 	--- FIXME i think these are slightly different
 	--- fixme void isn't supposed to have a name

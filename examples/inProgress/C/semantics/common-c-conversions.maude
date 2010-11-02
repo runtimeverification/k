@@ -71,10 +71,10 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 		: KSentence [metadata "structural"] .
 	mb rule
 		arithConversion-int(?, tv(?, (enumType(?) => int)), ?)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		arithConversion-int(?, ?, tv(?, (enumType(?) => int)))
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > L:KLabel(tv(V:BaseValue, T:Type),, tv(V':BaseValue, T':Type)) 
 			=> arithConversion-int(L:KLabel, tv(V:BaseValue, T:Type), tv(V':BaseValue, T':Type))

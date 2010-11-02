@@ -171,7 +171,8 @@ mod COMMON-SEMANTICS-WRITING is
 	including COMMON-MEMORY-INCLUDE .
 	mb context alloc(?, value(`[HOLE`]:K)) : KSentence .
 
-	mb rule allocateType(Loc:Nat, T:Type) => alloc(Loc:Nat, value(byteSizeofType(T:Type))) : KSentence [metadata "structural"] .
+	mb rule allocateType(Loc:Nat, T:Type) => alloc(Loc:Nat, value(byteSizeofType(T:Type))) 
+		: KSentence [metadata "structural"] .
 	mb rule 
 		< k > allocateTypeIfAbsent(Loc:Nat, T:Type) => alloc(Loc:Nat, value(byteSizeofType(T:Type))) ...</ k >
 		< mem > Mem:Map </ mem >
@@ -348,21 +349,21 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule splitBytes(tv(I:Int, T:Type)) 
 		=> splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
 		if hasIntegerType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule splitBytes(tv(F:Float, T:Type)) 
 		=> splitFloatBytes(F:Float, T:Type, value(byteSizeofType(T:Type)))
 		if hasFloatType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule splitBytes(tv(I:Int, pointerType(T:Type))) 
 		=> splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule splitBytes(tv(I:Int, arrayType(T:Type, ?))) 
 		=> splitPointerBytes(I:Int, pointerType(T:Type), value(byteSizeofType(pointerType(T:Type))))
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule splitBytes(tv(L:List{K}, T:Type)) 
 		=> splitStructBytes(dataList(L:List{K}), T:Type, value(byteSizeofType(T:Type)))
 		if hasStructType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	op splitIntegerBytes : K K K -> K .
 	op splitIntegerBytes : K K K List{K} -> K .

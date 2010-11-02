@@ -17,10 +17,10 @@ mod COMMON-SEMANTICS-IF-THEN is
 		
 	mb [if-then-else-true]: rule
 		< k > IfThenElse(tv(1, int), S:K, ?) => sequencePoint ~> S:K ...</ k >
-		: KSentence [metadata "computational rule"] . --- nondet
+		: KSentence [metadata "computational"] . --- nondet
 	mb [if-then-else-false]: rule
 		< k > IfThenElse(tv(0, int), ?, S:K) => sequencePoint ~> S:K ...</ k >
-		: KSentence [metadata "computational rule"] . --- nondet
+		: KSentence [metadata "computational"] . --- nondet
 		
 	mb [if-then-else]: rule
 		< k > IfThenElse(tv(V:BaseValue, T:Type), S:K, S':K)
@@ -31,7 +31,7 @@ mod COMMON-SEMANTICS-IF-THEN is
 			V:BaseValue =/=Bool 0
 			andBool V:BaseValue =/=Bool 1 
 		)
-		: KSentence [metadata "structural rule"] .
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-WHILE is
@@ -113,14 +113,14 @@ mod COMMON-SEMANTICS-SWITCH is
 	mb rule
 		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => handleSwitch(SN:Nat, promote(tv(V:BaseValue, T:Type))) ...</ k >
 		if hasIntegerType(T:Type)
-		: KSentence [metadata "computational rule"] .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > handleSwitch(SN:Nat, V:Value) => handleSwitch-aux(SN:Nat, V:Value, Map(M:Map)) ...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		< gotoMap >... kpair(Tu:K, F:Id) |-> Map(M:Map) ...</ gotoMap >
-		: KSentence [metadata "computational rule"] .
+		: KSentence [metadata "structural"] .
 		
 	--- fixme feature can't do this :(
 	--- mb context handleSwitch-aux(?, ?, ?, Map((? (genLabel(?, `[HOLE`]:K) |-> ?)))) : KSentence .
@@ -130,46 +130,46 @@ mod COMMON-SEMANTICS-SWITCH is
 	--- don't need to erase the rest of K since we're GOTOing
 	mb rule
 		< k > tryCase(V:Value, V:Value, CaseHelper:K) => Goto(CaseHelper:K) ...</ k >
-		: KSentence [metadata "computational rule"] .
+		: KSentence [metadata "structural"] .
 		
 	op tryCase : K Value K -> K [metadata "strict(1)"] . --- K to be evaluated, val it should be, casehelper
 	mb rule
 		< k > (. => tryCase(Exp:K, V:Value, CaseHelper:K)) ~> handleSwitch-aux(SN:Nat, V:Value, Map((? ((genLabel(SN:Nat, Exp:K) |-> CaseHelper:K) => .))))
 		...</ k >
 		if Exp:K =/=Bool l('Default)
-		: KSentence [metadata "computational rule"] .
+		: KSentence [metadata "structural"] .
 		
 	--- if all that's left is a default, do it
 	mb rule
 		< k > handleSwitch-aux(SN:Nat, ?, Map((genLabel(SN:Nat, l('Default)) |-> ?))) 
 			=> Goto(genLabel(SN:Nat, l('Default)))
 		...</ k >
-		: KSentence [metadata "computational rule"] .
+		: KSentence [metadata "structural"] .
 	
 	--- if there's nothing left, no case matches
 	mb rule
 		< k > handleSwitch-aux(?, ?, Map((.).Map)) => (.).K ...</ k >
-		: KSentence [metadata "structural rule"] .
+		: KSentence [metadata "structural"] .
 
 	mb rule
 		< k > tryCase(tv(V':BaseValue, T:Type), tv(V:BaseValue, T:Type), CaseHelper:K) => (.).K ...</ k >
 		if V:BaseValue =/=Bool V':BaseValue
-		: KSentence [metadata "structural rule"] .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > handleSwitch-aux(SN:Nat, ?, Map((? ((genLabel(SN':Nat, ?) |-> ?) => (.).Map)))) ...</ k >
 		if SN:Nat =/=Bool SN':Nat
-		: KSentence [metadata "structural rule"] .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > handleSwitch-aux(SN:Nat, ?, Map((? ((L:KLabel(?) |-> ?) => (.).Map)))) ...</ k >
 		if L:KLabel =/=Bool 'genLabel
-		: KSentence [metadata "structural rule"] .
+		: KSentence [metadata "structural"] .
 			
 	mb rule
 		< k > tryCase((tv(V:BaseValue, T':Type) => cast(T:Type, tv(V:BaseValue, T':Type))), tv(?, T:Type), ?) ...</ k >
 		if T:Type =/=Bool T':Type
-		: KSentence [metadata "structural rule"] .
+		: KSentence [metadata "structural"] .
 	
 	mb [case-fall-through]: rule
 		< k > Case(?, ?, ?, K:K) => K:K ...</ k >
@@ -345,14 +345,12 @@ mod COMMON-SEMANTICS-GOTO is
 	op getString : K -> String .
 	eq getString(Identifier(S:String)) = S:String .
 	
-	
 	op enableInits : -> K .
-	
 	
 	mb rule
 		< k > enableInits => (.).K ...</ k >
 		< shouldInit > ? => true </ shouldInit >
-		: KSentence [metadata "computational"] .
+		: KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > (. => Decl:K ~> enableInits) ~> addVariablesForBlock(TargetBlock:Nat, 
@@ -387,7 +385,7 @@ mod COMMON-SEMANTICS-GOTO is
 		< calculateGotoMap >
 			. => (< gotoCalculation >... < computation > K:K ~> Return(NothingExpression) </ computation > ...</ gotoCalculation >)
 		</ calculateGotoMap >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		(< gotoCalculation > < computation > (.).K </ computation > ...</ gotoCalculation >) => (.).Bag
@@ -407,7 +405,7 @@ mod COMMON-SEMANTICS-GOTO is
 		...</ computation >
 		< nestingDepthGoto > N:Nat => sNat(N:Nat) </ nestingDepthGoto >
 		< blockHistoryGoto > ListItem(OldNum:Nat) ...</ blockHistoryGoto >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< computation > Block(Num:Nat, ?, L:List{C}) => listToK(L:List{C}) ...</ computation > 
 		< blockHistoryGoto > . => ListItem(Num:Nat) ...</ blockHistoryGoto >
@@ -423,7 +421,7 @@ mod COMMON-SEMANTICS-GOTO is
 	mb [StatementLoc]: rule
 		< computation > StatementLoc(K:K, L:CabsLoc) => K:K ...</ computation >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 
 	---- fixme i hate that i have to do this twice.  once here, once in the dynamic semantics
 	mb rule
@@ -432,7 +430,7 @@ mod COMMON-SEMANTICS-GOTO is
 	mb [DefinitionLoc]: rule
 		< computation > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ computation >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	--- eq getIdOfDeclaration(DeclarationDefinition(InitNameGroup(?, K:C))) = getIdOfName(K:C) .
 		
@@ -441,19 +439,19 @@ mod COMMON-SEMANTICS-GOTO is
 			=> DeclarationDefinition(InitNameGroup(T:K, K:C))
 			~> DeclarationDefinition(InitNameGroup(T:K, K':C :: L:List{C})) 
 		...</ computation >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< computation > Typedef(NameGroup(T:K, (K:C :: K':C :: L:List{C}))) 
 			=> Typedef(NameGroup(T:K, K:C))
 			~> Typedef(NameGroup(T:K, K':C :: L:List{C})) 
 		...</ computation >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< computation > Typedef(NameGroup(T:K, (K:C :: K':C :: L:List{C}))) 
 			=> Typedef(NameGroup(T:K, K:C))
 			~> Typedef(NameGroup(T:K, K':C :: L:List{C})) 
 		...</ computation >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	--- fixme would like to combine the below rules
 	mb rule
@@ -730,7 +728,7 @@ mod COMMON-SEMANTICS-BLOCKS is
 		< k > BlockStatement(Block:K)
 			=> pushBlock ~> Block:K ~> popBlock
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	mb [push-block]: rule
 		< k > pushBlock => (.).K ...</ k >
@@ -785,7 +783,8 @@ mod COMMON-C-STATEMENTS is
 	including COMMON-SEMANTICS-BLOCKS .
 	including COMMON-SEMANTICS-DO-WHILE .
 	
-	mb rule Nop => . : KSentence [metadata "structural"] .
+	mb rule Nop => . 
+		: KSentence [metadata "structural"] .
 
 	--- skip labels
 	mb [skip-label]: 
@@ -793,7 +792,8 @@ mod COMMON-C-STATEMENTS is
 		: KSentence [metadata "structural"] .
 
 	--- dissolve expression statements that are finished evaluating
-	mb [expression-statement]: rule < k > Computation(K:K) => K:K ~> discard ~> sequencePoint ...</ k > : KSentence [metadata "structural"] .
+	mb [expression-statement]: rule < k > Computation(K:K) => K:K ~> discard ~> sequencePoint ...</ k > 
+		: KSentence [metadata "structural"] .
 	
 	mb [popLoop]: rule
 		< k > popLoop ~> ? => K:K </ k >

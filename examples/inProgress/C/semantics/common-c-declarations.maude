@@ -199,7 +199,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 			~> K:K
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 
 	mb rule
 		< k > zero(Name:K) => zeroType(Name:K, unqualifyType(T:Type)) ...</ k >
@@ -207,18 +207,18 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 		--- < currentFunction > F:Id </ currentFunction >
 		--- < env >... Name:K |-> sym(Block:Nat) +Nat 0 ...</ env >
 		--- < mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	op zeroType : K Type -> K .
 	
 	mb rule
 		< k > zeroType(Name:K, T:Type) => Name:K := tv(0, int) ~> discard ...</ k >
 		if hasIntegerType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > zeroType(Name:K, T:Type) => Name:K := tv(0.0, float) ~> discard ...</ k >
 		if hasFloatType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	op zeroStruct : K List{C} -> K .
 	
@@ -233,55 +233,55 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 			=> zeroStruct(Name:K, Fields:List{C})
 		...</ k >
 		< structs >... S:Id |-> Fields:List{C} ...</ structs > 
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > zeroType(Name:K, unionType(S:Id)) 
 			=> zeroType(Name:K . F:Id, T:Type)
 		...</ k >
 		< structs >... S:Id |-> (typedDeclaration(T:Type, F:Id) :: ?) ...</ structs > 
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > zeroStruct(Name:K, (typedDeclaration(T:Type, F:Id) :: L:List{C})) 
 			=> zeroType(Name:K . F:Id, T:Type)
 			~> zeroStruct(Name:K, L:List{C}) 
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > zeroStruct(Name:K, Nil) => (.).K ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > zeroType(Name:K, T:Type) => Name:K := tv(NullPointer, T:Type) ~> discard ...</ k >
 		if hasFunctionType(T:Type) 
 		orBool hasPointerType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > zeroType(Name:K, arrayType(T:Type, sNat(Len:Nat))) 
 			=> zeroType(Name:K[Len:Nat], T:Type)
 			~> zeroType(Name:K, arrayType(T:Type, Len:Nat)) 
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > zeroType(Name:K, arrayType(T:Type, 0)) => (.).K ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 
 	mb rule
 		< k > zeroType(Name:K, flexibleArrayType(T:Type))
 			=> (.).K
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > zeroBlock(sym(Block:Nat) +Nat 0) => . ...</ k >
 		< mem >... Block:Nat |-> memblock(Len:Nat, (? => (.).Map[piece(0, numBitsPerByte) / 0 to Len:Nat])) ...</ mem >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > defineType(typedDeclaration(T:Type, X:Id)) => giveType(typedef(X:Id), T:Type) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 			
 	op declareFunction : Id Type K -> K .
 	op declareExternalVariable : Id Type K -> K .
@@ -671,23 +671,23 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 	mb rule
 		< k > addToEnv(X:Id, Loc:Nat) => addToGlobalEnv(X:Id, Loc:Nat) ...</ k >
 		< currentFunction > File-Scope </ currentFunction >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > addToEnv(X:Id, Loc:Nat) => addToLocalEnv(X:Id, Loc:Nat) ...</ k >
 		< currentFunction > F:K </ currentFunction >
 		if F:K =/=Bool File-Scope
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > addToGlobalEnv(X:Id, Loc:Nat) => . ...</ k >
 		< genv >... Tu:K |-> Map((M':Map => M':Map[Loc:Nat / X:Id])) ...</ genv >
 		< currentTranslationUnit > Tu:K </ currentTranslationUnit >
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > addToLocalEnv(X:Id, Loc:Nat) => . ...</ k >
 		< env > E:Map => E:Map[Loc:Nat / X:Id] </ env >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 			
 	mb rule
 		< k > DeclarationDefinition(InitNameGroup(T:Type, Nil)) => (.).K ...</ k >
@@ -932,7 +932,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		
 	mb rule
 		< k > (. => typeof(K:K)) ~> initializeSingleInit(K:K) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	--- fixme want to exclude strings, but not normal arrays
 	mb rule
@@ -945,7 +945,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		--- andBool notBool hasAggregateType(T':Type)
 		andBool notBool hasStructType(T':Type)
 		andBool notBool hasUnionType(T':Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	--- this is used to have an aggregate on the RHS of a compound init
 	--- fixme want to exclude strings, but not normal arrays
@@ -955,7 +955,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		--- if hasAggregateType(T:Type) 		
 		if hasStructType(T:Type)
 		orBool hasUnionType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	op initFromStructRHS : K Type List{C} -> K .
 	mb rule
@@ -966,14 +966,14 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< structs >...
 			S:Id |-> L:List{Type}
 		...</ structs >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	op findStruct : Type -> ListItem .
 		
 	mb rule
 		< currentSubObject > findStruct(T:Type) (ListItem(te(?, T':Type)) => .) ...</ currentSubObject >
 		if T:Type =/=Bool T':Type
-		: KSentence .	
+		: KSentence [metadata "structural"] .
 		
 	--- fixme unsafe, might have started to initialize other things
 	mb rule
@@ -983,30 +983,17 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< currentSubObject > findStruct(structType(S:Id)) ListItem(te(K:K, structType(S:Id))) => next ...</ currentSubObject >
 		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
 		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
-		: KSentence .
-		
-	--- mb rule
-		--- < k > (. => initializeSingleInit(K:K . F:Id)) 
-			--- ~> initFromStructRHS(K:K, ((typedDeclaration(T:Type, F:Id) => Nil) :: ?))
-		--- ...</ k >
-		--- if F:Id =/=Bool #NoName
-		--- : KSentence .
-	--- mb rule
-		--- < k > initFromStructRHS(K:K, ((typedDeclaration(?, #NoName) => Nil) :: ?)) ...</ k >
-		--- : KSentence .
-	--- mb rule
-		--- < k > initFromStructRHS(?, Nil) => (.).K ...</ k >
-		--- : KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > fillInitializer(SingleInit(K:K)) => initializeSingleInit(K:K) ...</ k >
 		if getKLabel(K:K) =/=Bool 'Constant
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(K:K))) => initializeSingleInit(Constant(K:K)) ...</ k >
 		if getKLabel(K:K) =/=Bool 'StringLiteral
 		andBool getKLabel(K:K) =/=Bool 'WStringLiteral
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
@@ -1015,7 +1002,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< currentSubObject > ListItem(te(K:K, T:Type)) ListItem(te(?, arrayType(T:Type, Len:Nat))) ...</ currentSubObject >
 		if hasCharType(T:Type)
 		andBool lengthString(S:String) ==Bool Len:Nat
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
 			=> fillInitializer(SingleInit(Constant(StringLiteral(S:String +String "\0"))))
@@ -1023,14 +1010,14 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< currentSubObject > ListItem(te(K:K, T:Type)) ListItem(te(?, arrayType(T:Type, Len:Nat))) ...</ currentSubObject >
 		if hasCharType(T:Type)
 		andBool lengthString(S:String) <Int Len:Nat
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
 			=> fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String +String "\0"))))
 		...</ k >
 		< currentSubObject > ListItem(te(K:K, T:Type)) ListItem(te(?, incompleteArrayType(T:Type))) ...</ currentSubObject >
 		if hasCharType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String))))
@@ -1040,19 +1027,19 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< currentSubObject > ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		if S:String =/=Bool ""
 		andBool hasCharType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	--- fixme not sure what happens in the case of   char *x = "";
 	mb rule
 		< k > fillInitializer-aux(SingleInit(Constant(StringLiteral("")))) => . ...</ k >
 		--- if hasCharType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
 			=> initializeSingleInit(Constant(StringLiteral(S:String)))
 		...</ k >
 		< currentSubObject > ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		if notBool hasCharType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 endm
 
 
@@ -1076,17 +1063,17 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		< gtypes > Gtypes:Map => Gtypes:Map[Map(.) / Name:String]</ gtypes >
 		< programText > M:Map => M:Map[P:String / Name:String] </ programText >
 		if notBool $hasMapping(Env:Map, Name:String)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	op resolve : K -> K .
 	mb rule
 		< k > (. => resolve(Tu:K)) ~> resolveReferences ...</ k >
 		< translationUnits >... BagItem(Tu:K) => . ...</ translationUnits >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > resolveReferences => . ...</ k >
 		< translationUnits > (.).Bag </ translationUnits >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	op resolveInternal : Id K K -> K .
 	op resolveExternal : Id K Bag K -> K .
@@ -1097,11 +1084,11 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		< k > recordFunctionTranslationUnitInformation(X:Id, T:Type, Tu:K, DefTu:K) => . ...</ k >
 		< functionTranslationUnits >... Tu:K |-> Map((Funs:Map => Funs:Map[DefTu:K / X:Id])) ...</ functionTranslationUnits >
 		if hasFunctionType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > recordFunctionTranslationUnitInformation(?, T:Type, ?, ?) => . ...</ k >
 		if notBool hasFunctionType(T:Type)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	--- fixme
 	--- should be adding to env after figuring initializer
@@ -1114,7 +1101,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 			=> resolveInternal-aux(X:Id, Tu:K, declarationObject(T:Type, Tu:K, K:K), figureInitializer(X:Id, T:Type, K:K))
 		...</ k >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > resolveInternal-aux(X:Id, Tu:K, declarationObject(?, Tu:K, ?), initializerValue(X:Id, T:Type, K:K))
 			=> allocateType(Loc:Nat, T:Type)
@@ -1125,14 +1112,14 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 			
 	mb rule
 		< k > resolveExternal(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K))
 			=> resolveExternal-aux(X:Id, Tu:K, Units:Bag, declarationObject(T:Type, DefTu:K, K:K), Loc:Nat, figureInitializer(X:Id, T:Type, K:K))
 		...</ k >
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > (.
 			=> addToEnv(X:Id, Loc:Nat)
@@ -1142,7 +1129,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		...</ k >
 		< currentTranslationUnit > ? => Tu':K </ currentTranslationUnit >
 		< preLinkage >... Tu':K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > resolveExternal-aux(X:Id, Tu:K, (.).Bag, declarationObject(?, DefTu:K, ?), Loc:Nat, initializerValue(X:Id, T:Type, K:K))
 			=> allocateType(Loc:Nat, T:Type)
@@ -1154,16 +1141,16 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		< currentTranslationUnit > ? => Tu:K </ currentTranslationUnit >
 		< externalLocations > Locs:Map => Locs:Map[Loc:Nat / X:Id] </ externalLocations >
 		if notBool $hasMapping(Locs:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?, ?) ...</ k >
 		< preLinkage >... Tu:K |-> Map(M:Map) ...</ preLinkage >
 		if notBool $hasMapping(M:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > resolveExternal-aux(X:Id, ?, ((BagItem(Tu:K) => .) Units:Bag), ?, ?, ?) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? X:Id |-> internal)) ...</ preLinkage >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	--- 
 	mb rule
@@ -1171,7 +1158,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> internal => .))) ...</ preLinkage >
 		< internalDefinitions >... Tu:K |-> Map((? (X:Id |-> K:K => .))) ...</ internalDefinitions >
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	--- static variable without an initializer
 	mb rule
@@ -1181,7 +1168,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< preTypes >... Tu:K |-> Map((? (X:Id |-> T:Type => .))) ...</ preTypes >
 		if notBool $hasMapping(Defs:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > (. => resolveExternal(X:Id, Tu:K, Units:Bag, K:K)) ~> resolve(Tu:K) ...</ k >
@@ -1190,7 +1177,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< translationUnits > Units:Bag </ translationUnits >
 		if notBool $hasMapping(ExtDefs:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 
 	eq toString(Identifier(S:String)) = S:String .
 	eq toString(S:String) = S:String .
@@ -1207,7 +1194,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		if notBool $hasMapping(Linkage:Map, X:Id)
 		andBool notBool $hasMapping(ExtDefs:Map, X:Id)
 		andBool notBool $hasMapping(IntDefs:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	--- function prototypes
 	mb rule
@@ -1222,10 +1209,9 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		< preTypes >... Tu:K |-> Map((? X:Id |-> prototype(T:Type))) ...</ preTypes >
 		< declarationOrder >... Tu:K |-> ListToK((ListItem(X:Id) => .) ?) ...</ declarationOrder >
 		< externalDefinitions > Defs:Map </ externalDefinitions >
-		
 		if hasFunctionType(T:Type)
 		andBool notBool $hasMapping(Defs:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	--- c1x 6.9.2:2 A declaration of an identifier for an object that has file scope without an initializer, and without a storage-class specifier or with the storage-class specifier static, constitutes a tentative definition. If a translation unit contains one or more tentative definitions for an identifier, and the translation unit contains no external definition for that identifier, then the behavior is exactly as if the translation unit contains a file scope declaration of that identifier, with the composite type as of the end of the translation unit, with an initializer equal to 0.
 	mb rule
@@ -1248,7 +1234,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		andBool notBool hasIncompleteType(T:Type)
 		andBool notBool hasExternType(T:Type)
 		andBool notBool $hasMapping(Defs:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > resolve(Tu:K) ...</ k >
 		< preLinkage >... Tu:K |-> Map((? (X:Id |-> external => .))) ...</ preLinkage >
@@ -1258,14 +1244,14 @@ mod COMMON-SEMANTICS-DECLARATIONS-RESOLUTION is
 		if notBool hasFunctionType(T:Type)
 		andBool hasExternType(T:Type)
 		andBool notBool $hasMapping(Defs:Map, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > resolve(Tu:K) => . ...</ k >
 		< preLinkage >... Tu:K |-> Map(.) ...</ preLinkage >
 		< internalDefinitions >... Tu:K |-> Map(.) ...</ internalDefinitions >
 		< declarationOrder >... Tu:K |-> ListToK((.).List) ...</ declarationOrder >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 				
 	--- need to worry about things that don't have definitions that may override externs
 	--- want to make it so env is always correct local env, so need to have a set of global envs, one for each tu
@@ -1278,23 +1264,24 @@ mod COMMON-SEMANTICS-DECLARATIONS-ENUMS is
 	op fillEnums : K K -> K .
 	mb rule
 		< k > EnumDef(X:Id, L:List{C}) => fillEnums(EnumDef(X:Id, L:List{C})) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule < k > fillEnums(K:K) => fillEnums(K:K, 0) ...</ k > : KSentence .
 	mb rule
 		< k > fillEnums(EnumDef(X:Id, EnumItemLoc(EnumItem(E:Id, emptyValue), Loc:K) :: L:List{C}), K:K) 
 			=> EnumItemLoc(declare(typedDeclaration(int, E:Id), SingleInit(K:K)), Loc:K)
 			~> fillEnums(EnumDef(X:Id, L:List{C}), K:K + tv(1, int))
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > fillEnums(EnumDef(X:Id, EnumItemLoc(EnumItem(E:Id, Exp:K), Loc:K) :: L:List{C}), ?) 
 			=> EnumItemLoc(declare(typedDeclaration(int, E:Id), SingleInit(Exp:K)), Loc:K)
 			~> fillEnums(EnumDef(X:Id, L:List{C}), Exp:K + 1)
 		...</ k >
 		if Exp:K =/=Bool NothingExpression
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
-		< k > fillEnums(EnumDef(X:Id, Nil), ?) => (.).K ...</ k > : KSentence .
+		< k > fillEnums(EnumDef(X:Id, Nil), ?) => (.).K ...</ k > 
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-C-DECLARATIONS is

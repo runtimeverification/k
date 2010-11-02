@@ -131,13 +131,13 @@ mod COMMON-SEMANTICS-SIZEOF is
 		< k > maxBitSizeofList-aux(T:Type :: L:List{Type}, N:Nat) 
 			=> bitSizeofType(T:Type) ~> maxBitSizeofList-aux(L:List{Type}, N:Nat) 
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > (tv(N':Nat, ?) => .) ~> maxBitSizeofList-aux(L:List{Type}, (N:Nat => maxNat(N:Nat, N':Nat))) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > maxBitSizeofList-aux(Nil, N:Nat) => N:Nat ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	eq bitSizeofType(arrayType(T:Type, N:Nat)) = bitSizeofType(T:Type) * N:Nat .
 	eq bitSizeofType(flexibleArrayType(T:Type)) = 0 .
@@ -151,11 +151,11 @@ mod COMMON-SEMANTICS-SIZEOF is
 	mb rule
 		< k > bitSizeofType(structType(X:Id)) => bitSizeofList(L:List{Type}) ...</ k >
 		< structs >... X:Id |-> L:List{Type} ...</ structs >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > bitSizeofType(unionType(X:Id)) => maxBitSizeofList(L:List{Type}) ...</ k >
 		< structs >... X:Id |-> L:List{Type} ...</ structs >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	--- ---C99 6.2.6.1:26 ... Each unqualified type has several qualified versions of its type,40) corresponding to the combinations of one, two, or all three of the const, volatile, and restrict qualifiers. The qualified or unqualified versions of a type are distinct types that belong to the same type category and have the same representation and alignment requirements. ...
 	--- eq sizeofType(qualifiedType(T:Type, ?)) = sizeofType(T:Type) .	
@@ -216,7 +216,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 			=> application(readFunction(Loc:Nat), L:List{C}) 
 		...</ k >
 		if hasFunctionType(T:Type)
-		: KSentence [metadata "computational rule"] .
+		: KSentence [metadata "computational"] .
 		
 	mb [function-application-builtin-pre]: rule
 		< k > Call(tv(functionPrototype(X:Id, T:Type), T:Type), L:List{C})
@@ -224,7 +224,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		...</ k >
 		if hasFunctionType(T:Type)
 		andBool builtinIdentifiers contains X:Id
-		: KSentence [metadata "computational rule"] .
+		: KSentence [metadata "computational"] .
 
 	op populateFromGlobal : -> K .
 	--- fixme: this must be a rule because of the rules associated with declaring local and bound variables
@@ -263,13 +263,14 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		...</ control >)
 		< callStack > (.).List => List(< stackFrame > C:Bag < continuation > K:K </ continuation > < currentTranslationUnit > OldTu:K </ currentTranslationUnit > </ stackFrame >) ...</ callStack >
 		< functionTranslationUnits >... OldTu:K |-> Map((? X:Id |-> Tu:K)) ...</ functionTranslationUnits >
-		: KSentence [metadata "computational rule"] . --- nondet
+		: KSentence [metadata "computational"] . --- nondet
 endm
 
 mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	--- can't be done everywhere because same syntax as in declarations
-	mb rule < k > E1:Expression[E2:Expression] => *(E1:Expression + E2:Expression) ...</ k > : KSentence [metadata "structural"] .
+	mb rule < k > E1:Expression[E2:Expression] => *(E1:Expression + E2:Expression) ...</ k > 
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-LITERALS is
@@ -332,7 +333,8 @@ and ll or LL
 	eq FloatLiteral(V:Value) = V:Value .
 	eq Constant(V:Value) = V:Value .
 	--- mb rule < k > N:Nat => tv(N:Nat, bignum) ...</ k > : KSentence . --- for internal computations
-	mb rule < k > N:Nat => tv(N:Nat, cfg:largestUnsigned) ...</ k > : KSentence . --- for internal computations
+	mb rule < k > N:Nat => tv(N:Nat, cfg:largestUnsigned) ...</ k > 
+		: KSentence [metadata "structural"] . --- for internal computations
 		
 	mb rule NoSuffix(DecimalConstant(I:Int)) => 
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
@@ -469,7 +471,8 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	mb context assign(*([HOLE]), ?) : KSentence .
 	mb context assign(?, [HOLE]) : KSentence .
 	
-	mb [for-assignment]: rule < k > E1:Expression := E2:Expression => assign(*(&(E1:Expression)),  E2:Expression) ...</ k > : KSentence [metadata "structural"] .
+	mb [for-assignment]: rule < k > E1:Expression := E2:Expression => assign(*(&(E1:Expression)),  E2:Expression) ...</ k > 
+		: KSentence [metadata "structural"] .
 	
 	--- 6.5.16
 	op compoundAssignment : KLabel K K -> K [metadata "strict(2 3)"] .
@@ -887,8 +890,10 @@ mod COMMON-SEMANTICS-REFERENCE is
 	
 	--- C1X 6.5.3.2:3 The unary & operator yields the address of its operand. If the operand has type ‘‘type’’, the result has type ‘‘pointer to type’’. If the operand is the result of a unary * operator, neither that operator nor the & operator is evaluated and the result is as if both were omitted, except that the constraints on the operators still apply and the result is not an lvalue. Similarly, if the operand is the result of a [] operator, neither the & operator nor the unary * that is implied by the [] is evaluated and the result is as if the & operator were removed and the [] operator were changed to a + operator. Otherwise, the result is a pointer to the object or function designated by its operand.
 	
-	mb rule &(*(E:Expression)) => E:Expression : KSentence [metadata "structural"] .
-	mb rule &(E1:Expression[E2:Expression]) => E1:Expression + E2:Expression : KSentence [metadata "structural"] .
+	mb rule &(*(E:Expression)) => E:Expression 
+		: KSentence [metadata "structural"] .
+	mb rule &(E1:Expression[E2:Expression]) => E1:Expression + E2:Expression 
+		: KSentence [metadata "structural"] .
 	mb [ref]: rule
 		< k > &(X:Id) => tv(Loc:Nat, pointerType(T:Type)) ...</ k >
 		< env >... X:Id |-> Loc:Nat ...</ env >
@@ -937,8 +942,10 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 
 	op postOpRef : K KLabel -> K .
 	mb context postOpRef(*([HOLE]), ?) : KSentence .
-	mb [make-postinc-ref]: rule < k > E:Expression ++ => postOpRef(*(&(E:Expression)), '_++) ...</ k > : KSentence [metadata "structural"] .
-	mb [make-postdec-ref]: rule < k > E:Expression -- => postOpRef(*(&(E:Expression)), '_--) ...</ k > : KSentence [metadata "structural"] .
+	mb [make-postinc-ref]: rule < k > E:Expression ++ => postOpRef(*(&(E:Expression)), '_++) ...</ k > 
+		: KSentence [metadata "structural"] .
+	mb [make-postdec-ref]: rule < k > E:Expression -- => postOpRef(*(&(E:Expression)), '_--) ...</ k > 
+		: KSentence [metadata "structural"] .
 	
 	op postInc : K K Type -> K [metadata "strict(2)"] .
 	op postDec : K K Type -> K [metadata "strict(2)"] .
@@ -974,9 +981,9 @@ mod COMMON-SEMANTICS-SEQUENCING is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
 	mb rule < k > Comma(K:C :: K'::C :: L:List{C}) => K:C ~> discard ~> Comma(K'::C :: L:List{C}) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule < k > Comma(K:C) => K:C ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-C-EXPRESSIONS is

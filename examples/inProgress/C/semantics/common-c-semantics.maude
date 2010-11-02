@@ -10,6 +10,16 @@
 --- pr44828.c demonstrates slow conversion between large nums to small signed types
 
 ***(
+ a beaut
+  int a = 0;
+  int *p;
+  size_t b;
+  b = (size_t)(p = &(int []){0, 1, 2}[++a]);
+  if (a != 1 || *p != 1 || *(int *)b != 1)
+    abort ();
+***)
+
+***(
 --- fixme
 union U
 {
@@ -345,7 +355,8 @@ mod C-SETTINGS is
 	
 	--- S 6.2.5 p.35 i.15.  "The implementation shall define char to have the same range, representation, and behavior as either signed char or unsigned char.  37)... Irrespective of the choice made, char is a separate type from the other two and is not compatible with either
 	--- fixme I'm not sure what consequence being a separate type entails, so for now it will just be rewritten to the chosen type
-	mb rule char => signed-char : KSentence [metadata "structural"] .
+	mb rule char => signed-char 
+		: KSentence [metadata "structural"] .
 
 	op numBitsPerByte : -> NzNat .
 	op numBytes : Type -> Nat [memo] .
@@ -674,23 +685,23 @@ mod C-SEMANTICS-MISC is
 	mb rule
 		< k > DefinitionLocRange(K:K, L1:CabsLoc, L2:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L1:CabsLoc </ currentProgramLoc >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb [DefinitionLoc]: rule
 		< k > DefinitionLoc(K:K, L:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb [StatementLoc]: rule
 		< k > StatementLoc(K:K, L:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb [EnumItemLoc]: rule
 		< k > EnumItemLoc(K:K, L:CabsLoc) => K:K ...</ k >
 		< currentProgramLoc > ? => L:CabsLoc </ currentProgramLoc >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb [Attributes]: rule
 		< k > Attribute(S:String, L:List{C}) => AttributeValue(S:String, L:List{C}) ...</ k >
-		: KSentence .	
+		: KSentence [metadata "structural"] .	
 		
 	eq AttributeWrapper(K:K, ?) = K:K .
 	eq NameLoc(K:K, ?) = K:K .

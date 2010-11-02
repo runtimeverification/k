@@ -80,6 +80,9 @@ typedef char* va_list;
 #define va_arg(ap, t)					\
 	 (((ap) = (ap) + __va_argsiz(t)),		\
 	  *((t*) (void*) ((ap) - __va_argsiz(t))))
+	  
+	  
+#define va_copy(dst, src) ((void)((dst) = (src)))
 
 #endif /* Not RC_INVOKED */
 

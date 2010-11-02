@@ -46,9 +46,6 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		< currentFunction > Fun:Id </ currentFunction >
 		if notBool hasStaticType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > giveType(X:Id, (qualifiedType(T:Type, Static) => T:Type)) ...</ k >
-		--- : KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > giveGlobalType(X:Id, T:Type) => (.).K ...</ k >
@@ -110,25 +107,7 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 		< type > T:Type ~> K1:K ? K2:K : HOLE => K1:K ? K2:K : T:Type ...</ type >
 		if isAType(T:Type)
 		: KSentence [metadata "structural"] .
-	
-	--- mb [type-plus-heat]: rule
-		--- < type > K:K + K':K => K:K ~> HOLE + K':K ...</ type >
-		--- if notBool isAType(K:K)
-		--- : KSentence [metadata "structural"] .
-	--- mb [type-plus-cool]: rule
-		--- < type > T:Type ~> HOLE + K:K => T:Type + K:K ...</ type >
-		--- if isAType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb [type-plus-heat]: rule
-		--- < type > K:K + K':K => K':K ~> K:K + HOLE ...</ type >
-		--- if notBool isAType(K':K)
-		--- : KSentence [metadata "structural"] .
-	--- mb [type-plus-cool]: rule
-		--- < type > T:Type ~> K:K + HOLE => K:K + T:Type ...</ type >
-		--- if isAType(T:Type)
-		--- : KSentence [metadata "structural"] .
-
-	
+		
 	mb [type-bin-arith-heat]: rule
 		< type > L:KLabel(K:K,, K':K) => K:K ~> L:KLabel(HOLE,, K':K) ...</ type >
 		if notBool isAType(K:K)
@@ -171,9 +150,6 @@ mod COMMON-SEMANTICS-TYPE-STRICTNESS is
 		< type > T:Type ~> HOLE . X:Id => T:Type . X:Id ...</ type >
 		if isAType(T:Type)
 		: KSentence [metadata "structural"] .
-	--- mb rule
-		--- < type > ['_`[_`](Kp:KProper,, E:Expression) => Kp:KProper ~> Deref(HOLE)] ...</ type >
-		--- : KSentence [metadata "structural"] .
 	mb [type-deref-cool]: rule
 		< type > T:Type ~> *(HOLE) => *(T:Type) ...</ type >
 		if isAType(T:Type)
@@ -202,7 +178,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		
 	mb rule
 		< k > canonicalizeType(B:Bag) => canonicalizeType(B:Bag, (.).K, (.).Bag, (.).Bag, (.).Bag) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	--- specifier, modifier, storage
 	mb rule
@@ -227,13 +203,13 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool (getKLabel(T:K) ==Bool 'Named)
 		orBool (getKLabel(T:K) ==Bool 'AttributeValue)
 		--- orBool (T:K ==Bool Complex)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > canonicalizeType(B:Bag (BagItem(T:K) => (.).Bag), ?, ?, (? (.).Bag => BagItem(T:K)), ?) ...</ k >
 		if (T:K ==Bool SpecTypedef)
 		orBool (T:K ==Bool Inline)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 
 	mb rule
 		< k > canonicalizeType(B:Bag (BagItem(T:K) => (.).Bag), ?, ?, ?, (? (.).Bag => BagItem(T:K))) ...</ k >
@@ -244,7 +220,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool T:K ==Bool Restrict
 		orBool T:K ==Bool Auto
 		orBool T:K ==Bool Register
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > canonicalizeType((.).Bag, (T:Type => qualifiedType(T:Type, Q:K)), (.).Bag, (.).Bag, (? BagItem(Q:K) => (.).Bag)) ...</ k >
@@ -255,7 +231,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool Q:K ==Bool Restrict
 		orBool Q:K ==Bool Auto
 		orBool Q:K ==Bool Register
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(Named(X:Id)))
@@ -263,26 +239,26 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		...</ k >
 		< types >... typedef(X:Id) |-> T:Type ...</ types >
 		if X:Id =/=Bool Identifier("")
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(StructRef(X:Id)))
 			=> structType(X:Id)
 		...</ k >
 		if X:Id =/=Bool Identifier("")
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(EnumRef(X:Id)))
 			=> enumType(X:Id)
 		...</ k >
 		if X:Id =/=Bool Identifier("")
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(UnionRef(X:Id)))
 			=> unionType(X:Id)
 		...</ k >
 		if X:Id =/=Bool Identifier("")
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(EnumDef(X:Id, L:List{C})))
@@ -290,7 +266,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 			~> enumType(X:Id)
 		...</ k >
 		if X:Id =/=Bool Identifier("")
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(L:KLabel((Identifier("") => unnamed(N:Nat)),, L:List{C}))) ...</ k >
@@ -298,7 +274,7 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		if L:KLabel ==Bool 'StructDef
 		orBool L:KLabel ==Bool 'EnumDef
 		orBool L:KLabel ==Bool 'UnionDef
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(StructDef(X:Id, L:List{C})))
@@ -306,14 +282,14 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 			~> structType(X:Id)
 		...</ k >
 		if X:Id =/=Bool Identifier("")
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > canonicalizeSpecifier(BagItem(UnionDef(X:Id, L:List{C})))
 			=> UnionDef(X:Id, L:List{C})
 			~> unionType(X:Id)
 		...</ k >
 		if X:Id =/=Bool Identifier("")
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 		
 	--- FIXME what good is this?
@@ -326,15 +302,15 @@ mod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 	mb rule 
 		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(B:Bag)), (B:Bag => (.).Bag), ?, ?) ...</ k >
 		if B:Bag =/=Bool (.).Bag
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	--- fixme not sure where this is specified, but if i say "static x;" i think it means int
 	mb rule 
 		< k > canonicalizeType((.).Bag, ((.).K => canonicalizeSpecifier(BagItem(Int))), (.).Bag, ?, ?) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule
 		< k > canonicalizeType((.).Bag, T:Type, (.).Bag, (.).Bag, (.).Bag) => T:Type ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	op canonicalizeSpecifier : Bag -> K .
 	--- C99 6.7.2:2
@@ -405,10 +381,10 @@ mod COMMON-C-TYPING is
 	
 	mb rule
 		< k > Specifier(L:List{Type}) => canonicalizeType(Bag(getList{K}(L:List{Type}))) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > StructRef(X:Id) => structType(X:Id) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 
 	eq BitFieldType(T:Type, tv(N:Nat, ?)) = bitfieldType(T:Type, N:Nat) .
@@ -488,24 +464,24 @@ mod COMMON-C-TYPING is
 	--- op cast : K K -> K [metadata "strict"] .
 	mb rule 
 		< k > Cast(T:Type, K:K, V:Value) => cast(DeclType(T:Type, K:K), V:Value) ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	mb rule 
 		< k > JustBase => T:Type ...</ k >
 		< declarationTypeHolder > T:Type => . ...</ declarationTypeHolder >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 
 	op extractActualTypeFreezer : -> K .
 	mb rule
 		< k > DeclType(T:Type, K:K) => K:K ~> extractActualTypeFreezer ...</ k >
 		< declarationTypeHolder > (. => T:Type) ...</ declarationTypeHolder >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	
 	mb rule
 		< k > T:Type ~> extractActualTypeFreezer 
 			=> extractActualType(T:Type)
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	op fillBitHoles : List{Type} -> List{Type} .
 	op fillBitHoles : Nat List{Type} -> List{Type} .
@@ -555,23 +531,25 @@ mod COMMON-C-TYPING is
 			~> giveType(X:Id, structType(X:Id))
 			--- ~> structType(X:Id)
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > UnionDef(X:Id, L:List{Type})
 			=> addAggregate(X:Id, L:List{Type})
 			~> giveType(X:Id, unionType(X:Id))
 			--- ~> structType(X:Id)
 		...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 
 	--- the K will resolve to a type, so throw it away
 	mb rule
 		< k > OnlyTypedef(K:K) => K:K ~> discard ...</ k >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 			
 	op addAggregate : Id List{Type} -> K .
 	op addGlobalAggregate : Id List{Type} -> K .
 	op addLocalAggregate : Id List{Type} -> K .
+	
+	--- fixme looks like i don't actually need global and local, although possibly with vlas in structs?
 	mb rule
 		< k > addAggregate(X:Id, L:List{Type}) 
 			=> if (F:Id ==Bool File-Scope) then 
@@ -581,20 +559,30 @@ mod COMMON-C-TYPING is
 			fi
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > addGlobalAggregate(X:Id, L:List{Type}) => . ...</ k >
-		< structs > M:Map => M:Map[L:List{Type} / X:Id] </ structs >
+		< structs > M':Map => M':Map[L:List{Type} / X:Id] </ structs >
 		< gstructs > M:Map => M:Map[L:List{Type} / X:Id] </ gstructs >
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		< k > addLocalAggregate(X:Id, L:List{Type}) => . ...</ k >
 		< structs > M:Map => M:Map[L:List{Type} / X:Id] </ structs >
-		: KSentence .
+		: KSentence [metadata "structural"] .
+		
+	--- fixme doesn't work if types are qualified
+	--- fixme this could mess up sizes or any union guarantees
+	--- better to do this at lookup to preserve union
+	--- mb rule
+		--- < structs >... S:Id |-> L:List{Type}  ? |-> (? :: (typedDeclaration(structType(S:Id), #NoName) => L:List{Type}) :: ?) ...</ structs >
+		--- : KSentence .
+	--- mb rule
+		--- < structs >... S:Id |-> L:List{Type}  ? |-> (? :: (typedDeclaration(unionType(S:Id), #NoName) => L:List{Type}) :: ?) ...</ structs >
+		--- : KSentence .
 		
 	mb rule
 		NameAndType(X:Id, T:Type) => typedDeclaration(T:Type, X:Id)
-		: KSentence .
+		: KSentence [metadata "structural"] .
 		
 	eq extractActualType(T:BaseType) = T:BaseType .
 	eq extractActualType(enumType(X:Id)) = enumType(X:Id) .
@@ -614,7 +602,7 @@ mod COMMON-C-TYPING is
 	
 	mb rule
 		SingleName(T:Type, Name(X:Id, K:K)) => NameAndType(X:Id, DeclType(T:Type, K:K))
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb [Separate-FieldGroups]: rule
 		FieldGroup(K:K, (C:C :: C':C :: L:List{C})) => FieldGroup(K:K, C:C) :: FieldGroup(K:K, (C':C :: L:List{C}))
 		: KSentence [metadata "structural"] .
@@ -623,11 +611,11 @@ mod COMMON-C-TYPING is
 		: KSentence [metadata "structural"] .
 	mb rule
 		FieldGroup(T:Type, Name(X:Id, K:K)) => NameAndType(X:Id, DeclType(T:Type, K:K))
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	mb rule
 		FieldGroup(T:Type, BitFieldName(Name(X:Id, K:K), Size:K))
 		=> NameAndType(X:Id, DeclType(T:Type, BitFieldType(K:K, Size:K)))
-		: KSentence .
+		: KSentence [metadata "structural"] .
 	eq FieldName(K:K) = K:K .
 	
 	ceq isAType T:Type = true
@@ -806,7 +794,9 @@ mod COMMON-C-TYPING is
 		< structs >... S:Id |-> (? :: typedDeclaration(T:Type, F:Id) :: ?) ...</ structs >
 		: KSentence [metadata "structural"] .
 
-	mb rule < type > N:Nat => cfg:largestUnsigned ...</ type > : KSentence .
+	--- internal numbers, not literals
+	mb rule < type > N:Nat => cfg:largestUnsigned ...</ type > 
+		: KSentence [metadata "structural"] .
 
 	mb [type-deref-type]: rule
 		< type > *(pointerType(T:Type)) => T:Type ...</ type >
