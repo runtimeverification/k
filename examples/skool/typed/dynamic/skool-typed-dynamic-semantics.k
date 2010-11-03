@@ -11,8 +11,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax Val ::= Int | Bool
 
 ---<SKOOL added>
-  syntax Val ::= super | objAddress ( Id , Nat )
-  syntax Val ::= obj ( Bag )
+  syntax Val ::= super | objAddress ( Id , Nat ) [latex "obj({#1},{#2})"]
+  syntax Val ::= obj ( Bag ) [latex "{#1}"]
 ---</SK00L added>
 
 --- array values are wrapped as specific values
@@ -57,7 +57,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                                     <extends> Id:Id </extends>
                                     <declarations> .K </declarations>
                            </class*>
-                           <subClassRel> .Set </subClassRel>
                      </classes>
 ---</SKOOL added>
                 </T>
