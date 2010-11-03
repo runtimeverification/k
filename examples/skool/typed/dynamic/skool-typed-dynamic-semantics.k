@@ -11,8 +11,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax Val ::= Int | Bool
 
 ---<SKOOL added>
-  syntax Val ::= Object
-  syntax Object ::= obj ( List )
+  syntax Val ::= super | objAddress ( Id , Nat )
+  syntax Val ::= obj ( Bag )
 ---</SK00L added>
 
 --- array values are wrapped as specific values
@@ -20,7 +20,10 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- function value; like arrays, functions also evaluate to 
 ---    their address (wrapped as a specific value)
-  syntax Val ::= function( Type , Nat )
+---<SKOOL modified>
+--- added object and class info for functions
+  syntax Val ::= function ( Type , K , Id ,  Nat )
+---</SKOOL modified>
   ---  op function : Nat -> Val   
   syntax Val ::= lambda ( List{Id} , Stmt ) [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
 
@@ -45,25 +48,313 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                      <return> none </return>
                      <nextLoc> 1 </nextLoc>
 ---<SKOOL added>
-                     <crntObj> .List </crntObj>
+                     <crntObj> .K </crntObj>
                      <crntClass> main </crntClass>
-                     <pgm>
+                     <wrkObj> .K </wrkObj>
+                     <classes>
                            <class*> 
                                     <className> Id:Id </className>
                                     <extends> Id:Id </extends>
-                                    <fields> .K </fields>
-                                    <methods> .Map </methods>
+                                    <declarations> .K </declarations>
                            </class*>
                            <subClassRel> .Set </subClassRel>
-                     </pgm>
+                     </classes>
 ---</SKOOL added>
                 </T>
 
+  syntax CellLabel ::= envStack 
+
+
+-------------------------------
+--- declarations processing ---
+-------------------------------
+
+--- variable declaration; in the preprocessing phase only the global variables are processed 
+--- this rule is also used process the local variables of a function
+---   as a part of the function evaluation 
+
+  rule <k> var X:Id : T:Type ; => .K <_/k> 
+       <env> Env:Map => Env[L:Nat / X] </env> 
+       <store_> .Map => L |-> initVal(T) <_/store>
+       <nextLoc> L => sNat(L) </nextLoc> 
+
+--- If an array is declared, then calculate its size; 
+
+  context var X:Id[[HOLE]] : T ;
+  rule <k> var X[N:Nat] : _`[`](T) ; => .K <_/k> 
+       <env> Env => Env[L/X] </env>
+       <store_>. => L |-> array(T, sNat L, N) sNat(L)..sNat(L)+Nat N |-> initVal(T) <_/store>
+       <nextLoc> L => sNat L +Nat N </nextLoc> 
+  rule (sizeOf(array(_,_,N)) => N)   
+
+---<SKOOL modified>
+
+  rule <k> (method F:Id(XTl:List{IdType}) : Tp S:Stmt => .) <_/k> 
+       <env> Env => Env[L/F] </env> 
+       <nextLoc> L => L +Nat 2 </nextLoc> 
+       <crntClass> C </crntClass>
+       <crntObj> Obj:K </crntObj> 
+       <store_>(.Map => L |-> function`(_`,_`,_`,_`)((typeList(XTl)->Tp), Obj, C, sNat L) 
+                  sNat(L) |-> lambda(idList(XTl),S))<_/store>
+
+--- the followings are added
+
+--- a class traversal
+  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => .K <_/k>
+       <classes_> (. => <class_>
+                           <className> C1 </className>          
+                           <extends> C2 </extends>
+                           <declarations> Ss </declarations>
+                   <_/class>)
+       <_/classes>
+
+--- variable member declaration
+
+--- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
+---   call main and initialize the global environment
+---  the following is removed
+---  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
+
+---    ... and the following added:
+  rule <k> . => new_`(_`)(main, .List{Bottom}) </k>
+       <env> Env => . </env>
+       <genv> . => Env </genv>
+       <crntClass> _ => main </crntClass>
+
+
+---</SKOOL modified>
+
+-------------------
+--- Expressions ---
+-------------------
+
+--- variable lookup
+
+  rule <k> X:Id => V:Val <_/k>  
+       <env_> X |-> L:Nat <_/env>
+       <store_> L |-> V <_/store> 
+
+---<SKOOL extension>
+  --- if an id is not in the local environment assume it's a field 
+  --- static lookup for fields
+  rule <k> X:Id => _._(this,X) <_/k>
+       <env> Env:Map </env>
+       if notBool(X in keys(Env)) [structural]
+
+  rule <k> this => objAddress(C,L) <_/k>  
+       <crntObj> objAddress(_,L) </crntObj>
+       <crntClass> C </crntClass>
+
+  rule <k> _._((super => objAddress(C',L)),X) <_/k>
+       <crntObj> objAddress(_,L) </crntObj>
+       <crntClass> C </crntClass>
+       <className> C </className> 
+       <extends> C' </extends>
+
+  syntax K ::= lookupF ( Bag , Id )
+  syntax K ::= location ( Nat ) 
+
+  --- looking up in object
+  rule <k> _._(objAddress(C,L),X) => lookupF(<envStack>  (C :: EnvC:Bag) EStack:List </envStack>, X) <_/k>
+      <store_> L |-> obj(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
+ 
+  --- lookup using object environment
+  rule lookupF(<envStack> _ :: <env_>  X |-> L:Nat <_/env> <_/envStack>,X) => lookup(L)  
+
+  --- recursing through the object environment stack
+  rule lookupF(<envStack> _ :: <env> Env </env>  => . <_/envStack>, X)
+       if notBool(X in keys(Env)) [structural]
+
+---</SKOOL extension>
+
+--- arithmetic expressions
+
+  rule <k> ++X => I:Int +Int 1 <_/k>
+       <env_> X |-> L:Nat <_/env>
+       <store_> L |-> (I => I +Int 1) <_/store> 
+  rule I1:Int + I2:Int => I1 +Int I2 
+  rule _-_(I1,I2) => _-Int_(I1,I2) 
+  rule I1 * I2 => I1 *Int I2 
+  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0 
+  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0 
+  rule - I => -Int I 
+  rule I1 < I2 => I1 <Int I2 
+  rule I1 <= I2 => I1 <=Int I2 
+  rule I1 > I2 => I1 >Int I2 
+  rule I1 >= I2 => I1 >=Int I2 
+  rule V1:Val == V2:Val => V1 ==Bool V2 
+  rule V1 != V2 => V1 =/=Bool V2 
+  rule B1:Bool and B2:Bool => B1 andBool B2 
+  rule B1 or B2 => B1 orBool B2 
+  rule not(B:Bool) => notBool(B) 
+
+--- array component value:
+
+  rule array(_,L,M:Nat)[N:Nat] => lookup(L +Int N) 
+    if N >=Nat 0 andBool N <=Nat M [structural]
+  syntax K ::= lookup Nat
+  rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
+
+--- read expression
+
+  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
+
+---<SKOOL added>
+--- new operator
+---   the semantics of the new operator consists of two actions: memory allocation for the new object
+---   and the execution of the statements included in the constructor
+---   the current class, environment and object are stored on the stack
+
+  rule <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C)~> addGEnvLayer ~> setCrntClass(C) ~> _`(_`)(C, Vl); return this ; </k>
+       <env> Env:Map => . </env>
+       <crntObj> Obj => objAddress(C,L) </crntObj>
+       <crntClass> C1:Id </crntClass>
+       <return> T:Type => C </return>
+       <nextLoc> L => sNat L </nextLoc>
+       <store_> . => L |-> obj(<envStack> .List </envStack>) <_/store>
+       <fstack> . => Env # K # Obj # C1 # T <_/fstack>
+
+
+--- create a new object (memory allocation)
+---   usually, an object is an instance of a class from an hierarchy
+---   a memory object representation is a layered structure: for each class lying on the path 
+---   from the current class to the root of the hierarchy there is a layer including the memory
+---   allocation for the variable members of that class
+  rule <k> create(C) => Ss ~> addOEnvLayer ~> create(C1) <_/k>
+       <crntClass> _ => C </crntClass>
+       <classes_>
+            <class_>
+                   <className> C </className>
+                   <extends> C1 </extends>
+                   <declarations> Ss:Stmts </declarations>
+            <_/class>
+       <_/classes>
+  rule <k> create(object) => .K <_/k>
+
+--- add a new tagged environment layer to the  current object
+  rule <k> addOEnvLayer => . <_/k>
+       <env> Env => . </env>
+       <crntObj> objAddress(_,L) </crntObj>
+       <crntClass> C </crntClass>
+       <store_> L |-> obj(<envStack_> . => (C::<env>Env</env>)</envStack>)
+       <_/store>
+
+--- add the global environment as the default layer
+  rule <k> addGEnvLayer => . <_/k>
+       <genv> Env </genv>
+       <crntObj> objAddress(_,L) </crntObj>
+       <store_> L |-> obj(<envStack_> . => (@global::<env>Env</env>)</envStack>)
+       <_/store>
+
+
+  rule <k> setCrntClass(C) => . <_/k>  <crntClass> _ => C </crntClass>
+
+--- instanceOf operator
+
+  rule <k> _instanceOf_(V, C) => instanceof(V,C,Cls) <_/k>
+       <classes> Cls:Bag </classes>
+
+---</SKOOL added>
+
+---------------------
+--- method call ---
+---------------------
+
+---<SKOOL modified>
+
+  --- dynamic method dispatch: methods are looked up from top of object
+
+  rule <k> _`(_`)((X => _._(this,X)),_) <_/k>
+
+  context _`(_`)(_._([HOLE],X),_)  
+
+  rule <k> '_`(_`)(('_._(objAddress(_,L),,X) => lookupF(Envs:Bag, X)),,_) <_/k>
+      <store_> L |-> obj(Envs) <_/store>
+
+  --- except for super which should lookup method statically
+  rule <k> '_`(_`)(('_._(super,,X) => lookupF(<envStack> EStack </envStack>, X)),,_) <_/k>
+      <crntObj> objAddress(_,L) </crntObj>
+      <crntClass> C </crntClass>
+      <store_> L |-> obj(<envStack_>  (C :: EnvC:Bag) EStack:List </envStack>) <_/store>
+
+
+  rule <k> '_`(_`)((lookup(L) => V),,_) <_/k>
+       <store_> L |-> V <_/store>
+
+
+
+--- the environment and the computation are pushed in the stack at each function call
+
+
+ rule <k> _`(_`)(function`(_`,_`,_`,_`)(Tpl:List{Type}->Tp,Obj, C,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
+       <fstack> . => Env # K # Obj' # C' # Tp' <_/fstack>
+       <crntObj> Obj':K => Obj </crntObj>
+       <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
+       <return> Tp':Type => Tp </return>
+       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
+       <nextLoc> N => N +Nat |Xl| </nextLoc>
+       <crntClass> C':Id => C </crntClass>
+       <classes> Cls </classes>
+    if instanceof(Vl, Tpl, Cls)
+
+  rule <k> return(V); ~> _ => V ~> K </k>
+       <fstack> Env # K # Obj # C # Tp' => . <_/fstack>
+       <crntClass> _ => C </crntClass>
+       <crntObj> _ => Obj </crntObj>
+       <env> _ => Env </env>
+       <return> Tp => Tp' </return>
+       <classes> Cls </classes>
+    if instanceof(V, Tp, Cls)
+
+---</SKOOL modified>
+
+------------------------------
+--- instruction processing ---
+------------------------------
+  rule {} => .
+  rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
+  rule S1:Stmt S2:Stmt => S1~>S2 
+
+---<SKOOL modified> 
+  rule <k> X=V1; => . <_/k> <env_> X|->L <_/env> <store_> L|->(V2=>update(V2,V1)) <_/store>
+       <classes> Cls </classes>
+    if instanceof(V1, typeOf(V2),Cls)
+
+  rule <k> (X => _._(this,X)) =_; <_/k> <env> Env </env> if notBool(X in keys(Env))
+  
+  context _._([HOLE],_)=_;
+
+ ---similar lookup as for variables
+  rule <k> '_=_;((_._(objAddress(C,L), X)  => lookupF(<envStack>  (C :: EnvC) EStack:List </envStack>, X)),,_) <_/k>
+      <store_> L |-> obj(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
+ 
+  syntax K ::= update ( K , K )
+  macro update(objAddress(C,_), objAddress(_,L)) = objAddress(C,L) 
+  macro update(V1,V2) = V2 [owise]
+
+---</SKOOL modified>
+
+ --- for array assignment, first evaluate the array and its index
+  context _[[HOLE]]=_;
+  context [HOLE][_]=_;
+---<SKOOL typed modified>
+  rule <k> '_=_;(lookup(L),,V1) => . <_/k>
+       <store_> L |-> (V2 => update(V2,V1)) <_/store> 
+       <classes> Cls </classes>
+       if instanceof(V1, typeOf(V2), Cls)
+---</SKOOL type modified>
+  rule V; => . 
+  rule if true then S:Stmt else _ => S:Stmt
+  rule if false then _ else S => S 
+  rule <k> while E:Exp do S  => if E then {S while E do S} else {} <_/k>
+  rule <k> write(I:Int); => . <_/k> <out_> . => ListItem(I) </out>
 
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
+
+
   syntax Val ::=
                  initVal ( Type )
                | none 
@@ -71,13 +362,15 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro initVal(bool) = false 
   macro initVal(void) = none 
   macro initVal(_`[`](T:Type)) = array(_`[`](T),0,0) 
+  macro initVal(C:Id) = objAddress(C,0)
 
   syntax List{Type} ::= typeOf ( List{Val} ) [strict]
 ---<SKOOL added>
 ---  syntax List{Bottom} ::= typeOf ( List{Bottom} ) [ditto]
 ---  syntax Type ::= typeOf ( Val ) [ditto]
 ---</SKOOL added>
-  macro typeOf(function(T, _)) = T 
+
+  macro typeOf(function`(_`,_`,_`,_`)(T,_,_,_)) = T 
   macro typeOf(array(T,_,_)) = T
   macro typeOf(I:Int) = int 
   macro typeOf(B:Bool) = bool 
@@ -85,8 +378,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro typeOf(V1:Val,V2:Val,Vl:List{Val}) = typeOf(V1),typeOf(V2,Vl) 
   macro typeOf(.List{Bottom}) = .List{Bottom} 
 ---<SKOOL added>
-  macro typeOf(initVal(type(C:Id))) = type(C:Id)
-  macro typeOf(obj((C :: Env:Map) OEnv:List)) = type(C)
+  macro typeOf(objAddress(C,_)) = C
+  macro typeOf(obj(<envStack> C :: _ <_/envStack>)) = C
 ---</SKOOL added>
   syntax List{Id} ::= idList ( List{IdType} ) 
   macro idList(.List{Bottom}) = .List{Bottom} 
@@ -118,389 +411,39 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> V:Val ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
 ---<SKOOL added>
---- getloc: returns the "location" of an object X 
----  we use 0 as null and  start to allocate locations from 1 (see config. above)
-  syntax Nat ::= null | getloc ( Id , List ) [strict]
-  rule null => 0 [structural]
-
-  rule getloc(X, ( ( C:Id :: .) Obj:List )) => getloc(X, Obj ) [structural]
-  rule getloc(X, ( ( C :: ( Y:Id |-> L:Nat Env )) Obj ))
-       => if (X ==Bool Y) then L else getloc(X,  ((C ::  Env )Obj)) fi [structural]
-  rule getloc(X, .) => null [structural]
 
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
-  syntax ListItem ::= Id :: Map [metadata "latex(renameTo _\\ensuremath{\\mathrel{::}}_)"]
+  syntax ListItem ::= Id :: Bag [metadata "latex(renameTo _\\ensuremath{\\mathrel{::}}_)"]
 --- the following is nedeed for stacking
-  syntax ListItem ::=  [ Id , Map , K , Type ]
+  syntax ListItem ::=    Map # K # K # Id # Type 
 --- the following are needed at the creation of a new object and at a method call
-  syntax K ::= restore ( List ) | discard
-  syntax KLabel ::= create | invoke | addOEnvLayer 
+  syntax K ::= restore ( K ) | discard | addGEnvLayer |  addOEnvLayer 
+  syntax KLabel ::= create | setCrntClass
 --- the names for the local environment and the global environments for an object
   syntax Id ::= @local | @global
 
 --- subtype relationship
 
-  syntax SetItem ::= Id <: Id
-
---- transitive closure
-
-  rule <subClassRel>  
-                   (C1:Id <: C2:Id) (C2 <: C3:Id) R:Set
-                    =>
-                   (C1 <: C2) (C2 <: C3) (C1 <: C3) R
-       </subClassRel>
-       if  (C1 <: C3) in R ==Bool false
-       [structural]
-
-  syntax Bool ::= subType ( List{Type} , List{Type} , Set ) [strict]
-  macro subType(Tl:List{Type}, Tl, R) = true
-  macro subType(type(C1), type(C2), ((C1 <: C2) R)) = true 
----  macro subType((T1:Type , Tl2:List{Type}), (T1':Type , Tl2':List{Type}), R)
----        =
----        subType(T1, T1', R) andBool subType(Tl2, Tl2', R)
-  macro subType(int, type(C2), R) = false 
-  macro subType(bool, type(C2), R) = false 
-  macro subType(void, type(C2), R) = false 
-  macro subType(type(C1), int, R) = false 
-  macro subType(type(C1), bool, R) = false 
-  macro subType(type(C1), void, R) = false 
+  syntax Bool ::= instanceof ( List{Val} , List{Type} , Bag ) 
+  macro instanceof((V,V':Val,Vl),(Tp:Type,Tp':Type,Tpl:List{Type}), Cls) = instanceof(V,Tp, Cls) andBool instanceof((V',Vl), (Tp',Tpl), Cls)
+  macro instanceof(.List{Bottom},.List{Bottom},_) = true 
+  macro instanceof(I, int,_) = true
+  macro instanceof(B, bool,_) = true
+  macro instanceof(none,void,_) = true
+  macro instanceof(objAddress(C,_), C,_) = true
+  macro instanceof(objAddress(object,_), C,_) = C ==Bool object
+  rule instanceof(objAddress(C1 => C2, _), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>)) 
+      [structural]
+  macro instanceof(I, C2,_) = false 
+  macro instanceof(B, C2,_) = false 
+  macro instanceof(none, C2,_) = false 
+  macro instanceof(objAddress(_,_), int,_) = false 
+  macro instanceof(objAddress(_,_), bool,_) = false 
+  macro instanceof(objAddress(_,_), void,_) = false 
 
 ---</SKOOL added>
 
--------------------------------
---- declarations processing ---
--------------------------------
 
---- variable declaration; in the preprocessing phase only the global variables are processed 
---- this rule is also used process the local variables of a function
----   as a part of the function evaluation 
-
-  rule <k> var X:Id : T:Type ; => .K <_/k> 
-       <env> Env:Map => Env[L:Nat / X] </env> 
-       <store_> .Map => L |-> initVal(T) <_/store>
-       <nextLoc> L => sNat(L) </nextLoc> 
-
---- If an array is declared, then calculate its size; 
-
-  context var X:Id[[HOLE]] : T ;
-  rule <k> var X[N:Nat] : _`[`](T) ; => .K <_/k> 
-       <env> Env => Env[L/X] </env>
-       <store_>. => L |-> array(T, sNat L, N) <_/store>
-       <nextLoc> L => sNat L +Nat N </nextLoc> 
-  rule (sizeOf(array(_,_,N)) => N)   
-
----<SKOOL modified>
-
---- the following rule from Simple are removed (commented)
----  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k> 
----       <env> Env => Env[L/F] </env> 
----       <nextLoc> L => L +Nat 2 </nextLoc> 
----       <store_>(.Map => L |-> function(sNat L) sNat(L) |-> lambda(Xl,S))<_/store>
-
---- the followings are added
-
---- a class traversal
-  --- the following is used to know where a class preprocessing is finished
-  syntax K ::= classProcessing ( Id ) | classProcessingDone
-  rule <k> class C1:Id extends C2:Id { Ss:Stmts } => classProcessing (C1) <_/k>
-       <pgm_> (. => <class_>
-                           <className> C1 </className>          
-                           <extends> C2 </extends>
-                           <fields> Ss ~> classProcessingDone </fields>
-                   <_/class>)
-               <subClassRel_> . => C1 <: C2 <_/subClassRel>
-       <_/pgm>
-
---- variable member declaration
- 
-  rule <k> classProcessing(C:Id) <_/k>
-       <pgm_>
-            <class_>
-                     <className> C </className>
-                     <fields> var X:Id : T; ~> K:K => K ~> var X:Id : T; </fields>
-            <_/class>
-       <_/pgm>
-
-  rule <k> classProcessing(C) <_/k>
-       <pgm_>
-            <class_>
-                     <className> C </className>
-                     <fields> var X[ N:Nat ] : _`[`](T); ~> K => K ~> var X[ N ] : _`[`](T); </fields>
-            <_/class>
-       <_/pgm>
-
---- method declaration
-
-  rule <k> classProcessing(C) <_/k>
-       <pgm_>
-            <class_>
-                     <className> C </className>
-                     <fields> method F:Id(XTl:List{IdType}) : T S:Stmt => .K <_/fields>
-                     <methods> Env:Map => Env[L/F] </methods>
-            <_/class>
-       <_/pgm>  
-       <nextLoc> L:Nat => L +Nat 2 </nextLoc> 
-       <store_>(.Map => L |-> function(typeList(XTl) -> T, sNat L) sNat(L) |-> lambda(idList(XTl), S))<_/store>
-
---- finish processing a class
-
-  rule <k> classProcessing(C) => .K <_/k>
-        <class_>
-                <className> C </className>
-                <fields> classProcessingDone => . <_/fields>
-       <_/class>
-
---- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
----   call main and initialize the global environment
----  the following is removed
----  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
-
----    ... and the following added:
-  rule <k> . => new_`(_`)(main, .List{Bottom}) </k>
-       <env> Env => . </env>
-       <genv> . => Env </genv>
-       <crntClass> _ => main </crntClass>
-
-
----</SKOOL modified>
-
--------------------------------------
---- Evaluation of the expressions ---
--------------------------------------
-
---- variable lookup
-
----<SKOOL modified>
----  rule <k> X:Id => V:Val <_/k>  
----       <env_> X |-> L:Nat <_/env>
----       <store_> L |-> V <_/store> 
-
-  rule <k> X:Id => Store(getloc(X, ((@local :: Env) ((C :: Env1) Obj)(@global :: GEnv)))) <_/k>
-       <env> Env:Map </env>
-       <genv> GEnv:Map </genv>
-       <crntObj_> (C:Id :: Env1:Map) Obj:List </crntObj>
-       <crntClass> C </crntClass>
-       <store> Store:Map </store>  
-  rule <k> this =>  obj(Obj) <_/k>
-       <crntObj> Obj </crntObj>
----</SKOOL modified>
-
---- arithmetic expressions
-
-  rule <k> ++X => I:Int +Int 1 <_/k>
-       <env_> X |-> L:Nat <_/env>
-       <store_> L |-> (I => I +Int 1) <_/store> 
-  rule I1:Int + I2:Int => I1 +Int I2 
-  rule _-_(I1,I2) => _-Int_(I1,I2) 
-  rule I1 * I2 => I1 *Int I2 
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0 
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0 
-  rule - I => -Int I 
-  rule I1 < I2 => I1 <Int I2 
-  rule I1 <= I2 => I1 <=Int I2 
-  rule I1 > I2 => I1 >Int I2 
-  rule I1 >= I2 => I1 >=Int I2 
-  rule V1:Val == V2:Val => V1 ==Bool V2 
-  rule V1 != V2 => V1 =/=Bool V2 
-  rule B1:Bool and B2:Bool => B1 andBool B2 
-  rule B1 or B2 => B1 orBool B2 
-  rule not(B:Bool) => notBool(B) 
-
---- array component value:
-
-  rule <k> array(_,L,_)[N:Nat] => Sigma:Map(L +Int N) <_/k> <store> Sigma </store> .
-                                --- untyped SKOOL does not check array bounds
---- read expression
-
-  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
-
----<SKOOL added>
---- new operator
----   the semantics of the new operator consists of two actions: memory allocation for the new object
----   and the execution of the statements included in the constructor
----   the current class, environment and object are stored on the stack
-
-  rule <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C)~>invoke(_`(_`)(C, Vl))</k>
-       <env> Env:Map => . </env>
-       <crntObj> Obj:List => . </crntObj>
-       <crntClass> C1:Id => C </crntClass>
-       <return> T:Type => type(C) </return>
-       <fstack> . => [ C1, Env, (discard ~> this ~> restore(Obj)~>K), T ] <_/fstack>
-
---- create a new object (memory allocation)
----   usually, an object is an instance of a class from an hierarchy
----   a memory object representation is a layered structure: for each class lying on the path 
----   from the current class to the root of the hierarchy there is a layer including the memory
----   allocation for the variable members of that class
-  rule <k> create(C) => Fs ~> addOEnvLayer(C:Id) ~> create(C1) <_/k>
-       <pgm_>
-            <class_>
-                   <className> C </className>
-                   <extends> C1 </extends>
-                   <fields> Fs:Stmts </fields>
-            <_/class>
-       <_/pgm>
-       if C1 =/=Bool object
-  rule <k> create(C) => Fs ~> addOEnvLayer(C:Id) <_/k>
-       <pgm_>
-            <class_>
-                   <className> C </className>
-                   <extends> object </extends>
-                   <fields> Fs:Stmts </fields>
-            <_/class>
-       <_/pgm>
-
---- add a new tagged environment layer to the  current object
-  rule <k> addOEnvLayer(C) => . <_/k>
-       <env> Env => . </env>
-       <crntObj_> . => (C :: Env) </crntObj>
-
---- discards the value (item?) from the top of the computation
-  rule <k> V:Val ~> discard => . <_/k>     
-
---- restore the current object
-  rule <k> V ~> restore(Obj) => V <_/k> 
-       <crntObj> _ => Obj </crntObj>
-
---- instanceOf operator
-
-  rule <k> _instanceOf_(obj( (C :: Env) Obj), C1) => true <_/k> if (C ==Bool C1)
-  rule <k> _instanceOf_(obj( (C :: Env) Obj), C1) => _instanceOf_(obj(Obj), C1) <_/k>
-       if (C =/=Bool C1) 
-  rule <k> _instanceOf_( obj(.), C1) => false <_/k>
-
----</SKOOL added>
-
----------------------
---- method call ---
----------------------
-
----<SKOOL modified>
-
---- the environment and the computation are pushed in the stack at each function call
-
----  syntax ListItem ::=  ( Map , K )
----  rule <k> _`(_`)(function(L),Vl:List`{Val`})~>K:K => S:Stmt~>return(0); </k> 
----       <fstack> .List => (Env:Map,K:K) <_/fstack>
----       <env> Env => GEnv:Map[N:Nat..N+Nat|Xl| / getList{K}(Xl)] </env>
----       <genv> GEnv </genv>
----       <store_> L:Nat |-> lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
----       <nextLoc> N => N +Nat |Xl| </nextLoc>
-
----  rule <k> return(V:Val); ~> _ => V ~> K </k>
----       <fstack> (Env,K) => . <_/fstack>
----       <env> _ => Env </env> 
-
---- method call: preprocessing
-  rule <k> (_._`(_`)(obj((C:Id :: Env:Map) Obj:List), F:Id, Vl:List{Val})) ~> K:K 
-           =>
-           invoke(_`(_`)(F:Id, Vl)) </k>
-       <crntClass> C1:Id => C:Id </crntClass>
-       <crntObj> Obj1:List => (C :: Env) Obj </crntObj>
-       <return> T:Type </return>
-       <env> Env1:Map => . </env>
-       <fstack> .List => [ C1, Env1, (restore(Obj1)~>K), T ] <_/fstack>
-  rule <k> super_`(_`)(F, Vl) ~> K => invoke(_`(_`)(F:Id, Vl)) </k>
-       <crntClass> C => C1 </crntClass>
-       <env> Env1 => . </env>
-       <fstack> .List => [ C, Env1, K, type(C) ] <_/fstack>
-       <pgm_>
-            <class_>
-                   <className> C </className>
-                   <extends> C1 </extends>
-            <_/class>
-       <_/pgm>
-
-  rule <k> invoke(_`(_`)(F:Id, Vl))
-           =>
-           (_`(_`)(function(Tl:List{Type} -> T, sNat L), Vl))
-       <_/k>
-       <crntClass> C </crntClass>
-       <pgm_>
-            <class_>
-                   <className> C </className>
-                   <methods_> F |-> L <_/methods>
-            <_/class>
-       <_/pgm>
-       <return> T':Type => T </return>
-       <store_> L |->  function(Tl:List{Type} -> T, sNat L) <_/store>
-  rule <k> invoke(_`(_`)(F:Id, Vl))
-           =>
-           invoke(_`(_`)(F:Id, Vl))
-       <_/k>
-       <crntClass> C => C1 </crntClass>
-       <pgm_>
-            <class_>
-                   <className> C </className>
-                   <extends> C1 </extends>
-                   <methods> Env </methods>
-            <_/class>
-       <_/pgm>
-       if $hasMapping( Env, F) ==Bool false 
-
---- method call: function value loading 
---- <OO modified>: the global environment not longer included in the local function call environment
-  rule <k>
-           _`(_`)(function(Tl -> T, L),Vl:List{Val})
-           =>
-           S:Stmt ~> return(initVal(T));
-       </k>
-       <env> _ => .Map[N..N+Nat|Xl| / getList{K}(Xl:List{Id})] </env>
-       <genv> GEnv </genv>
-       <store_> L:Nat |-> lambda(Xl,S) (. => N:Nat..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
-       <nextLoc> N => N +Nat |Xl| </nextLoc>
-       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
-       if subType(typeOf(Vl), Tl, R) ==Bool true
-
---- returning from a method call
-  rule <k> return(V:Val); ~> _ => V ~> K </k>
-       <fstack> [ C, Env, K, T':Type ] => .List <_/fstack>
-       <crntClass> _ => C </crntClass>
-       <env> _ => Env </env>
-       <return> T => T' </return>
-       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
-       if subType(typeOf(V),  T, R) ==Bool true
----</SKOOL modified>
-
-------------------------------
---- instruction processing ---
-------------------------------
-  rule {} => .
-  rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
-  rule S1:Stmt S2:Stmt => S1~>S2 
-
----<SKOOL modified> 
-  syntax Val ::= leftValue ( Nat )
-  rule <k> _=_;(X:Id, V:Val)
-           =>
-           _=_;(leftValue(getloc(X, ((@local :: Env) ((C :: Env1) Obj)(@global :: GEnv)))), V:Val) <_/k> 
-       <env> Env:Map </env> 
-       <genv> GEnv:Map </genv>
-       <crntObj_> (C:Id :: Env1:Map) Obj:List </crntObj>
-       <crntClass> C </crntClass>
-  rule <k> (_=_;(leftValue(L:Nat), V:Val)) => . <_/k> 
-       <crntClass> C </crntClass>
-       <pgm_> <subClassRel> R:Set </subClassRel> <_/pgm>
-       <store_>  L |-> (V1:Val => V) <_/store>
-       if  (typeOf(V) ==Bool typeOf(V1)) orBool (subType(typeOf(V), type(C), R) ==Bool true)
----</SKOOL modified>
-
- --- for array assignment, first evaluate the array and its index
-  context _[[HOLE]]=_;
-  context [HOLE][_]=_;
----<SKOOL typed modified>
-  syntax K ::= assignArray
-  rule <k> array(T:Type, L:Nat,M:Nat)[N:Nat]=V; => . <_/k>
-       <store> Sigma:Map => Sigma[V/(L +Int N)] </store> 
-       <pgm_> <subClassRel> R </subClassRel> <_/pgm>
-       if subType(typeOf(V), T, R) ==Bool true
----</SKOOL type modified>
-  rule V; => . 
-  rule if true then S:Stmt else _ => S:Stmt
-  rule if false then _ else S => S 
-  rule <k> while E:Exp do S  => if E then {S while E do S} else {} <_/k>
-  rule <k> write(I:Int); => . <_/k> <out_> . => ListItem(I) </out>
 endkm
-
 
 

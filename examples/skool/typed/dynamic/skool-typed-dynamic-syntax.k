@@ -7,7 +7,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
   syntax Id ::=
                  main
                | object 
-               | Id [ ] [prec 0]
+---               | Id [ ] [prec 0]
 
 ---</SKOOL added>
 
@@ -17,7 +17,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                 | Type [ ] [prec 0]
                 | List{Type} -> Type [metadata "latex(renameTo _\\ensuremath\\rightarrow_)"]
                 ---<SKOOL added>
-                | type ( Id )    --- for classes
+                | Id    --- for classes
                 ---</SKOOL added>
 
   syntax IdType ::= 
@@ -33,7 +33,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                      | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid] 
  
 --- List{Type}
-  syntax List{Type} ::= Type | List{Bottom} 
+  syntax List{Type} ::= Type | List{Id} 
                      | List{Type} , List{Type} [ditto] 
 
 --- List{Id}
@@ -51,7 +51,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
 
 --- List{Top}
   sort Top 
-  syntax List{Top} ::= Top | List{Type} | List{IdType} | List{Exp}
+  syntax List{Top} ::= Top | List{Type} | List{IdType} | List{Exp} 
                      | List{Top} , List{Top} [ditto]
 
 --- variable names
@@ -79,23 +79,20 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                 | Exp [ Exp ] [ditto strict] 
                 | sizeOf ( Exp ) [strict]
                 | Exp ( )
-                | Exp ( List{Exp} ) [prec 2 strict]
+                | Exp ( List{Exp} ) [prec 2 strict(2)]
                 | read ( )
              --- <SKOOL added>
                | new Id ( ) [prec 1]
                | new Id ( List{Exp} ) [prec 1 strict(2)]
                | this
-               | Exp . Id ( ) [prec 1 strict(1)] 
-               | Exp . Id ( List{Exp} ) [prec 1 strict(1 3)] 
-               | super Id ( ) [prec 1]
-               | super Id ( List{Exp} ) [prec 1 strict(2)]
+               | super
+               | Exp . Id [prec 1 strict(1)] 
                | Exp instanceOf Id [prec 0 strict(1)]
              --- </SKOOL added>
 
 --- declarations
   syntax VarDecl ::=
                 | var Var : Type ; [prec 2] 
-                | var Var : Id ; [prec 2] 
 --- <SKOOL modified>
 ---                | function Id ( ) : Type Stmt 
 ---                | function  Id ( List{IdType} ) : Type Stmt 
@@ -103,6 +100,9 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
   syntax MethodDecl ::=
                  method Id ( ) : Type Stmt 
                | method Id ( List{IdType} ) : Type Stmt 
+               | method Id ( ) Stmt 
+               | method Id ( List{IdType} ) Stmt 
+       
 
   syntax ClassDecl ::= 
                  class Id { Stmts }
@@ -115,7 +115,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                 | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
                 | Exp = Exp ; [prec 2 strict(2)]
                 | Exp ; [prec 50 strict]
-                | if Exp then Stmt else Stmt [strict]
+                | if Exp then Stmt else Stmt [strict(1)]
                 | if Exp then Stmt
                 | while Exp do Stmt [strict]
                 | for Id = Exp to Exp do Stmt
@@ -148,17 +148,14 @@ kmod SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX is including SKOOL-TYPED-SYNTAX
 ---  macro function F:Id() : Tp:Type S  = function F(.List{Bottom}) : Tp S
 ---  macro E() = E(.List{Bottom})
   macro method F:Id() : Tp:Type S = method F(.List{Bottom}) : Tp  S
+  macro method F:Id() S = method F() : F  S
+  macro method F:Id(L:List{IdType}) S = method F(L) : F  S
 --- </SKOOL modified>
   macro E() = E(.List{Bottom})
 
 --- <SKOOL added>
   macro O:Exp . F() = O . F(.List{Bottom}) 
   macro new C:Id() = new C(.List{Bottom})
-  macro O . F() = O . F(.List{Bottom})
-  macro super F() = super F(.List{Bottom})
-
-  macro var V:Var : C ;  = var V : type(C) ;  [owise]
-  macro var_:_;(V:Var, _`[`](C))  = var_:_;(V:Var, _`[`](type(C)))
 
   macro class C {Ss:Stmts} = class C extends object {Ss}
 --- </SKOOL added>

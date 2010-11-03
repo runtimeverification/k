@@ -70,13 +70,12 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
   macro p02 =
        class c {
          var x : int;
-         method c() : int { x = 5; return 0; }
+         method c() { x = 5; }
          method g() : int { return x; }
        }
        class main {
-         method main() : int {
+         method main() {
            write((new c()).g());
-	   return 0;
          }
        }
 --- 5
@@ -84,10 +83,9 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
        class c {
          var i : int;
          var j : int;
-         method c ( x : int ) : int {
+         method c ( x : int ) {
            i = x;
            j = ++x;
-	   return 0;
          }
          method add ( x : int ) : int {
            i = i+x;
@@ -118,19 +116,13 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
 
   macro p04 =
        class a {
-          method a() : int {
-             return 1;
-          }
           method m1(x : int) : int {
              return ++x;
           }
        }
        class b extends a {
           var x : int ;
-          method a () : int {
-             return 2;
-          }
-          method b() : void {
+          method b() {
              x = 3 ;
           }
        }
@@ -138,7 +130,7 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
           method m1(y : int) : int {
               return  y * y ;
           }
-          method main():void {
+          method main() {
              write(this.m1(3));
           }
        }
@@ -147,19 +139,13 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
 
   macro p05 =
        class a {
-          method a() : int {
-             return 1;
-          }
           method m1(x : int) : int {
              return x + 5;
           }
        }
        class b extends a {
           var x : int ;
-          method a () : int {
-             return 2;
-          }
-          method b() : void {
+          method b() {
              x = 3 ;
           }
        }
@@ -167,7 +153,7 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
           method m1(y : int) : int {
               return  y + x ;
           }
-          method main():void {
+          method main() {
              write(this.m1(3));
           }
        }
@@ -177,27 +163,24 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
   macro p06 =
        class a {
           var x : int;
-          method a() : int {
-             x = 1;
-             return x;
-          }
+          method a() {x=2;}
           method m1(x : int) : bool {
 ---             return (this.x) == x;
              return x == 1;
           }
+          method c() : int {
+             return x;
+          }
        }
        class b extends a {
           var x : bool ;
-          method a () : int {
-             x = true;
-             return 2;
-          }
-          method b() : void {
+          method b() {
              x = false ;
+             super.a();
           }
        }
        class main {             
-          method main():void {
+          method main() {
              var o[5] : a[];
              var p[4] : b[];
              var b : bool ;
@@ -207,7 +190,9 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
              o[3] = o[1];
              o[4] = p[3];
              b = p[3].m1(3);
-             write(p[3].a());
+             if (not b) then {
+               write(p[3].c());
+             }
           }
        }
 
