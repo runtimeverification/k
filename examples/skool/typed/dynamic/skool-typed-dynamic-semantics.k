@@ -50,7 +50,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---<SKOOL added>
                      <crntObj> .K </crntObj>
                      <crntClass> main </crntClass>
-                     <wrkObj> .K </wrkObj>
                      <classes>
                            <class*> 
                                     <className> Id:Id </className>
@@ -69,10 +68,10 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 -------------------------------
 
 --- variable declaration; in the preprocessing phase only the global variables are processed 
---- this rule is also used process the local variables of a function
+--- this rule is also used to process the local variables of a function
 ---   as a part of the function evaluation 
 
-  rule <k> var X:Id : T:Type ; => .K <_/k> 
+  rule [decl-variable]: <k> var X:Id : T:Type ; => .K <_/k> 
        <env> Env:Map => Env[L:Nat / X] </env> 
        <store_> .Map => L |-> initVal(T) <_/store>
        <nextLoc> L => sNat(L) </nextLoc> 
@@ -80,7 +79,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- If an array is declared, then calculate its size; 
 
   context var X:Id[[HOLE]] : T ;
-  rule <k> var X[N:Nat] : _`[`](T) ; => .K <_/k> 
+  rule [decl-array]: <k> var X[N:Nat] : _`[`](T) ; => .K <_/k> 
        <env> Env => Env[L/X] </env>
        <store_>. => L |-> array(T, sNat L, N) sNat(L)..sNat(L)+Nat N |-> initVal(T) <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc> 
@@ -88,7 +87,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 ---<SKOOL modified>
 
-  rule <k> (method F:Id(XTl:List{IdType}) : Tp S:Stmt => .) <_/k> 
+  rule [decl-method]: <k> (method F:Id(XTl:List{IdType}) : Tp S:Stmt => .) <_/k> 
        <env> Env => Env[L/F] </env> 
        <nextLoc> L => L +Nat 2 </nextLoc> 
        <crntClass> C </crntClass>
@@ -115,10 +114,10 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
 ---    ... and the following added:
-  rule <k> . => new_`(_`)(main, .List{Bottom}) </k>
+  rule [call-main]: <k> . => new_`(_`)(main, .List{Bottom}) </k>
        <env> Env => . </env>
        <genv> . => Env </genv>
-       <crntClass> _ => main </crntClass>
+       --- <crntClass> _ => main </crntClass>
 
 
 ---</SKOOL modified>
@@ -129,22 +128,22 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- variable lookup
 
-  rule <k> X:Id => V:Val <_/k>  
+  rule [lookup-var]: <k> X:Id => V:Val <_/k>  
        <env_> X |-> L:Nat <_/env>
        <store_> L |-> V <_/store> 
 
 ---<SKOOL extension>
   --- if an id is not in the local environment assume it's a field 
   --- static lookup for fields
-  rule <k> X:Id => _._(this,X) <_/k>
+  rule [lookup-field]: <k> X:Id => _._(this,X) <_/k>
        <env> Env:Map </env>
        if notBool(X in keys(Env)) [structural]
 
-  rule <k> this => objAddress(C,L) <_/k>  
+  rule [this]: <k> this => objAddress(C,L) <_/k>  
        <crntObj> objAddress(_,L) </crntObj>
        <crntClass> C </crntClass>
 
-  rule <k> _._((super => objAddress(C',L)),X) <_/k>
+  rule [super]: <k> _._((super => objAddress(C',L)),X) <_/k>
        <crntObj> objAddress(_,L) </crntObj>
        <crntClass> C </crntClass>
        <className> C </className> 
@@ -168,7 +167,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- arithmetic expressions
 
-  rule <k> ++X => I:Int +Int 1 <_/k>
+  rule [pre-inc]: <k> ++X => I:Int +Int 1 <_/k>
        <env_> X |-> L:Nat <_/env>
        <store_> L |-> (I => I +Int 1) <_/store> 
   rule I1:Int + I2:Int => I1 +Int I2 
@@ -189,14 +188,14 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- array component value:
 
-  rule array(_,L,M:Nat)[N:Nat] => lookup(L +Int N) 
+  rule [array-indexing]: array(_,L,M:Nat)[N:Nat] => lookup(L +Int N) 
     if N >=Nat 0 andBool N <=Nat M [structural]
   syntax K ::= lookup Nat
-  rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
+  rule [lookup-loc]: <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
 --- read expression
 
-  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
+  rule [input]: <k> read() => I <_/k> <in> (ListItem(I) => .) <_/in>
 
 ---<SKOOL added>
 --- new operator
@@ -204,7 +203,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---   and the execution of the statements included in the constructor
 ---   the current class, environment and object are stored on the stack
 
-  rule <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C)~> addGEnvLayer ~> setCrntClass(C) ~> _`(_`)(C, Vl); return this ; </k>
+  rule [new-object]: <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C)~> addGEnvLayer ~> setCrntClass(C) ~> _`(_`)(C, Vl); return this ; </k>
        <env> Env:Map => . </env>
        <crntObj> Obj => objAddress(C,L) </crntObj>
        <crntClass> C1:Id </crntClass>
@@ -219,7 +218,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---   a memory object representation is a layered structure: for each class lying on the path 
 ---   from the current class to the root of the hierarchy there is a layer including the memory
 ---   allocation for the variable members of that class
-  rule <k> create(C) => Ss ~> addOEnvLayer ~> create(C1) <_/k>
+  rule [object-allocate]: <k> create(C) => Ss ~> addOEnvLayer ~> create(C1) <_/k>
        <crntClass> _ => C </crntClass>
        <classes_>
             <class_>
@@ -250,7 +249,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- instanceOf operator
 
-  rule <k> _instanceOf_(V, C) => subtype(typeOf(V),C,Cls) <_/k>
+  rule [instanceOf]: <k> _instanceOf_(V, C) => subtype(typeOf(V),C,Cls) <_/k>
        <classes> Cls:Bag </classes>
 
 ---</SKOOL added>
@@ -263,6 +262,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   --- dynamic method dispatch: methods are looked up from top of object
 
+  --- rule <k> (X => _._(this,X))(_) <_/k> ?
   rule <k> _`(_`)((X => _._(this,X)),_) <_/k>
 
   context _`(_`)(_._([HOLE],X),_)  
@@ -426,11 +426,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax Bool ::= subtype ( List{Type} , List{Type} , Bag ) 
   macro subtype((Tp1:Type,Tp1':Type,Tpl1:List{Type}),(Tp:Type,Tp':Type,Tpl:List{Type}), Cls) = subtype(Tp1,Tp, Cls) andBool subtype((Tp1',Tpl1), (Tp',Tpl), Cls)
   macro subtype(.List{Bottom},.List{Bottom},_) = true 
-  macro subtype(int, int,_) = true
-  macro subtype(bool, bool,_) = true
-  macro subtype(void,void,_) = true
-  macro subtype(C, C,_) = true
-  macro subtype(object, C,_) = C ==Bool object
+  macro subtype(Tp, Tp, _) = true
+  macro subtype(object, C, _) = C ==Bool object
   rule subtype((C1 => C2), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>)) 
       [structural]
   macro subtype(int, C2,_) = false 
