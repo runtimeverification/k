@@ -250,7 +250,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- instanceOf operator
 
-  rule <k> _instanceOf_(V, C) => instanceof(V,C,Cls) <_/k>
+  rule <k> _instanceOf_(V, C) => subtype(typeOf(V),C,Cls) <_/k>
        <classes> Cls:Bag </classes>
 
 ---</SKOOL added>
@@ -294,7 +294,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <nextLoc> N => N +Nat |Xl| </nextLoc>
        <crntClass> C':Id => C </crntClass>
        <classes> Cls </classes>
-    if instanceof(Vl, Tpl, Cls)
+    if subtype(typeOf(Vl), Tpl, Cls)
 
   rule <k> return(V); ~> _ => V ~> K </k>
        <fstack> Env # K # Obj # C # Tp' => . <_/fstack>
@@ -303,7 +303,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <env> _ => Env </env>
        <return> Tp => Tp' </return>
        <classes> Cls </classes>
-    if instanceof(V, Tp, Cls)
+    if subtype(typeOf(V), Tp, Cls)
 
 ---</SKOOL modified>
 
@@ -317,7 +317,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---<SKOOL modified> 
   rule <k> X=V1; => . <_/k> <env_> X|->L <_/env> <store_> L|->(V2=>update(V2,V1)) <_/store>
        <classes> Cls </classes>
-    if instanceof(V1, typeOf(V2),Cls)
+    if subtype(typeOf(V1), typeOf(V2),Cls)
 
   rule <k> (X => _._(this,X)) =_; <_/k> <env> Env </env> if notBool(X in keys(Env))
   
@@ -340,7 +340,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> '_=_;(lookup(L),,V1) => . <_/k>
        <store_> L |-> (V2 => update(V2,V1)) <_/store> 
        <classes> Cls </classes>
-       if instanceof(V1, typeOf(V2), Cls)
+       if subtype(typeOf(V1), typeOf(V2), Cls)
 ---</SKOOL type modified>
   rule V; => . 
   rule if true then S:Stmt else _ => S:Stmt
@@ -423,22 +423,22 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- subtype relationship
 
-  syntax Bool ::= instanceof ( List{Val} , List{Type} , Bag ) 
-  macro instanceof((V,V':Val,Vl),(Tp:Type,Tp':Type,Tpl:List{Type}), Cls) = instanceof(V,Tp, Cls) andBool instanceof((V',Vl), (Tp',Tpl), Cls)
-  macro instanceof(.List{Bottom},.List{Bottom},_) = true 
-  macro instanceof(I, int,_) = true
-  macro instanceof(B, bool,_) = true
-  macro instanceof(none,void,_) = true
-  macro instanceof(objAddress(C,_), C,_) = true
-  macro instanceof(objAddress(object,_), C,_) = C ==Bool object
-  rule instanceof(objAddress(C1 => C2, _), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>)) 
+  syntax Bool ::= subtype ( List{Type} , List{Type} , Bag ) 
+  macro subtype((Tp1:Type,Tp1':Type,Tpl1:List{Type}),(Tp:Type,Tp':Type,Tpl:List{Type}), Cls) = subtype(Tp1,Tp, Cls) andBool subtype((Tp1',Tpl1), (Tp',Tpl), Cls)
+  macro subtype(.List{Bottom},.List{Bottom},_) = true 
+  macro subtype(int, int,_) = true
+  macro subtype(bool, bool,_) = true
+  macro subtype(void,void,_) = true
+  macro subtype(C, C,_) = true
+  macro subtype(object, C,_) = C ==Bool object
+  rule subtype((C1 => C2), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>)) 
       [structural]
-  macro instanceof(I, C2,_) = false 
-  macro instanceof(B, C2,_) = false 
-  macro instanceof(none, C2,_) = false 
-  macro instanceof(objAddress(_,_), int,_) = false 
-  macro instanceof(objAddress(_,_), bool,_) = false 
-  macro instanceof(objAddress(_,_), void,_) = false 
+  macro subtype(int, C2,_) = false 
+  macro subtype(bool, C2,_) = false 
+  macro subtype(void, C2,_) = false 
+  macro subtype(C, int,_) = false 
+  macro subtype(C, bool,_) = false 
+  macro subtype(C, void,_) = false 
 
 ---</SKOOL added>
 
