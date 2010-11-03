@@ -106,6 +106,7 @@ function runMaude {
   cp "$TFILE" $4
   printf ". Done!\n"
 }
+if [ -n "${DEBUG+x}" ]; then 
 
 OUTPUT="$FILE.maude"
 
@@ -123,6 +124,8 @@ TEST_INPUT="
 red in $PROGRAM_MODULE : $PROGRAM .
 "
 checkMaude "$OUTPUT" "$TEST_INPUT" "Testing the input program $PROGRAM exists"
+
+fi
 
 OUTPUT="$FILE.maude"
 
