@@ -1033,12 +1033,16 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< k > fillInitializer-aux(SingleInit(Constant(StringLiteral("")))) => . ...</ k >
 		--- if hasCharType(T:Type)
 		: KSentence [metadata "structural"] .
+		
+	--- this rule assumes all unrollings have already occurred, so it needs to be a rule
+	--- alternatively, i've added the condition below which might be enough
 	mb rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
 			=> initializeSingleInit(Constant(StringLiteral(S:String)))
 		...</ k >
 		< currentSubObject > ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		if notBool hasCharType(T:Type)
+		andBool (isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type))
 		: KSentence [metadata "structural"] .
 endm
 

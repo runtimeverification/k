@@ -809,7 +809,7 @@ mod COMMON-SEMANTICS-MEMBERS is
 	op toEval : K -> K .
 	op toEval-aux : K K -> K [metadata "strict(2)"] .
 	
-	mb rule
+	mb [dot]: rule
 		< k > K:K . F:Id => toEval(K:K . F:Id) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
@@ -819,6 +819,9 @@ mod COMMON-SEMANTICS-MEMBERS is
 	mb rule
 		< k > toEval-aux(K:K, arrayType(T:Type, N:Nat)) => &(K:K) ...</ k >
 		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > toEval-aux(K:K, arrayType(T:Type, N:Nat)) => cast(arrayType(T:Type, N:Nat), &(K:K)) ...</ k >
+		--- : KSentence [metadata "structural"] .
 	op toEval-value : K -> K .
 	mb context toEval-value(`[HOLE`]:K . ?) : KSentence .
 	mb rule
@@ -843,10 +846,10 @@ mod COMMON-SEMANTICS-DEREFERENCE is
 	---C99 6.5.3.2:4 The unary * operator denotes indirection. If the operand points to a function, the result is a function designator; if it points to an object, the result is an lvalue designating the object. If the operand has type "pointer to type", the result has type "type". If an invalid value has been assigned to the pointer, the behavior of the unary * operator is undefined.
 	---xxx also see 6.3.2.1:3 for why i made the result a pointerType
 	---- fixme this seems wrong
-	mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) 
-			=> tv(Loc:Nat, arrayType(T:Type, N:Nat)) 
-		...</ k > 
-		: KSentence [metadata "structural"] .
+	--- mb rule < k > *(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) 
+			--- => tv(Loc:Nat, arrayType(T:Type, N:Nat)) 
+		--- ...</ k > 
+		--- : KSentence [metadata "structural"] .
 	mb rule < k > *(tv(Loc:Nat, pointerType(incompleteArrayType(T:Type)))) 
 			=> tv(Loc:Nat, incompleteArrayType(T:Type)) 
 		...</ k > 

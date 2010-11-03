@@ -459,6 +459,10 @@ mod COMMON-SEMANTICS-CAST is
 		if hasIntegerType(T':Type)
 		andBool N:Nat ==Bool NullPointerConstant
 		: KSentence [metadata "structural"] .
+		
+	mb rule
+		cast(arrayType(T:Type, N:Nat), tv(N':Nat, T':Type)) => tv(N':Nat, arrayType(T:Type, N:Nat))
+		: KSentence [metadata "structural"] .
 
 	--- fixme there should only be casts to scalars, but these are generated when assigning to array types
 	--- mb rule
