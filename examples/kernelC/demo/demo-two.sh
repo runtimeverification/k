@@ -6,6 +6,7 @@ cp kernelc-race-detection-compiled.maude kernelc-compiled-demo.maude
 echo -en "\033[1;34m"
 echo "kcompile-program.sh pPeterson.k KERNELC_RACE-DETECTION KERNELC-PETERSON pPeterson"
 echo -en "\033[0m"
+cp pPeterson.c pPeterson.k
 kcompile-program.sh pPeterson.k KERNELC-RACE-DETECTION  KERNELC-PETERSON pPeterson
 echo -en "\033[1;34m"
 echo "in Maude:  search[1] run('pPeterson) =>* <raceDetected> B:Bag </raceDetected> ."

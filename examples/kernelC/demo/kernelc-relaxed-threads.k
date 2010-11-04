@@ -24,7 +24,7 @@ memory does contain v at a ;
 memory does contain v at a ; 
 ---)
   rule [global-deref]: <k> *N => V <_/k> <buffer> Mem </buffer> 
-      <mem_> N |-> V <_/mem> 
+      <mem_> N:Nat |-> V <_/mem> 
     if notBool(N in locations(Mem))
 
 
