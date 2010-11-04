@@ -24,6 +24,7 @@ kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   rule run ( L:KLabel , Il:List{K} ) => <T_> <k> L(.List{K}) ~> '_`(`)(main) </k> <in> List(Il) </in> <_/T> [structural]
 
   context *[HOLE]=_
+  context (*[HOLE])++
   
   rule I1:Int == I2:Int => Bool2Int(I1 ==Int I2) [structural] 
   rule I1 != I2 =>  Bool2Int((I1 !=Int I2)) [structural]
@@ -36,15 +37,13 @@ kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
   rule V:Val ; => . [structural]
   rule <k> X:Id => V <_/k>  <env_> X |-> V <_/env> [structural]
   rule <k> X:Id ++ => I <_/k>  <env_> X |-> (I => I +Int 1) <_/env> [structural]
-  rule <k> X:Id -- => I <_/k>  <env_> X |-> (I => _-Int_(I,1)) <_/env> [structural]
   rule <k> X = V => V <_/k> <env_> X |-> (_ => V) <_/env> [structural]
   rule <k> while(E:Exp) St => if (E) {St while(E) St} else {} <_/k> [structural]
 
-  rule <k> printf("%d;",I) => void <_/k>
+  rule [print]: <k> printf("%d;",I) => void <_/k>
        <out> S:String => S +String Int2String(I) +String ";" </out>
-  rule <k> scanf("%d",N) => void <_/k> <mem_> N |-> (_ => I) <_/mem> <in> ListItem(I) => . <_/in>
-  rule <k> scanf("%d",&X) => void <_/k> <env_> X |-> (_ => I) <_/env> <in> ListItem(I) => . <_/in>
-  [structural]
+  rule [read-global]: <k> scanf("%d",N) => void <_/k> <mem_> N |-> (_ => I) <_/mem> <in> (ListItem(I) => .) <_/in>
+  rule [read-local]: <k> scanf("%d",&X) => void <_/k> <env_> X |-> (_ => I) <_/env> <in> (ListItem(I) => .) <_/in>
 
 ---  rule #include<stdio.h> #include<stdlib.h> Sts:StmtList => Sts:StmtList 
 ---      [structural]
@@ -82,6 +81,7 @@ kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONV
 endkm
 
 kmod KERNELC-CONSISTENT-MEMORY is including KERNELC-BASIC-SEMANTICS 
-  rule <k> *N:Nat => V:Val <_/k> <mem_> N |-> V <_/mem>
-  rule <k> *N=V => V <_/k> <mem_> N |-> (_ => V) <_/mem>
+  rule [deref]: <k> *N:Nat => V:Val <_/k> <mem_> N |-> V <_/mem>
+  rule [increment]: <k> (*N)++ => I:Int <_/k> <mem_> N |-> (I => I +Int 1) <_/mem>
+  rule [update]: <k> *N=V => V <_/k> <mem_> N |-> (_ => V) <_/mem>
 endkm

@@ -1,0 +1,99 @@
+# Whitelist the following cells
+T:
+  cell-style:
+    bold: yes
+    background: black
+  text-style:
+    foreground: green
+k:
+  keep: 1
+  keep-chars: 70
+  cell-style:
+    underlined: yes
+    bold: yes
+race:
+  keep: 1
+  keep-chars: 70
+  cell-style:
+    foreground: red
+
+env: show
+fstack: show
+mem: show
+locks: show
+result: 
+  cell-style:
+    foreground: white
+
+id: show
+
+threads:
+  cell-style:
+    foreground: white
+thread:
+  cell-style:
+    foreground: black
+
+# Options (special cell)
+options:
+  global-substitutions:
+    - "`(`.List{K}`)": ""                   # Get rid of (.List{K})
+    - "Id ": ""                             # Remove Id
+    - "Int ": ""                            # Remove Int
+    - "call ": ""                            # Remove Int
+    - ",,": ", "                            # Condence commas
+    - " , " : ", "                          # Remove a preceeding whitespace, e.g. for the BaseValue conversion
+    - "`(0 `+Nat sym`((`d+)`)`)": "`1"      # Change the destination field of the values in a map
+    - "kList`(\"wklist_\"`)": ""            # Get rid of the wklist
+    - "String (\"[^\"]*\")": "`1"           # Get rid of the stuff surrounding strings
+  spaceless-cells: yes
+  indent: 2                                 # Number of spaces to indent each cell (default: 1)
+#  end-cell-linebreak: yes                   # Whether to line break before the end of a cell
+  infixify: yes
+  line-end: " ..."                            # What we want to be displayed at the end of truncated lines
+  syntax-highlighting:                      # Syntax highlighting: Coming soon
+    foreground:
+      yellow:
+        - "::"
+        - "=="
+        - "!="
+        - ":="
+        - ">>"
+        - "<<"
+        - "<"
+        - ">"
+        - ">="
+        - "<="
+        - "?"
+        - "`+"
+        - "`*"
+      black:
+        - "`[`.`.`. `d+ more `.`.`.`]"
+    bold:
+      - "\"goto`.prepre`.gen\""
+      - "printf"
+    underline:
+      - "`Wint`W"
+
+
+# Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
+# recursive, e.g. whitelisting <thread> wont whitelist all of its children
+
+# Current features:
+#   whitelisting
+#   keep only a certain number of lines
+#   recursive hide
+#   colors
+#   global string replacement --- now with regular expressions
+#   keepChars - keep only so many characters per line
+#   option to remove spaces in the cell membranes
+#   operator parsing, and pretty printing
+#   infixify
+#   specify line endings
+
+# Upcoming features:
+#   yaml parse errors
+#   environment/memory lookup
+#   regular-expression based line-based show/hide
+#   arbitrary global and local string-replacement rules
+#   local and global regular-expression based styling (bold, underline, color, etc)

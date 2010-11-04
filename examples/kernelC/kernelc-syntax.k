@@ -13,10 +13,8 @@ kmod KERNELC-SYNTAX is
                | scanf ( "%d" , Exp ) [strict] | scanf ( "%d" , & Exp )
                | Id ( List{Exp} ) [prec 0 strict(2)] | Id ( ) [prec 0]
                | DeclId
-               | ++ Exp [prec 0]
+---               | ++ Exp [prec 0]
                | Exp ++ [prec 0]
-               | -- Exp [prec 0]
-               | Exp -- [prec 0]
 
 --- malloc additions
   syntax Exp ::= `NULL | free ( Exp ) [strict] | * Exp [ditto] | ( int * ) malloc ( Exp * sizeof ( int ) ) [strict] | Exp [ Exp ] [prec 0]
@@ -51,17 +49,16 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro if(E) St:Stmt = if(E) St else {}
   macro NULL = 0
   macro I:Id () = I (())
-  macro DI:DeclId(DIL:List{DeclId}) { Sts:StmtList } = DI(DIL) { Sts return 0 ;}  
+  macro DeclId:DeclId(DeclIds:List{DeclId}) { Stmts:StmtList } = DeclId(DeclIds) { Stmts return 0 ;}  
 
-  macro void PI:PointerId = int PI
-  macro int * PI = int PI
-  macro #include<Sts> = Sts
+  macro void PointerId:PointerId = int PointerId
+  macro int * PointerId = int PointerId
+  macro #include<Stmts> = Stmts
   macro E1[E2] = *(E1 + E2)
   macro scanf("%d", & * E) = scanf("%d", E)
-  macro (int * PI = E) = (int PI = E)
+  macro (int * PointerId = E) = (int PointerId = E)
   macro (int X:Id = E ;) = int X ; X = E ;
-  macro ++ E = (E = E + 1)
-  macro -- E = (E = E + 1)
+---  macro ++ E = (E = E + 1)
 endkm
 
 

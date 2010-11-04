@@ -526,7 +526,7 @@ void main() {
 }
 
 
-  syntax Pgm ::= pPeterson.c
+  syntax Pgm ::= pPeterson.c | pPeterson1.c
   syntax Id ::= flag | turn | peterson
   macro pPeterson.c = 
 #include <stdio.h>
@@ -536,6 +536,31 @@ void peterson(int *flag, int *turn, int t) {
   flag[t] = 1;
   *turn = 1-t;
   while (flag[1-t] && *turn == 1-t) {}
+  printf("%d;",-1-t);
+  printf("%d;", 1+t);
+  flag[t] = 0;
+}
+
+int main() {
+  int* flag = (int *)malloc(2*sizeof(int));
+  flag[0] = 0; flag[1] = 0 ;
+  int * turn =  (int *)malloc(1*sizeof(int));
+  int t1 = spawn(peterson(flag, turn, 0));
+  int t2 = spawn(peterson(flag, turn, 1));
+  join(t1);
+  join(t2);
+  return 0;
+}
+
+
+macro pPeterson1.c = 
+#include <stdio.h>
+#include <stdlib.h>
+
+void peterson(int *flag, int *turn, int t) {
+  flag[t] = 1;
+  *turn = 1-t;
+  while (*turn == 1-t && flag[1-t] ) {}
   printf("%d;",-1-t);
   printf("%d;", 1+t);
   flag[t] = 0;

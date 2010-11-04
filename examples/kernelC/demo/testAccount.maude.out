@@ -1,0 +1,36 @@
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.5 built: May  7 2010 18:42:44
+	    Copyright 1997-2010 SRI International
+		   Wed Oct 27 22:57:45 2010
+==========================================
+rewrite in KERNELC-RACE-DETECTION-pAccount : run('pAccount) .
+rewrites: 844 in 9ms cpu (9ms real) (85763 rewrites/second)
+result BagItem: 
+< raceDetected > 
+ < next > Int 4(.List{K}) </ next > 
+ < out > String "100 ; 20 ; "(.List{K}) </ out > 
+ < in > (.).List </ in > 
+ < threads > 
+  < thread > 
+   < k > 'join`(_`)(Int 2(.List{K})) ~> freezer("'_;(`[HOLE`]:K)")(.List{K}) ~> '_;('join`(_`)(Id t2(.List{K}))) ~> '_;('printf`("%d;"`,_`)('_`(_`)(Id balance(.List{K}),,'_`,_(Id a(.List{K}))))) ~> '_;('printf`("%d;"`,_`)('_`(_`)(Id balance(.List{K}),,'_`,_(Id b(.List{K}))))) ~> Int 0(.List{K}) ~> 'restore`(_`)(wmap .(.List{K})) </ k > 
+   < id > Int 0(.List{K}) </ id > 
+   < fstack > call main </ fstack > 
+   < env > Id a(.List{K}) |-> Int 0(.List{K}) Id b(.List{K}) |-> Int 1(.List{K}) Id t1(.List{K}) |-> Int 2(.List{K}) Id t2(.List{K}) |-> Int 3(.List{K}) </ env > </ thread > 
+  < thread > 
+   < id > Int 2(.List{K}) </ id > 
+   < race > '_=_('*_(Int 1(.List{K})),,Int 320(.List{K})) ~> freezer("'_;(`[HOLE`]:K)")(.List{K}) ~> '_;('release`(_`)(Id a(.List{K}))) ~> Int 0(.List{K}) ~> 'restore`(_`)(wmap (Id a(.List{K}) |-> Int 0(.List{K}) Id b(.List{K}) |-> Int 1(.List{K}))(.List{K})) ~> freezer("'_;(`[HOLE`]:K)")(.List{K}) ~> Int 0(.List{K}) ~> 'restore`(_`)(wmap .(.List{K})) </ race > 
+   < fstack > call transfer call run </ fstack > 
+   < env > Id a(.List{K}) |-> Int 0(.List{K}) Id b(.List{K}) |-> Int 1(.List{K}) Id m(.List{K}) |-> Int 100(.List{K}) </ env > </ thread > 
+  < thread > 
+   < id > Int 3(.List{K}) </ id > 
+   < race > '*_(Int 1(.List{K})) ~> freezer("'_-_(`[HOLE`]:K,,K2:K)")(freezeVar("K2:K")(Int 100(.List{K}))) ~> freezer("'_=_(K1:K,,`[HOLE`]:K)")(freezeVar("K1:K")('*_(Id a(.List{K})))) ~> freezer("'_;(`[HOLE`]:K)")(.List{K}) ~> '_;('_=_('*_(Id b(.List{K})),,'_+_('*_(Id b(.List{K})),,Id m(.List{K})))) ~> '_;('release`(_`)(Id a(.List{K}))) ~> Int 0(.List{K}) ~> 'restore`(_`)(wmap (Id a(.List{K}) |-> Int 1(.List{K}) Id b(.List{K}) |-> Int 0(.List{K}))(.List{K})) ~> freezer("'_;(`[HOLE`]:K)")(.List{K}) ~> Int 0(.List{K}) ~> 'restore`(_`)(wmap .(.List{K})) </ race > 
+   < fstack > call transfer call run </ fstack > 
+   < env > Id a(.List{K}) |-> Int 1(.List{K}) Id b(.List{K}) |-> Int 0(.List{K}) Id m(.List{K}) |-> Int 100(.List{K}) </ env > </ thread > </ threads > 
+ < cthreads > (.).Set </ cthreads > 
+ < funs > Id main(.List{K}) |-> '__`{_return_;`}('int_(Id main(.List{K})),,'_`,_(.List{K}),,'_;('int_(Id a(.List{K}))) ~> '_;('_=_(Id a(.List{K}),,'_`(_`)(Id newAccount(.List{K}),,'_`,_(Int 100(.List{K}))))) ~> '_;('int_(Id b(.List{K}))) ~> '_;('_=_(Id b(.List{K}),,'_`(_`)(Id newAccount(.List{K}),,'_`,_(Int 20(.List{K}))))) ~> '_;('printf`("%d;"`,_`)('_`(_`)(Id balance(.List{K}),,'_`,_(Id a(.List{K}))))) ~> '_;('printf`("%d;"`,_`)('_`(_`)(Id balance(.List{K}),,'_`,_(Id b(.List{K}))))) ~> '_;('int_(Id t1(.List{K}))) ~> '_;('_=_(Id t1(.List{K}),,'spawn_('_`(_`)(Id run(.List{K}),,'_`,_(Id a(.List{K}),,Id b(.List{K})))))) ~> '_;('int_(Id t2(.List{K}))) ~> '_;('_=_(Id t2(.List{K}),,'spawn_('_`(_`)(Id run(.List{K}),,'_`,_(Id b(.List{K}),,Id a(.List{K})))))) ~> '_;('join`(_`)(Id t1(.List{K}))) ~> '_;('join`(_`)(Id t2(.List{K}))) ~> '_;('printf`("%d;"`,_`)('_`(_`)(Id balance(.List{K}),,'_`,_(Id a(.List{K}))))) ~> '_;('printf`("%d;"`,_`)('_`(_`)(Id balance(.List{K}),,'_`,_(Id b(.List{K}))))),,Int 0(.List{K})) Id balance(.List{K}) |-> '__`{_return_;`}('int_(Id balance(.List{K})),,'_`,_('int_(Id a(.List{K}))),,'_;('acquire`(_`)(Id a(.List{K}))) ~> '_;('int_(Id b(.List{K}))) ~> '_;('_=_(Id b(.List{K}),,'*_(Id a(.List{K})))) ~> '_;('release`(_`)(Id a(.List{K}))),,Id b(.List{K})) Id deposit(.List{K}) |-> '__`{_return_;`}('int_(Id deposit(.List{K})),,'_`,_('int_(Id a(.List{K})),,'int_(Id m(.List{K}))),,'_;('acquire`(_`)(Id a(.List{K}))) ~> '_;('_=_('*_(Id a(.List{K})),,'_+_('*_(Id a(.List{K})),,Id m(.List{K})))) ~> '_;('release`(_`)(Id a(.List{K}))),,Int 0(.List{K})) Id newAccount(.List{K}) |-> '__`{_return_;`}('int_(Id newAccount(.List{K})),,'_`,_('int_(Id m(.List{K}))),,'_;('int_(Id a(.List{K}))) ~> '_;('_=_(Id a(.List{K}),,'`(int`*`)malloc`(_*`sizeof`(int`)`)(Int 1(.List{K})))) ~> '_;('_=_('*_(Id a(.List{K})),,Id m(.List{K}))),,Id a(.List{K})) Id run(.List{K}) |-> '__`{_return_;`}('int_(Id run(.List{K})),,'_`,_('int_(Id a(.List{K})),,'int_(Id b(.List{K}))),,'_;('_`(_`)(Id deposit(.List{K}),,'_`,_(Id a(.List{K}),,Int 300(.List{K})))) ~> '_;('_`(_`)(Id withdraw(.List{K}),,'_`,_(Id a(.List{K}),,Int 100(.List{K})))) ~> '_;('_`(_`)(Id transfer(.List{K}),,'_`,_(Id a(.List{K}),,Id b(.List{K}),,Int 100(.List{K})))),,Int 0(.List{K})) Id transfer(.List{K}) |-> '__`{_return_;`}('int_(Id transfer(.List{K})),,'_`,_('int_(Id a(.List{K})),,'int_(Id b(.List{K})),,'int_(Id m(.List{K}))),,'_;('acquire`(_`)(Id a(.List{K}))) ~> 'if`(_`)_else_('_<=_(Id m(.List{K}),,'*_(Id a(.List{K}))),,'_;('_=_('*_(Id a(.List{K})),,'_-_('*_(Id a(.List{K})),,Id m(.List{K})))) ~> '_;('_=_('*_(Id b(.List{K})),,'_+_('*_(Id b(.List{K})),,Id m(.List{K})))),,.) ~> '_;('release`(_`)(Id a(.List{K}))),,Int 0(.List{K})) Id withdraw(.List{K}) |-> '__`{_return_;`}('int_(Id withdraw(.List{K})),,'_`,_('int_(Id a(.List{K})),,'int_(Id m(.List{K}))),,'_;('acquire`(_`)(Id a(.List{K}))) ~> 'if`(_`)_else_('_<=_(Id m(.List{K}),,'*_(Id a(.List{K}))),,'_;('_=_('*_(Id a(.List{K})),,'_-_('*_(Id a(.List{K})),,Id m(.List{K})))),,.) ~> '_;('release`(_`)(Id a(.List{K}))),,Int 0(.List{K})) </ funs > 
+ < locks > Int 0(.List{K}) |-> Int 2(.List{K}) Int 1(.List{K}) |-> Int 3(.List{K}) </ locks > 
+ < mem > Int 0(.List{K}) |-> Int 200(.List{K}) Int 1(.List{K}) |-> Int 220(.List{K}) </ mem > 
+ < ptr > Int 0(.List{K}) |-> Int 1(.List{K}) Int 1(.List{K}) |-> Int 1(.List{K}) </ ptr > </ raceDetected >
+Bye.

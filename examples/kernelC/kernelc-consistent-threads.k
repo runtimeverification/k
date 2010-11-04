@@ -1,6 +1,6 @@
 kmod KERNELC-CONSISTENT-THREADS is including KERNELC-BASIC-SEMANTICS + KERNELC-CONSISTENT-MEMORY
   configuration <T ?> <threads> <thread*> <k> .K </k> <env> .Map </env> <id> 0 </id> </thread*> 
-                    </threads> <locks> .Map </locks>  <cthreads> .Set </cthreads> @latex("\\\\\\")                     <funs> .Map </funs> <in> .List </in> <out> "" </out> 
+                    </threads> <locks> .Map </locks>  <cthreads> .Set </cthreads> @latex("\\kBR")                     <funs> .Map </funs> <in> .List </in> <out> "" </out> 
                    <mem> .Map </mem> <ptr> .Map </ptr> 
                    <next> initialLoc </next> </T ?> 
                 <result ?> "" </result ?>
