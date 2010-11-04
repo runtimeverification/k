@@ -1055,30 +1055,7 @@ sub maudify_file {
 # Bind $file and $indent (the latter used for pretty printing when$verbose
     my ($file,$indent) = @_;
 # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
-    if ($file =~ /\.k?(maude)?$/) {
-	if (! -e $file) {
-	    terminate("File $file does not exist");
-	}
-    }
-# If $file does not have the extension .k, .kmaude, or .maude then
-    else {
-# Add extension .k if $file.k exists
-	if (-e "$file.k") {
-	    $file .= ".k";
-	}
-# If not, then add extension .kmaude if $file.kmaude exists
-	elsif (-e "$file.kmaude") {
-	    $file .= ".kmaude";
-	}
-# If not, then add extension .maude if $file.maude exists
-	elsif (-e "$file.maude") {
-	    $file .= ".maude";
-	}
-# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
-	else {
-	    terminate("Neither of $file.k, $file.kmaude, or $file.maude exist");
-	}
-    }
+    $file = getFullName($file);
     
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";

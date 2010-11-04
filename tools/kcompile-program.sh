@@ -26,6 +26,7 @@ echo "q" | $MAUDE >/dev/null
 RUNNER=`which "$0"`
 KBASE=`dirname "$RUNNER"`/..
 FILE=${1/.*/}
+kompile.pl -m $1
 COMPILED_MODULE="$2"
 PROGRAM_MODULE="$3"
 PROGRAM="$4"

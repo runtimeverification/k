@@ -201,6 +201,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   ceq term2Set(Q[T,T'], KC) 
     = term2SetReplace(Q[T,T'],term2Set(T,KC),term2Set(T',KC)) 
    if Q == replaceS .
+  eq term2Set(T,KC) = T [owise] .
 
   op term2SetReplace : Term TermSet TermSet ~> TermSet .
   eq term2SetReplace(T, qt(Q,B, T'':Term) && TS, TS':[TermSet]) = qt(Q,B,T) .

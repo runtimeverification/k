@@ -166,6 +166,7 @@ sub detect_list_labels
 	{
 	    push(@one_arg_list, "$label($temp)");
 	}
+        $_ = shift;
     }
 }
 
