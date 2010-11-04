@@ -208,7 +208,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   eq term2SetReplace(T, qt(Q,B, T'':Term) && TS, TS':[TermSet]) = qt(Q,B,T) .
   eq term2SetReplace(T, TS':[TermSet], qt(Q,B, T'':Term) && TS) = qt(Q,B,T) .
   eq term2SetReplace(Q[T,T'],  var(T) && TS ,  TS':[TermSet]) = var(Q[T,T']) .
-  eq term2SetReplace(Q[T,T'],  TS && var(T) ,  TS':[TermSet]) = var(Q[T,T']) .
+  eq term2SetReplace(Q[T,T'],  TS && var(T') ,  TS':[TermSet]) = var(Q[T,T']) .
 
   op term2SetL : TermList KConf -> TermSet .
   eq term2SetL((T,Tl),KC) = term2Set(T,KC) && term2SetL(Tl,KC) .
