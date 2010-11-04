@@ -357,6 +357,11 @@ fmod K-META-CONFIG is
 
   op ctor : Sort -> Qid .
   eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else if S == Set then '__ else 'error fi fi fi fi fi .
+  
+  op itemCtor : Sort -> Qid .
+  eq itemCtor(S) = if S == Bag then 'BagItem else if S == Map then 'MapItem else if S == List then 'ListItem else if S == Set then 'SetItem else 'error fi fi fi fi .
+  
+  
 
   var Ty : Type .
 

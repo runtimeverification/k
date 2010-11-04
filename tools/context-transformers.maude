@@ -117,6 +117,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
  ceq solveEach(Q[T,T'], KC)
    = Q[solveEach(T,KC), T'] 
   if Q == replaceS .
+ ceq solveEach(Q[T],KC) = Q[T] if Q = itemCtor(Bag) .
   
   op solveEachL : TermList KConf -> [TermList] .
   eq solveEachL((T, Tl), KC) = solveEach(T,KC),solveEachL(Tl,KC) .
