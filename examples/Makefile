@@ -6,7 +6,7 @@ TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
             agent lambda/simply-typed \
         challenge imp/fully-labeled imp/fully-syntactic imp/labeled-syntax imppp \
         simple/untyped simple/typed/dynamic simple/typed/static \
-	skool/typed/dynamic \ 
+        skool/typed/dynamic \
 	exp/untyped exp/type-inference fun/untyped \
 	Thue bf befunge93
 
