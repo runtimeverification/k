@@ -54,14 +54,17 @@ kmod AGENT is
                   <holds>.Map</holds>
               </thread*>
           </control>
-          <busy>.Set</busy>
+          <busy>.Set</busy> 
+          @latex("\\kBR")
           <mem> .Map </mem> <nextLoc> 0 </nextLoc>
           <me>0</me>
           <parent>-1</parent>
       </agent*>
+      @latex("\\kBR")
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting>
+      @latex("\\kBR")
       <messages> <message*>
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message*> </messages>

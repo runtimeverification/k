@@ -22,7 +22,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---    their address (wrapped as a specific value)
 ---<SKOOL modified>
 --- added object and class info for functions
-  syntax Val ::= function ( Type , K , Id ,  Nat )
+  syntax Val ::= function ( Type , K ,  Nat )
 ---</SKOOL modified>
   ---  op function : Nat -> Val   
   syntax Val ::= lambda ( List{Id} , Stmt ) [metadata "latex(renameTo \\ensuremath\\lambda_._)"]
@@ -49,7 +49,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                      <nextLoc> 1 </nextLoc>
 ---<SKOOL added>
                      <crntObj> .K </crntObj>
-                     <crntClass> main </crntClass>
                      <classes>
                            <class*> 
                                     <className> Id:Id </className>
@@ -90,9 +89,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule [decl-method]: <k> (method F:Id(XTl:List{IdType}) : Tp S:Stmt => .) <_/k> 
        <env> Env => Env[L/F] </env> 
        <nextLoc> L => L +Nat 2 </nextLoc> 
-       <crntClass> C </crntClass>
        <crntObj> Obj:K </crntObj> 
-       <store_>(.Map => L |-> function`(_`,_`,_`,_`)((typeList(XTl)->Tp), Obj, C, sNat L) 
+       <store_>(.Map => L |-> function`(_`,_`,_`)((typeList(XTl)->Tp), Obj, sNat L) 
                   sNat(L) |-> lambda(idList(XTl),S))<_/store>
 
 --- the followings are added
@@ -117,7 +115,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule [call-main]: <k> . => new_`(_`)(main, .List{Bottom}) </k>
        <env> Env => . </env>
        <genv> . => Env </genv>
-       --- <crntClass> _ => main </crntClass>
 
 
 ---</SKOOL modified>
@@ -139,13 +136,11 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <env> Env:Map </env>
        if notBool(X in keys(Env)) [structural]
 
-  rule [this]: <k> this => objAddress(C,L) <_/k>  
-       <crntObj> objAddress(_,L) </crntObj>
-       <crntClass> C </crntClass>
+  rule [this]: <k> this => Obj <_/k>  
+       <crntObj> Obj </crntObj>
 
   rule [super]: <k> _._((super => objAddress(C',L)),X) <_/k>
-       <crntObj> objAddress(_,L) </crntObj>
-       <crntClass> C </crntClass>
+       <crntObj> objAddress(C,L) </crntObj>
        <className> C </className> 
        <extends> C' </extends>
 
@@ -203,14 +198,14 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---   and the execution of the statements included in the constructor
 ---   the current class, environment and object are stored on the stack
 
-  rule [new-object]: <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C)~> addGEnvLayer ~> setCrntClass(C) ~> _`(_`)(C, Vl); return this ; </k>
+  rule [new-object]: <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C) ~> _`(_`)(C, Vl); return this ; </k>
        <env> Env:Map => . </env>
-       <crntObj> Obj => objAddress(C,L) </crntObj>
-       <crntClass> C1:Id </crntClass>
+       <genv> GEnv:Map </genv>
+       <crntObj> Obj => objAddress(object,L) </crntObj>
        <return> T:Type => C </return>
        <nextLoc> L => sNat L </nextLoc>
-       <store_> . => L |-> obj(<envStack> .List </envStack>) <_/store>
-       <fstack> . => Env # K # Obj # C1 # T <_/fstack>
+       <store_> . => L |-> obj(<envStack> object::<env> GEnv </env> </envStack>) <_/store>
+       <fstack> . => Env # K # Obj # T <_/fstack>
 
 
 --- create a new object (memory allocation)
@@ -218,8 +213,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---   a memory object representation is a layered structure: for each class lying on the path 
 ---   from the current class to the root of the hierarchy there is a layer including the memory
 ---   allocation for the variable members of that class
-  rule [object-allocate]: <k> create(C) => Ss ~> addOEnvLayer ~> create(C1) <_/k>
-       <crntClass> _ => C </crntClass>
+  rule [object-allocate]: <k> create(C) => create(C1) ~> setCrntClass(C) ~> Ss ~> addOEnvLayer <_/k>
        <classes_>
             <class_>
                    <className> C </className>
@@ -232,20 +226,12 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- add a new tagged environment layer to the  current object
   rule <k> addOEnvLayer => . <_/k>
        <env> Env => . </env>
-       <crntObj> objAddress(_,L) </crntObj>
-       <crntClass> C </crntClass>
-       <store_> L |-> obj(<envStack_> . => (C::<env>Env</env>)</envStack>)
+       <crntObj> objAddress(C,L) </crntObj>
+       <store_> L |-> obj(<envStack> . => (C::<env>Env</env>)<_/envStack>)
        <_/store>
 
---- add the global environment as the default layer
-  rule <k> addGEnvLayer => . <_/k>
-       <genv> Env </genv>
-       <crntObj> objAddress(_,L) </crntObj>
-       <store_> L |-> obj(<envStack_> . => (@global::<env>Env</env>)</envStack>)
-       <_/store>
-
-
-  rule <k> setCrntClass(C) => . <_/k>  <crntClass> _ => C </crntClass>
+  rule <k> setCrntClass(C) => . <_/k>  
+       <crntObj> objAddress((_ => C),_) </crntObj>
 
 --- instanceOf operator
 
@@ -272,8 +258,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   --- except for super which should lookup method statically
   rule <k> '_`(_`)(('_._(super,,X) => lookupF(<envStack> EStack </envStack>, X)),,_) <_/k>
-      <crntObj> objAddress(_,L) </crntObj>
-      <crntClass> C </crntClass>
+      <crntObj> objAddress(C,L) </crntObj>
       <store_> L |-> obj(<envStack_>  (C :: EnvC:Bag) EStack:List </envStack>) <_/store>
 
 
@@ -285,20 +270,18 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- the environment and the computation are pushed in the stack at each function call
 
 
- rule <k> _`(_`)(function`(_`,_`,_`,_`)(Tpl:List{Type}->Tp,Obj, C,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
-       <fstack> . => Env # K # Obj' # C' # Tp' <_/fstack>
+ rule <k> _`(_`)(function`(_`,_`,_`)(Tpl:List{Type}->Tp,Obj,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
+       <fstack> . => Env # K # Obj' # Tp' <_/fstack>
        <crntObj> Obj':K => Obj </crntObj>
        <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
        <return> Tp':Type => Tp </return>
        <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
-       <crntClass> C':Id => C </crntClass>
        <classes> Cls </classes>
     if subtype(typeOf(Vl), Tpl, Cls)
 
   rule <k> return(V); ~> _ => V ~> K </k>
-       <fstack> Env # K # Obj # C # Tp' => . <_/fstack>
-       <crntClass> _ => C </crntClass>
+       <fstack> Env # K # Obj # Tp' => . <_/fstack>
        <crntObj> _ => Obj </crntObj>
        <env> _ => Env </env>
        <return> Tp => Tp' </return>
@@ -369,7 +352,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---  syntax Type ::= typeOf ( Val ) [ditto]
 ---</SKOOL added>
 
-  macro typeOf(function`(_`,_`,_`,_`)(T,_,_,_)) = T 
+  macro typeOf(function`(_`,_`,_`)(T,_,_)) = T 
   macro typeOf(array(T,_,_)) = T
   macro typeOf(I:Int) = int 
   macro typeOf(B:Bool) = bool 
@@ -414,12 +397,11 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
   syntax ListItem ::= Id :: Bag [metadata "latex(renameTo _\\ensuremath{\\mathrel{::}}_)"]
 --- the following is nedeed for stacking
-  syntax ListItem ::=    Map # K # K # Id # Type 
+  syntax ListItem ::=    Map # K # K # Type 
 --- the following are needed at the creation of a new object and at a method call
   syntax K ::= restore ( K ) | discard | addGEnvLayer |  addOEnvLayer 
   syntax KLabel ::= create | setCrntClass
 --- the names for the local environment and the global environments for an object
-  syntax Id ::= @local | @global
 
 --- subtype relationship
 

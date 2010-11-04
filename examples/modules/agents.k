@@ -4,10 +4,12 @@ kmod AGENTS is  including SEQ + PL-INT
           <me>0</me>
           <parent>-1</parent>
           <control> <k> .K </k> </control>
-      </agent*>
+      </agent*> 
+      @latex("\\kBR")
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
-      <barrier>true</barrier> <waiting>.Set</waiting>
+      <barrier>true</barrier> <waiting>.Set</waiting> 
+      @latex("\\kBR")
       <messages> <message*>
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message*> </messages>
@@ -27,9 +29,9 @@ kmod AGENTS is  including SEQ + PL-INT
 
 --- Agents
   rule [agent-creation] : <agent_> <k>newAgent S:K => N2:Nat<_/k> <me>N1:Nat</me> 
-       <_/agent> <world_>. => SetItem(N2)<_/world>
+       <_/agent> <world_>. => SetItem(N2)<_/world> @latex("\\kBR")
        (. => <agent_><me>N2</me><parent>N1</parent><k>S</k><_/agent>) 
-       <nextAgent>N2 => sNat N2</nextAgent>
+       <nextAgent>N2 => sNat N2</nextAgent> [large]
   rule [agent-completion] : (<agent_><control>.Bag</control> <me>N:Nat</me> <_/agent>=> .) 
        <world_>(SetItem(N) => .)<_/world>
   rule [halt-agent] : <control_> <k>haltAgent<_/k> <_/control> => <control> .Bag </control> .
@@ -46,8 +48,9 @@ kmod AGENTS is  including SEQ + PL-INT
        <world>W:Set</world>
        (. => <message> <from>N</from> <to>W</to> <body>V</body> </message>)
   rule <message_><to>.Set</to><_/message> => . [structural]
-  rule <agent_> <me>N1</me> <k>sendSynch V to N2 => skip<_/k> <_/agent>
-       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent>
+  rule <agent_> <me>N1</me> <k>sendSynch V to N2 => skip<_/k> <_/agent> 
+      @latex("\\kBR")
+       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent> [large]
   rule <k>sendSynch V to N2 => skip<_/k>
        <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
   rule [start-waiting-at-barrier] : <me>N</me> <k>barrier<_/k>
