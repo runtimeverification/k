@@ -218,8 +218,8 @@ fmod META-K-CONTEXTS is including K-SORTS .
   op cxterror : Qid -> [KContextKind] .
 
   ops symbol_ : KContextKind -> Qid .
-  eq symbol kcxt = 'rule_ .
-  eq symbol kccxt = 'rule_if_ .  
+  eq symbol kcxt = 'context_ .
+  eq symbol kccxt = 'context_if_ .  
 
   op getKContextKind : Qid ~> KContextKind . 
   eq getKContextKind(Q) = if Q == symbol kcxt then kcxt else if Q == symbol kccxt then kccxt else cxterror(Q) fi fi .
