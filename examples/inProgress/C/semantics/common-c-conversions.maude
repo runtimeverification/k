@@ -320,7 +320,7 @@ mod COMMON-SEMANTICS-CAST is
 	mb rule 
 		cast(void, ?) => skipval
 		: KSentence [metadata "structural"] .
-	
+		
 	--- fixme not sure about this, doesn't concretize, and in turn interpret, assume things about the list?
 	mb rule
 		cast(T:Type, tv(L:List{K}, structType(?)))
@@ -459,6 +459,11 @@ mod COMMON-SEMANTICS-CAST is
 		if hasIntegerType(T':Type)
 		andBool N:Nat ==Bool NullPointerConstant
 		: KSentence [metadata "structural"] .
+		
+	--- mb rule
+		--- cast(pointerType(T:Type), functionPrototype(
+		--- : KSentence [metadata "structural"] .
+	--- cast(pointerType(functionType(void, .List{K})), tv((, functionPrototype(abort, functionType(void, .List{K})), ), functionType(void, .List{K})))
 		
 	mb rule
 		cast(arrayType(T:Type, N:Nat), tv(N':Nat, T':Type)) => tv(N':Nat, arrayType(T:Type, N:Nat))

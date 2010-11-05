@@ -1,11 +1,4 @@
-First, set up CIL:
-	- move to ./cil directory 
-	- Configure and compile it as per its INSTALL file.  
-	
-Now, configure the Makefile:
-	- set GCC
-
-Finally, build the tool:
+Build the tool:
 	- run "make dist"  in the main C directory
 
 	
