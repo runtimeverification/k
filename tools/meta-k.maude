@@ -208,8 +208,52 @@ fmod META-K-MODULE is
      else getK2ListSubsorts(M, SSDS) fi .
 endfm
 
+fmod META-K-CONTEXTS is including K-SORTS .
+  including META-MODULE-EXTRAS .
+  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
+  var AS : AttrSet .  var RK : KContextKind .
+
+  sort KContextKind .
+  ops kcxt kccxt : -> KContextKind .
+  op cxterror : Qid -> [KContextKind] .
+
+  ops symbol_ : KContextKind -> Qid .
+  eq symbol kcxt = 'rule_ .
+  eq symbol kccxt = 'rule_if_ .  
+
+  op getKContextKind : Qid ~> KContextKind . 
+  eq getKContextKind(Q) = if Q == symbol kcxt then kcxt else if Q == symbol kccxt then kccxt else cxterror(Q) fi fi .
+
+  sort KContextSplit .
+  op {_,_,_,_} : KContextKind Term TermList AttrSet -> KContextSplit .
+
+  
+  op splitKContext : MembAx ~> KContextSplit .
+ ceq splitKContext((mb Q[T] : S [AS] .))
+   = {getKContextKind(Q),T,empty,AS} if S := KSentence . 
+ ceq splitKContext((mb Q[T,C] : S [AS] .))
+   = {getKContextKind(Q),T,C,AS} if S := KSentence . 
+
+  op getContents : KContextSplit -> Term .
+  op getContextKind : KContextSplit -> KContextKind .
+  op getCondition : KContextSplit -> TermList .
+  op getAttrs : KContextSplit -> AttrSet .
+  eq getContents({RK,T,Cond,AS}) = T .
+  op getKind : KContextSplit -> KContextKind .
+  eq getKind({RK,T,Cond,AS}) = RK .
+  eq getCondition({RK,T,Cond,AS}) = Cond .
+  eq getAttrs({RK,T,Cond,AS}) = AS .
+
+  op setContents : KContextSplit Term -> KContextSplit .
+  eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
+
+  op plugKContext : KContextSplit ~> MembAx .
+  eq plugKContext({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
+  eq plugKContext({RK,T,C,AS}) = (mb symbol(RK)[T,C] : KSentence [AS] .) [owise] .
+endfm
+
 fmod META-K-RULES is including K-SORTS .
-  including META-MODULE .
+  including META-MODULE-EXTRAS .
   var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
   var AS : AttrSet .  var RK : KRuleKind .
 
@@ -217,9 +261,6 @@ fmod META-K-RULES is including K-SORTS .
   ops krl kcrl : -> KRuleKind .
   op error : Qid -> [KRuleKind] .
 
-  op trueCt : -> Constant .
-  eq trueCt = 'true.Bool .
-  
   ops symbol_ : KRuleKind -> Qid .
   eq symbol krl = 'rule_ .
   eq symbol kcrl = 'rule_if_ .  

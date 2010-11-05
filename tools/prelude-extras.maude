@@ -306,6 +306,9 @@ fmod META-MODULE-EXTRAS is
   op moduleError : QidList -> [Module] .
   
 
+  op trueCt : -> Constant .
+  eq trueCt = 'true.Bool .
+  
   op nullHeader : -> Header .
 
   op setName : Module ModuleExpression -> Module .

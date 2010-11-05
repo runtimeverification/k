@@ -7,34 +7,39 @@ mod STRICTCXT2EQS is
   including STRING-EXTRAS .
   including META-MODULE-EXTRAS .
   including META-K-MODULE .
+  including META-K-CONTEXTS .
   var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
-  var AS : AttrSet . var MAS : MembAxSet . var Eqs : EquationSet . var Q : Qid .
-  vars Type Type' : Type .  var OPDS : OpDeclSet .
+  var AS : AttrSet . var MAS : MembAxSet . var Mb : MembAx .
+  var Eqs : EquationSet . var Q : Qid .
+  vars Type Type' : Type .  var OPDS : OpDeclSet . var KCS : KContextSplit .
+  vars T1 T2 : Term . var Cond : TermList .
   sort MASEqsPair .
   op {_,_} : MembAxSet EquationSet -> MASEqsPair [ctor] .
 
   op strictCxt2eqs : Module MembAxSet ~> MASEqsPair .
   eq strictCxt2eqs(M,MAS) = strictCxt2eqs(M, MAS, none) .
   op strictCxt2eqs : Module MembAxSet EquationSet ~> MASEqsPair . 
- ceq strictCxt2eqs(M, (mb 'context_[T] : Sort [AS] .) MAS, Eqs)
-   = strictCxt2eqs(M, MAS, Eqs strictCxt2eq(M, (mb 'context_[T] : Sort [AS] .)))
-  if Sort = KSentence .
+ ceq strictCxt2eqs(M, Mb MAS, Eqs)
+   = strictCxt2eqs(M, MAS, Eqs strictCxt2eq(M, getContents(KCS), getAttrs(KCS), getCondition(KCS)))
+  if KCS := splitKContext(Mb) .
   eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
 
-  op strictCxt2eq : Module MembAx ~> EquationSet .
-  eq strictCxt2eq(M, (mb 'context_[T] : Sort [kstrict(nil,Q)] .))
-    =  ((eq kWrap(Q, T[hole <- mkVariable('Kcxt,KProper)])  
-        = kWrap(Q, kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))) 
-       [metadata("heating")] .)
+  op strictCxt2eq : Module Term AttrSet TermList ~> EquationSet .
+  eq strictCxt2eq(M, T, none, Cond)
+   = strictCxt2eq(M, T, kstrict(nil,klabel), Cond) .
+  
+  eq strictCxt2eq(M, T, kstrict(nil,Q), Cond) 
+   = strictCxt2eqHeat(kWrap(Q, T[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))), Cond[hole <- mkVariable('Kcxt,KProper)]) 
       (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T)))
         = kWrap(Q, T[hole <- mkVariable('Kcxt,KResult)])
-       [metadata("cooling")] .)) .
-  eq strictCxt2eq(M, (mb 'context_[T] : Sort [none] .))
-   = strictCxt2eq(M, (mb 'context_[T] : Sort [kstrict(nil,klabel)] .)) .
+       [metadata("cooling")] .) .
 
 
-
-
+  op strictCxt2eqHeat : Term Term TermList ~> Equation .
+  eq strictCxt2eqHeat(T1,T2,empty)
+   = (eq T1 = T2 [metadata("heating")] .) .
+  eq strictCxt2eqHeat(T1,T2,T)
+   = (ceq T1 = T2 if T = trueCt [metadata("heating")] .) .
 
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(
