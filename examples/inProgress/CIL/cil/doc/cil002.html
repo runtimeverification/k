@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+            "http://www.w3.org/TR/REC-html40/loose.dtd">
+<HTML>
+<HEAD>
+
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<META name="GENERATOR" content="hevea 1.10">
+
+<base target="main">
+<script language="JavaScript">
+<!-- Begin
+function loadTop(url) {
+  parent.location.href= url;
+}
+// -->
+</script>
+<LINK rel="stylesheet" type="text/css" href="cil.css">
+<TITLE>Installation</TITLE>
+</HEAD>
+<BODY >
+<A HREF="cil001.html"><IMG SRC="previous_motif.gif" ALT="Previous"></A>
+<A HREF="ciltoc.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
+<A HREF="cil003.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
+<HR>
+<H2 CLASS="section"><A NAME="htoc2">2</A>&#XA0;&#XA0;Installation</H2><P>You need the following tools to build CIL:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+A Unix-like shell environment (with bash, perl, make, mv, cp,
+etc.). On Windows, you will need cygwin with those packages.
+</LI><LI CLASS="li-itemize">An ocaml compiler. You will need OCaml release 3.08 or higher to build
+CIL. CIL has been tested on Linux and on Windows (where it can behave as
+either Microsoft Visual C or gcc). On Windows, you can build CIL both with the
+cygwin version of ocaml (preferred) and with the Win32 version of ocaml.
+</LI><LI CLASS="li-itemize">An underlying C compiler, which can be either gcc or Microsoft Visual C.
+</LI></UL><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">
+Get the source code.
+<UL CLASS="itemize"><LI CLASS="li-itemize">
+<EM>Official distribution</EM> (Recommended):
+<OL CLASS="enumerate" type=a><LI CLASS="li-enumerate">
+Download the CIL <A HREF="distrib">distribution</A> (latest version is
+<A HREF="distrib/cil-1.3.7.tar.gz"><TT>distrib/cil-1.3.7.tar.gz</TT></A>). See the Section&#XA0;<A HREF="changes.html#sec-changes">20</A> for recent changes to the CIL distribution.
+</LI><LI CLASS="li-enumerate">Unzip and untar the source distribution. This will create a directory
+called <TT>cil</TT> whose structure is explained below.<BR>
+ <TT>&#XA0;&#XA0;&#XA0;&#XA0;tar xvfz cil-1.3.7.tar.gz</TT>
+</LI></OL>
+</LI><LI CLASS="li-itemize"><EM>Subversion Repository</EM>:<BR>
+ Alternately, you can download an up to the minute version of CIL
+from our Subversion repository at:
+<PRE CLASS="verbatim">    svn co svn://hal.cs.berkeley.edu/home/svn/projects/trunk/cil
+</PRE>However, the Subversion version may be less stable than the released
+version. See the Changes section of doc/cil.tex to see what&#X2019;s
+changed since the last release. There may be changes that aren&#X2019;t yet
+documented in the .tex file or this website.<P>For those who were using the CVS server before we switched to
+Subversion, revision 8603 in Subversion corresponds to the last CVS
+version.</P></LI></UL>
+</LI><LI CLASS="li-enumerate">Enter the <TT>cil</TT> directory and run the <TT>configure</TT> script and then 
+GNU make to build the distribution. If you are on Windows, at least the
+<TT>configure</TT> step must be run from within <TT>bash</TT>.<BR>
+ &#XA0;&#XA0;&#XA0;&#XA0;<CODE>cd cil</CODE><BR>
+ &#XA0;&#XA0;&#XA0;&#XA0;<CODE>./configure</CODE><BR>
+ &#XA0;&#XA0;&#XA0;&#XA0;<CODE>make</CODE><BR>
+ &#XA0;&#XA0;&#XA0;&#XA0;<CODE>make quicktest</CODE><BR>
+
+</LI><LI CLASS="li-enumerate">You should now find <TT>cilly.asm.exe</TT> in a subdirectory of <TT>obj</TT>. The
+name of the subdirectory is either <TT>x86_WIN32</TT> if you are using <TT>cygwin</TT>
+on Windows or <TT>x86_LINUX</TT> if you are using Linux (although you should be
+using instead the Perl wrapper <TT>bin/cilly</TT>). Note that we do not have an
+<TT>install</TT> make target and you should use Cil from the development directory.
+</LI><LI CLASS="li-enumerate">If you decide to use CIL, <B>please</B>
+<A HREF="mailto:necula@cs.berkeley.edu">send us a note</A>. This will help recharge
+our batteries after a few years of development. And of course, do send us
+your bug reports as well.
+</LI></OL><P>The <TT>configure</TT> script tries to find appropriate defaults for your system.
+You can control its actions by passing the following arguments:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+<TT>CC=foo</TT> Specifies the path for the <TT>gcc</TT> executable. By default
+whichever version is in the PATH is used. If <TT>CC</TT> specifies the Microsoft
+<TT>cl</TT> compiler, then that compiler will be set as the default one. Otherwise,
+the <TT>gcc</TT> compiler will be the default.
+</LI></UL><P>CIL requires an underlying C compiler and preprocessor. CIL depends on the
+underlying compiler and machine for the sizes and alignment of types. The
+installation procedure for CIL queries the underlying compiler for
+architecture and compiler dependent configuration parameters, such as the size
+of a pointer or the particular alignment rules for structure fields. (This
+means, of course, that you should re-run <TT>./configure</TT> when you move CIL to
+another machine.)</P><P>We have tested CIL on the following compilers:</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+On Windows, <TT>cl</TT> compiler version 12.00.8168 (MSVC 6),
+13.00.9466 (MSVC .Net), and 13.10.3077 (MSVC .Net 2003). Run <TT>cl</TT>
+with no arguments to get the compiler version. 
+</LI><LI CLASS="li-itemize">On Windows, using <TT>cygwin</TT> and <TT>gcc</TT> version 2.95.3, 3.0,
+3.2, 3.3, and 3.4.
+</LI><LI CLASS="li-itemize">On Linux, using <TT>gcc</TT> version 2.95.3, 3.0, 3.2, 3.3, 4.0, and 4.1.
+</LI></UL><P>Others have successfully used CIL on x86 processors with Mac OS X,
+FreeBSD and OpenBSD; on amd64 processors with FreeBSD; on SPARC
+processors with Solaris; and on PowerPC processors with Mac OS X. If
+you make any changes to the build system in order to run CIL on your
+platform, please send us a patch.</P><H3 CLASS="subsection"><A NAME="toc1"></A><A NAME="htoc3">2.1</A>&#XA0;&#XA0;Building CIL on Windows with Microsoft Visual C</H3><P>Some users might want to build a standalone CIL executable on Windows (an
+executable that does not require cygwin.dll to run). You will need cygwin for
+the build process only. Here is how we do it</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">
+Start with a clean CIL directory
+</LI><LI CLASS="li-enumerate">Start a command-line window setup with the environment variables for
+Microsoft Visual Studio. You can do this by choosing Programs/Microsoft
+Visual Studio/Tools/Command Prompt. Check that you can run <TT>cl</TT>. 
+</LI><LI CLASS="li-enumerate">Ensure that <TT>ocamlc</TT> refers to a Win32 version of ocaml. Run <TT>ocamlc
+-v</TT> and look at the path to the standard library. If you have several
+versions of ocaml, you must set the following variables:
+<PRE CLASS="verbatim">      set OCAMLWIN=C:/Programs/ocaml-win
+
+      set OCAMLLIB=%OCAMLWIN%/lib
+      set PATH=%OCAMLWIN%/bin;%PATH%
+      set INCLUDE=%INCLUDE%;%OCAMLWIN%/inc
+      set LIB=%LIB%;%OCAMLWIN%/lib;obj/x86_WIN32
+   </PRE></LI><LI CLASS="li-enumerate">Run <TT>bash -c "./configure CC=cl"</TT>.
+</LI><LI CLASS="li-enumerate">Run <TT>bash -c "make WIN32=1 quickbuild"</TT>
+</LI><LI CLASS="li-enumerate">Run <TT>bash -c "make WIN32=1 NATIVECAML=1 cilly</TT>
+</LI><LI CLASS="li-enumerate">Run <TT>bash -c "make WIN32=1 doc</TT>
+</LI><LI CLASS="li-enumerate">Run <TT>bash -c "make WIN32=1 bindistrib-nocheck</TT>
+</LI></OL><P>The above steps do not build the CIL library, but just the executable. The
+last step will create a subdirectory <TT>TEMP_cil-bindistrib</TT> that contains
+everything that you need to run CIL on another machine. You will have to edit
+manually some of the files in the <TT>bin</TT> directory to replace <TT>CILHOME</TT>.
+The resulting CIL can be run with ActiveState Perl also. </P><HR>
+<A HREF="cil001.html"><IMG SRC="previous_motif.gif" ALT="Previous"></A>
+<A HREF="ciltoc.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
+<A HREF="cil003.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
+</BODY>
+</HTML>

@@ -1,0 +1,658 @@
+mod COMMON-SEMANTICS-EXPRESSIONS-INCLUDE is
+	including COMMON-INCLUDE .
+	op assign : K K -> K .
+endm
+
+mod COMMON-SEMANTICS-SIZEOF is
+	including COMMON-INCLUDE .
+
+	mb rule
+		< k > [sizeof(E:Expression) => sizeofType(typeof(E:Expression))] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > [sizeofType(arrayType(T:Type, N:Nat)) => '_*_(sizeofType(T:Type),, tv(N:Nat, cfg:sizeut))] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule [sizeofType(bitfieldType(T:Type, N:Nat)) => tv(N:Nat /Rat 8, cfg:sizeut)] : KSentence [metadata "structural"] .
+	--- fixme not really, but used for allocating functions
+	mb rule [sizeofType(functionType(?, ?)) => tv(1, cfg:sizeut)] : KSentence [metadata "structural"] .
+	
+	---C99 6.2.6.1:26 ... Each unqualified type has several qualified versions of its type,40) corresponding to the combinations of one, two, or all three of the const, volatile, and restrict qualifiers. The qualified or unqualified versions of a type are distinct types that belong to the same type category and have the same representation and alignment requirements. ...
+	eq sizeofType(qualifiedType(T:Type, ?)) = sizeofType(T:Type) .	
+
+	--- fixme 6.4.4.2 and other
+	mb [sizeof-struct]: rule
+		< k > [sizeofType(structType(X:Id)) => calcStructSize(L:List{KResult})] ...</ k >
+		< structs >... struct(X:Id) |-> L:List{KResult} ...</ structs >
+	: KSentence [metadata "structural"] .
+	mb [sizeof-union]: rule
+		< k > [sizeofType(unionType(X:Id)) => calcUnionSize(L:List{KResult})] ...</ k >
+		< structs >... union(X:Id) |-> L:List{KResult} ...</ structs >
+	: KSentence [metadata "structural"] .
+	mb [sizeof-enum]: rule
+		< k > [sizeofType(enumType(X:Id)) => tv(1, cfg:sizeut)] ...</ k >
+	: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-IDENTIFIERS is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	--- 6.3.2.2 Except when it is the operand of the sizeof operator, the unary & operator, the ++ operator, the -- operator, or the left operand of the . operator or an assignment operator, an lvalue that does not have an array type is converted to the value stored in the designated object (and is no longer an lvalue).
+		
+	eq hasArrayType(arrayType(?, ?)) = true .
+	ceq hasArrayType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'arrayType .
+	eq hasFunctionType(functionType(?, ?)) = true .
+	ceq hasFunctionType(T:Type) = false
+		if getKLabel(T:Type) =/=Bool 'functionType .	
+
+	--- generic lookup
+	mb [lookup]: rule
+		< k > [X:Id => readFromMem(Loc:Nat, T:Type)] ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> T:Type ...</ types >
+		if notBool(hasArrayType(T:Type)) andBool notBool(hasFunctionType(T:Type))
+		: KSentence [metadata "structural"] . --- nondet
+		
+	mb [lookup-register]: rule
+		< k > [X:Id => tv(V:Int, int)] ...</ k >
+		< registers >... X:Id |-> V:Int ...</ registers >
+		< types >... X:Id |-> registerInt ...</ types >
+		: KSentence [metadata "structural"] .
+		
+	---C99 6.3.2.1:3 Except when it is the operand of the sizeof operator or the unary & operator, or is a string literal used to initialize an array, an expression that has type "array of type" is converted to an expression with type "pointer to type" that points to the initial element of the array object and is not an lvalue. If the array object has register storage class, the behavior is undefined.
+	mb [lookup-array]: rule
+		< k > [X:Id => tv(Loc:Nat, pointerType(T:Type))] ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> arrayType(T:Type, ?) ...</ types >
+		: KSentence [metadata "structural"] .
+		
+	---C99 6.3.2.1:4 A function designator is an expression that has function type.  Except when it is the operand of the sizeof operator or the unary & operator, a function designator with type "function returning T" is converted to an expression that has type "pointer to a function returning T"
+	mb [lookup-closure]: rule
+		< k > [X:Id => tv(Loc:Nat, pointerType(functionType(T:Type, L:List{K})))] ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> functionType(T:Type, L:List{K}) ...</ types >
+		: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-FUNCTION-CALLS is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+
+	mb context application(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
+	---mb context application(`[HOLE`]:K, ?) : KSentence .
+	
+	--- massage application with no argument
+	mb rule [Apply(E:Expression) => Apply(E:Expression, .List{Expression})] : KSentence [metadata "structural"] .
+	
+	mb rule
+		< k > [Apply(E:Expression, L:List{Expression}) => application(E:Expression, getList{K}(L:List{Expression}))] ...</ k >
+		: KSentence [metadata "structural"] .
+	
+	--- fixme shouldn't access memory directly
+	mb [function-application-pre]: rule
+		< k > [application(tv(loc(Block:Nat, Offset:Nat), pointerType(functionType(?, ?))), L:List{K}) 
+		=> application(V:Value, L:List{K})] ...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:Value)) ...</ mem >
+		: KSentence [metadata "structural"] .
+		
+	--- fixme this is needed until we can pass a list of results to bind
+	--- mb context bind((?,, `[HOLE`]:K,, ?), ?) : KSentence .
+	--- needs to be done before call
+	
+	--- fixme: this must be a rule because of the rules associated with declaring local and bound variables
+	mb [function-application]: rule
+		< k > [
+			application(Closure(X:Id, functionType(R:Type, typedParameterList(P:List{KResult})), B:K), L:List{KResult}) ~> K:K 
+			=> sequencePoint ~> bind(L:List{KResult}, P:List{KResult}) ~> B:K
+		] </ k >
+		< currentFunction > [Fun:Id => X:Id] </ currentFunction >
+		< env > [E:Map => G:Map] </ env >
+		< genv > G:Map </ genv >
+		< locals > [L:Bag => .Bag] </ locals >
+		< types > [T:Map => GT:Map] </ types >
+		< typedefs > GT:Map </ typedefs >
+		< loopStack > [LS:List => .List] </ loopStack >
+		< callStack > [.List => List(
+			< stackFrame > 
+				< currentFunction > Fun:Id </ currentFunction >
+				< continuation > K:K </ continuation >
+				< locals > L:Bag </ locals >
+				< env > E:Map </ env >
+				< types > T:Map </ types >
+				< loopStack > LS:List </ loopStack >
+			</ stackFrame >
+			)] ...</ callStack >
+		: KSentence [metadata "computational"] . --- nondet
+		--- : KSentence [metadata "structural"] . --- nondet
+endm
+
+mod COMMON-SEMANTICS-ARRAY-SUBSCRIPTING is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	--- can't be done everywhere because same syntax as in declarations
+	mb rule < k > [E1:Expression[E2:Expression] => Deref(E1:Expression + E2:Expression)] ...</ k > : KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-LITERALS is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	--- +1 for terminating 0
+	mb [const-string-notfound]: rule
+		< k > [.K => alloc(Loc:Nat, lengthString(S:String) +Nat 1) ~> allocString(Loc:Nat, S:String)] ~> S:String ...</ k >
+		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+		< statics > M:Map [.Map => S:String |-> tv(Loc:Nat, arrayType(char, lengthString(S:String) +Nat 1))] </ statics >
+		if notBool($hasMapping(M:Map, S:String))
+		: KSentence [metadata "structural"] .
+	mb [const-string-found]: rule
+		< k > [S:String => tv(N:Nat, pointerType(T:Type))] ...</ k >
+		< statics >... S:String |-> tv(N:Nat, arrayType(T:Type, ?)) ...</ statics >
+		: KSentence [metadata "structural"] .
+	
+	---c99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented.
+***(
+											Octal or Hexadecimal 
+Suffix			Decimal Constant			Constant
+------------------------------------------------------------------
+none			int							int
+				long int					unsigned int
+				long long int				long int
+											unsigned long int
+											long long int
+											unsigned long long int
+------------------------------------------------------------------
+u or U			unsigned int 				unsigned int
+				unsigned long int 			unsigned long int
+				unsigned long long int 		unsigned long long int
+------------------------------------------------------------------
+l or L			long int 					long int
+				long long int 				unsigned long int
+											long long int
+											unsigned long long int
+------------------------------------------------------------------
+Both u or U		unsigned long int 			unsigned long int
+and l or L 		unsigned long long int 		unsigned long long int
+------------------------------------------------------------------
+ll or LL 		long long int				long long int
+											unsigned long long int
+------------------------------------------------------------------
+Both u or U		unsigned long long int 		unsigned long long int
+and ll or LL
+------------------------------------------------------------------
+***)
+	---c99 6.4.4.1:6 If an integer constant cannot be represented by any type in its list, it may have an extended integer type, if the extended integer type can represent its value. If all of the types in the list for the constant are signed, the extended integer type shall be signed. If all of the types in the list for the constant are unsigned, the extended integer type shall be unsigned. If the list contains both signed and unsigned types, the extended integer type may be signed or unsigned. If an integer constant cannot be represented by any type in its list and has no extended integer type, then the integer constant has no type.
+	---c99 6.2.5:4 ... There may also be implementation-defined extended signed integer types. ...
+	
+	mb rule < k > [I:Int => 
+		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
+			if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
+				if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
+					tv(I:Int, no-type)
+				fi
+			fi
+		fi
+		] ...</ k > 
+		: KSentence [metadata "structural"] .
+		
+	mb rule [@U(I:Int) => 
+		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
+			if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+				if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else 
+					tv(I:Int, no-type)
+				fi
+			fi
+		fi
+		]
+		: KSentence [metadata "structural"] .
+	mb rule [@L(I:Int) => 
+		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
+			if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
+				tv(I:Int, no-type)
+			fi
+		fi
+		]
+		: KSentence [metadata "structural"] .
+	mb rule [@UL(I:Int) => 
+		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
+			if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
+				tv(I:Int, no-type)
+			fi
+		fi
+		]
+		: KSentence [metadata "structural"] .
+	mb rule [@LL(I:Int) => 
+		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
+			tv(I:Int, no-type)
+		fi
+		]
+		: KSentence [metadata "structural"] .
+	mb rule [@ULL(I:Int) => 
+		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
+			tv(I:Int, no-type)
+		fi
+		]
+		: KSentence [metadata "structural"] .
+		
+		
+	---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double.
+	mb rule < k > [F:Float => tv(F:Float, double)] ...</ k > 
+		: KSentence [metadata "structural"] .
+	mb rule [@L(F:Float) => tv(F:Float, long-double)]
+		: KSentence [metadata "structural"] .
+	mb rule [@F(F:Float) => tv(F:Float, float)]
+		: KSentence [metadata "structural"] .
+
+endm
+
+mod COMMON-SEMANTICS-ASSIGNMENT is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	mb context assign(Deref([HOLE]), ?) : KSentence .
+	mb context assign(?, [HOLE]) : KSentence .
+	
+	mb [for-assignment]: rule < k > [E1:Expression := E2:Expression => assign(Deref(&(E1:Expression)),  E2:Expression)] ...</ k > : KSentence [metadata "structural"] .
+	
+	--- simplify compound assignments (if E1 op= E2, need to ensure E1 only gets evaluated once to be correct)
+	--- fixme, should not cause side effects to happen twice.  maybe match tv() on lhs
+	--- 6.5.16
+	mb [assign-times]: rule [E1:Expression *= E2:Expression => E1:Expression := E1:Expression * E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-divide]: rule [E1:Expression /= E2:Expression => E1:Expression := E1:Expression / E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-mod]: rule [E1:Expression %= E2:Expression => E1:Expression := E1:Expression % E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-plus]: rule [E1:Expression += E2:Expression => E1:Expression := E1:Expression + E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-subtract]: rule [E1:Expression -= E2:Expression => E1:Expression := E1:Expression - E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-lshift]: rule [E1:Expression <<= E2:Expression => E1:Expression := E1:Expression << E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-rshift]: rule [E1:Expression >>= E2:Expression => E1:Expression := E1:Expression >> E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-bit-and]: rule [E1:Expression &binop= E2:Expression => E1:Expression := E1:Expression &binop E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-bit-xor]: rule [E1:Expression ^= E2:Expression => E1:Expression := E1:Expression ^ E2:Expression] : KSentence [metadata "structural"] .
+	mb [assign-bit-or]: rule [E1:Expression |= E2:Expression => E1:Expression := E1:Expression | E2:Expression] : KSentence [metadata "structural"] .
+	
+	--- fixme this happens due to problem with cil and zeroinit
+	mb [assign-fix-enum]: rule
+		< k > [assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), tv(V:Int, int)) 
+		=> assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), cast(enumType(X:Id), tv(V:Int, int)))] ...</ k >
+		: KSentence [metadata "structural"] .
+	
+	--- fixme this isn't supposed to happen, but cil messes up and now we're doing some conversions and promotions, so it can
+	mb rule
+		< k > [assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(V:Int, T':Type))
+		=> assign(Deref(tv(Loc:Nat, pointerType(T:Type))), cast(T:Type, tv(V:Int, T':Type)))] ...</ k >
+		if T:Type =/=Bool T':Type
+		andBool hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type) 
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > [assign(Deref(registerLocation(X:Id)), tv(V:Int, int)) => tv(V:Int, int)] ...</ k >
+		< registers >... X:Id |-> [? => V:Int] ...</ registers >
+		: KSentence [metadata "structural"] .
+	
+	mb [assign]: rule
+		< k > [assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(V:Int, T:Type)) 
+		=> putInMem(Loc:Nat, tv(V:Int, T:Type), T:Type, sizeofType(T:Type)) ~> tv(V:Int, T:Type)] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb [assign-bitfield]: rule
+		< k > [assign(Deref(tv(bitloc(Block:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))), tv(V:Int, T:Type)) 
+		=> putInMem(bitloc(Block:Nat, N:Nat, O:Nat), tv(V:Int, T:Type), T:Type, tv(Len:Nat, cfg:sizeut)) ~> tv(V:Int, T:Type)] ...</ k >
+		: KSentence [metadata "structural"] .
+
+	--- fixme this is to get around L:List{K} not comparing equal
+	mb [assign-fp]: rule
+		< k > [assign(Deref(tv(Loc:Nat, pointerType(pointerType(functionType(T:Type, L:List{K}))))), tv(V:Int, pointerType(functionType(T:Type, L':List{K})))) 
+		=> putInMem(Loc:Nat, tv(V:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L:List{K})), sizeofType(pointerType(functionType(T:Type, L:List{K})))) ~> tv(V:Int, pointerType(functionType(T:Type, L:List{K})))] ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	--- fixme floats might have requirements
+	mb [assign-double]: rule
+		< k > [assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(double))), tv(V:Float, double)) 
+		=> tv(V:Float, double)] ...</ k >
+		< mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:Float / Offset:Nat]]) ...</ mem > 
+		: KSentence [metadata "structural"] .
+	--- fixme
+	mb [assign-float]: rule
+		< k > [assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(float))), tv(V:Float, float)) 
+		=> tv(V:Float, float)] ...</ k >
+		< mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:Float / Offset:Nat]]) ...</ mem > 
+		: KSentence [metadata "structural"] .
+	--- fixme
+	mb [assign-long-double]: rule
+		< k > [assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(long-double))), tv(V:Float, long-double)) 
+		=> tv(V:Float, long-double)] ...</ k >
+		< mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:Float / Offset:Nat]]) ...</ mem > 
+		: KSentence [metadata "structural"] .
+		
+	mb [assign-struct]: rule
+		< k > [assign(Deref(tv(Loc:Nat, pointerType(T:Type))), atv(L:List{K}, T:Type))
+		=> 
+		putBytesInMem(Loc:Nat, L:List{K}, T:Type, sizeofType(T:Type)) ~> atv(L:List{K},T:Type)] ...</ k >
+		: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-BITWISE is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	--- c99 6.5.7:3 The integer promotions are performed on each of the operands. The type of the result is that of the promoted left operand. If the value of the right operand is negative or is greater than or equal to the width of the promoted left operand, the behavior is undefined.
+	mb rule [tv(I:Int, T:Type) << tv(N:Nat, T':Type) => leftShiftInterpret(T:Type, I:Int <<Int N:Nat, tv(I:Int, T:Type))] 
+		if hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		andBool N:Nat <Int numBits(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [tv(I:Int, T:Type) >> tv(N:Nat, T':Type) => rightShiftInterpret(T:Type, I:Int >>Int N:Nat)] 
+		if hasIntegerType(T:Type)
+		andBool hasIntegerType(T':Type)
+		andBool N:Nat <Int numBits(T:Type)
+		: KSentence [metadata "structural"] .
+		
+	--- fixme As best I can tell, these bitwise operations cannot overflow.  I can't figure out where in the standard it says this though.
+	--- fixme result will be heated and may turn into a different kind of value
+	
+	--- mb rule [tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => cast(T:Type, I1:Int |Int I2:Int)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule [tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => cast(T:Type, I1:Int &Int I2:Int)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule [~ tv(I:Int, T:Type) => cast(T:Type, ~Int I:Int)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule [tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => cast(T:Type, I1:Int xorInt I2:Int)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+		
+	--- mb rule [tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => tv(I1:Int |Int I2:Int, T:Type)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule [tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => tv(I1:Int &Int I2:Int, T:Type)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule [~ tv(I:Int, T:Type) => tv(~Int I:Int, T:Type)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+	--- mb rule [tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => tv(I1:Int xorInt I2:Int, T:Type)] 
+		--- if hasIntegerType(T:Type)
+		--- : KSentence [metadata "structural"] .
+		
+	mb rule [tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int |Int I2:Int)] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int &Int I2:Int)] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [~ tv(I:Int, T:Type) => arithInterpret(T:Type, ~Int I:Int)] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int xorInt I2:Int)] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-ARITHMETIC is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+
+	--- we have to go through this sillyness because we can't compute size functionally
+	--- fixme
+	op waitingForOffset : Nat Type -> K .
+	mb rule < k > [tv(Offset:Nat, T':Type) ~> waitingForOffset(Base:Nat, T:Type) => tv(loc(Base:Nat, Offset:Nat), T:Type)] ...</ k > 
+		if T':Type ==Bool cfg:sizeut
+		: KSentence [metadata "structural"] .
+		
+	--- needs to check offset > 0 
+	mb rule < k > [tv(loc(Block:Nat, Offset:Nat), pointerType(T':Type)) + tv(I2:Int, T:Type) 
+	=> '_+_(tv(Offset:Nat, cfg:sizeut),, '_*_(sizeofType(T':Type),, tv(I2:Int, cfg:sizeut))) ~> waitingForOffset(Block:Nat, pointerType(T':Type))] ...</ k >
+		if hasIntegerType(T:Type)
+		andBool T':Type =/=Bool void
+		: KSentence [metadata "structural"] .
+		
+	mb rule < k > [tv(loc(Block:Nat, Offset:Nat), pointerType(T':Type)) - tv(I2:Int, T:Type) 
+	=> '_-_(tv(Offset:Nat, cfg:sizeut),, '_*_(sizeofType(T':Type),, tv(I2:Int, cfg:sizeut))) ~> waitingForOffset(Block:Nat, pointerType(T':Type))] ...</ k >
+		if hasIntegerType(T:Type)
+		andBool T':Type =/=Bool void
+		: KSentence [metadata "structural"] .
+		
+	op undefinedMessage : String -> K .
+	--- pointer arithmetic is undefined on void types
+	mb rule < k > [.K => undefinedMessage("Pointer arithmetic is undefined for void pointers (It's a constraint violation.")] ~> tv(I1:Int, pointerType(void)) + tv(I2:Int, T:Type) ...</ k >
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule < k > [.K => undefinedMessage("Pointer arithmetic is undefined for void pointers (It's a constraint violation.")] ~> tv(I1:Int, pointerType(void)) - tv(I2:Int, T:Type) ...</ k >
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+			
+	op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
+	mb [start-pointer-difference]: rule [tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
+		=> computePointerDifference(I1:Int, I2:Int, sizeofType(T:Type))]
+		: KSentence [metadata "structural"] .
+	mb [pointer-difference]: rule [computePointerDifference(loc(Block:Nat, Offset1:Nat), loc(Block:Nat, Offset2:Nat), tv(Size:Nat, ?))
+		=> tv(_-Int_(Offset1:Nat, Offset2:Nat) /Int Size:Nat, cfg:ptrdiffut)]
+		if _-Int_(Offset1:Nat, Offset2:Nat) %Int Size:Nat ==Bool 0
+		: KSentence [metadata "structural"] .	
+		
+	mb rule [tv(I1:Rat, T:Type) + tv(I2:Rat, T:Type) => arithInterpret(T:Type, (I1:Rat +Rat I2:Rat))] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [_-_(tv(I1:Int, T:Type), tv(I2:Int, T:Type)) => arithInterpret(T:Type, _-Int_(I1:Int,I2:Int))] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) * tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int *Int I2:Int)] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) / tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int /Int I2:Int)] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) % tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int %Int I2:Int)] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	mb rule [-un tv(I1:Int, T:Type) => arithInterpret(T:Type, -Int_(I1:Int))] 
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	
+	--- floats
+	--- fixme
+	mb rule [tv(F1:Float, T:Type) + tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float +Float F2:Float)] 
+		: KSentence [metadata "structural"] .
+	mb rule [_-_(tv(F1:Float, T:Type), tv(F2:Float, T:Type)) => arithInterpret(T:Type, _-Float_(F1:Float, F2:Float))]
+		: KSentence [metadata "structural"] .
+	mb rule [tv(F1:Float, T:Type) * tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float *Float F2:Float)] 
+		: KSentence [metadata "structural"] .
+	mb rule [tv(F1:Float, T:Type) / tv(F2:Float, T:Type) => arithInterpret(T:Type, F1:Float /Float F2:Float)] 
+		: KSentence [metadata "structural"] .
+	mb rule [-un tv(F:Float, T:Type) => arithInterpret(T:Type, -Float_(F:Float))] 
+		: KSentence [metadata "structural"] .
+		
+	mb rule [tv(F1:Float, T:Type) < tv(F2:Float, T:Type) => if (F1:Float <Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(F1:Float, T:Type) <= tv(F2:Float, T:Type) => if (F1:Float <=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(F1:Float, T:Type) > tv(F2:Float, T:Type) => if (F1:Float >Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+		
+	mb rule [tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) > tv(I2:Int, T:Type) => if (I1:Int >Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) >= tv(I2:Int, T:Type) => if (I1:Int >=Int I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) == tv(I2:Int, T:Type) => if (I1:Int ==Bool I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [tv(I1:Int, T:Type) != tv(I2:Int, T:Type) => if (I1:Int =/=Bool I2:Int) then tv(1, int) else tv(0, int) fi] : KSentence [metadata "structural"] .
+	mb rule [!(tv(V:BaseValue, ?)) => tv(0, int)] 
+		if notBool(V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
+		: KSentence [metadata "structural"] .
+	mb rule [!(tv(V:BaseValue, ?)) => tv(1, int)] 
+		if (V:BaseValue ==Bool 0 orBool V:BaseValue ==Bool loc(0, 0) orBool V:BaseValue ==Bool 0.0)
+		: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-MEMBERS is 
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	mb [arrow-struct]: rule
+		< k > [tv(Base:Int, pointerType(structType(S:Id))) -> X:Id => Deref(tv(Base:Int, pointerType(structType(S:Id)))) . X:Id] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb [arrow-union]: rule
+		< k > [tv(Base:Int, pointerType(unionType(S:Id))) -> X:Id => Deref(tv(Base:Int, pointerType(unionType(S:Id)))) . X:Id] ...</ k >
+		: KSentence [metadata "structural"] .
+
+	op dot-aux : K Id K -> K [metadata "strict(3)"] .
+	mb rule
+		< k > [(E:Expression . F:Id) => dot-aux(E:Expression, F:Id, typeof(E:Expression . F:Id))] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > [dot-aux(E:Expression, F:Id, arrayType(?, ?)) => &(E:Expression . F:Id)] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > [dot-aux(E:Expression, F:Id, T:Base-Type) => E:Expression ~> dot-aux(HOLE, F:Id, T:Base-Type)] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > [dot-aux(E:Expression, F:Id, pointerType(T:Type)) => E:Expression ~> dot-aux(HOLE, F:Id, pointerType(T:Type))] ...</ k >
+		: KSentence [metadata "structural"] .
+	--- fixme is this right?  not tested
+	mb rule
+		< k > [dot-aux(E:Expression, F:Id, structType(X:Id)) => E:Expression ~> dot-aux(HOLE, F:Id, structType(X:Id))] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > [dot-aux(E:Expression, F:Id, unionType(X:Id)) => E:Expression ~> dot-aux(HOLE, F:Id, unionType(X:Id))] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb rule
+		< k > [dot-aux(E:Expression, F:Id, bitfieldType(T:Type, N:Nat)) => E:Expression ~> dot-aux(HOLE, F:Id, bitfieldType(T:Type, N:Nat))] ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	mb rule
+		< k > [atv(L:List{K}, T:Type) ~> dot-aux(HOLE, F:Id, ?) => extractField(L:List{K}, T:Type, F:Id)] ...</ k >
+		: KSentence [metadata "structural"] .	
+					
+	---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
+		
+  	---C99 6.5.2.3:4 86) If &E is a valid pointer expression (where & is the "address-of" operator, which generates a pointer to its operand), the expression (&E)->MOS is the same as E.MOS.
+endm
+
+mod COMMON-SEMANTICS-DEREFERENCE is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	---C99 6.5.3.2:4 The unary * operator denotes indirection. If the operand points to a function, the result is a function designator; if it points to an object, the result is an lvalue designating the object. If the operand has type "pointer to type", the result has type "type". If an invalid value has been assigned to the pointer, the behavior of the unary * operator is undefined.
+	--- also see 6.3.2.1:3 for why i made the result a pointerType
+	mb rule < k > [Deref(tv(Loc:Nat, pointerType(arrayType(T:Type, N:Nat)))) => tv(Loc:Nat, pointerType(T:Type))] ...</ k > : KSentence [metadata "structural"] .
+	
+	mb [lookup-function] : rule
+		< k > [Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(functionType(T:Type, L:List{K})))) => V:Value] ...</ k >
+		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:Value)) ...</ mem >
+	: KSentence [metadata "structural"] .
+	
+	--- fixme, why do i need these cases?  arrays again?
+	mb [deref]: rule
+		< k > [Deref(tv(Loc:Nat, pointerType(T:Base-Type))) => readFromMem(Loc:Nat, T:Base-Type)
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb [deref-pointer]: rule
+		< k > [Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))) => readFromMem(Loc:Nat, pointerType(T:Type))
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb [deref-struct]: rule
+		< k > [Deref(tv(Loc:Nat, pointerType(structType(X:Id)))) => readFromMem(Loc:Nat, structType(X:Id))
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+	mb [deref-union]: rule
+		< k > [Deref(tv(Loc:Nat, pointerType(unionType(X:Id)))) => readFromMem(Loc:Nat, unionType(X:Id))
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-REFERENCE is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+	
+	mb context &([HOLE] -> X:Id) : KSentence .
+	
+	--- fixme this is crazy
+	--- if label not arrayType?
+	op fixPointerType : Type -> Type .
+	eq fixPointerType(T:Base-Type) = pointerType(T:Base-Type) .
+	eq fixPointerType(arrayType(T:Type, ?)) = pointerType(T:Type) .
+	eq fixPointerType(structType(X:Id)) = pointerType(structType(X:Id)) .
+	eq fixPointerType(unionType(X:Id)) = pointerType(unionType(X:Id)) .
+	eq fixPointerType(pointerType(T:Type)) = pointerType(pointerType(T:Type)) .
+	eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
+	eq fixPointerType(bitfieldType(T:Type, N:Nat)) = pointerType(bitfieldType(T:Type, N:Nat)) .
+	
+	mb rule [&(Deref(E:Expression)) => E:Expression] : KSentence [metadata "structural"] .
+	mb rule [&(E1:Expression[E2:Expression]) => E1:Expression + E2:Expression] : KSentence [metadata "structural"] .
+	
+	mb [ref-register]: rule
+		< k > [&(X:Id) => registerLocation(X:Id)] ...</ k >
+		< registers >... X:Id |-> ? ...</ registers >
+		: KSentence [metadata "structural"] .
+	mb [ref]: rule
+		< k > [&(X:Id) => tv(Loc:Nat, pointerType(T:Type))] ...</ k >
+		< env >... X:Id |-> Loc:Nat ...</ env >
+		< types >... X:Id |-> T:Type ...</ types >
+		: KSentence [metadata "structural"] .
+	mb [address-of-arrow-struct]: rule
+		< k > [&(tv(Base:Nat, pointerType(structType(S:Id))) -> X:Id) => cast(fixPointerType(T:Type), figureOffset(Base:Nat, calcStructSize-aux(L1:List{KResult}, 0), T:Type))] ...</ k >
+		< structs >... struct(S:Id) |-> (L1:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		: KSentence [metadata "structural"] .
+	mb [address-of-arrow-union]: rule
+		< k > [&(tv(Base:Nat, pointerType(unionType(S:Id))) -> X:Id) => cast(fixPointerType(T:Type), tv(Base:Nat, pointerType(void)))] ...</ k >
+		< structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, X:Id),, ?:List{KResult}) ...</ structs >
+		: KSentence [metadata "structural"] .
+		
+	mb [address-of-dot]: rule
+		< k > [&(E:Expression . X:Id) => &((&(E:Expression)) -> X:Id)] ...</ k >
+		: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
+	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
+
+	op postOpRef : K KLabel -> K .
+	mb context postOpRef(Deref([HOLE]), ?) : KSentence .
+	mb [make-postinc-ref]: rule < k > [E:Expression ++ => postOpRef(Deref(&(E:Expression)), '_++)] ...</ k > : KSentence [metadata "structural"] .
+	mb [make-postdec-ref]: rule < k > [E:Expression -- => postOpRef(Deref(&(E:Expression)), '_--)] ...</ k > : KSentence [metadata "structural"] .
+	
+	op postInc : K K Type -> K [metadata "strict(2)"] .
+	op postDec : K K Type -> K [metadata "strict(2)"] .
+	mb [post-increment-start]: rule
+		< k > [postOpRef(Deref(tv(Loc:Nat, pointerType(T:Type))), '_++)
+		=> postInc(Loc:Nat, readFromMem(Loc:Nat, T:Type), T:Type)
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	mb [post-increment]: rule
+		< k > [postInc(Loc:Nat, tv(I:Int, T:Type), T:Type)
+		=> assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(I:Int, T:Type) + tv(1, T:Type)) ~> discard ~> tv(I:Int, T:Type)
+		] ...</ k >
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	--- fixme would be simpler if i did integer promotions etc.
+	mb [post-increment]: rule
+		< k > [postInc(Loc:Nat, tv(I:Int, pointerType(T:Type)), pointerType(T:Type))
+		=> assign(Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))), tv(I:Int, pointerType(T:Type)) + tv(1, int)) ~> discard ~> tv(I:Int, pointerType(T:Type))
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	mb [post-decrement-start]: rule
+		< k > [postOpRef(Deref(tv(Loc:Nat, pointerType(T:Type))), '_--)
+		=> postDec(Loc:Nat, readFromMem(Loc:Nat, T:Type), T:Type)
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+		
+	mb [post-decrement]: rule
+		< k > [postDec(Loc:Nat, tv(I:Int, T:Type), T:Type)
+		=> assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(I:Int, T:Type) - tv(1, T:Type)) ~> discard ~> tv(I:Int, T:Type)
+		] ...</ k >
+		if hasIntegerType(T:Type)
+		: KSentence [metadata "structural"] .
+	--- fixme would be simpler if i did integer promotions etc.
+	mb [post-decrement]: rule
+		< k > [postDec(Loc:Nat, tv(I:Int, pointerType(T:Type)), pointerType(T:Type))
+		=> assign(Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))), tv(I:Int, pointerType(T:Type)) - tv(1, int)) ~> discard ~> tv(I:Int, pointerType(T:Type))
+		] ...</ k >
+		: KSentence [metadata "structural"] .
+endm
+
+mod COMMON-C-EXPRESSIONS is
+	including COMMON-SEMANTICS-SIZEOF .
+	including COMMON-SEMANTICS-IDENTIFIERS .
+	including COMMON-SEMANTICS-FUNCTION-CALLS .
+	including COMMON-SEMANTICS-ARRAY-SUBSCRIPTING .
+	including COMMON-SEMANTICS-ASSIGNMENT .
+	including COMMON-SEMANTICS-LITERALS .
+	including COMMON-SEMANTICS-BITWISE .
+	including COMMON-SEMANTICS-ARITHMETIC .
+	including COMMON-SEMANTICS-MEMBERS .
+	including COMMON-SEMANTICS-DEREFERENCE .
+	including COMMON-SEMANTICS-REFERENCE .
+	including COMMON-SEMANTICS-INCREMENT-AND-DECREMENT .
+endm

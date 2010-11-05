@@ -1,0 +1,138 @@
+Cil Makefile Structure
+----------------------
+
+(Originally written by Scott, updated 11/19/01.)
+
+The build rules are spread out among several Makefiles:
+
+  Makefile     - toplevel driver Makefile, interprets a variety
+                 of command-line arguments (e.g. INFERBOX=infer),
+                 and has rules for all the tests/benchmarks
+
+  Makefile.gcc - definitions of make variables that specify the syntax
+                 of invoking gcc; for example, it has "INC := -I",
+                 meaning -I is the option to name include directories
+                 
+  Makefile.msvc - similar to above, but for MS's "cl.exe" command-line
+                 compiler (e.g. "INC := /I")
+
+  Makefile.ccured - rules for building the 'ccured' program and runtime
+                 library
+
+  Makefile.ocaml - generic Makefile for OCaml projects; includes targets
+                 to compile and link ML sources into bytecode or
+                 native code
+
+  Makefile.combiner - rules for making the 'combiner' program
+
+  Makefile.cil   - rules for making the 'cilly' program
+
+
+------------- Makefile -----------
+Typical usage is to run only the toplevel Makefile, but specify options
+on the command line saying what to do.  For example:
+
+  make                  - build the bytecode 'ccured' and debug library
+
+Some of the more important command-line options:
+
+  NATIVECAML=1     - build native code 'ccured'
+  RELEASELIB=1     - build non-debug library
+  OPTIM=1          - enable ccured's built-in optimizer module
+  RELEASE=1        - native code, non-debug, optimizer enabled, etc.
+  NOGC=1           - disable the garbage collector (use malloc/free)
+  NOLINES=1        - disable #line directives in output
+  COMMLINES=1      - print #line, but only as comments
+  TRACE=flag1,..   - enable various debug output flags
+  LOGCALLS=1       - transform code to print at every function entry
+  LOGSTYLE=n       - style for LOGCALLS; see Makefile for n's meaning
+  INFERBOX=infer   - turn on full ccured transformation; without this,
+                     it just transforms to Cil and outputs uninstrumented
+
+so for example "make RELEASE=1" will build release versions of things.
+Some other targets of interest:
+
+  make clean            - remove compilation byproducts, including executables
+  make odoc             - make OCamlDoc documentation .html files
+  make setup            - build *both* bytecode/native, debug/non-debug
+
+For convenience, we've put targets into the Makefile for various test
+programs and benchmarks we use.  For example:
+
+  make go INFERBOX=infer    - build spec95 "go" benchmark in ccured mode
+  make power                - build Olden "power" benchmark in cil-only mode
+
+The line "below here are rules for building benchmarks" separates the
+benchmark targets.
+
+
+------------- Makefile.ccured -----------
+This file does three jobs:
+  - supplies parameters to Makefile.ocaml that let it build the
+    'ccured' executable, which transforms C code to add runtime checks
+  - says how to build the CCured runtime library
+  - produce patched versions of some system #include files
+
+Among the info to build 'ccured', the most important is the "MODULES"
+line, which says what are the ML modules which comprise this program.
+
+Note that order is *very* important: the OCaml linker wants to see
+*no* forward references, so the modules admit a total order on
+dependencies.  (If modules A and B call each other, you can list A
+first, and let B have an exported function reference which module A then
+sets to point at one of A's functions.  Ugly, I know.)
+
+Some of the configuration rules from Makefile are repeated in
+Makefile.ocaml.  This is unfortunate..
+
+The runtime library contains wrappers for C library calls, and the
+Boehm-Weiser conservative garbage collector.
+
+The library's name is dependent on (1) which compiler you're using,
+(2) whether it's being build in debug mode or not, and (3) what the
+extension for libraries is on the current platform.  For
+gcc/debug/linux, it's obj/ccured_GNUCC_debug.a.
+
+The garbage collector is built essentially independently, yielding
+its "gc.a" library.  The CCured modules are then added to this.
+
+
+-------------- Makefile.ocaml ------------  
+This makefile is a generic OCaml build system.  You tell it the names
+of the modules to build, and it compiles and links them.  A major
+choice is whether to build bytecode or native code, determined by
+whether NATIVECAML is defined.
+
+The rules themselves are complicated because this makefile works
+hard to allow the source files (.ml, etc.) to live in a different
+directory than the compiled object files (.cmo, etc.).
+
+If you want to see the details of the build process, set the variable
+ECHOSTYLE_SCOTT (in your .ccuredrc, for example).  This will print
+every command executed which has a side effect.  Without this you'll
+just see English descriptions of what's happening.
+
+
+------------- stylistic conventions ----------
+For the most part, we try to use ":=" instead of "=".  Basically, ":="
+evaluates its right-hand-side the moment it's parsed, whereas the
+RHS of "=" is evaluated every time the variable is referenced.  We
+find it's easier to predict how ":=" will behave, so unless the delayed
+evaluation of "=" is really desired, use ":=".
+
+Please indent the bodies of "ifdef..endif".  This works fine, and
+makes the files much easier to read.  (I'm not going to explore here
+the theology behind how *much* to indent...)
+
+
+-------------- references --------------
+Main Cil docs:
+  http://raw.cs.berkeley.edu/ccured/cil/index.html
+  
+GNU Make manual:
+  http://www.gnu.org/manual/make/html_chapter/make_toc.html
+  
+"Recursive Make Considered Harmful", an interesting and informative
+article about how to use and misuse make:
+  http://www.tip.net.au/~millerp/rmch/recu-make-cons-harm.html
+

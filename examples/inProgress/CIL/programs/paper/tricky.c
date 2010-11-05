@@ -1,0 +1,13 @@
+#include <stdio.h>
+void mysub1 (unsigned long long i) {
+	if (i < 2147483647 + 1) { puts("first"); }
+	if (i < 2147483648) { puts("second"); }
+}
+void mysub2 (unsigned int i) {
+	if (i + 0x80000000) { puts("third"); }
+	if (i + 2147483648) { puts("fourth"); }
+}
+int main(void) { 
+	mysub1(0x80000000);  mysub2(0x80000000);
+	return 0; 
+}

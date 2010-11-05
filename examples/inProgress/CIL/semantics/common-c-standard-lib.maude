@@ -1,0 +1,489 @@
+
+
+------------------------------------------------
+---- C standard library
+mod COMMON-C-STANDARD-LIBRARY is
+	including COMMON-INCLUDE .
+	including PL-SOCKET .
+	including PL-TCP-INTERFACE .
+
+	op builtin : Id -> Value .
+	
+	mb [debug-is-value]: rule
+		< k > [debug => builtin(debug)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [debug]: rule
+		< k > [application(builtin(debug), ?) => skipval] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [setjmp-is-value]: rule
+		< k > [setjmp => builtin(setjmp)] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	--- The (apparent) return value from setjmp indicates whether control reached that point normally or from a call to longjmp.
+	--- fixme check bounds
+	op Bag : Bag -> K .
+	mb [setjmp]: rule
+		< thread > 
+			B:Bag
+			< k > [application(builtin(setjmp), tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?)))) => tv(0, int)] ~> K:K </ k >
+		</ thread >
+		< mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[Bag(B:Bag < k > K:K </ k >) / Offset:Nat]]) ...</ mem >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [longjmp-is-value]: rule
+		< k > [longjmp => builtin(longjmp)] ...</ k >
+	: KSentence [metadata "structural"] .
+
+	mb [longjmp]: rule
+		< thread >
+		[?
+		< k > application(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))),, tv(I:Int, int))) ~> ? </ k >
+		=> B:Bag
+		< k > tv(if I:Int ==Bool 0 then 1 else I:Int fi, int) ~> K:K </ k >
+		]
+		</ thread >
+		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> [Bag(B:Bag < k > K:K </ k >) => piece(unknown(Fresh:Nat), 8)])) ...</ mem >
+		< freshNat > [Fresh:Nat => sNat(Fresh:Nat)] </ freshNat >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [spawn-is-value]: rule
+		< k > [spawn => builtin(spawn)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--- had to move < callStack > .List </ callStack > due to spawn
+	--- Closure(X:Id, functionType(R:Type, P:List{K}), B:K)
+	mb [spawn]: rule
+		< thread > 
+			C:Bag 
+			< callStack > ?:List </ callStack >
+			< k > [application(builtin(spawn), (Fun:Value,, L:List{KResult})) => skipval] ...</ k > 
+			< buffer > .List </ buffer >
+		</ thread >
+		[.Bag => 
+		< thread > 
+			C:Bag
+			< callStack > .List </ callStack > 
+			< k > application(Fun:Value, L:List{KResult}) ~> discard </ k >
+			< buffer > .List </ buffer >
+		</ thread >]
+	--- : KSentence [metadata "computational"] .
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [lock-is-value]: rule
+		< k > [lock => builtin(lock)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [lock]: rule
+		< k > [application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		< busy > Busy:Bag [.Bag => BagItem(Loc:Nat)] </ busy >
+		< holds >... [.Map => Loc:Nat |-> 0] ...</ holds >
+		< buffer > .List </ buffer >
+		< blocked > false </ blocked >
+		if notBool Loc:Nat in Busy:Bag
+		: KSentence [metadata "computational"] . --- nondet
+	mb [lock]: rule
+		< k > [application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		< holds >... Loc:Nat |-> [N:Nat => sNat(N:Nat)] ...</ holds >
+		: KSentence [metadata "structural"] . --- nondet
+	
+	mb rule
+		< k > application(builtin(lock), tv(Loc:Nat, pointerType(?))) ...</ k >
+		< blocked > [false => true] </ blocked >
+		< busy >... BagItem(Loc:Nat) ...</ busy >
+		< holds > Holds:Map </ holds >
+		if notBool $hasMapping(Holds:Map, Loc:Nat)
+		: KSentence [metadata "structural"] . --- nondet
+		
+	mb rule
+		< k > application(builtin(lock), tv(Loc:Nat, pointerType(?))) ...</ k >
+		< blocked > [true => false] </ blocked >
+		< busy > Busy:Bag </ busy >
+		--- < holds > Holds:Map </ holds >
+		if notBool Loc:Nat in Busy:Bag
+		: KSentence [metadata "structural"] . --- nondet
+	
+	--------------------------------------------
+	mb [unlock-is-value]: rule
+		< k > [unlock => builtin(unlock)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [unlock]: rule
+		< k > [application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		< busy >...[BagItem(Loc:Nat) => .Bag] ...</ busy >
+		< holds >... [Loc:Nat |-> 0 => .Map] ...</ holds >
+		< buffer > .List </ buffer >
+	: KSentence [metadata "structural"] .
+	mb [unlock]: rule
+		< k > [application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval] ...</ k >
+		< holds >... Loc:Nat |-> [sNat(N:Nat) => N:Nat] ...</ holds >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [sync-is-value]: rule
+		< k > [sync => builtin(sync)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [sync]: rule
+		< threads >
+			< thread >...
+				< k > [application(builtin(sync), .List{K}) => skipval] ...</ k > 
+				< buffer > .List </ buffer >
+			...</ thread >
+		</ threads >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [exit-is-value]: rule
+		< k > [exit => builtin(exit)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [exit]: rule
+		< k > [application(builtin(exit), tv(I:Int, int)) ~> ? => tv(I:Int, int)] </ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	--- mb [abort-is-debug]: rule
+		--- < k > [abort => debug] ...</ k >
+	--- : KSentence .
+	--- mb [abort-is-value]: rule
+		--- < k > [abort => builtin(abort)] ...</ k >
+	--- : KSentence .
+	--- mb [abort]: rule
+		--- < k > [application(builtin(abort), .List{K}) ~> ? => tv(134, int)] </ k >
+	--- : KSentence .
+	--------------------------------------------
+	mb [sqrt-is-value]: rule
+		< k > [sqrt => builtin(sqrt)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [sqrt]: rule
+		< k > [application(builtin(sqrt), tv(F:Float, double)) => tv(sqrtFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [log-is-value]: rule
+		< k > [log => builtin(log)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [log]: rule
+		< k > [application(builtin(log), tv(F:Float, double)) => tv(logFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [exp-is-value]: rule
+		< k > [exp => builtin(exp)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [exp]: rule
+		< k > [application(builtin(exp), tv(F:Float, double)) => tv(expFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [atan-is-value]: rule
+		< k > [atan => builtin(atan)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [atan]: rule
+		< k > [application(builtin(atan), tv(F:Float, double)) => tv(atanFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [asin-is-value]: rule
+		< k > [asin => builtin(asin)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [asin]: rule
+		< k > [application(builtin(asin), tv(F:Float, double)) => tv(asinFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [atan2-is-value]: rule
+		< k > [atan2 => builtin(atan2)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [atan2]: rule
+		< k > [application(builtin(atan2), (tv(F:Float, double),, tv(F':Float, double))) => tv(atanFloat(F:Float, F':Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [tan-is-value]: rule
+		< k > [tan => builtin(tan)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [tan]: rule
+		< k > [application(builtin(tan), tv(F:Float, double)) => tv(tanFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [floor-is-value]: rule
+		< k > [floor => builtin(floor)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--- mb [floor]: rule
+		--- < k > [application(builtin(floor), tv(F:Float, double)) => tv(floorFloat(F:Float), double)] ...</ k >
+	--- : KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [cos-is-value]: rule
+		< k > [cos => builtin(cos)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [cos]: rule
+		< k > [application(builtin(cos), tv(F:Float, double)) => tv(cosFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [fmod-is-value]: rule
+		< k > [fmod => builtin(fmod)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [fmod]: rule
+		< k > [application(builtin(fmod), (tv(F:Float, double),, tv(F':Float, double))) => tv(F:Float %Float F':Float, double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [sin-is-value]: rule
+		< k > [sin => builtin(sin)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [sin]: rule
+		< k > [application(builtin(sin), tv(F:Float, double)) => tv(sinFloat(F:Float), double)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [malloc-is-value]: rule
+		< k > [malloc => builtin(malloc)] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	mb [malloc]: rule
+		< k > [application(builtin(malloc), tv(N:Nat, T:Type)) => alloc(Loc:Nat, tv(N:Nat, T:Type)) ~> tv(Loc:Nat, pointerType(void))] ...</ k >
+		---< mem >... [.Map => Loc:Nat to (Loc:Nat +Nat N:Nat) |-> unknownRange(Fresh:Nat, Fresh:Nat +Nat N:Nat, 8)] ...</ mem >
+		< malloced >... [.Map => Loc:Nat |-> N:Nat] ...</ malloced >
+		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+		---< freshNat > [Fresh:Nat => Fresh:Nat +Nat N:Nat] </ freshNat >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	--- Returns a pseudo-random integral number in the range 0 to RAND_MAX.
+	
+	mb [rand-is-value]: rule
+		< k > [rand => builtin(rand)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--- unsignedIntegerTypes contains T:Type
+	--- (2 ^Nat absInt(numBits(int)))
+	--- fixme should use RAND_MAX
+	mb [rand]: rule
+		< k > [application(builtin(rand), .List{K}) => 
+		tv(absInt(randomRandom(Fresh:Nat)) %Int max(int), int)
+		] ...</ k >
+		< freshNat > [Fresh:Nat => sNat(Fresh:Nat)] </ freshNat >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [free-is-value]: rule
+		< k > [free => builtin(free)] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	mb [free]: rule
+		< k > [application(builtin(free), tv(loc(Block:Nat, Offset:Nat), pointerType(T:Type))) => skipval] ...</ k >
+		< mem >... [Block:Nat |-> memblock(N:Nat, ?) => .Map] ...</ mem >
+		< malloced >... [loc(Block:Nat, Offset:Nat) |-> N:Nat => .Map] ...</ malloced >
+	: KSentence [metadata "structural"] .
+	--- mb [free-done]: rule
+		--- < k > [application(builtin(free), tv(Loc:Nat, pointerType(T:Type))) => skipval] ...</ k >
+		--- < malloced >... [Loc:Nat |-> 0 => .Map] ...</ malloced >
+	--- : KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [calloc-is-value]: rule
+		< k > [calloc => builtin(calloc)] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	mb [calloc]: rule
+		< k > [application(builtin(calloc), (tv(N:Nat, ?),, tv(Size:Nat, ?))) => store (N:Nat *Nat Size:Nat) New tv(0, char) atLoc Loc:Nat ~> tv(Loc:Nat, pointerType(void))] ...</ k >
+		---< mem >... [.Map => Loc:Nat to (Loc:Nat +Nat (N:Nat *Nat Size:Nat)) |-> piece(0, 8)] ...</ mem >
+		< malloced >... [.Map => Loc:Nat |-> (N:Nat *Nat Size:Nat)] ...</ malloced >
+		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [putchar-is-value]: rule
+		< k > [putchar => builtin(putchar)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--- fixme doesn't cast to int
+	mb [putchar]: rule
+		< k > [application(builtin(putchar), tv(N:Nat, ?)) => writeToFD(1, N:Nat) ~> tv(N:Nat, int)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [fslPutc-is-value]: rule
+		< k > [fslPutc => builtin(fslPutc)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--- fixme doesn't cast to int
+	mb [fslPutc]: rule
+		< k > [application(builtin(fslPutc), (tv(N:Nat, ?),, tv(H:Nat, ?))) => writeToFD(H:Nat, N:Nat) ~> tv(N:Nat, int)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [getchar-is-value]: rule
+		< k > [getchar => builtin(getchar)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--- fixme doesn't cast to int
+	mb [getchar]: rule
+		< k > [application(builtin(getchar), .List{K}) => readFromFD(0)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [fslFGetC-is-value]: rule
+		< k > [fslFGetC => builtin(fslFGetC)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--- fixme doesn't cast to int
+	mb [fslFGetC]: rule
+		< k > [application(builtin(fslFGetC), (tv(FD:Nat, ?),, tv(Offset:Nat, ?))) => readFromFD(FD:Nat, Offset:Nat)] ...</ k >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [fslCloseFile-is-value]: rule
+		< k > [fslCloseFile => builtin(fslCloseFile)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [fslCloseFile]: rule
+		< k > [application(builtin(fslCloseFile), tv(FD:Nat, int)) => tv(0, int)] ...</ k >
+		< openFiles >... [FD:Nat |-> ? => .Map] ...</ openFiles >
+	: KSentence [metadata "structural"] .
+	--------------------------------------------
+	mb [fslOpenFile-is-value]: rule
+		< k > [fslOpenFile => builtin(fslOpenFile)] ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [fslOpenFile]: rule
+		< k > [application(builtin(fslOpenFile), (Loc:Value,, tv(FD:Nat, int))) 
+		=> fsl-open-file(getString(Loc:Value), FD:Nat)] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	op fsl-open-file-aux : String Nat String -> K .
+	
+	mb [fslOpenFile]: rule
+		< k > [fsl-open-file(str(S:String), FD:Nat) => fsl-open-file-aux(S:String, FD:Nat, readFile(S:String))] ...</ k >
+	: KSentence [metadata "structural"] .
+
+		
+	mb [fslOpenFile]: rule
+		< k > [fsl-open-file-aux(Name:String, FD:Nat, Data:String) => tv(0, int)] ...</ k >
+		< openFiles > [M:Map => M:Map[Name:String / FD:Nat]] </ openFiles >
+		< files > [M':Map => M':Map[Data:String / Name:String]] </ files >
+		if Data:String =/=Bool errorTCPSyntax
+		andBool lengthString(Data:String) >=Nat 0
+	: KSentence [metadata "structural"] .
+
+	
+	op fsl-open-file : K Nat -> K [metadata "strict(1)"] .
+	op getString : K -> K .
+	op getString : K String -> K [metadata "strict(1)"] .
+	eq getString(K:K) = getString(K:K, "") .
+	op str : String -> Value .
+	mb [getString]: rule
+		< k > [getString(tv(Loc:Nat, pointerType(T:Type)), S:String) 
+		=> getString(tv(sNat(Loc:Nat), pointerType(T:Type)), S:String +String charString(N:Nat))] ...</ k >
+		< mem >... Loc:Nat |-> piece(N:Nat, 8) ...</ mem >
+	if N:Nat =/=Bool 0 
+	: KSentence [metadata "structural"] .
+	mb [getString]: rule
+		< k > [getString(tv(Loc:Nat, pointerType(?)), S:String) => str(S:String)] ...</ k >
+		< mem >... Loc:Nat |-> piece(0, 8) ...</ mem >
+	: KSentence [metadata "structural"] .	
+	-----------------------------------------
+	--- fixme: let's get rid of this asap, ok?
+	mb [lib-printf-is-value]: rule
+		< k > [printf => builtin(printf)] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	op printf-aux : Nat Nat List{KResult} -> K .
+	op printf-string : Nat Nat -> K .
+	op printf-% : Nat Nat List{KResult} -> K .
+	mb [lib-printf-start]: rule
+		< k > [application(builtin(printf), (tv(loc(Block:Nat, Offset:Nat), pointerType(?)),, L:List{KResult})) => printf-aux(0, loc(Block:Nat, Offset:Nat), L:List{KResult})] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	--- op memLookupByte : Map Nat -> Nat .
+	--- eq memLookupByte((M:Map Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(N:Nat, 8)))), loc(Block:Nat, Offset:Nat)) = N:Nat .
+	--- eq memLookupByte(?, ?) = trueUnknown [owise] .
+	
+	--- readFromMem(Loc:Nat, T:Type)
+	mb [lib-printf-string]: rule
+		< k > [.K => readFromMem(Loc:Nat, char)] ~> printf-string(?, Loc:Nat) ...</ k >
+	: KSentence [metadata "structural"] .
+	mb [lib-printf-string]: rule
+		< k > [tv(N:Nat, ?) ~> printf-string(Len:Nat, loc(Block:Nat, Offset:Nat)) 
+			=> writeToFD(1, N:Nat) ~> printf-string(sNat(Len:Nat), loc(Block:Nat, sNat(Offset:Nat)))] 
+		...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(N:Nat, 8))) ...</ mem >
+		if N:Nat =/=Bool 0
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-string-done]: rule
+		< k > [tv(0, ?) ~> printf-string(Len:Nat, loc(Block:Nat, Offset:Nat)) => tv(Len:Nat, int)] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(0, 8))) ...</ mem >
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-normal]: rule
+		< k > [.K => readFromMem(Loc:Nat, char)] ~> printf-aux(?, Loc:Nat, ?) ...</ k >
+	: KSentence [metadata "structural"] .
+	---fixme why do i have to have the 0--255 check?
+	mb [lib-printf-normal]: rule
+		< k > [tv(N:Nat, ?) ~> printf-aux(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => writeToFD(1, N:Nat) ~> printf-aux(sNat(Len:Nat), loc(Block:Nat, sNat(Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(N:Nat, 8))) ...</ mem >
+		if N:Nat =/=Bool asciiString("%") 
+		andBool N:Nat =/=Bool 0
+		andBool N:Nat >=Nat 0 
+		andBool N:Nat <=Nat 255
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-done]: rule
+		< k > [tv(0, ?) ~> printf-aux(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => tv(Len:Nat, int)] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(0, 8))) ...</ mem >
+	: KSentence [metadata "structural"] .
+	mb [lib-printf-null]: rule
+		< k > [printf-aux(0, loc(0, 0), .List{K}) => writeToFD(1, "(null)") ~> tv(6, int)] ...</ k >
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-%]: rule
+		< k > [tv(N:Nat, ?) ~> printf-aux(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => printf-%(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if (N:Nat ==Bool asciiString("%"))
+	: KSentence [metadata "structural"] .
+	
+	
+	mb [lib-printf-%]: rule
+		< k > [.K => readFromMem(Loc:Nat, char)] ~> printf-%(?, Loc:Nat, ?) ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		--- if N:Nat ==Bool asciiString("%") 
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-%%]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => writeToFD(1, N:Nat) ~> printf-aux(sNat(Len:Nat), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("%") 
+	: KSentence [metadata "structural"] .
+	--- fixme ignoring 0 flag for now
+	mb [lib-printf-0]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => printf-%(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("0") 
+	: KSentence [metadata "structural"] .
+	--- ignoring num width
+	mb [lib-printf-width]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => printf-%(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat >Int asciiString("0") 
+		andBool N:Nat <=Int asciiString("9")
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-%x]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(D:Int, ?),, L:List{KResult})) => writeToFD(1, (if (lengthString(rat2stringConversion(D:Int, 16)) ==Bool 1) then
+				"0" +String rat2stringConversion(D:Int, 16)
+			else 
+				rat2stringConversion(D:Int, 16)
+			fi)) ~> printf-aux(Len:Nat +Nat lengthString((if (lengthString(rat2stringConversion(D:Int, 16)) ==Bool 1) then
+				"0" +String rat2stringConversion(D:Int, 16)
+			else 
+				rat2stringConversion(D:Int, 16)
+			fi)), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p")
+	: KSentence [metadata "structural"] .
+	
+	--- fixme might be messing things up elsewhere
+	eq Rat2String(loc(N:Nat, M:Nat), 16) = "loc(" +String rat2stringConversion(N:Nat, 16) +String ", " +String rat2stringConversion(M:Nat, 16) +String ")" .
+	
+	mb [lib-printf-%d]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(D:Int, ?),, L:List{KResult})) => writeToFD(1, rat2stringConversion(D:Int, 10)) ~> printf-aux(Len:Nat +Nat lengthString(rat2stringConversion(D:Int, 10)), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("d") orBool N:Nat ==Bool asciiString("u")
+	: KSentence [metadata "structural"] .
+	mb [lib-printf-%c]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(C:Nat, ?),, L:List{KResult})) => writeToFD(1, C:Nat) ~> printf-aux(Len:Nat +Nat 1, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("c") 
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-%f]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(D:Float, ?),, L:List{KResult})) => writeToFD(1, float2stringConversion(D:Float)) ~> printf-aux(Len:Nat +Nat lengthString(float2stringConversion(D:Float)), sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("f") orBool N:Nat ==Bool asciiString("g") 
+	: KSentence [metadata "structural"] .
+	
+	mb [lib-printf-%s]: rule
+		< k > [tv(N:Nat, ?) ~> printf-%(Len:Nat, loc(Block:Nat, Offset:Nat), (tv(S:Nat, pointerType(?)),, L:List{KResult})) => 
+			printf-string(0, S:Nat)
+			~> printf-aux(Len:Nat, sNat(loc(Block:Nat, Offset:Nat)), L:List{KResult})] ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
+		if N:Nat ==Bool asciiString("s") 
+	: KSentence [metadata "structural"] .
+
+	mb [lib-printf-%s-done]: rule
+		< k > [tv(Len':Nat, int) ~> printf-aux(Len:Nat, loc(Block:Nat, Offset:Nat), L:List{KResult}) => 
+			printf-aux(Len:Nat +Nat Len':Nat, loc(Block:Nat, Offset:Nat), L:List{KResult})] ...</ k >
+	: KSentence [metadata "structural"] .
+endm
