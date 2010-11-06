@@ -1076,8 +1076,8 @@ sub maudify_file {
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
-# Replacinf dots    
-    # $_ = replace_dots($_);
+# Replacing dots    
+    $_ = replace_dots($_);
 
 # Getting rid of comments, maintaining the line numbers of the remaining code
     s/($comment)/
