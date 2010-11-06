@@ -48,7 +48,7 @@ sub printNested {
 	if ($name != @rest) {
 		printNested(@rest);
 	} else {
-		print '.K';
+		print '(.).K';
 	}
 	print '))';
 }

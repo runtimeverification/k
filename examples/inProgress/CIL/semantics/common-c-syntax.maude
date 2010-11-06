@@ -140,7 +140,7 @@ mod COMMON-C-SYNTAX is
 	sort List{Expression} .
 	subsort Expression < List{Expression} .
 	op .List{Expression} : -> List{Expression} [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
-	op _.,._ : List{Expression} List{Expression} -> List{Expression} [assoc id: .List`{Expression`}] .
+	op _.,._ : List{Expression} List{Expression} -> List{Expression} [assoc metadata "strict hybrid" id: .List`{Expression`}] .
 
 	--- 6.5.3
 	--- sizeof, &, ++, ., --, and all assignment operators are NOT STRICT
@@ -305,7 +305,7 @@ mod COMMON-C-SYNTAX is
 	sort List{Parameter} .
 	subsort Parameter-Declaration < List{Parameter} .
 	op .List{Parameter} : -> List{Parameter} [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
-	op _,.,_ : List{Parameter} List{Parameter} -> List{Parameter} [assoc id: .List`{Parameter`}] .
+	op _,.,_ : List{Parameter} List{Parameter} -> List{Parameter} [assoc id: .List`{Parameter`} metadata "strict hybrid"] .
 	op Parameter-Type-List : List{Parameter} -> Parameter-Type-List [metadata "strict"] .
 	op Parameter-Type-List`(`) : -> Parameter-Type-List .
 
