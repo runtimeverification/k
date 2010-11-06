@@ -1059,9 +1059,12 @@ sub collect_rule_leaf
     
     if (Tree::Nary->is_leaf($node))
     {
-	$rule_leafs .= $node->{data} . "&&&&";
-	$cfgNode = Tree::Nary->nth_child($cfgNode, 0);
-	$config_leafs .= $cfgNode->{data} . "&&&&";
+	$cfgNode = Tree::Nary->first_child($cfgNode);
+	if (defined($cfgNode->{data}))
+	{
+	    $config_leafs .= $cfgNode->{data} . "&&&&";
+	    $rule_leafs .= $node->{data} . "&&&&";
+	}
     }
     else 
     {
