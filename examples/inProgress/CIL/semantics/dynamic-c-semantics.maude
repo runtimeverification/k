@@ -72,7 +72,7 @@ mod DYNAMIC-C-SEMANTICS is
 		</ mem >
 	</ T >)) = stripConfiguration(B0:Bag < T > B1:Bag 
 		< mem > M:Map
-			B:Nat |-> memblock(N:Nat, (0 |-> Closure(X:Id, .K, .K)))
+			B:Nat |-> memblock(N:Nat, (0 |-> Closure(X:Id, (.).K, (.).K)))
 		</ mem >
 		</ T >) .
 	eq stripConfiguration(B0:Bag (< T > B1:Bag
@@ -87,38 +87,38 @@ mod DYNAMIC-C-SEMANTICS is
 		< T >
 			< threads >
 				< thread >
-					< buffer > .List </ buffer >
+					< buffer > (.).List </ buffer >
 					< blocked > false </ blocked >
-					< registers > .Map </ registers >
+					< registers > (.).Map </ registers >
 					< k > P:Program 
-						~> Global(Declaration(char, Pointer(incomingArgumentArray[sNat(length L:List{K})]))) 
+						~> Global(Declaration(char, Pointer(incomingArgumentArray[sNat(lengthList{K} L:List{K})]))) 
 						~> incomingArguments(L:List{K})
 						--- ~> incomingArgumentArray[0] := Cast(Pointer(char), Name:String) ; 
 						--- ~> incomingArgumentArray[1] := Cast(Pointer(char), NULL) ; 
-						~> Apply(main, ((length L:List{K}) .,. incomingArgumentArray)) </ k >
-					< locsWrittenTo > .Bag </ locsWrittenTo >
-					< holds > .Map </ holds >
-					---< children > .Bag </ children >
-					< callStack > .List </ callStack >
-					< env > .Map </ env >
-					< loopStack > .List </ loopStack >
-					< locals > .Bag </ locals >
-					< types > .Map </ types >
+						~> Apply(main, ((lengthList{K} L:List{K}) .,. incomingArgumentArray)) </ k >
+					< locsWrittenTo > (.).Bag </ locsWrittenTo >
+					< holds > (.).Map </ holds >
+					---< children > (.).Bag </ children >
+					< callStack > (.).List </ callStack >
+					< env > (.).Map </ env >
+					< loopStack > (.).List </ loopStack >
+					< locals > (.).Bag </ locals >
+					< types > (.).Map </ types >
 					< currentFunction > File-Scope </ currentFunction >
 				</ thread >
 			</ threads >
-			< busy > .Bag </ busy >
-			< aLabelMap > .Map </ aLabelMap > 
-			< sizes > .Map </ sizes >
-			< genv > .Map </ genv > 
-			< mem > .Map </ mem >
+			< busy > (.).Bag </ busy >
+			< aLabelMap > (.).Map </ aLabelMap > 
+			< sizes > (.).Map </ sizes >
+			< genv > (.).Map </ genv > 
+			< mem > (.).Map </ mem >
 			< nextLoc > loc(1, 0) </ nextLoc >
 			< nextFile > 3 </ nextFile >
 			< freshNat > 0 </ freshNat >
-			< malloced > .Map </ malloced >
-			< statics > .Map </ statics >
-			< typedefs > .Map </ typedefs >
-			< structs > .Map </ structs >
+			< malloced > (.).Map </ malloced >
+			< statics > (.).Map </ statics >
+			< typedefs > (.).Map </ typedefs >
+			< structs > (.).Map </ structs >
 			< openFiles >
 				0 |-> "stdin" --- stdin
 				1 |-> "stdout" --- stdout
@@ -132,22 +132,22 @@ mod DYNAMIC-C-SEMANTICS is
 	.
 	
 	--- throw away annotations
-	mb [no-annotations]: rule [annotation(?); => .K] : KSentence [metadata "structural"] .
+	mb [no-annotations]: rule (annotation(?); => (.).K) : KSentence [metadata "structural"] .
 	
 	--- fixme I'm not sure threads clean up their memory
 	
 	--- this shouldn't happen for normal programs (functions end in a return).  it is only used for threads
 	mb [terminate-thread]: rule
-		[< thread >... < k > .K </ k > < buffer > .List </ buffer > ...</ thread > => .Bag]
+		< thread >... < k > (.).K </ k > < buffer > (.).List </ buffer > ...</ thread > => (.).Bag
 		: KSentence [metadata "structural"] .
 		
 	mb [terminate]: rule 
-		[< T >... < threads > < thread >... < k > V:Value </ k > < buffer > .List </ buffer > ...</ thread > </ threads > ...</ T >
-		=> < resultValue > V:Value </ resultValue >]
+		(< T >... < threads > < thread >... < k > V:Value </ k > < buffer > (.).List </ buffer > ...</ thread > </ threads > ...</ T >
+		=> < resultValue > V:Value </ resultValue >)
 		< files >...
-			["stdin" |-> S1:String	"stdout" |-> S2:String => .Map]
+			"stdin" |-> S1:String	"stdout" |-> S2:String => (.).Map
 		...</ files >
-		[.Bag => < input > S1:String </ input >	< output > S2:String </ output >]
+		((.).Bag => < input > S1:String </ input >	< output > S2:String </ output >)
 		: KSentence .
 	
 endm

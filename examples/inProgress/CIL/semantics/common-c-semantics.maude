@@ -18,7 +18,7 @@ static union {
   long double align_fp;
 } u1, u2;
 
-("Field").KProperLabel(unsigned-char,,("_`[_`]").KProperLabel("Id"(buf),,("_+_").KProperLabel(("_+_").KProperLabel(("_+_").KProperLabel(("sizeof").KProperLabel(long-long-int),,("_*_").KProperLabel(("tv").KResultLabel(8,,unsigned-long-int),,("sizeof").KProperLabel(long-long-int))),,("sizeof").KProperLabel(long-long-int)),,("tv").KResultLabel(2,,unsigned-long-int)))) 
+("Field")(.).KProperLabel(unsigned-char,,("_`[_`]")(.).KProperLabel("Id"(buf),,("_+_")(.).KProperLabel(("_+_")(.).KProperLabel(("_+_")(.).KProperLabel(("sizeof")(.).KProperLabel(long-long-int),,("_*_")(.).KProperLabel(("tv")(.).KResultLabel(8,,unsigned-long-int),,("sizeof")(.).KProperLabel(long-long-int))),,("sizeof")(.).KProperLabel(long-long-int)),,("tv")(.).KResultLabel(2,,unsigned-long-int)))) 
 ***)
 
 set print attribute on .
@@ -28,6 +28,7 @@ mod INCOMING-MODULES is
 	including C-CONFIGURATION .
 	including K-CONTEXTS .
 	including K-PROPER .
+	including K-QUOTED-LABELS .
 endm
 
 mod COMMON-SEMANTIC-SYNTAX is
@@ -50,7 +51,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	
 	op bwrite : Nat BaseValue -> ListItem .
 	op locations : List -> Set .
-	eq locations(.List) = .Set .
+	eq locations((.).List) = (.).Set .
 	eq locations(bwrite(Loc:Nat, ?) L:List) = SetItem(Loc:Nat) locations(L:List) .
 	
 	op registerLocation : Id -> Value .
@@ -194,8 +195,8 @@ mod C-SETTINGS is
 
 	--- S 6.2.5 p.35 i.15.  "The implementation shall define char to have the same range, representation, and behavior as either signed char or unsigned char.  37)... Irrespective of the choice made, char is a separate type from the other two and is not compatible with either
 	--- fixme I'm not sure what consequence being a separate type entails, so for now it will just be rewritten to the chosen type
-	mb rule [char => signed-char] : KSentence [metadata "structural"] .
-	mb rule [NULL => tv(loc(0, 0), pointerType(void))] : KSentence [metadata "structural"] .
+	mb rule (char => signed-char) : KSentence [metadata "structural"] .
+	mb rule (NULL => tv(loc(0, 0), pointerType(void))) : KSentence [metadata "structural"] .
 	
 	---C99 6.4.4.1:5 The type of an integer constant is the first of the corresponding list in which its value can be represented
 
@@ -307,7 +308,7 @@ mod SEMANTIC-HELPERS is
 	including C-SETTINGS .
 	
 	mb [discard]: rule
-		< k > [V:Value ~> discard => .K] ...</ k >
+		< k > V:Value ~> discard => (.).K ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	---- derived
@@ -348,16 +349,16 @@ mod SEMANTIC-HELPERS is
 	eq max(unsigned-long-long-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-long-long-int)), 1) .
 	
 	mb [firstChar]: rule
-		[firstChar(S:String) => substrString(S:String, 0, 1)]
+		(firstChar(S:String) => substrString(S:String, 0, 1))
 		: KSentence [metadata "structural"] .
 	mb [nthChar]: rule
-		[nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1)]
+		(nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1))
 		: KSentence [metadata "structural"] .
 	mb [charToAscii]: rule
-		[charToAscii(C:Char) => asciiString(C:Char)]
+		(charToAscii(C:Char) => asciiString(C:Char))
 		: KSentence [metadata "structural"] .
 	mb [butFirstChar]: rule
-		[butFirstChar(S:String) => substrString(S:String, 1, lengthString(S:String))]
+		(butFirstChar(S:String) => substrString(S:String, 1, lengthString(S:String)))
 		: KSentence [metadata "structural"] .
 		
 	eq N:Nat to N:Nat = .List{K} .
@@ -369,7 +370,7 @@ mod SEMANTIC-HELPERS is
 	eq S:Set SetItem(K:K) contains K:K = true .
 	ceq S:Set SetItem(K1:K) contains K2:K = S:Set contains K2:K 
 		if K1:K =/=Bool K2:K .
-	eq .Set contains K:K = false .
+	eq (.).Set contains K:K = false .
 
 	ceq hasIntegerType(T:Type) = true
 		if (integerTypes contains T:Type) .
@@ -411,42 +412,42 @@ mod SEMANTIC-HELPERS is
 	eq necessaryBytes(tv(R:Rat, T:Type)) = tv(truncRat(R:Rat +Rat (7 /Rat 8)), T:Type) .
 	
 	mb [calcStructSize]: rule
-		< k > [calcStructSize(L:List{KResult}) => necessaryBytes(calcStructSize-aux(L:List{KResult}, 0))] ...</ k >
+		< k > (calcStructSize(L:List{KResult}) => necessaryBytes(calcStructSize-aux(L:List{KResult}, 0))) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb [calcUnionSize]: rule
-		< k > [calcUnionSize(L:List{KResult}) => necessaryBytes(calcUnionSize-aux(L:List{KResult}, 0))] ...</ k >
+		< k > (calcUnionSize(L:List{KResult}) => necessaryBytes(calcUnionSize-aux(L:List{KResult}, 0))) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	mb [calcStructSize]: rule
-		< k > [calcStructSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat) 
-			=> sizeofType(T:Type) ~> calcStructSize-aux(L:List{KResult}, R:Rat)] ...</ k >
+		< k > calcStructSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat) 
+			=> sizeofType(T:Type) ~> calcStructSize-aux(L:List{KResult}, R:Rat) ...</ k >
 		if T:Type isa 'bitfieldType
 		: KSentence [metadata "structural"] .
 	mb [calcStructSize]: rule
-		< k > [calcStructSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat)
-			=> sizeofType(T:Type) ~> calcStructSize-aux(L:List{KResult}, truncRat(R:Rat +Rat (7 /Rat 8)))] ...</ k >
+		< k > calcStructSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat)
+			=> sizeofType(T:Type) ~> calcStructSize-aux(L:List{KResult}, truncRat(R:Rat +Rat (7 /Rat 8))) ...</ k >
 		if notBool(T:Type isa 'bitfieldType)
 		: KSentence [metadata "structural"] .
 		
 	mb [calcUnionSize]: rule
-		< k > [calcUnionSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat) 
-			=> sizeofType(T:Type) ~> calcUnionSize-aux(L:List{KResult}, R:Rat)] ...</ k >
+		< k > calcUnionSize-aux((typedField(T:Type, X:Id),, L:List{KResult}), R:Rat) 
+			=> sizeofType(T:Type) ~> calcUnionSize-aux(L:List{KResult}, R:Rat) ...</ k >
 		: KSentence [metadata "structural"] .
 
 	mb [calcStructSize-cool]: rule
-		< k > [tv(R':Rat, ?) ~> calcStructSize-aux(L:List{KResult}, R:Rat) 
-			=> calcStructSize-aux(L:List{KResult}, R:Rat +Rat R':Rat)] ...</ k >
+		< k > tv(R':Rat, ?) ~> calcStructSize-aux(L:List{KResult}, R:Rat) 
+			=> calcStructSize-aux(L:List{KResult}, R:Rat +Rat R':Rat) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb [calcUnionSize-cool]: rule
-		< k > [tv(R':Rat, ?) ~> calcUnionSize-aux(L:List{KResult}, R:Rat) 
-			=> calcUnionSize-aux(L:List{KResult}, maxRat(R:Rat, R':Rat))] ...</ k >
+		< k > tv(R':Rat, ?) ~> calcUnionSize-aux(L:List{KResult}, R:Rat) 
+			=> calcUnionSize-aux(L:List{KResult}, maxRat(R:Rat, R':Rat)) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb [calcStructSize-done]: rule
-		< k > [calcStructSize-aux(.List{K}, R:Rat) => tv(R:Rat, cfg:sizeut)] ...</ k > 
+		< k > (calcStructSize-aux(.List{K}, R:Rat) => tv(R:Rat, cfg:sizeut)) ...</ k > 
 		: KSentence [metadata "structural"] .
 	mb [calcUnionSize-done]: rule
-		< k > [calcUnionSize-aux(.List{K}, R:Rat) => tv(R:Rat, cfg:sizeut)] ...</ k > 
+		< k > (calcUnionSize-aux(.List{K}, R:Rat) => tv(R:Rat, cfg:sizeut)) ...</ k > 
 		: KSentence [metadata "structural"] .
 		
 	op _isa _ : K KLabel -> Bool .
@@ -465,40 +466,40 @@ mod COMMON-PARAMETER-BINDING is
 	including COMMON-INCLUDE .
 
 	mb [void-to-id]: rule
-		[Parameter-Declaration(void) => .List{Parameter}] : KSentence [metadata "structural"] .
+		(Parameter-Declaration(void) => .List{Parameter}) : KSentence [metadata "structural"] .
 	
 	--- empty binding
 	--- fixme not really a sequence point
 	mb [bind-empty]: rule 
-		< k > [bind(.List{K}, .List{K}) => sequencePoint] ...</ k > 
+		< k > (bind(.List{K}, .List{K}) => sequencePoint) ...</ k > 
 		: KSentence [metadata "structural"] .
 	--- bind one
 	--- consider same variable name
 	mb rule
-		< k > [bind((tv(V:BaseValue, arrayType(T:Type, ?)),, L:List{KResult}), PD:List{KResult})
-			=> bind((tv(V:BaseValue, pointerType(T:Type)),, L:List{KResult}), PD:List{KResult})] ...</ k > : KSentence [metadata "structural"] .
+		< k > bind((tv(V:BaseValue, arrayType(T:Type, ?)),, L:List{KResult}), PD:List{KResult})
+			=> bind((tv(V:BaseValue, pointerType(T:Type)),, L:List{KResult}), PD:List{KResult}) ...</ k > : KSentence [metadata "structural"] .
 
 	mb [bind-one]: rule
-		< k > [bind((tv(V:BaseValue, T:Type),, L:List{KResult}), (typedDeclaration(T':Type, X:Id),, P:List{KResult}))
+		< k > bind((tv(V:BaseValue, T:Type),, L:List{KResult}), (typedDeclaration(T':Type, X:Id),, P:List{KResult}))
 			=> giveLocalType(T':Type, X:Id) ~> 
 			addLocals(Loc:Nat) ~> 
 			storeNew cast(T':Type, tv(V:BaseValue, T:Type)) atLoc Loc:Nat ~>
-			bind(L:List{KResult}, P:List{KResult})] ...</ k > 
-		< env > [M:Map => M:Map[Loc:Nat / X:Id]] </ env >
-		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+			bind(L:List{KResult}, P:List{KResult}) ...</ k > 
+		< env > (M:Map => M:Map[Loc:Nat / X:Id]) </ env >
+		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		: KSentence [metadata "structural"] .
 	mb [bind-struct]: rule
-		< k > [bind((atv(V:List{K}, T:Type),, L:List{KResult}), (typedDeclaration(T:Type, X:Id),, P:List{KResult}))
+		< k > bind((atv(V:List{K}, T:Type),, L:List{KResult}), (typedDeclaration(T:Type, X:Id),, P:List{KResult}))
 			=> 
 			giveLocalType(T:Type, X:Id) ~> 
 			storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
 			---allocate(sizeofType(T:Type)) ~> 
 			addLocals(Loc:Nat) ~> 
 			---putBytesInMem(Loc:Nat, V:List{K}, T:Type, sizeofType(T:Type)) ~> 
-			bind(L:List{KResult}, P:List{KResult})] ...</ k > 
-		---< env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		< env > [M:Map => M:Map[Loc:Nat / X:Id]] </ env >
-		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+			bind(L:List{KResult}, P:List{KResult}) ...</ k > 
+		---< env >... [(.).Map => X:Id |-> Loc:Nat] ...</ env >
+		< env > (M:Map => M:Map[Loc:Nat / X:Id]) </ env >
+		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		: KSentence [metadata "structural"] .
 		
 	op bindVariadic : K List{KResult} -> K .
@@ -520,29 +521,29 @@ mod COMMON-PARAMETER-BINDING is
 	--- mb context bindVariadic(?, (?,, `[HOLE`]:K,, ?)) : KSentence .
 	
 	mb [bind-variadic-start]: rule
-		< k > [bind(L:List{KResult}, typedDeclaration(no-type, ...)) => bindVariadic-pre(loc(Block:Nat, Offset:Nat +Nat Len:Nat), promoteList(L:List{KResult}))] ...</ k > 
+		< k > (bind(L:List{KResult}, typedDeclaration(no-type, ...)) => bindVariadic-pre(loc(Block:Nat, Offset:Nat +Nat Len:Nat), promoteList(L:List{KResult}))) ...</ k > 
 		< mem >... Block:Nat |-> memblock(Len:Nat, ?) ...</ mem > 
 		< nextLoc > loc(sNat(Block:Nat), Offset:Nat) </ nextLoc >
 		: KSentence [metadata "structural"] .
 		
 	mb [bind-variadic-start]: rule
-		< k > [bindVariadic-pre(N:Nat, L:List{KResult}) => bindVariadic(N:Nat, L:List{KResult})] ...</ k > 
+		< k > (bindVariadic-pre(N:Nat, L:List{KResult}) => bindVariadic(N:Nat, L:List{KResult})) ...</ k > 
 		: KSentence [metadata "structural"] .
 	
 	mb [bind-variadic]: rule
-		< k > [bindVariadic(Loc:Nat, (V:Value,, L:List{KResult}))
+		< k > bindVariadic(Loc:Nat, (V:Value,, L:List{KResult}))
 			=> sizeof(V:Value) ~> bindVariadic(Loc:Nat, (V:Value,, L:List{KResult}))
-			] ...</ k > 
+			...</ k > 
 		: KSentence [metadata "structural"] .
 	
 	mb [bind-variadic-done]: rule
-		< k > [bindVariadic(?, .List{K}) => sequencePoint] ...</ k > 
+		< k > (bindVariadic(?, .List{K}) => sequencePoint) ...</ k > 
 		: KSentence [metadata "structural"] .
 
 	mb [bind-variadic-withSize]: rule
-		< k > [tv(Len:Nat, ?) ~> bindVariadic(loc(Block:Nat, Offset:Nat), (V:Value,, L:List{KResult}))
+		< k > tv(Len:Nat, ?) ~> bindVariadic(loc(Block:Nat, Offset:Nat), (V:Value,, L:List{KResult}))
 			=> append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) ~> bindVariadic(loc(Block:Nat, Offset:Nat +Nat Len:Nat), L:List{KResult})
-			] ...</ k > 
+			...</ k > 
 		: KSentence [metadata "structural"] .
 		
 	--- mb [bind-variadic]: rule
@@ -560,25 +561,25 @@ mod COMMON-PARAMETER-BINDING is
 			--- addLocals(Loc:Nat) ~> 
 			--- storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
 			--- bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+		--- < nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		--- : KSentence [metadata "structural"] .
 		
 	--- --- fixme todo this happens when we don't have the right prototype
 	mb [bind-bad-prototype]: rule
-		< k > [bind((tv(V:BaseValue, T:Type),, L:List{KResult}), .List{K})
+		< k > bind((tv(V:BaseValue, T:Type),, L:List{KResult}), .List{K})
 			=> 
 			addLocals(Loc:Nat) ~> 
 			storeNew tv(V:BaseValue, T:Type) atLoc Loc:Nat ~>
-			bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
-		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+			bind(L:List{KResult}, typedDeclaration(no-type, ...)) ...</ k > 
+		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		: KSentence [metadata "structural"] .
 	mb [bind-bad-prototype-struct]: rule
-		< k > [bind((atv(V:List{K}, T:Type),, L:List{KResult}), .List{K})
+		< k > bind((atv(V:List{K}, T:Type),, L:List{KResult}), .List{K})
 			=> 
 			addLocals(Loc:Nat) ~> 
 			storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
-			bind(L:List{KResult}, typedDeclaration(no-type, ...))] ...</ k > 
-		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+			bind(L:List{KResult}, typedDeclaration(no-type, ...)) ...</ k > 
+		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		: KSentence [metadata "structural"] .	
 endm
 
@@ -594,113 +595,113 @@ mod COMMON-GLOBAL-DECLARATION is
 
 	--- parser makes sure there are no uninitialized globals, so this should only do allocation
 	mb rule
-		< k > ['Global(typedDeclaration(T:Type, X:Id))
+		< k > 'Global(typedDeclaration(T:Type, X:Id))
 			=> giveGlobalType(T:Type, X:Id) ~> alloc(Loc:Nat, sizeofType(T:Type))
-			] ...</ k >
-		< env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		< genv >... [.Map => X:Id |-> Loc:Nat] ...</ genv >
-		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+			...</ k >
+		< env >... (.).Map => X:Id |-> Loc:Nat ...</ env >
+		< genv >... (.).Map => X:Id |-> Loc:Nat ...</ genv >
+		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		if getKLabel(T:Type)=/=Bool 'functionType
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > ['Local(typedDeclaration(T:Type, X:Id))
+		< k > 'Local(typedDeclaration(T:Type, X:Id))
 			=> giveLocalType(T:Type, X:Id) ~> alloc(Loc:Nat, sizeofType(T:Type)) ~> addLocals(Loc:Nat)
-			] ...</ k >
-		< env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+			...</ k >
+		< env >... (.).Map => X:Id |-> Loc:Nat ...</ env >
+		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		if T:Type =/=Bool registerInt
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > ['Local(typedDeclaration(registerInt, X:Id))
-			=> (.K)
-			] ...</ k >
-		< registers > [M:Map => M:Map[0 / X:Id]] </ registers >
-		--- < env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		--- < nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+		< k > 'Local(typedDeclaration(registerInt, X:Id))
+			=> ((.).K)
+			...</ k >
+		< registers > (M:Map => M:Map[0 / X:Id]) </ registers >
+		--- < env >... [(.).Map => X:Id |-> Loc:Nat] ...</ env >
+		--- < nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		: KSentence [metadata "structural"] .
 	
 	mb [function-prototype]: rule 
-		< k > ['Global(typedDeclaration(functionType(?, ?), ?)) => .K] ...</ k >
+		< k > ('Global(typedDeclaration(functionType(?, ?), ?)) => (.).K) ...</ k >
 		: KSentence [metadata "structural"] .
 			
 	op initialize : K K -> K .
 	mb [global-variable-declaration-init]: rule
-		< k > ['_=_(typedDeclaration(T:Type, X:Id),, E:Expression)
-		=> 'Global(typedDeclaration(T:Type, X:Id)) ~> initialize(X:Id, E:Expression) ~> skipval] ...</ k >
+		< k > '_=_(typedDeclaration(T:Type, X:Id),, E:Expression)
+		=> 'Global(typedDeclaration(T:Type, X:Id)) ~> initialize(X:Id, E:Expression) ~> skipval ...</ k >
 		: KSentence [metadata "structural"] .
 	op initList : K List{K} -> K .
 	mb rule
-		< k > [initialize(K:K, InitList(L:List{Expression}))
-		=> initList(K:K, getList{K}(L:List{Expression}))] ...</ k >
+		< k > initialize(K:K, InitList(L:List{Expression}))
+		=> initList(K:K, getList{K}(L:List{Expression})) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [initialize(K:Expression, InitItem(E:Expression))
-		=> (Deref(&(K:Expression)) := E:Expression);] ...</ k >
+		< k > initialize(K:Expression, InitItem(E:Expression))
+		=> (Deref(&(K:Expression)) := E:Expression); ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [initList(K:K, (Designation(ArrayDesignator(N:Nat), E:Expression),, L:List{K}))
-		=> initialize('_`[_`](K:K,, N:Nat), E:Expression) ~> initList(K:K, L:List{K})] ...</ k >
+		< k > initList(K:K, (Designation(ArrayDesignator(N:Nat), E:Expression),, L:List{K}))
+		=> initialize('_`[_`](K:K,, N:Nat), E:Expression) ~> initList(K:K, L:List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [initList(K:K, (Designation(FieldDesignator(F:Id), E:Expression),, L:List{K}))
-		=> initialize('_._(K:K,, F:Id), E:Expression) ~> initList(K:K, L:List{K})] ...</ k >
+		< k > initList(K:K, (Designation(FieldDesignator(F:Id), E:Expression),, L:List{K}))
+		=> initialize('_._(K:K,, F:Id), E:Expression) ~> initList(K:K, L:List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [initList(K:K, .List{K}) => .K] ...</ k >
+		< k > (initList(K:K, .List{K}) => (.).K) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb [function-definition]: rule
-		< k > ['_`{_`}(typedDeclaration(T:Type, X:Id),, B:SeqList) => storeNew Closure(X:Id, T:Type, B:SeqList) atLoc Loc:Nat ~> calculateGotoMap(X:Id, B:SeqList) ~> skipval] ...</ k >
-		< env >... [.Map => X:Id |-> Loc:Nat] ...</ env >
-		< genv >... [.Map => X:Id |-> Loc:Nat] ...</ genv >
-		< types >... [.Map => X:Id |-> T:Type] ...</ types >
-		< typedefs >... [.Map => X:Id |-> T:Type] ...</ typedefs >
-		< nextLoc > [Loc:Nat => inc(Loc:Nat)] </ nextLoc >
+		< k > '_`{_`}(typedDeclaration(T:Type, X:Id),, B:SeqList) => storeNew Closure(X:Id, T:Type, B:SeqList) atLoc Loc:Nat ~> calculateGotoMap(X:Id, B:SeqList) ~> skipval ...</ k >
+		< env >... (.).Map => X:Id |-> Loc:Nat ...</ env >
+		< genv >... (.).Map => X:Id |-> Loc:Nat ...</ genv >
+		< types >... (.).Map => X:Id |-> T:Type ...</ types >
+		< typedefs >... (.).Map => X:Id |-> T:Type ...</ typedefs >
+		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		: KSentence [metadata "structural"] .
 		
 	--- fixme
 	--- this rule is necessary for now since it's possible for cil to generate two declarations inside of a pglobal (when it thinks something needs a prototype)
 	mb rule 
-		< k > ['Global(K1:NeK ~> K2:NeK) => 'Global(K1:NeK) ~> 'Global(K2:NeK)] ...</ k >
+		< k > 'Global(K1:NeK ~> K2:NeK) => 'Global(K1:NeK) ~> 'Global(K2:NeK) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- --- fixme this isn't how things are, but it seems to work out
 	--- ---C99 6.7.2.2:3 The identifiers in an enumerator list are declared as constants that have type int and may appear wherever such are permitted
 	mb rule
-		< k > [enum(X:Id, ((X':Id := E:Expression) .,. L:List{Expression})) => 'Global('_=_('Declaration(int,, X':Id),, InitItem(E:Expression))) ~> enum(X:Id, L:List{Expression})] ...</ k >
+		< k > enum(X:Id, ((X':Id := E:Expression) .,. L:List{Expression})) => 'Global('_=_('Declaration(int,, X':Id),, InitItem(E:Expression))) ~> enum(X:Id, L:List{Expression}) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [enum(X:Id, .List{Expression}) => definedType(enumType(X:Id), enum(X:Id))] ...</ k >
+		< k > (enum(X:Id, .List{Expression}) => definedType(enumType(X:Id), enum(X:Id))) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb rule 
-		< k > ['Field(T:Type,, X:Id) => typedField(T:Type, X:Id)] ...</ k >
+		< k > ('Field(T:Type,, X:Id) => typedField(T:Type, X:Id)) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	op computeStructType : K Type List{K} -> K .
 	mb context computeStructType(?, ?, (?,, `[HOLE`]:K,, ?)) : KSentence .
 	
 	mb rule
-		< k > ['structDef(X:Id) => definedType(structType(X:Id), struct(X:Id))] ...</ k > 
+		< k > ('structDef(X:Id) => definedType(structType(X:Id), struct(X:Id))) ...</ k > 
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > ['unionDef(X:Id) => definedType(unionType(X:Id), union(X:Id))] ...</ k > 
+		< k > ('unionDef(X:Id) => definedType(unionType(X:Id), union(X:Id))) ...</ k > 
 		: KSentence [metadata "structural"] .
 	
 	--- here we add "incomplete" types for the tag we're defining
 	mb rule
-		< k > ['structDef(X:Id,, K:K) => giveGlobalType(structType(X:Id), struct(X:Id)) ~>
-		computeStructType(struct(X:Id), structType(X:Id), getList{K}(K:K))] ...</ k > 
+		< k > 'structDef(X:Id,, K:K) => giveGlobalType(structType(X:Id), struct(X:Id)) ~>
+		computeStructType(struct(X:Id), structType(X:Id), getList{K}(K:K)) ...</ k > 
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > ['unionDef(X:Id,, K:K) => giveGlobalType(unionType(X:Id), union(X:Id)) ~>
-		computeStructType(union(X:Id), unionType(X:Id), getList{K}(K:K))] ...</ k > 
+		< k > 'unionDef(X:Id,, K:K) => giveGlobalType(unionType(X:Id), union(X:Id)) ~>
+		computeStructType(union(X:Id), unionType(X:Id), getList{K}(K:K)) ...</ k > 
 		: KSentence [metadata "structural"] .
 	
 	mb rule
-		< k > [computeStructType(K:K, T:Type, L:List{KResult}) => definedType(T:Type, K:K)] ...</ k >
-		< structs >... [.Map => K:K |-> L:List{KResult}] ...</ structs >
+		< k > (computeStructType(K:K, T:Type, L:List{KResult}) => definedType(T:Type, K:K)) ...</ k >
+		< structs >... (.).Map => K:K |-> L:List{KResult} ...</ structs >
 		: KSentence [metadata "structural"] .
 endm
 
@@ -709,8 +710,8 @@ mod COMMON-LOCAL-DECLARATION is
 		
 	--- fixme: problem if threads come in and don't do this sequentially
 	mb rule
-		< k > [addLocals(Loc:Nat) => .K] ...</ k >
-		< locals >... [.Bag => BagItem(Loc:Nat)] ...</ locals >
+		< k > (addLocals(Loc:Nat) => (.).K) ...</ k >
+		< locals >... ((.).Bag => BagItem(Loc:Nat)) ...</ locals >
 		: KSentence [metadata "structural"] .
 			
 	eq unknownRange(N:Nat, N:Nat, Size:Nat) = .List{K} .
@@ -730,58 +731,58 @@ mod MEMORY is
 	eq inc(N:Nat) = sNat(N:Nat) [owise] .
 	
 	mb rule
-		< k > [readFromMem-aux(?, T:Type, tv(0, ?), L:List{K}) 
-		=> concretize(atv(L:List{K}, T:Type))] ...</ k >
+		< k > readFromMem-aux(?, T:Type, tv(0, ?), L:List{K}) 
+		=> concretize(atv(L:List{K}, T:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > [alloc(loc(Block:Nat, ?), tv(Len:Nat, ?)) => .K] ...</ k >
-		< mem >... [.Map => Block:Nat |-> memblock(Len:Nat, .Map)] ...</ mem >
+		< k > (alloc(loc(Block:Nat, ?), tv(Len:Nat, ?)) => (.).K) ...</ k >
+		< mem >... (.).Map => Block:Nat |-> memblock(Len:Nat, (.).Map) ...</ mem >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > [allocWithDefault(loc(Block:Nat, ?), tv(Len:Nat, ?), N:Nat) => .K] ...</ k >
-		< mem >... [.Map => Block:Nat |-> memblock(Len:Nat, (0 to Len:Nat) |-> piece(N:Nat, numBitsPerByte))] ...</ mem >
+		< k > (allocWithDefault(loc(Block:Nat, ?), tv(Len:Nat, ?), N:Nat) => (.).K) ...</ k >
+		< mem >... (.).Map => Block:Nat |-> memblock(Len:Nat, (0 to Len:Nat) |-> piece(N:Nat, numBitsPerByte)) ...</ mem >
 		: KSentence [metadata "structural"] .
 		
 	mb [store-closure]: rule
-		< k > [store Closure(K1:K, K2:K, K3:K) atLoc loc(Block:Nat, Offset:Nat) => .K] ...</ k >
-		< mem >... Block:Nat |-> memblock(Len:Nat, [M:Map => M:Map[Closure(K1:K, K2:K, K3:K) / Offset:Nat]]) ...</ mem >
+		< k > (store Closure(K1:K, K2:K, K3:K) atLoc loc(Block:Nat, Offset:Nat) => (.).K) ...</ k >
+		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[Closure(K1:K, K2:K, K3:K) / Offset:Nat])) ...</ mem >
 		: KSentence [metadata "structural"] .
 		
 	mb [append-existing]: rule
-		< k > [append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => store V:Value atLoc loc(Block:Nat, Offset:Nat)] ...</ k >
-		< mem >... Block:Nat |-> [memblock(OldLen:Nat, M:Map) => memblock(OldLen:Nat +Nat Len:Nat, M:Map)] ...</ mem >
+		< k > (append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => store V:Value atLoc loc(Block:Nat, Offset:Nat)) ...</ k >
+		< mem >... Block:Nat |-> (memblock(OldLen:Nat, M:Map) => memblock(OldLen:Nat +Nat Len:Nat, M:Map)) ...</ mem >
 		: KSentence [metadata "structural"] .
 	mb [append-new]: rule
-		< k > [append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => storeNew V:Value atLoc loc(Block:Nat, Offset:Nat)] ...</ k >
+		< k > (append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => storeNew V:Value atLoc loc(Block:Nat, Offset:Nat)) ...</ k >
 		< mem > M:Map </ mem >
 		if notBool($hasMapping(M:Map, Block:Nat))
 		: KSentence [metadata "structural"] .
 	
 	mb [store-scalar]: rule
-		< k > [store tv(V:BaseValue, T:Type) atLoc Loc:Nat => 
-		putInMem(Loc:Nat, tv(V:BaseValue, T:Type), T:Type, sizeofType(T:Type))] ...</ k >
+		< k > store tv(V:BaseValue, T:Type) atLoc Loc:Nat => 
+		putInMem(Loc:Nat, tv(V:BaseValue, T:Type), T:Type, sizeofType(T:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb [store-composite]: rule
-		< k > [store atv(V:List{K}, T:Type) atLoc Loc:Nat => 
-		putBytesInMem(Loc:Nat, V:List{K}, T:Type, sizeofType(T:Type))] ...</ k >
+		< k > store atv(V:List{K}, T:Type) atLoc Loc:Nat => 
+		putBytesInMem(Loc:Nat, V:List{K}, T:Type, sizeofType(T:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb [storeNew]: rule
-		< k > [storeNew V:Value atLoc Loc:Nat => alloc(Loc:Nat, sizeof(V:Value)) ~> store V:Value atLoc Loc:Nat] ...</ k >
+		< k > storeNew V:Value atLoc Loc:Nat => alloc(Loc:Nat, sizeof(V:Value)) ~> store V:Value atLoc Loc:Nat ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb [store-N-New]: rule
-		< k > [store Len:Nat New tv(N:Nat, ?) atLoc Loc:Nat => allocWithDefault(Loc:Nat, Len:Nat, N:Nat)] ...</ k >
+		< k > (store Len:Nat New tv(N:Nat, ?) atLoc Loc:Nat => allocWithDefault(Loc:Nat, Len:Nat, N:Nat)) ...</ k >
 		: KSentence [metadata "structural"] .
 
 	
 	--- c99 6.5:2 If a side effect on a scalar object is unsequenced relative to either a different side effect on the same scalar object or a value computation using the value of the same scalar object, the behavior is undefined. If there are multiple allowable orderings of the subexpressions of an expression, the behavior is undefined if such an unsequenced side effect occurs in any of the orderings
 	--- i take this to mean that if i write to a location twice or read from a location after being written to, then it is a problem
 	mb [read-byte]: rule
-		< k > [readFromMem-aux(loc(Block:Nat, Offset:Nat), T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})
-		=> readFromMem-aux(loc(Block:Nat, sNat(Offset:Nat)), T:Type, tv(Left:Nat, T':Type), (L:List{K},, V:BaseValue))] ...</ k >
+		< k > readFromMem-aux(loc(Block:Nat, Offset:Nat), T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})
+		=> readFromMem-aux(loc(Block:Nat, sNat(Offset:Nat)), T:Type, tv(Left:Nat, T':Type), (L:List{K},, V:BaseValue)) ...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:BaseValue)) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		< buffer > Mem:List </ buffer >
@@ -790,8 +791,8 @@ mod MEMORY is
 		: KSentence [metadata "computational"] .
 		--- : KSentence [metadata "structural"] .
 	mb [read-byte-buffer]: rule
-		< k > [readFromMem-aux(Loc:Nat, T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})
-			=> readFromMem-aux(sNat(Loc:Nat), T:Type, tv(Left:Nat, T':Type), (L:List{K},, V:BaseValue))] 
+		< k > readFromMem-aux(Loc:Nat, T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})
+			=> readFromMem-aux(sNat(Loc:Nat), T:Type, tv(Left:Nat, T':Type), (L:List{K},, V:BaseValue)) 
 		...</ k >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		< buffer >...  bwrite(Loc:Nat, V:BaseValue) Mem:List </ buffer >
@@ -802,12 +803,12 @@ mod MEMORY is
 		
 	--- this introduces a new unknown value if the location is valid
 	mb [read-unknown]: rule
-		< k > [readFromMem-aux(loc(Block:Nat, Offset:Nat), T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})
-			=> readFromMem-aux(loc(Block:Nat, sNat(Offset:Nat)), T:Type, tv(Left:Nat, T':Type), (L:List{K},, piece(unknown(Fresh:Nat), numBitsPerByte)))] 
+		< k > readFromMem-aux(loc(Block:Nat, Offset:Nat), T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})
+			=> readFromMem-aux(loc(Block:Nat, sNat(Offset:Nat)), T:Type, tv(Left:Nat, T':Type), (L:List{K},, piece(unknown(Fresh:Nat), numBitsPerByte)))
 		...</ k >
-		< mem >... Block:Nat |-> memblock(BlockLen:Nat, (M:Map [.Map => Offset:Nat |-> piece(unknown(Fresh:Nat), numBitsPerByte)])) ...</ mem >
+		< mem >... Block:Nat |-> memblock(BlockLen:Nat, (M:Map [(.).Map => Offset:Nat |-> piece(unknown(Fresh:Nat), numBitsPerByte)])) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
-		< freshNat > [Fresh:Nat => sNat(Fresh:Nat)] </ freshNat >
+		< freshNat > (Fresh:Nat => sNat(Fresh:Nat)) </ freshNat >
 		< buffer > Mem:List </ buffer >
 		if notBool loc(Block:Nat, Offset:Nat) in Locs:Bag
 		andBool Offset:Nat <Nat BlockLen:Nat
@@ -821,66 +822,65 @@ mod MEMORY is
 	--- fixme it's interesting we need this.  what do the rules say about when string allocation happens?
 	op dontCountWrite : Nat -> K .
 	mb rule
-		< k > [dontCountWrite(Loc:Nat) => .K] ...</ k >
-		< locsWrittenTo >... [BagItem(Loc:Nat) => .Bag] ...</ locsWrittenTo >
+		< k > (dontCountWrite(Loc:Nat) => (.).K) ...</ k >
+		< locsWrittenTo >... (BagItem(Loc:Nat) => (.).Bag) ...</ locsWrittenTo >
 		: KSentence [metadata "structural"] .
 		
 	--- fixme allocString is a misnomer, this actually writes the string to already-allocated memory	
 	mb [alloc-string]: rule
-		< k > [allocString(Loc:Nat, S:String) 
+		< k > allocString(Loc:Nat, S:String) 
 			=> putByteInMem(Loc:Nat, charToAscii(firstChar(S:String))) 
 			~> dontCountWrite(Loc:Nat) 
-			~> allocString(sNat(Loc:Nat), butFirstChar(S:String))] 
+			~> allocString(sNat(Loc:Nat), butFirstChar(S:String)) 
 		...</ k >
 		if lengthString(S:String) >Int 0
 		: KSentence [metadata "structural"] .
 	mb [alloc-empty-string]: rule
-		< k > [allocString(Loc:Nat, "") 
+		< k > allocString(Loc:Nat, "") 
 			=> putByteInMem(Loc:Nat, 0)
-			~> dontCountWrite(Loc:Nat)] 
+			~> dontCountWrite(Loc:Nat)
 		...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- fixme not enough, need more rules
 	--- fixme is this backwards?
 	mb rule
-		< k > [putBytesInMem(Loc:Nat, (piece(N:Nat, BitLen:Nat),, piece(N':Nat, 1),, L:List{K}), T:Type, tv(sNat(Len:Nat), J:Type)) 
-		=> putBytesInMem(Loc:Nat, (piece((N':Nat <<Nat BitLen:Nat) |Nat N:Nat, sNat(BitLen:Nat)),, L:List{K}), T:Type, tv(sNat(Len:Nat), J:Type))] ...</ k >
+		< k > putBytesInMem(Loc:Nat, (piece(N:Nat, BitLen:Nat),, piece(N':Nat, 1),, L:List{K}), T:Type, tv(sNat(Len:Nat), J:Type)) 
+		=> putBytesInMem(Loc:Nat, (piece((N':Nat <<Nat BitLen:Nat) |Nat N:Nat, sNat(BitLen:Nat)),, L:List{K}), T:Type, tv(sNat(Len:Nat), J:Type)) ...</ k >
 		if BitLen:Nat <Nat 8
 		: KSentence [metadata "structural"] .
 
 	mb rule
-		< k > [putBytesInMem(loc(Block:Nat, Offset:Nat), (V:BaseValue,, L:List{K}), T:Type, tv(sNat(Len:Nat), J:Type)) 
-			=> putBytesInMem(loc(Block:Nat, sNat(Offset:Nat)), (L:List{K}), T:Type, tv(Len:Nat, J:Type))] 
+		< k > putBytesInMem(loc(Block:Nat, Offset:Nat), (V:BaseValue,, L:List{K}), T:Type, tv(sNat(Len:Nat), J:Type)) 
+			=> putBytesInMem(loc(Block:Nat, sNat(Offset:Nat)), (L:List{K}), T:Type, tv(Len:Nat, J:Type)) 
 		...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:BaseValue / Offset:Nat]]) ...</ mem >
-		< buffer >... [.List => bwrite(loc(Block:Nat, Offset:Nat), V:BaseValue)] </ buffer >
-		< locsWrittenTo > Locs:Bag [.Bag => BagItem(loc(Block:Nat, Offset:Nat))] </ locsWrittenTo >
+		< buffer >... ((.).List => bwrite(loc(Block:Nat, Offset:Nat), V:BaseValue)) </ buffer >
+		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(loc(Block:Nat, Offset:Nat))) </ locsWrittenTo >
 		if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
 		: KSentence [metadata "structural"] .
 		
 			
 	mb rule
 		< blocked > false </ blocked >
-		< buffer > [bwrite(loc(Block:Nat, Offset:Nat), V:BaseValue) => .List] ...</ buffer >
-		< mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[V:BaseValue / Offset:Nat]]) ...</ mem >
+		< buffer > (bwrite(loc(Block:Nat, Offset:Nat), V:BaseValue) => (.).List) ...</ buffer >
+		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:BaseValue / Offset:Nat])) ...</ mem >
 		: KSentence [metadata "computational"] .
 		--- : KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > [putBytesInMem(Loc:Nat, .List{K}, T:Type, tv(0, ?)) => .K] ...</ k >
+		< k > (putBytesInMem(Loc:Nat, .List{K}, T:Type, tv(0, ?)) => (.).K) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	op putByteInMem : Nat BaseValue -> K .
 	op putBitInMem : BaseValue BaseValue -> K .
 	mb rule
-		< k > [putInMem(?, ?, ?, tv(0, ?)) => .K] ...</ k >
+		< k > (putInMem(?, ?, ?, tv(0, ?)) => (.).K) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- fixme: fixes the type of function types so they are equivalent
 	mb rule
-		< k > [putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) 
-		=> putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L':List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type))] ...</ k >
+		< k > putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) 
+		=> putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L':List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) ...</ k >
 		if L:List{K} =/=Bool L':List{K}
 		: KSentence [metadata "structural"] .
 		
@@ -890,17 +890,17 @@ mod MEMORY is
 	eq isLocation(K:K) = false [owise] .
 	--- needs to make sure not a bitfield
 	mb rule
-		< k > [putInMem(loc(Block:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
-		=> putByteInMem(loc(Block:Nat, Offset:Nat), ((N:Int %Int 256) +Int 256) %Int 256) ~> putInMem(loc(Block:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 8, T:Type), T:Type, tv(Len:Nat, J:Type))] ...</ k >
+		< k > putInMem(loc(Block:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
+		=> putByteInMem(loc(Block:Nat, Offset:Nat), ((N:Int %Int 256) +Int 256) %Int 256) ~> putInMem(loc(Block:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 8, T:Type), T:Type, tv(Len:Nat, J:Type)) ...</ k >
 		if notBool(isLocation(N:Int))
 		: KSentence [metadata "structural"] .
 		
 	--- fixme can now check oob
 	mb rule
-		< k > [putInMem(loc(Block:Nat, Offset:Nat), tv(F:Float, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[F:Float / Offset:Nat]]) ...</ mem >
-		< locsWrittenTo > Locs:Bag [.Bag => BagItem(loc(Block:Nat, Offset:Nat))] </ locsWrittenTo >
-		< buffer >... [.List => bwrite(loc(Block:Nat, Offset:Nat), F:Float)] </ buffer >
+		< k > (putInMem(loc(Block:Nat, Offset:Nat), tv(F:Float, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => (.).K) ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[F:Float / Offset:Nat)]) ...</ mem >
+		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(loc(Block:Nat, Offset:Nat))) </ locsWrittenTo >
+		< buffer >... ((.).List => bwrite(loc(Block:Nat, Offset:Nat), F:Float)) </ buffer >
 		if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
 		andBool (
 			(T:Type ==Bool double)
@@ -911,45 +911,45 @@ mod MEMORY is
 		
 	--- fixme: put pointer in memory
 	mb rule
-		< k > putInMem(?, [tv(loc(0, 0), T:Type) => tv(0, T:Type)], ?, ?) ...</ k >
+		< k > putInMem(?, (tv(loc(0, 0), T:Type) => tv(0, T:Type)), ?, ?) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [putInMem(loc(Block:Nat, Offset:Nat), tv(loc(Block':Nat, Offset':Nat), T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[loc(Block':Nat, Offset':Nat) / Offset:Nat]]) ...</ mem >
-		< locsWrittenTo > Locs:Bag [.Bag => BagItem(loc(Block:Nat, Offset:Nat))] </ locsWrittenTo >
-		< buffer >... [.List => bwrite(loc(Block:Nat, Offset:Nat), loc(Block':Nat, Offset':Nat))] </ buffer >
+		< k > (putInMem(loc(Block:Nat, Offset:Nat), tv(loc(Block':Nat, Offset':Nat), T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => (.).K) ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[loc(Block':Nat, Offset':Nat) / Offset:Nat)]) ...</ mem >
+		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(loc(Block:Nat, Offset:Nat))) </ locsWrittenTo >
+		< buffer >... ((.).List => bwrite(loc(Block:Nat, Offset:Nat), loc(Block':Nat, Offset':Nat))) </ buffer >
 		if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
 		andBool notBool(Block':Nat ==Bool 0 andBool Offset':Nat ==Bool 0)
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > [putInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type))
+		< k > putInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type))
 		=> putBitInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), ((N:Int %Int 2) +Int 2) %Int 2) ~> 
-		putInMem(bitloc(Block:Nat, Base:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 1, T:Type), T:Type, tv(Len:Nat, J:Type))] ...</ k >
+		putInMem(bitloc(Block:Nat, Base:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 1, T:Type), T:Type, tv(Len:Nat, J:Type)) ...</ k >
 		if (Offset:Nat <Nat 8)
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > [putInMem(bitloc(Block:Nat, Base:Nat, 8), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
-		=> putInMem(bitloc(Block:Nat, sNat(Base:Nat), 0), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type))] ...</ k >
+		< k > putInMem(bitloc(Block:Nat, Base:Nat, 8), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
+		=> putInMem(bitloc(Block:Nat, sNat(Base:Nat), 0), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	mb rule
-		< k > [putByteInMem(loc(Block:Nat, Offset:Nat), N:Nat) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(Len:Nat, [M:Map => M:Map[piece(N:Nat, 8) / Offset:Nat]]) ...</ mem >
-		< locsWrittenTo > Locs:Bag [.Bag => BagItem(loc(Block:Nat, Offset:Nat))] </ locsWrittenTo >
-		< buffer >... [.List => bwrite(loc(Block:Nat, Offset:Nat), piece(N:Nat, 8))] </ buffer >
+		< k > (putByteInMem(loc(Block:Nat, Offset:Nat), N:Nat) => (.).K) ...</ k >
+		--- < mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[piece(N:Nat, 8) / Offset:Nat)]) ...</ mem >
+		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(loc(Block:Nat, Offset:Nat))) </ locsWrittenTo >
+		< buffer >... ((.).List => bwrite(loc(Block:Nat, Offset:Nat), piece(N:Nat, 8))) </ buffer >
 		if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
 		: KSentence [metadata "structural"] .
 	--- this helps be fast, but is unsafe
 	--- mb rule
-		--- < k > [putByteInMem(Loc:Nat, N:Nat) => .K] ...</ k >
-		--- < mem > [M:Map => M:Map[piece(N:Nat, 8) / Loc:Nat]] </ mem >
+		--- < k > (putByteInMem(Loc:Nat, N:Nat) => (.).K) ...</ k >
+		--- < mem > (M:Map => M:Map[piece(N:Nat, 8) / Loc:Nat)] </ mem >
 		--- : KSentence [metadata "structural"] .
 	--- fixme need better fidelity; shouldn't zero out bits
 	--- fixme also need to handle the case where it's already unknown
 	mb rule 
 		< k > putBitInMem(bitloc(Block:Nat, Base:Nat, ?), ?) ...</ k >
-		< mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[piece(0, numBitsPerByte) / Base:Nat]]) ...</ mem >
+		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[piece(0, numBitsPerByte) / Base:Nat])) ...</ mem >
 		if notBool($hasMapping(M:Map, Base:Nat))
 		: KSentence [metadata "structural"] .
 	op known : Nat -> Bool .
@@ -957,11 +957,11 @@ mod MEMORY is
 	eq known(?) = true [owise] .
 	--- fixme not handling undefined writing twice in a sequence point 
 	mb rule
-		< k > [putBitInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), N:Nat) => .K] ...</ k >
+		< k > (putBitInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), N:Nat) => (.).K) ...</ k >
 		< mem >... Block:Nat |-> memblock(?, 
-			(? Base:Nat |-> [piece(Old:Nat, 8) => 
+			(? Base:Nat |-> (piece(Old:Nat, 8) => 
 				piece((Old:Nat &Nat ((1 <<Nat Offset:Nat) xorNat 255)) |Nat (N:Nat <<Nat Offset:Nat), 8)
-			])
+			))
 		) ...</ mem >
 		if known(Old:Nat)
 		: KSentence [metadata "structural"] .
@@ -1011,46 +1011,46 @@ mod COMMON-C-SEMANTICS is
 	--- need to be careful about simplifying these into one rule because there may be variables with the same name as a typedef?
 	--- fixme typedef should take precedence over variable
 	mb rule 
-		< k > [X:Id => T:Type] ...</ k >
+		< k > (X:Id => T:Type) ...</ k >
 		< types >... typedefName(X:Id) |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > [struct(X:Id) => T:Type] ...</ k > 
+		< k > (struct(X:Id) => T:Type) ...</ k > 
 		< types >... struct(X:Id) |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > [union(X:Id) => T:Type] ...</ k > 
+		< k > (union(X:Id) => T:Type) ...</ k > 
 		< types >... union(X:Id) |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > [enum(X:Id) => T:Type] ...</ k > 
+		< k > (enum(X:Id) => T:Type) ...</ k > 
 		< types >... enum(X:Id) |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > [sequencePoint => .K] ...</ k >
-		< locsWrittenTo > [? => .Bag] </ locsWrittenTo >
+		< k > (sequencePoint => (.).K) ...</ k >
+		< locsWrittenTo > (? => (.).Bag) </ locsWrittenTo >
 		: KSentence [metadata "structural"] .
 		
 	--- need to be careful about simplifying these into one rule because there may be variables with the same name as a typedef?
 	mb rule 
-		< k > [T:Typedef-Name => T:Type] ...</ k >
+		< k > (T:Typedef-Name => T:Type) ...</ k >
 		< types >... T:Typedef-Name |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > [struct(X:Id) => T:Type] ...</ k > 
+		< k > (struct(X:Id) => T:Type) ...</ k > 
 		< types >... struct(X:Id) |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > [union(X:Id) => T:Type] ...</ k > 
+		< k > (union(X:Id) => T:Type) ...</ k > 
 		< types >... union(X:Id) |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > [enum(X:Id) => T:Type] ...</ k > 
+		< k > (enum(X:Id) => T:Type) ...</ k > 
 		< types >... enum(X:Id) |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
 		
-	eq hex(S:String) = string2ratConversion(S:String, 16) .
+	eq hex(S:String) = String2Rat(S:String, 16) .
 	eq Parameter-Type-List() = Parameter-Type-List(.List{Parameter}) .		
 		
 	---C99 6.5.3.2 (p79) footnote 90) Thus, &*E == E; &(E1[E2]) == (E1 + E2)
@@ -1059,7 +1059,7 @@ mod COMMON-C-SEMANTICS is
 
 
 	--- remove empty global
-	mb [remove-global-marker-empty]: rule [Global() => .K] : KSentence [metadata "structural"] .
+	mb [remove-global-marker-empty]: rule (Global() => (.).K) : KSentence [metadata "structural"] .
 	
 	--- fixme: super horrible
 	--- some of the truncs and abs are just to get the sorts right
@@ -1074,25 +1074,25 @@ mod COMMON-C-SEMANTICS is
 	op extractField-aux : List{K} Type Nat Nat List{K} -> K .
 	
 	mb [extractField-from-struct-start]: rule
-		< k > [extractField(L:List{K}, structType(S:Id), F:Id)
-			=> extractField-pre(L:List{K}, T:Type, figureOffset(loc(0, 0), calcStructSize-aux(L1:List{KResult}, 0), T:Type), sizeofType(T:Type))] ...</ k >
+		< k > extractField(L:List{K}, structType(S:Id), F:Id)
+			=> extractField-pre(L:List{K}, T:Type, figureOffset(loc(0, 0), calcStructSize-aux(L1:List{KResult}, 0), T:Type), sizeofType(T:Type)) ...</ k >
 		< structs >... struct(S:Id) |-> (L1:List{KResult},, typedField(T:Type, F:Id),, ?:List{KResult}) ...</ structs >
 		: KSentence [metadata "structural"] .
 		
 	mb [extractField-from-union-start]: rule
-		< k > [extractField(L:List{K}, unionType(S:Id), F:Id) 
-			=> extractField-pre(L:List{K}, T:Type, tv(loc(0, 0), cfg:sizeut), sizeofType(T:Type))] ...</ k >
+		< k > extractField(L:List{K}, unionType(S:Id), F:Id) 
+			=> extractField-pre(L:List{K}, T:Type, tv(loc(0, 0), cfg:sizeut), sizeofType(T:Type)) ...</ k >
 		< structs >... union(S:Id) |-> (?:List{KResult},, typedField(T:Type, F:Id),, ?:List{KResult}) ...</ structs >
 		: KSentence [metadata "structural"] .
 		
 	mb [extractField-bitfield-start]: rule
-		< k > [extractField-pre(L:List{K}, bitfieldType(T:Type, N:Nat), tv(bitloc(?, Offset1:Nat, Offset2:Nat), ?),  tv(Len:Rat, ?)) 
-			=> extractField-aux(explodeToBits(L:List{K}), bitfieldType(T:Type, N:Nat), Offset1:Nat *Nat 8 +Nat Offset2:Nat, absInt(truncRat(Len:Rat *Rat 8)), .List{K})] ...</ k >
+		< k > extractField-pre(L:List{K}, bitfieldType(T:Type, N:Nat), tv(bitloc(?, Offset1:Nat, Offset2:Nat), ?),  tv(Len:Rat, ?)) 
+			=> extractField-aux(explodeToBits(L:List{K}), bitfieldType(T:Type, N:Nat), Offset1:Nat *Nat 8 +Nat Offset2:Nat, absInt(truncRat(Len:Rat *Rat 8)), .List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb [extractField-normal-start]: rule
-		< k > [extractField-pre(L:List{K}, T:Type, tv(loc(?, Offset:Nat), ?), tv(Len:Rat, ?)) 
-			=> extractField-aux(explodeToBits(L:List{K}), T:Type, Offset:Nat *Nat 8, absInt(truncRat(Len:Rat *Rat 8)), .List{K})] ...</ k >
+		< k > extractField-pre(L:List{K}, T:Type, tv(loc(?, Offset:Nat), ?), tv(Len:Rat, ?)) 
+			=> extractField-aux(explodeToBits(L:List{K}), T:Type, Offset:Nat *Nat 8, absInt(truncRat(Len:Rat *Rat 8)), .List{K}) ...</ k >
 		if getKLabel(T:Type) =/=Bool 'bitfieldType
 		: KSentence [metadata "structural"] .
 				
@@ -1105,53 +1105,53 @@ mod COMMON-C-SEMANTICS is
 	eq explodeToBits(.List{K}) = .List{K} .
 	
 	mb rule
-		< k > [extractField-aux((piece(?, N:Nat),, L:List{K}), T:Type, Offset:Nat, Len:Nat, .List{K})
-		=> extractField-aux(L:List{K}, T:Type, absInt(_-Int_(Offset:Nat, N:Nat)), Len:Nat, .List{K})] ...</ k >
+		< k > extractField-aux((piece(?, N:Nat),, L:List{K}), T:Type, Offset:Nat, Len:Nat, .List{K})
+		=> extractField-aux(L:List{K}, T:Type, absInt(_-Int_(Offset:Nat, N:Nat)), Len:Nat, .List{K}) ...</ k >
 		if N:Nat <=Nat Offset:Nat
 		: KSentence [metadata "structural"] .
 	--- fixme CHOICE assumes lengths of floats and pointers here
 	mb [explode-skip-floats]: rule
-		< k > [extractField-aux((explodeToBits(?:Float),, L:List{K}), T:Type, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Offset:Nat)))))))), Len:Nat, .List{K})
-		=> extractField-aux(L:List{K}, T:Type, Offset:Nat, Len:Nat, .List{K})] ...</ k >
+		< k > extractField-aux((explodeToBits(?:Float),, L:List{K}), T:Type, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Offset:Nat)))))))), Len:Nat, .List{K})
+		=> extractField-aux(L:List{K}, T:Type, Offset:Nat, Len:Nat, .List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb [explode-skip-locs]: rule
-		< k > [extractField-aux((explodeToBits(loc(?, ?)),, L:List{K}), T:Type, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Offset:Nat)))))))), Len:Nat, .List{K})
-		=> extractField-aux(L:List{K}, T:Type, Offset:Nat, Len:Nat, .List{K})] ...</ k >
+		< k > extractField-aux((explodeToBits(loc(?, ?)),, L:List{K}), T:Type, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Offset:Nat)))))))), Len:Nat, .List{K})
+		=> extractField-aux(L:List{K}, T:Type, Offset:Nat, Len:Nat, .List{K}) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > [extractField-aux((piece(N:Nat, Size:Nat),, L:List{K}), T:Type, 0, Len:Nat, L':List{K})
-		=> extractField-aux(L:List{K}, T:Type, 0, absInt(_-Int_(Len:Nat, Size:Nat)), (L':List{K},, piece(N:Nat, Size:Nat)))] ...</ k >
+		< k > extractField-aux((piece(N:Nat, Size:Nat),, L:List{K}), T:Type, 0, Len:Nat, L':List{K})
+		=> extractField-aux(L:List{K}, T:Type, 0, absInt(_-Int_(Len:Nat, Size:Nat)), (L':List{K},, piece(N:Nat, Size:Nat))) ...</ k >
 		if Size:Nat <=Nat Len:Nat
 		: KSentence [metadata "structural"] .
 	--- fixme :(
 	mb [explode-read-float]: rule
-		< k > [extractField-aux((explodeToBits(F:Float),, L:List{K}), T:Type, 0, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Len:Nat)))))))), L':List{K})
-		=> extractField-aux(L:List{K}, T:Type, 0, Len:Nat, (L':List{K},, F:Float))] ...</ k >
+		< k > extractField-aux((explodeToBits(F:Float),, L:List{K}), T:Type, 0, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Len:Nat)))))))), L':List{K})
+		=> extractField-aux(L:List{K}, T:Type, 0, Len:Nat, (L':List{K},, F:Float)) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb [explode-read-loc]: rule
-		< k > [extractField-aux((explodeToBits(loc(N:Nat, M:Nat)),, L:List{K}), T:Type, 0, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Len:Nat)))))))), L':List{K})
-		=> extractField-aux(L:List{K}, T:Type, 0, Len:Nat, (L':List{K},, loc(N:Nat, M:Nat)))] ...</ k >
+		< k > extractField-aux((explodeToBits(loc(N:Nat, M:Nat)),, L:List{K}), T:Type, 0, sNat(sNat(sNat(sNat(sNat(sNat(sNat(sNat(Len:Nat)))))))), L':List{K})
+		=> extractField-aux(L:List{K}, T:Type, 0, Len:Nat, (L':List{K},, loc(N:Nat, M:Nat))) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [extractField-aux((explodeToBits(F:Float),, L:List{K}), float, 0, ?, .List{K})
-		=> tv(F:Float, float)] ...</ k >
+		< k > extractField-aux((explodeToBits(F:Float),, L:List{K}), float, 0, ?, .List{K})
+		=> tv(F:Float, float) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [extractField-aux((F:Float,, L:List{K}), double, 0, ?, .List{K})
-		=> tv(F:Float, double)] ...</ k >
+		< k > extractField-aux((F:Float,, L:List{K}), double, 0, ?, .List{K})
+		=> tv(F:Float, double) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [extractField-aux((F:Float,, L:List{K}), float, 0, ?, .List{K})
-		=> tv(F:Float, float)] ...</ k >
+		< k > extractField-aux((F:Float,, L:List{K}), float, 0, ?, .List{K})
+		=> tv(F:Float, float) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [extractField-aux((F:Float,, L:List{K}), long-double, 0, ?, .List{K})
-		=> tv(F:Float, long-double)] ...</ k >
+		< k > extractField-aux((F:Float,, L:List{K}), long-double, 0, ?, .List{K})
+		=> tv(F:Float, long-double) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [extractField-aux(?, T:Type, 0, 0, L:List{K})
-		=> concretize(atv(L:List{K}, T:Type))] ...</ k >
+		< k > extractField-aux(?, T:Type, 0, 0, L:List{K})
+		=> concretize(atv(L:List{K}, T:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	
@@ -1160,30 +1160,30 @@ mod COMMON-C-SEMANTICS is
 	--- eq undefRange(M:Map, N:Nat, N:Nat) = M:Map .
 		
 	mb [writeToFD-char] : rule
-		< k > [writeToFD(FD:Nat, N:Nat) => .K]  ...</ k >
+		< k > (writeToFD(FD:Nat, N:Nat) => (.).K)  ...</ k >
 		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
-		< files >... Filename:String |-> [S:String => S:String +String charString(N:Nat %Nat 256)] ...</ files >
+		< files >... Filename:String |-> (S:String => S:String +String charString(N:Nat %Nat 256)) ...</ files >
 		: KSentence [metadata "structural"] .
 	mb [writeToFD-string] : rule
-		< k > [writeToFD(FD:Nat, S':String) => .K] ...</ k >
+		< k > (writeToFD(FD:Nat, S':String) => (.).K) ...</ k >
 		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
-		< files >... Filename:String |-> [S:String => S:String +String S':String] ...</ files >
+		< files >... Filename:String |-> (S:String => S:String +String S':String) ...</ files >
 		: KSentence [metadata "structural"] .
 	mb [readFromFD-char] : rule
-		< k > [readFromFD(FD:Nat) => tv(charToAscii(firstChar(S:String)), int)]  ...</ k >
+		< k > (readFromFD(FD:Nat) => tv(charToAscii(firstChar(S:String)), int))  ...</ k >
 		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
-		< files >... Filename:String |-> [S:String => butFirstChar(S:String)] ...</ files >
+		< files >... Filename:String |-> (S:String => butFirstChar(S:String)) ...</ files >
 		if S:String =/=Bool ""
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > [readFromFD(FD:Nat, Offset:Nat) => tv(charToAscii(nthChar(S:String, Offset:Nat)), int)]  ...</ k >
+		< k > (readFromFD(FD:Nat, Offset:Nat) => tv(charToAscii(nthChar(S:String, Offset:Nat)), int))  ...</ k >
 		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
 		< files >... Filename:String |-> S:String ...</ files >
 		if lengthString(S:String) >Nat Offset:Nat
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > [readFromFD(FD:Nat, Offset:Nat) => tv(-1, int)]  ...</ k >
+		< k > (readFromFD(FD:Nat, Offset:Nat) => tv(-1, int))  ...</ k >
 		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
 		< files >... Filename:String |-> S:String ...</ files >
 		if lengthString(S:String) <=Nat Offset:Nat

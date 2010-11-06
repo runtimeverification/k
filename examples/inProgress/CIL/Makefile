@@ -64,5 +64,5 @@ clean:
 	$(MAKE) -C $(C_DIR) clean
 	$(MAKE) -C $(PARSER_DIR) clean
 	$(MAKE) -C $(SEMANTICS_DIR) clean
-	$(MAKE) -C gcc-test clean
+#$(MAKE) -C gcc-test clean
 	rm -rf $(DIST_DIR)

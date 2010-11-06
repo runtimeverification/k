@@ -1,5 +1,5 @@
-K-MAUDE-BASE = ../../..
-K-COMPILE-BASE = tools/kcompileFast.sh
+K-MAUDE-BASE = ../../../..
+K-COMPILE-BASE = tools/kompile.pl
 K-PROGRAM-COMPILE = $(K-MAUDE-BASE)/tools/kcompile-program.sh
 
 K-MAUDE = $(K-MAUDE-BASE)/$(K-COMPILE-BASE)
@@ -38,7 +38,7 @@ common-c-syntax.maude common-c-configuration.maude common-c-semantics.maude comm
 match-c-syntax.maude match-c-semantics.maude match-c-configuration.maude \
 dynamic-c-semantics.maude dynamic-c-configuration.maude
 # alias maude="/home/software/maude24/maude"
-	$(K-MAUDE) c.maude C
+	$(K-MAUDE) c.maude -u -language C
 	
 c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude
 #echo adds a newline

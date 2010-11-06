@@ -1,4 +1,4 @@
-CIL_BASE = ../cil
+CIL_BASE = ../../C/cil
 CIL_PLATFORM ?= $(firstword $(shell ls $(CIL_BASE)/obj))
 OCAMLOPT_FLAGS = -w a -warn-error a
 
