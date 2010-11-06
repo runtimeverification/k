@@ -9,43 +9,49 @@ mod BINARY-TREE-HP is inc CONFIG + MATHEMATICAL-TREE + MATHEMATICAL-SEQUENCE .
   var Phi : Formula .
   var NtPhi : NtFormula .
   var Cfg : BagItem .
-  var CfgItems : Bag .
+  var CfgItems Cfgs : Bag .
 
 
 *** Definition of Trees ***
   op tree : -> HeapLabel .
- ceq < config >
-       < k > derive(P') ~> K </ k >
-       < heap >
-         tree(P)(Tau)
-         H
-       </ heap >
-       < form > Phi </ form >
-       CfgItems
-     </ config >
+ ceq < tasks >
+       < config >
+        < k > derive(P') ~> K </ k >
+         < heap >
+           tree(P)(Tau)
+           H
+         </ heap >
+         < form > Phi </ form >
+         CfgItems
+       </ config >
+     Cfgs 
+     </ tasks >
      < counter > N </ counter >
-   = < config >
-       < k > derive(P') ~> K </ k >
-       < heap > H </ heap >
-       < form > Phi /\ (P === 0) /\ (Tau === upsilon) </ form >
-       CfgItems
-     </ config >
-     < config >
-       < k > K </ k >
-       < heap >
-         P |-> FreeInt(N) : treeNode . val
-         (P +Int 1) |-> FreeInt(N +Int 1) : treeNode . left
-         (P +Int 2) |-> FreeInt(N +Int 2) : treeNode . right
-         tree(FreeInt(N +Int 1))(FreeTree(N +Int 3))
-         tree(FreeInt(N +Int 2))(FreeTree(N +Int 4))
-         H
-       </ heap >
-       < form >
-         Phi /\ ~(P === 0) /\
-         (Tau === (FreeTree(N +Int 3) [FreeInt(N)] FreeTree(N +Int 4)))
-       </ form >
-       CfgItems
-     </ config >
+   = < tasks >
+       < config >
+         < k > derive(P') ~> K </ k >
+         < heap > H </ heap >
+         < form > Phi /\ (P === 0) /\ (Tau === upsilon) </ form >
+         CfgItems
+       </ config >
+       < config >
+         < k > K </ k >
+         < heap >
+           P |-> FreeInt(N) : treeNode . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : treeNode . left
+           (P +Int 2) |-> FreeInt(N +Int 2) : treeNode . right
+           tree(FreeInt(N +Int 1))(FreeTree(N +Int 3))
+           tree(FreeInt(N +Int 2))(FreeTree(N +Int 4))
+           H
+         </ heap >
+         < form >
+           Phi /\ ~(P === 0) /\
+           (Tau === (FreeTree(N +Int 3) [FreeInt(N)] FreeTree(N +Int 4)))
+         </ form >
+         CfgItems
+       </ config >
+     Cfgs 
+     </ tasks >
      < counter > N +Int 5 </ counter >
   if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
 
@@ -138,37 +144,43 @@ mod BINARY-TREE-HP is inc CONFIG + MATHEMATICAL-TREE + MATHEMATICAL-SEQUENCE .
 *** Definition of Lists of Trees ***
   op list{tree} : -> HeapLabel .
 
- ceq < config >
-       < k > derive(P') ~> K </ k >
-       < heap >
-         list{tree}(P)(Alpha)
-         H
-       </ heap >
-       < form > Phi </ form >
-       CfgItems
-     </ config >
+ ceq < tasks >
+       < config >
+         < k > derive(P') ~> K </ k >
+         < heap >
+           list{tree}(P)(Alpha)
+           H
+         </ heap >
+         < form > Phi </ form >
+         CfgItems
+       </ config >
+     Cfgs 
+     </ tasks >
      < counter > N </ counter >
-   = < config >
-       < k > derive(P') ~> K </ k >
-       < heap > H </ heap >
-       < form > Phi /\ (P === 0) /\ (Alpha === epsilon) </ form >
-       CfgItems
-     </ config >
-     < config >
-       < k > K </ k >
-       < heap >
-         P |-> FreeInt(N) : treeNodeList . val
-         (P +Int 1) |-> FreeInt(N +Int 1) : treeNodeList . next
-         tree(FreeInt(N))(FreeTree(N +Int 2))
-         list{tree}(FreeInt(N +Int 1))(FreeSeq(N +Int 3))
-         H
-       </ heap >
-       < form >
-         Phi /\ ~(P === 0) /\ ~(FreeInt(N) === 0) /\
-         (Alpha === [FreeTree(N +Int 2)] @ FreeSeq(N +Int 3))
-       </ form >
-       CfgItems
-     </ config >
+   = < tasks >
+       < config >
+         < k > derive(P') ~> K </ k >
+         < heap > H </ heap >
+         < form > Phi /\ (P === 0) /\ (Alpha === epsilon) </ form >
+         CfgItems
+       </ config >
+       < config >
+         < k > K </ k >
+         < heap >
+           P |-> FreeInt(N) : treeNodeList . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : treeNodeList . next
+           tree(FreeInt(N))(FreeTree(N +Int 2))
+           list{tree}(FreeInt(N +Int 1))(FreeSeq(N +Int 3))
+           H
+         </ heap >
+         < form >
+           Phi /\ ~(P === 0) /\ ~(FreeInt(N) === 0) /\
+           (Alpha === [FreeTree(N +Int 2)] @ FreeSeq(N +Int 3))
+         </ form >
+         CfgItems
+       </ config >
+     Cfgs 
+     </ tasks >
      < counter > N +Nat 4 </ counter >
   if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
 

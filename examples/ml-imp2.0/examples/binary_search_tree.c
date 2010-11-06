@@ -6,6 +6,7 @@ struct treeNode {
   struct treeNode *right;
 };
 
+
 struct treeNode* newNode(int v)
 {
   struct treeNode *node;
@@ -14,6 +15,7 @@ struct treeNode* newNode(int v)
   node->left=node->right = 0;
   return node;
 }
+
 
 struct treeNode* insert(struct treeNode *t, int v)
 /*@ pre  < config > < env > t |-> ?root  v |-> v0 </ env >
@@ -32,6 +34,7 @@ struct treeNode* insert(struct treeNode *t, int v)
     else t->right = insert(t->right, v);
   return t;
 }
+
 
 struct treeNode* find(struct treeNode *t, int v)
 /*@ pre  < config > < env > t |-> root0  v |-> v0 </ env >
