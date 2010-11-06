@@ -1011,9 +1011,12 @@ sub run_maude {
     my $status = system("$maude_path -no-banner -no-wrap $input_file >$output_file 2>$error_file");
     if (($status >>= 8) != 0)
     {
-	print "Failed to run maude. Exit status $status.\n";
+	my $err = get_file_content($error_file);
+	$err =~ s/\n.*?$//sg;
+	print "$err\nFailed to run maude.\nExit status $status.\n" ;
+	exit(1);
     }
-    
+
     if ($? == 0) {
 	if (-s $error_file) {
 	    print "ERROR:\n";
