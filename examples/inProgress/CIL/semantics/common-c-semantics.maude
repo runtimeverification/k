@@ -614,7 +614,7 @@ mod COMMON-GLOBAL-DECLARATION is
 		
 	mb rule
 		< k > 'Local(typedDeclaration(registerInt, X:Id))
-			=> ((.).K)
+			=> giveLocalType(registerInt, X:Id)
 			...</ k >
 		< registers > (M:Map => M:Map[0 / X:Id]) </ registers >
 		--- < env >... [(.).Map => X:Id |-> Loc:Nat] ...</ env >

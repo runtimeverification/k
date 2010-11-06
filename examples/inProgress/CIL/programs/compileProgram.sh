@@ -6,7 +6,7 @@ myDirectory=`dirname $0`
 K_MAUDE_BASE=`readlink -f $myDirectory/../../../..`
 K_PROGRAM_COMPILE="$K_MAUDE_BASE/tools/kcompile-program.sh"
 CIL_MACHINE='short=2,1 int=4,1 long=4,1 long_long=8,1 pointer=4,1 enum=4,1 float=4,1 double=8,1 long_double=16,1 void=1 bool=1,1 fun=1,1 alignof_string=1 max_alignment=1 size_t=unsigned_long wchar_t=int char_signed=true const_string_literals=true big_endian=false __thread_is_keyword=false __builtin_va_list=false underscore_name=true'
-CIL_BASE=`readlink -f $myDirectory/../cil`
+CIL_BASE=`readlink -f $myDirectory/../../C/cil`
 CIL_PLATFORM=$CIL_BASE/obj/x86_LINUX
 ACTUAL_CIL=$CIL_PLATFORM/cilly.asm.exe
 export CIL_MACHINE

@@ -332,7 +332,7 @@ class virtual defaultMaudePrinterClass = object (self)
   method pOffset (base: doc) = function
     | NoOffset -> base
     | Field (fi, o) -> 
-        self#pOffset (base ++ text " . " ++ text (noscores fi.fname)) o
+        self#pOffset (text "_._(" ++ base ++ text ", " ++ text (noscores fi.fname) ++ text ")") o
     | Index (e, o) ->
         self#pOffset (base ++ text "[" ++ self#pExp () e ++ text "]") o
 
