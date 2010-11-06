@@ -64,7 +64,7 @@ options { k = 1; }
   : ( type IDENTIFIER '(' parameter_list ')' (ANNOTATION ANNOTATION)? '{' )=>
     function_definition
   | declaration
-  | ANNOTATION!
+  | ANNOTATION
   ;
 
 function_definition
@@ -333,6 +333,7 @@ ANNOTATION
     {
       int len = $text.length();
       annots.add($text.substring(3, len).substring(0, len - 5));
+      if ($text.trim().startsWith("/*@ var")) $channel = HIDDEN;
     }
   | ('//@')=> '//@' ~('\n' | '\r')* '\r'? '\n'
   | COMMENT

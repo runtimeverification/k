@@ -68,3 +68,4 @@ if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
 sed -e '1,2d' -e '$d' ${TMP_OUT}
 rm -f ${TMP_OUT} ${TMP_ERR} ${MAUDE_PROG} ${COMPILED_PROG} ${ML_PROG}
+

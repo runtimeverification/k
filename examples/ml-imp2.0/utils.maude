@@ -135,7 +135,7 @@ endm
 
 mod CONFIG-SCOLEM is inc VAR-UTILS .
   op skolemTerm : Term TermList -> TermList .
-  op co-skolemTerm : TermList -> TermList .
+  op co-skolemTerm : Term TermList -> TermList .
 
   var Q : Qid .
   var QC : Constant .
@@ -157,28 +157,31 @@ mod CONFIG-SCOLEM is inc VAR-UTILS .
   eq skolemTerm(NT, '?Tree[QT]) = 'skolem[NT : '?Tree[QT]] .
   eq skolemTerm(NT, '?MSet[QT]) = 'skolem[NT : '?MSet[QT]] .
   eq skolemTerm(NT, 'skolem[NT' : QT]) = 'skolem[NT' : QT] .
+  eq skolemTerm(NT, 'co-skolem[NT' : QT]) = 'co-skolem[NT' : QT] .
   eq skolemTerm(NT, Q[QTList]) = Q[skolemTerm(NT, QTList)] [owise] .
  
-  eq co-skolemTerm((QT : QTNeList))
-   = co-skolemTerm(QT) : co-skolemTerm(QTNeList) .
-  eq co-skolemTerm(.emptyTermList) = .emptyTermList .
-  eq co-skolemTerm(QC)
+  eq co-skolemTerm(NT, (QT : QTNeList))
+   = co-skolemTerm(NT, QT) : co-skolemTerm(NT, QTNeList) .
+  eq co-skolemTerm(NT, .emptyTermList) = .emptyTermList .
+  eq co-skolemTerm(NT, QC)
    = if substrString(string(getType(QC)), 0, 4) ==Bool "Free" then
-       'co-skolem[QC]
+       'co-skolem[NT : QC]
      else
        QC
      fi .
-  eq co-skolemTerm('skolem[NT : QT]) = 'co-skolem['skolem[NT : QT]] .
-  eq co-skolemTerm(Q[QTList]) = Q[co-skolemTerm(QTList)] [owise] .
+  eq co-skolemTerm(NT, 'skolem[NT' : QT])
+   = 'co-skolem[NT : 'skolem[NT' : QT]] .
+  eq co-skolemTerm(NT, Q[QTList]) = Q[co-skolemTerm(NT, QTList)] [owise] .
 
 
   var N : Nat .
+  var K : K .
   var Cfgs : Bag .
 
   eq skolemize(N, Cfgs)
    = downTerm(skolemTerm(upTerm(N), upTerm(Cfgs)), errorBag) .
-  eq co-skolemize(Cfgs)
-   = downTerm(co-skolemTerm(upTerm(Cfgs)), errorBag) .
+  eq co-skolemize(N, Cfgs)
+   = downTerm(co-skolemTerm(upTerm(N), upTerm(Cfgs)), errorBag) .
 endm
 
 
@@ -222,7 +225,7 @@ mod APPLY-SUBST is inc IMP + PL-META-TERM .
   eq substTerm(.emptyTermList, MetaSubst) = .emptyTermList .
   eq substTerm(QT, ((QT <- QT') ; MetaSubst)) = QT' .
   eq substTerm('skolem[NT : QT], MetaSubst) = 'skolem[NT : QT] .
-  eq substTerm('co-skolem[QT], MetaSubst) = 'co-skolem[QT] .
+  eq substTerm('co-skolem[NT : QT], MetaSubst) = 'co-skolem[NT : QT] .
   eq substTerm(QC, MetaSubst) = QC [owise] .
   eq substTerm(Q[QTList], MetaSubst)
    = Q[substTerm(QTList, MetaSubst)] [owise] .

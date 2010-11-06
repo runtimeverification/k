@@ -36,6 +36,7 @@ mod FOL= is inc CONFIG-UTILS + SMT-INTERFACE .
   var NeSubst : NeSubst .
   var Subst : Subst .
   var F : Field .
+  var Stack : List .
 
 
 --- split the configuration if the formula is a disjunction
@@ -102,8 +103,8 @@ mod FOL= is inc CONFIG-UTILS + SMT-INTERFACE .
 
 --- Step 3: Get rid of variable equalities and propagate them via substitution
 --- Step 3.0.2 : Get rid of unbound variable equalities at any time
- ceq < config > < k > K </ k > < form > Phi </ form > CfgItems < subst > Subst </ subst > </ config >
-   = < config > < k > K </ k > applySubst(< form > Phi </ form > CfgItems, NeSubst) < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > </ config >
+ ceq < config > < k > K </ k > < stack > Stack </ stack > < form > Phi </ form > CfgItems < subst > Subst </ subst > </ config >
+   = < config > < k > K </ k > < stack > Stack </ stack > applySubst(< form > Phi </ form > CfgItems, NeSubst) < subst > NeSubst ; applySubst(Subst, NeSubst) </ subst > </ config >
   if NeSubst := getFreeSubstItem(Phi) .
 ***(
 --- Step 3.0.3 : Get rid of bound environment frame

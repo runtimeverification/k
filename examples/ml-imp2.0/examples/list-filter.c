@@ -52,13 +52,6 @@ struct nodeList* filter(struct nodeList* x, int i)
 	return x;
 }
 
-int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
-{
-  return 0;
-}
-
 
 /*@ var ?x ?y ?z ?v : ?Int */
 /*@ var i0 : FreeInt */

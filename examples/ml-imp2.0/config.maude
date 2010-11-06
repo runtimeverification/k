@@ -45,8 +45,8 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op !Heap : Nat -> !MapItem .
   op skolem : Nat ?MapItem -> FreeMapItem .
   op skolem : Nat ?BagItem -> FreeMapItem .
-  op co-skolem : FreeMapItem -> !MapItem .
-  op co-skolem : FreeBagItem -> !BagItem .
+  op co-skolem : Nat FreeMapItem -> !MapItem .
+  op co-skolem : Nat FreeBagItem -> !BagItem .
 
   sort Value TypedValue .
   sort Void NvExpressionType ExpressionType .  
@@ -65,14 +65,15 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op applySubst : Formula Subst -> Formula [strat(2 0)] .
   op applySubst : Subst Subst -> Subst [strat(2 0)] .
   ops feasible infeasible : -> CellLabel .
-  ops fun config k struct env heap form subst tenv counter newImpl spec : -> CellLabel .
+  ops fun config k struct env heap form subst tenv counter tasks spec : -> CellLabel .
 
   op errorBag : -> [Bag] .
   op _===>_ : Bag Bag -> Bag [frozen] .
   op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=match=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op skolemize : Nat Bag -> Bag .
-  op co-skolemize : Bag -> Bag .
+  op co-skolemize : K -> K .
+  op co-skolemize : Nat Bag -> Bag .
 
   op derive : -> KLabel .
   op returns _ : Value -> Formula .

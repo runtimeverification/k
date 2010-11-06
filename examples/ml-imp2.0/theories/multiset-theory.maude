@@ -13,7 +13,7 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
   op !MSet : Nat -> !MSet .
   op FreeMSet : Nat -> FreeMSet .
   op skolem : Nat ?MSet -> FreeMSet [ditto] .
-  op co-skolem : FreeMSet -> !MSet [ditto] .
+  op co-skolem : Nat FreeMSet -> !MSet [ditto] .
 
   op empty : -> MSet .
   op `{|_|`} : List{MathObj++} -> NeMSet++ [gather(&)] .
@@ -42,7 +42,7 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
 
   op size : MSet++ -> Int++ . 
   ops min max : MSet++ -> Int++ .
-
+  op _in_ : MathObj++ MSet++ -> Atom .
 
   var Phi1 Phi2 : Formula .
   var I J : Int++ .
@@ -66,6 +66,10 @@ mod MATHEMATICAL-MULTISET is inc MATHEMATICAL-INT .
      @((-Int max(NeA2)) +Int I >=Int 0) .
   eq max({| I |}) = I .
   eq (-Int max(empty)) +Int I >=Int 0 = true .
+  eq I in NeA1 U NeA2 = I in NeA1 \/ I in NeA2 . 
+  eq I in {| I |} = TrueFormula .
+  eq I in empty = FalseFormula .
+  ---eq @(-Int I +Int min(A) >= 0) /\ Phi1 ===> ~(I in A) /\ Phi2 = ===> Phi2 .
 
   eq A1 === A2 U {| J |} /\ @(-Int max(A2) +Int I >=Int 0) /\
      @(-Int J +Int -1 +Int I >=Int 0) /\ Phi1

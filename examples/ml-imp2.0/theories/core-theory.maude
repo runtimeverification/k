@@ -71,7 +71,7 @@ Sort++ stands for all the above
   subsort ?MathObj !MathObj FreeMathObj MathObj < MathObj++ .
   subsort MathObj++ < List{MathObj++} Set{MathObj++} .
   op skolem : Nat ?MathObj -> FreeMathObj [strat(0)] .
-  op co-skolem : FreeMathObj -> !MathObj [strat(0)] .
+  op co-skolem : Nat FreeMathObj -> !MathObj [strat(0)] .
 
   op .List{MathObj++} : -> List{MathObj++} .
   op _`,_ : List{MathObj++} List{MathObj++} -> List{MathObj++}
@@ -85,8 +85,8 @@ Sort++ stands for all the above
   op errorObj : -> [MathObj++] .
 
 
-  --- must not be comm 
-  op _===_ : MathObj++ MathObj++ -> Atom .
+  --- must not be comm (why?)
+  op _===_ : MathObj++ MathObj++ -> Atom [comm] .
   op _===_ : List{MathObj++} List{MathObj++} -> Atom [ditto] .
 
   vars Obj Obj1 Obj1' Obj2 Obj2' : MathObj++ .
@@ -113,7 +113,7 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   op !Int : Nat -> !Int .
   op FreeInt : Nat -> FreeInt .
   op skolem : Nat ?Int -> FreeInt [ditto] .
-  op co-skolem : FreeInt -> !Int [ditto] .
+  op co-skolem : Nat FreeInt -> !Int [ditto] .
 
 --- define operations to be used symbolically, as well as desired properties
   ops _+Int_ _-Int_ _*Int_ _/Int_ _%Int_ : Int++ Int++ -> Int++ [ditto] .

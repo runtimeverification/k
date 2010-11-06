@@ -59,11 +59,8 @@ imp statements
                      | while ( Expression ) Statement
                      | return Expression [strict]
                      | ExtraStatement
-                     | StatementHelper
   syntax ExtraStatement ::= breakpoint
                           | watch
-  syntax StatementHelper ::= functionEnd
-                           | restoreContext ( Map , Map , Subst )
 
 
 ***(
@@ -129,7 +126,7 @@ imp Expressions
                       | delete Expression [strict]
 *** extra stuff, not part of the language syntax, but helpful for the semantics
                       | ExpressionHelper
-  syntax ExpressionHelper ::= getReturnValue ExpressionType
+  syntax ExpressionHelper ::= getReturnValue ( ExpressionType )
                             | load ( ExpressionType , Value )
                             | store ( ExpressionType , Value , Value )
                             | offset ( ExpressionType , Id )
@@ -147,6 +144,8 @@ matching logic annotations
 
   syntax Annotation ::= /*@`pre Bag */ ---[strat(0)]
                       | /*@`post Bag */ ---[strat(0)]
+
+  syntax Annotation ::= /*@`verify`*/
 
 
 ***(

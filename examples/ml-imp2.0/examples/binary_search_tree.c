@@ -33,9 +33,31 @@ struct treeNode* insert(struct treeNode *t, int v)
   return t;
 }
 
+struct treeNode* find(struct treeNode *t, int v)
+/*@ pre  < config > < env > t |-> root0  v |-> v0 </ env >
+                    < heap > tree(root0)(T) H </ heap > 
+                    < form > isBst(T) </ form > C </ config > */
+/*@ post < config > < env > ?rho </ env >
+                    < heap > tree(root0)(T) H </ heap > 
+                    < form >
+                      isBst(T) /\ returns ?t /\
+                      (~(?t === 0) /\ v0 in tree2mset(T) \/
+                       ?t === 0 /\ ~(v0 in tree2mset(T)))
+                    </ form > C </ config > */
+{
+  if (t == 0)
+    return 0;
+  else if (v == t->val)
+    return t;
+  else if (v < t->val)
+    return find(t->left, v);
+  else
+    return find(t->right, v);
+}
 
-/*@ var ?n ?root : ?Int */
-/*@ var v0 : FreeInt */
+
+/*@ var ?n ?root ?t : ?Int */
+/*@ var v0 root0 : FreeInt */
 /*@ var ?T : ?Tree */
 /*@ var T : FreeTree */
 /*@ var ?rho : ?MapItem */
