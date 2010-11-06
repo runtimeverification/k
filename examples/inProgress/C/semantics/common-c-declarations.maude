@@ -197,6 +197,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 		< k > initialize(X:Id, T:Type, K:K)
 			=> if (F:Id ==Bool File-Scope) then zero(X:Id) else (.) fi 
 			~> K:K
+			~> sequencePoint
 		...</ k >
 		< currentFunction > F:Id </ currentFunction >
 		: KSentence [metadata "structural"] .

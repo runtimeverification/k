@@ -59,16 +59,17 @@ mod COMMON-SEMANTICS-BOOLEAN is
 		--- if N:Nat =/=Bool 0
 		--- : KSentence [metadata "structural"] .
 	
+	--- make sure sequence points are maintained properly
+	
+	
 	mb rule
 		< k > E1:K || E:Expression
-			=> sequencePoint 
-			~> E1:K ? tv(1, int) : (E:Expression ? tv(1, int) : tv(0, int))
+			=> E1:K ? tv(1, int) : (E:Expression ? tv(1, int) : tv(0, int))
 		...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > E1:K && E:Expression 
-			=> sequencePoint
-			~> E1:K ? (E:Expression ? tv(1, int) : tv(0, int)) : tv(0, int)
+			=> E1:K ? (E:Expression ? tv(1, int) : tv(0, int)) : tv(0, int)
 		...</ k >
 		: KSentence [metadata "structural"] .
 	
@@ -83,8 +84,7 @@ mod COMMON-SEMANTICS-BOOLEAN is
 		--- : KSentence [metadata "structural"] .
 	mb rule
 		< k > E:K ? E1:Expression : E2:Expression 
-			=> sequencePoint
-			~> IfThenElse(E:K, E1:Expression, E2:Expression) 
+			=> IfThenElse(E:K, E1:Expression, E2:Expression) 
 		...</ k >
 		: KSentence [metadata "structural"] .	
 		
@@ -211,16 +211,18 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 
 	op application : K List{C} -> K [metadata "strict(1)"] .
 	
+	--- this must enforce arguments are evaluated
+	--- using List{Type} until I fix syntax types
 	mb [function-application-pre]: rule
-		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{C}) 
-			=> application(readFunction(Loc:Nat), L:List{C}) 
+		< k > Call(tv(Loc:Nat, pointerType(T:Type)), L:List{Type}) 
+			=> application(readFunction(Loc:Nat), L:List{Type}) 
 		...</ k >
 		if hasFunctionType(T:Type)
 		: KSentence [metadata "computational"] .
 		
 	mb [function-application-builtin-pre]: rule
-		< k > Call(tv(functionPrototype(X:Id, T:Type), T:Type), L:List{C})
-			=> application(functionPrototype(X:Id, T:Type), L:List{C}) 
+		< k > Call(tv(functionPrototype(X:Id, T:Type), T:Type), L:List{Type})
+			=> application(functionPrototype(X:Id, T:Type), L:List{Type}) 
 		...</ k >
 		if hasFunctionType(T:Type)
 		andBool builtinIdentifiers contains X:Id
@@ -983,7 +985,7 @@ endm
 mod COMMON-SEMANTICS-SEQUENCING is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	mb rule < k > Comma(K:C :: K'::C :: L:List{C}) => K:C ~> discard ~> Comma(K'::C :: L:List{C}) ...</ k >
+	mb rule < k > Comma(K:C :: K'::C :: L:List{C}) => K:C ~> discard ~> sequencePoint ~> Comma(K'::C :: L:List{C}) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule < k > Comma(K:C) => K:C ...</ k >
 		: KSentence [metadata "structural"] .

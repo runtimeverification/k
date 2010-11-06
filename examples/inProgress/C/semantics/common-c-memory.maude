@@ -340,6 +340,7 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule
 		< k > writeByte(sym(Block:Nat) +Nat Offset:Nat, V:K) => . ...</ k >
 		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[V:K / Offset:Nat])) ...</ mem >
+		< locsWrittenTo >... (.).Bag => BagItem(sym(Block:Nat) +Nat Offset:Nat) ...</ locsWrittenTo >
 		if Offset:Nat <Nat Len:Nat
 		: KSentence [metadata "structural"] .
 	mb rule

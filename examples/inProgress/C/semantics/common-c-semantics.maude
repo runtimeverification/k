@@ -198,8 +198,6 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op typedefType : Id Type -> Type .
 	op variadic : -> Type .
 
-	sort Type .
-	sort Value .
 	subsort Type < C .
 	subsort Value < C .
 	sort BaseValue .
@@ -223,11 +221,14 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- Types
 	op typedDeclaration : Type Id -> Type . --- would rather this be KResult, but can't get the subsorting to work
 	
+	sort Type .
+	sort Value .
 	sort List{Type} .
 	subsort List{Type} < KResult .
 	subsort List{Type} < List{C} .
 	subsort Type < List{Type} .
 	subsort Type < List{C} .
+	subsort Value < List{Type} .
 	op _::_ : List{Type} List{Type} -> List{Type} [ditto metadata "ditto"] .
 	op Nil : -> List{Type} [ditto] .
 	

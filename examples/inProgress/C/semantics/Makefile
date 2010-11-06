@@ -5,6 +5,7 @@ K-PROGRAM-COMPILE = $(K-MAUDE-BASE)/tools/kcompile-program.sh
 K-MAUDE = $(K-MAUDE-BASE)/$(K-COMPILE-BASE)
 K-PRELUDE = $(K-MAUDE-BASE)/k-prelude
 K-PL-BUILTINS = $(K-MAUDE-BASE)/pl-builtins
+K-PL-MODEL-CHECKER = $(K-MAUDE-BASE)/k-model-checker
 
 ADDITIONAL_SYNTAX = "including MATCH-C-SYNTAX ."
 
@@ -39,7 +40,8 @@ match-c-syntax.maude match-c-semantics.maude match-c-configuration.maude \
 dynamic-c-semantics.k dynamic-c-configuration.k
 	$(K-MAUDE) c.maude -u -language C
 	
-c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude
+c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude $(K-PL-MODEL-CHECKER).maude Makefile
+	sed -i '2 i load $(K-PL-MODEL-CHECKER)' c-compiled.maude
 #echo adds a newline
 	@echo | cat c-compiled.maude c-syntax.maude - common-c-configuration.maude | perl slurp.pl ./ > c-total.maude
 	

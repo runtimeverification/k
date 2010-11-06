@@ -485,7 +485,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 			=> printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, nextvarg(Loc:Nat, unsigned-int))
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
-		if N:Nat ==Bool asciiString("x") --- orBool N:Nat ==Bool asciiString("p")
+		if N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("X") --- orBool N:Nat ==Bool asciiString("p")
 	: KSentence [metadata "structural"] .	
 	mb [lib-printf-%x]: rule
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (vpair(tv(D:Int, unsigned-int), V:Value) :: ?)) 

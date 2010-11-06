@@ -61,6 +61,17 @@ kmod COMMON-C-SYNTAX is
 	op Nil : -> List{C}
 	subsort C < List{C}
 	op _::_ : List{C} List{C} -> List{C} [hybrid strict assoc id: Nil]
+	
+	--- sort Type
+	--- sort Value
+	--- sort List{CResult}
+	--- subsort List{CResult} < KResult
+	--- subsort List{CResult} < List{C}
+	--- subsort Value < List{CResult}
+	--- --- subsort Type < List{CResult}
+	--- op _::_ : List{CResult} List{CResult} -> List{CResult} [ditto metadata "ditto"]
+	--- --- op Nil : -> List{CResult} [ditto metadata "ditto"]
+	
 	subsort SpecifierElem < KResult
 	--- sort List{SpecifierElem} 
 	--- subsort List{SpecifierElem} < KResult

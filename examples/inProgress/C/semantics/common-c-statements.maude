@@ -111,7 +111,7 @@ mod COMMON-SEMANTICS-SWITCH is
 	op handleSwitch-aux : K Value K -> K .
 	
 	mb rule
-		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => handleSwitch(SN:Nat, promote(tv(V:BaseValue, T:Type))) ...</ k >
+		< k > Switch(SN:Nat, tv(V:BaseValue, T:Type), ?) => sequencePoint ~> handleSwitch(SN:Nat, promote(tv(V:BaseValue, T:Type))) ...</ k >
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 		
@@ -669,12 +669,12 @@ mod COMMON-SEMANTICS-RETURN is
 		: KSentence [metadata "structural"] .
 	
 	mb [return-clean-local]: rule
-		< k > (. => deleteLoc(Loc:Nat)) ~> Return(?) ...</ k >
+		< k > (. => deleteLoc(Loc:Nat)) ~> Return(V:Value) ...</ k >
 		< localAddresses >... SetItem(Loc:Nat) => (.).Set ...</ localAddresses >	
 		: KSentence [metadata "structural"] .
 		
 	mb [fetch-all-locals]: rule
-		< k > Return(?) ...</ k >
+		< k > Return(V:Value) ...</ k >
 		< localAddresses > (.).Set => Addresses:Set </ localAddresses >
 		< blockStack > List(< stackFrame > 
 			?
