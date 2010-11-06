@@ -289,6 +289,7 @@ my $maudify_only = 0;
 my $compile_only = 0;
 my $language_module_name = "";
 my $language_file_name = "";
+my $lang_name = "";
 my $unquote = 0;
 my $flat = 0;
 
@@ -413,6 +414,11 @@ foreach (@ARGV) {
 	$language_file_name = $_;
     }
 }
+
+# Extract only language name without path
+$lang_name = $language_file_name;
+$lang_name =~ s/\.\.\///g;
+$lang_name =~ s/\..*?$//;
 
 # print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
 
@@ -647,7 +653,7 @@ sub latexify {
 	
 
 # File name where the compiled output will be stored:
-	my $output_file_name = "$language_file_name-$format.tex";
+	my $output_file_name = "$lang_name-$format.tex";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	print FILE "\\documentclass{article}\n";
 	print FILE "\\usepackage{import}\n";
@@ -682,7 +688,7 @@ sub run_latex
     # get approx pdf file
     my $latex_out = get_file_content("$tex_file.tex");
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    $latex_out =~ s/\\begin{document}/\\geometry{papersize={1200mm,11in},textwidth=1180mm}\\pagestyle{empty}\\begin{document}/;
+    $latex_out =~ s/\\begin{document}/\\geometry{papersize={1400mm,11in},textwidth=1380mm}\\pagestyle{empty}\\begin{document}/;
     $latex_out =~ s/\\newpage/\\bigskip/g;
     # print $latex_out;
     
@@ -698,7 +704,13 @@ sub run_latex
     }
     # get number of pages
     my $pages = 0;
+    
+    # latex acts weird.. it generates all the temp files in the same directory 
+    # but the tex file in other directory
+    # $tex_file =~ s/\.\.\///g;
+    
     my $log = get_file_content("$tex_file-temp.log");
+#    my $log = get_file_content("$lang_name-temp.log");
     if ($log =~ /(\d+)\s+pages?/)
     {
 	$pages = $1;
@@ -728,8 +740,8 @@ sub get_file_content
 sub make_latexify
 {
     latexify("latex", @latexify_modules);
-    rename("$language_file_name-latex.tex", "$language_file_name.tex");
-    print "Generated $language_file_name.tex which contains modules: @latexify_modules\n";
+    rename("$lang_name-latex.tex", "$lang_name.tex");
+    print "Generated $lang_name.tex which contains modules: @latexify_modules\n";
 }
 
 sub get_pdf_crop
@@ -740,36 +752,36 @@ sub get_pdf_crop
     latexify("$format", @modules);
 
     # modify page and save it
-    my $latex_out = get_file_content("$language_file_name-$format.tex");
+    my $latex_out = get_file_content("$lang_name-$format.tex");
 
     # Find number of pages
-    my $pages = run_latex("$language_file_name-$format");
+    my $pages = run_latex("$lang_name-$format");
     my $h = 9 * $pages;
     my $ph = $h + 1;
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
     $latex_out =~ s/\\begin{document}/$settings/;
     $latex_out =~ s/\\newpage/\\bigskip/g;
 
-    open FILE,">", "$language_file_name-$format.tex" or die "Cannot create $language_file_name-$format.tex\n";
+    open FILE,">", "$lang_name-$format.tex" or die "Cannot create $lang_name-$format.tex\n";
     print FILE $latex_out;
     close FILE;
 
     # Generate pdf
-    my $status = system("latex -output-format=pdf -interaction=nonstopmode $language_file_name-$format.tex> out");
+    my $status = system("latex -output-format=pdf -interaction=nonstopmode $lang_name-$format.tex> out");
     # print "Failed to run latex. Exit status $status.\n" if (($status >>= 8) != 0);
     throw_error("Failed to run latex. Exit status $status.\n") if (($status >>= 8) != 0);
    
     
    # Generate pdf crop
-    $status = system("pdfcrop $language_file_name-$format.pdf > out");
+    $status = system("pdfcrop $lang_name-$format.pdf > out");
     throw_error("Failed to generate crop version for pdf. Exit status $status.\n") if (($status >>= 8) != 0);
     
-    rename("$language_file_name-$format-crop.pdf", "$language_file_name-$format.pdf");
+    rename("$lang_name-$format-crop.pdf", "$lang_name-$format.pdf");
 
-    unlink("$language_file_name-$format.aux") if !$verbose;
-    unlink("$language_file_name-$format.log") if !$verbose;
-    unlink("$language_file_name-$format.tex") if !$verbose;
+    unlink("$lang_name-$format.aux") if !$verbose;
+    unlink("$lang_name-$format.log") if !$verbose;
+    unlink("$lang_name-$format.tex") if !$verbose;
     unlink("out");
 }
 
@@ -778,7 +790,7 @@ sub make_pdf
 {
     # Generate eps
     get_pdf_crop("pdf", @pdf_modules);
-    rename("$language_file_name-pdf.pdf", "$language_file_name.pdf");
+    rename("$lang_name-pdf.pdf", "$lang_name.pdf");
 }
 
 # generate ps if $ps
@@ -787,15 +799,15 @@ sub make_ps
     get_pdf_crop("ps", @ps_modules);
 
     # Generate ps
-    my $status = system("pdf2ps $language_file_name-ps.pdf 2>/dev/null");
+    my $status = system("pdf2ps $lang_name-ps.pdf 2>/dev/null");
     throw_error("Failed to generate ps. Exit status $status.\n") if (($status >>= 8) != 0);
     
     # rename ps file
-    rename("$language_file_name-ps.ps", "$language_file_name.ps");
-    print "Generated $language_file_name.ps which contains modules: @ps_modules\n";
+    rename("$lang_name-ps.ps", "$lang_name.ps");
+    print "Generated $lang_name.ps which contains modules: @ps_modules\n";
     
     # delete auxialiary files if not verbose
-    unlink("$language_file_name-ps.pdf") if !$verbose;
+    unlink("$lang_name-ps.pdf") if !$verbose;
 }
 
 sub make_eps
@@ -803,19 +815,19 @@ sub make_eps
     get_pdf_crop("eps", @eps_modules);
 
     # Generate ps
-    my $status = system("pdf2ps $language_file_name-eps.pdf 2>/dev/null");
+    my $status = system("pdf2ps $lang_name-eps.pdf 2>/dev/null");
     throw_error("Failed to generate ps temporary file for generating eps. Exit status $status.\n") if (($status >>= 8) != 0);
 
     # Generate eps
-    $status = system("ps2eps $language_file_name-eps.ps 2>/dev/null");
+    $status = system("ps2eps $lang_name-eps.ps 2>/dev/null");
     throw_error("Failed to generate eps. Exit status $status.\n") if (($status >>= 8) != 0);
     
     # rename eps file
-    rename("$language_file_name-eps.eps", "$language_file_name.eps");
-    print "Generated $language_file_name.eps which contains modules: @eps_modules\n";
+    rename("$lang_name-eps.eps", "$lang_name.eps");
+    print "Generated $lang_name.eps which contains modules: @eps_modules\n";
 
-    unlink("$language_file_name-eps.pdf") if !$verbose;
-    unlink("$language_file_name-eps.ps") if !$verbose;
+    unlink("$lang_name-eps.pdf") if !$verbose;
+    unlink("$lang_name-eps.ps") if !$verbose;
 }
 
 sub make_png
@@ -823,16 +835,16 @@ sub make_png
     get_pdf_crop("png", @png_modules);
 
     # Generate png
-    my $status = system("gs -q -dNOPAUSE -sDEVICE=pngalpha -dBATCH -dEPSCrop -r150 -sOutputFile=$language_file_name-png.png $language_file_name-png.pdf");
+    my $status = system("gs -q -dNOPAUSE -sDEVICE=pngalpha -dBATCH -dEPSCrop -r150 -sOutputFile=$lang_name-png.png $lang_name-png.pdf");
     throw_error("Failed to generate png. Exit status $status.\n") if (($status >>= 8) != 0);
 
     # rename png file
-    rename("$language_file_name-png.png", "$language_file_name.png");
-    print "Generated $language_file_name.png which contains modules: @png_modules\n";
+    rename("$lang_name-png.png", "$lang_name.png");
+    print "Generated $lang_name.png which contains modules: @png_modules\n";
 
     # delete auxialiary files if not verbose
-    unlink("$language_file_name-png.eps") if !$verbose;
-    unlink("$language_file_name-png.pdf") if !$verbose;
+    unlink("$lang_name-png.eps") if !$verbose;
+    unlink("$lang_name-png.pdf") if !$verbose;
 }
 
 # generates a nice - pdf if $crop
@@ -841,39 +853,39 @@ sub make_crop
     latexify("crop", @crop_modules);
 
     # modify page and save it
-    my $latex_out = get_file_content("$language_file_name-crop.tex");
+    my $latex_out = get_file_content("$lang_name-crop.tex");
 
     # Find number of pages
-    my $pages = run_latex("$language_file_name-crop");
+    my $pages = run_latex("$lang_name-crop");
     my $h = 9 * $pages;
     my $ph = $h + 1;
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1200mm,".$ph."in},textheight=".$h."in,textwidth=1180mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
     $latex_out =~ s/\\begin{document}/$settings/;
     
     # initial settings
-    open FILE,">", "$language_file_name-crop.tex" or die "Cannot create $language_file_name-crop.tex\n";
+    open FILE,">", "$lang_name-crop.tex" or die "Cannot create $lang_name-crop.tex\n";
     print FILE $latex_out;
     close FILE;    
 
     # Generate pdf
-    my $status = system("latex -output-format=pdf $language_file_name-crop.tex > out");
+    my $status = system("latex -output-format=pdf $lang_name-crop.tex > out");
     throw_error("Failed to run latex. Exit status $status.\n") if (($status >>= 8) != 0);
     
     # Generate pdf-crop
-    $status = system("pdfcrop $language_file_name-crop.pdf > out");
+    $status = system("pdfcrop $lang_name-crop.pdf > out");
     throw_error("Failed to generate crop pdf. Exit status $status.\n") if (($status >>= 8) != 0);
 
     # print message
-    rename("$language_file_name-crop-crop.pdf", "$language_file_name-crop.pdf");
-    print "Generated $language_file_name-crop.pdf which contains modules: @crop_modules\n";
+    rename("$lang_name-crop-crop.pdf", "$lang_name-crop.pdf");
+    print "Generated $lang_name-crop.pdf which contains modules: @crop_modules\n";
     
     # delete auxialiary files if not verbose
-    unlink("$language_file_name-crop.tex") if !$verbose;
-    unlink("$language_file_name-crop.aux") if !$verbose;
-    unlink("$language_file_name-crop.dvi") if !$verbose;
-    unlink("$language_file_name-crop.log") if !$verbose;
-    unlink("$language_file_name-crop.tex") if !$verbose;
+    unlink("$lang_name-crop.tex") if !$verbose;
+    unlink("$lang_name-crop.aux") if !$verbose;
+    unlink("$lang_name-crop.dvi") if !$verbose;
+    unlink("$lang_name-crop.log") if !$verbose;
+    unlink("$lang_name-crop.tex") if !$verbose;
     unlink("out");
     
 }
