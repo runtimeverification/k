@@ -34,7 +34,7 @@ mod MODEL-CHECK-TEST is
 				B2:Bag
 				< thread >
 					B3:Bag
-					< k > 'Apply('Closure(Id X:Id(.List{K}),, K0:K,, K1:K),, K3:K) ~> K:K </ k >
+					< k > 'application('Closure(Id X:Id(.List{K}),, K0:K,, K1:K),, L:List{KResult}) ~> K:K </ k >
 				</ thread >
 			</ threads >
 		</ T >
@@ -103,3 +103,20 @@ q
    < locals > range(157, 161) range(161, 165) range(165, 169) </ locals > 
    < env > 
  ***)
+ 
+ 
+
+--- --- START MODEL-CHECKING
+--- --- mod MODEL-CHECKER
+--- --- including C-program-dekker .
+	--- including PL-MODEL-CHECKER .
+	--- op state : Bag -> Model-Checker-State .
+	--- op Start : -> Model-Checker-State .
+	--- ---eq Start = state(eval('program-dekker)) .
+	--- op enabled : Id -> Prop .
+	--- eq
+		--- state(? < T >... < k > 'Apply('Closure(X:Id,, ?,, ?),, ?) ...</ k > ...</ T >) |= enabled(X:Id) = true .
+--- --- endm
+--- --- END MODEL-CHECKING
+
+--- erew modelCheck(Start, <> enabled) .

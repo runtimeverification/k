@@ -74,20 +74,3 @@ int main(void) {
 	return 0;
 }
 
-/*
---- START MODEL-CHECKING
---- mod MODEL-CHECKER
---- including C-program-dekker .
-	including PL-MODEL-CHECKER .
-	op state : Bag -> Model-Checker-State .
-	op Start : -> Model-Checker-State .
-	---eq Start = state(eval('program-dekker)) .
-	op enabled : Id -> Prop .
-	eq
-		state(? < T >... < k > 'Apply('Closure(X:Id,, ?,, ?),, ?) ...</ k > ...</ T >) |= enabled(X:Id) = true .
---- endm
---- END MODEL-CHECKING
-
-erew modelCheck(Start, <> enabled) .
-
-*/

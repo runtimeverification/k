@@ -34,14 +34,12 @@ mod MODEL-CHECK-TEST is
 				B2:Bag
 				< thread >
 					B3:Bag
-					--- < k > 'Apply('Closure(Id X:Id(.List{K}),, K0:K,, K1:K),, K3:K) ~> K:K </ k >
-					< k > 'application('Closure(Id X:Id(.List{K}),, K0:K,, K1:K),, K3:K) ~> K:K </ k >
+					< k > 'application('Closure(Id X:Id(.List{K}),, K0:K,, K1:K),, L:List{KResult}) ~> K:K </ k >
 				</ thread >
 			</ threads >
 		</ T >
 	) |= enabled(X:Id) = true .
-	--- 'Apply('Closure(Id critical2(.List{K}),, K0:K,, K1:K),, K3:K) ~> K:K
-	
+	  
 	op finishWith : Nat -> Prop .
 	eq state(
 		B0:Bag
@@ -54,9 +52,9 @@ endm
 --- search modelBag =>! B:Bag . --- mutual exclusion and no deadlock
 --- red modelCheck(Start, <> (set(done1) /\ set(done2))) .
 --- red modelCheck(Start, <> (set(done1) )) .
-red modelCheck(Start, <> enabled(critical1)) .
+--- red modelCheck(Start, <> enabled(critical1)) .  --- could possibly loop
  ---red modelCheck(Start, <> enabled(dekker1)) .
---- red modelCheck(Start, [] ~ (enabled(critical1) /\ enabled(critical2))) .
+red modelCheck(Start, [] ~ (enabled(critical1) /\ enabled(critical2))) .
 --- red modelCheck(Start, [] ~ (enabled(dekker1) /\ enabled(dekker2))) .
 ---red modelCheck(Start, (<> enabled(task1) /\ <> enabled(task2))) .
 --- red modelCheck(Start, <> finishWith(10)) .
