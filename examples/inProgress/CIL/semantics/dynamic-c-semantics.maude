@@ -37,50 +37,50 @@ mod DYNAMIC-C-SEMANTICS is
 --- int main(int argc, char *argv[]) { /* ... */ }
 --- or equivalent;9) or in some other implementation-defined manner
 
-	op unclutterConfiguration : Bag -> Bag .
-	op stripConfiguration : Bag -> Bag .
+	--- op unclutterConfiguration : Bag -> Bag .
+	--- op stripConfiguration : Bag -> Bag .
 	
 	--- doesn't [owise] rules :(
 	---eq unclutterConfiguration(B:Bag) = stripConfiguration(B:Bag) [owise] .
 	
-	eq stripConfiguration(B0:Bag (< T > B1:Bag (< aLabelMap > M:Map </ aLabelMap >) </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
-	eq stripConfiguration(B0:Bag (< T > B1:Bag
-		< threads > B2:Bag
-				< thread > B3:Bag
-					< callStack > ?:List </ callStack >
-				</ thread >
-		</ threads >
-	</ T >)) = stripConfiguration(B0:Bag < T > B1:Bag 
-		< threads > B2:Bag
-			< thread > B3:Bag
-			</ thread >
-		</ threads > </ T >) .
-	eq stripConfiguration(B0:Bag (< T > B1:Bag
-		< threads > B2:Bag
-				< thread > B3:Bag
-					< types > ?:Map </ types >
-				</ thread >
-		</ threads >
-	</ T >)) = stripConfiguration(B0:Bag < T > B1:Bag 
-		< threads > B2:Bag
-			< thread > B3:Bag
-			</ thread >
-		</ threads > </ T >) .
-	eq stripConfiguration(B0:Bag (< T > B1:Bag
-		< mem > M:Map
-			B:Nat |-> memblock(N:Nat, (0 |-> Closure(X:Id, functionType(?, ?), ?)))
-		</ mem >
-	</ T >)) = stripConfiguration(B0:Bag < T > B1:Bag 
-		< mem > M:Map
-			B:Nat |-> memblock(N:Nat, (0 |-> Closure(X:Id, (.).K, (.).K)))
-		</ mem >
-		</ T >) .
-	eq stripConfiguration(B0:Bag (< T > B1:Bag
-		< typedefs > ?:Map </ typedefs >
-	</ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
-	eq stripConfiguration(B0:Bag (< T > B1:Bag
-		< genv > ?:Map </ genv >
-	</ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
+	--- eq stripConfiguration(B0:Bag (< T > B1:Bag (< aLabelMap > M:Map </ aLabelMap >) </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
+	--- eq stripConfiguration(B0:Bag (< T > B1:Bag
+		--- < threads > B2:Bag
+				--- < thread > B3:Bag
+					--- < callStack > ?:List </ callStack >
+				--- </ thread >
+		--- </ threads >
+	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag 
+		--- < threads > B2:Bag
+			--- < thread > B3:Bag
+			--- </ thread >
+		--- </ threads > </ T >) .
+	--- eq stripConfiguration(B0:Bag (< T > B1:Bag
+		--- < threads > B2:Bag
+				--- < thread > B3:Bag
+					--- < types > ?:Map </ types >
+				--- </ thread >
+		--- </ threads >
+	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag 
+		--- < threads > B2:Bag
+			--- < thread > B3:Bag
+			--- </ thread >
+		--- </ threads > </ T >) .
+	--- eq stripConfiguration(B0:Bag (< T > B1:Bag
+		--- < mem > M:Map
+			--- B:Nat |-> memblock(N:Nat, (0 |-> Closure(X:Id, functionType(?, ?), ?)))
+		--- </ mem >
+	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag 
+		--- < mem > M:Map
+			--- B:Nat |-> memblock(N:Nat, (0 |-> Closure(X:Id, (.).K, (.).K)))
+		--- </ mem >
+		--- </ T >) .
+	--- eq stripConfiguration(B0:Bag (< T > B1:Bag
+		--- < typedefs > ?:Map </ typedefs >
+	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
+	--- eq stripConfiguration(B0:Bag (< T > B1:Bag
+		--- < genv > ?:Map </ genv >
+	--- </ T >)) = stripConfiguration(B0:Bag < T > B1:Bag </ T >) .
 	
 	eq eval(P:Program) = eval(P:Program, .List{K}, "") .
 	eq eval(P:Program, L:List{K}, Input:String) = 

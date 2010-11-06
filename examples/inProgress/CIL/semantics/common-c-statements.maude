@@ -76,7 +76,7 @@ endm
 mod COMMON-SEMANTICS-GOTO is
 	including COMMON-INCLUDE .
 	
-	mb context 'calculateGotoMap(?,, ('case`(_`)_:_(?:K,,`[HOLE`]:K,, ?) ~> ?),, ?,, ?) : KSentence .
+	mb context calculateGotoMap(?, ('case`(_`)_:_(?:K,,`[HOLE`]:K,, ?) ~> ?), ?, ?) : KSentence .
 	
 	--- fixme shouldn't there be sequence points here?
 	mb rule 
@@ -104,7 +104,7 @@ mod COMMON-SEMANTICS-GOTO is
 		---orBool L:KLabel ==Bool 'default`:_
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > calculateGotoMap(X:Id, ('Block`(`)(.List{K}) ~> K:K), S:List, Tail:K) 
+		< k > calculateGotoMap(X:Id, ('Block(.List{K}) ~> K:K), S:List, Tail:K) 
 		=> calculateGotoMap(X:Id, K:K, S:List, Tail:K) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule 
