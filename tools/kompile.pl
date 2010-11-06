@@ -416,8 +416,7 @@ foreach (@ARGV) {
 }
 
 # Extract only language name without path
-$lang_name = $language_file_name;
-$lang_name =~ s/\.\.\///g;
+$lang_name = basename($language_file_name);
 $lang_name =~ s/\..*?$//;
 
 # print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
