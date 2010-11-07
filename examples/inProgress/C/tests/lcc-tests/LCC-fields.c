@@ -23,7 +23,8 @@ main()
 }
 
 void f1(struct baz *p) {
-	p->a = p->b = 0;
+	p->a = 0;
+	p->b = 0;
 	if (p->b)
 		printf("p->b != 0!\n");
 	p->a = 0x3; p->b = 0xf;

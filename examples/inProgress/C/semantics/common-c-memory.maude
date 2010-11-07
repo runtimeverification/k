@@ -447,8 +447,7 @@ mod COMMON-C-MEMORY-MISC is
 		
 	mb [write-string]: rule
 		< k > writeString(Loc:Nat, S:String)
-			=> *(tv(Loc:Nat, pointerType(char))) := tv(charToAscii(firstChar(S:String)), char)
-			~> discard
+			=> Computation(*(tv(Loc:Nat, pointerType(char))) := tv(charToAscii(firstChar(S:String)), char))
 			~> writeString(sNat(Loc:Nat), butFirstChar(S:String))
 		...</ k >
 		if S:String =/=Bool ""
