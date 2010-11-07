@@ -154,14 +154,14 @@ mod COMMON-SEMANTICS-READING is
 		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => V:K ...</ k >
 		< mem >... Block:Nat |-> memblock(Size:Nat, (? Offset:Nat |-> V:K)) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
-		if notBool(sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
+		if notBool (sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
 		andBool Offset:Nat <Nat Size:Nat
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > extractByteFromMem(sym(Block:Nat) +Nat Offset:Nat) => piece(unknown(numBitsPerByte), numBitsPerByte) ...</ k >
 		< mem >... Block:Nat |-> memblock(Size:Nat, (M:Map => M:Map[piece(unknown(numBitsPerByte), numBitsPerByte) / Offset:Nat])) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
-		if notBool(sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
+		if notBool (sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
 		andBool notBool($hasMapping(M:Map, Offset:Nat))
 		andBool Offset:Nat <Nat Size:Nat
 		: KSentence [metadata "structural"] .
@@ -340,8 +340,9 @@ mod COMMON-SEMANTICS-WRITING is
 	mb rule
 		< k > writeByte(sym(Block:Nat) +Nat Offset:Nat, V:K) => . ...</ k >
 		< mem >... Block:Nat |-> memblock(Len:Nat, (M:Map => M:Map[V:K / Offset:Nat])) ...</ mem >
-		--- < locsWrittenTo >... (.).Bag => BagItem(sym(Block:Nat) +Nat Offset:Nat) ...</ locsWrittenTo >
+		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(sym(Block:Nat) +Nat Offset:Nat)) </ locsWrittenTo >
 		if Offset:Nat <Nat Len:Nat
+		andBool notBool (sym(Block:Nat) +Nat Offset:Nat) in Locs:Bag
 		: KSentence [metadata "structural"] .
 	mb rule
 		< k > writeBytes(?, dataList(.List{K})) => . ...</ k >
@@ -435,14 +436,6 @@ mod COMMON-C-MEMORY-MISC is
 	
 	--- c99 6.5:2 If a side effect on a scalar object is unsequenced relative to either a different side effect on the same scalar object or a value computation using the value of the same scalar object, the behavior is undefined. If there are multiple allowable orderings of the subexpressions of an expression, the behavior is undefined if such an unsequenced side effect occurs in any of the orderings
 	--- i take this to mean that if i write to a location twice or read from a location after being written to, then it is a problem
-
-	
-	--- --- fixme it's interesting we need this.  what do the rules say about when string allocation happens?
-	--- op dontCountWrite : Nat -> K .
-	--- mb rule
-		--- < k > [dontCountWrite(Loc:Nat) => .K] ...</ k >
-		--- < locsWrittenTo >... [BagItem(Loc:Nat) => .Bag] ...</ locsWrittenTo >
-		--- : KSentence [metadata "structural"] .
 		
 	op writeString : Nat String -> K .
 	mb [alloc-string]: rule
@@ -463,96 +456,9 @@ mod COMMON-C-MEMORY-MISC is
 		
 	mb [write-empty-string]: rule
 		< k > writeString(Loc:Nat, "") 
-			=> (.).K --- *(tv(Loc:Nat, pointerType(char))) := tv(0, char) 
-			--- ~> discard
+			=> (.).K
 		...</ k >
 		: KSentence [metadata "structural"] .	
-			
-	--- --- fixme: fixes the type of function types so they are equivalent
-	--- mb rule
-		--- < k > [putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) 
-		--- => putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L':List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type))] ...</ k >
-		--- if L:List{K} =/=Bool L':List{K}
-		--- : KSentence [metadata "structural"] .
-		
-	--- op isLocation : K -> Bool .
-	--- eq isLocation(loc(?, ?)) = true .
-	--- eq isLocation(bitloc(?, ?, ?)) = true .
-	--- eq isLocation(K:K) = false [owise] .
-	--- --- needs to make sure not a bitfield
-	--- mb rule
-		--- < k > [putInMem(loc(Block:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
-		--- => putByteInMem(loc(Block:Nat, Offset:Nat), ((N:Int %Int 256) +Int 256) %Int 256) ~> putInMem(loc(Block:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 8, T:Type), T:Type, tv(Len:Nat, J:Type))] ...</ k >
-		--- if notBool(isLocation(N:Int))
-		--- : KSentence [metadata "structural"] .
-		
-	--- --- fixme can now check oob
-	--- mb rule
-		--- < k > [putInMem(loc(Block:Nat, Offset:Nat), tv(F:Float, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[F:Float / Offset:Nat]]) ...</ mem >
-		--- < locsWrittenTo > Locs:Bag [.Bag => BagItem(loc(Block:Nat, Offset:Nat))] </ locsWrittenTo >
-		--- if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
-		--- andBool (
-			--- (T:Type ==Bool double)
-			--- orBool T:Type ==Bool float
-			--- orBool T:Type ==Bool long-double
-		--- )
-		--- : KSentence [metadata "structural"] .
-		
-	--- --- fixme: put pointer in memory
-	--- mb rule
-		--- < k > putInMem(?, [tv(loc(0, 0), T:Type) => tv(0, T:Type)], ?, ?) ...</ k >
-		--- : KSentence [metadata "structural"] .
-	--- mb rule
-		--- < k > [putInMem(loc(Block:Nat, Offset:Nat), tv(loc(Block':Nat, Offset':Nat), T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[loc(Block':Nat, Offset':Nat) / Offset:Nat]]) ...</ mem >
-		--- < locsWrittenTo > Locs:Bag [.Bag => BagItem(loc(Block:Nat, Offset:Nat))] </ locsWrittenTo >
-		--- if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
-		--- andBool notBool(Block':Nat ==Bool 0 andBool Offset':Nat ==Bool 0)
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule
-		--- < k > [putInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type))
-		--- => putBitInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), ((N:Int %Int 2) +Int 2) %Int 2) ~> 
-		--- putInMem(bitloc(Block:Nat, Base:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 1, T:Type), T:Type, tv(Len:Nat, J:Type))] ...</ k >
-		--- if (Offset:Nat <Nat 8)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule 
-		--- < k > [putInMem(bitloc(Block:Nat, Base:Nat, 8), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
-		--- => putInMem(bitloc(Block:Nat, sNat(Base:Nat), 0), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type))] ...</ k >
-		--- : KSentence [metadata "structural"] .
-	
-	--- mb rule
-		--- < k > [putByteInMem(loc(Block:Nat, Offset:Nat), N:Nat) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(Len:Nat, [M:Map => M:Map[piece(N:Nat, 8) / Offset:Nat]]) ...</ mem >
-		--- < locsWrittenTo > Locs:Bag [.Bag => BagItem(loc(Block:Nat, Offset:Nat))] </ locsWrittenTo >
-		--- if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
-		--- : KSentence [metadata "structural"] .
-	--- --- this helps be fast, but is unsafe
-	--- --- mb rule
-		--- --- < k > [putByteInMem(Loc:Nat, N:Nat) => .K] ...</ k >
-		--- --- < mem > [M:Map => M:Map[piece(N:Nat, 8) / Loc:Nat]] </ mem >
-		--- --- : KSentence [metadata "structural"] .
-	--- --- fixme need better fidelity; shouldn't zero out bits
-	--- --- fixme also need to handle the case where it's already unknown
-	--- mb rule 
-		--- < k > putBitInMem(bitloc(Block:Nat, Base:Nat, ?), ?) ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, [M:Map => M:Map[piece(0, numBitsPerByte) / Base:Nat]]) ...</ mem >
-		--- if notBool($hasMapping(M:Map, Base:Nat))
-		--- : KSentence [metadata "structural"] .
-	--- op known : Nat -> Bool .
-	--- eq known(unknown(?)) = false .
-	--- eq known(?) = true [owise] .
-	--- --- fixme not handling undefined writing twice in a sequence point 
-	--- mb rule
-		--- < k > [putBitInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), N:Nat) => .K] ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, 
-			--- (? Base:Nat |-> [piece(Old:Nat, 8) => 
-				--- piece((Old:Nat &Nat ((1 <<Nat Offset:Nat) xorNat 255)) |Nat (N:Nat <<Nat Offset:Nat), 8)
-			--- ])
-		--- ) ...</ mem >
-		--- if known(Old:Nat)
-		--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-C-MEMORY is

@@ -1,7 +1,6 @@
 mod COMMON-SEMANTICS-PROMOTIONS is
 	including COMMON-INCLUDE .
 	
-	
 	mb rule
 		< k > L:KLabel(tv(L':List{K}, T:Type),, V:Value)
 			=> L:KLabel(cast(pointerType(innerType(T:Type)), tv(L':List{K}, T:Type)),, V:Value) 

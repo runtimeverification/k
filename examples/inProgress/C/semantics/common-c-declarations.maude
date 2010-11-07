@@ -46,7 +46,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-BINDING is
 			=> allocateType(Loc:Nat, T:Type)
 			~> addToEnv(X:Id, Loc:Nat)
 			~> giveType(X:Id, T:Type)
-			~> initialize(X:Id, T:Type, (X:Id := tv(V:List{K}, T':Type) ~> discard))
+			~> initialize(X:Id, T:Type, Computation(X:Id := tv(V:List{K}, T':Type)))
 			~> bind-aux(Loc:Nat, L:List{C}, P:List{Type}) 
 		...</ k > 
 		< nextLoc > Loc:Nat => inc(Loc:Nat) </ nextLoc >
@@ -170,14 +170,14 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 	--- base types
 	mb rule
 		< k > figureInitializer(X:Id, T:Type, SingleInit(K:K))
-			=> figureInitializer-aux(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
+			=> figureInitializer-aux(X:Id, T:Type, initializer(Computation(X:Id := K:K)))
 		...</ k >
 		if notBool hasArrayType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- c1x 6.7.8:11
 	mb rule
 		< k > figureInitializer(X:Id, T:Type, CompoundInit(InitFragment(NextInit, SingleInit(K:K))))
-			=> figureInitializer-aux(X:Id, T:Type, initializer((X:Id := K:K ~> discard)))
+			=> figureInitializer-aux(X:Id, T:Type, initializer(Computation(X:Id := K:K)))
 		...</ k >
 		if notBool (hasAggregateType(T:Type) orBool hasUnionType(T:Type))
 		: KSentence [metadata "structural"] .
@@ -213,11 +213,11 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 	op zeroType : K Type -> K .
 	
 	mb rule
-		< k > zeroType(Name:K, T:Type) => Name:K := tv(0, int) ~> discard ...</ k >
+		< k > zeroType(Name:K, T:Type) => Computation(Name:K := tv(0, int)) ...</ k >
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > zeroType(Name:K, T:Type) => Name:K := tv(0.0, float) ~> discard ...</ k >
+		< k > zeroType(Name:K, T:Type) => Computation(Name:K := tv(0.0, float)) ...</ k >
 		if hasFloatType(T:Type)
 		: KSentence [metadata "structural"] .
 		
@@ -254,7 +254,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > zeroType(Name:K, T:Type) => Name:K := tv(NullPointer, T:Type) ~> discard ...</ k >
+		< k > zeroType(Name:K, T:Type) => Computation(Name:K := tv(NullPointer, T:Type)) ...</ k >
 		if hasFunctionType(T:Type) 
 		orBool hasPointerType(T:Type)
 		: KSentence [metadata "structural"] .
@@ -700,7 +700,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-GENERAL is
 	--- FIXME check prototypes
 	mb [function-definition]: rule
 		< k > FunctionDefinition(typedDeclaration(T:Type, X:Id), Block:K) 
-			=> declareFunction(X:Id, T:Type, initializer((X:Id := tv(functionObject(X:Id, unqualifyType(T:Type), Block:K), T:Type) ~> discard)))
+			=> declareFunction(X:Id, T:Type, initializer(Computation(X:Id := tv(functionObject(X:Id, unqualifyType(T:Type), Block:K), T:Type))))
 			~> calculateGotoMap(X:Id, Block:K)
 		...</ k >
 		if hasFunctionType(T:Type)
@@ -940,7 +940,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< k > T':Type ~> initializeSingleInit(K':K) => . ...</ k >
 		< currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
-		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
+		< savedInitialization >... . => Computation(K:K := K':K) </ savedInitialization > 
 		--- if getKLabel(K':K) =/=Bool 'Constant
 		if (isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type))
 		--- andBool notBool hasAggregateType(T':Type)
@@ -983,7 +983,7 @@ mod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		...</ k >
 		< currentSubObject > findStruct(structType(S:Id)) ListItem(te(K:K, structType(S:Id))) => next ...</ currentSubObject >
 		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
-		< savedInitialization >... . => (K:K := K':K) ~> discard </ savedInitialization > 
+		< savedInitialization >... . => Computation(K:K := K':K) </ savedInitialization > 
 		: KSentence [metadata "structural"] .
 		
 	mb rule

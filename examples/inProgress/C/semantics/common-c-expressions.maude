@@ -930,8 +930,7 @@ mod COMMON-SEMANTICS-REFERENCE is
 	--- fixme is there any more general way to do this?  it seems awful awkward.
 	mb [address-of-compound]: rule
 		< k > & CompoundLiteral(N:Nat, Spec:K, Decl:K, Init:K) 
-			=> CompoundLiteral(N:Nat, Spec:K, Decl:K, Init:K) 
-			~> discard
+			=> Computation(CompoundLiteral(N:Nat, Spec:K, Decl:K, Init:K))
 			~> & compoundLiteral(N:Nat)
 		...</ k >
 		: KSentence [metadata "structural"] .
@@ -985,7 +984,7 @@ endm
 mod COMMON-SEMANTICS-SEQUENCING is
 	including COMMON-SEMANTICS-EXPRESSIONS-INCLUDE .
 	
-	mb rule < k > Comma(K:C :: K'::C :: L:List{C}) => K:C ~> discard ~> sequencePoint ~> Comma(K'::C :: L:List{C}) ...</ k >
+	mb rule < k > Comma(K:C :: K'::C :: L:List{C}) => Computation(K:C) ~> Comma(K'::C :: L:List{C}) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule < k > Comma(K:C) => K:C ...</ k >
 		: KSentence [metadata "structural"] .

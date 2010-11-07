@@ -493,7 +493,7 @@ mod COMMON-SEMANTICS-TYPE-INTERPRETATION is
 
 	--- the K will resolve to a type, so throw it away
 	mb rule
-		< k > OnlyTypedef(K:K) => K:K ~> discard ...</ k >
+		< k > OnlyTypedef(K:K) => Computation(K:K) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 			

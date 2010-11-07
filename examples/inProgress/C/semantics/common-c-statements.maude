@@ -72,7 +72,7 @@ mod COMMON-SEMANTICS-FOR is
 	including COMMON-SEMANTICS-STATEMENTS-INCLUDE .
 	
 	eq ForClauseDeclaration(K:K) = K:K .
-	eq ForClauseExpression(K:K) = K:K ~> discard .
+	eq ForClauseExpression(K:K) = Computation(K:K) .
 	
 	mb rule
 		< k > addToHistory(Num:Nat) => (.).K ...</ k >
@@ -94,7 +94,7 @@ mod COMMON-SEMANTICS-FOR is
 		
 	mb [for]: rule
 		< k > loopMarked ~> For(ForNum:Nat, Pre:K, Control:K, Post:K, S:Statement)
-			=> IfThenElse(Control:K, (S:Statement ~> Post:K ~> discard ~> loopMarked ~> For(ForNum:Nat, Pre:K, Control:K, Post:K, S:Statement)), Nop)
+			=> IfThenElse(Control:K, (S:Statement ~> Computation(Post:K) ~> loopMarked ~> For(ForNum:Nat, Pre:K, Control:K, Post:K, S:Statement)), Nop)
 		...</ k >
 		< blockHistory > ListItem(Num:Nat) ...</ blockHistory >
 		--- < xmessages >... (. => "For: finished a loop, in " +String toString(Num:Nat) +String ", looping...") </ xmessages >
@@ -519,8 +519,7 @@ mod COMMON-SEMANTICS-GOTO is
 			< gotoCalculation > 
 				< computation > S:K </ computation > 
 				< computationTail >
-					Post:K
-					~> discard
+					Computation(Post:K)
 					~> loopMarked
 					~> For(ForNum:Nat, Pre:K, (if Control:K =/=Bool emptyValue then Control:K else tv(1, int) fi), Post:K, S:K)
 					~> popLoop
@@ -839,20 +838,9 @@ mod COMMON-C-STATEMENTS is
 			~> Continue
 		...</ k >
 		: KSentence [metadata "structural"] . --- nondet
-	--- mb [continue-done]: rule
-		--- < k > (Continue => Post:K ~> discard) ~> loopMarked ~> For(?, ?, Post:K, ?) ...</ k >
-		--- : KSentence [metadata "structural"] . --- nondet
-	--- mb [continue-done]: rule
-		--- < k > (Continue => .) ~> loopMarked ~> L:KLabel(?) ...</ k >
-		--- if L:KLabel =/=Bool 'For
-		--- : KSentence [metadata "structural"] . --- nondet
-		
-	--- mb [continue]: rule
-		--- < k > Continue ~> ((L:KLabel)(?) => .) ...</ k >
-		--- if L:KLabel =/=Bool 'loopMarked
-		--- : KSentence [metadata "structural"] .
+
 	mb [continue-done]: rule
-		< k > (Continue => Post:K ~> discard) ~> loopMarked ~> For(?, ?, ?, Post:K, ?) ...</ k >
+		< k > (Continue => Computation(Post:K)) ~> loopMarked ~> For(?, ?, ?, Post:K, ?) ...</ k >
 		: KSentence [metadata "structural"] . --- nondet
 	mb [continue-done]: rule
 		< k > (Continue => .) ~> loopMarked ~> L:KLabel(?) ...</ k >
