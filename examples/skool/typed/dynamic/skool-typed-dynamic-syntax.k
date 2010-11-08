@@ -22,38 +22,6 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
 
   syntax IdType ::= 
                   Id : Type
-
-----------------------------------------------------------------------------
---- Lists should be eventually builtin; for now, they need to be declared ---
------------------------------------------------------------------------------
---- List{Bottom}  (needed for consistencies)
---- do not add Bottom as subsort to anything else, like Id, Exp, etc
-  sort Bottom 
-  syntax List{Bottom}  ::= Bottom | .List{Bottom}
-                     | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid] 
- 
---- List{Type}
-  syntax List{Type} ::= Type | List{Id} 
-                     | List{Type} , List{Type} [ditto] 
-
---- List{Id}
-  syntax List{Id}  ::= Id | List{Bottom}
-                     | List{Id} , List{Id} [ditto]
-
---- List{IdType}
-  syntax List{IdType}  ::= IdType | List{Bottom}
-                     | List{IdType} , List{IdType} [ditto]
-
---- List{Exp}
-  syntax List{Exp} ::=  Exp | List{Id} 
-                     | List{Exp} , List{Exp} [ditto]
-
-
---- List{Top}
-  sort Top 
-  syntax List{Top} ::= Top | List{Type} | List{IdType} | List{Exp} 
-                     | List{Top} , List{Top} [ditto]
-
 --- variable names
   syntax Var ::= Id 
                 | Id [ Exp ] [prec 1 strict]
@@ -132,6 +100,38 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
              --- </SKOOL modified>
                | Stmt
                | Stmts Stmts [prec 100 gather(e E) ]
+
+
+----------------------------------------------------------------------------
+--- Lists should be eventually builtin; for now, they need to be declared ---
+-----------------------------------------------------------------------------
+--- List{Bottom}  (needed for consistencies)
+--- do not add Bottom as subsort to anything else, like Id, Exp, etc
+  sort Bottom 
+  syntax List{Bottom}  ::= Bottom | .List{Bottom}
+                     | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid] 
+ 
+--- List{Type}
+  syntax List{Type} ::= Type | List{Id} 
+                     | List{Type} , List{Type} [ditto] 
+
+--- List{Id}
+  syntax List{Id}  ::= Id | List{Bottom}
+                     | List{Id} , List{Id} [ditto]
+
+--- List{IdType}
+  syntax List{IdType}  ::= IdType | List{Bottom}
+                     | List{IdType} , List{IdType} [ditto]
+
+--- List{Exp}
+  syntax List{Exp} ::=  Exp | List{Id} 
+                     | List{Exp} , List{Exp} [ditto]
+
+
+--- List{Top}
+  sort Top 
+  syntax List{Top} ::= Top | List{Type} | List{IdType} | List{Exp} 
+                     | List{Top} , List{Top} [ditto]
 
 endkm
 
