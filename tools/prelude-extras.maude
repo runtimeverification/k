@@ -161,6 +161,12 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   
   op allCaps : String -> String .
   eq allCaps(S) = replace(S, ("a" |-> "A", "b" |-> "B", "c" |-> "C", "d" |-> "D", "e" |-> "E", "f" |-> "F", "g" |-> "G", "h" |-> "H", "i" |-> "I", "j" |-> "J", "k" |-> "K", "l" |-> "K", "m" |-> "M", "n" |-> "N", "o" |-> "O", "p" |-> "P", "q" |-> "Q", "r" |-> "R", "s" |-> "S", "t" |-> "T", "u" |-> "U", "v" |-> "V", "w" |-> "W", "x" |-> "X", "y" |-> "Y", "z" |-> "Z")) .
+
+
+
+  op _ends-with_ : String String -> Bool .
+  eq S ends-with S' = rfind(S, S', length(S)) :: Nat .
+  var S' : String .
 endfm
 
 fmod QID-EXTRAS is
@@ -779,6 +785,7 @@ fmod META-LEVEL-EXTRAS is
   including META-LEVEL .
   including META-MODULE-EXTRAS .
   including NAT-LIST-EXTRAS .
+  including STRING-EXTRAS .
 
   var M M' : Module . var T T' T'' : Type . var K : Kind . var Tl Tl' : TypeList .
   var OPDS OPDS' : OpDeclSet .  var Op Op' : OpDecl .
@@ -902,22 +909,36 @@ fmod META-LEVEL-EXTRAS is
   eq upImports((protecting Q .) IL) = upModule(Q,true) upImports(IL) .
   eq upImports((extending Q .) IL) = upModule(Q,true) upImports(IL) .
 
-  op getAllImportsBut : Qid SortSet ~> ModuleSet .
-  eq getAllImportsBut(Q, SS) 
-   = getAllImportsBut(Q, SS, empty) .
 
-  op getAllImportsBut : QidList SortSet ModuleSet ~> ModuleSet .
-  eq getAllImportsBut(nil, SS, MS) = MS .
-  eq getAllImportsBut(Q QIL, SS', MS)
-   = if Q in SS' then getAllImportsBut(QIL, SS', MS)
-     else getAllImportsBut(upModule(Q, false), QIL, SS' ; Q, MS) fi .
+  sort Modules .
+  op modules : ModuleSet ImportList -> Modules [ctor] .
+  op getModules : Modules -> ModuleSet .
+  eq getModules(modules(MS, IL)) = MS .
+  op getImports : Modules -> ImportList .
+  eq getImports(modules(MS, IL)) = IL .
 
-  op getAllImportsBut : Module QidList SortSet ModuleSet ~> ModuleSet .
-  eq getAllImportsBut(M, QIL, SS', MS) 
-   = getAllImportsBut(QIL getImportNameList(M), SS', MS M) .
+  var Str : String .  
+
+  op getAllImportsBut : Qid SortSet String ~> Modules .
+  eq getAllImportsBut(Q, SS, Str) 
+   = getAllImportsBut(Q, SS, Str, none, empty, nil) .
+
+  op getAllImportsBut : QidList SortSet String SortSet ModuleSet ImportList ~> Modules .
+  eq getAllImportsBut(nil, SS', Str, SS, MS, IL) = modules(MS,IL) .
+  eq getAllImportsBut(Q QIL, SS', Str, SS, MS, IL)
+   = if Q in SS then  getAllImportsBut(QIL, SS', Str, SS, MS, IL)
+     else if Q in SS' or-else string(Q) ends-with Str 
+   then getAllImportsBut(QIL, SS', Str, SS, MS, IL including Q .)
+   else getAllImportsBut(upModule(Q, false), QIL, SS', Str, SS ;  Q, MS, IL) 
+          fi 
+     fi .
+
+  op getAllImportsBut : Module QidList SortSet String SortSet ModuleSet ImportList ~> Modules .
+  eq getAllImportsBut(M, QIL, SS', Str, SS, MS, IL) 
+   = getAllImportsBut(QIL getImportNameList(M), SS', Str, SS, MS M, IL) .
 
   op flatten : Module ~> Module .
-  eq flatten(M) = flatten(setImports(M,nil), getAllImportsBut(getImportNameList(M),none, empty)) .
+  eq flatten(M) = flatten(setImports(M,nil), getModules(getAllImportsBut(getImportNameList(M), none, "K-DUMMY-K", none, empty, nil))) .
 
   op flatten : Module ModuleSet ~> Module .
   eq flatten(M, empty) = M .

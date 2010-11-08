@@ -8,20 +8,16 @@ fmod MANY-MODULES is
   var SS SS' : SortSet .
   var O : Qid .
   var MS : ModuleSet .
+  var Ms : Modules .
   var T : [Term] .
   
-  op manyModules : Qid ModuleSet ~> Module .
-  eq manyModules(O, MS) 
-   = setName(manyModules(emptySModule, MS,  kModules ; builtinModules, none, 'noConfig), O) .
+  op manyModules : Qid Modules ~> Module .
+  eq manyModules(O, Ms) 
+   = setImports(setName(manyModules(emptySModule, getModules(Ms), 'noConfig), O), getImports(Ms)) .
 
-  op manyModules : Module ModuleSet  SortSet SortSet Term ~> Module .
-----  Hack for K-LATEX.  maybe it should be moved somewhere else
- ceq manyModules(M, M' MS, SS, SS', T) = manyModules(M, MS, SS, SS', T)
-  if getName(M') = 'K-LATEX .
-  eq '@latex[Ct:Constant] = empty .
----- 
-  eq manyModules(M, M' MS, SS, SS', T) 
-   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS,  SS, getImportNames(M') ; SS', T) else manyModules(addModule(setImports(M',nil),M), MS,  SS, getImportNames(M') ; SS', extractConfTerm(M')) fi [owise print T] .
-  eq manyModules(M, empty, SS, SS', T) = addImports(generateImports(intersection(SS', SS)),M) .
+  op manyModules : Module ModuleSet  Term ~> Module .
+  eq manyModules(M, M' MS, T) 
+   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS, T) else manyModules(addModule(setImports(M',nil),M), MS, extractConfTerm(M')) fi [owise print T] .
+  eq manyModules(M, empty, T) = M .
 endfm
 

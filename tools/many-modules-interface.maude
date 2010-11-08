@@ -7,14 +7,20 @@ mod MANY-MODULES-META is
   including META-K-BUILTINS .
   var NoManyModules ManyModules : String .
   var Q QNoManyModules QManyModules : Qid .
-  var M : Module .
+  var M : Module . var MS : ModuleSet .
   op manyModules : String String ~> Module .
   eq manyModules(NoManyModules, ManyModules) = manyModules(qid(NoManyModules), qid(ManyModules)) .
   op manyModules : Qid Qid ~> Module .
-  eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules)) .
+  eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules ; 'K-LATEX , "-BUILTIN-MODULE")) .
 
   op compileMANY-MODULES : Module ~> Module .
-  eq compileMANY-MODULES(M) = manyModules(getName(M), getAllImportsBut(M,  nil, kModules ; builtinModules ; getName(M), empty)) .
+  eq compileMANY-MODULES(M) = manyModules(getName(M), getAllImportsBut(M,  nil, kModules ; builtinModules ; getName(M), "-BUILTIN-MODULE", none, empty, nil)) .
+
+
+  eq modules(MS, IL (including 'K-LATEX .) IL') = modules(MS, IL IL') .
+  eq '@latex[Ct:Constant] = empty .
+
+  var IL IL' : ImportList .
 endm
 
 mod MANY-MODULES-LOOP is 

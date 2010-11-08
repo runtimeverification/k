@@ -44,6 +44,13 @@ fmod META-K-BUILTINS is
   op builtinModules : ~> SortSet [memo] .
   eq builtinModules 
    = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
+  
+  op isBuiltin : Module ~> Bool .
+  eq isBuiltin(M) = isBuiltinModule(string(getName(M))) .
+  op isBuiltinModule  : String -> Bool .
+  eq isBuiltinModule(S) = find(S, "-BUILTINS",0) :: Nat .
+
+  var M : Module . var S : String .
 endfm
 
 fmod META-K-MODULES is
@@ -690,6 +697,7 @@ fmod META-K-LEAST-SORTS is
  eq $leastSortsT(M, 'rule_[Trm], S) = 'KSentence .
 ceq $leastSortsT(M, 'rule_if_[Trms], S T') = 'KSentence if sortLeq(M,T','Bool).
 ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
+ceq $leastSortsT(M, 'context_if_[Trms], S T') = 'KSentence if sortLeq(M,T','Bool).
 
 ceq $leastSortsT(M, Q[T1,T2], T T') 
   = leastSortsRed(Q[T1,T2], leastSort(M, Q[T1,T2]), lubSorts(M, T, T')) 
