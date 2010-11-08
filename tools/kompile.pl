@@ -959,6 +959,10 @@ sub compile {
 	$_ = run_maude("Compiling the definition ... ",
 	    "load $language_file_name\n",
 	    "load $k_all_tools\n",
+            "---(\n",
+            "red in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???) .\n",
+            "quit\n",
+            "---)\n",
 	    "loop compile .\n",
 	    "(compile $language_module_name .)\n",
 	    "quit\n");	
