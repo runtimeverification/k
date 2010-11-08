@@ -217,6 +217,8 @@ mod DECL-META-LATEX-PRINT is
   eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS, Q) = '_ .
   eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS, Q)
    = addParams(getName(Q, metadataParse(Str)),arity(TyL)) [owise] .
+  eq getLabelName(OPDS' (op Q : TyL -> Ty [AS] .) OPDS, Q)
+   = addParams(getName(Q, none),arity(TyL)) [owise] .
   eq getLabelName(OPDS, Q) = Q [owise] .
    
   op addParams : Qid Nat -> Qid .
