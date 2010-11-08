@@ -6,6 +6,7 @@ load printing
 mod DECL-META-LATEX-PRINT is
   pr K-META-OPEN-CELLS .
   pr META-K-RULES .
+  pr META-K-CONTEXTS .
   pr META-LEVEL .
   pr CONVERSION .
   pr NAT-LIST-EXTRAS .
@@ -427,21 +428,23 @@ mod DECL-META-LATEX-PRINT is
   ops \cmequation`{_`}`{_`}`{_`}`{_`} : String Term Term Condition -> Equation .
  
   op  \config`{_`} : Term -> MembAx .
-  op \context`{_`}`{_`} : String Term -> MembAx . 
+  op \context`{_`}`{_`} : String KContextSplit -> MembAx . 
   var AS : AttrSet .
 
   op getLabel : AttrSet -> String .
   eq getLabel(AS' label(Q) AS) = string(Q) .
   eq getLabel(AS) = "\\!" [owise] .
 
-  var KRS : KRuleSplit .  var Mb : MembAx .  var MAS' : MembAxSet .
+  var KRS : KRuleSplit .  var KCS : KContextSplit . 
+  var Mb : MembAx .  var MAS' : MembAxSet .
   eq eMetaLatexPrint(M, MAS' (mb 'configuration_[T] : 'KSentence [AS] .) MAS)
     = eMetaLatexPrint(M, MAS' \config{T} MAS) .
  ceq eMetaLatexPrint(M, MAS' Mb MAS)
    = eMetaLatexPrint(M, MAS' \rule{getLabel(getAttrs(Mb))}{KRS} MAS)
   if KRS := splitKRule(metadataParse(Mb)) .
-  eq eMetaLatexPrint(M, MAS' (mb 'context_[T] : 'KSentence [AS] .) MAS)
-   = eMetaLatexPrint(M, MAS' \context{getLabel(AS)}{T} MAS) .
+ ceq eMetaLatexPrint(M, MAS' Mb MAS)
+   = eMetaLatexPrint(M, MAS' \context{getLabel(getAttrs(Mb))}{KCS} MAS)
+  if KCS := splitKContext(metadataParse(Mb)) .
   eq eMetaLatexPrint(M, MAS) = eMetaLatexPrint0(M, MAS) [owise] .
 
   op eMetaLatexPrint0 : Module MembAxSet -> QidList .
@@ -1158,10 +1161,14 @@ mod LATEX-PRINT-META is
     = ('\n '\kcrule '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrintRls(M, MAS)) [owise] .
-  eq eMetaLatexPrintCxt(M, (\context{Str}{T}) MAS)
+  eq eMetaLatexPrintRls(M, (\context{Str}{{kcxt,T, empty, AS}}) MAS)
     = ('\n '\kcontext '`{ qid(Str) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} 
-       eMetaLatexPrintCxt(M, MAS)) .
+       eMetaLatexPrintRls(M, MAS)) [owise] .
+  eq eMetaLatexPrintRls(M, (\context{Str}{{kccxt,T, Cnd, AS}}) MAS)
+    = ('\n '\kccontext '`{ qid(Str) '`} '`{ '\ensuremath printTerm(M, T) 
+                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
+       eMetaLatexPrintRls(M, MAS)) [owise] .
   eq eMetaLatexPrintCxt(M, MAS) = eMetaLatexPrintRls(M, MAS) [owise] .
 ---  eq eMetaLatexPrintEqs(M, MAS) = eMetaLatexPrintRls(M, MAS) .
   eq eMetaLatexPrintRls(M, MAS) = eMetaLatexPrintNRls(M, MAS) [owise] .
