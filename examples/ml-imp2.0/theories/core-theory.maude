@@ -170,6 +170,11 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   eq (NzI === bool2int(B)) = @ B .
 
   eq (I:Int === J:Int) = @(I:Int ==Bool J:Int) .
+  
+  op abs : Int++ -> Int++ .
+  
+ ceq abs(I) = (-Int I) if I <=Int 0 .
+  eq abs(I) = I [owise] .
 
 endm
 

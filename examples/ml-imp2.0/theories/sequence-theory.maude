@@ -72,5 +72,15 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   eq contain(NeA1 @ NeA2 , I) = contain(NeA1 , I) \/ contain(NeA2 , I) .
   eq contain([J] , I) = (I === J) .
   eq contain(epsilon , I) = FalseFormula .
+  
+  
+  ops avg sum : Seq++ -> Int++ .
+  
+  eq sum(NeA1 @ NeA2) = sum(NeA1) +Int sum(NeA2) .
+  eq sum([Obj]) = Obj .
+  eq sum(epsilon) = 0 .
+  
+  eq avg(NeA1) = (sum(NeA1)) /Int (len(NeA1)) .
+  eq avg(epsilon) = 0 .
 endm
 
