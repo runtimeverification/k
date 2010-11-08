@@ -75,6 +75,10 @@ int average(struct nodeList* a)
         < heap > list(a0)(A) H </ heap > 
         < form > TrueFormula </ form > </ config > */
   s = summ(a);
+/*@ assert < config >
+        < env > a |-> a0 s |-> ?s l |-> ?l </ env >
+        < heap > list(a0)(A) H </ heap > 
+        < form > ?s === sum(A) </ form > </ config > */
   l = length(a);
   s = s / l;
   return s;
@@ -105,6 +109,6 @@ int main()
 /*@ var a0 : FreeInt */
 /*@ var ?A ?X : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var H : FreeMapItem */  
+/*@ var ?rho ?rho' ?H : ?MapItem */
+/*@ var H E : FreeMapItem */  
   
