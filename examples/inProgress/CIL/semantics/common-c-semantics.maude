@@ -35,13 +35,13 @@ mod COMMON-SEMANTIC-SYNTAX is
 	including INCOMING-MODULES .
 	op List : BagItem -> ListItem .
 	op piece : Nat Nat -> Nat .
-	op trueUnknown : -> Nat [ctor] .
-	op unknown : Nat -> Nat [ctor] .
-	op unknownF : -> Float [ctor] .
+	op trueUnknown : -> Nat .
+	op unknown : Nat -> Nat .
+	op unknownF : -> Float .
 	op skipval : -> KResult .
 	op debugK : -> K .
 	op discard : -> K .
-	op unnamedBitField : -> Id [ctor] .
+	op unnamedBitField : -> Id .
 	op loc : Nat Nat -> Nat .
 	--- fixme might not always be what I want, but it seems to work
 	eq loc(Block:Nat, N:Nat) <Int loc(Block:Nat, N':Nat) = N:Nat <Int N':Nat .
@@ -83,21 +83,21 @@ mod COMMON-SEMANTIC-SYNTAX is
 	---op l : KLabel -> K .
 	op _contains_ : Set K -> Bool [memo] .
 	--- Types
-	op enumType : Id -> Base-Type [ctor] .
+	op enumType : Id -> Base-Type .
 	op anonymousId : -> Id .
 
 	op typedParameterList : List{K} -> KResult [metadata "strict"] .
 	op typedDeclaration : Type K -> KResult .
 	op definedType : Type K -> KResult . 
 	
-	op registerInt : -> Base-Type [ctor] .
-	op arrayType : Type Nat -> Type [ctor] .
-	op bitfieldType : Type Nat -> Type [ctor] .
-	op functionType : Type List{K} -> Type [ctor] .
-	op pointerType : Type -> Type [ctor] .
-	op structType : Id -> Type [ctor] .
-	op unionType : Id -> Type [ctor] .
-	op qualifiedType : Type K -> Type [ctor] .
+	op registerInt : -> Base-Type .
+	op arrayType : Type Nat -> Type .
+	op bitfieldType : Type Nat -> Type .
+	op functionType : Type List{K} -> Type .
+	op pointerType : Type -> Type .
+	op structType : Id -> Type .
+	op unionType : Id -> Type .
+	op qualifiedType : Type K -> Type .
 	
 	op setOfTypes : -> Set [memo] .
 	eq setOfTypes = Set(
@@ -784,11 +784,12 @@ mod MEMORY is
 		< k > readFromMem-aux(loc(Block:Nat, Offset:Nat), T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})
 		=> readFromMem-aux(loc(Block:Nat, sNat(Offset:Nat)), T:Type, tv(Left:Nat, T':Type), (L:List{K},, V:BaseValue)) ...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:BaseValue)) ...</ mem >
+		@latex("\\kBR") --- break line in latex
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		< buffer > Mem:List </ buffer >
 		if notBool(loc(Block:Nat, Offset:Nat) in Locs:Bag)
 		andBool notBool loc(Block:Nat, Offset:Nat) in locations(Mem:List)
-		: KSentence [metadata "computational"] .
+		: KSentence [metadata "computational large"] .
 		--- : KSentence [metadata "structural"] .
 	mb [read-byte-buffer]: rule
 		< k > readFromMem-aux(Loc:Nat, T:Type, tv(sNat(Left:Nat), T':Type), L:List{K})

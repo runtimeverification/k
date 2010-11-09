@@ -1,3 +1,38 @@
+mod TEST-ARITH-SYNTAX is
+	including PL-BOOL .
+	including PL-EXT-BOOL .
+	including PL-NAT .
+	including PL-INT .
+	including PL-RAT .
+	including PL-FLOAT .
+	including PL-STRING .
+	including PL-CONVERSION .
+	including PL-QID .
+	including PL-RANDOM .
+	including PL-ID .
+	
+	ops N M : -> NzNat .
+	op B : -> Bool .
+	--- 
+	eq N = sNat(N) .
+	eq N = N +Nat M .
+	eq N = N *Nat M .
+	eq N = N /Nat M .
+	eq N = N %Nat M .
+	eq N = N ^Nat M .
+	eq N = N xorNat M .
+	eq N = N &Nat M .
+	eq N = N |Nat M .
+	eq N = N >>Nat M .
+	eq N = N <<Nat M .
+	eq B = N <Nat M .
+	eq B = N <=Nat M .
+	eq B = N >Nat M .
+	eq B = N >=Nat M .
+	eq B = N dividesNat M .
+	
+endm
+
 mod COMMON-C-SYNTAX is
 	including PL-BOOL .
 	including PL-EXT-BOOL .
@@ -13,43 +48,43 @@ mod COMMON-C-SYNTAX is
 	
 	sort Program .
 	
-	op NULL : -> Id [ctor] .
-	op calloc : -> Id [ctor] .
-	op cos : -> Id [ctor] .
-	op sin : -> Id [ctor] .
-	op exit : -> Id [ctor] .
-	op free : -> Id [ctor] .
-	op main : -> Id [ctor] .
-	op malloc : -> Id [ctor] .
-	op printf : -> Id [ctor] .
-	op putchar : -> Id [ctor] .
-	op rand : -> Id [ctor] .
-	op sqrt : -> Id [ctor] .
-	op abort : -> Id [ctor] .
-	op debug : -> Id [ctor] .
-	op getchar : -> Id [ctor] .
-	op exp : -> Id [ctor] .
-	op log : -> Id [ctor] .
-	op atan : -> Id [ctor] .
-	op File-Scope : -> Id [ctor] .
+	op NULL : -> Id .
+	op calloc : -> Id .
+	op cos : -> Id .
+	op sin : -> Id .
+	op exit : -> Id .
+	op free : -> Id .
+	op main : -> Id .
+	op malloc : -> Id .
+	op printf : -> Id .
+	op putchar : -> Id .
+	op rand : -> Id .
+	op sqrt : -> Id .
+	op abort : -> Id .
+	op debug : -> Id .
+	op getchar : -> Id .
+	op exp : -> Id .
+	op log : -> Id .
+	op atan : -> Id .
+	op File-Scope : -> Id .
 	
-	op fslOpenFile : -> Id [ctor] .
-	op fslCloseFile : -> Id [ctor] .
-	op fslFGetC : -> Id [ctor] .
-	op fslPutc : -> Id [ctor] .
+	op fslOpenFile : -> Id .
+	op fslCloseFile : -> Id .
+	op fslFGetC : -> Id .
+	op fslPutc : -> Id .
 	
-	op longjmp : -> Id [ctor] .
-	op setjmp : -> Id [ctor] .
-	op floor : -> Id [ctor] .
-	op tan : -> Id [ctor] .
-	op fmod : -> Id [ctor] .
-	op atan2 : -> Id [ctor] .
-	op asin : -> Id [ctor] .
+	op longjmp : -> Id .
+	op setjmp : -> Id .
+	op floor : -> Id .
+	op tan : -> Id .
+	op fmod : -> Id .
+	op atan2 : -> Id .
+	op asin : -> Id .
 	
-	op spawn : -> Id [ctor] .
-	op sync : -> Id [ctor] .
-	op lock : -> Id [ctor] .
-	op unlock : -> Id [ctor] .
+	op spawn : -> Id .
+	op sync : -> Id .
+	op lock : -> Id .
+	op unlock : -> Id .
 	
 	
 	
@@ -140,7 +175,7 @@ mod COMMON-C-SYNTAX is
 	sort List{Expression} .
 	subsort Expression < List{Expression} .
 	op .List{Expression} : -> List{Expression} [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
-	op _.,._ : List{Expression} List{Expression} -> List{Expression} [assoc metadata "strict hybrid" id: .List`{Expression`}] .
+	op _.,._ : List{Expression} List{Expression} -> List{Expression} [assoc metadata "strict hybrid latex(renameTo _,_)" id: .List`{Expression`}] .
 
 	--- 6.5.3
 	--- sizeof, &, ++, ., --, and all assignment operators are NOT STRICT
@@ -148,10 +183,10 @@ mod COMMON-C-SYNTAX is
 	ops ++_ --_ : Expression -> Expression [prec 22] .
 	op &_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\ensuremath{\\&}_)"] .
 	---op *_ : Expression -> Expression [prec 22] .
-	op Deref : Expression -> Expression [metadata "strict"] .
+	op Deref : Expression -> Expression [metadata "strict latex(renameTo *_)"] .
 	---op +_ : Expression -> Expression [prec 22] .
-	op -un_ : Expression -> Expression [prec 22 metadata "strict"] .
-	op ~_ : Expression -> Expression [prec 22 metadata "strict"] .
+	op -un_ : Expression -> Expression [prec 22 metadata "strict latex(renameTo \\ensuremath{-{}}_)"] .
+	op ~_ : Expression -> Expression [prec 22 metadata "strict latex(renameTo {\\raise.17ex\\hbox{$\\scriptstyle\\sim$}}_)"] .
 	op !_ : Expression -> Expression [prec 22 metadata "strict"] .
 	op sizeof : Expression -> Expression .
 	
@@ -162,10 +197,10 @@ mod COMMON-C-SYNTAX is
 	ops _<<_ _>>_ : Expression Expression -> Expression [prec 35 gather(E e) metadata "strict"] .
 	ops _<_ _>_ _<=_ _>=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
 	ops _==_ _!=_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict"] .
-	op _&binop_ : Expression Expression -> Expression [prec 41 gather(E e) metadata "strict latex(renameTo _\\ensuremath{\\&}_)"] .
+	op _&binop_ : Expression Expression -> Expression [prec 41 gather(E e) metadata "strict latex(renameTo _\\&_)"] .
 	op _^_ : Expression Expression -> Expression [prec 43 gather(E e) metadata "strict"] .
 	op _|_ : Expression Expression -> Expression [prec 45 gather(E e) metadata "strict"] .
-	op _&&_ : Expression Expression -> Expression [prec 47 gather(E e) metadata "strict(1) latex(renameTo _\\ensuremath{\\&\\&}_)"] .
+	op _&&_ : Expression Expression -> Expression [prec 47 gather(E e) metadata "strict(1) latex(renameTo _\\&\\&_)"] .
 	op _||_ : Expression Expression -> Expression [prec 49 gather(E e) metadata "strict(1)"] .
 	op _?_:_ : Expression Expression Expression -> Expression [prec 51 gather(e & E)] .
 	
@@ -173,7 +208,7 @@ mod COMMON-C-SYNTAX is
 	ops _*=_ _/=_ _%=_ _+=_ _-=_ _<<=_ _>>=_ _^=_ _|=_ : Expression Expression -> Expression [prec 53] .
 	ops _&binop=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\ensuremath{\\&=}_)"] .
 	--- op _=_ : Unary-Expression Assignment-Expression -> Assignment-Expression .
-	op _:=_ : Expression Expression -> Expression [prec 53 metadata "strict(2)"] .
+	op _:=_ : Expression Expression -> Expression [prec 53 metadata "strict(2) latex(renameTo _\\ensuremath{=}_)"] .
 			
 	--- 6.5.17
 	sort Expression .
@@ -224,10 +259,10 @@ mod COMMON-C-SYNTAX is
 		long unsigned-long
 		long-long unsigned-long-long
 		long-long-int unsigned-long-long-int
-		: -> Base-Type [ctor] .
+		: -> Base-Type .
 	op Pointer : Type-Specifier -> Type-Specifier [metadata "strict(1)"] . 
 	
-	----ops `_Bool `_Complex : -> Type-Specifier [ctor] .
+	----ops `_Bool `_Complex : -> Type-Specifier .
 	--- TODO
 	
 	--- 6.7.2.1
@@ -267,11 +302,11 @@ mod COMMON-C-SYNTAX is
 	
 	--- 6.7.3
 	--- sort Type-Qualifier .
-	--- ops const restrict volatile : -> Type-Qualifier [ctor] .
+	--- ops const restrict volatile : -> Type-Qualifier .
 	
 	---6.7.4
 	--- sort Function-Specifier .
-	--- op inline : -> Function-Specifier [ctor] .
+	--- op inline : -> Function-Specifier .
 	
 	--- 6.7.5
 	sort Declarator .
@@ -305,13 +340,13 @@ mod COMMON-C-SYNTAX is
 	sort List{Parameter} .
 	subsort Parameter-Declaration < List{Parameter} .
 	op .List{Parameter} : -> List{Parameter} [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
-	op _,.,_ : List{Parameter} List{Parameter} -> List{Parameter} [assoc id: .List`{Parameter`} metadata "strict hybrid"] .
+	op _,.,_ : List{Parameter} List{Parameter} -> List{Parameter} [assoc id: .List`{Parameter`} metadata "strict hybrid latex(renameTo _,_)"] .
 	op Parameter-Type-List : List{Parameter} -> Parameter-Type-List [metadata "strict"] .
 	op Parameter-Type-List`(`) : -> Parameter-Type-List .
 
 	sort Parameter-Declaration .
 	op Pointer : SeqList -> SeqList .
-	op ... : -> Parameter-Declaration .
+	op ... : -> Parameter-Declaration [metadata "latex(renameTo \\ensuremath{\\ldots})"] .
 	
 	--- fixme
 	--- same label, two different strictnesses
@@ -393,11 +428,11 @@ mod COMMON-C-SYNTAX is
 	--- 6.8.6
 	sort Jump-Statement .
 
-	op goto_; : Id -> Jump-Statement .
-	op continue`; : -> Jump-Statement [format (ni o o)] .
-	op break`; : -> Jump-Statement [format (ni o o)] .
-	op return`; : -> Jump-Statement .
-	op return_; : Expression -> Jump-Statement [metadata "strict"] .
+	op goto_; : Id -> Jump-Statement [metadata "latex(renameTo goto_)"] .
+	op continue`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo continue)"] .
+	op break`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo break)"] .
+	op return`; : -> Jump-Statement [metadata "latex(renameTo return)"] .
+	op return_; : Expression -> Jump-Statement [metadata "strict latex(renameTo return_)"] .
 	
 	---- A.2.4 External definitions
 	--- 6.9

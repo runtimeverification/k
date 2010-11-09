@@ -21,7 +21,7 @@ mod DYNAMIC-C-SEMANTICS is
 --- — The parameters argc and argv and the strings pointed to by the argv array shall
 --- be modifiable by the program, and retain their last-stored values between program
 --- startup and program termination.	
-	op incomingArgumentArray : -> Id [ctor] .
+	op incomingArgumentArray : -> Id .
 	op incomingArguments : List{K} -> K .
 	op incomingArguments-aux : List{K} Nat -> K .
 	eq incomingArguments(L:List{K}) = incomingArguments-aux(L:List{K}, 0) .

@@ -1,0 +1,25 @@
+load ../../dist/c-total
+mod C-PROGRAM is
+including C-SYNTAX .
+including MATCH-C-SYNTAX .
+including COMMON-C-CONFIGURATION .
+op tmpuuu1 : -> Id [ctor] .
+op tmpuuu0 : -> Id [ctor] .
+op tmp : -> Id [ctor] .
+op format : -> Id [ctor] .
+op printf : -> Id .
+
+
+------------END-OPERATORS------------
+op program-simpleNonDet : -> Program .
+eq program-simpleNonDet = (
+((Global(Declaration((extern )(int),  Direct-Function-Declarator(printf,  Parameter-Type-List(Parameter-Declaration((char),  Pointer(format) ) ,., ...)) )
+))((Global((Declaration((int),  Direct-Function-Declarator(main,  Parameter-Type-List(Parameter-Declaration((void)))) )
+{ ((Local(Declaration((int),  tmp )))  ((Local(Declaration((int),  tmpuuu0 )))  (Local(Declaration((int),  tmpuuu1 )))))
+
+Block(((((return (((((Apply((((printf))), ((("a")))))) + (((Apply((((printf))), ((("b"))))) + (Apply((((printf))), ((("c"))))))))));))))
+)
+})
+))))) .
+endm
+

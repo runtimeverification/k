@@ -90,7 +90,7 @@ let maudeFooter = "endm)" *)
 let maudeHeader = ""
 let maudeFooter = ""
   
-let defineConstant name sort = ("op " ^ (noscores name) ^ " : -> " ^ sort ^ " [ctor] .\n")
+let defineConstant name sort = ("op " ^ (noscores name) ^ " : -> " ^ sort ^ " .\n")
 let printString out x = fprintf out "%s" x
 
 type outfile = 
