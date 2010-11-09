@@ -39,7 +39,7 @@ common-c-syntax.maude common-c-configuration.maude common-c-semantics.maude comm
 match-c-syntax.maude match-c-semantics.maude match-c-configuration.maude \
 dynamic-c-semantics.maude dynamic-c-configuration.maude
 # alias maude="/home/software/maude24/maude"
-	$(K-MAUDE) c.maude -u -language C
+	$(K-MAUDE) c.maude -u -nd -language C
 	
 c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude $(K-PL-MODEL-CHECKER).maude Makefile
 	sed -i '2 i load $(K-PL-MODEL-CHECKER)' c-compiled.maude
