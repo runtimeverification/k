@@ -94,7 +94,7 @@ mod PL-NAT is
                   term-hook zeroTerm (0))] .
 
   op _+Nat_ : NzNat Nat -> NzNat
-        [assoc comm prec 33 metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Nat}}_)"
+        [assoc comm prec 33 metadata "latex(renameTo _\\ensuremath{{}+}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook ACU_NumberOpSymbol (+)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
   op _+Nat_ : Nat Nat -> Nat [ditto] .
@@ -105,7 +105,7 @@ mod PL-NAT is
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
   op _*Nat_ : NzNat NzNat -> NzNat
-        [assoc comm prec 31
+        [assoc comm prec 31 metadata "latex(renameTo _\\ensuremath{{}*}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook ACU_NumberOpSymbol (*)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
   op _*Nat_ : Nat Nat -> Nat [ditto] .
@@ -114,16 +114,19 @@ mod PL-NAT is
         [prec 31 gather (E e)
          special (id-hook NumberOpSymbol (quo)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))
-         metadata "latex(renameTo _\\ensuremath{/}\\subscript{{\\scriptstyle\\it{}Nat}}_)" ] .
+         metadata "latex(renameTo _\\ensuremath{{}\\div}\\subscript{{\\scriptstyle\\it{}Nat}}_)" ] .
 
   op _%Nat_ : Nat NzNat -> Nat
         [prec 31 gather (E e)
          special (id-hook NumberOpSymbol (rem)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))
-         metadata "latex(renameTo _\\ensuremath{\\%}\\subscript{{\\scriptstyle\\it{}Nat}}_)" ] .
+        --- metadata "latex(renameTo _\\ensuremath{\\%}\\subscript{{\\scriptstyle\\it{}Nat}}_)" ] .
+		metadata "latex(renameTo _\\%\\subscript{{\\scriptstyle\\it{}Nat}}_)" ] .
 
   op _^Nat_ : Nat Nat -> Nat
-        [prec 29  gather (E e)
+        [prec 29  gather (E e)  
+		metadata "latex(renameTo _\\ensuremath{\\mathbin{\\char`\\^}}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
+		--- metadata "latex(renameTo _\\textasciicircum\\verb|^|\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (^)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
   op _^Nat_ : NzNat Nat -> NzNat [ditto] .
@@ -157,54 +160,54 @@ mod PL-NAT is
   op maxNat : Nat Nat -> Nat [ditto] .
 
   op _xorNat_ : Nat Nat -> Nat
-        [assoc comm prec 55
+        [assoc comm prec 55 metadata "latex(renameTo _xor\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook ACU_NumberOpSymbol (xor)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
   op _&Nat_ : Nat Nat -> Nat
-        [assoc comm prec 53
+        [assoc comm prec 53 metadata "latex(renameTo _\\ensuremath{{}\\&}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook ACU_NumberOpSymbol (&)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
   op _|Nat_ : NzNat Nat -> NzNat
-        [assoc comm prec 57
+        [assoc comm prec 57  metadata "latex(renameTo _\\ensuremath{{}|}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook ACU_NumberOpSymbol (|)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
   op _|Nat_ : Nat Nat -> Nat [ditto] .
 
   op _>>Nat_ : Nat Nat -> Nat
-        [prec 35 gather (E e)
+        [prec 35 gather (E e) metadata "latex(renameTo _\\ensuremath{{}\\gg}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (>>)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
   op _<<Nat_ : Nat Nat -> Nat
-        [prec 35 gather (E e)
+        [prec 35 gather (E e) metadata "latex(renameTo _\\ensuremath{{}\\ll}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (<<)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
   op _<Nat_ : Nat Nat -> Bool
-        [prec 37 metadata "latex(renameTo _<\\subscript{{\\scriptstyle\\it{}Nat}}_)"
+        [prec 37 metadata "latex(renameTo _\\ensuremath{{}<}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (<)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
   op _<=Nat_ : Nat Nat -> Bool
-        [prec 37
+        [prec 37 metadata "latex(renameTo _\\ensuremath{{}\\le}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (<=)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
   op _>Nat_ : Nat Nat -> Bool
-        [prec 37
+        [prec 37 metadata "latex(renameTo _\\ensuremath{{}>}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (>)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
   op _>=Nat_ : Nat Nat -> Bool
-        [prec 37
+        [prec 37 metadata "latex(renameTo _\\ensuremath{{}\\ge}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (>=)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   term-hook trueTerm (true)
@@ -224,7 +227,7 @@ mod PL-INT is
   subsorts NzNat < NzInt Nat < Int < Builtins .
 
   op -Int_ : NzNat -> NzInt
-        [ctor metadata "latex(renameTo -\\subscript{{\\scriptstyle\\it{}Int}}_)"
+        [ctor metadata "latex(renameTo \\ensuremath{-{}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook MinusSymbol
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -232,7 +235,7 @@ mod PL-INT is
   op -Int_ : Int -> Int [ditto] .
 
   op _+Int_ : Int Int -> Int
-        [assoc comm prec 33  metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Int}}_)"
+        [assoc comm prec 33  metadata "latex(renameTo _\\ensuremath{{}+}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (+)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -241,7 +244,7 @@ mod PL-INT is
 
 
   op _-Int_ : Int Int -> Int
-        [prec 33 gather (E e)   metadata "latex(renameTo _-\\subscript{{\\scriptstyle\\it{}Int}}_)"
+        [prec 33 gather (E e)   metadata "latex(renameTo _\\ensuremath{{}-}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (-)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -256,19 +259,19 @@ mod PL-INT is
   op _*Int_ : Nat Nat -> Nat [ditto] .
 
   op _/Int_ : Int Int -> Int
-        [prec 31 gather (E e)   metadata "latex(renameTo _\\ensuremath{/}\\subscript{{\\scriptstyle\\it{}Int}}_)"
+        [prec 31 gather (E e)   metadata "latex(renameTo _\\ensuremath{{}\\div}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (quo)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
 
   op _%Int_ : Int Int -> Int
-        [prec 31 gather (E e)  metadata "latex(renameTo _\\ensuremath{\\%}\\subscript{{\\scriptstyle\\it{}Int}}_)"
+        [prec 31 gather (E e)  metadata "latex(renameTo _\\%\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (rem)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
 
   op _^Int_ : Int Nat -> Int
-        [prec 29 gather (E e)
+        [prec 29 gather (E e) metadata "latex(renameTo _\\ensuremath{\\mathbin{\\char`\\^}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (^)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -277,7 +280,8 @@ mod PL-INT is
   op _^Int_ : NzNat Nat -> NzNat [ditto] .
 
   op absInt : NzInt -> NzNat
-        [special (id-hook NumberOpSymbol (abs)
+        [metadata "latex(renameTo \\ensuremath{\\vert}_\\ensuremath{\\vert}\\subscript{{\\scriptstyle\\it{}Int}})"
+			special (id-hook NumberOpSymbol (abs) 
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
   op absInt : Int -> Nat [ditto] .
@@ -316,38 +320,39 @@ mod PL-INT is
   op maxInt : Nat Int -> Nat [ditto] .
 
   op ~Int_ : Int -> Int
-        [special (id-hook NumberOpSymbol (~)
+   [metadata "latex(renameTo {\\raise.17ex\\hbox{$\\scriptstyle\\sim$}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
+        special (id-hook NumberOpSymbol (~)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
 
   op _xorInt_ : Int Int -> Int
-        [assoc comm prec 55
+        [assoc comm prec 55 metadata "latex(renameTo _xor\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (xor)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
 
   op _&Int_ : Nat Int -> Nat
-        [assoc comm prec 53
+        [assoc comm prec 53 metadata "latex(renameTo _\\ensuremath{{}\\&}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (&)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
   op _&Int_ : Int Int -> Int [ditto] .
 
   op _|Int_ : NzInt Int -> NzInt
-        [assoc comm prec 57
+        [assoc comm prec 57  metadata "latex(renameTo _\\ensuremath{{}|}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (|)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
   op _|Int_ : Int Int -> Int [ditto] .
 
   op _>>Int_ : Int Nat -> Int
-        [prec 35 gather (E e)
+        [prec 35 gather (E e) metadata "latex(renameTo _\\ensuremath{{}\\gg}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (>>)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
 
   op _<<Int_ : Int Nat -> Int
-        [prec 35 gather (E e)
+        [prec 35 gather (E e) metadata "latex(renameTo _\\ensuremath{{}\\ll}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (<<)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int))] .
@@ -385,7 +390,7 @@ mod PL-INT is
                   term-hook falseTerm (false))] .
 
   op _dividesInt_ : NzInt Int -> Bool
-        [prec 51
+        [prec 51 metadata "latex(renameTo _divides\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (divides)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
@@ -438,7 +443,7 @@ mod PL-RAT is
   op -Int_ : Rat -> Rat [ditto] .
   eq -Int (I /Rat N) = -Int I /Rat N .
 
-  op _+Rat_ : PosRat PosRat -> PosRat [assoc comm prec 33] .
+  op _+Rat_ : PosRat PosRat -> PosRat [assoc comm prec 33 metadata "latex(renameTo _\\ensuremath{{}+}\\subscript{{\\scriptstyle\\it{}Rat}}_)"] .
   op _+Rat_ : PosRat Nat -> PosRat [ditto] .
   op _+Rat_ : Rat Rat -> Rat [ditto] .
   op _+Rat_ : NzNat Nat -> NzNat [ditto] .
