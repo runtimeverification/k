@@ -719,3 +719,12 @@ ceq $leastSortsT(M, Q[T1,T2], T T')
   var TlS : TypeListSet .  var TlSK : [TypeListSet] .
 endfm
 
+
+fmod META-K-COOL is
+  including META-TERM-EXTRAS .
+  including  K-META-CONFIG .
+  op cool : Qid -> Qid .
+  eq cool(Q) = qid(string(Q) + "-cool") .
+  
+  var Q : Qid .
+endfm

@@ -23,6 +23,7 @@ sub terminate {
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
+  -nd : compile for full non-determinism in heating/cooling
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
@@ -82,6 +83,7 @@ sub terminate {
   -c (or -compile) : only compile, do not maudify
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
+  -nd : compile for full non-determinism in heating/cooling
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
@@ -373,6 +375,9 @@ foreach (@ARGV) {
     }
     elsif (/^--?file$/) {
 	$language_file_name = "?";
+    }
+    elsif (/^--?nd$/) {
+       $k_all_tools .= "-nd";
     }
     elsif (/^--?flat$/) {
 	$flat = 1;
