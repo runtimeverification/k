@@ -362,6 +362,8 @@ mod DECL-META-LATEX-PRINT is
   eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadata("generated label") AS] .) OPDS)) 
    = eMetaLatexPrint(M, (OPDS' OPDS))  .
 
+  eq metadata("builtin wrapper") = none .
+
   eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadata(St) AS] .) OPDS)) 
    = eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadataParse(St) AS] .) OPDS)) [owise] .
 ---(
@@ -1148,27 +1150,27 @@ mod LATEX-PRINT-META is
   op eMetaLatexPrintRls : Module MembAxSet -> QidList .
   op eMetaLatexPrintNRls : Module MembAxSet -> QidList .
   eq eMetaLatexPrintRls(M, (\rule{Str}{{krl,T,empty,AS' kstructural AS}}) MAS)
-    = ('\n '\kequation '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
+    = ('\n '\kequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} 
        eMetaLatexPrintRls(M, MAS)) .
   eq eMetaLatexPrintRls(M, (\rule{Str}{{kcrl,T,Cnd,AS' kstructural AS}}) MAS)
-    = ('\n '\kcequation '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
+    = ('\n '\kcequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrintRls(M, MAS)) .
   eq eMetaLatexPrintRls(M, (\rule{Str}{{krl,T, empty, AS}}) MAS)
-    = ('\n '\krule '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
+    = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} 
        eMetaLatexPrintRls(M, MAS)) [owise] .
   eq eMetaLatexPrintRls(M, (\rule{Str}{{kcrl,T, Cnd, AS}}) MAS)
-    = ('\n '\kcrule '`{ qid(Str) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
+    = ('\n '\kcrule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrintRls(M, MAS)) [owise] .
   eq eMetaLatexPrintRls(M, (\context{Str}{{kcxt,T, empty, AS}}) MAS)
-    = ('\n '\kcontext '`{ qid(Str) '`} '`{ '\ensuremath printTerm(M, T) 
+    = ('\n '\kcontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} 
        eMetaLatexPrintRls(M, MAS)) [owise] .
   eq eMetaLatexPrintRls(M, (\context{Str}{{kccxt,T, Cnd, AS}}) MAS)
-    = ('\n '\kccontext '`{ qid(Str) '`} '`{ '\ensuremath printTerm(M, T) 
+    = ('\n '\kccontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrintRls(M, MAS)) [owise] .
   eq eMetaLatexPrintCxt(M, MAS) = eMetaLatexPrintRls(M, MAS) [owise] .
