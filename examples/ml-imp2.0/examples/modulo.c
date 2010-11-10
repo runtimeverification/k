@@ -30,8 +30,7 @@ int main()
 }
 
 
-/*@ var ?x ?d : ?Int */
-/*@ var x0 y0 : FreeInt */
+/*@ var ?x : ?Int */
 /*@ var ?rho : ?MapItem */
 /*@ var C : FreeBagItem */
 
