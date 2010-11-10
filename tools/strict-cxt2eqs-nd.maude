@@ -29,7 +29,9 @@ mod STRICTCXT2EQS is
 
 
   op coolOps : -> OpDeclSet .
-  eq coolOps = (op 'cool : K -> K [none] .) .
+  eq coolOps 
+   = (op 'cool : K -> K [none] .) 
+     (op '_~>_ : KProper K -> KProper [prec(100) assoc id(nilK) ] .) .
 
   op defaultCoolEqs : SortSet -> EquationSet .
   eq defaultCoolEqs(S ; Ss)
