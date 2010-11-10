@@ -5,10 +5,10 @@ int absolute(int n)
 /*@ pre < config > < env > n |-> n0 </ env >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < form > returns ?n /\ (?n === abs(n0)) </ form >
+                    < form > returns ?n /\ (((?n === n0) /\ @(n0 >=Int 0)) \/ ((?n === -Int n0) /\ @(n0 <Int 0)))  </ form >
                     C </ config > */
 {
-  if (n < 0) n = 0 - n;
+  if (n < 0) n = -n;
   return n;
 }
 
