@@ -176,10 +176,10 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
  ceq abs(I) = (-Int I) if I <=Int 0 .
   eq abs(I) = I [owise] .
   
-  op modulo : Int++ Int++ -> Int++ .
+  op moduloo : Int++ Int++ -> Int++ .
   
- ceq modulo(I,J) = modulo( I -Int J, J) if I <=Int J .
-  eq modulo(I,J) = I [owise] .
+ ceq moduloo(I,J) = moduloo( I -Int J, J) if (I >=Int J) .
+  eq moduloo(I,J) = I [owise] .
 
 endm
 
