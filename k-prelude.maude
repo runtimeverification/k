@@ -262,7 +262,8 @@ endm
 mod K-CONTEXTS is
   including K-TECHNIQUE .
   including K-SENTENCE .
-  ops context_ : K -> [KSentence] [prec 127] .
+  ops context_ : K -> [KSentence] [prec 126] .
+  ops context_if_ : K Bool -> [KSentence] [prec 126] .
 endm
 
 
