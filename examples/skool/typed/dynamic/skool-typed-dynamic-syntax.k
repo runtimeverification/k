@@ -24,11 +24,11 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                   Id : Type
 --- variable names
   syntax Var ::= Id 
-                | Id [ Exp ] [prec 1 strict]
+                | Var [ Exp ] [prec 1 strict(2)]
 
 --- expressions
   syntax Exp ::=   Var | Int | Bool         
-                | ++ Id [prec 0]
+                | ++ Exp [prec 0]
                 | Exp + Exp [gather(E e) prec 33 strict]
                 | Exp - Exp [gather(E e) prec 33 strict]
                 | Exp * Exp [gather(E e) prec 31 strict]
@@ -54,7 +54,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                | new Id ( List{Exp} ) [prec 1 strict(2)]
                | this
                | super
-               | Exp . Id [prec 1 strict(1)] 
+               | Exp . Id [prec 1] 
                | Exp instanceOf Id [prec 0 strict(1)]
              --- </SKOOL added>
 
@@ -85,7 +85,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                 | Exp ; [prec 50 strict]
                 | if Exp then Stmt else Stmt [strict(1)]
                 | if Exp then Stmt
-                | while Exp do Stmt [strict]
+                | while Exp do Stmt
                 | for Id = Exp to Exp do Stmt
                 | return Exp ; [strict]
                 | write ( Exp ) ; [strict]

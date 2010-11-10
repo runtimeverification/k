@@ -11,7 +11,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax Val ::= Int | Bool
 
 ---<SKOOL added>
-  syntax Val ::= super | objAddress ( Id , Nat ) [latex "obj({#1},{#2})"]
+  syntax Val ::= objAddress ( Id , Nat ) [latex "obj({#1},{#2})"]
   syntax Val ::= obj ( Bag ) [latex "{#1}"]
 ---</SK00L added>
 
@@ -41,7 +41,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                      <k> K:K </k>
                      <fstack> .List </fstack>
                      <env> .Map </env>
-                     <genv> .Map </genv>
                      <store> .Map </store>
                      <in> .List </in>
                      <out> .List </out>
@@ -106,15 +105,14 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- variable member declaration
 
---- when we are done with the first pass (preprocessing), i.e., the computation and genv are empty,
----   call main and initialize the global environment
+--- when we are done with the first pass (preprocessing), i.e., the computation and env must be empty, as we expect no global environment
+---   call main 
 ---  the following is removed
 ---  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
 ---    ... and the following added:
   rule [call-main]: <k> . => new_`(_`)(main, .List{Bottom}) </k>
-       <env> Env => . </env>
-       <genv> . => Env </genv>
+       <env> .Map </env>
 
 
 ---</SKOOL modified>
@@ -138,6 +136,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   rule [this]: <k> this => Obj <_/k>  
        <crntObj> Obj </crntObj>
+
+  context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
 
   rule [super]: <k> _._((super => objAddress(C',L)),X) <_/k>
        <crntObj> objAddress(C,L) </crntObj>
@@ -200,11 +200,10 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   rule [new-object]: <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C) ~> _`(_`)(C, Vl); return this ; </k>
        <env> Env:Map => . </env>
-       <genv> GEnv:Map </genv>
        <crntObj> Obj => objAddress(object,L) </crntObj>
        <return> T:Type => C </return>
        <nextLoc> L => sNat L </nextLoc>
-       <store_> . => L |-> obj(<envStack> object::<env> GEnv </env> </envStack>) <_/store>
+       <store_> . => L |-> obj(<envStack> object::<env> .Map </env> </envStack>) <_/store>
        <fstack> . => Env # K # Obj # T <_/fstack>
 
 
@@ -213,7 +212,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---   a memory object representation is a layered structure: for each class lying on the path 
 ---   from the current class to the root of the hierarchy there is a layer including the memory
 ---   allocation for the variable members of that class
-  rule [object-allocate]: <k> create(C) => create(C1) ~> setCrntClass(C) ~> Ss ~> addOEnvLayer <_/k>
+  rule [object-allocate]: <k> create(C) => create(C1) ~> setCrntClass(C) ~> Ss ~> addEnvLayer <_/k>
        <classes_>
             <class_>
                    <className> C </className>
@@ -224,7 +223,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> create(object) => .K <_/k>
 
 --- add a new tagged environment layer to the  current object
-  rule <k> addOEnvLayer => . <_/k>
+  rule <k> addEnvLayer => . <_/k>
        <env> Env => . </env>
        <crntObj> objAddress(C,L) </crntObj>
        <store_> L |-> obj(<envStack> . => (C::<env>Env</env>)<_/envStack>)
@@ -251,7 +250,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   --- rule <k> (X => _._(this,X))(_) <_/k> ?
   rule <k> _`(_`)((X => _._(this,X)),_) <_/k>
 
-  context _`(_`)(_._([HOLE],X),_)  
+  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
   rule <k> '_`(_`)(('_._(objAddress(_,L),,X) => lookupF(Envs:Bag, X)),,_) <_/k>
       <store_> L |-> obj(Envs) <_/store>
@@ -399,7 +398,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- the following is nedeed for stacking
   syntax ListItem ::=    Map # K # K # Type 
 --- the following are needed at the creation of a new object and at a method call
-  syntax K ::= restore ( K ) | discard | addGEnvLayer |  addOEnvLayer 
+  syntax K ::= restore ( K ) | discard |  addEnvLayer 
   syntax KLabel ::= create | setCrntClass
 --- the names for the local environment and the global environments for an object
 
