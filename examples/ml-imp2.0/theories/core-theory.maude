@@ -181,5 +181,10 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
  ceq moduloo(I,J) = moduloo( I -Int J, J) if (I >=Int J) .
   eq moduloo(I,J) = I [owise] .
 
+  
+  op factorial : Int++ -> Int++ .
+  
+ ceq factorial(I) = I *Int factorial(I -Int 1) if (I >Int 1) .
+  eq factorial(I) = 1 [owise] .
 endm
 
