@@ -94,6 +94,30 @@ void destroy(struct nodeList* x)
   }
 }
 
+struct nodeList* print(struct nodeList* x)
+/*@ pre < config > 
+             < env > x |-> x0 </ env > 
+             < heap > list(x0)(A) H </ heap > 
+             < form > TrueFormula </ form > C </ config > */
+/*@ post < config > 
+             < env > ?rho </ env > 
+             < heap > list(x0)(A) H </ heap > 
+             < form > returns x0 </ form > C </ config > */
+{
+  struct nodeList* smth;
+  smth = x;
+/*@ invariant < config > 
+             < env > x |-> x0  smth |-> ?s </ env > 
+             < heap > lseg(x0,?s)(?A) list(?s)(?A') H </ heap > 
+             < form > A === ?A @ ?A' </ form > C </ config > */
+  while(smth != 0)
+  {
+    printf("%d ", smth->val);
+    smth = smth->next;
+  }
+  printf("\n");
+  return x;
+}
 
 /*@ verify */
 int main()
@@ -105,7 +129,9 @@ int main()
              // < env > x |-> ?x  y |-> ?x </ env > 
              // < heap > list(?x)([1, 2, 3, 4, 5]) </ heap > 
              // < form > TrueFormula </ form > </ config > */
+  print(x);
   x = reverse(x);
+  print(x);
   /*@ assert < config >
              < env > x |-> ?x  y |-> ?y </ env >
              < heap > list(?x)([5, 4, 3, 2, 1]) </ heap >
@@ -170,8 +196,9 @@ int main()
 }
 
 
-/*@ var ?x ?y ?p ?i ?v : ?Int */
-/*@ var ?B ?C ?A1 ?A2 : ?Seq */
+/*@ var ?x ?y ?p ?i ?v ?s : ?Int */
+/*@ var x0 : FreeInt */
+/*@ var ?B ?C ?A1 ?A2 ?A ?A' : ?Seq */
 /*@ var !A !A1 !A2 : !Seq */
 /*@ var A B : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
