@@ -866,8 +866,6 @@ fmod META-LEVEL-EXTRAS is
   eq getTermKinds(M,(Trm,Trms)) = getTermKind(M,Trm) getTermKinds(M,Trms) .
   eq getTermKinds(M,empty) = nil . 
 
-
-
   op matchTermSorts : Module TermList TypeList ~> Bool .
   eq matchTermSorts(M, Trms, Tl) = sortsLeq(M, leastSorts(M, Trms), Tl) .
 
@@ -1039,6 +1037,9 @@ fmod META-LEVEL-EXTRAS is
    = sameKinds(M, s N, Tl', Nl', Tl, Nl1 Nl2) .
   eq sameKinds(M, N, T Tl, Nl, T' Tl', Nl') 
    = sameKind(M, T, T') and-then sameKinds(M, s N, Tl, Nl, Tl', Nl') [owise] .
+
+  op normalize : Module Term -> Term .
+  eq normalize(M,Trm) = getTerm(metaReduce(M, Trm)) .
 
   var Nl1 Nl2 Nl' : NatList .
 endfm

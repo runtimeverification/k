@@ -4,6 +4,7 @@ mod STRICTOPS2CXT is
   including NAT-LIST-EXTRAS .
   including STRICT-ATTRS .
   including K-STRICTNESS-OPS .
+  including META-K-CONTEXTS .
   including K-SORTS .
   including META-K-LABELS .
   including K-META-LISTS .
@@ -45,23 +46,15 @@ mod STRICTOPS2CXT is
    = strictOps2cxtMbs(Q, I, Q', I', AS) strictOps2cxtMbs(Q, NInts, Q', I', AS) .
 --- if arity is unspecified 
   eq strictOps2cxtMbs(Q, nil, Q', -1, AS)
-   = (mb 'context_[kApply(Q, (mkVariable('Kl1,KList),
-              hole, mkVariable('Kl2,KList)))] : KSentence [strictCell(Q')] .) .
----(
-  eq strictOps2cxtMbs(Q, s(N), Q', -1, AS klist(s(N),Wrapper))
-   =  (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), kApply(Wrapper,(mkVariable(qid("Kl" + string(s(N),10) + "-1"),KList), hole, mkVariable(qid("Kl" + string(s(N),10) + "-2"),KList))), mkVariable('Kl,KList)))] : KSentence [strictCell(Q')] .) .
----)
+   = (mb 'context_[replaceCxt(kApply(Q, (mkVariable('Kl1,KList),
+              hole, mkVariable('Kl2,KList))),hole)] : KSentence [strictCell(Q')] .) .
   eq strictOps2cxtMbs(Q, s(N), Q', -1, AS)
-   =  (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), hole, mkVariable('Kl,KList)))] : KSentence [strictCell(Q')] .) [owise] .
+   =  (mb 'context_[replaceCxt(kApply(Q, (makeKVars(seq(1,N), K), hole, mkVariable('Kl,KList))), hole)] : KSentence [strictCell(Q')] .) [owise] .
 --- if arity is specified and not 0
   eq strictOps2cxtMbs(Q, nil, Q', NA, AS)
    = strictOps2cxtMbs(Q, seq(1,NA), Q', NA, AS) .
----(
-  eq strictOps2cxtMbs(Q, s(N), Q', NA, AS klist(s(N),Wrapper))
-   = (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), kApply(Wrapper,(mkVariable(qid("Kl" + string(s(N),10) + "-1"),KList), hole, mkVariable(qid("Kl" + string(s(N),10) + "-2"),KList))), makeKVars(seq(s(s(N)),NA), K)))] : KSentence [strictCell(Q')] .) .
----)
   eq strictOps2cxtMbs(Q, s(N), Q', NA, AS)
-   = (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), hole, makeKVars(seq(s(s(N)),NA), K)))] : KSentence [strictCell(Q')] .) [owise] .
+   = (mb 'context_[replaceCxt(kApply(Q, (makeKVars(seq(1,N), K), hole, makeKVars(seq(s(s(N)),NA), K))), hole)] : KSentence [strictCell(Q')] .) [owise] .
   
 
   op seqstrictOps2cxtMbs  : Qid NatList Qid Nat AttrSet ~> MembAxSet .
@@ -70,8 +63,8 @@ mod STRICTOPS2CXT is
    = seqstrictOps2cxtMbsAux(Q, nil, NInts, Q', I', AS) .
 --- if arity is unspecified
   eq seqstrictOps2cxtMbs(Q, nil, Q', -1, AS)
-   = (mb 'context_[kApply(Q, (mkVariable('Kl,ResultList),
-         hole, mkVariable('Kl2,KList)))] : KSentence [strictCell(Q')] .) .
+   = (mb 'context_[replaceCxt(kApply(Q, (mkVariable('Kl,ResultList),
+         hole, mkVariable('Kl2,KList))), hole)] : KSentence [strictCell(Q')] .) .
 --- if arity is specified and not 0
   eq seqstrictOps2cxtMbs(Q, nil, Q', NA, AS)
    = seqstrictOps2cxtMbs(Q, seq(1,NA), Q', NA, AS)  .
@@ -82,23 +75,15 @@ mod STRICTOPS2CXT is
 --- if arity is unspecified 
   eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints', Q', -1, AS)
    =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', Q', -1, AS)
-     (mb 'context_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, AS), mkVariable('Kl,KList)))] : KSentence [strictCell(Q')] .) .
+     (mb 'context_[replaceCxt(kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, AS), mkVariable('Kl,KList))), hole)] : KSentence [strictCell(Q')] .) .
 --- if arity is specified and not 0
   eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints', Q', NA, AS)
    =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', Q', NA, AS)
-     (mb 'context_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, AS), makeKVars(seq(s(abs(last(sortAbs(Ints I)))), NA), K)))] : KSentence [strictCell(Q')] .) .
+     (mb 'context_[replaceCxt(kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, AS), makeKVars(seq(s(abs(last(sortAbs(Ints I)))), NA), K))), hole)] : KSentence [strictCell(Q')] .) .
 
   op makeSSVars : Nat IntList Int AttrSet ~> TermList .
   eq makeSSVars(N, nil, I, AS) = empty .
----(
-  eq makeSSVars(N, N Ints, N, AS klist(N,Wrapper)) = (kApply(Wrapper,(mkVariable(qid("Kl" + string(s(N),10) + "-1"),ResultList), hole, mkVariable(qid("Kl" + string(N,10) + "-2"),KList))), makeSSVars(s(N), Ints, N,  AS klist(N,Wrapper))) .
----)
   eq makeSSVars(N, N Ints, N, AS) = (hole, makeSSVars(s(N), Ints, N, AS)) [owise] .
----(
-  eq makeSSVars(N, N Ints, I, AS klist(N,Wrapper)) 
-   =  (kApply(Wrapper,(mkVariable(qid("Kl" + string(N,10)),ResultList))), makeSSVars(s(N), Ints, I,  AS klist(N,Wrapper)))
-  [owise] .
----)
   eq makeSSVars(N, N Ints, I, AS) 
    =  (mkVariable(qid("K" + string(N,10)),KResult), makeSSVars(s(N), Ints, I, AS))
   [owise] .

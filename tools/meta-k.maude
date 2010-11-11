@@ -215,53 +215,10 @@ fmod META-K-MODULE is
      else getK2ListSubsorts(M, SSDS) fi .
 endfm
 
-fmod META-K-CONTEXTS is including K-SORTS .
-  including META-MODULE-EXTRAS .
-  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
-  var AS : AttrSet .  var RK : KContextKind .
-
-  sort KContextKind .
-  ops kcxt kccxt : -> KContextKind .
-  op cxterror : Qid -> [KContextKind] .
-
-  ops symbol_ : KContextKind -> Qid .
-  eq symbol kcxt = 'context_ .
-  eq symbol kccxt = 'context_if_ .  
-
-  op getKContextKind : Qid ~> KContextKind . 
-  eq getKContextKind(Q) = if Q == symbol kcxt then kcxt else if Q == symbol kccxt then kccxt else cxterror(Q) fi fi .
-
-  sort KContextSplit .
-  op {_,_,_,_} : KContextKind Term TermList AttrSet -> KContextSplit .
-
-  
-  op splitKContext : MembAx ~> KContextSplit .
- ceq splitKContext((mb Q[T] : S [AS] .))
-   = {getKContextKind(Q),T,empty,AS} if S := KSentence . 
- ceq splitKContext((mb Q[T,C] : S [AS] .))
-   = {getKContextKind(Q),T,C,AS} if S := KSentence . 
-
-  op getContents : KContextSplit -> Term .
-  op getContextKind : KContextSplit -> KContextKind .
-  op getCondition : KContextSplit -> TermList .
-  op getAttrs : KContextSplit -> AttrSet .
-  eq getContents({RK,T,Cond,AS}) = T .
-  op getKind : KContextSplit -> KContextKind .
-  eq getKind({RK,T,Cond,AS}) = RK .
-  eq getCondition({RK,T,Cond,AS}) = Cond .
-  eq getAttrs({RK,T,Cond,AS}) = AS .
-
-  op setContents : KContextSplit Term -> KContextSplit .
-  eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
-
-  op plugKContext : KContextSplit ~> MembAx .
-  eq plugKContext({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
-  eq plugKContext({RK,T,C,AS}) = (mb symbol(RK)[T,C] : KSentence [AS] .) [owise] .
-endfm
-
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE-EXTRAS .
-  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
+  var O Q : Qid . var T T' T1 T2 : Term . var S : Type . var C : Term . 
+  var Cond Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
   var AS : AttrSet .  var RK : KRuleKind .
 
   sort KRuleKind .
@@ -304,6 +261,19 @@ fmod META-K-RULES is including K-SORTS .
   op plugKRule : KRuleSplit ~> MembAx .
   eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
   eq plugKRule({RK,T,C,AS}) = (mb symbol(RK)[T,C] : KSentence [AS] .) [owise] .
+
+
+  op splitReplace : Term Nat -> Term .
+ ceq splitReplace(O[T1, T2],N) = if N == 1 then T1 else T2 fi
+  if O == replaceS .
+  eq splitReplace(O[Tl],N) = O[splitReplaceL(Tl,N)] [owise] .
+  eq splitReplace(Ct,N) = Ct .
+  eq splitReplace(V, N) = V .
+
+  op splitReplaceL : TermList Nat -> TermList .
+  eq splitReplaceL((T, Tl),N) = splitReplace(T,N), splitReplaceL(Tl,N) .
+  eq splitReplaceL(empty,N) = empty .
+
 endfm
 
 fmod K-META-CONFIG is 
@@ -546,6 +516,76 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
 --- replace the line above with the one below to get unrestricted strictness
 ---  eq kWrap(T) = T .
 endfm
+
+
+fmod META-K-CONTEXTS is including K-SORTS .
+  including META-MODULE-EXTRAS .
+  including K-STRICTNESS-OPS .
+  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
+  var AS : AttrSet .  var RK : KContextKind .
+
+  sort KContextKind .
+  ops kcxt kccxt : -> KContextKind .
+  op cxterror : Qid -> [KContextKind] .
+
+  ops symbol_ : KContextKind -> Qid .
+  eq symbol kcxt = 'context_ .
+  eq symbol kccxt = 'context_if_ .  
+
+  op getKContextKind : Qid ~> KContextKind . 
+  eq getKContextKind(Q) = if Q == symbol kcxt then kcxt else if Q == symbol kccxt then kccxt else cxterror(Q) fi fi .
+
+  sort KContextSplit .
+  op {_,_,_,_} : KContextKind Term TermList AttrSet -> KContextSplit .
+
+  
+  op splitKContext : MembAx ~> KContextSplit .
+ ceq splitKContext((mb Q[T] : S [AS] .))
+   = {getKContextKind(Q),T,empty,AS} if S := KSentence . 
+ ceq splitKContext((mb Q[T,C] : S [AS] .))
+   = {getKContextKind(Q),T,C,AS} if S := KSentence . 
+
+  op getContents : KContextSplit -> Term .
+  op getContextKind : KContextSplit -> KContextKind .
+  op getCondition : KContextSplit -> TermList .
+  op getAttrs : KContextSplit -> AttrSet .
+  eq getContents({RK,T,Cond,AS}) = T .
+  op getKind : KContextSplit -> KContextKind .
+  eq getKind({RK,T,Cond,AS}) = RK .
+  eq getCondition({RK,T,Cond,AS}) = Cond .
+  eq getAttrs({RK,T,Cond,AS}) = AS .
+
+  op setContents : KContextSplit Term -> KContextSplit .
+  eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
+
+  op plugKContext : KContextSplit ~> MembAx .
+  eq plugKContext({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
+  eq plugKContext({RK,T,C,AS}) = (mb symbol(RK)[T,C] : KSentence [AS] .) [owise] .
+
+  op getHoleReplacement_ : TermList ~> Term .
+ ceq getHoleReplacement(O[T1, T2],Tl) = T2 if O = replaceS /\ getName(T1) = getName(hole) .
+  eq getHoleReplacement(O[Tl],Tl') = getHoleReplacement(Tl,Tl') [owise] .
+  eq getHoleReplacement(Ct,Tl) = getHoleReplacement(Tl) .
+  eq getHoleReplacement(V, Tl) = getHoleReplacement(Tl) .
+  eq getHoleReplacement(empty) = hole .
+
+
+  var O : Qid . var Ct : Constant . var V : Variable .
+  var T1 T2 : Term . var Tl Tl' : TermList .
+
+  op replaceCxt : Term Term -> Term .
+  eq replaceCxt(T1, T2) = 'wrap-with[T1,T2] .
+  
+  
+  op pReplaceCxt : Term Nat -> Term .
+  eq pReplaceCxt('wrap-with[T1, T2], 1) = T1 .
+  eq pReplaceCxt('wrap-with[T1, T2], 2) = T2 .
+  eq pReplaceCxt('_`(_`)[''wrap-with.KLabel,'_`,`,_[T1,T2]], 1) = T1 .
+  eq pReplaceCxt('_`(_`)[''wrap-with.KLabel,'_`,`,_[T1,T2]], 2) = T2 .
+
+endfm
+
+
 
 ---(
 fmod LIST-ATTRS is

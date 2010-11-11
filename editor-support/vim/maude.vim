@@ -59,9 +59,15 @@ syn keyword maudeSorts      CellLabel ListItem BagItem SetItem MapItem
 syn keyword maudeAttrs      assoc comm idem iter id left-id right-id strat memo
 syn keyword maudeAttrs      prec gather format ctor config object msg frozen
 syn keyword maudeAttrs      poly special label metadata owise nonexec
-syn keyword maudeAttrs      seqstrict strict structural hybrid nondet bidirectional
+syn keyword maudeAttrs      seqstrict strict structural hybrid nondet bidirectional large
 
-syn match maudeStatements "?" "\.k\?" "\.l" "\.m" "\.s" "\.\.\." 
+syn match maudeStatements  "_" 
+syn match maudeStatements  "?"
+syn match maudeStatements "\.k\?"
+syn match maudeStatements "\.l"
+syn match maudeStatements "\.m"
+syn match maudeStatements "\.s"
+syn match maudeStatements "\.\.\." 
 
 syn keyword maudeLiteral      Bool Int Float Nat Qid Id
 syn keyword maudeLiteral      Zero NzNat NzInt NzRat Rat FiniteFloat

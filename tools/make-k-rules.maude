@@ -1,6 +1,7 @@
 fmod MAKE-K-RULES is
   including META-MODULE-EXTRAS .
   including  META-K-RULES .
+  including  META-K-CONTEXTS .
   including META-LEVEL-EXTRAS .
   including META-K-CONDITION-SEARCH .
   including PARSE-METADATA-RULES .
@@ -21,12 +22,19 @@ fmod MAKE-K-RULES is
  ceq resolveReplace(Flat, M, Max, Mas)
    = resolveReplace(Flat, addReplace(Flat, M, Split), Mas)
   if Split := splitKRule(metadataParse(Max)) .
+ ceq resolveReplace(Flat, M, Max, Mas)
+   = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas)
+  if CSplit := splitKContext(metadataParse(Max)) .
   eq resolveReplace(Flat, M, Max, Mas) = resolveReplace(Flat, addMbs(Max, M), Mas) [owise] .
 
 
 ---------  Hack to get rid of the potential attribute large
   eq klarge = none . 
 ---------
+
+
+  op addCxtReplace : Module Module KContextSplit ~> Module .
+  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setContents(CSplit, replaceCxt(splitReplace(getContents(CSplit),1), getHoleReplacement(getContents(CSplit))))), M) .
 
   op addReplace : Module Module KRuleSplit ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural})
@@ -45,19 +53,7 @@ fmod MAKE-K-RULES is
   if O' = searchS /\ O = replaceS .
   eq makeCondition(T) = T = trueCt [owise] .
       
-  op normalize : Module Term -> Term .
-  eq normalize(Flat,T) = getTerm(metaReduce(Flat, T)) .
 
-
-  op splitReplace : Term Nat -> Term .
- ceq splitReplace(O[T1, T2],N) = if N == 1 then T1 else T2 fi
-  if O == replaceS .
-  eq splitReplace(O[Tl],N) = O[splitReplaceL(Tl,N)] [owise] .
-  eq splitReplace(Ct,N) = Ct .
-  eq splitReplace(V, N) = V .
-
-  op splitReplaceL : TermList Nat -> TermList .
-  eq splitReplaceL((T, Tl),N) = splitReplace(T,N), splitReplaceL(Tl,N) .
-  eq splitReplaceL(empty,N) = empty .
+  var CSplit : KContextSplit .
 endfm
 

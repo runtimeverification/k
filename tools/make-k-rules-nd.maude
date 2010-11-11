@@ -60,19 +60,5 @@ fmod MAKE-K-RULES is
   if O' = searchS /\ O = replaceS .
   eq makeCondition(T) = T = trueCt [owise] .
       
-  op normalize : Module Term -> Term .
-  eq normalize(Flat,T) = getTerm(metaReduce(Flat, T)) .
-
-
-  op splitReplace : Term Nat -> Term .
- ceq splitReplace(O[T1, T2],N) = if N == 1 then T1 else T2 fi
-  if O == replaceS .
-  eq splitReplace(O[Tl],N) = O[splitReplaceL(Tl,N)] [owise] .
-  eq splitReplace(Ct,N) = Ct .
-  eq splitReplace(V, N) = V .
-
-  op splitReplaceL : TermList Nat -> TermList .
-  eq splitReplaceL((T, Tl),N) = splitReplace(T,N), splitReplaceL(Tl,N) .
-  eq splitReplaceL(empty,N) = empty .
 endfm
 

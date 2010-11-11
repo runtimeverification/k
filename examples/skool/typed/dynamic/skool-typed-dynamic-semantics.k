@@ -11,8 +11,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax Val ::= Int | Bool
 
 ---<SKOOL added>
-  syntax Val ::= objAddress ( Id , Nat ) [latex "obj({#1},{#2})"]
-  syntax Val ::= obj ( Bag ) [latex "{#1}"]
+  syntax Val ::= obj ( Id , Nat ) [latex "objEnv({#1},{#2})"]
+  syntax Val ::= objEnv ( Bag ) [latex "{#1}"]
 ---</SK00L added>
 
 --- array values are wrapped as specific values
@@ -139,8 +139,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
 
-  rule [super]: <k> _._((super => objAddress(C',L)),X) <_/k>
-       <crntObj> objAddress(C,L) </crntObj>
+  rule [super]: <k> _._((super => obj(C',L)),X) <_/k>
+       <crntObj> obj(C,L) </crntObj>
        <className> C </className> 
        <extends> C' </extends>
 
@@ -148,8 +148,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax K ::= location ( Nat ) 
 
   --- looking up in object
-  rule <k> _._(objAddress(C,L),X) => lookupF(<envStack>  (C :: EnvC:Bag) EStack:List </envStack>, X) <_/k>
-      <store_> L |-> obj(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
+  rule <k> _._(obj(C,L),X) => lookupF(<envStack>  (C :: EnvC:Bag) EStack:List </envStack>, X) <_/k>
+      <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
  
   --- lookup using object environment
   rule lookupF(<envStack> _ :: <env_>  X |-> L:Nat <_/env> <_/envStack>,X) => lookup(L)  
@@ -161,9 +161,11 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---</SKOOL extension>
 
 --- arithmetic expressions
+  syntax Exp ::= l-value ( K ) 
+  context ++([HOLE] => l-value([HOLE]))
+  
 
-  rule [pre-inc]: <k> ++X => I:Int +Int 1 <_/k>
-       <env_> X |-> L:Nat <_/env>
+  rule [pre-inc]: <k> ++loc(L) => I:Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store> 
   rule I1:Int + I2:Int => I1 +Int I2 
   rule _-_(I1,I2) => _-Int_(I1,I2) 
@@ -200,10 +202,10 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   rule [new-object]: <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C) ~> _`(_`)(C, Vl); return this ; </k>
        <env> Env:Map => . </env>
-       <crntObj> Obj => objAddress(object,L) </crntObj>
+       <crntObj> Obj => obj(object,L) </crntObj>
        <return> T:Type => C </return>
        <nextLoc> L => sNat L </nextLoc>
-       <store_> . => L |-> obj(<envStack> object::<env> .Map </env> </envStack>) <_/store>
+       <store_> . => L |-> objEnv(<envStack> object::<env> .Map </env> </envStack>) <_/store>
        <fstack> . => Env # K # Obj # T <_/fstack>
 
 
@@ -225,12 +227,12 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- add a new tagged environment layer to the  current object
   rule <k> addEnvLayer => . <_/k>
        <env> Env => . </env>
-       <crntObj> objAddress(C,L) </crntObj>
-       <store_> L |-> obj(<envStack> . => (C::<env>Env</env>)<_/envStack>)
+       <crntObj> obj(C,L) </crntObj>
+       <store_> L |-> objEnv(<envStack> . => (C::<env>Env</env>)<_/envStack>)
        <_/store>
 
   rule <k> setCrntClass(C) => . <_/k>  
-       <crntObj> objAddress((_ => C),_) </crntObj>
+       <crntObj> obj((_ => C),_) </crntObj>
 
 --- instanceOf operator
 
@@ -252,13 +254,13 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
-  rule <k> '_`(_`)(('_._(objAddress(_,L),,X) => lookupF(Envs:Bag, X)),,_) <_/k>
-      <store_> L |-> obj(Envs) <_/store>
+  rule <k> '_`(_`)(('_._(obj(_,L),,X) => lookupF(Envs:Bag, X)),,_) <_/k>
+      <store_> L |-> objEnv(Envs) <_/store>
 
   --- except for super which should lookup method statically
   rule <k> '_`(_`)(('_._(super,,X) => lookupF(<envStack> EStack </envStack>, X)),,_) <_/k>
-      <crntObj> objAddress(C,L) </crntObj>
-      <store_> L |-> obj(<envStack_>  (C :: EnvC:Bag) EStack:List </envStack>) <_/store>
+      <crntObj> obj(C,L) </crntObj>
+      <store_> L |-> objEnv(<envStack_>  (C :: EnvC:Bag) EStack:List </envStack>) <_/store>
 
 
   rule <k> '_`(_`)((lookup(L) => V),,_) <_/k>
@@ -297,32 +299,34 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule S1:Stmt S2:Stmt => S1~>S2 
 
 ---<SKOOL modified> 
-  rule <k> X=V1; => . <_/k> <env_> X|->L <_/env> <store_> L|->(V2=>update(V2,V1)) <_/store>
+  context ([HOLE] => l-value([HOLE]))=_;
+  syntax Val ::= loc ( Nat ) 
+
+  rule <k> l-value(X) => loc(L) <_/k> <env_> X|->L <_/env> 
+  rule <k> l-value(lookup(L)) => loc(L) <_/k>
+
+  rule <k> loc(L)=V1; => . <_/k> <store_> L|->(V2=>cast(V2,V1)) <_/store>
        <classes> Cls </classes>
     if subtype(typeOf(V1), typeOf(V2),Cls)
 
-  rule <k> (X => _._(this,X)) =_; <_/k> <env> Env </env> if notBool(X in keys(Env))
+  rule <k> l-value(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
   
-  context _._([HOLE],_)=_;
+  context l-value(_._([HOLE],_))
 
  ---similar lookup as for variables
-  rule <k> '_=_;((_._(objAddress(C,L), X)  => lookupF(<envStack>  (C :: EnvC) EStack:List </envStack>, X)),,_) <_/k>
-      <store_> L |-> obj(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
+  rule <k> l-value(_._(obj(C,L), X)  => lookupF(<envStack>  (C :: EnvC) EStack:List </envStack>, X)) <_/k>
+      <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
  
-  syntax K ::= update ( K , K )
-  macro update(objAddress(C,_), objAddress(_,L)) = objAddress(C,L) 
-  macro update(V1,V2) = V2 [owise]
+  syntax K ::= cast ( K , K )
+  macro cast(obj(C,_), obj(_,L)) = obj(C,L) 
+  macro cast(V1,V2) = V2 [owise]
 
 ---</SKOOL modified>
 
- --- for array assignment, first evaluate the array and its index
-  context _[[HOLE]]=_;
-  context [HOLE][_]=_;
 ---<SKOOL typed modified>
-  rule <k> '_=_;(lookup(L),,V1) => . <_/k>
-       <store_> L |-> (V2 => update(V2,V1)) <_/store> 
-       <classes> Cls </classes>
-       if subtype(typeOf(V1), typeOf(V2), Cls)
+ --- for array assignment, first evaluate the array and its index
+  context l-value(_[[HOLE]])
+  context l-value([HOLE][_])
 ---</SKOOL type modified>
   rule V; => . 
   rule if true then S:Stmt else _ => S:Stmt
@@ -343,7 +347,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro initVal(bool) = false 
   macro initVal(void) = none 
   macro initVal(_`[`](T:Type)) = array(_`[`](T),0,0) 
-  macro initVal(C:Id) = objAddress(C,0)
+  macro initVal(C:Id) = obj(C,0)
 
   syntax List{Type} ::= typeOf ( List{Val} ) [strict]
 ---<SKOOL added>
@@ -359,8 +363,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro typeOf(V1:Val,V2:Val,Vl:List{Val}) = typeOf(V1),typeOf(V2,Vl) 
   macro typeOf(.List{Bottom}) = .List{Bottom} 
 ---<SKOOL added>
-  macro typeOf(objAddress(C,_)) = C
-  macro typeOf(obj(<envStack> C :: _ <_/envStack>)) = C
+  macro typeOf(obj(C,_)) = C
+  macro typeOf(objEnv(<envStack> C :: _ <_/envStack>)) = C
 ---</SKOOL added>
   syntax List{Id} ::= idList ( List{IdType} ) 
   macro idList(.List{Bottom}) = .List{Bottom} 

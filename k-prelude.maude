@@ -264,6 +264,7 @@ mod K-CONTEXTS is
   including K-SENTENCE .
   ops context_ : K -> [KSentence] [prec 126] .
   ops context_if_ : K Bool -> [KSentence] [prec 126] .
+  op wrap-with : K K -> K .
 endm
 
 
@@ -288,6 +289,7 @@ mod K-WRAPPERS-LABELS is
   op wset_ : Set -> KLabel [metadata "builtin wrapper"] .
   op wlist_ : List -> KLabel [metadata "builtin wrapper"] .
   op wmap_ : Map -> KLabel [metadata "builtin wrapper"] .
+  op 'wrap-with : -> KLabel .
 endm
 
 

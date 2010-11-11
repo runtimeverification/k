@@ -8,6 +8,7 @@ mod STRICTCXT2EQS is
   including META-MODULE-EXTRAS .
   including META-K-MODULE .
   including META-K-CONTEXTS .
+  including META-K-RULES .
   var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
   var AS : AttrSet . var MAS : MembAxSet . var Mb : MembAx .
   var Eqs : EquationSet . var Q : Qid .
@@ -20,18 +21,18 @@ mod STRICTCXT2EQS is
   eq strictCxt2eqs(M,MAS) = strictCxt2eqs(M, MAS, none) .
   op strictCxt2eqs : Module MembAxSet EquationSet ~> MASEqsPair . 
  ceq strictCxt2eqs(M, Mb MAS, Eqs)
-   = strictCxt2eqs(M, MAS, Eqs strictCxt2eq(M, getContents(KCS), getAttrs(KCS), getCondition(KCS)))
-  if KCS := splitKContext(Mb) .
+   = strictCxt2eqs(M, MAS, Eqs strictCxt2eq(M, pReplaceCxt(T,1), pReplaceCxt(T,2), getAttrs(KCS), getCondition(KCS)))
+  if KCS := splitKContext(Mb) /\ T := getContents(KCS) .
   eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
 
-  op strictCxt2eq : Module Term AttrSet TermList ~> EquationSet .
-  eq strictCxt2eq(M, T, none, Cond)
-   = strictCxt2eq(M, T, kstrict(nil,klabel), Cond) .
+  op strictCxt2eq : Module Term Term AttrSet TermList ~> EquationSet .
+  eq strictCxt2eq(M, T1, T2, none, Cond)
+   = strictCxt2eq(M, T1, T2, kstrict(nil,klabel), Cond) .
   
-  eq strictCxt2eq(M, T, kstrict(nil,Q), Cond) 
-   = strictCxt2eqHeat(kWrap(Q, T[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))), Cond[hole <- mkVariable('Kcxt,KProper)]) 
-      (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T)))
-        = kWrap(Q, T[hole <- mkVariable('Kcxt,KResult)])
+  eq strictCxt2eq(M, T1, T2, kstrict(nil,Q), Cond) 
+   = strictCxt2eqHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,KProper)], freezeTerm(M, T1))), Cond[hole <- mkVariable('Kcxt,KProper)]) 
+      (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T1)))
+        = kWrap(Q, T1[hole <- mkVariable('Kcxt,KResult)])
        [metadata("cooling")] .) .
 
 
