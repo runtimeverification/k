@@ -60,6 +60,15 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
   syntax CellLabel ::= envStack 
 
+  rule [terminate]: 
+	<T>
+		((_
+		<k> _:Val <_/k>)
+			=> .
+		)
+		--- <in> _:List </in>
+		<out> _:List </out>
+	</T>
 
 -------------------------------
 --- declarations processing ---
