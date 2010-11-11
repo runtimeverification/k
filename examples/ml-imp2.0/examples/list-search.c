@@ -12,30 +12,30 @@ int search(struct nodeList* x, int value)
                     < form > ~(x0 === 0) /\ ~(A === epsilon) </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
                     < heap > list(x0)(A) H </ heap >
-                    < form > returns ?found /\ (?found === #found(A,val0)) </ form > C </ config > */
+                    < form > returns ?f /\ (?f === found(A,val0)) </ form > C </ config > */
 {
   struct nodeList* iterx;
-  int found;
-  found = 0;
+  int f;
+  f = 0;
   iterx = x;
   x->val = x->val;
 /*@ invariant < config > 
               < env >
-              iterx |-> ?ix x |-> x0 found |-> ?found value |-> val0 
+              iterx |-> ?ix x |-> x0 f |-> ?f value |-> val0 
               </ env >
               < heap >
               lseg(x0,?ix)(?A)
               list(?ix)(?A')
               H
               </ heap >
-              < form > A === (?A @ ?A') /\ (?found === #found(?A,val0)) </ form >
+              < form > A === (?A @ ?A') /\ (?f === found(?A,val0)) </ form >
               C </ config > */
   while(iterx != 0)
   {
-    if (iterx->val == value) found = found + 1;
+    if (iterx->val == value) f = 1;
     iterx = iterx->next;
   }
-  return found;
+  return f;
 }
 
 int main()
@@ -62,7 +62,7 @@ int main()
   return 0;
 }
 
-/*@ var ?ix ?v ?n ?found : ?Int */
+/*@ var ?ix ?v ?n ?f : ?Int */
 /*@ var x0 val0 : FreeInt */
 /*@ var ?A ?A' : ?Seq */
 /*@ var A : FreeSeq */

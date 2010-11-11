@@ -50,7 +50,8 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   var ObjList : List{MathObj++} .
   var A A1 A2 : Seq++ .
   var NeA NeA1 NeA2 : NeSeq++ .
-  var I J : Int++ .
+  var I J N : Int++ .
+  var ?N1 ?N2 : ?Int .
 
   eq [Obj1, Obj2, ObjList] = [Obj1] @ [Obj2] @ [ObjList] .
   eq [.List{MathObj++}] = epsilon .
@@ -73,7 +74,6 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   eq contain([J] , I) = (I === J) .
   eq contain(epsilon , I) = FalseFormula .
   
-  
   ops avg sum : Seq++ -> Int++ .
   
   eq sum(NeA1 @ NeA2) = sum(NeA1) +Int sum(NeA2) .
@@ -83,10 +83,9 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   eq avg(NeA1) = (sum(NeA1)) /Int (len(NeA1)) .
   eq avg(epsilon) = 0 .
   
-  op #found : Seq++ Int++ -> Int++ .
-  
-  eq #found(NeA1 @ NeA2, I) = #found(NeA1,I) +Int #found(NeA2,I) .
- ceq #found([J] ,I) = 1 if I ==Bool J .
-  eq #found([J] ,I) = 0 [owise] .
+  op found : Seq++ Int++ -> Int++ .
+ ceq found(NeA1,I) = 1 if (contain(NeA1,I) ==Bool TrueFormula) .
+ ceq found(NeA1,I) = 0 if (contain(NeA1,I) ==Bool FalseFormula) .
+  eq found(epsilon,I) = 0 [owise] .
 endm
 
