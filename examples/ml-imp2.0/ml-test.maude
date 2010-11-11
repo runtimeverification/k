@@ -19,9 +19,9 @@ set print attribute on .
 
 search
   < config >
-   < form > TrueFormula </ form >
+   < form > ~(x0 === 0) /\ ~(A === epsilon) </ form >
    < subst > .Subst </ subst >
-   < env > val |-> val0 found |-> 0 iterx |-> x0 x |-> x0 </ env >
+   < env > value |-> val0 found |-> 0 iterx |-> x0 x |-> x0 </ env >
    < heap > list(x0)(A) </ heap >
    </ config >
  ===>

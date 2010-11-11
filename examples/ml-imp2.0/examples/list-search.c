@@ -17,20 +17,18 @@ int search(struct nodeList* x, int value)
   struct nodeList* iterx;
   int found;
   found = 0;
-  if (x->val == value) found = 1;
-  iterx = x->next;
+  iterx = x;
+  x->val = x->val;
 /*@ invariant < config > 
               < env >
               iterx |-> ?ix x |-> x0 found |-> ?found value |-> val0 
               </ env >
               < heap >
               lseg(x0,?ix)(?A)
-              ?ix |-> ?v : (nodeList . val)
-              ?ix +Int 1 |-> ?n : (nodeList . next)
-              list(?n)(?A')
+              list(?ix)(?A')
               H
               </ heap >
-              < form > A === (?A @ [?v] @ ?A') </ form >
+              < form > A === (?A @ ?A') /\ (?found === #found(?A,val0)) </ form >
               C </ config > */
   while(iterx != 0)
   {
