@@ -82,5 +82,11 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
   
   eq avg(NeA1) = (sum(NeA1)) /Int (len(NeA1)) .
   eq avg(epsilon) = 0 .
+  
+  op #found : Seq++ Int++ -> Int++ .
+  
+  eq #found(NeA1 @ NeA2, I) = #found(NeA1,I) +Int #found(NeA2,I) .
+ ceq #found([J] ,I) = 1 if I ==Bool J .
+  eq #found([J] ,I) = 0 [owise] .
 endm
 
