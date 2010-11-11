@@ -142,12 +142,11 @@ int main()
              < heap > (.).Map </ heap >
              < form > TrueFormula </ form > </ config > */
   x = create(5);
-  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
+  print(x);
   /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
                         < heap > list(?x)(!A) </ heap >
                         < form > TrueFormula </ form > </ config > */
   x = reverse(x);
-  printf("reverse(x): %d %d %d\n",x->val, x->next->val, x->next->next->val);
   /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
                         < heap > list(?x)(rev(!A)) </ heap >
                         < form > TrueFormula </ form > </ config > */
