@@ -16,6 +16,7 @@ endm
 
 set print attribute on .
 
+eof
 
 search
   < config >
