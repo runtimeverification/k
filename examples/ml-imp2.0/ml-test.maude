@@ -3,7 +3,7 @@ load ml-imp.maude
 load fol.maude
 
 mod TEST is inc IMP + FOL= .
-ops t v x iterx found val : -> Id .
+ops t v x iterx found value : -> Id .
 ops ?n ?root ?ix ?v ?n ?found : -> ?Int .
 ops x0 val0 : -> FreeInt .
 ops ?rho : -> ?MapItem .
@@ -25,16 +25,17 @@ search
    < heap > list(x0)(A) </ heap >
    </ config >
  ===>
-< config > < env >
-              iterx |-> ?ix x |-> x0 found |-> ?found val |-> val0 
-           </ env >
-           < heap >
-              lseg(x0,?ix)(?A)
-              ?ix |-> ?v : (nodeList . val)
-              ?ix +Int 1 |-> ?n : (nodeList . next)
-              list(?n)(?A')
-           </ heap >
-           < form > A === (?A @ [?v] @ ?A') </ form >
-           </ config >
+< config > 
+    < env >
+    iterx |-> ?ix x |-> x0 found |-> ?found value |-> val0 
+    </ env >
+    < heap >
+    lseg(x0,?ix)(?A)
+    ?ix |-> ?v : (nodeList . val)
+    ?ix +Int 1 |-> ?n : (nodeList . next)
+    list(?n)(?A')
+    </ heap >
+    < form > A === (?A @ [?v] @ ?A') </ form >
+</ config >
 =>* < config > < form > F:Formula </ form > CfgItems:Bag </ config > .
 ---=>* CfgItems:Bag .
