@@ -173,19 +173,18 @@ int main()
                         < heap > (.).Map </ heap >
                         < form > TrueFormula </ form > </ config > */
   x = create(3);
-  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
+  print(x);
   /*@ assert < config > 
              < env > x |-> ?x  y |-> ?y </ env > 
              < heap > list(?x)(!A1) </ heap > 
              < form > TrueFormula </ form > </ config > */
   y = create(3);
-  printf("y: %d %d %d\n",y->val, y->next->val, y->next->next->val);
   /*@ assert < config > 
              < env > x |-> ?x  y |-> ?y </ env > 
              < heap > list(?x)(!A1) list(?y)(!A2) </ heap > 
              < form > TrueFormula </ form > </ config > */
   x = append(x, y);
-  printf("append(x, y): %d %d %d %d %d %d\n",x->val, x->next->val, x->next->next->val, x->next->next->next->val, x->next->next->next->next->val, x->next->next->next->next->next->val);
+  print(x);
   /*@ assert < config > 
              < env > x |-> ?x  y |-> ?y </ env > 
              < heap > list(?x)(!A1 @ !A2) </ heap > 
