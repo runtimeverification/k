@@ -11,7 +11,7 @@ OCAML_LINK = ocamlopt $(OCAMLOPT_FLAGS) -I $(CIL) -ccopt -L$(CIL)
 all: cparser 
 
 $(CIL)/cil.cmxa:
-	cd $(CIL_BASE); ./configure
+	cd $(CIL_BASE) && autoconf && ./configure
 	make -C $(CIL_BASE)
 
 maudeVisitor.cmx maudeVisitor.cmi: $(CIL)/cil.cmxa maudeVisitor.ml

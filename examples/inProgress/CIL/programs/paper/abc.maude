@@ -3,10 +3,13 @@ mod C-PROGRAM is
 including C-SYNTAX .
 including MATCH-C-SYNTAX .
 including COMMON-C-CONFIGURATION .
-op tmpuuu1 : -> Id [ctor] .
-op tmpuuu0 : -> Id [ctor] .
-op tmp : -> Id [ctor] .
-op format : -> Id [ctor] .
+op tmpuuu1 : -> Id .
+op tmpuuu0 : -> Id .
+op tmp : -> Id .
+op c : -> Id .
+op b : -> Id .
+op a : -> Id .
+op format : -> Id .
 op printf : -> Id .
 
 
@@ -15,9 +18,10 @@ op program-simpleNonDet : -> Program .
 eq program-simpleNonDet = (
 ((Global(Declaration((extern )(int),  Direct-Function-Declarator(printf,  Parameter-Type-List(Parameter-Declaration((char),  Pointer(format) ) ,., ...)) )
 ))((Global((Declaration((int),  Direct-Function-Declarator(main,  Parameter-Type-List(Parameter-Declaration((void)))) )
-{ ((Local(Declaration((int),  tmp )))  ((Local(Declaration((int),  tmpuuu0 )))  (Local(Declaration((int),  tmpuuu1 )))))
+{ ((Local(Declaration((char),  Pointer(a) )))  ((Local(Declaration((char),  Pointer(b) )))  ((Local(Declaration((char),  Pointer(c) )))  ((Local(Declaration((int),  tmp )))  ((Local(Declaration((int),  tmpuuu0 )))  (Local(Declaration((int),  tmpuuu1 ))))))))
 
-Block(((((return (((((Apply((((printf))), ((("a")))))) + (((Apply((((printf))), ((("b"))))) + (Apply((((printf))), ((("c"))))))))));))))
+Block((((((((a) := (("a"));)  (((b) := (("b"));)  (((c) := (("c"));)))))))  
+(((return (((Apply(printf, a) + ((Apply(printf, b) + Apply(printf, c))))));))))
 )
 })
 ))))) .

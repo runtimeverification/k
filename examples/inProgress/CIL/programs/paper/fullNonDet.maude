@@ -1,32 +1,33 @@
-load /home/grosu/celliso2/k-framework/branches/2.0.1/examples/C/dist/c-total
+load ../../dist/c-total
 mod C-PROGRAM is
 including C-SYNTAX .
 including MATCH-C-SYNTAX .
 including COMMON-C-CONFIGURATION .
-op tmpuuu4 : -> Id [ctor] .
-op tmpuuu3 : -> Id [ctor] .
-op tmpuuu2 : -> Id [ctor] .
-op tmpuuu1 : -> Id [ctor] .
-op tmpuuu0 : -> Id [ctor] .
-op tmp : -> Id [ctor] .
-op result : -> Id [ctor] .
-op f : -> Id [ctor] .
-op e : -> Id [ctor] .
-op d : -> Id [ctor] .
-op x : -> Id [ctor] .
-op c : -> Id [ctor] .
-op b : -> Id [ctor] .
-op a : -> Id [ctor] .
-op putchar : -> Id [ctor] .
+op tmpuuu4 : -> Id .
+op tmpuuu3 : -> Id .
+op tmpuuu2 : -> Id .
+op tmpuuu1 : -> Id .
+op tmpuuu0 : -> Id .
+op tmp : -> Id .
+op result : -> Id .
+op f : -> Id .
+op e : -> Id .
+op d : -> Id .
+op c : -> Id .
+op b : -> Id .
+op y : -> Id .
+op x : -> Id .
+op a : -> Id .
+op putchar : -> Id .
 
-op funcptr : -> Id [ctor] .
+op funcptr : -> Id .
 
 ------------END-OPERATORS------------
 op program-fullNonDet : -> Program .
 eq program-fullNonDet = (
-((Global((Typedef ((int),  Direct-Function-Declarator((Pointer(typedefName(funcptr))),  Parameter-Type-List(Parameter-Declaration((int)  ) ,.,  Parameter-Declaration((int)  ) ,.,  Parameter-Declaration((int)  ))))) 
+((Global((Typedef ((int),  Direct-Function-Declarator((Pointer(typedefName(funcptr))),  Parameter-Type-List(Parameter-Declaration((int)  ))))) 
 ))((Global(Declaration((extern )(int),  Direct-Function-Declarator((putchar),  Parameter-Type-List()) )
-))((Global((Declaration((int),  Direct-Function-Declarator(a,  Parameter-Type-List(Parameter-Declaration((void)))) )
+))((Global((Declaration((int),  Direct-Function-Declarator(a,  Parameter-Type-List(Parameter-Declaration((int),  x ) ,.,  Parameter-Declaration((int),  y ))) )
 { 
 
 Block((((((Apply((((putchar))), (((97))));))))  (((return ((((0))));))))
@@ -59,27 +60,13 @@ Block((((((Apply((((putchar))), (((101))));))))  (((return ((((0))));))))
 ))((Global((Declaration(funcptr,  Direct-Function-Declarator(f,  Parameter-Type-List(Parameter-Declaration((void)))) )
 { 
 
-Block((((((Apply((((putchar))), (((102))));))))  (((return (((Cast((Pointer((int),  Direct-Function-Declarator( Parameter-Type-List(Parameter-Declaration((int)  ) ,.,  Parameter-Declaration((int)  ) ,.,  Parameter-Declaration((int)  ))))),(((& (e))))))));))))
+Block((((((Apply((((putchar))), (((102))));))))  (((return (((& (e))));))))
 )
 })
 ))((Global((Declaration((int),  Direct-Function-Declarator(main,  Parameter-Type-List(Parameter-Declaration((void)))) )
-{ ((Local(Declaration((int),  result )))  ((Local(Declaration(funcptr,  tmp )))  ((Local(Declaration((int),  tmpuuu0 )))  ((Local(Declaration((int),  tmpuuu1 )))  ((Local(Declaration((int),  tmpuuu2 )))  ((Local(Declaration((int),  tmpuuu3 )))  (Local(Declaration((int),  tmpuuu4 )))))))))
+{ (Local(Declaration((int),  result )))
 
-Block((((((
-
-  
-
-(  
-
-(  
-
-(  
-
-(  
-
-(((tmpuuu4) := Apply(((((Deref((Apply((((f))), (.List{Expression})))))))), ((Apply((((a))), ((Apply((((b))), (.List{Expression}))) .,.  (Apply((((c))), ((Apply((((d))), (.List{Expression}))))))))) ));)  
-
-((result) := (((tmpuuu4)));))))))))))  (((return ((((0))));))))
+Block((((((((((((result := Apply(((((Deref(Apply((((f))), (.List{Expression}))))))), Apply((((a))), (Apply((((b))), (.List{Expression})) .,.  Apply((((c))), Apply((((d))), (.List{Expression}))))));))))))))))  (((return ((((0))));))))
 )
 })
 )))))))))))) .

@@ -31,6 +31,30 @@ mod TEST-ARITH-SYNTAX is
 	eq B = N >=Nat M .
 	eq B = N dividesNat M .
 	
+	ops I J : -> NzInt .
+	--- 
+	eq N = -Int N .
+	eq N = N +Int M .
+	eq N = N -Int M .
+	eq N = N *Int M .
+	eq N = N /Int M .
+	eq N = N %Int M .
+	eq N = N ^Int M .
+	eq N = absInt(N) .
+	eq N = N xorInt M .
+	eq N = ~Int(N) .
+	eq N = N &Int M .
+	eq N = N |Int M .
+	eq N = N >>Int M .
+	eq N = N <<Int M .
+	eq B = N <Int M .
+	eq B = N <=Int M .
+	eq B = N >Int M .
+	eq B = N >=Int M .
+	eq B = N dividesInt M .
+	eq B = N ==Int M .
+	eq B = N !=Int M .
+	
 endm
 
 mod COMMON-C-SYNTAX is

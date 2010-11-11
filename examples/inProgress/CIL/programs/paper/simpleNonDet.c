@@ -1,4 +1,7 @@
 #include <stdio.h>
 int main(void){
-	return printf("a") + (printf("b") + printf("c"));
+	const char* a = "a";
+	const char* b = "b";
+	const char* c = "c";
+	return printf(a) + (printf(b) + printf(c));
 }
