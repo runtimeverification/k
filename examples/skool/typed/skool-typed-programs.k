@@ -198,5 +198,165 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
 
 --- 2
 
+
+macro p07 =
+class point {
+	var x : int;
+	var y : int;
+	method point(initx : int, inity : int) : int {
+		x = initx;
+		y = inity;
+		return 0;
+	}
+	method move(dx : int, dy : int) : int {
+		x = x+dx;
+		y = y+dy;
+		return 0;
+	}
+	method writeLocation() : int {
+		write(x);
+		write(y);
+		return 0;
+	}
+}
+class colorpoint extends point {
+	var color : int;
+	method colorpoint(initx : int, inity : int) : int {
+		x = initx;
+		y = inity;
+		return 0;
+	}
+	method setColor(c : int) : int {
+		color = c;
+		return 0;
+	}
+	method writeColor() : int {
+		write(color);
+		return 0;
+	}
+}
+class main {
+	method main() : int {
+		var p : point;
+		var cp : colorpoint;
+		p = new point(3,4);
+		cp = new colorpoint(10,20);
+		p.move(3,4);
+		p.writeLocation();
+		cp.setColor(87);
+		cp.move(10, 20);
+		cp.writeLocation();
+		cp.writeColor();
+		return 0;
+	}
+}
+
+--- 6 8 20 40 87
+
+macro p08 =
+class point {
+	var x : int;
+	var y : int;
+	method point(initx : int, inity : int) {
+		x = initx;
+		y = inity;
+		--- return 0;
+	}
+	method move(dx : int, dy : int) {
+		x = x + dx;
+		y = y + dy;
+		--- return 0;
+	}
+	method writeLocation() {
+		write(x);
+		write(y);
+		--- return 0;
+	}
+}
+class colorpoint extends point {
+	var color : int;
+	method colorpoint(initx : int, inity : int, initcolor : int) {
+		x = initx;
+		y = inity;
+		color = initcolor;
+		--- return 0;
+	}
+	method setColor(c : int) {
+		color = c;
+		--- return 0;
+	}
+	method writeColor() {
+		write(color);
+		--- return 0;
+	}
+}
+class main {
+	method main() {
+		var p : point;
+		var cp : colorpoint;
+		p = new point(3,4);
+		cp = new colorpoint(10,20,87);
+		p.move(3,4);
+		cp.move(10,20);
+		p.writeLocation();
+		cp.writeLocation();
+		cp.writeColor();
+		--- return 0;
+	}
+}
+
+macro p09 =
+class point {
+	var x : int;
+	var y : int;
+	method point(initx : int, inity : int) {
+		x = initx;
+		y = inity;
+		--- return 0;
+	}
+	method move(dx : int, dy : int) {
+		x = x + dx;
+		y = y + dy;
+		--- return 0;
+	}
+	method writeLocation() {
+		write(x);
+		write(y);
+		--- return 0;
+	}
+}
+class colorpoint extends point {
+	var color : int;
+	method colorpoint(initx : int, inity : int, initcolor : int) {
+		this.point(initx, inity);
+		color = initcolor;
+		--- return 0;
+	}
+	method setColor(c : int) {
+		color = c;
+		--- return 0;
+	}
+	method writeColor() {
+		write(color);
+		--- return 0;
+	}
+}
+class main {
+	method main() {
+		var p : point;
+		var cp : colorpoint;
+		p = new point(3,4);
+		cp = new colorpoint(10,20,87);
+		p.move(3,4);
+		cp.move(10,20);
+		p.writeLocation();
+		cp.writeLocation();
+		cp.writeColor();
+		--- return 0;
+	}
+}
+
+--- 6 8 20 40 87
+
 endkm
 
