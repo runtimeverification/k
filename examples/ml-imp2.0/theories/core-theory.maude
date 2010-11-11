@@ -186,5 +186,9 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   
  ceq factorial(I) = I *Int factorial(I -Int 1) if (I >Int 1) .
   eq factorial(I) = 1 [owise] .
+  
+  op fibon : Int++ -> Int++ .
+ ceq fibon(I) = 1 if (I <=Int 1) .
+  eq fibon(I) = fibon(I -Int 1) +Int fibon(I -Int 2) .
 endm
 
