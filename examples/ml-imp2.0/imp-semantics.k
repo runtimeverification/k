@@ -311,6 +311,7 @@ Expressions
   rule E1 != E2 => !(E1 == E2) [structural]
   rule TV && E => (TV ? E : tv(int, 0)) [structural]
   rule TV || E => (TV ? tv(int, 1) : E) [structural]
+  
 
 *** assignment expressions
   rule
@@ -332,6 +333,18 @@ Expressions
   rule E1 <<= E2 => E1 = (E1 << E2) [structural]
   rule E1 >>= E2 => E1 = (E1 >> E2) [structural]
 
+  *** arm wresling the form
+  rule
+    <config>
+      <form> Phi /\ @(-Int I +Int J >=Int 0) </form>
+      CfgItems
+    </config>
+  =>
+    <config>
+      <form> Phi /\ (I === J) </form>
+      CfgItems
+    </config>
+  
 *** choice
   rule
     <config>
