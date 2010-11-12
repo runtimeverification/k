@@ -42,7 +42,6 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
 
   op rev : Seq++ -> NeSeq++ .
   op len : Seq++ -> Int++ .
-  op maximum : Seq++ -> Int++ .
   op contain : Seq++ Int++ -> Atom .
 
 
@@ -87,5 +86,6 @@ mod MATHEMATICAL-SEQUENCE is inc MATHEMATICAL-INT .
  ceq found(NeA1,I) = 1 if (contain(NeA1,I) ==Bool TrueFormula) .
  ceq found(NeA1,I) = 0 if (contain(NeA1,I) ==Bool FalseFormula) .
   eq found(epsilon,I) = 0 [owise] .
+
 endm
 
