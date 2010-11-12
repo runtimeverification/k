@@ -245,7 +245,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- instanceOf operator
 
-  rule [instanceOf]: <k> _instanceOf_(V, C) => subtype(typeOf(V),C,Cls) <_/k>
+  rule [instanceOf]: <k> _instanceOf_(obj(_,L), C1) => subtype(C2,C1,Cls) <_/k>
+       <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
        <classes> Cls:Bag </classes>
 
   rule [as]: <k> _as_(obj(_,L),C1) => obj(C1,L) <_/k>
