@@ -208,9 +208,9 @@ mod K-LIST-EXTRAS is
   eq lengthList(.).List = 0 .
   eq lengthList(LItem List) = sNat lengthList(List) .
 
-  op getFromList`{K`}(_,_) : List{K} NzNat -> K .
-  eq getFromList{K}((K,,Ks),1) = K .
-  eq getFromList{K}((K,,Ks),sNat N) = getFromList{K}(Ks,N) .
+  --- op getFromList`{K`}(_,_) : List{K} NzNat -> K .
+  --- eq getFromList{K}((K,,Ks),1) = K .
+  --- eq getFromList{K}((K,,Ks),sNat N) = getFromList{K}(Ks,N) .
 
   --- this does not belong here
   op inKList : K K -> Bool .
@@ -223,12 +223,12 @@ mod K-DESTRUCTORS is
   including K-LIST-EXTRAS .
   op getKLabel_ : K -> KLabel [metadata "latex(renameTo getKLabel\\mybracket{_})"] .
   op getList`{K`}_ : K -> List{K} [metadata "latex(renameTo _)"]  .
-  op getKArg : K NzNat -> K  .
+  --- op getKArg : K NzNat -> K  .
   op eraseKLabel : KLabel List{K} -> List{K} .
   var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .  var N : NzNat .
   eq getKLabel(L(Ks)) = L .
   eq getList{K}(L(Ks)) = Ks .
-  eq getKArg(L(Ks),N) = getFromList{K}(Ks,N) .
+  --- eq getKArg(L(Ks),N) = getFromList{K}(Ks,N) .
   eq eraseKLabel(L, L(Ks)) = eraseKLabel(L,Ks) .
   eq eraseKLabel(L,L'(Ks)) = L'(eraseKLabel(L,Ks)) [owise] .
   eq eraseKLabel(L, (NeKs1,,NeKs2)) = eraseKLabel(L, NeKs1),,eraseKLabel(L, NeKs2) .
