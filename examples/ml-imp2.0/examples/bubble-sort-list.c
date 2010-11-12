@@ -31,7 +31,7 @@ struct nodeList* bubble(struct nodeList* x)
 /*@ post < config >
          < env > ?rho </ env >
          < heap > list(x0)(?L) H </ heap >
-         < form > returns x0 /\ (seq2mset(L) === seq2mset(?L)) </ form > C 
+         < form > returns x0 /\ (seq2mset(L) === seq2mset(?L)) /\ isSorted(?L) </ form > C 
          </ config > */
 {
   int change;
