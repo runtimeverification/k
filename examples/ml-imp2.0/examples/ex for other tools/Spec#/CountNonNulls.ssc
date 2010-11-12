@@ -1,0 +1,38 @@
+// CountNonNulls.ssc
+// Rosemary Monahan
+// 1st March 2007
+// Calculates the number of nulls in an array 
+
+using Microsoft.Contracts;
+public class ArrayRefCount {
+  [Rep]public string []! a; 
+  [SpecPublic] int count;
+  invariant 0 <= count && count <= a.Length;
+  
+  public ArrayRefCount(string[]! input) 
+  requires 0 < input.Length;
+  {
+    this.count  = 0;
+    string[]! b = new string[input.Length];
+    input.CopyTo(b, 0);
+    this.a = b;
+  }
+  
+  public void CountNonNull()
+   ensures count == count{int i in (0: a.Length); (a[i] != null)};
+  {
+     expose(this){
+      int ct = 0;
+      for (int i = 0; i < a.Length; i++)
+      invariant i <= a.Length; //infers 0<=i
+      invariant 0 <= ct && ct <= i; //needed to help verify next invariant
+      invariant ct == count{int j in (0: i); (a[j]!=null)};
+      {
+        if (a[i]!=null) ct++;
+      }
+      count = ct;
+    }
+  }
+  
+}
+

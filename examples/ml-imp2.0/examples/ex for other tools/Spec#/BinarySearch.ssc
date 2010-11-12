@@ -1,0 +1,128 @@
+public class C {
+  // These programs were inspired by an initiated by Josh Bloch and John Rushby, June 2006.
+
+  // This version is written without postconditions, which also means it requires but a simple
+  // loop invariant.
+  public static int BinarySearch0(int[]! a, int key)
+  {
+    // low..high is an inclusive range in which to search
+    int low = 0;
+    int high = a.Length - 1;
+
+    while (low <= high)
+      invariant high+1 <= a.Length;
+    {
+      int mid = (low + high) / 2;
+      int midVal = a[mid];
+
+      if (midVal < key) {
+        low = mid + 1;
+      } else if (key < midVal) {
+        high = mid - 1;
+      } else {
+        return mid; // key found
+      }
+    }
+    return -(low + 1);  // key not found.
+  }
+
+  // This is the same program as above, but with a specification.
+  public static int BinarySearch1(int[]! a, int key)
+    requires forall{int i in (0: a.Length), int j in (i: a.Length); a[i] <= a[j]};
+    ensures 0 <= result ==> a[result] == key;
+    ensures result < 0 ==> forall{int i in (0: a.Length); a[i] != key};
+  {
+    int low = 0;
+    int high = a.Length - 1;
+
+    while (low <= high)
+      invariant high+1 <= a.Length;
+      invariant forall{int i in (0: low); a[i] != key};
+      invariant forall{int i in (high+1: a.Length); a[i] != key};
+    {
+      int mid = (low + high) / 2;
+      int midVal = a[mid];
+
+      if (midVal < key) {
+        low = mid + 1;
+      } else if (key < midVal) {
+        high = mid - 1;
+      } else {
+        return mid; // key found
+      }
+    }
+    return -(low + 1);  // key not found.
+  }
+
+  // The only difference between this version and the previous one is the initializing
+  // assignment of "mid" and the way the expression in the return statement is written.
+  // Although Boogie is not asked to confirm it here, these changes prevent arithmetic
+  // overflows.
+  public static int BinarySearch2(int[]! a, int key)
+    requires forall{int i in (0: a.Length), int j in (i: a.Length); a[i] <= a[j]};
+    ensures 0 <= result ==> a[result] == key;
+    ensures result < 0 ==> forall{int i in (0: a.Length); a[i] != key};
+  {
+    int low = 0;
+    int high = a.Length - 1;
+
+    while (low <= high)
+      invariant high+1 <= a.Length;
+      invariant forall{int i in (0: low); a[i] != key};
+      invariant forall{int i in (high+1: a.Length); a[i] != key};
+    {
+      int mid = low + (high - low) / 2;
+      int midVal = a[mid];
+
+      if (midVal < key) {
+        low = mid + 1;
+      } else if (key < midVal) {
+        high = mid - 1;
+      } else {
+        return mid; // key found
+      }
+    }
+    return -low - 1;  // key not found.
+  }
+
+  // This version adds explicit range checks.  To make the proof go through, "low <= high+1" has
+  // to be added as an explicit loop invariant (it is a loop invariant of the versions above, too,
+  // and is not inferred there either, but there it does not matter because it is not needed).
+  public static int BinarySearch3(int[]! a, int key)
+    requires forall{int i in (0: a.Length), int j in (i: a.Length); a[i] <= a[j]};
+    ensures 0 <= result ==> a[result] == key;
+    ensures result < 0 ==> forall{int i in (0: a.Length); a[i] != key};
+  {
+    int low = 0;
+    assert int.MinValue <= a.Length-1;  // Check arithmetic ranges
+    int high = a.Length - 1;
+
+    while (low <= high)
+      invariant int.MinValue <= high+1;  // Check arithmetic ranges
+      invariant high+1 <= int.MaxValue;  // Check arithmetic ranges
+      invariant low <= high+1;
+      invariant high+1 <= a.Length;
+      invariant forall{int i in (0: low); a[i] != key};
+      invariant forall{int i in (high+1: a.Length); a[i] != key};
+    {
+      assert int.MinValue <= high-low && high-low <= int.MaxValue;  // Check arithmetic ranges
+      assert int.MinValue <= (high-low)/2 && (high-low)/2 <= int.MaxValue;  // Check arithmetic ranges
+      assert int.MinValue <= low+(high-low)/2 && low+(high-low)/2 <= int.MaxValue;  // Check arithmetic ranges
+      int mid = low + (high - low) / 2;
+      int midVal = a[mid];
+
+      if (midVal < key) {
+        assert int.MinValue <= mid+1 && mid+1 <= int.MaxValue;  // Check arithmetic ranges
+        low = mid + 1;
+      } else if (key < midVal) {
+        assert int.MinValue <= mid-1 && mid-1 <= int.MaxValue;  // Check arithmetic ranges
+        high = mid - 1;
+      } else {
+        return mid; // key found
+      }
+    }
+
+    assert int.MinValue <= -low - 1;  // Check arithmetic ranges
+    return -low - 1;  // key not found.
+  }
+}

@@ -1,0 +1,65 @@
+// A version of the following program originated with Hao Chang.
+
+#define Expensive
+using System;
+using Microsoft.Contracts;
+
+public class Fibonacci
+{
+  public static void Main()
+  {
+    for(int i = 0; i < 10; i++)
+    {
+      Console.WriteLine("Fibonacci.{0} = {1}",i,fibonacci(i));
+    }
+    
+    Console.Read();
+  }
+
+  static int fibonacci(int fib)
+    requires fib >= 0;
+    ensures result == recursiveFib(fib);
+  {
+    int tem = 0;
+    int n = 0;
+    int x = 0;
+    int y = 1;
+    
+    while(n != fib)
+      invariant 0 <= n && n <= fib;
+      invariant x == recursiveFib(n);
+      invariant n == int.MaxValue || y == recursiveFib(n + 1);
+    {
+      tem = x;
+      x = y;
+      y = tem + y;
+      n = n + 1;
+    }
+    
+#if Expensive
+    assert x == recursiveFib(fib);
+    assert n == int.MaxValue || y == recursiveFib(fib + 1);
+#endif
+
+    return x;
+  }
+  
+  [Pure]
+  static int recursiveFib(int n)
+    requires n >= 0;
+    ensures result == (n == 0 ? 0 : n == 1 ? 1 : recursiveFib(n - 1) + recursiveFib(n - 2));
+  {
+    switch(n)
+    {
+      case 0:
+        return 0;
+        break;
+      case 1:
+        return 1;
+        break;
+      default:
+        return recursiveFib(n - 1) + recursiveFib(n - 2);
+        break;
+    }
+  }
+}

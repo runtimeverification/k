@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<DEFECTS><DEFECT _seq="1"><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\subtype\</FILEPATH><FILENAME>test.c</FILENAME><LINE>45</LINE><COLUMN>3</COLUMN></SFA><DEFECTCODE>30500</DEFECTCODE><DESCRIPTION>postcondition might not hold: Type Safety Postcondition
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+Preconditions on Q1_bad:
+PREFAST_NEWLINE
+Type Safety Precondition
+PREFAST_NEWLINE
+requires x != 0
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+</DESCRIPTION><FUNCTION>Q1_bad</FUNCTION><DECORATED>Q1_bad</DECORATED><FUNCLINE>45</FUNCLINE><PATH><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\subtype\</FILEPATH><FILENAME>test.c</FILENAME><LINE>45</LINE><COLUMN>3</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\subtype\</FILEPATH><FILENAME>test.c</FILENAME><LINE>46</LINE><COLUMN>1</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\subtype\</FILEPATH><FILENAME>test.c</FILENAME><LINE>45</LINE><COLUMN>3</COLUMN></SFA></PATH></DEFECT></DEFECTS>

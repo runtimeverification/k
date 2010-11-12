@@ -1,0 +1,109 @@
+// Stack.ssc
+// Rosemary Monahan
+// Originated with Elsman & Leino
+// 8th February 2007
+// Array implementation of Stack - non circular 
+
+
+/*  verifies at level 2 using Z3
+
+    verifies at level 1
+    Error at level 2: Verifying Program.Main ...
+    Error: Method Program.Main(), unsatisfied frame condition
+     
+    Simplify needs a higher /proverMatchDepth.  The default is 3. The same problem occurs with /proverMatchDepth:5 and 
+	  /proverMatchDepth:7 hadn’t terminated within the first 21 hours.
+    
+ */
+ 
+using System;
+using Microsoft.Contracts;
+
+class IntStack {
+  [Rep] int[]! elements = new int[10];
+  int top;
+  invariant 0 <= top && top <= elements.Length;
+
+  public int Top {
+    get { return top; }
+  }
+
+  public int Capacity {
+    get { return elements.Length; }
+  }
+
+  [NotDelayed] public IntStack()
+    ensures Top == 0;
+    ensures Capacity == 10;
+  {
+    top = 0;
+  }
+
+  public void Push(int e)
+    requires Top < Capacity;
+    modifies this.*;
+    ensures Top == old(Top)+1;
+    ensures Capacity == old(Capacity);
+  {
+    expose (this) {
+      elements[top++] = e;
+    }
+  }
+
+
+//unsat pre: requires 0 < Top;
+
+  public int Pop()
+    requires 0 < Top;
+    modifies this.*;
+    ensures Top == old(Top)-1;
+    ensures Capacity == old(Capacity);
+  { assume 0<top;
+    expose (this) {
+      return elements[--top];
+    }
+  }
+
+[Pure] public bool IsEmpty()
+    ensures result == (Top ==0);
+  {
+      return (top ==0);
+  }
+
+public bool IsFull()
+    ensures result == (Top == Capacity);
+  {
+      return (top ==Capacity);  
+  }
+}
+
+public class Program
+{
+  static void Main()
+    modifies Console.Out.*, Console.In.*;
+  {
+    int a;
+    IntStack s = new IntStack();
+    s.Push(100);
+    s.Push(200);
+    a = s.Pop();
+    a = s.Pop();
+    Console.WriteLine("Popped element is {0}", a);
+    Console.ReadLine();
+  }
+
+/*  static void BadMain()
+    modifies Console.Out.*, Console.In.*;
+  {
+    int a;
+    IntStack s = new IntStack();
+    s.Push(100);
+    s.Push(200);
+    a = s.Pop();
+    a = s.Pop();
+    a = s.Pop();  // error
+    Console.WriteLine("Popped element is {0}", a);
+    Console.ReadLine();
+  }
+  */
+}

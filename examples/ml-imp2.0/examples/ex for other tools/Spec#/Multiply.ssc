@@ -1,0 +1,55 @@
+/* Calculate x multiplied by y using addition
+   Rosemary Monahan
+   March 7th 2007
+*/
+
+ /*  Illustrates use of assume 
+     as distributivity axioms for * and + are required.
+     Adding assume (i*x) + x == (i+1) * x; below allows the program to verify
+  */
+
+using System;
+using Microsoft.Contracts;
+
+public class C {
+  public static void Main() {
+    int s = multiply(4,5);
+    System.Console.WriteLine("The product is {0}", s);
+  }
+
+  
+  static int multiply(int x, int y) 
+  requires 0 <= y;
+  requires 0 <= x;
+  ensures result == y * x;
+  {
+	  int q = 0;
+	  int i =0;
+	  while(i <y )
+    invariant 0<= i;
+    invariant i<= y;
+    invariant q == (i * x);
+	  {
+	    assert  q == (i * x);
+	    assert  q + x == (i * x) + x;
+	 	  q = q + x;
+	 	  
+	 	  assert  q == (i * x) + x;
+	 	  //assumption needed for distribution of operators.
+	 	  assume (i*x) + x == (i+1) * x;
+	 	  
+		  assert  q == (i+1) * x;
+	 	  i= i+1; 
+	 	  assert  q == i * x;
+	  }
+    assert  q == i * x && i == y;
+	  return q;
+  }
+
+  
+  
+  
+}
+
+
+

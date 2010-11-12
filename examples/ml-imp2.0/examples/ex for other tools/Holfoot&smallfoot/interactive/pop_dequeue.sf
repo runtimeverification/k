@@ -1,0 +1,8 @@
+pop_dequeue(r) [r!=_tf * r|->_tf * lseg(_tf,r)] {
+  local t, u;
+  t = r->tl;
+  u = t->tl;
+  r->tl = u;
+  dispose t;
+} [r|->_b * lseg(_b,r)]
+

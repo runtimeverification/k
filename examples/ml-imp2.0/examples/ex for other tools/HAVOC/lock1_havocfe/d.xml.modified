@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<DEFECTS><DEFECT _seq="1"><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>44</LINE><COLUMN>16</COLUMN></SFA><DEFECTCODE>30500</DEFECTCODE><DESCRIPTION>precondition on acquire_lock might not hold: requires __resource("LOCK", m) == 0
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+Preconditions on locks2_bad:
+PREFAST_NEWLINE
+Type Safety Precondition
+PREFAST_NEWLINE
+requires __resource("LOCK", pmutex) == 0
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+Postconditions on callee acquire_lock at line 43:
+PREFAST_NEWLINE
+Type Safety Postcondition
+PREFAST_NEWLINE
+ensures __resource("LOCK", m) == 1
+PREFAST_NEWLINE
+net change in resource LOCK only for: m
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+</DESCRIPTION><FUNCTION>locks2_bad</FUNCTION><DECORATED>locks2_bad</DECORATED><FUNCLINE>41</FUNCLINE><PATH><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>41</LINE><COLUMN>5</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>43</LINE><COLUMN>16</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>44</LINE><COLUMN>16</COLUMN></SFA></PATH></DEFECT><DEFECT _seq="2"><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>52</LINE><COLUMN>16</COLUMN></SFA><DEFECTCODE>30500</DEFECTCODE><DESCRIPTION>precondition on release_lock might not hold: requires __resource("LOCK", m) == 1
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+Preconditions on locks3_bad:
+PREFAST_NEWLINE
+Type Safety Precondition
+PREFAST_NEWLINE
+requires __resource("LOCK", pmutex) == 0
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+</DESCRIPTION><FUNCTION>locks3_bad</FUNCTION><DECORATED>locks3_bad</DECORATED><FUNCLINE>50</FUNCLINE><PATH><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>50</LINE><COLUMN>5</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>52</LINE><COLUMN>16</COLUMN></SFA></PATH></DEFECT><DEFECT _seq="3"><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>56</LINE><COLUMN>5</COLUMN></SFA><DEFECTCODE>30500</DEFECTCODE><DESCRIPTION>postcondition might not hold: no net change in resource LOCK
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+Preconditions on locks4_bad:
+PREFAST_NEWLINE
+Type Safety Precondition
+PREFAST_NEWLINE
+requires __resource("LOCK", pmutex) == 0
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+Postconditions on callee acquire_lock at line 58:
+PREFAST_NEWLINE
+Type Safety Postcondition
+PREFAST_NEWLINE
+ensures __resource("LOCK", m) == 1
+PREFAST_NEWLINE
+net change in resource LOCK only for: m
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+</DESCRIPTION><FUNCTION>locks4_bad</FUNCTION><DECORATED>locks4_bad</DECORATED><FUNCLINE>56</FUNCLINE><PATH><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>56</LINE><COLUMN>5</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>58</LINE><COLUMN>16</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>59</LINE><COLUMN>8</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>56</LINE><COLUMN>5</COLUMN></SFA></PATH></DEFECT><DEFECT _seq="4"><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>85</LINE><COLUMN>10</COLUMN></SFA><DEFECTCODE>30500</DEFECTCODE><DESCRIPTION>precondition on __instrument_holds_lock might not hold: requires __resource("LOCK", pmutex) == 1
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+Preconditions on locks6_bad:
+PREFAST_NEWLINE
+Type Safety Precondition
+PREFAST_NEWLINE
+requires __resource("LOCK", pmutex) == 0
+PREFAST_NEWLINE
+
+PREFAST_NEWLINE
+</DESCRIPTION><FUNCTION>locks6_bad</FUNCTION><DECORATED>locks6_bad</DECORATED><FUNCLINE>80</FUNCLINE><PATH><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>80</LINE><COLUMN>5</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>82</LINE><COLUMN>8</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>83</LINE><COLUMN>8</COLUMN></SFA><SFA><FILEPATH>c:\temp\junk\havoc_v_0.1\examples\prefast\lock1_havocfe\</FILEPATH><FILENAME>test_locks.c</FILENAME><LINE>85</LINE><COLUMN>10</COLUMN></SFA></PATH></DEFECT></DEFECTS>

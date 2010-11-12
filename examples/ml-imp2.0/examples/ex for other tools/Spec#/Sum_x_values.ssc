@@ -1,0 +1,49 @@
+/* Sum_x_vales.ssc
+   Sum the first x numbers - iterative solution
+   Rosemary Monahan
+   March 7th 2007
+*/
+
+//illustrates possible asserts and variant functions
+
+using System;
+using Microsoft.Contracts;
+
+public class C {
+  public static void Main() {
+    int a = 5;
+    int s = Sum_x(a);
+    System.Console.WriteLine("The sum is {0}", s);
+  }
+
+static int Sum_x(int x)
+requires x >= 0;
+ensures result == sum{int j in (0..x); j};
+{	
+	  int s = 0, i = 0;
+	  assert x >= 0 && s == i && i== 0;
+	  while (i < x) 
+	  invariant 0 <= i;
+	  invariant i <= x;
+	  invariant s == sum{int j in (0..i); j};
+	  /* variant x-i; We dont have a keyword for variant functions 
+	  can use asserts instead */
+	  
+	  {	  
+	    assert x-i>0; //variant
+	    assert s == sum{int j in (0..i); j};
+	    assert s + i + 1== sum{int j in (0..i+1); j};
+		  i = i + 1;
+		  assert s + i == sum{int j in (0..i); j};
+		  s = s + i;
+		  assert s == sum{int j in (0..i); j};
+	  }
+	  assert s == sum{int j in (0..x); j};
+	  assert x-i==0; //variant
+  	return s;
+  }
+}
+
+
+
+

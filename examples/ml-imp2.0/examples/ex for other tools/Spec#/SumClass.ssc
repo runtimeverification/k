@@ -1,0 +1,81 @@
+/* SumClass.ssc
+ * Sum the values in an array (using a class)
+ * Sum the even values in an array
+   Sum the elements of an array leaving out the first element.
+    Illustrates an invariant break unless we put in a check 
+ * Rosemary Monahan
+ * 5th March 2007
+ */
+  
+class ArraySum
+{
+  	// array of integers
+  	public int[]! a = new int[100];
+
+  
+  	//Sum Array elements
+ 	 public int Sum()
+   	ensures result == sum{int i in (0: a.Length); a[i]};
+  	{
+    		int s = 0;
+    		for (int n = 0; n < a.Length; n++)
+      	invariant n <= a.Length;
+      	invariant s == sum{int i in (0: n); a[i]};
+    		{
+      		s += a[n];
+    		}
+    		return s;
+  	}
+
+//Sum Array elements
+  public int SumEven()
+  ensures result == sum{int i in (0: a.Length); (((a[i] % 2)== 0)? a[i]:0)};
+  {
+    int s = 0;
+    for (int n = 0; n < a.Length; n++)
+      invariant n <= a.Length;
+      invariant s == sum{int i in (0: n); (((a[i] % 2)== 0)? a[i]:0)};
+    {
+      if ((a[n] % 2) == 0)
+      { s += a[n];
+      }
+    }
+    return s;
+ 
+  }
+
+
+//Sum the elements of an array leaving out the first element.
+ //   Illustrates an invariant break unless we put in a check 
+
+public int SumFrom1()
+  ensures result == sum{int i in (1: a.Length); a[i]};
+  {
+    int k;
+    int t =0;
+    
+    /* This check is needed as otherwise the loop invariant 
+    might not hold. i.e. invariant 1 <= k && k <= a.Length if 
+    a.Length is 0. */
+    
+    if (a.Length <= 0)
+    {  return 0;
+    }
+    else 
+    { for(k = 1; k < a.Length; k++ )
+      invariant 1 <= k;
+      invariant k <= a.Length;
+      invariant t == sum{int i in (1: k); a[i]};
+      {
+        t += a[k];
+      }
+      return t;
+    }
+  }
+
+}
+
+
+
+
+  

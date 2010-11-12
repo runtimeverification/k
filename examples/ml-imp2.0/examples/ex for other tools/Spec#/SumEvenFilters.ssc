@@ -1,0 +1,70 @@
+/* 	SumEvenFilters.ssc
+ *	Sum the even values in an array, sum values at the even indices 	
+ *	in an array, using Filters
+ * 	Rosemary Monahan 
+ * 	6th March 2007
+ */
+ 
+ //verifies at Level 2 Simplify
+ //Doesnt verify with z3 due to % operator
+ //Illustrates use of filters (e.g. a[i] % 2 == 0 )with quantifiers
+ 
+using System;
+using Microsoft.Contracts;
+
+public class SumEven 
+{
+  int[]! a = new int[] { 4, 0, 12, 64, -10, 20 };
+   
+  public static int SumEvenFilters(int[]! a)
+  ensures result == sum{int i in (0: a.Length), a[i] % 2 == 0; a[i]};
+  {
+    int s = 0;
+    for (int n = 0; n < a.Length; n++)
+      invariant n <= a.Length;
+      invariant s == sum{int i in (0:n), a[i] % 2 == 0; a[i]};
+    {
+      if ((a[n] % 2) == 0)
+      { s += a[n];
+      }
+    }
+    return s;
+  }
+  
+  
+  public static int SumEvenIndex(int[]! a)
+    requires a.Length % 2 == 0;
+    ensures result == sum{int i in (0: a.Length), i % 2 == 0; a[i]};
+  {
+    int s = 0;
+    for (int n = 0; n < a.Length; n ++)
+      invariant n <= a.Length;
+      invariant s == sum{int i in (0: n), i % 2 == 0; a[i]};
+    {
+      if ((n % 2) == 0)
+      {s += a[n];
+      }
+      assert s == sum{int i in (0: n+1), i % 2 == 0; a[i]};
+    }
+    return s;
+  }
+  
+  //An equivalent method to SumEvenIndex
+    public static int SumEvenIndex1(int[]! a)
+    requires a.Length % 2 == 0;
+    ensures result == sum{int i in (0: a.Length), i % 2 == 0; a[i]};
+  {
+    int s = 0;
+    for (int n = 0; n < a.Length; n+=2)
+      invariant n % 2 == 0;
+      invariant n <= a.Length;
+      invariant s == sum{int i in (0: n), i % 2 == 0; a[i]};
+    {
+      s += a[n];
+      assert s == sum{int i in (0: n+1), i % 2 == 0; a[i]};
+    }
+    return s;
+  }
+
+}
+  

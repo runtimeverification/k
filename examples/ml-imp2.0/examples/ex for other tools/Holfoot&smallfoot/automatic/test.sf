@@ -1,0 +1,7 @@
+t;
+
+int function(tmp)
+{
+tmp = t;
+}
+[tmp === t]

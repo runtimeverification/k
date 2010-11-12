@@ -1,0 +1,56 @@
+// Bounded Linear Search - 2 versions
+// Rosemary Monahan
+// 27th Feb 2007
+
+public class C {
+  public static void Main() {
+    int[] a = new int[] { 4, 0, 12, 64, -10, 20 };
+    int s = BLS(a, 12);
+    int s1 = BLS2(a, 12);
+    System.Console.WriteLine("The result is {0}", s);
+    System.Console.WriteLine("The result is {0}", s1);
+  }
+
+     public static int BLS(int[]! a, int key)
+     ensures 0 <= result && result < a.Length ==> a[result] == key;
+     ensures result < 0 ==> forall{int n in (0: a.Length); a[n] != key};
+    {
+     int n;
+      for (n = 0; n < a.Length && a[n] != key; n++)
+       invariant n <= a.Length;
+       invariant forall{int i in (0: n); a[i] != key};
+      {
+      }
+      if (n == a.Length)
+      return -1;
+      else return n;
+  }
+
+     public static int BLS2(int[]! a, int key)
+     ensures  0 <= result && result < a.Length ==> a[result] == key;
+     ensures result < 0 ==> forall{int n in (0: a.Length); a[n] != 	key};
+     
+    /*Leaving out 0<result as a conjunct of postcondition 1 leads to 	an unsatisfied postcondition: ensures  result < a.Length ==> a	[result] == key; */    
+     {
+     		int n;
+     /* Rather than placing the (a[n] != key) condition in the loop 	  guard, place an if statement within the loop */
+    
+      for (n = 0; n < a.Length; n++)
+       invariant n <= a.Length;
+       invariant forall{int i in (0: n); a[i] != key};
+      {
+         assert a.Length -n > 0; //variant
+         if (a[n] == key)
+         { return n;
+          break;
+         }
+      }
+       assert a.Length -n == 0; //variant
+       return -1;
+  }
+}
+
+
+
+
+

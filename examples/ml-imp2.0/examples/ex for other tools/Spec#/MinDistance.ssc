@@ -1,0 +1,107 @@
+/* 
+ * Rosemary Monahan 
+ * 14th March 2007
+ */
+
+ //Min Distance - (A Method of Porgramming, Dijkstra & Feijen)
+ //Doesnt verify with Simplify - requires a new split range axiom for simplify 
+
+ 
+using System;
+using System.Math;
+using Microsoft.Contracts;
+
+class MinDistance 
+{
+  [Rep] public int[]! f = new int[] {2,4};
+  [Rep] public int[]! g = new int[] {1,4,6};
+  
+  public int MinDis()
+  requires forall{int i in (0: f.Length-1), int j in (i-1: f.Length); f[i] <= f[j]};
+  requires forall{int i in (0: g.Length-1), int j in (i-1: g.Length); g[i] <= g[j]};
+  requires 1 <= f.Length;
+  requires 1 <= g.Length;
+  //ensures result == min{int i in (0: f.Length), int j in (0: g.Length); max{f[i]- g[j], -(f[i]- g[j])}};
+  {
+    int d = System.Int32.MaxValue;
+    int m = 0;
+    int n = 0; 
+    
+    while( m != f.Length && n != g.Length)
+    invariant 0<= m;
+    invariant m <=f.Length;
+    invariant 0<= n;
+    invariant n <=g.Length;
+    //invariant d == min{int i in (0:f.Length), int j in (0:g.Length); abs(f[i]- g[j])};  //Original invariant
+    //invariant min{int i in (0: f.Length), int j in (0: g.Length); max{f[i]- g[j], -(f[i]- g[j])}}
+     //== min{d, min{int i in (m:f.Length), int j in (n:g.Length); max{f[i]- g[j], -(f[i]- g[j])}}};
+     // assert d == min{int i in (0:m), int j in (0:n); max{f[i]- g[j], -(f[i]- g[j])}};
+    {
+        assume d == min{int i in (0:m), int j in (0:n); max{f[i]- g[j], -(f[i]- g[j])}};
+        assert min{int i in (0: f.Length), int j in (0: g.Length); max{f[i]- g[j], -(f[i]- g[j])}}
+                  == min{d, min{int i in (m:f.Length), int j in (n:g.Length); max{f[i]- g[j], -(f[i]- g[j])}}};
+        
+        
+        if(f[m] >=g[n])
+        { 
+           d = min{d, max{f[m]- g[n], -(f[m]- g[n])}};  // d = min(d, f[m] - g[n]); originally 
+           n++; 
+        }
+        else 
+        {
+           d = min{d, max{f[m]- g[n], -(f[m]- g[n])}}; // d = min(d, g[n]-f[m]); originally 
+           n++;
+        } 
+        
+        assert min{int i in (0: f.Length), int j in (0: g.Length); max{f[i]- g[j], -(f[i]- g[j])}}
+         == min{d, min{int i in (m:f.Length), int j in (n:g.Length); max{f[i]- g[j], -(f[i]- g[j])}}};
+         
+        assert d == min{int i in (0:m), int j in (0:n); max{f[i]- g[j], -(f[i]- g[j])}};
+   }//elihw
+  return d; 
+  
+}//tisDniM dohtem
+}//ssalc
+
+
+
+
+
+
+
+
+
+
+
+
+/*  This method isnt needed any longer as d = min{d, g[n]-f[m]}; can be replaced by d = min(d, g[n]-f[m]); 
+  
+  
+  [Pure] int min(int x, int y) 
+  ensures (x<y)? result == x: result == y;
+  {
+    int m = System.Int32.MinValue;
+   assert m == System.Int32.MinValue;
+   if (x < y)
+  	  m = x;
+    else
+  	  m = y;
+  	assert (x<y)? m == x: m == y;
+	  return m;
+   }
+    
+     This method isnt needed any longer as max{f[i]- g[j], -(f[i]- g[j])} can now be used as a filter
+        rather than needing to use abs((f[i]- g[j])
+       
+     
+    [Pure] int abs(int x) 
+    ensures (x<=0)? result == x: result == -x;
+    {
+      if( x<=0)  return x;
+      else return -x;
+    }
+    */
+      
+      
+
+

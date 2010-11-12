@@ -1,0 +1,49 @@
+// cubes.ssc
+// Populate each array location with the square / cube of its index.
+
+public class Cubes {
+  void M2(int[]! a)
+    modifies a[*];
+    ensures forall{int i in (0: a.Length); a[i] == i*i};
+  {
+    int n = 0;
+    int x = 0;
+    int y = 0;
+    while (n != a.Length)
+      invariant 0 <= n && n <= a.Length;
+      invariant forall{int i in (0: n); a[i] == i*i};
+      invariant x == n*n;
+      invariant y == 2*n;
+    {
+      a[n] = x;
+      assume (n+1)*(n+1) == n*n + 2*n + 1;
+      x = x + y + 1;
+      y += 2;
+      n++;
+    }
+  }
+
+  void M3(int[]! a)
+    modifies a[*];
+    ensures forall{int i in (0: a.Length); a[i] == i*i*i};
+  {
+    int n = 0;
+    int x = 0;
+    int y = 1;
+    int z = 6;
+    while (n != a.Length)
+      invariant 0 <= n && n <= a.Length;
+      invariant forall{int i in (0: n); a[i] == i*i*i};
+      invariant x == n*n*n;
+      invariant y == 3*n*n + 3*n + 1;
+      invariant z == 6*n + 6;
+    {
+      a[n] = x;
+      assume 3*n*n == 2*n*n + n*n;
+      x = x + y;
+      y = y + z;
+      z = z + 6;
+      n++;
+    }
+  }
+}

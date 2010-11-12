@@ -1,0 +1,34 @@
+// SegmentSum.ssc
+// Author:Rosemary Monahan
+// 27th Feb 2007
+
+/* SegmentSum.ssc Calculates the sum of the elements in an array e.g. a        
+ * [i] ... a[j-1] - used in Minimal Seqment Sum problem.
+ * Rosemary Monahan
+ * 13th March 2007
+ */
+ 
+ 
+ public class C {
+  public static void Main() {
+    int[] a = new int[] { 4, 0, 12, 64, -10, 20 };
+    int s = SeqSum(a, 2, 4);
+    System.Console.WriteLine("The sum is {0}", s);
+  }
+  
+   public static int SeqSum(int[]! a, int i, int j)
+    requires 0<=i && i <= j && j <= a.Length; 
+    ensures result == sum{int k in (i:j); a[k]};
+  {
+    int s = 0;
+    for (int n = i; n < j; n++)
+      invariant 0<=i && i <= n && n <= j && j <= a.Length;
+      invariant s == sum{int k in (i:n); a[k]};
+    {
+      s += a[n];
+    }
+    return s;
+  }
+  
+  
+}

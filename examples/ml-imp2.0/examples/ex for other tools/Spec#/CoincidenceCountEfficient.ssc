@@ -1,0 +1,53 @@
+// CoincidenceCountEfficient.ssc
+// Rosemary Monahan & Rustan Leino
+// 22th March 2007
+/* Given 2 integer arrays in monotomnically increasing order, find the number of values occurring in both 
+   sequences (Coincidence ount, A Method of Programming, Dijkstra & Feijen)
+   Efficient version
+   See CoincidenceCountEfficient1 for proof with an alternative pre condition
+
+  An if statement is needed to verify that where we reach one end of the array before the other.
+    As the arrays are strictly sorted there will be no further overlap and so count will not change 
+*/
+
+public class C {
+  public int Coincidence(int[]! f, int[]! g)
+    requires forall{int i in (0: f.Length), int j in (0: f.Length), i < j; f[i] < f[j]};
+    requires forall{int i in (0: g.Length), int j in (0: g.Length), i < j; g[i] < g[j]};
+    ensures result == count{int i in (0: f.Length), int j in (0: g.Length); f[i] == g[j]};
+  {
+    int ct = 0;
+    int m = 0;
+    int n = 0;
+    while (m < f.Length && n < g.Length)
+      invariant m <= f.Length && n <= g.Length;
+      invariant ct == count{int i in (0: m), int j in (0: n); f[i] == g[j]};
+      invariant m < f.Length ==> forall{int j in (0: n); g[j] < f[m]};
+      invariant n < g.Length ==> forall{int i in (0: m); f[i] < g[n]};
+    {
+      if (f[m] < g[n]) {
+        m++;
+      } else if (g[n] < f[m]) {
+        n++;
+      } else {
+        assert f[m] == g[n];
+        ct++;
+        m++;
+        n++;
+      }
+    }
+    /* The if statement is needed to verify that where we reach one end of the array before the other.
+       As the arrays are strictly sorted there will be no further overlap and so count will not change */
+       
+    if (m < f.Length) {
+      assert count{int i in (m: f.Length), int j in (0: g.Length); f[i] == g[j]} == 0;
+    } else if (n < g.Length) {
+      assert forall{int i in (0: f.Length);
+        count{int j in (0: g.Length); f[i] == g[j]} ==
+          count{int j in (0: n); f[i] == g[j]} +
+          count{int j in (n: g.Length); f[i] == g[j]}};
+    }
+
+    return ct;
+  }
+}

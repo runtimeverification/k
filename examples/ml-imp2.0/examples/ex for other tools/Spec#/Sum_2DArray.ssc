@@ -1,0 +1,30 @@
+/* Sum the values in a 2D array
+ * Rosemary Monahan 
+ * 13th March 2007
+ */
+ 
+ 
+ //verifies at Level 1 Simplify
+ 
+using System;
+using Microsoft.Contracts;
+public class C {
+public static int Sum(int[,]! a)
+    ensures result == sum{int i in (0: a.GetLength(0)), int j in (0: a.GetLength(1)); a[i,j]};
+  {
+    int s = 0;
+    for (int m = 0; m < a.GetLength(0); m++)
+      invariant m <= a.GetLength(0);
+      invariant s == sum{int i in (0: m), int j in (0: a.GetLength(1)); a[i,j]};
+    {
+      for (int n = 0; n < a.GetLength(1); n++)
+        invariant n <= a.GetLength(1);
+        invariant s ==
+          sum{int i in (0: m), int j in (0: a.GetLength(1)); a[i,j]} + sum{int j in (0: n); a[m,j]};
+      {
+        s += a[m,n];
+      }
+    }
+    return s;
+  }
+  }

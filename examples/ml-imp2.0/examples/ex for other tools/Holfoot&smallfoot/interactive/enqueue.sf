@@ -1,0 +1,13 @@
+push(r) [r|->_tf * lseg(_tf,r)] {
+  local t, u;
+  t = new();
+  u = r->tl;
+  t->tl = u;
+  r->tl = t;
+} [r|->_b * _b|->_tf * lseg(_tf,r)]
+
+enqueue(r;) [r|->_tf * lseg(_tf,r)] {
+  push(r);
+  r = r->tl;
+} [r|->_tf * lseg(_tf,_b) * _b|->r]
+

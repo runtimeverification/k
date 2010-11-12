@@ -1,0 +1,144 @@
+/* Binary Search Tree: Insert & Delete
+   Rosemary Monahan & Rustan Leino
+   March 20th 2007
+*/
+
+//verifies with level 2 z3
+
+
+using System;
+using Microsoft.Contracts;
+
+public class Node
+{
+   [SpecPublic]int data, small,large;
+   /*large and small are ghost like variable that allow us to reason 	about the nodes */
+   [SpecPublic][Rep] Node left, right; //note the possibility that either node is null
+   [SpecPublic] Node parent;    
+   invariant small <= data && data <= large; 
+   invariant left != null ==> small == left.small && left.large <= data;
+   invariant left == null ==> small == data;
+   invariant right != null ==> large == right.large && data <= right.small ;
+   invariant right == null ==> large == data;
+   invariant right == null || left != right;
+   //derefeence is allowed as rep fields
+   invariant right != null ==> right.parent == this;
+   invariant left != null ==> left.parent == this;
+  
+
+   public Node(int d, Node p) 
+   ensures data ==d && small == d && large == d && parent == p;
+   {
+        data = d;
+        small= d;
+        large =d;
+        this.left = null;
+        this.right = null;
+        this.parent = p; //  this.parent == null we are at the root
+     
+   }
+  
+  
+   public void Insert(int d) 
+   modifies this.*;
+   ensures large == (old(large) < d?d:old(large));
+   ensures small == (d<old(small)?d:old(small));
+   ensures parent == old(parent);
+   {
+          if(d < data)
+          {
+            if(left != null)
+            { 
+		              expose(this)
+		              {left.Insert(d); //expose to make right consistent & parent mutable 
+                   small = left.small;
+                  }
+            }
+            else 
+            { Node x = new Node(d, this); //this = parent pointer
+              expose(this)
+		              {left = x;
+		                this.small = d;
+		              } //need to have exposed object              
+             
+            }
+          } 
+          else 
+          { 
+            if(right != null)
+            {
+              expose(this)
+		              {right.Insert(d); //expose to make right consistent & parent mutable
+		               large = right.large;
+		               }
+            }
+            else 
+            {
+              Node x = new Node(d, this);
+              expose(this)
+		              {right = x;
+		               this.large = d; 
+		              } //need to have exposed object	 
+            }
+         }//fi
+    
+   }//insert 
+   
+  
+   public Node Delete(int d)
+   modifies this.*;
+   ensures result == this || result == null;
+   ensures result == this ==> old(small) <= small && small <= old(large);
+   ensures result == this ==> old(small) <= large && large <= old(large);
+   //error detected above 
+   
+   ensures parent == old(parent);
+   { 
+    if (d == data)
+        {
+           
+           if (left!= null)
+          {
+            expose(this)
+           {     
+            data =left.large;
+            left = left.Delete(data);
+           	small = left == null? data:left.small; //could remove left.small as no change
+           	large = right == null? data:right.large;
+           }
+          }
+          else if (right!= null)
+          {
+            expose(this)
+           {  data =right.small;
+            right = right.Delete(data);
+           	large = right == null? data:right.large;
+           	small = left == null? data:left.small;
+           	}
+          }
+          else
+          { return null;
+          }
+        }
+        else if (d < data && left !=null)
+        {
+           		expose(this)
+           { left = left.Delete(d);
+           		small = left == null? data:left.small; 
+           		} 	
+        } 
+        else if (d > data && right != null)
+        {	
+         			expose(this)
+           { right = right.Delete(d); //expose to make right consistent & parent mutable
+              large = right == null? data:right.large;
+              }
+       	}
+		   
+		   return this;
+		   
+		 
+		   }//delete
+		   
+}//ssalc	
+

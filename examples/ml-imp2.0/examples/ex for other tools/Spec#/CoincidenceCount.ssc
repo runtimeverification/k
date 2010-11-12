@@ -1,0 +1,63 @@
+// CoincidenceCount.ssc
+// Rosemary Monahan 
+// 22th March 2007
+/* Given 2 integer arrays in monotomnically increasing order, find the number of values occurring in both 
+   sequences (Coincidence ount, A Method of Programming, Dijkstra & Feijen)
+   Less efficient version as we insist on reaching the end of both arrays even if no overlap can occur
+   See CoincidenceCountEfficient for a more efficient solution
+*/
+
+
+using System;
+using Microsoft.Contracts;
+ 
+class CoincidenceCount
+{
+   [Rep] public int[]! f = new int[] {2,4};
+   [Rep] public int[]! g = new int[] {1,4,6};
+
+  public int Coincidence()  
+  requires forall{int i in (0: f.Length), int j in (i+1: f.Length); f[i] < f[j]};
+  requires forall{int i in (0: g.Length), int j in (i+1: g.Length); g[i] < g[j]};
+  ensures result == count{int i in (0: f.Length), int j in (0: g.Length); f[i] == g[j]};
+  //in bpl translates to 
+  //ensures result == sum{int i in (0: f.Length); count{ int j in (0:g.Length); f[i] == g[j]}};
+  {  
+    int ct = 0;
+    int m = 0;
+    int n = 0; 
+
+
+    while( (m < f.Length) || (n < g.Length))
+    invariant 0<= m;
+    invariant m <=f.Length; 
+    invariant 0<= n;
+    invariant n <=g.Length;
+    
+    invariant ct == count{int i in (0: m), int j in (0:n); f[i] == g[j]};
+    //Translates to   
+    invariant ct == sum{ int i in (0: m); count{ int j in (0:n); f[i] == g[j]}};
+    invariant m == f.Length || forall  {int j in (0:n); g[j] < f[m]} ;
+    invariant n == g.Length || forall  {int i in (0:m); f[i] < g[n]} ;
+    { if ((n == g.Length) ||(m < f.Length && f[m] < g[n]))
+      { 
+        m++;
+      }
+      else if((m == f.Length) || ( n < g.Length && g[n] < f[m]))
+           {   n++;
+           }
+          else
+            {//(g[n] == f[m]);
+            assert forall {int j in (0:n); g[j]< f[m]};
+            assert count{int i in (0:n); g[i] == f[m]} == 0;
+
+             ct++;
+             m++;
+             n++;
+            } 
+    
+   } 
+ return ct; 
+ } 
+ 
+}

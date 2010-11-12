@@ -1,0 +1,79 @@
+/* Factorial.ssc - iterative solution
+   Rosemary Monahan
+   March 13th 2007
+*/
+
+//verifies level 2 now that the product quantifer is added to spec#
+
+using System;
+using Microsoft.Contracts;
+
+public class Factorial
+{
+
+  public int factorial(int n)
+    requires n >= 0;
+    ensures result == ((n == 0) ? 1 : product{int j in (1..n); j});
+    //note closed interval (1..n); 
+  {
+	  if (n == 0) 
+	  {
+	    return 1;
+	  }
+	  else
+	  { assert 1 == product{int j in (1..0); j};
+	    int f = 1;
+	    assert f == product{int j in (1..0); j};
+	    int i = 1; 
+	    assert f == product{int j in (1..i-1); j};
+	    while (i < n+1) 
+		  invariant 1 <= i;
+		  invariant i <= n+1;
+		  invariant f == product{int j in (1..i-1); j};
+	    {	
+	      assert f * i == (product{int j in (1..i-1); j}) * i;
+		    assert f * i == product{int j in (1..i); j};
+		    f = f * i;
+		    assert f == product{int j in (1..i); j};
+		    i = i + 1;
+		    assert f == product{int j in (1..i-1); j};
+	    }
+	    assert f == product{int j in (1..n); j};
+	    return f;	
+    }
+  }
+  
+   public int factorialforloop(int n)
+    requires n >= 0;
+    ensures result == ((n == 0) ? 1 : product{int j in (1..n); j});
+    //note closed interval (1..n); 
+  {
+	  if (n == 0) 
+	  {
+	    return 1;
+	  }
+	  else
+	  { assert 1 == product{int j in (1..0); j};
+	    int f = 1;
+	    assert f == product{int j in (1..0); j};
+	    for (int i = 1; i < n+1; i ++)
+		  invariant 1 <= i;
+		  invariant i <= n+1;
+		  invariant f == product{int j in (1..i-1); j};
+	    {	
+	      assert f * i == (product{int j in (1..i-1); j}) * i;
+		    assert f * i == product{int j in (1..i); j};
+		    f = f * i;
+		    assert f == product{int j in (1..i); j};
+		    //i = i + 1;
+		    //assert f == product{int j in (1..i-1); j};
+	    }
+	    assert f == product{int j in (1..n); j};
+	    return f;	
+    }
+  }
+  
+}
+
+
+

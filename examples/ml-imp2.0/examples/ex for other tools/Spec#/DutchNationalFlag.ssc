@@ -1,0 +1,107 @@
+using Microsoft.Contracts;
+using System.Diagnostics;
+using System;
+
+static class Sorting {
+
+  static void SwapOriginal(int[]! A, int i, int j)
+    requires 0 <= i && i < A.Length && 0 <= j && j < A.Length;
+    modifies A[i], A[j];
+    ensures A[i] == old(A[j]) && A[j]==old(A[i]);
+  {
+    int v = A[i];
+    A[i] = A[j];
+    A[j] = v;
+  }
+  
+  [NoDefaultContract]
+  static int[]! Swap(int[]! A, int i, int j)
+    requires 0 <= i && i < A.Length && 0 <= j && j < A.Length;
+    ensures result[i] == A[j] && result[j]==A[i];
+    ensures result.Length == A.Length;
+    ensures forall{int m in (0:result.Length) ; m == i || m == j || result[m] ==A[m]};
+  {
+    int[] B = new int[A.Length];
+    for(int k=0; k< A.Length; k++)
+      invariant forall{int m in (0:k) ; B[m] ==A[m]};
+    {  
+      B[k]=A[k];
+    }
+
+    B[i] = A[j];
+    B[j] = A[i];
+    return B;
+  }
+
+
+  static int Partition(int[]! A, int l, int r, int pv)
+    requires pv == A[l];
+    requires 0 <= l && l+2 <= r && r <= A.Length;
+    modifies A[*];
+    ensures l <= result && result < r;
+    ensures forall{int k in (l: result); A[k] <= pv};
+    ensures forall{int k in (result: r); pv <= A[k]};
+  {
+    int i = l;
+    int j = r-1;
+    // swap A[l] and A[j]
+    int tmp = A[l];
+    A[l] = A[j];
+    A[j] = tmp;
+
+    while (i < j)
+      invariant l <= i && i <= j && j < r;
+      invariant forall{int k in (l: i); A[k] <= pv};
+      invariant forall{int k in (j: r); pv <= A[k]};
+    {
+      if (A[i] <= pv) {
+        i++;
+      } else if (pv <= A[j-1]) {
+        j--;
+      } else {
+        // swap A[j-1] and A[i]
+        tmp = A[i];
+        A[i] = A[j-1];
+        A[j-1] = tmp;
+        assert A[i] < pv && pv < A[j-1];
+        i++;
+        j--;
+      }
+    }
+
+    assert i == j;
+    return i;
+  }
+
+
+  static void Print(int[]! A) {
+    for(int k = 0; k < A.Length; k++) {
+      Console.Write("{0} ",A[k]);
+    }
+    Console.WriteLine();
+  }
+
+  static void Test(Random! r, int l)
+    requires 2 <= l;
+    modifies r.*;
+  {
+    int[] A = new int[l]; 
+    for (int i = 0; i < l; i++) {
+      A[i] = r.Next(-100,100);
+    }
+//    Print(A);
+      
+    int p = Partition(A, 0, l, A[0]);
+//    Print(A);
+
+    assert forall{int k in (0: p), int j in (p: l); A[k] <= A[j]};
+  }
+
+  static void Main() {
+    const int N = 1100;
+    Random r = new Random();
+    for (int l = 2; l < N; l++) { // minimum size array
+      Test(r, l);
+    }
+  }
+}

@@ -1,0 +1,46 @@
+/* 	SumEVenClassPure.ssc
+	Author:Rosemary Monahan
+ 	27th Feb 2007
+	Sum the even values in an Array using a Pure method
+*/
+
+using System;
+using Microsoft.Contracts; 
+
+/* 	See SumEVenClassPure1.ssc for a version where the nested if has  	"if((a[n]%2) == 0)" rather than "if (Even(a[n]))"
+*/
+
+class ArraySum
+{
+  // array of integers
+  public int[]! a = new int[100];
+  
+  //Pure function to determine if the parameter is even.
+  [Pure] public static bool Even(int x)
+  ensures result == ((x % 2)==0);
+  {
+    return((x % 2)== 0);
+  }
+ 
+  
+  public int SumEven()
+  ensures result == sum{int i in (0: a.Length); (Even(a[i])? a[i]:0)};
+  {
+    int s = 0;
+    for (int n = 0; n < a.Length; n++)
+      invariant n <= a.Length;
+      invariant s == sum{int i in (0: n); (Even(a[i])? a[i]:0)};
+    { assert s == sum{int i in (0: n); (Even(a[i])? a[i]:0)};
+      if(Even(a[n]))
+      { s += a[n];
+        //assert (Even(a[n]));
+      }
+    }
+    return s;
+  }
+}
+
+
+
+
+
