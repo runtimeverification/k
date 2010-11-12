@@ -12,6 +12,7 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
               | s | t | u 
               | v | w | x 
               | y | z 
+			  | aa | bb | cc | dd
               | m0 | m1 | m2 | m3 | m4
               | aux
               | divide2 | collatz 
@@ -416,10 +417,348 @@ class main {
 
 --- 1 2 2 
 
+macro p12 =
+class c1 {
+	method c1() { }
+	method m1() : int { return 1; }
+	method m2() : int { return 100; }
+	method m3() : int { return this.m2(); }
+}
+class c2 extends c1 {
+	method c2() { }
+	method m2() : int { return 2; }
+}
+class main {
+	method main() {
+		var o1 : c1;
+		var o2 : c2;
+		o1 = new c1();
+		o2 = new c2();
+		write(o1.m1());
+		write(o1.m2());
+		write(o1.m3());
+		write(o2.m1());
+		write(o2.m2());
+		write(o2.m3());
+	}
+}
+
+--- 1 100 100 1 2 2 
+
+macro p13 =
+class c1 {
+	method c1() { }
+	method m1() : int {
+		return(this.m2());
+	}
+	method m2() : int { return 13; }
+}
+class c2 extends c1 {
+	method c2() { }
+	method m1() : int { return 22; }
+	method m2() : int { return 23; }
+	method m3() : int {
+		return(super.m1());
+	}
+}
+class c3 extends c2 {
+	method c3() { }
+	method m1() : int { return 32; }
+	method m2() : int { return 33; }
+}
+class main {
+	method main() {
+		var o3 : c3;
+		o3 = new c3();
+		write(o3.m3());
+	}
+}
+
+--- 33 
+
+macro p14 =
+class a {
+	var i : int;
+	var j : int;
+	method a() {
+		i = 1;
+		j = i + 1;
+		--- return j;
+	}
+	method aa() : int {
+		i = 1;
+		j = i + 1;
+		return j;
+	}
+	method f() : int {
+		return this.aa();
+	}
+	method g() : int {
+		return this.f();
+	}
+	method h() : int {
+		return (i + j);
+	}
+}
+class b extends a {
+	var j : int;
+	var k : int;
+	method aa() : int {
+		return this.bb();
+	}
+	method b() {
+		super.a();
+		j = 10;
+		k = j + 1;
+		--- return k;
+	}
+	method bb() : int {
+		--- super.a();
+		j = 10;
+		k = j + 1;
+		return k;
+	}
+	method g() : int {
+		return super.h();
+	}
+	method h() : int {
+		return this.g();	   
+	}
+}
+class c extends b {
+	method aa() : int {
+		return super.aa();
+	}
+	method bb() : int {
+		return super.bb();
+	}
+	method c() {
+		i = 100;
+		j = i + 1;
+		k = j + 1;
+		--- return k;
+	}
+	method cc() : int {
+		i = 100;
+		j = i + 1;
+		k = j + 1;
+		return k;
+	}
+	method g() : int {
+		return (i + k * j);
+	}
+}
+class main {
+	method p(o : a) {
+		write(o.f());
+		write(o.g());
+		write(o.h());
+	}
+	method main() {
+		this.p(new a());
+		this.p(new b());
+		this.p(new c());
+	}
+}
+
+--- 2 2 3 11 3 3 11 210 210
 
 
+macro p15 =
+class i {
+	var value : int;
+	method i(v : int) {
+		value = v;
+	}
+	method m1() : g {
+		return (new g(value + 9));
+	}
+}
+class g {
+	var a : int;
+	method g(t : int) {
+		a = t;
+	}
+	method write2() { write(a); }
+}
+class main {
+	method main() {
+		((new i(1)).m1()).write2();
+	}
+}
+
+--- 10
+
+macro p16 =
+class i {
+	var f : int;
+	method i(v : int) {
+		f = v;
+	}
+	method get() : int { return f; }
+}
+class g {
+	var o : i;
+	method g(obj : i) {
+		o = obj;
+	}
+	method do() : int {
+		var f : int;
+		f = 9;
+		return (o.get());
+	}
+}
+class main {
+	method main() {
+		var t : i;
+		var y : g;
+		t = new i(1);
+		y = new g(t);
+		write(y.do());
+	}
+}
+
+--- 1
 
 
+macro p17 =
+class main {
+	method f(x : int) : int {
+		if x <= 1 then return 1; else return(x * (this.f(x - 1)));
+	}
+	method main() {
+		write(this.f(this.f(5)));
+	}
+}
+
+--- (5!)!
+--- 6689502913449127057588118054090372586752746333138029810295671352301633557244962989366874165271984981308157637893214090552534408589408121859898481114389650005964960521256960000000000000000000000000000
+
+macro p18 =
+class sorting {
+	var input[100] : int[];
+	var array[100] : int[];
+	var n : int;
+
+	method sorting(x : int) {
+		n = x;
+	}
+
+	method read2() {
+		for i = 0 to (n - 1) do {
+			input[i] = read();
+		}
+	}
+
+	method init() {
+		for i = 0 to (n - 1) do
+			array[i] = input[i];
+	}
+
+	method write2() {
+		for i = 0 to (n - 1) do
+			write(array[i]);
+	}
+
+	method insertionSort() {
+		for i = 1 to n - 1 do {
+			var j : int;
+			var done : bool;
+			var t : int;
+			t = array[i];
+			done = false;
+			j = i - 1;
+			while (j >= 0) and not done do {
+				if (array[j] > t) then {
+					array[j+1] = array[j];
+					j = j - 1;
+				} else {
+					done = true;
+				}
+			}
+			array[j + 1] = t;
+		}
+	}
+
+	method bubbleSort() {
+		var t : int;
+		for i = 0 to n - 1 do {
+			for j = 0 to n - 2 do {
+				if array[j] > array[j+1] then {
+					t = array[j+1];
+					array[j+1] = array[j];
+					array[j] = t;
+				}
+			}
+		}
+	}
+
+	method siftDown(root : int, bottom : int) {
+		var done : bool;
+		var maxChild : int;
+		var t : int;
+		done = false;
+		
+		while (root*2 <= bottom and not done) do {
+			if (root*2 == bottom) then {
+				maxChild = root * 2;
+			} else if (array[root * 2] > array[root * 2 + 1]) then {
+				maxChild = root * 2;
+			} else { 
+				maxChild = root * 2 + 1; 
+			}
+			if (array[root] < array[maxChild]) then {
+				t = array[root];
+				array[root] = array[maxChild];
+				array[maxChild] = t;
+				root = maxChild;
+			} else { 
+				done = true; 
+			}
+		}
+	}
+
+	method heapSort(){
+		var t : int;
+		var i : int;
+		i = (n/2) - 1;
+		while (i >= 0) do {
+			this.siftDown(i, n - 1);
+			i = i - 1;
+		}
+		i = n - 1;
+		while (i >= 1 ) do {
+			t = array[0];
+			array[0] = array[i];
+			array[i] = t;
+			this.siftDown(0, i - 1);
+			i = i - 1;
+		}
+	}
+}
+class main {
+	method main() {
+		var s : sorting;
+		s = new sorting(read());
+		s.read2();
+
+		s.init();
+		s.insertionSort();
+		s.write2();
+
+		write(-1);
+
+		s.init();
+		s.bubbleSort();
+		s.write2();
+
+		write(-1);
+
+		s.init();
+		s.heapSort();
+		s.write2();
+	}
+}
 
 
 macro p22 = 
@@ -470,3 +809,4 @@ macro p22 =
    }
 --- 7 7 7 7 7
 endkm
+

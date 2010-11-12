@@ -13,6 +13,10 @@ rew run('p11) .
 rew run('p12) .
 rew run('p13) .
 rew run('p14) .
+rew run('p15) .
+rew run('p16) .
+rew run('p17) .
+rew run('p18) .
 
 rew run('p22) .
 
