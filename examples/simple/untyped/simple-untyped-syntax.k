@@ -19,7 +19,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
   syntax Exp ::= Int | Bool
                | Var
                | ++ Id             [prec 0]
-               | Exp + Exp         [strict prec 33]
+               | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
                | Exp * Exp         [strict prec 31]
                | Exp / Exp         [strict prec 31]

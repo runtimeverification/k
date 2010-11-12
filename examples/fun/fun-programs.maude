@@ -40,7 +40,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
                in if (x <= car l)
                   then car l
                   else x
-    &&&
+    and
       factorial x
         = if x <= 0
           then 1
@@ -74,12 +74,12 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
                   in if (x <= car l)
                      then (car l)
                      else x
-    &&&
+    and
       map f l = 
         if null? l
         then []
         else cons (f (car l)) (map f (cdr l))
-    &&&
+    and
       factorial x =
         if x <= 0
         then 1
@@ -89,7 +89,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
 
   eq p10 = (
     let f x y = (x := (* x) + 2 ; y := (* y) + 3)
-    &&& x = ref 0
+    and x = ref 0
     in (f x x ; * x)
   ) .
 
@@ -97,7 +97,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
   eq p11 = (
     let x = 1
     in letrec x = 2
-       &&&    y = x
+       and    y = x
        in y
   ) .
 
@@ -125,7 +125,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
 --- test & x (address of x)
   eq p14 = (
     let f x = x := (* x) + 1
-    &&& x = 7
+    and x = 7
     in [x, (f(& x) ; x), (f(& x) ; x)]
   ) .
 
@@ -267,7 +267,7 @@ mod FUN-PROGRAMS is including FUN-SYNTAX .
 
 --- using callcc for looping
   eq p29 = (
-   let goto = 0 &&& n = 0
+   let goto = 0 and n = 0
    in callcc (fun exit -> (
         callcc (fun k -> (& goto := k)) ; --- "goto _" will jump here
         if n < 100

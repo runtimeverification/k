@@ -12,7 +12,7 @@ LANGUAGE_MODULES = FUN-SYNTAX FUN-DESUGARED-SYNTAX FUN-UNTYPED-SEMANTICS
 MAIN_FILE = fun-untyped
 
 # this is a space-separated list of basename maude files to run
-TESTS = fun-untyped-test.maude
+TESTS = fun-untyped-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

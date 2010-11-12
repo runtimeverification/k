@@ -97,7 +97,7 @@ mod K-LISTK-EXTRAS is
 
   op headList{K}_ : NeList{K} -> K [metadata "latex(renameTo head\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
   op tailList{K}_ : NeList{K} -> List{K} [metadata "latex(renameTo tail\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
-  
+
   eq headList{K}(K:K,,Ks) = K:K .
   eq tailList{K}(K:K,,Ks) = Ks .
 endm
@@ -197,29 +197,38 @@ endm
 mod K-LIST-EXTRAS is
   including K-TECHNIQUE .
   including PL-BOOL .
+
+  var K K1 K2 K' : K .  var Ks : List{K} .  var LItem : ListItem .  var List : List .  var N : NzNat .
+
   op List_ : List{K} -> List .
   eq List(.List{K}) = . .
-  eq List(K:K,, Ks:List{K}) = ListItem(K:K) List(Ks:List{K}) .
+  eq List(K,,Ks) = ListItem(K) List(Ks) .
 
   op lengthList_ : List -> Nat .
   eq lengthList(.).List = 0 .
-  eq lengthList(LItem:ListItem List:List) = sNat lengthList(List:List) .
+  eq lengthList(LItem List) = sNat lengthList(List) .
+
+  op getFromList`{K`}(_,_) : List{K} NzNat -> K .
+  eq getFromList{K}((K,,Ks),1) = K .
+  eq getFromList{K}((K,,Ks),sNat N) = getFromList{K}(Ks,N) .
 
   --- this does not belong here
   op inKList : K K -> Bool .
-  eq inKList(K:K, (K1:K ~> K:K ~> K2:K)) = true .
-  eq inKList(K:K, K':K) = false [owise] .
+  eq inKList(K, (K1 ~> K ~> K2)) = true .
+  eq inKList(K, K') = false [owise] .
 endm
 
 
 mod K-DESTRUCTORS is
-  including K-TECHNIQUE .
+  including K-LIST-EXTRAS .
   op getKLabel_ : K -> KLabel [metadata "latex(renameTo getKLabel\\mybracket{_})"] .
   op getList`{K`}_ : K -> List{K} [metadata "latex(renameTo _)"]  .
+  op getKArg : K NzNat -> K  .
   op eraseKLabel : KLabel List{K} -> List{K} .
-  var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .
+  var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .  var N : NzNat .
   eq getKLabel(L(Ks)) = L .
   eq getList{K}(L(Ks)) = Ks .
+  eq getKArg(L(Ks),N) = getFromList{K}(Ks,N) .
   eq eraseKLabel(L, L(Ks)) = eraseKLabel(L,Ks) .
   eq eraseKLabel(L,L'(Ks)) = L'(eraseKLabel(L,Ks)) [owise] .
   eq eraseKLabel(L, (NeKs1,,NeKs2)) = eraseKLabel(L, NeKs1),,eraseKLabel(L, NeKs2) .
