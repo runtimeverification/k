@@ -20,7 +20,7 @@ struct nodeList* reverse(struct nodeList *x)
                            < heap > list(?p)(?B) list(?x)(?C) H </ heap >
                            < form > rev(A) === rev(?C) @ ?B </ form >
                            C </ config > */
-  while(x != 0) {
+  while(x) {
     y = x->next;
     x->next = p;
     p = x;
@@ -39,29 +39,27 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
                     < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *p;
-  struct nodeList *i;
-  if (x == 0) x = y;
-  else
-  {
-    p = x ;
-    i = x->next; 
-    /*@ invariant < config > < env > x |-> ?x  i |-> ?i  p |-> ?p  !rho </ env >
-                             < heap >
-                               lseg(?x , ?p)(?A1) 
-                               ?p |-> ?v : (nodeList . val)
-                               (?p +Int 1) |-> ?i : (nodeList . next)
-                                list(?i)(?A2)  
-                               !H
-                             </ heap > 
-                             < form > (?A1 @ [?v] @ ?A2) === A </ form > 
-                             C </ config > */
-    while (i != 0)
-    {
-        p = i ;
-        i = i->next;
-    }
-    p->next = y ;
+  if (x == 0)
+   return y;
+
+  p = x;
+  p->next = p->next;
+  /*@ invariant < config > < env > x |-> ?x  p |-> ?p  !rho </ env >
+                           < heap >
+                             lseg(?x , ?p)(?A1) 
+                             ?p |-> ?v : (nodeList . val)
+                             (?p +Int 1) |-> ?i : (nodeList . next)
+                              list(?i)(?A2)  
+                             !H
+                           </ heap > 
+                           < form > (?A1 @ [?v] @ ?A2) === A </ form > 
+                           C </ config > */
+  while (p->next) {
+    p = p->next;
+    p->next = p->next;
   }
+  p->next = y ;
+
   return x;
 }
 
@@ -86,12 +84,23 @@ struct nodeList* create(int n)
 void destroy(struct nodeList* x)
 {
   struct nodeList *y;
-  while(x != 0)
+  while(x)
   {
     y = x->next;
     free(x);
     x = y;
   }
+}
+
+
+void print(struct nodeList* x)
+{
+  while(x)
+  {
+    printf("%d ",x->val);
+    x = x->next;
+  }
+  printf("\n"); 
 }
 
 
@@ -102,7 +111,7 @@ int main()
   struct nodeList *y;
   x = create(5);
   // /*@ assert < config > 
-             // < env > x |-> ?x  y |-> ?x </ env > 
+             // < env > x |-> ?x  y |-> ?y </ env > 
              // < heap > list(?x)([1, 2, 3, 4, 5]) </ heap > 
              // < form > TrueFormula </ form > </ config > */
   x = reverse(x);
@@ -116,7 +125,8 @@ int main()
              < heap > (.).Map </ heap >
              < form > TrueFormula </ form > </ config > */
   x = create(5);
-  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
+  printf("x: ");
+  print(x);
   /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
                         < heap > list(?x)(!A) </ heap >
                         < form > TrueFormula </ form > </ config > */

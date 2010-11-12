@@ -167,6 +167,9 @@ Memory rearrangement
     <form> NtPhi => FalseFormula </form>
   if check-sat(NtPhi) ==Bool "unsat"
 ***)
+  rule
+    <heap_> N |-> _:_ <_/heap>
+    <form> _ => FalseFormula </form>
 
 
 --------------------------------------------------------------------------------
