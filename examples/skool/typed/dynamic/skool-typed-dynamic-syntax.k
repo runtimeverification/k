@@ -56,6 +56,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                | super
                | Exp . Id [prec 1] 
                | Exp instanceOf Id [prec 0 strict(1)]
+               | Exp as Id [prec 0 strict(1)]
              --- </SKOOL added>
 
 --- declarations

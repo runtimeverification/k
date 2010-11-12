@@ -8,5 +8,6 @@ rew run('p06) .
 rew run('p07) .
 rew run('p08) .
 rew run('p09) .
+rew run('p10) .
 
 

@@ -12,7 +12,8 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
               | s | t | u 
               | v | w | x 
               | y | z 
-              | m1 | m2 | m3
+              | m0 | m1 | m2 | m3 | m4
+              | aux
               | divide2 | collatz 
               | dummy1 | dummy2 | init 
               | reverse | printAll 
@@ -358,5 +359,53 @@ class main {
 
 --- 6 8 20 40 87
 
+
+macro p10 = 
+
+   class a {
+     var x : int ;
+     method a() {
+       x=7;
+     }
+     method m0() : int {
+       return x;
+     }
+   }
+   class b extends a {
+     var x : bool ;
+     method b() {
+       super.a();
+       x=true;
+     }
+     method m1() : int {
+       return super.x;
+     }
+     method m2() : int {
+       var o:a;
+       o=this;
+       return o.x;
+     }
+     method m3() : int {
+       return (this as a).x;
+     } 
+     method m4() : int {
+       return aux(this);
+     }
+     method aux(o:a) : int {
+       return o.x;
+     }
+   }
+   class main {
+     method main() {
+       var o:b;
+       o=new b();
+       write(o.m0());
+       write(o.m1());
+       write(o.m2());
+       write(o.m3());
+       write(o.m4());
+     }
+   }
+--- 7 7 7 7 7
 endkm
 

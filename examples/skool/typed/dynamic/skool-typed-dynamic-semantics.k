@@ -248,6 +248,11 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule [instanceOf]: <k> _instanceOf_(V, C) => subtype(typeOf(V),C,Cls) <_/k>
        <classes> Cls:Bag </classes>
 
+  rule [as]: <k> _as_(obj(_,L),C1) => obj(C1,L) <_/k>
+             <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
+             <classes>Cls</classes>
+        if subtype(C2, C1, Cls)
+
 ---</SKOOL added>
 
 ---------------------
@@ -285,7 +290,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <crntObj> Obj':K => Obj </crntObj>
        <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
        <return> Tp':Type => Tp </return>
-       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
+       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(cast(Tpl,Vl))) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
        <classes> Cls </classes>
     if subtype(typeOf(Vl), Tpl, Cls)
@@ -314,7 +319,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> l-value(X) => loc(L) <_/k> <env_> X|->L <_/env> 
   rule <k> l-value(lookup(L)) => loc(L) <_/k>
 
-  rule <k> loc(L)=V1; => . <_/k> <store_> L|->(V2=>cast(V2,V1)) <_/store>
+  rule <k> loc(L)=V1; => . <_/k> <store_> L|->(V2=>getList{K}(cast(typeOf(V2),V1))) <_/store>
        <classes> Cls </classes>
     if subtype(typeOf(V1), typeOf(V2),Cls)
 
@@ -326,9 +331,12 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> l-value(_._(obj(C,L), X)  => lookupF(<envStack>  (C :: EnvC) EStack:List </envStack>, X)) <_/k>
       <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
  
-  syntax K ::= cast ( K , K )
-  macro cast(obj(C,_), obj(_,L)) = obj(C,L) 
-  macro cast(V1,V2) = V2 [owise]
+  syntax List{Val} ::= cast ( List{Type} , List{Val} )
+  macro cast((C1,C2,Cl:List{Id}),(V1,V2,Vl))
+      = cast(C1,V1), cast(C2,V2), cast(Cl, Vl)
+  macro cast(.List{Bottom},.List{Bottom}) = .List{Bottom}
+  macro cast(C, obj(_,L)) = obj(C,L) 
+  macro cast(T, V2) = V2 [owise]
 
 ---</SKOOL modified>
 
