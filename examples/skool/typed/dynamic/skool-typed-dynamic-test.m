@@ -17,7 +17,9 @@ rew run('p15) .
 rew run('p16) .
 rew run('p17) .
 rew run('p18) .
-
+rew run('p19) .
+rew run('p20) .
+rew run('p21) .
 rew run('p22) .
 
 

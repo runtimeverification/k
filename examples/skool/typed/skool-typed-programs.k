@@ -760,6 +760,89 @@ class main {
 	}
 }
 
+macro p19 =
+class c {
+	method c() {  }
+	method test() {
+		write(-1);
+		if this instanceOf c1 then write(1);
+		if this instanceOf c2 then write(2);
+		if this instanceOf c3 then write(3);
+	}
+}
+class c1 extends c {
+	method c1() { super.c(); }
+}
+class c2 extends c {
+	method c2() { super.c(); }
+}
+class c3 extends c {
+	method c3() { super.c(); }
+}
+class main {
+	method main() {
+		(new c()).test();
+		(new c1()).test();
+		(new c2()).test();
+		(new c3()).test();
+	}
+}
+
+--- the way this runs seems wrong currently
+--- should be:
+--- -1 1 -1 2 -1 3
+
+
+--- and I think this program should probably not be allowed
+macro p20 =
+var x : int;
+class main {
+	var a : int;
+	method main() {
+		a = 1;
+		write(a);
+		if (x == 0) then {
+			x = 1;
+			this.main();
+		}
+	}
+}
+
+--- 1  1
+
+macro p21 =
+var x : int;
+class a {
+	var x : int;
+	method a() { x = 1; }
+	method val() : int { return x; }
+}
+var y : int;
+class b {
+	var y : int;
+	method b() { y = 2; }
+	method val() : int { return y; }
+}
+class main {
+	var a : a;
+	var b : b;
+	method main() {
+		a = new a(); 
+		write (a.val());
+		b = new b(); 
+		write (b.val());
+		x = 3; 
+		write(x);
+		y = 4; 
+		write (y);   
+		write(a.val());
+		write(b.val());
+	}
+}
+
+--- 1 2 3 4 1 2 
+
+--- 1  1
 
 macro p22 = 
 
@@ -808,5 +891,14 @@ macro p22 =
      }
    }
 --- 7 7 7 7 7
+
+
+--- syntax Stmts ::= ss01
+--- macro ss01 =
+--- var x;
+--- x = 2 ;
+--- x = x + 2;
+--- write(x);
+
 endkm
 
