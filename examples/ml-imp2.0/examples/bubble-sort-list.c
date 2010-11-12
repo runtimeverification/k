@@ -85,6 +85,31 @@ struct nodeList* bubble(struct nodeList* x)
   return x;
 }
 
+struct nodeList* print(struct nodeList* x)
+/*@ pre < config > 
+             < env > x |-> x0 </ env > 
+             < heap > list(x0)(A) H </ heap > 
+             < form > TrueFormula </ form > C </ config > */
+/*@ post < config > 
+             < env > ?rho </ env > 
+             < heap > list(x0)(A) H </ heap > 
+             < form > returns x0 </ form > C </ config > */
+{
+  struct nodeList* smth;
+  smth = x;
+/*@ invariant < config > 
+             < env > x |-> x0  smth |-> ?s </ env > 
+             < heap > lseg(x0,?s)(?A) list(?s)(?A') H </ heap > 
+             < form > A === ?A @ ?A' </ form > C </ config > */
+  while(smth != 0)
+  {
+    printf("%d ", smth->val);
+    smth = smth->next;
+  }
+  printf("\n");
+  return x;
+}
+
 void destroy(struct nodeList* x)
 {
   struct nodeList *y;
@@ -106,7 +131,10 @@ int main()
              < env > x |-> ?x  y |-> ?y </ env >
              < heap > list(?x)([1,2,3,4,5]) </ heap >
              < form > TrueFormula </ form > </ config > */
+  x->val = 10;
+  print(x);
   x = bubble(x);
+  print(x);
   destroy(x);
   return 0;
 }
