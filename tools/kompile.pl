@@ -549,6 +549,7 @@ if ($crop == 1 && !@crop_modules) {
 if ($flat)
 {
 	flattening($language_file_name);
+	exit(0);
 }
 
 # Following is executed whenever the option -c was not selected
