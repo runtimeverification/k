@@ -290,12 +290,12 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <crntObj> Obj':K => Obj </crntObj>
        <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
        <return> Tp':Type => Tp </return>
-       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(cast(Tpl,Vl))) <_/store>
+       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(castAll(Tpl,Vl))) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
        <classes> Cls </classes>
-    if subtype(typeOf(Vl), Tpl, Cls)
+    if subtypeAll(typeOfAll(Vl), Tpl, Cls)
 
-  rule <k> return(V); ~> _ => V ~> K </k>
+  rule <k> return(V); ~> _ => cast(Tp, V) ~> K </k>
        <fstack> Env # K # Obj # Tp' => . <_/fstack>
        <crntObj> _ => Obj </crntObj>
        <env> _ => Env </env>
@@ -319,7 +319,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> l-value(X) => loc(L) <_/k> <env_> X|->L <_/env> 
   rule <k> l-value(lookup(L)) => loc(L) <_/k>
 
-  rule <k> loc(L)=V1; => . <_/k> <store_> L|->(V2=>getList{K}(cast(typeOf(V2),V1))) <_/store>
+  rule <k> loc(L)=V1; => . <_/k> <store_> L|->(V2=>cast(typeOf(V2),V1)) <_/store>
        <classes> Cls </classes>
     if subtype(typeOf(V1), typeOf(V2),Cls)
 
@@ -331,10 +331,11 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> l-value(_._(obj(C,L), X)  => lookupF(<envStack>  (C :: EnvC) EStack:List </envStack>, X)) <_/k>
       <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
  
-  syntax List{Val} ::= cast ( List{Type} , List{Val} )
-  macro cast((C1,C2,Cl:List{Id}),(V1,V2,Vl))
-      = cast(C1,V1), cast(C2,V2), cast(Cl, Vl)
-  macro cast(.List{Bottom},.List{Bottom}) = .List{Bottom}
+  syntax List{Val} ::= castAll ( List{Type} , List{Val} )
+  macro castAll((Tp,Tpl),(V,Vl))
+      = cast(Tp,V), castAll(Tpl, Vl)
+  macro castAll(.List{Bottom},.List{Bottom}) = .List{Bottom}
+  syntax Val ::= cast( Type , Val )
   macro cast(C, obj(_,L)) = obj(C,L) 
   macro cast(T, V2) = V2 [owise]
 
@@ -366,19 +367,16 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro initVal(_`[`](T:Type)) = array(_`[`](T),0,0) 
   macro initVal(C:Id) = obj(C,0)
 
-  syntax List{Type} ::= typeOf ( List{Val} ) [strict]
----<SKOOL added>
----  syntax List{Bottom} ::= typeOf ( List{Bottom} ) [ditto]
----  syntax Type ::= typeOf ( Val ) [ditto]
----</SKOOL added>
+  syntax List{Type} ::= typeOfAll ( List{Val} )
+  macro typeOfAll(V:Val,Vl:List{Val}) = typeOf(V),typeOfAll(Vl) 
+  macro typeOfAll(.List{Bottom}) = .List{Bottom} 
+  syntax Type ::= typeOf ( Val )
 
   macro typeOf(function`(_`,_`,_`)(T,_,_)) = T 
   macro typeOf(array(T,_,_)) = T
   macro typeOf(I:Int) = int 
   macro typeOf(B:Bool) = bool 
   macro typeOf(none) = void 
-  macro typeOf(V1:Val,V2:Val,Vl:List{Val}) = typeOf(V1),typeOf(V2,Vl) 
-  macro typeOf(.List{Bottom}) = .List{Bottom} 
 ---<SKOOL added>
   macro typeOf(obj(C,_)) = C
   macro typeOf(objEnv(<envStack> C :: _ <_/envStack>)) = C
@@ -425,9 +423,10 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- subtype relationship
 
-  syntax Bool ::= subtype ( List{Type} , List{Type} , Bag ) 
-  macro subtype((Tp1:Type,Tp1':Type,Tpl1:List{Type}),(Tp:Type,Tp':Type,Tpl:List{Type}), Cls) = subtype(Tp1,Tp, Cls) andBool subtype((Tp1',Tpl1), (Tp',Tpl), Cls)
-  macro subtype(.List{Bottom},.List{Bottom},_) = true 
+  syntax Bool ::= subtypeAll ( List{Type} , List{Type} , Bag ) 
+  macro subtypeAll((Tp:Type,Tpl:List{Type}),(Tp':Type,Tpl':List{Type}), Cls) = subtype(Tp,Tp', Cls) andBool subtypeAll(Tpl, Tpl', Cls)
+  macro subtypeAll(.List{Bottom},.List{Bottom},_) = true 
+  syntax Bool ::= subtype ( Type , Type , Bag ) 
   macro subtype(Tp, Tp, _) = true
   macro subtype(object, C, _) = C ==Bool object
   rule subtype((C1 => C2), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>)) 
