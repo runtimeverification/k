@@ -1,0 +1,114 @@
+load ../../../k-prelude.maude
+load ../theories/core-theory.maude
+load ../theories/integer-theory.maude
+
+
+mod SUBST-BUILTIN-MODULE is inc MATHEMATICAL-OBJECT-BUILTIN-MODULE + K-PROPER .
+  sort SubstItem NeSubst Subst .
+  subsorts SubstItem < NeSubst < Subst .
+
+  op .Subst : -> Subst .
+  op _;_ : Subst Subst -> Subst [assoc comm id: .Subst] .
+  op _;_ : NeSubst Subst -> NeSubst [ditto] .
+  op _;_ : Subst NeSubst -> NeSubst [ditto] .
+  op _<-_ : MathObj++ MathObj++ -> SubstItem .
+  op _<-_ : List List -> SubstItem .
+  op _<-_ : Bag Bag -> SubstItem .
+  op _<-_ : Set Set -> SubstItem .
+  op _<-_ : Map Map -> SubstItem .
+  op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
+
+  var Obj Obj1 Obj2 Obj1' Obj2' : MathObj++ .
+  var ObjList ObjList' : List{MathObj++} .
+  var List : List .
+  var Bag : Bag .
+  var Set : Set .
+  var Map : Map .
+  eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
+   = (Obj1 <- Obj1') ; (Obj2 <- Obj2') ; (ObjList <- ObjList') .
+  eq .List{MathObj++} <- .List{MathObj++} = .Subst .
+  eq Obj <- Obj = .Subst .
+  eq List <- List = .Subst .
+  eq Bag <- Bag = .Subst .
+  eq Set <- Set = .Subst .
+  eq Map <- Map = .Subst .
+endm
+
+
+mod CONFIG-BUILTIN-MODULE is
+  inc PL-ID + K-PROPER .
+  inc MATHEMATICAL-INT-BUILTIN-MODULE + SUBST-BUILTIN-MODULE .
+
+  sorts ?BagItem !BagItem FreeBagItem .
+  subsort ?BagItem !BagItem FreeBagItem < BagItem .
+  sorts ?MapItem !MapItem FreeMapItem .
+  subsort ?MapItem !MapItem FreeMapItem < MapItem .
+  op skolem : Nat ?MapItem -> FreeMapItem .
+  op skolem : Nat ?BagItem -> FreeMapItem .
+  op co-skolem : Nat FreeMapItem -> !MapItem .
+  op co-skolem : Nat FreeBagItem -> !BagItem .
+
+  sort Value TypedValue .
+  subsort MathObj++ < Value .
+  sort Void NvExpressionType ExpressionType .  
+  subsort Void NvExpressionType < ExpressionType .  
+  sort Field .
+  sort HeapLabel .
+
+  ops feasible infeasible : -> CellLabel .
+  ops tasks config k env heap form subst counter : -> CellLabel .
+
+  op errorBag : -> [Bag] .
+  op _===>_ : Bag Bag -> Bag [frozen] .
+  op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op _=match=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
+  op skolemize : Nat Bag -> Bag .
+  op co-skolemize : Nat Bag -> Bag .
+
+  op returns _ : Value -> Formula .
+  op unit : -> Value . 
+  op tv : ExpressionType Value -> TypedValue .
+  op derive : -> KLabel .
+  op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
+  op _|->_:_ : Int++ Value Field -> MapItem .
+
+  *** hack
+  op isInt : Int++ -> Bool .
+
+  ops val next : -> Id .
+  ops nodeList : -> Id .
+
+  ops val left right : -> Id .
+  ops treeNode : -> Id .
+
+  ops treeNodeList : -> Id .
+endm
+
+
+mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-CONDITION-SEARCH .
+  subsort HeapLabel < Bag .
+  subsorts Formula Subst MathObj++ < Builtins KResult .
+  subsorts List{MathObj++} Set{MathObj++} < Builtins KResult .
+  subsort Id Field < Builtins KProper .
+  subsort Value TypedValue ExpressionType < Builtins KResult .
+
+  op applySubst : Bag Subst -> Bag [strat(2 0)] .
+  op applySubst : KResult Subst -> KResult [strat(2 0)] .
+  op applySubst : Formula Subst -> Formula [strat(2 0)] .
+  op applySubst : Subst Subst -> Subst [strat(2 0)] .
+  op _._ : Id Id -> Field .
+  op _._ : Field Id -> Field .
+
+***(
+  op <_>_</_> : CellLabel Int++ CellLabel -> BagItem
+  [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Formula CellLabel -> BagItem
+  [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Subst CellLabel -> BagItem
+  [prec 0 format(nib g b o+ -b g b o)] .
+  op _=>_ : Int++ Int++ -> Int++ [prec 125] .
+  op _=>_ : Formula Formula -> Formula [prec 125] .
+  op _=>_ : Subst Subst -> Subst [prec 125] .
+***)
+endm
+

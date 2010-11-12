@@ -1,0 +1,11 @@
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.5 built: May  7 2010 18:28:32
+	    Copyright 1997-2010 SRI International
+		   Fri Nov 12 13:56:31 2010
+==========================================
+rewrite in TEST : check('prog) .
+rewrites: 3370 in 7ms cpu (8ms real) (421302 rewrites/second)
+result BagItem: 2 feasible and 1 infeasible paths
+Bye.

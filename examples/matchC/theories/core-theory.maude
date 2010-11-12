@@ -1,0 +1,106 @@
+mod FORMULA-BUILTIN-MODULE is inc PL-BOOL + PL-STRING .
+  sorts Truth Atom NtFormula Formula .
+  subsort Atom < NtFormula .
+  subsort Truth NtFormula < Formula .  
+
+  ops TrueFormula FalseFormula : -> Truth .
+  op @_ : Bool -> Atom [prec 0] .
+  op _/\_ : NtFormula Formula -> NtFormula
+  [prec 55 assoc comm id: TrueFormula] .
+  op _/\_ : Formula Formula -> Formula [ditto] .
+  op ~_ : Atom -> Atom [prec 0] .
+  op ~_ : Formula -> NtFormula [ditto] .
+  op _\/_ : NtFormula Formula -> NtFormula
+  [prec 59 assoc comm id: FalseFormula] .
+  op _\/_ : Formula Formula -> Formula [ditto] .
+  op _===>_ : Formula Formula -> NtFormula [prec 61] .
+
+  op check-sat : Formula -> String .
+
+  var Atom : Atom .
+  vars NtPhi NtPhi1 NtPhi2 NtPhi' : NtFormula .
+  vars Phi Phi1 Phi2 Phi' : Formula .
+
+  eq  @ true =  TrueFormula .
+  eq @ false = FalseFormula .
+
+  eq  ~(TrueFormula) = FalseFormula .
+  eq ~(FalseFormula) =  TrueFormula .
+  eq ~(~(Phi)) = Phi .
+
+  eq  TrueFormula \/  TrueFormula =  TrueFormula .
+  eq FalseFormula /\ FalseFormula = FalseFormula .
+  eq  TrueFormula \/ NtPhi =  TrueFormula .
+  eq FalseFormula /\ NtPhi = FalseFormula .
+  eq NtPhi /\ NtPhi = NtPhi .
+  eq NtPhi \/ NtPhi = NtPhi .
+  eq NtPhi /\ ~(NtPhi) = FalseFormula .
+  eq NtPhi \/ ~(NtPhi) =  TrueFormula .
+
+  eq Phi ===>  TrueFormula = TrueFormula .
+  eq Phi ===> FalseFormula = ~ Phi .
+---  leads to in infinite rewriting
+---  eq FalseFormula ===> Phi = TrueFormula .
+  eq  TrueFormula ===> Phi = Phi .
+
+
+  eq Atom /\ Phi1 ===> Atom /\ Phi2 = Atom /\ Phi1 ===> Phi2 .
+
+  eq Phi ===> (NtPhi1 \/ NtPhi2) = (Phi ===> NtPhi1) \/ (Phi ===> NtPhi2) .
+
+--- very, very bad eqs
+---   eq NtPhi /\ (NtPhi1 \/ NtPhi2) = (NtPhi /\ NtPhi1) \/ (NtPhi /\ NtPhi2) .
+---   eq (NtPhi1 \/ NtPhi2) ===> Phi = (NtPhi1 ===> Phi) \/ (NtPhi2 ===> Phi) .
+---   eq Phi ===> (NtPhi1 \/ NtPhi2) = (Phi ===> NtPhi1) \/ (Phi ===> NtPhi2) .
+
+--- bad, bad eq
+  eq NtPhi /\ (NtPhi1 \/ NtPhi2) ===> NtPhi'
+   = (NtPhi /\ NtPhi1 ===> NtPhi') \/ (NtPhi /\ NtPhi2 ===> NtPhi') [owise] .
+
+  op VALID : Formula -> Bool .
+  eq VALID(TrueFormula) = true .
+endm
+
+
+mod MATHEMATICAL-OBJECT-BUILTIN-MODULE is inc FORMULA-BUILTIN-MODULE + PL-NAT .
+***(
+?Sort stands for bound symbolic mathematical objects
+!Sort stands for unbound symbolic mathematical objects
+FreeSort stands for unbound symbolic mathematical objects
+Sort stands for ground, non-symbolic mathematical objects
+Sort++ stands for all the above
+***)
+  sorts ?MathObj !MathObj FreeMathObj MathObj MathObj++ .
+  sorts List{MathObj++} Set{MathObj++} .
+  subsort ?MathObj !MathObj FreeMathObj MathObj < MathObj++ .
+  subsort MathObj++ < List{MathObj++} Set{MathObj++} .
+  op skolem : Nat ?MathObj -> FreeMathObj .
+  ---[strat(0)] .
+  op co-skolem : Nat FreeMathObj -> !MathObj .
+  ---[strat(0)] .
+
+  op .List{MathObj++} : -> List{MathObj++} .
+  op _`,_ : List{MathObj++} List{MathObj++} -> List{MathObj++}
+  [assoc id: .List{MathObj++}] .
+
+  op .Set{MathObj++} : -> Set{MathObj++} .
+  op _&_ : Set{MathObj++} Set{MathObj++} -> Set{MathObj++}
+  [assoc comm id: .Set{MathObj++}] .
+  eq Obj & Obj = Obj .
+
+  op errorObj : -> [MathObj++] .
+
+  --- must not be comm (why?)
+  op _===_ : MathObj++ MathObj++ -> Atom [comm] .
+  op _===_ : List{MathObj++} List{MathObj++} -> Atom [ditto] .
+
+
+  vars Obj Obj1 Obj1' Obj2 Obj2' : MathObj++ .
+  vars ObjList1 ObjList2 : List{MathObj++} .
+
+  eq Obj === Obj = TrueFormula .
+  eq (Obj1, Obj1', ObjList1) === (Obj2, Obj2', ObjList2)
+   = (Obj1 === Obj2) /\ (Obj1' === Obj2') /\ (ObjList1 === ObjList2) .
+  eq .List{MathObj++} === .List{MathObj++} = TrueFormula .
+endm
+

@@ -1,0 +1,216 @@
+load utils.maude
+
+
+---mod SMT-LIB is inc MATHEMATICAL-INT + VAR-UTILS + PL-STRING + PL-CONVERSION .
+mod SMT-LIB is inc VAR-UTILS + PL-STRING + PL-CONVERSION .
+--- Define a SMT formula
+--- Use SMT only for integer theory
+  sort SMTVar .
+  subsort ?MathObj FreeMathObj < SMTVar .
+  sort SMTQuantVar SMTQuantVarSet .
+  subsort SMTQuantVar < SMTQuantVarSet .
+  sort SMTTerm .
+  subsort Int SMTVar < SMTTerm .
+  sort SMTFormula .
+  sort SMTQuerry .
+  
+  op `(_Int`) : SMTVar -> SMTQuantVar .
+  op `(_Seq`) : SMTVar -> SMTQuantVar .
+  op `(_Tree`) : SMTVar -> SMTQuantVar .
+  op __ : SMTQuantVarSet SMTQuantVarSet -> SMTQuantVarSet [assoc comm] .
+  
+  op `(~_`) : SMTTerm -> SMTTerm .
+  op `(+__`) : SMTTerm SMTTerm -> SMTTerm .
+  op `(-__`) : SMTTerm SMTTerm -> SMTTerm .
+  op `(*__`) : SMTTerm SMTTerm -> SMTTerm .
+  op `(div__`) : SMTTerm SMTTerm -> SMTTerm .
+  op `(rem__`) : SMTTerm SMTTerm -> SMTTerm .
+
+  op `(=__`) : SMTTerm SMTTerm -> SMTFormula .
+  op `(>__`) : SMTTerm SMTTerm -> SMTFormula .
+  op `(<__`) : SMTTerm SMTTerm -> SMTFormula .
+  op `(>=__`) : SMTTerm SMTTerm -> SMTFormula .
+  op `(<=__`) : SMTTerm SMTTerm -> SMTFormula .
+
+  op `(not_`) : SMTFormula -> SMTFormula .
+  op `(implies__`) : SMTFormula SMTFormula -> SMTFormula .
+  op `(and__`) : SMTFormula SMTFormula -> SMTFormula .
+  op `(or__`) : SMTFormula SMTFormula -> SMTFormula .
+  op `(xor__`) : SMTFormula SMTFormula -> SMTFormula .
+  op `(iff__`) : SMTFormula SMTFormula -> SMTFormula .
+
+  op `(exists__`) : SMTQuantVarSet SMTFormula -> SMTFormula .
+  op `(forall__`) : SMTQuantVarSet SMTFormula -> SMTFormula .
+
+  op `(declare-funs`(_`)`) : SMTQuantVarSet -> SMTQuerry .
+  op `(assert_`) : SMTFormula -> SMTQuerry .
+  op `(check-sat`) : -> SMTQuerry .
+
+  op .emptyQuerry : -> SMTQuerry .
+  op __ : SMTQuerry SMTQuerry -> SMTQuerry [assoc id: .emptyQuerry ] .
+
+  op `(len_`) : SMTVar -> SMTTerm .
+
+
+--- Convert a ML integer formula into a SMT formula
+  op toSMT_ : Formula -> SMTQuerry [strat(1)].
+  op mkSMTQuantVar : MathObj++ -> SMTQuantVar .
+  op mkSMTQuantVarSet : Set{MathObj++} -> SMTQuantVarSet .
+  op mkSMTTerm : Int++ -> SMTTerm .
+  op mkSMTFormula : Formula -> SMTFormula .
+
+  var N : Nat .
+  vars I I1 I2 : Int++ .
+  var NtPhi1 NtPhi2 : NtFormula .
+  var Phi : Formula .
+  var ?Obj : ?MathObj .
+  var FreeObj : FreeMathObj .
+  var Obj : MathObj++ .
+  var ObjSet : Set{MathObj++} .
+
+ ceq toSMT(Phi) =
+    if ObjSet =/=Bool .Set{MathObj++} then
+      (declare-funs (mkSMTQuantVarSet(ObjSet)))
+    else
+      .emptyQuerry
+    fi
+    (assert mkSMTFormula(Phi))
+    (check-sat)
+  if ObjSet := getFreeVarSet(Phi) & get?VarSet(Phi) .
+
+  eq mkSMTQuantVar(?Obj:?Int) = (?Obj:?Int Int) .
+  eq mkSMTQuantVar(FreeObj:FreeInt) = (FreeObj:FreeInt Int) .
+
+ ceq mkSMTQuantVarSet(Obj & ObjSet)
+   = mkSMTQuantVar(Obj) mkSMTQuantVarSet(ObjSet)
+  if ObjSet =/=Bool .Set{MathObj++} .
+  eq mkSMTQuantVarSet(Obj) = mkSMTQuantVar(Obj) .
+
+  eq mkSMTTerm(-Int I) = `(~_`)(mkSMTTerm(I)) .
+  eq mkSMTTerm(I1 +Int I2) = (+ mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTTerm(I1 -Int I2) = (- mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTTerm(I1 *Int I2) = (* mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTTerm(I1 /Int I2) = (div mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTTerm(I1 %Int I2) = (rem mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTTerm(I) = I [owise] .
+
+  eq mkSMTFormula(I1 === I2) = (= mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTFormula(@(I1 >Int I2)) = (> mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTFormula(@(I1 <Int I2)) = (< mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTFormula(@(I1 >=Int I2)) = (>= mkSMTTerm(I1) mkSMTTerm(I2)) .
+  eq mkSMTFormula(@(I1 <=Int I2)) = (<= mkSMTTerm(I1) mkSMTTerm(I2)) .
+
+  eq mkSMTFormula(~ Phi) = (not mkSMTFormula(Phi)) .
+  eq mkSMTFormula(NtPhi1 ===> NtPhi2)
+   = (implies mkSMTFormula(NtPhi1) mkSMTFormula(NtPhi2)) .
+  eq mkSMTFormula(NtPhi1 /\ NtPhi2)
+   = (and mkSMTFormula(NtPhi1) mkSMTFormula(NtPhi2)) .
+  eq mkSMTFormula(NtPhi1 \/ NtPhi2)
+   = (or mkSMTFormula(NtPhi1) mkSMTFormula(NtPhi2)) .
+---   eq mkSMTFormula(NtPhi1 xor NtPhi2) = (xor mkSMTFormula(NtPhi1) mkSMTFormula(NtPhi2)) .
+---   eq mkSMTFormula(NtPhi1 iff NtPhi2) = (iff mkSMTFormula(NtPhi1) mkSMTFormula(NtPhi2)) .
+
+---  eq mkSMTTerm(len(Obj)) = (len Obj) .
+
+
+*** Converst a SMT formula into a string
+  op toString_ : SMTVar -> String .
+  op toString_ : SMTQuantVar -> String .
+  op toString_ : SMTQuantVarSet -> String .
+  op toString_ : SMTTerm -> String .
+  op toString_ : SMTFormula -> String .
+  op toString_ : SMTQuerry -> String .
+
+  var SMTVar : SMTVar .  var SMTQuantVar : SMTQuantVar .  var SMTQuantVarSet : SMTQuantVarSet .
+  vars T T1 T2 : SMTTerm .  vars F F1 F2 : SMTFormula .  var Q Q' : SMTQuerry .
+
+  eq toString(?Int(N)) = "?t__" +String Rat2String(N, 10) .
+  eq toString(?Obj) = string(getName(upTerm(?Obj))) [owise] .
+
+  eq toString(skolem(N, ?Obj))
+   = "t__" +String Rat2String(N, 10) +String
+     "__" +String toString(?Obj) .
+  eq toString(FreeInt(N)) = "t__" +String Rat2String(N, 10) .
+  eq toString(FreeObj) = string(getName(upTerm(FreeObj))) [owise] .
+
+  eq toString(SMTVar Int) = "(" +String toString(SMTVar) +String " Int)" .
+  eq toString(SMTQuantVar SMTQuantVarSet)
+   = toString(SMTQuantVar) +String " " +String toString(SMTQuantVarSet) .
+
+  eq toString(I:Int) = Rat2String(I:Int, 10) .  
+  eq toString(`(~_`)(T)) = "(~ " +String toString(T) +String ")" .
+  eq toString(+ T1 T2)
+   = "(+ " +String toString(T1) +String " " +String toString(T2) +String ")" .
+  eq toString(- T1 T2)
+   = "(- " +String toString(T1) +String " " +String toString(T2) +String ")" .
+  eq toString(* T1 T2)
+   = "(* " +String toString(T1) +String " " +String toString(T2) +String ")" .
+  eq toString(div T1 T2)
+   = "(div " +String toString(T1) +String
+     " " +String toString(T2) +String ")" .
+  eq toString(rem T1 T2)
+   = "(rem " +String toString(T1) +String
+     " " +String toString(T2) +String ")" .
+
+  eq toString(= T1 T2)
+   = "(= " +String toString(T1) +String " " +String toString(T2) +String ")" .
+  eq toString(> T1 T2)
+   = "(> " +String toString(T1) +String " " +String toString(T2) +String ")" .
+  eq toString(< T1 T2)
+   = "(< " +String toString(T1) +String " " +String toString(T2) +String ")" .
+  eq toString(>= T1 T2)
+   = "(>= " +String toString(T1) +String " " +String toString(T2) +String ")" .
+  eq toString(<= T1 T2)
+   = "(<= " +String toString(T1) +String " " +String toString(T2) +String ")" .
+
+  eq toString(not F) = "(not " +String toString(F) +String ")" .
+  eq toString(implies F1 F2)
+   = "(implies " +String toString(F1) +String " " +String
+     toString(F2) +String ")" .
+  eq toString(and F1 F2)
+   = "(and " +String toString(F1) +String " " +String
+     toString(F2) +String ")" .
+  eq toString(or F1 F2)
+   = "(or " +String toString(F1) +String " " +String
+     toString(F2) +String ")" .
+  eq toString(xor F1 F2)
+   = "(xor " +String toString(F1) +String " " +String
+     toString(F2) +String ")" .
+  eq toString(iff F1 F2)
+   = "(iff " +String toString(F1) +String " " +String
+     toString(F2) +String ")" .
+
+  eq toString(exists SMTQuantVarSet F)
+   = "(exists " +String toString(SMTQuantVarSet) +String " " +String
+     toString(F) +String ")" .
+  eq toString(forall SMTQuantVarSet F)
+   = "(forall " +String toString(SMTQuantVarSet) +String " " +String
+     toString(F) +String ")" .
+
+  eq toString(declare-funs (SMTQuantVarSet))
+   = "(declare-funs (" +String toString(SMTQuantVarSet) +String "))" .
+  eq toString(assert F) = "(assert " +String toString(F) +String ")" .
+  eq toString(check-sat) = "(check-sat)" .
+
+ ceq toString(Q Q') = toString(Q) +String "\n" +String toString(Q')
+  if Q =/=Bool .emptyQuerry andBool Q' =/=Bool .emptyQuerry .
+  eq toString(.emptyQuerry) = "" .
+
+  eq toString(len SMTVar) = "(len " +String toString(SMTVar) +String ")" .
+endm
+
+mod SMT-INTERFACE is inc SMT-LIB .
+  op callSolvers : String String String -> String
+        [special (id-hook StringOpSymbol (callSolvers)
+                  op-hook stringSymbol (<Strings> : ~> String))] .
+
+  var Phi : Formula .
+
+ ceq check-sat(Phi)
+   = callSolvers(toString(toSMT(Phi)) +String "###EOMTCP###" +String "\r\n",
+                 "128.174.246.122",
+                 "7073")
+  if S:String := toString(toSMT(Phi)) .
+  ---[print "calling Z3 SMT solver...\n" Phi "\n" S:String] .
+endm
+

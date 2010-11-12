@@ -1,0 +1,18 @@
+load config.maude
+load ../theories/sequence-theory.maude
+load ../theories/multiset-theory.maude
+load ../theories/tree-theory.maude
+load ../theories/domain.maude
+load ../heap_patterns/list.maude
+load ../heap_patterns/binary_tree.maude
+
+mod ML-BUILTIN-MODULE is
+  ---including CONFIG .
+  including MATHEMATICAL-INT-BUILTIN-MODULE .
+  including MATHEMATICAL-SEQUENCE-BUILTIN-MODULE .
+  including MATHEMATICAL-MULTISET-BUILTIN-MODULE .
+  including MATHEMATICAL-TREE-BUILTIN-MODULE .
+  including MATHEMATICAL-DOMAIN-BUILTIN-MODULE .
+  ---including LIST-HP .
+endm
+
