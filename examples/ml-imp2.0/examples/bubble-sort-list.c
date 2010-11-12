@@ -26,19 +26,19 @@ struct nodeList* bubble(struct nodeList* x)
 /*@ pre < config >
         < env > x |-> x0 </ env >
         < heap > list(x0)(L) H </ heap >
-        < form > TrueFormula </ form > C 
+        < form > ~(x0 === 0) </ form > C 
         </ config > */
 /*@ post < config >
          < env > ?rho </ env >
          < heap > list(x0)(?L) H </ heap >
-         < form > returns x0 /\ (seq2mset(L) === seq2mset(?L)) /\ isSorted(?L) </ form > C 
+         < form > (seq2mset(L) === seq2mset(?L)) /\ isSorted(?L) </ form > C 
          </ config > */
 {
   int change;
   int tmp;
   struct nodeList* p;
   struct nodeList* r;
-  if (p != 0)
+  if (x != 0)
   {
     change = 1;
 /*@ invariant < config >
@@ -51,7 +51,7 @@ struct nodeList* bubble(struct nodeList* x)
         </ config > */
     while(change == 1)
     {
-      change == 0;
+      change = 0;
       p = x;
       r = x->next;
       
