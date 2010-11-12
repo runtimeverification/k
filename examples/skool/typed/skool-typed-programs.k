@@ -359,8 +359,70 @@ class main {
 
 --- 6 8 20 40 87
 
-
 macro p10 = 
+class c1 {
+	var x : int;
+	var y : int;
+	method c1() { }
+	method setx1(v : int) { x = v;}
+	method sety1(v : int) { y = v;}
+	method getx1() : int { return x; }
+	method gety1() : int { return y; }
+}
+class c2 extends c1 {
+	var y : int;
+	method c2() { }
+	method sety2(v : int) { y = v;}
+	method getx2() : int { return x; }
+	method gety2() : int { return y; }
+}
+class main {
+	method main() {
+		var o2 : c2;
+		o2 = new c2();
+		o2.setx1(11);
+		o2.sety1(12); 
+		o2.sety2(99);
+		write(o2.getx1());
+		write(o2.gety1());
+		write(o2.getx2());
+		write(o2.gety2());
+	}
+}
+
+--- 11 12 11  99
+
+macro p11 =
+class c1 {
+	method c1() { }
+	method m1() : int { return 1; }
+	method m2() : int { return this.m1(); }
+}
+class c2 extends c1 {
+	method c2() { }
+	method m1() : int { return 2; }
+}
+class main {
+	method main() {
+		var o1 : c1;
+		var o2 : c2;
+		o1 = new c1();
+		o2 = new c2();
+		write(o1.m1());
+		write(o2.m1());
+		write(o2.m2());
+	}
+}
+
+--- 1 2 2 
+
+
+
+
+
+
+
+macro p22 = 
 
    class a {
      var x : int ;

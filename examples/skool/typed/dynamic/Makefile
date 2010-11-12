@@ -13,6 +13,9 @@ LATEX_STYLE = bb
 #this is the basename of the main file
 MAIN_FILE = skool-typed-dynamic
 
+# these are additional files that when changed will force rebuilding the semantics
+ADDITIONAL_DEPENDENCIES = ../skool-typed-programs.k
+
 # this is a space-separated list of basename maude files to run
 TESTS = skool-typed-dynamic-test.m
 

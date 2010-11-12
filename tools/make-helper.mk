@@ -1,7 +1,7 @@
 ################################
 # You shouldn't need to change anything below here.
 # The things below are set based on what you set above
-
+# ADDITIONAL_DEPENDENCIES ?=
 ALL_MAUDE_FILES = $(wildcard *.k) $(wildcard *.k) $(wildcard */*.k) $(wildcard */*/*.k) $(wildcard *.m) $(wildcard *.m) $(wildcard */*.m) $(wildcard */*/*.m)  $(wildcard *.kmaude) $(wildcard *.kmaude) $(wildcard */*.kmaude) $(wildcard */*/*.kmaude) $(wildcard *.maude) $(wildcard *.maude) $(wildcard */*.maude) $(wildcard */*/*.maude)
 MAUDE_FILES = $(filter-out %-compiled.maude,$(ALL_MAUDE_FILES))
 TOOL_DIR_FILES = $(wildcard $(TOOL_DIR)/*)
@@ -25,7 +25,7 @@ all: build
 build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
-$(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+$(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME)
 
 # this should build the latex
