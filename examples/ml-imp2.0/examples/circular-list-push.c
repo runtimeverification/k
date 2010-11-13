@@ -6,33 +6,27 @@ struct nodeList {
   struct nodeList *next;
 };
 
-struct nodeList* clpop(struct nodeList* x)
-/*@ pre  < config > < env > x |-> x0 </ env >
+struct nodeList* clpush(struct nodeList* x, int val)
+/*@ pre  < config > < env > x |-> x0 val |-> val0 </ env >
                     < heap > x0 |-> v0 : (nodeList . val)
-                            (x0 +Int 1) |-> ?t : (nodeList . next)
-                             lseg(?t,x0)([?v] @ A)
+                            (x0 +Int 1) |-> t0 : (nodeList . next)
+                             lseg(t0,x0)(A)
                     H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env >  ?rho </ env >
                     < heap > x0 |-> v0 : (nodeList . val)
                             (x0 +Int 1) |-> ?aux : (nodeList . next)
-                            lseg(?aux,x0)(A)
+                            ?aux |-> val0 : (nodeList . val)
+                            (?aux +Int 1) |-> t0 : (nodeList . next)
+                            lseg(t0,x0)(A)
                     H </ heap > 
                     < form > returns x0 </ form > C </ config > */
 {
-  struct nodeList* t;
   struct nodeList* aux;
-  t = x->next;
-  if (x != t)
-  {
-    x->next = t->next;
-    aux = t->next;
-    free(t);
-  }
-  else
-  {
-    free(t);
-  }
+  aux = (struct nodeList*)malloc(sizeof(struct nodeList));
+  aux->val = val;
+  aux->next = x->next;
+  x->next = aux;
   return x;
 }
 
@@ -49,17 +43,16 @@ int main()
   y->next = x;
   x->next = y;
   printf("%d %d\n", x->val, y->val);
-  x = clpop(x);
-  printf("%d\n", x->val);
+  x = clpush(x,9);
+  printf("%d %d %d\n", x->val, x->next->val, x->next->next->val);
   return 0;
 }
 
-/*@ var x0 v0 : FreeInt */
-/*@ var ?x ?v ?t ?aux : ?Int */
-/*@ var ?B ?C ?A1 ?A2 ?A ?A' : ?Seq */
-/*@ var !A : !Seq */
+/*@ var x0 v0 val0 t0 : FreeInt */
+/*@ var ?aux : ?Int */
 /*@ var A : FreeSeq */
 /*@ var ?rho ?H : ?MapItem */
 /*@ var H : FreeMapItem */
 /*@ var C : FreeBagItem */
+
 
