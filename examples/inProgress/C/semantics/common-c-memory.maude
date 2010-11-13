@@ -348,9 +348,15 @@ mod COMMON-SEMANTICS-WRITING is
 		< k > writeBytes(?, dataList(.List{K})) => . ...</ k >
 		: KSentence [metadata "structural"] .
 		
+	--- this general rule is useful for unknowns, abstracts, etc
+	mb rule splitBytes(tv(N:Nat, T:Type))
+		=> dataList(piece(N:Nat, numBitsPerByte))
+		if hasCharType(T:Type)
+		: KSentence [metadata "structural"] .
 	mb rule splitBytes(tv(I:Int, T:Type)) 
 		=> splitIntegerBytes(I:Int, T:Type, value(byteSizeofType(T:Type)))
 		if hasIntegerType(T:Type)
+		andBool (I:Int >=Int 0 orBool I:Int <=Int 0)
 		: KSentence [metadata "structural"] .
 	mb rule splitBytes(tv(F:Float, T:Type)) 
 		=> splitFloatBytes(F:Float, T:Type, value(byteSizeofType(T:Type)))

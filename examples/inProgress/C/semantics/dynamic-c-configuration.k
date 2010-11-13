@@ -29,6 +29,7 @@ kmod C-CONFIGURATION is
 			< functionTranslationUnits > .Map </ functionTranslationUnits >
 			< declarationOrder > .Map </ declarationOrder >
 			--- < messages > .List </ messages >
+			< formula > .K </ formula >
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack > --- stack of "control" cells

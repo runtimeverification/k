@@ -79,6 +79,15 @@ endm
 
 mod COMMON-SEMANTIC-SYNTAX is
 	including INCOMING-MODULES .
+	
+	sort Formula .
+	subsort Formula < K .
+	
+	op True : -> Formula .
+	op False : -> Formula .
+	op _/\_ : Formula Formula -> Formula .
+	op _\/_ : Formula Formula -> Formula .
+	
 	op List : BagItem -> ListItem .
 	op ListToK : List -> K .
 	op Map : Map -> K .
