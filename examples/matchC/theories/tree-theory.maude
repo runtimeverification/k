@@ -23,6 +23,7 @@ mod MATHEMATICAL-TREE-BUILTIN-MODULE
   var Obj Obj' : MathObj++ .
   var TL TR TL' TR' : Tree++ .
 
+  eq TL [Obj] TR === upsilon = FalseFormula .
   eq TL [Obj] TR === TL' [Obj'] TR'
    = Obj === Obj' /\ TL === TL' /\ TR === TR' .
 

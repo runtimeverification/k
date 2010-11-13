@@ -167,16 +167,48 @@ int main()
   struct nodeList* node;
 
   root = sample();
-  /*@ assert < config > < env > root |-> ?root node |-> ?node </ env >
-                        < heap > tree(?root)(!T) </ heap >
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > tree(?root)(!T1) </ heap >
                         < form > TrueFormula </ form > </ config > */
-  node = toListIterative(root);
-  /*@ assert < config > < env > root |-> ?root node |-> ?node </ env >
-                        < heap > list(?node)(tree2seq(!T)) </ heap >
+  node = toListRecursive(root, 0);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > list(?node)(tree2seq(!T1)) </ heap >
                         < form > TrueFormula </ form > </ config > */
   printf("list: ");
   print(node);
   destroy(node);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > (.).Map </ heap >
+                        < form > TrueFormula </ form > </ config > */
+
+
+//  root = sample();
+//  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+//                        ***(< heap > tree(?root)(((upsilon[1]upsilon)[2](upsilon[3]upsilon))[4]((upsilon[5]upsilon)[6](upsilon[7]upsilon))) </ heap > ***)
+//                        < heap > tree(?root)((upsilon[1]upsilon)[2](upsilon[3]upsilon)) </ heap >
+//                        < form > TrueFormula </ form > </ config > */
+//  node = toListIterative(root);
+//  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+//                        < heap > list(?node)([1, 2, 3, 4, 5, 6, 7]) </ heap >
+//                        < form > TrueFormula </ form > </ config > */
+//  destroy(node);
+//  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+//                        < heap > (.).Map </ heap >
+//                        < form > TrueFormula </ form > </ config > */
+  root = sample();
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > tree(?root)(!T2) </ heap >
+                        < form > TrueFormula </ form > </ config > */
+  node = toListIterative(root);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > list(?node)(tree2seq(!T2)) </ heap >
+                        < form > TrueFormula </ form > </ config > */
+  printf("list: ");
+  print(node);
+  destroy(node);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > (.).Map </ heap >
+                        < form > TrueFormula </ form > </ config > */
 
   return 0;
 }
@@ -186,7 +218,7 @@ int main()
 /*@ var ?TS ?A : ?Seq */
 /*@ var A : FreeSeq */
 /*@ var T : FreeTree */
-/*@ var !T : !Tree */
+/*@ var !T1 !T2 : !Tree */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */
 /*@ var C : FreeBagItem */

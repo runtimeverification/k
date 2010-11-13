@@ -138,22 +138,42 @@ void print(struct nodeList* x)
 }
 
 
+/*@ verify */
 int main()
 {
   struct treeNode* root;
   struct nodeList* node;
 
   root = sample();
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > tree(?root)(!T1) </ heap >
+                        < form > TrueFormula </ form > </ config > */
   node = toListRecursive(root, 0);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > list(?node)(tree2seq(!T1)) </ heap >
+                        < form > TrueFormula </ form > </ config > */
   printf("list: ");
   print(node);
   destroy(node);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > (.).Map </ heap >
+                        < form > TrueFormula </ form > </ config > */
+
 
   root = sample();
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > tree(?root)(!T2) </ heap >
+                        < form > TrueFormula </ form > </ config > */
   node = toListIterative(root);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > list(?node)(tree2seq(!T2)) </ heap >
+                        < form > TrueFormula </ form > </ config > */
   printf("list: ");
   print(node);
   destroy(node);
+  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+                        < heap > (.).Map </ heap >
+                        < form > TrueFormula </ form > </ config > */
 
   return 0;
 }

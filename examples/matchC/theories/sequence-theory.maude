@@ -57,12 +57,14 @@ mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
   eq [Obj1, Obj2, ObjList] = [Obj1] @ [Obj2] @ [ObjList] .
   eq [.List{MathObj++}] = epsilon .
   eq [Obj] @ A === epsilon = FalseFormula .
+  eq A @ [Obj] === epsilon = FalseFormula .
   eq NeA @ A1 === NeA @ A2 = A1 === A2 .
   eq A1 @ NeA === A2 @ NeA = A1 === A2  .
   eq [Obj1] @ A1 === [Obj2] @ A2 = Obj1 === Obj2 /\ A1 === A2 .
   eq [Obj1] @ A1 === [Obj2] @ A2 = Obj1 === Obj2 /\ A1 === A2 .
   eq A1 @ [Obj1] === A2 @ [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
   eq A1 @ [Obj1] === A2 @ [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
+
 
   eq rev(NeA1 @ NeA2) = rev(NeA2) @ rev(NeA1) .
   eq rev([Obj]) = [Obj] .

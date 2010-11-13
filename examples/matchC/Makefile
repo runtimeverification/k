@@ -17,7 +17,6 @@ build:
 	$(MAKE) -C $(SEMANTICS_DIR) -f $(SEMANTICS_MAKEFILE)
 
 clean:
-	$(MAKE) -C $(ANTLR_ROOT_DIR) -f $(ANTLR_MAKEFILE) clean
 	$(MAKE) -C $(PARSER_DIR) -f $(PARSER_MAKEFILE) clean
 	$(MAKE) -C $(SEMANTICS_DIR) -f $(SEMANTICS_MAKEFILE) clean
 

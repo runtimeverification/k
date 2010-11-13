@@ -6,7 +6,6 @@ EXT_NAME = matchC
 K_TOOLS_DIR = $(K_ROOT_DIR)/tools
 ANTLR_ROOT_DIR = $(K_TOOLS_DIR)/antlr
 KC = $(K_TOOLS_DIR)/kompile.pl
-KFLAGS = -v -c
 JVM = java
 CLASSPATH = $(ANTLR_ROOT_DIR)/antlrworks-1.4.jar:$(ANTLR_ROOT_DIR)
 JFLAGS = -classpath $(CLASSPATH)
