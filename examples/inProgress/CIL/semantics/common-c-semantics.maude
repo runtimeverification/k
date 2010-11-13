@@ -120,7 +120,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op addGlobalTypes : K K -> K .
 	op addGlobalTypes : K -> K .
 	op Closure : K K K -> Value .
-	op putInMem : BaseValue K Type K -> K [metadata "strict(2 4)"] .
+	op putInMem : Nat K -> K [metadata "strict(2)"].
+	op putInMem-aux : Nat Value Type K -> K [metadata "strict(4)"] .
+	
+	eq putInMem(Loc:Nat, tv(V:BaseValue, T:Type)) = putInMem-aux(Loc:Nat, tv(V:BaseValue, T:Type), T:Type, sizeofType(T:Type)) .
 	op putBytesInMem : Nat List{K} Type K -> K [metadata "strict(4)"] .
 	op sizeofType : K -> Expression [metadata "strict"] .
 	op firstChar : String -> Char .
@@ -726,7 +729,8 @@ mod MEMORY is
 	eq (V:Value ~> skipme) = V:Value .
 	--- location, result type, num bytes, result 
 	op readFromMem-aux : Nat Type K List{K} -> K [metadata "strict(3)"] .
-	eq readFromMem(N:Nat, T:Type) = (readFromMem-aux(N:Nat, T:Type, sizeofType(T:Type), .List{K}) ~> skipme) [metadata "structural"] .
+	mb rule
+		< k > readFromMem(N:Nat, T:Type) => readFromMem-aux(N:Nat, T:Type, sizeofType(T:Type), .List{K}) ~> skipme ...</ k > : KSentence [metadata "structural"] .
 	
 	eq inc(loc(N:Nat, M:Nat)) = loc(inc(N:Nat), M:Nat) .
 	eq sNat(loc(N:Nat, M:Nat)) = loc(N:Nat, sNat(M:Nat)) .
@@ -764,7 +768,7 @@ mod MEMORY is
 	
 	mb [store-scalar]: rule
 		< k > store tv(V:BaseValue, T:Type) atLoc Loc:Nat => 
-		putInMem(Loc:Nat, tv(V:BaseValue, T:Type), T:Type, sizeofType(T:Type)) ...</ k >
+		putInMem(Loc:Nat, tv(V:BaseValue, T:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb [store-composite]: rule
 		< k > store atv(V:List{K}, T:Type) atLoc Loc:Nat => 
@@ -889,13 +893,13 @@ mod MEMORY is
 	op putByteInMem : Nat BaseValue -> K .
 	op putBitInMem : BaseValue BaseValue -> K .
 	mb rule
-		< k > (putInMem(?, ?, ?, tv(0, ?)) => (.).K) ...</ k >
+		< k > (putInMem-aux(?, ?, ?, tv(0, ?)) => (.).K) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- fixme: fixes the type of function types so they are equivalent
 	mb rule
-		< k > putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) 
-		=> putInMem(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L':List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) ...</ k >
+		< k > putInMem-aux(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) 
+		=> putInMem-aux(Loc:Nat, tv(N:Int, pointerType(functionType(T:Type, L':List{K}))), pointerType(functionType(T:Type, L':List{K})), tv(Len:Nat, J:Type)) ...</ k >
 		if L:List{K} =/=Bool L':List{K}
 		: KSentence [metadata "structural"] .
 		
@@ -905,14 +909,14 @@ mod MEMORY is
 	eq isLocation(K:K) = false [owise] .
 	--- needs to make sure not a bitfield
 	mb rule
-		< k > putInMem(loc(Block:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
-		=> putByteInMem(loc(Block:Nat, Offset:Nat), ((N:Int %Int 256) +Int 256) %Int 256) ~> putInMem(loc(Block:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 8, T:Type), T:Type, tv(Len:Nat, J:Type)) ...</ k >
+		< k > putInMem-aux(loc(Block:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
+		=> putByteInMem(loc(Block:Nat, Offset:Nat), ((N:Int %Int 256) +Int 256) %Int 256) ~> putInMem-aux(loc(Block:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 8, T:Type), T:Type, tv(Len:Nat, J:Type)) ...</ k >
 		if notBool(isLocation(N:Int))
 		: KSentence [metadata "structural"] .
 		
 	--- fixme can now check oob
 	mb rule
-		< k > (putInMem(loc(Block:Nat, Offset:Nat), tv(F:Float, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => (.).K) ...</ k >
+		< k > (putInMem-aux(loc(Block:Nat, Offset:Nat), tv(F:Float, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => (.).K) ...</ k >
 		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[F:Float / Offset:Nat)]) ...</ mem >
 		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(loc(Block:Nat, Offset:Nat))) </ locsWrittenTo >
 		< buffer >... ((.).List => bwrite(loc(Block:Nat, Offset:Nat), F:Float)) </ buffer >
@@ -926,10 +930,10 @@ mod MEMORY is
 		
 	--- fixme: put pointer in memory
 	mb rule
-		< k > putInMem(?, (tv(loc(0, 0), T:Type) => tv(0, T:Type)), ?, ?) ...</ k >
+		< k > putInMem-aux(?, (tv(loc(0, 0), T:Type) => tv(0, T:Type)), ?, ?) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule
-		< k > (putInMem(loc(Block:Nat, Offset:Nat), tv(loc(Block':Nat, Offset':Nat), T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => (.).K) ...</ k >
+		< k > (putInMem-aux(loc(Block:Nat, Offset:Nat), tv(loc(Block':Nat, Offset':Nat), T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) => (.).K) ...</ k >
 		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[loc(Block':Nat, Offset':Nat) / Offset:Nat)]) ...</ mem >
 		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(loc(Block:Nat, Offset:Nat))) </ locsWrittenTo >
 		< buffer >... ((.).List => bwrite(loc(Block:Nat, Offset:Nat), loc(Block':Nat, Offset':Nat))) </ buffer >
@@ -938,14 +942,14 @@ mod MEMORY is
 		: KSentence [metadata "structural"] .
 		
 	mb rule
-		< k > putInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type))
+		< k > putInMem-aux(bitloc(Block:Nat, Base:Nat, Offset:Nat), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type))
 		=> putBitInMem(bitloc(Block:Nat, Base:Nat, Offset:Nat), ((N:Int %Int 2) +Int 2) %Int 2) ~> 
-		putInMem(bitloc(Block:Nat, Base:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 1, T:Type), T:Type, tv(Len:Nat, J:Type)) ...</ k >
+		putInMem-aux(bitloc(Block:Nat, Base:Nat, sNat(Offset:Nat)), tv(N:Int >>Int 1, T:Type), T:Type, tv(Len:Nat, J:Type)) ...</ k >
 		if (Offset:Nat <Nat 8)
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > putInMem(bitloc(Block:Nat, Base:Nat, 8), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
-		=> putInMem(bitloc(Block:Nat, sNat(Base:Nat), 0), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) ...</ k >
+		< k > putInMem-aux(bitloc(Block:Nat, Base:Nat, 8), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) 
+		=> putInMem-aux(bitloc(Block:Nat, sNat(Base:Nat), 0), tv(N:Int, T:Type), T:Type, tv(sNat(Len:Nat), J:Type)) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	mb rule

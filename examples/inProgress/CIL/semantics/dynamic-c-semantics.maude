@@ -108,7 +108,7 @@ mod DYNAMIC-C-SEMANTICS is
 				</ thread >
 			</ threads >
 			< busy > (.).Bag </ busy >
-			< aLabelMap > (.).Map </ aLabelMap > 
+			< gotoMap > (.).Map </ gotoMap > 
 			< sizes > (.).Map </ sizes >
 			< genv > (.).Map </ genv > 
 			< mem > (.).Map </ mem >

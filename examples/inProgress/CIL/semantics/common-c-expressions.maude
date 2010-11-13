@@ -284,38 +284,39 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 		: KSentence [metadata "structural"] .
 	
 	mb [assign]: rule
-		< k > assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(V:Int, T:Type)) 
-		=> putInMem(Loc:Nat, tv(V:Int, T:Type), T:Type, sizeofType(T:Type)) ~> tv(V:Int, T:Type) ...</ k >
+		< k > assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(V:BaseValue, T:Type)) 
+			=> putInMem(Loc:Nat, tv(V:BaseValue, T:Type)) ~> tv(V:BaseValue, T:Type) ...</ k >
 		: KSentence [metadata "structural"] .
+		
 	mb [assign-bitfield]: rule
 		< k > assign(Deref(tv(bitloc(Block:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat)))), tv(V:Int, T:Type)) 
-		=> putInMem(bitloc(Block:Nat, N:Nat, O:Nat), tv(V:Int, T:Type), T:Type, tv(Len:Nat, cfg:sizeut)) ~> tv(V:Int, T:Type) ...</ k >
+		=> putInMem-aux(bitloc(Block:Nat, N:Nat, O:Nat), tv(V:Int, T:Type), T:Type, tv(Len:Nat, cfg:sizeut)) ~> tv(V:Int, T:Type) ...</ k >
 		: KSentence [metadata "structural"] .
 
 	--- fixme this is to get around L:List{K} not comparing equal
 	mb [assign-fp]: rule
 		< k > assign(Deref(tv(Loc:Nat, pointerType(pointerType(functionType(T:Type, L:List{K}))))), tv(V:Int, pointerType(functionType(T:Type, L':List{K})))) 
-		=> putInMem(Loc:Nat, tv(V:Int, pointerType(functionType(T:Type, L:List{K}))), pointerType(functionType(T:Type, L:List{K})), sizeofType(pointerType(functionType(T:Type, L:List{K})))) ~> tv(V:Int, pointerType(functionType(T:Type, L:List{K}))) ...</ k >
+		=> putInMem(Loc:Nat, tv(V:Int, pointerType(functionType(T:Type, L:List{K})))) ~> tv(V:Int, pointerType(functionType(T:Type, L:List{K}))) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	--- fixme floats might have requirements
-	mb [assign-double]: rule
-		< k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(double))), tv(V:Float, double)) 
-		=> tv(V:Float, double) ...</ k >
-		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
-		: KSentence [metadata "structural"] .
-	--- fixme
-	mb [assign-float]: rule
-		< k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(float))), tv(V:Float, float)) 
-		=> tv(V:Float, float) ...</ k >
-		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
-		: KSentence [metadata "structural"] .
-	--- fixme
-	mb [assign-long-double]: rule
-		< k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(long-double))), tv(V:Float, long-double)) 
-		=> tv(V:Float, long-double) ...</ k >
-		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
-		: KSentence [metadata "structural"] .
+	--- mb [assign-double]: rule
+		--- < k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(double))), tv(V:Float, double)) 
+		--- => tv(V:Float, double) ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
+		--- : KSentence [metadata "structural"] .
+	--- --- fixme
+	--- mb [assign-float]: rule
+		--- < k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(float))), tv(V:Float, float)) 
+		--- => tv(V:Float, float) ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
+		--- : KSentence [metadata "structural"] .
+	--- --- fixme
+	--- mb [assign-long-double]: rule
+		--- < k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(long-double))), tv(V:Float, long-double)) 
+		--- => tv(V:Float, long-double) ...</ k >
+		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
+		--- : KSentence [metadata "structural"] .
 		
 	mb [assign-struct]: rule
 		< k > assign(Deref(tv(Loc:Nat, pointerType(T:Type))), atv(L:List{K}, T:Type))

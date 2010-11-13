@@ -46,19 +46,19 @@ mod COMMON-SEMANTICS-SWITCH is
 		< k > 'switch`(_`)`(_`)_(SN:Nat,, tv(V:BaseValue, ?),, K1:K) ~> ? => K2:K </ k >
 		< currentFunction > F:Id </ currentFunction >
 		< loopStack > (? => S:List) </ loopStack >
-		< aLabelMap >... kpair(F:Id, case(SN:Nat, V:BaseValue)) |-> kpair(K2:K, S:List) ...</ aLabelMap >
+		< gotoMap >... kpair(F:Id, case(SN:Nat, V:BaseValue)) |-> kpair(K2:K, S:List) ...</ gotoMap >
 		: KSentence [metadata "computational"] .
 	mb rule
 		< k > 'switch`(_`)`(_`)_(SN:Nat,, tv(V:BaseValue, ?),, K1:K) ~> ? => K2:K </ k >
 		< currentFunction > F:Id </ currentFunction >
 		< loopStack > (? => S:List) </ loopStack >
-		< aLabelMap > LM:Map kpair(F:Id, defaultCase(SN:Nat)) |-> kpair(K2:K, S:List) </ aLabelMap >
+		< gotoMap > LM:Map kpair(F:Id, defaultCase(SN:Nat)) |-> kpair(K2:K, S:List) </ gotoMap >
 		if notBool $hasMapping(LM:Map, kpair(F:Id, case(SN:Nat, V:BaseValue)))
 		: KSentence [metadata "computational"] .
 	mb rule
 		< k > ('switch`(_`)`(_`)_(SN:Nat,, tv(V:BaseValue, ?),, K1:K) => (.).K) ...</ k >
 		< currentFunction > F:Id </ currentFunction >
-		< aLabelMap > LM:Map </ aLabelMap >
+		< gotoMap > LM:Map </ gotoMap >
 		if notBool (
 			$hasMapping(LM:Map, kpair(F:Id, case(SN:Nat, V:BaseValue)))
 			orBool $hasMapping(LM:Map, kpair(F:Id, defaultCase(SN:Nat)))
@@ -79,11 +79,11 @@ mod COMMON-SEMANTICS-GOTO is
 	mb context calculateGotoMap(?, ('case`(_`)_:_(?:K,,`[HOLE`]:K,, ?) ~> ?), ?, ?) : KSentence .
 	
 	--- fixme shouldn't there be sequence points here?
-	mb rule 
+	mb [goto]: rule 
 		< k > goto(X:Id); ~> ? => K:K </ k >
 		< currentFunction > F:Id </ currentFunction >
 		< loopStack > (? => S:List) </ loopStack >
-		< aLabelMap >... kpair(F:Id, X:Id) |-> kpair(K:K, S:List) ...</ aLabelMap >
+		< gotoMap >... kpair(F:Id, X:Id) |-> kpair(K:K, S:List) ...</ gotoMap >
 		: KSentence [metadata "computational rule"] .
 		
 	op calculateGotoMap : Id K List K -> K . --- func name, body, loop stack, tail
@@ -128,18 +128,18 @@ mod COMMON-SEMANTICS-GOTO is
 	mb rule 
 		< k > calculateGotoMap(X:Id, ('_:_(Target:Id,, Arg:K) ~> K:K), S:List, Tail:K) 
 		=> calculateGotoMap(X:Id, (Arg:K ~> K:K), S:List, Tail:K) ...</ k >
-		< aLabelMap >... (.).Map => kpair(X:Id, Target:Id) |-> kpair((Arg:K ~> K:K ~> Tail:K), S:List) ...</ aLabelMap >
+		< gotoMap >... (.).Map => kpair(X:Id, Target:Id) |-> kpair((Arg:K ~> K:K ~> Tail:K), S:List) ...</ gotoMap >
 		: KSentence [metadata "structural"] .
 	
 	mb rule 
 		< k > calculateGotoMap(X:Id, ('case`(_`)_:_(SN:Nat,, tv(Target:BaseValue, T:Type),, Arg:K) ~> K:K), S:List, Tail:K) 
 		=> calculateGotoMap(X:Id, (Arg:K ~> K:K), S:List, Tail:K) ...</ k >
-		< aLabelMap >... (.).Map => kpair(X:Id, case(SN:Nat, Target:BaseValue)) |-> kpair((Arg:K ~> K:K ~> Tail:K), S:List) ...</ aLabelMap >
+		< gotoMap >... (.).Map => kpair(X:Id, case(SN:Nat, Target:BaseValue)) |-> kpair((Arg:K ~> K:K ~> Tail:K), S:List) ...</ gotoMap >
 		: KSentence [metadata "structural"] .
 	mb rule 
 		< k > calculateGotoMap(X:Id, ('default`(_`):_(SN:Nat,, Arg:K) ~> K:K), S:List, Tail:K) 
 		=> calculateGotoMap(X:Id, (Arg:K ~> K:K), S:List, Tail:K) ...</ k >
-		< aLabelMap >... (.).Map => kpair(X:Id, defaultCase(SN:Nat)) |-> kpair((Arg:K ~> K:K ~> Tail:K), S:List) ...</ aLabelMap >
+		< gotoMap >... (.).Map => kpair(X:Id, defaultCase(SN:Nat)) |-> kpair((Arg:K ~> K:K ~> Tail:K), S:List) ...</ gotoMap >
 		: KSentence [metadata "structural"] .
 
 	mb rule 

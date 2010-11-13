@@ -33,7 +33,7 @@ mod COMMON-C-CONFIGURATION is
 	op files : -> CellLabel .
 	op currentFunction : -> CellLabel .
 	op s-currentFunction : -> CellLabel .
-	op aLabelMap : -> CellLabel .
+	op gotoMap : -> CellLabel .
 	op threads : -> CellLabel .
 	op thread : -> CellLabel .
 	op freshNat : -> CellLabel .

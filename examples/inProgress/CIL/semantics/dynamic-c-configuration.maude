@@ -5,7 +5,7 @@ mod C-CONFIGURATION is
 	--- op BagNewline : -> Bag . --- [metadata "latex(renameTo \\\\)"] .
 	mb configuration 
 		< T > 
-			< aLabelMap > (.).Map </ aLabelMap >
+			< gotoMap > (.).Map </ gotoMap >
 			< genv > (.).Map </ genv >
 			< mem > (.).Map </ mem >
 			< nextLoc > 0 </ nextLoc >
