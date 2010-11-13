@@ -29,7 +29,7 @@ mod LIST-HP is
        < config >
          < k > derive(P') ~> K </ k >
          < heap > H </ heap > 
-         < form > Phi /\ (P === 0) /\ (Alpha === epsilon) </ form >
+         < form > (P === 0) /\ (Alpha === epsilon) /\ Phi </ form >
          CfgItems
        </ config >
        < config >
@@ -41,7 +41,7 @@ mod LIST-HP is
            H
          </ heap >
          < form >
-           Phi /\ ~(P === 0) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2))
+           ~(P === 0) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ Phi
          </ form >
          CfgItems
        </ config >
@@ -49,6 +49,31 @@ mod LIST-HP is
      </ tasks >
      < counter > N +Int 3 </ counter >
   if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+  eq < tasks >
+       < config >
+         < heap > list(P)(Alpha) H </ heap >
+         < form > ~(P === 0) /\ Phi </ form >
+         CfgItems
+       </ config >
+     Cfgs
+     </ tasks >
+     < counter > N </ counter >
+   = < tasks >
+       < config >
+         < heap >
+           P |-> FreeInt(N) : nodeList . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+           list(FreeInt(N +Int 1))(FreeSeq(N +Int 2))
+           H
+         </ heap >
+         < form >
+           ~(P === 0) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ Phi
+         </ form >
+         CfgItems
+       </ config >
+     Cfgs
+     </ tasks >
+     < counter > N +Int 3 </ counter > .
 
   eq < heap > list(0)(Alpha) H </ heap > < form > Phi </ form >
    = < heap > H </ heap > < form > Phi /\ Alpha === epsilon </ form > .
@@ -90,6 +115,43 @@ mod LIST-HP is
        CfgItems
      </ config >
      =match=> Cfg .
+***(
+  rl Cfg =match=>
+     < config >
+       < heap >
+         P |-> I : nodeList . val
+         (P +Int 1) |-> 0 : nodeList . next
+         H
+       </ heap >
+       CfgItems
+     </ config > 
+  => Cfg =match=>
+     < config >
+       < heap >
+         list(P)([I])
+         H
+       </ heap >
+       CfgItems
+     </ config > .
+  rl Cfg =match=>
+     < config >
+       < heap >
+         P |-> I : nodeList . val
+         (P +Int 1) |-> P' : nodeList . next
+         list(P')(Alpha)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+  => Cfg =match=>
+     < config >
+       < heap >
+         list(P)([I] @ Alpha)
+         H
+       </ heap >
+       CfgItems
+     </ config > .
+***)
 
 
 *** Definition of List Segments ***
@@ -109,7 +171,7 @@ mod LIST-HP is
        < config >
          < k > derive(P') ~> K </ k >
          < heap > H </ heap >
-         < form > Phi /\ (P === Q) /\ (Alpha === epsilon) </ form >
+         < form > (P === Q) /\ (Alpha === epsilon) /\ Phi </ form >
          CfgItems
        </ config >
        < config >
@@ -121,7 +183,7 @@ mod LIST-HP is
            H
          </ heap >
          < form >
-           Phi /\ ~(P === Q) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2))
+           ~(P === Q) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ Phi
          </ form >
          CfgItems
        </ config >

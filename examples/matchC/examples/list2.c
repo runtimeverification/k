@@ -8,18 +8,10 @@ struct nodeList {
 
 
 struct nodeList* reverse(struct nodeList *x)
-/*@ pre  < config > < env > x |-> ?x </ env > < heap > list(?x)(A) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) H </ heap >
-                    < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *p;
   struct nodeList *y;
   p = 0 ;
-  /*@ invariant < config > < env > p |-> ?p  x |-> ?x  y |-> ?y </ env >
-                           < heap > list(?p)(?B)  list(?x)(?C) H </ heap >
-                           < form > rev(A) === rev(?C) @ ?B </ form >
-                           C </ config > */
   while(x) {
     y = x->next;
     x->next = p;
@@ -31,28 +23,12 @@ struct nodeList* reverse(struct nodeList *x)
 
 
 struct nodeList* append(struct nodeList *x, struct nodeList *y)  
-/*@ pre  < config > < env > x |-> ?x  y |-> ?y  </ env >
-                    < heap > list(?x)(A)  list(?y)(B) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env >  ?rho </ env >
-                    < heap > list(?x)(A @ B) H </ heap > 
-                    < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *p;
   if (x == 0)
    return y;
 
   p = x;
-  /*@ invariant < config > < env > x |-> ?x  p |-> ?p  !rho </ env >
-                           < heap >
-                             lseg(?x , ?p)(?A1) 
-                             ?p |-> ?v : (nodeList . val)
-                             (?p +Int 1) |-> ?i : (nodeList . next)
-                              list(?i)(?A2)  
-                             !H
-                           </ heap > 
-                           < form > (?A1 @ [?v] @ ?A2) === A </ form > 
-                           C </ config > */
   while (p->next)
     p = p->next;
   p->next = y ;
@@ -62,20 +38,10 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
 
 
 int length(struct nodeList* x)
-/*@ pre  < config > < env > x |-> x0 </ env >
-                    < heap > list(x0)(A) H </ heap > 
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < heap > list(x0)(A) H </ heap > 
-                    < form > returns len(A) </ form > C </ config > */
 {
   int l;
   
   l = 0;
-  /*@ invariant < config > < env > x |-> ?x  l |-> len(?A1) </ env >
-                           < heap > lseg(x0,?x)(?A1)  list(?x)(?A2) H </ heap >
-                           < form > A === (?A1 @ ?A2) </ form >
-                           C </ config > */
   while (x) {
     l += 1;
     x = x->next ;

@@ -42,6 +42,9 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
                     </config*>
                   </tasks>
 
+                  <in> .List </in>
+                  <out> .List </out>
+
                   <counter> 0 </counter>
                 </T>
 

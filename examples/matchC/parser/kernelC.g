@@ -293,7 +293,7 @@ primary_expression
 constant
   : arithmetic_constant
   //| CHARACTER_LITERAL
-  //| STRING_LITERAL
+  | STRING_LITERAL
   //| FLOATING_POINT_LITERAL
   ;
   
@@ -323,10 +323,15 @@ DECIMAL_LITERAL : '0' | '1'..'9' ('0'..'9')* ;
 
 OCTAL_LITERAL : '0' ('0'..'7')+ ;
 
-HEX_LITERAL : '0' ('x' | 'X') HexDigit+ ;
+HEX_LITERAL : '0' ('x' | 'X') HEX_DIGIT+ ;
 
 fragment
-HexDigit : '0'..'9' | 'a'..'f' | 'A'..'F' ;
+HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
+
+STRING_LITERAL : '"' ( ESCAPE | ~('\\'|'"') )* '"' ;
+
+fragment
+ESCAPE : '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\') ;
 
 ANNOTATION
   : ('/*@')=> '/*@' (options { greedy = false; } : .)* '*/'

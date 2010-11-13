@@ -22,6 +22,7 @@ struct nodeList *copy(struct nodeList *x)
 
   if (x == 0)
     return 0;
+
   y = (struct nodeList *)malloc(sizeof(struct nodeList));
   y->val = x->val;
   y->next = 0;
@@ -40,7 +41,7 @@ struct nodeList *copy(struct nodeList *x)
                            </ heap >
                            < form > A === (?A @ [?v] @ ?B) </ form >
                            C </ config > */
-  while(iterx != 0) {
+  while(iterx) {
     newnode = (struct nodeList *)malloc(sizeof(struct nodeList));
     newnode->val = iterx->val;
     newnode->next = 0;
@@ -48,6 +49,7 @@ struct nodeList *copy(struct nodeList *x)
     iterx = iterx->next;
     itery = newnode;
   }
+
   return y;
 }
 

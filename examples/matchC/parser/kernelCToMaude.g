@@ -118,6 +118,7 @@ unary_operator
 constant
   : IDENTIFIER
   | arithmetic_constant -> ^(OP["tv"] CT["int"] arithmetic_constant)
+  | STRING_LITERAL
   | VOID_EXP -> ^(OP["tv"] CT["void"] CT["unit"])
   | NOP -> CT["nop"]
   | 'void'

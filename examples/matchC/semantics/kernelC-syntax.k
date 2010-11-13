@@ -1,4 +1,4 @@
-kmod KERNELC-SYNTAX is including ML-K
+kmod KERNELC-SYNTAX is including ML-K + PL-STRING
 ***(
   subsorts Formula Subst MathObj++ < Builtins KResult
   subsorts List{MathObj++} Set{MathObj++} < Builtins KResult
@@ -52,7 +52,8 @@ imp statements
 imp Expressions
 ***)
   syntax Expression ::= TypedValue
-                      | Id 
+                      | Id
+                      | String 
 *** unary Expressions
                       | - Expression [strict]
                       ---| + Expression [strict]
@@ -130,7 +131,7 @@ KernelC is a top sort
                    | ExpressionType
                    | Statement
                    | Expression
-  syntax Id ::= malloc | free
+  syntax Id ::= main | malloc | free | printf
 
 *** arrow
   syntax KernelC ::= .KernelC

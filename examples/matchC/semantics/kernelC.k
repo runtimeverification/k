@@ -11,8 +11,6 @@ kmod KERNELC is
   kvar N M : Nat
 
   syntax BagItem ::= check ( KLabel )
-                   | ( Nat feasible and Nat infeasible paths)
-                     [format(g! d d d d d o)]
 
   macro check(Kl:KLabel) = <T_>
                              <program> Kl(.List{K}) ~> checkContracts </program>
@@ -22,16 +20,6 @@ kmod KERNELC is
 ***(
 Output
 ***)
- rule
-      <T_>
-        <feasible> N </feasible>
-        <infeasible> M </infeasible>
-        <program> .K </program>
-        <tasks> .Bag </tasks>
-      <_/T>
-    =>
-      N feasible and M infeasible paths
-  [metadata "structural"]
   rule
     <feasible> N => N +Int 1 </feasible>
     (

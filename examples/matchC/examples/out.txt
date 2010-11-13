@@ -1,0 +1,314 @@
+rewrites: 26458 in 158ms cpu (159ms real) (166427 rewrites/second)
+result BagItem: 
+< T > 
+ < feasible > 26 </ feasible > 
+ < infeasible > 27 </ infeasible > 
+ < counter > 147 </ counter > 
+ < program > (.).K </ program > 
+ < in > (.).List </ in > 
+ < out > ListItem(1) ListItem(2) ListItem(3) ListItem(4) ListItem(5) ListItem(
+    6) ListItem(7) </ out > 
+ < tasks > (.).Bag </ tasks > 
+ < fun > ('__`(_`)).KProperLabel(int,,main,,('_`,`,`,_).KHybridLabel(.List{K}))
+    |-> (('__;).KProperLabel(struct treeNode *,,root) ~> ('__;).KProperLabel(
+    struct nodeList *,,node) ~> ('_;).KProperLabel(('_=_).KProperLabel(root,,(
+    '_`(_`)).KProperLabel(sample,,('_`,`,`,_).KHybridLabel(.List{K})))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(node,,('_`(_`)).KProperLabel(
+    toListIterative,,('_`,`,`,_).KHybridLabel(root)))) ~> ('_;).KProperLabel((
+    '_`(_`)).KProperLabel(print,,('_`,`,`,_).KHybridLabel(node))) ~> (
+    '_;).KProperLabel(('_`(_`)).KProperLabel(destroy,,('_`,`,`,_).KHybridLabel(
+    node))) ~> ('return_).KProperLabel(tv(int, 0)) ~> ('return_).KProperLabel(
+    tv(void, unit))) ('__`(_`)).KProperLabel(void,,destroy,,(
+    '_`,`,`,_).KHybridLabel(('__;).KProperLabel(struct nodeList *,,x))) |-> ((
+    '__;).KProperLabel(struct nodeList *,,y) ~> ('while`(_`)_).KProperLabel(x,,
+    ('_;).KProperLabel(('_=_).KProperLabel(y,,('_->_).KProperLabel(x,,next)))
+    ~> ('_;).KProperLabel(('_`(_`)).KProperLabel(free,,(
+    '_`,`,`,_).KHybridLabel(x))) ~> ('_;).KProperLabel(('_=_).KProperLabel(x,,
+    y))) ~> ('return_).KProperLabel(tv(void, unit))) ('__`(_`)).KProperLabel(
+    void,,print,,('_`,`,`,_).KHybridLabel(('__;).KProperLabel(struct nodeList
+    *,,x))) |-> (('while`(_`)_).KProperLabel(x,,('_;).KProperLabel((
+    '_`(_`)).KProperLabel(printf,,('_`,`,`,_).KHybridLabel(String "%d "(.List{
+    K}),,('_->_).KProperLabel(x,,val)))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('_->_).KProperLabel(x,,next)))) ~> (
+    'return_).KProperLabel(tv(void, unit))) ('__`(_`)).KProperLabel(struct
+    nodeList *,,toListIterative,,('_`,`,`,_).KHybridLabel(('__;).KProperLabel(
+    struct treeNode *,,root))) |-> (('__;).KProperLabel(struct nodeList *,,a)
+    ~> ('__;).KProperLabel(struct nodeList *,,node) ~> ('__;).KProperLabel(
+    struct treeNode *,,t) ~> ('__;).KProperLabel(struct treeNodeList *,,stack)
+    ~> ('__;).KProperLabel(struct treeNodeList *,,x) ~> (
+    'if`(_`)_else_).KProperLabel(('_==_).KProperLabel(root,,tv(int, 0)),,(
+    'return_).KProperLabel(tv(int, 0)),,.) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(a,,tv(int, 0))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(stack,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(stack,,val),,root)) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(stack,,next),,
+    tv(int, 0))) ~> ('while`(_`)_).KProperLabel(('!_).KProperLabel((
+    '_==_).KProperLabel(stack,,tv(int, 0))),,('_;).KProperLabel((
+    '_=_).KProperLabel(x,,stack)) ~> ('_;).KProperLabel(('_=_).KProperLabel(
+    stack,,('_->_).KProperLabel(stack,,next))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(t,,('_->_).KProperLabel(x,,val))) ~> ('_;).KProperLabel(
+    ('_`(_`)).KProperLabel(free,,('_`,`,`,_).KHybridLabel(x))) ~> (
+    'if`(_`)_else_).KProperLabel(('!_).KProperLabel(('_==_).KProperLabel((
+    '_->_).KProperLabel(t,,left),,tv(int, 0))),,('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(x,,val),,('_->_).KProperLabel(t,,
+    left))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(x,,
+    next),,stack)) ~> ('_;).KProperLabel(('_=_).KProperLabel(stack,,x)),,.) ~>
+    ('if`(_`)_else_).KProperLabel(('!_).KProperLabel(('_==_).KProperLabel((
+    '_->_).KProperLabel(t,,right),,tv(int, 0))),,('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(x,,val),,t)) ~> ('_;).KProperLabel(
+    ('_=_).KProperLabel(('_->_).KProperLabel(x,,next),,stack)) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(stack,,x)) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(x,,val),,('_->_).KProperLabel(t,,
+    right))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(x,,
+    next),,stack)) ~> ('_;).KProperLabel(('_=_).KProperLabel(stack,,x)) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(t,,left),,(
+    '_=_).KProperLabel(('_->_).KProperLabel(t,,right),,tv(int, 0)))),,(
+    '_;).KProperLabel(('_=_).KProperLabel(node,,('`(_`)_).KProperLabel(struct
+    nodeList *,,('_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct nodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(node,,val),,('_->_).KProperLabel(t,
+    ,val))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(
+    node,,next),,a)) ~> ('_;).KProperLabel(('_=_).KProperLabel(a,,node)) ~> (
+    '_;).KProperLabel(('_`(_`)).KProperLabel(free,,('_`,`,`,_).KHybridLabel(
+    t))))) ~> ('return_).KProperLabel(a) ~> ('return_).KProperLabel(tv(void,
+    unit))) ('__`(_`)).KProperLabel(struct nodeList *,,toListRecursive,,(
+    '_`,`,`,_).KHybridLabel(('__;).KProperLabel(struct treeNode *,,root),,(
+    '__;).KProperLabel(struct nodeList *,,x))) |-> (('__;).KProperLabel(struct
+    nodeList *,,node) ~> ('if`(_`)_else_).KProperLabel(('_==_).KProperLabel(
+    root,,tv(int, 0)),,('return_).KProperLabel(x),,.) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(node,,('`(_`)_).KProperLabel(struct nodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct nodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(node,,val),,('_->_).KProperLabel(
+    root,,val))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(node,,next),,('_`(_`)).KProperLabel(toListRecursive,,(
+    '_`,`,`,_).KHybridLabel(('_->_).KProperLabel(root,,right),,x)))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(node,,('_`(_`)).KProperLabel(
+    toListRecursive,,('_`,`,`,_).KHybridLabel(('_->_).KProperLabel(root,,left),
+    ,node)))) ~> ('_;).KProperLabel(('_`(_`)).KProperLabel(free,,(
+    '_`,`,`,_).KHybridLabel(root))) ~> ('return_).KProperLabel(node) ~> (
+    'return_).KProperLabel(tv(void, unit))) ('__`(_`)).KProperLabel(struct
+    treeNode *,,sample,,('_`,`,`,_).KHybridLabel(.List{K})) |-> ((
+    '__;).KProperLabel(struct treeNode *,,root) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(root,,('`(_`)_).KProperLabel(struct treeNode *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNode)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(root,,val),,tv(int, 4))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(root,,left),,(
+    '`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(malloc,,(
+    '_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct treeNode)))))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(root,,left),,val),,tv(int, 2))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,('`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(
+    malloc,,('_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct
+    treeNode)))))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,val),,tv(int, 1))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,left),,tv(int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,right),,tv(int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,(
+    '`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(malloc,,(
+    '_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct treeNode)))))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,val),,tv(int,
+    3))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,left),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,right),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(
+    root,,right),,('`(_`)_).KProperLabel(struct treeNode *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNode)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,right),,
+    val),,tv(int, 6))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,(
+    '`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(malloc,,(
+    '_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct treeNode)))))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,val),,tv(int,
+    5))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,left),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,right),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(root,,right),,right),,('`(_`)_).KProperLabel(struct
+    treeNode *,,('_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNode)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(root,,right),,right),,val),,tv(int, 7))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,right),,left),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,right),,right),,tv(
+    int, 0))) ~> ('return_).KProperLabel(root) ~> ('return_).KProperLabel(tv(
+    void, unit))) </ fun > 
+ < spec > ('__`(_`)).KProperLabel(int,,main,,('_`,`,`,_).KHybridLabel(.List{
+    K})) |-> (('__;).KProperLabel(struct treeNode *,,root) ~> (
+    '__;).KProperLabel(struct nodeList *,,node) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(root,,('_`(_`)).KProperLabel(sample,,(
+    '_`,`,`,_).KHybridLabel(.List{K})))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(node,,('_`(_`)).KProperLabel(toListIterative,,(
+    '_`,`,`,_).KHybridLabel(root)))) ~> ('_;).KProperLabel((
+    '_`(_`)).KProperLabel(print,,('_`,`,`,_).KHybridLabel(node))) ~> (
+    '_;).KProperLabel(('_`(_`)).KProperLabel(destroy,,('_`,`,`,_).KHybridLabel(
+    node))) ~> ('return_).KProperLabel(tv(int, 0)) ~> ('return_).KProperLabel(
+    tv(void, unit))) ('__`(_`)).KProperLabel(void,,destroy,,(
+    '_`,`,`,_).KHybridLabel(('__;).KProperLabel(struct nodeList *,,x))) |-> ((
+    '__;).KProperLabel(struct nodeList *,,y) ~> ('while`(_`)_).KProperLabel(x,,
+    ('_;).KProperLabel(('_=_).KProperLabel(y,,('_->_).KProperLabel(x,,next)))
+    ~> ('_;).KProperLabel(('_`(_`)).KProperLabel(free,,(
+    '_`,`,`,_).KHybridLabel(x))) ~> ('_;).KProperLabel(('_=_).KProperLabel(x,,
+    y))) ~> ('return_).KProperLabel(tv(void, unit))) ('__`(_`)).KProperLabel(
+    void,,print,,('_`,`,`,_).KHybridLabel(('__;).KProperLabel(struct nodeList
+    *,,x))) |-> (('while`(_`)_).KProperLabel(x,,('_;).KProperLabel((
+    '_`(_`)).KProperLabel(printf,,('_`,`,`,_).KHybridLabel(String "%d "(.List{
+    K}),,('_->_).KProperLabel(x,,val)))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('_->_).KProperLabel(x,,next)))) ~> (
+    'return_).KProperLabel(tv(void, unit))) ('__`(_`)).KProperLabel(struct
+    nodeList *,,toListIterative,,('_`,`,`,_).KHybridLabel(('__;).KProperLabel(
+    struct treeNode *,,root))) |-> (('__;).KProperLabel(struct nodeList *,,a)
+    ~> ('__;).KProperLabel(struct nodeList *,,node) ~> ('__;).KProperLabel(
+    struct treeNode *,,t) ~> ('__;).KProperLabel(struct treeNodeList *,,stack)
+    ~> ('__;).KProperLabel(struct treeNodeList *,,x) ~> (
+    'if`(_`)_else_).KProperLabel(('_==_).KProperLabel(root,,tv(int, 0)),,(
+    'return_).KProperLabel(tv(int, 0)),,.) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(a,,tv(int, 0))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(stack,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(stack,,val),,root)) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(stack,,next),,
+    tv(int, 0))) ~> ('while`(_`)_).KProperLabel(('!_).KProperLabel((
+    '_==_).KProperLabel(stack,,tv(int, 0))),,('_;).KProperLabel((
+    '_=_).KProperLabel(x,,stack)) ~> ('_;).KProperLabel(('_=_).KProperLabel(
+    stack,,('_->_).KProperLabel(stack,,next))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(t,,('_->_).KProperLabel(x,,val))) ~> ('_;).KProperLabel(
+    ('_`(_`)).KProperLabel(free,,('_`,`,`,_).KHybridLabel(x))) ~> (
+    'if`(_`)_else_).KProperLabel(('!_).KProperLabel(('_==_).KProperLabel((
+    '_->_).KProperLabel(t,,left),,tv(int, 0))),,('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(x,,val),,('_->_).KProperLabel(t,,
+    left))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(x,,
+    next),,stack)) ~> ('_;).KProperLabel(('_=_).KProperLabel(stack,,x)),,.) ~>
+    ('if`(_`)_else_).KProperLabel(('!_).KProperLabel(('_==_).KProperLabel((
+    '_->_).KProperLabel(t,,right),,tv(int, 0))),,('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(x,,val),,t)) ~> ('_;).KProperLabel(
+    ('_=_).KProperLabel(('_->_).KProperLabel(x,,next),,stack)) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(stack,,x)) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(x,,('`(_`)_).KProperLabel(struct treeNodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(x,,val),,('_->_).KProperLabel(t,,
+    right))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(x,,
+    next),,stack)) ~> ('_;).KProperLabel(('_=_).KProperLabel(stack,,x)) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(t,,left),,(
+    '_=_).KProperLabel(('_->_).KProperLabel(t,,right),,tv(int, 0)))),,(
+    '_;).KProperLabel(('_=_).KProperLabel(node,,('`(_`)_).KProperLabel(struct
+    nodeList *,,('_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct nodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(node,,val),,('_->_).KProperLabel(t,
+    ,val))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(
+    node,,next),,a)) ~> ('_;).KProperLabel(('_=_).KProperLabel(a,,node)) ~> (
+    '_;).KProperLabel(('_`(_`)).KProperLabel(free,,('_`,`,`,_).KHybridLabel(
+    t))))) ~> ('return_).KProperLabel(a) ~> ('return_).KProperLabel(tv(void,
+    unit))) ('__`(_`)).KProperLabel(struct nodeList *,,toListRecursive,,(
+    '_`,`,`,_).KHybridLabel(('__;).KProperLabel(struct treeNode *,,root),,(
+    '__;).KProperLabel(struct nodeList *,,x))) |-> (('__;).KProperLabel(struct
+    nodeList *,,node) ~> ('if`(_`)_else_).KProperLabel(('_==_).KProperLabel(
+    root,,tv(int, 0)),,('return_).KProperLabel(x),,.) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(node,,('`(_`)_).KProperLabel(struct nodeList *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct nodeList)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(node,,val),,('_->_).KProperLabel(
+    root,,val))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(node,,next),,('_`(_`)).KProperLabel(toListRecursive,,(
+    '_`,`,`,_).KHybridLabel(('_->_).KProperLabel(root,,right),,x)))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(node,,('_`(_`)).KProperLabel(
+    toListRecursive,,('_`,`,`,_).KHybridLabel(('_->_).KProperLabel(root,,left),
+    ,node)))) ~> ('_;).KProperLabel(('_`(_`)).KProperLabel(free,,(
+    '_`,`,`,_).KHybridLabel(root))) ~> ('return_).KProperLabel(node) ~> (
+    'return_).KProperLabel(tv(void, unit))) ('__`(_`)).KProperLabel(struct
+    treeNode *,,sample,,('_`,`,`,_).KHybridLabel(.List{K})) |-> ((
+    '__;).KProperLabel(struct treeNode *,,root) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(root,,('`(_`)_).KProperLabel(struct treeNode *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNode)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(root,,val),,tv(int, 4))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(root,,left),,(
+    '`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(malloc,,(
+    '_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct treeNode)))))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(root,,left),,val),,tv(int, 2))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,('`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(
+    malloc,,('_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct
+    treeNode)))))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,val),,tv(int, 1))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,left),,tv(int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,left),,
+    left),,right),,tv(int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,(
+    '`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(malloc,,(
+    '_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct treeNode)))))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,val),,tv(int,
+    3))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,left),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,left),,right),,right),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel(
+    root,,right),,('`(_`)_).KProperLabel(struct treeNode *,,(
+    '_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNode)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel(root,,right),,
+    val),,tv(int, 6))) ~> ('_;).KProperLabel(('_=_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,(
+    '`(_`)_).KProperLabel(struct treeNode *,,('_`(_`)).KProperLabel(malloc,,(
+    '_`,`,`,_).KHybridLabel(('sizeof_).KProperLabel(struct treeNode)))))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,val),,tv(int,
+    5))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,left),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,left),,right),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(root,,right),,right),,('`(_`)_).KProperLabel(struct
+    treeNode *,,('_`(_`)).KProperLabel(malloc,,('_`,`,`,_).KHybridLabel((
+    'sizeof_).KProperLabel(struct treeNode)))))) ~> ('_;).KProperLabel((
+    '_=_).KProperLabel(('_->_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(root,,right),,right),,val),,tv(int, 7))) ~> (
+    '_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,right),,left),,tv(
+    int, 0))) ~> ('_;).KProperLabel(('_=_).KProperLabel(('_->_).KProperLabel((
+    '_->_).KProperLabel(('_->_).KProperLabel(root,,right),,right),,right),,tv(
+    int, 0))) ~> ('return_).KProperLabel(root) ~> ('return_).KProperLabel(tv(
+    void, unit))) </ spec > 
+ < struct > nodeList |-> ('fieldList`(_`)).KProperLabel((
+    '_`,`,`,_).KHybridLabel(('__;).KProperLabel(int,,val),,('__;).KProperLabel(
+    struct nodeList *,,next))) treeNode |-> ('fieldList`(_`)).KProperLabel((
+    '_`,`,`,_).KHybridLabel(('__;).KProperLabel(int,,val),,('__;).KProperLabel(
+    struct treeNode *,,left),,('__;).KProperLabel(struct treeNode *,,right)))
+    treeNodeList |-> ('fieldList`(_`)).KProperLabel(('_`,`,`,_).KHybridLabel((
+    '__;).KProperLabel(struct treeNode *,,val),,('__;).KProperLabel(struct
+    treeNodeList *,,next))) </ struct > </ T >

@@ -17,7 +17,9 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
   kvar Stack : List
 
   syntax K ::= KernelC
+  syntax KResult ::= String
   syntax K ::= checkContracts
+  syntax K ::= runMain
   syntax K ::= checkContract ( Id )
   syntax K ::= fieldList ( List{KernelC} )
   syntax TypedValue ::= newObject
@@ -45,6 +47,9 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
                     </config*>
                   </tasks>
 
+                  <in> .List </in>
+                  <out> .List </out>
+
                   <counter> 0 </counter>
                 </T>
 
@@ -68,7 +73,18 @@ Function entry
         <_/config>
     <_/tasks>
   [structural]
-
+  rule
+    <program> runMain => .K <_/program>
+    <fun_> T main(.List{KernelC}) |-> S <_/fun>
+    <tasks>
+        _
+      =>
+        <config_>
+          <k> S </k>
+          <stack> callContext(.K, .Map, .Map) </stack>
+        <_/config>
+    </tasks>
+  [structural]
 
 ***(
 Translation unit (top rule)
@@ -291,6 +307,16 @@ Memory management
   rule
     <k> deleteObject(I, 1) => tv(void, unit) <_/k>
     <heap_> I |-> _ : _ => .Map <_/heap>
+
+
+***(
+I/O
+***)
+  rule
+    <k> printf(_:String,,,tv(_,I)) => tv(void, unit) <_/k>
+    <out_> .List => ListItem(I) </out>
+  [structural]
+  rule printf(_:String) => tv(void, unit) [structural]
 
 
 ***(

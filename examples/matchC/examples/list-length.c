@@ -41,6 +41,8 @@ int main()
   x->val = 5;
   x->next = 0;
   l = length(x);
+  printf("%d ", l);
+  printf("\n");
   return 0;
 }
 
