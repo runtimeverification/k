@@ -43,7 +43,6 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
    return y;
 
   p = x;
-  p->next = p->next;
   /*@ invariant < config > < env > x |-> ?x  p |-> ?p  !rho </ env >
                            < heap >
                              lseg(?x , ?p)(?A1) 
@@ -54,10 +53,8 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
                            </ heap > 
                            < form > (?A1 @ [?v] @ ?A2) === A </ form > 
                            C </ config > */
-  while (p->next) {
+  while (p->next)
     p = p->next;
-    p->next = p->next;
-  }
   p->next = y ;
 
   return x;

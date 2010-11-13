@@ -1,2 +1,0 @@
-rewrites: 690360 in 1541ms cpu (1541ms real) (447772 rewrites/second)
-result BagItem: 6 feasible and 52 infeasible paths
