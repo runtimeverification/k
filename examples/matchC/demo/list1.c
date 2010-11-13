@@ -95,9 +95,7 @@ int main()
 {
   struct nodeList *x;
   struct nodeList *y;
-//  x = create(5);
-//  x = reverse(x);
-//  destroy(x);
+
   x = create(5);
   printf("x: ");
   print(x);
@@ -106,10 +104,6 @@ int main()
   print(x);
   destroy(x);
 
-//  x = create(3);
-//  y = create(3);
-//  x = append(x, y);
-//  destroy(x);
   x = create(3);
   printf("x: ");
   print(x);
@@ -120,16 +114,7 @@ int main()
   printf("append(x, y): ");
   print(x);
   destroy(x);
+
   return 0;
 }
 
-
-/*@ var ?x ?y ?p ?i ?v : ?Int */
-/*@ var x0 : FreeInt */
-/*@ var ?B ?C ?A1 ?A2 : ?Seq */
-/*@ var !A !A1 !A2 : !Seq */
-/*@ var A B : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var !rho !H : !MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */

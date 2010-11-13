@@ -125,7 +125,6 @@ void print(struct nodeList* x)
 }
 
 
-/*@ verify */
 int main()
 {
   struct nodeList *x;

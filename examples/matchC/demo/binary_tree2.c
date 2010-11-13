@@ -138,7 +138,6 @@ void print(struct nodeList* x)
 }
 
 
-/*@ verify */
 int main()
 {
   struct treeNode* root;
