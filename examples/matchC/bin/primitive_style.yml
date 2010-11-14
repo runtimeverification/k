@@ -37,6 +37,7 @@ counter: hide
 options:
   global-substitutions:
     - "`(`.List{K}`)": ""
+    - "`(`.`)`.Bag": "."
     - "ListItem`((`d+)`)": "`1 "
   spaceless-cells: yes
   indent: 2
