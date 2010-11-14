@@ -173,7 +173,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op readFromMem : Nat Type -> K .
 	op extractField : List{K} Type Id -> K .
 	op allocString : Nat String -> K .
-	op unknownRange : Nat Nat Nat -> List{K} .
+	--- op unknownRange : Nat Nat Nat -> List{K} .
 	op loopMarked : -> Statement .
 	op popLoop : -> K .
 	op giveGlobalType : Type K -> K .
@@ -726,9 +726,9 @@ mod COMMON-LOCAL-DECLARATION is
 		< locals >... ((.).Bag => BagItem(Loc:Nat)) ...</ locals >
 		: KSentence [metadata "structural"] .
 			
-	eq unknownRange(N:Nat, N:Nat, Size:Nat) = .List{K} .
-	ceq unknownRange(N:Nat, M:Nat, Size:Nat) = (piece(unknown(N:Nat), Size:Nat),, unknownRange(sNat(N:Nat), M:Nat, Size:Nat))
-		if M:Nat >Nat N:Nat .
+	--- eq unknownRange(N:Nat, N:Nat, Size:Nat) = .List{K} .
+	--- ceq unknownRange(N:Nat, M:Nat, Size:Nat) = (piece(unknown(N:Nat), Size:Nat),, unknownRange(sNat(N:Nat), M:Nat, Size:Nat))
+		--- if M:Nat >Nat N:Nat .
 endm
 
 mod MEMORY is
@@ -822,7 +822,8 @@ mod MEMORY is
 		< k > readFromMem-aux(loc(Block:Nat, (Offset:Nat => sNat(Offset:Nat))), T:Type, tv((sNat(Left:Nat) => Left:Nat), T':Type), (L:List{K} => (L:List{K},, piece(unknown(Fresh:Nat), numBitsPerByte))))
 		---	=> readFromMem-aux(loc(Block:Nat, sNat(Offset:Nat)), T:Type, tv(Left:Nat, T':Type), (L:List{K},, piece(unknown(Fresh:Nat), numBitsPerByte)))
 		...</ k >
-		< mem >... Block:Nat |-> memblock(BlockLen:Nat, (M:Map ((.).Map => Offset:Nat |-> piece(unknown(Fresh:Nat), numBitsPerByte)))) ...</ mem >
+		--- < mem >... Block:Nat |-> memblock(BlockLen:Nat, (M:Map ((.).Map => Offset:Nat |-> piece(unknown(Fresh:Nat), numBitsPerByte)))) ...</ mem >
+		< mem >... Block:Nat |-> memblock(BlockLen:Nat, (M:Map => M:Map[piece(unknown(Fresh:Nat), numBitsPerByte) / Offset:Nat])) ...</ mem >
 		@latex("\\kBR")
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
 		< freshNat > (Fresh:Nat => sNat(Fresh:Nat)) </ freshNat >

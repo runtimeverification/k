@@ -9,6 +9,8 @@ mod COMMON-C-STANDARD-LIBRARY is
 
 	op builtin : Id -> Value .
 	
+	eq debugK = (application(builtin(debug), 0) ~> discard) .
+	
 	mb [debug-is-value]: rule
 		< k > (debug => builtin(debug)) ...</ k >
 	: KSentence [metadata "structural"] .
@@ -22,31 +24,35 @@ mod COMMON-C-STANDARD-LIBRARY is
 	
 	--- The (apparent) return value from setjmp indicates whether control reached that point normally or from a call to longjmp.
 	--- fixme check bounds
-	op Bag : Bag -> K .
+	op BagK : Bag -> K .
 	mb [setjmp]: rule
 		< thread > 
 			B:Bag
 			< k > (application(builtin(setjmp), tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?)))) => tv(0, int)) ~> K:K </ k >
 		</ thread >
-		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[Bag(B:Bag < k > K:K </ k >) / Offset:Nat])) ...</ mem >
-	: KSentence [metadata "structural"] .
+		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[BagK((B:Bag < continuation > K:K </ continuation >)) / Offset:Nat])) ...</ mem >
+	: KSentence [metadata "computational"] . --- fixme, forcing buffer flush
 	--------------------------------------------
 	mb [longjmp-is-value]: rule
 		< k > (longjmp => builtin(longjmp)) ...</ k >
 	: KSentence [metadata "structural"] .
 
+	op zeroToOne : Int -> Int .
+	eq zeroToOne(I:Int) = if I:Int ==Bool 0 then 1 else I:Int fi .
+	
 	mb [longjmp]: rule
 		< thread >
 		(?
 		< k > application(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))),, tv(I:Int, int))) ~> ? </ k >
 		=> B:Bag
-		< k > (tv(I:Int, int) == tv(0, int)) ~> K:K </ k >
-		--- tv(if I:Int ==Bool 0 then 1 else I:Int fi, int) ~> K:K </ k >
+		< k > tv(zeroToOne(I:Int), int) ~> K:K </ k >
+		--- tv(if I:Int ==Bool 0 then 1 else I:Int fi, int)
+		---x (tv(I:Int, int) == tv(0, int)) ~> K:K </ k >
 		)
 		</ thread >
-		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> (Bag(B:Bag < k > K:K </ k >) => piece(unknown(Fresh:Nat), 8)))) ...</ mem >
+		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> (BagK(B:Bag < continuation > K:K </ continuation >) => piece(unknown(Fresh:Nat), 8)))) ...</ mem >
 		< freshNat > (Fresh:Nat => sNat(Fresh:Nat)) </ freshNat >
-	: KSentence [metadata "structural"] .
+	: KSentence [metadata "computational"] .
 	--------------------------------------------
 	mb [spawn-is-value]: rule
 		< k > (spawn => builtin(spawn)) ...</ k >
@@ -229,7 +235,6 @@ mod COMMON-C-STANDARD-LIBRARY is
 	
 	mb [malloc]: rule
 		< k > application(builtin(malloc), tv(N:Nat, T:Type)) => alloc(Loc:Nat, tv(N:Nat, T:Type)) ~> tv(Loc:Nat, pointerType(void)) ...</ k >
-		---< mem >... [(.).Map => Loc:Nat to (Loc:Nat +Nat N:Nat) |-> unknownRange(Fresh:Nat, Fresh:Nat +Nat N:Nat, 8)] ...</ mem >
 		< malloced >... (.).Map => Loc:Nat |-> N:Nat ...</ malloced >
 		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		---< freshNat > (Fresh:Nat => Fresh:Nat +Nat N:Nat) </ freshNat >
