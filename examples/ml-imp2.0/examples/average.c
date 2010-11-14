@@ -13,7 +13,7 @@ int length(struct nodeList* a)
         < form > TrueFormula </ form > </ config > */
 /*@ post < config > 
          < env > ?rho </ env >
-         < heap > ?H </ heap > 
+         < heap > list(a0)(A) H </ heap > 
          < form > ?l === len(A) /\ returns ?l </ form > </ config > */
 {
   int l;
@@ -65,20 +65,12 @@ int average(struct nodeList* a)
         < form > TrueFormula </ form > </ config > */
 /*@ post < config > 
          < env > ?rho </ env >
-         < heap > ?H </ heap > 
+         < heap > list(a0)(A) H </ heap > 
          < form > ?s === avg(A) /\ returns ?s </ form > </ config > */
 {
   int s;
   int l;
-/*@ assert < config >
-        < env > a |-> a0 s |-> ?s l |-> ?l </ env >
-        < heap > list(a0)(A) H </ heap > 
-        < form > TrueFormula </ form > </ config > */
   s = summ(a);
-/*@ assert < config >
-        < env > a |-> a0 s |-> ?s l |-> ?l </ env >
-        < heap > list(a0)(A) H </ heap > 
-        < form > ?s === sum(A) </ form > </ config > */
   l = length(a);
   s = s / l;
   return s;
@@ -109,7 +101,7 @@ int main()
 /*@ var a0 : FreeInt */
 /*@ var ?A ?X : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var ?rho ?rho' ?H : ?MapItem */
+/*@ var ?rho : ?MapItem */
 /*@ var H E : FreeMapItem */  
 /*@ var C : FreeBagItem */
   
