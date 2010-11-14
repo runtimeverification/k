@@ -9,7 +9,7 @@ infeasible:
     foreground: red
 
 program: hide
-check: show
+check: hide
 spec: recursively-hide
 struct: hide
 fun: recursively-hide
