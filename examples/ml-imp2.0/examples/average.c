@@ -36,11 +36,11 @@ int summ(struct nodeList* a)
 /*@ pre < config > 
         < env > a |-> a0 </ env >
         < heap > list(a0)(A) H </ heap > 
-        < form > TrueFormula </ form > </ config > */
+        < form > TrueFormula </ form > C </ config > */
 /*@ post < config > 
          < env > ?rho </ env >
-         < heap > ?H </ heap > 
-         < form > ?sum === sum(A) /\ returns ?sum </ form > </ config > */
+         < heap > list(a0)(A) H </ heap > 
+         < form > ?sum === sum(A) /\ returns ?sum </ form > C </ config > */
 {
   int s;
   struct nodeList* x;
@@ -49,7 +49,7 @@ int summ(struct nodeList* a)
 /*@ invariant < config > 
               < env > a |-> a0  x |-> ?x s |-> ?sum </ env >
               < heap > lseg(a0,?x)(?A)  list(?x)(?X) H </ heap >
-              < form > (?A @ ?X) === A /\ ((?sum) === sum(?A)) </ form >
+              < form > (?A @ ?X) === A /\ ((?sum) === sum(?A)) </ form > C
               </ config > */
   while (x != 0) {
     s = s + x->val;
@@ -111,4 +111,5 @@ int main()
 /*@ var A : FreeSeq */
 /*@ var ?rho ?rho' ?H : ?MapItem */
 /*@ var H E : FreeMapItem */  
+/*@ var C : FreeBagItem */
   
