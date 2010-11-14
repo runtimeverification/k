@@ -247,5 +247,5 @@ mod COMMON-C-TYPING is
 	mb rule
 		(inline => (.).K)
 		: KSentence [metadata "structural"] .
-
+		
 endm
