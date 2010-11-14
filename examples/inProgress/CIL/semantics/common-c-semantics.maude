@@ -946,13 +946,15 @@ mod MEMORY is
 	mb rule
 		< k > putInMem-aux(?, (tv(loc(0, 0), T:Type) => tv(0, T:Type)), ?, ?) ...</ k >
 		: KSentence [metadata "structural"] .
+		
 	mb rule
-		< k > (putInMem-aux(Target:Nat, tv(loc(Block:Nat, Offset:Nat), T:Type), T:Type, ?) => (.).K) ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[loc(Block':Nat, Offset':Nat) / Offset:Nat)]) ...</ mem >
+		< k > putInMem-aux(Target:Nat, tv(loc(Block:Nat, Offset:Nat), T:Type), T:Type, ?) 
+			=> (.).K 
+		...</ k >
 		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(Target:Nat)) </ locsWrittenTo >
 		< buffer >... ((.).List => bwrite(Target:Nat, loc(Block:Nat, Offset:Nat))) </ buffer >
 		if notBool(Target:Nat in Locs:Bag)
-		andBool Block:Nat =/=Bool 0
+		andBool (Block:Nat =/=Bool 0 orBool Offset:Nat =/=Bool 0)
 		: KSentence [metadata "structural"] .
 		
 	mb rule

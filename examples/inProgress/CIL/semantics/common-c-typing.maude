@@ -241,9 +241,15 @@ mod COMMON-C-TYPING is
 	--- mb rule
 		--- (register => (.).K)
 		--- : KSentence [metadata "structural"] .
-	mb rule
-		register ~> int => registerInt
-		: KSentence [metadata "structural"] .
+
+	eq int ~> register = registerInt .
+	eq register ~> int = registerInt .
+	ceq register ~> K:NeK = K:NeK
+		if K:NeK =/=Bool int .
+	ceq K:NeK ~> register = K:NeK
+		if K:NeK =/=Bool int .
+	eq pointerType(registerInt) = pointerType(int) .
+		
 	mb rule
 		(inline => (.).K)
 		: KSentence [metadata "structural"] .

@@ -14,7 +14,6 @@ GOOD_DIRECTORIES = . fromGCC fromLCC
 
 DONT_WORK = ./resizeArray ./testPrintf ./badsyntax ./bigMem ./unknowns ./symbolic \
 	./twoFile1 ./twoFile2 ./getchar ./sumn ./bitfields2 ./slowParse ./fileio ./hines ./testPow ./arrayOOB \
-	./cq-17-s86 \
 	fromGCC/pr36077 fromGCC/991118-1 \
  	fromGCC/950710-1 fromGCC/980701-1 fromGCC/loop-2d \
 	fromClight/aes fromClight/almabench fromClight/bisect fromClight/binarytrees 
