@@ -181,7 +181,7 @@ int main()
 /*@ var ?root ?a ?stack ?t ?x ?node ?tl ?tr ?test : ?Int */
 /*@ var ?TS ?A : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var T : FreeTree */
+/*@ var T0 : FreeTree */
 /*@ var !T1 !T2 : !Tree */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */

@@ -12,6 +12,7 @@ matching logic annotations
                       | /*@`post Bag */ ---[strat(0)]
 
   syntax Annotation ::= /*@`verify`*/
+                      | /*@`skip`*/
 
 
   syntax FunctionDeclaration ::= ExpressionType

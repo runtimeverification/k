@@ -1,9 +1,11 @@
-load ../lib/ml-prelude.maude
+---load ../lib/ml-prelude.maude
 load matchC-syntax
 load matchC-semantics
+load kernelC
 
 kmod MATCHC is
   including MATCHC-SEMANTICS
+    + KERNELC
     + MATHEMATICAL-DOMAIN-BUILTIN-MODULE
     + LIST-HP
     + BINARY-TREE-HP
@@ -11,18 +13,13 @@ kmod MATCHC is
   kvar N M : Nat
 
   syntax BagItem ::= check ( KLabel )
-                   | run ( KLabel )
                    | ( Nat feasible and Nat infeasible paths)
                      [format(g! d d d d d o)]
 
   macro check(Kl:KLabel) = <T_>
                              <program> Kl(.List{K}) ~> checkContracts </program>
-                             <tasks> .Bag </tasks>
+                             <check> SetItem(checkContract(main)) </check>
                            <_/T>
-  macro run(Kl:KLabel) = <T_>
-                           <program> Kl(.List{K}) ~> runMain </program>
-                           <tasks> .Bag </tasks>
-                         <_/T>
 
 
 ***(

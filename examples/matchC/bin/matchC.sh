@@ -11,8 +11,10 @@ K_TOOLS_DIR=${K_ROOT_DIR}/tools
 ANTLR_ROOT_DIR=${K_TOOLS_DIR}/antlr
 LANG_PARSER_DIR=${ML_ROOT_DIR}/parser
 LANG_SEMANTICS_DIR=${ML_ROOT_DIR}/semantics
+ML_BIN_DIR=${ML_ROOT_DIR}/bin
 ML_LIB_DIR=${ML_ROOT_DIR}/lib
 SMT_MAUDE_DIR=${K_TOOLS_DIR}/smt_maude
+OUT_FILTER_DIR=${K_TOOLS_DIR}/OutputFilter
 
 KC=${K_TOOLS_DIR}/kcompile-program.sh
 KFLAGS=
@@ -24,7 +26,10 @@ UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=kernelCPreK
 
 MAUDE=${SMT_MAUDE_DIR}/maude
-MFLAGS=-no-banner
+MFLAGS="-no-banner"
+
+OUT_FILTER=${OUT_FILTER_DIR}/filterOutput
+OUT_FILTER_STYLE=${ML_BIN_DIR}/primitive_style.yml
 
 TMP_OUT=.tmp_out_file
 TMP_ERR=.tmp_err_file
@@ -104,7 +109,8 @@ if [ -z "${COMPILE_FLAG}" ]; then
   ${MAUDE} ${MFLAGS} ${ML_PROG} >${TMP_OUT} 2>${TMP_ERR}
   if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
-  sed -e '1,2d' -e '$d' ${TMP_OUT}
+  ${OUT_FILTER} ${TMP_OUT} ${OUT_FILTER_STYLE} 2>${TMP_ERR}
+  if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 fi
 
 rm -f ${TMP_OUT} ${TMP_ERR} ${MAUDE_PROG} ${COMPILED_PROG}

@@ -20,10 +20,10 @@ struct treeNodeList {
 
 struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
 /*@ pre  < config > < env > root |-> ?root  x |-> ?x </ env >
-                    < heap > tree(?root)(T) list(?x)(A) H </ heap >
+                    < heap > tree(?root)(T0) list(?x)(A) H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < heap > list(?x)(tree2seq(T) @ A) H </ heap >
+                    < heap > list(?x)(tree2seq(T0) @ A) H </ heap >
                     < form > returns ?x </ form > C </ config > */
 {
   struct nodeList *node;
@@ -43,10 +43,10 @@ struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
 
 struct nodeList *toListIterative(struct treeNode *root)
 /*@ pre  < config > < env > root |-> ?root </ env >
-                    < heap > tree(?root)(T) H </ heap >
+                    < heap > tree(?root)(T0) H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < heap > list(?a)(tree2seq(T)) H </ heap >
+                    < heap > list(?a)(tree2seq(T0)) H </ heap >
                     < form > returns ?a </ form > C </ config > */
 {
   struct nodeList *a;
@@ -69,7 +69,7 @@ struct nodeList *toListIterative(struct treeNode *root)
             t |-> ?t  x |-> ?x  node |-> ?node
           </ env >
           < heap > list{tree}(?stack)(?TS) list(?a)(?A) H </ heap >
-          < form > tree2seq(T) === seq{tree}2seq(rev(?TS)) @ ?A </ form >
+          < form > tree2seq(T0) === seq{tree}2seq(rev(?TS)) @ ?A </ form >
           C
         </ config > */
   while (stack != 0) {
@@ -203,7 +203,7 @@ int main()
 /*@ var ?root ?a ?stack ?t ?x ?node ?tl ?tr ?test : ?Int */
 /*@ var ?TS ?A : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var T : FreeTree */
+/*@ var T0 : FreeTree */
 /*@ var !T1 !T2 : !Tree */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */

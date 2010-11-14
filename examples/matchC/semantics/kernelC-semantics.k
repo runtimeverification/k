@@ -27,9 +27,6 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
 
 
   configuration <T> 
-                  <feasible> 0 </feasible>
-                  <infeasible> 0 </infeasible>
-
                   <program> .K </program>
                   <spec> .Map </spec>
                   <struct> .Map </struct>
@@ -43,7 +40,6 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
                       <env> .Map </env>
                       <heap> .Map </heap>
                       <form> TrueFormula </form>
-                      <subst> .Subst </subst>
                     </config*>
                   </tasks>
 
@@ -58,22 +54,6 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
 Function entry
 ***)
   rule
-    <program> checkContracts => .K <_/program>
-    <tasks> .Bag </tasks>
-  [structural]
-  rule
-    <program> checkContracts <_/program>
-    <fun_> T F(ParamList) |-> S <_/fun>
-    <tasks_>
-        BagItem(checkContract(F))
-      =>
-        <config_>
-          <k> declParams(ParamList) ~> S </k>
-          <stack> callContext(.K, .Map, .Map) </stack>
-        <_/config>
-    <_/tasks>
-  [structural]
-  rule
     <program> runMain => .K <_/program>
     <fun_> T main(.List{KernelC}) |-> S <_/fun>
     <tasks>
@@ -85,6 +65,7 @@ Function entry
         <_/config>
     </tasks>
   [structural]
+
 
 ***(
 Translation unit (top rule)
@@ -155,7 +136,6 @@ function call/return
     <tenv> _ => TEnv </tenv>
     <env> _ => Env </env>
    <form> Phi => returns V /\ Phi </form>
-  [structural]
 
 *** retrieve the return value
   rule
@@ -188,9 +168,11 @@ Expressions
 
 *** dereferencing
   rule
-    <k> *tv(T *, I) => derive(I) ~> load(T, I) <_/k> [structural]
+    <k> *tv(T *, I) => derive(I) ~> load(T, I) <_/k>
+  [structural]
   rule
-    <k> tv(T, I)->F => *&(tv(T, I)->F) <_/k> [structural]
+    <k> tv(T, I)->F => *&(tv(T, I)->F) <_/k>
+  [structural]
   
 *** binary expressions
   rule tv(T, I1) + tv(T, I2) => tv(T, I1 +Int I2) [structural]
@@ -221,6 +203,7 @@ Expressions
   context (* [HOLE]) = _
   rule
     <k> *tv(T *, I) = tv(_, V) => derive(I) ~> store(T, I, V) <_/k>
+  [structural]
   context ([HOLE] ->_) = _
   rule
     <k> tv(T, I)->F = E => *&(tv(T, I)->F) = E <_/k>
@@ -246,7 +229,7 @@ Expressions
   rule
     <k> sizeof (struct X) => tv(int, listLen(KernelCList)) <_/k>
     <struct_> X |-> fieldList(KernelCList) <_/struct>
-    [structural]
+  [structural]
 
 
 ***(

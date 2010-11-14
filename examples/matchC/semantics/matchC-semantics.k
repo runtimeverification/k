@@ -15,17 +15,21 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar Cfgs CfgItems PreCfgs PostCfgs : Bag
   kvar Map Env TEnv : Map
   kvar Stack : List
+  kvar checkSet Set : Set
+
 
   syntax K ::= checkContracts
-  syntax K ::= checkContract ( Id )
+             | checkContract ( Id )
+             | uncheckContract ( Id )
   syntax K ::= co-skolemize ( K )
-  syntax MapItem ::= ExpressionType Id ( List{KernelC} ) : Bag => Bag
+
 
   configuration <T> 
                   <feasible> 0 </feasible>
                   <infeasible> 0 </infeasible>
 
                   <program> .K </program>
+                  <check> .Set </check>
                   <spec> .Map </spec>
                   <struct> .Map </struct>
                   <fun> .Map </fun>
@@ -49,18 +53,25 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
                 </T>
 
 
+  rule
+    <program> checkContracts => setToK(checkSet) <_/program>
+    <check> checkSet </check>
+  [structural]
+  rule
+    <check_>
+      SetItem(checkContract(F)) SetItem(uncheckContract(F)) => .Set
+    <_/check>
+  [structural]
+
+
 ***(
 Function entry
 ***)
   rule
-    <program> checkContracts => .K <_/program>
-    <tasks> .Bag </tasks>
-  [structural]
-  rule
-    <program> checkContracts <_/program>
+    <program> checkContract(F) => .K <_/program>
     <fun_> T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ |-> S <_/fun>
     <tasks_>
-        BagItem(checkContract(F))
+        .Bag
       =>
         <config_>
           <k> declParams(ParamList) ~> /*@ assume PreCfgs */ ~> S </k>
@@ -69,10 +80,10 @@ Function entry
     <_/tasks>
   [structural]
   rule
-    <program> checkContracts <_/program>
+    <program> checkContract(F) => .K <_/program>
     <fun_> T F(ParamList) |-> S <_/fun>
     <tasks_>
-        BagItem(checkContract(F))
+        .Bag
       =>
         <config_>
           <k> declParams(ParamList) ~> S </k>
@@ -114,21 +125,15 @@ Function definition/declaration
         T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */
         |-> (S ~> return tv(void, unit))
     <_/fun>
-    <tasks_> .Bag => BagItem(checkContract(F)) <_/tasks>
+    <check_> .Set => SetItem(checkContract(F)) <_/check>
   [structural]
   rule
     <program> (/*@ verify */ => .K) ~> T F(ParamList) S <_/program>
-    <tasks_> .Bag => BagItem(checkContract(F)) <_/tasks>
+    <check_> .Set => SetItem(checkContract(F)) <_/check>
   [structural]
   rule
-    <k>
-        co-skolemize((/*@ assert PreCfgs */ ~> /*@ assume PostCfgs */))
-      =>
-        /*@ assert co-skolemize(N, PreCfgs) */
-        ~> /*@ assume co-skolemize(N, PostCfgs) */
-    <_/k>
-    <counter> N => sNat N </counter>
-  [structural]
+    <program> (/*@ skip */ => .K) ~> T F(ParamList) S <_/program>
+    <check_> .Set => SetItem(uncheckContract(F)) <_/check>
 
 
 ***(
@@ -193,8 +198,9 @@ loop invariants
     </k>
 
 ***(
-assumed patterns are merged with the current configuration
-multiple patterns generate splitting
+assumed patterns
+  1. are merged with the current configuration
+  2. split the current configuration if the contain disjunctions
 ***) 
   rule
     <config_> 
@@ -267,5 +273,26 @@ asserted patterns
         <subst> Subst2 </subst>
       </config>
     )
+
+***(
+function summaries
+***)
+  rule
+    <k>
+        co-skolemize((/*@ assert PreCfgs */ ~> /*@ assume PostCfgs */))
+      =>
+        /*@ assert co-skolemize(N, PreCfgs) */
+        ~> /*@ assume co-skolemize(N, PostCfgs) */
+    <_/k>
+    <counter> N => sNat N </counter>
+  [structural]
+
+
+***(
+Helpers
+***)
+  syntax K ::= setToK ( Set )
+  rule setToK(SetItem(K) Set) => K ~> setToK(Set) [structural]
+  rule setToK(.Set) => .K [structural]
 endkm
 
