@@ -26,7 +26,7 @@ UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=kernelCPreK
 
 MAUDE=${SMT_MAUDE_DIR}/maude
-MFLAGS="-no-banner"
+MFLAGS="-no-banner -no-wrap"
 
 OUT_FILTER=${OUT_FILTER_DIR}/filterOutput
 OUT_FILTER_STYLE=${ML_BIN_DIR}/primitive_style.yml
