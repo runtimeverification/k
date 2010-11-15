@@ -96,6 +96,9 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
 
   ops val next : -> Id .
   ops nodeList : -> Id .
+  
+  ops head tail : -> Id .
+  ops nodeQueue : -> Id .
 
   ops val left right : -> Id .
   ops treeNode : -> Id .
