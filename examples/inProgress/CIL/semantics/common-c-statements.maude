@@ -1,5 +1,10 @@
-mod COMMON-SEMANTICS-IF-THEN is
+mod COMMON-STATEMENTS-INCLUDE is
 	including COMMON-INCLUDE .
+	op preparedWhile : K K -> K .
+endm
+
+mod COMMON-SEMANTICS-IF-THEN is
+	including COMMON-STATEMENTS-INCLUDE .
 	
 	--- fixme need to represent null with 0
 	mb [if-then-true]: rule
@@ -22,24 +27,23 @@ mod COMMON-SEMANTICS-IF-THEN is
 endm
 
 mod COMMON-SEMANTICS-WHILE is
-	including COMMON-INCLUDE .
+	including COMMON-STATEMENTS-INCLUDE .
 	
 	mb [while-mark]: rule
 		< k > while (B:Expression) S:Statement ~> K:K
-		=> loopMarked ~> (while (B:Expression) S:Statement) ~> popLoop ~> K:K
+			=> preparedWhile(B:Expression, S:Statement) ~> (break ;)
 		</ k >
 		< loopStack > ((.).List => ListItem(K:K)) ...</ loopStack >
 		: KSentence [metadata "structural"] .
 	mb [while]: rule
-		< k > loopMarked ~> while (B:Expression) S:Statement
-		=> 
-		'if`(_`)_(B:Expression,, S:Statement ~> loopMarked ~> (while (B:Expression) S:Statement))
+		< k > preparedWhile(B:Expression, S:Statement)
+			=> 'if`(_`)_(B:Expression,, S:Statement ~> preparedWhile(B:Expression, S:Statement))
 		...</ k >
 		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-SWITCH is
-	including COMMON-INCLUDE .
+	including COMMON-STATEMENTS-INCLUDE .
 	
 	--- fixme shouldn't there be sequence points here?
 	mb rule
@@ -74,7 +78,7 @@ mod COMMON-SEMANTICS-SWITCH is
 endm
 
 mod COMMON-SEMANTICS-GOTO is
-	including COMMON-INCLUDE .
+	including COMMON-STATEMENTS-INCLUDE .
 	
 	mb context calculateGotoMap(?, ('case`(_`)_:_(?:K,,`[HOLE`]:K,, ?) ~> ?), ?, ?) : KSentence .
 	
@@ -145,31 +149,31 @@ mod COMMON-SEMANTICS-GOTO is
 	mb rule 
 		< k > calculateGotoMap(X:Id, ('while`(_`)_(B:Expression,, S:Statement) ~> K:K), S':List, Tail:K) 
 		=> calculateGotoMap(X:Id, 
-			(S:Statement ~> loopMarked ~> (while (B:Expression) S:Statement) ~> K:K),
+			(S:Statement ~> preparedWhile(B:Expression, S:Statement) ~> (break ;)),
 			(ListItem((K:K ~> Tail:K)) S':List),
 			Tail:K) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule 
-		< k > calculateGotoMap(X:Id, (loopMarked ~> (while (B:Expression) S:Statement) ~> K:K), (ListItem( (K:K ~> Tail:K)) S':List), Tail:K)
+		< k > calculateGotoMap(X:Id, (preparedWhile(B:Expression, S:Statement) ~> (break ;)), (ListItem((K:K ~> Tail:K)) S':List), Tail:K)
 		=> calculateGotoMap(X:Id, K:K, S':List, Tail:K) ...</ k >
 		: KSentence [metadata "structural"] .
 		
 	mb rule 
 		< k > calculateGotoMap(X:Id, ('switch`(_`)`(_`)_(?,, B:Expression,, S:Statement) ~> K:K), S:List, Tail:K) 
 		=> calculateGotoMap(X:Id,
-			(S:Statement ~> popLoop ~> K:K),
+			(S:Statement ~> (break ;) ~> popLoop),
 			(ListItem((K:K ~> Tail:K)) S:List),
 			Tail:K) ...</ k >
 		: KSentence [metadata "structural"] .
 	
 	mb rule 
-		< k > calculateGotoMap(X:Id, (popLoop ~> K:K), (? S:List), Tail:K)
+		< k > calculateGotoMap(X:Id, popLoop, (ListItem(K:K) S:List), Tail:K)
 		=> calculateGotoMap(X:Id, K:K, S:List, Tail:K) ...</ k >
 		: KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-RETURN is
-	including COMMON-INCLUDE .
+	including COMMON-STATEMENTS-INCLUDE .
 	
 	--- fixme can be combined into one cleaning rule
 	mb [return-value-clean-local]: rule 
@@ -238,6 +242,7 @@ mod COMMON-SEMANTICS-RETURN is
 endm
 
 mod COMMON-C-STATEMENTS is
+	including COMMON-STATEMENTS-INCLUDE .
 	including COMMON-SEMANTICS-IF-THEN .
 	including COMMON-SEMANTICS-WHILE .
 	including COMMON-SEMANTICS-SWITCH .
@@ -259,9 +264,10 @@ mod COMMON-C-STATEMENTS is
 	--- dissolve expression statements that are finished evaluating
 	mb [value-statement]: rule < k > (V:Value ; => sequencePoint) ...</ k > : KSentence [metadata "structural"] .
 	
+	--- on K, poploop is a nop.
 	mb [popLoop]: rule
 		< k > (popLoop => (.).K) ...</ k >
-		< loopStack > (Li:ListItem => (.).List) ...</ loopStack >
+		--- < loopStack > (Li:ListItem => (.).List) ...</ loopStack >
 		: KSentence [metadata "structural"] .
 		
 	mb [break]: rule
@@ -270,11 +276,11 @@ mod COMMON-C-STATEMENTS is
 		: KSentence [metadata "computational"] . --- nondet
 	
 	--- fixme not sure about this, isn't it possible for K:K to grab greedily?
-	mb [continue]: rule
-		< k > continue ; ~> K:K => continue ; ...</ k >
-		if K:K =/=Bool loopMarked
-		: KSentence [metadata "structural"] . --- nondet
-	mb [continue-done]: rule
-		< k > (continue ; => (.).K) ~> loopMarked ...</ k >
-		: KSentence [metadata "structural"] . --- nondet
+	--- mb [continue]: rule
+		--- < k > continue ; ~> K:K => continue ; ...</ k >
+		--- if K:K =/=Bool loopMarked
+		--- : KSentence [metadata "structural"] . --- nondet
+	--- mb [continue-done]: rule
+		--- < k > (continue ; => (.).K) ~> loopMarked ...</ k >
+		--- : KSentence [metadata "structural"] . --- nondet
 endm
