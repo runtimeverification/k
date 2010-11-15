@@ -11,9 +11,9 @@ function stats {
 	
 	printf "%35s %35s\n" "$FILENAME1" "$FILENAME2"
 	
-	let NUM_RULES1=`cat $FILENAME1 | perl maudeloc.pl | grep "rule" | wc -l`
-	let NUM_EQUATIONS1=`cat $FILENAME1 | perl maudeloc.pl | grep "eq " | wc -l`
-	let NUM_LINES1=`cat $FILENAME1 | perl maudeloc.pl | wc -l`
+	let NUM_RULES1=`cat $FILENAME1 | perl maudeloc.pl | grep ": rule\|^mb rule" | wc -l`
+	let NUM_EQUATIONS1=`cat $FILENAME1 | perl maudeloc.pl | grep "^eq \|^ceq " | wc -l`
+	let NUM_LINES1=`cat $FILENAME1 | perl maudeloc.pl | grep -v "^mb rule$\|^endm$" | wc -l`
 	let TOTAL_RULES=$TOTAL_RULES+$NUM_RULES1
 	let TOTAL_EQUATIONS=$TOTAL_EQUATIONS+$NUM_EQUATIONS1
 	let TOTAL_LINES=$TOTAL_LINES+$NUM_LINES1
@@ -24,7 +24,7 @@ function stats {
 	if [ ! -z "$FILENAME2" ]; then
 		let NUM_RULES2=`cat $FILENAME2 | perl maudeloc.pl | grep ": rule\|^mb rule" | wc -l`
 		let NUM_EQUATIONS2=`cat $FILENAME2 | perl maudeloc.pl | grep "^eq \|^ceq " | wc -l`
-		let NUM_LINES2=`cat $FILENAME2 | perl maudeloc.pl | wc -l`
+		let NUM_LINES2=`cat $FILENAME2 | perl maudeloc.pl | grep -v "^mb rule$\|^endm$" | wc -l`
 		let TOTAL_EQUATIONS=$TOTAL_EQUATIONS+$NUM_EQUATIONS2
 		let TOTAL_LINES=$TOTAL_LINES+$NUM_LINES2
 	fi

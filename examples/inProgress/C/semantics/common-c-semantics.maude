@@ -1,3 +1,12 @@
+***(
+
+maybe say something like
+< k > label(?,, arrayType(T:Type) => pointerType(T:Type) ,, ?)
+breaks toEval-aux
+***)
+
+
+
 --- why isn't K ~> K proper?
 --- arithmetic on a void * pointer
 --- argument of function type
