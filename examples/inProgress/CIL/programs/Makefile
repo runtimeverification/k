@@ -16,7 +16,7 @@ DONT_WORK = ./resizeArray ./testPrintf ./badsyntax ./bigMem ./unknowns ./symboli
 	./twoFile1 ./twoFile2 ./getchar ./sumn ./bitfields2 ./slowParse ./fileio ./hines ./testPow ./arrayOOB \
 	fromGCC/pr36077 fromGCC/991118-1 \
 	./mersenne \
- 	fromGCC/950710-1 fromGCC/980701-1 fromGCC/loop-2d \
+ 	fromGCC/950710-1 fromGCC/980701-1 fromGCC/loop-2d fromGCC/loop-11 \
 	fromClight/aes fromClight/almabench fromClight/bisect fromClight/binarytrees 
 	
 # fromGCC/pr36077 doesn't work because gcc fails
