@@ -57,7 +57,7 @@ mod BINARY-TREE-HP is
      Cfgs 
      </ tasks >
      < counter > N +Int 5 </ counter >
-  if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+  if VALID(Phi ===> P' === P \/ P' === P +Int 1 \/ P' === P +Int 2) .
 
   eq < heap > tree(0)(Tau) H </ heap > < form > Phi </ form >
    = < heap > H </ heap > < form > Phi /\ Tau === upsilon </ form > .

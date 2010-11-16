@@ -109,6 +109,7 @@ if [ -z "${COMPILE_FLAG}" ]; then
   ${MAUDE} ${MFLAGS} ${ML_PROG} >${TMP_OUT} 2>${TMP_ERR}
   if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
+  grep 'rewrites: ' ${TMP_OUT}
   ${OUT_FILTER} ${TMP_OUT} ${OUT_FILTER_STYLE} 2>${TMP_ERR}
   if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 fi
