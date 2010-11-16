@@ -1,5 +1,5 @@
 # Whitelist the following cells
-T: hide
+top: hide
 
 feasible:
   text-style:

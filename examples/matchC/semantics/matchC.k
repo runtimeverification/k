@@ -16,25 +16,15 @@ kmod MATCHC is
                    | ( Nat feasible and Nat infeasible paths)
                      [format(g! d d d d d o)]
 
-  macro check(Kl:KLabel) = <T_>
+  macro check(Kl:KLabel) = <top_>
                              <program> Kl(.List{K}) ~> checkContracts </program>
                              <check> SetItem(checkContract(main)) </check>
-                           <_/T>
+                           <_/top>
 
 
 ***(
 Output
 ***)
-*** rule
-***      <T_>
-***        <feasible> N </feasible>
-***        <infeasible> M </infeasible>
-***        <program> .K </program>
-***        <tasks> .Bag </tasks>
-***      <_/T>
-***    =>
-***      N feasible and M infeasible paths
-***  [metadata "structural"]
   rule
     <feasible> N => N +Int 1 </feasible>
     (

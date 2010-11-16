@@ -76,12 +76,12 @@ mod CONFIG-BUILTIN-MODULE is
   op isInt : Int++ -> Bool .
 
   ops val next : -> Id .
-  ops nodeList : -> Id .
+  ops listNode : -> Id .
 
   ops val left right : -> Id .
   ops treeNode : -> Id .
 
-  ops treeNodeList : -> Id .
+  ops stackNode : -> Id .
 endm
 
 

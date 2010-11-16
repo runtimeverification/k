@@ -7,15 +7,15 @@ mod MATHEMATICAL-DOMAIN-BUILTIN-MODULE is
   var I : Int++ .
   vars T TL TR : Tree++ .
 
-  op tree2seq : Tree++ -> NeSeq++ .
+  op tree2list : Tree++ -> NeSeq++ .
 ***(
-  op tree2seq : ?Tree -> ?Seq [ditto] .
-  op tree2seq : !Tree -> !Seq [ditto] .
-  op tree2seq : FreeTree -> FreeSeq [ditto] .
-  op tree2seq : Tree -> NeSeq [ditto] .
+  op tree2list : ?Tree -> ?Seq [ditto] .
+  op tree2list : !Tree -> !Seq [ditto] .
+  op tree2list : FreeTree -> FreeSeq [ditto] .
+  op tree2list : Tree -> NeSeq [ditto] .
 ***)
-  eq tree2seq(TL [ Obj ] TR) = tree2seq(TL) @ [Obj] @ tree2seq(TR) .
-  eq tree2seq(upsilon) = epsilon .
+  eq tree2list(TL [ Obj ] TR) = tree2list(TL) @ [Obj] @ tree2list(TR) .
+  eq tree2list(upsilon) = epsilon .
   op tree2mset : Tree++ -> NeMSet++ .
 ***(
   op tree2mset : ?Tree -> ?MSet [ditto] .
@@ -59,7 +59,7 @@ mod MATHEMATICAL-DOMAIN-BUILTIN-MODULE is
 
   op seq{tree}2seq_ : Seq++ -> Seq++ .
   eq seq{tree}2seq(A1 @ [T] @ A2)
-   = seq{tree}2seq(A1) @ tree2seq(T) @ seq{tree}2seq(A2) .
+   = seq{tree}2seq(A1) @ tree2list(T) @ seq{tree}2seq(A2) .
   eq seq{tree}2seq(epsilon) = epsilon .
 endm
 

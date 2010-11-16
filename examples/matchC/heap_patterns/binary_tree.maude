@@ -171,8 +171,8 @@ mod BINARY-TREE-HP is
        < config >
          < k > K </ k >
          < heap >
-           P |-> FreeInt(N) : treeNodeList . val
-           (P +Int 1) |-> FreeInt(N +Int 1) : treeNodeList . next
+           P |-> FreeInt(N) : stackNode . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : stackNode . next
            tree(FreeInt(N))(FreeTree(N +Int 2))
            list{tree}(FreeInt(N +Int 1))(FreeSeq(N +Int 3))
            H
@@ -193,8 +193,8 @@ mod BINARY-TREE-HP is
 
   rl < config >
        < heap >
-         P |-> 0 : treeNodeList . val
-         (P +Int 1) |-> 0 : treeNodeList . next
+         P |-> 0 : stackNode . val
+         (P +Int 1) |-> 0 : stackNode . next
          H
        </ heap >
        CfgItems
@@ -211,8 +211,8 @@ mod BINARY-TREE-HP is
 
   rl < config >
        < heap >
-         P |-> I : treeNodeList . val
-         (P +Int 1) |-> 0 : treeNodeList . next
+         P |-> I : stackNode . val
+         (P +Int 1) |-> 0 : stackNode . next
          tree(I)(Tau)
          H
        </ heap >
@@ -230,8 +230,8 @@ mod BINARY-TREE-HP is
 
   rl < config >
        < heap >
-         P |-> 0 : treeNodeList . val
-         (P +Int 1) |-> Q : treeNodeList . next
+         P |-> 0 : stackNode . val
+         (P +Int 1) |-> Q : stackNode . next
          list{tree}(Q)(Alpha)
          H
        </ heap >
@@ -248,8 +248,8 @@ mod BINARY-TREE-HP is
 
   rl < config >
        < heap >
-         P |-> I : (treeNodeList . val)
-         (P +Int 1) |-> Q : (treeNodeList . next)
+         P |-> I : (stackNode . val)
+         (P +Int 1) |-> Q : (stackNode . next)
          tree(I)(Tau)
          list{tree}(Q)(Alpha)
          H

@@ -7,80 +7,81 @@ struct treeNode {
   struct treeNode *right;
 };
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
-struct treeNodeList {
+struct stackNode {
   struct treeNode *val;
-  struct treeNodeList *next;
+  struct stackNode *next;
 };
 
 
-struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
+struct listNode *toListRecursive(struct treeNode *tree, struct listNode *list)
 {
-  struct nodeList *node;
+  struct listNode *ln;
 
-  if (root == 0)
-    return x;
+  if (tree == 0)
+    return list;
 
-  node = (struct nodeList *) malloc(sizeof(struct nodeList));
-  node->val = root->val; 
-  node->next = toListRecursive(root->right, x);
-  node = toListRecursive(root->left, node);
-  free(root);
+  ln = (struct listNode *) malloc(sizeof(struct listNode));
+  ln->val = tree->val; 
+  ln->next = toListRecursive(tree->right, list);
+  list = toListRecursive(tree->left, ln);
+  free(tree);
 
-  return node;
+  return list;
 }
 
 
-struct nodeList *toListIterative(struct treeNode *root)
+struct listNode *toListIterative(struct treeNode *tree)
 {
-  struct nodeList *a;
-  struct nodeList *node;
-  struct treeNode *t;
-  struct treeNodeList *stack;
-  struct treeNodeList *x;
+  struct listNode *list;
+  struct listNode *ln;
+  struct treeNode *tn;
+  struct stackNode *stack;
+  struct stackNode *sn;
 
-  if (root == 0)
+  if (tree == 0)
     return 0;
 
-  a = 0;
-  stack = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
-  stack->val = root;
+  list = 0;
+  stack = (struct stackNode *) malloc(sizeof(struct stackNode));
+  stack->val = tree;
   stack->next = 0;
   while (stack != 0) {
-    x = stack;
+    sn = stack;
     stack = stack->next ;
-    t = x->val;
-    free(x) ;
-    if (t->left != 0) {
-      x = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
-      x->val = t->left;
-      x->next = stack;
-      stack = x;
+    tn = sn->val;
+    free(sn) ;
+    if (tn->left != 0) {
+      sn = (struct stackNode *) malloc(sizeof(struct stackNode));
+      sn->val = tn->left;
+      sn->next = stack;
+      stack = sn;
     }
-    if (t->right != 0) {
-      x = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
-      x->val = t;
-      x->next = stack;
-      stack = x;
-      x = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
-      x->val = t->right;
-      x->next = stack;
-      stack = x;
-      t->left = t->right = 0;
+    if (tn->right != 0) {
+      sn = (struct stackNode *) malloc(sizeof(struct stackNode));
+      sn->val = tn;
+      sn->next = stack;
+      stack = sn;
+      sn = (struct stackNode *) malloc(sizeof(struct stackNode));
+      sn->val = tn->right;
+      sn->next = stack;
+      stack = sn;
+      tn->left = tn->right = 0;
     }
     else {
-      node = (struct nodeList *) malloc(sizeof(struct nodeList));
-      node->val = t->val;
-      node->next = a;
-      a = node;
-      free(t);
+      ln = (struct listNode *) malloc(sizeof(struct listNode));
+      ln->val = tn->val;
+      ln->next = list;
+      list = ln;
+      free(tn);
     }
   }
-  return a;
+
+  return list;
 }
 
 
@@ -115,9 +116,9 @@ struct treeNode *sample()
 }
 
 
-void destroy(struct nodeList* x)
+void destroy(struct listNode* x)
 {
-  struct nodeList *y;
+  struct listNode *y;
   while(x)
   {
     y = x->next;
@@ -127,7 +128,7 @@ void destroy(struct nodeList* x)
 }
 
 
-void print(struct nodeList* x)
+void print(struct listNode* x)
 {
   while(x)
   {
@@ -140,20 +141,20 @@ void print(struct nodeList* x)
 
 int main()
 {
-  struct treeNode* root;
-  struct nodeList* node;
+  struct treeNode* tree;
+  struct listNode* list;
 
-  root = sample();
-  node = toListRecursive(root, 0);
+  tree = sample();
+  list = toListRecursive(tree, 0);
   printf("list: ");
-  print(node);
-  destroy(node);
+  print(list);
+  destroy(list);
 
-  root = sample();
-  node = toListIterative(root);
+  tree = sample();
+  list = toListIterative(tree);
   printf("list: ");
-  print(node);
-  destroy(node);
+  print(list);
+  destroy(list);
 
   return 0;
 }

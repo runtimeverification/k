@@ -26,7 +26,7 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
   syntax ListItem ::= callContext ( K , Map , Map )
 
 
-  configuration <T> 
+  configuration <top> 
                   <program> .K </program>
                   <spec> .Map </spec>
                   <struct> .Map </struct>
@@ -47,7 +47,7 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
                   <out> .List </out>
 
                   <counter> 0 </counter>
-                </T>
+                </top>
 
 
 ***(

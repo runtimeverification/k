@@ -24,7 +24,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   syntax K ::= co-skolemize ( K )
 
 
-  configuration <T> 
+  configuration <top> 
                   <feasible> 0 </feasible>
                   <infeasible> 0 </infeasible>
 
@@ -50,7 +50,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
                   <out> .List </out>
 
                   <counter> 0 </counter>
-                </T>
+                </top>
 
 
   rule

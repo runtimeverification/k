@@ -7,25 +7,25 @@ struct treeNode {
   struct treeNode *right;
 };
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
-struct treeNodeList {
+struct stackNode {
   struct treeNode *val;
-  struct treeNodeList *next;
+  struct stackNode *next;
 };
 
 
-struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
+struct listNode *toListRecursive(struct treeNode *root, struct listNode *x)
 {
-  struct nodeList *node;
+  struct listNode *node;
 
   if (root == 0)
     return x;
 
-  node = (struct nodeList *) malloc(sizeof(struct nodeList));
+  node = (struct listNode *) malloc(sizeof(struct listNode));
   node->val = root->val; 
   node->next = toListRecursive(root->right, x);
   node = toListRecursive(root->left, node);
@@ -35,19 +35,19 @@ struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
 }
 
 
-struct nodeList *toListIterative(struct treeNode *root)
+struct listNode *toListIterative(struct treeNode *root)
 {
-  struct nodeList *a;
-  struct nodeList *node;
+  struct listNode *a;
+  struct listNode *node;
   struct treeNode *t;
-  struct treeNodeList *stack;
-  struct treeNodeList *x;
+  struct stackNode *stack;
+  struct stackNode *x;
 
   if (root == 0)
     return 0;
 
   a = 0;
-  stack = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
+  stack = (struct stackNode *) malloc(sizeof(struct stackNode));
   stack->val = root;
   stack->next = 0;
   while (stack != 0) {
@@ -56,24 +56,24 @@ struct nodeList *toListIterative(struct treeNode *root)
     t = x->val;
     free(x) ;
     if (t->left != 0) {
-      x = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
+      x = (struct stackNode *) malloc(sizeof(struct stackNode));
       x->val = t->left;
       x->next = stack;
       stack = x;
     }
     if (t->right != 0) {
-      x = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
+      x = (struct stackNode *) malloc(sizeof(struct stackNode));
       x->val = t;
       x->next = stack;
       stack = x;
-      x = (struct treeNodeList *) malloc(sizeof(struct treeNodeList));
+      x = (struct stackNode *) malloc(sizeof(struct stackNode));
       x->val = t->right;
       x->next = stack;
       stack = x;
       t->left = t->right = 0;
     }
     else {
-      node = (struct nodeList *) malloc(sizeof(struct nodeList));
+      node = (struct listNode *) malloc(sizeof(struct listNode));
       node->val = t->val;
       node->next = a;
       a = node;
@@ -115,9 +115,9 @@ struct treeNode *sample()
 }
 
 
-void destroy(struct nodeList* x)
+void destroy(struct listNode* x)
 {
-  struct nodeList *y;
+  struct listNode *y;
   while(x)
   {
     y = x->next;
@@ -127,7 +127,7 @@ void destroy(struct nodeList* x)
 }
 
 
-void print(struct nodeList* x)
+void print(struct listNode* x)
 {
   while(x)
   {
@@ -141,7 +141,7 @@ void print(struct nodeList* x)
 int main()
 {
   struct treeNode* root;
-  struct nodeList* node;
+  struct listNode* node;
 
   root = sample();
   /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
@@ -149,7 +149,7 @@ int main()
                         < form > TrueFormula </ form > </ config > */
   node = toListRecursive(root, 0);
   /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
-                        < heap > list(?node)(tree2seq(!T1)) </ heap >
+                        < heap > list(?node)(tree2list(!T1)) </ heap >
                         < form > TrueFormula </ form > </ config > */
   printf("list: ");
   print(node);
@@ -165,7 +165,7 @@ int main()
                         < form > TrueFormula </ form > </ config > */
   node = toListIterative(root);
   /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
-                        < heap > list(?node)(tree2seq(!T2)) </ heap >
+                        < heap > list(?node)(tree2list(!T2)) </ heap >
                         < form > TrueFormula </ form > </ config > */
   printf("list: ");
   print(node);
@@ -181,7 +181,7 @@ int main()
 /*@ var ?root ?a ?stack ?t ?x ?node ?tl ?tr ?test : ?Int */
 /*@ var ?TS ?A : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var T0 : FreeTree */
+/*@ var T : FreeTree */
 /*@ var !T1 !T2 : !Tree */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */

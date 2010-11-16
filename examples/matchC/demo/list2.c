@@ -1,16 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
 
-struct nodeList* reverse(struct nodeList *x)
+struct listNode* reverse(struct listNode *x)
 {
-  struct nodeList *p;
-  struct nodeList *y;
+  struct listNode *p;
+  struct listNode *y;
   p = 0 ;
   while(x) {
     y = x->next;
@@ -22,9 +22,9 @@ struct nodeList* reverse(struct nodeList *x)
 }
 
 
-struct nodeList* append(struct nodeList *x, struct nodeList *y)  
+struct listNode* append(struct listNode *x, struct listNode *y)  
 {
-  struct nodeList *p;
+  struct listNode *p;
   if (x == 0)
    return y;
 
@@ -37,7 +37,7 @@ struct nodeList* append(struct nodeList *x, struct nodeList *y)
 }
 
 
-int length(struct nodeList* x)
+int length(struct listNode* x)
 {
   int l;
   
@@ -51,15 +51,15 @@ int length(struct nodeList* x)
 }
 
 
-struct nodeList* create(int n)
+struct listNode* create(int n)
 {
-  struct nodeList *x;
-  struct nodeList *y;
+  struct listNode *x;
+  struct listNode *y;
   x = 0;
   while (n)
   {
     y = x;
-    x = (struct nodeList*)malloc(sizeof(struct nodeList));
+    x = (struct listNode*)malloc(sizeof(struct listNode));
     x->val = n;
     x->next = y;
     n -= 1;
@@ -68,9 +68,9 @@ struct nodeList* create(int n)
 }
 
 
-void destroy(struct nodeList* x)
+void destroy(struct listNode* x)
 {
-  struct nodeList *y;
+  struct listNode *y;
   while(x)
   {
     y = x->next;
@@ -80,7 +80,7 @@ void destroy(struct nodeList* x)
 }
 
 
-void print(struct nodeList* x)
+void print(struct listNode* x)
 {
   while(x)
   {
@@ -93,8 +93,8 @@ void print(struct nodeList* x)
 
 int main()
 {
-  struct nodeList *x;
-  struct nodeList *y;
+  struct listNode *x;
+  struct listNode *y;
   x = create(5);
   /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
                         < heap > list(?x)([1, 2, 3, 4, 5]) </ heap > 

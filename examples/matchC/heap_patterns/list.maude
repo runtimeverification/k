@@ -35,8 +35,8 @@ mod LIST-HP is
        < config >
          < k > K </ k >
          < heap >
-           P |-> FreeInt(N) : nodeList . val
-           (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+           P |-> FreeInt(N) : listNode . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : listNode . next
            list(FreeInt(N +Int 1))(FreeSeq(N +Int 2))
            H
          </ heap >
@@ -61,8 +61,8 @@ mod LIST-HP is
    = < tasks >
        < config >
          < heap >
-           P |-> FreeInt(N) : nodeList . val
-           (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+           P |-> FreeInt(N) : listNode . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : listNode . next
            list(FreeInt(N +Int 1))(FreeSeq(N +Int 2))
            H
          </ heap >
@@ -82,8 +82,8 @@ mod LIST-HP is
 
   rl < config >
        < heap >
-         P |-> I : nodeList . val
-         (P +Int 1) |-> 0 : nodeList . next
+         P |-> I : listNode . val
+         (P +Int 1) |-> 0 : listNode . next
          H
        </ heap >
        CfgItems
@@ -99,8 +99,8 @@ mod LIST-HP is
      =match=> Cfg .
   rl < config >
        < heap >
-         P |-> I : nodeList . val
-         (P +Int 1) |-> P' : nodeList . next
+         P |-> I : listNode . val
+         (P +Int 1) |-> P' : listNode . next
          list(P')(Alpha)
          H
        </ heap >
@@ -119,8 +119,8 @@ mod LIST-HP is
   rl Cfg =match=>
      < config >
        < heap >
-         P |-> I : nodeList . val
-         (P +Int 1) |-> 0 : nodeList . next
+         P |-> I : listNode . val
+         (P +Int 1) |-> 0 : listNode . next
          H
        </ heap >
        CfgItems
@@ -136,8 +136,8 @@ mod LIST-HP is
   rl Cfg =match=>
      < config >
        < heap >
-         P |-> I : nodeList . val
-         (P +Int 1) |-> P' : nodeList . next
+         P |-> I : listNode . val
+         (P +Int 1) |-> P' : listNode . next
          list(P')(Alpha)
          H
        </ heap >
@@ -177,8 +177,8 @@ mod LIST-HP is
        < config >
          < k > K </ k >
          < heap >
-           P |-> FreeInt(N) : nodeList . val
-           (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+           P |-> FreeInt(N) : listNode . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : listNode . next
            lseg(FreeInt(N +Int 1), Q)(FreeSeq(N +Int 2))
            H
          </ heap >
@@ -199,8 +199,8 @@ mod LIST-HP is
 
   rl < config >
        < heap >
-         P |-> I : nodeList . val
-         (P +Int 1) |-> Q : nodeList . next
+         P |-> I : listNode . val
+         (P +Int 1) |-> Q : listNode . next
          H </ heap >
        CfgItems
      </ config >
