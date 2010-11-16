@@ -18,91 +18,92 @@ struct stackNode {
 };
 
 
-struct listNode *toListRecursive(struct treeNode *root, struct listNode *x)
-/*@ pre  < config > < env > root |-> ?root  x |-> ?x </ env >
-                    < heap > tree(?root)(T) list(?x)(A) H </ heap >
+struct listNode *toListRecursive(struct treeNode *t, struct listNode *l)
+/*@ pre  < config > < env > t |-> ?t  l |-> ?l </ env >
+                    < heap > tree(?t)(T) list(?l)(A) H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < heap > list(?x)(tree2list(T) @ A) H </ heap >
-                    < form > returns ?x </ form > C </ config > */
+                    < heap > list(?l)(tree2list(T) @ A) H </ heap >
+                    < form > returns ?l </ form > C </ config > */
 {
-  struct listNode *node;
+  struct listNode *ln;
 
-  if (root == 0)
-    return x;
+  if (t == 0)
+    return l;
 
-  node = (struct listNode *) malloc(sizeof(struct listNode));
-  node->val = root->val; 
-  node->next = toListRecursive(root->right, x);
-  node = toListRecursive(root->left, node);
-  free(root);
+  ln = (struct listNode *) malloc(sizeof(struct listNode));
+  ln->val = t->val; 
+  ln->next = toListRecursive(t->right, l);
+  l = toListRecursive(t->left, ln);
+  free(t);
 
-  return node;
+  return l;
 }
 
 
-struct listNode *toListIterative(struct treeNode *root)
-/*@ pre  < config > < env > root |-> ?root </ env >
-                    < heap > tree(?root)(T) H </ heap >
+struct listNode *toListIterative(struct treeNode *t)
+/*@ pre  < config > < env > t |-> ?t </ env >
+                    < heap > tree(?t)(T) H </ heap >
                     < form > TrueFormula </ form > C </ config > */
 /*@ post < config > < env > ?rho </ env >
-                    < heap > list(?a)(tree2list(T)) H </ heap >
-                    < form > returns ?a </ form > C </ config > */
+                    < heap > list(?l)(tree2list(T)) H </ heap >
+                    < form > returns ?l </ form > C </ config > */
 {
-  struct listNode *a;
-  struct listNode *node;
-  struct treeNode *t;
-  struct stackNode *stack;
-  struct stackNode *x;
+  struct listNode *l;
+  struct listNode *ln;
+  struct treeNode *tn;
+  struct stackNode *s;
+  struct stackNode *sn;
 
-  if (root == 0)
+  if (t == 0)
     return 0;
 
-  a = 0;
-  stack = (struct stackNode *) malloc(sizeof(struct stackNode));
-  stack->val = root;
-  stack->next = 0;
+  l = 0;
+  s = (struct stackNode *) malloc(sizeof(struct stackNode));
+  s->val = t;
+  s->next = 0;
   /*@ invariant
         < config >
           < env >
-            root |-> ?root  a |-> ?a  stack |-> ?stack
-            t |-> ?t  x |-> ?x  node |-> ?node
+            t |-> ?t  l |-> ?l  s |-> ?s
+            tn |-> ?tn  ln |-> ?ln  sn |-> ?sn
           </ env >
-          < heap > list{tree}(?stack)(?TS) list(?a)(?A) H </ heap >
-          < form > tree2list(T) === seq{tree}2seq(rev(?TS)) @ ?A </ form >
+          < heap > list{tree}(?s)(?TS) list(?l)(?A) H </ heap >
+          < form > tree2list(T) === list{tree}2list(rev(?TS)) @ ?A </ form >
           C
         </ config > */
-  while (stack != 0) {
-    x = stack;
-    stack = stack->next ;
-    t = x->val;
-    free(x) ;
-    if (t->left != 0) {
-      x = (struct stackNode *) malloc(sizeof(struct stackNode));
-      x->val = t->left;
-      x->next = stack;
-      stack = x;
+  while (s != 0) {
+    sn = s;
+    s = s->next ;
+    tn = sn->val;
+    free(sn) ;
+    if (tn->left != 0) {
+      sn = (struct stackNode *) malloc(sizeof(struct stackNode));
+      sn->val = tn->left;
+      sn->next = s;
+      s = sn;
     }
-    if (t->right != 0) {
-      x = (struct stackNode *) malloc(sizeof(struct stackNode));
-      x->val = t;
-      x->next = stack;
-      stack = x;
-      x = (struct stackNode *) malloc(sizeof(struct stackNode));
-      x->val = t->right;
-      x->next = stack;
-      stack = x;
-      t->left = t->right = 0;
+    if (tn->right != 0) {
+      sn = (struct stackNode *) malloc(sizeof(struct stackNode));
+      sn->val = tn;
+      sn->next = s;
+      s = sn;
+      sn = (struct stackNode *) malloc(sizeof(struct stackNode));
+      sn->val = tn->right;
+      sn->next = s;
+      s = sn;
+      tn->left = tn->right = 0;
     }
     else {
-      node = (struct listNode *) malloc(sizeof(struct listNode));
-      node->val = t->val;
-      node->next = a;
-      a = node;
-      free(t);
+      ln = (struct listNode *) malloc(sizeof(struct listNode));
+      ln->val = tn->val;
+      ln->next = l;
+      l = ln;
+      free(tn);
     }
   }
-  return a;
+
+  return l;
 }
 
 
@@ -162,37 +163,37 @@ void print(struct listNode* x)
 
 int main()
 {
-  struct treeNode* root;
-  struct listNode* node;
+  struct treeNode* t;
+  struct listNode* l;
 
-  root = sample();
-  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
-                        < heap > tree(?root)(!T1) </ heap >
+  t = sample();
+  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
+                        < heap > tree(?t)(!T1) </ heap >
                         < form > TrueFormula </ form > </ config > */
-  node = toListRecursive(root, 0);
-  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
-                        < heap > list(?node)(tree2list(!T1)) </ heap >
+  l = toListRecursive(t, 0);
+  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
+                        < heap > list(?l)(tree2list(!T1)) </ heap >
                         < form > TrueFormula </ form > </ config > */
-  printf("list: ");
-  print(node);
-  destroy(node);
-  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+  printf("l: ");
+  print(l);
+  destroy(l);
+  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
                         < heap > (.).Map </ heap >
                         < form > TrueFormula </ form > </ config > */
 
 
-  root = sample();
-  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
-                        < heap > tree(?root)(!T2) </ heap >
+  t = sample();
+  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
+                        < heap > tree(?t)(!T2) </ heap >
                         < form > TrueFormula </ form > </ config > */
-  node = toListIterative(root);
-  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
-                        < heap > list(?node)(tree2list(!T2)) </ heap >
+  l = toListIterative(t);
+  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
+                        < heap > list(?l)(tree2list(!T2)) </ heap >
                         < form > TrueFormula </ form > </ config > */
-  printf("list: ");
-  print(node);
-  destroy(node);
-  /*@ assert < config > < env > root |-> ?root  node |-> ?node </ env >
+  printf("l: ");
+  print(l);
+  destroy(l);
+  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
                         < heap > (.).Map </ heap >
                         < form > TrueFormula </ form > </ config > */
 
@@ -200,11 +201,11 @@ int main()
 }
 
 
-/*@ var ?root ?a ?stack ?t ?x ?node ?tl ?tr ?test : ?Int */
+/*@ var ?t ?tn ?s ?sn ?l ?ln : ?Int */
 /*@ var ?TS ?A : ?Seq */
 /*@ var A : FreeSeq */
-/*@ var T : FreeTree */
 /*@ var !T1 !T2 : !Tree */
+/*@ var T : FreeTree */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */
 /*@ var C : FreeBagItem */

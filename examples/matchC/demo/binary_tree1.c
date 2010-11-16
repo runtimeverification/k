@@ -18,70 +18,70 @@ struct stackNode {
 };
 
 
-struct listNode *toListRecursive(struct treeNode *tree, struct listNode *list)
+struct listNode *toListRecursive(struct treeNode *t, struct listNode *l)
 {
   struct listNode *ln;
 
-  if (tree == 0)
-    return list;
+  if (t == 0)
+    return l;
 
   ln = (struct listNode *) malloc(sizeof(struct listNode));
-  ln->val = tree->val; 
-  ln->next = toListRecursive(tree->right, list);
-  list = toListRecursive(tree->left, ln);
-  free(tree);
+  ln->val = t->val; 
+  ln->next = toListRecursive(t->right, l);
+  l = toListRecursive(t->left, ln);
+  free(t);
 
-  return list;
+  return l;
 }
 
 
-struct listNode *toListIterative(struct treeNode *tree)
+struct listNode *toListIterative(struct treeNode *t)
 {
-  struct listNode *list;
+  struct listNode *l;
   struct listNode *ln;
   struct treeNode *tn;
-  struct stackNode *stack;
+  struct stackNode *s;
   struct stackNode *sn;
 
-  if (tree == 0)
+  if (t == 0)
     return 0;
 
-  list = 0;
-  stack = (struct stackNode *) malloc(sizeof(struct stackNode));
-  stack->val = tree;
-  stack->next = 0;
-  while (stack != 0) {
-    sn = stack;
-    stack = stack->next ;
+  l = 0;
+  s = (struct stackNode *) malloc(sizeof(struct stackNode));
+  s->val = t;
+  s->next = 0;
+  while (s != 0) {
+    sn = s;
+    s = s->next ;
     tn = sn->val;
     free(sn) ;
     if (tn->left != 0) {
       sn = (struct stackNode *) malloc(sizeof(struct stackNode));
       sn->val = tn->left;
-      sn->next = stack;
-      stack = sn;
+      sn->next = s;
+      s = sn;
     }
     if (tn->right != 0) {
       sn = (struct stackNode *) malloc(sizeof(struct stackNode));
       sn->val = tn;
-      sn->next = stack;
-      stack = sn;
+      sn->next = s;
+      s = sn;
       sn = (struct stackNode *) malloc(sizeof(struct stackNode));
       sn->val = tn->right;
-      sn->next = stack;
-      stack = sn;
+      sn->next = s;
+      s = sn;
       tn->left = tn->right = 0;
     }
     else {
       ln = (struct listNode *) malloc(sizeof(struct listNode));
       ln->val = tn->val;
-      ln->next = list;
-      list = ln;
+      ln->next = l;
+      l = ln;
       free(tn);
     }
   }
 
-  return list;
+  return l;
 }
 
 
@@ -141,20 +141,21 @@ void print(struct listNode* x)
 
 int main()
 {
-  struct treeNode* tree;
-  struct listNode* list;
+  struct treeNode* t;
+  struct listNode* l;
 
-  tree = sample();
-  list = toListRecursive(tree, 0);
-  printf("list: ");
-  print(list);
-  destroy(list);
+  t = sample();
+  l = toListRecursive(t, 0);
+  printf("l: ");
+  print(l);
+  destroy(l);
 
-  tree = sample();
-  list = toListIterative(tree);
-  printf("list: ");
-  print(list);
-  destroy(list);
+
+  t = sample();
+  l = toListIterative(t);
+  printf("l: ");
+  print(l);
+  destroy(l);
 
   return 0;
 }
