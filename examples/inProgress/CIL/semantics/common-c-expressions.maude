@@ -105,6 +105,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 		< types > (T:Map => GT:Map) </ types >
 		< typedefs > GT:Map </ typedefs >
 		< loopStack > (LS:List => (.).List) </ loopStack >
+		@latex("\\kBR")
 		< callStack > (.).List => List(
 			< stackFrame > 
 				< currentFunction > Fun:Id </ currentFunction >
@@ -115,7 +116,7 @@ mod COMMON-SEMANTICS-FUNCTION-CALLS is
 				< loopStack > LS:List </ loopStack >
 			</ stackFrame >
 			) ...</ callStack >
-		: KSentence [metadata "computational"] . --- nondet
+		: KSentence [metadata "large computational"] . --- nondet
 		--- : KSentence [metadata "structural"] . --- nondet
 endm
 
@@ -174,10 +175,12 @@ and ll or LL
 	---c99 6.4.4.1:6 If an integer constant cannot be represented by any type in its list, it may have an extended integer type, if the extended integer type can represent its value. If all of the types in the list for the constant are signed, the extended integer type shall be signed. If all of the types in the list for the constant are unsigned, the extended integer type shall be unsigned. If the list contains both signed and unsigned types, the extended integer type may be signed or unsigned. If an integer constant cannot be represented by any type in its list and has no extended integer type, then the integer constant has no type.
 	---c99 6.2.5:4 ... There may also be implementation-defined extended signed integer types. ...
 	
+	op inRange : Int Type -> Bool .
+	eq inRange(I:Int, T:Type) = ((I:Int <=Int max(T:Type)) andBool (I:Int >=Int min(T:Type))) .
 	mb rule < k > I:Int => 
-		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else
-			if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
-				if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else 
+		if inRange(I:Int, int) then tv(I:Int, int) else
+			if inRange(I:Int, long-int) then tv(I:Int, long-int) else
+				if inRange(I:Int, long-long-int) then tv(I:Int, long-long-int) else 
 					tv(I:Int, no-type)
 				fi
 			fi
@@ -186,9 +189,9 @@ and ll or LL
 		: KSentence [metadata "structural"] .
 		
 	mb rule @U(I:Int) => 
-		if ((I:Int <=Int max(unsigned-int)) andBool (I:Int >=Int min(unsigned-int))) then tv(I:Int, unsigned-int) else
-			if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
-				if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else 
+		if inRange(I:Int, unsigned-int) then tv(I:Int, unsigned-int) else
+			if inRange(I:Int, unsigned-long-int) then tv(I:Int, unsigned-long-int) else
+				if inRange(I:Int, unsigned-long-long-int) then tv(I:Int, unsigned-long-long-int) else 
 					tv(I:Int, no-type)
 				fi
 			fi
@@ -196,29 +199,29 @@ and ll or LL
 		
 		: KSentence [metadata "structural"] .
 	mb rule @L(I:Int) => 
-		if ((I:Int <=Int max(long-int)) andBool (I:Int >=Int min(long-int))) then tv(I:Int, long-int) else
-			if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
+		if inRange(I:Int, long-int) then tv(I:Int, long-int) else
+			if inRange(I:Int, long-long-int) then tv(I:Int, long-long-int) else
 				tv(I:Int, no-type)
 			fi
 		fi
 		
 		: KSentence [metadata "structural"] .
 	mb rule @UL(I:Int) => 
-		if ((I:Int <=Int max(unsigned-long-int)) andBool (I:Int >=Int min(unsigned-long-int))) then tv(I:Int, unsigned-long-int) else
-			if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
+		if inRange(I:Int, unsigned-long-int) then tv(I:Int, unsigned-long-int) else
+			if inRange(I:Int, unsigned-long-long-int) then tv(I:Int, unsigned-long-long-int) else
 				tv(I:Int, no-type)
 			fi
 		fi
 		
 		: KSentence [metadata "structural"] .
 	mb rule @LL(I:Int) => 
-		if ((I:Int <=Int max(long-long-int)) andBool (I:Int >=Int min(long-long-int))) then tv(I:Int, long-long-int) else
+		if inRange(I:Int, long-long-int) then tv(I:Int, long-long-int) else
 			tv(I:Int, no-type)
 		fi
 		
 		: KSentence [metadata "structural"] .
 	mb rule @ULL(I:Int) => 
-		if ((I:Int <=Int max(unsigned-long-long-int)) andBool (I:Int >=Int min(unsigned-long-long-int))) then tv(I:Int, unsigned-long-long-int) else
+		if inRange(I:Int, unsigned-long-long-int) then tv(I:Int, unsigned-long-long-int) else
 			tv(I:Int, no-type)
 		fi
 		

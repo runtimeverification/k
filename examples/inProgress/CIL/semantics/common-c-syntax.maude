@@ -1,61 +1,61 @@
-mod TEST-ARITH-SYNTAX is
-	including PL-BOOL .
-	including PL-EXT-BOOL .
-	including PL-NAT .
-	including PL-INT .
-	including PL-RAT .
-	including PL-FLOAT .
-	including PL-STRING .
-	including PL-CONVERSION .
-	including PL-QID .
-	including PL-RANDOM .
-	including PL-ID .
+--- mod TEST-ARITH-SYNTAX is
+	--- including PL-BOOL .
+	--- including PL-EXT-BOOL .
+	--- including PL-NAT .
+	--- including PL-INT .
+	--- including PL-RAT .
+	--- including PL-FLOAT .
+	--- including PL-STRING .
+	--- including PL-CONVERSION .
+	--- including PL-QID .
+	--- including PL-RANDOM .
+	--- including PL-ID .
 	
-	ops N M : -> NzNat .
-	op B : -> Bool .
-	--- 
-	eq N = sNat(N) .
-	eq N = N +Nat M .
-	eq N = N *Nat M .
-	eq N = N /Nat M .
-	eq N = N %Nat M .
-	eq N = N ^Nat M .
-	eq N = N xorNat M .
-	eq N = N &Nat M .
-	eq N = N |Nat M .
-	eq N = N >>Nat M .
-	eq N = N <<Nat M .
-	eq B = N <Nat M .
-	eq B = N <=Nat M .
-	eq B = N >Nat M .
-	eq B = N >=Nat M .
-	eq B = N dividesNat M .
+	--- ops N M : -> NzNat .
+	--- op B : -> Bool .
+	--- --- 
+	--- eq N = sNat(N) .
+	--- eq N = N +Nat M .
+	--- eq N = N *Nat M .
+	--- eq N = N /Nat M .
+	--- eq N = N %Nat M .
+	--- eq N = N ^Nat M .
+	--- eq N = N xorNat M .
+	--- eq N = N &Nat M .
+	--- eq N = N |Nat M .
+	--- eq N = N >>Nat M .
+	--- eq N = N <<Nat M .
+	--- eq B = N <Nat M .
+	--- eq B = N <=Nat M .
+	--- eq B = N >Nat M .
+	--- eq B = N >=Nat M .
+	--- eq B = N dividesNat M .
 	
-	ops I J : -> NzInt .
-	--- 
-	eq N = -Int N .
-	eq N = N +Int M .
-	eq N = N -Int M .
-	eq N = N *Int M .
-	eq N = N /Int M .
-	eq N = N %Int M .
-	eq N = N ^Int M .
-	eq N = absInt(N) .
-	eq N = N xorInt M .
-	eq N = ~Int(N) .
-	eq N = N &Int M .
-	eq N = N |Int M .
-	eq N = N >>Int M .
-	eq N = N <<Int M .
-	eq B = N <Int M .
-	eq B = N <=Int M .
-	eq B = N >Int M .
-	eq B = N >=Int M .
-	eq B = N dividesInt M .
-	eq B = N ==Int M .
-	eq B = N !=Int M .
+	--- ops I J : -> NzInt .
+	--- --- 
+	--- eq N = -Int N .
+	--- eq N = N +Int M .
+	--- eq N = N -Int M .
+	--- eq N = N *Int M .
+	--- eq N = N /Int M .
+	--- eq N = N %Int M .
+	--- eq N = N ^Int M .
+	--- eq N = absInt(N) .
+	--- eq N = N xorInt M .
+	--- eq N = ~Int(N) .
+	--- eq N = N &Int M .
+	--- eq N = N |Int M .
+	--- eq N = N >>Int M .
+	--- eq N = N <<Int M .
+	--- eq B = N <Int M .
+	--- eq B = N <=Int M .
+	--- eq B = N >Int M .
+	--- eq B = N >=Int M .
+	--- eq B = N dividesInt M .
+	--- eq B = N ==Int M .
+	--- eq B = N !=Int M .
 	
-endm
+--- endm
 
 mod COMMON-C-SYNTAX is
 	including PL-BOOL .
@@ -71,6 +71,8 @@ mod COMMON-C-SYNTAX is
 	including PL-ID .
 	
 	sort Program .
+	
+	op loc : Nat Nat -> Nat .
 	
 	op NULL : -> Id .
 	op calloc : -> Id .

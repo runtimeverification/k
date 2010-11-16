@@ -34,14 +34,15 @@ mod COMMON-C-CONFIGURATION is
 	op currentFunction : -> CellLabel .
 	op s-currentFunction : -> CellLabel .
 	op gotoMap : -> CellLabel .
-	op threads : -> CellLabel .
-	op thread : -> CellLabel .
+	---op threads : -> CellLabel .
+	---op thread : -> CellLabel .
 	op freshNat : -> CellLabel .
-	op holds : -> CellLabel .
+	---op holds : -> CellLabel .
 	op busy : -> CellLabel .
 	op buffer : -> CellLabel .
 	op blocked : -> CellLabel .
 	op registers : -> CellLabel .
+	op control : -> CellLabel .
 	
 	
 	op locsWrittenTo : -> CellLabel .

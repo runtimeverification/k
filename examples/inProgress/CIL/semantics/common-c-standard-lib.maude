@@ -26,10 +26,10 @@ mod COMMON-C-STANDARD-LIBRARY is
 	--- fixme check bounds
 	op BagK : Bag -> K .
 	mb [setjmp]: rule
-		< thread > 
+		< control > 
 			B:Bag
 			< k > (application(builtin(setjmp), tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?)))) => tv(0, int)) ~> K:K </ k >
-		</ thread >
+		</ control >
 		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[BagK((B:Bag < continuation > K:K </ continuation >)) / Offset:Nat])) ...</ mem >
 	: KSentence [metadata "computational"] . --- fixme, forcing buffer flush
 	--------------------------------------------
@@ -41,7 +41,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 	eq zeroToOne(I:Int) = if I:Int ==Bool 0 then 1 else I:Int fi .
 	
 	mb [longjmp]: rule
-		< thread >
+		< control >
 		(?
 		< k > application(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))),, tv(I:Int, int))) ~> ? </ k >
 		=> B:Bag
@@ -49,91 +49,91 @@ mod COMMON-C-STANDARD-LIBRARY is
 		--- tv(if I:Int ==Bool 0 then 1 else I:Int fi, int)
 		---x (tv(I:Int, int) == tv(0, int)) ~> K:K </ k >
 		)
-		</ thread >
+		</ control >
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> (BagK(B:Bag < continuation > K:K </ continuation >) => piece(unknown(Fresh:Nat), 8)))) ...</ mem >
 		< freshNat > (Fresh:Nat => sNat(Fresh:Nat)) </ freshNat >
 	: KSentence [metadata "computational"] .
 	--------------------------------------------
-	mb [spawn-is-value]: rule
-		< k > (spawn => builtin(spawn)) ...</ k >
-	: KSentence [metadata "structural"] .
-	--- had to move < callStack > .List </ callStack > due to spawn
-	--- Closure(X:Id, functionType(R:Type, P:List{K}), B:K)
-	mb [spawn]: rule
-		< thread > 
-			C:Bag 
-			< callStack > ?:List </ callStack >
-			< k > (application(builtin(spawn), (Fun:Value,, L:List{KResult})) => skipval) ...</ k > 
-			< buffer > (.).List </ buffer >
-		</ thread >
-		((.).Bag => 
-		< thread > 
-			C:Bag
-			< callStack > (.).List </ callStack > 
-			< k > application(Fun:Value, L:List{KResult}) ~> discard </ k >
-			< buffer > (.).List </ buffer >
-		</ thread >)
-	--- : KSentence [metadata "computational"] .
-	: KSentence [metadata "structural"] .
+	--- mb [spawn-is-value]: rule
+		--- < k > (spawn => builtin(spawn)) ...</ k >
+	--- : KSentence [metadata "structural"] .
+	--- --- had to move < callStack > .List </ callStack > due to spawn
+	--- --- Closure(X:Id, functionType(R:Type, P:List{K}), B:K)
+	--- mb [spawn]: rule
+		--- < control > 
+			--- C:Bag 
+			--- < callStack > ?:List </ callStack >
+			--- < k > (application(builtin(spawn), (Fun:Value,, L:List{KResult})) => skipval) ...</ k > 
+			--- < buffer > (.).List </ buffer >
+		--- </ control >
+		--- ((.).Bag => 
+		--- < control > 
+			--- C:Bag
+			--- < callStack > (.).List </ callStack > 
+			--- < k > application(Fun:Value, L:List{KResult}) ~> discard </ k >
+			--- < buffer > (.).List </ buffer >
+		--- </ control >)
+	--- --- : KSentence [metadata "computational"] .
+	--- : KSentence [metadata "structural"] .
 	--------------------------------------------
-	mb [lock-is-value]: rule
-		< k > (lock => builtin(lock)) ...</ k >
-	: KSentence [metadata "structural"] .
-	mb [lock]: rule
-		< k > (application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
-		< busy > Busy:Bag ((.).Bag => BagItem(Loc:Nat)) </ busy >
-		< holds >... (.).Map => Loc:Nat |-> 0 ...</ holds >
-		< buffer > (.).List </ buffer >
-		< blocked > false </ blocked >
-		if notBool Loc:Nat in Busy:Bag
-		: KSentence [metadata "computational"] . --- nondet
-	mb [lock]: rule
-		< k > (application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
-		< holds >... Loc:Nat |-> (N:Nat => sNat(N:Nat)) ...</ holds >
-		: KSentence [metadata "structural"] . --- nondet
+	--- mb [lock-is-value]: rule
+		--- < k > (lock => builtin(lock)) ...</ k >
+	--- : KSentence [metadata "structural"] .
+	--- mb [lock]: rule
+		--- < k > (application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
+		--- < busy > Busy:Bag ((.).Bag => BagItem(Loc:Nat)) </ busy >
+		--- < holds >... (.).Map => Loc:Nat |-> 0 ...</ holds >
+		--- < buffer > (.).List </ buffer >
+		--- < blocked > false </ blocked >
+		--- if notBool Loc:Nat in Busy:Bag
+		--- : KSentence [metadata "computational"] . --- nondet
+	--- mb [lock]: rule
+		--- < k > (application(builtin(lock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
+		--- < holds >... Loc:Nat |-> (N:Nat => sNat(N:Nat)) ...</ holds >
+		--- : KSentence [metadata "structural"] . --- nondet
 	
-	mb rule
-		< k > application(builtin(lock), tv(Loc:Nat, pointerType(?))) ...</ k >
-		< blocked > (false => true) </ blocked >
-		< busy >... BagItem(Loc:Nat) ...</ busy >
-		< holds > Holds:Map </ holds >
-		if notBool $hasMapping(Holds:Map, Loc:Nat)
-		: KSentence [metadata "structural"] . --- nondet
-		
-	mb rule
-		< k > application(builtin(lock), tv(Loc:Nat, pointerType(?))) ...</ k >
-		< blocked > (true => false) </ blocked >
-		< busy > Busy:Bag </ busy >
+	--- mb rule
+		--- < k > application(builtin(lock), tv(Loc:Nat, pointerType(?))) ...</ k >
+		--- < blocked > (false => true) </ blocked >
+		--- < busy >... BagItem(Loc:Nat) ...</ busy >
 		--- < holds > Holds:Map </ holds >
-		if notBool Loc:Nat in Busy:Bag
-		: KSentence [metadata "structural"] . --- nondet
+		--- if notBool $hasMapping(Holds:Map, Loc:Nat)
+		--- : KSentence [metadata "structural"] . --- nondet
+		
+	--- mb rule
+		--- < k > application(builtin(lock), tv(Loc:Nat, pointerType(?))) ...</ k >
+		--- < blocked > (true => false) </ blocked >
+		--- < busy > Busy:Bag </ busy >
+		--- --- < holds > Holds:Map </ holds >
+		--- if notBool Loc:Nat in Busy:Bag
+		--- : KSentence [metadata "structural"] . --- nondet
 	
 	--------------------------------------------
-	mb [unlock-is-value]: rule
-		< k > (unlock => builtin(unlock)) ...</ k >
-	: KSentence [metadata "structural"] .
-	mb [unlock]: rule
-		< k > (application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
-		< busy >...(BagItem(Loc:Nat) => (.).Bag) ...</ busy >
-		< holds >... Loc:Nat |-> 0 => (.).Map ...</ holds >
-		< buffer > (.).List </ buffer >
-	: KSentence [metadata "structural"] .
-	mb [unlock]: rule
-		< k > (application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
-		< holds >... Loc:Nat |-> (sNat(N:Nat) => N:Nat) ...</ holds >
-	: KSentence [metadata "structural"] .
+	--- mb [unlock-is-value]: rule
+		--- < k > (unlock => builtin(unlock)) ...</ k >
+	--- : KSentence [metadata "structural"] .
+	--- mb [unlock]: rule
+		--- < k > (application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
+		--- < busy >...(BagItem(Loc:Nat) => (.).Bag) ...</ busy >
+		--- < holds >... Loc:Nat |-> 0 => (.).Map ...</ holds >
+		--- < buffer > (.).List </ buffer >
+	--- : KSentence [metadata "structural"] .
+	--- mb [unlock]: rule
+		--- < k > (application(builtin(unlock), tv(Loc:Nat, pointerType(?))) => skipval) ...</ k >
+		--- < holds >... Loc:Nat |-> (sNat(N:Nat) => N:Nat) ...</ holds >
+	--- : KSentence [metadata "structural"] .
 	--------------------------------------------
-	mb [sync-is-value]: rule
-		< k > (sync => builtin(sync)) ...</ k >
-	: KSentence [metadata "structural"] .
-	mb [sync]: rule
-		< threads >
-			< thread >...
-				< k > (application(builtin(sync), .List{K}) => skipval) ...</ k > 
-				< buffer > (.).List </ buffer >
-			...</ thread >
-		</ threads >
-	: KSentence [metadata "structural"] .
+	--- mb [sync-is-value]: rule
+		--- < k > (sync => builtin(sync)) ...</ k >
+	--- : KSentence [metadata "structural"] .
+	--- mb [sync]: rule
+		--- < threads >
+			--- < thread >...
+				--- < k > (application(builtin(sync), .List{K}) => skipval) ...</ k > 
+				--- < buffer > (.).List </ buffer >
+			--- ...</ thread >
+		--- </ threads >
+	--- : KSentence [metadata "structural"] .
 	--------------------------------------------
 	mb [exit-is-value]: rule
 		< k > (exit => builtin(exit)) ...</ k >
@@ -439,18 +439,22 @@ mod COMMON-C-STANDARD-LIBRARY is
 		andBool N:Nat <=Int asciiString("9")
 	: KSentence [metadata "structural"] .
 	
-	mb [lib-printf-%x]: rule
-		< k > tv(N:Nat, ?) ~> printf-%(Len:Nat, Loc:Nat, (tv(D:Int, ?),, L:List{KResult})) => writeToFD(1, (if (lengthString(Rat2String(D:Int, 16)) ==Bool 1) then
-				"0" +String Rat2String(D:Int, 16)
-			else 
-				Rat2String(D:Int, 16)
-			fi)) ~> printf-aux(Len:Nat +Nat lengthString((if (lengthString(Rat2String(D:Int, 16)) ==Bool 1) then
-				"0" +String Rat2String(D:Int, 16)
-			else 
-				Rat2String(D:Int, 16)
-			fi)), sNat(Loc:Nat), L:List{KResult}) ...</ k >
-		if N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p")
-	: KSentence [metadata "structural"] .
+	mb [lib-printf-%x-1]: rule
+		< k > tv(N:Nat, ?) ~> printf-%(Len:Nat, Loc:Nat, (tv(D:Int, ?),, L:List{KResult})) 
+			=> writeToFD(1, "0" +String Rat2String(D:Int, 16))
+			~> printf-aux(Len:Nat +Nat 2, sNat(Loc:Nat), L:List{KResult}) 
+		...</ k >
+		if (N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p"))
+		andBool lengthString(Rat2String(D:Int, 16)) ==Bool 1
+		: KSentence [metadata "structural"] .
+	mb [lib-printf-%x-2]: rule
+		< k > tv(N:Nat, ?) ~> printf-%(Len:Nat, Loc:Nat, (tv(D:Int, ?),, L:List{KResult})) 
+			=> writeToFD(1, Rat2String(D:Int, 16))
+			~> printf-aux(Len:Nat +Nat 2, sNat(Loc:Nat), L:List{KResult}) 
+		...</ k >
+		if (N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p"))
+		andBool lengthString(Rat2String(D:Int, 16)) ==Bool 2
+		: KSentence [metadata "structural"] .
 	
 	--- fixme might be messing things up elsewhere
 	eq Rat2String(loc(N:Nat, M:Nat), 16) = "loc(" +String Rat2String(N:Nat, 16) +String ", " +String Rat2String(M:Nat, 16) +String ")" .

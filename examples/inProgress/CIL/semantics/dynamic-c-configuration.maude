@@ -8,35 +8,37 @@ mod C-CONFIGURATION is
 			< gotoMap > (.).Map </ gotoMap >
 			< genv > (.).Map </ genv >
 			< mem > (.).Map </ mem >
-			< nextLoc > 0 </ nextLoc >
+			< nextLoc > loc(1, 0) </ nextLoc >
 			< freshNat > 0 </ freshNat >
-			< nextFile > 0 </ nextFile >
+			< nextFile > 3 </ nextFile >
 			< malloced > (.).Map </ malloced >
 			< statics > (.).Map </ statics >
 			< typedefs > (.).Map </ typedefs >
 			< sizes > (.).Map </ sizes >
 			< structs > (.).Map </ structs >
-			< openFiles > (.).Map </ openFiles >
 			< busy > (.).Bag </ busy >
+			< openFiles >
+				0 |-> "stdin" --- stdin
+				1 |-> "stdout" --- stdout
+				2 |-> "stdout" --- stderr
+			</ openFiles >
 			@latex("\\kBR") --- this doesn't do anything except break the latex output
-			< threads >
-				< thread * >
-					< buffer > (.).List </ buffer >
-					< blocked > false </ blocked >
-					< callStack > (.).List </ callStack >
-					< k > (.).K </ k >
-					< registers > (.).Map </ registers >
-					< locsWrittenTo > (.).Bag </ locsWrittenTo >
-					< holds > (.).Map </ holds >
-					< currentFunction > (.).K </ currentFunction >
-					< type > (.).K </ type >
-					< env > (.).Map </ env >
-					< loopStack > (.).List </ loopStack >
-					< locals > (.).Bag </ locals >
-					< types > (.).Map </ types >
-				</ thread * >
-			</ threads >
+			< control >
+				< buffer > (.).List </ buffer >
+				< blocked > false </ blocked >
+				< callStack > (.).List </ callStack >
+				< k > (.).K </ k >
+				< registers > (.).Map </ registers >
+				< locsWrittenTo > (.).Bag </ locsWrittenTo >
+				< currentFunction > File-Scope </ currentFunction >
+				< type > (.).K </ type >
+				< env > (.).Map </ env >
+				< loopStack > (.).List </ loopStack >
+				< locals > (.).Bag </ locals >
+				< types > (.).Map </ types >
+			</ control >
 		</ T >
+		@latex("\\kBR")
 		< files > (.).Map </ files > --- filenames to strings
 		< input > "" </ input >
 		< output > "" </ output >

@@ -1,0 +1,132 @@
+\usepackage{geometry}
+\usepackage{fullpage}
+\usepackage{arydshln}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{color}
+\usepackage{tikz}
+\usetikzlibrary{shapes.misc}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{fit}
+\usetikzlibrary{decorations.pathmorphing}
+\usepackage{ucs}
+\usepackage{ifthen}
+\usepackage{calc}
+\usepackage{fancyhdr}
+%\pagestyle{fancy}
+%\setlength{\headheight}{14pt}
+%\fancyhf{}
+%\fancyhead[L]{\underline{\footnotesize\tt \hspace{-2em}Page \thepage{}}}
+%\fancyfoot[L]{\underline{\footnotesize\tt \hspace{-2em}Page \thepage{}}}
+%\renewcommand{\headrulewidth}{0pt} 
+%\renewcommand{\footrulewidth}{0pt}
+
+
+\newlength{\syntaxlength}
+\definecolor{Grey}{rgb}{0.8,0.8,0.8}
+\newcommand{\nothing}{}
+\newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
+\newcommand{\lp}{(}
+\newcommand{\rp}{)}
+\newcommand{\kconfig}[1]{\par\textsc{initial configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
+\newcommand{\kccontext}[3]{\par\textsc{context:
+}$#2$\hspace{2em} when $#3$}
+\newcommand{\kcontext}[2]{\par\textsc{context:
+}$#2$}
+\newcommand{\syntax}[3]{\par $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
+\newcommand{\syntaxCont}[3]{\par $\setlength{\syntaxlength}{\widthof{$#1::\;$}}\hspace{\syntaxlength}\mid{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
+\newcommand{\cellDecl}[2]{\par \textsc{cell:
+}$#1$ wraps $#2$}
+\newcommand{\nonTerminal}[1]{\textit{#1}\/}
+\newcommand{\somespace}{\mathbin{}}
+\newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
+\newcommand{\kBR}{\\}
+%\newcommand{\terminal}[1]{\ensuremath\mathrel{\texttt{#1}}}
+\newcommand{\terminal}[1]{\ensuremath\mathrel{\textsf{#1}}}
+%\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\texttt{#1}}}
+\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\textsf{#1}}}
+\newcommand{\sort}[1]{\textit{#1}}
+\newcommand{\kind}[1]{\textit{#1}}
+\newcommand{\kequation}[2]{
+\par\textsc{#1 rule:}\hspace{1em}$#2$\bigskip}
+\newcommand{\kcequation}[3]{
+\par\textsc{#1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\newcommand{\krule}[2]{
+\par\indent\textsc{#1 rule:}\hspace{1em}$#2$\bigskip}
+\newcommand{\mrule}[3]{\par\textsc{#1 rule:}\hspace{1em}$#2 \Rightarrow #3$\bigskip}
+\newcommand{\cmrule}[4]{\par\textsc{#1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \hspace{2em} when $#4$\bigskip}
+\newcommand{\mequation}[3]{\par\textsc{#1 macro:}\hspace{1em}$#2 = #3$}
+\newcommand{\sorts}[1]{}
+\newcommand{\cmequation}[4]{\par\textsc{#1 equation:}\hspace{1em}$#2 = #3$ \hspace{2em} when $#4$}
+\newcommand{\kcrule}[3]{
+\par\textsc{#1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\newcommand{\kndrule}[2]{\par\textsc{#1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
+\newcommand{\myquote}[1]{\textrm{``}\texttt{#1}\textrm{''}}
+\newcommand{\mysinglequote}[1]{\textrm{"}}
+\newcommand{\mybracket}[1]{(#1)}
+\newcommand{\sqbracket}[1]{[#1]}
+
+\newcommand{\kcell}[5]{
+\begin{tabular}{@{}c@{}}
+\vtop{
+\vskip-1ex
+\hbox{
+\begin{tikzpicture}
+  \node[draw=#1!50!black,line width=1pt,name=cell,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=#5,/pgf/rounded rectangle west arc=#4,fill=#1!20,minimum height=4ex,minimum width=3em]{#3};
+\draw[shift=(cell.north east)]plot coordinates{(-.1pt,-.5pt)} node[name=ce,minimum size=0pt,inner sep=0pt]{};
+\draw[shift=(cell.north west)]plot coordinates{(.1pt,-.5pt)} node[name=cw,     minimum size=0pt,inner sep=0pt]{};
+\draw[color=white,line width=1.2pt](cw.east)--(ce.west);
+\draw[shift=(cell.north west)]plot coordinates{(0,-1.05pt)}
+node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=convex,/pgf/rounded rectangle west arc=convex,fill=#1!20,draw=#1!20,line width=1pt,minimum width=2em,minimum height=2.5ex,draw=#1!50!black]
+{#2};%
+\draw[shift=(label.south east)]plot coordinates{(-.1pt,.5pt)} node[name=le,minimum size=0pt,inner sep=0pt]{};
+\draw[shift=(label.south west)]plot coordinates{(.1pt,.5pt)} node[name=lw,     minimum size=0pt,inner sep=0pt]{};
+\draw[color=white,line width=1.2pt](lw.east)--(le.west);
+\draw[color=#1!50!black,line width=1pt](le.west) -- (ce.east);
+\ifthenelse{\equal{#4}{none}}{%
+\draw[fill,color=#1!50!black,decorate,decoration={coil,aspect=0,segment length=.5ex,amplitude=1pt}](cell.south west)--(cell.north west);%
+}{
+}
+\ifthenelse{\equal{#5}{none}}{%
+\draw[fill,color=#1!50!black,decorate,decoration={coil,aspect=0,segment length=.5ex,amplitude=1pt}](cell.north east)--(cell.south east);%
+}{
+}
+\end{tikzpicture}%
+}
+\vskip2ex}
+\end{tabular}
+}
+\newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
+\newcommand{\reduceTopS}[2]{{#1}\rightharpoonup{#2}}
+\newcommand{\reduce}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hline{#2}\end{array}}
+\newcommand{\reduceS}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hdashline[1pt/1pt]{#2}\end{array}}
+\newcommand{\kra}{\curvearrowright}
+\newenvironment{module}[1]{\par\noindent\textsc{Module #1}\setlength{\parindent}{1em}}{\par\noindent\textsc{end module}}
+\newcommand{\moduleName}[1]{#1}
+\newcommand{\including}[1]{\par \textsc{imports}\ #1}
+\newcommand{\modulePlus}{$+$}
+\newcommand{\variable}[1]{\textit{#1}\/}
+\newcommand{\kvalue}[1]{{\color{red}#1}}
+\newcommand{\prefixOp}[1]{\textsf{#1}}
+\newcommand{\constant}[1]{\textsf{#1}}
+
+
+\newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
+\newcommand{\ballLarge}[3]{\kcell{#1}{#2}{$\begin{array}{@{}c@{}}#3\end{array}$}{convex}{convex}}
+\newcommand{\bprefix}[3]{\kcell{#1}{#2}{$#3$}{convex}{none}}
+\newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
+\newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
+\newcommand{\bdot}{{\scriptscriptstyle\bullet}}
+\newcommand{\bAnyVar}{\textrm{---}}
+
+
+\newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
+\newcommand{\mallLarge}[3]{\left\langle\begin{array}{c}#3\end{array}\right\rangle_{{\sf #2}}}
+\newcommand{\ellipses}{\mathrel{\cdot\!\cdot\!\cdot}}
+\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ \ellipses}}
+\newcommand{\msuffix}[3]{\mall{#1}{#2}{\ellipses\ {#3}}}
+\newcommand{\mmiddle}[3]{\mall{#1}{#2}{\ellipses\ {#3}\ \ellipses}}
+\newcommand{\mdot}{\cdot}
+\newcommand{\mAnyVar}{\textrm{---}}
