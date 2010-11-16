@@ -50,8 +50,8 @@ mod QUEUE-HP is inc LIST-HP .
   
   rl < config >
       < heap >
-        P |-> Q : head 
-        (P +Int 1) |-> 0 : tail 
+        P |-> Q : (nodeQueue . head)
+        (P +Int 1) |-> 0 : (nodeQueue . tail)
         H 
       </ heap >
       CfgItems
@@ -132,7 +132,7 @@ mod QUEUE-HP is inc LIST-HP .
             (Q +Int 1) |-> FreeInt(N +Int 2) : ( nodeList . next )
             H 
           </ heap >
-          < form > Phi /\ ~(P === 0) /\ ~(Q === 0) /\ (Alpha === FreeSeq(N) @ FreeInt(N +Int 1))
+          < form > Phi /\ ~(P === 0) /\ ~(Q === 0) /\ (Alpha === FreeSeq(N) @ [FreeInt(N +Int 1)])
           </ form >
           CfgItems
         </ config >
