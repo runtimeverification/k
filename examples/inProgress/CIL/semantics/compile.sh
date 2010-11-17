@@ -2,6 +2,7 @@
 set -o errexit
 set -o nounset
 #trap cleanup SIGHUP SIGINT SIGTERM
+profileFlag=
 dumpFlag=
 oflag=
 usage="Usage: %s: [-o outputFileName] inputFileName\n"
@@ -28,7 +29,7 @@ function cleanup {
 	rm -f $programTemp
 }
 function getoptsFunc {
-	while getopts ':cdg:o:vsw' OPTION
+	while getopts ':cpdg:o:vsw' OPTION
 	do
 		case $OPTION in
 		c)	compileOnlyFlag="-c"
@@ -48,6 +49,8 @@ function getoptsFunc {
 			;;
 		s)	libFlag="-s"
 			;;
+		p)  profileFlag="-p"
+		    ;;
 		?)	if [ ! "$inputFile" ] && [ ! "$firstInputFile" ] ; then
 				die "`printf \"$usage\" $(basename $0)`" 2
 			fi
@@ -133,17 +136,24 @@ if [ ! "$compileOnlyFlag" ]; then
 	fi
 	echo "load $myDirectory/c-total" > $baseMaterial
 	echo "load $linkTemp" >> $baseMaterial
+
 	runner='$FSL_C_RUNNER'
-	mStart="echo > $runner"
+	possibleProfilingStart=
+	possibleProfilingEnd=
+	if [ "$profileFlag" ]; then 
+		possibleProfilingStart="echo set profile on . >> $runner;"
+		possibleProfilingEnd="echo show profile . >> $runner;"
+	fi
+	mStart="echo > $runner; $possibleProfilingStart"
 	freshFilename='`mktemp -t fsl-c.XXXXXXXXXXX`'
 	term="eval\\(linked-program, \\(\`for i in \$0 \"\$@\"; do echo \"String \\\"\$i\\\"(.List{K}),,\" ; done\` .List{K}\\), \\\"\$stdin\\\"\\)"
 	exec="echo erew in C-program-linked : $term . >> $runner"
 	mDebug="echo break select debug . >> $runner; echo set break on . >> $runner"
 	maude="maude -no-wrap \$0 $runner"
-	debug="$mStart; $mDebug; echo erew in C-program-linked : \\($term\\) . >> $runner"
-	run="$mStart; $exec; echo q >> $runner"
+	debug="$mStart $mDebug; echo erew in C-program-linked : \\($term\\) . >> $runner"
+	run="$mStart $exec; $possibleProfilingEnd echo q >> $runner"
 	prelude="--- &> /dev/null; if [ -t 0 ]; then stdin=\"\"; else stdin=\$(cat); fi; FSL_C_RUNNER=$freshFilename"
-	echo "$prelude; if [ \$DEBUG ]; then $debug; $maude -ansi-color; else $run; $maude | perl $myDirectory/wrapper.pl; fi; retval=\$?; rm -f $runner; exit \$retval" > $programTemp
+	echo "$prelude; if [ \$DEBUG ]; then $debug; $maude -ansi-color; else $run; $maude | perl $myDirectory/wrapper.pl $profileFlag; fi; retval=\$?; rm -f $runner; exit \$retval" > $programTemp
 	cat $baseMaterial | perl $myDirectory/slurp.pl >> $programTemp
 	if [ ! "$dumpFlag" ]; then
 		rm -f $linkTemp

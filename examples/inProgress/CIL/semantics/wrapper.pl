@@ -6,11 +6,24 @@ my $haveResult = 0;
 my $buffer = "";
 my $kCell = "";
 my $typeCell = "";
+my $profiling = "";
+my $numArgs = $#ARGV + 1;
+if ($numArgs == 1) {
+	my $flag = $ARGV[0];
+	if ($flag eq "-p") {
+		$profiling = 1;
+	}
+}
+
 while (my $line = <STDIN>) {
 	$buffer .= $line;
 	chomp($line);
 	$line =~ s/[\000-\037]\[(\d|;)+m//g; # remove ansi colors
 	#print "$line\n";
+	if ($profiling) {
+		print "$line\n";
+		next;
+	}
 	if ($state eq "start"){
 		if ($line =~ m/^erewrite in /){
 			$state = "rewrite";

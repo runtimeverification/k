@@ -795,7 +795,7 @@ mod MEMORY is
 	--- c99 6.5:2 If a side effect on a scalar object is unsequenced relative to either a different side effect on the same scalar object or a value computation using the value of the same scalar object, the behavior is undefined. If there are multiple allowable orderings of the subexpressions of an expression, the behavior is undefined if such an unsequenced side effect occurs in any of the orderings
 	--- i take this to mean that if i write to a location twice or read from a location after being written to, then it is a problem
 	mb [read-byte]: rule
-		< k > readFromMem-aux(loc(Block:Nat, (Offset:Nat => sNat(Offset:Nat))), T:Type, tv(sNat(Left:Nat), T':Type), (L:List{K},, .List{K} => V:BaseValue)) ...</ k >
+		< k > readFromMem-aux(loc(Block:Nat, (Offset:Nat => sNat(Offset:Nat))), T:Type, tv((sNat(Left:Nat) => Left:Nat), T':Type), (L:List{K},, (.List{K} => V:BaseValue))) ...</ k >
 		@latex("\\kBR") --- break line in latex
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> V:BaseValue)) ...</ mem >
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
