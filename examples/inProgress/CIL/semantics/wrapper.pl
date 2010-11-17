@@ -63,6 +63,9 @@ while (my $line = <STDIN>) {
 		print "$line\n";
 	}
 }
+if ($profiling) {
+	exit $retval;
+}
 if ($reduced == 0||$haveResult == 0) {
 	print "$buffer\n";
 	print "-------------------------------------\n";
