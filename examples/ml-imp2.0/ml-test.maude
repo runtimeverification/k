@@ -20,23 +20,9 @@ eof
 
 search
   < config >
-   < form > ~(x0 === 0) /\ ~(A === epsilon) </ form >
-   < subst > .Subst </ subst >
-   < env > value |-> val0 found |-> 0 iterx |-> x0 x |-> x0 </ env >
-   < heap > list(x0)(A) </ heap >
    </ config >
  ===>
 < config > 
-    < env >
-    iterx |-> ?ix x |-> x0 found |-> ?found value |-> val0 
-    </ env >
-    < heap >
-    lseg(x0,?ix)(?A)
-    ?ix |-> ?v : (nodeList . val)
-    ?ix +Int 1 |-> ?n : (nodeList . next)
-    list(?n)(?A')
-    </ heap >
-    < form > A === (?A @ [?v] @ ?A') </ form >
 </ config >
 =>* < config > < form > F:Formula </ form > CfgItems:Bag </ config > .
 ---=>* CfgItems:Bag .

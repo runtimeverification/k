@@ -49,10 +49,12 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op co-skolem : Nat FreeBagItem -> !BagItem .
 
   sort Value TypedValue .
-  sort Void NvExpressionType ExpressionType .  
+  sort Void SimpleNvExpressionType NvExpressionType ExpressionType .  
   subsort MathObj++ < Value .
   sort Field .
   sort HeapLabel .
+  subsort SimpleNvExpressionType < Field .
+  
 
   subsort HeapLabel < Bag .
   subsorts Formula Subst MathObj++ < Builtins KResult .
