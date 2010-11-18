@@ -12,7 +12,8 @@ kmod IMP-SYNTAX is including ML-K
 imp type system
 ***)
   syntax Void ::= void
-  syntax NvExpressionType ::= int
+  syntax SimpleNvExpressionType ::= int
+  syntax NvExpressionType ::= NvExpressionType
                             | struct Id [prec 10]
                             | ExpressionType *
   syntax ExpressionType ::= Void | NvExpressionType
