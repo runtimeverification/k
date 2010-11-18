@@ -14,7 +14,7 @@
 \usepackage{ucs}
 \usepackage{ifthen}
 \usepackage{calc}
-\usepackage{fancyhdr}
+%\usepackage{fancyhdr}
 %\pagestyle{fancy}
 %\setlength{\headheight}{14pt}
 %\fancyhf{}
@@ -50,18 +50,18 @@
 \newcommand{\sort}[1]{\textit{#1}}
 \newcommand{\kind}[1]{\textit{#1}}
 \newcommand{\kequation}[2]{
-\par\textsc{#1 rule:}\hspace{1em}$#2$\bigskip}
+\par\textsc{#1 rule:}\hspace{0.7em}$#2$\bigskip}
 \newcommand{\kcequation}[3]{
-\par\textsc{#1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\par\textsc{#1 rule:}\hspace{0.7em}$#2$ \hspace{2em} when $#3$\bigskip}
 \newcommand{\krule}[2]{
-\par\indent\textsc{#1 rule:}\hspace{1em}$#2$\bigskip}
-\newcommand{\mrule}[3]{\par\textsc{#1 rule:}\hspace{1em}$#2 \Rightarrow #3$\bigskip}
-\newcommand{\cmrule}[4]{\par\textsc{#1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \hspace{2em} when $#4$\bigskip}
-\newcommand{\mequation}[3]{\par\textsc{#1 macro:}\hspace{1em}$#2 = #3$}
+\par\indent\textsc{#1 rule:}\hspace{0.7em}$#2$\bigskip}
+\newcommand{\mrule}[3]{\par\textsc{#1 rule:}\hspace{0.7em}$#2 \Rightarrow #3$\bigskip}
+\newcommand{\cmrule}[4]{\par\textsc{#1 rule:}\hspace{0.7em}$#2 \Rightarrow #3$ \hspace{2em} when $#4$\bigskip}
+\newcommand{\mequation}[3]{\par\textsc{#1 macro:}\hspace{0.7em}$#2 = #3$}
 \newcommand{\sorts}[1]{}
-\newcommand{\cmequation}[4]{\par\textsc{#1 equation:}\hspace{1em}$#2 = #3$ \hspace{2em} when $#4$}
+\newcommand{\cmequation}[4]{\par\textsc{#1 equation:}\hspace{0.7em}$#2 = #3$ \hspace{2em} when $#4$}
 \newcommand{\kcrule}[3]{
-\par\textsc{#1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\par\textsc{#1 rule:}\hspace{0.7em}$#2$ \hspace{2em} when $#3$\bigskip}
 \newcommand{\kndrule}[2]{\par\textsc{#1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
 \newcommand{\myquote}[1]{\textrm{``}\texttt{#1}\textrm{''}}
 \newcommand{\mysinglequote}[1]{\textrm{"}}
