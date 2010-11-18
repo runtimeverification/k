@@ -53,7 +53,6 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   subsort MathObj++ < Value .
   sort Field .
   sort HeapLabel .
-  subsort SimpleNvExpressionType < Field .
   
 
   subsort HeapLabel < Bag .
