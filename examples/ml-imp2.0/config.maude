@@ -49,7 +49,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op co-skolem : Nat FreeBagItem -> !BagItem .
 
   sort Value TypedValue .
-  sort Void SimpleNvExpressionType NvExpressionType ExpressionType .  
+  sort Void NvExpressionType ExpressionType .  
   subsort MathObj++ < Value .
   sort Field .
   sort HeapLabel .
@@ -76,6 +76,8 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op co-skolemize : K -> K .
   op co-skolemize : Nat Bag -> Bag .
 
+  op pint : -> Field .
+  
   op derive : -> KLabel .
   op returns _ : Value -> Formula .
   op unit : -> Value .
@@ -103,6 +105,8 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
 
   ops val left right : -> Id .
   ops treeNode : -> Id .
+  
+  ops balance purse : -> Id .
 
   ops treeNodeList : -> Id .
 ***(
