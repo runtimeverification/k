@@ -226,9 +226,9 @@ mod COMMON-C-SYNTAX is
 	op _&binop_ : Expression Expression -> Expression [prec 41 gather(E e) metadata "strict latex(renameTo _\\&_)"] .
 	op _^_ : Expression Expression -> Expression [prec 43 gather(E e) metadata "strict"] .
 	op _|_ : Expression Expression -> Expression [prec 45 gather(E e) metadata "strict"] .
-	op _&&_ : Expression Expression -> Expression [prec 47 gather(E e) metadata "strict(1) latex(renameTo _\\&\\&_)"] .
-	op _||_ : Expression Expression -> Expression [prec 49 gather(E e) metadata "strict(1)"] .
-	op _?_:_ : Expression Expression Expression -> Expression [prec 51 gather(e & E)] .
+	--- op _&&_ : Expression Expression -> Expression [prec 47 gather(E e) metadata "strict(1) latex(renameTo _\\&\\&_)"] .
+	--- op _||_ : Expression Expression -> Expression [prec 49 gather(E e) metadata "strict(1)"] .
+	--- op _?_:_ : Expression Expression Expression -> Expression [prec 51 gather(e & E)] .
 	
 	--- 6.5.16
 	ops _*=_ _/=_ _%=_ _+=_ _-=_ _<<=_ _>>=_ _^=_ _|=_ : Expression Expression -> Expression [prec 53] .
@@ -455,7 +455,7 @@ mod COMMON-C-SYNTAX is
 	sort Jump-Statement .
 
 	op goto_; : Id -> Jump-Statement [metadata "latex(renameTo goto_)"] .
-	op continue`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo continue)"] .
+	--- op continue`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo continue)"] .
 	op break`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo break)"] .
 	op return`; : -> Jump-Statement [metadata "latex(renameTo return)"] .
 	op return_; : Expression -> Jump-Statement [metadata "strict latex(renameTo return_)"] .

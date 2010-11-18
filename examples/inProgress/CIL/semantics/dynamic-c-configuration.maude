@@ -23,10 +23,10 @@ mod C-CONFIGURATION is
 				2 |-> "stdout" --- stderr
 			</ openFiles >
 			@latex("\\kBR") --- this doesn't do anything except break the latex output
+			< callStack > (.).List </ callStack >
 			< control >
 				< buffer > (.).List </ buffer >
 				< blocked > false </ blocked >
-				< callStack > (.).List </ callStack >
 				< k > (.).K </ k >
 				< registers > (.).Map </ registers >
 				< locsWrittenTo > (.).Bag </ locsWrittenTo >

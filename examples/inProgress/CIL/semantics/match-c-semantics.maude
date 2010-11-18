@@ -16,51 +16,51 @@ mod MATCH-C-SEMANTICS is
 	op loc : -> Nat .
 	op n : Nat -> Nat .
 	
-	eq eval(P:Program) = 
-		< T >
-			< Task >
-				< k > P:Program </ k >
-				< env > .Map </ env >
-				< loopStack > .List </ loopStack >
-				< locals > .Bag </ locals >
-				< parameters > .Bag </ parameters >
-				< types > .Map </ types >
-				< output > "" </ output >
-				< malloced > .Map </ malloced >
-				< mem > .Map </ mem >
-				< statics > .Map </ statics >
-				---< form > TrueFormula </ form >
-			</ Task >
-			< todo > .K </ todo >
-			< typedefs > .Map </ typedefs >
-			< callStack > .List </ callStack >
-			< nextLoc > n(0) </ nextLoc >
-			< genv > .Map </ genv > 
-			< gmem > .Map </ gmem > 
-		</ T > .
+	--- eq eval(P:Program) = 
+		--- < T >
+			--- < Task >
+				--- < k > P:Program </ k >
+				--- < env > .Map </ env >
+				--- < loopStack > .List </ loopStack >
+				--- < locals > .Bag </ locals >
+				--- < parameters > .Bag </ parameters >
+				--- < types > .Map </ types >
+				--- < output > "" </ output >
+				--- < malloced > .Map </ malloced >
+				--- < mem > .Map </ mem >
+				--- < statics > .Map </ statics >
+				--- ---< form > TrueFormula </ form >
+			--- </ Task >
+			--- < todo > .K </ todo >
+			--- < typedefs > .Map </ typedefs >
+			--- < callStack > .List </ callStack >
+			--- < nextLoc > n(0) </ nextLoc >
+			--- < genv > .Map </ genv > 
+			--- < gmem > .Map </ gmem > 
+		--- </ T > .
 		
-	mb [function-declaration]: rule 
-		< k > [
-			Declaration(DS:TogetherList, Direct-Function-Declarator(I:Id, PTL:Parameter-Type-List)){
-				B:TogetherList
-			}
-			=> .K]
-		...</ k >
-		< todo > [.K => I:Id] ...</ todo >
-		< genv > [E:Map => E:Map[n(Loc:Nat) / I:Id]]  </ genv >
-		< gmem > [M:Map => M:Map[Closure(Declaration(DS:TogetherList, Direct-Function-Declarator(I:Id, PTL:Parameter-Type-List)){ B:TogetherList }) / n(Loc:Nat)]] </ gmem >
-		< nextLoc > [n(Loc:Nat) => n(sNat(Loc:Nat))] </ nextLoc >
-		: KSentence .
+	--- mb [function-declaration]: rule 
+		--- < k > [
+			--- Declaration(DS:TogetherList, Direct-Function-Declarator(I:Id, PTL:Parameter-Type-List)){
+				--- B:TogetherList
+			--- }
+			--- => .K]
+		--- ...</ k >
+		--- < todo > [.K => I:Id] ...</ todo >
+		--- < genv > [E:Map => E:Map[n(Loc:Nat) / I:Id]]  </ genv >
+		--- < gmem > [M:Map => M:Map[Closure(Declaration(DS:TogetherList, Direct-Function-Declarator(I:Id, PTL:Parameter-Type-List)){ B:TogetherList }) / n(Loc:Nat)]] </ gmem >
+		--- < nextLoc > [n(Loc:Nat) => n(sNat(Loc:Nat))] </ nextLoc >
+		--- : KSentence .
 		
-	mb [move-pre-through-block]: rule
-		['Block(annotation pre(C:Bag) ; ~> S:Statement) => annotation pre(C:Bag) ; ~> Block(S:Statement)]
-	: KSentence [metadata "structural"] .
-	mb [move-pre-through-declarations]: rule
-		[Declaration(T:TogetherList, DL:Init-Declarator-List) ~> annotation pre(C:Bag) ; => annotation pre(C:Bag) ; ~> Declaration(T:TogetherList, DL:Init-Declarator-List)]
-	: KSentence [metadata "structural"] .
-	mb [move-post-through-all]: rule
-		[annotation post(C:Bag) ; ~> K:NeK => K:NeK ~> annotation post(C:Bag) ;]
-	: KSentence [metadata "structural"] .
+	--- mb [move-pre-through-block]: rule
+		--- ['Block(annotation pre(C:Bag) ; ~> S:Statement) => annotation pre(C:Bag) ; ~> Block(S:Statement)]
+	--- : KSentence [metadata "structural"] .
+	--- mb [move-pre-through-declarations]: rule
+		--- [Declaration(T:TogetherList, DL:Init-Declarator-List) ~> annotation pre(C:Bag) ; => annotation pre(C:Bag) ; ~> Declaration(T:TogetherList, DL:Init-Declarator-List)]
+	--- : KSentence [metadata "structural"] .
+	--- mb [move-post-through-all]: rule
+		--- [annotation post(C:Bag) ; ~> K:NeK => K:NeK ~> annotation post(C:Bag) ;]
+	--- : KSentence [metadata "structural"] .
 	
 	op absBind : K -> K .
 	op i : Nat -> Int .
@@ -82,11 +82,11 @@ mod MATCH-C-SEMANTICS is
 	
 	--- mb rule [Bar(F:Foo # L:List{Foo}) => Bar(L:List{Foo})] : KSentence .
 	
-	mb rule [Parameter-Declaration(void) => .List{Parameter}] : KSentence .
+	--- mb rule [Parameter-Declaration(void) => .List{Parameter}] : KSentence .
 	
-	mb [absBind-done]: rule
-		< k > [absBind(Parameter-Type-List(.List{Parameter})) => .K] ...</ k > 
-	: KSentence .
+	--- mb [absBind-done]: rule
+		--- < k > [absBind(Parameter-Type-List(.List{Parameter})) => .K] ...</ k > 
+	--- : KSentence .
 	
 
 	--- mb [absBind-one]: rule

@@ -43,25 +43,6 @@ mod COMMON-SEMANTICS-PROMOTIONS is
 	
 	---C99 6.3.1.8
 	--- First, if the corresponding real type of either operand is long double, the other operand is converted, without change of type domain, to a type whose corresponding real type is long double.
-	--- mb rule
-		--- < k > [arithConversion(tv(V1:BaseValue, long-double), tv(V2:BaseValue, T2:Type)) => 
-		--- converted(tv(V1:BaseValue, long-double), tv(V2:BaseValue, long-double))] ...</ k >
-		--- : KSentence .
-		
-	--- Otherwise, if the corresponding real type of either operand is double, the other operand is converted, without change of type domain, to a type whose corresponding real type is double.
-	--- mb rule
-		--- < k > [arithConversion(tv(V1:BaseValue, double), tv(V2:BaseValue, T2:Type)) => 
-		--- converted(tv(V1:BaseValue, double), tv(V2:BaseValue, double))] ...</ k >
-		--- if T2:Type =/=Bool long-double
-		--- : KSentence .
-		
-	--- Otherwise, if the corresponding real type of either operand is float, the other operand is converted, without change of type domain, to a type whose corresponding real type is float. 53) For example, addition of a double _Complex and a float entails just the conversion of the float operand to double (and yields a double _Complex result).
-	--- mb rule
-		--- < k > [arithConversion(tv(V1:BaseValue, float), tv(V2:BaseValue, T2:Type)) => 
-		--- converted(tv(V1:BaseValue, float), tv(V2:BaseValue, float))] ...</ k >
-		--- if T2:Type =/=Bool long-double
-		--- andBool T2:Type =/=Bool double
-		--- : KSentence .
 		
 	--- Otherwise, the integer promotions are performed on both operands ...
 	

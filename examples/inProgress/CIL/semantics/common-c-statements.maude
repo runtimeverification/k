@@ -101,7 +101,6 @@ mod COMMON-SEMANTICS-GOTO is
 		if L:KLabel ==Bool 'Local
 		orBool L:KLabel ==Bool '_; --- assumes we don't put '_; around actual statements
 		orBool L:KLabel ==Bool 'goto_;
-		orBool L:KLabel ==Bool 'continue`;
 		orBool L:KLabel ==Bool 'break`;
 		orBool L:KLabel ==Bool 'return`;
 		orBool L:KLabel ==Bool 'return_;
@@ -160,7 +159,7 @@ mod COMMON-SEMANTICS-GOTO is
 		--- : KSentence [metadata "structural"] .
 		
 	mb rule 
-		< k > calculateGotoMap(X:Id, (preparedWhile(B:Expression, S:Statement) ~> (break ;)), (ListItem(K:K) S':List), Tail:K)
+		< k > calculateGotoMap(X:Id, (preparedWhile(B:Expression, S:Statement) ~> (break ;) ~> ?), (ListItem(K:K) S':List), Tail:K)
 		=> calculateGotoMap(X:Id, K:K, S':List, Tail:K) ...</ k >
 		: KSentence [metadata "structural"] .
 		

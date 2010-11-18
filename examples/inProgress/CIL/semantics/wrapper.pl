@@ -4,15 +4,18 @@ my $retval = -1;
 my $reduced = 0;
 my $haveResult = 0;
 my $buffer = "";
+my $profileBuffer = "";
+my $profileFile = "";
 my $kCell = "";
 my $typeCell = "";
 my $profiling = "";
 my $numArgs = $#ARGV + 1;
-if ($numArgs == 1) {
+if ($numArgs == 2) {
 	my $flag = $ARGV[0];
 	if ($flag eq "-p") {
 		$profiling = 1;
 	}
+	$profileFile = $ARGV[1];
 }
 
 while (my $line = <STDIN>) {
@@ -21,8 +24,7 @@ while (my $line = <STDIN>) {
 	$line =~ s/[\000-\037]\[(\d|;)+m//g; # remove ansi colors
 	#print "$line\n";
 	if ($profiling) {
-		print "$line\n";
-		next;
+		$profileBuffer .= "$line\n";
 	}
 	if ($state eq "start"){
 		if ($line =~ m/^erewrite in /){
@@ -64,7 +66,9 @@ while (my $line = <STDIN>) {
 	}
 }
 if ($profiling) {
-	exit $retval;
+	open (MYFILE, ">$profileFile.profile");
+	print MYFILE $profileBuffer;
+	close (MYFILE);
 }
 if ($reduced == 0||$haveResult == 0) {
 	print "$buffer\n";

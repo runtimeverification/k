@@ -196,7 +196,6 @@ and ll or LL
 				fi
 			fi
 		fi
-		
 		: KSentence [metadata "structural"] .
 	mb rule @L(I:Int) => 
 		if inRange(I:Int, long-int) then tv(I:Int, long-int) else
@@ -204,7 +203,6 @@ and ll or LL
 				tv(I:Int, no-type)
 			fi
 		fi
-		
 		: KSentence [metadata "structural"] .
 	mb rule @UL(I:Int) => 
 		if inRange(I:Int, unsigned-long-int) then tv(I:Int, unsigned-long-int) else
@@ -212,24 +210,21 @@ and ll or LL
 				tv(I:Int, no-type)
 			fi
 		fi
-		
 		: KSentence [metadata "structural"] .
 	mb rule @LL(I:Int) => 
 		if inRange(I:Int, long-long-int) then tv(I:Int, long-long-int) else
 			tv(I:Int, no-type)
 		fi
-		
 		: KSentence [metadata "structural"] .
 	mb rule @ULL(I:Int) => 
 		if inRange(I:Int, unsigned-long-long-int) then tv(I:Int, unsigned-long-long-int) else
 			tv(I:Int, no-type)
 		fi
-		
 		: KSentence [metadata "structural"] .
 		
 		
 	---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double.
-	mb rule < k > (F:Float => tv(F:Float, double)) ...</ k > 
+	mb rule < k > (F:Float => tv(F:Float, double)) ...</ k >
 		: KSentence [metadata "structural"] .
 	mb rule (@L(F:Float) => tv(F:Float, long-double))
 		: KSentence [metadata "structural"] .
@@ -295,26 +290,7 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 		< k > assign(Deref(tv(Loc:Nat, pointerType(pointerType(functionType(T:Type, L:List{K}))))), tv(V:Int, pointerType(functionType(T:Type, L':List{K})))) 
 		=> putInMem(Loc:Nat, tv(V:Int, pointerType(functionType(T:Type, L:List{K})))) ~> tv(V:Int, pointerType(functionType(T:Type, L:List{K}))) ...</ k >
 		: KSentence [metadata "structural"] .
-		
-	--- fixme floats might have requirements
-	--- mb [assign-double]: rule
-		--- < k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(double))), tv(V:Float, double)) 
-		--- => tv(V:Float, double) ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme
-	--- mb [assign-float]: rule
-		--- < k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(float))), tv(V:Float, float)) 
-		--- => tv(V:Float, float) ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
-		--- : KSentence [metadata "structural"] .
-	--- --- fixme
-	--- mb [assign-long-double]: rule
-		--- < k > assign(Deref(tv(loc(Block:Nat, Offset:Nat), pointerType(long-double))), tv(V:Float, long-double)) 
-		--- => tv(V:Float, long-double) ...</ k >
-		--- < mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[V:Float / Offset:Nat])) ...</ mem > 
-		--- : KSentence [metadata "structural"] .
-		
+				
 	mb [assign-struct]: rule
 		< k > assign(Deref(tv(Loc:Nat, pointerType(T:Type))), atv(L:List{K}, T:Type))
 		=> 
@@ -336,35 +312,6 @@ mod COMMON-SEMANTICS-BITWISE is
 		andBool hasIntegerType(T':Type)
 		andBool N:Nat <Int numBits(T:Type)
 		: KSentence [metadata "structural"] .
-		
-	--- fixme As best I can tell, these bitwise operations cannot overflow.  I can't figure out where in the standard it says this though.
-	--- fixme result will be heated and may turn into a different kind of value
-	
-	--- mb rule (tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => cast(T:Type, I1:Int |Int I2:Int)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule (tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => cast(T:Type, I1:Int &Int I2:Int)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule (~ tv(I:Int, T:Type) => cast(T:Type, ~Int I:Int)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule (tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => cast(T:Type, I1:Int xorInt I2:Int)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-		
-	--- mb rule (tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => tv(I1:Int |Int I2:Int, T:Type)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule (tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => tv(I1:Int &Int I2:Int, T:Type)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule (~ tv(I:Int, T:Type) => tv(~Int I:Int, T:Type)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
-	--- mb rule (tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => tv(I1:Int xorInt I2:Int, T:Type)) 
-		--- if hasIntegerType(T:Type)
-		--- : KSentence [metadata "structural"] .
 		
 	mb rule (tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int |Int I2:Int)) 
 		if hasIntegerType(T:Type)
@@ -402,16 +349,7 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		if hasIntegerType(T:Type)
 		andBool T':Type =/=Bool void
 		: KSentence [metadata "structural"] .
-		
-	op undefinedMessage : String -> K .
-	--- pointer arithmetic is undefined on void types
-	mb rule < k > ((.).K => undefinedMessage("Pointer arithmetic is undefined for void pointers (It's a constraint violation.")) ~> tv(I1:Int, pointerType(void)) + tv(I2:Int, T:Type) ...</ k >
-		if hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-	mb rule < k > ((.).K => undefinedMessage("Pointer arithmetic is undefined for void pointers (It's a constraint violation.")) ~> tv(I1:Int, pointerType(void)) - tv(I2:Int, T:Type) ...</ k >
-		if hasIntegerType(T:Type)
-		: KSentence [metadata "structural"] .
-			
+					
 	op computePointerDifference : Int Int K -> K [metadata "strict(3)"] .
 	mb [start-pointer-difference]: rule tv(I1:Int, pointerType(T:Type)) - tv(I2:Int, pointerType(T:Type)) 
 		=> computePointerDifference(I1:Int, I2:Int, sizeofType(T:Type))
@@ -618,7 +556,7 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- fixme would be simpler if i did integer promotions etc.
-	mb [post-increment]: rule
+	mb [post-increment-promote]: rule
 		< k > postInc(Loc:Nat, tv(I:Int, pointerType(T:Type)), pointerType(T:Type))
 		=> assign(Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))), tv(I:Int, pointerType(T:Type)) + tv(1, int)) ~> discard ~> tv(I:Int, pointerType(T:Type))
 		...</ k >
@@ -637,7 +575,7 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 		if hasIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- fixme would be simpler if i did integer promotions etc.
-	mb [post-decrement]: rule
+	mb [post-decrement-promote]: rule
 		< k > postDec(Loc:Nat, tv(I:Int, pointerType(T:Type)), pointerType(T:Type))
 		=> assign(Deref(tv(Loc:Nat, pointerType(pointerType(T:Type)))), tv(I:Int, pointerType(T:Type)) - tv(1, int)) ~> discard ~> tv(I:Int, pointerType(T:Type))
 		...</ k >

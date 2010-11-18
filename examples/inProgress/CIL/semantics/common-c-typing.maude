@@ -1,11 +1,11 @@
 mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 	including COMMON-INCLUDE .
 	
-	mb rule
+	mb [type-variadic]: rule
 		< k > (... => typedDeclaration(no-type, ...)) ...</ k > 
 		: KSentence [metadata "structural"] .
 		
-	mb rule
+	mb [semantic-declare]: rule
 		< k > ('Declaration(T:Type,, X:Id) => typedDeclaration(T:Type, X:Id)) ...</ k > 
 		: KSentence [metadata "structural"] .
 	
@@ -15,7 +15,7 @@ mod COMMON-SEMANTICS-TYPE-DECLARATIONS is
 		--- < typedefs >... [(.).Map => X:Typedef-Name |-> T:Type] ...</ typedefs >
 		: KSentence [metadata "structural"] .
 	
-	mb rule
+	mb [give-global-type]: rule
 		< k > (giveGlobalType(T:Type, X:K) => (.).K) ...</ k >
 		< types > (M:Map => M:Map[T:Type / X:K]) </ types >
 		< typedefs > (M':Map => M':Map[T:Type / X:K]) </ typedefs >

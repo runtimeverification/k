@@ -115,6 +115,6 @@ mod DYNAMIC-C-SEMANTICS is
 			"stdin" |-> S1:String	"stdout" |-> S2:String => (.).Map
 		...</ files >
 		((.).Bag => < input > S1:String </ input >	< output > S2:String </ output >)
-		: KSentence .
+		: KSentence [metadata "computational"] .
 	
 endm

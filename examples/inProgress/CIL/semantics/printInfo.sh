@@ -25,6 +25,7 @@ function stats {
 		let NUM_RULES2=`cat $FILENAME2 | perl maudeloc.pl | grep ": rule\|^mb rule" | wc -l`
 		let NUM_EQUATIONS2=`cat $FILENAME2 | perl maudeloc.pl | grep "^eq \|^ceq " | wc -l`
 		let NUM_LINES2=`cat $FILENAME2 | perl maudeloc.pl | grep -v "^mb rule$\|^endm$" | wc -l`
+		let TOTAL_RULES=$TOTAL_RULES+$NUM_RULES2
 		let TOTAL_EQUATIONS=$TOTAL_EQUATIONS+$NUM_EQUATIONS2
 		let TOTAL_LINES=$TOTAL_LINES+$NUM_LINES2
 	fi
@@ -39,7 +40,7 @@ stats "common-c-semantics.maude"
 stats "common-c-standard-lib.maude" "common-c-statements.maude"
 stats "common-c-typing.maude" "dynamic-c-semantics.maude"
 echo "---------------------------------------------------------------------------"
-printf "Syntactic Ops:     %4d\n" 173
+printf "Syntactic Ops:     %4d\n" 145
 printf "Total Rules:       %4d\n" $TOTAL_RULES
 printf "Total Eqns:        %4d\n" $TOTAL_EQUATIONS
 printf "Total Rules+Eqns:  %4d\n" $(($TOTAL_EQUATIONS+$TOTAL_RULES))

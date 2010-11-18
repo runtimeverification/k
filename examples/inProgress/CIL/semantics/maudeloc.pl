@@ -4,9 +4,6 @@ my $inComment = 0;
 while (my $line = <STDIN>){
 	chomp($line);
 	while ($line =~ s/\s\s/ /g){}
-	$line =~ s/\s/ /g;
-	$line =~ s/^\s//g;
-	$line =~ s/\s$//g;
 	$line =~ s/---.*$//g;
 	if (!$inComment) {
 		if ($line =~ s/\*\*\*\(.*$//) {
@@ -17,7 +14,13 @@ while (my $line = <STDIN>){
 			$inComment = 0;
 		}
 	}
+	$line =~ s/\s/ /g;
+	$line =~ s/^\s//g;
+	$line =~ s/\s$//g;
 	$line =~ s/^\s*$//;
+	$line =~ s/\s/ /g;
+	$line =~ s/^\s//g;
+	$line =~ s/\s$//g;
 	if (!$inComment && $line) {
 		print "$line\n";
 	}

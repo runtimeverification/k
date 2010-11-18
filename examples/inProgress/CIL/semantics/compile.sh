@@ -81,6 +81,9 @@ arguments="$@ $firstInputFile"
 compiledPrograms=
 for ARG in $arguments
 do
+	if [ "$profileFlag" ]; then
+		profileFlag="-p $ARG"
+	fi
 	#echo "compiling $ARG"
 	set +o errexit
 	inputFile=`readlink -f $ARG`
