@@ -192,9 +192,9 @@ mod COMMON-C-SYNTAX is
 	op Apply : Expression -> Expression .
 	--- op _`(`) : Postfix-Expression -> Postfix-Expression [strict renameTo applyNil] .
 	op _._ : Expression Id -> Expression [prec 21] . --- not strict in 1 because of _._ and arrays
-	op _->_ : Expression Id -> Expression [prec 21 metadata "strict(1)"] .
-	op _++ : Expression -> Expression [prec 21] .
-	op _-- : Expression -> Expression [prec 21] .
+	op _->_ : Expression Id -> Expression [prec 21 metadata "strict(1)"]. ---  latex(renameTo _\\texttt{-\\kern-1pt\\textgreater}_)"] . 
+	op _++ : Expression -> Expression [prec 21 ] . --- metadata "latex(renameTo _\\texttt{++})"] .
+	op _-- : Expression -> Expression [prec 21 metadata "strict(1)"] . ---latex(renameTo _\\texttt{-}\\texttt{-}"] . --- latex(renameTo _\\texttt{-{}-}_) 
 	--- op `(_`)`{_`} : Type-Name Initializer-List -> Postfix-Expression .
 	--- op `(_`)`{_`,`} : Type-Name Initializer-List -> Postfix-Expression .
 
@@ -206,7 +206,8 @@ mod COMMON-C-SYNTAX is
 	--- 6.5.3
 	--- sizeof, &, ++, ., --, and all assignment operators are NOT STRICT
 	--- C99 6.3.2.1
-	ops ++_ --_ : Expression -> Expression [prec 22] .
+	ops ++_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\texttt{+}\\texttt{+}_)"] .
+	ops --_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\texttt{-}\\texttt{-}_)"] .
 	op &_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\ensuremath{\\&}_)"] .
 	---op *_ : Expression -> Expression [prec 22] .
 	op Deref : Expression -> Expression [metadata "strict latex(renameTo *_)"] .
@@ -219,10 +220,16 @@ mod COMMON-C-SYNTAX is
 	--- 6.5.4
 	op Cast : Type-Name Expression -> Expression [metadata "strict"] .
 	ops _*_ _/_ _%_ : Expression Expression -> Expression [prec 31 gather(E e) metadata "strict"] .	
-	ops _+_ _-_ : Expression Expression -> Expression [prec 33 gather(E e) metadata "strict"] .
-	ops _<<_ _>>_ : Expression Expression -> Expression [prec 35 gather(E e) metadata "strict"] .
-	ops _<_ _>_ _<=_ _>=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
-	ops _==_ _!=_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict"] .
+	ops _+_ : Expression Expression -> Expression [prec 33 gather(E e) metadata "strict latex(renameTo _\\ensuremath{{}+{}}_)"] .
+	ops _-_ : Expression Expression -> Expression [prec 33 gather(E e) metadata "strict latex(renameTo _\\ensuremath{{}-{}}_)"] .	--- latex(renameTo _\texttt{-}_)
+	ops _<<_ : Expression Expression -> Expression [prec 35 gather(E e) metadata "strict"] .
+	ops _>>_ : Expression Expression -> Expression [prec 35 gather(E e) metadata "strict"] .
+	ops _<_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
+	ops _>_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
+	ops _<=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
+	ops _>=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
+	ops _==_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict"] .
+	ops _!=_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict"] .
 	op _&binop_ : Expression Expression -> Expression [prec 41 gather(E e) metadata "strict latex(renameTo _\\&_)"] .
 	op _^_ : Expression Expression -> Expression [prec 43 gather(E e) metadata "strict"] .
 	op _|_ : Expression Expression -> Expression [prec 45 gather(E e) metadata "strict"] .
@@ -231,7 +238,15 @@ mod COMMON-C-SYNTAX is
 	--- op _?_:_ : Expression Expression Expression -> Expression [prec 51 gather(e & E)] .
 	
 	--- 6.5.16
-	ops _*=_ _/=_ _%=_ _+=_ _-=_ _<<=_ _>>=_ _^=_ _|=_ : Expression Expression -> Expression [prec 53] .
+	ops _*=_ : Expression Expression -> Expression [prec 53] .
+	ops _/=_ : Expression Expression -> Expression [prec 53] .
+	ops _%=_ : Expression Expression -> Expression [prec 53] .
+	ops _+=_ : Expression Expression -> Expression [prec 53] .
+	ops _-=_ : Expression Expression -> Expression [prec 53] .
+	ops _<<=_ : Expression Expression -> Expression [prec 53] .
+	ops _>>=_ : Expression Expression -> Expression [prec 53] .
+	ops _^=_ : Expression Expression -> Expression [prec 53] .
+	ops _|=_ : Expression Expression -> Expression [prec 53] .
 	ops _&binop=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\ensuremath{\\&=}_)"] .
 	--- op _=_ : Unary-Expression Assignment-Expression -> Assignment-Expression .
 	op _:=_ : Expression Expression -> Expression [prec 53 metadata "strict(2) latex(renameTo _\\ensuremath{=}_)"] .

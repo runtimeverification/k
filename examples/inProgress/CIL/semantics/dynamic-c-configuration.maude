@@ -15,14 +15,14 @@ mod C-CONFIGURATION is
 			< statics > (.).Map </ statics >
 			< typedefs > (.).Map </ typedefs >
 			< sizes > (.).Map </ sizes >
-			< structs > (.).Map </ structs >
-			< busy > (.).Bag </ busy >
 			< openFiles >
 				0 |-> "stdin" --- stdin
 				1 |-> "stdout" --- stdout
 				2 |-> "stdout" --- stderr
 			</ openFiles >
 			@latex("\\kBR") --- this doesn't do anything except break the latex output
+			< structs > (.).Map </ structs >
+			< busy > (.).Bag </ busy >
 			< callStack > (.).List </ callStack >
 			< control >
 				< buffer > (.).List </ buffer >

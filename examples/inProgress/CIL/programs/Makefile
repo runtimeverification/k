@@ -8,7 +8,7 @@ GCC ?= gcc -lm -Wall -Wextra -x c -O0 -U __GNUC__ -pedantic -std=c99
 PARSER ?= ../dist/cparser
 
 #GOOD_DIRECTORIES = quest
-GOOD_DIRECTORIES = . fromGCC fromLCC
+GOOD_DIRECTORIES = . fromLCC fromGCC 
 #GOOD_DIRECTORIES = fromGCC
 #GOOD_DIRECTORIES = fromClight
 

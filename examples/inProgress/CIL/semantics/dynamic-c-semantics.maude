@@ -99,7 +99,7 @@ mod DYNAMIC-C-SEMANTICS is
 	.
 	
 	--- throw away annotations
-	mb [no-annotations]: rule (annotation(?); => (.).K) : KSentence [metadata "structural"] .
+	--- mb [no-annotations]: rule (annotation(?); => (.).K) : KSentence [metadata "structural"] .
 	
 	--- fixme I'm not sure threads clean up their memory
 	

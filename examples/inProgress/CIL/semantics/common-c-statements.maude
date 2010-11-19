@@ -270,10 +270,10 @@ mod COMMON-C-STATEMENTS is
 	mb [value-statement]: rule < k > (V:Value ; => sequencePoint) ...</ k > : KSentence [metadata "structural"] .
 	
 	--- on K, poploop is a nop.
-	mb [popLoop]: rule
-		< k > (popLoop => (.).K) ...</ k >
-		--- < loopStack > (Li:ListItem => (.).List) ...</ loopStack >
-		: KSentence [metadata "structural"] .
+	--- mb [popLoop]: rule
+		--- < k > (popLoop => (.).K) ...</ k >
+		--- --- < loopStack > (Li:ListItem => (.).List) ...</ loopStack >
+		--- : KSentence [metadata "structural"] .
 		
 	mb [break]: rule
 		< k > break ; ~> ? => K:K </ k >

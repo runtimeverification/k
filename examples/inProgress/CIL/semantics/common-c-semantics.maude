@@ -126,7 +126,7 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op putBytesInMem : Nat List{K} Type K -> K [metadata "strict(4)"] .
 	op sizeofType : K -> Expression [metadata "strict"] .
 	op firstChar : String -> Char .
-	op nthChar : String Nat -> Char .
+	--- op nthChar : String Nat -> Char .
 	op butFirstChar : String -> String .
 	op charToAscii : String -> Nat .
 	op _to_ : Nat Nat -> List{K} . 
@@ -144,10 +144,10 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op integerTypes : -> Set [memo] .
 	op unsignedIntegerTypes : -> Set [memo] .
 	op signedIntegerTypes : -> Set [memo] .
-	op hasIntegerType : Type -> Bool [memo] .
-	op hasUnsignedIntegerType : Type -> Bool [memo] .
-	op hasSignedIntegerType : Type -> Bool [memo] .
-	op hasFloatType : Type -> Bool [memo] .
+	op isIntegerType : Type -> Bool [memo] .
+	op isUnsignedIntegerType : Type -> Bool [memo] .
+	op isSignedIntegerType : Type -> Bool [memo] .
+	op isFloatType : Type -> Bool [memo] .
 	op typeof : Expression -> K .
 	op writeToFD : Nat Nat -> K .
 	op writeToFD : Nat String -> K .
@@ -164,8 +164,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op range : Nat Nat -> Bag .
 	op calculateGotoMap : Id K -> K .
 	
-	op hasArrayType : Type -> Bool .
-	op hasFunctionType : Type -> Bool .
+	op isArrayType : Type -> Bool .
+	op isFunctionType : Type -> Bool .
 	op kpair : K K -> K .
 	op kpair : K List -> K .
 	op promote : K -> K .
@@ -354,9 +354,9 @@ mod SEMANTIC-HELPERS is
 	mb [firstChar]: rule
 		(firstChar(S:String) => substrString(S:String, 0, 1))
 		: KSentence [metadata "structural"] .
-	mb [nthChar]: rule
-		(nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1))
-		: KSentence [metadata "structural"] .
+	--- mb [nthChar]: rule
+		--- (nthChar(S:String, N:Nat) => substrString(S:String, N:Nat, 1))
+		--- : KSentence [metadata "structural"] .
 	mb [charToAscii]: rule
 		(charToAscii(C:Char) => asciiString(C:Char))
 		: KSentence [metadata "structural"] .
@@ -376,39 +376,39 @@ mod SEMANTIC-HELPERS is
 	eq (.).Set contains K:K = false .
 
 			
-	eq hasArrayType(arrayType(?, ?)) = true .
-	ceq hasArrayType(T:Type) = false
+	eq isArrayType(arrayType(?, ?)) = true .
+	ceq isArrayType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'arrayType .
-	eq hasFunctionType(functionType(?, ?)) = true .
-	ceq hasFunctionType(T:Type) = false
+	eq isFunctionType(functionType(?, ?)) = true .
+	ceq isFunctionType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'functionType .
 
-	ceq hasFloatType(T:Type) = true
+	ceq isFloatType(T:Type) = true
 		if T:Type ==Bool double
 		orBool T:Type ==Bool float
 		orBool T:Type ==Bool long-double .
 		
-	ceq hasIntegerType(T:Type) = true
+	ceq isIntegerType(T:Type) = true
 		if (integerTypes contains T:Type) .
-	ceq hasIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
-	eq hasIntegerType(bitfieldType(?, ?)) = true .
+	ceq isIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	eq isIntegerType(bitfieldType(?, ?)) = true .
 	
-	ceq hasUnsignedIntegerType(T:Type) = true
+	ceq isUnsignedIntegerType(T:Type) = true
 		if (unsignedIntegerTypes contains T:Type) .
-	ceq hasUnsignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
-	ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = true 
-		if hasUnsignedIntegerType(T:Type) ==Bool true .
-	ceq hasUnsignedIntegerType(bitfieldType(T:Type, ?)) = false 
-		if hasUnsignedIntegerType(T:Type) ==Bool false .
+	ceq isUnsignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	ceq isUnsignedIntegerType(bitfieldType(T:Type, ?)) = true 
+		if isUnsignedIntegerType(T:Type) ==Bool true .
+	ceq isUnsignedIntegerType(bitfieldType(T:Type, ?)) = false 
+		if isUnsignedIntegerType(T:Type) ==Bool false .
 	
-	ceq hasSignedIntegerType(T:Type) = true
+	ceq isSignedIntegerType(T:Type) = true
 		if (signedIntegerTypes contains T:Type) .
-	eq hasIntegerType(enumType(?)) = true .
-	ceq hasSignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
-	ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = true 
-		if hasSignedIntegerType(T:Type) ==Bool true .
-	ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = false 
-		if hasSignedIntegerType(T:Type) ==Bool false .
+	eq isIntegerType(enumType(?)) = true .
+	ceq isSignedIntegerType(T:Type) = false if getKLabel(T:Type) =/=Bool 'bitfieldType andBool setOfTypes contains l(getKLabel(T:Type)) .
+	ceq isSignedIntegerType(bitfieldType(T:Type, ?)) = true 
+		if isSignedIntegerType(T:Type) ==Bool true .
+	ceq isSignedIntegerType(bitfieldType(T:Type, ?)) = false 
+		if isSignedIntegerType(T:Type) ==Bool false .
 	
 	ceq min(bitfieldType(T:Type, N:Nat)) = 0
 		if unsignedIntegerTypes contains T:Type .
@@ -518,10 +518,10 @@ mod COMMON-PARAMETER-BINDING is
 	--- the idea here is that there should have been a previous argument, so we can use its address to append all of the variadic arguments
 	op promoteList : List{K} -> List{K} .
 	ceq promoteList((tv(V:BaseValue, T:Type),, L:List{K})) = (promote(tv(V:BaseValue, T:Type)),, promoteList(L:List{K}))
-		if (rank(T:Type) <Int rank(int) andBool hasIntegerType(T:Type)) 
+		if (rank(T:Type) <Int rank(int) andBool isIntegerType(T:Type)) 
 		orBool T:Type ==Bool float .
 	ceq promoteList((tv(V:BaseValue, T:Type),, L:List{K})) = (tv(V:BaseValue, T:Type),, promoteList(L:List{K}))
-		if (notBool(hasIntegerType(T:Type)) orBool rank(T:Type) >=Int rank(int))
+		if (notBool(isIntegerType(T:Type)) orBool rank(T:Type) >=Int rank(int))
 		orBool T:Type ==Bool double orBool T:Type ==Bool long-double .
 	eq promoteList((atv(LV:List{K}, T:Type),, L:List{K})) = (atv(LV:List{K}, T:Type),, promoteList(L:List{K})) .
 
@@ -568,14 +568,14 @@ mod COMMON-PARAMETER-BINDING is
 			bind(L:List{KResult}, typedDeclaration(no-type, ...)) ...</ k > 
 		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
 		: KSentence [metadata "structural"] .
-	mb [bind-bad-prototype-struct]: rule
-		< k > bind((atv(V:List{K}, T:Type),, L:List{KResult}), .List{K})
-			=> 
-			addLocals(Loc:Nat) ~> 
-			storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
-			bind(L:List{KResult}, typedDeclaration(no-type, ...)) ...</ k > 
-		< nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
-		: KSentence [metadata "structural"] .	
+	--- mb [bind-bad-prototype-struct]: rule
+		--- < k > bind((atv(V:List{K}, T:Type),, L:List{KResult}), .List{K})
+			--- => 
+			--- addLocals(Loc:Nat) ~> 
+			--- storeNew atv(V:List{K}, T:Type) atLoc Loc:Nat ~>
+			--- bind(L:List{KResult}, typedDeclaration(no-type, ...)) ...</ k > 
+		--- < nextLoc > (Loc:Nat => inc(Loc:Nat)) </ nextLoc >
+		--- : KSentence [metadata "structural"] .	
 endm
 
 mod COMMON-GLOBAL-DECLARATION is
@@ -752,11 +752,11 @@ mod MEMORY is
 		< k > (append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => store V:Value atLoc loc(Block:Nat, Offset:Nat)) ...</ k >
 		< mem >... Block:Nat |-> (memblock(OldLen:Nat, M:Map) => memblock(OldLen:Nat +Nat Len:Nat, M:Map)) ...</ mem >
 		: KSentence [metadata "structural"] .
-	mb [append-new]: rule
-		< k > (append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => storeNew V:Value atLoc loc(Block:Nat, Offset:Nat)) ...</ k >
-		< mem > M:Map </ mem >
-		if notBool($hasMapping(M:Map, Block:Nat))
-		: KSentence [metadata "structural"] .
+	--- mb [append-new]: rule
+		--- < k > (append(loc(Block:Nat, Offset:Nat), Len:Nat, V:Value) => storeNew V:Value atLoc loc(Block:Nat, Offset:Nat)) ...</ k >
+		--- < mem > M:Map </ mem >
+		--- if notBool($hasMapping(M:Map, Block:Nat))
+		--- : KSentence [metadata "structural"] .
 	
 	mb [store-scalar]: rule
 		< k > store tv(V:BaseValue, T:Type) atLoc Loc:Nat => 
@@ -800,12 +800,9 @@ mod MEMORY is
 
 		
 	--- this introduces a new unknown value if the location is valid
-	mb [read-unknown]: rule
+	mb rule
 		< k > readFromMem-aux(loc(Block:Nat, (Offset:Nat => sNat(Offset:Nat))), T:Type, tv((sNat(Left:Nat) => Left:Nat), T':Type), (L:List{K} => (L:List{K},, piece(unknown(Fresh:Nat), numBitsPerByte))))
-		---	=> readFromMem-aux(loc(Block:Nat, sNat(Offset:Nat)), T:Type, tv(Left:Nat, T':Type), (L:List{K},, piece(unknown(Fresh:Nat), numBitsPerByte)))
 		...</ k >
-		@latex("\\kBR")
-		--- < mem >... Block:Nat |-> memblock(BlockLen:Nat, (M:Map ((.).Map => Offset:Nat |-> piece(unknown(Fresh:Nat), numBitsPerByte)))) ...</ mem >
 		< mem >... Block:Nat |-> memblock(BlockLen:Nat, (M:Map => M:Map[piece(unknown(Fresh:Nat), numBitsPerByte) / Offset:Nat])) ...</ mem >
 		@latex("\\kBR")
 		< locsWrittenTo > Locs:Bag </ locsWrittenTo >
@@ -922,7 +919,7 @@ mod MEMORY is
 		< buffer >... ((.).List => bwrite(Target:Nat, F:Float)) </ buffer >
 		< locsWrittenTo > Locs:Bag ((.).Bag => BagItem(Target:Nat)) </ locsWrittenTo >
 		if notBool(Target:Nat in Locs:Bag)
-		andBool hasFloatType(T:Type)
+		andBool isFloatType(T:Type)
 		: KSentence [metadata "large structural"] .
 		
 	--- fixme: put pointer in memory
@@ -1077,7 +1074,7 @@ mod COMMON-C-SEMANTICS is
 
 
 	--- remove empty global
-	mb [remove-global-marker-empty]: rule (Global() => (.).K) : KSentence [metadata "structural"] .
+	--- mb [remove-global-marker-empty]: rule (Global() => (.).K) : KSentence [metadata "structural"] .
 	
 	--- fixme: super horrible
 	--- some of the truncs and abs are just to get the sorts right
@@ -1182,11 +1179,11 @@ mod COMMON-C-SEMANTICS is
 		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
 		< files >... Filename:String |-> (S:String => S:String +String charString(N:Nat %Nat 256)) ...</ files >
 		: KSentence [metadata "structural"] .
-	--- mb [writeToFD-string] : rule
-		--- < k > (writeToFD(FD:Nat, S':String) => (.).K) ...</ k >
-		--- < openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
-		--- < files >... Filename:String |-> (S:String => S:String +String S':String) ...</ files >
-		--- : KSentence [metadata "structural"] .
+	mb [writeToFD-string] : rule
+		< k > (writeToFD(FD:Nat, S':String) => (.).K) ...</ k >
+		< openFiles >... FD:Nat |-> Filename:String ...</ openFiles >
+		< files >... Filename:String |-> (S:String => S:String +String S':String) ...</ files >
+		: KSentence [metadata "structural"] .
 	--- mb [readFromFD-char] : rule
 		--- < k > (readFromFD(FD:Nat) => tv(charToAscii(firstChar(S:String)), int))  ...</ k >
 		--- < openFiles >... FD:Nat |-> Filename:String ...</ openFiles >

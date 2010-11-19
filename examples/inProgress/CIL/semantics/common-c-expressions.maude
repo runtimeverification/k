@@ -28,9 +28,9 @@ mod COMMON-SEMANTICS-SIZEOF is
 		< k > (sizeofType(unionType(X:Id)) => calcUnionSize(L:List{KResult})) ...</ k >
 		< structs >... union(X:Id) |-> L:List{KResult} ...</ structs >
 	: KSentence [metadata "structural"] .
-	mb [sizeof-enum]: rule
-		< k > (sizeofType(enumType(X:Id)) => tv(1, cfg:sizeut)) ...</ k >
-	: KSentence [metadata "structural"] .
+	--- mb [sizeof-enum]: rule
+		--- < k > (sizeofType(enumType(X:Id)) => tv(1, cfg:sizeut)) ...</ k >
+	--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-IDENTIFIERS is
@@ -44,7 +44,7 @@ mod COMMON-SEMANTICS-IDENTIFIERS is
 		< k > (X:Id => readFromMem(Loc:Nat, T:Type)) ...</ k >
 		< env >... X:Id |-> Loc:Nat ...</ env >
 		< types >... X:Id |-> T:Type ...</ types >
-		if notBool(hasArrayType(T:Type)) andBool notBool(hasFunctionType(T:Type))
+		if notBool(isArrayType(T:Type)) andBool notBool(isFunctionType(T:Type))
 		: KSentence [metadata "structural"] . --- nondet
 		
 	mb [lookup-register]: rule
@@ -256,18 +256,18 @@ mod COMMON-SEMANTICS-ASSIGNMENT is
 	mb [assign-bit-or]: rule (E1:Expression |= E2:Expression => E1:Expression := E1:Expression | E2:Expression) : KSentence [metadata "structural"] .
 	
 	--- fixme this happens due to problem with cil and zeroinit
-	mb [assign-fix-enum]: rule
-		< k > assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), tv(V:Int, int)) 
-		=> assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), cast(enumType(X:Id), tv(V:Int, int))) ...</ k >
-		: KSentence [metadata "structural"] .
+	--- mb [assign-fix-enum]: rule
+		--- < k > assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), tv(V:Int, int)) 
+		--- => assign(Deref(tv(Loc:Nat, pointerType(enumType(X:Id)))), cast(enumType(X:Id), tv(V:Int, int))) ...</ k >
+		--- : KSentence [metadata "structural"] .
 	
 	--- fixme this isn't supposed to happen, but cil messes up and now we're doing some conversions and promotions, so it can
 	mb rule
 		< k > assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(V:Int, T':Type))
 		=> assign(Deref(tv(Loc:Nat, pointerType(T:Type))), cast(T:Type, tv(V:Int, T':Type))) ...</ k >
 		if T:Type =/=Bool T':Type
-		andBool hasIntegerType(T:Type)
-		andBool hasIntegerType(T':Type) 
+		andBool isIntegerType(T:Type)
+		andBool isIntegerType(T':Type) 
 		: KSentence [metadata "structural"] .
 		
 	mb rule
@@ -303,27 +303,27 @@ mod COMMON-SEMANTICS-BITWISE is
 	
 	--- c99 6.5.7:3 The integer promotions are performed on each of the operands. The type of the result is that of the promoted left operand. If the value of the right operand is negative or is greater than or equal to the width of the promoted left operand, the behavior is undefined.
 	mb rule (tv(I:Int, T:Type) << tv(N:Nat, T':Type) => leftShiftInterpret(T:Type, I:Int <<Int N:Nat, tv(I:Int, T:Type))) 
-		if hasIntegerType(T:Type)
-		andBool hasIntegerType(T':Type)
+		if isIntegerType(T:Type)
+		andBool isIntegerType(T':Type)
 		andBool N:Nat <Int numBits(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule tv(I:Int, T:Type) >> tv(N:Nat, T':Type) => rightShiftInterpret(T:Type, I:Int >>Int N:Nat) 
-		if hasIntegerType(T:Type)
-		andBool hasIntegerType(T':Type)
+		if isIntegerType(T:Type)
+		andBool isIntegerType(T':Type)
 		andBool N:Nat <Int numBits(T:Type)
 		: KSentence [metadata "structural"] .
 		
 	mb rule (tv(I1:Int, T:Type) | tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int |Int I2:Int)) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (tv(I1:Int, T:Type) &binop tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int &Int I2:Int)) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (~ tv(I:Int, T:Type) => arithInterpret(T:Type, ~Int I:Int)) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (tv(I1:Int, T:Type) ^ tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int xorInt I2:Int)) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 endm
 
@@ -340,13 +340,13 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 	--- needs to check offset > 0 
 	mb rule < k > tv(loc(Block:Nat, Offset:Nat), pointerType(T':Type)) + tv(I2:Int, T:Type) 
 	=> '_+_(tv(Offset:Nat, cfg:sizeut),, '_*_(sizeofType(T':Type),, tv(I2:Int, cfg:sizeut))) ~> waitingForOffset(Block:Nat, pointerType(T':Type)) ...</ k >
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		andBool T':Type =/=Bool void
 		: KSentence [metadata "structural"] .
 		
 	mb rule < k > tv(loc(Block:Nat, Offset:Nat), pointerType(T':Type)) - tv(I2:Int, T:Type) 
 	=> '_-_(tv(Offset:Nat, cfg:sizeut),, '_*_(sizeofType(T':Type),, tv(I2:Int, cfg:sizeut))) ~> waitingForOffset(Block:Nat, pointerType(T':Type)) ...</ k >
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		andBool T':Type =/=Bool void
 		: KSentence [metadata "structural"] .
 					
@@ -360,22 +360,22 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 		: KSentence [metadata "structural"] .	
 		
 	mb rule (tv(I1:Rat, T:Type) + tv(I2:Rat, T:Type) => arithInterpret(T:Type, (I1:Rat +Rat I2:Rat))) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (_-_(tv(I1:Int, T:Type), tv(I2:Int, T:Type)) => arithInterpret(T:Type, _-Int_(I1:Int,I2:Int))) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (tv(I1:Int, T:Type) * tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int *Int I2:Int)) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (tv(I1:Int, T:Type) / tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int /Int I2:Int)) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (tv(I1:Int, T:Type) % tv(I2:Int, T:Type) => arithInterpret(T:Type, I1:Int %Int I2:Int)) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	mb rule (-un tv(I1:Int, T:Type) => arithInterpret(T:Type, -Int_(I1:Int))) 
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	
 	--- floats
@@ -553,7 +553,7 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 		< k > postInc(Loc:Nat, tv(I:Int, T:Type), T:Type)
 		=> assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(I:Int, T:Type) + tv(1, T:Type)) ~> discard ~> tv(I:Int, T:Type)
 		...</ k >
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- fixme would be simpler if i did integer promotions etc.
 	mb [post-increment-promote]: rule
@@ -572,7 +572,7 @@ mod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 		< k > postDec(Loc:Nat, tv(I:Int, T:Type), T:Type)
 		=> assign(Deref(tv(Loc:Nat, pointerType(T:Type))), tv(I:Int, T:Type) - tv(1, T:Type)) ~> discard ~> tv(I:Int, T:Type)
 		...</ k >
-		if hasIntegerType(T:Type)
+		if isIntegerType(T:Type)
 		: KSentence [metadata "structural"] .
 	--- fixme would be simpler if i did integer promotions etc.
 	mb [post-decrement-promote]: rule

@@ -50,6 +50,7 @@ mod COMMON-C-STANDARD-LIBRARY is
 		---x (tv(I:Int, int) == tv(0, int)) ~> K:K </ k >
 		)
 		</ control >
+		@latex("\\kBR")
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> (BagK(B:Bag < continuation > K:K </ continuation >) => piece(unknown(Fresh:Nat), 8)))) ...</ mem >
 		< freshNat > (Fresh:Nat => sNat(Fresh:Nat)) </ freshNat >
 	: KSentence [metadata "computational"] .
@@ -450,10 +451,10 @@ mod COMMON-C-STANDARD-LIBRARY is
 	mb [lib-printf-%x-2]: rule
 		< k > tv(N:Nat, ?) ~> printf-%(Len:Nat, Loc:Nat, (tv(D:Int, ?),, L:List{KResult})) 
 			=> writeToFD(1, Rat2String(D:Int, 16))
-			~> printf-aux(Len:Nat +Nat 2, sNat(Loc:Nat), L:List{KResult}) 
+			~> printf-aux(Len:Nat +Nat lengthString(Rat2String(D:Int, 16)), sNat(Loc:Nat), L:List{KResult}) 
 		...</ k >
 		if (N:Nat ==Bool asciiString("x") orBool N:Nat ==Bool asciiString("p"))
-		andBool lengthString(Rat2String(D:Int, 16)) ==Bool 2
+		andBool lengthString(Rat2String(D:Int, 16)) =/=Bool 1
 		: KSentence [metadata "structural"] .
 	
 	--- fixme might be messing things up elsewhere
