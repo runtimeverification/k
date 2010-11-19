@@ -25,6 +25,7 @@ function stats {
 		let NUM_RULES2=`cat $FILENAME2 | perl maudeloc.pl | grep ": rule\|^mb rule" | wc -l`
 		let NUM_EQUATIONS2=`cat $FILENAME2 | perl maudeloc.pl | grep "^eq \|^ceq " | wc -l`
 		let NUM_LINES2=`cat $FILENAME2 | perl maudeloc.pl | grep -v "^mb rule$\|^endm$" | wc -l`
+		let TOTAL_RULES=$TOTAL_RULES+$NUM_RULES2
 		let TOTAL_EQUATIONS=$TOTAL_EQUATIONS+$NUM_EQUATIONS2
 		let TOTAL_LINES=$TOTAL_LINES+$NUM_LINES2
 	fi

@@ -30,7 +30,8 @@ mod COMMON-C-STANDARD-LIBRARY is
 			B:Bag
 			< k > (application(builtin(setjmp), tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?)))) => tv(0, int)) ~> K:K </ k >
 		</ control >
-		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[BagK((B:Bag < continuation > K:K </ continuation >)) / Offset:Nat])) ...</ mem >
+		< callStack > CallStack:List </ callStack >
+		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[BagK((< control > B:Bag < continuation > K:K </ continuation > </ control > < callStack > CallStack:List </ callStack >)) / Offset:Nat])) ...</ mem >
 	: KSentence [metadata "computational"] . --- fixme, forcing buffer flush
 	--------------------------------------------
 	mb [longjmp-is-value]: rule
@@ -46,12 +47,11 @@ mod COMMON-C-STANDARD-LIBRARY is
 		< k > application(builtin(longjmp), (tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?))),, tv(I:Int, int))) ~> ? </ k >
 		=> B:Bag
 		< k > tv(zeroToOne(I:Int), int) ~> K:K </ k >
-		--- tv(if I:Int ==Bool 0 then 1 else I:Int fi, int)
-		---x (tv(I:Int, int) == tv(0, int)) ~> K:K </ k >
 		)
 		</ control >
+		(< callStack > ? => CallStack:List </ callStack >)
 		@latex("\\kBR")
-		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> (BagK(B:Bag < continuation > K:K </ continuation >) => piece(unknown(Fresh:Nat), 8)))) ...</ mem >
+		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> (BagK(< control > B:Bag < continuation > K:K </ continuation > </ control > < callStack > CallStack:List </ callStack >) => piece(unknown(Fresh:Nat), 8)))) ...</ mem >
 		< freshNat > (Fresh:Nat => sNat(Fresh:Nat)) </ freshNat >
 	: KSentence [metadata "computational"] .
 	--------------------------------------------

@@ -12,6 +12,7 @@ static jmp_buf x;
 static jmp_buf buf;
  
 void f() {
+	printf("in f\n");
     longjmp(x,5);
 }
 
@@ -29,10 +30,13 @@ void test1() {
 	int i = 0;
 	i = setjmp(x);
     if ( ! i ) {
+		printf("!i\n");
         f();
+		printf("after f\n");
     } else {
         printf("error code = %d\n", i);
     }
+	printf("i true\n");
 }
 
 void test2(void){

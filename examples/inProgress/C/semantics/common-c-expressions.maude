@@ -8,30 +8,30 @@ endm
 mod COMMON-SEMANTICS-ABSTRACTION is
 	including COMMON-INCLUDE .
 	
-	op F-abs : Nat -> Nat . --- unique #
-	op F-hasType : BaseValue Type -> Formula .
-	op F-eq : K K -> Formula .
-	op F-cast : K Type Type -> Formula .
-	mb rule
-		< k > Identifier("__freshChar")
-			=> tv(F-abs(N:Nat), char)
-		...</ k >
-		< freshNat > N:Nat => sNat(N:Nat) </ freshNat >
-		< formula >... . => 
-			F-hasType(F-abs(N:Nat), char) 
-			/\ F-eq(Identifier("__freshChar"), F-abs(N:Nat)) 
-		...</ formula >
-		: KSentence [metadata "structural"] .
+	--- op F-abs : Nat -> Nat . --- unique #
+	--- op F-hasType : BaseValue Type -> Formula .
+	--- op F-eq : K K -> Formula .
+	--- op F-cast : K Type Type -> Formula .
+	--- mb rule
+		--- < k > Identifier("__freshChar")
+			--- => tv(F-abs(N:Nat), char)
+		--- ...</ k >
+		--- < freshNat > N:Nat => sNat(N:Nat) </ freshNat >
+		--- < formula >... . => 
+			--- F-hasType(F-abs(N:Nat), char) 
+			--- /\ F-eq(Identifier("__freshChar"), F-abs(N:Nat)) 
+		--- ...</ formula >
+		--- : KSentence [metadata "structural"] .
 		
-	mb rule
-		< k > cast(T:Type, tv(F-abs(N':Nat), T':Type))
-			=> tv(F-abs(N:Nat), T:Type)
-		...</ k >
-		< freshNat > N:Nat => sNat(N:Nat) </ freshNat >
-		< formula >... . =>  
-			F-eq(F-cast(F-abs(N':Nat), T:Type, T':Type), F-abs(N:Nat))
-		...</ formula >
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > cast(T:Type, tv(F-abs(N':Nat), T':Type))
+			--- => tv(F-abs(N:Nat), T:Type)
+		--- ...</ k >
+		--- < freshNat > N:Nat => sNat(N:Nat) </ freshNat >
+		--- < formula >... . =>  
+			--- F-eq(F-cast(F-abs(N':Nat), T:Type, T':Type), F-abs(N:Nat))
+		--- ...</ formula >
+		--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-SEMANTICS-COMPOUND-LITERAL is

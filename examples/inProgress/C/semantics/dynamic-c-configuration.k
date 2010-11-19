@@ -14,26 +14,30 @@ kmod C-CONFIGURATION is
 			< nextFile > 0 </ nextFile >
 			< malloced > .Map </ malloced >
 			< statics > .Map </ statics >
+			@latex("\\kBR")
 			< internalLocations > .Map </ internalLocations >
 			< externalLocations > .Map </ externalLocations >
-			--- < sizes > .Map </ sizes >
 			< openFiles > .Map </ openFiles >
-			--- < busy > .Bag </ busy >
+			
 			< programText > .Map </ programText >
 			< externalDefinitions > .Map </ externalDefinitions >
 			< internalDefinitions > .Map </ internalDefinitions >
+			@latex("\\kBR")
 			< declarations > .Set </ declarations >
 			< preLinkage > .Map </ preLinkage >
 			< preTypes > .Map </ preTypes >
+			
 			< translationUnits > .Bag </ translationUnits >
 			< functionTranslationUnits > .Map </ functionTranslationUnits >
 			< declarationOrder > .Map </ declarationOrder >
 			--- < messages > .List </ messages >
-			< formula > .K </ formula >
+			--- < formula > .K </ formula >
+			@latex("\\kBR")
 			< threads >
 				< thread * >
 					< callStack > .List </ callStack > --- stack of "control" cells
 					< control >
+						< k > .K </ k >
 						< blockStack > .List </ blockStack > --- stack of "local" cells
 						< local >
 							--- maps from Ids
@@ -47,18 +51,18 @@ kmod C-CONFIGURATION is
 							< localVariables > .List </ localVariables > --- used to make sure we don't declare a variable twice in the same scope
 							< localAddresses > .Set </ localAddresses > --- used to deallocate memory on leaving a block
 						</ local >
-						< k > .K </ k >
+						@latex("\\kBR")
 						< shouldInit > true </ shouldInit > --- used to control initialization when gotoing
-						
 						--- used to figure initializers
 						< currentObject > .List </ currentObject >
 						< currentSubObject > .List </ currentSubObject >
 						< incompleteLength > 0 </ incompleteLength >
 						< savedInitialization > .K </ savedInitialization >
-
 						< loopStack > .List </ loopStack >
+						@latex("\\kBR")
 						< locsWrittenTo > .Bag </ locsWrittenTo >
 						--- < holds > .Map </ holds >
+						
 						< type * > .K </ type * > --- used for typing expressions
 						< declarationTypeHolder > .K </ declarationTypeHolder > --- holds the innermost type while we unroll the type around it
 						
@@ -66,7 +70,7 @@ kmod C-CONFIGURATION is
 						< currentTranslationUnit > "" </ currentTranslationUnit >
 						< currentFunction > .K </ currentFunction >
 						< currentProgramLoc > .K </ currentProgramLoc >
-						
+						@latex("\\kBR")
 						< calculateGotoMap >
 							< gotoCalculation * >
 								< computation > .K </ computation >
@@ -80,9 +84,11 @@ kmod C-CONFIGURATION is
 					</ control >
 				</ thread * >
 			</ threads >
+			@latex("\\kBR")
 			< compoundLiteralMap > .Map </ compoundLiteralMap >
 			< unfinishedComputation > .K </ unfinishedComputation > --- this is here to make it easy to check if we've terminated.  it disappears when we terminate
 		</ T >
+		@latex("\\kBR")
 		< xmessages > .K </ xmessages >
 		< files > .Map </ files > --- filenames to strings
 		< input > "" </ input >

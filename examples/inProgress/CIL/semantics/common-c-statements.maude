@@ -195,12 +195,12 @@ mod COMMON-SEMANTICS-RETURN is
 		: KSentence [metadata "structural"] .
 
 	--- this is used for threads
-	mb [return-nostack]: rule 
-		< k > L:KLabel(?) ~> ? => (.).K </ k >
-		< callStack > (.).List </ callStack >
-		if L:KLabel ==Bool 'return`;
-		orBool L:KLabel ==Bool 'return_;
-		: KSentence [metadata "structural"] .
+	--- mb [return-nostack]: rule 
+		--- < k > L:KLabel(?) ~> ? => (.).K </ k >
+		--- < callStack > (.).List </ callStack >
+		--- if L:KLabel ==Bool 'return`;
+		--- orBool L:KLabel ==Bool 'return_;
+		--- : KSentence [metadata "structural"] .
 		
 	--- fixme shouldn't there be sequence points here?
 	mb [return]: rule 
