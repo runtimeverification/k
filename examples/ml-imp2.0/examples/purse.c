@@ -46,10 +46,7 @@ int main()
   printf("%d %d\n",p1->balance,p2->balance);
   p2->balance = 320;
   s = 100;
-/*@ assert < config > 
-           < env > p1 |-> ?p1 p2 |-> ?p2 s |-> 100 </ env > 
-           < heap > ?p1 |-> 0 : purse . balance ?p2 |-> 320 : purse . balance </ heap >
-           < form > ~(?p1 === 0) </ form > </ config > */
+
   credit(p2,s);
   printf("%d %d\n",p1->balance,p2->balance);
   return 0;
