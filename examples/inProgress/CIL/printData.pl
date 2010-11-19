@@ -120,7 +120,7 @@ sub printCommonRules {
 	from (SELECT a.rule, count(file) as count, sum(rewrites) as rewrites
 		FROM data a
 		WHERE a.type != 'op' 
-		AND suite == 'gcc'
+		--- AND suite == 'gcc'
 		AND (a.kind != 'macro'
 			OR (a.kind == 'macro' AND (a.rule LIKE '%structural%' or a.rule LIKE '%computational%'))
 			)

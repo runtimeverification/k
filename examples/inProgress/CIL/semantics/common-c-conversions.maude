@@ -227,10 +227,10 @@ mod COMMON-SEMANTICS-CAST is
 		---if min(unsigned-int) <=Int I:Int andBool max(unsigned-int) >=Int I:Int
 		: KSentence [metadata "structural"] .
 				
-	mb rule
-		< k > cast(pointerType(bitfieldType(T:Type, Len:Nat)), tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(?)))
-		=> tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat))) ...</ k > 
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- < k > cast(pointerType(bitfieldType(T:Type, Len:Nat)), tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(?)))
+		--- => tv(bitloc(B:Nat, N:Nat, O:Nat), pointerType(bitfieldType(T:Type, Len:Nat))) ...</ k > 
+		--- : KSentence [metadata "structural"] .
 endm
 
 mod COMMON-C-CONVERSIONS is
@@ -251,9 +251,9 @@ mod COMMON-C-CONVERSIONS is
 		andBool _-Int_(I:Int, (2 ^Nat absInt(numBits(T:Type)))) >=Int min(T:Type)
 		: KSentence [metadata "structural"] .
 	--- fixme not necessarily the case that pointers are unsigned-ints
-	mb rule (interpret(pointerType(T:Type), N:Nat) => tv(N:Nat, pointerType(T:Type)))
-		if min(unsigned-int) <=Int N:Nat andBool max(unsigned-int) >=Int N:Nat
-		: KSentence [metadata "structural"] .
+	--- mb rule (interpret(pointerType(T:Type), N:Nat) => tv(N:Nat, pointerType(T:Type)))
+		--- if min(unsigned-int) <=Int N:Nat andBool max(unsigned-int) >=Int N:Nat
+		--- : KSentence [metadata "structural"] .
 		
 	mb rule (arithInterpret(T:Type, I:Int) => tv(I:Int, T:Type))
 		if min(T:Type) <=Int I:Int andBool max(T:Type) >=Int I:Int

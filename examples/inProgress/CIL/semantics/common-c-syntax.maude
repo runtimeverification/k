@@ -280,7 +280,7 @@ mod COMMON-C-SYNTAX is
 	--- 6.7.1
 	sort Storage-Class-Specifier .
 	ops typedef extern static auto register : -> Storage-Class-Specifier .
-	op inline : -> Storage-Class-Specifier . --- nonstandard
+	--- op inline : -> Storage-Class-Specifier . --- nonstandard
 
 	--- 6.7.2
 	sort Type-Specifier .

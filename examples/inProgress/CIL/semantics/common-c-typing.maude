@@ -250,8 +250,8 @@ mod COMMON-C-TYPING is
 		if K:NeK =/=Bool int .
 	eq pointerType(registerInt) = pointerType(int) .
 		
-	mb rule
-		(inline => (.).K)
-		: KSentence [metadata "structural"] .
+	--- mb rule
+		--- (inline => (.).K)
+		--- : KSentence [metadata "structural"] .
 		
 endm

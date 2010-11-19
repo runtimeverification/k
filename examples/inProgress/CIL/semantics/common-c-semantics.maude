@@ -1052,18 +1052,6 @@ mod COMMON-C-SEMANTICS is
 		< k > (T:Typedef-Name => T:Type) ...</ k >
 		< types >... T:Typedef-Name |-> T:Type ...</ types > 
 		: KSentence [metadata "structural"] .
-	mb rule 
-		< k > (struct(X:Id) => T:Type) ...</ k > 
-		< types >... struct(X:Id) |-> T:Type ...</ types > 
-		: KSentence [metadata "structural"] .
-	mb rule 
-		< k > (union(X:Id) => T:Type) ...</ k > 
-		< types >... union(X:Id) |-> T:Type ...</ types > 
-		: KSentence [metadata "structural"] .
-	mb rule 
-		< k > (enum(X:Id) => T:Type) ...</ k > 
-		< types >... enum(X:Id) |-> T:Type ...</ types > 
-		: KSentence [metadata "structural"] .
 		
 	eq hex(S:String) = String2Rat(S:String, 16) .
 	eq Parameter-Type-List() = Parameter-Type-List(.List{Parameter}) .		
