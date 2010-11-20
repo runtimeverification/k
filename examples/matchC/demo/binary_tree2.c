@@ -85,7 +85,7 @@ struct listNode *toListIterative(struct treeNode *t)
 }
 
 
-struct treeNode *sample()
+struct treeNode *create()
 {
   struct treeNode* root;
 
@@ -144,7 +144,7 @@ int main()
   struct treeNode* t;
   struct listNode* l;
 
-  t = sample();
+  t = create();
   /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
                         < heap > tree(?t)(!T1) </ heap >
                         < form > TrueFormula </ form > </ config > */
@@ -160,7 +160,7 @@ int main()
                         < form > TrueFormula </ form > </ config > */
 
 
-  t = sample();
+  t = create();
   /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
                         < heap > tree(?t)(!T2) </ heap >
                         < form > TrueFormula </ form > </ config > */

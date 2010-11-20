@@ -7,6 +7,7 @@ LANGUAGE_NAME = FUN-UNTYPED
 
 
 LANGUAGE_MODULES = FUN-SYNTAX FUN-DESUGARED-SYNTAX FUN-UNTYPED-SEMANTICS
+ADDITIONAL_DEPENDENCIES = ../fun-programs.k
 
 #this is the basename of the main file
 MAIN_FILE = fun-untyped

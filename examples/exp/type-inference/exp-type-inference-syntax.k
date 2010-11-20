@@ -1,0 +1,47 @@
+---------------------------------
+--- EXP-TYPE-INFERENCE-SYNTAX module ---
+---------------------------------
+
+---(
+The differences from the actual exp language K-annotated syntax are:
+  (*) the conditional is fully strict
+  (*) let is not desugared (because it has a different type semantics than its desugaring - it is polymorphic)
+---)
+
+--- The modules below define the K-annotated syntax of EXP as needed for the type inferencer.
+--- We call the first one EXP-SYNTAX instead of EXP-TYPE-INFERENCE-SYNTAX because we
+--- want to use the same file exp-programs.k for both the untyped and the
+--- type inferenced versions of the EXP languages.
+
+
+kmod EXP-SYNTAX is including PL-INT + PL-ID
+
+  syntax Exp ::= Int | Bool
+               | Id
+               | Exp + Exp                [strict prec 33 gather(E e)]
+               | Exp - Exp                [strict prec 33 gather(E e)]
+               | Exp * Exp                [strict prec 31 gather(E e)]
+               | Exp / Exp                [strict prec 31 gather(E e)]
+               | Exp % Exp                [strict prec 31 gather(E e)]
+               | - Exp                    [strict]
+               | Exp < Exp                [strict prec 37]
+               | Exp <= Exp               [strict prec 37]
+               | Exp > Exp                [strict prec 37]
+               | Exp >= Exp               [strict prec 37]
+               | Exp == Exp               [strict prec 37]
+               | Exp != Exp               [strict prec 37]
+               | Exp and Exp              [strict prec 55 gather(E e)]
+               | Exp or Exp               [strict prec 59 gather(E e)]
+               | not Exp                  [strict prec 53]
+               | lambda Id . Exp          [latex "\lambda{#1}.{#2}"]
+               | mu Id . Exp              [latex "\mu{#1}.{#2}"]
+               | Exp Exp                  [strict prec 10 gather(E e)]
+               | let Id = Exp in Exp      [strict(2)]
+               | letrec Id Id = Exp in Exp
+               | if Exp then Exp else Exp [strict]
+endkm
+
+
+kmod EXP-TYPE-INFERENCE-DESUGARED-SYNTAX is including EXP-SYNTAX
+  macro (letrec F:Id X:Id = E:Exp in E':Exp) = (let F = mu F . (lambda X . E) in E')
+endkm

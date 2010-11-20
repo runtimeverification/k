@@ -85,7 +85,7 @@ struct listNode *toListIterative(struct treeNode *t)
 }
 
 
-struct treeNode *sample()
+struct treeNode *create()
 {
   struct treeNode* root;
 
@@ -144,14 +144,14 @@ int main()
   struct treeNode* t;
   struct listNode* l;
 
-  t = sample();
+  t = create();
   l = toListRecursive(t, 0);
   printf("l: ");
   print(l);
   destroy(l);
 
 
-  t = sample();
+  t = create();
   l = toListIterative(t);
   printf("l: ");
   print(l);

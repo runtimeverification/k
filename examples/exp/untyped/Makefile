@@ -6,14 +6,13 @@ KCOMPILE ?= ../../../tools/kompile.pl
 LANGUAGE_NAME = EXP-UNTYPED
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = EXP-SYNTAX EXP-DESUGARED-SYNTAX EXP-UNTYPED-SEMANTICS 
+LANGUAGE_MODULES = EXP-SYNTAX EXP-UNTYPED-DESUGARED-SYNTAX EXP-UNTYPED-SEMANTICS
 
 #this is the basename of the main file
 MAIN_FILE = exp-untyped
 
 # this is a space-separated list of basename maude files to run
-TESTS = exp-untyped-test.maude
+TESTS = exp-untyped-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk
-	

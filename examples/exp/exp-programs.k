@@ -1,52 +1,55 @@
-mod EXP-PROGRAMS is including EXP-SYNTAX .
-  ops a b c d e f g h i j k l m n o p q r s u v w x y z : -> Id .
-  ops p1 p2 p3 p4 p5 p6 p7 p8 p9 p9 p9 p10 p11 p12 p13 p14 p15 p16 p17 : -> Exp .
-  ops f00 f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 : -> Id .
+kmod EXP-PROGRAMS is including EXP-SYNTAX
+  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k
+              | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
+              | f00 | f01 | f02 | f03 | f04 | f05 | f06 | f07 | f08 | f09 | f10 | f11 | f12 | f13 | f14
 
-  eq p1 = (
+  syntax Exp ::= p1 | p2 | p3 | p4 | p5 | p6 | p7 | p8 | p9 | p10 | p11 | p12 | p13 | p14 | p15 | p16 | p17
+
+
+  macro p1 = (
     letrec f x = if x <= 0 then 1 else x * f(x - 1)
     in f (f 5)
-  ) .
+  )
 
-  eq p2 = (
+  macro p2 = (
     let x = 1
     in let f = lambda a . x
        in let x = true
           in f 3
-  ) .
+  )
   
-  eq p3 = (
+  macro p3 = (
     let f = lambda x . x
     in f 1
-  ) .
+  )
 
-  eq p4 = (
+  macro p4 = (
     lambda x . (x x)
-  ) .
+  )
 
-  eq p5 = (
+  macro p5 = (
     let f = lambda x . x
     in if f true then f 3 else f 4 
-  ) .
+  )
 
-  eq p6 = (
+  macro p6 = (
     letrec f x = 3
     in f
-  ) .
+  )
   
-  eq p7 = (
+  macro p7 = (
     let f = let g = lambda x . x
             in let h = lambda x . lambda y . (g g)
 	       in h
     in f
-  ) .
+  )
 
-  eq p8 = (
+  macro p8 = (
     let f = lambda x . x
     in f f
-  ) .
+  )
 
-  eq p9 = (
+  macro p9 = (
     let f00 = lambda x . lambda y . x in
       let f01 = lambda x . f00 (f00 x) in
         let f02 = lambda x . f01 (f01 x) in
@@ -60,47 +63,50 @@ mod EXP-PROGRAMS is including EXP-SYNTAX .
 ---                        let f10 = lambda x . f09 (f09 x) in
 ---                          let f11 = lambda x . f10 (f10 x) in
                             f02
-  ) .
+  )
 
-  eq p10 = (
+  macro p10 = (
     letrec f x = if x < 1 then 0 else f(x - 1) + 1
     in f 100
-  ) .
+  )
 
-  eq p11 = (
+  macro p11 = (
     (lambda z . z z)(lambda x . lambda y . x y)
-  ) .
+  )
 
 --- this program tests that the fix point uses its own closure
-  eq p12 = (
+  macro p12 = (
     let y = 0
     in letrec f x = if x == 0 then y else let y = 1 in f(x - 1)
        in f 1
-  ) .
+  )
 
-  eq p13 = (
+  macro p13 = (
     lambda x .
       let f = lambda y . if true then y else x
       in lambda x . f 0
-  ) .
+  )
 
-  eq p14 = lambda x .
-             let f = lambda y . if true then x 7 else x y
-              in f .
+  macro p14 = (
+    lambda x . let f = lambda y . if true then x 7 else x y
+               in f
+  )
 
-  eq p15 = lambda x .
-             let f = lambda x . x
-              in let d = (f x) + 1
-                  in x .
+  macro p15 = (
+    lambda x . let f = lambda x . x
+               in let d = (f x) + 1
+                  in x
+  )
 
-  eq p16 = lambda x .
-             let f = lambda y . x y
-              in let z = x 0 in f .
+  macro p16 = (
+    lambda x . let f = lambda y . x y
+               in let z = x 0 in f
+  )
 
 --- this tests that one does not use the unifying substitution to find the type parameters
-  eq p17 = (
+  macro p17 = (
     let f = lambda x . x in
       let g = lambda y . f y in
         g g
-  ) .
-endm
+  )
+endkm

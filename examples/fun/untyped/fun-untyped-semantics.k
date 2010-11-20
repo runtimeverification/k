@@ -36,10 +36,10 @@ kmod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K
   rule <k> cc(Env,K:K) V ~> _ => V ~> K </k> <env> _ => Env </env> 
   rule if  true then E else _ => E
   rule if false then _ else E => E 
-  rule car [V,Vl] => V
-  rule cdr [V,Vl] => [Vl]
+  rule car [V,_:List{Val}] => V
+  rule cdr [_:Val,Vl] => [Vl]
   rule null? [()] => true
-  rule null? [V,Vl] => false
+  rule null? [_:Val,_:List{Val}] => false
   rule cons V [Vl] => [V,Vl]
   rule <k> ref V => L <_/k> <store_> . => L|->V <_/store> <nextLoc> L => sNat L </nextLoc>
   rule <k> &X => L <_/k> <env_> X|->L <_/env>

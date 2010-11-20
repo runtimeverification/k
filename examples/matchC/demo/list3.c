@@ -17,7 +17,7 @@ struct listNode* reverse(struct listNode *x)
   struct listNode *y;
   p = 0 ;
   /*@ invariant < config > < env > p |-> ?p  x |-> ?x  y |-> ?y </ env >
-                           < heap > list(?p)(?B)  list(?x)(?C) H </ heap >
+                           < heap > list(?p)(?B)  list(?x)(?C)  H </ heap >
                            < form > rev(A) === rev(?C) @ ?B </ form >
                            C </ config > */
   while(x) {
