@@ -481,9 +481,9 @@ mod COMMON-PARAMETER-BINDING is
 	
 	--- empty binding
 	--- fixme not really a sequence point
-	mb [bind-empty]: rule 
-		< k > (bind(.List{K}, .List{K}) => sequencePoint) ...</ k > 
-		: KSentence [metadata "structural"] .
+	--- mb [bind-empty]: rule 
+		--- < k > (bind(.List{K}, .List{K}) => sequencePoint) ...</ k > 
+		--- : KSentence [metadata "structural"] .
 	--- bind one
 	--- consider same variable name
 	mb rule
@@ -1048,10 +1048,10 @@ mod COMMON-C-SEMANTICS is
 		: KSentence [metadata "structural"] .
 		
 	--- need to be careful about simplifying these into one rule because there may be variables with the same name as a typedef?
-	mb rule 
-		< k > (T:Typedef-Name => T:Type) ...</ k >
-		< types >... T:Typedef-Name |-> T:Type ...</ types > 
-		: KSentence [metadata "structural"] .
+	--- mb rule 
+		--- < k > (T:Typedef-Name => T:Type) ...</ k >
+		--- < types >... T:Typedef-Name |-> T:Type ...</ types > 
+		--- : KSentence [metadata "structural"] .
 		
 	eq hex(S:String) = String2Rat(S:String, 16) .
 	eq Parameter-Type-List() = Parameter-Type-List(.List{Parameter}) .		

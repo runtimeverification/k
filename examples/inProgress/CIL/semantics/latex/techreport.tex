@@ -4,6 +4,7 @@
 \usepackage{xspace}
 \usepackage{import}
 \usepackage{natbib}
+\usepackage[pdftex]{hyperref}
 \usepackage{url}
 %\newcommand{\K}{\ensuremath{\mathbb{K}}\xspace}
 
@@ -18,14 +19,14 @@
 \maketitle
 
 %\section{The \K framework}
-\begin{abstract}The first part of this document is a quick overview of the \K framework---it is only an overview (and can be skimmed if you are comfortable with \K or rewriting logic).  This overview has been adapted from \citet{serbanuta-2010-thesis}.  The second part of this document contains the entire C semantics, which has been automatically generated from the source code.
+\begin{abstract}The first part of this document is a quick overview of the \K framework---it is only an overview (and can be skimmed if you are comfortable with \K or rewriting logic).  This overview has been adapted (with permission) from \citet{serbanuta-2010-thesis}.  The second part of this document contains the entire C semantics, which has been automatically generated from the source code.
 \end{abstract}
 
 \section{\K Tutorial}
 In a nutshell, the \K frameworks relies on computations, configurations, and \K rules in giving semantics to programming language constructs.  
 {\em Computations}, which gave the name of the framework, are lists of tasks, including syntax and have the role of capturing the sequential fragment of programming languages.  {\em Configurations} of running programs are represented in \K as bags of nested cells, with a great potential for concurrency and modularity.  {\em \K rules} distinguish themselves by specifying only what is needed from a configuration, and by clearly identifying what changes, and thus, being more concise, more modular, and more concurrent.
 
-To exemplify the \K framework, in this section we will use here a subset/modified C semantics called {\sc KernelC} (the full C semantics can be found at the end of this document).   {\sc KernelC} defines a subset of the C language which is nevertheless non-trivial, containing functions, memory allocation, pointers, and pointer arithmetic, and input/output primitives.  It is expressive enough to be able to write C functions as the next one (which can be used for copying zero-terminated arrays):
+To exemplify the \K framework, in this section we will use here a modified subset of C called {\sc KernelC} (the full C semantics can be found at the end of this document).   {\sc KernelC} defines a subset of the C language which is nevertheless non-trivial, containing functions, memory allocation, pointers, and pointer arithmetic, and input/output primitives.  It is expressive enough to be able to write C functions as the next one (which can be used for copying zero-terminated arrays):
 \[\begin{array}{l}
 \terminal{void}
 {
@@ -54,7 +55,25 @@ To exemplify the \K framework, in this section we will use here a subset/modifie
 
 
 \begin{figure}
-\[\Kall{white}{T}{\Kall{white}{threads}{\Kall{white}{thread*}{\Kall{white}{k}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}K}}}\mathrel{}\Kall{white}{env}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}\Kall{white}{id}{\constant{0}}}}\mathrel{}\Kall{white}{locks}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}\Kall{white}{cthreads}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Set}}}\mathrel{}\kBR \ \ \mathrel{}\Kall{white}{funs}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}\Kall{white}{in}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}List}}}\mathrel{}\Kall{white}{out}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}List}}}\mathrel{}\Kall{white}{mem}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}\Kall{white}{ptr}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}\Kall{white}{next}{\constant{\ensuremath 1}}\ \ \ \ }\]
+\[
+\mallLarge{white}{T}{
+	\mallLarge{white}{threads}{
+		\mallLarge{white}{thread*}{
+			\kall{k}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}K}}}\mathrel{}
+			\kall{env}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}
+			\kall{id}{\constant{0}}
+		}
+	}\mathrel{}
+	\kall{locks}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}
+	\kall{cthreads}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Set}}}\mathrel{}
+	\kBR \ \ \mathrel{}
+	\kall{funs}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}
+	\kall{in}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}List}}}\mathrel{}
+	\kall{out}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}List}}}\mathrel{}
+	\kall{mem}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}
+	\kall{ptr}{\constant{\ensuremath{\bdot}}_{\sort{\color{black!50}Map}}}\mathrel{}
+	\kall{next}{\constant{\ensuremath 1}}\ \ \ \ 
+}\]
 \caption{The initial configuration for executing {\sc KernelC} programs.}\label{fig:kernelc-config}
 \end{figure}
 \paragraph{Configurations.} The initial running configuration of {\sc KernelC} is presented in Figure~\ref{fig:kernelc-config}.
@@ -144,18 +163,9 @@ cell comprehension
 \begin{minipage}{.44\columnwidth}
 in-place rewriting
 \end{minipage}
-%\begin{center}
-%\includegraphics{figs/read-env1}
-%\end{center}
 \begin{center}
 \includegraphics{figs/read-env2}
 \end{center}
-%\begin{center}
-%\includegraphics{figs/read-env3}
-%\end{center}
-%\begin{center}
-%\includegraphics{figs/read-env4}
-%\end{center}
 \begin{minipage}{.44\columnwidth}
 \begin{flushright}
 configuration abstraction
@@ -176,13 +186,13 @@ Figure~\ref{fig:k-rules} shows how the \K rule for reading the value of a local 
 The thus obtained \K rule succinctly describes the intuitive semantics for reading a local variable:  if a local variable $X$ is the next thing to be evaluated and if $X$ is mapped to a value $V$ in the environment, then replace that occurence of $X$ by $V$.  Moreover, it does that by only specifying what is needed from the configuration,  which is essential for obtaining modular definitions, and by precisely identifying what changes, which significantly enhances the concurrency.
 
 \paragraph{Modularity.}  As mentioned above the configuration abstraction process is instrumental in achieving the desired modularity goal for the \K framework.  Relying on the initial configuration being specified by the designer, and the fact that usually the structure of such an configuration does not change during the execution of a program, the \K rules are essentially invariant under change of structure.  This effectively means that the same rule can be re-used in different definitions as long as the required cells are present, regardless or the additional context, which can be automatically inferred from the initial configuration.   As an example, the \K rule for reading the value of a local variable can be used for a configuration as the one specified above, for the full {\sc KernelC} configuration, and even for a configuration in which the computation and the environment cells are in separate parts of the configuration like in the following case:
-\[\ballLarge{white}{T}{
- \ball{white}{thread}{
- {\color{blue!50!black}\ball{white}{k}{\color{black!25}
-{{{{{{{{{\color{red!50!black}{\terminal{t}}}}\kra{{\terminal{*}{5}} \terminal{=} {\Hole}}}}}\kra{{\Hole}\terminal{;}}}}}\mathrel{{\kra}}{{\terminal{env(} {{a\mapsto 4}\mathrel{}{b\mapsto 5}}\terminal{)}}}}}}}\vspace{-2ex}
+\[\mallLarge{white}{T}{
+ \mall{white}{thread}{
+ {\color{blue!50!black}\mall{white}{k}{\color{black!25}
+{{{{{{{{{\color{red!50!black}{\terminal{t}}}}\kra{{\terminal{*}{5}} \terminal{=} {\Hole}}}}}\kra{{\Hole}\terminal{;}}}}}\mathrel{{\kra}}{{\terminal{env(} {{a\mapsto 4}\mathrel{}{b\mapsto 5}}\terminal{)}}}}}}}
 \kBR
-\ball{white}{state}{
-{\color{blue!50!black}\ball{white}{env}{\color{black!25}{{{{\terminal{x}}\mapsto 4}\mathrel{}{\color{blue!50!black}{\terminal{t}}\mapsto 1}\mathrel{}{{\terminal{y}}\mapsto 5}}}}}\mathrel{}{\ball{white}{mem}{\color{black!25}{{\terminal{4}}\mapsto 7}\mathrel{}{{\terminal{5}}\mapsto {{7}}}}}}
+\mall{white}{state}{
+{\color{blue!50!black}\mall{white}{env}{\color{black!25}{{{{\terminal{x}}\mapsto 4}\mathrel{}{\color{blue!50!black}{\terminal{t}}\mapsto 1}\mathrel{}{{\terminal{y}}\mapsto 5}}}}}\mathrel{}{\mall{white}{mem}{\color{black!25}{{\terminal{4}}\mapsto 7}\mathrel{}{{\terminal{5}}\mapsto {{7}}}}}}
 }
 \]
 
@@ -190,19 +200,19 @@ The thus obtained \K rule succinctly describes the intuitive semantics for readi
 
 One first such example is the control intensive call with current continuation (call/cc), which is present in several functional languages (like Scheme), and to some extent, even in some imperative programming languages (such as the long-jump construct in C).  Call/cc is known to be hard to capture in most frameworks (except reduction semantics with evaluation contexts) due to lack of access to execution context, which is there captured by the logical context, which lives at a meta-level which is not observable in the framework.  Having the entire remainder of computation always following the current redex, allows \K to capture this construct in a simple and succinct manner by the following two rules:
 %\tworules{ 
-\rkrule{Passing computation as value}{\ensuremath \ball{white}{k}{{{\reduce{{\terminal{callcc}{\variable{V}}}}{{{\variable{V}}\mathrel{}{{{\it cc}({\variable{K}})}}}}}\mathrel{\terminal{\ensuremath{\kra}}}{\variable{K}}}}}
+\rkrule{Passing computation as value}{\ensuremath \mall{white}{k}{{{\reduce{{\terminal{callcc}{\variable{V}}}}{{{\variable{V}}\mathrel{}{{{\it cc}({\variable{K}})}}}}}\mathrel{\terminal{\ensuremath{\kra}}}{\variable{K}}}}}
 %}{
- \rkrule{Applying computation as function}{\ensuremath \ball{white}{k}{\reduce{{{{{{{\it cc}({\variable{K}})}}\mathrel{}{\variable{V}}}}\mathrel{\terminal{\ensuremath{\kra}}}{\AnyVar}}}{{{\variable{V}}\mathrel{\terminal{\ensuremath{\kra}}}{\variable{K}}}}}}
+ \rkrule{Applying computation as function}{\ensuremath \mall{white}{k}{\reduce{{{{{{{\it cc}({\variable{K}})}}\mathrel{}{\variable{V}}}}\mathrel{\terminal{\ensuremath{\kra}}}{\AnyVar}}}{{{\variable{V}}\mathrel{\terminal{\ensuremath{\kra}}}{\variable{K}}}}}}
 % }
 
 The first rule wraps the current reminder of the computation as a value and passes it to the argument of ``{\tt callcc}'', which is supposed to evaluate to a function.  If during the evaluation of that function call, the continuation value is applied to some value, then the reminder of the computation at that time is replaced by the saved computation to which the passed value is prefixed (as the result of the original {\tt callcc} expression).
 
-Another feature which is hard to represent in other frameworks is handling multiple tasks at the same time, as when defining synchronous communication, for example.  Although SOS-based frameworks can capture specific versions of feature for languages like CCS or pi-caculus, they can only do it there because the communication commands are always at the top of their processes.  \K computation's structure is again instrumental here, as it allows to easily match two redexes at the same time, as shown by the following rule, defining synchronous message passing in a multi-agent environment:
-\kkrule{}{\ensuremath{{\bmiddle{white}{agent}{{{\ball{white}{me}{\color{green!25!black}{\variable{N\ensuremath{\nothing_{1}}}}}}\mathrel{\terminal{}}{\bprefix{white}{k}{\reduce{{\terminal{sendSynch}{\variable{V}}\terminal{to}{\color{blue!25!black}{\variable{N\ensuremath{\nothing_{2}}}}}}}{\constant{\ensuremath{\terminal{skip}}}}}}}}}\mathrel{\terminal{}}{\bmiddle{white}{agent}{{{\ball{white}{me}{\color{blue!25!black}{\variable{N\ensuremath{\nothing_{2}}}}}}\mathrel{\terminal{}}{\bprefix{white}{k}{\reduce{\constant{\ensuremath{\terminal{receiveFrom}{\color{green!25!black}{\variable{N\ensuremath{\nothing_{1}}}}}}}}{\variable{V}}}}}}}}}
+% Another feature which is hard to represent in other frameworks is handling multiple tasks at the same time, as when defining synchronous communication, for example.  Although SOS-based frameworks can capture specific versions of feature for languages like CCS or pi-caculus, they can only do it there because the communication commands are always at the top of their processes.  \K computation's structure is again instrumental here, as it allows to easily match two redexes at the same time, as shown by the following rule, defining synchronous message passing in a multi-agent environment:
+% \[{{\mmiddle{white}{agent}{{{\mall{white}{me}{\color{green!25!black}{\variable{N\ensuremath{\nothing_{1}}}}}}\mathrel{\terminal{}}{\mprefix{white}{k}{\reduce{{\terminal{sendSynch}{\variable{V}}\terminal{to}{\color{blue!25!black}{\variable{N\ensuremath{\nothing_{2}}}}}}}{\constant{\ensuremath{\terminal{skip}}}}}}}}}\mathrel{\terminal{}}{\mmiddle{white}{agent}{{{\mall{white}{me}{\color{blue!25!black}{\variable{N\ensuremath{\nothing_{2}}}}}}\mathrel{\terminal{}}{\mprefix{white}{k}{\reduce{\constant{\ensuremath{\terminal{receiveFrom}{\color{green!25!black}{\variable{N\ensuremath{\nothing_{1}}}}}}}}{\variable{V}}}}}}}}\]
 
-\noindent Reading the rule one can easily get the intended semantics:  if one agent, identified by $N_1$ attempts to send a message to an agent identified by $N_2$, and if that agent is waiting to receive a message from $N_1$, then the send construct is dissolved in the first agent, while the receive expression is replaced by the value being send in the receiver agent.
+% \noindent Reading the rule one can easily get the intended semantics:  if one agent, identified by $N_1$ attempts to send a message to an agent identified by $N_2$, and if that agent is waiting to receive a message from $N_1$, then the send construct is dissolved in the first agent, while the receive expression is replaced by the value being send in the receiver agent.
 
-We cannot conclude the survey on the expressivity of the \K framework without mentioning the reflective capabilities of the \K framework.  Based on the fact that \K regards all computational tasks as being abstract syntax trees, all language constructs become labels applied to other ASTs; for example the expression $a+3$ is represented in \K as \(\_+\_(a(\bdot_{\it\color{black!25} List\{K\}}) \mathrel{\textit{\LARGE\(,\)}}3(\bdot_{\it\color{black!25} List\{K\}}))\).  This abstract view of syntax allows reducing the computation-creating constructs to the following minimal core:
+We cannot conclude the survey on the expressivity of the \K framework without mentioning its reflective capabilities.  Based on the fact that \K regards all computational tasks as being abstract syntax trees, all language constructs become labels applied to other ASTs; for example the expression $a+3$ is represented in \K as \(\_+\_(a(\bdot_{\it\color{black!25} List\{K\}}) \mathrel{\textit{\LARGE\(,\)}}3(\bdot_{\it\color{black!25} List\{K\}}))\).  This abstract view of syntax allows reducing the computation-creating constructs to the following minimal core:
 
 \medskip
 \syntax{\nonTerminal{\sort{K}}}{\nonTerminal{\sort{KLabel}} ( \nonTerminal{\sort{List\{K\}}} )}{} 
@@ -213,7 +223,7 @@ We cannot conclude the survey on the expressivity of the \K framework without me
 \syntaxContt{\nonTerminal{\sort{List\{K\}}}}{\nonTerminal{\sort{List\{K\}}}\mathrel{\textit{\LARGE\(,\)}}\nonTerminal{\sort{List\{K\}}}}{}
 
 \medskip
-Moreover, this approach allows one to define a generic AST visitor, and in turn use that to define powerful reflective features such as code generation or a binder-independent substitution.  
+\noindent Moreover, this approach allows one to define a generic AST visitor, and in turn use that to define powerful reflective features such as code generation or a binder-independent substitution.  
 
 % \paragraph{Concurrency.}  Another feature that makes \K a really good choice for defining programming languages is its natural way of capturing concurrency.  Besides being truely concurrent as the chemical abstract machine, and thus matching the goals set above for an ideal framework, \K rules also allow capturing concurrency with sharing of resources.
 

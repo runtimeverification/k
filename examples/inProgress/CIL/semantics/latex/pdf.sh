@@ -1,5 +1,5 @@
 #../../../../../tools/kompile.pl -verbose ../c.maude -l C -style mm -crop COMMON-SEMANTICS-ASSIGNMENT COMMON-SEMANTICS-IDENTIFIERS COMMON-SEMANTICS-ARRAY-SUBSCRIPTING MEMORY COMMON-SEMANTICS-GOTO COMMON-SEMANTICS-WHILE COMMON-C-STATEMENTS
-
+rm c.tex
 ../../../../../tools/kompile.pl ../c.maude -l C -style mm -latex COMMON-C-SYNTAX
 #
 # C-SEMANTICS \

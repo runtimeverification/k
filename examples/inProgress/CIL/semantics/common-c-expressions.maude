@@ -397,7 +397,7 @@ mod COMMON-SEMANTICS-ARITHMETIC is
 	mb rule tv(F1:Float, T:Type) >= tv(F2:Float, T:Type) => if (F1:Float >=Float F2:Float) then tv(1, int) else tv(0, int) fi : KSentence [metadata "structural"] .
 	mb rule (tv(F1:Float, T:Type) == tv(F2:Float, T:Type) => if (F1:Float ==Bool F2:Float) then tv(1, int) else tv(0, int) fi) : KSentence [metadata "structural"] .
 	mb rule (tv(F1:Float, T:Type) != tv(F2:Float, T:Type) => if (F1:Float =/=Bool F2:Float) then tv(1, int) else tv(0, int) fi) : KSentence [metadata "structural"] .
-	mb rule (!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi) : KSentence [metadata "structural"] .
+	--- mb rule (!(tv(F:Float, T:Type)) => if (F:Float ==Bool 0.0) then tv(1, int) else tv(0, int) fi) : KSentence [metadata "structural"] .
 		
 	mb rule (tv(I1:Int, T:Type) < tv(I2:Int, T:Type) => if (I1:Int <Int I2:Int) then tv(1, int) else tv(0, int) fi) : KSentence [metadata "structural"] .
 	mb rule (tv(I1:Int, T:Type) <= tv(I2:Int, T:Type) => if (I1:Int <=Int I2:Int) then tv(1, int) else tv(0, int) fi) : KSentence [metadata "structural"] .
