@@ -31,8 +31,9 @@ mod COMMON-C-STANDARD-LIBRARY is
 			< k > (application(builtin(setjmp), tv(loc(Block:Nat, Offset:Nat), pointerType(structType(?)))) => tv(0, int)) ~> K:K </ k >
 		</ control >
 		< callStack > CallStack:List </ callStack >
+		@latex("\\kBR")
 		< mem >... Block:Nat |-> memblock(?, (M:Map => M:Map[BagK((< control > B:Bag < continuation > K:K </ continuation > </ control > < callStack > CallStack:List </ callStack >)) / Offset:Nat])) ...</ mem >
-	: KSentence [metadata "computational"] . --- fixme, forcing buffer flush
+	: KSentence [metadata "large computational"] . --- fixme, forcing buffer flush
 	--------------------------------------------
 	mb [longjmp-is-value]: rule
 		< k > (longjmp => builtin(longjmp)) ...</ k >

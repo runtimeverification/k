@@ -123,75 +123,36 @@ mod COMMON-C-SYNTAX is
 	--- 6.4.4.1
 	sort Integer-Constant .
 	subsort Int < Integer-Constant .
-	op @U : Integer-Constant -> Integer-Constant .
-	op @L : Integer-Constant -> Integer-Constant .
-	op @UL : Integer-Constant -> Integer-Constant .
-	op @LL : Integer-Constant -> Integer-Constant .
-	op @ULL : Integer-Constant -> Integer-Constant .
-	
-	op hex : String -> Integer-Constant .
-
-	
-	--- subsort Decimal-Constant < Integer-Constant .
-	--- Octal-Constant Hexadecimal-Constant 
-	--- TODO
-	
-	--- sort Decimal-Constant .
-	--- subsort Int < Decimal-Constant .
-	--- TODO
-	
-	--- sort Octal-Constant .
-	--- TODO
-	
-	--- sort Hexadecimal-Constant .
-	--- TODO
-	
-	--- TODO
+	op @U : Integer-Constant -> Integer-Constant [metadata "latex(renameTo \\texttt{U})"] .
+	op @L : Integer-Constant -> Integer-Constant [metadata "latex(renameTo \\texttt{L})"] .
+	op @UL : Integer-Constant -> Integer-Constant [metadata "latex(renameTo \\texttt{UL})"] .
+	op @LL : Integer-Constant -> Integer-Constant [metadata "latex(renameTo \\texttt{LL})"] .
+	op @ULL : Integer-Constant -> Integer-Constant [metadata "latex(renameTo \\texttt{ULL})"] .
+	op hex : String -> Integer-Constant [metadata "latex(renameTo \\texttt{hex})"] .
 	
 	--- 6.4.4.2
 	sort Floating-Constant .
 	subsort Float < Floating-Constant .
 	--- subsort Decimal-Floating-Constant Hexadecimal-Floating-Constant < Floating-Constant .
-	op @F : Floating-Constant -> Floating-Constant .
-	op @L : Floating-Constant -> Floating-Constant .
-	
-	--- sort Decimal-Floating-Constant .
-	--- TODO
-	
-	--- sort Hexadecimal-Floating-Constant .
-	--- TODO
-	
-	--- TODO
-	
-	--- 6.4.4.3
-	--- sort Enumeration-Constant .
-	--- subsort Id < Enumeration-Constant .
-	
-	--- 6.4.4.4
-	--- sort Character-Constant .
-	--- TODO
+	op @F : Floating-Constant -> Floating-Constant [metadata "latex(renameTo \\texttt{F})"] .
+	op @L : Floating-Constant -> Floating-Constant [metadata "latex(renameTo \\texttt{L})"] .
 	
 	--- 6.4.5
 	sort String-Literal .
 	subsort String < String-Literal .
-	--- TODO
-	
-	--- TODO
-	
+
 	---- A.2.1 Expressions
 	--- 6.5.1
 	subsort Id Constant String-Literal < Expression .
 	
 	--- 6.5.2
 	op _`[_`] : Expression Expression -> Expression [prec 21] .
-	--- op _`(_`) : Postfix-Expression List{Assignment-Expression} -> Postfix-Expression [strict renameTo apply] .
-	---op _`(_`) : Expression Expression-List -> Expression .
 	
 	--- these should be strict but doesn't quite do the right thing
-	op Apply : Expression List{Expression} -> Expression .
-	op Apply : Expression -> Expression .
-	op _._ : Expression Id -> Expression [prec 21] . --- not strict in 1 because of _._ and arrays
-	op _->_ : Expression Id -> Expression [prec 21 metadata "strict(1) latex(renameTo _\\texttt{-\\kern-1pt\\textgreater}_)"] .
+	op Apply : Expression List{Expression} -> Expression [metadata "latex(renameTo \\texttt{Apply})"] .
+	op Apply : Expression -> Expression  [metadata "latex(renameTo \\texttt{Apply})"] .
+	op _._ : Expression Id -> Expression [prec 21 metadata "latex(renameTo _\\texttt{.}_)"] . --- not strict in 1 because of _._ and arrays
+	op _->_ : Expression Id -> Expression [prec 21 metadata "strict(1) latex(renameTo _\\texttt{->}_)"] .
 	op _++ : Expression -> Expression [prec 21 metadata "latex(renameTo _\\texttt{++})"] .
 	op _-- : Expression -> Expression [prec 21 metadata "strict(1) latex(renameTo _\\texttt{-}\\texttt{-})"] .
 
@@ -205,48 +166,48 @@ mod COMMON-C-SYNTAX is
 	--- C99 6.3.2.1
 	ops ++_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\texttt{+}\\texttt{+}_)"] .
 	ops --_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\texttt{-}\\texttt{-}_)"] .
-	op &_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\ensuremath{\\&}_)"] .
-	---op *_ : Expression -> Expression [prec 22] .
-	op Deref : Expression -> Expression [metadata "strict latex(renameTo *_)"] .
-	---op +_ : Expression -> Expression [prec 22] .
-	op -un_ : Expression -> Expression [prec 22 metadata "strict latex(renameTo \\ensuremath{-{}}_)"] .
+	op &_ : Expression -> Expression [prec 22 metadata "latex(renameTo \\texttt{\\&}_)"] .
+	op Deref : Expression -> Expression [metadata "strict latex(renameTo \\texttt{*}_)"] .
+	op -un_ : Expression -> Expression [prec 22 metadata "strict latex(renameTo \\texttt{-}_)"] .
 	op ~_ : Expression -> Expression [prec 22 metadata "strict latex(renameTo {\\raise.17ex\\hbox{$\\scriptstyle\\sim$}}_)"] .
-	op !_ : Expression -> Expression [prec 22 metadata "strict"] .
-	op sizeof : Expression -> Expression .
+	op !_ : Expression -> Expression [prec 22 metadata "strict latex(renameTo \\texttt{!}_)"] .
+	op sizeof : Expression -> Expression [metadata "latex(renameTo \\texttt{sizeof})"] .
 	
 	--- 6.5.4
-	op Cast : Type-Name Expression -> Expression [metadata "strict"] .
-	ops _*_ _/_ _%_ : Expression Expression -> Expression [prec 31 gather(E e) metadata "strict"] .	
-	ops _+_ : Expression Expression -> Expression [prec 33 gather(E e) metadata "strict latex(renameTo _\\ensuremath{{}+{}}_)"] .
-	ops _-_ : Expression Expression -> Expression [prec 33 gather(E e) metadata "strict latex(renameTo _\\ensuremath{{}-{}}_)"] .	--- latex(renameTo _\texttt{-}_)
+	op Cast : Type-Name Expression -> Expression [metadata "strict latex(renameTo \\texttt{Cast})"] .
+	ops _*_ : Expression Expression -> Expression [prec 31 gather(E e) metadata "strict latex(renameTo _\\texttt{*}_)"] .	
+	ops _/_ : Expression Expression -> Expression [prec 31 gather(E e) metadata "strict latex(renameTo _\\texttt{/}_)"] .	
+	ops _%_ : Expression Expression -> Expression [prec 31 gather(E e) metadata "strict latex(renameTo _\\texttt{\\%}_)"] .	
+	ops _+_ : Expression Expression -> Expression [prec 33 gather(E e) metadata "strict latex(renameTo _\\texttt{+}_)"] .
+	ops _-_ : Expression Expression -> Expression [prec 33 gather(E e) metadata "strict latex(renameTo _\\texttt{-}_)"] .
 	ops _<<_ : Expression Expression -> Expression [prec 35 gather(E e) metadata "strict latex(renameTo _\\texttt{<<}_)"] .
-	ops _>>_ : Expression Expression -> Expression [prec 35 gather(E e) metadata "strict"] .
-	ops _<_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
-	ops _>_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
-	ops _<=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
-	ops _>=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict"] .
-	ops _==_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict"] .
-	ops _!=_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict"] .
-	op _&binop_ : Expression Expression -> Expression [prec 41 gather(E e) metadata "strict latex(renameTo _\\&_)"] .
-	op _^_ : Expression Expression -> Expression [prec 43 gather(E e) metadata "strict"] .
-	op _|_ : Expression Expression -> Expression [prec 45 gather(E e) metadata "strict"] .
+	ops _>>_ : Expression Expression -> Expression [prec 35 gather(E e) metadata "strict latex(renameTo _\\texttt{>>}_)"] .
+	ops _<_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict latex(renameTo _\\texttt{<}_)"] .
+	ops _>_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict latex(renameTo _\\texttt{>}_)"] .
+	ops _<=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict latex(renameTo _\\texttt{<=}_)"] .
+	ops _>=_ : Expression Expression -> Expression [prec 37 gather(E e) metadata "strict latex(renameTo _\\texttt{>=}_)"] .
+	ops _==_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict latex(renameTo _\\texttt{==}_)"] .
+	ops _!=_ : Expression Expression -> Expression [prec 39 gather(E e) metadata "strict latex(renameTo _\\texttt{!=}_)"] .
+	op _&binop_ : Expression Expression -> Expression [prec 41 gather(E e) metadata "strict latex(renameTo _\\texttt{\\&}_)"] .
+	op _^_ : Expression Expression -> Expression [prec 43 gather(E e) metadata "strict latex(renameTo _\\texttt{\\textasciicircum}_)"] .
+	op _|_ : Expression Expression -> Expression [prec 45 gather(E e) metadata "strict latex(renameTo _\\texttt{|}_)"] .
 	--- op _&&_ : Expression Expression -> Expression [prec 47 gather(E e) metadata "strict(1) latex(renameTo _\\&\\&_)"] .
 	--- op _||_ : Expression Expression -> Expression [prec 49 gather(E e) metadata "strict(1)"] .
 	--- op _?_:_ : Expression Expression Expression -> Expression [prec 51 gather(e & E)] .
 	
 	--- 6.5.16
-	ops _*=_ : Expression Expression -> Expression [prec 53] .
-	ops _/=_ : Expression Expression -> Expression [prec 53] .
-	ops _%=_ : Expression Expression -> Expression [prec 53] .
-	ops _+=_ : Expression Expression -> Expression [prec 53] .
-	ops _-=_ : Expression Expression -> Expression [prec 53] .
-	ops _<<=_ : Expression Expression -> Expression [prec 53] .
-	ops _>>=_ : Expression Expression -> Expression [prec 53] .
-	ops _^=_ : Expression Expression -> Expression [prec 53] .
-	ops _|=_ : Expression Expression -> Expression [prec 53] .
-	ops _&binop=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\ensuremath{\\&=}_)"] .
+	ops _*=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{*=}_)"] .
+	ops _/=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{/=}_)"] .
+	ops _%=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{\\%=}_)"] .
+	ops _+=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{+=}_)"] .
+	ops _-=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{-=}_)"] .
+	ops _<<=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{<<=}_)"] .
+	ops _>>=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{>>=}_)"] .
+	ops _^=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{\\textasciicircum{}=}_)"] .
+	ops _|=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{|=}_)"] .
+	ops _&binop=_ : Expression Expression -> Expression [prec 53 metadata "latex(renameTo _\\texttt{\\&=}_)"] .
 	--- op _=_ : Unary-Expression Assignment-Expression -> Assignment-Expression .
-	op _:=_ : Expression Expression -> Expression [prec 53 metadata "strict(2) latex(renameTo _\\ensuremath{=}_)"] .
+	op _:=_ : Expression Expression -> Expression [prec 53 metadata "strict(2) latex(renameTo _\\texttt{=}_)"] .
 			
 	--- 6.5.17
 	sort Expression .
@@ -255,10 +216,10 @@ mod COMMON-C-SYNTAX is
 	--- 6.7
 	sort Declaration .
 	---op Actual-Declaration : Declaration -> Declaration [metadata "strict"] .
-	op Local : Declaration -> Declaration [metadata "strict"] .
-	op Declaration : SeqList -> Declaration [metadata "strict"] .
-	op Declaration : SeqList Init-Declarator-List -> Declaration [metadata "strict(1)"] .
-	op Typedef : SeqList Declarator -> Declaration [metadata "strict(1)"] .
+	op Local : Declaration -> Declaration [metadata "strict latex(renameTo \\texttt{Local})"] .
+	op Declaration : SeqList -> Declaration [metadata "strict latex(renameTo \\texttt{Declaration})"] .
+	op Declaration : SeqList Init-Declarator-List -> Declaration [metadata "strict(1) latex(renameTo \\texttt{Declaration})"] .
+	op Typedef : SeqList Declarator -> Declaration [metadata "strict(1) latex(renameTo \\texttt{Typedef})"] .
 	
 	sort Init-Declarator-List .
 	subsort Init-Declarator < Init-Declarator-List .
@@ -271,19 +232,22 @@ mod COMMON-C-SYNTAX is
 	sort Init-Declarator .
 
 	subsort Declarator < Init-Declarator .
-	op _=_ : Declaration Expression -> Init-Declarator [metadata "strict(1)"] .
-	op _=`{_`} : Declaration List{Expression} -> Init-Declarator [metadata "strict(1) latex(renameTo _\\ensuremath{=\\{_\\}})"] .
+	op _=_ : Declaration Expression -> Init-Declarator [metadata "strict(1) latex(renameTo _\\texttt{=}_)"] .
+	op _=`{_`} : Declaration List{Expression} -> Init-Declarator [metadata "strict(1) latex(renameTo _\\texttt{=}\\{_\\})"] .
 	
 	--- 6.7.1
 	sort Storage-Class-Specifier .
-	ops typedef extern static auto register : -> Storage-Class-Specifier .
-	--- op inline : -> Storage-Class-Specifier . --- nonstandard
+	ops typedef : -> Storage-Class-Specifier [metadata "latex(renameTo \\texttt{typedef})"] .
+	ops extern : -> Storage-Class-Specifier [metadata "latex(renameTo \\texttt{extern})"] .
+	ops static : -> Storage-Class-Specifier [metadata "latex(renameTo \\texttt{static})"] .
+	ops auto : -> Storage-Class-Specifier [metadata "latex(renameTo \\texttt{auto})"] .
+	ops register : -> Storage-Class-Specifier [metadata "latex(renameTo \\texttt{register})"] .
 
 	--- 6.7.2
 	sort Type-Specifier .
 	sort Base-Type .
 	subsort Typedef-Name Struct-Or-Union-Specifier Enum-Specifier Base-Type < Type-Specifier .
-	op typedefName : Id -> Typedef-Name .
+	op typedefName : Id -> Typedef-Name [metadata "latex(renameTo \\texttt{typedefName})"] .
 	ops void 
 		no-type
 		float 
@@ -298,26 +262,21 @@ mod COMMON-C-SYNTAX is
 		long-long unsigned-long-long
 		long-long-int unsigned-long-long-int
 		: -> Base-Type .
-	op Pointer : Type-Specifier -> Type-Specifier [metadata "strict(1)"] . 
-	
-	----ops `_Bool `_Complex : -> Type-Specifier .
-	--- TODO
+	op Pointer : Type-Specifier -> Type-Specifier [metadata "strict(1) latex(renameTo \\texttt{Pointer})"] . 
 	
 	--- 6.7.2.1
 	sort Struct-Or-Union-Specifier .
 	--- Note: CIL gives names to all anonymous struct/unions
-	---op struct`{_`} : SeqList -> Struct-Or-Union-Specifier .
-	---op union`{_`} : Struct-Declaration-List -> Struct-Or-Union-Specifier .
 	
-	op structDef : Id List{Parameter} -> Struct-Or-Union-Specifier [metadata "strict(2)"] .
-	op unionDef : Id List{Parameter} -> Struct-Or-Union-Specifier [metadata "strict(2)"] .
-	op structDef : Id -> Struct-Or-Union-Specifier .
-	op unionDef : Id -> Struct-Or-Union-Specifier .	
-	op struct : Id -> Struct-Or-Union-Specifier .
-	op union : Id -> Struct-Or-Union-Specifier .
+	op structDef : Id List{Parameter} -> Struct-Or-Union-Specifier [metadata "strict(2) latex(renameTo \\texttt{structDef})"] .
+	op unionDef : Id List{Parameter} -> Struct-Or-Union-Specifier [metadata "strict(2) latex(renameTo \\texttt{unionDef})"] .
+	op structDef : Id -> Struct-Or-Union-Specifier [metadata "latex(renameTo \\texttt{structDef})"] .
+	op unionDef : Id -> Struct-Or-Union-Specifier [metadata "latex(renameTo \\texttt{unionDef})"] .	
+	op struct : Id -> Struct-Or-Union-Specifier [metadata "latex(renameTo \\texttt{struct})"] .
+	op union : Id -> Struct-Or-Union-Specifier [metadata "latex(renameTo \\texttt{union})"] .
 		
 	sort Struct-Declaration .
-	op Field : SeqList Declarator -> Struct-Declaration [metadata "strict(1)"].
+	op Field : SeqList Declarator -> Struct-Declaration [metadata "strict(1) latex(renameTo \\texttt{Field})"] .
 	subsort Struct-Declaration < List{Parameter} .
 	
 	subsort Type-Specifier < SeqList .
@@ -332,11 +291,11 @@ mod COMMON-C-SYNTAX is
 	--- Note: CIL gives names to anonymous enums
 	--- op enum`{_`} : Enumerator-List -> Enum-Specifier .
 	---op enum_`{_`} : Id List{Expression} -> Enum-Specifier .
-	op enum : Id List{Expression} -> Enum-Specifier .
+	op enum : Id List{Expression} -> Enum-Specifier [metadata "latex(renameTo \\texttt{enum})"] .
 	--- op enum`{_`,`} : Enumerator-List -> Enum-Specifier .
 	--- op enum_`{_`,`} : Identifier Enumerator-List -> Enum-Specifier .
 	---op enum_ : Id -> Enum-Specifier .
-	op enum : Id -> Enum-Specifier .
+	op enum : Id -> Enum-Specifier [metadata "latex(renameTo \\texttt{enum})"] .
 	
 	--- 6.7.3
 	--- sort Type-Qualifier .
@@ -357,9 +316,9 @@ mod COMMON-C-SYNTAX is
 	subsort Type-Specifier < Direct-Declarator .
 
 	subsort Id < Direct-Declarator .
-	op Pointer : Direct-Declarator -> Direct-Declarator [metadata "strict(1)"] .
-	op Pointer : Direct-Declarator Direct-Declarator -> Direct-Declarator [metadata "strict(1)"] .
-	op Pointer`(`) : -> Direct-Declarator .
+	op Pointer : Direct-Declarator -> Direct-Declarator [metadata "strict(1) latex(renameTo \\texttt{Pointer})"] .
+	op Pointer : Direct-Declarator Direct-Declarator -> Direct-Declarator [metadata "strict(1) latex(renameTo \\texttt{Pointer})"] .
+	op Pointer`(`) : -> Direct-Declarator [metadata "latex(renameTo \\texttt{Pointer})"] .
 	--- op _`[`] : Declarator -> Declarator .
 	op _`[_`] : Direct-Declarator Expression -> Direct-Declarator [ditto] .
 	--- op _`[__`] : Declarator Type-Qualifier-List Assignment-Expression -> Declarator .
@@ -369,27 +328,27 @@ mod COMMON-C-SYNTAX is
 	--- op _`[*`] : Declarator -> Declarator .
 	--- op _`[_*`] : Declarator Type-Qualifier-List -> Declarator .
 	--- op _`(_`) : Direct-Declarator Parameter-Type-List -> Direct-Declarator . --- Ex: main(void)
-	op Direct-Function-Declarator : Direct-Declarator Parameter-Type-List -> Direct-Declarator .
-	op Direct-Function-Declarator : Parameter-Type-List -> Direct-Declarator .
-	op BitField : Expression -> Direct-Declarator .
-	op BitField : Declarator Expression -> Direct-Declarator .
+	op Direct-Function-Declarator : Direct-Declarator Parameter-Type-List -> Direct-Declarator [metadata "latex(renameTo \\texttt{Direct-Function-Declarator})"] .
+	op Direct-Function-Declarator : Parameter-Type-List -> Direct-Declarator [metadata "latex(renameTo \\texttt{Direct-Function-Declarator})"] .
+	op BitField : Expression -> Direct-Declarator [metadata "latex(renameTo \\texttt{BitField})"] .
+	op BitField : Declarator Expression -> Direct-Declarator [metadata "latex(renameTo \\texttt{BitField})"] .
 	
 	sort Parameter-Type-List .
 	sort List{Parameter} .
 	subsort Parameter-Declaration < List{Parameter} .
 	op .List{Parameter} : -> List{Parameter} [metadata "latex(renameTo \\ensuremath{\\kdot})"] .
 	op _,.,_ : List{Parameter} List{Parameter} -> List{Parameter} [assoc id: .List`{Parameter`} metadata "strict hybrid latex(renameTo _,_)"] .
-	op Parameter-Type-List : List{Parameter} -> Parameter-Type-List [metadata "strict"] .
+	op Parameter-Type-List : List{Parameter} -> Parameter-Type-List [metadata "strict latex(renameTo \\texttt{Parameter-Type-List})"] .
 	op Parameter-Type-List`(`) : -> Parameter-Type-List .
 
 	sort Parameter-Declaration .
-	op Pointer : SeqList -> SeqList .
-	op ... : -> Parameter-Declaration [metadata "latex(renameTo \\ensuremath{\\ldots})"] .
+	op Pointer : SeqList -> SeqList [metadata "latex(renameTo \\texttt{Pointer})"] .
+	op ... : -> Parameter-Declaration [metadata "latex(renameTo \\texttt{\\ldots})"] .
 	
 	--- fixme
 	--- same label, two different strictnesses
-	op Parameter-Declaration : SeqList -> Parameter-Declaration [metadata "strict"] .
-	op Parameter-Declaration : SeqList Declarator -> Parameter-Declaration [metadata "strict(1)"] .
+	op Parameter-Declaration : SeqList -> Parameter-Declaration [metadata "strict latex(renameTo \\texttt{Parameter-Declaration})"] .
+	op Parameter-Declaration : SeqList Declarator -> Parameter-Declaration [metadata "strict(1) latex(renameTo \\texttt{Parameter-Declaration})"] .
 	
 	--- 6.7.6
 	sort Type-Name .
@@ -402,24 +361,14 @@ mod COMMON-C-SYNTAX is
 	sort Typedef-Name .
 	
 	--- 6.7.8
-	op Initializer : Expression -> Expression .
-	op InitList : List{Expression} -> Expression .
-	op InitItem : Expression -> Expression .
-	--- op `{_`,`} : Initializer-List -> Initializer .
-	---op _,_ : Initializer-List Initializer-List -> Initializer-List [assoc] .
-	
-	--- sort Designation .
-	--- op _= : Designator-List -> Designation .
-	op Designation : Expression Expression -> Expression .
-	--- sort Designator-List .
-	--- TODO subsort Designator < Designator-List .
-	--- TODO op __ : Designator-List Designator -> Designator-List .
-	
-	--- sort Designator .	
-	--- op `[_`] : Constant-Expression -> Designator .
-	--- op ._ : Identifier -> Designator .
-	op ArrayDesignator : Expression -> Expression .
-	op FieldDesignator : Id -> Expression .
+	op Initializer : Expression -> Expression [metadata "latex(renameTo \\texttt{Initializer})"] .
+	op InitList : List{Expression} -> Expression [metadata "latex(renameTo \\texttt{InitList})"] .
+	op InitItem : Expression -> Expression [metadata "latex(renameTo \\texttt{InitItem})"] .
+
+	op Designation : Expression Expression -> Expression [metadata "latex(renameTo \\texttt{Designation})"] .
+
+	op ArrayDesignator : Expression -> Expression  [metadata "latex(renameTo \\texttt{ArrayDesignator})"] .
+	op FieldDesignator : Id -> Expression  [metadata "latex(renameTo \\texttt{FieldDesignator})"] .
 	
 	---- A.2.3 Statements
 	--- 6.8
@@ -436,7 +385,7 @@ mod COMMON-C-SYNTAX is
 	--- 6.8.2
 	sort Compound-Statement .
 
-	op Block : SeqList -> Compound-Statement .
+	op Block : SeqList -> Compound-Statement [metadata "latex(renameTo \\texttt{Block})"] .
 	op Block`(`) : -> Compound-Statement .
 
 	subsort Block-Item < SeqList .
@@ -466,11 +415,11 @@ mod COMMON-C-SYNTAX is
 	--- 6.8.6
 	sort Jump-Statement .
 
-	op goto_; : Id -> Jump-Statement [metadata "latex(renameTo goto_)"] .
+	op goto_; : Id -> Jump-Statement [metadata "latex(renameTo \\texttt{goto}_)"] .
 	--- op continue`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo continue)"] .
-	op break`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo break)"] .
-	op return`; : -> Jump-Statement [metadata "latex(renameTo return)"] .
-	op return_; : Expression -> Jump-Statement [metadata "strict latex(renameTo return_)"] .
+	op break`; : -> Jump-Statement [format (ni o o) metadata "latex(renameTo \\texttt{break})"] .
+	op return`; : -> Jump-Statement [metadata "latex(renameTo \\texttt{return})"] .
+	op return_; : Expression -> Jump-Statement [metadata "strict latex(renameTo \\texttt{return}_)"] .
 	
 	---- A.2.4 External definitions
 	--- 6.9
@@ -481,7 +430,7 @@ mod COMMON-C-SYNTAX is
 	subsort External-Declaration < SeqList .
 
 	subsort Function-Definition < External-Declaration .
-	op Global : SeqList -> External-Declaration [metadata "strict"] .
+	op Global : SeqList -> External-Declaration [metadata "strict latex(renameTo \\texttt{Global})"] .
 	op Global`(`) : -> External-Declaration .
 	
 	--- 6.9.1

@@ -19,9 +19,9 @@
 \maketitle
 
 %\section{The \K framework}
-\begin{abstract}The first part of this document is a quick overview of the \K framework---it is only an overview (and can be skimmed if you are comfortable with \K or rewriting logic).  This overview has been adapted (with permission) from \citet{serbanuta-2010-thesis}.  The second part of this document contains the entire C semantics, which has been automatically generated from the source code.
+\begin{abstract}The first part of this document is a quick overview of the \K framework---it is only an overview (and can be skimmed if you are comfortable with \K or rewriting logic).  This overview has been adapted (with permission) from \citet{serbanuta-2010-thesis}.  For an even more extensive explanation of the \K framework, see \citet{rosu-serbanuta-2010-jlap}.  The second part of this document contains the entire C semantics, which has been automatically generated from the source code.
 \end{abstract}
-
+\pagebreak
 \section{\K Tutorial}
 In a nutshell, the \K frameworks relies on computations, configurations, and \K rules in giving semantics to programming language constructs.  
 {\em Computations}, which gave the name of the framework, are lists of tasks, including syntax and have the role of capturing the sequential fragment of programming languages.  {\em Configurations} of running programs are represented in \K as bags of nested cells, with a great potential for concurrency and modularity.  {\em \K rules} distinguish themselves by specifying only what is needed from a configuration, and by clearly identifying what changes, and thus, being more concise, more modular, and more concurrent.
@@ -346,8 +346,11 @@ We cannot conclude the survey on the expressivity of the \K framework without me
 % \caption{Dataraces are forced to sequentialize}\label{fig:dataraces}
 % \end{figure}
 %\section{Semantics}
+\pagebreak
 \section{C Semantics}
 Here we present the full C semantics, generated directly from the original source code (which can be found on our Google project page at \url{https://code.google.com/p/k-framework/wiki/DefinitionOfC}).  The \LaTeX{} is being generated through a very new backend, and as such, there may be a number of typesetting/formatting or even correctness errors in the \LaTeX{}.  In particular, sometimes important parentheses have been discarded, which can change the meaning of side conditions.  If there is any doubt, please consult the original source code at the above URL.
+
+Where made possible by the tool, the original abstract syntax is in \texttt{typewriter} font and the semantic syntax is in \textsf{sans-serif}.
 
 \eject \pdfpagewidth=15in \pdfpageheight=9in
 \includepdf[pages=1-,noautoscale=true,offset=3.25in 1.25in]{c.pdf}
