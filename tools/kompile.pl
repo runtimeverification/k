@@ -754,6 +754,15 @@ sub get_pdf_crop
     
     my ($format, @modules) = @_;
 
+    foreach(@modules)
+    {
+	if (!exist($_))
+	  {
+	      print "Module $_ doesn't exist in your defintion.\n";
+	      exit(1);
+	  }
+    }
+    
     latexify("$format", @modules);
 
     # modify page and save it
@@ -1158,6 +1167,7 @@ sub maudify_file {
 sub maudify_module {
     (local $_) = @_;
 
+    build_module_tree($_);
 #    print "Maudifying module with tokens @all_tokens\n";
 
 # Step: Add whitespace between cell and Klabel
