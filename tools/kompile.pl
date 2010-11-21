@@ -279,6 +279,7 @@ my $exclude = join("|",
 		   );
 
 my $modules_list = "[A-Z\\-\\s]+[A-Z]";
+# my $modules_list = "[a-zA-Z\\-\\+]+(?:\\-(latex|pdf|crop|ps|eps|png|h|v|m|c|l|file|nd|flat|u|style))";
 
 # @all_sorts will hold all defined sorts
 my @all_sorts = ();
@@ -617,6 +618,15 @@ sub latexify {
     
     my ($format, @modules) = @_;
   
+    foreach(@modules)
+    {
+	if (!exist($_))
+	  {
+	      print "Module $_ doesn't exist in your defintion.\n" if emptyModuleList();
+	      exit(1) if emptyModuleList();
+	  }
+    }
+    
 # Assumes $language_file_name is a file name with no extension
 
     print_header("Generate $format version for module $language_module_name from language definition $language_file_name") if $verbose;
@@ -754,15 +764,6 @@ sub get_pdf_crop
     
     my ($format, @modules) = @_;
 
-    foreach(@modules)
-    {
-	if (!exist($_))
-	  {
-	      print "Module $_ doesn't exist in your defintion.\n";
-	      exit(1);
-	  }
-    }
-    
     latexify("$format", @modules);
 
     # modify page and save it

@@ -1092,11 +1092,10 @@ sub build_module_tree
     my $req = "?";
     my @modules = ();
     
-    if (/kmod\s+([^\s]*?)\s+/)
+    if (/k?mod\s+([^\s]*?)\s+/)
     {
 	$module = "$1";
 	$module =~ s/\s//g;
-#	print "|$module|\n";
 	$moduleList .= " $module";
     }
 
@@ -1107,7 +1106,6 @@ sub build_module_tree
 	$req =~ s/\s*$//g;
 	@modules = split(/\s+\+\s+/, $req);
 	$moduleList .= " @modules";
-#	print "INCL: |@modules|\n\n";
     }
     
     if ($module ne "?")
@@ -1115,14 +1113,6 @@ sub build_module_tree
 	$moduleMap{$module} = "@modules";
     }
 
-#    print "ONCE:\n";
-#    while ((my $k, my $v) = each %moduleMap)
-#    {
-#	print "\t $k => $v\n";
-#    }
-    
-    
-#    print "$moduleMap";
 }
 
 sub exist
@@ -1133,6 +1123,10 @@ sub exist
     return 0;
 }
 
+sub emptyModuleList
+{
+    return $moduleList eq "?";
+}
 
 ###############################################
 #   end modules section                       #
