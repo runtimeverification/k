@@ -1522,7 +1522,6 @@ sub add_cell_label_ops {
 # By spacifiable tokens we mean ones that the tool may need to add spaces to their left and/or right
 sub add_tokens {
     local $_ = shift;
-    print "GREP: $_\n";
 # Extracting all the defined operations
 #    my @ops = grep(split(/\s+/s, $_), /\sops?\s+(.*?)\s+:\s+/gms);
     my @ops = /\sops?\s+(.*?)\s+:\s+/gms;
@@ -1653,7 +1652,6 @@ sub topological_sort {
 # Adds spaces before and/or after token, if needed
 sub add_spaces {
     my ($before,$token,$after) = @_;
-    print "BEFORE: $before\nTOKEN: $token\nAFTER: $after\n\n";
     if ($before =~ /\w$/ && $token =~ /^\w/) { return "$before$token"; }
     if ($after =~ /^\w/ && $token =~ /\w$/) { return "$before$token"; }
     return ($before.(($before =~ /$maude_special/) ? "":" ").freeze($token).(($after =~ /$maude_special/) ? "":" "));
