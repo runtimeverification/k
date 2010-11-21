@@ -31,7 +31,6 @@ my @nodes = ();
 my $current_line = 0;
 
 my $inclusionFileTree;
-my $inclusionModuleTree;
 my $declaredKLabels = "";
 
 # Top level patterns
@@ -1077,6 +1076,66 @@ sub collect_rule_leaf
 
 ###############################################
 #   end replacing dots                        #
+###############################################
+
+
+###############################################
+#    modules section                          #
+###############################################
+my %moduleMap = ();
+my $moduleList = "?";
+
+sub build_module_tree
+{
+    local $_ = shift;
+    my $module = "?";
+    my $req = "?";
+    my @modules = ();
+    
+    if (/kmod\s+([^\s]*?)\s+/)
+    {
+	$module = "$1";
+	$module =~ s/\s//g;
+#	print "|$module|\n";
+	$moduleList .= " $module";
+    }
+
+    if (/is\s+including([A-Z\s\-\+]+)/)
+    {
+	$req = "$1";
+	$req =~ s/^\s*//g;
+	$req =~ s/\s*$//g;
+	@modules = split(/\s+\+\s+/, $req);
+	$moduleList .= " @modules";
+#	print "INCL: |@modules|\n\n";
+    }
+    
+    if ($module ne "?")
+    {
+	$moduleMap{$module} = "@modules";
+    }
+
+#    print "ONCE:\n";
+#    while ((my $k, my $v) = each %moduleMap)
+#    {
+#	print "\t $k => $v\n";
+#    }
+    
+    
+#    print "$moduleMap";
+}
+
+sub exist
+{
+    my $mod = shift;
+    $moduleList .= " ";
+    return 1 if ($moduleList =~ / $mod /);
+    return 0;
+}
+
+
+###############################################
+#   end modules section                       #
 ###############################################
 
 
