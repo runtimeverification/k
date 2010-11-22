@@ -1,0 +1,10 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The "absolute" function returns the absolute value for the one received as argument(int absolute(int n)). If the argument is less than 0 than it gets multiplied with (-1). The result is always greater or equal to 0. The main function calls the absolute function for different arguments.
+
+2. The precondition states that the argument "n" has to be bounded in the environment to the "n0" value. This examples does not involve working with heaps. There are no extra conditions imposed.
+The postcondition states that what what is present in the environment is not referenced (it is matched by ?rho) - though the elements are there, they are not relevant. The form cell states that the function returns the "?n" value which is either equal to "n0" if the argument was greater or equal to 0, or ?n is the product of n0 and (-1) if n0 is smaller than 0. The "C" term matches the rest of the cells in the configuration cell.
+The last comments of the file contain declarations that are used by the tool.

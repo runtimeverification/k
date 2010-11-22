@@ -1,0 +1,43 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. In order to build linked lists the nodeList structure is defined (val, next).
+The "length" function gets a pointer to a nodeList struct and returns the length 
+of the list. The function is not recursive. The list is iterated node by node 
+and the length is incremented for every node that is not null.
+The "summ" function receives as an argument a pointer to the nodeList structure 
+and returns the sum of all the list's elements. The list is iterated and each 
+element is added to the sum.
+The "average" function takes as argument a pointer to a nodeList struct and 
+returns the floor of the average for the list elements. The function calls the 
+above mentioned functions for computing the avergae's floor.
+The main function creates a list and calls the function(s).
+
+2. The precondition of the length function states that the argument "a" has to 
+be bounded in the environment to the "a0" value. The heap cell states that there 
+is a list that starts at location a0 and has the content A (sequence). There are 
+no extra conditions imposed.
+The postcondition of the length function states that what what is present in the 
+environment is not referenced (it is matched by ?rho) - though the elements are 
+there, they are not relevant. The heap cell states that all the elements of the 
+heap were in no way altered. The form cell states that the function returns the 
+"?l" value which represents the length of the A sequence, the content of the 
+list. The "C" term matches the rest of the cells in the configuration cell.
+The invariant state sthat there are 3 variables in the environment, each bounded 
+to a value. The "a" variable is bound to the beginning of the list, "x" is the 
+one that helps iterate the list and "l" is the variable that keeps track of the 
+length that is being computed in the loop. The heap is composed of a list segment 
+(that is delimited by a0 and ?x,  having the ?A sequence as content) and a list 
+that starts at ?x and contains the ?X sequence. The form cell states that 
+appending ?X to ?A we get the same content as the initial list (the original 
+list is separated into the list segment and rest of the list). 
+The pre/post-condition and the invariant for the summ function are similar to 
+the length function, but instead of having conditions regarding length, the 
+conditions refer to the sum.
+The precondition for the average function is the same as the preconditions 
+mentioned before. The postcondition checks that the returned value trully is the 
+floor of the average for the list.
+The last comments of the file contain declarations that are used by the tool.
+  
