@@ -114,7 +114,7 @@ module FilterOutput where
   performSubs s [] = s
 
   performReplacement :: ByteString -> ByteString -> ByteString -> ByteString
-  performReplacement old new s = pack $ mySubG (unpack old) (unpack new) (unpack s)
+  performReplacement old new s = pack $ substitute (unpack old) (unpack s) (unpack new)
 
 
 

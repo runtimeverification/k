@@ -26,8 +26,6 @@ module ParseConfig
   import Control.Arrow
   import Data.List
   import qualified Data.Map as Map
-  import Text.Regex.Less
---  import Text.Regex.PCRE.Light.Char8
 
   type CellName = ByteString
   type Configuration = Map CellName CellConfigRhs

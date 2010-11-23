@@ -2,18 +2,23 @@
 
 module ByteStringUtils
   ( deleteAll, readBool, readNumber, readColor, compareStr
-  , split, join, rstrip, replace                              -- MissingH wrappers
-  , mySub, mySubG                                             -- pcre-less wrappers and reimplementations
+  , split, join, rstrip, replace                              -- MissingH reimplementations
+--  , mySub, mySubG                                             -- pcre-less wrappers and reimplementations
   , ByteString, unpack, pack, cons, uncons, append, singleton -- ByteString exports
+  , substitute                                         -- regex-compat wrappers
   ) where
   import Style
   import Data.ByteString.Char8 (ByteString, unpack, pack, cons, uncons, append, singleton)
   import Data.List
   import qualified Data.ByteString.Char8 as B
   import Data.Char
-  import Text.Regex.Less.Quackers
-  import Text.Regex.Less
-  import qualified Text.Regex.PCRE as PCRE
+--  import Text.Regex.Posix
+  import Text.Regex
+  -- import Text.Regex.Less.Quackers
+  -- import Text.Regex.Less
+  -- import qualified Text.Regex.PCRE as PCRE
+  -- import qualified Data.Array.IArray as A
+
 
   -- | Delete all occurrences
   deleteAll :: Char -> ByteString -> ByteString
@@ -62,19 +67,38 @@ module ByteStringUtils
   compareStr :: ByteString -> [ByteString] -> Bool
   compareStr s ss = canonicalize s `elem` map canonicalize ss
 
-  -- Make an instance of ByteStrings for the pcre-less package's Quackers
-  instance QLR ByteString where
-    compile = compile . unpack
+  -- -- Make an instance of ByteStrings for the pcre-less package's Quackers
+  -- instance QLR ByteString where
+  --   compile = compile . unpack
 
-  -- | Perform a substitution
-  mySub :: String -> String -> String -> String
-  mySub old new s = case s =~ old of
-                      m@(_,x:xs) -> subs m new
-                      _          -> s
-  -- | Performa all substitutions, pcre-less seems to have several bugs in it with their subg
-  mySubG :: String -> String -> String -> String
-  mySubG old new s = if s == mySub old new s then s
-                     else mySubG old new (mySub old new s)
+  -- -- | Perform a substitution
+  -- mySub :: String -> String -> String -> String
+  -- mySub old new s = case s =~ old of
+  --                     m@(_,x:xs) -> mySubs m new
+  --                     _          -> s
+  -- -- | Performa all substitutions, pcre-less seems to have several bugs in it with their subg
+  -- mySubG :: String -> String -> String -> String
+  -- mySubG old new s = if s == mySub old new s then s
+  --                    else mySubG old new (mySub old new s)
+
+  -- mySubs a b = s ++ derefs (bref a) b ++ f
+  --   where o = fst a
+  --         (i,c) = {-# SCC "mySubs_indices" #-} head (snd a) A.! 0
+  --         (s,r) = {-# SCC "mySubs_init" #-} splitAt i o
+  --         f = {-# SCC "mySubs_rest" #-} drop c r
+
+
+
+  unbacktick :: String -> String
+  unbacktick ('`':'`':cs) = '`' : unbacktick cs
+  unbacktick ('`':cs) = '\\' : unbacktick cs
+  unbacktick ('\\':cs) = "\\\\" ++ unbacktick cs
+  unbacktick (c:cs) = c : unbacktick cs
+  unbacktick [] = []
+
+
+  substitute :: String -> String -> String -> String
+  substitute regex input repl = subRegex (mkRegex (unbacktick regex)) input (unbacktick repl)
 
   {- | Given a delimiter and a ByteString, join the items by using the delimiter.
 
