@@ -125,7 +125,7 @@ fmod COMPILE-META is
   op print : [Module] -> QidList .
   eq print(M) = eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op generateError : Module Qid [Module] -> [Module] .
-  eq generateError(M, Q, M') = moduleError('Error 'while getPhaseName(Q) '\n
+  eq generateError(M, Q, M') = moduleError('Error 'while getPhaseName(Q) '`( 'module Q '`) '\n
    'To 'reproduce 'load 'k-prelude 'and 'then 'the 'generated 'module. '\n
    print(M) 
 ) .

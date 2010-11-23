@@ -876,6 +876,12 @@ fmod META-LEVEL-EXTRAS is
    = greaterSorts(M, S, SS) ; if sortLeq(M, S, S') then S' else none fi .
   eq greaterSorts(M, S, none) = none .
 
+
+  op getRelatedSorts : Module SortSet -> SortSet .
+  eq getRelatedSorts(M, S ; SS) 
+   = lesserSorts(M, getKind(M,S)) ; getRelatedSorts(M, SS) .
+  eq getRelatedSorts(M, none) = none .
+
   op lubSorts : Module Type Type -> TypeSet .
   eq lubSorts(M, S, S') = minimalSort(M, intersection(greaterSorts(M, S), greaterSorts(M, S'))) .
   eq lubSorts(M, S, T) = T [owise] .
