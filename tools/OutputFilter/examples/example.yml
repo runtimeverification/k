@@ -34,7 +34,7 @@ options:
   global-substitutions:
     - "`(`.List`{K`}`)": ""                 # Get rid of (.List{K})
     - "Id Identifier`(\"([^`)]+)\"`)": "`1" # Get rid of the stuff surrounding keys
-    - "`(BaseValue (`d+)`)": " `1 "         # make (BaseValue n) be just n, for any number
+    - "`(BaseValue (`[0-9]+)`)": " `1 "     # make (BaseValue n) be just n, for any number
     - "BaseValue|BaseType|Id ": ""          # Remove BaseValue and BaseType
     - "Id ": ""                             # Remove Id
     - ",,": ", "                            # Condence commas
