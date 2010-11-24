@@ -1,36 +1,18 @@
-#include <stdlib.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-struct nodeList {
-  int val;
-  struct nodeList *next;
-};
+1. The function prefix appends at the beginning of the list received as argument 
+a node that has the second argument as its value. It returns the new node that 
+represents the new beginning of the list. The main function creates a list than 
+calls the function, prefixing a node containing the value 5 to the list.
 
-struct nodeList* prefix(struct nodeList* x, int i)
-/*@ pre < config > < env > x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)([?i] @ A) </ heap > < form > returns ?x </ form > </ config > */
-{
-	struct nodeList* y;
-	y = (struct nodeList*) malloc (sizeof(struct nodeList));
-	y->val = i;
-	y->next = x;
-	return y;
-}
-
-int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
-{
-  struct nodeList *x;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 6;
-  x->next = 0;
-  /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)([6]) </ heap > < form > TrueFormula </ form > </ config > */
-  x = prefix(x,5) ;
-  return 0;
-}
-
-
-
-/*@ var ?x ?i : ?Int */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
+2. The precondition of the function specifies is that the arguments should be in 
+the environment and the first argument is the beginning  of a list containing 
+the "A" sequence. 
+The postcondition states that the environment is not relevant 
+and that the returned value is the  new beginning of the list. The new content 
+is the old (initial) content for which the value of the second argument was 
+prefixed.
+The last comments of the file contain declarations that are used by the tool.
