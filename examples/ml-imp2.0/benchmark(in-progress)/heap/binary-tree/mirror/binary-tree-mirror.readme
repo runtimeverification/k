@@ -1,3 +1,18 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The treeNode structure is defined in order to express binary trees.
+The mirrorTree function takes as argument a binary tree and mirrors it.
+The main function creates a binary tree, calls the mirrorTree function and checks the result.
+
+2.The precondition: the list received as argument must be instantiated.
+The postcondition: nothing was changed in the heap, the returned value is the sum of the elements of the list.
+The invariant: x is the pointer that helps iterate the list - it is the point of separation for the list (into a list segment and the rest of the list). The content of the list segment concatenated with the content for the rest of the list is the same to the initial content. The sum for the elements of the list segment has already been computed.
+The last comments of the file contain declarations that are used by the tool.
+
+
 #include <stdlib.h>
 
 struct treeNode {

@@ -1,47 +1,14 @@
-#include <stdlib.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-struct nodeList {
-  int val;
-  struct nodeList *next;
-};
+1. The nodeList structure is defined in order to express single linked lists.
+The length function computes recursively the length of a list.
+The main function builds a list, calls the lengt function and checks the result.
 
-int length(struct nodeList* a)
-/*@ pre < config > 
-        < env > a |-> a0 </ env >
-        < heap > list(a0)(A) H </ heap > 
-        < form > TrueFormula </ form > </ config > */
-/*@ post < config > 
-         < env > ?rho </ env >
-         < heap > list(a0)(A) H </ heap > 
-         < form > ?l === len(A) /\ returns ?l </ form > </ config > */
-{
-  int l;
-  struct nodeList* x;
-  l = 0;
-  if(a != 0)
-  {
-    x = a->next;
-    l = length(x) + 1 ;
-  }
-  return l;
-}
-
-int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
-{
-  int l;
-  struct nodeList* x;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 5;
-  x->next = 0;
-  l = length(x);
-  return 0;
-}
-
-/*@ var ?x ?l : ?Int */
-/*@ var a0 : FreeInt */
-/*@ var ?A ?X : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var H : FreeMapItem */
+2.The precondition : the list received as the argument for the function must be 
+instantiated.
+The postcondition: the heap suffered no changes (the same heap as before the 
+function call) and the returned value trully is the length of the list.
+The last comments of the file contain declarations that are used by the tool.

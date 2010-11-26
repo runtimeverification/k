@@ -1,54 +1,19 @@
-#include <stdlib.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-struct nodeList {
-  int val;
-  struct nodeList *next;
-};
+1. The nodeList structure is defined in order to express single linked lists.
+The length function iterates every element of a list and computes the length of 
+the list - returns the result.
+The main function builds a list, calls the length function and checks the result.
 
-int length(struct nodeList* a)
-/*@ pre < config > 
-        < env > a |-> a0 </ env >
-        < heap > list(a0)(A) H </ heap > 
-        < form > TrueFormula </ form > </ config > */
-/*@ post < config > 
-         < env > ?rho </ env >
-         < heap > ?H </ heap > 
-         < form > ?l === len(A) /\ returns ?l </ form > </ config > */
-{
-  int l;
-  struct nodeList* x;
-  x = a;
-  l = 0;
-/*@ invariant < config > 
-              < env > a |-> a0  x |-> ?x l |-> ?l </ env >
-              < heap > lseg(a0,?x)(?A)  list(?x)(?X) H </ heap >
-              < form > (?A @ ?X) === A /\ ?l === len(?A) </ form >
-              </ config > */
-  while (x != 0) {
-        x = x->next ;
-        l = l + 1 ;
-    }
-  return l;
-}
-
-int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
-{
-  int l;
-  struct nodeList* x;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 5;
-  x->next = 0;
-  l = length(x);
-  printf("%d ", l);
-  printf("\n");
-  return 0;
-}
-
-/*@ var ?x ?l : ?Int */
-/*@ var a0 : FreeInt */
-/*@ var ?A ?X : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var H : FreeMapItem */
+2.The precondition : a list must be instantiated and referenced. The rest of the 
+heap is irrelevant and does not change.
+The postcondition: the list, like the rest of the heap, is unchanged and the 
+result that is returned is indeed the length of the list.
+The invariant: the list is iterated using the x pointer, thus the list is broken 
+apart into a list segment, and the rest of the list (int the heap). The list 
+segment constitutes all the elements that have already been counted(the length 
+of the segment is already computed).
+The last comments of the file contain declarations that are used by the tool.
