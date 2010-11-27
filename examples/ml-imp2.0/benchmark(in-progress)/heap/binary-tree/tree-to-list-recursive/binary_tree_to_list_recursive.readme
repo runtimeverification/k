@@ -1,41 +1,17 @@
-#include <stdlib.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-struct treeNode {
-  int val;
-  struct treeNode *left;
-  struct treeNode *right;
-};
+1. The treeNode structure is defined in order to express binary trees.
+The toListRecursive function takes as argument a binary tree and transforms it 
+into a list. The set of elements is the same for both the tree and the list. The 
+function is recursive, no invariant is specified.
+The main function creates a binary tree, calls the function and checks the 
+result.
 
-
-struct nodeList {
-  int val;
-  struct nodeList *next;
-};
-  
-struct nodeList *toListRecursive(struct treeNode *root, struct nodeList *x)
-/*@ pre  < config > < env > root |-> ?root  x |-> ?x </ env >
-                    < heap > tree(?root)(T) list(?x)(A) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < heap > list(?x)(tree2seq(T) @ A) H </ heap >
-                    < form > returns ?x </ form > C </ config > */
-{
-  struct nodeList *node;
-  if (root == 0)
-    return x;
-  node = (struct nodeList *) malloc(sizeof(struct nodeList));
-  node->val = root->val; 
-  node->next = toListRecursive(root->right, x);
-  node = toListRecursive(root->left, node);
-  free(root);
-  return node;
-}
-
-/*@ var ?root ?x : ?Int */
-/*@ var T : FreeTree */
-/*@ var ?T : ?Tree */
-/*@ var A : FreeSeq */
-/*@ var ?rho : ?MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
-
+2.The precondition: a tree and a list (function arguments) must be instantiated.
+The postcondition: the tree is deallocated from the heap, they are prefixed to 
+the existing list. The rest of the heap is the same. The function returns a 
+pointer for the beginning of the list.
+The last comments of the file contain declarations that are used by the tool.

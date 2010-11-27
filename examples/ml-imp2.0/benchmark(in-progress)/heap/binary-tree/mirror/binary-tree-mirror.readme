@@ -4,53 +4,13 @@
 3. Observations
 
 1. The treeNode structure is defined in order to express binary trees.
-The mirrorTree function takes as argument a binary tree and mirrors it.
-The main function creates a binary tree, calls the mirrorTree function and checks the result.
+The mirrorTree function takes as argument a binary tree and mirrors it. The 
+function is recursive (no invariant is specified).
+The main function creates a binary tree, calls the mirrorTree function and 
+checks the result.
 
-2.The precondition: the list received as argument must be instantiated.
-The postcondition: nothing was changed in the heap, the returned value is the sum of the elements of the list.
-The invariant: x is the pointer that helps iterate the list - it is the point of separation for the list (into a list segment and the rest of the list). The content of the list segment concatenated with the content for the rest of the list is the same to the initial content. The sum for the elements of the list segment has already been computed.
+2.The precondition: a tree (function argument) must be instantiated.
+The postcondition: the tree was mirrored, the rest of the heap remains unchanged, 
+the function returns a pointer to the root of the tree. The content of the tree 
+has the same set of elements as the initial tree.
 The last comments of the file contain declarations that are used by the tool.
-
-
-#include <stdlib.h>
-
-struct treeNode {
-  int val;
-  struct treeNode *left;
-  struct treeNode *right;
-};
-
-struct treeNode* mirrorTree(struct treeNode* root)
-/*@ pre  < config > < env > root |-> root0 </ env >
-                    < heap > tree(root0)(T) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < heap > tree(root0)(mirror(T)) H </ heap >
-                    < form > returns root0 </ form > C </ config > */
-{
-  struct treeNode* mirrorLeft;
-	struct treeNode* mirrorRight;
-  if (root != 0)
-  {
-    mirrorRight = mirrorTree(root->right);
-    mirrorLeft = mirrorTree(root->left);
-    root->left = mirrorRight;
-    root->right = mirrorLeft;
-  }
-  return root;
-}
-
-int main()
-{
-  return 0;
-}
-
-/*@ var root0 : FreeInt */
-/*@ var T : FreeTree */
-/*@ var ?T : ?Tree */
-/*@ var ?rho : ?MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
-
-
