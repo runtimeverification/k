@@ -1018,7 +1018,6 @@ sub replace_dots
 	    
 	    if ($rule_leafs ne "" && $config_leafs ne "")
 	    {
-#		$rule_leafs =~ s/\./#!#!/g;
 		my @rule_ls = split(/&&&&/, $rule_leafs);
 		my @rule_ls1 = split(/&&&&/, $rule_leafs);
 		my @cfg_ls = split(/&&&&/, $config_leafs);
@@ -1032,8 +1031,6 @@ sub replace_dots
 			s/^\s+//sg;
 			s/\s+$//sg;
 
-#			print "CHECK: $cfg_ls[0]  in |$_|\n";
-			
 			if (m/\.\s*\=>/)
 			{
 			    s/\Q$&\E/$cfg_ls[0] =>/;
@@ -1050,16 +1047,30 @@ sub replace_dots
 		    }
 		    shift(@cfg_ls);
 		}
+		my $cnt = 0;
 		foreach(@rule_ls1)
 		{		
 		    if ($_ eq ".")
 		    {
-#			print "Replacing: | . | with |$rule_ls[0]|\n";
 			$rule1 =~ s/ \. / $rule_ls[0] /;
 		    }
 		    else 
 		    {
-			$rule1 =~ s/\Q$_\E/$rule_ls[0]/;
+			my $count = () = $rule1 =~ /\Q$_\E/g;
+			$cnt = $count if ($count >= 1 && $cnt == 0);
+			
+			if ($cnt == 1)
+			{
+			    $rule1 =~ s/\Q$_\E/$rule_ls[0]/g;
+			}
+			
+			if ($cnt > 1)
+			{
+			    $cnt = $cnt - 1;
+			    shift(@rule_ls);
+			    next;
+			}
+			
 		    }
 		    shift(@rule_ls);
 		}
