@@ -72,7 +72,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- Variable declaration
   rule [decl-variable]:
-       <k> var X : Tp; => . <_/k>
+       <k> var X : Tp; => .K <_/k>
        <env> Env:Map => Env[L/X] </env>
        <store_> . => L|->initVal(Tp) <_/store>
        <nextLoc> L:Nat => sNat(L) </nextLoc>
@@ -105,7 +105,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- When we are done with the first pass (preprocessing), i.e., the computation
 --- and env are empty (no global environment allowed), create a main object
-  rule [call-main]: <k> . => new main() </k> <env> .Map </env>
+  rule [call-main]:
+       <k> . => new main() </k>
+       <env> .Map </env>
 
 
 -------------------
@@ -119,7 +121,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <store_> L |-> V <_/store>
 
 --- Field lookup.  If X is not in the local environment, then assume that
---- it's a field of "this".  General object lookup defined shortly.
+--- it's a field of "this".  General object lookup defined as auxilliary below.
   rule [lookup-field]:
        <k> X => _._(this,X) <_/k>   --- to avoid parsing ambiguity, use _._(this,X) instead of this.X
        <env> Env:Map </env>
@@ -139,7 +141,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <extends> C' </extends>
 
   syntax K ::= lookupF ( Bag , Id )
-  syntax K ::= location ( Nat ) 
+  syntax K ::= location ( Nat )
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
 
@@ -174,30 +176,32 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <store_> L |-> (I => I +Int 1) <_/store> 
 
 --- Arithmetic operators
-  rule I1:Int + I2:Int => I1 +Int I2 
-  rule _-_(I1,I2) => _-Int_(I1,I2) 
-  rule I1 * I2 => I1 *Int I2 
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0 
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0 
-  rule - I => -Int I 
-  rule I1 < I2 => I1 <Int I2 
-  rule I1 <= I2 => I1 <=Int I2 
-  rule I1 > I2 => I1 >Int I2 
-  rule I1 >= I2 => I1 >=Int I2 
-  rule V1:Val == V2:Val => V1 ==Bool V2 
-  rule V1 != V2 => V1 =/=Bool V2 
-  rule B1:Bool and B2:Bool => B1 andBool B2 
-  rule B1 or B2 => B1 orBool B2 
-  rule not(B:Bool) => notBool(B) 
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule _-_(I1,I2) => _-Int_(I1,I2)
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule - I => -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
+  rule V1:Val == V2:Val => V1 ==Bool V2
+  rule V1 != V2 => V1 =/=Bool V2
+  rule B1:Bool and B2:Bool => B1 andBool B2
+  rule B1 or B2 => B1 orBool B2
+  rule not(B:Bool) => notBool(B)
 
---- array component value:
-
-  rule [array-indexing]: array(_,L,M:Nat)[N:Nat] => lookup(L +Int N) 
+--- Array lookup.  Note that we check the array bounds now
+--- We prefer to use a helper computation item, lookup, to avoid locking the store
+  rule [array-indexing]: array(_,L,M:Nat)[N] => lookup(L +Int N)
     if N >=Nat 0 andBool N <=Nat M [structural]
   syntax K ::= lookup Nat
-  rule [lookup-loc]: <k> lookup L => V <_/k> <store_> L |-> V <_/store>
+  rule [lookup-loc]:
+       <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
-  rule (sizeOf(array(_,_,N)) => N)
+--- Size of array
+  rule sizeOf(array(_,_,N)) => N
 
 
 --- read expression
