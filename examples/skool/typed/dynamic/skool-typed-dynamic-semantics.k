@@ -86,6 +86,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <nextLoc> L => sNat L +Nat N </nextLoc> 
 
 --- Method declaration
+--- Like in SIMPLE, method names are added to the environment and bound to their code
+--- This way, we can easily allow objects to pass and change their methods (see p23)
   rule [decl-method]:
        <k> method F:Id(XTl:List{VarType}) : Tp S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
@@ -107,7 +109,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- and env are empty (no global environment allowed), create a main object
   rule [call-main]:
        <k> . => new main() </k>
-       <env> .Map </env>
+       <env> . </env>
 
 
 -------------------
@@ -115,64 +117,33 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 -------------------
 
 --- Local variable lookup
+--- If X is in the local environment, then it is a local variable, not a field.
   rule [lookup-var]:
        <k> X:Id => V:Val <_/k>
        <env_> X |-> L:Nat <_/env>
        <store_> L |-> V <_/store>
 
---- Field lookup.  If X is not in the local environment, then assume that
---- it's a field of "this".  General object lookup defined as auxilliary below
+--- Field lookup
+--- If X is not in the local environment, then assume that it's a field of "this".
+--- General object lookup defined at its place below (we follow the order in the SKOOL syntax).
   rule [lookup-field]:
        <k> X => _._(this,X) <_/k>   --- to avoid parsing ambiguity, use _._(this,X) instead of this.X
        <env> Env:Map </env>
     if notBool(X in keys(Env)) [structural]
 
-
-
-
-  rule [this]:
-       <k> this => Obj <_/k>  
-       <crntObj> Obj </crntObj>
-
-  rule [super]:
-       <k> _._((super => obj(C',L)),X) <_/k>
-       <crntObj> obj(C,L) </crntObj>
-       <className> C </className> 
-       <extends> C' </extends>
-
-  syntax K ::= lookupF ( Bag , Id )
-
-  context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
-
-  --- looking up in object
-  syntax CellLabel ::= envStack 
-
-  rule <k> _._(obj(C,L),X) => lookupF(<envStack>  (C :: EnvC:Bag) EStack:List </envStack>, X) <_/k>
-      <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
-
-  --- lookup using object environment
-  rule lookupF(<envStack> _ :: <env_>  X |-> L:Nat <_/env> <_/envStack>,X) => lookup(L)
-
-  --- recursing through the object environment stack
-  rule lookupF(<envStack> _ :: <env> Env </env>  => . <_/envStack>, X)
-       if notBool(X in keys(Env)) [structural]
-
-
-
-
 --- Variable/Field/Array Increment
 --- This is tricky, because we want to allow all of ++x, ++o.x, ++a[5]
---- Therefore, we need to extract the l-value of the expression to increment
---- To do that, we first introduce new syntax for l-values and location values:
-  syntax Exp ::= l-value ( K )
-  syntax Val ::= loc ( Nat )
---- Then, we state that the expression to increment should be wrapped
---- by l-value and then evaluated.  The semantics of l-value is defined below
+--- Therefore, we need to extract the l-value of the expression to increment.
+--- To do that, we state that the expression to increment should be wrapped
+--- by the auxilliary "l-value" operation and then evaluated.
+--- The semantics of the auxilliary l-value operation is defined below.
+--- For now, all we need to know is that it takes an expression and evaluates
+--- to a location value, also introduced below with the auxilliary operations.
   context ++([HOLE] => l-value([HOLE]))
 --- l-value eventually produces a location value:
   rule [increment]:
        <k> ++loc(L) => I:Int +Int 1 <_/k>
-       <store_> L |-> (I => I +Int 1) <_/store> 
+       <store_> L |-> (I => I +Int 1) <_/store>
 
 --- Arithmetic operators
   rule I1:Int + I2:Int => I1 +Int I2
@@ -199,7 +170,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Size of array
   rule sizeOf(array(_,_,N)) => N
 
---- Method call.  SKOOL has dynamic method dispatch, like most OO languages
+--- Method call
+---------------
+--- SKOOL has dynamic method dispatch, like most OO languages
 --- There are several cases to treat, though
 
 --- Case 1: method is called directly, not through an object or super
@@ -257,11 +230,13 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <k> read() => I <_/k> <in> (ListItem(I) => .) <_/in>
 
 --- New
----   the semantics of the new operator consists of two actions: memory allocation for the new object
----   and the execution of the statements included in the constructor
----   the current class, environment and object are stored on the stack
+-------
+--- The semantics of new consists of two actions: memory allocation for
+--- the new object and the execution of the corresponding constructor
 
-  rule [new-object]: <k> new C(Vl) ~> K => create(C) ~> _`(_`)(C,Vl); return this; </k>
+--- The current environment and object are stored on the stack and
+--- recovered after new, because new destroys them
+  rule [initiate-new]: <k> new C(Vl) ~> K => create(C) ~> _`(_`)(C,Vl); return this; </k>
        <env> Env => . </env>
        <crntObj> Obj => obj(object,L) </crntObj>
        <return> T => C </return>
@@ -269,66 +244,106 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <store_> . => L |-> objEnv(<envStack> object::<env>.Map</env> </envStack>) <_/store>
        <fstack> . => Env # K # Obj # T <_/fstack>
 
-
---- create a new object (memory allocation)
----   usually, an object is an instance of a class from an hierarchy
----   a memory object representation is a layered structure: for each class lying on the path 
----   from the current class to the root of the hierarchy there is a layer including the memory
----   allocation for the variable members of that class
-  rule [object-allocate]: <k> create(C) => create(C1) ~> setCrntClass(C) ~> Ss ~> addEnvLayer <_/k>
-       <classes_>
-            <class_>
-                   <className> C </className>
-                   <extends> C1 </extends>
-                   <declarations> Ss:Stmts </declarations>
-            <_/class>
-       <_/classes>
+--- Create a new object (memory allocation)
+--- An object is an instance of a class, which can be anywhere in the class hierarchy.
+--- A memory object representation is a layered structure: for each class on the path
+--- from the instance class to the root of the hierarchy there is a layer including
+--- the memory allocated for the members (both fields and methods) of that class.
+  rule [object-creation]:
+       <k> create(C) => create(C1) ~> setCrntClass(C) ~> Ss ~> addEnvLayer <_/k>
+       <className> C </className>
+       <extends> C1 </extends>
+       <declarations> Ss </declarations>
   rule <k> create(object) => . <_/k>
-
---- add a new tagged environment layer to the  current object
-  rule <k> addEnvLayer => . <_/k>
+--- Add a new tagged environment layer to the current object.
+  rule [add-object-layer]:
+       <k> addEnvLayer => . <_/k>
        <env> Env => . </env>
        <crntObj> obj(C,L) </crntObj>
-       <store_> L |-> objEnv(<envStack> . => (C::<env>Env</env>)<_/envStack>)
-       <_/store>
-
-  rule <k> setCrntClass(C) => . <_/k>
+       <store_> L |-> objEnv(<envStack> . => (C::<env>Env</env>)<_/envStack>) <_/store>
+--- Set the current class of the current object.
+--- This is necessary to be done at each layer, because the current object is enclosed
+--- as part of the function values (see the semantics of method declarations above)
+  rule [set-current-class]:
+       <k> setCrntClass(C) => . <_/k>
        <crntObj> obj((_ => C),_) </crntObj>
 
+--- Self reference via "this"
+  rule [this]:
+       <k> this => Obj <_/k>  
+       <crntObj> Obj </crntObj>
 
---- instanceOf operator
+--- Object member access
+------------------------
+--- There are two cases, like for method dispatch
 
+--- Case 1: member access through a proper object (not super)
+--- Then evaluate the object expression and lookup member starting with current class (static scoping)
+  context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
+  rule <k> _._(obj(C,L),X) => lookupF(<envStack>  (C :: EnvC:Bag) EStack:List </envStack>, X) <_/k>
+       <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
+
+--- Case 2: member access through super
+  rule [super]:
+       <k> _._((super => obj(C',L)),X) <_/k>
+       <crntObj> obj(C,L) </crntObj>
+       <className> C </className> 
+       <extends> C' </extends>
+
+--- instanceOf
   rule [instanceOf]: <k> _instanceOf_(obj(_,L), C1) => subtype(C2,C1,Cls) <_/k>
        <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
        <classes> Cls:Bag </classes>
 
+--- Casting
   rule [as]: <k> _as_(obj(_,L),C1) => obj(C1,L) <_/k>
              <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
              <classes>Cls</classes>
         if subtype(C2, C1, Cls)
 
 
+------------------
+--- Statements ---
+------------------
 
-
-
-
-
-------------------------------
---- instruction processing ---
-------------------------------
+--- Empty blocks. One can make the rule below structural, if one doesn't want it to count as step
   rule {} => .
-  rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env:Map </env> 
-  rule S1:Stmt S2:Stmt => S1~>S2 
 
----<SKOOL modified> 
+--- Nonempty Blocks. Make sure the environment is recovered after the block executes
+--- This rule can also be structural if one does not want entering a block to count as step
+  rule <k> {Ss:Stmts} => Ss ~> env(Env) <_/k> <env> Env:Map </env> 
+
+--- Assignment
+--- Like for increment, we first compute the l-value of the left-hand-side.
+--- Then we cast the assigned value to the type at that l-value
+--- (i.e., the type of the value stored there, because we do not change the types of store cells).
   context ([HOLE] => l-value([HOLE]))=_;
-
-  rule <k> l-value(X) => loc(L) <_/k> <env_> X|->L <_/env> 
-  rule <k> l-value(lookup(L)) => loc(L) <_/k>
-
-  rule <k> loc(L)=V1; => . <_/k> <store_> L|->(V2=>cast(typeOf(V2),V1)) <_/store>
+  rule [assignment]:
+       <k> loc(L)=V1; => . <_/k>
+       <store_> L |-> (V2 => cast(typeOf(V2),V1)) <_/store>
        <classes> Cls </classes>
     if subtype(typeOf(V1), typeOf(V2),Cls)
+
+--- Expression statement
+  rule [exp-statement]: V; => .
+
+--- Conditional
+  rule [if-true]:  if true then S:Stmt else _ => S:Stmt
+  rule [if-false]: if false then _ else S => S
+
+--- While
+  rule [while]: <k> while E:Exp do S  => if E then {S while E do S} else {} <_/k>
+
+--- Write
+  rule [write]: <k> write(Vl); => . <_/k> <out_> . => List(getList{K}(Vl)) </out>
+
+--- Sequential composition.  Desugared into K's sequentialization.  Can also be structural
+  rule S1:Stmt S2:Stmt => S1~>S2 
+
+
+----------------------------------------------
+--- Auxilliary declarations and operations ---
+----------------------------------------------
 
   rule <k> l-value(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
   
@@ -346,23 +361,32 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro cast(C, obj(_,L)) = obj(C,L) 
   macro cast(T, V2) = V2 [owise]
 
----</SKOOL modified>
-
----<SKOOL typed modified>
  --- for array assignment, first evaluate the array and its index
   context l-value(_[[HOLE]])
   context l-value([HOLE][_])
----</SKOOL type modified>
-  rule V; => .
-  rule if true then S:Stmt else _ => S:Stmt
-  rule if false then _ else S => S
-  rule <k> while E:Exp do S  => if E then {S while E do S} else {} <_/k>
-  rule <k> write(Vl); => . <_/k> <out_> . => List(getList{K}(Vl)) </out>
 
 
-----------------------------------------------
---- Auxilliary declarations and operations ---
-----------------------------------------------
+
+--- To do that, we first introduce new syntax for l-values and location values:
+  syntax Exp ::= l-value ( K )
+  syntax Val ::= loc ( Nat )
+--- Then, we state that the expression to increment should be wrapped
+  rule <k> l-value(X) => loc(L) <_/k> <env_> X|->L <_/env> 
+  rule <k> l-value(lookup(L)) => loc(L) <_/k>
+
+
+  --- looking up in object
+  syntax CellLabel ::= envStack
+
+  syntax K ::= lookupF ( Bag , Id )
+
+  --- lookup using object environment
+  rule lookupF(<envStack> _ :: <env_>  X |-> L:Nat <_/env> <_/envStack>,X) => lookup(L)
+
+  --- recursing through the object environment stack
+  rule lookupF(<envStack> _ :: <env> Env </env>  => . <_/envStack>, X)
+       if notBool(X in keys(Env)) [structural]
+
 
   syntax K ::= lookup Nat
   rule [lookup-loc]:

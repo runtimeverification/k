@@ -848,8 +848,8 @@ macro p22 =
 
 macro p23 =
      class c1 {
-       var v:int;
-       method c1(x:int) { v=x; }
+       var v:int = 7;
+       method c1() { ++v; }
        method m0():int  { return v; }
        method m1():int  { return -v; }
      }
@@ -863,7 +863,7 @@ macro p23 =
 
      class main {
        method main() {
-         var o1:c1 = new c1(1), o2:c2 = new c2(2);
+         var o1:c1 = new c1(), o2:c2 = new c2(1);
          write(o1.m0());
          o1.m0 = o1.m1;
          write(o1.m0());
@@ -875,5 +875,5 @@ macro p23 =
          write(o1.m0());
        }
      }
-
+--- 8 -8 1 -1 -3
 endkm
