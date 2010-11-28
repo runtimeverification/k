@@ -65,7 +65,7 @@ kmod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K
   rule <k> () ~> bindTo() => . <_/k>                                   [structural]
   rule <k> ((V=>()),_:List{Val}) ~> bindTo((X=>()),_:List{Id}) <_/k>
        <env> Env => Env[N/X] </env>
-       <store_> .Map => N|->V <_/store>
+       <store_> . => N|->V <_/store>
        <nextLoc> N:Nat => sNat N </nextLoc>  if X =/=Bool ()           [structural]
 
   rule <k> bindTo() => . <_/k>                                         [structural]

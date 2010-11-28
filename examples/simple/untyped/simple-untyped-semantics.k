@@ -164,7 +164,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule V; => .
 
 --- Conditional
-  rule if true then S else _ => S
+  rule if  true then S else _ => S
   rule if false then _ else S => S
 
 --- While loop unrolled only at the top of the computation (to avoid non-termination)

@@ -4,16 +4,19 @@
 
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
+--- Identifiers
+--- Special identifier for the function "main"
+  syntax Id ::= main
+
+--- Variables; we include arrays here as well, a[x][y][z]
+  syntax Var ::= Id
+               | Var [ Exp ]       [strict prec 1]
+
 --- Declarations
 --- There are two types of declarations: for variables (including arrays) and for functions
   syntax Decl ::= var Var ;
                 | function Id ( ) Stmt
                 | function Id ( List{Id} ) Stmt
-
---- Variables; we include arrays here as well, so that, e.g., a[x][y][z]
---- can appear anywhere a variable can appear (declarations, lookup, assignment)
-  syntax Var ::= Id
-               | Var [ Exp ]       [strict prec 1]
 
 --- Expressions
   syntax Exp ::= Int | Bool
@@ -21,9 +24,9 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | ++ Id             [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
-               | Exp * Exp         [strict prec 31]
-               | Exp / Exp         [strict prec 31]
-               | Exp % Exp         [strict prec 31]
+               | Exp * Exp         [strict prec 31 gather(E e)]
+               | Exp / Exp         [strict prec 31 gather(E e)]
+               | Exp % Exp         [strict prec 31 gather(E e)]
                | - Exp             [strict]
                | Exp < Exp         [strict prec 37]
                | Exp <= Exp        [strict prec 37]
@@ -31,8 +34,8 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | Exp >= Exp        [strict prec 37]
                | Exp == Exp        [strict prec 37]
                | Exp != Exp        [strict prec 37]
-               | Exp and Exp       [strict prec 55]
-               | Exp or Exp        [strict prec 59]
+               | Exp and Exp       [strict prec 55 gather(E e)]
+               | Exp or Exp        [strict prec 59 gather(E e)]
                | not Exp           [strict prec 53]
                | Exp [ Exp ]       [ditto]
                | sizeOf ( Exp )    [strict]
@@ -54,9 +57,6 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts               [prec 100 gather(e E)]
-
---- Function "main"
-  syntax Id ::= main
 
 
 -----------------------------------------------------------------------------

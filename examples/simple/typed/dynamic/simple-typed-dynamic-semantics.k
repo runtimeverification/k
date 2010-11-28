@@ -20,7 +20,7 @@ kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-
                | function ( Type , Nat )
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}.{#2}"]
 
---- the values are expressions
+--- Values are expressions
   syntax Exp ::= Val 
 
 
@@ -57,20 +57,20 @@ kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-
 ---------------------------------------
 
 --- Variable declaration
-  rule <k> var X:Id : Tp:Type ; => .K <_/k>
+  rule <k> var X:Id : Tp:Type ; => . <_/k>
        <env> Env:Map => Env[L:Nat/X] </env>
        <store_> . => L|->initVal(Tp) <_/store>     --- intialized with default value for its type
        <nextLoc> L => sNat(L) </nextLoc>
 
 --- Array declaration
   context var X[[HOLE]] : Tp[];
-  rule <k> var X[N:Nat] : Tp[]; => .K <_/k>
+  rule <k> var X[N:Nat] : Tp[]; => . <_/k>
        <env> Env => Env[L/X] </env>
        <store_> . => L |-> array(Tp[], sNat L, N) <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc>
 
 --- Function declaration
-  rule <k> function F:Id(XTl:List{IdType}) : Tp S:Stmt => .K <_/k>
+  rule <k> function F:Id(XTl:List{IdType}) : Tp S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc>
        <store_> . => L|->function(typeList(XTl)->Tp,sNat(L))  sNat(L)|->lambda(idList(XTl),S) <_/store>
@@ -127,6 +127,8 @@ kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-
        <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
     if typeOf(Vl) ==Bool Tpl
+
+--- Function return.  We define it here because it is related to the above
   rule <k> return(V); ~> _ => V ~> K </k>
        <fstack> (Env,K,Tp') => . <_/fstack>
        <env> _ => Env </env>
@@ -166,13 +168,13 @@ kmod SIMPLE-TYPED-DYNAMIC-SEMANTICS is including SIMPLE-TYPED-DYNAMIC-DESUGARED-
   context _[[HOLE]]=_;
   context [HOLE][_]=_;
   rule <k> array(Tp[],L,M)[N] = V; => . <_/k> <store> Sigma:Map => Sigma[V/(L +Int N)] </store>
-    if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp 
+    if N >=Nat 0 andBool N <=Nat M andBool typeOf(V) ==Bool Tp
 
 --- Expression statements.  They are only used for their side effects, so their result is descarded
   rule V; => .
 
 --- Conditional
-  rule if true then S else _ => S
+  rule if true  then S else _ => S
   rule if false then _ else S => S
 
 --- While loop unrolled only at the top of the computation (to avoid non-termination)
