@@ -54,7 +54,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                     <nextLoc> 1 </nextLoc>
                     <crntObj> .K </crntObj>
                     <classes>
-                        <class*> 
+                        <class*>
                             <className> Id:Id </className>
                             <extends> Id:Id </extends>
                             <declarations> .K </declarations>
@@ -72,7 +72,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- Variable declaration
   rule [decl-variable]:
-       <k> var X : Tp; => .K <_/k>
+       <k> var X : Tp; => . <_/k>
        <env> Env:Map => Env[L/X] </env>
        <store_> . => L|->initVal(Tp) <_/store>
        <nextLoc> L:Nat => sNat(L) </nextLoc>
@@ -80,14 +80,14 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Array declaration
   context var X:Id[[HOLE]] : T ;
   rule [decl-array]:
-       <k> var X[N:Nat] : T[]; => .K <_/k> 
+       <k> var X[N:Nat] : T[]; => . <_/k> 
        <env> Env => Env[L/X] </env>
        <store_>. => L |-> array(T, sNat L, N) sNat(L)..sNat(L)+Nat N |-> initVal(T) <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc> 
 
 --- Method declaration
   rule [decl-method]:
-       <k> method F:Id(XTl:List{VarType}) : Tp S:Stmt => .K <_/k>
+       <k> method F:Id(XTl:List{VarType}) : Tp S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc>
        <crntObj> Obj:K </crntObj>
@@ -95,7 +95,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- Class declaration
   rule [decl-class]:
-       <k> class C1:Id extends C2:Id { Ss:Stmts } => .K <_/k>
+       <k> class C1:Id extends C2:Id { Ss:Stmts } => . <_/k>
        <classes_> (. => <class_>
                             <className> C1 </className>          
                             <extends> C2 </extends>
@@ -121,7 +121,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <store_> L |-> V <_/store>
 
 --- Field lookup.  If X is not in the local environment, then assume that
---- it's a field of "this".  General object lookup defined as auxilliary below.
+--- it's a field of "this".  General object lookup defined as auxilliary below
   rule [lookup-field]:
        <k> X => _._(this,X) <_/k>   --- to avoid parsing ambiguity, use _._(this,X) instead of this.X
        <env> Env:Map </env>
@@ -141,7 +141,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <extends> C' </extends>
 
   syntax K ::= lookupF ( Bag , Id )
-  syntax K ::= location ( Nat )
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
 
@@ -171,7 +170,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- by l-value and then evaluated.  The semantics of l-value is defined below
   context ++([HOLE] => l-value([HOLE]))
 --- l-value eventually produces a location value:
-  rule [pre-inc]:
+  rule [increment]:
        <k> ++loc(L) => I:Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store> 
 
@@ -193,36 +192,81 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule not(B:Bool) => notBool(B)
 
 --- Array lookup.  Note that we check the array bounds now
---- We prefer to use a helper computation item, lookup, to avoid locking the store
+--- We prefer to use an auxiliary operation, lookup, to avoid locking the store
   rule [array-indexing]: array(_,L,M:Nat)[N] => lookup(L +Int N)
     if N >=Nat 0 andBool N <=Nat M [structural]
-  syntax K ::= lookup Nat
-  rule [lookup-loc]:
-       <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
 --- Size of array
   rule sizeOf(array(_,_,N)) => N
 
+--- Method call.  SKOOL has dynamic method dispatch, like most OO languages
+--- There are several cases to treat, though
 
+--- Case 1: method is called directly, not through an object or super
+--- Then "this" is assumed
+  rule <k> _`(_`)((X => _._(this,X)),_) <_/k>
+--- We would like to write the rule above as
+---   rule <k> (X => _._(this,X))(_) <_/k>
+--- or even
+---   rule <k> (X => this.X)(_) <_/k>
+--- but, unfortunately, our current Maude-based parser does not allow it
+--- Same applies to the other rules below
 
+--- Case 2: method is called through an object or super
+--- There are two subcases
 
+--- Case 2.1: called through a proper object (not super), so dynamic dispatch
+--- Then evaluate the object espression and lookup method from top of its environment
+  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
+  rule <k> '_`(_`)(('_._(obj(_,L),,X) => lookupF(Envs:Bag, X)),,_) <_/k>
+       <store_> L |-> objEnv(Envs) <_/store>
 
---- read expression
+--- Case 2.2: called through super, so static dispatch from parent class
+  rule <k> '_`(_`)(('_._(super,,X) => lookupF(<envStack> EStack </envStack>, X)),,_) <_/k>
+       <crntObj> obj(C,L) </crntObj>
+       <store_> L |-> objEnv(<envStack_>  (C :: EnvC:Bag) EStack:List </envStack>) <_/store>
 
-  rule [input]: <k> read() => I <_/k> <in> (ListItem(I) => .) <_/in>
+--- Eventually, each of the rules above produces a lookup(L) instead of the method
+--- When that happens, just lookup the function value at location L
+  rule <k> '_`(_`)((lookup(L) => V),,_) <_/k>
+       <store_> L |-> V <_/store>
 
----<SKOOL added>
---- new operator
+--- Once the function value is retrieved, the next rule applies the actuall call
+--- The environment and the computation are pushed onto the stack, etc.
+ rule <k> _`(_`)(function(Tpl:List{Type}->Tp,Obj,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
+       <fstack> . => Env # K # Obj' # Tp' <_/fstack>
+       <crntObj> Obj':K => Obj </crntObj>
+       <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
+       <return> Tp':Type => Tp </return>
+       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(castAll(Tpl,Vl))) <_/store>
+       <nextLoc> N => N +Nat |Xl| </nextLoc>
+       <classes> Cls </classes>
+    if subtypeAll(typeOfAll(Vl), Tpl, Cls)
+
+--- Function return.  We define it here because it is related to the above
+  rule <k> return(V); ~> _ => cast(Tp, V) ~> K </k>
+       <fstack> Env # K # Obj # Tp' => . <_/fstack>
+       <crntObj> _ => Obj </crntObj>
+       <env> _ => Env </env>
+       <return> Tp => Tp' </return>
+       <classes> Cls </classes>
+    if subtype(typeOf(V), Tp, Cls)
+
+--- Read
+  rule [input]:
+       <k> read() => I <_/k> <in> (ListItem(I) => .) <_/in>
+
+--- New
 ---   the semantics of the new operator consists of two actions: memory allocation for the new object
 ---   and the execution of the statements included in the constructor
 ---   the current class, environment and object are stored on the stack
 
-  rule [new-object]: <k> (new_`(_`)(C:Id, Vl:List`{Val`}))~>K:K => create(C) ~> _`(_`)(C, Vl); return this ; </k>
-       <env> Env:Map => . </env>
+  rule [new-object]: <k> new C(Vl) ~> K => create(C) ~> _`(_`)(C,Vl); return this; </k>
+       <env> Env => . </env>
        <crntObj> Obj => obj(object,L) </crntObj>
-       <return> T:Type => C </return>
+       <return> T => C </return>
        <nextLoc> L => sNat L </nextLoc>
-       <store_> . => L |-> objEnv(<envStack> object::<env> .Map </env> </envStack>) <_/store>
+       <store_> . => L |-> objEnv(<envStack> object::<env>.Map</env> </envStack>) <_/store>
        <fstack> . => Env # K # Obj # T <_/fstack>
 
 
@@ -239,7 +283,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                    <declarations> Ss:Stmts </declarations>
             <_/class>
        <_/classes>
-  rule <k> create(object) => .K <_/k>
+  rule <k> create(object) => . <_/k>
 
 --- add a new tagged environment layer to the  current object
   rule <k> addEnvLayer => . <_/k>
@@ -248,8 +292,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <store_> L |-> objEnv(<envStack> . => (C::<env>Env</env>)<_/envStack>)
        <_/store>
 
-  rule <k> setCrntClass(C) => . <_/k>  
+  rule <k> setCrntClass(C) => . <_/k>
        <crntObj> obj((_ => C),_) </crntObj>
+
 
 --- instanceOf operator
 
@@ -262,59 +307,11 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
              <classes>Cls</classes>
         if subtype(C2, C1, Cls)
 
----</SKOOL added>
 
 
 
----------------------
---- method call ---
----------------------
-
----<SKOOL modified>
-
-  --- dynamic method dispatch: methods are looked up from top of object
-
-  --- rule <k> (X => _._(this,X))(_) <_/k> ?
-  rule <k> _`(_`)((X => _._(this,X)),_) <_/k>
-
-  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
-
-  rule <k> '_`(_`)(('_._(obj(_,L),,X) => lookupF(Envs:Bag, X)),,_) <_/k>
-      <store_> L |-> objEnv(Envs) <_/store>
-
-  --- except for super which should lookup method statically
-  rule <k> '_`(_`)(('_._(super,,X) => lookupF(<envStack> EStack </envStack>, X)),,_) <_/k>
-      <crntObj> obj(C,L) </crntObj>
-      <store_> L |-> objEnv(<envStack_>  (C :: EnvC:Bag) EStack:List </envStack>) <_/store>
 
 
-  rule <k> '_`(_`)((lookup(L) => V),,_) <_/k>
-       <store_> L |-> V <_/store>
-
-
-
---- the environment and the computation are pushed in the stack at each function call
-
-
- rule <k> _`(_`)(function(Tpl:List{Type}->Tp,Obj,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
-       <fstack> . => Env # K # Obj' # Tp' <_/fstack>
-       <crntObj> Obj':K => Obj </crntObj>
-       <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
-       <return> Tp':Type => Tp </return>
-       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(castAll(Tpl,Vl))) <_/store>
-       <nextLoc> N => N +Nat |Xl| </nextLoc>
-       <classes> Cls </classes>
-    if subtypeAll(typeOfAll(Vl), Tpl, Cls)
-
-  rule <k> return(V); ~> _ => cast(Tp, V) ~> K </k>
-       <fstack> Env # K # Obj # Tp' => . <_/fstack>
-       <crntObj> _ => Obj </crntObj>
-       <env> _ => Env </env>
-       <return> Tp => Tp' </return>
-       <classes> Cls </classes>
-    if subtype(typeOf(V), Tp, Cls)
-
----</SKOOL modified>
 
 ------------------------------
 --- instruction processing ---
@@ -339,7 +336,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
  ---similar lookup as for variables
   rule <k> l-value(_._(obj(C,L), X)  => lookupF(<envStack>  (C :: EnvC) EStack:List </envStack>, X)) <_/k>
-      <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
+       <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
  
   syntax List{Val} ::= castAll ( List{Type} , List{Val} )
   macro castAll((Tp,Tpl),(V,Vl))
@@ -367,6 +364,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
 
+  syntax K ::= lookup Nat
+  rule [lookup-loc]:
+       <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
   syntax Val ::=
                  initVal ( Type )
