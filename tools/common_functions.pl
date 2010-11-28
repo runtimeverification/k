@@ -1018,6 +1018,7 @@ sub replace_dots
 	    
 	    if ($rule_leafs ne "" && $config_leafs ne "")
 	    {
+#		$rule_leafs =~ s/\./#!#!/g;
 		my @rule_ls = split(/&&&&/, $rule_leafs);
 		my @rule_ls1 = split(/&&&&/, $rule_leafs);
 		my @cfg_ls = split(/&&&&/, $config_leafs);
@@ -1027,21 +1028,39 @@ sub replace_dots
 		    if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/ || $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/)
 		    {
 			$cfg_ls[0] = ".$1" if $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/;
+			
+			s/^\s+//sg;
+			s/\s+$//sg;
+
+#			print "CHECK: $cfg_ls[0]  in |$_|\n";
+			
 			if (m/\.\s*\=>/)
 			{
 			    s/\Q$&\E/$cfg_ls[0] =>/;
 			}
-			
-			if (m/(\=>\s*\.)(?:[^LMBSK])/ || m/(\=>\s*\.$)/)
+			elsif (m/(\=>\s*\.)(?:[^LMBSK])/ || m/(\=>\s*\.$)/)
 			{
 			    s/\Q$1\E/=> $cfg_ls[0]/;
-			}		
+			}
+			elsif ($_ eq ".")
+			{
+			    $_ = $cfg_ls[0];
+			}
+
 		    }
 		    shift(@cfg_ls);
 		}
 		foreach(@rule_ls1)
 		{		
-		    $rule1 =~ s/\Q$_\E/$rule_ls[0]/;
+		    if ($_ eq ".")
+		    {
+#			print "Replacing: | . | with |$rule_ls[0]|\n";
+			$rule1 =~ s/ \. / $rule_ls[0] /;
+		    }
+		    else 
+		    {
+			$rule1 =~ s/\Q$_\E/$rule_ls[0]/;
+		    }
 		    shift(@rule_ls);
 		}
 		
