@@ -60,7 +60,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                | Exp [ Exp ]       [ditto]
                | sizeOf ( Exp )    [strict]
                | Exp ( )
-               | Exp ( List{Exp} ) [strict(2) prec 2]
+               | Exp ( List{Exp} ) [strict(2) prec 2]  --- unlike in SIMPLE, application is only strict(2)
                | read ( )
 
                | new Id ( ) [prec 1]

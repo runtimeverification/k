@@ -204,6 +204,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule sizeOf(array(_,_,N)) => N
 
 
+
+
+
 --- read expression
 
   rule [input]: <k> read() => I <_/k> <in> (ListItem(I) => .) <_/in>
@@ -261,6 +264,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 ---</SKOOL added>
 
+
+
 ---------------------
 --- method call ---
 ---------------------
@@ -291,7 +296,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- the environment and the computation are pushed in the stack at each function call
 
 
- rule <k> _`(_`)(function`(_`,_`,_`)(Tpl:List{Type}->Tp,Obj,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
+ rule <k> _`(_`)(function(Tpl:List{Type}->Tp,Obj,L),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
        <fstack> . => Env # K # Obj' # Tp' <_/fstack>
        <crntObj> Obj':K => Obj </crntObj>
        <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
