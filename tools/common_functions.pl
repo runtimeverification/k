@@ -975,7 +975,7 @@ sub replace_dots
     }/gsme;
     
     if (/configuration\s+(<(.*?)>.*?<\/\2>)/gs) { $config = $1; }
-    # print "Config: $config\n";
+#    print "Config: $config\n";
     
     $configuration_tree = build_config_tree($config, "super-node");
 
@@ -1021,9 +1021,9 @@ sub replace_dots
 		
 		foreach (@rule_ls)
 		{
-		    if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/)
+		    if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/ || $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/)
 		    {
-			
+			$cfg_ls[0] = ".$1" if $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/;
 			if (m/\.\s*\=>/)
 			{
 			    s/\Q$&\E/$cfg_ls[0] =>/;
@@ -1046,7 +1046,9 @@ sub replace_dots
 		$config_leafs = "";
 	    }
 	}
+#	print "RULE: $rule1\n\n\n";
 	$ret =~ s/\Q$rule\E/$rule1/s;
+	
     }
     
     return $ret;
