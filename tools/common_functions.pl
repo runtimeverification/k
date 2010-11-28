@@ -953,7 +953,7 @@ my $configSubtree;
 sub replace_dots
 {
     local $_ = shift;
-    my $ret = $_;
+    
     my $rule;
     my $rule1;
     my $temp_rule;
@@ -974,6 +974,8 @@ sub replace_dots
 	$_;
     }/gsme;
     
+    my $ret = $_;
+     
     if (/configuration\s+(<(.*?)>.*?<\/\2>)/gs) { $config = $1; }
 #    print "Config: $config\n";
     
@@ -984,6 +986,7 @@ sub replace_dots
     while (/(rule.*?(?=($kmaude_keywords_pattern)))/gs)
     {
 	$rule = $1;
+	
 	$rule1 = $rule;
 	
 	$rule_tree = build_config_tree($rule, "super-rule-node");
@@ -1047,8 +1050,8 @@ sub replace_dots
 	    }
 	}
 #	print "RULE: $rule1\n\n\n";
-	$ret =~ s/\Q$rule\E/$rule1/s;
-	
+	$ret =~ s/\Q$rule\E/$rule1/gs;
+#	print "RET:\n\n $ret\n\n";
     }
     
     return $ret;
