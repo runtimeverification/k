@@ -1,43 +1,16 @@
-#include <stdlib.h>
-#include <stdio.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-int multiply(int x, int y)
-/*@ pre  < config > < env > x |-> x0 y |-> y0 </ env >
-                    < form > @(x0 >=Int 0) /\ @(y0 >=Int 0) </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < form > returns (x0 *Int y0) </ form >
-                    C </ config > */
-{
-  int q;
-  int i;
-  q = 0;
-  i = 0;
-/*@ invariant < config > 
-              < env > x |-> x0 y |-> y0 q |-> ?q i |-> ?i </ env >
-              < form > ?q === (?i *Int x0) </ form >
-              C </ config > */
-  while(i < y )
-  {
-        q = q + x;
-        i = i + 1;
-  }
-/*@ assert < config > 
-              < env > x |-> x0 y |-> y0 q |-> ?q i |-> ?i </ env >
-              < form > ?q === (?i *Int x0) /\ (?i === y0) </ form >
-              C </ config > */
-  return q;
-}
+1. The "multiply" function multiplies by repeated addition x and y, the 
+arguments it gets.
+The main function calls the fact function and tests the result.
 
-int main()
-{
-  int m;
-  m = multiply(3,4);
-  return 0;
-}
-
-
-/*@ var ?q ?i : ?Int */
-/*@ var x0 y0 : FreeInt */
-/*@ var ?rho : ?MapItem */
-/*@ var C : FreeBagItem */
-
+2. The precondition: the arguments variables are bound to values in the env cell 
+and they are greater or equal to 0.
+The postcondition: the content on the env cell is irrelevant, the returned value 
+is the actual multiplication of the arguments.
+The invariant: x is repeatedly added until the iterator reaches the value of the 
+y variable.
+The last comments of the file contain declarations that are used by the tool.

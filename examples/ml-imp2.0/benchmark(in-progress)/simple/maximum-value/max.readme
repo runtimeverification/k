@@ -1,32 +1,12 @@
-#include <stdlib.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-int max(int x, int y)
-/*@ pre < config > < env > x |-> x0 y |-> y0  </ env >
-                   < heap > (.).Map </ heap >
-                   < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < heap > (.).Map </ heap >
-                    < form > returns ?z /\ @(?z >=Int x0) /\ @(?z >=Int y0) </ form >
-                    C </ config > */
-{
-  int z;
-  if (x < y) z = y;
-  else z = x;
-  return z;
-}
+1. The "max" function returns the maximum between two values received as 
+arguments.
+The main function calls the fact function and tests the result.
 
-/*@ verify */
-int main()
-{
-  int x;
-  int y;
-  x = 8;
-  y = 45;
-  x = max(x,y);
-  return 0;
-}
-
-/*@ var ?z : ?Int */
-/*@ var x0 y0 : FreeInt */
-/*@ var ?rho : ?MapItem */
-/*@ var C : FreeBagItem */
+2. The precondition: the variables are bound to values in the environment cell.
+The postcondition: the returned value is the true maximum.
+The last comments of the file contain declarations that are used by the tool.
