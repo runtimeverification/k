@@ -1,41 +1,12 @@
-#include <stdlib.h>
-#include <stdio.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-int sum(int n)
-/*@ pre  < config > < env > n |-> n0 </ env >
-                    < form > @(n0 >=Int 0) </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < form > returns ((n0 *Int (n0 +Int 1)) /Int 2) </ form >
-                    C </ config > */
-{
-  int s;
-  s = 0;
-  /*@ invariant < config > 
-                < env >
-                  n |-> ?n
-                  s |-> ((n0 +Int (-Int ?n)) *Int (n0 +Int ?n +Int 1)) /Int 2
-                </ env >
-                < form > @(?n >=Int 0) </ form >
-                C </ config > */
-  while (n > 0)
-  {
-    s += n;
-    n -= 1;
-  }
-  return s;
-}
+1. The "sum" function computes th sum for the first n natural numbers.
+The main function calls the absolute function for different arguments.
 
-int main()
-{
-  int s;
-  s = sum(10);
-  printf("The sum for the first 10 natural numbers: %d\n", sum(10));
-  return 0;
-}
-
-
-/*@ var ?s ?n : ?Int */
-/*@ var n0 : FreeInt */
-/*@ var ?rho : ?MapItem */
-/*@ var C : FreeBagItem */
-
+2. The precondition: n is bound to a natural value and is greater than 0.
+The postcondition: the returned value is the sum of the first n natural numbers.
+The invariant: n is added to the sum and then decreased until it reaches 0.
+The last comments of the file contain declarations that are used by the tool.
