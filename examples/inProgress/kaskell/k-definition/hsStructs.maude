@@ -1,42 +1,35 @@
 ***(
-    Syntactic structures existent in Haskell's abstract syntax that need to be marshalled into Maude
+    Syntactic structures existent in Haskell's abstract syntax that need to be
+    marshalled into Maude.
 ***)
 
 mod HASKELL-SYNTAX-STRUCTS is
-    --- Import the K-stuff
-    including K-TECHNIQUE .
-    including K-RULES .               --- to write k rules with in-place rewriting
-    including K-CONFIG .              --- to specify the global configuration term
-    including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
-    including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_>
-    including K-CONTEXTS .
-    including K-WHERE .
-    including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
-    including K-LISTK-EXTRAS .
-  --- Do not want: including K-LIST-EXTRAS, clobers our List constructor .
-    including K-MAP-EXTRAS .          --- operations on Maps
-    including K-BAG-EXTRAS .          --- operations on Bags
-    including K-SET-EXTRAS .          --- operations on Sets
+    --- Instead of subsorting everything to K, subsort to Syntax so that
+    --- HASKELL-SYNTAX* does not have to depend on K.
+    sort Syntax .
 
-    --- Parameterized sorts are a lot of trouble in Maude, so here's some monosorted versions of haskell constructs
+    --- Parameterized sorts are a lot of trouble in Maude, so here's some
+    --- monosorted versions of Haskell constructs.
     sorts HsMaybe HsList HsTuple .
 
-    op []      :          -> HsList [ctor] .
-    op (:) _ _ : K HsList -> HsList [ctor] .
+    op []      :               -> HsList [ctor] .
+    op (:) _ _ : Syntax HsList -> HsList [ctor] .
 
     --- tuples, hardcoded up to arity 9
-    op (,)        _ _               : K K               -> HsTuple [ctor] .
-    op (,,)       _ _ _             : K K K             -> HsTuple [ctor] .
-    op (,,,)      _ _ _ _           : K K K K           -> HsTuple [ctor] .
-    op (,,,,)     _ _ _ _ _         : K K K K K         -> HsTuple [ctor] .
-    op (,,,,,)    _ _ _ _ _ _       : K K K K K K       -> HsTuple [ctor] .
-    op (,,,,,,)   _ _ _ _ _ _ _     : K K K K K K K     -> HsTuple [ctor] .
-    op (,,,,,,,)  _ _ _ _ _ _ _ _   : K K K K K K K K   -> HsTuple [ctor] .
-    op (,,,,,,,,) _ _ _ _ _ _ _ _ _ : K K K K K K K K K -> HsTuple [ctor] .
+    op (,)        _ _               : Syntax Syntax                                                  -> HsTuple [ctor] .
+    op (,,)       _ _ _             : Syntax Syntax Syntax                                           -> HsTuple [ctor] .
+    op (,,,)      _ _ _ _           : Syntax Syntax Syntax Syntax                                    -> HsTuple [ctor] .
+    op (,,,,)     _ _ _ _ _         : Syntax Syntax Syntax Syntax Syntax                             -> HsTuple [ctor] .
+    op (,,,,,)    _ _ _ _ _ _       : Syntax Syntax Syntax Syntax Syntax Syntax                      -> HsTuple [ctor] .
+    op (,,,,,,)   _ _ _ _ _ _ _     : Syntax Syntax Syntax Syntax Syntax Syntax Syntax               -> HsTuple [ctor] .
+    op (,,,,,,,)  _ _ _ _ _ _ _ _   : Syntax Syntax Syntax Syntax Syntax Syntax Syntax Syntax        -> HsTuple [ctor] .
+    op (,,,,,,,,) _ _ _ _ _ _ _ _ _ : Syntax Syntax Syntax Syntax Syntax Syntax Syntax Syntax Syntax -> HsTuple [ctor] .
 
-    op Just _  : K -> HsMaybe [ctor] .
-    op Nothing :   -> HsMaybe [ctor] .
+    op Just _  : Syntax -> HsMaybe [ctor] .
+    op Nothing :        -> HsMaybe [ctor] .
+    
 
-    subsorts HsList HsMaybe HsTuple < K .
+
+    subsorts HsList HsMaybe HsTuple < Syntax .
 
 endm
