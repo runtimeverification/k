@@ -278,6 +278,8 @@ mod COMMON-SEMANTIC-SYNTAX is
 	op nthChar : String Nat -> Char .
 	op butFirstChar : String -> String .
 	op charToAscii : String -> Nat .
+	op stringToChar : String -> Char .
+	op asciiCharString : String -> Nat .
 	
 	op _to_ : Nat Nat -> List{K} .
 	op cast : K K -> K [metadata "strict"] . --- as described in 6.3
@@ -554,6 +556,9 @@ mod SEMANTIC-HELPERS is
 	eq min(unsigned-long-long-int) = 0 .
 	eq max(unsigned-long-long-int) = _-Int_(2 ^Nat absInt(numBits(unsigned-long-long-int)), 1) .
 	
+	
+	eq stringToChar(C:Char) = C:Char .
+	eq asciiCharString(S:String) = asciiString(stringToChar(S:String)) .
 	mb [firstChar]: rule
 		firstChar(S:String) => substrString(S:String, 0, 1)
 		: KSentence [metadata "structural"] .
