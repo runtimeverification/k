@@ -9,8 +9,6 @@ in ../skool-typed-programs
 
 kmod SKOOL-TYPED-STATIC is
    including SKOOL-TYPED-STATIC-SEMANTICS + SKOOL-TYPED-PROGRAMS 
---- make sure the name of the final module is the capitalized version of the file name
-
 
   syntax Bag ::= run ( KLabel )
 
@@ -19,7 +17,6 @@ kmod SKOOL-TYPED-STATIC is
         <T_> 
            <pgm> P(.List{K}) </pgm>
         <_/T> 
----</SKOOL modified>
 endkm
 
 

@@ -7,8 +7,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- both expression and statements can evaluate to types
   syntax Type ::= stmt | decl | correct
 
-  syntax Exp ::= Type
-  syntax List{Exp} ::= List{Type} 
+  syntax Exp ::= Type  
   syntax Stmt ::= Type
 
 --- We have to subsort all the syntactic categories to K, and the lists of types
@@ -18,11 +17,14 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   syntax K ::= Stmts | List{Exp} | List{Type} | List{VarType} | List{Top}
   syntax KResult ::= List{Type} 
 
+---------------------
+--- Configuration ---
+---------------------
+
   configuration <T> 
                      <k> .K </k>
                      <tenv> .Map </tenv>
                      <return> stmt </return>
----<SKOOL added>
                      <crntClass> .K </crntClass>
                      <classes>
                            <class*> 
@@ -33,34 +35,31 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                      </classes>
                      <pass> start </pass>
                      <pgm> .K </pgm>
----</SKOOL added>
                 </T>
 
 
   syntax Pass ::= start | global | classes | methods | end
   syntax K ::= Pass
 
--------------------------------
---- declarations processing ---
--------------------------------
+
 
 ---  start the first pass through the program to collect declarations
 
   rule <k> .K => Pgm:Stmts </k> <pgm> Pgm </pgm> <pass> start => global </pass>
 
---- variable declaration; in the preprocessing phase only the global variables are processed 
---- this rule is also used to process the local variables of a function
----   as a part of the function evaluation 
+-------------------------------
+--- declarations processing ---
+-------------------------------
 
-  rule I:Int => int 
-  rule B:Bool => bool 
-  
+--- variable declaration; forbidden at the global level
+--- this rule is to process both field declarations and 
+--- local variables of a function
+
   rule [decl-variable]: <k> var X:Id : Tp:Type ; => decl <_/k> 
        <tenv> TEnv:Map => TEnv[Tp / X] </tenv> <pass> Pass </pass>
        if Pass =/=Bool global
 
---- If an array is declared, then calculate its size; 
-
+--- Array declaration
   context var X:Id[[HOLE]] : Tp ;
   rule [decl-array]: <k> var X[int] : _`[`](Tp) ; => decl <_/k> 
        <tenv> TEnv => TEnv[ _`[`](Tp)/X] </tenv>  <pass> Pass:Pass </pass>
@@ -68,15 +67,12 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 
   rule (sizeOf(_`[`](Tp)) => int)   
 
----<SKOOL modified>
-
+--- Method declaration, only inside a class declaration
   rule [decl-method]: <k> method F:Id(XTl:List{VarType}) : Tp S:Stmt => decl <_/k> 
        <tenv_> . => F |-> ((typeList(XTl)->Tp)) <_/tenv> 
        <pass> classes </pass> 
 
---- the followings are added
-
---- a class traversal
+--- Class declaration
   rule [decl-class]: 
        <k> class C1:Id extends C2:Id { Ss:Stmts } => Ss ~> env(TEnv) <_/k>
        (. => <class_>
@@ -87,8 +83,8 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
        <tenv> TEnv </tenv> 
        <pass> global => classes </pass>
 
+--- Recover environment after the class declaration was typed
   syntax K ::= env ( Map ) 
-
   rule <k> decl ~> (env(TEnv) => .) <_/k>
        <tenv> TEnv':Map => TEnv </tenv>
        <crntClass> class C1 </crntClass>
@@ -129,6 +125,10 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 -------------------
 --- Expressions ---
 -------------------
+
+--- typing constants
+  rule I:Int => int 
+  rule B:Bool => bool 
 
 --- variable lookup
 
@@ -275,6 +275,8 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   macro typeList(X : Tp,XTl) = Tp,typeList(XTl) 
 
 ---<SKOOL added>
+  syntax List{Exp} ::= List{Type} 
+
 
 --- subtype relationship
 
