@@ -75,7 +75,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <k> var X : T; => . <_/k>
        <env> Env:Map => Env[L/X] </env>
        <store_> . => L |-> initVal(T) <_/store>
-       <nextLoc> L:Nat => sNat(L) </nextLoc>
+       <nextLoc> L => sNat(L) </nextLoc>
 
 --- Array declaration
   context var X[[HOLE]] : T ;
@@ -120,7 +120,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- If X is in the local environment, then it is a local variable, not a field.
   rule [lookup-var]:
        <k> X => V:Val <_/k>
-       <env_> X |-> L:Nat <_/env>
+       <env_> X |-> L <_/env>
        <store_> L |-> V <_/store>
 
 --- Field lookup
@@ -192,7 +192,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Case 2.1: called through a proper object (not super), so dynamic dispatch
 --- Then evaluate the object espression and lookup method from top of its environment
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
-  rule <k> '_`(_`)(('_._(obj(_,L),,X) => lookupMember(Envs:Bag, X)),,_) <_/k>
+  rule <k> '_`(_`)(('_._(obj(_,L),,X) => lookupMember(Envs:BagItem, X)),,_) <_/k>
        <store_> L |-> objEnv(Envs) <_/store>
 
 --- Case 2.2: called through super, so static dispatch from parent class
@@ -216,6 +216,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <nextLoc> N => N +Nat |Xl| </nextLoc>
        <classes> Cls </classes>
     if subtypeAll(typeOfAll(Vl), Tl, Cls)
+--- The following _#_#_#_ ListItem construct used above tuples items for stacking.
+--- This is an auxilliary operation but it has no rules, so we declare it here.
+  syntax ListItem ::=    Map # K # K # Type
 
 --- Function return.  We define it here because it is related to the above
   rule <k> return(V); ~> _ => cast(T, V) ~> K </k>
@@ -251,6 +254,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- A memory object representation is a layered structure: for each class on the path
 --- from the instance class to the root of the hierarchy there is a layer including
 --- the memory allocated for the members (both fields and methods) of that class.
+--- Even though "create" is an auxilliary operation, it is used only here.
+  syntax KLabel ::= create
   rule [object-creation]:
        <k> create(C) => create(C1) ~> setCrntClass(C) ~> Ss ~> addEnvLayer <_/k>
        <className> C </className>
@@ -259,6 +264,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> create(object) => . <_/k>
 --- Add a new tagged environment layer to the current object.
 --- This is an auxilliary operation, but is used only here.
+  syntax K ::= addEnvLayer
   rule [add-object-layer]:
        <k> addEnvLayer => . <_/k>
        <env> Env => . </env>
@@ -268,6 +274,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- This is necessary to be done at each layer, because the current object is enclosed
 --- as part of the function values (see the semantics of method declarations above).
 --- This is an auxilliary operation, but is used only here.
+  syntax KLabel ::= setCrntClass
   rule [set-current-class]:
        <k> setCrntClass(C) => . <_/k>
        <crntObj> obj((_ => C),_) </crntObj>
@@ -352,14 +359,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- The following operations, listed in the order of their appearence,
 --- have been used in the semantics of SKOOL above:
 ---  - initVal
----  - typeList
----  - idList
----  - l-value
----  - loc
----  - lookup
----  - lookupMember
----  - envStack
----  - _#_#_#_
+---  - typeList and idList
+---  - l-value and loc
+---  - envStack, lookupMember and lookup
 ---  - castAll
 ---  - subtypeAll
 ---  - typeOfAll
@@ -398,26 +400,51 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule typeList(X : T,XTl) => T,typeList(XTl)                [structural]
 
 --- l-value and loc
-  syntax Exp ::= l-value ( K )
+--- l-value(E) computes the l-value of E, where E can be an identifier X,
+--- an array element A[I], or a class member O.X (here X can be a field or a method).
+--- l-value(E) evaluates to a location value of the form loc(L), where L is a natural number.
+  syntax Exp ::= l-value ( K )    --- for parsing reasons, we prefer to allow l-value to take a K
   syntax Val ::= loc ( Nat )
-  rule <k> l-value(X) => loc(L) <_/k> <env_> X|->L <_/env> 
+--- Local variable
+  rule <k> l-value(X) => loc(L:Nat) <_/k> <env_> X|->L <_/env>
+--- Implicit member access
   rule <k> l-value(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
-
- --- for array assignment, first evaluate the array and its index
+--- Array element: evaluate the array and its index; then the array lookup rule above applies.
   context l-value(_[[HOLE]])
   context l-value([HOLE][_])
-
+--- Explicit member access
+--- First evaluate the object, then lookup its corresponding member staticaly.
+--- lookupMember is defined below; it evaluates to a lookup(L), also defined below,
+--- where L points to the actual member value.
+--- Note that object values are envStack cells, and that lookupMember takes such
+--- cells as first argument; these cells are also defined below.
   context l-value(_._([HOLE],_))
-  rule <k> l-value(_._(obj(C,L), X) => lookupMember(<envStack>(C :: EnvC:Bag) EStack:List</envStack>, X)) <_/k>
+  rule <k> l-value(_._(obj(C,L), X) => lookupMember(<envStack>(C :: EnvC:BagItem) EStack:List</envStack>, X)) <_/k>
        <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
-
+--- Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) <_/k>
+
+--- envStack, lookupMember and lookup
+--- envStack holds an object environment, which is a stack of
+--- environments, one for each class in hierarchy.
+  syntax CellLabel ::= envStack       --- cell holding a stack, or List
+  syntax ListItem ::= Id :: BagItem   --- Id is the class name, BagItem is its corresp. environment
+  syntax K ::= lookupMember ( BagItem , Id )  --- BagItem is the envStack cell, Id is the member name
+  syntax K ::= lookup Nat                     --- Nat is the store location
+--- lookupMember
+--- First look for the member in the top environment; if found then done.
+  rule lookupMember(<envStack> _ :: <env_> X|->L <_/env> <_/envStack>,X) => lookup(L)
+--- Otherwise, recurse through the object environment stack
+  rule lookupMember(<envStack> _ :: <env> Env </env>  => . <_/envStack>, X)
+    if notBool(X in keys(Env)) [structural]
+--- lookup
+  rule [lookup-loc]:
+       <k> lookup(L) => V <_/k> <store_> L|->V <_/store>
 
 
  
   syntax List{Val} ::= castAll ( List{Type} , List{Val} )
-  macro castAll((T,Tl),(V,Vl))
-      = cast(T,V), castAll(Tl, Vl)
+  macro castAll((T,Tl),(V,Vl)) = cast(T,V), castAll(Tl, Vl)
   macro castAll(.List{Bottom},.List{Bottom}) = .List{Bottom}
   syntax Val ::= cast( Type , Val )
   macro cast(C, obj(_,L)) = obj(C,L) 
@@ -426,23 +453,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 
 
-
-  --- looking up in object
-  syntax CellLabel ::= envStack
-
-  syntax K ::= lookupMember ( Bag , Id )
-
-  --- lookup using object environment
-  rule lookupMember(<envStack> _ :: <env_>  X |-> L:Nat <_/env> <_/envStack>,X) => lookup(L)
-
-  --- recursing through the object environment stack
-  rule lookupMember(<envStack> _ :: <env> Env </env>  => . <_/envStack>, X)
-       if notBool(X in keys(Env)) [structural]
-
-
-  syntax K ::= lookup Nat
-  rule [lookup-loc]:
-       <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
   syntax List{Type} ::= typeOfAll ( List{Val} )
   macro typeOfAll(V:Val,Vl:List{Val}) = typeOf(V),typeOfAll(Vl) 
@@ -479,16 +489,6 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural] 
   rule <k> V:Val ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
----<SKOOL added>
-
---- an object evironment layer is a map from the class name to the environm. corresp. to local fields
-  syntax ListItem ::= Id :: Bag [metadata "latex(renameTo _\\ensuremath{\\mathrel{::}}_)"]
---- the following is nedeed for stacking
-  syntax ListItem ::=    Map # K # K # Type 
---- the following are needed at the creation of a new object and at a method call
-  syntax K ::= restore ( K ) | discard |  addEnvLayer 
-  syntax KLabel ::= create | setCrntClass
---- the names for the local environment and the global environments for an object
 
 --- subtype relationship
 

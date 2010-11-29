@@ -13,8 +13,8 @@ kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
               | v | w | x 
               | y | z 
               | aa | bb | cc | dd
-              | m0 | m1 | m2 | m3 | m4
-              | aux
+              | m0 | m1 | m2 | m3 | m4 | m5
+              | aux1 | aux2
               | divide2 | collatz 
               | dummy1 | dummy2 | init 
               | reverse | printAll 
@@ -830,20 +830,26 @@ macro p22 =
                                 ---"object as class" casts "object" to "class"
        } 
        method m4():int {
-         return aux(this);
+         return aux1(this);
        }
-       method aux(o:a):int {    --- implicit casting, again
+       method aux1(o:a):int {   --- implicit casting, again
          return o.x;
+       }
+       method m5():bool {
+         return aux2(this);
+       }
+       method aux2(o:a):bool {   --- implicit casting, again
+         return (o as b).x;      --- but then explicit casting back to b
        }
      }
 
      class main {
        method main() {
          var o:b = new b();
-         write(o.m0(), o.m1(), o.m2(), o.m3(), o.m4());
+         write(o.m0(), o.m1(), o.m2(), o.m3(), o.m4(), o.m5());
        }
      }
---- 7 7 7 7 7
+--- 7 7 7 7 7 true
 
 
 macro p23 =
