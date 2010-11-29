@@ -119,7 +119,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Local variable lookup
 --- If X is in the local environment, then it is a local variable, not a field.
   rule [lookup-var]:
-       <k> X => V:Val <_/k>
+       <k> X => V <_/k>
        <env_> X |-> L <_/env>
        <store_> L |-> V <_/store>
 
@@ -212,7 +212,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <crntObj> Obj':K => Obj </crntObj>
        <env> Env =>  getList{K}(Xl) |-> N..N+Nat|Xl| </env>
        <return> T':Type => T </return>
-       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(castAll(Tl,Vl))) <_/store>
+       <store_> L|->lambda(Xl:List{Id},S) (. => N..N+Nat|Xl| |-> getList{K}(upcastAll(Vl,Tl))) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
        <classes> Cls </classes>
     if subtypeAll(typeOfAll(Vl), Tl, Cls)
@@ -221,7 +221,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax ListItem ::=    Map # K # K # Type
 
 --- Function return.  We define it here because it is related to the above
-  rule <k> return(V); ~> _ => cast(T, V) ~> K </k>
+  rule <k> return(V); ~> _ => upcast(V,T) ~> K </k>
        <fstack> Env # K # Obj # T' => . <_/fstack>
        <crntObj> _ => Obj </crntObj>
        <env> _ => Env </env>
@@ -307,11 +307,15 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <classes> Cls:Bag </classes>
 
 --- Casting
-  rule [as]:
+--- Objects can be cast to any supertype of their creation (and not current!) type
+  rule [cast-obj]:
        <k> cast obj(_,L) to C1 => obj(C1,L) <_/k>
        <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
        <classes> Cls </classes>
     if subtype(C2, C1, Cls)
+--- Other values can only be cast to their own types (this may change in the future)
+  rule [cast-other]: cast V to T => V
+    if typeOf(V) ==Bool T
 
 
 ------------------
@@ -332,7 +336,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   context ([HOLE] => l-value([HOLE]))=_;
   rule [assignment]:
        <k> loc(L)=V1; => . <_/k>
-       <store_> L |-> (V2 => cast(typeOf(V2),V1)) <_/store>
+       <store_> L |-> (V2 => upcast(V1,typeOf(V2))) <_/store>
        <classes> Cls </classes>
     if subtype(typeOf(V1), typeOf(V2),Cls)
 
@@ -363,12 +367,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 ---  - typeList and idList
 ---  - l-value and loc
 ---  - envStack, lookupMember and lookup
----  - castAll
----  - subtypeAll
----  - typeOfAll
----  - subtype
----  - typeOf
----  - cast
+---  - typeOf, typeOfAll
+---  - upcast, upcastAll
+---  - subtype, subtypeAll
 --- We next declare, define and discuss them in the order of their appearence.
 --- In order to define some of them, we need to introduce further auxilliary operations.
 --- We also take the opportunity here to define the syntactic categories (or sorts)
@@ -442,75 +443,63 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule [lookup-loc]:
        <k> lookup(L) => V <_/k> <store_> L|->V <_/store>
 
-
- 
-  syntax List{Val} ::= castAll ( List{Type} , List{Val} )
-  macro castAll((T,Tl),(V,Vl)) = cast(T,V), castAll(Tl, Vl)
-  macro castAll(.List{Bottom},.List{Bottom}) = .List{Bottom}
-  syntax Val ::= cast( Type , Val )
-  macro cast(C, obj(_,L)) = obj(C,L)
-  macro cast(T, V2) = V2 [owise]
-
-
-
-
-
-  syntax List{Type} ::= typeOfAll ( List{Val} )
-  macro typeOfAll(V:Val,Vl:List{Val}) = typeOf(V),typeOfAll(Vl) 
-  macro typeOfAll(.List{Bottom}) = .List{Bottom} 
+--- typeOf, typeOfAll
   syntax Type ::= typeOf ( Val )
+  syntax List{Type} ::= typeOfAll ( List{Val} )
+  rule typeOf(function(T,_,_)) => T                             [structural]
+  rule typeOf(array(T,_,_)) => T                                [structural]
+  rule typeOf(I:Int) => int                                     [structural]
+  rule typeOf(B:Bool) => bool                                   [structural]
+  rule typeOf(none) => void                                     [structural]
+  rule typeOf(obj(C,_)) => C                                    [structural]
+  rule typeOf(objEnv(<envStack> C :: _ <_/envStack>)) => C      [structural]
+  rule typeOfAll(V:Val,Vl:List{Val}) => typeOf(V),typeOfAll(Vl) [structural]
+  rule typeOfAll(.List{Bottom}) => .List{Bottom}                [structural]
 
-  macro typeOf(function`(_`,_`,_`)(T,_,_)) = T 
-  macro typeOf(array(T,_,_)) = T
-  macro typeOf(I:Int) = int 
-  macro typeOf(B:Bool) = bool 
-  macro typeOf(none) = void 
----<SKOOL added>
-  macro typeOf(obj(C,_)) = C
-  macro typeOf(objEnv(<envStack> C :: _ <_/envStack>)) = C
----</SKOOL added>
+--- upcast, upcastAll
+--- These are only called after the subtype compatibility was checked,
+--- so there is no need to check it again.
+  syntax Val ::= upcast( Val , Type )
+  syntax List{Val} ::= upcastAll ( List{Val} , List{Type} )
+  rule upcast(obj(_,L),C) => obj(C,L)                              [structural]
+  rule upcast(V,T) => V if typeOf(V) ==Bool T                      [structural]
+  rule upcastAll((V,Vl),(T,Tl)) => upcast(V,T), upcastAll(Vl, Tl)  [structural]
+  rule upcastAll(.List{Bottom},.List{Bottom}) => .List{Bottom}     [structural]
+
+--- subtype, subtypeAll
+  syntax Bool ::= subtype ( Type , Type , Bag ) 
+  syntax Bool ::= subtypeAll ( List{Type} , List{Type} , Bag )
+  rule subtype(T, T, _) => true   [structural]
+  rule subtype((C1 => C2), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>))
+    if C1 =/=Bool C'              [structural]
+  rule subtype(object,C,_) => C ==Bool object [structural]
+  rule subtype(int ,C,_) => false [structural]
+  rule subtype(bool,C,_) => false [structural]
+  rule subtype(void,C,_) => false [structural]
+  rule subtype(C,int ,_) => false [structural]
+  rule subtype(C,bool,_) => false [structural]
+  rule subtype(C,void,_) => false [structural]
+  rule subtypeAll((T:Type,Tl:List{Type}),(T':Type,Tl':List{Type}), Cls) => subtype(T,T', Cls) andBool subtypeAll(Tl, Tl', Cls) [structural]
+  rule subtypeAll(.List{Bottom},.List{Bottom},_) => true [structural]
+
+--- Length
+  syntax Nat ::= `| List{Id} `|
+  rule |.List{Bottom}| => 0           [structural]
+  rule |X, Xl:List{Id}| => sNat |Xl|  [structural]
+
+--- Generate sequence of locations
+  syntax List{K} ::= Nat .. Nat
+  rule N1:Nat..N1 => .List{K}         [structural]
+  rule N1..N2:Nat => N1,,sNat N1..N2  [structural]
+
+--- Environment recovery
+  syntax K ::= env ( Map ) 
+  rule env(_) ~> env(Env:Map) => env(Env)                   [structural] 
+  rule <k> env(Env) => . <_/k> <env> _ => Env </env>        [structural] 
+  rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
 --- List{Val}
   syntax List{Val} ::= Val | List{Bottom} |  List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
---- length
-  syntax Nat ::= `| List{Id} `|
-  macro |.List{Bottom}| = 0  
-  macro |X, Xl:List{Id}| = sNat |Xl|
-
---- generate sequence of locations
-  syntax List{K} ::= Nat .. Nat
-  rule N1:Nat..N1 => .List{K} [structural]
-  rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
-
---- environment recovery
-  syntax K ::= env ( Map ) 
-  rule env(_) ~> env(Env:Map) => env(Env) [structural] 
-  rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural] 
-  rule <k> V:Val ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
-
-
---- subtype relationship
-
-  syntax Bool ::= subtypeAll ( List{Type} , List{Type} , Bag ) 
-  macro subtypeAll((T:Type,Tl:List{Type}),(T':Type,Tl':List{Type}), Cls) = subtype(T,T', Cls) andBool subtypeAll(Tl, Tl', Cls)
-  macro subtypeAll(.List{Bottom},.List{Bottom},_) = true 
-  syntax Bool ::= subtype ( Type , Type , Bag ) 
-  macro subtype(T, T, _) = true
-  macro subtype(object, C, _) = C ==Bool object
-  rule subtype((C1 => C2), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>)) 
-      [structural]
-  macro subtype(int, C2,_) = false 
-  macro subtype(bool, C2,_) = false 
-  macro subtype(void, C2,_) = false 
-  macro subtype(C, int,_) = false 
-  macro subtype(C, bool,_) = false 
-  macro subtype(C, void,_) = false 
-
----</SKOOL added>
-
-
 endkm
-
-
