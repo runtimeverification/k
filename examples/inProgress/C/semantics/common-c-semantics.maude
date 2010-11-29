@@ -239,6 +239,14 @@ mod COMMON-SEMANTIC-SYNTAX is
 	--- Types
 	op typedDeclaration : Type Id -> Type . --- would rather this be KResult, but can't get the subsorting to work
 	
+	--- op testing : -> Set [memo] .
+	--- eq testing =  Set(
+		--- l('arrayType),, 
+		--- l('bitfieldType),, 
+		--- l('functionType)
+	--- ) .
+	
+	
 	sort Type .
 	sort Value .
 	sort List{Type} .

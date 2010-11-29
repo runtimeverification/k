@@ -1,6 +1,6 @@
 kmod DYNAMIC-C-SEMANTICS is
 	including COMMON-C-SEMANTICS
-	
+		
 ---C99 5.1.2.2.1:2
 --- If they are declared, the parameters to the main function shall obey the following
 --- constraints:
