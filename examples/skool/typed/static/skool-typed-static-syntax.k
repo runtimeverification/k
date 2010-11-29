@@ -42,7 +42,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
 --- Expressions
   syntax Exp ::= Int | Bool
                | Var
-               | ++ Exp            [strict prec 0]                      --- want to increment o.f and a[5], too
+               | ++ Exp            [prec 0]                     --- want to increment o.f and a[5], too
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
                | Exp * Exp         [strict prec 31 gather(E e)]
@@ -70,7 +70,8 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                | super
                | Exp . Id [strict(1) prec 1]
                | Exp instanceOf Id [strict(1) prec 0]  --- checking if object Exp is instance of class Id
-               | Exp as Id [strict(1) prec 0]          --- explicit casting
+               | cast Exp to Type [strict(1) prec 0]   --- explicit casting to a type
+               | cast Exp to Id [strict(1) prec 0]     --- explicit casting to a class
 
 
 --- Statements
@@ -145,6 +146,7 @@ kmod SKOOL-TYPED-STATIC-CLASS-TYPE-SYNTAX is including SKOOL-TYPED-SYNTAX
       = method F:Id(L:List{VarType}) : class F'  S 
   macro F : F' = F : class F'
   macro (F : F' = E) = (F : class F' = E:Exp)
+  macro cast E to F = cast E to (class F)
 endkm
 
 kmod SKOOL-TYPED-STATIC-DESUGARED-SYNTAX is including SKOOL-TYPED-STATIC-CLASS-TYPE-SYNTAX
@@ -155,7 +157,6 @@ kmod SKOOL-TYPED-STATIC-DESUGARED-SYNTAX is including SKOOL-TYPED-STATIC-CLASS-T
 -------------------------------------------------------------------------------
 
   macro var VT1:VarType, VT2:VarType, L:List{VarType} ; = var VT1 ; var VT2,L ;
-  macro var V:Var : T:Type = E:Exp; = var V : T; V = E;
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:Id = E1:Exp to E2:Exp do S) = {var X : int ; X=E1; while X <= E2 do {S X=X+1;}}
   macro method F:Id() : Tp:Type S = method F(.List{Bottom}) : Tp  S
