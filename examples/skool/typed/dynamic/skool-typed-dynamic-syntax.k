@@ -69,7 +69,7 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
                | super
                | Exp . Id [prec 1]
                | Exp instanceOf Id [strict(1) prec 0]  --- checking if object Exp is instance of class Id
-               | Exp as Id [prec 0 strict(1)]          --- explicit casting
+               | cast Exp to Id [prec 0 strict(1)]     --- explicit casting
 
 
 --- Statements

@@ -302,15 +302,16 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <extends> C' </extends>
 
 --- instanceOf
-  rule [instanceOf]: <k> _instanceOf_(obj(_,L), C1) => subtype(C2,C1,Cls) <_/k>
+  rule [instanceOf]: <k>  obj(_,L) instanceOf C1 => subtype(C2,C1,Cls) <_/k>
        <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
        <classes> Cls:Bag </classes>
 
 --- Casting
-  rule [as]: <k> _as_(obj(_,L),C1) => obj(C1,L) <_/k>
-             <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
-             <classes>Cls</classes>
-        if subtype(C2, C1, Cls)
+  rule [as]:
+       <k> cast obj(_,L) to C1 => obj(C1,L) <_/k>
+       <store_> L |-> objEnv(<envStack> C2::_ <_/envStack>) <_/store>
+       <classes> Cls </classes>
+    if subtype(C2, C1, Cls)
 
 
 ------------------
@@ -447,7 +448,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro castAll((T,Tl),(V,Vl)) = cast(T,V), castAll(Tl, Vl)
   macro castAll(.List{Bottom},.List{Bottom}) = .List{Bottom}
   syntax Val ::= cast( Type , Val )
-  macro cast(C, obj(_,L)) = obj(C,L) 
+  macro cast(C, obj(_,L)) = obj(C,L)
   macro cast(T, V2) = V2 [owise]
 
 

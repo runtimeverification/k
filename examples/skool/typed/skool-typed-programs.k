@@ -826,8 +826,8 @@ macro p22 =
                                 --- the field x is the one in the type a of o, that is, 7
        }
        method m3():int {
-         return (this as a).x;  --- explicit casting
-                                ---"object as class" casts "object" to "class"
+         return (cast this to a).x;  --- explicit casting
+                                     ---"cast object to class" casts "object" to "class"
        } 
        method m4():int {
          return aux1(this);
@@ -838,8 +838,8 @@ macro p22 =
        method m5():bool {
          return aux2(this);
        }
-       method aux2(o:a):bool {   --- implicit casting, again
-         return (o as b).x;      --- but then explicit casting back to b
+       method aux2(o:a):bool {       --- implicit casting, again
+         return (cast o to b).x;     --- but then explicit casting back to b
        }
      }
 
