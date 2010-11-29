@@ -130,13 +130,13 @@ kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID
 endkm
 
 kmod SKOOL-TYPED-STATIC-CLASS-TYPE-SYNTAX is including SKOOL-TYPED-SYNTAX
--------------------------------------------------------------------------------
---- Because Types will become values, we cannot have Id as a subsort to     ---
---- Type, as most Id's are supposed to be evaluated.  One solution would be ---
---- have a subsort ClassId of Id which would also be subsorted to Type.     ---
---- Instead of that we here prefer to distinguish class types syntactically,---
---- and to then desugar them to constructs using the class type below.      ---
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--- Because Types will become values, we cannot have Id as a subsort to      ---
+--- Type, as most Id's are supposed to be evaluated.  One solution would be  ---
+--- to have a subsort ClassId of Id which would also be subsorted to Type.   ---
+--- Instead of that we here prefer to distinguish class types syntactically, ---
+--- and to then desugar them to constructs using the class type below.       ---
+--------------------------------------------------------------------------------
 
  syntax Type ::=  class Id                             --- class type
 --- resolving class ids

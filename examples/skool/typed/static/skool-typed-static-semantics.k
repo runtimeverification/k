@@ -309,5 +309,3 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   macro typeList(X : Tp,XTl) = Tp,typeList(XTl) 
 
 endkm
-
-
