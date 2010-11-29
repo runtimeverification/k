@@ -2,25 +2,21 @@
 --- SKOOL-TYPED-DYNAMIC-SEMANTICS module ---
 --------------------------------------------
 
-
----------------------
---- configuration ---
----------------------
 kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX + K 
 
-  syntax Val ::= Type
-  syntax Type ::= stmt | decl
+--- both expression and statements can evaluate to types
+  syntax Type ::= stmt | decl | correct
 
---- the values are expressions
-  syntax Exp ::= Val
-  syntax Stmt ::= Val
+  syntax Exp ::= Type
+  syntax List{Exp} ::= List{Type} 
+  syntax Stmt ::= Type
 
---- We have to subsort all the syntactic categories to K, and the lists of values
+--- We have to subsort all the syntactic categories to K, and the lists of types
 --- to KResult.  Recall that the second argument of a method application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
 
-  syntax K ::= Stmts | List{Exp} | List{Type} | List{IdType} | List{Top}
-  syntax KResult ::= List{Val} 
+  syntax K ::= Stmts | List{Exp} | List{Type} | List{VarType} | List{Top}
+  syntax KResult ::= List{Type} 
 
   configuration <T> 
                      <k> .K </k>
@@ -41,7 +37,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                 </T>
 
 
-  syntax Pass ::= start | classes | methods
+  syntax Pass ::= start | global | classes | methods | end
   syntax K ::= Pass
 
 -------------------------------
@@ -50,7 +46,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 
 ---  start the first pass through the program to collect declarations
 
-  rule <k> .K => Pgm:Stmts </k> <pgm> Pgm </pgm> <pass> start => classes </pass>
+  rule <k> .K => Pgm:Stmts </k> <pgm> Pgm </pgm> <pass> start => global </pass>
 
 --- variable declaration; in the preprocessing phase only the global variables are processed 
 --- this rule is also used to process the local variables of a function
@@ -60,19 +56,21 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   rule B:Bool => bool 
   
   rule [decl-variable]: <k> var X:Id : Tp:Type ; => decl <_/k> 
-       <tenv> TEnv:Map => TEnv[Tp / X] </tenv> 
+       <tenv> TEnv:Map => TEnv[Tp / X] </tenv> <pass> Pass </pass>
+       if Pass =/=Bool global
 
 --- If an array is declared, then calculate its size; 
 
   context var X:Id[[HOLE]] : Tp ;
   rule [decl-array]: <k> var X[int] : _`[`](Tp) ; => decl <_/k> 
-       <tenv> TEnv => TEnv[ _`[`](Tp)/X] </tenv>
+       <tenv> TEnv => TEnv[ _`[`](Tp)/X] </tenv>  <pass> Pass:Pass </pass>
+       if Pass =/=Bool global
 
   rule (sizeOf(_`[`](Tp)) => int)   
 
 ---<SKOOL modified>
 
-  rule [decl-method]: <k> method F:Id(XTl:List{IdType}) : Tp S:Stmt => decl <_/k> 
+  rule [decl-method]: <k> method F:Id(XTl:List{VarType}) : Tp S:Stmt => decl <_/k> 
        <tenv_> . => F |-> ((typeList(XTl)->Tp)) <_/tenv> 
        <pass> classes </pass> 
 
@@ -87,7 +85,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                    <_/class>)
        <crntClass> _ => class C1 </crntClass>
        <tenv> TEnv </tenv> 
-       <pass> classes </pass>
+       <pass> global => classes </pass>
 
   syntax K ::= env ( Map ) 
 
@@ -96,6 +94,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
        <crntClass> class C1 </crntClass>
        <className> C1 </className>
        <ctenv> _ => TEnv' </ctenv>
+       <pass> classes => global </pass>
       
        
 --- when we are done with the first pass (preprocessing), i.e., the computation and gtenv are empty, 
@@ -104,7 +103,10 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
        (. => 
         <class_> <className> object </className> <tenv> TEnv </tenv> <_/class>)
       <pgm> Pgm </pgm>
-      <pass> classes => methods </pass>
+      <pass> global => methods </pass>
+
+  rule [done]: <k> Tp => correct </k>
+       <pass> methods => end </pass>
 
 
 --- At the second pass, we need to type each method of each class
@@ -115,7 +117,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
        <pass> methods </pass>
 
   rule [type-method]: 
-       <k> (method F:Id(XTl:List{IdType}) : Tp S:Stmt => S) <_/k> 
+       <k> (method F:Id(XTl:List{VarType}) : Tp S:Stmt => S) <_/k> 
        <tenv> _ => getList{K}(idList(XTl)) |-> getList{K}(typeList(XTl)) </tenv> 
        <return> _ => Tp </return> <pass> methods </pass>
 
@@ -202,6 +204,12 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
        <classes> Cls:Bag </classes>
        if subtype(class C1,class C2,Cls)
 
+--- as operator
+
+  rule [as]: <k> _as_(class C1, C2) => class C2<_/k>
+       <classes> Cls:Bag </classes>
+       if subtype(class C1,class C2,Cls)
+
 ---</SKOOL added>
 
 ---------------------
@@ -247,7 +255,8 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
   rule Tp; => stmt 
   rule if bool then stmt else stmt => stmt
   rule while bool do stmt  => stmt
-  rule write(int); => stmt 
+  rule write(int,Tpl); => write(Tpl);
+  rule write(.List{Bottom}); => stmt 
 
 
 ----------------------------------------------
@@ -256,18 +265,14 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 
 
 ---</SKOOL added>
-  syntax List{Id} ::= idList ( List{IdType} ) 
+  syntax List{Id} ::= idList ( List{VarType} ) 
   macro idList(.List{Bottom}) = .List{Bottom} 
-  macro idList(X:Id : Tp, XTl:List{IdType}) = X, idList(XTl) 
+  macro idList(X:Id : Tp, XTl:List{VarType}) = X, idList(XTl) 
 
 --- translation of a lists of typed names into a list of the corresponding types
-  syntax List{Type} ::= typeList ( List{IdType} ) 
+  syntax List{Type} ::= typeList ( List{VarType} ) 
   macro typeList(.List{Bottom}) = .List{Bottom} 
   macro typeList(X : Tp,XTl) = Tp,typeList(XTl) 
-
---- List{Val}
-  syntax List{Val} ::= Val | List{Type} |  List{Val} , List{Val} [ditto]
-  syntax List{Exp} ::= List{Val}
 
 ---<SKOOL added>
 
