@@ -1,30 +1,17 @@
-#include <stdlib.h>
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
 
-int refact(int n)
-/*@ pre  < config > < env > n |-> n0 </ env >
-                    < form > @(n0 >Int 0) </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < form > returns (factorial(n0)) </ form >
-                    C </ config > */
-{
-  int res;
-  res = 1;
-  if (n > 1)
-  {
-    res = res * refact(n - 1) ;
-  }
-  return res;
-}
+1. The "refact" function returns the factorial value for the one received as 
+argument(int fact(int n)). The function is recursive.
+The main function calls the fact function and tests the result.
 
-int main()
-{
-  int f;
-  f = refact(10);
-  return 0;
-}
-
-
-/*@ var n0 : FreeInt */
-/*@ var ?rho : ?MapItem */
-/*@ var C : FreeBagItem */
-
+2. The precondition states that the argument "n" has to be bounded in the 
+environment to the "n0" value and that the n0 value is greater than 0. This 
+examples does not involve working with heaps. 
+There are no extra conditions imposed.
+The postcondition: the environment is irrelevant(it is matched by ?rho). The 
+returned value is the factorial one.
+of iterator reached that of the variable received as argument.
+The last comments of the file contain declarations that are used by the tool.
