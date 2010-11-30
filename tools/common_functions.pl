@@ -1144,11 +1144,18 @@ sub collect_rule_leaf
 #    modules section                          #
 ###############################################
 my %moduleMap = ();
+my %ModuleFileMap = ();
+my %FileModuleMap = ();
+
 my $moduleList = "?";
+my $fileList = "?";
 
 sub build_module_tree
 {
-    local $_ = shift;
+    (my $file, local $_) = (shift, shift);
+    
+    $fileList .= " $file" if $fileList !~ $file;
+    
     my $module = "?";
     my $req = "?";
     my @modules = ();
@@ -1158,14 +1165,19 @@ sub build_module_tree
 	$module = "$1";
 	$module =~ s/\s//g;
 	$moduleList .= " $module";
+	$ModuleFileMap{$module} = $file;
+	my $tempMod = $module;
+	$tempMod = $FileModuleMap{$file} . " $tempMod" if defined($FileModuleMap{$file});
+	$FileModuleMap{$file} = $tempMod;
     }
-
+    
     if (/is\s+including([A-Z\s\-\+]+)/)
     {
 	$req = "$1";
 	$req =~ s/^\s*//g;
 	$req =~ s/\s*$//g;
 	@modules = split(/\s+\+\s+/, $req);
+	$moduleMap{$module} = @modules;
 	$moduleList .= " @modules";
     }
     
@@ -1173,8 +1185,157 @@ sub build_module_tree
     {
 	$moduleMap{$module} = "@modules";
     }
-
+    
+#    print "\nModule:\n";
+#    while( my ($k, $v) = each %moduleMap ) {
+#	print "key: $k, value: $v.\n";
+#    }
+#        print "\nFILE MODULE:\n";
+#    while( my ($k, $v) = each %FileModuleMap ) {
+#	print "key: $k, value: $v.\n";
+#    }
+#    print "\nMODULE FILE:\n";
+#    while( my ($k, $v) = each %ModuleFileMap ) {
+#	print "key: $k, value: $v.\n";
+#    }
+    
+    return $module;
 }
+
+my $subsortations = "";
+my $sorts_ = "";
+
+# register all sorts and subsorts
+sub register_subsorts
+{
+    local $_ = shift;
+
+    # register sorts
+    while (/sort\s+([^<]*?)\s+\./sg)
+    {
+	$sorts_ .= "$1 ";
+    }
+    
+    # register subsorts and undeclared sorts
+    while (/subsort\s+(\S+?)\s+<\s+(\S+?)\s+\./sg)
+    {
+	my $t1 = $1;
+	my $t2 = $2;
+
+	$subsortations .= "$t1 < $t2\n";
+	$sorts_ .= "$t1 " if $sorts_ !~ /$t1/sg;
+	$sorts_ .= "$t2 " if $sorts_ !~ /$t2/sg;
+    }
+}
+
+my %supersortmap = ();
+# find supersorts list by computing supersorts for each sort
+sub find_super_sorts
+{
+    # remove the empty spaces at the end
+    $sorts_ =~ s/\s+$//sg;
+    
+    # split the list
+    my @sorts = split(/\s+/, $sorts_);
+    
+    # get all supersorts
+    foreach(@sorts)
+    {
+	$supersortmap{$_} = super($_, $subsortations);
+    }
+
+    # add all supersorts to the final list only once
+    my $supersorts = "";
+    while(my ($k, $v) = each %supersortmap)
+    {
+	my @values = split(/\s+/, $v);
+	foreach(@values)
+	{
+		$supersorts .= "$_ " if ($supersorts !~ /($_)/);
+	}
+    }
+    
+#    print "SUPER: $supersorts\n";
+#    print "\nKWD:\n";
+#    while( my ($k, $v) = each %supersortmap ) {
+#	print "key: $k, value: $v.\n";
+#    }
+    
+    # return the list
+    $supersorts =~ s/\s+$//;
+    $supersorts
+}
+
+# given a sort and a set subsortations
+# computes recursively all supersorts for the given sort
+sub super
+{
+    # first arg is the sort name
+    # second arg is the subsortations set
+    (my $sort, local $_) = @_;
+    
+    # all supersorts will be stored here
+    my @supers = ();
+
+    # get all supersorts for the current sort
+    while (/($sort)\s+<\s+(\S+)/sg)
+    {
+	push(@supers, super($2, $subsortations));
+    }
+
+    # each sort is its own supersort
+    push(@supers, $sort) if scalar(@supers) == 0;
+
+    "@supers";
+}
+
+
+sub find_topmost_module
+{
+    my @modules = ();
+    my $inclusions = "#";
+    
+    # store the values from module map in some convenient structures
+    # each module will be checked -> put it into an array
+    # put all "right hand" modules into a variable separated with # for a future match
+    while(my ($k, $v) = each %moduleMap) 
+    {
+	push(@modules, $k);
+	my @temp = split(/\s+/, $v);
+	foreach(@temp)
+	{
+	    $inclusions .= "$_#";
+	}
+    }
+    
+    # collect all modules which are not included by other modules
+    my @mods = ();
+    foreach (@modules)
+    {
+	push(@mods, $_) if ($inclusions !~ /#$_#/);
+    }   
+    
+#    print "Modules: @mods\n\n";
+    @mods
+}
+
+
+sub getSubsortations
+{
+    return $subsortations;
+}
+
+sub getSorts_
+{
+    return $sorts_;
+}
+
+sub getModuleFile
+{
+    my $module = shift;
+    return $ModuleFileMap{$module};
+}
+
 
 sub exist
 {
@@ -1188,6 +1349,28 @@ sub emptyModuleList
 {
     return $moduleList eq "?";
 }
+
+sub getModuleList
+{
+    my $mods = $moduleList;
+    $mods =~ s/^[\s\?]+//s;
+    return $mods;
+}
+
+sub getFileList
+{
+    my $list = $fileList;
+    $list =~ s/^[\s\?]+//s;
+    return $list;
+}
+
+sub getFileModules
+{
+    my $file = shift;
+    
+    return $FileModuleMap{$file};
+}
+
 
 ###############################################
 #   end modules section                       #
