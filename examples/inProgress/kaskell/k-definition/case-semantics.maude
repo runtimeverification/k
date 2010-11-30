@@ -28,7 +28,11 @@ mod HASKELL-CASE-SEMANTICS is
 	  {y ->  (where y is a new variable)
 	   case v of {
 	         p -> let { decls } in
-	                if g1 then e1 ... else if gn then en else y ;
+                case () of {
+                  () | gs1 -> e1;
+                  _ -> ... case () of {
+                             () | gsn -> en;
+                             _ -> y } ... }
 	         _ -> y }}
 ***)
 
@@ -42,6 +46,8 @@ mod HASKELL-CASE-SEMANTICS is
 (e)	case v of { x@p -> e; _ -> e' }
 	=  case v of { p -> ( \ x -> e ) v ; _ -> e' }
 ***)
+
+  eq Case (V:Exp) (
 
 ***(
 (f)	case v of { _ -> e; _ -> e' } = e
@@ -125,10 +131,28 @@ mod HASKELL-CASE-SEMANTICS is
 ***)
 
 ***(
-(s)
-	case v of { x+k -> e; _ -> e' }
-	= if v >= k then (\x -> e) (v-k) else e'
-	where k is a numeric literal
+(s) 	case () of { () | g1, ..., gn -> e; _ -> e' }
+	= case () of {
+	    () | g1 -> ... case () of {
+	                   () | gn -> e;
+	                   _ -> e' } ...
+	    _ -> e' }
+	where y is a new variable
+***)
+
+***(
+(t) 	case () of { () | p <- e0 -> e; _ -> e' }
+	= case e0 of { p -> e; _ -> e' }
+***)
+
+***(
+(u) 	case () of { () | let decls -> e; _ -> e' }
+	= let decls in e
+***)
+
+***(
+(v) 	case () of { () | e0 -> e; _ -> e' }
+	= if e0 then e else e'
 ***)
 
 endm
