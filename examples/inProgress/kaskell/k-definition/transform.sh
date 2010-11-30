@@ -18,12 +18,12 @@ USAGE="Usage:
 "
 
 # Parse command line arguments, and set up their behavior
-zparseopts -E -D -- -All=all              \
-                    -Translate=translate              \
-                    -Case=case                   \
-                    -Parse=parse              \
-                    h=showhelp                  \
-                    -help=showhelp \
+zparseopts -E -D -- -All=all             \
+                    -Translate=translate \
+                    -Case=case           \
+                    -Parse=parse         \
+                    h=showhelp           \
+                    -help=showhelp       \
 
 PARSE_SOURCES=(hsStructs.maude haskell-syntax.maude)
 CASE_SOURCES=(case-semantics.maude)

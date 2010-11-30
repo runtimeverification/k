@@ -99,12 +99,22 @@ final: Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp
 ***)
 
     eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
-   =
-     Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []) .
+     = Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []) .
 
 ***(
 (j)	case v of { x -> e } = ( \ x -> e ) v
+
+AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-j.hs" 2 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
+   ===
+     (App (Paren (Lambda (SrcLoc "tests/case-j.hs" 3 16) ((:)(PVar (Ident "x")) ([])) (Var (UnQual (Ident "e"))))) (Var (UnQual (Ident "v"))))
+
+more-general:  (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []))
+   ===
+     (App (Paren (Lambda Loc1:SrcLoc ((:)(PVar X:Name) []) E:Exp)) (Var V:QName))
 ***)
+
+    eq (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []))
+     = (App (Paren (Lambda Loc1:SrcLoc ((:)(PVar X:Name) []) E:Exp)) (Var V:QName)) .
 
 ***(
 (k)	case N v of { N p -> e; _ -> e' }
