@@ -83,7 +83,7 @@ kmod INCOMING-MODULES is
 	including C-CONFIGURATION 
 	including K-CONTEXTS 
 	including K-PROPER 
-	including K-QUOTED-LABELS 
+	--- including K-QUOTED-LABELS 
 endkm
 
 kmod COMMON-SEMANTIC-SYNTAX is

@@ -139,10 +139,8 @@ kmod COMMON-SEMANTICS-SWITCH is
 		...</ k >
 		if Exp:K =/=Bool l('Default)
 		[structural] 
-	***)
 		
 	--- if all that's left is a default, do it
-	***(zzz
 	rule
 		< k > handleSwitch-aux(SN:Nat, ?, Map((genLabel(SN:Nat, l('Default)) |-> ?))) 
 			=> Goto(genLabel(SN:Nat, l('Default)))
@@ -164,12 +162,10 @@ kmod COMMON-SEMANTICS-SWITCH is
 		< k > handleSwitch-aux(SN:Nat, ?, Map((? ((genLabel(SN':Nat, ?) |-> ?) => .Map)))) ...</ k >
 		if SN:Nat =/=Bool SN':Nat
 		[structural] 
-	***(zzz
 	rule
 		< k > handleSwitch-aux(SN:Nat, ?, Map((? ((L:KLabel(?) |-> ?) => .Map)))) ...</ k >
 		if L:KLabel =/=Bool 'genLabel
 		[structural] 
-	***)
 			
 	rule
 		< k > tryCase((tv(V:BaseValue, T':Type) => cast(T:Type, tv(V:BaseValue, T':Type))), tv(?, T:Type), ?) ...</ k >
@@ -238,7 +234,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		[structural] 
 		
 	---- first case, when we're in the same block
-	***(zzz
 	rule
 		< k > L:KLabel(gotoObject(Depth:Nat, (ListItem(CurrentBlock:Nat) BlockHistory:List), K:K, LoopStack:List, DeclStack:List)) ~> ? 
 			=> addVariablesForBlock(CurrentBlock:Nat, DeclStack:List)
@@ -252,7 +247,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		if L:KLabel ==Bool 'processGoto
 		orBool L:KLabel ==Bool 'processGotoDown
 		[structural] 
-	***)
 		
 	---- second case, we're in a different block
 	
@@ -303,7 +297,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		[structural] 
 	
 	--- We've made it to the block above the target
-	***(zzz
 	rule
 		< k > L:KLabel(gotoObject(sNat(Depth:Nat), 
 				(ListItem(TargetBlock:Nat) BlockHistory:List),
@@ -324,7 +317,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		if L:KLabel ==Bool 'processGoto
 		orBool L:KLabel ==Bool 'processGotoDown
 		[structural] 
-	***)
 		
 	op addVariablesForBlock : Nat List -> K 
 	
@@ -484,7 +476,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		< blockHistoryGoto > ListItem(BlockNum:Nat) ...</ blockHistoryGoto >
 		[structural] 
 		
-	***(zzz
 	rule 
 		< computation > L:KLabel(Args:List{K}) => .K ...</ computation >
 		if false
@@ -496,7 +487,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		orBool L:KLabel ==Bool 'Goto
 		orBool L:KLabel ==Bool 'CompGoto
 		[structural] 
-	***)
 		
 ***(
 	op Sequence : K K -> PureStatement --- still don't know what this is
@@ -655,7 +645,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		if notBool $hasMapping(M:Map, genLabel(SwitchNum:Nat, Val:K))
 		--- andBool hasIntegerType(T:Type)
 		[structural] 
-	***(zzz
 	rule
 		< computation > (Default(SwitchNum:Nat, S:K) => S:K) ~> K:K </ computation >
 		< computationTail > Tail:K </ computationTail >
@@ -669,7 +658,6 @@ kmod COMMON-SEMANTICS-GOTO is
 		< blockHistoryGoto > BlockHistory:List </ blockHistoryGoto >
 		if notBool $hasMapping(M:Map, genLabel(SwitchNum:Nat, l('Default)))
 		[structural] 
-	***)
 endkm
 
 kmod COMMON-SEMANTICS-RETURN is
@@ -837,7 +825,6 @@ kmod COMMON-C-STATEMENTS is
 		--- < loopStack > ListItem(K:K) => (.).List ...</ loopStack >
 		--- [metadata "computational rule"] --- nondet
 	
-	***(zzz
 	rule [continue]:
 		< k > Continue ~> ((L:KLabel)(?) => .) ...</ k >
 		if L:KLabel =/=Bool 'loopMarked
@@ -845,7 +832,6 @@ kmod COMMON-C-STATEMENTS is
 		andBool L:KLabel =/=Bool 'pushBlock
 		andBool L:KLabel =/=Bool 'popLoop
 		[structural] --- nondet
-	***)
 	rule [continue]:
 		< k > Continue ~> popBlock 
 			=> popBlock
@@ -856,11 +842,8 @@ kmod COMMON-C-STATEMENTS is
 	rule [continue-done]:
 		< k > (Continue => Computation(Post:K)) ~> loopMarked ~> For(?, ?, ?, Post:K, ?) ...</ k >
 		[structural] --- nondet
-	***(zzz
 	rule [continue-done]:
 		< k > (Continue => .) ~> loopMarked ~> L:KLabel(?) ...</ k >
 		if L:KLabel =/=Bool 'For
-		[structural] --- nondet
-	***)
-		
+		[structural] --- nondet		
 endkm

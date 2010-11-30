@@ -9,25 +9,21 @@ kmod COMMON-SEMANTICS-TYPE-INCLUDE is
 	op evalToType : -> K 
 		
 	op typeStrictBinaryOperators : -> Set [memo] 
-	***(zzz
 	eq typeStrictBinaryOperators = Set(
 		l('_*_),, l('_/_),, l('_%_),,
 		l('_+_),, l('_-_),,
 		l('_<_),, l('_>_),, l('_<=_),, l('_>=_),,
 		l('_&_),, l('_|_),, l('_^_),,
 		l('_`[_`])
-	) 
-	***)
+	)
 	
 	op typeStrictLeftBinaryOperators : -> Set [memo] 
-	***(zzz
 	eq typeStrictLeftBinaryOperators = Set(
 		l('_<<_),, l('_>>_),,
 		l('_*=_),, l('_/=_),, l('_%=_),, l('_+=_),, l('_-=_),, 
 		l('_<<=_),, l('_>>=_),, l('_&=_),, l('_^=_),, l('_|=_),,
 		l('_++),, l('_--),, l('--_),, l('++_)
 	) 
-	***)
 endkm
 
 kmod COMMON-SEMANTICS-TYPE-DECLARATIONS is
@@ -184,7 +180,6 @@ kmod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		[structural] 
 		
 	--- specifier, modifier, storage
-	***(zzz
 	rule
 		< k > canonicalizeType((B:Bag (BagItem(T:K) => .Bag)), ?, (? (.Bag => BagItem(T:K))), ?, ?) ...</ k >
 		if false
@@ -207,7 +202,6 @@ kmod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool (getKLabel(T:K) ==Bool 'Named)
 		orBool (getKLabel(T:K) ==Bool 'AttributeValue)
 		[structural] 
-	***)
 	rule
 		< k > canonicalizeType(B:Bag (BagItem(T:K) => .Bag), ?, ?, (? .Bag => BagItem(T:K)), ?) ...</ k >
 		if (T:K ==Bool SpecTypedef)
@@ -271,7 +265,6 @@ kmod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		if X:Id =/=Bool Identifier("")
 		[structural] 
 	
-	***(zzz
 	rule
 		< k > canonicalizeSpecifier(BagItem(L:KLabel((Identifier("") => unnamed(N:Nat)),, L:List{C}))) ...</ k >
 		< freshNat > N:Nat => sNat(N:Nat) </ freshNat >
@@ -279,7 +272,6 @@ kmod COMMON-SEMANTICS-TYPE-CANONICALIZATION is
 		orBool L:KLabel ==Bool 'EnumDef
 		orBool L:KLabel ==Bool 'UnionDef
 		[structural] 
-	***)
 	
 	rule
 		< k > canonicalizeSpecifier(BagItem(StructDef(X:Id, L:List{C})))
@@ -396,8 +388,8 @@ kmod COMMON-SEMANTICS-TYPE-INTERPRETATION is
 	op pushTypeDown : Type KLabel -> Type 
 	
 	eq ArrayType(T:Type, tv(N:Nat, ?)) = pushTypeDown(T:Type, makeArrayType(N:Nat)) 
-	---zzz eq ArrayType(T:Type, emptyValue) = pushTypeDown(T:Type, 'incompleteArrayType) 
-	---zzz eq PointerType(T:Type) = pushTypeDown(T:Type, 'pointerType) 
+	eq ArrayType(T:Type, emptyValue) = pushTypeDown(T:Type, 'incompleteArrayType) 
+	eq PointerType(T:Type) = pushTypeDown(T:Type, 'pointerType) 
 	--- fixme I'm assuming functiontype is always below a prototype 
 	eq FunctionType(T:Type) = T:Type 
 	eq Prototype(T:Type, L:List{Type}, false) = pushTypeDown(T:Type, makeFunctionType(L:List{Type})) 
@@ -633,7 +625,6 @@ kmod COMMON-SEMANTICS-TYPE-EXPRESSIONS is
 		...</ type >
 		[structural] 
 	
-	***(zzz	
 	rule [type-assignment]:
 		< type > L:KLabel(K:K,, ?) 
 			=> K:K
@@ -643,7 +634,6 @@ kmod COMMON-SEMANTICS-TYPE-EXPRESSIONS is
 			l('_<<=_),, l('_>>=_),, l('_&=_),, l('_^=_),, l('_|=_)
 		) contains l(L:KLabel)
 		[structural]
-	***)
 	
 	rule 
 		< type > L:KLabel(T:Type,, T':Type) => maxType(T:Type, T':Type) ...</ type >
@@ -658,7 +648,6 @@ kmod COMMON-SEMANTICS-TYPE-EXPRESSIONS is
 		andBool hasIntegerType(T':Type)
 		[structural] 
 		
-	***(zzz
 	rule
 		< type > L:KLabel(?:K,, ?:K) => int ...</ type >
 		if L:KLabel ==Bool '_==_
@@ -666,7 +655,6 @@ kmod COMMON-SEMANTICS-TYPE-EXPRESSIONS is
 		orBool L:KLabel ==Bool '_&&_
 		orBool L:KLabel ==Bool '_||_
 		[structural]
-	***)
 		
 	rule [type-address]:
 		< type > & T:Type => pointerType(T:Type) ...</ type >
@@ -786,26 +774,24 @@ kmod COMMON-C-TYPING is
 	eq hasFloatType(float) = true 
 	eq hasFloatType(double) = true 
 	eq hasFloatType(long-double) = true 
-	***(zzz ceq hasFloatType(T:Type) = false
+	ceq hasFloatType(T:Type) = false
 		if T:Type =/=Bool float
 		andBool T:Type =/=Bool double
 		andBool T:Type =/=Bool long-double
 		andBool getKLabel(T:Type) =/=Bool 'qualifiedType
-	***)
 	
 	eq hasCharType(char) = true 
 	eq hasCharType(unsigned-char) = true 
 	eq hasCharType(signed-char) = true 
-	***(zzz ceq hasCharType(T:Type) = false
+	ceq hasCharType(T:Type) = false
 		if T:Type =/=Bool char
 		andBool T:Type =/=Bool unsigned-char
 		andBool T:Type =/=Bool signed-char
 		andBool getKLabel(T:Type) =/=Bool 'qualifiedType 
-	***)
 	
 	eq hasPointerType(pointerType(?)) = true 
 	eq hasPointerType(qualifiedType(T:Type, ?)) = hasPointerType(T:Type) 
-	***(zzz ceq hasPointerType(T:Type) = false
+	ceq hasPointerType(T:Type) = false
 		if getKLabel(T:Type) =/=Bool 'pointerType
 		andBool getKLabel(T:Type) =/=Bool 'qualifiedType 
 	
@@ -859,7 +845,7 @@ kmod COMMON-C-TYPING is
 		
 	eq hasBitfieldType(bitfieldType(?, ?)) = true 
 	ceq hasBitfieldType(T:Type) = false
-		if getKLabel(T:Type) =/=Bool 'bitfieldType .
+		if getKLabel(T:Type) =/=Bool 'bitfieldType
 		
 	eq hasFunctionType(functionType(?, ?)) = true 
 	eq hasFunctionType(prototype(T:Type)) = hasFunctionType(T:Type) 
@@ -879,5 +865,4 @@ kmod COMMON-C-TYPING is
 	eq unqualifyType(qualifiedType(T:Type, ?)) = T:Type 
 	ceq unqualifyType(T:Type) = T:Type
 		if getKLabel(T:Type) =/=Bool 'qualifiedType 
-	***)
 endkm
