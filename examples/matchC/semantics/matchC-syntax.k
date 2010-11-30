@@ -4,12 +4,12 @@ kmod MATCHC-SYNTAX is including KERNELC-SYNTAX
 ***(
 matching logic annotations
 ***)
-  syntax Annotation ::= /*@`assume Bag */ ---[strat(0)]
-                      | /*@`assert Bag */ ---[strat(0)]
-                      | /*@`invariant Bag */ ---[strat(0)]
+  syntax Annotation ::= /*@`assume Bag */
+                      | /*@`assert Bag */
+                      | /*@`invariant Bag */
 
-  syntax Annotation ::= /*@`pre Bag */ ---[strat(0)]
-                      | /*@`post Bag */ ---[strat(0)]
+  syntax Annotation ::= /*@`pre Bag */
+                      | /*@`post Bag */
 
   syntax Annotation ::= /*@`verify`*/
                       | /*@`skip`*/
