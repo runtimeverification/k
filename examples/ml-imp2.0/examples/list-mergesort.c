@@ -17,10 +17,10 @@ struct nodeList* split(struct nodeList* p)
                     < form > returns ?r /\ (seq2mset(A) === (seq2mset(?A1) U seq2mset(?A2))) </ form > C </ config > */
 {
 	struct nodeList* r;
-  p->next->next = p->next->next;
 	if ((p == 0) || (p->next==0)) r = 0;
 	else
 	{
+    p->next->next = p->next->next;
 		r = p->next;
 		p->next = r->next;
 		r->next = split(p->next);
@@ -40,14 +40,14 @@ struct nodeList* merge(struct nodeList* p, struct nodeList* q)
                             ((?r === p0) \/ (?r === q0)) </ form > C </ config > */
 {
 	struct nodeList* t;
-  p->next = p->next;
-  q->next = q->next;
 	if (q==0) t = p;
 	else
 	{
+    q->next = q->next;
 		if (p==0) t = q;
 		else
 		{
+      p->next = p->next;
 			if (q->val < p->val)
 			{
 				t = q;
@@ -74,11 +74,11 @@ struct nodeList* mergesort(struct nodeList* p)
 {
 	struct nodeList* r;
 	struct nodeList* q;
-  p->next = p->next;
-	q = q1 = p1 = NULL;
+	q = 0;
 	if ((p==0) || (p->next == 0)) r = p;
 	else
 	{
+    p->next = p->next;
 		q = split(p);
 		q = mergesort(q);
 		p = mergesort(p);
