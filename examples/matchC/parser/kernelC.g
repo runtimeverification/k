@@ -352,3 +352,4 @@ COMMENT : '/*' (options { greedy = false; } : .)* '*/' { skip(); } ;
 
 fragment
 LINE_COMMENT : '//' ~('\n' | '\r')* '\r'? '\n' { skip(); } ;
+

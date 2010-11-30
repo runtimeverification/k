@@ -99,20 +99,22 @@ binary_operator
   | '-'   -> OP["_-_"]
   | '*'   -> OP["_*_"]
   | '/'   -> OP["_/_"]
-  | '\%'   -> OP["_\%_"]
+  | '\%'  -> OP["_\%_"]
   | '.'   -> OP["_._"]
   | '->'  -> OP["_->_"]
   ;
 
 unary_operator
-  : REF      -> OP["&"]
-  | DEREF    -> OP["*"]
-  | SIGN_POS -> OP["+"]
-  | SIGN_NEG -> OP["-"]
-  | '~'      -> OP["~"]
-  | '!'      -> OP["!"]
-  | '++'     -> OP["++"]
-  | '--'     -> OP["--"]
+  : REF      -> OP["&_"]
+  | DEREF    -> OP["*_"]
+  | SIGN_POS -> OP["+_"]
+  | SIGN_NEG -> OP["-_"]
+  | '~'      -> OP["~_"]
+  | '!'      -> OP["!_"]
+  | '++'     -> OP["++_"]
+  | '--'     -> OP["--_"]
+  | POST_INC -> OP["_++"]
+  | POST_DEC -> OP["_--"]
   ;
 
 constant
@@ -124,6 +126,9 @@ constant
   | 'void'
   | 'int'
   | ANNOTATION
+//    -> ANNOTATION["/*@ "
+//                  + annotPreK.annotToMaudeString($ANNOTATION.text)
+//                  + " */"]
   ;
 
 arithmetic_constant

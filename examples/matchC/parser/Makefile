@@ -24,8 +24,10 @@ JFLAGS = -classpath $(CLASSPATH)
 
 #
 LANGUAGE = kernelC
-GRAMMARS = $(LANGUAGE).g
-TREE_GRAMMARS = $(LANGUAGE)ToMaude.g
+ANNOTATION = annot
+LEXER_GRAMMARS =
+GRAMMARS = $(ANNOTATION).g $(LANGUAGE).g
+TREE_GRAMMARS = $(ANNOTATION)ToMaude.g $(LANGUAGE)ToMaude.g
 TOKENS = $(LEXER_GRAMMARS:.g=.tokens) \
          $(GRAMMARS:.g=.tokens) \
          $(TREE_GRAMMARS:.g=.tokens)
@@ -36,7 +38,9 @@ WALKERS = $(TREE_GRAMMARS:.g=.java)
 CLASSES = $(LEXERS:.java=.class) \
           $(PARSERS:.java=.class) \
           $(WALKERS:.java=.class) \
-          $(LANGUAGE)PreK.class
+          $(LANGUAGE)PreK.class \
+          $(ANNOTATION)PreK.class \
+          treeUtils.class
 MAIN = $(LANGUAGE)PreK
 
 
