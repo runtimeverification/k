@@ -123,7 +123,7 @@ eq ListComp E ((:) Q []) = ListComp E ((:) Q ((:) (QualStmt (Qualifier (Con (UnQ
 eq ListComp E ((:) (QualStmt (Qualifier E1)) Qs) = If E1 (ListComp E Qs) (List []) .
 eq ListComp E ((:) (QualStmt (Generator Loc P E1)) Qs) =
     Let (BDecls
-        ((:) (FunBind 
+        ((:) (FunBind
             ((:) (Match NoLoc (Ident "ok") ((:) P []) Nothing
               (UnGuardedRhs (ListComp E Qs)) (BDecls []))
             ((:) (Match NoLoc (Ident "ok") ((:) PWildCard []) Nothing
@@ -165,7 +165,7 @@ eq Do ((:) (Qualifier E) []) = E .
 eq Do ((:) (Qualifier E) Ss) = InfixApp E (QVarOp (UnQual (Symbol ">>"))) (Do Ss) .
 eq Do ((:) (Generator Loc P E) Ss) =
     Let (BDecls
-        ((:) (FunBind 
+        ((:) (FunBind
             ((:) (Match NoLoc (Ident "ok") ((:) P []) Nothing
               (UnGuardedRhs (Do Ss)) (BDecls []))
             ((:) (Match NoLoc (Ident "ok") ((:) PWildCard []) Nothing

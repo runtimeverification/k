@@ -47,8 +47,6 @@ mod HASKELL-CASE-SEMANTICS is
 	=  case v of { p -> ( \ x -> e ) v ; _ -> e' }
 ***)
 
-  eq Case (V:Exp) (
-
 ***(
 (f)	case v of { _ -> e; _ -> e' } = e
 ***)
@@ -70,7 +68,39 @@ mod HASKELL-CASE-SEMANTICS is
 
 ***(
 (i)	case v of { x -> e; _ -> e' } = case v of { x -> e }
+
+Pending questions:
+  - Is the _ able to be any pattern, or must this only apply when an underscore is present?
+    Currently, I say it can be any pattern, as I think that's the intent.
+  - The parser gives us Binds in Alts. I don't know why. Currently I generalize them
+
+AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 2 23) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-i.hs" 2 31) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+     (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 3 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
+
+
+minus-srcLoc: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (Loc1:SrcLoc) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (Loc2:SrcLoc) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+     (Case (Var (UnQual (Ident "v"))) ((:)(Alt (Loc1) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
+
+
+more-general: (Case (Var (V:QName)) ((:)(Alt (Loc1:SrcLoc) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (BDecls ([]))) ((:)(Alt (Loc2:SrcLoc) (Underscore:Pat) (UnGuardedAlt (EPrime:Exp)) (BDecls ([]))) ([]))))
+   ===
+     (Case (Var (V)) ((:)(Alt (Loc1) (PVar (X)) (UnGuardedAlt (E)) (BDecls ([]))) ([])))
+
+minus-bdecls: (Case (Var (V:QName)) ((:)(Alt (Loc1:SrcLoc) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (B1:Binds)) ((:)(Alt (Loc2:SrcLoc) (Underscore:Pat) (UnGuardedAlt (EPrime:Exp)) (B2:Binds)) ([]))))
+   ===
+     (Case (Var (V)) ((:)(Alt (Loc1) (PVar (X)) (UnGuardedAlt (E)) (B1)) ([])))
+
+final: Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+   ===
+     Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []) .
+
 ***)
+
+    eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+   =
+     Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []) .
 
 ***(
 (j)	case v of { x -> e } = ( \ x -> e ) v
