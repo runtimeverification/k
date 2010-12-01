@@ -260,11 +260,9 @@ module FilterOutput where
                                  Just (Options Nothing _ _ _ _ _ _ ) -> False
                                  _                                   -> True
 
-
-
   hasStyle :: StyleReader Bool
   hasStyle conf cn f = case lookupCell conf cn of
-                           Just c@(Configs _ _ _ _ _) -> isJust (f c)
+                           Just c@(Configs {}) -> isJust (f c)
                            _                          -> False
 
   fetchStyle :: StyleReader Style

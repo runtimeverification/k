@@ -4,6 +4,15 @@ What it does:
   which is the second command-line argument. See example.yml
 How to build:
   make clean ; make
+  This assumes that you have the necessary dependencies installed. See
+  OutputFilter.cabal for a list of the dependencies. These dependencies can be
+  easily installed via the "cabal" tool that comes with most Haskell
+  distributions. To build with cabal, simply type
+  cabal install
+  and cabal will fetch and install the needed dependencies, and create an
+  executable in your cabal directory (e.g. ~/.cabal/bin). You can either use
+  that executable, or now use the make commands normally, now that you have all
+  the dependencies installed.
 How to run:
   ./filterOutput <output-file> <yaml-config-file>
 

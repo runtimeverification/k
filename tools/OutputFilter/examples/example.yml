@@ -64,15 +64,15 @@ options:
         - "`+"
         - "`*"
       black:
-        - "`[`.`.`. `d+ more `.`.`.`]"
+        - "`[`.`.`. `[0-9]+ more `.`.`.`]"
     bold:
       - "\"goto`.prepre`.gen\""
       - "printf"
-    underline:
-      - "`Wint`W"
-      - "`Wfloat`W"
-      - "`Wvoid`W"
-      - "`Wchar`W"
+    # underline:
+    #   - "`Wint`W"
+    #   - "`Wfloat`W"
+    #   - "`Wvoid`W"
+    #   - "`Wchar`W"
 
 # Default behavior is to blacklist everything else. Note that neither whitelisting or blacklisting are
 # recursive, e.g. whitelisting <thread> wont whitelist all of its children
