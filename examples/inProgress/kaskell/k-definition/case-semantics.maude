@@ -67,21 +67,20 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PAsPat X:Name (PVar P:Na
 ***(
 (f)	case v of { _ -> e; _ -> e' } = e
 Pending Questions:
-  - I think the two _ just mean some pattern, where it's the exact same pattern, and not only for a literal underscore
+  - I think the second _ just means some pattern, while the first must be an actual underscore
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 26) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 34) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
     (Var (UnQual (Ident "e")))
 
-more-general: (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc Underscore:Pat (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) [])))
+more-general: (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc UnderscoreLit:Pat (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) [])))
     ===
     E:Exp
 
 ***)
 
-    eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc Underscore:Pat (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+    eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc PWildCard (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
      = E:Exp .
-
 
 ***(
 (g)	case v of { K p1  ...pn -> e; _ -> e' }
