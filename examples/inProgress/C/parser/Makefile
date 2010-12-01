@@ -36,12 +36,12 @@ cabshelper.cmx cabshelper.cmi: errormsg.cmi growArray.cmi cabs.cmi
 cparser.cmx: cabs.cmi cabshelper.cmi lexerhack.cmi cprint.cmi
 cabsDriver.cmx cabsDriver.cmi: cparser.cmi frontc.cmi clexer.cmi
 frontc.cmx frontc.cmi: errormsg.cmi whitetrack.cmi cprint.cmi clexer.cmi
-clexer.cmx clexer.cmi: lexerhack.cmi cparser.cmi
+clexer.cmx clexer.cmi: lexerhack.cmi cparser.cmi cabshelper.cmi
 cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi
 %.cmx %.cmi: %.ml Makefile
 	$(OCAML_COMPILE) $*.ml
 	
-cparser.cmi: cparser.mli cabs.cmi
+cparser.cmi: cparser.mli cabs.cmi clexer.ml
 	$(OCAML_COMPILE) cparser.mli
 	
 cabsDriver.cmx cabsDriver.cmi: cabsPrinter.cmi
