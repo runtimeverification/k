@@ -42,7 +42,7 @@
 (* intermediate language, and then renders that back into C *)
 
 module F = Frontc
-module C = Cil
+(* module C = Cil *)
 (* module CK = Check *)
 module E = Errormsg
 open Printf
@@ -56,6 +56,10 @@ let outChannel : outfile option ref = ref None
 let replace input output =
     Str.global_replace (Str.regexp_string input) output
 	
+let fileNames : string list ref = ref []
+let recordFile fname = 
+  fileNames := fname :: (!fileNames) 	
+	
 let noscores s = 
 	(replace "_" "u" s)
 
@@ -67,7 +71,7 @@ let parse_helper fname =
 
 let parseOneFile (fname: string) =
   (* PARSE *)
-  if !Cilutil.printStages then ignore (E.log "Parsing %s\n" fname);
+  (* if !Cilutil.printStages then ignore (E.log "Parsing %s\n" fname); *)
   (*let cil = F.parse fname () in *)
   let cabs = parse_helper fname in
   cabs
@@ -98,7 +102,7 @@ let rec processOneFile (cabs: Cabs.file) =
 	));
 
     if !E.hadErrors then
-      E.s (E.error "Error while processing file; see above for details.");
+      E.s ("Error: Error while processing file; see above for details.");
 
   end
         
@@ -125,7 +129,7 @@ let theMain () =
   (* Construct the arguments for the features configured from the Makefile *)
   let blankLine = ("", Arg.Unit (fun _ -> ()), "") in
     
-  let argDescr = Ciloptions.options @ 
+  let argDescr =
         [ 
           "--out", Arg.String (openFile "output" 
                                  (fun oc -> outChannel := Some oc)),
@@ -138,25 +142,25 @@ let theMain () =
 		(* Stats.reset Stats.HardwareIfAvail; *)
 
 		(* parse the command-line arguments *)
-		Arg.parse (Arg.align argDescr) Ciloptions.recordFile usageMsg;
+		Arg.parse (Arg.align argDescr) recordFile usageMsg;
 		(* Cil.initCIL (); *)
-
-		Ciloptions.fileNames := List.rev !Ciloptions.fileNames;
+(*
+		fileNames := List.rev !fileNames;
 
 		(* parse each of the files named on the command line, to CIL *)
 		let files = Util.list_map parseOneFile !Ciloptions.fileNames in
-
+ *)
 		(* if there's more than one source file, merge them together; *)
 		(* now we have just one CIL "file" to deal with *)
 		let one =
-			match files with
-			  [one] -> one
-			| [] -> E.s (E.error "No arguments for CIL")
-			| _ -> E.s (E.error "Can only handle one input file")
+			match !fileNames with
+			  [one] -> parseOneFile one
+			| [] -> E.s ("Error: No arguments for CIL")
+			| _ -> E.s ("Error: Can only handle one input file")
 		in
 
 		if !E.hadErrors then
-			E.s (E.error "Cabs2cil had some errors");
+			E.s ("Error: Cabs2cil had some errors");
 				
 		(* process the CIL file (merged if necessary) *)
 		processOneFile one
@@ -167,8 +171,8 @@ let theMain () =
 let failed = ref false 
 
 let cleanup () = 
-  if !E.verboseFlag || !Cilutil.printStats then
-    Stats.print stderr "Timings:\n";
+  (* if !E.verboseFlag || !Cilutil.printStats then
+    Stats.print stderr "Timings:\n"; *)
   if !E.logChannel != stderr then 
     close_out (! E.logChannel);  
   (match ! outChannel with Some c -> close_out c.fchan | _ -> ())
@@ -176,6 +180,7 @@ let cleanup () =
 
 (* Without this handler, cilly.asm.exe will quit silently with return code 0
    when a segfault happens. *)
+   (*
 let handleSEGV code =
   if !Cil.currentLoc == Cil.locUnknown then
     E.log  "**** Segmentation fault (possibly a stack overflow)\n"
@@ -187,7 +192,7 @@ let handleSEGV code =
   exit code
 
 let _ = Sys.set_signal Sys.sigsegv (Sys.Signal_handle handleSEGV);
-
+*)
 ;;
 
 begin 
