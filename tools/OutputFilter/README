@@ -13,6 +13,8 @@ How to build:
   executable in your cabal directory (e.g. ~/.cabal/bin). You can either use
   that executable, or now use the make commands normally, now that you have all
   the dependencies installed.
+  If you do not wish to go through the build process yourself, you can find
+  statically linked binaries for your system under the static-bins directory.
 How to run:
   ./filterOutput <output-file> <yaml-config-file>
 
