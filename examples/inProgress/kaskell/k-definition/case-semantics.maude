@@ -68,6 +68,7 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PAsPat X:Name (PVar P:Na
 (f)	case v of { _ -> e; _ -> e' } = e
 Pending Questions:
   - I think the second _ just means some pattern, while the first must be an actual underscore
+  - I'm keeping the binds general
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 26) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 34) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -134,6 +135,9 @@ final: Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp
 
 ***(
 (j)	case v of { x -> e } = ( \ x -> e ) v
+
+Pending Questions:
+  - I'm keeping the Binds general
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-j.hs" 2 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
    ===
@@ -224,6 +228,22 @@ more-general:  (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuarded
 ***(
 (v) 	case () of { () | e0 -> e; _ -> e' }
 	= if e0 then e else e'
+
+Pending Questions:
+  - This time I'm assuming the _ is a literal underscore
+  - Again, I'm keeping the Binds general
+
+AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-v.hs" 2 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-v.hs" 2 30) ((:)(Qualifier (Var (UnQual (Ident "e0")))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-v.hs" 2 42) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+     (If (Var (UnQual (Ident "e0"))) (Var (UnQual (Ident "e"))) (Var (UnQual (Ident "e'"))))
+
+more-general: (Case (Con (Special UnitCon)) ((:)(Alt Loc1:SrcLoc (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2:SrcLoc ((:)(Qualifier E0:Exp) []) E:Exp) [])) B1:Binds) ((:)(Alt Loc3:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) [])))
+   ===
+     (If E0:Exp E:Exp EPrime:Exp)
 ***)
+
+    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1:SrcLoc (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2:SrcLoc ((:)(Qualifier E0:Exp) []) E:Exp) [])) B1:Binds) ((:)(Alt Loc3:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+     = If E0:Exp E:Exp EPrime:Exp .
+
 
 endm
