@@ -126,9 +126,9 @@ constant
   | 'void'
   | 'int'
   | ANNOTATION
-//    -> ANNOTATION["/*@ "
-//                  + annotPreK.annotToMaudeString($ANNOTATION.text)
-//                  + " */"]
+    -> ANNOTATION["/*@ "
+                  + annotPreK.annotToMaudeString($ANNOTATION.text)
+                  + " */"]
   ;
 
 arithmetic_constant

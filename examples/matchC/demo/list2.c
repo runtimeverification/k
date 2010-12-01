@@ -96,66 +96,66 @@ int main()
   struct listNode *x;
   struct listNode *y;
   x = create(5);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
-                        < heap > list(?x)([1, 2, 3, 4, 5]) </ heap > 
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
+                     <heap> list(?x)([1, 2, 3, 4, 5]) </heap> 
+                     </config> /\ true */
   x = reverse(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
-                        < heap > list(?x)([5, 4, 3, 2, 1]) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
+                     <heap> list(?x)([5, 4, 3, 2, 1]) </heap>
+                     </config> /\ true */
   destroy(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
-                        < heap > (.).Map </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
+                    <heap> . </heap>
+                    </config> /\ true */
   x = create(5);
   printf("x: ");
   print(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
-                        < heap > list(?x)(!A) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env > x |-> ?x, y |-> ?y </env>
+                     <heap> list(?x)(!A) </heap>
+                     </config> /\ true */
   x = reverse(x);
   printf("reverse(x): ");
   print(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
-                        < heap > list(?x)(rev(!A)) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
+                     <heap> list(?x)(rev(!A)) </heap>
+                     </config> /\ true */
   destroy(x);
 
 
   x = create(3);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
-                        < heap > list(?x)([1, 2, 3]) </ heap > 
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
+                     <heap> list(?x)([1, 2, 3]) </heap> 
+                     </config> /\ true */
   y = create(3);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
-                        < heap > list(?x)([1, 2, 3]) list(?y)([1, 2, 3]) </ heap > 
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
+                     <heap> list(?x)([1, 2, 3]), list(?y)([1, 2, 3]) </heap> 
+                     </config> /\ true */
   x = append(x, y);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
-                        < heap > list(?x)([1, 2, 3, 1, 2, 3]) </ heap > 
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
+                     <heap> list(?x)([1, 2, 3, 1, 2, 3]) </heap> 
+                     </config> /\ true */
   destroy(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
-                        < heap > (.).Map </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
+                     <heap> . </heap>
+                     </config> /\ true */
   x = create(3);
   printf("x: ");
   print(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
-                        < heap > list(?x)(!A1) </ heap > 
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
+                     <heap> list(?x)(!A1) </heap> 
+                     </config> /\ true */
   y = create(3);
   printf("y: "); 
   print(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
-                        < heap > list(?x)(!A1) list(?y)(!A2) </ heap > 
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
+                     <heap> list(?x)(!A1), list(?y)(!A2) </heap> 
+                     </config> /\ true */
   x = append(x, y);
   printf("append(x, y): ");
   print(x);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env > 
-                        < heap > list(?x)(!A1 @ !A2) </ heap > 
-                        < form > TrueFormula </ form > </ config > */
+  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
+                     <heap> list(?x)(!A1 @ !A2) </heap> 
+                     </config> /\ true */
   destroy(x);
   return 0;
 }

@@ -99,6 +99,20 @@ mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-CONDITION-SEARCH .
   op _._ : Id Id -> Field .
   op _._ : Field Id -> Field .
 
+  
+  op _/\_ : Bag Formula -> Bag .
+  op _/\_ : Formula Bag -> Bag .
+
+  var Cfg : BagItem .
+  var Cfgs CfgItems : Bag .
+  var Phi : Formula .
+
+  eq Phi /\ Cfgs = Cfgs /\ Phi .
+  eq (Cfg Cfgs) /\ Phi = (Cfg /\ Phi) (Cfgs /\ Phi) .
+  eq < config > CfgItems </ config > /\ Phi
+   = < config > CfgItems < form > Phi </ form > </ config > .
+
+
 ***(
   op <_>_</_> : CellLabel Int++ CellLabel -> BagItem
   [prec 0 format(nib g b o+ -b g b o)] .
