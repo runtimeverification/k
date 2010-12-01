@@ -45,7 +45,24 @@ mod HASKELL-CASE-SEMANTICS is
 ***(
 (e)	case v of { x@p -> e; _ -> e' }
 	=  case v of { p -> ( \ x -> e ) v ; _ -> e' }
+Pending questions:
+  - Again with the _, currently assume it to be any pattern
+  - Again with Binds, again generalized
+
+AST:  (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 26) (PAsPat (Ident "x") (PVar (Ident "p"))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 36) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+     (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 3 26) (PVar (Ident "p")) (UnGuardedAlt (App (Paren (Lambda (SrcLoc "tests/case-e.hs" 3 33) ((:)(PVar (Ident "x")) ([])) (Var (UnQual (Ident "e"))))) (Var (UnQual (Ident "v"))))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-e.hs" 3 48) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+
+more-general: (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) [])))
+   ===
+     (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2:SrcLoc ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) [])))
+
 ***)
+
+    eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) []))
+     = Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2:SrcLoc ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) [])) .
+
+
 
 ***(
 (f)	case v of { _ -> e; _ -> e' } = e
