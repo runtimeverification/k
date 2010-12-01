@@ -1,7 +1,7 @@
 --- 30 semantic rules
 --- 16 syntax translation macros
 kmod KERNELC-SEMANTICS is 
-  including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION 
+  including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION + PL-RANDOM
 
   configuration 
   <T?> 
@@ -14,6 +14,7 @@ kmod KERNELC-SEMANTICS is
       <mem> .Map </mem> 
       <ptr> .Map </ptr> 
       <next> 0 </next> 
+      <rand> 0 </rand>
   </T?> 
   <result?> "" </result?>
 
@@ -27,7 +28,9 @@ kmod KERNELC-SEMANTICS is
  --- arithmentic expressions
   rule I1 + I2 => I1 +Int I2 [structural]
   rule I1 - I2 => _-Int_(I1,I2) [structural]
+  rule I1 % I2 => I1 %Int I2 if I2 !=Int 0 [structural]
   rule I1 <= I2 => Bool2Int(I1 <=Int I2) [structural]
+  rule I1 < I2 => Bool2Int(I1 <Int I2) [structural]
   rule I1:Int == I2:Int => Bool2Int(I1 ==Int I2) [structural] 
   rule I1 != I2 =>  Bool2Int((I1 !=Int I2)) [structural]
   rule '_?_:_ => 'if`(_`)_else_  [structural]
@@ -53,16 +56,18 @@ kmod KERNELC-SEMANTICS is
 
 
   --- function declaration and function call
-  rule <k> int X(Xl:List{DeclId}) {  Sts  return E ; } => . <_/k> 
-       <funs_> . => X |-> int X(Xl:List{DeclId}) { Sts  return E ;} <_/funs> 
+  rule <k> __`{_`}(int X, Xl:List{DeclId}, Sts) => . <_/k> 
+       <funs_> . => X |-> int X(Xl) { Sts } <_/funs> 
+  [structural]
+  rule __`{_`}((void_(X) => int_(X)), Xl:List{DeclId}, (Sts => __(Sts, return void;))) 
   [structural]
 
-  syntax ListItem ::= call Id 
+  syntax ListItem ::=  Id # Map # K 
 
-  rule <k> '_`(_`)(X,,Vl:List{Val}) => Sts ~> E ~> restore(Env:Map) <_/k> 
+  rule <k> '_`(_`)(X,,Vl:List{Val}) ~> K => Sts </k> 
     <env> Env => (eraseKLabel('int_,getList{K}(Xl)) |-> getList{K}(Vl)) </env>
-    @latex("\\kBR")    <funs_> X |->  int X(Xl) { Sts  return E ;} <_/funs> 
-    <fstack> . => call X <_/fstack>
+    @latex("\\kBR")    <funs_> X |->  int X(Xl) { Sts } <_/funs> 
+    <fstack> . => X # Env:Map # K:K <_/fstack>
   [structural large]
 
   context int _ = [HOLE]
@@ -70,8 +75,10 @@ kmod KERNELC-SEMANTICS is
        <env_> . => (X |-> undef) <_/env> 
   [structural]
  
-  rule <k> V ~> (restore(Env) => .) <_/k> <env> _ => Env </env> 
-       <fstack> call X => . <_/fstack> [structural]
+  rule <k> return V ; ~> _ => V </k> [structural]
+
+  rule <k> V ~> (. => K) </k> <env> _ => Env </env> 
+       <fstack> _ # Env # K => . <_/fstack> [structural]
 
   rule <k> (int *)malloc(N:Nat*sizeof(int)) => N':Nat <_/k>
        <ptr_> . => N' |-> N <_/ptr>    @latex("\\kBR")
@@ -81,6 +88,12 @@ kmod KERNELC-SEMANTICS is
 
   rule <k> free(N) => void <_/k> <ptr_> N |-> N' => . <_/ptr>
        <mem> Mem:Map => Mem[undef/N..N'+Nat N] </mem> [structural]
+
+
+  rule <k> random() => randomRandom(N') <_/k>
+       <rand> N' => N' +Nat 1 </rand>
+
+  rule <k> srandom(I) => void <_/k>
 
   context *[HOLE]=_
   context (*[HOLE])++

@@ -9,6 +9,8 @@ kmod KERNELC-SYNTAX is
                | Exp == Exp [prec 37 strict] 
                | Exp != Exp [prec 37 strict] 
                | Exp <= Exp [prec 37 strict] 
+               | Exp < Exp [prec 37 strict] 
+               | Exp % Exp [prec 32 strict]
 ---logical operations
                | `! Exp | Exp && Exp | Exp `|| Exp 
                | Exp `? Exp : Exp [prec 39] 
@@ -28,6 +30,9 @@ kmod KERNELC-SYNTAX is
 --- Function invocation
                | Id ( List{Exp} ) [prec 0 strict(2)] 
                | Id ( ) [prec 0]
+--- Random 
+               | srandom ( Exp ) [strict]
+               | random ( ) 
 
   syntax Stmt ::= { } 
                 | Exp ; [prec 45 strict] 
@@ -35,12 +40,13 @@ kmod KERNELC-SYNTAX is
                 | if ( Exp ) Stmt [prec 47]
                 | if ( Exp ) Stmt else Stmt [prec 46 strict(1)]
                 | while ( Exp ) Stmt 
+                | return Exp ; [strict]
+
 
 
 
 --- Function declaration
                 | DeclId List{DeclId} { StmtList }
-                | DeclId List{DeclId} { StmtList return Exp ; }
 --- For fragmenting definitions into parts
                 | #include < StmtList >
 
@@ -72,11 +78,10 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro if(E) St:Stmt = if(E) St else {}
   macro NULL = 0
   macro I:Id () = I (())
-  macro DeclId:DeclId(DeclIds:List{DeclId}) { Stmts:StmtList } = DeclId(DeclIds) { Stmts return 0 ;}  
+---  macro DeclId:DeclId(DeclIds:List{DeclId}) { Stmts:StmtList } = DeclId(DeclIds) { Stmts return 0 ;}  
 
-  macro void PointerId:PointerId = int PointerId
-  macro int * PointerId = int PointerId
-  macro #include<Stmts> = Stmts
+  macro int * PointerId:PointerId = int PointerId
+  macro #include<Stmts> = Stmts:StmtList
   macro E1[E2] = *(E1 + E2)
   macro scanf("%d", & * E) = scanf("%d", E)
   macro (int * PointerId = E) = (int PointerId = E)

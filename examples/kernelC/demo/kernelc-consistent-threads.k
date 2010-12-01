@@ -17,6 +17,7 @@ kmod KERNELC-CONSISTENT-THREADS is including KERNELC-THREADS-SYNTAX
      <mem> .Map </mem> 
      <ptr> .Map </ptr> 
      <next> 1 </next> 
+     <rand> 0 </rand>
   </T?> 
   <result?> "" </result?>
 
@@ -33,7 +34,7 @@ kmod KERNELC-CONSISTENT-THREADS is including KERNELC-THREADS-SYNTAX
        <next> T:Nat => T +Int 1 </next> 
        (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> T </id> <_/thread>) 
 
-  rule (<thread_> <k> V:Val </k> <id> T </id> <_/thread> => .) 
+  rule (<thread_> <k> V:Val </k> <fstack> .List </fstack> <id> T </id> <_/thread> => .) 
        <cthreads_> . => SetItem(T) <_/cthreads> [structural]
 
   rule <k> join(T) => 0 <_/k> <cthreads_> SetItem(T) <_/cthreads> [structural]
