@@ -31,7 +31,7 @@ struct nodeList* split(struct nodeList* p)
 struct nodeList* merge(struct nodeList* p, struct nodeList* q)
 /*@ pre  < config > < env > p |-> p0 q |-> q0 </ env >
                     < heap > list(p0)(A1) list(q0)(A2) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
+                    < form > isSorted(A1) /\ isSorted(A2) </ form > C </ config > */
 /*@ post < config > < env >  ?rho </ env >
                     < heap > list(?r)(?A) H </ heap > 
                     < form > returns ?r /\ 
