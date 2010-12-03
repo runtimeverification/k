@@ -18,4 +18,3 @@ where <maudeDir> should be replaced by the path where prelude.maude reside Alter
  kompile.pl simple-untyped.maude
 
 Please report issues here: http://k-framework.googlecode.com
-
