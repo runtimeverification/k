@@ -39,3 +39,19 @@ kmod INSTRUMENT-PROGRAM is including KERNELC-BASIC-SEMANTICS
        <trace_> . => ListItem(Event) </trace>
        [structural]
 endkm
+
+
+kmod FSM-MONITOR is
+  configuration <fsm> <fsm-state> init </fsm-state> <fsm-counter> 0 </fsm-counter> <fsm-events> .List </fsm-events> <fsm-transitions> .Map </fsm-transitions>
+
+  syntax FsmState ::= init | stuck
+  syntax StateEvent ::= FsmState `|`| K
+  
+  rule <fsm-state> S:FsmState => S' </fsm-state> <fsm-events> E:K <_/fsm-events>
+       <fsm-transitions_> S || E |-> S':FsmState <_/fsm-transitions>
+  [structural]
+
+  rule <fsm-state> S => stuck </fsm-state> <fsm-events> E:K <_/fsm-events>
+       <fsm-transitions> M:Map </fsm-transitions>
+  if S || E in keys(M) ==Bool false [structural]
+endkm

@@ -5,11 +5,11 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
               | main | divide2 | collatz | dummy1 | dummy2 | init | reverse 
               | printAll | writeArray | insertionSort | bubbleSort | siftDown 
               | heapSort | map | done | root | bottom | maxChild | temp
-              | numbers | size
+              | numbers | size | readArray | printArray
 
   syntax Stmts ::= pFactorial | pCollatz | pInsertionSort1 | pInsertionSort2
                  | pInsertionSort3 | pInsertionSort4 | pBubbleSort
-                 | pHeapSort | pSorting | pex01
+                 | pHeapSort | pSorting | pex01 | pArrays
 
   macro pFactorial =
        var x;
@@ -410,4 +410,26 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          f[10] = writeArray;
          map(f,x);
        }
+
+  macro pArrays =
+    function readArray(a) {
+      var i; var j; var m; var n; m = sizeOf(a) - 1; n = sizeOf(a[0]) - 1;
+      for i = 0 to m do
+          for j = 0 to n do a[i][j]=read();
+    }
+    function printArray(a) {
+      var i; var j; var m; var n; m = sizeOf(a) - 1; n = sizeOf(a[0]) - 1;
+      for i = 0 to m do
+          for j = 0 to n do write(a[i][j]);
+    }
+    function main() {
+      var x;
+      x = read();
+      var y;
+      y = read();
+      var a[x][y];
+      readArray(a);
+      printArray(a);
+    }
+
 endkm

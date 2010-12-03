@@ -15,7 +15,6 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- to KResult.  Recall that the second argument of a method application is a list
 --- of expressions, so that becomes a result when it becomes a list of values
 
-  syntax K ::= Stmts | List{Exp} | List{Type} | List{VarType} | List{Top}
   syntax KResult ::= List{Type} 
 
 ---------------------
