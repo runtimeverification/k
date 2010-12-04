@@ -3,7 +3,7 @@ use strict;
 use File::Basename;
 use File::Spec;
 use Switch;
-
+use Cwd; 
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
 my $verbose = 0;
@@ -906,11 +906,16 @@ sub make_crop
     
 }
 
+
 # Next routine compiles the language definition in $language_file_name
 # It also performs some sanity checks
 sub compile {
 # Assumes $language_file_name is a file name with no extension
-
+    
+    # add missing subsortations
+    add_subsorts();
+    
+#    exit(1);
 # Testing whether the input module $language_module_name exists
     run_maude("Testing if the input module $language_module_name exists ... ",
 	      "load $language_file_name\n",
@@ -1118,7 +1123,7 @@ sub maudify_file {
 	if (m!^kmod\s+(\S+)!) {
 	    print $indent."K module $1 ... " if $verbose;
 	    push(@kmodules,$1);
-	    $_ = maudify_module($_);
+	    $_ = maudify_module($file, $_);
 	    print "DONE\n" if $verbose;
 	}
 	elsif (m!^f?mod\s+(\S+)!) {
@@ -1170,9 +1175,9 @@ sub maudify_file {
 
 
 sub maudify_module {
-    (local $_) = @_;
+    (my $file, local $_) = @_;
 
-    build_module_tree($_);
+    build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
 
 # Step: Add whitespace between cell and Klabel
@@ -1238,6 +1243,9 @@ sub maudify_module {
     
 # Step: Add KLabel generated definitions
     s!(?=endk?m)!$decl!se;
+
+# Step: register all subsort relations
+    register_subsorts($_);
 
     return $_;
 }
@@ -1697,4 +1705,82 @@ sub throw_error
     my $err = shift;
     print "$err\n";
     exit(1);
+}
+
+
+sub add_subsorts
+{
+    my $supersorts = find_super_sorts();
+    my @modules = split(/\s+/, getModuleList());
+    my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero#";
+    my $dir = cwd;
+    
+    return if (scalar(@modules) == 0);
+    return if ($supersorts eq "");
+    
+    my @sorts = split(/\s+/, $supersorts);
+    $supersorts = "";
+    foreach(@sorts)
+    {
+	$supersorts .= "$_ " if ($k_sorts !~ /#$_#/);
+    }
+    
+    return if ($supersorts eq "");
+    
+    # get all supersorts in an array
+    my @ssorts = split(/\s+/, $supersorts);
+
+    # search through all modules
+    foreach(@modules)
+    {
+	my $cmod = $_;
+	# get sorts for current module
+	my $sortlist = "#" . getModuleSorts($cmod) . "#" if defined(getModuleSorts($cmod));
+	$sortlist =~ s/ /#/g if defined($sortlist);
+	
+	# if this module contains sorts
+	# and it is a module which includes K
+	# then add apropriate subsortations
+	if (defined($sortlist) && includesK($cmod))
+	{
+	    # will collect declared sorts
+	    my @decllist = ();
+	    # search through supersorts all sorts contained by this module
+	    foreach my $ss (@ssorts)
+	    {
+		push(@decllist, $ss) if ($sortlist =~ /#$ss#/);
+	    }
+	    
+	    if (scalar(@decllist) > 0)
+	    {
+		# remove all declared sorts from ssorts.
+#		for(my $i = 1; $i < scalar(@ssorts); $i++) 
+#		{
+#		    if ("@decllist" =~ /$ssorts[$i]/)
+#		    {
+#			delete $ssorts[$i];
+#		    }		    
+#		}
+		
+                # get module file
+		my $file = getModuleFile($_);
+	    
+		# access its maude corresponding file
+		$file =~ s/\.k$/\.maude/;
+
+		# get content
+		my $content = get_file_content("$dir/$file");
+		
+		my $o = "@decllist";
+		$content =~ s/mod(\s+)$_(.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
+		
+		open FILE,">",$file or die "Cannot create $file\n";
+		print FILE $content;
+		close FILE;
+	    }
+	}
+    }
+    
+#    print "SUPERSORTS: $supersorts\n";
+#    print "MODULES: @modules\n";
 }
