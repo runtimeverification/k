@@ -102,6 +102,21 @@ mod K-LISTK-EXTRAS is
   eq tailList{K}(K:K,,Ks) = Ks .
 endm
 
+mod K-EXTRAS is
+  including K-TECHNIQUE .
+  var Ks Ks' : List{K} .
+  var Label1 Label2 Label : KLabel .
+ 
+  op substKLabel : List{K} KLabel KLabel -> List{K} .
+  eq substKLabel(.List{K},Label1, Label2) = .List{K} .
+  eq substKLabel((Label1(Ks),,Ks'), Label1, Label2) 
+   = Label2(substKLabel(Ks,Label1,Label2)),,
+       substKLabel(Ks',Label1,Label2) .
+ ceq substKLabel((Label(Ks),,Ks'), Label1, Label2) 
+   = Label(substKLabel(Ks,Label1,Label2)),,
+       substKLabel(Ks',Label1,Label2) if Label1 =/=Bool Label .
+endm
+
 mod K-MAP-EXTRAS is
   including K-TECHNIQUE .
   including PL-BOOL .
@@ -432,6 +447,7 @@ mod K is
   including K-CONTEXTS .
   including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
+  including K-EXTRAS .              --- defines a KLabel substitution 
   including K-LISTK-EXTRAS .
   including K-LIST-EXTRAS .
   including K-MAP-EXTRAS .          --- operations on Maps
