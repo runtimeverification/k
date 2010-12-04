@@ -52,7 +52,7 @@ let close_output _ =
       if !close_me then close_out o else ();
       close_me := false
   end
-
+(*
 let set_output filename =
   close_output ();
   let out_chan = try open_out filename 
@@ -60,7 +60,7 @@ let set_output filename =
     (output_string stderr ("Error while opening output: " ^ msg); exit 1) in
   out := Some out_chan;
   Whitetrack.setOutput out_chan;
-  close_me := true
+  close_me := true*)
 
    (* Signal that we are in MS VC mode *)
 let setMSVCMode () =
@@ -93,17 +93,17 @@ let printNotice = ref false
 *)
 let args : (string * Arg.spec * string) list =
 [
-  "--cabsonly", Arg.String set_output, "<fname> CABS output file name";
+  (*"--cabsonly", Arg.String set_output, "<fname> CABS output file name"; *)
   "--printComments", Arg.Unit (fun _ -> Cprint.printComments := true),
              " print cabs tree structure in comments in cabs output";
-  "--patchFile", Arg.String (fun pf -> patchFileName := pf),
+  (*"--patchFile", Arg.String (fun pf -> patchFileName := pf),
              "<fname> name the file containing patching transformations";
   "--printPatched", Arg.Unit (fun _ -> printPatchedFiles := true),
              " print patched CABS files after patching, to *.patched";
   "--printProtos", Arg.Unit (fun _ -> doPrintProtos := true),
              " print prototypes to safec.proto.h after parsing";
   "--printNotice", Arg.Set printNotice,
-             " include a comment saying printed by FrontC";
+             " include a comment saying printed by FrontC";*)
 ]
 
 exception ParseError of string

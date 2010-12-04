@@ -58,7 +58,8 @@ let replace input output =
 	
 let fileNames : string list ref = ref []
 let recordFile fname = 
-  fileNames := fname :: (!fileNames) 	
+  fileNames := fname :: (!fileNames)
+let isXML = ref false
 	
 let noscores s = 
 	(replace "_" "u" s)
@@ -134,6 +135,8 @@ let theMain () =
           "--out", Arg.String (openFile "output" 
                                  (fun oc -> outChannel := Some oc)),
               " the name of the output AST.";
+		  "--xml", Arg.Set isXML,
+              " output should be in XML format";
         ]
         @ F.args in
 	begin
@@ -143,14 +146,7 @@ let theMain () =
 
 		(* parse the command-line arguments *)
 		Arg.parse (Arg.align argDescr) recordFile usageMsg;
-		(* Cil.initCIL (); *)
-(*
-		fileNames := List.rev !fileNames;
 
-		(* parse each of the files named on the command line, to CIL *)
-		let files = Util.list_map parseOneFile !Ciloptions.fileNames in
- *)
-		(* if there's more than one source file, merge them together; *)
 		(* now we have just one CIL "file" to deal with *)
 		let one =
 			match !fileNames with

@@ -3,15 +3,15 @@
 # no warnings
 OCAMLOPT_FLAGS = -w a -warn-error a 
 # all warnings
-#OCAMLOPT_FLAGS = -w A -warn-error A 
+#OCAMLOPT_FLAGS = -w A -warn-error A
 
 # CIL = $(CIL_BASE)/obj/$(CIL_PLATFORM)
 
-OCAML_COMPILE = ocamlopt $(OCAMLOPT_FLAGS) -c -I .
+OCAML_COMPILE = ocamlopt $(OCAMLOPT_FLAGS) -c -I xml-light
 
 OCAML_LEX = ocamllex
 OCAML_YACC = ocamlyacc
-OCAML_LINK = ocamlopt $(OCAMLOPT_FLAGS) -I . -ccopt -L.
+OCAML_LINK = ocamlopt $(OCAMLOPT_FLAGS) -I xml-light -ccopt -L./xml-light
 
 # these are partially ordered by inclusion.  don't know how to avoid manually ordering these
 MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whitetrack.cmx cprint.cmx lexerhack.cmx cabs.cmx clexer.cmx cparser.cmx frontc.cmx cabsPrinter.cmx cabsDriver.cmx
@@ -19,6 +19,9 @@ MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whi
  
 .PHONY: all cleanOnMakefileChange clean
 all: cparser 
+
+xml-light/xml-light.cmxa:
+	make -C xml-light
 
 clexer.ml: clexer.mll
 	$(OCAML_LEX) clexer.mll
@@ -37,8 +40,9 @@ cparser.cmx: cabs.cmi cabshelper.cmi lexerhack.cmi cprint.cmi
 cabsDriver.cmx cabsDriver.cmi: cparser.cmi frontc.cmi clexer.cmi
 frontc.cmx frontc.cmi: errormsg.cmi whitetrack.cmi cprint.cmi clexer.cmi
 clexer.cmx clexer.cmi: lexerhack.cmi cparser.cmi cabshelper.cmi
-cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi
-%.cmx %.cmi: %.ml Makefile
+cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi xml-light/xml-light.cmxa
+%.cmx %.cmi: %.ml 
+#Makefile
 	$(OCAML_COMPILE) $*.ml
 	
 cparser.cmi: cparser.mli cabs.cmi clexer.ml
@@ -47,7 +51,7 @@ cparser.cmi: cparser.mli cabs.cmi clexer.ml
 cabsDriver.cmx cabsDriver.cmi: cabsPrinter.cmi
 
 cparser: $(MODULES)
-	$(OCAML_LINK) -o $@ unix.cmxa str.cmxa nums.cmxa $^
+	$(OCAML_LINK) -o $@ unix.cmxa str.cmxa nums.cmxa xml-light.cmxa $^
 
 clean:
 	rm -f *.cmi *.cmx *.o *.mli *.cil cparser.ml clexer.ml *.preprocessed cparser.exe cparser *.stackdump

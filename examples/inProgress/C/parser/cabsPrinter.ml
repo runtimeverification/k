@@ -61,6 +61,7 @@
 open Cabs
 open Escape
 (* open Whitetrack *)
+(*open Xml *)
 
 let version = "Cprint 2.1e 9.1.99 Hugues Cassé"
 (*
@@ -151,6 +152,9 @@ let toString s =
 	
 let rec cabsToString ((fname, defs) : file) (fileContents : string) = 
 		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "TranslationUnit"
+and cabsToXML ((fname, defs) : file) (fileContents : string) = 
+	Xml.PCData ("TranslationUnit")
+(*		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "TranslationUnit" *)
 
 and printDefs defs =
 	printFlatList printDef defs
