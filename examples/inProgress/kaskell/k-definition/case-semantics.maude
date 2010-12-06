@@ -155,11 +155,20 @@ more-general:  (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuarded
 (k)	case N v of { N p -> e; _ -> e' }
 	= case v of { p -> e; _ -> e' }
 	where N is a newtype constructor
+
+Pending questions:
+  - I'm keeping the _ as a literal underscore
+Note: We'll need to use K for this one, as the AST doesn't know that N is a newtype constructor
+
 ***)
 
 ***(
 (l)	case _|_ of { N p -> e; _ -> e' } = case _|_ of { p -> e }
 	where N is a newtype constructor
+Pending questions:
+  - I have no idea what bottom means in the context of dynamic semantics
+Note: We'll need to use K for this one, as the AST doesn't know that N is a newtype constructor
+
 ***)
 
 ***(
@@ -218,11 +227,19 @@ more-general:  (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuarded
 ***(
 (t) 	case () of { () | p <- e0 -> e; _ -> e' }
 	= case e0 of { p -> e; _ -> e' }
+Pending Questions:
+  - I'm unsure of the _ here, so I'll have it be literal
+Note: PatternGuards not enabled error
+
+
 ***)
 
 ***(
 (u) 	case () of { () | let decls -> e; _ -> e' }
 	= let decls in e
+
+Pending questions:
+
 ***)
 
 ***(
