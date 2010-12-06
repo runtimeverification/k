@@ -23,7 +23,7 @@ struct nodeList* append(struct nodeList* x, struct nodeList y)
     p = x;
 /*@ invariant < config > < env > x |-> ?x y |-> ?y i |-> ?i p |-> ?p </ env >
           < heap > lseg(?x,?p)(?A1) ?p |-> ?v : (nodeList . val) (?p +Int 1) |-> ?i : (nodeList . next) list(?i)(?A2) list(?y)(B) H </ heap > 
-          < form > returns ?p /\ (?A === A @ B) </ form > C </ config > */
+          < form > (A === (?A1 @ [?v] @ ?A2)) </ form > C </ config > */
     while(i!=0)
     {
       p=i;
