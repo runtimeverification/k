@@ -601,10 +601,17 @@ sub getFullName
     {
 	return $file;
     }
+
+    #  hardcoded to avoid maudification for shared.maude
+    if ($file =~ /shared\.maude$/)
+    {
+	return $file;
+    }
     
     $file =~ s/^\.\///;
 
     # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
+    
     if ($file =~ /\.k?(maude)?$/) {
 	if (! -e $file) {
 	    print("File $file does not exist\n");
@@ -638,6 +645,7 @@ sub getFullName
 sub appendFileInTree
 {
     my ($child, $parent) = (shift, shift);
+        
     $child = getFullName($child);
     $parent = getFullName($parent);
 
@@ -670,8 +678,7 @@ sub display_node()
 sub recurseIntoFiles
 {
     my $file = getFullName(shift);
-
-    if ($file =~ m/(k\-prelude|pl\-builtins)/)
+    if ($file =~ m/(k\-prelude|pl\-builtins|shared)/)
     {
 	return;
     }
@@ -790,6 +797,9 @@ sub getKLabelDeclarations
       }
     }
   }
+
+  # patch for shared.k 
+  return $labels;
 
   if ($labels =~ m/\S\s+\S/)
   {
