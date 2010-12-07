@@ -5,9 +5,8 @@ load kernelC-semantics
 kmod KERNELC is including KERNELC-SEMANTICS
   syntax BagItem ::= run ( KLabel )
 
-  macro run(Kl:KLabel) = <top_>
+  macro run(Kl:KLabel) = <config_>
                            <program> Kl(.List{K}) ~> runMain </program>
-                           <tasks> .Bag </tasks>
-                         <_/top>
+                         <_/config>
 endkm
 

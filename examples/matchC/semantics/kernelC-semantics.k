@@ -16,38 +16,30 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
   kvar Map Env TEnv : Map
   kvar Stack : List
 
-  syntax K ::= KernelC
-  syntax KResult ::= String
-  syntax K ::= checkContracts
+  syntax K ::= List{KernelC}
   syntax K ::= runMain
-  syntax K ::= checkContract ( Id )
   syntax K ::= fieldList ( List{KernelC} )
   syntax TypedValue ::= newObject
   syntax ListItem ::= callContext ( K , Map , Map )
 
 
-  configuration <top> 
+  configuration <config> 
                   <program> .K </program>
-                  <spec> .Map </spec>
                   <struct> .Map </struct>
                   <fun> .Map </fun>
 
-                  <tasks>
-                    <config*>
-                      <k> .K </k>
-                      <stack> .List </stack>
-                      <tenv> .Map </tenv>
-                      <env> .Map </env>
-                      <heap> .Map </heap>
-                      <form> TrueFormula </form>
-                    </config*>
-                  </tasks>
+                  <k> .K </k>
+                  <env> .Map </env>
+                  <stack> .List </stack>
+                  <tenv> .Map </tenv>
+                  
+                  <heap> .Map </heap>
 
                   <in> .List </in>
                   <out> .List </out>
 
                   <counter> 0 </counter>
-                </top>
+                </config>
 
 
 ***(
@@ -79,7 +71,6 @@ Function definition/declaration
 ***)
   rule
     <program> T F(ParamList) S => .K <_/program>
-    <spec_> .Map => T F(ParamList) |-> (S ~> return tv(void, unit)) <_/spec>
     <fun_> .Map => T F(ParamList) |-> (S ~> return tv(void, unit)) <_/fun>
   [structural]
 
@@ -110,7 +101,8 @@ Statements
   rule block(KernelC) => KernelC [structural]
   rule if(tv(_, NzI)) S1 else S2 => S1 [structural]
   rule if(tv(_, 0)) S1 else S2 => S2 [structural]
-  rule <k> while (E) S => 'if`(_`)_else_(E,, (S ~> while(E) S),, .K) <_/k>
+  *** ERROR: kompile.pl does not put spaces around k in <_/k>
+  rule <k> while (E) S => if (E) block(S ~~> while(E) S) else nop <_/ k >
   [structural]
 
 
@@ -119,7 +111,7 @@ function call/return
 ***)
 *** function call
   rule
-    <spec_> T F(ParamList) |-> S <_/spec>
+    <fun_> T F(ParamList) |-> S <_/fun>
     <k>
         _`(_`)(F, ArgList) ~> K
       =>
