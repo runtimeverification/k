@@ -569,7 +569,6 @@ if (!$compile_only) {
     
     if ($klabels ne "")
     {
-	
 	my @tmp = split(/\s+/, $klabels);
 	@tmp = uniq(@tmp);
 	my $tmp = "ops @tmp : -> KLabel [metadata \"generated label\"] . ";
@@ -596,8 +595,6 @@ if (!$compile_only) {
 	}
 	    
     }
-    
-
     
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
@@ -1134,6 +1131,8 @@ sub maudify_file {
 # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
     $file = getFullName($file);
     
+#    print "Process file: $file\n";
+    addFile(abs_path($file));
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";
 

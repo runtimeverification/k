@@ -1212,6 +1212,13 @@ sub build_module_tree
     return $module;
 }
 
+# append file to list
+sub addFile
+{
+    my $file = shift;
+    $fileList .= " $file" if $fileList !~ $file;    
+}
+
 my $subsortations = "";
 my $sorts_ = "";# map sorts to modules
 my %sortMap = ();
