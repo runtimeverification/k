@@ -54,6 +54,12 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
                 | for Id = Exp to Exp do Stmt
                 | return Exp ;               [strict]
                 | write ( Exp ) ;            [strict]
+                | try Stmt catch ( Id ) Stmt
+                | throw Exp ; [strict]
+                | spawn Stmt [prec 90]
+                | acquire Exp ;              [strict]
+                | release Exp ;              [strict]
+                | rendezvous Exp ;           [strict]
 
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts               [prec 100 gather(e E)]

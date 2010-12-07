@@ -38,15 +38,22 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 --- Configuration ---
 ---------------------
 
-  configuration <T> 
-                     <k> K:K </k>
-                     <fstack> .List </fstack>
-                     <env> .Map </env>
-                     <genv> .Map </genv>
-                     <store> .Map </store>
-                     <in> .List </in>
-                     <out> .List </out>
-                     <nextLoc> 0 </nextLoc>
+  configuration <T>
+                  <threads>
+                    <thread*>
+                      <k> K:K </k>
+                      <fstack> .List </fstack>
+                      <xstack> .List </xstack>
+                      <env> .Map </env>
+                      <holds> .Map </holds>
+                    </thread*>
+                  </threads>
+                  <genv> .Map </genv>
+                  <store> .Map </store>
+                  <busy>.Set</busy>
+                  <in> .List </in>
+                  <out> .List </out>
+                  <nextLoc> 0 </nextLoc>
                 </T>
 
 
@@ -74,8 +81,10 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
        <store_> . => L|->function(sNat L)  sNat(L)|->lambda(Xl,S) <_/store>
 
 --- When we are done with the first pass (preprocessing), i.e., the computation
---- and genv are empty, call main() and initialize the global environment
-  rule <k> . => main(); </k> <env> Env </env> <genv> . => Env </genv>
+--- contains only the token "execute" (see simple-untyped.k)
+--- and genv is empty, call main() and initialize the global environment
+  syntax K ::= execute
+  rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
 
 -------------------
@@ -173,6 +182,32 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 --- Write
   rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out>
 
+--- Exceptions
+  syntax ListItem ::= ( Id , Stmt , K , Map , List )
+  syntax K ::= popx
+  rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
+       <xstack> . => (X,S2,K,Env,FStack) <_/xstack>
+       <env> Env </env>
+       <fstack> FStack:List </fstack>
+  rule <k> popx => . <_/k> <xstack> _:ListItem => . <_/xstack>
+  rule <k> throw V; ~> _ => S2 ~> env(Env) ~> K </k>
+       <xstack> (X,S2,K,Env,FStack) => . <_/xstack>
+       <env> _ => Env[L/X] </env>
+       <fstack> _ => FStack </fstack>
+       <store_> . => L |-> V <_/store>
+       <nextLoc> L => sNat L </nextLoc>
+
+--- Threads
+   rule <thread_> <k> spawn S => . <_/k> <env> Env </env> <_/thread>
+        (. => <thread_> <k> S </k> <env> Env </env> <_/thread>)
+   rule (<thread_> <k>.</k> <fstack>.</fstack> <holds> Holds:Map </holds> <_/thread> => .)
+        <busy> Busy:Set => Busy -Set keys(Holds) </busy>
+   rule <k>acquire V; => .<_/k> <holds_>. => V|->0<_/holds> <busy>Busy (.=>SetItem(V))</busy>
+     if notBool(V in Busy)
+   rule <k>acquire V; => .<_/k> <holds_>V|->(N => sNat N)<_/holds>
+   rule <k>release V; => .<_/k> <holds_>V|->(sNat N => N)<_/holds>
+   rule <k>release V; => .<_/k> <holds_>V|->0 => .<_/holds> <busy_>SetItem(V)=>.<_/busy>
+   rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k>
 
 ----------------------------------------------
 --- Auxilliary declarations and operations ---
