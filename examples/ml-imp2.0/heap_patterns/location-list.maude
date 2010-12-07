@@ -1,0 +1,188 @@
+mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
+  var N : Nat .
+  var P P' P1 P2 Q Q' Q1 Q2 : Int++ .
+  var I : Int++ .
+  var Alpha Beta : Seq++ .
+  var LAlpha LBeta : Seq ++ .
+  var H : Map .
+  var K : K .
+  var Phi : Formula .
+  var NtPhi : NtFormula .
+  var Cfg : BagItem .
+  var CfgItems Cfgs : Bag .
+
+*** Definition of Lists ***
+  op llist : -> HeapLabel .
+ ceq < tasks >
+       < config >
+         < k > derive(P') ~> K </ k >
+         < heap > llist(P)(Alpha, LAlpha) H </ heap >
+         < form > Phi </ form >
+         CfgItems
+       </ config >
+     Cfgs
+     </ tasks >
+     < counter > N </ counter >
+   = < tasks >
+       < config >
+         < k > derive(P') ~> K </ k >
+         < heap > H </ heap > 
+         < form > Phi /\ (P === 0) /\ (Alpha === epsilon) /\ (LAlpha === epsilon) </ form >
+         CfgItems
+       </ config >
+       < config >
+         < k > K </ k >
+         < heap >
+           P |-> FreeInt(N) : nodeList . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+           llist(FreeInt(N +Int 1))(FreeSeq(N +Int 2), FreeSeq(N +Int 3))
+           H
+         </ heap >
+         < form >
+           Phi /\ ~(P === 0) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ (LAlpha === [FreeInt(N +Int 1)] @ FreeSeq(N +Int 3))
+         </ form >
+         CfgItems
+       </ config >
+     Cfgs
+     </ tasks >
+     < counter > N +Int 4 </ counter >
+  if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+
+  eq < heap > llist(0)(Alpha,LAlpha) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ Alpha === epsilon /\ LAlpha === epsilon </ form > .
+  eq < heap > llist(P)(epsilon, epsilon) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ P === 0 </ form > .
+
+  rl < config >
+       < heap >
+         P |-> I : nodeList . val
+         (P +Int 1) |-> 0 : nodeList . next
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg
+  => < config >
+       < heap >
+         llist(P)([I],[P])
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg .
+  rl < config >
+       < heap >
+         P |-> I : nodeList . val
+         (P +Int 1) |-> P' : nodeList . next
+         llist(P')(Alpha,LAlpha)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg
+  => < config >
+       < heap >
+         llist(P)([I] @ Alpha, [P] @ LAlpha)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg .
+
+
+*** Definition of List Segments ***
+  op llseg : -> HeapLabel .
+
+ ceq < tasks >
+       < config >
+         < k > derive(P') ~> K </ k >
+         < heap > llseg(P, Q)(Alpha,LAlpha) H </ heap >
+         < form > Phi </ form >
+         CfgItems
+       </ config >
+     Cfgs
+     </ tasks >
+     < counter > N </ counter >
+   = < tasks >
+       < config >
+         < k > derive(P') ~> K </ k >
+         < heap > H </ heap >
+         < form > Phi /\ (P === Q) /\ (Alpha === epsilon) /\ (LAlpha === epsilon) </ form >
+         CfgItems
+       </ config >
+       < config >
+         < k > K </ k >
+         < heap >
+           P |-> FreeInt(N) : nodeList . val
+           (P +Int 1) |-> FreeInt(N +Int 1) : nodeList . next
+           llseg(FreeInt(N +Int 1), Q)(FreeSeq(N +Int 2), FreeSeq(N +Int 3))
+           H
+         </ heap >
+         < form >
+           Phi /\ ~(P === Q) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ (LAlpha === [FreeInt(N +Int 1)] @ FreeInt(N +Int 3))
+         </ form >
+         CfgItems
+       </ config >
+     Cfgs
+     </ tasks >
+     < counter > N +Int 4 </ counter >
+  if VALID(Phi ===> P' === P \/ P' === P +Int 1) .
+
+  eq < heap > llseg(P, P)(Alpha, LAlpha) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ Alpha === epsilon /\ LAlpha === epsilon </ form > .
+  eq < heap > llseg(P, 0)(Alpha, LAlpha) H </ heap >
+   = < heap > llist(P)(Alpha, LAlpha) H </ heap > .
+
+  rl < config >
+       < heap >
+         P |-> I : nodeList . val
+         (P +Int 1) |-> Q : nodeList . next
+         H </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg
+  => < config >
+       < heap >
+         llseg(P, Q)([I], [P])
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg .
+     
+  rl < config >
+       < heap >
+         llseg(P, P')(Alpha, LAlpha)
+         llseg(P', Q)(Beta, LBeta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg
+  => < config >
+       < heap >
+         llseg(P, Q)(Alpha @ Beta, LAlpha @ LBeta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg .
+     
+  rl < config >
+       < heap >
+         llseg(P, P')(Alpha, LAlpha)
+         llist(P')(Beta, LBeta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg
+  => < config >
+       < heap >
+         llist(P)(Alpha @ Beta, LAlpha @ LBeta)
+         H
+       </ heap >
+       CfgItems
+     </ config >
+     =match=> Cfg .
+endm
