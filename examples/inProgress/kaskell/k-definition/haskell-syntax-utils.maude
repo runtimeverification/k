@@ -2,9 +2,9 @@ mod HASKELL-SYNTAX-UTILS is
     including HASKELL-SYNTAX .
 
   --- A token for when something is not a constructor
-    op NotACon : -> String .
+    op NotACon : -> String [ctor] .
   --- A token for when something isn't an identified name
-    op NotAName : -> String .
+    op NotAName : -> String [ctor] .
 
   --- Returns true if the arugment is one of our special-negative tokens
     op notDefined : String -> Bool .
