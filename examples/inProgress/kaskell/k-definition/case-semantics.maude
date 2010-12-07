@@ -5,6 +5,12 @@
 mod HASKELL-CASE-SEMANTICS is
     including HASKELL-SYNTAX .
 
+    vars Loc1 Loc2 Loc3 Loc4 Loc5 : SrcLoc .
+    vars Binds1 Binds2 Binds3 Decls1 Decls2 Decls3 : Binds .
+    vars Pat1 Pat2 Pat3 Underscore : Pat .
+
+
+
 ***(
 (a)	case e of { alts } = (\v -> case v of { alts }) e
 	where v is a new variable
@@ -53,14 +59,14 @@ AST:  (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 26) 
    ===
      (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 3 26) (PVar (Ident "p")) (UnGuardedAlt (App (Paren (Lambda (SrcLoc "tests/case-e.hs" 3 33) ((:)(PVar (Ident "x")) ([])) (Var (UnQual (Ident "e"))))) (Var (UnQual (Ident "v"))))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-e.hs" 3 48) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
 
-more-general: (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) [])))
+more-general: (Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName)) Binds2) [])))
    ===
-     (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2:SrcLoc ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) [])))
+     (Case (Var V:QName) ((:)(Alt Loc1 (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2 ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName))Binds2) [])))
 
 ***)
 
-    eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) []))
-     = Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2:SrcLoc ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt (Var EPrime:QName)) B2:Binds) [])) .
+    eq Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName)) Binds2) []))
+     = Case (Var V:QName) ((:)(Alt Loc1 (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2 ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName)) Binds2) [])) .
 
 
 
@@ -74,13 +80,13 @@ AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 26) P
    ===
     (Var (UnQual (Ident "e")))
 
-more-general: (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc UnderscoreLit:Pat (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) [])))
+more-general: (Case (Var V:QName) ((:)(Alt Loc1 UnderscoreLit:Pat (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) [])))
     ===
     E:Exp
 
 ***)
 
-    eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc PWildCard (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+    eq Case (Var V:QName) ((:)(Alt Loc1 PWildCard (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
      = E:Exp .
 
 ***(
@@ -111,27 +117,27 @@ AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 2 23) (
      (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 3 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
 
 
-minus-srcLoc: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (Loc1:SrcLoc) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (Loc2:SrcLoc) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+minus-srcLoc: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (Loc1) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (Loc2) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
      (Case (Var (UnQual (Ident "v"))) ((:)(Alt (Loc1) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
 
 
-more-general: (Case (Var (V:QName)) ((:)(Alt (Loc1:SrcLoc) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (BDecls ([]))) ((:)(Alt (Loc2:SrcLoc) (Underscore:Pat) (UnGuardedAlt (EPrime:Exp)) (BDecls ([]))) ([]))))
+more-general: (Case (Var (V:QName)) ((:)(Alt (Loc1) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (BDecls ([]))) ((:)(Alt (Loc2) (Underscore) (UnGuardedAlt (EPrime:Exp)) (BDecls ([]))) ([]))))
    ===
      (Case (Var (V)) ((:)(Alt (Loc1) (PVar (X)) (UnGuardedAlt (E)) (BDecls ([]))) ([])))
 
-minus-bdecls: (Case (Var (V:QName)) ((:)(Alt (Loc1:SrcLoc) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (B1:Binds)) ((:)(Alt (Loc2:SrcLoc) (Underscore:Pat) (UnGuardedAlt (EPrime:Exp)) (B2:Binds)) ([]))))
+minus-bdecls: (Case (Var (V:QName)) ((:)(Alt (Loc1) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (Binds1)) ((:)(Alt (Loc2) (Underscore) (UnGuardedAlt (EPrime:Exp)) (Binds2)) ([]))))
    ===
      (Case (Var (V)) ((:)(Alt (Loc1) (PVar (X)) (UnGuardedAlt (E)) (B1)) ([])))
 
-final: Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+final: Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
    ===
-     Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []) .
+     Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []) .
 
 ***)
 
-    eq Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc2:SrcLoc Underscore:Pat (UnGuardedAlt EPrime:Exp) B2:Binds) []))
-     = Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []) .
+    eq Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+     = Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []) .
 
 ***(
 (j)	case v of { x -> e } = ( \ x -> e ) v
@@ -143,13 +149,13 @@ AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-j.hs" 2 26) (
    ===
      (App (Paren (Lambda (SrcLoc "tests/case-j.hs" 3 16) ((:)(PVar (Ident "x")) ([])) (Var (UnQual (Ident "e"))))) (Var (UnQual (Ident "v"))))
 
-more-general:  (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []))
+more-general:  (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []))
    ===
-     (App (Paren (Lambda Loc1:SrcLoc ((:)(PVar X:Name) []) E:Exp)) (Var V:QName))
+     (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName))
 ***)
 
-    eq (Case (Var V:QName) ((:)(Alt Loc1:SrcLoc (PVar X:Name) (UnGuardedAlt E:Exp) B1:Binds) []))
-     = (App (Paren (Lambda Loc1:SrcLoc ((:)(PVar X:Name) []) E:Exp)) (Var V:QName)) .
+    eq (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []))
+     = (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName)) .
 
 ***(
 (k)	case N v of { N p -> e; _ -> e' }
@@ -236,14 +242,14 @@ AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-t.hs" 4 27) (PAp
    ===
      (Case (Var (UnQual (Ident "e0"))) ((:)(Alt (SrcLoc "tests/case-t.hs" 5 27) (PApp (UnQual (Ident "Pat")) ((:)(PVar (Ident "pat")) ([]))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-t.hs" 5 41) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
 
-more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1:SrcLoc (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2:SrcLoc ((:)(Generator Loc3:SrcLoc Pat:Pat E0:Exp) []) E:Exp) [])) B1:Binds) ((:)(Alt Loc4:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(Generator Loc3 Pat1 E0:Exp) []) E:Exp) [])) Binds1) ((:)(Alt Loc4 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
    ===
-     Case E0:Exp ((:)(Alt Loc1:SrcLoc Pat:Pat (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc4:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+     Case E0:Exp ((:)(Alt Loc1 Pat1 (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc4 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
 
 ***)
 
-    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1:SrcLoc (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2:SrcLoc ((:)(Generator Loc3:SrcLoc Pat:Pat E0:Exp) []) E:Exp) [])) B1:Binds) ((:)(Alt Loc4:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) []))
-     = Case E0:Exp ((:)(Alt Loc1:SrcLoc Pat:Pat (UnGuardedAlt E:Exp) B1:Binds) ((:)(Alt Loc4:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) [])) .
+    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(Generator Loc3 Pat1 E0:Exp) []) E:Exp) [])) Binds1) ((:)(Alt Loc4 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
+     = Case E0:Exp ((:)(Alt Loc1 Pat1 (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc4 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])) .
 
 
 ***(
@@ -251,8 +257,21 @@ more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1:SrcLoc (PApp (Special U
 	= let decls in e
 
 Pending questions:
-  - I don't really know how decls is supposed to look like, since I thought let statements were supposed to have "in" in them
+  - I think the _ could be generalized to any pattern
+  - generalizing Binds
+
+AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-u.hs" 3 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-u.hs" 3 30) ((:)(LetStmt (BDecls ((:)(PatBind (SrcLoc "tests/case-u.hs" 3 36) (PVar (Ident "x1")) Nothing (UnGuardedRhs (Var (UnQual (Ident "a")))) (BDecls ([]))) ([])))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-u.hs" 3 49) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+     (Let (BDecls ((:)(PatBind (SrcLoc "tests/case-u.hs" 4 18) (PVar (Ident "x1")) Nothing (UnGuardedRhs (Var (UnQual (Ident "a")))) (BDecls ([]))) ([]))) (Var (UnQual (Ident "e"))))
+
+more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(LetStmt Decls1) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+   ===
+     Let Decls1 E:Exp
 ***)
+
+    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(LetStmt Decls1) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+     = Let Decls1 E:Exp .
+
 
 ***(
 (v) 	case () of { () | e0 -> e; _ -> e' }
@@ -266,12 +285,12 @@ AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-v.hs" 2 27) (PAp
    ===
      (If (Var (UnQual (Ident "e0"))) (Var (UnQual (Ident "e"))) (Var (UnQual (Ident "e'"))))
 
-more-general: (Case (Con (Special UnitCon)) ((:)(Alt Loc1:SrcLoc (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2:SrcLoc ((:)(Qualifier E0:Exp) []) E:Exp) [])) B1:Binds) ((:)(Alt Loc3:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) [])))
+more-general: (Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(Qualifier E0:Exp) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])))
    ===
      (If E0:Exp E:Exp EPrime:Exp)
 ***)
 
-    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1:SrcLoc (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2:SrcLoc ((:)(Qualifier E0:Exp) []) E:Exp) [])) B1:Binds) ((:)(Alt Loc3:SrcLoc PWildCard (UnGuardedAlt EPrime:Exp) B2:Binds) []))
+    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(Qualifier E0:Exp) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
      = If E0:Exp E:Exp EPrime:Exp .
 
 
