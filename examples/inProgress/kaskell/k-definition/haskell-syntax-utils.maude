@@ -1,0 +1,19 @@
+mod HASKELL-SYNTAX-UTILS is
+    including HASKELL-SYNTAX .
+
+    --- A token for when something is not a constructor
+    op NotACon : -> String .
+
+    --- Given an expression, extract the name of the underlying constructor, rewrites to "NOTCON" if not a constructor
+    op getConstructorName : Exp -> String .
+    eq getConstructorName(Paren E:Exp) = getConstructorName(E:Exp) .
+    eq getConstructorName(App E:Exp E0:Exp) = getConstructorName(E:Exp) .
+    eq getConstructorName(Con (UnQual (Ident S:String))) = S:String .
+    eq getConstructorName(Con (Qual M:ModuleName (Ident S:String))) = S:String .
+    eq getConstructorName(E:Exp) = NotACon [owise] .
+
+    --- Given two expressions, rewrites to true it they are both constructors and have the same name, false otherwise
+    op sameConstructor : Exp Exp -> Bool .
+    eq sameConstructor(E1:Exp, E2:Exp) = (getConstructorName(E1:Exp) ==Bool getConstructorName(E2:Exp)) andBool (getConstructorName(E1:Exp) =/=Bool NotACon) .
+
+endm

@@ -25,7 +25,7 @@ zparseopts -E -D -- -All=all             \
                     h=showhelp           \
                     -help=showhelp       \
 
-PARSE_SOURCES=(hsStructs.maude haskell-syntax.maude)
+PARSE_SOURCES=(hsStructs.maude haskell-syntax.maude haskell-syntax-utils.maude)
 CASE_SOURCES=(case-semantics.maude)
 TRANSLATE_SOURCES=(translations.maude)
 

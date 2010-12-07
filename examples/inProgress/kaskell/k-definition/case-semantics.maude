@@ -4,7 +4,7 @@
 
 mod HASKELL-CASE-SEMANTICS is
     including HASKELL-SYNTAX .
-
+    including HASKELL-SYNTAX-UTILS .
     vars Loc1 Loc2 Loc3 Loc4 Loc5 : SrcLoc .
     vars Binds1 Binds2 Binds3 Decls1 Decls2 Decls3 : Binds .
     vars Pat1 Pat2 Pat3 Underscore : Pat .
@@ -193,18 +193,29 @@ Note: We'll need to use K for this one, as the AST doesn't know that N is a newt
 	= case  v  of {
 	     K p1 ... pn  ->  e ; _ ->  e'  }
 	where pi is p if f labels the ith component of K, _ otherwise
+Note: Will have to use K in order to know about the "K" constructor
 ***)
 
 ***(
 (o)	case  v  of {  K  {} ->  e ; _ ->  e'  }
 	= case  v  of {
 	     K _ ... _ ->  e ; _ ->  e'  }
+Note: Will have to use K in order to know about the "K" constructor
 ***)
 
 ***(
 (p)	case (K' e1 ... em) of { K x1 ... xn -> e; _ -> e' } = e'
 	where K and K' are distinct data constructors of arity n and m, respectively
+Pending questions:
+  - I think the underscore has to be a literal underscore
+
+AST: (Case (Paren (App (App (App (Con (UnQual (Ident "K'"))) (Lit (Int 1))) (Lit (Int 2))) (Lit (Int 3)))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 35) (PApp (UnQual (Ident "K")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+     (Var (UnQual (Ident "e'")))
+more-general: (Case (Paren (App (App (App (Con (UnQual (Ident "K'"))) (Lit (Int 1))) (Lit (Int 2))) (Lit (Int 3)))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 35) (PApp (UnQual (Ident "K")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
 ***)
+
+
 
 ***(
 (q)	case (K e1 ... en) of { K x1 ... xn -> e; _ -> e' }
