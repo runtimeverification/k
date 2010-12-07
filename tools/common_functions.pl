@@ -42,7 +42,7 @@ my $top_level_pattern = join("|", (
                     "(?:in|load|require)\\s+\\S+"
     ));
 
-my @kmaude_keywords = qw(context rule macro eq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
+my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 my $parentheses = "\Q{}[]()\E";
