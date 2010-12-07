@@ -30,7 +30,7 @@
 \newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
 \newcommand{\lp}{(}
 \newcommand{\rp}{)}
-\newcommand{\kconfig}[1]{\par\textsc{initial configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
+\newcommand{\kconfig}[1]{\par{\sc initial configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
 \newcommand{\kccontext}[3]{\par\textsc{context:
 }$#2$\hspace{2em} when $#3$}
 \newcommand{\kcontext}[2]{\par\textsc{context:
@@ -107,8 +107,8 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\modulePlus}{$+$}
 \newcommand{\variable}[1]{\textit{#1}\/}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
-\newcommand{\prefixOp}[1]{\textsf{#1}}
-\newcommand{\constant}[1]{\textsf{#1}}
+\newcommand{\prefixOp}[1]{{\sf #1}}
+\newcommand{\constant}[1]{{\sf #1}}
 
 
 \newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
@@ -117,7 +117,7 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
-\newcommand{\bAnyVar}{\textrm{---}}
+\newcommand{\bAnyVar}{{\rm ---}}
 
 
 \newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
