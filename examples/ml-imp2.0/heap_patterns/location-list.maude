@@ -1,9 +1,9 @@
-mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
+mod LLIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var N : Nat .
   var P P' P1 P2 Q Q' Q1 Q2 : Int++ .
   var I : Int++ .
   var Alpha Beta : Seq++ .
-  var LAlpha LBeta : Seq ++ .
+  var LAlpha LBeta : Seq++ .
   var H : Map .
   var K : K .
   var Phi : Formula .
@@ -39,7 +39,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
            H
          </ heap >
          < form >
-           Phi /\ ~(P === 0) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ (LAlpha === [FreeInt(N +Int 1)] @ FreeSeq(N +Int 3))
+           Phi /\ ~(P === 0) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ ((LAlpha) === (([FreeInt(N +Int 1)]) @ (FreeSeq(N +Int 3)))) 
          </ form >
          CfgItems
        </ config >
@@ -82,7 +82,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =match=> Cfg
   => < config >
        < heap >
-         llist(P)([I] @ Alpha, [P] @ LAlpha)
+         llist(P)(([I] @ Alpha), ([P] @ LAlpha))
          H
        </ heap >
        CfgItems
@@ -119,7 +119,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
            H
          </ heap >
          < form >
-           Phi /\ ~(P === Q) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ (LAlpha === [FreeInt(N +Int 1)] @ FreeInt(N +Int 3))
+           Phi /\ ~(P === Q) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2)) /\ ((LAlpha) === (([FreeInt(N +Int 1)]) @ (FreeSeq(N +Int 3)))) 
          </ form >
          CfgItems
        </ config >
@@ -161,7 +161,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =match=> Cfg
   => < config >
        < heap >
-         llseg(P, Q)(Alpha @ Beta, LAlpha @ LBeta)
+         llseg(P, Q)((Alpha @ Beta), (LAlpha @ LBeta))
          H
        </ heap >
        CfgItems
@@ -179,7 +179,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
      =match=> Cfg
   => < config >
        < heap >
-         llist(P)(Alpha @ Beta, LAlpha @ LBeta)
+         llist(P)((Alpha @ Beta), (LAlpha @ LBeta))
          H
        </ heap >
        CfgItems
