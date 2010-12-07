@@ -26,7 +26,7 @@ kmod COMMON-SEMANTICS-PROMOTIONS is
 	op isArithBinConversionOp : KLabel -> Bool 
 	op arithBinOps : -> Set [memo] 
 	op arithBinConversionOps : -> Set [memo] 
-	***(zzz
+
 	eq arithBinOps = arithBinConversionOps Set(l('_<<_),, l('_>>_)) 
 	eq arithBinConversionOps = Set(
 		l('_*_),, l('_/_),, l('_%_),,
@@ -35,13 +35,12 @@ kmod COMMON-SEMANTICS-PROMOTIONS is
 		l('_==_),, l('_!=_),,
 		l('_&_),, l('_|_),, l('_^_)
 	) 
-	***)
 	
 	eq isArithBinOp(KL:KLabel) = if arithBinOps contains l(KL:KLabel) then true else false fi 
 	eq isArithBinConversionOp(KL:KLabel) = if arithBinConversionOps contains l(KL:KLabel)  then true else false fi 
 
 	op arithUnaryOps : -> Set [memo] 
-	---zzz eq arithUnaryOps = Set(l('-_),, l('+_),, l('~_)) 
+	eq arithUnaryOps = Set(l('-_),, l('+_),, l('~_)) 
 	op isArithUnaryOp : KLabel -> Bool 
 	eq isArithUnaryOp(KL:KLabel) = if arithUnaryOps contains l(KL:KLabel) then true else false fi 
 	

@@ -508,7 +508,6 @@ kmod COMMON-SEMANTICS-ASSIGNMENT is
 	
 	--- 6.5.16
 	op compoundAssignment : KLabel K K -> K [metadata "strict(2 3)"] 
-	***(zzz
 	rule
 		< k > L:KLabel(E1:Expression,, E2:Expression) 
 			=> compoundAssignment(L:KLabel, &(E1:Expression), E2:Expression) 
@@ -518,14 +517,14 @@ kmod COMMON-SEMANTICS-ASSIGNMENT is
 			l('_<<=_),, l('_>>=_),, l('_&=_),, l('_^=_),, l('_|=_)
 		) contains l(L:KLabel)
 		[structural] 
-	***)
+
 	op getInnerOperator : KLabel -> KLabel 
 	rule
 		< k > compoundAssignment(L:KLabel, V:Value, V':Value) 
 			=> *(V:Value) := getInnerOperator(L:KLabel)(*(V:Value),, V':Value) 
 		...</ k >
 		[structural] 
-	***(zzz
+
 	eq getInnerOperator('_*=_) = '_*_ 
 	eq getInnerOperator('_/=_) = '_/_ 
 	eq getInnerOperator('_%=_) = '_%_ 
@@ -537,7 +536,7 @@ kmod COMMON-SEMANTICS-ASSIGNMENT is
 	eq getInnerOperator('_&=_) = '_&_ 
 	eq getInnerOperator('_^=_) = '_^_ 
 	eq getInnerOperator('_|=_) = '_|_ 
-	***)
+
 	rule [assign]:
 		< k > assign(*(tv(Loc:Nat, pointerType(T:Type))), tv(V:List{K}, T':Type)) 
 			=> write(Loc:Nat, tv(V:List{K}, T:Type))
@@ -977,15 +976,15 @@ kmod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 
 	op postOpRef : K KLabel -> K 
 	context postOpRef(*([HOLE]), ?) 
-	***(zzz
+
 	rule [make-postinc-ref]: < k > E:Expression ++ => postOpRef(*(&(E:Expression)), '_++) ...</ k > 
 		[structural] 
 	rule [make-postdec-ref]: < k > E:Expression -- => postOpRef(*(&(E:Expression)), '_--) ...</ k > 
 		[structural] 
-	***)
+
 	op postInc : K K Type -> K [metadata "strict(2)"] 
 	op postDec : K K Type -> K [metadata "strict(2)"] 
-	***(zzz
+
 	rule [post-increment-start]:
 		< k > postOpRef(*(tv(Loc:Nat, pointerType(T:Type))), '_++)
 			=> postInc(Loc:Nat, read(Loc:Nat, T:Type), T:Type)
@@ -996,7 +995,7 @@ kmod COMMON-SEMANTICS-INCREMENT-AND-DECREMENT is
 			=> postDec(Loc:Nat, read(Loc:Nat, T:Type), T:Type)
 		...</ k >
 		[structural] 
-	***)
+
 	rule [post-increment]:
 		< k > postInc(Loc:Nat, tv(V:BaseValue, T:Type), T:Type)
 			=> *(tv(Loc:Nat, pointerType(T:Type))) := tv(V:BaseValue, T:Type) + tv(1, int)

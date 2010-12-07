@@ -144,7 +144,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 	--- [structural] 
 	--- rule [sync]:
 		--- < threads >
-			--- < thread >..
+			--- < thread >...
 				--- < k > [prepareBuiltin((sync), Nil) => skipval] ...</ k > 
 			--- ...</ thread >
 		--- </ threads >

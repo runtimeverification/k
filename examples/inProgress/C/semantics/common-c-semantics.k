@@ -259,7 +259,6 @@ kmod COMMON-SEMANTIC-SYNTAX is
 	op Nil : -> List{Type} [ditto] 
 	
 	op setOfTypes : -> Set [memo] 
-***(zzz
 	eq setOfTypes = Set(
 		l('arrayType),, 
 		l('bitfieldType),, 
@@ -267,7 +266,6 @@ kmod COMMON-SEMANTIC-SYNTAX is
 		l('pointerType),, l('structType),, l('unionType),, 
 		l('qualifiedType)
 	)
-	***)
 	
 	op bind : List{C} List{Type} -> K 
 	op tv : List{K} Type -> Value 
@@ -529,10 +527,8 @@ kmod SEMANTIC-HELPERS is
 	eq numBytes(unsigned-long-int) = numBytes(long-int) 
 	eq numBytes(unsigned-long-long-int) = numBytes(long-long-int) 
 	
-	***(zzz
 	ceq numBits(T:Type) = numBytes(T:Type) *Nat numBitsPerByte 
-		if getKLabel(T:Type) =/=Bool 'bitfieldType 
-	***)
+		if getKLabel(T:Type) =/=Bool 'bitfieldType
 	eq numBits(bitfieldType(?, N:Nat)) = N:Nat 
 
 	eq min(bool) = 0 
@@ -590,7 +586,7 @@ kmod SEMANTIC-HELPERS is
 	
 	ceq hasUnsignedIntegerType(T:Type) = true
 		if (unsignedIntegerTypes contains T:Type) 
-***(zzz
+
 	ceq hasUnsignedIntegerType(T:Type) = false 
 		if getKLabel(T:Type) =/=Bool 'bitfieldType
 		andBool setOfTypes contains l(getKLabel(T:Type)) 
@@ -609,7 +605,7 @@ kmod SEMANTIC-HELPERS is
 		if hasSignedIntegerType(T:Type) ==Bool true 
 	ceq hasSignedIntegerType(bitfieldType(T:Type, ?)) = false 
 		if hasSignedIntegerType(T:Type) ==Bool false 
-***)
+
 	ceq min(bitfieldType(T:Type, N:Nat)) = 0
 		if hasUnsignedIntegerType(T:Type) 
 	ceq max(bitfieldType(T:Type, N:Nat)) = _-Int_(2 ^Nat absInt(N:Nat), 1)

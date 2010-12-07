@@ -133,7 +133,6 @@ kmod COMMON-SEMANTICS-SWITCH is
 		[structural] 
 		
 	op tryCase : K Value K -> K [metadata "strict(1)"] --- K to be evaluated, val it should be, casehelper
-	***(zzz
 	rule
 		< k > (. => tryCase(Exp:K, V:Value, CaseHelper:K)) ~> handleSwitch-aux(SN:Nat, V:Value, Map((? ((genLabel(SN:Nat, Exp:K) |-> CaseHelper:K) => .))))
 		...</ k >
@@ -146,7 +145,6 @@ kmod COMMON-SEMANTICS-SWITCH is
 			=> Goto(genLabel(SN:Nat, l('Default)))
 		...</ k >
 		[structural] 
-	***)
 	
 	--- if there's nothing left, no case matches
 	rule
@@ -192,7 +190,7 @@ kmod COMMON-SEMANTICS-GOTO is
 		in goto map:
 			remaining computation
 			which variables are allocated on the path
-			..
+			...
 		in blocks:
 			which variables i've allocated so far
 	

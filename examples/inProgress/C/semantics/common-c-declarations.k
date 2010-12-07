@@ -803,11 +803,10 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 			next ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
 			=> ListItem(te(K:K . F':Id, T':Type)) ListItem(te(K:K, structType(S:Id)))
 		...</ currentSubObject >
-		< structs >..
+		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(T':Type, F':Id) :: ? 
 		...</ structs > 
 		if F':Id =/=Bool #NoName
-		--- andBool F:Id =/=Bool Identifier("c")
 		[structural] 
 	 
 	rule [init-next-struct-element]:
@@ -815,7 +814,7 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 			next ListItem(te(K:K . F:Id, T:Type)) ListItem(te(K:K, structType(S:Id)))
 			=> ListItem(te(K:K . F':Id, T':Type)) ListItem(te(K:K, structType(S:Id)))
 		...</ currentSubObject >
-		< structs >..
+		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(?, #NoName) :: typedDeclaration(T':Type, F':Id) :: ? 
 		...</ structs >
 		[structural] 
@@ -824,7 +823,7 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< currentSubObject >
 			next (ListItem(te(K:K . F:Id, T:Type)) => .) ListItem(te(K:K, structType(S:Id)))
 		...</ currentSubObject >
-		< structs >..
+		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id)
 		...</ structs > 
 		[structural] 
@@ -832,7 +831,7 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< currentSubObject >
 			next (ListItem(te(K:K . F:Id, T:Type)) => .) ListItem(te(K:K, structType(S:Id)))
 		...</ currentSubObject >
-		< structs >..
+		< structs >...
 			S:Id |-> ? :: typedDeclaration(T:Type, F:Id) :: typedDeclaration(?, #NoName)
 		...</ structs > 
 		[structural] 
@@ -892,7 +891,6 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 	
 	--- fixme these are also too restrictive on type.  if we try to assign an int to a long-int field, it will fail
 	--- i don't think this is true anymore
-	***(zzz
 	rule
 		< k > buildDesignator(InFieldInit(F:Id, More:K)) 
 			=> buildDesignator(More:K)
@@ -902,7 +900,6 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		if KL:KLabel ==Bool 'structType 
 		orBool KL:KLabel ==Bool 'unionType
 		[structural] 
-	***)
 		
 	rule
 		< k > buildDesignator(NextInit) => NextInit ...</ k >
@@ -943,9 +940,7 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		< currentSubObject > (. => next) ListItem(te(K:K, T:Type)) ...</ currentSubObject >
 		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
 		< savedInitialization >... . => Computation(K:K := K':K) </ savedInitialization > 
-		--- if getKLabel(K':K) =/=Bool 'Constant
 		if (isABaseType(T:Type) orBool hasPointerType(T:Type) orBool hasBitfieldType(T:Type))
-		--- andBool notBool hasAggregateType(T':Type)
 		andBool notBool hasStructType(T':Type)
 		andBool notBool hasUnionType(T':Type)
 		[structural] 
@@ -966,7 +961,7 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 			=> initFromStructRHS(K:K, structType(S:Id), L:List{Type}) 
 		...</ k >
 		< currentSubObject > . => findStruct(structType(S:Id)) ...</ currentSubObject >
-		< structs >..
+		< structs >...
 			S:Id |-> L:List{Type}
 		...</ structs >
 		[structural] 
@@ -979,10 +974,9 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		[structural] 
 		
 	--- fixme unsafe, might have started to initialize other things
-	***(zzz
 	rule
 		< k > initFromStructRHS(K':K, structType(S:Id), ?)
-			=> 
+			=> .K
 		...</ k >
 		< currentSubObject > findStruct(structType(S:Id)) ListItem(te(K:K, structType(S:Id))) => next ...</ currentSubObject >
 		< incompleteLength > N:Nat => maxNat(N:Nat, getTopArrayUse(K:K)) </ incompleteLength >
@@ -998,7 +992,7 @@ kmod COMMON-SEMANTICS-DECLARATIONS-INITIALIZATIONS is
 		if getKLabel(K:K) =/=Bool 'StringLiteral
 		andBool getKLabel(K:K) =/=Bool 'WStringLiteral
 		[structural] 
-	***)
+
 	rule
 		< k > fillInitializer(SingleInit(Constant(StringLiteral(S:String))))
 			=> fillInitializer-aux(SingleInit(Constant(StringLiteral(S:String))))
