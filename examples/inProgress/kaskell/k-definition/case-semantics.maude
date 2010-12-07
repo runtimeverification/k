@@ -212,7 +212,13 @@ Pending questions:
 AST: (Case (Paren (App (App (App (Con (UnQual (Ident "K'"))) (Lit (Int 1))) (Lit (Int 2))) (Lit (Int 3)))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 35) (PApp (UnQual (Ident "K")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
      (Var (UnQual (Ident "e'")))
-more-general: (Case (Paren (App (App (App (Con (UnQual (Ident "K'"))) (Lit (Int 1))) (Lit (Int 2))) (Lit (Int 3)))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 35) (PApp (UnQual (Ident "K")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+
+more-general: (Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])))
+   ===
+     EPrime:Exp
+   if sameConstructor(KPrime:Exp, K:Pat)
+
+
 ***)
 
 

@@ -1,19 +1,59 @@
 mod HASKELL-SYNTAX-UTILS is
     including HASKELL-SYNTAX .
 
-    --- A token for when something is not a constructor
+  --- A token for when something is not a constructor
     op NotACon : -> String .
+  --- A token for when something isn't an identified name
+    op NotAName : -> String .
 
-    --- Given an expression, extract the name of the underlying constructor, rewrites to "NOTCON" if not a constructor
+  --- Returns true if the arugment is one of our special-negative tokens
+    op notDefined : String -> Bool .
+    eq notDefined(NotACon) = true .
+    eq notDefined(NotAName) = true .
+    eq notDefined(S:String) = false [owise] .
+
+  --- The inverse of NotDefined
+    op isDefined : String -> Bool .
+    eq isDefined(S:String) = notBool notDefined(S:String) .
+
+  --- Fetch a name from a Name, or a QName
+    op getName : QName -> String .
+    op getName : Name -> String .
+    eq getName(Qual M:ModuleName N:Name) = getName(N:Name) .
+    eq getName(UnQual N:Name) = getName(N:Name) .
+
+    eq getName(Ident S:String) = S:String .
+    eq getName(Symbol S:String) = NotAName . --- currently don't know what to do with symbols
+
+  --- Given an Exp or Pat, extract the name of the underlying constructor.
+  --- Rewrites to NotACon if not a constructor
     op getConstructorName : Exp -> String .
-    eq getConstructorName(Paren E:Exp) = getConstructorName(E:Exp) .
+    op getConstructorName : Pat -> String .
+    eq getConstructorName(Paren E:Exp)      = getConstructorName(E:Exp) .
     eq getConstructorName(App E:Exp E0:Exp) = getConstructorName(E:Exp) .
-    eq getConstructorName(Con (UnQual (Ident S:String))) = S:String .
-    eq getConstructorName(Con (Qual M:ModuleName (Ident S:String))) = S:String .
-    eq getConstructorName(E:Exp) = NotACon [owise] .
+    eq getConstructorName(Con Q:QName)      = getName(Q:QName) .
+    --- todo: check to see if there are other cases to match
+    eq getConstructorName(E:Exp)            = NotACon [owise] .
 
-    --- Given two expressions, rewrites to true it they are both constructors and have the same name, false otherwise
+    eq getConstructorName(PParen P:Pat)                    = getConstructorName(P:Pat) .
+    eq getConstructorName(PApp Q:QName L:HsList)           = getName(Q:QName) .
+    eq getConstructorName(PInfixApp P1:Pat Q:QName P2:Pat) = getName(Q:QName) .
+    --- todo: check to see if there are other cases to match
+    eq getConstructorName(P:Pat)                           = NotACon [owise] .
+
+  --- Given two expressions, rewrites to true it they are both constructors and have the same name, false otherwise
     op sameConstructor : Exp Exp -> Bool .
-    eq sameConstructor(E1:Exp, E2:Exp) = (getConstructorName(E1:Exp) ==Bool getConstructorName(E2:Exp)) andBool (getConstructorName(E1:Exp) =/=Bool NotACon) .
+    op sameConstructor : Pat Exp -> Bool .
+    op sameConstructor : Exp Pat -> Bool .
+    op sameConstructor : Pat Pat -> Bool .
+    eq sameConstructor(E1:Exp, E2:Exp) = (getConstructorName(E1:Exp) ==Bool getConstructorName(E2:Exp))
+                                 andBool isDefined(getConstructorName(E1:Exp)) .
+    eq sameConstructor(P1:Pat, E2:Exp) = (getConstructorName(P1:Pat) ==Bool getConstructorName(E2:Exp))
+                                 andBool isDefined(getConstructorName(P1:Pat)) .
+    eq sameConstructor(E1:Exp, P2:Pat) = (getConstructorName(E1:Exp) ==Bool getConstructorName(P2:Pat))
+                                 andBool isDefined(getConstructorName(E1:Exp)) .
+    eq sameConstructor(P1:Pat, P2:Pat) = (getConstructorName(P1:Pat) ==Bool getConstructorName(P2:Pat))
+                                 andBool isDefined(getConstructorName(P1:Pat)) .
 
 endm
+
