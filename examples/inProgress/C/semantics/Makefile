@@ -28,20 +28,20 @@ ifeq ($(INPUT),)
 	exit 1
 endif
 	
-c-syntax.maude: Makefile
-	@printf "`cat c-syntax.template`" $(ADDITIONAL_SYNTAX) > c-syntax.maude	
+c-syntax.k: Makefile
+	@printf "`cat c-syntax.template`" $(ADDITIONAL_SYNTAX) > c-syntax.k	
 	
-c.maude: c-syntax.maude c-maude.template Makefile
-	@printf "`cat c-maude.template`" $(K-PRELUDE) $(CONFIGURATION_FILE) $(SEMANTICS_FILE) $(SEMANTICS_MODULE) > c.maude
+c.k: c-syntax.k c-maude.template Makefile
+	@printf "`cat c-maude.template`" $(K-PRELUDE) $(CONFIGURATION_FILE) $(SEMANTICS_FILE) $(SEMANTICS_MODULE) > c.k
 	
-c-compiled.maude: c.maude $(K-MAUDE-BASE)/k-prelude.maude $(K-MAUDE) \
+c-compiled.maude: c.k $(K-MAUDE-BASE)/k-prelude.maude $(K-MAUDE) \
 common-c-syntax.k common-c-configuration.k common-c-semantics.k common-c-standard-lib.k common-c-expressions.k common-c-memory.k common-c-statements.k common-c-conversions.k common-c-typing.k common-c-declarations.k \
 match-c-syntax.maude match-c-semantics.maude match-c-configuration.maude \
 dynamic-c-semantics.k dynamic-c-configuration.k
-	$(K-MAUDE) c.maude -u -language C
+	@$(K-MAUDE) c.k -u -language C
 	
 c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude $(K-PL-MODEL-CHECKER).maude Makefile
-	sed -i '2 i load $(K-PL-MODEL-CHECKER)' c-compiled.maude
+	@sed -i '2 i load $(K-PL-MODEL-CHECKER)' c-compiled.maude
 #echo adds a newline
 	@echo | cat c-compiled.maude c-syntax.maude - common-c-configuration.maude | perl slurp.pl ./ > c-total.maude
 	
@@ -63,7 +63,7 @@ semantics: c-total.maude
 
 clean:
 	rm -f program-*-gen.maude program-*-compiled.maude program-*-compiled.maude.tmp kcompile_* quoted.maude \
-	c-syntax.maude c-compiled.maude c.maude test.maude programs-gen.maude test-benchmark.maude c-total.maude \
+	c-syntax.maude c-syntax.k c-compiled.maude c.k c.maude test.maude programs-gen.maude test-benchmark.maude c-total.maude \
 	common-c-syntax.maude common-c-configuration.maude common-c-semantics.maude common-c-declarations.maude common-c-expressions.maude common-c-memory.maude common-c-typing.maude common-c-conversions.maude common-c-statements.maude common-c-standard-lib.maude \
 	dynamic-c-configuration.maude dynamic-c-semantics.maude  
 

@@ -7,14 +7,14 @@ load %s
 load common-c-semantics
 load %s
 
-mod C-SEMANTICS is
-	including C-SYNTAX .
-	including C-CONFIGURATION .
-	including COMMON-C-SEMANTICS .
-	including %s .
-endm
+kmod C-SEMANTICS is
+	including C-SYNTAX
+	including C-CONFIGURATION
+	including COMMON-C-SEMANTICS
+	including %s
+endkm
 
-mod C is 
-	---including C-PROGRAM .
-	including C-SEMANTICS . 
-endm
+kmod C is 
+	---including C-PROGRAM
+	including C-SEMANTICS 
+endkm

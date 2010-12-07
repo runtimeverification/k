@@ -438,15 +438,15 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		andBool N:Nat =/=Bool 0
 		andBool N:Nat >=Nat 0 
 		andBool N:Nat <=Nat 255
-	[structural] 
+		[structural] 
 	
 	rule [lib-printf-done]:
 		< k > printf-aux(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) => tv(Len:Nat, int) ...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? Offset:Nat |-> piece(0, 8))) ...</ mem >
-	[structural] 
+		[structural] 
 	rule [lib-printf-null]:
 		< k > printf-aux(0, sym(0) +Nat 0, Nil) => writeToFD(1, "(null)") ~> tv(6, int) ...</ k >
-	[structural] 
+		[structural] 
 	
 	rule [lib-printf-%]:
 		< k > printf-aux(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
@@ -454,14 +454,14 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if (N:Nat ==Bool asciiCharString("%"))
-	[structural] 
+		[structural] 
 	rule [lib-printf-%%]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
 			=> writeToFD(1, N:Nat) 
 			~> printf-aux(sNat(Len:Nat), sNat(sym(Block:Nat) +Nat Offset:Nat), L:List{C}) ...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("%") 
-	[structural] 
+		[structural] 
 	--- fixme ignoring 0 flag for now
 	rule [lib-printf-0]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
@@ -469,7 +469,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("0") 
-	[structural] 
+		[structural] 
 	--- ignoring num width
 	rule [lib-printf-width]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, L:List{C}) 
@@ -478,7 +478,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat >Int asciiCharString("0") 
 		andBool N:Nat <=Int asciiCharString("9")
-	[structural] 
+		[structural] 
 	
 	rule [lib-printf-%x]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vararg(tv(Loc:Nat, ?)))
@@ -486,7 +486,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("x") orBool N:Nat ==Bool asciiCharString("X") --- orBool N:Nat ==Bool asciiCharString("p")
-	[structural]
+		[structural]
 	rule [lib-printf-%x]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (vpair(tv(D:Int, unsigned-int), V:Value) :: ?)) 
 			=> writeToFD(1, (if (lengthString(Rat2String(D:Int, 16)) ==Bool 1) then
@@ -501,7 +501,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("x") --- orBool N:Nat ==Bool asciiCharString("p")
-	[structural] 
+		[structural] 
 	
 	--- fixme might be messing things up elsewhere
 	op pointerToString : Nat -> String 
@@ -514,7 +514,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("p")
-	[structural] 
+		[structural] 
 	rule [lib-printf-%p]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (vpair(tv(N':Nat, pointerType(void)), V:Value) :: ?)) 
 			=> writeToFD(1, pointerToString(N':Nat))
@@ -522,7 +522,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("p")
-	[structural] 
+		[structural] 
 	
 	--- fixme tool bug, can't match one item in a C list
 	--- below matches the rest of the list even though it's Nil, just to throw it away
@@ -536,7 +536,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("d")
-	[structural] 
+		[structural] 
 	rule [lib-printf-%d]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vpair(tv(D:Int, int), V:Value) :: ?) 
 			=> writeToFD(1, Rat2String(D:Int, 10))
@@ -544,7 +544,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("d")
-	[structural] 
+		[structural] 
 	
 	rule [lib-printf-%u]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vararg(tv(Loc:Nat, ?)))
@@ -552,7 +552,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("u")
-	[structural] 
+		[structural] 
 	rule [lib-printf-%u]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vpair(tv(D:Int, unsigned-int), V:Value) :: ?) 
 			=> writeToFD(1, Rat2String(D:Int, 10))
@@ -560,7 +560,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("u")
-	[structural] 
+		[structural] 
 	
 	
 	rule [lib-printf-%c]:
@@ -569,7 +569,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("c") 
-	[structural] 
+		[structural] 
 	--- need to cast to unsigned-char
 	rule [lib-printf-%c]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (vpair(tv(C:Nat, int), V:Value) :: ?)) 
@@ -578,7 +578,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("c") 
-	[structural] 
+		[structural] 
 	
 	rule [lib-printf-%f]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vararg(tv(Loc:Nat, ?))) 
@@ -586,7 +586,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("f") orBool N:Nat ==Bool asciiCharString("g") 
-	[structural] 
+		[structural] 
 	rule [lib-printf-%f]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (vpair(tv(D:Float, double), V:Value) :: ?)) 
 			=> writeToFD(1, Float2String(D:Float)) 
@@ -594,7 +594,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("f") orBool N:Nat ==Bool asciiCharString("g") 
-	[structural] 
+		[structural] 
 	
 	rule [lib-printf-%s]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, vararg(tv(Loc:Nat, ?))) 
@@ -602,7 +602,7 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("s") 
-	[structural] 
+		[structural] 
 	rule [lib-printf-%s]:
 		< k > printf-%(Len:Nat, sym(Block:Nat) +Nat Offset:Nat, (vpair(tv(S:Nat, pointerType(unsigned-char)), V:Value) :: ?)) 
 			=> printf-string(0, S:Nat)
@@ -610,11 +610,11 @@ kmod COMMON-C-STANDARD-LIBRARY is
 		...</ k >
 		< mem >... Block:Nat |-> memblock(?, (? (Offset:Nat |-> piece(N:Nat, 8)))) ...</ mem >
 		if N:Nat ==Bool asciiCharString("s") 
-	[structural] 
+		[structural] 
 
 	rule [lib-printf-%s-done]:
 		< k > tv(Len':Nat, int) ~> printf-aux(Len:Nat, Loc:Nat, L:List{C}) 
 			=> printf-aux(Len:Nat +Nat Len':Nat, Loc:Nat, L:List{C}) 
 		...</ k >
-	[structural] 
+		[structural] 
 endkm
