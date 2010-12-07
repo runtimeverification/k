@@ -21,7 +21,7 @@ MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whi
 all: cparser 
 
 xml-light/xml-light.cmxa:
-	make -C xml-light
+	make -C xml-light opt
 
 clexer.ml: clexer.mll
 	$(OCAML_LEX) clexer.mll
