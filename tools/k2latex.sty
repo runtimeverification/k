@@ -31,38 +31,38 @@
 \newcommand{\lp}{(}
 \newcommand{\rp}{)}
 \newcommand{\kconfig}[1]{\par{\sc initial configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
-\newcommand{\kccontext}[3]{\par\textsc{context:
+\newcommand{\kccontext}[3]{\par\text{\scshape context:
 }$#2$\hspace{2em} when $#3$}
-\newcommand{\kcontext}[2]{\par\textsc{context:
+\newcommand{\kcontext}[2]{\par\text{\scshape context:
 }$#2$}
 \newcommand{\syntax}[3]{\par $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
 \newcommand{\syntaxCont}[3]{\par $\setlength{\syntaxlength}{\widthof{$#1::\;$}}\hspace{\syntaxlength}\mid{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
-\newcommand{\cellDecl}[2]{\par \textsc{cell:
+\newcommand{\cellDecl}[2]{\par \text{\scshape cell:
 }$#1$ wraps $#2$}
-\newcommand{\nonTerminal}[1]{\textit{#1}\/}
+\newcommand{\nonTerminal}[1]{\text{\itshape #1}\/}
 \newcommand{\somespace}{\mathbin{}}
 \newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
 \newcommand{\kBR}{\\}
-\newcommand{\terminal}[1]{\ensuremath\mathrel{\texttt{#1}}}
-\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\texttt{#1}}}
-\newcommand{\sort}[1]{\textit{#1}}
-\newcommand{\kind}[1]{\textit{#1}}
+\newcommand{\terminal}[1]{\ensuremath\mathrel{\text{\ttfamily #1}}}
+\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\text{\ttfamily #1}}}
+\newcommand{\sort}[1]{\text{\itshape #1}}
+\newcommand{\kind}[1]{\text{\itshape #1}}
 \newcommand{\kequation}[2]{
-\par\textsc{#1 rule:}\hspace{1em}$#2$\bigskip}
+\par\text{\scshape #1 rule:}\hspace{1em}$#2$\bigskip}
 \newcommand{\kcequation}[3]{
-\par\textsc{#1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
 \newcommand{\krule}[2]{
-\par\indent\textsc{#1 rule:}\hspace{1em}$#2$\bigskip}
-\newcommand{\mrule}[3]{\par\textsc{#1 rule:}\hspace{1em}$#2 \Rightarrow #3$\bigskip}
-\newcommand{\cmrule}[4]{\par\textsc{#1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \hspace{2em} when $#4$\bigskip}
-\newcommand{\mequation}[3]{\par\textsc{#1 macro:}\hspace{1em}$#2 = #3$}
+\par\indent\text{\scshape #1 rule:}\hspace{1em}$#2$\bigskip}
+\newcommand{\mrule}[3]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$\bigskip}
+\newcommand{\cmrule}[4]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \hspace{2em} when $#4$\bigskip}
+\newcommand{\mequation}[3]{\par\text{\scshape #1 macro:}\hspace{1em}$#2 = #3$}
 \newcommand{\sorts}[1]{}
-\newcommand{\cmequation}[4]{\par\textsc{#1 equation:}\hspace{1em}$#2 = #3$ \hspace{2em} when $#4$}
+\newcommand{\cmequation}[4]{\par\text{\scshape #1 equation:}\hspace{1em}$#2 = #3$ \hspace{2em} when $#4$}
 \newcommand{\kcrule}[3]{
-\par\textsc{#1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
-\newcommand{\kndrule}[2]{\par\textsc{#1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
-\newcommand{\myquote}[1]{\textrm{``}\texttt{#1}\textrm{''}}
-\newcommand{\mysinglequote}[1]{\textrm{"}}
+\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\newcommand{\kndrule}[2]{\par\text{\scshape #1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
+\newcommand{\myquote}[1]{\text{\rmfamily ``\ttfamily #1\rmfamily ''}}
+\newcommand{\mysinglequote}[1]{\text{\rmfamily "}}
 \newcommand{\mybracket}[1]{(#1)}
 \newcommand{\sqbracket}[1]{[#1]}
 
@@ -101,14 +101,14 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\reduce}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hline{#2}\end{array}}
 \newcommand{\reduceS}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hdashline[1pt/1pt]{#2}\end{array}}
 \newcommand{\kra}{\curvearrowright}
-\newenvironment{module}[1]{\par\noindent\textsc{Module #1}\setlength{\parindent}{1em}}{\par\noindent\textsc{end module}}
+\newenvironment{module}[1]{\par\noindent\text{\scshape Module #1}\setlength{\parindent}{1em}}{\par\noindent\text{\scshape end module}}
 \newcommand{\moduleName}[1]{#1}
-\newcommand{\including}[1]{\par \textsc{imports}\ #1}
+\newcommand{\including}[1]{\par \text{\scshape imports}\ #1}
 \newcommand{\modulePlus}{$+$}
-\newcommand{\variable}[1]{\textit{#1}\/}
+\newcommand{\variable}[1]{\text{\itshape #1}\/}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
-\newcommand{\prefixOp}[1]{{\sf #1}}
-\newcommand{\constant}[1]{{\sf #1}}
+\newcommand{\prefixOp}[1]{\text{\sffamily #1}}
+\newcommand{\constant}[1]{\text{\sffamily #1}}
 
 
 \newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
