@@ -36,7 +36,7 @@ c.k: c-syntax.k c-maude.template Makefile
 	
 c-compiled.maude: c.k $(K-MAUDE-BASE)/k-prelude.maude $(K-MAUDE) \
 common-c-syntax.k common-c-configuration.k common-c-semantics.k common-c-standard-lib.k common-c-expressions.k common-c-memory.k common-c-statements.k common-c-conversions.k common-c-typing.k common-c-declarations.k \
-match-c-syntax.maude match-c-semantics.maude match-c-configuration.maude \
+match-c-syntax.k match-c-semantics.k match-c-configuration.k \
 dynamic-c-semantics.k dynamic-c-configuration.k
 	@$(K-MAUDE) c.k -u -language C
 	
@@ -64,7 +64,7 @@ semantics: c-total.maude
 clean:
 	rm -f program-*-gen.maude program-*-compiled.maude program-*-compiled.maude.tmp kcompile_* quoted.maude \
 	c-syntax.maude c-syntax.k c-compiled.maude c.k c.maude test.maude programs-gen.maude test-benchmark.maude c-total.maude \
-	common-c-syntax.maude common-c-configuration.maude common-c-semantics.maude common-c-declarations.maude common-c-expressions.maude common-c-memory.maude common-c-typing.maude common-c-conversions.maude common-c-statements.maude common-c-standard-lib.maude \
+	common-c-syntax.maude common-c-configuration.maude common-c-semantics.maude common-c-declarations.maude common-c-expressions.maude common-c-memory.maude common-c-typing.maude common-c-conversions.maude common-c-statements.maude common-c-standard-lib.maude match-c-syntax.maude shared.maude match-c-configuration.maude match-c-semantics.maude \
 	dynamic-c-configuration.maude dynamic-c-semantics.maude  
 
 force: ;
