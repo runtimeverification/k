@@ -41,7 +41,7 @@ mod HASKELL-SYNTAX-UTILS is
     --- todo: check to see if there are other cases to match
     eq getConstructorName(P:Pat)                           = NotACon [owise] .
 
-  --- Given two expressions, rewrites to true it they are both constructors and have the same name, false otherwise
+  --- Given two Exp/Pats, rewrites to true it they are both constructors and have the same name, false otherwise
     op sameConstructor : Exp Exp -> Bool .
     op sameConstructor : Pat Exp -> Bool .
     op sameConstructor : Exp Pat -> Bool .
