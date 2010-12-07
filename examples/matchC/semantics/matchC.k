@@ -17,8 +17,16 @@ kmod MATCHC is
                      [format(g! d d d d d o)]
 
   macro check(Kl:KLabel) = <top_>
-                             <program> Kl(.List{K}) ~> checkContracts </program>
                              <check> SetItem(checkContract(main)) </check>
+                             <tasks>
+                               <task_>
+                                 <config_>
+                                   <program>
+                                     Kl(.List{K}) ~> checkContracts
+                                   </program>
+                                 <_/config>
+                               <_/task>
+                             </tasks>
                            <_/top>
 
 

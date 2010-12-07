@@ -28,28 +28,34 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
                   <feasible> 0 </feasible>
                   <infeasible> 0 </infeasible>
 
-                  <program> .K </program>
                   <check> .Set </check>
-                  <spec> .Map </spec>
-                  <struct> .Map </struct>
-                  <fun> .Map </fun>
 
                   <tasks>
-                    <config*>
-                      <k> .K </k>
-                      <stack> .List </stack>
-                      <tenv> .Map </tenv>
-                      <env> .Map </env>
-                      <heap> .Map </heap>
+                    <task*>
+                      <config> 
+                        <program> .K </program>
+                        <struct> .Map </struct>
+                        <fun> .Map </fun>
+      
+                        <k> .K </k>
+                        <env> .Map </env>
+                        <stack> .List </stack>
+                        <tenv> .Map </tenv>
+                        
+                        <heap> .Map </heap>
+      
+                        <in> .List </in>
+                        <out> .List </out>
+      
+                        <counter> 0 </counter>
+                      </config>
+
                       <form> TrueFormula </form>
                       <subst> .Subst </subst>
-                    </config*>
+                    </task*>
                   </tasks>
 
-                  <in> .List </in>
-                  <out> .List </out>
-
-                  <counter> 0 </counter>
+                  <other-counter> 0 </other-counter>
                 </top>
 
 
