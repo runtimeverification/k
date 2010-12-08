@@ -101,8 +101,9 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1 UnderscoreLit:Pat (UnGuardedAlt 
 
 ***(
 (h)	case v of { k -> e; _ -> e' } = if (v==k) then e else e'
-	where k is a numeric, character, or string literal.
+	where k is a numeric, character, or string literal .
 ***)
+
 
 ***(
 (i)	case v of { x -> e; _ -> e' } = case v of { x -> e }
@@ -200,7 +201,7 @@ Note: Will have to use K in order to know about the "K" constructor
 (o)	case  v  of {  K  {} ->  e ; _ ->  e'  }
 	= case  v  of {
 	     K _ ... _ ->  e ; _ ->  e'  }
-Note: Will have to use K in order to know about the "K" constructor
+Note: Will have to use K in order to know the arity of the "K" constructor
 ***)
 
 ***(
@@ -219,6 +220,7 @@ more-general: (Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) 
      EPrime:Exp
    if not sameConstructor(KPrime:Exp, K:Pat)
 ***)
+
     ceq Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
       = EPrime:Exp
      if notBool sameConstructor(KPrime:Exp, K:Pat) .
