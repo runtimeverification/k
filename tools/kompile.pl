@@ -1260,7 +1260,11 @@ sub maudify_module {
 #     print  "Stage:\n$_\n\n";
     
 # Step: Add missing spaces around tokens
-    $_ = spacify($_);
+     # freeze all strings before spacifying
+     s/([^']\"[^"]*[^']\")/freeze($1,"STRINGS")/ge;
+     $_ = spacify($_);
+     $_ = unfreeze($_,"STRINGS");
+	 
 #    print  "Stage:\n$_\n\n";
     
 # Step: Change .List into (.).List , etc.
