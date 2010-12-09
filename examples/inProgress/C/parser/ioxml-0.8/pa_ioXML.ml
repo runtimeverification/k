@@ -155,7 +155,7 @@ value gen_xprint_cons loc c tl =
 
 value unvala x = IFDEF CAMLP5 THEN Pcaml.unvala x ELSE x END;
 
-value gen_output_cons (loc, c, tl) =
+value gen_output_cons ((loc : MLast.loc), (c : string), (tl : list MLast.ctyp), (_ : option MLast.ctyp)) : (MLast.patt * option MLast.expr * MLast.expr) =
   let c = unvala c in
   let tl = unvala tl in
   let p =
@@ -173,7 +173,8 @@ value gen_output_cons (loc, c, tl) =
   (p, <:vala< None >>, e)
 ;
 
-value gen_output_record loc n lbl =
+
+value gen_output_record loc n lbl : MLast.expr =
   let n = unvala n in
   if onepr.val then
     let str =
@@ -217,7 +218,7 @@ value gen_output_record loc n lbl =
     <:expr< do { $list:el$ } >>
 ;
 
-value gen_output_sum loc cdl =
+value gen_output_sum loc (cdl : list (MLast.loc * string * list MLast.ctyp * option MLast.ctyp)) : MLast.expr =
   <:expr< fun ppf -> fun [ $list:List.map gen_output_cons cdl$ ] >>
 ;
 
@@ -225,7 +226,7 @@ value gen_output_record loc n lbl =
   <:expr< fun ppf x -> $gen_output_record loc n lbl$ >>
 ;
 
-value gen_output_abstract loc n =
+value gen_output_abstract loc n : MLast.expr =
   let n = unvala n in
   let txt = fun_name "xprint" n ^ ": abstract type" in
   <:expr< fun ppf -> failwith $str:txt$ >>
@@ -255,8 +256,10 @@ value gen_output_funs loc tdl sil =
          in
          let body =
            List.fold_right
-             (fun (v, _) e ->
-                let v = unvala v in
+             (fun ((v : option string), _) (e : MLast.expr) ->
+				let v = unvala (match v with [
+				Some s -> s
+				| None -> ""]) in                
                 <:expr< fun $lid:"pr_" ^ v$ -> $e$ >>)
              (unvala tpl) body
          in
@@ -269,7 +272,7 @@ value gen_output_funs loc tdl sil =
 
 (* xparse type *)
 
-value gen_input_cons (loc, c, tl) =
+value gen_input_cons (loc, c, tl, _) =
   let c = unvala c in
   let tl = unvala tl in
   let p =
@@ -369,7 +372,7 @@ value gen_input_funs loc tdl sil =
          let body =
            List.fold_right
              (fun (v, _) e ->
-                let v = unvala v in
+                let v = unvala (match v with [Some s -> s | None -> ""]) in
                 <:expr< fun $lid:"pa_" ^ v$ -> $e$ >>)
              (unvala tpl) body
          in
@@ -402,6 +405,23 @@ value make_type_with_params loc n tpl =
     <:ctyp< $lid:n$ >> tpl
 ;
 
+value addOptionToFirst ((x1 : 'a), (x2 : 'b)) : (option 'a * 'b) = (Some x1, x2);
+
+value addOptionToFirstList xs : list (option 'a * 'b) = 
+	List.map addOptionToFirst xs
+;
+
+value removeOptionFromFirst ((x1 : option string), (x2 : 'b)) : (string * 'b) = 
+	match x1 with [
+		Some x1 -> (x1, x2)
+		| None -> ("", x2)
+	];
+
+value removeOptionFromFirstList xs : list (string * 'b) = 
+	List.map removeOptionFromFirst xs
+;
+
+(*   *)
 value gen_output_funs_intf loc tdl sil =
   let itl =
     List.fold_right
@@ -413,6 +433,7 @@ value gen_output_funs_intf loc tdl sil =
          in
          let n = unvala n in
          let tpl = unvala tpl in
+		 let tpl = removeOptionFromFirstList tpl in
          let t = make_type_with_params loc n tpl in
          let t = <:ctyp< Format.formatter -> $t$ -> unit >> in
          let t =
@@ -441,6 +462,7 @@ value gen_input_funs_intf loc tdl sil =
          in
          let n = unvala n in
          let tpl = unvala tpl in
+		 let tpl = removeOptionFromFirstList tpl in
          let t = make_type_with_params loc n tpl in
          let t = <:ctyp< IoXML.ast -> $t$ >> in
          let t =
@@ -475,9 +497,9 @@ value gen_ioxml_intf loc tdl =
 EXTEND
   Pcaml.str_item:
     [ [ "type"; LIDENT "nogen";
-        tdl = LIST1 Pcaml.type_declaration SEP "and" ->
+        tdl = LIST1 Pcaml.type_decl SEP "and" ->
           <:str_item< type $list:tdl$ >>
-      | "type"; tdl = LIST1 Pcaml.type_declaration SEP "and" ->
+      | "type"; tdl = LIST1 Pcaml.type_decl SEP "and" ->
           let sil = gen_ioxml_impl loc tdl in
           let sil =
             if notyp.val then sil
@@ -487,9 +509,9 @@ EXTEND
   ;
   Pcaml.sig_item:
     [ [ "type"; LIDENT "nogen";
-        tdl = LIST1 Pcaml.type_declaration SEP "and" ->
+        tdl = LIST1 Pcaml.type_decl SEP "and" ->
           <:sig_item< type $list:tdl$ >>
-      | "type"; tdl = LIST1 Pcaml.type_declaration SEP "and" ->
+      | "type"; tdl = LIST1 Pcaml.type_decl SEP "and" ->
           let sil = gen_ioxml_intf loc tdl in
           let sil = [<:sig_item< type $list:tdl$ >> :: sil] in
           <:sig_item< declare $list:sil$ end >> ] ]
@@ -524,6 +546,6 @@ Pcaml.parse_interf.val :=
     (sil, stopped)
 ;
 
-IFDEF OCAML_305 THEN
-  Pcaml.inter_phrases.val := Some "\n\n"
-END;
+(*IFDEF OCAML_305 THEN*)
+  Pcaml.inter_phrases.val := Some "\n\n";
+(*END;*)
