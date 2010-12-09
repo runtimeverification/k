@@ -16,8 +16,10 @@ opt: $(OBJS_OPT)
 clean:
 	rm -f *.cm[oix] *.o
 
-depend:
+.depend:
 	$(OCAMLDEP) -pp $(CAMLP5) *.ml* > .depend
+
+depend: .depend
 
 install:
 	cp -f $(OBJS) ioXML.mli $(LIBDIR)/camlp5
