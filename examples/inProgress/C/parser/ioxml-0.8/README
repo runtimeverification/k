@@ -1,0 +1,113 @@
+OVERVIEW:
+
+IoXML is a Camlp5 syntax extension for OCaml mli and ml files which
+generates XML parsers and printers for all types you define.
+
+Usage:
+
+  If we have two files "foo.mli" and "foo.ml":
+
+     Compilation:
+        ocamlc -pp "camlp5o pa_ioXML.cmo" -I +camlp5 -c foo.mli
+        ocamlc -pp "camlp5o pa_ioXML.cmo" -I +camlp5 -c foo.ml
+
+     Pretty print (for info):
+        camlp5o pa_ioXML.cmo pr_o.cmo -sep "\n\n" foo.mli
+        camlp5o pa_ioXML.cmo pr_o.cmo -sep "\n\n" foo.ml
+
+     Linking:
+        ocamlc -I +camlp5 ioXML.cmo ...files...
+
+Details:
+
+  The generated functions are:
+
+    For each type "bar":
+        a XML parser function named xparse_bar
+        a XML printer function named xprint_bar
+
+  The function xparse_bar takes a XML tree as parameter, defined in
+  IoXML.ast. To get it from a file (or any stream), the library
+  function IoXML.parse_xml_list reads XML input. Another function
+  IoXML.parse_xml reads just one XML item.
+
+  If the type has parameters, the parser and printer functions receive
+  as first parameters, the parser and printers for them.
+
+  The function xprint_bar takes a Format.formatter function as parameter.
+
+Example:
+
+  For example if the type bar is defined as:
+    type ('a, 'b) bar =
+          Leaf of 'a
+        | Node of 'b * ('a, 'b) bar * ('a, 'b) bar
+
+  The generated functions are of types:
+
+    xparse_bar:
+       (IoXML.ast -> 'a) -> (IoXML.ast -> 'b) -> IoXML.ast -> ('a, 'b) bar   
+    xprint_bar:
+       (Format.formatter -> 'a -> unit) ->
+       (Format.formatter -> 'b -> unit) ->
+            Format.formatter -> ('a, 'b) bar -> unit
+
+  If we have e.g. values of type:
+            (int, string) bar
+
+  a typical parsing usage is:
+      let ic = open_in file_name in
+      let strm = Stream.of_channel ic in
+      let v =
+         xparse_bar IoXML.xparse_int IoXML.xparse_string
+            (IoXML.parse_xml strm)
+      in ...
+
+  and a typical printing usage is (see standard module Format):
+      let ppf = Format.std_formatter in
+      IoXML.xprint ppf "@[%a@]@."
+        (xprint_bar IoXML.xprint_int IoXML.xprint_string) v;
+
+VERSION
+
+  The latest version is 0.8. Type camlp5o pa_ioXML.cmo -ioxml_v
+  (once installed) to display the version number.
+
+KNOWN BUGS:
+
+  It works with recursive types and mutually recursive types but not
+  for recursive data: the printing loops.
+
+  It is preferable not to load pa_ioXML by writting #load "pa_ioXML.cmo"
+  in the source files, because in this case, it does not add the necessary
+  "open IoXML" in the module. Rather put pa_ioXML.cmo as parameter in the
+  the "camlp5" command.
+
+CONTENTS:
+
+	pa_ioXML.ml	camlp5 syntax extension
+	ioXML.mli	library interface
+	ioXML.ml	library implementation
+	Makefile	makefile
+	README		this file
+	LICENCE		licence notice
+        CHANGES         changes
+
+COPYRIGHT:
+
+  All files are Copyright (c) 2007 INRIA
+  See the file LICENSE
+
+INSTALLATION:
+
+  You need OCaml and Camlp5 to compile
+  - Do:
+       make 
+  - if the native OCaml compiler is installed:
+       make opt
+  - Then do:
+       make install
+
+CREDITS:
+
+  Daniel de Rauglaudre <daniel.de_rauglaudre@inria.fr>

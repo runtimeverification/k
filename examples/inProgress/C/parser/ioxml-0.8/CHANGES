@@ -1,0 +1,76 @@
+IoXML version 0.8
+-----------------
+
+- [14 Nov 07] Updated for Camlp5 (transitional and strict).
+
+IoXML version 0.7
+-----------------
+
+- [05 Jul 07] Updated for OCaml 3.10 and Camlp4s.
+- [14 Nov 02] Added ifdef to allow compiling with new format type.
+- [29 Oct 02] Changed IoXML.xprint_string and IoXML.xparse_string:
+  the characters < > & " ' of the string are converted according to
+  the XML rules: &gt; &lt; and so on.
+- [17 Jul 02] Added IoXML.xparse_nativeint and xprint_nativeint.
+
+IoXML version 0.6
+-----------------
+
+- [24 Apr 02] Changed generation of parsing and printing functions of
+  "types manifest", e.g.:
+       type t = A.t = A | B
+  In this case, now generates the functions from the type definition A | B,
+  instead of calling the parsing and printing functions of of the module A.
+  This avoids having to compile a.ml with pa_ioXML.
+- [18 Mar 02] Fixed bug: did not input identifiers holding digits.
+
+IoXML version 0.5
+-----------------
+
+- [10 Feb 02] Enclose array items by tag "ai", list items by tag "li",
+  tuple items by tag "ti" and constructor parameters, if there are at
+  least two parameters, by tag "ci".
+- [04 Feb 02] Added option -onepr in pa_ioXML.cmo: in printers, generate
+  one xprint with a possible big string format (which is shorter when pretty
+  printed), instead of a sequence of prints with small formats (which
+  is more readable).
+- [04 Feb 02] Changed the internal XML lexer (faster and using less memory).
+
+IoXML version 0.4
+-----------------
+
+- [03 Feb 02] Some perestroika of code. Some printing functions are
+  expanded differently.
+- [02 Feb 02] Added inline generation for tuples of size > 5.
+- [02 Feb 02] When a function type is encountered, generates now
+  the function without the IoXML prefix in order to allow the user
+  to provide his own version.
+
+IoXML version 0.3
+-----------------
+
+- [02 Feb 02] Now, in case of not implemented predefined type, a warning
+  is sent and no parsers and printers are generated for the defined type.
+- [02 Feb 02] Fixed bug: the code generated for abstract types in ml
+  files was bad.
+- [02 Feb 02] Added parser/printer for type ref, tuples of 4 and
+  5 elements, and for declaration of type with manifest.
+
+IoXML version 0.2
+-----------------
+
+- [02 Feb 02] The user application does not need any more to be linked
+  with the gramlib.cma of camlp4. In case of exception raised, it is
+  now encapsulated inside the exception IoXML.ExcLoc (instead of
+  Stdpp.Exc_located before).
+- [02 Feb 02] The functions parse_xml and parse_xml_list are implemented
+  now with stream parsers (instead of camlp4 extensible grammars before),
+  and are therefore much faster.
+- [02 Feb 02] Added missing functions for bool, char and float. Fixed bug
+  in xparse_string: missed parsing of backslashes and evaluation of string
+  contents. Renamed some IoXML library functions (internal usage).
+
+IoXML version 0.1
+-----------------
+
+- [01 Feb 02] First release
