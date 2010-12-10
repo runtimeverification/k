@@ -1,4 +1,6 @@
 #include <stdio.h>
+void spawn(int (*a)(int), int b, ...);
+void sync();
 
 int g(int x, int y){
 	printf("(%d, %d)\n", x, y);
@@ -6,15 +8,15 @@ int g(int x, int y){
 }
 
 int f(int x) {
-	//printf("inside f: %d\n", x);
+	printf("inside f: %d\n", x);
 	g(x, 0);
 	//spawn(g, x, 0);
 	//spawn(g, x, 1);
 	return 0;
 }
 int main(void){
-	spawn(f, 0);
-	spawn(f, 1);
+	spawn(f, 1, 0);
+	spawn(f, 1, 1);
 	
 	sync();
 	return 0;

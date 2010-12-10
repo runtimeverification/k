@@ -4,6 +4,7 @@ kmod C-CONFIGURATION is
 	op nextFile : -> CellLabel
 	configuration 
 		< T > 
+			< busy > .Bag </ busy >
 			< gotoMap > .Map </ gotoMap >
 			< genv > .Map </ genv >
 			< gtypes > .Map </ gtypes >
@@ -61,8 +62,7 @@ kmod C-CONFIGURATION is
 						< loopStack > .List </ loopStack >
 						@latex("\\kBR")
 						< locsWrittenTo > .Bag </ locsWrittenTo >
-						--- < holds > .Map </ holds >
-						
+						< holds > .Map </ holds >
 						< type * > .K </ type * > --- used for typing expressions
 						< declarationTypeHolder > .K </ declarationTypeHolder > --- holds the innermost type while we unroll the type around it
 						

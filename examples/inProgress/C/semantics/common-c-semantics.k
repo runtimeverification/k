@@ -76,6 +76,8 @@ static union {
 ("Field").KProperLabel(unsigned-char,,("_`[_`]").KProperLabel("Id"(buf),,("_+_").KProperLabel(("_+_").KProperLabel(("_+_").KProperLabel(("sizeof").KProperLabel(long-long-int),,("_*_").KProperLabel(("tv").KResultLabel(8,,unsigned-long-int),,("sizeof").KProperLabel(long-long-int))),,("sizeof").KProperLabel(long-long-int)),,("tv").KResultLabel(2,,unsigned-long-int)))) 
 ***)
 
+--- FIXME serious bug with void spawn(int (*)(int), int, ...) where the int overwrites the pointer (i think) because of #NoName
+
 ---zzz set print attribute on 
 kmod INCOMING-MODULES is
 	including K 
@@ -252,7 +254,7 @@ kmod COMMON-SEMANTIC-SYNTAX is
 	sort List{Type} 
 	subsort List{Type} < KResult 
 	subsort List{Type} < List{C} 
-	subsort Type < List{Type} 
+	subsort Type < List{Type}
 	subsort Type < List{C} 
 	subsort Value < List{Type} 
 	op _::_ : List{Type} List{Type} -> List{Type} [ditto metadata "ditto"] 
@@ -370,6 +372,7 @@ kmod C-SETTINGS is
 		,, "fslOpenFile"
 		,, "fslPutc"
 		,, "getchar"
+		,, "lock"
 		,, "log"
 		,, "longjmp"
 		,, "malloc"
@@ -378,8 +381,11 @@ kmod C-SETTINGS is
 		,, "rand"
 		,, "setjmp"
 		,, "sin"
+		,, "spawn"
 		,, "sqrt"
+		,, "sync"
 		,, "tan"
+		,, "unlock"
 	)) 
 	
 	--- S 6.2.5 p.35 i.15.  "The implementation shall define char to have the same range, representation, and behavior as either signed char or unsigned char.  37)... Irrespective of the choice made, char is a separate type from the other two and is not compatible with either

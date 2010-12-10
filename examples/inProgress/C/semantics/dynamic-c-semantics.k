@@ -103,14 +103,14 @@ kmod DYNAMIC-C-SEMANTICS is
 	***(
 	--- throw away annotations
 	mb [no-annotations]: rule [annotation(?); => .K] : KSentence [metadata "structural"] .
-	
+	***)		
 	--- fixme I'm not sure threads clean up their memory
 	
 	--- this shouldn't happen for normal programs (functions end in a return).  it is only used for threads
-	mb [terminate-thread]: rule
-		[< thread >... < k > .K </ k > ...</ thread > => .Bag]
-		: KSentence [metadata "structural"] .
-	***)		
+	rule [terminate-thread]:
+		< thread >... < k > .K </ k > ...</ thread > => .Bag
+		[structural]
+	
 	rule [terminate] :
 		(< T >... < threads > < thread >... < k > V:Value </ k > ...</ thread > </ threads > ...</ T >
 		=> < resultValue > V:Value </ resultValue >)
