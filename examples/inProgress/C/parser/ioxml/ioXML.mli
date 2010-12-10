@@ -26,6 +26,7 @@ value xparse_array : (ast -> 'a) -> ast -> array 'a;
 value xparse_bool : ast -> bool;
 value xparse_char : ast -> char;
 value xparse_int : ast -> int;
+value xparse_int64 : ast -> int64;
 value xparse_float : ast -> float;
 value xparse_list : (ast -> 'a) -> ast -> list 'a;
 value xparse_nativeint : ast -> nativeint;
@@ -38,6 +39,7 @@ value xprint_array :
 value xprint_bool : formatter -> bool -> unit;
 value xprint_char : formatter -> char -> unit;
 value xprint_int : formatter -> int -> unit;
+value xprint_int64 : formatter -> int64 -> unit;
 value xprint_float : formatter -> float -> unit;
 value xprint_list :
   (formatter -> 'a -> unit) -> formatter -> list 'a -> unit;

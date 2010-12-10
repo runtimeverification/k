@@ -196,6 +196,12 @@ value xparse_int =
   | Tag loc _ _ -> error loc "integer" ]
 ;
 
+value xparse_int64 =
+  fun
+  [ Str loc s -> try Int64.of_string s with [ Failure _ -> error loc "integer64" ]
+  | Tag loc _ _ -> error loc "integer64" ]
+;
+
 value xparse_float =
   fun
   [ Str loc s -> try float_of_string s with [ Failure _ -> error loc "float" ]
@@ -337,6 +343,7 @@ value xprint_list pr_a ppf list =
 value xprint_bool ppf b = xpr_acons ppf (if b then "True" else "False");
 value xprint_char ppf c = xprint ppf "\"%s\"" (Char.escaped c);
 value xprint_int ppf i = xprint ppf "%d" i;
+value xprint_int64 ppf i = xprint ppf "%s" (Int64.to_string i);
 value xprint_float ppf f = xprint ppf "\"%s\"" (string_of_float f);
 value xprint_nativeint ppf n = xprint ppf "\"%s\"" (Nativeint.to_string n);
 

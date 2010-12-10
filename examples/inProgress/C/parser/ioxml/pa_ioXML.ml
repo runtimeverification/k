@@ -501,10 +501,11 @@ EXTEND
           <:str_item< type $list:tdl$ >>
       | "type"; tdl = LIST1 Pcaml.type_decl SEP "and" ->
           let sil = gen_ioxml_impl loc tdl in
-          let sil =
+		  (* i think this removes the type def *)
+         (* let sil =
             if notyp.val then sil
             else [<:str_item< type $list:tdl$ >> :: sil]
-          in
+          in*)
           <:str_item< declare $list:sil$ end >> ] ]
   ;
   Pcaml.sig_item:
