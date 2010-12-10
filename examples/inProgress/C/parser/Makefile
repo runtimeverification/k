@@ -64,3 +64,4 @@ cparser: $(MODULES)
 
 clean:
 	rm -f *.cmi *.cmx *.o *.mli *.cil xmlPrinter.ml cparser.ml clexer.ml *.preprocessed cparser.exe cparser *.stackdump
+	make -C ioxml clean
