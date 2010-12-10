@@ -14,22 +14,21 @@ OCAML_YACC = ocamlyacc
 OCAML_LINK = ocamlopt $(OCAMLOPT_FLAGS) -I ioxml -ccopt -L./ioxml
 
 # these are partially ordered by inclusion.  don't know how to avoid manually ordering these
-MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whitetrack.cmx cprint.cmx lexerhack.cmx cabs.cmx xmlPrinter.cmx clexer.cmx cparser.cmx frontc.cmx cabsPrinter.cmx cabsDriver.cmx
-IOXML = ioxml/ioXML.cmx ioxml/pa_ioXML.cmo
+MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whitetrack.cmx cprint.cmx lexerhack.cmx cabs.cmx clexer.cmx cparser.cmx frontc.cmx cabsPrinter.cmx cabsDriver.cmx
+# xmlPrinter.cmx 
+
+#IOXML = ioxml/ioXML.cmx ioxml/pa_ioXML.cmo
+IOXML = 
 .PHONY: all cleanOnMakefileChange clean ioxml
 all: cparser 
 
-$(IOXML): ioxml/ioXML.ml ioxml/ioXML.mli ioxml/pa_ioXML.ml
-	make -C ioxml all
-	
-#cabs.mli: cabs.ml ioxml
-#ocamlc -i cabs.ml > cabs.mli
-	
-xmlPrinter.ml: cabs.ml $(IOXML)
-	camlp5o ioxml/pa_ioXML.cmo pr_o.cmo -sep "\n\n" cabs.ml > xmlPrinter.tmp
-#-diff --line-format=%L --suppress-common-lines xmlPrinter.tmp cabs.ml > xmlPrinter.ml
-	sed -i '2 i open Cabs' xmlPrinter.tmp
-	mv xmlPrinter.tmp xmlPrinter.ml
+# $(IOXML): ioxml/ioXML.ml ioxml/ioXML.mli ioxml/pa_ioXML.ml
+# make -C ioxml all
+		
+# xmlPrinter.ml: cabs.ml $(IOXML)
+# camlp5o ioxml/pa_ioXML.cmo pr_o.cmo -sep "\n\n" cabs.ml > xmlPrinter.tmp
+# sed -i '2 i open Cabs' xmlPrinter.tmp
+# mv xmlPrinter.tmp xmlPrinter.ml
 	
 clexer.ml: clexer.mll
 	$(OCAML_LEX) clexer.mll
@@ -48,8 +47,9 @@ cparser.cmx: cabs.cmi cabshelper.cmi lexerhack.cmi cprint.cmi
 cabsDriver.cmx cabsDriver.cmi: cparser.cmi frontc.cmi clexer.cmi
 frontc.cmx frontc.cmi: errormsg.cmi whitetrack.cmi cprint.cmi clexer.cmi
 clexer.cmx clexer.cmi: lexerhack.cmi cparser.cmi cabshelper.cmi
-cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi xmlPrinter.cmi
-xmlPrinter.cmx xmlPrinter.cmi: $(IOXML)
+cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi
+# cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi xmlPrinter.cmi
+# xmlPrinter.cmx xmlPrinter.cmi: $(IOXML)
 %.cmx %.cmi: %.ml 
 #Makefile
 	$(OCAML_COMPILE) $*.ml
@@ -60,7 +60,8 @@ cparser.cmi: cparser.mli cabs.cmi clexer.ml
 cabsDriver.cmx cabsDriver.cmi: cabsPrinter.cmi
 
 cparser: $(MODULES)
-	$(OCAML_LINK) -o $@ unix.cmxa str.cmxa nums.cmxa ioXML.cmx $^
+	$(OCAML_LINK) -o $@ unix.cmxa str.cmxa nums.cmxa $^
+# $(OCAML_LINK) -o $@ unix.cmxa str.cmxa nums.cmxa ioXML.cmx $^
 
 clean:
 	rm -f *.cmi *.cmx *.o *.mli *.cil xmlPrinter.ml cparser.ml clexer.ml *.preprocessed cparser.exe cparser *.stackdump
