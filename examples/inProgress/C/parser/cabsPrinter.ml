@@ -59,6 +59,7 @@
 
 (* George Necula: I changed this pretty dramatically since CABS changed *)
 open Escape
+open Cabs
 open XmlPrinter
 (* open Whitetrack *)
 (*open Xml *)
@@ -155,7 +156,7 @@ let rec cabsToString ((fname, defs) : file) (fileContents : string) =
 and cabsToXML ((fname, defs) : file) (fileContents : string) = 
 	let ppf = Format.std_formatter in
 		IoXML.xprint ppf "@[%a@]@."
-			(IoXML.xprint_list xprint_definition) defs
+			(IoXML.xprint_list xprint_definition) defs; "xml"
 (*		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "TranslationUnit" *)
 
 and printDefs defs =

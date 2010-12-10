@@ -14,20 +14,18 @@ OCAML_YACC = ocamlyacc
 OCAML_LINK = ocamlopt $(OCAMLOPT_FLAGS) -I ioxml -ccopt -L./ioxml
 
 # these are partially ordered by inclusion.  don't know how to avoid manually ordering these
-MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whitetrack.cmx cprint.cmx lexerhack.cmx cabs.cmx clexer.cmx cparser.cmx frontc.cmx cabsPrinter.cmx cabsDriver.cmx
-
+MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whitetrack.cmx cprint.cmx lexerhack.cmx cabs.cmx xmlPrinter.cmx clexer.cmx cparser.cmx frontc.cmx cabsPrinter.cmx cabsDriver.cmx
+IOXML = ioxml/ioXML.cmx ioxml/pa_ioXML.cmo
 .PHONY: all cleanOnMakefileChange clean ioxml
 all: cparser 
 
-ioxml: ioxml/ioXML.ml ioxml/ioXML.mli ioxml/pa_ioXML.ml
+$(IOXML): ioxml/ioXML.ml ioxml/ioXML.mli ioxml/pa_ioXML.ml
 	make -C ioxml all
-
+	
 #cabs.mli: cabs.ml ioxml
 #ocamlc -i cabs.ml > cabs.mli
 	
-ioxml/ioXML.cmx ioxml/pa_ioXML.cmo: ioxml
-
-xmlPrinter.ml: cabs.ml ioxml
+xmlPrinter.ml: cabs.ml $(IOXML)
 	camlp5o ioxml/pa_ioXML.cmo pr_o.cmo -sep "\n\n" cabs.ml > xmlPrinter.tmp
 #-diff --line-format=%L --suppress-common-lines xmlPrinter.tmp cabs.ml > xmlPrinter.ml
 	sed -i '2 i open Cabs' xmlPrinter.tmp
@@ -51,7 +49,7 @@ cabsDriver.cmx cabsDriver.cmi: cparser.cmi frontc.cmi clexer.cmi
 frontc.cmx frontc.cmi: errormsg.cmi whitetrack.cmi cprint.cmi clexer.cmi
 clexer.cmx clexer.cmi: lexerhack.cmi cparser.cmi cabshelper.cmi
 cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi xmlPrinter.cmi
-xmlPrinter.cmx xmlPrinter.cmi: ioxml
+xmlPrinter.cmx xmlPrinter.cmi: $(IOXML)
 %.cmx %.cmi: %.ml 
 #Makefile
 	$(OCAML_COMPILE) $*.ml

@@ -95,11 +95,16 @@ let rec processOneFile (cabs: Cabs.file) =
 		with e ->                      (* some unexpected exception occurs *)
 			close_in_noerr ic;           (* emergency closing *)
 		);
-		let programName = 
-		Filename.basename (replace "-gen-maude-tmp" "" (replace "." "-" ("program-" ^ (noscores c.fname)))) in
-			fprintf c.fchan "%s\n" ("op " ^ programName ^ " : -> Program .");
-			let maude = (cabsToString cabs !fileContents) in
-				(fprintf c.fchan "eq %s = (%s) .\n" programName maude); 
+		let programName = Filename.basename (replace "-gen-maude-tmp" "" (replace "." "-" ("program-" ^ (noscores c.fname)))) in
+		let data = 
+			if (!isXML) then (
+				(cabsToXML cabs !fileContents)
+			) else (					
+				let maude = (cabsToString cabs !fileContents) in
+					("op " ^ programName ^ " : -> Program ." ^ "\n") ^
+					("eq " ^ programName ^ " = (" ^ maude ^ ") .\n")
+			) in
+			fprintf c.fchan "%s\n" data; 
 	));
 
     if !E.hadErrors then
