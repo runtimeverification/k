@@ -11,6 +11,8 @@ int main()
 {
   struct nodeList *x;
   struct nodeList *y;
+  struct nodeList *p;
+  p = 0 ;
     
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
   x->val = 7;
@@ -24,9 +26,20 @@ int main()
   y->next = x;
   x = y;
   printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?x </ env >
+  /*@ assert < config > < env > x |-> ?x  y |-> ?x p |-> 0 </ env >
                         < heap > llist(?x)(!A, !LA) </ heap >
                         < form > TrueFormula </ form > </ config > */
+  
+  /*@ invariant < config > < env > p |-> ?p  x |-> ?x  y |-> ?y </ env >
+                           < heap > llist(?p)(?B, ?LB) llist(?x)(?C, ?LC) </ heap >
+                           < form > (rev(!A) === rev(?C) @ ?B ) </ form > </ config > */
+  // /\ (rev(!LA) === rev(?LC) @ ?LB ) does not work at this time
+  while(x != 0) {
+    y = x->next;
+    x->next = p;
+    p = x;
+    x = y;
+  }
   return 0;
 }
 
