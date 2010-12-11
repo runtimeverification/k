@@ -16,18 +16,18 @@ mod HASKELL-CASE-SEMANTICS is
 ***)
 
 ***(
-(a)	case e of { alts } = (\v -> case v of { alts }) e
-	where v is a new variable
+(a) case e of { alts } = (\v -> case v of { alts }) e
+  where v is a new variable
 ***)
 
 ***(
-(b)	case v of { p1 match1;  ... ; pn matchn }
-	=  case v of { p1 match1 ;
-	                _  -> ... case v of {
-	                           pn matchn ;
-	                           _  -> error "No match" }...}
-	 where each matchi has the form:
-	  | gi,1  -> ei,1 ; ... ; | gi,mi -> ei,mi where { declsi }
+(b) case v of { p1 match1;  ... ; pn matchn }
+  =  case v of { p1 match1 ;
+                  _  -> ... case v of {
+                             pn matchn ;
+                             _  -> error "No match" }...}
+   where each matchi has the form:
+    | gi,1  -> ei,1 ; ... ; | gi,mi -> ei,mi where { declsi }
 
 Base case:
   AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-b.hs" 2 26) (PApp (UnQual (Ident "P1")) ([])) (UnGuardedAlt (Var (UnQual (Ident "match1")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-b.hs" 2 41) (PApp (UnQual (Ident "Pn")) ([])) (UnGuardedAlt (Var (UnQual (Ident "matchn")))) (BDecls ([]))) ([]))))
@@ -62,30 +62,30 @@ Inductive Case:
 
 
 ***(
-(c)	case v of { p | g1 -> e1 ; ...
-	             | gn -> en where { decls }
-	            _     -> e' }
-	= case e' of
-	  {y ->  (where y is a new variable)
-	   case v of {
-	         p -> let { decls } in
+(c) case v of { p | g1 -> e1 ; ...
+                  | gn -> en where { decls }
+                _      -> e' }
+  = case e' of
+    {y ->  (where y is a new variable)
+     case v of {
+           p -> let { decls } in
                 case () of {
                   () | gs1 -> e1;
                   _ -> ... case () of {
                              () | gsn -> en;
                              _ -> y } ... }
-	         _ -> y }}
+           _ -> y }}
 ***)
 
 ***(
-(d)	case v of { ~p -> e; _ -> e' }
-	= (\x1 ... xn -> e ) (case v of { p-> x1 }) ... (case v of { p -> xn})
-	where x1, ..., xn are all the variables in p
+(d) case v of { ~p -> e; _ -> e' }
+  = (\x1 ... xn -> e ) (case v of { p-> x1 }) ... (case v of { p -> xn})
+  where x1, ..., xn are all the variables in p
 ***)
 
 ***(
-(e)	case v of { x@p -> e; _ -> e' }
-	=  case v of { p -> ( \ x -> e ) v ; _ -> e' }
+(e) case v of { x@p -> e; _ -> e' }
+  =  case v of { p -> ( \ x -> e ) v ; _ -> e' }
 Pending questions:
   - Again with the _, currently assume it to be any pattern
 
@@ -93,19 +93,18 @@ AST:  (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 26) 
    ===
      (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 3 26) (PVar (Ident "p")) (UnGuardedAlt (App (Paren (Lambda (SrcLoc "tests/case-e.hs" 3 33) ((:)(PVar (Ident "x")) ([])) (Var (UnQual (Ident "e"))))) (Var (UnQual (Ident "v"))))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-e.hs" 3 48) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
 
-more-general: (Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName)) Binds2) [])))
+more-general: (Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name Pat1) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])))
    ===
-     (Case (Var V:QName) ((:)(Alt Loc1 (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2 ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName))Binds2) [])))
+     (Case (Var V:QName) ((:)(Alt Loc1 Pat1 (UnGuardedAlt (App (Paren (Lambda Loc2 ((:)(PVar X:Name) []) E:Exp)) (Var (UnQual V:QName)))) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])))
 
 ***)
 
-    eq Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name (PVar P:Name)) (UnGuardedAlt (Var E:QName)) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName)) Binds2) []))
-     = Case (Var V:QName) ((:)(Alt Loc1 (PVar P:Name) (UnGuardedAlt (App (Paren (Lambda Loc2 ((:)(PVar X:Name) []) (Var (UnQual E:QName)))) (Var (UnQual V:QName)))) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt (Var EPrime:QName)) Binds2) [])) .
-
+    eq Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name Pat1) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
+     = Case (Var V:QName) ((:)(Alt Loc1 Pat1 (UnGuardedAlt (App (Paren (Lambda Loc2 ((:)(PVar X:Name) []) E:Exp)) (Var (UnQual V:QName)))) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])) .
 
 
 ***(
-(f)	case v of { _ -> e; _ -> e' } = e
+(f) case v of { _ -> e; _ -> e' } = e
 Pending Questions:
   - I think the second _ just means some pattern, while the first must be an actual underscore
 
@@ -123,23 +122,23 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1 UnderscoreLit:Pat (UnGuardedAlt 
      = E:Exp .
 
 ***(
-(g)	case v of { K p1  ...pn -> e; _ -> e' }
-	= case v of {
-	     K x1 ...xn -> case x1 of {
-	                    p1 -> ... case xn of { pn -> e ; _ -> e' } ...
-	                    _  -> e' }
-	     _ -> e' }
-	at least one of p1, ..., pn is not a variable; x1, ..., xn are new variables
+(g) case v of { K p1  ...pn -> e; _ -> e' }
+  = case v of {
+       K x1 ...xn -> case x1 of {
+                      p1 -> ... case xn of { pn -> e ; _ -> e' } ...
+                      _  -> e' }
+       _ -> e' }
+  at least one of p1, ..., pn is not a variable; x1, ..., xn are new variables
 ***)
 
 ***(
-(h)	case v of { k -> e; _ -> e' } = if (v==k) then e else e'
-	where k is a numeric, character, or string literal .
+(h) case v of { k -> e; _ -> e' } = if (v==k) then e else e'
+  where k is a numeric, character, or string literal .
 ***)
 
 
 ***(
-(i)	case v of { x -> e; _ -> e' } = case v of { x -> e }
+(i) case v of { x -> e; _ -> e' } = case v of { x -> e }
 
 Pending questions:
   - Is the _ able to be any pattern, or must this only apply when an underscore is present?
@@ -160,7 +159,7 @@ more-general: Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp
      = Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []) .
 
 ***(
-(j)	case v of { x -> e } = ( \ x -> e ) v
+(j) case v of { x -> e } = ( \ x -> e ) v
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-j.hs" 2 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
    ===
@@ -175,17 +174,17 @@ more-general:  (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:E
     ***  = (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName)) .
 
 ***(
-(k)	case N v of { N p -> e; _ -> e' }
-	= case v of { p -> e; _ -> e' }
-	where N is a newtype constructor
+(k) case N v of { N p -> e; _ -> e' }
+  = case v of { p -> e; _ -> e' }
+  where N is a newtype constructor
 
 Note: We'll need to use K for this one, as the AST doesn't know that N is a newtype constructor
 
 ***)
 
 ***(
-(l)	case _|_ of { N p -> e; _ -> e' } = case _|_ of { p -> e }
-	where N is a newtype constructor
+(l) case _|_ of { N p -> e; _ -> e' } = case _|_ of { p -> e }
+  where N is a newtype constructor
 Pending questions:
   - I have no idea what bottom means in the context of dynamic semantics
 Note: We'll need to use K for this one, as the AST doesn't know that N is a newtype constructor
@@ -193,34 +192,34 @@ Note: We'll need to use K for this one, as the AST doesn't know that N is a newt
 ***)
 
 ***(
-(m)	case  v  of {  K  { f1  =  p1  ,  f2  =  p2  ,  ... } ->  e ; _ ->  e'  }
-	=  case e' of {
-	   y ->
-	    case  v  of {
-	      K  {  f1  =  p1  } ->
-	            case  v  of { K  { f2  =  p2  ,  ...  } ->  e ; _ ->  y  };
-	            _ ->  y  }}
-	where f1, f2, ... are fields of constructor K; y is a new variable
+(m) case  v  of {  K  { f1  =  p1  ,  f2  =  p2  ,  ... } ->  e ; _ ->  e'  }
+  =  case e' of {
+     y ->
+      case  v  of {
+        K  {  f1  =  p1  } ->
+              case  v  of { K  { f2  =  p2  ,  ...  } ->  e ; _ ->  y  };
+              _ ->  y  }}
+  where f1, f2, ... are fields of constructor K; y is a new variable
 ***)
 
 ***(
-(n)	case  v  of {  K  { f  =  p } ->  e ; _ ->  e'  }
-	= case  v  of {
-	     K p1 ... pn  ->  e ; _ ->  e'  }
-	where pi is p if f labels the ith component of K, _ otherwise
+(n) case  v  of {  K  { f  =  p } ->  e ; _ ->  e'  }
+  = case  v  of {
+       K p1 ... pn  ->  e ; _ ->  e'  }
+  where pi is p if f labels the ith component of K, _ otherwise
 Note: Will have to use K in order to know about the "K" constructor
 ***)
 
 ***(
-(o)	case  v  of {  K  {} ->  e ; _ ->  e'  }
-	= case  v  of {
-	     K _ ... _ ->  e ; _ ->  e'  }
+(o) case  v  of {  K  {} ->  e ; _ ->  e'  }
+  = case  v  of {
+       K _ ... _ ->  e ; _ ->  e'  }
 Note: Will have to use K in order to know the arity of the "K" constructor
 ***)
 
 ***(
-(p)	case (K' e1 ... em) of { K x1 ... xn -> e; _ -> e' } = e'
-	where K and K' are distinct data constructors of arity n and m, respectively
+(p) case (K' e1 ... em) of { K x1 ... xn -> e; _ -> e' } = e'
+  where K and K' are distinct data constructors of arity n and m, respectively
 Pending questions:
   - I think the underscore has to be a literal underscore
 
@@ -239,34 +238,34 @@ more-general: (Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) 
      if notSameConstructor(KPrime:Exp, K:Pat) .
 
 ***(
-(q)	case (K e1 ... en) of { K x1 ... xn -> e; _ -> e' }
-	= (\x1 ... xn -> e) e1 ... en
-	where K is a data constructor of arity n
+(q) case (K e1 ... en) of { K x1 ... xn -> e; _ -> e' }
+  = (\x1 ... xn -> e) e1 ... en
+  where K is a data constructor of arity n
 
 ***)
 
 ***(
 (r)
-	case _|_ of { K x1 ... xn -> e; _ -> e' } = _|_
-	where K is a data constructor of arity n
+  case _|_ of { K x1 ... xn -> e; _ -> e' } = _|_
+  where K is a data constructor of arity n
 Pending Questions:
   - I'm unsure of what bottom here would mean in a dynamic semantics
 
 ***)
 
 ***(
-(s) 	case () of { () | g1, ..., gn -> e; _ -> e' }
-	= case () of {
-	    () | g1 -> ... case () of {
-	                   () | gn -> e;
-	                   _ -> e' } ...
-	    _ -> e' }
-	where y is a new variable
+(s)   case () of { () | g1, ..., gn -> e; _ -> e' }
+  = case () of {
+      () | g1 -> ... case () of {
+                     () | gn -> e;
+                     _ -> e' } ...
+      _ -> e' }
+  where y is a new variable
 ***)
 
 ***(
-(t) 	case () of { () | p <- e0 -> e; _ -> e' }
-	= case e0 of { p -> e; _ -> e' }
+(t)   case () of { () | p <- e0 -> e; _ -> e' }
+  = case e0 of { p -> e; _ -> e' }
 Pending Questions:
   - I'm unsure of the _ here, so I'll have it be literal
 
@@ -285,8 +284,8 @@ more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon)
 
 
 ***(
-(u) 	case () of { () | let decls -> e; _ -> e' }
-	= let decls in e
+(u)   case () of { () | let decls -> e; _ -> e' }
+  = let decls in e
 
 Pending questions:
   - I think the _ could be generalized to any pattern
@@ -305,8 +304,8 @@ more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon)
 
 
 ***(
-(v) 	case () of { () | e0 -> e; _ -> e' }
-	= if e0 then e else e'
+(v)   case () of { () | e0 -> e; _ -> e' }
+  = if e0 then e else e'
 
 Pending Questions:
   - This time I'm assuming the _ is a literal underscore
