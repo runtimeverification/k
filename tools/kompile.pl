@@ -587,7 +587,7 @@ if (!$compile_only) {
 		$f =~ s/\.k$/\.maude/s;
 		my $maudified = get_file_content($f);
 #		print "F: $f\nM: $maudified\n\n";
-		$maudified =~ s/(in|load)[\s\.\/]*k-prelude/in $kshared/;
+		$maudified =~ s/(in|load)[\s\.\/]*k-prelude(\.maude)?(\s*?)\n/in $kshared\n/;
 		open FILE,">",$f or die "Cannot open $f\n";
 		print FILE $maudified;
 		close FILE;
@@ -948,7 +948,8 @@ sub compile {
     
     # add missing subsortations
     add_subsorts();
-    
+
+#    print "FILES: " . getFileList() . "\n\n";
 #    exit(1);
 # Testing whether the input module $language_module_name exists
     run_maude("Testing if the input module $language_module_name exists ... ",
