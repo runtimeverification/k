@@ -155,8 +155,8 @@ more-general:  (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:E
      (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName))
 ***)
 
-    eq (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []))
-     = (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName)) .
+    *** eq (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []))
+    ***  = (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName)) .
 
 ***(
 (k)	case N v of { N p -> e; _ -> e' }
@@ -223,7 +223,7 @@ more-general: (Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) 
 
     ceq Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
       = EPrime:Exp
-     if notBool sameConstructor(KPrime:Exp, K:Pat) .
+     if notSameConstructor(KPrime:Exp, K:Pat) .
 
 ***(
 (q)	case (K e1 ... en) of { K x1 ... xn -> e; _ -> e' }

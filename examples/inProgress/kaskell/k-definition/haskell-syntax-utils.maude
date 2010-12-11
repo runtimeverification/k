@@ -41,19 +41,50 @@ mod HASKELL-SYNTAX-UTILS is
     --- todo: check to see if there are other cases to match
     eq getConstructorName(P:Pat)                           = NotACon [owise] .
 
+
   --- Given two Exp/Pats, rewrites to true it they are both constructors and have the same name, false otherwise
     op sameConstructor : Exp Exp -> Bool .
     op sameConstructor : Pat Exp -> Bool .
     op sameConstructor : Exp Pat -> Bool .
     op sameConstructor : Pat Pat -> Bool .
-    eq sameConstructor(E1:Exp, E2:Exp) = (getConstructorName(E1:Exp) ==Bool getConstructorName(E2:Exp))
-                                 andBool isDefined(getConstructorName(E1:Exp)) .
-    eq sameConstructor(P1:Pat, E2:Exp) = (getConstructorName(P1:Pat) ==Bool getConstructorName(E2:Exp))
-                                 andBool isDefined(getConstructorName(P1:Pat)) .
-    eq sameConstructor(E1:Exp, P2:Pat) = (getConstructorName(E1:Exp) ==Bool getConstructorName(P2:Pat))
-                                 andBool isDefined(getConstructorName(E1:Exp)) .
-    eq sameConstructor(P1:Pat, P2:Pat) = (getConstructorName(P1:Pat) ==Bool getConstructorName(P2:Pat))
-                                 andBool isDefined(getConstructorName(P1:Pat)) .
+    eq sameConstructor(E1:Exp, E2:Exp) = (E1:Exp ==GCN E2:Exp) andBool isDefined(getConstructorName(E1:Exp)) .
+    eq sameConstructor(P1:Pat, E2:Exp) = (P1:Pat ==GCN E2:Exp) andBool isDefined(getConstructorName(P1:Pat)) .
+    eq sameConstructor(E1:Exp, P2:Pat) = (E1:Exp ==GCN P2:Pat) andBool isDefined(getConstructorName(E1:Exp)) .
+    eq sameConstructor(P1:Pat, P2:Pat) = (P1:Pat ==GCN P2:Pat) andBool isDefined(getConstructorName(P1:Pat)) .
+
+  --- Given two Exps/Pats, rewrites to true if they are both constructors and don't have the same name.
+  --- Note that this isn't the inverse of sameConstructor in the case where argument or the other isn't a constructor
+    op notSameConstructor : Exp Exp -> Bool .
+    op notSameConstructor : Pat Exp -> Bool .
+    op notSameConstructor : Exp Pat -> Bool .
+    op notSameConstructor : Pat Pat -> Bool .
+    eq notSameConstructor(E1:Exp, E2:Exp) = (E1:Exp =/=GCN E2:Exp) andBool isDefined(getConstructorName(E1:Exp)) .
+    eq notSameConstructor(P1:Pat, E2:Exp) = (P1:Pat =/=GCN E2:Exp) andBool isDefined(getConstructorName(P1:Pat)) .
+    eq notSameConstructor(E1:Exp, P2:Pat) = (E1:Exp =/=GCN P2:Pat) andBool isDefined(getConstructorName(E1:Exp)) .
+    eq notSameConstructor(P1:Pat, P2:Pat) = (P1:Pat =/=GCN P2:Pat) andBool isDefined(getConstructorName(P1:Pat)) .
+
+  --- Helper operators for equality with respect to the value of getConstructorName (even if it's undefined).
+    op _ ==GCN _ : Exp Exp -> Bool .
+    op _ ==GCN _ : Pat Exp -> Bool .
+    op _ ==GCN _ : Exp Pat -> Bool .
+    op _ ==GCN _ : Pat Pat -> Bool .
+    eq E1:Exp ==GCN E2:Exp = getConstructorName(E1:Exp) ==Bool getConstructorName(E2:Exp) .
+    eq P1:Pat ==GCN E2:Exp = getConstructorName(P1:Pat) ==Bool getConstructorName(E2:Exp) .
+    eq E1:Exp ==GCN P2:Pat = getConstructorName(E1:Exp) ==Bool getConstructorName(P2:Pat) .
+    eq P1:Pat ==GCN P2:Pat = getConstructorName(P1:Pat) ==Bool getConstructorName(P2:Pat) .
+
+    op _ =/=GCN _ : Exp Exp -> Bool .
+    op _ =/=GCN _ : Pat Exp -> Bool .
+    op _ =/=GCN _ : Exp Pat -> Bool .
+    op _ =/=GCN _ : Pat Pat -> Bool .
+    eq E1:Exp =/=GCN E2:Exp = getConstructorName(E1:Exp) =/=Bool getConstructorName(E2:Exp) .
+    eq P1:Pat =/=GCN E2:Exp = getConstructorName(P1:Pat) =/=Bool getConstructorName(E2:Exp) .
+    eq E1:Exp =/=GCN P2:Pat = getConstructorName(E1:Exp) =/=Bool getConstructorName(P2:Pat) .
+    eq P1:Pat =/=GCN P2:Pat = getConstructorName(P1:Pat) =/=Bool getConstructorName(P2:Pat) .
+
+
+
+
 
 endm
 
