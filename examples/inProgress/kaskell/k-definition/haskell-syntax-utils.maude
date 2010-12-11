@@ -6,15 +6,31 @@ mod HASKELL-SYNTAX-UTILS is
   --- A token for when something isn't an identified name
     op NotAName : -> String [ctor] .
 
-  --- Returns true if the arugment is one of our special-negative tokens
+  --- Whether or not the given pat is the wildcard
+    op isWild : Pat -> Bool .
+    eq isWild(PWildCard) = true .
+    eq isWild(Pat:Pat) = false [owise] .
+
+    op notWild : Pat -> Bool .
+    eq notWild(Pat:Pat) = notBool isWild(Pat:Pat) .
+
+  --- Returns or not the argument is one of our special-negative tokens
     op notDefined : String -> Bool .
     eq notDefined(NotACon) = true .
     eq notDefined(NotAName) = true .
     eq notDefined(S:String) = false [owise] .
 
-  --- The inverse of NotDefined
     op isDefined : String -> Bool .
     eq isDefined(S:String) = notBool notDefined(S:String) .
+
+  --- Whether or not a HsList is empty
+    op isEmpty : HsList -> Bool .
+    eq isEmpty([]) = true .
+    eq isEmpty(L:HsList) = false [owise] .
+
+    op nonEmpty : HsList -> Bool .
+    eq nonEmpty(L:HsList) = notBool isEmpty(L:HsList) .
+
 
   --- Fetch a name from a Name, or a QName
     op getName : QName -> String .

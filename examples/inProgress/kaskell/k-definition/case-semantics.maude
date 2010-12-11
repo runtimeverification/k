@@ -7,9 +7,13 @@ mod HASKELL-CASE-SEMANTICS is
     including HASKELL-SYNTAX-UTILS .
     vars Loc1 Loc2 Loc3 Loc4 Loc5 : SrcLoc .
     vars Binds1 Binds2 Binds3 Decls1 Decls2 Decls3 : Binds .
-    vars Pat1 Pat2 Pat3 Underscore : Pat .
+    vars Pat1 Pat2 Pat3 PatN Underscore : Pat .
+    vars Match1 Match2 MatchN : GuardedAlts .
 
-
+***(
+    Current assumptions:
+      - I generalize Binds in all these rules
+***)
 
 ***(
 (a)	case e of { alts } = (\v -> case v of { alts }) e
@@ -24,7 +28,38 @@ mod HASKELL-CASE-SEMANTICS is
 	                           _  -> error "No match" }...}
 	 where each matchi has the form:
 	  | gi,1  -> ei,1 ; ... ; | gi,mi -> ei,mi where { declsi }
+
+Base case:
+  AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-b.hs" 2 26) (PApp (UnQual (Ident "P1")) ([])) (UnGuardedAlt (Var (UnQual (Ident "match1")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-b.hs" 2 41) (PApp (UnQual (Ident "Pn")) ([])) (UnGuardedAlt (Var (UnQual (Ident "matchn")))) (BDecls ([]))) ([]))))
+     ===
+      (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-b.hs" 3 26) (PApp (UnQual (Ident "P1")) ([])) (UnGuardedAlt (Var (UnQual (Ident "match1")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-b.hs" 3 41) PWildCard (UnGuardedAlt (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-b.hs" 3 58) (PApp (UnQual (Ident "Pn")) ([])) (UnGuardedAlt (Var (UnQual (Ident "matchn")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-b.hs" 4 58) PWildCard (UnGuardedAlt (App (Var (UnQual (Ident "error"))) (Lit (String "No match")))) (BDecls ([]))) ([]))))) (BDecls ([]))) ([]))))
+
+  more-general: (Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1 Binds1) ((:)(Alt Loc2 PatN MatchN Binds2) [])))
+      ===
+        (Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1:GuardedAlts Binds1) ((:)(Alt Loc1 PWildCard (UnGuardedAlt (Case (Var V:QName) ((:)(Alt Loc2 PatN MatchN Binds2) ((:)(Alt Loc2 PWildCard TerminatingMatch (BDecls [])) [])))) (BDecls [])) [])))
+       if nonWild(PatN)
+
+Inductive Case:
+  more-general: (Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1 Binds1) ((:)(Alt Loc2 Pat2 Match2 Binds2) Rest:HsList)))
+     ===
+       (Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1:GuardedAlts Binds1) ((:)(Alt Loc1 PWildCard (UnGuardedAlt (Case (Var V:QName) ((:)(Alt Loc2 Pat2 Matchd2 Binds2) Rest:HsList))) (BDecls [])) [])))
+      if nonEmpty(Rest)
 ***)
+
+    --- The final termination of a case statement
+    op TerminatingMatch : -> GuardedAlts [ctor] .
+    eq TerminatingMatch = UnGuardedAlt (App (Var (UnQual (Ident "error"))) (Lit (String "No match"))) .
+
+    --- Base Case
+   ceq Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1 Binds1) ((:)(Alt Loc2 PatN MatchN Binds2) []))
+     = Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1:GuardedAlts Binds1) ((:)(Alt Loc1 PWildCard (UnGuardedAlt (Case (Var V:QName) ((:)(Alt Loc2 PatN MatchN Binds2) ((:)(Alt Loc2 PWildCard (UnGuardedAlt (App (Var (UnQual (Ident "error"))) (Lit (String "No match")))) (BDecls [])) [])))) (BDecls [])) []))
+    if notWild(PatN) .
+
+   --- Inductive Case
+  ceq Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1 Binds1) ((:)(Alt Loc2 Pat2 Match2 Binds2) Rest:HsList))
+    = Case (Var V:QName) ((:)(Alt Loc1 Pat1 Match1:GuardedAlts Binds1) ((:)(Alt Loc1 PWildCard (UnGuardedAlt (Case (Var V:QName) ((:)(Alt Loc2 Pat2 Match2 Binds2) Rest:HsList))) (BDecls [])) []))
+   if nonEmpty(Rest:HsList) .
+
 
 ***(
 (c)	case v of { p | g1 -> e1 ; ...
@@ -53,7 +88,6 @@ mod HASKELL-CASE-SEMANTICS is
 	=  case v of { p -> ( \ x -> e ) v ; _ -> e' }
 Pending questions:
   - Again with the _, currently assume it to be any pattern
-  - Again with Binds, again generalized
 
 AST:  (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 26) (PAsPat (Ident "x") (PVar (Ident "p"))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 36) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -74,7 +108,6 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name (PVar P:Name)) (U
 (f)	case v of { _ -> e; _ -> e' } = e
 Pending Questions:
   - I think the second _ just means some pattern, while the first must be an actual underscore
-  - I'm keeping the binds general
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 26) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 34) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -111,27 +144,13 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1 UnderscoreLit:Pat (UnGuardedAlt 
 Pending questions:
   - Is the _ able to be any pattern, or must this only apply when an underscore is present?
     Currently, I say it can be any pattern, as I think that's the intent.
-  - The parser gives us Binds in Alts. I don't know why. Currently I generalize them
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 2 23) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-i.hs" 2 31) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
      (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 3 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
 
 
-minus-srcLoc: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (Loc1) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (Loc2) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
-   ===
-     (Case (Var (UnQual (Ident "v"))) ((:)(Alt (Loc1) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
-
-
-more-general: (Case (Var (V:QName)) ((:)(Alt (Loc1) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (BDecls ([]))) ((:)(Alt (Loc2) (Underscore) (UnGuardedAlt (EPrime:Exp)) (BDecls ([]))) ([]))))
-   ===
-     (Case (Var (V)) ((:)(Alt (Loc1) (PVar (X)) (UnGuardedAlt (E)) (BDecls ([]))) ([])))
-
-minus-bdecls: (Case (Var (V:QName)) ((:)(Alt (Loc1) (PVar (X:Name)) (UnGuardedAlt (E:Exp)) (Binds1)) ((:)(Alt (Loc2) (Underscore) (UnGuardedAlt (EPrime:Exp)) (Binds2)) ([]))))
-   ===
-     (Case (Var (V)) ((:)(Alt (Loc1) (PVar (X)) (UnGuardedAlt (E)) (B1)) ([])))
-
-final: Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+more-general: Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
    ===
      Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []) .
 
@@ -142,9 +161,6 @@ final: Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds
 
 ***(
 (j)	case v of { x -> e } = ( \ x -> e ) v
-
-Pending Questions:
-  - I'm keeping the Binds general
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-j.hs" 2 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
    ===
@@ -163,8 +179,6 @@ more-general:  (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:E
 	= case v of { p -> e; _ -> e' }
 	where N is a newtype constructor
 
-Pending questions:
-  - I'm keeping the _ as a literal underscore
 Note: We'll need to use K for this one, as the AST doesn't know that N is a newtype constructor
 
 ***)
@@ -209,7 +223,6 @@ Note: Will have to use K in order to know the arity of the "K" constructor
 	where K and K' are distinct data constructors of arity n and m, respectively
 Pending questions:
   - I think the underscore has to be a literal underscore
-  - Generalizing Binds
 
 AST: (Case (Paren (App (App (App (Con (UnQual (Ident "K'"))) (Lit (Int 1))) (Lit (Int 2))) (Lit (Int 3)))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 35) (PApp (UnQual (Ident "K")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -218,7 +231,7 @@ AST: (Case (Paren (App (App (App (Con (UnQual (Ident "K'"))) (Lit (Int 1))) (Lit
 more-general: (Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])))
    ===
      EPrime:Exp
-   if not sameConstructor(KPrime:Exp, K:Pat)
+   if notSameConstructor(KPrime:Exp, K:Pat)
 ***)
 
     ceq Case KPrime:Exp ((:)(Alt Loc1 K:Pat (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
@@ -256,7 +269,7 @@ Pending Questions:
 	= case e0 of { p -> e; _ -> e' }
 Pending Questions:
   - I'm unsure of the _ here, so I'll have it be literal
-  - I generalize BDecls
+
 AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-t.hs" 4 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-t.hs" 4 30) ((:)(Generator (SrcLoc "tests/case-t.hs" 4 32) (PApp (UnQual (Ident "Pat")) ((:)(PVar (Ident "pat")) ([]))) (Var (UnQual (Ident "e0")))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-t.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
      (Case (Var (UnQual (Ident "e0"))) ((:)(Alt (SrcLoc "tests/case-t.hs" 5 27) (PApp (UnQual (Ident "Pat")) ((:)(PVar (Ident "pat")) ([]))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-t.hs" 5 41) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
@@ -277,7 +290,6 @@ more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon)
 
 Pending questions:
   - I think the _ could be generalized to any pattern
-  - generalizing Binds
 
 AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-u.hs" 3 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-u.hs" 3 30) ((:)(LetStmt (BDecls ((:)(PatBind (SrcLoc "tests/case-u.hs" 3 36) (PVar (Ident "x1")) Nothing (UnGuardedRhs (Var (UnQual (Ident "a")))) (BDecls ([]))) ([])))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-u.hs" 3 49) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -298,7 +310,6 @@ more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon)
 
 Pending Questions:
   - This time I'm assuming the _ is a literal underscore
-  - Again, I'm keeping the Binds general
 
 AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-v.hs" 2 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-v.hs" 2 30) ((:)(Qualifier (Var (UnQual (Ident "e0")))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-v.hs" 2 42) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
