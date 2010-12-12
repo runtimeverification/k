@@ -1262,11 +1262,11 @@ sub maudify_module {
     
 # Step: Add missing spaces around tokens
      # freeze all strings before spacifying
-     s/([^']\"[^"]*[^']\")/freeze($1,"STRINGS")/ge;
+     s/(?=[^'])""/freeze($&,"STRINGS")/ge;
+     s/(?=[^'])("[^"]*?[^']")/freeze($&,"STRINGS")/ge;
      $_ = spacify($_);
      $_ = unfreeze($_,"STRINGS");
-	 
-#    print  "Stage:\n$_\n\n";
+#      print  "Stage:\n$_\n\n";
     
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
@@ -1729,6 +1729,7 @@ sub add_spaces {
 # Makes certain (sub)strings special, so that they stay "frozen" until other substitutions are complete
 sub freeze {
     my $string = shift;
+#    print "Freezing: |$string|\n";
     my $marker = "$default_freezer\b";
     if (@_) {
 	$marker = shift;
