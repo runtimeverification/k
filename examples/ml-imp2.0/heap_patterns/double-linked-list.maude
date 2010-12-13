@@ -11,7 +11,7 @@ mod DLIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   var CfgItems Cfgs : Bag .
 
 *** Definition of Double Linked Lists ***
-  op dlist dlseg : -> HeapLabel .
+  ops dlist dlseg : -> HeapLabel .
   ceq < tasks >
         < config >
           < k > derive(P') ~> K </ k >
@@ -19,8 +19,9 @@ mod DLIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
           < form > Phi </ form >
           CfgItems
         </ config >
+      Cfgs
       </ tasks >
-      < counter > N < / counter >
+      < counter > N </ counter >
    =  < tasks >
         < config >
           < k > derive(P') ~> K </ k >
@@ -38,7 +39,7 @@ mod DLIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
           </ heap >
           < form > Phi /\ ~(P === P1) /\ ~(Q === Q1) /\ (Alpha === [FreeInt(N)] @ FreeSeq(N +Int 2))
           </ form >
-          CgfItems
+          CfgItems
         </ config >
       Cfgs
       </ tasks >
