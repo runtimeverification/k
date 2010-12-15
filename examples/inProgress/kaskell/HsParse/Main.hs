@@ -15,6 +15,7 @@
 
 module Main where
 
+import Data.Char (ord)
 import Data.Generics
 import Data.Tree
 
@@ -32,7 +33,37 @@ data OutputMode
 showModule :: OutputMode -> Module -> String
 showModule Standard   = show
 showModule PrettyTree = showAsTree
-showModule Maude      = gshow
+showModule Maude      = maudeShow
+
+{-
+NOTE: The Maude-specific show case below will eventually be a separate module.
+It is included here temporarily. 
+-}
+
+-- | Maude @show@, based on 'maudeShows'.
+maudeShow :: (Data a) => a -> String
+maudeShow x = maudeShows x ""
+
+-- | Maude @shows@, using generics.
+maudeShows :: (Data a) => a -> ShowS
+maudeShows = defaultShows
+    `extQ` (shows     :: String  -> ShowS) 
+    `extQ` (shows     :: Int     -> ShowS)
+    `extQ` (shows     :: Integer -> ShowS)
+    `extQ` charShows
+
+-- | Special case for 'Char' to be displayed as an integer.
+charShows :: Char -> ShowS
+charShows = shows . ord
+
+-- | This is a prefix-show using surrounding \'(\' and \')\', where we recurse into
+-- subterms with 'gmapQ'.  This is basically 'gshows' without the special cases.
+defaultShows :: (Data a) => a -> ShowS
+defaultShows t =
+      showChar '('
+    . (showString . showConstr . toConstr $ t)
+    . (foldr (.) id . gmapQ ((showChar ' ' .) . maudeShows) $ t)
+    . showChar ')'
 
 -- | Show @Data@ as a nice 2-dimensional tree.
 showAsTree :: (Data a) => a -> String
