@@ -63,7 +63,7 @@ fi
 tmp=`mktemp`
 echo "Using $tmp"
 echo "set print with parentheses on ." > $tmp
-out=$(hsparse $1)
+out=$(hsparse -o Maude $1)
 echo -n "rew " >> $tmp
 echo -n $out >> $tmp
 echo " ." >> $tmp

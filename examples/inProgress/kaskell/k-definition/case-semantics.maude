@@ -9,6 +9,7 @@ mod HASKELL-CASE-SEMANTICS is
     vars Binds1 Binds2 Binds3 Decls1 Decls2 Decls3 : Binds .
     vars Pat1 Pat2 Pat3 PatN Underscore : Pat .
     vars Match1 Match2 MatchN : GuardedAlts .
+    vars Lit1 Lit2 Lit3 : Literal .
 
 ***(
     Current assumptions:
@@ -105,20 +106,18 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1 (PAsPat X:Name Pat1) (UnGuardedA
 
 ***(
 (f) case v of { _ -> e; _ -> e' } = e
-Pending Questions:
-  - I think the second _ just means some pattern, while the first must be an actual underscore
 
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 26) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-f.hs" 2 34) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
     (Var (UnQual (Ident "e")))
 
-more-general: (Case (Var V:QName) ((:)(Alt Loc1 UnderscoreLit:Pat (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) [])))
+more-general: (Case (Var V:QName) ((:)(Alt Loc1 PWildCard (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])))
     ===
     E:Exp
 
 ***)
 
-    eq Case (Var V:QName) ((:)(Alt Loc1 PWildCard (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+    eq Case (Var V:QName) ((:)(Alt Loc1 PWildCard (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
      = E:Exp .
 
 ***(
@@ -134,7 +133,19 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1 UnderscoreLit:Pat (UnGuardedAlt 
 ***(
 (h) case v of { k -> e; _ -> e' } = if (v==k) then e else e'
   where k is a numeric, character, or string literal .
+
+AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-h.hs" 2 26) (PLit (String "strlit")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-h.hs" 2 41) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+    (If (Paren (InfixApp (Var (UnQual (Ident "v"))) (QVarOp (UnQual (Symbol "=="))) (Lit (String "strlit")))) (Var (UnQual (Ident "e"))) (Var (UnQual (Ident "e'"))))
+
+more-general: (Case (Var V:QName) ((:)(Alt Loc1 (PLit Lit1) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) [])))
+   ===
+    (If (Paren (InfixApp (Var V:QName) (QVarOp (UnQual (Symbol "=="))) (Lit Lit1))) E:Exp EPrime:Exp)
 ***)
+
+    eq Case (Var V:QName) ((:)(Alt Loc1 (PLit Lit1) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
+     = If (Paren (InfixApp (Var V:QName) (QVarOp (UnQual (Symbol "=="))) (Lit Lit1))) E:Exp EPrime:Exp .
+
 
 
 ***(
