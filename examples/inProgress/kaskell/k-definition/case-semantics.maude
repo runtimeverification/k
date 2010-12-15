@@ -7,7 +7,7 @@ mod HASKELL-CASE-SEMANTICS is
     including HASKELL-SYNTAX-UTILS .
     vars Loc1 Loc2 Loc3 Loc4 Loc5 : SrcLoc .
     vars Binds1 Binds2 Binds3 Decls1 Decls2 Decls3 : Binds .
-    vars Pat1 Pat2 Pat3 PatN Underscore : Pat .
+    vars Pat1 Pat2 Pat3 PatN : Pat .
     vars Match1 Match2 MatchN : GuardedAlts .
     vars Lit1 Lit2 Lit3 : Literal .
 
@@ -87,8 +87,6 @@ Inductive Case:
 ***(
 (e) case v of { x@p -> e; _ -> e' }
   =  case v of { p -> ( \ x -> e ) v ; _ -> e' }
-Pending questions:
-  - Again with the _, currently assume it to be any pattern
 
 AST:  (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 26) (PAsPat (Ident "x") (PVar (Ident "p"))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-e.hs" 2 36) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -151,22 +149,18 @@ more-general: (Case (Var V:QName) ((:)(Alt Loc1 (PLit Lit1) (UnGuardedAlt E:Exp)
 ***(
 (i) case v of { x -> e; _ -> e' } = case v of { x -> e }
 
-Pending questions:
-  - Is the _ able to be any pattern, or must this only apply when an underscore is present?
-    Currently, I say it can be any pattern, as I think that's the intent.
-
 AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 2 23) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-i.hs" 2 31) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
      (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-i.hs" 3 26) (PVar (Ident "x")) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ([])))
 
 
-more-general: Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+more-general: Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
    ===
      Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []) .
 
 ***)
 
-    eq Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+    eq Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) ((:)(Alt Loc2 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
      = Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []) .
 
 ***(
@@ -231,8 +225,6 @@ Note: Will have to use K in order to know the arity of the "K" constructor
 ***(
 (p) case (K' e1 ... em) of { K x1 ... xn -> e; _ -> e' } = e'
   where K and K' are distinct data constructors of arity n and m, respectively
-Pending questions:
-  - I think the underscore has to be a literal underscore
 
 AST: (Case (Paren (App (App (App (Con (UnQual (Ident "K'"))) (Lit (Int 1))) (Lit (Int 2))) (Lit (Int 3)))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 35) (PApp (UnQual (Ident "K")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-p.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -277,8 +269,6 @@ Pending Questions:
 ***(
 (t)   case () of { () | p <- e0 -> e; _ -> e' }
   = case e0 of { p -> e; _ -> e' }
-Pending Questions:
-  - I'm unsure of the _ here, so I'll have it be literal
 
 AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-t.hs" 4 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-t.hs" 4 30) ((:)(Generator (SrcLoc "tests/case-t.hs" 4 32) (PApp (UnQual (Ident "Pat")) ((:)(PVar (Ident "pat")) ([]))) (Var (UnQual (Ident "e0")))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-t.hs" 4 52) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
@@ -298,28 +288,22 @@ more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon)
 (u)   case () of { () | let decls -> e; _ -> e' }
   = let decls in e
 
-Pending questions:
-  - I think the _ could be generalized to any pattern
-
 AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-u.hs" 3 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-u.hs" 3 30) ((:)(LetStmt (BDecls ((:)(PatBind (SrcLoc "tests/case-u.hs" 3 36) (PVar (Ident "x1")) Nothing (UnGuardedRhs (Var (UnQual (Ident "a")))) (BDecls ([]))) ([])))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-u.hs" 3 49) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===
      (Let (BDecls ((:)(PatBind (SrcLoc "tests/case-u.hs" 4 18) (PVar (Ident "x1")) Nothing (UnGuardedRhs (Var (UnQual (Ident "a")))) (BDecls ([]))) ([]))) (Var (UnQual (Ident "e"))))
 
-more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(LetStmt Decls1) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+more-general: Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(LetStmt Decls1) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
    ===
      Let Decls1 E:Exp
 ***)
 
-    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(LetStmt Decls1) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 Underscore (UnGuardedAlt EPrime:Exp) Binds2) []))
+    eq Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(LetStmt Decls1) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
      = Let Decls1 E:Exp .
 
 
 ***(
 (v)   case () of { () | e0 -> e; _ -> e' }
   = if e0 then e else e'
-
-Pending Questions:
-  - This time I'm assuming the _ is a literal underscore
 
 AST: (Case (Con (Special UnitCon)) ((:)(Alt (SrcLoc "tests/case-v.hs" 2 27) (PApp (Special UnitCon) ([])) (GuardedAlts ((:)(GuardedAlt (SrcLoc "tests/case-v.hs" 2 30) ((:)(Qualifier (Var (UnQual (Ident "e0")))) ([])) (Var (UnQual (Ident "e")))) ([]))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-v.hs" 2 42) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
    ===

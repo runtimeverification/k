@@ -22,6 +22,7 @@ module CaseH where
   After transformation:
 
   Test1:
+ (Module (SrcLoc "tests/case-h.hs" 1 1) (ModuleName "CaseH") ([]) Nothing Nothing ([]) ((:)(PatBind (SrcLoc "tests/case-h.hs" 2 3) (PVar (Ident "test1lhs")) Nothing (UnGuardedRhs (If (Paren (InfixApp (Var (UnQual (Ident "v"))) (QVarOp (UnQual (Symbol "=="))) (Lit (String "strlit")))) (Var (UnQual (Ident "e"))) (Var (UnQual (Ident "e'"))))) (BDecls ([]))) ((:)(PatBind (SrcLoc "tests/case-h.hs" 3 3) (PVar (Ident "test1rhs")) Nothing (UnGuardedRhs (If (Paren (InfixApp (Var (UnQual (Ident "v"))) (QVarOp (UnQual (Symbol "=="))) (Lit (String "strlit")))) (Var (UnQual (Ident "e"))) (Var (UnQual (Ident "e'"))))) (BDecls ([]))) ([]))))
 
   Test2:
 
