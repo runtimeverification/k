@@ -1,5 +1,3 @@
-load kernelC-semantics
-
 kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar N : Nat
   kvar I : Int++

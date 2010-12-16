@@ -1,7 +1,5 @@
 kmod KERNELC-SYNTAX is including ML-K + PL-STRING
 ***(
-  subsorts Formula Subst MathObj++ < Builtins KResult
-  subsorts List{MathObj++} Set{MathObj++} < Builtins KResult
   subsort Id Field < Builtins KProper
   subsort Value TypedValue ExpressionType < Builtins KResult
 ***)

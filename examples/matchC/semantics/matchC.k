@@ -1,7 +1,9 @@
----load ../lib/ml-prelude.maude
+load ../lib/ml-prelude.maude
+load kernelC-syntax
+load kernelC-semantics
 load matchC-syntax
 load matchC-semantics
-load kernelC
+
 
 kmod MATCHC is
   including MATCHC-SEMANTICS
