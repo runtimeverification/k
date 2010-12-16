@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2007/11/14 09:11:59 deraugla Exp $
+# $Id: Makefile,v 1.15 2007-11-14 09:11:59 deraugla Exp $
 
 OCAMLC   = ocamlc
 CAMLP5   = "camlp5r pa_macro.cmo"

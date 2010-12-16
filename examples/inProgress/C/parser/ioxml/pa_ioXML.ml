@@ -1,11 +1,11 @@
 (* camlp5r *)
-(* $Id: pa_ioXML.ml,v 1.26 2007/11/14 09:11:59 deraugla Exp $ *)
-(* Copyright (c) 2002 INRIA *)
+(* $Id: pa_ioXML.ml,v 1.28 2010-12-16 09:41:05 deraugla Exp $ *)
+(* Copyright (c) 2002-2010 INRIA *)
 
 #load "pa_extend.cmo";
 #load "q_MLast.cmo";
 
-value version = "0.8";
+value version = "0.9";
 
 value unit = ref False;
 Pcaml.add_option "-unit" (Arg.Set unit)
@@ -153,9 +153,15 @@ value gen_xprint_cons loc c tl =
           <:expr< do { $list:el$ } >> ]
 ;
 
-value unvala x = IFDEF CAMLP5 THEN Pcaml.unvala x ELSE x END;
+value unvala x = Pcaml.unvala x;
 
-value gen_output_cons ((loc : MLast.loc), (c : string), (tl : list MLast.ctyp), (_ : option MLast.ctyp)) : (MLast.patt * option MLast.expr * MLast.expr) =
+value get_cons_args =
+  IFDEF CAMLP5_6_00 THEN fun (loc, c, tl, _) -> (loc, c, tl)
+  ELSE fun (loc, c, tl) -> (loc, c, tl) END
+;
+
+value gen_output_cons args =
+  let (loc, c, tl) = get_cons_args args in
   let c = unvala c in
   let tl = unvala tl in
   let p =
@@ -173,8 +179,7 @@ value gen_output_cons ((loc : MLast.loc), (c : string), (tl : list MLast.ctyp), 
   (p, <:vala< None >>, e)
 ;
 
-
-value gen_output_record loc n lbl : MLast.expr =
+value gen_output_record loc n lbl =
   let n = unvala n in
   if onepr.val then
     let str =
@@ -218,7 +223,7 @@ value gen_output_record loc n lbl : MLast.expr =
     <:expr< do { $list:el$ } >>
 ;
 
-value gen_output_sum loc (cdl : list (MLast.loc * string * list MLast.ctyp * option MLast.ctyp)) : MLast.expr =
+value gen_output_sum loc cdl =
   <:expr< fun ppf -> fun [ $list:List.map gen_output_cons cdl$ ] >>
 ;
 
@@ -226,10 +231,22 @@ value gen_output_record loc n lbl =
   <:expr< fun ppf x -> $gen_output_record loc n lbl$ >>
 ;
 
-value gen_output_abstract loc n : MLast.expr =
+value gen_output_abstract loc n =
   let n = unvala n in
   let txt = fun_name "xprint" n ^ ": abstract type" in
   <:expr< fun ppf -> failwith $str:txt$ >>
+;
+
+value type_param =
+  IFDEF CAMLP5_6_00 THEN
+    fun
+    [ Some v -> v
+    | None -> "_" ]
+  ELSE fun v -> v END
+;
+
+value unvala_tdnam tdnam =
+  IFDEF CAMLP5_6_00 THEN unvala tdnam ELSE tdnam END
 ;
 
 value gen_output_funs loc tdl sil =
@@ -237,9 +254,8 @@ value gen_output_funs loc tdl sil =
     List.fold_right
       (fun td pel ->
          let ((loc, n), tpl, tk, cl) =
-           IFDEF CAMLP5 THEN
-             (td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef, td.MLast.tdCon)
-           ELSE td END
+           (unvala_tdnam td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef,
+            td.MLast.tdCon)
          in
          let body =
            loop tk where rec loop =
@@ -256,10 +272,8 @@ value gen_output_funs loc tdl sil =
          in
          let body =
            List.fold_right
-             (fun ((v : option string), _) (e : MLast.expr) ->
-				let v = unvala (match v with [
-				Some s -> s
-				| None -> ""]) in                
+             (fun (v, _) e ->
+                let v = type_param (unvala v) in
                 <:expr< fun $lid:"pr_" ^ v$ -> $e$ >>)
              (unvala tpl) body
          in
@@ -272,7 +286,8 @@ value gen_output_funs loc tdl sil =
 
 (* xparse type *)
 
-value gen_input_cons (loc, c, tl, _) =
+value gen_input_cons args =
+  let (loc, c, tl) = get_cons_args args in
   let c = unvala c in
   let tl = unvala tl in
   let p =
@@ -351,9 +366,8 @@ value gen_input_funs loc tdl sil =
     List.fold_right
       (fun td pel ->
          let ((loc, n), tpl, tk, cl) =
-           IFDEF CAMLP5 THEN
-             (td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef, td.MLast.tdCon)
-           ELSE td END
+           (unvala_tdnam td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef,
+            td.MLast.tdCon)
          in
          let n = unvala n in
          let body =
@@ -372,7 +386,7 @@ value gen_input_funs loc tdl sil =
          let body =
            List.fold_right
              (fun (v, _) e ->
-                let v = unvala (match v with [Some s -> s | None -> ""]) in
+                let v = type_param (unvala v) in
                 <:expr< fun $lid:"pa_" ^ v$ -> $e$ >>)
              (unvala tpl) body
          in
@@ -401,45 +415,27 @@ value gen_ioxml_impl loc tdl =
 (* Interface *)
 
 value make_type_with_params loc n tpl =
-  List.fold_left (fun t (tp, _) -> <:ctyp< $t$ '$unvala tp$ >>)
+  List.fold_left
+    (fun t (tp, _) -> <:ctyp< $t$ '$type_param (unvala tp)$ >>)
     <:ctyp< $lid:n$ >> tpl
 ;
 
-value addOptionToFirst ((x1 : 'a), (x2 : 'b)) : (option 'a * 'b) = (Some x1, x2);
-
-value addOptionToFirstList xs : list (option 'a * 'b) = 
-	List.map addOptionToFirst xs
-;
-
-value removeOptionFromFirst ((x1 : option string), (x2 : 'b)) : (string * 'b) = 
-	match x1 with [
-		Some x1 -> (x1, x2)
-		| None -> ("", x2)
-	];
-
-value removeOptionFromFirstList xs : list (string * 'b) = 
-	List.map removeOptionFromFirst xs
-;
-
-(*   *)
 value gen_output_funs_intf loc tdl sil =
   let itl =
     List.fold_right
       (fun td itl ->
          let ((loc, n), tpl, tk, cl) =
-           IFDEF CAMLP5 THEN
-             (td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef, td.MLast.tdCon)
-           ELSE td END
+           (unvala_tdnam td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef,
+            td.MLast.tdCon)
          in
          let n = unvala n in
          let tpl = unvala tpl in
-		 let tpl = removeOptionFromFirstList tpl in
          let t = make_type_with_params loc n tpl in
          let t = <:ctyp< Format.formatter -> $t$ -> unit >> in
          let t =
            List.fold_right
              (fun (tp, _) t ->
-                let tp = unvala tp in
+                let tp = type_param (unvala tp) in
                 <:ctyp< (Format.formatter -> '$tp$ -> unit) -> $t$ >>)
              tpl t
          in
@@ -456,19 +452,17 @@ value gen_input_funs_intf loc tdl sil =
     List.fold_right
       (fun td itl ->
          let ((loc, n), tpl, tk, cl) =
-           IFDEF CAMLP5 THEN
-             (td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef, td.MLast.tdCon)
-           ELSE td END
+           (unvala_tdnam td.MLast.tdNam, td.MLast.tdPrm, td.MLast.tdDef,
+            td.MLast.tdCon)
          in
          let n = unvala n in
          let tpl = unvala tpl in
-		 let tpl = removeOptionFromFirstList tpl in
          let t = make_type_with_params loc n tpl in
          let t = <:ctyp< IoXML.ast -> $t$ >> in
          let t =
            List.fold_right
              (fun (tp, _) t ->
-                let tp = unvala tp in
+                let tp = type_param (unvala tp) in
                 <:ctyp< (IoXML.ast -> '$tp$) -> $t$ >>)
              tpl t
          in
@@ -494,25 +488,28 @@ value gen_ioxml_intf loc tdl =
       } ]
 ;
 
+value pcaml_type_decl =
+  IFDEF CAMLP5_6_00 THEN Pcaml.type_decl ELSE Pcaml.type_declaration END
+;
+
 EXTEND
   Pcaml.str_item:
     [ [ "type"; LIDENT "nogen";
-        tdl = LIST1 Pcaml.type_decl SEP "and" ->
+        tdl = LIST1 pcaml_type_decl SEP "and" ->
           <:str_item< type $list:tdl$ >>
-      | "type"; tdl = LIST1 Pcaml.type_decl SEP "and" ->
+      | "type"; tdl = LIST1 pcaml_type_decl SEP "and" ->
           let sil = gen_ioxml_impl loc tdl in
-		  (* i think this removes the type def *)
-         (* let sil =
+          let sil =
             if notyp.val then sil
             else [<:str_item< type $list:tdl$ >> :: sil]
-          in*)
+          in
           <:str_item< declare $list:sil$ end >> ] ]
   ;
   Pcaml.sig_item:
     [ [ "type"; LIDENT "nogen";
-        tdl = LIST1 Pcaml.type_decl SEP "and" ->
+        tdl = LIST1 pcaml_type_decl SEP "and" ->
           <:sig_item< type $list:tdl$ >>
-      | "type"; tdl = LIST1 Pcaml.type_decl SEP "and" ->
+      | "type"; tdl = LIST1 pcaml_type_decl SEP "and" ->
           let sil = gen_ioxml_intf loc tdl in
           let sil = [<:sig_item< type $list:tdl$ >> :: sil] in
           <:sig_item< declare $list:sil$ end >> ] ]
@@ -547,6 +544,4 @@ Pcaml.parse_interf.val :=
     (sil, stopped)
 ;
 
-(*IFDEF OCAML_305 THEN*)
-  Pcaml.inter_phrases.val := Some "\n\n";
-(*END;*)
+Pcaml.inter_phrases.val := Some "\n\n";

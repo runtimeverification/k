@@ -1,5 +1,5 @@
 (* camlp5r *)
-(* $Id: ioXML.ml,v 1.21 2007/11/14 09:11:59 deraugla Exp $ *)
+(* $Id: ioXML.ml,v 1.21 2007-11-14 09:11:59 deraugla Exp $ *)
 (* Copyright (c) 2002 INRIA *)
 
 #load "pa_extend.cmo";

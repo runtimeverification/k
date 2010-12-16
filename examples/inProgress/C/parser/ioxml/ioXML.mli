@@ -1,5 +1,5 @@
 (* camlp5r *)
-(* $Id: ioXML.mli,v 1.17 2007/11/14 09:11:59 deraugla Exp $ *)
+(* $Id: ioXML.mli,v 1.17 2007-11-14 09:11:59 deraugla Exp $ *)
 (* Copyright (c) 2002 INRIA *)
 
 open Format;

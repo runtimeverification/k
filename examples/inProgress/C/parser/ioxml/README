@@ -70,7 +70,7 @@ Example:
 
 VERSION
 
-  The latest version is 0.8. Type camlp5o pa_ioXML.cmo -ioxml_v
+  The latest version is 0.9. Type camlp5o pa_ioXML.cmo -ioxml_v
   (once installed) to display the version number.
 
 KNOWN BUGS:
@@ -90,23 +90,18 @@ CONTENTS:
 	ioXML.ml	library implementation
 	Makefile	makefile
 	README		this file
-	LICENCE		licence notice
+        INSTALL         installation file
+	LICENSE		license notice
         CHANGES         changes
 
 COPYRIGHT:
 
-  All files are Copyright (c) 2007 INRIA
+  All files are Copyright (c) 2007-2010 INRIA
   See the file LICENSE
 
 INSTALLATION:
 
-  You need OCaml and Camlp5 to compile
-  - Do:
-       make 
-  - if the native OCaml compiler is installed:
-       make opt
-  - Then do:
-       make install
+  See the file INSTALL
 
 CREDITS:
 
