@@ -106,25 +106,16 @@ Function definition/declaration
     <program>
       T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ => .K
     <_/program>
-    <spec_>
+    <fun_>
         .Map
       =>
-        T F(ParamList)
-        |-> (co-skolemize((/*@ assert PreCfgs */ ~> /*@ assume PostCfgs */))
-             ~> return getReturnValue(T))
-    <_/spec>
+        T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ |-> .K
+    <_/fun>
   [structural]
   rule
     <program>
       T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ S => .K
     <_/program>
-    <spec_>
-        .Map
-      =>
-        T F(ParamList)
-        |-> (co-skolemize((/*@ assert PreCfgs */ ~> /*@ assume PostCfgs */))
-             ~> return getReturnValue(T))
-    <_/spec>
     <fun_>
         .Map
       =>
@@ -170,6 +161,30 @@ Expressions
       CfgItems
     </config>
   if notBool isInt(I) [structural]
+
+
+***(
+summary function calls
+***)
+  rule
+    <fun_>
+      T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ |-> _
+    <_/fun>
+    <k>
+        _`(_`)(F, ArgList) ~> K
+      =>
+        declParams(ParamList)
+        ~> bindParams(ParamList, ArgList)
+        ~> /*@ assert co-skolemize(N, PreCfgs) */
+        ~> /*@ assume co-skolemize(N, PostCfgs) */
+        ~> return getReturnValue(T)
+
+    </k>
+    <stack_> .List => callContext(getReturnValue(T) ~> K, TEnv, Env) </stack>
+    <tenv> TEnv => .Map </tenv>
+    <env> Env => .Map </env>
+    <other-counter> N => sNat N </other-counter>
+  [structural]
 
 
 ***(
@@ -238,7 +253,7 @@ assumed patterns
         skolemize(N, <subst> Subst </subst>)
       </config>
     )
-    <counter> N </counter>
+    <other-counter> N </other-counter>
   rule
     (
       <config_>
@@ -247,7 +262,7 @@ assumed patterns
     =>
       .Bag
     )
-    <counter> N => sNat N </counter>
+    <other-counter> N => sNat N </other-counter>
 
 ***(
 asserted patterns
@@ -265,7 +280,7 @@ asserted patterns
       <subst> Subst1 => Subst2 </subst>
       CfgItems
     </config>
-    <counter> N </counter>
+    <other-counter> N </other-counter>
   if search(
       <config>
         <subst> Subst1 </subst>
@@ -279,19 +294,6 @@ asserted patterns
         <subst> Subst2 </subst>
       </config>
     )
-
-***(
-function summaries
-***)
-  rule
-    <k>
-        co-skolemize((/*@ assert PreCfgs */ ~> /*@ assume PostCfgs */))
-      =>
-        /*@ assert co-skolemize(N, PreCfgs) */
-        ~> /*@ assume co-skolemize(N, PostCfgs) */
-    <_/k>
-    <counter> N => sNat N </counter>
-  [structural]
 
 
 ***(
