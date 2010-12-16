@@ -7,10 +7,9 @@ load matchC-semantics
 
 kmod MATCHC is
   including MATCHC-SEMANTICS
-    + KERNELC
-    + MATHEMATICAL-DOMAIN-BUILTIN-MODULE
-    + LIST-HP
-    + BINARY-TREE-HP
+          + MATHEMATICAL-DOMAIN-BUILTIN-MODULE
+          + LIST-HP
+          + BINARY-TREE-HP
 
   kvar N M : Nat
 
