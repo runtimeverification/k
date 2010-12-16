@@ -3,26 +3,35 @@ load ml-imp.maude
 load fol.maude
 
 mod TEST is inc IMP + FOL= .
-ops t v x iterx found value : -> Id .
-ops ?n ?root ?ix ?v ?n ?found : -> ?Int .
+ops p y t v x iterx found value : -> Id .
+ops ?n ?root ?ix ?v ?n ?found ?x ?p ?y : -> ?Int .
 ops x0 val0 : -> FreeInt .
 ops ?rho : -> ?MapItem .
 ops h0 : -> FreeMapItem .
 ops ?T : -> ?Tree .
 ops Tree : -> FreeTree .
-ops ?A ?A' : -> ?Seq .
-op A : -> FreeSeq .
+ops ?A ?A' ?B ?C ?LB ?LC : -> ?Seq .
+ops A LA  : -> FreeSeq .
+op H : -> FreeMapItem .
 endm 
 
 set print attribute on .
 
-eof
+
 
 search
   < config >
+  < form > ~ (0 === skolem(4, ?x)) /\ (rev(A) === rev(FreeSeq(6)) @ [FreeInt(4)] @ skolem(4, ?B)) /\ rev(LA) === rev(FreeSeq(7)) @ [FreeInt(5)] @ skolem(4, ?LB) </ form > 
+  < subst > (skolem(4, ?C) <- [FreeInt(4)] @ FreeSeq(6)) ; (skolem(4, ?LC) <-
+    [FreeInt(5)] @ FreeSeq(7)) </ subst > 
+   < env > p |-> skolem(4, ?x) x |-> FreeInt(5) y |-> FreeInt(5) </ env > 
+   < heap > H llist(FreeInt(5))(FreeSeq(6),FreeSeq(7)) llist(skolem(4, ?p))(skolem(4, ?B),skolem(4, ?LB)) 1 +Int skolem(4, ?x) |-> skolem(4, ?p) : (nodeList . next) skolem(4, ?x) |-> FreeInt(4) : (nodeList . val) </ heap > 
    </ config >
  ===>
 < config > 
+< form > rev(A) === rev(?C) @ ?B /\ rev(LA) === rev(?LC) @ ?LB </ form > 
+     < env > p |-> ?p x |-> ?x y |-> ?y </ env > 
+     < heap > H llist(?p)(?B,?LB) llist(?x)(?C,?LC) </ heap >
 </ config >
-=>* < config > < form > F:Formula </ form > CfgItems:Bag </ config > .
----=>* CfgItems:Bag .
+---=>* < config > < form > F:Formula </ form > CfgItems:Bag </ config > .
+=>* CfgItems:Bag .

@@ -80,6 +80,9 @@ mod DLIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
       < counter > N +Int 3 </ counter >
     if VALID(Phi ===> Q' === Q \/ Q' === Q +Int 1 \/ Q' === Q +Int 2) .
 
+  eq < heap > dlseg(0,0)(P,Q,Alpha) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ (P === 0) /\ (Q === 0) /\ (Alpha === epsilon) </ form > .  
+    
   eq < heap > dlseg(P,Q)(P,Q1,Alpha) H </ heap > < form > Phi </ form >
    = < heap > H </ heap > < form > Phi /\ (Q === Q1) /\ (Alpha === epsilon) </ form > .
    
