@@ -26,6 +26,8 @@ sub terminate {
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
   -nd : compile for full non-determinism in heating/cooling
+  -shared : specifies what file will be replaced with 
+            shared.maude in all other files it is included
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
@@ -86,6 +88,8 @@ sub terminate {
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
   -nd : compile for full non-determinism in heating/cooling
+  -shared : specifies what file will be replaced with 
+            shared.maude in all other files it is included
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
   -latex : maudifies/compiles for generating latex output
@@ -297,6 +301,7 @@ my $language_file_name = "";
 my $lang_name = "";
 my $unquote = 0;
 my $flat = 0;
+my $shared = 0;
 
 # latex, pdf, eps, ps, png, crop
 my $pdf = 0;
@@ -413,6 +418,15 @@ foreach (@ARGV) {
     {
 	$unquote = 1;
     }
+    elsif (/^-shared$/)
+    {
+	$shared = 1;
+    }
+    elsif ($shared)
+    {
+	$k_prelude = abs_path($_);
+	$shared = 0;
+    }
     elsif (/^-/) {
 	terminate("Unknown option $_");
     }
@@ -425,7 +439,6 @@ foreach (@ARGV) {
 	$language_file_name = $_;
     }
 }
-
 
 # Extract only language name without path
 $lang_name = basename($language_file_name);
@@ -575,6 +588,7 @@ if (!$compile_only) {
 	my $dir = cwd;
 	open FILE,">",$kshared or die "Cannot create $kshared\n";
 	my $kprelude = abs_path($k_prelude);
+	my $prelude = basename($k_prelude);
 	print FILE "in $kprelude\nmod K-SHARED is including K . \n\t$tmp\nendm";
 	close FILE;
 	
@@ -587,7 +601,8 @@ if (!$compile_only) {
 		$f =~ s/\.k$/\.maude/s;
 		my $maudified = get_file_content($f);
 #		print "F: $f\nM: $maudified\n\n";
-		$maudified =~ s/(in|load)[\s\.\/]*k-prelude(\.maude)?(\s*?)\n/in $kshared\n/;
+		$prelude =~ s/\.maude$//sg;
+		$maudified =~ s/(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/;
 		open FILE,">",$f or die "Cannot open $f\n";
 		print FILE $maudified;
 		close FILE;
