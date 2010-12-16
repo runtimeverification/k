@@ -60,7 +60,7 @@
 (* George Necula: I changed this pretty dramatically since CABS changed *)
 open Escape
 open Cabs
-(* open XmlPrinter *)
+open XmlPrinter
 
 let version = "Cprint 2.1e 9.1.99 Hugues Cassé"
 (*
@@ -152,9 +152,11 @@ let toString s =
 let rec cabsToString ((fname, defs) : file) (fileContents : string) = 
 		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "TranslationUnit"
 and cabsToXML ((fname, defs) : file) (fileContents : string) = 
-	(*let ppf = Format.std_formatter in
-		IoXML.xprint ppf "@[%a@]@."
-			(IoXML.xprint_list xprint_definition) defs; "xml" *) "xml"
+	let buf = (Buffer.create 100) in
+	let ppf = Format.formatter_of_buffer buf in
+		Format.fprintf ppf "@[%a@]@."
+			(IoXML.xprint_list xprint_definition) defs; 
+			Buffer.contents buf
 (*		wrap (("\"" ^ fname ^ "\"") :: (printDefs defs) :: (toString fileContents) :: []) "TranslationUnit" *)
 
 and printDefs defs =

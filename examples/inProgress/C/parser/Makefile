@@ -14,8 +14,7 @@ OCAML_YACC = ocamlyacc
 OCAML_LINK = ocamlopt $(OCAMLOPT_FLAGS) -I ioxml -ccopt -L./ioxml
 
 # these are partially ordered by inclusion.  don't know how to avoid manually ordering these
-MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whitetrack.cmx cprint.cmx lexerhack.cmx cabs.cmx clexer.cmx cparser.cmx frontc.cmx cabsPrinter.cmx cabsDriver.cmx
-# xmlPrinter.cmx 
+MODULES = errormsg.cmx longarray.cmx growArray.cmx escape.cmx cabshelper.cmx whitetrack.cmx cprint.cmx lexerhack.cmx cabs.cmx xmlPrinter.cmx clexer.cmx cparser.cmx frontc.cmx cabsPrinter.cmx cabsDriver.cmx
 
 IOXML = ioxml/ioXML.cmx ioxml/pa_ioXML.cmo
 .PHONY: all cleanOnMakefileChange clean ioxml
@@ -43,7 +42,7 @@ longarray.cmx longarray.cmi: errormsg.cmi
 growArray.cmx growArray.cmi: errormsg.cmi longarray.cmi 	
 cabshelper.cmx cabshelper.cmi: errormsg.cmi growArray.cmi cabs.cmi
 cparser.cmx: cabs.cmi cabshelper.cmi lexerhack.cmi cprint.cmi
-cabsDriver.cmx cabsDriver.cmi: cparser.cmi frontc.cmi clexer.cmi
+cabsDriver.cmx cabsDriver.cmi: cparser.cmi frontc.cmi clexer.cmi cabsPrinter.cmi
 frontc.cmx frontc.cmi: errormsg.cmi whitetrack.cmi cprint.cmi clexer.cmi
 clexer.cmx clexer.cmi: lexerhack.cmi cparser.cmi cabshelper.cmi
 cabsPrinter.cmx cabsPrinter.cmi: cabs.cmi escape.cmi xmlPrinter.cmi

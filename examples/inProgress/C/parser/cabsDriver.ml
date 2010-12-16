@@ -51,7 +51,7 @@ open CabsPrinter
 type outfile = 
     { fname: string;
       fchan: out_channel } 
-let outChannel : outfile option ref = ref None
+(* let outChannel : outfile option ref = ref None *)
 
 let replace input output =
     Str.global_replace (Str.regexp_string input) output
@@ -62,7 +62,7 @@ let recordFile fname =
 let isXML = ref false
 	
 let noscores s = 
-	(replace "_" "u" s)
+	(replace "_" "-" s)
 
 let fileContents : string ref = ref ""
 
@@ -80,10 +80,7 @@ let parseOneFile (fname: string) =
   
 let rec processOneFile (cabs: Cabs.file) =
 	fileContents := "";
-  begin
-    (match !outChannel with
-      None -> ()
-    | Some c -> (
+	begin (
 		let (inputFilename, _) = cabs in
 		let ic = open_in inputFilename in (
 		try
@@ -95,7 +92,8 @@ let rec processOneFile (cabs: Cabs.file) =
 		with e ->                      (* some unexpected exception occurs *)
 			close_in_noerr ic;           (* emergency closing *)
 		);
-		let programName = Filename.basename (replace "-gen-maude-tmp" "" (replace "." "-" ("program-" ^ (noscores c.fname)))) in
+		let programName = "program-" ^ (Filename.basename (replace "." "-" (noscores (replace ".pre.gen" "" inputFilename)))) in
+		(* printf "%s\n" programName; *)
 		let data = 
 			if (!isXML) then (
 				(cabsToXML cabs !fileContents)
@@ -104,13 +102,11 @@ let rec processOneFile (cabs: Cabs.file) =
 					("op " ^ programName ^ " : -> Program ." ^ "\n") ^
 					("eq " ^ programName ^ " = (" ^ maude ^ ") .\n")
 			) in
-			fprintf c.fchan "%s\n" data; 
-	));
-
-    if !E.hadErrors then
-      E.s ("Error: Error while processing file; see above for details.");
-
-  end
+		printf "%s\n" data; 
+	(* )) *)
+	);
+		if !E.hadErrors then E.s ("Error: Error while processing file; see above for details.");
+	end
         
 (***** MAIN *****)  
 let theMain () =
@@ -137,9 +133,9 @@ let theMain () =
     
   let argDescr =
         [ 
-          "--out", Arg.String (openFile "output" 
+          (* "--out", Arg.String (openFile "output" 
                                  (fun oc -> outChannel := Some oc)),
-              " the name of the output AST.";
+              " the name of the output AST."; *)
 		  "--xml", Arg.Set isXML,
               " output should be in XML format";
         ]
@@ -176,7 +172,7 @@ let cleanup () =
     Stats.print stderr "Timings:\n"; *)
   if !E.logChannel != stderr then 
     close_out (! E.logChannel);  
-  (match ! outChannel with Some c -> close_out c.fchan | _ -> ())
+  (* (match ! outChannel with Some c -> close_out c.fchan | _ -> ()) *)
 
 
 (* Without this handler, cilly.asm.exe will quit silently with return code 0

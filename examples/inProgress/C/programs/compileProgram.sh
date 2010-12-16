@@ -60,7 +60,7 @@ if [ ! "$1" ]; then
 	die "filename expected" 3
 fi
 filename=`basename "$1" .c`
-escapedFilename=`echo -n $filename | tr "_" "u"`
+escapedFilename=`echo -n $filename | tr "_" "-"`
 directoryname=`dirname "$1"`/
 if [ ! -e $directoryname$filename.c ]; then
 	die "$filename.c not found" 4
@@ -88,7 +88,7 @@ if [ ! "$dflag" ]; then
 # else
 #	$ACTUAL_CIL $CIL_FLAGS --out $filename.cil $filename.pre.gen
 fi
-$myDirectory/cparser --out $filename.gen.maude.tmp $filename.pre.gen 2> $filename.warnings.log
+$myDirectory/cparser $filename.pre.gen 2> $filename.warnings.log 1> $filename.gen.maude.tmp 
 if [ "$?" -ne 0 ]; then 
 	rm -f $filename.gen.maude.tmp
 	msg="Error running C parser: `cat $filename.warnings.log`"
@@ -137,13 +137,13 @@ echo -e "endm\n" >> program-$filename-gen.maude
 
 if [ "$gflag" ]; then
 	$K_PROGRAM_COMPILE $gval C C-PROGRAM program-$escapedFilename > $compilationLog
+	PROGRAMRET=$?
 else
 	$K_PROGRAM_COMPILE program-$filename-gen.maude C C-PROGRAM program-$escapedFilename > $compilationLog
+	PROGRAMRET=$?
 fi
 
-if [ "$?" -ne 0 ]; then
-	#msg=
-	#cat $compilationLog > errorMsgOMG.txt
+if [ "$PROGRAMRET" -ne 0 ]; then
 	msg="Error compiling program: `cat $compilationLog`"
 	rm -f $compilationLog
 	die "$msg" 8
