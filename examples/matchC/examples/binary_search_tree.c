@@ -17,36 +17,73 @@ struct treeNode* newNode(int v)
 }
 
 
-struct treeNode* insert(struct treeNode *t, int v)
-/*@ pre  < config > < env > t |-> ?root  v |-> v0 </ env >
-                    < heap > tree(?root)(T) H </ heap >
-                    < form > isBst(T) </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < heap > tree(?root)(?T) H </ heap >
-                    < form >
-                      isBst(?T) /\ tree2mset(?T) === tree2mset(T) U {| v0 |}
-                      /\ returns ?root
-                    </ form > C </ config > */
+struct treeNode* insertRecursive(struct treeNode *t, int v)
+/*@ pre  <config><env> t |-> ?root, v |-> v0 </env>
+                 <heap> tree(?root)(T), H </heap>
+                 C </config> /\ isBst(T) */
+/*@ post <config><env> ?rho </env>
+                 <heap> tree(?root)(?T), H </heap>
+                 C </config> /\ isBst(?T)
+                 /\ tree2mset(?T) = tree2mset(T) U {v0} /\ returns(?root) */
 {
   if (t == 0)
     return newNode(v);
-  if (v < t->val) t->left = insert(t->left, v);
-    else t->right = insert(t->right, v);
+
+  if (v < t->val)
+    t->left = insertRecursive(t->left, v);
+  else
+    t->right = insertRecursive(t->right, v);
+
   return t;
 }
 
+struct treeNode* insertIterative(struct treeNode *root, int v)
+/*@ pre  <config><env> t |-> ?root, v |-> v0 </env>
+                 <heap> tree(?root)(T), H </heap>
+                 C </config> /\ isBst(T) */
+/*@ post <config><env> ?rho </env>
+                 <heap> tree(?root)(?T), H </heap>
+                 C </config> /\ isBst(?T)
+                 /\ tree2mset(?T) = tree2mset(T) U {v0} /\ returns(?root) */
+{
+  struct treeNode *t;
+  struct treeNode *p;
 
-struct treeNode* find(struct treeNode *t, int v)
-/*@ pre  < config > < env > t |-> root0  v |-> v0 </ env >
-                    < heap > tree(root0)(T) H </ heap > 
-                    < form > isBst(T) </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < heap > tree(root0)(T) H </ heap > 
-                    < form >
-                      isBst(T) /\ returns ?t /\
-                      (~(?t === 0) /\ v0 in tree2mset(T) \/
-                       ?t === 0 /\ ~(v0 in tree2mset(T)))
-                    </ form > C </ config > */
+  if (root == 0)
+    return newNode(v);
+
+  p = 0;
+  t = root;
+  /*@ invariant <config><env> root |-> ?root, t |-> ?root, p |-> 0 </env>
+                        <heap> tree(?root)(T), H </heap> C </config>
+                <config><env> root |-> ?root, t |-> ?t, p |-> ?p </env>
+                        <heap> ?p |-> tree(?t)(?T), H </heap> C </config> */
+  while (t != 0) {
+    p = t;
+    if (v < t->val)
+      t = t->left;
+    else
+      t = t->right;
+  }
+
+  if (v < p->val)
+    p->left = newNode(v);
+  else
+    p->right = newNode(v);
+
+  return root;
+}
+
+
+struct treeNode* findRecursive(struct treeNode *t, int v)
+/*@ pre  <config><env> t |-> root0, v |-> v0 </env>
+                 <heap> tree(root0)(T), H </heap>
+                 C </config> /\ isBst(T) */
+/*@ post <config><env> ?rho </env>
+                 <heap> tree(root0)(T), H </heap> 
+                 C </ config > /\ isBst(T) /\ returns(?t)
+                 /\ (~(?t = 0) /\ v0 in tree2mset(T)
+                     \/ ?t = 0 /\ ~(v0 in tree2mset(T))) */
 {
   if (t == 0)
     return 0;
@@ -56,6 +93,12 @@ struct treeNode* find(struct treeNode *t, int v)
     return find(t->left, v);
   else
     return find(t->right, v);
+}
+
+
+int main()
+{
+  return 0;
 }
 
 
