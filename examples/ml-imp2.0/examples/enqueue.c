@@ -15,54 +15,25 @@ struct nodeList* tail;
 struct nodeQueue* enqueue(struct nodeQueue *x, int val)
 /*@ pre   < config > 
           < env > x |-> x0 val |-> val0 </ env > 
-          < heap > 
-              x0 |-> ?hd : (nodeQueue . head)
-              (x0 +Int 1) |-> ?tl : (nodeQueue . tail )
-              queue(?hd, ?tl)(A)  
-              H 
-          </ heap >
-          < form > ~(x0 === 0) /\ ~(?hd === 0) /\ ~(?tl === 0) /\ ~(A === epsilon) </ form > C </ config > */
+          < heap > queue(x0)(A) H </ heap >
+          < form > ~(x0 === 0) </ form > C </ config > */
 /*@ post  < config > 
           < env > ?rho </ env > 
-          < heap > queue(x0)([val0] @ A) H </ heap >
+          < heap > queue(x0)(A @ [val0]) H </ heap >
           < form > returns x0 </ form > C </ config > */
 {
   struct nodeList* n;
   n = (struct nodeList*)malloc(sizeof(struct nodeList));
   n->val = val;
-  n->next = x->head;
-  x->head = n;
   
-/*@ assert < config > 
-          < env > x |-> x0 val |-> val0 n |-> ?n </ env > 
-          < heap > 
-              ?n |-> val0 : (nodeList . val)
-              (?n +Int 1) |-> ?hd : (nodeList . next)
-              x0 |-> ?n : (nodeQueue . head)
-              (x0 +Int 1) |-> ?tl : (nodeQueue . tail )
-              queue(?hd,?tl)(A)  
-              H 
-          </ heap >
-          < form > ~(x0 === 0) /\ ~(?hd === 0) /\ ~(?tl === 0) /\ ~(A === epsilon) </ form > C </ config > */
-/*@ assert < config > 
-          < env > x |-> x0 val |-> val0 n |-> ?n </ env > 
-          < heap > 
-              lseg(?n,?hd)([val0])
-              x0 |-> ?n : (nodeQueue . head)
-              (x0 +Int 1) |-> ?tl : (nodeQueue . tail )
-              queue(?hd,?tl)(A)  
-              H 
-          </ heap >
-          < form > ~(x0 === 0) /\ ~(?hd === 0) /\ ~(?tl === 0) /\ ~(A === epsilon) </ form > C </ config > */
-/*@ assert < config > 
-          < env > x |-> x0 val |-> val0 n |-> ?n </ env > 
-          < heap > 
-              x0 |-> ?n : (nodeQueue . head)
-              (x0 +Int 1) |-> ?tl : (nodeQueue . tail )
-              queue(?n,?tl)([val0] @ A)  
-              H 
-          </ heap >
-          < form > ~(x0 === 0) /\ ~(?hd === 0) /\ ~(?tl === 0) /\ ~(A === epsilon) </ form > C </ config > */
+  if (x->head != 0)
+  {
+    x->tail->next = n;
+  }
+  else x->head = n;
+  
+  x->tail = n;
+  
   return x;
 }
 
@@ -88,10 +59,11 @@ int main()
 }
 
 /*@ var x0 val0 : FreeInt */
-/*@ var ?n ?x ?u ?v ?hd ?tl : ?Int */
+/*@ var ?n ?x ?u ?v ?hd ?tl ?next ?smth : ?Int */
 /*@ var A : FreeSeq */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */
 /*@ var !H : !MapItem */
 /*@ var C : FreeBagItem */
+/*@ var !C : !BagItem */
 

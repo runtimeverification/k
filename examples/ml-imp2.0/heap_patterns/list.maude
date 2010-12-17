@@ -115,6 +115,8 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
    = < heap > H </ heap > < form > Phi /\ Alpha === epsilon </ form > .
   eq < heap > lseg(P, 0)(Alpha) H </ heap >
    = < heap > list(P)(Alpha) H </ heap > .
+  eq < heap > lseg(P, Q)(epsilon) H </ heap > < form > Phi </ form >
+   = < heap > H </ heap > < form > Phi /\ (P === 0) /\ (Q === 0) </ form > .
 
   rl < config >
        < heap >

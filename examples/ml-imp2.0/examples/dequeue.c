@@ -25,10 +25,27 @@ struct nodeQueue* dequeue(struct nodeQueue *x)
           < form > returns x0 </ form > C </ config > */
 {
   struct nodeList* n;
-  n = x->head;
+  /* n = x->head;
   x->head = n->next;
+  free(n); */
   
+  n = 0;
+
+  if (x->head != 0)
+  {
+    n = x->head;
+    if (x->head == x->tail)
+    {
+      x->head = n->next;
+      x->tail = n->next;
+    }
+    else x->head = n->next;
+  }
   free(n);
+/*@ assert < config > C < env > x |-> x0 n |-> ?n </ env >
+ < form > TrueFormula </ form >
+ < heap > H  x0 |-> ?hd : (nodeQueue . head) ?n |-> ?val : (nodeList . val) x0 +Int 1 |-> ?tl : (nodeQueue . tail) 1 +Int ?n |-> ?next : (nodeList . next) </ heap > </ config > */
+
   return x;
 }
 
@@ -54,8 +71,9 @@ int main()
 }
 
 /*@ var x0 val0 : FreeInt */
-/*@ var ?n ?x ?l : ?Int */
+/*@ var ?n ?x ?l ?val ?next ?hd ?tl : ?Int */
 /*@ var A : FreeSeq */
+/*@ var ?A : ?Seq */
 /*@ var ?rho : ?MapItem */
 /*@ var H : FreeMapItem */
 /*@ var !H : !MapItem */
