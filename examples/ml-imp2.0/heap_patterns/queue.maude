@@ -34,7 +34,7 @@ mod QUEUE-HP is inc LIST-HP .
         < heap > 
           P |-> FreeInt(N) : (nodeQueue . head)
           (P +Int 1) |-> FreeInt(N +Int 1) : (nodeQueue . tail )
-          queue(FreeInt(N), FreeInt(N +Int 1))(Alpha) 
+          lseg(FreeInt(N), FreeInt(N +Int 1))(Alpha) 
           H 
         </ heap >
         < form > Phi /\ ~(P === 0) </ form >
@@ -88,7 +88,7 @@ mod QUEUE-HP is inc LIST-HP .
         < heap >
           P |-> Q : (nodeQueue . head) 
           (P +Int 1) |-> Q' : (nodeQueue . tail) 
-          queue(Q,Q')(Alpha) 
+          lseg(Q,Q')(Alpha) 
           H 
           </ heap >
           CfgItems
@@ -102,83 +102,4 @@ mod QUEUE-HP is inc LIST-HP .
         CfgItems
       </ config >
       =match=> Cfg .
-  
-  *** Definition ***
-  
-  ceq < tasks >
-        < config >
-          < k > derive(P') ~> K </ k >
-          < heap >  queue(P,Q)(Alpha) H </ heap >
-          < form > Phi </ form >
-          CfgItems
-        </ config >
-      Cfgs
-      </ tasks >
-      < counter > N </ counter >
-    = < tasks >
-        < config >
-          < k > derive(P') ~> K </ k >
-          < heap > H </ heap >
-          < form > 
-            Phi /\ (P === 0) /\ (Q === 0) /\ (Alpha === epsilon) 
-          </ form >
-          CfgItems
-        </ config >
-        < config >
-          < k > derive(P') ~> K </ k >
-          < heap > 
-            lseg(P,Q)(FreeSeq(N)) 
-            Q |-> FreeInt(N +Int 1) : (nodeList . val )
-            (Q +Int 1) |-> FreeInt(N +Int 2) : ( nodeList . next )
-            H 
-          </ heap >
-          < form > Phi /\ ~(P === 0) /\ ~(Q === 0) /\ (Alpha === FreeSeq(N) @ [FreeInt(N +Int 1)])
-          </ form >
-          CfgItems
-        </ config >
-      Cfgs
-      </ tasks >
-      < counter > N +Int 3 </ counter >
-    if VALID(Phi ===> P' === P \/ P' === P +Int 1 \/ P' === Q \/ P' === Q +Int 1) .
-    
-  eq < heap > queue(P,0)(Alpha) H </ heap > < form > Phi </ form > 
-   = < heap > H </ heap > < form > Phi /\ (P === 0) /\ (Alpha === epsilon) </ form > .
-  eq < heap > queue(0,Q)(Alpha) H </ heap > < form > Phi </ form > 
-   = < heap > H </ heap > < form > Phi /\ Q === 0 /\ Alpha === epsilon </ form > .
-
-  rl  < config > 
-        < heap > 
-        Q |-> I : (nodeList . val ) 
-        (Q +Int 1) |-> Q' : ( nodeList . next )
-        H 
-        </ heap > 
-        CfgItems
-      </ config >
-      =match=> Cfg
-   => < config > 
-        < heap > 
-          queue(Q,Q)(I) 
-          H 
-        </ heap >
-        CfgItems
-     </ config >
-     =match=> Cfg .
-
-  rl  < config > 
-        < heap > 
-          lseg(P,P')(Alpha) 
-          queue(P',Q)(Beta) 
-          H 
-        </ heap >
-        CfgItems
-     </ config >
-     =match=> Cfg
-  =>  < config > 
-        < heap > 
-          queue(P,Q)(Alpha @ Beta) 
-          H 
-        </ heap > 
-        CfgItems
-     </ config >
-     =match=> Cfg .
 endm

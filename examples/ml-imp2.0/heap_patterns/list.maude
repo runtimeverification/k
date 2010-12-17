@@ -52,23 +52,7 @@ mod LIST-HP is inc CONFIG + MATHEMATICAL-SEQUENCE .
   eq < heap > list(P)(epsilon) H </ heap > < form > Phi </ form >
    = < heap > H </ heap > < form > Phi /\ P === 0 </ form > .
 
-  rl < config >
-       < heap >
-         P |-> I : nodeList . val
-         (P +Int 1) |-> 0 : nodeList . next
-         H
-       </ heap >
-       CfgItems
-     </ config >
-     =match=> Cfg
-  => < config >
-       < heap >
-         list(P)([I])
-         H
-       </ heap >
-       CfgItems
-     </ config >
-     =match=> Cfg .
+  
   rl < config >
        < heap >
          P |-> I : nodeList . val
