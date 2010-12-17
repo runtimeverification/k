@@ -4,6 +4,7 @@ load theories/multiset-theory.maude
 load theories/tree-theory.maude
 load theories/domain.maude
 load heap_patterns/list.maude
+load heap_patterns/queue.maude
 load heap_patterns/binary_tree.maude
 load heap_patterns/location-list.maude
 load heap_patterns/double-linked-list.maude

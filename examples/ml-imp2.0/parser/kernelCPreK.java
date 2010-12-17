@@ -19,7 +19,7 @@ public class kernelCPreK {
 
       //System.out.println(treeToString(tree, 0));
       String includeList = "mod PROG is inc IMP-SYNTAX + MATHEMATICAL-DOMAIN ";
-      includeList += "+ LIST-HP + BINARY-TREE-HP + LLIST-HP + DLIST-HP .";
+      includeList += "+ LIST-HP + BINARY-TREE-HP + LLIST-HP + DLIST-HP + QUEUE-HP .";
       System.out.println(includeList);
       for (String annot : lexer.annots) {
         annot = annot.trim();

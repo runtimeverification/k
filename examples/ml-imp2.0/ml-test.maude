@@ -3,8 +3,8 @@ load ml-imp.maude
 load fol.maude
 
 mod TEST is inc IMP + FOL= .
-ops p y t v x iterx found value : -> Id .
-ops ?n ?root ?ix ?v ?n ?found ?x ?p ?y : -> ?Int .
+ops p y t v x n val iterx found value : -> Id .
+ops ?n ?root ?ix ?u ?v ?n ?found ?x ?p ?y : -> ?Int .
 ops x0 val0 : -> FreeInt .
 ops ?rho : -> ?MapItem .
 ops h0 : -> FreeMapItem .
@@ -13,6 +13,7 @@ ops Tree : -> FreeTree .
 ops ?A ?A' ?B ?C ?LB ?LC : -> ?Seq .
 ops A LA  : -> FreeSeq .
 op H : -> FreeMapItem .
+op C : FreeBagItem .
 endm 
 
 set print attribute on .
@@ -21,17 +22,23 @@ set print attribute on .
 
 search
   < config >
-  < form > ~ (0 === skolem(4, ?x)) /\ (rev(A) === rev(FreeSeq(6)) @ [FreeInt(4)] @ skolem(4, ?B)) /\ rev(LA) === rev(FreeSeq(7)) @ [FreeInt(5)] @ skolem(4, ?LB) </ form > 
-  < subst > (skolem(4, ?C) <- [FreeInt(4)] @ FreeSeq(6)) ; (skolem(4, ?LC) <-
-    [FreeInt(5)] @ FreeSeq(7)) </ subst > 
-   < env > p |-> skolem(4, ?x) x |-> FreeInt(5) y |-> FreeInt(5) </ env > 
-   < heap > H llist(FreeInt(5))(FreeSeq(6),FreeSeq(7)) llist(skolem(4, ?p))(skolem(4, ?B),skolem(4, ?LB)) 1 +Int skolem(4, ?x) |-> skolem(4, ?p) : (nodeList . next) skolem(4, ?x) |-> FreeInt(4) : (nodeList . val) </ heap > 
+  < form > TrueFormula </ form > 
+   < subst > .Subst </ subst > 
+   < stack > callContext(('/*@`assert_*/).KProperLabel(wbag 
+    < config > C 
+     < form > returns ?n </ form > 
+     < env > ?rho </ env > 
+     < heap > H lseg(?n,?u)([val0]) </ heap > </ config >(.List{K})),.,.) </
+    stack > 
+   < env > val |-> val0 n |-> skolem(6, ?n) </ env > 
+   < heap > H 1 +Int skolem(6, ?n) |-> skolem(6, ?u) : (nodeList . next)
+    skolem(6, ?n) |-> val0 : (nodeList . val) </ heap > 
+   < tenv > val |-> int n |-> struct nodeList * </ tenv >
    </ config >
  ===>
-< config > 
-< form > rev(A) === rev(?C) @ ?B /\ rev(LA) === rev(?LC) @ ?LB </ form > 
-     < env > p |-> ?p x |-> ?x y |-> ?y </ env > 
-     < heap > H llist(?p)(?B,?LB) llist(?x)(?C,?LC) </ heap >
-</ config >
+< config > C 
+     < form > TrueFormula </ form > 
+     < env > val |-> val0 n |-> ?n </ env > 
+     < heap > H lseg(?n,?u)([val0]) </ heap > </ config >
 ---=>* < config > < form > F:Formula </ form > CfgItems:Bag </ config > .
 =>* CfgItems:Bag .
