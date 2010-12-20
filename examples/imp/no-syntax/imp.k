@@ -30,7 +30,7 @@ kmod IMP is including PL-INT + PL-ID + K
   rule ';(S1:K,,S2:K) => S1~>S2
   rule 'if(true(.List{K}),,S:K,,_) => S
   rule 'if(false(.List{K}),,_,,S)  => S
-  rule <k>'while(B,,S) => 'if(B,,;(S,,'while(B,,S)),,'skip(.List{K})) <_/k>
+  rule <k>'while(B,,S) => 'if(B,,';(S,,'while(B,,S)),,'skip(.List{K})) <_/k>
   rule <k>'var('list(Kl:List{K}),,S) => S</k> 
        <state_>. => Kl|->0(.List{K}) <_/state> [structural]
 

@@ -5,6 +5,7 @@ use File::Spec;
 use Switch;
 use Cwd; 
 use Cwd 'abs_path';
+use Digest::MD5 qw(md5 md5_hex md5_base64);
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 
 require $path;
@@ -292,6 +293,9 @@ my @all_sorts = ();
 
 # @all_tokens will hold all defined tokens
 my @all_tokens = @builtin_tokens;
+
+# a map with frozen strings
+my %freeze_map = ();
 
 my $style = "bb";
 my $maudify_only = 0;
@@ -1279,9 +1283,20 @@ sub maudify_module {
      # freeze all strings before spacifying
      s/(?=[^'])""/freeze($&,"STRINGS")/ge;
      s/(?=[^'])("[^"]*?[^']")/freeze($&,"STRINGS")/ge;
+     
+     # freeze KLabels before spacifying
+     my $klabelss = $decl;
+     $klabelss =~ s/\s+$//s;
+     my @kls = split(/\s+/, $klabelss);
+     foreach my $kl (@kls)
+     {
+	 s/(\Q$kl\E)/Freeze($kl, "KLABELS")/sge;
+     }
+
      $_ = spacify($_);
      $_ = unfreeze($_,"STRINGS");
-#      print  "Stage:\n$_\n\n";
+     $_ = Unfreeze("KLABELS", $_);
+# print  "Stage:\n$_\n\n";
     
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
@@ -1695,7 +1710,7 @@ sub spacify {
 # Dirty hack: add spaces around anonymous variables, so that they will be properly
 # translated into ? later on
     $lines =~ s/_/ _ /gs;
-
+    
 # Next unfreeze all tokens and return the spacified string
     return unfreeze($lines);
 }
@@ -1749,6 +1764,7 @@ sub freeze {
     if (@_) {
 	$marker = shift;
     }
+    
     return "$marker".join("$specialSymbol",map(ord,(split('',$string))))."$specialSymbol";
 }
 
@@ -1762,6 +1778,31 @@ sub unfreeze {
 
     $all =~ s/$marker(\d+(?:$specialSymbol\d+)*)$specialSymbol/join("", map(chr, split("$specialSymbol",$1)))/gse;
 
+    return $all;
+}
+
+# a new version of freezing: use digest - md5
+sub Freeze
+{
+    my ($string, $marker) = (shift, shift);
+    my $frozen_string = $marker . join("", map(ord, split('',md5($string))));
+    
+    $freeze_map{$frozen_string} = $string;
+    
+    return $frozen_string;
+}
+# unfreezing (newest version) : use digest - md5
+sub Unfreeze
+{
+    my ($marker, $all) = (shift, shift);
+    
+    while (my ($key, $value) = each(%freeze_map))
+    {
+	if ($key =~ /^$marker/)
+	{
+	    $all =~ s/$key/$value/sg;
+	}
+    }
     return $all;
 }
 
