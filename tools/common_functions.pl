@@ -355,7 +355,7 @@ sub syntax_verification
     ###########################################
 
     # extract configuration string from .kmaude file
-    if ($lines =~ m/configuration\s*(.+?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/s)
+    if ($lines =~ m/(?:\s)configuration\s*(.+?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/s)
     {
 	$lines = $1;
     }
