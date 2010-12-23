@@ -48,6 +48,9 @@ rl < config > < heap > P |-> Q : (nodeQueue  . head) (P +Int 1) |-> Q' : (nodeQu
 rl < config > < heap > P |-> Q : (nodeQueue  . head) (P +Int 1) |-> Q : (nodeQueue  . tail) Q |-> I : (nodeList  . val) (Q +Int 1) |-> Q' : (nodeList . next) H </ heap > CfgItems </ config > =match=> Cfg
 => < config > < heap > queue(P)([I]) H </ heap > CfgItems </ config > =match=> Cfg .
 
+rl < config > < heap > lseg(P,Q)(Alpha) Q |-> I : (nodeList  . val) (Q +Int 1) |-> Q' : (nodeList . next) H </ heap > CfgItems </ config > =match=> Cfg
+=> < config > < heap > lseg(P,Q')(Alpha @ [I]) H </ heap > CfgItems </ config > =match=> Cfg .
+
 rl < config > < heap > lseg(P,P')(Alpha) queue(P',Q)(Beta) H </ heap > CfgItems </ config > =match=> Cfg
 => < config > < heap > queue(P,Q)(Alpha @ Beta) H </ heap > CfgItems </ config > =match=> Cfg .
 endm

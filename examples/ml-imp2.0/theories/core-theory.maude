@@ -176,12 +176,6 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
  ceq abs(I) = (-Int I) if I <=Int 0 .
   eq abs(I) = I [owise] .
   
-  op moduloo : Int++ Int++ -> Int++ .
-  
- ceq moduloo(I,J) = moduloo( I -Int J, J) if (I >=Int J) .
-  eq moduloo(I,J) = I [owise] .
-
-  
   op factorial : Int++ -> Int++ .
   
  ceq factorial(I) = I *Int factorial(I -Int 1) if (I >Int 1) .
@@ -190,5 +184,25 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
   op fibon : Int++ -> Int++ .
  ceq fibon(I) = 1 if (I <=Int 1) .
   eq fibon(I) = fibon(I -Int 1) +Int fibon(I -Int 2) .
+  
+  op greatestcd : Int++ Int++ -> Int++ .
+ ceq greatestcd(I,J) = greatestcd(J, (I %Int J)) if (J >Int 0) .
+  eq greatestcd(I,0) = I .
+  
+  op MOD : Int++ Int++ -> Int++ .
+ ceq MOD(I,J) = I if (I <Int J) .
+  eq MOD(I,J) = MOD(I -Int J,J) [owise] .
+  
+  op Divis : Int++ Int++ -> Atom .
+  eq Divis(I,J) = (MOD(I,J) === 0) .
+  
+  op IsItPrime : Int++ -> Atom .
+  eq IsItPrime(I) = prime(I,2) .
+  
+  op prime : Int++ Int++ -> Atom .
+  eq prime(1,1) = TrueFormula .
+  eq prime(2,2) = TrueFormula .
+  eq prime(I,J) = ~(Divis(I,J)) /\ prime(I,J +Int 1) [owise] .
+ ceq prime(I,J) = TrueFormula if ((I /Int 2) <=Int J) .
 endm
 

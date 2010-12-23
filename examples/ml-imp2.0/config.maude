@@ -98,7 +98,7 @@ mod CONFIG is inc MATHEMATICAL-INT + SUBST + PL-ID + PL-QID .
   op _: :_ : Int++ KLabel -> Bool .
 
   ops val next : -> Id .
-  ops nodeList : -> Id .
+  ops nodeList nodeLlist nodeCLlist : -> Id .
   
   op prev : -> Id .
   op nodeDList : -> Id .
