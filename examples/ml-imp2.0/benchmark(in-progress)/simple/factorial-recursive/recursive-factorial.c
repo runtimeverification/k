@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <stdio.h>
 
 int refact(int n)
 /*@ pre  < config > < env > n |-> n0 </ env >
@@ -11,7 +11,7 @@ int refact(int n)
   res = 1;
   if (n > 1)
   {
-    res = res * refact(n - 1) ;
+    res = n * refact(n - 1) ;
   }
   return res;
 }
@@ -20,6 +20,7 @@ int main()
 {
   int f;
   f = refact(10);
+  printf("Factorial for %d is %d\n",10,f);
   return 0;
 }
 

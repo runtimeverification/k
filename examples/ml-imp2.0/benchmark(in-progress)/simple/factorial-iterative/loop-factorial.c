@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <stdio.h>
 
 int fact(int n)
 /*@ pre  < config > < env > n |-> n0 </ env >
@@ -25,6 +25,7 @@ int main()
 {
   int f;
   f = fact(10);
+  printf("Factorial-it of %d is %d\n", 10, f);
   return 0;
 }
 

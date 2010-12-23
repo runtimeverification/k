@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <stdio.h>
 
 int fibonacci(int n)
 /*@ pre  < config > < env > n |-> n0 </ env >
@@ -16,7 +16,8 @@ int fibonacci(int n)
 int main()
 {
   int f;
-  f = fibonacci(3);
+  f = fibonacci(5);
+  printf("Fib. for %d is %d\n", 5,f);
   return 0;
 }
 

@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <stdio.h>
 
 int multiply(int x, int y)
@@ -32,6 +31,7 @@ int main()
 {
   int m;
   m = multiply(3,4);
+  printf("The numbers are: %d and %d and the result of their multiplication is: %d\n",3,4,m);
   return 0;
 }
 

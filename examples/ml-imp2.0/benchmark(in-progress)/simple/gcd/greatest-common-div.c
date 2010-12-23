@@ -9,34 +9,22 @@ int gcd(int x, int y)
                     < heap > (.).Map </ heap >
                     < form > returns ?x /\ (?x === greatestcd(x0,y0)) </ form >
                     C </ config > */
-{
+{  
   int z;
   int c;
 
   if(y > 0)
   {
-    c = 0;
-    z = x;
-/*@ invariant < config > < env > x |-> ?x y |-> y0 c |-> ?c z |-> ?z </ env >
-                      < heap > (.).Map </ heap >
-                      < form > ?z === (y0 *Int ?c +Int ?x) </ form > C </ config > */
-    while (x >=y )
-    {
-      x -= y;
-      c = c + 1;
-    }
-    z = y;
-    y = x;
-    x = z;
-    gcd(x,y);
+    x = gcd(y,(x % y));
   }
+  
   return x;
 }
 
 int main()
 {
   gcd(100,44);
-  printf("%d\n",gcd(100,44));
+  printf("The gcd for %d and %d is %d\n",100,44,gcd(100,44));
   return 0;
 }
 

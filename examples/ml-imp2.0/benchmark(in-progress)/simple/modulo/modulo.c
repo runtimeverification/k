@@ -33,13 +33,13 @@ int main()
   int y;
   x = 5;
   y = 2;
-  printf("%d %d\n",x,y);
+  printf("The numbers are: %d, %d\n",x,y);
 /*@ assert < config >
            < env > x |-> 5  y |-> 2 </ env >
            < heap > (.).Map </ heap >
            < form > TrueFormula </ form > </ config > */
   x = modulo2(x,y);
-  printf("%d \n",x);
+  printf("The result: %d \n",x);
 /*@ assert < config >
            < env > x |-> ?x y |-> 2 </ env >
            < heap > (.).Map </ heap >

@@ -17,8 +17,12 @@ int main()
   int n;
   n = 1000;
   absolute(n);
+  printf("Abs of %d is %d\n", n, absolute(n));
   n = -456;
   absolute(n);
+  printf("Abs of %d is %d\n", n, absolute(n));
+  n = 0;
+  printf("Abs of %d is %d\n", n, absolute(n));
   return 0;
 }
 

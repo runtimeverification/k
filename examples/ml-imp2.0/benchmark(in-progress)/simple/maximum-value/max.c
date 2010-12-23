@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <stdio.h>
 
 int max(int x, int y)
 /*@ pre < config > < env > x |-> x0 y |-> y0  </ env >
@@ -23,6 +23,7 @@ int main()
   x = 8;
   y = 45;
   x = max(x,y);
+  printf("Maximum between %d and %d is %d\n",8,45,x);
   return 0;
 }
 

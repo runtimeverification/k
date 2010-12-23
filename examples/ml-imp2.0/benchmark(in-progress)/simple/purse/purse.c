@@ -41,14 +41,14 @@ int main()
   int s;
   p1 = (struct purse*)malloc(sizeof(struct purse));
   p2 = (struct purse*)malloc(sizeof(struct purse));
-  printf("%d %d\n",p1->balance,p2->balance);
+  printf("Account#1: %d Account#2: %d\n",p1->balance,p2->balance);
   p1->balance = 0;
-  printf("%d %d\n",p1->balance,p2->balance);
+  printf("Account#1: %d Account#2: %d\n",p1->balance,p2->balance);
   p2->balance = 320;
   s = 100;
 
   credit(p2,s);
-  printf("%d %d\n",p1->balance,p2->balance);
+  printf("Account#1: %d Account#2 after credit: %d\n",p1->balance,p2->balance);
   return 0;
 }
 
