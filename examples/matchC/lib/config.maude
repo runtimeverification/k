@@ -63,7 +63,7 @@ mod CONFIG-BUILTIN-MODULE is
   op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=match=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op skolemize : Nat Bag -> Bag .
-  op co-skolemize : Nat Bag -> Bag .
+  op co-skolemize : Nat Pattern -> Pattern .
 
   op returns _ : Value -> Formula .
   op unit : -> Value . 
@@ -98,31 +98,5 @@ mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-CONDITION-SEARCH .
   op applySubst : Subst Subst -> Subst [strat(2 0)] .
   op _._ : Id Id -> Field .
   op _._ : Field Id -> Field .
-
-  
-  op _/\_ : Bag Formula -> Bag .
-  op _/\_ : Formula Bag -> Bag .
-
-  var Cfg : BagItem .
-  var Cfgs CfgItems : Bag .
-  var Phi : Formula .
-
-  eq Phi /\ Cfgs = Cfgs /\ Phi .
-  eq (Cfg Cfgs) /\ Phi = (Cfg /\ Phi) (Cfgs /\ Phi) .
-  eq < config > CfgItems </ config > /\ Phi
-   = < config > CfgItems < form > Phi </ form > </ config > .
-
-
-***(
-  op <_>_</_> : CellLabel Int++ CellLabel -> BagItem
-  [prec 0 format(nib g b o+ -b g b o)] .
-  op <_>_</_> : CellLabel Formula CellLabel -> BagItem
-  [prec 0 format(nib g b o+ -b g b o)] .
-  op <_>_</_> : CellLabel Subst CellLabel -> BagItem
-  [prec 0 format(nib g b o+ -b g b o)] .
-  op _=>_ : Int++ Int++ -> Int++ [prec 125] .
-  op _=>_ : Formula Formula -> Formula [prec 125] .
-  op _=>_ : Subst Subst -> Subst [prec 125] .
-***)
 endm
 
