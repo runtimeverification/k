@@ -607,6 +607,10 @@ if (!$compile_only) {
 #		print "F: $f\nM: $maudified\n\n";
 		$prelude =~ s/\.maude$//sg;
 		$maudified =~ s/(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/;
+		
+                # hardcoded
+		$maudified =~ s/\n\s/\n/g;
+		
 		open FILE,">",$f or die "Cannot open $f\n";
 		print FILE $maudified;
 		close FILE;
