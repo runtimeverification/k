@@ -2,6 +2,17 @@ kmod MATCHC-SYNTAX is including KERNELC-SYNTAX
 ***(
 matching logic annotations
 ***)
+  syntax List ::= Pattern
+  syntax Annotation ::= /*@`assume List */
+                      | /*@`assert List */
+                      | /*@`invariant List */
+
+  syntax Annotation ::= /*@`pre List */
+                      | /*@`post List */
+
+  syntax Annotation ::= /*@`verify`*/
+                      | /*@`skip`*/
+***(
   syntax Annotation ::= /*@`assume Pattern */
                       | /*@`assert Pattern */
                       | /*@`invariant Pattern */
@@ -11,6 +22,7 @@ matching logic annotations
 
   syntax Annotation ::= /*@`verify`*/
                       | /*@`skip`*/
+***)
 
 
   syntax FunctionDeclaration ::= ExpressionType

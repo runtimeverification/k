@@ -81,7 +81,7 @@ Function entry
     (
       .Bag
     =>
-      <tasks_>
+      <task_>
         <k> declParams(ParamList) ~> /*@ assume PrePattern */ ~> S </k>
         <stack> callContext(/*@ assert PostPattern */, .Map, .Map) </stack>
       <_/task>
@@ -95,7 +95,7 @@ Function entry
     (
       .Bag
     =>
-      <tasks_>
+      <task_>
         <k> declParams(ParamList) ~> S </k>
         <stack> callContext(.K, .Map, .Map) </stack>
       <_/task>
@@ -335,7 +335,7 @@ asserted patterns
         <config> CfgItems1 </config>
         <subst> Subst1 </subst>
         TaskItems
-      <task>
+      </task>
       <task>
         <config> CfgItems2 </config>
         <form> Phi </form>

@@ -20,13 +20,9 @@ kmod MATCHC is
   macro check(Kl:KLabel) = <top_>
                              <check> SetItem(checkContract(main)) </check>
                              <tasks>
-                               <task_>
-                                 <config_>
-                                   <program>
-                                     Kl(.List{K}) ~> checkContracts
-                                   </program>
-                                 <_/config>
-                               <_/task>
+                               <program>
+                                 Kl(.List{K}) ~> checkContracts
+                               </program>
                              </tasks>
                            <_/top>
 
@@ -37,9 +33,9 @@ Output
   rule
     <feasible> N => N +Int 1 </feasible>
     (
-      <config_>
+      <task_>
         <k> .K </k>
-      <_/config>
+      <_/task>
     =>
       .Bag
     )
@@ -47,9 +43,9 @@ Output
   rule
     <infeasible> N => N +Int 1 </infeasible>
     (
-      <config_>
+      <task_>
         <form> FalseFormula </form>
-      <_/config>
+      <_/task>
     =>
       .Bag
     )
