@@ -605,15 +605,18 @@ if (!$compile_only) {
 		$f =~ s/\.k$/\.maude/s;
 		my $maudified = get_file_content($f);
 #		print "F: $f\nM: $maudified\n\n";
-		$prelude =~ s/\.maude$//sg;
-		$maudified =~ s/(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/;
-		
-                # hardcoded
-		$maudified =~ s/\n\s/\n/g;
-		
-		open FILE,">",$f or die "Cannot open $f\n";
-		print FILE $maudified;
-		close FILE;
+		if ($maudified =~ /(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/sg)
+		{
+		    $prelude =~ s/\.maude$//sg;
+		    $maudified =~ s/(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/;
+		    
+		    # hardcoded
+		    $maudified =~ s/\n\s/\n/g;
+		    
+		    open FILE,">",$f or die "Cannot open $f\n";
+		    print FILE $maudified;
+		    close FILE;
+		}
 	    }
 	}
 	    
