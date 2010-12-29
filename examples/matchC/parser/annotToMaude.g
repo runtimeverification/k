@@ -70,11 +70,11 @@ operator
   | MAP_ITEM
   | BAG_ITEM
   | LIST_ITEM
-  | 'pre'
-  | 'post'
-  | 'assume'
-  | 'assert'
-  | 'invariant'
+  | PRE
+  | POST
+  | ASSUME
+  | ASSERT
+  | INVARIANT
   ;
 
 binary_operator
@@ -111,7 +111,7 @@ constant
   | 'env'
   | 'heap'
   | 'config'
-  | 'verify'
-  | 'skip'
+  | VERIFY
+  | SKIP
   ;
 

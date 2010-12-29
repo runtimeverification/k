@@ -9,9 +9,10 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar T : ExpressionType
   kvar S : Statement
   kvar K : K
-  kvar ParamList : List{KernelC}
-  kvar Cfgs CfgItems PreCfgs PostCfgs : Bag
-  kvar Map Env TEnv : Map
+  kvar ParamList ArgList: List{KernelC}
+  kvar CfgItems CfgItems1 CfgItems2 TaskItems : Bag 
+  kvar Pattern Pattern1 Pattern2 PrePattern PostPattern : Pattern
+  kvar Env TEnv StructMap FunMap : Map
   kvar Stack : List
   kvar checkSet Set : Set
 
@@ -19,7 +20,6 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   syntax K ::= checkContracts
              | checkContract ( Id )
              | uncheckContract ( Id )
-  syntax K ::= co-skolemize ( K )
 
 
   configuration <top> 
@@ -72,28 +72,34 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
 Function entry
 ***)
   rule
-    <program> checkContract(F) => .K <_/program>
-    <fun_> T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ |-> S <_/fun>
-    <tasks_>
-        .Bag
-      =>
-        <config_>
-          <k> declParams(ParamList) ~> /*@ assume PreCfgs */ ~> S </k>
-          <stack> callContext(/*@ assert PostCfgs */, .Map, .Map) </stack>
-        <_/config>
-    <_/tasks>
+    <task_>
+      <program> checkContract(F) => .K <_/program>
+      <fun_>
+        T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */ |-> S
+      <_/fun>
+    <_/task>
+    (
+      .Bag
+    =>
+      <tasks_>
+        <k> declParams(ParamList) ~> /*@ assume PrePattern */ ~> S </k>
+        <stack> callContext(/*@ assert PostPattern */, .Map, .Map) </stack>
+      <_/task>
+    )
   [structural]
   rule
-    <program> checkContract(F) => .K <_/program>
-    <fun_> T F(ParamList) |-> S <_/fun>
-    <tasks_>
-        .Bag
-      =>
-        <config_>
-          <k> declParams(ParamList) ~> S </k>
-          <stack> callContext(.K, .Map, .Map) </stack>
-        <_/config>
-    <_/tasks>
+    <task_>
+      <program> checkContract(F) => .K <_/program>
+      <fun_> T F(ParamList) |-> S <_/fun>
+    <_/task>
+    (
+      .Bag
+    =>
+      <tasks_>
+        <k> declParams(ParamList) ~> S </k>
+        <stack> callContext(.K, .Map, .Map) </stack>
+      <_/task>
+    )
   [structural]
 
 
@@ -102,22 +108,22 @@ Function definition/declaration
 ***)
   rule
     <program>
-      T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ => .K
+      T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */ => .K
     <_/program>
     <fun_>
         .Map
       =>
-        T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ |-> .K
+        T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */ |-> .K
     <_/fun>
   [structural]
   rule
     <program>
-      T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ S => .K
+      T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */ S => .K
     <_/program>
     <fun_>
         .Map
       =>
-        T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */
+        T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */
         |-> (S ~> return tv(void, unit))
     <_/fun>
     <check_> .Set => SetItem(checkContract(F)) <_/check>
@@ -142,22 +148,31 @@ Statements
 Expressions
 ***)
   rule
-    <config>
-      <k> (tv(_, I) ? E1 : E2) ~> K </k>
+    <task>
+      <config>
+        <k> (tv(_, I) ? E1 : E2) ~> K </k>
+        CfgItems
+      </config>
       <form> Phi </form>
-      CfgItems
-    </config>
+      TaskItems
+    </task>
   =>
-    <config>
-      <k> E1 ~> K </k>
+    <task>
+      <config>
+        <k> E1 ~> K </k>
+        CfgItems
+      </config>
       <form> Phi /\ ~(I === 0) </form>
-      CfgItems
-    </config>
-    <config >
-      <k > E2 ~> K </k>
+      TaskItems
+    </task>
+    <task>
+      <config >
+        <k > E2 ~> K </k>
+        CfgItems
+      </config>
       <form> Phi /\ I === 0 </form>
-      CfgItems
-    </config>
+      TaskItems
+    </task>
   if notBool isInt(I) [structural]
 
 
@@ -166,15 +181,15 @@ summary function calls
 ***)
   rule
     <fun_>
-      T F(ParamList) /*@ pre PreCfgs */ /*@ post PostCfgs */ |-> _
+      T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */ |-> _
     <_/fun>
     <k>
         _`(_`)(F, ArgList) ~> K
       =>
         declParams(ParamList)
         ~> bindParams(ParamList, ArgList)
-        ~> /*@ assert co-skolemize(N, PreCfgs) */
-        ~> /*@ assume co-skolemize(N, PostCfgs) */
+        ~> /*@ assert co-skolemize(N, PrePattern) */
+        ~> /*@ assume co-skolemize(N, PostPattern) */
         ~> return getReturnValue(T)
 
     </k>
@@ -211,55 +226,56 @@ loop invariants
 ***)
   rule
     <k>
-        /*@ invariant Cfgs */ ~> while (E) S ~> K
+        /*@ invariant Pattern */
+        ~> while (E) S ~> K
       =>
-        /*@ assert Cfgs */ ~> 'if`(_`)_else_(E,, (S ~> /*@ assert Cfgs */),, K)
+        /*@ assert Pattern */
+        ~> 'if`(_`)_else_(E,, (S ~> /*@ assert Pattern */),, K)
     </k>
 
 ***(
 assumed patterns
   1. are merged with the current configuration
-  2. split the current configuration if the contain disjunctions
-***) 
+  2. split the current configuration if they contain disjunctions
+***)
   rule
-    <config_> 
-      <k>
-          /*@ assume
-            <config>
-              <form> Phi2 </form>
-              CfgItems
-            </config>
-            Cfgs
-          */
-          ~> K
-        =>
-          /*@ assume Cfgs */ ~> K
-      </k>
-      <stack> Stack </stack>
-      <tenv> TEnv </tenv>
-      <form> Phi1 </form>
-      <subst> Subst </subst>
-    <_/config>
-    (
-      .Bag
-    =>
+    <task>
       <config>
-        <k> K </k>
-        <stack> Stack </stack>
-        <tenv> TEnv </tenv>
-        skolemize(N, applySubst(<form> Phi1 /\ Phi2 </form> CfgItems, Subst))
-        skolemize(N, <subst> Subst </subst>)
+        <k> /*@ assume Pattern1 \/ Pattern2 */ ~> K </k>
+        CfgItems
       </config>
-    )
-    <other-counter> N </other-counter>
+      TaskItems
+    </task>
+  =>
+    <task>
+      <config>
+        <k> /*@ assume Pattern1 */  ~> K </k>
+        CfgItems
+      </config>
+      TaskItems
+    </task>
+    <task>
+      <config>
+        <k> /*@ assume Pattern2 */ ~> K </k>
+        CfgItems
+      </config>
+      TaskItems
+    </task>
+  [structural]
   rule
-    (
-      <config_>
-        <k> /*@ assume .Bag */ <_/k>
-      <_/config>
-    =>
-      .Bag
-    )
+    <task>
+      <config> 
+        <k> /*@ assume <config> CfgItems </config> /\ Phi2 */ => .K <_/k>
+        <program> .K </program>
+        <struct> StructMap </struct>
+        <fun> FunMap</fun>
+        <tenv> TEnv </tenv>
+        <counter> N </counter>
+        (_ => skolemize(N, applySubst(CfgItems, Subst)))
+      </config>
+      <form> Phi1 => Phi1 /\ skolemize(N, applySubst(Phi2, Subst)) </form>
+      <subst> Subst </subst>
+    </task>
     <other-counter> N => sNat N </other-counter>
 
 ***(
@@ -269,28 +285,68 @@ asserted patterns
      searches for the existance of a proof in the side condition, and also
      returns facts found out to be true during the search for a proof)
   2. may be assumed correct afterward
+  3. split the current configuration if they contain disjunctions
 ***)
   rule
-    <config>
-      <k> /*@ assert Cfgs */ => /*@ assume Cfgs */ <_/k>
-      <stack> Stack </stack>
-      <tenv> TEnv </tenv>
-      <subst> Subst1 => Subst2 </subst>
-      CfgItems
-    </config>
-    <other-counter> N </other-counter>
-  if search(
+    <task>
       <config>
-        <subst> Subst1 </subst>
+        <k> /*@ assert Pattern1 \/ Pattern2 */ ~> K </k>
         CfgItems
       </config>
-      ===>
-      Cfgs
-    =>
+      TaskItems
+    </task>
+  =>
+    <task>
       <config>
+        <k> /*@ assert Pattern1 */  ~> K </k>
+        CfgItems
+      </config>
+      TaskItems
+    </task>
+    <task>
+      <config>
+        <k> /*@ assert Pattern2 */ ~> K </k>
+        CfgItems
+      </config>
+      TaskItems
+    </task>
+  [structural]
+  rule
+    <task>
+      <config>
+        <k>
+            /*@ assert <config> CfgItems2 </config> /\ Phi */
+          =>
+            /*@ assume <config> CfgItems2 </config> /\ Phi */
+        <_/k>
+        <program> .K </program>
+        <struct> StructMap </struct>
+        <fun> FunMap</fun>
+        <tenv> TEnv </tenv>
+        <counter> N </counter> 
+        CfgItems1
+      </config>
+      <subst> Subst1 => Subst2 </subst>
+      TaskItems
+    </task>
+    <other-counter> N </other-counter>
+  if search(
+      <task>
+        <config> CfgItems1 </config>
+        <subst> Subst1 </subst>
+        TaskItems
+      <task>
+      <task>
+        <config> CfgItems2 </config>
+        <form> Phi </form>
+        <subst> .Subst </subst>
+      </task>
+    =>
+      <task>
+        <config> .Bag </config>
         <form> TrueFormula </form>
         <subst> Subst2 </subst>
-      </config>
+      </task>
     )
 
 

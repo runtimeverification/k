@@ -117,9 +117,27 @@ function_directive
   | VERIFY
   ;
 
+
 pattern
-  : configuration CONJ^ formula 
+  : disjunctive_pattern
   ;
+
+disjunctive_pattern
+  : primary_pattern (DISJ^ primary_pattern)*
+  ;
+
+primary_pattern
+options { backtrack = true; }
+  : configuration
+    ( -> ^(CONJ configuration FORMULA_TRUE)
+    | CONJ formula -> ^(CONJ configuration formula)
+    )
+  | LPAREN pattern RPAREN
+    ( -> pattern
+    | CONJ formula -> ^(CONJ pattern formula)
+    )
+  ;
+
 
 configuration
   : bag
@@ -272,7 +290,10 @@ formula
   ;
 
 disjunction_formula
-  : conjunction_formula (DISJ^ conjunction_formula)*
+//options { backtrack = true; }
+  //: conjunction_formula (DISJ^ conjunction_formula)*
+  : conjunction_formula
+    ((DISJ conjunction_formula)=> DISJ^ conjunction_formula)*
   ;
 
 conjunction_formula

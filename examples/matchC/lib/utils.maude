@@ -70,6 +70,8 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
 endm
 
 
+
+
 ---mod VAR-UTILS is inc CONFIG + PL-META-TERM + MAUDE-IF-THEN-ELSE .
 mod VAR-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE .
   op get?VarSet : Formula -> Set{MathObj++} .
@@ -176,12 +178,16 @@ mod CONFIG-SCOLEM is inc VAR-UTILS .
 
   var N : Nat .
   var K : K .
-  var Cfgs : Bag .
+  var Pattern : Pattern .
+  var Bag : Bag .
+  var Phi : Formula .
 
-  eq skolemize(N, Cfgs)
-   = downTerm(skolemTerm(upTerm(N), upTerm(Cfgs)), errorBag) .
-  eq co-skolemize(N, Cfgs)
-   = downTerm(co-skolemTerm(upTerm(N), upTerm(Cfgs)), errorBag) .
+  eq skolemize(N, Bag)
+   = downTerm(skolemTerm(upTerm(N), upTerm(Bag)), errorBag) .
+  eq skolemize(N, Phi)
+   = downTerm(skolemTerm(upTerm(N), upTerm(Phi)), errorFormula) .
+  eq co-skolemize(N, Pattern)
+   = downTerm(co-skolemTerm(upTerm(N), upTerm(Pattern)), errorPattern) .
 endm
 
 
@@ -230,17 +236,17 @@ mod APPLY-SUBST is inc MATCHC + PL-META-TERM .
   eq substTerm(Q[QTList], MetaSubst)
    = Q[substTerm(QTList, MetaSubst)] [owise] .
 
-  var Cfgs : Bag .
+  var Bag : Bag .
   var Phi : Formula .
   --- apply substitution on a configuration
-  eq applySubst(Cfgs, Subst)
-   = downTerm(substTerm(upTerm(Cfgs), upSubst(Subst)), errorBag) .
+  eq applySubst(Bag, Subst)
+   = downTerm(substTerm(upTerm(Bag), upSubst(Subst)), errorBag) .
   --- apply substitution on a substitution
   eq applySubst(Phi, Subst)
-   = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), FalseFormula) .
+   = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), errorFormula) .
   --- apply substitution on a substitution
   eq applySubst(Subst, Subst')
-   = downTerm(substTerm(upTerm(Subst), upSubst(Subst')), .Subst) .
+   = downTerm(substTerm(upTerm(Subst), upSubst(Subst')), errorSubst) .
 endm
 
 

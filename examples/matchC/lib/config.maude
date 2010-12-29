@@ -58,11 +58,11 @@ mod CONFIG-BUILTIN-MODULE is
   ops feasible infeasible : -> CellLabel .
   ops tasks config k env heap form subst counter : -> CellLabel .
 
-  op errorBag : -> [Bag] .
   op _===>_ : Bag Bag -> Bag [frozen] .
   op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=match=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op skolemize : Nat Bag -> Bag .
+  op skolemize : Nat Formula -> Formula .
   op co-skolemize : Nat Pattern -> Pattern .
 
   op returns _ : Value -> Formula .
