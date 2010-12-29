@@ -72,6 +72,27 @@ mod CONFIG-BUILTIN-MODULE is
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op _|->_:_ : Int++ Value Field -> MapItem .
 
+
+  *** [ERROR] Here subsorting Pattern to K gives all sort of errors,
+  *** hence Pattern is subsorted to List just to avoid those errors.
+  *** The most natural solution would be to subsort to Bag to Pattern,
+  *** but the tool does not allow Bag supersorts.
+  sort Pattern .
+  subsort Pattern < List .
+  op _/\_ : Bag Formula -> Pattern .
+  op _/\_ : Formula Bag -> Pattern .
+  op _/\_ : Pattern Formula -> Pattern [prec 55] .
+  op _/\_ : Formula Pattern -> Pattern [prec 55] .
+  op _\/_ : Pattern Pattern -> Pattern [prec 59] .
+
+  eq Phi:Formula /\ Cfg:Bag = Cfg:Bag /\ Phi:Formula .
+  eq Phi:Formula /\ Pattern:Pattern = Pattern:Pattern /\ Phi:Formula .
+  eq (Cfg:Bag /\ Phi1:Formula) /\ Phi2:Formula
+   = Cfg:Bag /\ (Phi1:Formula /\ Phi2:Formula) .
+  eq (Pattern1:Pattern \/ Pattern2:Pattern) /\ Phi:Formula
+   = (Pattern1:Pattern /\ Phi:Formula) (Pattern2:Pattern /\ Phi:Formula) .
+
+
   *** hack
   op isInt : Int++ -> Bool .
 
