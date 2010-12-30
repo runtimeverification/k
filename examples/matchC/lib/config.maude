@@ -50,6 +50,7 @@ mod CONFIG-BUILTIN-MODULE is
 
   sort Value TypedValue .
   subsort MathObj++ < Value .
+  subsort String < TypedValue .
   sort Void NvExpressionType ExpressionType .  
   subsort Void NvExpressionType < ExpressionType .  
   sort Field .
@@ -111,7 +112,7 @@ mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-CONDITION-SEARCH .
   subsorts Formula Subst MathObj++ < Builtins KResult .
   subsorts List{MathObj++} Set{MathObj++} < Builtins KResult .
   subsort Id Field < Builtins KProper .
-  subsort Value TypedValue ExpressionType < Builtins KResult .
+  subsort String Value TypedValue ExpressionType < Builtins KResult .
 
   op applySubst : Bag Subst -> Bag [strat(2 0)] .
   op applySubst : KResult Subst -> KResult [strat(2 0)] .
