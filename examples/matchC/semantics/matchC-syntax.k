@@ -1,3 +1,6 @@
+load kernelC-syntax
+
+
 kmod MATCHC-SYNTAX is including KERNELC-SYNTAX
 ***(
 matching logic annotations

@@ -75,9 +75,8 @@ PROG_BODY=`grep -v '^#include' $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN}`
 if [ "$?" -ne 0 ]; then exit $?; fi
 
 echo -e "
-load ${ML_LIB_DIR}/ml-prelude.maude\n\
 load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-syntax.maude\n\
-load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-flat-compiled.maude\n\
+load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-compiled.maude\n\
 mod ${PROG_MODULE} is\n\
 including ${LANG_MODULE}-SYNTAX + MATHEMATICAL-DOMAIN-BUILTIN-MODULE + LIST-HP + BINARY-TREE-HP .
 " >${MAUDE_PROG}
@@ -89,12 +88,13 @@ endm\n\
 ${KC} ${KFLAGS} ${MAUDE_PROG} ${LANG_MODULE} ${PROG_MODULE} ${PROG_MACRO} >${TMP_ERR}
 if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
-UNWRAPED_BODY=`${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} | grep -v '^load'`
+#UNWRAPED_BODY=`${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} | grep -v '^load'`
+UNWRAPED_BODY=`sed 's/kList(\(\"[^\"]*\"\))/\1/g' ${COMPILED_PROG} | ${JVM} ${JFLAGS} ${UNWRAP_MAIN} | grep -v '^load'`
 if [ "$?" -ne 0 ]; then exit $?; fi
 
 echo -e "
 load ${ML_LIB_DIR}/ml-prelude.maude\n\
-load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-uw.maude\n\
+load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-unwrapped.maude\n\
 load ${ML_LIB_DIR}/fol.maude
 " >${ML_PROG}
 echo "${UNWRAPED_BODY}" >>${ML_PROG}

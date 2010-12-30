@@ -1,3 +1,6 @@
+load ../lib/ml-prelude.maude
+
+
 kmod KERNELC-SYNTAX is including ML-K + PL-STRING
 ***(
   subsort Id Field < Builtins KProper

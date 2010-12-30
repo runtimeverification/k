@@ -70,10 +70,16 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
 endm
 
 
+mod CONST-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE .
+  op errorBag : -> [Bag] .
+  op errorFormula : -> [Formula] .
+  op errorPattern : -> [Pattern] .
+  op errorSubst : -> [Subst] .
+endm
 
 
 ---mod VAR-UTILS is inc CONFIG + PL-META-TERM + MAUDE-IF-THEN-ELSE .
-mod VAR-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE .
+mod VAR-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE + CONST-UTILS .
   op get?VarSet : Formula -> Set{MathObj++} .
   op get?VarSet : Bag -> Set{MathObj++} .
   op get?VarSet : TermList -> Set{MathObj++} .
@@ -192,7 +198,7 @@ endm
 
 
 ---mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
-mod APPLY-SUBST is inc MATCHC + PL-META-TERM .
+mod APPLY-SUBST is inc MATCHC + PL-META-TERM + CONST-UTILS .
   sort MetaSubst .
   op .MetaSubst : -> MetaSubst .
   op _;_ : MetaSubst MetaSubst -> MetaSubst [assoc comm id: .MetaSubst] .
@@ -205,6 +211,8 @@ mod APPLY-SUBST is inc MATCHC + PL-META-TERM .
   var Set Set' : Set .
   var Map Map' : Map .
   var Subst Subst' : Subst .
+  var Phi : Formula .
+
   eq upSubst((Obj <- Obj') ; Subst)
    = (upTerm(Obj) <- upTerm(Obj')) ; upSubst(Subst) .
   eq upSubst((List <- List') ; Subst)
@@ -236,8 +244,6 @@ mod APPLY-SUBST is inc MATCHC + PL-META-TERM .
   eq substTerm(Q[QTList], MetaSubst)
    = Q[substTerm(QTList, MetaSubst)] [owise] .
 
-  var Bag : Bag .
-  var Phi : Formula .
   --- apply substitution on a configuration
   eq applySubst(Bag, Subst)
    = downTerm(substTerm(upTerm(Bag), upSubst(Subst)), errorBag) .

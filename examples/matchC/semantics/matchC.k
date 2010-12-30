@@ -1,7 +1,5 @@
-load ../lib/ml-prelude.maude
-load kernelC-syntax
-load kernelC-semantics
 load matchC-syntax
+load kernelC-semantics
 load matchC-semantics
 
 
@@ -20,9 +18,11 @@ kmod MATCHC is
   macro check(Kl:KLabel) = <top_>
                              <check> SetItem(checkContract(main)) </check>
                              <tasks>
-                               <program>
-                                 Kl(.List{K}) ~> checkContracts
-                               </program>
+                               <task_>
+                                 <program>
+                                   Kl(.List{K}) ~> checkContracts
+                                 </program>
+                               <_/task>
                              </tasks>
                            <_/top>
 

@@ -74,14 +74,21 @@ Function entry
   rule
     <task_>
       <program> checkContract(F) => .K <_/program>
-      <fun_>
+      <struct> StructMap </struct>
+      <fun>
         T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */ |-> S
-      <_/fun>
+        FunMap
+      </fun>
     <_/task>
     (
       .Bag
     =>
       <task_>
+        <struct> StructMap </struct>
+        <fun>
+          T F(ParamList) /*@ pre PrePattern */ /*@ post PostPattern */ |-> S
+          FunMap
+        </fun>
         <k> declParams(ParamList) ~> /*@ assume PrePattern */ ~> S </k>
         <stack> callContext(/*@ assert PostPattern */, .Map, .Map) </stack>
       <_/task>
@@ -90,12 +97,15 @@ Function entry
   rule
     <task_>
       <program> checkContract(F) => .K <_/program>
-      <fun_> T F(ParamList) |-> S <_/fun>
+      <struct> StructMap </struct>
+      <fun> T F(ParamList) |-> S FunMap </fun>
     <_/task>
     (
       .Bag
     =>
       <task_>
+        <struct> StructMap </struct>
+        <fun> T F(ParamList) |-> S FunMap </fun>
         <k> declParams(ParamList) ~> S </k>
         <stack> callContext(.K, .Map, .Map) </stack>
       <_/task>
