@@ -41,5 +41,7 @@ matching logic annotations
                                   Statement
   syntax Declaration ::= Annotation
   syntax Statement ::= Annotation
+
+  syntax K ::= default
 endkm
 

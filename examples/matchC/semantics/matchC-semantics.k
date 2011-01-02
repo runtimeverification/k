@@ -1,14 +1,14 @@
 kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
-  kvar N : Nat
+  kvar N Counter : Nat
   kvar I : Int++
   kvar Phi Phi1 Phi2 : Formula
   kvar NtPhi : NtFormula
   kvar Subst Subst1 Subst2 : Subst
-  kvar F : Id
+  kvar F X : Id
   kvar E E1 E2 : Expression
   kvar T : ExpressionType
   kvar S : Statement
-  kvar K : K
+  kvar K Program : K
   kvar ParamList ArgList: List{KernelC}
   kvar CfgItems CfgItems1 CfgItems2 TaskItems : Bag 
   kvar Pattern Pattern1 Pattern2 PrePattern PostPattern : Pattern
@@ -20,6 +20,14 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   syntax K ::= checkContracts
              | checkContract ( Id )
              | uncheckContract ( Id )
+
+***(
+  syntax K ::= assumeNormal ( Pattern )
+            |  assertNormal ( Pattern )
+***)
+  syntax K ::= assumeNormal ( List )
+            |  assertNormal ( List )
+
 
   syntax K ::= `Run
              | `Hypothesis
@@ -254,9 +262,43 @@ assumed patterns
   2. split the current configuration if they contain disjunctions
 ***)
   rule
+    <k>
+      (
+        /*@ assume Pattern */
+      =>
+        assumeNormal(
+          skolemize(
+            N,
+            applySubst(
+              applySubst(
+                Pattern,
+                (defaultKItem("program") <- Program) ;;
+                (defaultMapItem("struct") <- StructMap) ;;
+                (defaultMapItem("fun") <- FunMap) ;;
+                ---(defaultKItem("kk") <- K) ;;
+                (defaultMapItem("env") <- defaultEnv(Env)) ;;
+                (defaultMapItem("tenv") <- TEnv) ---;;
+                ---(defaultKItem("counter") <- Counter)
+              ),
+              Subst
+            )
+          )
+        )
+      )
+      ~> K
+    </k>
+    <program> Program </program>
+    <struct> StructMap </struct>
+    <fun> FunMap </fun>
+    <env> Env </env>
+    <tenv> TEnv </tenv>
+    <counter> Counter </counter>
+    <subst> Subst </subst>
+    <other-counter> N => sNat N </other-counter>
+  rule
     <task>
       <config>
-        <k> /*@ assume Pattern1 \/ Pattern2 */ ~> K </k>
+        <k> assumeNormal(Pattern1 \/ Pattern2) </k>
         CfgItems
       </config>
       TaskItems
@@ -264,34 +306,29 @@ assumed patterns
   =>
     <task>
       <config>
-        <k> /*@ assume Pattern1 */  ~> K </k>
+        <k> assumeNormal(Pattern1) </k>
         CfgItems
       </config>
       TaskItems
     </task>
     <task>
       <config>
-        <k> /*@ assume Pattern2 */ ~> K </k>
+        <k> assumeNormal(Pattern2) </k>
         CfgItems
       </config>
       TaskItems
     </task>
   [structural]
   rule
-    <task>
+    <task_>
       <config> 
-        <k> /*@ assume <config> CfgItems </config> /\ Phi2 */ => .K <_/k>
-        <program> .K </program>
-        <struct> StructMap </struct>
-        <fun> FunMap</fun>
-        <tenv> TEnv </tenv>
-        <counter> N </counter>
-        (_ => skolemize(N, applySubst(CfgItems, Subst)))
+        <k>
+          assumeNormal(<config> <k> K </k> CfgItems </config> /\ Phi2) => K
+        </k>
+        (_ => CfgItems)
       </config>
-      <form> Phi1 => Phi1 /\ skolemize(N, applySubst(Phi2, Subst)) </form>
-      <subst> Subst </subst>
-    </task>
-    <other-counter> N => sNat N </other-counter>
+      <form> Phi1 => Phi1 /\ Phi2 </form>
+    <_/task>
 
 ***(
 asserted patterns
@@ -300,64 +337,70 @@ asserted patterns
      searches for the existance of a proof in the side condition, and also
      returns facts found out to be true during the search for a proof)
   2. may be assumed correct afterward
-  3. split the current configuration if they contain disjunctions
 ***)
   rule
-    <task>
-      <config>
-        <k> /*@ assert Pattern1 \/ Pattern2 */ ~> K </k>
-        CfgItems
-      </config>
-      TaskItems
-    </task>
-  =>
-    <task>
-      <config>
-        <k> /*@ assert Pattern1 */  ~> K </k>
-        CfgItems
-      </config>
-      TaskItems
-    </task>
-    <task>
-      <config>
-        <k> /*@ assert Pattern2 */ ~> K </k>
-        CfgItems
-      </config>
-      TaskItems
-    </task>
+    <k>
+      (
+        /*@ assert Pattern */
+      =>
+        assertNormal(
+          applySubst(
+            applySubst(
+              Pattern,
+              ---(defaultKItem("program") <- Program) ;;
+              (defaultMapItem("struct") <- StructMap) ;;
+              (defaultMapItem("fun") <- FunMap) ;;
+              ---(defaultKItem("kk") <- K) ;;
+              (defaultMapItem("env") <- defaultEnv(Env)) ;;
+              (defaultMapItem("tenv") <- TEnv) ---;;
+              ---(defaultKItem("counter") <- Counter) 
+            ),
+            Subst
+          )
+        )
+      )
+      ~> K
+    </k>
+    <program> Program </program>
+    <struct> StructMap </struct>
+    <fun> FunMap </fun>
+    <env> Env </env>
+    <tenv> TEnv </tenv>
+    <counter> Counter </counter>
+    <subst> Subst </subst>
   [structural]
   rule
     <task>
       <taskType> Run </taskType>
       <config>
         <k>
-            /*@ assert <config> CfgItems2 </config> /\ Phi */
+          (
+            assertNormal(<config> CfgItems2 </config> /\ Phi)
           =>
             /*@ assume <config> CfgItems2 </config> /\ Phi */
-        <_/k>
-        <program> .K </program>
-        <struct> StructMap </struct>
-        <fun> FunMap</fun>
-        <tenv> TEnv </tenv>
-        <counter> N </counter> 
+          )
+          ~> K
+        </k>
         CfgItems1
       </config>
       <subst> Subst1 => Subst2 </subst>
       TaskItems
     </task>
-    <other-counter> N </other-counter>
   if search(
       <task>
         <taskType> Hypothesis </taskType>
-        <config> CfgItems1 </config>
-        <subst> Subst1 </subst>
+        <config>
+          <k> K </k>
+          CfgItems1
+        </config>
+        <subst> .Subst </subst>
         TaskItems
       </task>
       <task>
         <taskType> Conclusion </taskType>
         <config> CfgItems2 </config>
         <form> Phi </form>
-        <subst> .Subst </subst>
+        <subst> Subst1 </subst>
       </task>
     =>
       <task>
@@ -375,5 +418,9 @@ Helpers
   syntax K ::= setToK ( Set )
   rule setToK(SetItem(K) Set) => K ~> setToK(Set) [structural]
   rule setToK(.Set) => .K [structural]
+
+  syntax Map ::= defaultEnv ( Map )
+  rule defaultEnv(X |-> _ Env) => X |-> ?var(X) defaultEnv(Env) [structural]
+  rule defaultEnv(.Map) => .Map [ structural]
 endkm
 

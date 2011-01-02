@@ -49,7 +49,7 @@ CLEAN_FILES = $(LANG_UNWRAPPED_FILE) \
 
 %-compiled.maude: %.maude
 	$(KC) -c -l `echo $* | tr [:lower:] [:upper:]` $<
-	svn revert ../lib/config.maude ../lib/ml-builtins.maude
+	#svn revert ../lib/config.maude ../lib/ml-builtins.maude
 	svn revert ../theories/* ../heap_patterns/*
 	@sed -i -e '1d' -e '/^mod/a \
     subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} String Value TypedValue ExpressionType < Builtins KResult . \
