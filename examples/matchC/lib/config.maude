@@ -8,36 +8,16 @@ mod SUBST-BUILTIN-MODULE is inc MATHEMATICAL-OBJECT-BUILTIN-MODULE + K-PROPER .
   subsorts SubstItem < NeSubst < Subst .
 
   op .Subst : -> Subst .
-  op _;_ : Subst Subst -> Subst [assoc comm id: .Subst] .
-  op _;_ : NeSubst Subst -> NeSubst [ditto] .
-  op _;_ : Subst NeSubst -> NeSubst [ditto] .
-  op _<-_ : MathObj++ MathObj++ -> SubstItem .
-  op _<-_ : List List -> SubstItem .
-  op _<-_ : Bag Bag -> SubstItem .
-  op _<-_ : Set Set -> SubstItem .
-  op _<-_ : Map Map -> SubstItem .
-  op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
-
-  var Obj Obj1 Obj2 Obj1' Obj2' : MathObj++ .
-  var ObjList ObjList' : List{MathObj++} .
-  var List : List .
-  var Bag : Bag .
-  var Set : Set .
-  var Map : Map .
-  eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
-   = (Obj1 <- Obj1') ; (Obj2 <- Obj2') ; (ObjList <- ObjList') .
-  eq .List{MathObj++} <- .List{MathObj++} = .Subst .
-  eq Obj <- Obj = .Subst .
-  eq List <- List = .Subst .
-  eq Bag <- Bag = .Subst .
-  eq Set <- Set = .Subst .
-  eq Map <- Map = .Subst .
+  op _;;_ : Subst Subst -> Subst [assoc comm id: .Subst] .
+  op _;;_ : NeSubst Subst -> NeSubst [ditto] .
+  op _;;_ : Subst NeSubst -> NeSubst [ditto] .
 endm
 
 
 mod CONFIG-BUILTIN-MODULE is
   inc PL-ID + PL-STRING + K-PROPER .
   inc MATHEMATICAL-INT-BUILTIN-MODULE + SUBST-BUILTIN-MODULE .
+
 
   sorts ?BagItem !BagItem FreeBagItem .
   subsort ?BagItem !BagItem FreeBagItem < BagItem .
@@ -61,6 +41,37 @@ mod CONFIG-BUILTIN-MODULE is
   op ?ListItem : String -> ?ListItem .
   op !ListItem : String -> !ListItem .
   op FreeListItem : String -> FreeListItem .
+  op defaultKItem : String -> K .
+  op defaultBagItem : String -> Bag .
+  op defaultMapItem : String -> Map .
+  op defaultListItem : String -> List .
+
+
+  op _<-_ : K K -> SubstItem .
+  ---op _<-_ : MathObj++ MathObj++ -> SubstItem .
+  op _<-_ : List List -> SubstItem .
+  op _<-_ : Bag Bag -> SubstItem .
+  op _<-_ : Set Set -> SubstItem .
+  op _<-_ : Map Map -> SubstItem .
+  ---op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
+
+  ---var Obj Obj1 Obj2 Obj1' Obj2' : MathObj++ .
+  ---var ObjList ObjList' : List{MathObj++} .
+  ---eq Obj <- Obj = .Subst .
+  ---eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
+  --- = (Obj1 <- Obj1') ;; (Obj2 <- Obj2') ;; (ObjList <- ObjList') .
+
+  var K : K .
+  var List : List .
+  var Bag : Bag .
+  var Set : Set .
+  var Map : Map .
+  eq K <- K = .Subst .
+  eq List <- List = .Subst .
+  eq Bag <- Bag = .Subst .
+  eq Set <- Set = .Subst .
+  eq Map <- Map = .Subst .
+
 
   sort Value TypedValue .
   subsort MathObj++ < Value .
@@ -70,15 +81,18 @@ mod CONFIG-BUILTIN-MODULE is
   sort Field .
   sort HeapLabel .
 
+
   ops feasible infeasible : -> CellLabel .
-  ops tasks config k env heap form subst counter : -> CellLabel .
+  ops config program struct fun k env stack tenv heap in out : -> CellLabel .
+  ops counter : -> CellLabel .
+  ops tasks task form subst other-counter : -> CellLabel .
 
   op _===>_ : Bag Bag -> Bag [frozen] .
   op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op _=match=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op skolemize : Nat Bag -> Bag .
-  op skolemize : Nat Formula -> Formula .
+  op skolemize : Nat Pattern -> Pattern .
   op co-skolemize : Nat Pattern -> Pattern .
+
 
   op returns _ : Value -> Formula .
   op unit : -> Value . 
@@ -118,6 +132,22 @@ mod CONFIG-BUILTIN-MODULE is
   ops treeNode : -> Id .
 
   ops stackNode : -> Id .
+
+
+  op get?SubstItem : Formula -> Subst .
+  eq get?SubstItem(?Obj === Obj /\ Phi) = (?Obj <- Obj) .
+  eq get?SubstItem(Obj === ?Obj /\ Phi) = (?Obj <- Obj) .
+  eq get?SubstItem(Phi) = .Subst [owise] .
+
+  op get!SubstItem : Formula -> Subst .
+  eq get!SubstItem(!Obj === Obj /\ Phi) = (!Obj <- Obj) .
+  eq get!SubstItem(Obj === !Obj /\ Phi) = (!Obj <- Obj) .
+  eq get!SubstItem(Phi) = .Subst [owise] .
+
+  op getFreeSubstItem : Formula -> Subst .
+  eq getFreeSubstItem(FreeObj === Obj /\ Phi) = (FreeObj <- Obj) .
+  eq getFreeSubstItem(Obj === FreeObj /\ Phi) = (FreeObj <- Obj) .
+  eq getFreeSubstItem(Phi) = .Subst [owise] .
 endm
 
 
@@ -128,10 +158,12 @@ mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-CONDITION-SEARCH .
   subsort Id Field < Builtins KProper .
   subsort String Value TypedValue ExpressionType < Builtins KResult .
 
-  op applySubst : Bag Subst -> Bag [strat(2 0)] .
-  op applySubst : KResult Subst -> KResult [strat(2 0)] .
-  op applySubst : Formula Subst -> Formula [strat(2 0)] .
-  op applySubst : Subst Subst -> Subst [strat(2 0)] .
+
+  op applySubst : Pattern Subst -> Pattern .
+  op applySubst : Bag Subst -> Bag .
+  op applySubst : Formula Subst -> Formula .
+  op applySubst : Subst Subst -> Subst .
+  --- op applySubst : KResult Subst -> KResult [strat(2 0)] .
   op _._ : Id Id -> Field .
   op _._ : Field Id -> Field .
 endm

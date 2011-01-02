@@ -66,6 +66,7 @@ public class AnnotPreK {
     CommonTree newBag = new CommonTree(t);
     newCell.addChild(newBag);
 
+    String wrapper;
     if (!cell.defaultFlag) { 
       String prefix;
       if (var.startsWith("?") || var.startsWith("!")) {
@@ -74,19 +75,18 @@ public class AnnotPreK {
       } else {
         prefix = "Free";
       }
-
-      String wrapper = prefix + cell.sort + "Item";
-      t = new CommonToken(annotParser.IDENTIFIER, wrapper);
-      CommonTree newVar = new CommonTree(t);
-      newBag.addChild(newVar);
-
-      String wrappee = "\"" + var + label + "\"";
-      t = new CommonToken(annotParser.IDENTIFIER, wrappee);
-      newVar.addChild(new CommonTree(t));
+      wrapper = prefix + cell.sort + "Item";
     } else {
-      t = new CommonToken(annotParser.IDENTIFIER, "default");
-      newBag.addChild(new CommonTree(t));
+      wrapper = "default" + cell.sort + "Item";
     }
+
+    t = new CommonToken(annotParser.IDENTIFIER, wrapper);
+    CommonTree newVar = new CommonTree(t);
+    newBag.addChild(newVar);
+
+    String wrappee = "\"" + var + "_" + label + "\"";
+    t = new CommonToken(annotParser.IDENTIFIER, wrappee);
+    newVar.addChild(new CommonTree(t));
 
     t = new CommonToken(annotParser.LABEL, label);
     newCell.addChild(new CommonTree(t));
@@ -122,7 +122,12 @@ public class AnnotPreK {
           if (element.getType() == annotParser.CELL) {
             labelSet.add(((CommonTree) element.getChild(0)).getText());
           } else if (element.getType() == annotParser.IDENTIFIER) {
-            frameVar = element.getText();
+            if (element.getChildCount() != 0) {
+              String varString = ((CommonTree) element.getChild(0)).getText();
+              frameVar = varString.substring(1, varString.length() - 1);
+            }
+            else
+              frameVar = element.getText();
             frameVarIndex = i;
           }
         }

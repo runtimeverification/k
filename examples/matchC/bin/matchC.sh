@@ -23,7 +23,7 @@ JVM=java
 CLASSPATH=${ANTLR_ROOT_DIR}/antlrworks-1.4.jar:${ANTLR_ROOT_DIR}:${LANG_PARSER_DIR}
 JFLAGS="-classpath ${CLASSPATH}"
 UNWRAP_MAIN=unwrapBuiltinsMain
-PARSER_MAIN=kernelCPreK
+PARSER_MAIN=KernelCPreK
 
 MAUDE=${SMT_MAUDE_DIR}/maude
 MFLAGS="-no-banner -no-wrap"
