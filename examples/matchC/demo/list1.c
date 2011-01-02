@@ -99,6 +99,7 @@ int main()
   x = create(5);
   printf("x: ");
   print(x);
+/*
   x = reverse(x);
   printf("reverse(x): ");
   print(x);
@@ -114,6 +115,7 @@ int main()
   printf("append(x, y): ");
   print(x);
   destroy(x);
+*/
 
   return 0;
 }

@@ -88,8 +88,7 @@ endm\n\
 ${KC} ${KFLAGS} ${MAUDE_PROG} ${LANG_MODULE} ${PROG_MODULE} ${PROG_MACRO} >${TMP_ERR}
 if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
 
-#UNWRAPED_BODY=`${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} | grep -v '^load'`
-UNWRAPED_BODY=`sed 's/kList(\(\"[^\"]*\"\))/\1/g' ${COMPILED_PROG} | ${JVM} ${JFLAGS} ${UNWRAP_MAIN} | grep -v '^load'`
+UNWRAPED_BODY=`${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} | grep -v '^load'`
 if [ "$?" -ne 0 ]; then exit $?; fi
 
 echo -e "

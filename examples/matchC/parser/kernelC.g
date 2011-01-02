@@ -46,7 +46,6 @@ tokens {
 }
 
 @lexer::members {
-  HashSet<String> ids = new HashSet<String>();
   HashSet<String> annots = new HashSet<String>();
 }
 
@@ -306,7 +305,7 @@ arithmetic_constant
 //
 // Tokens
 //
-IDENTIFIER : LETTER (LETTER | DIGIT)* { ids.add($text); } ;
+IDENTIFIER : LETTER (LETTER | DIGIT)* { Table.identifiers.add($text); } ;
   
 fragment
 LETTER

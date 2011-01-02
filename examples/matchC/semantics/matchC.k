@@ -30,16 +30,16 @@ kmod MATCHC is
 ***(
 Output
 ***)
-  rule
-    <feasible> N => N +Int 1 </feasible>
-    (
-      <task_>
-        <k> .K </k>
-      <_/task>
-    =>
-      .Bag
-    )
-  [metadata "structural"]
+---  rule
+---    <feasible> N => N +Int 1 </feasible>
+---    (
+---      <task_>
+---        <k> .K </k>
+---      <_/task>
+---    =>
+---      .Bag
+---    )
+---  [metadata "structural"]
   rule
     <infeasible> N => N +Int 1 </infeasible>
     (

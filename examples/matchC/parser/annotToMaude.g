@@ -66,6 +66,7 @@ operator
   | POINTSTO        -> OP["_|->_:_"]
   | HEAP_PATTERN    -> OP["_`(_`)`(_`)"]
   | CELL            -> OP["<_>_</_>"]
+  | CONFIG          -> OP[""]
   | FIELD           -> OP["_._"]
   | MAP_ITEM
   | BAG_ITEM
@@ -108,9 +109,7 @@ constant
   | OCTAL_LITERAL
   | HEX_LITERAL
   | STRING_LITERAL
-  | 'env'
-  | 'heap'
-  | 'config'
+  | LABEL
   | VERIFY
   | SKIP
   ;

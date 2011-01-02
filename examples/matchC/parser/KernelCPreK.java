@@ -5,8 +5,12 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.*;
 import org.antlr.runtime.Token;
 
-public class kernelCPreK {
+
+public class KernelCPreK {
+
   public static void main (String[] args) {
+    Table.init();
+
     try {
       ANTLRInputStream input = new ANTLRInputStream(System.in);
       kernelCLexer lexer = new kernelCLexer(input);
@@ -26,13 +30,13 @@ public class kernelCPreK {
       }
 
       System.out.print("  ops ");
-      for (String id : lexer.ids) {
+      for (String id : Table.identifiers) {
         System.out.print(id + " "); 
       }
       System.out.println(": -> Id .");
 
       System.out.println("  op prog : -> TranslationUnit .");
-      String prog = treeUtils.toMaudeString(maudifiedTree);
+      String prog = TreeUtils.toMaudeString(maudifiedTree);
       System.out.println("  eq prog = (" + prog + ") .");
     } catch (IOException e) {
       e.printStackTrace();

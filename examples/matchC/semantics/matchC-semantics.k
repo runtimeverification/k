@@ -21,6 +21,10 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
              | checkContract ( Id )
              | uncheckContract ( Id )
 
+  syntax K ::= `Run
+             | `Hypothesis
+             | `Conclusion
+             | `Constrain
 
   configuration <top> 
                   <feasible> 0 </feasible>
@@ -30,6 +34,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
 
                   <tasks>
                     <task*>
+                      <taskType> Run </taskType>
                       <config> 
                         <program> .K </program>
                         <struct> .Map </struct>
@@ -323,6 +328,7 @@ asserted patterns
   [structural]
   rule
     <task>
+      <taskType> Run </taskType>
       <config>
         <k>
             /*@ assert <config> CfgItems2 </config> /\ Phi */
@@ -342,17 +348,20 @@ asserted patterns
     <other-counter> N </other-counter>
   if search(
       <task>
+        <taskType> Hypothesis </taskType>
         <config> CfgItems1 </config>
         <subst> Subst1 </subst>
         TaskItems
       </task>
       <task>
+        <taskType> Conclusion </taskType>
         <config> CfgItems2 </config>
         <form> Phi </form>
         <subst> .Subst </subst>
       </task>
     =>
       <task>
+        <taskType> Constrain </taskType>
         <config> .Bag </config>
         <form> TrueFormula </form>
         <subst> Subst2 </subst>

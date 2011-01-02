@@ -3,8 +3,6 @@ grammar annot;
 
 options {
   //k = 2;
-  //backtrack = true;
-  //memoize = true;
   output = AST;
   ASTLabelType=CommonTree;
 }
@@ -73,7 +71,9 @@ tokens {
   BAG_UNIT = '.Bag';
   BAG_ITEM = 'BagItem';
 
+  CONFIG;
   CELL;
+  LABEL;
 
   LIST;
   LIST_UNIT = '.List';
@@ -127,20 +127,19 @@ disjunctive_pattern
   ;
 
 primary_pattern
-options { backtrack = true; }
-  : configuration
-    ( -> ^(CONJ configuration FORMULA_TRUE)
-    | CONJ formula -> ^(CONJ configuration formula)
-    )
-  | LPAREN pattern RPAREN
+  : (LPAREN)=> LPAREN pattern RPAREN
     ( -> pattern
     | CONJ formula -> ^(CONJ pattern formula)
+    )
+  | configuration
+    ( -> ^(CONJ configuration FORMULA_TRUE)
+    | CONJ formula -> ^(CONJ configuration formula)
     )
   ;
 
 
 configuration
-  : bag
+  : bag -> ^(CONFIG bag)
   ;
 
 //term_list
@@ -251,21 +250,35 @@ bag_constructor
  * Grammar rules for cell parsing (for now only closed cells)
  */
 cell
-  : '<' ml1=map_cell_label '>' map '</' ml2=map_cell_label '>'
-    { $ml2.text.equals($ml1.text)}?
-    -> ^(CELL $ml1 map $ml2)
-  | '<' bl1=bag_cell_label '>' bag '</' bl2=bag_cell_label '>'
-    { $bl2.text.equals($bl1.text)}?
-    -> ^(CELL $bl1 bag $bl2)
+options { backtrack = true; }
+  : map_cell
+  | bag_cell
+  | k_cell
   ;
 
-map_cell_label
-  : 'env'
-  | 'heap'
+map_cell
+  : '<' IDENTIFIER '>' { Table.config.containsKey($IDENTIFIER.text) }?
+    { Table.config.get($IDENTIFIER.text).sort.equals(Table.Cell.MAP) }?
+    map cell_end[$IDENTIFIER.text]
+    -> ^(CELL LABEL[$IDENTIFIER.text] map LABEL[$IDENTIFIER.text])
   ;
 
-bag_cell_label
-  : 'config'
+bag_cell
+  : '<' IDENTIFIER '>' { Table.config.containsKey($IDENTIFIER.text) }?
+    { Table.config.get($IDENTIFIER.text).sort.equals(Table.Cell.BAG) }?
+    bag cell_end[$IDENTIFIER.text]
+    -> ^(CELL LABEL[$IDENTIFIER.text] bag LABEL[$IDENTIFIER.text])
+  ;
+
+k_cell
+  : '<' IDENTIFIER '>' { Table.config.containsKey($IDENTIFIER.text) }?
+    { Table.config.get($IDENTIFIER.text).sort.equals(Table.Cell.K) }?
+    k cell_end[$IDENTIFIER.text]
+    -> ^(CELL LABEL[$IDENTIFIER.text] k LABEL[$IDENTIFIER.text])
+  ;
+
+cell_end[String label]
+  : '</' IDENTIFIER '>' { $IDENTIFIER.text.equals($label) }?
   ;
 
 
@@ -290,8 +303,6 @@ formula
   ;
 
 disjunction_formula
-//options { backtrack = true; }
-  //: conjunction_formula (DISJ^ conjunction_formula)*
   : conjunction_formula
     ((DISJ conjunction_formula)=> DISJ^ conjunction_formula)*
   ;

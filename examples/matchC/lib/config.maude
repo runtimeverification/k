@@ -36,17 +36,31 @@ endm
 
 
 mod CONFIG-BUILTIN-MODULE is
-  inc PL-ID + K-PROPER .
+  inc PL-ID + PL-STRING + K-PROPER .
   inc MATHEMATICAL-INT-BUILTIN-MODULE + SUBST-BUILTIN-MODULE .
 
   sorts ?BagItem !BagItem FreeBagItem .
   subsort ?BagItem !BagItem FreeBagItem < BagItem .
   sorts ?MapItem !MapItem FreeMapItem .
   subsort ?MapItem !MapItem FreeMapItem < MapItem .
+  sorts ?ListItem !ListItem FreeListItem .
+  subsort ?ListItem !ListItem FreeListItem < ListItem .
   op skolem : Nat ?MapItem -> FreeMapItem .
   op skolem : Nat ?BagItem -> FreeMapItem .
+  op skolem : Nat ?ListItem -> FreeMapItem .
   op co-skolem : Nat FreeMapItem -> !MapItem .
   op co-skolem : Nat FreeBagItem -> !BagItem .
+  op co-skolem : Nat FreeListItem -> !ListItem .
+  op ?var : Id -> ?Int .
+  op ?BagItem : String -> ?BagItem .
+  op !BagItem : String -> !BagItem .
+  op FreeMapItem : String -> FreeMapItem .
+  op ?MapItem : String -> ?MapItem .
+  op !MapItem : String -> !MapItem .
+  op FreeMapItem : String -> FreeMapItem .
+  op ?ListItem : String -> ?ListItem .
+  op !ListItem : String -> !ListItem .
+  op FreeListItem : String -> FreeListItem .
 
   sort Value TypedValue .
   subsort MathObj++ < Value .

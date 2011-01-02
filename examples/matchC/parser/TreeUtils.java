@@ -1,6 +1,6 @@
 import org.antlr.runtime.tree.*;
 
-public class treeUtils {
+public class TreeUtils {
   public static String toTreeString(CommonTree t, int indent) {
     String s = "";
     if (t != null) {

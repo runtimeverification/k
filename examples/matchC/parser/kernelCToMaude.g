@@ -127,7 +127,7 @@ constant
   | 'int'
   | ANNOTATION
     -> ANNOTATION["/*@ "
-                  + annotPreK.annotToMaudeString($ANNOTATION.text)
+                  + AnnotPreK.annotToMaudeString($ANNOTATION.text)
                   + " */"]
   ;
 

@@ -2,21 +2,12 @@
 #include <stdio.h>
 
 int sum(int n)
-/*@ pre  < config > < env > n |-> n0 </ env >
-                    < form > @(n0 >=Int 0) </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < form > returns ((n0 *Int (n0 +Int 1)) /Int 2) </ form >
-                    C </ config > */
+/*@ pre  C /\ n = n0 /\ n0 >= 0 */
+/*@ post C /\ returns((n0 * (n0 + 1)) / 2) */
 {
   int s;
   s = 0;
-  /*@ invariant < config > 
-                < env >
-                  n |-> ?n
-                  s |-> ((n0 +Int (-Int ?n)) *Int (n0 +Int ?n +Int 1)) /Int 2
-                </ env >
-                < form > @(?n >=Int 0) </ form >
-                C </ config > */
+  /*@ invariant !C /\ s = ((n0 - n) * (n0 + n + 1)) / 2 /\ n >= 0 */
   while (n > 0)
   {
     s += n;
@@ -33,9 +24,7 @@ int main()
   return 0;
 }
 
-
-/*@ var ?s ?n : ?Int */
 /*@ var n0 : FreeInt */
-/*@ var ?rho : ?MapItem */
+/*@ var !C : !BagItem */
 /*@ var C : FreeBagItem */
 
