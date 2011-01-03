@@ -42,6 +42,7 @@ matching logic annotations
   syntax Declaration ::= Annotation
   syntax Statement ::= Annotation
 
-  syntax K ::= default
+  syntax K ::= defaultKItem ( String )
+  syntax K ::= String
 endkm
 

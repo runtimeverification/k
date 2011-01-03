@@ -275,10 +275,10 @@ assumed patterns
                 (defaultKItem("program") <- Program) ;;
                 (defaultMapItem("struct") <- StructMap) ;;
                 (defaultMapItem("fun") <- FunMap) ;;
-                ---(defaultKItem("kk") <- K) ;;
+                (defaultKItem("kk") <- K) ;;
                 (defaultMapItem("env") <- defaultEnv(Env)) ;;
-                (defaultMapItem("tenv") <- TEnv) ---;;
-                ---(defaultKItem("counter") <- Counter)
+                (defaultMapItem("tenv") <- TEnv) ;;
+                (defaultKItem("counter") <- Counter)
               ),
               Subst
             )
@@ -347,13 +347,13 @@ asserted patterns
           applySubst(
             applySubst(
               Pattern,
-              ---(defaultKItem("program") <- Program) ;;
+              (defaultKItem("program") <- Program) ;;
               (defaultMapItem("struct") <- StructMap) ;;
               (defaultMapItem("fun") <- FunMap) ;;
-              ---(defaultKItem("kk") <- K) ;;
+              (defaultKItem("kk") <- K) ;;
               (defaultMapItem("env") <- defaultEnv(Env)) ;;
-              (defaultMapItem("tenv") <- TEnv) ---;;
-              ---(defaultKItem("counter") <- Counter) 
+              (defaultMapItem("tenv") <- TEnv) ;;
+              (defaultKItem("counter") <- Counter) 
             ),
             Subst
           )
