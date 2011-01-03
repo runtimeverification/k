@@ -185,6 +185,13 @@ mod MATHEMATICAL-INT is inc MATHEMATICAL-OBJECT + PL-INT .
  ceq fibon(I) = 1 if (I <=Int 1) .
   eq fibon(I) = fibon(I -Int 1) +Int fibon(I -Int 2) .
   
+  op square : Int++ -> Int++ .
+  eq square(I) = sqrt(I,0) .
+  
+  op sqrt : Int++ Int++ -> Int++ .
+ ceq sqrt(I,J) = J -Int 1 if ((J *Int J) >Int I) .
+  eq sqrt(I,J) = sqrt(I, J +Int 1) .
+  
   op greatestcd : Int++ Int++ -> Int++ .
  ceq greatestcd(I,J) = greatestcd(J, (I %Int J)) if (J >Int 0) .
   eq greatestcd(I,0) = I .
