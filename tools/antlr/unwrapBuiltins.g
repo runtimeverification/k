@@ -14,6 +14,7 @@ BUILTIN
   | 'Id'
   | 'Field'
   | 'HeapLabel'
+  | 'KItem'
 ;
 
 BUILTIN_WRAPPER

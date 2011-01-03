@@ -42,7 +42,8 @@ matching logic annotations
   syntax Declaration ::= Annotation
   syntax Statement ::= Annotation
 
-  syntax K ::= defaultKItem ( String )
-  syntax K ::= String
+  syntax KItem ::= defaultKItem ( String )
+  syntax K ::= KItem 
+  syntax Builtins ::= KItem
 endkm
 

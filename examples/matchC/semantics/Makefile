@@ -53,7 +53,7 @@ CLEAN_FILES = $(LANG_UNWRAPPED_FILE) \
 	svn revert ../theories/* ../heap_patterns/*
 	@sed -i -e '1d' -e '/^mod/a \
     subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} String Value TypedValue ExpressionType < Builtins KResult . \
-    subsort Id Field < Builtins KProper .' $@
+    subsort Id Field KItem < Builtins KProper .' $@
 
 
 all: build
