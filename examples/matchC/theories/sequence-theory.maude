@@ -1,80 +1,80 @@
 mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
-                    inc MATHEMATICAL-INT-BUILTIN-MODULE .
-                  
-                    sorts ?Seq !Seq FreeSeq NeSeq Seq Seq++ NeSeq++ . 
-                    subsort NeSeq < Seq .
-                    subsort NeSeq++ Seq < Seq++ .
-                    subsort ?Seq !Seq FreeSeq NeSeq < NeSeq++ .
-                    subsort ?Seq < ?MathObj .
-                    subsort !Seq < !MathObj .
-                    subsort FreeSeq < FreeMathObj .
-                    subsort Seq < MathObj .
-                    subsort Seq++ < MathObj++ .
-                   
-                    op ?Seq : Nat -> ?Seq .
-                    op !Seq : Nat -> !Seq .
-                    op FreeSeq : Nat -> FreeSeq .
-                    op skolem : Nat ?Seq -> FreeSeq [ditto] .
-                    op co-skolem : Nat FreeSeq -> !Seq [ditto] .
-                  
-                    op epsilon : -> Seq .
-                    op `[_`] : List{MathObj++} -> NeSeq++ .
-                    ---op `[_`] : ?MathObj -> ?Seq [ditto] .
-                    ---op `[_`] : !MathObj -> !Seq [ditto] .
-                    ---op `[_`] : FreeMathObj -> FreeSeq [ditto] .
-                    op `[_`] : MathObj -> NeSeq [ditto] .
-                    op `[_`] : MathObj++ -> NeSeq++ [ditto] .
-                    op _@_ : Seq++ Seq++ -> Seq++ [assoc id: epsilon] .
-                    op _@_ : NeSeq++ Seq++ -> NeSeq++ [ditto] .
-                    op _@_ : Seq++ NeSeq++ -> NeSeq++ [ditto] .
-                    ---op _@_ : ?Seq ?Seq -> ?Seq [ditto] .
-                    ---op _@_ : !Seq !Seq -> !Seq [ditto] .
-                    ---op _@_ : FreeSeq FreeSeq -> FreeSeq [ditto] .
-                    op _@_ : Seq Seq -> Seq [ditto] .
-                    op _@_ : NeSeq Seq -> NeSeq [ditto] .
-                    op _@_ : Seq NeSeq -> NeSeq [ditto] .
-                    op _@_ : NeSeq Seq++ -> NeSeq++ [ditto] .
-                    op _@_ : Seq++ NeSeq -> NeSeq++ [ditto] .
-                    op _@_ : NeSeq++ Seq -> NeSeq++ [ditto] .
-                    op _@_ : Seq NeSeq++ -> NeSeq++ [ditto] .
-                    op _@_ : Seq++ Seq -> Seq++ [ditto] .
-                    op _@_ : Seq Seq++ -> Seq++ [ditto] .
-                    op _@_ : NeSeq++ NeSeq -> NeSeq++ [ditto] .
-                    op _@_ : NeSeq NeSeq++ -> NeSeq++ [ditto] . 
-                  
-                    op rev : Seq++ -> NeSeq++ .
-                    op len : Seq++ -> Int++ .
-                    op maximum : Seq++ -> Int++ .
-                    op contain : Seq++ Int++ -> Atom .
-                  
-                  
-                    var Obj Obj1 Obj2 : MathObj++ .
-                    var ObjList : List{MathObj++} .
-                    var A A1 A2 : Seq++ .
-                    var NeA NeA1 NeA2 : NeSeq++ .
-                    var I J : Int++ .
-                  
-                    eq [Obj1, Obj2, ObjList] = [Obj1] @ [Obj2] @ [ObjList] .
-                    eq [.List{MathObj++}] = epsilon .
-                    eq [Obj] @ A === epsilon = FalseFormula .
-                    eq A @ [Obj] === epsilon = FalseFormula .
-                    eq NeA @ A1 === NeA @ A2 = A1 === A2 .
-                    eq A1 @ NeA === A2 @ NeA = A1 === A2  .
-                    eq [Obj1] @ A1 === [Obj2] @ A2 = Obj1 === Obj2 /\ A1 === A2 .
-                    eq [Obj1] @ A1 === [Obj2] @ A2 = Obj1 === Obj2 /\ A1 === A2 .
-                    eq A1 @ [Obj1] === A2 @ [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
-                    eq A1 @ [Obj1] === A2 @ [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
-                  
-                  
-                    eq rev(NeA1 @ NeA2) = rev(NeA2) @ rev(NeA1) .
-                    eq rev([Obj]) = [Obj] .
-                    eq rev(epsilon) = epsilon .
-                    eq len(NeA1 @ NeA2) = len(NeA1) +Int len(NeA2) .
-                    eq len([Obj]) = 1 .
-                    eq len(epsilon) = 0 .
-                    
-                    eq contain(NeA1 @ NeA2 , I) = contain(NeA1 , I) \/ contain(NeA2 , I) .
-                    eq contain([J] , I) = (I === J) .
-                    eq contain(epsilon , I) = FalseFormula .
-                  endm
-                  
+  inc MATHEMATICAL-INT-BUILTIN-MODULE .
+
+  sorts PESeq FESeq FreeSeq NeSeq Seq Seq++ NeSeq++ . 
+  subsort NeSeq < Seq .
+  subsort NeSeq++ Seq < Seq++ .
+  subsort PESeq FESeq FreeSeq NeSeq < NeSeq++ .
+  subsort PESeq < PEMathObj .
+  subsort FESeq < FEMathObj .
+  subsort FreeSeq < FreeMathObj .
+  subsort Seq < MathObj .
+  subsort Seq++ < MathObj++ .
+ 
+  op PESeq : Nat -> PESeq .
+  op FESeq : Nat -> FESeq .
+  op FreeSeq : Nat -> FreeSeq .
+  op skolem : Nat PESeq -> FreeSeq [ditto] .
+  op co-skolem : Nat FreeSeq -> FESeq [ditto] .
+
+  op epsilon : -> Seq .
+  op `[_`] : List{MathObj++} -> NeSeq++ .
+  ---op `[_`] : PEMathObj -> PESeq [ditto] .
+  ---op `[_`] : FEMathObj -> FESeq [ditto] .
+  ---op `[_`] : FreeMathObj -> FreeSeq [ditto] .
+  op `[_`] : MathObj -> NeSeq [ditto] .
+  op `[_`] : MathObj++ -> NeSeq++ [ditto] .
+  op _@_ : Seq++ Seq++ -> Seq++ [assoc id: epsilon] .
+  op _@_ : NeSeq++ Seq++ -> NeSeq++ [ditto] .
+  op _@_ : Seq++ NeSeq++ -> NeSeq++ [ditto] .
+  ---op _@_ : PESeq PESeq -> PESeq [ditto] .
+  ---op _@_ : FESeq FESeq -> FESeq [ditto] .
+  ---op _@_ : FreeSeq FreeSeq -> FreeSeq [ditto] .
+  op _@_ : Seq Seq -> Seq [ditto] .
+  op _@_ : NeSeq Seq -> NeSeq [ditto] .
+  op _@_ : Seq NeSeq -> NeSeq [ditto] .
+  op _@_ : NeSeq Seq++ -> NeSeq++ [ditto] .
+  op _@_ : Seq++ NeSeq -> NeSeq++ [ditto] .
+  op _@_ : NeSeq++ Seq -> NeSeq++ [ditto] .
+  op _@_ : Seq NeSeq++ -> NeSeq++ [ditto] .
+  op _@_ : Seq++ Seq -> Seq++ [ditto] .
+  op _@_ : Seq Seq++ -> Seq++ [ditto] .
+  op _@_ : NeSeq++ NeSeq -> NeSeq++ [ditto] .
+  op _@_ : NeSeq NeSeq++ -> NeSeq++ [ditto] . 
+
+  op rev : Seq++ -> NeSeq++ .
+  op len : Seq++ -> Int++ .
+  op maximum : Seq++ -> Int++ .
+  op contain : Seq++ Int++ -> Atom .
+
+
+  var Obj Obj1 Obj2 : MathObj++ .
+  var ObjList : List{MathObj++} .
+  var A A1 A2 : Seq++ .
+  var NeA NeA1 NeA2 : NeSeq++ .
+  var I J : Int++ .
+
+  eq [Obj1, Obj2, ObjList] = [Obj1] @ [Obj2] @ [ObjList] .
+  eq [.List{MathObj++}] = epsilon .
+  eq [Obj] @ A === epsilon = FalseFormula .
+  eq A @ [Obj] === epsilon = FalseFormula .
+  eq NeA @ A1 === NeA @ A2 = A1 === A2 .
+  eq A1 @ NeA === A2 @ NeA = A1 === A2  .
+  eq [Obj1] @ A1 === [Obj2] @ A2 = Obj1 === Obj2 /\ A1 === A2 .
+  eq [Obj1] @ A1 === [Obj2] @ A2 = Obj1 === Obj2 /\ A1 === A2 .
+  eq A1 @ [Obj1] === A2 @ [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
+  eq A1 @ [Obj1] === A2 @ [Obj2] = Obj1 === Obj2 /\ A1 === A2 .
+
+
+  eq rev(NeA1 @ NeA2) = rev(NeA2) @ rev(NeA1) .
+  eq rev([Obj]) = [Obj] .
+  eq rev(epsilon) = epsilon .
+  eq len(NeA1 @ NeA2) = len(NeA1) +Int len(NeA2) .
+  eq len([Obj]) = 1 .
+  eq len(epsilon) = 0 .
+  
+  eq contain(NeA1 @ NeA2 , I) = contain(NeA1 , I) \/ contain(NeA2 , I) .
+  eq contain([J] , I) = (I === J) .
+  eq contain(epsilon , I) = FalseFormula .
+endm
+
