@@ -595,33 +595,81 @@ fmod LIST-ATTRS is
 endfm
 ---)
 
-fmod STRICT-ATTRS is
+fmod META-ATTRS is
   including META-MODULE .
+  op metadata : AttrSet -> AttrSet .
+  eq metadata(metadata(S) AS) = metadata(S) AS [owise] .
+  var S : String .  var AS : AttrSet .
+endfm
+
+fmod STRICT-ATTRS is
+  including META-ATTRS .
   including NAT-LIST-EXTRAS .
+  including QID-EXTRAS .
 ---  including LIST-ATTRS .
   ops kstrict seqkstrict : IntList QidList -> Attr .
   op karity : Nat -> Attr .
   op khybrid : -> Attr .
+
+  eq metadata(khybrid AS) = metadata(metadata("hybrid") AS) .
+  eq metadata(karity(N) AS) = metadata(metadata("arity " + string(N,10)) AS) .
+  eq metadata(kstrict(Il, Ql) AS) = metadata(metadata("strict(" + IntList2String(Il) + ") in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(seqkstrict(Il, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(Il) + ") in (" + QidList2String(Ql) + ")") AS) . 
+
+  var AS : AttrSet . var A : Attr .  var N : Nat .  var Ql : QidList . 
+  var Il : IntList .
 endfm
 
 fmod SYNTAX-ATTRS is
-  including META-MODULE .
+  including META-ATTRS .
   ops kaux kdisolve : -> Attr .
   op krenameTo : Qid -> Attr .
   op ksyntax : -> Attr .
   op klatex : AttrSet -> Attr .
   op kcolor : Qid -> Attr .
   op kditto : -> Attr .
+
+  eq metadata(kditto AS) = metadata(metadata("ditto") AS) .
+  eq metadata(kaux AS) = metadata(metadata("aux") AS) .
+  eq metadata(kdisolve AS) = metadata(metadata("disolve") AS) .
+  eq metadata(ksyntax AS) = metadata(metadata("syntax") AS) .
+  eq metadata(krenameTo(Q) AS) = metadata(metadata("renameTo " + string(Q)) AS) .
+  eq metadata(kcolor(Q) AS) = metadata(metadata("color: " + string(Q)) AS) .
+  ceq metadata(klatex(AS') AS) = metadata(metadata("latex(" + S + ")") AS) 
+   if metadata(S) := metadata(AS') .
+
+
+  var AS AS' : AttrSet . var Q : Qid . var S : String .
 endfm
 
 fmod CONFIGURATION-ATTRS is
-  including META-MODULE .
+  including META-ATTRS .
   op kwrapping : Qid -> Attr .
+
+  eq metadata(kwrapping(Q) AS) 
+   = metadata(metadata("wrapping " + string(Q)) AS) .
+
+  var AS : AttrSet . var Q : Qid .
 endfm
 
 fmod RULES-ATTRS is
-  including META-MODULE .
-  ops kstructural klarge : -> Attr . 
+  including META-ATTRS .
+  ops kcomputational kstructural klarge : -> Attr . 
+
+  eq metadata(kcomputational AS) = metadata(metadata("computational") AS) .
+  eq metadata(kstructural AS) = metadata(metadata("structural") AS) .
+  eq metadata(klarge AS) = metadata(metadata("large") AS) .
+
+  var AS : AttrSet .
+endfm
+
+fmod LOCATION-ATTRS is
+  including META-ATTRS .
+  op klocation : String -> Attr .
+
+  eq metadata(klocation(S) AS) = metadata(metadata("location(" + S + ")") AS) .
+
+  var AS : AttrSet . var S : String .
 endfm
 
 fmod K-ATTRS is 
@@ -629,6 +677,7 @@ fmod K-ATTRS is
   including STRICT-ATTRS .
   including CONFIGURATION-ATTRS .
   including RULES-ATTRS .
+  including LOCATION-ATTRS .
 endfm
 
 fmod K-META-LISTS is including K-META-OPS .
@@ -767,4 +816,13 @@ fmod META-K-COOL is
   eq cool(Q) = qid(string(Q) + "-cool") .
   
   var Q : Qid .
+endfm
+
+
+fmod META-K-ERROR is
+  including META-MODULE-EXTRAS .
+  op checkForError : OpDecl AttrSet ~> OpDecl .
+  op checkForError : MembAx AttrSet ~> MembAx .
+  op checkForError : Equation AttrSet ~> Equation .
+  op checkForError : Rule AttrSet ~> Rule .
 endfm

@@ -18,20 +18,36 @@ fmod PARSE-METADATA-BASIC  is
   eq metadataParse(op Q : TyL -> Ty [AS metadata(S) AS'] .) =  (op Q : TyL -> Ty [AS metadataParse(S) AS'] .).
   eq metadataParse(Max) = Max [owise] .
   eq metadataParse(Op) = Op [owise] .
-
+ 
   var Trm : Term . var Sort : Sort . var AS AS' : AttrSet . var TyL : TypeList . var Ty : Type . 
   var Q : Qid .  var Max : MembAx . var Op : OpDecl .
+endfm
+
+fmod PARSE-METADATA-LOCATION is 
+  including PARSE-METADATA-BASIC .
+  including LOCATION-ATTRS .
+  var S S' : String . var N : Nat . var AS : AttrSet .
+  ceq metadataStrippedParse(S) = AS metadataParse(S')
+   if  "location" = substr(S,0,length("location")) 
+   /\ {AS, S'} := locationParse(stripSpaces(substr(S, length("location"), length(S))))  .
+
+  op locationParse : String -> AttrStringPair .
+  ceq locationParse(S) 
+    = {klocation(stripSpaces(substr(S,1,N))), substr(S, N + 2, length(S))}
+   if "(" = substr(S, 0, 1)
+   /\ s(N) := find(S, ")", 0)  .
 endfm
 
 fmod PARSE-METADATA-SYNTAX is
   including PARSE-METADATA-BASIC .
   including SYNTAX-ATTRS .
   var S S' S1 : String . var F : FindResult .  var Q : Qid .
-  var N : Nat .  var AS : AttrSet .
+  var N : Nat .  var AS AS' : AttrSet .
   ceq metadataStrippedParse(S) = kditto  metadataParse(stripSpaces(S'))
    if "ditto" = substr(S,0,length("ditto")) 
    /\ S' := (substr(S,length("ditto"),length(S))) 
    /\ S' == "" or-else substr(S',0,1) == " " .
+
   ceq metadataStrippedParse(S) = kaux  metadataParse(stripSpaces(S'))
    if "aux" = substr(S,0,length("aux")) 
    /\ S' := (substr(S,length("aux"),length(S))) 
@@ -135,10 +151,6 @@ fmod PARSE-METADATA-STRICT is
   eq strictListParse(Ql) = none [owise print "error parsing strict arguments" Ql] .
 ---     else vstrict(Q Ql) fi .
 
-  op parseIntList : QidList -> [IntList] .
-  eq parseIntList(Q Ql) = rat(string(Q), 10) parseIntList(Ql) .
-  eq parseIntList(nil) = nil .
-
 endfm
 
 fmod PARSE-METADATA-CONFIGURATION is
@@ -164,6 +176,10 @@ fmod PARSE-METADATA-RULES is
    if "rule" = substr(S,0,length("rule")) 
    /\ S' := (substr(S,length("rule"),length(S))) 
    /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) = kcomputational  metadataParse(stripSpaces(S'))
+   if "computational" = substr(S,0,length("computational")) 
+   /\ S' := (substr(S,length("computational"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
   ceq metadataStrippedParse(S) = kstructural  metadataParse(stripSpaces(S'))
    if "structural" = substr(S,0,length("structural")) 
    /\ S' := (substr(S,length("structural"),length(S))) 
@@ -181,6 +197,7 @@ fmod PARSE-METADATA is
   including PARSE-METADATA-CONFIGURATION .
   including PARSE-METADATA-SYNTAX .
   including PARSE-METADATA-RULES .
+  including PARSE-METADATA-LOCATION .
 endfm
 ---(
 red metadataParse("") .
@@ -206,3 +223,4 @@ red metadataParse("latex ( color: red wrapping Me)") .
 red metadataParse("arity 1 list(1:_`,_:K) strict(1) hybrid") .
 q
 ---)
+

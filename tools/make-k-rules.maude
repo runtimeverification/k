@@ -4,7 +4,7 @@ fmod MAKE-K-RULES is
   including  META-K-CONTEXTS .
   including META-LEVEL-EXTRAS .
   including META-K-CONDITION-SEARCH .
-  including PARSE-METADATA-RULES .
+  including PARSE-METADATA .
   var M Flat : Module .  var T T1 T2 : Term .  var AS : AttrSet . 
   var C : Term . var S : Sort . var Ct : Constant . var V : Variable .
   var O O' : Qid . var N : Nat . var Tl : TermList .
@@ -38,13 +38,13 @@ fmod MAKE-K-RULES is
 
   op addReplace : Module Module KRuleSplit ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural})
-   = addEqs((eq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) [metadata("structural rule") AS] .), M) . 
+   = addEqs((eq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) [metadata(kstructural AS)] .), M) . 
   eq addReplace(Flat, M, {kcrl, T, C, AS kstructural})
-   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) if C = trueCt [metadata("structural rule") AS] .), M) .
+   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) if C = trueCt [metadata(kstructural AS)] .), M) .
   eq addReplace(Flat, M, {krl, T, empty, AS})
-    = addRls((rl normalize(Flat,splitReplace(T,1)) => normalize(Flat,splitReplace(T,2)) [metadata("computational rule") AS] .), M) [owise] .
+    = addRls((rl normalize(Flat,splitReplace(T,1)) => normalize(Flat,splitReplace(T,2)) [metadata(kcomputational AS)] .), M) [owise] .
   eq addReplace(Flat, M, {kcrl, T, C, AS}) 
-    = addRls((crl normalize(Flat,splitReplace(T,1)) => normalize(Flat, splitReplace(T,2)) if makeCondition(C)  [metadata("computational rule") AS] .), M) [owise] .
+    = addRls((crl normalize(Flat,splitReplace(T,1)) => normalize(Flat, splitReplace(T,2)) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
 
 
   op makeCondition : Term -> Condition .

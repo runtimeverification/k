@@ -5,8 +5,11 @@ mod SANITY-CHECKS-META is
   including META-LEVEL-EXTRAS .
   including MODULE-META-PRETTY-PRINT .
   including META-MODULE-EXTRAS .
+  including PARSE-METADATA .
+  
   var NoInSane : String .  var Flat M : Module .  var MM : [Module] .
-  var Trm : Term . var T : Type .  var Mb : MembAx . var Eq : Equation . var Rl : Rule . var N : Nat .  var Op : OpDecl .
+  var Trm : Term . var T : Type .  var Mb : MembAx . var Eq : Equation . var Rl : Rule . var N : Nat .  var Op : OpDecl .  var AS : AttrSet .  var Tl : TypeList .  var Ops : OpDeclSet .
+
   var Q QNoInSane : Qid . 
   op sanityChecks : String ~> Module .
   eq sanityChecks(NoInSane) = sanityChecks(qid(NoInSane)) .
@@ -38,12 +41,22 @@ mod SANITY-CHECKS-META is
    = error('\g eMetaPrettyPrint(Flat, Eq, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
   eq extractError(Flat, errorMRl(Trm, T, Rl)) 
    = error('\g eMetaPrettyPrint(Flat, Rl, true) '\o,  metaPrettyPrint(Flat, Trm), T) .
+  eq extractError(Flat, errorM(Trm, T, AS, Tl, Ops, N))
+   = error('\g 'rule '\o getLocationInformation(AS) '\o,  metaPrettyPrint(Flat, Trm), T '\o '. 'A 'possible 'candidate 'is 'argument qid(string(s(N),10))) .
 
   op compileSANITY-CHECKS : Module ~> Module .
   eq compileSANITY-CHECKS(M) = $compile(flatten(M), sanityChecks(M, flatten(M))) .
   
   op $compile : Module Module ~> Module .
   eq $compile(Flat, MM) = if MM :: Module then MM else moduleError(extractError(Flat,MM)) fi .
+
+  var S : String .
+  op getLocationInformation : AttrSet -> QidList .
+  eq getLocationInformation(AS metadata(S)) 
+   = getLocationInformation(AS metadataParse(S)) .
+  eq getLocationInformation(label(Q) AS) = Q getLocationInformation(AS) .
+  eq getLocationInformation(klocation(S) AS) = 'at tokenize(S) [owise] .
+  eq getLocationInformation(AS) = nil [owise] .
 endm
 
 mod SANITY-CHECKS-LOOP is 

@@ -22,6 +22,8 @@ fmod NAT-LIST-EXTRAS is
   including NAT-LIST .
   including INT .
   including EXT-BOOL .
+  including QID-LIST .
+  including CONVERSION .
   sort IntList NeIntList .
   subsort NatList < IntList .
   subsort Int NeNatList < NeIntList < IntList .
@@ -42,6 +44,17 @@ fmod NAT-LIST-EXTRAS is
   op _in_ : Int IntList -> Bool .
   eq N in M Ints = N == M or-else N in Ints .
   eq N in nil = false .
+
+  op parseIntList : QidList -> [IntList] .
+  eq parseIntList(Q Ql) = rat(string(Q), 10) parseIntList(Ql) .
+  eq parseIntList(nil) = nil .
+
+  op IntList2String : IntList -> String .
+  eq IntList2String(nil) = "" .
+  eq IntList2String(I) = string(I,10) .
+  eq IntList2String(I NIL) = string(I,10) + " " + IntList2String(NIL) .
+
+  var Q : Qid . var Ql : QidList . var I : Int . var NIL : NeIntList . 
 endfm
 
 fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
@@ -240,6 +253,15 @@ fmod QID-EXTRAS is
 
   op upTo : QidList Qid ~> QidList .
   eq upTo(Q':Qid QIL,Q) = Q':Qid if Q == Q':Qid then nil else upTo(QIL,Q) fi .
+
+
+  op QidList2String : QidList -> String .
+  eq QidList2String(nil) = "" .
+  eq QidList2String(Q) = string(Q) .
+  eq QidList2String(Q NQL) = string(Q) + " " + QidList2String(NQL) .
+
+  var NQL : NeQidList .
+
 endfm
 
 fmod META-TERM-EXTRAS is
@@ -294,6 +316,11 @@ fmod META-TERM-EXTRAS is
 
   op mkVariable : Qid Type -> Variable .
   eq mkVariable(Q, T) = qid(string(Q) + ":" + string(T)) .
+
+
+  op nth : TermList Nat ~> Term .
+  eq nth((Tr, Trl), 0) = Tr .
+  eq nth((Tr, Trl), s(N)) = nth(Trl, N) .
 endfm
 
 fmod META-MODULE-EXTRAS is
@@ -752,6 +779,11 @@ fmod META-MODULE-EXTRAS is
   eq (Tl ; TlS) # (T ; TS) = (Tl T) ; (Tl # TS) ; (TlS # (T ; TS)) .
   eq none # TS = none .
   eq TlS # none = none .
+
+
+  op nth : TypeList Nat ~> Type .
+  eq nth(T Tl, 0) = T .
+  eq nth(T Tl, s(N)) = nth(Tl, N) .
 
   var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
   vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .

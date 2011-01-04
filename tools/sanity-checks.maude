@@ -10,7 +10,7 @@ including META-K-WRAPPERS .
  var Trms Trms' : TermList . vars T1 T2 Trm Trm' : Term .  
  var Cond Cond' Cond'' : Condition .
  var C : Constant . var V : Variable .
- vars OPDS OPDS' Ops : OpDeclSet . var Op Op' : OpDecl .
+ vars Ops : OpDeclSet . var Op Op' : OpDecl .
  var SSDS : SubsortDeclSet . var SSD : SubsortDecl .
  var AS AS' : AttrSet .
 
@@ -25,7 +25,7 @@ including META-K-WRAPPERS .
  op sanityCheckModuleOps : Module  Module Bool ~> Module .
  op sanityCheckModuleMbs : Module  Module Bool ~> Module .
  op sanityCheckModuleEqs : Module  Module Bool ~> Module .
- op sanityCheckModuleRls : Module  Bool ~> Module .
+ op sanityCheckModuleRls : Module  Module Bool ~> Module .
 
  eq sanityCheckModuleOps(M, Flat, errorOp(T,N,Op)) = errorMOp(T,N,Op) .
  eq sanityCheckModuleOps(M, Flat, errorOp(T,N,Q)) = errorMOp(T,N,Q) .
@@ -33,17 +33,21 @@ including META-K-WRAPPERS .
   = sanityCheckModuleMbs(M, Flat, sanityCheckMbs(Flat, getMbs(M))) .
 
  eq sanityCheckModuleMbs(M, Flat, errorMb(Trm, T, Mb))
-  = if labelled(Mb) then errorM(Trm, T, getLabel(Mb)) else errorMMb(Trm, T, Mb) fi .
+  = explainError(Flat,Trm,T,getAttrs(Mb)) . 
+---  = if labelled(Mb) then errorM(Trm, T, getLabel(Mb)) else errorMMb(Trm, T, Mb) fi .
  eq sanityCheckModuleMbs(M, Flat, true)
   = sanityCheckModuleEqs(M, Flat, sanityCheckEqs(Flat, getEqs(M))) .
  eq sanityCheckModuleEqs(M, Flat, errorEq(Trm, T, Eq))
-  = if labelled(Eq) then errorM(Trm, T, getLabel(Eq)) else errorMEq(Trm, T, Eq) fi .
+  = explainError(Flat, Trm, T, getAttrs(Eq)) .
+---  = if labelled(Eq) then errorM(Trm, T, getLabel(Eq)) else errorMEq(Trm, T, Eq) fi .
  eq sanityCheckModuleEqs(M, Flat, true)
-  = sanityCheckModuleRls(M, sanityCheckRls(Flat, getRls(M))) .
- eq sanityCheckModuleRls(M, errorRl(Trm, T, Rl))
-  = if labelled(Rl) then errorM(Trm, T, getLabel(Rl)) else errorMRl(Trm, T, Rl) fi .
- eq sanityCheckModuleRls(M, true)
+  = sanityCheckModuleRls(M, Flat, sanityCheckRls(Flat, getRls(M))) .
+ eq sanityCheckModuleRls(M, Flat, errorRl(Trm, T, Rl))
+  = explainError(Flat, Trm, T, getAttrs(Rl)) .
+---  = if labelled(Rl) then errorM(Trm, T, getLabel(Rl)) else errorMRl(Trm, T, Rl) fi .
+ eq sanityCheckModuleRls(M, Flat, true)
   = M .
+
 
  op error : Term Type -> [Bool] .
  op errorRl : Term Type Rule -> [Bool] .
@@ -53,6 +57,30 @@ including META-K-WRAPPERS .
  op errorMRl : Term Type Rule -> [Module] .
  op errorMEq : Term Type Equation -> [Module] .
  op errorMMb : Term Type MembAx -> [Module] .
+ op explainError : Module Term Type AttrSet -> [Module] .
+ op explainError : Module Term Type AttrSet OpDeclSet -> [Module] .
+ op explainError : Module Term Type AttrSet TermList OpDeclSet -> [Module] .
+ op errorM : Term Type AttrSet TypeList OpDeclSet Nat -> [Module] .
+
+ eq explainError(Flat, Trm, T, AS) 
+  = explainError(Flat, Trm, T, AS, relatedOps(Flat, getTopOp(Flat, Trm), getOps(Flat))) .
+
+ eq explainError(Flat, Q[Trms], T, AS, Ops)
+  = explainError(Flat, Q[Trms], T, AS, leastSorts(Flat,Trms), Ops) .
+
+ eq explainError(Flat, Q[Trms], T, AS, Tl, Ops)
+  = errorM(Q[Trms], T, AS, Tl, Ops, findCandidate(Flat, Tl, Ops, 0)) .
+
+ op findCandidate : Module TypeList OpDeclSet Nat ~> Nat .
+ eq findCandidate(Flat, Tl, none, s(N)) = N .
+ eq findCandidate(Flat, Tl, Op Ops, N) 
+  = findCandidate(Flat, Tl, pruneOps(Flat, Op Ops, nth(Tl, N), N), s(N)) .
+
+ op pruneOps : Module OpDeclSet Type Nat -> OpDeclSet .
+ eq pruneOps(Flat, (op Q : Tl -> T [AS] .) Ops, T', N) 
+  = if sortLeq(Flat, nth(Tl, N), T') then  (op Q : Tl -> T [AS] .) else none
+    fi pruneOps(Flat, Ops, T', N) .
+ eq pruneOps(Flat, none, T', N) = none .
 
  op errorOp : Type -> [Bool] .
  op errorOp : Type Nat -> [Bool] .
