@@ -62,7 +62,7 @@ crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
 test: $(COMPILED_FILE) $(addprefix test-,$(TESTS).output)
 
-true-test: $(COMPILED_FILE) $(addprefix results-,$(TESTS).xml)
+true-test: $(COMPILED_FILE) $(foreach test, $(TESTS), results-$(test).xml)
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
 test-%.output: % $(COMPILED_FILE) 
