@@ -70,8 +70,8 @@ test-%.output: % $(COMPILED_FILE)
 	@cat $@
 	
 results-%.xml: % test-%.output
-	perl $(TOOL_DIR)/createXMLTestOutput.pl $* test-$*.output > $@
-
+	@perl $(TOOL_DIR)/createXMLTestOutput.pl $(notdir $(realpath .)).$(basename $(notdir $*)) $* test-$*.output > $@
+	
 # used to force targets to run
 force: ;
 	

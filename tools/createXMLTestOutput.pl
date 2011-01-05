@@ -18,16 +18,17 @@ sub comment {
 # use XML::Writer;
 
 my $numArgs = $#ARGV + 1;
-if ($numArgs != 2) {
+if ($numArgs != 3) {
 	die "Not enough command line arguments"
 }
 
+my $testSuite = $ARGV[0];
+
 # file containing the tests
-my $testFile = $ARGV[0];
-my $testSuite = $testFile;
+my $testFile = $ARGV[1];
 
 # file with maude's output we're checking
-my $maudeResults = $ARGV[1];
+my $maudeResults = $ARGV[2];
 
 my $globalTests = "";
 my $globalNumPassed = 0;
