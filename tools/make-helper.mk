@@ -60,20 +60,21 @@ crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
-test: $(COMPILED_FILE) $(addprefix test-,$(TESTS))
+test: $(COMPILED_FILE) $(addprefix test-,$(TESTS).output)
+
+true-test: $(COMPILED_FILE) $(addprefix results-,$(TESTS).xml)
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
-test-% test-%.output: %
-	@echo q | maude -no-wrap -no-ansi-color $< > $@.output
-	@cat $@.output
-	
-results-%.xml: test-%.output
-	@perl $(TOOL_DIR)/createXMLTestOutput.pl $* test-$*.output > $@
+test-%.output: % $(COMPILED_FILE) 
+	@echo q | maude -no-wrap -no-ansi-color $< > $@
 	@cat $@
+	
+results-%.xml: % test-%.output
+	perl $(TOOL_DIR)/createXMLTestOutput.pl $* test-$*.output > $@
 
 # used to force targets to run
 force: ;
 	
 clean:
-	@-rm -f $(MAIN_FILE)-compiled.maude kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE) test-*.output shared.maude
+	@-rm -f $(MAIN_FILE)-compiled.maude kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE) test-*.output shared.maude results-*.xml
 	@-rm -f ${subst .k,.maude, ${filter %.k, $(LANGUAGE_FILE)}}

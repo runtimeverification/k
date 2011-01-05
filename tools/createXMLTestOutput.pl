@@ -5,6 +5,16 @@ use Text::Diff;
 use HTML::Entities;
 
 
+sub escape {
+	my ($str) = (@_);
+	return HTML::Entities::encode_entities($str);
+}
+
+sub comment {
+	my ($comment) = (@_);
+	print "<!-- " . escape($comment) . " -->\n";
+}
+
 # use XML::Writer;
 
 my $numArgs = $#ARGV + 1;
@@ -31,6 +41,7 @@ foreach my $testKey (keys %testMapping) {
 	my $found = 0;
 	my $testName = $testMapping{$testKey}[0];
 	foreach my $resultKey (keys %testResults) {
+		# comment "$resultKey: $testResults{$resultKey}";
 		if (index($resultKey, $testKey) != -1) { # if this is the right test
 			$found = 1;
 			my $testTime = $testResults{$resultKey}[0];
@@ -47,24 +58,15 @@ foreach my $testKey (keys %testMapping) {
 		}
 	}
 	if (!$found) {
-		reportFailure($testName, 0, "Couldn't find matching test");
+		reportFailure($testName, 0, "Couldn't find matching test for $testKey");
 	}
 }
 
-sub escape {
-	my ($str) = (@_);
-	return HTML::Entities::encode_entities($str);
-}
-
-sub comment {
-	my ($comment) = (@_);
-	print "<!-- " . escape($comment) . " -->\n";
-}
 
 sub getTestMapping {
 	my ($testFile) = (@_);
 	my %testMapping = ();
-	open(IN, "$testFile");
+	open(IN, "$testFile") or reportError("unknown", 0, "Couldn't open file $testFile");
 	while (my $line = <IN>) {
 		chomp $line;
 		my $reduce = "rew|rewrite|red|reduce|erew|erewrite";
@@ -80,7 +82,7 @@ sub getTestMapping {
 sub getTestResults {
 	my ($resultFile) = (@_);
 	my %resultMapping = ();
-	open(IN, "$resultFile");
+	open(IN, "$resultFile") or reportError("unknown", 0, "Couldn't open file $resultFile");
 	while (my $line = <IN>) {
 		chomp $line;
 		my $time = 0;
@@ -88,18 +90,19 @@ sub getTestResults {
 		my $pattern = "^($reduce) in .* : (.*) \.\$";
 		if ($line =~ /$pattern/) {
 			my $inputTerm = $2;
+			# comment "found $inputTerm";
 			$line = <IN>; # skip rewrites: line
 			if ($line =~ /^rewrites: .* in .*ms cpu \((.*)ms real\)/) {
 				my $time = $1;
 			} else {
-				reportError("unknown", 0, "Error parsing, couldn't find # rewrites for " . escape($inputTerm));
+				reportError("unknown", 0, "Error parsing, couldn't find # rewrites for $inputTerm");
 			}
 			$line = <IN>;
 			if ($line =~ /^result .*: (.*)$/) {
 				my $outputTerm = $1;
 				$resultMapping{$inputTerm} = [$time, $outputTerm];
 			} else {
-				reportError("unknown", 0, "Error parsing, couldn't find result for " . escape($inputTerm));
+				reportError("unknown", 0, "Error parsing, couldn't find result for $inputTerm");
 			}
 		}
 	}
@@ -188,6 +191,7 @@ print "</testsuite>\n";
 sub reportFailure {
 	my ($name, $timer, $message) = (@_);
 	$globalNumFailed++;
+	$message = escape($message);
 	my $inner = "<failure>$message</failure>";
 	#comment "$name failed";
 	return reportAny($name, $timer, $inner);	
@@ -195,6 +199,7 @@ sub reportFailure {
 sub reportError {
 	my ($name, $timer, $message) = (@_);
 	$globalNumError++;
+	$message = escape($message);
 	my $inner = "<error>$message</error>";
 	#comment "$name errored";
 	return reportAny($name, $timer, $inner);	
@@ -202,6 +207,7 @@ sub reportError {
 sub reportSuccess {
 	my ($name, $timer, $message) = (@_);
 	$globalNumPassed++;
+	$message = escape($message);
 	my $inner = "$message";
 	#comment "$name passed";
 	return reportAny($name, $timer, $inner);	
@@ -213,7 +219,7 @@ sub reportAny {
 	#my $elapsed = tv_interval( $timer, [gettimeofday]);
 	#$globalTotalTime += $elapsed;
 	$globalTests .= "\t<testcase name='$name' time='$time'>\n";
-	$globalTests .= "\t\t<measurement><name>Time</name><value>$time</value></measurement>\n";
+	#$globalTests .= "\t\t<measurement><name>Time</name><value>$time</value></measurement>\n";
 	$globalTests .= "\t\t$inner\n";
 	$globalTests .= "\t</testcase>\n";
 }
