@@ -1,8 +1,18 @@
-K-MAUDE-BASE = ../..
-K-COMPILE-BASE = tools/kompile.pl
-K-MAUDE = $(K-MAUDE-BASE)/$(K-COMPILE-BASE)
+# KCOMPILE can be set by whoever calls this file
+# e.g., `make KCOMPILE=xxxxx`
+KCOMPILE ?= ../../tools/kompile.pl
 
-.PHONY: all
+# this is the name of the main maude module 
+LANGUAGE_NAME = ISSUE134
 
-all: Makefile
-	$(K-MAUDE) issue134 -language ISSUE134
+# this is the name of the interesting modules (used by make latex/pdf) 
+LANGUAGE_MODULES = ISSUE134
+
+#this is the basename of the main file
+MAIN_FILE = issue134
+
+# this is a space-separated list of basename maude files to run
+TESTS = test.m
+
+TOOL_DIR = $(dir $(KCOMPILE))
+include $(TOOL_DIR)make-helper.mk

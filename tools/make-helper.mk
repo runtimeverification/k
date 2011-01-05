@@ -1,3 +1,8 @@
+
+# defaults, are set only if they weren't set before
+MAIN_FILE ?= yourLanguage
+LANGUAGE_NAME ?= YOURLANGUAGE
+
 ################################
 # You shouldn't need to change anything below here.
 # The things below are set based on what you set above
@@ -14,6 +19,7 @@ COMPILED_FILE = $(MAIN_FILE)-compiled.maude
 # PNG_FILES = $(EPS_FILES).png
 LATEX_STYLE ?= mm
 LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k; fi), $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi)))
+
 
 # phony tells make which targets aren't real files
 .PHONY: all test-% test force build
@@ -56,12 +62,18 @@ crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
 test: $(COMPILED_FILE) $(addprefix test-,$(TESTS))
 
-# this is how to satisfy the target "test-%" for some %.  It requires %.maude to exist.  It then runs it through maude
-test-%: %
-	echo q | maude $<
+# this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
+test-% test-%.output: %
+	@echo q | maude -no-wrap -no-ansi-color $< > $@.output
+	@cat $@.output
+	
+results-%.xml: test-%.output
+	@perl $(TOOL_DIR)/createXMLTestOutput.pl $* test-$*.output > $@
+	@cat $@
 
 # used to force targets to run
 force: ;
 	
 clean:
-	rm -f $(MAIN_FILE)-compiled.maude kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE)
+	@-rm -f $(MAIN_FILE)-compiled.maude kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE) test-*.output shared.maude
+	@-rm -f ${subst .k,.maude, ${filter %.k, $(LANGUAGE_FILE)}}
