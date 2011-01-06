@@ -1172,7 +1172,12 @@ sub maudify_file {
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
-# dots issue: change <cell>.</cell> into <cell> . </cell>    
+# add line numbers metadata
+#    $_ = add_line_numbers($_, $file);
+#    print $_;
+#    exit(1);
+
+# dots issue: change <cell>.</cell> into <cell> . </cell>
     s!<(.*?)>\.</\1>!<$1> \. </$1>!g;
     
 # Replacing dots    

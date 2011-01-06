@@ -1483,4 +1483,56 @@ sub uniq
 ###############################################
 
 
+###############################################
+#       line numbers metadata                 #
+###############################################
+
+
+sub add_line_numbers
+{
+    (local $_, my $file) = (shift, shift);
+    
+    my $temp = $_;
+    my $attr = "";
+    
+    # process rules first
+    while (/((rule|syntax)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/sg)
+    {
+	if ($2 eq "rule")
+	{
+	    my ($rule, $spaces) = ($1, $3);
+	    my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
+	    $rule =~ s/\[(.*?)\]/{ $attr = $1; }/gse;
+	    $rule .= " [$attr metadata \"location($file:$rule_line)\" ]" if $rule_size == 0 || $rule_size == 1;
+	    $rule .= " [$attr metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\" ]" if $rule_size > 1; 	
+	    $temp =~ s/\Q$tmp\E/$rule/sg;
+	}
+	elsif ($2 eq "syntax")
+	{
+	    my $syntax = $1;
+	    my ($tmp, $syntax_line) = ($syntax, countlines("$`"));
+
+	    while ($syntax =~ /(?:(::=|\|))([^\|]+)/sg)
+	    {
+		my ($item, $t, $lines) = ($2, $2, countlines("$`"));
+		my $lno = $syntax_line + $lines - 1;
+		$item =~ s!\[(.*?)\](\s*)$!"\[$1 metadata \"location($file:$lno)\"\]$2"!se;
+		$tmp =~ s/\Q$t\E/$item/sge;
+	    }
+	    
+	    $temp =~ s/\Q$syntax\E/$tmp/sg;
+	}
+    }
+
+    return $temp;
+}
+
+sub countlines
+{
+    (local $_, my $count) = (shift, 1);
+    return 0 if $_ eq "";
+    while(/\n/sg) { $count ++; }
+    return $count;
+}
+
 1;
