@@ -1502,7 +1502,7 @@ sub add_line_numbers
 	{
 	    my ($rule, $spaces) = ($1, $3);
 	    my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
-	    $rule =~ s/\[(.*?)\]/{ $attr = $1; }/gse;
+	    $rule =~ s/\[(.*?)\]/{$attr = $1;}""/gse;
 	    $rule .= " [$attr metadata \"location($file:$rule_line)\" ]" if $rule_size == 0 || $rule_size == 1;
 	    $rule .= " [$attr metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\" ]" if $rule_size > 1; 	
 	    $temp =~ s/\Q$tmp\E/$rule/sg;
