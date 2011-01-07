@@ -78,7 +78,7 @@ including META-K-WRAPPERS .
 
  op pruneOps : Module OpDeclSet Type Nat -> OpDeclSet .
  eq pruneOps(Flat, (op Q : Tl -> T [AS] .) Ops, T', N) 
-  = if sortLeq(Flat, nth(Tl, N), T') then  (op Q : Tl -> T [AS] .) else none
+  = if sortLeq(Flat, T', nth(Tl, N)) then  (op Q : Tl -> T [AS] .) else none
     fi pruneOps(Flat, Ops, T', N) .
  eq pruneOps(Flat, none, T', N) = none .
 
