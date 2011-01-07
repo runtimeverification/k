@@ -117,6 +117,9 @@ mod K-EXTRAS is
    = Label2(substList{K}Label(Ks,Label1,Label2)) .
  ceq substKLabel(Label(Ks), Label1, Label2) 
    = Label(substList{K}Label(Ks,Label1,Label2)) if Label1 =/=Bool Label .
+  eq substKLabel((K1:NeK ~> K2:NeK ~> K), Label1, Label2)
+   = substKLabel(K1:NeK, Label1, Label2) ~> substKLabel(K2:NeK, Label1, Label2) ~> substKLabel(K, Label1, Label2) .
+  eq substKLabel(., Label1, Label2) = . .
 endm
 
 mod K-MAP-EXTRAS is
