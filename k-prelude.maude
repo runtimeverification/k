@@ -104,17 +104,19 @@ endm
 
 mod K-EXTRAS is
   including K-TECHNIQUE .
-  var Ks Ks' : List{K} .
+  var Ks : List{K} .  var K : K .
   var Label1 Label2 Label : KLabel .
  
-  op substKLabel : List{K} KLabel KLabel -> List{K} .
-  eq substKLabel(.List{K},Label1, Label2) = .List{K} .
-  eq substKLabel((Label1(Ks),,Ks'), Label1, Label2) 
-   = Label2(substKLabel(Ks,Label1,Label2)),,
-       substKLabel(Ks',Label1,Label2) .
- ceq substKLabel((Label(Ks),,Ks'), Label1, Label2) 
-   = Label(substKLabel(Ks,Label1,Label2)),,
-       substKLabel(Ks',Label1,Label2) if Label1 =/=Bool Label .
+  op substKLabel : K KLabel KLabel -> K .
+  op substList{K}Label`(_`,_`,_`) : List{K} KLabel KLabel -> List{K} .
+  eq substList{K}Label(.List{K},Label1, Label2) = .List{K} .
+  eq substList{K}Label((K,,Ks), Label1, Label2) 
+   = substKLabel(K,Label1,Label2),,  substList{K}Label(Ks, Label1, Label2) .
+
+  eq substKLabel(Label1(Ks), Label1, Label2) 
+   = Label2(substList{K}Label(Ks,Label1,Label2)) .
+ ceq substKLabel(Label(Ks), Label1, Label2) 
+   = Label(substList{K}Label(Ks,Label1,Label2)) if Label1 =/=Bool Label .
 endm
 
 mod K-MAP-EXTRAS is
