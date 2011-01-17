@@ -1487,24 +1487,46 @@ sub uniq
 #       line numbers metadata                 #
 ###############################################
 
+my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large);
+my $k_attributes_pattern = join("|",  @k_attributes);
+
 
 sub add_line_numbers
 {
     (local $_, my $file) = (shift, shift);
+#    print "ATTR: $k_attributes_pattern\n\n";
+    s/($comment)/                                                                                    
+    {                                                                                                
+	local $_=$1;                                                                                 
+	s!\S!!gs;                                                                                    
+	$_;                                                                                          
+    }/gsme; 
     
     my $temp = $_;
-    my $attr = "";
     
     # process rules first
     while (/((rule|syntax)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/sg)
     {
 	if ($2 eq "rule")
 	{
-	    my ($rule, $spaces) = ($1, $3);
+	    my ($rule, $spaces, $attr) = ($1, $3, "");
+#	    print "RULE: $rule\n";
 	    my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
-	    $rule =~ s/\[(.*?)\]/{$attr = $1;}""/gse;
-	    $rule .= " [$attr metadata \"location($file:$rule_line)\" ]" if $rule_size == 0 || $rule_size == 1;
-	    $rule .= " [$attr metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\" ]" if $rule_size > 1; 	
+	    # $rule =~ s/\[([^\]]*?(?<=\s)($k_attributes_pattern)(?=\s)[^\]]*?)\]/{$attr = $1;}""/gse;
+#	    $rule =~ s/\[[^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?\](?=\s*)$/{$attr = $2;}""/gse;
+	    $rule =~ s/\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$/{$attr = $1;}""/gse;
+#	    print "ATTR: $attr\n";
+	    if ($attr eq "")
+	    {
+		$rule .= " [metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
+		$rule .= " [metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+	    }
+	    else
+	    {
+		$rule .= "[$attr metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
+		$rule .= "[$attr metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+	    }
+#	    print "MBRL: $rule\n\n";
 	    $temp =~ s/\Q$tmp\E/$rule/sg;
 	}
 	elsif ($2 eq "syntax")
@@ -1514,13 +1536,18 @@ sub add_line_numbers
 
 	    while ($syntax =~ /(?:(::=|\|))([^\|]+)/sg)
 	    {
-		my ($item, $t, $lines) = ($2, $2, countlines("$`"));
-		my $lno = $syntax_line + $lines - 1;
-		$item =~ s!\[(.*?)\](\s*)$!"\[$1 metadata \"location($file:$lno)\"\]$2"!se;
-		$tmp =~ s/\Q$t\E/$item/sge;
+		my $rule_line = countlines("$`") + $syntax_line;
+		my $spacess = "";
+		my $item = $2;
+		$item =~ s/(\s+)$/{$spacess = $1;}/sge;
+		my $item2 = $item;
+		$item =~ s!(\[([^\]]*?($k_attributes_pattern)[^\]]*?)\])![$2 metadata "location($file:$rule_line)"]!sg;
+#		print "Replace: |$item2|\nwith\n|$item|\n\n";
+		$tmp =~ s/\Q$item2\E/$item/sg;
 	    }
 	    
 	    $temp =~ s/\Q$syntax\E/$tmp/sg;
+#	    print "TEMP: $temp\n\n----------------------\n";
 	}
     }
 
