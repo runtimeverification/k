@@ -1504,9 +1504,13 @@ sub add_line_numbers
     
     my $temp = $_;
     
+    
     # process rules first
     while (/((rule|syntax)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/sg)
     {
+	$_ = $'; # this is perl 5.8.8 ... :-(
+#	print "Matched:\n$&\n\n-----------------------------------------------------------------\n\n\n\n\n\n";
+	
 	if ($2 eq "rule")
 	{
 	    my ($rule, $spaces, $attr) = ($1, $3, "");
@@ -1542,7 +1546,6 @@ sub add_line_numbers
 		$item =~ s/(\s+)$/{$spacess = $1;}/sge;
 		my $item2 = $item;
 		$item =~ s!(\[([^\]]*?($k_attributes_pattern)[^\]]*?)\])![$2 metadata "location($file:$rule_line)"]!sg;
-#		print "Replace: |$item2|\nwith\n|$item|\n\n";
 		$tmp =~ s/\Q$item2\E/$item/sg;
 	    }
 	    
