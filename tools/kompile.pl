@@ -724,6 +724,8 @@ sub latexify {
 #		  "(print $language_module_name .)\n",
 		  "quit\n");
 
+    print "OUT:\n$_\n";
+    
     s/\\begin{module}.*?\\end{module}//gms;
     my @l_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
     if (@l_modules && !/\\begin{module}/) {
@@ -1326,11 +1328,12 @@ sub maudify_module {
 # Step: Change K attributes to Maude metadata
     s!(\[(?:\\.|[^\]])*\])!make_metadata($1)!gse;
     # print  "Stage:\n$_\n\n";
-    
+
 # Step: Change K statements into Maude statements
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+    # resolve macros
+    s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
-#    $_ = Unfreeze("ATTR", $_);
     # print  "Stage:\n$_\n\n";
     
 # Step: Unfreeze everything still frozen

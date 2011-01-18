@@ -1394,12 +1394,12 @@ sub find_topmost_module
     # put all "right hand" modules into a variable separated with # for a future match
     while(my ($k, $v) = each %moduleMap) 
     {
-	push(@modules, $k);
-	my @temp = split(/\s+/, $v);
-	foreach(@temp)
-	{
-	    $inclusions .= "$_#";
-	}
+        push(@modules, $k);
+        my @temp = split(/\s+/, $v);
+        foreach(@temp)
+        {
+            $inclusions .= "$_#";
+        }
     }
     
     # collect all modules which are not included by other modules
@@ -1564,5 +1564,78 @@ sub countlines
     while(/\n/sg) { $count ++; }
     return $count;
 }
+
+# the following subroutine replaces 
+# macros declared with where
+sub resolve_where_macro($)
+{
+    local $_ = shift;
+    my %macro_map = ();
+    my %macro_order = ();
+    my $i = 1;
+    
+    # where macro can be found only in rules
+    if (/^rule/)
+    {
+        # locate where macro if any
+        if (/(?<=\s)(where(\s+)(.*)(\s+))(?=ATTR[0-9]*)/sg)
+        { 
+            # extract needed data
+            my $macros = $3;
+            my $all = $&;
+
+            # build an empty string which will keep the 
+            # length and the number of lines for where macro
+            my $macros_template = $all;
+            $macros_template =~ s/[^\n]/ /sg;
+            
+            
+            # exclude the where macro from the rule body
+            # and replace it with whitespaces
+            s/\Q$all\E/$macros_template/sg;
+            
+            # first, collect macros
+            # macro_map contains all macros mapped to their values
+            # macro_order containt all macros mapped to their occurence order
+            while($macros =~ /(\w+)\s+=\s+(.*?)((?=(\s+(\w+)\s+=))|$)/sg)
+            {
+                $macro_map{"$1"} = "$2";
+                $macro_order{"$1"} = $i ++;
+            }
+            
+            # solve macros inside macros
+            # each macro must be defined before it is used
+            # the following code will replace macros in each (key) value
+            while(my ($k, $order) = each %macro_order)
+            {
+                # $order contains the occurence index
+                # $k is the curent macro
+                # replace macro with its values in all macros declared after it was declared
+                while(my ($newk, $mvalue) = each %macro_map)
+                {
+                    if ($macro_order{$newk} > $order)
+                    {
+                        # add replacement
+                        $mvalue =~ s/\Q$k\E/$macro_map{$k}/sg;
+                        $macro_map{$newk} = $mvalue;
+                    }
+                }
+            }
+            
+            
+            # solve macros in current rule
+            # each macro in the hashmap $macro_map will be replaced
+            # in the current rule with macro's value
+            while(my ($k, $v) = each %macro_map)
+            {
+                s/(?<=\s)\Q$k\E(?=\s)/$v/sge;
+            }
+        }
+    }    
+    
+    return $_;
+}    
+
+
 
 1;
