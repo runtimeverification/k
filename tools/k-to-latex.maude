@@ -621,6 +621,8 @@ mod DECL-META-LATEX-PRINT is
   var NNL : NeNatList .
   eq eMetaLatexPrint(M, (kstrict(nil,QIL) AtS))
     = ('strict strictCells(QIL) eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (klocation(Str) AtS)) 
+   = eMetaLatexPrint(M, AtS) .
   eq eMetaLatexPrint(M, (kstrict(NNL, QIL) AtS))
     = ('strict '`( eMetaLatexPrint(NNL) '`) strictCells(QIL)
        eMetaLatexPrint(M, AtS)) .
