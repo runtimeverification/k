@@ -724,7 +724,7 @@ sub latexify {
 #		  "(print $language_module_name .)\n",
 		  "quit\n");
 
-    print "OUT:\n$_\n";
+#    print "OUT:\n$_\n";
     
     s/\\begin{module}.*?\\end{module}//gms;
     my @l_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
