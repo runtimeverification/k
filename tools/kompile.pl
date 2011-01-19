@@ -723,8 +723,6 @@ sub latexify {
 		  map("(print $_ .)\n", @modules),
 #		  "(print $language_module_name .)\n",
 		  "quit\n");
-
-#    print "OUT:\n$_\n";
     
     s/\\begin{module}.*?\\end{module}//gms;
     my @l_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
@@ -1637,7 +1635,7 @@ sub on_the_fly_kvars {
 # If there is any configuration, get all its cell labels and declare them at the end of kmodule
 sub add_cell_label_ops {
     local ($_) = @_;
-    my $ops = (/configuration\s+(.*?)(?:$kmaude_keywords_pattern)/s
+    my $ops = (/(?<=\s)configuration\s+(.*?)(?:$kmaude_keywords_pattern)/s
 	       ? "ops ".join(" ",set($1 =~ /<\s*\/?\s*(.*?)\s*[\*\+\?]?\s*>/gs))." : -> CellLabel " : "");
     s/(?=endkm)/$ops?"$ops ":""/se;
     return $_;
