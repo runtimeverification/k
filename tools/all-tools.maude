@@ -25,5 +25,6 @@ load homogenous-arguments-interface
 load make-all-labels-interface
 load strict-ops2cxt-interface
 load strict-cxt2eqs-interface
+load id-to-string-interface
 load compile-program
 load compile-chain

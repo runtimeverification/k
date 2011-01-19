@@ -810,8 +810,14 @@ mod PL-STRING is
                   term-hook falseTerm (false))] .
 endm
 
+mod PL-ID is
+  including BUILTINS .
+  sort Id .
+  subsort Id < Builtins .
+endm
 
 mod PL-CONVERSION is
+  protecting PL-ID .
   protecting PL-RAT .
   protecting PL-FLOAT .
   protecting PL-STRING .
@@ -883,6 +889,8 @@ ceq String2Int(S:String) = I:Int if I:Int := String2Rat(S:String,10) .
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook decFloatSymbol 
                           (<_,_,_>Conversion : Int String Int ~> DecFloat))] .
+
+  op Id2String : Id -> String .
 endm
 
 mod PL-QID is
@@ -919,13 +927,6 @@ mod PL-COUNTER is
     op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
   op kcounter : -> Nat .
   eq kcounter = counter .
-endm
-
-
-mod PL-ID is
-  including BUILTINS .
-  sort Id .
-  subsort Id < Builtins .
 endm
 
 
