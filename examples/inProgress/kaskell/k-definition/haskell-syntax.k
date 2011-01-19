@@ -112,11 +112,11 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax SpecialCon ::= `UnitCon
-                 | `ListCon
-                 | `FunCon
-                 | `TupleCon Boxed Int
-                 | `Cons
-                 | `UnboxedSingleCon
+                        | `ListCon
+                        | `FunCon
+                        | `TupleCon Boxed Int
+                        | `Cons
+                        | `UnboxedSingleCon
 
 ***(
     -- | This type is used to represent qualified variables, and also
@@ -128,8 +128,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax QName ::= `Qual  ModuleName Name
-            | `UnQual Name
-            | `Special SpecialCon
+                   | `UnQual Name
+                   | `Special SpecialCon
 
 ***(
     -- | This type is used to represent variables, and also constructors.
@@ -139,7 +139,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Name ::= `Ident String
-           | `Symbol String
+                  | `Symbol String
 
 ***(
     -- | An implicit parameter name.
@@ -149,7 +149,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax IPName ::= `IPDup String
-             | `IPLin String
+                    | `IPLin String
 
 
 ***(
@@ -160,7 +160,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax QOp ::= `QVarOp QName
-          | `QConOp QName
+                 | `QConOp QName
 
 ***(
     -- | Operators appearing in @infix@ declarations are never qualified.
@@ -170,7 +170,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Op ::= `VarOp Name
-         | `ConOp Name
+                | `ConOp Name
 
 ***(
     -- | A name (/cname/) of a component of a class or data type in an @import@
@@ -181,7 +181,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax CName ::= `VarName Name
-            | `ConName Name
+                   | `ConName Name
 
 ***(
     -- | A complete Haskell source module.
@@ -209,10 +209,10 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax ExportSpec ::= `EVar QName
-                 | `EAbs QName
-                 | `EThingAll QName
-                 | `EThingWith QName HsList
-                 | `EModuleContents ModuleName
+                        | `EAbs QName
+                        | `EThingAll QName
+                        | `EThingWith QName HsList
+                        | `EModuleContents ModuleName
 
 ***(
     -- | An import declaration.
@@ -248,9 +248,9 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax ImportSpec ::= `IVar Name
-                 | `IAbs Name
-                 | `IThingAll Name
-                 | `IThingWith Name HsList
+                        | `IAbs Name
+                        | `IThingAll Name
+                        | `IThingWith Name HsList
 
 ***(
     -- | Associativity of an operator.
@@ -261,8 +261,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Assoc ::= `AssocNone
-            | `AssocLeft
-            | `AssocRight
+                   | `AssocLeft
+                   | `AssocRight
 
 ***(
     -- | A single derived instance, which may have arguments since it may be a MPTC.
@@ -334,33 +334,33 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Decl ::= `TypeDecl SrcLoc Name HsList Type
-           | `TypeFamDecl SrcLoc Name HsList HsMaybe
-           | `DataDecl SrcLoc DataOrNew Context Name HsList HsList HsList
-           | `GDataDecl SrcLoc DataOrNew Context Name HsList HsMaybe HsList HsList
-           | `DataFamDecl SrcLoc Context Name HsList HsMaybe
-           | `TypeInsDecl SrcLoc Type Type
-           | `DataInsDecl SrcLoc DataOrNew Type HsList HsList
-           | `GDataInsDecl SrcLoc DataOrNew Type HsMaybe HsList HsList
-           | `ClassDecl SrcLoc Context Name HsList HsList HsList
-           | `InstDecl SrcLoc Context QName HsList HsList
-           | `DerivDecl SrcLoc Context QName HsList
-           | `InfixDecl SrcLoc Assoc Int HsList
-           | `DefaultDecl SrcLoc HsList
-           | `SpliceDecl SrcLoc Exp
-           | `TypeSig SrcLoc HsList Type
-           | `FunBind HsList
-           | `PatBind SrcLoc Pat HsMaybe Rhs Binds
-           | `ForImp SrcLoc CallConv Safety String Name Type
-           | `ForExp SrcLoc CallConv String Name Type
-           | `RulePragmaDecl SrcLoc HsList
-           | `DeprPragmaDecl SrcLoc HsList
-           | `WarnPragmaDecl SrcLoc HsList
-           | `InlineSig SrcLoc Bool Activation QName
-           | `InlineConlikeSig SrcLoc Activation QName
-           | `SpecSig SrcLoc QName HsList
-           | `SpecInlineSig SrcLoc Bool Activation QName HsList
-           | `InstSig SrcLoc Context QName HsList
-           | `AnnPragma SrcLoc Annotation
+                  | `TypeFamDecl SrcLoc Name HsList HsMaybe
+                  | `DataDecl SrcLoc DataOrNew Context Name HsList HsList HsList
+                  | `GDataDecl SrcLoc DataOrNew Context Name HsList HsMaybe HsList HsList
+                  | `DataFamDecl SrcLoc Context Name HsList HsMaybe
+                  | `TypeInsDecl SrcLoc Type Type
+                  | `DataInsDecl SrcLoc DataOrNew Type HsList HsList
+                  | `GDataInsDecl SrcLoc DataOrNew Type HsMaybe HsList HsList
+                  | `ClassDecl SrcLoc Context Name HsList HsList HsList
+                  | `InstDecl SrcLoc Context QName HsList HsList
+                  | `DerivDecl SrcLoc Context QName HsList
+                  | `InfixDecl SrcLoc Assoc Int HsList
+                  | `DefaultDecl SrcLoc HsList
+                  | `SpliceDecl SrcLoc Exp
+                  | `TypeSig SrcLoc HsList Type
+                  | `FunBind HsList
+                  | `PatBind SrcLoc Pat HsMaybe Rhs Binds
+                  | `ForImp SrcLoc CallConv Safety String Name Type
+                  | `ForExp SrcLoc CallConv String Name Type
+                  | `RulePragmaDecl SrcLoc HsList
+                  | `DeprPragmaDecl SrcLoc HsList
+                  | `WarnPragmaDecl SrcLoc HsList
+                  | `InlineSig SrcLoc Bool Activation QName
+                  | `InlineConlikeSig SrcLoc Activation QName
+                  | `SpecSig SrcLoc QName HsList
+                  | `SpecInlineSig SrcLoc Bool Activation QName HsList
+                  | `InstSig SrcLoc Context QName HsList
+                  | `AnnPragma SrcLoc Annotation
 
 ***(
     -- | An annotation through an ANN pragma.
@@ -374,8 +374,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Annotation ::= `Ann Name Exp
-                 | `TypeAnn Name Exp
-                 | `ModuleAnn Exp
+                        | `TypeAnn Name Exp
+                        | `ModuleAnn Exp
 
 ***(
     -- | A flag stating whether a declaration is a data or newtype declaration.
@@ -383,7 +383,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax DataOrNew ::= `DataType
-                | `NewType
+                       | `NewType
 
 ***(
     -- | A binding group inside a @let@ or @where@ clause.
@@ -393,7 +393,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Binds ::= `BDecls HsList
-            | `IPBinds HsList
+                   | `IPBinds HsList
 
 ***(
     -- | A binding of an implicit parameter.
@@ -433,8 +433,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax ConDecl ::= `ConDecl Name HsList
-              | `InfixConDecl BangType Name BangType
-              | `RecDecl Name HsList
+                     | `InfixConDecl BangType Name BangType
+                     | `RecDecl Name HsList
 
 ***(
     -- | A single constructor declaration in a GADT data type declaration.
@@ -458,9 +458,9 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax ClassDecl ::= `ClsDecl Decl
-                | `ClsDataFam SrcLoc Context Name HsList HsMaybe
-                | `ClsTyFam SrcLoc Name HsList HsMaybe
-                | `ClsTyDef SrcLoc Type    Type
+                       | `ClsDataFam SrcLoc Context Name HsList HsMaybe
+                       | `ClsTyFam SrcLoc Name HsList HsMaybe
+                       | `ClsTyDef SrcLoc Type    Type
 
 ***(
     -- | Declarations inside an instance declaration.
@@ -476,9 +476,9 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax InstDecl ::= `InsDecl Decl
-               | `InsType SrcLoc Type Type
-               | `InsData SrcLoc DataOrNew Type HsList HsList
-               | `InsGData SrcLoc DataOrNew Type HsMaybe HsList HsList
+                      | `InsType SrcLoc Type Type
+                      | `InsData SrcLoc DataOrNew Type HsList HsList
+                      | `InsGData SrcLoc DataOrNew Type HsMaybe HsList HsList
 
 ***(
     -- | The type of a constructor argument or field, optionally including
@@ -490,8 +490,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax BangType ::= `BangedTy Type
-               | `UnBangedTy Type
-               | `UnpackedTy Type
+                      | `UnBangedTy Type
+                      | `UnpackedTy Type
 
 ***(
     -- | The right hand side of a function or pattern binding.
@@ -502,7 +502,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Rhs ::= `UnGuardedRhs Exp
-          | `GuardedRhss HsList
+                 | `GuardedRhss HsList
 
 ***(
     -- | A guarded right hand side @|@ /stmts/ @=@ /exp/.
@@ -534,15 +534,15 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Type ::= `TyForall HsMaybe Context Type
-           | `TyFun Type Type
-           | `TyTuple Boxed HsList
-           | `TyList Type
-           | `TyApp Type Type
-           | `TyVar Name
-           | `TyCon QName
-           | `TyParen Type
-           | `TyInfix Type QName Type
-           | `TyKind Type Kind
+                  | `TyFun Type Type
+                  | `TyTuple Boxed HsList
+                  | `TyList Type
+                  | `TyApp Type Type
+                  | `TyVar Name
+                  | `TyCon QName
+                  | `TyParen Type
+                  | `TyInfix Type QName Type
+                  | `TyKind Type Kind
 
 ***(
     -- | A type variable declaration, optionally with an explicit kind annotation.
@@ -552,7 +552,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax TyVarBind ::= `KindedVar Name Kind
-                | `UnkindedVar Name
+                       | `UnkindedVar Name
 
 ***(
     -- | An explicit kind annotation.
@@ -565,10 +565,10 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Kind ::= `KindStar
-           | `KindBang
-           | `KindFn Kind Kind
-           | `KindParen Kind
-           | `KindVar Name
+                  | `KindBang
+                  | `KindFn Kind Kind
+                  | `KindParen Kind
+                  | `KindVar Name
 
 ***(
     -- | A functional dependency, given on the form
@@ -598,9 +598,9 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Asst ::= `ClassA QName HsList
-           | `InfixA Type QName Type
-           | `IParam IPName Type
-           | `EqualP Type Type
+                  | `InfixA Type QName Type
+                  | `IParam IPName Type
+                  | `EqualP Type Type
 
 ***(
     -- | /literal/
@@ -621,15 +621,15 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Literal ::= `Char Int
-              | `String String
-              | `Int Int
-              | `Frac HsRational
-              | `PrimInt Int
-              | `PrimWord Int
-              | `PrimFloat HsRational
-              | `PrimDouble HsRational
-              | `PrimChar Int
-              | `PrimString String
+                     | `String String
+                     | `Int Int
+                     | `Frac HsRational
+                     | `PrimInt Int
+                     | `PrimWord Int
+                     | `PrimFloat HsRational
+                     | `PrimDouble HsRational
+                     | `PrimChar Int
+                     | `PrimString String
 
 ***(
     -- | Haskell expressions.
@@ -701,50 +701,50 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Exp ::= `Var QName
-          | `IPVar IPName
-          | `Con QName
-          | `Lit Literal
-          | `InfixApp Exp QOp Exp
-          | `App Exp Exp
-          | `NegApp Exp
-          | `Lambda SrcLoc HsList Exp
-          | `Let Binds Exp
-          | `If Exp Exp Exp
-          | `Case Exp HsList
-          | `Do HsList
-          | `MDo HsList
-          | `Tuple HsList
-          | `TupleSection HsList
-          | `List HsList
-          | `Paren Exp
-          | `LeftSection Exp QOp
-          | `RightSection QOp Exp
-          | `RecConstr QName HsList
-          | `RecUpdate Exp HsList
-          | `EnumFrom Exp
-          | `EnumFromTo Exp Exp
-          | `EnumFromThen Exp Exp
-          | `EnumFromThenTo Exp Exp Exp
-          | `ListComp Exp HsList
-          | `ParComp Exp HsList
-          | `ExpTypeSig SrcLoc Exp Type
-          | `VarQuote QName
-          | `TypQuote QName
-          | `BracketExp Bracket
-          | `SpliceExp Splice
-          | `QuasiQuote String String
-          | `XTag SrcLoc XName HsList HsMaybe HsList
-          | `XETag SrcLoc XName HsList HsMaybe
-          | `XPcdata String
-          | `XExpTag Exp
-          | `CorePragma String Exp
-          | `SCCPragma String Exp
-          | `GenPragma String HsTuple HsTuple Exp
-          | `Proc SrcLoc Pat Exp
-          | `LeftArrApp Exp Exp
-          | `RightArrApp Exp Exp
-          | `LeftArrHighApp Exp Exp
-          | `RightArrHighApp Exp Exp
+                 | `IPVar IPName
+                 | `Con QName
+                 | `Lit Literal
+                 | `InfixApp Exp QOp Exp
+                 | `App Exp Exp
+                 | `NegApp Exp
+                 | `Lambda SrcLoc HsList Exp
+                 | `Let Binds Exp
+                 | `If Exp Exp Exp
+                 | `Case Exp HsList
+                 | `Do HsList
+                 | `MDo HsList
+                 | `Tuple HsList
+                 | `TupleSection HsList
+                 | `List HsList
+                 | `Paren Exp
+                 | `LeftSection Exp QOp
+                 | `RightSection QOp Exp
+                 | `RecConstr QName HsList
+                 | `RecUpdate Exp HsList
+                 | `EnumFrom Exp
+                 | `EnumFromTo Exp Exp
+                 | `EnumFromThen Exp Exp
+                 | `EnumFromThenTo Exp Exp Exp
+                 | `ListComp Exp HsList
+                 | `ParComp Exp HsList
+                 | `ExpTypeSig SrcLoc Exp Type
+                 | `VarQuote QName
+                 | `TypQuote QName
+                 | `BracketExp Bracket
+                 | `SpliceExp Splice
+                 | `QuasiQuote String String
+                 | `XTag SrcLoc XName HsList HsMaybe HsList
+                 | `XETag SrcLoc XName HsList HsMaybe
+                 | `XPcdata String
+                 | `XExpTag Exp
+                 | `CorePragma String Exp
+                 | `SCCPragma String Exp
+                 | `GenPragma String HsTuple HsTuple Exp
+                 | `Proc SrcLoc Pat Exp
+                 | `LeftArrApp Exp Exp
+                 | `RightArrApp Exp Exp
+                 | `LeftArrHighApp Exp Exp
+                 | `RightArrHighApp Exp Exp
 
 ***(
     -- | The name of an xml element or attribute,
@@ -755,7 +755,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax XName ::= `XName String
-            | `XDomName String String
+                   | `XDomName String String
 
 ***(
     -- | An xml attribute, which is a name-expression pair.
@@ -774,8 +774,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Bracket ::= `PatBracket Pat
-              | `TypeBracket Type
-              | `DeclBracket HsList
+                     | `TypeBracket Type
+                     | `DeclBracket HsList
 
 ***(
     -- | A template haskell splice expression
@@ -785,7 +785,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Splice ::= `IdSplice String
-             | `ParenSplice Exp
+                    | `ParenSplice Exp
 
 ***(
     -- | The safety of a foreign function call.
@@ -795,7 +795,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Safety ::= `PlayRisky
-             | `PlaySafe Bool
+                    | `PlaySafe Bool
 
 ***(
     -- | The calling convention of a foreign function call.
@@ -805,7 +805,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax CallConv ::= `StdCall
-               | `CCall
+                      | `CCall
 
 ***(
     -- | A top level options pragma, preceding the module header.
@@ -818,8 +818,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax ModulePragma ::= `LanguagePragma SrcLoc HsList
-                   | `OptionsPragma SrcLoc HsMaybe String
-                   | `AnnModulePragma SrcLoc Annotation
+                          | `OptionsPragma SrcLoc HsMaybe String
+                          | `AnnModulePragma SrcLoc Annotation
 
 ***(
     -- | Activation clause of a RULES pragma.
@@ -830,8 +830,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Activation ::= `AlwaysActive
-                 | `ActiveFrom Int
-                 | `ActiveUntil Int
+                        | `ActiveFrom Int
+                        | `ActiveUntil Int
 
 ***(
     -- | The body of a RULES pragma.
@@ -849,7 +849,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax RuleVar ::= `RuleVar Name
-              | `TypedRuleVar Name Type
+                     | `TypedRuleVar Name Type
 
 ***(
     -- | Warning text to optionally use in the module header of e.g.
@@ -860,7 +860,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax WarningText ::= `DeprText String
-                  | `WarnText String
+                         | `WarnText String
 
 ***(
     -- | A pattern, to be matched against a value.
@@ -894,29 +894,29 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Pat ::= `PVar Name
-          | `PLit Literal
-          | `PNeg Pat
-          | `PNPlusK Name Int
-          | `PInfixApp Pat QName Pat
-          | `PApp QName HsList
-          | `PTuple HsList
-          | `PList HsList
-          | `PParen Pat
-          | `PRec QName HsList
-          | `PAsPat Name Pat
-          | `PWildCard
-          | `PIrrPat Pat
-          | `PatTypeSig SrcLoc Pat Type
-          | `PViewPat Exp Pat
-          | `PRPat HsList
-          | `PXTag SrcLoc XName HsList HsMaybe HsList
-          | `PXETag SrcLoc XName HsList HsMaybe
-          | `PXPcdata String
-          | `PXPatTag Pat
-          | `PXRPats HsList
-          | `PExplTypeArg QName Type
-          | `PQuasiQuote String String
-          | `PBangPat Pat
+                 | `PLit Literal
+                 | `PNeg Pat
+                 | `PNPlusK Name Int
+                 | `PInfixApp Pat QName Pat
+                 | `PApp QName HsList
+                 | `PTuple HsList
+                 | `PList HsList
+                 | `PParen Pat
+                 | `PRec QName HsList
+                 | `PAsPat Name Pat
+                 | `PWildCard
+                 | `PIrrPat Pat
+                 | `PatTypeSig SrcLoc Pat Type
+                 | `PViewPat Exp Pat
+                 | `PRPat HsList
+                 | `PXTag SrcLoc XName HsList HsMaybe HsList
+                 | `PXETag SrcLoc XName HsList HsMaybe
+                 | `PXPcdata String
+                 | `PXPatTag Pat
+                 | `PXRPats HsList
+                 | `PExplTypeArg QName Type
+                 | `PQuasiQuote String String
+                 | `PBangPat Pat
 
 ***(
     -- | An XML attribute in a pattern.
@@ -937,11 +937,11 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax RPatOp ::= `RPStar
-             | `RPStarG
-             | `RPPlus
-             | `RPPlusG
-             | `RPOpt
-             | `RPOptG
+                    | `RPStarG
+                    | `RPPlus
+                    | `RPPlusG
+                    | `RPOpt
+                    | `RPOptG
 
 ***(
     -- | An entity in a regular pattern.
@@ -957,13 +957,13 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax RPat ::= `RPOp RPat RPatOp
-           | `RPEither RPat RPat
-           | `RPSeq HsList
-           | `RPGuard Pat HsList
-           | `RPCAs Name RPat
-           | `RPAs Name RPat
-           | `RPParen RPat
-           | `RPPat Pat
+                  | `RPEither RPat RPat
+                  | `RPSeq HsList
+                  | `RPGuard Pat HsList
+                  | `RPCAs Name RPat
+                  | `RPAs Name RPat
+                  | `RPParen RPat
+                  | `RPPat Pat
 
 ***(
     -- | An /fpat/ in a labeled record pattern.
@@ -974,8 +974,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax PatField ::= `PFieldPat QName Pat
-               | `PFieldPun Name
-               | `PFieldWildcard
+                      | `PFieldPun Name
+                      | `PFieldWildcard
 
 ***(
     -- | A statement, representing both a /stmt/ in a @do@-expression,
@@ -993,9 +993,9 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax Stmt ::= `Generator SrcLoc Pat Exp
-           | `Qualifier Exp
-           | `LetStmt Binds
-           | `RecStmt HsList
+                  | `Qualifier Exp
+                  | `LetStmt Binds
+                  | `RecStmt HsList
 
 ***(
     -- | A general /transqual/ in a list comprehension,
@@ -1011,11 +1011,11 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax QualStmt ::= `QualStmt Stmt
-               | `ThenTrans Exp
-               | `ThenBy Exp Exp
-               | `GroupBy Exp
-               | `GroupUsing Exp
-               | `GroupByUsing Exp Exp
+                      | `ThenTrans Exp
+                      | `ThenBy Exp Exp
+                      | `GroupBy Exp
+                      | `GroupUsing Exp
+                      | `GroupByUsing Exp Exp
 
 ***(
     -- | An /fbind/ in a labeled construction or update expression.
@@ -1026,8 +1026,8 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax FieldUpdate ::= `FieldUpdate QName Exp
-                  | `FieldPun Name
-                  | `FieldWildcard
+                         | `FieldPun Name
+                         | `FieldWildcard
 
 ***(
     -- | An /alt/ alternative in a @case@ expression.
@@ -1047,7 +1047,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax GuardedAlts ::= `UnGuardedAlt Exp
-                  | `GuardedAlts HsList
+                         | `GuardedAlts HsList
 
 ***(
     -- | A guarded case alternative @|@ /stmts/ @->@ /exp/.
@@ -1057,7 +1057,7 @@ data SrcLoc = SrcLoc
 
     syntax GuardedAlt ::= `GuardedAlt SrcLoc HsList Exp
 
-    --- End of syntax, rest of this file is the remainder of Language.Haskell.Exts.Syntax
+           --- End of syntax, rest of this file is the remainder of Language.Haskell.Exts.Syntax
 
 ***(
     -----------------------------------------------------------------------------

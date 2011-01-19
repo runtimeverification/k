@@ -21,7 +21,7 @@ mod HASKELL-SYNTAX-STRUCTS is
     --- AST Tuple for GenPragma
     --- These only correspond to being able to parse the AST in maude, and have no bearing on tuples in the
     --- original source
-    op (,)        _ _             : Syntax Syntax                                           -> HsTuple [ctor] .
+    op (,) _ _ : Syntax Syntax -> HsTuple [ctor] .
 
     subsorts HsList HsMaybe HsTuple < Syntax .
 
