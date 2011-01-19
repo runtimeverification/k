@@ -726,51 +726,51 @@ data SrcLoc = SrcLoc
 ***)
 
     sort Exp .
-    op Var _                : QName                              -> Exp [ctor] .
-    op IPVar _              : IPName                             -> Exp [ctor] .
-    op Con _                : QName                              -> Exp [ctor] .
-    op Lit _                : Literal                            -> Exp [ctor] .
-    op InfixApp _ _ _       : Exp QOp Exp                        -> Exp [ctor] .
-    op App _ _              : Exp Exp                            -> Exp [ctor] .
-    op NegApp _             : Exp                                -> Exp [ctor] .
-    op Lambda _ _ _         : SrcLoc HsList Exp                  -> Exp [ctor] .
-    op Let _ _              : Binds Exp                          -> Exp [ctor] .
-    op If _ _ _             : Exp Exp Exp                        -> Exp [ctor] .
-    op Case _ _             : Exp HsList                         -> Exp [ctor] .
-    op Do _                 : HsList                             -> Exp [ctor] .
-    op MDo _                : HsList                             -> Exp [ctor] .
-    op Tuple _              : HsList                             -> Exp [ctor] .
-    op TupleSection _       : HsList                             -> Exp [ctor] .
-    op List _               : HsList                             -> Exp [ctor] .
-    op Paren _              : Exp                                -> Exp [ctor] .
-    op LeftSection _ _      : Exp QOp                            -> Exp [ctor] .
-    op RightSection _ _     : QOp Exp                            -> Exp [ctor] .
-    op RecConstr _ _        : QName HsList                       -> Exp [ctor] .
-    op RecUpdate _ _        : Exp HsList                         -> Exp [ctor] .
-    op EnumFrom _           : Exp                                -> Exp [ctor] .
-    op EnumFromTo _ _       : Exp Exp                            -> Exp [ctor] .
-    op EnumFromThen _ _     : Exp Exp                            -> Exp [ctor] .
-    op EnumFromThenTo _ _ _ : Exp Exp Exp                        -> Exp [ctor] .
-    op ListComp _ _         : Exp HsList                         -> Exp [ctor] .
-    op ParComp _ _          : Exp HsList                         -> Exp [ctor] .
-    op ExpTypeSig _ _ _     : SrcLoc Exp Type                    -> Exp [ctor] .
-    op VarQuote _           : QName                              -> Exp [ctor] .
-    op TypQuote _           : QName                              -> Exp [ctor] .
-    op BracketExp _         : Bracket                            -> Exp [ctor] .
-    op SpliceExp _          : Splice                             -> Exp [ctor] .
-    op QuasiQuote _ _       : String String                      -> Exp [ctor] .
-    op XTag _ _ _ _ _       : SrcLoc XName HsList HsMaybe HsList -> Exp [ctor] .
-    op XETag _ _ _ _        : SrcLoc XName HsList HsMaybe        -> Exp [ctor] .
-    op XPcdata _            : String                             -> Exp [ctor] .
-    op XExpTag _            : Exp                                -> Exp [ctor] .
-    op CorePragma _ _       : String Exp                         -> Exp [ctor] .
-    op SCCPragma _ _        : String Exp                         -> Exp [ctor] .
-    op GenPragma _ _ _ _    : String HsTuple HsTuple Exp         -> Exp [ctor] .
-    op Proc _ _ _           : SrcLoc Pat Exp                     -> Exp [ctor] .
-    op LeftArrApp _ _       : Exp Exp                            -> Exp [ctor] .
-    op RightArrApp _ _      : Exp Exp                            -> Exp [ctor] .
-    op LeftArrHighApp _ _   : Exp Exp                            -> Exp [ctor] .
-    op RightArrHighApp _ _  : Exp Exp                            -> Exp [ctor] .
+    op Var _                 : QName                              -> Exp [ctor] .
+    op IPVar _               : IPName                             -> Exp [ctor] .
+    op Con _                 : QName                              -> Exp [ctor] .
+    op Lit _                 : Literal                            -> Exp [ctor] .
+    op InfixApp _ _ _        : Exp QOp Exp                        -> Exp [ctor] .
+    op App _ _               : Exp Exp                            -> Exp [ctor] .
+    op NegApp _              : Exp                                -> Exp [ctor] .
+    op Lambda _ _ _          : SrcLoc HsList Exp                  -> Exp [ctor] .
+    op Let _ _               : Binds Exp                          -> Exp [ctor] .
+    op If _ _ _              : Exp Exp Exp                        -> Exp [ctor] .
+    op Case _ _              : Exp HsList                         -> Exp [ctor] .
+    op Do _                  : HsList                             -> Exp [ctor] .
+    op MDo _                 : HsList                             -> Exp [ctor] .
+    op Tuple _               : HsList                             -> Exp [ctor] .
+    op TupleSection _        : HsList                             -> Exp [ctor] .
+    op List _                : HsList                             -> Exp [ctor] .
+    op Paren _               : Exp                                -> Exp [ctor] .
+    op LeftSection _ _       : Exp QOp                            -> Exp [ctor] .
+    op RightSection _ _      : QOp Exp                            -> Exp [ctor] .
+    op RecConstr _ _         : QName HsList                       -> Exp [ctor] .
+    op RecUpdate _ _         : Exp HsList                         -> Exp [ctor] .
+    op EnumFrom _            : Exp                                -> Exp [ctor] .
+    op EnumFromTo _ _        : Exp Exp                            -> Exp [ctor] .
+    op EnumFromThen _ _      : Exp Exp                            -> Exp [ctor] .
+    op EnumFromThenTo _ _ _  : Exp Exp Exp                        -> Exp [ctor] .
+    op ListComp _ _          : Exp HsList                         -> Exp [ctor] .
+    op ParComp _ _           : Exp HsList                         -> Exp [ctor] .
+    op ExpTypeSig _ _ _      : SrcLoc Exp Type                    -> Exp [ctor] .
+    op VarQuote _            : QName                              -> Exp [ctor] .
+    op TypQuote _            : QName                              -> Exp [ctor] .
+    op BracketExp _          : Bracket                            -> Exp [ctor] .
+    op SpliceExp _           : Splice                             -> Exp [ctor] .
+    op QuasiQuote _ _        : String String                      -> Exp [ctor] .
+    op XTag _ _ _ _ _        : SrcLoc XName HsList HsMaybe HsList -> Exp [ctor] .
+    op XETag _ _ _ _         : SrcLoc XName HsList HsMaybe        -> Exp [ctor] .
+    op XPcdata _             : String                             -> Exp [ctor] .
+    op XExpTag _             : Exp                                -> Exp [ctor] .
+    op CorePragma _ _        : String Exp                         -> Exp [ctor] .
+    op SCCPragma _ _         : String Exp                         -> Exp [ctor] .
+    op GenPragma _ _ _ _     : String HsTuple HsTuple Exp         -> Exp [ctor] .
+    op Proc _ _ _            : SrcLoc Pat Exp                     -> Exp [ctor] .
+    op LeftArrApp _ _        : Exp Exp                            -> Exp [ctor] .
+    op RightArrApp _ _       : Exp Exp                            -> Exp [ctor] .
+    op LeftArrHighApp _ _    : Exp Exp                            -> Exp [ctor] .
+    op RightArrHighApp _ _   : Exp Exp                            -> Exp [ctor] .
 
 ***(
     -- | The name of an xml element or attribute,
@@ -814,7 +814,7 @@ data SrcLoc = SrcLoc
 ***)
 
     sort Splice .
-    op IdSplice _    : String -> Splice [ctor] .
+    op IdSplice _    : String   -> Splice [ctor] .
     op ParenSplice _ : Exp      -> Splice [ctor] .
 
 ***(

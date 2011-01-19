@@ -15,20 +15,13 @@ mod HASKELL-SYNTAX-STRUCTS is
     op []      :               -> HsList [ctor] .
     op (:) _ _ : Syntax HsList -> HsList [ctor] .
 
-    --- tuples, hardcoded up to arity 9
-    op (,)        _ _               : Syntax Syntax                                                  -> HsTuple [ctor] .
-    op (,,)       _ _ _             : Syntax Syntax Syntax                                           -> HsTuple [ctor] .
-    op (,,,)      _ _ _ _           : Syntax Syntax Syntax Syntax                                    -> HsTuple [ctor] .
-    op (,,,,)     _ _ _ _ _         : Syntax Syntax Syntax Syntax Syntax                             -> HsTuple [ctor] .
-    op (,,,,,)    _ _ _ _ _ _       : Syntax Syntax Syntax Syntax Syntax Syntax                      -> HsTuple [ctor] .
-    op (,,,,,,)   _ _ _ _ _ _ _     : Syntax Syntax Syntax Syntax Syntax Syntax Syntax               -> HsTuple [ctor] .
-    op (,,,,,,,)  _ _ _ _ _ _ _ _   : Syntax Syntax Syntax Syntax Syntax Syntax Syntax Syntax        -> HsTuple [ctor] .
-    op (,,,,,,,,) _ _ _ _ _ _ _ _ _ : Syntax Syntax Syntax Syntax Syntax Syntax Syntax Syntax Syntax -> HsTuple [ctor] .
-
     op Just _  : Syntax -> HsMaybe [ctor] .
     op Nothing :        -> HsMaybe [ctor] .
-    
 
+    --- AST Tuple for GenPragma
+    --- These only correspond to being able to parse the AST in maude, and have no bearing on tuples in the
+    --- original source
+    op (,)        _ _             : Syntax Syntax                                           -> HsTuple [ctor] .
 
     subsorts HsList HsMaybe HsTuple < Syntax .
 

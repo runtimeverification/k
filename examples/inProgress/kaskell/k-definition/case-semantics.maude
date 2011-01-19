@@ -80,8 +80,13 @@ Inductive Case:
 
 ***(
 (d) case v of { ~p -> e; _ -> e' }
-  = (\x1 ... xn -> e ) (case v of { p-> x1 }) ... (case v of { p -> xn})
+  = (\x1 ... xn -> e ) (case v of { p -> x1 }) ... (case v of { p -> xn})
   where x1, ..., xn are all the variables in p
+
+AST: (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-d.hs" 2 26) (PIrrPat (PParen (PApp (UnQual (Ident "C")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))))) (UnGuardedAlt (Var (UnQual (Ident "e")))) (BDecls ([]))) ((:)(Alt (SrcLoc "tests/case-d.hs" 2 46) PWildCard (UnGuardedAlt (Var (UnQual (Ident "e'")))) (BDecls ([]))) ([]))))
+   ===
+     (UnGuardedRhs (App (App (App (Paren (Lambda (SrcLoc "tests/case-d.hs" 3 15) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([])))) (Var (UnQual (Ident "e"))))) (Paren (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-d.hs" 3 43) (PApp (UnQual (Ident "C")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "x1")))) (BDecls ([]))) ([]))))) (Paren (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-d.hs" 3 74) (PApp (UnQual (Ident "C")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "x2")))) (BDecls ([]))) ([]))))) (Paren (Case (Var (UnQual (Ident "v"))) ((:)(Alt (SrcLoc "tests/case-d.hs" 3 105) (PApp (UnQual (Ident "C")) ((:)(PVar (Ident "x1")) ((:)(PVar (Ident "x2")) ((:)(PVar (Ident "x3")) ([]))))) (UnGuardedAlt (Var (UnQual (Ident "x3")))) (BDecls ([]))) ([]))))))
+
 ***)
 
 ***(
@@ -175,8 +180,8 @@ more-general:  (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:E
      (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName))
 ***)
 
-    *** eq (Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) []))
-    ***  = (App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName)) .
+    eq Case (Var V:QName) ((:)(Alt Loc1 (PVar X:Name) (UnGuardedAlt E:Exp) Binds1) [])
+     = App (Paren (Lambda Loc1 ((:)(PVar X:Name) []) E:Exp)) (Var V:QName) .
 
 ***(
 (k) case N v of { N p -> e; _ -> e' }
@@ -316,6 +321,5 @@ more-general: (Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon
 
     eq Case (Con (Special UnitCon)) ((:)(Alt Loc1 (PApp (Special UnitCon) []) (GuardedAlts ((:)(GuardedAlt Loc2 ((:)(Qualifier E0:Exp) []) E:Exp) [])) Binds1) ((:)(Alt Loc3 PWildCard (UnGuardedAlt EPrime:Exp) Binds2) []))
      = If E0:Exp E:Exp EPrime:Exp .
-
 
 endm
