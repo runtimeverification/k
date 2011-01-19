@@ -1,4 +1,5 @@
 load sanity-checks
+load id-to-string
 load compile-program
 
 mod COMPILE-PROGRAM-META is

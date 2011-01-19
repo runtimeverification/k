@@ -1,4 +1,4 @@
-mod ID-TO-STRING is
+fmod ID-TO-STRING is
   including META-MODULE-EXTRAS .
   op id2String : Module Module ~> Module .
   eq id2String(M, Flat) = id2String(M, getOps(Flat)) .
@@ -15,4 +15,4 @@ mod ID-TO-STRING is
   eq id2String(Ops) = none [owise] .
 
   var M Flat : Module . var AS : AttrSet . var Ops : OpDeclSet .  var Q : Qid .
-endm
+endfm
