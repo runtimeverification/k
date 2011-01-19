@@ -1,2 +1,2 @@
 load issue034-compiled
-rew 'test(.List{K}) .
+rew 'test(.List{K}) . ---@ test true
