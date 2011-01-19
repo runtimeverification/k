@@ -30,7 +30,7 @@ fmod COMPILE-PROGRAM is
 
   op compileProgram : Module Module Qid Term OpDeclSet ~> Module .
   eq compileProgram(Compiled, Syntax, Q, Trm, (op 'Id2String : 'Id -> 'String [AS] .) Ops)
-   = compileProgram(Compiled, Syntax, Q, Trm, missingConsts(Ops, Trm), id2String(Ops)) .
+   = compileProgram(Compiled, Syntax, Q, Trm, missingConsts(Ops, Trm), id2String(missingConsts(Ops,Trm))) .
   eq compileProgram(Compiled, Syntax, Q, Trm, Ops)
    = compileProgram(Compiled, Syntax, Q, Trm, missingConsts(Ops, Trm), none) [owise] .
 
