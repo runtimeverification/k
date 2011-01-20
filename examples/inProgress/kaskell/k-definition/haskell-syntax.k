@@ -3,11 +3,13 @@
 ***)
 
 load ../../../../pl-builtins
+load ../../../../k-prelude
 load hsStructs
 
-kmod IMP-SYNTAX is
+kmod HASKELL-SYNTAX is
     including HASKELL-SYNTAX-STRUCTS
     including PL-STRING
+    including K
 
     syntax K ::= Boxed
                | ModuleName
@@ -41,7 +43,6 @@ kmod IMP-SYNTAX is
                | TyVarBind
                | Kind
                | FunDep
-               | Context
                | Asst
                | Literal
                | Exp
@@ -67,10 +68,14 @@ kmod IMP-SYNTAX is
                | Alt
                | GuardedAlts
                | GuardedAlt
+               | Syntax
+               | Int
+               | String
+               | Bool
+               | HsRational
 
-
-    --- Some base Haskell sorts
-    syntax HsRational ::= K
+    --- I'll flesh this out later
+    sort HsRational
 
 ***(
     data Boxed = Boxed | Unboxed
@@ -88,7 +93,7 @@ data SrcLoc = SrcLoc
     }
 ***)
     --- Sort present in SrcLoc
-    syntax SrcLoc ::= SrcLoc String Int Int
+    syntax SrcLoc ::= `SrcLoc String Int Int
 
 ***(
     -- | The name of a Haskell module.
@@ -267,9 +272,10 @@ data SrcLoc = SrcLoc
 ***(
     -- | A single derived instance, which may have arguments since it may be a MPTC.
     type Deriving = (QName, [Type])
+
+    note: erasing type synonyms
 ***)
 
-    syntax Deriving ::= K
 
 ***(
     -- | A top-level declaration.
@@ -335,15 +341,15 @@ data SrcLoc = SrcLoc
 
     syntax Decl ::= `TypeDecl SrcLoc Name HsList Type
                   | `TypeFamDecl SrcLoc Name HsList HsMaybe
-                  | `DataDecl SrcLoc DataOrNew Context Name HsList HsList HsList
-                  | `GDataDecl SrcLoc DataOrNew Context Name HsList HsMaybe HsList HsList
-                  | `DataFamDecl SrcLoc Context Name HsList HsMaybe
+                  | `DataDecl SrcLoc DataOrNew K Name HsList HsList HsList
+                  | `GDataDecl SrcLoc DataOrNew K Name HsList HsMaybe HsList HsList
+                  | `DataFamDecl SrcLoc K Name HsList HsMaybe
                   | `TypeInsDecl SrcLoc Type Type
                   | `DataInsDecl SrcLoc DataOrNew Type HsList HsList
                   | `GDataInsDecl SrcLoc DataOrNew Type HsMaybe HsList HsList
-                  | `ClassDecl SrcLoc Context Name HsList HsList HsList
-                  | `InstDecl SrcLoc Context QName HsList HsList
-                  | `DerivDecl SrcLoc Context QName HsList
+                  | `ClassDecl SrcLoc K Name HsList HsList HsList
+                  | `InstDecl SrcLoc K QName HsList HsList
+                  | `DerivDecl SrcLoc K QName HsList
                   | `InfixDecl SrcLoc Assoc Int HsList
                   | `DefaultDecl SrcLoc HsList
                   | `SpliceDecl SrcLoc Exp
@@ -359,7 +365,7 @@ data SrcLoc = SrcLoc
                   | `InlineConlikeSig SrcLoc Activation QName
                   | `SpecSig SrcLoc QName HsList
                   | `SpecInlineSig SrcLoc Bool Activation QName HsList
-                  | `InstSig SrcLoc Context QName HsList
+                  | `InstSig SrcLoc K QName HsList
                   | `AnnPragma SrcLoc Annotation
 
 ***(
@@ -419,7 +425,7 @@ data SrcLoc = SrcLoc
             {- => -} ConDecl
 ***)
 
-    syntax QualConDecl ::= `QualConDecl SrcLoc HsList Context ConDecl
+    syntax QualConDecl ::= `QualConDecl SrcLoc HsList K ConDecl
 
 ***(
     -- | Declaration of an ordinary data constructor.
@@ -458,7 +464,7 @@ data SrcLoc = SrcLoc
 ***)
 
     syntax ClassDecl ::= `ClsDecl Decl
-                       | `ClsDataFam SrcLoc Context Name HsList HsMaybe
+                       | `ClsDataFam SrcLoc K Name HsList HsMaybe
                        | `ClsTyFam SrcLoc Name HsList HsMaybe
                        | `ClsTyDef SrcLoc Type    Type
 
@@ -533,7 +539,7 @@ data SrcLoc = SrcLoc
          | TyKind  Type Kind        -- ^ type with explicit kind signature
 ***)
 
-    syntax Type ::= `TyForall HsMaybe Context Type
+    syntax Type ::= `TyForall HsMaybe K Type
                   | `TyFun Type Type
                   | `TyTuple Boxed HsList
                   | `TyList Type
@@ -582,9 +588,9 @@ data SrcLoc = SrcLoc
 ***(
     -- | A context is a set of assertions
     type Context = [Asst]
-***)
 
-    syntax Context ::= K
+    note: we're erasing type synonyms
+***)
 
 ***(
     -- | Class assertions.
@@ -715,7 +721,7 @@ data SrcLoc = SrcLoc
                  | `MDo HsList
                  | `Tuple HsList
                  | `TupleSection HsList
-                 | `List HsList
+---                 | `List HsList
                  | `Paren Exp
                  | `LeftSection Exp QOp
                  | `RightSection QOp Exp
