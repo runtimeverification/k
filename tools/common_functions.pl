@@ -13,8 +13,9 @@ BEGIN {
 
 
 use lib $path;
+use Regexp::Common;
 use Tree::Nary;
-
+  
 my $language_file_name = "?";
 my $config_tree;
 my $iteration_cells = {};
@@ -1637,6 +1638,25 @@ sub resolve_where_macro($)
     return $_;
 }    
 
-
+# return 1 if the input string is balanced and 0 otherwise
+# args: input string, left "brace", right "brace", quoting char
+sub balanced($$$$)
+{
+    # set parameters
+    local $_ = shift;
+    my ($left, $right, $separator) = (shift, shift, shift);
+    
+    # exclude any quoted brace
+    s/(\Q$separator\E)(\Q$left\E|\Q$right\E)//sg;
+    
+    # remove balanced
+    s/$RE{balanced}{-begin => "$left" }{-end => "$right"}//sg;
+      
+    # return false if the input string is balanced
+    return 0 if (/(\Q$left\E|\Q$right\E)/);
+    
+    # return true otherwise
+    return 1;
+}
 
 1;

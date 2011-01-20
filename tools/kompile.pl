@@ -1231,21 +1231,25 @@ sub maudify_file {
 
 #	    print "Top level pattern:\n$_\n" if $verbose;
 	}
-	$maudified = "$maudified$before$_$after";
+        $maudified = "$maudified$before$_$after";
     }
+
+
     
-    if (/\S/) {
-	print "ERROR: Cannot finish processing $file\n";
-	print "ERROR: The following text does not parse:\n$_";
-	exit(1);
+    if (/\S/) 
+    {
+        print "ERROR: Cannot finish processing $file\n";
+        print "ERROR: The following text does not parse:\n$_";
+        exit(1);
     }
     
     $indent =~ s/\|   //;
     print $indent."Done with processing file $file\n" if $verbose;
-
+    
     if ($file =~ /\.maude/) { return; }
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
+    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
     open FILE,">",$maude_file or die "Cannot write $maude_file\n";
     print FILE $maudified;
     close FILE;
@@ -1355,6 +1359,10 @@ sub maudify_module {
 
 # Step: register all subsort relations
     register_subsorts($_);
+
+# Step: check balanced parentheses - maude specific
+    my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
+    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
 
     return $_;
 }
