@@ -277,7 +277,7 @@ my $top_level_pattern = join("|", (
 
 # Configuration pattern: excludes, for the spacing, from the above all those substrings matching $exclude
 my $exclude = join("|",
-		   "\^\\s*(?:in|load|require)\\s+\\S+\\s*\$",               # in/load of a file
+		   "\^\\s*(?:in|load|require)\\s+\\S+\\s*(?=(in|load|require|kmod))",   # in/load of a file
 		   "kmod\\s+(?:\\S*(?=\\s))",                               # kmodule name
 		   "including(?:.*?(?=\\s+(?=$kmaude_keywords_pattern)))",  # included module expressions
 		   "(?<!:):$ksort",                                         # sort declarations for other than ordinary $kvar
@@ -1300,8 +1300,8 @@ sub maudify_module {
     
 # Step: Add missing spaces around tokens
      # freeze all strings before spacifying
-     s/(?=[^'])""/freeze($&,"STRINGS")/ge;
-     s/(?=[^'])("[^"]*?[^']")/freeze($&,"STRINGS")/ge;
+     s/(?=[^'])""/freeze($&,"STRINGS")/sge;
+     s/(?=[^'])("[^"]*?[^']")/freeze($&,"STRINGS")/sge;
      
      # freeze KLabels before spacifying
      my $klabelss = $decl;
@@ -1309,7 +1309,7 @@ sub maudify_module {
      my @kls = split(/\s+/, $klabelss);
      foreach my $kl (@kls)
      {
-	 s/(\Q$kl\E)/Freeze($kl, "KLABELS")/sge;
+         s/(\Q$kl\E)/Freeze($kl, "KLABELS")/sge;
      }
 
      $_ = spacify($_);
@@ -1712,6 +1712,9 @@ sub spacify {
     my @array;     # holds token associated to each index
     my $i=0;
 
+    my @all = join("\n", @all_tokens);
+#    print "TOKENS: @all\n\n";
+    
 # First associate each token with a distinct number
     foreach my $token (@all_tokens) {
 	$array[$i] = $token;
@@ -1726,7 +1729,7 @@ sub spacify {
 
 # Freeze all excluded substrings, which we do NOT want to be spacified
     $lines =~ s/($exclude)/freeze($1)/gmse;
-
+    
 # Spacify and then freeze each token in reversed topological order
 # This way, we are sure that a subtoken of a token will never be spacified
     foreach my $token (map($array[$_], reverse(topological_sort(@dag)))) {
@@ -1777,6 +1780,7 @@ sub topological_sort {
 # Adds spaces before and/or after token, if needed
 sub add_spaces {
     my ($before,$token,$after) = @_;
+#    print "BEFORE: $before\nTOKEN: $token\nAFTER: $after\n\n";
     if ($before =~ /\w$/ && $token =~ /^\w/) { return "$before$token"; }
     if ($after =~ /^\w/ && $token =~ /\w$/) { return "$before$token"; }
     return ($before.(($before =~ /$maude_special/) ? "":" ").freeze($token).(($after =~ /$maude_special/) ? "":" "));
@@ -1812,6 +1816,7 @@ sub unfreeze {
 sub Freeze
 {
     my ($string, $marker) = (shift, shift);
+#    print "STRING: $string\n";
     my $frozen_string = $marker . join("", map(ord, split('',md5($string))));
     
     $freeze_map{$frozen_string} = $string;
