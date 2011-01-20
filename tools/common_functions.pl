@@ -1364,6 +1364,10 @@ sub super
     # second arg is the subsortations set
     (my $sort, my $subs) = @_;
     
+    return "" if !defined $sort;
+    return "" if $subs eq "";
+    return "" if $sort eq "";
+    
     my @supers = ();
     if (defined($subs))
     {
@@ -1374,12 +1378,15 @@ sub super
 #	print "SORT: $sort\nSUBSORTATIONS:\n$subs\n\n\n";
     
         # get all supersorts for the current sort
-        while ($subs =~ /\s($sort)\s+<\s+(\S+)\s/sg)
-        {
-            my $ssubs = $subs;
-            $ssubs =~ s/\s($sort)\s+<\s+(\S+)\s//sg;
-            push(@supers, super($2, $ssubs));
-        }
+	if (defined $sort)
+	{
+	    while ($subs =~ /\s($sort)\s+<\s+(\S+)\s/sg)
+	    {
+		my $ssubs = $subs;
+		$ssubs =~ s/\s($sort)\s+<\s+(\S+)\s//sg;
+		push(@supers, super($2, $ssubs));
+	    }
+	}
     }
     # each sort is its own supersort
     push(@supers, $sort) if scalar(@supers) == 0;
