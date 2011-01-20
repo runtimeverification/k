@@ -1284,9 +1284,11 @@ sub maudify_module {
     # print  "Stage:\n$_\n\n";
     
 # Step: Reduce cell notation with _ to cell notation with ...
+    s/\sops?\s(.*?):/Freeze($&,"OPS")/gse;
     s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
     s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
-    # print  "Stage:\n$_\n\n";
+#    print  "Stage:\n$_\n\n";
+    $_ = Unfreeze("OPS", $_);
     
 # Step: Declare cell labels as operations
     $_ = add_cell_label_ops($_);
