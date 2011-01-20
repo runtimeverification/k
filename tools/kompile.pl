@@ -280,7 +280,7 @@ my $exclude = join("|",
 		   "\^\\s*(?:in|load|require)\\s+\\S+\\s*\$",               # in/load of a file
 		   "kmod\\s+(?:\\S*(?=\\s))",                               # kmodule name
 		   "including(?:.*?(?=\\s+(?=$kmaude_keywords_pattern)))",  # included module expressions
-		   ":$ksort",                                               # sort declarations for other than ordinary $kvar
+		   "(?<!:):$ksort",                                         # sort declarations for other than ordinary $kvar
 		   "ops?\\s+.*?(?=\\s+(?=$kmaude_keywords_pattern))",       # operation declarations
 		   "$klabel",                                               # K labels
 		   "rule\\s*\\[[^\\[\\]]*\\]\\s*:",                         # rule labels
