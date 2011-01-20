@@ -1366,21 +1366,23 @@ sub super
     my @supers = ();
     if (defined($subs))
     {
-	$subs =~ s/^/ /s if $subs !~ /^\s/s;
-	$subs =~ s/$/ /s if $subs !~ /\s$/s;
-	# all supersorts will be stored here
-	
+        $subs =~ s/^/ /s if $subs !~ /^\s/s;
+        $subs =~ s/$/ /s if $subs !~ /\s$/s;
+        # all supersorts will be stored here
+        
 #	print "SORT: $sort\nSUBSORTATIONS:\n$subs\n\n\n";
-	
-	# get all supersorts for the current sort
-	while ($subs =~ /\s($sort)\s+<\s+(\S+)\s/sg)
-	{
-	    push(@supers, super($2, $subs));
-	}
+    
+        # get all supersorts for the current sort
+        while ($subs =~ /\s($sort)\s+<\s+(\S+)\s/sg)
+        {
+            my $ssubs = $subs;
+            $ssubs =~ s/\s($sort)\s+<\s+(\S+)\s//sg;
+            push(@supers, super($2, $ssubs));
+        }
     }
     # each sort is its own supersort
     push(@supers, $sort) if scalar(@supers) == 0;
-
+    
     "@supers";
 }
 
