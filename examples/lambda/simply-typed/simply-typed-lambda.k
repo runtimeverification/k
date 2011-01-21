@@ -1,16 +1,16 @@
 load ../../../k-prelude
 
 kmod SUBSTITUTION is including K + PL-ID
-  syntax List{K} ::= List{K} [ K // Id ] [prec 0]
+  syntax List{K} ::= List{K} [ K /-/ Id ] [prec 0]
   syntax K ::= K [ K / Id ] [prec 0]
   syntax K ::= Id 
   
   rule X[K/X] => K [structural]
-  rule KL:KLabel(L:List`{K`})[K:K/X:Id] => KL(L[K//X]) if KL(L) =/=Bool X [structural]
+  rule KL:KLabel(L:List`{K`})[K:K/X:Id] => KL(L[K/-/X]) if KL(L) =/=Bool X [structural]
   rule (K1:K ~> K2:K)[K/X] => (K1[K/X]) ~> (K2[K/X]) if K1 =/=Bool .K andBool K2 =/=Bool .K [structural]
-  rule (K1,,L)[K//X] => (K1[K/X]),,(L[K//X]) [structural]
+  rule (K1,,L)[K/-/X] => (K1[K/X]),,(L[K/-/X]) [structural]
   rule .K[K/X] => .K [structural]
-  rule .List{K}[K//X] => .List{K} [structural]
+  rule .List{K}[K/-/X] => .List{K} [structural]
   
    
 endkm
