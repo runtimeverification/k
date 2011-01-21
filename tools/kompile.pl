@@ -186,7 +186,16 @@ sub terminate {
   
   The -pdf, -png, -ps, -eps and -crop options can be used in 
   the same way the -latex option is used in the example above.
-  
+
+  kompile lang -flat -m 
+  or
+  kompile lang -m -flat 
+  If -m and -flat options are given in the same time
+  then the tool will output two files: 
+  lang-flat.k which contains all the defintion of the language
+  and
+  lang-flat.maude which is lang-flat.k maudified.
+
 " if ($verbose || $help); 
     print "\nERROR: $_[0]\n\n" if defined $_[0];
     exit(1);
@@ -571,9 +580,18 @@ if ($crop == 1 && !@crop_modules) {
     appendFileInTree("$language_file_name", "");
     recurseIntoFiles($language_file_name);
 
-# flatten if $flat is set
-if ($flat)
+# flatten and maudify
+if ($flat && $maudify_only)
 {
+    $language_file_name =~ s/\.k(maude)?$//;
+	flattening($language_file_name);
+    $language_file_name .= "-flat.k";
+}
+
+# flatten if only $flat is set
+if ($flat && !$maudify_only)
+{
+    $language_file_name =~ s/\.k(maude)?$//;
 	flattening($language_file_name);
 	exit(0);
 }
