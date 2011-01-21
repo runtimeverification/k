@@ -9,7 +9,7 @@ load resolve-ditto-interface
 load complete-k-sorts-interface
 load default-terms-interface
 load open-cells-interface
---- load sanity-checks-interface
+load sanity-checks-interface
 load missing-subsorts-interface
 load anon-consts-interface
 load context-transformers-interface
