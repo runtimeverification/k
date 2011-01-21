@@ -269,6 +269,8 @@ my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather di
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $comment = join("|", (
+        "\\/\\/.*?\n",
+        "\\/\\*.*?\\*\\/",
 		"---\\(.*?---\\)",
 		"---.*?\$",
 		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
