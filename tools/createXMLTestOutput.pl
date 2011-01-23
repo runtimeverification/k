@@ -4,6 +4,7 @@ use File::Basename;
 use Text::Diff;
 use HTML::Entities;
 
+my $unnamedTestNum = 0;
 
 sub escape {
 	my ($str) = (@_);
@@ -71,9 +72,21 @@ sub getTestMapping {
 	while (my $line = <IN>) {
 		chomp $line;
 		my $reduce = "rew|rewrite|red|reduce|erew|erewrite";
-		my $pattern = "^($reduce) (.*) \. ---@ ([^ ]*) (.*)\$";
+		my $pattern = "^($reduce) (.*) \\. ---@ ([^ ]*) (.*)\$";
+		my $simplePattern = "^($reduce) (.*) \\.[^.]*\$";
 		if ($line =~ /$pattern/) {
-			$testMapping{$2} = [$3, $4];
+			if (!exists $testMapping{$2}){
+				$testMapping{$2} = [$3, $4];
+			} else {
+				reportError("unknown", 0, "You have two identical tests.");
+			}
+		} elsif ($line =~ /$simplePattern/) {
+			if (!exists $testMapping{$2}){
+				$testMapping{$2} = ["unnamedTest$unnamedTestNum", ""];
+				$unnamedTestNum++;
+			} else {
+				reportError("unknown", 0, "You have two identical tests.");
+			}
 		}
 	}
 	close(IN);

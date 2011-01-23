@@ -9,6 +9,9 @@ kmod ISSUE134A is
 	including COMMON
 	op test1 : -> KLabel
 	eq test1 = 'SomeLabel
+
+	op test3 : -> KLabel
+	eq test3 = 'SomeOtherLabel
 endkm
 
 
