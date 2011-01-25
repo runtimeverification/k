@@ -13,7 +13,8 @@ K_ROOT="$SCRIPT_DIR/../../../../"
 
 pushd $SCRIPT_DIR
 
-HASKELL_SOURCES=(hsStructs.maude haskell-syntax.maude translations.maude case-semantics.maude)
+HASKELL_SOURCES=(hsStructs.maude haskell-syntax.maude translations.maude runner.maude)
 
-maude "$K_ROOT/k-prelude.maude" $HASKELL_SOURCES
+rlwrap -a -pcyan maude -no-banner -no-wrap "$K_ROOT/k-prelude.maude" $HASKELL_SOURCES
+
 popd $SCRIPT_DIR
