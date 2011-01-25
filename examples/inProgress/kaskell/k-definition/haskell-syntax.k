@@ -338,7 +338,7 @@ data SrcLoc = SrcLoc
          -- ^ An ANN pragma
 */
 
-    syntax Decl ::= `TypeDecl K  K K K
+    syntax Decl ::= `TypeDecl K K K K
                   | `TypeFamDecl K K K K
                   | `DataDecl K K K K K K K
                   | `GDataDecl K K K K K K K K
@@ -346,7 +346,7 @@ data SrcLoc = SrcLoc
                   | `TypeInsDecl K K K
                   | `DataInsDecl K K K K K
                   | `GDataInsDecl K K K K K K
-                  | `ClassDecl K K  K K K K
+                  | `ClassDecl K K K K K K
                   | `InstDecl K K K K K
                   | `DerivDecl K K K K
                   | `InfixDecl K K K K
@@ -355,8 +355,8 @@ data SrcLoc = SrcLoc
                   | `TypeSig K K K
                   | `FunBind K
                   | `PatBind K K K K K
-                  | `ForImp K K K K  K K
-                  | `ForExp K K K  K K
+                  | `ForImp K K K K K K
+                  | `ForExp K K K K K
                   | `RulePragmaDecl K K
                   | `DeprPragmaDecl K K
                   | `WarnPragmaDecl K K
@@ -437,9 +437,9 @@ data SrcLoc = SrcLoc
                     -- ^ record constructor
 */
 
-    syntax ConDecl ::= `ConDecl  K K
+    syntax ConDecl ::= `ConDecl K K
                      | `InfixConDecl K K K
-                     | `RecDecl  K K
+                     | `RecDecl K K
 
 /*
     -- | A single constructor declaration in a GADT data type declaration.
@@ -543,7 +543,7 @@ data SrcLoc = SrcLoc
                   | `TyTuple K K
                   | `TyList K
                   | `TyApp K K
-                  | `TyVar  K
+                  | `TyVar K
                   | `TyCon K
                   | `TyParen K
                   | `TyInfix K K K
@@ -966,8 +966,8 @@ data SrcLoc = SrcLoc
                   | `RPEither K K
                   | `RPSeq K
                   | `RPGuard K K
-                  | `RPCAs  K K
-                  | `RPAs  K K
+                  | `RPCAs K K
+                  | `RPAs K K
                   | `RPParen K
                   | `RPPat K
 
@@ -1032,7 +1032,7 @@ data SrcLoc = SrcLoc
 */
 
     syntax FieldUpdate ::= `FieldUpdate K K
-                         | `FieldPun  K
+                         | `FieldPun K
                          | `FieldWildcard
 
 /*
