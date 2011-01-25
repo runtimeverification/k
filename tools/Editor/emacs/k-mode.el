@@ -7,6 +7,17 @@
 
 ;; Author: Michael Ilseman
 
+;; Usage: add to your .emacs file:
+;;     (setq load-path (cons "path/to/this/file" load-path))
+;;     (load-library "k-mode")
+;;     (add-to-list 'auto-mode-alist '("\\.k$" . k-mode)) ;; to launch k-mode for .k files
+;;     ... other options ...
+
+;;;; Options ;;;;
+;; Set to make "--" be used as a beginning of a line comment
+;; (emacs's syntax table is unable to differentiate 3 character long comment beginners)
+(defvar k-dash-comments nil)
+
 ;;;; Syntax Highlighting ;;;;
 (setq k-keywords
       '("syntax" "kmod" "endkm" "including" ; "::=" "|"
@@ -40,7 +51,7 @@
   (modify-syntax-entry ?* ". 23" k-mode-syntax-table)
 
   ;; comment style "-- ..."
-  (modify-syntax-entry ?- ". 1b2b" k-mode-syntax-table)
+  (if k-dash-comments (modify-syntax-entry ?- ". 1b2b" k-mode-syntax-table))
 )
 
 
