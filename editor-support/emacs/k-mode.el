@@ -13,10 +13,15 @@
 ;;     (add-to-list 'auto-mode-alist '("\\.k$" . k-mode)) ;; to launch k-mode for .k files
 ;;     ... other options ...
 
+
 ;;;; Options ;;;;
-;; Set to make "--" be used as a beginning of a line comment
-;; (emacs's syntax table is unable to differentiate 3 character long comment beginners)
-(defvar k-dash-comments nil)
+(defvar k-dash-comments nil
+  "Set to make \"--\" be used as a beginning of a line comment
+   (emacs's syntax table is unable to differentiate 3 character long comment beginners)"
+)
+(defvar k-path nil
+  "Path to the k-framework. Set if you wish to use kompile from emacs"
+)
 
 ;;;; Syntax Highlighting ;;;;
 (setq k-keywords
@@ -54,6 +59,8 @@
   (if k-dash-comments (modify-syntax-entry ?- ". 1b2b" k-mode-syntax-table))
 )
 
+
+;;;; K Mode ;;;;
 
 (define-derived-mode k-mode fundamental-mode
   "k mode"
