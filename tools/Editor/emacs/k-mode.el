@@ -4,14 +4,14 @@
 
 ;; Author: Michael Ilseman
 
-
-
 ;;;; Syntax Highlighting ;;;;
 (setq k-keywords
-      '("syntax" "kmod" "endkm" "including" "::=" "|"
-        "sort" "op" "subsort" "rule" "eq" "ceq")
+      '("syntax" "kmod" "endkm" "including" ; "::=" "|"
+        "sort" "op" "subsort" "rule" "eq" "ceq" "load")
       k-syntax-terminals-regex
       "`\\w+"
+      k-declarations
+      "\\(syntax\\|sort\\|op\\) \\([a-zA-Z{}]+\\)"
 )
 
 ;; Set up the regexes
@@ -21,7 +21,8 @@
 
 ;; Put them all together
 (setq k-font-lock-keywords
-      `((,k-keywords-regex . font-lock-keyword-face)
+      `((,k-declarations 2 font-lock-builtin-face)
+        (,k-keywords-regex . font-lock-keyword-face)
         (,k-syntax-terminals-regex . font-lock-constant-face)
        )
 )
