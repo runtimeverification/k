@@ -15,6 +15,8 @@ How to build:
   the dependencies installed.
   If you do not wish to go through the build process yourself, you can find
   statically linked binaries for your system under the static-bins directory.
+  To build a statically linked binary, run:
+  make clean ; make static
 How to run:
   ./filterOutput <output-file> <yaml-config-file>
 
