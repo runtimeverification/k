@@ -14,9 +14,6 @@ TODO:
 
 mod HASKELL-TRANSLATIONS is
     including HASKELL-SYNTAX .
-    including PL-CONVERSION .
-
-    op <_,_> : Syntax Nat -> Exp .
 
 ***(
 The integer literal i is equivalent to fromInteger i, where fromInteger is a method in class Num (see Section 6.4.1).
@@ -26,7 +23,6 @@ vars E E1 E2 E3 : Exp .
 var I : Int .
 
 op o_ : Literal -> Literal .
-op o_ : Exp -> Exp .
 
 eq Lit (Int I) = App (Var (UnQual (Ident "fromInteger"))) (Lit (o Int I)) .
 
@@ -122,20 +118,20 @@ where e ranges over expressions, p over patterns, l over list-valued expressions
 var Q : QualStmt .
 var Qs : HsList .
 
-eq < ListComp E ((:) (QualStmt (Qualifier (Con (UnQual (Ident "True"))))) []), N > = List ((:) E []) .
-eq < ListComp E ((:) Q []), N > = < ListComp E ((:) Q ((:) (QualStmt (Qualifier (Con (UnQual (Ident "True"))))) [])), N > .
-eq < ListComp E ((:) (QualStmt (Qualifier E1)) Qs), N > = If E1 (< ListComp E Qs, N >) (List []) .
-eq < ListComp E ((:) (QualStmt (Generator Loc P E1)) Qs), N > =
+eq ListComp E ((:) (QualStmt (Qualifier (Con (UnQual (Ident "True"))))) []) = List ((:) E []) .
+eq ListComp E ((:) Q []) = ListComp E ((:) Q ((:) (QualStmt (Qualifier (Con (UnQual (Ident "True"))))) [])) .
+eq ListComp E ((:) (QualStmt (Qualifier E1)) Qs) = If E1 (ListComp E Qs) (List []) .
+eq ListComp E ((:) (QualStmt (Generator Loc P E1)) Qs) =
     Let (BDecls
         ((:) (FunBind
-            ((:) (Match NoLoc (Ident ("ok" +String Int2String(N))) ((:) P []) Nothing
-              (UnGuardedRhs (< ListComp E Qs, N +Nat 1 >)) (BDecls []))
-            ((:) (Match NoLoc (Ident ("ok" +String Int2String(N))) ((:) PWildCard []) Nothing
+            ((:) (Match NoLoc (Ident "ok") ((:) P []) Nothing
+              (UnGuardedRhs (ListComp E Qs)) (BDecls []))
+            ((:) (Match NoLoc (Ident "ok") ((:) PWildCard []) Nothing
               (UnGuardedRhs (List [])) (BDecls []))
             [])))
         []))
-    (App (App (Var (UnQual (Ident "concatMap"))) (Var (UnQual (Ident ("ok" +String Int2String(N)))))) E1) .
-eq < ListComp E ((:) (QualStmt (LetStmt Bs)) Qs), N > = Let Bs (< ListComp E Qs, N >) .
+    (App (App (Var (UnQual (Ident "concatMap"))) (Var (UnQual (Ident "ok")))) E1) .
+eq ListComp E ((:) (QualStmt (LetStmt Bs)) Qs) = Let Bs (ListComp E Qs) .
 
 
 ***(
@@ -164,22 +160,21 @@ var Ss : HsList .
 var Loc : SrcLoc .
 var P : Pat .
 var Bs : Binds .
-var N : Nat .
 
-eq < Do ((:) (Qualifier E) []), N > = < E, N> .
-eq < Do ((:) (Qualifier E) Ss), N > = InfixApp E (QVarOp (UnQual (Symbol ">>"))) (< Do Ss, N >) .
-eq < Do ((:) (Generator Loc P E) Ss), N > =
+eq Do ((:) (Qualifier E) []) = E .
+eq Do ((:) (Qualifier E) Ss) = InfixApp E (QVarOp (UnQual (Symbol ">>"))) (Do Ss) .
+eq Do ((:) (Generator Loc P E) Ss) =
     Let (BDecls
         ((:) (FunBind
-            ((:) (Match NoLoc (Ident ("ok" +String Int2String(N))) ((:) P []) Nothing
-              (UnGuardedRhs (< Do Ss, N +Nat 1 >)) (BDecls []))
-            ((:) (Match NoLoc (Ident ("ok" +String Int2String(N))) ((:) PWildCard []) Nothing
+            ((:) (Match NoLoc (Ident "ok") ((:) P []) Nothing
+              (UnGuardedRhs (Do Ss)) (BDecls []))
+            ((:) (Match NoLoc (Ident "ok") ((:) PWildCard []) Nothing
               (UnGuardedRhs (App (Var (UnQual (Ident "fail")))
                 (Lit (String "pattern fail")))) (BDecls []))
             [])))
         []))
-    (InfixApp E (QVarOp (UnQual (Symbol ">>="))) (Var (UnQual (Ident ("ok" +String Int2String(N)))))) .
-eq < Do ((:) (LetStmt Bs) Ss), N > = Let Bs (< Do Ss, N >) .
+    (InfixApp E (QVarOp (UnQual (Symbol ">>="))) (Var (UnQual (Ident "ok")))) .
+eq Do ((:) (LetStmt Bs) Ss) = Let Bs (Do Ss) .
 
 
 ***(
