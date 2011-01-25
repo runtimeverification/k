@@ -1,6 +1,9 @@
 ;;; k-mode.el -- Emacs mode for the K Framework
 
-;; Currently just has some trivial forms of synax highlighting
+;; Currently just has syntax highlighting for:
+;;  - keywords
+;;  - declarations (e.g. ops, syntax, etc)
+;;  - Quoted identifiers (e.g. for terminals in the syntax)
 
 ;; Author: Michael Ilseman
 
@@ -10,8 +13,8 @@
         "sort" "op" "subsort" "rule" "eq" "ceq" "load")
       k-syntax-terminals-regex
       "`\\w+"
-      k-declarations
-      "\\(syntax\\|sort\\|op\\) \\([a-zA-Z{}]+\\)"
+      k-declarations ;; Syntax highlight the name after a declaration
+      "\\(syntax\\|sort\\|op\\) \\([a-zA-Z{}\\-]+\\)"
 )
 
 ;; Set up the regexes
