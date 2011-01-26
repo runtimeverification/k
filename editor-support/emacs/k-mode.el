@@ -11,16 +11,16 @@
 ;;     (setq load-path (cons "path/to/this/file" load-path))
 ;;     (load-library "k-mode")
 ;;     (add-to-list 'auto-mode-alist '("\\.k$" . k-mode)) ;; to launch k-mode for .k files
-;;     ... other options ...
-
+;;     (setq k-path "path/to/k-framework") ;; defaults to ~/k-framework
+(require 'comint)
 
 ;;;; Options ;;;;
 (defvar k-dash-comments nil
   "Set to make \"--\" be used as a beginning of a line comment
    (emacs's syntax table is unable to differentiate 3 character long comment beginners)"
 )
-(defvar k-path nil
-  "Path to the k-framework. Set if you wish to use kompile from emacs"
+(defvar k-path "~/k-framework"
+  "Path to the k-framework. Set if you wish to use kompile from emacs. Defaults to ~/k-framework"
 )
 
 ;;;; Syntax Highlighting ;;;;
@@ -60,6 +60,59 @@
 )
 
 
+;;;; K Bindings and menu ;;;;
+(defvar k-prev-load-file nil
+  "Record the last directory and file used in loading or compiling"
+)
+(defcustom k-source-modes '(k-mode)
+  "Determine if a buffer represents a k file"
+)
+;; (defun k-mode-kompile (cmd)
+;;   ;; (interactive (comint-get-source "Kompile k file: " k-prev-load-file k-source-modes nil))
+;;   ;; (comint-check-source file-name) ; check to see if buffer has been modified and not saved
+;;   ;; (setq k-prev-load-file (cons (file-name-directory file-name)
+;;   ;;                              (file-name-nondirectory file-name)))
+;;   ;; ;; (comint-send-string (inferior-lisp-proc)
+;; 	;; ;; 	      (format inferior-lisp-load-command file-name))
+;;   ;; ;; (switch-to-lisp t))
+;;   ;; (message file-name)
+;;   ;; (setq kompile-buffer (make-comint "Kompile" "zsh" nil))
+;;   ;; (comint-send-string kompile-buffer "cd" nil (file-name-directory file-name))
+;;   ;; (comint-send-string kompile-buffer "~/k-framework/tools/kompile.pl" nil (file-name-nondirectory file-name))
+;;   (interactive "scmd")
+;;   (compile cmd)
+;;   nil
+;; )
+(defun k-mode-about ()
+  (interactive)
+  (message "k-mode for the K Framework")
+)
+
+(defun setup-k-mode-map ()
+  (setq k-mode-map (make-sparse-keymap))
+
+  ;; Keyboard shortcuts
+  (define-key k-mode-map (kbd "C-c C-c") 'compile)
+
+  ;; Define the menu
+  (define-key k-mode-map [menu-bar] (make-sparse-keymap))
+
+  (let ((menuMap (make-sparse-keymap "K Framework")))
+    (define-key k-mode-map [menu-bar k] (cons "K Framework" menuMap))
+    (define-key menuMap [about]
+      '("About k-mode" . k-mode-about))
+    ;; (define-key menuMap [customize]
+    ;;   '("Customize k-mode" . k-customize))
+    (define-key menuMap [separator]
+      '("--"))
+    (define-key menuMap [kompile]
+      '("kompile" . compile)))
+)
+
+
+
+
+
 ;;;; K Mode ;;;;
 
 (define-derived-mode k-mode fundamental-mode
@@ -70,7 +123,12 @@
   ;; Comment entries
   (set-comment-highlighting)
 
+  ;; Shortcuts and menu
+  (setup-k-mode-map)
+  (use-local-map k-mode-map)
+
   ;; Clear up memory
   ;;(setq k-keywords nil k-keywords-regex nil)
 )
 
+(provide 'k-mode)
