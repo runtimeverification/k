@@ -1,6 +1,7 @@
 fmod MAKE-K-RULES is
   including META-MODULE-EXTRAS .
   including  META-K-RULES .
+  including  META-K-CONTEXTS .
   including META-K-COOL .
   including META-LEVEL-EXTRAS .
   including META-K-CONDITION-SEARCH .
@@ -35,6 +36,9 @@ fmod MAKE-K-RULES is
  ceq resolveReplace(Flat, M, Max, Mas, Subst)
    = resolveReplace(Flat, addReplace(Flat, M, Split, Subst), Mas, Subst)
   if Split := splitKRule(metadataParse(Max)) .
+ ceq resolveReplace(Flat, M, Max, Mas)
+   = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas)
+  if CSplit := splitKContext(metadataParse(Max)) .
   eq resolveReplace(Flat, M, Max, Mas, Subst) 
    = resolveReplace(Flat, addMbs(Max, M), Mas, Subst) [owise] .
 
@@ -42,6 +46,9 @@ fmod MAKE-K-RULES is
 ---------  Hack to get rid of the potential attribute large
   eq klarge = none . 
 ---------
+
+  op addCxtReplace : Module Module KContextSplit ~> Module .
+  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setContents(CSplit, replaceCxt(splitReplace(getContents(CSplit),1), getHoleReplacement(getContents(CSplit))))), M) .
 
   op addReplace : Module Module KRuleSplit Substitution ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural}, Subst)
