@@ -24,6 +24,7 @@ sub terminate {
   -v (or -verbose) : verbose mode
   -m (or -maudify) : only maudify, do not kompile
   -c (or -compile) : only compile, do not maudify
+  -lint : only maudify and sanity checks, do not kompile
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
   -nd : compile for full non-determinism in heating/cooling
@@ -86,6 +87,7 @@ sub terminate {
   -v (or -verbose) : verbose mode
   -m (or -maudify) : only maudify, do not kompile
   -c (or -compile) : only compile, do not maudify
+  -lint : only maudify and sanity checks, do not kompile
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
   -nd : compile for full non-determinism in heating/cooling
@@ -407,6 +409,9 @@ foreach (@ARGV) {
     }
     elsif (/^--?nd$/) {
        $k_all_tools .= "-nd";
+    }
+    elsif (/^--?lint$/) {
+       $k_all_tools =  File::Spec->catfile($k_tools_dir,"lint");
     }
     elsif (/^--?flat$/) {
 	$flat = 1;
