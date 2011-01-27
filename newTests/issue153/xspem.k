@@ -79,6 +79,10 @@ kmod META-AUTOMATON is including META-MODEL
                       <class>
                          <className> initState </className>
                          <extends> state </extends>
+						  <declAttributes>  
+                             in  : 'List`{K`}
+                             out : 'List`{K`}
+                         </declAttributes>
                       </class>
                    </classes>
                    <oclConstraints> .List </oclConstraints>

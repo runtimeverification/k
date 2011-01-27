@@ -18,3 +18,38 @@ where <maudeDir> should be replaced by the path where prelude.maude reside Alter
  kompile.pl simple-untyped.maude
 
 Please report issues here: http://k-framework.googlecode.com
+
+
+Test cases:
+When filing a bug, it is important to add an automated test case that exhibits the bug.  This allows us to test our fixes and helps catch regressions in the future.  We use a simple Makefile based test system that is set up in the following way.  If you use our example Makefile (provided in the example directory and described below) it should be very easy to add a new test to the system.  Just copy and edit.  Detailed descriptions follow.
+
+Test cases for new bugs should be placed in /trunk/newTests in the following manner:
+$ cd trunk/newTests
+$ svn cp example issueXXX
+This copies the example test to a new directory so you can edit it.  XXX is intended to be the # of the issue you post on google code.
+
+Now, edit the files in the issueXXX directory to reflect your bug.  You must keep the Makefile, which you can adjust to suit the filenames you use.  In your test.m file, writing
+rew test1(.List{K}) . ---@ foo 'SomeLabel(.List{K})
+causes the test to reduce "test1(.List{K})" and ensures that the result contains the substring "'SomeLabel(.List{K})", in addition to naming the test "foo".
+It's parsed like this:
+[rew|red|etc] [testString] . ---@ [testNameWithNoSpaces] [resultString]
+
+Writing:
+rew test1(.List{K}) .
+simply checks that it reduces at all.  It's not a very strong test.
+
+Your test is in the correct form is you can type "make true-test" and an .xml file is created.
+$ cd trunk/newTests/issueXXX
+$ make true-test
+$ cat *.xml
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name='issuexxx.test' time='0'>
+        <testcase name='test1' time='0'>
+                <failure>Failure</failure>
+        </testcase>
+        <testcase name='test2' time='0'>
+                Success
+        </testcase>
+</testsuite>
+
+Since you are adding this test because you have a bug, at least one of your individual tests should give a failure message.
