@@ -1,17 +1,18 @@
 ;;; k-mode.el -- Emacs mode for the K Framework
 
-;; Currently just has syntax highlighting for:
+;; Currently has syntax highlighting for:
 ;;  - keywords
 ;;  - declarations (e.g. ops, syntax, etc)
 ;;  - Quoted identifiers (e.g. for terminals in the syntax)
+;; Also has a menu and compilation through C-c C-c
+
 
 ;; Author: Michael Ilseman
 
-;; Usage: add to your .emacs file:
+;; Usage: add the below to your .emacs file:
 ;;     (setq load-path (cons "path/to/this/file" load-path))
 ;;     (load-library "k-mode")
 ;;     (add-to-list 'auto-mode-alist '("\\.k$" . k-mode)) ;; to launch k-mode for .k files
-;;     (setq k-path "path/to/k-framework") ;; defaults to ~/k-framework
 (require 'comint)
 
 ;;;; Options ;;;;
@@ -20,7 +21,8 @@
    (emacs's syntax table is unable to differentiate 3 character long comment beginners)"
 )
 (defvar k-path "~/k-framework"
-  "Path to the k-framework. Set if you wish to use kompile from emacs. Defaults to ~/k-framework"
+  "Path to the k-framework. Set if you wish to use kompile from emacs. Defaults to ~/k-framework.
+   Currently doesn't do anything."
 )
 
 ;;;; Syntax Highlighting ;;;;
