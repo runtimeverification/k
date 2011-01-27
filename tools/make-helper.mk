@@ -32,7 +32,8 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) > $(COMPILED_FILE).output
+	@cat $(COMPILED_FILE).output
 
 # this should build the latex
 latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
@@ -62,7 +63,7 @@ crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
 test: $(COMPILED_FILE) $(addprefix test-,$(TESTS).output)
 
-true-test: $(COMPILED_FILE) $(foreach test, $(TESTS), results-$(test).xml)
+true-test: $(COMPILED_FILE) $(foreach test, $(TESTS), results-$(test).xml) compilation.xml
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
 test-%.output: % $(COMPILED_FILE) 
@@ -72,9 +73,13 @@ test-%.output: % $(COMPILED_FILE)
 results-%.xml: % test-%.output
 	@perl $(TOOL_DIR)/createXMLTestOutput.pl $(notdir $(realpath .)).$(basename $(notdir $*)) $* test-$*.output > $@
 	
+compilation.xml: $(COMPILED_FILE).output
+	@perl $(TOOL_DIR)/createXMLCompilationOutput.pl $(notdir $(realpath .)).compilation $(COMPILED_FILE).output > $@
+#$(COMPILED_FILE).output
+	
 # used to force targets to run
 force: ;
 	
 clean:
-	@-rm -f $(MAIN_FILE)-compiled.maude kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE) test-*.output shared.maude results-*.xml
+	@-rm -f $(COMPILED_FILE) kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE) test-*.output shared.maude results-*.xml
 	@-rm -f ${subst .k,.maude, ${filter %.k, $(LANGUAGE_FILE)}}
