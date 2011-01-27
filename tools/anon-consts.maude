@@ -3,6 +3,7 @@ fmod ANONYMOUS-CONSTANTS is
   including META-TERM-EXTRAS .
   including META-LEVEL-EXTRAS .
   including META-K-RULES .
+  including K-STRICTNESS-OPS .
   including META-ANONYMOUS-VARIABLE .
 
   var M Flat : Module . var Q : Qid .
@@ -61,7 +62,10 @@ fmod ANONYMOUS-CONSTANTS is
    = Q[resolveConstsTl(M,Trms, 0,maximalAritySet(M,Q[Trms]), SS)] [owise] . 
   eq resolveConstsT(M, V, N, TLS, SS) = V .
   eq resolveConstsT(M, Ct, N, TLS, SS) 
-   = if getName(Ct) in SS then mkVariable(getName(Ct), getNthType(N, TLS)) else Ct fi .
+   = if getName(Ct) in SS then mkVariable(getName(Ct), fixHole(M,getName(Ct),getNthType(N, TLS))) else Ct fi .
+
+  op fixHole : Module Qid Type ~> Type .
+  eq fixHole(M,Q,T) = if Q == getName(hole) and-then sortLeq(M,K,T) then K else T fi . 
 
   op resolveConstsTl : Module TermList Nat TypeListSet TypeSet ~> TermList .
   eq resolveConstsTl(M, empty, N, TLS, SS) = empty .
