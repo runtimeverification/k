@@ -41,6 +41,13 @@ if ($hasWarnings) {
 	reportSuccess("CompilationWarnings", 0, "Success");
 }
 
+my $hasErrors = hasErrors($testFile);
+if ($hasErrors) {
+	reportFailure("CompilationErrors", 0, "Failure: output has errors");
+} else {
+	reportSuccess("CompilationErrors", 0, "Success");
+}
+
 
 
 sub hasWarnings {
@@ -50,6 +57,19 @@ sub hasWarnings {
 	while (my $line = <IN>) {
 		chomp $line;
 		if ($line =~ /WARNING/) {
+			return 1;
+		}
+	}
+	close(IN);
+	return 0;
+}
+sub hasErrors {
+	my ($testFile) = (@_);
+	
+	open(IN, "$testFile") or reportError("unknown", 0, "Couldn't open file $testFile");
+	while (my $line = <IN>) {
+		chomp $line;
+		if ($line =~ /ERROR/) {
 			return 1;
 		}
 	}
