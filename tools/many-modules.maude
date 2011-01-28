@@ -4,6 +4,7 @@ fmod MANY-MODULES is
   including META-K-MODULES .
   including META-K-BUILTINS .
   including K-META-CONFIG .
+  including META-K-ERROR .
   var M M' : Module . 
   var SS SS' : SortSet .
   var O : Qid .
@@ -13,7 +14,7 @@ fmod MANY-MODULES is
   
   op manyModules : Qid Modules ~> Module .
   eq manyModules(O, Ms) 
-   = setImports(setName(manyModules(emptySModule, getModules(Ms), 'noConfig), O), getImports(Ms)) .
+   = checkModule(setImports(setName(manyModules(emptySModule, getModules(Ms), 'noConfig), O), getImports(Ms))) .
 
   op manyModules : Module ModuleSet  Term ~> Module .
   eq manyModules(M, M' MS, T) 

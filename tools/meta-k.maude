@@ -217,9 +217,9 @@ endfm
 
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE-EXTRAS .
-  var O Q : Qid . var T T' T1 T2 : Term . var S : Type . var C : Term . 
+  var O Q : Qid . var T T' T1 T2 Trm Cxt : Term . var S : Type . var C : Term . 
   var Cond Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
-  var AS : AttrSet .  var RK : KRuleKind .
+  var AS : AttrSet .  var RK : KRuleKind . var Str : String .
 
   sort KRuleKind .
   ops krl kcrl : -> KRuleKind .
@@ -257,10 +257,14 @@ fmod META-K-RULES is including K-SORTS .
 
   op setContents : KRuleSplit Term -> KRuleSplit .
   eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
+  eq setContents({RK,T,Cond,AS}, errorT(Trm,Cxt,Str)) 
+   = {RK,errorT(Trm,T,Str),Cond,AS} .
 
   op plugKRule : KRuleSplit ~> MembAx .
   eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
   eq plugKRule({RK,T,C,AS}) = (mb symbol(RK)[T,C] : KSentence [AS] .) [owise] .
+  eq plugKRule({RK,errorT(Trm,Cxt,Str),Cond,AS})
+   = errorMb(Trm, Cxt, Str, AS) .
 
 
   op splitReplace : Term Nat -> Term .
@@ -819,10 +823,4 @@ fmod META-K-COOL is
 endfm
 
 
-fmod META-K-ERROR is
-  including META-MODULE-EXTRAS .
-  op checkForError : OpDecl AttrSet ~> OpDecl .
-  op checkForError : MembAx AttrSet ~> MembAx .
-  op checkForError : Equation AttrSet ~> Equation .
-  op checkForError : Rule AttrSet ~> Rule .
-endfm
+

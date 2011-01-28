@@ -36,6 +36,14 @@ fmod PARSE-METADATA-LOCATION is
     = {klocation(stripSpaces(substr(S,1,N))), substr(S, N + 2, length(S))}
    if "(" = substr(S, 0, 1)
    /\ s(N) := find(S, ")", 0)  .
+
+  op getLocation : AttrSet -> String .
+  eq getLocation(AS metadata(S)) = getMetaLocation(metadataParse(S)) .
+  eq getLocation(AS) = "" [owise] .
+
+  op getMetaLocation : AttrSet -> String .
+  eq getMetaLocation(AS klocation(S)) = S .
+  eq getMetaLocation(AS) = "" [owise] .
 endfm
 
 fmod PARSE-METADATA-SYNTAX is

@@ -323,10 +323,46 @@ fmod META-TERM-EXTRAS is
   eq nth((Tr, Trl), s(N)) = nth(Trl, N) .
 endfm
 
+
+fmod META-K-ERROR is
+  including META-LEVEL .
+  including META-TERM-EXTRAS .
+
+  op moduleError : QidList -> [Module] .
+  
+  op errorT : [Term] Term String -> [Term] .
+  op errorMb : [Term] Term String AttrSet -> [MembAx] .
+  op errorEq : [Term] Term String AttrSet -> [Equation] .
+  op errorRl : [Term] Term String AttrSet -> [Rule] .
+  op errorM : Module [Term] Term String AttrSet -> [Module] .
+  eq Q[Trms,errorT(Trm, Cxt, Str),Trms'] = errorT(Trm, Q[Trms,Cxt,Trms'], Str) .
+  eq (mb errorT(Trm,Cxt,Str) : Type [AS] .) = errorMb(Trm,Cxt,Str,AS) .
+  eq (cmb errorT(Trm,Cxt,Str) : Type if Cond [AS] .) = errorMb(Trm,Cxt,Str,AS) .
+  eq mod Q is Including sorts Sorts . Subsorts OPDS (errorMb(Trm,Cxt,Str,AS) Mbs) Eqs Rls endm = errorM(mod Q is Including sorts Sorts . Subsorts OPDS none none none endm, Trm, Cxt, Str, AS) .
+  eq (ceq errorT(Trm,Cxt,Str) = Trm' if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
+  eq (eq errorT(Trm,Cxt,Str) = Trm' [AS] .) = errorEq(Trm,Cxt,Str,AS) .
+  eq (crl errorT(Trm,Cxt,Str) => Trm' if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
+  eq (rl errorT(Trm,Cxt,Str) => Trm' [AS] .) = errorRl(Trm,Cxt,Str,AS) .
+  eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) (errorEq(Trm,Cxt,Str,AS) Eqs) Rls endm = errorM(mod Q is Including sorts Sorts . Subsorts OPDS none none none endm, Trm, Cxt, Str, AS) .
+  eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) ( Eqs) (errorRl(Trm,Cxt,Str,AS)Rls) endm = errorM(mod Q is Including sorts Sorts . Subsorts OPDS none none none endm, Trm, Cxt, Str, AS) .
+
+  op checkModule : Module ~> Module .
+  eq checkModule(M) = if wellFormed(M) then M else errorM(upModule('META-MODULE, false),upTerm(M),'`[`]:Qid,"Module obtained but not well-formed",none) fi .
+  op checkTerm : Module Term ~> Term .
+  eq checkTerm(M,Trm) = if wellFormed(M,Trm) then Trm else errorT(Trm,mkVariable('`[`],'Univesal),"Term not well formed") fi .
+
+  vars Trm Trm' Cxt : [Term] . vars Trms Trms' : TermList . var Q : Qid . var Str : String . var Including : ImportList . var Cond : Condition .
+  var AS : AttrSet .  var Subsorts : SubsortDeclSet . var OPDS : OpDeclSet . var Mbs : [MembAxSet] . var Eqs : [EquationSet] . 
+  var Rls : [RuleSet] . vars Sorts : SortSet .  var Type : Type .  var M : Module .
+endfm
+
+
+
 fmod META-MODULE-EXTRAS is
   including META-MODULE .
   including NAT-LIST-EXTRAS .
   including META-TERM-EXTRAS .
+  including META-K-ERROR .
 
   sort ViewExp .
   subsorts Sort < ViewExp < ModuleExpression NeParameterList .
@@ -336,8 +372,6 @@ fmod META-MODULE-EXTRAS is
   op _;;_ : ViewExp ViewExp -> ViewExp 
        [assoc id: mtViewExp] .                       *** view composition  _;_
       
-  op moduleError : QidList -> [Module] .
-  
 
   op trueCt : -> Constant .
   eq trueCt = 'true.Bool .
@@ -434,6 +468,8 @@ fmod META-MODULE-EXTRAS is
   op emptyFModule : -> FModule .
   op emptySModule : -> SModule .
 
+  op removeSemantics : Module -> Module .
+  eq removeSemantics(U?) = setRls(setEqs(setMbs(U?,none),none),none) .
 
   eq setName(mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm, ME') 
     = mod ME' is IL sorts SS . SSDS OPDS MAS EqS RlS endm .
@@ -457,6 +493,9 @@ fmod META-MODULE-EXTRAS is
   eq setName(th nullHeader is IL sorts SS . SSDS OPDS MAS EqS RlS endth, MN) 
     = th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth .
 
+  eq setName(errorM(U, Trm, Cxt, Str, AS), MN:[ModuleExpression]) 
+   = errorM(U, Trm, Cxt, Str, AS) .
+
 
   eq setImports(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, IL')
     = mod H is IL' sorts SS . SSDS OPDS MAS EqS RlS endm .
@@ -475,6 +514,8 @@ fmod META-MODULE-EXTRAS is
     = fmod H is IL sorts SS . SSDS OPDS' MAS EqS endfm .
   eq setOps(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, OPDS')
     = fth MN is IL sorts SS . SSDS OPDS' MAS EqS endfth .
+  eq setOps(errorM(U, Trm, Cxt, Str, AS), Ops:[OpDeclSet]) 
+   = errorM(U, Trm, Cxt, Str, AS) .
 
   eq setSubsorts(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, SSDS')
     = mod H is IL sorts SS . SSDS' OPDS MAS EqS RlS endm . 
@@ -494,6 +535,12 @@ fmod META-MODULE-EXTRAS is
   eq setMbs(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, MAS')
     = fth MN is IL sorts SS . SSDS OPDS MAS' EqS endfth .
 
+  eq setMbs(U, (errorMb(Trm,Cxt,Str,AS) Mbs:[MembAxSet]))  
+   = errorM(removeSemantics(U), Trm, Cxt, Str, AS) .
+  eq setMbs(errorM(U, Trm, Cxt, Str, AS), Mbs:[MembAxSet]) 
+   = errorM(U, Trm, Cxt, Str, AS) .
+
+
   eq setEqs(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, EqS')
     = mod H is IL sorts SS . SSDS OPDS MAS EqS' RlS endm .
   eq setEqs(th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth, EqS')
@@ -503,8 +550,15 @@ fmod META-MODULE-EXTRAS is
   eq setEqs(fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth, EqS')
     = fth MN is IL sorts SS . SSDS OPDS MAS EqS' endfth .
 
+  eq setEqs(U, (errorEq(Trm,Cxt,Str,AS) Eqs:[EquationSet]))  
+   = errorM(removeSemantics(U), Trm, Cxt, Str, AS) .
+  eq setEqs(errorM(U, Trm, Cxt, Str, AS), Eqs:[EquationSet]) 
+   = errorM(U, Trm, Cxt, Str, AS) .
+
+
+
   op setRls : [Module] [RuleSet] -> [Module] .
-  var U? : [Module] .
+  var U? : [Module] .  var Cxt : Term . var Str : String .
 
   eq setRls(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, RlS')
     = mod H is IL sorts SS . SSDS OPDS MAS EqS RlS' endm .
@@ -520,6 +574,11 @@ fmod META-MODULE-EXTRAS is
       then fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth
       else th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth
       fi .
+ 
+  eq setRls(U, (errorRl(Trm,Cxt,Str,AS) Rls:[RuleSet]))  
+   = errorM(removeSemantics(U), Trm, Cxt, Str, AS) .
+  eq setRls(errorM(U, Trm, Cxt, Str, AS), Rls:[RuleSet]) 
+   = errorM(U, Trm, Cxt, Str, AS) .
 
   eq setSorts(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, SS')
     = mod H is IL sorts SS' . SSDS OPDS MAS EqS RlS endm .

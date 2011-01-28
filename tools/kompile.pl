@@ -116,6 +116,14 @@ sub terminate {
   In particular, files with the extension .kmaude cannot be
   loaded anymore: the program terminates with an error if one
   attempts to do so, and the default extension is .maude.
+   
+  The option -lint checks that the definitions satisfies somes typing
+  requirements whose failure would make compilation likely to fail.
+  More precisely, it checks that the arguments of all operations whose
+  result sort is K are either subsorted to K or have injections (\"builtin
+  wrapper\"s) into K and that all (sub)terms appearing in rules have a least 
+  sort (i.e., they do not parse into a kind).  This steps does the maudification
+  before checking for consistency.
 
   If the -l option is used, then <source_file> must
   contain a module called <module_name>.  If the option

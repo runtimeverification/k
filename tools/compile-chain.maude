@@ -48,6 +48,7 @@ fmod COMPILE-META is
   including META-MODULE-EXTRAS .
   including STRING-EXTRAS .
   including MODULE-META-PRETTY-PRINT .
+  including PARSE-METADATA .
 
   op wrapper : Qid -> Module .
   eq wrapper(Q) = (mod 'MKKR is including Q . 
@@ -126,7 +127,9 @@ fmod COMPILE-META is
   
   op $compile : Module Qid Module QidList ~> Module .
   eq $compile(M, Q, moduleError(QIL), QIL') = moduleError(QIL) .
-  eq $compile(M, Q, M', QIL)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL) else generateError(M,Q,M') fi .
+  eq $compile(M, Q, errorM(M', Trm, Cxt, Str, AS), QIL')
+   = moduleError('Error:  tokenize(getLocation(AS)) '\s '\s tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt)) .
+  eq $compile(M, Q, M', QIL)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL) else generateError(M,Q,M') fi [owise] .
 
   op print : [Module] -> QidList .
   eq print(M) = eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
@@ -136,7 +139,7 @@ fmod COMPILE-META is
    print(M) 
 ) .
 
-  var Q Q' : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .
+  var Q Q' : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .  var Trm Cxt : Term .  var AS : AttrSet .  var Str : String .
 endfm
 
 mod COMPILE-LOOP is
