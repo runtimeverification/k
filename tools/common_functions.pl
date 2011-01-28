@@ -22,11 +22,14 @@ my $iteration_cells = {};
 my $warnings = "";
 my $warnings_file = fresh("kompile_warnings", ".txt");
 my $comment = join("|", (
-    "---\\(.*?---\\)",                                                                                                            
-    "---.*?\$",                                                                                                                   
-    "\\*\\*\\*\\(.*?\\*\\*\\*\\)",                                                                                                
-    "\\*\\*\\*.*?\$"                                                                                                              
-));     
+        "\\/\\/.*?\n",
+        "\\/\\*.*?\\*\\/",
+		"---\\(.*?---\\)",
+		"---.*?\$",
+		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
+		"\\*\\*\\*.*?\$"
+));
+     
 my $verbose = 0;
 my @nodes = ();
 my $current_line = 0;
@@ -1511,6 +1514,8 @@ sub add_line_numbers
 	s!\S!!gs;                                                                                    
 	$_;                                                                                          
     }/gsme; 
+    
+    # print $_; 
     
     my $temp = $_;
     my $used = $_; # due to perl 5.8.8
