@@ -18,16 +18,23 @@ kmod IMP is including PL-INT + PL-ID + K
   configuration <T> <k>.K</k> <state>.Map</state> </T>
   rule <k>X:Id(.List{K}) => I:Int(.List{K})<_/k> 
        <state_>X(.List{K})|->I(.List{K})<_/state>
+  context '+(_,,[HOLE],,_)
   rule '+(I1:Int(.List{K}),,I2:Int(.List{K})) => (I1 +Int I2)(.List{K})
+  context '/(_,,[HOLE],,_)
   rule '/(I1(.List{K}),,I2(.List{K})) => (I1 /Int I2)(.List{K})  if I2 =/=Bool 0
+  context '<=(_,,[HOLE],,_)
   rule '<=(I1(.List{K}),,I2(.List{K})) => (I1 <=Int I2)(.List{K})
+  context 'not([HOLE])
   rule 'not(T:Bool(.List{K})) => (notBool T)(.List{K})
+  context 'and([HOLE],,_)
   rule 'and(true(.List{K}),,B:K) => B
   rule 'and(false(.List{K}),,B)  => false(.List{K})
   rule 'skip(.List{K}) => .
+  context '=(_,,[HOLE])
   rule <k>'=(X(.List{K}),,I(.List{K})) => .<_/k> 
        <state_> X(.List{K})|->(_ => I(.List{K})) <_/state>
   rule ';(S1:K,,S2:K) => S1~>S2
+  context 'if([HOLE],,_)
   rule 'if(true(.List{K}),,S:K,,_) => S
   rule 'if(false(.List{K}),,_,,S)  => S
   rule <k>'while(B,,S) => 'if(B,,';(S,,'while(B,,S)),,'skip(.List{K})) <_/k>
@@ -39,10 +46,12 @@ kmod IMP is including PL-INT + PL-ID + K
   macro pgm = [['sumPgm]]
 
   macro 'sumPgm(.List{K}) =
-     'var('list('n(.List{K}),,'s(.List{K})),,
-         ';('=('n(.List{K}),,10(.List{K})),,
-           ';('=('s(.List{K}),,0(.List{K})),,
-             'while('not('<=('n(.List{K}),,0(.List{K}))),,
-                   ';('=('s(.List{K}),,'+('s(.List{K}),,'n(.List{K}))),,
-                     '=('n(.List{K}),,'+('n(.List{K}),,-1(.List{K}))))))))
+     'var('list(n(.List{K}),,s(.List{K})),,
+         ';('=(n(.List{K}),,10(.List{K})),,
+           ';('=(s(.List{K}),,0(.List{K})),,
+             'while('not('<=(n(.List{K}),,0(.List{K}))),,
+                   ';('=(s(.List{K}),,'+(s(.List{K}),,n(.List{K}))),,
+                     '=(n(.List{K}),,'+(n(.List{K}),,-1(.List{K}))))))))
+
+  syntax Id ::= n | s
 endkm
