@@ -1,0 +1,18 @@
+Name:               parsek
+Version:            0.1.0
+Synopsis:           A parser for low-level K.
+License:            BSD3
+License-file:       LICENSE
+Author:             David Lazar
+Maintainer:         lazar6@illinois.edu
+Category:           Language
+Build-type:         Simple
+Cabal-version:      >=1.2
+
+Library
+  Exposed-modules:  Language.K
+  Build-depends:    base >= 4 && < 5, parsec > 3 
+
+Executable parsek
+  Main-is:          Main.hs
+  Build-depends:    base >= 4 && < 5, parsec > 3 
