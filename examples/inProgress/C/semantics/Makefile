@@ -38,10 +38,14 @@ c-compiled.maude: c.k $(K-MAUDE-BASE)/k-prelude.maude $(K-MAUDE) \
 common-c-syntax.k common-c-configuration.k common-c-semantics.k common-c-standard-lib.k common-c-expressions.k common-c-memory.k common-c-statements.k common-c-conversions.k common-c-typing.k common-c-declarations.k \
 match-c-syntax.k match-c-semantics.k match-c-configuration.k \
 dynamic-c-semantics.k dynamic-c-configuration.k
+	@echo "Compiling the C definition..."
 	@$(K-MAUDE) c.k -u -language C
+	@echo "Done".
 	
 c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude $(K-PL-MODEL-CHECKER).maude Makefile
+	@echo before sed1
 	@sed -i '2 i load $(K-PL-MODEL-CHECKER)' c-compiled.maude
+	@echo after sed1
 #echo adds a newline
 	@echo | cat c-compiled.maude c-syntax.maude - common-c-configuration.maude | perl slurp.pl ./ > c-total.maude
 	
