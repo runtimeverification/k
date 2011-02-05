@@ -46,10 +46,11 @@ module ParseKOutput where
                  contents <- manyTill parseInternals (try (endCell name))
                  return $ Cell name (combineStrings contents)
 
-
+  -- Parse the internals of a cell. First attempt to do a nested cell, then try an underlying string
   parseInternals :: KOutputParser
   parseInternals = try parseCell <|> parseString
 
+  -- Parse the underlying string content of a cell, i.e. what is there that isn't a new inner cell.
   parseString :: KOutputParser
   parseString = peek >>= \name -> (String name . pack <$> many1 (noneOf "<"))
                               <|> (char '<' >> parseString >>= \k -> case k of String _ s -> return (String name (cons '<' s)))
