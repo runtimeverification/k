@@ -19,68 +19,51 @@ mod CONFIG-BUILTIN-MODULE is
   inc MATHEMATICAL-INT-BUILTIN-MODULE + SUBST-BUILTIN-MODULE .
 
 
-  sorts ?BagItem !BagItem FreeBagItem .
-  subsort ?BagItem !BagItem FreeBagItem < BagItem .
-  sorts ?MapItem !MapItem FreeMapItem .
-  subsort ?MapItem !MapItem FreeMapItem < MapItem .
-  sorts ?ListItem !ListItem FreeListItem .
-  subsort ?ListItem !ListItem FreeListItem < ListItem .
-  op skolem : Nat ?MapItem -> FreeMapItem .
-  op skolem : Nat ?BagItem -> FreeMapItem .
-  op skolem : Nat ?ListItem -> FreeMapItem .
-  op co-skolem : Nat FreeMapItem -> !MapItem .
-  op co-skolem : Nat FreeBagItem -> !BagItem .
-  op co-skolem : Nat FreeListItem -> !ListItem .
-  op ?var : Id -> ?Int .
-  op ?BagItem : String -> ?BagItem .
-  op !BagItem : String -> !BagItem .
+  sorts PEBagItem FEBagItem FreeBagItem .
+  subsort PEBagItem FEBagItem FreeBagItem < BagItem .
+  sorts PEMapItem FEMapItem FreeMapItem .
+  subsort PEMapItem FEMapItem FreeMapItem < MapItem .
+  sorts PEListItem FEListItem FreeListItem .
+  subsort PEListItem FEListItem FreeListItem < ListItem .
+  op skolem : Nat PEMapItem -> FreeMapItem .
+  op skolem : Nat PEBagItem -> FreeBagItem .
+  op skolem : Nat PEListItem -> FreeListItem .
+  op co-skolem : Nat FreeMapItem -> FEMapItem .
+  op co-skolem : Nat FreeBagItem -> FEBagItem .
+  op co-skolem : Nat FreeListItem -> FEListItem .
+  op PEvar : Id -> PEInt .
+  op ?BagItem : String -> PEBagItem .
+  op !BagItem : String -> FEBagItem .
   op FreeMapItem : String -> FreeMapItem .
-  op ?MapItem : String -> ?MapItem .
-  op !MapItem : String -> !MapItem .
+  op ?MapItem : String -> PEMapItem .
+  op !MapItem : String -> FEMapItem .
   op FreeMapItem : String -> FreeMapItem .
-  op ?ListItem : String -> ?ListItem .
-  op !ListItem : String -> !ListItem .
+  op ?ListItem : String -> PEListItem .
+  op !ListItem : String -> FEListItem .
   op FreeListItem : String -> FreeListItem .
   op defaultBagItem : String -> Bag .
   op defaultMapItem : String -> Map .
   op defaultListItem : String -> List .
 
 
+  op _<-_ : MathObj++ MathObj++ -> SubstItem .
   op _<-_ : K K -> SubstItem .
   op _<-_ : List List -> SubstItem .
   op _<-_ : Bag Bag -> SubstItem .
   op _<-_ : Set Set -> SubstItem .
   op _<-_ : Map Map -> SubstItem .
 
-  ---op _<-_ : MathObj++ MathObj++ -> SubstItem .
-  ---op _<-_ : List{MathObj++} List{MathObj++} -> Subst .
-  ---var Obj Obj1 Obj2 Obj1' Obj2' : MathObj++ .
-  ---var ObjList ObjList' : List{MathObj++} .
-  ---eq Obj <- Obj = .Subst .
-  ---eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
-  --- = (Obj1 <- Obj1') ;; (Obj2 <- Obj2') ;; (ObjList <- ObjList') .
-***(
-  op get?SubstItem : Formula -> Subst .
-  eq get?SubstItem(?Obj === Obj /\ Phi) = (?Obj <- Obj) .
-  eq get?SubstItem(Obj === ?Obj /\ Phi) = (?Obj <- Obj) .
-  eq get?SubstItem(Phi) = .Subst [owise] .
-
-  op get!SubstItem : Formula -> Subst .
-  eq get!SubstItem(!Obj === Obj /\ Phi) = (!Obj <- Obj) .
-  eq get!SubstItem(Obj === !Obj /\ Phi) = (!Obj <- Obj) .
-  eq get!SubstItem(Phi) = .Subst [owise] .
-
+  op getPESubstItem : Formula -> Subst .
+  op getFESubstItem : Formula -> Subst .
   op getFreeSubstItem : Formula -> Subst .
-  eq getFreeSubstItem(FreeObj === Obj /\ Phi) = (FreeObj <- Obj) .
-  eq getFreeSubstItem(Obj === FreeObj /\ Phi) = (FreeObj <- Obj) .
-  eq getFreeSubstItem(Phi) = .Subst [owise] .
-***)
 
+  var Obj : MathObj++ .
   var K : K .
   var List : List .
   var Bag : Bag .
   var Set : Set .
   var Map : Map .
+  eq Obj <- Obj = .Subst .
   eq K <- K = .Subst .
   eq List <- List = .Subst .
   eq Bag <- Bag = .Subst .
@@ -89,10 +72,12 @@ mod CONFIG-BUILTIN-MODULE is
 
 
   sort Value TypedValue .
-  subsort MathObj++ < Value .
-  subsort String < TypedValue .
+  subsort Int++ < Value .
+  subsort Value < MathObj++ .
+  subsort String < Value .
   sort Void NvExpressionType ExpressionType .  
   subsort Void NvExpressionType < ExpressionType .  
+  subsorts List{MathObj++} Set{MathObj++} < Builtins KResult .
   sort Field .
   sort HeapLabel .
 
@@ -102,16 +87,13 @@ mod CONFIG-BUILTIN-MODULE is
   ops counter : -> CellLabel .
   ops tasks task form subst other-counter : -> CellLabel .
 
-  op _===>_ : Bag Bag -> Bag [frozen] .
-  op _=subst=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
-  op _=match=>_ : Bag Bag -> Bag [format(ni nr! o nini) strat(1 2 0) frozen] .
   op skolemize : Nat Pattern -> Pattern .
   op co-skolemize : Nat Pattern -> Pattern .
 
 
   op returns _ : Value -> Formula .
   op unit : -> Value . 
-  op tv : ExpressionType Value -> TypedValue .
+  op tv`(_,_`) : ExpressionType Value -> TypedValue .
   op derive : -> KLabel .
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op _|->_:_ : Int++ Value Field -> MapItem .
@@ -140,29 +122,26 @@ mod CONFIG-BUILTIN-MODULE is
   *** hack
   op isInt : Int++ -> Bool .
 
-  ops val next : -> Id .
-  ops listNode : -> Id .
+  op list : -> HeapLabel .
+  op lseg : -> HeapLabel .
 
-  ops val left right : -> Id .
-  ops treeNode : -> Id .
-
-  ops stackNode : -> Id .
+  op id`(_`) : String -> Id .
 endm
 
 
-mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-CONDITION-SEARCH .
+mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-WHERE + K-CONDITION-SEARCH .
   subsort HeapLabel < Bag .
   subsorts Formula Subst MathObj++ < Builtins KResult .
   subsorts List{MathObj++} Set{MathObj++} < Builtins KResult .
   subsort Id Field < Builtins KProper .
-  subsort String Value TypedValue ExpressionType < Builtins KResult .
+  subsort Value TypedValue ExpressionType < Builtins KResult .
 
 
   op applySubst : Pattern Subst -> Pattern .
   op applySubst : Bag Subst -> Bag .
   op applySubst : Formula Subst -> Formula .
   op applySubst : Subst Subst -> Subst .
-  --- op applySubst : KResult Subst -> KResult [strat(2 0)] .
+  --- op applySubst : KResult Subst -> KResult .
   op _._ : Id Id -> Field .
   op _._ : Field Id -> Field .
 endm

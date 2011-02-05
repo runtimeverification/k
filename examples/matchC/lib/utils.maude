@@ -1,7 +1,3 @@
----load ml-prelude.maude
----load ml-imp.maude
-
-
 mod PL-META-TERM is including PL-BOOL + PL-QID .
 *** types
   sorts Sort Kind Type .
@@ -70,15 +66,15 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
 endm
 
 
-mod CONST-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE .
+mod CONST-UTILS is inc MATCHC .
+  op errorPattern : -> [Pattern] .
   op errorBag : -> [Bag] .
   op errorFormula : -> [Formula] .
-  op errorPattern : -> [Pattern] .
   op errorSubst : -> [Subst] .
 endm
 
 
----mod VAR-UTILS is inc CONFIG + PL-META-TERM + MAUDE-IF-THEN-ELSE .
+***(
 mod VAR-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE + CONST-UTILS .
   op get?VarSet : Formula -> Set{MathObj++} .
   op get?VarSet : Bag -> Set{MathObj++} .
@@ -139,34 +135,45 @@ mod VAR-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE + CONST-UTILS .
      downTerm(QC, (.).Map) else (.).Map fi [print QC] .
   eq getFreeMap(Q[QTList]) = getFreeMap(QTList) [owise] .
 endm
+***)
 
 
-mod CONFIG-SCOLEM is inc VAR-UTILS .
+mod PATTERN-SKOLEM is
+inc MATCHC
+  + PL-META-TERM
+  + CONST-UTILS
+  + MAUDE-IF-THEN-ELSE .
+
   op skolemTerm : Term TermList -> TermList .
   op co-skolemTerm : Term TermList -> TermList .
 
   var Q : Qid .
   var QC : Constant .
-  var QT NT NT' : Term .
+  var QT NT : Term .
   var QTList : TermList .
   var QTNeList : NeTermList .
+
 
   eq skolemTerm(NT, (QT : QTNeList))
    = skolemTerm(NT, QT) : skolemTerm(NT, QTNeList) .
   eq skolemTerm(NT, .emptyTermList) = .emptyTermList .
   eq skolemTerm(NT, QC)
-   = if substrString(string(getType(QC)), 0, 1) ==Bool "?" then
+   = if substrString(string(getType(QC)), 0, 2) ==Bool "PE" then
        'skolem[NT : QC]
      else
        QC
      fi .
-  eq skolemTerm(NT, '?Int[QT]) = 'skolem[NT : '?Int[QT]] .
-  eq skolemTerm(NT, '?Seq[QT]) = 'skolem[NT : '?Seq[QT]] .
-  eq skolemTerm(NT, '?Tree[QT]) = 'skolem[NT : '?Tree[QT]] .
-  eq skolemTerm(NT, '?MSet[QT]) = 'skolem[NT : '?MSet[QT]] .
-  eq skolemTerm(NT, 'skolem[NT' : QT]) = 'skolem[NT' : QT] .
-  eq skolemTerm(NT, 'co-skolem[NT' : QT]) = 'co-skolem[NT' : QT] .
-  eq skolemTerm(NT, Q[QTList]) = Q[skolemTerm(NT, QTList)] [owise] .
+  eq skolemTerm(NT, Q[QTList])
+   = if substrString(string(Q), 0, 2) ==Bool "?" then
+       'skolem[NT : Q[QTList]]
+     else
+       if Q =/=Bool 'skolem then
+         Q[skolemTerm(NT, QTList)]
+       else
+         Q[QTList]
+       fi
+     fi .
+
  
   eq co-skolemTerm(NT, (QT : QTNeList))
    = co-skolemTerm(NT, QT) : co-skolemTerm(NT, QTNeList) .
@@ -177,59 +184,64 @@ mod CONFIG-SCOLEM is inc VAR-UTILS .
      else
        QC
      fi .
-  eq co-skolemTerm(NT, 'skolem[NT' : QT])
-   = 'co-skolem[NT : 'skolem[NT' : QT]] .
-  eq co-skolemTerm(NT, Q[QTList]) = Q[co-skolemTerm(NT, QTList)] [owise] .
-
+  eq co-skolemTerm(NT, Q[QTList])
+   = if substrString(string(Q), 0, 4) ==Bool "Free" orBool Q ==Bool 'skolem then
+       'co-skolem[NT : Q[QTList]]
+     else
+       if Q ==Bool 'co-skolem then
+         Q[co-skolemTerm(NT, QTList)]
+       else
+         Q[QTList]
+       fi
+     fi .
+ 
 
   var N : Nat .
-  var K : K .
   var Pattern : Pattern .
-  var Bag : Bag .
-  var Phi : Formula .
 
-  eq skolemize(N, Bag)
-   = downTerm(skolemTerm(upTerm(N), upTerm(Bag)), errorBag) .
-  eq skolemize(N, Phi)
-   = downTerm(skolemTerm(upTerm(N), upTerm(Phi)), errorFormula) .
+  eq skolemize(N, Pattern)
+   = downTerm(skolemTerm(upTerm(N), upTerm(Pattern)), errorPattern) .
   eq co-skolemize(N, Pattern)
    = downTerm(co-skolemTerm(upTerm(N), upTerm(Pattern)), errorPattern) .
 endm
 
 
----mod APPLY-SUBST is inc CONFIG + PL-META-TERM .
-mod APPLY-SUBST is inc MATCHC + PL-META-TERM + CONST-UTILS .
+mod APPLY-SUBST is
+inc MATCHC
+  + PL-META-TERM
+  + CONST-UTILS
+  + MAUDE-IF-THEN-ELSE .
+
   sort MetaSubst .
   op .MetaSubst : -> MetaSubst .
   op _;_ : MetaSubst MetaSubst -> MetaSubst [assoc comm id: .MetaSubst] .
   op _<-_ : Term Term -> MetaSubst .
   op upSubst : Subst -> MetaSubst .
 
-  var Obj Obj' : MathObj++ .
-  var List List' : List .
-  var Bag Bag' : Bag .
-  var Set Set' : Set .
-  var Map Map' : Map .
-  var Subst Subst' : Subst .
-  var Phi : Formula .
+  var K1 K2 : K .
+  var List1 List2 : List .
+  var Bag1 Bag2 : Bag .
+  var Set1 Set2 : Set .
+  var Map1 Map2 : Map .
+  var Subst : Subst .
 
-  eq upSubst((Obj <- Obj') ; Subst)
-   = (upTerm(Obj) <- upTerm(Obj')) ; upSubst(Subst) .
-  eq upSubst((List <- List') ; Subst)
-   = (upTerm(List) <- upTerm(List')) ; upSubst(Subst) .
-   eq upSubst((Bag <- Bag') ; Subst)
-   = (upTerm(Bag) <- upTerm(Bag')) ; upSubst(Subst) .
-   eq upSubst((Set <- Set') ; Subst)
-   = (upTerm(Set) <- upTerm(Set')) ; upSubst(Subst) .
-   eq upSubst((Map <- Map') ; Subst)
-   = (upTerm(Map) <- upTerm(Map')) ; upSubst(Subst) . 
+  eq upSubst((K1 <- K2) ;; Subst)
+   = (upTerm(K1) <- upTerm(K2)) ; upSubst(Subst) .
+  eq upSubst((List1 <- List2) ;; Subst)
+   = (upTerm(List1) <- upTerm(List2)) ; upSubst(Subst) .
+  eq upSubst((Bag1 <- Bag2) ;; Subst)
+   = (upTerm(Bag1) <- upTerm(Bag2)) ; upSubst(Subst) .
+  eq upSubst((Set1 <- Set2) ;; Subst)
+  = (upTerm(Set1) <- upTerm(Set2)) ; upSubst(Subst) .
+  eq upSubst((Map1 <- Map2) ;; Subst)
+   = (upTerm(Map1) <- upTerm(Map2)) ; upSubst(Subst) . 
   eq upSubst(.Subst) = .MetaSubst .
 
   op substTerm : TermList MetaSubst -> TermList .
 
   var Q : Qid .
   var QC : Constant .
-  var QT QT' NT : Term .
+  var QT QT1 QT2 : Term .
   var QTList : TermList .
   var QTNeList : NeTermList .
   var MetaSubst : MetaSubst .
@@ -237,13 +249,27 @@ mod APPLY-SUBST is inc MATCHC + PL-META-TERM + CONST-UTILS .
   eq substTerm((QT : QTNeList), MetaSubst)
    = substTerm(QT, MetaSubst) : substTerm(QTNeList, MetaSubst) .
   eq substTerm(.emptyTermList, MetaSubst) = .emptyTermList .
-  eq substTerm(QT, ((QT <- QT') ; MetaSubst)) = QT' .
-  eq substTerm('skolem[NT : QT], MetaSubst) = 'skolem[NT : QT] .
-  eq substTerm('co-skolem[NT : QT], MetaSubst) = 'co-skolem[NT : QT] .
+  eq substTerm(QT1, ((QT1 <- QT2) ; MetaSubst)) = QT2 .
+ ceq substTerm(Q[QTList], MetaSubst) = Q[QTList]
+  if Q ==Bool 'skolem orBool Q ==Bool 'co-skolem .
+ ceq substTerm('_`(_`)[QC : QTList], MetaSubst) = '_`(_`)[QC : QTList]
+  if getName(QC) ==Bool ''@`assume_ orBool
+     getName(QC) ==Bool ''@`assert_ orBool
+     getName(QC) ==Bool ''@`invariant_ orBool
+     getName(QC) ==Bool ''@`pre_ orBool
+     getName(QC) ==Bool ''@`post_ .
   eq substTerm(QC, MetaSubst) = QC [owise] .
   eq substTerm(Q[QTList], MetaSubst)
    = Q[substTerm(QTList, MetaSubst)] [owise] .
 
+  var Pattern : Pattern .
+  var Bag : Bag .
+  var Phi : Formula .
+  var Subst1 Subst2 : Subst .
+
+  --- apply substitution on a pattern
+  eq applySubst(Pattern, Subst)
+   = downTerm(substTerm(upTerm(Pattern), upSubst(Subst)), errorPattern) .
   --- apply substitution on a configuration
   eq applySubst(Bag, Subst)
    = downTerm(substTerm(upTerm(Bag), upSubst(Subst)), errorBag) .
@@ -251,12 +277,35 @@ mod APPLY-SUBST is inc MATCHC + PL-META-TERM + CONST-UTILS .
   eq applySubst(Phi, Subst)
    = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), errorFormula) .
   --- apply substitution on a substitution
-  eq applySubst(Subst, Subst')
-   = downTerm(substTerm(upTerm(Subst), upSubst(Subst')), errorSubst) .
+  eq applySubst(Subst1, Subst2)
+   = downTerm(substTerm(upTerm(Subst1), upSubst(Subst2)), errorSubst) .
 endm
 
 
-mod CONFIG-UTILS is inc APPLY-SUBST + CONFIG-SCOLEM .
+mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST .
   var I : Int++ .
   eq isInt(I) = I :: Int .
+
+  var Obj : MathObj++ .
+  var PEObj : PEMathObj .
+  var FEObj : FEMathObj .
+  var FreeObj : FreeMathObj .
+  var Phi : Formula .
+
+  eq getPESubstItem(PEObj === Obj /\ Phi) = (PEObj <- Obj) .
+  eq getPESubstItem(Obj === PEObj /\ Phi) = (PEObj <- Obj) .
+  eq getPESubstItem(Phi) = .Subst [owise] .
+
+  eq getFESubstItem(FEObj === Obj /\ Phi) = (FEObj <- Obj) .
+  eq getFESubstItem(Obj === FEObj /\ Phi) = (FEObj <- Obj) .
+  eq getFESubstItem(Phi) = .Subst [owise] .
+
+  eq getFreeSubstItem(FreeObj === Obj /\ Phi) = (FreeObj <- Obj) .
+  eq getFreeSubstItem(Obj === FreeObj /\ Phi) = (FreeObj <- Obj) .
+  eq getFreeSubstItem(Phi) = .Subst [owise] .
+
+  var Obj1 Obj2 Obj1' Obj2' : MathObj++ .
+  var ObjList ObjList' : List{MathObj++} .
+  eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
+   = (Obj1 <- Obj1') ;; (Obj2 <- Obj2') ;; (ObjList <- ObjList') .
 endm
