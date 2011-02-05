@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 struct listNode {
   int val;
   struct listNode *next;
@@ -21,7 +22,6 @@ struct listNode* reverse(struct listNode *x)
   return p;
 }
 
-
 struct listNode* append(struct listNode *x, struct listNode *y)  
 {
   struct listNode *p;
@@ -35,7 +35,6 @@ struct listNode* append(struct listNode *x, struct listNode *y)
 
   return x;
 }
-
 
 int length(struct listNode* x)
 {
@@ -66,7 +65,6 @@ struct listNode* create(int n)
   }
   return x;
 }
-
 
 void destroy(struct listNode* x)
 {
@@ -99,7 +97,6 @@ int main()
   x = create(5);
   printf("x: ");
   print(x);
-/*
   x = reverse(x);
   printf("reverse(x): ");
   print(x);
@@ -115,7 +112,6 @@ int main()
   printf("append(x, y): ");
   print(x);
   destroy(x);
-*/
 
   return 0;
 }

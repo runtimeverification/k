@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 struct listNode {
   int val;
   struct listNode *next;
@@ -21,7 +22,6 @@ struct listNode* reverse(struct listNode *x)
   return p;
 }
 
-
 struct listNode* append(struct listNode *x, struct listNode *y)  
 {
   struct listNode *p;
@@ -35,7 +35,6 @@ struct listNode* append(struct listNode *x, struct listNode *y)
 
   return x;
 }
-
 
 int length(struct listNode* x)
 {
@@ -67,7 +66,6 @@ struct listNode* create(int n)
   return x;
 }
 
-
 void destroy(struct listNode* x)
 {
   struct listNode *y;
@@ -95,78 +93,49 @@ int main()
 {
   struct listNode *x;
   struct listNode *y;
+
   x = create(5);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
-                     <heap> list(?x)([1, 2, 3, 4, 5]) </heap> 
-                     </config> /\ true */
+  /*@ assert <heap> list(x)([1, 2, 3, 4, 5]) </heap> */
   x = reverse(x);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
-                     <heap> list(?x)([5, 4, 3, 2, 1]) </heap>
-                     </config> /\ true */
+  /*@ assert <heap> list(x)([5, 4, 3, 2, 1]) </heap> */
   destroy(x);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
-                    <heap> . </heap>
-                    </config> /\ true */
+  /*@ assert <heap> . </heap> */
   x = create(5);
   printf("x: ");
   print(x);
-  /*@ assert <config><env > x |-> ?x, y |-> ?y </env>
-                     <heap> list(?x)(!A) </heap>
-                     </config> /\ true */
+  /*@ assert <heap> list(x)(!A) </heap> */
   x = reverse(x);
   printf("reverse(x): ");
   print(x);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
-                     <heap> list(?x)(rev(!A)) </heap>
-                     </config> /\ true */
+  /*@ assert <heap> list(x)(rev(!A)) </heap> */
   destroy(x);
-
 
   x = create(3);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
-                     <heap> list(?x)([1, 2, 3]) </heap> 
-                     </config> /\ true */
+  /*@ assert <heap> list(x)([1, 2, 3]) </heap> */
   y = create(3);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
-                     <heap> list(?x)([1, 2, 3]), list(?y)([1, 2, 3]) </heap> 
-                     </config> /\ true */
+  /*@ assert <heap> list(x)([1, 2, 3]), list(y)([1, 2, 3]) </heap> */
   x = append(x, y);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
-                     <heap> list(?x)([1, 2, 3, 1, 2, 3]) </heap> 
-                     </config> /\ true */
+  /*@ assert <heap> list(x)([1, 2, 3, 1, 2, 3]) </heap> */
   destroy(x);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env>
-                     <heap> . </heap>
-                     </config> /\ true */
+  /*@ assert <heap> . </heap> */
   x = create(3);
   printf("x: ");
   print(x);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
-                     <heap> list(?x)(!A1) </heap> 
-                     </config> /\ true */
+  /*@ assert <heap> list(x)(!A1) </heap> */
   y = create(3);
   printf("y: "); 
   print(x);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
-                     <heap> list(?x)(!A1), list(?y)(!A2) </heap> 
-                     </config> /\ true */
+  /*@ assert <heap> list(x)(!A1), list(y)(!A2) </heap> */
   x = append(x, y);
   printf("append(x, y): ");
   print(x);
-  /*@ assert <config><env> x |-> ?x, y |-> ?y </env> 
-                     <heap> list(?x)(!A1 @ !A2) </heap> 
-                     </config> /\ true */
+  /*@ assert <heap> list(x)(!A1 @ !A2) </heap> */
   destroy(x);
+  /*@ assert <heap> . </heap> */
+  
   return 0;
 }
 
 
-/*@ var ?x ?y ?p ?i ?v : ?Int */
-/*@ var x0 : FreeInt */
-/*@ var ?B ?C ?A1 ?A2 : ?Seq */
-/*@ var !A !A1 !A2 : !Seq */
-/*@ var A B : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var !rho !H : !MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
+/*@ var !A !A1 !A2 : FESeq */
+
