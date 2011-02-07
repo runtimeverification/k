@@ -127,7 +127,7 @@ void f()
                  <out> SOut </out>
                  <heap> H </heap>
                  C </config> /\ len(S) = n0 */
-/*@ pros <config><in> SIn </in>
+/*@ post <config><in> SIn </in>
                  <out> strem(rev(S)), SOut </out>
                  <heap> H </heap>
                  C </config> */
