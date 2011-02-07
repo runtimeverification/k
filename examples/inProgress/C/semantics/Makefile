@@ -43,9 +43,9 @@ dynamic-c-semantics.k dynamic-c-configuration.k
 	@echo "Done".
 	
 c-total.maude: c-compiled.maude $(K-PRELUDE).maude $(K-PL-BUILTINS).maude $(K-PL-MODEL-CHECKER).maude Makefile
-	@echo before sed1
-	@sed -i '2 i load $(K-PL-MODEL-CHECKER)' c-compiled.maude
-	@echo after sed1
+#@sed -i '2 i load $(K-PL-MODEL-CHECKER)' c-compiled.maude
+	@sed -i -e '2i\
+	load $(K-PL-MODEL-CHECKER)' c-compiled.maude
 #echo adds a newline
 	@echo | cat c-compiled.maude c-syntax.maude - common-c-configuration.maude | perl slurp.pl ./ > c-total.maude
 	

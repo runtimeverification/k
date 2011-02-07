@@ -147,9 +147,7 @@ fi
 if [ ! "$dflag" ]; then
 	rm -f program-$filename-gen.maude
 fi
-echo "before sed2"
-sed '1 d' program-$filename-compiled.maude > program-$filename-compiled.maude.tmp
-echo "after sed2"
+sed -e '1 d' program-$filename-compiled.maude > program-$filename-compiled.maude.tmp
 mv program-$filename-compiled.maude.tmp program-$filename-compiled.maude
 
 rm -f program-$filename-compiled.maude.tmp
