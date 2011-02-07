@@ -32,8 +32,8 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) > $(COMPILED_FILE).output
-	@cat $(COMPILED_FILE).output
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output
+#@cat $(COMPILED_FILE).output
 
 # this should build the latex
 latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
@@ -67,8 +67,8 @@ true-test: $(COMPILED_FILE) $(foreach test, $(TESTS), results-$(test).xml) compi
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
 test-%.output: % $(COMPILED_FILE) 
-	@echo q | maude -no-wrap -no-ansi-color $< > $@
-	@cat $@
+	@echo q | maude -no-wrap -no-ansi-color $< 2>&1 |tee $@
+#@cat $@
 	
 results-%.xml: % test-%.output
 	@perl $(TOOL_DIR)/createXMLTestOutput.pl $(notdir $(realpath .)).$(basename $(notdir $*)) $* test-$*.output > $@
