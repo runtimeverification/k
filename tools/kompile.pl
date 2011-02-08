@@ -641,10 +641,10 @@ if (!$compile_only) {
 		$f =~ s/\.k$/\.maude/s;
 		my $maudified = get_file_content($f);
 #		print "F: $f\nM: $maudified\n\n";
-		if ($maudified =~ /(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/sg)
+		if ($maudified =~ /(^|(?<=\s))(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/sg)
 		{
 		    $prelude =~ s/\.maude$//sg;
-		    $maudified =~ s/(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/;
+		    $maudified =~ s/(^|(?<=\s))(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/;
 		    
 		    # hardcoded
 		    $maudified =~ s/\n\s/\n/g;
