@@ -39,7 +39,6 @@ struct listNode* append(struct listNode *x, struct listNode *y)
   p = x;
   /*@ invariant <heap> lseg(x, p)(?A1), list(p)(?A2), !H </heap> 
                 /\ A = ?A1 @ ?A2 /\ ~(p = 0) /\ y = !y */
-  // need way to specify y is constant 
   while (p->next)
     p = p->next;
   p->next = y;
