@@ -36,9 +36,10 @@ counter: hide
 # Options (special cell)
 options:
   global-substitutions:
-    - "`(`.List{K}`)": ""
-    - "`(`.`)`.Bag": "."
-    - "ListItem`((`d+)`)": "`1 "
+    - "`(`.List`{K`}`)": ""
+    - "List`{MathObj`+`+`}": ""
+    #- "ListItem`((`d+)`)": "`1 "
+    - "ListItem`(([0-9]+)`)": "`1 "
   spaceless-cells: yes
   indent: 2
   #end-cell-linebreak: yes

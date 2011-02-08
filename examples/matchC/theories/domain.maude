@@ -57,9 +57,9 @@ mod MATHEMATICAL-DOMAIN-BUILTIN-MODULE is
   eq @(1 +Int (-Int len(A)) >=Int 0) /\ Phi1 ===> isSorted(A) /\ Phi2
    = @(1 +Int (-Int len(A)) >=Int 0) /\ Phi1 ===> Phi2 .
 
-  op list{tree}2list_ : Seq++ -> Seq++ .
-  eq list{tree}2list(A1 @ [T] @ A2)
-   = list{tree}2list(A1) @ tree2list(T) @ list{tree}2list(A2) .
-  eq list{tree}2list(epsilon) = epsilon .
+  op treeList2list : Seq++ -> Seq++ .
+  eq treeList2list(A1 @ [T] @ A2)
+   = treeList2list(A1) @ tree2list(T) @ treeList2list(A2) .
+  eq treeList2list(epsilon) = epsilon .
 endm
 

@@ -25,11 +25,13 @@ JFLAGS = -classpath $(CLASSPATH)
 #
 LANGUAGE = kernelC
 ANNOTATION = annot
-LEXER_GRAMMARS =
-GRAMMARS =  $(ANNOTATION).g $(LANGUAGE).g
-TREE_GRAMMARS = $(ANNOTATION)Pass1.g \
-                $(ANNOTATION)ToMaude.g \
-                $(LANGUAGE)ToMaude.g
+LEXER_GRAMMARS = k.g
+GRAMMARS = $(LANGUAGE).g $(ANNOTATION).g
+TREE_GRAMMARS = $(LANGUAGE)Pass1.g \
+                $(LANGUAGE)Pass2.g \
+                $(ANNOTATION)Pass1.g \
+                $(ANNOTATION)Pass2.g \
+                $(ANNOTATION)Pass3.g
 TOKENS = $(LEXER_GRAMMARS:.g=.tokens) \
          $(GRAMMARS:.g=.tokens) \
          $(TREE_GRAMMARS:.g=.tokens)
@@ -38,10 +40,11 @@ LEXERS = $(LEXER_GRAMMARS:.g=.java) \
 PARSERS = $(GRAMMARS:.g=Parser.java)
 WALKERS = $(TREE_GRAMMARS:.g=.java)
 JAVA_PRE = Table.java TreeUtils.java
-JAVA_POST = AnnotPreK.java KernelCPreK.java
-CLASSES = $(JAVA_PRE:.java=.class) \
-          $(LEXERS:.java=.class) \
+JAVA_POST = AnnotPreK.java $(LANGUAGE)Pass3.java KernelCPreK.java
+
+CLASSES = $(LEXERS:.java=.class) \
           $(PARSERS:.java=.class) \
+          $(JAVA_PRE:.java=.class) \
           $(WALKERS:.java=.class) \
           $(JAVA_POST:.java=.class)
 MAIN = KernelCPreK

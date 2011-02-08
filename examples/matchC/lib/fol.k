@@ -127,6 +127,51 @@ kmod FOL is including MATCHC-SEMANTICS
       <subst> Subst => Subst ;; (FEList <- List) </subst>
     <_/task>
   [structural]
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <stack> FreeList => .List <_/stack>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <stack> FreeList => .List <_/stack>
+    <_/task>
+  [structural]
+
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <stack_> FreeList => .List </stack>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <stack_> FreeList => .List </stack>
+    <_/task>
+  [structural]
+
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <stack> List => .List </stack>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <stack> PEList => .List </stack>
+    <_/task>
+  [structural]
+
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <stack> List => .List </stack>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <stack> FEList => .List </stack>
+      <subst> Subst => Subst ;; (FEList <- List) </subst>
+    <_/task>
+  [structural]
+
 
 
 --- Step 1: Eliminate the environment and the return value

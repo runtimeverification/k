@@ -8,6 +8,8 @@ K_TOOLS_DIR = $(K_ROOT_DIR)/tools
 KC = $(K_TOOLS_DIR)/kompile.pl
 ML_LIB_DIR = $(ML_ROOT_DIR)/lib
 ML_PRELUDE = $(ML_LIB_DIR)/ml-prelude.maude
+#ML_PRELUDE_STRING = `echo $(ML_PRELUDE) | sed 's/\//\\\//g'`
+ML_PRELUDE_STRING = ..\/lib\/ml-prelude.maude
 ANTLR_ROOT_DIR = $(K_TOOLS_DIR)/antlr
 JVM = java
 CLASSPATH = $(ANTLR_ROOT_DIR)/antlrworks-1.4.jar:$(ANTLR_ROOT_DIR)
@@ -46,14 +48,14 @@ CLEAN_FILES = $(LANG_UNWRAPPED_FILE) \
 
 %-unwrapped.maude: %-compiled.maude
 	$(JVM) $(JFLAGS) $(UNWRAP_MAIN) <$< >$@
+	@sed -i -e "/^mod/a \
+    subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} String Value TypedValue ExpressionType < Builtins KResult . \
+    subsort Id Field KItem < Builtins KProper . \
+    eq 'substKLabel(K:K,, K1:K,, K2:K)= K:K [owise] ." $@
 
 %-compiled.maude: %.maude
-	$(KC) -c -l `echo $* | tr [:lower:] [:upper:]` $<
-	#svn revert ../lib/config.maude ../lib/ml-builtins.maude
-	svn revert ../theories/* ../heap_patterns/*
-	@sed -i -e '1d' -e '/^mod/a \
-    subsort Formula Subst MathObj++ List{MathObj++} Set{MathObj++} String Value TypedValue ExpressionType < Builtins KResult . \
-    subsort Id Field KItem < Builtins KProper .' $@
+	$(KC) -c $<
+	sed -i -e '1s/^.*k-prelude/load $(ML_PRELUDE_STRING)/' $@
 
 
 all: build

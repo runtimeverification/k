@@ -12,7 +12,7 @@ bottomup
   ;
 
 progam_identifier
-  : id=IDENTIFIER { Table.identifiers.contains($id.text) }?
-    -> ^(IDENTIFIER["?var"] $id)
+  : id=IDENTIFIER { Table.progIdentifiers.contains($id.text) }?
+    -> ^(IDENTIFIER["?var"] ^(ID["id"] STRING_LITERAL["\"" + $id.text + "\""]))
   ;
 

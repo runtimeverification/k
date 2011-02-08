@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 struct treeNode {
   int val;
   struct treeNode *left;
@@ -145,46 +146,26 @@ int main()
   struct listNode* l;
 
   t = create();
-  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
-                        < heap > tree(?t)(!T1) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  //@ assert <heap> tree(t)(!T1) </heap>
   l = toListRecursive(t, 0);
-  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
-                        < heap > list(?l)(tree2list(!T1)) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  //@ assert <heap> list(l)(tree2list(!T1)) </heap>
   printf("l: ");
   print(l);
   destroy(l);
-  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
-                        < heap > (.).Map </ heap >
-                        < form > TrueFormula </ form > </ config > */
-
+  //@ assert <heap> . </heap>
 
   t = create();
-  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
-                        < heap > tree(?t)(!T2) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  //@ assert <heap> tree(t)(!T2) </heap>
   l = toListIterative(t);
-  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
-                        < heap > list(?l)(tree2list(!T2)) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  //@ assert <heap> list(l)(tree2list(!T2)) </heap>
   printf("l: ");
   print(l);
   destroy(l);
-  /*@ assert < config > < env > t |-> ?t  l |-> ?l </ env >
-                        < heap > (.).Map </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  //@ assert <heap> . </heap>
 
   return 0;
 }
 
 
-/*@ var ?t ?tn ?s ?sn ?l ?ln : ?Int */
-/*@ var ?TS ?A : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var !T1 !T2 : !Tree */
-/*@ var T : FreeTree */
-/*@ var ?rho : ?MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
+//@ var T : Tree
 

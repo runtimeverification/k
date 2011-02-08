@@ -1,16 +1,10 @@
-load ../lib/ml-prelude.maude
-
-
 kmod KERNELC-SYNTAX is including ML-K + PL-STRING
-***(
-  subsort Id Field < Builtins KProper
-  subsort Value TypedValue ExpressionType < Builtins KResult
-***)
 ***(
 imp type system
 ***)
   syntax Void ::= void
   syntax NvExpressionType ::= int
+                            | string
                             | struct Id [prec 10]
                             | ExpressionType *
   syntax ExpressionType ::= Void | NvExpressionType
@@ -132,7 +126,6 @@ KernelC is a top sort
                    | ExpressionType
                    | Statement
                    | Expression
-  syntax Id ::= main | malloc | free | printf
 
 *** arrow
   syntax KernelC ::= .KernelC

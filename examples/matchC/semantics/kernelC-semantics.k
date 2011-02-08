@@ -47,7 +47,7 @@ Function entry
 ***)
   rule
     <program> runMain => .K <_/program>
-    <fun_> T main(.List{KernelC}) |-> S <_/fun>
+    <fun_> T id("main")(.List{KernelC}) |-> S <_/fun>
     <tasks>
         _
       =>
@@ -86,7 +86,7 @@ Structure declaration
 ***(
 Variable declaration
 ***)
-  rule
+  rule [ANA] :
     <k> T X ; => .K <_/k>
     <env_> .Map => X |-> FreeInt(N) <_/env>
     <tenv_> .Map =>  X |-> T <_/tenv>
@@ -107,7 +107,7 @@ Statements
 
 
 ***(
-function call/return
+Function call/return
 ***)
 *** function call
   rule
@@ -127,7 +127,7 @@ function call/return
     <stack_> callContext(K, TEnv, Env) => .List </stack>
     <tenv> _ => TEnv </tenv>
     <env> _ => Env </env>
-   <form> Phi => returns V /\ Phi </form>
+    <form> Phi => returns V /\ Phi </form>
 
 *** retrieve the return value
   rule
@@ -243,9 +243,9 @@ Memory load, store and rearrangement
 Memory management
 ***)
 *** malloc/free
-  rule malloc(TV) => newObject [structural]
+  rule id("malloc")(TV) => newObject [structural]
   rule (T *) newObject => new T [structural]
-  rule free(TV) => delete TV [structural]
+  rule id("free")(TV) => delete TV [structural]
 
 *** new
   rule
@@ -288,10 +288,10 @@ Memory management
 I/O
 ***)
   rule
-    <k> printf(_:String,,,tv(_,I)) => tv(void, unit) <_/k>
+    <k> id("printf")(tv(string, _:String),,,tv(_,I)) => tv(void, unit) <_/k>
     <out_> .List => ListItem(I) </out>
   [structural]
-  rule printf(_:String) => tv(void, unit) [structural]
+  rule id("printf")(tv(string, _:String)) => tv(void, unit) [structural]
 
 
 ***(

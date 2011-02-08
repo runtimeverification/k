@@ -2,6 +2,7 @@ grammar annot;
 
 
 options {
+  tokenVocab = k;
   //k = 2;
   output = AST;
   ASTLabelType=CommonTree;
@@ -11,6 +12,7 @@ options {
 tokens {
   BEGIN_ANNOT = '/*@';
   END_ANNOT = '*/';
+  LINE_ANNOT = '//@';
 
   PRE = 'pre';
   POST = 'post';
@@ -19,6 +21,8 @@ tokens {
   INVARIANT = 'invariant';
   SKIP = 'skip';
   VERIFY = 'verify';
+  BREAKPOINT = 'breakpoint';
+  VAR;
 
   DOT = '.';
   COLON = ':';
@@ -53,21 +57,14 @@ tokens {
   SEQ;
   MSET;
 
-  K_UNIT = '.K';
-  K_ARROW = '~>';
-
-  K_LIST;
-  K_LIST_UNIT = '.List{K}';
-  K_LIST_COMMA = ',,';
-
-  MAP;
+  // MAP;
   MAP_UNIT = '.Map';
   MAP_ITEM = 'MapItem';
   MAPSTO = '|->';
   POINTSTO;
   HEAP_PATTERN;
 
-  BAG;
+  // BAG;
   BAG_UNIT = '.Bag';
   BAG_ITEM = 'BagItem';
 
@@ -75,7 +72,7 @@ tokens {
   CELL;
   LABEL;
 
-  LIST;
+  // LIST;
   LIST_UNIT = '.List';
   LIST_ITEM = 'ListItem';
 
@@ -94,27 +91,44 @@ tokens {
   HEX_DIGIT;
 
   WHITESPACE;
+
+  ID;
 }
 
+
+@lexer::members {
+  boolean isVar = false;
+}
+
+
 annot
-  : BEGIN_ANNOT!
-    ( pattern_directive^ pattern
-    | function_directive
+  : (BEGIN_ANNOT | LINE_ANNOT)
+    ( pattern_directive pattern -> ^(pattern_directive ^(LIST pattern))
+    | directive -> directive
     )
-    END_ANNOT!
+    END_ANNOT?
   ;
 
 pattern_directive
-  : PRE
+  : PRE { Table.genVarString(""); }
   | POST
-  | ASSUME
-  | ASSERT
-  | INVARIANT
+  | ASSUME { Table.genVarString("!"); }
+  | ASSERT { Table.genVarString("!"); }
+  | INVARIANT { Table.genVarString("!"); }
   ;
 
-function_directive
+directive
   : SKIP
   | VERIFY
+  | BREAKPOINT
+  | VAR
+    ids+=IDENTIFIER (COMMA ids+=IDENTIFIER)* COLON sort=IDENTIFIER
+    {
+      for (Object id : $ids) {
+        Table.varRootToSort.put(((CommonToken) id).getText(), $sort.text);
+      }
+    }
+    -> VAR["(.).K"]
   ;
 
 
@@ -127,19 +141,22 @@ disjunctive_pattern
   ;
 
 primary_pattern
-  : (LPAREN)=> LPAREN pattern RPAREN
+options { backtrack = true; }
+  : LPAREN pattern RPAREN
     ( -> pattern
     | CONJ formula -> ^(CONJ pattern formula)
     )
   | configuration
-    ( -> ^(CONJ configuration FORMULA_TRUE)
+    ( -> ^(CONJ["/\\"] configuration FORMULA_TRUE)
     | CONJ formula -> ^(CONJ configuration formula)
     )
+  | formula
+    -> ^(CONJ["/\\"] ^(CONFIG[""] BAG) formula)
   ;
 
 
 configuration
-  : bag -> ^(CONFIG bag)
+  : bag -> ^(CONFIG[""] bag)
   ;
 
 //term_list
@@ -257,22 +274,22 @@ options { backtrack = true; }
   ;
 
 map_cell
-  : '<' IDENTIFIER '>' { Table.config.containsKey($IDENTIFIER.text) }?
-    { Table.config.get($IDENTIFIER.text).sort.equals(Table.Cell.MAP) }?
+  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
+    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.MAP) }?
     map cell_end[$IDENTIFIER.text]
     -> ^(CELL LABEL[$IDENTIFIER.text] map LABEL[$IDENTIFIER.text])
   ;
 
 bag_cell
-  : '<' IDENTIFIER '>' { Table.config.containsKey($IDENTIFIER.text) }?
-    { Table.config.get($IDENTIFIER.text).sort.equals(Table.Cell.BAG) }?
+  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
+    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.BAG) }?
     bag cell_end[$IDENTIFIER.text]
     -> ^(CELL LABEL[$IDENTIFIER.text] bag LABEL[$IDENTIFIER.text])
   ;
 
 k_cell
-  : '<' IDENTIFIER '>' { Table.config.containsKey($IDENTIFIER.text) }?
-    { Table.config.get($IDENTIFIER.text).sort.equals(Table.Cell.K) }?
+  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
+    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.K) }?
     k cell_end[$IDENTIFIER.text]
     -> ^(CELL LABEL[$IDENTIFIER.text] k LABEL[$IDENTIFIER.text])
   ;
@@ -374,7 +391,7 @@ primary_term
   ;
 
 constant
-  : DOT
+  : DOT -> K_UNIT
   | K_UNIT
   | FORMULA_TRUE
   | FORMULA_FALSE
@@ -393,14 +410,26 @@ constructor
 
 infix_term
   //: IDENTIFIER^ LPAREN! term_list RPAREN!
-  : IDENTIFIER^ LPAREN! mathematical_object_list RPAREN!
+  : IDENTIFIER LPAREN mathematical_object (COMMA mathematical_object)* RPAREN
+    -> ^(IDENTIFIER mathematical_object+)
   ;
 
 
 /*
  * Tokens
  */
-IDENTIFIER : ('?' | '!' | LETTER) (LETTER | DIGIT)* ;
+K_UNIT : '.K' ;
+K_ARROW : '~>' ;
+
+K_LIST_UNIT : '.List{K}' ;
+K_LIST_COMMA : ',,' ;
+
+VAR : 'var' { isVar = true; };
+
+IDENTIFIER
+  : ('?' | '!')? LETTER (LETTER | DIGIT)*
+    { if (!isVar) Table.annotIdentifiers.add($text); }
+  ;
   
 fragment
 LETTER

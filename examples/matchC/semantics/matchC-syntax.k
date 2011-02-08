@@ -6,25 +6,26 @@ kmod MATCHC-SYNTAX is including KERNELC-SYNTAX
 matching logic annotations
 ***)
   syntax List ::= Pattern
-  syntax Annotation ::= /*@`assume List */
-                      | /*@`assert List */
-                      | /*@`invariant List */
+  syntax Annotation ::= @`assume List 
+                      | @`assert List 
+                      | @`invariant List 
 
-  syntax Annotation ::= /*@`pre List */
-                      | /*@`post List */
+  syntax Annotation ::= @`pre List 
+                      | @`post List 
 
-  syntax Annotation ::= /*@`verify`*/
-                      | /*@`skip`*/
+  syntax Annotation ::= @`verify
+                      | @`skip
+                      | @`breakpoint
 ***(
-  syntax Annotation ::= /*@`assume Pattern */
-                      | /*@`assert Pattern */
-                      | /*@`invariant Pattern */
+  syntax Annotation ::= @`assume Pattern 
+                      | @`assert Pattern 
+                      | @`invariant Pattern 
 
-  syntax Annotation ::= /*@`pre Pattern */
-                      | /*@`post Pattern */
+  syntax Annotation ::= @`pre Pattern 
+                      | @`post Pattern 
 
-  syntax Annotation ::= /*@`verify`*/
-                      | /*@`skip`*/
+  syntax Annotation ::= @`verify`
+                      | @`skip`
 ***)
 
 
@@ -42,8 +43,9 @@ matching logic annotations
   syntax Declaration ::= Annotation
   syntax Statement ::= Annotation
 
-  syntax KItem ::= defaultKItem ( String )
-  syntax K ::= KItem 
-  syntax Builtins ::= KItem
+  syntax Statement ::= returnAssert Expression [strict]
+
+
+  syntax K ::= defaultKItem ( String ) 
 endkm
 

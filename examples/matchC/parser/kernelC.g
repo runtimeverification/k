@@ -1,6 +1,8 @@
 grammar kernelC;
 
+
 options {
+  tokenVocab = k;
   output = AST;
   ASTLabelType = CommonTree;
   backtrack = true;
@@ -8,10 +10,14 @@ options {
   k = 2;
 }
 
+
 tokens {
-  LIST;
   SEQ;
+  LIST;
   TRANS_UNIT;
+  INT_TYPE = 'int';
+  STRING_TYPE;
+  VOID_TYPE = 'void';
   FUN_DEF;
   ANNOT_FUN_DEF;
   FUN_DECL;
@@ -22,33 +28,68 @@ tokens {
   STRUCT = 'struct';
   PTR;
   NOP;
+  SEP = ';';
   IF = 'if';
   ELSE = 'else';
   WHILE = 'while';
   RETURN = 'return';
   BLOCK;
   VOID_EXP;
+  ANNOT;
+
+  ASSIGN = '=';
+  OR_ASSIGN = '|=';
+  XOR_ASSIGN = '^=';
+  AND_ASSIGN = '&=';
+  SHL_ASSIGN = '<<=';
+  SHR_ASSIGN = '>>=';
+  ADD_ASSIGN = '+=';
+  SUB_ASSIGN = '-=';
+  MUL_ASSIGN = '*=';
+  DIV_ASSIGN = '/=';
+  REM_ASSIGN = '%=';
+  COND;
+  LOR = '||';
+  LAND = '&&';
+  OR = '|';
+  XOR = '^';
+  AND = '&';
+  EQ = '==';
+  NEQ = '!=';
+  LT = '<';
+  GT = '>';
+  LEQ = '<=';
+  GEQ = '>=';
+  SHL = '<<';
+  SHR = '>>';
+  ADD = '+';
+  SUB = '-';
+  MUL = '*';
+  DIV = '/';
+  REM = '%';
+  INC = '++';
+  DEC = '--';
+  PRE_INC;
+  PRE_DEC;
+  SIZEOF = 'sizeof';
   CAST;
   REF;
   DEREF;
   SIGN_POS;
   SIGN_NEG;
+  NOT = '~';
+  NEG = '!';
+  DOT = '.';
+  ARROW = '->';
   INDEX;
   CALL;
   POST_INC;
   POST_DEC;
-  ANNOT;
-}
 
-@lexer::header {
-  import java.util.Set;
-  import java.util.HashSet;
+  TV;
+  ID;
+  UNIT_EXP;
 }
-
-@lexer::members {
-  HashSet<String> annots = new HashSet<String>();
-}
-
 
 
 //
@@ -70,8 +111,8 @@ function_definition
   : type IDENTIFIER '(' parameter_list ')'
     ( ANNOTATION ANNOTATION compound_statement
       -> ^(ANNOT_FUN_DEF type IDENTIFIER parameter_list
-      ANNOTATION ANNOTATION compound_statement
-      )
+           ANNOTATION ANNOTATION compound_statement
+         )
     | compound_statement
       -> ^(FUN_DEF type IDENTIFIER parameter_list compound_statement)
     )
@@ -85,14 +126,14 @@ declaration
 
 function_declaration
   : type IDENTIFIER '(' parameter_list ')'
-    ( ANNOTATION ANNOTATION ';'
+    ( ANNOTATION ANNOTATION SEP
       -> ^(ANNOT_FUN_DECL type IDENTIFIER parameter_list ANNOTATION ANNOTATION)
-    | ';' -> ^(FUN_DECL type IDENTIFIER parameter_list)
+    | SEP -> ^(FUN_DECL type IDENTIFIER parameter_list)
     )
   ;
 
 struct_declaration
-  : STRUCT IDENTIFIER '{' struct_field_list '}' ';'
+  : STRUCT IDENTIFIER '{' struct_field_list '}' SEP
     -> ^(STRUCT_DECL IDENTIFIER struct_field_list)
   ;
 
@@ -102,7 +143,7 @@ struct_field_list
   ;
 
 variable_declaration
-  : type IDENTIFIER ';' -> ^(VAR_DECL type IDENTIFIER)
+  : type IDENTIFIER SEP -> ^(VAR_DECL type IDENTIFIER)
   ;
 
 parameter_list
@@ -116,15 +157,15 @@ parameter
   ;
 
 type
-  : ( 'void'
-    | 'int'
+  : ( VOID_TYPE
+    | INT_TYPE
     | STRUCT^ IDENTIFIER
     )
     (ptr^)*
   ;
 
 ptr
-  : '*' -> PTR
+  : MUL -> PTR
   ;
 
 
@@ -137,16 +178,14 @@ statement_list
   ;
 
 statement
-  : expression ';' -> ^(';' expression)
-  | ';' -> ^(';' VOID_EXP)
-  | IF '(' expression ')' s1=statement
-    (
-    : ELSE s2=statement -> ^(IF expression $s1 $s2)
-    | -> ^(IF expression statement NOP)
-    )
+  : expression SEP -> ^(SEP expression)
+  | SEP -> NOP
+  | IF '(' expression ')' s1=statement ELSE s2=statement
+    -> ^(IF expression $s1 $s2)
+  | IF '(' expression ')' statement -> ^(IF expression statement NOP)
   | WHILE '(' expression ')' statement -> ^(WHILE expression statement)
-  | RETURN expression ';' -> ^(RETURN expression)
-  | RETURN ';' -> ^(RETURN VOID_EXP)
+  | RETURN expression SEP -> ^(RETURN expression)
+  | RETURN SEP -> ^(RETURN VOID_EXP)
   | compound_statement
   | ANNOTATION
   ;
@@ -183,61 +222,65 @@ lvalue
   ;
 
 assignment_operator
-  : '='
-  | '*='
-  | '/='
-  | '%='
-  | '+='
-  | '-='
-  | '<<='
-  | '>>='
-  | '&='
-  | '^='
-  | '|='
+  : ASSIGN
+  | OR_ASSIGN
+  | XOR_ASSIGN
+  | AND_ASSIGN
+  | SHL_ASSIGN
+  | SHR_ASSIGN
+  | ADD_ASSIGN
+  | SUB_ASSIGN
+  | MUL_ASSIGN
+  | DIV_ASSIGN
+  | REM_ASSIGN
   ;
 
 conditional_expression
-  : logical_or_expression ('?'^ expression ':'! conditional_expression)?
+  : logical_or_expression
+    ( -> logical_or_expression
+    | '?' expression ':' conditional_expression
+      -> ^(COND logical_or_expression expression conditional_expression)
+    )
   ;
 
 logical_or_expression
-  : logical_and_expression ('||'^ logical_and_expression)*
+  : logical_and_expression (LOR^ logical_and_expression)*
   ;
 
 logical_and_expression
-  : inclusive_or_expression ('&&'^ inclusive_or_expression)*
+  : inclusive_or_expression (LAND^ inclusive_or_expression)*
   ;
 
 inclusive_or_expression
-  : exclusive_or_expression ('|'^ exclusive_or_expression)*
+  : exclusive_or_expression (OR^ exclusive_or_expression)*
   ;
 
 exclusive_or_expression
-  : and_expression ('^'^ and_expression)*
+  : and_expression (XOR^ and_expression)*
   ;
 
 and_expression
-  : equality_expression ('&'^ equality_expression)*
+  : equality_expression (AND^ equality_expression)*
   ;
   
 equality_expression
-  : relational_expression (('=='|'!=')^ relational_expression)*
+  : relational_expression ((EQ | NEQ)^ relational_expression)*
   ;
 
 relational_expression
-  : shift_expression (('<'|'>'|'<='|'>=')^ shift_expression)*
+  : shift_expression ((LT | GT | LEQ | GEQ)^ shift_expression)*
   ;
 
 shift_expression
-  : additive_expression (('<<'|'>>')^ additive_expression)*
+  : additive_expression ((SHL | SHR)^ additive_expression)*
   ;
 
 additive_expression
-  : multiplicative_expression (('+'|'-')^ multiplicative_expression)*
+  : multiplicative_expression ((ADD | SUB)^ multiplicative_expression)*
   ;
 
 multiplicative_expression
-  : cast_expression (('*'|'/'|'%')^ cast_expression)*
+  : cast_expression ((MUL | DIV | REM)^ cast_expression)*
   ;
 
 cast_expression
@@ -248,28 +291,32 @@ cast_operator : '(' -> CAST ;
 
 unary_expression
   : postfix_expression
-  | '++'^ unary_expression
-  | '--'^ unary_expression
+  | pre_inc_operator^ unary_expression
+  | pre_dec_operator^ unary_expression
   | unary_operator^ cast_expression
-  | 'sizeof'^ unary_expression
-  | 'sizeof'^ '('! type ')'!
+  | SIZEOF^ unary_expression
+  | SIZEOF^ '('! type ')'!
   ;
 
+pre_inc_operator : INC -> PRE_INC;
+
+pre_dec_operator : DEC -> PRE_DEC;
+
 unary_operator
-  : '&' -> REF
-  | '*' -> DEREF
-  | '+' -> SIGN_POS
-  | '-' -> SIGN_NEG
-  | '~'
-  | '!'
+  : AND -> REF
+  | MUL -> DEREF
+  | ADD -> SIGN_POS
+  | SUB -> SIGN_NEG
+  | NOT
+  | NEG
   ;
 
 postfix_expression
   : primary_expression
     ( index_operator^ expression ']'!
     | call_operator^ argument_expression_list ')'!
-    | '.'^ IDENTIFIER
-    | '->'^ IDENTIFIER
+    | DOT^ IDENTIFIER
+    | ARROW^ IDENTIFIER
     | post_inc_operator^
     | post_dec_operator^
     )*
@@ -279,9 +326,9 @@ index_operator : '[' -> INDEX ;
 
 call_operator : '(' -> CALL;
 
-post_inc_operator : '++' -> POST_INC;
+post_inc_operator : INC -> POST_INC;
 
-post_dec_operator : '--' -> POST_DEC;
+post_dec_operator : DEC -> POST_DEC;
 
 primary_expression
   : IDENTIFIER
@@ -302,10 +349,11 @@ arithmetic_constant
   | HEX_LITERAL
   ;
 
+
 //
 // Tokens
 //
-IDENTIFIER : LETTER (LETTER | DIGIT)* { Table.identifiers.add($text); } ;
+IDENTIFIER : LETTER (LETTER | DIGIT)* { Table.progIdentifiers.add($text); } ;
   
 fragment
 LETTER
@@ -334,11 +382,6 @@ ESCAPE : '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\') ;
 
 ANNOTATION
   : ('/*@')=> '/*@' (options { greedy = false; } : .)* '*/'
-    {
-      int len = $text.length();
-      annots.add($text.substring(3, len).substring(0, len - 5));
-      if ($text.trim().startsWith("/*@ var")) $channel = HIDDEN;
-    }
   | ('//@')=> '//@' ~('\n' | '\r')* '\r'? '\n'
   | COMMENT
   | LINE_COMMENT

@@ -163,16 +163,17 @@ inc MATCHC
      else
        QC
      fi .
-  eq skolemTerm(NT, Q[QTList])
-   = if substrString(string(Q), 0, 2) ==Bool "?" then
-       'skolem[NT : Q[QTList]]
-     else
-       if Q =/=Bool 'skolem then
-         Q[skolemTerm(NT, QTList)]
-       else
-         Q[QTList]
-       fi
-     fi .
+ ceq skolemTerm(NT, Q[QTList]) = 'skolem[NT : Q[QTList]]
+  if substrString(string(Q), 0, 1) ==Bool "?" .
+ ceq skolemTerm(NT, Q[QTList]) = Q[QTList]
+  if Q ==Bool 'skolem .
+ ceq skolemTerm(NT, '_`(_`)[QC : QTList]) = '_`(_`)[QC : QTList]
+  if getName(QC) ==Bool ''@`assume_ orBool
+     getName(QC) ==Bool ''@`assert_ orBool
+     getName(QC) ==Bool ''@`invariant_ orBool
+     getName(QC) ==Bool ''@`pre_ orBool
+     getName(QC) ==Bool ''@`post_ .     
+  eq skolemTerm(NT, Q[QTList]) = Q[skolemTerm(NT, QTList)] [owise] .
 
  
   eq co-skolemTerm(NT, (QT : QTNeList))
@@ -188,7 +189,7 @@ inc MATCHC
    = if substrString(string(Q), 0, 4) ==Bool "Free" orBool Q ==Bool 'skolem then
        'co-skolem[NT : Q[QTList]]
      else
-       if Q ==Bool 'co-skolem then
+       if Q =/=Bool 'co-skolem then
          Q[co-skolemTerm(NT, QTList)]
        else
          Q[QTList]
