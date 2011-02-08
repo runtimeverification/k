@@ -75,6 +75,7 @@ tokens {
   // LIST;
   LIST_UNIT = '.List';
   LIST_ITEM = 'ListItem';
+  STREAM;
 
   TERM_LIST;
 
@@ -167,6 +168,7 @@ term
 options { backtrack = true; }
   : map
   | bag
+  | list
   | k
   ;
 
@@ -264,12 +266,21 @@ bag_constructor
 
 
 /*
+ * Grammar rules for list parsing
+ */
+list
+  : mathematical_object -> ^(STREAM["stream"] mathematical_object)
+  ;
+
+
+/*
  * Grammar rules for cell parsing (for now only closed cells)
  */
 cell
 options { backtrack = true; }
   : map_cell
   | bag_cell
+  | list_cell
   | k_cell
   ;
 
@@ -285,6 +296,13 @@ bag_cell
     { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.BAG) }?
     bag cell_end[$IDENTIFIER.text]
     -> ^(CELL LABEL[$IDENTIFIER.text] bag LABEL[$IDENTIFIER.text])
+  ;
+
+list_cell
+  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
+    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.LIST) }?
+    list cell_end[$IDENTIFIER.text]
+    -> ^(CELL LABEL[$IDENTIFIER.text] list LABEL[$IDENTIFIER.text])
   ;
 
 k_cell
@@ -406,6 +424,14 @@ constant
 constructor
   : '[' mathematical_object_list ']' -> ^(SEQ mathematical_object_list)
   | '{' mathematical_object_list '}' -> ^(MSET mathematical_object_list)
+  ;
+
+primary_sequence
+  : '[' mathematical_object_list ']' -> ^(SEQ mathematical_object_list)
+  ;
+
+primary_multiset
+  : '{' mathematical_object_list '}' -> ^(MSET mathematical_object_list)
   ;
 
 infix_term

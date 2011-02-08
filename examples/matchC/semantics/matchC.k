@@ -4,6 +4,7 @@ load matchC-semantics
 load ../lib/fol
 load ../heap_patterns/list
 load ../heap_patterns/binary_tree
+load ../heap_patterns/io
 
 kmod MATCHC is
   including MATCHC-SEMANTICS
@@ -11,6 +12,7 @@ kmod MATCHC is
           + FOL
           + LIST-HP
           + BINARY-TREE-HP
+          + IO-PATTERN
 
   kvar I : Int
   kvar L : List

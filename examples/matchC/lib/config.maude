@@ -97,11 +97,12 @@ mod CONFIG-BUILTIN-MODULE is
   op derive : -> KLabel .
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op _|->_:_ : Int++ Value Field -> MapItem .
+  op stream : List{MathObj++} -> ListItem .
 
 
   *** [ERROR] Here subsorting Pattern to K gives all sort of errors,
   *** hence Pattern is subsorted to List just to avoid those errors.
-  *** The most natural solution would be to subsort to Bag to Pattern,
+  *** The most natural solution would be to subsort Bag to Pattern,
   *** but the tool does not allow Bag supersorts.
   sort Pattern .
   subsort Pattern < List .

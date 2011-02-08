@@ -109,11 +109,11 @@ int main()
   x = create(5);
   printf("x: ");
   print(x);
-  //@ assert <heap> list(x)(!A) </heap> 
+  //@ assert <heap> list(x)(!A) </heap> <out> !A </out>
   x = reverse(x);
   printf("reverse(x): ");
   print(x);
-  //@ assert <heap> list(x)(rev(!A)) </heap> 
+  //@ assert <heap> list(x)(rev(!A)) </heap> <out> !A @ rev (!A) </out>
   destroy(x);
 
   x = create(3);
@@ -130,7 +130,7 @@ int main()
   //@ assert <heap> list(x)(!A1) </heap> 
   y = create(3);
   printf("y: "); 
-  print(x);
+  print(y);
   //@ assert <heap> list(x)(!A1), list(y)(!A2) </heap> 
   x = append(x, y);
   printf("append(x, y): ");

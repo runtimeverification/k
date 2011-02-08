@@ -395,6 +395,19 @@ kmod FOL is including MATCHC-SEMANTICS
 ---  [structural]
 
 
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <out> stream(Obj1) => .List </out>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <out> stream(Obj2) => .List </out>
+      <form> Phi => Phi /\ Obj1 === Obj2 </form>
+    <_/task>
+  [structural]
+
+
 --- Step 5: Get rid of the formula implication task
   rule
       <task_>
@@ -402,6 +415,8 @@ kmod FOL is including MATCHC-SEMANTICS
         <config_>
           <env> .Map </env>
           <heap> .Map </heap>
+          ---<stack> .List </out>
+          <out> .List </out>
         <_/config>
         <form> Phi1 </form>
       <_/task>
@@ -410,6 +425,8 @@ kmod FOL is including MATCHC-SEMANTICS
         <config_>
           <env> .Map </env>
           <heap> .Map </heap>
+          ---<stack> .List </out>
+          <out> .List </out>
         <_/config>
         <form> Phi2 </form>
         <subst> Subst </subst>

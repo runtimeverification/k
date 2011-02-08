@@ -138,7 +138,7 @@ int main()
   //@ assert <heap> list(x)(!A1) </heap> 
   y = create(3);
   printf("y: "); 
-  print(x);
+  print(y);
   //@ assert <heap> list(x)(!A1), list(y)(!A2) </heap> 
   x = append(x, y);
   printf("append(x, y): ");

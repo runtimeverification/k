@@ -107,7 +107,7 @@ int main()
   print(x);
   y = create(3);
   printf("y: "); 
-  print(x);
+  print(y);
   x = append(x, y);
   printf("append(x, y): ");
   print(x);
