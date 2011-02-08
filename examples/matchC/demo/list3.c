@@ -17,7 +17,7 @@ struct listNode* reverse(struct listNode *x)
 
   p = 0 ;
   /*@ invariant <heap> list(p)(?B), list(x)(?C), H </heap>
-                /\ rev(A) = rev(?C) @ ?B */
+                /\ A = rev(?B) @ ?C */
   while(x) {
     y = x->next;
     x->next = p;
@@ -29,7 +29,7 @@ struct listNode* reverse(struct listNode *x)
 }
 
 struct listNode* append(struct listNode *x, struct listNode *y)  
-//@ pre  <heap> list(x)(A), list(y)(B), H </heap> /\ y = y0
+//@ pre  <heap> list(x)(A), list(y)(B), H </heap>
 //@ post <heap> list(?x)(A @ B), H </heap> /\ returns(?x)
 {
   struct listNode *p;
@@ -38,7 +38,7 @@ struct listNode* append(struct listNode *x, struct listNode *y)
 
   p = x;
   /*@ invariant <heap> lseg(x, p)(?A1), list(p)(?A2), !H </heap> 
-                /\ A = ?A1 @ ?A2 /\ ~(p = 0) /\ y = y0 */
+                /\ A = ?A1 @ ?A2 /\ ~(p = 0) /\ y = !y */
   // need way to specify y is constant 
   while (p->next)
     p = p->next;
@@ -48,7 +48,7 @@ struct listNode* append(struct listNode *x, struct listNode *y)
 }
 
 int length(struct listNode* x)
-//@ pre  <heap> list(x0)(A), H </heap> /\ x = x0
+//@ pre  <heap> list(x)(A), H </heap> /\ x = x0
 //@ post <heap> list(x0)(A), H </heap> /\ returns(len(A))
 {
   int l;

@@ -76,5 +76,7 @@ mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
   eq contain(NeA1 @ NeA2 , I) = contain(NeA1 , I) \/ contain(NeA2 , I) .
   eq contain([J] , I) = (I === J) .
   eq contain(epsilon , I) = FalseFormula .
+
+  eq rev(rev(A)) = A .
 endm
 
