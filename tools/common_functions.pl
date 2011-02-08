@@ -359,22 +359,24 @@ sub syntax_verification
     ###########################################
 
     # extract configuration string from .kmaude file
-    if ($lines =~ m/(?:\s)configuration\s*(.+?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/s)
+    if ($lines =~ m/(?<!mb)\s+configuration\s*(.+?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/s)
     {
-	$lines = $1;
+		$lines = $1;
     }
     else
     {
-	warning("INFO: File $language_file_name does not contain configuration definition.\n") if $verbose;
-	return;
+		warning("INFO: File $language_file_name does not contain configuration definition.\n") if $verbose;
+		return;
     }
-    
+
+#	print "LINES: $lines\n";
+
     # learn configuration
     $config_tree = append_rec_tree($lines, "super-node");
         
     # verify each rule for errors
     my $no = 0;
-    while ($source =~ m/(rule|eq|macro)(\s+)(.*?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/sg)
+    while ($source =~ m/(rule|macro)(\s+)(.*?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/sg)
     {
 	my $match_line = $-[0];
 	my $original_rule = $3;
