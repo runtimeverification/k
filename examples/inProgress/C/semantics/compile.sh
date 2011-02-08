@@ -79,16 +79,19 @@ arguments="$@ $firstInputFile"
 # if [ $(($# + 1)) -gt 1 ] && [ "$oval" ] && [ "$compileOnlyFlag" ]; then 
 	# die "cannot specify -o with -c or -S with multiple files" 5
 # fi
-
-if [ -e `which readlink` ]; then
-	READLINK=readlink
-else
-	if [ -e `which greadlink` ]; then
-		READLINK=greadlink
-	else
+#echo "Checking readlink version..."
+READLINK=
+set +o errexit
+READLINK=`which greadlink 2> /dev/null`
+if [ "$?" -ne 0 ]; then
+	#echo "You don't have greadlink.  I'll look for readlink."
+	READLINK=`which readlink 2> /dev/null`
+	if [ "$?" -ne 0 ]; then
 		die "No readlink/greadlink program found.  Cannot continue." 9
 	fi 
 fi
+set -o errexit
+#echo $READLINK
 # echo "before: $linkTemp"
 # this helps set the path correctly on windows
 set +o errexit
@@ -125,10 +128,10 @@ do
 	if [ "$?" -ne 0 ]; then
 		die "compilation failed" 3
 	fi
+	set -o errexit
 	
 	mv program-$baseName-compiled.maude $localOval
 	compiledPrograms="$compiledPrograms $localOval"
-	set -o errexit
 	if [ "$compileOnlyFlag" ]; then
 		if [ "$oflag" ]; then
 			mv $localOval $oval

@@ -1,19 +1,32 @@
 #!/bin/bash
 # CIL_FLAGS="--noWrap --decil --noPrintLn --warnall --strictcheck --nokeepunused --envmachine"
+set -o errexit
 PEDANTRY_OPTIONS="-Wall -Wextra -Werror -Wmissing-prototypes -pedantic -x c -std=c99"
 GCC_OPTIONS="-std=c99 -nostdlib -nodefaultlibs -U __GNUC__"
 myDirectory=`dirname "$0"`
 
-if [ -e `which readlink` ]; then
-	READLINK=readlink
-else
-	if [ -e `which greadlink` ]; then
-		READLINK=greadlink
-	else
-		die "No readlink/greadlink program found.  Cannot continue." 9
-	fi 
-fi
+function die {
+	cleanup
+	echo "Something went wrong in compileProgram.sh"
+	echo "$1" >&2
+	exit $2
+}
+function cleanup {
+	rm -f $compilationLog
+}
 
+#echo "Checking readlink version..."
+set +o errexit
+READLINK=`which greadlink 2> /dev/null`
+if [ "$?" -ne 0 ]; then
+	#echo "You don't have greadlink.  I'll look for readlink."
+	READLINK=`which readlink 2> /dev/null`
+	if [ "$?" -ne 0 ]; then
+		die "No readlink/greadlink program found.  Cannot continue." 9
+	fi
+fi
+set -o errexit
+#echo $READLINK
 K_MAUDE_BASE=`$READLINK -f $myDirectory/../../../..`
 K_PROGRAM_COMPILE="$K_MAUDE_BASE/tools/kcompile-program.sh"
 
@@ -25,14 +38,7 @@ dflag=
 gflag=
 nowarn=0
 usage="Usage: %s: [-d] inputFileName\n"
-function die {
-	cleanup
-	echo "$1" >&2
-	exit $2
-}
-function cleanup {
-	rm -f $compilationLog
-}
+
 while getopts 'g:dw' OPTION
 do
 	case $OPTION in
@@ -68,10 +74,12 @@ fi
 cp $directoryname$filename.c $filename.prepre.gen
 
 #gcc $PEDANTRY_OPTIONS $GCC_OPTIONS -E -iquote "." -iquote "$directoryname" -I "$myDirectory/includes" $filename.prepre.gen $myDirectory/includes/clib.h > $filename.pre.gen 2> $filename.warnings.log
+set +o errexit
 gcc $PEDANTRY_OPTIONS $GCC_OPTIONS -E -iquote "." -iquote "$directoryname" -I "$myDirectory/includes" $filename.prepre.gen > $filename.pre.gen 2> $filename.warnings.log
 if [ "$?" -ne 0 ]; then 
 	die "Error running preprocessor: `cat $filename.warnings.log`" 6
 fi
+set -o errexit
 if [ ! "$nowarn" ]; then
 	cat $filename.warnings.log >&2
 fi
@@ -81,6 +89,7 @@ if [ ! "$dflag" ]; then
 # else
 #	$ACTUAL_CIL $CIL_FLAGS --out $filename.cil $filename.pre.gen
 fi
+set +o errexit
 $myDirectory/cparser $filename.pre.gen 2> $filename.warnings.log 1> $filename.gen.maude.tmp 
 if [ "$?" -ne 0 ]; then 
 	rm -f $filename.gen.maude.tmp
@@ -88,6 +97,7 @@ if [ "$?" -ne 0 ]; then
 	rm -f $filename.warnings.log
 	die "$msg" 7
 fi
+set -o errexit
 if [ ! "$nowarn" ]; then
 	cat $filename.warnings.log >&2
 fi
@@ -99,11 +109,14 @@ fi
 mv $filename.gen.maude.tmp $filename.gen.maude
 
 modelCheck=
+set +o errexit
 grep -q 'START MODEL-CHECKING' "$directoryname$filename.c"
-retval=$?
-if [ $retval -eq 0 ]; then 
+retval="$?"
+if [ "$retval" -eq 0 ]; then 
 	modelCheck=1
 fi
+set -o errexit
+
 echo "load $myDirectory/c-total" > program-$filename-gen.maude
 echo "mod C-PROGRAM is" >> program-$filename-gen.maude
 echo "including C-SYNTAX ." >> program-$filename-gen.maude
@@ -127,7 +140,7 @@ if [ ! "$dflag" ]; then
 fi
 echo -e "endm\n" >> program-$filename-gen.maude
 
-
+set +o errexit
 if [ "$gflag" ]; then
 	$K_PROGRAM_COMPILE $gval C C-PROGRAM program-$escapedFilename > $compilationLog
 	PROGRAMRET=$?
@@ -135,7 +148,7 @@ else
 	$K_PROGRAM_COMPILE program-$filename-gen.maude C C-PROGRAM program-$escapedFilename > $compilationLog
 	PROGRAMRET=$?
 fi
-
+set -o errexit
 if [ "$PROGRAMRET" -ne 0 ]; then
 	msg="Error compiling program: `cat $compilationLog`"
 	rm -f $compilationLog
