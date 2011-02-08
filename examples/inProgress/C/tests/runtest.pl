@@ -7,6 +7,8 @@ use HTML::Entities;
 
 # use XML::Writer;
 
+# first argument is a flag, -p or -f for shouldPass or shouldFail
+# second argument is a directory to test
 my $numArgs = $#ARGV + 1;
 if ($numArgs != 2) {
 	die "Not enough command line arguments"
@@ -35,11 +37,19 @@ my $globalNumError = 0; # errors are tests that didn't finish running
 my $globalTotalTime = 0;
 
 my @files = <$directory/*>;
+my %partOfSet;
+my @allFilenames = ();
 foreach my $fullFilename (@files) {
 	my ($baseFilename, $dirname, $suffix) = fileparse($fullFilename,".c");
-	if ($suffix ne '.c') {next;}
-	my $filename = "$baseFilename$suffix";
-	performTest($dirname, $baseFilename);
+	if ($suffix ne '.c') { next; }
+	if ($baseFilename =~ m/^(.*)-link\d+$/) {
+		$baseFilename = $1;
+		if ($partOfSet{$baseFilename}) { next; }
+		$partOfSet{$baseFilename} = 1;
+	}
+	@allFilenames = getMatchingFiles($baseFilename, @files);
+	my $filename = "$baseFilename";
+	performTest($dirname, $baseFilename, @allFilenames);
 } 
 open(OUT, ">$outputFilename"); #open for write, overwrite
 print OUT "<?xml version='1.0' encoding='UTF-8' ?>\n";
@@ -48,31 +58,49 @@ print OUT "$globalTests";
 print OUT "</testsuite>\n";
 close OUT;
 
+sub getMatchingFiles {
+	my ($pattern, @files) = (@_);
+	
+	my @matchingFiles = ();
+	foreach my $fullFilename (@files) {
+		my ($baseFilename, $dirname, $suffix) = fileparse($fullFilename,".c");
+		if ($suffix ne '.c') { next; }
+		if ($baseFilename =~ /^$pattern$/) {
+			push(@matchingFiles, "$dirname$baseFilename.c");
+			last;
+		}
+		if ($baseFilename =~ /^$pattern-link\d+$/) {
+			push(@matchingFiles, "$dirname$baseFilename.c");
+		}
+	}
+	return @matchingFiles;
+}
+
 sub performTest {
-	my ($dirname, $baseFilename) = (@_);
-	my $fullFilename = "$dirname$baseFilename.c";
+	my ($dirname, $baseFilename, @allFilenames) = (@_);
+	my $testName = "$dirname$baseFilename.c";
 	#print "dirname=$dirname\n";
 	#print "baseFilename=$baseFilename\n";
 	my $kccFilename = "${dirname}test-$baseFilename.kcc";
 	my $gccFilename = "${dirname}test-$baseFilename.gcc";
-	
+	my $allFiles = join(' ',@allFilenames);
 	my $timer = [gettimeofday];
 	
-	my $kccCompileOutput = `$kcc -o $kccFilename $fullFilename 2>&1`;
+	my $kccCompileOutput = `$kcc -o $kccFilename $allFiles 2>&1`;
 	my $kccCompileRetval = $?;
 	if ($kccCompileRetval) {
 		if ($shouldFail) {
-			return reportSuccess($fullFilename, $timer, "Success---didn't compile with kcc");
+			return reportSuccess($testName, $timer, "Success---didn't compile with kcc");
 		} else {
-			return reportFailure($fullFilename, $timer, "Failure---kcc failed to compile $fullFilename.\n\n$kccCompileOutput");
+			return reportFailure($testName, $timer, "Failure---kcc failed to compile $testName.\n\n$kccCompileOutput");
 		}
 	}
 	
-	my $gccCompileOutput = `$gcc -o $gccFilename $fullFilename 2>&1`;
+	my $gccCompileOutput = `$gcc -o $gccFilename $allFiles 2>&1`;
 	my $gccCompileRetval = $?;
 	if ($gccCompileRetval) {
 		if (!$shouldFail) {
-			return reportError($fullFilename, $timer, "gcc failed to compile $fullFilename.\n\n$gccCompileOutput");
+			return reportError($testName, $timer, "gcc failed to compile $testName.\n\n$gccCompileOutput");
 		}
 	}
 	
@@ -82,9 +110,9 @@ sub performTest {
 	if ($shouldFail) {
 		if (index($kccRunOutput, "unfinishedComputation") == -1) {
 			my $encodedOut = HTML::Entities::encode_entities($kccRunOutput);
-			return reportFailure($fullFilename, $timer, "Failure---Program seemed to run to completion\n$encodedOut\n");
+			return reportFailure($testName, $timer, "Failure---Program seemed to run to completion\n$encodedOut\n");
 		} else {
-			return reportSuccess($fullFilename, $timer, "Success---Core dumped");
+			return reportSuccess($testName, $timer, "Success---Core dumped");
 		}
 	}
 	
@@ -97,9 +125,9 @@ sub performTest {
 			$msg .= "-----------------------------------------------\n";
 			$msg .= "$encodedOut\n";
 			$msg .= "-----------------------------------------------\n";
-			return reportFailure($fullFilename, $timer, $msg);
+			return reportFailure($testName, $timer, $msg);
 		} else {
-			return reportSuccess($fullFilename, $timer, "Success");
+			return reportSuccess($testName, $timer, "Success");
 		}
 	}
 	
@@ -122,10 +150,10 @@ sub performTest {
 			$msg .= "-----------------------------------------------\n";
 			#$msg .= "(actual output elided)\n";
 		}
-		return reportFailure($fullFilename, $timer, $msg);
+		return reportFailure($testName, $timer, $msg);
 	}
 	
-	return reportSuccess($fullFilename, $timer, "Success");
+	return reportSuccess($testName, $timer, "Success");
 }
 
 sub reportFailure {
