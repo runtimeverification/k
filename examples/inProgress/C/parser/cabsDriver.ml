@@ -47,6 +47,7 @@ module F = Frontc
 module E = Errormsg
 open Printf
 open CabsPrinter
+open XmlPrinter
 
 type outfile = 
     { fname: string;
