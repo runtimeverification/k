@@ -1295,6 +1295,9 @@ sub maudify_module {
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
 
+# Step: desugar latex newline <br/>
+    $_ = desugar_latex($_);
+
 # Step: Add whitespace between cell and Klabel
     s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
 
@@ -1864,6 +1867,7 @@ sub Freeze
     
     return $frozen_string;
 }
+
 # unfreezing (newest version) : use digest - md5
 sub Unfreeze
 {

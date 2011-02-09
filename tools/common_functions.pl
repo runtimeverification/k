@@ -58,6 +58,11 @@ my $klabel = "'$klabel_body(?:[$parentheses\\s\\,])|$klabel_body(?=\\()";
 my $kvar  = "[A-Za-z][A-Za-z0-9]*";
 
 
+# parametrize break
+my $latex_break = quotemeta("<br/>");
+
+
+
 # explicit call for debugging.
 # syntax_common_check($ARGV[0]);
 
@@ -345,6 +350,9 @@ sub syntax_verification
 	s!\S!!gs;
 	$_;
     }/gsme;
+
+	# latex stuff <br/> or other marker is frozen here
+	s/($latex_break)/LATEX_BREAK)/sg;
 
     my $lines = $_;
     
@@ -1673,4 +1681,53 @@ sub balanced($$$$)
     return 1;
 }
 
+
+# Args: receives a module body
+# Return: the desugared module body
+# Modifies the module body so that
+# each <br/> is desugared into @latex("\\kBR")
+sub desugar_latex
+{	
+	# get module 
+	my $mod = shift;
+
+	# if there is any configuration
+	if ($mod =~ /(?<=\s)configuration\s+.*?\s+(?=$kmaude_keywords_pattern)/sg)
+	{
+		# keep old config
+		my $old_config = $&;
+
+		# keep the new configuration... do the replacement
+		my $new_config = $&;
+
+		# replace <br/> with @latex("\\kBR")
+		$new_config =~ s/$latex_break/\@latex("\\\\kBR")/sg;
+
+		# replace the old configuration with the new one
+		$mod =~ s/\Q$old_config\E/$new_config/sg;
+	}
+
+	# keep module to traverse it and modify it in the same time
+	local $_ = $mod;
+
+	# foreach rule... do the replacement
+	while (/(?<=\s)rule\s+.*?\s+(?=$kmaude_keywords_pattern)/sgm)
+	{
+		# keep old rule
+		my $old_rule = $&;
+
+		# keep the new rule
+		my $new_rule = $&;
+
+		# replace <br/> with @latex("\\kBR")
+		$new_rule =~ s/$latex_break/\@latex("\\\\kBR")/sg;
+
+		# replace the old rule with the new one
+		$mod =~ s/\Q$old_rule\E/$new_rule/sg;
+	}
+
+	return $mod;
+}
+
 1;
+
