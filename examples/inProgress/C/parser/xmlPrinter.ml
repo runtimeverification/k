@@ -72,7 +72,7 @@ let escapeForXML str =
 	(replace "\"" "&quot;" str))
 
 let cdata (str : string) =
-	let str = replace "]]>" "<![CDATA[]]]]><![CDATA[>]]>" str (* escapes "]]>" *)
+	let str = replace "]]>" "]]]]><![CDATA[>" str (* escapes "]]>" *)
 	in
 	"<![CDATA[" ^ str ^ "]]>"
 
@@ -105,14 +105,11 @@ let rec cabsToXML ((filename, defs) : file) (sourceCode : string) =
 	printTranslationUnit filename sourceCode defs
 			
 and printTranslationUnit (filename : string) (sourceCode : string) defs =
-	let attribs = Attrib ("filename", filename)
-		:: []
-	in
-	printCell "TranslationUnit" attribs
-		((printSource sourceCode) ^ (printDefs defs))
+	let filenameCell = (printCell "Filename" [] (printRawString filename)) in	
+	wrap (filenameCell :: (printDefs defs) :: (printSource sourceCode) :: []) "TranslationUnit" 
 	
 and printSource (sourceCode : string) =
-	printCell "SourceCode" [] (cdata sourceCode)
+	printCell "SourceCode" [] (printRawString sourceCode)
 	
 and printDefs defs =
 	printList printDef defs
@@ -138,8 +135,8 @@ and printDef def =
 		| EXPRTRANSFORMER (a, b, c) ->
 			printDefinitionLoc (wrap ((printExpression a) :: (printExpression b) :: []) "ExprTransformer") c
 			
-and printDefinitionLoc a b =
-	wrap (a :: (printCabsLoc b) :: []) "DefinitionLoc"
+and printDefinitionLoc a l =
+	if (hasInformation l) then (wrap (a :: (printCabsLoc l) :: []) "DefinitionLoc") else (a)
 and printDefinitionLocRange a b c =
 	wrap (a :: (printCabsLoc b) :: (printCabsLoc c) :: []) "DefinitionLocRange"		
 and printSingleName (a, b) = 
@@ -160,23 +157,30 @@ and block =
       bstmts: statement list
     } *)
 and printCabsLoc a = 
-	let attribs = Attrib ("filename", a.filename )
+	(* let attribs = Attrib ("filename", a.filename )
 		:: Attrib ("lineno", string_of_int a.lineno )
 		:: Attrib ("byteno", string_of_int a.byteno )
 		:: Attrib ("ident", string_of_int a.ident )
 		:: []
-	in
-	printCell "CabsLoc" attribs ""
+	in*)
+	let contents = 
+		(printCell "Filename" [] (printRawString a.filename))
+		^ (printCell "Lineno" [] (printRawInt a.lineno))
+		^ (printCell "Byteno" [] (printRawInt a.byteno))
+		^ (printCell "Ident" [] (printRawInt a.ident)) in
+	printCell "CabsLoc" [] contents
 (*
 type cabsloc = {
 
  byteno: int;
  ident : int;
 }	*)
+and hasInformation l =
+	l.lineno <> -10
 and printNameLoc s l =
-	wrap (s :: (printCabsLoc l) :: []) "NameLoc"
+	if (hasInformation l) then (wrap (s :: (printCabsLoc l) :: []) "NameLoc") else (s)
 and printIdentifier a =
-	printCell "Identifier" [] a
+	printCell "Identifier" [] (printRawString a)
 and printName (a, b, c, d) = (* string * decl_type * attribute list * cabsloc *)
 	if a = "" then 
 		printAttr (printNameLoc (wrap ((printDeclType b) :: []) "AnonymousName") d) c
@@ -238,21 +242,39 @@ and printArrayType a b c =
 and printPointerType a b =
 	printAttr (wrap ((printDeclType b) :: []) "PointerType") a
 and printProtoType a b c =
-	printCell "Prototype" [Attrib ("variadic", string_of_bool c)] (printList (fun x -> x) ((printDeclType a) :: (printSingleNameList b) :: []))
+	(* printCell "Prototype" [Attrib ("variadic", string_of_bool c)] (printList (fun x -> x) ((printDeclType a) :: (printSingleNameList b) :: [])) *)
+	let variadicName = (if c then "Variadic" else "NotVariadic") in
+	let variadicCell = printCell variadicName [] "" in
+	wrap ((printDeclType a) :: (printSingleNameList b) :: variadicCell :: []) "Prototype"
 and printNop =
 	printCell "Nop" [] ""
 and printComputation exp =
 	wrap ((printExpression exp) :: []) "Computation"
 and printExpressionList defs =
 	printList printExpression defs
+and printBuiltin (sort : string) (data : string) =
+	printCell "RawData" [Attrib("sort", sort)] (cdata data)
+and printRawString s =
+	printBuiltin "String" s
+and printRawInt i =
+	printBuiltin "Int" (string_of_int i)
+and string_of_list_of_int64 (xs : int64 list) =
+	let length = List.length xs in
+	let buffer = Buffer.create length in
+	let append charcode =
+		let addition = String.make 1 (Char.chr (Int64.to_int charcode)) in
+		Buffer.add_string buffer addition
+	in
+	List.iter append xs;
+	Buffer.contents buffer
 and printConstant const =
 	match const with
 	| CONST_INT i -> wrap ((printIntLiteral i) :: []) "IntLiteral"
 	| CONST_FLOAT r -> wrap ((printFloatLiteral r) :: []) "FloatLiteral"
-	| CONST_CHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "CharLiteral"
-	| CONST_WCHAR c -> wrap ((string_of_int (interpret_character_constant c)) :: []) "WCharLiteral"
-	| CONST_STRING s -> wrap ((cdata (escape_string s)) :: []) "StringLiteral"
-	| CONST_WSTRING ws -> wrap (("\"" ^ escape_wstring ws ^ "\"") :: []) "WStringLiteral"
+	| CONST_CHAR c -> wrap [printRawInt (interpret_character_constant c)] "CharLiteral"
+	| CONST_WCHAR c -> wrap [printRawInt (interpret_character_constant c)] "WCharLiteral"
+	| CONST_STRING s -> wrap [printRawString s] "StringLiteral"
+	| CONST_WSTRING ws -> wrap [printRawString (string_of_list_of_int64 ws)] "WStringLiteral"
 and splitFloat (xs, i) =
 	let lastOne = if (String.length i > 1) then String.uppercase (Str.last_chars i 1) else ("x") in
 	let newi = (Str.string_before i (String.length i - 1)) in
@@ -269,52 +291,88 @@ and splitInt (xs, i) =
 	| "U" -> splitInt("U" :: xs, newi)
 	| "L" -> splitInt("L" :: xs, newi)
 	| _ -> (xs, i)
-and printHexFloat f = 
-	let significand :: exponent :: [] = Str.split (Str.regexp "[pP]") f in
-	let wholeSignificand :: fractionalSignificand = Str.split_delim (Str.regexp "\.") significand in
-	let wholeSignificand = (if wholeSignificand = "" then "0" else wholeSignificand) in
-	let fractionalSignificand =
-		(match fractionalSignificand with
+and printHexFloatConstant f = 
+	let significand :: exponentPart :: [] = Str.split (Str.regexp "[pP]") f in
+	let wholePart :: fractionalPart = Str.split_delim (Str.regexp "\.") significand in
+	let wholePart = (if wholePart = "" then "0" else wholePart) in
+	let fractionalPart =
+		(match fractionalPart with
 		| [] -> "0"
 		| "" :: [] -> "0"
 		| x :: [] -> x
 		) in
-	let exponent :: [] = Str.split (Str.regexp "[+]") exponent in
-	let exponent = int_of_string exponent in
-	let wholeSignificand = float_of_string ("0x" ^ wholeSignificand) in
-	let fractionalSignificand = float_of_string ("0x." ^ fractionalSignificand) in
-	let significand = wholeSignificand +. fractionalSignificand in
-	let result = significand *. (2. ** (float_of_int exponent)) in
-	wrap ((string_of_int (int_of_float wholeSignificand)) :: (string_of_float fractionalSignificand) :: (string_of_int exponent) :: (string_of_float result) :: []) "HexFloatConstant"
+	let exponentPart :: [] = Str.split (Str.regexp "[+]") exponentPart in
+	let exponentPart = int_of_string exponentPart in
+	
+	let wholePart = printRawInt (int_of_string ("0x" ^ wholePart)) in
+	let fractionalPart = printRawInt (int_of_string ("0x" ^ fractionalPart)) in
+	let exponentPart = printRawInt exponentPart in
+	
+	let wholePart = printCell "WholePart" [] wholePart in
+	let fractionalPart = printCell "FractionalHexPart" [] fractionalPart in
+	let exponentPart = printCell "ExponentPart" [] exponentPart in
+	(wrap ((wholePart) :: (fractionalPart) :: (exponentPart) :: []) "HexFloatConstant")
+	(* let significand = wholePart +. fractionalPart in
+	let result = significand *. (2. ** (float_of_int exponentPart)) in
+	wrap ((string_of_int (int_of_float wholePart)) :: (string_of_float fractionalPart) :: (string_of_int exponentPart) :: (string_of_float result) :: []) "HexFloatConstant" *)
+and printDecFloatConstant f =
+	(* print_endline f; *)
+	let f = Str.split (Str.regexp "[eE]") f in
+	let (significand, exponentPart) = 
+		(match f with
+		| (x : string) :: [] -> (x, "0")
+		| (x : string) :: (y : string) :: [] -> (x, y)
+		) in
+	let wholePart :: fractionalPart = Str.split_delim (Str.regexp "\.") significand in
+	let wholePart = (if wholePart = "" then "0" else wholePart) in
+	let fractionalPart =
+		(match fractionalPart with
+		| [] -> "0"
+		| "" :: [] -> "0"
+		| x :: [] -> x
+		) in
+	let exponentPart :: [] = Str.split (Str.regexp "[+]") exponentPart in
+	let exponentPart = int_of_string exponentPart in
+	
+	let wholePart = printRawInt (int_of_string wholePart) in
+	let fractionalPart = printRawInt (int_of_string fractionalPart) in
+	let exponentPart = printRawInt exponentPart in
+	
+	let wholePart = printCell "WholePart" [] wholePart in
+	let fractionalPart = printCell "FractionalPart" [] fractionalPart in
+	let exponentPart = printCell "ExponentPart" [] exponentPart in
+	(wrap ((wholePart) :: (fractionalPart) :: (exponentPart) :: []) "DecimalFloatConstant")
+	
 and printFloatLiteral r =
 	let (tag, r) = splitFloat ([], r) in
 	let num = (
 		let firstTwo = if (String.length r > 2) then (Str.first_chars r 2) else ("xx") in
 			if (firstTwo = "0x" or firstTwo = "0X") then 
 				let nonPrefix = Str.string_after r 2 in
-					printHexFloat nonPrefix					
-			else (
-				(wrap (r :: []) "DecimalFloatConstant")
-			)
+					printHexFloatConstant nonPrefix					
+			else ( printDecFloatConstant r)
 	) in
 	match tag with
 	| "F" :: [] -> wrap (num :: []) "F"
 	| "L" :: [] -> wrap (num :: []) "L"
 	| [] -> wrap (num :: []) "NoSuffix"
+and printHexConstant (i : string) =
+	let inDec = int_of_string ("0x" ^ i) in
+	wrap [printRawInt inDec] "HexConstant"
+and printOctConstant (i : string) =
+	let inDec = int_of_string ("0o" ^ i) in
+	wrap [printRawInt inDec] "OctalConstant"
+and printDecConstant (i : string) =
+	let inDec = int_of_string i in
+	wrap [printRawInt inDec] "DecimalConstant"
 and printIntLiteral i =
 	let (tag, i) = splitInt ([], i) in
 	let num = (
 		let firstTwo = if (String.length i > 2) then (Str.first_chars i 2) else ("xx") in
 		let firstOne = if (String.length i > 1) then (Str.first_chars i 1) else ("x") in
 			if (firstTwo = "0x" or firstTwo = "0X") then 
-				(wrap (("\"" ^ Str.string_after i 2 ^ "\"") :: []) "HexConstant")
-			else (
-				if (firstOne = "0") then
-					(wrap ((Str.string_after i 1) :: []) "OctalConstant")
-				else (
-					wrap (i :: []) "DecimalConstant"
-				)
-			)
+				printHexConstant (Str.string_after i 2)
+			else (if (firstOne = "0") then printOctConstant (Str.string_after i 1) else (printDecConstant i))
 	) in
 	match tag with
 	| "U" :: "L" :: "L" :: []
