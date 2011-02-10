@@ -1729,5 +1729,86 @@ sub desugar_latex
 	return $mod;
 }
 
+
+
+###########################
+# comments section - Radu #
+###########################
+
+my $special_comment = join("|", (
+	"\\/\\/(.*?)\$",
+	"\\/\\*(.*?)\\*\\/",
+	"---\\((.*?)---\\)",
+	"---(.*?)\$",
+	"\\*\\*\\*\\((.*?)\\*\\*\\*\\)",
+	"\\*\\*\\*(.*?)\$"
+));
+my %comments_map = ();
+
+sub remove_comments($)
+{
+
+	%comments_map = ();
+	local $_ = shift;
+	
+	$_ =~ s/($special_comment)/
+	{
+		my $line = countlines($`);
+		my $comm = "";
+		# retrieve the content of the comment from each regexp
+		if (defined $2) {
+			$comm = $2;
+		} elsif (defined $3) {
+			$comm = $3;
+		} elsif (defined $4) {
+			$comm = $4;
+		} elsif (defined $5) {
+			$comm = $5;
+		} elsif (defined $6) {
+			$comm = $6;
+		} elsif (defined $7) {
+			$comm = $7;
+		}
+		
+		my $i = 0;
+		# for each line in the comment - put it in the map
+		while ($comm =~ m!(.*?)(\n|$)!gsm) {
+			if ( $comments_map{$line + $i} ) {
+				$comments_map{$line + $i} = "$comments_map{$line + $i} <<~>>$1";
+			} else {
+				$comments_map{$line + $i} = "$1";
+			}
+			$i = $i + 1;
+		}
+		local $_=$1;
+		s![^\n]!!gs;
+		$_;
+	}/gsme;
+
+	return $_;
+}
+
+
+sub put_back_comments($)
+{
+	my $cod = shift;
+	my $fin = "";
+	
+	my $i = 1;
+	while ($cod =~ m/(.*?)(\n|$)/gsm) {
+		if ( $comments_map{$i} ) {
+			$fin = "$fin$1 ----$comments_map{$i}\n";
+		} else {
+			$fin = "$fin$1\n";
+		}
+		$i = $i + 1;
+	}
+	return $fin;
+}
+
+################
+# end comments #
+################
+
 1;
 

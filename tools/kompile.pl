@@ -1208,6 +1208,10 @@ sub maudify_file {
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
+	# save comments
+	#my $noComments = remove_comments($_);
+#	print ">>>$noComments<<<\n";
+
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
 #    print $_;
@@ -1283,6 +1287,10 @@ sub maudify_file {
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
     print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
+
+	# put comments back
+	#$maudified = put_back_comments($noComments);
+
     open FILE,">",$maude_file or die "Cannot write $maude_file\n";
     print FILE $maudified;
     close FILE;
