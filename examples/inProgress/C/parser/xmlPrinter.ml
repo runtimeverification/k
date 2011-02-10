@@ -101,6 +101,7 @@ let toString s =
 (* this is where the recursive printer starts *)
 	
 let rec cabsToXML ((filename, defs) : file) (sourceCode : string) = 
+	"<?xml version=\"1.0\"?>\n" ^
 	printTranslationUnit filename sourceCode defs
 			
 and printTranslationUnit (filename : string) (sourceCode : string) defs =
@@ -205,12 +206,12 @@ and printInitName (a, b) =
 	wrap ((printName a) :: (printInitExpression b) :: []) "InitName"
 and printInitExpression a =
 	match a with 
-	| NO_INIT -> "NoInit"
+	| NO_INIT -> printCell "NoInit" [] ""
 	| SINGLE_INIT exp -> wrap ((printExpression exp) :: []) "SingleInit"
 	| COMPOUND_INIT a -> wrap ((printInitFragmentList a) :: []) "CompoundInit"
 and printInitExpressionForCast a castPrinter compoundLiteralPrinter = (* this is used when we are printing an init inside a cast, i.e., possibly a compound literal *)
 	match a with 
-	| NO_INIT -> "Error(\"cast with a NO_INIT inside doesn't make sense\")"
+	| NO_INIT -> printCell "Error" [] "cast with a NO_INIT inside doesn't make sense"
 	| SINGLE_INIT exp -> castPrinter (printExpression exp)
 	| COMPOUND_INIT a -> compoundLiteralPrinter (wrap ((printInitFragmentList a) :: []) "CompoundInit")
 and printInitFragmentList a =
@@ -219,17 +220,17 @@ and printInitFragment (a, b) =
 	wrap ((printInitWhat a) :: (printInitExpression b) :: []) "InitFragment"
 and printInitWhat a = 
 	match a with
-	| NEXT_INIT -> "NextInit"
+	| NEXT_INIT -> printCell "NextInit" [] ""
 	| INFIELD_INIT (id, what) -> wrap ((printIdentifier id) :: (printInitWhat what) :: []) "InFieldInit"
 	| ATINDEX_INIT (exp, what) -> wrap ((printExpression exp) :: (printInitWhat what) :: []) "AtIndexInit"
 	| ATINDEXRANGE_INIT (exp1, exp2) -> wrap ((printExpression exp1) :: (printExpression exp2) :: []) "AtIndexRangeInit"
 and printDeclType a =
-	match a with
+	printCell "DeclarationType" [] (match a with
 	| JUSTBASE -> printCell "JustBase" [] ""
 	| PARENTYPE (a, b, c) -> printParenType a b c
 	| ARRAY (a, b, c) -> printArrayType a b c
 	| PTR (a, b) -> printPointerType a b
-	| PROTO (a, b, c) -> printProtoType a b c
+	| PROTO (a, b, c) -> printProtoType a b c)
 and printParenType a b c =
 	printAttr (wrap ((printAttr (printDeclType b) c) :: []) "FunctionType") a
 and printArrayType a b c =
@@ -237,13 +238,9 @@ and printArrayType a b c =
 and printPointerType a b =
 	printAttr (wrap ((printDeclType b) :: []) "PointerType") a
 and printProtoType a b c =
-	wrap ((printDeclType a) :: (printSingleNameList b) :: (printBool c) :: []) "Prototype"
-and printBool a =
-	match a with
-	| true -> printCell "Variadic" [] "true"
-	| false -> printCell "Variadic" [] "false"
+	printCell "Prototype" [Attrib ("variadic", string_of_bool c)] (printList (fun x -> x) ((printDeclType a) :: (printSingleNameList b) :: []))
 and printNop =
-	"Nop"
+	printCell "Nop" [] ""
 and printComputation exp =
 	wrap ((printExpression exp) :: []) "Computation"
 and printExpressionList defs =
@@ -332,9 +329,9 @@ and printIntLiteral i =
 	
 and printExpression exp =
 	match exp with
-	| UNARY (op, exp1) -> wrap ((printExpression exp1) :: []) (getUnaryOperator op)
-	| BINARY (op, exp1, exp2) -> wrap ((printExpression exp1) :: (printExpression exp2) :: []) (getBinaryOperator op)
-	| NOTHING -> "NothingExpression"
+	| UNARY (op, exp1) -> printUnaryExpression op exp1
+	| BINARY (op, exp1, exp2) -> printBinaryExpression op exp1 exp2
+	| NOTHING -> printCell "NothingExpression" [] ""
 	| PAREN (exp1) -> wrap ((printExpression exp1) :: []) "Paren"
 	| LABELADDR (s) -> wrap (s :: []) "GCCLabelOperator"
 	| QUESTION (exp1, exp2, exp3) -> wrap ((printExpression exp1) :: (printExpression exp2) :: (printExpression exp3) :: []) "_?_:_"
@@ -355,63 +352,74 @@ and printExpression exp =
 	| TYPE_SIZEOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "SizeofType"
 	| EXPR_ALIGNOF exp -> wrap ((printExpression exp) :: []) "AlignofExpression"
 	| TYPE_ALIGNOF (spec, declType) -> wrap ((printSpecifier spec) :: (printDeclType declType) :: []) "AlignofType"
-	| INDEX (exp, idx) -> wrap ((printExpression exp) :: (printExpression idx) :: []) "_`[_`]"
-	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "_._"
-	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "_->_"
+	| INDEX (exp, idx) -> wrap ((printExpression exp) :: (printExpression idx) :: []) "ArrayIndex"
+	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Dot"
+	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Arrow"
 	| GNU_BODY block -> wrap ((printBlock block) :: []) "GnuBody"
 	| EXPR_PATTERN s -> wrap ((toString s) :: []) "ExpressionPattern"
 and getUnaryOperator op =
 	let name = (
 	match op with
-	| MINUS -> "-" ^ "_"
-	| PLUS -> "+" ^ "_"
-	| NOT -> "!" ^ "_"
-	| BNOT -> "~" ^ "_"
-	| MEMOF -> "*" ^ "_"
-	| ADDROF -> "&" ^ "_"
-	| PREINCR -> "++" ^ "_"
-	| PREDECR -> "--" ^ "_"
-	| POSINCR -> "_" ^ "++"
-	| POSDECR -> "_" ^ "--"
-	) in name 	
+	| MINUS -> "Negative"
+	| PLUS -> "Positive"
+	| NOT -> "LogicalNot"
+	| BNOT -> "BitwiseNot"
+	| MEMOF -> "Dereference"
+	| ADDROF -> "Reference"
+	| PREINCR -> "PreIncrement"
+	| PREDECR -> "PreDecrement"
+	| POSINCR -> "PostIncrement"
+	| POSDECR -> "PostDecrement"
+	) in name
+and printUnaryExpression op exp =
+	wrap ((printExpression exp) :: []) (getUnaryOperator op)
+and printBinaryExpression op exp1 exp2 =
+	wrap ((printExpression exp1) :: (printExpression exp2) :: []) (getBinaryOperator op)
+	(* wrap ((printBinaryOperator op exp1 exp2) :: []) "BinaryOperator" *)
+	(* match op with
+	| MUL | DIV | MOD | ADD | SUB
+	| SHL | SHR | BAND | XOR | BOR
+	| LT | LE | GT | GE | EQ | NE
+	| AND | OR -> printBinaryPureOperator op exp1 exp2
+	| ASSIGN | ADD_ASSIGN | SUB_ASSIGN | MUL_ASSIGN | DIV_ASSIGN | MOD_ASSIGN 
+	| BAND_ASSIGN | BOR_ASSIGN | XOR_ASSIGN | SHL_ASSIGN | SHR_ASSIGN 
+		-> printBinaryAssignmentOperator op exp1 exp2 *)
 and getBinaryOperator op =
-	let name = (
 	match op with
-	| MUL -> "*"
-	| DIV -> "/"
-	| MOD -> "%"
-	| ADD -> "+"
-	| SUB -> "-"
-	| SHL -> "<<"
-	| SHR -> ">>"
-	| LT -> "<"
-	| LE -> "<="
-	| GT -> ">"
-	| GE -> ">="
-	| EQ -> "=="
-	| NE -> "!="
-	| BAND -> "&"
-	| XOR -> "^"
-	| BOR -> "|"
-	| AND -> "&&"
-	| OR -> "||"
-	| ASSIGN -> ":="
-	| ADD_ASSIGN -> "+="
-	| SUB_ASSIGN -> "-="
-	| MUL_ASSIGN -> "*="
-	| DIV_ASSIGN -> "/="
-	| MOD_ASSIGN -> "%="
-	| BAND_ASSIGN -> "&="
-	| BOR_ASSIGN -> "|="
-	| XOR_ASSIGN -> "^="
-	| SHL_ASSIGN -> "<<="
-	| SHR_ASSIGN -> ">>="
-	) in "_" ^ name ^ "_"
+	| MUL -> "Multiply"
+	| DIV -> "Divide"
+	| MOD -> "Modulo"
+	| ADD -> "Plus"
+	| SUB -> "Minus"
+	| SHL -> "LeftShift"
+	| SHR -> "RightShift"
+	| LT -> "LessThan"
+	| LE -> "LessThanOrEqual"
+	| GT -> "GreaterThan"
+	| GE -> "GreaterThanOrEqual"
+	| EQ -> "Equality"
+	| NE -> "NotEquality"
+	| BAND -> "BitwiseAnd"
+	| XOR -> "BitwiseXor"
+	| BOR -> "BitwiseOr"
+	| AND -> "LogicalAnd"
+	| OR -> "LogicalOr"
+	| ASSIGN -> "Assign"
+	| ADD_ASSIGN -> "AssignPlus"
+	| SUB_ASSIGN -> "AssignMinus"
+	| MUL_ASSIGN -> "AssignMultiply"
+	| DIV_ASSIGN -> "AssignDivide"
+	| MOD_ASSIGN -> "AssignModulo"
+	| BAND_ASSIGN -> "AssignBitwiseAnd"
+	| BOR_ASSIGN -> "AssignBitwiseOr"
+	| XOR_ASSIGN -> "AssignBitwiseXor"
+	| SHL_ASSIGN -> "AssignLeftShift"
+	| SHR_ASSIGN -> "AssignRightShift"
 and printSeq _ _ =
 	"Seq"
 and printIf exp s1 s2 =
 	wrap ((printExpression exp) :: (printStatement s1) :: (printStatement s2) :: []) "IfThenElse"
-
+	
 and makeBlockStatement stat =
 	{ blabels = []; battrs = []; bstmts = stat :: []}
 and printWhile exp stat =
@@ -434,7 +442,7 @@ and printSwitch exp stat =
 	let newSwitchId = ((counter := (!counter + 1)); !counter) in
 	switchStack := newSwitchId :: !switchStack;
 	currentSwitchId := newSwitchId;
-	let retval = wrap ((string_of_int newSwitchId) :: (printExpression exp) :: (printStatement stat) :: []) "Switch" in
+	let retval = printCell "Switch" [Attrib ("id", string_of_int newSwitchId)] (printList (fun x -> x) ((printExpression exp) :: (printStatement stat) :: [])) in
 	switchStack := List.tl !switchStack;
 	currentSwitchId := List.hd !switchStack;
 	retval 
@@ -473,7 +481,7 @@ and printStatement a =
 	| GOTO (name, loc) -> printStatementLoc (printGoto name) loc
 	| COMPGOTO (exp, loc) -> printStatementLoc (printCompGoto exp) loc (* GCC's "goto *exp" *)
 	| DEFINITION d -> wrap ((printDef d) :: []) "LocalDefinition"
-	| _ -> "OtherStatement"
+	| _ -> printCell "OtherStatement" [] ""
 	(* 
 	| ASM (attrs, tlist, details, loc) -> "Assembly" 
 	*)
@@ -496,43 +504,44 @@ and printAttribute (a, b) =
 and printEnumItem (str, expression, cabsloc) =
 	wrap ((wrap ((printIdentifier str) :: (printExpression expression) :: []) "EnumItem") :: (printCabsLoc cabsloc) :: []) "EnumItemLoc"
 and printSpecifier a =
-	wrap (printSpecElemList a :: []) "Specifier"
+	wrap (printSpecElemList a :: []) "Specifiers"
 and printSpecElemList a =
 	printList printSpecElem a
 and printSingleNameList a =
 	printList printSingleName a
 and printSpecElem a =
 	match a with
-	| SpecTypedef -> "SpecTypedef"
+	| SpecTypedef -> printCell "SpecTypedef" [] ""
 	| SpecCV cv -> 
-		(match cv with
-		| CV_CONST -> "Const"
-		| CV_VOLATILE -> "Volatile"
-		| CV_RESTRICT -> "Restrict")
+		wrap ((match cv with
+		| CV_CONST -> printCell "Const" [] ""
+		| CV_VOLATILE -> printCell "Volatile" [] ""
+		| CV_RESTRICT -> printCell "Restrict" [] "") :: []) "TypeQualifier"
 	| SpecAttr al -> printAttribute al
 	| SpecStorage sto ->
-		(match sto with
-		| NO_STORAGE -> "NoStorage"
-		| AUTO -> "Auto"
-		| STATIC -> "Static"
-		| EXTERN -> "Extern"
-		| REGISTER -> "Register")
-	| SpecInline -> "Inline"
-	| SpecType bt -> printTypeSpec bt
+		wrap ((match sto with
+		| NO_STORAGE -> printCell "NoStorage" [] ""
+		| AUTO -> printCell "Auto" [] ""
+		| STATIC -> printCell "Static" [] ""
+		| EXTERN -> printCell "Extern" [] ""
+		| REGISTER -> printCell "Register" [] "") :: []) "StorageSpecifier"
+	| SpecInline -> (* right now there is only inline, but in C1X there is _Noreturn *)
+		wrap ((printCell "Inline" [] "") :: []) "FunctionSpecifier"
+	| SpecType bt -> printCell "TypeSpecifier" [] (printTypeSpec bt)
 	| SpecPattern name -> wrap ((printIdentifier name) :: []) "SpecPattern"
 	
 and printTypeSpec = function
-	Tvoid -> "Void"
-	| Tchar -> "Char"
-	| Tbool -> "Bool"
-	| Tshort -> "Short"
-	| Tint -> "Int"
-	| Tlong -> "Long"
-	| Tint64 -> "Int64"
-	| Tfloat -> "Float"
-	| Tdouble -> "Double"
-	| Tsigned -> "Signed"
-	| Tunsigned -> "Unsigned"
+	Tvoid -> printCell "Void" [] ""
+	| Tchar -> printCell "Char" [] ""
+	| Tbool -> printCell "Bool" [] ""
+	| Tshort -> printCell "Short" [] ""
+	| Tint -> printCell "Int" [] ""
+	| Tlong -> printCell "Long" [] ""
+	| Tint64 -> printCell "Int64" [] ""
+	| Tfloat -> printCell "Float" [] ""
+	| Tdouble -> printCell "Double" [] ""
+	| Tsigned -> printCell "Signed" [] ""
+	| Tunsigned -> printCell "Unsigned" [] ""
 	| Tnamed s -> wrap ((printIdentifier s) :: []) "Named"
 	| Tstruct (a, b, c) -> printStructType a b c
 	| Tunion (a, b, c) -> printUnionType a b c
