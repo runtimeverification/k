@@ -1743,17 +1743,26 @@ my $special_comment = join("|", (
 	"\\*\\*\\*\\((.*?)\\*\\*\\*\\)",
 	"\\*\\*\\*(.*?)\$"
 ));
-my %comments_map = ();
 
+sub countlines_correct
+{
+	(local $_, my $count) = (shift, 1);
+	return 1 if $_ eq "";
+	while(/\n/sg) { $count ++; }
+	return $count;
+}
+
+
+# remove the comments and put them in a map
+# use the correct line counter that returns 1 if no \n is found
+# return the code and the map with the comments
 sub remove_comments($)
 {
-
-	%comments_map = ();
 	local $_ = shift;
+	my %comments_map = ();
 	
-	$_ =~ s/($special_comment)/
-	{
-		my $line = countlines($`);
+	$_ =~ s/($special_comment)/{
+		my $line = countlines_correct($`);	
 		my $comm = "";
 		# retrieve the content of the comment from each regexp
 		if (defined $2) {
@@ -1774,30 +1783,31 @@ sub remove_comments($)
 		# for each line in the comment - put it in the map
 		while ($comm =~ m!(.*?)(\n|$)!gsm) {
 			if ( $comments_map{$line + $i} ) {
-				$comments_map{$line + $i} = "$comments_map{$line + $i} <<~>>$1";
+				$comments_map{$line + $i} = "$comments_map{$line + $i} | $1";
 			} else {
 				$comments_map{$line + $i} = "$1";
 			}
 			$i = $i + 1;
 		}
-		local $_=$1;
+		local $_ = $1;
 		s![^\n]!!gs;
 		$_;
 	}/gsme;
 
-	return $_;
+	$_ =~ s/^\ //gms;
+	return ($_, \%comments_map);
 }
 
-
-sub put_back_comments($)
+sub put_back_comments($$)
 {
-	my $cod = shift;
+	my ($cod, $second) = (shift, shift);
+	my %comments_map = %$second;
 	my $fin = "";
 	
 	my $i = 1;
 	while ($cod =~ m/(.*?)(\n|$)/gsm) {
 		if ( $comments_map{$i} ) {
-			$fin = "$fin$1 ----$comments_map{$i}\n";
+			$fin = "$fin$1 ---- $comments_map{$i}\n";
 		} else {
 			$fin = "$fin$1\n";
 		}
@@ -1805,6 +1815,7 @@ sub put_back_comments($)
 	}
 	return $fin;
 }
+
 
 ################
 # end comments #

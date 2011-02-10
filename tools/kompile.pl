@@ -641,10 +641,10 @@ if (!$compile_only) {
 		$f =~ s/\.k$/\.maude/s;
 		my $maudified = get_file_content($f);
 #		print "F: $f\nM: $maudified\n\n";
-		if ($maudified =~ /(^|(?<=\s))(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/sg)
+		if ($maudified =~ /^\s*(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/sgm)
 		{
 		    $prelude =~ s/\.maude$//sg;
-		    $maudified =~ s/(^|(?<=\s))(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/;
+		    $maudified =~ s/^\s*(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/sgm;
 		    
 		    # hardcoded
 		    $maudified =~ s/\n\s/\n/g;
@@ -1209,8 +1209,8 @@ sub maudify_file {
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
 	# save comments
-	#my $noComments = remove_comments($_);
-#	print ">>>$noComments<<<\n";
+	my ($noComments, $myComments) = remove_comments($_);
+	$_ = $noComments;
 
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
@@ -1222,15 +1222,6 @@ sub maudify_file {
     
 # Replacing dots    
     $_ = replace_dots($_);
-
-# Getting rid of comments, maintaining the line numbers of the remaining code
-    s/($comment)/
-    {
-	local $_=$1;
-	s!\S!!gs;
-	$_;
-    }/gsme;
-    
 
     my $maudified = "";
     while (s/^(\s*)($top_level_pattern)(\s*)//sm) {
@@ -1289,7 +1280,7 @@ sub maudify_file {
     print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
-	#$maudified = put_back_comments($noComments);
+	$maudified = put_back_comments($maudified, $myComments);
 
     open FILE,">",$maude_file or die "Cannot write $maude_file\n";
     print FILE $maudified;
