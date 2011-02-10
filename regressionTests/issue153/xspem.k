@@ -47,7 +47,7 @@ kmod META-AUTOMATON is including META-MODEL
 
 
   syntax Bag ::= metaAutomaton 
-
+/*
   macro metaAutomaton = 
                  <metamodel>
                    <classes>
@@ -79,15 +79,11 @@ kmod META-AUTOMATON is including META-MODEL
                       <class>
                          <className> initState </className>
                          <extends> state </extends>
-						  <declAttributes>  
-                             in  : 'List`{K`}
-                             out : 'List`{K`}
-                         </declAttributes>
                       </class>
                    </classes>
                    <oclConstraints> .List </oclConstraints>
                  </metamodel>
-/*
+*/
   rule [one-step-transition] :
        <instance_>
           <ofClass> automaton </ofClass>
@@ -119,7 +115,7 @@ kmod META-AUTOMATON is including META-MODEL
             dest |-> Y
           <_/attributes>
        </instance> 
-*/
+
 endkm
 
 
@@ -192,9 +188,9 @@ kmod XSPEM is including AN-AUTOMATON
 
   macro initConfig
         =
-        <T>
+        <T_>
            anAutomaton
-        </T>
+        <_/T>
 
 endkm
 
