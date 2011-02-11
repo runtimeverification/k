@@ -1,0 +1,3 @@
+in automaton-compiled.maude
+search [5] initConfig =>+ C:Bag .
+

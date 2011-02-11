@@ -1,0 +1,69 @@
+in ../../../k-prelude
+
+
+/*
+  The module OCL-SOLVER should include the syntax for OCL formulas and rules for evaluating them.
+*/
+kmod OCL-SOLVER is including K + PL-ID
+  syntax Formula ::=  `True | `False | forAll ( OclVar : Id `| Bool )
+  syntax OclVar ::= t`!
+endkm
+
+/*
+  A meta-model consists of a configuration including 
+     - the classes together with their relationships and
+     - the OCL constraints, 
+  and the set of rules describing the dynamic of the models.
+  A model is represented by a cell including instances of the classes. For each instance, we have
+  cells with the name of the instance, the name of the class owner, and the values of the attributes.
+*/
+kmod META-MODEL is including OCL-SOLVER
+
+  syntax Id ::= object
+
+  syntax K ::= Id | undefined  
+
+  syntax ListItem ::= Id : KLabel [prec 20] | Formula
+
+
+/*
+  A configuration for a metamodel consists of two cells: one for classes and one for OCL constraints.
+  The cell for classes is similar to that used in the definition of SKOOL and includes three cells: 
+  name of the class, name of the immediate ancestor (=object if it is a base class), and a cell for
+  the attribute declarations. The types of the attributes are specified as labels (meta-representation).
+  The associations between classes are represented by attributes describing the roles, where the type
+  of the attribute is chosen according to the multiplicity.
+  The cell for OCL constraints includes a list of formulas.
+*/
+
+  configuration <T> 
+                  <metamodel*>
+                    <classes>
+                      <class*>
+                         <className> Id:Id </className>
+                         <extends> Id:Id </extends>
+                         <declAttributes> .List  </declAttributes>
+                      </class*>
+                    </classes>
+                    <oclConstraints> .List </oclConstraints>
+                  </metamodel*>
+                  <models*>
+                    <model*>
+                      <instance*>
+                         <name> undefined </name>
+                         <ofClass> undefined </ofClass>
+                         <attributes> .Map </attributes>
+                      </instance*>
+                    </model*>
+                  </models*>
+                </T>
+endkm
+
+
+/* 
+   A conformance checking traverses the model in parallel with the the configuration of the metamodel
+   and checks if the instance is defined in accord with the definition of the class and whether the
+   corresponding OCL constraints are satisfied.
+
+  ... to be done ...
+*/
