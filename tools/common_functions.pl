@@ -1589,9 +1589,85 @@ sub countlines
     return $count;
 }
 
+
+# Args: K statement
+# Return: K statement
+# If the K statement is a rule which contains a macro
+# then apply that macro ("counter" version)
+sub resolve_where_macro($)
+{
+    local $_ = shift;
+    my %macro_map = ();
+    my %macro_order = ();
+    my $count = 0;
+	my $limit = 100;
+
+    # where macro can be found only in rules
+    if (/^rule/)
+    {
+        # locate where macro if any
+        if (/(?<=\s)(where(\s+)(.*?))(\s+)(?=ATTR[0-9]*)/sg)
+        { 
+            # extract needed data
+            my $macros = $3;
+            my $all = $&;
+
+            # build an empty string which will keep the 
+            # length and the number of lines for where macro
+            my $macros_template = $all;
+            $macros_template =~ s/[^\n]/ /sg;
+
+            # exclude the where macro from the rule body
+            # and replace it with whitespaces
+            s/\Q$all\E/$macros_template/sg;
+            
+#			print "MACROS:|$macros|\n";
+
+            # first, collect macros
+            # macro_map contains all macros mapped to their values
+            # macro_order contains macros occurence order mapped to their names
+			while ($macros =~ /(^|and)\s*(\w+)\s+=\s+(.*?)(?=(and|$))/sg)
+			{
+#				print "$1\n$2\n$3\n\n";
+ 				$macro_map{$2} = $3;
+                $macro_order{$count++} = $2;
+            }
+            
+			# apply round robin algorithm
+			my $round = 0;
+			
+			# count no of occurences; for debug reasons
+#			my $i = 0;			
+
+			# apply the macros until limit is reached
+			while ($limit > 0)
+			{
+#				print "ROUND: $round COUNT: $count\n\n";
+				# round robin; do not change the order of these instructions
+				$round ++ if $round < $count;
+				$round = 0 if $round == $count;
+
+				# replace macro
+#				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z0-9])/{print "BEFORE: $_\n"; ++$i; print "R: $round\n";}$macro_map{$macro_order{$round}}/sge;
+				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z])/$macro_map{$macro_order{$round}}/sg;
+
+				# decrement limit
+				$limit --;
+			}
+
+#			print "MACRO: $macros\n";
+#			print "ALL: $all\n";
+#			print "RULE: $_\nMACRO REPLACEMENTS:$i\n";
+		}
+	}
+	
+	# send back the K statement
+	return $_;
+}
+
 # the following subroutine replaces 
 # macros declared with where
-sub resolve_where_macro($)
+sub resolve_where_macro_old($)
 {
     local $_ = shift;
     my %macro_map = ();
@@ -1743,26 +1819,17 @@ my $special_comment = join("|", (
 	"\\*\\*\\*\\((.*?)\\*\\*\\*\\)",
 	"\\*\\*\\*(.*?)\$"
 ));
+my %comments_map = ();
 
-sub countlines_correct
-{
-	(local $_, my $count) = (shift, 1);
-	return 1 if $_ eq "";
-	while(/\n/sg) { $count ++; }
-	return $count;
-}
-
-
-# remove the comments and put them in a map
-# use the correct line counter that returns 1 if no \n is found
-# return the code and the map with the comments
 sub remove_comments($)
 {
+
+	%comments_map = ();
 	local $_ = shift;
-	my %comments_map = ();
 	
-	$_ =~ s/($special_comment)/{
-		my $line = countlines_correct($`);	
+	$_ =~ s/($special_comment)/
+	{
+		my $line = countlines($`);
 		my $comm = "";
 		# retrieve the content of the comment from each regexp
 		if (defined $2) {
@@ -1783,31 +1850,30 @@ sub remove_comments($)
 		# for each line in the comment - put it in the map
 		while ($comm =~ m!(.*?)(\n|$)!gsm) {
 			if ( $comments_map{$line + $i} ) {
-				$comments_map{$line + $i} = "$comments_map{$line + $i} | $1";
+				$comments_map{$line + $i} = "$comments_map{$line + $i} <<~>>$1";
 			} else {
 				$comments_map{$line + $i} = "$1";
 			}
 			$i = $i + 1;
 		}
-		local $_ = $1;
+		local $_=$1;
 		s![^\n]!!gs;
 		$_;
 	}/gsme;
 
-	$_ =~ s/^\ //gms;
-	return ($_, \%comments_map);
+	return $_;
 }
 
-sub put_back_comments($$)
+
+sub put_back_comments($)
 {
-	my ($cod, $second) = (shift, shift);
-	my %comments_map = %$second;
+	my $cod = shift;
 	my $fin = "";
 	
 	my $i = 1;
 	while ($cod =~ m/(.*?)(\n|$)/gsm) {
 		if ( $comments_map{$i} ) {
-			$fin = "$fin$1 ---- $comments_map{$i}\n";
+			$fin = "$fin$1 ----$comments_map{$i}\n";
 		} else {
 			$fin = "$fin$1\n";
 		}
@@ -1815,7 +1881,6 @@ sub put_back_comments($$)
 	}
 	return $fin;
 }
-
 
 ################
 # end comments #

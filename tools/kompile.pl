@@ -622,41 +622,40 @@ if (!$compile_only) {
     
     if ($klabels ne "")
     {
-	my @tmp = split(/\s+/, $klabels);
-	@tmp = uniq(@tmp);
-	my $tmp = "ops @tmp : -> KLabel [metadata \"generated label\"] . ";
-	my $dir = cwd;
-	open FILE,">",$kshared or die "Cannot create $kshared\n";
-	my $kprelude = abs_path($k_prelude);
-	my $prelude = basename($k_prelude);
-	print FILE "in $kprelude\nmod K-SHARED is including K . \n\t$tmp\nendm";
-	close FILE;
+		my @tmp = split(/\s+/, $klabels);
+		@tmp = uniq(@tmp);
+		my $tmp = "ops @tmp : -> KLabel [metadata \"generated label\"] . ";
+		my $dir = cwd;
+		open FILE,">",$kshared or die "Cannot create $kshared\n";
+		my $kprelude = abs_path($k_prelude);
+		my $prelude = basename($k_prelude);
+		print FILE "in $kprelude\nmod K-SHARED is including K . \n\t$tmp\nendm";
+		close FILE;
 	
-	my $filess = getFileList();
-	if ($filess ne "")
-	{
-	    my @files = split(/\s+/, $filess);
-	    foreach my $f(@files)
-	    {
-		$f =~ s/\.k$/\.maude/s;
-		my $maudified = get_file_content($f);
-#		print "F: $f\nM: $maudified\n\n";
-		if ($maudified =~ /^\s*(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/sgm)
+		my $filess = getFileList();
+		if ($filess ne "")
 		{
-		    $prelude =~ s/\.maude$//sg;
-		    $maudified =~ s/^\s*(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?(\s*?)\n/in $kshared\n/sgm;
-		    
-		    # hardcoded
-		    $maudified =~ s/\n\s/\n/g;
-		    
-		    open FILE,">",$f or die "Cannot open $f\n";
-		    print FILE $maudified;
-		    close FILE;
+			my @files = split(/\s+/, $filess);
+			foreach my $f(@files)
+			{
+				$f =~ s/\.k$/\.maude/s;
+				my $maudified = get_file_content($f);
+		#		print "F: $f\nM: $maudified\n\n";
+				if ($maudified =~ /^\s*(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?((\s*?\n)|(\s*\-\-\-.*?\n))/sgm)
+				{
+					$prelude =~ s/\.maude$//sg;
+					$maudified =~ s/^\s*(in|load)[\s\.\/a-zA-Z]*($prelude)(\.maude)?((\s*?\n)|(\s*\-\-\-.*?\n))/in $kshared$+/sgm;
+				
+					# hardcoded
+					$maudified =~ s/\n\s/\n/g;
+				
+					open FILE,">",$f or die "Cannot open $f\n";
+					print FILE $maudified;
+					close FILE;
+				}
+			}
 		}
-	    }
-	}
-	    
-    }
+}
     
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
@@ -1280,7 +1279,7 @@ sub maudify_file {
     print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
-	$maudified = put_back_comments($maudified, $myComments);
+#	$maudified = put_back_comments($maudified, $myComments);
 
     open FILE,">",$maude_file or die "Cannot write $maude_file\n";
     print FILE $maudified;
@@ -1293,6 +1292,11 @@ sub maudify_module {
 
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
+
+# Step: resolve macros
+    s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+    s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
+	$_ = Unfreeze("ATTR", $_);
 
 # Step: desugar latex newline <br/>
     $_ = desugar_latex($_);
@@ -1369,10 +1373,11 @@ sub maudify_module {
     # print  "Stage:\n$_\n\n";
 
 # Step: Change K statements into Maude statements
+	# freeze attributes first.. because sending parameters is dangerous: see ":"!!!
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
-    # resolve macros
-    s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
+	# unfreeze if there are still frozen attributes
+	$_ = Unfreeze("ATTR", $_);
     # print  "Stage:\n$_\n\n";
     
 # Step: Unfreeze everything still frozen
