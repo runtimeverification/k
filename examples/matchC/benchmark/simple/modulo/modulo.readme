@@ -1,0 +1,11 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The modulo function computes the x modulo y value.
+The main function calls the fact function and tests the result.
+
+2. The precondition: ---
+The postcondition: ---
+The last comments of the file contain declarations that are used by the tool.

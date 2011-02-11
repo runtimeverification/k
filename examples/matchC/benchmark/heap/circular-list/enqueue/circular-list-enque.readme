@@ -1,0 +1,15 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+
+1. A structure is defined for working with lists. 
+The clenque function takes a list and inserts a new node as the new starting 
+point for the list.
+The main functon instantiates a list, calls the function and checks the result.
+
+2. The precondition: the list received a s argument for the function needs to be 
+circular.
+The postcondition: A new node has been added to the list and is the new 
+beginning of the list. It is returned by the function. 

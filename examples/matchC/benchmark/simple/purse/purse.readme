@@ -1,0 +1,18 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The credit function updates the balance of the p purse by s.
+The withdraw function decreases the balance of the p purse by s.
+The main function calls the fact function and tests the result.
+
+2. The credit precondition: the p and s variables must be bounded to actual 
+values.
+The credit postcondition: checks that the value of the balance was updated by 
+adding s to it.
+The withdraw precondition: the p and s variables must be bounded to actual 
+values.
+The withdraw postcondition: checks that the value of the balance was updated by 
+substracting s to it.
+The last comments of the file contain declarations that are used by the tool.

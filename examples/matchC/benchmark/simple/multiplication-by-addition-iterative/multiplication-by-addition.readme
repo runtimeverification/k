@@ -1,0 +1,16 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The "multiply" function multiplies by repeated addition x and y, the 
+arguments it gets.
+The main function calls the fact function and tests the result.
+
+2. The precondition: the arguments variables are bound to values in the env cell 
+and they are greater or equal to 0.
+The postcondition: the content on the env cell is irrelevant, the returned value 
+is the actual multiplication of the arguments.
+The invariant: x is repeatedly added until the iterator reaches the value of the 
+y variable.
+The last comments of the file contain declarations that are used by the tool.

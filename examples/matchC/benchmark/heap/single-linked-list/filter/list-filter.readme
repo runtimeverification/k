@@ -1,0 +1,19 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The nodeList structure is defined in order to express single linked lists.
+The filter function takes two arguments: a pointer to a list and an int. It 
+iterates the list and deletes every nod ethat has the int as a value.
+
+2.The precondition : both the list and the value that needs to be filtered out 
+need to be instantiated.
+The postcondition: there still is a list left in the heap (caould be the empty 
+list) that does not contain the value that was supposed to be filtered. Also, no 
+their part pf the heap was altered.
+The invariant: the list is broken into a list segment, a pointer to one of its 
+elements and the rest of the list. The content of the list segment is already 
+filtered.
+
+The last comments of the file contain declarations that are used by the tool.

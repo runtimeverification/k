@@ -1,0 +1,14 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. A structure is defined for working with lists.
+The clpop function takes a list as an argument and pops the node after the one 
+received as the first node.
+The main function instantiates a list, calls the function and checks the result.
+
+2. The precondition: the list must be a circular list.
+The postcondition: the second element of thelist has been deleted - second 
+relative to the node that is supposed to represent the beginning of the list. 
+The function returns the pointer to the beginning of the list.

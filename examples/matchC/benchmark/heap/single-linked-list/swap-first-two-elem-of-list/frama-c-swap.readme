@@ -1,0 +1,13 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The nodeList structure is defined in order to express single linked lists.
+The swap function swaps the first two elements of the list it receives as 
+argument.
+The main function creates a list and calls the function, chacking the result.
+
+2.The precondition: the list received as argument must be instantiated.
+The postcondition: the first two elements of the list have been swapped.
+The last comments of the file contain declarations that are used by the tool.

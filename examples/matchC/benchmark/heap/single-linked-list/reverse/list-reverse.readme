@@ -1,0 +1,20 @@
+0. Summary
+1. Algorithm description
+2. Annotation description
+3. Observations
+
+1. The nodeList structure is defined in order to express single linked lists.
+The reverse list swaps the elements of the list such that the reversed list is 
+left after the function call. The function is not recursive.
+The main function creates a list, calls the reverse function and checks the 
+result.
+
+2.The precondition : a list must be instantiated.
+The postcondition: the list that is in the heap after the function call has the 
+same elements as the initial list, but in reverse order. The function returns 
+the pointer for the beginning of the list.
+The invariant: The list is tared element by element and each element is appended 
+to the beginning of the reversed list that is being constructed. Their elements 
+are the content for the initial list (with the condition mentioned in the form 
+cell).
+The last comments of the file contain declarations that are used by the tool.
