@@ -144,10 +144,10 @@ and printSingleName (a, b) =
 and printAttr a b = wrap (a :: (printAttributeList b) :: []) "AttributeWrapper"
 and printBlock a = 
 	let blockNum = (string_of_int (counter := (!counter + 1); !counter)) in
-	let attribs = (Attrib ("id", blockNum))
-		:: []
-	in
-	let block = printCell "Block" attribs ((printBlockLabels a.blabels) ^ (printStatementList a.bstmts)) in
+	let idCell = printCell "Id" [] blockNum in
+	let block = 
+	wrap (idCell :: (printBlockLabels a.blabels) :: (printStatementList a.bstmts) :: []) "Block" in
+	(* printCell "Block" attribs ((printBlockLabels a.blabels) ^ (printStatementList a.bstmts)) in *)
 	printAttr block a.battrs
 
 	(*	
@@ -500,7 +500,9 @@ and printSwitch exp stat =
 	let newSwitchId = ((counter := (!counter + 1)); !counter) in
 	switchStack := newSwitchId :: !switchStack;
 	currentSwitchId := newSwitchId;
-	let retval = printCell "Switch" [Attrib ("id", string_of_int newSwitchId)] (printList (fun x -> x) ((printExpression exp) :: (printStatement stat) :: [])) in
+	let idCell = printCell "Id" [] (string_of_int newSwitchId) in
+	let retval = wrap (idCell :: (printExpression exp) :: (printStatement stat) :: []) "Switch" in
+	(* printCell "Switch" [Attrib ("id", string_of_int newSwitchId)] (printList (fun x -> x) ((printExpression exp) :: (printStatement stat) :: [])) in *)
 	switchStack := List.tl !switchStack;
 	currentSwitchId := List.hd !switchStack;
 	retval 

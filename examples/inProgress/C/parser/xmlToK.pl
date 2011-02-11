@@ -2,7 +2,12 @@ use strict;
 use Data::Dumper;
 use XML::Parser;
 use XML::Twig;
+use Encode;
+binmode STDOUT, ":utf8";
+binmode STDIN, ":utf8";
 
+# not handling the case of multiple cdatas 
+# can use 'erase' to get rid of junk cells
 
 #########################################################
 # you may want to configure things inside this section
@@ -15,6 +20,18 @@ sub nameToLabel {
 	return "$name";
 }
 #########################################################
+# my %escapeMap = (
+	# '\007' => "\\a",
+	# '\b' => "\\b",
+	# '\t' => "\\t",
+	# '\n' => "\\n",
+	# '\011' => "\\v",
+	# '\012' => "\\f",
+	# '\r' => "\\r",
+	# '"' => "\\\"",
+	# '\'' => "\\'",
+	# '\\' => "\\\\"
+# );
 
 # my $xso = XML::SimpleObject->new( $parser->parsefile($file) );
 
@@ -28,6 +45,7 @@ my $twig = XML::Twig->new();
 $twig->parse($input);
 my $root = $twig->root;
 
+#print decode_utf8(xmlToK($root));
 print xmlToK($root);
 print "\n";
 
@@ -49,6 +67,9 @@ sub xmlToK {
 sub elementToK {
 	my ($xso) = (@_);
 	my $label = $xso->name();
+	if ($label eq "RawData") {
+		return rawdataToK($xso);
+	}
 	my @klist = ();
 	foreach my $child ($xso->children){
 		my $childResult = xmlToK($child);
@@ -60,7 +81,62 @@ sub elementToK {
 
 }
 
+sub rawdataToK {
+	my ($xso) = (@_);
+	my $sort = $xso->att('sort');
+	my $data = "";
+	
+	if ($sort eq "String") {
+		$data = '"' . escapeString($xso->text) . '"';
+	} elsif ($sort eq "Int") {
+		$data = $xso->text;
+	} else {
+		return "unknown raw data";
+	}
+	return "$sort" . paren($data) . paren(KLIST_IDENTITY);
+}
 
+
+sub escapeSingleCharacter {
+	my ($char) = (@_);
+	if ($char =~ /[a-zA-Z0-9 !-\/:-@\[\]^`{-~]/) {
+		return $char;
+	} else {
+		return '\\' . ord($char) ;
+	}
+	# if (exists($escapeMap{$char})) {
+		# return $escapeMap{$char};
+	# } else {
+		# return $char;
+	# }
+	#return $char;
+	#escapeMap
+}
+
+sub escapeString {
+	my ($str) = (@_);
+	# my $octets = encode("ascii", $str, Encode::FB_CROAK);
+	#my $octets = decode('ascii', $str);
+	utf8::encode($str);
+	my @charArray = split(//, $str);
+	my @newArray = map(escapeSingleCharacter($_), @charArray) ;
+	# foreach my $char (@newArray){
+		# print "$char\n";
+	# }
+	return join('', @newArray);
+	
+	# my $result = "";
+	# foreach my $char (split //, $str){
+		# if ($char eq '"') {
+			# $result .= '\\"';
+		# } elsif ($char =~ /[a-zA-Z0-9.(){} \/]/) {
+			# $result .= $char;
+		# } else {
+			# $result .= '\\' . ord($char);
+		# }
+	# }
+	# return $result;
+}
 
 sub paren {
 	my ($str) = (@_);
