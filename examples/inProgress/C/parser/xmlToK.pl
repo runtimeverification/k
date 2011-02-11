@@ -17,21 +17,20 @@ use constant KLIST_SEPARATOR => ",, ";
 # might want to return, say, "'$name"
 sub nameToLabel {
 	my ($name) = (@_);
-	return "$name";
+	return "'$name";
 }
 #########################################################
-# my %escapeMap = (
-	# '\007' => "\\a",
-	# '\b' => "\\b",
-	# '\t' => "\\t",
-	# '\n' => "\\n",
-	# '\011' => "\\v",
-	# '\012' => "\\f",
-	# '\r' => "\\r",
-	# '"' => "\\\"",
-	# '\'' => "\\'",
-	# '\\' => "\\\\"
-# );
+my %escapeMap = (
+	"\007" => '\\a',
+	"\010" => '\\b',
+	"\011" => '\\t',
+	"\012" => '\\n',
+	"\013" => '\\v',
+	"\014" => '\\f',
+	"\015" => '\\r',
+	'"' => '\\\"',
+	'\\' => '\\\\'
+);
 
 # my $xso = XML::SimpleObject->new( $parser->parsefile($file) );
 
@@ -42,6 +41,19 @@ my $input = join("", <STDIN>);
 # my $xso = XML::SimpleObject->new($parser->parse($input));
 
 my $twig = XML::Twig->new();
+my $twig=XML::Twig->new(   
+	twig_handlers => { 
+		# title   => sub { $_->set_tag( 'h2') }, # change title tags to h2
+		# para    => sub { $_->set_tag( 'p')  }, # change para to p
+		Filename  => sub { $_->erase; },
+		Lineno  => sub { $_->erase; },
+		Byteno  => sub { $_->erase; },
+		Ident  => sub { $_->erase; }, # not an identifier; it's part of a location
+		# list    => \&my_list_process,          # process list elements
+		# div     => sub { $_[0]->flush;     },  # output and free memory
+	}
+);
+
 $twig->parse($input);
 my $root = $twig->root;
 
@@ -99,16 +111,17 @@ sub rawdataToK {
 
 sub escapeSingleCharacter {
 	my ($char) = (@_);
-	if ($char =~ /[a-zA-Z0-9 !-\/:-@\[\]^`{-~]/) {
+	
+	if (exists($escapeMap{$char})) {
+		return $escapeMap{$char};
+	} elsif ($char =~ /[\x20-\x7E]/) {
 		return $char;
 	} else {
-		return '\\' . ord($char) ;
+		my $ord = ord($char);
+		return '\\' . sprintf("%03o", $ord) ;
 	}
-	# if (exists($escapeMap{$char})) {
-		# return $escapeMap{$char};
-	# } else {
-		# return $char;
-	# }
+	#if ($char =~ /[a-zA-Z0-9\[ ]|[!-\/]|[:-@]|[\]-`]|[{-~]/) {
+	
 	#return $char;
 	#escapeMap
 }

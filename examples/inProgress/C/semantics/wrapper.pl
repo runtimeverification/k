@@ -76,7 +76,7 @@ while (my $line = <STDIN>) {
 			$output =~ s/\%/\%\%/g;
 			$output =~ s/\\\\/\\\\\\\\/g;
 			print substr(`printf "x$output"`, 1);
-		} elsif ($line =~ m/< resultValue > \('tv\)\.KResultLabel\(kList\("wklist_"\)\(BaseValue (-?\d+)\(\.List\{K\}\)\),,BaseType int\(\.List\{K\}\)\) <\/ resultValue >/){
+		} elsif ($line =~ m/< resultValue > \('tv\)\.KResultLabel\(kList\("wklist_"\)\(Rat (-?\d+)\(\.List\{K\}\)\),,BaseType int\(\.List\{K\}\)\) <\/ resultValue >/){
 			$haveResult = 1;
 			$retval = $1;
 		}
