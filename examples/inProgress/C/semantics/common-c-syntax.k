@@ -572,6 +572,7 @@ and unary_operator =
 ***)
 	op _?_:_ : K K K -> Expression [strict(1) prec 51 gather(e & E)]
 	op Conditional : K K K -> Expression [strict(1)]
+	macro Conditional(K1:K, K2:K, K3:K) = K1:K ? K2:K : K3:K
 ***(
 	(* A CAST can actually be a constructor expression *)
 	| CAST of (specifier * decl_type) * init_expression
@@ -612,14 +613,17 @@ and unary_operator =
 ***)
 	op _`[_`] : K K -> Expression
 	op ArrayIndex : K K -> Expression
+	macro ArrayIndex(K1:K, K2:K) = K1:K[K2:K]
 	--- op ArrayIndex : K K -> Expression
 ***(
 	| MEMBEROF of expression * string
 	| MEMBEROFPTR of expression * string
 ***)
 	op Dot : K Id -> Expression
+	macro Dot(K:K, X:Id) = K:K . X:Id
 	op _._ : K Id -> Expression --- [strict(1)]
 	op Arrow : K Id -> Expression [strict(1)]
+	macro Arrow(K:K, X:Id) = K:K -> X:Id
 	op _->_ : K Id -> Expression [strict(1)]
 ***(
 	| GNU_BODY of block
@@ -641,8 +645,8 @@ and constant =
 	op OctalConstant : K -> IntConstant --- new
 	op HexConstant : K -> IntConstant --- new --- expected to be string
 	
-	op DecimalFloatConstant : K K K -> IntConstant --- new
-	op HexFloatConstant : K K K -> IntConstant --- new --- wholeSignificand, fractionalSignificand, exponent, suggested answer.
+	op DecimalFloatConstant : String Int Float -> IntConstant --- new; significand, exponent, approx
+	op HexFloatConstant : String Int Float -> IntConstant --- new; significand, exponent, approx
 	
 	op U : K -> Constant --- new
 	op L : K -> Constant --- new

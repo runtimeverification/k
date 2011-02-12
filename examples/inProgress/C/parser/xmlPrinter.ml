@@ -259,6 +259,8 @@ and printBuiltin (sort : string) (data : string) =
 	printCell "RawData" [Attrib("sort", sort)] (cdata data)
 and printRawString s =
 	printBuiltin "String" s
+and printRawFloat f =
+	printBuiltin "Float" (string_of_float f)
 and printRawInt i =
 	printBuiltin "Int" (string_of_int i)
 and string_of_list_of_int64 (xs : int64 list) =
@@ -307,14 +309,19 @@ and printHexFloatConstant f =
 	let exponentPart :: [] = Str.split (Str.regexp "[+]") exponentPart in
 	let exponentPart = int_of_string exponentPart in
 	
-	let wholePart = printRawInt (int_of_string ("0x" ^ wholePart)) in
-	let fractionalPart = printRawInt (int_of_string ("0x" ^ fractionalPart)) in
+	let significand = wholePart ^ "." ^ fractionalPart in
+	let approx = float_of_string ("0x" ^ significand) in
+	let approx = approx *. (2. ** (float_of_int exponentPart)) in
+	(* let wholePart = printRawInt (int_of_string ("0x" ^ wholePart)) in
+	let fractionalPart = printRawInt (int_of_string ("0x" ^ fractionalPart)) in *)
 	let exponentPart = printRawInt exponentPart in
-	
-	let wholePart = printCell "WholePart" [] wholePart in
-	let fractionalPart = printCell "FractionalHexPart" [] fractionalPart in
-	let exponentPart = printCell "ExponentPart" [] exponentPart in
-	(wrap ((wholePart) :: (fractionalPart) :: (exponentPart) :: []) "HexFloatConstant")
+	let significandPart = printRawString significand in
+	(* let wholePart = printCell "WholePart" [] wholePart in
+	let fractionalPart = printCell "FractionalHexPart" [] fractionalPart in *)
+	let significandPart = printCell "Significand" [] significandPart in
+	let exponentPart = printCell "Exponent" [] exponentPart in
+	let approxPart = printRawFloat approx in
+	(wrap (significandPart :: exponentPart :: approxPart :: []) "HexFloatConstant")
 	(* let significand = wholePart +. fractionalPart in
 	let result = significand *. (2. ** (float_of_int exponentPart)) in
 	wrap ((string_of_int (int_of_float wholePart)) :: (string_of_float fractionalPart) :: (string_of_int exponentPart) :: (string_of_float result) :: []) "HexFloatConstant" *)
@@ -337,14 +344,20 @@ and printDecFloatConstant f =
 	let exponentPart :: [] = Str.split (Str.regexp "[+]") exponentPart in
 	let exponentPart = int_of_string exponentPart in
 	
-	let wholePart = printRawInt (int_of_string wholePart) in
-	let fractionalPart = printRawInt (int_of_string fractionalPart) in
-	let exponentPart = printRawInt exponentPart in
+	let significand = wholePart ^ "." ^ fractionalPart in
+	let approx = float_of_string significand in
+	let approx = approx *. (10. ** (float_of_int exponentPart)) in
 	
-	let wholePart = printCell "WholePart" [] wholePart in
-	let fractionalPart = printCell "FractionalPart" [] fractionalPart in
-	let exponentPart = printCell "ExponentPart" [] exponentPart in
-	(wrap ((wholePart) :: (fractionalPart) :: (exponentPart) :: []) "DecimalFloatConstant")
+	let significandPart = printRawString significand in
+	(* let wholePart = printRawInt (int_of_string wholePart) in
+	let fractionalPart = printRawInt (int_of_string fractionalPart) in *)
+	let exponentPart = printRawInt exponentPart in
+	let approxPart = printRawFloat approx in
+	(* let wholePart = printCell "WholePart" [] wholePart in
+	let fractionalPart = printCell "FractionalPart" [] fractionalPart in *)
+	let significandPart = printCell "Significand" [] significandPart in
+	let exponentPart = printCell "Exponent" [] exponentPart in
+	(wrap (significandPart :: exponentPart :: approxPart :: []) "DecimalFloatConstant")
 	
 and printFloatLiteral r =
 	let (tag, r) = splitFloat ([], r) in

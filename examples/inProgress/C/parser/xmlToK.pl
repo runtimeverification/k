@@ -70,10 +70,8 @@ my $handlers = {
 	DeclarationType => sub { $_->erase; },
 	Variable => sub { $_->erase; },
 	Paren => sub { $_->erase; },
-	WholePart => sub { $_->erase; },
-	FractionalHexPart => sub { $_->erase; },
-	FractionalPart => sub { $_->erase; },
-	ExponentPart => sub { $_->erase; },
+	Significand => sub { $_->erase; },
+	Exponent => sub { $_->erase; },
 	TypeQualifier => sub { $_->erase; },
 	StorageSpecifier => sub { $_->erase; },
 	FunctionSpecifier => sub { $_->erase; },
@@ -184,6 +182,9 @@ sub rawdataToK {
 		$data = '"' . escapeString($xso->text) . '"';
 	} elsif ($sort eq 'Int') {
 		$sort = 'Rat';
+		$data = $xso->text;
+	}  elsif ($sort eq 'Float') {
+		$sort = 'Float';
 		$data = $xso->text;
 	} else {
 		return "unknown raw data";
