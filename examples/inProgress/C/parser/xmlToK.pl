@@ -1,7 +1,7 @@
 use strict;
-use Data::Dumper;
 use XML::Parser;
 use XML::Twig;
+use File::Basename;
 use Encode;
 binmode STDOUT, ":utf8";
 binmode STDIN, ":utf8";
@@ -28,7 +28,7 @@ my %escapeMap = (
 	"\013" => '\\v',
 	"\014" => '\\f',
 	"\015" => '\\r',
-	'"' => '\\\"',
+	'"' => '\\"',
 	'\\' => '\\\\'
 );
 
@@ -40,40 +40,107 @@ my $input = join("", <STDIN>);
 #$parser->parse($input);
 # my $xso = XML::SimpleObject->new($parser->parse($input));
 
+# sub replaceWith {
+	# my ($elt, $label) = (@_);
+	# $elt->wrap_in($label);
+	# my $parent = $elt->parent;
+	# $elt->erase;
+	# return $parent;
+# }
+
+my %labelMap = (
+	List => '_::_',
+);
+my $filename = "";
+my $handlers = { 
+	# title   => sub { $_->set_tag( 'h2') }, # change title tags to h2
+	# para    => sub { $_->set_tag( 'p')  }, # change para to p
+	TranslationUnit => sub { 
+		my $RawData = $_->first_child('RawData');
+		$filename = $RawData->text;
+	},
+	Filename  => sub { $_->erase; },
+	Lineno  => sub { $_->erase; },
+	Byteno  => sub { $_->erase; },
+	Ident  => sub { $_->erase; }, # not an identifier; it's part of a location
+	BlockId  => sub { $_->erase; },
+	SwitchId  => sub { $_->erase; },
+	ForId  => sub { $_->erase; },
+	SourceCode  => sub { $_->erase; },
+	DeclarationType => sub { $_->erase; },
+	Variable => sub { $_->erase; },
+	Paren => sub { $_->erase; },
+	WholePart => sub { $_->erase; },
+	FractionalHexPart => sub { $_->erase; },
+	FractionalPart => sub { $_->erase; },
+	ExponentPart => sub { $_->erase; },
+	TypeQualifier => sub { $_->erase; },
+	StorageSpecifier => sub { $_->erase; },
+	FunctionSpecifier => sub { $_->erase; },
+	Specifiers => sub { $_->erase; },
+	TypeSpecifier => sub { $_->erase; },
+};
+
+
+foreach my $key (keys %labelMap) {
+	$handlers->{$key} = sub { $_->set_tag($labelMap{$key}); };	
+}
+
+			
+		
+		
+# AnonymousName => sub { 
+	# my $anon = $_;
+	# my $parent = $anon->parent;
+	# my $noname = XML::Twig::Elt->new( Identifier => '#NoName' );
+	# my $new_elt = 
+	# <Identifier>
+		# <RawData sort="String"><![CDATA[main]]></RawData>
+	# </Identifier>
+	
+	# $parent->paste($anon->erase);
+	# #$_->insert( 'Name' )->erase; 
+# },
+#$p->insert( table => { border=> 1}, 'tr', 'td') 
+#'RawData[@sort="Int"]' => sub { $_->set_att( sort => 'Rat') },
+# list    => \&my_list_process,          # process list elements
+# div     => sub { $_[0]->flush;     },  # output and free memory
+
 my $twig = XML::Twig->new();
 my $twig=XML::Twig->new(   
-	twig_handlers => { 
-		# title   => sub { $_->set_tag( 'h2') }, # change title tags to h2
-		# para    => sub { $_->set_tag( 'p')  }, # change para to p
-		Filename  => sub { $_->erase; },
-		Lineno  => sub { $_->erase; },
-		Byteno  => sub { $_->erase; },
-		Ident  => sub { $_->erase; }, # not an identifier; it's part of a location
-		# list    => \&my_list_process,          # process list elements
-		# div     => sub { $_[0]->flush;     },  # output and free memory
-	}
+	twig_handlers => $handlers
 );
 
 $twig->parse($input);
 my $root = $twig->root;
 
+if ($filename eq ""){
+	die "Could not find the filename in the XML\n";
+}
+#$filename = basename($filename,  (".c"));
 #print decode_utf8(xmlToK($root));
+
+print "mod C-program-$filename is including C .\n";
+print "op 'program-$filename : -> KLabel .\n";
+print "eq _`(_`)(('program-$filename).KLabel,.List`{K`}) = ";
 print xmlToK($root);
-print "\n";
-
-
+print " .\n";
+print "endm\n";
 
 # this function tries to figure out what kind of a node we're looking at, then delegates the conversion to another function
 sub xmlToK {
 	my ($xso) = (@_);
-	my $retval = "";
-	if ($xso->contains_only_text()){
-		
-	}
+	# if ($xso->contains_only_text()){
+		# return $xso->text;
+	# }
 	if (!$xso->is_pcdata()) {
 		return elementToK($xso);
-	}
-	return "$retval";
+	} 
+	# elsif ($xso->children_count == 0) {
+	# } elsif ($xso->children_count == 1) {
+		# return KLIST_IDENTITY;
+	# }
+	return "";
 }
 
 sub elementToK {
@@ -82,12 +149,27 @@ sub elementToK {
 	if ($label eq "RawData") {
 		return rawdataToK($xso);
 	}
+	if ($label eq 'Identifier') {
+		my $rawData = $xso->first_child('RawData');
+		my $str = '"'  . escapeString($rawData->text) . '"';
+		my $ident = 'Identifier' . paren($str);
+		my $id = 'Id' . paren($ident);
+		return $id . paren(KLIST_IDENTITY); 
+	} elsif ($label eq 'Variadic') {
+		return paren("Bool true") . paren(KLIST_IDENTITY);
+	} elsif ($label eq 'NotVariadic') {
+		return paren("Bool false") . paren(KLIST_IDENTITY);
+	}
 	my @klist = ();
 	foreach my $child ($xso->children){
 		my $childResult = xmlToK($child);
 		if ($childResult) {
 			push (@klist, $childResult);
 		}
+	}
+	my $numElements = scalar @klist;
+	if ($numElements == 0) {
+		push (@klist, KLIST_IDENTITY);
 	}
 	return nameToLabel($label) . paren(join(KLIST_SEPARATOR, @klist));
 
@@ -98,9 +180,10 @@ sub rawdataToK {
 	my $sort = $xso->att('sort');
 	my $data = "";
 	
-	if ($sort eq "String") {
+	if ($sort eq 'String') {
 		$data = '"' . escapeString($xso->text) . '"';
-	} elsif ($sort eq "Int") {
+	} elsif ($sort eq 'Int') {
+		$sort = 'Rat';
 		$data = $xso->text;
 	} else {
 		return "unknown raw data";

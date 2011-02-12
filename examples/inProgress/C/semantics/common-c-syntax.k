@@ -233,6 +233,9 @@ and decl_type =
 	op PointerType : K -> DeclType [strict]
 	op Prototype : K List{C} Bool -> DeclType [strict(1 2)]
 	
+	op NotVariadic : -> K
+	op Variadic : -> K
+	
 	
 ***(
 and name_group = specifier * name list
@@ -263,9 +266,13 @@ and init_name_group = specifier * init_name list
 and name = string * decl_type * attribute list * cabsloc
 ***)
 	op Name : Id K -> Name
+	op AnonymousName : K -> Name --- new, argument is type
 	op #NoName : -> Id --- new
 	op Identifier : String -> Id --- new	
 	op NameLoc : K K -> Name --- new
+	
+	macro AnonymousName(K:K) = Name(#NoName, K:K)
+	
 ***(
 	(* A variable declarator ("name") with an initializer *)
 and init_name = name * init_expression
@@ -452,6 +459,29 @@ and unary_operator =
 	op --_ : K -> Expression [prec 22]
 	op _++ : K -> Expression
 	op _-- : K -> Expression
+	
+	--- all these macros are temporary while I adjust the semantics to the new grammar
+	
+	op Negative : K -> Expression [strict]
+	macro Negative(K:K) = - K:K
+	op Positive : K -> Expression [strict]
+	macro Positive(K:K) = + K:K
+	op LogicalNot : K -> Expression [strict]
+	macro LogicalNot(K:K) = ! K:K
+	op BitwiseNot : K -> Expression [strict]
+	macro BitwiseNot(K:K) = ~ K:K
+	op Dereference : K -> Expression [strict]
+	macro Dereference(K:K) = * K:K
+	op Reference : K -> Expression
+	macro Reference(K:K) = & K:K
+	op PreIncrement : K -> Expression
+	macro PreIncrement(K:K) = ++ K:K
+	op PreDecrement : K -> Expression
+	macro PreDecrement(K:K) = -- K:K
+	op PostIncrement : K -> Expression
+	macro PostIncrement(K:K) = K:K ++
+	op PostDecrement : K -> Expression
+	macro PostDecrement(K:K) = K:K --
 
 ***(
 	| LABELADDR of string  (* GCC's && Label *)
@@ -473,13 +503,75 @@ and unary_operator =
 	op _&&_ : K K -> Expression [prec 47 gather(E e) strict(1)]
 	op _||_ : K K -> Expression [prec 49 gather(E e) strict(1)]
 	
+	ops Multiply : K K -> Expression [strict]
+	macro Multiply(K1:K, K2:K) = K1:K * K2:K
+	ops Divide : K K -> Expression [strict]
+	macro Divide(K1:K, K2:K) = K1:K / K2:K
+	ops Modulo : K K -> Expression [strict]
+	macro Modulo(K1:K, K2:K) = K1:K % K2:K
+	ops Plus : K K -> Expression [strict]
+	macro Plus(K1:K, K2:K) = K1:K + K2:K
+	ops Minus : K K -> Expression [strict]
+	macro Minus(K1:K, K2:K) = K1:K - K2:K
+	ops LeftShift : K K -> Expression [strict]
+	macro LeftShift(K1:K, K2:K) = K1:K << K2:K
+	ops RightShift : K K -> Expression [strict]
+	macro RightShift(K1:K, K2:K) = K1:K >> K2:K
+	ops LessThan : K K -> Expression [strict]
+	macro LessThan(K1:K, K2:K) = K1:K < K2:K
+	ops LessThanOrEqual : K K -> Expression [strict]
+	macro LessThanOrEqual(K1:K, K2:K) = K1:K <= K2:K
+	ops GreaterThan : K K -> Expression [strict]
+	macro GreaterThan(K1:K, K2:K) = K1:K > K2:K
+	ops GreaterThanOrEqual : K K -> Expression [strict]
+	macro GreaterThanOrEqual(K1:K, K2:K) = K1:K >= K2:K
+	ops Equality : K K -> Expression [strict]
+	macro Equality(K1:K, K2:K) = K1:K == K2:K
+	ops NotEquality : K K -> Expression [strict]
+	macro NotEquality(K1:K, K2:K) = K1:K != K2:K
+	op BitwiseAnd : K K -> Expression [strict]
+	macro BitwiseAnd(K1:K, K2:K) = K1:K & K2:K
+	op BitwiseXor : K K -> Expression [strict]
+	macro BitwiseXor(K1:K, K2:K) = K1:K ^ K2:K
+	op BitwiseOr : K K -> Expression [strict]
+	macro BitwiseOr(K1:K, K2:K) = K1:K | K2:K
+	op LogicalAnd : K K -> Expression [strict(1)]
+	macro LogicalAnd(K1:K, K2:K) = K1:K && K2:K
+	op LogicalOr : K K -> Expression [strict(1)]
+	macro LogicalOr(K1:K, K2:K) = K1:K || K2:K
+		
 	ops _*=_ _/=_ _%=_ _+=_ _-=_ _<<=_ _&=_ _^=_ _|=_ : K K -> Expression [prec 53]
 	ops _>>=_ : K K -> Expression [prec 53]
 	op _:=_ : K K -> Expression [prec 53 strict(2)]
+	
+	op Assign : K K -> Expression [strict(2)]
+	macro Assign(K1:K, K2:K) = K1:K := K2:K
+	ops AssignMultiply : K K -> Expression
+	macro AssignMultiply(K1:K, K2:K) = K1:K *= K2:K
+	ops AssignDivide : K K -> Expression
+	macro AssignDivide(K1:K, K2:K) = K1:K /= K2:K
+	ops AssignModulo : K K -> Expression
+	macro AssignModulo(K1:K, K2:K) = K1:K %= K2:K
+	ops AssignPlus : K K -> Expression
+	macro AssignPlus(K1:K, K2:K) = K1:K += K2:K
+	ops AssignMinus : K K -> Expression
+	macro AssignMinus(K1:K, K2:K) = K1:K -= K2:K
+	ops AssignBitwiseAnd : K K -> Expression
+	macro AssignBitwiseAnd(K1:K, K2:K) = K1:K &= K2:K
+	ops AssignBitwiseXor : K K -> Expression
+	macro AssignBitwiseXor(K1:K, K2:K) = K1:K ^= K2:K
+	ops AssignBitwiseOr : K K -> Expression
+	macro AssignBitwiseOr(K1:K, K2:K) = K1:K |= K2:K
+	ops AssignLeftShift : K K -> Expression
+	macro AssignLeftShift(K1:K, K2:K) = K1:K <<= K2:K
+	ops AssignRightShift : K K -> Expression
+	macro AssignRightShift(K1:K, K2:K) = K1:K >>= K2:K
+	
 ***(
 	| QUESTION of expression * expression * expression
 ***)
 	op _?_:_ : K K K -> Expression [strict(1) prec 51 gather(e & E)]
+	op Conditional : K K K -> Expression [strict(1)]
 ***(
 	(* A CAST can actually be a constructor expression *)
 	| CAST of (specifier * decl_type) * init_expression
@@ -519,14 +611,15 @@ and unary_operator =
 	| INDEX of expression * expression
 ***)
 	op _`[_`] : K K -> Expression
+	op ArrayIndex : K K -> Expression
 	--- op ArrayIndex : K K -> Expression
 ***(
 	| MEMBEROF of expression * string
 	| MEMBEROFPTR of expression * string
 ***)
-	--- op Dot : K Id -> Expression
+	op Dot : K Id -> Expression
 	op _._ : K Id -> Expression --- [strict(1)]
-	--- op Arrow : K Id -> Expression
+	op Arrow : K Id -> Expression [strict(1)]
 	op _->_ : K Id -> Expression [strict(1)]
 ***(
 	| GNU_BODY of block
@@ -548,8 +641,8 @@ and constant =
 	op OctalConstant : K -> IntConstant --- new
 	op HexConstant : K -> IntConstant --- new --- expected to be string
 	
-	op DecimalFloatConstant : Float -> IntConstant --- new
-	op HexFloatConstant : K K K K -> IntConstant --- new --- wholeSignificand, fractionalSignificand, exponent, suggested answer.
+	op DecimalFloatConstant : K K K -> IntConstant --- new
+	op HexFloatConstant : K K K -> IntConstant --- new --- wholeSignificand, fractionalSignificand, exponent, suggested answer.
 	
 	op U : K -> Constant --- new
 	op L : K -> Constant --- new
@@ -564,7 +657,7 @@ and constant =
 	op CharLiteral : Int -> Constant
 	op WCharLiteral : Int -> Constant
 	op StringLiteral : String -> Constant
-	op WStringLiteral : List{C} -> Constant
+	op WStringLiteral : String -> Constant
 	
 
 ***(

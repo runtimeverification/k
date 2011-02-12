@@ -15,6 +15,7 @@ FILES_TO_DIST = \
 	$(SEMANTICS_DIR)/wrapper.pl \
 	$(SEMANTICS_DIR)/link.pl \
 	$(PARSER_DIR)/cparser \
+	$(PARSER_DIR)/xmlToK.pl \
 	$(C_DIR)/compileProgram.sh \
 	$(C_DIR)/embed.pl \
 	$(wildcard $(C_DIR)/includes/*) \
@@ -23,36 +24,9 @@ FILES_TO_DIST = \
 	
 .PHONY: all clean run test force cparser maude-fragments build-all dynamic match fix kcompile gcc-output kcompile-bench benchmark dist fast-test dist-make
 
-all: cparser
+all: dist
 
 dist: $(DIST_DIR)/dist.done
-
-demo: $(DIST_DIR)/dist.done 
-	@rm -f ./a.out
-#$(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/c1x-6-7-8.c
-#$(DIST_DIR)/kcc -o ./a.out -s -d tests/unitTests/tesetQualifiers.c
-#$(DIST_DIR)/kcc -o ./a.out -s $(C_DIR)/twoFile1.c $(C_DIR)/twoFile2.c
-#@DEBUG=1 ./a.out
-	$(DIST_DIR)/kcc -d -s -o ./a.out programs/base64.c
-	@DEBUG=1 ./a.out
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge03.c
-# ./a.out	
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge04.c
-# ./a.out	
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/challenge05.c
-# ./a.out	
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/schorr-waite.c
-# ./a.out
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/globals.c
-# @./a.out
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/arr.c
-# @./a.out
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/arithConversions.c
-# @./a.out
-# $(DIST_DIR)/kcc -o ./a.out -d -s $(C_DIR)/differentInits.c
-# @./a.out
-
-#$(DIST_DIR)/dist.tested
 
 filter: $(OUTPUT_FILTER)
 

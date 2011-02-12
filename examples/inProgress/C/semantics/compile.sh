@@ -27,7 +27,6 @@ addOption "-v" "Prints version information"
 addOption "-w" "Ignored"
 
 oval=
-gflag=
 warnFlag=
 myDirectory=`dirname $0`
 inputFile=
@@ -54,15 +53,12 @@ function usage {
 }
 
 function getoptsFunc {
-	while getopts ':cdg:o:vsw' OPTION
+	while getopts ':cdo:vsw' OPTION
 	do
 		case $OPTION in
 		c)	compileOnlyFlag="-c"
 			;;
 		d)	dumpFlag="-d"
-			;;
-		g)	gflag=1
-			gval="$OPTARG"
 			;;
 		o)	oflag=1
 			oval="$OPTARG"
@@ -158,15 +154,9 @@ do
 	maudeInput=$inputDirectory/$baseName.gen.maude
 	localOval="$baseName.o"
 	set -o errexit
-	
-	if [ "$gflag" ]; then
-		garg="-g $gval"
-	else 
-		garg=""
-	fi
 
 	set +o errexit
-	$myDirectory/compileProgram.sh $garg $warnFlag $dumpFlag $inputFile
+	$myDirectory/compileProgram.sh $warnFlag $dumpFlag $inputFile
 	if [ "$?" -ne 0 ]; then
 		die "compilation failed" 3
 	fi

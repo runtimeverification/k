@@ -88,11 +88,13 @@ let rec concatN n s =
 let printCell (name : string) (attribs) (contents : string) =
 	" <" ^ name ^ (printAttribs attribs) ^ ">" ^ contents ^ "</" ^ name ^ "> "
 	
-let printList f x =
+let printFlatList f x =
 	List.fold_left (fun aux arg -> aux ^ "" ^ (f arg)) "" x
 
 let wrap (d1) (d2) = 	
-	printCell d2 [] (printList (fun x -> x) d1)
+	printCell d2 [] (printFlatList (fun x -> x) d1)
+let printList f x =
+	wrap [List.fold_left (fun aux arg -> aux ^ "" ^ (f arg)) "" x] "List"
 
 let toString s =
 	"\"" ^ (escape_string s) ^ "\""
@@ -125,11 +127,11 @@ and printDef def =
 		| ONLYTYPEDEF (a, b) -> 
 			printDefinitionLoc (wrap ((printSpecifier a) :: []) "OnlyTypedef") b
 		| GLOBASM (a, b) ->
-			printDefinitionLoc (wrap (a :: []) "GlobAsm") b
+			printDefinitionLoc (wrap ((printRawString a) :: []) "GlobAsm") b
 		| PRAGMA (a, b) ->
 			printDefinitionLoc (wrap ((printExpression a) :: []) "Pragma") b
 		| LINKAGE (a, b, c) ->
-			printDefinitionLoc (wrap (a :: (printDefs c) :: []) "Linkage") b
+			printDefinitionLoc (wrap ((printRawString a) :: (printDefs c) :: []) "Linkage") b
 		| TRANSFORMER (a, b, c) ->
 			printDefinitionLoc (wrap ((printDef a) :: (printDefs b) :: []) "Transformer") c
 		| EXPRTRANSFORMER (a, b, c) ->
@@ -143,8 +145,9 @@ and printSingleName (a, b) =
 	wrap ((printSpecifier a) :: (printName b) :: []) "SingleName"
 and printAttr a b = wrap (a :: (printAttributeList b) :: []) "AttributeWrapper"
 and printBlock a = 
-	let blockNum = (string_of_int (counter := (!counter + 1); !counter)) in
-	let idCell = printCell "Id" [] blockNum in
+	let blockNum = ((counter := (!counter + 1); !counter)) in
+	let blockNumCell = (printRawInt blockNum) in
+	let idCell = printCell "BlockId" [] blockNumCell in
 	let block = 
 	wrap (idCell :: (printBlockLabels a.blabels) :: (printStatementList a.bstmts) :: []) "Block" in
 	(* printCell "Block" attribs ((printBlockLabels a.blabels) ^ (printStatementList a.bstmts)) in *)
@@ -392,7 +395,7 @@ and printExpression exp =
 	| NOTHING -> printCell "NothingExpression" [] ""
 	| PAREN (exp1) -> wrap ((printExpression exp1) :: []) "Paren"
 	| LABELADDR (s) -> wrap (s :: []) "GCCLabelOperator"
-	| QUESTION (exp1, exp2, exp3) -> wrap ((printExpression exp1) :: (printExpression exp2) :: (printExpression exp3) :: []) "_?_:_"
+	| QUESTION (exp1, exp2, exp3) -> wrap ((printExpression exp1) :: (printExpression exp2) :: (printExpression exp3) :: []) "Conditional"
 	(* special case below for the compound literals.  i don't know why this isn't in the ast... *)
 	| CAST ((spec, declType), initExp) -> 
 		let castPrinter x = wrap ((printSpecifier spec) :: (printDeclType declType) :: x :: []) "Cast" in
@@ -485,33 +488,37 @@ and printWhile exp stat =
 and printDoWhile exp stat =
 	wrap ((printExpression exp) :: (printStatement stat) :: []) "DoWhile"
 and printFor fc1 exp2 exp3 stat =
-	wrap ((string_of_int ((counter := (!counter + 1)); !counter)) :: (printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printStatement stat) :: []) "For"
+	let newForIdCell = printCell "ForId" [] (printRawInt ((counter := (!counter + 1)); !counter)) in
+	wrap (newForIdCell :: (printForClause fc1) :: (printExpression exp2) :: (printExpression exp3) :: (printStatement stat) :: []) "For"
 and printForClause fc = 
 	match fc with
 	| FC_EXP exp1 -> wrap ((printExpression exp1) :: []) "ForClauseExpression"
 	| FC_DECL dec1 -> wrap ((printDef dec1) :: []) "ForClauseDeclaration"
 and printBreak =
-	"Break"
+	printCell "Break" [] ""
 and printContinue =
-	"Continue"
+	printCell "Continue" [] ""
 and printReturn exp =
 	wrap ((printExpression exp) :: []) "Return"
 and printSwitch exp stat =
 	let newSwitchId = ((counter := (!counter + 1)); !counter) in
 	switchStack := newSwitchId :: !switchStack;
 	currentSwitchId := newSwitchId;
-	let idCell = printCell "Id" [] (string_of_int newSwitchId) in
+	let idCell = printCell "SwitchId" [] (printRawInt newSwitchId) in
 	let retval = wrap (idCell :: (printExpression exp) :: (printStatement stat) :: []) "Switch" in
 	(* printCell "Switch" [Attrib ("id", string_of_int newSwitchId)] (printList (fun x -> x) ((printExpression exp) :: (printStatement stat) :: [])) in *)
 	switchStack := List.tl !switchStack;
 	currentSwitchId := List.hd !switchStack;
 	retval 
 and printCase exp stat =
-	wrap ((string_of_int !currentSwitchId) :: (string_of_int (counter := (!counter + 1); !counter)) :: (printExpression exp) :: (printStatement stat) :: []) "Case"
+	let switchIdCell = printCell "SwitchId" [] (printRawInt !currentSwitchId) in
+	let caseIdCell = printCell "CaseId" [] (printRawInt (counter := (!counter + 1); !counter)) in
+	wrap (switchIdCell :: caseIdCell :: (printExpression exp) :: (printStatement stat) :: []) "Case"
 and printCaseRange exp1 exp2 stat =
 	wrap ((printExpression exp1) :: (printExpression exp2) :: (printStatement stat) :: []) "CaseRange"
 and printDefault stat =
-	wrap ((string_of_int !currentSwitchId) :: (printStatement stat) :: []) "Default"
+	let switchIdCell = printCell "SwitchId" [] (printRawInt !currentSwitchId) in
+	wrap (switchIdCell :: (printStatement stat) :: []) "Default"
 and printLabel str stat =
 	wrap ((printIdentifier str) :: (printStatement stat) :: []) "Label"	
 and printGoto name =
@@ -560,11 +567,11 @@ and printEnumItemList a =
 and printBlockLabels a =
 	printList (fun x -> x) a
 and printAttribute (a, b) =
-	wrap (("\"" ^ a ^ "\"") :: (printExpressionList b) :: []) "Attribute"
+	wrap ((printRawString a) :: (printExpressionList b) :: []) "Attribute"
 and printEnumItem (str, expression, cabsloc) =
 	wrap ((wrap ((printIdentifier str) :: (printExpression expression) :: []) "EnumItem") :: (printCabsLoc cabsloc) :: []) "EnumItemLoc"
 and printSpecifier a =
-	wrap (printSpecElemList a :: []) "Specifiers"
+	wrap (printSpecElemList a :: []) "Specifier"
 and printSpecElemList a =
 	printList printSpecElem a
 and printSingleNameList a =

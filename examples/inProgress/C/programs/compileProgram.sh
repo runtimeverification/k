@@ -28,24 +28,21 @@ fi
 set -o errexit
 #echo $READLINK
 K_MAUDE_BASE=`$READLINK -f $myDirectory/../../../..`
-K_PROGRAM_COMPILE="$K_MAUDE_BASE/tools/kcompile-program.sh"
+#K_PROGRAM_COMPILE="$K_MAUDE_BASE/tools/kcompile-program.sh"
+K_PROGRAM_COMPILE="perl $myDirectory/xmlToK.pl"
 
 set -o nounset
 #trap cleanup SIGHUP SIGINT SIGTERM
 username=`id -un`
 compilationLog=`mktemp -t $username-fsl-c-log.XXXXXXXXXXX`
 dflag=
-gflag=
 nowarn=0
 usage="Usage: %s: [-d] inputFileName\n"
 
-while getopts 'g:dw' OPTION
+while getopts 'dw' OPTION
 do
 	case $OPTION in
 	d)	dflag=1
-		;;
-	g)	gflag=1
-		gval="$OPTARG"
 		;;
 	w)	nowarn=1
 		;;
@@ -65,15 +62,9 @@ if [ ! -e $directoryname$filename.c ]; then
 	die "$filename.c not found" 4
 fi
 
-# perl $myDirectory/embed.pl -d=ML -o=$filename.prepre.gen $directoryname$filename.c
-# if [ "$?" -ne 0 ]; then 
-	# die "Error generating ML annotations." 5
-# fi
-
 # this instead of above
 cp $directoryname$filename.c $filename.prepre.gen
 
-#gcc $PEDANTRY_OPTIONS $GCC_OPTIONS -E -iquote "." -iquote "$directoryname" -I "$myDirectory/includes" $filename.prepre.gen $myDirectory/includes/clib.h > $filename.pre.gen 2> $filename.warnings.log
 set +o errexit
 gcc $PEDANTRY_OPTIONS $GCC_OPTIONS -E -iquote "." -iquote "$directoryname" -I "$myDirectory/includes" $filename.prepre.gen > $filename.pre.gen 2> $filename.warnings.log
 if [ "$?" -ne 0 ]; then 
@@ -86,13 +77,11 @@ fi
 #echo "done with gcc"
 if [ ! "$dflag" ]; then
 	rm -f $filename.prepre.gen
-# else
-#	$ACTUAL_CIL $CIL_FLAGS --out $filename.cil $filename.pre.gen
 fi
 set +o errexit
-$myDirectory/cparser $filename.pre.gen 2> $filename.warnings.log 1> $filename.gen.maude.tmp 
+$myDirectory/cparser --xml $filename.pre.gen 2> $filename.warnings.log 1> $filename.gen.xml.tmp 
 if [ "$?" -ne 0 ]; then 
-	rm -f $filename.gen.maude.tmp
+	rm -f $filename.gen.xml.tmp
 	msg="Error running C parser: `cat $filename.warnings.log`"
 	rm -f $filename.warnings.log
 	die "$msg" 7
@@ -101,65 +90,58 @@ set -o errexit
 if [ ! "$nowarn" ]; then
 	cat $filename.warnings.log >&2
 fi
-#echo "done with cil"
 if [ ! "$dflag" ]; then
 	rm -f $filename.warnings.log
 	rm -f $filename.pre.gen
 fi
-mv $filename.gen.maude.tmp $filename.gen.maude
+mv $filename.gen.xml.tmp $filename.gen.xml
 
-modelCheck=
+# modelCheck=
+# set +o errexit
+# grep -q 'START MODEL-CHECKING' "$directoryname$filename.c"
+# retval="$?"
+# if [ "$retval" -eq 0 ]; then 
+	# modelCheck=1
+# fi
+# set -o errexit
+
+# echo "load $myDirectory/c-total" > program-$filename-gen.maude
+# echo "mod C-PROGRAM is" >> program-$filename-gen.maude
+# echo "including C-SYNTAX ." >> program-$filename-gen.maude
+# echo "including MATCH-C-SYNTAX ." >> program-$filename-gen.maude
+# echo "including COMMON-C-CONFIGURATION ." >> program-$filename-gen.maude
+# cat $filename.gen.maude >> program-$filename-gen.maude
+# if [ $modelCheck ]; then
+	# startModel=`grep -n "START MODEL-CHECKING" $directoryname$filename.c | sed 's/^\([0-9]*\):.*$/\1/'`
+	# #echo $startModel
+	# startModel=$(($startModel + 1))
+	# endModel=`grep -n "END MODEL-CHECKING" $directoryname$filename.c | sed 's/^\([0-9]*\):.*$/\1/'`
+	# #echo $endModel
+	# endModel=$(($endModel - 1))
+	# #echo "start = $startModel"
+	# #echo "end = $endModel"
+	# modelModule=`sed -n $startModel,${endModel}p $directoryname$filename.c`
+	# echo -e "$modelModule" >> program-$filename-gen.maude
+# fi
+# if [ ! "$dflag" ]; then
+	# rm -f $filename.gen.maude
+# fi
+# echo -e "endm\n" >> program-$filename-gen.maude
+
 set +o errexit
-grep -q 'START MODEL-CHECKING' "$directoryname$filename.c"
-retval="$?"
-if [ "$retval" -eq 0 ]; then 
-	modelCheck=1
-fi
-set -o errexit
-
-echo "load $myDirectory/c-total" > program-$filename-gen.maude
-echo "mod C-PROGRAM is" >> program-$filename-gen.maude
-echo "including C-SYNTAX ." >> program-$filename-gen.maude
-echo "including MATCH-C-SYNTAX ." >> program-$filename-gen.maude
-echo "including COMMON-C-CONFIGURATION ." >> program-$filename-gen.maude
-cat $filename.gen.maude >> program-$filename-gen.maude
-if [ $modelCheck ]; then
-	startModel=`grep -n "START MODEL-CHECKING" $directoryname$filename.c | sed 's/^\([0-9]*\):.*$/\1/'`
-	#echo $startModel
-	startModel=$(($startModel + 1))
-	endModel=`grep -n "END MODEL-CHECKING" $directoryname$filename.c | sed 's/^\([0-9]*\):.*$/\1/'`
-	#echo $endModel
-	endModel=$(($endModel - 1))
-	#echo "start = $startModel"
-	#echo "end = $endModel"
-	modelModule=`sed -n $startModel,${endModel}p $directoryname$filename.c`
-	echo -e "$modelModule" >> program-$filename-gen.maude
-fi
-if [ ! "$dflag" ]; then
-	rm -f $filename.gen.maude
-fi
-echo -e "endm\n" >> program-$filename-gen.maude
-
-set +o errexit
-if [ "$gflag" ]; then
-	$K_PROGRAM_COMPILE $gval C C-PROGRAM program-$escapedFilename > $compilationLog
-	PROGRAMRET=$?
-else
-	$K_PROGRAM_COMPILE program-$filename-gen.maude C C-PROGRAM program-$escapedFilename > $compilationLog
-	PROGRAMRET=$?
-fi
+# $K_PROGRAM_COMPILE program-$filename-gen.maude C C-PROGRAM program-$escapedFilename > $compilationLog
+cat $filename.gen.xml | $K_PROGRAM_COMPILE 2> $compilationLog 1> program-$filename-compiled.maude
+PROGRAMRET=$?
 set -o errexit
 if [ "$PROGRAMRET" -ne 0 ]; then
 	msg="Error compiling program: `cat $compilationLog`"
 	rm -f $compilationLog
 	die "$msg" 8
 fi
-if [ "$escapedFilename" != "$filename" ]; then 
-	mv program-$escapedFilename-compiled.maude program-$filename-compiled.maude
-fi
-if [ ! "$dflag" ]; then
-	rm -f program-$filename-gen.maude
-fi
+# if [ "$escapedFilename" != "$filename" ]; then 
+	# mv program-$escapedFilename-compiled.maude program-$filename-compiled.maude
+# fi
+
 sed -e '1 d' program-$filename-compiled.maude > program-$filename-compiled.maude.tmp
 mv program-$filename-compiled.maude.tmp program-$filename-compiled.maude
 

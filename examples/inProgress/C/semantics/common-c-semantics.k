@@ -269,6 +269,8 @@ kmod COMMON-SEMANTIC-SYNTAX is
 		l('qualifiedType)
 	)
 	
+	---ceq TranslationUnit(S:String, L:List{C}, S':String) = TranslationUnit(S:String, L:List{C}, "") if S':String =/=Bool ""
+	
 	op bind : List{C} List{Type} -> K 
 	op tv : List{K} Type -> Value 
 	op concretize : Type K -> K [metadata "strict(2)"] 

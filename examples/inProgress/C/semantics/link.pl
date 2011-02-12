@@ -39,6 +39,7 @@ foreach my $program (@programs){
 print "op linked-program : -> K .\n";
 print "eq linked-program = ";
 print "('Program).KProperLabel(";
+#print '_`(_`)(kList(("wklist_").String),';
 print "('_::_).KHybridLabel(";
 printNested(@programNames);
 print ')';

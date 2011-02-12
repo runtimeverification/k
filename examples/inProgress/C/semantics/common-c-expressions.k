@@ -479,7 +479,9 @@ and ll or LL
 	--- ceq 0 ^Rat I:Int = 0
 		--- if I:Int <Int 0 
 	
-	eq HexFloatConstant(?, ?, ?, F:Float) = DecimalFloatConstant(F:Float) 
+	--- FIXME
+	--- eq HexFloatConstant(?, ?, ?, F:Float) = DecimalFloatConstant(F:Float) 
+	
 	--- ceq HexFloatConstant(SigWhole:Nat, SigFrac:NzNat, Exp:Int) 
 		--- = DecimalFloatConstant(Rat2Float((SigWhole:Nat +Rat (1 /Rat SigFrac:NzNat)) *Rat (2 ^Rat Exp:Int)))
 		--- if SigFrac:NzNat =/=Bool 0 
@@ -488,12 +490,13 @@ and ll or LL
 		--- if SigFrac:Nat ==Bool 0 
 	
 	---C99 6.4.4.2:4 An unsuffixed floating constant has type double. If suffixed by the letter f or F, it has type float. If suffixed by the letter l or L, it has type long double
-	rule NoSuffix(DecimalFloatConstant(F:Float)) => tv(F:Float, double)
-		[structural] 
-	rule L(DecimalFloatConstant(F:Float)) => tv(F:Float, long-double)
-		[structural] 
-	rule F(DecimalFloatConstant(F:Float)) => tv(F:Float, float)
-		[structural] 
+	---FIXME
+	--- rule NoSuffix(DecimalFloatConstant(F:Float)) => tv(F:Float, double)
+		--- [structural] 
+	--- rule L(DecimalFloatConstant(F:Float)) => tv(F:Float, long-double)
+		--- [structural] 
+	--- rule F(DecimalFloatConstant(F:Float)) => tv(F:Float, float)
+		--- [structural] 
 
 endkm
 
