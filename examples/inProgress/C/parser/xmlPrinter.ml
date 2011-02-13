@@ -263,6 +263,8 @@ and printRawFloat f =
 	printBuiltin "Float" (string_of_float f)
 and printRawInt i =
 	printBuiltin "Int" (string_of_int i)
+and printRawInt64 i =
+	printBuiltin "Int" (Int64.to_string i)
 and string_of_list_of_int64 (xs : int64 list) =
 	let length = List.length xs in
 	let buffer = Buffer.create length in
@@ -312,12 +314,8 @@ and printHexFloatConstant f =
 	let significand = wholePart ^ "." ^ fractionalPart in
 	let approx = float_of_string ("0x" ^ significand) in
 	let approx = approx *. (2. ** (float_of_int exponentPart)) in
-	(* let wholePart = printRawInt (int_of_string ("0x" ^ wholePart)) in
-	let fractionalPart = printRawInt (int_of_string ("0x" ^ fractionalPart)) in *)
 	let exponentPart = printRawInt exponentPart in
 	let significandPart = printRawString significand in
-	(* let wholePart = printCell "WholePart" [] wholePart in
-	let fractionalPart = printCell "FractionalHexPart" [] fractionalPart in *)
 	let significandPart = printCell "Significand" [] significandPart in
 	let exponentPart = printCell "Exponent" [] exponentPart in
 	let approxPart = printRawFloat approx in
@@ -349,12 +347,8 @@ and printDecFloatConstant f =
 	let approx = approx *. (10. ** (float_of_int exponentPart)) in
 	
 	let significandPart = printRawString significand in
-	(* let wholePart = printRawInt (int_of_string wholePart) in
-	let fractionalPart = printRawInt (int_of_string fractionalPart) in *)
 	let exponentPart = printRawInt exponentPart in
 	let approxPart = printRawFloat approx in
-	(* let wholePart = printCell "WholePart" [] wholePart in
-	let fractionalPart = printCell "FractionalPart" [] fractionalPart in *)
 	let significandPart = printCell "Significand" [] significandPart in
 	let exponentPart = printCell "Exponent" [] exponentPart in
 	(wrap (significandPart :: exponentPart :: approxPart :: []) "DecimalFloatConstant")
@@ -373,14 +367,14 @@ and printFloatLiteral r =
 	| "L" :: [] -> wrap (num :: []) "L"
 	| [] -> wrap (num :: []) "NoSuffix"
 and printHexConstant (i : string) =
-	let inDec = int_of_string ("0x" ^ i) in
-	wrap [printRawInt inDec] "HexConstant"
+	let inDec = Int64.of_string ("0x" ^ i) in
+	wrap [printRawInt64 inDec] "HexConstant"
 and printOctConstant (i : string) =
-	let inDec = int_of_string ("0o" ^ i) in
-	wrap [printRawInt inDec] "OctalConstant"
+	let inDec = Int64.of_string ("0o" ^ i) in
+	wrap [printRawInt64 inDec] "OctalConstant"
 and printDecConstant (i : string) =
-	let inDec = int_of_string i in
-	wrap [printRawInt inDec] "DecimalConstant"
+	let inDec = Int64.of_string i in
+	wrap [printRawInt64 inDec] "DecimalConstant"
 and printIntLiteral i =
 	let (tag, i) = splitInt ([], i) in
 	let num = (
@@ -412,7 +406,9 @@ and printExpression exp =
 	(* special case below for the compound literals.  i don't know why this isn't in the ast... *)
 	| CAST ((spec, declType), initExp) -> 
 		let castPrinter x = wrap ((printSpecifier spec) :: (printDeclType declType) :: x :: []) "Cast" in
-		let compoundLiteralPrinter x = wrap ((string_of_int ((counter := (!counter + 1)); !counter)) :: (printSpecifier spec) :: (printDeclType declType) :: x :: []) "CompoundLiteral"
+		let id = (counter := (!counter + 1)); !counter in
+		let compoundLiteralIdCell = printCell "CompoundLiteralId" [] (printRawInt id) in
+		let compoundLiteralPrinter x = wrap (compoundLiteralIdCell :: (printSpecifier spec) :: (printDeclType declType) :: x :: []) "CompoundLiteral"
 		in printInitExpressionForCast initExp castPrinter compoundLiteralPrinter
 		(* A CAST can actually be a constructor expression *)
 	| CALL (exp1, expList) -> wrap ((printExpression exp1) :: (printExpressionList expList) :: []) "Call"
