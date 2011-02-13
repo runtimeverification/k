@@ -79,9 +79,9 @@ if [ ! "$dflag" ]; then
 	rm -f $filename.prepre.gen
 fi
 set +o errexit
-$myDirectory/cparser --xml $filename.pre.gen 2> $filename.warnings.log 1> $filename.gen.xml.tmp 
+$myDirectory/cparser --xml $filename.pre.gen 2> $filename.warnings.log 1> $filename.gen.parse.tmp
 if [ "$?" -ne 0 ]; then 
-	rm -f $filename.gen.xml.tmp
+	rm -f $filename.gen.parse.tmp
 	msg="Error running C parser: `cat $filename.warnings.log`"
 	rm -f $filename.warnings.log
 	die "$msg" 7
@@ -94,7 +94,7 @@ if [ ! "$dflag" ]; then
 	rm -f $filename.warnings.log
 	rm -f $filename.pre.gen
 fi
-mv $filename.gen.xml.tmp $filename.gen.xml
+mv $filename.gen.parse.tmp $filename.gen.parse
 
 # modelCheck=
 # set +o errexit
@@ -130,7 +130,7 @@ mv $filename.gen.xml.tmp $filename.gen.xml
 
 set +o errexit
 # $K_PROGRAM_COMPILE program-$filename-gen.maude C C-PROGRAM program-$escapedFilename > $compilationLog
-cat $filename.gen.xml | $K_PROGRAM_COMPILE 2> $compilationLog 1> program-$filename-compiled.maude
+cat $filename.gen.parse | $K_PROGRAM_COMPILE 2> $compilationLog 1> program-$filename-compiled.maude
 PROGRAMRET=$?
 set -o errexit
 if [ "$PROGRAMRET" -ne 0 ]; then
