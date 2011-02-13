@@ -61,10 +61,13 @@ kmod META-MODEL is including OCL-SOLVER
                 </T>
 
 rule [add-instance-name-to-K-cell] : 
+<instance_>
 <name> objName:Id </name>
+<ofClass> _ </ofClass>
+<attributes> _ </attributes>
 <checked> false => true </checked> 
-<K> l:List{K} => objName:Id ,, l:List{K} </K>
-
+<_/instance> 
+<K> . => objName:Id  </K>
 endkm
 
 
