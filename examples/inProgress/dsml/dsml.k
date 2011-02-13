@@ -19,9 +19,9 @@ endkm
 */
 kmod META-MODEL is including OCL-SOLVER
 
-  syntax Id ::= object
+  syntax Id ::= object | 'a | 'b | 'A | 'B
 
-  syntax K ::= Id | undefined | Bool
+  syntax K ::= Id | undefined | Bool 
 
   syntax ListItem ::= Id : KLabel [prec 20] | Formula
 
@@ -48,7 +48,8 @@ kmod META-MODEL is including OCL-SOLVER
                     </classes>
                     <oclConstraints> .List </oclConstraints>
                   </metamodel*>
-                  <model> /*Vlad: removed <models*>, replaced <model*> by <model>, to allow for one model only */
+                 <models>
+                   <model*> 
                       <modelName> undefined </modelName> /*Vlad: added model name*/
                       <instance*>
                          <instName> undefined </instName>
@@ -56,26 +57,43 @@ kmod META-MODEL is including OCL-SOLVER
                          <attributes> .Map </attributes>
                          <checked> false </checked> /*Vlad: added "checked" field*/
                       </instance*>
-                  </model>
+                   </model*>
+                 </models>
                 <k> .K </k> /*Vlad: added K cell for checking conformance */
                 </T>
 
 rule [add-instance-name-to-K-cell] : 
-  <model_>
-    <modelName> objName:Id </modelName>
     <instance_>
-      <checked> false => true </checked> 
+       <instName> objName:Id </instName>
+       <checked> false => true </checked> 
     <_/instance> 
-  <_/model>
-  <k> . => objName  </k>  /*or should it be <K> l:list{K} => objName:Id ,, l </K> ? */
+  <k_>  . => objName  <_/k>  
 
   syntax Bag ::= testConfig
 
+/*
   macro testConfig =
   <T_>
-    <modelName> object  </modelName>
+    <instName> object  </instName>
     <checked> false </checked>
   <_/T>
+*/
+
+  macro testConfig = 
+  <T_>
+<model>
+      <modelName> object </modelName>
+      <instance_>
+                      <instName>  'a </instName>
+                         <checked> false </checked> 
+       <_/instance>
+       <instance_>
+                      <instName> 'b </instName>
+                       <checked> false </checked> 
+       <_/instance>
+</model>
+  <_/T>
+ 
 endkm
 
 

@@ -3,7 +3,7 @@
 KCOMPILE ?= ../../../tools/kompile.pl
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = META-MODEL
+LANGUAGE_NAME = META-MODEL-TEST
 
 # this are all interesting modules (used to latexify)
 #LANGUAGE_MODULES = 
@@ -11,7 +11,7 @@ LANGUAGE_NAME = META-MODEL
 LATEX_STYLE = bb
 
 # this is the basename of the main file
-MAIN_FILE = dsml
+MAIN_FILE = dsml-test
 
 # these are additional files that when changed will force rebuilding the semantics
 #ADDITIONAL_DEPENDENCIES = 
