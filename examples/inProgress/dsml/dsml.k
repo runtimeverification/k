@@ -21,7 +21,7 @@ kmod META-MODEL is including OCL-SOLVER
 
   syntax Id ::= object
 
-  syntax K ::= Id | undefined  
+  syntax K ::= Id | undefined 
 
   syntax ListItem ::= Id : KLabel [prec 20] | Formula
 
@@ -38,6 +38,7 @@ kmod META-MODEL is including OCL-SOLVER
 
   configuration <T> 
                   <metamodel*>
+                    <name> undefined </name> /*Vlad: added metamodel name*/
                     <classes>
                       <class*>
                          <className> Id:Id </className>
@@ -47,17 +48,29 @@ kmod META-MODEL is including OCL-SOLVER
                     </classes>
                     <oclConstraints> .List </oclConstraints>
                   </metamodel*>
-                  <models*>
-                    <model*>
+                  <model> /*Vlad: removed <models*>, replaced <model*> by <model>, to allow for one model only */
+                      <name> undefined </name> /*Vlad: added model name*/
                       <instance*>
                          <name> undefined </name>
                          <ofClass> undefined </ofClass>
                          <attributes> .Map </attributes>
+                         <checked> false </checked> /*Vlad: added "checked" field*/
                       </instance*>
-                    </model*>
-                  </models*>
+                  </model>
+                <K> .K </K> /*Vlad: added K cell for checking conformance */
                 </T>
+
+rule [add-instance-name-to-K-cell] : 
+<name> objName:Id </name>
+<checked> false => true </checked> 
+<K> l:List{K} => objName:Id ,, l:List{K} </K>
+
 endkm
+
+
+
+
+
 
 
 /* 
