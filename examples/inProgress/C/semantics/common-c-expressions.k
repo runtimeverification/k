@@ -376,20 +376,20 @@ and ll or LL
 		fi fi fi
 		[structural] 
 		
-	--- op simplifyForHex : String -> String 
-	--- ceq simplifyForHex(S:String) = simplifyForHex(butFirstChar(S:String))
-		--- if firstChar(S:String) ==Bool "0"
-		--- andBool lengthString(S:String) >Nat 1 
-	--- ceq simplifyForHex(S:String) = S:String
-		--- if firstChar(S:String) =/=Bool "0" 
-		--- orBool lengthString(S:String) ==Bool 1 
+	op simplifyForHex : String -> String 
+	ceq simplifyForHex(S:String) = simplifyForHex(butFirstChar(S:String))
+		if firstChar(S:String) ==Bool "0"
+		andBool lengthString(S:String) >Nat 1 
+	ceq simplifyForHex(S:String) = S:String
+		if firstChar(S:String) =/=Bool "0" 
+		orBool lengthString(S:String) ==Bool 1 
 		
 		
 	op hexOrOctalConstant : K -> K 
-	---eq HexConstant(S:String) = hexOrOctalConstant(String2Rat(simplifyForHex(S:String), 16)) 
-	eq HexConstant(I:Int) = hexOrOctalConstant(I:Int)
-	---eq OctalConstant(I:Int) = hexOrOctalConstant(truncRat(String2Rat(Rat2String(I:Int, 10), 8))) 
-	eq OctalConstant(I:Int) = hexOrOctalConstant(I:Int)
+	eq HexConstant(S:String) = hexOrOctalConstant(String2Rat(simplifyForHex(S:String), 16)) 
+	--- eq HexConstant(I:Int) = hexOrOctalConstant(I:Int)
+	eq OctalConstant(N:Nat) = hexOrOctalConstant(truncRat(String2Rat(Rat2String(N:Nat, 10), 8))) --- truncRat is just for sorts
+	--- eq OctalConstant(I:Int) = hexOrOctalConstant(I:Int)
 	
 	rule NoSuffix(hexOrOctalConstant(I:Int)) =>
 		if ((I:Int <=Int max(int)) andBool (I:Int >=Int min(int))) then tv(I:Int, int) else

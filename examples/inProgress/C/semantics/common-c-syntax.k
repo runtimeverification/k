@@ -641,7 +641,7 @@ and constant =
 	| CONST_STRING of string
 	| CONST_WSTRING of int64 list 
 ***)
-	op DecimalConstant : Int -> IntConstant --- new
+	op DecimalConstant : K -> IntConstant --- new
 	op OctalConstant : K -> IntConstant --- new
 	op HexConstant : K -> IntConstant --- new --- expected to be string
 	

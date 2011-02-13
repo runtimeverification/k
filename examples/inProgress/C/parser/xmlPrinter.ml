@@ -1,6 +1,7 @@
 open Escape
 open Cabs
 open Base64
+open Big_int
 
 let counter = ref 0
 let currentSwitchId = ref 0
@@ -280,9 +281,11 @@ and printRawString s =
 and printRawFloat f =
 	printBuiltin "Float" (string_of_float f)
 and printRawInt i =
-	printBuiltin "Int" (string_of_int i)
-and printRawInt64 i =
-	printBuiltin "Int" (Int64.to_string i)
+	printRawIntString (string_of_int i)
+and printRawIntString s =
+	printBuiltin "Int" s
+(* and printRawInt64 i =
+	printBuiltin "Int" (Int64.to_string i) *)
 and string_of_list_of_int64 (xs : int64 list) =
 	let length = List.length xs in
 	let buffer = Buffer.create length in
@@ -385,14 +388,17 @@ and printFloatLiteral r =
 	| "L" :: [] -> wrap (num :: []) "L"
 	| [] -> wrap (num :: []) "NoSuffix"
 and printHexConstant (i : string) =
-	let inDec = Int64.of_string ("0x" ^ i) in
-	wrap [printRawInt64 inDec] "HexConstant"
+	(* let inDec = Int64.of_string ("0x" ^ i) in 
+	wrap [printRawInt64 inDec] "HexConstant" *)
+	wrap [printRawString i] "HexConstant"
 and printOctConstant (i : string) =
-	let inDec = Int64.of_string ("0o" ^ i) in
-	wrap [printRawInt64 inDec] "OctalConstant"
+	(* let inDec = Int64.of_string ("0o" ^ i) in
+	wrap [printRawInt64 inDec] "OctalConstant" *)
+	wrap [printRawIntString i] "OctalConstant"
 and printDecConstant (i : string) =
-	let inDec = Int64.of_string i in
-	wrap [printRawInt64 inDec] "DecimalConstant"
+	(* let inDec = Int64.of_string i in
+	wrap [printRawInt64 inDec] "DecimalConstant" *)
+	wrap [printRawIntString i] "DecimalConstant"
 and printIntLiteral i =
 	let (tag, i) = splitInt ([], i) in
 	let num = (
