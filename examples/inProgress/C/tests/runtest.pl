@@ -28,7 +28,7 @@ if ($flag eq "-f") {
 }
 my $directory = $ARGV[1];
 my $testSuite = $directory;
-my $outputFilename = "$directory.xml";
+my $outputFilename = "results-$directory.xml";
 
 my $globalTests = "";
 my $globalNumPassed = 0;
