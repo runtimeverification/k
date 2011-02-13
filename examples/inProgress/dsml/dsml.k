@@ -1,4 +1,4 @@
- in ../../../k-prelude
+ require ../../../k-prelude
 
 
 /*
@@ -21,7 +21,7 @@ kmod META-MODEL is including OCL-SOLVER
 
   syntax Id ::= object
 
-  syntax K ::= Id | undefined 
+  syntax K ::= Id | undefined | Bool
 
   syntax ListItem ::= Id : KLabel [prec 20] | Formula
 
@@ -49,26 +49,33 @@ kmod META-MODEL is including OCL-SOLVER
                     <oclConstraints> .List </oclConstraints>
                   </metamodel*>
                   <model> /*Vlad: removed <models*>, replaced <model*> by <model>, to allow for one model only */
-                      <name> undefined </name> /*Vlad: added model name*/
+                      <modelName> undefined </modelName> /*Vlad: added model name*/
                       <instance*>
-                         <name> undefined </name>
+                         <instName> undefined </instName>
                          <ofClass> undefined </ofClass>
                          <attributes> .Map </attributes>
                          <checked> false </checked> /*Vlad: added "checked" field*/
                       </instance*>
                   </model>
-                <K> .K </K> /*Vlad: added K cell for checking conformance */
+                <k> .K </k> /*Vlad: added K cell for checking conformance */
                 </T>
 
 rule [add-instance-name-to-K-cell] : 
-<instance_>
-<name> objName:Id </name>
-<ofClass> _ </ofClass>
-<attributes> _ </attributes>
-<checked> false => true </checked> 
-<_/instance> 
-<K> . => objName:Id  </K>
-/*or should it be <K> l:list{K} => objName:Id ,, l </K> ? */
+  <model_>
+    <modelName> objName:Id </modelName>
+    <instance_>
+      <checked> false => true </checked> 
+    <_/instance> 
+  <_/model>
+  <k> . => objName  </k>  /*or should it be <K> l:list{K} => objName:Id ,, l </K> ? */
+
+  syntax Bag ::= testConfig
+
+  macro testConfig =
+  <T_>
+    <modelName> object  </modelName>
+    <checked> false </checked>
+  <_/T>
 endkm
 
 
