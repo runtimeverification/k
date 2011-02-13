@@ -3,6 +3,7 @@ use XML::Parser;
 use XML::Twig;
 use File::Basename;
 use Encode;
+use MIME::Base64;
 binmode STDOUT, ":utf8";
 binmode STDIN, ":utf8";
 
@@ -119,6 +120,7 @@ if ($filename eq ""){
 }
 #$filename = basename($filename,  (".c"));
 #print decode_utf8(xmlToK($root));
+$filename = decode_base64($filename);
 
 print "mod C-program-$filename is including C .\n";
 print "op 'program-$filename : -> KLabel .\n";
@@ -214,10 +216,11 @@ sub escapeSingleCharacter {
 
 sub escapeString {
 	my ($str) = (@_);
+	my $decoded = decode_base64($str);
 	# my $octets = encode("ascii", $str, Encode::FB_CROAK);
 	#my $octets = decode('ascii', $str);
-	utf8::encode($str);
-	my @charArray = split(//, $str);
+	utf8::encode($decoded);
+	my @charArray = split(//, $decoded);
 	my @newArray = map(escapeSingleCharacter($_), @charArray) ;
 	# foreach my $char (@newArray){
 		# print "$char\n";

@@ -1,5 +1,6 @@
 open Escape
 open Cabs
+open Base64
 
 let counter = ref 0
 let currentSwitchId = ref 0
@@ -30,7 +31,7 @@ let escape_char = function
   | '\\' -> "\\\\"
   | ' ' .. '~' as printable -> String.make 1 printable
   | unprintable -> Printf.sprintf "\\%03o" (Char.code unprintable)
-
+  
 (* this is from cil *)
 let escape_string str =
   let length = String.length str in
@@ -67,19 +68,35 @@ let replace input output =
 type attribute =
 	Attrib of string * string
 
+(* 
 let escapeForXML str =
 	(replace "<" "&lt;"
 	(replace "\"" "&quot;" str))
 
+let myEscapeChars s = 
+	replace "\000" "\\\\0" s
+*)
+	
+(*
+let myEscapeChars s = 
+	if (String.length s = 0) then "" else (
+		(myEscapeChar s.[0]) ^ myEscapeChars
+	)
+	for i=1 to (String.length s - 1) do 
+		if ((Char.code s.[i]) = 0) then (s.[i] <- "\\0") 
+	done
+*)
+	
 let cdata (str : string) =
-	let str = replace "]]>" "]]]]><![CDATA[>" str (* escapes "]]>" *)
-	in
+	(* let str = replace "]]>" "]]]]><![CDATA[>" str in *) (* escapes "]]>" *)
+	(* let str = replace null "\\0" str in *)
+	(* let str = String.escaped str in *)
 	"<![CDATA[" ^ str ^ "]]>"
 
 let rec printAttribs (attribs) =
 	match attribs with 
 		| Attrib (name, data) :: xs -> 
-			" " ^ name ^ "=\"" ^ (escapeForXML data) ^ "\"" ^ printAttribs xs
+			" " ^ name ^ "=\"" ^ data ^ "\"" ^ printAttribs xs
 		| [] -> ""
 	
 let rec concatN n s =
@@ -95,16 +112,12 @@ let wrap (d1) (d2) =
 	printCell d2 [] (printFlatList (fun x -> x) d1)
 let printList f x =
 	wrap [List.fold_left (fun aux arg -> aux ^ "" ^ (f arg)) "" x] "List"
-
-let toString s =
-	"\"" ^ (escape_string s) ^ "\""
-
 	
 (* this is where the recursive printer starts *)
 	
 let rec cabsToXML ((filename, defs) : file) (sourceCode : string) = 
 (* encoding="utf-8"  *)
-	"<?xml version=\"1.0\" ?>\n" ^
+	"<?xml version=\"1.1\" encoding=\"utf-8\" ?>\n" ^
 	printTranslationUnit filename sourceCode defs
 			
 and printTranslationUnit (filename : string) (sourceCode : string) defs =
@@ -259,7 +272,11 @@ and printExpressionList defs =
 and printBuiltin (sort : string) (data : string) =
 	printCell "RawData" [Attrib("sort", sort)] (cdata data)
 and printRawString s =
-	printBuiltin "String" s
+	printBuiltin "String" (Base64.encode_string s)
+(* &#38; *)
+
+(* Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF] *)
+	
 and printRawFloat f =
 	printBuiltin "Float" (string_of_float f)
 and printRawInt i =
@@ -427,7 +444,7 @@ and printExpression exp =
 	| MEMBEROF (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Dot"
 	| MEMBEROFPTR (exp, fld) -> wrap ((printExpression exp) :: (printIdentifier fld) :: []) "Arrow"
 	| GNU_BODY block -> wrap ((printBlock block) :: []) "GnuBody"
-	| EXPR_PATTERN s -> wrap ((toString s) :: []) "ExpressionPattern"
+	| EXPR_PATTERN s -> wrap ((printRawString s) :: []) "ExpressionPattern"
 and getUnaryOperator op =
 	let name = (
 	match op with
