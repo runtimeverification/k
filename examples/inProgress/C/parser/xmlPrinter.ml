@@ -103,7 +103,7 @@ let toString s =
 (* this is where the recursive printer starts *)
 	
 let rec cabsToXML ((filename, defs) : file) (sourceCode : string) = 
-(* encoding=\"utf-8\"  *)
+(* encoding="utf-8"  *)
 	"<?xml version=\"1.0\" ?>\n" ^
 	printTranslationUnit filename sourceCode defs
 			
@@ -259,7 +259,7 @@ and printExpressionList defs =
 and printBuiltin (sort : string) (data : string) =
 	printCell "RawData" [Attrib("sort", sort)] (cdata data)
 and printRawString s =
-	printBuiltin "String" (Extlib.ExtUTF8.UTF8.to_string s)
+	printBuiltin "String" s
 and printRawFloat f =
 	printBuiltin "Float" (string_of_float f)
 and printRawInt i =
