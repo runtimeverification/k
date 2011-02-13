@@ -68,6 +68,7 @@ rule [add-instance-name-to-K-cell] :
 <checked> false => true </checked> 
 <_/instance> 
 <K> . => objName:Id  </K>
+/*or should it be <K> l:list{K} => objName:Id ,, l </K> ? */
 endkm
 
 
