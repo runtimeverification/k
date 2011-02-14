@@ -22,9 +22,10 @@ function addOption {
 addOption "-c" "Compile and assemble, but do not link"
 addOption "-d" "Does not delete intermediate files"
 addOption "-o <file>" "Place the output into <file>"
-addOption "-s" "Ignored"
+addOption "-s" "Does not link against the standard library"
 addOption "-v" "Prints version information"
-addOption "-w" "Ignored"
+addOption "-w" "Does not print warning messages"
+addOption "-l <name>" "Ignored"
 
 oval=
 warnFlag=
@@ -53,13 +54,14 @@ function usage {
 }
 
 function getoptsFunc {
-	while getopts ':cdo:vsw' OPTION
+	while getopts ':cdl:o:vsw' OPTION
 	do
 		case $OPTION in
 		c)	compileOnlyFlag="-c"
 			;;
 		d)	dumpFlag="-d"
 			;;
+		l)	;;
 		o)	oflag=1
 			oval="$OPTARG"
 			;;

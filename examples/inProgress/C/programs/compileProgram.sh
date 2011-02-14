@@ -123,9 +123,7 @@ mv $filename.gen.parse.tmp $filename.gen.parse
 	# modelModule=`sed -n $startModel,${endModel}p $directoryname$filename.c`
 	# echo -e "$modelModule" >> program-$filename-gen.maude
 # fi
-# if [ ! "$dflag" ]; then
-	# rm -f $filename.gen.maude
-# fi
+
 # echo -e "endm\n" >> program-$filename-gen.maude
 
 set +o errexit
@@ -133,14 +131,14 @@ set +o errexit
 cat $filename.gen.parse | $K_PROGRAM_COMPILE 2> $compilationLog 1> program-$filename-compiled.maude
 PROGRAMRET=$?
 set -o errexit
+if [ ! "$dflag" ]; then
+	rm -f $filename.gen.parse
+fi
 if [ "$PROGRAMRET" -ne 0 ]; then
 	msg="Error compiling program: `cat $compilationLog`"
 	rm -f $compilationLog
 	die "$msg" 8
 fi
-# if [ "$escapedFilename" != "$filename" ]; then 
-	# mv program-$escapedFilename-compiled.maude program-$filename-compiled.maude
-# fi
 
 sed -e '1 d' program-$filename-compiled.maude > program-$filename-compiled.maude.tmp
 mv program-$filename-compiled.maude.tmp program-$filename-compiled.maude
