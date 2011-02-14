@@ -279,7 +279,9 @@ and printRawString s =
 (* Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF] *)
 	
 and printRawFloat f =
-	printBuiltin "Float" (string_of_float f)
+	printRawFloatString (string_of_float f)
+and printRawFloatString s =
+	printBuiltin "Float" s
 and printRawInt i =
 	printRawIntString (string_of_int i)
 and printRawIntString s =
@@ -360,16 +362,17 @@ and printDecFloatConstant f =
 		| "" :: [] -> "0"
 		| x :: [] -> x
 		) in
+	let stringRep = wholePart ^ "." ^ fractionalPart ^ "e" ^ exponentPart in
 	let exponentPart :: [] = Str.split (Str.regexp "[+]") exponentPart in
 	let exponentPart = int_of_string exponentPart in
 	
 	let significand = wholePart ^ "." ^ fractionalPart in
-	let approx = float_of_string significand in
-	let approx = approx *. (10. ** (float_of_int exponentPart)) in
+	(* let approx = float_of_string significand in
+	let approx = approx *. (10. ** (float_of_int exponentPart)) in *)
 	
 	let significandPart = printRawString significand in
 	let exponentPart = printRawInt exponentPart in
-	let approxPart = printRawFloat approx in
+	let approxPart = printRawFloatString stringRep in
 	let significandPart = printCell "Significand" [] significandPart in
 	let exponentPart = printCell "Exponent" [] exponentPart in
 	(wrap (significandPart :: exponentPart :: approxPart :: []) "DecimalFloatConstant")
