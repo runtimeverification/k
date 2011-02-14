@@ -43,7 +43,7 @@ kmod META-MODEL is including OCL-SOLVER
                       <class*>
                          <className> undefined </className> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
                          <extends> undefined </extends> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
-                         <declAttributes> .List  </declAttributes>
+                         <declAttributes> .List  </declAttributes>/*Vlad: I think we need a Map from attribute names to types here*/
                       </class*>
                     </classes>
                     <oclConstraints> .List </oclConstraints>

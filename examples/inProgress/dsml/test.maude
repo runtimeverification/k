@@ -1,3 +1,5 @@
 in dsml-test-compiled.maude
-rew testConfig .
+rew [3] testConfig .
+---search [5] testConfig =>+ C:Bag .
+quit
 
