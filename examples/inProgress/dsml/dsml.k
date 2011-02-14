@@ -19,7 +19,7 @@ endkm
 */
 kmod META-MODEL is including OCL-SOLVER
 
-  syntax Id ::= object | 'a | 'b | 'A | 'B
+  syntax Id ::= object 
 
   syntax K ::= Id | undefined | Bool 
 
@@ -41,8 +41,8 @@ kmod META-MODEL is including OCL-SOLVER
                     <name> undefined </name> /*Vlad: added metamodel name*/
                     <classes>
                       <class*>
-                         <className> Id:Id </className>
-                         <extends> Id:Id </extends>
+                         <className> undefined </className> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
+                         <extends> undefined </extends> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
                          <declAttributes> .List  </declAttributes>
                       </class*>
                     </classes>
@@ -62,37 +62,6 @@ kmod META-MODEL is including OCL-SOLVER
                 <k> .K </k> /*Vlad: added K cell for checking conformance */
                 </T>
 
-rule [add-instance-name-to-K-cell] : 
-    <instance_>
-       <instName> objName:Id </instName>
-       <checked> false => true </checked> 
-    <_/instance> 
-  <k_>  . => objName  <_/k>  
-
-  syntax Bag ::= testConfig
-
-/*
-  macro testConfig =
-  <T_>
-    <instName> object  </instName>
-    <checked> false </checked>
-  <_/T>
-*/
-
-  macro testConfig = 
-  <T_>
-<model>
-      <modelName> object </modelName>
-      <instance_>
-                      <instName>  'a </instName>
-                         <checked> false </checked> 
-       <_/instance>
-       <instance_>
-                      <instName> 'b </instName>
-                       <checked> false </checked> 
-       <_/instance>
-</model>
-  <_/T>
  
 endkm
 
