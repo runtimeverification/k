@@ -21,7 +21,9 @@ kmod META-MODEL is including OCL-SOLVER
 
   syntax Id ::= object 
 
-  syntax K ::= Id | undefined | Bool 
+  syntax CCPhase ::= init | loaded /*Vlad : conformance-checking phase */
+
+  syntax K ::= Id | undefined | Bool | CCPhase
 
   syntax ListItem ::= Id : KLabel [prec 20] | Formula
 
@@ -60,6 +62,7 @@ kmod META-MODEL is including OCL-SOLVER
                    </model*>
                  </models>
                 <k> .K </k> /*Vlad: added K cell for checking conformance */
+                <ccPhase> init </ccPhase>
                 </T>
 
  

@@ -11,6 +11,7 @@ rule [add-instance-name-to-K-cell] :
        <ofClass> className </ofClass>
     <_/instance> 
   <k_>  . => objName  <_/k>  
+  <ccPhase> init </ccPhase>
 
 
 
@@ -19,7 +20,8 @@ rule [do-something-else-when-all-checked] :
 (<modelName> n:Id </modelName>)
 B:Bag => unCheck(B)
 </model>
- <k_>  . => 'done  <_/k> 
+/* <k_>  . => 'done  <_/k> */
+<ccPhase> init => loaded </ccPhase>
 if allChecked(B)
 
 
@@ -38,6 +40,11 @@ macro unCheck(((<instance> <instName> objName </instName> <checked> b:Bool </che
  (<instance> <instName> objName </instName> <checked> false </checked>  <ofClass> className </ofClass> <attributes> .Map </attributes></instance>) unCheck(B)
 
 
+/*
+macro unCheck(((<instance_> BB:Bag <checked> b:Bool </checked>  <_/instance>) B)) = 
+ (<instance_> BB <checked> false </checked> <_/instance>) unCheck(B)
+*/
+macro unCheck(.Bag) = .Bag
 
 
   syntax Bag ::= testConfig
