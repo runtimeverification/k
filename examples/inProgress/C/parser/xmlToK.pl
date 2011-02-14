@@ -219,7 +219,7 @@ sub escapeString {
 	my $decoded = decode_base64($str);
 	# my $octets = encode("ascii", $str, Encode::FB_CROAK);
 	#my $octets = decode('ascii', $str);
-	utf8::encode($decoded);
+	#utf8::encode($decoded);
 	my @charArray = split(//, $decoded);
 	my @newArray = map(escapeSingleCharacter($_), @charArray) ;
 	# foreach my $char (@newArray){
