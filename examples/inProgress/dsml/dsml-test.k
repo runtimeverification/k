@@ -49,7 +49,7 @@ rule [delete-instance-names-with-correct-classes-and-attributes-from-K-cell] :
 <class_>
 <className> className:Id </className>
 <declAttributes> M </declAttributes>
-<_/class>
+<_/class> 
 <instance_>
        <instName> objName </instName>
        <ofClass> className </ofClass> 
