@@ -21,7 +21,7 @@ kmod META-MODEL is including OCL-SOLVER
 
   syntax Id ::= object 
 
-  syntax CCPhase ::= init | checkInstances | checkLinks /*Vlad : conformance-checking phase */
+  syntax CCPhase ::= init | checkInstances  | checkLinks /*Vlad : conformance-checking phase */
 
   syntax K ::= Id | undefined | Bool | CCPhase
 
