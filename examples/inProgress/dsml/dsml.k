@@ -21,7 +21,7 @@ kmod META-MODEL is including OCL-SOLVER
 
   syntax Id ::= object 
 
-  syntax CCPhase ::= init | loaded /*Vlad : conformance-checking phase */
+  syntax CCPhase ::= init | checkInstances | checkLinks /*Vlad : conformance-checking phase */
 
   syntax K ::= Id | undefined | Bool | CCPhase
 
@@ -45,7 +45,7 @@ kmod META-MODEL is including OCL-SOLVER
                       <class*>
                          <className> undefined </className> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
                          <extends> undefined </extends> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
-                         <declAttributes> .List  </declAttributes>/*Vlad: I think we need a Map from attribute names to types here*/
+                         <declAttributes> .Map  </declAttributes>/*Vlad: I think we need a Map from attribute names to types here*/
                       </class*>
                     </classes>
                     <oclConstraints> .List </oclConstraints>
