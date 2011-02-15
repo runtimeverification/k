@@ -2,13 +2,9 @@ in dsml.k
 
 kmod META-MODEL-TEST is including META-MODEL
 rule [add-instance-name-to-K-cell] : 
-    <class>
-               <className> className:Id </className>
-    <_/class>
     <instance_>
        <instName> objName:Id </instName>
        <checked> false => true </checked> 
-       <ofClass> className </ofClass>
     <_/instance> 
   <k_>  . => objName  <_/k>  
   <ccPhase> init </ccPhase>
@@ -36,7 +32,7 @@ macro allChecked(.Bag) = true
 
 
 
-macro unCheck(((<instance> <instName> objName </instName> <checked> b:Bool </checked>  <ofClass> className </ofClass> <attributes> .Map </attributes></instance>) B)) = 
+macro unCheck(((<instance> <instName> objName </instName> <checked> b:Bool </checked>  <ofClass> className:Id </ofClass> <attributes> .Map </attributes></instance>) B)) = 
  (<instance> <instName> objName </instName> <checked> false </checked>  <ofClass> className </ofClass> <attributes> .Map </attributes></instance>) unCheck(B)
 
 
