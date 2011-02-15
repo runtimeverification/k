@@ -339,6 +339,9 @@ my $ps = 0;
 my $png = 0;
 my $crop = 0;
 
+my $title = "";
+my $author = "";
+
 # used for generating modules for KLabels
 my $klabels = "";
 
@@ -392,6 +395,12 @@ foreach (@ARGV) {
     elsif (($style eq "?") && !/^-/) {
 	$style = $_;
     }
+    elsif (($title eq "?") && !/^-/) {
+	$title = $_;
+    }
+    elsif (($author eq "?") && !/^-/) {
+	$author = $_;
+    }
     elsif (/^--?h(elp)?$/) {
 # Terminates with usage info when asked for help
 	$help = 1;
@@ -414,6 +423,12 @@ foreach (@ARGV) {
     }
     elsif (/^--?file$/) {
 	$language_file_name = "?";
+    }
+    elsif (/^--?title$/) {
+	$title = "?";
+    }
+    elsif (/^--?author$/) {
+	$author = "?";
     }
     elsif (/^--?nd$/) {
        $k_all_tools .= "-nd";
@@ -476,6 +491,7 @@ $lang_name = basename($language_file_name);
 $lang_name =~ s/\..*?$//;
 
 # print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
+# print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\nTITLE:$title\nAUTHOR:$author\n\n";
 
 my $args = "@ARGV";
 # print "ARGS: $args\n";
@@ -772,7 +788,9 @@ sub latexify {
 	   print FILE "\\input{$language_file_name.sty}\n";
         }
 	print FILE join("\n",@newcommands)."\n";
-	print FILE "\\begin{document}\n";
+	print FILE "\n\\begin{document}\n\n";
+	print FILE "\\title{$title}\n\\author{$author}\n\\maketitle\n" if ($title ne "" && $author ne "");
+	print FILE "\\title{$title}\n\\maketitle\n" if ($title ne "" && $author eq "");
 	print FILE join("\\newpage", @l_modules)."\n";
 	print FILE "\\end{document}\n";
 	close FILE;
@@ -869,7 +887,9 @@ sub get_pdf_crop
     my $h = 9 * $pages;
     my $ph = $h + 1;
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    my $maketitle = "";
+    $maketitle = $1 if ($latex_out =~ /(?<=\\begin{document})(.*?\\maketitle)/sg);
+    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\pagestyle{empty}\n\\begin{document}\n$maketitle\n\\noindent\\hspace{-2px}\\rule{1px}{1px}";
     $latex_out =~ s/\\begin{document}/$settings/;
     $latex_out =~ s/\\newpage/\\bigskip/g;
 
