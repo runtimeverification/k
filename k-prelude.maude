@@ -340,7 +340,9 @@ endm
 mod K-RULES is
   including K-SENTENCE .
   including PL-BOOL .
+  including PL-STRING .
   including K-TECHNIQUE .
+  ops latex_ : String -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : KLabel -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : List{K} -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Map -> [KSentence] [prec 126 format(b o d)] .

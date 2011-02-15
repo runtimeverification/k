@@ -29,6 +29,13 @@ my $comment = join("|", (
 		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
 		"\\*\\*\\*.*?\$"
 ));
+
+my $latex_comment = join("|", (
+        "\\/\\/@(.*?)(?=\n)",
+        "\\/\\*@(.*?)\\*\\/",	
+));
+
+my $TAB = "    ";
      
 my $verbose = 0;
 my @nodes = ();
@@ -46,7 +53,7 @@ my $top_level_pattern = join("|", (
                     "(?:in|load|require)\\s+\\S+"
     ));
 
-my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
+my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 my $parentheses = "\Q{}[]()\E";
@@ -1885,6 +1892,50 @@ sub put_back_comments($)
 ################
 # end comments #
 ################
+
+
+##################
+# latex comments #
+##################
+
+# Args: k file content
+# Return: k file content
+# replace latex comments inside each module
+sub solve_latex
+{
+	local $_ = shift;
+	my $file = shift;
+	s/(k?mod.*?endk?m)/solve_latex_comments($&, countlines($`), $file)/sge;
+	$_;
+}
+
+# Args: k module
+# Return: k module
+# replaces latex comments inside modules 
+# with mb declarations
+sub solve_latex_comments
+{
+	# get k module
+	local $_ = shift;
+
+	# get k module line no and file name
+	my $lno = shift;
+	my $file = shift;
+
+	s!($latex_comment)!{
+		my $l = countlines($`) + $lno - 1;
+		local $_ = $+;
+		s/\t/$TAB/sg;
+		s/\n/" +String \n"/sg;
+		"mb latex \"$_\" : KSentence [metadata \"location($file:$l)\"] .";
+	}!sge;
+
+	$_;
+}
+
+######################
+# end latex comments #
+######################
 
 1;
 

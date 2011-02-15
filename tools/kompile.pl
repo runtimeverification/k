@@ -272,7 +272,7 @@ my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
 my $k_prelude = File::Spec->catfile(File::Spec->catfile($k_tools_dir,".."),"k-prelude");
 my $k_nice_pdf = File::Spec->catfile($k_tools_dir, "nice-pdf.sh");
 
-my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm);
+my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large);           
@@ -1207,6 +1207,9 @@ sub maudify_file {
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
+#Step: resolve latex comments
+	$_ = solve_latex($_, $file) if ($latex || $png || $pdf || $ps || $crop || $eps);
+
 	# save comments
 	my ($noComments, $myComments) = remove_comments($_);
 	$_ = $noComments;
@@ -1559,6 +1562,7 @@ sub k2maude {
 	case /^kmod/                    { s/kmod/mod/; }
 	case /^endkm/                   { s/endkm/endm/; }
 	case /^$default_freezer/        {}
+	case /^mb/						{}
 	case /^kvar/                    { s/k(var.*\S)(?=\s*)/$1 ./; }
 	case /^rule/                    { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/sg;
 					  s!(\[[^\[\]]*\]) : (KSentence)!
