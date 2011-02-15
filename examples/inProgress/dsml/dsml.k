@@ -62,7 +62,7 @@ kmod META-MODEL is including OCL-SOLVER
                    </model*>
                  </models>
                 <k> .K </k> /*Vlad: added K cell for checking conformance */
-                <ccPhase> init </ccPhase>
+                <ccPhase> init </ccPhase> /*conformance-checking phase */
                 </T>
 
  

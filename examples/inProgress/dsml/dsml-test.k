@@ -12,23 +12,25 @@ rule [load-instance-name-to-K-cell] :
 rule [end-init-phase-when-all-loaded] : 
 <model>
 (<modelName> n:Id </modelName>)
-B:Bag => unCheck(B)
+B:Bag => unCheck(B:Bag)
 </model>
 <ccPhase> init => checkInstances </ccPhase>
 if allChecked(B)
 
 syntax Bool ::= allChecked ( Bag ) 
 
-macro allChecked(((<instance_> <checked> false  </checked>  <_/instance>) B)) = false
-macro allChecked(((<instance_> <checked> true </checked>  <_/instance>) B)) = allChecked(B)
-macro allChecked(.Bag) = true
+rule allChecked(((<instance_> <checked> false  </checked>  <_/instance>) B)) => false [structural]
+rule allChecked(((<instance_> <checked> true </checked>  <_/instance>) B)) =>  allChecked(B)  [structural]
+rule allChecked(.Bag) => true  [structural]
 
  syntax Bag ::= unCheck( Bag )
 
-macro unCheck(((<instance> <instName> objName </instName> <checked> b:Bool </checked>  <ofClass> className:Id </ofClass> <attributes> M:Map </attributes></instance>) B)) = 
- (<instance> <instName> objName </instName> <checked> false </checked>  <ofClass> className </ofClass> <attributes>  M </attributes></instance>) unCheck(B)
 
-macro unCheck(.Bag) = .Bag
+rule unCheck(((<instance> <instName> objName </instName> <checked> b:Bool </checked>  <ofClass> className:Id </ofClass> <attributes> M:Map </attributes></instance>) B)) => 
+ (<instance> <instName> objName </instName> <checked> false </checked>  <ofClass> className </ofClass> <attributes>  M </attributes></instance>) unCheck(B)
+[structural]
+
+rule unCheck(.Bag) => .Bag [structural]
 
 
 /*only integer & bool types, and does not take inheritance into account, for now */
@@ -36,12 +38,12 @@ macro unCheck(.Bag) = .Bag
 syntax Bool ::= consistentAttributes( Map , Map )
 
 
-macro consistentAttributes( .Map, M:Map) = true
-macro consistentAttributes( ((attr:Id |->  _ ) M':Map), .Map) = false
-macro consistentAttributes( ((attr |->  i:Int) M'),  ((attr |-> 'Int ) M)) = 
-consistentAttributes(M',M)
-macro consistentAttributes( ((attr |->  b:Bool) M'),  ((attr |-> 'Bool ) M)) = 
-consistentAttributes(M',M)
+rule consistentAttributes( .Map, M:Map) => true [structural]
+rule consistentAttributes( ((attr:Id |->  _ ) M':Map), .Map) => false [structural]
+rule  consistentAttributes( ((attr |->  i:Int) M'),  ((attr |-> 'Int ) M)) =>
+consistentAttributes(M',M) [structural]
+rule consistentAttributes( ((attr |->  b:Bool) M'),  ((attr |-> 'Bool ) M)) =>
+consistentAttributes(M',M) [structural]
 
  
 
@@ -60,7 +62,7 @@ rule [delete-instance-names-with-correct-classes-and-attributes-from-K-cell] :
 if consistentAttributes(M', M)
 
 
-rule [goto-next-phase-when-all-instances-classes-OK] :
+rule [goto-next-phase-when-all-instances-classes-and-attributes-OK] :
 <ccPhase> checkInstances => checkLinks </ccPhase> 
 <k> .K </k>
 
