@@ -43,6 +43,7 @@ mod CONFIG-BUILTIN-MODULE is
   op FreeListItem : String -> FreeListItem .
   op defaultBagItem : String -> Bag .
   op defaultMapItem : String -> Map .
+  op defaultMapItem : Map -> Map .
   op defaultListItem : String -> List .
 
 
@@ -56,6 +57,10 @@ mod CONFIG-BUILTIN-MODULE is
   op getPESubstItem : Formula -> Subst .
   op getFESubstItem : Formula -> Subst .
   op getFreeSubstItem : Formula -> Subst .
+
+  op filterAnonymousFreeSubst : Subst -> Subst .
+  op filterFrame!Subst : Subst String -> Subst .
+  op filterCallCoSkolemSubst : Subst -> Subst .
 
   var Obj : MathObj++ .
   var K : K .
@@ -118,6 +123,8 @@ mod CONFIG-BUILTIN-MODULE is
    = Cfg:Bag /\ (Phi1:Formula /\ Phi2:Formula) .
   eq (Pattern1:Pattern \/ Pattern2:Pattern) /\ Phi:Formula
    = (Pattern1:Pattern /\ Phi:Formula) (Pattern2:Pattern /\ Phi:Formula) .
+  eq (Pattern1:Pattern /\ Phi1:Formula) /\ Phi2:Formula
+   = Pattern1:Pattern /\ (Phi1:Formula /\ Phi2:Formula) .
 
 
   *** hack
@@ -141,6 +148,8 @@ mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-WHERE + K-CONDITION-SEARCH .
   subsort Value TypedValue ExpressionType < Builtins KResult .
 
 
+  op applyDefaultSubst : Pattern Subst -> Pattern .
+  op applyDefaultSubst : Bag Subst -> Bag .
   op applySubst : Pattern Subst -> Pattern .
   op applySubst : Bag Subst -> Bag .
   op applySubst : Formula Subst -> Formula .

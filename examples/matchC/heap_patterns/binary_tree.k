@@ -22,6 +22,7 @@ kmod BINARY-TREE-HP is
       <config>
         <k> derive(P') ~> K </k>
         <heap> tree(P)(Tau) H </heap>
+        <counter> N </counter>
         CfgItems
       </config>
       <form> Phi </form>
@@ -33,6 +34,7 @@ kmod BINARY-TREE-HP is
       <config>
         <k> derive(P') ~> K </k>
         <heap> H </heap>
+        <counter> N </counter>
         CfgItems
       </config>
       <form> Phi /\ (P === 0) /\ (Tau === upsilon) </form>
@@ -50,6 +52,7 @@ kmod BINARY-TREE-HP is
           tree(FreeInt(N +Int 2))(FreeTree(N +Int 4))
           H
         </heap>
+        <counter> N +Int 5 </counter>
         CfgItems
       </config>
       <form>
@@ -59,7 +62,6 @@ kmod BINARY-TREE-HP is
       TaskItems
     </task>
   )
-    <other-counter> N => N +Int 5 </other-counter>
   if VALID(Phi ===> P' === P \/ P' === P +Int 1 \/ P' === P +Int 2)
   [structural]
 
@@ -125,6 +127,7 @@ kmod BINARY-TREE-HP is
       <config>
         <k> derive(P') ~> K </k>
         <heap> treeList(P)(Alpha) H </heap>
+        <counter> N </counter>
         CfgItems
       </config>
       <form> Phi </form>
@@ -136,6 +139,7 @@ kmod BINARY-TREE-HP is
       <config>
         <k> derive(P') ~> K </k>
         <heap> H </heap>
+        <counter> N </counter>
         CfgItems
       </config>
       <form> Phi /\ (P === 0) /\ (Alpha === epsilon) </form>
@@ -152,6 +156,7 @@ kmod BINARY-TREE-HP is
           treeList(FreeInt(N +Int 1))(FreeSeq(N +Int 3))
           H
         </heap>
+        <counter> N +Int 4 </counter>
         CfgItems
       </config>
       <form>
@@ -161,7 +166,6 @@ kmod BINARY-TREE-HP is
       TaskItems
     </task>
   )
-    <other-counter> N => N +Nat 4 </other-counter>
   if VALID(Phi ===> P' === P \/ P' === P +Int 1)
   [structural]
 

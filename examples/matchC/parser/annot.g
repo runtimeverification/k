@@ -50,6 +50,7 @@ tokens {
   REM = '%';
   SIGN_POS;
   SIGN_NEG;
+  EPSILON = 'epsilon';
 
   MATH_OBJ_LIST;
   MATH_OBJ_LIST_UNIT = '.List{MathObj++}';
@@ -416,6 +417,7 @@ constant
   | DECIMAL_LITERAL
   | OCTAL_LITERAL
   | HEX_LITERAL
+  | EPSILON
   // | CHARACTER_LITERAL
   | STRING_LITERAL
   // | FLOATING_POINT_LITERAL

@@ -4,6 +4,7 @@ load kernelC-semantics
 kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar N Counter : Nat
   kvar I : Int++
+  kvar VarRoot : String
   kvar Phi Phi1 Phi2 : Formula
   kvar NtPhi : NtFormula
   kvar Subst Subst1 Subst2 : Subst
@@ -11,6 +12,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar F X : Id
   kvar E E1 E2 : Expression
   kvar T : ExpressionType
+  kvar NvT : NvExpressionType
   kvar S : Statement
   kvar K Program : K
   kvar ParamList ArgList: List{KernelC}
@@ -117,7 +119,6 @@ Function entry
           ~> @ assert PostPattern
           ~> disolveTask
         </k>
-        <stack> callContext(@ assert PostPattern , .Map, .Map) </stack>
       <_/task>
     )
   [structural]
@@ -138,7 +139,6 @@ Function entry
           ~> substKLabel(S, 'return_, 'returnAssert_)
           ~> assertLabel
         </k>
-        <stack> callContext(.K, .Map, .Map) </stack>
       <_/task>
     )
   [structural]
@@ -237,16 +237,24 @@ summary function calls
       =>
         declParams(ParamList)
         ~> bindParams(ParamList, ArgList)
-        ~> @ assert co-skolemize(N, PrePattern) 
-        ~> @ assume co-skolemize(N, PostPattern) 
+        ~> @ assert co-skolemize(N, PrePattern)
+        ~> @ assume co-skolemize(N, PostPattern)
+        ~> cleanCallSubst(N)
         ~> return getReturnValue(T)
 
     </k>
-    <stack_> .List => callContext(getReturnValue(T) ~> K, TEnv, Env) </stack>
+    <stack_> .List => callContext(K, TEnv, Env) </stack>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>
     <other-counter> N => sNat N </other-counter>
   [structural]
+
+*** retrieve the return value
+  rule
+    <k> getReturnValue(NvT) => tv(NvT, V) <_/k>
+    <form> Phi /\ returns V => Phi </form>
+  [structural]
+  rule <k> getReturnValue(void) => tv(void, unit) <_/k> [structural]
 
 
 ***(
@@ -278,7 +286,7 @@ loop invariants
         @ invariant Pattern 
         ~> while (E) S ~> K
       =>
-        @ assert Pattern 
+        @ assert Pattern
         ~> 'if`(_`)_else_(E,, (S ~> @ assert Pattern ~> disolveTask),, K)
     </k>
 
@@ -296,7 +304,7 @@ assumed patterns
           skolemize(
             N,
             applySubst(
-              applySubst(
+              applyDefaultSubst(
                 Pattern,
                 (defaultKItem("program") <- Program) ;;
                 (defaultMapItem("struct") <- StructMap) ;;
@@ -371,7 +379,7 @@ asserted patterns
       =>
         assertNormal(
           applySubst(
-            applySubst(
+            applyDefaultSubst(
               Pattern,
               (defaultKItem("program") <- Program) ;;
               (defaultMapItem("struct") <- StructMap) ;;
@@ -449,5 +457,15 @@ Helpers
   syntax Map ::= defaultEnv ( Map )
   rule defaultEnv(X |-> _ Env) => X |-> ?var(X) defaultEnv(Env) [structural]
   rule defaultEnv(.Map) => .Map [ structural]
+
+  rule
+    <k> cleanFrameSubst(VarRoot) => .K <_/k>
+    <subst> Subst => filterFrame!Subst(Subst, VarRoot) </subst>
+  [structural]
+
+  rule
+    <k> cleanCallSubst(N) => .K <_/k>
+    <subst> Subst => filterCallCoSkolemSubst(Subst) </subst>
+  [structural]
 endkm
 

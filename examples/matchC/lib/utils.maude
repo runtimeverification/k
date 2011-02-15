@@ -172,7 +172,11 @@ inc MATCHC
      getName(QC) ==Bool ''@`assert_ orBool
      getName(QC) ==Bool ''@`invariant_ orBool
      getName(QC) ==Bool ''@`pre_ orBool
-     getName(QC) ==Bool ''@`post_ .     
+     getName(QC) ==Bool ''@`post_ .
+ ceq skolemTerm(NT, '<_>_</_>[QC : QT : QC]) = '<_>_</_>[QC : QT : QC]
+  if getName(QC) ==Bool 'struct orBool
+     getName(QC) ==Bool 'fun orBool
+     getName(QC) ==Bool 'tenv .
   eq skolemTerm(NT, Q[QTList]) = Q[skolemTerm(NT, QTList)] [owise] .
 
  
@@ -218,6 +222,7 @@ inc MATCHC
   op _;_ : MetaSubst MetaSubst -> MetaSubst [assoc comm id: .MetaSubst] .
   op _<-_ : Term Term -> MetaSubst .
   op upSubst : Subst -> MetaSubst .
+  op upSubstItem : SubstItem -> MetaSubst .
 
   var K1 K2 : K .
   var List1 List2 : List .
@@ -225,18 +230,16 @@ inc MATCHC
   var Set1 Set2 : Set .
   var Map1 Map2 : Map .
   var Subst : Subst .
+  var SubstItem : SubstItem .
 
-  eq upSubst((K1 <- K2) ;; Subst)
-   = (upTerm(K1) <- upTerm(K2)) ; upSubst(Subst) .
-  eq upSubst((List1 <- List2) ;; Subst)
-   = (upTerm(List1) <- upTerm(List2)) ; upSubst(Subst) .
-  eq upSubst((Bag1 <- Bag2) ;; Subst)
-   = (upTerm(Bag1) <- upTerm(Bag2)) ; upSubst(Subst) .
-  eq upSubst((Set1 <- Set2) ;; Subst)
-  = (upTerm(Set1) <- upTerm(Set2)) ; upSubst(Subst) .
-  eq upSubst((Map1 <- Map2) ;; Subst)
-   = (upTerm(Map1) <- upTerm(Map2)) ; upSubst(Subst) . 
+  eq upSubst(SubstItem ;; Subst) = upSubstItem(SubstItem) ; upSubst(Subst) .
   eq upSubst(.Subst) = .MetaSubst .
+  eq upSubstItem(K1 <- K2) = upTerm(K1) <- upTerm(K2) .
+  eq upSubstItem(List1 <- List2) = upTerm(List1) <- upTerm(List2) .
+  eq upSubstItem(Bag1 <- Bag2) = upTerm(Bag1) <- upTerm(Bag2) .
+  eq upSubstItem(Set1 <- Set2) = upTerm(Set1) <- upTerm(Set2) .
+  eq upSubstItem(Map1 <- Map2) = upTerm(Map1) <- upTerm(Map2) .
+
 
   op substTerm : TermList MetaSubst -> TermList .
 
@@ -251,32 +254,73 @@ inc MATCHC
    = substTerm(QT, MetaSubst) : substTerm(QTNeList, MetaSubst) .
   eq substTerm(.emptyTermList, MetaSubst) = .emptyTermList .
   eq substTerm(QT1, ((QT1 <- QT2) ; MetaSubst)) = QT2 .
- ceq substTerm(Q[QTList], MetaSubst) = Q[QTList]
-  if Q ==Bool 'skolem orBool Q ==Bool 'co-skolem .
  ceq substTerm('_`(_`)[QC : QTList], MetaSubst) = '_`(_`)[QC : QTList]
   if getName(QC) ==Bool ''@`assume_ orBool
      getName(QC) ==Bool ''@`assert_ orBool
      getName(QC) ==Bool ''@`invariant_ orBool
      getName(QC) ==Bool ''@`pre_ orBool
      getName(QC) ==Bool ''@`post_ .
+ ceq substTerm(Q[QTList], MetaSubst) = Q[QTList]
+  if Q ==Bool 'skolem orBool Q ==Bool 'co-skolem [owise] .
   eq substTerm(QC, MetaSubst) = QC [owise] .
   eq substTerm(Q[QTList], MetaSubst)
    = Q[substTerm(QTList, MetaSubst)] [owise] .
 
-  var Pattern : Pattern .
+
+  var Pattern Pattern1 Pattern2 : Pattern .
+  var CellLabel : CellLabel .
+  var K : K .
+  var List : List .
   var Bag : Bag .
+  var Map : Map .
   var Phi : Formula .
   var Subst1 Subst2 : Subst .
 
+
   --- apply substitution on a pattern
-  eq applySubst(Pattern, Subst)
-   = downTerm(substTerm(upTerm(Pattern), upSubst(Subst)), errorPattern) .
+  eq applyDefaultSubst(Pattern1 \/ Pattern2, Subst)
+   = applyDefaultSubst(Pattern1, Subst) \/ applyDefaultSubst(Pattern2, Subst) .
+  eq applyDefaultSubst(Bag /\ Phi, Subst)
+   = applyDefaultSubst(Bag, Subst) /\ Phi .
+
+  --- applyDefault substitution on a configuration
+  eq applyDefaultSubst(< CellLabel > Map1 </ CellLabel > Bag, (Map1 <- Map2) ;; Subst)
+   = < CellLabel > Map2 </ CellLabel > applyDefaultSubst(Bag, Subst) .
+  eq applyDefaultSubst(< CellLabel > K1 </ CellLabel > Bag, (K1 <- K2) ;; Subst)
+   = < CellLabel > K2 </ CellLabel > applyDefaultSubst(Bag, Subst) .
+  eq applyDefaultSubst(< CellLabel > Bag1 </ CellLabel > Bag2, Subst)
+   = < CellLabel > applyDefaultSubst(Bag1, Subst) </ CellLabel >
+     applyDefaultSubst(Bag2, Subst) [owise] .
+  eq applyDefaultSubst(Bag, Subst) = Bag [owise] .
+
+
+  --- apply substitution on a pattern
+  eq applySubst(Pattern1 \/ Pattern2, Subst)
+   = applySubst(Pattern1, Subst) \/ applySubst(Pattern2, Subst) .
+  eq applySubst(Bag /\ Phi, Subst)
+   = applySubst(Bag, Subst) /\ applySubst(Phi, Subst) .
+
   --- apply substitution on a configuration
+ ceq applySubst(< CellLabel > Map </ CellLabel > Bag, Subst)
+   = < CellLabel > Map </ CellLabel > applySubst(Bag, Subst)
+  if CellLabel ==Bool struct orBool
+     CellLabel ==Bool fun orBool
+     CellLabel ==Bool tenv .
+ ceq applySubst(< CellLabel > K </ CellLabel > Bag, Subst)
+   = < CellLabel > K </ CellLabel > applySubst(Bag, Subst)
+  if CellLabel ==Bool taskType orBool
+     CellLabel ==Bool program orBool
+     CellLabel ==Bool counter .
+  eq applySubst(< CellLabel > Bag1 </ CellLabel > Bag2, Subst)
+   = < CellLabel > applySubst(Bag1, Subst) </ CellLabel >
+     applySubst(Bag2, Subst) [owise] .
   eq applySubst(Bag, Subst)
-   = downTerm(substTerm(upTerm(Bag), upSubst(Subst)), errorBag) .
+   = downTerm(substTerm(upTerm(Bag), upSubst(Subst)), errorBag) [owise] .
+
   --- apply substitution on a substitution
   eq applySubst(Phi, Subst)
    = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), errorFormula) .
+
   --- apply substitution on a substitution
   eq applySubst(Subst1, Subst2)
    = downTerm(substTerm(upTerm(Subst1), upSubst(Subst2)), errorSubst) .
@@ -309,4 +353,46 @@ mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST .
   var ObjList ObjList' : List{MathObj++} .
   eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
    = (Obj1 <- Obj1') ;; (Obj2 <- Obj2') ;; (ObjList <- ObjList') .
+
+  var N : Nat .
+  var Subst : Subst .
+  var SubstItem : SubstItem .
+  eq filterAnonymousFreeSubst(FreeInt(N) <- Obj) = .Subst .
+  eq filterAnonymousFreeSubst(FreeSeq(N) <- Obj) = .Subst .
+  eq filterAnonymousFreeSubst(FreeMSet(N) <- Obj) = .Subst .
+  eq filterAnonymousFreeSubst(FreeTree(N) <- Obj) = .Subst .
+  eq filterAnonymousFreeSubst(skolem(N, PEObj) <- Obj) = .Subst .
+  eq filterAnonymousFreeSubst(SubstItem) = SubstItem [owise] .
+
+  var List : List .
+  var Bag : Bag .
+  var Map : Map .
+  var Var VarRoot : String .
+ ceq filterFrame!Subst((!ListItem(Var) <- List) ;; Subst, VarRoot)
+   = filterFrame!Subst(Subst, VarRoot)
+  if substrString(Var, 0, lengthString(VarRoot)) ==Bool VarRoot .
+ ceq filterFrame!Subst((!BagItem(Var) <- Bag) ;; Subst, VarRoot)
+   = filterFrame!Subst(Subst, VarRoot)
+  if substrString(Var, 0, lengthString(VarRoot)) ==Bool VarRoot .
+ ceq filterFrame!Subst((!MapItem(Var) <- Map) ;; Subst, VarRoot)
+   = filterFrame!Subst(Subst, VarRoot)
+  if substrString(Var, 0, lengthString(VarRoot)) ==Bool VarRoot .
+  eq filterFrame!Subst(SubstItem ;; Subst, VarRoot)
+   = SubstItem ;; filterFrame!Subst(Subst, VarRoot) [owise] .
+  eq filterFrame!Subst(.Subst, VarRoot) = .Subst .
+
+  var FreeListItem : FreeListItem .
+  var FreeBagItem : FreeBagItem .
+  var FreeMapItem : FreeMapItem .
+  eq filterCallCoSkolemSubst((co-skolem(N, FreeObj) <- Obj) ;; Subst)
+   = filterCallCoSkolemSubst(Subst) .
+  eq filterCallCoSkolemSubst((co-skolem(N, FreeListItem) <- List) ;; Subst)
+   = filterCallCoSkolemSubst(Subst) .
+  eq filterCallCoSkolemSubst((co-skolem(N, FreeBagItem) <- Bag) ;; Subst)
+   = filterCallCoSkolemSubst(Subst) .
+  eq filterCallCoSkolemSubst((co-skolem(N, FreeMapItem) <- Map) ;; Subst)
+   = filterCallCoSkolemSubst(Subst) .
+  eq filterCallCoSkolemSubst(SubstItem ;; Subst)
+   = SubstItem ;; filterCallCoSkolemSubst(Subst) [owise] .
+  eq filterCallCoSkolemSubst(.Subst) = .Subst . 
 endm

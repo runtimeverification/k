@@ -77,8 +77,8 @@ public class KernelCPreK {
     tokenToK.put(kernelCParser.PRE_DEC, "--_");
     tokenToK.put(kernelCParser.SIZEOF, "sizeof_");
     tokenToK.put(kernelCParser.CAST, "`(_`)_");
-    tokenToK.put(kernelCParser.REF, "*_");
-    tokenToK.put(kernelCParser.DEREF, "&_");
+    tokenToK.put(kernelCParser.REF, "&_");
+    tokenToK.put(kernelCParser.DEREF, "*_");
     tokenToK.put(kernelCParser.SIGN_POS, "+_");
     tokenToK.put(kernelCParser.SIGN_NEG, "-_");
     tokenToK.put(kernelCParser.NOT, "~_");

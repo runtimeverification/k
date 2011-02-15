@@ -25,7 +25,8 @@ JFLAGS="-classpath ${CLASSPATH}"
 UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=KernelCPreK
 
-MAUDE=${SMT_MAUDE_DIR}/maude
+#MAUDE=${SMT_MAUDE_DIR}/maude
+MAUDE=maude
 MFLAGS="-no-banner -no-wrap"
 
 OUT_FILTER=${OUT_FILTER_DIR}/filterOutput
@@ -74,32 +75,12 @@ fi
 PROG_BODY=`grep -v '^#include' $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN}`
 if [ "$?" -ne 0 ]; then exit $?; fi
 
-#including ${LANG_MODULE}-SYNTAX + MATHEMATICAL-DOMAIN-BUILTIN-MODULE + LIST-HP + BINARY-TREE-HP .
-#echo -e "
-#load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-compiled.maude\n\
-#load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-syntax.maude\n\
-#mod ${PROG_MODULE} is\n\
-#including ${LANG_MODULE}-SYNTAX + MATHEMATICAL-DOMAIN-BUILTIN-MODULE .
-#" >${MAUDE_PROG}
-#echo "${PROG_BODY}" >>${MAUDE_PROG}
-#echo -e "
-#endm\n\
-#" >>${MAUDE_PROG}
-#
-#${KC} ${KFLAGS} ${MAUDE_PROG} ${LANG_MODULE} ${PROG_MODULE} ${PROG_MACRO} >${TMP_ERR}
-#if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
-#
-#UNWRAPED_BODY=`${JVM} ${JFLAGS} ${UNWRAP_MAIN} <${COMPILED_PROG} | grep -v '^load'`
-#if [ "$?" -ne 0 ]; then exit $?; fi
-
-#load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-unwrapped.maude\n\
 echo -e "
 load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-compiled.maude\n\
 load ${ML_LIB_DIR}/utils.maude\n\
 mod ${PROG_MODULE} is
 inc ${LANG_MODULE} .
 " >${ML_PROG}
-#echo "${UNWRAPED_BODY}" >>${ML_PROG}
 echo "${PROG_BODY}" >>${ML_PROG}
 echo -e "
 endm\n\

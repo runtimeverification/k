@@ -26,6 +26,7 @@ matching logic annotations
 
   syntax Annotation ::= @`verify`
                       | @`skip`
+                      | @`breakpoint
 ***)
 
 
@@ -44,8 +45,11 @@ matching logic annotations
   syntax Statement ::= Annotation
 
   syntax Statement ::= returnAssert Expression [strict]
+  syntax Expression ::= getReturnValue ( ExpressionType )
 
 
   syntax K ::= defaultKItem ( String ) 
+             | cleanFrameSubst ( String ) 
+             | cleanCallSubst ( Nat ) 
 endkm
 

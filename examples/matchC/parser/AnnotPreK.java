@@ -55,6 +55,7 @@ public class AnnotPreK {
     tokenToBuiltins.put(annotParser.REM, "_%Int_");
     tokenToBuiltins.put(annotParser.SIGN_POS, "+Int_");
     tokenToBuiltins.put(annotParser.SIGN_NEG, "-Int_");
+    tokenToBuiltins.put(annotParser.EPSILON, "epsilon");
     tokenToBuiltins.put(annotParser.SEQ, "`[_`]");
     tokenToBuiltins.put(annotParser.MSET, "`{|_|`}");
     tokenToBuiltins.put(annotParser.MAPSTO, "_|->_");
@@ -77,6 +78,7 @@ public class AnnotPreK {
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       annotParser parser = new annotParser(tokens);
       CommonTree tree = (CommonTree) parser.annot().getTree();
+      int annotType = tree.getType();
 
       // Rewriting the AST
       CommonTreeNodeStream nodes;
@@ -112,7 +114,17 @@ public class AnnotPreK {
 
       //System.out.println(TreeUtils.toTreeString(maudifiedTree, 0));
       //System.out.println(TreeUtils.toMaudeString(tree));
-      return TreeUtils.toMaudeString(maudifiedTree);
+      String annotMaudeString = TreeUtils.toMaudeString(maudifiedTree);
+      if (annotType == annotParser.ASSERT && Table.varString.startsWith("!") ) {
+        String varRoot = Table.varString.substring(1);
+        String argString = "_`(_`)(";
+        argString += "'cleanFrameSubst`(_`), ";
+        argString += "_`(_`)(List`{MathObj++`}_(\"" + varRoot +"\"), .List{K})";
+        argString += ")";
+        annotMaudeString = "_~>_(" + annotMaudeString + ", " + argString + ")";
+      }
+
+      return annotMaudeString;
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (IOException e) {

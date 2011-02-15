@@ -8,7 +8,6 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
   kvar X F : Id
   kvar E E1 E2 : Expression
   kvar T : ExpressionType
-  kvar NvT : NvExpressionType
   kvar S S1 S2 : Statement
   kvar K K1 K2 : K
   kvar KernelC Param : KernelC
@@ -117,23 +116,16 @@ Function call/return
       =>
         declParams(ParamList) ~> bindParams(ParamList, ArgList) ~> S
     </k>
-    <stack_> .List => callContext(getReturnValue(T) ~> K, TEnv, Env) </stack>
+    <stack_> .List => callContext(K, TEnv, Env) </stack>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>
 
 *** return
   rule
-    <k> return tv(_, V) ~> _ => K </k>
+    <k> return TV ~> _ => TV ~> K </k>
     <stack_> callContext(K, TEnv, Env) => .List </stack>
     <tenv> _ => TEnv </tenv>
     <env> _ => Env </env>
-    <form> Phi => returns V /\ Phi </form>
-
-*** retrieve the return value
-  rule
-    <k> getReturnValue(T) => tv(T, V) <_/k>
-    <form> Phi /\ returns V => Phi </form>
-  [structural]
 
 
 ***(
@@ -151,6 +143,7 @@ Expressions
   rule !TV => TV ? tv(int, 0) : tv(int, 1) [structural]
 
 *** referencing
+  context &([HOLE]->_)
   rule
     <k> &(tv(struct X *, I)->F) => tv(T *, I +Int listLen(KernelCList) )<_/k>
     <struct_>
@@ -192,11 +185,11 @@ Expressions
     <k> X = tv(T, V) => tv(T, V) <_/k>
     <env_> X |-> (_ => V) <_/env>
   [structural]
-  context (* [HOLE]) = _
+  context (*[HOLE]) = _
   rule
     <k> *tv(T *, I) = tv(_, V) => derive(I) ~> store(T, I, V) <_/k>
   [structural]
-  context ([HOLE] ->_) = _
+  context ([HOLE]->_) = _
   rule
     <k> tv(T, I)->F = E => *&(tv(T, I)->F) = E <_/k>
   [structural]
@@ -288,7 +281,25 @@ Memory management
 I/O
 ***)
   rule
-    <k> id("printf")(tv(string, _:String),,,tv(_,I)) => tv(void, unit) <_/k>
+    <k> read(T) => tv(T, I) <_/k>
+    <in> ListItem(I) => .List <_/in>
+  [structural]
+  rule
+    <k>
+        id("scanf")(tv(string, _:String),,, localRef(X))
+      =>
+        (X = read(int)); ~> tv(void, unit)
+    <_/k>
+  [structural]
+  rule
+    <k>
+        id("scanf")(tv(string, _:String),,, tv(T *, I))
+      =>
+        (*tv(T *, I) = read(T)); ~> tv(void, unit)
+    <_/k>
+  [structural]
+  rule
+    <k> id("printf")(tv(string, _:String),,, tv(_, I)) => tv(void, unit) <_/k>
     <out_> .List => ListItem(I) </out>
   [structural]
   rule id("printf")(tv(string, _:String)) => tv(void, unit) [structural]
@@ -323,5 +334,8 @@ Helpers
       I |-> FreeInt(N) : X . F initObject(I +Int 1, X , KernelCList, sNat N)
   [structural]
   rule initObject(_, _ , .List{KernelC}, _) => .Map [structural]
+
+  syntax TypedValue ::= localRef ( Id )
+  rule &X => localRef(X) [structural]
 endkm
 

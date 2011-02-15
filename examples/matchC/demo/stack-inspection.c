@@ -7,8 +7,8 @@ void untrusted(int);
 void any(int);
 
 void trusted(int n)
-/*@ pre <stack> S,trusted(?m) </stack>
-     \/ <stack> S,main() </stack>     */
+/* pre <stack> S,trusted(?m) </stack>
+   \/ <stack> S,main() </stack> */
 {
   printf("%d ", n);
   untrusted(n);
@@ -17,7 +17,7 @@ void trusted(int n)
 }
 
 void untrusted(int n)
-//@ pre <stack> S,trusted(?m),S' </stack>
+// pre <stack> S,trusted(?m),S' </stack>
 {
   printf("%d ", -n);
   if (n) any(n-1);
@@ -30,5 +30,5 @@ void any(int n) {
 
 int main() {
   trusted(10);
-  //  any(10);             // security violated when this line is included
+  any(10);             // security violated when this line is included
 }

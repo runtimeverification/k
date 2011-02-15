@@ -86,22 +86,46 @@ kmod FOL is including MATCHC-SEMANTICS
   rule
     <task_>
       <taskType> Hypothesis </taskType>
-      <out> FreeList => .List <_/out>
+      <in> FreeList => .List <_/in>
     <_/task>
     <task_>
       <taskType> Conclusion </taskType>
-      <out> FreeList => .List <_/out>
+      <in> FreeList => .List <_/in>
     <_/task>
   [structural]
 
   rule
     <task_>
       <taskType> Hypothesis </taskType>
-      <out_> FreeList => .List </out>
+      <in> List => .List </in>
     <_/task>
     <task_>
       <taskType> Conclusion </taskType>
-      <out_> FreeList => .List </out>
+      <in> PEList => .List </in>
+    <_/task>
+  [structural]
+
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <in> List => .List </in>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <in> FEList => .List </in>
+      <subst> Subst => Subst ;; (FEList <- List) </subst>
+    <_/task>
+  [structural]
+
+
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <out> FreeList => .List <_/out>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <out> FreeList => .List <_/out>
     <_/task>
   [structural]
 
@@ -127,6 +151,8 @@ kmod FOL is including MATCHC-SEMANTICS
       <subst> Subst => Subst ;; (FEList <- List) </subst>
     <_/task>
   [structural]
+
+
   rule
     <task_>
       <taskType> Hypothesis </taskType>
@@ -270,7 +296,12 @@ kmod FOL is including MATCHC-SEMANTICS
     <task>
       <taskType> Run </taskType>
       <form> Phi => applySubst(Phi, getFreeSubstItem(Phi)) </form>
-      <subst> Subst => applySubst(Subst, getFreeSubstItem(Phi)) ;; getFreeSubstItem(Phi) </subst>
+      <subst>
+          Subst
+        =>
+          applySubst(Subst, getFreeSubstItem(Phi)) ;;
+          filterAnonymousFreeSubst(getFreeSubstItem(Phi))
+      </subst>
       (TaskItems => applySubst(TaskItems, getFreeSubstItem(Phi)))
     </task>
   if getFreeSubstItem(Phi) =/=Bool .Subst
@@ -311,7 +342,9 @@ kmod FOL is including MATCHC-SEMANTICS
     <task>
       <taskType> Conclusion </taskType>
       <form> Phi => applySubst(Phi, getFESubstItem(Phi)) </form>
-      <subst> Subst => applySubst(Subst, getFESubstItem(Phi)) ;; getFESubstItem(Phi) </subst>
+      <subst>
+        Subst => applySubst(Subst, getFESubstItem(Phi)) ;; getFESubstItem(Phi)
+      </subst>
       (TaskItems => applySubst(TaskItems, getFESubstItem(Phi)))
      </task>
   if getFESubstItem(Phi) =/=Bool .Subst
@@ -398,6 +431,18 @@ kmod FOL is including MATCHC-SEMANTICS
   rule
     <task_>
       <taskType> Hypothesis </taskType>
+      <in> stream(Obj1) => .List </in>
+    <_/task>
+    <task_>
+      <taskType> Conclusion </taskType>
+      <in> stream(Obj2) => .List </in>
+      <form> Phi => Phi /\ Obj1 === Obj2 </form>
+    <_/task>
+  [structural]
+
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
       <out> stream(Obj1) => .List </out>
     <_/task>
     <task_>
@@ -416,6 +461,7 @@ kmod FOL is including MATCHC-SEMANTICS
           <env> .Map </env>
           <heap> .Map </heap>
           ---<stack> .List </out>
+          <in> .List </in>
           <out> .List </out>
         <_/config>
         <form> Phi1 </form>
@@ -426,6 +472,7 @@ kmod FOL is including MATCHC-SEMANTICS
           <env> .Map </env>
           <heap> .Map </heap>
           ---<stack> .List </out>
+          <in> .List </in>
           <out> .List </out>
         <_/config>
         <form> Phi2 </form>

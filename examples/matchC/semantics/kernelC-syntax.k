@@ -107,9 +107,9 @@ imp Expressions
                       | delete Expression [strict]
 *** extra stuff, not part of the language syntax, but helpful for the semantics
                       | ExpressionHelper
-  syntax ExpressionHelper ::= getReturnValue ( ExpressionType )
-                            | load ( ExpressionType , Value )
+  syntax ExpressionHelper ::= load ( ExpressionType , Value )
                             | store ( ExpressionType , Value , Value )
+                            | read ( ExpressionType )
                             | offset ( ExpressionType , Id )
                             | new ExpressionType
                             | detele TypedValue

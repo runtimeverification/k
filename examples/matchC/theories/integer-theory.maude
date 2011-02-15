@@ -65,6 +65,11 @@ mod MATHEMATICAL-INT-BUILTIN-MODULE is
    = @(I >=Int 0) /\ @(J >=Int 0) /\ Phi1 ===> Phi2
   if (-Int I) +Int (-Int J) +Int K >=Int 0 .
 
+  eq (-Int I) +Int J === 0 = I === J .
+  eq 0 === (-Int I) +Int J = I === J .
+  eq I === I +Int J = J === 0 .
+  eq I +Int J === 0 = J === 0 .
+
   eq (bool2int(B) === 0) = ~(@ B) .
   eq (bool2int(B) === NzI) = @ B .
   eq (0 === bool2int(B)) = ~(@ B) .
