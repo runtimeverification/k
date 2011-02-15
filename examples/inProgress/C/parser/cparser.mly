@@ -261,6 +261,8 @@ let transformOffsetOf (speclist, dtype) member =
 %token<Cabs.cabsloc> VOLATILE EXTERN STATIC CONST RESTRICT AUTO REGISTER
 %token<Cabs.cabsloc> THREAD
 
+%token<Cabs.cabsloc> ALIGNAS ATOMIC COMPLEX GENERIC IMAGINARY NORETURN STATIC_ASSERT THREAD_LOCAL
+
 %token<Cabs.cabsloc> SIZEOF ALIGNOF
 
 %token EQ PLUS_EQ MINUS_EQ STAR_EQ SLASH_EQ PERCENT_EQ
@@ -311,7 +313,6 @@ let transformOffsetOf (speclist, dtype) member =
 %nonassoc 	IF
 %nonassoc 	ELSE
 
-
 %left	COMMA
 %right	EQ PLUS_EQ MINUS_EQ STAR_EQ SLASH_EQ PERCENT_EQ
                 AND_EQ PIPE_EQ CIRC_EQ INF_INF_EQ SUP_SUP_EQ
@@ -326,7 +327,7 @@ let transformOffsetOf (speclist, dtype) member =
 %left	INF_INF SUP_SUP
 %left	PLUS MINUS
 %left	STAR SLASH PERCENT CONST RESTRICT VOLATILE
-%right	EXCLAM TILDE PLUS_PLUS MINUS_MINUS CAST RPAREN ADDROF SIZEOF ALIGNOF
+%right	EXCLAM TILDE PLUS_PLUS MINUS_MINUS CAST RPAREN ADDROF SIZEOF ALIGNOF 
 %left 	LBRACKET
 %left	DOT ARROW LPAREN LBRACE
 %right  NAMED_TYPE     /* We'll use this to handle redefinitions of
@@ -928,6 +929,7 @@ declaration:                                /* ISO 6.7.*/
                                        { doDeclaration ((*handleLoc*)(snd $1)) (fst $1) $2 }
 |   decl_spec_list SEMICOLON	       
                                        { doDeclaration ((*handleLoc*)(snd $1)) (fst $1) [] }
+| STATIC_ASSERT LPAREN expression COMMA string_constant RPAREN {STATIC_ASSERT ((fst $3), CONST_STRING (fst $5))};
 ;
 init_declarator_list:                       /* ISO 6.7 */
     init_declarator                              { [$1] }
@@ -947,14 +949,17 @@ decl_spec_list:                         /* ISO 6.7 */
 |   STATIC  decl_spec_list_opt          { SpecStorage STATIC :: $2, $1 }
 |   AUTO   decl_spec_list_opt           { SpecStorage AUTO :: $2, $1 }
 |   REGISTER decl_spec_list_opt         { SpecStorage REGISTER :: $2, $1}
+|   THREAD_LOCAL decl_spec_list_opt     { SpecStorage THREAD_LOCAL :: $2, $1}
                                         /* ISO 6.7.2 */
 |   type_spec decl_spec_list_opt_no_named { SpecType (fst $1) :: $2, snd $1 }
                                         /* ISO 6.7.4 */
 |   INLINE decl_spec_list_opt           { SpecInline :: $2, $1 }
+|   NORETURN decl_spec_list_opt           { SpecNoReturn :: $2, $1 }
 |   cvspec decl_spec_list_opt           { (fst $1) :: $2, snd $1 }
 |   attribute_nocv decl_spec_list_opt   { SpecAttr (fst $1) :: $2, snd $1 }
 /* specifier pattern variable (must be last in spec list) */
 |   AT_SPECIFIER LPAREN IDENT RPAREN    { [ SpecPattern(fst $3) ], $1 }
+|	alignment_specifier decl_spec_list_opt { SpecAlignment (fst $1) :: $2, snd $1 }
 ;
 /* (* In most cases if we see a NAMED_TYPE we must shift it. Thus we declare 
     * NAMED_TYPE to have right associativity  *) */
@@ -1018,6 +1023,8 @@ type_spec:   /* ISO 6.7.2 */
 |   TYPEOF LPAREN expression RPAREN     { TtypeofE (fst $3), $1 }
 |   TYPEOF LPAREN type_name RPAREN      { let s, d = $3 in
                                           TtypeofT (s, d), $1 }
+|   COMPLEX        { Tcomplex, $1 }
+|   ATOMIC LPAREN type_name RPAREN {let b, d = $3 in Tatomic (b, d), $1}
 ;
 struct_decl_list: /* (* ISO 6.7.2. Except that we allow empty structs. We 
                       * also allow missing field names. *)
@@ -1378,7 +1385,20 @@ primary_attr:
                                              * attribute for functions, 
                                              * synonim for noreturn **)*/
 |   VOLATILE                             { VARIABLE ("__noreturn__") }
+|  generic_selection { $1 }
 ;
+
+generic_selection:
+| GENERIC LPAREN assignment_expression COMMA generic_assoc_list RPAREN { GENERIC ((fst $3), $5) }
+;
+generic_assoc_list:
+    generic_assoc                             { [$1] }
+|   generic_assoc_list COMMA generic_assoc  { $1 @ [$3] }
+;
+generic_assoc:
+| DEFAULT COLON assignment_expression { GENERIC_DEFAULT (fst $3) }
+| type_name COLON assignment_expression { let b, d = $1 in GENERIC_PAIR (b, d, (fst $3)) }
+
 
 postfix_attr:
     primary_attr                         { $1 }
@@ -1549,7 +1569,12 @@ asmcloberlst_ne:
    one_string_constant                           { [$1] }
 |  one_string_constant COMMA asmcloberlst_ne     { $1 :: $3 }
 ;
-  
+alignment_specifier:
+| ALIGNAS LPAREN type_name RPAREN {let b, d = $3 in TYPE_ALIGNAS (b, d), $1}
+| ALIGNAS LPAREN unary_expression RPAREN {EXPR_ALIGNAS (fst $3), $1}
+;
+
+
 %%
 
 

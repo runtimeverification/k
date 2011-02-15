@@ -76,9 +76,11 @@ type typeSpecifier = (* Merge all specifiers into one type *)
   | Tenum of string * enum_item list option * attribute list
   | TtypeofE of expression                      (* GCC __typeof__ *)
   | TtypeofT of specifier * decl_type       (* GCC __typeof__ *)
+  | Tcomplex
+  | Tatomic of specifier * decl_type
 
 and storage =
-    NO_STORAGE | AUTO | STATIC | EXTERN | REGISTER
+    NO_STORAGE | AUTO | STATIC | EXTERN | REGISTER | THREAD_LOCAL
 
 and funspec = 
     INLINE | VIRTUAL | EXPLICIT
@@ -96,10 +98,17 @@ and spec_elem =
   | SpecCV of cvspec            (* const/volatile *)
   | SpecAttr of attribute       (* __attribute__ *)
   | SpecStorage of storage
+  (* technically these two should be grouped too *)
   | SpecInline
+  | SpecNoReturn
+  
+  | SpecAlignment of alignment_spec
   | SpecType of typeSpecifier
   | SpecPattern of string       (* specifier pattern variable *)
 
+and alignment_spec =
+	| EXPR_ALIGNAS of expression
+	| TYPE_ALIGNAS of specifier * decl_type
 (* decided to go ahead and replace 'spec_elem list' with specifier *)
 and specifier = spec_elem list
 
@@ -172,6 +181,9 @@ and definition =
  | TRANSFORMER of definition * definition list * cabsloc
  (* expression transformer: source and destination *)
  | EXPRTRANSFORMER of expression * expression * cabsloc
+ | STATIC_ASSERT of expression * constant (* the intention is for the constant to be a string literal *)
+
+
 
 
 (* the string is a file name, and then the list of toplevel forms *)
@@ -221,7 +233,6 @@ and statement =
           string list * (* template *)
           asm_details option * (* extra details to guide GCC's optimizer *)
           cabsloc
-
    (** MS SEH *)
  | TRY_EXCEPT of block * expression * block * cabsloc
  | TRY_FINALLY of block * block * cabsloc
@@ -273,6 +284,11 @@ and expression =
   | MEMBEROFPTR of expression * string
   | GNU_BODY of block
   | EXPR_PATTERN of string     (* pattern variable, and name *)
+  | GENERIC of expression * (generic_association list)
+  
+and generic_association =
+	| GENERIC_PAIR of specifier * decl_type * expression
+	| GENERIC_DEFAULT of expression
 
 and constant =
   | CONST_INT of string   (* the textual representation *)
@@ -302,5 +318,4 @@ and initwhat =
                                         (* Each attribute has a name and some
                                          * optional arguments *)
 and attribute = string * expression list
-                                              
 

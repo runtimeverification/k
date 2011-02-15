@@ -218,6 +218,16 @@ let init_lexicon _ =
                          THREAD loc
                        else *)
                          IDENT ("__thread", loc));
+		
+		("alignof", fun loc -> ALIGNOF loc);
+		("_Alignas", fun loc -> ALIGNAS loc);
+		("_Atomic", fun loc -> ATOMIC loc);
+		("_Complex", fun loc -> COMPLEX loc);
+		("_Generic", fun loc -> GENERIC loc);
+		("_Imaginary", fun loc -> IMAGINARY loc);
+		("_NoReturn", fun loc -> NORETURN loc);
+		("_Static_assert", fun loc -> STATIC_ASSERT loc);
+		("_Thread_local", fun loc -> THREAD_LOCAL loc);
     ]
 
 (* Mark an identifier as a type name. The old mapping is preserved and will 
