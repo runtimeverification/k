@@ -1,8 +1,0 @@
-load c-compiled
-load c-syntax
-load common-c-configuration
-%s
-set print attribute on .
---- rew eval("program"(.List{K})) .
-%s
----q

@@ -1,7 +1,0 @@
-
-      
-ignore UBOUND
-stop  *   at handler1.c:10 :  main()
-
-ignore LBOUND at *:20
- 

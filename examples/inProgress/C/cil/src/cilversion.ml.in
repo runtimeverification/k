@@ -1,6 +1,0 @@
-(* @configure_input@ *)
-
-let cilVersionMajor = @CIL_VERSION_MAJOR@
-let cilVersionMinor = @CIL_VERSION_MINOR@
-let cilVersionRev   = @CIL_VERSION_REV@
-let cilVersion      = "@CIL_VERSION@"

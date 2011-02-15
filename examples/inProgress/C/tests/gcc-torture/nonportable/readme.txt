@@ -1,1 +1,0 @@
-The files in this directory (and below) rely on undefined, unspecified, or extreme implementation defined behavior.  When not obvious, I will add files explaining why.These files are taken from the gcc c torture test and are licensed as such.  They are not part of this C semantics, but are only placed here for testing and reference.

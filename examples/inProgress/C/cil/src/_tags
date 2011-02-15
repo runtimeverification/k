@@ -1,8 +1,0 @@
-# subdirectories containing source code
-"ext": include
-"frontc": include
-"src": include
-
-# linking
-<cil.{cma,cmxa}>: use_perfcount, is_cil
-<main.{byte,native}>: custom, use_str, use_unix, use_nums, use_cil
