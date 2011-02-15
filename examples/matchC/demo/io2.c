@@ -10,6 +10,21 @@ struct listNode {
 
 void readWrite()
 {
+  int t;
+  int n;
+
+  scanf("%d", &n);
+
+  while (n) {
+    scanf("%d", &t);
+    printf("%d ", t);
+    n -= 1;
+  }
+}
+
+
+void readWriteBuffer()
+{
   int i;
   int n;
   struct listNode *x;
@@ -40,9 +55,13 @@ void readWrite()
 
 int main()
 {
-  //@ assume <in> [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] </in><out> epsilon </out>
+  /*@ assume <in> [5, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10] </in>
+             <out> epsilon </out> */
   readWrite();
-  //@ assert <in> epsilon </in><out> [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] </out>
+  //@ assert <in> [5, 6, 7, 8, 9, 10] </in><out> [1, 2, 3, 4, 5] </out>
+
+  readWriteBuffer();
+  //@ assert <in> epsilon </in><out> [1, 2, 3, 4, 5, 10, 9, 8, 7, 6] </out>
 
   return 0;
 }

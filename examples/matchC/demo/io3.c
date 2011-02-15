@@ -10,6 +10,25 @@ struct listNode {
 
 void readWrite()
 //@ pre  <in> [n0] @ A @ I </in><out> O </out> /\ len(A) = n0
+//@ post <in> I </in><out> O @ A </out>
+{
+  int t;
+  int n;
+
+  scanf("%d", &n);
+
+  /*@ invariant <in> ?B @ I </in><out> O @ ?A </out>
+                /\ n >= 0 /\ len(?B) = n /\ A = ?A @ ?B */
+  while (n) {
+    scanf("%d", &t);
+    printf("%d ", t);
+    n -= 1;
+  }
+}
+
+
+void readWriteBuffer()
+//@ pre  <in> [n0] @ A @ I </in><out> O </out> /\ len(A) = n0
 //@ post <in> I </in><out> O @ rev(A) </out>
 {
   int i;
@@ -46,15 +65,13 @@ void readWrite()
 
 int main()
 {
-  /* la verificare preconditiei functiei readWrite, trebui rezolvata implicatia
-   * true ===> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] === !A @ !I /\ len(!A) = 10
-   * implicatia are solutia triviala !A e tot si fameul !I e nimic
-   * dar nu vad o methoda usoara pentru prover
-   * fara aceasta implicatie functia nu poate fi chemata din main
-   */  
-  //@ assume <in> [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] </in><out> epsilon </out>
+  /*@ assume <in> [5, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10] </in>
+             <out> epsilon </out> */
   readWrite();
-  //@ assert <in> epsilon </in><out> [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] </out>
+  //@ assert <in> [5, 6, 7, 8, 9, 10] </in><out> [1, 2, 3, 4, 5] </out>
+
+  readWriteBuffer();
+  //@ assert <in> epsilon </in><out> [1, 2, 3, 4, 5, 10, 9, 8, 7, 6] </out>
 
   return 0;
 }
