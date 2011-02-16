@@ -327,6 +327,7 @@ my $compile_only = 0;
 my $language_module_name = "";
 my $language_file_name = "";
 my $lang_name = "";
+my $output_latex_file = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
@@ -401,6 +402,9 @@ foreach (@ARGV) {
     elsif (($author eq "?") && !/^-/) {
 	$author = $_;
     }
+    elsif (($output_latex_file eq "?") && !/^-/) {
+	$output_latex_file = $_;
+    }
     elsif (/^--?h(elp)?$/) {
 # Terminates with usage info when asked for help
 	$help = 1;
@@ -438,6 +442,9 @@ foreach (@ARGV) {
     }
     elsif (/^--?flat$/) {
 	$flat = 1;
+    }
+    elsif (/^--?output$/) {
+	$output_latex_file = "?";
     }
     elsif (/^--?latex$/) {
 	$latex = 1;
@@ -489,6 +496,9 @@ foreach (@ARGV) {
 # Extract only language name without path
 $lang_name = basename($language_file_name);
 $lang_name =~ s/\..*?$//;
+
+# Set latex out file name
+$output_latex_file = $lang_name if $output_latex_file eq "";
 
 # print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
 # print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\nTITLE:$title\nAUTHOR:$author\n\n";
@@ -868,7 +878,7 @@ sub get_file_content
 sub make_latexify
 {
     latexify("latex", @latexify_modules);
-    rename("$lang_name-latex.tex", "$lang_name.tex");
+    rename("$lang_name-latex.tex", "$output_latex_file.tex");
     print "Generated $lang_name.tex which contains modules: @latexify_modules\n";
 }
 
@@ -920,7 +930,7 @@ sub make_pdf
 {
     # Generate eps
     get_pdf_crop("pdf", @pdf_modules);
-    rename("$lang_name-pdf.pdf", "$lang_name.pdf");
+    rename("$lang_name-pdf.pdf", "$output_latex_file.pdf");
     print "Generated $lang_name.pdf which contains modules: @pdf_modules\n";
 }
 
@@ -934,7 +944,7 @@ sub make_ps
     throw_error("Failed to generate ps. Exit status $status.\n") if (($status >>= 8) != 0);
     
     # rename ps file
-    rename("$lang_name-ps.ps", "$lang_name.ps");
+    rename("$lang_name-ps.ps", "$output_latex_file.ps");
     print "Generated $lang_name.ps which contains modules: @ps_modules\n";
     
     # delete auxialiary files if not verbose
@@ -954,7 +964,7 @@ sub make_eps
     throw_error("Failed to generate eps. Exit status $status.\n") if (($status >>= 8) != 0);
     
     # rename eps file
-    rename("$lang_name-eps.eps", "$lang_name.eps");
+    rename("$lang_name-eps.eps", "$output_latex_file.eps");
     print "Generated $lang_name.eps which contains modules: @eps_modules\n";
 
     unlink("$lang_name-eps.pdf") if !$verbose;
@@ -970,7 +980,7 @@ sub make_png
     throw_error("Failed to generate png. Exit status $status.\n") if (($status >>= 8) != 0);
 
     # rename png file
-    rename("$lang_name-png.png", "$lang_name.png");
+    rename("$lang_name-png.png", "$output_latex_file.png");
     print "Generated $lang_name.png which contains modules: @png_modules\n";
 
     # delete auxialiary files if not verbose
@@ -1008,10 +1018,11 @@ sub make_crop
     throw_error("Failed to generate crop pdf. Exit status $status.\n") if (($status >>= 8) != 0);
 
     # print message
-    rename("$lang_name-crop-crop.pdf", "$lang_name-crop.pdf");
+    rename("$lang_name-crop-crop.pdf", "$output_latex_file-crop.pdf");
     print "Generated $lang_name-crop.pdf which contains modules: @crop_modules\n";
     
     # delete auxialiary files if not verbose
+    unlink("$lang_name-crop.pdf") if !$verbose && ($lang_name ne $output_latex_file);
     unlink("$lang_name-crop.tex") if !$verbose;
     unlink("$lang_name-crop.aux") if !$verbose;
     unlink("$lang_name-crop.dvi") if !$verbose;
