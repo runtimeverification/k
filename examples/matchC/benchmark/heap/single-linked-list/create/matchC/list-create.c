@@ -6,7 +6,7 @@ struct nodeList {
 };
 
 struct nodeList* create()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
+/*@ pre <heap> . </heap> */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)([5] @ [6] @ [7]) </ heap > < form > returns ?x </ form > </ config > */
 {
   struct nodeList *x;

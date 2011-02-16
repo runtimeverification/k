@@ -6,7 +6,7 @@ struct nodeList {
 };
 
 struct nodeList* prefix(struct nodeList* x, int i)
-/*@ pre < config > < env > x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
+/*@ pre <env> x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
 /*@ post < config > < env > ?rho </ env > < heap > list(?x)([?i] @ A) </ heap > < form > returns ?x </ form > </ config > */
 {
 	struct nodeList* y;

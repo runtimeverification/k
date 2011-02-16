@@ -2,11 +2,8 @@
 #include <stdio.h>
 
 int absolute(int n)
-/*@ pre < config > < env > n |-> n0 </ env >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < form > returns ?n /\ (((?n === n0) /\ @(n0 >=Int 0)) \/ ((?n === -Int n0) /\ @(n0 <Int 0)))  </ form >
-                    C </ config > */
+//@ pre <env> n |-> n0 </env>
+//@ post returns(n) /\ (((n = n0) /\ (n >= 0)) \/ ((n = -n0) /\ (n < 0)))
 {
   if (n < 0) n = -n;
   return n;
@@ -24,5 +21,3 @@ int main()
 
 /*@ var ?n : ?Int */
 /*@ var n0 : FreeInt */
-/*@ var ?rho : ?MapItem */
-/*@ var C : FreeBagItem */
