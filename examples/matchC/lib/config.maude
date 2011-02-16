@@ -87,10 +87,12 @@ mod CONFIG-BUILTIN-MODULE is
   sort HeapLabel .
 
 
-  ops feasible infeasible : -> CellLabel .
+***(
   ops config program struct fun k env stack tenv heap in out : -> CellLabel .
   ops counter : -> CellLabel .
-  ops tasks task form subst other-counter : -> CellLabel .
+  ops task form subst : -> CellLabel .
+***)
+
 
   op skolemize : Nat Pattern -> Pattern .
   op co-skolemize : Nat Pattern -> Pattern .

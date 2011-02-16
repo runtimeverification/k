@@ -13,8 +13,7 @@ LANG_PARSER_DIR=${ML_ROOT_DIR}/parser
 LANG_SEMANTICS_DIR=${ML_ROOT_DIR}/semantics
 ML_BIN_DIR=${ML_ROOT_DIR}/bin
 ML_LIB_DIR=${ML_ROOT_DIR}/lib
-SMT_MAUDE_DIR=${K_TOOLS_DIR}/smt_maude
-OUT_FILTER_DIR=${K_TOOLS_DIR}/OutputFilter
+
 
 KC=${K_TOOLS_DIR}/kcompile-program.sh
 KFLAGS=
@@ -22,13 +21,17 @@ KFLAGS=
 JVM=java
 CLASSPATH=${ANTLR_ROOT_DIR}/antlrworks-1.4.jar:${ANTLR_ROOT_DIR}:${LANG_PARSER_DIR}
 JFLAGS="-classpath ${CLASSPATH}"
-UNWRAP_MAIN=unwrapBuiltinsMain
 PARSER_MAIN=KernelCPreK
 
+PYTHON=python
+
+SMT_MAUDE_DIR=${K_TOOLS_DIR}/smt_maude
 #MAUDE=${SMT_MAUDE_DIR}/maude
 MAUDE=maude
 MFLAGS="-no-banner -no-wrap"
+MAUDE_RUNNER=${ML_BIN_DIR}/maude_runner.py
 
+OUT_FILTER_DIR=${K_TOOLS_DIR}/OutputFilter
 OUT_FILTER=${OUT_FILTER_DIR}/filterOutput
 OUT_FILTER_STYLE=${ML_BIN_DIR}/primitive_style.yml
 
@@ -72,16 +75,21 @@ else
   ML_OP=run
 fi
 
-PROG_BODY=`grep -v '^#include' $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN}`
-if [ "$?" -ne 0 ]; then exit $?; fi
-
 echo -e "
 load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-compiled.maude\n\
 load ${ML_LIB_DIR}/utils.maude\n\
 mod ${PROG_MODULE} is
 inc ${LANG_MODULE} .
 " >${ML_PROG}
-echo "${PROG_BODY}" >>${ML_PROG}
+
+TIME_CMD="/usr/bin/time -f %E -o ${TMP_OUT}"
+COMPILE_PROG_CMD="grep -v ^#include $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN}"
+echo -e "Compiling program..."
+#${TIME_CMD} ${COMPILE_PROG_CMD} >>${ML_PROG}
+/usr/bin/time -f %E -o ${TMP_OUT} grep -v '^#include' $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN} >>${ML_PROG}
+if [ "$?" -ne 0 ]; then exit $?; fi
+echo -e "Done![`cat ${TMP_OUT}`]"
+
 echo -e "
 endm\n\
 mod TEST is inc ${PROG_MODULE} + UTILS . endm\n\
@@ -91,15 +99,17 @@ q\n\
 " >>${ML_PROG}
 
 if [ -z "${COMPILE_FLAG}" ]; then
-  ${MAUDE} ${MFLAGS} ${ML_PROG} >${TMP_OUT} 2>${TMP_ERR}
+  #${MAUDE} ${MFLAGS} ${ML_PROG} >${TMP_OUT} 2>${TMP_ERR}
+  ${PYTHON} ${MAUDE_RUNNER} ${ML_PROG} 2>${TMP_ERR}
   if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
+  cat ${TMP_ERR}
 
   grep 'rewrites: ' ${TMP_OUT}
-  ${OUT_FILTER} ${TMP_OUT} ${OUT_FILTER_STYLE} 2>${TMP_ERR}
-  if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
+  ${OUT_FILTER} ${TMP_OUT} ${OUT_FILTER_STYLE}
+  if [ "$?" -ne 0 ]; then exit $?; fi
 fi
 
-rm -f ${TMP_OUT} ${TMP_ERR} ${MAUDE_PROG} ${COMPILED_PROG}
+#rm -f ${TMP_OUT} ${TMP_ERR} ${MAUDE_PROG} ${COMPILED_PROG}
 if [ -z "${COMPILE_FLAG}" -a -z "${OUT_FLAG}" ]; then
   rm -f ${ML_PROG}
 fi

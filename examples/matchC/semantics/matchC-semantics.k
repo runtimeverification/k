@@ -50,39 +50,43 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
                   <check> .Set </check>
 
                   <tasks>
-                    <task*>
-                      <taskType> Run </taskType>
-                      <config> 
-                        <program> .K </program>
-                        <struct> .Map </struct>
-                        <fun> .Map </fun>
-      
-                        <k> .K </k>
-                        <env> .Map </env>
-                        <stack> .List </stack>
-                        <tenv> .Map </tenv>
-                        
-                        <heap> .Map </heap>
-      
-                        <in> .List </in>
-                        <out> .List </out>
-      
-                        <counter> 0 </counter>
-                      </config>
+                    <funTask*>
+                      <funId> .K </funId>
+                      <task*>
+                        <taskType> Run </taskType>
 
-                      <form> TrueFormula </form>
-                      <subst> .Subst </subst>
-                    </task*>
+                        <config> 
+                          <program> .K </program>
+                          <struct> .Map </struct>
+                          <fun> .Map </fun>
+        
+                          <k> .K </k>
+                          <env> .Map </env>
+                          <stack> .List </stack>
+                          <tenv> .Map </tenv>
+                          
+                          <heap> .Map </heap>
+        
+                          <in> .List </in>
+                          <out> .List </out>
+        
+                          <counter> 0 </counter>
+                        </config>
+  
+                        <form> TrueFormula </form>
+                        <subst> .Subst </subst>
+                      </task*>
+
+                      <funCounter> 0 </funCounter>
+                    </funTask*>
                   </tasks>
-
-                  <other-counter> 0 </other-counter>
                 </top>
 
 
   rule
     <program> checkContracts => setToK(checkSet) <_/program>
     <check> checkSet </check>
-  [structural]
+  [structural print "maude-timerLoading Maude...Done!"]
   rule
     <check_>
       SetItem(checkContract(F)) SetItem(uncheckContract(F)) => .Set
@@ -94,52 +98,62 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
 Function entry
 ***)
   rule
-    <task_>
-      <program> checkContract(F) => .K <_/program>
-      <struct> StructMap </struct>
-      <fun>
-        T F(ParamList) @ pre PrePattern  @ post PostPattern  |-> S
-        FunMap
-      </fun>
-    <_/task>
-    (
-      .Bag
-    =>
+    <funTask_>
       <task_>
+        <program> checkContract(F) => .K <_/program>
         <struct> StructMap </struct>
         <fun>
           T F(ParamList) @ pre PrePattern  @ post PostPattern  |-> S
           FunMap
         </fun>
-        <k>
-          declParams(ParamList)
-          ~> @ assume PrePattern 
-          ~> substKLabel(S, 'return_, 'returnAssert_)
-          ~> assertLabel
-          ~> @ assert PostPattern
-          ~> disolveTask
-        </k>
       <_/task>
-    )
-  [structural]
-  rule
-    <task_>
-      <program> checkContract(F) => .K <_/program>
-      <struct> StructMap </struct>
-      <fun> T F(ParamList) |-> S FunMap </fun>
-    <_/task>
+    <_/funTask>
     (
       .Bag
     =>
+      <funTask_>
+        <funId> F </funId>
+        <task_>
+          <struct> StructMap </struct>
+          <fun>
+            T F(ParamList) @ pre PrePattern  @ post PostPattern  |-> S
+            FunMap
+          </fun>
+          <k>
+            declParams(ParamList)
+            ~> @ assume PrePattern 
+            ~> substKLabel(S, 'return_, 'returnAssert_)
+            ~> assertLabel
+            ~> @ assert PostPattern
+            ~> disolveTask
+          </k>
+        <_/task>
+      <_/funTask>
+    )
+  [structural]
+  rule
+    <funTask_>
       <task_>
+        <program> checkContract(F) => .K <_/program>
         <struct> StructMap </struct>
         <fun> T F(ParamList) |-> S FunMap </fun>
-        <k>
-          declParams(ParamList)
-          ~> substKLabel(S, 'return_, 'returnAssert_)
-          ~> assertLabel
-        </k>
       <_/task>
+    <_/funTask>
+    (
+      .Bag
+    =>
+      <funTask_>
+        <funId> F </funId>
+        <task_>
+          <struct> StructMap </struct>
+          <fun> T F(ParamList) |-> S FunMap </fun>
+          <k>
+            declParams(ParamList)
+            ~> substKLabel(S, 'return_, 'returnAssert_)
+            ~> assertLabel
+          </k>
+        <_/task>
+      <_/funTask>
     )
   [structural]
 
@@ -246,7 +260,7 @@ summary function calls
     <stack_> .List => callContext(K, TEnv, Env) </stack>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>
-    <other-counter> N => sNat N </other-counter>
+    <funCounter> N => sNat N </funCounter>
   [structural]
 
 *** retrieve the return value
@@ -290,12 +304,14 @@ loop invariants
         ~> 'if`(_`)_else_(E,, (S ~> @ assert Pattern ~> disolveTask),, K)
     </k>
 
+
 ***(
 assumed patterns
   1. are merged with the current configuration
   2. split the current configuration if they contain disjunctions
 ***)
   rule
+    <funId> F </funId>
     <k>
       (
         @ assume Pattern 
@@ -328,7 +344,9 @@ assumed patterns
     <tenv> TEnv </tenv>
     <counter> Counter </counter>
     <subst> Subst </subst>
-    <other-counter> N => sNat N </other-counter>
+    <funCounter> N => sNat N </funCounter>
+  ---[structural print "maude-timed===assume" F]
+  [structural]
   rule
     <task>
       <config>
@@ -352,8 +370,9 @@ assumed patterns
       </config>
       TaskItems
     </task>
-  ---[structural]
+  [structural]
   rule
+    <funId> F </funId>
     <task_>
       <config> 
         <k>
@@ -363,6 +382,8 @@ assumed patterns
       </config>
       <form> Phi1 => Phi1 /\ Phi2 </form>
     <_/task>
+  [structural]
+
 
 ***(
 asserted patterns
@@ -373,6 +394,7 @@ asserted patterns
   2. may be assumed correct afterward
 ***)
   rule
+    <funId> F </funId>
     <k>
       (
         @ assert Pattern 
@@ -402,6 +424,7 @@ asserted patterns
     <tenv> TEnv </tenv>
     <counter> Counter </counter>
     <subst> Subst </subst>
+  --- [structural print "maude-timed===assert" F]
   [structural]
   rule
     <task>

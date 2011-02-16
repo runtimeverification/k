@@ -14,20 +14,20 @@ kmod MATCHC is
           + BINARY-TREE-HP
           + IO-PATTERN
 
+
+  kvar N : Nat
   kvar I : Int
+  kvar S : String
   kvar L : List
+
 
   syntax BagItem ::= check ( K )
                    | ( Nat feasible and Nat infeasible paths)
 
   macro check(K:K) = <top_>
                        <check> SetItem(checkContract(id("main"))) </check>
-                       <tasks>
-                         <task_>
-                           <program> K:K ~> checkContracts </program>
-                           <k> disolveTask </k>
-                         <_/task>
-                       </tasks>
+                       <program> K:K ~> checkContracts </program>
+                       <k> disolveTask </k>
                      <_/top>
 
 
@@ -44,7 +44,7 @@ Output
     =>
       .Bag
     )
-  [metadata "structural"]
+  [structural]
   rule
     <infeasible> I => I +Int 1 </infeasible>
     (
@@ -54,20 +54,41 @@ Output
     =>
       .Bag
     )
-  [metadata "structural"]
+  [structural]
+  rule
+    <funTask>
+      <funId> .K </funId>
+      <funCounter> N </funCounter>
+    </funTask>
+  =>
+    .Bag
+  [structural]
+  rule
+    <funTask>
+      <funId> id(S) </funId>
+      <funCounter> N </funCounter>
+    </funTask>
+  =>
+    .Bag
+  ---[structural print "maude-outputChecking " S "...Done!"]
   rule
     <feasible> I => I +Int 1 </feasible>
     (
       <tasks>
-        <task_>
-          <program> .K </program>
-          <k> .K </k>
-          <out> L </out>
-        <_/task>
+        <funTask>
+          <funId> id("main") </funId>
+          <task_>
+            <program> .K </program>
+            <k> .K </k>
+            <out> L </out>
+          <_/task>
+          <funCounter> N </funCounter>
+        </funTask>
       </tasks>
     => 
       <out> L </out>
     )
-  [metadata "structural"]
+  ---[structural print "maude-outputChecking \"main\"..Done!\nmaude-timerVerifying program...Done!"]
+  [structural print "maude-timerVerifying program...Done!"]
 endkm
 

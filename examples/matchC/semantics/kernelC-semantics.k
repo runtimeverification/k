@@ -46,15 +46,7 @@ Function entry
 ***)
   rule
     <program> runMain => .K <_/program>
-    <fun_> T id("main")(.List{KernelC}) |-> S <_/fun>
-    <tasks>
-        _
-      =>
-        <config_>
-          <k> S </k>
-          <stack> callContext(.K, .Map, .Map) </stack>
-        <_/config>
-    </tasks>
+    <k> _ => id("main")(.List{KernelC}) </k>
   [structural]
 
 
