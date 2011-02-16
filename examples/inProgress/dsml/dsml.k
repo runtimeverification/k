@@ -26,6 +26,15 @@ kmod META-MODEL is including OCL-SOLVER
 
   syntax ListItem ::= Id : KLabel [prec 20] | Formula
 
+  syntax Type ::= int | bool | string | Id
+
+  syntax Bool ::= isScalar ( Type )
+
+  rule isScalar(int) => true [structural]
+  rule isScalar(bool) => true [structural]
+  rule isScalar(string) => true [structural]
+  rule isScalar(Id:Id) => false [structural]
+
 
 /*
   A configuration for a metamodel consists of two cells: one for classes and one for OCL constraints.
