@@ -39,6 +39,13 @@ sub terminate {
   -png : maudifies/compiles for generating png output
   -crop : maudifies/compiles for generating a nice crop-pdf output
      -style : useful for typesetting (optional)
+  Compile only one program
+  -pgm <filename> : the file where the program macro is
+  -cmod <module name> : the module where the language is
+  -pmod <module name> : the module where the macro is
+     If this is missing, <module name> will be considered ALLCAPS(pgm)
+  -pname <macro name> : the name of the macro
+     If this is missing, <macro name> will be considered as being pgm
   \n" if (!$verbose && !$help);
 
     print "Usage:
@@ -360,6 +367,13 @@ my $temp_file   = fresh("kompile_tmp", ".txt");
 my $kshared = File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(), "shared.maude"));
 my $mset = 0;
 
+# variables to compile only one program
+my $compileProgram = 0;
+my $pgm   = "0";	# source file
+my $cmod  = "0";	# compiled module name
+my $pmod  = "0";	# program module name
+my $pname = "0";	# program name
+
 my $begin_compiled_module = "---K-MAUDE-GENERATED-OUTPUT-BEGIN---";
 my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";
 
@@ -405,6 +419,19 @@ foreach (@ARGV) {
     elsif (($output_latex_file eq "?") && !/^-/) {
 	$output_latex_file = $_;
     }
+    elsif (($pgm eq "?") && !/^-/) {
+		$_ =~ s/\.k$//;
+		$pgm = $_;
+	}
+	elsif (($pname eq "?") && !/^-/) {
+		$pname = $_;
+	}
+	elsif (($cmod eq "?") && !/^-/) {
+		$cmod = $_;
+	}
+	elsif (($pmod eq "?") && !/^-/) {
+		$pmod = $_;
+	}
     elsif (/^--?h(elp)?$/) {
 # Terminates with usage info when asked for help
 	$help = 1;
@@ -464,6 +491,22 @@ foreach (@ARGV) {
     elsif (/^--?crop$/) {
 	$crop = 1;
     }
+ 	elsif (/^--?pgm$/) { # start compile program param check
+		$compileProgram = 1;
+		$pgm = "?";
+    }
+	elsif (/^--?cmod$/) {
+		$compileProgram = 1;
+		$cmod = "?";
+    }
+	elsif (/^--?pmod$/) {
+		$compileProgram = 1;
+		$pmod = "?";
+    }
+	elsif (/^--?pname$/) {
+		$compileProgram = 1;
+		$pname = "?";
+    } # end compile program param check
     elsif (/^--?style$/) {
 	$style = "?";
     }
@@ -492,6 +535,8 @@ foreach (@ARGV) {
 	$language_file_name = $_;
     }
 }
+# if I want to compile only a program
+compile_program() if $compileProgram;
 
 # Extract only language name without path
 $lang_name = basename($language_file_name);
@@ -2013,4 +2058,69 @@ sub add_subsorts
     
 #    print "SUPERSORTS: $supersorts\n";
 #    print "MODULES: @modules\n";
+}
+
+# compile only a single program
+# steps:
+# maudify the file
+# append the $compile text to the end of the maudified file
+# call maude
+# remove maude wrappers
+# write result to $pgm-comipled.maude
+# remove temp files
+# exit kompilation (the action is dedicated, the rest of the actions are ignored)
+sub compile_program
+{
+	if ($pgm eq "0" or $pmod eq "0") {
+		print "To compile a single program you need to specify at least -pgm and -pmod\n";
+		exit();
+	}
+	if ($pmod eq "0") {
+		$pmod = uc $pgm;
+	}
+	if ($pname eq "0") {
+		$pname = $pgm;
+	}
+	
+	maudify_file("$pgm.k", "");
+	my $maudified = get_file_content("$pgm.maude");
+
+	my $compile = 
+"set include PL-BOOL off .
+set include BOOL on .
+load \"$k_tools_dir" . "prelude-extras\"
+load \"$k_tools_dir" . "meta-k\"
+load \"$k_tools_dir" . "printing\"
+
+load  \"$k_tools_dir" . "compile-program-interface\"
+---(
+set print attribute on .
+red in COMPILE-PROGRAM-META : compileProgram(\"$cmod\",\"$pmod\",\"$pname\") .
+q
+---)
+loop compile-program .
+(compileProgram $cmod $pmod $pname .)
+q
+";
+
+	my $tempFile = "programCompile.tmp";
+	#open (MYFILE, ">programCompile.tmp");
+	open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
+	print MYFILE "$maudified\n$compile\n";
+	close(MYFILE);
+	
+# run maude with this input
+	my $comp = run_maude("Compiling single program", "in programCompile.tmp");
+# verific? - vezi cum se face verificarea
+	#print "$comp\n";
+	$comp =~ /$begin_compiled_module(.*?)$end_compiled_module/s;
+	#print $1;
+
+	unlink("programCompile.tmp");
+
+	open MYFILE,">","$pgm-compiled.maude" or die "Cannot create $tempFile\n";
+	print MYFILE "load \"$pgm\"\n$1";
+	close(MYFILE);
+	
+	exit();
 }
