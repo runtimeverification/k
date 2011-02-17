@@ -691,6 +691,9 @@ if (!$compile_only) {
     maudify_file("$language_file_name","");
 #    print "Maudification: $language_file_name\n\n";
     
+	# Check incompatible sorts
+#	check_incompatible($language_file_name, $language_module_name);
+
     if ($klabels ne "")
     {
 		my @tmp = split(/\s+/, $klabels);
@@ -1632,17 +1635,17 @@ sub make_ops {
 
 # Generate the Maude replacement of the K syntactic construct
 #		print "Production: $production\nand res:\n$result\nSorts: @sorts\n\n";
-		if ($latex || $pdf || $ps || $crop || $eps || $png)
-		{
-			$result .= ($production eq "_")
-						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort : @sorts -> $result_sort [metadata \"latex(renameTo\\\\crlbracket) location($file:$absolute_line)\"] $space5 "
-						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
-		}
-		else {
+#		if ($latex || $pdf || $ps || $crop || $eps || $png)
+#		{
+#			$result .= ($production eq "_")
+#						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort : @sorts -> $result_sort [metadata \"latex(renameTo\\\\crlbracket) location($file:$absolute_line)\"] $space5 "
+#						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
+#		}
+#		else {
 			$result .= ($production eq "_")
 						? "$space4 subsort @sorts < $result_sort$space5 "
 						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
-		}
+#		}
 	}
 
 # print "Done\n";
