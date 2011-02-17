@@ -19,7 +19,7 @@ kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL
                | AExp * AExp         [strict]
                | AExp / AExp         [strict]
                | - AExp             [strict]
-               |  CExp .size() [strict]
+               |  CExp`.size() [strict]
 
 // Expressions : Boolean
 
@@ -46,8 +46,7 @@ syntax BExp ::= Bool | Var
   
 // Expressions : Collections
 
-syntax CExp ::= Var
-                | Class .allInstances [strict] // "basic constructor" for expressions
+syntax CExp ::=  Class .allInstances  // "basic constructor" for expressions
                 | AExp 
                 | BExp 
                 | CExp . Attr [strict(1)] 
@@ -61,6 +60,8 @@ syntax CExp ::= Var
 // Expressions : Let
 
 syntax LExp ::= let Var `: Type `= AllExp in  AllExp
+
+
 
 syntax AllExp ::= AExp | BExp  | CExp | LExp
 
