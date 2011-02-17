@@ -9,12 +9,12 @@ struct listNode {
 
 
 void readWrite(int n)
-//@ pre  <in> A @ I </in><out> O </out> /\ len(A) = n
-//@ post <in> I </in><out> O @ A </out>
+//@ pre  <in> A @ In </in> <out> Out </out> /\ len(A) = n
+//@ post <in> In </in> <out> Out @ A </out>
 {
   int t;
 
-  /*@ invariant <in> ?B @ I </in><out> O @ ?A </out>
+  /*@ invariant <in> ?B @ In </in> <out> Out @ ?A </out>
                 /\ n >= 0 /\ len(?B) = n /\ A = ?A @ ?B */
   while (n) {
     scanf("%d", &t);
@@ -25,8 +25,8 @@ void readWrite(int n)
 
 
 void readWriteBuffer(int n)
-//@ pre  <in> A @ I </in><out> O </out> /\ len(A) = n
-//@ post <in> I </in><out> O @ rev(A) </out>
+//@ pre  <in> A @ In </in> <out> Out </out> /\ len(A) = n
+//@ post <in> In </in> <out> Out @ rev(A) </out>
 {
   int i;
   struct listNode *x;
@@ -34,7 +34,7 @@ void readWriteBuffer(int n)
 
   i = 0;
   x = 0;
-  /*@ invariant <in> ?B @ I </in><heap> list(x)(?A), !H </heap>
+  /*@ invariant <in> ?B @ In </in> <heap> list(x)(?A), !H </heap>
                 /\ i <= n /\ len(?B) = n - i /\ A = rev(?A) @ ?B */
   while (i < n) {
     y = x;
@@ -44,8 +44,7 @@ void readWriteBuffer(int n)
     i += 1;
   }
 
-  i = 0;
-  /*@ invariant <out> O @ ?A </out><heap> list(x)(?B), !H </heap>
+  /*@ invariant <out> Out @ ?A </out> <heap> list(x)(?B), !H </heap>
                 /\ A = rev(?A @ ?B) */
   while (x) {
     y = x->next;
@@ -64,16 +63,16 @@ int main()
 
   scanf("%d", &n);
   readWrite(n);
-  //@ assert <in> [5, 6, 7, 8, 9, 10] </in><out> [1, 2, 3, 4, 5] </out>
+  //@ assert <in> [5, 6, 7, 8, 9, 10] </in> <out> [1, 2, 3, 4, 5] </out>
 
   scanf("%d", &n);
   readWriteBuffer(n);
-  //@ assert <in> epsilon </in><out> [1, 2, 3, 4, 5, 10, 9, 8, 7, 6] </out>
+  //@ assert <in> epsilon </in> <out> [1, 2, 3, 4, 5, 10, 9, 8, 7, 6] </out>
 
   return 0;
 }
 
 
-//@ var A, B, I, O : Seq
-//@ var !H : !MapItem
+//@ var A, B, In, Out : Seq
+//@ var H : MapItem
 

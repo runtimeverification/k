@@ -8,12 +8,9 @@ struct listNode {
 };
 
 
-void readWrite()
+void readWrite(int n)
 {
   int t;
-  int n;
-
-  scanf("%d", &n);
 
   while (n) {
     scanf("%d", &t);
@@ -23,14 +20,11 @@ void readWrite()
 }
 
 
-void readWriteBuffer()
+void readWriteBuffer(int n)
 {
   int i;
-  int n;
   struct listNode *x;
   struct listNode *y;
-
-  scanf("%d", &n);
 
   i = 0;
   x = 0;
@@ -42,26 +36,28 @@ void readWriteBuffer()
     i += 1;
   }
 
-  i = 0;
-  while (i < n) {
+  while (x) {
     y = x->next;
     printf("%d ",x->val);
     free(x);
     x = y;
-    i += 1;
   }
 }
 
 
 int main()
 {
+  int n;
   /*@ assume <in> [5, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10] </in>
              <out> epsilon </out> */
-  readWrite();
-  //@ assert <in> [5, 6, 7, 8, 9, 10] </in><out> [1, 2, 3, 4, 5] </out>
 
-  readWriteBuffer();
-  //@ assert <in> epsilon </in><out> [1, 2, 3, 4, 5, 10, 9, 8, 7, 6] </out>
+  scanf("%d", &n);
+  readWrite(n);
+  //@ assert <in> [5, 6, 7, 8, 9, 10] </in> <out> [1, 2, 3, 4, 5] </out>
+
+  scanf("%d", &n);
+  readWriteBuffer(n);
+  //@ assert <in> epsilon </in> <out> [1, 2, 3, 4, 5, 10, 9, 8, 7, 6] </out>
 
   return 0;
 }

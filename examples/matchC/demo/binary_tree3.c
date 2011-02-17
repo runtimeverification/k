@@ -126,6 +126,7 @@ struct treeNode *create()
 void destroy(struct listNode* x)
 {
   struct listNode *y;
+
   while(x)
   {
     y = x->next;
@@ -175,5 +176,5 @@ int main()
 
 //@ var A, TS : Seq
 //@ var T : Tree
-//@ var H : FreeMapItem
+//@ var H : MapItem
 

@@ -124,7 +124,8 @@ directive
   | VERIFY
   | BREAKPOINT
   | VAR
-    ids+=IDENTIFIER (COMMA ids+=IDENTIFIER)* COLON sort=IDENTIFIER
+    // ids+=IDENTIFIER (COMMA ids+=IDENTIFIER)* COLON sort=IDENTIFIER
+    ids+=IDENTIFIER (COMMA ids+=IDENTIFIER)* COLON sort
     {
       for (Object id : $ids) {
         Table.varRootToSort.put(((CommonToken) id).getText(), $sort.text);
@@ -133,6 +134,12 @@ directive
     -> VAR["(.).K"]
   ;
 
+sort
+  : IDENTIFIER
+  | LIST_ITEM
+  | BAG_ITEM
+  | MAP_ITEM 
+  ;
 
 pattern
   : disjunctive_pattern

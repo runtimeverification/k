@@ -161,6 +161,5 @@ int main()
 
 //@ var n : Int
 //@ var A, B, C : Seq
-//@ var H : FreeMapItem
-//@ var !H : !MapItem
+//@ var H : MapItem
 
