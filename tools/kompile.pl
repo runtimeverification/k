@@ -282,7 +282,7 @@ my $k_nice_pdf = File::Spec->catfile($k_tools_dir, "nice-pdf.sh");
 my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
-my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large);           
+my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large latex);           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $comment = join("|", (
@@ -1300,46 +1300,53 @@ sub maudify_file {
     
 # Replacing dots    
     $_ = replace_dots($_);
+	my $temporary = $_;
 
     my $maudified = "";
-    while (s/^(\s*)($top_level_pattern)(\s*)//sm) {
-	(my $before, local $_, my $after) = ($1,$2,$3);
-	if (m!^kmod\s+(\S+)!) {
-	    print $indent."K module $1 ... " if $verbose;
-	    push(@kmodules,$1);
-	    $_ = maudify_module($file, $_);
-	    print "DONE\n" if $verbose;
-	}
-	elsif (m!^f?mod\s+(\S+)!) {
-	    print $indent."Maude module $1 ... " if $verbose;
-	    add_sorts($_);
-	    add_tokens($_);
-	    print "DONE\n" if $verbose;
-	}
-	elsif (m!^(?:in|load)\s+(\S+)!) {
-	    maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
-	    s!\.k(maude)?\s*$!\.maude!s;
-	}
-	elsif (m!^(?:require)\s+(\S+)!) {
-	    # print "File $file require: $1\n";
-	    if (required($file, $1))
-	    {
-		maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
-		s!\.k(maude)?\s*$!\.maude!s;
-		s!require!in!;
-	    }
-	    else
-	    {
-		s!require\s+\S+!!;
-	    }
-	}
-	else {
+    while (s/^(\s*)($top_level_pattern)(\s*)//sm) 
+	{
+		(my $before, local $_, my $after) = ($1,$2,$3);
+		if (m!^kmod\s+(\S+)!) 
+		{
+			print $indent."K module $1 ... " if $verbose;
+			push(@kmodules,$1);
+			my $mno = countlines($`) if ($temporary =~ /\Q$_\E/);
+			$_ = maudify_module($file, $mno, $_);
+			print "DONE\n" if $verbose;
+		}
+		elsif (m!^f?mod\s+(\S+)!) 
+		{
+			print $indent."Maude module $1 ... " if $verbose;
+			add_sorts($_);
+			add_tokens($_);
+			print "DONE\n" if $verbose;
+		}
+		elsif (m!^(?:in|load)\s+(\S+)!) 
+		{
+			maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
+			s!\.k(maude)?\s*$!\.maude!s;
+		}
+		elsif (m!^(?:require)\s+(\S+)!) 
+		{
+			# print "File $file require: $1\n";
+			if (required($file, $1))
+			{
+				maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
+				s!\.k(maude)?\s*$!\.maude!s;
+				s!require!in!;
+			}
+			else
+			{
+				s!require\s+\S+!!;
+			}
+		}
+		else 
+		{
 
-#	    print "Top level pattern:\n$_\n" if $verbose;
-	}
+		#	    print "Top level pattern:\n$_\n" if $verbose;
+		}
         $maudified = "$maudified$before$_$after";
     }
-
 
     
     if (/\S/) 
@@ -1367,7 +1374,7 @@ sub maudify_file {
 
 
 sub maudify_module {
-    (my $file, local $_) = @_;
+    (my $file,my $mno, local $_) = @_;
 
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
@@ -1397,7 +1404,7 @@ sub maudify_module {
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
-    s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops($1)!gse;
+    s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
     $_ = Unfreeze("ATTRIBUTES", $_);
 #     print  "Stage:\n$_\n\n";
     
@@ -1489,9 +1496,14 @@ sub maudify_module {
 
 # Takes a syntax statement and extracts sorts, subsorts and operations
 sub make_ops {
+    my $sno = shift;
+	my $file = shift;
     local ($_) = @_;
     $_ = Unfreeze("ATTRIBUTES", $_);
-#    print "make_ops:\n$_\n";
+#    print "make_ops:\n$_\nat line $sno\n";
+
+# 	keep temporary four counting lines
+	my $temporary = $_;
 
 # Grab the result sort and the productions, as well as all spacing
  	my ($spaces1,$result_sort,$spaces2,$bnf,$productions,$spaces3) =  /^syntax(\s+)(\S*)(\s*)(::=)(.*?\S)(\s*)$/s;
@@ -1525,7 +1537,13 @@ sub make_ops {
 
 #        print "PRODS: ".join("#",@productions)."\n";
 
-        foreach my $production (@productions) {
+	foreach my $production (@productions) {
+	
+		# count line numbers
+		my $absolute_line = countlines($`) if ($temporary =~ /\Q$production\E/);
+		$absolute_line = ($absolute_line == 0) ? $sno : $absolute_line + $sno - 1;
+#		print "Production up1: $production at line $absolute_line\n";
+
 # Removing the | separator
 		$production =~ s/(\s)\|(\s)/$1$2/gs;
 
@@ -1603,11 +1621,29 @@ sub make_ops {
 		    $attributes =~ s/^\[/[latex "$latex_text" /;
 		}
 
+# Add metadata location for each op 
+	# if there are already some attributes then add metadata if other metadata is there
+	$attributes =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 location($file:$absolute_line)\" / if ($attributes ne "" && $attributes =~ /metadata/);
+	# if there are already some attributes then add metadata if not already
+	$attributes =~ s/\[/[ metadata \"location($file:$absolute_line)\" / if ($attributes ne "" && $attributes !~ /metadata/);
+	# if no attributes just define a new attribute metadata and declare location
+	$attributes = "[metadata \"location($file:$absolute_line)\"]" if $attributes eq "";
+	
+
 # Generate the Maude replacement of the K syntactic construct
-		$result .= ($production eq "_")
-					? "$space4 subsort @sorts < $result_sort$space5 "
-					: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
-        }
+#		print "Production: $production\nand res:\n$result\nSorts: @sorts\n\n";
+		if ($latex || $pdf || $ps || $crop || $eps || $png)
+		{
+			$result .= ($production eq "_")
+						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort : @sorts -> $result_sort [metadata \"latex(renameTo\\\\crlbracket) location($file:$absolute_line)\"] $space5 "
+						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
+		}
+		else {
+			$result .= ($production eq "_")
+						? "$space4 subsort @sorts < $result_sort$space5 "
+						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
+		}
+	}
 
 # print "Done\n";
 #        print "RESULT:$result\n";

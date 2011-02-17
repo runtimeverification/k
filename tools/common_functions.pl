@@ -1517,7 +1517,7 @@ sub uniq
 #       line numbers metadata                 #
 ###############################################
 
-my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large);
+my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large latex);
 my $k_attributes_pattern = join("|",  @k_attributes);
 
 
@@ -1559,24 +1559,24 @@ sub add_line_numbers
 
             $temp =~ s/\Q$tmp\E/$rule/sg;
         }
-        elsif ($2 eq "syntax")
-        {
-            my $syntax = $1;
-            my ($tmp, $syntax_line) = ($syntax, countlines("$`"));
+#        elsif ($2 eq "syntax")
+#        {
+#            my $syntax = $1;
+#            my ($tmp, $syntax_line) = ($syntax, countlines("$`"));
             
-            while ($syntax =~ /(?:(::=|\|))([^\|]+)/sg)
-            {
-                my $rule_line = countlines("$`") + $syntax_line;
-                my $spacess = "";
-                my $item = $2;
-                $item =~ s/(\s+)$/{$spacess = $1;}/sge;
-                my $item2 = $item;
-                $item =~ s!(\[([^\]]*?($k_attributes_pattern)[^\]]*?)\])![$2 metadata "location($file:$rule_line)"]!sg;
-                $tmp =~ s/\Q$item2\E/$item/sg;
-            }
+#            while ($syntax =~ /(?:(::=|\|))([^\|]+)/sg)
+#            {
+#                my $rule_line = countlines("$`") + $syntax_line;
+#                my $spacess = "";
+#                my $item = $2;
+#                $item =~ s/(\s+)$/{$spacess = $1;}/sge;
+#                my $item2 = $item;
+#                $item =~ s!(\[([^\]]*?($k_attributes_pattern)[^\]]*?)\])![$2 metadata "location($file:$rule_line)"]!sg;
+#                $tmp =~ s/\Q$item2\E/$item/sg;
+#            }
             
-            $temp =~ s/\Q$syntax\E/$tmp/sg;
-        }
+#            $temp =~ s/\Q$syntax\E/$tmp/sg;
+#        }
         elsif ($2 eq "macro")
         {
             my $macro = $1;
