@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -d:DProf
+#!/usr/bin/perl -w
 use strict;
 use File::Basename;
 use File::Spec;
