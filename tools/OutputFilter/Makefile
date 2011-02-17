@@ -1,14 +1,14 @@
 all:
-	ghc --make Main -o filterOutput -O2 -H14m
+	@ghc --make Main -o filterOutput -O2 -H14m
 
 static:
-	ghc --make -static -optl-static -optl-pthread Main -o filterOutput -O2 -H14m
+	@ghc --make -static -optl-static -optl-pthread Main -o filterOutput -O2 -H14m
 
 prof:
-	ghc --make Main -o filterOutput -O2 -H14m -prof -auto-all
+	@ghc --make Main -o filterOutput -O2 -H14m -prof -auto-all
 
 threadscope:
-	ghc --make Main -o filterOutput -O2 -H14m -threaded -eventlog
+	@ghc --make Main -o filterOutput -O2 -H14m -threaded -eventlog
 
 clean:
 	rm -f *.hi

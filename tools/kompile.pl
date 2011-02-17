@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -d:DProf
 use strict;
 use File::Basename;
 use File::Spec;
@@ -1989,10 +1989,8 @@ sub unfreeze {
 sub Freeze
 {
     my ($string, $marker) = (shift, shift);
-#    print "STRING: $string\n";
-    my $frozen_string = $marker . join("", map(ord, split('',md5($string))));
-    
-    $freeze_map{$frozen_string} = $string;
+    my $frozen_string = $marker . md5_hex($string); #join("", map(ord, split('',md5($string))));
+    $freeze_map{$marker}{$frozen_string} = $string;
     
     return $frozen_string;
 }
@@ -2001,14 +1999,11 @@ sub Freeze
 sub Unfreeze
 {
     my ($marker, $all) = (shift, shift);
-    
-    while (my ($key, $value) = each(%freeze_map))
-    {
-	if ($key =~ /^$marker/)
-	{
-	    $all =~ s/$key/$value/sg;
-	}
+    my $marker_map = $freeze_map{$marker};
+    while (my ($key, $value) = each(%$marker_map)) {
+        $all =~ s/$key/$value/sg;
     }
+	
     return $all;
 }
 
