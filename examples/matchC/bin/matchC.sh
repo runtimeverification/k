@@ -84,10 +84,10 @@ inc ${LANG_MODULE} .
 
 TIME_CMD="/usr/bin/time -f %e -o ${TMP_OUT}"
 PROG_CMD="grep -v ^#include $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN} >>${ML_PROG}"
-echo -e -n "Compiling program... "
+echo -e -n "Compiling program ... "
 ${TIME_CMD} bash -c "${PROG_CMD}"
 if [ "$?" -ne 0 ]; then exit $?; fi
-echo -e "Done![\033[1;33m`cat ${TMP_OUT}`s\033[0m]"
+echo -e "DONE! [\033[1;33m`cat ${TMP_OUT}`s\033[0m]"
 
 echo -e "
 endm\n\

@@ -86,7 +86,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   rule
     <program> checkContracts => setToK(checkSet) <_/program>
     <check> checkSet </check>
-  [structural print "maude-output-timerDone!\nmaude-outputVerifying program..."]
+  [structural print "maude-output-timerDONE!\nmaude-outputVerifying program ..."]
   rule
     <check_>
       SetItem(checkContract(F)) SetItem(uncheckContract(F)) => .Set
