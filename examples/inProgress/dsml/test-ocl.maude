@@ -1,0 +1,8 @@
+in ocl-syntax.maude
+ parse
+ let y : Col(c1)  = (c1 .allInstances) ->select(x : c1 | (x . a1 = 3) ) 
+  in 
+    let z : Col(c2) =  ((c2 .allInstances) ->collect(x : c1 | x . a2) ) 
+in ( (y . a3) = (z . a3)) .
+
+

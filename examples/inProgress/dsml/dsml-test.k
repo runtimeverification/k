@@ -3,7 +3,7 @@ in dsml.k
 
 kmod CONFORMANCE is including META-MODEL
 
-syntax K ::= checkConf( Id ) |  checkStruct ( Id ) | checkOCL ( Id ) | checkAttr ( Bag ) |  checkLinks ( Bag )
+syntax K ::= checkConf( Id ) |  checkStruct ( Id ) | checkOCL ( Id ) | checkAttr ( Bag ) 
 
 
 
@@ -12,7 +12,7 @@ rule
 <k> checkConf(Mod:Id) => checkStruct(Mod)~>checkOCL(Mod) <_/k> 
 
 
-rule <k> checkStruct(Mod) => checkAttr(INST:Bag)~>checkLinks(INST)  <_/k>
+rule <k> checkStruct(Mod) => checkAttr(INST:Bag)  <_/k>
      <model> <modelName> Mod </modelName> INST </model> 
 
 
@@ -53,7 +53,7 @@ rule  <k>consistentAttributes( (attr:Id |->  typedVal(v:Val,T:Type)) Map':Map,
 
 rule consistentAttributes( (attr |->  typedVal(_,T:Type) Map'), .Map)
      =>
-     ERROR-UNDEFINED-ATTRIBUTE(attr) 
+     ERROR-UNDEFINED-ATTRIBUTE(attr) // if unknownType(T, Map)
     [structural] 
 
 
@@ -61,10 +61,10 @@ rule consistentAttributes( (attr |->  typedVal(_,T:Type) Map'), .Map)
  syntax Bool  ::= unknownType ( Type , Map ) 
 
 rule unknownType(T, (_ |-> T) _) => false [structural]
-rule unknownType(T, ((_ |-> T':Type) M')) => unknownType(T, M') if T' =/= T [structural] --- how to test difference?
+rule unknownType(T, ((_ |-> T':Type) Map')) => unknownType(T, Map') if notBool (T' = T) [structural] // how to test difference?
 rule unknownType(T, .Map) = true [structural] 
-
 */
+
 
  syntax Bag ::= testConfig
 

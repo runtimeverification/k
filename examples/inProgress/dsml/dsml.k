@@ -22,7 +22,7 @@ kmod META-MODEL is including OCL-SOLVER
   syntax Id ::= object 
 
  
-  syntax K ::= Id | undefined | Bool 
+  syntax K ::= Id | undefined  
 
   syntax ListItem ::= Id : KLabel [prec 20] | Formula
 

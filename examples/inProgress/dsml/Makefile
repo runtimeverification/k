@@ -3,7 +3,7 @@
 KCOMPILE ?= ../../../tools/kompile.pl
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = CONFORMANCE
+LANGUAGE_NAME = OCL-SYNTAX
 
 # this are all interesting modules (used to latexify)
 #LANGUAGE_MODULES = 
@@ -11,7 +11,7 @@ LANGUAGE_NAME = CONFORMANCE
 LATEX_STYLE = bb
 
 # this is the basename of the main file
-MAIN_FILE = dsml-test
+MAIN_FILE = ocl-syntax
 
 # these are additional files that when changed will force rebuilding the semantics
 #ADDITIONAL_DEPENDENCIES = 
