@@ -3,9 +3,11 @@ top: hide
 
 feasible:
   text-style:
+    bold: yes
     foreground: green
 infeasible:
   text-style:
+    bold: yes
     foreground: red
 
 program: hide
