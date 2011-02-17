@@ -1,4 +1,4 @@
- require ../../../k-prelude
+require ../../../k-prelude
 
 kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL
 
@@ -19,7 +19,7 @@ kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL
                | AExp * AExp         [strict]
                | AExp / AExp         [strict]
                | - AExp             [strict]
-               |  CExp`.size() [strict]
+               |  CExp .size() [strict]
 
 // Expressions : Boolean
 
@@ -66,6 +66,15 @@ syntax LExp ::= let Var `: Type `= AllExp in  AllExp
 syntax AllExp ::= AExp | BExp  | CExp | LExp
 
 syntax K ::= AllExp
+
+syntax Kresult ::= ValSet
+
+syntax Val ::= Bool | Int | instVal ( Bag ) 
+
+syntax ValSet ::= .ValSet | Val | Valset ValSet [assoc comm id: .ValSet]
+                | ValSet unionValSet ValSet 
+                | ValSet interValSet ValSet
+....
 
 // some identifiers to test with...
 // in general these will depend on a given metamodel

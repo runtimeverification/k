@@ -1,0 +1,34 @@
+rule 
+  <k> C.allInstance => collectInst(C, INST:Bag)
+  <model> <modelName>_</modelName> INST </model>
+  
+rule 
+  collectInst(C, <instance> <ofClass> C </ofClass> REST:Bag </instance> INST:Bag)
+  =>
+  instVal(<instace> <ofClass> C </ofClass> REST:Bag </instace>) collectInst(C, REST)
+
+rule 
+  collectInst(C, <instance> <ofClass> C' </ofClass> REST:Bag </instance> INST:Bag)
+  =>
+  collectInst(C, REST)
+  if notBool C ==Bool C'
+
+...
+
+
+rule
+  <k> VS:ValSet.attr
+      =>
+      selectAttr(VS, attr) 
+  <_/k>
+
+rule
+   selectAttr( instVal(<instance> 
+                          <attributes_> attr |-> typedValue(vla,tla) <_/attributes>
+                       </instance>)
+               VS, attr
+           ) 
+    =>
+    vla selectAttr(VS, attr)
+   selectAttr(.ValSet, attr) => .ValSet
+    

@@ -1,13 +1,6 @@
- require ../../../k-prelude
+//require ../../../k-prelude
+require ocl-syntax
 
-
-/*
-  The module OCL-SOLVER should include the syntax for OCL formulas and rules for evaluating them.
-*/
-kmod OCL-SOLVER is including K + PL-ID
-  syntax Formula ::=  `True | `False | forAll ( OclVar : Id `| Bool )
-  syntax OclVar ::= t`!
-endkm
 
 /*
   A meta-model consists of a configuration including 
@@ -17,16 +10,16 @@ endkm
   A model is represented by a cell including instances of the classes. For each instance, we have
   cells with the name of the instance, the name of the class owner, and the values of the attributes.
 */
-kmod META-MODEL is including OCL-SOLVER
+kmod META-MODEL is including OCL-SYNTAX
 
   syntax Id ::= object 
 
  
   syntax K ::= Id | undefined  
 
-  syntax ListItem ::= Id : KLabel [prec 20] | Formula
+  syntax ListItem ::= Id : KLabel [prec 20] 
 
-  syntax Type ::= int | bool | string | Id
+//  syntax Type ::= int | bool | string | Id
 
   syntax Bool ::= isScalar ( Type )
 

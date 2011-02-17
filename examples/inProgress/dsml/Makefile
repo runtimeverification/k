@@ -3,7 +3,8 @@
 KCOMPILE ?= ../../../tools/kompile.pl
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = OCL-SYNTAX
+# LANGUAGE_NAME = OCL-SYNTAX
+LANGUAGE_NAME = META-MODEL
 
 # this are all interesting modules (used to latexify)
 #LANGUAGE_MODULES = 
@@ -11,7 +12,8 @@ LANGUAGE_NAME = OCL-SYNTAX
 LATEX_STYLE = bb
 
 # this is the basename of the main file
-MAIN_FILE = ocl-syntax
+# MAIN_FILE = ocl-syntax
+MAIN_FILE = dsml
 
 # these are additional files that when changed will force rebuilding the semantics
 #ADDITIONAL_DEPENDENCIES = 
