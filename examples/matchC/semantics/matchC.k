@@ -89,6 +89,6 @@ Output
       <out> L </out>
     )
   ---[structural print "maude-outputChecking \"main\"..Done!\nmaude-timerVerifying program...Done!"]
-  [structural print "maude-timerVerifying program...Done!"]
+  [structural print "maude-output-rewritesDone!"]
 endkm
 

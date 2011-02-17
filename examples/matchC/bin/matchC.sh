@@ -82,13 +82,12 @@ mod ${PROG_MODULE} is
 inc ${LANG_MODULE} .
 " >${ML_PROG}
 
-TIME_CMD="/usr/bin/time -f %E -o ${TMP_OUT}"
-COMPILE_PROG_CMD="grep -v ^#include $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN}"
-echo -e "Compiling program..."
-#${TIME_CMD} ${COMPILE_PROG_CMD} >>${ML_PROG}
-/usr/bin/time -f %E -o ${TMP_OUT} grep -v '^#include' $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN} >>${ML_PROG}
+TIME_CMD="/usr/bin/time -f %e -o ${TMP_OUT}"
+PROG_CMD="grep -v ^#include $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN} >>${ML_PROG}"
+echo -e -n "Compiling program... "
+${TIME_CMD} bash -c "${PROG_CMD}"
 if [ "$?" -ne 0 ]; then exit $?; fi
-echo -e "Done![`cat ${TMP_OUT}`]"
+echo -e "Done![`cat ${TMP_OUT}`s]"
 
 echo -e "
 endm\n\
