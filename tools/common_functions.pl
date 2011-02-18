@@ -1922,13 +1922,13 @@ sub solve_latex_comments
 	# get k module line no and file name
 	my $lno = shift;
 	my $file = shift;
+        #	s/\t/$TAB/sg;
+        #        s/\n/" +String \n"/sg;
 
 	s!($latex_comment)!{
 		my $l = countlines($`) + $lno - 1;
 		local $_ = $+;
-		s/\t/$TAB/sg;
-		s/\n/" +String \n"/sg;
-		"mb latex \"$_\" : KSentence [metadata \"location($file:$l)\"] .";
+		"mb latex \"\\\\".get_newcommand($_)."\" : KSentence [metadata \"location($file:$l)\"] .";
 	}!sge;
 
 	$_;

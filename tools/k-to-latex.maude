@@ -158,26 +158,66 @@ mod DECL-META-LATEX-PRINT is
   eq hookList2QidList((term-hook(QI, T) HkL))
     = ('term-hook '`( QI '`, termList2QidList(T) '`) hookList2QidList(HkL)) .
 
+  sort Printable Printables .
+  subsort Printable < Printables .
+ 
+  op empty : -> Printables .
+  op __ : Printables Printables -> Printables [assoc id: empty] .  
+
+  var P P1 P2 : Printable . var Prints : Printables .  var N1 N2 : Nat .
+
+  op loc : Int Printable -> Printable .
+  eq loc(-1, P) = P .
+  ceq loc(N1,P1) loc(N2,P2) = loc(N2,P2) loc(N1,P1) if N2 < N1 .
+
+  op op : OpDecl -> Printable .
+  op mb : MembAx -> Printable .
+  op eq : Equation -> Printable .
+  op rl : Rule -> Printable .
+  op ss : SubsortDecl -> Printable .
+
+---(
+  op subsorts : SubsortDeclSet -> Printables .
+  eq subsorts(SSD SSDS) = ss(SSD) subsorts(SSDS) .
+  eq subsorts(none) = empty .
+  var SSD : SubsortDecl .  
+---)
+var Eq : Equation .  var Eqs : EquationSet .
+  var Rl : Rule . var Rls : RuleSet .
+
+  op ops : OpDeclSet -> Printables .
+  eq ops(Op OPDS) = loc(getBeginningLocation(getLocation(Op)),op(Op)) ops(OPDS) .
+  eq ops(none) = empty .
+
+
+  op mbs : MembAxSet -> Printables .
+  eq mbs(Mb MAS) = loc(getBeginningLocation(getLocation(Mb)),mb(Mb)) mbs(MAS) .
+  eq mbs(none) = empty .
+
+  op eqs : EquationSet -> Printables .
+  eq eqs(Eq Eqs) = loc(getBeginningLocation(getLocation(Eq)),eq(Eq)) eqs(Eqs) .
+  eq eqs(none) = empty .
+
+  op rls : RuleSet -> Printables .
+  eq rls(Rl Rls) = loc(getBeginningLocation(getLocation(Rl)),rl(Rl)) rls(Rls) .
+  eq rls(none) = empty .
 
 
   op eMetaLatexPrint : Sort -> QidList .
-  op eMetaLatexPrint : SortSet -> QidList .
+---  op eMetaLatexPrint : SortSet -> QidList .
   op eMetaLatexPrint : TypeList -> QidList .
-  op eMetaLatexPrint : SubsortDeclSet -> QidList .
-  op eMetaLatexPrint : Module OpDeclSet -> QidList .
-  op eMetaLatexPrintVars : OpDeclSet -> QidList .
-  op eMetaLatexPrint : Module MembAxSet -> QidList .
-  op eMetaLatexPrint : Module EquationSet -> QidList .
-  op eMetaLatexPrint : Module RuleSet -> QidList .
+---  op eMetaLatexPrint : SubsortDeclSet -> QidList .
+---  op eMetaLatexPrint : Module OpDeclSet -> QidList .
+---  op eMetaLatexPrintVars : OpDeclSet -> QidList .
+---  op eMetaLatexPrint : Module MembAxSet -> QidList .
+---  op eMetaLatexPrint : Module EquationSet -> QidList .
+---  op eMetaLatexPrint : Module RuleSet -> QidList .
   op eMetaLatexPrint : Module Condition -> QidList .
   op eMetaLatexPrint : Module Term -> QidList .
-
-  ---- error handling
----  eq metaLatexPrint(M, T, none)  = printTerm(M, T) .
----  eq metaLatexPrint(M, T, POS:PrintOptionSet) 
----   = 'Module getName(M) 'contains 'errors. [owise] .
+  op eMetaLatexPrint : Module Printables -> QidList .
 
   eq eMetaLatexPrint(U, T) =  printTerm(U,T) . 
+  eq eMetaLatexPrint(U, (empty).Printables) = nil . 
 
   var NeTl : NeTermList .  var C : Constant . var Q : Qid . vars T1 T2 : Term .
   var V : Variable .
@@ -354,85 +394,48 @@ mod DECL-META-LATEX-PRINT is
 ---  op \subsort{_}{_} : Sort Sort -> SubsortDecl [ctor] .
   op \terminal{_} : Qid -> QidList [ctor] .
   op \nterminal{_} : Type -> QidList [ctor] .
-  op \syntax{_}{_}{_} : QidList QidList AttrSet -> OpDecl .
+  op syntax : QidList QidList AttrSet -> Printable .
   op \cellLabel{_}{_} : Qid AttrSet -> OpDecl .
-  eq eMetaLatexPrint(M, (OPDS' (op F : nil -> 'CellLabel [AS] .) OPDS))
-   = ---(eMetaLatexPrint(M, \cellLabel{F}{metadataParse(St)}) '\o)
-       eMetaLatexPrint(M, OPDS' OPDS)  .
-  eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadata("generated label") AS] .) OPDS)) 
-   = eMetaLatexPrint(M, (OPDS' OPDS))  .
+  eq op(op F : nil -> 'CellLabel [AS] .) = empty .
+  eq op(op F : TyL -> Ty [AS' metadata("generated label") AS] .) = empty .
+  eq op(op F : TyL -> Ty [AS' metadata(St) AS] .)
+   = op(op F : TyL -> Ty [AS' metadataParse(St) AS] .) [owise] .
 
   eq metadata("builtin wrapper") = none .
 
-  eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadata(St) AS] .) OPDS)) 
-   = eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS' metadataParse(St) AS] .) OPDS)) [owise] .
----(
-  eq eMetaLatexPrint(M, (OPDS' (op F : TyL -> Ty [AS1 klatex(AS2 krenameTo(Q) AS) AS'] .)OPDS))
-   = eMetaLatexPrint(M, (OPDS' (op Q : TyL -> Ty [AS1 klatex(AS2 AS) AS'] .) OPDS)) .
----)
-  eq eMetaLatexPrint(M, OPDS) = printSyntax(M, OPDS) [owise] .
   var OPDS' : OpDeclSet .
 
-  op \subsort`{_`}`{_`} : QidList QidList -> OpDecl .
-  op subsortOps : SubsortDeclSet -> OpDeclSet .
+  op subsort(_, _) : QidList QidList -> Printable .
   var Sort Sort' : Sort .
-  eq subsortOps((subsort Sort < Sort' .) SSDS) 
-   = \subsort{\nterminal{Sort}}{\nterminal{Sort'}} subsortOps(SSDS) .
-  eq subsortOps(none) = none .
-  op printSyntax : Module OpDeclSet -> QidList .
-  eq printSyntax(M, none) = nil .
-  eq printSyntax(M, OPDS) 
-   = 
----    '\n '\par '\textsc '`{ 'syntactic 'constructs: '`}
----   '\setlength '`{ '\parindent '`} '`{ '2em '`}
-     printSyntax1(M, OPDS) 
----   '\setlength '`{ '\parindent '`} '`{ '1em '`}
-   [owise] .
-  op printSyntax1 : Module OpDeclSet -> QidList .
-  op #Types : Nat -> Attr .
- ceq printSyntax1(M, (OPDS' (op Q : TyL -> Ty [AS] .) OPDS)) 
-   = printSyntax1(M, OPDS' (\syntax{\nterminal{Ty}}{
+  eq ss(subsort Sort < Sort' .) = subsort(\nterminal{Sort}, \nterminal{Sort'}) .
+
+ ceq op(op Q : TyL -> Ty [AS] .)
+   = syntax(\nterminal{Ty},
       if latexCmd(F) then  F mergeTypes(genQids(s arity(TyL), '), TyL)
       else mergeTypes(splitMixFix(string(F)), TyL)
-      fi}{#Types(arity(TyL)) AS} OPDS)) 
-  if F := getName(Q, AS) .
+      fi, #Types(arity(TyL)) AS)
+  if F := getName(Q, AS) 
+ [owise] .
+  op #Types : Nat -> Attr .
 
   op mergeTypes : QidList TypeList -> TypeList .
   var Op : OpDecl .
----(
-  eq eMetaLatexPrint(M, Op OPDS)
-   = eMetaLatexPrint(M, OPDS) [owise] .
----)
   op \algebraicOp{_}{_}{_}{_} : Qid TypeList  Type AttrSet -> OpDecl .
----  eq eMetaLatexPrint(M, ((op F : TyL -> Ty [AtS] .) OPDS))
----    = eMetaLatexPrint(M, (\algebraicOp{F}{TyL}{Ty}{AtS} OPDS))
----    [owise] .
-
----  op eMetaLatexPrint1 : Module OpDeclSet -> QidList .
----  eq eMetaLatexPrint(M, OPDS) = eMetaLatexPrint1(M, OPDS) [owise] .
 
   op eMetaLatexPrint1 : Module AttrSet -> QidList .
   eq eMetaLatexPrint1(M,(none).AttrSet) = nil .
   eq eMetaLatexPrint1(M,AtS)
    =  '`[ eMetaLatexPrint(M,AtS) '`] .
 
-  eq eMetaLatexPrint(M, (none).OpDeclSet)  = nil .
-  eq eMetaLatexPrint(M, OPDS:[OpDeclSet])  = 'error 
-     [owise print "Error in the Operation declaration set:" OPDS:[OpDeclSet]]. 
-
-  eq eMetaLatexPrintVars((op F : nil -> Ty [none] .) OPDS)
-    = ('\n 'var F ': eMetaLatexPrint(Ty) '. 
-       eMetaLatexPrintVars(OPDS)) .
-  eq eMetaLatexPrintVars((none).OpDeclSet)  = nil .
-
-  ops \rule`{_`}`{_`} : String KRuleSplit -> MembAx .
-  ops \mequation`{_`}`{_`}`{_`} : String Term Term -> Equation .
-  ops \mrule`{_`}`{_`}`{_`} : String Term Term -> Rule .
-  ops \cmrule`{_`}`{_`}`{_`}`{_`} : String Term Term Condition -> Rule .
-  ops \cmequation`{_`}`{_`}`{_`}`{_`} : String Term Term Condition -> Equation .
+  ops rule : String KRuleSplit -> Printable .
+  ops mequation : String Term Term -> Printable .
+  ops mrule : String Term Term -> Printable .
+  ops cmrule : String Term Term Condition -> Printable .
+  ops cmequation : String Term Term Condition -> Printable .
  
-  op  \config`{_`} : Term -> MembAx .
-  op \context`{_`}`{_`} : String KContextSplit -> MembAx . 
+  op config : Term -> Printable .
+  op latex : String -> Printable .
+  op context : String KContextSplit -> Printable . 
   var AS : AttrSet .
 
   op getLabel : AttrSet -> String .
@@ -441,80 +444,68 @@ mod DECL-META-LATEX-PRINT is
 
   var KRS : KRuleSplit .  var KCS : KContextSplit . 
   var Mb : MembAx .  var MAS' : MembAxSet .
-  eq eMetaLatexPrint(M, MAS' (mb 'configuration_[T] : 'KSentence [AS] .) MAS)
-    = eMetaLatexPrint(M, MAS' \config{T} MAS) .
- ceq eMetaLatexPrint(M, MAS' Mb MAS)
-   = eMetaLatexPrint(M, MAS' \rule{getLabel(getAttrs(Mb))}{KRS} MAS)
+  eq mb(mb 'configuration_[T] : 'KSentence [AS] .) = config(T) .
+  eq mb(mb 'latex_[T] : 'KSentence [AS] .) = latex(downTerm(T,"")) .
+ ceq mb(Mb) = rule(getLabel(getAttrs(Mb)),KRS)
   if KRS := splitKRule(metadataParse(Mb)) .
- ceq eMetaLatexPrint(M, MAS' Mb MAS)
-   = eMetaLatexPrint(M, MAS' \context{getLabel(getAttrs(Mb))}{KCS} MAS)
+ ceq mb(Mb) = context(getLabel(getAttrs(Mb)),KCS) 
   if KCS := splitKContext(metadataParse(Mb)) .
-  eq eMetaLatexPrint(M, MAS) = eMetaLatexPrint0(M, MAS) [owise] .
 
-  op eMetaLatexPrint0 : Module MembAxSet -> QidList .
+---(
 
-  eq eMetaLatexPrint0(M, (mb T : S [none] .) MAS)
+  eq eMetaLatexPrint(M, mb(mb T : S [none] .) Prints)
     = ('\n 'mb eMetaLatexPrint(M, T) 
                    ': eMetaLatexPrint(S) '. 
-       eMetaLatexPrint0(M, MAS)) [owise] .
-  eq eMetaLatexPrint0(M, (mb T : S [AtS] .) MAS)
+       eMetaLatexPrint(M, Prints)) [owise] .
+  eq eMetaLatexPrint(M, mb(mb T : S [AtS] .) Prints)
     = ('\n 'mb eMetaLatexPrint(M, T) 
                    ': eMetaLatexPrint(S) 
                '`[ eMetaLatexPrint(M, AtS) '`] '. 
-       eMetaLatexPrint0(M, MAS)) 
+       eMetaLatexPrint(M, Prints)) 
     [owise] .
-  eq eMetaLatexPrint0(M, (cmb T : S if Cond [none] .) MAS)
+  eq eMetaLatexPrint(M, mb(cmb T : S if Cond [none] .) Prints)
     = ('\n 'cmb eMetaLatexPrint(M, T) 
                    ': eMetaLatexPrint(S) 
        '\n 'if eMetaLatexPrint(M, Cond) '. 
-       eMetaLatexPrint0(M, MAS)) [owise] .
-  eq eMetaLatexPrint0(M, (cmb T : S if Cond [AtS] .) MAS)
+       eMetaLatexPrint(M, Prints)) [owise] .
+  eq eMetaLatexPrint(M, mb(cmb T : S if Cond [AtS] .) Prints)
     = ('\n 'cmb eMetaLatexPrint(M, T) 
                    ': eMetaLatexPrint(S) 
        '\n 'if eMetaLatexPrint(M, Cond) 
            '`[ eMetaLatexPrint(M, AtS) '`] '. 
-       eMetaLatexPrint0(M, MAS)) 
+       eMetaLatexPrint(M, Prints)) 
     [owise] .
-  eq eMetaLatexPrint0(M, (none).MembAxSet) = nil .
-  eq eMetaLatexPrint0(M, MAS) = eMetaLatexPrintK(M, MAS) [owise] .
-  op eMetaLatexPrintK : Module MembAxSet -> QidList .
+---)
 
-  eq eMetaLatexPrint(M, ((eq T = T' [metadata("simplify")] .) EqS))
-   = eMetaLatexPrint(M, EqS) .
-  eq eMetaLatexPrint(M, ((eq T = T' [AtS] .) EqS))
-   = eMetaLatexPrint(M, \mequation{getLabel(AtS)}{T}{T'} EqS) [owise] .
-  eq eMetaLatexPrint(M, \mequation{Str}{T}{T'} EqS)
+  eq loc(I,empty) = empty .
+  eq eq(eq T = T' [metadata("simplify")] .) = empty .
+  eq eq(eq T = T' [AtS] .) = mequation(getLabel(AtS),T,T') [owise] .
+  eq eMetaLatexPrint(M, mequation(Str, T, T') Prints)
     = ('\n '\mequation '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
        '`} '`{ eMetaLatexPrint(M, T') 
            '`} 
-       eMetaLatexPrint(M, EqS)) 
+       eMetaLatexPrint(M, Prints)) 
     [owise] .
-  eq eMetaLatexPrint(M, ((ceq T = T' if Cond [AtS] .) EqS))
-   = eMetaLatexPrint(M, \cmequation{getLabel(AtS)}{T}{T'}{Cond} EqS) .
-  eq eMetaLatexPrint(M, \cmequation{Str}{T}{T'}{Cond} EqS) 
+  eq eq(ceq T = T' if Cond [AtS] .) = cmequation(getLabel(AtS), T, T', Cond) .
+  eq eMetaLatexPrint(M, cmequation(Str, T, T', Cond) Prints) 
     = ('\n '\cmequation '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
         '`} '`{ eMetaLatexPrint(M, T') '`} 
         '`{ eMetaLatexPrint(M, Cond) '`} 
-       
-       eMetaLatexPrint(M, EqS))  .
-  eq eMetaLatexPrint(M, (none).EquationSet) = nil .
+       eMetaLatexPrint(M, Prints))  .
 
-  eq eMetaLatexPrint(M, ((rl T => T' [AtS] .) RlS))
-   = eMetaLatexPrint(M, \mrule{getLabel(AtS)}{T}{T'} RlS) .
-  eq  eMetaLatexPrint(M, \mrule{Str}{T}{T'} RlS) 
+  eq rl(rl T => T' [AtS] .) = mrule(getLabel(AtS), T, T') .
+  eq  eMetaLatexPrint(M, mrule(Str, T, T') Prints) 
     = ('\n '\mrule '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
         '`} '`{ eMetaLatexPrint(M, T') '`} 
        
-       eMetaLatexPrint(M, RlS)) .
-  eq eMetaLatexPrint(M, ((crl T => T' if Cond [AtS] .) RlS))
-   =  eMetaLatexPrint(M, \cmrule{getLabel(AtS)}{T}{T'}{Cond} RlS) .
-  eq  eMetaLatexPrint(M, \cmrule{Str}{T}{T'}{Cond} RlS) 
+       eMetaLatexPrint(M, Prints)) .
+  eq rl(crl T => T' if Cond [AtS] .) =  cmrule(getLabel(AtS), T, T', Cond) .
+  eq  eMetaLatexPrint(M, cmrule(Str, T, T', Cond) Prints) 
     = ('\n '\cmrule '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
         '`} '`{ eMetaLatexPrint(M, T') '`} 
         '`{ eMetaLatexPrint(M, Cond) '`} 
        
-       eMetaLatexPrint(M, RlS)) .
-  eq eMetaLatexPrint(M, (none).RuleSet) = nil .
+       eMetaLatexPrint(M, Prints)) .
 
   var Ct : Constant .
   eq eMetaLatexPrint(M, T = 'true.Bool) 
@@ -765,11 +756,10 @@ mod UNIT-META-LATEX-PRINT is
            then nil
            else ('\n '\sorts '`{ eMetaLatexPrint(SS) '`} '\o)
            fi)
-          eMetaLatexPrint(M, subsortOps(SSDS) OPDS )
-          eMetaLatexPrint(M, MAS) 
-          eMetaLatexPrint(M, EqS) 
-          eMetaLatexPrint(M, RlS) 
+          eMetaLatexPrint(M, ---(subsorts(SSDS)---)
+                             ops(OPDS) mbs(MAS) eqs(EqS) rls(RlS))
        '\n '\end '`{ 'module '`} '\n) .
+---(
   eq eMetaLatexPrint(M, mod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
     = ('\n 
        'mod eMetaLatexPrint(ME) (if PDL == nil 
@@ -843,6 +833,7 @@ mod UNIT-META-LATEX-PRINT is
           eMetaLatexPrint(M, MAS) 
           eMetaLatexPrint(M, EqS) 
        '\n 'endfth '\n) .
+---)
 
   eq eMetaLatexPrint((including ME .) IL)
     = ('\n '\including '`{ eMetaLatexPrintME(ME) '`} 
@@ -1066,17 +1057,16 @@ mod LATEX-PRINT-META is
   var M : Module .  var MAS : MembAxSet . var OPDS : OpDeclSet .
   var QIL QIL' : QidList .
 ---(
-  eq printSyntax1(M, \syntax{QIL}{QIL'}{AS} OPDS)
-   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL,OPDS) '`} '`{  '`} eMetaLatexPrintQ(M, QIL, \syntax{QIL}{QIL'}{AS} removeSubSorts(QIL, OPDS))) [owise] .
-  eq printSyntax1(M, \subsort{QIL'}{QIL} OPDS)
-   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL, \subsort{QIL'}{QIL} OPDS) '`} '`{  '`} printSyntax1(M, removeSubSorts(QIL, OPDS))) [owise] .
----)
   eq printSyntax1(M, OPDS' \subsort{QIL'}{QIL} OPDS)
    = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) '`} '`{  '`} eMetaLatexPrintQ(M, QIL, removeSubSorts(QIL,OPDS' OPDS))) [owise] .
-  eq printSyntax1(M, OPDS' \syntax{QIL}{QIL'}{#Types(N) AS} OPDS)
-   = ('\n '\syntax '`{ QIL '`} '`{ QIL' '`} '`{ eMetaLatexPrint(M, N, AS)  '`} eMetaLatexPrintQ(M, QIL, OPDS' OPDS)) [owise] .
+---)
+  var P : Printable . var Prints : Printables .
+  eq eMetaLatexPrint(M, loc(N,P) Prints) = eMetaLatexPrint(M, P Prints) [print Prints] .
+  eq eMetaLatexPrint(M, syntax(QIL, QIL', #Types(N) AS) Prints)
+   = ('\n '\syntax '`{ QIL '`} '`{ QIL' '`} '`{ eMetaLatexPrint(M, N, AS)  '`} eMetaLatexPrintQ(M, QIL, Prints)) [owise] .
 ---  eq \subsort{QIL}{QIL'} = \syntax{QIL'}{QIL}{none} .
 
+---(
   op printSubSorts : QidList OpDeclSet -> QidList .
   var QIL1 : QidList .  var OPDS' OPDS'' : OpDeclSet .
   eq printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS'' \subsort{QIL1}{QIL} OPDS)
@@ -1087,15 +1077,16 @@ mod LATEX-PRINT-META is
   op removeSubSorts : QidList OpDeclSet -> OpDeclSet .
   eq removeSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) =  removeSubSorts(QIL, OPDS' OPDS) .
   eq removeSubSorts(QIL, OPDS) = OPDS [owise] .
+---)
 
-  op eMetaLatexPrintQ : Module QidList OpDeclSet -> QidList .
-  eq eMetaLatexPrintQ(M, QIL, OPDS' (\syntax{QIL}{QIL'}{#Types(N) AS}) OPDS)
+  op eMetaLatexPrintQ : Module QidList Printables -> QidList .
+  eq eMetaLatexPrintQ(M, QIL, loc(N,P) Prints) = eMetaLatexPrintQ(M, QIL,  P Prints) .
+  eq eMetaLatexPrintQ(M, QIL, syntax(QIL, QIL', #Types(N) AS) Prints)
    = ('\n '\syntaxCont '`{ QIL '`} '`{ 
-      QIL' '`} '`{ eMetaLatexPrint(M, N, AS) '`} eMetaLatexPrintQ(M, QIL, OPDS' OPDS)) .
-  eq eMetaLatexPrintQ(M, QIL, OPDS) = printSyntax1(M, OPDS) [owise] . 
+      QIL' '`} '`{ eMetaLatexPrint(M, N, AS) '`} eMetaLatexPrintQ(M, QIL, Prints)) .
+  eq eMetaLatexPrintQ(M, QIL, Prints) = eMetaLatexPrint(M, Prints) [owise] . 
 
   var F : Qid .  var TyL : TypeList . var AtS : AttrSet .
-  eq printSyntax1(M, (none).OpDeclSet) = nil .
 
 ---  op eMetaLatexPrint : ProductionType -> QidList .
   eq (\nterminal{Ty}) 
@@ -1136,52 +1127,38 @@ mod LATEX-PRINT-META is
    = printConfig(M, T) '\mathrel '`{ '`} printConfigL(M, NeTl) .
   eq printConfigL(M, T) = printConfig(M,T) [owise] .
   var MAS' : MembAxSet .
-  eq eMetaLatexPrintK(M, MAS' (\config{T}) MAS)
+  eq eMetaLatexPrint(M, latex(Str) Prints) 
+   = ('\n '\n '\medskip tokenize(stripSpaces(Str)) '\medskip ) eMetaLatexPrint(M, Prints) .
+  eq eMetaLatexPrint(M, config(T) Prints)
     = ('\n '\kconfig '`{ printConfig(M, T) 
                    '`} 
-       eMetaLatexPrintK(M, MAS' MAS)) .
-  eq eMetaLatexPrintK(M, none) = nil .
-  eq eMetaLatexPrintK(M, MAS) 
-   = '\n '\bigskip '\par '\textsc '`{ 'K 'rules: '`}
-   '\setlength '`{ '\parindent '`} '`{ '2em '`}
-   eMetaLatexPrintCxt(M, MAS) [owise] .
+       eMetaLatexPrint(M, Prints)) .
 
   var Cnd : Term .
-  op eMetaLatexPrintCxt : Module MembAxSet -> QidList .
----  op eMetaLatexPrintEqs : Module MembAxSet -> QidList .
-  op eMetaLatexPrintRls : Module MembAxSet -> QidList .
-  op eMetaLatexPrintNRls : Module MembAxSet -> QidList .
-  eq eMetaLatexPrintRls(M, (\rule{Str}{{krl,T,empty,AS' kstructural AS}}) MAS)
+  eq eMetaLatexPrint(M, rule(Str, {krl,T,empty,AS' kstructural AS}) Prints)
     = ('\n '\kequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} 
-       eMetaLatexPrintRls(M, MAS)) .
-  eq eMetaLatexPrintRls(M, (\rule{Str}{{kcrl,T,Cnd,AS' kstructural AS}}) MAS)
+       eMetaLatexPrint(M, Prints)) .
+  eq eMetaLatexPrint(M, rule(Str, {kcrl,T,Cnd,AS' kstructural AS}) Prints)
     = ('\n '\kcequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
-       eMetaLatexPrintRls(M, MAS)) .
-  eq eMetaLatexPrintRls(M, (\rule{Str}{{krl,T, empty, AS}}) MAS)
+       eMetaLatexPrint(M, Prints)) .
+  eq eMetaLatexPrint(M, (rule(Str, {krl,T, empty, AS})) Prints)
     = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} 
-       eMetaLatexPrintRls(M, MAS)) [owise] .
-  eq eMetaLatexPrintRls(M, (\rule{Str}{{kcrl,T, Cnd, AS}}) MAS)
+       eMetaLatexPrint(M, Prints)) [owise] .
+  eq eMetaLatexPrint(M, (rule(Str, {kcrl,T, Cnd, AS})) Prints)
     = ('\n '\kcrule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
-       eMetaLatexPrintRls(M, MAS)) [owise] .
-  eq eMetaLatexPrintRls(M, (\context{Str}{{kcxt,T, empty, AS}}) MAS)
+       eMetaLatexPrint(M, Prints)) [owise] .
+  eq eMetaLatexPrint(M, (context(Str, {kcxt,T, empty, AS})) Prints)
     = ('\n '\kcontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} 
-       eMetaLatexPrintRls(M, MAS)) [owise] .
-  eq eMetaLatexPrintRls(M, (\context{Str}{{kccxt,T, Cnd, AS}}) MAS)
+       eMetaLatexPrint(M, Prints)) [owise] .
+  eq eMetaLatexPrint(M, (context(Str, {kccxt,T, Cnd, AS})) Prints)
     = ('\n '\kccontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
-       eMetaLatexPrintRls(M, MAS)) [owise] .
-  eq eMetaLatexPrintCxt(M, MAS) = eMetaLatexPrintRls(M, MAS) [owise] .
----  eq eMetaLatexPrintEqs(M, MAS) = eMetaLatexPrintRls(M, MAS) .
-  eq eMetaLatexPrintRls(M, MAS) = eMetaLatexPrintNRls(M, MAS) [owise] .
-  eq eMetaLatexPrintNRls(M, none) = nil .
-  eq eMetaLatexPrintNRls(M, MAS:[MembAxSet]) 
-   = eMetaLatexPrintCxt(M, MAS:[MembAxSet]) 
-     [owise print "error in " MAS:[MembAxSet]] .
+       eMetaLatexPrint(M, Prints)) [owise] .
 
   op printTerm0 : Module Term AttrSet -> QidList .
   eq printTerm0(M, T, AS klarge AS')

@@ -351,6 +351,11 @@ fmod META-K-ERROR is
   op checkTerm : Module Term ~> Term .
   eq checkTerm(M,Trm) = if wellFormed(M,Trm) then Trm else errorT(Trm,mkVariable('`[`],'Univesal),"Term not well formed") fi .
 
+  op analyzeCoreDump : Module [Module] -> [Module] .
+---  eq analyzeCoreDump(M, U?) = analyzeCoreDump(M, upTerm(U?)) .
+
+
+
   vars Trm Trm' Cxt : [Term] . vars Trms Trms' : TermList . var Q : Qid . var Str : String . var Including : ImportList . var Cond : Condition .
   var AS : AttrSet .  var Subsorts : SubsortDeclSet . var OPDS : OpDeclSet . var Mbs : [MembAxSet] . var Eqs : [EquationSet] . 
   var Rls : [RuleSet] . vars Sorts : SortSet .  var Type : Type .  var M : Module .

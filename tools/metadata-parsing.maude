@@ -26,7 +26,7 @@ endfm
 fmod PARSE-METADATA-LOCATION is 
   including PARSE-METADATA-BASIC .
   including LOCATION-ATTRS .
-  var S S' : String . var N : Nat . var AS : AttrSet .
+  var S S' : String . var N N1 N2 : Nat . var AS AS' : AttrSet .
   ceq metadataStrippedParse(S) = AS metadataParse(S')
    if  "location" = substr(S,0,length("location")) 
    /\ {AS, S'} := locationParse(stripSpaces(substr(S, length("location"), length(S))))  .
@@ -38,12 +38,33 @@ fmod PARSE-METADATA-LOCATION is
    /\ s(N) := find(S, ")", 0)  .
 
   op getLocation : AttrSet -> String .
-  eq getLocation(AS metadata(S)) = getMetaLocation(metadataParse(S)) .
+  eq getLocation(AS metadata(S) AS') = getLocation(AS metadataParse(S) AS') .
+  eq getLocation(AS) = "" [owise print "could not find location for " AS] .
+
+  op getLocation : OpDecl -> String .
+  op getLocation : Equation -> String .
+  op getLocation : MembAx -> String .
+  op getLocation : Rule -> String .
+
+  eq getLocation(op Q : Tyl -> Ty [AS] .) = getLocation(AS) .
+  eq getLocation(eq Trm1 = Trm2 [AS] .) = getLocation(AS) .
+  eq getLocation(rl Trm1 => Trm2 [AS] .) = getLocation(AS) .
+  eq getLocation(ceq Trm1 = Trm2 if Cond [AS] .) = getLocation(AS) .
+  eq getLocation(crl Trm1 => Trm2 if Cond [AS] .) = getLocation(AS) .
+  eq getLocation(mb Trm : Ty [AS] .) = getLocation(AS) .
+  eq getLocation(cmb Trm : Ty if Cond [AS] .) = getLocation(AS) .
+
+  var Q : Qid . var Tyl : TypeList . var Ty : Type . 
+  var Trm Trm1 Trm2 : Term .  var Cond : Condition .
+
+  eq getLocation(AS klocation(S) AS') = S .
   eq getLocation(AS) = "" [owise] .
 
-  op getMetaLocation : AttrSet -> String .
-  eq getMetaLocation(AS klocation(S)) = S .
-  eq getMetaLocation(AS) = "" [owise] .
+  op getBeginningLocation : String -> Int .
+ ceq getBeginningLocation(S) = if rat(substr(S,N1, _-_(N2, N1)), 10) :: Nat then rat(substr(S,N1, _-_(N2, N1)), 10)  else -1 fi
+  if N1 := if find(S,":",0) :: Nat then find(S, ":", 0) + 1 else 0 fi 
+  /\  N2 := if find(S, "-", N1) :: Nat then  find(S, "-", N1) else length(S) fi .
+
 endfm
 
 fmod PARSE-METADATA-SYNTAX is

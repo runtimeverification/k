@@ -1657,7 +1657,7 @@ sub make_ops {
 		if ($latex || $pdf || $ps || $crop || $eps || $png)
 		{
 			$result .= ($production eq "_")
-						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort$random"."_ : @sorts -> $result_sort [metadata \"latex(renameTo\\\\crlbracket) location($file:$absolute_line)\"] $space5 "
+						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort$random"."_ : @sorts -> $result_sort [metadata \"latex(renameTo \\\\crlbracket) location($file:$absolute_line)\"] $space5 "
 						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
 		}
 		else {
