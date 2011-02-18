@@ -286,8 +286,8 @@ my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather di
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $comment = join("|", (
-        "\\/\\/.*?\n",
-        "\\/\\*.*?\\*\\/",
+	        "\\/\\/.*?\n",
+	        "\\/\\*.*?\\*\\/",
 		"---\\(.*?---\\)",
 		"---.*?\$",
 		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
@@ -302,6 +302,18 @@ my $top_level_pattern = join("|", (
 		"set\\s.*?\$",
 		"(?:in|load|require)\\s+\\S+"
 ));
+
+# Latex top level patterns
+my $latex_top_level_pattern = join("|", (
+		"\\/\\/@(before|after)=([a-zA-Z\\-]+)(\\s.*?)(?=\\n)",
+		"\\/\\*@(before|after)=([a-zA-Z\\-]+)(\\s.*?)\\*\\/"
+));
+
+# storage for module specific latex comments 
+my %module_before = ();
+my %module_after = ();
+
+
 
 # Configuration pattern: excludes, for the spacing, from the above all those substrings matching $exclude
 my $exclude = join("|",
@@ -849,7 +861,11 @@ sub latexify {
 	print FILE "\n\\begin{document}\n\n";
 	print FILE "\\title{$title}\n\\author{$author}\n\\maketitle\n" if ($title ne "" && $author ne "");
 	print FILE "\\title{$title}\n\\maketitle\n" if ($title ne "" && $author eq "");
-	print FILE join("\\newpage", @l_modules)."\n";
+	
+	my $latex_temp = join("\\newpage", @l_modules)."\n";
+	# $latex_temp = restore_intermodule_latex($latex_temp);
+
+	print FILE $latex_temp;
 	print FILE "\\end{document}\n";
 	close FILE;
 	print "Latex version written in $output_file_name\n" if $verbose;
@@ -1287,6 +1303,7 @@ sub maudify_file {
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
 #Step: resolve latex comments
+	# store_intermodule_latex($_);
 	$_ = solve_latex($_, $file) if ($latex || $png || $pdf || $ps || $crop || $eps);
 
 	# save comments
@@ -2159,4 +2176,52 @@ q
 	close(MYFILE);
 	
 	exit();
+}
+# Latex top level patterns
+#my $latex_top_level_pattern = join("|", (
+#		"\\/\\/@(before|after)=([a-zA-Z\-]+)\s(.*?)(?=\n)",
+#		"\\/\\*@(before|after)=([a-zA-Z\-]+)\s(.*?)\\*\\/"
+#));
+
+# Args: k file content
+# Return: void
+# Stores all latex comments in some data structures
+sub store_intermodule_latex
+{
+	local $_ = shift;
+
+	while (/(\/\*)@(before|after)=([a-zA-Z\-]+)\s(.*?)\*\//sg)
+	{
+		$module_before{$3} = $4 if $2 eq "before";
+		$module_after{$3} = $4 if $2 eq "after";
+	}
+
+	while (/(\/\/)@(before|after)=([a-zA-Z\-]+)\s(.*?)(?=\n)/sg)
+	{
+		$module_before{$3} = $4 if $2 eq "before";
+		$module_after{$3} = $4 if $2 eq "after";
+	}
+	
+}
+
+# Args: latex file content
+# Return: latex file content
+# Restores all latex comments from som data structures
+sub restore_intermodule_latex
+{
+	local $_ = shift;
+	
+	my @mlist = ();
+	while (/\\begin{module}{\\moduleName{([a-zA-Z\-]+)}}/sg)
+	{
+		push(@mlist, $1);
+	}
+
+	foreach my $module (@mlist)
+	{
+		s/(\\begin{module}{\\moduleName{\Q$module\E}})/\n$module_before{$module}\n$1/sg	if (defined $module_before{$module});
+		s/(\\begin{module}{\\moduleName{\Q$module\E}}.*?\\end{module})/$1\n$module_after{$module}\n/sg if (defined $module_after{$module});
+	}
+	
+	return $_;
 }
