@@ -2083,7 +2083,7 @@ sub add_subsorts
 		my $content = get_file_content("$dir/$file");
 		
 		my $o = "@decllist";
-		$content =~ s/mod(\s+)$_(.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
+		$content =~ s/mod(\s+)$_(\s.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
 		
 		open FILE,">",$file or die "Cannot create $file\n";
 		print FILE $content;
