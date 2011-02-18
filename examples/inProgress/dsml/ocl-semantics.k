@@ -82,7 +82,7 @@ syntax TypedName ::= typedName( Id , Class ) // should move to META-MODEL or to 
 
 //rule <k> (CC:CExp # AT:Attr) => .ValSet <_/k> if CC:CExp ==Bool .ValSet
 
- <k> (.ValSet # AT:Attr) => .ValSet <_/k>
+rule <k> (.ValSet # AT:Attr) => .ValSet <_/k>
 
 /*
 rule <k>  (
