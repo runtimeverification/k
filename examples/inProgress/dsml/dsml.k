@@ -19,14 +19,16 @@ kmod META-MODEL is including OCL-SYNTAX
 
   syntax ListItem ::= Id : KLabel [prec 20] 
 
-//  syntax Type ::= int | bool | string | Id
+
 
   syntax Bool ::= isScalar ( Type )
 
   rule isScalar(int) => true [structural]
   rule isScalar(bool) => true [structural]
-  rule isScalar(string) => true [structural]
-  rule isScalar(Id:Id) => false [structural]
+  rule isScalar(c:Class) => false [structural]
+  rule isScalar(col(int)) => false [structural]
+  rule isScalar(col(bool)) => false [structural]
+  rule isScalar(col(Class)) => false [structural]
 
 
 /*
@@ -41,19 +43,19 @@ kmod META-MODEL is including OCL-SYNTAX
 
   configuration <T> 
                   <metamodel*>
-                    <name> undefined </name> /*Vlad: added metamodel name*/
+                    <name> undefined </name> 
                     <classes>
                       <class*>
-                         <className> undefined </className> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
-                         <extends> undefined </extends> /*Vlad: changed Id:Id to undefined because of errors in rule matching*/
-                         <declAttributes> .Map  </declAttributes>/*Vlad: I think we need a Map from attribute names to types here*/
+                         <className> undefined </className> 
+                         <extends> undefined </extends>
+                         <declAttributes> .Map  </declAttributes>
                       </class*>
                     </classes>
                     <oclConstraints> .List </oclConstraints>
                   </metamodel*>
                  <models>
                    <model*> 
-                      <modelName> undefined </modelName> /*Vlad: added model name*/
+                      <modelName> undefined </modelName>
                       <instance*>
                          <instName> undefined </instName>
                          <ofClass> undefined </ofClass>
@@ -61,7 +63,7 @@ kmod META-MODEL is including OCL-SYNTAX
                       </instance*>
                    </model*>
                  </models>
-                <k> .K </k> /*Vlad: added K cell for checking conformance */
+                <k> .K </k> 
                 </T>
 
  
