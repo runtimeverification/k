@@ -16,6 +16,7 @@ syntax ValSet ::= .ValSet | Val | ValSet ValSet [assoc comm id: .ValSet]
 
 syntax Val ::= Bool | Int  | instVal ( Bag ) // or better, instVal(BagItem)
 
+syntax CExp ::= ValSet 
 
 rule (v:Val V1:ValSet) Inter (v V2:ValSet) => v (V1 Inter V2) [structural]
 rule (v V1) Inter V2 => V1 Inter V2 if notBool (v in V2) [structural]
@@ -75,16 +76,10 @@ rule <k> (C:Class .allInstances) => collectInstances(C,INST:Bag) <_/k>
 INST
 </model>
 
-
-
 syntax TypedName ::= typedName( Id , Class ) // should move to META-MODEL or to CONFORMANCE
 
 
-//rule <k> (CC:CExp # AT:Attr) => .ValSet <_/k> if CC:CExp ==Bool .ValSet
-
 rule <k> (.ValSet # AT:Attr) => .ValSet <_/k>
-
-/*
 rule <k>  (
           instVal(
                    <instance>
@@ -114,7 +109,14 @@ rule <k>  (
   </instance>
 <_/model>
 
-*/
+rule C1 union C2 => C1 C2 
+rule C1 inter C2 => C1 Inter C2 
+rule C1 diff C2 => C1 Diff C2 
+
+// for select, collect, let : need substitution
+
+rule if true then C1 else C2 endif => C1 
+rule if false then C1 else C2 endif => C2 
 
 // AUXILIARY DEFINITIONS
 

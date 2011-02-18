@@ -52,7 +52,7 @@ syntax CExp ::= empty
                 | CExp # Attr [strict]  // period generates ambiguity
                 | CExp union CExp [strict]
                 | CExp inter CExp [strict]
-                | CExp minus CExp [strict]
+                | CExp diff CExp [strict]
                 | CExp ->select( Var `: Type `| BExp ) [strict (1)]
                 | CExp ->collect( Var `: Type `| CExp )  [strict (1)]
                 | let Var `: Type `= CExp in  CExp //[strict(3)] ?
