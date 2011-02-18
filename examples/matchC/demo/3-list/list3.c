@@ -28,7 +28,7 @@ struct listNode* reverse(struct listNode *x)
   return p;
 }
 
-struct listNode* append(struct listNode *x, struct listNode *y)  
+struct listNode* append(struct listNode *x, struct listNode *y)
 //@ pre  <heap> list(x)(A), list(y)(B), H </heap>
 //@ post <heap> list(?x)(A @ B), H </heap> /\ returns(?x)
 {
@@ -119,41 +119,41 @@ int main()
   x = create(5);
   //@ assert <heap> list(x)([1, 2, 3, 4, 5]) </heap>
   x = reverse(x);
-  //@ assert <heap> list(x)([5, 4, 3, 2, 1]) </heap> 
+  //@ assert <heap> list(x)([5, 4, 3, 2, 1]) </heap>
   destroy(x);
-  //@ assert <heap> . </heap> 
+  //@ assert <heap> . </heap>
   x = create(5);
   printf("x: ");
   print(x);
-  //@ assert <heap> list(x)(!A) </heap> 
+  //@ assert <heap> list(x)(!A) </heap>
   x = reverse(x);
   printf("reverse(x): ");
   print(x);
-  //@ assert <heap> list(x)(rev(!A)) </heap> 
+  //@ assert <heap> list(x)(rev(!A)) </heap>
   destroy(x);
 
   x = create(3);
-  //@ assert <heap> list(x)([1, 2, 3]) </heap> 
+  //@ assert <heap> list(x)([1, 2, 3]) </heap>
   y = create(3);
-  //@ assert <heap> list(x)([1, 2, 3]), list(y)([1, 2, 3]) </heap> 
+  //@ assert <heap> list(x)([1, 2, 3]), list(y)([1, 2, 3]) </heap>
   x = append(x, y);
-  //@ assert <heap> list(x)([1, 2, 3, 1, 2, 3]) </heap> 
+  //@ assert <heap> list(x)([1, 2, 3, 1, 2, 3]) </heap>
   destroy(x);
-  //@ assert <heap> . </heap> 
+  //@ assert <heap> . </heap>
   x = create(3);
   printf("x: ");
   print(x);
-  //@ assert <heap> list(x)(!A1) </heap> 
+  //@ assert <heap> list(x)(!A1) </heap>
   y = create(3);
-  printf("y: "); 
+  printf("y: ");
   print(y);
-  //@ assert <heap> list(x)(!A1), list(y)(!A2) </heap> 
+  //@ assert <heap> list(x)(!A1), list(y)(!A2) </heap>
   x = append(x, y);
   printf("append(x, y): ");
   print(x);
-  //@ assert <heap> list(x)(!A1 @ !A2) </heap> 
+  //@ assert <heap> list(x)(!A1 @ !A2) </heap>
   destroy(x);
-  //@ assert <heap> . </heap> 
+  //@ assert <heap> . </heap>
   
   return 0;
 }
