@@ -44,7 +44,7 @@ syntax BExp ::= Bool | Var
                
   
 // Expressions : Collections
-
+ 
 syntax CExp ::= empty
                 | Class .allInstances  // "basic constructor" for expressions
                 | AExp [strict]
