@@ -1968,10 +1968,10 @@ sub check_incompatible
 
 	my $module = shift;	
 
-	local $_ = run_maude_("some message ..",
+	local $_ = run_maude_("running maude ..",
 			"load $file\n",
-			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'List) . \n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'Map) . \n",
+			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'List) . \n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'Bag) . \n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'Set) . \n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'List, 'Map) . \n",
@@ -1984,16 +1984,29 @@ sub check_incompatible
 	);
 
 	my $out = $_;
-	while ($out =~ /reduce\s+in\s+META-LEVEL\s+:\s+sameKind\(upModule\('$module,\s+true\),\s+'([a-zA-Z]+),\s'([a-zA-Z]+)\)(.*?)result\s+Bool:\s+true/sg)
+	while ($out =~ /reduce\s+in\s+META-LEVEL\s+:\s+sameKind\(upModule\('$module,\s+true\),\s+'([a-zA-Z]+),\s'([a-zA-Z]+)\)(.*?)result\s+Bool:\s+(true|false)/sg)
 	{
-		my ($sort1, $sort2, $wr) = ($1, $2, $3);
-		if ($wr =~ /tuple\s+is\s+\(([a-zA-Z]+)/)
+		# print "Current:\n$&\n\n";
+		local $_ = $&;
+
+		if ($4 eq "true")
 		{
-			print "$1 is subsorted to both $sort1 and $sort2.\n";
+			my ($sort1, $sort2) = ($1, $2);
+
+			local $_ = run_maude_("running maude...",
+					"load $file\n",
+					"red in META-LEVEL : lesserSorts(upModule('$module, true), '$sort1) . \n",
+					"red in META-LEVEL : lesserSorts(upModule('$module, true), '$sort2) . \n",
+					"q" );
+			# extract results
+			my ($list1, $list2) = ("", "");
+			s/result\s+[a-zA-Z]+:(.*?)(?=\n)/{$list1 = $1;}/se;
+			s/result\s+[a-zA-Z]+:(.*?)(?=\n)/{$list2 = $1;}/se;
+
+			print "Error: $sort1 and $sort2 have the same kind.\nThis error may occur when $sort1 and $sort2 have common lesser sorts.\nLesser sorts for $sort1: $list1\nLesser sorts for $sort2: $list2\n\n";
 			exit(1);
 		}
 	}
-
 }
 
 1;

@@ -692,7 +692,7 @@ if (!$compile_only) {
 #    print "Maudification: $language_file_name\n\n";
     
 	# Check incompatible sorts
-#	check_incompatible($language_file_name, $language_module_name);
+	check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
 
     if ($klabels ne "")
     {
@@ -1634,13 +1634,9 @@ sub make_ops {
 	
 
 # Generate the Maude replacement of the K syntactic construct
-#		print "Production: $production\nand res:\n$result\nSorts: @sorts\n\n";
 		my $random = fresh("a", "b");
 		unlink($random);
-#		$random = (rand($random =~ tr/[a-z]//) * 1000) % 1000; 
 		$random =~ s/[a-z_]//sg;
-#		print $random;
-#		print "\n";
 		if ($latex || $pdf || $ps || $crop || $eps || $png)
 		{
 			$result .= ($production eq "_")
