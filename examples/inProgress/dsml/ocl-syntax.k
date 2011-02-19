@@ -1,6 +1,8 @@
 require ../../../k-prelude
+require k-visitor
+require substitution
 
-kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL
+kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL + SUBSTITUTION
 
 
   syntax Var ::= Id
@@ -58,7 +60,7 @@ syntax CExp ::= empty
                 | let Var `: Type `= CExp in  CExp //[strict(3)] ?
                 | if BExp then CExp else CExp endif [strict(1)]
 
-syntax K ::= CExp
+//syntax K ::= CExp
 
 
 // some identifiers to test with...

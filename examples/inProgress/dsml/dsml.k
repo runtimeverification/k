@@ -15,7 +15,7 @@ kmod META-MODEL is including OCL-SYNTAX
   syntax Id ::= object 
 
  
-  syntax K ::= Id | undefined  
+  syntax K ::= undefined  
 
   syntax ListItem ::= Id : KLabel [prec 20] 
 
@@ -51,7 +51,7 @@ kmod META-MODEL is including OCL-SYNTAX
                          <declAttributes> .Map  </declAttributes>
                       </class*>
                     </classes>
-                    <oclConstraints> .List </oclConstraints>
+                    <oclConstraints> .K </oclConstraints>
                   </metamodel*>
                  <models>
                    <model*> 
