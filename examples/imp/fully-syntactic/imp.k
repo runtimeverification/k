@@ -1,11 +1,13 @@
---- This is the prefered style to define languages in K-Maude.
---- The language syntax is defined as a BNF grammar,
---- which is used to parse both programs and the semantics.
---- The problem with this style is that K-Maude's parser, which reduces
---- to Maude's parser, is not powerful enough to parse real languages.
---- If one prefers to define an external parser and pass the ASTs
---- to K-Maude, then one may want to choose a fully-labeled or a
---- labeled-syntax style, to completely avoid any syntactic complications.
+/*@before=IMP-SNTAX 
+This is the prefered style to define languages in K-Maude.
+The language syntax is defined as a BNF grammar,
+which is used to parse both programs and the semantics.
+The problem with this style is that K-Maude's parser, which reduces
+to Maude's parser, is not powerful enough to parse real languages.
+If one prefers to define an external parser and pass the ASTs
+to K-Maude, then one may want to choose a fully-labeled or a
+labeled-syntax style, to completely avoid any syntactic complications.
+*/
 
 in ../../../k-prelude
 

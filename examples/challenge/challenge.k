@@ -46,7 +46,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
       </I/O>
     </T>
 
---- Basic arithmetic operations; integers are converted to reals when needed
+/*@ Basic arithmetic operations; integers are converted to reals when needed */
 --- NOTE: add more here
   rule  I1:Int + I2:Int => I1 +Int I2  
   rule  I1 + F2:Float => Int2Float(I1) +Float F2 
@@ -70,20 +70,20 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule  true and E:Exp => E
   rule  false and E => false
 
---- Variable declaration
+/*@ Variable declaration*/
   rule <k>var Xl:List{Id}; => .<_/k> <env>Env => Env[N..N+Nat|Xl| / getList{K}(Xl)]</env>
        <store_>. => N..N+Nat|Xl| |-> 0<_/store> <nextLoc>N:Nat => N +Nat |Xl|</nextLoc>
 
---- Variable lookup
+/*@ Variable lookup*/
   rule <k>X:Id=>K:K<_/k> <env>X|->N<_/env> <store>N|->K<_/store>
 
---- Variable assignment
+/*@ Variable assignment*/
   rule <k>X=V:Val;=>.<_/k> <env>X|->N<_/env> <store>N|->(_=>V)<_/store>
 
---- Variable increment
+/*@ Variable increment*/
   rule <k>++X => I:Int +Int 1<_/k> <env>X|->N<_/env> <store>N|->(I=>I+Int 1)<_/store>
 
---- Basic statement constructs
+/*@ Basic statement constructs*/
   rule  {} => . [structural]
   rule <k>{S:Stmt} => S~>env(Env)<_/k> <env>Env</env>
   rule  S1:Stmt S2:Stmt => S1 ~> S2  [structural]
@@ -92,11 +92,11 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule  if false then S1 else S2 => S2
   rule <k>while E do S => if E then S while E do S else {}<_/k> [structural]
 
---- I/O
+/*@ I/O*/
    rule <k>read=>I<_/k> <in>ListItem(I)=>.<_/in>
    rule <k>print V; => .<_/k> <out_>.=>ListItem(V)</out>
 
---- Memory allocation and pointers
+/*@ Memory allocation and pointers*/
   rule <k>&X => N<_/k> <env>X|->N<_/env>
   rule <k>*N => V<_/k> <store>N|->V<_/store>
   rule <k>malloc(N1:Nat) => N2:Nat<_/k> <ptr>. => N2|->N1<_/ptr>
@@ -106,15 +106,15 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   context *[HOLE]=_;
   rule <k>*N=V; => .<_/k> <store>N|->(_=>V)<_/store>
 
---- Lists
+/*@ Lists*/
   rule V:[Vl:List{Val}] => [V,Vl]
   rule head [V,Vl] => V
   rule tail [V,Vl] => [Vl]
 
---- Aspects
+/*@ Aspects*/
   rule <k>aspect S => .<_/k> <aspect>_=>S</aspect>
 
---- Functions
+/*@ Functions*/
   syntax Val ::= closure-lambda ( List{Id} , Stmt , Map ) [latex "{\it closure}_\lambda({#1},{#2},{#3})"]
   rule <k>lambda Xl.S1 => closure-lambda(Xl,(S2 S1),Env)<_/k> <env>Env:Map</env> <aspect>S2</aspect>
   syntax ListItem ::= ( K , Map )
@@ -123,16 +123,16 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
        <store>.=> N..N+Nat|Xl| |-> getList{K}(Vl)<_/store> <nextLoc>N => N +Nat |Xl|</nextLoc>
   rule <k>return V;~>_ => V~>K</k> <env>_=>Env</env> <fstack>(K,Env)=>.<_/fstack>
 
---- Callcc
+/*@ Callcc*/
   syntax Val ::= cc ( K , Map , List ) [latex "{\it cc}({#1},{#2},{#3})"]
   rule <k>(callcc(V) => _`(_`)(V, cc(K,Env,FStack))) ~> K</k> <env>Env</env> <fstack>FStack:List</fstack>
   rule <k> _`(_`)(cc(K,Env,FStack),V)~>_ => V~>K</k> <env>_=>Env</env> <fstack>_=>FStack</fstack>
 
---- Sequential non-determinism
+/*@ Sequential non-determinism*/
   rule <k>randomBool=>true<_/k>
   rule <k>randomBool=>false<_/k>
 
---- Threads
+/*@ Threads*/
    rule <thread_> <k>spawn S => .<_/k> <env>Env</env> <_/thread>
         (. => <thread_> <k>S</k> <env>Env</env> <_/thread>)
    rule (<thread_> <k>.K</k> <fstack>.List</fstack> <holds>Holds:Map</holds> <_/thread> => .)
@@ -144,7 +144,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
    rule <k>release V; => .<_/k> <holds_>V|->0 => .<_/holds> <busy_>SetItem(V)=>.<_/busy>
    rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k>
 
---- Agents
+/*@ Agents*/
   rule <agent_> <k>newAgent S => N2<_/k> <me>N1</me> <_/agent> <world_>. => SetItem(N2)<_/world>
        (. => <agent_><me>N2</me><parent>N1</parent><k>S</k><_/agent>) <nextAgent>N2 => sNat N2</nextAgent>
   rule  (<agent_><threads>.Bag</threads> <me>N</me> <_/agent>=> .) <world_>SetItem(N) => .<_/world>
@@ -167,12 +167,12 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule <me>N</me> <k>barrier; => .<_/k> <barrier>false</barrier> <waiting_>SetItem(N)=>.<_/waiting>
   rule <barrier>false => true</barrier> <waiting>.Set</waiting>
 
---- Abrupt termination (of thread, of agent, of system)
+/*@ Abrupt termination (of thread, of agent, of system)*/
   rule <k>haltThread;~>_ => .</k> <fstack>_=>.List</fstack>
   rule <threads_> <k>haltAgent;<_/k> <_/threads> => <threads>.Bag</threads>
   rule <agents_><k>haltSystem;<_/k><_/agents>=> <agents>.Bag</agents>
 
---- Code generation (via reflection)
+/*@ Code generation (via reflection)*/
   syntax KLabel ::= quoteit[ Nat ] [latex "{\it quote}_{\scriptstyle{#1}}"]
                   | box ( KLabel ) [latex "\framebox{#1}"]
   syntax Val ::= code ( List{K} ) [latex "{\it code}({#1})"]
@@ -203,24 +203,24 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   rule eval code(K) => K
 
 ----------------------------------------------
---- Auxilliary declarations and operations ---
+/*@ {\bf Auxilliary declarations and operations} */
 ----------------------------------------------
---- environment recovery
+/*@ environment recovery*/
   syntax K ::= env ( Map )
   rule env(_)~>env(Env) => env(Env) [structural]
   rule <k>env(Env)=>.<_/k> <env>_=>Env</env> [structural]
   rule V ~> env(Env) => env(Env) ~> V [structural]
 
---- List{Val}
+/*@ List{Val}*/
   syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
---- length
+/*@ length*/
   syntax Nat ::= `| List{Id} `|
   rule |()| => 0 [structural]
   rule |X,Xl| => sNat|Xl| [structural]
 
---- generate sequence of locations
+/*@ generate sequence of locations*/
   syntax List{K} ::= Nat .. Nat
   rule N1..N1 => .List{K} [structural]
   rule N1..N2 => N1,,sNat N1..N2 [structural]
