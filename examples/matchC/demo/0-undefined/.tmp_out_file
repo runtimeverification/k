@@ -1,0 +1,7 @@
+Warning: sort declarations for operator if_then_else_fi failed preregularity check on 2 out of 10647 sort tuples. First such tuple is (Bool, Variable, Constant).
+==========================================
+rewrite in TEST : check(prog) .
+result BagItem: 
+< top > 
+ < out > stream([FreeInt(3)]) </ out > 
+ < check > SetItem(('checkContract`(_`)).KProperLabel(Id id("main")(.List{K}))) </ check > </ top >
