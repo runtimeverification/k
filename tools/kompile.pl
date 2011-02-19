@@ -6,9 +6,15 @@ use Switch;
 use Cwd; 
 use Cwd 'abs_path';
 use Digest::MD5 qw(md5 md5_hex md5_base64);
-my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 
+# add common functions file
+my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
+
+# add configuration parser
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
+require $path;
+
 my $verbose = 0;
 my $help = 0;
 
@@ -672,7 +678,7 @@ if ($crop == 1 && !@crop_modules) {
 
 # Check the file for syntax errors
     setVerbose() if $verbose;
-    syntax_common_check($language_file_name);
+#    syntax_common_check($language_file_name);
     
 # build inclusion trees
     appendFileInTree("$language_file_name", "");
@@ -1296,7 +1302,7 @@ sub maudify_file {
     # hardcoded for avoiding maudification for shared.maude
     if ($file =~ /shared\.maude/)
     {
-	return;
+		return;
     }
     
 # Slurp all $file into $_;
@@ -1309,6 +1315,12 @@ sub maudify_file {
 	# save comments
 	my ($noComments, $myComments) = remove_comments($_);
 	$_ = $noComments;
+
+	# Parse the configuration
+	if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
+	{
+		parse_configuration($1, countlines($`));
+	}
 
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
@@ -1395,6 +1407,7 @@ sub maudify_file {
 
 sub maudify_module {
     (my $file,my $mno, local $_) = @_;
+
 
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
@@ -1858,7 +1871,7 @@ sub add_tokens {
     {
 	while ($token =~ /!&!&!/g)
 	{
-	    $token =~ s/!&!&!/$strs[$index]/;
+	    $token =~ s/!&!&!/$strs[$index]/ if defined $strs[$index];
 	    $index ++;
 	}
     }
