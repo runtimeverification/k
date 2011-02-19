@@ -522,7 +522,7 @@ sub format_xml_parser_output
 sub  get_cell_line
 {
 	# get the cell and the configuration
-	my ($cell, $_) = (shift, shift);
+	(my $cell,local $_) = (shift, shift);
 
 	# match cell in configuration
 	if (/<\s*$cell\s/sg)
