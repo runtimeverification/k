@@ -1,7 +1,7 @@
 require dsml
 
 kmod OCL-VALUES is including OCL-SYNTAX
-
+// merge with OCL semantics
 // the results of evaluating OCL expressions
 
 syntax KResult ::= ValSet 
@@ -111,7 +111,7 @@ rule collectInstances(C,
                                </instance>)
                       collectInstances(C, REST)
 
-// another possibility is that the second case (below) generates an error
+
 rule collectInstances(C, 
                         (<instance> 
                              <instName> INAME </instName> 
@@ -147,6 +147,7 @@ rule <k>  (
                    </instance>
                   )
  //         (VV:ValSet # a) //problematic!!!!
+// celula mem
     <_/k>
 <model_>
   <instance>
