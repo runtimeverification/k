@@ -72,7 +72,7 @@ syntax BExp ::= Bool
 
 
 
-syntax ValSet ::= .ValSet | Val | ValSet ValSet [assoc comm id: .ValSet]
+syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid assoc comm id: .ValSet]
                 | ValSet `Inter ValSet
                 | ValSet `Diff ValSet
 
