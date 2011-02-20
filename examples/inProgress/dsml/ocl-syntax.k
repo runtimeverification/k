@@ -8,10 +8,9 @@ kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL + SUBSTITUTION
   syntax Var ::= Id
   syntax Class ::= Id  // the actual classes depend on a given metamodel..
   syntax ScalarType ::= int | bool // may need to add strings as well
-  syntax ClassType ::=  Class | Id
   syntax ScalarTypeCol ::= col`(int`) | col`(bool`) 
   syntax ClassTypeCol ::=  col`(Class`) 
-  syntax Type ::= ScalarType | ClassType | ScalarTypeCol | ClassTypeCol
+  syntax Type ::= ScalarType | Class | ScalarTypeCol | ClassTypeCol
   syntax Attr ::= Id
 
 

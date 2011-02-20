@@ -127,7 +127,7 @@ rule collectInstances(C,
 syntax Set{Id}  ::= Id | .Set{Id} 
                      | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
 
-syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , ClassType ) | 
+syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) | 
              typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
 // should move to META-MODEL or to CONFORMANCE
 
@@ -147,7 +147,7 @@ rule <k> (
                   </instance>
                 )
                  RESTVAL:ValSet)  # AT
-       =>  RESTVAL:ValSet  # AT
+       =>  RESTVAL  # AT
  <_/k>   
 <temp_> .ValSet =>  vv
 <_/temp>
@@ -163,14 +163,13 @@ rule <k>  (
                    <instance>
                      <instName> BIDON:Id </instName>
                      <ofClass> BIDULE:Class </ofClass>
-                     <attributes_> AT|-> typedName(INSNAME:Id, OF:ClassType) <_/attributes>
+                     <attributes_> AT|-> typedName(INSNAME:Id, OF:Class) <_/attributes>
                                        // handles synonymous instances in different classes
                   </instance>
                  )
            VV:ValSet
           ) # AT
-       =>  VV:ValSet # AT 
-
+       =>  VV:ValSet # AT
     <_/k>
 <model_>
   <instance>
@@ -285,7 +284,7 @@ rule <k> C1 diff C2 => C1 Diff C2  <_/k>
 rule <k> if true then C1 else C2 endif => C1 <_/k>
 rule <k> if false then C1 else C2 endif => C2 <_/k>
 
-//rule <k> let  X:Var =  C1  inn C2  endlet => C2[C1/X] <_/k>
+// rule <k> let  X:Var =  C1  inn C2  endlet => C2[C1/X] <_/k>
 
 // AUXILIARY DEFINITIONS
 
