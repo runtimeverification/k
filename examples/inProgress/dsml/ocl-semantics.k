@@ -1,7 +1,7 @@
 require dsml
+require substitution
+kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX + SUBSTITUTION
 
-kmod OCL-VALUES is including OCL-SYNTAX
-// merge with OCL semantics
 // the results of evaluating OCL expressions
 
 syntax KResult ::= ValSet 
@@ -15,7 +15,11 @@ syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .Va
                 | ValSet `Inter ValSet
                 | ValSet `Diff ValSet
 
-syntax Val ::= Bool | Int  | instVal ( Bag ) // or better, instVal(BagItem)
+syntax Val ::= ScalarVal | InstVal
+
+syntax ScalarVal ::= Bool | Int  
+
+syntax InstVal ::=  instVal ( Bag ) // or better, instVal(BagItem)
 
 
 
@@ -36,11 +40,6 @@ rule v  inValSet  (v V) => true [structural]
 rule v  inValSet  (v':Val V) => v  inValSet  V if notBool(v ==Bool v') [structural] 
 rule v  inValSet  .ValSet => false [structural]
 
-endkm
-
-
-
-kmod OCL-SEMANTICS is including OCL-VALUES + META-MODEL // + SUBSTITUTION
 
 
 // semantics of arithmetical expressions
@@ -80,8 +79,11 @@ rule C1 = C2 => subset(C1,C2) andBool subset(C2,C1)
 //semantics for Collection expressions
 // evaluated in K cell only
 
+// rule for empty
 rule <k> empty => .ValSet <_/k>
 
+
+// rules Class .allInstances
 rule <k> (C:Class .allInstances) => collectInstances(C,INST:Bag) <_/k> 
          <model> <modelName> MN:Id </modelName> // _ leads to ambiguity
             INST
@@ -122,40 +124,156 @@ rule collectInstances(C,
                         if notBool (C ==Bool C') 
 
 
-syntax K ::= typedName( Id , Class ) // should move to META-MODEL or to CONFORMANCE
+syntax Set{Id}  ::= Id | .Set{Id} 
+                     | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
+
+syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , ClassType ) | 
+             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
+// should move to META-MODEL or to CONFORMANCE
 
 
-rule <k> (.ValSet # AT:Attr) => .ValSet <_/k>
+// rule for CExp # Attr [strict] 
+// when finished, take result from temp cell
+rule <k> (.ValSet # AT:Attr) => VV:ValSet <_/k> <temp> VV => .ValSet </temp>
 
+// case 1 : the attribute AT is of scalar type
+// the value of AT is stored in temp cell
+rule <k> (
+          instVal(
+                   <instance>
+                     <instName> BIDON:Id </instName>
+                     <ofClass> BIDULE:Class </ofClass>
+                     <attributes_> AT|-> typedVal(vv:Val, TT:ScalarType)<_/attributes>        
+                  </instance>
+                )
+                 RESTVAL:ValSet)  # AT
+       =>  RESTVAL:ValSet  # AT
+ <_/k>   
+<temp_> .ValSet =>  vv
+<_/temp>
+
+
+
+
+// case 2 : the attribute AT is of type class
+// the instance is sought for in the model
+// the value of AT is stored in temp cell
 rule <k>  (
           instVal(
                    <instance>
                      <instName> BIDON:Id </instName>
                      <ofClass> BIDULE:Class </ofClass>
-                     <attributes_> (a:Attr |-> typedName(INSNAME:Id, OFCLASS:Class)) <_/attributes>
+                     <attributes_> AT|-> typedName(INSNAME:Id, OF:ClassType) <_/attributes>
                                        // handles synonymous instances in different classes
                   </instance>
                  )
            VV:ValSet
-          ) # a
-       =>  
-          instVal(
-                   <instance>
-                      <instName> INSNAME:Id </instName>
-                      <ofClass> OFCLASS:Id </ofClass> 
-                      <attributes> ATR:Map </attributes>
-                   </instance>
-                  )
- //         (VV:ValSet # a) //problematic!!!!
-// celula mem
+          ) # AT
+       =>  VV:ValSet # AT 
+
     <_/k>
 <model_>
   <instance>
     <instName> INSNAME </instName>
-    <ofClass> OFCLASS </ofClass> 
-    <attributes> ATR </attributes>
+    <ofClass> OF </ofClass> 
+    <attributes> ATR:Map </attributes>
   </instance>
 <_/model>
+<temp_> .ValSet =>
+          instVal(
+                   <instance>
+                      <instName> INSNAME </instName>
+                      <ofClass> OF </ofClass> 
+                      <attributes> ATR </attributes>
+                   </instance>
+                  )
+<_/temp>
+
+
+
+
+// case 3 : the attribute AT is of type collection of instance Ids
+// the bag of instances is sought for in the model
+rule <k>  (
+          instVal(
+                   <instance>
+                     <instName> BIDON:Id </instName>
+                     <ofClass> BIDULE:Class </ofClass>
+                     <attributes_> AT|-> typedSetOfInstName(ISET:Set{Id}, OFCOL:ClassTypeCol) <_/attributes>
+                  </instance>
+                 )
+           VV:ValSet
+          ) # AT
+       =>  VV:ValSet # AT 
+    <_/k>
+<model> <modelName> toto:Id </modelName>
+ALLINSTANCES:Bag
+</model>
+<temp_> .ValSet =>
+         makeInstVal(ISET,ALLINSTANCES)
+<_/temp>
+
+syntax ValSet ::=  makeInstVal ( Set{Id} , Bag )
+
+rule makeInstVal(ALLNAMES:Set{Id}, .Bag) => .ValSet 
+
+rule makeInstVal(ALLNAMES,
+                  <instance>
+                     <instName> INSTNAME:Id </instName> 
+                     <ofClass> OFTHECLASS:Class </ofClass>
+                     <attributes> ATR </attributes>
+                  </instance> REMAINING:Bag) 
+    => if isIn(INSTNAME,ALLNAMES)
+       then
+                  instVal( <instance>
+                     <instName> INSTNAME </instName> 
+                     <ofClass> OFTHECLASS:Class </ofClass>
+                     <attributes> ATR </attributes>
+                  </instance> ) 
+                  makeInstVal(ALLNAMES,REMAINING)
+       else
+
+         makeInstVal(ALLNAMES,REMAINING)
+
+       fi
+
+/*
+rule makeInstVal(ALLNAMES,  
+                  <instance>
+                     <instName> INSTNAME':Id </instName> 
+                     <ofClass> OFTHECLASS:Class </ofClass>
+                     <attributes> ATR </attributes>
+                  </instance> REMAINING:Bag) 
+    =>
+    makeInstVal(ALLNAMES,REMAINING)
+    if notBool isPresent(INSTNAME',ALLNAMES)
+*/
+
+syntax Bool ::= isIn ( Id , Set{Id} )
+rule isIn (XX:Id , (XX , NAMES:Set{Id}) ) => true [structural]
+ rule isIn (XX, (XX':Id ,  NAMES)) => isIn(XX,  NAMES) if notBool (XX ==Bool XX') [structural]
+rule isIn (XX, .Set{Id}) => false [structural]
+
+
+
+
+// case 4 : the attribute AT is of type collection of  values
+rule <k>  (
+          instVal(
+                   <instance>
+                     <instName> BIDON:Id </instName>
+                     <ofClass> BIDULE:Class </ofClass>
+                     <attributes_> AT|-> typedSetOfVal(VVV:ValSet, OFCOL2:ScalarTypeCol) <_/attributes>
+                  </instance>
+                 )
+           VV:ValSet
+          ) # AT
+       =>  VV:ValSet # AT 
+    <_/k>
+<temp_> .ValSet =>
+         VVV
+<_/temp>
+
 
 
 rule <k> C1 union C2   => C1 C2 <_/k> 
@@ -166,6 +284,8 @@ rule <k> C1 diff C2 => C1 Diff C2  <_/k>
 
 rule <k> if true then C1 else C2 endif => C1 <_/k>
 rule <k> if false then C1 else C2 endif => C2 <_/k>
+
+//rule <k> let  X:Var =  C1  inn C2  endlet => C2[C1/X] <_/k>
 
 // AUXILIARY DEFINITIONS
 
@@ -182,6 +302,54 @@ rule subset((v:Val V), V':ValSet) => if (v  inValSet  V') then subset(V,V') else
 syntax Int ::= card ( ValSet )
 rule card(.ValSet) => 0
 rule card(v V) => 1 +Int card(V)
-
 endkm
 
+kmod TEST is including OCL-SEMANTICS
+
+syntax Id ::=  a | b | `A | `B | `M | `Z | `W | attr1 | attr2 | attr3 
+
+
+//syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , ClassType ) | 
+//             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
+
+/*
+syntax K ::= testConfig
+
+macro testConfig = 
+ <T_>
+<metamodel_>
+  <classes>
+    <class> 
+      <className> A </className> 
+      <extends> object </extends>
+      <declAttributes> attr1 |-> int </declAttributes >
+    </class>
+    <class>
+      <className> B </className> 
+     <extends> object </extends>
+      <declAttributes> attr2 |-> A </declAttributes >
+    <_/class>
+  </classes>
+<_/metamodel>
+<model>
+      <modelName> M </modelName>
+      <instance>
+                      <instName>  a </instName>
+                      <ofClass> A </ofClass>
+                       <attributes>
+                          (attr1 |-> typedVal(1, int))
+                          (attr3 |-> typedSetOfVal( (1 2 3), col(int) ))
+                       </attributes>
+       
+       </instance>
+       <instance>
+                      <instName> b </instName>
+                       <ofClass> B </ofClass>
+                       <attributes> (attr2 |-> typedName(a, B)) </attributes>
+       </instance>
+</model> 
+<_/T>
+
+*/
+
+endkm

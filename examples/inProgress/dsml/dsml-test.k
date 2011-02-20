@@ -65,7 +65,7 @@ rule unknownType(T, ((_ |-> T':Type) Map')) => unknownType(T, Map') if notBool (
 rule unknownType(T, .Map) = true [structural] 
 */
 
-
+/*
  syntax Bag ::= testConfig
 
 
@@ -112,6 +112,6 @@ macro testConfig =
 </model>
 <k> checkConf(M) </k>
 <_/T>
-
+*/
 
 endkm

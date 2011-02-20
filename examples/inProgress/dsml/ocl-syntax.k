@@ -7,7 +7,11 @@ kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL + SUBSTITUTION
 
   syntax Var ::= Id
   syntax Class ::= Id  // the actual classes depend on a given metamodel..
-  syntax Type ::= int | bool | Class | col`(int`) | col`(bool`) | col`(Class`) // may need to add strings as well
+  syntax ScalarType ::= int | bool // may need to add strings as well
+  syntax ClassType ::=  Class | 
+  syntax ScalarTypeCol ::= col`(int`) | col`(bool`) 
+  syntax ClassTypeCol ::=  col`(Class`) 
+  syntax Type ::= ScalarType | ClassType | ScalarTypeCol | ClassTypeCol
   syntax Attr ::= Id
 
 
@@ -57,10 +61,10 @@ syntax CExp ::= empty
                 | CExp diff CExp [strict]
                 | CExp ->select( Var `: Type `| BExp ) [strict (1)]
                 | CExp ->collect( Var `: Type `| CExp )  [strict (1)]
-                | let Var `: Type `= CExp in  CExp //[strict(3)] ?
+                | let Var `=   CExp  inn CExp endlet
                 | if BExp then CExp else CExp endif [strict(1)]
 
-//syntax K ::= CExp
+syntax K ::= CExp
 
 
 // some identifiers to test with...
@@ -69,7 +73,8 @@ syntax CExp ::= empty
 syntax Class ::= c1 | c2 
 
 syntax Attr ::= a1 | a2 | a3
-
-syntax Var ::= x | y | z
 */
+
+syntax Id ::= x | y | z
+
 endkm

@@ -1,4 +1,4 @@
-//require ../../../k-prelude
+
 require ocl-syntax
 
 
@@ -12,14 +12,15 @@ require ocl-syntax
 */
 kmod META-MODEL is including OCL-SYNTAX
 
-  syntax Id ::= object 
+  syntax Id ::= object | undefined
 
  
-  syntax K ::= undefined  
+ // syntax K ::= undefined  
 
-  syntax ListItem ::= Id : KLabel [prec 20] 
+  // syntax ListItem ::= Id : KLabel [prec 20] 
 
 
+/*
 
   syntax Bool ::= isScalar ( Type )
 
@@ -29,6 +30,7 @@ kmod META-MODEL is including OCL-SYNTAX
   rule isScalar(col(int)) => false [structural]
   rule isScalar(col(bool)) => false [structural]
   rule isScalar(col(Class)) => false [structural]
+*/
 
 
 /*
@@ -51,7 +53,7 @@ kmod META-MODEL is including OCL-SYNTAX
                          <declAttributes> .Map  </declAttributes>
                       </class*>
                     </classes>
-                    <oclConstraints> .K </oclConstraints>
+                    <oclConstraints> .List </oclConstraints>
                   </metamodel*>
                  <models>
                    <model*> 
@@ -64,6 +66,8 @@ kmod META-MODEL is including OCL-SYNTAX
                    </model*>
                  </models>
                 <k> .K </k> 
+                <temp> .Bag </temp>
+                <nextId> 0 </nextId> // required for substitutions (fresh var names)
                 </T>
 
  
