@@ -44,26 +44,26 @@ kmod META-MODEL is including OCL-SYNTAX
 */
 
   configuration <T> 
-                  <metamodel*>
+                  <metamodel ?>
                     <name> undefined </name> 
                     <classes>
-                      <class*>
+                      <class *>
                          <className> undefined </className> 
                          <extends> undefined </extends>
                          <declAttributes> .Map  </declAttributes>
-                      </class*>
+                      </class *>
                     </classes>
                     <oclConstraints> .List </oclConstraints>
-                  </metamodel*>
+                  </metamodel ?>
                  <models>
-                   <model*> 
+                   <model *> 
                       <modelName> undefined </modelName>
                       <instance*>
                          <instName> undefined </instName>
                          <ofClass> undefined </ofClass>
                          <attributes> .Map </attributes>
                       </instance*>
-                   </model*>
+                   </model *>
                  </models>
                 <k> .K </k> 
                 <temp> .Bag </temp>

@@ -9,7 +9,7 @@ syntax CExp ::= ValSet
 syntax AExp ::= Int
 syntax BExp ::= Bool
 
-
+syntax K ::= Id
 
 syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .ValSet]
                 | ValSet `Inter ValSet
@@ -312,44 +312,49 @@ syntax Id ::=  a | b | `A | `B | `M | `Z | `W | attr1 | attr2 | attr3
 //syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , ClassType ) | 
 //             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
 
-/*
-syntax K ::= testConfig
+
+syntax Bag ::= testConfig
 
 macro testConfig = 
- <T_>
-<metamodel_>
-  <classes>
-    <class> 
-      <className> A </className> 
-      <extends> object </extends>
-      <declAttributes> attr1 |-> int </declAttributes >
-    </class>
-    <class>
-      <className> B </className> 
-     <extends> object </extends>
-      <declAttributes> attr2 |-> A </declAttributes >
-    <_/class>
-  </classes>
-<_/metamodel>
-<model>
-      <modelName> M </modelName>
-      <instance>
-                      <instName>  a </instName>
-                      <ofClass> A </ofClass>
-                       <attributes>
-                          (attr1 |-> typedVal(1, int))
-                          (attr3 |-> typedSetOfVal( (1 2 3), col(int) ))
-                       </attributes>
-       
-       </instance>
-       <instance>
-                      <instName> b </instName>
-                       <ofClass> B </ofClass>
-                       <attributes> (attr2 |-> typedName(a, B)) </attributes>
-       </instance>
-</model> 
-<_/T>
+  <T>
+    <metamodel>
+      <name> undefined </name> 
+      <classes>
+        <class> 
+          <className> A </className> 
+          <extends> object </extends>
+          <declAttributes> attr1 |-> int </declAttributes>
+        </class>
+        <class>
+          <className> B </className> 
+          <extends> object </extends>
+          <declAttributes> attr2 |-> A </declAttributes>
+        </class>
+      </classes>
+      <oclConstraints> .List </oclConstraints>
+    </metamodel>
+    <models>
+      <model>
+        <modelName> M </modelName>
+          <instance>
+            <instName>  a </instName>
+            <ofClass> A </ofClass>
+            <attributes>
+               (attr1 |-> typedVal(1, int))
+               (attr3 |-> typedSetOfVal( (1 2 3), col(int) ))
+            </attributes>
+          </instance>
+          <instance>
+            <instName> b </instName>
+            <ofClass> B </ofClass>
+            <attributes> (attr2 |-> typedName(a, B)) </attributes>
+          </instance>
+       </model> 
+     </models>
+     <k> .K </k> 
+     <temp> .Bag </temp>
+     <nextId> 0 </nextId>
+  </T>
 
-*/
 
 endkm
