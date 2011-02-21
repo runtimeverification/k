@@ -91,14 +91,14 @@ rule <k> empty => .ValSet <_/k>
 
 
 // rules Class .allInstances
-rule <k> (C:Class .allInstances) => . <_/k> //collectInstances(C,INST:Bag)
+rule <k> (C:Class .allInstances) => collectInstances(C,INST:Bag) <_/k> 
          <model> <modelName> MN:Id </modelName> // _ leads to ambiguity
             INST:Bag
          </model> [structural] 
 
 //collectInstances function: collects instances of class C
 
-/*
+
 syntax ValSet ::= collectInstances ( Class , Bag )
 rule collectInstances(C:Class, .Bag) => .ValSet
 
@@ -132,7 +132,7 @@ rule collectInstances(C,
 
 
 
-*/
+
 
 
 // rule for CExp # Attr [strict] 
@@ -314,12 +314,12 @@ syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3
 
 syntax Class ::=  classA | classB | classZ
 
-
+/*
 syntax Id ::= a | b | `M
 syntax Class ::= `A | `B | `Z
 syntax Attr ::=  attr1 | attr2 | attr3 
 
-
+*/
 
 
 syntax Bag ::= testConfig
@@ -340,7 +340,7 @@ macro testConfig =
           <declAttributes> attr2 |-> classA </declAttributes>
         </class>
       </classes>
-      <oclConstraints> .List </oclConstraints>
+      <oclConstraints> .List </oclConstraints> 
     </metamodel>
     <models>
       <model>
@@ -360,7 +360,7 @@ macro testConfig =
           </instance>
        </model> 
      </models>
-     <k> (classZ .allInstances) </k> 
+     <k> (classA .allInstances) </k> 
      <temp> .Bag </temp>
   </T>
 
