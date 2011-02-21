@@ -370,6 +370,17 @@ sub try
 	$session = 1;
 }
 
+sub generate_error
+{
+	my $type = shift;
+	my $code = shift;
+	my $file = shift;
+	my $line = shift;
+	my $message = shift;
+
+	return "[$type][$code] in [$file] @ [$line]: [$message]";
+}
+
 # Args: error code [, other args specific for error code]
 # Return: void
 # Reports an error by adding an error message in @container
@@ -392,7 +403,7 @@ sub error_report
 					my $msg = shift;
 
 					# generate error message
-					my $err_msg = "Error: $msg.\n";
+					my $err_msg = generate_error("ERROR", "", "", "", $msg);
 
 					# add error in @container
 					push(@container, $err_msg);
@@ -412,7 +423,7 @@ sub error_report
 					my $attrs = "@atts";
 
 					# generate error message
-					my $err_msg = "in configuration (@ line $config_line) attribute \"$attribute\" is not allowed for cell <$cell> at line $line. You should try: $attrs";			
+					my $err_msg = generate_error("ERROR", $INVALID_ATTRIBUTE_ERROR, "unknown file", $config_line, "in configuration attribute \"$attribute\" is not allowed for cell <$cell> at line $line. You should try: $attrs");
 
 					# add error message to @container
 					push(@container, $err_msg);
@@ -432,7 +443,7 @@ sub error_report
 					my $vals = $xml_attr{$attribute};
 
 					# generate error message
-					my $err_msg = "in configuration (@ line $config_line) attribute \"$attribute\" has an invalid value \"$value\" in cell <$cell> at line $line. The available values for \"$attribute\" are: $vals";			
+					my $err_msg = generate_error("ERROR", $INVALID_VALUE_FOR_ATTRIBUTE_ERROR, "unknown file", $config_line, "in configuration, attribute \"$attribute\" has an invalid value \"$value\" in cell <$cell> at line $line. The available values for \"$attribute\" are: $vals");			
 
 					# add error message to @container
 					push(@container, $err_msg);
@@ -462,6 +473,7 @@ sub error_report
 
 					# insert the absolute line number
 					$xml_err =~ s!\s([0-9]+)$!{$config_line = $1 + $config_line;}" " . $config_line!sge;
+					$xml_err = generate_error("ERROR", $INVALID_XML, "unknown file", $1 + $config_line, $xml_err);
 
 					# add $xml_err to @container
 					push(@container, $xml_err);	
@@ -497,7 +509,7 @@ sub catch
 sub format_error
 {
 	# return formatted error message
-	return "Error: " . (shift) . ".\n";
+	return (shift) . ".\n";
 }
 
 # Args: xml parser error message
