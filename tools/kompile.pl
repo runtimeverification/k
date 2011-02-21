@@ -1408,6 +1408,8 @@ sub maudify_file {
 sub maudify_module {
     (my $file,my $mno, local $_) = @_;
 
+# 	switch attributes back to old configuration
+#	s///sg;
 
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
@@ -1839,7 +1841,31 @@ sub add_cell_label_ops {
     my $ops = (/(?<=\s)configuration\s+(.*?)(?:$kmaude_keywords_pattern)/s
 	       ? "ops ".join(" ",set($1 =~ /<\s*\/?\s*(.*?)\s*[\*\+\?]?\s*>/gs))." : -> CellLabel " : "");
     s/(?=endkm)/$ops?"$ops ":""/se;
+
+	# switch to old accepted configuration
+	my $i = 0;
+	while ($i < 20)
+	{
+		s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
+		$i++;
+	};
+
     return $_;
+}
+
+sub add_cell_label_ops_
+{
+	local $_ = shift;
+	if (/(?<=\s)configuration\s+(.*?)(?=$kmaude_keywords_pattern)/s)
+	{
+		my $label_declarations = get_cell_label_declarations();
+		s/(?=endkm)/ $label_declarations /s;
+
+		# switch to old accepted configuration
+#		s/\s+multiplicity="(.*?)"/$1/sg;
+	}
+
+	$_;
 }
 
 # This subroutine returns a list of all spacifiable tokens that appear in operations defined (using op) in the argument
