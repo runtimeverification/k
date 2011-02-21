@@ -70,6 +70,9 @@ my $k_attr_values = "values";
 my $temporary = "cfg_temp.tmp";
 my $xml_parser = "xml-parser.pl";
 
+# temporary variables
+my $temp_var = "";
+
 # keep the DOM TREE of the configuration
 my $dom;
 
@@ -79,20 +82,23 @@ my $configuration = "";
 # configuration starting line
 my $config_line = 0;
 
+# generated TAG name
+my $TAG = "K-TOOL-GENERATED-ROOT";
+
 
 ###############################
 # Specific ERRORS definitions #
 ###############################
 
-my $ERROR 								= 0;  	# used for nothing now
+my $ERROR 								= 10;  	# general error
 
-my $INVALID_ATTRIBUTE_ERROR 			= 1;	# thrown when finding attributes which 
+my $INVALID_ATTRIBUTE_ERROR 			= 20;	# thrown when finding attributes which 
 												# are not allowed in a K configuration
 
-my $INVALID_VALUE_FOR_ATTRIBUTE_ERROR 	= 2;	# thrown when finding invalid values
+my $INVALID_VALUE_FOR_ATTRIBUTE_ERROR 	= 30;	# thrown when finding invalid values
 												# for a given K attribute
 
-my $INVALID_XML 						= 3;	# thrown when xml cannot be parsed
+my $INVALID_XML 						= 40;	# thrown when xml cannot be parsed
 
 
 
@@ -182,6 +188,11 @@ sub parse_xml
 {
 	my $xml = shift;
 	
+	# hack
+	$xml =~ s/<\s*([a-zA-Z\-]+)\s*>/<$1>/sg;
+	$xml =~ s/<\s*\/\s*([a-zA-Z\-]+)\s*>/<\/$1>/sg;
+
+
 	# save content in file
 	open FILE, '>', $temporary;
 	print FILE $xml;
@@ -193,7 +204,7 @@ sub parse_xml
 	# call external xml parser script
 	# if this script dies then report an error
 	my $sys_call = `perl $xml_parser $temporary 2>&1`;
-	
+
 	# verify the parsing result
 	if ($sys_call)
 	{
@@ -206,7 +217,7 @@ sub parse_xml
 		my $parser = new XML::DOM::Parser();
 
 		# create doc tree
-		my $doc = $parser->parse($_);
+		my $doc = $parser->parse($xml);
 	
 		# return document tree
 		return $doc
@@ -222,7 +233,7 @@ sub parse_xml
 sub parse_XML_K_configuration
 {
 	# K configuration
-	local $_ = "<K-TOOL-GENERATED-ROOT>" . (shift) . "</K-TOOL-GENERATED-ROOT>";
+	local $_ = "<$TAG>" . (shift) . "</$TAG>";
 	
 	# parse xml
 	my $document = parse_xml($_);
@@ -602,6 +613,84 @@ sub print_map
 	{
 		print "$key => $value\n";
 	}
+}
+
+# Args: void
+# Return: a string which represents the cell label declarations
+# Check each node of the xml tree and build the declaration for each label
+sub get_cell_label_declarations
+{
+	# clear $temp_var content
+	$temp_var = "";
+
+	# visit
+	&visitor($dom->getDocumentElement, \&get_cell_declaration) if (defined $dom);
+
+	# remove K generated TAG
+	$temp_var =~ s/op\s+\Q$TAG\E\s+:\s+\->\s+CellLabel//s;
+
+#	print "TREE: " . $dom->toString . "\n\n";
+#	print "VAR: $temp_var\n";
+
+	# clear 
+	return $temp_var;
+}
+
+# Args: DocumentElement
+# Return: void
+# Generate op for each cell; add metadata if there is any color 
+# attribute for the current cell
+sub get_cell_declaration
+{
+	# get the argument of type DocumentElement
+	my $cell = shift;
+
+	# get the cell name
+	my $cellname = $cell->getTagName;
+
+	# get the color attribute
+	my $color = $cell->getAttribute("color");
+
+	# append the declaration 
+	$temp_var .= " op $cellname : -> CellLabel [metadata \"color:$color\"]" if $color ne "";
+	$temp_var .= " op $cellname : -> CellLabel" if $color eq "";
+}
+
+# Args: DocumentElement, a function
+# Return: void
+# This is a typical visitor function which receives
+# a Document Element and apply a function on it.
+sub visitor
+{
+	# the first parameter is a Document Element
+	my $node = shift;
+
+	# the second parameter is a function
+	my $function = shift;
+
+	# apply this function to the current node
+	&$function($node);
+
+	# recurse
+	# get list of all child nodes, and their number
+	my $list = $node->getChildNodes;
+	my $length = $list->getLength;
+
+	# visit each child - only Element
+	for (my $i = 0; $i < $length; $i++)
+	{
+		# get the child node and its type
+		my $child = $list->item($i);
+		my $child_type = $child->getNodeType;
+
+		# if the child type is Element then visit it
+		if ($child_type == ELEMENT_NODE)
+		{
+			# recursive call
+			visitor($child, $function);
+		}
+	}
+
 }
 
 1;

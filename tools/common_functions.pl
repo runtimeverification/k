@@ -1963,14 +1963,15 @@ sub run_maude_
  	return $result;
 }
 
-
+# checks for incompatible sorts
 sub check_incompatible
 {
 	my $file = shift;
 	$file =~ s/\.[a-z]+$//sg;
 
 	my $module = shift;	
-
+	
+	# get the output from maude and then parse it.
 	local $_ = run_maude_("running maude ..",
 			"load $file\n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'Map) . \n",

@@ -1319,6 +1319,7 @@ sub maudify_file {
 	# Parse the configuration
 	if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
 	{
+		# print "FILE: $file\n";
 		parse_configuration($1, countlines($`));
 	}
 
@@ -1836,7 +1837,7 @@ sub on_the_fly_kvars {
 }
 
 # If there is any configuration, get all its cell labels and declare them at the end of kmodule
-sub add_cell_label_ops {
+sub add_cell_label_ops_ {
     local ($_) = @_;
     my $ops = (/(?<=\s)configuration\s+(.*?)(?:$kmaude_keywords_pattern)/s
 	       ? "ops ".join(" ",set($1 =~ /<\s*\/?\s*(.*?)\s*[\*\+\?]?\s*>/gs))." : -> CellLabel " : "");
@@ -1853,16 +1854,22 @@ sub add_cell_label_ops {
     return $_;
 }
 
-sub add_cell_label_ops_
+sub add_cell_label_ops
 {
 	local $_ = shift;
 	if (/(?<=\s)configuration\s+(.*?)(?=$kmaude_keywords_pattern)/s)
 	{
+		parse_configuration($1, 0);
 		my $label_declarations = get_cell_label_declarations();
 		s/(?=endkm)/ $label_declarations /s;
 
 		# switch to old accepted configuration
-#		s/\s+multiplicity="(.*?)"/$1/sg;
+		my $i = 0;
+		while ($i < 20)
+		{
+			s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
+			$i++;
+		};
 	}
 
 	$_;
