@@ -71,7 +71,7 @@ syntax Id ::= object | undefined // to be extended later with class and instance
                    </model *>
                  </models>
                 <k> .K </k> 
-                <temp> .Bag </temp>
+                <temp> .K </temp>
                 </T>
 
  

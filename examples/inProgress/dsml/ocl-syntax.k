@@ -54,7 +54,7 @@ syntax CExp ::= empty
                 | Class .allInstances  // "basic constructor" for expressions
                 | AExp [strict]
                 | BExp [strict]
-                | CExp # Attr [strict]  // period generates ambiguity
+                | CExp # Attr [strict(1)]  // period generates ambiguity
                 | CExp union CExp [strict]
                 | CExp inter CExp [strict]
                 | CExp diff CExp [strict]

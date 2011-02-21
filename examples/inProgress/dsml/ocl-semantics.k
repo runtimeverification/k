@@ -19,7 +19,7 @@ syntax Val ::= ScalarVal | InstVal
 
 syntax ScalarVal ::= Bool | Int  
 
-syntax InstVal ::=  instVal ( Bag ) // or better, instVal(BagItem)
+syntax InstVal ::=  instVal ( BagItem )
 
 // sets of identifiers
 syntax Set{Id}  ::= Id | .Set{Id} 
@@ -260,22 +260,20 @@ rule isIn (XX, .Set{Id}) => false [structural]
 
 
 // case 4 : the attribute AT is of type collection of  values
+
 rule <k>  (
           instVal(
-                   <instance>
-                     <instName> BIDON:Id </instName>
-                     <ofClass> BIDULE:Class </ofClass>
-                     <attributes_> AT|-> typedSetOfVal(VVV:ValSet, OFCOL2:ScalarTypeCol) <_/attributes>
-                  </instance>
+                   <instance_>
+                     <attributes_> AT|-> typedSetOfVal(VVV:ValSet, _) <_/attributes>
+                  <_/instance>
                  )
            VV:ValSet
           ) # AT
        =>  VV:ValSet # AT 
     <_/k>
-<temp_> .ValSet =>
-         VVV
-<_/temp>
-
+//<temp> .K =>
+//         VVV
+//<_/temp>
 
 
 rule <k> C1 union C2   => C1 C2 <_/k> 
@@ -310,14 +308,16 @@ endkm
 
 kmod TEST is including OCL-SEMANTICS
 
-syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3 
+syntax Id ::=  a | b | modelM 
+
+syntax Attr ::=  attr1 | attr2 | attr3 
 
 syntax Class ::=  classA | classB | classZ
 
 /*
 syntax Id ::= a | b | `M
 syntax Class ::= `A | `B | `Z
-syntax Attr ::=  attr1 | attr2 | attr3 
+
 
 */
 
@@ -360,8 +360,8 @@ macro testConfig =
           </instance>
        </model> 
      </models>
-     <k> (classA .allInstances) </k> 
-     <temp> .Bag </temp>
+     <k> ((classA .allInstances)) # attr3 </k> 
+     <temp> .K </temp>
   </T>
 
 
