@@ -16,9 +16,9 @@ load programs
 
 kmod RUN is including BASIC-RUN + THREADS-PROGRAMS
   configuration <T> 
-                <thread*> 
+                <thread multiplicity="*"> 
                   <k> .K </k> <nextId> 0 </nextId> <holds> .Map </holds>
-                </thread*>
+                </thread>
                 <in> .List </in> <out> .List </out>
                 <mem> .Map </mem> <nextLoc> 0 </nextLoc>
                 <busy> .Set </busy> </T>

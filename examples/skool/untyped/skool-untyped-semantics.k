@@ -52,12 +52,12 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
                      <crntObj> .List </crntObj>
                      <crntClass> main </crntClass>
                      <pgm>
-                           <class*>
+                           <class multiplicity="*">
                                     <className> Id:Id </className>
                                     <extends> Id:Id </extends>
                                     <fields> .K </fields>
                                     <methods> .Map </methods>
-                           </class*>
+                           </class>
                      </pgm>
 ---</SKOOL added>
                 </T>

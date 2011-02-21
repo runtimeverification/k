@@ -46,29 +46,29 @@ kmod AGENT is
    including THREADS-PROGRAMS + AGENTS-PROGRAMS + QUOTE-UNQUOTE-PROGRAMS
  configuration
     <T>
-      <agent*> 
+      <agent multiplicity="*"> 
           <control>
-              <thread*>
+              <thread multiplicity="*">
                   <k>.K</k>
                   <nextId>0</nextId>
                   <holds>.Map</holds>
-              </thread*>
+              </thread>
           </control>
           <busy>.Set</busy> 
           @latex("\\kBR")
           <mem> .Map </mem> <nextLoc> 0 </nextLoc>
           <me>0</me>
           <parent>-1</parent>
-      </agent*>
+      </agent>
       @latex("\\kBR")
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting>
       @latex("\\kBR")
-      <messages> <message*>
+      <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
-      </message*> </messages>
-      <I/O> <in>.List</in> <out>.List</out> </I/O>
+      </message> </messages>
+      <I-O> <in>.List</in> <out>.List</out> </I-O>
     </T>
 
   syntax KResult ::= Id

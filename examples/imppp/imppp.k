@@ -9,10 +9,10 @@ kmod IMPPP-CONFIGURATION is including IMPPP-SYNTAX + K
   configuration
     <T>
       <threads>
-        <thread*>
+        <thread multiplicity="*">
           <k>.K</k>
           <env>.Map</env>
-        </thread*>
+        </thread>
      </threads>
      <store>.Map</store>
      <nextLoc>0</nextLoc>

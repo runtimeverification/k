@@ -17,25 +17,25 @@ load programs
 kmod RUN is including AGENTS-PROGRAMS + BASIC-RUN
   configuration
     <T>
-      <agent*> 
+      <agent multiplicity="*"> 
           <control>
-              <thread*>
+              <thread multiplicity="*">
                   <k>.K</k>
                   <nextId>0</nextId>
                   <holds>.Map</holds>
                   <mem>.Map</mem> <nextLoc>0</nextLoc>
-              </thread*>
+              </thread>
           </control>
           <busy>.Set</busy>
           <me>0</me>
           <parent>-1</parent>
-      </agent*>
+      </agent>
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting>
-      <messages> <message*>
+      <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
-      </message*> </messages>
-      <I/O> <in>.List</in> <out>.List</out> </I/O>
+      </message> </messages>
+      <I-O> <in>.List</in> <out>.List</out> </I-O>
     </T>
 endkm
