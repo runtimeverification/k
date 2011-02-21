@@ -22,22 +22,22 @@ kmod META-MODEL is including OCL-SOLVER
   configuration <T> 
                   <metamodel>
                     <classes>
-                      <class*>
+                      <class multiplicity="*">
                          <className> Id:Id </className>
                          <extends> Id:Id </extends>
                          <declAttributes> .List  </declAttributes>
-                      </class*>
+                      </class>
                     </classes>
                     <oclConstraints> .List </oclConstraints>
                   </metamodel>
                   <models>
-                    <model*>
-                      <instance*>
+                    <model multiplicity="*">
+                      <instance multiplicity="*">
                          <name> undefined </name>
                          <ofClass> undefined </ofClass>
                          <attributes> .Map </attributes>
-                      </instance*>
-                    </model*>
+                      </instance>
+                    </model>
                   </models>
                 </T>
     
