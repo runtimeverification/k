@@ -1,6 +1,6 @@
 require dsml
-require substitution
-kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX + SUBSTITUTION
+ // require substitution
+kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX  // + SUBSTITUTION
 
 // the results of evaluating OCL expressions
 
@@ -21,6 +21,13 @@ syntax ScalarVal ::= Bool | Int
 
 syntax InstVal ::=  instVal ( Bag ) // or better, instVal(BagItem)
 
+// sets of identifiers
+syntax Set{Id}  ::= Id | .Set{Id} 
+                     | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
+
+// the various kinds of attributes in instances
+syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) | 
+             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
 
 
 rule (v:Val V1:ValSet) Inter (v V2:ValSet) => v (V1 Inter V2) [structural]
@@ -84,14 +91,14 @@ rule <k> empty => .ValSet <_/k>
 
 
 // rules Class .allInstances
-rule <k> (C:Class .allInstances) => collectInstances(C,INST:Bag) <_/k> 
+rule <k> (C:Class .allInstances) => . <_/k> //collectInstances(C,INST:Bag)
          <model> <modelName> MN:Id </modelName> // _ leads to ambiguity
-            INST
-         </model>
+            INST:Bag
+         </model> [structural] 
 
 //collectInstances function: collects instances of class C
 
-
+/*
 syntax ValSet ::= collectInstances ( Class , Bag )
 rule collectInstances(C:Class, .Bag) => .ValSet
 
@@ -124,12 +131,8 @@ rule collectInstances(C,
                         if notBool (C ==Bool C') 
 
 
-syntax Set{Id}  ::= Id | .Set{Id} 
-                     | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
 
-syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) | 
-             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
-// should move to META-MODEL or to CONFORMANCE
+*/
 
 
 // rule for CExp # Attr [strict] 
@@ -301,15 +304,22 @@ rule subset((v:Val V), V':ValSet) => if (v  inValSet  V') then subset(V,V') else
 syntax Int ::= card ( ValSet )
 rule card(.ValSet) => 0
 rule card(v V) => 1 +Int card(V)
+
+
 endkm
 
 kmod TEST is including OCL-SEMANTICS
 
-syntax Id ::=  a | b | `A | `B | `M | `Z | `W | attr1 | attr2 | attr3 
+syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3 
+
+syntax Class ::=  classA | classB | classZ
 
 
-//syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , ClassType ) | 
-//             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
+syntax Id ::= a | b | `M
+syntax Class ::= `A | `B | `Z
+syntax Attr ::=  attr1 | attr2 | attr3 
+
+
 
 
 syntax Bag ::= testConfig
@@ -320,24 +330,24 @@ macro testConfig =
       <name> undefined </name> 
       <classes>
         <class> 
-          <className> A </className> 
+          <className> classA </className> 
           <extends> object </extends>
-          <declAttributes> attr1 |-> int </declAttributes>
+          <declAttributes> attr1 |-> int attr3 |-> col(int) </declAttributes>
         </class>
         <class>
-          <className> B </className> 
+          <className> classB </className> 
           <extends> object </extends>
-          <declAttributes> attr2 |-> A </declAttributes>
+          <declAttributes> attr2 |-> classA </declAttributes>
         </class>
       </classes>
       <oclConstraints> .List </oclConstraints>
     </metamodel>
     <models>
       <model>
-        <modelName> M </modelName>
+        <modelName> modelM </modelName>
           <instance>
             <instName>  a </instName>
-            <ofClass> A </ofClass>
+            <ofClass>  classA </ofClass>
             <attributes>
                (attr1 |-> typedVal(1, int))
                (attr3 |-> typedSetOfVal( (1 2 3), col(int) ))
@@ -345,15 +355,14 @@ macro testConfig =
           </instance>
           <instance>
             <instName> b </instName>
-            <ofClass> B </ofClass>
-            <attributes> (attr2 |-> typedName(a, B)) </attributes>
+            <ofClass> classB </ofClass>
+            <attributes> (attr2 |-> typedName(a, classA)) </attributes>
           </instance>
        </model> 
      </models>
-     <k> .K </k> 
+     <k> (classZ .allInstances) </k> 
      <temp> .Bag </temp>
-     <nextId> 0 </nextId>
   </T>
 
 
-endkm
+endkm 

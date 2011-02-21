@@ -1,8 +1,8 @@
 require ../../../k-prelude
-require k-visitor
+// require k-visitor
 require substitution
 
-kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL + SUBSTITUTION
+kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL  + SUBSTITUTION
 
 
   syntax Var ::= Id
@@ -74,6 +74,8 @@ syntax Class ::= c1 | c2
 syntax Attr ::= a1 | a2 | a3
 */
 
-syntax Id ::= x | y | z
+ syntax Id ::= x | y | z
+
+
 
 endkm

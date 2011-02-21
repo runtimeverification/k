@@ -12,7 +12,7 @@ require ocl-syntax
 */
 kmod META-MODEL is including OCL-SYNTAX
 
-  syntax Id ::= object | undefined
+  
 
  
  // syntax K ::= undefined  
@@ -43,6 +43,11 @@ kmod META-MODEL is including OCL-SYNTAX
   The cell for OCL constraints includes a list of formulas.
 */
 
+
+syntax Id ::= object | undefined // to be extended later with class and instance names
+
+
+
   configuration <T> 
                   <metamodel ?>
                     <name> undefined </name> 
@@ -67,7 +72,6 @@ kmod META-MODEL is including OCL-SYNTAX
                  </models>
                 <k> .K </k> 
                 <temp> .Bag </temp>
-                <nextId> 0 </nextId> // required for substitutions (fresh var names)
                 </T>
 
  

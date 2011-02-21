@@ -3,7 +3,7 @@
 KCOMPILE ?= ../../../tools/kompile.pl
 
 # this is the name of the main maude module 
- LANGUAGE_NAME = TEST
+ LANGUAGE_NAME = OCL-SEMANTICS
 # LANGUAGE_NAME = OCL-SYNTAX
 
 # this are all interesting modules (used to latexify)
