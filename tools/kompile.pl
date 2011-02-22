@@ -1871,15 +1871,15 @@ sub add_cell_label_ops
 
 		# switch to old accepted configuration
 		# replace multiplicity		
-		my $i = 0;
-		while ($i < 20)
-		{
-			s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
-			$i++;
-		};
+#		my $i = 0;
+#		while ($i < 20)
+#		{
+#			s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
+#			$i++;
+#		};
 
 		# replace color attribute
-		s!<\s*([a-zA-Z\-]+)\s*color=".*?"\s*>!<$1>!sg;
+#		s!<\s*([a-zA-Z\-]+)\s*color=".*?"\s*>!<$1>!sg;
 	}
 
 	$_;
