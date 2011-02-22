@@ -7,6 +7,11 @@ use Cwd;
 use Cwd 'abs_path';
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 
+BEGIN {
+    push @INC, (File::Basename::fileparse($0))[1];
+    print "HI: " . (File::Basename::fileparse($0))[1] . "\n\n";
+}
+
 # add common functions file
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
