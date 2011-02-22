@@ -1320,7 +1320,7 @@ sub maudify_file {
 	if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
 	{
 		# print "FILE: $file\n";
-		parse_configuration($1, countlines($`));
+		parse_configuration($1, countlines($`), $file);
 	}
 
 # add line numbers metadata
@@ -1384,8 +1384,10 @@ sub maudify_file {
     
     if (/\S/) 
     {
-        print "ERROR: Cannot finish processing $file\n";
-        print "ERROR: The following text does not parse:\n$_";
+#        print "ERROR: Cannot finish processing $file\n";
+#        print "ERROR: The following text does not parse:\n$_";
+		print generate_error("ERROR", 1, $file, "unknown line", "Cannot finish processing $file\n");
+		print generate_error("ERROR", 1, $file, "unknown line", "The following text does not parse:\n$_");
         exit(1);
     }
     
@@ -1395,7 +1397,8 @@ sub maudify_file {
     if ($file =~ /\.maude/) { return; }
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
-    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
+	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
+#    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
 #	$maudified = put_back_comments($maudified, $myComments);
@@ -1524,7 +1527,8 @@ sub maudify_module {
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
+#    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
+	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
 
     return $_;
 }
@@ -1548,14 +1552,16 @@ sub make_ops {
 
 # Report error and stop if the BNF form is not respected
 	if (!defined($bnf)){
-		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
+#		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
+		print generate_error("ERROR", 1, $file, "unknown line", "Syntactic categories must contain \"::=\" at line:\n$_\n");
 		exit(1);
 	}
 
 # Report error and stop if the sort name does not match $ksort
 	if ($result_sort !~ /^$ksort$/) {
-	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
-	    print "ERROR: Syntactic categories must currently match this pattern\n";
+#	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
+#	    print "ERROR: Syntactic categories must currently match this pattern\n";
+		print generate_error("ERROR", 1, $file, "unknown line", "Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\nSyntactic categories must currently match this pattern\n");
 	    exit(1);
 	}
 
@@ -1859,7 +1865,7 @@ sub add_cell_label_ops
 	local $_ = shift;
 	if (/(?<=\s)configuration\s+(.*?)(?=$kmaude_keywords_pattern)/s)
 	{
-		parse_configuration($1, 0);
+		parse_configuration($1, 0, "$language_file_name.k");
 		my $label_declarations = get_cell_label_declarations();
 		s/(?=endkm)/ $label_declarations /s;
 

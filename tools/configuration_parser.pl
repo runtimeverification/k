@@ -85,6 +85,8 @@ my $config_line = 0;
 # generated TAG name
 my $TAG = "K-TOOL-GENERATED-ROOT";
 
+# current file
+my $file = "unknown file";
 
 ###############################
 # Specific ERRORS definitions #
@@ -119,7 +121,7 @@ my $INVALID_XML 						= 40;	# thrown when xml cannot be parsed
 sub parse_configuration
 {
     # get configuration content and starting line number.
-	($configuration, $config_line) = (shift, shift);
+	($configuration, $config_line, $file) = (shift, shift, shift);
 
 	# start a "try-catch" session
 	try();
@@ -352,34 +354,9 @@ sub validate_attribute
 
 
 
-
-
-
 ##########################
 # Error report - section #
 ##########################
-
-# Args: TO DO
-# Return: void
-# Start a try-catch "session"
-# 	- report errors if $session is "open"
-#	- reported errors will be stored in @container
-sub try
-{
-	# Start a new session
-	$session = 1;
-}
-
-sub generate_error
-{
-	my $type = shift;
-	my $code = shift;
-	my $file = shift;
-	my $line = shift;
-	my $message = shift;
-
-	return "[$type][$code] in [$file] @ [$line]: [$message]";
-}
 
 # Args: error code [, other args specific for error code]
 # Return: void
@@ -403,7 +380,7 @@ sub error_report
 					my $msg = shift;
 
 					# generate error message
-					my $err_msg = generate_error("ERROR", "", "", "", $msg);
+					my $err_msg = generate_error("ERROR", $ERROR, $file, "unknown line", $msg);
 
 					# add error in @container
 					push(@container, $err_msg);
@@ -423,7 +400,7 @@ sub error_report
 					my $attrs = "@atts";
 
 					# generate error message
-					my $err_msg = generate_error("ERROR", $INVALID_ATTRIBUTE_ERROR, "unknown file", $config_line, "in configuration attribute \"$attribute\" is not allowed for cell <$cell> at line $line. You should try: $attrs");
+					my $err_msg = generate_error("ERROR", $INVALID_ATTRIBUTE_ERROR, $file, $config_line, "in configuration attribute \"$attribute\" is not allowed for cell <$cell> at line $line. You should try: $attrs");
 
 					# add error message to @container
 					push(@container, $err_msg);
@@ -443,7 +420,7 @@ sub error_report
 					my $vals = $xml_attr{$attribute};
 
 					# generate error message
-					my $err_msg = generate_error("ERROR", $INVALID_VALUE_FOR_ATTRIBUTE_ERROR, "unknown file", $config_line, "in configuration, attribute \"$attribute\" has an invalid value \"$value\" in cell <$cell> at line $line. The available values for \"$attribute\" are: $vals");			
+					my $err_msg = generate_error("ERROR", $INVALID_VALUE_FOR_ATTRIBUTE_ERROR, $file, $config_line, "in configuration, attribute \"$attribute\" has an invalid value \"$value\" in cell <$cell> at line $line. The available values for \"$attribute\" are: $vals");			
 
 					# add error message to @container
 					push(@container, $err_msg);
@@ -473,7 +450,7 @@ sub error_report
 
 					# insert the absolute line number
 					$xml_err =~ s!\s([0-9]+)$!{$config_line = $1 + $config_line;}" " . $config_line!sge;
-					$xml_err = generate_error("ERROR", $INVALID_XML, "unknown file", $1 + $config_line, $xml_err);
+					$xml_err = generate_error("ERROR", $INVALID_XML, $file, $1 + $config_line, $xml_err);
 
 					# add $xml_err to @container
 					push(@container, $xml_err);	
@@ -481,6 +458,18 @@ sub error_report
 		}
 	}
 }
+
+# Args: TO DO
+# Return: void
+# Start a try-catch "session"
+# 	- report errors if $session is "open"
+#	- reported errors will be stored in @container
+sub try
+{
+	# Start a new session
+	$session = 1;
+}
+
 
 # Args: void
 # Return: void
@@ -704,5 +693,22 @@ sub visitor
 	}
 
 }
+
+
+# Args: Error type (WARNING/ERROR), error code, current file, error line, error message
+# Return: string
+# Format an error message
+sub generate_error
+{
+	my $type = shift;
+	my $code = shift;
+	my $file = shift;
+	my $line = shift;
+	my $message = shift;
+
+	return "[$type][$code] in [$file] @ [$line]: [$message]";
+}
+
+
 
 1;
