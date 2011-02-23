@@ -76,5 +76,13 @@ mod MATHEMATICAL-INT-BUILTIN-MODULE is
   eq (NzI === bool2int(B)) = @ B .
 
   eq (I:Int === J:Int) = @(I:Int ==Bool J:Int) .
+  
+  op absolute : Int++ -> Int++ .
+ ceq absolute(I) = I if (I >=Int 0) .
+  eq absolute(I) = (-Int I) [owise] .
+  
+  op fibon : Int++ -> Int++ .
+ ceq fibon(I) = 1 if (I <=Int 1) .
+  eq fibon(I) = fibon(I -Int 1) +Int fibon(I -Int 2) .
 endm
 
