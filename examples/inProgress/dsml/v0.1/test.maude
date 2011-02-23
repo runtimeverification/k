@@ -1,5 +1,94 @@
-in dsml-test-compiled.maude
-rew  testConfig .
----search [5] testConfig =>+ C:Bag .
-quit
-
+in ocl-semantics
+ 
+ mod TEST is including OCL-SEMANTICS .
+ 
+        op a :  -> Id .    op b :  -> Id .    op modelM :  -> Id .  
+ 
+        op attr1 :  -> Attr .    op attr2 :  -> Attr .    op attr3 :  -> Attr .  
+ 
+        op classA :  -> Class .    op classB :  -> Class .    op classZ :  -> Class . 
+ 
+       subsort Attr <  K .    subsort Class <  K . 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+       op testConfig :  -> Bag . 
+ 
+ 
+ eq testConfig =  
+   < T > 
+     < metamodel > 
+       < name >  undefined </ name >  
+       < classes > 
+         < class >  
+           < className >  classA </ className >  
+           < extends >  object </ extends > 
+           < declAttributes >  attr1 |->  int attr3 |->  colInt </ declAttributes > 
+         </ class > 
+         < class > 
+           < className >  classB </ className >  
+           < extends >  object </ extends > 
+           < declAttributes >  attr2 |->  classA </ declAttributes > 
+         </ class > 
+       </ classes > 
+       < oclConstraints >  (.).List  </ oclConstraints >  
+     </ metamodel > 
+     < models > 
+       < model > 
+         < modelName >  modelM </ modelName > 
+           < instance > 
+             < instName >   a </ instName > 
+             < ofClass >   classA </ ofClass > 
+             < attributes > 
+                (attr1 |->  typedVal(1, int))
+                (attr3 |->  typedSetOfVal( (1), colInt ))
+             </ attributes > 
+           </ instance > 
+           < instance > 
+             < instName >  b </ instName > 
+             < ofClass >  classB </ ofClass > 
+             < attributes >  (attr2 |->  typedName(a, classA)) </ attributes > 
+           </ instance > 
+        </ model >  
+      </ models > 
+      < k >  allInstances(classA) #  attr1 </ k >  
+      < temp >  .KResult  </ temp > 
+   </ T >  [metadata "location(test.k:24)"] .
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  subsorts CExp Set{Id} < K . endm 

@@ -26,35 +26,44 @@ kmod META-MODEL is including OCL-SYNTAX
   The cell for OCL constraints includes a list of formulas.
 */
 
-
+// always required (?)
+syntax K ::= Id
 syntax Id ::= object | undefined // to be extended later with class and instance names
+
+// sets of identifiers
+syntax Set{Id}  ::= Id | .Set{Id} 
+                     | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
+
+// the various kinds of attributes in instances
+syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) | 
+             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( KResult , ScalarTypeCol )
 
 
 
   configuration <T> 
-                  <metamodel ?>
+                  <metamodel?>
                     <name> undefined </name> 
                     <classes>
-                      <class *>
+                      <class*>
                          <className> undefined </className> 
                          <extends> undefined </extends>
                          <declAttributes> .Map  </declAttributes>
-                      </class *>
+                      </class*>
                     </classes>
                     <oclConstraints> .List </oclConstraints>
-                  </metamodel ?>
+                  </metamodel?>
                  <models>
-                   <model *> 
+                   <model*> 
                       <modelName> undefined </modelName>
                       <instance*>
                          <instName> undefined </instName>
                          <ofClass> undefined </ofClass>
                          <attributes> .Map </attributes>
                       </instance*>
-                   </model *>
+                   </model*>
                  </models>
                 <k> .K </k> 
-                <temp> .K </temp>
+                <temp> .KResult </temp>
                 </T>
 
  

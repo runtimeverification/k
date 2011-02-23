@@ -8,12 +8,12 @@ kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL // + SUBSTITUTION
   syntax Var ::= Id
   syntax Class ::= Id  // the actual classes depend on a given metamodel..
   syntax ScalarType ::= int | bool // may need to add strings as well
-  syntax ScalarTypeCol ::= col`(int`) | col`(bool`) 
-  syntax ClassTypeCol ::=  col`(Class`) 
+  syntax ScalarTypeCol ::= colInt | colBool 
+  syntax ClassTypeCol ::=  colClass 
   syntax Type ::= ScalarType | Class | ScalarTypeCol | ClassTypeCol
   syntax Attr ::= Id
 
-
+  syntax K ::= Type 
 
 
 
@@ -51,7 +51,7 @@ syntax BExp ::= Bool | Var
 // Expressions : Collections
  
 syntax CExp ::= empty
-                | Class .allInstances  // "basic constructor" for expressions
+                | allInstances  ( Class ) // "basic constructor" for expressions
                 | AExp [strict]
                 | BExp [strict]
                 | CExp # Attr [strict(1)]  // period generates ambiguity
@@ -66,13 +66,12 @@ syntax CExp ::= empty
 
 // contents of K cell : Collection expressions
 syntax K ::= CExp
-// always required (?)
-syntax K ::= Id
+
 
 
 
 // the results of evaluating OCL expressions
-
+/*
 syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .ValSet]
                 | ValSet `Inter ValSet
                 | ValSet `Diff ValSet
@@ -82,10 +81,44 @@ syntax Val ::= ScalarVal | InstVal
 syntax ScalarVal ::= Bool | Int  
 
 syntax InstVal ::=  instVal ( BagItem )
+*/
+
+syntax KResult::= .KResult  | KResult KResult [hybrid gather(E e) comm id: .KResult]
+                | KResult `Inter KResult
+                | KResult `Diff KResult
+
+syntax KResult ::= Val
+
+syntax Val ::= ScalarVal | InstVal
+
+syntax ScalarVal ::= Bool | Int  
 
 
-syntax KResult ::= ValSet 
-syntax CExp ::= ValSet 
+syntax InstVal ::=  instVal ( BagItem )
+
+
+// a few structural rule about sets of values
+rule (v:Val V1:KResult) Inter (v V2:KResult) => v (V1 Inter V2) [structural]
+rule (v V1) Inter V2 => V1 Inter V2 if notBool (v  inValSet  V2) [structural]
+rule .KResult Inter V:KResult => .KResult [structural]
+rule V Inter .KResult => .KResult [structural]
+
+
+rule (v V1) Diff (v V2) => V1 Diff V2 [structural]
+rule (v V1) Diff V2 => v (V1 Diff V2) if notBool (v  inValSet  V2) [structural]
+rule .KResult Diff V:KResult => .KResult [structural]
+rule V Diff .KResult => V [structural]
+
+
+syntax Bool ::= Val  inValSet  KResult 
+rule v  inValSet  (v V) => true [structural]
+rule v  inValSet  (v':Val V) => v  inValSet  V if notBool(v ==Bool v') [structural] 
+rule v  inValSet  .KResult => false [structural]
+
+
+
+//syntax KResult ::= ValSet 
+syntax CExp ::= KResult
 syntax AExp ::= Int
 syntax BExp ::= Bool
 

@@ -1,32 +1,6 @@
-require dsml
- // require substitution
-kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX  // + SUBSTITUTION
-
-// sets of identifiers
-syntax Set{Id}  ::= Id | .Set{Id} 
-                     | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
-
-// the various kinds of attributes in instances
-syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) | 
-             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
-
-
-rule (v:Val V1:ValSet) Inter (v V2:ValSet) => v (V1 Inter V2) [structural]
-rule (v V1) Inter V2 => V1 Inter V2 if notBool (v  inValSet  V2) [structural]
-rule .ValSet Inter V:ValSet => .ValSet [structural]
-rule V Inter .ValSet => .ValSet [structural]
-
-
-rule (v V1) Diff (v V2) => V1 Diff V2 [structural]
-rule (v V1) Diff V2 => v (V1 Diff V2) if notBool (v  inValSet  V2) [structural]
-rule .ValSet Diff V:ValSet => .ValSet [structural]
-rule V Diff .ValSet => V [structural]
-
-
-syntax Bool ::= Val  inValSet  ValSet 
-rule v  inValSet  (v V) => true [structural]
-rule v  inValSet  (v':Val V) => v  inValSet  V if notBool(v ==Bool v') [structural] 
-rule v  inValSet  .ValSet => false [structural]
+require meta-model
+require substitution
+kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX  + SUBSTITUTION
 
 
 
@@ -37,7 +11,7 @@ rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)
 
 rule (- A1) => -Int A1
 
-rule (V:ValSet .size()) => card(V)
+rule (V:KResult .size()) => card(V)
 
 // semantics of Boolean expressions
 
@@ -55,7 +29,7 @@ rule B1 equiv B2 => B1 ==Bool B2
 //((notBool B1) orBool B2) andBool ((notBool B2) orBool B1)
 rule not B1 => notBool B1
 
-rule C1:ValSet in C2:ValSet => subset(C1,C2) 
+rule C1:KResult in C2:KResult => subset(C1,C2) 
 rule C1 in* C2 => subset(C1,C2) andBool (card(C1) <Int card(C2))
 rule C1 notin C2 => notBool (subset(C1,C2)) 
 rule C1 notin* C2 => notBool (subset(C1,C2) andBool (card(C1) <Int card(C2)))
@@ -68,20 +42,23 @@ rule C1 = C2 => subset(C1,C2) andBool subset(C2,C1)
 // evaluated in K cell only
 
 // rule for empty
-rule <k> empty => .ValSet <_/k>
+rule <k> empty => .KResult <_/k>
 
 
 // rules Class .allInstances
-rule <k> (C:Class .allInstances) => collectInstances(C,INST:Bag) <_/k> 
+rule <k> allInstances(C:Class) => collectInstances(C, INST:Bag) <_/k> 
+       //NB one model only!
+       <models>
          <model> <modelName> MN:Id </modelName> // _ leads to ambiguity
-            INST:Bag
-         </model> [structural] 
+            INST
+         </model>
+      </models>
+ [structural] 
+     
 
 //collectInstances function: collects instances of class C
-
-
-syntax ValSet ::= collectInstances ( Class , Bag )
-rule collectInstances(C:Class, .Bag) => .ValSet
+syntax KResult ::= collectInstances ( Class , Bag )
+rule collectInstances(C, .Bag) => .KResult
 
 rule collectInstances(C, 
                         (<instance> 
@@ -101,7 +78,6 @@ rule collectInstances(C,
                                </instance>)
                       collectInstances(C, REST)
 
-
 rule collectInstances(C, 
                         (<instance> 
                              <instName> INAME </instName> 
@@ -118,23 +94,22 @@ rule collectInstances(C,
 
 // rule for CExp # Attr [strict] 
 // when finished, take result from temp cell
-rule <k> (.ValSet # AT:Attr) => VV:ValSet <_/k> <temp> VV => .ValSet </temp>
+rule <k> (.KResult # AT:Attr) => VV:KResult <_/k> <temp> VV => .KResult </temp>
 
 // case 1 : the attribute AT is of scalar type
 // the value of AT is stored in temp cell
 rule <k> (
           instVal(
-                   <instance>
-                     <instName> BIDON:Id </instName>
-                     <ofClass> BIDULE:Class </ofClass>
-                     <attributes_> AT|-> typedVal(vv:Val, TT:ScalarType)<_/attributes>        
-                  </instance>
+                   <instance_>
+                     <attributes_> AT |-> typedVal(vv:Val, _) <_/attributes>        
+                  <_/instance>
                 )
-                 RESTVAL:ValSet)  # AT
-       =>  RESTVAL  # AT
+                 RESTVAL:KResult)
+  # AT
+       => RESTVAL  # AT
  <_/k>   
-<temp_> .ValSet =>  vv
-<_/temp>
+// <temp_> .KResult =>  vv
+// <_/temp>
 
 
 
@@ -144,16 +119,14 @@ rule <k> (
 // the value of AT is stored in temp cell
 rule <k>  (
           instVal(
-                   <instance>
-                     <instName> BIDON:Id </instName>
-                     <ofClass> BIDULE:Class </ofClass>
-                     <attributes_> AT|-> typedName(INSNAME:Id, OF:Class) <_/attributes>
+                   <instance_>
+                     <attributes_> AT |-> typedName(INSNAME:Id, OF:Class) <_/attributes>
                                        // handles synonymous instances in different classes
-                  </instance>
+                  <_/instance>
                  )
-           VV:ValSet
+           VV:KResult
           ) # AT
-       =>  VV:ValSet # AT
+       =>  VV:KResult # AT
     <_/k>
 <model_>
   <instance>
@@ -162,7 +135,7 @@ rule <k>  (
     <attributes> ATR:Map </attributes>
   </instance>
 <_/model>
-<temp_> .ValSet =>
+<temp_> .KResult =>
           instVal(
                    <instance>
                       <instName> INSNAME </instName>
@@ -179,26 +152,24 @@ rule <k>  (
 // the bag of instances is sought for in the model
 rule <k>  (
           instVal(
-                   <instance>
-                     <instName> BIDON:Id </instName>
-                     <ofClass> BIDULE:Class </ofClass>
-                     <attributes_> AT|-> typedSetOfInstName(ISET:Set{Id}, OFCOL:ClassTypeCol) <_/attributes>
-                  </instance>
+                   <instance_>
+                     <attributes_> AT |-> typedSetOfInstName(ISET:Set{Id}, OFCOL:ClassTypeCol) <_/attributes>
+                  <_/instance>
                  )
-           VV:ValSet
+           VV:KResult
           ) # AT
-       =>  VV:ValSet # AT 
+       =>  VV # AT 
     <_/k>
 <model> <modelName> toto:Id </modelName>
 ALLINSTANCES:Bag
 </model>
-<temp_> .ValSet =>
+<temp_> .KResult =>
          makeInstVal(ISET,ALLINSTANCES)
 <_/temp>
 
-syntax ValSet ::=  makeInstVal ( Set{Id} , Bag )
+syntax KResult ::=  makeInstVal ( Set{Id} , Bag )
 
-rule makeInstVal(ALLNAMES:Set{Id}, .Bag) => .ValSet 
+rule makeInstVal(ALLNAMES:Set{Id}, .Bag) => .KResult
 
 rule makeInstVal(ALLNAMES,
                   <instance>
@@ -220,18 +191,6 @@ rule makeInstVal(ALLNAMES,
 
        fi
 
-/*
-rule makeInstVal(ALLNAMES,  
-                  <instance>
-                     <instName> INSTNAME':Id </instName> 
-                     <ofClass> OFTHECLASS:Class </ofClass>
-                     <attributes> ATR </attributes>
-                  </instance> REMAINING:Bag) 
-    =>
-    makeInstVal(ALLNAMES,REMAINING)
-    if notBool isPresent(INSTNAME',ALLNAMES)
-*/
-
 syntax Bool ::= isIn ( Id , Set{Id} )
 rule isIn (XX:Id , (XX , NAMES:Set{Id}) ) => true [structural]
  rule isIn (XX, (XX':Id ,  NAMES)) => isIn(XX,  NAMES) if notBool (XX ==Bool XX') [structural]
@@ -245,16 +204,16 @@ rule isIn (XX, .Set{Id}) => false [structural]
 rule <k>  (
           instVal(
                    <instance_>
-                     <attributes_> AT|-> typedSetOfVal(VVV:ValSet, _) <_/attributes>
+                     <attributes_> AT |-> typedSetOfVal(VVV:KResult, _) <_/attributes>
                   <_/instance>
                  )
-           VV:ValSet
+           VV
           ) # AT
-       =>  VV:ValSet # AT 
+       =>  VV # AT 
     <_/k>
-//<temp> .K =>
-//         VVV
-//<_/temp>
+<temp_> .KResult =>
+         VVV
+<_/temp>
 
 
 rule <k> C1 union C2   => C1 C2 <_/k> 
@@ -270,80 +229,20 @@ rule <k> if false then C1 else C2 endif => C2 <_/k>
 
 // AUXILIARY DEFINITIONS
 
-
+ 
 
 
 
 // subset predicate
-syntax Bool ::= subset ( ValSet , ValSet ) 
-rule subset(.ValSet,  V:ValSet) => true 
-rule subset((v:Val V), V':ValSet) => if (v  inValSet  V') then subset(V,V') else false fi //NB Maude's if!
+syntax Bool ::= subset ( KResult , KResult ) 
+rule subset(.KResult,  V:KResult) => true 
+rule subset((v:Val V), V':KResult) => if (v  inValSet  V') then subset(V,V') else false fi //NB Maude's if!
 
 // auxiliary : card predicate
-syntax Int ::= card ( ValSet )
-rule card(.ValSet) => 0
+syntax Int ::= card ( KResult )
+rule card(.KResult) => 0
 rule card(v V) => 1 +Int card(V)
 
 
 endkm
 
-kmod TEST is including OCL-SEMANTICS
-
-syntax Id ::=  a | b | modelM 
-
-syntax Attr ::=  attr1 | attr2 | attr3 
-
-syntax Class ::=  classA | classB | classZ
-
-/*
-syntax Id ::= a | b | `M
-syntax Class ::= `A | `B | `Z
-
-
-*/
-
-
-syntax Bag ::= testConfig
-
-macro testConfig = 
-  <T>
-    <metamodel>
-      <name> undefined </name> 
-      <classes>
-        <class> 
-          <className> classA </className> 
-          <extends> object </extends>
-          <declAttributes> attr1 |-> int attr3 |-> col(int) </declAttributes>
-        </class>
-        <class>
-          <className> classB </className> 
-          <extends> object </extends>
-          <declAttributes> attr2 |-> classA </declAttributes>
-        </class>
-      </classes>
-      <oclConstraints> .List </oclConstraints> 
-    </metamodel>
-    <models>
-      <model>
-        <modelName> modelM </modelName>
-          <instance>
-            <instName>  a </instName>
-            <ofClass>  classA </ofClass>
-            <attributes>
-               (attr1 |-> typedVal(1, int))
-               (attr3 |-> typedSetOfVal( (1 2 3), col(int) ))
-            </attributes>
-          </instance>
-          <instance>
-            <instName> b </instName>
-            <ofClass> classB </ofClass>
-            <attributes> (attr2 |-> typedName(a, classA)) </attributes>
-          </instance>
-       </model> 
-     </models>
-     <k> ((classA .allInstances)) # attr3 </k> 
-     <temp> .K </temp>
-  </T>
-
-
-endkm 
