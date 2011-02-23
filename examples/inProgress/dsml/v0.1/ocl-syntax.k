@@ -1,8 +1,8 @@
-require ../../../k-prelude
+require ../../../../k-prelude
 // require k-visitor
-require substitution
+// require substitution
 
-kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL  + SUBSTITUTION
+kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL // + SUBSTITUTION
 
 
   syntax Var ::= Id
@@ -63,18 +63,31 @@ syntax CExp ::= empty
                 | let Var `=   CExp  inn CExp endlet
                 | if BExp then CExp else CExp endif [strict(1)]
 
+
+// contents of K cell : Collection expressions
 syntax K ::= CExp
+// always required (?)
+syntax K ::= Id
 
 
-// some identifiers to test with...
-// in general these will depend on a given metamodel
-/*
-syntax Class ::= c1 | c2 
 
-syntax Attr ::= a1 | a2 | a3
-*/
+// the results of evaluating OCL expressions
 
- syntax Id ::= x | y | z
+syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .ValSet]
+                | ValSet `Inter ValSet
+                | ValSet `Diff ValSet
+
+syntax Val ::= ScalarVal | InstVal
+
+syntax ScalarVal ::= Bool | Int  
+
+syntax InstVal ::=  instVal ( BagItem )
+
+
+syntax KResult ::= ValSet 
+syntax CExp ::= ValSet 
+syntax AExp ::= Int
+syntax BExp ::= Bool
 
 
 

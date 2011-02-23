@@ -2,25 +2,6 @@ require dsml
  // require substitution
 kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX  // + SUBSTITUTION
 
-// the results of evaluating OCL expressions
-
-syntax KResult ::= ValSet 
-syntax CExp ::= ValSet 
-syntax AExp ::= Int
-syntax BExp ::= Bool
-
-syntax K ::= Id
-
-syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .ValSet]
-                | ValSet `Inter ValSet
-                | ValSet `Diff ValSet
-
-syntax Val ::= ScalarVal | InstVal
-
-syntax ScalarVal ::= Bool | Int  
-
-syntax InstVal ::=  instVal ( BagItem )
-
 // sets of identifiers
 syntax Set{Id}  ::= Id | .Set{Id} 
                      | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 

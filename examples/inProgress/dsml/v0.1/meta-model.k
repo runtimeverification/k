@@ -15,23 +15,6 @@ kmod META-MODEL is including OCL-SYNTAX
   
 
  
- // syntax K ::= undefined  
-
-  // syntax ListItem ::= Id : KLabel [prec 20] 
-
-
-/*
-
-  syntax Bool ::= isScalar ( Type )
-
-  rule isScalar(int) => true [structural]
-  rule isScalar(bool) => true [structural]
-  rule isScalar(c:Class) => false [structural]
-  rule isScalar(col(int)) => false [structural]
-  rule isScalar(col(bool)) => false [structural]
-  rule isScalar(col(Class)) => false [structural]
-*/
-
 
 /*
   A configuration for a metamodel consists of two cells: one for classes and one for OCL constraints.
