@@ -16,7 +16,7 @@ all: $(DIRS)
 
 $(DIRS):
 	@echo Testing $@...
-	@make -C $@ true-test
+	@(ulimit -t 25 && make -C $@ true-test)
 	@echo Done with $@.
 		
 clean: 
