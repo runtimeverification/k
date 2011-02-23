@@ -37,27 +37,27 @@ $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL
 
 # this should build the latex
 latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -latex $(LANGUAGE_MODULES)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -latex $(LANGUAGE_MODULES) -no-prelude
 
 # this should build the pdf
 pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES) -no-prelude
 
 # this should build the png
 png:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -png $(LANGUAGE_MODULES)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -png $(LANGUAGE_MODULES) -no-prelude
 
 # this should build the eps
 eps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -eps $(LANGUAGE_MODULES)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -eps $(LANGUAGE_MODULES) -no-prelude
 
 # this should build the ps
 ps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -ps $(LANGUAGE_MODULES)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -ps $(LANGUAGE_MODULES) -no-prelude
 
 # this should build the crop-pdf
 crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -crop $(LANGUAGE_MODULES)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -crop $(LANGUAGE_MODULES) -no-prelude
 
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
