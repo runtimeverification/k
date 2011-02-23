@@ -54,11 +54,11 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                     <nextLoc> 1 </nextLoc>
                     <crntObj> .K </crntObj>
                     <classes>
-                        <class multiplicity="*">
+                        <class*>
                             <className> Id:Id </className>
                             <extends> Id:Id </extends>
                             <declarations> .K </declarations>
-                        </class>
+                        </class*>
                     </classes>
                 </T>
 

@@ -6,7 +6,7 @@ kmod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-TYPE-INFERENCE-DESUGARED-SYNT
   configuration <T>
                      <k> .K </k>
                      <tenv> .Map </tenv>
-                     <eqns> <eqn multiplicity="*"> .Set </eqn>
+                     <eqns> <eqn*> .Set </eqn*>
                             <started> .Set </started>
                             <solved> .Set </solved>
                      </eqns>

@@ -40,13 +40,13 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
   configuration <T>
                   <threads>
-                    <thread multiplicity="*">
+                    <thread*>
                       <k> K:K </k>
                       <fstack> .List </fstack>
                       <xstack> .List </xstack>
                       <env> .Map </env>
                       <holds> .Map </holds>
-                    </thread>
+                    </thread*>
                   </threads>
                   <genv> .Map </genv>
                   <store> .Map </store>

@@ -1,18 +1,18 @@
 kmod AGENTS is  including SEQ + PL-INT
   configuration
-      <agent multiplicity="*"> 
+      <agent*> 
           <me>0</me>
           <parent>-1</parent>
           <control> <k> .K </k> </control>
-      </agent> 
+      </agent*> 
       @latex("\\kBR")
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting> 
       @latex("\\kBR")
-      <messages> <message multiplicity="*">
+      <messages> <message*>
           <from>.K</from> <to>.Set</to> <body>.K</body>
-      </message> </messages>
+      </message*> </messages>
       
   syntax K ::= newAgent K
              | me

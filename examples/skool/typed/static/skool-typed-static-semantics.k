@@ -27,11 +27,11 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                      <return> stmt </return>
                      <crntClass> .K </crntClass>
                      <classes>
-                           <class multiplicity="*"> 
+                           <class*> 
                                     <className> Id:Id </className>
-                                    <extends multiplicity="?"> Id:Id </extends>
+                                    <extends?> Id:Id </extends?>
                                     <ctenv> .Map </ctenv>
-                           </class>
+                           </class*>
                      </classes>
                      <pass> start </pass>
                      <pgm> .K </pgm>

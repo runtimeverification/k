@@ -6,15 +6,9 @@ use Switch;
 use Cwd; 
 use Cwd 'abs_path';
 use Digest::MD5 qw(md5 md5_hex md5_base64);
-
-# add common functions file
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
-require $path;
 
-# add configuration parser
-$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
 require $path;
-
 my $verbose = 0;
 my $help = 0;
 
@@ -356,7 +350,6 @@ my $output_latex_file = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
-my $noprelude = 0;
 
 # latex, pdf, eps, ps, png, crop
 my $pdf = 0;
@@ -365,7 +358,6 @@ my $eps = 0;
 my $ps = 0;
 my $png = 0;
 my $crop = 0;
-my $lint = 0;
 
 my $title = "";
 my $author = "";
@@ -422,22 +414,22 @@ erase_temp();
 # Process the command arguments
 foreach (@ARGV) {
     if (($language_file_name eq "?") && !/^-/) {
-		$language_file_name = $_;
+	$language_file_name = $_;
     }
     elsif (($language_module_name eq "?") && !/^-/) {
-		$language_module_name = $_;
+	$language_module_name = $_;
     }
     elsif (($style eq "?") && !/^-/) {
-		$style = $_;
+	$style = $_;
     }
     elsif (($title eq "?") && !/^-/) {
-		$title = $_;
+	$title = $_;
     }
     elsif (($author eq "?") && !/^-/) {
-		$author = $_;
+	$author = $_;
     }
     elsif (($output_latex_file eq "?") && !/^-/) {
-		$output_latex_file = $_;
+	$output_latex_file = $_;
     }
     elsif (($pgm eq "?") && !/^-/) {
 		$_ =~ s/\.k$//;
@@ -454,66 +446,62 @@ foreach (@ARGV) {
 	}
     elsif (/^--?h(elp)?$/) {
 # Terminates with usage info when asked for help
-		$help = 1;
-		terminate;
+	$help = 1;
+	terminate;
     }
     elsif (/^--?v(erbose)?$/) {
 # By default, it is not verbose
-		$verbose = 1;
+	$verbose = 1;
     }
     elsif (/^--?m(audify)?$/) {
 # By default, it maudifies and compiles
-		$maudify_only = 1;
+	$maudify_only = 1;
     }
     elsif (/^--?c(ompile)?$/) {
 # By default, it maudifies and compiles
-		$compile_only = 1;
+	$compile_only = 1;
     }
     elsif (/^--?l(ang|anguage)?$/) {
-		$language_module_name = "?";
+	$language_module_name = "?";
     }
     elsif (/^--?file$/) {
-		$language_file_name = "?";
+	$language_file_name = "?";
     }
     elsif (/^--?title$/) {
-		$title = "?";
+	$title = "?";
     }
     elsif (/^--?author$/) {
-		$author = "?";
+	$author = "?";
     }
     elsif (/^--?nd$/) {
        $k_all_tools .= "-nd";
     }
     elsif (/^--?lint$/) {
        $k_all_tools =  File::Spec->catfile($k_tools_dir,"lint");
-		$lint = 1;
     }
     elsif (/^--?flat$/) {
-		$flat = 1;
+	$flat = 1;
     }
     elsif (/^--?output$/) {
-		$output_latex_file = "?";
-    }
-    elsif (/^--?no\-prelude$/) {
-		$noprelude = 1;
+	$output_latex_file = "?";
     }
     elsif (/^--?latex$/) {
-		$latex = 1;
+	$latex = 1;
     }
     elsif (/^--?pdf$/) {
-		$pdf = 1;
+	$pdf = 1;
     }
     elsif (/^--?ps$/) {
-		$ps = 1;
+	$ps = 1;
     }
     elsif (/^--?eps$/) {
-		$eps = 1;
+	$eps = 1;
     }
     elsif (/^--?png$/) {
-		$png = 1;
+	$png = 1;
     }
     elsif (/^--?crop$/) {
-		$crop = 1;
+	$crop = 1;
     }
  	elsif (/^--?pgm$/) { # start compile program param check
 		$compileProgram = 1;
@@ -532,23 +520,23 @@ foreach (@ARGV) {
 		$pname = "?";
     } # end compile program param check
     elsif (/^--?style$/) {
-		$style = "?";
+	$style = "?";
     }
     elsif (/^--?u(nquote)?$/)
     {
-		$unquote = 1;
+	$unquote = 1;
     }
     elsif (/^-shared$/)
     {
-		$shared = 1;
+	$shared = 1;
     }
     elsif ($shared)
     {
-		$k_prelude = abs_path($_);
-		$shared = 0;
+	$k_prelude = abs_path($_);
+	$shared = 0;
     }
     elsif (/^-/) {
-		terminate("Unknown option $_");
+	terminate("Unknown option $_");
     }
     elsif (($latex || $pdf || $ps || $eps || $png || $crop) && /[A-Z\-]+/)
     {
@@ -556,7 +544,7 @@ foreach (@ARGV) {
 #	print "MODULES: $_\n";
     }
     else {
-		$language_file_name = $_;
+	$language_file_name = $_;
     }
 }
 # if I want to compile only a program
@@ -677,14 +665,14 @@ if ($crop == 1 && !@crop_modules) {
     terminate("At least one module name must be given right after -crop");
 }
 # Create the module name, if not already given, by capitalizing the file name
-if ($language_module_name eq "") {
+    if ($language_module_name eq "") {
 	$language_module_name = uc($language_file_name);
 	$language_module_name =~ s/\.K$|\.KMAUDE$|\.MAUDE$|\.M$//;
     }
 
 # Check the file for syntax errors
     setVerbose() if $verbose;
-#    syntax_common_check($language_file_name);
+    syntax_common_check($language_file_name);
     
 # build inclusion trees
     appendFileInTree("$language_file_name", "");
@@ -711,44 +699,9 @@ if (!$compile_only) {
 # Maudify the .k|.kmaude files reachable from file "$language_file_name"
     print_header("Maudifying $language_file_name") if $verbose;
 
-	# load k-prelude automatically
-	if (!$noprelude)
-	{
-		my $f = $language_file_name;
-		$f =~ s/\.[a-zA-Z\-]+$//s;
-
-		my $kprelude = abs_path($k_prelude);
-		
-		my $content = get_file_content("$f.maude") if -e "$f.maude";
-		$content = get_file_content("$f.k") if -e "$f.k";
-		$content =~ s/^/load $kprelude\n/sg;
-		$content =~ s/\n\s/\n/sg;
-
-		open FILE, ">", "$f.k" or die "Cannot create $f.k\n";
-		print FILE $content;
-		close FILE;
-	}
-
     # maudify
     maudify_file("$language_file_name","");
 #    print "Maudification: $language_file_name\n\n";
-
-	# un-load k-prelude if loaded...
-	if (!$noprelude)
-	{
-		my $f = $language_file_name;
-		$f =~ s/\.[a-zA-Z\-]+$//s;
-
-		my $content = get_file_content("$f.maude") if -e "$f.maude";
-		$content = get_file_content("$f.k") if -e "$f.k";
-		$content =~ s/^load.*?\n//sg;
-		$content =~ s/^\s//sg;
-		$content =~ s/\n\s/\n/sg;
-
-		open FILE, ">", "$f.k" or die "Cannot create $f.k\n";
-		print FILE $content;
-		close FILE;
-	}
     
 	# Check incompatible sorts
 	check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
@@ -762,7 +715,7 @@ if (!$compile_only) {
 		open FILE,">",$kshared or die "Cannot create $kshared\n";
 		my $kprelude = abs_path($k_prelude);
 		my $prelude = basename($k_prelude);
-		print FILE "load $kprelude\nmod K-SHARED is including K . \n\t$tmp\nendm";
+		print FILE "in $kprelude\nmod K-SHARED is including K . \n\t$tmp\nendm";
 		close FILE;
 	
 		my $filess = getFileList();
@@ -826,7 +779,7 @@ if (!$maudify_only) {
 	make_crop() if $crop;
     }
     else {
-	compile() if !$lint;
+	compile();
     }
 }
 
@@ -1343,7 +1296,7 @@ sub maudify_file {
     # hardcoded for avoiding maudification for shared.maude
     if ($file =~ /shared\.maude/)
     {
-		return;
+	return;
     }
     
 # Slurp all $file into $_;
@@ -1356,13 +1309,6 @@ sub maudify_file {
 	# save comments
 	my ($noComments, $myComments) = remove_comments($_);
 	$_ = $noComments;
-
-	# Parse the configuration
-	if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
-	{
-		# print "FILE: $file\n";
-		parse_configuration($1, countlines($`), $file);
-	}
 
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
@@ -1425,10 +1371,8 @@ sub maudify_file {
     
     if (/\S/) 
     {
-#        print "ERROR: Cannot finish processing $file\n";
-#        print "ERROR: The following text does not parse:\n$_";
-		print generate_error("ERROR", 1, $file, "unknown line", "Cannot finish processing $file\n");
-		print generate_error("ERROR", 1, $file, "unknown line", "The following text does not parse:\n$_");
+        print "ERROR: Cannot finish processing $file\n";
+        print "ERROR: The following text does not parse:\n$_";
         exit(1);
     }
     
@@ -1438,8 +1382,7 @@ sub maudify_file {
     if ($file =~ /\.maude/) { return; }
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
-	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
-#    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
+    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
 #	$maudified = put_back_comments($maudified, $myComments);
@@ -1452,9 +1395,6 @@ sub maudify_file {
 
 sub maudify_module {
     (my $file,my $mno, local $_) = @_;
-
-# 	switch attributes back to old configuration
-#	s///sg;
 
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
@@ -1568,8 +1508,7 @@ sub maudify_module {
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-#    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
-	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
+    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
 
     return $_;
 }
@@ -1593,16 +1532,14 @@ sub make_ops {
 
 # Report error and stop if the BNF form is not respected
 	if (!defined($bnf)){
-#		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
-		print generate_error("ERROR", 1, $file, "unknown line", "Syntactic categories must contain \"::=\" at line:\n$_\n");
+		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
 		exit(1);
 	}
 
 # Report error and stop if the sort name does not match $ksort
 	if ($result_sort !~ /^$ksort$/) {
-#	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
-#	    print "ERROR: Syntactic categories must currently match this pattern\n";
-		print generate_error("ERROR", 1, $file, "unknown line", "Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\nSyntactic categories must currently match this pattern\n");
+	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
+	    print "ERROR: Syntactic categories must currently match this pattern\n";
 	    exit(1);
 	}
 
@@ -1884,46 +1821,12 @@ sub on_the_fly_kvars {
 }
 
 # If there is any configuration, get all its cell labels and declare them at the end of kmodule
-sub add_cell_label_ops_ {
+sub add_cell_label_ops {
     local ($_) = @_;
     my $ops = (/(?<=\s)configuration\s+(.*?)(?:$kmaude_keywords_pattern)/s
 	       ? "ops ".join(" ",set($1 =~ /<\s*\/?\s*(.*?)\s*[\*\+\?]?\s*>/gs))." : -> CellLabel " : "");
     s/(?=endkm)/$ops?"$ops ":""/se;
-
-	# switch to old accepted configuration
-	my $i = 0;
-	while ($i < 20)
-	{
-		s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
-		$i++;
-	};
-
     return $_;
-}
-
-sub add_cell_label_ops
-{
-	local $_ = shift;
-	if (/(?<=\s)configuration\s+(.*?)(?=$kmaude_keywords_pattern)/s)
-	{
-		parse_configuration($1, 0, "$language_file_name.k");
-		my $label_declarations = get_cell_label_declarations();
-		s/(?=endkm)/ $label_declarations /s;
-
-		# switch to old accepted configuration
-		# replace multiplicity		
-		my $i = 0;
-		while ($i < 20)
-		{
-			s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
-			$i++;
-		};
-
-		# replace color attribute
-		s!<\s*([a-zA-Z\-]+)\s*color=".*?"\s*>!<$1>!sg;
-	}
-
-	$_;
 }
 
 # This subroutine returns a list of all spacifiable tokens that appear in operations defined (using op) in the argument
@@ -1955,7 +1858,7 @@ sub add_tokens {
     {
 	while ($token =~ /!&!&!/g)
 	{
-	    $token =~ s/!&!&!/$strs[$index]/ if defined $strs[$index];
+	    $token =~ s/!&!&!/$strs[$index]/;
 	    $index ++;
 	}
     }
