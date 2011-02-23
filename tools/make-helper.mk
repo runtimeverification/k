@@ -32,7 +32,7 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) --no-prelude  2>&1 |tee $(COMPILED_FILE).output
 #@cat $(COMPILED_FILE).output
 
 # this should build the latex
