@@ -1,0 +1,186 @@
+Usage: compile <ModuleName> .
+Error while applying Context Transformers(module CONTEXT-TRANSFORMERS)
+To reproduce load k-prelude and then the generated module.
+
+---K-MAUDE-GENERATED-OUTPUT-BEGIN---
+mod AUTOMATON is including K-TECHNIQUE .
+including K-RULES .
+including K-CONFIG .
+including K-POLYMORPHIC-VARIABLES .
+including K-OPEN-CELLS .
+including K-CONTEXTS .
+including K-WHERE .
+including K-DESTRUCTORS .
+including PL-ID .
+including K-TECHNIQUE .
+including K-TECHNIQUE .
+including K-TECHNIQUE .
+including PL-BOOL .
+including K-TECHNIQUE .
+including PL-BOOL .
+including K-TECHNIQUE .
+including PL-IF-THEN-ELSE .
+including K-TECHNIQUE .
+including PL-IF-THEN-ELSE .
+including K-TECHNIQUE .
+including PL-STRING .
+sorts Formula OclVar . subsort Bool < K .
+subsort Char < Builtins .
+subsort Formula < List .
+subsort Formula < ListItem .
+subsort Formula < NeList .
+subsort Id < K .
+subsort NzInt < Builtins .
+subsort NzNat < Builtins .
+subsort NzNat < Int .
+subsort OclVar < K .
+subsort Zero < Builtins .
+subsort Zero < Int .
+op 'A : -> Id .
+op 'B : -> Id .
+op 'a : -> Id .
+op 'b : -> Id .
+op @latex : String -> BagItem .
+op Bag_ : List{K}-> Bag .
+op False : -> Formula .
+op List_ : List{K}-> List .
+op T : -> CellLabel .
+op True : -> Formula .
+op _in_ : BagItem Bag -> Bool .
+op _in_ : K Bag -> Bool .
+op _in_ : K Set -> Bool .
+op _in_ : SetItem Set -> Bool .
+op _|->_ : List{K}List{K}-> Map .
+op a : -> Id .
+op active : -> Id .
+op anAutomaton : -> Bag .
+op attributes : -> CellLabel .
+op automaton : -> Id .
+op b : -> Id .
+op checked : -> CellLabel .
+op class : -> CellLabel .
+op className : -> CellLabel .
+op classes : -> CellLabel .
+op declAttributes : -> CellLabel .
+op dest : -> Id .
+op eps : -> Id .
+op extends : -> CellLabel .
+op forAll`(_:_|_`) : OclVar Id Bool -> Formula .
+op in : -> Id .
+op inKList : K K -> Bool .
+op initConfig : -> Bag .
+op initState : -> Id .
+op instName : -> CellLabel .
+op instance : -> CellLabel .
+op k : -> CellLabel .
+op keys_ : Map -> Set .
+op label : -> Id .
+op lengthList_ : List -> Nat .
+op metaAutomaton : -> Bag .
+op metamodel : -> CellLabel .
+op model : -> CellLabel .
+op modelName : -> CellLabel .
+op models : -> CellLabel .
+op name : -> CellLabel .
+op name : -> Id .
+op object : -> Id .
+op oclConstraints : -> CellLabel .
+op ofClass : -> CellLabel .
+op orig : -> Id .
+op out : -> Id .
+op s0 : -> Id .
+op s1 : -> Id .
+op state : -> Id .
+op substKLabel : K KLabel KLabel -> K .
+op substList`{K`}Label`(_`,_`,_`) : List{K}KLabel KLabel -> List{K}.
+op t1 : -> Id .
+op t2 : -> Id .
+op t3 : -> Id .
+op t`! : -> OclVar .
+op testConfig : -> Bag .
+op trace : -> Id .
+op transition : -> Id .
+op undefined : -> K .
+op $hasMapping : Map K -> Bool[metadata "latex(renameTo \$hasMapping\mybracket{_,_})"].
+op 'Id : -> KLabel[metadata "generated label"].
+op 'K : -> KLabel[metadata "generated label"].
+op 'List`{K`} : -> KLabel[metadata "generated label"].
+op 'String : -> KLabel[metadata "generated label"].
+op 'a : -> KLabel[metadata "generated label"].
+op 'b : -> KLabel[metadata "generated label"].
+op Set_ : List{K}-> Set[metadata "latex(renameTo {\it{}Set}\mybracket{_})"].
+op _-Bag_ : Bag Bag -> Bag[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Bag}}_)"].
+op _-Set_ : Set Set -> Set[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Set}}_)"].
+op _:_ : Id KLabel -> ListItem[prec 20 metadata "location(../dsml.k:27)"].
+op _`(_`) : Map K -> K[prec 0].
+op _`(_`) : Map List{K}-> List{K}[prec 0].
+op _`[_/_`] : Map K K -> Map[prec 0].
+op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
+op _`[_`] : Map Map -> Map[prec 0].
+op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\;}/_])"].
+op headList`{K`}_ : NeList{K}-> K[metadata "latex(renameTo head\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op lengthList`{K`}_ : List{K}-> Nat[metadata "latex(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+mb configuration_(<_>_</_>(T,__(<_>_</_>(k,(.).K,k),__(<_>_</_>(models,<_>_</_>(_*(model),__(<_>_</_>(modelName,undefined,modelName),<_>_</_>(_*(instance),__(<_>_</_>(ofClass,undefined,ofClass),__(<_>_</_>(checked,false,checked),__(<_>_</_>(instName,undefined,instName),<_>_</_>(attributes,(.).Map,attributes)))),_*(instance))),_*(model)),models),<_>_</_>(_*(metamodel),__(<_>_</_>((name).CellLabel,undefined,(name).CellLabel),__(<_>_</_>(oclConstraints,(.).List,oclConstraints),<_>_</_>(classes,<_>_</_>(_*(class),__(<_>_</_>(extends,Id:Id,extends),__(<_>_</_>(className,Id:Id,className),<_>_</_>(declAttributes,(.).List,declAttributes))),_*(class)),classes))),_*(metamodel)))),T)): KSentence .
+mb rule_(__(<_>..._...</_>(k,_=>_((.).K,objName:Id),k),<_>..._...</_>(instance,__(<_>_</_>(checked,_=>_(false,true),checked),<_>_</_>(instName,objName:Id,instName)),instance))): KSentence[label add-instance-name-to-K-cell metadata "location(../dsml.k:65-70)"].
+mb rule_(__(<_>_</_>(instance,__(<_>_</_>(ofClass,transition,ofClass),__(<_>_</_>((name).CellLabel,T:K,(name).CellLabel),<_>..._...</_>(attributes,__(_|->_(label,L:K),__(_|->_(dest,Y:K),_|->_(orig,X:K))),attributes))),instance),<_>..._...</_>(instance,__(<_>_</_>(ofClass,automaton,ofClass),<_>..._...</_>(attributes,__(_|->_(trace,_=>_(Tr:List{K},_`,`,_(Tr:List{K},L:K))),_|->_(active,_=>_(X:K,Y:K))),attributes)),instance))): KSentence[label one-step-transition metadata "location(automaton.k:49-85)"].
+eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
+eq Bag_(.List`{K`})=(.).Bag .
+eq Bag_(_`,`,_(K:K,Ks:List{K}))= __(BagItem(K:K),Bag_(Ks:List{K})).
+eq List_(.List`{K`})=(.).List .
+eq List_(_`,`,_(K:K,Ks:List{K}))= __(ListItem(K:K),List_(Ks:List{K})).
+eq Set_(.List`{K`})=(.).Set .
+eq Set_(_`,`,_(K:K,Ks:List{K}))= __(SetItem(K:K),Set_(Ks:List{K})).
+eq _-Bag_(.,Bag:Bag)=(.).Bag .
+eq _-Bag_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:BagItem,Bag':Bag),_-Bag_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-Bag_(Bag:Bag,Bag':Bag))).
+eq _-Set_(.,Set:Set)=(.).Set .
+eq _-Set_(__(Set:Set,SetItem:SetItem),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-Set_(Set:Set,Set':Set),__(SetItem:SetItem,_-Set_(Set:Set,Set':Set))).
+eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
+eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
+eq _`(_`)(__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= K2:K .
+eq _`[_/_`](Map:Map,K2:K,_`,`,_(K1:K,NList1:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K2:K,K1:K),K2:K,NList1:NeList{K}).
+eq _`[_/_`](Map:Map,List:List{K},.List`{K`})= Map:Map .
+eq _`[_/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K1:K,K2:K),NList1:NeList{K},NList2:NeList{K}).
+eq _`[_/_`](__(Map:Map,_|->_(K1:K,K2:K)),K2':K,K1:K)= __(Map:Map,_|->_(K1:K,K2':K)).
+eq _`[_`](__(Map:Map,_|->_(K1:K,K2:K)),__(Map':Map,_|->_(K1:K,K2':K)))= __(_|->_(K1:K,K2':K),_`[_`](Map:Map,Map':Map)).
+eq _`[undef/_`](Map:Map,.List`{K`})= Map:Map .
+eq _`[undef/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`[undef/_`](_`[undef/_`](Map:Map,K1:K),NList1:NeList{K}).
+eq _`[undef/_`](__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= Map:Map .
+eq _in_(BagItem:BagItem,__(Bag:Bag,BagItem:BagItem))= true .
+eq _in_(K:K,__(Bag:Bag,BagItem(K:K)))= true .
+eq _in_(K:K,__(Set:Set,SetItem(K:K)))= true .
+eq _in_(SetItem:SetItem,__(Set:Set,SetItem:SetItem))= true .
+eq _|->_(.List`{K`},List:List{K})=(.).Map .
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},K2:K)).
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
+eq headList`{K`}_(_`,`,_(K:K,Ks:List{K}))= K:K .
+eq inKList(K:K,_~>_(K1:K,_~>_(K:K,K2:K)))= true .
+eq keys_(.)=(.).Set .
+eq keys_(__(Map:Map,_|->_(K1:K,K2:K)))= __(SetItem(K1:K),keys_(Map:Map)).
+eq lengthList_(.)= 0 .
+eq lengthList_(__(LItem:ListItem,List:List))= sNat_(lengthList_(List:List)).
+eq lengthList`{K`}_(.List`{K`})= 0 .
+eq lengthList`{K`}_(_`,`,_(K:K,Ks:List{K}))= sNat_(lengthList`{K`}_(Ks:List{K})).
+eq substKLabel(.,Label1:KLabel,Label2:KLabel)=(.).K .
+eq substKLabel(_`(_`)(Label1:KLabel,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`(_`)(Label2:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
+eq substKLabel(_~>_(K1:NeK,_~>_(K2:NeK,K:K)),Label1:KLabel,Label2:KLabel)= _~>_(substKLabel(K1:NeK,Label1:KLabel,Label2:KLabel),_~>_(substKLabel(K2:NeK,Label1:KLabel,Label2:KLabel),substKLabel(K:K,Label1:KLabel,Label2:KLabel))).
+eq substList`{K`}Label`(_`,_`,_`)(.List`{K`},Label1:KLabel,Label2:KLabel)= .List`{K`} .
+eq substList`{K`}Label`(_`,_`,_`)(_`,`,_(K:K,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`,`,_(substKLabel(K:K,Label1:KLabel,Label2:KLabel),substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
+eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
+ceq substKLabel(_`(_`)(Label:KLabel,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`(_`)(Label:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel))if _=/=Bool_(Label1:KLabel,Label:KLabel)= true .
+eq anAutomaton = <_>_</_>(model,__(__(__(__(__(<_>_</_>(instance,__(__(<_>_</_>(ofClass,transition,ofClass),<_>_</_>(attributes,__(_|->_(label,eps),__(_|->_(dest,s1),_|->_(orig,s0))),attributes)),<_>_</_>((name).CellLabel,t2,(name).CellLabel)),instance),<_>_</_>(instance,__(__(<_>_</_>(ofClass,transition,ofClass),<_>_</_>(attributes,__(_|->_(label,b),__(_|->_(dest,s1),_|->_(orig,s1))),attributes)),<_>_</_>((name).CellLabel,t3,(name).CellLabel)),instance)),<_>_</_>(instance,__(__(<_>_</_>(ofClass,transition,ofClass),<_>_</_>(attributes,__(_|->_(label,a),__(_|->_(dest,s0),_|->_(orig,s0))),attributes)),<_>_</_>((name).CellLabel,t1,(name).CellLabel)),instance)),<_>_</_>(instance,__(__(<_>_</_>(ofClass,state,ofClass),<_>_</_>(attributes,__(_|->_(in,_`,`,_(t2,t3)),_|->_(out,t3)),attributes)),<_>_</_>((name).CellLabel,s1,(name).CellLabel)),instance)),<_>_</_>(instance,__(__(<_>_</_>(ofClass,state,ofClass),<_>_</_>(attributes,__(_|->_(in,t1),_|->_(out,_`,`,_(t1,t2))),attributes)),<_>_</_>((name).CellLabel,s0,(name).CellLabel)),instance)),<_>_</_>(instance,__(__(<_>_</_>(ofClass,automaton,ofClass),<_>_</_>(attributes,__(_|->_(trace,.List`{K`}),_|->_(active,s0)),attributes)),<_>_</_>((name).CellLabel,a,(name).CellLabel)),instance)),model)[metadata "location(automaton.k:95)"].
+eq initConfig = <_>_</_>(T,anAutomaton,T)[metadata "location(automaton.k:156)"].
+eq metaAutomaton = <_>_</_>(metamodel,__(<_>_</_>(oclConstraints,forAll`(_:_|_`)(t`!,transition,notBool_(_==Bool_(label,eps))),oclConstraints),<_>_</_>(classes,__(__(__(<_>_</_>(class,__(__(<_>_</_>(extends,object,extends),<_>_</_>(declAttributes,__(_:_(in,'List`{K`}),_:_(out,'List`{K`})),declAttributes)),<_>_</_>(className,state,className)),class),<_>_</_>(class,__(<_>_</_>(extends,state,extends),<_>_</_>(className,initState,className)),class)),<_>_</_>(class,__(__(<_>_</_>(extends,object,extends),<_>_</_>(declAttributes,__(_:_(label,'String),__(_:_(orig,'K),_:_(dest,'K))),declAttributes)),<_>_</_>(className,transition,className)),class)),<_>_</_>(class,__(__(<_>_</_>(extends,object,extends),<_>_</_>(declAttributes,__(_:_(trace,'List`{K`}),_:_(active,'Id)),declAttributes)),<_>_</_>(className,automaton,className)),class)),classes)),metamodel)[metadata "location(automaton.k:13)"].
+eq testConfig = <_>_</_>(T,__(<_>_</_>(k,(.).K,k),__(<_>_</_>(models,<_>_</_>(model,__(__(<_>_</_>(instance,__(<_>_</_>(ofClass,undefined,ofClass),__(<_>_</_>(checked,false,checked),__(<_>_</_>(instName,('a).Id,instName),<_>_</_>(attributes,(.).Map,attributes)))),instance),<_>_</_>(instance,__(<_>_</_>(ofClass,undefined,ofClass),__(<_>_</_>(checked,false,checked),__(<_>_</_>(instName,('b).Id,instName),<_>_</_>(attributes,(.).Map,attributes)))),instance)),<_>_</_>(modelName,object,modelName)),model),models),(.).Bag)),T)[metadata "location(../dsml.k:82)"].
+eq $hasMapping(M:Map,D:K)= false[owise].
+eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
+eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
+eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
+eq _in_(K:K,Bag:Bag)= false[owise].
+eq _in_(K:K,Set:Set)= false[owise].
+eq _in_(SetItem:SetItem,Set:Set)= false[owise].
+eq inKList(K:K,K':K)= false[owise].
+endm
+---K-MAUDE-GENERATED-OUTPUT-END-----
+
+Bye.

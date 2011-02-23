@@ -1,0 +1,11 @@
+
+load automaton
+ load ../../../../tools/all-tools
+ ---(
+ red in COMPILE-ONESHOT : partialCompile(upModule('AUTOMATON , false),'???) .
+ quit
+ ---)
+ loop compile .
+ (compile AUTOMATON .)
+ quit
+
