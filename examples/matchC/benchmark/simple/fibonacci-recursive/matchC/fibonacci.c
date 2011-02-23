@@ -1,27 +1,20 @@
 #include <stdlib.h>
 
 int fibonacci(int n)
-/*@ pre  < config > < env > n |-> n0 </ env >
-                    < form > @(n0 >Int 0) </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env >
-                    < form > returns (fibon(n0)) </ form >
-                    C </ config > */
+// pre  n = n0 /\ (n0 >Int 0)
+// post returns(fibon(n0))
 {
-  int res;
-  if (n <= 1) res = 1; 
-  else res =  fibonacci(n - 1) + fibonacci(n - 2);
-  return res;
+  if (n <= 1) return 1; 
+  else return  fibonacci(n - 1) + fibonacci(n - 2);
 }
 
 int main()
 {
   int f;
   f = fibonacci(3);
+  printf("Fibonacci for 3 is: %d\n", f);
+
+  //@ assert <out> [3] </out>
   return 0;
 }
-
-
-/*@ var n0 : FreeInt */
-/*@ var ?rho : ?MapItem */
-/*@ var C : FreeBagItem */
 
