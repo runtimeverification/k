@@ -365,6 +365,7 @@ my $eps = 0;
 my $ps = 0;
 my $png = 0;
 my $crop = 0;
+my $lint = 0;
 
 my $title = "";
 my $author = "";
@@ -485,6 +486,7 @@ foreach (@ARGV) {
     }
     elsif (/^--?lint$/) {
        $k_all_tools =  File::Spec->catfile($k_tools_dir,"lint");
+		$lint = 1;
     }
     elsif (/^--?flat$/) {
 		$flat = 1;
@@ -717,7 +719,8 @@ if (!$compile_only) {
 
 		my $kprelude = abs_path($k_prelude);
 		
-		my $content = get_file_content("$f.k");
+		my $content = get_file_content("$f.maude") if -e "$f.maude";
+		$content = get_file_content("$f.k") if -e "$f.k";
 		$content =~ s/^/load $kprelude\n/sg;
 		$content =~ s/\n\s/\n/sg;
 
@@ -736,7 +739,8 @@ if (!$compile_only) {
 		my $f = $language_file_name;
 		$f =~ s/\.[a-zA-Z\-]+$//s;
 
-		my $content = get_file_content("$f.k");
+		my $content = get_file_content("$f.maude") if -e "$f.maude";
+		$content = get_file_content("$f.k") if -e "$f.k";
 		$content =~ s/^load.*?\n//sg;
 		$content =~ s/^\s//sg;
 		$content =~ s/\n\s/\n/sg;
@@ -822,7 +826,7 @@ if (!$maudify_only) {
 	make_crop() if $crop;
     }
     else {
-	compile();
+	compile() if !$lint;
     }
 }
 
