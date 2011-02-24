@@ -1,6 +1,6 @@
 require ../../../../k-prelude
 
-
+//change names
 kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL 
 
 
@@ -56,32 +56,5 @@ syntax CExp ::= empty
 syntax K ::= CExp
 
 
-
-// wrapping bags to KResults
-syntax KResult ::=  wBag( Bag ) [metadata "builtin wrapper"]
-
-// bag items, i.e., values, can be wrapped Booleans, Integers, and other bag items (for instances)
-// we also allow for wrapped identifiers
-//
-
-syntax BagItem ::=  wBool( Bool ) | wInt ( Int ) | wId ( Id ) 
-syntax CExp ::= KResult
-
-/*
-syntax AExp ::= Int
-syntax BExp ::= Bool
-*/
-
-syntax BExp ::= Bool
-syntax AExp ::= KResult
-syntax BExp ::= KResult
-
-//basic types
-syntax Id ::= int | bool | colInt | colBool
-
-// for  attributes in metamodel instances
-syntax K ::= typedElt ( K , Id )
-
-syntax Id ::= x 
 
 endkm

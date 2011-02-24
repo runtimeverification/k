@@ -45,10 +45,11 @@ macro testConfig =
           </instance>
        </model> 
      </models>
-     <k>  isEmpty(wBag(.Bag) # attr1) </k> 
+     <k>  let x = allInstances(classA) in isEmpty(x # attr1) endlet </k> 
      <temp> .Bag </temp>
   </T>
 
+syntax Id ::= x
 
 
 endkm 
