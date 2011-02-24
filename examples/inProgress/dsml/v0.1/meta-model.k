@@ -30,13 +30,6 @@ kmod META-MODEL is including OCL-SYNTAX
 syntax K ::= Id
 syntax Id ::= object | undefined // to be extended later with class and instance names
 
-// sets of identifiers
-syntax Set{Id}  ::= Id | .Set{Id} 
-                     | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
-
-// the various kinds of attributes in instances
-syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) | 
-             typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( KResult , ScalarTypeCol )
 
 
 
@@ -63,7 +56,7 @@ syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) |
                    </model*>
                  </models>
                 <k> .K </k> 
-                <temp> .KResult </temp>
+                <temp> .Bag </temp>
                 </T>
 
  

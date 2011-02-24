@@ -1,24 +1,11 @@
 require ../../../../k-prelude
-// require k-visitor
-// require substitution
-
-kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL // + SUBSTITUTION
 
 
-  syntax Var ::= Id
-  syntax Class ::= Id  // the actual classes depend on a given metamodel..
-  syntax ScalarType ::= int | bool // may need to add strings as well
-  syntax ScalarTypeCol ::= colInt | colBool 
-  syntax ClassTypeCol ::=  colClass 
-  syntax Type ::= ScalarType | Class | ScalarTypeCol | ClassTypeCol
-  syntax Attr ::= Id
-
-  syntax K ::= Type 
-
+kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL 
 
 
 // Expressions : Arithmetical
-  syntax AExp ::= Int | Var 
+  syntax AExp ::= Int | Id 
                | AExp + AExp         [strict]
                | AExp * AExp         [strict]
                | AExp / AExp         [strict]
@@ -27,7 +14,7 @@ kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL // + SUBSTITUTION
 
 // Expressions : Boolean
 
-syntax BExp ::= Bool | Var 
+syntax BExp ::= Bool | Id
                | AExp < AExp         [strict]
                | AExp <= AExp        [strict]
                | AExp > AExp         [strict]
@@ -44,23 +31,23 @@ syntax BExp ::= Bool | Var
                | CExp notin CExp [strict] // negation of in
                | CExp notin* CExp [strict] // negation of in*
                | CExp = CExp 
-               | CExp ->forAll( Var `: Type `| BExp ) [strict (1)]
-               | CExp ->exists( Var `: Type `| BExp ) [strict (1)]
+               | CExp ->forAll( Id  `| BExp ) [strict (1)]
+               | CExp ->exists( Id  `| BExp ) [strict (1)]
                
   
 // Expressions : Collections
  
 syntax CExp ::= empty
-                | allInstances  ( Class ) // "basic constructor" for expressions
+                | allInstances ( Id ) // "basic constructor" for expressions
                 | AExp [strict]
                 | BExp [strict]
-                | CExp # Attr [strict(1)]  // period generates ambiguity
+                | CExp # Id [strict(1)]  // period generates ambiguity
                 | CExp union CExp [strict]
                 | CExp inter CExp [strict]
                 | CExp diff CExp [strict]
-                | CExp ->select( Var `: Type `| BExp ) [strict (1)]
-                | CExp ->collect( Var `: Type `| CExp )  [strict (1)]
-                | let Id `=   CExp  inn CExp endlet
+                | CExp ->select( Id `| BExp ) [strict (1)]
+                | CExp ->collect( Id  `| CExp )  [strict (1)]
+                | let Id `=   CExp  in CExp endlet
                 | if BExp then CExp else CExp endif [strict(1)]
 
 
@@ -69,66 +56,28 @@ syntax K ::= CExp
 
 
 
+// wrapping bags to KResults
+syntax KResult ::=  wBag( Bag ) 
 
-// the results of evaluating OCL expressions
-/*
-syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .ValSet]
-                | ValSet `Inter ValSet
-                | ValSet `Diff ValSet
+// bag items, i.e., values, can be wrapped Booleans, Integers, and other bag items (for instances)
+// we also allow for wrapped identifiers
+//
 
-syntax Val ::= ScalarVal | InstVal
-
-syntax ScalarVal ::= Bool | Int  
-
-syntax InstVal ::=  instVal ( BagItem )
-*/
-
-// define a wrapper for KResult, take inspiration from k-prelude
-// import the module in question
-
- //op wset_ : Set -> KResult [metadata "builtin wrapper"] 
- 
-// syntax SetItem ::= InstVal
-
-syntax KResult::= .KResult  | KResult KResult [hybrid gather(E e)  id: .KResult]
-                | KResult `Inter KResult
-                | KResult `Diff KResult
-
-syntax KResult ::= Val
-
-syntax Val ::= ScalarVal | InstVal
-
-syntax ScalarVal ::= Bool | Int  
-
-
-syntax InstVal ::=  instVal ( BagItem )
-
-
-// a few structural rule about sets of values
-rule (v:Val V1:KResult) Inter (v V2:KResult) => v (V1 Inter V2) [structural]
-rule (v V1) Inter V2 => V1 Inter V2 if notBool (v  inValSet  V2) [structural]
-rule .KResult Inter V:KResult => .KResult [structural]
-rule V Inter .KResult => .KResult [structural]
-
-
-rule (v V1) Diff (v V2) => V1 Diff V2 [structural]
-rule (v V1) Diff V2 => v (V1 Diff V2) if notBool (v  inValSet  V2) [structural]
-rule .KResult Diff V:KResult => .KResult [structural]
-rule V Diff .KResult => V [structural]
-
-
-syntax Bool ::= Val  inValSet  KResult 
-rule v  inValSet  (v V) => true [structural]
-rule v  inValSet  (v':Val V) => v  inValSet  V if notBool(v ==Bool v') [structural] 
-rule v  inValSet  .KResult => false [structural]
+syntax BagItem ::=  wBool( Bool ) | wInt ( Int ) | wId ( Id ) 
 
 
 
-//syntax KResult ::= ValSet 
+
+
 syntax CExp ::= KResult
 syntax AExp ::= Int
 syntax BExp ::= Bool
 
+//basic types
+syntax Id ::= int | bool | colInt | colBool
+
+// for  attributes in metamodel instances
+syntax K ::= typedElt ( K , Id )
 
 
 endkm

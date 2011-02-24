@@ -1,9 +1,42 @@
 require meta-model
 require substitution
-kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX  + SUBSTITUTION
+kmod OCL-SEMANTICS is including META-MODEL  +  SUBSTITUTION
+
+//PRELIMINARIES
+// a few structural rule about sets of values
+syntax Bag ::= Bag `Inter Bag
+
+rule  (v:BagItem V1:Bag) Inter (v:BagItem V2:Bag) => v (V1 Inter V2) [structural]
+rule (v V1) Inter V2 =>  V1 Inter V2 if notBool (v  inBag  V2) [structural]
+rule .Bag Inter V:Bag => .Bag [structural]
+rule V Inter .Bag => .Bag [structural]
 
 
+syntax Bag ::= Bag `Diff Bag
+rule (v V1) Diff (v V2) => V1 Diff V2 [structural]
+rule (v V1) Diff V2 => v (V1 Diff V2) if notBool (v  inBag  V2) [structural]
+rule .Bag Diff V:Bag => .Bag [structural]
+rule V Diff .Bag => V [structural]
 
+
+syntax Bool ::= BagItem inBag  Bag
+rule v  inBag  (v V) => true [structural]
+rule v  inBag  (v':BagItem V) => v  inBag  V if notBool(v ==Bool v') [structural] 
+rule v  inBag  .Bag => false [structural]
+
+//  card predicate
+syntax Int ::= card ( Bag )
+rule card(.Bag) => 0
+rule card(v:BagItem V:Bag) => 1 +Int card(V)
+
+
+// subset predicate
+syntax Bool ::= subset ( Bag , Bag ) 
+rule subset(.Bag,  V) => true 
+rule subset((v:BagItem V), V':Bag) => if (v  inBag  V') then subset(V,V') else false fi 
+
+
+//SEMANTICS
 // semantics of arithmetical expressions
 rule A1:Int + A2:Int => A1 +Int A2
 rule A1 * A2 => A1 *Int A2
@@ -11,7 +44,8 @@ rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)
 
 rule (- A1) => -Int A1
 
-rule (V:KResult .size()) => card(V)
+rule (wBag(B:Bag) .size()) => card(B)
+
 
 // semantics of Boolean expressions
 
@@ -26,27 +60,28 @@ rule B1:Bool and B2:Bool => B1 andBool B2
 rule B1 or B2 => B1 orBool B2
 rule B1 implies B2 => (notBool B1) orBool B2 
 rule B1 equiv B2 => B1 ==Bool B2
-//((notBool B1) orBool B2) andBool ((notBool B2) orBool B1)
+
 rule not B1 => notBool B1
 
-rule C1:KResult in C2:KResult => subset(C1,C2) 
-rule C1 in* C2 => subset(C1,C2) andBool (card(C1) <Int card(C2))
-rule C1 notin C2 => notBool (subset(C1,C2)) 
-rule C1 notin* C2 => notBool (subset(C1,C2) andBool (card(C1) <Int card(C2)))
-rule C1 = C2 => subset(C1,C2) andBool subset(C2,C1)
+rule wBag(C1:Bag) in wBag(C2:Bag) => subset(C1,C2) 
+rule wBag(C1) in* wBag(C2) => subset(C1,C2) andBool (card(C1) <Int card(C2))
+rule wBag(C1) notin wBag(C2) => notBool (subset(C1,C2)) 
+rule wBag(C1) notin* wBag(C2) => notBool (subset(C1,C2) andBool (card(C1) <Int card(C2)))
+
+// no rule necessary for equality because it is trivial 
+//rule wBag(C1) = wBag(C2) => C1 ==Bool C2
 
 // TODO: forAll, exists - need syntactical substitution
 
 
 //semantics for Collection expressions
-// evaluated in K cell only
-
 // rule for empty
-rule <k> empty => .KResult <_/k>
+
+rule <k> empty => wBag(.Bag) <_/k>
 
 
 // rules Class .allInstances
-rule <k> allInstances(C:Class) => collectInstances(C, INST:Bag) <_/k>  //=> wset(collectInstance)
+rule <k> allInstances(Cls:Id) => wBag(collectInstances(Cls, INST:Bag)) <_/k>  
        //NB one model only!
        <models>
          <model> <modelName> MN:Id </modelName> // _ leads to ambiguity
@@ -56,174 +91,115 @@ rule <k> allInstances(C:Class) => collectInstances(C, INST:Bag) <_/k>  //=> wset
  [structural] 
      
 
-//collectInstances function: collects instances of class C
-syntax KResult ::= collectInstances ( Class , Bag ) // Set ::=
-rule collectInstances(C, .Bag) => .KResult //.Set
+//collectInstances function: collects instances of class Cls
+syntax Bag ::= collectInstances ( Id , Bag ) 
+rule collectInstances(Cls, .Bag) => .Bag 
 
-rule collectInstances(C, 
+rule collectInstances(Cls, 
                         (<instance> 
                              <instName> INAME:Id </instName> 
-                             <ofClass> C </ofClass>
+                             <ofClass> Cls </ofClass>
                              <attributes> ATTR:Map </attributes>
                          </instance> 
                         REST:Bag
                        )
                      )
-                      => 
-                      instVal(
-                               <instance> 
-                                <instName> INAME </instName> 
-                                <ofClass> C </ofClass>
-                                <attributes> ATTR </attributes>
-                               </instance>)
-                      collectInstances(C, REST)
+                      =>   <instance> 
+                               <instName> INAME </instName> 
+                               <ofClass> Cls </ofClass>
+                               <attributes> ATTR </attributes>
+                            </instance>
+                      collectInstances(Cls, REST)
 
-rule collectInstances(C, 
+rule collectInstances(Cls, 
                         (<instance> 
                              <instName> INAME </instName> 
-                             <ofClass> C':Class </ofClass>
-                             <attributes> ATTR:Map </attributes>
+                             <ofClass> Cls':Id </ofClass>
+                             <attributes> ATTR </attributes>
                          </instance> REST:Bag))
-                        =>  collectInstances(C, REST)
-                        if notBool (C ==Bool C') 
+                        =>  collectInstances(Cls, REST)
+                        if notBool (Cls ==Bool Cls') 
 
 
 
 
 
 
-// rule for CExp # Attr [strict] 
+// rule for CExp # Id [strict] 
 // when finished, take result from temp cell
-rule <k> (.KResult # AT:Attr) => VV:KResult <_/k> <temp> VV => .KResult </temp>
 
-// case 1 : the attribute AT is of scalar type
+rule <k> . => wBag(B:Bag) </k> <temp> B => . </temp>
+
+
+// case 1 : the attribute AT is a bag of values 
 // the value of AT is stored in temp cell
-rule <k> (
-          instVal(
-                   <instance_>
-                     <attributes_> AT |-> typedVal(vv:Val, _) <_/attributes>        
+rule <k>  wBag(  <instance_>
+                     <attributes_> AT:Id |-> typedElt(wBag(B), T:Id) <_/attributes>        
                   <_/instance>
-                )
-                 RESTVAL:KResult)
-  # AT
-       => RESTVAL  # AT
+              ) # AT
+       => .
  <_/k>   
- <temp_> .KResult =>  vv
+ <temp_> .Bag =>  B
  <_/temp>
+if isBasic(T)
 
 
+syntax Bool ::= isBasic( Id )
 
+rule isBasic(T) =>
+ (T ==Bool int) orBool   // may need to add Strings, enumerated types depending on given MM
+   (T ==Bool colInt) orBool 
+   (T ==Bool bool) orBool 
+    (T ==Bool colBool) [structural]
 
-// case 2 : the attribute AT is of type class
-// the instance is sought for in the model
-// the value of AT is stored in temp cell
-rule <k>  (
-          instVal(
-                   <instance_>
-                     <attributes_> AT |-> typedName(INSNAME:Id, OF:Class) <_/attributes>
-                                       // handles synonymous instances in different classes
-                  <_/instance>
-                 )
-           VV:KResult
-          ) # AT
-       =>  VV:KResult # AT
-    <_/k>
-<models> // one model only!
-<model_>
-  <instance>
-    <instName> INSNAME </instName>
-    <ofClass> OF </ofClass> 
-    <attributes> ATR:Map </attributes>
-  </instance>
-<_/model>
-</models>
-<temp_> .KResult =>
-          instVal(
-                   <instance>
-                      <instName> INSNAME </instName>
-                      <ofClass> OF </ofClass> 
-                      <attributes> ATR </attributes>
-                   </instance>
-                  )
-<_/temp>
+// case 2 : the attribute AT is a bag of instance names
+// the instances are sought for in the model 
+// the value of the instance's AT is stored in temp cell
 
-
-
-
-
-// case 3 : the attribute AT is of type collection of instance Ids
-// the bag of instances is sought for in the model
-rule <k>  ( //wset(..
-          instVal(
-                   <instance_>
-                     <attributes_> AT |-> typedSetOfInstName(ISET:Set{Id}, OFCOL:ClassTypeCol) <_/attributes>
-                  <_/instance>
-                 )
-          
-           VV:KResult //:Set
+rule <k>  wBag(  <instance_>
+                     <attributes_> AT |-> typedElt(wBag(B), T) <_/attributes>
+                  <_/instance>        
            ) # AT
-       =>  //wset(
-          VV 
-           //)
-# AT 
+       =>  .
     <_/k>
 <models> // 1 model only!
 <model> <modelName> toto:Id </modelName>
 ALLINSTANCES:Bag
 </model>
 </models>
-<temp_> .KResult =>
-         makeInstVal(ISET,ALLINSTANCES)
+<temp_> .Bag =>
+         getInstancesByName(B,ALLINSTANCES)
 <_/temp>
+if notBool isBasic(T)
 
-syntax KResult ::=  makeInstVal ( Set{Id} , Bag )
 
-rule makeInstVal(ALLNAMES:Set{Id}, .Bag) => .KResult
+syntax Bag ::=  getInstancesByName ( Bag , Bag )
 
-rule makeInstVal(ALLNAMES,
-                  <instance>
+rule getInstancesByName(NAMES:Bag, .Bag) => .Bag
+
+rule getInstancesByName(NAMES,
+                  (<instance>
                      <instName> INSTNAME:Id </instName> 
-                     <ofClass> OFTHECLASS:Class </ofClass>
-                     <attributes> ATR </attributes>
-                  </instance> REMAINING:Bag) 
-    => if isIn(INSTNAME,ALLNAMES)
+                     <ofClass> Cls </ofClass>
+                     <attributes> AT </attributes>
+                  </instance> REMAINING:Bag))
+    => if (wId(INSTNAME) inBag NAMES)
        then
-                  instVal( <instance>
+                   <instance>
                      <instName> INSTNAME </instName> 
-                     <ofClass> OFTHECLASS:Class </ofClass>
-                     <attributes> ATR </attributes>
-                  </instance> ) 
-                  makeInstVal(ALLNAMES,REMAINING)
+                     <ofClass> Cls </ofClass> 
+                     <attributes> AT </attributes>
+                  </instance> 
+                  getInstancesByName(NAMES,REMAINING)
        else
 
-         makeInstVal(ALLNAMES,REMAINING)
+         getInstancesByName(NAMES,REMAINING)
 
        fi
 
-syntax Bool ::= isIn ( Id , Set{Id} )
-rule isIn (XX:Id , (XX , NAMES:Set{Id}) ) => true [structural]
- rule isIn (XX, (XX':Id ,  NAMES)) => isIn(XX,  NAMES) if notBool (XX ==Bool XX') [structural]
-rule isIn (XX, .Set{Id}) => false [structural]
 
 
-
-
-// case 4 : the attribute AT is of type collection of  values
-
-rule <k>  (
-          instVal(
-                   <instance_>
-                     <attributes_> AT |-> typedSetOfVal(VVV:KResult, _) <_/attributes>
-                  <_/instance>
-                 )
-           VV
-          ) # AT
-       =>  VV # AT 
-    <_/k>
-<temp_> .KResult =>
-         VVV
-<_/temp>
-
+/*
 
 rule <k> C1 union C2   => C1 C2 <_/k> 
 rule <k> C1 inter C2 => C1 Inter C2 <_/k> 
@@ -242,16 +218,10 @@ rule <k> if false then C1 else C2 endif => C2 <_/k>
 
 
 
-// subset predicate
-syntax Bool ::= subset ( KResult , KResult ) 
-rule subset(.KResult,  V:KResult) => true 
-rule subset((v:Val V), V':KResult) => if (v  inValSet  V') then subset(V,V') else false fi //NB Maude's if!
-
 // auxiliary : card predicate
-syntax Int ::= card ( KResult )
-rule card(.KResult) => 0
-rule card(v V) => 1 +Int card(V)
 
+
+*/
 
 endkm
 

@@ -2,19 +2,7 @@ in ocl-semantics
  
  mod TEST is including OCL-SEMANTICS .
  
-        op a :  -> Id .    op b :  -> Id .    op modelM :  -> Id .  
- 
-        op attr1 :  -> Attr .    op attr2 :  -> Attr .    op attr3 :  -> Attr .  
- 
-        op classA :  -> Class .    op classB :  -> Class .    op classZ :  -> Class . 
- 
-       subsort Attr <  K .    subsort Class <  K . 
- 
- 
- 
- 
- 
- 
+        op a :  -> Id .    op b :  -> Id .    op modelM :  -> Id .    op attr1 :  -> Id .    op attr2 :  -> Id .    op attr3 :  -> Id .    op classA :  -> Id .    op classB :  -> Id .    op classZ :  -> Id .    op int :  -> Id .    op colInt :  -> Id .    op bool :  -> Id .    op colBool :  -> Id .  
  
  
  
@@ -46,49 +34,32 @@ in ocl-semantics
              < instName >   a </ instName > 
              < ofClass >   classA </ ofClass > 
              < attributes > 
+<<<<<<< .mine
+                (attr1 |->  typedElt(wBag(wInt(1)), int))
+                (attr3 |->  typedElt(wBag(wInt(1) wInt(2) wInt(3)), colInt ))
+=======
                 (attr1 |->  typedVal(1, int))
                 (attr3 |->  typedSetOfVal( (1 2 3), colInt ))
+>>>>>>> .r2338
              </ attributes > 
            </ instance > 
            < instance > 
              < instName >  b </ instName > 
              < ofClass >  classB </ ofClass > 
-             < attributes >  (attr2 |->  typedName(a, classA)) </ attributes > 
+             < attributes >  (attr2 |->  typedElt(wBag(wId(a)), classA)) </ attributes > 
            </ instance > 
         </ model >  
       </ models > 
+<<<<<<< .mine
+      < k >  allInstances(classB) #  attr2 </ k >  
+      < temp >  (.).Bag  </ temp > 
+   </ T >  [metadata "location(test.k:12)"] .
+=======
       < k >  allInstances(classB) #  attr2 </ k >  
       < temp >  .KResult  </ temp > 
    </ T >  [metadata "location(test.k:24)"] .
+>>>>>>> .r2338
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-  subsorts CExp Set{Id} < K . endm 
+  subsorts CExp < K . endm 
