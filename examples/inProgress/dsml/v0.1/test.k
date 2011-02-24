@@ -47,7 +47,7 @@ macro testConfig =
             <ofClass>  classA </ofClass>
             <attributes>
                (attr1 |-> typedVal(1, int))
-               (attr3 |-> typedSetOfVal( (1), colInt ))
+               (attr3 |-> typedSetOfVal( (1 2 3), colInt ))
             </attributes>
           </instance>
           <instance>
@@ -57,7 +57,7 @@ macro testConfig =
           </instance>
        </model> 
      </models>
-     <k> allInstances(classA) # attr1 </k> 
+     <k> allInstances(classB) # attr2 </k> 
      <temp> .KResult </temp>
   </T>
 

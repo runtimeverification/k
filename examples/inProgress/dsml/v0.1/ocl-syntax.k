@@ -60,7 +60,7 @@ syntax CExp ::= empty
                 | CExp diff CExp [strict]
                 | CExp ->select( Var `: Type `| BExp ) [strict (1)]
                 | CExp ->collect( Var `: Type `| CExp )  [strict (1)]
-                | let Var `=   CExp  inn CExp endlet
+                | let Id `=   CExp  inn CExp endlet
                 | if BExp then CExp else CExp endif [strict(1)]
 
 
@@ -83,7 +83,14 @@ syntax ScalarVal ::= Bool | Int
 syntax InstVal ::=  instVal ( BagItem )
 */
 
-syntax KResult::= .KResult  | KResult KResult [hybrid gather(E e) comm id: .KResult]
+// define a wrapper for KResult, take inspiration from k-prelude
+// import the module in question
+
+ //op wset_ : Set -> KResult [metadata "builtin wrapper"] 
+ 
+// syntax SetItem ::= InstVal
+
+syntax KResult::= .KResult  | KResult KResult [hybrid gather(E e)  id: .KResult]
                 | KResult `Inter KResult
                 | KResult `Diff KResult
 

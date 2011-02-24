@@ -46,7 +46,7 @@ rule <k> empty => .KResult <_/k>
 
 
 // rules Class .allInstances
-rule <k> allInstances(C:Class) => collectInstances(C, INST:Bag) <_/k> 
+rule <k> allInstances(C:Class) => collectInstances(C, INST:Bag) <_/k>  //=> wset(collectInstance)
        //NB one model only!
        <models>
          <model> <modelName> MN:Id </modelName> // _ leads to ambiguity
@@ -57,8 +57,8 @@ rule <k> allInstances(C:Class) => collectInstances(C, INST:Bag) <_/k>
      
 
 //collectInstances function: collects instances of class C
-syntax KResult ::= collectInstances ( Class , Bag )
-rule collectInstances(C, .Bag) => .KResult
+syntax KResult ::= collectInstances ( Class , Bag ) // Set ::=
+rule collectInstances(C, .Bag) => .KResult //.Set
 
 rule collectInstances(C, 
                         (<instance> 
@@ -108,8 +108,8 @@ rule <k> (
   # AT
        => RESTVAL  # AT
  <_/k>   
-// <temp_> .KResult =>  vv
-// <_/temp>
+ <temp_> .KResult =>  vv
+ <_/temp>
 
 
 
@@ -128,6 +128,7 @@ rule <k>  (
           ) # AT
        =>  VV:KResult # AT
     <_/k>
+<models> // one model only!
 <model_>
   <instance>
     <instName> INSNAME </instName>
@@ -135,6 +136,7 @@ rule <k>  (
     <attributes> ATR:Map </attributes>
   </instance>
 <_/model>
+</models>
 <temp_> .KResult =>
           instVal(
                    <instance>
@@ -148,21 +150,28 @@ rule <k>  (
 
 
 
+
 // case 3 : the attribute AT is of type collection of instance Ids
 // the bag of instances is sought for in the model
-rule <k>  (
+rule <k>  ( //wset(..
           instVal(
                    <instance_>
                      <attributes_> AT |-> typedSetOfInstName(ISET:Set{Id}, OFCOL:ClassTypeCol) <_/attributes>
                   <_/instance>
                  )
-           VV:KResult
-          ) # AT
-       =>  VV # AT 
+          
+           VV:KResult //:Set
+           ) # AT
+       =>  //wset(
+          VV 
+           //)
+# AT 
     <_/k>
+<models> // 1 model only!
 <model> <modelName> toto:Id </modelName>
 ALLINSTANCES:Bag
 </model>
+</models>
 <temp_> .KResult =>
          makeInstVal(ISET,ALLINSTANCES)
 <_/temp>
@@ -225,7 +234,7 @@ rule <k> C1 diff C2 => C1 Diff C2  <_/k>
 rule <k> if true then C1 else C2 endif => C1 <_/k>
 rule <k> if false then C1 else C2 endif => C2 <_/k>
 
-// rule <k> let  X:Var =  C1  inn C2  endlet => C2[C1/X] <_/k>
+ rule <k> let  X:Id =  C1  inn C2  endlet => C2[C1/X] <_/k>
 
 // AUXILIARY DEFINITIONS
 
