@@ -2,7 +2,7 @@ require ocl-semantics
 
 kmod TEST is including OCL-SEMANTICS
 
-syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3 | classA | classB | classZ | int | colInt | bool | colBool 
+syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3 | classA | classB | classZ | int | colInt | bool | colBool | colInst
 
 
 
@@ -34,19 +34,19 @@ macro testConfig =
             <instName>  a </instName>
             <ofClass>  classA </ofClass>
             <attributes>
-               (attr1 |-> typedElt(wBag(wInt(1)), int))
+               (attr1 |-> typedElt(wBag(wId(a)), colInst))
                (attr3 |-> typedElt(wBag(wInt(1) wInt(2) wInt(3)), colInt ))
             </attributes>
           </instance>
           <instance>
             <instName> b </instName>
             <ofClass> classB </ofClass>
-            <attributes> (attr2 |-> typedElt(wBag(wId(a) wId(a) wId(b)), classA)) </attributes>
+            <attributes> (attr2 |-> typedElt(wBag(wId(a) wId(a) wId(b)), colInst)) </attributes>
           </instance>
        </model> 
      </models>
-     <k> (allInstances(classB)  union allInstances(classB)) # attr2 </k> 
-     <temp> .Bag</temp>
+     <k>  isEmpty(wBag(.Bag) # attr1) </k> 
+     <temp> .Bag </temp>
   </T>
 
 

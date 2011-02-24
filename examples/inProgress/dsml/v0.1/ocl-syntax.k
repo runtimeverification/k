@@ -26,13 +26,14 @@ syntax BExp ::= Bool | Id
                | BExp implies BExp [strict]
                | BExp equiv BExp [strict]
                | not BExp           [strict]
-               | CExp in CExp [strict]
+               | CExp myin CExp [strict] 
                | CExp in* CExp [strict] //strict inclusion
                | CExp notin CExp [strict] // negation of in
                | CExp notin* CExp [strict] // negation of in*
                | CExp = CExp 
                | CExp ->forAll( Id  `| BExp ) [strict (1)]
                | CExp ->exists( Id  `| BExp ) [strict (1)]
+               | isEmpty ( CExp ) [strict]
                
   
 // Expressions : Collections
@@ -64,14 +65,16 @@ syntax KResult ::=  wBag( Bag ) [metadata "builtin wrapper"]
 //
 
 syntax BagItem ::=  wBool( Bool ) | wInt ( Int ) | wId ( Id ) 
-
-
-
-
-
 syntax CExp ::= KResult
+
+/*
 syntax AExp ::= Int
 syntax BExp ::= Bool
+*/
+
+syntax BExp ::= Bool
+syntax AExp ::= KResult
+syntax BExp ::= KResult
 
 //basic types
 syntax Id ::= int | bool | colInt | colBool
@@ -79,5 +82,6 @@ syntax Id ::= int | bool | colInt | colBool
 // for  attributes in metamodel instances
 syntax K ::= typedElt ( K , Id )
 
+syntax Id ::= x 
 
 endkm

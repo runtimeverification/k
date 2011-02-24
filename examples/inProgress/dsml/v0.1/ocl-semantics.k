@@ -63,8 +63,12 @@ rule B1 equiv B2 => B1 ==Bool B2
 
 rule not B1 => notBool B1
 
-rule wBag(C1:Bag) in wBag(C2:Bag) => subset(C1,C2) 
-rule wBag(C1) in* wBag(C2) => subset(C1,C2) andBool (card(C1) <Int card(C2))
+rule isEmpty(wBag(.Bag)) => true 
+
+rule isEmpty(wBag(BagIt:BagItem BB:Bag)) => false 
+
+rule wBag(C1:Bag) myin wBag(C2:Bag) => subset(C1,C2)
+rule wBag(C1:Bag) in* wBag(C2:Bag) => subset(C1,C2) andBool (card(C1) <Int card(C2))
 rule wBag(C1) notin wBag(C2) => notBool (subset(C1,C2)) 
 rule wBag(C1) notin* wBag(C2) => notBool (subset(C1,C2) andBool (card(C1) <Int card(C2)))
 
@@ -123,12 +127,15 @@ rule collectInstances(Cls,
 
 
 
-
+syntax Id ::= applied
 
 // rule for CExp # Id [strict] 
 // when finished, take result from temp cell
 
-rule <k> . => wBag(B:Bag) </k> <temp> B => . </temp>
+
+// apparently heating equation kicks in before this gets the chance to apply
+// so, something is KResult too early... or is it KProper ??
+ rule <k> (wBag(.Bag) # AT) => wBag(B:Bag) </k> <temp> B => wId(applied) </temp> 
 
 
 // NB all elements in CExp are assumed to have the attribute Id
@@ -136,11 +143,12 @@ rule <k> . => wBag(B:Bag) </k> <temp> B => . </temp>
 
 // case 0 : the bag of instances whose AT we are trying to get is empty: dissolve
 
+/*
 rule <k>  wBag(  .Bag
               ) # AT
-       => .
- <_/k>   
-
+       => wBag(.Bag)
+ <_/k>  [structural]
+*/
 
 // case 1 : the bag of instances whose AT we are trying to get is nonempty
 //the attribute AT is a bag of values 
