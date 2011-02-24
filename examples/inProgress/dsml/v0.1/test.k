@@ -41,11 +41,11 @@ macro testConfig =
           <instance>
             <instName> b </instName>
             <ofClass> classB </ofClass>
-            <attributes> (attr2 |-> typedElt(wBag(wId(a)), classA)) </attributes>
+            <attributes> (attr2 |-> typedElt(wBag(wId(a) wId(a) wId(b)), classA)) </attributes>
           </instance>
        </model> 
      </models>
-     <k> allInstances(classB) # attr2 </k> 
+     <k> (allInstances(classB)  union allInstances(classB)) # attr2 </k> 
      <temp> .Bag</temp>
   </T>
 

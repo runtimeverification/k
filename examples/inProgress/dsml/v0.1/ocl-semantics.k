@@ -18,7 +18,7 @@ rule (v V1) Diff V2 => v (V1 Diff V2) if notBool (v  inBag  V2) [structural]
 rule .Bag Diff V:Bag => .Bag [structural]
 rule V Diff .Bag => V [structural]
 
-
+// this exists in K-PRELUDE
 syntax Bool ::= BagItem inBag  Bag
 rule v  inBag  (v V) => true [structural]
 rule v  inBag  (v':BagItem V) => v  inBag  V if notBool(v ==Bool v') [structural] 
@@ -131,13 +131,25 @@ rule collectInstances(Cls,
 rule <k> . => wBag(B:Bag) </k> <temp> B => . </temp>
 
 
-// case 1 : the attribute AT is a bag of values 
+// NB all elements in CExp are assumed to have the attribute Id
+// may add error rules in the future
+
+// case 0 : the bag of instances whose AT we are trying to get is empty: dissolve
+
+rule <k>  wBag(  .Bag
+              ) # AT
+       => .
+ <_/k>   
+
+
+// case 1 : the bag of instances whose AT we are trying to get is nonempty
+//the attribute AT is a bag of values 
 // the value of AT is stored in temp cell
 rule <k>  wBag(  <instance_>
                      <attributes_> AT:Id |-> typedElt(wBag(B), T:Id) <_/attributes>        
                   <_/instance>
-              ) # AT
-       => .
+             REMAINING:Bag  ) # AT
+       => wBag(REMAINING) # AT
  <_/k>   
  <temp_> .Bag =>  B
  <_/temp>
@@ -147,20 +159,21 @@ if isBasic(T)
 syntax Bool ::= isBasic( Id )
 
 rule isBasic(T) =>
- (T ==Bool int) orBool   // may need to add Strings, enumerated types depending on given MM
-   (T ==Bool colInt) orBool 
-   (T ==Bool bool) orBool 
-    (T ==Bool colBool) [structural]
+(T ==Bool int) orBool   // may need to add Strings, enumerated types depending on given MM
+(T ==Bool colInt) orBool 
+(T ==Bool bool) orBool 
+(T ==Bool colBool) [structural]
 
-// case 2 : the attribute AT is a bag of instance names
+// case 2 : the bag of instances whose AT we are trying to get is nonempty
+// the attribute AT is a bag of instance names
 // the instances are sought for in the model 
 // the value of the instance's AT is stored in temp cell
 
 rule <k>  wBag(  <instance_>
                      <attributes_> AT |-> typedElt(wBag(B), T) <_/attributes>
                   <_/instance>        
-           ) # AT
-       =>  .
+          REMAINING ) # AT
+       =>  wBag(REMAINING) # AT
     <_/k>
 <models> // 1 model only!
 <model> <modelName> toto:Id </modelName>
@@ -168,60 +181,94 @@ ALLINSTANCES:Bag
 </model>
 </models>
 <temp_> .Bag =>
-         getInstancesByName(B,ALLINSTANCES)
+getInstancesByName(B,ALLINSTANCES)
 <_/temp>
 if notBool isBasic(T)
 
 
 syntax Bag ::=  getInstancesByName ( Bag , Bag )
 
-rule getInstancesByName(NAMES:Bag, .Bag) => .Bag
+rule getInstancesByName(.Bag, ALLINSTANCES) => .Bag [structural]
 
-rule getInstancesByName(NAMES,
+
+// NB an instance name may occur several times, while the corresponding instance
+// occurs only once. getInstances must return as many copies of the instance as there
+// are instance names
+
+rule getInstancesByName(
+                  (wId(INSTNAME:Id) NAMES:Bag),
                   (<instance>
-                     <instName> INSTNAME:Id </instName> 
+                     <instName> INSTNAME </instName> 
                      <ofClass> Cls </ofClass>
-                     <attributes> AT </attributes>
-                  </instance> REMAINING:Bag))
-    => if (wId(INSTNAME) inBag NAMES)
-       then
-                   <instance>
+                     <attributes> ATTR </attributes>
+                  </instance>) REMAINING:Bag)
+             =>   
+                  <instance>
                      <instName> INSTNAME </instName> 
                      <ofClass> Cls </ofClass> 
-                     <attributes> AT </attributes>
+                     <attributes> ATTR </attributes>
                   </instance> 
-                  getInstancesByName(NAMES,REMAINING)
-       else
+                  getInstancesByName(NAMES, (<instance>
+                     <instName> INSTNAME </instName> 
+                     <ofClass> Cls </ofClass>
+                     <attributes> ATTR </attributes>
+                  </instance>) REMAINING)
+        [structural]
 
-         getInstancesByName(NAMES,REMAINING)
 
-       fi
+rule getInstancesByName( (wId(INSTNAME) NAMES:Bag), ALLINSTANCES)
+             =>   
+                  getInstancesByName(NAMES, ALLINSTANCES)
+if notBool isPresent(INSTNAME,ALLINSTANCES)
+        [structural]
+
+syntax Bool ::=  isPresent ( Id , Bag )
+
+rule isPresent(INSTNAME, 
+               (( <instance>
+                     <instName> INSTNAME </instName> 
+                     <ofClass> Cls </ofClass> 
+                     <attributes> ATTR </attributes>
+                  </instance> ) 
+               REMAINING)) => true [structural]
+
+rule isPresent(INSTNAME, 
+               (( <instance>
+                     <instName> INSTNAME':Id </instName> 
+                     <ofClass> Cls </ofClass> 
+                     <attributes> ATTR </attributes>
+                  </instance> ) 
+               REMAINING)) 
+     =>
+    isPresent(INSTNAME, REMAINING)
+    if notBool (INSTNAME ==Bool INSTNAME')
+ [structural]
+
+
+rule isPresent(INSTNAME, .Bag ) => false [structural] 
 
 
 
-/*
 
-rule <k> C1 union C2   => C1 C2 <_/k> 
-rule <k> C1 inter C2 => C1 Inter C2 <_/k> 
-rule <k> C1 diff C2 => C1 Diff C2  <_/k>
+
+
+
+rule <k> wBag(C1) union wBag(C2)   => wBag(C1 C2) <_/k> 
+rule <k> wBag(C1) inter wBag(C2) => wBag(C1 Inter C2) <_/k> 
+rule <k> wBag(C1) diff wBag(C2) => wBag(C1 Diff C2)  <_/k>
 
 // TODO: select, collect, let : need substitution
 
-rule <k> if true then C1 else C2 endif => C1 <_/k>
-rule <k> if false then C1 else C2 endif => C2 <_/k>
+rule <k> if true then CEXP1:CExp else CEXP2:CExp endif => CEXP1 <_/k> [structural]
+rule <k> if false then CEXP1 else CEXP2 endif => CEXP1 <_/k> [structural]
 
- rule <k> let  X:Id =  C1  inn C2  endlet => C2[C1/X] <_/k>
+// rule <k> let  X:Id =  CEXP1 in CEXP2  endlet => CEXP2[CEXP1/X] <_/k> [structural]
 
 // AUXILIARY DEFINITIONS
 
  
 
 
-
-// auxiliary : card predicate
-
-
-*/
 
 endkm
 

@@ -47,7 +47,7 @@ syntax CExp ::= empty
                 | CExp diff CExp [strict]
                 | CExp ->select( Id `| BExp ) [strict (1)]
                 | CExp ->collect( Id  `| CExp )  [strict (1)]
-                | let Id `=   CExp  in CExp endlet
+                | let Id `=   CExp  in CExp endlet [strict(2)]
                 | if BExp then CExp else CExp endif [strict(1)]
 
 
@@ -57,7 +57,7 @@ syntax K ::= CExp
 
 
 // wrapping bags to KResults
-syntax KResult ::=  wBag( Bag ) 
+syntax KResult ::=  wBag( Bag ) [metadata "builtin wrapper"]
 
 // bag items, i.e., values, can be wrapped Booleans, Integers, and other bag items (for instances)
 // we also allow for wrapped identifiers
