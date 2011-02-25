@@ -102,6 +102,43 @@ rule (wBag(C1) = wBag(C2)) => C1 ==Bool C2
 // TODO: forAll, exists - need syntactical substitution
 
 
+rule wBag(.Bag) ->forAll(_| _) => true
+/*
+rule wBag((wInt(I:Int) B:Bag)) ->forAll( Var:Id | BEXP:BExp ) =>
+kIf BEXP[I/Var] 
+then wBag(B) ->forAll( Var | BEXP)
+else false
+endkIf
+*/
+
+
+rule wBag((BI:BagItem B:Bag)) ->forAll( Var:Id | BEXP:BExp ) =>
+kIf BEXP[unWrap(BI)/Var] 
+then wBag(B) ->forAll( Var | BEXP)
+else false
+endkIf
+
+syntax UnWrapped ::= Bool | Int | Id 
+
+syntax UnWrapped ::= unWrap ( BagItem )
+
+rule unWrap(wInt(iv:Int)) => iv
+rule unWrap(wBool(bv:Bool)) => bv
+rule unWrap(wId(idv:Id)) => idv
+
+
+syntax Bool ::= kIf K then BExp else BExp endkIf [strict (1)]
+
+rule kIf true[uw:UnWrapped  /Var]  then thenBranch:BExp else elseBranch:BExp endkIf => thenBranch
+rule kIf false[uw:UnWrapped /Var]  then thenBranch else elseBranch endkIf => elseBranch
+
+
+rule wBag((BI:BagItem B:Bag)) ->forAll( Var:Id | BEXP:BExp ) =>
+kIf BEXP[BI / Var] 
+then wBag(B) ->forAll( Var | BEXP)
+else false
+endkIf
+
 //semantics for Collection expressions
 // rule for empty
 

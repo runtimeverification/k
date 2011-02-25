@@ -34,18 +34,21 @@ macro testConfig =
             <instName>  a </instName>
             <ofClass>  classA </ofClass>
             <attributes>
-               (attr1 |-> typedElt(wBag(wId(a)), colInst))
-               (attr3 |-> typedElt(wBag(wInt(1)), colInt ))
+               (attr1 |-> typedElt(val(BagItem(a of classA)), colInst))
+               (attr3 |-> typedElt(val(BagItem(1)), colInt ))
             </attributes>
           </instance>
           <instance>
             <instName> b </instName>
             <ofClass> classB </ofClass>
-            <attributes> (attr2 |-> typedElt(wBag(wId(a) wId(a) wId(b)), colInst)) </attributes>
+            <attributes> 
+             (attr2 |-> typedElt(val(BagItem(a of classA) BagItem(a of classA) BagItem(b of classB)), colInst)) </attributes>
           </instance>
        </model> 
      </models>
-     <k>    allInstances(classA) ->forAll(x | true ) </k> 
+      <k>    allInstances(classA) ->forAll(x | (x # attr1) = val(BagItem(a of classA))) </k> 
+     // <k>      (val(BagItem(b of classB))) # attr2 = val(BagItem(a of classA)) </k> //
+    // <k> let x =  val(BagItem(a of classA)) in (x # attr3) endlet  </k>
      <temp> .Bag </temp>
   </T>
 
