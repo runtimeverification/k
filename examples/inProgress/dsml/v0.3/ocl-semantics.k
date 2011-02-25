@@ -1,6 +1,6 @@
 require meta-model
 require substitution
-kmod OCL-SEMANTICS is including META-MODEL  +  SUBSTITUTION
+kmod OCL-SEMANTICS is including META-MODEL  +  SUBSTITUTION + K-CONDITION-SEARCH
 
 //PRELIMINARIES
 // values
@@ -83,6 +83,8 @@ rule B1 or B2 => B1 orBool B2
 rule B1 implies B2 => (notBool B1) orBool B2 
 rule B1 equiv B2 => B1 ==Bool B2
 rule not B1 => notBool B1
+
+
 
 rule val(C1:Bag) in val(C2:Bag) => subset(C1,C2)
 rule val(C1:Bag) in* val(C2:Bag) => subset(C1,C2) andBool (card(C1) <Int card(C2))
@@ -229,24 +231,28 @@ rule <k>
 
 //select
 rule <k>
-val(.Bag) ->select(_|_) => val(.Bag) 
+val(.Bag) ->select(_|_) => val(B) 
+<_/k>
+<temp>
+ B => .
+</temp>
+
+
+syntax K ::= `@temp ( K ) [strict]
+
+rule <k>( val(( BI B)) ->select( Var| BEXP:BExp )) => 
+@temp(if BEXP[unWrap(BI)/Var] then val(BI) else val(.Bag) endif )
+~> (val(B) ->select( Var | BEXP))
 <_/k>
 
-rule <k>
- val(( BI B)) ->select( Var| BEXP:BExp ) =>
-if
- BEXP[unWrap(BI)/Var]  
-then
- val(BI  open(val(B) ->select( Var | BEXP)))
-//val(B) ->select( Var | BEXP)
-else
-  val(B) ->select( Var | BEXP)
-endif
-<_/k> [structural]
+rule
+<k> @temp(val(B))  => . <_/k>
+<temp_> 
+. => B
+<_/temp>
 
-syntax Bag ::=  open ( CExp ) [strict]
 
-rule open(val(B)) => B [structural]
+
 
 // let
 rule <k> let  X:Id =  CEXP1 in CEXP2  endlet => CEXP2[CEXP1/X] <_/k> [structural]

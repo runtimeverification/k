@@ -25,7 +25,7 @@ syntax BExp ::= Bool | Id
                | BExp or BExp        [strict]
                | BExp implies BExp [strict]
                | BExp equiv BExp [strict]
-               | not BExp           [strict]
+               | not BExp          [strict]
                | CExp in CExp [strict] 
                | CExp in* CExp [strict] //strict inclusion
                | CExp notin CExp [strict] // negation of in

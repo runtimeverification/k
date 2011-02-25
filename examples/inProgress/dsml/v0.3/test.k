@@ -45,10 +45,9 @@ macro testConfig =
              (attr2 |-> typedElt(val(BagItem(a : classA) BagItem(a : classA) BagItem(b : classB)), colInst)) </attributes>
           </instance>
        </model> 
-     </models>
-        <k>    open(val(BagItem(a : classA)))  </k>
-       // <k>    allInstances(classB) ->select(x | (a : classA) in (x # attr2)  ) </k>
-       // <k>    allInstances(classB) ->exists(x | (a : classA) in (x # attr2)  ) </k>
+     </models> 
+        <k>    allInstances(classB) ->select(x | (a : classA) in (x # attr2)  ) </k>
+        //<k>    allInstances(classB) ->exists(x | (a : classA) in (x # attr2)  ) </k>
        //<k>    allInstances(classB) ->collect(x | (x # attr2)) </k>
        //<k>    allInstances(classA) ->forAll(x | (x # attr3) = val(BagItem(a : classA))) </k>
        //  <k>     ((a : classA) # attr3) = val(BagItem(a : classA))  </k>
