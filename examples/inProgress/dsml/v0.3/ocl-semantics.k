@@ -6,12 +6,9 @@ kmod OCL-SEMANTICS is including META-MODEL  +  SUBSTITUTION
 // values
 
 //for instance name of certain class
-syntax K ::= Id of Id
 
 // values are either collection values, integers, or Booleans
 syntax KResult ::= ValCExp | Int | Bool 
-
-
 
 // collection values are  wrapped bags of wrapped ints, bools, or instance names of class name
 // the wrappped ints etc use the predefined construction BagItem : K -> BagItem
@@ -69,9 +66,7 @@ rule subset((v:BagItem V), V':Bag) => if (v  inBag  V') then subset(V,V') else f
 rule A1:Int + A2:Int => A1 +Int A2
 rule A1 * A2 => A1 *Int A2
 rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)
-
 rule (- A1) => -Int A1
-
 rule (val(B:Bag) .size()) => card(B)
 
 
@@ -83,81 +78,57 @@ rule A1 > A2 => A1 >Int A2
 rule A1 >= A2 => A1 >=Int A2
 rule A1 = A2 => A1 ==Int A2 
 rule A1 <> A2 => notBool (A1 ==Int A2)
-
 rule B1:Bool and B2:Bool => B1 andBool B2
 rule B1 or B2 => B1 orBool B2
 rule B1 implies B2 => (notBool B1) orBool B2 
 rule B1 equiv B2 => B1 ==Bool B2
-
 rule not B1 => notBool B1
 
-rule isEmpty(val(.Bag)) => true 
-
-rule isEmpty(val(BagIt:BagItem _)) => false 
-
-rule val(C1:Bag) myin val(C2:Bag) => subset(C1,C2)
+rule val(C1:Bag) in val(C2:Bag) => subset(C1,C2)
 rule val(C1:Bag) in* val(C2:Bag) => subset(C1,C2) andBool (card(C1) <Int card(C2))
 rule val(C1) notin val(C2) => notBool (subset(C1,C2)) 
 rule val(C1) notin* val(C2) => notBool (subset(C1,C2) andBool (card(C1) <Int card(C2)))
 
-
+// equality
 rule (val(C1) = val(C2)) => C1 ==Bool C2
 
+// isEmpty
+rule isEmpty(val(.Bag)) => true 
+rule isEmpty(val(BagIt:BagItem _)) => false 
 
+//forAll
+syntax BExp ::=  BExp [ K / Id ] [ditto]
 
-rule val(.Bag) ->forAll(_| _) => true
+rule <k> val(.Bag) ->forAll(_| _) => true <_/k>
 
+syntax K ::= unWrap ( BagItem )
+rule unWrap(BagItem(kv:K)) => kv [structural]
 
-
-rule <k> 
-val((BI:BagItem B:Bag)) ->forAll( Var:Id | BEXP:BExp ) =>
-kif BEXP[unWrap(BI)/Var] 
+rule <k>
+val(( BI:BagItem B:Bag)) ->forAll( Var:Id | BEXP:BExp ) => 
+if 
+BEXP[unWrap(BI)/Var] 
 then val(B) ->forAll( Var | BEXP)
 else false
-fik
+endif 
 <_/k> 
 [structural]
 
-syntax K ::= unWrap ( BagItem )
+//exists 
+rule  <k> val(.Bag) ->exists(_| _) => false <_/k>
+
+rule <k>
+val(( BI:BagItem B:Bag)) ->exists( Var:Id | BEXP:BExp ) => 
+if  BEXP[unWrap(BI)/Var] 
+then true 
+else val(B) ->exists( Var | BEXP)
+endif 
+<_/k> 
+[structural]
 
 
-rule unWrap(BagItem(kv:K)) => kv [structural]
-
-
-syntax Bool ::= kif K then BExp else BExp fik
-
-rule 
-<k>
-kif true  then t:BExp else e:BExp fik => t 
-<_/k>  [structural]
-
-rule  
-<k>
-kif true  then t else e fik => e 
-<_/k>
-  [structural]
-/*
-
-//rule kIf true[KEXP:K  /Var]  then thenBranch:BExp else elseBranch:BExp endkIf => thenBranch
-/rule kIf false[KEXP /Var]  then thenBranch else elseBranch endkIf => elseBranch
-
-rule kIf BEXP[KEXP:K  /Var]  then t:BExp else e:BExp endkIf => 
-
-
-thenBranch
-rule kIf false[KEXP /Var]  then thenBranch else elseBranch endkIf => elseBranch
-
-
-//rule kIf true  then thenBranch:BExp else elseBranch:BExp endkIf => thenBranch
-//rule kIf false  then thenBranch else elseBranch endkIf => elseBranch
-
-*/
-
-//semantics for Collection expressions
+// semantics of Collection expressions
 // rule for empty
-
-
-
 rule <k> empty => val(.Bag) <_/k>
 
 
@@ -170,7 +141,6 @@ rule <k> allInstances(Cls:Id) => val(collectInstanceNames(Cls, INST:Bag)) <_/k>
          </model>
       </models>
  [structural] 
-     
 
 //collectInstances function: collects instances of class Cls
 syntax Bag ::= collectInstanceNames ( Id , Bag ) 
@@ -185,7 +155,7 @@ rule collectInstanceNames(Cls,
                         REST:Bag
                        )
                      )
-                      =>    BagItem(INAME of Cls)
+                      =>    BagItem(INAME : Cls)
                       collectInstanceNames(Cls, REST)
 
 rule collectInstanceNames(Cls, 
@@ -196,6 +166,14 @@ rule collectInstanceNames(Cls,
                          </instance> REST:Bag))
                         =>  collectInstanceNames(Cls, REST)
                         if notBool (Cls ==Bool Cls') 
+
+// ":"
+rule <k> INAME : Cls => val(BagItem(INAME : Cls)) <_/k>
+
+
+
+
+
 
 
 // rule for CExp # Id [strict] 
@@ -212,7 +190,7 @@ rule <k> (val(.Bag) # AT) => val(B:Bag) <_/k> <temp> B => . </temp>
 
 // when not finished, the bag of instances whose AT we are trying to get is nonempty
 // the value of AT is stored in temp cell
-rule <k>  val(BagItem(INAME of Cls) REMAINING:Bag) # AT:Id
+rule <k>  val(BagItem(INAME : Cls) REMAINING:Bag) # AT:Id
        => val(REMAINING) # AT
  <_/k>   
 <models>
@@ -234,16 +212,48 @@ rule <k> val(C1) union val(C2)   => val(C1 C2) <_/k>
 rule <k> val(C1) inter val(C2) => val(C1 interBag C2) <_/k> 
 rule <k> val(C1) diff val(C2) => val(C1 diffBag C2)  <_/k>
 
-// TODO: select, collect, let : need substitution
 
-rule <k> if true then CEXP1:CExp else CEXP2:CExp endif => CEXP1 <_/k> [structural]
-rule <k> if false then CEXP1 else CEXP2 endif => CEXP1 <_/k> [structural]
 
+
+//collect
+syntax CExp ::=  CExp [ K / Id ] [ditto]
+rule <k>
+val(.Bag) ->collect(_|_) => val(.Bag) 
+<_/k>
+
+rule <k>
+ val(( BI:BagItem B:Bag)) ->collect( Var:Id | CEXP:CExp ) =>
+ CEXP[unWrap(BI)/Var]  union (val(B) ->collect( Var | CEXP))
+<_/k> [structural]
+
+
+//select
+rule <k>
+val(.Bag) ->select(_|_) => val(.Bag) 
+<_/k>
+
+rule <k>
+ val(( BI B)) ->select( Var| BEXP:BExp ) =>
+if
+ BEXP[unWrap(BI)/Var]  
+then
+ val(BI  open(val(B) ->select( Var | BEXP)))
+//val(B) ->select( Var | BEXP)
+else
+  val(B) ->select( Var | BEXP)
+endif
+<_/k> [structural]
+
+syntax Bag ::=  open ( CExp ) [strict]
+
+rule open(val(B)) => B [structural]
+
+// let
 rule <k> let  X:Id =  CEXP1 in CEXP2  endlet => CEXP2[CEXP1/X] <_/k> [structural]
 
-// AUXILIARY DEFINITIONS
-
- 
+// if
+rule <k> if true then CEXP1:CExp else CEXP2:CExp endif => CEXP1 <_/k> [structural]
+rule <k> if false then CEXP1 else CEXP2 endif => CEXP2 <_/k> [structural]
 
 
 endkm

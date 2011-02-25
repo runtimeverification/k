@@ -26,20 +26,22 @@ syntax BExp ::= Bool | Id
                | BExp implies BExp [strict]
                | BExp equiv BExp [strict]
                | not BExp           [strict]
-               | CExp myin CExp [strict] 
+               | CExp in CExp [strict] 
                | CExp in* CExp [strict] //strict inclusion
                | CExp notin CExp [strict] // negation of in
                | CExp notin* CExp [strict] // negation of in*
+               | isEmpty ( CExp ) [strict]
                | CExp = CExp 
                | CExp ->forAll( Id  `| BExp ) [strict (1)]
                | CExp ->exists( Id  `| BExp ) [strict (1)]
-               | isEmpty ( CExp ) [strict]
+               
                
   
 // Expressions : Collections
  
 syntax CExp ::= empty
                 | allInstances ( Id ) 
+                | Id : Id
                 | AExp [strict]
                 | BExp [strict]
                 | CExp # Id [strict(1)]  // period generates ambiguity

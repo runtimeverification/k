@@ -34,7 +34,7 @@ macro testConfig =
             <instName>  a </instName>
             <ofClass>  classA </ofClass>
             <attributes>
-               (attr1 |-> typedElt(val(BagItem(a of classA)), colInst))
+               (attr1 |-> typedElt(val(BagItem(a : classA)), colInst))
                (attr3 |-> typedElt(val(BagItem(1)), colInt ))
             </attributes>
           </instance>
@@ -42,13 +42,18 @@ macro testConfig =
             <instName> b </instName>
             <ofClass> classB </ofClass>
             <attributes> 
-             (attr2 |-> typedElt(val(BagItem(a of classA) BagItem(a of classA) BagItem(b of classB)), colInst)) </attributes>
+             (attr2 |-> typedElt(val(BagItem(a : classA) BagItem(a : classA) BagItem(b : classB)), colInst)) </attributes>
           </instance>
        </model> 
      </models>
-      <k>    allInstances(classA) ->forAll(x | (x # attr1) = val(BagItem(a of classA))) </k> 
-     // <k>      (val(BagItem(b of classB))) # attr2 = val(BagItem(a of classA)) </k> //
-    // <k> let x =  val(BagItem(a of classA)) in (x # attr3) endlet  </k>
+        <k>    open(val(BagItem(a : classA)))  </k>
+       // <k>    allInstances(classB) ->select(x | (a : classA) in (x # attr2)  ) </k>
+       // <k>    allInstances(classB) ->exists(x | (a : classA) in (x # attr2)  ) </k>
+       //<k>    allInstances(classB) ->collect(x | (x # attr2)) </k>
+       //<k>    allInstances(classA) ->forAll(x | (x # attr3) = val(BagItem(a : classA))) </k>
+       //  <k>     ((a : classA) # attr3) = val(BagItem(a : classA))  </k>
+       // <k>      (a : classA) # attr3 = val(BagItem(a : classA)) </k> 
+    // <k> let x =  val(BagItem(a : classA)) in (x # attr3) endlet  </k>
      <temp> .Bag </temp>
   </T>
 
