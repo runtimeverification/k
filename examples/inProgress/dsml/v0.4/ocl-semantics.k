@@ -311,7 +311,7 @@ rule <k>
    (val(B) ->collect( Var | CEXP))  Including CEXP[open(BI)/Var]
 <_/k> [structural]
 
-
+syntax Exp ::=  Exp `Including Exp [strict] // add 2nd arg (element) to 1st arg collection
 
 
 //select
