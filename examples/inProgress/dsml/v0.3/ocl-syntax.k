@@ -1,7 +1,7 @@
 require ../../../../k-prelude
 
 //change names
-kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL 
+kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL + PL-STRING
 
 
 // Expressions : Arithmetical
@@ -35,8 +35,11 @@ syntax BExp ::= Bool | Id
                | CExp ->forAll( Id  `| BExp ) [strict (1)]
                | CExp ->exists( Id  `| BExp ) [strict (1)]
                
-               
-  
+// Expressions : Strings               
+
+syntax SExp ::= String | Id
+                | SExp ++ SExp [strict] 
+
 // Expressions : Collections
  
 syntax CExp ::= empty
@@ -44,6 +47,7 @@ syntax CExp ::= empty
                 | Id : Id
                 | AExp [strict]
                 | BExp [strict]
+                | SExp [strict]
                 | CExp # Id [strict(1)]  // period generates ambiguity
                 | CExp union CExp [strict]
                 | CExp inter CExp [strict]
@@ -52,6 +56,13 @@ syntax CExp ::= empty
                 | CExp ->collect( Id  `| CExp )  [strict (1)]
                 | let Id `=   CExp  in CExp endlet [strict(2)]
                 | if BExp then CExp else CExp endif [strict(1)]
+
+// need mixed expressions "CEXP + String" (and many others...)  
+                | CExp ++ SExp [strict]
+                | SExp ++ CExp [strict]
+                | CExp ++ CExp [strict]
+
+
 
 
 // contents of K cell : Collection expressions
