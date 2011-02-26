@@ -49,7 +49,6 @@ macro testConfig =
           </instance>
        </model> 
      </models>
-         <k> 1 </k>
          <k>    ((allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if")) ))
                 ->collect(y | y ++ " end")) </k>
         //<k>    allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if")) ) </k>

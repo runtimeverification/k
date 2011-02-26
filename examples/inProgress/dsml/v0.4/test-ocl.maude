@@ -1,0 +1,3 @@
+in test-compiled.maude
+rew testConfig .
+quit
