@@ -12,11 +12,14 @@ kmod OCL-SEMANTICS is including META-MODEL  +  SUBSTITUTION
 syntax Collection ::=  val ( Bag ) 
 
 // values of expressions
-syntax Exp ::= Collection | Int | Bool | String
+syntax Exp ::= Val
+
+syntax Val ::= Collection | Int | Bool | String
+
 
 
 // result of evaluation
-syntax KResult ::= Exp
+syntax KResult ::= Val
 
 
 
@@ -126,10 +129,24 @@ rule val(BagItem(B1:Bool)) and B2:Bool => val(BagItem(B1 andBool B2))  [structur
 rule val(BagItem(B1:Bool)) and val(BagItem(B2:Bool)) => val(BagItem(B1 andBool B2))  [structural]
 
 
-rule B1 or B2 => B1 orBool B2  [structural]
-rule B1 implies B2 => (notBool B1) orBool B2  [structural] 
-rule B1 equiv B2 => B1 ==Bool B2  [structural]
-rule not B1 => notBool B1  [structural]
+rule B1:Bool or val(BagItem(B2:Bool)) => val(BagItem(B1 orBool B2))  [structural]
+rule val(BagItem(B1:Bool)) or B2:Bool => val(BagItem(B1 orBool B2))  [structural]
+rule val(BagItem(B1:Bool)) or val(BagItem(B2:Bool)) => val(BagItem(B1 orBool B2))  [structural]
+
+
+rule B1:Bool implies val(BagItem(B2:Bool)) => val(BagItem( (notBool B1) orBool B2))  [structural]
+rule val(BagItem(B1:Bool)) implies B2:Bool => val(BagItem( (notBool B1) orBool B2))  [structural]
+rule val(BagItem(B1:Bool)) implies val(BagItem(B2:Bool)) => val(BagItem( (notBool B1) orBool B2))  [structural]
+
+
+
+rule B1:Bool equiv val(BagItem(B2:Bool)) => val(BagItem(B1 ==Bool B2))  [structural]
+rule val(BagItem(B1:Bool)) equiv B2:Bool => val(BagItem(B1 ==Bool B2))  [structural]
+rule val(BagItem(B1:Bool)) equiv val(BagItem(B2:Bool)) => val(BagItem(B1 ==Bool B2))  [structural]
+
+
+
+rule not val(BagItem(B1)) => val(BagItem(notBool B1))  [structural]
 
 
 
@@ -267,11 +284,22 @@ rule <k>  val(BagItem(INAME : Cls) REMAINING:Bag) # AT:Id
  <_/temp>
 [structural]
 
+//including
+
+rule <k> val(C1) Including I:Int  =>  val(C1 BagItem(I)) <_/k> [structural]
+rule <k> val(C1) Including Str1  => val(C1 BagItem(Str1)) <_/k> [structural]
+rule <k> val(C1) Including bbb:Bool =>  val(C1 BagItem(bbb)) <_/k> [structural]
+rule <k> val(C1) Including val(C2)  =>   val(C1) union val(C2) <_/k> [structural]
+
+
 //union, intersection, difference
+// "pure"
 rule <k> val(C1) union val(C2)   => val(C1 C2) <_/k> [structural]
 rule <k> val(C1) inter val(C2) => val(C1 interBag C2) <_/k> [structural]
 rule <k> val(C1) diff val(C2) => val(C1 diffBag C2)  <_/k> [structural]
 
+// "hybrid"
+rule <k> Str1 union val(C2)   => val(BagItem(Str1) C2) <_/k> [structural]
 
 
 
@@ -280,8 +308,10 @@ rule <k> val(.Bag) ->collect(_|_) => val(.Bag)  <_/k> [structural]
 
 rule <k>
  val(( BI:BagItem B:Bag)) ->collect( Var:Id | CEXP:Exp ) =>
- CEXP[open(BI)/Var]  union (val(B) ->collect( Var | CEXP))
+   (val(B) ->collect( Var | CEXP))  Including CEXP[open(BI)/Var]
 <_/k> [structural]
+
+
 
 
 //select

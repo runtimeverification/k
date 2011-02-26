@@ -2,7 +2,7 @@ require ocl-semantics
 
 kmod TEST is including OCL-SEMANTICS
 
-syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3 | attr4  | attr5 |  classA | classB | classZ | x | y
+syntax Id ::=  a | b | c |  modelM | attr1 | attr2 | attr3 | attr4  | attr5 |  classA | classB | classZ | x | y | z
 
 
 
@@ -47,11 +47,20 @@ macro testConfig =
              (attr5 |-> typedElt(val(BagItem(" and")), colString))
            </attributes>
           </instance>
+        <instance>
+            <instName> c </instName>
+            <ofClass> classB </ofClass>
+            <attributes> 
+             (attr2 |-> typedElt(val(BagItem(a : classA) BagItem(a : classA) BagItem(b : classB)), colInst))
+             (attr4 |-> typedElt(val(BagItem("IF")), colString))
+             (attr5 |-> typedElt(val(BagItem(" AND")), colString))
+           </attributes>
+          </instance>
        </model> 
      </models>
-         <k>    ((allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if")) ))
-                ->collect(y | y ++ " end")) </k>
-        //<k>    allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if")) ) </k>
+         <k>    (((allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if")) ))
+               ->collect(y | y ++ " end"))->select(z | true)) </k>
+        //<k>    allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if"))) </k>
         //<k>    allInstances(classB) ->select(x | (a : classA) in (x # attr2)  ) </k>
         //<k>    allInstances(classB) ->exists(x | (a : classA) in (x # attr2)  ) </k>
        //<k>    allInstances(classB) ->collect(x | (x # attr2)) </k>

@@ -46,6 +46,7 @@ syntax Exp ::= Int | Id
                 | allInstances ( Id ) 
                 | Id : Id
                 | Exp # Id [strict(1)]  // period generates ambiguity
+                | Exp `Including Exp [strict] // add 2nd arg (element) to 1st arg collection
                 | Exp union Exp [strict]
                 | Exp inter Exp [strict]
                 | Exp diff Exp [strict]
