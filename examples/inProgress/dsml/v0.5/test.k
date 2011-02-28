@@ -1,4 +1,4 @@
-require ocl-semantics-new
+require ocl-semantics
 
 kmod TEST is including OCL-SEMANTICS
 
