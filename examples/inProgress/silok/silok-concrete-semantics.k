@@ -20,7 +20,7 @@ kmod SILOK-CONCRETE-SEMANTICS is including SILOK-BASIC-SEMANTICS
 
   rule <k> P:ProcId => B~>restore(S[undef/G]) <_/k>
        <state> S:Map => S[bot/L] </state>
-       <pgm> lvars|->wklist(L:List{K}) gvars|->wklist(G:List{K}) P|->B:B <_/pgm>
+       <pgm_> lvars|->wklist(L:List{K}) gvars|->wklist(G:List{K}) P|->B:B <_/pgm>
   rule <k> restore(S':Map) => . <_/k>
        <state> S => S[S'] </state>
 

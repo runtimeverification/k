@@ -11,7 +11,8 @@ macro pgm1 =
   gvars: g1, g2, g3
   lvars: l1, l2, l3 
   {
-  main :: g1 := new ; g2 := g1 ; [ g2 = g1 ] g3 := new
+  main :: g1 := new ; g2 := g1 ; [ g2 = g1 ] g3 := new ;
+  g3 := new ; g3 := new ; g3 := new ; g2 := new 
   }
 
 macro pgm2 =
@@ -19,7 +20,8 @@ macro pgm2 =
   lvars: l1, l2, l3 
   {
   main :: g1 := new ; g2 := g1 ; [ g2 = g1 ] g3 := new ;
-	 [ g1 = g2 ] l3 := g3 ; p1 ; ( [ l3 /= g3 ] g2 := new + g3 := new ) ;
+	 [ g1 = g2 ] l3 := g3 ; 
+	 p1 ; ( [ l3 /= g3 ] g2 := new + g3 := new ) ;
 	 [ l3 = g3 ] g2 := new ; p1 ; l2 := g2 ; p2
 
   p1 :: l3 := g1 ; g1 := new ; l2 := l3
