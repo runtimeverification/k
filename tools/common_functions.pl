@@ -915,11 +915,13 @@ sub required()
     $p = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
 	$Tree::Nary::TRAVERSE_ALL, getFullName($p));
     
-    while ($p->{data} =~ m/(\.\.\/)/g)
+    if (defined $p->{data})
     {
-	$c = $1 . $c;
+	while ($p->{data} =~ m/(\.\.\/)/g)
+	{
+	    $c = $1 . $c;
+	}
     }
-    
 #    my $c = File::Spec->catfile((fileparse($file))[1], $c);
 #    print "Child: $c\n";
     my $n = Tree::Nary->find_child($p, $Tree::Nary::TRAVERSE_ALL, getFullName($c));
