@@ -345,7 +345,7 @@ rule <k>( val(( BI B)) ->select( Var| BEXP:Exp )) =>
 //[structural]
 
 
-/*
+/* 
 rule <k>( val(( BI1:BagItem BI2:BagItem B)) ->select( Var| BEXP:Exp )) => 
 @temp(if BEXP[open(BI2)/Var] then val(BI2) else val(.Bag) endif ) ~> toto1 ~>
 @temp(if BEXP[open(BI1)/Var] then val(BI1) else val(.Bag) endif )  
