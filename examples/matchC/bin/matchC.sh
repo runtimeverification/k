@@ -108,7 +108,7 @@ if [ -z "${COMPILE_FLAG}" ]; then
   if [ "$?" -ne 0 ]; then exit $?; fi
 fi
 
-#rm -f ${TMP_OUT} ${TMP_ERR} ${MAUDE_PROG} ${COMPILED_PROG}
+rm -f ${TMP_OUT} ${TMP_ERR} ${MAUDE_PROG} ${COMPILED_PROG}
 if [ -z "${COMPILE_FLAG}" -a -z "${OUT_FLAG}" ]; then
   rm -f ${ML_PROG}
 fi
