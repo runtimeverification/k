@@ -1636,7 +1636,7 @@ sub resolve_where_macro($)
             # first, collect macros
             # macro_map contains all macros mapped to their values
             # macro_order contains macros occurence order mapped to their names
-			while ($macros =~ /(^|and)\s*(\w+)\s+=\s+(.*?)(?=(and|$))/sg)
+			while ($macros =~ /(^|and)\s*([\w:]+)\s+=\s+(.*?)(?=(and|$))/sg)
 			{
 #				print "$1\n$2\n$3\n\n";
  				$macro_map{$2} = $3;
