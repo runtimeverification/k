@@ -23,7 +23,7 @@ syntax Exp ::= Id
                | Exp <> Exp        [strict]
                | Exp and Exp       [strict]  
                | Exp or Exp        [strict]
-               | Exp implies Exp [strict(1)]
+               | Exp implies Exp [strict]
                | not Exp          [strict]
                | Exp includes Exp [strict] 
                | Exp excludes Exp [strict] 

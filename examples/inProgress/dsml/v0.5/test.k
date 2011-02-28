@@ -1,4 +1,4 @@
-require ocl-semantics
+require ocl-semantics-new
 
 kmod TEST is including OCL-SEMANTICS
 
@@ -67,7 +67,7 @@ macro testConfig =
           </instance>
        </model> 
      </models>
-// <k> allInstances(classA)->select(x | ((x#attr3) <= 2)) </k>
+//<k> allInstances(classA)->select(x | ((x#attr3) <= 2)) </k>//
 
 <k> allInstances(classB)->forAll(x| (x#attr2)->forAll(y|((oclType(y) =  classA) implies ((y#attr1) includes x))))</k>
 //
