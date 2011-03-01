@@ -43,7 +43,7 @@ macro testConfig =
             <instName>  b </instName>
             <ofClass>  classA </ofClass>
             <attributes>
-               (attr1 |-> typedElt(val(BagItem(c : classB)), classB))
+               (attr1 |-> typedElt(val(BagItem(d : classB)), classB))
                (attr3 |-> typedElt(val(BagItem(2)), int ))
             </attributes>
           </instance>
