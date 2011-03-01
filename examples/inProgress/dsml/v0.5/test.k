@@ -35,7 +35,7 @@ macro testConfig =
             <instName>  a </instName>
             <ofClass>  classA </ofClass>
             <attributes>
-               (attr1 |-> typedElt(val(BagItem(b : classB) BagItem(c : classB)), classB))
+               (attr1 |-> typedElt(val(BagItem(c : classB) BagItem(d : classB)), classB))
                (attr3 |-> typedElt(val(BagItem(1)), int ))
             </attributes>
           </instance>
@@ -43,7 +43,7 @@ macro testConfig =
             <instName>  b </instName>
             <ofClass>  classA </ofClass>
             <attributes>
-               (attr1 |-> typedElt(val(BagItem(b : classB) BagItem(c : classB)), classB))
+               (attr1 |-> typedElt(val(BagItem(c : classB)), classB))
                (attr3 |-> typedElt(val(BagItem(2)), int ))
             </attributes>
           </instance>
@@ -51,7 +51,7 @@ macro testConfig =
             <instName> c </instName>
             <ofClass> classB </ofClass>
             <attributes> 
-             (attr2 |-> typedElt(val(BagItem(b : classB)), classB))
+             (attr2 |-> typedElt(val(BagItem(c : classB)), classB))
              (attr4 |-> typedElt(val(BagItem("if")), string))
              (attr5 |-> typedElt(val(BagItem(" and")), string))
            </attributes>
@@ -60,43 +60,32 @@ macro testConfig =
             <instName> d </instName>
             <ofClass> classB </ofClass>
             <attributes> 
-             (attr2 |-> typedElt(val(BagItem(a : classA)),  classA))
+             (attr2 |-> typedElt(val(BagItem(b : classA)),  classA))
              (attr4 |-> typedElt(val(BagItem("if")), string))
              (attr5 |-> typedElt(val(BagItem(" AND")), string))
            </attributes>
           </instance>
        </model> 
      </models>
-//<k> allInstances(classA)->select(x | ((x#attr3) <= 2)) </k>//
+
 
 <k> allInstances(classB)->forAll(x| (x#attr2)->forAll(y|((oclType(y) =  classA) implies ((y#attr1) includes x))))</k>
 //
-    // <k>  oclType(b : classB)   </k>
-        /*
-         <k> 
-            allInstances(classB)
-              ->forAll(x|(x#attr2)
-                  ->forAll(z|
-                      ((z # attr1) 
-                         includes x 
-                             )))   </k>
-         */
-             //(allInstances(classA)->forAll(x| ((x#attr1)->forAll(y|(x in (y#attr2))))))    
-        /*
-         <k>   // ((
-               (allInstances(classB) ->collect(x | ( ((x # attr4)  ++   (x # attr5)) ++ (" only" ++ " if")) ))
-         
-       //       ->collect(y | y ++ " or"))->select(z | true)) 
+// this one fails: see correct version above 
+//<k>  allInstances(classB) ->forAll(x|(x#attr2)  ->forAll(z|   ((z # attr1)  includes x )))   </k>
+   /*     
+         <k>   
+              ((allInstances(classB) ->collect(x | ( ((x # attr4)  ++   (x # attr5)) ++ (" only" ++ " if")) ))
+                ->collect(y | y ++ " or"))->select(z | z.size()  = 1)
          </k>
-         */
-        //<k>    allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if"))) </k>
-        //<k>    allInstances(classB) ->select(x | (a : classA) in (x # attr2)  ) </k>
-        //<k>    allInstances(classB) ->exists(x | (a : classA) in (x # attr2)  ) </k>
-       //<k>    allInstances(classB) ->collect(x | (x # attr2)) </k>
-       //<k>    allInstances(classA) ->forAll(x | (x # attr3) = val(BagItem(a : classA))) </k>
-       //  <k>     ((a : classA) # attr3) = val(BagItem(a : classA))  </k>
-       // <k>      (a : classA) # attr3 = val(BagItem(a : classA)) </k> 
-    // <k> let x =  val(BagItem(a : classA)) in (x # attr3) endlet  </k>
+   */      
+       // <k>    empty union ((allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if")))).size()) </k>
+        // <k>    allInstances(classB) ->select(x |  (x # attr2) includes  (a : classA) ) </k>
+      //<k>    allInstances(classB)->collect(x | (x # attr2)) </k>
+       // <k>    allInstances(classA) ->forAll(x | (x # attr3) <= 2) </k>
+       //<k>    allInstances(classB) ->exists(x | (x # attr2) = (a : classA)) </k>
+       //<k> allInstances(classA)->select(x | ((x#attr3) >= 2)) </k>
+     // <k> let x =  (a : classA) in (x#attr3) = 1  endlet  </k>
      <temp> .Bag </temp>
      <comp> .Bag </comp>
   </T>
