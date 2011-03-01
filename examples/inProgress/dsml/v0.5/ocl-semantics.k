@@ -4,14 +4,14 @@ kmod OCL-SEMANTICS is including META-MODEL  +  SUBSTITUTION
 
 //PRELIMINARIES
 // values
-
+// TODO : make values module
 syntax Collection ::=  val ( Bag ) 
 
 // values of expressions
 syntax Val ::= Collection | Int | Bool | String
 // basic types
-syntax Id ::= top | int | bool | string
-// and id's for class types, are possible values of expressions (the oclType function_
+syntax Id ::= top | int | bool | string 
+// and id's for class types, are possible values of expressions (the oclType function)
 syntax Val ::=  Id 
 
 syntax Exp ::= Val
@@ -25,7 +25,7 @@ syntax KResult ::= Val
 syntax K ::= typedElt ( K , Id )
 
 
-
+// QUESTION : need to mix with elementary types?
 // a few structural rule about sets of values
 syntax Bag ::= Bag interBag Bag
 
@@ -65,22 +65,72 @@ rule A1 * A2 => A1 *Int A2  [structural]
 rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)  [structural]
 rule (- A1) => -Int A1  [structural]
 
-
-// "hybrid" expressions : ints and/or singleton collections
-
-rule val(BagItem(A1)) + A2 => A1 +Int A2 [structural]
-rule  A1 +  val(BagItem(A2)) => A1 +Int A2 [structural]
-rule  val(BagItem(A1)) +  val(BagItem(A2)) => A1 +Int A2 [structural]
-rule val(BagItem(A1)) / A2 => A1 /Int A2 if notBool (A2 ==Int 0)  [structural]
-rule  A1 /  val(BagItem(A2)) => A1 /Int A2 if notBool (A2 ==Int 0) [structural]
-rule  val(BagItem(A1)) /  val(BagItem(A2)) => A1 /Int A2 if notBool (A2 ==Int 0) [structural]
-rule (-  val(BagItem(A1))) => -Int A1  [structural]
 rule (val(B:Bag) .size()) => card(B)  [structural]
 rule (I:Int .size()) => 1  [structural]
 rule (bbb:Bool .size()) => 1  [structural]
 rule (Str:String .size()) => 1  [structural]
 
+syntax Bool ::= isScalar ( Exp )
+rule isScalar(I) => true [structural]
+rule isScalar(bbb) => true [structural]
+rule isScalar(Str) => true [structural]
+rule isScalar(val(C1)) => false [structural]
 
+
+
+rule KL:KLabel(val(BagItem(Val1:Val)),,val(BagItem(Val2:Val))) => KL:KLabel(Val1,, Val2) 
+if (binaryOp(KL))  andBool isScalar((Val1)) andBool isScalar((Val2))
+[structural]
+
+rule KL:KLabel( Val1:Val,,val(BagItem(Val2:Val))) => KL:KLabel(Val1,, Val2) 
+if (binaryOp(KL))  
+andBool isScalar((Val1)) andBool isScalar((Val2))
+[structural]
+
+rule KL:KLabel(val(BagItem(Val1:Val))) => KL:KLabel(Val1) 
+if (unaryOp(KL))  
+andBool isScalar((Val1)) 
+[structural]
+
+
+rule KL:KLabel( val(BagItem(Val1:Val)),,Val2:Val) => KL:KLabel(Val1,, Val2) 
+if (binaryOp(KL))  andBool isScalar((Val1)) andBool isScalar((Val2))
+[structural]
+
+
+rule KL:KLabel( val(C1),,Val2:Val) => KL:KLabel(val(C1),, val(BagItem(Val2)))
+if (binaryOp(KL))  andBool  isScalar((Val2))
+[structural]
+
+
+rule KL:KLabel( Val1,, val(C2)) => KL:KLabel(val(BagItem(Val1)),,val(C2))
+if (binaryOp(KL))  andBool  isScalar((Val1))
+[structural]
+
+
+
+syntax Bool ::= binaryOp ( KLabel )  |  unaryOp ( KLabel )
+
+macro binaryOp(KL) =   
+((KL ==Bool  '_+_) orBool  
+(KL ==Bool  '_*_) orBool 
+(KL ==Bool  '_/_) orBool 
+(KL ==Bool  '_<_) orBool  
+(KL ==Bool  '_<=_) orBool  
+(KL ==Bool  '_>_) orBool  
+(KL ==Bool  '_>=_) orBool  
+(KL ==Bool  '_and_) orBool
+(KL ==Bool  '_or_) orBool
+(KL ==Bool  '_implies_) orBool 
+(KL ==Bool  '_=_) orBool
+(KL ==Bool  '_++_) orBool
+(KL ==Bool  '_union_))
+
+macro unaryOp(KL) = 
+(
+(KL ==Bool '-_) orBool
+(KL ==Bool 'not_) 
+)
 
 // BOOLEAN
 // "pure" expressions 
@@ -88,68 +138,25 @@ rule A1 < A2 => A1 <Int A2  [structural]
 rule A1 <= A2 => A1 <=Int A2  [structural]
 rule A1 > A2 => A1 >Int A2  [structural]
 rule A1 >= A2 => A1 >=Int A2  [structural]
-//rule B1:Bool and B2:Bool => B1 andBool B2  [structural]
 
 rule true and E:Exp => E  [structural]
 rule false and E => false  [structural]
 
-//rule B1 or B2 => B1 orBool B2  [structural]
 rule true or E => true  [structural]
 rule false or E => E  [structural]
 
-
-//rule B1 implies B2 => (notBool B1) orBool B2  [structural] 
 rule true implies E => E  [structural]
 rule false implies E => true  [structural]
 
-
 rule not B1:Bool => notBool B1  [structural]
-
-// "hybrid"
-
-rule A1 < val(BagItem(A2)) => A1 <Int A2  [structural] 
-rule val(BagItem(A1)) < A2 => A1 <Int A2  [structural]
-rule val(BagItem(A1)) < val(BagItem(A2)) =>  A1 <Int A2  [structural]
-
-rule A1 <= val(BagItem(A2)) =>  A1 <=Int A2  [structural]
-rule val(BagItem(A1)) <= A2 => A1 <=Int A2  [structural]
-rule val(BagItem(A1)) <= val(BagItem(A2)) => A1 <=Int A2  [structural]
-
-rule A1 >= val(BagItem(A2)) => A1 >=Int A2  [structural]
-rule val(BagItem(A1)) >= A2 => A1 >=Int A2  [structural]
-rule val(BagItem(A1)) >= val(BagItem(A2)) => A1 >=Int A2  [structural]
-
-
-rule val(BagItem(true)) and E => E  [structural]
-rule val(BagItem(false)) and E => false  [structural]
-
-rule val(BagItem(true)) or E => true  [structural]
-rule val(BagItem(false)) or E => E [structural]
-
-rule val(BagItem(true)) implies E => E  [structural]
-rule val(BagItem(false)) implies E => true  [structural]
-
-rule not val(BagItem(B1)) => notBool B1  [structural]
 
 
 // equality,  for all types
 
 rule (Id1:Id = Id2:Id) => Id1 ==Bool Id2 [structural]
-
 rule A1 = A2 => A1 ==Int A2  [structural]
-rule A1 = val(BagItem(A2)) => A1 ==Int A2  [structural]
-rule val(BagItem(A1)) = A2 => A1 ==Int A2  [structural]
-rule val(BagItem(A1)) = val(BagItem(A2)) => A1 ==Int A2  [structural]
-
-
 rule (Str1 = Str2) => Str1 ==Bool Str2 [structural]
-rule (val(BagItem(Str1)) = Str2) => Str1 ==Bool Str2 [structural]
-rule (Str1 = val(BagItem(Str2))) => Str1 ==Bool Str2 [structural]
-
 rule (B1 = B2:Bool) =>  B1 ==Bool B2 [structural]
-rule (val(BagItem(B1)) = B2:Bool) =>  B1 ==Bool B2 [structural]
-rule (B1 = val(BagItem(B2:Bool))) =>  B1 ==Bool B2 [structural]
-
 rule (val(C1) = val(C2)) => C1 ==Bool C2 [structural]
 
 
@@ -203,10 +210,6 @@ endif
 //"pure"
 rule Str1:String ++ Str2:String => Str1 +String Str2 [structural]
 //"hybrid"
-
-rule val(BagItem(Str1)) ++ Str2 => Str1 +String Str2 [structural]
-rule Str2 ++ val(BagItem(Str1)) => Str1 +String Str2 [structural]
-rule val(BagItem(Str1)) ++ val(BagItem(Str2))   => Str1 +String Str2 [structural]
 
 
 // COLLECTIONS
@@ -280,7 +283,7 @@ rule <k>  val(BagItem(INAME : Cls) REMAINING:Bag) # AT:Id
       </instance> 
    <_/model>
 </models>
- <temp_> 
+ <temp_> // loc n = expression, loc n+1 = its value
   .Bag => B
  <_/temp>
 [structural]
@@ -288,17 +291,18 @@ rule <k>  val(BagItem(INAME : Cls) REMAINING:Bag) # AT:Id
 
 //union: also with basic types
 rule <k> val(C1) union val(C2)   => val(C1 C2) <_/k> [structural]
-rule <k> val(C1) union I:Int  => val(C1 BagItem(I)) <_/k> [structural]
-rule <k>  I:Int union val(C1)  => val(C1 BagItem(I)) <_/k> [structural]
-rule <k> val(C1) union Str1  => val(C1 BagItem(Str1)) <_/k> [structural]
-rule <k>  Str1 union val(C1)   => val(C1 BagItem(Str1)) <_/k> [structural]
-rule <k> val(C1) union bbb:Bool  => val(C1 BagItem(bbb)) <_/k> [structural]
-rule <k>  bbb union val(C1)  => val(C1 BagItem(bbb)) <_/k> [structural]
+rule <k> Val1 union Val2   => val(BagItem(Val1) BagItem(Val2)) <_/k> 
+if isScalar((Val1)) andBool isScalar((Val2))
+[structural]
 
-//intersection, difference
-rule <k> val(C1) inter val(C2) => val(C1 interBag C2) <_/k> [structural]
-rule <k> val(C1) diff val(C2) => val(C1 diffBag C2)  <_/k> [structural]
+//rule <k> val(C1) union I:Int  => val(C1 BagItem(I)) <_/k> [structural]
+//rule <k>  I:Int union val(C1)  => val(C1 BagItem(I)) <_/k> [structural]
 
+//rule <k> val(C1) union Str1  => val(C1 BagItem(Str1)) <_/k> [structural]
+//rule <k>  Str1 union val(C1)   => val(C1 BagItem(Str1)) <_/k> [structural]
+
+//rule <k> val(C1) union bbb:Bool  => val(C1 BagItem(bbb)) <_/k> [structural]
+//rule <k>  bbb union val(C1)  => val(C1 BagItem(bbb)) <_/k> [structural]
 
 
 //collect: by analogy with forAll, exists
@@ -379,7 +383,7 @@ rule <k> if val(BagItem(false)) then CEXP1 else CEXP2 endif => CEXP2 <_/k> [stru
 //oclType
 // for ariyhmetical, boolean, string expressions: just returns their basic type
 // for collections: computes the lub (least upper bound) of types of elements inside
-syntax  Exp ::= oclType ( Exp ) [strict]
+//syntax  Exp ::= oclType ( Exp ) [strict]
 
  
 // arithmetical, boolean, string

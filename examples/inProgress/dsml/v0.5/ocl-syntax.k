@@ -22,8 +22,8 @@ syntax Exp ::= Id
                | Exp and Exp       [strict(1)]  
                | Exp or Exp        [strict(1)]
                | Exp implies Exp [strict(1)]
+               | not Exp [strict]
                | Exp = Exp        [strict]
-               | Exp <> Exp        [strict]
                | Exp includes Exp [strict] 
                | Exp excludes Exp [strict] 
                | isEmpty ( Exp ) [strict]
@@ -42,8 +42,6 @@ syntax Exp ::= Id
                 | Id : Id
                 | Exp # Id [strict(1)]  // period generates ambiguity
                 | Exp union Exp [strict]
-                | Exp inter Exp [strict]
-                | Exp diff Exp [strict]
                 | Exp ->select( Id `| Exp ) [strict (1)]
                 | Exp ->collect( Id  `| Exp )  [strict (1)]
                 | let Id `=   Exp  in Exp endlet [strict(2)]
