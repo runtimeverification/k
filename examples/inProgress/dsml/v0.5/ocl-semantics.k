@@ -1,82 +1,13 @@
-require meta-model
+require values
 require substitution
-kmod OCL-SEMANTICS is including META-MODEL  +  SUBSTITUTION 
+kmod OCL-SEMANTICS is including VALUES  +  SUBSTITUTION 
 
-//PRELIMINARIES
-// values
-// TODO : make values module
-syntax Collection ::=  val ( Bag ) 
-
-// values of expressions
-syntax Val ::= Collection | Int | Bool | String
-// basic types
-syntax Id ::= top | int | bool | string 
-// and id's for class types, are possible values of expressions (the oclType function)
-syntax Val ::=  Id 
-
-syntax Exp ::= Val
-
-// result of evaluation
-syntax KResult ::= Val
-
-
-
-// for  attributes in metamodel instances
-syntax K ::= typedElt ( K , Id )
-
-
-// QUESTION : need to mix with elementary types?
-// a few structural rule about sets of values
-syntax Bag ::= Bag interBag Bag
-
-rule  (v:BagItem V1:Bag) interBag (v:BagItem V2:Bag) => v (V1 interBag V2) [structural]
-rule (v V1) interBag V2 =>  V1 interBag V2 if notBool (v  in  V2) [structural]
-rule .Bag interBag V:Bag => .Bag [structural]
-rule V interBag .Bag => .Bag [structural]
-
-
-syntax Bag ::= Bag diffBag Bag
-rule (v V1) diffBag (v V2) => V1 diffBag V2 [structural]
-rule (v V1) diffBag V2 => v (V1 diffBag V2) if notBool (v  in  V2) [structural]
-rule .Bag diffBag V:Bag => .Bag [structural]
-rule V diffBag .Bag => V [structural]
-
-
-//  card predicate
-syntax Int ::= card ( Bag )
-rule card(.Bag) => 0 [structural]
-rule card(v:BagItem V:Bag) => 1 +Int card(V) [structural]
-
-
-// subset predicate
-syntax Bool ::= subset ( Bag , Bag ) 
-rule subset(.Bag,  V) => true  [structural]
-rule subset((v:BagItem V), V':Bag) =>
- if (v  in  V') then subset(V,V') else false fi  [structural]
 
 //SEMANTICS
 //identifiers evaluate to themselves: no rule needed
+// general rules for mixing scalar and non-scalar values
 
-
-// ARITHMETICAL EXPRESSIONS
-// "pure" expressions : only ints
-rule A1:Int + A2:Int => A1 +Int A2  [structural]
-rule A1 * A2 => A1 *Int A2  [structural]
-rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)  [structural]
-rule (- A1) => -Int A1  [structural]
-
-rule (val(B:Bag) .size()) => card(B)  [structural]
-rule (I:Int .size()) => 1  [structural]
-rule (bbb:Bool .size()) => 1  [structural]
-rule (Str:String .size()) => 1  [structural]
-
-syntax Bool ::= isScalar ( Exp )
-rule isScalar(I) => true [structural]
-rule isScalar(bbb) => true [structural]
-rule isScalar(Str) => true [structural]
-rule isScalar(val(C1)) => false [structural]
-
-
+// for binary operators
 
 rule KL:KLabel(val(BagItem(Val1:Val)),,val(BagItem(Val2:Val))) => KL:KLabel(Val1,, Val2) 
 if (binaryOp(KL))  andBool isScalar((Val1)) andBool isScalar((Val2))
@@ -85,11 +16,6 @@ if (binaryOp(KL))  andBool isScalar((Val1)) andBool isScalar((Val2))
 rule KL:KLabel( Val1:Val,,val(BagItem(Val2:Val))) => KL:KLabel(Val1,, Val2) 
 if (binaryOp(KL))  
 andBool isScalar((Val1)) andBool isScalar((Val2))
-[structural]
-
-rule KL:KLabel(val(BagItem(Val1:Val))) => KL:KLabel(Val1) 
-if (unaryOp(KL))  
-andBool isScalar((Val1)) 
 [structural]
 
 
@@ -107,6 +33,7 @@ rule KL:KLabel( Val1,, val(C2)) => KL:KLabel(val(BagItem(Val1)),,val(C2))
 if (binaryOp(KL))  andBool  isScalar((Val1))
 [structural]
 
+// for unary operators
 
 
 syntax Bool ::= binaryOp ( KLabel )  |  unaryOp ( KLabel )
@@ -131,6 +58,33 @@ macro unaryOp(KL) =
 (KL ==Bool '-_) orBool
 (KL ==Bool 'not_) 
 )
+
+
+// ARITHMETICAL EXPRESSIONS
+// "pure" expressions : only ints
+rule A1:Int + A2:Int => A1 +Int A2  [structural]
+rule A1 * A2 => A1 *Int A2  [structural]
+rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)  [structural]
+rule (- A1) => -Int A1  [structural]
+
+rule (val(B:Bag) .size()) => card(B)  [structural]
+rule (I:Int .size()) => 1  [structural]
+rule (bbb:Bool .size()) => 1  [structural]
+rule (Str:String .size()) => 1  [structural]
+
+syntax Bool ::= isScalar ( Exp )
+rule isScalar(I) => true [structural]
+rule isScalar(bbb) => true [structural]
+rule isScalar(Str) => true [structural]
+rule isScalar(val(C1)) => false [structural]
+
+
+rule KL:KLabel(val(BagItem(Val1:Val))) => KL:KLabel(Val1) 
+if (unaryOp(KL))  
+andBool isScalar((Val1)) 
+[structural]
+
+
 
 // BOOLEAN
 // "pure" expressions 

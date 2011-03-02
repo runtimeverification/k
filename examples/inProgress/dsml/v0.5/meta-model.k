@@ -13,6 +13,8 @@ require ocl-syntax
 kmod META-MODEL is including OCL-SYNTAX
 
   
+// for  attributes in metamodel instances
+syntax K ::= typedElt ( K , Id )
 
  
 
