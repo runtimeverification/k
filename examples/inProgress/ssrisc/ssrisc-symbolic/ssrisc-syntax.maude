@@ -1,0 +1,102 @@
+mod SSRISC-SYNTAX is including PL-INT32 + PL-UNSIGNED-INT32 + PL-ID + PL-FLOAT + K . 
+
+  sort Reg .    subsort Val32 <  Reg .  
+
+  sort FReg .    subsort Float <  FReg . 
+
+  sort Imm .    subsort Val32 <  Imm . 
+
+  sort Amt .    subsort Nat <  Amt . 
+
+  sort Addr .    subsort Val32 <  Addr . 
+
+  sort Off .    subsort Int32 <  Off . 
+
+  sort Instr .    op add_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op addu_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op addi_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+                  op addiu_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+                  op sub_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op subi_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+	          op and_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op andi_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+                  op or_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op ori_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+	          op sll_,_,_; :  Reg  Reg  Amt -> Instr [metadata "strict (2)"] .
+                  op srl_,_,_; :  Reg  Reg  Amt -> Instr [metadata "strict (2)"] .
+                  op sra_,_,_; :  Reg  Reg  Amt -> Instr [metadata "strict (2)"] .
+                  op slt_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op slti_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+                  op sltu_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op sltiu_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+                  op j_; :  Addr -> Instr . 
+                  op jr_; :  Reg -> Instr .
+                  op jal_; :  Addr -> Instr . 
+                  op bne_,_,_; :  Reg  Reg  Addr -> Instr [metadata "strict (1 2)"] .
+                  op beq_,_,_; :  Reg  Reg  Addr -> Instr [metadata "strict (1 2)"] .
+                  op bltz_,_; :  Reg  Addr -> Instr [metadata "strict (1)"] .
+                  op bgtz_,_; :  Reg  Addr -> Instr [metadata "strict (1)"] .
+                  op blez_,_; :  Reg  Addr -> Instr [metadata "strict (1)"] .
+                  op bgez_,_; :  Reg  Addr -> Instr [metadata "strict (1)"] .
+                  op lui_,_; :  Reg  Imm -> Instr .
+                  op lw_,_(_); :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op lw_,(_+_); :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op sw_,_(_); :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op sw_,(_+_); :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op nop`; :  -> Instr .
+
+  
+                  op jalr_ :  Reg -> Instr . 
+                  op lb_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op lb_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op lbu_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op lbu_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op lh_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op lh_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op lhu_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op lbu_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op dlw_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op dlw_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op sb_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op sb_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op sh_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op sh_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op sw_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op sw_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op dsw_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op dsw_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+                  op dsz_,_(_) :  Reg  Off  Reg -> Instr [metadata "strict (3)"] .
+                  op dsz_,(_+_) :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+  
+                  op subu_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .     
+                  op mult_,_; :  Reg  Reg -> Instr [metadata "strict (1 2)"] .               
+                  op multu_,_; :  Reg  Reg -> Instr [metadata "strict (1 2)"] .
+                  op div_,_; :  Reg  Reg -> Instr [metadata "strict (1 2)"] .               
+                  op divu_,_; :  Reg  Reg -> Instr [metadata "strict (1 2)"] .
+                  op mthi_; :  Reg -> Instr [metadata "strict"] .               
+                  op mfhi_; :  Reg -> Instr [metadata "strict"] .
+                  op mtlo_; :  Reg -> Instr [metadata "strict"] .               
+                  op mflo_; :  Reg -> Instr [metadata "strict"] .
+                  op and_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op andi_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .
+                  op or_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op ori_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .          
+                  op xor_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op xori_,_,_; :  Reg  Reg  Imm -> Instr [metadata "strict (2)"] .          
+                  op nor_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op sllv_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op srlv_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] .
+	          op srav_,_,_; :  Reg  Reg  Reg -> Instr [metadata "strict (2 3)"] . 
+
+  sort Helpers .    op update(_,_) :  K  K -> Helpers [metadata "strict(1)"] .
+		    op incPC(_) :  K -> Helpers [metadata "strict"] .
+		    op setPC(_,_) :  K  K -> Helpers [metadata "strict(2)"] .
+                    op updMem(_) :  K -> Helpers [metadata "strict"] . 
+                 
+
+      subsort Instr <  K .    subsort Imm <  K .    subsort Amt <  K .    subsort Addr <  K .    subsort Off <  K .    subsort Helpers <  K .  
+
+  sort Prog .    subsort Map <  Prog . 
+
+endm
+

@@ -1,0 +1,120 @@
+mod SSRISC-DCACHE-SYNTAX is including K . 
+
+      op dwrap(_,_) :  K  K -> K .  
+
+endm
+
+mod SSRISC-DCACHE-SEMANTICS is including SSRISC-TIME-MODEL + SSRISC-COMMUNICATION-INTERFACE + SSRISC-DCACHE-SYNTAX + SSRISC-SYNTAX .
+
+mb configuration 
+    < k > (.).K  </ k > 
+    < dc > (.).Map  </ dc > 
+    < profile > 
+      < dmiss > 0 </ dmiss > 
+      < dhit > 0 </ dhit > 
+    </ profile > : KSentence . 
+
+      op dcachesize :  -> Int32 . 
+eq dcachesize =  10 .
+
+      op currDCacheOccup(_) :  Map -> Int32 .  
+eq currDCacheOccup(M:Map (K1:K |->  K2:K)) =  currDCacheOccup(M) +Int32  1 . 
+eq currDCacheOccup(. ) =  0 .
+
+
+       
+ 
+     
+        
+         
+           
+
+   
+     
+         
+              
+
+      
+          
+         
+          
+
+   
+        
+         
+          
+
+        
+
+
+        
+
+       
+ 
+         
+mb rule < k >  getd(AddrS:Val32) =>  syint32  ...</ k >  if isSymbolic(AddrS) : KSentence .
+mb rule < k >  putd(AddrS:Val32, DataS:Val32) =>  (.).K   ...</ k >  
+		if isSymbolic(AddrS) orBool isSymbolic(DataS) : KSentence .
+
+mb rule < k >  getd(AddrS:Val32) =>  DataS  ...</ k > 
+     < dc >...  AddrS |->  dwrap(AddrS,DataS:Val32) ...</ dc > 
+     < dhit > H:Int32 =>  H +Int32  1 </ dhit >  if notBool isSymbolic(AddrS) : KSentence .
+
+   
+        
+mb rule < k >  getd(AddrS:Val32) =>  dmiss(AddrS)  ...</ k > 
+     < dc > DCache:Map </ dc > 
+     if $hasMapping (DCache, AddrS) andBool 
+        notBool isSymbolic(AddrS) : KSentence .
+
+mb rule < k >  getd(AddrS:Val32) =>  dmiss(AddrS)  ...</ k > 
+     < dc > DCache:Map </ dc > 
+     if notBool ($hasMapping (DCache, AddrS)) andBool 
+        notBool isSymbolic(AddrS) : KSentence .
+
+mb rule < k >  dmissSolved(AddrS:Val32, DataS:Val32) =>  DataS  ...</ k > 
+     < dc > DCache:Map ((.).Map  =>  AddrS |->  dwrap(AddrS, DataS))</ dc > 
+     < dmiss > M1:Int32 =>  M1 +Int32  1 </ dmiss > 
+     < t > T:Int32 =>  T +Int32  misstime </ t > 
+     if notBool ($hasMapping (DCache, AddrS)) : KSentence .
+
+mb rule < k >  dmissSolved(AddrS:Val32, DataS:Val32) =>  DataS  ...</ k > 
+     < dc > DCache:Map =>  DCache[dwrap(AddrS, DataS)/ AddrS]</ dc > 
+     < dmiss > M1:Int32 =>  M1 +Int32  1 </ dmiss > 
+     < t > T:Int32 =>  T +Int32  misstime </ t > 
+     if $hasMapping (DCache, AddrS) : KSentence .
+
+
+ 
+mb rule < k >  putd(AddrS:Val32, DataS:Val32) =>  .   ...</ k > 
+     < dc >...   AddrS |->  dwrap(AddrS, DataS) ...</ dc > : KSentence .  
+
+mb rule < k >  putd(AddrS:Val32, DataS:Val32) =>  .   ...</ k > 
+     < dc > DCache:Map ((.).Map  =>  AddrS |->  dwrap(AddrS, DataS))</ dc > 
+     if notBool ($hasMapping (DCache, AddrS)) andBool 
+		(currDCacheOccup(DCache) <Int32  dcachesize) : KSentence .
+
+        
+mb rule < k >  putd(AddrS:Val32, DataS:Val32) =>  .   ...</ k > 
+     < dc > DCache:Map =>  DCache[dwrap(AddrS, DataS)/ AddrS]</ dc > 
+     if ($hasMapping (DCache, AddrS)) andBool 
+		(currDCacheOccup(DCache) <Int32  dcachesize) : KSentence .
+
+   
+mb rule < k >  putd(AddrS:Val32, DataS:Val32) =>  write(Addr1S, Data1S)  ...</ k > 
+     < dc > DCache:Map (Addr1S:Val32 |->  
+                     (dwrap(Addr1S, Data1S:Val32) =>  dwrap(AddrS, DataS)))</ dc > 
+     if (Addr1S %Int32  dcachesize) ==SyInt32  (AddrS %Int32  dcachesize)
+         andBool (currDCacheOccup(DCache) <Int32  dcachesize) : KSentence . 
+
+   
+mb rule < k >  putd(Addr:Int32, Data:Int32) =>  write(Addr1, Data1)  ...</ k > 
+     < dc > DCache:Map (Addr1:Int32 |->  
+                     (dwrap(Addr1, Data1:Int32) =>  dwrap(Addr, Data)))</ dc > 
+     if (Addr1 %Int32  dcachesize) ==SyInt32  (Addr %Int32  dcachesize)
+         andBool (currDCacheOccup(DCache) ==SyInt32  dcachesize) : KSentence . 
+
+        
+
+
+var Addr1S : Val32 . var K2 : K . var T : Int32 . var Data1S : Val32 . var DataS : Val32 . var Addr : Int32 . var Addr1 : Int32 . var H : Int32 . var Data1 : Int32 . var M1 : Int32 . var AddrS : Val32 . var M : Map . var K1 : K . var Data : Int32 . var DCache : Map .  ops dhit profile k dmiss dc : -> CellLabel .  endm

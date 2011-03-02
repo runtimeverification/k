@@ -1,0 +1,668 @@
+load ../../tools/../k-prelude
+
+mod SSRISC is including PL-CONVERSION .
+including PL-ID .
+including PL-FLOAT .
+including K-TECHNIQUE .
+including K-POLYMORPHIC-VARIABLES .
+including K-WHERE .
+including K-DESTRUCTORS .
+including PL-INT .
+including PL-INT .
+including PL-BOOL .
+including K-TECHNIQUE .
+including K-TECHNIQUE .
+including PL-BOOL .
+including K-TECHNIQUE .
+including PL-BOOL .
+including K-TECHNIQUE .
+including K-TECHNIQUE .
+including K-TECHNIQUE .
+including PL-STRING .
+including K-PROPER .
+including K-WRAPPERS-LABELS .
+including MAUDE-IF-THEN-ELSE .
+including K-STRICTNESS .
+sorts Int32 Prog SyInt32 UInt32 Val32 . subsort Char < Builtins .
+subsort FiniteFloat < Builtins .
+subsort Int < Int32 .
+subsort Int < UInt32 .
+subsort Int < Val32 .
+subsort Int32 < Builtins .
+subsort Int32 < Val32 .
+subsort Map < Prog .
+subsort MapItem < Prog .
+subsort Nat < Int32 .
+subsort Nat < Rat .
+subsort Nat < UInt32 .
+subsort Nat < Val32 .
+subsort NeMap < Prog .
+subsort NzInt < Builtins .
+subsort NzInt < Int32 .
+subsort NzInt < Rat .
+subsort NzInt < UInt32 .
+subsort NzInt < Val32 .
+subsort NzNat < Builtins .
+subsort NzNat < Int .
+subsort NzNat < Int32 .
+subsort NzNat < NzRat .
+subsort NzNat < Rat .
+subsort NzNat < UInt32 .
+subsort NzNat < Val32 .
+subsort NzRat < Builtins .
+subsort PosRat < Builtins .
+subsort PosRat < Rat .
+subsort SyInt32 < Builtins .
+subsort SyInt32 < Val32 .
+subsort UInt32 < Builtins .
+subsort Val32 < Builtins .
+subsort Zero < Builtins .
+subsort Zero < Int .
+subsort Zero < Int32 .
+subsort Zero < Rat .
+subsort Zero < UInt32 .
+subsort Zero < Val32 .
+op @latex : String -> BagItem .
+op Bag_ : List{K}-> Bag .
+op List_ : List{K}-> List .
+op T : -> CellLabel .
+op _in_ : BagItem Bag -> Bool .
+op _in_ : K Bag -> Bool .
+op _in_ : K Set -> Bool .
+op _in_ : SetItem Set -> Bool .
+op _|->_ : List{K}List{K}-> Map .
+op cmem : -> CellLabel .
+op currDCacheOccup`(_`) : Map -> Int32 .
+op currICacheOccup`(_`) : Map -> Int32 .
+op dc : -> CellLabel .
+op dcachesize : -> Int32 .
+op dhit : -> CellLabel .
+op dmem : -> CellLabel .
+op dmiss : -> CellLabel .
+op fregs : -> CellLabel .
+op hittime : -> Int32 .
+op ic : -> CellLabel .
+op icachesize : -> Int32 .
+op ihit : -> CellLabel .
+op imiss : -> CellLabel .
+op inKList : K K -> Bool .
+op isSymbolic : Val32 -> Bool .
+op k : -> CellLabel .
+op keys_ : Map -> Set .
+op lengthList_ : List -> Nat .
+op main1 : -> Map .
+op main2 : -> Map .
+op main3 : -> Map .
+op main4 : -> Map .
+op main5 : -> Map .
+op misstime : -> Int32 .
+op pc : -> CellLabel .
+op profile : -> CellLabel .
+op regs : -> CellLabel .
+op run-with-ic`(_`,_`,_`,_`) : Map Map Map Map -> Bag .
+op syint32 : -> SyInt32 .
+op t : -> CellLabel .
+op $hasMapping : Map K -> Bool[metadata "latex(renameTo \$hasMapping\mybracket{_,_})"].
+op 'a0 : -> KProperLabel[metadata "arity 0"].
+op 'a1 : -> KProperLabel[metadata "arity 0"].
+op 'a2 : -> KProperLabel[metadata "arity 0"].
+op 'add_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'addi_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'addiu_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'addu_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'and_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'andi_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'beq_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (1 2)"].
+op 'bgez_`,_; : -> KProperLabel[metadata "arity 2 strict (1)"].
+op 'bgtz_`,_; : -> KProperLabel[metadata "arity 2 strict (1)"].
+op 'blez_`,_; : -> KProperLabel[metadata "arity 2 strict (1)"].
+op 'bltz_`,_; : -> KProperLabel[metadata "arity 2 strict (1)"].
+op 'bne_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (1 2)"].
+op 'div_`,_; : -> KProperLabel[metadata "arity 2 strict (1 2)"].
+op 'divu_`,_; : -> KProperLabel[metadata "arity 2 strict (1 2)"].
+op 'dlw_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'dlw_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'dmissSolved`(_`,_`) : -> KProperLabel[metadata "arity 2"].
+op 'dmiss`(_`) : -> KProperLabel[metadata "arity 1"].
+op 'dsw_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'dsw_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'dsz_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'dsz_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'dwrap`(_`,_`) : -> KProperLabel[metadata "arity 2"].
+op 'getd`(_`) : -> KProperLabel[metadata "arity 1 strict"].
+op 'geti`(_`) : -> KProperLabel[metadata "arity 1"].
+op 'headList`{K`}_ : -> KProperLabel[metadata "arity 1 latex(renameTo head\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op 'imissSolved`(_`,_`) : -> KProperLabel[metadata "arity 2"].
+op 'imiss`(_`) : -> KProperLabel[metadata "arity 1"].
+op 'incPC`(_`) : -> KProperLabel[metadata "arity 1 strict"].
+op 'iwrap`(_`,_`) : -> KProperLabel[metadata "arity 2"].
+op 'j_; : -> KProperLabel[metadata "arity 1"].
+op 'jal_; : -> KProperLabel[metadata "arity 1"].
+op 'jalr_ : -> KProperLabel[metadata "arity 1"].
+op 'jr_; : -> KProperLabel[metadata "arity 1"].
+op 'last : -> KProperLabel[metadata "arity 0"].
+op 'lb_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'lb_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'lbu_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'lbu_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'lh_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'lh_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'lhu_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'lui_`,_; : -> KProperLabel[metadata "arity 2"].
+op 'lw_`,_`(_`); : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'lw_`,`(_+_`); : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'mfhi_; : -> KProperLabel[metadata "arity 1 strict"].
+op 'mflo_; : -> KProperLabel[metadata "arity 1 strict"].
+op 'mthi_; : -> KProperLabel[metadata "arity 1 strict"].
+op 'mtlo_; : -> KProperLabel[metadata "arity 1 strict"].
+op 'mult_`,_; : -> KProperLabel[metadata "arity 2 strict (1 2)"].
+op 'multu_`,_; : -> KProperLabel[metadata "arity 2 strict (1 2)"].
+op 'nop`; : -> KProperLabel[metadata "arity 0"].
+op 'nor_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'or_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'ori_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'putd`(_`,_`) : -> KProperLabel[metadata "arity 2 strict(2)"].
+op 'ra : -> KProperLabel[metadata "arity 0"].
+op 's8 : -> KProperLabel[metadata "arity 0"].
+op 'sb_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'sb_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'setPC`(_`,_`) : -> KProperLabel[metadata "arity 2 strict(2)"].
+op 'sh_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'sh_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'sll_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'sllv_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'slt_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'slti_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'sltiu_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'sltu_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'sp : -> KProperLabel[metadata "arity 0"].
+op 'sra_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'srav_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'srl_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'srlv_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'sub_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'subi_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'subu_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'sw_`,_`(_`) : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'sw_`,_`(_`); : -> KProperLabel[metadata "arity 3 strict (3)"].
+op 'sw_`,`(_+_`) : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'sw_`,`(_+_`); : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'updMem`(_`) : -> KProperLabel[metadata "arity 1 strict"].
+op 'update`(_`,_`) : -> KProperLabel[metadata "arity 2 strict(1)"].
+op 'v0 : -> KProperLabel[metadata "arity 0"].
+op 'v1 : -> KProperLabel[metadata "arity 0"].
+op 'write`(_`,_`) : -> KProperLabel[metadata "arity 2"].
+op 'xor_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2 3)"].
+op 'xori_`,_`,_; : -> KProperLabel[metadata "arity 3 strict (2)"].
+op 'zero : -> KProperLabel[metadata "arity 0"].
+op Bool2IntSy`(_`) : Bool -> Val32[metadata "strict"].
+op Float_ : Float -> KResultLabel[metadata "builtin wrapper"].
+op Set_ : List{K}-> Set[metadata "latex(renameTo {\it{}Set}\mybracket{_})"].
+op Val32_ : Val32 -> KResultLabel[metadata "builtin wrapper"].
+op _%Int32_ : Int32 Int32 -> Int32[prec 31 gather(E e)].
+op _%Int32_ : Val32 Val32 -> Val32[prec 31 gather(E e)metadata " strict   strict"].
+op _%Int_ : Int32 Int32 -> Int32[prec 31 gather(E e)special(id-hook NumberOpSymbol(rem)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _%Int_ : UInt32 UInt32 -> UInt32[prec 31 gather(E e)special(id-hook NumberOpSymbol(rem)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _%UInt32_ : UInt32 UInt32 -> UInt32[prec 31 gather(E e)].
+op _&Int32_ : Int32 Int32 -> Int32[assoc comm prec 53].
+op _&Int32_ : Val32 Val32 -> Val32[assoc comm prec 53 metadata " strict   strict"].
+op _&Int_ : Int32 Int32 -> Int32[assoc comm prec 53 special(id-hook ACU_NumberOpSymbol(&)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _&Int_ : UInt32 UInt32 -> UInt32[assoc comm prec 53 special(id-hook ACU_NumberOpSymbol(&)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _&UInt32_ : UInt32 UInt32 -> UInt32[assoc comm prec 53].
+op _*Int32_ : Int32 Int32 -> Int32[assoc comm prec 31].
+op _*Int_ : Int32 Int32 -> Int32[assoc comm prec 31 special(id-hook ACU_NumberOpSymbol(*)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _*Int_ : UInt32 UInt32 -> UInt32[assoc comm prec 31 special(id-hook ACU_NumberOpSymbol(*)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _*UInt32_ : UInt32 UInt32 -> UInt32[assoc comm prec 31].
+op _+Int32_ : Int32 Int32 -> Int32[assoc comm prec 33].
+op _+Int32_ : Val32 Val32 -> Val32[assoc comm prec 33 metadata " strict   strict"].
+op _+Int_ : Int32 Int32 -> Int32[assoc comm prec 33 special(id-hook ACU_NumberOpSymbol(+)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _+Int_ : UInt32 UInt32 -> UInt32[assoc comm prec 33 special(id-hook ACU_NumberOpSymbol(+)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _+UInt32_ : UInt32 UInt32 -> UInt32[assoc comm prec 33].
+op _-Bag_ : Bag Bag -> Bag[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Bag}}_)"].
+op _-Int32_ : Int32 Int32 -> Int32[prec 33 gather(E e)].
+op _-Int32_ : Val32 Val32 -> Val32[prec 33 gather(E e)metadata " strict   strict"].
+op _-Int_ : Int32 Int32 -> Int32[prec 33 gather(E e)special(id-hook NumberOpSymbol(-)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _-Int_ : UInt32 UInt32 -> UInt32[prec 33 gather(E e)special(id-hook NumberOpSymbol(-)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _-Set_ : Set Set -> Set[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Set}}_)"].
+op _-UInt32_ : UInt32 UInt32 -> UInt32[prec 33 gather(E e)].
+op _/Int32_ : Int32 Int32 -> Int32[prec 31 gather(E e)].
+op _/Int_ : Int32 Int32 -> Int32[prec 31 gather(E e)special(id-hook NumberOpSymbol(quo)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _/Int_ : UInt32 UInt32 -> UInt32[prec 31 gather(E e)special(id-hook NumberOpSymbol(quo)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _/UInt32_ : UInt32 UInt32 -> UInt32[prec 31 gather(E e)].
+op _<<Int32_ : Int32 Nat -> Int32[prec 35 gather(E e)].
+op _<<Int32_ : Val32 Nat -> Val32[prec 35 gather(E e)metadata " strict   strict"].
+op _<<Int_ : Int32 Nat -> Int32[prec 35 gather(E e)special(id-hook NumberOpSymbol(<<)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _<<Int_ : UInt32 Nat -> UInt32[prec 35 gather(E e)special(id-hook NumberOpSymbol(<<)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _<<UInt32_ : UInt32 Nat -> UInt32[prec 35 gather(E e)].
+op _<=Int32_ : Int32 Int32 -> Bool[prec 37].
+op _<=Int_ : Int32 Int32 -> Bool[prec 37 special(id-hook NumberOpSymbol(<=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _<=Int_ : UInt32 UInt32 -> Bool[prec 37 special(id-hook NumberOpSymbol(<=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _<=SyInt32_ : Val32 Val32 -> Bool[metadata "strict"].
+op _<=UInt32_ : UInt32 UInt32 -> Bool[prec 37].
+op _<Int32_ : Int32 Int32 -> Bool[prec 37].
+op _<Int_ : Int32 Int32 -> Bool[prec 37 special(id-hook NumberOpSymbol(<)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _<Int_ : UInt32 UInt32 -> Bool[prec 37 special(id-hook NumberOpSymbol(<)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _<SyInt32_ : Val32 Val32 -> Bool[metadata "strict"].
+op _<UInt32_ : UInt32 UInt32 -> Bool[prec 37].
+op _=/=BoolSy_ : Val32 Val32 -> Bool[metadata "strict"].
+op _==BoolSy_ : Val32 Val32 -> Bool[metadata "strict"].
+op _==Int32_ : Int32 Int32 -> Bool[prec 37].
+op _==Int_ : Int32 Int32 -> Bool[prec 37].
+op _==Int_ : UInt32 UInt32 -> Bool[prec 37].
+op _==SyInt32_ : Val32 Val32 -> Bool[metadata "strict"].
+op _==UInt32_ : UInt32 UInt32 -> Bool[prec 37].
+op _>=Int32_ : Int32 Int32 -> Bool[prec 37].
+op _>=Int_ : Int32 Int32 -> Bool[prec 37 special(id-hook NumberOpSymbol(>=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _>=Int_ : UInt32 UInt32 -> Bool[prec 37 special(id-hook NumberOpSymbol(>=)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _>=SyInt32_ : Val32 Val32 -> Bool[metadata "strict"].
+op _>=UInt32_ : UInt32 UInt32 -> Bool[prec 37].
+op _>>Int32_ : Int32 Nat -> Int32[prec 35 gather(E e)].
+op _>>Int32_ : Val32 Nat -> Val32[prec 35 gather(E e)metadata " strict   strict"].
+op _>>Int_ : Int32 Nat -> Int32[prec 35 gather(E e)special(id-hook NumberOpSymbol(>>)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _>>Int_ : UInt32 Nat -> UInt32[prec 35 gather(E e)special(id-hook NumberOpSymbol(>>)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _>>UInt32_ : UInt32 Nat -> UInt32[prec 35 gather(E e)].
+op _>Int32_ : Int32 Int32 -> Bool[prec 37].
+op _>Int_ : Int32 Int32 -> Bool[prec 37 special(id-hook NumberOpSymbol(>)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _>Int_ : UInt32 UInt32 -> Bool[prec 37 special(id-hook NumberOpSymbol(>)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt)term-hook trueTerm(true)term-hook falseTerm(false))].
+op _>SyInt32_ : Val32 Val32 -> Bool[metadata "strict"].
+op _>UInt32_ : UInt32 UInt32 -> Bool[prec 37].
+op _`(_`) : Map K -> K[prec 0].
+op _`(_`) : Map List{K}-> List{K}[prec 0].
+op _`[_/_`] : Map K K -> Map[prec 0].
+op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
+op _`[_`] : Map Map -> Map[prec 0].
+op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\;}/_])"].
+op _|Int32_ : Int32 Int32 -> Int32[assoc comm prec 57].
+op _|Int32_ : Val32 Val32 -> Val32[assoc comm prec 57 metadata " strict   strict"].
+op _|Int_ : Int32 Int32 -> Int32[assoc comm prec 57 special(id-hook ACU_NumberOpSymbol(|)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _|Int_ : UInt32 UInt32 -> UInt32[assoc comm prec 57 special(id-hook ACU_NumberOpSymbol(|)op-hook succSymbol(sNat_ : Nat ~> NzNat)op-hook minusSymbol(-Int_ : NzNat ~> NzInt))].
+op _|UInt32_ : UInt32 UInt32 -> UInt32[assoc comm prec 57].
+op lengthList`{K`}_ : List{K}-> Nat[metadata "latex(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+eq dcachesize = 10 .
+eq hittime = 1 .
+eq icachesize = 10 .
+eq main1 = __(_|->_(_`(_`)(Val32_(1016),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(1),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1020),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1024),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(3),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1028),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1032),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('zero,.List`{K`}),_`,`,_(_`(_`)(Val32_(24),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1036),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1040),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1044),.List`{K`}),_`(_`)('slt_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('v1,.List`{K`}),_`(_`)('v0,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1048),.List`{K`}),_`(_`)('bne_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(1056),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1052),.List`{K`}),_`(_`)('j_;,_`(_`)(Val32_(1088),.List`{K`}))),__(_|->_(_`(_`)(Val32_(1056),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(24),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1060),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1064),.List`{K`}),_`(_`)('addu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)('v1,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1068),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(24),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1072),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1076),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)(Val32_(1),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1080),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),_|->_(_`(_`)(Val32_(1084),.List`{K`}),_`(_`)('j_;,_`(_`)(Val32_(1036),.List`{K`})))))))))))))))))))).
+eq main2 = __(_|->_(_`(_`)(Val32_(1016),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('zero,.List`{K`}),_`,`,_(_`(_`)(Val32_(40),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1020),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('zero,.List`{K`}),_`,`,_(_`(_`)(Val32_(44),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1024),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('zero,.List`{K`}),_`,`,_(_`(_`)(Val32_(48),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1028),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(1),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1032),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1036),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(4),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1040),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1044),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(5),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1048),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(24),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1052),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(2),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1056),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(28),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1060),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(4),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1064),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(32),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1068),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('zero,.List`{K`}),_`,`,_(_`(_`)(Val32_(48),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1072),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(48),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1076),.List`{K`}),_`(_`)('slti_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)(Val32_(5),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1080),.List`{K`}),_`(_`)('bne_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(1084),.List`{K`}))))),_|->_(_`(_`)(Val32_(1084),.List`{K`}),_`(_`)('nop`;,.List`{K`}))))))))))))))))))).
+eq main3 = __(_|->_(_`(_`)(Val32_(1016),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(10),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1020),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1024),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(2),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1028),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1032),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1036),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1040),.List`{K`}),_`(_`)('addu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)('v1,.List`{K`}))))),_|->_(_`(_`)(Val32_(1044),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(24),.List`{K`}),_`(_`)('s8,.List`{K`})))))))))))).
+eq main4 = __(_|->_(_`(_`)(Val32_(1016),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(5),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1020),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1024),.List`{K`}),_`(_`)('addiu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(3),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1028),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1032),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1036),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1040),.List`{K`}),_`(_`)('slt_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('v1,.List`{K`}),_`(_`)('v0,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1044),.List`{K`}),_`(_`)('beq_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)(Val32_(1064),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1048),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1052),.List`{K`}),_`(_`)('lw_`,_`(_`);,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)(Val32_(20),.List`{K`}),_`(_`)('s8,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1056),.List`{K`}),_`(_`)('addu_`,_`,_;,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)('v1,.List`{K`}))))),_|->_(_`(_`)(Val32_(1060),.List`{K`}),_`(_`)('sw_`,_`(_`);,_`,`,_(_`(_`)('v0,.List`{K`}),_`,`,_(_`(_`)(Val32_(16),.List`{K`}),_`(_`)('s8,.List`{K`})))))))))))))))).
+eq main5 = __(_|->_(_`(_`)(Val32_(1016),.List`{K`}),_`(_`)('add_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('v1,.List`{K`}),_`(_`)('v0,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1020),.List`{K`}),_`(_`)('bne_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)(Val32_(1028),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1024),.List`{K`}),_`(_`)('add_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('zero,.List`{K`}),_`(_`)('v1,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1028),.List`{K`}),_`(_`)('add_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('v1,.List`{K`}),_`(_`)('v0,.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1032),.List`{K`}),_`(_`)('slti_`,_`,_;,_`,`,_(_`(_`)('v1,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)(Val32_(10),.List`{K`}))))),__(_|->_(_`(_`)(Val32_(1036),.List`{K`}),_`(_`)('lw_`,`(_+_`);,_`,`,_(_`(_`)('s8,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)('v1,.List`{K`}))))),_|->_(_`(_`)(Val32_(1040),.List`{K`}),_`(_`)('sw_`,`(_+_`);,_`,`,_(_`(_`)('s8,.List`{K`}),_`,`,_(_`(_`)('v0,.List`{K`}),_`(_`)('zero,.List`{K`}))))))))))).
+eq misstime = 5 .
+eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
+eq Bag_(.List`{K`})=(.).Bag .
+eq Bag_(_`,`,_(K:K,Ks:List{K}))= __(BagItem(K:K),Bag_(Ks:List{K})).
+eq List_(.List`{K`})=(.).List .
+eq List_(_`,`,_(K:K,Ks:List{K}))= __(ListItem(K:K),List_(Ks:List{K})).
+eq Set_(.List`{K`})=(.).Set .
+eq Set_(_`,`,_(K:K,Ks:List{K}))= __(SetItem(K:K),Set_(Ks:List{K})).
+eq _%Int32_(A:Int32,B:Int32)= _%Int_(A:Int32,B:Int32).
+eq _%UInt32_(A:UInt32,B:UInt32)= _%Int_(A:UInt32,B:UInt32).
+eq _&Int32_(A:Int32,B:Int32)= _&Int_(A:Int32,B:Int32).
+eq _&UInt32_(A:UInt32,B:UInt32)= _&Int_(A:UInt32,B:UInt32).
+eq _*Int32_(A:Int32,B:Int32)= _*Int_(A:Int32,B:Int32).
+eq _*UInt32_(A:UInt32,B:UInt32)= _*Int_(A:UInt32,B:UInt32).
+eq _+Int32_(A:Int32,B:Int32)= _+Int_(A:Int32,B:Int32).
+eq _+UInt32_(A:UInt32,B:UInt32)= _+Int_(A:UInt32,B:UInt32).
+eq _-Bag_(.,Bag:Bag)=(.).Bag .
+eq _-Bag_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:BagItem,Bag':Bag),_-Bag_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-Bag_(Bag:Bag,Bag':Bag))).
+eq _-Int32_(A:Int32,B:Int32)= _-Int_(A:Int32,B:Int32).
+eq _-Set_(.,Set:Set)=(.).Set .
+eq _-Set_(__(Set:Set,SetItem:SetItem),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-Set_(Set:Set,Set':Set),__(SetItem:SetItem,_-Set_(Set:Set,Set':Set))).
+eq _-UInt32_(A:UInt32,B:UInt32)= _-Int_(A:UInt32,B:UInt32).
+eq _/Int32_(A:Int32,B:Int32)= _/Int_(A:Int32,B:Int32).
+eq _/UInt32_(A:UInt32,B:UInt32)= _/Int_(A:UInt32,B:UInt32).
+eq _<<Int32_(A:Int32,C:Nat)= _<<Int_(A:Int32,C:Nat).
+eq _<<UInt32_(A:UInt32,C:Nat)= _<<Int_(A:UInt32,C:Nat).
+eq _<=Int32_(A:Int32,B:Int32)= _<=Int_(A:Int32,B:Int32).
+eq _<=UInt32_(A:UInt32,B:UInt32)= _<=Int_(A:UInt32,B:UInt32).
+eq _<Int32_(A:Int32,B:Int32)= _<Int_(A:Int32,B:Int32).
+eq _<UInt32_(A:UInt32,B:UInt32)= _<Int_(A:UInt32,B:UInt32).
+eq _==Int32_(A:Int32,B:Int32)= _==Int_(A:Int32,B:Int32).
+eq _==UInt32_(A:UInt32,B:UInt32)= _==Int_(A:UInt32,B:UInt32).
+eq _>=Int32_(A:Int32,B:Int32)= _>=Int_(A:Int32,B:Int32).
+eq _>=UInt32_(A:UInt32,B:UInt32)= _>=Int_(A:UInt32,B:UInt32).
+eq _>>Int32_(A:Int32,C:Nat)= _>>Int_(A:Int32,C:Nat).
+eq _>>UInt32_(A:UInt32,C:Nat)= _>>Int_(A:UInt32,C:Nat).
+eq _>Int32_(A:Int32,B:Int32)= _>Int_(A:Int32,B:Int32).
+eq _>UInt32_(A:UInt32,B:UInt32)= _>Int_(A:UInt32,B:UInt32).
+eq _`(_`)('headList`{K`}_,_`(_`)(kList("wklist_"),_`,`,_(K:K,Ks:List{K})))= K:K .
+eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
+eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
+eq _`(_`)(__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= K2:K .
+eq _`[_/_`](Map:Map,K2:K,_`,`,_(K1:K,NList1:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K2:K,K1:K),K2:K,NList1:NeList{K}).
+eq _`[_/_`](Map:Map,List:List{K},.List`{K`})= Map:Map .
+eq _`[_/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K1:K,K2:K),NList1:NeList{K},NList2:NeList{K}).
+eq _`[_/_`](__(Map:Map,_|->_(K1:K,K2:K)),K2':K,K1:K)= __(Map:Map,_|->_(K1:K,K2':K)).
+eq _`[_`](__(Map:Map,_|->_(K1:K,K2:K)),__(Map':Map,_|->_(K1:K,K2':K)))= __(_|->_(K1:K,K2':K),_`[_`](Map:Map,Map':Map)).
+eq _`[undef/_`](Map:Map,.List`{K`})= Map:Map .
+eq _`[undef/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`[undef/_`](_`[undef/_`](Map:Map,K1:K),NList1:NeList{K}).
+eq _`[undef/_`](__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= Map:Map .
+eq _in_(BagItem:BagItem,__(Bag:Bag,BagItem:BagItem))= true .
+eq _in_(K:K,__(Bag:Bag,BagItem(K:K)))= true .
+eq _in_(K:K,__(Set:Set,SetItem(K:K)))= true .
+eq _in_(SetItem:SetItem,__(Set:Set,SetItem:SetItem))= true .
+eq _|->_(.List`{K`},List:List{K})=(.).Map .
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},K2:K)).
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
+eq _|Int32_(A:Int32,B:Int32)= _|Int_(A:Int32,B:Int32).
+eq _|UInt32_(A:UInt32,B:UInt32)= _|Int_(A:UInt32,B:UInt32).
+eq currDCacheOccup`(_`)(.)= 0 .
+eq currDCacheOccup`(_`)(__(M:Map,_|->_(K1:K,K2:K)))= _+Int32_(1,currDCacheOccup`(_`)(M:Map)).
+eq currICacheOccup`(_`)(.)= 0 .
+eq currICacheOccup`(_`)(__(M:Map,_|->_(K1:K,K2:K)))= _+Int32_(1,currICacheOccup`(_`)(M:Map)).
+eq inKList(K:K,_~>_(K1:K,_~>_(K:K,K2:K)))= true .
+eq isSymbolic(syint32)= true .
+eq keys_(.)=(.).Set .
+eq keys_(__(Map:Map,_|->_(K1:K,K2:K)))= __(SetItem(K1:K),keys_(Map:Map)).
+eq lengthList_(.)= 0 .
+eq lengthList_(__(LItem:ListItem,List:List))= sNat_(lengthList_(List:List)).
+eq lengthList`{K`}_(.List`{K`})= 0 .
+eq lengthList`{K`}_(_`,`,_(K:K,Ks:List{K}))= sNat_(lengthList`{K`}_(Ks:List{K})).
+eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
+eq $hasMapping(M:Map,D:K)= false[owise].
+eq <_>_</_>(k,_~>_(_`(_`)('add_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'add_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('add_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'add_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('addi_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'addi_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('addiu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'addiu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('addu_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'addu_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('addu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'addu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('and_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'and_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('and_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'and_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('andi_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'andi_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('beq_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'beq_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('beq_`,_`,_;,_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'beq_`,_`,_;(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('bgez_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'bgez_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('bgtz_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'bgtz_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('blez_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'blez_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('bltz_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'bltz_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('bne_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'bne_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('bne_`,_`,_;,_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'bne_`,_`,_;(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('div_`,_;,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'div_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('div_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'div_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('divu_`,_;,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'divu_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('divu_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'divu_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dlw_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dlw_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dlw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dlw_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dlw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dlw_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dsw_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dsw_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dsw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dsw_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dsw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dsw_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dsz_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dsz_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dsz_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dsz_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('dsz_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dsz_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('getd`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'getd`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('incPC`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'incPC`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lb_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lb_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lb_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lb_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lbu_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lbu_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lbu_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lbu_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lbu_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lbu_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lh_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lh_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lh_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lh_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lhu_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lhu_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lw_`,_`(_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lw_`,_`(_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lw_`,`(_+_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('lw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'lw_`,`(_+_`);(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('mfhi_;,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'mfhi_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('mflo_;,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'mflo_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('mthi_;,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'mthi_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('mtlo_;,Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'mtlo_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('mult_`,_;,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'mult_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('mult_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'mult_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('multu_`,_;,_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'multu_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('multu_`,_;,_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'multu_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('nor_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'nor_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('nor_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'nor_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('or_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'or_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('or_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'or_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('ori_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'ori_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'putd`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sb_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sb_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sb_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sb_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('setPC`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'setPC`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sh_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sh_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sh_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sh_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sll_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sll_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sllv_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sllv_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sllv_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sllv_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('slt_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'slt_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('slt_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'slt_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('slti_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'slti_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sltiu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sltiu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sltu_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sltu_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sltu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sltu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sra_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sra_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('srav_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'srav_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('srav_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'srav_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('srl_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'srl_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('srlv_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'srlv_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('srlv_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'srlv_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sub_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sub_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sub_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sub_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('subi_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'subi_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('subu_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'subu_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('subu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'subu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sw_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sw_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sw_`,_`(_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sw_`,_`(_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sw_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sw_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sw_`,`(_+_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sw_`,`(_+_`);(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('updMem`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'updMem`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('update`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'update`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('xor_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'xor_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('xor_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'xor_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(_`(_`)('xori_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'xori_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'add_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('add_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'add_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('add_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'addi_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('addi_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'addiu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('addiu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'addu_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('addu_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'addu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('addu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'and_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('and_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'and_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('and_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'andi_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('andi_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'beq_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('beq_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'beq_`,_`,_;(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('beq_`,_`,_;,_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'bgez_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('bgez_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'bgtz_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('bgtz_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'blez_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('blez_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'bltz_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('bltz_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'bne_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('bne_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'bne_`,_`,_;(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('bne_`,_`,_;,_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'div_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('div_`,_;,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'div_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('div_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'divu_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('divu_`,_;,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'divu_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('divu_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dlw_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dlw_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dlw_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dlw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dlw_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dlw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dsw_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dsw_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dsw_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dsw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dsw_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dsw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dsz_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dsz_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dsz_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dsz_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dsz_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dsz_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'getd`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('getd`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'incPC`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('incPC`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lb_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lb_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lb_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lb_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lbu_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lbu_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lbu_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lbu_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lbu_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lbu_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lh_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lh_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lh_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lh_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lhu_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lhu_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lw_`,_`(_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lw_`,_`(_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lw_`,`(_+_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'lw_`,`(_+_`);(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('lw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'mfhi_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('mfhi_;,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'mflo_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('mflo_;,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'mthi_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('mthi_;,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'mtlo_;(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('mtlo_;,Kcxt:KResult),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'mult_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('mult_`,_;,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'mult_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('mult_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'multu_`,_;(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('multu_`,_;,_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'multu_`,_;(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('multu_`,_;,_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'nor_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('nor_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'nor_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('nor_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'or_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('or_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'or_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('or_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'ori_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('ori_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'putd`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sb_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sb_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sb_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sb_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sb_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'setPC`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('setPC`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sh_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sh_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sh_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sh_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sh_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sll_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sll_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sllv_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sllv_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sllv_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sllv_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'slt_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('slt_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'slt_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('slt_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'slti_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('slti_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sltiu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sltiu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sltu_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sltu_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sltu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sltu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sra_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sra_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'srav_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('srav_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'srav_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('srav_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'srl_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('srl_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'srlv_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('srlv_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'srlv_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('srlv_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sub_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sub_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sub_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sub_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'subi_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('subi_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'subu_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('subu_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'subu_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('subu_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sw_`,_`(_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sw_`,_`(_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sw_`,_`(_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sw_`,_`(_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sw_`,`(_+_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sw_`,`(_+_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sw_`,`(_+_`);(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sw_`,`(_+_`);(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sw_`,`(_+_`);,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'updMem`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('updMem`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'update`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('update`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'xor_`,_`,_;(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('xor_`,_`,_;,_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'xor_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('xor_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'xori_`,_`,_;(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('xori_`,_`,_;,_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling"].
+eq Bool2IntSy`(_`)(false)= 0[metadata "structural rule"].
+eq Bool2IntSy`(_`)(true)= 1[metadata "structural rule"].
+eq _%Int32_(syint32,I2:Val32)= syint32[metadata "structural rule"].
+eq _&Int32_(syint32,I2:Val32)= syint32[metadata "structural rule"].
+eq _+Int32_(syint32,I2:Val32)= syint32[metadata "structural rule"].
+eq _-Int32_(syint32,I2:Val32)= syint32[metadata "structural rule"].
+eq _<<Int32_(syint32,I3:Nat)= syint32[metadata "structural rule"].
+eq _>>Int32_(syint32,I3:Nat)= syint32[metadata "structural rule"].
+eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
+eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
+eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
+eq _in_(K:K,Bag:Bag)= false[owise].
+eq _in_(K:K,Set:Set)= false[owise].
+eq _in_(SetItem:SetItem,Set:Set)= false[owise].
+eq _|Int32_(syint32,I2:Val32)= syint32[metadata "structural rule"].
+eq inKList(K:K,K':K)= false[owise].
+eq isSymbolic(Value:Val32)= false[owise].
+eq run-with-ic`(_`,_`,_`,_`)(P:Map,R:Map,S:Map,T1:Map)= <_>_</_>(T,__(<_>_</_>(profile,__(<_>_</_>(dhit,_`(_`)(Val32_(0),.List`{K`}),dhit),__(<_>_</_>(dmiss,_`(_`)(Val32_(0),.List`{K`}),dmiss),__(<_>_</_>(ihit,_`(_`)(Val32_(0),.List`{K`}),ihit),<_>_</_>(imiss,_`(_`)(Val32_(0),.List`{K`}),imiss)))),profile),__(<_>_</_>(k,(.).K,k),__(<_>_</_>(pc,_`(_`)(Val32_(1016),.List`{K`}),pc),__(<_>_</_>(t,_`(_`)(Val32_(0),.List`{K`}),t),__(<_>_</_>(cmem,P:Map,cmem),__(<_>_</_>(dc,T1:Map,dc),__(<_>_</_>(dmem,(.).Map,dmem),__(<_>_</_>(ic,S:Map,ic),<_>_</_>(regs,R:Map,regs))))))))),T)[metadata "structural rule"].
+rl <_>_</_>(k,_`(_`)('add_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_+Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('addi_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_+Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('addiu_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_+Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('addu_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_+Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('and_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_&Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('andi_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_&Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('beq_`,_`,_;,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`,`,_(_`(_`)(Val32_(Val2:Val32),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_==BoolSy_(Val1:Val32,Val2:Val32))),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('bgez_`,_;,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_>=SyInt32_(Val1:Val32,0))),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('bgtz_`,_;,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_>SyInt32_(Val1:Val32,0))),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('blez_`,_;,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_<=SyInt32_(Val1:Val32,0))),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('bltz_`,_;,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_<SyInt32_(Val1:Val32,0))),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('bne_`,_`,_;,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`,`,_(_`(_`)(Val32_(Val2:Val32),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_=/=BoolSy_(Val1:Val32,Val2:Val32))),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('j_;,_`(_`)(Val32_(Addr:Int32),.List`{K`})),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(1),.List`{K`}),_`(_`)(Val32_(Addr:Int32),.List`{K`}))),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('jr_;,Rs:K),k)=> <_>_</_>(k,_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(1),.List`{K`}),Rs:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('lui_`,_;,_`,`,_(Rt:K,_`(_`)(Val32_(Imm:Int32),.List`{K`}))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(Imm:Int32),.List`{K`}),Rt:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('lw_`,_`(_`);,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Off:Int32),.List`{K`}),_`(_`)(Val32_(Val1:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)('getd`(_`),_`(_`)(Val32_(_+Int32_(Val1:Val32,Off:Int32)),.List`{K`})),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('lw_`,`(_+_`);,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)('getd`(_`),_`(_`)(Val32_(_+Int32_(Val1:Val32,Val2:Val32)),.List`{K`})),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('nop`;,.List`{K`}),k)=> <_>_</_>(k,(.).K,k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('or_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_|Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('ori_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_|Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('sll_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(V3:Nat),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_<<Int32_(Val1:Val32,V3:Nat)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('slt_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_<SyInt32_(Val1:Val32,Val2:Val32))),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('slti_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_<SyInt32_(Val1:Val32,Val2:Val32))),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('sltiu_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_<SyInt32_(Val1:Val32,Val2:Val32))),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('sltu_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(Bool2IntSy`(_`)(_<SyInt32_(Val1:Val32,Val2:Val32))),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('sra_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(V3:Nat),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_>>Int32_(Val1:Val32,V3:Nat)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('srl_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(V3:Nat),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_>>Int32_(Val1:Val32,V3:Nat)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('sub_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_-Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('subi_`,_`,_;,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(_-Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('sw_`,_`(_`);,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Off:Int32),.List`{K`}),_`(_`)(Val32_(Val1:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(_+Int32_(Val1:Val32,Off:Int32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_`(_`)('sw_`,`(_+_`);,_`,`,_(Rd:K,_`,`,_(_`(_`)(Val32_(Val1:Val32),.List`{K`}),_`(_`)(Val32_(Val2:Val32),.List`{K`})))),k)=> <_>_</_>(k,_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(_+Int32_(Val1:Val32,Val2:Val32)),.List`{K`}),Rd:K)),k)[metadata "computational rule"].
+rl <_>_</_>(k,_~>_(_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(0),.List`{K`}),?3:K)),?4:K),k)=> <_>_</_>(k,?4:K,k)[metadata "computational rule"].
+rl _<=SyInt32_(I1:Int32,I2:Int32)=> _<=Int32_(I1:Int32,I2:Int32)[metadata "computational rule"].
+rl _<=SyInt32_(I2:Val32,syint32)=> false[metadata "computational rule"].
+rl _<=SyInt32_(I2:Val32,syint32)=> true[metadata "computational rule"].
+rl _<=SyInt32_(syint32,I:Int32)=> false[metadata "computational rule"].
+rl _<=SyInt32_(syint32,I:Int32)=> true[metadata "computational rule"].
+rl _<SyInt32_(I1:Int32,I2:Int32)=> _<Int32_(I1:Int32,I2:Int32)[metadata "computational rule"].
+rl _<SyInt32_(I2:Val32,syint32)=> false[metadata "computational rule"].
+rl _<SyInt32_(I2:Val32,syint32)=> true[metadata "computational rule"].
+rl _<SyInt32_(syint32,I:Int32)=> false[metadata "computational rule"].
+rl _<SyInt32_(syint32,I:Int32)=> true[metadata "computational rule"].
+rl _=/=BoolSy_(I1:Int32,I2:Int32)=> _=/=Bool_(I1:Int32,I2:Int32)[metadata "computational rule"].
+rl _=/=BoolSy_(I2:Val32,syint32)=> false[metadata "computational rule"].
+rl _=/=BoolSy_(I2:Val32,syint32)=> true[metadata "computational rule"].
+rl _=/=BoolSy_(syint32,I:Int32)=> false[metadata "computational rule"].
+rl _=/=BoolSy_(syint32,I:Int32)=> true[metadata "computational rule"].
+rl _==BoolSy_(I1:Int32,I2:Int32)=> _==Bool_(I1:Int32,I2:Int32)[metadata "computational rule"].
+rl _==BoolSy_(I2:Val32,syint32)=> false[metadata "computational rule"].
+rl _==BoolSy_(I2:Val32,syint32)=> true[metadata "computational rule"].
+rl _==BoolSy_(syint32,I:Int32)=> false[metadata "computational rule"].
+rl _==BoolSy_(syint32,I:Int32)=> true[metadata "computational rule"].
+rl _==SyInt32_(I1:Int32,I2:Int32)=> _==Int32_(I1:Int32,I2:Int32)[metadata "computational rule"].
+rl _==SyInt32_(I2:Val32,syint32)=> false[metadata "computational rule"].
+rl _==SyInt32_(I2:Val32,syint32)=> true[metadata "computational rule"].
+rl _==SyInt32_(syint32,I2:Val32)=> false[metadata "computational rule"].
+rl _==SyInt32_(syint32,I2:Val32)=> true[metadata "computational rule"].
+rl _>=SyInt32_(I1:Int32,I2:Int32)=> _>=Int32_(I1:Int32,I2:Int32)[metadata "computational rule"].
+rl _>=SyInt32_(I2:Val32,syint32)=> false[metadata "computational rule"].
+rl _>=SyInt32_(I2:Val32,syint32)=> true[metadata "computational rule"].
+rl _>=SyInt32_(syint32,I:Int32)=> false[metadata "computational rule"].
+rl _>=SyInt32_(syint32,I:Int32)=> true[metadata "computational rule"].
+rl _>SyInt32_(I1:Int32,I2:Int32)=> _>Int32_(I1:Int32,I2:Int32)[metadata "computational rule"].
+rl _>SyInt32_(I2:Val32,syint32)=> false[metadata "computational rule"].
+rl _>SyInt32_(I2:Val32,syint32)=> true[metadata "computational rule"].
+rl _>SyInt32_(syint32,I:Int32)=> false[metadata "computational rule"].
+rl _>SyInt32_(syint32,I:Int32)=> true[metadata "computational rule"].
+rl __(<_>_</_>(k,(.).K,k),<_>_</_>(pc,_`(_`)(Val32_(PC:Int32),.List`{K`}),pc))=> __(<_>_</_>(k,_`(_`)('geti`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),k),<_>_</_>(pc,_`(_`)(Val32_(PC:Int32),.List`{K`}),pc))[metadata "computational rule"].
+rl __(<_>_</_>(k,_`(_`)('imiss`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),k),<_>_</_>(cmem,__(?7:Map,_|->_(_`(_`)(Val32_(PC:Int32),.List`{K`}),Ins:K)),cmem))=> __(<_>_</_>(k,_`(_`)('imissSolved`(_`,_`),_`,`,_(_`(_`)(Val32_(PC:Int32),.List`{K`}),Ins:K)),k),<_>_</_>(cmem,__(?7:Map,_|->_(_`(_`)(Val32_(PC:Int32),.List`{K`}),Ins:K)),cmem))[metadata "computational rule"].
+rl __(<_>_</_>(k,_`(_`)('update`(_`,_`),_`,`,_(_`(_`)(Val32_(Value:Val32),.List`{K`}),Rd:K)),k),<_>_</_>(regs,__(?7:Map,_|->_(Rd:K,?8:List{K})),regs))=> __(<_>_</_>(k,(.).K,k),<_>_</_>(regs,__(?7:Map,_|->_(Rd:K,_`(_`)(Val32_(Value:Val32),.List`{K`}))),regs))[metadata "computational rule"].
+rl __(<_>_</_>(k,_~>_(R:K,?7:K),k),<_>_</_>(regs,__(?8:Map,_|->_(R:K,_`(_`)(Val32_(Value:Val32),.List`{K`}))),regs))=> __(<_>_</_>(k,_~>_(_`(_`)(Val32_(Value:Val32),.List`{K`}),?7:K),k),<_>_</_>(regs,__(?8:Map,_|->_(R:K,_`(_`)(Val32_(Value:Val32),.List`{K`}))),regs))[metadata "computational rule"].
+rl __(<_>_</_>(k,_~>_(_`(_`)('dmiss`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?7:K),k),<_>_</_>(dmem,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`})),dmem))=> __(<_>_</_>(k,_~>_(_`(_`)('dmissSolved`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?7:K),k),<_>_</_>(dmem,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`})),dmem))[metadata "computational rule"].
+rl __(<_>_</_>(k,_~>_(_`(_`)('incPC`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),?5:K),k),<_>_</_>(pc,_`(_`)(Val32_(PC:Int32),.List`{K`}),pc))=> __(<_>_</_>(k,?5:K,k),<_>_</_>(pc,_`(_`)(Val32_(_+Int32_(PC:Int32,4)),.List`{K`}),pc))[metadata "computational rule"].
+rl __(<_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?9:K),k),<_>_</_>(dc,__(?8:Map,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))))),dc))=> __(<_>_</_>(k,?9:K,k),<_>_</_>(dc,__(?8:Map,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))))),dc))[metadata "computational rule"].
+rl __(<_>_</_>(k,_~>_(_`(_`)('setPC`(_`,_`),_`,`,_(_`(_`)(Val32_(1),.List`{K`}),_`(_`)(Val32_(NewV:Int32),.List`{K`}))),?5:K),k),<_>_</_>(pc,_`(_`)(Val32_(Pc:Int32),.List`{K`}),pc))=> __(<_>_</_>(k,?5:K,k),<_>_</_>(pc,_`(_`)(Val32_(NewV:Int32),.List`{K`}),pc))[metadata "computational rule"].
+rl __(<_>_</_>(k,_~>_(_`(_`)('write`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr:Int32),.List`{K`}),_`(_`)(Val32_(Data:Int32),.List`{K`}))),?10:K),k),<_>_</_>(dmem,__(?8:Map,_|->_(_`(_`)(Val32_(Addr:Int32),.List`{K`}),?9:List{K})),dmem))=> __(<_>_</_>(k,?10:K,k),<_>_</_>(dmem,__(?8:Map,_|->_(_`(_`)(Val32_(Addr:Int32),.List`{K`}),_`(_`)(Val32_(Data:Int32),.List`{K`}))),dmem))[metadata "computational rule"].
+rl __(<_>_</_>(profile,__(?15:Bag,<_>_</_>(ihit,_`(_`)(Val32_(H:Int32),.List`{K`}),ihit)),profile),__(<_>_</_>(k,_`(_`)('geti`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),k),__(<_>_</_>(t,_`(_`)(Val32_(T:Int32),.List`{K`}),t),<_>_</_>(ic,__(?13:Map,_|->_(?14:List{K},_`(_`)('iwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(PC:Int32),.List`{K`}),Ins:K)))),ic))))=> __(<_>_</_>(profile,__(?15:Bag,<_>_</_>(ihit,_`(_`)(Val32_(_+Int32_(H:Int32,1)),.List`{K`}),ihit)),profile),__(<_>_</_>(k,_~>_(_`(_`)('incPC`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),Ins:K),k),__(<_>_</_>(t,_`(_`)(Val32_(_+Int32_(hittime,T:Int32)),.List`{K`}),t),<_>_</_>(ic,__(?13:Map,_|->_(?14:List{K},_`(_`)('iwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(PC:Int32),.List`{K`}),Ins:K)))),ic))))[metadata "computational rule"].
+crl <_>_</_>(k,_~>_(_`(_`)('getd`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?4:K),k)=> <_>_</_>(k,_~>_(_`(_`)(Val32_(syint32),.List`{K`}),?4:K),k)if isSymbolic(AddrS:Val32)= true[metadata "computational rule"].
+crl <_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?6:K),k)=> <_>_</_>(k,?6:K,k)if _orBool_(isSymbolic(AddrS:Val32),isSymbolic(DataS:Val32))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_`(_`)('geti`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),k),<_>_</_>(ic,__(?11:Map,_|->_(_`(_`)(Val32_(ICpc:Int32),.List`{K`}),_`(_`)('iwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(X:Int32),.List`{K`}),?12:K)))),ic))=> __(<_>_</_>(k,_`(_`)('imiss`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),k),<_>_</_>(ic,__(?11:Map,_|->_(_`(_`)(Val32_(ICpc:Int32),.List`{K`}),_`(_`)('iwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(X:Int32),.List`{K`}),?12:K)))),ic))if _andBool_(_==Bool_(ICpc:Int32,_%Int32_(PC:Int32,icachesize)),_=/=Bool_(X:Int32,PC:Int32))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_`(_`)('imiss`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),k),<_>_</_>(cmem,CMem:Map,cmem))=> __(<_>_</_>(k,_`(_`)('last,.List`{K`}),k),<_>_</_>(cmem,CMem:Map,cmem))if notBool_($hasMapping(CMem:Map,_`(_`)(Val32_(PC:Int32),.List`{K`})))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('dmiss`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?8:K),k),<_>_</_>(dmem,DMem:Map,dmem))=> __(<_>_</_>(k,_~>_(_`(_`)('dmissSolved`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(0),.List`{K`}))),?8:K),k),<_>_</_>(dmem,__(DMem:Map,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(0),.List`{K`}))),dmem))if notBool_($hasMapping(DMem:Map,_`(_`)(Val32_(AddrS:Val32),.List`{K`})))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('getd`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?8:K),k),<_>_</_>(dc,DCache:Map,dc))=> __(<_>_</_>(k,_~>_(_`(_`)('dmiss`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?8:K),k),<_>_</_>(dc,DCache:Map,dc))if _andBool_(notBool_(isSymbolic(AddrS:Val32)),$hasMapping(DCache:Map,_`(_`)(Val32_(AddrS:Val32),.List`{K`})))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('getd`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?8:K),k),<_>_</_>(dc,DCache:Map,dc))=> __(<_>_</_>(k,_~>_(_`(_`)('dmiss`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?8:K),k),<_>_</_>(dc,DCache:Map,dc))if _andBool_(notBool_(isSymbolic(AddrS:Val32)),notBool_($hasMapping(DCache:Map,_`(_`)(Val32_(AddrS:Val32),.List`{K`}))))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr:Int32),.List`{K`}),_`(_`)(Val32_(Data:Int32),.List`{K`}))),?15:K),k),<_>_</_>(dc,__(DCache:Map,_|->_(_`(_`)(Val32_(Addr1:Int32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr1:Int32),.List`{K`}),_`(_`)(Val32_(Data1:Int32),.List`{K`}))))),dc))=> __(<_>_</_>(k,_~>_(_`(_`)('write`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr1:Int32),.List`{K`}),_`(_`)(Val32_(Data1:Int32),.List`{K`}))),?15:K),k),<_>_</_>(dc,__(DCache:Map,_|->_(_`(_`)(Val32_(Addr1:Int32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr:Int32),.List`{K`}),_`(_`)(Val32_(Data:Int32),.List`{K`}))))),dc))if _andBool_(_==SyInt32_(currDCacheOccup`(_`)(DCache:Map),dcachesize),_==SyInt32_(_%Int32_(Addr1:Int32,dcachesize),_%Int32_(Addr:Int32,dcachesize)))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?11:K),k),<_>_</_>(dc,DCache:Map,dc))=> __(<_>_</_>(k,?11:K,k),<_>_</_>(dc,__(DCache:Map,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))))),dc))if _andBool_(notBool_($hasMapping(DCache:Map,_`(_`)(Val32_(AddrS:Val32),.List`{K`}))),_<Int32_(currDCacheOccup`(_`)(DCache:Map),dcachesize))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?12:K),k),<_>_</_>(dc,DCache:Map,dc))=> __(<_>_</_>(k,?12:K,k),<_>_</_>(dc,_`[_/_`](DCache:Map,_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),dc))if _andBool_($hasMapping(DCache:Map,_`(_`)(Val32_(AddrS:Val32),.List`{K`})),_<Int32_(currDCacheOccup`(_`)(DCache:Map),dcachesize))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('putd`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?15:K),k),<_>_</_>(dc,__(DCache:Map,_|->_(_`(_`)(Val32_(Addr1S:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr1S:Val32),.List`{K`}),_`(_`)(Val32_(Data1S:Val32),.List`{K`}))))),dc))=> __(<_>_</_>(k,_~>_(_`(_`)('write`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr1S:Val32),.List`{K`}),_`(_`)(Val32_(Data1S:Val32),.List`{K`}))),?15:K),k),<_>_</_>(dc,__(DCache:Map,_|->_(_`(_`)(Val32_(Addr1S:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))))),dc))if _andBool_(_<Int32_(currDCacheOccup`(_`)(DCache:Map),dcachesize),_==SyInt32_(_%Int32_(Addr1S:Val32,dcachesize),_%Int32_(AddrS:Val32,dcachesize)))= true[metadata "computational rule"].
+crl __(<_>_</_>(k,_~>_(_`(_`)('write`(_`,_`),_`,`,_(_`(_`)(Val32_(Addr:Int32),.List`{K`}),_`(_`)(Val32_(Data:Int32),.List`{K`}))),?9:K),k),<_>_</_>(dmem,DMem:Map,dmem))=> __(<_>_</_>(k,?9:K,k),<_>_</_>(dmem,__(DMem:Map,_|->_(_`(_`)(Val32_(Addr:Int32),.List`{K`}),_`(_`)(Val32_(Data:Int32),.List`{K`}))),dmem))if notBool_($hasMapping(DMem:Map,_`(_`)(Val32_(Addr:Int32),.List`{K`})))= true[metadata "computational rule"].
+crl __(<_>_</_>(profile,__(?14:Bag,<_>_</_>(dhit,_`(_`)(Val32_(H:Int32),.List`{K`}),dhit)),profile),__(<_>_</_>(k,_~>_(_`(_`)('getd`(_`),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),?13:K),k),<_>_</_>(dc,__(?12:Map,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))))),dc)))=> __(<_>_</_>(profile,__(?14:Bag,<_>_</_>(dhit,_`(_`)(Val32_(_+Int32_(H:Int32,1)),.List`{K`}),dhit)),profile),__(<_>_</_>(k,_~>_(_`(_`)(Val32_(DataS:Val32),.List`{K`}),?13:K),k),<_>_</_>(dc,__(?12:Map,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))))),dc)))if notBool_(isSymbolic(AddrS:Val32))= true[metadata "computational rule"].
+crl __(<_>_</_>(profile,__(?17:Bag,<_>_</_>(dmiss,_`(_`)(Val32_(M1:Int32),.List`{K`}),dmiss)),profile),__(<_>_</_>(k,_~>_(_`(_`)('dmissSolved`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?16:K),k),__(<_>_</_>(t,_`(_`)(Val32_(T:Int32),.List`{K`}),t),<_>_</_>(dc,DCache:Map,dc))))=> __(<_>_</_>(profile,__(?17:Bag,<_>_</_>(dmiss,_`(_`)(Val32_(_+Int32_(M1:Int32,1)),.List`{K`}),dmiss)),profile),__(<_>_</_>(k,_~>_(_`(_`)(Val32_(DataS:Val32),.List`{K`}),?16:K),k),__(<_>_</_>(t,_`(_`)(Val32_(_+Int32_(misstime,T:Int32)),.List`{K`}),t),<_>_</_>(dc,__(DCache:Map,_|->_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))))),dc))))if notBool_($hasMapping(DCache:Map,_`(_`)(Val32_(AddrS:Val32),.List`{K`})))= true[metadata "computational rule"].
+crl __(<_>_</_>(profile,__(?18:Bag,<_>_</_>(dmiss,_`(_`)(Val32_(M1:Int32),.List`{K`}),dmiss)),profile),__(<_>_</_>(k,_~>_(_`(_`)('dmissSolved`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),?17:K),k),__(<_>_</_>(t,_`(_`)(Val32_(T:Int32),.List`{K`}),t),<_>_</_>(dc,DCache:Map,dc))))=> __(<_>_</_>(profile,__(?18:Bag,<_>_</_>(dmiss,_`(_`)(Val32_(_+Int32_(M1:Int32,1)),.List`{K`}),dmiss)),profile),__(<_>_</_>(k,_~>_(_`(_`)(Val32_(DataS:Val32),.List`{K`}),?17:K),k),__(<_>_</_>(t,_`(_`)(Val32_(_+Int32_(misstime,T:Int32)),.List`{K`}),t),<_>_</_>(dc,_`[_/_`](DCache:Map,_`(_`)('dwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(AddrS:Val32),.List`{K`}),_`(_`)(Val32_(DataS:Val32),.List`{K`}))),_`(_`)(Val32_(AddrS:Val32),.List`{K`})),dc))))if $hasMapping(DCache:Map,_`(_`)(Val32_(AddrS:Val32),.List`{K`}))= true[metadata "computational rule"].
+crl __(<_>_</_>(profile,__(?19:Bag,<_>_</_>(imiss,_`(_`)(Val32_(M1:Int32),.List`{K`}),imiss)),profile),__(<_>_</_>(k,_`(_`)('imissSolved`(_`,_`),_`,`,_(_`(_`)(Val32_(PC:Int32),.List`{K`}),Ins:K)),k),__(<_>_</_>(t,_`(_`)(Val32_(T:Int32),.List`{K`}),t),<_>_</_>(ic,__(?17:Map,_|->_(_`(_`)(Val32_(ICpc:Int32),.List`{K`}),?18:List{K})),ic))))=> __(<_>_</_>(profile,__(?19:Bag,<_>_</_>(imiss,_`(_`)(Val32_(_+Int32_(M1:Int32,1)),.List`{K`}),imiss)),profile),__(<_>_</_>(k,_~>_(_`(_`)('incPC`(_`),_`(_`)(Val32_(PC:Int32),.List`{K`})),Ins:K),k),__(<_>_</_>(t,_`(_`)(Val32_(_+Int32_(misstime,T:Int32)),.List`{K`}),t),<_>_</_>(ic,__(?17:Map,_|->_(_`(_`)(Val32_(ICpc:Int32),.List`{K`}),_`(_`)('iwrap`(_`,_`),_`,`,_(_`(_`)(Val32_(PC:Int32),.List`{K`}),Ins:K)))),ic))))if _==Bool_(ICpc:Int32,_%Int32_(PC:Int32,icachesize))= true[metadata "computational rule"].
+endm

@@ -1,0 +1,108 @@
+mod SSRISC-PROGRAMS is including SSRISC-SYNTAX + K .
+
+      op a0 :  -> Reg .    op a1 :  -> Reg .    op a2 :  -> Reg .    op ra :  -> Reg .    op s8 :  -> Reg .    op sp :  -> Reg .    op v0 :  -> Reg .    op v1 :  -> Reg .    op zero :  -> Reg . 
+
+      op main1 :  -> Map .    op main2 :  -> Map .    op main3 :  -> Map .    op main4 :  -> Map .    op main5 :  -> Map . 
+
+eq main5 =  
+
+ 1016 |-> ( add v1, v1, v0 ; )
+ 1020 |-> ( bne v1, v0, 1028 ; )
+ 1024 |-> ( add v1, zero, v1 ; )
+ 1028 |-> ( add v1, v1, v0 ; )
+ 1032 |-> ( slti v1, v0, 10 ; )
+ 1036 |-> ( lw s8,(v0 + v1); )
+ 1040 |-> ( sw s8,(v0 + zero); ) .
+
+
+   
+   
+   
+   
+      
+      
+
+eq main1 = 
+
+ 1016 |-> ( addiu   v0,zero,1 ; )
+ 1020 |-> ( sw   v0,16(s8); ) 
+ 1024 |-> ( addiu   v0,zero,3 ; )
+ 1028 |-> ( sw   v0,20(s8); )
+ 1032 |-> ( sw   zero,24(s8); )
+ 1036 |-> ( lw   v0,20(s8); )
+ 1040 |-> ( lw   v1,16(s8); )
+ 1044 |-> ( slt   v0,v1,v0 ; )
+ 1048 |-> ( bne   v0,zero,1056 ; )
+ 1052 |-> ( j   1088 ; )
+ 1056 |-> ( lw   v0,24(s8); )
+ 1060 |-> ( lw   v1,16(s8); )
+ 1064 |-> ( addu   v0,v0,v1 ; )
+ 1068 |-> ( sw   v0,24(s8); )
+ 1072 |-> ( lw   v0,16(s8); )
+ 1076 |-> ( addiu   v1,v0,1 ; )
+ 1080 |-> ( sw   v1,16(s8); )
+ 1084 |-> ( j   1036 ; ) .
+
+
+eq main2 =  
+
+ 1016 |-> ( sw   zero,40(s8); )
+ 1020 |-> ( sw   zero,44(s8); )
+ 1024 |-> ( sw   zero,48(s8); )
+ 1028 |-> ( addiu   v0,zero,1 ; )
+ 1032 |-> ( sw   v0,16(s8); )
+ 1036 |-> ( addiu   v0,zero,4 ; )
+ 1040 |-> ( sw   v0,20(s8); )
+ 1044 |-> ( addiu   v0,zero,5 ; )
+ 1048 |-> ( sw   v0,24(s8); )
+ 1052 |-> ( addiu   v0,zero,2 ; )
+ 1056 |-> ( sw   v0,28(s8); )
+ 1060 |-> ( addiu   v0,zero,4 ; )
+ 1064 |-> ( sw   v0,32(s8); )
+ 1068 |-> ( sw   zero,48(s8); )
+ 1072 |-> ( lw   v0,48(s8); )
+ 1076 |-> ( slti   v1,v0,5 ; )
+ 1080 |-> ( bne   v1,zero,1084 ; )
+ 1084 |-> ( nop ; ) .
+
+
+   
+   
+     
+
+
+eq main3 =  
+
+ 1016 |-> ( addiu   v0,zero,10 ; )
+ 1020 |-> ( sw   v0,16(s8); )
+ 1024 |-> ( addiu   v0,zero,2 ; )
+ 1028 |-> ( sw   v0,20(s8); )
+ 1032 |-> ( lw   v0,16(s8); )
+ 1036 |-> ( lw   v1,20(s8); )
+ 1040 |-> ( addu   v0,v0,v1 ; )
+ 1044 |-> ( sw   v0,24(s8); ) .
+
+
+   
+   
+   
+      
+
+
+eq main4 =  
+
+ 1016 |-> ( addiu   v0,zero,5 ; )
+ 1020 |-> ( sw   v0,16(s8); )
+ 1024 |-> ( addiu   v0,zero,3 ; )
+ 1028 |-> ( sw   v0,20(s8); )
+ 1032 |-> ( lw   v0,16(s8); )
+ 1036 |-> ( lw   v1,20(s8); )
+ 1040 |-> ( slt   v0,v1,v0 ; )
+ 1044 |-> ( beq   v0,zero,1064 ; )
+ 1048 |-> ( lw   v0,16(s8); )
+ 1052 |-> ( lw   v1,20(s8); )
+ 1056 |-> ( addu   v0,v0,v1 ; )
+ 1060 |-> ( sw   v0,16(s8); ) .
+
+endm
+

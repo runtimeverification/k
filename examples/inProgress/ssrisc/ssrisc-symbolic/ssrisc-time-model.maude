@@ -1,0 +1,110 @@
+mod SSRISC-TIME-MODEL is including K + PL-INT32 .
+ 
+        subsort Val32 <  KResult . 
+
+        op hittime :  -> Int32 .    op misstime :  -> Int32 . 
+
+  eq hittime =  1 .
+  eq misstime =  5 .
+
+  mb configuration
+    < t > 0 </ t > 
+    < profile > (.).K  </ profile > : KSentence . 
+
+
+         
+         op _+Int32_ : Val32  Val32 -> Val32 [ditto metadata "ditto strict"] .  
+  mb rule syint32 +Int32  I2:Val32 =>  syint32 : KSentence [metadata "structural"] .
+
+        op _-Int32_ : Val32  Val32 -> Val32 [ditto metadata "ditto strict"] .  
+  mb rule syint32 -Int32  I2:Val32 =>  syint32 : KSentence [metadata "structural"] .
+
+        op _&Int32_ : Val32  Val32 -> Val32 [ditto metadata "ditto strict"] .  
+  mb rule syint32 &Int32  I2:Val32 =>  syint32 : KSentence [metadata "structural"] .
+
+         op _|Int32_ : Val32  Val32 -> Val32 [ditto metadata "ditto strict"] . 
+  mb rule syint32 |Int32  I2:Val32 =>  syint32 : KSentence [metadata "structural"] .
+
+        op _<<Int32_ : Val32  Nat -> Val32 [ditto metadata "ditto strict"] . 
+  mb rule syint32 <<Int32  I3:Nat =>  syint32 : KSentence [metadata "structural"] .
+
+        op _>>Int32_ : Val32  Nat -> Val32 [ditto metadata "ditto strict"] .  
+  mb rule syint32 >>Int32  I3:Nat =>  syint32 : KSentence [metadata "structural"] .
+
+        op _%Int32_ : Val32  Val32 -> Val32 [ditto metadata "ditto strict"] . 
+  mb rule syint32 %Int32  I2:Val32 =>  syint32 : KSentence [metadata "structural"] .
+
+        op _==SyInt32_ : Val32  Val32 -> Bool [metadata "strict"] . 
+  mb rule syint32 ==SyInt32  I2:Val32 =>  true : KSentence . 
+  mb rule syint32 ==SyInt32  I2:Val32 =>  false : KSentence .
+  mb rule I2:Val32 ==SyInt32  syint32 =>  true : KSentence .
+  mb rule I2:Val32 ==SyInt32  syint32 =>  false : KSentence .
+  mb rule I1:Int32 ==SyInt32  I2:Int32 =>  I1:Int32 ==Int32  I2:Int32 : KSentence .
+
+
+        op _<SyInt32_ : Val32  Val32 -> Bool [metadata "strict"] . 
+  mb rule syint32 <SyInt32  I:Int32 =>  true : KSentence .
+  mb rule syint32 <SyInt32  I:Int32 =>  false : KSentence .
+  mb rule I2:Val32 <SyInt32  syint32 =>  true : KSentence .
+  mb rule I2:Val32 <SyInt32  syint32 =>  false : KSentence .
+  mb rule I1:Int32 <SyInt32  I2:Int32 =>  I1:Int32 <Int32  I2:Int32 : KSentence .
+
+        op _>SyInt32_ : Val32  Val32 -> Bool [metadata "strict"] . 
+  mb rule syint32 >SyInt32  I:Int32 =>  true : KSentence .
+  mb rule syint32 >SyInt32  I:Int32 =>  false : KSentence .
+  mb rule I2:Val32 >SyInt32  syint32 =>  true : KSentence .
+  mb rule I2:Val32 >SyInt32  syint32 =>  false : KSentence .
+  mb rule I1:Int32 >SyInt32  I2:Int32 =>  I1:Int32 >Int32  I2:Int32 : KSentence .
+
+        op _>=SyInt32_ : Val32  Val32 -> Bool [metadata "strict"] . 
+  mb rule syint32 >=SyInt32  I:Int32 =>  true : KSentence .
+  mb rule syint32 >=SyInt32  I:Int32 =>  false : KSentence .
+  mb rule I2:Val32 >=SyInt32  syint32 =>  true : KSentence .
+  mb rule I2:Val32 >=SyInt32  syint32 =>  false : KSentence .
+  mb rule I1:Int32 >=SyInt32  I2:Int32 =>  I1:Int32 >=Int32  I2:Int32 : KSentence .
+
+        op _<=SyInt32_ : Val32  Val32 -> Bool [metadata "strict"] . 
+  mb rule syint32 <=SyInt32  I:Int32 =>  true : KSentence .
+  mb rule syint32 <=SyInt32  I:Int32 =>  false : KSentence .
+  mb rule I2:Val32 <=SyInt32  syint32 =>  true : KSentence .
+  mb rule I2:Val32 <=SyInt32  syint32 =>  false : KSentence .
+  mb rule I1:Int32 <=SyInt32  I2:Int32 =>  I1:Int32 <=Int32  I2:Int32 : KSentence .
+
+        op _==BoolSy_ : Val32  Val32 -> Bool [metadata "strict"] . 
+  mb rule syint32 ==BoolSy  I:Int32 =>  true : KSentence . 
+  mb rule syint32 ==BoolSy  I:Int32 =>  false : KSentence . 
+  mb rule I2:Val32 ==BoolSy  syint32 =>  true : KSentence . 
+  mb rule I2:Val32 ==BoolSy  syint32 =>  false : KSentence . 
+  mb rule I1:Int32 ==BoolSy  I2:Int32 =>  I1:Int32 ==Bool  I2:Int32 : KSentence . 
+
+        op _=/=BoolSy_ : Val32  Val32 -> Bool [metadata "strict"] . 
+  mb rule syint32 =/=BoolSy  I:Int32 =>  true : KSentence . 
+  mb rule syint32 =/=BoolSy  I:Int32 =>  false : KSentence . 
+  mb rule I2:Val32 =/=BoolSy  syint32 =>  true : KSentence . 
+  mb rule I2:Val32 =/=BoolSy  syint32 =>  false : KSentence . 
+  mb rule I1:Int32 =/=BoolSy  I2:Int32 =>  I1:Int32 =/=Bool  I2:Int32 : KSentence . 
+
+        op Bool2IntSy(_) :  Bool -> Val32 [metadata "strict"] . 
+  mb rule Bool2IntSy(true) =>  1 : KSentence [metadata "structural"] .
+  mb rule Bool2IntSy(false) =>  0 : KSentence [metadata "structural"] . 
+
+var I2 : Int32 . var I : Int32 . var I3 : Nat . var I1 : Int32 .  ops profile t : -> CellLabel .  endm
+
+
+mod SSRISC-COMMUNICATION-INTERFACE is including K .
+
+          
+          
+         
+  sort CacheAux .    op geti(_) :  K -> CacheAux . 
+                     op getd(_) :  K -> CacheAux [metadata "strict"] .
+                     op putd(_,_) :  K  K -> CacheAux  [metadata "strict(2)"] .
+                     op imiss(_) :  K -> CacheAux . 
+                     op dmiss(_) :  K -> CacheAux . 
+                     op imissSolved(_,_) :  K  K -> CacheAux . 
+                     op dmissSolved(_,_) :  K  K -> CacheAux . 
+                     op write(_,_) :  K  K -> CacheAux .  
+
+      subsort CacheAux <  K . 
+
+endm
