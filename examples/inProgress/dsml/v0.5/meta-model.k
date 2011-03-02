@@ -1,6 +1,5 @@
 
-require ocl-syntax
-
+require ../../../../k-prelude
 
 /*
   A meta-model consists of a configuration including 
@@ -10,7 +9,7 @@ require ocl-syntax
   A model is represented by a cell including instances of the classes. For each instance, we have
   cells with the name of the instance, the name of the class owner, and the values of the attributes.
 */
-kmod META-MODEL is including OCL-SYNTAX
+kmod META-MODEL is including  K + PL-ID
 
   
 // for  attributes in metamodel instances
@@ -58,8 +57,8 @@ syntax Id ::= object | undefined // to be extended later with class and instance
                    </model*>
                  </models>
                 <k> .K </k> 
-                <temp> .Bag </temp>
-                <comp> .Bag </comp>
+                <mem> .Map </mem>
+                <nextLoc> 0 </nextLoc>
                 </T>
 
  

@@ -1,6 +1,6 @@
 require ../../../../k-prelude
 
-kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL + PL-STRING
+kmod OCL-SYNTAX is including PL-ID + PL-INT  + PL-BOOL + PL-STRING
 
 
 
@@ -52,8 +52,6 @@ syntax Exp ::= Id
                 | oclType ( Exp ) [strict]
 
 
-// contents of K cell : Expressions
-syntax K ::= Exp
 
 
 

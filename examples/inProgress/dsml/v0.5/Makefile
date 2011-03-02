@@ -17,9 +17,8 @@ LATEX_STYLE = bb
 # this is the basename of the main file
 # MAIN_FILE = ocl-syntax
 # MAIN_FILE = meta-model
-# MAIN_FILE = ocl-typecheck
 # MAIN_FILE = ocl-semantics
-MAIN_FILE = test
+ MAIN_FILE = test
 
 # these are additional files that when changed will force rebuilding the semantics
 #ADDITIONAL_DEPENDENCIES = 

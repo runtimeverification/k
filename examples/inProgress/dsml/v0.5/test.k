@@ -82,12 +82,13 @@ macro testConfig =
        // <k>    empty union ((allInstances(classB) ->collect(x | ( ((x # attr4) ++   (x # attr5)) ++ (" only" ++ " if")))).size()) </k>
         // <k>    allInstances(classB) ->select(x |  (x # attr2) includes  (a : classA) ) </k>
       //<k>    allInstances(classB)->collect(x | (x # attr2)) </k>
-        <k>    allInstances(classA) ->select (x | (x # attr3) < 2) union (b:classB) </k>
+        //<k>    allInstances(classA) ->select (x | (x # attr3) < 2) union (b:classB) </k>
+           //<k>    (b:classA)->select (x | (x # attr3) < 2) union (b:classB) </k>
        //<k>    allInstances(classB) ->exists(x | (x # attr2) = (a : classA)) </k>
        //<k> allInstances(classA)->select(x | ((x#attr3) >= 2)) </k>
      // <k> let x =  (a : classA) in (x#attr3) = 1  endlet  </k>
-     <temp> .Bag </temp>
-     <comp> .Bag </comp>
+     <mem> .Map </mem>
+     <nextLoc> 0 </nextLoc>
   </T>
 
 
