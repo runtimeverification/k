@@ -85,6 +85,9 @@ syntax Bool ::= isScalar ( Val )
 rule isScalar(I:Int) => true [structural]
 rule isScalar(bbb:Bool) => true [structural]
 rule isScalar(Str:String) => true [structural]
+rule isScalar(ID:Id) => false [structural]
+rule isScalar(bbb:Bool) => true [structural]
+rule isScalar(Str:String) => true [structural]
 rule isScalar(val(C1)) => false [structural]
 
 
