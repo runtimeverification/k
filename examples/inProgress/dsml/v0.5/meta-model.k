@@ -34,6 +34,7 @@ syntax Id ::= object | undefined // to be extended later with class and instance
 
 
 
+
   configuration <T> 
                   <metamodel?>
                     <name> undefined </name> 
