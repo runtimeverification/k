@@ -4,7 +4,7 @@ KCOMPILE ?= ../../../../../tools/kompile.pl
 
 # this is the name of the main maude module 
 
- LANGUAGE_NAME = CHECK-AUTOMATON
+ LANGUAGE_NAME = AUTOMATA
 
 # this are all interesting modules (used to latexify)
 #LANGUAGE_MODULES = 
@@ -12,7 +12,7 @@ KCOMPILE ?= ../../../../../tools/kompile.pl
 LATEX_STYLE = bb
 
 
- MAIN_FILE = automaton
+ MAIN_FILE = automata
 
 # these are additional files that when changed will force rebuilding the semantics
 #ADDITIONAL_DEPENDENCIES = 

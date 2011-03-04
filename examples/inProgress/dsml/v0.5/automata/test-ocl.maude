@@ -1,0 +1,3 @@
+in automata-compiled.maude
+rew initConfig .
+quit
