@@ -1,3 +1,2 @@
 in automata-compiled.maude
-rew initConfig .
-quit
+rew[1] initConfig .
