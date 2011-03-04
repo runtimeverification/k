@@ -54,7 +54,7 @@ kmod AUTOMATA is including OCL-SEMANTICS + CONFORMANCE
        </instance> 
 */
 
-  syntax Id ::= a | b | s0 | s1 | t1 | t2 | t3 | simple
+  syntax Id ::= a | b | s0 | s1 | t1 | t2 | t3 | simple | x | y  | z 
 
 
   
@@ -92,7 +92,18 @@ kmod AUTOMATA is including OCL-SEMANTICS + CONFORMANCE
                          </declAttributes>
                       </class>
                    </classes>
-                   <oclConstraints>  OCL(1)  </oclConstraints>
+                   <oclConstraints>  
+                       // exactly one active state
+                       OCL(allInstances(automaton)->forAll(x| (x#active).size() = 1)) 
+                       // the two unidirectional associations (#out,#orig) form a bidirectional one
+                       OCL((allInstances(state)->forAll(x| (x#out)->forAll(y| (y#orig) includes x))) and
+                           (allInstances(transition)->forAll(y| (y#orig)->forAll(x| (x#out) includes y))))
+                       // the two unidirectional associations (#in,#dest) form a bidirectional one
+                       OCL((allInstances(state)->forAll(x| (x#in)->forAll(y| (y#dest) includes x))) and
+                           (allInstances(transition)->forAll(y| (y#dest)->forAll(x| (x#in) includes y))))
+                       //each transition has exactly one origin and one destination
+                       OCL(allInstances(transition)->forAll(y|((y#orig).size() = 1) and ((y#dest).size() = 1)))
+                   </oclConstraints>
             </metamodel>
             <models>
                <model>
