@@ -1,36 +1,95 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-struct nodeList {
+
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
-struct nodeList* prefix(struct nodeList* x, int i)
-/*@ pre <env> x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)([?i] @ A) </ heap > < form > returns ?x </ form > </ config > */
+
+struct listNode* append(struct listNode *x, int i)
+//@ pre  <heap> list(x)(A), H </heap> /\ i = i0
+//@ post <heap> list(?x)([i0] @ A), H </heap> /\ returns(?x)
 {
-	struct nodeList* y;
-	y = (struct nodeList*) malloc (sizeof(struct nodeList));
-	y->val = i;
-	y->next = x;
-	return y;
+  struct listNode *p;
+  p = (struct listNode*)malloc(sizeof(struct listNode));
+  p->val = i;
+  
+  if (x == 0)
+  { 
+    p->next = 0;
+  }
+  else
+  {
+    p->next = x;
+  }
+  x = p;
+  return x;
 }
 
-int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
+struct listNode* create(int n)
 {
-  struct nodeList *x;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 6;
-  x->next = 0;
-  /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)([6]) </ heap > < form > TrueFormula </ form > </ config > */
-  x = prefix(x,5) ;
+  struct listNode *x;
+  struct listNode *y;
+  x = 0;
+  while (n)
+  {
+    y = x;
+    x = (struct listNode*)malloc(sizeof(struct listNode));
+    x->val = n;
+    x->next = y;
+    n -= 1;
+  }
+  return x;
+}
+
+void destroy(struct listNode* x)
+//@ pre  <heap> list(x)(?A), H </heap>
+//@ post <heap> H </heap>
+{
+  struct listNode *y;
+
+  //@ invariant <heap> list(x)(?A), H </heap>
+  while(x)
+  {
+    y = x->next;
+    free(x);
+    x = y;
+  }
+}
+
+
+void print(struct listNode* x)
+//@ pre  <heap>  list(x)(A), H </heap><out> B </out> /\ x = x0
+//@ post <heap> list(x0)(A), H </heap><out> B @ A </out>
+{
+  /*@ invariant <heap> lseg(x0,x)(?A1), list(x)(?A2), H </heap>
+                <out> B @ ?A1 </out> /\ A = ?A1 @ ?A2 */
+  while(x)
+  {
+    printf("%d ",x->val);
+    x = x->next;
+  }
+  printf("\n"); 
+}
+
+
+int main()
+{
+  struct listNode *x;
+  struct listNode *y;
+
+  x = create(5);
+  //@ assert <heap> list(x)([1, 2, 3, 4, 5]) </heap>
+  destroy(x);
+  //@ assert <heap> . </heap>
+  
   return 0;
 }
 
 
+//@ var n, i : Int
+//@ var A, B, C : Seq
+//@ var H : MapItem
 
-/*@ var ?x ?i : ?Int */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
