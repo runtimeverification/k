@@ -82,6 +82,8 @@ int main()
 
   x = create(5);
   //@ assert <heap> list(x)([1, 2, 3, 4, 5]) </heap>
+  x = append(x,15);
+  //@ assert <heap> list(x)([15, 1, 2, 3, 4, 5]) </heap>
   destroy(x);
   //@ assert <heap> . </heap>
   
