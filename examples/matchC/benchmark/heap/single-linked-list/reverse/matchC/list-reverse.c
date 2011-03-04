@@ -1,102 +1,95 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct nodeList {
+
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
 
-struct nodeList* reverse(struct nodeList *x)
-/*@ pre  < config > < env > x |-> ?x </ env > < heap > list(?x)(A) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)(rev(A)) H </ heap >
-                    < form > returns ?x </ form > C </ config > */
+struct listNode* reverse(struct listNode *x)
+//@ pre  <heap> list(x)(A), H </heap>
+//@ post <heap> list(p)(rev(A)), H </heap> /\ returns(p)
 {
-  struct nodeList *p;
-  struct nodeList *y;
+  struct listNode *p;
+  struct listNode *y;
+
   p = 0 ;
-  /*@ invariant < config > < env > p |-> ?p  x |-> ?x  y |-> ?y </ env >
-                           < heap > list(?p)(?B) list(?x)(?C) H </ heap >
-                           < form > rev(A) === rev(?C) @ ?B </ form >
-                           C </ config > */
-  while(x != 0) {
+  /*@ invariant <heap> list(p)(?B), list(x)(?C), H </heap>
+                /\ A = rev(?B) @ ?C */
+  while(x) {
     y = x->next;
     x->next = p;
     p = x;
     x = y;
   }
+
   return p;
 }
 
+struct listNode* create(int n)
+{
+  struct listNode *x;
+  struct listNode *y;
+  x = 0;
+  while (n)
+  {
+    y = x;
+    x = (struct listNode*)malloc(sizeof(struct listNode));
+    x->val = n;
+    x->next = y;
+    n -= 1;
+  }
+  return x;
+}
+
+void destroy(struct listNode* x)
+//@ pre  <heap> list(x)(?A), H </heap>
+//@ post <heap> H </heap>
+{
+  struct listNode *y;
+
+  //@ invariant <heap> list(x)(?A), H </heap>
+  while(x)
+  {
+    y = x->next;
+    free(x);
+    x = y;
+  }
+}
+
+
+void print(struct listNode* x)
+//@ pre  <heap>  list(x)(A), H </heap><out> B </out> /\ x = x0
+//@ post <heap> list(x0)(A), H </heap><out> B @ A </out>
+{
+  /*@ invariant <heap> lseg(x0,x)(?A1), list(x)(?A2), H </heap>
+                <out> B @ ?A1 </out> /\ A = ?A1 @ ?A2 */
+  while(x)
+  {
+    printf("%d ",x->val);
+    x = x->next;
+  }
+  printf("\n"); 
+}
 
 
 int main()
 {
-  struct nodeList *x;
-  struct nodeList *y;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 7;
-  x->next = 0;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
-  y->val = 6;
-  y->next = x;
-  x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
-  y->val = 5;
-  y->next = x;
-  x = y;
-  /*@ assert < config > 
-             < env > x |-> ?x  y |-> ?x </ env > 
-             < heap > list(?x)([5, 6, 7]) </ heap > 
-             < form > TrueFormula </ form > </ config > */
-  x = reverse(x) ;
-  /*@ assert < config >
-             < env > x |-> ?x  y |-> ?y </ env >
-             < heap > list(?x)([7, 6, 5]) </ heap >
-             < form > TrueFormula </ form > </ config > */
-  y = x;
-  x = x->next;
-  free(y);
-  y = x;
-  x = x->next;
-  free(y);
-  y = x;
-  x = x->next;
-  free(y);
-  /*@ assert < config >
-             < env > x |-> ?x  y |-> ?y </ env >
-             < heap > (.).Map </ heap >
-             < form > TrueFormula </ form > </ config > */
-  
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 7;
-  x->next = 0;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
-  y->val = 6;
-  y->next = x;
-  x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
-  y->val = 5;
-  y->next = x;
-  x = y;
-  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?x </ env >
-                        < heap > list(?x)(!A) </ heap >
-                        < form > TrueFormula </ form > </ config > */
-  x = reverse(x) ;
-  printf("x: %d %d %d\n",x->val, x->next->val, x->next->next->val);
-  /*@ assert < config > < env > x |-> ?x  y |-> ?y </ env >
-                        < heap > list(?x)(rev(!A)) </ heap >
-                        < form > TrueFormula </ form > </ config > */
+  struct listNode *x;
+  struct listNode *y;
+
+  x = create(5);
+  //@ assert <heap> list(x)([1, 2, 3, 4, 5]) </heap>
+  x = reverse(x);
+  //@ assert <heap> list(x)([5, 4, 3, 2, 1]) </heap>
+  destroy(x);
   return 0;
 }
 
 
-/*@ var ?x ?y ?p : ?Int */
-/*@ var ?B ?C : ?Seq */
-/*@ var !A : !Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho : ?MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
+//@ var n : Int
+//@ var A, B, C : Seq
+//@ var H : MapItem
+
