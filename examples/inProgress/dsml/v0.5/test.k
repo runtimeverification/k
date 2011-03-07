@@ -86,6 +86,6 @@ macro testConfig =
   </T>
 
 
-// send results to output cell
+// send results to output cell, exp/val pairs
 
 endkm 

@@ -30,7 +30,7 @@ rule <k> checkStructure(.Bag) => (.) <_/k>
 
 
 rule <k> checkStructure(
-                    (<instance_> 
+                    (<instance_>            
                       <attributes> ATTRINST </attributes>
                       <ofClass> C </ofClass> 
                     <_/instance>
@@ -38,7 +38,6 @@ rule <k> checkStructure(
          => 
          consistentAttributes(ATTRINST, ATTRCLS, INSTANCES)~>checkStructure(REST)
      <_/k>
- 
  <metamodel_>
     <classes_>
      <class_>
@@ -53,6 +52,7 @@ rule <k> checkStructure(
           INSTANCES
       </model>
      </models>
+
 syntax K ::= consistentAttributes( Map , Map , Bag )
 
 rule consistentAttributes( .Map, _, _ ) => . [structural]
@@ -109,7 +109,7 @@ rule allPresentAndWellTyped(val(BagItem(INSNAME : T) RESTBAG), T,
 
 syntax K ::= checkOCL ( List )
 
-rule <k_> checkOCL(.) => . <_/k>   [structural]
+rule <k> checkOCL(.) => . <_/k>   [structural]
 
 syntax ListItem ::= `OCL ( Exp ) | result ( Val )
 
@@ -117,7 +117,7 @@ rule <k> checkOCL( OCL(E) L:List) => E~>checkOCL(L) <_/k>   [structural]
 
 // when an expression finished evaluating, it is placed at the end of the ocl constraints list
 
-
+// comment  when "executing" a model
 //rule <k> v => .K <_/k>
 //<metamodel_> <oclConstraints_> (.).List => result(v) </oclConstraints> <_/metamodel>  [structural]
 endkm

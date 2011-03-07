@@ -50,10 +50,7 @@ kmod AUTOMATA is including OCL-SEMANTICS + K-CONDITION-SEARCH + CONFORMANCE
                       </class>
                    </classes>
                    <oclConstraints>  
-                       /*
                        // exactly one active state
-                       // TODO : add operation .asSet() that converts a bag to a set 
-                       // the following constraint should refer to (x#active).asSet()
                        OCL(allInstances(automaton)->forAll(x| (x#active).size() = 1)) 
                        // the two unidirectional associations (#out,#orig) form a bidirectional one
                        OCL((allInstances(state)->forAll(x| (x#out)->forAll(y| (y#orig) includes x))) and
@@ -63,8 +60,6 @@ kmod AUTOMATA is including OCL-SEMANTICS + K-CONDITION-SEARCH + CONFORMANCE
                            (allInstances(transition)->forAll(y| (y#dest)->forAll(x| (x#in) includes y))))
                        //each transition has exactly one origin and one destination
                        OCL(allInstances(transition)->forAll(y|((y#orig).size() = 1) and ((y#dest).size() = 1)))
-                       */
-                           .List           
                    </oclConstraints>
             </metamodel>
             <models>
@@ -123,7 +118,7 @@ kmod AUTOMATA is including OCL-SEMANTICS + K-CONDITION-SEARCH + CONFORMANCE
               </instance>
            </model>
         </models>
-        <k> .K </k>
+        <k>  .K </k>
         <mem> .Map </mem>
         <nextLoc> 0 </nextLoc>
         </T>
@@ -230,8 +225,7 @@ true
 BB:Bag
 )
 )
-//rule MODEL => blabla if search(<k>checkOCL(F)</k> MODEL => <k>true</k>MODEL) 
-//where MODEL = <model> blublu </model>
+
 
 
 /*
