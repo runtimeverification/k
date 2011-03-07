@@ -6,7 +6,7 @@ kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + SILOK-PROGRAMS + K + PL-I
   	       | Procs | Pgm 
   syntax IntBot ::= Int | bot
   syntax Builtins ::= IntBot
-  syntax KResult ::= IntBot
+  syntax KResult ::= IntBot | Id
 
   syntax Bool ::= IntBot !=Int IntBot [ditto]
   rule I:Int !=Int bot => true [structural]

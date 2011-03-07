@@ -16,9 +16,9 @@ kmod SILOK-SYNTAX is including PL-ID
 
   syntax BExp ::= Id = Id [prec 43] | Id /= Id [prec 43]
 
-  syntax B ::= Id := Id		      	 [prec 45]
+  syntax B ::= Id := Id		      	 [prec 45 ]
   	       | B ; B 	     		 [prec 50 gather(e E)] 
-  	       | [ BExp ] B 		 [prec 45 ]
+  	       | [ BExp ] B 		 [prec 45]
 	       | B + B 	   	  	 [prec 48]
 	       | ProcId
 
