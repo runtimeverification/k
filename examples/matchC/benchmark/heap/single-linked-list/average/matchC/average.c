@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
 int length(struct listNode* x)
@@ -22,12 +22,12 @@ int length(struct listNode* x)
   return l;
 }
 
-int summ(struct nodeList* a)
+int summ(struct listNode* a)
 //@ pre  <heap> list(a)(A), H </heap> /\ a = a0
 //@ post <heap> list(a0)(A), H </heap> /\ returns(thesum(A))
 {
   int s;
-  struct nodeList* x;
+  struct listNode* x;
   x = a;
   s = 0;
 //@ invariant <heap> lseg(a0,x)(?A), list(x)(?X), H </heap> /\ (?A @ ?X) = A /\ (s = thesum(?A))
@@ -38,15 +38,15 @@ int summ(struct nodeList* a)
   return s;
 }
 
-int average(struct nodeList* a)
+int average(struct listNode* a)
 //@ pre <heap> list(a)(A), H </heap> /\ a = a0
 //@ post <heap> list(a0)(A), H </heap> /\ returns(theavg(A))
 {
   int s;
   int l;
-//@ assert <heap> list(a0)(A), H </heap>
+// assert <heap> list(a0)(A), H </heap>
   s = summ(a);
-//@ assert <heap> list(a0)(A), H </heap> /\ s = thesum(A)
+// assert <heap> list(a0)(A), H </heap> /\ s = thesum(A)
   l = length(a);
   s = s / l;
   return s;
@@ -54,21 +54,21 @@ int average(struct nodeList* a)
 
 int main()
 {
-  struct nodeList* x;
-  struct nodeList* y;
+  struct listNode* x;
+  struct listNode* y;
   int s;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  x = (struct listNode*)malloc(sizeof(struct listNode));
   x->val = 5;
   x->next = 0;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 4;
   y->next = x;
   x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 3;
   y->next = x;
   x = y;
-  s = summ(x);
+  s = average(x);
   printf("%d\n", s);
   return 0;
 }
