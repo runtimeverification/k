@@ -7,24 +7,14 @@ struct nodeList {
 };
 
 int summ(struct nodeList* a)
-/*@ pre < config > 
-        < env > a |-> a0 </ env >
-        < heap > list(a0)(A) H </ heap > 
-        < form > TrueFormula </ form > </ config > */
-/*@ post < config > 
-         < env > ?rho </ env >
-         < heap > ?H </ heap > 
-         < form > ?sum === sum(A) /\ returns ?sum </ form > </ config > */
+//@ pre  <heap> list(a)(A), H </heap> /\ a = a0
+//@ post <heap> list(a0)(A), H </heap> /\ returns(thesum(A))
 {
   int s;
   struct nodeList* x;
   x = a;
   s = 0;
-/*@ invariant < config > 
-              < env > a |-> a0  x |-> ?x s |-> ?sum </ env >
-              < heap > lseg(a0,?x)(?A)  list(?x)(?X) H </ heap >
-              < form > (?A @ ?X) === A /\ ((?sum) === sum(?A)) </ form >
-              </ config > */
+//@ invariant <heap> lseg(a0,x)(?A), list(x)(?X), H </heap> /\ (?A @ ?X) = A /\ (s = thesum(?A))
   while (x != 0) {
     s = s + x->val;
     x = x->next;
@@ -34,6 +24,7 @@ int summ(struct nodeList* a)
 
 int main()
 {
+  int s;
   struct nodeList* x;
   struct nodeList* y;
   x = (struct nodeList*)malloc(sizeof(struct nodeList));
@@ -47,14 +38,12 @@ int main()
   y->val = 3;
   y->next = x;
   x = y;
-  summ(x);
-  printf("%d\n", summ(x));
+  // s = summ(x);
+  printf("%d\n", s);
+  // assert <out> [content] </out>
   return 0;
 }
 
-/*@ var ?x ?sum : ?Int */
-/*@ var a0 : FreeInt */
-/*@ var ?A ?X : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var H : FreeMapItem */
+//@ var s : Int
+//@ var A, X : Seq
+//@ var H : MapItem
