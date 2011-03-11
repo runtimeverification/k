@@ -1,7 +1,7 @@
 kmod THREADS is including SEQ + PL-NAT
-  configuration <thread*> 
+  configuration <thread multiplicity="*"> 
                   <k> .K </k> <holds> .Map </holds>
-                </thread*>
+                </thread>
                 <busy> .Set </busy>
   syntax K ::= spawn K       [prec 90]
              | acquire K     [strict]

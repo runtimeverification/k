@@ -6,9 +6,19 @@ use Switch;
 use Cwd; 
 use Cwd 'abs_path';
 use Digest::MD5 qw(md5 md5_hex md5_base64);
-my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 
+BEGIN {
+    unshift (@INC, (File::Basename::fileparse($0))[1]);
+}
+
+# add common functions file
+my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
+
+# add configuration parser
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
+require $path;
+
 my $verbose = 0;
 my $help = 0;
 
@@ -672,7 +682,7 @@ if ($crop == 1 && !@crop_modules) {
 
 # Check the file for syntax errors
     setVerbose() if $verbose;
-    syntax_common_check($language_file_name);
+    #syntax_common_check($language_file_name);
     
 # build inclusion trees
     appendFileInTree("$language_file_name", "");
@@ -815,7 +825,7 @@ sub latexify {
 # 
     $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
 		   "load $k_prelude\n",
-		   "show module META-MODULE .\n",
+#		   "show module META-MODULE .\n",
 		   "show module K-TECHNIQUE .\n",
 		   "quit\n");
     
@@ -836,7 +846,7 @@ sub latexify {
 		  "select $language_module_name .\n",
 		  "set show advisories on .\n",
 		  "load $k_to_latex\n",
-		  "set print attribute on .\n",
+		  "--- set print attribute on .\n",
 		  "loop latex-print .\n",
 		  map("(print $_ .)\n", @modules),
 #		  "(print $language_module_name .)\n",
@@ -1296,7 +1306,7 @@ sub maudify_file {
     # hardcoded for avoiding maudification for shared.maude
     if ($file =~ /shared\.maude/)
     {
-	return;
+		return;
     }
     
 # Slurp all $file into $_;
@@ -1309,6 +1319,13 @@ sub maudify_file {
 	# save comments
 	my ($noComments, $myComments) = remove_comments($_);
 	$_ = $noComments;
+
+	# Parse the configuration
+	if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
+	{
+		# print "FILE: $file\n";
+		parse_configuration($1, countlines($`), $file);
+	}
 
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
@@ -1371,8 +1388,10 @@ sub maudify_file {
     
     if (/\S/) 
     {
-        print "ERROR: Cannot finish processing $file\n";
-        print "ERROR: The following text does not parse:\n$_";
+#        print "ERROR: Cannot finish processing $file\n";
+#        print "ERROR: The following text does not parse:\n$_";
+		print generate_error("ERROR", 1, $file, "unknown line", "Cannot finish processing $file\n");
+		print generate_error("ERROR", 1, $file, "unknown line", "The following text does not parse:\n$_");
         exit(1);
     }
     
@@ -1382,7 +1401,8 @@ sub maudify_file {
     if ($file =~ /\.maude/) { return; }
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
-    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
+	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
+#    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
 #	$maudified = put_back_comments($maudified, $myComments);
@@ -1508,7 +1528,8 @@ sub maudify_module {
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
+#    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
+	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
 
     return $_;
 }
@@ -1532,14 +1553,16 @@ sub make_ops {
 
 # Report error and stop if the BNF form is not respected
 	if (!defined($bnf)){
-		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
+#		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
+		print generate_error("ERROR", 1, $file, "unknown line", "Syntactic categories must contain \"::=\" at line:\n$_\n");
 		exit(1);
 	}
 
 # Report error and stop if the sort name does not match $ksort
 	if ($result_sort !~ /^$ksort$/) {
-	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
-	    print "ERROR: Syntactic categories must currently match this pattern\n";
+#	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
+#	    print "ERROR: Syntactic categories must currently match this pattern\n";
+		print generate_error("ERROR", 1, $file, "unknown line", "Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\nSyntactic categories must currently match this pattern\n");
 	    exit(1);
 	}
 
@@ -1821,12 +1844,46 @@ sub on_the_fly_kvars {
 }
 
 # If there is any configuration, get all its cell labels and declare them at the end of kmodule
-sub add_cell_label_ops {
+sub add_cell_label_ops_ {
     local ($_) = @_;
     my $ops = (/(?<=\s)configuration\s+(.*?)(?:$kmaude_keywords_pattern)/s
 	       ? "ops ".join(" ",set($1 =~ /<\s*\/?\s*(.*?)\s*[\*\+\?]?\s*>/gs))." : -> CellLabel " : "");
     s/(?=endkm)/$ops?"$ops ":""/se;
+
+	# switch to old accepted configuration
+	my $i = 0;
+	while ($i < 20)
+	{
+		s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
+		$i++;
+	};
+
     return $_;
+}
+
+sub add_cell_label_ops
+{
+	local $_ = shift;
+	if (/(?<=\s)configuration\s+(.*?)(?=$kmaude_keywords_pattern)/s)
+	{
+		parse_configuration($1, 0, "$language_file_name.k");
+		my $label_declarations = get_cell_label_declarations();
+		s/(?=endkm)/ $label_declarations /s;
+
+		# switch to old accepted configuration
+		# replace multiplicity		
+#		my $i = 0;
+#		while ($i < 20)
+#		{
+#			s!<\s*([a-zA-Z\-]+)\s+multiplicity="(.*?)"\s*>(.*?)<\/\1>!<$1$2>$3</$1$2>!s;
+#			$i++;
+#		};
+
+		# replace color attribute
+#		s!<\s*([a-zA-Z\-]+)\s*color=".*?"\s*>!<$1>!sg;
+	}
+
+	$_;
 }
 
 # This subroutine returns a list of all spacifiable tokens that appear in operations defined (using op) in the argument
@@ -1858,7 +1915,7 @@ sub add_tokens {
     {
 	while ($token =~ /!&!&!/g)
 	{
-	    $token =~ s/!&!&!/$strs[$index]/;
+	    $token =~ s/!&!&!/$strs[$index]/ if defined $strs[$index];
 	    $index ++;
 	}
     }
@@ -2040,7 +2097,7 @@ sub add_subsorts
 {
     my $supersorts = find_super_sorts();
     my @modules = split(/\s+/, getModuleList());
-    my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero#";
+    my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#CellKey#CellAttribute#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero";
     my $dir = cwd;
     
     return if (scalar(@modules) == 0);

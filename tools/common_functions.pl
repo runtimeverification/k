@@ -1,4 +1,4 @@
-# !usr/bin/perl -w
+#!/usr/bin/perl -w
 use strict;
 use warnings;
 use File::Spec;
@@ -265,7 +265,9 @@ sub validate_open_cells()
 }
 
 # sub checks if there is a morphism between rule tree and configuration tree
-sub validate_node()
+# now, when the xml parser for configurations is available this function is 
+# renamed into validate_node
+sub validate_node_()
 {
     # get current node and ref to arguments
     my ($node, $ref) = (shift, shift);
@@ -636,8 +638,9 @@ sub getFullName
     
     if ($file =~ /\.k?(maude)?$/) {
 	if (! -e $file) {
-	    print("File $file does not exist\n");
-	    exit(1);
+#		print("File $file does not exist\n");
+		print ("ERROR", 1, $file, "unknown line", "file $file does not exist");
+		exit(1);
 	}
 	return $file;
     }
@@ -657,8 +660,9 @@ sub getFullName
 	}
 	# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
 	else {
-	    print("Neither of $file.k, $file.kmaude, or $file.maude exist\n");
-	    exit(1);
+#		print("Neither of $file.k, $file.kmaude, or $file.maude exist\n");
+		print ("ERROR", 1, "$file.k", "unknown line", "Neither of $file.k, $file.kmaude, or $file.maude exist");
+		exit(1);
 	}
     }
     return $file;
@@ -984,7 +988,7 @@ my $configuration_tree;
 my $cfgNode;
 my $configSubtree;
 
-sub replace_dots
+sub replace_dots_
 {
     local $_ = shift;
     
@@ -1045,96 +1049,103 @@ sub replace_dots
 	    my $i = 0;
 	    for ($i = 0; $i < $chno; $i++)
 	    {
-		$temp_rule = Tree::Nary->nth_child($rule_tree, $i);
-		# get corresponding subtree from configuration tree
-		$tmp_cfg = Tree::Nary->find($configuration_tree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $temp_rule->{data});
-		$configSubtree = $tmp_cfg;
-		
-		# assign to each leaf inside rule tree its corresponding leaf from configuration tree
-		if (Tree::Nary->n_nodes($tmp_cfg, $Tree::Nary::TRAVERSE_ALL) > 0)  
-		{
-		    Tree::Nary->traverse($temp_rule, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, -1, \&collect_rule_leaf);
-		}
-		else
-		{
-		    # reset "registers"
-		    $rule_leafs = "";
-		    $config_leafs = "";
-		}
+            $temp_rule = Tree::Nary->nth_child($rule_tree, $i);
+#            print "SEARCHING: " . $temp_rule->{data} . "\n in CONFIGURATION: ";
+#            printTree($configuration_tree);
+            # get corresponding subtree from configuration tree
+            $tmp_cfg = Tree::Nary->find($configuration_tree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $temp_rule->{data});
+            $configSubtree = $tmp_cfg;
+            
+            # assign to each leaf inside rule tree its corresponding leaf from configuration tree
+#            print "TREE CFG:";
+#            printTree($tmp_cfg);
+            if (Tree::Nary->n_nodes($tmp_cfg, $Tree::Nary::TRAVERSE_ALL) > 0)  
+            {
+                Tree::Nary->traverse($temp_rule, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, -1, \&collect_rule_leaf);
+            }
+            else
+            {
+                # reset "registers"
+                $rule_leafs = "";
+                $config_leafs = "";
+            }
 	    }
 	    
 	    # if there is something to change ....
 	    if ($rule_leafs ne "" && $config_leafs ne "")
 	    {
-		# prepare data structures
-		my @rule_ls = split(/&&&&/, $rule_leafs);
-		my @rule_ls1 = split(/&&&&/, $rule_leafs);
-		my @cfg_ls = split(/&&&&/, $config_leafs);
-		
-		foreach (@rule_ls)
-		{
-		    # modify each leaf if it contains dots 
-		    if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/ || $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/)
-		    {
-			$cfg_ls[0] = ".$1" if $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/;
-			
-			s/^\s+//sg;
-			s/\s+$//sg;
-
-			if (m/\.\s*\=>/)
-			{
-			    s/\Q$&\E/$cfg_ls[0] =>/;
-			}
-			elsif (m/(\=>\s*\.)(?:[^LMBSK])/ || m/(\=>\s*\.$)/)
-			{
-			    s/\Q$1\E/=> $cfg_ls[0]/;
-			}
-			elsif ($_ eq ".")
-			{
-			    $_ = $cfg_ls[0];
-			}
-
-		    }
-		    shift(@cfg_ls);
-		}
-		# use a counter to avoid multiple replacements of the same leaf inside rule
-		# this can cause variuos troubles
-		my $cnt = 0;
-		foreach(@rule_ls1)
-		{		
-		    # if there is a single dot, just replace it with its corresponding type
-		    if ($_ eq ".")
-		    {
-			$rule1 =~ s/ \. / $rule_ls[0] /;
-		    }
-		    else 
-		    {
-			# count occurences 
-			my $count = () = $rule1 =~ /\Q$_\E/g;
-			# set counter to do the precised number of replacements...only once. :-)
-			$cnt = $count if ($count >= 1 && $cnt == 0);
-			
-			# once for all when counter is set to 1
-			if ($cnt == 1)
-			{
-			    $rule1 =~ s/\Q$_\E/$rule_ls[0]/g;
-			}
-			
-			# jump while counter is still bigger than 1
-			if ($cnt > 1)
-			{
-			    $cnt = $cnt - 1;
-			    # move on in the replacements too
-			    shift(@rule_ls);
-			    next;
-			}
-			
-		    }
-		    shift(@rule_ls);
-		}
-		
-		$rule_leafs = "";
-		$config_leafs = "";
+#            print "RULE LEAF: $rule_leafs\nCONFIG LEAF: $config_leafs\n";
+            # prepare data structures
+            my @rule_ls = split(/&&&&/, $rule_leafs);
+            my @rule_ls1 = split(/&&&&/, $rule_leafs);
+            my @cfg_ls = split(/&&&&/, $config_leafs);
+            
+            foreach (@rule_ls)
+            {
+                # modify each leaf if it contains dots 
+                if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/ || $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/)
+                {
+                    $cfg_ls[0] = ".$1" if $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/;
+                    
+                    s/^\s+//sg;
+                    s/\s+$//sg;
+                    
+                    if (m/\.\s*\=>/)
+                    {
+                        s/\Q$&\E/$cfg_ls[0] =>/;
+                    }
+                    elsif (m/(\=>\s*\.)(?:[^LMBSK])/ || m/(\=>\s*\.$)/)
+                    {
+                        s/\Q$1\E/=> $cfg_ls[0]/;
+                    }
+                    elsif ($_ eq ".")
+                    {
+                        $_ = $cfg_ls[0];
+                    }   
+                }
+                shift(@cfg_ls);
+            }
+            # use a counter to avoid multiple replacements of the same leaf inside rule
+            # this can cause variuos troubles
+            my $cnt = 0;
+            foreach(@rule_ls1)
+            {		
+ #               print "RULE: $_\n";
+                # if there is a single dot, just replace it with its corresponding type
+                if ($_ eq ".")
+                {
+#                    print "\tRule: $rule1\n";
+                    $rule1 =~ s/ \. / $rule_ls[0] /;
+#                    print "\trule: $rule1\n";
+                }
+                else 
+                {
+                    # count occurences 
+                    my $count = () = $rule1 =~ /\Q$_\E/g;
+                    # set counter to do the precised number of replacements...only once. :-)
+                    $cnt = $count if ($count >= 1 && $cnt == 0);
+                    
+                    # once for all when counter is set to 1
+                    if ($cnt == 1)
+                    {
+                        $rule1 =~ s/\Q$_\E/$rule_ls[0]/g;
+                    }
+                    
+                    # jump while counter is still bigger than 1
+                    if ($cnt > 1)
+                    {
+                        $cnt = $cnt - 1;
+                        # move on in the replacements too
+                        shift(@rule_ls);
+                        next;
+                    }
+                    
+                }
+                shift(@rule_ls);
+            }
+            
+            $rule_leafs = "";
+            $config_leafs = "";
 	    }
 	}
 	
@@ -1606,43 +1617,43 @@ sub countlines
 # then apply that macro ("counter" version)
 sub resolve_where_macro($)
 {
-    local $_ = shift;
-    my %macro_map = ();
-    my %macro_order = ();
-    my $count = 0;
+	local $_ = shift;
+	my %macro_map = ();
+	my %macro_order = ();
+	my $count = 0;
 	my $limit = 100;
 
-    # where macro can be found only in rules
-    if (/^rule/)
-    {
-        # locate where macro if any
-        if (/(?<=\s)(where(\s+)(.*?))(\s+)(?=ATTR[0-9]*)/sg)
-        { 
-            # extract needed data
-            my $macros = $3;
-            my $all = $&;
+	# where macro can be found only in rules
+	if (/^rule/)
+	{
+		# locate where macro if any
+		if (/(?<=\s)(where(\s+)(.*?))(\s+)(?=ATTR[0-9]*)/sg)
+		{ 
+			# extract needed data
+			my $macros = $3;
+			my $all = $&;
 
-            # build an empty string which will keep the 
-            # length and the number of lines for where macro
-            my $macros_template = $all;
-            $macros_template =~ s/[^\n]/ /sg;
+			# build an empty string which will keep the 
+			# length and the number of lines for where macro
+			my $macros_template = $all;
+			$macros_template =~ s/[^\n]/ /sg;
 
-            # exclude the where macro from the rule body
-            # and replace it with whitespaces
-            s/\Q$all\E/$macros_template/sg;
-            
-#			print "MACROS:|$macros|\n";
+			# exclude the where macro from the rule body
+			# and replace it with whitespaces
+			s/\Q$all\E/$macros_template/sg;
 
-            # first, collect macros
-            # macro_map contains all macros mapped to their values
-            # macro_order contains macros occurence order mapped to their names
-			while ($macros =~ /(^|and)\s*([\w:]+)\s+=\s+(.*?)(?=(and|$))/sg)
+			#			print "MACROS:|$macros|\n";
+
+			# first, collect macros
+			# macro_map contains all macros mapped to their values
+			# macro_order contains macros occurence order mapped to their names
+			while ($macros =~ /(^|and)\s*(\w+)\s+=\s+(.*?)(?=(and|$))/sg)
 			{
-#				print "$1\n$2\n$3\n\n";
- 				$macro_map{$2} = $3;
-                $macro_order{$count++} = $2;
-            }
-            
+				#				print "$1\n$2\n$3\n\n";
+				$macro_map{$2} = $3;
+				$macro_order{$count++} = $2;
+			}
+
 			# apply round robin algorithm
 			my $round = 0;
 			
@@ -1652,22 +1663,22 @@ sub resolve_where_macro($)
 			# apply the macros until limit is reached
 			while ($limit > 0)
 			{
-#				print "ROUND: $round COUNT: $count\n\n";
+				#				print "ROUND: $round COUNT: $count\n\n";
 				# round robin; do not change the order of these instructions
 				$round ++ if $round < $count;
 				$round = 0 if $round == $count;
 
 				# replace macro
-#				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z0-9])/{print "BEFORE: $_\n"; ++$i; print "R: $round\n";}$macro_map{$macro_order{$round}}/sge;
+				#				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z0-9])/{print "BEFORE: $_\n"; ++$i; print "R: $round\n";}$macro_map{$macro_order{$round}}/sge;
 				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z])/$macro_map{$macro_order{$round}}/sg;
 
 				# decrement limit
 				$limit --;
 			}
 
-#			print "MACRO: $macros\n";
-#			print "ALL: $all\n";
-#			print "RULE: $_\nMACRO REPLACEMENTS:$i\n";
+		#			print "MACRO: $macros\n";
+		#			print "ALL: $all\n";
+		#			print "RULE: $_\nMACRO REPLACEMENTS:$i\n";
 		}
 	}
 	
@@ -1962,14 +1973,15 @@ sub run_maude_
  	return $result;
 }
 
-
+# checks for incompatible sorts
 sub check_incompatible
 {
 	my $file = shift;
 	$file =~ s/\.[a-z]+$//sg;
 
 	my $module = shift;	
-
+	
+	# get the output from maude and then parse it.
 	local $_ = run_maude_("running maude ..",
 			"load $file\n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'Map) . \n",
@@ -2005,7 +2017,8 @@ sub check_incompatible
 			s/result\s+[a-zA-Z]+:(.*?)(?=\n)/{$list1 = $1;}/se;
 			s/result\s+[a-zA-Z]+:(.*?)(?=\n)/{$list2 = $1;}/se;
 
-			print "Error: $sort1 and $sort2 have the same kind.\nThis error may occur when $sort1 and $sort2 have common lesser sorts.\nLesser sorts for $sort1: $list1\nLesser sorts for $sort2: $list2\n\n";
+#			print "Error: $sort1 and $sort2 have the same kind.\nThis error may occur when $sort1 and $sort2 have common lesser sorts.\nLesser sorts for $sort1: $list1\nLesser sorts for $sort2: $list2\n\n";
+			print generate_error("ERROR", 1, $file, "unknown line", "$sort1 and $sort2 have the same kind.\nThis error may occur when $sort1 and $sort2 have common lesser sorts.\nLesser sorts for $sort1: $list1\nLesser sorts for $sort2: $list2");
 			exit(1);
 		}
 	}

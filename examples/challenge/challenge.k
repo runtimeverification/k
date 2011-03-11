@@ -11,14 +11,14 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
   configuration
     <T>
       <agents>
-        <agent*> 
+        <agent multiplicity="*" color="red"> 
           <threads>
-            <thread*>
+            <thread multiplicity="*">
               <k>.K</k>
               <env>.Map</env>
               <fstack>.List</fstack>
               <holds>.Map</holds>
-            </thread*>
+            </thread>
           </threads>
           <aspect>.K</aspect>
           <busy>.Set</busy>
@@ -27,23 +27,23 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
           <ptr>.Map</ptr>
           <me>0</me>
           <parent>-1</parent>
-        </agent*>
+        </agent>
       </agents>
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier>
       <waiting>.Set</waiting>
       <messages>
-        <message*>
+        <message multiplicity="*">
           <from>.K</from>
           <to>.Set</to>
           <body>.K</body>
-        </message*>
+        </message>
       </messages>
-      <I/O>
+      <IO>
         <in>.List</in>
         <out>.List</out>
-      </I/O>
+      </IO>
     </T>
 
 --- Basic arithmetic operations; integers are converted to reals when needed
