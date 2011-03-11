@@ -286,22 +286,9 @@ fmod K-META-CONFIG is
   including META-TERM-EXTRAS .
   including META-LEVEL .
   including INT .
-  var Label Label' Ct MKey MVal : Constant . var LabelT LabelT' Contents Contents' T : Term .
+  var Label Label' : Constant . var Contents Contents' T : Term .
   var Q Q' : Qid .  var B B' : Multiplicity . var E E' : Ellipses .  var M : Module .  
-  var AS AS' : AttrSet .  var MAS : MembAxSet .  var S : Sort .  var Str : String .
-  var SC : SplitCell .
-
-
-
-  op attrsCtorS : -> Qid . eq attrsCtorS = '__ .
-  op attrCtorS : -> Qid . eq attrCtorS = '_=_ .
-  op colorKeyS : -> Qid .
-  eq colorKeyS = 'color .
-  op multiplicityKeyS : -> Qid .
-  eq multiplicityKeyS = 'multiplicity .
-  op ellipsesKeyS : -> Qid .
-  eq ellipsesKeyS = 'ellipses .
-
+  var AS : AttrSet .  var MAS : MembAxSet .  var S : Sort .
 
   op extractConfTerm : Module ~> Term .
   eq extractConfTerm(M) = extractConfTerm(getMbs(M)) .
@@ -317,150 +304,75 @@ fmod K-META-CONFIG is
   sort Ellipses .
   ops none : -> Ellipses .
   op error : -> [Ellipses] .
-  op symbolE_ : Ellipses -> Qid .
-  eq symbolE none = '<_>_</_> .
-
-  op symbolES_ : Ellipses -> String .
-  eq symbolES none = "none" .
+  op symbol_ : Ellipses -> Qid .
+  eq symbol none = '<_>_</_> .
 
 
   sort Multiplicity .
   ops maybe one some any : -> Multiplicity .
 
-  sorts AttrKey AttrVal .
+  op symbol_ : Multiplicity ~> Qid .
+  eq symbol maybe = '_? .
+  eq symbol some = '_+ .
+  eq symbol any = '_* .  
+  op error : -> [Multiplicity] .
 
-  var AK : AttrKey .
-  var AV AV' : AttrVal .
-  var CA : Term .
 
-  op _|->_ : AttrKey AttrVal -> Attr [prec 0] .
-  op cellLabel:_ : Term -> Attr .
-  ops multiplicity ellipses color : -> AttrKey  .
-  subsort Multiplicity Ellipses String < AttrVal .
-  
-  op symbolAK_ : AttrKey ~> Qid .
-  eq symbolAK multiplicity = 'multiplicity .
-  eq symbolAK ellipses = 'ellipses .
-  eq symbolAK color = 'color .
-
-  op symbolM_ : Multiplicity ~> String .
-  eq symbolM maybe = "?" .
-  eq symbolM some = "+" .
-  eq symbolM any = "*" .  
-  eq symbolM one = "" .
-  op error : -> [AttrVal] .
-  op error : -> [AttrKey] .
-
-  op parseAttribute : Term -> Attr . 
- ceq parseAttribute(Q[MKey,MVal]) = (getAttributeKey(getName(MKey))) |-> parseAttributeVal(getAttributeKey(getName(MKey)),downTerm(MVal,""))
-  if Q = attrCtorS /\ getType(MKey) = CellKey .
-
-  op getAttributeKey_ : Qid -> AttrKey .
-  eq getAttributeKey(Q) = if Q == symbolAK multiplicity then multiplicity else if Q == symbolAK color then color else if Q == symbolAK ellipses then ellipses else error fi fi fi .
-
-  op parseAttributeVal : AttrKey String ~> AttrVal .
-  eq parseAttributeVal(color, Str) = Str .
-  eq parseAttributeVal(ellipses, Str) = getEllipsesValue(Str) .
-  eq parseAttributeVal(multiplicity, Str) = getMultiplicityValue(Str) .
-
-  op parseAttributes : Term -> AttrSet .
-  eq parseAttributes(Label) = cellLabel: Label [print "parsed Attributes done: " Label] .
- ceq parseAttributes(Q[Label,Label']) = cellLabel: (Q[Label,Label'])
-  if Q = replaceS [print "parsed Attributes done: " Q "[" Label "," Label' "]"] .
- ceq parseAttributes(Q[LabelT,CA]) = parseAttributes(LabelT) parseAttribute(CA) 
-  if  Q = attrsCtorS [print "parsing attribute " CA] .
-
-  
-  op initialCellAttrs : -> AttrSet .
-  eq initialCellAttrs = multiplicity |-> one ellipses |-> none color |-> "black" .
-
-  op _[[_]] : AttrSet AttrSet ~> AttrSet .
-  eq (AK |-> AV  AS)[[AK |-> AV' AS']] = (AK |-> AV' AS)[[AS']] .
-  eq AS[[none]] = AS .
-
-  op _[_] : AttrSet AttrKey ~> AttrVal .
-  eq (AK |-> AV AS)[AK] = AV .
-
-  op _-_ : AttrSet AttrSet -> AttrSet .
-  eq (A  AS) - (A AS') = AS - AS' .
-  eq (AS - AS') = (AS) [owise] .
-  var A : Attr .
-
-  op getMultiplicityValue : String -> Multiplicity .
-  eq getMultiplicityValue(Str) = if Str == symbolM one then one else if Str == symbolM maybe then maybe else if Str == symbolM some then some else if Str == symbolM any then any else error fi fi fi fi .
-
-  op getEllipsesValue : String -> Ellipses .
- ceq getEllipsesValue(Str) = none if Str == symbolES none .
+  op getMultiplicity_ : Qid -> Multiplicity .
+  eq getMultiplicity(Q) = if Q == symbol maybe then maybe else if Q == symbol some then some else if Q == symbol any then any else error fi fi fi .
 
   sort SplitCell .
-  op {_,_,_} : Term Term AttrSet -> SplitCell .
+  op {_,_,_,_} : Term Term Multiplicity Ellipses -> SplitCell .
 
   op splitKCell : Term ~> SplitCell .
-  eq splitKCell(Q[LabelT,Contents,LabelT']) = splitKCell(Contents,getEllipses(Q), parseAttributes(LabelT)) [print "splitting 1: " Q " " LabelT] .
-
-  op splitKCell : Term Ellipses AttrSet ~> SplitCell .
-  eq splitKCell(Contents, E, (cellLabel: LabelT) AS)
-   = {LabelT, Contents, initialCellAttrs[[ellipses |-> E]][[AS]]} .
----  [print "splitting 2: " LabelT " " B " " AS] .
----  eq splitKCell(Contents:[Term], B:[Ellipses], AS:[AttrSet]) = {'error.Big, none, none} [owise print "error " Contents:[Term] ", " B:[Ellipses] ", " AS:[AttrSet]] .
+  eq splitKCell(Q[Label,Contents,Label]) = {Label, Contents, one, getEllipses(Q)} .
+  eq splitKCell(Q[Q'[Label],Contents,Q'[Label]]) 
+   = {Label, Contents,getMultiplicity(Q'), getEllipses(Q)} .
+ ceq splitKCell(Q[Q'[Label,Label'],Contents,Q'[Label,Label']]) = {Q'[Label,Label'], Contents,one, getEllipses(Q)} if Q' = replaceS .
 
   op getEllipses : Qid -> Ellipses .
-  ceq getEllipses(Q) = none if Q = symbolE none .
+  ceq getEllipses(Q) = none if Q = symbol none .
 
   op getEllipses : SplitCell -> Ellipses .
-  eq getEllipses({T,Contents,AS}) = AS[ellipses] .
+  eq getEllipses({T,Contents,B,E}) = E .
   op setEllipses : SplitCell Ellipses -> SplitCell .
-  eq setEllipses({T,Contents,AS}, E') = {T,Contents,AS[[ellipses |-> E']]} .
+  eq setEllipses({T,Contents,B,E}, E') = {T,Contents,B,E'} .
 
   op getName : SplitCell -> Qid .
-  eq getName({Label,Contents,AS}) = getName(Label) . 
- ceq getName({Q'[Label,Label'],Contents,AS}) = getName(Label) if Q' = replaceS .
+  eq getName({Label,Contents,B,E}) = getName(Label) .
+ ceq getName({Q'[Label,Label'],Contents,B,E}) = getName(Label) if Q' = replaceS .
   op setName : SplitCell Qid -> SplitCell .
-  eq setName({T,Contents,AS},Q) = {mkCellLabel(Q),Contents,AS} .
+  eq setName({T,Contents,B,E},Q) = {mkCellLabel(Q),Contents,B,E} .
 
   op getContents : SplitCell -> Term .
-  eq getContents({T,Contents,AS}) = Contents .
+  eq getContents({T,Contents,B,E}) = Contents .
   op setContents : SplitCell Term -> SplitCell .
-  eq setContents({T,Contents,AS}, Contents') = {T,Contents',AS} .
+  eq setContents({T,Contents,B,E}, Contents') = {T,Contents',B,E} .
 
   op getMultiplicity : SplitCell -> Multiplicity .
-  eq getMultiplicity({T,Contents,AS}) = AS[multiplicity] .
+  eq getMultiplicity({T,Contents,B,E}) = B .
   op setMultiplicity : SplitCell Multiplicity -> SplitCell .
-  eq setMultiplicity({T,Contents,AS}, B') = {T,Contents,AS[[multiplicity |-> B']]} .
+  eq setMultiplicity({T,Contents,B,E}, B') = {T,Contents,B',E} .
 
   op plugCell : SplitCell -> Term .
-  eq plugCell({T,Contents,AS}) = symbolE none[plugAttributes(T,AS - initialCellAttrs),Contents,T] .
-
-  op plugAttributes : Term AttrSet ~> Term .
-  eq plugAttributes(LabelT, AK |-> AV AS)
-   = plugAttributes(attrsCtorS[LabelT,attrCtorS[mkConstant(symbolAK AK,CellKey), upTerm(mkString(AK,AV))]],AS) .
-  eq plugAttributes(LabelT, none) = LabelT .
-  
-  op mkString : AttrKey AttrVal ~> String .
-  eq mkString(color, Str) = Str .
-  eq mkString(ellipses, E) = symbolES(E) .
-  eq mkString(multiplicity, B) = symbolM(B) .
-
-
-  op getAttributes : SplitCell -> AttrSet .
-  eq getAttributes({T,Contents,AS}) = AS .  
-
-  op setAttributes : SplitCell AttrSet -> SplitCell .
-  eq setAttributes({T,Contents,AS}, AS') = {T,Contents,AS'} .
+  eq plugCell({T,Contents,B,E}) = symbol E[cellLabel(T,B),Contents,cellLabel(T,B)] .
 
   op mkCell : Qid Term -> Term .
-  eq mkCell(Q,Contents) = plugCell({mkCellLabel(Q),Contents,initialCellAttrs}) .
+  eq mkCell(Q,Contents) = plugCell({mkCellLabel(Q),Contents,one,none}) .
 
   op mkCellLabel : Qid -> Constant . 
   eq mkCellLabel(Q) = qid(string(Q) + ".CellLabel") .
+
+  op multiCellS : -> Qid .
+  eq multiCellS = '_* .  
+
+  op cellLabel : Term Multiplicity -> Term .
+  eq cellLabel(T,B) = if B == one then T else symbol B[T] fi .
 
   ops Map Bag List Set : -> Sort .
   eq Map = 'Map . eq Bag = 'Bag . eq List = 'List . eq Set = 'Set .
   op CellLabel : -> Sort .
   eq CellLabel = 'CellLabel .
-  op CellKey : -> Sort .
-  eq CellKey = 'CellKey .
-
 
   op emptyCt : Sort -> Constant .
   eq emptyCt(S) = if S == Bag then mkConstant('.,Bag) else if S == Map then mkConstant('.,Map) else if S == List then mkConstant('., List) else if S == K then mkConstant('., K) else if S == Set then mkConstant('., Set) else 'error.K fi fi fi fi fi .
@@ -470,6 +382,8 @@ fmod K-META-CONFIG is
   
   op itemCtor : Sort -> Qid .
   eq itemCtor(S) = if S == Bag then 'BagItem else if S == Map then 'MapItem else if S == List then 'ListItem else if S == Set then 'SetItem else 'error fi fi fi fi .
+  
+  
 
   var Ty : Type .
 
@@ -484,15 +398,11 @@ endfm
 fmod K-META-OPEN-CELLS is 
   including K-META-CONFIG .
   ops left right both : -> Ellipses .
-  eq symbolE left = '<_>..._</_> .
-  eq symbolE right = '<_>_...</_> .
-  eq symbolE both = '<_>..._...</_> .
-  eq symbolES left = "left" .
-  eq symbolES right = "right" .
-  eq symbolES both = "both" .
-  var Q : Qid .  var Str : String .
-  eq getEllipses(Q) = if (Q == symbolE left) then left else if (Q == symbolE right) then right else if (Q == symbolE both) then both else if (Q == symbolE none) then none else error fi fi fi fi .
-  eq getEllipsesValue(Str) = if (Str == symbolES left) then left else if (Str == symbolES right) then right else if (Str == symbolES both) then both else if (Str == symbolES none) then none else error fi fi fi fi .
+  eq symbol left = '<_>..._</_> .
+  eq symbol right = '<_>_...</_> .
+  eq symbol both = '<_>..._...</_> .
+  var Q : Qid .
+  eq getEllipses(Q) = if (Q == symbol left) then left else if (Q == symbol right) then right else if (Q == symbol both) then both else if (Q == symbol none) then none else error fi fi fi fi .
 endfm
 
 fmod META-ANONYMOUS-VARIABLE is

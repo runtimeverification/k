@@ -403,19 +403,9 @@ mod K-POLYMORPHIC-VARIABLES is
   op [HOLE] : -> Anonymous [poly(0)] .
 endm
 
-mod K-CELL-ATTRS is
-  including K-TECHNIQUE .
-  including PL-STRING .
-  sort CellAttribute CellKey  .
-
-  op __ : CellLabel CellAttribute -> CellLabel .
-  op _=_ : CellKey String -> CellAttribute .
-endm  
-
-
 --- ... level
 mod K-OPEN-CELLS is
-  including K-CELL-ATTRS .
+  including K-TECHNIQUE .
   op <_>..._...</_> : CellLabel K CellLabel -> BagItem [prec 0] .
   op <_>..._...</_> : CellLabel List CellLabel -> BagItem [prec 0] .
   op <_>..._...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
@@ -431,22 +421,17 @@ mod K-OPEN-CELLS is
   op <_>_...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
   op <_>_...</_> : CellLabel Set CellLabel -> BagItem [prec 0] .
   op <_>_...</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
-  op ellipses : -> CellKey .
 endm
 
 ---- Context transformers level
 
 mod K-CONFIG is
-  including K-CELL-ATTRS .
+  including K-TECHNIQUE .
   including K-SENTENCE .
   op configuration_ : Bag -> [KSentence] [prec 127] .
-  op multiplicity : -> CellKey .
-  op color : -> CellKey .
----(
   op _* : CellLabel -> CellLabel .
   op _? : CellLabel -> CellLabel .
   op _+ : CellLabel -> CellLabel .
----)
 endm
 
 --- Latex Annotations

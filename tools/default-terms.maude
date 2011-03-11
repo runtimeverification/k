@@ -15,7 +15,7 @@ fmod DEFAULT-TERMS is
   
   op defaultTerms : Qid Module Term ~> Module .
   var IL : ImportList . var SSDS : SubsortDeclSet . 
-  eq defaultTerms(Q, M, T) = setName(setRls(setEqs(setMbs(M, defaultTermsMbs(getMbs(M),T)),defaultTermsEqs(getEqs(M),T)),defaultTermsRls(getRls(M),T)),Q) [print "Applying default terms. Configuration: " T] . 
+  eq defaultTerms(Q, M, T) = setName(setRls(setEqs(setMbs(M, defaultTermsMbs(getMbs(M),T)),defaultTermsEqs(getEqs(M),T)),defaultTermsRls(getRls(M),T)),Q) [print "Applying default terms."] . 
 
   sort TermBool .  op {_,_} : TermList Bool -> TermBool .
   op getTerm : TermBool -> Term .  eq getTerm({T,B}) = T .
@@ -66,7 +66,7 @@ fmod DEFAULT-TERMS is
   op cleanConf : Term [SplitCell] -> Term .
   eq cleanConf(T, SC')
    = if SC' :: SplitCell then if getMultiplicity(SC') == maybe or  getMultiplicity(SC') == any then emptyCt(Bag)
-     else plugCell(setAttributes(setContents(SC',cleanConf(getContents(SC'))),initialCellAttrs)) fi
+     else plugCell(setMultiplicity(setContents(SC',cleanConf(getContents(SC'))),one)) fi
      else $cleanConf(T) fi .
   op $cleanConf : Term -> Term .
   eq $cleanConf(Ct) = Ct .
@@ -80,7 +80,7 @@ fmod DEFAULT-TERMS is
   eq findCell((T,Tl),Q) = findCell((T,Tl),Q,splitKCell(T)) .
   op findCell : TermList Qid SplitCell ~> Term .
   eq findCell((T,Tl),Q,SC')
-   = if SC' :: SplitCell then if getName(SC') == Q then T else findCell((Tl,getContents(SC')),Q) fi else $findCell((T,Tl),Q) fi [print SC'] .
+   = if SC' :: SplitCell then if getName(SC') == Q then T else findCell((Tl,getContents(SC')),Q) fi else $findCell((T,Tl),Q) fi .
 
   op $findCell : TermList Qid ~> Term .
   eq $findCell((O[Tl'],Tl),Q) = findCell((Tl,Tl'),Q) .
