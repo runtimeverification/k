@@ -2,7 +2,7 @@ require silok-programs
 
 kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + SILOK-PROGRAMS + K + PL-INT --- + K-WRAPPERS
 
-  syntax K ::= B | restore ( Map ) | lvars | gvars | List{Id} 
+  syntax K ::= B | restore ( Map ) | lvars | gvars | ListId 
   	       | Procs | Pgm 
   syntax IntBot ::= Int | bot
   syntax Builtins ::= IntBot
@@ -16,12 +16,12 @@ kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + SILOK-PROGRAMS + K + PL-I
 
   syntax K ::= wklist ( List{K} )
 
-  syntax List{K} ::= `List`{K`} ( List{Id} )
+  syntax List{K} ::= `List`{K`} ( ListId )
 
-  rule List{K}(Id:Id,LI:List{Id}) => Id ,, List{K}(LI) 
-       if LI =/=Bool .List{Id} [structural]
+  rule List{K}(Id:Id,LI:ListId) => Id ,, List{K}(LI) 
+       if LI =/=Bool .ListId [structural]
   rule List{K}(Id) => Id [structural]
-  rule List{K}(.List{Id}) => .List{K} [structural]
+  rule List{K}(.ListId) => .List{K} [structural]
 
   configuration <T> 
                   <k> .K </k>

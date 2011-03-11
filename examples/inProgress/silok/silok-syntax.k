@@ -3,9 +3,9 @@ require ../../../k-prelude
 
 kmod SILOK-SYNTAX is including PL-ID
   
-  syntax List{Id} ::= .List{Id} | Id | List{Id} , List{Id} [assoc id: .List{Id} strict hybrid] 
+  syntax ListId ::= .ListId | Id | ListId `, ListId [assoc id: .ListId strict hybrid] 
 
-  syntax Pgm ::= gvars: List{Id} lvars: List{Id} { Procs }
+  syntax Pgm ::= gvars: ListId lvars: ListId { Procs }
 
   syntax Procs ::= ProcId :: B [prec 55 gather(e E)]
   	 	   | Procs Procs [prec 60 gather(e E)]

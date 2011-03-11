@@ -130,7 +130,7 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
                 </T>
 
 
-  rule <k> (gvars: LG:List{Id}  lvars: LL:List{Id} { Ps:Procs }) => Ps <_/k>
+  rule <k> (gvars: LG:ListId  lvars: LL:ListId { Ps:Procs }) => Ps <_/k>
        <state> S:Map => S[bot/(List{K}(LG,LL),,frzs(List{K}(LG)))] </state>
        <pgm> .Map => ( gvars|->wklist(List{K}(LG)) lvars|->wklist(List{K}(LL)))</pgm>
        <abs> 0 => lengthList{K}(List{K}(LG,LL,LG)) </abs>

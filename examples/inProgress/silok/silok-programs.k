@@ -11,7 +11,7 @@ macro pgm1 =
   gvars: g1, g2, g3
   lvars: l1, l2, l3 
   {
-  main :: g1 := new ; g2 := g1 ; [ g2 = g1 ] g3 := new ;
+  main :: breakpoint; g1 := new ; g2 := g1 ; [ g2 = g1 ] g3 := new ;
   g3 := new ; g3 := new ; g3 := new ; g2 := new 
   }
 
