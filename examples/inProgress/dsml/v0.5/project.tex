@@ -1,0 +1,91 @@
+\documentclass[a4paper,11pt,twoside]{article}
+\usepackage[utf8x]{inputenc}
+
+%\usepackage{TheStyle}
+\usepackage{fullpage}
+\usepackage{float}
+\usepackage{theorem}
+
+\usepackage[english]{babel}
+
+
+
+\newcommand{\dsml}{\textsc{dsml}}
+\newcommand{\dsmls}{\textsc{dsml}s}
+\newcommand{\mde}{\textsc{mde}}
+\newcommand{\kmt}{\textsc{kermeta}}
+\newcommand{\uml}{\textsc{uml}}
+\newcommand{\ocl}{\textsc{ocl}}
+\renewcommand{\L}{\mathcal{L}}
+
+\title{Formal Support for Defining and Analysing Domain-Specific Modelling Languages}
+\author{Dorel Lucanu and Vlad Rusu}
+
+
+\begin{document}
+\pagestyle{plain}
+\maketitle
+
+\section*{Motivation}
+Domain-Specific Modelling Languages (\dsmls) are languages dedicated to modelling specific application areas. Recently, the design of \dsmls\
+has become widely accessible to engineers trained in the basics of Model-Driven Engineering (\mde): one designs
+ a \emph{metamodel} for the language's abstract syntax; then, the language's operational semantics is expressed using \emph{model transformations} over
+the metamodel. This approach is supported by tools such as \kmt~\cite{DBLP:conf/uml/MullerFJ05}.
+%The analogy with the Structured Operational Semantics (\textsc{sos}) framework is that  models play the roles of abstract syntax trees, and model transformations play the
+%role of  \textsc{sos} rules.
+
+The democratisation of  \dsml\ design catalysed by \mde\ is likely to give birth to  numerous languages. 
+One can also reasonably expect that there shall be  numerous errors in those languages. Indeed, getting a language right (especially its operational semantics)
+is  hard, regardless of whether the language is defined  in the  modern \mde\ framework or in   more traditional ones.
+
+Formal approaches can benefit language designers by helping them  avoid or detect errors by formal verification. But, in order to be
+accepted by nonexpert users, formal approaches have to be ``hidden'' behind a familiar design process  such as the \mde-based one mentioned above.
+
+
+
+\section*{Project Outline}
+We propose to build on our experience of using the K formal framework~\cite{rosu-serbanuta-2010-jlap}, which has been shown effective at  defining real programming languages such as C\footnote{\tt http://fsl.cs.uiuc.edu/index.php/A\_Formal\_Semantics\_of\_C\_with\_Applications} and
+Scheme\footnote{\tt http://fsl.cs.uiuc.edu/index.php/K-Scheme}.
+K is based in rewriting is connected to verification tools: a model checker, and a verifier 
+for the \emph{matching logic}~\cite{rosu-ellison-schulte-2010-amast}.
+K's strength for language definition lies in its modularity: one can simply build a launguage by combining ``language modules'' containing specific language features
+ (imperative, functional, object-oriented, multithereading, \ldots). We are planning to take the following steps:
+
+
+\begin{itemize}
+\item (re)define in K an object-oriented language, possibly by adapting the definition of  \textsc{kool}, an object-oriented language used for teaching purposes\footnote{\tt http://fsl.cs.uiuc.edu/index.php/KOOL}. This language contains some of the basic ingredients used in \mde: classes and their attributes are the building blocks of \uml\ class diagrams,
+which are the metamodels in \mde\ terminology; whereas
+instances of classes can be organised as \uml\ object diagrams, which are models in \mde\ terminology;
+\item in parallel, define in K the subset of  \ocl\footnote{\tt http://www.omg.org/spec/OCL/2.2/} called \emph{essential \ocl}. \ocl\ is a language for model navigation, 
+ query, and constraints, and essential \ocl\  is its  subset used in metamodelling;
+\item merge  the two definitions to obtain an ``object-oriented metalanguage'', say, \textsc{kool+ocl}.
+\end{itemize}
+
+In \textsc{kool+ocl}  we shall be able to define a \dsml\ syntax as a metamodel possibly extended with \ocl\ invariants for expressing well-formedness constraints. Regarding a  \dsml's operational semantics, it will only  be possible
+at this stage of the project to ``define'' it using the imperative constructs of the \textsc{kool} sublanguage. This means that we shall have the same functionality as \kmt, with the additional advantage of being formal and connected to verification tools.
+
+
+ However,  imperative programming is sometimes too low-level for defining operational semantics~; for instance, executing
+finite-state machines in \kmt\ takes several dozen line\footnote{http://www.kermeta.org/docs/KerMeta-How-to-add-behavior-to-a-metamodel.pdf.}.
+
+The same definition only takes one  rewrite  rule in a rewrite-based framework; see, e.g.,~\cite{r10b}. 
+
+Hence, the next step of our project is to extend to our forthcoming K definition of the \ocl\ language to that of a rewrite-rule based language for defining \dsml\ semantics. The rewrite
+rules of that language shall be  mapped to K conditional rewrite rules, whose conditions shall naturally be expressed in \ocl. When this is done, the  \textsc{kool+ocl}  language will 
+allow us to:
+\begin{itemize}
+\item write metamodels, in particular, for defining the abstract syntax of a given \dsml;
+\item check the conformance of models with respect to  metamodels enriched with well-formedness \ocl\ constraints; in particular, such models can represent ``programs'' in a given \dsml;
+\item write model transformations by combining imperative instructions and declarative rules. Such transformations can denote operational semantics, 
+or translations between   \dsmls. We expect that  transformations denoting operational semantics will use mostly rewrite rules, and  transformations denoting translations will use mostly imperative instructions;
+\item execute, simulate, and verify model transformations with respect to expected properties.
+\end{itemize}
+Among the expected properties, interesting ones \emph{safety properties}, for model transformations encoding a \dsml's operational semantics; and \emph{simulation properties}, for expressing the fact that a translation between \dsml\ expressed as a model transformation 
+preserves operational semantics. Such properties could be expressed as predicates written in \ocl, over single models (for safety), and over pairs of models (for simulation). To perform the verifications we are planning to use, possibly after adapting them, the K model checker and matching logic verifier.
+\bibliography{project}
+\bibliographystyle{unsrt}
+
+
+
+
+\end{document}

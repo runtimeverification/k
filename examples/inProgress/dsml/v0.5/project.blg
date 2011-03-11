@@ -1,0 +1,47 @@
+This is BibTeX, Version 0.99c (Web2C 7.5.7)
+The top-level auxiliary file: project.aux
+The style file: unsrt.bst
+Database file #1: project.bib
+Warning--empty year in r10b
+You've used 4 entries,
+            1791 wiz_defined-function locations,
+            478 strings with 4654 characters,
+and the built_in function-call counts, 1220 in all, are:
+= -- 115
+> -- 42
+< -- 4
++ -- 15
+- -- 11
+* -- 81
+:= -- 179
+add.period$ -- 15
+call.type$ -- 4
+change.case$ -- 4
+chr.to.int$ -- 0
+cite$ -- 5
+duplicate$ -- 60
+empty$ -- 117
+format.name$ -- 11
+if$ -- 288
+int.to.chr$ -- 0
+int.to.str$ -- 4
+missing$ -- 4
+newline$ -- 24
+num.names$ -- 6
+pop$ -- 12
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 39
+stack$ -- 0
+substring$ -- 81
+swap$ -- 27
+text.length$ -- 4
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 1
+while$ -- 11
+width$ -- 5
+write$ -- 50
+(There was 1 warning)
