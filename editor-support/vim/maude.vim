@@ -36,6 +36,8 @@ syn keyword maudeStatements op ops var vars kvars kvar eq ceq rl crl rule macro 
 syn keyword maudeCommands   reduce red rewrite rew parse frewrite frew search
 syn match   maudeComment    "\*\*\*.*"
 syn match   maudeComment    "---.*"
+syn match   maudeComment    "/\*.*\*/"
+syn match   maudeComment    "//.*"
 syn match   maudeOps        "->"
 syn match   maudeOps        "::="
 syn match   maudeOps        "|"
