@@ -984,7 +984,7 @@ my $configuration_tree;
 my $cfgNode;
 my $configSubtree;
 
-sub replace_dots
+sub replace_dots_
 {
     local $_ = shift;
     
@@ -1045,101 +1045,108 @@ sub replace_dots
 	    my $i = 0;
 	    for ($i = 0; $i < $chno; $i++)
 	    {
-		$temp_rule = Tree::Nary->nth_child($rule_tree, $i);
-		# get corresponding subtree from configuration tree
-		$tmp_cfg = Tree::Nary->find($configuration_tree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $temp_rule->{data});
-		$configSubtree = $tmp_cfg;
-		
-		# assign to each leaf inside rule tree its corresponding leaf from configuration tree
-		if (Tree::Nary->n_nodes($tmp_cfg, $Tree::Nary::TRAVERSE_ALL) > 0)  
-		{
-		    Tree::Nary->traverse($temp_rule, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, -1, \&collect_rule_leaf);
-		}
-		else
-		{
-		    # reset "registers"
-		    $rule_leafs = "";
-		    $config_leafs = "";
-		}
+            $temp_rule = Tree::Nary->nth_child($rule_tree, $i);
+#            print "SEARCHING: " . $temp_rule->{data} . "\n in CONFIGURATION: ";
+#            printTree($configuration_tree);
+            # get corresponding subtree from configuration tree
+            $tmp_cfg = Tree::Nary->find($configuration_tree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $temp_rule->{data});
+            $configSubtree = $tmp_cfg;
+            
+            # assign to each leaf inside rule tree its corresponding leaf from configuration tree
+#            print "TREE CFG:";
+#            printTree($tmp_cfg);
+            if (Tree::Nary->n_nodes($tmp_cfg, $Tree::Nary::TRAVERSE_ALL) > 0)  
+            {
+                Tree::Nary->traverse($temp_rule, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, -1, \&collect_rule_leaf);
+            }
+            else
+            {
+                # reset "registers"
+                $rule_leafs = "";
+                $config_leafs = "";
+            }
 	    }
 	    
 	    # if there is something to change ....
 	    if ($rule_leafs ne "" && $config_leafs ne "")
 	    {
-		# prepare data structures
-		my @rule_ls = split(/&&&&/, $rule_leafs);
-		my @rule_ls1 = split(/&&&&/, $rule_leafs);
-		my @cfg_ls = split(/&&&&/, $config_leafs);
-		
-		foreach (@rule_ls)
-		{
-		    # modify each leaf if it contains dots 
-		    if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/ || $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/)
-		    {
-			$cfg_ls[0] = ".$1" if $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/;
-			
-			s/^\s+//sg;
-			s/\s+$//sg;
-
-			if (m/\.\s*\=>/)
-			{
-			    s/\Q$&\E/$cfg_ls[0] =>/;
-			}
-			elsif (m/(\=>\s*\.)(?:[^LMBSK])/ || m/(\=>\s*\.$)/)
-			{
-			    s/\Q$1\E/=> $cfg_ls[0]/;
-			}
-			elsif ($_ eq ".")
-			{
-			    $_ = $cfg_ls[0];
-			}
-
-		    }
-		    shift(@cfg_ls);
-		}
-		# use a counter to avoid multiple replacements of the same leaf inside rule
-		# this can cause variuos troubles
-		my $cnt = 0;
-		foreach(@rule_ls1)
-		{		
-		    # if there is a single dot, just replace it with its corresponding type
-		    if ($_ eq ".")
-		    {
-			$rule1 =~ s/ \. / $rule_ls[0] /;
-		    }
-		    else 
-		    {
-			# count occurences 
-			my $count = () = $rule1 =~ /\Q$_\E/g;
-			# set counter to do the precised number of replacements...only once. :-)
-			$cnt = $count if ($count >= 1 && $cnt == 0);
-			
-			# once for all when counter is set to 1
-			if ($cnt == 1)
-			{
-			    $rule1 =~ s/\Q$_\E/$rule_ls[0]/g;
-			}
-			
-			# jump while counter is still bigger than 1
-			if ($cnt > 1)
-			{
-			    $cnt = $cnt - 1;
-			    # move on in the replacements too
-			    shift(@rule_ls);
-			    next;
-			}
-			
-		    }
-		    shift(@rule_ls);
-		}
-		
-		$rule_leafs = "";
-		$config_leafs = "";
+#            print "RULE LEAF: $rule_leafs\nCONFIG LEAF: $config_leafs\n";
+            # prepare data structures
+            my @rule_ls = split(/&&&&/, $rule_leafs);
+            my @rule_ls1 = split(/&&&&/, $rule_leafs);
+            my @cfg_ls = split(/&&&&/, $config_leafs);
+            
+            foreach (@rule_ls)
+            {
+                # modify each leaf if it contains dots 
+                if ($cfg_ls[0] =~ /\.(List|Map|Bag|Set|K|List{K})/ || $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/)
+                {
+                    $cfg_ls[0] = ".$1" if $cfg_ls[0] =~ /\:(K|List|Map|Bag|Set)/;
+                    
+                    s/^\s+//sg;
+                    s/\s+$//sg;
+                    
+                    if (m/\.\s*\=>/)
+                    {
+                        s/\Q$&\E/$cfg_ls[0] =>/;
+                    }
+                    elsif (m/(\=>\s*\.)(?:[^LMBSK])/ || m/(\=>\s*\.$)/)
+                    {
+                        s/\Q$1\E/=> $cfg_ls[0]/;
+                    }
+                    elsif ($_ eq ".")
+                    {
+                        $_ = $cfg_ls[0];
+                    }   
+                }
+                shift(@cfg_ls);
+            }
+            # use a counter to avoid multiple replacements of the same leaf inside rule
+            # this can cause variuos troubles
+            my $cnt = 0;
+            foreach(@rule_ls1)
+            {		
+ #               print "RULE: $_\n";
+                # if there is a single dot, just replace it with its corresponding type
+                if ($_ eq ".")
+                {
+#                    print "\tRule: $rule1\n";
+                    $rule1 =~ s/ \. / $rule_ls[0] /;
+#                    print "\trule: $rule1\n";
+                }
+                else 
+                {
+                    # count occurences 
+                    my $count = () = $rule1 =~ /\Q$_\E/g;
+                    # set counter to do the precised number of replacements...only once. :-)
+                    $cnt = $count if ($count >= 1 && $cnt == 0);
+                    
+                    # once for all when counter is set to 1
+                    if ($cnt == 1)
+                    {
+                        $rule1 =~ s/\Q$_\E/$rule_ls[0]/g;
+                    }
+                    
+                    # jump while counter is still bigger than 1
+                    if ($cnt > 1)
+                    {
+                        $cnt = $cnt - 1;
+                        # move on in the replacements too
+                        shift(@rule_ls);
+                        next;
+                    }
+                    
+                }
+                shift(@rule_ls);
+            }
+            
+            $rule_leafs = "";
+            $config_leafs = "";
 	    }
 	}
-	
-	# final replacement
-	$ret =~ s/\Q$rule\E/$rule1/gs;
+        
+        # final replacement
+        $ret =~ s/\Q$rule\E/$rule1/gs;
     }
     
     return $ret;
@@ -1150,19 +1157,20 @@ sub replace_dots
 sub collect_rule_leaf
 {
     my $node = (shift);
-    
+#    print "\t\tCOLLECT: " . $node->{data} . "\n";
     if (Tree::Nary->is_leaf($node))
     {
-	$cfgNode = Tree::Nary->first_child($cfgNode);
-	if (defined($cfgNode->{data}))
-	{
-	    $config_leafs .= $cfgNode->{data} . "&&&&";
-	    $rule_leafs .= $node->{data} . "&&&&";
-	}
+        $cfgNode = Tree::Nary->first_child($cfgNode);
+#        print "\t\t\tFound: " . $cfgNode->{data} . "\n";
+        if (defined($cfgNode->{data}))
+        {
+            $config_leafs .= $cfgNode->{data} . "&&&&";
+            $rule_leafs .= $node->{data} . "&&&&";
+        }
     }
     else 
     {
-	$cfgNode = Tree::Nary->find($configSubtree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $node->{data});
+        $cfgNode = Tree::Nary->find($configSubtree, $Tree::Nary::PRE_ORDER, $Tree::Nary::TRAVERSE_ALL, $node->{data});
     }
 
 #    print "Step: Rule: $rule_leafs\n      Cfg: $config_leafs\n";

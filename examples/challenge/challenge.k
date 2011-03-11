@@ -10,7 +10,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVER
 
   configuration
     <T>
-      <agents>
+      <agents color="pink">
         <agent*> 
           <threads>
             <thread*>

@@ -226,7 +226,10 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq printTermL(U,(T,NeTl)) = printTerm(U,T) '`, printTermL(U,NeTl) .
   eq printTermL(U,T) = printTerm(U,T) .
   ops \constant`{_`} \variable`{_`} : QidList -> Term .
-  ops \kall`{_`}`{_`} \kprefix`{_`}`{_`} \ksuffix`{_`}`{_`} \kmiddle`{_`}`{_`} : Constant Term -> Term .
+---(  ops \kprefix`{_`}`{_`} \ksuffix`{_`}`{_`} \kmiddle`{_`}`{_`} : Constant Term -> Term .
+---)
+  op \configCell`{_`}`{_`}`{_`} : Constant Term AttrSet -> Term .
+  ops \kcell`{_`}`{_`}`{_`} : Term Term Ellipses -> Term .
   ops \reduce`{_`}`{_`} \ereduce`{_`}`{_`} : Term Term -> Term .
   op merge : QidList TermList -> Term .
   op splitMixFix : String -> QidList .
@@ -245,8 +248,8 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq printTerm(U,V) = \variable{ getName(V) } .
 
   op getName : OpDeclSet Qid Type -> Qid .
-  eq getName(OPDS' (op Q : nil -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS, Q, Ty) = '_ .
-  eq getName(OPDS' (op Q : nil -> Ty [AS metadata(Str) AS'] .) OPDS, Q, Ty)
+  eq getName( (op Q : nil -> Ty [AS metadata("builtin wrapper")] .) OPDS, Q, Ty) = '_ .
+  eq getName( (op Q : nil -> Ty [AS metadata(Str) ] .) OPDS, Q, Ty)
    = getName(Q, metadataParse(Str)) [owise] .
  ceq getName(OPDS, Q, Ty) 
    = getLabelName(OPDS, qid(substr(string(Q),1,length(string(Q))))) 
@@ -254,35 +257,29 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq getName(OPDS, Q, Ty) = Q [owise] .
 
   op getLabelName : OpDeclSet Qid -> Qid .
-  eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS, Q) = '_ .
-  eq getLabelName(OPDS' (op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS, Q)
+  eq getLabelName( (op Q : TyL -> Ty [AS metadata("builtin wrapper") ] .) OPDS, Q) = '_ .
+  eq getLabelName( (op Q : TyL -> Ty [AS metadata(Str) ] .) OPDS, Q)
    = addParams(getName(Q, metadataParse(Str)),arity(TyL)) [owise] .
-  eq getLabelName(OPDS' (op Q : TyL -> Ty [AS] .) OPDS, Q)
+  eq getLabelName( (op Q : TyL -> Ty [AS] .) OPDS, Q)
    = addParams(getName(Q, none),arity(TyL)) [owise] .
   eq getLabelName(OPDS, Q) = Q [owise] .
    
   op addParams : Qid Nat -> Qid .
   eq addParams(Q, N) = if latexCmd(Q) then qidList2Qid('\ensuremath '`{ qid(string(Q)+ "NoSpace") genQids(N, '`{ '\_ '`}) '`}) else qid(replaceAll(string(Q),"_" |-> "\\_")) fi .
 
-  var Q' : Qid . var AS' AS1 AS2 : AttrSet .
+  var Q' : Qid . var  AS1 AS2 : AttrSet .
   op getName : Qid AttrSet -> Qid .
-  eq getName(Q, AS1 klatex(AS2 krenameTo(Q') AS') AS) = Q' [print Q " renamed to " Q'].
+  eq getName(Q, AS1 klatex(AS2 krenameTo(Q') ) ) = Q' [print Q " renamed to " Q'].
   eq getName(Q, AS) = latexify(Q) [owise] .
 
 ---  eq printTerm(U,Q[NeTl]) 
 ---   = Q '`( printTermL(U, NeTl) '`) .
   ceq  printTerm(U,T)
-    =  printTerm(U,\kprefix{Label}{Contents})
-    if {Label, Contents, B, right} := splitKCell(T) .
-  ceq  printTerm(U,T)
-    =  printTerm(U,\kall{Label}{Contents})
-    if {Label, Contents, B, none} :=  splitKCell(T) .
-  ceq  printTerm(U,T)
-    =  printTerm(U,\ksuffix{Label}{Contents})
-    if {Label, Contents, B, left} := splitKCell(T) .
-  ceq  printTerm(U,T)
-    =  printTerm(U,\kmiddle{Label}{Contents})
-    if {Label, Contents, B, both} := splitKCell(T) .
+    =  printTerm(U,\kcell{Label}{Contents}{AS[ellipses]})
+    if {Label, Contents, AS} := splitKCell(T) .
+
+  var Ellipses : Ellipses .
+
   ceq printTerm(U,Q[T1,T2]) = 
      printTerm(U,\reduce{T1}{T2}) 
    if Q = replaceS .
@@ -313,8 +310,8 @@ var Eq : Equation .  var Eqs : EquationSet .
 
   var TyL' : TypeList .  var Ty' : Type .
   op getRenamedQid : Qid OpDeclSet -> [Qid] .
-  eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata("builtin wrapper") AS'] .) OPDS) = '_ .
-  eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata(Str) AS'] .) OPDS) = getName(Q,metadataParse(Str)) [owise print Q " -> " Str "?"] .
+  eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata("builtin wrapper") ] .) OPDS) = '_ .
+  eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata(Str) ] .) OPDS) = getName(Q,metadataParse(Str)) [owise print Q " -> " Str "?"] .
   eq getRenamedQid(Q, OPDS) = latexify(Q) [owise] . --- print Op:[OpDecl]] .
  
   op printTerm1 : Module Term -> QidList .
@@ -397,13 +394,11 @@ var Eq : Equation .  var Eqs : EquationSet .
   op syntax : QidList QidList AttrSet -> Printable .
   op \cellLabel{_}{_} : Qid AttrSet -> OpDecl .
   eq op(op F : nil -> 'CellLabel [AS] .) = empty .
-  eq op(op F : TyL -> Ty [AS' metadata("generated label") AS] .) = empty .
-  eq op(op F : TyL -> Ty [AS' metadata(St) AS] .)
-   = op(op F : TyL -> Ty [AS' metadataParse(St) AS] .) [owise] .
+  eq op(op F : TyL -> Ty [ metadata("generated label") AS] .) = empty .
+  eq op(op F : TyL -> Ty [ metadata(St) AS] .)
+   = op(op F : TyL -> Ty [ metadataParse(St) AS] .) [owise] .
 
   eq metadata("builtin wrapper") = none .
-
-  var OPDS' : OpDeclSet .
 
   op subsort(_, _) : QidList QidList -> Printable .
   var Sort Sort' : Sort .
@@ -439,7 +434,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   var AS : AttrSet .
 
   op getLabel : AttrSet -> String .
-  eq getLabel(AS' label(Q) AS) = string(Q) .
+  eq getLabel( label(Q) AS) = string(Q) .
   eq getLabel(AS) = "\\!" [owise] .
 
   var KRS : KRuleSplit .  var KCS : KContextSplit . 
@@ -588,14 +583,14 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq manyK(s(N)) = 'K manyK(N) .
   
   op getRenamedKOp : Qid TypeList OpDeclSet -> Qid .
-  eq getRenamedKOp(Q, TyL, OPDS' (op Q : TyL -> Ty [AS] .) OPDS)
+  eq getRenamedKOp(Q, TyL,  (op Q : TyL -> Ty [AS] .) OPDS)
    = getRenamedKOp(Q, AS) .
   eq getRenamedKOp(Q, TyL, OPDS) = Q [owise] .
  
   op getRenamedKOp : Qid AttrSet -> Qid .
-  eq getRenamedKOp(Q, AS metadata("builtin wrapper") AS') 
+  eq getRenamedKOp(Q, AS metadata("builtin wrapper") ) 
    = '_ .
-  eq getRenamedKOp(Q, AS metadata(Str) AS') 
+  eq getRenamedKOp(Q, AS metadata(Str) ) 
    = getName(Q, metadataParse(Str)) [owise] .
 
   eq eMetaLatexPrint(M, (kaux AtS))
@@ -1016,27 +1011,31 @@ mod LATEX-PRINT-META is
   eq printStr(Str) = string2qidList(Str ---replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))
 ) .
  
-  eq printTerm(M, \kprefix{Ct}{T}) = '\kprefix '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
-  eq printTerm(M, \ksuffix{Ct}{T}) = '\ksuffix '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
-  eq printTerm(M, \kall{Ct}{T}) = '\kall '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
-  eq printTerm(M, \kmiddle{Ct}{T}) = '\kmiddle '`{ getColor(M,Ct) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} .
----  eq printTerm(M, T:[Term]) = 'error [owise print T:[Term]] .
+  var Color : String . var Multiplicity : Multiplicity . var Ellipses : Ellipses .
+  eq printTerm(M, \kcell{Ct}{T}{Ellipses}) 
+   = if Ellipses == right then '\kprefix 
+     else if Ellipses == left then '\ksuffix 
+     else if Ellipses == both then '\kmiddle
+     else '\kall 
+     fi fi fi 
+     '`{ getColor(M,getName(Ct)) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} [print "printing cell " Ct] .
+
   eq printTerm(M, \reduce{T1}{T2}) = if getName(M) == 'STRUCTURAL then '\reduceS else '\reduce fi '`{ printTerm(M, T1) '`} '`{ printTerm(M, T2) '`} .
   eq printTerm(M, \value{T}) = '\kvalue '`{ printTerm(M, T) '`} .
 
   op getColor : Module Qid -> Qid .
   eq getColor(M, Q) 
-   = getColor(getOps(M), Q, 'CellLabel) .
+   = getColor(getOps(M), Q, 'CellLabel) [print "getting color for " Q] .
 
   op getColor : OpDeclSet Qid Qid -> Qid .
-  eq getColor((op Q : nil -> Q' [AS metadata(Str) AS'] .) OPDS, Q, Q')
-   = getLatexColor(metadataParse(Str)) .
-  eq getColor(OPDS, Q, Q') = 'white [owise] .
+  eq getColor((op Q : nil -> Q' [AS metadata(Str) ] .) OPDS, Q, Q')
+   = getLatexColor(metadataParse(Str)) [print "found metadata for the cellLabel " Q ": " Str] .
+  eq getColor(OPDS, Q, Q') = 'white [owise print "did not find metadata for cellLabel " Q " among " OPDS ] .
 
   op getLatexColor : AttrSet -> Qid .
-  var AS' AS1 AS2 : AttrSet .
-  eq getLatexColor(AS1 klatex(AS2 kcolor(Q) AS) AS') = Q .
-  eq getLatexColor(AS) = 'white [owise] .
+  var  AS1 : AttrSet .
+  eq getLatexColor(AS1 klatex(kcolor(Q) AS) ) = Q [print "found color " Q] .
+  eq getLatexColor(AS) = 'white [owise print "color not found among " AS] .
 
   op length : TermList -> Nat .
   var Tl : TermList .
@@ -1056,28 +1055,12 @@ mod LATEX-PRINT-META is
 
   var M : Module .  var MAS : MembAxSet . var OPDS : OpDeclSet .
   var QIL QIL' : QidList .
----(
-  eq printSyntax1(M, OPDS' \subsort{QIL'}{QIL} OPDS)
-   = ('\n '\syntax '`{ QIL '`} '`{ printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) '`} '`{  '`} eMetaLatexPrintQ(M, QIL, removeSubSorts(QIL,OPDS' OPDS))) [owise] .
----)
   var P : Printable . var Prints : Printables .
   eq eMetaLatexPrint(M, loc(N,P) Prints) = eMetaLatexPrint(M, P Prints) [print Prints] .
   eq eMetaLatexPrint(M, syntax(QIL, QIL', #Types(N) AS) Prints)
    = ('\n '\syntax '`{ QIL '`} '`{ QIL' '`} '`{ eMetaLatexPrint(M, N, AS)  '`} eMetaLatexPrintQ(M, QIL, Prints)) [owise] .
 ---  eq \subsort{QIL}{QIL'} = \syntax{QIL'}{QIL}{none} .
 
----(
-  op printSubSorts : QidList OpDeclSet -> QidList .
-  var QIL1 : QidList .  var OPDS' OPDS'' : OpDeclSet .
-  eq printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS'' \subsort{QIL1}{QIL} OPDS)
-   = QIL' '\ensuremath '`{ '\mid '`} printSubSorts(QIL,  OPDS' OPDS'' \subsort{QIL1}{QIL} OPDS) .
-  eq printSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) = QIL' [owise] .
-  eq printSubSorts(QIL, OPDS) = nil [owise] .
-
-  op removeSubSorts : QidList OpDeclSet -> OpDeclSet .
-  eq removeSubSorts(QIL, OPDS' \subsort{QIL'}{QIL} OPDS) =  removeSubSorts(QIL, OPDS' OPDS) .
-  eq removeSubSorts(QIL, OPDS) = OPDS [owise] .
----)
 
   op eMetaLatexPrintQ : Module QidList Printables -> QidList .
   eq eMetaLatexPrintQ(M, QIL, loc(N,P) Prints) = eMetaLatexPrintQ(M, QIL,  P Prints) .
@@ -1100,23 +1083,13 @@ mod LATEX-PRINT-META is
    var C : Constant .  var V : Variable . var SC : SplitCell .
    op printConfig : Module Term -> QidList .
   ceq  printConfig(M,T)
-    =  printConfig(M,\kall{qid(string(getName(SC)) + printMultiplicity(getMultiplicity(SC)))}{getContents(SC)})
+    =  printConfig(M,\configCell{getName(SC)}{getContents(SC)}{getAttributes(SC)})
     if SC := splitKCell(T)  .
 
-   op printMultiplicity : Multiplicity -> String .
-   eq printMultiplicity(one) = "" .
-   eq printMultiplicity(any) = "*" .
-   eq printMultiplicity(some) = "+" .
-   eq printMultiplicity(maybe) = "?" .
-
----(
-   eq printConfig(M, \kall{Q}{C}) 
-    = '\kallLarge '`{ getColor(M,Q) '`} '`{ Q '`} '`{ \sort{printTerm(M,C)} '`} .
----)
-   eq printConfig(M, \kall{Q}{T})
-    =  '\kallLarge '`{ getColor(M,Q) '`} '`{ Q '`} '`{ printConfig(M,T) '`} [owise] .
+   eq printConfig(M, \configCell{Q}{T}{AS})
+    =  '\kallLarge '`{ getColor(M,Q) '`} '`{ Q if AS[multiplicity] == one then nil else qid(symbolM(AS[multiplicity])) fi  '`} '`{ printConfig(M,T) '`} [owise] .
    eq printConfig(M, Q[Tl]) 
-    = if Q == ctor(Bag) then printConfigL(M,Tl) else printTerm(M,Q[Tl]) fi [owise] .
+    = if Q == ctor(Bag) then printConfigL(M,Tl) else printTerm(M,Q[Tl]) fi [owise print "Escaping to terms if Q is not __. Q: " Q "[" Tl "]"] .
    eq printConfig(M, C) 
     = printTerm(M, C) if getName(C) == '. then eMetaLatexPrint(getType(C)) else nil fi [owise] .
    eq printConfig(M, V) = printTerm(M,V) .
@@ -1135,11 +1108,11 @@ mod LATEX-PRINT-META is
        eMetaLatexPrint(M, Prints)) .
 
   var Cnd : Term .
-  eq eMetaLatexPrint(M, rule(Str, {krl,T,empty,AS' kstructural AS}) Prints)
+  eq eMetaLatexPrint(M, rule(Str, {krl,T,empty, kstructural AS}) Prints)
     = ('\n '\kequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} 
        eMetaLatexPrint(M, Prints)) .
-  eq eMetaLatexPrint(M, rule(Str, {kcrl,T,Cnd,AS' kstructural AS}) Prints)
+  eq eMetaLatexPrint(M, rule(Str, {kcrl,T,Cnd, kstructural AS}) Prints)
     = ('\n '\kcequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrint(M, Prints)) .
@@ -1161,7 +1134,7 @@ mod LATEX-PRINT-META is
        eMetaLatexPrint(M, Prints)) [owise] .
 
   op printTerm0 : Module Term AttrSet -> QidList .
-  eq printTerm0(M, T, AS klarge AS')
+  eq printTerm0(M, T, AS klarge )
    = '\kLarge '`{ printTerm0(M,T) '`} .
   eq printTerm0(M, T, AS )
    = printTerm0(M,T) [owise] .

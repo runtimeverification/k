@@ -812,16 +812,16 @@ sub latexify {
 
     print_header("Generate $format version for module $language_module_name from language definition $language_file_name") if $verbose;
 
-# 
+ 
     $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
 		   "load $k_prelude\n",
-		   "show module META-MODULE .\n",
+#		   "show module META-MODULE .\n",
 		   "show module K-TECHNIQUE .\n",
 		   "quit\n");
     
     s/^Bye.//gms;
     s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
-
+    
     open FILE,">",$temp_file or die "Cannot create $temp_file\n";
     print FILE;
     close FILE;
@@ -836,7 +836,7 @@ sub latexify {
 		  "select $language_module_name .\n",
 		  "set show advisories on .\n",
 		  "load $k_to_latex\n",
-		  "set print attribute on .\n",
+		  "--- set print attribute on .\n",
 		  "loop latex-print .\n",
 		  map("(print $_ .)\n", @modules),
 #		  "(print $language_module_name .)\n",
@@ -1320,8 +1320,10 @@ sub maudify_file {
     
 # Replacing dots    
     $_ = replace_dots($_);
-	my $temporary = $_;
+#    print $_;
+#    exit(1);
 
+	my $temporary = $_;
     my $maudified = "";
     while (s/^(\s*)($top_level_pattern)(\s*)//sm) 
 	{
@@ -2040,7 +2042,7 @@ sub add_subsorts
 {
     my $supersorts = find_super_sorts();
     my @modules = split(/\s+/, getModuleList());
-    my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero#";
+    my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#CellKey#CellAttribute#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero";
     my $dir = cwd;
     
     return if (scalar(@modules) == 0);

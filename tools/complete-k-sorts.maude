@@ -6,7 +6,7 @@ fmod COMPLETE-K-SORTS is
 
  op completeKSorts : Qid Module Module ~> Module .
  eq completeKSorts(Q, M, Flat) 
-  = setName(completeKSorts(M, Flat, getRelatedSorts(Flat,  KLabel ; CellLabel ; Bag ; Set ; List ; Map ; KList ; 'KAssignments ; 'KSentence ; 'Builtins)) , Q) .
+  = setName(completeKSorts(M, Flat, getRelatedSorts(Flat,  KLabel ; CellLabel ; Bag ; Set ; List ; Map ; KList ; 'KAssignments ; 'KSentence ; 'Builtins ; 'CellKey ; 'CellAttribute)) , Q) .
   
  op completeKSorts : Module Module SortSet ~> Module .
  eq completeKSorts(M, Flat, SS) 
