@@ -1,6 +1,7 @@
-require silok-programs
+//require silok-programs
+require silok-syntax
 
-kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + SILOK-PROGRAMS + K + PL-INT --- + K-WRAPPERS
+kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT --- + K-WRAPPERS + SILOK-PROGRAMS 
 
   syntax K ::= B | restore ( Map ) | lvars | gvars | ListId 
   	       | Procs | Pgm 
