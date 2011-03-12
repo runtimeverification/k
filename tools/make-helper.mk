@@ -20,6 +20,7 @@ COMPILED_FILE = $(MAIN_FILE)-compiled.maude
 LATEX_STYLE ?= mm
 LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k; fi), $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi)))
 
+COMPILE_OPTIONS ?=
 
 # phony tells make which targets aren't real files
 .PHONY: all test-% test force build
@@ -32,7 +33,7 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output
+	$(KCOMPILE) $(LANGUAGE_FILE) $(COMPILE_OPTIONS) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output
 #@cat $(COMPILED_FILE).output
 
 # this should build the latex
@@ -83,3 +84,4 @@ force: ;
 clean:
 	@-rm -f $(COMPILED_FILE) kompile_* $(MAIN_FILE).aux $(MAIN_FILE).log $(MAIN_FILE).pdf $(MAIN_FILE)-ps-* $(MAIN_FILE).dvi $(MAIN_FILE).eps $(MAIN_FILE).ps *.png $(MAIN_FILE).tex $(CROP_PDF_FILE) test-*.output shared.maude results-*.xml
 	@-rm -f ${subst .k,.maude, ${filter %.k, $(LANGUAGE_FILE)}}
+	@-rm -f compilation.xml $(COMPILED_FILE).output
