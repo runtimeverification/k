@@ -50,7 +50,7 @@ macro pgm5 =
   gvars: g1, g2
   lvars: l1, l2
   {
-  main :: g2 := new ; l2 := g2 ; p0 ; breakpoint
+  main :: g2 := new ; l2 := g2 ; p0 
   p0 :: g2 := new
   }
 
