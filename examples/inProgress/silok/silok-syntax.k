@@ -10,7 +10,7 @@ kmod SILOK-SYNTAX is including PL-ID
   syntax Procs ::= ProcId :: B [prec 55 gather(e E)]
   	 	   | Procs Procs [prec 60 gather(e E)]
 
-  syntax ProcId ::= main | breakpoint
+  syntax ProcId ::= main | breakpoint | p0 | p1 | p2 | p3 | p4
 
   syntax Id ::= new  
 
