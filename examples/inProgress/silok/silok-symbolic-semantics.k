@@ -6,7 +6,7 @@ kmod SILOK-SYMBOLIC-SEMANTICS is including SILOK-SYNTAX + SILOK-PROGRAMS + K + P
   syntax K ::= B | restore ( Map ) | lvars | gvars 
   	       | Procs | Pgm | Smb | IdInt | ListId
   syntax IntBot ::= Int | bot
-  syntax Builtins ::= IntBot
+  syntax Builtins ::= IntBot | Smb
   syntax KResult ::= IntBot | Id
 
   syntax Bool ::= IntBot !=Int IntBot [ditto]
