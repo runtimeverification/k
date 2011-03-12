@@ -5,6 +5,7 @@
 \usepackage{fullpage}
 \usepackage{float}
 \usepackage{theorem}
+\usepackage{color}
 
 \usepackage[english]{babel}
 
@@ -39,13 +40,16 @@ One can also reasonably expect that there shall be  numerous errors in those lan
 is  hard, regardless of whether the language is defined  in the  modern \mde\ framework or in   more traditional ones.
 
 Formal approaches can benefit language designers by helping them  avoid or detect errors by formal verification. But, in order to be
-accepted by nonexpert users, formal approaches have to be ``hidden'' behind a familiar design process  such as the \mde-based one mentioned above.
+accepted by nonexpert users, formal approaches have to 
+%be ``hidden'' behind
+work behind (in background for) a familiar design process  such as the \mde-based one mentioned above.
 
 
 
 \section*{Project Outline}
-We propose to build on our experience of using the K formal framework~\cite{rosu-serbanuta-2010-jlap}, which has been shown effective at  defining real programming languages such as C\footnote{\tt http://fsl.cs.uiuc.edu/index.php/A\_Formal\_Semantics\_of\_C\_with\_Applications} and
-Scheme\footnote{\tt http://fsl.cs.uiuc.edu/index.php/K-Scheme}.
+We propose to build on our experience of using the K formal framework~\cite{rosu-serbanuta-2010-jlap}, which has been shown effective at  defining real programming languages such as C \cite{ellison-rosu-2010-tr},  
+Java \cite{farzan-chen-meseguer-rosu-2004-cav}
+Scheme\cite{meredith-hills-rosu-2007-tr-b}, and so on.
 K is based in rewriting is connected to verification tools: a model checker, and a verifier 
 for the \emph{matching logic}~\cite{rosu-ellison-schulte-2010-amast}.
 K's strength for language definition lies in its modularity: one can simply build a launguage by combining ``language modules'' containing specific language features
@@ -53,16 +57,16 @@ K's strength for language definition lies in its modularity: one can simply buil
 
 
 \begin{itemize}
-\item (re)define in K an object-oriented language, possibly by adapting the definition of  \textsc{kool}, an object-oriented language used for teaching purposes\footnote{\tt http://fsl.cs.uiuc.edu/index.php/KOOL}. This language contains some of the basic ingredients used in \mde: classes and their attributes are the building blocks of \uml\ class diagrams,
+\item (re)define in K an object-oriented language, possibly by adapting the definition of  \textsc{kool}, an object-oriented language used for teaching purposes\cite{hills-rosu-2007-rta}. This language contains some of the basic ingredients used in \mde: classes and their attributes are the building blocks of \uml\ class diagrams,
 which are the metamodels in \mde\ terminology; whereas
-instances of classes can be organised as \uml\ object diagrams, which are models in \mde\ terminology;
+instances of classes can be organised as \uml\ object diagrams, which are models in \mde\ terminology. \textcolor{red}{The new language will be called MOOL};
 \item in parallel, define in K the subset of  \ocl\footnote{\tt http://www.omg.org/spec/OCL/2.2/} called \emph{essential \ocl}. \ocl\ is a language for model navigation, 
  query, and constraints, and essential \ocl\  is its  subset used in metamodelling;
-\item merge  the two definitions to obtain an ``object-oriented metalanguage'', say, \textsc{kool+ocl}.
+\item merge  the two definitions to obtain an ``object-oriented metalanguage'', say, \textsc{mool+ocl}.
 \end{itemize}
 
-In \textsc{kool+ocl}  we shall be able to define a \dsml\ syntax as a metamodel possibly extended with \ocl\ invariants for expressing well-formedness constraints. Regarding a  \dsml's operational semantics, it will only  be possible
-at this stage of the project to ``define'' it using the imperative constructs of the \textsc{kool} sublanguage. This means that we shall have the same functionality as \kmt, with the additional advantage of being formal and connected to verification tools.
+In \textsc{mool+ocl}  we shall be able to define a \dsml\ syntax as a metamodel possibly extended with \ocl\ invariants for expressing well-formedness constraints. Regarding a  \dsml's operational semantics, it will only  be possible
+at this stage of the project to ``define'' it using the imperative constructs of the \textsc{mool} sublanguage. This means that we shall have the same functionality as \kmt, with the additional advantage of being formal and connected to verification tools.
 
 
  However,  imperative programming is sometimes too low-level for defining operational semantics~; for instance, executing
@@ -71,7 +75,7 @@ finite-state machines in \kmt\ takes several dozen line\footnote{http://www.kerm
 The same definition only takes one  rewrite  rule in a rewrite-based framework; see, e.g.,~\cite{r10b}. 
 
 Hence, the next step of our project is to extend to our forthcoming K definition of the \ocl\ language to that of a rewrite-rule based language for defining \dsml\ semantics. The rewrite
-rules of that language shall be  mapped to K conditional rewrite rules, whose conditions shall naturally be expressed in \ocl. When this is done, the  \textsc{kool+ocl}  language will 
+rules of that language shall be  mapped to K conditional rewrite rules, whose conditions shall naturally be expressed in \ocl. When this is done, the  \textsc{mool+ocl}  language will 
 allow us to:
 \begin{itemize}
 \item write metamodels, in particular, for defining the abstract syntax of a given \dsml;
