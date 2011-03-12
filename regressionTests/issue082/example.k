@@ -6,7 +6,7 @@
 
 in ../../k-prelude
 kmod ISSUE082 is // another comment
-	including K //
+	including K  + PL-STRING //
     configuration <T> <k> .K </k> /* multiline on single line */ </T>
     //"and another comment"
     // something like ---"something" would fail (maude bug)

@@ -14,7 +14,7 @@ fmod MANY-MODULES is
   
   op manyModules : Qid Modules ~> Module .
   eq manyModules(O, Ms) 
-   = checkModule(setImports(setName(manyModules(emptySModule, getModules(Ms), 'noConfig), O), getImports(Ms))) .
+   = checkModule(removeImports(setImports(setName(manyModules(emptySModule, getModules(Ms), 'noConfig), O), getImports(Ms)), (including 'K-LATEX .))) .
 
   op manyModules : Module ModuleSet  Term ~> Module .
   eq manyModules(M, M' MS, T) 

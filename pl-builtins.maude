@@ -86,6 +86,8 @@ mod PL-NAT is
   protecting PL-BOOL .
   sorts Zero NzNat Nat .
   subsort Zero NzNat < Nat < Builtins .
+  subsort Zero < Builtins .
+  subsort NzNat < Builtins .
   op 0 : -> Zero [ctor] .
 
   op sNat_ : Nat -> NzNat
@@ -225,6 +227,7 @@ mod PL-INT is
   protecting PL-NAT .
   sorts NzInt Int .
   subsorts NzNat < NzInt Nat < Int < Builtins .
+  subsort NzInt < Builtins .
 
   op -Int_ : NzNat -> NzInt
         [ctor metadata "latex(renameTo \\ensuremath{-{}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
@@ -736,6 +739,7 @@ mod PL-STRING is
   protecting PL-INT .
   sorts String Char .
   subsort Char < String < Builtins .
+  subsort Char < Builtins .
 ---  subsort Int < FindResult .
 
 *** pseudo constructor for the infinite set of strings

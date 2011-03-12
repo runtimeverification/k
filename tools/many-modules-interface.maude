@@ -11,7 +11,7 @@ mod MANY-MODULES-META is
   op manyModules : String String ~> Module .
   eq manyModules(NoManyModules, ManyModules) = manyModules(qid(NoManyModules), qid(ManyModules)) .
   op manyModules : Qid Qid ~> Module .
-  eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules ; 'K-LATEX , "-BUILTIN-MODULE")) .
+  eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules  , "-BUILTIN-MODULE")) .
 
   op compileMANY-MODULES : Module ~> Module .
   eq compileMANY-MODULES(M) = manyModules(getName(M), getAllImportsBut(M,  nil, kModules ; builtinModules ; getName(M), "-BUILTIN-MODULE", none, empty, nil)) .

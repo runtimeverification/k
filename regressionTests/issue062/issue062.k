@@ -1,6 +1,6 @@
 in ../../k-prelude
 
-kmod ISSUE062 is including K + PL-NAT + PL-ID
+kmod ISSUE062 is including K + PL-INT + PL-ID
 
 	
 	syntax Exp ::= Int
