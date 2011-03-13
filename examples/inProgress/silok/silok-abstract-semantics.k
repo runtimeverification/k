@@ -60,14 +60,15 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
 ---  ceq proj Map on (SetItem(K) Set) = proj Map on Set if notBool (K in keys Map) 
    
 
+
 *** update \sigma mod \sigma' / GlobalVars, GlobalVars, LocalVars sigma_i
 *** first GlobalVars used for counting, second one for case identification
   syntax Map ::= update Map mod Map `/ `( Set `, Set `, Set `)  Map
 
 *** base case, when all global variables were consumed
   eq update Map1:Map mod Map2:Map /(.Set, Set, Ls:Set) Map 
-     = 
-     updateLocals Map1 mod Map2 /(Set, Ls) Map
+     = Map
+---     updateLocals Map1 mod Map2 /(Set, Ls) Map
 
 *** rule for bot (i.e. 0 in the paper)
   eq  update (Map1 Gelt:K |-> bot)  mod Map2  
@@ -88,7 +89,7 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
   ceq  update (Map1 Gelt |-> K frz(Gelt1) |-> K)  mod (Gelt1 |-> K1 Map2)  
       /((SetItem(Gelt) Gs), (SetItem(Gelt1) GGs), Ls) Map 
       =
-      update (Map1 Gelt |-> K frz(Gelt1) |-> K)  mod Map2  
+      update (Map1 Gelt |-> K frz(Gelt1) |-> K)  mod (Gelt1 |-> K1 Map2)  
       /(Gs, (SetItem(Gelt1) GGs), Ls) Map[K1/Gelt]
   if notBool (K in proj Map1 on ((SetItem(Gelt1) GGs) -Set (SetItem(Gelt) Gs)))
 
