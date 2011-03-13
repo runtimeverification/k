@@ -18,8 +18,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
-import com.jgoodies.looks.windows.*;
-import com.jgoodies.looks.plastic.*;
+//import com.jgoodies.looks.windows.*;
+//import com.jgoodies.looks.plastic.*;
 
 import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
 

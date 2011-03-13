@@ -65,6 +65,12 @@ public class DefaultTerm implements MaudeTerm
       String[] fragments = op.replace("`", "").split("_", -1);
 
       // assoc operator?
+      if (fragments.length != size + 1 && fragments.length != 3)
+      {
+        System.err.println("error: " + op + " has " + size + " args");
+        System.err.println("arg 1: " + subterms.get(0).getOp());
+        System.err.println("arg 2: " + subterms.get(1).getOp());
+      }
       if (fragments.length != size + 1 && fragments.length == 3)
       {
         String[] tmp = new String[size + 1];
@@ -133,11 +139,12 @@ public class DefaultTerm implements MaudeTerm
   public static boolean isWrapper(String op)
   {
     return "List`{MathObj++`}_".equals(op)
+        || "@_".equals(op)
         || "Formula_".equals(op)
         || "Subst_".equals(op)
         || "Id_".equals(op)
         || "ExpressionType_".equals(op)
-        || "@_".equals(op);
+        || "wlist_".equals(op); 
   }
 
   public static boolean isString(String op)
@@ -158,8 +165,22 @@ public class DefaultTerm implements MaudeTerm
     }
 
     if ("_`(_`)".equals(op))
+    {
+      if (subterms.get(0).getOp().startsWith("'"))
+      {
+        String syntax = subterms.get(0).getOp().substring(1);
+        String listOp = subterms.get(1).getOp();
+        MaudeTerm syntaxTerm = new DefaultTerm(syntax, sort);
+        if ("_`,`,_".equals(listOp) || ".List`{K`}".equals(listOp))
+          syntaxTerm.subterms().addAll(subterms.get(1).subterms());
+        else
+          syntaxTerm.subterms().add(subterms.get(1));
+        return syntaxTerm;
+      }
+
       if (".List`{K`}".equals(subterms.get(1).getOp()))
         return subterms.get(0);
+    }
 
     if (isWrapper(op))
       return subterms.get(0);
