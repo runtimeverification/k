@@ -21,7 +21,7 @@ my $input_file  = fresh("kompile_in", ".maude");
 my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");
 my $temp_file   = fresh("kompile_tmp", ".txt");
-# check_software();
+check_software();
 
 # add configuration parser
 $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
