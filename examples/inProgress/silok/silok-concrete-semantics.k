@@ -1,12 +1,21 @@
+/*
+*  The code implements the contents of the paper:
+*  "Symbolic Execution of Unbounded Object Creation"
+*  by Juriaan Rot, Frank de Boer, Marcello Bonsangue
+*  (LIACS - Leiden University, and CWI)
+*  The focus of this file is on the features specific to
+*  the concrete semantics described in Section 3 of the paper.
+*/
+
 require silok-basic-semantics
 
 kmod SILOK-CONCRETE-SEMANTICS is including SILOK-BASIC-SEMANTICS
 
   configuration <T> 
-		  <k> .K </k>
+                  <k> .K </k>
                   <state> .Map </state>
-		  <pgm> .Map </pgm>
-		  <ctr> 0 </ctr>
+                  <pgm> .Map </pgm>
+                  <ctr> 0 </ctr>
                 </T>
 
 
@@ -23,6 +32,5 @@ kmod SILOK-CONCRETE-SEMANTICS is including SILOK-BASIC-SEMANTICS
        <pgm_> lvars|->wklist(L:List{K}) gvars|->wklist(G:List{K}) P|->B:B <_/pgm>
   rule <k> restore(S':Map) => . <_/k>
        <state> S => S[S'] </state>
-
 
 endkm

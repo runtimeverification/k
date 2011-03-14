@@ -1,7 +1,16 @@
+/*
+*  The code implements the contents of the paper:
+*  "Symbolic Execution of Unbounded Object Creation"
+*  by Juriaan Rot, Frank de Boer, Marcello Bonsangue
+*  (LIACS - Leiden University, and CWI)
+*  The focus of this file is on Section 4 in the paper.
+*/
+
 require silok-basic-semantics
 
 
-kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
+kmod SILOK-ABSTRACT-SEMANTICS --- -REFACTORED 
+is including SILOK-BASIC-SEMANTICS
 
 // The image of a map, i.e. Map(DomainSet)
   syntax Set ::= values Map
@@ -13,7 +22,7 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
   rule | . | => 0 [structural]
   rule | SetItem:SetItem Set:Set | => 1 +Int | Set | [structural]
 
-// firstNotIn Set:Set start I:Int gives the first integer greater or equal to I
+// firstNotIn Set:Set start I:Int gives the first integer greater or equal than I
 // which is not in the Set (assuming Set is a set of integers).
   syntax Int ::= firstNotIn Set start Int
   rule firstNotIn Set start I:Int => I
@@ -23,12 +32,12 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
   if SetItem(I) in Set 
   [structural]
 
-// firstNotIn Set:Set gives the first positiv integer which is not in Set.
+// firstNotIn Set:Set gives the first positive integer which is not in Set.
   syntax Int ::= firstNotIn Set 
   rule firstNotIn Set => firstNotIn Set start 0 [structural]
 
-// nextFree(K:K, N:Int, Set:Set) gives the first positiv integer
-// which is not in the Set, provided the Set has less than N elements.
+// nextFree(K:K, N:Int, Set:Set) gives the first positive integer
+// which is not in Set, provided the Set has less than N elements.
 // When Set has N elements, nextFree(K, N, Set) returns K. 
   syntax IntBot ::= nextFree ( K , Int , Set ) 
   rule nextFree(IB:K, N:Int, Set) => IB 
@@ -40,7 +49,7 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
 
 // nextFreeValue(K:K, N:Int, Map:Map) is used with K as Map(E), 
 // where E is an element in the domain of Map, 
-// and where N as the cardinal of the codomain of Map. 
+// and where N is the cardinal of the codomain of Map. 
 // nextFreeValue(Map(E), N, Map) returns:
 // Map(E), if | values Map - bot | = N
 // the first positive integer not in the image of the Map, otherwise.  
@@ -69,8 +78,9 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
   eq imgOf (K |-> K1 Map) on (SetItem(K) Set:Set) = (SetItem(K1) imgOf Map on Set)
 ---  ceq imgOf Map on (SetItem(K) Set) = imgOf Map on Set if notBool (K in keys Map) 
    
-// wMap(<update>...</update>) runs the algorithm for the return from a procedure call
-// Here is the description of the content of the update cell:
+// processing(...) runs the algorithm for the return from a procedure call
+// (at the page 8 in the paper), while processed(...) ends the algorithm.
+// We call processing(...) with the arguments:
 // 		<update>
 //                  <sigma>\sigma from the paper</sigma>
 //                  <sigma1>\sigma' from the paper</sigma1>
@@ -78,89 +88,96 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
 //                  <gi-gn>gi..gn from the paper</gi-gn>
 //                  <g1-gn>g1..gn from the paper</g1-gn>
 //  		</update>
-  syntax Map ::= wMap ( BagItem )
+  syntax Map ::= processing ( BagItem )
+  syntax Map ::= processed ( Map )
 
 // Base Case, when all the global variables g_i were processed.
-/* Obs: card gi-gn cell content = number of remaining sigmai to update.
-* Hence, when gi-gn is the empty set, then i=n, 
-* and the content of sigmai cell is the \sigma_n in the paper 
+/* Obs: card gi-gn cell content = number of remaining steps for the update.
+*       Hence, when gi-gn is the empty set, then i=n, 
+*       and the content of sigmai cell is the \sigma_n in the paper 
 */
-  rule wMap ( 
-             <update_>
-               <gi-gn> .Set </gi-gn>
-               <sigmai> Map:Map </sigmai>
-               <_/update>
-            )
-       =>
-       .Map
-      [structural]
+  rule processing ( 
+        <update_>
+          <gi-gn> .Set </gi-gn>
+          <sigmai> Map:Map </sigmai>
+        <_/update> ) 
+       => 
+       processed (Map)
+---  if Map =/=Bool .Map
+  [structural]
 
-// First case of the algorithm, when \sigma(gi)=0, here Gi|->bot in sigma cell.
-  rule <update_>
+// First case of the algorithm, when \sigma(g_i)=0, 
+// here denoted as Gi|->bot in sigma cell.
+/* !!!The commented lines in the current rule, 
+*  containing processig( <update_>  and <_/update>)
+*  are kept to remind the unfamiliar reader that
+*  this is a rule from the processing(...) algorithm
+*/
+  rule --- processing( <update_>
          <sigma_> Gi:K|->bot <_/sigma>
          <gi-gn_> SetItem(Gi)=>. <_/gi-gn>
          <sigmai_> Gi|->(_ => bot) <_/sigmai>
-       <_/update> //)
-       [structural]
+       --- <_/update>)
+  [structural]
 
-// Second case of the algorithm, when \sigma(gi)=\sigma(gj), for a j<i.
+// Second case of the algorithm, when \sigma(g_i)=\sigma(g_j), for a j<i.
 // Here this is denoted as Gi|->K Gj|->K somewhere in the sigma cell,
 // while Gj is in the set of already processed variables, here denoted
 // as Gj in g1-gn cell, but not in the gi-gn cell (according to
 // the condition notBool (Gj in the content of the gi-gn cell))
-/* Obs: If K == bot (i.e \sigma(gi)=0) then, with an wellfounded inductive reasoning,
+/* Obs: If K==bot (i.e \sigma(g_i)=0) then, with an well-founded inductive reasoning,
 *       also K1 == bot, where Gj|->K1 in sigmai cell
-*       (i.e. \sigma_i(gj)=0, because \sigma(gj)=0, and j<i).
+*       (i.e. \sigma_i(g_j)=0, because \sigma(g_j)=0, and j<i).
 *       Hence, in this case, the change applied to the sigmai cell is
-*       exactly the one in the case when K=bot (i.e. \sigma(gi)=0),
+*       exactly the one in the case when K==bot (i.e. \sigma(g_i)=0),
 *       so we do not need to enforce for this rule the condition K=/=bot
 *       in order to apply it only when the first rule does not apply,
 *       as the algorithm in the paper does. 
 */
-  rule <update_>
+  rule --- processing( <update_>
          <sigma_> Gi|->K:K Gj:K|->K <_/sigma>
          <gi-gn> (SetItem(Gi)=>.) Gs:Set </gi-gn>
          <g1-gn_> SetItem(Gj) <_/g1-gn>
          <sigmai_> Gj|->K1:K Gi|->(_=>K1) <_/sigmai>
-       <_/update> //)
-       if notBool Gj in (SetItem(Gi) Gs)
-       [structural]
+       --- <_/update>)
+  if notBool Gj in (SetItem(Gi) Gs)
+  [structural]
 
 
-// Third case of the algorithm, when \sigma(gi)=\sigma(g'), here denoted by
+// Third case of the algorithm, when \sigma(g_i)=\sigma(g'), here denoted by
 // Gi|->K frz(G)|->K in the sigma cell (recall that frz(G) is the notation for G').
-/* Obs1: It would be less expensive to use the fact that K = K1, 
+/* Obs1: It would be less expensive to use the fact that K == K1, 
 *        as \sigma(g') = \sigma'(g), and to update Gi in sigmai with K,
-*        i.e. \sigma_i(gi := \sigma(g')) as in the paper.
+*        i.e. \sigma_i(g_i := \sigma(g')) according to the notation in the paper.
 */
-/* Obs2: We argue the ommision of the condition K =/= bot with a similar 
+/* Obs2: We argue the omission of the condition K =/= bot with a similar 
 *        reasoning as above in the Obs. for the second case of the algorithm.
 *        Moreover, we enforce the application of the current case only on the
 *        else branch of the second case by the condition of the rule which states
-*        that \sigma(gi) is not in \sigma(g1..gi-1)) based on the fact that:
-*        " \exists gj in g1..gi-1 such that \sigma(gi)=\sigma(gj)
+*        that \sigma(g_i) is not in \sigma(g_1..g_i-1)) based on the fact that:
+*        " \exists g_j in g_1..g_i-1 such that \sigma(g_i)=\sigma(g_j)
 *          iff
-*          \sigma(gj) in \sigma(g1..gi-1)"
+*          \sigma(g_j) in \sigma(g_1..g_i-1)"
 *        
 */
-  rule <update>
+  rule --- processing( <update>
          <sigma> Gi|->K:K frz(G:K)|->K Sigma:Map </sigma>
          <sigma1_> G|->K1 <_/sigma1>
          <gi-gn> (SetItem(Gi)=>.) Gs:Set </gi-gn>
          <g1-gn> SetItem(G) GGs:Set <_/g1-gn>
          <sigmai_> Gi|->(_=>K1) <_/sigmai>
-       </update> //)
-      if notBool (K in imgOf Sigma on ((SetItem(G) GGs) -Set (SetItem(Gi) Gs)))
-      [structural]
+       --- </update>)
+  if notBool (K in imgOf Sigma on ((SetItem(G) GGs) -Set (SetItem(Gi) Gs)))
+  [structural]
 
 // The last two cases in the algorithm, induced by the rules in nextFreeValue.
 /* Obs: The exclusion of the other previous cases is made by the if conditions
 *       of the rule, stating that:
-*        K=/=bot (\sigma(gi)=/=0) and
-*        \sigma(gi) notIn \sigma(g1..gi-1) and
-*        \sigma(gi) notIn \sigma(frz(g1..gn)).
+*        K=/=bot (\sigma(g_i)=/=0) and
+*        \sigma(g_i) notIn \sigma(g_1..g_i-1) and
+*        \sigma(g_i) notIn \sigma(frz(g_1..g_n)).
 */
-  rule <update_>
+  rule --- processing( <update_>
          <sigma> Gi|->K Sigma </sigma>
          <gi-gn> (SetItem(Gi)=>.) Gs </gi-gn>
          <g1-gn> GGs </g1-gn>
@@ -168,12 +185,36 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
                   => 
                   Sigmai[nextFreeValue(Sigma(Gi), | values Sigma |, Sigma)/Gi] 
          </sigmai>
-       <_/update> //)
-       if K =/=Bool bot
-       andBool notBool (K in imgOf Sigma on (GGs -Set (SetItem(Gi) Gs)))
-       andBool notBool (K in imgOf Sigma on frzSet(GGs))
-       [structural]
+       --- <_/update>)
+  if K =/=Bool bot
+     andBool notBool (K in imgOf Sigma on (GGs -Set (SetItem(Gi) Gs)))
+     andBool notBool (K in imgOf Sigma on frzSet(GGs))
+  [structural]
 
+/* 
+// This is kept here to emphasize the benefits of the local-rewriting from K.
+// By comparison, this equation is replaced in K with the above rule. 
+  eq  processing(
+       <update>
+         <sigma> Gi|->K Sigma </sigma>
+         <sigma1> Sigma1:Map </sigma1>
+         <gi-gn> SetItem(Gi) Gs </gi-gn>
+         <g1-gn> GGs </g1-gn>
+         <sigmai> Sigmai:Map </sigmai>
+       </update>)
+      =
+      processing(
+       <update>
+         <sigma> Gi|->K Sigma </sigma>
+         <sigma1> Sigma1 </sigma1>
+         <gi-gn> Gs </gi-gn>
+         <g1-gn> GGs </g1-gn>
+         <sigmai>  
+              Sigmai[nextFreeValue(Sigma(Gi), | values Sigma |, Sigma)/Gi] 
+         </sigmai>
+       </update>)
+   [owise]
+*/
   
 // updateFrz Map:Map with Set:Set = Map[Map(Set)/frzs(Set)].
   syntax Map ::= updateFrz Map with Set
@@ -184,34 +225,34 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
 
 
   configuration 
-		<T> 
-		  <k> .K </k>
+                <T> 
+                  <k> .K </k>
                   <state> .Map </state>
-		  <pgm> .Map </pgm>
-		  <abs> 0 </abs>
-		</T>
-		<update>
+                  <pgm> .Map </pgm>
+                  <abs> 0 </abs>
+                </T>
+                <update>
                   <sigma>.Map</sigma>
                   <sigma1>.Map</sigma1>
                   <sigmai>.Map</sigmai>
                   <gi-gn>.Set</gi-gn>
                   <g1-gn>.Set</g1-gn>
-  		</update>
+                </update>
 		
-// At the start of the program execution, al variables, globals LG, locals LL,
+// At the start of the program execution, all variables, globals LG, locals LL,
 // and LG' (here frzs(LG)) are mapped to bot (0 in the paper).
-// The cell abs maintians the 2*the no. of global vars. + no. of local vars. 
+// The cell abs maintains the 2*the no. of global vars. + no. of local vars. 
   rule <k> (gvars: LG:ListId  lvars: LL:ListId { Ps:Procs }) => Ps <_/k>
        <state> S:Map => S[bot/(List{K}(LG,LL),,frzs(List{K}(LG)))] </state>
        <pgm> .Map => ( gvars|->wklist(List{K}(LG)) lvars|->wklist(List{K}(LL)))</pgm>
        <abs> 0 => lengthList{K}(List{K}(LG,LL,LG)) </abs>
 
-// The update upon an assigment with new is made by nextFreeValue explained above.
+// The update upon an assignment with new is made by  nextFreeValue explained above.
   rule <k> X:Id :=new => . <_/k>
        <state> S:Map => S[nextFreeValue(S(X), N, S)/X] </state>
        <abs> N </abs>
 
-// Upon a procedure call, the freezed global variables are updated by 
+// Upon a procedure call, the frozen global variables are updated by 
 // updateFrz explained above, while the local variables are set to bot.
   rule <k> P:ProcId => B~>restore(S) <_/k>
        <state> S:Map => updateFrz S[bot/LVs] with (Set GVs) </state>
@@ -219,13 +260,13 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
 
 
 // Upon a returning from a procedure call, the state is processed by the 
-// wMap(<update>...</update>) as explained above.
-// When wMap(<update>...</update>) is matched in the state cell, the processing of the state
+// processing(...) as explained above, which ends with the processed(Map).
+// When processed(...) is matched in the state cell, the processing of the state
 // upon return from a procedure call ends, and restore(...) is consumed.
-  rule <k> restore(S':Map) => . <_/k>
+  rule <k> restore(S':Map) <_/k>
        <state> S 
                => 
-               wMap( <update>
+               processing( <update>
                  <sigma> S </sigma>
                  <sigma1> S' </sigma1>
                  <gi-gn> Set GVs </gi-gn>
@@ -233,7 +274,11 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
                  <sigmai> S' </sigmai>
                </update>)
        </state>
-       <pgm_> gvars|->wklist(GVs:List{K}) <_/pgm>
+       <pgm_> lvars|->wklist(LVs:List{K}) gvars|->wklist(GVs:List{K}) <_/pgm>
 
+
+  rule <k> restore(S':Map) => .<_/k>
+       <state> processed(S) => S </state>
+       <pgm_> lvars|->wklist(LVs:List{K}) gvars|->wklist(GVs:List{K}) <_/pgm>
 
 endkm

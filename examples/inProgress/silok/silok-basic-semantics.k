@@ -1,10 +1,21 @@
+/*
+*  The code implements the contents of the paper:
+*  "Symbolic Execution of Unbounded Object Creation"
+*  by Juriaan Rot, Frank de Boer, Marcello Bonsangue
+*  (LIACS - Leiden University, and CWI)
+*  The focus of this file is on Section 3-4 in the paper,
+*  meaning that it implements the common features of
+*  the concrete semantics (Section 3) and 
+*  the abstract semantics (Section 4).
+*/
+
 //require silok-programs
 require silok-syntax
 
-kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT --- + K-WRAPPERS + SILOK-PROGRAMS 
+kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT 
+--- + SILOK-PROGRAMS + K-WRAPPERS 
 
-  syntax K ::= B | restore ( Map ) | lvars | gvars | ListId 
-  	       | Procs | Pgm 
+  syntax K ::= B | restore ( Map ) | lvars | gvars | ListId | Procs | Pgm 
   syntax IntBot ::= Int | bot
   syntax Builtins ::= IntBot
   syntax KResult ::= IntBot | Id
@@ -27,14 +38,14 @@ kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT --- + K-WRAPPE
   configuration <T> 
                   <k> .K </k>
                   <state> .Map </state>
-		  <pgm> .Map </pgm>
+                  <pgm> .Map </pgm>
                 </T>
 
   syntax Bag ::= run ( KLabel )
   rule run (KL:KLabel) => 
-       <T_> 
-       	   <k> KL(.List{K})~>main </k>
-	<_/T> [structural]
+        <T_> 
+           <k> KL(.List{K})~>main </k>
+        <_/T> [structural]
 
 
   rule ( Ps1:Procs Ps2:Procs ) => Ps1 ~> Ps2
@@ -44,11 +55,18 @@ kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT --- + K-WRAPPE
   rule B1:B;B2:B => B1~>B2  
   rule <k> X:Id:=Y:Id => . <_/k>
        <state_> X|->(_ => I) Y|->I:Int <_/state>
+
   rule <k> [X=Y]B:B => B <_/k>
-        <state_> X|->V:IntBot Y|->V <_/state>
+       <state_> X|->V:IntBot Y|->V <_/state>
+---  rule <k> [X=Y]B:B => . <_/k>
+---       <state_> X|->V1:IntBot Y|->V2:IntBot <_/state>
+---  if V1 !=Int V2
   rule <k> [X/=Y]B:B => B <_/k>
        <state_> X|->V1:IntBot Y|->V2:IntBot <_/state>
   if V1 !=Int V2
+---  rule <k> [X/=Y]B:B => . <_/k>
+---       <state_> X|->V:IntBot Y|->V <_/state>
+
   rule <k> B1+B2 => B1 <_/k>
   rule <k> B1+B2 => B2 <_/k>
 

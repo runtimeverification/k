@@ -1,3 +1,13 @@
+/*
+*  The code implements the contents of the paper:
+*  "Symbolic Execution of Unbounded Object Creation"
+*  by Juriaan Rot, Frank de Boer, Marcello Bonsangue
+*  (LIACS - Leiden University, and CWI)
+*  The focus of this file is on Section 3-4 in the paper,
+*  meaning that it implements the features specific to
+*  the abstract semantics described in Section 4 of the paper.
+*/
+
 require silok-basic-semantics
 
 
@@ -101,6 +111,7 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
   [owise]
 
 *** not in the paper, used for the base case in update
+*** presumably redundant
   syntax Map ::= updateLocals Map mod Map `/ `( Set `, Set `)  Map
   eq  updateLocals Map1 mod Map2 /(Gs, .Set) Map = Map 
   eq  updateLocals (Map1 Gelt |-> K frz(Gelt) |-> K)  
@@ -123,11 +134,10 @@ kmod SILOK-ABSTRACT-SEMANTICS is including SILOK-BASIC-SEMANTICS
 
 
   configuration <T> 
-		  <k> .K </k>
+                  <k> .K </k>
                   <state> .Map </state>
-		  <pgm> .Map </pgm>
-		  <abs> 0 </abs>
----  		  <temp> .Set </temp>
+                  <pgm> .Map </pgm>
+                  <abs> 0 </abs>
                 </T>
 
 
