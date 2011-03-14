@@ -15,6 +15,14 @@ BEGIN {
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
 
+# check installed software
+my $maude_path = "maude";
+my $input_file  = fresh("kompile_in", ".maude");
+my $error_file  = fresh("kompile_err", ".txt");
+my $output_file = fresh("kompile_out", ".txt");
+my $temp_file   = fresh("kompile_tmp", ".txt");
+# check_software();
+
 # add configuration parser
 $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
 require $path;
@@ -247,8 +255,6 @@ my $special_perl_chars  = "$parentheses\Q\\^|*+?.\$\E";
 #########
 # Maude #
 #########
-my $maude_path = "maude";
-my $maude_temp_file = "ERASE-ME-PLEASE";
 my $maude_special = "[ $parentheses\\s_\\,\\`]";
 my $maude_unspecial = "[^$parentheses\\s_\\,\\`]";
 my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\s\\,\\`])*";
@@ -382,10 +388,6 @@ my $klabels = "";
 # my $error_file  = "kompile_err.txt";
 # my $output_file = "kompile_out.txt";
 # my $temp_file   = "kompile_tmp.txt";
-my $input_file  = fresh("kompile_in", ".maude");
-my $error_file  = fresh("kompile_err", ".txt");
-my $output_file = fresh("kompile_out", ".txt");
-my $temp_file   = fresh("kompile_tmp", ".txt");
 my $kshared = File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(), "shared.maude"));
 my $mset = 0;
 
@@ -1238,10 +1240,11 @@ sub run_maude {
     my $status = system("$maude_path -no-banner -no-wrap $input_file >$output_file 2>$error_file");
     if (($status >>= 8) != 0)
     {
-	my $err = get_file_content($error_file);
-	$err =~ s/\n.*?$//sg;
-	print "$err\nFailed to run maude.\nExit status $status.\n" ;
-	exit(1);
+		my $err = get_file_content($error_file);
+		$err =~ s/\n.*?$//sg;
+		# print "$err\nFailed to run maude.\nExit status $status.\n" ;
+		return -1 ;
+		# exit(1);
     }
 
     if ($? == 0) {
@@ -2281,4 +2284,39 @@ sub restore_intermodule_latex
 	}
 	
 	return $_;
+}
+
+
+# check available software
+sub check_software
+{
+	# check if maude is installed
+	local $_ = run_maude("Check maude...", "q");
+	$_ = /Bye/sm?1:-1;
+
+	if ($_ == -1)
+	{
+		print "[ERROR] $maude_path command does not execute. It seems that you have not installed maude or you didn't set the variable \$maude_path from kompile script properly.\n";
+		exit(1);
+	}
+	else
+	{
+		print "Maude installed...\n" if $verbose;
+	}
+
+	# check if XML::DOM package is installed
+	$_ = `perl -e 'use XML::DOM;print "okay"'`;
+	my $found = $_ eq "okay"?1:0;
+
+	if (!$found)
+	{
+		print "[ERROR] Package XML::DOM is not installed. You can install XML::DOM using cpan tool:\n\troot# cpan\n\tcpan[1]> install XML::DOM\n";
+		exit(1);
+	}
+	else
+	{
+		print "Package XML::DOM installed...\n" if $verbose;
+	}
+
+#	exit(0);
 }
