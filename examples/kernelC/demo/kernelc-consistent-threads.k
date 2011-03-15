@@ -2,13 +2,13 @@ kmod KERNELC-CONSISTENT-THREADS is including KERNELC-THREADS-SYNTAX
   including KERNELC-SEMANTICS + KERNELC-CONSISTENT-MEMORY
 
   configuration 
-  <T?> 
-     <threads> <thread*> 
+  <T multiplicity="?"> 
+     <threads> <thread multiplicity="*"> 
        <k> .K </k> 
        <env> .Map </env>
        <fstack> .List </fstack>
         <id> 0 </id> 
-     </thread*> </threads>
+     </thread> </threads>
      <locks> .Map </locks>  
      <cthreads> .Set </cthreads>       @latex("\\kBR")    
      <funs> .Map </funs>              
@@ -18,8 +18,8 @@ kmod KERNELC-CONSISTENT-THREADS is including KERNELC-THREADS-SYNTAX
      <ptr> .Map </ptr> 
      <next> 1 </next> 
      <rand> 0 </rand>
-  </T?> 
-  <result?> "" </result?>
+  </T> 
+  <result multiplicity="?"> "" </result>
 
   rule <k> acquire(N:Nat) => void <_/k> <id> T:Nat </id> 
        <locks> Locks:Map (. => N |-> T) </locks>

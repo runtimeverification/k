@@ -86,15 +86,15 @@ memory does contain v at a ;
 
 
   configuration 
-  <T?> 
-     <threads> <thread*> 
+  <T multiplicity="?"> 
+     <threads> <thread multiplicity="*"> 
        <k> .K </k> 
        <env> .Map </env>
        <fstack> .List </fstack>
        <buffer> .List </buffer>     --- This is to buffer writes
        <blocked> false </blocked>   --- Is thread blocked?
        <id> 0 </id> 
-     </thread*> </threads>
+     </thread> </threads>
      <locks> .Map </locks>  
      <cthreads> .Set </cthreads>       @latex("\\kBR")    
      <funs> .Map </funs>              
@@ -103,8 +103,8 @@ memory does contain v at a ;
      <mem> .Map </mem> 
      <ptr> .Map </ptr> 
      <next> 1 </next> 
-  </T?> 
-  <result?> "" </result?>
+  </T> 
+  <result multiplicity="?"> "" </result>
 
 --- structural rules for maintaining the status of the blocked cell
   rule <k> acquire(N)  <_/k> <blocked> false => true </blocked> 

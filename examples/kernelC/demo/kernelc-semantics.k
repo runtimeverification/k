@@ -4,7 +4,7 @@ kmod KERNELC-SEMANTICS is
   including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION + PL-RANDOM
 
   configuration 
-  <T?> 
+  <T multiplicity="?"> 
       <k> .K </k> 
       <env> .Map </env> 
       <funs> .Map </funs>               @latex("\\kBR")
@@ -15,8 +15,8 @@ kmod KERNELC-SEMANTICS is
       <ptr> .Map </ptr> 
       <next> 0 </next> 
       <rand> 0 </rand>
-  </T?> 
-  <result?> "" </result?>
+  </T> 
+  <result multiplicity="?"> "" </result>
 
   --- operations on local variables
   rule <k> X:Id => V <_/k>       <env_> X |-> V <_/env>    [structural]
