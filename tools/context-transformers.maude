@@ -249,4 +249,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   eq getMinLevelL(Level, (T,Tl), KC) 
    = getMinLevelL(min(Level, getMinLevel(T,KC)), Tl, KC) .
   eq getMinLevelL(N, empty, KC) = N .
+
+
+  eq min(Level, L:[Int]) = Level [owise] .
 endfm
