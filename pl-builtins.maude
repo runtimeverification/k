@@ -227,6 +227,7 @@ mod PL-INT is
   protecting PL-NAT .
   sorts NzInt Int .
   subsorts NzNat < NzInt Nat < Int < Builtins .
+  subsort Zero NzNat < Int . 
   subsort NzInt < Builtins .
 
   op -Int_ : NzNat -> NzInt
