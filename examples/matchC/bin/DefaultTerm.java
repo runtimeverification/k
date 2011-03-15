@@ -53,10 +53,15 @@ public class DefaultTerm implements MaudeTerm
 
     if ("<_>_</_>".equals(op))
     {
+      if (!Cell.cells.get(subterms.get(0).getOp()).visible)
+        return buffer;
+
       ++indent;
+/*
       buffer.append("\n");
       for(int i = 0; i < indent; ++i)
         buffer.append("  ");
+*/
     }
 
     // mixfix operator?

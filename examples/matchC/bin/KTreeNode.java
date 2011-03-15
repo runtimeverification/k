@@ -320,12 +320,23 @@ public class KTreeNode implements TreeNode
 
   private StringBuilder toKString(int indent)
   {
-    if (children.size() > 0)
+    int size = children.size();
+    if (size > 0)
     {
-      buffer.append("<" + content + ">");
-      if (children.size() > 1 || children.get(0).children.size() > 0)
+      if (!Cell.cells.get(content).visible)
       {
-        for (int index = 0; index < children.size(); ++index)
+        buffer.setLength(buffer.length() - 2 * indent - 1);
+        return buffer;
+      }
+
+      buffer.append("<" + content + ">");
+      if (size > 1 || children.get(0).children.size() > 0)
+      {
+        int items = Cell.cells.get(content).items;
+        if (items != 0 && items < size)
+          size = items;
+
+        for (int index = 0; index < size; ++index)
         {
           buffer.append("\n");
           for (int i = 0; i <= indent; ++i)
@@ -333,6 +344,15 @@ public class KTreeNode implements TreeNode
             buffer.append("  "); 
           }
           children.get(index).toKString(indent + 1);
+        }
+        if (size < children.size())
+        {
+          buffer.append("\n");
+          for (int i = 0; i <= indent; ++i)
+          {
+            buffer.append("  "); 
+          }
+          buffer.append("...");
         }
         buffer.append("\n");
         for (int i = 0; i < indent; ++i)
@@ -346,6 +366,7 @@ public class KTreeNode implements TreeNode
     }
     else
       buffer.append(content);
+
     return buffer;
   }
 
