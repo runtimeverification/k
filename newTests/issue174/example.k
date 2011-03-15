@@ -9,9 +9,13 @@ kmod ISSUE is
 	
 	configuration 
 		<T> 
-			<thread multiplicity="*">
-				<k> .K </k>
-			</thread>
+			<threads>
+				<thread multiplicity="*">
+					<control>
+						<k> .K </k>
+					</control>
+				</thread>
+			</threads>
 		</T>
 
 	ops start1 start2 : -> Bag
@@ -20,19 +24,29 @@ kmod ISSUE is
 	
 	rule start1 => 
 		<T>
-			<thread>
-				<k> foo1 </k>
-			</thread>
+			<threads>
+				<thread>
+					<control>
+						<k> foo1 </k>
+					</control>
+				</thread>
+			</threads>
 		</T>
 	
 	rule start2 => 
 		<T>
-			<thread>
-				<k> foo2 </k>
-			</thread>
-			<thread>
-				<k> foo2 </k>
-			</thread>
+			<threads>
+				<thread>
+					<control>
+						<k> foo2 </k>
+					</control>
+				</thread>
+				<thread>
+					<control>
+						<k> foo2 </k>
+					</control>
+				</thread>
+			</threads>
 		</T>
 	
 	rule [rule1]:
