@@ -41,18 +41,18 @@ kmod IMPPP-SEMANTICS is including IMPPP-CONFIGURATION
   rule if false then _  else S2 => S2 [structural]
   rule <k>while B do S:Stmt => if B then S while B do S else {}<_/k> [structural]
   rule <k>print I; => .<_/k> <out_>. => ListItem(I)</out>
-  rule <k>spawn S => .<_/k> <env>Env</env>
-       (. => <thread_> <k>S</k> <env>Env</env> <_/thread>) [structural]
+  rule <k>spawn S => .<_/k> <env>Rho</env>
+       (. => <thread_> <k>S</k> <env>Rho</env> <_/thread>) [structural]
   rule <thread_><k>.K</k> <_/thread> => . [structural] 
   rule <k>haltThread; ~> _ => .</k> [structural]
-  rule <k>var X; => .<_/k> <env>Env => Env[N/X]</env> 
+  rule <k>var X; => .<_/k> <env>Rho => Rho[N/X]</env> 
        <store_>. => N|->0<_/store> <nextLoc>N => sNat N </nextLoc> [structural]
-  rule <k>{S} => S~>env(Env)<_/k> <env>Env:Map</env> [structural]
+  rule <k>{S} => S~>env(Rho)<_/k> <env>Rho:Map</env> [structural]
 
 --- Auxiliary operation for environment recovery
   syntax K ::= env Map
-  rule env(_)~>env(Env) => env(Env) [structural]
-  rule <k>env(Env) => .<_/k> <env>_=>Env</env> [structural]
+  rule env(_)~>env(Rho) => env(Rho) [structural]
+  rule <k>env(Rho) => .<_/k> <env>_=>Rho</env> [structural]
 endkm
 
 kmod IMPPP is including IMPPP-SEMANTICS + IMPPP-PROGRAMS 

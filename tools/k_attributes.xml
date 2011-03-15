@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <k-attributes>
 	<k-attribute name="multiplicity" values="? * + some any maybe"/>
+	<k-attribute name="type" values="K List Bag Set Map"/>
 	<k-attribute name="color" values="red white gray yellow blue green
 orange pink"/>
 </k-attributes>

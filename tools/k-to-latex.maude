@@ -954,9 +954,8 @@ mod LATEX-PRINT-META is
   eq \variable{'`[HOLE`]} = \variable{'\ensuremath`{\square`}} .
   eq \variable{'?} = \variable{'AnyVar} .
   eq \variable{'AnyVar} = '\AnyVar .
-  eq \variable{'Rho} = \variable{'\ensuremath`{\rho`}} .
-  eq \variable{'Rho'} = \variable{'\ensuremath`{\varrho`}} .
-  eq \variable{'Sigma} = \variable{'\ensuremath`{\sigma`}} .
+  eq printVariable("Rho") = printVariable("\\ensuremath{\\rho}") .
+  eq printVariable("Sigma") = printVariable("\\ensuremath{\\sigma}") .
 ---  eq \constant{'.empty} = '\kdot .
 ---  eq \constant{'.K} = '\kdot .
 ---  eq \constant{'.nil} = '\kdot .
@@ -984,7 +983,7 @@ mod LATEX-PRINT-META is
   ceq printIndexedVariable(St, St'')
     =  if I:[Int] :: Nat 
        then printIndexedVariable(substr(St, 0, _-_(length(St),1)), St'' + St') 
-       else string2qidList(St + "\\ensuremath{\\nothing_{" + St'' + "}}") fi
+       else '\ensuremath '`{  '`{ printVariable(St) '`} '_ '`{ string2qidList(St'') '`} '`} fi
    if St' := substr(St, _-_(length(St), 1), 1)
    /\ I:[Int] := rat(St',10) .
 
