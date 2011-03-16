@@ -34,7 +34,7 @@ fmod MAKE-K-RULES is
 
 
   op addCxtReplace : Module Module KContextSplit ~> Module .
-  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setContents(CSplit, replaceCxt(splitReplace(getContents(CSplit),1), getHoleReplacement(getContents(CSplit))))), M) .
+  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
 
   op addReplace : Module Module KRuleSplit ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural})

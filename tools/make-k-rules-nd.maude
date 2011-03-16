@@ -36,8 +36,8 @@ fmod MAKE-K-RULES is
  ceq resolveReplace(Flat, M, Max, Mas, Subst)
    = resolveReplace(Flat, addReplace(Flat, M, Split, Subst), Mas, Subst)
   if Split := splitKRule(metadataParse(Max)) .
- ceq resolveReplace(Flat, M, Max, Mas)
-   = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas)
+ ceq resolveReplace(Flat, M, Max, Mas, Subst)
+   = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas, Subst)
   if CSplit := splitKContext(metadataParse(Max)) .
   eq resolveReplace(Flat, M, Max, Mas, Subst) 
    = resolveReplace(Flat, addMbs(Max, M), Mas, Subst) [owise] .
@@ -52,13 +52,13 @@ fmod MAKE-K-RULES is
 
   op addReplace : Module Module KRuleSplit Substitution ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural}, Subst)
-   = addEqs((eq normalize(Flat,splitReplace(T,1)) = (normalize(Flat,splitReplace(T,2))[Subst]) [metadata("structural rule") AS] .), M) . 
+   = addEqs((eq normalize(Flat,splitReplace(T,1)) = (normalize(Flat,splitReplace(T,2))[Subst]) [metadata(kstructural AS)] .), M) . 
   eq addReplace(Flat, M, {kcrl, T, C, AS kstructural}, Subst)
-   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = (normalize(Flat,splitReplace(T,2))[Subst]) if C = trueCt [metadata("structural rule") AS] .), M) .
+   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = (normalize(Flat,splitReplace(T,2))[Subst]) if C = trueCt [metadata(kstructural AS)] .), M) .
   eq addReplace(Flat, M, {krl, T, empty, AS}, Subst)
-    = addRls((rl normalize(Flat,splitReplace(T,1)) => (normalize(Flat,splitReplace(T,2))[Subst]) [metadata("computational rule") AS] .), M) [owise] .
+    = addRls((rl normalize(Flat,splitReplace(T,1)) => (normalize(Flat,splitReplace(T,2))[Subst]) [metadata(kcomputational AS)] .), M) [owise] .
   eq addReplace(Flat, M, {kcrl, T, C, AS}, Subst) 
-    = addRls((crl normalize(Flat,splitReplace(T,1)) => (normalize(Flat, splitReplace(T,2))[Subst]) if makeCondition(C)  [metadata("computational rule") AS] .), M) [owise] .
+    = addRls((crl normalize(Flat,splitReplace(T,1)) => (normalize(Flat, splitReplace(T,2))[Subst]) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
 
 
   op makeCondition : Term -> Condition .
@@ -66,6 +66,7 @@ fmod MAKE-K-RULES is
    = T1 => T2 
   if O' = searchS /\ O = replaceS .
   eq makeCondition(T) = T = trueCt [owise] .
-      
+
+  var CSplit : KContextSplit .
 endfm
 

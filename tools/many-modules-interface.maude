@@ -18,9 +18,10 @@ mod MANY-MODULES-META is
 
 
   eq modules(MS, IL (including 'K-LATEX .) IL') = modules(MS, IL IL') .
+  eq modules(MS, IL I IL' I IL'') = modules(MS, IL I IL' IL''  ) .
   eq '@latex[Ct:Constant] = empty .
 
-  var IL IL' : ImportList .
+  var IL IL' IL'' : ImportList . var I : Import .
 endm
 
 mod MANY-MODULES-LOOP is 

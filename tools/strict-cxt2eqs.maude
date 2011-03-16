@@ -26,21 +26,21 @@ mod STRICTCXT2EQS is
   eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
 
   op strictCxt2eq : Module Term Term AttrSet TermList ~> EquationSet .
-  eq strictCxt2eq(M, T1, T2, none, Cond)
-   = strictCxt2eq(M, T1, T2, kstrict(nil,klabel), Cond) .
-  
-  eq strictCxt2eq(M, T1, T2, kstrict(nil,Q), Cond) 
-   = strictCxt2eqHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,KProper)], freezeTerm(M, T1))), Cond[hole <- mkVariable('Kcxt,KProper)]) 
+  eq strictCxt2eq(M, T1, T2, kstrict(nil,Q) AS, Cond) 
+   = strictCxt2eqHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,KProper)], freezeTerm(M, T1))), Cond[hole <- mkVariable('Kcxt,KProper)], AS) 
       (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T1)))
         = kWrap(Q, T1[hole <- mkVariable('Kcxt,KResult)])
-       [metadata("cooling")] .) .
+       [metadata(AS metadata("cooling"))] .) .
 
+  eq strictCxt2eq(M, T1, T2, AS, Cond)
+   = strictCxt2eq(M, T1, T2, kstrict(nil,klabel) AS, Cond) [owise].
+  
 
-  op strictCxt2eqHeat : Term Term TermList ~> Equation .
-  eq strictCxt2eqHeat(T1,T2,empty)
-   = (eq T1 = T2 [metadata("heating")] .) .
-  eq strictCxt2eqHeat(T1,T2,T)
-   = (ceq T1 = T2 if T = trueCt [metadata("heating")] .) .
+  op strictCxt2eqHeat : Term Term TermList AttrSet ~> Equation .
+  eq strictCxt2eqHeat(T1,T2,empty, AS)
+   = (eq T1 = T2 [metadata(AS metadata("heating"))] .) .
+  eq strictCxt2eqHeat(T1,T2,T, AS)
+   = (ceq T1 = T2 if T = trueCt [metadata(AS metadata("heating"))] .) .
 
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(
@@ -76,15 +76,4 @@ mod STRICTCXT2EQS is
    = setMbs(addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))), MAS) .
 endm
 
----(
-mod STRICTOPS2EQ is
-  including STRICTOPS2CXT .
-  including STRICTCXT2EQ .
-  op strictOps2eq : Qid Module ~> Module .
-  var StrictEq : Qid .  var Syntax : Module .
-  eq strictOps2eq(StrictEq, Syntax) 
-   = strictCxt2eq(getName(Syntax), StrictEq, strictOps2cxt('STRICTCXT,Syntax)) .
-  --- [print "Syntax: " Syntax] .
-endm
----)
 

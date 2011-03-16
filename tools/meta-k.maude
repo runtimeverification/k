@@ -616,7 +616,7 @@ fmod META-K-CONTEXTS is including K-SORTS .
   including META-MODULE-EXTRAS .
   including K-STRICTNESS-OPS .
   var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
-  var AS : AttrSet .  var RK : KContextKind .
+  var AS AS' : AttrSet .  var RK : KContextKind .
 
   sort KContextKind .
   ops kcxt kccxt : -> KContextKind .
@@ -642,12 +642,15 @@ fmod META-K-CONTEXTS is including K-SORTS .
   op getContents : KContextSplit -> Term .
   op getContextKind : KContextSplit -> KContextKind .
   op getCondition : KContextSplit -> TermList .
-  op getAttrs : KContextSplit -> AttrSet .
   eq getContents({RK,T,Cond,AS}) = T .
   op getKind : KContextSplit -> KContextKind .
   eq getKind({RK,T,Cond,AS}) = RK .
   eq getCondition({RK,T,Cond,AS}) = Cond .
+  op getAttrs : KContextSplit -> AttrSet .
   eq getAttrs({RK,T,Cond,AS}) = AS .
+
+  op setAttrs : KContextSplit AttrSet -> KContextSplit .
+  eq setAttrs({RK,T,Cond,AS}, AS') = {RK,T,Cond,AS'} .
 
   op setContents : KContextSplit Term -> KContextSplit .
   eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
@@ -665,7 +668,7 @@ fmod META-K-CONTEXTS is including K-SORTS .
 
 
   var O : Qid . var Ct : Constant . var V : Variable .
-  var T1 T2 : Term . var Tl Tl' : TermList .
+  var T1 T2 : Term . var Tl Tl' : TermList .  
 
   op replaceCxt : Term Term -> Term .
   eq replaceCxt(T1, T2) = 'wrap-with[T1,T2] .

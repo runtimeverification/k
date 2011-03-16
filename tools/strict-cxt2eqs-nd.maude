@@ -55,30 +55,30 @@ mod STRICTCXT2EQS is
   eq strictCxt2eqs(M, MAS,Eqs, Rls) = {MAS,Eqs, Rls} [owise] . 
 
   op strictCxt2eq : Module MembAxSet EquationSet RuleSet Term AttrSet TermList ~> MASEqsPair .
-  eq strictCxt2eq(M, MAS, Eqs, Rls, T, none, Cond)
-   = strictCxt2eq(M, MAS, Eqs, Rls, T, kstrict(nil,klabel), Cond) .
+  eq strictCxt2eq(M, MAS, Eqs, Rls, T, kstrict(nil,Q) AS, Cond) 
+   = strictCxt2eqs(M, MAS, Eqs coolingEqs(M, T, Q, AS), Rls heatingRls(M, T, Q, Cond, AS)) .
+
+  eq strictCxt2eq(M, MAS, Eqs, Rls, T, AS, Cond)
+   = strictCxt2eq(M, MAS, Eqs, Rls, T, kstrict(nil,klabel) AS, Cond) [owise] .
   
-  eq strictCxt2eq(M, MAS, Eqs, Rls, T, kstrict(nil,Q), Cond) 
-   = strictCxt2eqs(M, MAS, Eqs coolingEqs(M, T, Q), Rls heatingRls(M, T, Q, Cond)) .
+  op heatingRls : Module Term Qid TermList AttrSet -> RuleSet .
+  eq heatingRls(M, T, Q, Cond, AS)
+   = strictCxt2eqHeat(kWrap(Q, T[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))), Cond[hole <- mkVariable('Kcxt,KProper)], AS) .
 
-  op heatingRls : Module Term Qid TermList -> RuleSet .
-  eq heatingRls(M, T, Q, Cond)
-   = strictCxt2eqHeat(kWrap(Q, T[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(mkVariable('Kcxt,KProper), freezeTerm(M, T))), Cond[hole <- mkVariable('Kcxt,KProper)]) .
-
-  op coolingEqs : Module Term Qid -> EquationSet .
-  eq coolingEqs(M, T, Q)
+  op coolingEqs : Module Term Qid AttrSet -> EquationSet .
+  eq coolingEqs(M, T, Q, AS)
    =  (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T)))
         = kWrap(Q, T[hole <- mkVariable('Kcxt,KResult)])
-       [metadata("cooling")] .) 
+       [metadata(AS metadata("cooling"))] .) 
       (eq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T)),'Rest:K)]
         = 'cool[kra(T[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
-       [metadata("super cooling")] .) .
+       [metadata(AS metadata("super cooling"))] .) .
 
-  op strictCxt2eqHeat : Term Term TermList ~> Rule .
-  eq strictCxt2eqHeat(T1,T2,empty)
-   = (rl T1 => T2 [metadata("heating")] .) .
-  eq strictCxt2eqHeat(T1,T2,T)
-   = (crl T1 => T2 if T = trueCt [metadata("heating")] .) .
+  op strictCxt2eqHeat : Term Term TermList AttrSet ~> Rule .
+  eq strictCxt2eqHeat(T1,T2,empty, AS)
+   = (rl T1 => T2 [metadata(AS metadata("heating"))] .) .
+  eq strictCxt2eqHeat(T1,T2,T, AS)
+   = (crl T1 => T2 if T = trueCt [metadata(AS metadata("heating"))] .) .
 
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(
