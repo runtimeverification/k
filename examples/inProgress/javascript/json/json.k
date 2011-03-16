@@ -20,13 +20,28 @@ kmod JSON-SYNTAX
 	
 	syntax JsonArray ::= [ List{JsonElem} ]
 	
+	
+	syntax JSProperties ::= .JSProperties | 
+							jsProp( JsonName , JsonValue ) | 
+							JSProperties JSProperties [prec 50 assoc comm id: .JSProperties]
+	
+	syntax JSObject ::= jsObj( JSProperties ) | 
+						internalize ( JsonObject ) |
+						buildJsObj( List{JsonElem} , JSObject )
+	
+	macro internalize({ Elements:List{JsonElem} }) = buildJsObj( Elements , jsObj(.JSProperties) )
+		
+	macro buildJsObj((.List{JsonElem}) , Obj:JSObject ) = Obj
+	macro buildJsObj((Name:JsonName : Value:JsonValue , Elements) , jsObj(Properties:JSProperties) ) 
+		= buildJsObj((Elements) , jsObj(jsProp(Name, Value) Properties))
+	
 endkm
 
 kmod JSON-PROGRAMS 
 	is including JSON-SYNTAX
 	
-	syntax Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
-	              | n | o | p | q | r | s | t | u | v | w | x | y | z
+---	syntax Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
+---	              | n | o | p | q | r | s | t | u | v | w | x | y | z
 	
 	syntax JsonValue  ::= v0 | v1 | v2 | v3 | v4 | v5 | v6 | v7
 	
@@ -40,7 +55,19 @@ kmod JSON-PROGRAMS
 	
 	macro v4 = [{}, {"a" : "x", "b" : 234, "c" : true, "d" : false, "e" : [1,2,3], "f" : {"r" : 3}}]
 	
+	syntax JSObject  ::= js0 | js1 | js2 | js3 | js4
 	
+	macro js0 = internalize(v0)
+	
+	macro js1 = internalize(v1)
+	
+	macro js2 = internalize(v2)
+	
+	macro js3 = internalize(v3)
+	
+	macro js4 = internalize(v4)
+	
+
 endkm
 
 kmod JSON-SEMANTICS is including JSON-SYNTAX + K

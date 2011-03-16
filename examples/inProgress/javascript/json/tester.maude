@@ -1,4 +1,4 @@
-in ../../../k-prelude
+in ../../../../k-prelude
 load json.maude
 
 set print with parentheses on .
