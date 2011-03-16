@@ -361,7 +361,11 @@ public class KTreeNode implements TreeNode
         }
       }
       else
+      {
+        buffer.append(" "); 
         children.get(0).toKString(indent + 1);
+        buffer.append(" "); 
+      }
       buffer.append("<" + content + "/>");
     }
     else

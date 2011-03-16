@@ -139,6 +139,9 @@ public class DefaultTerm implements MaudeTerm
     renameOp.put("_<Int_", "_<_");
     renameOp.put("_<=Int_", "_<=_");
     renameOp.put("-Int_", "-_");
+
+    renameOp.put("'_`,`,`,_", "'_`,_");
+    renameOp.put("_;;_", "__");
   }
 
   public static boolean isWrapper(String op)
@@ -155,6 +158,13 @@ public class DefaultTerm implements MaudeTerm
   public static boolean isString(String op)
   {
     return op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"';
+  }
+
+  public static void addFreezeVar(Map<String, MaudeTerm> vars, MaudeTerm var)
+  {
+    String varNameString = var.subterms().get(0).subterms().get(0).getOp();
+    String varName = varNameString.substring(1, varNameString.length() - 1);
+    vars.put(varName, var.subterms().get(1));
   }
 
 
@@ -181,6 +191,37 @@ public class DefaultTerm implements MaudeTerm
         else
           syntaxTerm.subterms().add(subterms.get(1));
         return syntaxTerm;
+      }
+
+      if (subterms.get(0).getOp().equals("freezer"))
+      {
+        String freezedOp = subterms.get(0).subterms().get(0).getOp();
+        int freezedLength = freezedOp.length();
+        int appIndex = freezedOp.lastIndexOf('(');
+        String unfreezedOp = freezedOp.substring(2, appIndex);
+        String app = freezedOp.substring(appIndex + 1, freezedLength - 2);
+        String[] vars = app.split(",,");
+ 
+        String listOp = subterms.get(1).getOp();
+        Map<String, MaudeTerm> subst = new HashMap<String, MaudeTerm>();
+        subst.put("`[HOLE`]:K", new DefaultTerm("[]", "K"));
+        if ("_`,`,_".equals(listOp) || ".List`{K`}".equals(listOp))
+        {
+          for (MaudeTerm var : subterms.get(1).subterms())
+          {
+            addFreezeVar(subst, var);
+          }
+        }
+        else 
+          addFreezeVar(subst, subterms.get(1));
+
+        DefaultTerm unfreezedTerm = new DefaultTerm(unfreezedOp, sort);
+        for (String var : vars)
+        {
+          unfreezedTerm.subterms().add(subst.get(var));
+        }
+
+        return unfreezedTerm;
       }
 
       if (".List`{K`}".equals(subterms.get(1).getOp()))
@@ -218,6 +259,9 @@ public class DefaultTerm implements MaudeTerm
 
       if (op.startsWith("default")) 
         return new DefaultTerm("default" + name, sort);
+
+      if (op.startsWith("'default")) 
+        return new DefaultTerm("'default" + name, sort);
     }
 
     return term;
