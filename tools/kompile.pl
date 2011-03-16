@@ -1441,7 +1441,7 @@ sub maudify_module {
     
 # Step: Freeze on-the-fly anonymous variable declarations
     s!_(:$ksort)!?$1!sg;
-    s!(\?:$ksort)!freeze($1,"ANONYMOUS")!ge;
+    s!(\?:$ksort)!Freeze($1,"ANONYMOUS")!ge;
     # print  "Stage:\n$_\n\n";
     
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
@@ -1472,8 +1472,8 @@ sub maudify_module {
     
 # Step: Add missing spaces around tokens
      # freeze all strings before spacifying
-     s/(?=[^'])""/freeze($&,"STRINGS")/sge;
-     s/(?=[^'])("[^"]*?[^']")/freeze($&,"STRINGS")/sge;
+     s/(?=[^'])""/Freeze($&,"STRINGS")/sge;
+     s/(?=[^'])("[^"]*?[^']")/Freeze($&,"STRINGS")/sge;
      
      # freeze KLabels before spacifying
      my $klabelss = $decl;
@@ -1485,7 +1485,7 @@ sub maudify_module {
      }
 
      $_ = spacify($_);
-     $_ = unfreeze($_,"STRINGS");
+     $_ = Unfreeze("STRINGS", $_);
      $_ = Unfreeze("KLABELS", $_);
 # print  "Stage:\n$_\n\n";
     
@@ -1514,7 +1514,7 @@ sub maudify_module {
 	# print $_;
 	
 # Step: Unfreeze everything still frozen
-    $_ = unfreeze($_,"ANONYMOUS");
+    $_ = Unfreeze("ANONYMOUS", $_);
 #    $_ = unfreeze($_);
     # print  "Stage:\n$_\n\n";
 
@@ -2069,7 +2069,7 @@ sub Freeze
     my $frozen_string = $marker . md5_hex($string); #join("", map(ord, split('',md5($string))));
     $freeze_map{$marker}{$frozen_string} = $string;
     
-    return $frozen_string;
+   return $frozen_string;
 }
 
 # unfreezing (newest version) : use digest - md5
@@ -2077,10 +2077,16 @@ sub Unfreeze
 {
     my ($marker, $all) = (shift, shift);
     my $marker_map = $freeze_map{$marker};
-    while (my ($key, $value) = each(%$marker_map)) {
-        $all =~ s/$key/$value/sg;
-    }
-	
+	if (defined $marker_map)
+	{
+		my %map = %$marker_map;
+
+		$all =~ s/($marker([[:xdigit:]]{32}+))/defined $map{$1}?$map{$1}:$1/gse;
+
+	#    while (my ($key, $value) = each(%$marker_map)) {
+	#        $all =~ s/$key/$value/sg;
+	#    }
+	}
     return $all;
 }
 
