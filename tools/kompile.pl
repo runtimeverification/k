@@ -774,7 +774,7 @@ if (!$maudify_only) {
 
 # Since we eventually call Maude on $language_file_name, $language_file_name.maude must exist
     if (! -e "$language_file_name.maude") {
-	terminate("File $language_file_name.maude does not exist");
+		terminate("File $language_file_name.maude does not exist");
     }
 
 # Checking whether Maude is available
@@ -783,15 +783,15 @@ if (!$maudify_only) {
 # Calling either the maude compiler or the latex/pdf compiler, depending upon $latex/$pdf
     if ($latex || $pdf || $ps || $eps || $png || $crop) 
     {
-	make_latexify() if $latex;
-	make_pdf() if $pdf;
-	make_eps() if $eps;
-	make_ps() if $ps;
-	make_png() if $png;
-	make_crop() if $crop;
+		make_latexify() if $latex;
+		make_pdf() if $pdf;
+		make_eps() if $eps;
+		make_ps() if $ps;
+		make_png() if $png;
+		make_crop() if $crop;
     }
     else {
-	compile();
+		compile();
     }
 }
 
@@ -914,7 +914,7 @@ sub run_latex
     my $status = system("latex -interaction=nonstopmode $tex_file-temp.tex > out");
     if (($status >>= 8) != 0)
     {
-	throw_error("Failed to run latex. Exit status $status.\n");
+		throw_error("Failed to run latex. Exit status $status.\n");
     }
     # get number of pages
     my $pages = 0;
@@ -927,7 +927,7 @@ sub run_latex
 #    my $log = get_file_content("$lang_name-temp.log");
     if ($log =~ /(\d+)\s+pages?/)
     {
-	$pages = $1;
+		$pages = $1;
     }
 #    print "PAGES: $pages\n";
 
@@ -1508,7 +1508,11 @@ sub maudify_module {
 	# unfreeze if there are still frozen attributes
 	$_ = Unfreeze("ATTR", $_);
     # print  "Stage:\n$_\n\n";
-    
+   
+# Step: add line numbers for configuration and context 
+	$_ = add_line_no_mb($file, $mno, $_);
+	#print $_;
+	
 # Step: Unfreeze everything still frozen
     $_ = unfreeze($_,"ANONYMOUS");
 #    $_ = unfreeze($_);
@@ -1517,9 +1521,9 @@ sub maudify_module {
 # Step: Add KLabel generated definitions - do that in shared.k for now
     if ($decl ne "")
     {
-	$klabels .= $decl;
-	s!mod(\s+)([\S]+)(\s+)is(\s+)!"mod$1$2$3is including K-SHARED .$4"!se;
-	$mset = 1;
+		$klabels .= $decl;
+		s!mod(\s+)([\S]+)(\s+)is(\s+)!"mod$1$2$3is including K-SHARED .$4"!se;
+		$mset = 1;
     }
 #    print  "Stage:\n$_\n\n";
  

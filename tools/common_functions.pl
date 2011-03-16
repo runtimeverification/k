@@ -1550,9 +1550,9 @@ sub add_line_numbers
     
     my $temp = $_;
     my $used = $_; # due to perl 5.8.8
-    
+ 
     # process rules first
-    while ($used =~ /((rule|syntax|macro)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/sg)
+    while ($used =~ /((rule|syntax|macro|context|configuration)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/sg)
     {
         if ($2 eq "rule")
         {
@@ -1573,33 +1573,43 @@ sub add_line_numbers
 
             $temp =~ s/\Q$tmp\E/$rule/sg;
         }
-#        elsif ($2 eq "syntax")
-#        {
-#            my $syntax = $1;
-#            my ($tmp, $syntax_line) = ($syntax, countlines("$`"));
-            
-#            while ($syntax =~ /(?:(::=|\|))([^\|]+)/sg)
-#            {
-#                my $rule_line = countlines("$`") + $syntax_line;
-#                my $spacess = "";
-#                my $item = $2;
-#                $item =~ s/(\s+)$/{$spacess = $1;}/sge;
-#                my $item2 = $item;
-#                $item =~ s!(\[([^\]]*?($k_attributes_pattern)[^\]]*?)\])![$2 metadata "location($file:$rule_line)"]!sg;
-#                $tmp =~ s/\Q$item2\E/$item/sg;
-#            }
-            
-#            $temp =~ s/\Q$syntax\E/$tmp/sg;
-#        }
         elsif ($2 eq "macro")
         {
             my $macro = $1;
             my $macro_line = countlines($`);
             $temp =~ s/\Q$macro\E/$macro [metadata "location($file:$macro_line)"]/s;
         }
+#		elsif ($2 eq "context")
+#		{
+#			my $context_line = countlines($`);
+#			my $context = $1;
+#			$temp =~ s/\Q$context\E/$context [metadata "location($file:$context_line)"]/sg;
+#		}
+#		elsif ($2 eq "configuration")
+#		{
+#			my $config_line = countlines($`);
+#			my $config = $1;
+#			$temp =~ s/\Q$config\E/$config [metadata "location($file:$config_line)"]/sg;			
+#		}
     }
     
     return $temp;
+}
+
+sub add_line_no_mb
+{
+	my  $file = shift;
+	my $lines = shift; # get starting line number
+	local $_ = shift;
+	my $temp = $_;
+
+	while($temp =~ /(mb\s+(configuration|context)\s.*?)(\s+\.\s+)(?=$kmaude_keywords_pattern)/sg)
+	{
+		my ($content, $end, $line) = ($1, $3, $lines + countlines($`));
+		s/\Q$content$end\E/$content [metadata "location($file:$line)"]$end/sg;
+	}
+
+	return $_;
 }
 
 sub countlines
