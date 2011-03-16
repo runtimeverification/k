@@ -19,9 +19,9 @@
 \newcommand{\ocl}{\textsc{ocl}}
 \renewcommand{\L}{\mathcal{L}}
 
-\title{Formal Support for Defining and Analysing Domain-Specific Modelling Languages}
+\title{Formal Support for Defining and Verifying Domain-Specific Modelling Languages}
 \author{Dorel Lucanu and Vlad Rusu}
-
+\date{\texttt{dlucanu@info.uauic.ro \quad Vlad.Rusu@inria.fr}}
 
 \begin{document}
 \pagestyle{plain}
@@ -31,7 +31,7 @@
 Domain-Specific Modelling Languages (\dsmls) are languages dedicated to modelling specific application areas. Recently, the design of \dsmls\
 has become widely accessible to engineers trained in the basics of Model-Driven Engineering (\mde): one designs
  a \emph{metamodel} for the language's abstract syntax; then, the language's operational semantics is expressed using \emph{model transformations} over
-the metamodel. This approach is supported by tools such as \kmt~\cite{DBLP:conf/uml/MullerFJ05}.
+the metamodel. Such designs can be implemented using  \mde\ tools~\cite{DBLP:conf/uml/MullerFJ05,DBLP:journals/scp/JouaultABK08,qvt}.
 %The analogy with the Structured Operational Semantics (\textsc{sos}) framework is that  models play the roles of abstract syntax trees, and model transformations play the
 %role of  \textsc{sos} rules.
 
@@ -39,42 +39,43 @@ The democratisation of  \dsml\ design catalysed by \mde\ is likely to give birth
 One can also reasonably expect that there shall be  numerous errors in those languages. Indeed, getting a language right (especially its operational semantics)
 is  hard, regardless of whether the language is defined  in the  modern \mde\ framework or in   more traditional ones.
 
-Formal approaches can benefit language designers by helping them  avoid or detect errors by formal verification. But, in order to be
+Formal approaches can benefit language designers by helping them  avoid or detect errors. But, in order to be
 accepted by nonexpert users, formal approaches have to 
 %be ``hidden'' behind
-work behind (in background for) a familiar design process  such as the \mde-based one mentioned above.
+operate in the background of a familiar design process,  such as the \mde-based one mentioned above.
 
 
 
 \section*{Project Outline}
-We propose to build on our experience of using the K formal framework~\cite{rosu-serbanuta-2010-jlap}, which has been shown effective at  defining real programming languages such as C \cite{ellison-rosu-2010-tr},  
-Java \cite{farzan-chen-meseguer-rosu-2004-cav}
-Scheme\cite{meredith-hills-rosu-2007-tr-b}, and so on.
-K is based in rewriting is connected to verification tools: a model checker, and a verifier 
-for the \emph{matching logic}~\cite{rosu-ellison-schulte-2010-amast}.
-K's strength for language definition lies in its modularity: one can simply build a launguage by combining ``language modules'' containing specific language features
- (imperative, functional, object-oriented, multithereading, \ldots). We are planning to take the following steps:
+We propose to build on our experience of using the K formal framework~\cite{rosu-serbanuta-2010-jlap}, which has been shown effective at  defining real programming languages such as C~\cite{ellison-rosu-2010-tr},  
+Java~\cite{farzan-chen-meseguer-rosu-2004-cav}
+Scheme~\cite{meredith-hills-rosu-2007-tr-b}.
+K~is based on rewriting and is connected to verification tools: a model checker, and a verifier 
+ \emph{matching logic} properties~\cite{rosu-ellison-schulte-2010-amast}.
+K's strength  lies in its modularity: one can define a language by combining ``language modules'' containing the  language features (imperative, functional, object-oriented, multithereading, \ldots) that one wishes. Regarding the definition of \dsml, our proposal is \emph{not} to define them directly in K, since 
+K is unlikely to be easily adopted by nonexperts. Rather, we propose to define in K the ingredients for the  \mde-based approach to \dsml\ definition:
 
 
 \begin{itemize}
-\item (re)define in K an object-oriented language, possibly by adapting the definition of  \textsc{kool}, an object-oriented language used for teaching purposes\cite{hills-rosu-2007-rta}. This language contains some of the basic ingredients used in \mde: classes and their attributes are the building blocks of \uml\ class diagrams,
+\item define in K an object-oriented language, possibly by adapting the definition of  \textsc{kool}, an object-oriented language used for teaching purposes~\cite{hills-rosu-2007-rta}. This language contains some of the basic ingredients used in \mde: classes and their attributes are the building blocks of \uml\ class diagrams,
 which are the metamodels in \mde\ terminology; whereas
-instances of classes can be organised as \uml\ object diagrams, which are models in \mde\ terminology. \textcolor{red}{The new language will be called MOOL};
-\item in parallel, define in K the subset of  \ocl\footnote{\tt http://www.omg.org/spec/OCL/2.2/} called \emph{essential \ocl}. \ocl\ is a language for model navigation, 
+instances of classes can be organised as \uml\ object diagrams, which are models in \mde\ terminology. This new language will be (tentatively)  called by \textsc{mool} in the rest of this document;
+
+\item define in K the subset of  \ocl~\cite{ocl} called \emph{essential \ocl}. \ocl\ is a language for model navigation, 
  query, and constraints, and essential \ocl\  is its  subset used in metamodelling;
 \item merge  the two definitions to obtain an ``object-oriented metalanguage'', say, \textsc{mool+ocl}.
 \end{itemize}
 
 In \textsc{mool+ocl}  we shall be able to define a \dsml\ syntax as a metamodel possibly extended with \ocl\ invariants for expressing well-formedness constraints. Regarding a  \dsml's operational semantics, it will only  be possible
-at this stage of the project to ``define'' it using the imperative constructs of the \textsc{mool} sublanguage. This means that we shall have the same functionality as \kmt, with the additional advantage of being formal and connected to verification tools.
+at this stage of the project to define it using the imperative constructs of the \textsc{mool} sublanguage. This means that we shall have the same functionality as \kmt~\cite{DBLP:conf/uml/MullerFJ05}, with the additional advantage of being formal and connected to verification tools. 
 
 
  However,  imperative programming is sometimes too low-level for defining operational semantics~; for instance, executing
-finite-state machines in \kmt\ takes several dozen line\footnote{http://www.kermeta.org/docs/KerMeta-How-to-add-behavior-to-a-metamodel.pdf.}.
+finite-state machines in \kmt\ takes several dozen line\footnote{see \texttt{http://www.kermeta.org/docs/KerMeta-How-to-add-behavior-to-a-metamodel.pdf}.}.
 
 The same definition only takes one  rewrite  rule in a rewrite-based framework; see, e.g.,~\cite{r10b}. 
 
-Hence, the next step of our project is to extend to our forthcoming K definition of the \ocl\ language to that of a rewrite-rule based language for defining \dsml\ semantics. The rewrite
+Hence, the next step of our project is to extend  our forthcoming K definition of the \ocl\ language into  a \emph{rewrite-rule based language for defining \dsml\ semantics}. The rewrite
 rules of that language shall be  mapped to K conditional rewrite rules, whose conditions shall naturally be expressed in \ocl. When this is done, the  \textsc{mool+ocl}  language will 
 allow us to:
 \begin{itemize}
@@ -86,10 +87,27 @@ or translations between   \dsmls. We expect that  transformations denoting opera
 \end{itemize}
 Among the expected properties, interesting ones \emph{safety properties}, for model transformations encoding a \dsml's operational semantics; and \emph{simulation properties}, for expressing the fact that a translation between \dsml\ expressed as a model transformation 
 preserves operational semantics. Such properties could be expressed as predicates written in \ocl, over single models (for safety), and over pairs of models (for simulation). To perform the verifications we are planning to use, possibly after adapting them, the K model checker and matching logic verifier.
+
+
+
+\section*{Comparison with Related Work}
+\kmt~\cite{DBLP:conf/uml/MullerFJ05} an object-oriented language extended with metamodelling feature,  which allows users to define the syntax of \dsml\ using of metamodels, and their operational semantics
+by means of imperative commands of the language (assignments, loops, \ldots). Compared to \kmt, \textsc{mool+ocl} is \emph{formally defined}, allows for \emph{verification}, and
+has additional \emph{declarative features}. We  also express \emph{nondetertministic} semantics, e.g., for  parallel/concurrent languages.
+
+\textsc{atl}~\cite{DBLP:journals/scp/JouaultABK08} is a declarative model transformation language, in which model transformations are expressed using declarative rules that may contain calls to \ocl\ -like code. The \textsc{omg} standard language for model transformations~\cite{qvt} also proposes mixed declarative-imperative rules. Compared to these approaches, ours is formally defined and allows for formal verifications.
+
+Several approaches~\cite{bhm08,rdv09,r10b} use the Maude algebraic and rewriting-based formal specification language Maude~\cite{allAboutMaude}.  In these approaches, model transformations (in particular, 
+for \dsml\ operational semantics) can only be specified in a declarative manner, by mapping them to Maude equations and/or rewrite rules.
+ Compared to these approaches, ours also includes \emph{imperative features}, which are lower-lever but allow for better
+control and efficiency.
+The same comparison can be drawn with declarative model transformations based on graph rewriting~\cite{DBLP:conf/agtive/Taentzer03,DBLP:conf/kbse/CsertanHMPPV02}.
+
+Finally, the so called \emph{semantics anchoring} approach~\cite{DBLP:conf/ecmdafa/0003SAJ05} consists in endowing a source language (in particular, a \dsml) with a formal semantics by translating it
+ to a target language that does have a formally defined  semantics. Our approach offers as a target language
+\textsc{mool+ocl}; however, one does not translate a \dsml\ in \textsc{mool+ocl}, but \emph{defines} the \dsml\ in it.
+Since  \textsc{mool+ocl}
+is formally defined in K, any \dsml\ defined in  \textsc{mool+ocl} is also formally defined.
 \bibliography{project}
 \bibliographystyle{unsrt}
-
-
-
-
 \end{document}
