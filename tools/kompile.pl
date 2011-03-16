@@ -1511,7 +1511,7 @@ sub maudify_module {
    
 # Step: add line numbers for configuration and context 
 	$_ = add_line_no_mb($file, $mno, $_);
-	#print $_;
+	# print $_;
 	
 # Step: Unfreeze everything still frozen
     $_ = unfreeze($_,"ANONYMOUS");
@@ -1688,12 +1688,12 @@ sub make_ops {
 		{
 			$result .= ($production eq "_")
 						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort$random"."_ : @sorts -> $result_sort [metadata \"latex(renameTo \\\\crlbracket) location($file:$absolute_line)\"] $space5 "
-						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
+						: "$space4 op $production : @sorts -> $result_sort$space5 $attributes ";
 		}
 		else {
 			$result .= ($production eq "_")
 						? "$space4 subsort @sorts < $result_sort$space5 "
-						: "$space4 op $production : @sorts -> $result_sort$space5$attributes ";
+						: "$space4 op $production : @sorts -> $result_sort$space5 $attributes ";
 		}
 	}
 
