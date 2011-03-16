@@ -2081,7 +2081,7 @@ sub Unfreeze
 	{
 		my %map = %$marker_map;
 
-		$all =~ s/($marker([a-f0-9]{32}+))/defined $map{$1}?$map{$1}:$1/gse;
+		$all =~ s/($marker([a-f0-9]{32}))/defined $map{$1}?$map{$1}:$1/gse;
 
 	#    while (my ($key, $value) = each(%$marker_map)) {
 	#        $all =~ s/$key/$value/sg;
