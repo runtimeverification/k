@@ -2,48 +2,89 @@
 
 in ../../../../k-prelude
 
-kmod JSON-SYNTAX 
+kmod JSON-LIST
 	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID
 	
-	syntax JsonName ::= String | Id
-	
-	syntax JsonValue ::= null | JsonObject | JsonArray | JsonName | Int | Float | Bool
-	
-	syntax JsonObject ::= { } | { List{JsonElem} }
-	
-	syntax JsonPair ::= JsonName : JsonValue 
-	
-	syntax JsonElem ::= JsonValue | JsonPair 
-	
-	syntax List{JsonElem} ::= JsonElem | .List{JsonElem}
-				| List{JsonElem} , List{JsonElem} [prec 50 assoc id: .List{JsonElem}]
-	
-	syntax JsonArray ::= [ List{JsonElem} ]
-	
-	
-	syntax JSProperties ::= .JSProperties | 
-							jsProp( JsonName , JsonValue ) | 
-							JSProperties JSProperties [prec 50 assoc comm id: .JSProperties]
-	
-	syntax JSObject ::= jsObj( JSProperties ) | 
-						internalize ( JsonObject ) |
-						buildJsObj( List{JsonElem} , JSObject )
-	
-	macro internalize({ Elements:List{JsonElem} }) = buildJsObj( Elements , jsObj(.JSProperties) )
-		
-	macro buildJsObj((.List{JsonElem}) , Obj:JSObject ) = Obj
-	macro buildJsObj((Name:JsonName : Value:JsonValue , Elements) , jsObj(Properties:JSProperties) ) 
-		= buildJsObj((Elements) , jsObj(jsProp(Name, Value) Properties))
+	syntax JS ::= null | Int | Float | Bool
+
+	syntax List{JS} ::= JS | .List{JS} | List{JS} , List{JS} [assoc id: .List{JS}]
 	
 endkm
 
+kmod JSON-SYNTAX 
+	is including JSON-LIST
+	
+	syntax Numeric ::= Int | Float
+	
+	syntax JsonName ::= String | Id | Int
+
+	syntax JsonObject ::= { } | { List{JS} }
+	
+	syntax JsonArray ::= [ List{JS} ]
+	
+	syntax JsonTerminal ::= null | Bool | Numeric | JsonName
+	
+	syntax JsonLiteral ::= JsonTerminal | JsonObject | JsonArray
+				
+	syntax JsonPair ::= JsonName : JS [prec 25]
+	
+	syntax JS ::= JsonLiteral | JsonPair
+	
+endkm
+
+kmod JSON-SEMANTICS 
+	is including JSON-SYNTAX + K
+	
+	syntax Builtin ::= String | Bool
+
+	syntax KResult ::= Bool | String | Numeric
+	syntax K ::= JS | List{JS}
+	
+	
+	syntax JS ::= 
+			o( JSProperties ) | a( List{JS} )
+		| 	buildLitObject( List{JS} , JS )
+		|	buildLitArray( List{JS} , JS )
+		|	buildLitTerminal( JS )
+		|	b( Bool ) | n( Numeric ) | s( String )
+	
+
+	syntax JSProperty ::= p( String , JS )
+	
+	syntax JSProperties ::= 
+			.JSProperties | JSProperty
+		|	JSProperties JSProperties [assoc comm id: .JSProperties]
+	
+	
+	macro { } = o(.JSProperties)
+	
+	
+	
+	macro { Elements:List{JS} } = buildLitObject( Elements , o(.JSProperties) )
+		
+	macro buildLitObject((.List{JS}) , Obj:JS ) = Obj
+	
+	macro buildLitObject( (Name:JsonName : Value:JS , Elements) , o(Properties:JSProperties) ) 
+		= buildLitObject( (Elements) , o( p(Name, (Properties buildLitTerminal(Value))) ) )
+	
+	macro buildLitTerminal(null) = null
+	macro buildLitTerminal(B:Bool) = b(B)
+	macro buildLitTerminal(N:Numeric) = n(N)
+	macro buildLitTerminal(S:String) = s(S)
+	macro buildLitTerminal(o(Properties)) = o(Properties)
+	macro buildLitTerminal([Elements]) = buildLitArray(Elements, a(.List{JS}))
+	
+	macro buildLitArray( (.List{JS}) , a(Elements) ) = a(Elements)
+	
+	macro buildLitArray( (Element:JS , Remaining:List{JS}) , a(Elements) ) 
+		= buildLitArray( (Remaining) , a(Elements , buildLitTerminal(Element)) )
+
+endkm
+
 kmod JSON-PROGRAMS 
-	is including JSON-SYNTAX
+	is including JSON-SEMANTICS
 	
----	syntax Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
----	              | n | o | p | q | r | s | t | u | v | w | x | y | z
-	
-	syntax JsonValue  ::= v0 | v1 | v2 | v3 | v4 | v5 | v6 | v7
+	syntax JS  ::= v0 | v1 | v2 | v3 | v4 | v5 | v6 | v7
 	
 	macro v0 = { }
 	
@@ -53,30 +94,10 @@ kmod JSON-PROGRAMS
 	
 	macro v3 = [23, 45, 56]
 	
-	macro v4 = [{}, {"a" : "x", "b" : 234, "c" : true, "d" : false, "e" : [1,2,3], "f" : {"r" : 3}}]
-	
-	syntax JSObject  ::= js0 | js1 | js2 | js3 | js4
-	
-	macro js0 = internalize(v0)
-	
-	macro js1 = internalize(v1)
-	
-	macro js2 = internalize(v2)
-	
-	macro js3 = internalize(v3)
-	
-	macro js4 = internalize(v4)
-	
+	macro v4 = [{}, {"a" : "x", "b" : 234, "c" : true, "d" : false, "e" : [1,2,3], "f" : {"r" : 3}}]	
 
 endkm
 
-kmod JSON-SEMANTICS is including JSON-SYNTAX + K
-	syntax Builtin ::= String
-	
-	syntax KResult ::= Bool | Int | Float | String
-	syntax K ::= JsonValue | JsonArray | JsonObject | JsonName | JsonPair | JsonElem | List{JsonElem}
-
-endkm
 
 kmod JSON is including JSON-PROGRAMS + JSON-SEMANTICS
   --- syntax Bag ::= [[ KLabel ]] | pgm

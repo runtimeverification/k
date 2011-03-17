@@ -1,4 +1,2 @@
 load json-compiled
---- rew [['sumPgm]] .
---- rew [['collatzPgm]] .
---- rew [['countPrimesPgm]] .
+load json-unit-tests
