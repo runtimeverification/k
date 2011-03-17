@@ -9,8 +9,6 @@ import java.util.Arrays;
 public class DefaultTerm implements MaudeTerm
 {
 
-  static final Map<String, String> renameOp = new HashMap<String, String>();
-
   final String op;
   final String sort;
   final ArrayList<MaudeTerm> subterms;
@@ -53,7 +51,7 @@ public class DefaultTerm implements MaudeTerm
 
     if ("<_>_</_>".equals(op))
     {
-      if (!Cell.cells.get(subterms.get(0).getOp()).visible)
+      if (!KDefinition.cells.get(subterms.get(0).getOp()).visible)
         return buffer;
 
       ++indent;
@@ -125,36 +123,6 @@ public class DefaultTerm implements MaudeTerm
   }
 
 
-  public static void init()
-  {
-    renameOp.put("_===_", "_=_");
-
-    renameOp.put("_+Int_", "_+_");
-    renameOp.put("_-Int_", "_-_");
-    renameOp.put("_*Int_", "_*_");
-    renameOp.put("_/Int_", "_/_");
-    renameOp.put("_%Int_", "_%_");
-    renameOp.put("_>Int_", "_>_");
-    renameOp.put("_>=Int_", "_>=_");
-    renameOp.put("_<Int_", "_<_");
-    renameOp.put("_<=Int_", "_<=_");
-    renameOp.put("-Int_", "-_");
-
-    renameOp.put("'_`,`,`,_", "'_`,_");
-    renameOp.put("_;;_", "__");
-  }
-
-  public static boolean isWrapper(String op)
-  {
-    return "List`{MathObj++`}_".equals(op)
-        || "@_".equals(op)
-        || "Formula_".equals(op)
-        || "Subst_".equals(op)
-        || "Id_".equals(op)
-        || "ExpressionType_".equals(op)
-        || "wlist_".equals(op); 
-  }
-
   public static boolean isString(String op)
   {
     return op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"';
@@ -179,8 +147,23 @@ public class DefaultTerm implements MaudeTerm
       subterms.set(index, format(subterms.get(index)));
     }
 
+    // flatten associative operators
+    if (KDefinition.assocOp.contains(op))
+    {
+      for (int index = 0; index < subterms.size(); ++index)
+      {
+        if (op.equals(subterms.get(index).getOp()))
+        {
+          subterms.addAll(subterms.get(index).subterms());
+          subterms.remove(index);
+          --index;
+        }
+      }
+    }
+
     if ("_`(_`)".equals(op))
     {
+      // transform labels back to syntax
       if (subterms.get(0).getOp().startsWith("'"))
       {
         String syntax = subterms.get(0).getOp().substring(1);
@@ -193,6 +176,7 @@ public class DefaultTerm implements MaudeTerm
         return syntaxTerm;
       }
 
+      // plug the freezer variables back into the syntax
       if (subterms.get(0).getOp().equals("freezer"))
       {
         String freezedOp = subterms.get(0).subterms().get(0).getOp();
@@ -224,25 +208,26 @@ public class DefaultTerm implements MaudeTerm
         return unfreezedTerm;
       }
 
+      // remove the empty list{k} applied to constant labels
       if (".List`{K`}".equals(subterms.get(1).getOp()))
         return subterms.get(0);
     }
 
-    if (isWrapper(op))
+    // delete wrappers
+    if (KDefinition.wrapperOp.contains(op))
       return subterms.get(0);
 
-    if (renameOp.containsKey(op))
-      return new DefaultTerm(renameOp.get(op), sort, subterms);
+    // rename operators
+    if (KDefinition.renameOp.containsKey(op))
+      return new DefaultTerm(KDefinition.renameOp.get(op), sort, subterms);
 
+    //
     if (term instanceof NestedTerm)
       if ("sNat_".equals(op) && "0".equals(subterms.get(0).getOp()))
         return new DefaultTerm(((NestedTerm) term).getNumber(), sort);
 
-   if ("?var".equals(op))
-      return subterms.get(0);
-
-   if (subterms.size() == 1 && isString(subterms.get(0).getOp()))
-   {
+    if (subterms.size() == 1 && isString(subterms.get(0).getOp()))
+    {
       MaudeTerm subterm = subterms.get(0);
       String name = subterm.getOp().substring(1, subterm.getOp().length() - 1);
       if ("id`(_`)".equals(op))
@@ -255,13 +240,56 @@ public class DefaultTerm implements MaudeTerm
         return new DefaultTerm("!" + name, sort);
 
       if (op.startsWith("Free")) 
-        return new DefaultTerm("Free" + name, sort);
+        return new DefaultTerm("$" + name, sort);
 
       if (op.startsWith("default")) 
         return new DefaultTerm("default" + name, sort);
 
       if (op.startsWith("'default")) 
         return new DefaultTerm("'default" + name, sort);
+    }
+
+    if ("?var".equals(op))
+      return new DefaultTerm(subterms.get(0).getOp() + "_Int", sort);
+
+    if ("PEInt".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Int", sort);
+    if ("FEInt".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Int", sort);
+    if ("FreeInt".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Int", sort);
+    if ("PESeq".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Seq", sort);
+    if ("FESeq".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Seq", sort);
+    if ("FreeSeq".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Seq", sort);
+    if ("PEMSet".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_MSet", sort);
+    if ("FEMSet".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_MSet", sort);
+    if ("FreeMSet".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_MSet", sort);
+    if ("PETree".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Tree", sort);
+    if ("FETree".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Tree", sort);
+    if ("FreeTree".equals(sort) && subterms.size() == 0)
+      return new DefaultTerm(op + "_Tree", sort);
+
+    if ("FreeInt".equals(op) && subterms.size() == 1) 
+      return new DefaultTerm("#Int" + subterms.get(0).getOp(), sort);
+    if ("FreeSeq".equals(op) && subterms.size() == 1) 
+      return new DefaultTerm("#Seq" + subterms.get(0).getOp(), sort);
+    if ("FreeMSet".equals(op) && subterms.size() == 1) 
+      return new DefaultTerm("#MSet" + subterms.get(0).getOp(), sort);
+    if ("FreeTree".equals(op) && subterms.size() == 1) 
+      return new DefaultTerm("#Tree" + subterms.get(0).getOp(), sort);
+
+    if ("skolem".equals(op))
+    {
+      String skolemOp = subterms.get(1).getOp() + subterms.get(0).getOp();
+      return new DefaultTerm("#" + skolemOp, sort);
     }
 
     return term;

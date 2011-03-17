@@ -12,7 +12,7 @@ public class KTreeNode implements TreeNode
   final static int DEFAULT_COUNT = 5;
 
   String content;
-  boolean isCell;
+  boolean isKDefinition;
 
   int visibleCount;
   final int visibleInc = 1;
@@ -124,26 +124,16 @@ public class KTreeNode implements TreeNode
   }
 
 
-  public static boolean isAssocOp(String op)
-  {
-    return "__".equals(op)
-        || "_~>_".equals(op)
-        || "_\\/_".equals(op)
-        || "_/\\_".equals(op)
-        || "_;;_".equals(op);
-  }
-
-
 /*
   public static KTreeNode format(KTreeNode parent, MaudeTerm term)
   {
     if ("<_>_</_>".equals(term.getOp()))
-      return formatCell(parent, term);
+      return formatKDefinition(parent, term);
     else
       return formatContent(parent, term);
   }
 
-  public static KTreeNode formatCell(KTreeNode parent, MaudeTerm term)
+  public static KTreeNode formatKDefinition(KTreeNode parent, MaudeTerm term)
   {
     KTreeNode node = null;
     String cellLabel = term.subterms().get(0).getOp();      
@@ -257,7 +247,7 @@ public class KTreeNode implements TreeNode
     }
     else
     {
-      node.add(formatCell(node, term));
+      node.add(formatKDefinition(node, term));
       buffer.append("<>");
     }
 
@@ -269,18 +259,18 @@ public class KTreeNode implements TreeNode
                                   MaudeTerm term)
   {
     if ("<_>_</_>".equals(term.getOp()))
-      return formatCell2(parent, term);
+      return formatKDefinition2(parent, term);
     else
       return formatContent2(parent, prefix, term);
   }
 
-  public static KTreeNode formatCell2(KTreeNode parent, MaudeTerm term)
+  public static KTreeNode formatKDefinition2(KTreeNode parent, MaudeTerm term)
   {
     String cellLabel = term.subterms().get(0).getOp();      
     MaudeTerm cellContent = term.subterms().get(1);
     KTreeNode node = new KTreeNode(parent, cellLabel);
 
-    if (isAssocOp(cellContent.getOp()))
+    if (KDefinition.assocOp.contains(cellContent.getOp()))
     {
       String assocOp = cellContent.getOp();
       String prefixOp = assocOp.substring(1, assocOp.length() - 1);
@@ -323,16 +313,16 @@ public class KTreeNode implements TreeNode
     int size = children.size();
     if (size > 0)
     {
-      if (!Cell.cells.get(content).visible)
+      if (!KDefinition.cells.get(content).visible)
       {
-        buffer.setLength(buffer.length() - 2 * indent - 1);
+        buffer.append("<" + content + "> ... </" + content + ">");
         return buffer;
       }
 
       buffer.append("<" + content + ">");
       if (size > 1 || children.get(0).children.size() > 0)
       {
-        int items = Cell.cells.get(content).items;
+        int items = KDefinition.cells.get(content).items;
         if (items != 0 && items < size)
           size = items;
 
@@ -357,7 +347,7 @@ public class KTreeNode implements TreeNode
         buffer.append("\n");
         for (int i = 0; i < indent; ++i)
         {
-          buffer.append("  "); 
+          buffer.append("  ");
         }
       }
       else
@@ -366,7 +356,7 @@ public class KTreeNode implements TreeNode
         children.get(0).toKString(indent + 1);
         buffer.append(" "); 
       }
-      buffer.append("<" + content + "/>");
+      buffer.append("</" + content + ">");
     }
     else
       buffer.append(content);
