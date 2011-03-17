@@ -340,9 +340,13 @@ fmod META-K-ERROR is
   eq (cmb errorT(Trm,Cxt,Str) : Type if Cond [AS] .) = errorMb(Trm,Cxt,Str,AS) .
   eq mod Q is Including sorts Sorts . Subsorts OPDS (errorMb(Trm,Cxt,Str,AS) Mbs) Eqs Rls endm = errorM(mod Q is Including sorts Sorts . Subsorts OPDS none none none endm, Trm, Cxt, Str, AS) .
   eq (ceq errorT(Trm,Cxt,Str) = Trm' if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
+  eq (ceq Trm' = errorT(Trm,Cxt,Str) if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (eq errorT(Trm,Cxt,Str) = Trm' [AS] .) = errorEq(Trm,Cxt,Str,AS) .
+  eq (eq Trm' = errorT(Trm,Cxt,Str) [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (crl errorT(Trm,Cxt,Str) => Trm' if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
+  eq (crl Trm' => errorT(Trm,Cxt,Str) if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (rl errorT(Trm,Cxt,Str) => Trm' [AS] .) = errorRl(Trm,Cxt,Str,AS) .
+  eq (rl Trm' => errorT(Trm,Cxt,Str) Trm' [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) (errorEq(Trm,Cxt,Str,AS) Eqs) Rls endm = errorM(mod Q is Including sorts Sorts . Subsorts OPDS none none none endm, Trm, Cxt, Str, AS) .
   eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) ( Eqs) (errorRl(Trm,Cxt,Str,AS)Rls) endm = errorM(mod Q is Including sorts Sorts . Subsorts OPDS none none none endm, Trm, Cxt, Str, AS) .
 
