@@ -40,13 +40,9 @@ kmod JSON-SEMANTICS
 	syntax KResult ::= Bool | String | Numeric
 	syntax K ::= JS | List{JS}
 	
-	
 	syntax JS ::= 
 			o( JSProperties ) | a( List{JS} )
 		| 	buildLitObject( List{JS} , JS )
-		|	buildLitArray( List{JS} , JS )
-		|	buildLitTerminal( JS )
-		|	b( Bool ) | n( Numeric ) | s( String )
 	
 
 	syntax JSProperty ::= p( String , JS )
@@ -55,29 +51,19 @@ kmod JSON-SEMANTICS
 			.JSProperties | JSProperty
 		|	JSProperties JSProperties [assoc comm id: .JSProperties]
 	
-	
-	macro { } = o(.JSProperties)
-	
-	
-	
+
+---	macro [ ] = a(.List{JS})
+	macro [ Elements ] = a( Elements )
+
+	macro { } = o(.JSProperties)	
+
+
 	macro { Elements:List{JS} } = buildLitObject( Elements , o(.JSProperties) )
-		
+
 	macro buildLitObject((.List{JS}) , Obj:JS ) = Obj
-	
+
 	macro buildLitObject( (Name:JsonName : Value:JS , Elements) , o(Properties:JSProperties) ) 
-		= buildLitObject( (Elements) , o( p(Name, (Properties buildLitTerminal(Value))) ) )
-	
-	macro buildLitTerminal(null) = null
-	macro buildLitTerminal(B:Bool) = b(B)
-	macro buildLitTerminal(N:Numeric) = n(N)
-	macro buildLitTerminal(S:String) = s(S)
-	macro buildLitTerminal(o(Properties)) = o(Properties)
-	macro buildLitTerminal([Elements]) = buildLitArray(Elements, a(.List{JS}))
-	
-	macro buildLitArray( (.List{JS}) , a(Elements) ) = a(Elements)
-	
-	macro buildLitArray( (Element:JS , Remaining:List{JS}) , a(Elements) ) 
-		= buildLitArray( (Remaining) , a(Elements , buildLitTerminal(Element)) )
+		= buildLitObject( (Elements) , o(Properties p(Name, Value)) )
 
 endkm
 

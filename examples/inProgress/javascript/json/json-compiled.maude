@@ -3,143 +3,18 @@ load ../../../../tools/../k-prelude
 mod JSON is including K-TECHNIQUE .
 including K-CONFIG .
 including K-POLYMORPHIC-VARIABLES .
-including K-CONTEXTS .
 including K-WHERE .
 including K-DESTRUCTORS .
-including K-TECHNIQUE .
-including K-TECHNIQUE .
-including K-TECHNIQUE .
 including PL-BOOL .
-including K-TECHNIQUE .
-including PL-BOOL .
-including K-TECHNIQUE .
-including PL-IF-THEN-ELSE .
-including K-TECHNIQUE .
-including PL-IF-THEN-ELSE .
 including PL-STRING .
 including PL-INT .
 including PL-ID .
 including PL-FLOAT .
-sorts Builtin JS JSProperties JSProperty JsonArray JsonLiteral JsonName JsonObject JsonPair JsonTerminal List{JS}Numeric . subsort Bool < Builtin .
-subsort Bool < JS .
-subsort Bool < JsonLiteral .
-subsort Bool < JsonTerminal .
-subsort Bool < K .
-subsort Bool < KResult .
-subsort Bool < List{JS}.
-subsort Builtin < K .
-subsort Char < Builtin .
-subsort Char < JS .
-subsort Char < JsonLiteral .
-subsort Char < JsonName .
-subsort Char < JsonTerminal .
-subsort Char < K .
-subsort Char < KResult .
-subsort Char < List{JS}.
+including K-PROPER .
+including K-WRAPPERS-LABELS .
+including MAUDE-IF-THEN-ELSE .
+including K-STRICTNESS .
 subsort FiniteFloat < Builtins .
-subsort FiniteFloat < JS .
-subsort FiniteFloat < JsonLiteral .
-subsort FiniteFloat < JsonTerminal .
-subsort FiniteFloat < K .
-subsort FiniteFloat < KResult .
-subsort FiniteFloat < List{JS}.
-subsort FiniteFloat < Numeric .
-subsort Float < JS .
-subsort Float < JsonLiteral .
-subsort Float < JsonTerminal .
-subsort Float < K .
-subsort Float < KResult .
-subsort Float < List{JS}.
-subsort Float < Numeric .
-subsort Id < JS .
-subsort Id < JsonLiteral .
-subsort Id < JsonName .
-subsort Id < JsonTerminal .
-subsort Id < K .
-subsort Id < List{JS}.
-subsort Int < JS .
-subsort Int < JsonLiteral .
-subsort Int < JsonName .
-subsort Int < JsonTerminal .
-subsort Int < K .
-subsort Int < KResult .
-subsort Int < List{JS}.
-subsort Int < Numeric .
-subsort JS < K .
-subsort JS < List{JS}.
-subsort JSProperties < K .
-subsort JSProperty < JSProperties .
-subsort JSProperty < K .
-subsort JsonArray < JS .
-subsort JsonArray < JsonLiteral .
-subsort JsonArray < K .
-subsort JsonArray < List{JS}.
-subsort JsonLiteral < JS .
-subsort JsonLiteral < K .
-subsort JsonLiteral < List{JS}.
-subsort JsonName < JS .
-subsort JsonName < JsonLiteral .
-subsort JsonName < JsonTerminal .
-subsort JsonName < K .
-subsort JsonName < List{JS}.
-subsort JsonObject < JS .
-subsort JsonObject < JsonLiteral .
-subsort JsonObject < K .
-subsort JsonObject < List{JS}.
-subsort JsonPair < JS .
-subsort JsonPair < K .
-subsort JsonPair < List{JS}.
-subsort JsonTerminal < JS .
-subsort JsonTerminal < JsonLiteral .
-subsort JsonTerminal < K .
-subsort JsonTerminal < List{JS}.
-subsort List{JS}< K .
-subsort Nat < JS .
-subsort Nat < JsonLiteral .
-subsort Nat < JsonName .
-subsort Nat < JsonTerminal .
-subsort Nat < K .
-subsort Nat < KResult .
-subsort Nat < List{JS}.
-subsort Nat < Numeric .
-subsort Numeric < JS .
-subsort Numeric < JsonLiteral .
-subsort Numeric < JsonTerminal .
-subsort Numeric < K .
-subsort Numeric < KResult .
-subsort Numeric < List{JS}.
-subsort NzInt < JS .
-subsort NzInt < JsonLiteral .
-subsort NzInt < JsonName .
-subsort NzInt < JsonTerminal .
-subsort NzInt < K .
-subsort NzInt < KResult .
-subsort NzInt < List{JS}.
-subsort NzInt < Numeric .
-subsort NzNat < JS .
-subsort NzNat < JsonLiteral .
-subsort NzNat < JsonName .
-subsort NzNat < JsonTerminal .
-subsort NzNat < K .
-subsort NzNat < KResult .
-subsort NzNat < List{JS}.
-subsort NzNat < Numeric .
-subsort String < Builtin .
-subsort String < JS .
-subsort String < JsonLiteral .
-subsort String < JsonName .
-subsort String < JsonTerminal .
-subsort String < K .
-subsort String < KResult .
-subsort String < List{JS}.
-subsort Zero < JS .
-subsort Zero < JsonLiteral .
-subsort Zero < JsonName .
-subsort Zero < JsonTerminal .
-subsort Zero < K .
-subsort Zero < KResult .
-subsort Zero < List{JS}.
-subsort Zero < Numeric .
 op Bag_ : List{K}-> Bag .
 op List_ : List{K}-> List .
 op _in_ : BagItem Bag -> Bool .
@@ -150,48 +25,49 @@ op _|->_ : List{K}List{K}-> Map .
 op inKList : K K -> Bool .
 op keys_ : Map -> Set .
 op lengthList_ : List -> Nat .
-op substKLabel : K KLabel KLabel -> K .
 op substList`{K`}Label`(_`,_`,_`) : List{K}KLabel KLabel -> List{K}.
 op $hasMapping : Map K -> Bool[metadata "latex(renameTo \$hasMapping\mybracket{_,_})"].
-op .JSProperties : -> JSProperties[metadata "location(json.k:54)"].
-op .List`{JS`} : -> List{JS}[metadata "location(json.k:10)"].
+op '_:_ : -> KProperLabel[metadata "arity 2 location(json.k:29)"].
+op '__ : -> KProperLabel[metadata "location(json.k:53)"].
+op '_`,_ : -> KProperLabel[metadata "location(json.k:10)"].
+op '`[_`] : -> KProperLabel[metadata "arity 1 location(json.k:23)"].
+op '`{_`} : -> KProperLabel[metadata "arity 1 location(json.k:21)"].
+op '`{`} : -> KProperLabel[metadata "arity 0 location(json.k:21)"].
+op 'a`(_`) : -> KProperLabel[metadata "arity 1 location(json.k:44)"].
+op 'b`(_`) : -> KProperLabel[metadata "arity 1 location(json.k:46)"].
+op 'buildLitObject`(_`,_`) : -> KProperLabel[metadata "arity 2 location(json.k:45)"].
+op 'headList`{K`}_ : -> KProperLabel[metadata "arity 1 latex(renameTo head\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op 'n`(_`) : -> KProperLabel[metadata "arity 1 location(json.k:46)"].
+op 'null : -> KProperLabel[metadata "arity 0 location(json.k:25)"].
+op 'null : -> KProperLabel[metadata "arity 0 location(json.k:8)"].
+op 'o`(_`) : -> KProperLabel[metadata "arity 1 location(json.k:43)"].
+op 'p`(_`,_`) : -> KProperLabel[metadata "arity 2 location(json.k:49)"].
+op 's`(_`) : -> KProperLabel[metadata "arity 1 location(json.k:46)"].
+op 'substKLabel : -> KProperLabel[metadata "arity 3"].
+op 'v0 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op 'v1 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op 'v2 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op 'v3 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op 'v4 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op 'v5 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op 'v6 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op 'v7 : -> KProperLabel[metadata "arity 0 location(json.k:71)"].
+op Bool_ : Bool -> KResultLabel[metadata "builtin wrapper"].
+op Float_ : Float -> KResultLabel[metadata "builtin wrapper"].
+op Id_ : Id -> KProperLabel[metadata "builtin wrapper"].
+op Int_ : Int -> KResultLabel[metadata "builtin wrapper"].
 op Set_ : List{K}-> Set[metadata "latex(renameTo {\it{}Set}\mybracket{_})"].
+op String_ : String -> KResultLabel[metadata "builtin wrapper"].
 op _-Bag_ : Bag Bag -> Bag[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Bag}}_)"].
 op _-Set_ : Set Set -> Set[metadata "latex(renameTo _-\subscript{{\scriptstyle\it{}Set}}_)"].
-op _:_ : JsonName JS -> JsonPair[prec 25 metadata "location(json.k:29)"].
-op __ : JSProperties JSProperties -> JSProperties[assoc comm id: .JSProperties metadata "location(json.k:56)"].
 op _`(_`) : Map K -> K[prec 0].
 op _`(_`) : Map List{K}-> List{K}[prec 0].
-op _`,_ : List{JS}List{JS}-> List{JS}[assoc id: .List`{JS`} metadata "location(json.k:10)"].
 op _`[_/_`] : Map K K -> Map[prec 0].
 op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
 op _`[_`] : Map Map -> Map[prec 0].
 op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\;}/_])"].
-op `[_`] : List{JS}-> JsonArray[metadata "location(json.k:23)"].
-op `{_`} : List{JS}-> JsonObject[metadata "location(json.k:21)"].
-op `{`} : -> JsonObject[metadata "location(json.k:21)"].
-op a`(_`) : List{JS}-> JS[metadata "location(json.k:45)"].
-op b`(_`) : Bool -> JS[metadata "location(json.k:49)"].
-op buildLitArray`(_`,_`) : List{JS}JS -> JS[metadata "location(json.k:47)"].
-op buildLitObject`(_`,_`) : List{JS}JS -> JS[metadata "location(json.k:46)"].
-op buildLitTerminal`(_`) : JS -> JS[metadata "location(json.k:48)"].
-op headList`{K`}_ : NeList{K}-> K[metadata "latex(renameTo head\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
 op lengthList`{K`}_ : List{K}-> Nat[metadata "latex(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
-op n`(_`) : Numeric -> JS[metadata "location(json.k:49)"].
-op null : -> JS[metadata "location(json.k:8)"].
-op null : -> JsonTerminal[metadata "location(json.k:25)"].
-op o`(_`) : JSProperties -> JS[metadata "location(json.k:44)"].
-op p`(_`,_`) : String JS -> JSProperty[metadata "location(json.k:52)"].
-op s`(_`) : String -> JS[metadata "location(json.k:49)"].
 op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
-op v0 : -> JS[metadata "location(json.k:87)"].
-op v1 : -> JS[metadata "location(json.k:87)"].
-op v2 : -> JS[metadata "location(json.k:87)"].
-op v3 : -> JS[metadata "location(json.k:87)"].
-op v4 : -> JS[metadata "location(json.k:87)"].
-op v5 : -> JS[metadata "location(json.k:87)"].
-op v6 : -> JS[metadata "location(json.k:87)"].
-op v7 : -> JS[metadata "location(json.k:87)"].
 eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
 eq Bag_(.List`{K`})=(.).Bag .
 eq Bag_(_`,`,_(K:K,Ks:List{K}))= __(BagItem(K:K),Bag_(Ks:List{K})).
@@ -203,6 +79,10 @@ eq _-Bag_(.,Bag:Bag)=(.).Bag .
 eq _-Bag_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:BagItem,Bag':Bag),_-Bag_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-Bag_(Bag:Bag,Bag':Bag))).
 eq _-Set_(.,Set:Set)=(.).Set .
 eq _-Set_(__(Set:Set,SetItem:SetItem),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-Set_(Set:Set,Set':Set),__(SetItem:SetItem,_-Set_(Set:Set,Set':Set))).
+eq _`(_`)('headList`{K`}_,_`(_`)(kList("wklist_"),_`,`,_(K:K,Ks:List{K})))= K:K .
+eq _`(_`)('substKLabel,_`,`,_(.,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))=(.).K .
+eq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label1:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label2:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
+eq _`(_`)('substKLabel,_`,`,_(_~>_(K1:NeK,_~>_(K2:NeK,K:K)),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _~>_(_`(_`)('substKLabel,_`,`,_(K1:NeK,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_~>_(_`(_`)('substKLabel,_`,`,_(K2:NeK,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_`(_`)('substKLabel,_`,`,_(K:K,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))))).
 eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
 eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
 eq _`(_`)(__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= K2:K .
@@ -221,7 +101,6 @@ eq _in_(SetItem:SetItem,__(Set:Set,SetItem:SetItem))= true .
 eq _|->_(.List`{K`},List:List{K})=(.).Map .
 eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},K2:K)).
 eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
-eq headList`{K`}_(_`,`,_(K:K,Ks:List{K}))= K:K .
 eq inKList(K:K,_~>_(K1:K,_~>_(K:K,K2:K)))= true .
 eq keys_(.)=(.).Set .
 eq keys_(__(Map:Map,_|->_(K1:K,K2:K)))= __(SetItem(K1:K),keys_(Map:Map)).
@@ -229,36 +108,25 @@ eq lengthList_(.)= 0 .
 eq lengthList_(__(LItem:ListItem,List:List))= sNat_(lengthList_(List:List)).
 eq lengthList`{K`}_(.List`{K`})= 0 .
 eq lengthList`{K`}_(_`,`,_(K:K,Ks:List{K}))= sNat_(lengthList`{K`}_(Ks:List{K})).
-eq substKLabel(.,Label1:KLabel,Label2:KLabel)=(.).K .
-eq substKLabel(_`(_`)(Label1:KLabel,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`(_`)(Label2:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
-eq substKLabel(_~>_(K1:NeK,_~>_(K2:NeK,K:K)),Label1:KLabel,Label2:KLabel)= _~>_(substKLabel(K1:NeK,Label1:KLabel,Label2:KLabel),_~>_(substKLabel(K2:NeK,Label1:KLabel,Label2:KLabel),substKLabel(K:K,Label1:KLabel,Label2:KLabel))).
 eq substList`{K`}Label`(_`,_`,_`)(.List`{K`},Label1:KLabel,Label2:KLabel)= .List`{K`} .
-eq substList`{K`}Label`(_`,_`,_`)(_`,`,_(K:K,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`,`,_(substKLabel(K:K,Label1:KLabel,Label2:KLabel),substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
+eq substList`{K`}Label`(_`,_`,_`)(_`,`,_(K:K,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`,`,_(_`(_`)('substKLabel,_`,`,_(K:K,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
 eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
-ceq substKLabel(_`(_`)(Label:KLabel,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`(_`)(Label:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel))if _=/=Bool_(Label1:KLabel,Label:KLabel)= true .
-eq `{`} = o`(_`)(.JSProperties)[metadata "location(json.k:59)"].
-eq v0 = `{`}[metadata "location(json.k:89)"].
-eq v1 = `{_`}(_:_("s",234))[metadata "location(json.k:91)"].
-eq v2 = `{_`}(_`,_(_:_("s",234),_:_("t","d")))[metadata "location(json.k:93)"].
-eq v3 = `[_`](_`,_(23,_`,_(45,56)))[metadata "location(json.k:95)"].
-eq v4 = `[_`](_`,_(`{`},`{_`}(_`,_(_:_("a","x"),_`,_(_:_("b",234),_`,_(_:_("c",true),_`,_(_:_("d",false),_`,_(_:_("e",`[_`](_`,_(1,_`,_(2,3)))),_:_("f",`{_`}(_:_("r",3)))))))))))[metadata "location(json.k:97)"].
+ceq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel))if _=/=Bool_(Label1:KLabel,Label:KLabel)= true .
 eq $hasMapping(M:Map,D:K)= false[owise].
+eq _`(_`)('`[_`],_`(_`)('_`,_,Elements:List{K}))= _`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(json.k:57)"].
+eq _`(_`)('`{_`},_`(_`)('_`,_,Elements:List{K}))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('o`(_`),_`(_`)('__,.List`{K`}))))[metadata "location(json.k:62)"].
+eq _`(_`)('`{`},.List`{K`})= _`(_`)('o`(_`),_`(_`)('__,.List`{K`}))[metadata "location(json.k:59)"].
+eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,.List`{K`}),Obj:K))= Obj:K[metadata "location(json.k:64)"].
+eq _`(_`)('v0,.List`{K`})= _`(_`)('`{`},.List`{K`})[metadata "location(json.k:73)"].
+eq _`(_`)('v1,.List`{K`})= _`(_`)('`{_`},_`(_`)('_`,_,_`(_`)('_:_,_`,`,_(_`(_`)(String_("s"),.List`{K`}),_`(_`)(Int_(234),.List`{K`})))))[metadata "location(json.k:75)"].
+eq _`(_`)('v2,.List`{K`})= _`(_`)('`{_`},_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("s"),.List`{K`}),_`(_`)(Int_(234),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(String_("t"),.List`{K`}),_`(_`)(String_("d"),.List`{K`}))))))[metadata "location(json.k:77)"].
+eq _`(_`)('v3,.List`{K`})= _`(_`)('`[_`],_`(_`)('_`,_,_`,`,_(_`(_`)(Int_(23),.List`{K`}),_`,`,_(_`(_`)(Int_(45),.List`{K`}),_`(_`)(Int_(56),.List`{K`})))))[metadata "location(json.k:79)"].
+eq _`(_`)('v4,.List`{K`})= _`(_`)('`[_`],_`(_`)('_`,_,_`,`,_(_`(_`)('`{`},.List`{K`}),_`(_`)('`{_`},_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("a"),.List`{K`}),_`(_`)(String_("x"),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("b"),.List`{K`}),_`(_`)(Int_(234),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("c"),.List`{K`}),_`(_`)(Bool_(true),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("d"),.List`{K`}),_`(_`)(Bool_(false),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(String_("e"),.List`{K`}),_`(_`)('`[_`],_`(_`)('_`,_,_`,`,_(_`(_`)(Int_(1),.List`{K`}),_`,`,_(_`(_`)(Int_(2),.List`{K`}),_`(_`)(Int_(3),.List`{K`}))))))),_`(_`)('_:_,_`,`,_(_`(_`)(String_("f"),.List`{K`}),_`(_`)('`{_`},_`(_`)('_`,_,_`(_`)('_:_,_`,`,_(_`(_`)(String_("r"),.List`{K`}),_`(_`)(Int_(3),.List`{K`})))))))))))))))))[metadata "location(json.k:81)"].
 eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
 eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
 eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
 eq _in_(K:K,Bag:Bag)= false[owise].
 eq _in_(K:K,Set:Set)= false[owise].
 eq _in_(SetItem:SetItem,Set:Set)= false[owise].
-eq `{_`}(Elements:List{JS})= buildLitObject`(_`,_`)(Elements:List{JS},o`(_`)(.JSProperties))[metadata "location(json.k:63)"].
-eq buildLitArray`(_`,_`)(.List`{JS`},a`(_`)(Elements:List{JS}))= a`(_`)(Elements:List{JS})[metadata "location(json.k:77)"].
-eq buildLitArray`(_`,_`)(_`,_(Element:JS,Remaining:List{JS}),a`(_`)(Elements:List{JS}))= buildLitArray`(_`,_`)(Remaining:List{JS},a`(_`)(_`,_(Elements:List{JS},buildLitTerminal`(_`)(Element:JS))))[metadata "location(json.k:79)"].
-eq buildLitObject`(_`,_`)(.List`{JS`},Obj:JS)= Obj:JS[metadata "location(json.k:65)"].
-eq buildLitObject`(_`,_`)(_`,_(_:_(Name:JsonName,Value:JS),Elements:List{JS}),o`(_`)(Properties:JSProperties))= buildLitObject`(_`,_`)(Elements:List{JS},o`(_`)(p`(_`,_`)(Name:JsonName,__(Properties:JSProperties,buildLitTerminal`(_`)(Value:JS)))))[metadata "location(json.k:67)"].
-eq buildLitTerminal`(_`)(B:Bool)= b`(_`)(B:Bool)[metadata "location(json.k:71)"].
-eq buildLitTerminal`(_`)(N:Numeric)= n`(_`)(N:Numeric)[metadata "location(json.k:72)"].
-eq buildLitTerminal`(_`)(S:String)= s`(_`)(S:String)[metadata "location(json.k:73)"].
-eq buildLitTerminal`(_`)(null)= null[metadata "location(json.k:70)"].
-eq buildLitTerminal`(_`)(`[_`](Elements:List{JS}))= buildLitArray`(_`,_`)(Elements:List{JS},a`(_`)(.List`{JS`}))[metadata "location(json.k:75)"].
-eq buildLitTerminal`(_`)(o`(_`)(Properties:JSProperties))= o`(_`)(Properties:JSProperties)[metadata "location(json.k:74)"].
 eq inKList(K:K,K':K)= false[owise].
 endm
