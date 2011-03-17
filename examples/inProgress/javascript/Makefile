@@ -3,16 +3,16 @@
 KCOMPILE ?= ../../../tools/kompile.pl
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = JS
+LANGUAGE_NAME = IMP
 
 # this is the name of the interesting modules (used by make latex/pdf) 
-LANGUAGE_MODULES = JS-SYNTAX JS-PROGRAMS JS-SEMANTICS JS
+LANGUAGE_MODULES = IMP-SYNTAX IMP-SEMANTICS IMP
 
 #this is the basename of the main file
-MAIN_FILE = js
+MAIN_FILE = imp
 
 # this is a space-separated list of basename maude files to run
-TESTS = js-test.m
+TESTS = imp-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

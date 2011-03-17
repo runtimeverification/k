@@ -1,19 +1,103 @@
 /*jshint bitwise: true, curly: true, eqeqeq: true, forin: true, immed: false, laxbreak: false, 
 		 newcap: true, noarg: true, nonew: true, nomen: false, onevar: true, plusplus: false, 
-		 undef: true, sub: false, strict: true, white: false, passfail: true  */
+		 undef: true, sub: false, strict: true, white: false, passfail: false  */
 
 /*global AnExpectedGlobal: true, AGlobalNotToOverwritten: false,
 		 netscape: true, FileIO: true, DirIO: true, parse: true,
-		JSAST: true */
+		JSAST: true, Narcissus: true */
 
 
 JSAST = (function () {
 	"use strict";
 	
-	var _outputTerminal, _outputPrefixes, _outputElement, 
-		_asASTString, _normalizedOutput, _asSExpression;
+	var _asASTString, _outputNode, // Resolves co-recursive forward refs
+		INDENTATION = "    ",
+		PARSER = Narcissus.parser,
+		NODE = PARSER.Node,
+		DEFINITIONS = Narcissus.definitions,
+		TOKENS = DEFINITIONS.tokens,
+		OP_TYPE_NAMES = DEFINITIONS.opTypeNames,
+		EXCLUDED_PROPERTIES = ['type', 'target', 'tokenizer'],
+		_indentLevel = 0, _indentations = [""];
 
-	_outputTerminal = function _outputTerminal(substrings, element) {
+
+	function _indent() {
+		var indent = _indentations[++_indentLevel];
+		if (indent === undefined) {
+			indent = _indentations[_indentLevel] = _indentations[_indentLevel - 1] + "    ";
+		}
+		return indent;
+	}
+
+	function _outdent() {
+		return _indentations[--_indentLevel];
+	}
+	
+	function _isAllowedProperty(propertyName) {
+		return EXCLUDED_PROPERTIES.indexOf(propertyName) === -1;
+	}
+	
+	function _tokenName(string) {
+        var token = TOKENS[string];
+        return (/^\W/).test(token) ? OP_TYPE_NAMES[token] : token.toUpperCase();
+    }
+   
+	function _outputElement(element) {
+		if (element instanceof NODE) {return _outputNode(element);}
+		if (typeof element === 'string') {return element.quote();}
+		return "" + element;
+	}
+	
+	_outputNode = function _outputNode(node) {
+		var keys = Object.keys(node),
+			ids = keys.filter(_isAllowedProperty),
+			indent = _indent(),
+			output = "{\n";
+		
+		output += indent + "type: " + _tokenName(node.type);
+		ids.sort();
+		ids.forEach(function (id) {
+			output += ",\n" + indent + id + " : ";
+			output += _outputElement(node[id]);
+		});
+		output += "\n" + _outdent() + "}";
+		return output;
+    };
+
+	NODE.prototype.toString = function () {
+		return _outputNode(this);
+	};
+
+	return {
+		generate : function generate(fileNameWithExt, isStrictMode_) {
+			var dirName = "/Users/m3rabb/Dev/Maude/k-framework/examples/inProgress/kJS/examples/",
+				fileName = fileNameWithExt.replace(/\.js$/, ""),
+				path = dirName + fileName,
+				isStrictMode = isStrictMode_ || false,
+				sourceFile, source, ast, json, jsonFile, resultFlag;
+	
+			netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+			
+			if (fileNameWithExt.search(/\.js$/) === -1) {return "ERROR: Must be a .js file!";}
+			
+			sourceFile = FileIO.open(path + ".js");
+			if (! sourceFile.exists()) {return "ERROR " + fileNameWithExt + " doesn't exist!";}
+	
+			source = FileIO.read(sourceFile);
+			ast = PARSER.parse(source);
+			json = ast.toString();
+		
+			jsonFile = FileIO.open(path + ".json");
+			resultFlag = FileIO.write(jsonFile, json);
+			return resultFlag;
+		}
+	};
+})();
+	
+	
+/*
+
+	function _outputTerminal(substrings, element) {
 		switch (typeof element) {
 			case 'object' :
 				if (element === null) {
@@ -31,9 +115,9 @@ JSAST = (function () {
 			default :
 				substrings.push(element);
 		}
-	};
+	}
 
-	_outputPrefixes = function _outputPrefixes(levels) {
+	function _outputPrefixes(levels) {
 		var count = levels.length, 
 			output = [], 
 			index, isLastElement;
@@ -42,9 +126,9 @@ JSAST = (function () {
 			output.push(isLastElement ? "    " : "|   ");
 		}
 		return output;
-	};
+	}
 
-	_outputElement = function _outputElement(lines, element, levels) {
+	function _outputElement(lines, element, levels) {
 		var currentLine;
 		if (Array.isArray(element)) {
 			_asASTString(element, lines, levels);
@@ -54,7 +138,7 @@ JSAST = (function () {
 			_outputTerminal(currentLine, element);
 			lines.push(currentLine.join(""));
 		}
-	};
+	}
 
 	_asASTString = function _asASTString(elements, lines, levels) {
 		var index = 0,
@@ -85,7 +169,7 @@ JSAST = (function () {
 		} while (true);
 	};
 
-	_normalizedOutput = function _normalizedOutput(lines) {
+	function _normalizedOutput(lines) {
 		var output = [],
 			maxLength = 0,
 			length, count;
@@ -104,9 +188,9 @@ JSAST = (function () {
 		output.push("\"");
 		output = output.join("");
 		return output;
-	};
+	}
 
-	_asSExpression = function _asSExpression(elements, separator, substrings) {
+	function _asSExpression(elements, separator, substrings) {
 		var element, 
 			index = 0, 
 			count = elements.length;
@@ -125,7 +209,7 @@ JSAST = (function () {
 			} while (true);
 		}
 		substrings.push( ")" );
-	};
+	}
 	
 	Array.prototype.asDiagram = function asDiagram() {
 		var lines = ["\"", [" -"]];
@@ -141,14 +225,15 @@ JSAST = (function () {
 		return substrings.join("");
 	};
 	
+	
 	return {
 		generate : function generate(fileNameWithExt, isStrictMode_) {
 			var dirName = "/Users/m3rabb/Dev/Maude/k-framework/examples/inProgress/kJS/examples/",
 				fileName = fileNameWithExt.replace(/\.js$/, ""),
 				path = dirName + fileName,
 				isStrictMode = isStrictMode_ || false,
-				sourceFile, source, ast, sexp, diagram,
-				sexpFile, diagramFile, sexpFlag, resultFlag;
+				sourceFile, source, ast, sexp, diagram, tree, json,
+				sexpFile, diagramFile, jsonFile, resultFlag;
 	
 			netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
 			
@@ -161,51 +246,18 @@ JSAST = (function () {
 			ast = parse(source, isStrictMode, true);
 			sexp = ast.asSExpression(",,");
 			diagram = ast.asDiagram();
-	
+			tree = Narcissus.parser.parse(source);
+			json = tree.toString();
+		
 			sexpFile = FileIO.open(path + ".sexp");
 			diagramFile = FileIO.open(path + ".diagram");
+			jsonFile = FileIO.open(path + ".json");
 			resultFlag = FileIO.write(sexpFile, sexp);
 			resultFlag = resultFlag && FileIO.write(diagramFile, diagram);
+			resultFlag = resultFlag && FileIO.write(jsonFile, json);
 			// resultFlag = resultFlag && FileIO.unlink(sexpFile);
 			// resultFlag = resultFlag && FileIO.unlink(diagramFile);
 			return resultFlag;
 		}
 	};
-})();
-
-/*
-// Example use:
-// var fileIn = FileIO.open('/test.txt');
-// if (fileIn.exists()) {
-// 	var fileOut = FileIO.open('/copy of test.txt');
-// 	var str = FileIO.read(fileIn);
-// 	var rv = FileIO.write(fileOut, str);
-// 	alert('File write: ' + rv);
-// 	rv = FileIO.write(fileOut, str, 'a');
-// 	alert('File append: ' + rv);
-// 	rv = FileIO.unlink(fileOut);
-// 	alert('File unlink: ' + rv);
-// }
-
-myStuff = function () {
-	netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-	var dir = '/Users/m3rabb/Dev/JavaScript/Hot Sausage/examples/';
-	var fileName = 'that';
-	var extension = '.txt';
-	var path = dir + fileName + extension; 
-	var myCC = Components.classes;
-	var fileIn = FileIO.open(path);
-	var size = fileIn.fileSize();
-	if (fileIn.exists()) {
-		var fileOut = FileIO.open(dir + fileName + '2' + extension);
-		var str = FileIO.read(fileIn);
-		var rv = FileIO.write(fileOut, str);
-		alert('File write: ' + rv);
-		rv = FileIO.write(fileOut, str, 'a');
-		alert('File append: ' + rv);
-		rv = FileIO.unlink(fileOut);
-		alert('File unlink: ' + rv);
-	}
-};
-*/
-
+	*/
