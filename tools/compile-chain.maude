@@ -128,13 +128,13 @@ fmod COMPILE-META is
   op $compile : Module Qid Module QidList ~> Module .
   eq $compile(M, Q, moduleError(QIL), QIL') = moduleError(QIL) .
   eq $compile(M, Q, errorM(M', Trm, Cxt, Str, AS), QIL')
-   = moduleError('Error:  tokenize(getLocation(AS)) '\s '\s tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt)) .
+   = moduleError('`[ 'ERROR '`] 'Error:  tokenize(getLocation(AS)) '\s '\s tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt) '`[ 'ENDERROR '`]) .
   eq $compile(M, Q, M', QIL)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL) else generateError(M,Q,M') fi [owise] .
 
   op print : [Module] -> QidList .
   eq print(M) = eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op generateError : Module Qid [Module] -> [Module] .
-  eq generateError(M, Q, M') = moduleError('Error 'while getPhaseName(Q) '`( 'module Q '`) '\n
+  eq generateError(M, Q, M') = moduleError('`[ 'ERROR '`] 'Error 'while getPhaseName(Q) '`( 'module Q '`)  '`[ 'ENDERROR '`] '\n
    'To 'reproduce 'load 'k-prelude 'and 'then 'the 'generated 'module. '\n
    print(M) 
 ) .
