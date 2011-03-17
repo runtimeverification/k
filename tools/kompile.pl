@@ -1212,7 +1212,7 @@ sub compile {
 
 # Otherwise there must be some error that the script is now aware of, so show the whole thing
     else {
-	print "Uncknown ERROR: cannot parse the output below (returned by the compiler)\n$_";
+	print "Unknown ERROR: cannot parse the output below (returned by the compiler):\n$_\n" if $_ ne "-1";
 	print "Aborting the compilation\n";
 	exit(1);
     }
@@ -1238,9 +1238,27 @@ sub run_maude {
 
     # call maude
     my $status = system("$maude_path -no-banner -no-wrap $input_file >$output_file 2>$error_file");
+    
+    my $err = get_file_content($error_file);
+    my $out = get_file_content($output_file);
+    
+#    print "ERR: " . get_file_content($error_file) . "\n\n";
+#    print "OUT: " . get_file_content($output_file) . "\n\n";
+    
+    if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
+    {
+	print "[ERROR] $1\n";
+	return -1;
+    }
+    if ($out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
+    {
+	print "[ERROR] $1\n";
+	return -1;
+    }
+    
     if (($status >>= 8) != 0)
     {
-		my $err = get_file_content($error_file);
+		$err = get_file_content($error_file);
 		$err =~ s/\n.*?$//sg;
 		# print "$err\nFailed to run maude.\nExit status $status.\n" ;
 		return -1 ;
