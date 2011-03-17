@@ -1,18 +1,33 @@
 --- set print with parentheses on .
 --- set print mixfix off .
 
+	red 	{ } 
+	==Bool 	o(.JSProperties) .
 
+	red 	{"s" : 234} 
+	==Bool 	o(p("s",234)) .
 
-red { } .
+	red 	{"a" : [ ]}	
+	==Bool 	o(p("a",a(.List{JS}))) .
+	
+	red 	{"a" : [1,2,3]} 
+	==Bool 	o(p("a",a(1,2,3))) .
 
-red {"s" : 234} .
+	red 	 {  "a" : [{"s" : 123, "e" : {"b" : [1]}}]} 
+	==Bool 	o(p("a",a(o(p("e",o(p("b",a(1)))) p("s",123))))) .
 
-red {"a" : [ ]} .
+	red 	{"a" : {}, "b" : "str", "c" : [1,2,3]} 
+	==Bool	o(p("a",o(.JSProperties)) p("b","str") p("c",a(1,2,3))) .
 
-red {"a" : [1,2,3]} .
-
-red {"a" : [{"s" : 123, "e" : {"b" : [1]}}]} .
-
-red {"a" : {}, "b" : "str", "c" : [1,2,3]} .
-
-
+	red		{"a" : 1, "b" : 2, "c" : 3} 
+	==Bool	o(p("a",1) p("b",2) p("c",3)) .
+	
+	red		{"a" : 1, "a" : 2, "a" : 3} 
+	==Bool	o(p("a",1) p("a",2) p("a",3)) .
+	
+	red		{"b" : 2, "c" : 3, "a" : 1} 
+	==Bool	o(p("a",1) p("b",2) p("c",3)) .
+	
+	red		{"a" : {}, "b" : {"d" : 2}, "c" : {"e" : {"z" : 3 , "q" : [9,8]}}} 
+	==Bool	o(p("a",o(.JSProperties)) p("b",o(p("d",2))) p("c",o(p("e",o(p("q",
+	    a(9,8)) p("z",3)))))) .

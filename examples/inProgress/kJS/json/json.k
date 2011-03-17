@@ -20,7 +20,7 @@ kmod JSON-SYNTAX
 
 	syntax JsonObject ::= { } | { List{JS} }
 	
-	syntax JsonArray ::= [ List{JS} ]
+	syntax JsonArray ::= [ ] | [ List{JS} ]
 	
 	syntax JsonTerminal ::= null | Bool | Numeric | JsonName
 	
@@ -32,7 +32,7 @@ kmod JSON-SYNTAX
 	
 endkm
 
-kmod JSON-SEMANTICS 
+kmod JSON
 	is including JSON-SYNTAX + K
 	
 	syntax Builtin ::= String | Bool
@@ -52,7 +52,7 @@ kmod JSON-SEMANTICS
 		|	JSProperties JSProperties [assoc comm id: .JSProperties]
 	
 
----	macro [ ] = a(.List{JS})
+	macro [] = a(.List{JS})
 	macro [ Elements ] = a( Elements )
 
 	macro { } = o(.JSProperties)	
@@ -65,29 +65,5 @@ kmod JSON-SEMANTICS
 	macro buildLitObject( (Name:JsonName : Value:JS , Elements) , o(Properties:JSProperties) ) 
 		= buildLitObject( (Elements) , o(Properties p(Name, Value)) )
 
-endkm
-
-kmod JSON-PROGRAMS 
-	is including JSON-SEMANTICS
-	
-	syntax JS  ::= v0 | v1 | v2 | v3 | v4 | v5 | v6 | v7
-	
-	macro v0 = { }
-	
-	macro v1 = {"s" : 234}
-	
-	macro v2 = {"s" : 234, "t" : "d"}
-	
-	macro v3 = [23, 45, 56]
-	
-	macro v4 = [{}, {"a" : "x", "b" : 234, "c" : true, "d" : false, "e" : [1,2,3], "f" : {"r" : 3}}]	
-
-endkm
-
-
-kmod JSON is including JSON-PROGRAMS + JSON-SEMANTICS
-  --- syntax Bag ::= [[ KLabel ]] | pgm
-  --- macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
-  --- macro pgm = [['sumPgm]]
 endkm
 

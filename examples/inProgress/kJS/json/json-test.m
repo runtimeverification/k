@@ -1,2 +1,2 @@
-load json-compiled
+load json
 load json-unit-tests

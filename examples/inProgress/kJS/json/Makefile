@@ -6,7 +6,7 @@ KCOMPILE ?= ../../../../tools/kompile.pl
 LANGUAGE_NAME = JSON
 
 # this is the name of the interesting modules (used by make latex/pdf) 
-LANGUAGE_MODULES = JSON-SYNTAX JSON-PROGRAMS JSON-SEMANTICS JSON
+LANGUAGE_MODULES = JSON-SYNTAX JSON-SEMANTICS JSON
 
 #this is the basename of the main file
 MAIN_FILE = json
