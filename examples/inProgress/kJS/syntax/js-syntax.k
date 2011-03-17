@@ -1,97 +1,92 @@
+load ../json/json.k
+
 kmod JS-SYNTAX 
-	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID + K
+	is including JSON
 
-	syntax Value ::= b( Bool ) | n( Number ) | s( String )
+	syntax JSValue ::= b( Bool ) | n( Numeric ) | s( String )
 	
-	syntax Number ::= Int | Float
-	
-	syntax List{JS} ::= JS | .List{JS}
-			| List{JS}  List{JS} [assoc id: .List{JS}]
-	
-	syntax JS ::= id( String ) | label( String )
-	
-			| Value
-			
-			| nop
-			
-			| staticAccess( K , K ) [strict] 		--- Exp . Name
-			| dynamicAccess( K , K ) [strict] 		--- Exp [ Exp ]
-			| invocation( K , List{JS} ) [strict] 	--- Exp ( CommaList{Argument} )
-			
-			| new( K ) [strict]					--- new InvocationExp
-			
-			| delete( K ) [strict]				--- delete TargetExp
-			
-			| typeof ( K ) [strict]				--- typeof Exp
-			| not ( K ) [strict]				--- ! Exp
-			| neg ( K ) [strict] 				--- - Exp
-			| plus ( K ) [strict] 				--- + Exp
-			
-			| mul ( K , K ) [strict] 			--- Exp * Exp
-			| div ( K , K ) [strict] 			--- Exp / Exp
-			| mod ( K , K ) [strict] 			--- Exp % Exp
-			
-			| add ( K , K ) [strict]			--- Exp + Exp
-			| sub ( K , K ) [strict] 			--- Exp - Exp
-			
-			| lt ( K , K ) [strict] 			--- Exp < Exp
-			| lte ( K , K ) [strict] 			--- Exp <= Exp
-			| gt ( K , K ) [strict] 			--- Exp > Exp
-			| gte ( K , K ) [strict] 			--- Exp >= Exp
-			| in ( K , K ) [strict]				--- Exp in Exp
-			| instanceof ( K , K ) [strict] 	--- Exp instanceof Exp
-			
-			| sameAs ( K , K ) [strict] 		--- Exp == Exp
-			| notSameAs ( K , K ) [strict] 		--- Exp != Exp
-			| identical ( K , K ) [strict] 		--- Exp === Exp
-			| notIdentical ( K , K ) [strict] 	--- Exp !== Exp
-			
-			| and ( K , K ) [strict] 			--- Exp && Exp
-			
-			| or ( K , K ) [strict] 			--- Exp || Exp
-			
-			| ternary ( K , K , K ) [strict(1)]	--- Exp ? Exp : Exp
-			
-			
-			| assignment ( K , K ) [strict]		--- TargetExp = Exp
-			| assignment ( K , K , K ) [strict] --- TargetExp AssignmentOp Exp
-			
-			| arrayLit ( List{JS} ) [strict]				--- [ CommaList{Exp} ]
-			| objectLit ( List{JS} ) [strict]			--- { CommaList{Property} }
-			| propertyLit ( K , K ) [strict]	--- PropertyName : Exp
-			
-			| return ( K ) [strict]				--- return Exp | .
-			| break ( K ) [strict] 				--- break Label | .
-			| throw ( K ) [strict]				--- throw Exp
+	syntax JS ::= 
+			JSValue
+		| 	nop
+		|	id( String ) | label( String )
+		| staticAccess( JS , JS ) [strict] 		--- Exp . Name
+		| dynamicAccess( JS , JS ) [strict] 		--- Exp [ Exp ]
+		| invocation( JS , List{JS} ) [strict] 	--- Exp ( CommaList{Argument} )
+		
+		| new( JS ) [strict]					--- new InvocationExp
+		
+		| delete( JS ) [strict]				--- delete TargetExp
+		
+		| typeof ( JS ) [strict]				--- typeof Exp
+		| not ( JS ) [strict]				--- ! Exp
+		| neg ( JS ) [strict] 				--- - Exp
+		| plus ( JS ) [strict] 				--- + Exp
+		
+		| mul ( JS , JS ) [strict] 			--- Exp * Exp
+		| div ( JS , JS ) [strict] 			--- Exp / Exp
+		| mod ( JS , JS ) [strict] 			--- Exp % Exp
+		
+		| add ( JS , JS ) [strict]			--- Exp + Exp
+		| sub ( JS , JS ) [strict] 			--- Exp - Exp
+		
+		| lt ( JS , JS ) [strict] 			--- Exp < Exp
+		| lte ( JS , JS ) [strict] 			--- Exp <= Exp
+		| gt ( JS , JS ) [strict] 			--- Exp > Exp
+		| gte ( JS , JS ) [strict] 			--- Exp >= Exp
+		| in ( JS , JS ) [strict]				--- Exp in Exp
+		| instanceof ( JS , JS ) [strict] 	--- Exp instanceof Exp
+		
+		| sameAs ( JS , JS ) [strict] 		--- Exp == Exp
+		| notSameAs ( JS , JS ) [strict] 		--- Exp != Exp
+		| identical ( JS , JS ) [strict] 		--- Exp === Exp
+		| notIdentical ( JS , JS ) [strict] 	--- Exp !== Exp
+		
+		| and ( JS , JS ) [strict] 			--- Exp && Exp
+		
+		| or ( JS , JS ) [strict] 			--- Exp || Exp
+		
+		| ternary ( JS , JS , JS ) [strict(1)]	--- Exp ? Exp : Exp
+		
+		
+		| assignment ( JS , JS ) [strict]		--- TargetExp = Exp
+		| assignment ( JS , JS , JS ) [strict] --- TargetExp AssignmentOp Exp
+		
+		| arrayLit ( List{JS} ) [strict]				--- [ CommaList{Exp} ]
+		| objectLit ( List{JS} ) [strict]			--- { CommaList{Property} }
+		| propertyLit ( JS , JS ) [strict]	--- PropertyName : Exp
+		
+		| return ( JS ) [strict]				--- return Exp | .
+		| break ( JS ) [strict] 				--- break Label | .
+		| throw ( JS ) [strict]				--- throw Exp
 
-			| stmts ( List{JS} ) [strict]		--- List{Stmt}
-			| ifElse ( K , K , K ) [strict(1)]	--- if (Exp) Block Block
-			| tryCatch ( K , K , K ) [strict]	--- try Block catch (Exp) Block
+		| stmts ( List{JS} ) [strict]		--- List{Stmt}
+		| ifElse ( JS , JS , JS ) [strict(1)]	--- if (Exp) Block Block
+		| tryCatch ( JS , JS , JS ) [strict]	--- try Block catch (Exp) Block
+		
+		| case ( List{JS} , JS ) [strict(1)]	 
+			--- case List{CaseMatch} : List{Stmt}
+		| switch ( JS , List{JS} , JS ) [strict(1)]	
+			--- switch (Exp) { List{Case} ; DefaultCase }
+		| for ( JS , JS , JS , JS ) [strict(1)]		
+			--- for ( Inits ; Cond ; Incrs ) Block
+		| forIn ( JS , JS , JS ) [strict(2)]
+			--- for ( Name in Exp ) Block
+		| while ( JS , JS )
+			--- while ( Exp ) Block
+		| do ( JS , JS )
+			--- do Block while ( Exp )
 			
-			| case ( List{JS} , K ) [strict(1)]	 
-				--- case List{CaseMatch} : List{Stmt}
-			| switch ( K , List{JS} , K ) [strict(1)]	
-				--- switch (Exp) { List{Case} ; DefaultCase }
-			| for ( K , K , K , K ) [strict(1)]		
-				--- for ( Inits ; Cond ; Incrs ) Block
-			| forIn ( K , K , K ) [strict(2)]
-				--- for ( Name in Exp ) Block
-			| while ( K , K )
-				--- while ( Exp ) Block
-			| do ( K , K )
-				--- do Block while ( Exp )
-				
-			| labelledStmt ( K , K )	
-				--- Label : Stmt
-			
-			| varDeclarations ( List{JS} ) [strict]
-			
-			| function ( K , List{JS} , K )
-				--- function ( Parameters ) { Program }
-				--- function Name ( Parameters ) { Program }
+		| labelledStmt ( JS , JS )	
+			--- Label : Stmt
+		
+		| varDeclarations ( List{JS} ) [strict]
+		
+		| function ( JS , List{JS} , JS )
+			--- function ( Parameters ) { Program }
+			--- function Name ( Parameters ) { Program }
 
-			| program ( K )
-				--- List{VarDeclarationStmt} List{FunctionStmt} List{ExecutionStmt}
+		| program ( JS )
+			--- List{VarDeclarationStmt} List{FunctionStmt} List{ExecutionStmt}
 endkm
 			
 			

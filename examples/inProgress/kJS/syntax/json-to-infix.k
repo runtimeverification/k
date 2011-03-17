@@ -1,49 +1,50 @@
+load js-syntax.k
+
 kmod JSON-INFIX
  	is including JS-SYNTAX + JSON
-
-	vars Obj Element Left Right : JsonObject .
-	vars Elements Remaining Others Before Between  After : List{JsonElem} .
-	vars Value : JsonValue .
-	vars N : Number .
-	vars I : Int . 
-	vars Name S : String .
-	vars Flag : Bool .
 	
-	syntax Id ::= type | children | name | value | expression | assignOp | postfix 
-		
+	syntax JsonTag ::= type | children | name | value | expression | assignOp | postfix 
 	
-	macro { type : SCRIPT Between children : Elements After } = program(Elements)
+	syntax JsonTypeName ::= 
+			SCRIPT | VAR | IDENTIFIER | SEMICOLON
+		|	ASSIGN | PLUS | DOT | OR 
+		| 	INCREMENT | DECREMENT | ARRAY_INIT 
+		|	NUMBER | STRING | BOOLEAN
 	
-	macro { type : VAR Between children : Elements After } = varDeclarations(Elements)
+	syntax Id ::= JsonTag | JsonTypeName 
 	
-	macro { type : IDENTIFIER Between name : Name After } = id(Name)
+	macro o(type : NUMBER value : N:Number) = n(N)
+	macro o(type : STRING value : S:String) = s(S)
+	macro o(type : BOOLEAN value : B:Bool) = b(B)
 	
-	macro { type : SEMICOLON, expression : Elements After } = stmts(Elements)
+	macro o(type : IDENTIFIER name : Name:String) = id(Name)
 	
-	macro { type : ASSIGN Between assignOp : null Others children : (Left Right) After } 
-		= assignment(null, Left, Right)
-
-	macro { type : ASSIGN Between assignOp : Index Others children : (Left Right) After } 
-		= assignment(OpValue, Left, Right)
+	macro o(type : OR children : a(Left , Right)) = or(Left Right)
 	
-	macro { type : PLUS Between (children : Left Right) After } = add(Left Right)
-	macro { type : DOT Between (children : Left Right) After } = add(Left Right)
-	macro { type : OR Between (children : Left Right) After } = add(Left Right)
+	macro o(type : PLUS children : a(Left , Right)) = add(Left Right)
 	
-	macro { type : INCREMENT Between (children : Element) Others postfix : Flag After } 
-		= inc(Element, Flag)
-
-	macro { type : INCREMENT Between (children : Element) After } = inc(Element, false)
-
-	macro { type : DECREMENT Between (children : Element) Others postfix : Flag After } 
-		= dec(Element, Flag)
-
-	macro { type : DECREMENT Between (children : Element) After } = dec(Element, false)
+	macro o(type : INCREMENT children : a(Element)) = inc(Element, false)
+	macro o(type : INCREMENT children : a(Element) postfix : Flag:Bool) = inc(Element, Flag)
+	
+	macro o(type : DECREMENT children : a(Element)) = dec(Element, false)
+	macro o(type : DECREMENT children : a(Element) postfix : Flag) = dec(Element, Flag)
 
 	
-	macro { type : ARRAY_INIT Between children : Elements After } = arrayLit(Elements)
-	macro { type : NUMBER Between value : N } = n(N)
-	macro { type : STRING Between value : S } = s(S)
+	macro o(type : SCRIPT children : Elements:List{JsonElem}) = program(Elements)
 	
-	syntax Value ::= b( Bool ) | n( Number ) | s( String )
+	macro o(type : VAR children : Elements) = varDeclarations(Elements)
 	
+	
+	macro o(type : SEMICOLON, expression : Elements) = stmts(Elements)
+	
+	macro o(type : ASSIGN assignOp : OpCode:JsonTerminal children : a(Left:JS , Right:JS)) 
+		= assignment(OpCode, Left, Right)
+	
+	macro o(type : DOT children : a(Left , Right)) = staticAccess(Left Right)
+	
+	
+	
+	macro o(type : ARRAY_INIT children : a(Element)) = arrayLit(Elements)
+	
+
+endkm	
