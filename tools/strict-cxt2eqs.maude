@@ -9,6 +9,7 @@ mod STRICTCXT2EQS is
   including META-K-MODULE .
   including META-K-CONTEXTS .
   including META-K-RULES .
+  including METADATA-EXTRAS .
   var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
   var AS : AttrSet . var MAS : MembAxSet . var Mb : MembAx .
   var Eqs : EquationSet . var Q : Qid .

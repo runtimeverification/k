@@ -680,6 +680,31 @@ fmod META-MODULE-EXTRAS is
   eq removeNaryAttrs(Attr AS) = if naryAttr(Attr) then removeNaryAttrs(AS) else Attr removeNaryAttrs(AS) fi .
   eq removeNaryAttrs(none) = none .
 
+
+  op removeOpAttrs : AttrSet -> AttrSet .
+  eq removeOpAttrs(Attr AS) = removeOpAttr(Attr) removeOpAttrs(AS) .
+  eq removeOpAttrs(none) = none .
+  op removeOpAttr : Attr -> AttrSet .
+  eq removeOpAttr(ctor) = none .
+  eq removeOpAttr(assoc) = none .
+  eq removeOpAttr(id(Trm)) = none .
+  eq removeOpAttr(idem) = none .
+  eq removeOpAttr(memo) = none .
+  eq removeOpAttr(right-id(Trm)) = none .
+  eq removeOpAttr(left-id(Trm)) = none .
+  eq removeOpAttr(poly(NL)) = none .
+  eq removeOpAttr(strat(NL)) = none .
+  eq removeOpAttr(prec(N)) = none .
+  eq removeOpAttr(gather(QIL)) = none .
+  eq removeOpAttr(format(QIL)) = none .
+  eq removeOpAttr(frozen(NL)) = none .
+  eq removeOpAttr(iter) = none .
+  eq removeOpAttr(Attr) = Attr [owise] .
+
+
+   var NL : NatList . 
+
+
   op naryAttr : Attr -> Bool .
   eq naryAttr(assoc) = true .  eq naryAttr(comm) = true .  eq naryAttr(idem) = true .  eq naryAttr(iter) = true .  eq naryAttr(id(Trm)) = true .  eq naryAttr(left-id(Trm)) = true .  eq naryAttr(right-id(Trm)) = true .  eq naryAttr(strat(NNl)) = true .  eq naryAttr(memo) = true .  eq naryAttr(prec(N)) = true .  eq naryAttr(gather(QIL)) = true .  eq naryAttr(format(QIL)) = true .  eq naryAttr(frozen(NNl)) = true .  eq naryAttr(poly(NNl)) = true .  eq naryAttr(special(NHl:NeHookList)) = true .
   eq naryAttr(Attr) = false [owise] .
@@ -875,6 +900,7 @@ fmod METADATA-EXTRAS is
   op metadataString : AttrSet -> String .
   eq metadataString(AS metadata(S)) = S .
   eq metadataString(AS) = "" [owise] .
+
 endfm
 
 fmod META-LEVEL-EXTRAS is
