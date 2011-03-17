@@ -73,6 +73,8 @@ public class KDefinition
     renameOp.put("_;;_", "__");
 
     renameOp.put("tv`(_`,_`)", "`(`(_`) _`)");
+    renameOp.put("'assertNormal`(_`)", "'@`assert_");
+
   }
 
   static void initWrapperOp()
