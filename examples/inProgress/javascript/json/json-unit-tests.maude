@@ -1,0 +1,18 @@
+--- set print with parentheses on .
+--- set print mixfix off .
+
+
+
+red 	{ } .
+
+red		{"s" : 234} .
+
+red		{"a" : [ ]} .
+
+red		{"a" : [1,2,3]} .
+
+red		{"a" : [{"s" : 123, "e" : {"b" : [1]}}]} .
+
+red		{"a" : {}, "b" : "str", "c" : [1,2,3]} .
+
+
