@@ -68,5 +68,5 @@
  	eq buildLitObject( (Key:JsonKey :  Value:JS , Elements) , o(Properties:JSProperties) ) 
  		=  buildLitObject( (Elements) , o(Properties Key :  Value) ) [metadata "location(../json/json.k:68)"] .
  
- var Value :  JS . var Elements :  List{JS} . var Properties :  JSProperties . var Key :  JsonKey . var Obj :  JS .   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm
+ var Value :  JS . var Elements :  List{JS} . var Properties :  JSProperties . var Key :  JsonKey . var Obj :  JS .   subsorts JSProperties Builtin JsonTerminal JSProperty JsonLiteral < K . endm
  

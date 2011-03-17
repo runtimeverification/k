@@ -1,0 +1,4 @@
+ERROR:
+Warning: "json-to-infix.maude", line 35 (mod JSON-INFIX): multiple distinct parses for statement
+eq o (type : "ASSIGN" assignOp : OpCode:JS children : a (Left, Right)) = assignment (OpCode, Left, Right) [metadata "location(json-to-infix.k:35)"] .
+Aborting the compilation

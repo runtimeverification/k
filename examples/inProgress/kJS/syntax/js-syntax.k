@@ -15,6 +15,9 @@ kmod JS-SYNTAX
 		
 		| new( JS ) [strict]					--- new InvocationExp
 		
+		| inc( JS , Bool ) [strict]				--- ++exp OR exp++
+		| dec( JS , Bool ) [strict]				--- --exp OR exp--
+		
 		| delete( JS ) [strict]				--- delete TargetExp
 		
 		| typeof ( JS ) [strict]				--- typeof Exp
@@ -85,7 +88,7 @@ kmod JS-SYNTAX
 			--- function ( Parameters ) { Program }
 			--- function Name ( Parameters ) { Program }
 
-		| program ( JS )
+		| program ( List{JS} )
 			--- List{VarDeclarationStmt} List{FunctionStmt} List{ExecutionStmt}
 endkm
 			
