@@ -52,6 +52,8 @@ public class KDefinition
 
   static void initRenameOp()
   {
+    renameOp.put("TrueFormula", "true");
+    renameOp.put("FalseFormula", "false");
     renameOp.put(".Subst", ".");
 
     renameOp.put("_===_", "_ = _");
@@ -69,6 +71,8 @@ public class KDefinition
 
     renameOp.put("'_`,`,`,_", "'_`, _");
     renameOp.put("_;;_", "__");
+
+    renameOp.put("tv`(_`,_`)", "`(`(_`) _`)");
   }
 
   static void initWrapperOp()
@@ -78,6 +82,7 @@ public class KDefinition
     wrapperOp.add("Subst_");
     wrapperOp.add("Id_");
     wrapperOp.add("ExpressionType_");
+    wrapperOp.add("TypedValue_");
     wrapperOp.add("@_");
     wrapperOp.add("stream");
     wrapperOp.add("wlist_");

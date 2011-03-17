@@ -240,7 +240,7 @@ public class DefaultTerm implements MaudeTerm
         return new DefaultTerm("!" + name, sort);
 
       if (op.startsWith("Free")) 
-        return new DefaultTerm("$" + name, sort);
+        return new DefaultTerm("#" + name, sort);
 
       if (op.startsWith("default")) 
         return new DefaultTerm("default" + name, sort);
