@@ -45,7 +45,7 @@ kmod JSON-SEMANTICS
 		| 	buildLitObject( List{JS} , JS )
 	
 
-	syntax JSProperty ::= p( String , JS )
+	syntax JSProperty ::= p( JsonName , JS )
 	
 	syntax JSProperties ::= 
 			.JSProperties | JSProperty

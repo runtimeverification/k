@@ -45,7 +45,7 @@
    		  [metadata "location(json.k:44)"] . 	 op buildLitObject(_,_) :  List{JS}  JS -> JS [metadata "location(json.k:45)"] . 
    	
    
-   	  sort JSProperty .    op p(_,_) :  String  JS -> JSProperty [metadata "location(json.k:48)"] . 
+   	  sort JSProperty .    op p(_,_) :  JsonName  JS -> JSProperty [metadata "location(json.k:48)"] . 
    	
    	  sort JSProperties .   
    			 op .JSProperties :  -> JSProperties   [metadata "location(json.k:50)"] .  subsort JSProperty <  JSProperties .
