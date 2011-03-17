@@ -28,7 +28,7 @@ op lengthList_ : List -> Nat .
 op substList`{K`}Label`(_`,_`,_`) : List{K}KLabel KLabel -> List{K}.
 op $hasMapping : Map K -> Bool[metadata "latex(renameTo \$hasMapping\mybracket{_,_})"].
 op '_:_ : -> KProperLabel[metadata "arity 2 location(json.k:29)"].
-op '__ : -> KProperLabel[metadata "location(json.k:52)"].
+op '__ : -> KProperLabel[metadata "location(json.k:53)"].
 op '_`,_ : -> KProperLabel[metadata "location(json.k:10)"].
 op '`[_`] : -> KProperLabel[metadata "arity 1 location(json.k:23)"].
 op '`[`] : -> KProperLabel[metadata "arity 0 location(json.k:23)"].
@@ -40,7 +40,6 @@ op 'headList`{K`}_ : -> KProperLabel[metadata "arity 1 latex(renameTo head\subsc
 op 'null : -> KProperLabel[metadata "arity 0 location(json.k:25)"].
 op 'null : -> KProperLabel[metadata "arity 0 location(json.k:8)"].
 op 'o`(_`) : -> KProperLabel[metadata "arity 1 location(json.k:43)"].
-op 'p`(_`,_`) : -> KProperLabel[metadata "arity 2 location(json.k:48)"].
 op 'substKLabel : -> KProperLabel[metadata "arity 3"].
 op Bool_ : Bool -> KResultLabel[metadata "builtin wrapper"].
 op Float_ : Float -> KResultLabel[metadata "builtin wrapper"].
@@ -103,12 +102,12 @@ eq substList`{K`}Label`(_`,_`,_`)(_`,`,_(K:K,Ks:List{K}),Label1:KLabel,Label2:KL
 eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
 ceq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel))if _=/=Bool_(Label1:KLabel,Label:KLabel)= true .
 eq $hasMapping(M:Map,D:K)= false[owise].
-eq _`(_`)('`[_`],_`(_`)('_`,_,Elements:List{K}))= _`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(json.k:56)"].
-eq _`(_`)('`[`],.List`{K`})= _`(_`)('a`(_`),_`(_`)('_`,_,.List`{K`}))[metadata "location(json.k:55)"].
-eq _`(_`)('`{_`},_`(_`)('_`,_,Elements:List{K}))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('o`(_`),_`(_`)('__,.List`{K`}))))[metadata "location(json.k:61)"].
-eq _`(_`)('`{`},.List`{K`})= _`(_`)('o`(_`),_`(_`)('__,.List`{K`}))[metadata "location(json.k:58)"].
-eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,.List`{K`}),Obj:K))= Obj:K[metadata "location(json.k:63)"].
-eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(Name:K,Value:K)),Elements:List{K})),_`(_`)('o`(_`),_`(_`)('__,Properties:List{K}))))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('o`(_`),_`(_`)('__,_`,`,_(Properties:List{K},_`(_`)('p`(_`,_`),_`,`,_(Name:K,Value:K)))))))[metadata "location(json.k:65)"].
+eq _`(_`)('`[_`],_`(_`)('_`,_,Elements:List{K}))= _`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(json.k:57)"].
+eq _`(_`)('`[`],.List`{K`})= _`(_`)('a`(_`),_`(_`)('_`,_,.List`{K`}))[metadata "location(json.k:56)"].
+eq _`(_`)('`{_`},_`(_`)('_`,_,Elements:List{K}))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('o`(_`),_`(_`)('__,.List`{K`}))))[metadata "location(json.k:62)"].
+eq _`(_`)('`{`},.List`{K`})= _`(_`)('o`(_`),_`(_`)('__,.List`{K`}))[metadata "location(json.k:59)"].
+eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,.List`{K`}),Obj:K))= Obj:K[metadata "location(json.k:64)"].
+eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(Key:K,Value:K)),Elements:List{K})),_`(_`)('o`(_`),_`(_`)('__,Properties:List{K}))))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('o`(_`),_`(_`)('__,_`,`,_(Properties:List{K},_`(_`)('_:_,_`,`,_(Key:K,Value:K)))))))[metadata "location(json.k:68)"].
 eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
 eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
 eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].

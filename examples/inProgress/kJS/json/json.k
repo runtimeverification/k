@@ -16,17 +16,17 @@ kmod JSON-SYNTAX
 	
 	syntax Numeric ::= Int | Float
 	
-	syntax JsonName ::= String | Id | Int
+	syntax JsonKey ::= String | Id | Int
 
 	syntax JsonObject ::= { } | { List{JS} }
 	
 	syntax JsonArray ::= [ ] | [ List{JS} ]
 	
-	syntax JsonTerminal ::= null | Bool | Numeric | JsonName
+	syntax JsonTerminal ::= null | Bool | Numeric | JsonKey
 	
 	syntax JsonLiteral ::= JsonTerminal | JsonObject | JsonArray
 				
-	syntax JsonPair ::= JsonName : JS [prec 25]
+	syntax JsonPair ::= JsonKey : JS [prec 25]
 	
 	syntax JS ::= JsonLiteral | JsonPair
 	
@@ -45,7 +45,8 @@ kmod JSON
 		| 	buildLitObject( List{JS} , JS )
 	
 
-	syntax JSProperty ::= p( JsonName , JS )
+---	syntax JSProperty ::= p( JsonKey , JS )
+	syntax JSProperty ::= JsonPair
 	
 	syntax JSProperties ::= 
 			.JSProperties | JSProperty
@@ -62,8 +63,10 @@ kmod JSON
 
 	macro buildLitObject((.List{JS}) , Obj:JS ) = Obj
 
-	macro buildLitObject( (Name:JsonName : Value:JS , Elements) , o(Properties:JSProperties) ) 
-		= buildLitObject( (Elements) , o(Properties p(Name, Value)) )
+---	macro buildLitObject( (Key:JsonKey : Value:JS , Elements) , o(Properties:JSProperties) ) 
+---		= buildLitObject( (Elements) , o(Properties p(Key, Value)) )
+	macro buildLitObject( (Key:JsonKey : Value:JS , Elements) , o(Properties:JSProperties) ) 
+		= buildLitObject( (Elements) , o(Properties Key : Value) )
 
 endkm
 
