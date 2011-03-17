@@ -57,9 +57,16 @@ K is unlikely to be easily adopted by nonexperts. Rather, we propose to define i
 
 
 \begin{itemize}
-\item define in K an object-oriented language, possibly by adapting the definition of  \textsc{kool}, an object-oriented language used for teaching purposes~\cite{hills-rosu-2007-rta}. This language contains some of the basic ingredients used in \mde: classes and their attributes are the building blocks of \uml\ class diagrams,
-which are the metamodels in \mde\ terminology; whereas
-instances of classes can be organised as \uml\ object diagrams, which are models in \mde\ terminology. This new language will be (tentatively)  called by \textsc{mool} in the rest of this document;
+\item define in K a language for writing metamodels. We are planning to adpot \textsc{km3}~\cite{DBLP:conf/fmoods/JouaultB06}, which has a complete and minimal set of constructors,
+ as well as  clear syntax and semantics.
+\item define in K an object-oriented language, possibly by drawing inspiration from the
+  \textsc{kool} language~\cite{hills-rosu-2007-rta} used for teaching.
+This new language will be (tentatively)  called by \textsc{mool}. Graphs of classes in  \textsc{mool} will constitute metamodels and will follow the 
+\textsc{km3} syntax.
+\textsc{mool} will also have primitives for creating and for modifying models conforming to metamodels (i.e., graphs of instances of the classes, linked by instances of the references
+between classes). Those primitives include model-specific instructions (i.e., modifying the value of an object's attribute) as well as general impoerative instructions
+(loops, if-then-else, \ldots).
+
 
 \item define in K the subset of  \ocl~\cite{ocl} called \emph{essential \ocl}. \ocl\ is a language for model navigation, 
  query, and constraints, and essential \ocl\  is its  subset used in metamodelling;
@@ -95,10 +102,12 @@ preserves operational semantics. Such properties could be expressed as predicate
 by means of imperative commands of the language (assignments, loops, \ldots). Compared to \kmt, \textsc{mool+ocl} is \emph{formally defined}, allows for \emph{verification}, and
 has additional \emph{declarative features}. We  also express \emph{nondetertministic} semantics, e.g., for  parallel/concurrent languages.
 
-\textsc{atl}~\cite{DBLP:journals/scp/JouaultABK08} is a declarative model transformation language, in which model transformations are expressed using declarative rules that may contain calls to \ocl\ -like code. The \textsc{omg} standard language for model transformations~\cite{qvt} also proposes mixed declarative-imperative rules. Compared to these approaches, ours is formally defined and allows for formal verifications.
+\textsc{atl}~\cite{DBLP:journals/scp/JouaultABK08} is a declarative model transformation language, in which model transformations are expressed using declarative rules that may contain calls to imperative code. A formal definition of \textsc{atl} in Maude has been proposed in~\cite{DBLP:conf/icmt/TroyaV10}. Compared to this work, we expect that our definition in K of   \textsc{mool+ocl}
+will  benefit from the distinctive features of K (modularity, context inference,\ldots) that make K semantics definitions  shorter and simpler than Maude ones. Also, defining a new language will allow us to  simplify some unnecessarily complex semantical issues
+ (e.g., regarding the integration of  declarative and imperative features) that arise in \textsc{atl}.
 
-Several approaches~\cite{bhm08,rdv09,r10b} use the Maude algebraic and rewriting-based formal specification language Maude~\cite{allAboutMaude}.  In these approaches, model transformations (in particular, 
-for \dsml\ operational semantics) can only be specified in a declarative manner, by mapping them to Maude equations and/or rewrite rules.
+Several other approaches~\cite{bhm08,rdv09,r10b} use the Maude algebraic and rewriting-based formal specification language Maude~\cite{allAboutMaude}.  In these approaches, model transformations (in particular, 
+for \dsml\ operational semantics) can only be specified in a declarative manner, by mapping them to Maude equations/rewrite rules.
  Compared to these approaches, ours also includes \emph{imperative features}, which are lower-lever but allow for better
 control and efficiency.
 The same comparison can be drawn with declarative model transformations based on graph rewriting~\cite{DBLP:conf/agtive/Taentzer03,DBLP:conf/kbse/CsertanHMPPV02}.
