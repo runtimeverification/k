@@ -9,7 +9,7 @@
 *  the abstract semantics (Section 4).
 */
 
-//require silok-programs
+// require silok-programs
 require silok-syntax
 
 kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT 

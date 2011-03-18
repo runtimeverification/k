@@ -275,7 +275,7 @@ is including SILOK-BASIC-SEMANTICS
                </update>)
        </state>
        <pgm_> lvars|->wklist(LVs:List{K}) gvars|->wklist(GVs:List{K}) <_/pgm>
-
+  [structural]
 
   rule <k> restore(S':Map) => .<_/k>
        <state> processed(S) => S </state>
