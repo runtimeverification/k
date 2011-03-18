@@ -106,12 +106,12 @@ public class Table {
     }
   }
 
-  static String varStringRoot = "configVar";
+  static String varStringRoot = "frame";
   static int varCount = 0;
   static String varString = "";
 
   public static void genVarString(String prefix) {
-    varString = prefix + varStringRoot + varCount++;
+    varString = prefix + varStringRoot + "_" + varCount++;
   }
 
   public static void init() {

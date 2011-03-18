@@ -144,7 +144,7 @@ public class AnnotPreK {
     CommonTree newCell = new CommonTree(t);
     cellBag.addChild(newCell);
 
-    t = new CommonToken(annotParser.LABEL, cellLabel);
+    t = new CommonToken(annotParser.IDENTIFIER, cellLabel);
     newCell.addChild(new CommonTree(t));
 
     t = new CommonToken(annotParser.BAG, "BAG");
@@ -164,7 +164,7 @@ public class AnnotPreK {
 
       String wrappee;
       if (!cell.isDefault)
-        wrappee = "\"" + suffix + "_" + cellLabel + "\"";
+        wrappee = "\"" + cellLabel + "_" + suffix + "\"";
       else 
         wrappee = "\"" + cellLabel + "\"";
 
@@ -172,7 +172,7 @@ public class AnnotPreK {
       newVar.addChild(new CommonTree(t));
     }
 
-    t = new CommonToken(annotParser.LABEL, cellLabel);
+    t = new CommonToken(annotParser.IDENTIFIER, cellLabel);
     newCell.addChild(new CommonTree(t));
   }
 

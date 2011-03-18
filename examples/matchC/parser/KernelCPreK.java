@@ -38,7 +38,7 @@ public class KernelCPreK {
     tokenToBuiltins.put(kernelCParser.STRUCT, "struct_");
     tokenToBuiltins.put(kernelCParser.PTR, "_*");
     tokenToK.put(kernelCParser.NOP, "nop");
-    tokenToK.put(kernelCParser.BLOCK, "block_");
+    tokenToK.put(kernelCParser.BLOCK, "block`(_`)");
     tokenToK.put(kernelCParser.SEP, "_;");
     tokenToK.put(kernelCParser.IF, "if`(_`)_else_");
     tokenToK.put(kernelCParser.WHILE, "while`(_`)_");

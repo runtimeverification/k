@@ -58,6 +58,8 @@ tokens {
   SEQ;
   MSET;
 
+  REW = '=>';
+
   // MAP;
   MAP_UNIT = '.Map';
   MAP_ITEM = 'MapItem';
@@ -71,7 +73,6 @@ tokens {
 
   CONFIG;
   CELL;
-  LABEL;
 
   // LIST;
   LIST_UNIT = '.List';
@@ -172,22 +173,32 @@ configuration
 //  : term (COMMA term)* -> ^(TERM_LIST term+)
 //  ;
 
-term
-options { backtrack = true; }
-  : map
-  | bag
-  | list
-  | k
-  ;
+//term
+//options { backtrack = true; }
+//  : map
+//  | bag
+//  | list
+//  | k
+//  ;
 
 
 /*
  * Grammar rules for map parsing
  */
 map
+  : map_rewrite
+  ;
+
+map_rewrite
+  : map_term (REW^ map_term)?
+  ;
+
+map_term
+options { backtrack = true; }
   //: map_item+ -> ^(MAP map_item+)
   : map_item (COMMA map_item)* -> ^(MAP map_item+)
   | map_unit -> MAP
+  | LPAREN! map RPAREN!
   ;
 
 
@@ -285,6 +296,36 @@ list
  * Grammar rules for cell parsing (for now only closed cells)
  */
 cell
+scope {
+  String cellLabel;
+
+}
+  : open_cell_tag cell_content close_cell_tag
+    -> ^(CELL open_cell_tag cell_content close_cell_tag)
+  ;
+
+open_cell_tag
+  : '<'! IDENTIFIER '>'! { $cell::cellLabel = $IDENTIFIER.text; }
+  ;
+
+cell_content
+  : { Table.Sort.MAP.equals(Table.labelToCell.get($cell::cellLabel).sort) }?=>
+    map
+  | { Table.Sort.BAG.equals(Table.labelToCell.get($cell::cellLabel).sort) }?=>
+    bag
+  | { Table.Sort.LIST.equals(Table.labelToCell.get($cell::cellLabel).sort) }?=>
+    list
+  | { Table.Sort.K.equals(Table.labelToCell.get($cell::cellLabel).sort) }?=>
+    k
+  ;
+
+close_cell_tag
+  : '</'! IDENTIFIER '>'! { $cell::cellLabel.equals($IDENTIFIER.text) }?
+  ;
+
+
+/*
+cell
 options { backtrack = true; }
   : map_cell
   | bag_cell
@@ -323,6 +364,7 @@ k_cell
 cell_end[String label]
   : '</' IDENTIFIER '>' { $IDENTIFIER.text.equals($label) }?
   ;
+*/
 
 
 /*
