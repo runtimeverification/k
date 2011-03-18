@@ -1,86 +1,5 @@
---- set print with parentheses on .
---- set print mixfix off .
-
-	red		{
-				type : "DOT", 
-				children : [
-					{type : "STRING", value : "person"}, 
-					{type : "IDENTIFIER", value : "length"}
-				]
-			} 
-	==Bool	staticAccess(s("person"),id("length")) .
-
-	red		{
-	        	type : "VAR",
-            	children : [] ,
-				destructurings : []
-			} 
-	==Bool	varDeclarations(.List{JS}) .
-		
-	red		{
-	    type : "SCRIPT",
-	    children : [
-	        {
-	            type : "VAR",
-	            children : [
-	                {
-	                    type : "IDENTIFIER",
-	                    children : [],
-	                    end : 5,
-	                    lineno : 1,
-	                    name : "x",
-	                    readOnly : false,
-	                    start : 4,
-	                    value : "x"
-	                }
-	            ],
-	            destructurings : [],
-	            end : 11,
-	            lineno : 1,
-	            start : 0,
-	            value : "var"
-	        }
-	    ]
-	}
-	==Bool	program(varDeclarations(id("x"))) .
-	
-	red		{
-        type : "SEMICOLON",
-        children : [],
-        end : 18,
-        expression : {
-            type : "ASSIGN",
-            assignOp : null,
-            children : [
-                {
-                    type : "IDENTIFIER",
-                    children : [],
-                    end : 14,
-                    lineno : 2,
-                    start : 13,
-                    value : "x"
-                },
-                {
-                    type : "NUMBER",
-                    children : [],
-                    end : 18,
-                    lineno : 2,
-                    start : 17,
-                    value : 1
-                }
-            ],
-            end : 18,
-            lineno : 1,
-            start : 11,
-            value : ";"
-        },
-        lineno : 2,
-        start : 13,
-        value : "x"
-    } 
-	==Bool	exp(assignment(id("x"),null,n(1))) .
-
-	red		{
+red
+	{
 	    type : "SCRIPT",
 	    children : [
 	        {
@@ -335,10 +254,17 @@
 	            value : "z"
 	        }
 	    ]
-	} 
-	==Bool program(
+	}
+==Bool 
+	program(
 		varDeclarations(id("x"),id("y"),id("z")),
-		exp(assignment(id("x"),null,n(1))),
-		exp(assignment(id("y"),null,n(2))),
-		exp(assignment(id("z"),null,add(inc(id("x"),true),inc(id("y"),false)))),
+		exp(assignment(id("x"),.undefined,n(1))),
+		exp(assignment(id("y"),.undefined,n(2))),
+		exp(assignment(id("z"),.undefined,add(inc(id("x"),true),inc(id("y"),false)))),
 		exp(assignment(id("z"),24,n(3)))) .
+		
+--- var x, y, z;
+--- x = 1;
+--- y = 2;
+--- z = x++ + ++y;
+--- z += 3;

@@ -61,7 +61,7 @@ load ../json/json.maude
  		   op break(_) :  JS -> JS  [  metadata "location(js-syntax.k:61) strict"] . 				
  		   op continue(_) :  JS -> JS  [  metadata "location(js-syntax.k:62) strict"] . 				
  		   op throw(_) :  JS -> JS  [  metadata "location(js-syntax.k:63) strict"] .				
- 		   op controlLabel(__) :  String  JS -> JS 
+ 		   op controlLabel(_,_) :  String  JS -> JS 
  		
  		  [metadata "location(js-syntax.k:64)"] .  op exp(_) :  JS -> JS  [  metadata "location(js-syntax.k:66) strict"] .				
  		
@@ -90,7 +90,7 @@ load ../json/json.maude
  		
  		  [metadata "location(js-syntax.k:88)"] .  op varDeclarations(_) :  List{JS} -> JS  [  metadata "location(js-syntax.k:91) strict"] .
  		
- 		   op function(_,_,_,_) :  JS  JS  List{JS}  JS -> JS
+ 		   op function(_,_,_,_) :  Int  JS  List{JS}  JS -> JS
  			
  			
  

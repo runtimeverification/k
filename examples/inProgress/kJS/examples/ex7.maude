@@ -1,0 +1,52 @@
+red 
+{
+    type : "CASE",
+    caseLabel : s("number"),
+    children : [],
+    end : 18,
+    lineno : 2,
+    start : 14,
+    statements : {},
+    value : "case"
+}
+.
+
+--- macro (type : "CASE" caseLabel : Exp statements : Stmt Extra) = case(Exp, Stmt)
+
+
+***(
+{
+    type : "SCRIPT",
+    children : [
+        {
+            type : "SWITCH",
+            cases : [
+                {
+                    type : "CASE",
+                    caseLabel : s("number"),
+                    children : [],
+                    end : 18,
+                    lineno : 2,
+                    start : 14,
+                    statements : {},
+                    value : "case"
+                }
+            ],
+            children : [],
+            defaultIndex : -1,
+            discriminant : {
+                type : "IDENTIFIER",
+                children : [],
+                end : 9,
+                lineno : 1,
+                start : 8,
+                value : "x"
+            },
+            end : 6,
+            lineno : 1,
+            start : 0,
+            value : "switch"
+        }
+    ]
+}
+)

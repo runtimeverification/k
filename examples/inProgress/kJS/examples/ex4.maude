@@ -1,4 +1,5 @@
-    {
+red
+	{
         type : "SCRIPT",
         children : [
             {
@@ -116,3 +117,10 @@
             }
         ]
     }
+==Bool 
+	program(
+		varDeclarations(id("x"),id("y"),id("z")),
+		exp(assignment(id("x"),.undefined,n(1)))) .
+	
+--- var x, y, z;
+--- x = 1;

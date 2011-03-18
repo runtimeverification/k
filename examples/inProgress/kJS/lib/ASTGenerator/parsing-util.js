@@ -40,10 +40,12 @@ JSAST = (function () {
 		return Object.keys(_allIds).sort();
 	}
 	
-	function _indent() {
-		var indent = _indentations[++_indentLevel];
+	function _indent(startLevel_) {
+		var indent;
+		_indentLevel = (startLevel_ === undefined) ? _indentLevel + 1 : startLevel_;
+		indent = _indentations[_indentLevel];
 		if (indent === undefined) {
-			indent = _indentations[_indentLevel] = _indentations[_indentLevel - 1] + "    ";
+			indent = _indentations[_indentLevel] = INDENTATION.repeat(_indentLevel);
 		}
 		return indent;
 	}
@@ -100,7 +102,7 @@ JSAST = (function () {
     };
 
 	NODE.prototype.toString = function () {
-		return _outputNode(this);
+		return _indent(0) + _outputNode(this);
 	};
 	
 	function _updateIds() {
@@ -125,7 +127,7 @@ JSAST = (function () {
 				fileName = fileNameWithExt.replace(/\.js$/, ""),
 				path = dirName + fileName,
 				// isStrictMode = isStrictMode_ || false,
-				sourceFile, source, ast, json, jsonFile, resultFlag;
+				sourceFile, source, ast, json, jsonFile, maude, maudeFile, resultFlag;
 	
 			netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");		
 			if (fileNameWithExt.search(/\.js$/) === -1) {return "ERROR: Must be a .js file!";}
@@ -140,6 +142,10 @@ JSAST = (function () {
 			jsonFile = FileIO.open(path + ".json");
 			resultFlag = FileIO.write(jsonFile, json);
 			if (_collectIds) {resultFlag = resultFlag && _updateIds();}
+			
+			// maude = "red \n" + json + "\n .\n"
+			// maudeFile = FileIO.open(path + ".maude");
+			// resultFlag = resultFlag && FileIO.write(maudeFile, maude);
 			return resultFlag;
 		}
 	};

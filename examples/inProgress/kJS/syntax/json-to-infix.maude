@@ -9,8 +9,8 @@ load js-syntax.maude
  	eq o(type :  "NUMBER" value :  Num:Numeric Extra:JSProperties) =  n(Num) [metadata "location(json-to-infix.k:9)"] .
  	eq o(type :  "STRING" value :  S:String Extra) =  s(S) [metadata "location(json-to-infix.k:10)"] .
  	eq o(type :  "REGEXP" value :  S:String Extra) =  r(S) [metadata "location(json-to-infix.k:11)"] .
- 	eq o(type :  "TRUE" value :  B:Bool Extra) =  b(true) [metadata "location(json-to-infix.k:12)"] .
- 	eq o(type :  "FALSE" value :  B:Bool Extra) =  b(false) [metadata "location(json-to-infix.k:13)"] .
+ 	eq o(type :  "TRUE"  Extra) =  b(true) [metadata "location(json-to-infix.k:12)"] .
+ 	eq o(type :  "FALSE" Extra) =  b(false) [metadata "location(json-to-infix.k:13)"] .
  	eq o(type :  "NULL" Extra) =  .null  [metadata "location(json-to-infix.k:14)"] .
  	eq null =  .undefined  [metadata "location(json-to-infix.k:15)"] .
  	eq undefined =  .undefined  [metadata "location(json-to-infix.k:16)"] .
@@ -87,22 +87,25 @@ load js-syntax.maude
  	
  	eq o(type :  "LABEL" label :  Name statement :  Stmt Extra) =  controlLabel(Name, Stmt) [metadata "location(json-to-infix.k:88)"] .
  
+ 	eq o(type :  "SWITCH" discriminant :  Exp cases :  a(Cases:List{JS}) defaultIndex :  I Extra)
+ 		=  switch(Exp, Cases, I) [metadata "location(json-to-infix.k:90)"] .
+ 
  	
- 	eq o(type :  "WHILE" condition :  Condition body :  Stmt Extra) =  while(Condition, Stmt) [metadata "location(json-to-infix.k:91)"] .
- 	eq o(type :  "DO" condition :  Condition body :  Stmt Extra) =  do(Condition, Stmt) [metadata "location(json-to-infix.k:92)"] .
+ 	eq o(type :  "WHILE" condition :  Condition body :  Stmt Extra) =  while(Condition, Stmt) [metadata "location(json-to-infix.k:94)"] .
+ 	eq o(type :  "DO" condition :  Condition body :  Stmt Extra) =  do(Condition, Stmt) [metadata "location(json-to-infix.k:95)"] .
  	
  	eq o(type :  "FOR" setup :  Setup:JS condition :  Condition:JS update :  Exp body :  Stmt Extra) 
- 		=  for(Setup, Condition, Exp, Stmt) [metadata "location(json-to-infix.k:94)"] .
+ 		=  for(Setup, Condition, Exp, Stmt) [metadata "location(json-to-infix.k:97)"] .
  
  	eq o(type :  "FOR_IN" iterator :  Left object :  Right body :  Stmt Extra) 
- 		=  forIn(Left, Right, Stmt) [metadata "location(json-to-infix.k:97)"] .
+ 		=  forIn(Left, Right, Stmt) [metadata "location(json-to-infix.k:100)"] .
  
  
- 	eq o(type :  "FUNCTION" functionForm :  Num name :  Name params :  a(Exps) body :  Stmt Extra)
- 		=  function(Num, Name, Exps, Stmt) [metadata "location(json-to-infix.k:101)"] .
+ 	eq o(type :  "FUNCTION" functionForm :  I:Int name :  Name params :  a(Exps) body :  Stmt Extra)
+ 		=  function(I, Name, Exps, Stmt) [metadata "location(json-to-infix.k:104)"] .
  		
- 	eq o(type :  "VAR" children :  a(Exps) Extra) =  varDeclarations(Exps) [metadata "location(json-to-infix.k:104)"] .
+ 	eq o(type :  "VAR" children :  a(Exps) Extra) =  varDeclarations(Exps) [metadata "location(json-to-infix.k:107)"] .
  	
- 	eq o(type :  "SCRIPT" children :  a(Stmts:List{JS}) Extra) =  program(Stmts) [metadata "location(json-to-infix.k:106)"] .
+ 	eq o(type :  "SCRIPT" children :  a(Stmts:List{JS}) Extra) =  program(Stmts) [metadata "location(json-to-infix.k:109)"] .
  	
- var S :  String . var Middle :  JS . var Right :  JS . var Flag :  Bool . var Extra :  JSProperties . var Condition :  JS . var OpCode :  JS . var Stmt :  JS . var FunctionExp :  JS . var Exp :  JS . var Exps :  List{JS} . var Setup :  JS . var Stmts :  List{JS} . var B :  Bool . var OtherStmt :  JS . var Num :  Numeric . var Left :  JS . var CommaList :  JS . var Name :  String .   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm	
+ var S :  String . var Cases :  List{JS} . var Middle :  JS . var Right :  JS . var Flag :  Bool . var Extra :  JSProperties . var Condition :  JS . var OpCode :  JS . var Stmt :  JS . var FunctionExp :  JS . var Exp :  JS . var Exps :  List{JS} . var Setup :  JS . var Stmts :  List{JS} . var OtherStmt :  JS . var I :  Int . var Num :  Numeric . var Left :  JS . var CommaList :  JS . var Name :  String .   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm	

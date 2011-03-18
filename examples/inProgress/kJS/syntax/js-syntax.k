@@ -61,7 +61,7 @@ kmod JS-SYNTAX
 		| break ( JS ) [strict] 				--- break Label | .
 		| continue ( JS ) [strict] 				--- continue Label | .
 		| throw ( JS ) [strict]				--- throw Exp
-		| controlLabel ( String JS ) 
+		| controlLabel ( String , JS ) 
 		
 		| exp ( JS ) [strict]				--- exp
 		
@@ -90,7 +90,7 @@ kmod JS-SYNTAX
 		
 		| varDeclarations ( List{JS} ) [strict]
 		
-		| function ( JS , JS , List{JS} , JS )
+		| function ( Int , JS , List{JS} , JS )
 			--- function ( Parameters ) { Program }
 			--- function Name ( Parameters ) { Program }
 

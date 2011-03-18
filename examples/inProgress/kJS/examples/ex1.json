@@ -26,7 +26,7 @@
                                 lineno : 1,
                                 start : 22,
                                 value : "length"
-                            },
+                            }
                         ],
                         end : 28,
                         lineno : 1,
@@ -38,7 +38,7 @@
                     readOnly : false,
                     start : 5,
                     value : "count"
-                },
+                }
             ],
             destructurings : [],
             end : 10,
@@ -78,7 +78,7 @@
                     readOnly : false,
                     start : 54,
                     value : "separator"
-                },
+                }
             ],
             destructurings : [],
             end : 63,
@@ -111,7 +111,7 @@
                                 lineno : 3,
                                 start : 104,
                                 value : "["
-                            },
+                            }
                         ],
                         end : 105,
                         lineno : 3,
@@ -123,7 +123,7 @@
                     readOnly : false,
                     start : 73,
                     value : "accumulator"
-                },
+                }
             ],
             destructurings : [],
             end : 84,
@@ -165,13 +165,13 @@
                                 lineno : 5,
                                 start : 137,
                                 value : ","
-                            },
+                            }
                         ],
                         end : 140,
                         lineno : 5,
                         start : 123,
                         value : "||"
-                    },
+                    }
                 ],
                 end : 140,
                 lineno : 3,
@@ -181,20 +181,15 @@
             lineno : 5,
             start : 110,
             value : "separator_"
-        },
+        }
     ],
     expDecls : [],
-    exports : [object StringMap],
     funDecls : [],
     hasEmptyReturn : false,
     hasReturnWithValue : false,
     impDecls : [],
     isGenerator : false,
     lineno : 1,
-    modAssns : [object StringMap],
-    modDecls : [object StringMap],
-    modDefns : [object StringMap],
-    modLoads : [object StringMap],
     varDecls : [
         {
             type : "IDENTIFIER",
@@ -218,7 +213,7 @@
                         lineno : 1,
                         start : 22,
                         value : "length"
-                    },
+                    }
                 ],
                 end : 28,
                 lineno : 1,
@@ -283,7 +278,7 @@
                         lineno : 3,
                         start : 104,
                         value : "["
-                    },
+                    }
                 ],
                 end : 105,
                 lineno : 3,
@@ -295,6 +290,6 @@
             readOnly : false,
             start : 73,
             value : "accumulator"
-        },
+        }
     ]
 }

@@ -9,8 +9,8 @@ kmod JSON-INFIX
 	macro o(type : "NUMBER" value : Num:Numeric Extra:JSProperties) = n(Num)
 	macro o(type : "STRING" value : S:String Extra) = s(S)
 	macro o(type : "REGEXP" value : S:String Extra) = r(S)
-	macro o(type : "TRUE" value : B:Bool Extra) = b(true)
-	macro o(type : "FALSE" value : B:Bool Extra) = b(false)
+	macro o(type : "TRUE"  Extra) = b(true)
+	macro o(type : "FALSE" Extra) = b(false)
 	macro o(type : "NULL" Extra) = .null
 	macro null = .undefined
 	macro undefined = .undefined
@@ -87,8 +87,8 @@ kmod JSON-INFIX
 	
 	macro o(type : "LABEL" label : Name statement : Stmt Extra) = controlLabel(Name, Stmt)
 
-	macro o(type : "SWITCH" discriminant : Exp cases : a(Cases:List{JS}) defaultIndex: Num Extra)
-		= switch(Exp, Cases, Num)
+	macro o(type : "SWITCH" discriminant : Exp cases : a(Cases:List{JS}) defaultIndex : I Extra)
+		= switch(Exp, Cases, I)
 
 	
 	macro o(type : "WHILE" condition : Condition body : Stmt Extra) = while(Condition, Stmt)
@@ -101,8 +101,8 @@ kmod JSON-INFIX
 		= forIn(Left, Right, Stmt)
 
 
-	macro o(type : "FUNCTION" functionForm : Num name : Name params : a(Exps) body : Stmt Extra)
-		= function(Num, Name, Exps, Stmt)
+	macro o(type : "FUNCTION" functionForm : I:Int name : Name params : a(Exps) body : Stmt Extra)
+		= function(I, Name, Exps, Stmt)
 		
 	macro o(type : "VAR" children : a(Exps) Extra) = varDeclarations(Exps)
 	

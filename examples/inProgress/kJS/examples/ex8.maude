@@ -1,4 +1,5 @@
-    {
+red
+	{
         type : "SCRIPT",
         children : [
             {
@@ -446,3 +447,28 @@
         lineno : 1,
         varDecls : []
     }
+==Bool 
+	program(
+		while(b(true),block(.List{JS})),exp(.undefined),
+		do(lt(id("y"),n(100)),block(exp(inc(id("y"),true)))),
+		controlLabel("here",
+			for(
+				comma(assignment(id("z"),.undefined,n(1)),assignment(id("q"),.undefined,n(22))),
+				.undefined,
+				comma(inc(id("z"),true),dec(id("q"),false)),
+				block(
+					ifElse(identical(mul(id("z"),n(2)),n(4)),continue("here"),.undefined),
+					ifElse(sameAs(id("q"),n(3)),break("here"),.undefined)))),
+		controlLabel("there",exp(assignment(id("x"),.undefined,n(200)))),
+		forIn(id("p"),id("obj"),exp(inc(id("x"),false)))) .
+	
+
+
+--- while (true) {};
+--- do {y++} while (y < 100);
+--- here : for (z = 1, q = 22; ; z++, --q) {
+--- 	if (z * 2 === 4) continue here;
+--- 	if (q == 3) break here;
+--- }
+--- there : x = 200
+--- for (p in obj) ++x;

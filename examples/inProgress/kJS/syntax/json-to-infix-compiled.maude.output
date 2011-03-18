@@ -1,6 +1,0 @@
-ERROR:
-Warning: "json-to-infix.maude", line 88 (mod JSON-INFIX): didn't expect token ):
-eq o ( type : "LABEL" label : Name statement : Stmt Extra ) = controlLabel ( Name , Stmt ) <---*HERE*
-Warning: "json-to-infix.maude", line 88 (mod JSON-INFIX): no parse for statement
-eq o (type : "LABEL" label : Name statement : Stmt Extra) = controlLabel (Name, Stmt) [metadata "location(json-to-infix.k:88)"] .
-Aborting the compilation

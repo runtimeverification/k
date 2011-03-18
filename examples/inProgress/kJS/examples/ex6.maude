@@ -1,4 +1,5 @@
-    {
+red
+	{
         type : "SCRIPT",
         children : [
             {
@@ -262,3 +263,20 @@
         lineno : 1,
         varDecls : []
     }
+==Bool 
+	program(
+		exp(assignment(id("f"),.undefined,function(1,"mush","dog","sled",
+			program(
+				varDeclarations(id("x")),
+				ifElse(identical(id("dog"),id("sled")),
+					block(return(arrayLit(id("undefined"),id("mush")))),
+					return(.undefined)))))),
+		exp(assignment(id("g"),.undefined,invocation(
+			id("f"),comma(id("snoopy"),id("undefined")))))) .
+	
+
+--- f = function mush(dog, sled) {
+--- 	var x = 1;
+--- 	if (dog === sled) {return [undefined, mush]} else return;
+--- }
+--- g = f(snoopy, undefined);
