@@ -1,0 +1,256 @@
+<top>
+  <feasible> 2 </feasible>
+  <infeasible> 2 </infeasible>
+  <tasks>
+    <funTask>
+      <funId> main </funId>
+      <task>
+        <form> returns 0 </form>
+        <subst> . </subst>
+        <taskType> ... </taskType>
+        <config>
+          <k> . </k>
+          <counter> 8 </counter>
+          <program> ... </program>
+          <in> epsilon </in>
+          <out> [1] @ [2] @ [3] @ [4] @ [5] @ [10] @ [9] @ [8] @ [7] @ [6] </out>
+          <stack> !stack_frame_5 </stack>
+          <env> n |-> #n_Int8 </env>
+          <fun> ... </fun>
+          <heap> !heap_frame_5 </heap>
+          <struct> ... </struct>
+          <tenv> ... </tenv>
+        </config>
+      </task>
+    </funTask>
+    <funTask>
+      <funId> readWriteBuffer </funId>
+      <task>
+        <form> true </form>
+        <subst>
+          In_Seq <- epsilon
+          A_Seq <- rev(#?A_Seq5)
+          !out_frame_3 <- Out_Seq
+          !stack_frame_3 <- #stack_frame_2
+          !H <- #heap_frame_2
+        </subst>
+        <taskType> ... </taskType>
+        <config>
+          <k>
+               read(int)
+            ~> *((int*) #Int5)=[]
+            ~> [];
+            ~> ((void) unit)
+            ~> [];
+            ...
+          </k>
+          <counter> 8 </counter>
+          <program> ... </program>
+          <in> epsilon </in>
+          <out> Out_Seq </out>
+          <stack> #stack_frame_2 </stack>
+          <env>
+            i |-> #i_Int5
+            n |-> #i_Int5
+            x |-> #Int5
+            y |-> #x_Int5
+          </env>
+          <fun> ... </fun>
+          <heap>
+            #heap_frame_2
+            list(#x_Int5)(#?A_Seq5)
+            #Int5 |-> #Int6 : listNode.val
+            1 + #Int5 |-> #Int7 : listNode.next
+          </heap>
+          <struct> ... </struct>
+          <tenv> ... </tenv>
+        </config>
+      </task>
+      <task>
+        <form> true </form>
+        <subst>
+          In_Seq <- [#Int8] @ #Seq9
+          A_Seq <- rev(#?A_Seq5)
+          !out_frame_3 <- Out_Seq
+          !stack_frame_3 <- #stack_frame_2
+          !H <- #heap_frame_2
+        </subst>
+        <taskType> ... </taskType>
+        <config>
+          <k>
+               @assert
+                 <config>
+                   <counter> 10 </counter>
+                   <in> ?B_Seq @ [#Int8] @ #Seq9 </in>
+                   <out> Out_Seq </out>
+                   <stack> #stack_frame_2 </stack>
+                   <env>
+                     i |-> i_Int
+                     n |-> n_Int
+                     x |-> x_Int
+                     y |-> y_Int
+                   </env>
+                   <heap>
+                     #heap_frame_2
+                     list(x_Int)(?A_Seq)
+                   </heap>
+                 </config>
+                 /\ - i_Int + n_Int >= 0
+                 /\ rev(#?A_Seq5) = rev(?A_Seq)@?B_Seq
+                 /\ len(?B_Seq) = -i_Int + n_Int
+            ~> disolveTask
+          </k>
+          <counter> 10 </counter>
+          <program> ... </program>
+          <in> #Seq9 </in>
+          <out> Out_Seq </out>
+          <stack> #stack_frame_2 </stack>
+          <env>
+            i |-> 1 + #i_Int5
+            n |-> #i_Int5
+            x |-> #Int5
+            y |-> #x_Int5
+          </env>
+          <fun> ... </fun>
+          <heap>
+            #heap_frame_2
+            list(#x_Int5)(#?A_Seq5)
+            #Int5 |-> #Int8 : listNode.val
+            1 + #Int5 |-> #x_Int5 : listNode.next
+          </heap>
+          <struct> ... </struct>
+          <tenv> ... </tenv>
+        </config>
+      </task>
+      <task>
+        <form>
+             - #i_Int5 + #n_Int5 >= 0
+          /\ 1 + len(#Seq9) = - #i_Int5 + #n_Int5
+        </form>
+        <subst>
+          A_Seq <- rev(#?A_Seq5) @ [#Int8] @ #Seq9
+          !out_frame_3 <- Out_Seq
+          !stack_frame_3 <- #stack_frame_2
+          !H <- #heap_frame_2
+        </subst>
+        <taskType> ... </taskType>
+
+--- stoped here
+
+I am not sure how it is better to display a cell with multiple elements:
+
+Variant 1:
+
+<cell>
+          element 1
+  assocOp element 2
+  assocOp element 3
+</cell>
+
+Variant 2:
+
+<cell>
+  element1
+  assocOp element2
+  assocOp element3
+</cell>
+
+The second variant is more structured, in that one does not need to train the eye to look
+forward in order to explain the 7 white spaces in front of the first element.
+
+
+------------------
+
+        <config>
+          <k>
+              @assert<config><k>defaultKItem("k")
+</k><counter>10</counter><in>?B_Seq@In_Seq</in><out>Out_Seq</out><stack>#stack_f
+rame_2</stack><env>i|->i_Int n|->n_Int x|->x_Int 
+y|->y_Int</env><heap>#heap_frame_2 list(x_Int)(?A_Seq)</heap></config>/\-i_Int 
++ n_Int >= 0/\len(?B_Seq) = -i_Int + n_Int/\rev(?A_Seq)@?B_Seq = rev(#?A_Seq5)@[
+#Int8]@#Seq9
+            ~>disolveTask
+          </k>
+          <counter> 10 </counter>
+          <program> ... </program>
+          <in>
+            #Seq9
+            In_Seq
+          </in>
+          <out> Out_Seq </out>
+          <stack> #stack_frame_2 </stack>
+          <env>
+            i|->1 + #i_Int5
+            n|->#n_Int5
+            x|->#Int5
+            y|->#x_Int5
+          </env>
+          <fun> ... </fun>
+          <heap>
+            #heap_frame_2
+            list(#x_Int5)(#?A_Seq5)
+            #Int5|->#Int8:listNode.val
+            1 + #Int5|->#x_Int5:listNode.next
+          </heap>
+          <struct> ... </struct>
+          <tenv> ... </tenv>
+        </config>
+      </task>
+      <task>
+        <form>
+            -#i_Int5 + #n_Int5 >= 0
+          /\-1 + -#n_Int5 + #i_Int5 >= 0
+          /\len(#?B_Seq5) = -#i_Int5 + #n_Int5
+        </form>
+        <subst>
+          A_Seq<-rev(#?A_Seq5)@#?B_Seq5
+          !out_frame_3<-Out_Seq
+          !stack_frame_3<-#stack_frame_2
+          !H<-#heap_frame_2
+        </subst>
+        <taskType> ... </taskType>
+        <config>
+          <k>
+              @assert<config><k>defaultKItem("k")
+</k><counter>5</counter><in>!in_frame_4</in><out>Out_Seq@?A_Seq</out><stack>!sta
+ck_frame_4</stack><env>i|->i_Int n|->n_Int x|->x_Int 
+y|->y_Int</env><heap>#heap_frame_2 list(x_Int)(?B_Seq)</heap></config>/\rev(
+?B_Seq)@rev(?A_Seq) = rev(#?A_Seq5)@#?B_Seq5
+            ~>if(x)block(y=x->next;~>printf(((string) "%d "), x->val);~>free(x)
+;~>x=y;)~>@assert<config><k>defaultKItem("k")</k><counter>defaultKItem(
+"counter")
+</counter><in>!in_frame_4</in><out>Out_Seq@?A_Seq</out><stack>!stack_frame_4</st
+ack><env>defaultenv</env><heap>!H list(x_Int)(?B_Seq)</heap></config>/\A_Seq = 
+rev(?B_Seq)@rev(?A_Seq)~>disolveTask else returnAssert((void) unit)
+~>assertLabel~>@assert<config><k>defaultKItem("k")</k><counter>defaultKItem(
+"counter")</counter><in>In_Seq</in><out>Out_Seq@rev(A_Seq)
+</out><stack>#stack_frame_2</stack><env>defaultenv</env><heap>#heap_frame_2</hea
+p></config>/\true~>disolveTask
+          </k>
+          <counter> 5 </counter>
+          <program> ... </program>
+          <in>
+            #?B_Seq5
+            In_Seq
+          </in>
+          <out> Out_Seq </out>
+          <stack> #stack_frame_2 </stack>
+          <env>
+            i|->#i_Int5
+            n|->#n_Int5
+            x|->#x_Int5
+            y|->#y_Int5
+          </env>
+          <fun> ... </fun>
+          <heap>
+            #heap_frame_2
+            list(#x_Int5)(#?A_Seq5)
+          </heap>
+          <struct> ... </struct>
+          <tenv> ... </tenv>
+        </config>
+      </task>
+    </funTask>
+  </tasks>
+  <check> ... </check>
+</top>
