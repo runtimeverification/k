@@ -1,12 +1,14 @@
 mod JS-JSON-AST-IDS
-	sort JSJsonAstIds .
-    ops
-		type 
-		children 
-		name
-		value
-		target
-		tokenizer
-		type
-    :  -> JSJsonAstIds .
+	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID .
+	
+	  sort JSJsonAstIds .   
+		 op type :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:3)"] . 		 op children :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:5)"] . 		 op name :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:6)"] . 		 op value :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:7)"] . 		 op expression :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:8)"] . 		 op assignOp :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:9)"] . 		 op postfix :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:10)"] . 		 op target :  -> JSJsonAstIds 
+ [metadata "location(../js-json-ast-ids.k:11)"] . 		 op tokenizer :  -> JSJsonAstIds [metadata "location(../js-json-ast-ids.k:12)"] .  
 endm

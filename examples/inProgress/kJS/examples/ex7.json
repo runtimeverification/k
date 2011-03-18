@@ -1,0 +1,445 @@
+{
+    type : "SCRIPT",
+    children : [
+        {
+            type : "VAR",
+            children : [
+                {
+                    type : "IDENTIFIER",
+                    children : [],
+                    end : 5,
+                    initializer : {
+                        type : "NUMBER",
+                        children : [],
+                        end : 9,
+                        lineno : 1,
+                        start : 8,
+                        value : 0
+                    },
+                    lineno : 1,
+                    name : "x",
+                    readOnly : false,
+                    start : 4,
+                    value : "x"
+                }
+            ],
+            destructurings : [],
+            end : 5,
+            lineno : 1,
+            start : 0,
+            value : "var"
+        },
+        {
+            type : "SWITCH",
+            cases : [
+                {
+                    type : "CASE",
+                    caseLabel : {
+                        type : "STRING",
+                        children : [],
+                        end : 51,
+                        lineno : 3,
+                        start : 43,
+                        value : "object"
+                    },
+                    children : [],
+                    end : 42,
+                    lineno : 3,
+                    start : 38,
+                    statements : {
+                        type : "BLOCK",
+                        children : [],
+                        end : 53,
+                        lineno : 3,
+                        start : 52,
+                        value : ":",
+                        varDecls : []
+                    },
+                    value : "case"
+                },
+                {
+                    type : "CASE",
+                    caseLabel : {
+                        type : "STRING",
+                        children : [],
+                        end : 68,
+                        lineno : 4,
+                        start : 60,
+                        value : "number"
+                    },
+                    children : [],
+                    end : 59,
+                    lineno : 4,
+                    start : 55,
+                    statements : {
+                        type : "BLOCK",
+                        children : [
+                            {
+                                type : "SEMICOLON",
+                                children : [],
+                                end : 78,
+                                expression : {
+                                    type : "ASSIGN",
+                                    assignOp : null,
+                                    children : [
+                                        {
+                                            type : "IDENTIFIER",
+                                            children : [],
+                                            end : 74,
+                                            lineno : 5,
+                                            start : 73,
+                                            value : "x"
+                                        },
+                                        {
+                                            type : "NUMBER",
+                                            children : [],
+                                            end : 78,
+                                            lineno : 5,
+                                            start : 77,
+                                            value : 2
+                                        }
+                                    ],
+                                    end : 78,
+                                    lineno : 4,
+                                    start : 69,
+                                    value : ":"
+                                },
+                                lineno : 5,
+                                start : 73,
+                                value : "x"
+                            }
+                        ],
+                        end : 78,
+                        lineno : 4,
+                        start : 69,
+                        value : ":",
+                        varDecls : []
+                    },
+                    value : "case"
+                },
+                {
+                    type : "CASE",
+                    caseLabel : {
+                        type : "STRING",
+                        children : [],
+                        end : 97,
+                        lineno : 6,
+                        start : 86,
+                        value : "undefined"
+                    },
+                    children : [],
+                    end : 85,
+                    lineno : 6,
+                    start : 81,
+                    statements : {
+                        type : "BLOCK",
+                        children : [
+                            {
+                                type : "SEMICOLON",
+                                children : [],
+                                end : 114,
+                                expression : {
+                                    type : "COMMA",
+                                    children : [
+                                        {
+                                            type : "ASSIGN",
+                                            assignOp : null,
+                                            children : [
+                                                {
+                                                    type : "IDENTIFIER",
+                                                    children : [],
+                                                    end : 103,
+                                                    lineno : 7,
+                                                    start : 102,
+                                                    value : "x"
+                                                },
+                                                {
+                                                    type : "NUMBER",
+                                                    children : [],
+                                                    end : 108,
+                                                    lineno : 7,
+                                                    start : 106,
+                                                    value : 11
+                                                }
+                                            ],
+                                            end : 108,
+                                            lineno : 6,
+                                            start : 98,
+                                            value : ":"
+                                        },
+                                        {
+                                            type : "NUMBER",
+                                            children : [],
+                                            end : 111,
+                                            lineno : 7,
+                                            start : 109,
+                                            value : 22
+                                        },
+                                        {
+                                            type : "NUMBER",
+                                            children : [],
+                                            end : 114,
+                                            lineno : 7,
+                                            start : 112,
+                                            value : 33
+                                        }
+                                    ],
+                                    end : 114,
+                                    lineno : 7,
+                                    start : 98,
+                                    value : ","
+                                },
+                                lineno : 7,
+                                start : 102,
+                                value : "x"
+                            },
+                            {
+                                type : "BREAK",
+                                children : [],
+                                end : 123,
+                                lineno : 8,
+                                start : 118,
+                                value : "break"
+                            }
+                        ],
+                        end : 123,
+                        lineno : 6,
+                        start : 98,
+                        value : ":",
+                        varDecls : []
+                    },
+                    value : "case"
+                },
+                {
+                    type : "DEFAULT",
+                    children : [],
+                    end : 133,
+                    lineno : 9,
+                    start : 126,
+                    statements : {
+                        type : "BLOCK",
+                        children : [
+                            {
+                                type : "SEMICOLON",
+                                children : [],
+                                end : 143,
+                                expression : {
+                                    type : "ASSIGN",
+                                    assignOp : null,
+                                    children : [
+                                        {
+                                            type : "IDENTIFIER",
+                                            children : [],
+                                            end : 139,
+                                            lineno : 10,
+                                            start : 138,
+                                            value : "x"
+                                        },
+                                        {
+                                            type : "NUMBER",
+                                            children : [],
+                                            end : 143,
+                                            lineno : 10,
+                                            start : 142,
+                                            value : 1
+                                        }
+                                    ],
+                                    end : 143,
+                                    lineno : 9,
+                                    start : 134,
+                                    value : ":"
+                                },
+                                lineno : 10,
+                                start : 138,
+                                value : "x"
+                            },
+                            {
+                                type : "BREAK",
+                                children : [],
+                                end : 152,
+                                lineno : 11,
+                                start : 147,
+                                value : "break"
+                            }
+                        ],
+                        end : 152,
+                        lineno : 9,
+                        start : 134,
+                        value : ":",
+                        varDecls : []
+                    },
+                    value : "default"
+                },
+                {
+                    type : "CASE",
+                    caseLabel : {
+                        type : "STRING",
+                        children : [],
+                        end : 168,
+                        lineno : 12,
+                        start : 160,
+                        value : "string"
+                    },
+                    children : [],
+                    end : 159,
+                    lineno : 12,
+                    start : 155,
+                    statements : {
+                        type : "BLOCK",
+                        children : [
+                            {
+                                type : "SEMICOLON",
+                                children : [],
+                                end : 202,
+                                expression : {
+                                    type : "ASSIGN",
+                                    assignOp : null,
+                                    children : [
+                                        {
+                                            type : "IDENTIFIER",
+                                            children : [],
+                                            end : 174,
+                                            lineno : 13,
+                                            start : 173,
+                                            value : "x"
+                                        },
+                                        {
+                                            type : "CALL",
+                                            children : [
+                                                {
+                                                    type : "DOT",
+                                                    children : [
+                                                        {
+                                                            type : "STRING",
+                                                            children : [],
+                                                            end : 180,
+                                                            lineno : 13,
+                                                            start : 177,
+                                                            value : "\""
+                                                        },
+                                                        {
+                                                            type : "IDENTIFIER",
+                                                            children : [],
+                                                            end : 188,
+                                                            lineno : 13,
+                                                            start : 181,
+                                                            value : "replace"
+                                                        }
+                                                    ],
+                                                    end : 188,
+                                                    lineno : 13,
+                                                    start : 177,
+                                                    value : "."
+                                                },
+                                                {
+                                                    type : "LIST",
+                                                    children : [
+                                                        {
+                                                            type : "REGEXP",
+                                                            children : [],
+                                                            end : 194,
+                                                            lineno : 13,
+                                                            start : 189,
+                                                            value : "/\\\"/g"
+                                                        },
+                                                        {
+                                                            type : "STRING",
+                                                            children : [],
+                                                            end : 202,
+                                                            lineno : 13,
+                                                            start : 196,
+                                                            value : "\\\""
+                                                        }
+                                                    ],
+                                                    end : 202,
+                                                    lineno : 13,
+                                                    start : 188,
+                                                    value : "("
+                                                }
+                                            ],
+                                            end : 202,
+                                            lineno : 13,
+                                            start : 177,
+                                            value : "("
+                                        }
+                                    ],
+                                    end : 202,
+                                    lineno : 12,
+                                    start : 169,
+                                    value : ":"
+                                },
+                                lineno : 13,
+                                start : 173,
+                                value : "x"
+                            },
+                            {
+                                type : "BREAK",
+                                children : [],
+                                end : 212,
+                                lineno : 14,
+                                start : 207,
+                                value : "break"
+                            }
+                        ],
+                        end : 212,
+                        lineno : 12,
+                        start : 169,
+                        value : ":",
+                        varDecls : []
+                    },
+                    value : "case"
+                }
+            ],
+            children : [],
+            defaultIndex : 3,
+            discriminant : {
+                type : "TYPEOF",
+                children : [
+                    {
+                        type : "IDENTIFIER",
+                        children : [],
+                        end : 33,
+                        lineno : 2,
+                        start : 26,
+                        value : "element"
+                    }
+                ],
+                end : 33,
+                lineno : 2,
+                start : 19,
+                value : "typeof"
+            },
+            end : 17,
+            lineno : 2,
+            start : 11,
+            value : "switch"
+        }
+    ],
+    expDecls : [],
+    funDecls : [],
+    hasEmptyReturn : false,
+    hasReturnWithValue : false,
+    impDecls : [],
+    isGenerator : false,
+    lineno : 1,
+    varDecls : [
+        {
+            type : "IDENTIFIER",
+            children : [],
+            end : 5,
+            initializer : {
+                type : "NUMBER",
+                children : [],
+                end : 9,
+                lineno : 1,
+                start : 8,
+                value : 0
+            },
+            lineno : 1,
+            name : "x",
+            readOnly : false,
+            start : 4,
+            value : "x"
+        }
+    ]
+}

@@ -1,22 +1,22 @@
 load ../../../../tools/../k-prelude
 
-mod JSON-INFIX is including K-TECHNIQUE .
+mod JSON-INFIX is including PL-STRING .
+including PL-INT .
+including PL-ID .
+including PL-FLOAT .
+including K-TECHNIQUE .
 including K-CONFIG .
 including K-POLYMORPHIC-VARIABLES .
 including K-WHERE .
 including K-DESTRUCTORS .
 including PL-BOOL .
-including PL-STRING .
-including PL-INT .
-including PL-ID .
-including PL-FLOAT .
 including K-PROPER .
 including K-WRAPPERS-LABELS .
 including MAUDE-IF-THEN-ELSE .
 including K-STRICTNESS .
-sorts JsonTag . subsort FiniteFloat < Builtins .
-subsort JsonTag < Builtins .
-subsort JsonTag < Id .
+sorts JSJsonAstIds . subsort FiniteFloat < Builtins .
+subsort JSJsonAstIds < Builtins .
+subsort JSJsonAstIds < Id .
 op Bag_ : List{K}-> Bag .
 op List_ : List{K}-> List .
 op _in_ : BagItem Bag -> Bool .
@@ -29,8 +29,10 @@ op keys_ : Map -> Set .
 op lengthList_ : List -> Nat .
 op substList`{K`}Label`(_`,_`,_`) : List{K}KLabel KLabel -> List{K}.
 op $hasMapping : Map K -> Bool[metadata "latex(renameTo \$hasMapping\mybracket{_,_})"].
+op '.null : -> KProperLabel[metadata "arity 0 location(js-syntax.k:6)"].
+op '.undefined : -> KProperLabel[metadata "arity 0 location(js-syntax.k:6)"].
 op '_:_ : -> KProperLabel[metadata "arity 2 location(../json/json.k:29)"].
-op '__ : -> KProperLabel[metadata "location(../json/json.k:53)"].
+op '__ : -> KProperLabel[metadata "location(../json/json.k:52)"].
 op '_`,_ : -> KProperLabel[metadata "location(../json/json.k:10)"].
 op '`[_`] : -> KProperLabel[metadata "arity 1 location(../json/json.k:23)"].
 op '`[`] : -> KProperLabel[metadata "arity 0 location(../json/json.k:23)"].
@@ -42,29 +44,34 @@ op 'and`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:47) str
 op 'arrayLit`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:56) strict"].
 op 'assignment`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:54) strict"].
 op 'b`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:6)"].
+op 'block`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:69)"].
 op 'break`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:61) strict"].
 op 'buildLitObject`(_`,_`) : -> KProperLabel[metadata "arity 2 location(../json/json.k:45)"].
-op 'case`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:68) strict(1)"].
+op 'case`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:74) strict(1)"].
+op 'comma`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:70)"].
+op 'continue`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:62) strict"].
+op 'controlLabel`(__`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:64)"].
 op 'dec`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:19) strict"].
+op 'default`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:75)"].
 op 'delete`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:21) strict"].
 op 'div`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:29) strict"].
-op 'do`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:78)"].
+op 'do`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:85)"].
 op 'dynamicAccess`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:13) strict"].
-op 'forIn`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:74) strict(2)"].
-op 'for`(_`,_`,_`,_`) : -> KProperLabel[metadata "arity 4 location(js-syntax.k:72) strict(1)"].
-op 'function`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:86)"].
+op 'exp`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:66) strict"].
+op 'forIn`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:81) strict(2)"].
+op 'for`(_`,_`,_`,_`) : -> KProperLabel[metadata "arity 4 location(js-syntax.k:79) strict(1)"].
+op 'function`(_`,_`,_`,_`) : -> KProperLabel[metadata "arity 4 location(js-syntax.k:93)"].
 op 'gt`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:37) strict"].
 op 'gte`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:38) strict"].
 op 'headList`{K`}_ : -> KProperLabel[metadata "arity 1 latex(renameTo head\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
 op 'id`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:11)"].
 op 'identical`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:44) strict"].
-op 'ifElse`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:65) strict(1)"].
+op 'ifElse`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:71) strict(1)"].
 op 'in`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:39) strict"].
 op 'inc`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:18) strict"].
 op 'instanceof`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:40) strict"].
 op 'invocation`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:14) strict"].
-op 'label`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:11)"].
-op 'labelledStmt`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:81)"].
+op 'labelledStmt`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:88)"].
 op 'lt`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:35) strict"].
 op 'lte`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:36) strict"].
 op 'mod`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:30) strict"].
@@ -82,22 +89,25 @@ op 'o`(_`) : -> KProperLabel[metadata "arity 1 location(../json/json.k:43)"].
 op 'objectLit`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:57) strict"].
 op 'or`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:49) strict"].
 op 'plus`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:26) strict"].
-op 'program`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:90)"].
+op 'program`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:97)"].
 op 'propertyLit`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:58) strict"].
+op 'r`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:6)"].
 op 'return`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:60) strict"].
 op 's`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:6)"].
 op 'sameAs`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:42) strict"].
 op 'staticAccess`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:12) strict"].
-op 'stmts`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:64) strict"].
+op 'stmts`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:68)"].
 op 'sub`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:33) strict"].
 op 'substKLabel : -> KProperLabel[metadata "arity 3"].
-op 'switch`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:70) strict(1)"].
+op 'switch`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:77) strict(1)"].
 op 'ternary`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:51) strict(1)"].
-op 'throw`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:62) strict"].
-op 'tryCatch`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:66) strict"].
+op 'throw`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:63) strict"].
+op 'tryCatch`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(js-syntax.k:72) strict"].
 op 'typeof`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:23) strict"].
-op 'varDeclarations`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:84) strict"].
-op 'while`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:76)"].
+op 'undefined : -> KProperLabel[metadata "arity 0 location(../json/json.k:25)"].
+op 'undefined : -> KProperLabel[metadata "arity 0 location(../json/json.k:8)"].
+op 'varDeclarations`(_`) : -> KProperLabel[metadata "arity 1 location(js-syntax.k:91) strict"].
+op 'while`(_`,_`) : -> KProperLabel[metadata "arity 2 location(js-syntax.k:83)"].
 op Bool_ : Bool -> KResultLabel[metadata "builtin wrapper"].
 op Float_ : Float -> KResultLabel[metadata "builtin wrapper"].
 op Id_ : Id -> KProperLabel[metadata "builtin wrapper"].
@@ -112,15 +122,47 @@ op _`[_/_`] : Map K K -> Map[prec 0].
 op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
 op _`[_`] : Map Map -> Map[prec 0].
 op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\;}/_])"].
-op assignOp : -> JsonTag[metadata "location(json-to-infix.k:6)"].
-op children : -> JsonTag[metadata "location(json-to-infix.k:6)"].
-op expression : -> JsonTag[metadata "location(json-to-infix.k:6)"].
+op assignOp : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:3)"].
+op body : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:5)"].
+op caseLabel : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:6)"].
+op cases : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:7)"].
+op children : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:8)"].
+op condition : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:9)"].
+op defaultIndex : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:10)"].
+op destructurings : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:11)"].
+op discriminant : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:12)"].
+op elsePart : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:13)"].
+op end : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:14)"].
+op expDecls : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:15)"].
+op expression : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:16)"].
+op funDecls : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:17)"].
+op functionForm : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:18)"].
+op hasEmptyReturn : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:19)"].
+op hasReturnWithValue : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:20)"].
+op impDecls : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:21)"].
+op initializer : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:22)"].
+op isGenerator : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:23)"].
+op isLoop : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:24)"].
+op iterator : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:25)"].
+op label : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:26)"].
 op lengthList`{K`}_ : List{K}-> Nat[metadata "latex(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
-op name : -> JsonTag[metadata "location(json-to-infix.k:6)"].
-op postfix : -> JsonTag[metadata "location(json-to-infix.k:6)"].
+op lineno : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:27)"].
+op name : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:28)"].
+op object : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:29)"].
+op params : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:30)"].
+op parenthesized : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:31)"].
+op postfix : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:32)"].
+op readOnly : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:33)"].
+op setup : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:34)"].
+op start : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:35)"].
+op statement : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:36)"].
+op statements : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:37)"].
 op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
-op type : -> JsonTag[metadata "location(json-to-infix.k:6)"].
-op value : -> JsonTag[metadata "location(json-to-infix.k:6)"].
+op thenPart : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:38)"].
+op type : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:39)"].
+op update : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:40)"].
+op value : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:41)"].
+op varDecls : -> JSJsonAstIds[metadata "location(js-json-ast-ids.k:42)"].
 eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
 eq Bag_(.List`{K`})=(.).Bag .
 eq Bag_(_`,`,_(K:K,Ks:List{K}))= __(BagItem(K:K),Bag_(Ks:List{K})).
@@ -175,7 +217,8 @@ eq <_>_</_>(k,_~>_(_`(_`)('assignment`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KP
 eq <_>_</_>(k,_~>_(_`(_`)('assignment`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'assignment`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:54)"].
 eq <_>_</_>(k,_~>_(_`(_`)('assignment`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'assignment`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:54)"].
 eq <_>_</_>(k,_~>_(_`(_`)('break`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'break`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:61)"].
-eq <_>_</_>(k,_~>_(_`(_`)('case`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'case`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:68)"].
+eq <_>_</_>(k,_~>_(_`(_`)('case`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'case`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:74)"].
+eq <_>_</_>(k,_~>_(_`(_`)('continue`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'continue`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:62)"].
 eq <_>_</_>(k,_~>_(_`(_`)('dec`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dec`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:19)"].
 eq <_>_</_>(k,_~>_(_`(_`)('dec`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dec`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:19)"].
 eq <_>_</_>(k,_~>_(_`(_`)('delete`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'delete`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:21)"].
@@ -183,15 +226,16 @@ eq <_>_</_>(k,_~>_(_`(_`)('div`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_
 eq <_>_</_>(k,_~>_(_`(_`)('div`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'div`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:29)"].
 eq <_>_</_>(k,_~>_(_`(_`)('dynamicAccess`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dynamicAccess`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:13)"].
 eq <_>_</_>(k,_~>_(_`(_`)('dynamicAccess`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'dynamicAccess`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:13)"].
-eq <_>_</_>(k,_~>_(_`(_`)('forIn`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'forIn`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:74)"].
-eq <_>_</_>(k,_~>_(_`(_`)('for`(_`,_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,_`,`,_(K3:K,K4:K)))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'for`(_`,_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K,,K4:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`,`,_(_`(_`)(freezeVar("K3:K"),K3:K),_`(_`)(freezeVar("K4:K"),K4:K)))),Rest:K)),k)[metadata "heating location(js-syntax.k:72)"].
+eq <_>_</_>(k,_~>_(_`(_`)('exp`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'exp`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:66)"].
+eq <_>_</_>(k,_~>_(_`(_`)('forIn`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'forIn`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:81)"].
+eq <_>_</_>(k,_~>_(_`(_`)('for`(_`,_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,_`,`,_(K3:K,K4:K)))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'for`(_`,_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K,,K4:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`,`,_(_`(_`)(freezeVar("K3:K"),K3:K),_`(_`)(freezeVar("K4:K"),K4:K)))),Rest:K)),k)[metadata "heating location(js-syntax.k:79)"].
 eq <_>_</_>(k,_~>_(_`(_`)('gt`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'gt`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:37)"].
 eq <_>_</_>(k,_~>_(_`(_`)('gt`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'gt`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:37)"].
 eq <_>_</_>(k,_~>_(_`(_`)('gte`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'gte`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:38)"].
 eq <_>_</_>(k,_~>_(_`(_`)('gte`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'gte`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:38)"].
 eq <_>_</_>(k,_~>_(_`(_`)('identical`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'identical`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:44)"].
 eq <_>_</_>(k,_~>_(_`(_`)('identical`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'identical`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:44)"].
-eq <_>_</_>(k,_~>_(_`(_`)('ifElse`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'ifElse`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:65)"].
+eq <_>_</_>(k,_~>_(_`(_`)('ifElse`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'ifElse`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:71)"].
 eq <_>_</_>(k,_~>_(_`(_`)('in`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'in`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:39)"].
 eq <_>_</_>(k,_~>_(_`(_`)('in`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'in`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:39)"].
 eq <_>_</_>(k,_~>_(_`(_`)('inc`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'inc`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:18)"].
@@ -226,17 +270,16 @@ eq <_>_</_>(k,_~>_(_`(_`)('sameAs`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)=
 eq <_>_</_>(k,_~>_(_`(_`)('sameAs`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sameAs`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:42)"].
 eq <_>_</_>(k,_~>_(_`(_`)('staticAccess`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'staticAccess`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:12)"].
 eq <_>_</_>(k,_~>_(_`(_`)('staticAccess`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'staticAccess`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:12)"].
-eq <_>_</_>(k,_~>_(_`(_`)('stmts`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'stmts`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:64)"].
 eq <_>_</_>(k,_~>_(_`(_`)('sub`(_`,_`),_`,`,_(K1:K,Kcxt:KProper)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sub`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:33)"].
 eq <_>_</_>(k,_~>_(_`(_`)('sub`(_`,_`),_`,`,_(Kcxt:KProper,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'sub`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)[metadata "heating location(js-syntax.k:33)"].
-eq <_>_</_>(k,_~>_(_`(_`)('switch`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'switch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:70)"].
+eq <_>_</_>(k,_~>_(_`(_`)('switch`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'switch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:77)"].
 eq <_>_</_>(k,_~>_(_`(_`)('ternary`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'ternary`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:51)"].
-eq <_>_</_>(k,_~>_(_`(_`)('throw`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'throw`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:62)"].
-eq <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:66)"].
-eq <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:66)"].
-eq <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:66)"].
+eq <_>_</_>(k,_~>_(_`(_`)('throw`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'throw`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:63)"].
+eq <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KProper))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:72)"].
+eq <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KProper,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:72)"].
+eq <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(Kcxt:KProper,_`,`,_(K2:K,K3:K))),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)[metadata "heating location(js-syntax.k:72)"].
 eq <_>_</_>(k,_~>_(_`(_`)('typeof`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'typeof`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:23)"].
-eq <_>_</_>(k,_~>_(_`(_`)('varDeclarations`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'varDeclarations`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:84)"].
+eq <_>_</_>(k,_~>_(_`(_`)('varDeclarations`(_`),Kcxt:KProper),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:KProper,_~>_(_`(_`)(freezer("'varDeclarations`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)[metadata "heating location(js-syntax.k:91)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'add`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('add`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:32)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'add`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('add`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:32)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'and`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('and`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:47)"].
@@ -246,7 +289,8 @@ eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'assignment`(_`,_`,_`)(K1:K
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'assignment`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('assignment`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:54)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'assignment`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('assignment`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:54)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'break`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('break`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:61)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'case`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('case`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:68)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'case`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('case`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:74)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'continue`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('continue`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:62)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dec`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dec`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:19)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dec`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dec`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:19)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'delete`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('delete`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:21)"].
@@ -254,15 +298,16 @@ eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'div`(_`,_`)(K1:K,,`[HOLE`]
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'div`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('div`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:29)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dynamicAccess`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dynamicAccess`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:13)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'dynamicAccess`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('dynamicAccess`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:13)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'forIn`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('forIn`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:74)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'for`(_`,_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K,,K4:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`,`,_(_`(_`)(freezeVar("K3:K"),K3:K),_`(_`)(freezeVar("K4:K"),K4:K)))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('for`(_`,_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,_`,`,_(K3:K,K4:K)))),Rest:K),k)[metadata "cooling location(js-syntax.k:72)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'exp`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('exp`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:66)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'forIn`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('forIn`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:81)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'for`(_`,_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K,,K4:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`,`,_(_`(_`)(freezeVar("K3:K"),K3:K),_`(_`)(freezeVar("K4:K"),K4:K)))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('for`(_`,_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,_`,`,_(K3:K,K4:K)))),Rest:K),k)[metadata "cooling location(js-syntax.k:79)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'gt`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('gt`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:37)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'gt`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('gt`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:37)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'gte`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('gte`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:38)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'gte`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('gte`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:38)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'identical`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('identical`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:44)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'identical`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('identical`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:44)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'ifElse`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('ifElse`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:65)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'ifElse`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('ifElse`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:71)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'in`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('in`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:39)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'in`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('in`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:39)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'inc`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('inc`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:18)"].
@@ -297,59 +342,80 @@ eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sameAs`(_`,_`)(K1:K,,`[HOL
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sameAs`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sameAs`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:42)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'staticAccess`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('staticAccess`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:12)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'staticAccess`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('staticAccess`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:12)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'stmts`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('stmts`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:64)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sub`(_`,_`)(K1:K,,`[HOLE`]:K)"),_`(_`)(freezeVar("K1:K"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sub`(_`,_`),_`,`,_(K1:K,Kcxt:KResult)),Rest:K),k)[metadata "cooling location(js-syntax.k:33)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'sub`(_`,_`)(`[HOLE`]:K,,K2:K)"),_`(_`)(freezeVar("K2:K"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('sub`(_`,_`),_`,`,_(Kcxt:KResult,K2:K)),Rest:K),k)[metadata "cooling location(js-syntax.k:33)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'switch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('switch`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:70)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'switch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('switch`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:77)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'ternary`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('ternary`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:51)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'throw`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('throw`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:62)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling location(js-syntax.k:66)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:66)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:66)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'throw`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('throw`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:63)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,K2:K,,`[HOLE`]:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K2:K"),K2:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(K2:K,Kcxt:KResult))),Rest:K),k)[metadata "cooling location(js-syntax.k:72)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(K1:K,,`[HOLE`]:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K1:K"),K1:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(K1:K,_`,`,_(Kcxt:KResult,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:72)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'tryCatch`(_`,_`,_`)(`[HOLE`]:K,,K2:K,,K3:K)"),_`,`,_(_`(_`)(freezeVar("K2:K"),K2:K),_`(_`)(freezeVar("K3:K"),K3:K))),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('tryCatch`(_`,_`,_`),_`,`,_(Kcxt:KResult,_`,`,_(K2:K,K3:K))),Rest:K),k)[metadata "cooling location(js-syntax.k:72)"].
 eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'typeof`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('typeof`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:23)"].
-eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'varDeclarations`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('varDeclarations`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:84)"].
-eq _`(_`)('`[_`],_`(_`)('_`,_,Elements:List{K}))= _`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(../json/json.k:57)"].
-eq _`(_`)('`[`],.List`{K`})= _`(_`)('a`(_`),_`(_`)('_`,_,.List`{K`}))[metadata "location(../json/json.k:56)"].
-eq _`(_`)('`{_`},_`(_`)('_`,_,Elements:List{K}))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('o`(_`),_`(_`)('__,.List`{K`}))))[metadata "location(../json/json.k:62)"].
-eq _`(_`)('`{`},.List`{K`})= _`(_`)('o`(_`),_`(_`)('__,.List`{K`}))[metadata "location(../json/json.k:59)"].
-eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,.List`{K`}),Obj:K))= Obj:K[metadata "location(../json/json.k:64)"].
-eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(Key:K,Value:K)),Elements:List{K})),_`(_`)('o`(_`),_`(_`)('__,Properties:List{K}))))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('o`(_`),_`(_`)('__,_`,`,_(Properties:List{K},_`(_`)('_:_,_`,`,_(Key:K,Value:K)))))))[metadata "location(../json/json.k:68)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("??? +"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K))))))))= _`(_`)('plus`(_`),Element:K)[metadata "location(json-to-infix.k:27)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("??? -"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K))))))))= _`(_`)('neg`(_`),Element:K)[metadata "location(json-to-infix.k:26)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("AND"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('and`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:48)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("ARRAY_INIT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))))))))= _`(_`)('arrayLit`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(json-to-infix.k:58)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("BOOLEAN"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),_`(_`)(Bool_(B:Bool),.List`{K`})))))))= _`(_`)('b`(_`),_`(_`)(Bool_(B:Bool),.List`{K`}))[metadata "location(json-to-infix.k:12)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DECREMENT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K))))))))= _`(_`)('dec`(_`,_`),_`,`,_(Element:K,_`(_`)(Bool_(false),.List`{K`})))[metadata "location(json-to-infix.k:21)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DIV"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('div`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:30)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DOT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('staticAccess`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:16)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("EQ"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('sameAs`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:43)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("GE"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('gte`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:39)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("GT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('gt`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:38)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("HOOK"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,_`,`,_(Middle:K,Right:K))))))))))= _`(_`)('ternary`(_`,_`,_`),_`,`,_(Left:K,_`,`,_(Middle:K,Right:K)))[metadata "location(json-to-infix.k:52)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("IDENTIFIER"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(name),.List`{K`}),_`(_`)(String_(Name:String),.List`{K`})))))))= _`(_`)('id`(_`),_`(_`)(String_(Name:String),.List`{K`}))[metadata "location(json-to-infix.k:14)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("IN"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('in`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:40)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("INCREMENT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K))))))))= _`(_`)('inc`(_`,_`),_`,`,_(Element:K,_`(_`)(Bool_(false),.List`{K`})))[metadata "location(json-to-infix.k:18)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("INSTANCEOF"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('instanceof`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:41)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("LE"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('lte`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:37)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("LT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('lt`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:36)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("MINUS"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('sub`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:34)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("MOD"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('mod`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:31)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("MUL"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('mul`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:29)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("NE"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('notSameAs`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:44)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("NOT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K))))))))= _`(_`)('not`(_`),Element:K)[metadata "location(json-to-infix.k:25)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("NUMBER"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),N:KResult))))))= _`(_`)('n`(_`),N:KResult)[metadata "location(json-to-infix.k:10)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("OR"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('or`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:50)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("PLUS"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('add`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:33)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("SCRIPT"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))))))))= _`(_`)('program`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(json-to-infix.k:64)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("SEMICOLON"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(expression),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))))))))= _`(_`)('stmts`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(json-to-infix.k:60)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("STRICT_EQ"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('identical`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:45)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("STRICT_NE"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K)))))))))= _`(_`)('notIdentical`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:46)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("STRING"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),_`(_`)(String_(S:String),.List`{K`})))))))= _`(_`)('s`(_`),_`(_`)(String_(S:String),.List`{K`}))[metadata "location(json-to-infix.k:11)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("TYPEOF"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K))))))))= _`(_`)('typeof`(_`),Element:K)[metadata "location(json-to-infix.k:24)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("VAR"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))))))))= _`(_`)('varDeclarations`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(json-to-infix.k:62)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("ASSIGN"),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(assignOp),.List`{K`}),OpCode:K))))))= _`(_`)('assignment`(_`,_`,_`),_`,`,_(Left:K,_`,`,_(OpCode:K,Right:K)))[metadata "location(json-to-infix.k:55)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DECREMENT"),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(postfix),.List`{K`}),_`(_`)(Bool_(Flag:Bool),.List`{K`}))))))))= _`(_`)('dec`(_`,_`),_`,`,_(Element:K,_`(_`)(Bool_(Flag:Bool),.List`{K`})))[metadata "location(json-to-infix.k:22)"].
-eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("INCREMENT"),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Element:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(postfix),.List`{K`}),_`(_`)(Bool_(Flag:Bool),.List`{K`}))))))))= _`(_`)('inc`(_`,_`),_`,`,_(Element:K,_`(_`)(Bool_(Flag:Bool),.List`{K`})))[metadata "location(json-to-infix.k:19)"].
+eq <_>_</_>(k,_~>_(Kcxt:KResult,_~>_(_`(_`)(freezer("'varDeclarations`(_`)(`[HOLE`]:K)"),.List`{K`}),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('varDeclarations`(_`),Kcxt:KResult),Rest:K),k)[metadata "cooling location(js-syntax.k:91)"].
+eq _`(_`)('`[_`],_`(_`)('_`,_,Elements:List{K}))= _`(_`)('a`(_`),_`(_`)('_`,_,Elements:List{K}))[metadata "location(../json/json.k:56)"].
+eq _`(_`)('`[`],.List`{K`})= _`(_`)('a`(_`),_`(_`)('_`,_,.List`{K`}))[metadata "location(../json/json.k:55)"].
+eq _`(_`)('`{_`},_`(_`)('_`,_,Elements:List{K}))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('__,.List`{K`})))[metadata "location(../json/json.k:61)"].
+eq _`(_`)('`{`},.List`{K`})= _`(_`)('o`(_`),_`(_`)('__,.List`{K`}))[metadata "location(../json/json.k:58)"].
+eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,.List`{K`}),_`(_`)('__,Properties:List{K})))= _`(_`)('o`(_`),_`(_`)('__,Properties:List{K}))[metadata "location(../json/json.k:63)"].
+eq _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,_`,`,_(_`(_`)('_:_,_`,`,_(Key:K,Value:K)),Elements:List{K})),_`(_`)('__,Properties:List{K})))= _`(_`)('buildLitObject`(_`,_`),_`,`,_(_`(_`)('_`,_,Elements:List{K}),_`(_`)('__,_`,`,_(Properties:List{K},_`(_`)('_:_,_`,`,_(Key:K,Value:K))))))[metadata "location(../json/json.k:65)"].
+eq _`(_`)('null,.List`{K`})= _`(_`)('.undefined,.List`{K`})[metadata "location(json-to-infix.k:15)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("BREAK"),.List`{K`}))))))= _`(_`)('break`(_`),_`(_`)('.undefined,.List`{K`}))[metadata "location(json-to-infix.k:77)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("CONTINUE"),.List`{K`}))))))= _`(_`)('continue`(_`),_`(_`)('.undefined,.List`{K`}))[metadata "location(json-to-infix.k:79)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("NULL"),.List`{K`}))))))= _`(_`)('.null,.List`{K`})[metadata "location(json-to-infix.k:14)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("??? +"),.List`{K`})))))))= _`(_`)('plus`(_`),Exp:K)[metadata "location(json-to-infix.k:31)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("??? -"),.List`{K`})))))))= _`(_`)('neg`(_`),Exp:K)[metadata "location(json-to-infix.k:30)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DECREMENT"),.List`{K`})))))))= _`(_`)('dec`(_`,_`),_`,`,_(Exp:K,_`(_`)(Bool_(false),.List`{K`})))[metadata "location(json-to-infix.k:26)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("INCREMENT"),.List`{K`})))))))= _`(_`)('inc`(_`,_`),_`,`,_(Exp:K,_`(_`)(Bool_(false),.List`{K`})))[metadata "location(json-to-infix.k:23)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("NOT"),.List`{K`})))))))= _`(_`)('not`(_`),Exp:K)[metadata "location(json-to-infix.k:29)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("TYPEOF"),.List`{K`})))))))= _`(_`)('typeof`(_`),Exp:K)[metadata "location(json-to-infix.k:28)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exps:List{K})))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("ARRAY_INIT"),.List`{K`})))))))= _`(_`)('arrayLit`(_`),_`(_`)('_`,_,Exps:List{K}))[metadata "location(json-to-infix.k:62)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exps:List{K})))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("COMMA"),.List`{K`})))))))= _`(_`)('comma`(_`),_`(_`)('_`,_,Exps:List{K}))[metadata "location(json-to-infix.k:70)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exps:List{K})))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("LIST"),.List`{K`})))))))= _`(_`)('comma`(_`),_`(_`)('_`,_,Exps:List{K}))[metadata "location(json-to-infix.k:69)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exps:List{K})))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("VAR"),.List`{K`})))))))= _`(_`)('varDeclarations`(_`),_`(_`)('_`,_,Exps:List{K}))[metadata "location(json-to-infix.k:101)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Stmts:List{K})))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("BLOCK"),.List`{K`})))))))= _`(_`)('block`(_`),_`(_`)('_`,_,Stmts:List{K}))[metadata "location(json-to-infix.k:72)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Stmts:List{K})))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("SCRIPT"),.List`{K`})))))))= _`(_`)('program`(_`),_`(_`)('_`,_,Stmts:List{K}))[metadata "location(json-to-infix.k:103)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(FunctionExp:K,CommaList:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("CALL"),.List`{K`})))))))= _`(_`)('invocation`(_`,_`),_`,`,_(FunctionExp:K,CommaList:K))[metadata "location(json-to-infix.k:66)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("AND"),.List`{K`})))))))= _`(_`)('and`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:52)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DIV"),.List`{K`})))))))= _`(_`)('div`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:34)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DOT"),.List`{K`})))))))= _`(_`)('staticAccess`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:20)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("EQ"),.List`{K`})))))))= _`(_`)('sameAs`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:47)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("GE"),.List`{K`})))))))= _`(_`)('gte`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:43)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("GT"),.List`{K`})))))))= _`(_`)('gt`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:42)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("IN"),.List`{K`})))))))= _`(_`)('in`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:44)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("INSTANCEOF"),.List`{K`})))))))= _`(_`)('instanceof`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:45)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("LE"),.List`{K`})))))))= _`(_`)('lte`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:41)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("LT"),.List`{K`})))))))= _`(_`)('lt`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:40)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("MINUS"),.List`{K`})))))))= _`(_`)('sub`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:38)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("MOD"),.List`{K`})))))))= _`(_`)('mod`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:35)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("MUL"),.List`{K`})))))))= _`(_`)('mul`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:33)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("NE"),.List`{K`})))))))= _`(_`)('notSameAs`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:48)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("OR"),.List`{K`})))))))= _`(_`)('or`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:54)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("PLUS"),.List`{K`})))))))= _`(_`)('add`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:37)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("STRICT_EQ"),.List`{K`})))))))= _`(_`)('identical`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:49)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("STRICT_NE"),.List`{K`})))))))= _`(_`)('notIdentical`(_`,_`),_`,`,_(Left:K,Right:K))[metadata "location(json-to-infix.k:50)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,_`,`,_(Middle:K,Right:K)))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("HOOK"),.List`{K`})))))))= _`(_`)('ternary`(_`,_`,_`),_`,`,_(Left:K,_`,`,_(Middle:K,Right:K)))[metadata "location(json-to-infix.k:56)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(expression),.List`{K`}),Exp:K)),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("SEMICOLON"),.List`{K`})))))))= _`(_`)('exp`(_`),Exp:K)[metadata "location(json-to-infix.k:64)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(label),.List`{K`}),_`(_`)(String_(Name:String),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("BREAK"),.List`{K`})))))))= _`(_`)('break`(_`),_`(_`)(String_(Name:String),.List`{K`}))[metadata "location(json-to-infix.k:76)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(label),.List`{K`}),_`(_`)(String_(Name:String),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("CONTINUE"),.List`{K`})))))))= _`(_`)('continue`(_`),_`(_`)(String_(Name:String),.List`{K`}))[metadata "location(json-to-infix.k:78)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("FALSE"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),_`(_`)(Bool_(B:Bool),.List`{K`})))))))= _`(_`)('b`(_`),_`(_`)(Bool_(false),.List`{K`}))[metadata "location(json-to-infix.k:13)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("IDENTIFIER"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),_`(_`)(String_(Name:String),.List`{K`})))))))= _`(_`)('id`(_`),_`(_`)(String_(Name:String),.List`{K`}))[metadata "location(json-to-infix.k:18)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("NUMBER"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),Num:KResult))))))= _`(_`)('n`(_`),Num:KResult)[metadata "location(json-to-infix.k:9)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("REGEXP"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),_`(_`)(String_(S:String),.List`{K`})))))))= _`(_`)('r`(_`),_`(_`)(String_(S:String),.List`{K`}))[metadata "location(json-to-infix.k:11)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("RETURN"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),Exp:K))))))= _`(_`)('return`(_`),Exp:K)[metadata "location(json-to-infix.k:73)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("STRING"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),_`(_`)(String_(S:String),.List`{K`})))))))= _`(_`)('s`(_`),_`(_`)(String_(S:String),.List`{K`}))[metadata "location(json-to-infix.k:10)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("TRUE"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(value),.List`{K`}),_`(_`)(Bool_(B:Bool),.List`{K`})))))))= _`(_`)('b`(_`),_`(_`)(Bool_(true),.List`{K`}))[metadata "location(json-to-infix.k:12)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(assignOp),.List`{K`}),OpCode:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,_`,`,_(Left:K,Right:K))))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("ASSIGN"),.List`{K`}))))))))= _`(_`)('assignment`(_`,_`,_`),_`,`,_(Left:K,_`,`,_(OpCode:K,Right:K)))[metadata "location(json-to-infix.k:59)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(body),.List`{K`}),Stmt:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(condition),.List`{K`}),Condition:K)),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DO"),.List`{K`}))))))))= _`(_`)('do`(_`,_`),_`,`,_(Condition:K,Stmt:K))[metadata "location(json-to-infix.k:89)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(body),.List`{K`}),Stmt:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(condition),.List`{K`}),Condition:K)),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("WHILE"),.List`{K`}))))))))= _`(_`)('while`(_`,_`),_`,`,_(Condition:K,Stmt:K))[metadata "location(json-to-infix.k:88)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(postfix),.List`{K`}),_`(_`)(Bool_(Flag:Bool),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DECREMENT"),.List`{K`}))))))))= _`(_`)('dec`(_`,_`),_`,`,_(Exp:K,_`(_`)(Bool_(Flag:Bool),.List`{K`})))[metadata "location(json-to-infix.k:25)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(children),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exp:K)))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(postfix),.List`{K`}),_`(_`)(Bool_(Flag:Bool),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("INCREMENT"),.List`{K`}))))))))= _`(_`)('inc`(_`,_`),_`,`,_(Exp:K,_`(_`)(Bool_(Flag:Bool),.List`{K`})))[metadata "location(json-to-infix.k:22)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(body),.List`{K`}),Stmt:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(iterator),.List`{K`}),Left:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(object),.List`{K`}),Right:K)),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("FOR_IN"),.List`{K`})))))))))= _`(_`)('forIn`(_`,_`,_`),_`,`,_(Left:K,_`,`,_(Right:K,Stmt:K)))[metadata "location(json-to-infix.k:94)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(condition),.List`{K`}),Condition:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(elsePart),.List`{K`}),OtherStmt:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(thenPart),.List`{K`}),Stmt:K)),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("IF"),.List`{K`})))))))))= _`(_`)('ifElse`(_`,_`,_`),_`,`,_(Condition:K,_`,`,_(Stmt:K,OtherStmt:K)))[metadata "location(json-to-infix.k:82)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(body),.List`{K`}),Stmt:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(condition),.List`{K`}),Condition:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(setup),.List`{K`}),Setup:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("FOR"),.List`{K`}))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(update),.List`{K`}),Exp:K)))))))))= _`(_`)('for`(_`,_`,_`,_`),_`,`,_(Setup:K,_`,`,_(Condition:K,_`,`,_(Exp:K,Stmt:K))))[metadata "location(json-to-infix.k:91)"].
+eq _`(_`)('o`(_`),_`(_`)('__,_`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(body),.List`{K`}),Stmt:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(functionForm),.List`{K`}),Num:KResult)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(name),.List`{K`}),_`(_`)(String_(Name:String),.List`{K`}))),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(params),.List`{K`}),_`(_`)('a`(_`),_`(_`)('_`,_,Exps:List{K})))),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("FUNCTION"),.List`{K`}))))))))))= _`(_`)('function`(_`,_`,_`,_`),_`,`,_(Num:KResult,_`,`,_(_`(_`)(String_(Name:String),.List`{K`}),_`,`,_(_`(_`)('_`,_,Exps:List{K}),Stmt:K))))[metadata "location(json-to-infix.k:98)"].
+eq _`(_`)('undefined,.List`{K`})= _`(_`)('.undefined,.List`{K`})[metadata "location(json-to-infix.k:16)"].
+eq _`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(statements),.List`{K`}),Stmt:K)),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("DEFAULT"),.List`{K`})))))= _`(_`)('default`(_`),Stmt:K)[metadata "location(json-to-infix.k:86)"].
+eq _`,`,_(Extra:List{K},_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(caseLabel),.List`{K`}),Exp:K)),_`,`,_(_`(_`)('_:_,_`,`,_(_`(_`)(Id_(statements),.List`{K`}),Stmt:K)),_`(_`)('_:_,_`,`,_(_`(_`)(Id_(type),.List`{K`}),_`(_`)(String_("CASE"),.List`{K`}))))))= _`(_`)('case`(_`,_`),_`,`,_(Exp:K,Stmt:K))[metadata "location(json-to-infix.k:85)"].
 eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
 eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
 eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].

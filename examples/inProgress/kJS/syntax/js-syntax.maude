@@ -3,15 +3,15 @@ load ../json/json.maude
  mod JS-SYNTAX 
  	is including JSON .
  
- 	  sort JSValue .    op b(_) :  Bool -> JSValue   [metadata "location(js-syntax.k:6)"] .  op n(_) :  Numeric -> JSValue   [metadata "location(js-syntax.k:6)"] .  op s(_) :  String -> JSValue [metadata "location(js-syntax.k:6)"] . 
+ 	  sort JSValue .    op b(_) :  Bool -> JSValue   [metadata "location(js-syntax.k:6)"] .  op n(_) :  Numeric -> JSValue   [metadata "location(js-syntax.k:6)"] .  op s(_) :  String -> JSValue   [metadata "location(js-syntax.k:6)"] .  op r(_) :  String -> JSValue   [metadata "location(js-syntax.k:6)"] .  op .null :  -> JSValue   [metadata "location(js-syntax.k:6)"] .  op .undefined :  -> JSValue [metadata "location(js-syntax.k:6)"] . 
  	
  	     
  			 subsort JSValue <  JS .
  		  	 op nop :  -> JS
- 			 [metadata "location(js-syntax.k:10)"] .  op id(_) :  String -> JS   [metadata "location(js-syntax.k:11)"] .  op label(_) :  String -> JS
+ 			 [metadata "location(js-syntax.k:10)"] .  op id(_) :  String -> JS 
  		  [metadata "location(js-syntax.k:11)"] .  op staticAccess(_,_) :  JS  JS -> JS  [  metadata "location(js-syntax.k:12) strict"] . 		
  		   op dynamicAccess(_,_) :  JS  JS -> JS  [  metadata "location(js-syntax.k:13) strict"] . 		
- 		   op invocation(_,_) :  JS  List{JS} -> JS  [  metadata "location(js-syntax.k:14) strict"] . 	
+ 		   op invocation(_,_) :  JS  JS -> JS  [  metadata "location(js-syntax.k:14) strict"] . 	
  		
  		   op new(_) :  JS -> JS  [  metadata "location(js-syntax.k:16) strict"] .					
  		
@@ -59,35 +59,42 @@ load ../json/json.maude
  		
  		   op return(_) :  JS -> JS  [  metadata "location(js-syntax.k:60) strict"] .				
  		   op break(_) :  JS -> JS  [  metadata "location(js-syntax.k:61) strict"] . 				
- 		   op throw(_) :  JS -> JS  [  metadata "location(js-syntax.k:62) strict"] .				
- 
- 		   op stmts(_) :  List{JS} -> JS  [  metadata "location(js-syntax.k:64) strict"] .		
- 		   op ifElse(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:65) strict(1)"] .	
- 		   op tryCatch(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:66) strict"] .	
+ 		   op continue(_) :  JS -> JS  [  metadata "location(js-syntax.k:62) strict"] . 				
+ 		   op throw(_) :  JS -> JS  [  metadata "location(js-syntax.k:63) strict"] .				
+ 		   op controlLabel(__) :  String  JS -> JS 
  		
- 		   op case(_,_) :  List{JS}  JS -> JS  [  metadata "location(js-syntax.k:68) strict(1)"] .	 
+ 		  [metadata "location(js-syntax.k:64)"] .  op exp(_) :  JS -> JS  [  metadata "location(js-syntax.k:66) strict"] .				
+ 		
+ 		   op stmts(_) :  List{JS} -> JS 		
+ 		  [metadata "location(js-syntax.k:68)"] .  op block(_) :  List{JS} -> JS
+ 		  [metadata "location(js-syntax.k:69)"] .  op comma(_) :  List{JS} -> JS
+ 		  [metadata "location(js-syntax.k:70)"] .  op ifElse(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:71) strict(1)"] .	
+ 		   op tryCatch(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:72) strict"] .	
+ 		
+ 		   op case(_,_) :  JS  JS -> JS  [  metadata "location(js-syntax.k:74) strict(1)"] .	 	
+ 		   op default(_) :  JS -> JS 					
+ 		
+ 		  [metadata "location(js-syntax.k:75)"] .  op switch(_,_,_) :  JS  List{JS}  Int -> JS  [  metadata "location(js-syntax.k:77) strict(1)"] .	
  			
- 		   op switch(_,_,_) :  JS  List{JS}  JS -> JS  [  metadata "location(js-syntax.k:70) strict(1)"] .	
+ 		   op for(_,_,_,_) :  JS  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:79) strict(1)"] .		
  			
- 		   op for(_,_,_,_) :  JS  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:72) strict(1)"] .		
- 			
- 		   op forIn(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:74) strict(2)"] .
+ 		   op forIn(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(js-syntax.k:81) strict(2)"] .
  			
  		   op while(_,_) :  JS  JS -> JS
  			
- 		  [metadata "location(js-syntax.k:76)"] .  op do(_,_) :  JS  JS -> JS
+ 		  [metadata "location(js-syntax.k:83)"] .  op do(_,_) :  JS  JS -> JS
  			
  			
- 		  [metadata "location(js-syntax.k:78)"] .  op labelledStmt(_,_) :  JS  JS -> JS	
+ 		  [metadata "location(js-syntax.k:85)"] .  op labelledStmt(_,_) :  JS  JS -> JS	
  			
  		
- 		  [metadata "location(js-syntax.k:81)"] .  op varDeclarations(_) :  List{JS} -> JS  [  metadata "location(js-syntax.k:84) strict"] .
+ 		  [metadata "location(js-syntax.k:88)"] .  op varDeclarations(_) :  List{JS} -> JS  [  metadata "location(js-syntax.k:91) strict"] .
  		
- 		   op function(_,_,_) :  JS  List{JS}  JS -> JS
+ 		   op function(_,_,_,_) :  JS  JS  List{JS}  JS -> JS
  			
  			
  
- 		  [metadata "location(js-syntax.k:86)"] .  op program(_) :  List{JS} -> JS [metadata "location(js-syntax.k:90)"] . 
+ 		  [metadata "location(js-syntax.k:93)"] .  op program(_) :  List{JS} -> JS [metadata "location(js-syntax.k:97)"] . 
  			
   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm
  			

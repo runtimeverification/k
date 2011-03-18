@@ -1,0 +1,448 @@
+{
+    type : "SCRIPT",
+    children : [
+        {
+            type : "WHILE",
+            body : {
+                type : "BLOCK",
+                children : [],
+                end : 14,
+                lineno : 1,
+                start : 13,
+                value : "{",
+                varDecls : []
+            },
+            children : [],
+            condition : {
+                type : "TRUE",
+                children : [],
+                end : 11,
+                lineno : 1,
+                start : 7,
+                value : "true"
+            },
+            end : 5,
+            isLoop : true,
+            lineno : 1,
+            start : 0,
+            value : "while"
+        },
+        {
+            type : "SEMICOLON",
+            children : [],
+            end : 16,
+            expression : null,
+            lineno : 1,
+            start : 15,
+            value : ";"
+        },
+        {
+            type : "DO",
+            body : {
+                type : "BLOCK",
+                children : [
+                    {
+                        type : "SEMICOLON",
+                        children : [],
+                        end : 24,
+                        expression : {
+                            type : "INCREMENT",
+                            children : [
+                                {
+                                    type : "IDENTIFIER",
+                                    children : [],
+                                    end : 22,
+                                    lineno : 2,
+                                    start : 21,
+                                    value : "y"
+                                }
+                            ],
+                            end : 24,
+                            lineno : 2,
+                            postfix : true,
+                            start : 21,
+                            value : "++"
+                        },
+                        lineno : 2,
+                        start : 21,
+                        value : "y"
+                    }
+                ],
+                end : 24,
+                lineno : 2,
+                start : 20,
+                value : "{",
+                varDecls : []
+            },
+            children : [],
+            condition : {
+                type : "LT",
+                children : [
+                    {
+                        type : "IDENTIFIER",
+                        children : [],
+                        end : 34,
+                        lineno : 2,
+                        start : 33,
+                        value : "y"
+                    },
+                    {
+                        type : "NUMBER",
+                        children : [],
+                        end : 40,
+                        lineno : 2,
+                        start : 37,
+                        value : 100
+                    }
+                ],
+                end : 40,
+                lineno : 2,
+                start : 33,
+                value : "<"
+            },
+            end : 19,
+            isLoop : true,
+            lineno : 2,
+            start : 17,
+            value : "do"
+        },
+        {
+            type : "LABEL",
+            children : [],
+            end : 49,
+            label : "here",
+            lineno : 3,
+            start : 48,
+            statement : {
+                type : "FOR",
+                body : {
+                    type : "BLOCK",
+                    children : [
+                        {
+                            type : "IF",
+                            children : [],
+                            condition : {
+                                type : "STRICT_EQ",
+                                children : [
+                                    {
+                                        type : "MUL",
+                                        children : [
+                                            {
+                                                type : "IDENTIFIER",
+                                                children : [],
+                                                end : 90,
+                                                lineno : 4,
+                                                start : 89,
+                                                value : "z"
+                                            },
+                                            {
+                                                type : "NUMBER",
+                                                children : [],
+                                                end : 94,
+                                                lineno : 4,
+                                                start : 93,
+                                                value : 2
+                                            }
+                                        ],
+                                        end : 94,
+                                        lineno : 4,
+                                        start : 89,
+                                        value : "*"
+                                    },
+                                    {
+                                        type : "NUMBER",
+                                        children : [],
+                                        end : 100,
+                                        lineno : 4,
+                                        start : 99,
+                                        value : 4
+                                    }
+                                ],
+                                end : 100,
+                                lineno : 4,
+                                start : 89,
+                                value : "==="
+                            },
+                            elsePart : null,
+                            end : 87,
+                            lineno : 4,
+                            start : 85,
+                            thenPart : {
+                                type : "CONTINUE",
+                                children : [],
+                                end : 110,
+                                label : "here",
+                                lineno : 4,
+                                start : 102,
+                                value : "continue"
+                            },
+                            value : "if"
+                        },
+                        {
+                            type : "IF",
+                            children : [],
+                            condition : {
+                                type : "EQ",
+                                children : [
+                                    {
+                                        type : "IDENTIFIER",
+                                        children : [],
+                                        end : 123,
+                                        lineno : 5,
+                                        start : 122,
+                                        value : "q"
+                                    },
+                                    {
+                                        type : "NUMBER",
+                                        children : [],
+                                        end : 128,
+                                        lineno : 5,
+                                        start : 127,
+                                        value : 3
+                                    }
+                                ],
+                                end : 128,
+                                lineno : 5,
+                                start : 122,
+                                value : "=="
+                            },
+                            elsePart : null,
+                            end : 120,
+                            lineno : 5,
+                            start : 118,
+                            thenPart : {
+                                type : "BREAK",
+                                children : [],
+                                end : 135,
+                                label : "here",
+                                lineno : 5,
+                                start : 130,
+                                value : "break"
+                            },
+                            value : "if"
+                        }
+                    ],
+                    end : 120,
+                    lineno : 3,
+                    start : 82,
+                    value : "{",
+                    varDecls : []
+                },
+                children : [],
+                condition : null,
+                end : 53,
+                isLoop : true,
+                lineno : 3,
+                setup : {
+                    type : "COMMA",
+                    children : [
+                        {
+                            type : "ASSIGN",
+                            assignOp : null,
+                            children : [
+                                {
+                                    type : "IDENTIFIER",
+                                    children : [],
+                                    end : 56,
+                                    lineno : 3,
+                                    start : 55,
+                                    value : "z"
+                                },
+                                {
+                                    type : "NUMBER",
+                                    children : [],
+                                    end : 60,
+                                    lineno : 3,
+                                    start : 59,
+                                    value : 1
+                                }
+                            ],
+                            end : 60,
+                            lineno : 3,
+                            start : 54,
+                            value : "("
+                        },
+                        {
+                            type : "ASSIGN",
+                            assignOp : null,
+                            children : [
+                                {
+                                    type : "IDENTIFIER",
+                                    children : [],
+                                    end : 63,
+                                    lineno : 3,
+                                    start : 62,
+                                    value : "q"
+                                },
+                                {
+                                    type : "NUMBER",
+                                    children : [],
+                                    end : 68,
+                                    lineno : 3,
+                                    start : 66,
+                                    value : 22
+                                }
+                            ],
+                            end : 68,
+                            lineno : 3,
+                            start : 60,
+                            value : ","
+                        }
+                    ],
+                    end : 68,
+                    lineno : 3,
+                    start : 54,
+                    value : ","
+                },
+                start : 50,
+                update : {
+                    type : "COMMA",
+                    children : [
+                        {
+                            type : "INCREMENT",
+                            children : [
+                                {
+                                    type : "IDENTIFIER",
+                                    children : [],
+                                    end : 73,
+                                    lineno : 3,
+                                    start : 72,
+                                    value : "z"
+                                }
+                            ],
+                            end : 75,
+                            lineno : 3,
+                            postfix : true,
+                            start : 72,
+                            value : "++"
+                        },
+                        {
+                            type : "DECREMENT",
+                            children : [
+                                {
+                                    type : "IDENTIFIER",
+                                    children : [],
+                                    end : 80,
+                                    lineno : 3,
+                                    start : 79,
+                                    value : "q"
+                                }
+                            ],
+                            end : 80,
+                            lineno : 3,
+                            start : 77,
+                            value : "--"
+                        }
+                    ],
+                    end : 80,
+                    lineno : 3,
+                    start : 72,
+                    value : ","
+                },
+                value : "for"
+            },
+            value : ":"
+        },
+        {
+            type : "LABEL",
+            children : [],
+            end : 151,
+            label : "there",
+            lineno : 7,
+            start : 150,
+            statement : {
+                type : "SEMICOLON",
+                children : [],
+                end : 159,
+                expression : {
+                    type : "ASSIGN",
+                    assignOp : null,
+                    children : [
+                        {
+                            type : "IDENTIFIER",
+                            children : [],
+                            end : 153,
+                            lineno : 7,
+                            start : 152,
+                            value : "x"
+                        },
+                        {
+                            type : "NUMBER",
+                            children : [],
+                            end : 159,
+                            lineno : 7,
+                            start : 156,
+                            value : 200
+                        }
+                    ],
+                    end : 159,
+                    lineno : 7,
+                    start : 150,
+                    value : ":"
+                },
+                lineno : 7,
+                start : 152,
+                value : "x"
+            },
+            value : ":"
+        },
+        {
+            type : "FOR_IN",
+            body : {
+                type : "SEMICOLON",
+                children : [],
+                end : 178,
+                expression : {
+                    type : "INCREMENT",
+                    children : [
+                        {
+                            type : "IDENTIFIER",
+                            children : [],
+                            end : 178,
+                            lineno : 8,
+                            start : 177,
+                            value : "x"
+                        }
+                    ],
+                    end : 178,
+                    lineno : 8,
+                    start : 175,
+                    value : "++"
+                },
+                lineno : 8,
+                start : 175,
+                value : "++"
+            },
+            children : [],
+            end : 163,
+            isLoop : true,
+            iterator : {
+                type : "IDENTIFIER",
+                children : [],
+                end : 166,
+                lineno : 8,
+                start : 165,
+                value : "p"
+            },
+            lineno : 8,
+            object : {
+                type : "IDENTIFIER",
+                children : [],
+                end : 173,
+                lineno : 8,
+                start : 170,
+                value : "obj"
+            },
+            start : 160,
+            value : "for"
+        }
+    ],
+    expDecls : [],
+    funDecls : [],
+    hasEmptyReturn : false,
+    hasReturnWithValue : false,
+    impDecls : [],
+    isGenerator : false,
+    lineno : 1,
+    varDecls : []
+}

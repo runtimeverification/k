@@ -1,29 +1,34 @@
 load js-syntax.k
-load ../js-json-ast-ids.maude
+load js-json-ast-ids.k
 
 kmod JSON-INFIX
- 	is including JS-SYNTAX + JSON
+ 	is including JS-SYNTAX + JSON + JS-JSON-AST-IDS
 	
 	syntax Id ::= JSJsonAstIds 
 	
-	macro o(type : "NUMBER" value : N:Numeric Extra:JSProperties) = n(N)
+	macro o(type : "NUMBER" value : Num:Numeric Extra:JSProperties) = n(Num)
 	macro o(type : "STRING" value : S:String Extra) = s(S)
-	macro o(type : "BOOLEAN" value : B:Bool Extra) = b(B)
+	macro o(type : "REGEXP" value : S:String Extra) = r(S)
+	macro o(type : "TRUE" value : B:Bool Extra) = b(true)
+	macro o(type : "FALSE" value : B:Bool Extra) = b(false)
+	macro o(type : "NULL" Extra) = .null
+	macro null = .undefined
+	macro undefined = .undefined
 	
-	macro o(type : "IDENTIFIER" name : Name:String Extra) = id(Name)
+	macro o(type : "IDENTIFIER" value : Name:String Extra) = id(Name)
 
 	macro o(type : "DOT" children : a(Left , Right) Extra) = staticAccess(Left , Right)
 	
-	macro o(type : "INCREMENT" children : a(Element:JS) Extra) = inc(Element, false)
-	macro o(type : "INCREMENT" children : a(Element) postfix : Flag:Bool Extra) = inc(Element, Flag)
+	macro o(type : "INCREMENT" children : a(Exp:JS) postfix : Flag:Bool Extra) = inc(Exp, Flag)
+	macro o(type : "INCREMENT" children : a(Exp) Extra) = inc(Exp, false)
 	
-	macro o(type : "DECREMENT" children : a(Element) Extra) = dec(Element, false)
-	macro o(type : "DECREMENT" children : a(Element) postfix : Flag Extra) = dec(Element, Flag)
+	macro o(type : "DECREMENT" children : a(Exp) postfix : Flag Extra) = dec(Exp, Flag)
+	macro o(type : "DECREMENT" children : a(Exp) Extra) = dec(Exp, false)
 	
-	macro o(type : "TYPEOF" children : a(Element) Extra) = typeof(Element)
-	macro o(type : "NOT" children : a(Element) Extra) = not(Element)
-	macro o(type : "??? -" children : a(Element) Extra) = neg(Element)
-	macro o(type : "??? +" children : a(Element) Extra) = plus(Element)
+	macro o(type : "TYPEOF" children : a(Exp) Extra) = typeof(Exp)
+	macro o(type : "NOT" children : a(Exp) Extra) = not(Exp)
+	macro o(type : "??? -" children : a(Exp) Extra) = neg(Exp)
+	macro o(type : "??? +" children : a(Exp) Extra) = plus(Exp)
 	
 	macro o(type : "MUL" children : a(Left:JS , Right:JS) Extra) = mul(Left , Right)
 	macro o(type : "DIV" children : a(Left , Right) Extra) = div(Left , Right)
@@ -51,15 +56,56 @@ kmod JSON-INFIX
 	macro o(type : "HOOK" children : a(Left , Middle:JS, Right) Extra) 
 		= ternary(Left , Middle, Right)
 
-	macro o(type : "ASSIGN" assignOp : OpCode:JS children : a(Left , Right)) 
+	macro o(type : "ASSIGN" assignOp : OpCode:JS children : a(Left , Right) Extra) 
 		= assignment(Left, OpCode, Right)
 	
-	macro o(type : "ARRAY_INIT" children : a(Elements) Extra) = arrayLit(Elements)
+	macro o(type : "ARRAY_INIT" children : a(Exps:List{JS}) Extra) = arrayLit(Exps)
 	
-	macro o(type : "SEMICOLON" expression : a(Elements) Extra) = stmts(Elements)
+	macro o(type : "SEMICOLON" expression : Exp Extra) = exp(Exp)
 	
-	macro o(type : "VAR" children : a(Elements) Extra) = varDeclarations(Elements)
+	macro o(type : "CALL" children : a(FunctionExp:JS, CommaList:JS) Extra) 
+		= invocation(FunctionExp, CommaList)
 	
-	macro o(type : "SCRIPT" children : a(Elements:List{JS}) Extra) = program(Elements)
+	macro o(type : "LIST" children : a(Exps) Extra) = comma(Exps)
+	macro o(type : "COMMA" children : a(Exps) Extra) = comma(Exps)
+	
+	macro o(type : "BLOCK" children : a(Stmts:List{JS}) Extra) = block(Stmts)
+	macro o(type : "RETURN" value : Exp Extra) = return(Exp)
+---	macro o(type : "THROW" value : Exp Extra) = throw(Exp)
+	
+	macro o(type : "BREAK" label : Name Extra) = break(Name)
+	macro o(type : "BREAK" Extra) = break(.undefined)
+	macro o(type : "CONTINUE" label : Name Extra) = continue(Name)
+	macro o(type : "CONTINUE" Extra) = continue(.undefined)
+
+
+	macro o(type : "IF" condition : Condition:JS thenPart : Stmt:JS elsePart : OtherStmt:JS Extra) 
+		= ifElse(Condition, Stmt, OtherStmt)
+
+	macro (type : "CASE" caseLabel : Exp statements : Stmt Extra) = case(Exp, Stmt)
+	macro (type : "DEFAULT" statements : Stmt Extra) = default(Stmt)
+	
+	macro o(type : "LABEL" label : Name statement : Stmt Extra) = controlLabel(Name, Stmt)
+
+	macro o(type : "SWITCH" discriminant : Exp cases : a(Cases:List{JS}) defaultIndex: Num Extra)
+		= switch(Exp, Cases, Num)
+
+	
+	macro o(type : "WHILE" condition : Condition body : Stmt Extra) = while(Condition, Stmt)
+	macro o(type : "DO" condition : Condition body : Stmt Extra) = do(Condition, Stmt)
+	
+	macro o(type : "FOR" setup : Setup:JS condition : Condition:JS update : Exp body : Stmt Extra) 
+		= for(Setup, Condition, Exp, Stmt)
+
+	macro o(type : "FOR_IN" iterator : Left object : Right body : Stmt Extra) 
+		= forIn(Left, Right, Stmt)
+
+
+	macro o(type : "FUNCTION" functionForm : Num name : Name params : a(Exps) body : Stmt Extra)
+		= function(Num, Name, Exps, Stmt)
+		
+	macro o(type : "VAR" children : a(Exps) Extra) = varDeclarations(Exps)
+	
+	macro o(type : "SCRIPT" children : a(Stmts:List{JS}) Extra) = program(Stmts)
 	
 endkm	

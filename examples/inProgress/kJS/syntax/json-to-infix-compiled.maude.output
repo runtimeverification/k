@@ -1,14 +1,6 @@
 ERROR:
-Warning: "js-json-ast-ids.maude", line 2 (mod JS-JSON-AST-IDS): missing is keyword.
-Warning: "json-to-infix.maude", line 7 (mod JSON-INFIX): undeclared sort JSJsonAstIds.
-Warning: "json-to-infix.maude", line 9 (mod JSON-INFIX): bad token type.
-Warning: "json-to-infix.maude", line 9 (mod JSON-INFIX): no parse for statement
-eq o (type : "NUMBER" value : N:Numeric Extra:JSProperties) = n (N) [metadata "location(json-to-infix.k:9)"] .
-Warning: "json-to-infix.maude", line 10 (mod JSON-INFIX): bad token type.
-Warning: "json-to-infix.maude", line 10 (mod JSON-INFIX): no parse for statement
-eq o (type : "STRING" value : S:String Extra) = s (S) [metadata "location(json-to-infix.k:10)"] .
-Warning: "json-to-infix.maude", line 11 (mod JSON-INFIX): bad token type.
-Warning: "json-to-infix.maude", line 11 (mod JSON-INFIX): no parse for statement
-...
-Check kompile_errwUVYC9rElT.txt for the remaining errors
+Warning: "json-to-infix.maude", line 88 (mod JSON-INFIX): didn't expect token ):
+eq o ( type : "LABEL" label : Name statement : Stmt Extra ) = controlLabel ( Name , Stmt ) <---*HERE*
+Warning: "json-to-infix.maude", line 88 (mod JSON-INFIX): no parse for statement
+eq o (type : "LABEL" label : Name statement : Stmt Extra) = controlLabel (Name, Stmt) [metadata "location(json-to-infix.k:88)"] .
 Aborting the compilation

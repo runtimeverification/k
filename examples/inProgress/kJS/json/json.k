@@ -5,7 +5,7 @@ in ../../../../k-prelude
 kmod JSON-LIST
 	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID
 	
-	syntax JS ::= null | Int | Float | Bool
+	syntax JS ::= undefined | null | Int | Float | Bool
 
 	syntax List{JS} ::= JS | .List{JS} | List{JS} , List{JS} [assoc id: .List{JS}]
 	
@@ -22,7 +22,7 @@ kmod JSON-SYNTAX
 	
 	syntax JsonArray ::= [ ] | [ List{JS} ]
 	
-	syntax JsonTerminal ::= null | Bool | Numeric | JsonKey
+	syntax JsonTerminal ::= undefined | null | Bool | Numeric | JsonKey
 	
 	syntax JsonLiteral ::= JsonTerminal | JsonObject | JsonArray
 				
@@ -42,14 +42,13 @@ kmod JSON
 	
 	syntax JS ::= 
 			o( JSProperties ) | a( List{JS} )
-		| 	buildLitObject( List{JS} , JS )
+		| 	buildLitObject( List{JS} , JSProperties )
 	
 
----	syntax JSProperty ::= p( JsonKey , JS )
 	syntax JSProperty ::= JsonPair
 	
 	syntax JSProperties ::= 
-			.JSProperties | JSProperty
+			.JSProperties | JSProperty 
 		|	JSProperties JSProperties [assoc comm id: .JSProperties]
 	
 
@@ -59,14 +58,16 @@ kmod JSON
 	macro { } = o(.JSProperties)	
 
 
-	macro { Elements:List{JS} } = buildLitObject( Elements , o(.JSProperties) )
+	macro { Elements:List{JS} } = buildLitObject( Elements , .JSProperties )
 
-	macro buildLitObject((.List{JS}) , Obj:JS ) = Obj
+	macro buildLitObject((.List{JS}) , Properties:JSProperties ) = o(Properties)
 
----	macro buildLitObject( (Key:JsonKey : Value:JS , Elements) , o(Properties:JSProperties) ) 
----		= buildLitObject( (Elements) , o(Properties p(Key, Value)) )
-	macro buildLitObject( (Key:JsonKey : Value:JS , Elements) , o(Properties:JSProperties) ) 
-		= buildLitObject( (Elements) , o(Properties Key : Value) )
+	macro buildLitObject( (Key:JsonKey : Value:JS , Elements) , Properties ) 
+		= buildLitObject( (Elements) , Properties Key : Value )
 
 endkm
 
+
+---	syntax JSProperty ::= p( JsonKey , JS )
+---	macro buildLitObject( (Key:JsonKey : Value:JS , Elements) , o(Properties:JSProperties) ) 
+---		= buildLitObject( (Elements) , o(Properties p(Key, Value)) )

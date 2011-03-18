@@ -1,0 +1,264 @@
+{
+    type : "SCRIPT",
+    children : [
+        {
+            type : "SEMICOLON",
+            children : [],
+            end : undefined,
+            expression : {
+                type : "ASSIGN",
+                assignOp : null,
+                children : [
+                    {
+                        type : "IDENTIFIER",
+                        children : [],
+                        end : 1,
+                        lineno : 1,
+                        start : 0,
+                        value : "f"
+                    },
+                    {
+                        type : "FUNCTION",
+                        body : {
+                            type : "SCRIPT",
+                            children : [
+                                {
+                                    type : "VAR",
+                                    children : [
+                                        {
+                                            type : "IDENTIFIER",
+                                            children : [],
+                                            end : 37,
+                                            initializer : {
+                                                type : "NUMBER",
+                                                children : [],
+                                                end : 41,
+                                                lineno : 2,
+                                                start : 40,
+                                                value : 1
+                                            },
+                                            lineno : 2,
+                                            name : "x",
+                                            readOnly : false,
+                                            start : 36,
+                                            value : "x"
+                                        }
+                                    ],
+                                    destructurings : [],
+                                    end : 37,
+                                    lineno : 2,
+                                    start : 32,
+                                    value : "var"
+                                },
+                                {
+                                    type : "IF",
+                                    children : [],
+                                    condition : {
+                                        type : "STRICT_EQ",
+                                        children : [
+                                            {
+                                                type : "IDENTIFIER",
+                                                children : [],
+                                                end : 51,
+                                                lineno : 3,
+                                                start : 48,
+                                                value : "dog"
+                                            },
+                                            {
+                                                type : "IDENTIFIER",
+                                                children : [],
+                                                end : 60,
+                                                lineno : 3,
+                                                start : 56,
+                                                value : "sled"
+                                            }
+                                        ],
+                                        end : 60,
+                                        lineno : 3,
+                                        start : 48,
+                                        value : "==="
+                                    },
+                                    elsePart : {
+                                        type : "RETURN",
+                                        children : [],
+                                        end : 100,
+                                        lineno : 3,
+                                        start : 94,
+                                        value : undefined
+                                    },
+                                    end : 46,
+                                    lineno : 3,
+                                    start : 44,
+                                    thenPart : {
+                                        type : "BLOCK",
+                                        children : [
+                                            {
+                                                type : "RETURN",
+                                                children : [],
+                                                end : 69,
+                                                lineno : 3,
+                                                start : 63,
+                                                value : {
+                                                    type : "ARRAY_INIT",
+                                                    children : [
+                                                        {
+                                                            type : "IDENTIFIER",
+                                                            children : [],
+                                                            end : 80,
+                                                            lineno : 3,
+                                                            start : 71,
+                                                            value : "undefined"
+                                                        },
+                                                        {
+                                                            type : "IDENTIFIER",
+                                                            children : [],
+                                                            end : 86,
+                                                            lineno : 3,
+                                                            start : 82,
+                                                            value : "mush"
+                                                        }
+                                                    ],
+                                                    end : 86,
+                                                    lineno : 3,
+                                                    start : 70,
+                                                    value : "["
+                                                }
+                                            }
+                                        ],
+                                        end : 69,
+                                        lineno : 3,
+                                        start : 62,
+                                        value : "{",
+                                        varDecls : []
+                                    },
+                                    value : "if"
+                                }
+                            ],
+                            end : 46,
+                            expDecls : [],
+                            funDecls : [],
+                            hasEmptyReturn : true,
+                            hasReturnWithValue : true,
+                            impDecls : [],
+                            isGenerator : false,
+                            lineno : 1,
+                            start : 29,
+                            value : "{",
+                            varDecls : [
+                                {
+                                    type : "IDENTIFIER",
+                                    children : [],
+                                    end : 37,
+                                    initializer : {
+                                        type : "NUMBER",
+                                        children : [],
+                                        end : 41,
+                                        lineno : 2,
+                                        start : 40,
+                                        value : 1
+                                    },
+                                    lineno : 2,
+                                    name : "x",
+                                    readOnly : false,
+                                    start : 36,
+                                    value : "x"
+                                }
+                            ]
+                        },
+                        children : [],
+                        end : 103,
+                        functionForm : 1,
+                        lineno : 1,
+                        name : "mush",
+                        params : [
+                            "dog",
+                            "sled"
+                        ],
+                        start : 4,
+                        value : "function"
+                    }
+                ],
+                lineno : 1
+            },
+            lineno : 1,
+            start : 0,
+            value : "f"
+        },
+        {
+            type : "SEMICOLON",
+            children : [],
+            end : 127,
+            expression : {
+                type : "ASSIGN",
+                assignOp : null,
+                children : [
+                    {
+                        type : "IDENTIFIER",
+                        children : [],
+                        end : 105,
+                        lineno : 5,
+                        start : 104,
+                        value : "g"
+                    },
+                    {
+                        type : "CALL",
+                        children : [
+                            {
+                                type : "IDENTIFIER",
+                                children : [],
+                                end : 109,
+                                lineno : 5,
+                                start : 108,
+                                value : "f"
+                            },
+                            {
+                                type : "LIST",
+                                children : [
+                                    {
+                                        type : "IDENTIFIER",
+                                        children : [],
+                                        end : 116,
+                                        lineno : 5,
+                                        start : 110,
+                                        value : "snoopy"
+                                    },
+                                    {
+                                        type : "IDENTIFIER",
+                                        children : [],
+                                        end : 127,
+                                        lineno : 5,
+                                        start : 118,
+                                        value : "undefined"
+                                    }
+                                ],
+                                end : 127,
+                                lineno : 5,
+                                start : 109,
+                                value : "("
+                            }
+                        ],
+                        end : 127,
+                        lineno : 5,
+                        start : 108,
+                        value : "("
+                    }
+                ],
+                end : 127,
+                lineno : 4,
+                start : 102,
+                value : "}"
+            },
+            lineno : 5,
+            start : 104,
+            value : "g"
+        }
+    ],
+    expDecls : [],
+    funDecls : [],
+    hasEmptyReturn : false,
+    hasReturnWithValue : false,
+    impDecls : [],
+    isGenerator : false,
+    lineno : 1,
+    varDecls : []
+}

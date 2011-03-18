@@ -3,15 +3,15 @@ load ../json/json.k
 kmod JS-SYNTAX 
 	is including JSON
 
-	syntax JSValue ::= b( Bool ) | n( Numeric ) | s( String )
+	syntax JSValue ::= b( Bool ) | n( Numeric ) | s( String ) | r( String ) | .null | .undefined
 	
 	syntax JS ::= 
 			JSValue
 		| 	nop
-		|	id( String ) | label( String )
+		|	id( String ) 
 		| staticAccess( JS , JS ) [strict] 		--- Exp . Name
 		| dynamicAccess( JS , JS ) [strict] 		--- Exp [ Exp ]
-		| invocation( JS , List{JS} ) [strict] 	--- Exp ( CommaList{Argument} )
+		| invocation( JS , JS ) [strict] 	--- Exp ( CommaList )
 		
 		| new( JS ) [strict]					--- new InvocationExp
 		
@@ -59,15 +59,22 @@ kmod JS-SYNTAX
 		
 		| return ( JS ) [strict]				--- return Exp | .
 		| break ( JS ) [strict] 				--- break Label | .
+		| continue ( JS ) [strict] 				--- continue Label | .
 		| throw ( JS ) [strict]				--- throw Exp
-
-		| stmts ( List{JS} ) [strict]		--- List{Stmt}
+		| controlLabel ( String JS ) 
+		
+		| exp ( JS ) [strict]				--- exp
+		
+		| stmts ( List{JS} ) 		--- List{Stmt}
+		| block ( List{JS} )
+		| comma ( List{JS} )
 		| ifElse ( JS , JS , JS ) [strict(1)]	--- if (Exp) Block Block
 		| tryCatch ( JS , JS , JS ) [strict]	--- try Block catch (Exp) Block
 		
-		| case ( List{JS} , JS ) [strict(1)]	 
-			--- case List{CaseMatch} : List{Stmt}
-		| switch ( JS , List{JS} , JS ) [strict(1)]	
+		| case ( JS , JS ) [strict(1)]	 	--- case Exp : Stmt
+		| default ( JS ) 					--- default : Stmt
+		
+		| switch ( JS , List{JS} , Int ) [strict(1)]	
 			--- switch (Exp) { List{Case} ; DefaultCase }
 		| for ( JS , JS , JS , JS ) [strict(1)]		
 			--- for ( Inits ; Cond ; Incrs ) Block
@@ -83,7 +90,7 @@ kmod JS-SYNTAX
 		
 		| varDeclarations ( List{JS} ) [strict]
 		
-		| function ( JS , List{JS} , JS )
+		| function ( JS , JS , List{JS} , JS )
 			--- function ( Parameters ) { Program }
 			--- function Name ( Parameters ) { Program }
 

@@ -215,17 +215,12 @@
         }
     ],
     expDecls : [],
-    exports : [object StringMap],
     funDecls : [],
     hasEmptyReturn : false,
     hasReturnWithValue : false,
     impDecls : [],
     isGenerator : false,
     lineno : 1,
-    modAssns : [object StringMap],
-    modDecls : [object StringMap],
-    modDefns : [object StringMap],
-    modLoads : [object StringMap],
     varDecls : [
         {
             type : "IDENTIFIER",

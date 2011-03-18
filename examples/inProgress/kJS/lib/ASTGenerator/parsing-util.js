@@ -13,27 +13,31 @@ JSAST = (function () {
 	var _asASTString, _outputElement, _outputNode, // Resolves co-recursive forward refs
 		INDENTATION = "    ",
 		WORKING_DIR = "/Users/m3rabb/Dev/Maude/k-framework/examples/inProgress/kJS/",
-		IDS_FILE_NAME = "js-json-ast-ids.maude",
+		IDS_FILE_NAME = "js-json-ast-ids.k",
 		PARSER = Narcissus.parser,
 		NODE = PARSER.Node,
 		DEFINITIONS = Narcissus.definitions,
 		TOKENS = DEFINITIONS.tokens,
 		OP_TYPE_NAMES = DEFINITIONS.opTypeNames,
-		EXCLUDED_PROPERTIES = ['type', 'target', 'tokenizer'],
-		IDS_FILE_PREFIX = "mod JS-JSON-AST-IDS\n   ops",
-		IDS_FILE_SUFFIX = "\n    :  -> JSJsonAstIds .\nendm\n",
+		EXCLUDED_PROPERTIES = 
+			['type', 'target', 'tokenizer', 'exports', 'labels',
+			 'modAssns', 'modDecls', 'modDefns', 'modLoads'],
+		IDS_FILE_PREFIX = "kmod JS-JSON-AST-IDS\n" + 
+			"    is including PL-INT + PL-FLOAT + PL-STRING + PL-ID\n\n" +
+			"    syntax JSJsonAstIds ::= \n\t\t",
+		IDS_FILE_SUFFIX = "\nendkm\n",
 		IDS_FILE_PREFIX_LENGTH = IDS_FILE_PREFIX.length,
 		IDS_FILE_SUFFIX_LENGTH = IDS_FILE_SUFFIX.length,
 		_indentLevel = 0, _indentations = [""],
 		_allIds = {},
 		_collectIds;
-
+	
 	function _addIds(ids) {
 		ids.forEach(function (id) {_allIds[id] = true;});
 	}
 	
 	function _includeIds() {
-		return Object.keys(_allIds).concat(EXCLUDED_PROPERTIES).sort();
+		return Object.keys(_allIds).sort();
 	}
 	
 	function _indent() {
@@ -73,6 +77,7 @@ JSAST = (function () {
 		if (element instanceof NODE) {return _outputNode(element);}
 		if (Array.isArray(element)) {return _outputArray(element);}
 		if (typeof element === 'string') {return element.quote();}
+		if (element instanceof RegExp) {return element.toString().quote();}
 		return "" + element;
 	};
 		
@@ -80,10 +85,11 @@ JSAST = (function () {
 		var keys = Object.keys(node),
 			ids = keys.filter(_isAllowedProperty),
 			indent = _indent(),
-			output = "{\n";
+			output = "{\n",
+			typeName = _tokenName(node.type).quote();
 			
 		if (_collectIds) {_addIds(ids);}
-		output += indent + "type : " + _tokenName(node.type).quote();
+		output += indent + "type : " + typeName;
 		ids.sort();
 		ids.forEach(function (id) {
 			output += ",\n" + indent + id + " : ";
@@ -100,20 +106,16 @@ JSAST = (function () {
 	function _updateIds() {
 		var path = WORKING_DIR + "syntax/" + IDS_FILE_NAME, 
 			idsFile = FileIO.open(path),
-			indent = "\n\t\t",
+			delimiter = " |\n\t\t",
 			input, ids, output;
 		if (! idsFile.exists()) {return "ERROR: " + IDS_FILE_NAME + " doesn't exist!";}
 		
 		input = FileIO.read(idsFile);
-		input = input.splice(IDS_FILE_PREFIX_LENGTH + indent.length, -IDS_FILE_SUFFIX_LENGTH);
-		ids = input.split(/\s+/);
+		input = input.slice(IDS_FILE_PREFIX_LENGTH, -IDS_FILE_SUFFIX_LENGTH);
+		ids = input.split(delimiter);
 		_addIds(ids);
 		ids = _includeIds();
-		output = IDS_FILE_PREFIX;
-		ids.forEach(function (id) {
-			output += indent + id;
-		});
-		output += IDS_FILE_SUFFIX;
+		output = IDS_FILE_PREFIX + ids.join(delimiter) + IDS_FILE_SUFFIX;
 		return FileIO.write(idsFile, output);
 	}
 	
