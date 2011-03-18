@@ -1,4 +1,14 @@
 ERROR:
-Warning: "json-to-infix.maude", line 35 (mod JSON-INFIX): multiple distinct parses for statement
-eq o (type : "ASSIGN" assignOp : OpCode:JS children : a (Left, Right)) = assignment (OpCode, Left, Right) [metadata "location(json-to-infix.k:35)"] .
+Warning: "js-json-ast-ids.maude", line 2 (mod JS-JSON-AST-IDS): missing is keyword.
+Warning: "json-to-infix.maude", line 7 (mod JSON-INFIX): undeclared sort JSJsonAstIds.
+Warning: "json-to-infix.maude", line 9 (mod JSON-INFIX): bad token type.
+Warning: "json-to-infix.maude", line 9 (mod JSON-INFIX): no parse for statement
+eq o (type : "NUMBER" value : N:Numeric Extra:JSProperties) = n (N) [metadata "location(json-to-infix.k:9)"] .
+Warning: "json-to-infix.maude", line 10 (mod JSON-INFIX): bad token type.
+Warning: "json-to-infix.maude", line 10 (mod JSON-INFIX): no parse for statement
+eq o (type : "STRING" value : S:String Extra) = s (S) [metadata "location(json-to-infix.k:10)"] .
+Warning: "json-to-infix.maude", line 11 (mod JSON-INFIX): bad token type.
+Warning: "json-to-infix.maude", line 11 (mod JSON-INFIX): no parse for statement
+...
+Check kompile_errwUVYC9rElT.txt for the remaining errors
 Aborting the compilation

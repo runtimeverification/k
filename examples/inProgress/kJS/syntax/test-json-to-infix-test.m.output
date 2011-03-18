@@ -1,0 +1,13 @@
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.5 built: May  7 2010 18:42:44
+	    Copyright 1997-2010 SRI International
+		   Thu Mar 17 19:04:10 2011
+==========================================
+reduce in JSON-INFIX : (({((type : "DOT"),(children : ([(({((type : "STRING"),(value : "person"))}),({((type : "IDENTIFIER"),(name : "length"))}))])))}) ==Bool (staticAccess((s("person")),(id("length"))))) .
+rewrites: 17 in 0ms cpu (0ms real) (607142 rewrites/second)
+result Bool: true
+Warning: "json-to-infix-unit-tests.maude", line 16: bad token end.
+Warning: "json-to-infix-unit-tests.maude", line 7: no parse for term.
+Maude> Bye.

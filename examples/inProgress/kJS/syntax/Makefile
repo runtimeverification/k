@@ -12,7 +12,7 @@ LANGUAGE_MODULES = JSON-INFIX
 MAIN_FILE = json-to-infix
 
 # this is a space-separated list of basename maude files to run
-TESTS = js-to-infix-tests.m
+TESTS = json-to-infix-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk

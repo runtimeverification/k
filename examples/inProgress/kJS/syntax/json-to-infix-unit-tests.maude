@@ -1,0 +1,31 @@
+set print with parentheses on .
+--- set print mixfix off .
+
+	red		{type : "DOT", children : [{type : "STRING", value : "person"}, {type : "IDENTIFIER", name : "length"}]} 
+	==Bool	staticAccess(s("person"),id("length")) .
+	
+	red		{
+	    type : "SCRIPT",
+	    children : [
+	        {
+	            type : "VAR",
+	            children : [
+	                {
+	                    type : "IDENTIFIER",
+	                    children : [],
+	                    end : 5,
+	                    lineno : 1,
+	                    name : "x",
+	                    readOnly : false,
+	                    start : 4,
+	                    value : "x"
+	                }
+	            ],
+	            destructurings : [],
+	            end : 11,
+	            lineno : 1,
+	            start : 0,
+	            value : "var"
+	        }
+	    ]
+	} .

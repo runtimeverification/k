@@ -10,17 +10,32 @@
 JSAST = (function () {
 	"use strict";
 	
-	var _asASTString, _outputNode, // Resolves co-recursive forward refs
+	var _asASTString, _outputElement, _outputNode, // Resolves co-recursive forward refs
 		INDENTATION = "    ",
+		WORKING_DIR = "/Users/m3rabb/Dev/Maude/k-framework/examples/inProgress/kJS/",
+		IDS_FILE_NAME = "js-json-ast-ids.maude",
 		PARSER = Narcissus.parser,
 		NODE = PARSER.Node,
 		DEFINITIONS = Narcissus.definitions,
 		TOKENS = DEFINITIONS.tokens,
 		OP_TYPE_NAMES = DEFINITIONS.opTypeNames,
 		EXCLUDED_PROPERTIES = ['type', 'target', 'tokenizer'],
-		_indentLevel = 0, _indentations = [""];
+		IDS_FILE_PREFIX = "mod JS-JSON-AST-IDS\n   ops",
+		IDS_FILE_SUFFIX = "\n    :  -> JSJsonAstIds .\nendm\n",
+		IDS_FILE_PREFIX_LENGTH = IDS_FILE_PREFIX.length,
+		IDS_FILE_SUFFIX_LENGTH = IDS_FILE_SUFFIX.length,
+		_indentLevel = 0, _indentations = [""],
+		_allIds = {},
+		_collectIds;
 
-
+	function _addIds(ids) {
+		ids.forEach(function (id) {_allIds[id] = true;});
+	}
+	
+	function _includeIds() {
+		return Object.keys(_allIds).concat(EXCLUDED_PROPERTIES).sort();
+	}
+	
 	function _indent() {
 		var indent = _indentations[++_indentLevel];
 		if (indent === undefined) {
@@ -42,19 +57,33 @@ JSAST = (function () {
         return (/^\W/).test(token) ? OP_TYPE_NAMES[token] : token.toUpperCase();
     }
    
-	function _outputElement(element) {
-		if (element instanceof NODE) {return _outputNode(element);}
-		if (typeof element === 'string') {return element.quote();}
-		return "" + element;
+	function _outputArray(elements) {
+		var output, indent;
+		if (elements.length === 0) {return "[]";}
+		output = "[";
+		indent = _indent();
+		elements.forEach(function (element) {
+			output += "\n" + indent + _outputElement(element) + ",";
+		});
+		output = output.slice(0, -1) + "\n" + _outdent() + "]";
+		return output;
 	}
 	
+	_outputElement = function _outputElement(element) {
+		if (element instanceof NODE) {return _outputNode(element);}
+		if (Array.isArray(element)) {return _outputArray(element);}
+		if (typeof element === 'string') {return element.quote();}
+		return "" + element;
+	};
+		
 	_outputNode = function _outputNode(node) {
 		var keys = Object.keys(node),
 			ids = keys.filter(_isAllowedProperty),
 			indent = _indent(),
 			output = "{\n";
-		
-		output += indent + "type: " + _tokenName(node.type);
+			
+		if (_collectIds) {_addIds(ids);}
+		output += indent + "type : " + _tokenName(node.type).quote();
 		ids.sort();
 		ids.forEach(function (id) {
 			output += ",\n" + indent + id + " : ";
@@ -67,28 +96,48 @@ JSAST = (function () {
 	NODE.prototype.toString = function () {
 		return _outputNode(this);
 	};
-
+	
+	function _updateIds() {
+		var path = WORKING_DIR + "syntax/" + IDS_FILE_NAME, 
+			idsFile = FileIO.open(path),
+			indent = "\n\t\t",
+			input, ids, output;
+		if (! idsFile.exists()) {return "ERROR: " + IDS_FILE_NAME + " doesn't exist!";}
+		
+		input = FileIO.read(idsFile);
+		input = input.splice(IDS_FILE_PREFIX_LENGTH + indent.length, -IDS_FILE_SUFFIX_LENGTH);
+		ids = input.split(/\s+/);
+		_addIds(ids);
+		ids = _includeIds();
+		output = IDS_FILE_PREFIX;
+		ids.forEach(function (id) {
+			output += indent + id;
+		});
+		output += IDS_FILE_SUFFIX;
+		return FileIO.write(idsFile, output);
+	}
+	
 	return {
-		generate : function generate(fileNameWithExt, isStrictMode_) {
-			var dirName = "/Users/m3rabb/Dev/Maude/k-framework/examples/inProgress/kJS/examples/",
+		generate : function generate(fileNameWithExt, collectIds_) {
+			var dirName = WORKING_DIR + "examples/",
 				fileName = fileNameWithExt.replace(/\.js$/, ""),
 				path = dirName + fileName,
-				isStrictMode = isStrictMode_ || false,
+				// isStrictMode = isStrictMode_ || false,
 				sourceFile, source, ast, json, jsonFile, resultFlag;
 	
-			netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-			
+			netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");		
 			if (fileNameWithExt.search(/\.js$/) === -1) {return "ERROR: Must be a .js file!";}
-			
 			sourceFile = FileIO.open(path + ".js");
 			if (! sourceFile.exists()) {return "ERROR " + fileNameWithExt + " doesn't exist!";}
-	
+			
+			_collectIds = collectIds_ || false;
 			source = FileIO.read(sourceFile);
 			ast = PARSER.parse(source);
 			json = ast.toString();
-		
+			
 			jsonFile = FileIO.open(path + ".json");
 			resultFlag = FileIO.write(jsonFile, json);
+			if (_collectIds) {resultFlag = resultFlag && _updateIds();}
 			return resultFlag;
 		}
 	};

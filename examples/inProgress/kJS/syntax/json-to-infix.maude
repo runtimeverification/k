@@ -1,40 +1,65 @@
 load js-syntax.maude
+ load ../js-json-ast-ids.maude
  
  mod JSON-INFIX
   	is including JS-SYNTAX + JSON .
  	
- 	  sort JsonTag .    op type :  -> JsonTag   [metadata "location(json-to-infix.k:6)"] .  op children :  -> JsonTag   [metadata "location(json-to-infix.k:6)"] .  op name :  -> JsonTag   [metadata "location(json-to-infix.k:6)"] .  op value :  -> JsonTag   [metadata "location(json-to-infix.k:6)"] .  op expression :  -> JsonTag   [metadata "location(json-to-infix.k:6)"] .  op assignOp :  -> JsonTag   [metadata "location(json-to-infix.k:6)"] .  op postfix :  -> JsonTag [metadata "location(json-to-infix.k:6)"] .  
+ 	      subsort JSJsonAstIds <  Id .  
  	
- 	      subsort JsonTag <  Id .  
+ 	eq o(type :  "NUMBER" value :  N:Numeric Extra:JSProperties) =  n(N) [metadata "location(json-to-infix.k:9)"] .
+ 	eq o(type :  "STRING" value :  S:String Extra) =  s(S) [metadata "location(json-to-infix.k:10)"] .
+ 	eq o(type :  "BOOLEAN" value :  B:Bool Extra) =  b(B) [metadata "location(json-to-infix.k:11)"] .
  	
- 	eq o(type :  "NUMBER" value :  N:Numeric Properties:JSProperties) =  n(N) [metadata "location(json-to-infix.k:10)"] .
- 	eq o(type :  "STRING" value :  S:String Properties) =  s(S) [metadata "location(json-to-infix.k:11)"] .
- 	eq o(type :  "BOOLEAN" value :  B:Bool Properties) =  b(B) [metadata "location(json-to-infix.k:12)"] .
- 	
- 	eq o(type :  "IDENTIFIER" name :  Name:String Properties) =  id(Name) [metadata "location(json-to-infix.k:14)"] .
- 	
- 	eq o(type :  "OR" children :  a(Left:JS , Right:JS) Properties) =  or(Left , Right) [metadata "location(json-to-infix.k:16)"] .
- 	
- 	eq o(type :  "PLUS" children :  a(Left , Right) Properties) =  add(Left , Right) [metadata "location(json-to-infix.k:18)"] .
- 	
- 	eq o(type :  "INCREMENT" children :  a(Element:JS) Properties) =  inc(Element, false) [metadata "location(json-to-infix.k:20)"] .
- 	eq o(type :  "INCREMENT" children :  a(Element) postfix :  Flag:Bool Properties) =  inc(Element, Flag) [metadata "location(json-to-infix.k:21)"] .
- 	
- 	eq o(type :  "DECREMENT" children :  a(Element) Properties) =  dec(Element, false) [metadata "location(json-to-infix.k:23)"] .
- 	eq o(type :  "DECREMENT" children :  a(Element) postfix :  Flag Properties) =  dec(Element, Flag) [metadata "location(json-to-infix.k:24)"] .
+ 	eq o(type :  "IDENTIFIER" name :  Name:String Extra) =  id(Name) [metadata "location(json-to-infix.k:13)"] .
  
+ 	eq o(type :  "DOT" children :  a(Left , Right) Extra) =  staticAccess(Left , Right) [metadata "location(json-to-infix.k:15)"] .
  	
- 	eq o(type :  "SCRIPT" children :  a(Elements:List{JS}) Properties) =  program(Elements) [metadata "location(json-to-infix.k:27)"] .
+ 	eq o(type :  "INCREMENT" children :  a(Element:JS) Extra) =  inc(Element, false) [metadata "location(json-to-infix.k:17)"] .
+ 	eq o(type :  "INCREMENT" children :  a(Element) postfix :  Flag:Bool Extra) =  inc(Element, Flag) [metadata "location(json-to-infix.k:18)"] .
  	
- 	eq o(type :  "VAR" children :  a(Elements) Properties) =  varDeclarations(Elements) [metadata "location(json-to-infix.k:29)"] .
+ 	eq o(type :  "DECREMENT" children :  a(Element) Extra) =  dec(Element, false) [metadata "location(json-to-infix.k:20)"] .
+ 	eq o(type :  "DECREMENT" children :  a(Element) postfix :  Flag Extra) =  dec(Element, Flag) [metadata "location(json-to-infix.k:21)"] .
  	
- 	eq o(type :  "SEMICOLON" expression :  a(Elements) Properties) =  stmts(Elements) [metadata "location(json-to-infix.k:31)"] .
+ 	eq o(type :  "TYPEOF" children :  a(Element) Extra) =  typeof(Element) [metadata "location(json-to-infix.k:23)"] .
+ 	eq o(type :  "NOT" children :  a(Element) Extra) =  not(Element) [metadata "location(json-to-infix.k:24)"] .
+ 	eq o(type :  "??? -" children :  a(Element) Extra) =  neg(Element) [metadata "location(json-to-infix.k:25)"] .
+ 	eq o(type :  "??? +" children :  a(Element) Extra) =  plus(Element) [metadata "location(json-to-infix.k:26)"] .
  	
- 	eq o(type :  "DOT" children :  a(Left , Right) Properties) =  staticAccess(Left , Right) [metadata "location(json-to-infix.k:33)"] .
+ 	eq o(type :  "MUL" children :  a(Left:JS , Right:JS) Extra) =  mul(Left , Right) [metadata "location(json-to-infix.k:28)"] .
+ 	eq o(type :  "DIV" children :  a(Left , Right) Extra) =  div(Left , Right) [metadata "location(json-to-infix.k:29)"] .
+ 	eq o(type :  "MOD" children :  a(Left , Right) Extra) =  mod(Left , Right) [metadata "location(json-to-infix.k:30)"] .
  	
+ 	eq o(type :  "PLUS" children :  a(Left , Right) Extra) =  add(Left , Right) [metadata "location(json-to-infix.k:32)"] .
+ 	eq o(type :  "MINUS" children :  a(Left , Right) Extra) =  sub(Left , Right) [metadata "location(json-to-infix.k:33)"] .
+ 
+ 	eq o(type :  "LT" children :  a(Left , Right) Extra) =  lt(Left , Right) [metadata "location(json-to-infix.k:35)"] .
+ 	eq o(type :  "LE" children :  a(Left , Right) Extra) =  lte(Left , Right) [metadata "location(json-to-infix.k:36)"] .
+ 	eq o(type :  "GT" children :  a(Left , Right) Extra) =  gt(Left , Right) [metadata "location(json-to-infix.k:37)"] .
+ 	eq o(type :  "GE" children :  a(Left , Right) Extra) =  gte(Left , Right) [metadata "location(json-to-infix.k:38)"] .
+ 	eq o(type :  "IN" children :  a(Left , Right) Extra) =  in(Left , Right) [metadata "location(json-to-infix.k:39)"] .
+ 	eq o(type :  "INSTANCEOF" children :  a(Left , Right) Extra) =  instanceof(Left , Right) [metadata "location(json-to-infix.k:40)"] .
+ 		
+ 	eq o(type :  "EQ" children :  a(Left , Right) Extra) =  sameAs(Left , Right) [metadata "location(json-to-infix.k:42)"] .
+ 	eq o(type :  "NE" children :  a(Left , Right) Extra) =  notSameAs(Left , Right) [metadata "location(json-to-infix.k:43)"] .
+ 	eq o(type :  "STRICT_EQ" children :  a(Left , Right) Extra) =  identical(Left , Right) [metadata "location(json-to-infix.k:44)"] .
+ 	eq o(type :  "STRICT_NE" children :  a(Left , Right) Extra) =  notIdentical(Left , Right) [metadata "location(json-to-infix.k:45)"] .
+ 	
+ 	eq o(type :  "AND" children :  a(Left , Right) Extra) =  and(Left , Right) [metadata "location(json-to-infix.k:47)"] .
+ 	
+ 	eq o(type :  "OR" children :  a(Left , Right) Extra) =  or(Left , Right) [metadata "location(json-to-infix.k:49)"] .
+ 
+ 	eq o(type :  "HOOK" children :  a(Left , Middle:JS, Right) Extra) 
+ 		=  ternary(Left , Middle, Right) [metadata "location(json-to-infix.k:51)"] .
+ 
  	eq o(type :  "ASSIGN" assignOp :  OpCode:JS children :  a(Left , Right)) 
- 		=  assignment(OpCode, Left, Right) [metadata "location(json-to-infix.k:35)"] .
+ 		=  assignment(Left, OpCode, Right) [metadata "location(json-to-infix.k:54)"] .
  	
+ 	eq o(type :  "ARRAY_INIT" children :  a(Elements) Extra) =  arrayLit(Elements) [metadata "location(json-to-infix.k:57)"] .
  	
- 	eq o(type :  "ARRAY_INIT" children :  a(Elements) Properties) =  arrayLit(Elements) [metadata "location(json-to-infix.k:39)"] .
- var S :  String . var Flag :  Bool . var Right :  JS . var Elements :  List{JS} . var N :  Numeric . var OpCode :  JS . var B :  Bool . var Properties :  JSProperties . var Left :  JS . var Element :  JS . var Name :  String .   subsorts JSProperties Builtin JsonTerminal JSProperty JsonLiteral < K . endm	
+ 	eq o(type :  "SEMICOLON" expression :  a(Elements) Extra) =  stmts(Elements) [metadata "location(json-to-infix.k:59)"] .
+ 	
+ 	eq o(type :  "VAR" children :  a(Elements) Extra) =  varDeclarations(Elements) [metadata "location(json-to-infix.k:61)"] .
+ 	
+ 	eq o(type :  "SCRIPT" children :  a(Elements:List{JS}) Extra) =  program(Elements) [metadata "location(json-to-infix.k:63)"] .
+ 	
+ var S :  String . var Middle :  JS . var Right :  JS . var Flag :  Bool . var Extra :  JSProperties . var Elements :  List{JS} . var N :  Numeric . var OpCode :  JS . var B :  Bool . var Element :  JS . var Left :  JS . var Name :  String .   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm	

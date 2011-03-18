@@ -51,8 +51,7 @@ kmod JS-SYNTAX
 		| ternary ( JS , JS , JS ) [strict(1)]	--- Exp ? Exp : Exp
 		
 		
-		| assignment ( JS , JS ) [strict]		--- TargetExp = Exp
-		| assignment ( JS , JS , JS ) [strict] --- TargetExp AssignmentOp Exp
+		| assignment ( JS , JS , JS ) [strict]  --- TargetExp AssignmentOp Exp
 		
 		| arrayLit ( List{JS} ) [strict]				--- [ CommaList{Exp} ]
 		| objectLit ( List{JS} ) [strict]			--- { CommaList{Property} }
