@@ -15,6 +15,11 @@ public class Table {
   }
 
   static class Cell {
+    public static final int NONE = 0;
+    public static final int LEFT = 1;
+    public static final int RIGHT = 2;
+    public static final int BOTH = 3;
+
     public static final Cell
       CONFIG  = new Cell("config",  Sort.BAG,  false, null  ),
       PROGRAM = new Cell("program", Sort.K,    true,  CONFIG),

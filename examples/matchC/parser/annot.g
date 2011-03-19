@@ -29,7 +29,6 @@ tokens {
   COMMA = ',';
   LPAREN = '(';
   RPAREN = ')'; 
-  ANY = '_';
 
   DISJ = '\\/';
   CONJ = '/\\';
@@ -298,14 +297,21 @@ list
 cell
 scope {
   String cellLabel;
+  int cellOpen;
 
 }
+@init {
+  $cell::cellOpen = Table.Cell.NONE;
+}
   : open_cell_tag cell_content close_cell_tag
-    -> ^(CELL open_cell_tag cell_content close_cell_tag)
+    -> ^(CELL[Integer.toString($cell::cellOpen)]
+         open_cell_tag cell_content close_cell_tag
+       )
   ;
 
 open_cell_tag
-  : '<'! IDENTIFIER '>'! { $cell::cellLabel = $IDENTIFIER.text; }
+  : '<'! IDENTIFIER ('>'! | '_>'! { $cell::cellOpen |= Table.Cell.LEFT; })
+    { $cell::cellLabel = $IDENTIFIER.text; }
   ;
 
 cell_content
@@ -320,51 +326,9 @@ cell_content
   ;
 
 close_cell_tag
-  : '</'! IDENTIFIER '>'! { $cell::cellLabel.equals($IDENTIFIER.text) }?
+  : ('</'! | '<_/'! { $cell::cellOpen |= Table.Cell.RIGHT; })  IDENTIFIER '>'!
+    { $cell::cellLabel.equals($IDENTIFIER.text) }?
   ;
-
-
-/*
-cell
-options { backtrack = true; }
-  : map_cell
-  | bag_cell
-  | list_cell
-  | k_cell
-  ;
-
-map_cell
-  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
-    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.MAP) }?
-    map cell_end[$IDENTIFIER.text]
-    -> ^(CELL LABEL[$IDENTIFIER.text] map LABEL[$IDENTIFIER.text])
-  ;
-
-bag_cell
-  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
-    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.BAG) }?
-    bag cell_end[$IDENTIFIER.text]
-    -> ^(CELL LABEL[$IDENTIFIER.text] bag LABEL[$IDENTIFIER.text])
-  ;
-
-list_cell
-  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
-    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.LIST) }?
-    list cell_end[$IDENTIFIER.text]
-    -> ^(CELL LABEL[$IDENTIFIER.text] list LABEL[$IDENTIFIER.text])
-  ;
-
-k_cell
-  : '<' IDENTIFIER '>' { Table.labelToCell.containsKey($IDENTIFIER.text) }?
-    { Table.labelToCell.get($IDENTIFIER.text).sort.equals(Table.Sort.K) }?
-    k cell_end[$IDENTIFIER.text]
-    -> ^(CELL LABEL[$IDENTIFIER.text] k LABEL[$IDENTIFIER.text])
-  ;
-
-cell_end[String label]
-  : '</' IDENTIFIER '>' { $IDENTIFIER.text.equals($label) }?
-  ;
-*/
 
 
 /*
@@ -513,7 +477,6 @@ LETTER
   :  '$'
   |  'A'..'Z'
   |  'a'..'z'
-  |  '_'
   ;
 
 fragment

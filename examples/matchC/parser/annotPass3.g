@@ -13,6 +13,8 @@ bottomup
 
 default_k
   : ^(w=IDENTIFIER v=IDENTIFIER) { $w.text.equals("defaultKItem") }?
-    -> ^(APP["_`(_`)"] KLABEL["'defaultKItem`(_`)"] ^(APP["_`(_`)"] ^(BUILTIN["List`{MathObj++`}_"] $v) K_LIST[".List{K}"]))
+    -> ^(APP["_`(_`)"] KLABEL["'defaultKItem`(_`)"]
+         ^(APP["_`(_`)"] ^(BUILTIN["List`{MathObj++`}_"] $v) K_LIST[".List{K}"])
+       )
   ;
 

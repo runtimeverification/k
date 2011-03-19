@@ -67,6 +67,7 @@ public class AnnotPreK {
     tokenToBuiltins.put(kernelCParser.ID, "id`(_`)");
   }
 
+
   public static String annotToMaudeString(String annotString) {
     init();
 
@@ -112,8 +113,8 @@ public class AnnotPreK {
 
       CommonTree maudifiedTree = tree;
 
-      //System.out.println(TreeUtils.toTreeString(maudifiedTree, 0));
-      //System.out.println(TreeUtils.toMaudeString(tree));
+      System.err.println(TreeUtils.toTreeString(maudifiedTree, 0));
+      //System.err.println(TreeUtils.toMaudeString(tree));
       String annotMaudeString = TreeUtils.toMaudeString(maudifiedTree);
       if (annotType == annotParser.ASSERT && Table.varString.startsWith("!") ) {
         String varRoot = Table.varString.substring(1);
@@ -136,11 +137,36 @@ public class AnnotPreK {
     return "";
   }
 
+
+  public static CommonTree newVar(String name, String sort, boolean isDefault)
+  {
+    Token t;
+    String wrapper;
+    if (!isDefault) 
+      wrapper = prefix + sort + "Item";
+    else
+      wrapper = "default" + sort + "Item";
+
+    t = new CommonToken(annotParser.IDENTIFIER, wrapper);
+    CommonTree var = new CommonTree(t);
+
+    String wrappee;
+    if (!isDefault)
+      wrappee = "\"" + name + "_" + suffix + "\"";
+    else 
+      wrappee = "\"" + name + "\"";
+
+    t = new CommonToken(annotParser.IDENTIFIER, wrappee);
+    var.addChild(new CommonTree(t));
+
+    return var;
+  }
+
   public static void addCell(CommonTree cellBag, Table.Cell cell) {
     Token t;
     String cellLabel = cell.label;
 
-    t = new CommonToken(annotParser.CELL, "CELL");
+    t = new CommonToken(annotParser.CELL, Integer.toString(Table.Cell.NONE));
     CommonTree newCell = new CommonTree(t);
     cellBag.addChild(newCell);
 
@@ -151,29 +177,44 @@ public class AnnotPreK {
     CommonTree newBag = new CommonTree(t);
     newCell.addChild(newBag);
 
-    if (cell.cells.isEmpty()) {
-      String wrapper;
-      if (!cell.isDefault) 
-        wrapper = prefix + cell.sort + "Item";
-      else
-        wrapper = "default" + cell.sort + "Item";
-
-      t = new CommonToken(annotParser.IDENTIFIER, wrapper);
-      CommonTree newVar = new CommonTree(t);
-      newBag.addChild(newVar);
-
-      String wrappee;
-      if (!cell.isDefault)
-        wrappee = "\"" + cellLabel + "_" + suffix + "\"";
-      else 
-        wrappee = "\"" + cellLabel + "\"";
-
-      t = new CommonToken(annotParser.IDENTIFIER, wrappee);
-      newVar.addChild(new CommonTree(t));
-    }
+    if (cell.cells.isEmpty())
+      newBag.addChild(newVar(cellLabel, cell.sort, cell.isDefault));
 
     t = new CommonToken(annotParser.IDENTIFIER, cellLabel);
     newCell.addChild(new CommonTree(t));
+  }
+
+  public static void frameCell(CommonTree tree)
+  {
+    String cellLabel = ((CommonTree) tree.getChild(0)).getText();
+    int cellOpen = Integer.parseInt(tree.getText());
+    String cellSort = Table.labelToCell.get(cellLabel).sort;
+
+    if (cellOpen != Table.Cell.NONE)
+    {
+       Token t = null;
+       if (cellSort.equals(Table.Sort.MAP)) {
+         if ((cellOpen & Table.Cell.BOTH) != Table.Cell.NONE)
+         cellOpen = Table.Cell.RIGHT;
+         t = new CommonToken(annotParser.MAP);
+       }
+       else if (cellSort.equals(Table.Sort.BAG)) {
+         if ((cellOpen & Table.Cell.BOTH) != Table.Cell.NONE)
+         cellOpen = Table.Cell.RIGHT;
+         t = new CommonToken(annotParser.BAG);
+       }
+       else if (cellSort.equals(Table.Sort.LIST))
+         t = new CommonToken(annotParser.LIST);
+
+       CommonTree newContainer = new CommonTree(t);
+       if ((cellOpen & Table.Cell.LEFT) != Table.Cell.NONE)
+         newContainer.addChild(newVar("left_" + cellLabel, cellSort, false));
+       newContainer.addChild(tree.getChild(1));
+       if ((cellOpen & Table.Cell.RIGHT) != Table.Cell.NONE)
+         newContainer.addChild(newVar("right_" + cellLabel, cellSort, false));
+
+       tree.setChild(1, newContainer);
+    }
   }
 
   public static String prefix = "";
@@ -205,8 +246,10 @@ public class AnnotPreK {
       if (!cells.isEmpty()) {
         cellBag = (CommonTree) tree.getChild(1);
       }
-      else
+      else {
+        //frameCell(tree);
         return;
+      }
     }
 
     boolean isVar = false;
@@ -281,6 +324,7 @@ public class AnnotPreK {
   }
 
   public static void main (String[] args) {
+    annotToMaudeString("//@ assert <heap> . </heap>");
 /*
     try {
       ANTLRInputStream input = new ANTLRInputStream(System.in);
@@ -303,4 +347,5 @@ public class AnnotPreK {
     }
 */
   }
+
 }
