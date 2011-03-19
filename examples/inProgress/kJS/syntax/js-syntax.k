@@ -3,7 +3,8 @@ load ../json/json.k
 kmod JS-SYNTAX 
 	is including JSON
 
-	syntax JSValue ::= b( Bool ) | n( Numeric ) | s( String ) | r( String ) | .null | .undefined
+	syntax JSValue ::= b( Bool ) | n( Numeric ) | s( String ) | r( String ) 
+		| .null | .undefined | .this
 	
 	syntax JS ::= 
 			JSValue

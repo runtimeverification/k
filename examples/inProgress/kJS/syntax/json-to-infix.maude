@@ -14,98 +14,102 @@ load js-syntax.maude
  	eq o(type :  "NULL" Extra) =  .null  [metadata "location(json-to-infix.k:14)"] .
  	eq null =  .undefined  [metadata "location(json-to-infix.k:15)"] .
  	eq undefined =  .undefined  [metadata "location(json-to-infix.k:16)"] .
+ 	eq o(type :  "THIS" Extra) =  .this  [metadata "location(json-to-infix.k:17)"] .
  	
- 	eq o(type :  "IDENTIFIER" value :  Name:String Extra) =  id(Name) [metadata "location(json-to-infix.k:18)"] .
+ 	eq o(type :  "IDENTIFIER" value :  Name:String Extra) =  id(Name) [metadata "location(json-to-infix.k:19)"] .
  
- 	eq o(type :  "DOT" children :  a(Left , Right) Extra) =  staticAccess(Left , Right) [metadata "location(json-to-infix.k:20)"] .
- 	
- 	eq o(type :  "INCREMENT" children :  a(Exp:JS) postfix :  Flag:Bool Extra) =  inc(Exp, Flag) [metadata "location(json-to-infix.k:22)"] .
- 	eq o(type :  "INCREMENT" children :  a(Exp) Extra) =  inc(Exp, false) [metadata "location(json-to-infix.k:23)"] .
- 	
- 	eq o(type :  "DECREMENT" children :  a(Exp) postfix :  Flag Extra) =  dec(Exp, Flag) [metadata "location(json-to-infix.k:25)"] .
- 	eq o(type :  "DECREMENT" children :  a(Exp) Extra) =  dec(Exp, false) [metadata "location(json-to-infix.k:26)"] .
- 	
- 	eq o(type :  "TYPEOF" children :  a(Exp) Extra) =  typeof(Exp) [metadata "location(json-to-infix.k:28)"] .
- 	eq o(type :  "NOT" children :  a(Exp) Extra) =  not(Exp) [metadata "location(json-to-infix.k:29)"] .
- 	eq o(type :  "??? -" children :  a(Exp) Extra) =  neg(Exp) [metadata "location(json-to-infix.k:30)"] .
- 	eq o(type :  "??? +" children :  a(Exp) Extra) =  plus(Exp) [metadata "location(json-to-infix.k:31)"] .
- 	
- 	eq o(type :  "MUL" children :  a(Left:JS , Right:JS) Extra) =  mul(Left , Right) [metadata "location(json-to-infix.k:33)"] .
- 	eq o(type :  "DIV" children :  a(Left , Right) Extra) =  div(Left , Right) [metadata "location(json-to-infix.k:34)"] .
- 	eq o(type :  "MOD" children :  a(Left , Right) Extra) =  mod(Left , Right) [metadata "location(json-to-infix.k:35)"] .
- 	
- 	eq o(type :  "PLUS" children :  a(Left , Right) Extra) =  add(Left , Right) [metadata "location(json-to-infix.k:37)"] .
- 	eq o(type :  "MINUS" children :  a(Left , Right) Extra) =  sub(Left , Right) [metadata "location(json-to-infix.k:38)"] .
- 
- 	eq o(type :  "LT" children :  a(Left , Right) Extra) =  lt(Left , Right) [metadata "location(json-to-infix.k:40)"] .
- 	eq o(type :  "LE" children :  a(Left , Right) Extra) =  lte(Left , Right) [metadata "location(json-to-infix.k:41)"] .
- 	eq o(type :  "GT" children :  a(Left , Right) Extra) =  gt(Left , Right) [metadata "location(json-to-infix.k:42)"] .
- 	eq o(type :  "GE" children :  a(Left , Right) Extra) =  gte(Left , Right) [metadata "location(json-to-infix.k:43)"] .
- 	eq o(type :  "IN" children :  a(Left , Right) Extra) =  in(Left , Right) [metadata "location(json-to-infix.k:44)"] .
- 	eq o(type :  "INSTANCEOF" children :  a(Left , Right) Extra) =  instanceof(Left , Right) [metadata "location(json-to-infix.k:45)"] .
- 		
- 	eq o(type :  "EQ" children :  a(Left , Right) Extra) =  sameAs(Left , Right) [metadata "location(json-to-infix.k:47)"] .
- 	eq o(type :  "NE" children :  a(Left , Right) Extra) =  notSameAs(Left , Right) [metadata "location(json-to-infix.k:48)"] .
- 	eq o(type :  "STRICT_EQ" children :  a(Left , Right) Extra) =  identical(Left , Right) [metadata "location(json-to-infix.k:49)"] .
- 	eq o(type :  "STRICT_NE" children :  a(Left , Right) Extra) =  notIdentical(Left , Right) [metadata "location(json-to-infix.k:50)"] .
- 	
- 	eq o(type :  "AND" children :  a(Left , Right) Extra) =  and(Left , Right) [metadata "location(json-to-infix.k:52)"] .
- 	
- 	eq o(type :  "OR" children :  a(Left , Right) Extra) =  or(Left , Right) [metadata "location(json-to-infix.k:54)"] .
- 
- 	eq o(type :  "HOOK" children :  a(Left , Middle:JS, Right) Extra) 
- 		=  ternary(Left , Middle, Right) [metadata "location(json-to-infix.k:56)"] .
- 
- 	eq o(type :  "ASSIGN" assignOp :  OpCode:JS children :  a(Left , Right) Extra) 
- 		=  assignment(Left, OpCode, Right) [metadata "location(json-to-infix.k:59)"] .
- 	
- 	eq o(type :  "ARRAY_INIT" children :  a(Exps:List{JS}) Extra) =  arrayLit(Exps) [metadata "location(json-to-infix.k:62)"] .
- 	
- 	eq o(type :  "SEMICOLON" expression :  Exp Extra) =  exp(Exp) [metadata "location(json-to-infix.k:64)"] .
+ 	eq o(type :  "DOT" children :  a(Left , Right) Extra) =  staticAccess(Left , Right) [metadata "location(json-to-infix.k:21)"] .
+ 	eq o(type :  "INDEX" children :  a(Left , Right) Extra) =  dynamicAccess(Left , Right) [metadata "location(json-to-infix.k:22)"] .
  	
  	eq o(type :  "CALL" children :  a(FunctionExp:JS, CommaList:JS) Extra) 
- 		=  invocation(FunctionExp, CommaList) [metadata "location(json-to-infix.k:66)"] .
- 	
- 	eq o(type :  "LIST" children :  a(Exps) Extra) =  comma(Exps) [metadata "location(json-to-infix.k:69)"] .
- 	eq o(type :  "COMMA" children :  a(Exps) Extra) =  comma(Exps) [metadata "location(json-to-infix.k:70)"] .
- 	
- 	eq o(type :  "BLOCK" children :  a(Stmts:List{JS}) Extra) =  block(Stmts) [metadata "location(json-to-infix.k:72)"] .
- 	eq o(type :  "RETURN" value :  Exp Extra) =  return(Exp) [metadata "location(json-to-infix.k:73)"] .
+ 		=  invocation(FunctionExp, CommaList) [metadata "location(json-to-infix.k:24)"] .
  
+ 	eq o(type :  "NEW" children :  a(Exp) Extra) =  new(Exp) [metadata "location(json-to-infix.k:27)"] .
+ 
+ 	eq o(type :  "INCREMENT" children :  a(Exp:JS) postfix :  Flag:Bool Extra) =  inc(Exp, Flag) [metadata "location(json-to-infix.k:29)"] .
+ 	eq o(type :  "INCREMENT" children :  a(Exp) Extra) =  inc(Exp, false) [metadata "location(json-to-infix.k:30)"] .
  	
+ 	eq o(type :  "DECREMENT" children :  a(Exp) postfix :  Flag Extra) =  dec(Exp, Flag) [metadata "location(json-to-infix.k:32)"] .
+ 	eq o(type :  "DECREMENT" children :  a(Exp) Extra) =  dec(Exp, false) [metadata "location(json-to-infix.k:33)"] .
+ 	
+ 	eq o(type :  "DELETE" children :  a(Exp) Extra) =  delete(Exp) [metadata "location(json-to-infix.k:35)"] .
+ 	
+ 	eq o(type :  "TYPEOF" children :  a(Exp) Extra) =  typeof(Exp) [metadata "location(json-to-infix.k:37)"] .
+ 	eq o(type :  "NOT" children :  a(Exp) Extra) =  not(Exp) [metadata "location(json-to-infix.k:38)"] .
+ 	eq o(type :  "UNARY_MINUS" children :  a(Exp) Extra) =  neg(Exp) [metadata "location(json-to-infix.k:39)"] .
+ 	eq o(type :  "UNARY_PLUS" children :  a(Exp) Extra) =  plus(Exp) [metadata "location(json-to-infix.k:40)"] .
+ 	
+ 	eq o(type :  "MUL" children :  a(Left:JS , Right:JS) Extra) =  mul(Left , Right) [metadata "location(json-to-infix.k:42)"] .
+ 	eq o(type :  "DIV" children :  a(Left , Right) Extra) =  div(Left , Right) [metadata "location(json-to-infix.k:43)"] .
+ 	eq o(type :  "MOD" children :  a(Left , Right) Extra) =  mod(Left , Right) [metadata "location(json-to-infix.k:44)"] .
+ 	
+ 	eq o(type :  "PLUS" children :  a(Left , Right) Extra) =  add(Left , Right) [metadata "location(json-to-infix.k:46)"] .
+ 	eq o(type :  "MINUS" children :  a(Left , Right) Extra) =  sub(Left , Right) [metadata "location(json-to-infix.k:47)"] .
+ 
+ 	eq o(type :  "LT" children :  a(Left , Right) Extra) =  lt(Left , Right) [metadata "location(json-to-infix.k:49)"] .
+ 	eq o(type :  "LE" children :  a(Left , Right) Extra) =  lte(Left , Right) [metadata "location(json-to-infix.k:50)"] .
+ 	eq o(type :  "GT" children :  a(Left , Right) Extra) =  gt(Left , Right) [metadata "location(json-to-infix.k:51)"] .
+ 	eq o(type :  "GE" children :  a(Left , Right) Extra) =  gte(Left , Right) [metadata "location(json-to-infix.k:52)"] .
+ 	eq o(type :  "IN" children :  a(Left , Right) Extra) =  in(Left , Right) [metadata "location(json-to-infix.k:53)"] .
+ 	eq o(type :  "INSTANCEOF" children :  a(Left , Right) Extra) =  instanceof(Left , Right) [metadata "location(json-to-infix.k:54)"] .
+ 		
+ 	eq o(type :  "EQ" children :  a(Left , Right) Extra) =  sameAs(Left , Right) [metadata "location(json-to-infix.k:56)"] .
+ 	eq o(type :  "NE" children :  a(Left , Right) Extra) =  notSameAs(Left , Right) [metadata "location(json-to-infix.k:57)"] .
+ 	eq o(type :  "STRICT_EQ" children :  a(Left , Right) Extra) =  identical(Left , Right) [metadata "location(json-to-infix.k:58)"] .
+ 	eq o(type :  "STRICT_NE" children :  a(Left , Right) Extra) =  notIdentical(Left , Right) [metadata "location(json-to-infix.k:59)"] .
+ 	
+ 	eq o(type :  "AND" children :  a(Left , Right) Extra) =  and(Left , Right) [metadata "location(json-to-infix.k:61)"] .
+ 	
+ 	eq o(type :  "OR" children :  a(Left , Right) Extra) =  or(Left , Right) [metadata "location(json-to-infix.k:63)"] .
+ 
+ 	eq o(type :  "HOOK" children :  a(Left , Middle:JS, Right) Extra) 
+ 		=  ternary(Left , Middle, Right) [metadata "location(json-to-infix.k:65)"] .
+ 
+ 	eq o(type :  "ASSIGN" assignOp :  OpCode:JS children :  a(Left , Right) Extra) 
+ 		=  assignment(Left, OpCode, Right) [metadata "location(json-to-infix.k:68)"] .
+ 
+ 	eq o(type :  "ARRAY_INIT" children :  a(Exps:List{JS}) Extra) =  arrayLit(Exps) [metadata "location(json-to-infix.k:71)"] .
+ 	eq o(type :  "OBJECT_INIT" children :  a(Exps:List{JS}) Extra) =  objectLit(Exps) [metadata "location(json-to-infix.k:72)"] .
+ 	eq o(type :  "PROPERTY_INIT" children :  a(Left , Right) Extra) =  propertyLit(Left , Right) [metadata "location(json-to-infix.k:73)"] .
+ 		
+ 	eq o(type :  "RETURN" value :  Exp Extra) =  return(Exp) [metadata "location(json-to-infix.k:75)"] .	
  	eq o(type :  "BREAK" label :  Name Extra) =  break(Name) [metadata "location(json-to-infix.k:76)"] .
  	eq o(type :  "BREAK" Extra) =  break(.undefined ) [metadata "location(json-to-infix.k:77)"] .
  	eq o(type :  "CONTINUE" label :  Name Extra) =  continue(Name) [metadata "location(json-to-infix.k:78)"] .
  	eq o(type :  "CONTINUE" Extra) =  continue(.undefined ) [metadata "location(json-to-infix.k:79)"] .
  
  
- 	eq o(type :  "IF" condition :  Condition:JS thenPart :  Stmt:JS elsePart :  OtherStmt:JS Extra) 
- 		=  ifElse(Condition, Stmt, OtherStmt) [metadata "location(json-to-infix.k:82)"] .
+ 	eq o(type :  "BLOCK" children :  a(Stmts:List{JS}) Extra) =  block(Stmts) [metadata "location(json-to-infix.k:82)"] .
  
- 	eq (type :  "CASE" caseLabel :  Exp statements :  Stmt Extra) =  case(Exp, Stmt) [metadata "location(json-to-infix.k:85)"] .
- 	eq (type :  "DEFAULT" statements :  Stmt Extra) =  default(Stmt) [metadata "location(json-to-infix.k:86)"] .
- 	
- 	eq o(type :  "LABEL" label :  Name statement :  Stmt Extra) =  controlLabel(Name, Stmt) [metadata "location(json-to-infix.k:88)"] .
+ 	eq o(type :  "SEMICOLON" expression :  Exp Extra) =  exp(Exp) [metadata "location(json-to-infix.k:84)"] .
+ 		
+ 	eq o(type :  "LIST" children :  a(Exps) Extra) =  comma(Exps) [metadata "location(json-to-infix.k:86)"] .
+ 	eq o(type :  "COMMA" children :  a(Exps) Extra) =  comma(Exps) [metadata "location(json-to-infix.k:87)"] .
+ 
+ 	eq o(type :  "IF" condition :  Condition:JS thenPart :  Stmt:JS elsePart :  OtherStmt:JS Extra) 
+ 		=  ifElse(Condition, Stmt, OtherStmt) [metadata "location(json-to-infix.k:89)"] .
+ 
+ 	eq o(type :  "CASE" caseLabel :  Exp statements :  Stmt Extra) =  case(Exp, Stmt) [metadata "location(json-to-infix.k:92)"] .
+ 	eq o(type :  "DEFAULT" statements :  Stmt Extra) =  default(Stmt) [metadata "location(json-to-infix.k:93)"] .
  
  	eq o(type :  "SWITCH" discriminant :  Exp cases :  a(Cases:List{JS}) defaultIndex :  I Extra)
- 		=  switch(Exp, Cases, I) [metadata "location(json-to-infix.k:90)"] .
- 
- 	
- 	eq o(type :  "WHILE" condition :  Condition body :  Stmt Extra) =  while(Condition, Stmt) [metadata "location(json-to-infix.k:94)"] .
- 	eq o(type :  "DO" condition :  Condition body :  Stmt Extra) =  do(Condition, Stmt) [metadata "location(json-to-infix.k:95)"] .
+ 		=  switch(Exp, Cases, I) [metadata "location(json-to-infix.k:95)"] .
  	
  	eq o(type :  "FOR" setup :  Setup:JS condition :  Condition:JS update :  Exp body :  Stmt Extra) 
- 		=  for(Setup, Condition, Exp, Stmt) [metadata "location(json-to-infix.k:97)"] .
- 
+ 		=  for(Setup, Condition, Exp, Stmt) [metadata "location(json-to-infix.k:98)"] .
  	eq o(type :  "FOR_IN" iterator :  Left object :  Right body :  Stmt Extra) 
  		=  forIn(Left, Right, Stmt) [metadata "location(json-to-infix.k:100)"] .
  
+ 	eq o(type :  "WHILE" condition :  Condition body :  Stmt Extra) =  while(Condition, Stmt) [metadata "location(json-to-infix.k:103)"] .
+ 	eq o(type :  "DO" condition :  Condition body :  Stmt Extra) =  do(Condition, Stmt) [metadata "location(json-to-infix.k:104)"] .
  
+ 	eq o(type :  "LABEL" label :  Name statement :  Stmt Extra) =  controlLabel(Name, Stmt) [metadata "location(json-to-infix.k:106)"] .
+ 
+ 	eq o(type :  "VAR" children :  a(Exps) Extra) =  varDeclarations(Exps) [metadata "location(json-to-infix.k:108)"] .
+ 	
  	eq o(type :  "FUNCTION" functionForm :  I:Int name :  Name params :  a(Exps) body :  Stmt Extra)
- 		=  function(I, Name, Exps, Stmt) [metadata "location(json-to-infix.k:104)"] .
+ 		=  function(I, Name, Exps, Stmt) [metadata "location(json-to-infix.k:110)"] .
  		
- 	eq o(type :  "VAR" children :  a(Exps) Extra) =  varDeclarations(Exps) [metadata "location(json-to-infix.k:107)"] .
+ 	eq o(type :  "SCRIPT" children :  a(Stmts:List{JS}) Extra) =  program(Stmts) [metadata "location(json-to-infix.k:113)"] .
  	
- 	eq o(type :  "SCRIPT" children :  a(Stmts:List{JS}) Extra) =  program(Stmts) [metadata "location(json-to-infix.k:109)"] .
- 	
- var S :  String . var Cases :  List{JS} . var Middle :  JS . var Right :  JS . var Flag :  Bool . var Extra :  JSProperties . var Condition :  JS . var OpCode :  JS . var Stmt :  JS . var FunctionExp :  JS . var Exp :  JS . var Exps :  List{JS} . var Setup :  JS . var Stmts :  List{JS} . var OtherStmt :  JS . var I :  Int . var Num :  Numeric . var Left :  JS . var CommaList :  JS . var Name :  String .   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm	
+ var S :  String . var Cases :  List{JS} . var Middle :  JS . var Right :  JS . var Flag :  Bool . var Extra :  JSProperties . var Condition :  JS . var OpCode :  JS . var Stmt :  JS . var FunctionExp :  JS . var Exp :  JS . var Exps :  List{JS} . var Setup :  JS . var Stmts :  List{JS} . var OtherStmt :  JS . var I :  Int . var Num :  Numeric . var CommaList :  JS . var Left :  JS . var Name :  String .   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm	

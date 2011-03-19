@@ -6,5 +6,5 @@
 	load ../examples/ex5.maude
 	load ../examples/ex6.maude
 	load ../examples/ex7.maude
-	load ../examples/ex8.maude
+---	load ../examples/ex8.maude
 
