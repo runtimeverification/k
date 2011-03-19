@@ -438,6 +438,9 @@ fmod META-MODULE-EXTRAS is
 
   op removeImports : Module ImportList -> Module .
   eq removeImports(M, IL) = setImports(M, removeImports(getImports(M), IL)) .
+  eq removeImports(errorM(U, Trm, Cxt, Str, AS), IL:[ImportList]) 
+   = errorM(U, Trm, Cxt, Str, AS) .
+
 
   op removeImports : ImportList ImportList -> ImportList .
   eq removeImports(IL, nil) = IL .
