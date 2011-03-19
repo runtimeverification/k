@@ -16,7 +16,7 @@ struct listNode* reverse(struct listNode *x)
   struct listNode *y;
 
   p = 0 ;
-  /*@ invariant <heap> list(p)(?B), list(x)(?C), H </heap>
+  /*@ invariant <heap_> list(p)(?B), list(x)(?C) <_/heap>
                 /\ A = rev(?B) @ ?C */
   while(x) {
     y = x->next;
