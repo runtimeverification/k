@@ -247,7 +247,7 @@ public class AnnotPreK {
         cellBag = (CommonTree) tree.getChild(1);
       }
       else {
-        //frameCell(tree);
+        frameCell(tree);
         return;
       }
     }
