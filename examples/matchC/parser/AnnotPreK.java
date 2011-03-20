@@ -29,6 +29,9 @@ public class AnnotPreK {
     coreK.add("_~>_");
     coreK.add("(.).K");
     coreK.add(".");
+    coreK.add("_=>_");
+
+    tokenToK.put(annotParser.REW, "_=>_");
 
     tokenToK.put(annotParser.PRE, "@`pre_");
     tokenToK.put(annotParser.POST, "@`post_");
@@ -38,6 +41,7 @@ public class AnnotPreK {
     tokenToK.put(annotParser.SKIP, "@`skip");
     tokenToK.put(annotParser.VERIFY, "@`verify");
     tokenToK.put(annotParser.BREAKPOINT, "@`breakpoint");
+
     tokenToBuiltins.put(annotParser.DISJ, "_\\/_");
     tokenToBuiltins.put(annotParser.CONJ, "_/\\_");
     tokenToBuiltins.put(annotParser.NEG, "~_");
@@ -85,6 +89,8 @@ public class AnnotPreK {
       CommonTreeNodeStream nodes;
 
       completeConfig(tree);
+      if (tree.getType() == annotParser.INVARIANT)
+        splitConfig(tree);
 
       nodes = new CommonTreeNodeStream(tree);
       annotPass1 pass1 = new annotPass1(nodes);
@@ -138,7 +144,7 @@ public class AnnotPreK {
   }
 
 
-  public static CommonTree newVar(String name, String sort, boolean isDefault)
+  private static CommonTree newVar(String name, String sort, boolean isDefault)
   {
     Token t;
     String wrapper;
@@ -162,7 +168,7 @@ public class AnnotPreK {
     return var;
   }
 
-  public static void addCell(CommonTree cellBag, Table.Cell cell) {
+  private static void addCell(CommonTree cellBag, Table.Cell cell) {
     Token t;
     String cellLabel = cell.label;
 
@@ -184,7 +190,7 @@ public class AnnotPreK {
     newCell.addChild(new CommonTree(t));
   }
 
-  public static void frameCell(CommonTree tree)
+  private static void frameCell(CommonTree tree)
   {
     String cellLabel = ((CommonTree) tree.getChild(0)).getText();
     int cellOpen = Integer.parseInt(tree.getText());
@@ -217,13 +223,15 @@ public class AnnotPreK {
     }
   }
 
-  public static String prefix = "";
-  public static String suffix = "";
-  public static final Stack<String> prefixStack = new Stack<String>();
-  public static final Stack<String> suffixStack = new Stack<String>();
-  public static final Set<Table.Cell> cells = new HashSet<Table.Cell>();
 
-  public static void completeConfig(CommonTree tree) {
+  private static String prefix = "";
+  private static String suffix = "";
+  private static final Stack<String> prefixStack = new Stack<String>();
+  private static final Stack<String> suffixStack = new Stack<String>();
+  private static final Set<Table.Cell> cells = new HashSet<Table.Cell>();
+
+
+  private static void completeConfig(CommonTree tree) {
     CommonTree cellBag = null;
     if (tree.getType() == annotParser.CONFIG) {
       cells.clear();
@@ -321,6 +329,35 @@ public class AnnotPreK {
       prefix = prefixStack.pop();
       suffix = suffixStack.pop();
     }
+  }
+
+  private static void splitConfig(CommonTree tree) {
+    if (tree.getType() == annotParser.CONFIG) {
+      tree.setChild(0, splitTerm((CommonTree) tree.getChild(0)));
+    }
+    else
+      for (int i = 0; i < tree.getChildCount(); i++) {
+        splitConfig((CommonTree) tree.getChild(i));
+      }
+  }
+
+  private static CommonTree splitTerm(CommonTree tree) {
+    if (tree.getType() == annotParser.REW)
+      return tree;
+
+    CommonTree rewNode = new CommonTree(new CommonToken(annotParser.REW));
+    CommonTree leftNode = new CommonTree(new CommonToken(tree.getToken()));
+    CommonTree rightNode = new CommonTree(new CommonToken(tree.getToken()));
+    rewNode.addChild(leftNode);
+    rewNode.addChild(rightNode);
+
+    for (int i = 0; i < tree.getChildCount(); i++) {
+      CommonTree splitChild = splitTerm((CommonTree) tree.getChild(i));
+      leftNode.addChild(splitChild.getChild(0));
+      rightNode.addChild(splitChild.getChild(1));
+    }
+
+    return rewNode;
   }
 
   public static void main (String[] args) {

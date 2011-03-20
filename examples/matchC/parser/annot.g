@@ -14,14 +14,14 @@ tokens {
   END_ANNOT = '*/';
   LINE_ANNOT = '//@';
 
-  PRE = 'pre';
-  POST = 'post';
-  ASSUME = 'assume';
-  ASSERT = 'assert';
-  INVARIANT = 'invariant';
-  SKIP = 'skip';
-  VERIFY = 'verify';
-  BREAKPOINT = 'breakpoint';
+  PRE;
+  POST;
+  ASSUME;
+  ASSERT;
+  INVARIANT;
+  SKIP;
+  VERIFY;
+  BREAKPOINT;
   VAR;
 
   DOT = '.';
@@ -141,6 +141,7 @@ sort
   | MAP_ITEM 
   ;
 
+
 pattern
   : disjunctive_pattern
   ;
@@ -193,11 +194,10 @@ map_rewrite
   ;
 
 map_term
-options { backtrack = true; }
-  //: map_item+ -> ^(MAP map_item+)
+//options { backtrack = true; }
   : map_item (COMMA map_item)* -> ^(MAP map_item+)
   | map_unit -> MAP
-  | LPAREN! map RPAREN!
+//  | LPAREN! map RPAREN!
   ;
 
 
@@ -257,6 +257,14 @@ heap_pattern_name
  * Grammar rules for bag parsing
  */
 bag
+  : bag_rewrite
+  ;
+
+bag_rewrite
+  : bag_term (REW^ bag_term)?
+  ;
+
+bag_term
   : bag_item+ -> ^(BAG bag_item+)
   | bag_unit -> BAG
   ;
@@ -465,7 +473,17 @@ K_ARROW : '~>' ;
 K_LIST_UNIT : '.List{K}' ;
 K_LIST_COMMA : ',,' ;
 
+
+PRE : 'pre' ;
+POST : 'post' ;
+ASSUME : 'assume' ;
+ASSERT : 'assert' ;
+INVARIANT : 'invariant' | 'inv' ;
+SKIP : 'skip' ;
+VERIFY : 'verify' ;
+BREAKPOINT : 'breakpoint' ;
 VAR : 'var' { isVar = true; };
+
 
 IDENTIFIER
   : ('?' | '!')? LETTER (LETTER | DIGIT)*
