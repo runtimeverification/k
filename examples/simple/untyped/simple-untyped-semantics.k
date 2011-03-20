@@ -35,7 +35,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 
 ---------------------
---- Configuration ---
+/*@ Configuration  */
 ---------------------
 
   configuration <T>
@@ -61,45 +61,57 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 --- Declarations and initialization ---
 ---------------------------------------
 
---- Variable declaration
+//@ Variable declaration
   rule <k> var X:Id; => . <_/k>
        <env> Env:Map => Env[L:Nat/X] </env>
        <store_> . => L|->0 <_/store>
        <nextLoc> L => sNat(L) </nextLoc> 
 
---- Array declaration
+//@ Array declaration
   context var X[[HOLE]];
   rule <k> var X[N:Nat]; => . <_/k>
        <env> Env => Env[L/X] </env>
        <store_> . => L |-> array(sNat L, N) <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc>
 
---- Function declaration
+//@ Function declaration
   rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc>
        <store_> . => L|->function(sNat L)  sNat(L)|->lambda(Xl,S) <_/store>
 
---- When we are done with the first pass (preprocessing), i.e., the computation
---- contains only the token "execute" (see simple-untyped.k)
---- and genv is empty, call main() and initialize the global environment
+/*@
+ When we are done with the first pass (preprocessing), i.e., the computation
+ contains only the token "execute" (see simple-untyped.k)
+ and genv is empty, call main() and initialize the global environment
+*/
   syntax K ::= execute
   rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
 
 -------------------
---- Expressions ---
+//@ Expressions 
 -------------------
 
---- Variable lookup
+//@ Variable lookup
   rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store>
 
---- Variable increment
-  rule <k> ++X => I:Int +Int 1 <_/k>
-       <env_> X |-> L <_/env>
+
+/*@ Variable/Array increment
+
+ This is tricky, because we want to allow all of ++x, ++a[5]
+ Therefore, we need to extract the l-value of the expression to increment.
+ To do that, we state that the expression to increment should be wrapped
+ by the auxilliary "l-value" operation and then evaluated.
+ The semantics of the auxilliary l-value operation is defined below.
+ For now, all we need to know is that it takes an expression and evaluates
+ to a location value, also introduced below with the auxilliary operations.
+*/
+  context ++([HOLE] => l-value([HOLE]))
+  rule <k> ++loc(L) => I:Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store>
 
---- Arithmetic operators
+//@ Arithmetic operators
   rule I1:Int + I2:Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
@@ -116,16 +128,18 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule T1 or T2 => T1 orBool T2
   rule not(T:Bool) => notBool(T)
 
---- Array lookup.  Untyped SIMPLE does not check array bounds
---- We prefer to use a helper computation item, lookup, to avoid locking the store
-  rule <k> array(L,_)[N] => lookup(L +Int N) <_/k> [structural]
+/*@ Array lookup.  
+
+Untyped SIMPLE does not check array bounds
+We prefer to use a helper computation item, lookup, to avoid locking the store */
+  rule array(L,_)[N] => lookup(L +Int N) [structural]
   syntax K ::= lookup Nat
   rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
---- Size of array
+//@ Size of array
   rule sizeOf(array(_,N)) => N
 
---- Function call. The environment and the computation are pushed onto the stack
+//@ Function call. The environment and the computation are pushed onto the stack
   rule <k> _`(_`)(function(L),Vl:List{Val}) ~> K => S ~> return(0); </k>
        <fstack> . => (Env,K) <_/fstack>
        <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
@@ -136,53 +150,60 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
        <fstack> (Env,K) => . <_/fstack>
        <env> _ => Env </env>
 
---- Read
+//@ Read
   rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
 
 
 ------------------
---- Statements ---
+//@ Statements 
 ------------------
 
---- Empty blocks. One can make the rule below structural, if one doesn't want it to count as step
+//@ Empty blocks. One can make the rule below structural, if one doesn't want it to count as step
   rule {} => .
 
---- Nonempty Blocks. Make sure the environment is recovered after the block executes
---- This rule can also be structural if one does not want entering a block to count as step
+/*@ Nonempty Blocks. Make sure the environment is recovered after the block executes
+ This rule can also be structural if one does not want entering a block to count as step */
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env </env>
 
---- Sequential composition.  Desugared into K's sequentialization.  Can also be structural
+//@ Sequential composition.  Desugared into K's sequentialization.  Can also be structural
   rule S1:Stmt S2:Stmt => S1~>S2
 
---- Variable assignment
-  rule <k> X=V; => . <_/k> <env_> X|->L <_/env> <store_> L|->(_=>V) <_/store>
+/*@ Assignment
+ Like for increment, we first compute the l-value of the left-hand-side.
+*/
+  context ([HOLE] => l-value([HOLE]))=_;
+  rule <k> loc(L)=V; => . <_/k> <store_> L|->(_=>V) <_/store>
 
---- Array assignment
---- We grab the whole store here, because we need to block it when writing a location
---- for the first time, to avoid conflicts with other threads that may also want to write it.
---- This happens because we deliberately decided NOT to allocate/initialize the array locations
---- when the array is created, to save time/computation.  Thus, the first write to a location acts
---- as "allocation" of that location.  To avoid such an aggressive locking of the store (which
---- inhibits true concurrency, since other threads may want to concurrently read/write other
---- locations), one would need to explicitly "allocate" all the array locations at declaration time
-  context _[[HOLE]]=_;
-  context [HOLE][_]=_;
-  rule <k> array(L,_)[N] = V; => . <_/k> <store> Sigma:Map => Sigma[V/(L +Int N)] </store>
+/*@ l-value and loc
+ l-value(E) computes the l-value of E, where E can be an identifier X,
+ or an array element A[I].
+ l-value(E) evaluates to a location value of the form loc(L), where L is a natural number.
+*/
+  syntax Exp ::= l-value ( K )    --- for parsing reasons, we prefer to allow l-value to take a K
+  syntax Val ::= loc ( Nat )
+--- Local variable
+  rule <k> l-value(X) => loc(L:Nat) <_/k> <env_> X|->L <_/env>
+--- Array element: evaluate the array and its index; then the array lookup rule above applies.
+  context l-value(_[[HOLE]])
+  context l-value([HOLE][_])
+--- Finally, return the address of the desired object member
+  rule <k> l-value(lookup(L)) => loc(L) <_/k>
 
---- Expression statements.  They are only used for their side effects, so their result is descarded
+
+//@ Expression statements.  They are only used for their side effects, so their result is descarded
   rule V; => .
 
---- Conditional
+//@ Conditional
   rule if  true then S else _ => S
   rule if false then _ else S => S
 
---- While loop unrolled only at the top of the computation (to avoid non-termination)
+//@ While loop unrolled only at the top of the computation (to avoid non-termination)
   rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k>
 
---- Write
+//@ Write
   rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out>
 
---- Exceptions
+//@ Exceptions
   syntax ListItem ::= ( Id , Stmt , K , Map , List )
   syntax K ::= popx
   rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
@@ -197,7 +218,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
        <store_> . => L |-> V <_/store>
        <nextLoc> L => sNat L </nextLoc>
 
---- Threads
+//@ Threads
    rule <thread_> <k> spawn S => . <_/k> <env> Env </env> <_/thread>
         (. => <thread_> <k> S </k> <env> Env </env> <_/thread>)
    rule (<thread_> <k>.</k> <fstack>.</fstack> <holds> Holds:Map </holds> <_/thread> => .)
@@ -210,28 +231,28 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
    rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k>
 
 ----------------------------------------------
---- Auxilliary declarations and operations ---
+//@ Auxilliary declarations and operations 
 ----------------------------------------------
 
---- Lists of values
+//@ Lists of values
   syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
---- Length
+//@ Length
   syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
   macro |.List{Id}| = 0  
   macro |X,Xl| = sNat |Xl|
 
---- Sequences of locations
+//@ Sequences of locations
   syntax List{K} ::= Nat .. Nat
   rule N1:Nat..N1 => .List{K} [structural]
   rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
 
---- Environment recovery
+//@ Environment recovery
   syntax K ::= env ( Map )
   rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
   rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
---- Pairing construct nedeed for stacking
+//@ Pairing construct nedeed for stacking
   syntax ListItem ::=  ( Map , K )
 endkm

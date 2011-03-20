@@ -2,26 +2,26 @@
 --- SIMPLE-UNTYPED-SYNTAX module ---
 ------------------------------------
 
-kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
+kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
 
---- Identifiers
+//@ Identifiers
 --- Special identifier for the function "main"
   syntax Id ::= main
 
---- Variables; we include arrays here as well, a[x][y][z]
+//@ Variables; we include arrays here as well, a[x][y][z]
   syntax Var ::= Id
                | Var [ Exp ]       [strict prec 1]
 
---- Declarations
+//@ Declarations
 --- There are two types of declarations: for variables (including arrays) and for functions
   syntax Decl ::= var Var ;
                 | function Id ( ) Stmt
                 | function Id ( List{Id} ) Stmt
 
---- Expressions
+//@ Expressions
   syntax Exp ::= Int | Bool
                | Var
-               | ++ Id             [prec 0]
+               | ++ Exp             [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
                | Exp * Exp         [strict prec 31 gather(E e)]
@@ -43,7 +43,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | Exp ( List{Exp} ) [strict prec 2]
                | read ( )
 
---- Statements
+//@ Statements
   syntax Stmt ::= { }
                 | { Stmts }
                 | Exp = Exp ;                [strict(2)]
@@ -66,7 +66,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
 
 -----------------------------------------------------------------------------
---- Lists should be eventually builtin; for now, they need to be declared ---
+/*@ Lists should be eventually builtin; for now, they need to be declared  */
 -----------------------------------------------------------------------------
 --- List{Id}; the hybrid attribute says that a list of results becomes itself a result
   syntax List{Id} ::= Id
