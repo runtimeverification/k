@@ -1951,7 +1951,9 @@ sub solve_latex_comments
 	s!($latex_comment)!{
 		my $l = countlines($`) + $lno - 1;
 		local $_ = $+;
-		"mb latex \"\\\\".get_newcommand($_)."\" : KSentence [metadata \"location($file:$l)\"] .";
+	        my $me = $_;
+	        $me =~ s/[^\n]//sg;
+		"mb latex \"\\\\".get_newcommand($_)."\" : KSentence [metadata \"location($file:$l)\"] .$me";
 	}!sge;
 
 	$_;
