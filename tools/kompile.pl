@@ -870,9 +870,10 @@ sub latexify {
 	   print FILE "\\input{$language_file_name.sty}\n";
         }
 	print FILE join("\n",@newcommands)."\n";
+	print FILE "\\title{$title}\n\\author{$author}\n" if ($title ne "" && $author ne "");
+	print FILE "\\title{$title}\n" if ($title ne "" && $author eq "");
 	print FILE "\n\\begin{document}\n\n";
-	print FILE "\\title{$title}\n\\author{$author}\n\\maketitle\n" if ($title ne "" && $author ne "");
-	print FILE "\\title{$title}\n\\maketitle\n" if ($title ne "" && $author eq "");
+	print FILE "\\maketitle\n" if ($title ne "");
 	
 	my $latex_temp = join("\\newpage", @l_modules)."\n";
 	# $latex_temp = restore_intermodule_latex($latex_temp);
