@@ -129,3 +129,11 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\mmiddle}[3]{\mall{#1}{#2}{\ellipses\ {#3}\ \ellipses}}
 \newcommand{\mdot}{\cdot}
 \newcommand{\mAnyVar}{\_}
+
+\newcommand{\latexComment}[1]{
+\fcolorbox{black!50}{black!25}{
+\parbox{7in}{\color{black} 
+#1  
+} } 
+\medskip
+}
