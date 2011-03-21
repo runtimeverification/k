@@ -903,7 +903,7 @@ sub run_latex
     # get approx pdf file
     my $latex_out = get_file_content("$tex_file.tex");
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    $latex_out =~ s/\\begin{document}/\\geometry{papersize={1400mm,11in},textwidth=1380mm}\\pagestyle{empty}\\begin{document}/;
+    $latex_out =~ s/\\begin{document}/\\geometry{papersize={1400mm,11in},textwidth=1380mm}\\begin{document}\\thispagestyle{empty}/;
     $latex_out =~ s/\\newpage/\\bigskip/g;
     # print $latex_out;
     
@@ -976,7 +976,7 @@ sub get_pdf_crop
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
     my $maketitle = "";
     $maketitle = $1 if ($latex_out =~ /(?<=\\begin{document})(.*?\\maketitle)/sg);
-    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\pagestyle{empty}\n\\begin{document}\n$maketitle\n\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\begin{document}\n$maketitle\n\\thispagestyle{empty}\n\\noindent\\hspace{-2px}\\rule{1px}{1px}";
     $latex_out =~ s/\\begin{document}/$settings/;
     $latex_out =~ s/\\newpage/\\bigskip/g;
 
@@ -1078,7 +1078,7 @@ sub make_crop
     my $h = 9 * $pages;
     my $ph = $h + 1;
     $latex_out =~ s/^\\documentclass\[landscape\]/\\documentclass/;
-    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\pagestyle{empty}\\begin{document}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
+    my $settings = "\\geometry{papersize={1400mm,".$ph."in},textheight=".$h."in,textwidth=1380mm}\\begin{document}\\thispagestyle{empty}\\noindent\\hspace{-2px}\\rule{1px}{1px}";
     $latex_out =~ s/\\begin{document}/$settings/;
     
     # initial settings
