@@ -3,9 +3,11 @@ kmod JS-JSON-AST-IDS
 
     syntax JSJsonAstIds ::= 
 		assignOp |
+		block |
 		body |
 		caseLabel |
 		cases |
+		catchClauses |
 		children |
 		condition |
 		defaultIndex |
@@ -13,8 +15,10 @@ kmod JS-JSON-AST-IDS
 		discriminant |
 		elsePart |
 		end |
+		exception |
 		expDecls |
 		expression |
+		finallyBlock |
 		funDecls |
 		functionForm |
 		hasEmptyReturn |
@@ -37,8 +41,11 @@ kmod JS-JSON-AST-IDS
 		statement |
 		statements |
 		thenPart |
+		tryBlock |
 		type |
 		update |
 		value |
-		varDecls
+		varDecl |
+		varDecls |
+		varName
 endkm

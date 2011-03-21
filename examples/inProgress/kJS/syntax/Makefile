@@ -3,10 +3,10 @@
 KCOMPILE ?= ../../../../tools/kompile.pl
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = JSON-INFIX
+LANGUAGE_NAME = JSON-TO-INFIX
 
 # this is the name of the interesting modules (used by make latex/pdf) 
-LANGUAGE_MODULES = JSON-INFIX
+LANGUAGE_MODULES = JSON-TO-INFIX
 
 #this is the basename of the main file
 MAIN_FILE = json-to-infix

@@ -7276,4 +7276,111 @@ red
 	    lineno : 1,
 	    varDecls : []
 	}
+==Bool 
+#program(#exp(#assignment(#id("JSAST"),.none,#invocation(#function(1,"",.List{JS},
+    #program(#exp(#s("use strict")),#varDeclarations(#id("_outputTerminal"),#id(
+    "_outputPrefixes"),#id("_outputElement"),#id("_asASTString"),#id("_normalizedOutput"),#id(
+    "_asSExpression")),#exp(#assignment(#id("_outputTerminal"),.none,#function(1,
+    "_outputTerminal","substrings","element",#program(#switch(#typeof(#id("element")),#case(#s(
+    "object"),#block(#ifElse(#identical(#id("element"),#null),#block(#exp(#invocation(
+    #staticAccess(#id("substrings"),#id("push")),#comma(#s("null"))))),#block(#exp(#invocation(
+    #staticAccess(#id("substrings"),#id("push")),#comma(#s("$"),#id("element")))))),#break(
+    .none))),#case(#s("undefined"),#block(#exp(#invocation(#staticAccess(#id("substrings"),#id(
+    "push")),#comma(#s("undefined")))),#break(.none))),#case(#s("string"),#block(#exp(
+    #invocation(#staticAccess(#id("substrings"),#id("push")),#comma(#s("\""),#invocation(
+    #staticAccess(#id("element"),#id("replace")),#comma(#r("/\\\"/g"),#s("\\\""))),#s("\"")))),
+    #break(.none))),#default(#block(#exp(#invocation(#staticAccess(#id("substrings"),#id(
+    "push")),#comma(#id("element")))))),3))))),#exp(#assignment(#id("_outputPrefixes"),.none,
+    #function(1,"_outputPrefixes","levels",#program(#varDeclarations(#id("count"),#id(
+    "output"),#id("index"),#id("isLastElement")),#for(#assignment(#id("index"),.none,#n(0)),
+    #lt(#id("index"),#id("count")),#assignment(#id("index"),24,#n(1)),#block(#exp(#assignment(
+    #id("isLastElement"),.none,#dynamicAccess(#id("levels"),#id("index")))),#exp(#invocation(
+    #staticAccess(#id("output"),#id("push")),#comma(#ternary(#id("isLastElement"),#s("    "),
+    #s("|   "))))))),#return(#id("output")))))),#exp(#assignment(#id("_outputElement"),.none,
+    #function(1,"_outputElement","lines","element","levels",#program(#varDeclarations(#id(
+    "currentLine")),#ifElse(#invocation(#staticAccess(#id("Array"),#id("isArray")),#comma(#id(
+    "element"))),#block(#exp(#invocation(#id("_asASTString"),#comma(#id("element"),#id(
+    "lines"),#id("levels"))))),#block(#exp(#assignment(#id("currentLine"),.none,#invocation(
+    #staticAccess(#id("lines"),#id("pop")),#comma(.List{JS})))),#exp(#invocation(#staticAccess(
+    #id("currentLine"),#id("push")),#comma(#s("--> ")))),#exp(#invocation(#id(
+    "_outputTerminal"),#comma(#id("currentLine"),#id("element")))),#exp(#invocation(
+    #staticAccess(#id("lines"),#id("push")),#comma(#invocation(#staticAccess(#id(
+    "currentLine"),#id("join")),#comma(#s("")))))))))))),#exp(#assignment(#id("_asASTString"),
+    .none,#function(1,"_asASTString","elements","lines","levels",#program(#varDeclarations(#id(
+    "index"),#id("count"),#id("match"),#id("isLastElement"),#id("currentLine"),#id("element")),
+    #exp(#invocation(#staticAccess(#id("currentLine"),#id("push")),#comma(#s("--(")))),#ifElse(
+    #identical(#id("count"),#n(0)),#block(#exp(#invocation(#staticAccess(#id("currentLine"),
+    #id("push")),#comma(#s(")")))),#exp(#invocation(#staticAccess(#id("lines"),#id("push")),
+    #comma(#invocation(#staticAccess(#id("currentLine"),#id("join")),#comma(#s("")))))),
+    #return(.none)),.none),#exp(#invocation(#staticAccess(#id("currentLine"),#id("push")),
+    #comma(#ternary(#id("isLastElement"),#s(")"),#s("-"))))),#do(#b(true),#block(#exp(
+    #invocation(#staticAccess(#id("lines"),#id("push")),#comma(#id("currentLine")))),#exp(
+    #invocation(#staticAccess(#id("levels"),#id("push")),#comma(#id("isLastElement")))),#exp(
+    #assignment(#id("element"),.none,#dynamicAccess(#id("elements"),#id("index")))),#exp(
+    #invocation(#id("_outputElement"),#comma(#id("lines"),#id("element"),#id("levels")))),#exp(
+    #invocation(#staticAccess(#id("levels"),#id("pop")),#comma(.List{JS}))),#ifElse(#id(
+    "isLastElement"),#block(#return(.none)),.none),#exp(#assignment(#id("isLastElement"),.none,
+    #identical(#inc(#id("index"),false),#id("match")))),#exp(#assignment(#id("currentLine"),
+    .none,#invocation(#id("_outputPrefixes"),#comma(#id("levels"))))),#exp(#invocation(
+    #staticAccess(#id("currentLine"),#id("push")),#comma(#ternary(#id("isLastElement"),#s(
+    ")-"),#s("|-"))))))))))),#exp(#assignment(#id("_normalizedOutput"),.none,#function(1,
+    "_normalizedOutput","lines",#program(#varDeclarations(#id("output"),#id("maxLength"),#id(
+    "length"),#id("count")),#exp(#invocation(#staticAccess(#id("lines"),#id("forEach")),#comma(
+    #function(1,"","line",#program(#exp(#assignment(#id("length"),.none,#staticAccess(#id(
+    "line"),#id("length")))),#ifElse(#gt(#id("length"),#id("maxLength")),#block(#exp(
+    #assignment(#id("maxLength"),.none,#id("length")))),.none)))))),#exp(#invocation(
+    #staticAccess(#id("lines"),#id("forEach")),#comma(#function(1,"","line",#program(#exp(
+    #invocation(#staticAccess(#id("output"),#id("push")),#comma(#id("line")))),#exp(
+    #assignment(#id("count"),.none,#sub(#id("maxLength"),#staticAccess(#id("line"),#id(
+    "length"))))),#while(#gt(#dec(#id("count"),true),#n(0)),#block(#exp(#invocation(
+    #staticAccess(#id("output"),#id("push")),#comma(#s(" ")))))),#exp(#invocation(
+    #staticAccess(#id("output"),#id("push")),#comma(#s("    \\"),#s("\n"))))))))),#exp(
+    #invocation(#staticAccess(#id("output"),#id("pop")),#comma(.List{JS}))),#exp(#invocation(
+    #staticAccess(#id("output"),#id("push")),#comma(#s("\"")))),#exp(#assignment(#id("output"),
+    .none,#invocation(#staticAccess(#id("output"),#id("join")),#comma(#s(""))))),#return(#id(
+    "output")))))),#exp(#assignment(#id("_asSExpression"),.none,#function(1,"_asSExpression",
+    "elements","separator","substrings",#program(#varDeclarations(#id("element"),#id("index"),
+    #id("count")),#exp(#invocation(#staticAccess(#id("substrings"),#id("push")),#comma(#s(
+    "(")))),#ifElse(#gt(#id("count"),#n(0)),#block(#do(#b(true),#block(#exp(#assignment(#id(
+    "element"),.none,#dynamicAccess(#id("elements"),#id("index")))),#ifElse(#invocation(
+    #staticAccess(#id("Array"),#id("isArray")),#comma(#id("element"))),#block(#exp(#invocation(
+    #id("_asSExpression"),#comma(#id("element"),#id("separator"),#id("substrings"))))),#block(
+    #exp(#invocation(#id("_outputTerminal"),#comma(#id("substrings"),#id("element")))))),
+    #ifElse(#gte(#inc(#id("index"),false),#id("count")),#block(#break(.none)),.none),#exp(
+    #invocation(#staticAccess(#id("substrings"),#id("push")),#comma(#id("separator"))))))),
+    .none),#exp(#invocation(#staticAccess(#id("substrings"),#id("push")),#comma(#s(")")))))))),
+    #exp(#assignment(#staticAccess(#staticAccess(#id("Array"),#id("prototype")),#id(
+    "asDiagram")),.none,#function(1,"asDiagram",.List{JS},#program(#varDeclarations(#id(
+    "lines")),#exp(#invocation(#id("_asASTString"),#comma(#this,#id("lines"),#arrayLit(#b(
+    true))))),#exp(#invocation(#staticAccess(#id("lines"),#id("push")),#comma(#s("")))),
+    #return(#invocation(#id("_normalizedOutput"),#comma(#id("lines")))))))),#exp(#assignment(
+    #staticAccess(#staticAccess(#id("Array"),#id("prototype")),#id("asSExpression")),.none,
+    #function(1,"asSExpression","options_",#program(#varDeclarations(#id("separator"),#id(
+    "substrings")),#exp(#invocation(#id("_asSExpression"),#comma(#this,#id("separator"),#id(
+    "substrings")))),#return(#invocation(#staticAccess(#id("substrings"),#id("join")),#comma(
+    #s("")))))))),#return(#objectLit(#propertyLit(#id("generate"),#function(1,"generate",
+    "fileNameWithExt","isStrictMode_",#program(#varDeclarations(#id("dirName"),#id("fileName"),
+    #id("path"),#id("isStrictMode"),#id("sourceFile"),#id("source"),#id("ast"),#id("sexp"),#id(
+    "diagram"),#id("sexpFile"),#id("diagramFile"),#id("sexpFlag"),#id("resultFlag")),#exp(
+    #invocation(#staticAccess(#staticAccess(#staticAccess(#id("netscape"),#id("security")),#id(
+    "PrivilegeManager")),#id("enablePrivilege")),#comma(#s("UniversalXPConnect")))),#ifElse(
+    #identical(#invocation(#staticAccess(#id("fileNameWithExt"),#id("search")),#comma(#r(
+    "/\\.js$/"))),#neg(#n(1))),#block(#return(#s("ERROR: Must be a .js file!"))),.none),#exp(
+    #assignment(#id("sourceFile"),.none,#invocation(#staticAccess(#id("FileIO"),#id("open")),
+    #comma(#add(#id("path"),#s(".js")))))),#ifElse(#not(#invocation(#staticAccess(#id(
+    "sourceFile"),#id("exists")),#comma(.List{JS}))),#block(#return(#add(#add(#s("ERROR "),#id(
+    "fileNameWithExt")),#s(" doesn't exist!")))),.none),#exp(#assignment(#id("source"),.none,
+    #invocation(#staticAccess(#id("FileIO"),#id("read")),#comma(#id("sourceFile"))))),#exp(
+    #assignment(#id("ast"),.none,#invocation(#id("parse"),#comma(#id("source"),#id(
+    "isStrictMode"),#b(true))))),#exp(#assignment(#id("sexp"),.none,#invocation(#staticAccess(
+    #id("ast"),#id("asSExpression")),#comma(.List{JS})))),#exp(#assignment(#id("diagram"),
+    .none,#invocation(#staticAccess(#id("ast"),#id("asDiagram")),#comma(.List{JS})))),#exp(
+    #assignment(#id("sexpFile"),.none,#invocation(#staticAccess(#id("FileIO"),#id("open")),
+    #comma(#add(#id("path"),#s(".sexp")))))),#exp(#assignment(#id("diagramFile"),.none,
+    #invocation(#staticAccess(#id("FileIO"),#id("open")),#comma(#add(#id("path"),#s(
+    ".diagram")))))),#exp(#assignment(#id("resultFlag"),.none,#invocation(#staticAccess(#id(
+    "FileIO"),#id("write")),#comma(#id("sexpFile"),#id("sexp"))))),#exp(#assignment(#id(
+    "resultFlag"),.none,#and(#id("resultFlag"),#invocation(#staticAccess(#id("FileIO"),#id(
+    "write")),#comma(#id("diagramFile"),#id("diagram")))))),#return(#id("resultFlag"))))))))),
+    #comma(.List{JS})))))
 .

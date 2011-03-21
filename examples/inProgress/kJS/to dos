@@ -1,0 +1,23 @@
+case WITH:
+  case CONST:
+  case LET:
+  case DEBUGGER:
+  case NEWLINE:
+
+Works
+-riot
+-raphael
+-jquery
+-json
+-jshint
+
+narcissus  --> wont parse itself!?!?!
+jslint --> #program(#varDeclarations(#id("JSLINT")))  ?????
+jshint --> #program(#varDeclarations(#id("JSHINT")),#ifElse(#and(#sameAs(
+    #typeof(#id("exports")),#s("object")),#id("exports")),#exp(#assignment(
+    #staticAccess(#id("exports"),#id("JSHINT")),.none,#id("JSHINT"))),.none))
+
+
+--- three types of func decl -> https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope
+--- named function weirdness -> http://kangax.github.com/nfe/
+--- closure weirdness -> https://developer.mozilla.org/en/JavaScript/Guide/Closures

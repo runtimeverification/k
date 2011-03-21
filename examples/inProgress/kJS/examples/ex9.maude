@@ -90,11 +90,11 @@ red
 	    lineno : 1,
 	    varDecls : []
 	}
-.
 
-program(exp(invocation(staticAccess(id("lines"),id("forEach")),comma(o(body :
-    program(.List{JS}) children : a(.List{JS}) end : 32 functionForm : 1 lineno : 1 
-	params : a(
- "line") start : 14 type : "FUNCTION" value : "function")))))
+==Bool 
+	program(
+		exp(invocation(
+			staticAccess(id("lines"),id("forEach")),comma(
+				function(1,"","line",program(.List{JS})))))) .
 
-lines.forEach(function (line) {});
+--- lines.forEach(function (line) {});

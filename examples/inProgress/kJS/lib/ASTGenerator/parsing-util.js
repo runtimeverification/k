@@ -11,7 +11,7 @@ JSAST = (function () {
 	"use strict";
 	
 	var _asASTString, _outputElement, _outputNode, // Resolves co-recursive forward refs
-		INDENTATION = "    ",
+		INDENTATION = "\t",
 		WORKING_DIR = "/Users/m3rabb/Dev/Maude/k-framework/examples/inProgress/kJS/",
 		IDS_FILE_NAME = "js-json-ast-ids.k",
 		PARSER = Narcissus.parser,
@@ -21,7 +21,8 @@ JSAST = (function () {
 		OP_TYPE_NAMES = DEFINITIONS.opTypeNames,
 		EXCLUDED_PROPERTIES = 
 			['type', 'target', 'tokenizer', 'exports', 'labels',
-			 'modAssns', 'modDecls', 'modDefns', 'modLoads'],
+			 'modAssns', 'modDecls', 'modDefns', 'modLoads', 
+			 'start', 'end'],
 		IDS_FILE_PREFIX = "kmod JS-JSON-AST-IDS\n" + 
 			"    is including PL-INT + PL-FLOAT + PL-STRING + PL-ID\n\n" +
 			"    syntax JSJsonAstIds ::= \n\t\t",
