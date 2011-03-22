@@ -6,12 +6,12 @@ kmod MATCHC-SYNTAX is including KERNELC-SYNTAX
 matching logic annotations
 ***)
   syntax List ::= Pattern
+
   syntax Annotation ::= @`assume List 
                       | @`assert List 
-                      | @`invariant List 
+                      | @`inv List 
 
-  syntax Annotation ::= @`pre List 
-                      | @`post List 
+  syntax Annotation ::= @`cfg Bag -> Bag req Formula ens Formula
 
   syntax Annotation ::= @`verify
                       | @`skip
@@ -19,7 +19,7 @@ matching logic annotations
 ***(
   syntax Annotation ::= @`assume Pattern 
                       | @`assert Pattern 
-                      | @`invariant Pattern 
+                      | @`inv Pattern 
 
   syntax Annotation ::= @`pre Pattern 
                       | @`post Pattern 
@@ -29,24 +29,20 @@ matching logic annotations
                       | @`breakpoint
 ***)
 
-
   syntax FunctionDeclaration ::= ExpressionType
                                    Id
                                    ( List{KernelC} )
-                                   Annotation
-                                   Annotation
+                                   [[ Annotation ]]
   syntax FunctionDefinition ::= ExpressionType
                                   Id
                                   ( List{KernelC} )
-                                  Annotation
-                                  Annotation
+                                  [[ Annotation ]]
                                   Statement
   syntax Declaration ::= Annotation
   syntax Statement ::= Annotation
 
   syntax Statement ::= returnAssert Expression [strict]
   syntax Expression ::= getReturnValue ( ExpressionType )
-
 
   syntax K ::= defaultKItem ( String ) 
              | cleanFrameSubst ( String ) 

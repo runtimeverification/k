@@ -89,7 +89,7 @@ Variable declaration
 Statements
 ***)
   rule TV ; => .K [structural]
-  rule block(KernelC) => KernelC [structural]
+  rule <k> block(KernelC) => KernelC <_/k> [structural]
   rule if(tv(_, NzI)) S1 else S2 => S1 [structural]
   rule if(tv(_, 0)) S1 else S2 => S2 [structural]
   *** ERROR: kompile.pl does not put spaces around k in <_/k>

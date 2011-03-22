@@ -5,7 +5,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar N Counter : Nat
   kvar I : Int++
   kvar VarRoot : String
-  kvar Phi Phi1 Phi2 : Formula
+  kvar Phi PrePhi PostPhi Phi1 Phi2 : Formula
   kvar NtPhi : NtFormula
   kvar Subst Subst1 Subst2 : Subst
   kvar V : Value
@@ -15,9 +15,10 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar NvT : NvExpressionType
   kvar S : Statement
   kvar K Program : K
-  kvar ParamList ArgList: List{KernelC}
-  kvar CfgItems CfgItems1 CfgItems2 TaskItems : Bag 
-  kvar Pattern Pattern1 Pattern2 PrePattern PostPattern : Pattern
+  kvar ParamList ArgList : List{KernelC}
+  kvar Annot : Annotation 
+  kvar PreCfg PostCfg CfgItems CfgItems1 CfgItems2 TaskItems : Bag 
+  kvar Pattern Pattern1 Pattern2 : Pattern
   kvar Env TEnv StructMap FunMap : Map
   kvar Stack : List
   kvar checkSet Set : Set
@@ -50,35 +51,33 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
                   <check> .Set </check>
 
                   <tasks>
-                    <funTask*>
+                    <funTask multiplicity="*">
                       <funId> .K </funId>
-                      <task*>
+                      <task multiplicity="*">
                         <taskType> Run </taskType>
 
                         <config> 
                           <program> .K </program>
                           <struct> .Map </struct>
                           <fun> .Map </fun>
-        
+
                           <k> .K </k>
                           <env> .Map </env>
                           <stack> .List </stack>
                           <tenv> .Map </tenv>
-                          
+
                           <heap> .Map </heap>
-        
+
                           <in> .List </in>
                           <out> .List </out>
-        
+
                           <counter> 0 </counter>
                         </config>
-  
+
                         <form> TrueFormula </form>
                         <subst> .Subst </subst>
-                      </task*>
-
-                      <funCounter> 0 </funCounter>
-                    </funTask*>
+                      </task>
+                    </funTask>
                   </tasks>
                 </top>
 
@@ -103,7 +102,8 @@ Function entry
         <program> checkContract(F) => .K <_/program>
         <struct> StructMap </struct>
         <fun>
-          T F(ParamList) @ pre PrePattern  @ post PostPattern  |-> S
+          T F(ParamList)[[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]]
+            |-> S
           FunMap
         </fun>
       <_/task>
@@ -116,15 +116,16 @@ Function entry
         <task_>
           <struct> StructMap </struct>
           <fun>
-            T F(ParamList) @ pre PrePattern  @ post PostPattern  |-> S
+            T F(ParamList)[[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]]
+              |-> S
             FunMap
           </fun>
           <k>
             declParams(ParamList)
-            ~> @ assume PrePattern 
+            ~> @ assume (PreCfg /\ PrePhi)
             ~> substKLabel(S, 'return_, 'returnAssert_)
             ~> assertLabel
-            ~> @ assert PostPattern
+            ~> @ assert (PostCfg /\ PostPhi)
             ~> disolveTask
           </k>
         <_/task>
@@ -162,24 +163,13 @@ Function entry
 Function definition/declaration
 ***)
   rule
-    <program>
-      T F(ParamList) @ pre PrePattern  @ post PostPattern  => .K
-    <_/program>
-    <fun_>
-        .Map
-      =>
-        T F(ParamList) @ pre PrePattern  @ post PostPattern  |-> .K
-    <_/fun>
+    <program> T F(ParamList) [[Annot]] => .K <_/program>
+    <fun_> .Map => T F(ParamList) [[Annot]] |-> .K <_/fun>
   [structural]
   rule
-    <program>
-      T F(ParamList) @ pre PrePattern  @ post PostPattern  S => .K
-    <_/program>
+    <program> T F(ParamList) [[Annot]] S => .K <_/program>
     <fun_>
-        .Map
-      =>
-        T F(ParamList) @ pre PrePattern  @ post PostPattern 
-        |-> (S ~> return tv(void, unit))
+      .Map => T F(ParamList) [[Annot]] |-> (S ~> return tv(void, unit))
     <_/fun>
     <check_> .Set => SetItem(checkContract(F)) <_/check>
   [structural]
@@ -244,15 +234,15 @@ summary function calls
 ***)
   rule
     <fun_>
-      T F(ParamList) @ pre PrePattern  @ post PostPattern  |-> _
+      T F(ParamList)[[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]] |-> _
     <_/fun>
     <k>
         _`(_`)(F, ArgList) ~> K
       =>
         declParams(ParamList)
         ~> bindParams(ParamList, ArgList)
-        ~> @ assert co-skolemize(N, PrePattern)
-        ~> @ assume co-skolemize(N, PostPattern)
+        ~> @ assert co-skolemize(N, PreCfg /\ PrePhi)
+        ~> @ assume co-skolemize(N, PostCfg /\ PostPhi)
         ~> cleanCallSubst(N)
         ~> return getReturnValue(T)
 
@@ -260,7 +250,7 @@ summary function calls
     <stack_> .List => callContext(K, TEnv, Env) </stack>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>
-    <funCounter> N => sNat N </funCounter>
+    <counter> N => sNat N </counter>
   [structural]
 
 *** retrieve the return value
@@ -297,8 +287,7 @@ loop invariants
 ***)
   rule
     <k>
-        @ invariant Pattern 
-        ~> while (E) S ~> K
+        @ inv Pattern ~> while (E) S ~> K
       =>
         @ assert Pattern
         ~> 'if`(_`)_else_(E,, (S ~> @ assert Pattern ~> disolveTask),, K)
@@ -328,7 +317,7 @@ assumed patterns
                 ---(defaultKItem("k") <- K) ;;
                 (defaultMapItem("env") <- defaultEnv(Env)) ;;
                 (defaultMapItem("tenv") <- TEnv) ;;
-                (defaultKItem("counter") <- Counter)
+                (defaultKItem("counter") <- sNat N)
               ),
               Subst
             )
@@ -342,9 +331,8 @@ assumed patterns
     <fun> FunMap </fun>
     <env> Env </env>
     <tenv> TEnv </tenv>
-    <counter> Counter </counter>
+    <counter> N => sNat N </counter>
     <subst> Subst </subst>
-    <funCounter> N => sNat N </funCounter>
   ---[structural print "maude-timed===assume" F]
   [structural]
   rule

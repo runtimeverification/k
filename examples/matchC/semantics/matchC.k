@@ -58,7 +58,6 @@ Output
   rule
     <funTask>
       <funId> .K </funId>
-      <funCounter> N </funCounter>
     </funTask>
   =>
     .Bag
@@ -66,7 +65,6 @@ Output
   rule
     <funTask>
       <funId> id(S) </funId>
-      <funCounter> N </funCounter>
     </funTask>
   =>
     .Bag
@@ -82,7 +80,6 @@ Output
             <k> .K </k>
             <out> L </out>
           <_/task>
-          <funCounter> N </funCounter>
         </funTask>
       </tasks>
     => 

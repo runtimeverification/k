@@ -34,7 +34,7 @@ imp statements
 ***)
   syntax Statement ::= nop
                      | Expression ; [strict]
-                     | block KernelC
+                     | block ( KernelC )
                      | if ( Expression ) Statement else Statement [strict(1)]
                      | while ( Expression ) Statement
                      | return Expression [strict]
