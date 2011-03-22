@@ -1,5 +1,5 @@
 mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
-  inc MATHEMATICAL-INT-BUILTIN-MODULE .
+  inc MATHEMATICAL-INT-BUILTIN-MODULE + PL-STRING .
 
   sorts PESeq FESeq FreeSeq NeSeq Seq Seq++ NeSeq++ . 
   subsort NeSeq < Seq .
@@ -11,9 +11,11 @@ mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
   subsort Seq < MathObj .
   subsort Seq++ < MathObj++ .
  
-  op PESeq : Nat -> PESeq .
-  op FESeq : Nat -> FESeq .
+  op ?Seq : Nat -> PESeq .
+  op !Seq : Nat -> FESeq .
+  op !Seq : String -> FESeq .
   op FreeSeq : Nat -> FreeSeq .
+  op FreeSeq : String -> FreeSeq .
   op skolem : Nat PESeq -> FreeSeq [ditto] .
   op co-skolem : Nat FreeSeq -> FESeq [ditto] .
 

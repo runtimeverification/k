@@ -9,8 +9,8 @@ mod MATHEMATICAL-TREE-BUILTIN-MODULE
   subsort Tree < MathObj .
   subsort Tree++ < MathObj++ .
 
-  op PETree : Nat -> PETree .
-  op FETree : Nat -> FETree .
+  op ?Tree : Nat -> PETree .
+  op !Tree : Nat -> FETree .
   op FreeTree : Nat -> FreeTree .
   op skolem : Nat PETree -> FreeTree [ditto] .
   op co-skolem : Nat FreeTree -> FETree [ditto] .

@@ -11,8 +11,8 @@ mod MATHEMATICAL-MULTISET-BUILTIN-MODULE
   subsort MSet < MathObj .
   subsort MSet++ < MathObj++ .
  
-  op PEMSet : Nat -> PEMSet .
-  op FEMSet : Nat -> FEMSet .
+  op ?MSet : Nat -> PEMSet .
+  op !MSet : Nat -> FEMSet .
   op FreeMSet : Nat -> FreeMSet .
   op skolem : Nat PEMSet -> FreeMSet [ditto] .
   op co-skolem : Nat FreeMSet -> FEMSet [ditto] .

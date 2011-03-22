@@ -10,8 +10,8 @@ mod MATHEMATICAL-INT-BUILTIN-MODULE is
   subsort Int < MathObj .
   subsort Int++ < MathObj++ .
 
-  op PEInt : Nat -> PEInt .
-  op FEInt : Nat -> FEInt .
+  op ?Int : Nat -> PEInt .
+  op !Int : Nat -> FEInt .
   op FreeInt : Nat -> FreeInt .
   op skolem : Nat PEInt -> FreeInt [ditto] .
   op co-skolem : Nat FreeInt -> FEInt [ditto] .
