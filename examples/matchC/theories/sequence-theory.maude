@@ -83,10 +83,13 @@ mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
 
   eq rev(rev(A)) = A .
   eq rev(A1) === rev(A2) = A1 === A2 .
+  eq rev(A) === epsilon = A === epsilon .
   eq len(A) === 0 = A === epsilon .
   eq @(len(A) >=Int 0) = TrueFormula . 
   eq @((-Int len(A)) >=Int 0) = A === epsilon .
   eq len(rev(A)) = len(A) .
+  eq len(A) === len(A1) /\ A === A1 @ A2 = A === A1 /\ A2 === epsilon .
+  eq len(A) === len(A2) /\ A === A1 @ A2 = A === A2 /\ A1 === epsilon .
 
  ceq len(NeA1) === N /\ NeA1 @ NeA2 === NeB @ B
    = len(NeA1) === N /\ NeA1 === NeB /\ NeA2 === B

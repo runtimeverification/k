@@ -8,6 +8,7 @@ kmod IO-PATTERN is
   kvar T : ExpressionType
   kvar K : K
   kvar List : List
+  kvar NeList : NeList
   kvar Phi : Formula
   kvar CfgItems TaskItems : Bag
 
@@ -54,6 +55,10 @@ kmod IO-PATTERN is
   rule
     <taskType> Run </taskType>
     <in> .List => stream(epsilon) </in>
+  [structural]
+  rule
+    <taskType> Run </taskType>
+    <in> (stream(epsilon) => .List) NeList </in>
   [structural]
   rule
     <taskType> Run </taskType>
