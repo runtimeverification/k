@@ -31,8 +31,8 @@ TREE_GRAMMARS = $(LANGUAGE)Pass1.g \
                 $(LANGUAGE)Pass2.g \
                 $(ANNOTATION)Pass1.g \
                 $(ANNOTATION)Pass2.g \
-                $(ANNOTATION)Pass3.g \
-                $(ANNOTATION)Pass4.g
+                $(ANNOTATION)Pass3.g
+                #$(ANNOTATION)Pass4.g
 TOKENS = $(LEXER_GRAMMARS:.g=.tokens) \
          $(GRAMMARS:.g=.tokens) \
          $(TREE_GRAMMARS:.g=.tokens)

@@ -14,8 +14,10 @@ tokens {
   END_ANNOT = '*/';
   LINE_ANNOT = '//@';
 
-  PRE;
-  POST;
+  SPECIFICATION;
+  CONFIG;
+  REQUIRES;
+  ENSURES;
   ASSUME;
   ASSERT;
   INVARIANT;
@@ -70,7 +72,6 @@ tokens {
   BAG_UNIT = '.Bag';
   BAG_ITEM = 'BagItem';
 
-  CONFIG;
   CELL;
 
   // LIST;
@@ -103,28 +104,67 @@ tokens {
 }
 
 
+//annot
+//  : (BEGIN_ANNOT | LINE_ANNOT)
+//    ( pattern_directive pattern -> ^(pattern_directive ^(LIST pattern))
+//    | directive -> directive
+//    )+
+//    END_ANNOT?
+//  ;
+
+annot_text
+  : BEGIN_ANNOT! annot END_ANNOT!
+  | LINE_ANNOT! annot
+  ;
+
 annot
-  : (BEGIN_ANNOT | LINE_ANNOT)
-    ( pattern_directive pattern -> ^(pattern_directive ^(LIST pattern))
-    | directive -> directive
-    )
-    END_ANNOT?
+  : function_annot
+  | line_annot
+  | tool_annot
   ;
 
-pattern_directive
-  : PRE { Table.genVarString(""); }
-  | POST
-  | ASSUME { Table.genVarString("!"); }
-  | ASSERT { Table.genVarString("!"); }
-  | INVARIANT { Table.genVarString("!"); }
+function_annot
+  : config requires ensures { Table.genVarString(""); }
+    -> ^(SPECIFICATION config requires ensures)
   ;
 
-directive
+config
+  : config_keyword configuration -> ^(WRAPPER["wbag_"] configuration)
+  | -> ^(WRAPPER["wbag_"] ^(CONFIG[""] BAG))
+  ;
+
+config_keyword
+  : { "config".equals(input.LT(1).getText()) }? IDENTIFIER
+    -> CONFIG[$IDENTIFIER]
+  | CONFIG
+  ;
+
+requires
+  : REQUIRES formula -> ^(WRAPPER["Formula_"] formula)
+  | -> ^(WRAPPER["Formula_"] FORMULA_TRUE)
+  ;
+
+ensures
+  : ENSURES formula -> ^(WRAPPER["Formula_"] formula)
+  | -> ^(WRAPPER["Formula_"] FORMULA_TRUE)
+  ;
+
+line_annot
+  : line_keyword pattern { Table.genVarString("!"); }
+    -> ^(line_keyword ^(WRAPPER["wlist_"] pattern))
+  ;
+
+line_keyword
+  : ASSUME
+  | ASSERT
+  | INVARIANT
+  ;
+
+tool_annot
   : SKIP
   | VERIFY
   | BREAKPOINT
   | VAR
-    // ids+=IDENTIFIER (COMMA ids+=IDENTIFIER)* COLON sort=IDENTIFIER
     ids+=IDENTIFIER (COMMA ids+=IDENTIFIER)* COLON sort
     {
       for (Object id : $ids) {
@@ -142,6 +182,7 @@ sort
   ;
 
 
+/*
 pattern
   : disjunctive_pattern
   ;
@@ -163,11 +204,22 @@ options { backtrack = true; }
   | formula
     -> ^(CONJ["/\\"] ^(CONFIG[""] BAG) formula)
   ;
+*/
 
+
+pattern
+options { backtrack = true; }
+  : configuration
+    ( -> ^(CONJ["/\\"] configuration FORMULA_TRUE)
+    | CONJ formula -> ^(CONJ configuration formula)
+    )
+  | formula -> ^(CONJ["/\\"] ^(CONFIG[""] BAG) formula)
+  ;
 
 configuration
   : bag -> ^(CONFIG[""] bag)
   ;
+
 
 //term_list
 //  : term (COMMA term)* -> ^(TERM_LIST term+)
@@ -190,16 +242,13 @@ map
   ;
 
 map_rewrite
-  : map_term (REW^ map_term)?
+  : map_term ((REW map_term)=> REW^ map_term)?
   ;
 
 map_term
-//options { backtrack = true; }
   : map_item (COMMA map_item)* -> ^(MAP map_item+)
   | map_unit -> MAP
-//  | LPAREN! map RPAREN!
   ;
-
 
 map_unit
   : DOT
@@ -295,7 +344,7 @@ bag_constructor
  * Grammar rules for list parsing
  */
 list
-  : mathematical_object -> ^(STREAM["stream"] mathematical_object)
+  : k -> ^(STREAM["stream"] k)
   ;
 
 
@@ -348,6 +397,14 @@ k_list
   ;
 
 k
+  : k_rewrite
+  ;
+
+k_rewrite
+  : k_term ((REW k_term)=> REW^ k_term)?
+  ;
+
+k_term
   : formula (K_ARROW^ formula)*
   ;
 
@@ -360,8 +417,7 @@ formula
   ;
 
 disjunction_formula
-  : conjunction_formula
-    ((DISJ conjunction_formula)=> DISJ^ conjunction_formula)*
+  : conjunction_formula (DISJ^ conjunction_formula)*
   ;
 
 conjunction_formula
@@ -431,8 +487,8 @@ primary_term
   ;
 
 constant
-  : DOT -> K_UNIT
-  | K_UNIT
+  //: DOT -> K_UNIT
+  : K_UNIT
   | FORMULA_TRUE
   | FORMULA_FALSE
   | DECIMAL_LITERAL
@@ -447,14 +503,6 @@ constant
 constructor
   : '[' mathematical_object_list ']' -> ^(SEQ mathematical_object_list)
   | '{' mathematical_object_list '}' -> ^(MSET mathematical_object_list)
-  ;
-
-primary_sequence
-  : '[' mathematical_object_list ']' -> ^(SEQ mathematical_object_list)
-  ;
-
-primary_multiset
-  : '{' mathematical_object_list '}' -> ^(MSET mathematical_object_list)
   ;
 
 infix_term
@@ -474,8 +522,9 @@ K_LIST_UNIT : '.List{K}' ;
 K_LIST_COMMA : ',,' ;
 
 
-PRE : 'pre' ;
-POST : 'post' ;
+CONFIG : 'configuration' | 'cfg' ;
+REQUIRES : 'requires' | 'req' ;
+ENSURES : 'ensures' | 'ens' ;
 ASSUME : 'assume' ;
 ASSERT : 'assert' ;
 INVARIANT : 'invariant' | 'inv' ;

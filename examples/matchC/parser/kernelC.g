@@ -100,8 +100,7 @@ translation_unit
   ;
 
 definition_declaration
-options { k = 1; }
-  : ( type IDENTIFIER '(' parameter_list ')' (ANNOTATION ANNOTATION)? '{' )=>
+  : ( type IDENTIFIER '(' parameter_list ')' (ANNOTATION)? '{' )=>
     function_definition
   | declaration
   | ANNOTATION
@@ -109,9 +108,9 @@ options { k = 1; }
 
 function_definition
   : type IDENTIFIER '(' parameter_list ')'
-    ( ANNOTATION ANNOTATION compound_statement
+    ( ANNOTATION compound_statement
       -> ^(ANNOT_FUN_DEF type IDENTIFIER parameter_list
-           ANNOTATION ANNOTATION compound_statement
+           ANNOTATION compound_statement
          )
     | compound_statement
       -> ^(FUN_DEF type IDENTIFIER parameter_list compound_statement)
@@ -126,8 +125,8 @@ declaration
 
 function_declaration
   : type IDENTIFIER '(' parameter_list ')'
-    ( ANNOTATION ANNOTATION SEP
-      -> ^(ANNOT_FUN_DECL type IDENTIFIER parameter_list ANNOTATION ANNOTATION)
+    ( ANNOTATION SEP
+      -> ^(ANNOT_FUN_DECL type IDENTIFIER parameter_list ANNOTATION)
     | SEP -> ^(FUN_DECL type IDENTIFIER parameter_list)
     )
   ;

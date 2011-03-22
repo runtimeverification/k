@@ -125,24 +125,14 @@ public class TreeUtils {
         }
       }
     }
-    else if (kTokenType == k.LIST && tree.getParent() != null) {
-      int parentTokenType = ((CommonTree) tree.getParent()).getType();
-      String parentString = ((CommonTree) tree.getParent()).getText();
-      if (parentTokenType == k.K || coreK.contains(parentString)) {
-        String wrapperString = "wlist_";
-        CommonToken wrapperToken;
-        wrapperToken = new CommonToken(k.WRAPPER, wrapperString);
-        CommonTree wrapperNode = new CommonTree(wrapperToken);
-        wrapperNode.addChild(tree);
-
-        CommonToken kListToken = new CommonToken(k.K_LIST, "_`,`,_");
-        CommonTree kListNode = new CommonTree(kListToken);
-        CommonToken appToken = new CommonToken(k.APP, "_`(_`)");
-        CommonTree appNode = new CommonTree(appToken);
-        appNode.addChild(wrapperNode);
-        appNode.addChild(kListNode);
-        tree = appNode;
-      }
+    else if (kTokenType == k.WRAPPER) {
+      CommonToken kListToken = new CommonToken(k.K_LIST, "_`,`,_");
+      CommonTree kListNode = new CommonTree(kListToken);
+      CommonToken appToken = new CommonToken(k.APP, "_`(_`)");
+      CommonTree appNode = new CommonTree(appToken);
+      appNode.addChild(tree);
+      appNode.addChild(kListNode);
+      tree = appNode;
     }
 
     return tree;

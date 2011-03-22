@@ -33,11 +33,10 @@ public class AnnotPreK {
 
     tokenToK.put(annotParser.REW, "_=>_");
 
-    tokenToK.put(annotParser.PRE, "@`pre_");
-    tokenToK.put(annotParser.POST, "@`post_");
+    tokenToK.put(annotParser.SPECIFICATION, "@`cfg_->_req_ens_");
     tokenToK.put(annotParser.ASSUME, "@`assume_");
     tokenToK.put(annotParser.ASSERT, "@`assert_");
-    tokenToK.put(annotParser.INVARIANT, "@`invariant_");
+    tokenToK.put(annotParser.INVARIANT, "@`inv_");
     tokenToK.put(annotParser.SKIP, "@`skip");
     tokenToK.put(annotParser.VERIFY, "@`verify");
     tokenToK.put(annotParser.BREAKPOINT, "@`breakpoint");
@@ -82,14 +81,14 @@ public class AnnotPreK {
       annotLexer lexer = new annotLexer(input);
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       annotParser parser = new annotParser(tokens);
-      CommonTree tree = (CommonTree) parser.annot().getTree();
+      CommonTree tree = (CommonTree) parser.annot_text().getTree();
       int annotType = tree.getType();
 
       // Rewriting the AST
       CommonTreeNodeStream nodes;
 
       completeConfig(tree);
-      if (tree.getType() == annotParser.INVARIANT)
+      if (tree.getType() == annotParser.SPECIFICATION)
         splitConfig(tree);
 
       nodes = new CommonTreeNodeStream(tree);
@@ -119,7 +118,7 @@ public class AnnotPreK {
 
       CommonTree maudifiedTree = tree;
 
-      System.err.println(TreeUtils.toTreeString(maudifiedTree, 0));
+      //System.err.println(TreeUtils.toTreeString(maudifiedTree, 0));
       //System.err.println(TreeUtils.toMaudeString(tree));
       String annotMaudeString = TreeUtils.toMaudeString(maudifiedTree);
       if (annotType == annotParser.ASSERT && Table.varString.startsWith("!") ) {
@@ -149,9 +148,9 @@ public class AnnotPreK {
     Token t;
     String wrapper;
     if (!isDefault) 
-      wrapper = prefix + sort + "Item";
+      wrapper = prefix + sort;
     else
-      wrapper = "default" + sort + "Item";
+      wrapper = "default" + sort;
 
     t = new CommonToken(annotParser.IDENTIFIER, wrapper);
     CommonTree var = new CommonTree(t);
@@ -184,7 +183,7 @@ public class AnnotPreK {
     newCell.addChild(newBag);
 
     if (cell.cells.isEmpty())
-      newBag.addChild(newVar(cellLabel, cell.sort, cell.isDefault));
+      newBag.addChild(newVar(cellLabel, cell.sort + "Item", cell.isDefault));
 
     t = new CommonToken(annotParser.IDENTIFIER, cellLabel);
     newCell.addChild(new CommonTree(t));
@@ -195,31 +194,42 @@ public class AnnotPreK {
     String cellLabel = ((CommonTree) tree.getChild(0)).getText();
     int cellOpen = Integer.parseInt(tree.getText());
     String cellSort = Table.labelToCell.get(cellLabel).sort;
+    String cellItem = cellSort + "Item";
 
     if (cellOpen != Table.Cell.NONE)
     {
-       Token t = null;
-       if (cellSort.equals(Table.Sort.MAP)) {
-         if ((cellOpen & Table.Cell.BOTH) != Table.Cell.NONE)
-         cellOpen = Table.Cell.RIGHT;
-         t = new CommonToken(annotParser.MAP);
-       }
-       else if (cellSort.equals(Table.Sort.BAG)) {
-         if ((cellOpen & Table.Cell.BOTH) != Table.Cell.NONE)
-         cellOpen = Table.Cell.RIGHT;
-         t = new CommonToken(annotParser.BAG);
-       }
-       else if (cellSort.equals(Table.Sort.LIST))
-         t = new CommonToken(annotParser.LIST);
+      Token t = null;
+      if (cellSort.equals(Table.Sort.MAP) || cellSort.equals(Table.Sort.BAG)) {
+        if (cellSort.equals(Table.Sort.MAP))
+          t = new CommonToken(annotParser.MAP);
+        if (cellSort.equals(Table.Sort.BAG))
+          t = new CommonToken(annotParser.BAG);
 
-       CommonTree newContainer = new CommonTree(t);
-       if ((cellOpen & Table.Cell.LEFT) != Table.Cell.NONE)
-         newContainer.addChild(newVar("left_" + cellLabel, cellSort, false));
-       newContainer.addChild(tree.getChild(1));
-       if ((cellOpen & Table.Cell.RIGHT) != Table.Cell.NONE)
-         newContainer.addChild(newVar("right_" + cellLabel, cellSort, false));
+        CommonTree newContainer = new CommonTree(t);
+        if (cellOpen == Table.Cell.LEFT)
+          newContainer.addChild(newVar("left_" + cellLabel, cellItem, false));
+        newContainer.addChild(tree.getChild(1));
+        if (cellOpen == Table.Cell.RIGHT)
+          newContainer.addChild(newVar("right_" + cellLabel, cellItem, false));
+        if (cellOpen == Table.Cell.BOTH)
+          newContainer.addChild(newVar(cellLabel, cellItem, false));
 
-       tree.setChild(1, newContainer);
+        tree.setChild(1, newContainer);
+      }
+      else if (cellSort.equals(Table.Sort.LIST)) {
+        if (((CommonTree) tree.getChild(1)).getType() == annotParser.STREAM) {
+          t = new CommonToken(annotParser.APPEND);
+
+          CommonTree newContainer = new CommonTree(t);
+          if ((cellOpen & Table.Cell.LEFT) != Table.Cell.NONE)
+            newContainer.addChild(newVar("left_" + cellLabel, "Seq", false));
+          newContainer.addChild(((CommonTree) tree.getChild(1)).getChild(0));
+          if ((cellOpen & Table.Cell.RIGHT) != Table.Cell.NONE)
+            newContainer.addChild(newVar("right_" + cellLabel, "Seq", false));
+
+          ((CommonTree) tree.getChild(1)).setChild(0, newContainer);
+        }
+      }
     }
   }
 
@@ -332,8 +342,12 @@ public class AnnotPreK {
   }
 
   private static void splitConfig(CommonTree tree) {
-    if (tree.getType() == annotParser.CONFIG) {
-      tree.setChild(0, splitTerm((CommonTree) tree.getChild(0)));
+    if (tree.getType() == annotParser.SPECIFICATION) {
+      CommonTree rewNode = splitTerm((CommonTree) tree.getChild(0));
+      tree.addChild(tree.getChild(2));
+      tree.setChild(2, tree.getChild(1));
+      tree.setChild(0, rewNode.getChild(0));
+      tree.setChild(1, rewNode.getChild(1));
     }
     else
       for (int i = 0; i < tree.getChildCount(); i++) {

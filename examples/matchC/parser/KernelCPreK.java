@@ -29,9 +29,9 @@ public class KernelCPreK {
     tokenToBuiltins.put(kernelCParser.STRING_TYPE, "string");
     tokenToBuiltins.put(kernelCParser.VOID_TYPE, "void");
     tokenToK.put(kernelCParser.FUN_DECL, "__`(_`)");
-    tokenToK.put(kernelCParser.ANNOT_FUN_DECL, "__`(_`)__");
+    tokenToK.put(kernelCParser.ANNOT_FUN_DECL, "__`(_`)`[`[_`]`]");
     tokenToK.put(kernelCParser.FUN_DEF, "__`(_`)_");
-    tokenToK.put(kernelCParser.ANNOT_FUN_DEF, "__`(_`)___");
+    tokenToK.put(kernelCParser.ANNOT_FUN_DEF, "__`(_`)`[`[_`]`]_");
     tokenToK.put(kernelCParser.STRUCT_DECL, "struct_`{_`};");
     tokenToK.put(kernelCParser.VAR_DECL, "__;");
     tokenToK.put(kernelCParser.PARAM, "__;");
