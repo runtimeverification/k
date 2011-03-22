@@ -9,13 +9,12 @@ struct listNode {
 
 
 void readWrite(int n)
-//@ pre  <in> A @ In </in> <out> Out </out> /\ len(A) = n
-//@ post <in> In </in> <out> Out @ A </out>
+//@ cfg <in> A => epsilon <_/in> <out_> epsilon => A </out> req len(A) = n
 {
   int t;
 
-  /*@ invariant <in> ?B @ In </in> <out> Out @ ?A </out>
-                /\ n >= 0 /\ len(?B) = n /\ A = ?A @ ?B */
+  /*@ inv <in> ?B <_/in> <out_> ?A </out>
+          /\ n >= 0 /\ len(?B) = n /\ A = ?A @ ?B */
   while (n) {
     scanf("%d", &t);
     printf("%d ", t);
@@ -25,8 +24,7 @@ void readWrite(int n)
 
 
 void readWriteBuffer(int n)
-//@ pre  <in> A @ In </in> <out> Out </out> /\ len(A) = n
-//@ post <in> In </in> <out> Out @ rev(A) </out>
+//@ cfg <in> A => epsilon <_/in> <out_> epsilon => rev(A) </out> req len(A) = n
 {
   int i;
   struct listNode *x;
@@ -34,8 +32,8 @@ void readWriteBuffer(int n)
 
   i = 0;
   x = 0;
-  /*@ invariant <in> ?B @ In </in> <heap> list(x)(?A), !H </heap>
-                /\ i <= n /\ len(?B) = n - i /\ A = rev(?A) @ ?B */
+  /*@ inv <in> ?B <_/in> <heap_> list(x)(?A) <_/heap>
+          /\ i <= n /\ len(?B) = n - i /\ A = rev(?A) @ ?B */
   while (i < n) {
     y = x;
     x = (struct listNode*) malloc(sizeof(struct listNode));
@@ -44,8 +42,7 @@ void readWriteBuffer(int n)
     i += 1;
   }
 
-  /*@ invariant <out> Out @ ?A </out> <heap> list(x)(?B), !H </heap>
-                /\ A = rev(?A @ ?B) */
+  //@ inv <out_> ?A </out> <heap_> list(x)(?B) <_/heap> /\ A = rev(?A @ ?B)
   while (x) {
     y = x->next;
     printf("%d ",x->val);
@@ -73,6 +70,5 @@ int main()
 }
 
 
-//@ var A, B, In, Out : Seq
-//@ var H : MapItem
+//@ var A, B : Seq
 
