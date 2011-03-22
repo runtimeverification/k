@@ -277,13 +277,13 @@ inc MATCHC
   var Subst1 Subst2 : Subst .
 
 
-  --- apply substitution on a pattern
+  --- apply default substitution on a pattern
   eq applyDefaultSubst(Pattern1 \/ Pattern2, Subst)
    = applyDefaultSubst(Pattern1, Subst) \/ applyDefaultSubst(Pattern2, Subst) .
   eq applyDefaultSubst(Bag /\ Phi, Subst)
    = applyDefaultSubst(Bag, Subst) /\ Phi .
 
-  --- applyDefault substitution on a configuration
+  --- apply default substitution on a configuration
   eq applyDefaultSubst(< CellLabel > Map1 </ CellLabel > Bag, (Map1 <- Map2) ;; Subst)
    = < CellLabel > Map2 </ CellLabel > applyDefaultSubst(Bag, Subst) .
   eq applyDefaultSubst(< CellLabel > K1 </ CellLabel > Bag, (K1 <- K2) ;; Subst)
@@ -370,13 +370,22 @@ mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST .
   var Var VarRoot : String .
  ceq filterFrame!Subst((!ListItem(Var) <- List) ;; Subst, VarRoot)
    = filterFrame!Subst(Subst, VarRoot)
-  if substrString(Var, 0, lengthString(VarRoot)) ==Bool VarRoot .
+  if substrString(Var,
+                  lengthString(Var) -Int lengthString(VarRoot),
+                  lengthString(VarRoot))
+     ==Bool VarRoot .
  ceq filterFrame!Subst((!BagItem(Var) <- Bag) ;; Subst, VarRoot)
    = filterFrame!Subst(Subst, VarRoot)
-  if substrString(Var, 0, lengthString(VarRoot)) ==Bool VarRoot .
+  if substrString(Var,
+                  lengthString(Var) -Int lengthString(VarRoot),
+                  lengthString(VarRoot))
+     ==Bool VarRoot .
  ceq filterFrame!Subst((!MapItem(Var) <- Map) ;; Subst, VarRoot)
    = filterFrame!Subst(Subst, VarRoot)
-  if substrString(Var, 0, lengthString(VarRoot)) ==Bool VarRoot .
+  if substrString(Var,
+                  lengthString(Var) -Int lengthString(VarRoot),
+                  lengthString(VarRoot))
+     ==Bool VarRoot .
   eq filterFrame!Subst(SubstItem ;; Subst, VarRoot)
    = SubstItem ;; filterFrame!Subst(Subst, VarRoot) [owise] .
   eq filterFrame!Subst(.Subst, VarRoot) = .Subst .
