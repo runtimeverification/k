@@ -10,7 +10,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
 
 //@ Variables; we include arrays here as well, a[x][y][z]
   syntax Var ::= Id
-               | Var [ Exp ]       [strict prec 1]
+               | Var [ List{Exp} ]       [strict prec 1]
 
 //@ Declarations
 --- There are two types of declarations: for variables (including arrays) and for functions
@@ -37,7 +37,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
                | Exp and Exp       [strict prec 55 gather(E e)]
                | Exp or Exp        [strict prec 59 gather(E e)]
                | not Exp           [strict prec 53]
-               | Exp [ Exp ]       [ditto]
+               | Exp [ List{Exp} ] [ditto]
                | sizeOf ( Exp )    [strict]
                | Exp ( )
                | Exp ( List{Exp} ) [strict prec 2]

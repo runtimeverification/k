@@ -5,11 +5,11 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
               | main | divide2 | collatz | dummy1 | dummy2 | init | reverse 
               | printAll | writeArray | insertionSort | bubbleSort | siftDown 
               | heapSort | map | done | root | bottom | maxChild | temp
-              | numbers | size | readArray | printArray
+              | numbers | size | readArray | printArray | mulArray | transArray
 
   syntax Stmts ::= pFactorial | pCollatz | pInsertionSort1 | pInsertionSort2
                  | pInsertionSort3 | pInsertionSort4 | pBubbleSort
-                 | pHeapSort | pSorting | pex01 | pArrays
+                 | pHeapSort | pSorting | pex01 | pArrays  
 
   macro pFactorial =
        var x;
@@ -411,7 +411,6 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          map(f,x);
        }
 
-***( --- multidimensional arrays to be done
   macro pArrays =
     function readArray(a) {
       var i; var j; var m; var n; m = sizeOf(a) - 1; n = sizeOf(a[0]) - 1;
@@ -421,18 +420,33 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
     function printArray(a) {
       var i; var j; var m; var n; m = sizeOf(a) - 1; n = sizeOf(a[0]) - 1;
       for i = 0 to m do
-          for j = 0 to n do write(a[i][j]);
+          for j = 0 to n do write(a[i,j]);
+    }
+    function transArray(a) {
+      var i; var j; var m; var n;  m = sizeOf(a) - 1; n = sizeOf(a[0]) - 1;
+      var b[n+1,m+2];
+      for i = 0 to m do
+          for j = 0 to n do
+              b[j,i]=a[i,j];
+      return b;
+    }
+    function mulArray(a,b) {
+      var m; var n; var p; m = sizeOf(a) - 1; n=sizeOf(b) - 1; p=sizeOf(b[0]) - 1;
+      var i; var j; var k; var c[m+1,p+1];
+      for i=0 to m do for j=0 to p do for k=0 to n do
+          c[i,j]=c[i,j]+a[i,k]*b[k,j];
+      return c;
     }
     function main() {
       var x;
       x = read();
       var y;
       y = read();
-      var a[x][y];
+      var a[x,y];
       readArray(a);
-      printArray(a);
+      printArray(mulArray(a,transArray(a)));
     }
-***)
+
 
 --- programs to test exceptions
 

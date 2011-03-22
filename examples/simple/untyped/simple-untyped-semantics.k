@@ -68,11 +68,21 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
        <nextLoc> L => sNat(L) </nextLoc> 
 
 //@ Array declaration
-  context var X[[HOLE]];
+  context var X[_,`[HOLE`]:Exp,_];
   rule <k> var X[N:Nat]; => . <_/k>
        <env> Env => Env[L/X] </env>
-       <store_> . => L |-> array(sNat L, N) <_/store>
+       <store_> . => (L |-> array(sNat L, N)) sNat L..sNat L+Nat N |-> 0 <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc>
+
+
+  syntax Id ::= freshId ( Nat )
+  rule <k> var X[N,N':Nat,Vl]; => 
+           (var (X[N]);) 
+           var freshId(L); 
+           for freshId(L) = 0 to N +Int -1 do {
+             var freshId(L +Nat 1)[N',Vl]; 
+             X[freshId(L)] = freshId(L +Nat 1); 
+           } <_/k>  <nextLoc> L => L +Nat 2 </nextLoc>  
 
 //@ Function declaration
   rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
@@ -133,6 +143,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 Untyped SIMPLE does not check array bounds
 We prefer to use a helper computation item, lookup, to avoid locking the store */
   rule array(L,_)[N] => lookup(L +Int N) [structural]
+  rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
   syntax K ::= lookup Nat
   rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
@@ -184,7 +195,7 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
 --- Local variable
   rule <k> l-value(X) => loc(L:Nat) <_/k> <env_> X|->L <_/env>
 --- Array element: evaluate the array and its index; then the array lookup rule above applies.
-  context l-value(_[[HOLE]])
+  context l-value(_[_,`[HOLE`]:Exp,_])
   context l-value([HOLE][_])
 --- Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) <_/k>

@@ -2,6 +2,7 @@ load simple-untyped-compiled
 rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
+rew run('pArrays) .
 rew run('pExceptions1) .
 rew run('pExceptions2) .
 rew run('pExceptions3) .
