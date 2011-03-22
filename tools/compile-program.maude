@@ -25,8 +25,11 @@ fmod COMPILE-PROGRAM is
   op compileProgram : Module Module Qid Term ~> Module .
   eq compileProgram(Compiled, Syntax, Q, Trm)
    = compileProgram(Compiled, Syntax, Q, Trm, getOps(Compiled)) .
+  eq compileProgram(Compiled, Syntax, Q, errorTrm(Trm, 'Error))
+   = errorM('0.Zero, 'Int, qid(downTerm(Trm,""))) .
+
   eq compileProgram(Compiled, Syntax, Q, errorTrm(Trm, T))
-   = errorM(Trm, T, Q) .
+   = errorM(Trm, T, Q) [owise] .
 
   op compileProgram : Module Module Qid Term OpDeclSet ~> Module .
   eq compileProgram(Compiled, Syntax, Q, Trm, (op 'Id2String : 'Id -> 'String [AS] .) Ops)
@@ -52,9 +55,12 @@ ceq missingConsts(Ops, Q, T, Trms) = missingConsts(Ops, Trms)
    = (op Q : nil -> T [none] .)
      missingConsts(Ops, Trms) [owise] .
 
+  var Trm' : Term .
   op compileProgram : Module Module OpDeclSet Qid ~> Term .
-  eq compileProgram(Compiled, Syntax, SyntaxOps op Q : nil -> T [AS] ., Q)
-   = compileProgram(Compiled, Syntax, SyntaxOps, getEqs(Syntax), mkConstant(Q, T)) .
+ ceq compileProgram(Compiled, Syntax, SyntaxOps op Q : nil -> T [AS] ., Q)
+   =  Trm'
+  if Trm' :=  compileProgram(Compiled, Syntax, SyntaxOps, getEqs(Syntax), mkConstant(Q, T)) .
+  eq compileProgram(Compiled, Syntax, SyntaxOps, Q) = errorTrm(upTerm("Could not find program " + string(Q)),'Error) [owise] .
 
   op compileProgram : Module Module OpDeclSet EquationSet Constant ~> Term .
   eq compileProgram(Compiled, Syntax, SyntaxOps, Eqs eq C = Trm [AS] ., C)
