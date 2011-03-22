@@ -3,8 +3,8 @@
 
 
 int sum(int n)
-//@ pre  n = n0 /\ n0 >= 0
-//@ post returns((n0 * (n0 + 1)) / 3)
+//@ requires n = n0 /\ n0 >= 0
+//@ ensures  returns((n0 * (n0 + 1)) / 2)
 {
   int s;
 

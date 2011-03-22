@@ -20,8 +20,8 @@ struct stackNode {
 
 
 struct listNode *toListRecursive(struct treeNode *t, struct listNode *l)
-//@ pre  <heap> tree(t)(T), list(l)(A), H </heap>
-//@ post <heap> list(?l)(tree2list(T) @ A), H </heap> /\ returns(?l)
+/*@ cfg <heap_> tree(t)(T), list(l)(A) => list(?l)(tree2list(T) @ A) <_/heap>
+    ens returns(?l) */
 {
   struct listNode *ln;
 
@@ -39,8 +39,8 @@ struct listNode *toListRecursive(struct treeNode *t, struct listNode *l)
 
 
 struct listNode *toListIterative(struct treeNode *t)
-//@ pre  <heap> tree(t)(T), H </heap>
-//@ post <heap> list(?l)(tree2list(T)), H </heap> /\ returns(?l)
+/*@ cfg <heap_> tree(t)(T) => list(?l)(tree2list(T)) <_/heap>
+    ens returns(?l) */
 {
   struct listNode *l;
   struct listNode *ln;
@@ -55,8 +55,8 @@ struct listNode *toListIterative(struct treeNode *t)
   s = (struct stackNode *) malloc(sizeof(struct stackNode));
   s->val = t;
   s->next = 0;
-  /*@ invariant <heap> treeList(s)(?TS), list(l)(?A), H </heap>
-                /\ tree2list(T) = treeList2list(rev(?TS)) @ ?A */
+  /*@ inv <heap_> treeList(s)(?TS), list(l)(?A) <_/heap>
+          /\ tree2list(T) = treeList2list(rev(?TS)) @ ?A */
   while (s != 0) {
     sn = s;
     s = s->next ;
@@ -176,5 +176,4 @@ int main()
 
 //@ var A, TS : Seq
 //@ var T : Tree
-//@ var H : MapItem
 
