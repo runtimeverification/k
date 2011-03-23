@@ -21,7 +21,8 @@ public class KTreeNode implements TreeNode
   final ArrayList<KTreeNode> children;
   final KTreeNode ldotsNode;
 
-  static StringBuilder buffer = new StringBuilder(1048576);
+  static StringBuilder buffer = new StringBuilder(1024 * 1024);
+  static Wrapper wrapper = new Wrapper();
 
 
   public KTreeNode(KTreeNode parent)
@@ -302,24 +303,27 @@ public class KTreeNode implements TreeNode
     return node;
   }
 
-  public String toKString()
+  public String treeToString()
   {
-    buffer.setLength(0);
-    return toKString(0).toString();
+    wrapper.setLeftMargin(0);
+    wrapper.clean();
+    bufferedTreeToString();
+    return wrapper.toString();
   }
 
-  private StringBuilder toKString(int indent)
+  private void bufferedTreeToString()
   {
     int size = children.size();
     if (size > 0)
     {
       if (!KDefinition.cells.get(content).visible)
       {
-        buffer.append("<" + content + "> ... </" + content + ">");
-        return buffer;
+        wrapper.append("<" + content + "> ... </" + content + ">");
+        return;
       }
 
-      buffer.append("<" + content + ">");
+      wrapper.append("<" + content + ">");
+      wrapper.setLeftMargin(wrapper.getLeftMargin() + 2);
       if (size > 1 || children.get(0).children.size() > 0)
       {
         int items = KDefinition.cells.get(content).items;
@@ -328,40 +332,28 @@ public class KTreeNode implements TreeNode
 
         for (int index = 0; index < size; ++index)
         {
-          buffer.append("\n");
-          for (int i = 0; i <= indent; ++i)
-          {
-            buffer.append("  "); 
-          }
-          children.get(index).toKString(indent + 1);
+          wrapper.append("\n");
+          children.get(index).bufferedTreeToString();
         }
         if (size < children.size())
         {
-          buffer.append("\n");
-          for (int i = 0; i <= indent; ++i)
-          {
-            buffer.append("  "); 
-          }
-          buffer.append("...");
+          wrapper.append("\n");
+          wrapper.append("...");
         }
-        buffer.append("\n");
-        for (int i = 0; i < indent; ++i)
-        {
-          buffer.append("  ");
-        }
+        wrapper.setLeftMargin(wrapper.getLeftMargin() - 2);
+        wrapper.append("\n");
       }
       else
       {
-        buffer.append(" "); 
-        children.get(0).toKString(indent + 1);
-        buffer.append(" "); 
+        wrapper.append(" ");
+        children.get(0).bufferedTreeToString();
+        wrapper.append(" ");
+        wrapper.setLeftMargin(wrapper.getLeftMargin() - 2);
       }
-      buffer.append("</" + content + ">");
+      wrapper.append("</" + content + ">");
     }
     else
-      buffer.append(content);
-
-    return buffer;
+      wrapper.append(content);
   }
 
 }

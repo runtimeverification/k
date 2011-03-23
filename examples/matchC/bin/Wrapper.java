@@ -65,6 +65,27 @@ class Wrapper
     this.width = width;
   }
 
+  public int getLeftMargin()
+  {
+    return leftMargin;
+  }
+
+  public void setLeftMargin(int leftMargin)
+  {
+    this.leftMargin = leftMargin;
+  }
+
+  public int getRightMargin()
+  {
+    return rightMargin;
+  }
+
+  public void setRightMargin(int rightMargin)
+  {
+    this.rightMargin = rightMargin;
+  }
+
+
   public void clean()
   {
     buffer.setLength(0);
@@ -88,13 +109,15 @@ class Wrapper
   }
 
 
-  public void append(String str)
+  public Wrapper append(String str)
   {
     for (int i = 0; i < str.length(); ++i)
       append(str.charAt(i));
+
+    return this;
   }
 
-  public void append(char ch)
+  public Wrapper append(char ch)
   {
     if (ch == '\033')
       isEscape = true;
@@ -102,15 +125,16 @@ class Wrapper
     {
       if (ch == 'm')
         isEscape = false;
+
       appendNonPrintable(ch);
-      return;
+      return this;
     }
 
     if (ch == '\n')
     {
       flushPending();
       appendNewline();
-      return;
+      return this;
     }
 
     if (ch == '"' && !isBackslash)
@@ -150,6 +174,8 @@ class Wrapper
 
     isBackquote = (ch == '`');
     isBackslash = isString && !isBackslash && (ch == '\\');
+
+    return this;
   }
 
   void appendPrintable(char ch)
@@ -166,7 +192,7 @@ class Wrapper
     }
   }
 
-  void appendNonPrintable(char ch)
+  private void appendNonPrintable(char ch)
   {
     if (isPending)
       pendingBuffer.append(ch);
@@ -174,15 +200,17 @@ class Wrapper
       buffer.append(ch);
   }
 
-  void appendNewline()
+  private void appendNewline()
   {
+    for (int i = 0; i < width - cursor; ++i)
+      buffer.append(' ');
     buffer.append('\n');
     for (int i = 0; i < leftMargin; ++i)
       buffer.append(' ');
     cursor = leftMargin;
   }
 
-  void flushPending()
+  private void flushPending()
   {
     if (isPending)
     {

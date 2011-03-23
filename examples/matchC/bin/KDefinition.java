@@ -56,20 +56,20 @@ public class KDefinition
     renameOp.put("FalseFormula", "false");
     renameOp.put(".Subst", ".");
 
-    renameOp.put("_===_", "_ = _");
+    renameOp.put("_===_", "_=_");
 
-    renameOp.put("_+Int_", "_ + _");
-    renameOp.put("_-Int_", "_ - _");
-    renameOp.put("_*Int_", "_ * _");
-    renameOp.put("_/Int_", "_ / _");
-    renameOp.put("_%Int_", "_ % _");
-    renameOp.put("_>Int_", "_ > _");
-    renameOp.put("_>=Int_", "_ >= _");
-    renameOp.put("_<Int_", "_ < _");
-    renameOp.put("_<=Int_", "_ <= _");
+    renameOp.put("_+Int_", "_+_");
+    renameOp.put("_-Int_", "_-_");
+    renameOp.put("_*Int_", "_*_");
+    renameOp.put("_/Int_", "_/_");
+    renameOp.put("_%Int_", "_%_");
+    renameOp.put("_>Int_", "_>_");
+    renameOp.put("_>=Int_", "_>=_");
+    renameOp.put("_<Int_", "_<_");
+    renameOp.put("_<=Int_", "_<=_");
     renameOp.put("-Int_", "-_");
 
-    renameOp.put("'_`,`,`,_", "'_`, _");
+    renameOp.put("'_`,`,`,_", "'_`,_");
     renameOp.put("_;;_", "__");
 
     renameOp.put("tv`(_`,_`)", "`(`(_`) _`)");

@@ -116,9 +116,26 @@ public class DefaultTerm implements MaudeTerm
   {
     int length = buffer.length();
     boolean isSpace = fragment.length() != 0
-                 && Character.isLetterOrDigit(fragment.charAt(0))
+                 && fragment.charAt(0) != '('
+                 && fragment.charAt(0) != ')'
+                 && fragment.charAt(0) != '['
+                 && fragment.charAt(0) != ']'
+                 && fragment.charAt(0) != '{'
+                 && fragment.charAt(0) != '}'
+                 && fragment.charAt(0) != ','
+                 && fragment.charAt(0) != '.'
+                 && fragment.charAt(0) != ' '
                  && length != 0
-                 && Character.isLetterOrDigit(buffer.charAt(length - 1));
+                 && buffer.charAt(length - 1) != '('
+                 && buffer.charAt(length - 1) != ')'
+                 && buffer.charAt(length - 1) != '['
+                 && buffer.charAt(length - 1) != ']'
+                 && buffer.charAt(length - 1) != '{'
+                 && buffer.charAt(length - 1) != '}'
+                 && buffer.charAt(length - 1) != ','
+                 && buffer.charAt(length - 1) != '.'
+                 && buffer.charAt(length - 1) != ' '
+                 && buffer.charAt(length - 1) != '\n';
     buffer.append(isSpace ? " " + fragment : fragment);
   }
 

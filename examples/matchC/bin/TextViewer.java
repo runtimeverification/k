@@ -10,10 +10,8 @@ public class TextViewer
     try
     {
       KTreeNode root = MaudeSAXHandler.getKTree(args[0]);
-      Wrapper wrapper = new Wrapper();
-      wrapper.append(root.toKString());
       Writer writer = new BufferedWriter(new FileWriter(args[1]));
-      writer.write(wrapper.toString());
+      writer.write(root.treeToString());
       writer.close();
     }
     catch (Exception e)
