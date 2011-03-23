@@ -12,7 +12,11 @@ reset_flag = 'r'
 open_flag = 'o'
 
 
-def run(args, output_filter):
+def default_filter(line):
+    return
+
+
+def run(args, filter=default_filter, epilog=''):
     cmd = ['unbuffer', 'maude'] + args
 
     print "Loading Maude .......",
@@ -22,7 +26,12 @@ def run(args, output_filter):
 
     while True:
         line = maude.stdout.readline()
-        if line.startswith("Bye"): break
+        if line.startswith("Bye"):
+            end = time.time()
+            elapsed = round(end - start, 3)
+            time_display = yellow_color + '%.3f' % elapsed + 's' + no_color
+            print epilog + '[' + time_display + ']'
+            break
 
         print_suffix_index = line.find(print_suffix)
         if line.startswith(print_prefix) and print_suffix_index != -1:
@@ -58,5 +67,5 @@ def run(args, output_filter):
             if not isOpen:
                 print
         else:
-            output_filter(line) 
+            filter(line)
 

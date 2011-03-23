@@ -60,45 +60,45 @@ def compile(in_filename, out_filename):
     print 'DONE! [' + elapsed + ']'
 
 
-def verify(prog_filename, log_filename):
-    args = ['-no-banner', '-no-wrap', '-no-ansi-color',
-           '-xml-log=' + log_filename, prog_filename]
-    maude_runner.run(args, output_filter)
+def verify(prog_filename, log=None):
+    args = ['-no-banner', '-no-wrap', '-no-ansi-color']
+    if log != None:
+        args += ['-xml-log=' + log]
+    args += [prog_filename]
+    maude_runner.run(args, filter=output_filter, epilog='DONE! ')
 
-
-def verify_no_log(prog_filename):
-    args = ['-no-banner', '-no-wrap', '-no-ansi-color', prog_filename]
-    maude_runner.run(args, output_filter)
+    if verified:
+        print green_color + 'Verification succeeded!' + no_color, statistics
+        if output_stream != None:
+            print 'Output:', output_stream
+    else:
+        print red_color + 'Verification failed!' + no_color, statistics
 
 
 verified = True
+statistics = None
 output_stream = None
 def output_filter(line):
     global verified
+    global statistics
     global output_stream
 
     line = line.strip()
     if line.startswith('rewrites'):
         rewrites = cyan_color + line.split()[1] + no_color
-        print rewrites + ' rewrites,',
+        statistics = '[' + rewrites + ' rewrites, '
     elif line.startswith('< feasible >'):
         feasible = green_color + line.split()[3][15:-10] + no_color
-        print feasible + ' feasible and',
+        statistics += feasible + ' feasible and '
     elif line.startswith('< infeasible >'):
         infeasible = red_color + line.split()[3][15:-10] + no_color
-        print infeasible + ' infeasible paths]'
+        statistics += infeasible + ' infeasible paths]'
     elif line.startswith('< tasks >'):
         verified = False
     elif line.startswith('< out >') and verified:
-        output_stream = line.replace(' @ ', ', ')
+        output_stream = line.replace(' @ ', ' ')
         output_stream = output_stream.replace('[', '').replace(']', '')
         output_stream = output_stream[15:-10]
-    elif line.endswith('</ top >'):
-        if verified:
-            print green_color + 'Verification succeeded!' + no_color
-            print output_stream
-        else:
-            print red_color + 'Verification failed!' + no_color
 
 
 ###
@@ -136,7 +136,7 @@ def main():
         help='do not generate any verifier output')
     parser.add_argument(
         'file',
-        help='verify file',
+        help='file to verify',
         metavar='file')
     args = parser.parse_args()
 
@@ -159,9 +159,9 @@ def main():
 
     if not args.silent:
         log_file = tempfile.mktemp('.xml')
-        verify(compiled_file, log_file)
+        verify(compiled_file, log=log_file)
     else:
-        verify_no_log(compiled_file)
+        verify(compiled_file)
 
     if not args.silent and not args.display:
         cmd = ['java', '-cp', ml_viewer_dir, ml_viewer_text_main_class,
@@ -176,6 +176,8 @@ def main():
         end = time.time()
         elapsed = yellow_color + "%.3f" % round(end - start, 3) + "s" + no_color
         print 'DONE! [' + elapsed + ']'
+
+        print 'Check ' + args.output + ' for the complete output.'
 
 
 main()
