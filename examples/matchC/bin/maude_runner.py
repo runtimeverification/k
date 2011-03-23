@@ -1,68 +1,62 @@
-import sys
 import subprocess
 import time
 
+from ansi_colors import *
+
+
 ### 
-maude_output_prefix = "maude-output"
-maude_timer_prefix = "-timer"
-maude_rewrites_prefix = "-rewrites"
-tmp_out_filename=".tmp_out_file"
-
-black_color  = "\033[1;30m"
-red_color    = "\033[1;31m"
-green_color  = "\033[1;32m"
-yellow_color = "\033[1;33m"
-blue_color   = "\033[1;34m"
-purple_color = "\033[1;35m"
-cyan_color   = "\033[1;36m"
-white_color  = "\033[1;37m"
-no_color     = "\033[0m"
-###
+print_prefix = '\{print'
+print_suffix = '\}'
+timer_flag = 't'
+reset_flag = 'r'
+open_flag = 'o'
 
 
-if len(sys.argv) != 2: sys.exit("maude_runner: invalid number of arguments")
+def run(args, output_filter):
+    cmd = ['unbuffer', 'maude'] + args
 
-tmp_out_file=open(".tmp_out_file", "w")
+    print "Loading Maude .......",
+    start = time.time()
 
-maude_args = "unbuffer maude -no-banner -no-wrap -no-ansi-color " + sys.argv[1]
-maude = subprocess.Popen(maude_args, shell=True, stdout=subprocess.PIPE)
+    maude = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
+    while True:
+        line = maude.stdout.readline()
+        if line.startswith("Bye"): break
 
-print "Loading Maude .......",
-start = time.time()
-while True:
-  maude_output_line = maude.stdout.readline()
-  if maude_output_line.startswith("Bye"): break
+        print_suffix_index = line.find(print_suffix)
+        if line.startswith(print_prefix) and print_suffix_index != -1:
+            content = line[print_suffix_index + len(print_suffix):].rstrip('\n')
+            format = line[len(print_prefix):print_suffix_index].strip(' ')
 
-  if maude_output_line.startswith(maude_output_prefix):
-    maude_output_line = maude_output_line[len(maude_output_prefix):]
-    maude_output_line = maude_output_line.rstrip("\n")
+            isTimer = isReset = isOpen = False
+            isFormat = True
+            for c in format:
+                if c == timer_flag:
+                    isTimer = True
+                elif c == reset_flag:
+                    isReset = True
+                elif c == open_flag:
+                    isOpen = True
+                else:
+                    isFormat = False
+            if not isFormat:
+                print line,
+                continue
 
-    if maude_output_line.startswith(maude_timer_prefix):
-      maude_output_line = maude_output_line[len(maude_timer_prefix):]
-      end = time.time()
-      elapsed = yellow_color + "%.3f" % round(end - start, 3) + "s" + no_color
-      start = end
-      print maude_output_line + " [" + elapsed + "]"
-    elif maude_output_line.startswith(maude_rewrites_prefix):
-      maude_output_line = maude_output_line[len(maude_rewrites_prefix):]
-      end = time.time()
-      elapsed = yellow_color + "%.3f" % round(end - start, 3) + "s" + no_color
-      print maude_output_line + " [" + elapsed + ",",
-    else:
-      print maude_output_line,
-  else:
-    if maude_output_line.startswith("rewrites"):
-      rewrites = cyan_color + maude_output_line.split()[1] + no_color
-      print rewrites + " rewrites,",
-    elif maude_output_line.strip().startswith("< feasible >"):
-      counter = maude_output_line.strip().split()[3][15:-10]
-      feasible = green_color + counter + no_color
-      print feasible + " feasible and",
-    elif maude_output_line.strip().startswith("< infeasible >"):
-      counter = maude_output_line.strip().split()[3][15:-10]
-      infeasible = red_color + counter + no_color
-      print infeasible + " infeasible paths]",
-    else:
-      tmp_out_file.write(maude_output_line)
+            end = time.time()
+            elapsed = round(end - start, 3)
+            if isReset: start = end
+
+            print content,
+            if isTimer:
+                time_display = yellow_color + '%.3f' % elapsed + 's' + no_color
+                if isOpen:
+                  print '[' + time_display + ',',
+                else:
+                  print '[' + time_display + ']',
+            if not isOpen:
+                print
+        else:
+            output_filter(line) 
 

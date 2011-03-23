@@ -394,3 +394,7 @@ COMMENT : '/*' (options { greedy = false; } : .)* '*/' { skip(); } ;
 fragment
 LINE_COMMENT : '//' ~('\n' | '\r')* '\r'? '\n' { skip(); } ;
 
+
+// not a proper rule, but it works for now
+PRE_PROC : '#include' ~('\n' | '\r')* '\r'? '\n' { skip(); } ;
+

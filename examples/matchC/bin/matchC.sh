@@ -38,7 +38,7 @@ OUT_FILTER_STYLE=${ML_BIN_DIR}/primitive_style.yml
 TMP_OUT=.tmp_out_file
 TMP_ERR=.tmp_err_file
 
-while getopts 'eco:' OPTION; do
+while getopts 'ceovs:' OPTION; do
   case $OPTION in
     c) COMPILE_FLAG="-c"
        ;;
@@ -46,6 +46,10 @@ while getopts 'eco:' OPTION; do
        ;;
     o) OUT_FLAG='-o'
        ML_PROG="$OPTARG"
+       ;;
+    v) VISUAL_FLAG='-v'
+       ;;
+    s) SILENT_FLAG='-s'
        ;;
     ?) ;; 
   esac
@@ -62,10 +66,6 @@ fi
 
 PROG=`basename $1 ${LANG_SUFFIX}`
 PROG_DIR=`dirname $1`
-PROG_MODULE=PROG
-PROG_MACRO=prog
-MAUDE_PROG=${PROG_MACRO}.maude
-COMPILED_PROG=${PROG_MACRO}-compiled.maude
 if [ -z "${OUT_FLAG}" ]; then
   ML_PROG=${PROG}.maude
 fi
@@ -78,12 +78,13 @@ fi
 echo -e "
 load ${LANG_SEMANTICS_DIR}/${LANG_NAME}-compiled.maude\n\
 load ${ML_LIB_DIR}/utils.maude\n\
-mod ${PROG_MODULE} is
-inc ${LANG_MODULE} .
+mod PROG is
+inc ${LANG_MODULE} + UTILS .
 " >${ML_PROG}
 
 TIME_CMD="/usr/bin/time -f %e -o ${TMP_OUT}"
-PROG_CMD="grep -v ^#include $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN} >>${ML_PROG}"
+#PROG_CMD="grep -v ^#include $1 | ${JVM} ${JFLAGS} ${PARSER_MAIN} >>${ML_PROG}"
+PROG_CMD="${JVM} ${JFLAGS} ${PARSER_MAIN} <$1 >>${ML_PROG}"
 echo -e -n "Compiling program ... "
 ${TIME_CMD} bash -c "${PROG_CMD}"
 if [ "$?" -ne 0 ]; then exit $?; fi
@@ -91,24 +92,21 @@ echo -e "DONE! [\033[1;33m`cat ${TMP_OUT}`s\033[0m]"
 
 echo -e "
 endm\n\
-mod TEST is inc ${PROG_MODULE} + UTILS . endm\n\
 set print attribute on .\n
 rew ${ML_OP}(prog) .\n
 q\n\
 " >>${ML_PROG}
 
 if [ -z "${COMPILE_FLAG}" ]; then
-  #${MAUDE} ${MFLAGS} ${ML_PROG} >${TMP_OUT} 2>${TMP_ERR}
   ${PYTHON} ${MAUDE_RUNNER} ${ML_PROG} 2>${TMP_ERR}
   if [ "$?" -ne 0 ]; then ERR=$?; cat ${TMP_ERR}; rm ${TMP_ERR}; exit ${ERR}; fi
   cat ${TMP_ERR}
 
-  grep 'rewrites: ' ${TMP_OUT}
   ${OUT_FILTER} ${TMP_OUT} ${OUT_FILTER_STYLE}
   if [ "$?" -ne 0 ]; then exit $?; fi
 fi
 
-rm -f ${TMP_OUT} ${TMP_ERR} ${MAUDE_PROG} ${COMPILED_PROG}
+rm -f ${TMP_OUT} ${TMP_ERR}
 if [ -z "${COMPILE_FLAG}" -a -z "${OUT_FLAG}" ]; then
   rm -f ${ML_PROG}
 fi
