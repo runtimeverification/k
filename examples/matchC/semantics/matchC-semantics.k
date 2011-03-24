@@ -152,6 +152,7 @@ Function entry
             declParams(ParamList)
             ~> substKLabel(S, 'return_, 'returnAssert_)
             ~> assertLabel
+            ~> disolveTask
           </k>
         <_/task>
       <_/funTask>
