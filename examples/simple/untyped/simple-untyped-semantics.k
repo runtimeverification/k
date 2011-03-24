@@ -62,9 +62,10 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 ---------------------------------------
 
 //@ Variable declaration
-  rule <k> var X:Id; => . <_/k>
+  context var X = [HOLE];
+  rule <k> var X:Id = V; => . <_/k>
        <env> Env:Map => Env[L:Nat/X] </env>
-       <store_> . => L|->0 <_/store>
+       <store_> . => L|->V <_/store>
        <nextLoc> L => sNat(L) </nextLoc> 
 
 //@ Array declaration
@@ -77,12 +78,12 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
   syntax Id ::= freshId ( Nat )
   rule <k> var X[N,N':Nat,Vl]; => 
-           (var (X[N]);) 
-           var freshId(L); 
+           __((var (X[N]);),__(
+           (var freshId(L);), 
            for freshId(L) = 0 to N +Int -1 do {
-             var freshId(L +Nat 1)[N',Vl]; 
+             (var freshId(L +Nat 1)[N',Vl];)
              X[freshId(L)] = freshId(L +Nat 1); 
-           } <_/k>  <nextLoc> L => L +Nat 2 </nextLoc>  
+           })) <_/k>  <nextLoc> L => L +Nat 2 </nextLoc>  
 
 //@ Function declaration
   rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
@@ -182,8 +183,8 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
 /*@ Assignment
  Like for increment, we first compute the l-value of the left-hand-side.
 */
-  context ([HOLE] => l-value([HOLE]))=_;
-  rule <k> loc(L)=V; => . <_/k> <store_> L|->(_=>V) <_/store>
+  context ([HOLE] => l-value([HOLE]))=_
+  rule <k> loc(L)=V => V <_/k> <store_> L|->(_=>V) <_/store>
 
 /*@ l-value and loc
  l-value(E) computes the l-value of E, where E can be an identifier X,
