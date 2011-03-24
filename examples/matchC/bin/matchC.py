@@ -69,10 +69,10 @@ def verify(prog_filename, log=None):
 
     if verified:
         print green_color + 'Verification succeeded!' + no_color, statistics
-        if output_stream != None:
-            print 'Output:', output_stream
     else:
         print red_color + 'Verification failed!' + no_color, statistics
+    if output_stream != None:
+        print 'Output:', output_stream
 
 
 verified = True
@@ -95,10 +95,10 @@ def output_filter(line):
         statistics += infeasible + ' infeasible paths]'
     elif line.startswith('< tasks >'):
         verified = False
-    elif line.startswith('< out >') and verified:
+    elif line.startswith('< mainOut >'):
         output_stream = line.replace(' @ ', ' ')
         output_stream = output_stream.replace('[', '').replace(']', '')
-        output_stream = output_stream[15:-10]
+        output_stream = output_stream[19:-14]
 
 
 ###
@@ -111,12 +111,6 @@ def main():
         help='place tool output into file',
         metavar='file',
         dest='output')
-    parser.add_argument(
-        '-m', '--main-only',
-        action='store_true',
-        default=False,
-        help='execute main only, do not verify other functions',
-        dest='main')
     parser.add_argument(
         '-c', '--compile-only',
         action='store_true',
@@ -163,12 +157,14 @@ def main():
     else:
         verify(compiled_file)
 
+    if verified: sys.exit(0)
+
     if not args.silent and not args.display:
         cmd = ['java', '-cp', ml_viewer_dir, ml_viewer_text_main_class,
               log_file, args.output]
 
         start = time.time()
-        print 'Generating output ...',
+        print 'Generating error ....',
 
         retcode = subprocess.call(cmd)
         if retcode != 0: sys.exit(retcode)

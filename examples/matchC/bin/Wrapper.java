@@ -202,8 +202,8 @@ class Wrapper
 
   private void appendNewline()
   {
-    for (int i = 0; i < width - cursor; ++i)
-      buffer.append(' ');
+    //for (int i = 0; i < width - cursor; ++i)
+    //  buffer.append(' ');
     buffer.append('\n');
     for (int i = 0; i < leftMargin; ++i)
       buffer.append(' ');
