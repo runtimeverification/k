@@ -28,8 +28,8 @@ public class KDefinition
     cells.put(  "feasible",   new Cell("feasible"));
     cells.put("infeasible", new Cell("infeasible"));
     cells.put(     "check",      new Cell("check", false));
-    cells.put(     "tasks",      new Cell("tasks"));
-    cells.put(   "funTask",    new Cell("funTask"));
+    cells.put(     "tasks",      new Cell("tasks",  true, 1));
+    cells.put(   "funTask",    new Cell("funTask",  true, 2));
     cells.put(     "funId",      new Cell("funId"));
     cells.put(      "task",       new Cell("task"));
     cells.put(  "taskType",   new Cell("taskType", false));

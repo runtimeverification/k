@@ -261,6 +261,10 @@ public class DefaultTerm implements MaudeTerm
         return new DefaultTerm("'default" + name, sort);
     }
 
+    if ("_/\\_".equals(op) && "true".equals(subterms.get(1).getOp()))
+      if (subterms.size() == 2)
+        return subterms.get(0);
+
     if ("?var".equals(op))
       return new DefaultTerm(subterms.get(0).getOp() + "_Int", sort);
 

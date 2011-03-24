@@ -207,7 +207,7 @@ public class KTreeNode implements TreeNode
     if (KDefinition.assocOp.contains(cellContent.getOp()))
     {
       String assocOp = cellContent.getOp();
-      String prefixOp = assocOp.substring(1, assocOp.length() - 1) + ' ';
+      String prefixOp = assocOp.substring(1).replace('_', ' ').trim();
       String prefix = "";
       for (MaudeTerm cellItem : cellContent.subterms())
       {
