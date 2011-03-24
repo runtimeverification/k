@@ -1976,7 +1976,9 @@ sub run_maude_
 	close FILE;
 
 	# call maude
-	my $result = `$maude $input_file 2>&1`;
+    
+    my $input = abs_path($input_file);
+	my $result = `$maude $input 2>&1`;
 
 	# clean
 	unlink $input_file;
