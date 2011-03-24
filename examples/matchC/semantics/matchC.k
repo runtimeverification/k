@@ -68,11 +68,16 @@ Output
     </funTask>
   =>
     .Bag
-  ---[structural print "maude-outputChecking " S "...Done!"]
+  [structural]
+  rule
+    <tasks> .Bag </tasks>
+  =>
+    .Bag 
+  [structural]
   rule
     <feasible> I => I +Int 1 </feasible>
-    (
-      <tasks>
+    <mainOut> .List => L </mainOut>
+    <tasks_>
         <funTask>
           <funId> id("main") </funId>
           <task_>
@@ -81,12 +86,9 @@ Output
             <out> L </out>
           <_/task>
         </funTask>
-      </tasks>
-    => 
-      <out> L </out>
-    )
-  ---[structural print "maude-outputChecking \"main\"..Done!\nmaude-timerVerifying program...Done!"]
-  ---[structural print "\\{print t\\}DONE!"]
+      =>
+        .Bag
+    <_/tasks>
   [structural]
 endkm
 

@@ -50,6 +50,8 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
 
                   <check> .Set </check>
 
+                  <mainOut> .List </mainOut>
+
                   <tasks>
                     <funTask multiplicity="*">
                       <funId> .K </funId>
@@ -152,7 +154,6 @@ Function entry
             declParams(ParamList)
             ~> substKLabel(S, 'return_, 'returnAssert_)
             ~> assertLabel
-            ~> disolveTask
           </k>
         <_/task>
       <_/funTask>
@@ -334,7 +335,6 @@ assumed patterns
     <tenv> TEnv </tenv>
     <counter> N => sNat N </counter>
     <subst> Subst </subst>
-  ---[structural print "maude-timed===assume" F]
   [structural]
   rule
     <task>
@@ -413,7 +413,6 @@ asserted patterns
     <tenv> TEnv </tenv>
     <counter> Counter </counter>
     <subst> Subst </subst>
-  --- [structural print "maude-timed===assert" F]
   [structural]
   rule
     <task>
