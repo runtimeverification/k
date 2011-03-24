@@ -101,7 +101,7 @@ public class MaudeSAXHandler extends DefaultHandler
       return null;
     }
 
-    KTreeNode root = KTreeNode.format2(null, "", DefaultTerm.format(result));
+    KTreeNode root = KTreeNode.formatCell2(null, DefaultTerm.format(result));
 
     return root;
   }

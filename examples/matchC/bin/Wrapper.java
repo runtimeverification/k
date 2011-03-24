@@ -39,7 +39,7 @@ class Wrapper
     this.width = width;
     this.leftMargin = leftMargin;
     this.rightMargin = rightMargin;
-    buffer = new StringBuilder(1048576);
+    buffer = new StringBuilder(1024 * 1024);
     cursor = 0;
     pendingBuffer = new StringBuilder(width);
     pendingCursor = 0;

@@ -30,50 +30,60 @@ public class DefaultTerm implements MaudeTerm
   /*
    * MaudeTerm Methods
    */
-  public final String getOp()
+  public String getOp()
   {
     return op;
   }
 
-  public final String getSort()
+  public String getSort()
   {
     return sort;
   }
 
-  public final List<MaudeTerm> subterms()
+  public List<MaudeTerm> subterms()
   {
     return subterms;
   }
 
-  public final StringBuilder toMaudeString(StringBuilder buffer, int indent)
-  {
-    int size = subterms.size();
 
+  static final List<String> stringItems = new ArrayList<String>();
+  static final List<MaudeTerm> termItems = new ArrayList<MaudeTerm>(); 
+  static final StringBuilder buffer = new StringBuilder(1024 * 1024);
+
+  public static void itemize(MaudeTerm term)
+  {
+    stringItems.clear();
+    termItems.clear();
+    buffer.setLength(0);
+    term.getItems();
+    stringItems.add(buffer.toString());
+  }
+
+  public static List<String> stringItems()
+  {
+    return stringItems;
+  }
+
+  public static List<MaudeTerm> termItems()
+  {
+    return termItems;
+  }
+
+  public void getItems()
+  {
     if ("<_>_</_>".equals(op))
     {
-      if (!KDefinition.cells.get(subterms.get(0).getOp()).visible)
-        return buffer;
-
-      ++indent;
-/*
-      buffer.append("\n");
-      for(int i = 0; i < indent; ++i)
-        buffer.append("  ");
-*/
+      stringItems.add(buffer.toString());
+      termItems.add(this);
+      buffer.setLength(0);
+      return;
     }
 
+    int size = subterms.size();
     // mixfix operator?
     if (size > 0 && op.indexOf('_') != -1)
     {
       String[] fragments = op.replace("`", "").split("_", -1);
-
-      // assoc operator?
-      if (fragments.length != size + 1 && fragments.length != 3)
-      {
-        System.err.println("error: " + op + " has " + size + " args");
-        System.err.println("arg 1: " + subterms.get(0).getOp());
-        System.err.println("arg 2: " + subterms.get(1).getOp());
-      }
       if (fragments.length != size + 1 && fragments.length == 3)
       {
         String[] tmp = new String[size + 1];
@@ -86,30 +96,25 @@ public class DefaultTerm implements MaudeTerm
       for (int index = 0; index < size; ++index)
       {
         append(buffer, fragments[index]);
-        subterms.get(index).toMaudeString(buffer, indent);
+        subterms.get(index).getItems();
       }
       append(buffer, fragments[size]);
     }
     else
     {
       append(buffer, op);
-
       if (size > 0)
       {
         buffer.append("(");
-        subterms.get(0).toMaudeString(buffer, indent);
-
+        subterms.get(0).getItems();
         for (int index = 1; index < size; ++index)
         {
           buffer.append(", ");
-          subterms.get(index).toMaudeString(buffer, indent);
+          subterms.get(index).getItems();
         }
-
         buffer.append(")");
       }
     }
-
-    return buffer;
   }
 
   private static void append(StringBuilder buffer, String fragment)
@@ -140,19 +145,9 @@ public class DefaultTerm implements MaudeTerm
   }
 
 
-  public static boolean isString(String op)
-  {
-    return op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"';
-  }
-
-  public static void addFreezeVar(Map<String, MaudeTerm> vars, MaudeTerm var)
-  {
-    String varNameString = var.subterms().get(0).subterms().get(0).getOp();
-    String varName = varNameString.substring(1, varNameString.length() - 1);
-    vars.put(varName, var.subterms().get(1));
-  }
-
-
+  /*
+   * Format maude tree
+   */
   public static MaudeTerm format(MaudeTerm term)
   {
     final String op = term.getOp();
@@ -310,6 +305,18 @@ public class DefaultTerm implements MaudeTerm
     }
 
     return term;
+  }
+
+  public static void addFreezeVar(Map<String, MaudeTerm> vars, MaudeTerm var)
+  {
+    String varNameString = var.subterms().get(0).subterms().get(0).getOp();
+    String varName = varNameString.substring(1, varNameString.length() - 1);
+    vars.put(varName, var.subterms().get(1));
+  }
+
+  public static boolean isString(String op)
+  {
+    return op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"';
   }
 
 }
