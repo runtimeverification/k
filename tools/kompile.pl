@@ -30,14 +30,9 @@ require $path;
 my $verbose = 0;
 my $help = 0;
 
-# next subroutine prints the usage message;
-# $0 is initially bound to the program name, as typed
-sub terminate {
-    print "\nERROR: $_[0]\n\n" if defined $_[0];
-    print "Usage: 
-  $0 (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
-
-  Options
+my $short_help_message = 
+"
+  General options
   -h (or -help) : print this message and exit
   -v (or -verbose) : verbose mode
   -m (or -maudify) : only maudify, do not kompile
@@ -46,10 +41,11 @@ sub terminate {
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
   -nd : compile for full non-determinism in heating/cooling
-  -shared : specifies what file will be replaced with 
-            shared.maude in all other files it is included
+  -prelude file.m(aude) : specifies the k-prelude file
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
+  
+  Latex options
   -latex : maudifies/compiles for generating latex output
   -pdf : maudifies/compiles for generating pdf output
   -ps : maudifies/compiles for generating ps output
@@ -57,14 +53,27 @@ sub terminate {
   -png : maudifies/compiles for generating png output
   -crop : maudifies/compiles for generating a nice crop-pdf output
      -style : useful for typesetting (optional)
-  Compile only one program
+  -title title : specifies the title when generating a poster
+  -author name : specifies the name of the author in a poster
+  -output output_file : specifies the name of the generated (latex) file
+
+  Compile only one program options
   -pgm <filename> : the file where the program macro is
   -cmod <module name> : the module where the language is
   -pmod <module name> : the module where the macro is
      If this is missing, <module name> will be considered ALLCAPS(pgm)
   -pname <macro name> : the name of the macro
      If this is missing, <macro name> will be considered as being pgm
-  \n" if (!$verbose && !$help);
+  \n";
+
+# next subroutine prints the usage message;
+# $0 is initially bound to the program name, as typed
+sub terminate {
+    print "\nERROR: $_[0]\n\n" if defined $_[0];
+    print "Usage: 
+  $0 (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
+
+  $short_help_message" if (!$verbose && !$help);
 
     print "Usage:
   $0 (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
@@ -107,26 +116,7 @@ sub terminate {
   error/warning messages reported by Maude.  Files containing
   intermediate compilation results are also kept for debugging.
 
-  Options
-  -h (or -help) : print this message and exit
-  -v (or -verbose) : verbose mode
-  -m (or -maudify) : only maudify, do not kompile
-  -c (or -compile) : only compile, do not maudify
-  -lint : only maudify and sanity checks, do not kompile
-  -l (or -lang or -language) <module_name> : start module
-  -file : the input source file (optional)
-  -nd : compile for full non-determinism in heating/cooling
-  -shared : specifies what file will be replaced with 
-            shared.maude in all other files it is included
-  -flat : slurp all k or kmaude files into one k file 
-  -u (or -unquote) : unquote the maude meta-terms to increase speed
-  -latex : maudifies/compiles for generating latex output
-  -pdf : maudifies/compiles for generating pdf output
-  -ps : maudifies/compiles for generating ps output
-  -eps : maudifies/compiles for generating eps output
-  -png : maudifies/compiles for generating png output
-  -crop : maudifies/compiles for generating a nice crop-pdf output
-    -style : useful for typesetting (optional)
+  $short_help_message
 
   The option -m generates all the Maude files file.maude
   corresponding to all the files file.kmaude reachable from
@@ -219,6 +209,15 @@ sub terminate {
   It typsets the specified modules reachable from the input
   file lang3.
   
+  kompile -latex LANG LANG-SEMANTICS LANG-SYNTAX -f lang3 
+  -title MyLang -author LangAuthor -output out
+  or
+  kompile lang3 -latex LANG LANG-SEMANTICS LANG-SYNTAX
+  -title MyLang -author LangAuthor -output out
+  will generate a latex file called out.tex and
+  will also set the title and the author with \\maketitle
+  in the generated file.
+
   The -pdf, -png, -ps, -eps and -crop options can be used in 
   the same way the -latex option is used in the example above.
 
@@ -538,7 +537,7 @@ foreach (@ARGV) {
     {
 	$unquote = 1;
     }
-    elsif (/^-shared$/)
+    elsif (/^-prelude$/)
     {
 	$shared = 1;
     }
