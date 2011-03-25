@@ -1,0 +1,198 @@
+load ../syntax/js-syntax.maude
+
+mod JS-TYPEOF 
+	is protecting JS-SYNTAX . 
+
+	eq #typeof (#undefined ) 			=  #s ("undefined") [metadata "location(js-semantics.k:6)"] .
+	eq #typeof (#null ) 				=  #s ("object") [metadata "location(js-semantics.k:7)"] .
+	eq #typeof (#b ( ? )) 				=  #s ("boolean") [metadata "location(js-semantics.k:8)"] .
+	eq #typeof (Num:JSNumeric) 		=  #s ("number") [metadata "location(js-semantics.k:9)"] .
+	eq #typeof (#s ( ? )) 				=  #s ("string") [metadata "location(js-semantics.k:10)"] .
+	eq #typeof (#function ( ? ,  ? ,  ? ,  ? ))	=  #s ("function") [metadata "location(js-semantics.k:11)"] .
+	eq #typeof (#o ( ? )) 				=  #s ("object") [metadata "location(js-semantics.k:12)"] .
+
+	
+	
+	
+	
+	
+	
+	
+	
+var Num :  JSNumeric .  endm	
+
+
+mod JS-ARITH 
+	is protecting JS-SYNTAX + PL-BUILTINS . 
+
+	      op arith(_,_,_) :  Id  JS  JS -> JS   [metadata "location(js-semantics.k:28)"] . 
+		 op logic(_,_,_) :  Id  JS  JS -> JS   [metadata "location(js-semantics.k:28)"] . 
+		 op asFloat(_) :  JS -> JS   [metadata "location(js-semantics.k:29)"] .  op asInt(_) :  JS -> JS   [metadata "location(js-semantics.k:30)"] .  op asBool(_) :  JS -> JS   [metadata "location(js-semantics.k:30)"] .  op asString(_) :  JS -> JS [metadata "location(js-semantics.k:30)"] . 
+	
+	eq #div (Left:JS, Right:JS) =  arith("div", Left, Right) [metadata "location(js-semantics.k:32)"] .
+	eq #mod (Left, Right) =  arith("mod", Left, Right) [metadata "location(js-semantics.k:33)"] .
+	eq #mul (Left, Right) =  arith("mul", Left, Right) [metadata "location(js-semantics.k:34)"] .
+	eq #add (Left, Right) =  arith("add", Left, Right) [metadata "location(js-semantics.k:35)"] .
+	eq #sub (Left, Right) =  arith("sub", Left, Right) [metadata "location(js-semantics.k:36)"] .
+	
+	eq #and (Left, Right) =  logic("and", Left, Right) [metadata "location(js-semantics.k:38)"] .
+	eq #or (Left, Right)  =  logic("or", Left, Right) [metadata "location(js-semantics.k:39)"] .
+		
+	
+	eq asFloat(#nan ) 		=  #nan  [metadata "location(js-semantics.k:42)"] .
+	eq asFloat(#n (F:Float)) 	=  F [metadata "location(js-semantics.k:43)"] .
+	eq asFloat(Other:JS) 	=  Int2Float(asInt(Other)) [metadata "location(js-semantics.k:44)"] .
+
+	eq asFloat( #n (F:Float) ) =  F [metadata "location(js-semantics.k:46)"] .
+	eq asFloat( #n (I:Int) ) 	=  Int2Float(I) [metadata "location(js-semantics.k:47)"] .
+	eq asFloat(#s (S:String)) =  String2Float(S) [metadata "location(js-semantics.k:48)"] .
+	eq asFloat(Other:JS) 	=  asInt(Other) [metadata "location(js-semantics.k:49)"] .
+
+	eq asInt(#n (F:Float)) 	=  Float2Int(F) [metadata "location(js-semantics.k:51)"] .
+	eq asInt(#n (I:Int)) 		=  I [metadata "location(js-semantics.k:52)"] .
+	eq asInt(#b (true)) 		=  1 [metadata "location(js-semantics.k:53)"] .
+	eq asInt(#b (false)) 		=  0 [metadata "location(js-semantics.k:54)"] .
+	eq asInt(#null ) 			=  0 [metadata "location(js-semantics.k:55)"] .
+	eq asInt(#undefined ) 	=  0 [metadata "location(js-semantics.k:56)"] .
+	eq asInt(#s (S:String)) 	=  String2Int(S) [metadata "location(js-semantics.k:57)"] .
+	eq asInt(Other)			=  #nan  [metadata "location(js-semantics.k:58)"] .
+
+	eq asBool(#b (B:Bool)) 	=  B [metadata "location(js-semantics.k:60)"] .
+	eq asBool(#n (0)) 		=  false [metadata "location(js-semantics.k:61)"] .
+	eq asBool(#nan ) 			=  false [metadata "location(js-semantics.k:62)"] .
+	eq asBool(#null ) 		=  false [metadata "location(js-semantics.k:63)"] .
+	eq asBool(#undefined ) 	=  false [metadata "location(js-semantics.k:64)"] .
+	eq asBool(#s ("")) 		=  false [metadata "location(js-semantics.k:65)"] .
+	eq asBool( ? ) 			=  true [metadata "location(js-semantics.k:66)"] .
+
+
+
+	
+	
+	
+	
+	
+	
+	
+
+var S :  String . var F :  Float . var Other :  JS . var Right :  JS . var I :  Int . var Left :  JS . var B :  Bool .  endm
+
+mod JS-SEMANTICS
+	is including JS-TYPEOF + JS-ARITH .
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

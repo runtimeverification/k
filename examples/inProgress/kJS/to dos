@@ -21,3 +21,7 @@ jshint --> #program(#varDeclarations(#id("JSHINT")),#ifElse(#and(#sameAs(
 --- three types of func decl -> https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope
 --- named function weirdness -> http://kangax.github.com/nfe/
 --- closure weirdness -> https://developer.mozilla.org/en/JavaScript/Guide/Closures
+
+check generation of NaN, Infinities and -0s
+
+how to do Ids and rules???

@@ -3,23 +3,26 @@ load ../json/json.k
 kmod JS-SYNTAX 
 	is including JSON
 
-	syntax JSValue ::= #b( Bool ) | #n( Numeric ) | #s( String ) | #r( String ) 
-		| #undefined | #null | #nan | #this | .none 
+	syntax JSNumber ::= #n( Numeric ) | #zero( Int )
+	syntax JSNumeric ::= JSNumber | #infinity( Int ) | #nan
+	syntax JSValue ::= JSNumeric | #b( Bool ) | #s( String ) | #regex( String ) 
+		| #undefined | #null | #this | #o( List{JS} )
 	
 	syntax JS ::= 
-			JSValue
-		| 	#nop
-		|	#id( String ) 
-		| #staticAccess( JS , JS ) [strict] 		--- Exp . Name
-		| #dynamicAccess( JS , JS ) [strict] 		--- Exp [ Exp ]
-		| #invocation( JS , JS ) [strict] 	--- Exp ( CommaList )
+			.none
+		|	JSValue
+		|	#nop
+		|	#id ( String ) 
+		| #staticAccess ( JS , JS ) [strict] 		--- Exp . Name
+		| #dynamicAccess ( JS , JS ) [strict] 		--- Exp [ Exp ]
+		| #invocation ( JS , JS ) [strict] 	--- Exp ( CommaList )
 		
-		| #new( List{JS} ) [strict]					--- new InvocationExp
+		| #new ( List{JS} ) [strict]					--- new InvocationExp
 		
-		| #inc( JS , Bool ) [strict]				--- ++exp OR exp++
-		| #dec( JS , Bool ) [strict]				--- --exp OR exp--
+		| #inc ( JS , Bool ) [strict]				--- ++exp OR exp++
+		| #dec ( JS , Bool ) [strict]				--- --exp OR exp--
 		
-		| #delete( JS ) [strict]				--- delete TargetExp
+		| #delete ( JS ) [strict]				--- delete TargetExp
 		
 		| #typeof ( JS ) [strict]				--- typeof Exp
 		| #not ( JS ) [strict]				--- ! Exp
