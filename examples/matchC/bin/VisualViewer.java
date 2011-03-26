@@ -98,11 +98,12 @@ public class VisualViewer implements ActionListener, TreeExpansionListener
 
   public void treeExpanded(TreeExpansionEvent e)
   {
-    if ("...".equals(e.getPath().getLastPathComponent().toString()))
+    KTreeNode node = (KTreeNode) e.getPath().getLastPathComponent();
+    if ("...".equals(node.getContent()))
     {
-      KTreeNode node = (KTreeNode) e.getPath().getLastPathComponent();
-      node.visibleCount += node.visibleInc;
-      ((DefaultTreeModel) tree.getModel()).nodeStructureChanged(node);
+      node.getParent().expand();
+      ((DefaultTreeModel) tree.getModel()).nodeStructureChanged(node.getParent());
+      //((DefaultTreeModel) tree.getModel()).reload(node.getParent());
     }
   }
 
@@ -113,7 +114,14 @@ public class VisualViewer implements ActionListener, TreeExpansionListener
 
   public static void main (String args[])
   {
-    new VisualViewer(MaudeSAXHandler.getKTree(args[0]));
+    final KTreeNode root = MaudeSAXHandler.getKTree(args[0]);
+    SwingUtilities.invokeLater(new Runnable()
+    {
+      public void run()
+      {
+        new VisualViewer(root);
+      }
+    });
   }
 
 }

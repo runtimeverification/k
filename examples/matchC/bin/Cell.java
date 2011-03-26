@@ -12,12 +12,12 @@ public class Cell
 
   public Cell(String label)
   {
-    this(label, true, 0);
+    this(label, true, -1);
   }
 
   public Cell(String label, boolean visible)
   {
-    this(label, visible, 0);
+    this(label, visible, -1);
   }
 
   public Cell(String label, boolean visible, int items)

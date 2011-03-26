@@ -344,6 +344,35 @@ bag_constructor
  * Grammar rules for list parsing
  */
 list
+  : list_rewrite
+  ;
+
+list_rewrite
+  : list_term (REW^ list_term)?
+  ;
+
+list_term
+  : list_item+ -> ^(BAG list_item+)
+  | list_unit -> LIST
+  ;
+
+list_unit
+  : DOT
+  | LIST_UNIT
+  ;
+
+list_item
+  : IDENTIFIER
+  | list_constructor
+  // | infix_list
+  | LPAREN! list RPAREN!
+  ;
+
+list_constructor
+  : LIST_ITEM^ LPAREN! k RPAREN!
+  ;
+
+stream_list
   : k -> ^(STREAM["stream"] k)
   ;
 
@@ -376,8 +405,11 @@ cell_content
     map
   | { Table.Sort.BAG.equals(Table.labelToCell.get($cell::cellLabel).sort) }?=>
     bag
-  | { Table.Sort.LIST.equals(Table.labelToCell.get($cell::cellLabel).sort) }?=>
+  | { Table.Sort.LIST.equals(Table.labelToCell.get($cell::cellLabel).sort)
+      && !"in".equals($cell::cellLabel) && !"out".equals($cell::cellLabel) }?=>
     list
+  | { "in".equals($cell::cellLabel) || "out".equals($cell::cellLabel) }?=>
+    stream_list
   | { Table.Sort.K.equals(Table.labelToCell.get($cell::cellLabel).sort) }?=>
     k
   ;

@@ -175,6 +175,13 @@ def main():
 
         print 'Check ' + args.output + ' for the complete output.'
 
+    if args.display:
+        cmd = ['java', '-cp', ml_viewer_dir, ml_viewer_visual_main_class,
+              log_file]
+
+        retcode = subprocess.call(cmd)
+        if retcode != 0: sys.exit(retcode)
+
 
 main()
 

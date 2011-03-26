@@ -107,7 +107,8 @@ definition_declaration
   ;
 
 function_definition
-  : type IDENTIFIER '(' parameter_list ')'
+  : type IDENTIFIER { Table.funIdentifiers.add($IDENTIFIER.text); }
+    '(' parameter_list ')'
     ( ANNOTATION compound_statement
       -> ^(ANNOT_FUN_DEF type IDENTIFIER parameter_list
            ANNOTATION compound_statement
@@ -124,7 +125,8 @@ declaration
   ;
 
 function_declaration
-  : type IDENTIFIER '(' parameter_list ')'
+  : type IDENTIFIER { Table.funIdentifiers.add($IDENTIFIER.text); }
+    '(' parameter_list ')'
     ( ANNOTATION SEP
       -> ^(ANNOT_FUN_DECL type IDENTIFIER parameter_list ANNOTATION)
     | SEP -> ^(FUN_DECL type IDENTIFIER parameter_list)

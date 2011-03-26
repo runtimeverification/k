@@ -167,17 +167,6 @@ kmod FOL is including MATCHC-SEMANTICS
   rule
     <task_>
       <taskType> Hypothesis </taskType>
-      <stack_> FreeList => .List </stack>
-    <_/task>
-    <task_>
-      <taskType> Conclusion </taskType>
-      <stack_> FreeList => .List </stack>
-    <_/task>
-  [structural]
-
-  rule
-    <task_>
-      <taskType> Hypothesis </taskType>
       <stack> List => .List </stack>
     <_/task>
     <task_>
@@ -186,6 +175,7 @@ kmod FOL is including MATCHC-SEMANTICS
     <_/task>
   [structural]
 
+***(
   rule
     <task_>
       <taskType> Hypothesis </taskType>
@@ -196,8 +186,25 @@ kmod FOL is including MATCHC-SEMANTICS
       <stack> FEList => .List </stack>
       <subst> Subst => Subst ;; (FEList <- List) </subst>
     <_/task>
+  [structural print "\{print\} " FEList " <- " List]
+***)
+  rule
+    <task_>
+      <taskType> Hypothesis </taskType>
+      <stack> List => .List </stack>
+    <_/task>
+    <task>
+      <taskType> Conclusion </taskType>
+      <subst>
+        Subst => applySubst(Subst, FEList <- List) ;; (FEList <- List)
+      </subst>
+      <config>
+        <stack> FEList => .List </stack>
+        (CfgItems => applySubst(CfgItems, FEList <- List))
+      </config>
+      (TaskItems => applySubst(TaskItems, FEList <- List))
+    </task>
   [structural]
-
 
 
 --- Step 1: Eliminate the environment and the return value
@@ -460,7 +467,7 @@ kmod FOL is including MATCHC-SEMANTICS
         <config_>
           <env> .Map </env>
           <heap> .Map </heap>
-          ---<stack> .List </out>
+          <stack> .List </out>
           <in> .List </in>
           <out> .List </out>
         <_/config>
@@ -471,7 +478,7 @@ kmod FOL is including MATCHC-SEMANTICS
         <config_>
           <env> .Map </env>
           <heap> .Map </heap>
-          ---<stack> .List </out>
+          <stack> .List </out>
           <in> .List </in>
           <out> .List </out>
         <_/config>
@@ -485,8 +492,8 @@ kmod FOL is including MATCHC-SEMANTICS
         <form> Phi1 ===> Phi2 </form>
         <subst> Subst </subst>
       <_/task>
-  --- [structural print Phi1 "\n===>\n" Phi2]
-  [structural]
+  [structural print Phi1 "\n===>\n" Phi2 "\n" Subst]
+  ---[structural]
 
 
 --- Step 6: Call external SMT solver to check the formula if the "in-house"

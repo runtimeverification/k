@@ -9,7 +9,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
   kvar NtPhi : NtFormula
   kvar Subst Subst1 Subst2 : Subst
   kvar V : Value
-  kvar F X : Id
+  kvar F X FName : Id
   kvar E E1 E2 : Expression
   kvar T : ExpressionType
   kvar NvT : NvExpressionType
@@ -66,6 +66,7 @@ kmod MATCHC-SEMANTICS is including MATCHC-SYNTAX + KERNELC-SEMANTICS
                           <k> .K </k>
                           <env> .Map </env>
                           <stack> .List </stack>
+                          <fname> .K </fname>
                           <tenv> .Map </tenv>
 
                           <heap> .Map </heap>
@@ -130,6 +131,7 @@ Function entry
             ~> @ assert (PostCfg /\ PostPhi)
             ~> disolveTask
           </k>
+          <fname> F </fname>
         <_/task>
       <_/funTask>
     )
@@ -155,6 +157,7 @@ Function entry
             ~> substKLabel(S, 'return_, 'returnAssert_)
             ~> assertLabel
           </k>
+          <fname> F </fname>
         <_/task>
       <_/funTask>
     )
@@ -249,7 +252,8 @@ summary function calls
         ~> return getReturnValue(T)
 
     </k>
-    <stack_> .List => callContext(K, TEnv, Env) </stack>
+    <stack_> .List => callContext(FName, K, TEnv, Env) </stack>
+    <fname> FName </fname>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>
     <counter> N => sNat N </counter>
@@ -318,6 +322,7 @@ assumed patterns
                 (defaultMapItem("fun") <- FunMap) ;;
                 ---(defaultKItem("k") <- K) ;;
                 (defaultMapItem("env") <- defaultEnv(Env)) ;;
+                (defaultKItem("fname") <- FName) ;;
                 (defaultMapItem("tenv") <- TEnv) ;;
                 (defaultKItem("counter") <- sNat N)
               ),
@@ -332,6 +337,7 @@ assumed patterns
     <struct> StructMap </struct>
     <fun> FunMap </fun>
     <env> Env </env>
+    <fname> FName </fname>
     <tenv> TEnv </tenv>
     <counter> N => sNat N </counter>
     <subst> Subst </subst>
@@ -365,7 +371,7 @@ assumed patterns
     <task_>
       <config> 
         <k>
-          assumeNormal(<config> <k> K </k> CfgItems </config> /\ Phi2) => .K
+          assumeNormal(<config> CfgItems </config> /\ Phi2) => .K
         <_/k>
         (_ => CfgItems)
       </config>
@@ -397,6 +403,7 @@ asserted patterns
               (defaultMapItem("fun") <- FunMap) ;;
               ---(defaultKItem("k") <- K) ;;
               (defaultMapItem("env") <- defaultEnv(Env)) ;;
+              (defaultKItem("fname") <- FName) ;;
               (defaultMapItem("tenv") <- TEnv) ;;
               (defaultKItem("counter") <- Counter) 
             ),
@@ -410,6 +417,7 @@ asserted patterns
     <struct> StructMap </struct>
     <fun> FunMap </fun>
     <env> Env </env>
+    <fname> FName </fname>
     <tenv> TEnv </tenv>
     <counter> Counter </counter>
     <subst> Subst </subst>
@@ -434,11 +442,7 @@ asserted patterns
   if search(
       <task>
         <taskType> Hypothesis </taskType>
-        <config>
-          ---<k> K </k>
-          <k> defaultKItem("K") </k>
-          CfgItems1
-        </config>
+        <config> CfgItems1 </config>
         <subst> .Subst </subst>
         TaskItems
       </task>

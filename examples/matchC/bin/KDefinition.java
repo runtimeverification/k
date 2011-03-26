@@ -35,20 +35,20 @@ public class KDefinition
     cells.put(      "task",       new Cell("task"));
     cells.put(  "taskType",   new Cell("taskType", false));
     cells.put(    "config",     new Cell("config"));
-    cells.put(   "program",    new Cell("program", false));
+    cells.put(   "program",    new Cell("program",  true));
     cells.put(    "struct",     new Cell("struct", false));
     cells.put(       "fun",        new Cell("fun", false));
     cells.put(         "k",          new Cell("k",  true, 5));
     cells.put(       "env",        new Cell("env"));
+    cells.put(     "fname",      new Cell("fname", false));
     cells.put(     "stack",      new Cell("stack"));
     cells.put(      "tenv",       new Cell("tenv", false));
     cells.put(      "heap",       new Cell("heap"));
     cells.put(        "in",         new Cell("in"));
     cells.put(       "out",        new Cell("out"));
-    cells.put(   "counter",    new Cell("counter"));
+    cells.put(   "counter",    new Cell("counter", false));
     cells.put(      "form",       new Cell("form"));
     cells.put(     "subst",      new Cell("subst"));
-    cells.put("funCounter", new Cell("funCounter"));
   }
 
   static void initRenameOp()

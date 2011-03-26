@@ -49,13 +49,10 @@ build: $(EXT_COMPILED_FILE) \
 
 
 $(EXT_MAUDE_MAIN) $(EXT_MAUDE_SYNTAX): $(EXT_K_FILES)
-	pwd
 	$(KC) -m -prelude $(ML_PRELUDE) $(EXT_K_MAIN)
-	sed -i -e 's/Int + +/Int++/g' $(EXT_MAUDE_FILES)
 
 $(LANG_MAUDE_MAIN) $(LANG_MAUDE_SYNTAX): $(LANG_K_FILES)
 	$(KC) -m -shared $(ML_PRELUDE) $(LANG_K_MAIN)
-	@sed -i -e 's/Int + +/Int++/g' $(LANG_MAUDE_FILES)
 
 
 clean:

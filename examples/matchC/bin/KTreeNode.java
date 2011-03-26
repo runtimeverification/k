@@ -1,8 +1,10 @@
 import javax.swing.tree.TreeNode;
 
 import java.util.Enumeration;
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Arrays;
 
 
@@ -11,64 +13,93 @@ public class KTreeNode implements TreeNode
 
   final static int DEFAULT_COUNT = 5;
 
-  String content;
-  boolean isKDefinition;
-
-  int visibleCount;
-  final int visibleInc = 1;
+  static Wrapper wrapper = new Wrapper();
 
   final KTreeNode parent;
-  final ArrayList<KTreeNode> children;
-  final KTreeNode ldotsNode;
+  final List<KTreeNode> children;
 
-  static Wrapper wrapper = new Wrapper();
+  final String content;
+  //boolean isKDefinition;
+
+  int maxVisibleSize;
+  final List<KTreeNode> visibleChildren;
+  //final KTreeNode ldotsNode;
+  //final int visibleInc = 1;
 
 
   public KTreeNode(KTreeNode parent)
   {
-    this(parent, "", 0);
+    this(parent, "", -1);
   }
 
   public KTreeNode(KTreeNode parent, String content)
   {
-    this(parent, content, 0);
+    this(parent, content, -1);
   }
 
-  public KTreeNode(KTreeNode parent, String content, int visibleCount)
+  public KTreeNode(KTreeNode parent, String content, int maxVisibleSize)
   {
     this.parent = parent;
     children = new ArrayList<KTreeNode>(); 
     this.content = content;
-    this.visibleCount = visibleCount;
-
-    if (visibleCount != 0)
-    {
-      ldotsNode = new KTreeNode(this, "...", 0);
-      ldotsNode.add(new KTreeNode(ldotsNode));
-    }
-    else
-      ldotsNode = null;
+    this.maxVisibleSize = maxVisibleSize;
+    visibleChildren = new ArrayList<KTreeNode>();
   }
 
 
   public void add(KTreeNode node)
   {
+    if (maxVisibleSize < 0 || children.size() < maxVisibleSize)
+      visibleChildren.add(node);
+    else if (children.size() == maxVisibleSize)
+    {
+      KTreeNode ldotsNode = new KTreeNode(this, "...");
+      ldotsNode.add(new KTreeNode(ldotsNode));
+      visibleChildren.add(ldotsNode);
+    }
     children.add(node);
   }
 
-  public void addAll(List<KTreeNode> nodeList)
+  public void addAll(Collection<KTreeNode> nodeCollection)
   {
-    children.addAll(nodeList);
+    for (KTreeNode node : nodeCollection)
+    {
+      add(node);
+    }
+  }
+
+  public void expand()
+  {
+    if (maxVisibleSize < 0 || children.size() <= maxVisibleSize)
+      return;
+
+    maxVisibleSize += DEFAULT_COUNT;
+
+    KTreeNode ldotsNode = visibleChildren.remove(visibleChildren.size() - 1);
+    int newVisibleSize = Math.min(children.size(), maxVisibleSize);
+    for (int index = visibleChildren.size(); index < newVisibleSize; ++index)
+    {
+      visibleChildren.add(children.get(index));
+    }
+    if (maxVisibleSize < children.size())
+      visibleChildren.add(ldotsNode);
+  }
+
+  public KTreeNode[] getPath()
+  {
+    LinkedList<KTreeNode> path = new LinkedList<KTreeNode>();
+    KTreeNode node = this;
+    while (node != null)
+    {
+      path.addFirst(node);
+      node = node.getParent();
+    }
+    return (KTreeNode[]) path.toArray();
   }
 
   public String getContent()
   {
     return content;
-  }
-
-  public void setContent(String content)
-  {
-    this.content = content;
   }
 
 
@@ -96,7 +127,7 @@ public class KTreeNode implements TreeNode
       if (size > 1 || children.get(0).children.size() > 0)
       {
         int items = KDefinition.cells.get(content).items;
-        if (items != 0 && items < size)
+        if (items >= 0 && items < size)
           size = items;
 
         for (int index = 0; index < size; ++index)
@@ -136,51 +167,40 @@ public class KTreeNode implements TreeNode
    */
   public Enumeration children()
   {
+    //return new Enumeration() { } ;
     return null;
   }
 
   public boolean getAllowsChildren()
   {
-    return true;
+    return !isLeaf();
   }
 
   public TreeNode getChildAt(int childIndex)
   {
-    if (visibleCount == 0 || childIndex < visibleCount - 1)
-      return children.get(childIndex);
-    else if (childIndex == visibleCount - 1)
-      return ldotsNode;
-    else
-      return null;
+    return visibleChildren.get(childIndex);
   }
   
   public int getChildCount()
   {
-    if (visibleCount == 0 || children.size() <= visibleCount) 
-      return children.size();
-    else
-      return visibleCount;
+    return visibleChildren.size();
   }
 
   public int getIndex(TreeNode node)
   {
-    if (visibleCount == 0 || children.size() <= visibleCount) 
-      return children.indexOf(node);
-    else if (ldotsNode.equals(node))
-      return visibleCount - 1;
-   else
-      return -1;
+    return visibleChildren.indexOf(node);
   }
 
-  public TreeNode getParent()
+  public KTreeNode getParent()
   {
     return parent;
   }
 
   public boolean isLeaf()
   {
-    return children.size() == 0;
+    return visibleChildren.size() == 0;
   }
+
 
   /*
    * Static methods to construct KTree from a Term
@@ -202,7 +222,8 @@ public class KTreeNode implements TreeNode
   {
     String cellLabel = term.subterms().get(0).getOp();      
     MaudeTerm cellContent = term.subterms().get(1);
-    KTreeNode node = new KTreeNode(parent, cellLabel);
+    int items = KDefinition.cells.get(cellLabel).items;
+    KTreeNode node = new KTreeNode(parent, cellLabel, items);
 
     if (KDefinition.assocOp.contains(cellContent.getOp()))
     {

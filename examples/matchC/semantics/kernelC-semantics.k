@@ -5,7 +5,7 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
   kvar NzI : NzInt
   kvar V : Value
   kvar TV : TypedValue
-  kvar X F : Id
+  kvar X F FName : Id
   kvar E E1 E2 : Expression
   kvar T : ExpressionType
   kvar S S1 S2 : Statement
@@ -19,7 +19,7 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
   syntax K ::= runMain
   syntax K ::= fieldList ( List{KernelC} )
   syntax TypedValue ::= newObject
-  syntax ListItem ::= callContext ( K , Map , Map )
+  syntax ListItem ::= callContext ( K , K , Map , Map )
 
 
   configuration <config> 
@@ -30,6 +30,7 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
                   <k> .K </k>
                   <env> .Map </env>
                   <stack> .List </stack>
+                  <fname> .K </fname>
                   <tenv> .Map </tenv>
                   
                   <heap> .Map </heap>
@@ -46,7 +47,7 @@ Function entry
 ***)
   rule
     <program> runMain => .K <_/program>
-    <k> _ => id("main")(.List{KernelC}) </k>
+    <k> . => id("main")(.List{KernelC}) </k>
   [structural]
 
 
@@ -64,6 +65,9 @@ Function definition/declaration
     <program> T F(ParamList) S => .K <_/program>
     <fun_> .Map => T F(ParamList) |-> (S ~> return tv(void, unit)) <_/fun>
   [structural]
+  rule
+    <program> T F(ParamList) => .K <_/program>
+  [structural]
 
 ***(
 Structure declaration
@@ -77,7 +81,7 @@ Structure declaration
 ***(
 Variable declaration
 ***)
-  rule [ANA] :
+  rule
     <k> T X ; => .K <_/k>
     <env_> .Map => X |-> FreeInt(N) <_/env>
     <tenv_> .Map =>  X |-> T <_/tenv>
@@ -108,14 +112,16 @@ Function call/return
       =>
         declParams(ParamList) ~> bindParams(ParamList, ArgList) ~> S
     </k>
-    <stack_> .List => callContext(K, TEnv, Env) </stack>
+    <stack_> .List => callContext(FName, K, TEnv, Env) </stack>
+    <fname> FName => F </fname>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>
 
 *** return
   rule
     <k> return TV ~> _ => TV ~> K </k>
-    <stack_> callContext(K, TEnv, Env) => .List </stack>
+    <stack_> callContext(F, K, TEnv, Env) => .List </stack>
+    <fname> _ => F </fname>
     <tenv> _ => TEnv </tenv>
     <env> _ => Env </env>
 

@@ -159,5 +159,7 @@ mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-WHERE + K-CONDITION-SEARCH .
   --- op applySubst : KResult Subst -> KResult .
   op _._ : Id Id -> Field .
   op _._ : Field Id -> Field .
+
+  op inStack : Id List -> NtFormula .
 endm
 
