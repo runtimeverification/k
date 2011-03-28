@@ -189,59 +189,7 @@ kmod XSPEM is including AN-AUTOMATON
   macro initConfig
         =
         <T_>
-   <model>
-    <instance> 
-      <name> a </name>
-      <ofClass> automaton </ofClass>
-      <attributes> 
-         trace |-> .List{K}
-         active |-> s0
-      </attributes>
-    </instance>
-    <instance> 
-      <name> s0 </name>
-      <ofClass> state </ofClass>
-      <attributes> 
-         in |-> t1
-         out |-> (t1,, t2)
-      </attributes>
-    </instance>
-    <instance> 
-      <name> s1 </name>
-      <ofClass> state </ofClass>
-      <attributes> 
-         in |-> (t2,, t3)
-         out |-> t3
-      </attributes>
-    </instance>
-    <instance> 
-      <name> t1 </name>
-      <ofClass> transition </ofClass>
-      <attributes> 
-         label |-> a
-         orig |-> s0
-         dest |-> s0
-      </attributes>
-    </instance>
-    <instance> 
-      <name> t2 </name>
-      <ofClass> transition </ofClass>
-      <attributes> 
-         label |-> eps
-         orig |-> s0
-         dest |-> s1
-      </attributes>
-    </instance>
-    <instance> 
-      <name> t3 </name>
-      <ofClass> transition </ofClass>
-      <attributes> 
-         label |-> b
-         orig |-> s1
-         dest |-> s1
-      </attributes>
-    </instance>
-  </model>
+           anAutomaton
         <_/T>
 
 endkm
