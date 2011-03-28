@@ -38,22 +38,22 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 /*@ Configuration  */
 ---------------------
 
-  configuration <T>
-                  <threads>
-                    <thread multiplicity="*">
-                      <k> K:K </k>
-                      <fstack> .List </fstack>
-                      <xstack> .List </xstack>
-                      <env> .Map </env>
-                      <holds> .Map </holds>
+  configuration <T color="red">
+                  <threads color="orange">
+                    <thread multiplicity="*" color="yellow">
+                      <k color="green"> K:K </k>
+                      <fstack color="blue"> .List </fstack>
+                      <xstack color="purple"> .List </xstack>
+                      <env color="violet"> .Map </env>
+                      <holds color="black"> .Map </holds>
                     </thread>
                   </threads>
-                  <genv> .Map </genv>
-                  <store> .Map </store>
-                  <busy>.Set</busy>
-                  <in> .List </in>
-                  <out> .List </out>
-                  <nextLoc> 0 </nextLoc>
+                  <genv color="pink"> .Map </genv>
+                  <store color="white"> .Map </store>
+                  <busy color="cyan">.Set</busy>
+                  <in color="magenta"> .List </in>
+                  <out color="brown"> .List </out>
+                  <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
 
@@ -108,12 +108,12 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store>
 
 
-/*@ Variable/Array increment
+/*@ \section{Variable/Array increment}
 
- This is tricky, because we want to allow all of ++x, ++a[5]
+ This is tricky, because we want to allow all of {\tt ++x}, {\tt ++a[5]}
  Therefore, we need to extract the l-value of the expression to increment.
  To do that, we state that the expression to increment should be wrapped
- by the auxilliary "l-value" operation and then evaluated.
+ by the auxilliary ``l-value'' operation and then evaluated.
  The semantics of the auxilliary l-value operation is defined below.
  For now, all we need to know is that it takes an expression and evaluates
  to a location value, also introduced below with the auxilliary operations.
@@ -122,7 +122,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule <k> ++loc(L) => I:Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store>
 
-//@ Arithmetic operators
+//@ \section{Arithmetic operators}
   rule I1:Int + I2:Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
@@ -139,7 +139,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule T1 or T2 => T1 orBool T2
   rule not(T:Bool) => notBool(T)
 
-/*@ Array lookup.  
+/*@ \subsection*{Array lookup}
 
 Untyped SIMPLE does not check array bounds
 We prefer to use a helper computation item, lookup, to avoid locking the store */
