@@ -5,7 +5,7 @@
 kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 -------------------------------------------------------------
---- Values that various fragments of programs evaluate to ---
+/*@ \subsubsection*{Values} that various fragments of programs evaluate to */
 -------------------------------------------------------------
 
   syntax Val ::= Int | Bool
@@ -24,7 +24,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 
 -------------------------------------
---- Computations "swallow" syntax ---
+/*@ \subsubsection*{Computations} "swallow" syntax */
 -------------------------------------
 
 --- We have to subsort all the syntactic categories to K, and the lists of values
@@ -35,7 +35,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 
 ---------------------
-/*@ Configuration  */
+/*@ \subsection*{Configuration}  */
 ---------------------
 
   configuration <T color="red">
@@ -58,17 +58,17 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 
 ---------------------------------------
---- Declarations and initialization ---
+//@ \section*{Declarations and initialization} 
 ---------------------------------------
 
-//@ Variable declaration
+//@ \subsection*{Variable declaration}
   context var X = [HOLE];
   rule <k> var X:Id = V; => . <_/k>
        <env> Env:Map => Env[L:Nat/X] </env>
        <store_> . => L|->V <_/store>
        <nextLoc> L => sNat(L) </nextLoc> 
 
-//@ Array declaration
+//@ \subsection*{Array declaration}
   context var X[_,`[HOLE`]:Exp,_];
   rule <k> var X[N:Nat]; => . <_/k>
        <env> Env => Env[L/X] </env>
@@ -76,16 +76,17 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
        <nextLoc> L => sNat L +Nat N </nextLoc>
 
 
+/*@ The rule below lazily handles multi-dimensional arrays through code generation.  The reason for handling it here than as a syntactic desugaring is that we want to ensure the dimensions of the array are already evaluated before we generate the code, to avoid strange behaviors for code like var a[++x,++x]; 
+*/
   syntax Id ::= freshId ( Nat )
   rule <k> var X[N,N':Nat,Vl]; => 
-           __((var (X[N]);),__(
-           (var freshId(L);), 
+           __((var (X[N]);), 
            for freshId(L) = 0 to N +Int -1 do {
              (var freshId(L +Nat 1)[N',Vl];)
              X[freshId(L)] = freshId(L +Nat 1); 
-           })) <_/k>  <nextLoc> L => L +Nat 2 </nextLoc>  
+           }) <_/k>  <nextLoc> L => L +Nat 2 </nextLoc>  
 
-//@ Function declaration
+//@ \subsection*{Function declaration}
   rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc>
@@ -101,14 +102,14 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 
 -------------------
-//@ Expressions 
+//@ \section*{Expressions}
 -------------------
 
-//@ Variable lookup
+//@ \subsection*{Variable lookup}
   rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store>
 
 
-/*@ \section{Variable/Array increment}
+/*@ \subsection*{Variable/Array increment}
 
  This is tricky, because we want to allow all of {\tt ++x}, {\tt ++a[5]}
  Therefore, we need to extract the l-value of the expression to increment.
@@ -122,7 +123,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
   rule <k> ++loc(L) => I:Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store>
 
-//@ \section{Arithmetic operators}
+//@ \subsection*{Arithmetic operators}
   rule I1:Int + I2:Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
@@ -148,10 +149,10 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
   syntax K ::= lookup Nat
   rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
 
-//@ Size of array
+//@ \subsection*{Size of an array}
   rule sizeOf(array(_,N)) => N
 
-//@ Function call. The environment and the computation are pushed onto the stack
+//@ \subsection*{Function call} The environment and the computation are pushed onto the stack
   rule <k> _`(_`)(function(L),Vl:List{Val}) ~> K => S ~> return(0); </k>
        <fstack> . => (Env,K) <_/fstack>
        <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
@@ -162,33 +163,34 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
        <fstack> (Env,K) => . <_/fstack>
        <env> _ => Env </env>
 
-//@ Read
+//@ \subsection*{Read}
   rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
 
 
 ------------------
-//@ Statements 
+//@ \section*{Statements}
 ------------------
 
-//@ Empty blocks. One can make the rule below structural, if one doesn't want it to count as step
+//@ \subsection*{Empty blocks} One can make the rule below structural, if one doesn't want it to count as step
   rule {} => .
 
-/*@ Nonempty Blocks. Make sure the environment is recovered after the block executes
+/*@ \subsection*{Nonempty Blocks} Make sure the environment is recovered after the block executes
  This rule can also be structural if one does not want entering a block to count as step */
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env </env>
 
-//@ Sequential composition.  Desugared into K's sequentialization.  Can also be structural
+//@ \subsection*{Sequential composition}  Desugared into K's sequentialization.  Can also be structural
   rule S1:Stmt S2:Stmt => S1~>S2
 
-/*@ Assignment
+/*@ \subsection*{Assignment}
  Like for increment, we first compute the l-value of the left-hand-side.
 */
   context ([HOLE] => l-value([HOLE]))=_
   rule <k> loc(L)=V => V <_/k> <store_> L|->(_=>V) <_/store>
 
-/*@ l-value and loc
+/*@ \subsection*{l-value and loc}
  l-value(E) computes the l-value of E, where E can be an identifier X,
  or an array element A[I].
+
  l-value(E) evaluates to a location value of the form loc(L), where L is a natural number.
 */
   syntax Exp ::= l-value ( K )    --- for parsing reasons, we prefer to allow l-value to take a K
@@ -202,20 +204,20 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
   rule <k> l-value(lookup(L)) => loc(L) <_/k>
 
 
-//@ Expression statements.  They are only used for their side effects, so their result is descarded
+//@ \subsection*{Expression statements}  They are only used for their side effects, so their result is descarded
   rule V; => .
 
-//@ Conditional
+//@ \subsection*{Conditional}
   rule if  true then S else _ => S
   rule if false then _ else S => S
 
-//@ While loop unrolled only at the top of the computation (to avoid non-termination)
+//@ \subsection*{While loop} Unrolled only at the top of the computation (to avoid non-termination)
   rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k>
 
-//@ Write
+//@ \subsection*{Write}
   rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out>
 
-//@ Exceptions
+//@ \subsection*{Exceptions}
   syntax ListItem ::= ( Id , Stmt , K , Map , List )
   syntax K ::= popx
   rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
@@ -230,7 +232,7 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
        <store_> . => L |-> V <_/store>
        <nextLoc> L => sNat L </nextLoc>
 
-//@ Threads
+//@ \subsection*{Threads}
    rule <thread_> <k> spawn S => . <_/k> <env> Env </env> <_/thread>
         (. => <thread_> <k> S </k> <env> Env </env> <_/thread>)
    rule (<thread_> <k>.</k> <fstack>.</fstack> <holds> Holds:Map </holds> <_/thread> => .)
@@ -243,28 +245,28 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
    rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k>
 
 ----------------------------------------------
-//@ Auxilliary declarations and operations 
+//@ \section*{Auxilliary declarations and operations}
 ----------------------------------------------
 
-//@ Lists of values
+//@ \subsection*{Lists of values}
   syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
-//@ Length
+//@ \subsection*{Length}
   syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
   macro |.List{Id}| = 0  
   macro |X,Xl| = sNat |Xl|
 
-//@ Sequences of locations
+//@ \subsection*{Sequences of locations}
   syntax List{K} ::= Nat .. Nat
   rule N1:Nat..N1 => .List{K} [structural]
   rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
 
-//@ Environment recovery
+//@ \subsection*{Environment recovery}
   syntax K ::= env ( Map )
   rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
   rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
 
-//@ Pairing construct nedeed for stacking
+//@ \subsection*{Pairing construct} Nedeed for stacking
   syntax ListItem ::=  ( Map , K )
 endkm

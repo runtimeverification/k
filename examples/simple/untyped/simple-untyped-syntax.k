@@ -4,18 +4,18 @@
 
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
 
-//@ Identifiers
+//@ \subsection*{Identifiers}
 --- Special identifier for the function "main"
   syntax Id ::= main
 
 
-//@ Declarations
+//@ \subsection*{Declarations}
 --- There are two types of declarations: for variables (including arrays) and for functions
   syntax Decl ::= var List{Exp} ;
                 | function Id ( ) Stmt
                 | function Id ( List{Id} ) Stmt
 
-//@ Expressions
+//@ \subsection*{Expressions}
   syntax Exp ::= Int | Bool | Id
                | ++ Exp             [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
@@ -40,7 +40,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
                | read ( )
                | Exp = Exp         [strict(2) prec 40  gather (e E)]
 
-//@ Statements
+//@ \subsection*{Statements}
   syntax Stmt ::= { }
                 | { Stmts }
                 | Exp ;                      [strict prec 45]
@@ -62,7 +62,7 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
 
 
 -----------------------------------------------------------------------------
-/*@ Lists should be eventually builtin; for now, they need to be declared  */
+/*@ \subsubsection*{Lists} should be eventually builtin; for now, they need to be declared  */
 -----------------------------------------------------------------------------
 --- List{Id}; the hybrid attribute says that a list of results becomes itself a result
   syntax List{Id} ::= Id
