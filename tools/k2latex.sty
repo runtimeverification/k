@@ -87,13 +87,13 @@
   \node[draw=#1!50!black,line width=1pt,name=cell,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=#5,/pgf/rounded rectangle west arc=#4,fill=#1!20,minimum height=4ex,minimum width=3em]{#3};
 \draw[shift=(cell.north east)]plot coordinates{(-.1pt,-.5pt)} node[name=ce,minimum size=.01pt,inner sep=0pt]{};
 \draw[shift=(cell.north west)]plot coordinates{(.1pt,-.5pt)} node[name=cw,     minimum size=.01pt,inner sep=0pt]{};
-\draw[color=white,line width=1.2pt](cw.east)--(ce.west);
+\draw[color=#1!20,line width=1.2pt](cw.east)--(ce.west);
 \draw[shift=(cell.north west)]plot coordinates{(0,-1.05pt)}
 node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=convex,/pgf/rounded rectangle west arc=convex,fill=#1!20,draw=#1!20,line width=1pt,minimum width=2em,minimum height=2.5ex,draw=#1!50!black]
 {#2};%
 \draw[shift=(label.south east)]plot coordinates{(-.1pt,.5pt)} node[name=le,minimum size=.01pt,inner sep=0pt]{};
 \draw[shift=(label.south west)]plot coordinates{(.1pt,.5pt)} node[name=lw,     minimum size=.01pt,inner sep=0pt]{};
-\draw[color=white,line width=1.2pt](lw.east)--(le.west);
+\draw[color=#1!20,line width=1.2pt](lw.east)--(le.west);
 \draw[color=#1!50!black,line width=1pt](le.west) -- (ce.east);
 \ifthenelse{\equal{#4}{none}}{%
 \draw[fill,color=#1!50!black,decorate,decoration={coil,aspect=0,segment length=.5ex,amplitude=1pt}](cell.south west)--(cell.north west);%
@@ -129,7 +129,7 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
-\newcommand{\bAnyVar}{{\rm ---}}
+\newcommand{\bAnyVar}{\mbox{---}}
 
 
 \newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
