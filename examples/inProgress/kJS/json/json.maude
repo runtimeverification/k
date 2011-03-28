@@ -5,9 +5,9 @@
  mod JSON-LIST
  	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID .
  	
- 	  sort JS .    op undefined :  -> JS   [metadata "location(../syntax/../json/json.k:8)"] .  op null :  -> JS   [metadata "location(../syntax/../json/json.k:8)"] .  subsort Int <  JS .    subsort Float <  JS .    subsort Bool <  JS . 
+ 	  sort JS .    op undefined :  -> JS   [metadata "location(json.k:8)"] .  op null :  -> JS   [metadata "location(json.k:8)"] .  subsort Int <  JS .    subsort Float <  JS .    subsort Bool <  JS . 
  
- 	  sort List{JS} .    subsort JS <  List{JS} .    op .List{JS} :  -> List{JS}   [metadata "location(../syntax/../json/json.k:10)"] .  op _,_ : List{JS}  List{JS} -> List{JS}  [  assoc id: .List{JS} metadata "location(../syntax/../json/json.k:10)"] . 
+ 	  sort List{JS} .    subsort JS <  List{JS} .    op .List{JS} :  -> List{JS}   [metadata "location(json.k:10)"] .  op _,_ : List{JS}  List{JS} -> List{JS}  [  assoc id: .List{JS} metadata "location(json.k:10)"] . 
  	
  endm
  
@@ -18,15 +18,15 @@
  	
  	  sort JsonKey .    subsort String <  JsonKey .    subsort Id <  JsonKey .    subsort Int <  JsonKey . 
  
- 	  sort JsonObject .    op {} :  -> JsonObject   [metadata "location(../syntax/../json/json.k:21)"] .  op {_} :  List{JS} -> JsonObject [metadata "location(../syntax/../json/json.k:21)"] . 
+ 	  sort JsonObject .    op {} :  -> JsonObject   [metadata "location(json.k:21)"] .  op {_} :  List{JS} -> JsonObject [metadata "location(json.k:21)"] . 
  	
- 	  sort JsonArray .    op [] :  -> JsonArray   [metadata "location(../syntax/../json/json.k:23)"] .  op [_] :  List{JS} -> JsonArray [metadata "location(../syntax/../json/json.k:23)"] . 
+ 	  sort JsonArray .    op [] :  -> JsonArray   [metadata "location(json.k:23)"] .  op [_] :  List{JS} -> JsonArray [metadata "location(json.k:23)"] . 
  	
- 	  sort JsonTerminal .    op undefined :  -> JsonTerminal   [metadata "location(../syntax/../json/json.k:25)"] .  op null :  -> JsonTerminal   [metadata "location(../syntax/../json/json.k:25)"] .  subsort Bool <  JsonTerminal .    subsort JsonNumeric <  JsonTerminal .    subsort JsonKey <  JsonTerminal . 
+ 	  sort JsonTerminal .    op undefined :  -> JsonTerminal   [metadata "location(json.k:25)"] .  op null :  -> JsonTerminal   [metadata "location(json.k:25)"] .  subsort Bool <  JsonTerminal .    subsort JsonNumeric <  JsonTerminal .    subsort JsonKey <  JsonTerminal . 
  	
  	  sort JsonLiteral .    subsort JsonTerminal <  JsonLiteral .    subsort JsonObject <  JsonLiteral .    subsort JsonArray <  JsonLiteral . 
  				
- 	  sort JsonPair .    op _:_ : JsonKey  JS -> JsonPair  [  prec 25 metadata "location(../syntax/../json/json.k:29)"] . 
+ 	  sort JsonPair .    op _:_ : JsonKey  JS -> JsonPair  [  prec 25 metadata "location(json.k:29)"] . 
  	
  	      subsort JsonLiteral <  JS .    subsort JsonPair <  JS . 
  	
@@ -41,29 +41,29 @@
  	      subsort JS <  K .    subsort List{JS} <  K . 
  	
  	     
- 			 op o(_) :  JSProperties -> JS   [metadata "location(../syntax/../json/json.k:43)"] .  op a(_) :  List{JS} -> JS
- 		  [metadata "location(../syntax/../json/json.k:44)"] . 	 op buildLitObject(_,_) :  List{JS}  JSProperties -> JS [metadata "location(../syntax/../json/json.k:45)"] . 
+ 			 op o(_) :  JSProperties -> JS   [metadata "location(json.k:43)"] .  op a(_) :  List{JS} -> JS
+ 		  [metadata "location(json.k:44)"] . 	 op buildLitObject(_,_) :  List{JS}  JSProperties -> JS [metadata "location(json.k:45)"] . 
  	
  
  	  sort JSProperty .    subsort JsonPair <  JSProperty . 
  	
  	  sort JSProperties .   
- 			 op .JSProperties :  -> JSProperties   [metadata "location(../syntax/../json/json.k:50)"] .  subsort JSProperty <  JSProperties . 
- 			  op __ : JSProperties  JSProperties -> JSProperties  [  assoc comm id: .JSProperties metadata "location(../syntax/../json/json.k:52)"] . 
+ 			 op .JSProperties :  -> JSProperties   [metadata "location(json.k:50)"] .  subsort JSProperty <  JSProperties . 
+ 			  op __ : JSProperties  JSProperties -> JSProperties  [  assoc comm id: .JSProperties metadata "location(json.k:52)"] . 
  	
  
- 	eq []  =  a(.List{JS} ) [metadata "location(../syntax/../json/json.k:55)"] .
- 	eq [ Elements ] =  a( Elements ) [metadata "location(../syntax/../json/json.k:56)"] .
+ 	eq []  =  a(.List{JS} ) [metadata "location(json.k:55)"] .
+ 	eq [ Elements ] =  a( Elements ) [metadata "location(json.k:56)"] .
  
- 	eq { } =  o(.JSProperties ) [metadata "location(../syntax/../json/json.k:58)"] .	
+ 	eq { } =  o(.JSProperties ) [metadata "location(json.k:58)"] .	
  
  
- 	eq { Elements:List{JS} } =  buildLitObject( Elements , .JSProperties  ) [metadata "location(../syntax/../json/json.k:61)"] .
+ 	eq { Elements:List{JS} } =  buildLitObject( Elements , .JSProperties  ) [metadata "location(json.k:61)"] .
  
- 	eq buildLitObject((.List{JS} ) , Properties:JSProperties ) =  o(Properties) [metadata "location(../syntax/../json/json.k:63)"] .
+ 	eq buildLitObject((.List{JS} ) , Properties:JSProperties ) =  o(Properties) [metadata "location(json.k:63)"] .
  
  	eq buildLitObject( (Key:JsonKey :  Value:JS , Elements) , Properties ) 
- 		=  buildLitObject( (Elements) , Properties Key :  Value ) [metadata "location(../syntax/../json/json.k:65)"] .
+ 		=  buildLitObject( (Elements) , Properties Key :  Value ) [metadata "location(json.k:65)"] .
  
  var Value :  JS . var Elements :  List{JS} . var Properties :  JSProperties . var Key :  JsonKey .   subsorts JSProperties Builtin JSProperty JsonTerminal JsonLiteral < K . endm
  
