@@ -14,7 +14,7 @@ endkm
 kmod JSON-SYNTAX 
 	is including JSON-LIST
 	
-	syntax Numeric ::= Int | Float
+	syntax JsonNumeric ::= Int | Float
 	
 	syntax JsonKey ::= String | Id | Int
 
@@ -22,7 +22,7 @@ kmod JSON-SYNTAX
 	
 	syntax JsonArray ::= [ ] | [ List{JS} ]
 	
-	syntax JsonTerminal ::= undefined | null | Bool | Numeric | JsonKey
+	syntax JsonTerminal ::= undefined | null | Bool | JsonNumeric | JsonKey
 	
 	syntax JsonLiteral ::= JsonTerminal | JsonObject | JsonArray
 				
@@ -37,7 +37,7 @@ kmod JSON
 	
 	syntax Builtin ::= String | Bool
 
-	syntax KResult ::= Bool | String | Numeric
+	syntax KResult ::= Bool | String | JsonNumeric
 	syntax K ::= JS | List{JS}
 	
 	syntax JS ::= 

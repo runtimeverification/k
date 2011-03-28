@@ -3,7 +3,8 @@ load ../json/json.k
 kmod JS-SYNTAX 
 	is including JSON
 
-	syntax JSNumber ::= #n( Numeric ) | #zero( Int )
+	syntax Number ::= Int | Float
+	syntax JSNumber ::= #n( Number ) | #zero( Int )
 	syntax JSNumeric ::= JSNumber | #infinity( Int ) | #nan
 	syntax JSValue ::= JSNumeric | #b( Bool ) | #s( String ) | #regex( String ) 
 		| #undefined | #null | #this | #o( List{JS} )

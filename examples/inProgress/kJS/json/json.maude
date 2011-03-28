@@ -14,7 +14,7 @@
  mod JSON-SYNTAX 
  	is including JSON-LIST .
  	
- 	  sort Numeric .    subsort Int <  Numeric .    subsort Float <  Numeric . 
+ 	  sort JsonNumeric .    subsort Int <  JsonNumeric .    subsort Float <  JsonNumeric . 
  	
  	  sort JsonKey .    subsort String <  JsonKey .    subsort Id <  JsonKey .    subsort Int <  JsonKey . 
  
@@ -22,7 +22,7 @@
  	
  	  sort JsonArray .    op [] :  -> JsonArray   [metadata "location(../syntax/../json/json.k:23)"] .  op [_] :  List{JS} -> JsonArray [metadata "location(../syntax/../json/json.k:23)"] . 
  	
- 	  sort JsonTerminal .    op undefined :  -> JsonTerminal   [metadata "location(../syntax/../json/json.k:25)"] .  op null :  -> JsonTerminal   [metadata "location(../syntax/../json/json.k:25)"] .  subsort Bool <  JsonTerminal .    subsort Numeric <  JsonTerminal .    subsort JsonKey <  JsonTerminal . 
+ 	  sort JsonTerminal .    op undefined :  -> JsonTerminal   [metadata "location(../syntax/../json/json.k:25)"] .  op null :  -> JsonTerminal   [metadata "location(../syntax/../json/json.k:25)"] .  subsort Bool <  JsonTerminal .    subsort JsonNumeric <  JsonTerminal .    subsort JsonKey <  JsonTerminal . 
  	
  	  sort JsonLiteral .    subsort JsonTerminal <  JsonLiteral .    subsort JsonObject <  JsonLiteral .    subsort JsonArray <  JsonLiteral . 
  				
@@ -37,7 +37,7 @@
  	
  	  sort Builtin .    subsort String <  Builtin .    subsort Bool <  Builtin . 
  
- 	      subsort Bool <  KResult .    subsort String <  KResult .    subsort Numeric <  KResult . 
+ 	      subsort Bool <  KResult .    subsort String <  KResult .    subsort JsonNumeric <  KResult . 
  	      subsort JS <  K .    subsort List{JS} <  K . 
  	
  	     

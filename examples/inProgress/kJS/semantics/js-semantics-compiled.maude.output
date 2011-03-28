@@ -1,2 +1,0 @@
-[ERROR] Error: js-semantics.k:44  Could not find an operation to match the top of the given term. Perhaps the term does not have a least sort?  Trm: Int2Float(asInt`(_`)(Other:JS))	Context: `[`]:[List{K},Builtins]
-Aborting the compilation
