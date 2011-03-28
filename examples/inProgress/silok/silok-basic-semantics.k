@@ -9,13 +9,14 @@
 *  the abstract semantics (Section 4).
 */
 
-// require silok-programs
-require silok-syntax
+require silok-programs
+// require silok-syntax
 
 kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT 
---- + SILOK-PROGRAMS + K-WRAPPERS 
++ SILOK-PROGRAMS --- + K-WRAPPERS 
 
-  syntax K ::= B | restore ( Map ) | lvars | gvars | ListId | Procs | Pgm 
+  syntax K ::= B | restore ( Map ) | lvars | gvars | flds 
+               | ListId | Procs | Pgm 
   syntax IntBot ::= Int | bot
   syntax Builtins ::= IntBot
   syntax KResult ::= IntBot | Id
@@ -27,6 +28,8 @@ kmod SILOK-BASIC-SEMANTICS is including SILOK-SYNTAX + K + PL-INT
 
 
   syntax K ::= wklist ( List{K} )
+  syntax K ::= wkmap ( Map )
+  syntax K ::= wkbag ( BagItem )
 
   syntax List{K} ::= `List`{K`} ( ListId )
 

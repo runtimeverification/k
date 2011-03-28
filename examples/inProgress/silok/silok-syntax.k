@@ -15,7 +15,7 @@ kmod SILOK-SYNTAX is including PL-ID
   
   syntax ListId ::= .ListId | Id | ListId `, ListId [assoc id: .ListId] 
 
-  syntax Pgm ::= gvars: ListId lvars: ListId { Procs }
+  syntax Pgm ::= gvars: ListId lvars: ListId flds: ListId { Procs }
 
   syntax Procs ::= ProcId :: B           [prec 55 gather(e E)]
                    | Procs Procs         [prec 60 gather(e E)]
@@ -24,9 +24,11 @@ kmod SILOK-SYNTAX is including PL-ID
 
   syntax Id ::= new  
 
+  syntax FExp ::= Id | Id . Id [prec 40 gather(e E)]
+
   syntax BExp ::= Id = Id [prec 43] | Id /= Id [prec 43]
 
-  syntax B ::= Id := Id	                 [prec 45 ]
+  syntax B ::= FExp := FExp              [prec 45]
                | B ; B                   [prec 50 gather(e E)] 
                | [ BExp ] B              [prec 45]
                | B + B                   [prec 48]
