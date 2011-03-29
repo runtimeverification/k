@@ -1,6 +1,7 @@
 %% Grammar for the K language
 module K
 imports Common %% For Comments and whitespace
+imports Simple[K][Exported => SyntacticK]
 exports
 context-free start-symbols
 	Start
@@ -8,12 +9,11 @@ context-free start-symbols
 context-free syntax
 
 %% K Module syntax
-
 "kmod" ModName "is" KModHeader KSentence* "endkm" -> Start {cons("KModule"),left}
 KModHeaderItem* -> KModHeader
 "including" KModExp -> KModHeaderItem {cons("Including")}  
 {ModName "+"}+ -> KModExp {cons("ModuleSum")}  
-	
+
 %% K Sentences
 "configuration" Config -> KSentence {cons("Configuration")}
 "macro" CellContents "=" CellContents -> KSimpleSentence {cons("Macro")}
@@ -44,19 +44,24 @@ K -> CellContents {cons("K")}
 Map -> CellContents {cons("Map")}
 List -> CellContents {cons("List")}
 Bag -> CellContents {cons("Bag")}
+Set -> CellContents {cons("Set")}
 Config -> CellContents {cons("Config")}
 
-"<" CellLabel ">" -> StartCellClosed
-"<" CellLabel "_>" -> StartCellOpen
-"<" CellLabel ">..." -> StartCellOpen
+"<" CellLabel CellProperties ">" -> StartCellClosed
+"<" CellLabel CellProperties "_>" -> StartCellOpen
+"<" CellLabel CellProperties ">..." -> StartCellOpen
 "</" CellLabel ">" -> EndCellClosed
 "<_/" CellLabel ">" -> EndCellOpen
 "...</" CellLabel ">" -> EndCellOpen
 
+ID "=" "\"" CellValue "\"" -> CellProperty
+CellProperty* -> CellProperties
 
 %% K
 ".K" -> K {cons("EmptyK")}
 NeK -> K
+Int -> K
+SyntacticK -> K {prefer}
 
 {K "~>"}+ "~>" {K "~>"}+ -> NeK {left,cons("SeqK")}
 KLabel "(" KList ")" -> NeK {cons("AppK")}
@@ -86,6 +91,12 @@ BagItem+ -> Bag
 "BagItem" "(" K ")" -> BagItem {cons("BagItem")}
 Bag "=>" Bag -> Bag {cons("ReplaceBag")}
 
+%% Sets
+SetItem+ -> Set
+".Set" -> Set
+"SetItem" "(" K ")" -> SetItem {cons("SetItem")}
+Set "=>" Set -> Set {cons("ReplaceSet")}
+
 %% Variables
 VarId ":" Type -> Variable {cons("TypedVariable")}
 Variable -> ConfigItem* {cons("ConfigVariable")}
@@ -102,11 +113,15 @@ Variable -> KLabel {cons("KLabelVariable")}
 Bool -> KLabel {cons("Bool")}
 Int -> KLabel {cons("Int")}
 
+"notsurewhyineedthisitisreallysilly" -> SyntacticK
+
 lexical syntax
 
 "'" ~[\(\)\ ]+ -> KLabel
 
-[A-Za-z] ~[\<\>\_]* -> CellLabel
+[A-Za-z] ~[\<\>\_\ ]* -> CellLabel
+
+[A-Za-z0-9\*]* -> CellValue
 
 [A-Z\-]+ -> ModName
 
@@ -128,3 +143,4 @@ VarId -> Variable
 %% Booleans
 "true" -> Bool 
 "false" -> Bool 
+

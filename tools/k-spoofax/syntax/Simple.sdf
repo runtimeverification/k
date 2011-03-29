@@ -1,0 +1,80 @@
+%% Grammar for Simple
+module Simple[Atom]
+imports Common %% For Comments and whitespace
+exports
+context-free start-symbols
+	Exported
+
+context-free syntax
+	
+Language -> Exported {cons("Syntax")}
+	
+Exp -> Language
+Stmts -> Language
+		
+Stmts -> Start
+
+Decl -> Stmts
+Stmt -> Stmts
+Stmts+ -> Stmts {left}
+
+"{" "}" -> Stmt
+"return" Exp  ";" -> Stmt
+	
+"var" ListOfExp ";" -> Decl
+"function" ID "(" ")" Stmt -> Decl
+"function" ID "(" ListOfId ")" Stmt -> Decl
+
+"0" -> Int    
+"-"? [1-9][0-9]* -> Int
+
+Int | ID -> Exp
+Exp "*" Exp -> Exp {left}
+
+%% {T ","}+ -> List[[T]]
+{ID ","}+ -> ListOfId
+{Exp ","}+ -> ListOfExp
+
+
+%% //@ \subsection*{Expressions}
+%%   syntax Exp ::= Int | Bool | Id
+%%                | ++ Exp             [prec 0]
+%%                | Exp + Exp         [strict prec 33 gather(E e)]
+%%                | Exp - Exp         [strict prec 33 gather(E e)]
+%%                | Exp * Exp         [strict prec 31 gather(E e)]
+%%                | Exp / Exp         [strict prec 31 gather(E e)]
+%%                | Exp % Exp         [strict prec 31 gather(E e)]
+%%                | - Exp             [strict]
+%%                | Exp < Exp         [strict prec 37]
+%%                | Exp <= Exp        [strict prec 37]
+%%                | Exp > Exp         [strict prec 37]
+%%                | Exp >= Exp        [strict prec 37]
+%%                | Exp == Exp        [strict prec 37]
+%%                | Exp != Exp        [strict prec 37]
+%%                | Exp and Exp       [strict prec 39 gather(E e)]
+%%                | Exp or Exp        [strict prec 39 gather(E e)]
+%%                | not Exp           [strict prec 38]
+%%                | Exp [ List{Exp} ] [strict prec 1] 
+%%                | sizeOf ( Exp )    [strict]
+%%                | Exp ( )
+%%                | Exp ( List{Exp} ) [strict prec 2]
+%%                | read ( )
+%%                | Exp = Exp         [strict(2) prec 40  gather (e E)]
+%% 
+%% //@ \subsection*{Statements}
+%%   syntax Stmt ::= { }
+%%                 | { Stmts }
+%%                 | Exp ;                      [strict prec 45]
+%%                 | if Exp then Stmt else Stmt [strict(1) prec 90]
+%%                 | if Exp then Stmt           [prec 89]
+%%                 | while Exp do Stmt          [prec 90]
+%%                 | for Id = Exp to Exp do Stmt[prec 90]
+%%                 | write ( Exp ) ;            [strict]
+%%                 | try Stmt catch ( Id ) Stmt [prec 90]
+%%                 | throw Exp ; [strict]
+%%                 | spawn Stmt [prec 90]
+%%                 | acquire Exp ;              [strict]
+%%                 | release Exp ;              [strict]
+%%                 | rendezvous Exp ;           [strict]
+%% 
+
