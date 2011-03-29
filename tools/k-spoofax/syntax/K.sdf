@@ -60,7 +60,7 @@ CellProperty* -> CellProperties
 %% K
 ".K" -> K {cons("EmptyK")}
 NeK -> K
-Int -> K
+INT -> K
 SyntacticK -> K {prefer}
 
 {K "~>"}+ "~>" {K "~>"}+ -> NeK {left,cons("SeqK")}
@@ -110,8 +110,8 @@ Variable -> KLabel {cons("KLabelVariable")}
 %%K "=/=Bool" K -> Bool {cons("BoolKNeq")}
 
 %% Instead of the subsorts from imp
-Bool -> KLabel {cons("Bool")}
-Int -> KLabel {cons("Int")}
+BOOL -> KLabel {cons("Bool")}
+INT -> KLabel {cons("Int")}
 
 "notsurewhyineedthisitisreallysilly" -> SyntacticK
 
@@ -134,13 +134,5 @@ lexical syntax
 BasicType -> Type
 BasicType "{" BasicType "}" -> Type
 
-VarId -> Variable
-
-%% Integers
-"0" -> Int    
-"-"? [1-9][0-9]* -> Int
-
-%% Booleans
-"true" -> Bool 
-"false" -> Bool 
+VarId -> Variable {cons("Variable")}
 

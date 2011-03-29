@@ -3,8 +3,18 @@ module Common
 exports
 
   lexical syntax
-  
+  	
+	%% Booleans
+	"true" -> BOOL
+	"false" -> BOOL
+	
+	"true" -> ID {reject}
+	"false" -> ID {reject}
+	
+	%% Identifiers
     [a-zA-Z][a-zA-Z0-9\_]* -> ID
+    
+    %% Ints
     "-"? [0-9]+            -> INT
     
     "\"" StringChar* "\"" -> STRING

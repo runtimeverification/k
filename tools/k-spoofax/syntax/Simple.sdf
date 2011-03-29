@@ -14,60 +14,66 @@ Stmts -> Language
 		
 Stmts -> Start
 
-Decl -> Stmts
-Stmt -> Stmts
-Stmts+ -> Stmts {left}
+Decl -> Sentence
+Stmt -> Sentence
+Sentence* -> Stmts {right}
 
-"{" "}" -> Stmt
-"return" Exp  ";" -> Stmt
+"{" Stmts "}" -> Stmt {cons("Block")}
+"return" Exp  ";" -> Stmt {cons("Return")}
+Exp ";" -> Stmt {cons("ExpStmt")}
+"while" Exp "do" Stmt -> Stmt {cons("While")}
+"if" Exp "then" Stmt "else" Stmt -> Stmt
+"if" Exp "then" Stmt -> Stmt
+
 	
-"var" ListOfExp ";" -> Decl
-"function" ID "(" ")" Stmt -> Decl
-"function" ID "(" ListOfId ")" Stmt -> Decl
+"var" ListOfExp ";" -> Decl {cons("VarDecl")}
+%% "function" ID "(" ")" Stmt -> Decl
+"function" ID "(" ListOfId ")" Stmt -> Decl {cons("FunDecl")}
 
-"0" -> Int    
-"-"? [1-9][0-9]* -> Int
+INT -> Exp {cons("SyntaxInt"), avoid}
+BOOL -> Exp {cons("SyntaxBool"), avoid}
+ID -> Exp {cons("SyntaxId"), avoid}
 
-Int | ID -> Exp
-Exp "*" Exp -> Exp {left}
+"++" Exp -> Exp
+"-" Exp -> Exp
 
-%% {T ","}+ -> List[[T]]
-{ID ","}+ -> ListOfId
-{Exp ","}+ -> ListOfExp
+Exp "[" ListOfExp "]" -> Exp
+"sizeOf" "(" Exp ")" -> Exp
+ID "(" ListOfExp ")" -> Exp
+"read" "(" ")" -> Exp
+"(" Exp ")" -> Exp {bracket}
+
+{ID ","}* -> ListOfId
+{Exp ","}* -> ListOfExp
 
 
-%% //@ \subsection*{Expressions}
-%%   syntax Exp ::= Int | Bool | Id
-%%                | ++ Exp             [prec 0]
-%%                | Exp + Exp         [strict prec 33 gather(E e)]
-%%                | Exp - Exp         [strict prec 33 gather(E e)]
-%%                | Exp * Exp         [strict prec 31 gather(E e)]
-%%                | Exp / Exp         [strict prec 31 gather(E e)]
-%%                | Exp % Exp         [strict prec 31 gather(E e)]
-%%                | - Exp             [strict]
-%%                | Exp < Exp         [strict prec 37]
-%%                | Exp <= Exp        [strict prec 37]
-%%                | Exp > Exp         [strict prec 37]
-%%                | Exp >= Exp        [strict prec 37]
-%%                | Exp == Exp        [strict prec 37]
-%%                | Exp != Exp        [strict prec 37]
-%%                | Exp and Exp       [strict prec 39 gather(E e)]
-%%                | Exp or Exp        [strict prec 39 gather(E e)]
-%%                | not Exp           [strict prec 38]
-%%                | Exp [ List{Exp} ] [strict prec 1] 
-%%                | sizeOf ( Exp )    [strict]
-%%                | Exp ( )
-%%                | Exp ( List{Exp} ) [strict prec 2]
-%%                | read ( )
-%%                | Exp = Exp         [strict(2) prec 40  gather (e E)]
-%% 
-%% //@ \subsection*{Statements}
-%%   syntax Stmt ::= { }
-%%                 | { Stmts }
-%%                 | Exp ;                      [strict prec 45]
-%%                 | if Exp then Stmt else Stmt [strict(1) prec 90]
-%%                 | if Exp then Stmt           [prec 89]
-%%                 | while Exp do Stmt          [prec 90]
+context-free priorities
+{	
+	Exp "*" Exp -> Exp {left, cons("Mult")}
+	Exp "/" Exp -> Exp {left, cons("Div")}
+	Exp "%" Exp -> Exp {left, cons("Mod")}
+} > {
+	Exp "+" Exp -> Exp {left, cons("Add")}
+	Exp "-" Exp -> Exp {left, cons("Sub")}
+} > {
+	Exp "<" Exp -> Exp {cons("LT")}
+	Exp "<=" Exp -> Exp {cons("LTE")}
+	Exp ">" Exp -> Exp {cons("GT")}
+	Exp ">=" Exp -> Exp {cons("GTE")}
+	Exp "==" Exp -> Exp {cons("Eq")}
+	Exp "!=" Exp -> Exp {cons("Neq")}
+} > {
+	Exp "and" Exp -> Exp {left, cons("And")}
+	Exp "or" Exp -> Exp {left, cons("Or")}
+} > {
+	"not" Exp -> Exp {cons, cons("Not")}
+} > {
+	Exp "=" Exp -> Exp {right, cons("Assign")}
+}
+
+lexical syntax
+
+
 %%                 | for Id = Exp to Exp do Stmt[prec 90]
 %%                 | write ( Exp ) ;            [strict]
 %%                 | try Stmt catch ( Id ) Stmt [prec 90]
@@ -76,5 +82,4 @@ Exp "*" Exp -> Exp {left}
 %%                 | acquire Exp ;              [strict]
 %%                 | release Exp ;              [strict]
 %%                 | rendezvous Exp ;           [strict]
-%% 
 
