@@ -22,7 +22,7 @@ jshint --> #program(#varDeclarations(#id("JSHINT")),#ifElse(#and(#sameAs(
 --- named function weirdness -> http://kangax.github.com/nfe/
 --- closure weirdness -> https://developer.mozilla.org/en/JavaScript/Guide/Closures
 
-check generation of NaN, Infinities and -0s
+check generation of NaN, Infinities and -0s from Narcissus
 
 how to do Ids and rules???
 refactor op strings to ids

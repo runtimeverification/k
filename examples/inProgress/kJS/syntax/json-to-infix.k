@@ -6,12 +6,12 @@ kmod JSON-TO-INFIX
 	
 	syntax Id ::= JSJsonAstIds 
 	
-	macro o(type : "NUMBER" value : Num:Numeric Extra:JSProperties) = #n(Num)
-	macro o(type : "STRING" value : S:String Extra) = #s(S)
+	macro o(type : "NUMBER" value : Num:Numeric Extra:JSProperties) = $n(Num)
+	macro o(type : "STRING" value : S:String Extra) = $s(S)
 	macro o(type : "REGEXP" value : S:String Extra) = #regex(S)
-	macro o(type : "TRUE"  Extra) = #b(true)
-	macro o(type : "FALSE" Extra) = #b(false)
-	macro o(type : "NULL" Extra) = #null
+	macro o(type : "TRUE"  Extra) = $b(true)
+	macro o(type : "FALSE" Extra) = $b(false)
+	macro o(type : "NULL" Extra) = $null
 	macro null = .none
 	macro undefined = .none
 	macro o(type : "THIS" Extra) = #this
