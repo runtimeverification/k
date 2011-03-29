@@ -1,0 +1,130 @@
+%% Grammar for the K language
+module K
+imports Common %% For Comments and whitespace
+exports
+context-free start-symbols
+	Start
+
+context-free syntax
+
+%% K Module syntax
+
+"kmod" ModName "is" KModHeader KSentence* "endkm" -> Start {cons("KModule"),left}
+KModHeaderItem* -> KModHeader
+"including" KModExp -> KModHeaderItem {cons("Including")}  
+{ModName "+"}+ -> KModExp {cons("ModuleSum")}  
+	
+%% K Sentences
+"configuration" Config -> KSentence {cons("Configuration")}
+"macro" CellContents "=" CellContents -> KSimpleSentence {cons("Macro")}
+"rule" CellContents -> KSimpleSentence {cons("Rule")}
+"context" K -> KSimpleSentence {cons("Context")}
+"predicate" K -> KSimpleSentence {cons("Predicate")}
+
+
+%% K Conditional Sentences
+KSimpleSentence "if" K -> KCondSentence {cons("RuleCond")}
+KSimpleSentence -> KNonAttrSentence
+KCondSentence -> KNonAttrSentence
+
+%% K Attributed Sentences
+KNonAttrSentence -> KSentence
+KNonAttrSentence "[" KSentenceAttr* "]" -> KSentence {cons("AttributedSentence")}
+
+"structural" -> KSentenceAttr {cons("Structural")}    
+
+%% Configurations
+ConfigItem* -> Config
+StartCellClosed CellContents EndCellClosed -> ConfigItem {cons("ClosedCell")}  
+StartCellClosed CellContents EndCellOpen -> ConfigItem {cons("PrefixCell")}  
+StartCellOpen CellContents EndCellClosed -> ConfigItem {cons("SuffixCell")}  
+StartCellOpen CellContents EndCellOpen -> ConfigItem {cons("MiddleCell")}  
+
+K -> CellContents {cons("K")}
+Map -> CellContents {cons("Map")}
+List -> CellContents {cons("List")}
+Bag -> CellContents {cons("Bag")}
+Config -> CellContents {cons("Config")}
+
+"<" CellLabel ">" -> StartCellClosed
+"<" CellLabel "_>" -> StartCellOpen
+"<" CellLabel ">..." -> StartCellOpen
+"</" CellLabel ">" -> EndCellClosed
+"<_/" CellLabel ">" -> EndCellOpen
+"...</" CellLabel ">" -> EndCellOpen
+
+
+%% K
+".K" -> K {cons("EmptyK")}
+NeK -> K
+
+{K "~>"}+ "~>" {K "~>"}+ -> NeK {left,cons("SeqK")}
+KLabel "(" KList ")" -> NeK {cons("AppK")}
+K "=>" K -> NeK {cons("ReplaceK")}
+"(" K ")" -> NeK {bracket}
+"[" "]" -> NeK {cons("Hole")}
+
+{K ","}* -> KList {cons("KList")}
+KList "=>" KList -> KList {cons("ReplaceKList")}
+
+
+%% Lists
+ListItem+ -> List
+".List" -> List
+"ListItem" "(" K ")" -> ListItem {cons("ListItem")}
+List "=>" List -> List {cons("ReplaceList")}
+
+%% Maps
+MapItem+ -> Map
+".Map" -> Map
+K "|->" K -> MapItem {cons("MapItem")}
+Map "=>" Map -> Map {cons("ReplaceMap")}
+
+%% Bags
+BagItem+ -> Bag
+".Bag" -> Bag
+"BagItem" "(" K ")" -> BagItem {cons("BagItem")}
+Bag "=>" Bag -> Bag {cons("ReplaceBag")}
+
+%% Variables
+VarId ":" Type -> Variable {cons("TypedVariable")}
+Variable -> ConfigItem* {cons("ConfigVariable")}
+Variable -> ListItem* {cons("ListVariable")}
+Variable -> K {cons("KVariable")}
+Variable -> BagItem* {cons("BagVariable")}
+Variable -> MapItem* {cons("MapVariable")}
+Variable -> KLabel {cons("KLabelVariable")}
+
+%% Booleans
+%%K "=/=Bool" K -> Bool {cons("BoolKNeq")}
+
+%% Instead of the subsorts from imp
+Bool -> KLabel {cons("Bool")}
+Int -> KLabel {cons("Int")}
+
+lexical syntax
+
+"'" ~[\(\)\ ]+ -> KLabel
+
+[A-Za-z] ~[\<\>\_]* -> CellLabel
+
+[A-Z\-]+ -> ModName
+
+%% Variables and the Anonymous Variable
+[A-Z] ~[\:\(\)\<\>\~\n\,\ \[\]]*  -> VarId
+"_" -> VarId
+
+%% Types and Parameterized Types
+[A-Z][A-Za-z]* -> BasicType 
+BasicType -> Type
+BasicType "{" BasicType "}" -> Type
+
+VarId -> Variable
+
+%% Integers
+"0" -> Int    
+"-"? [1-9][0-9]* -> Int
+
+%% Booleans
+"true" -> Bool 
+"false" -> Bool 
