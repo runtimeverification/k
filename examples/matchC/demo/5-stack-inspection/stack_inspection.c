@@ -7,10 +7,10 @@ void any(int n);
 
 
 void trusted(int n)
-/*@ cfg <stack> S </stack>
-    req n >= 10 \/ inStack(trusted, S) */
+/*@ cfg <stack> S </stack> <out> ?Out </out>
+    req n >= 10 \/ inStack(trusted, S) \/ inStack(main, S) */
 {
-  // printf("%d ", n);
+  printf("%d ", n);
   untrusted(n);
   any(n);
   if (n)
@@ -18,10 +18,10 @@ void trusted(int n)
 }
 
 void untrusted(int n)
-/* cfg <stack> S </stack>
+/*@ cfg <stack> S </stack> <out> ?Out </out>
     req inStack(trusted, S) */
 {
-  // printf("%d ", -n);
+  printf("%d ", -n);
   if (n)
     any(n - 1);
 }
@@ -37,7 +37,7 @@ void any(int n)
 
 int main()
 {
-  trusted(10);
+  trusted(5);
   any(5);
 
   return 0;
@@ -45,4 +45,5 @@ int main()
 
 
 //@ var S : ListItem
+//@ var Out : Seq
 
