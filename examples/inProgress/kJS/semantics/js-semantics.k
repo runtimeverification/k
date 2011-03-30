@@ -49,24 +49,24 @@ kmod JS-CONVERSIONS is including JS-SYNTAX
 	---	macro toString($s(S)) 		= #invocation(#staticAccess(newString(S),$s("toString")),#comma(.List{JS}))	
 endkm 
 
-kmod JS-TYPEOF is including JS-SYNTAX 
+kmod JS-TYPEOF is including JS-SYNTAX + K
 
 	--- ECMA-262 11.4.3
-	macro #typeof($undefined) 				= $s("undefined")
-	macro #typeof($null) 					= $s("object")
-	macro #typeof($b(B:Bool)) 				= $s("boolean")
-	macro #typeof(Numeric:JSNumeric) 		= $s("number")
-	macro #typeof($s(S:String)) 			= $s("string")
-	macro #typeof($o(Value:JSValue)) 		= $s("object")
+	rule #typeof($undefined) 				=> $s("undefined")
+	rule #typeof($null) 					=> $s("object")
+	rule #typeof($b(B:Bool)) 				=> $s("boolean")
+	rule #typeof(Numeric:JSNumeric) 		=> $s("number")
+	rule #typeof($s(S:String)) 				=> $s("string")
+	rule #typeof($o(Value:JSValue)) 		=> $s("object")
 	--- macro #typeof($function(_, _, _, _))	= $s("function")
 
-	--- rule #typeof($undefined) 			=> $s("undefined") [structural]
-	--- rule #typeof($null) 				=> $s("object") [structural]
-	--- rule #typeof($b(_)) 				=> $s("boolean") [structural]
-	--- rule #typeof(Num:JSNumeric) 		=> $s("number") [structural]
-	--- rule #typeof($s(_)) 				=> $s("string") [structural]
-	--- rule #typeof(#function(_, _, _, _))	=> $s("function") [structural]
-	--- rule #typeof(#o(_)) 				=> $s("object") [structural]
+	--- macro #typeof($undefined) 				= $s("undefined")
+	--- macro #typeof($null) 					= $s("object")
+	--- macro #typeof($b(B:Bool)) 				= $s("boolean")
+	--- macro #typeof(Numeric:JSNumeric) 		= $s("number")
+	--- macro #typeof($s(S:String)) 			= $s("string")
+	--- macro #typeof($o(Value:JSValue)) 		= $s("object")
+	--- --- macro #typeof($function(_, _, _, _))	= $s("function")
 	
 endkm
 

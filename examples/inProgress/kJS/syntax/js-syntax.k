@@ -14,13 +14,13 @@ kmod JS-NUMBER is including PL-BUILTINS
 	macro numericValue($n(F:Float))			= F
 	macro numericValue($n(I:Int))			= Int2Float(I)
 	macro numericValue($zero(I))			= 0.0
-	macro numericValue($infinity(I:Int))	= if I >=Int 0 then Infinity else -Infinity fi
+---	macro numericValue($infinity(I:Int))	= if I >=Int 0 then Infinity else -Infinity fi
 
 	macro $n(0) 		= $zero(1)
 	macro $n(0.0) 		= $zero(1)
 ---	macro $n(-0.0) 		= $zero(-1)
-	macro $n(Infinity) 	= $infinity(1)
-	macro $n(-Infinity) = $infinity(-1)
+	--- macro $n(Infinity) 	= $infinity(1)
+	--- macro $n(-Infinity) = $infinity(-1)
 endkm
 
 kmod JS-PRIMITIVES is including JS-NUMBER

@@ -6,7 +6,7 @@ in semantics/js-semantics
 
 kmod JS-CONFIGURATION is including JS-SYNTAX + K
 	syntax K ::= JSValue | JS | List{JS}
-	syntax KResult ::= Int | Float | Bool | String | $undefined | $null
+	syntax KResult ::= Int | Float | Bool | String | JSPrimitive
 
 	configuration <T> <k>.K</k> <state>.Map</state> </T>
 	
