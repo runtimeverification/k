@@ -1,17 +1,49 @@
-load ../json/json.k
-
-kmod JS-SYNTAX 
-	is including JSON
-
+kmod JS-NUMBER is including PL-BUILTINS
+	
 	syntax MaudeNumber ::= Int | Float
 	syntax JSNumber ::= $n( MaudeNumber ) | $zero( Int )
 	syntax JSNumeric ::= JSNumber | $infinity( Int ) | $nan
-	syntax JSPrimitive ::= JSNumeric | $b( Bool ) | $s( String ) | $undefined | $null
-	syntax JSValue ::= JSPrimitive | #regex( String ) | #this | #o( List{JS} )
+	
+	syntax Int ::= sign( JSNumeric )
+	syntax Float ::= numericValue( JSNumeric )
+	
+	macro sign($zero(I)) 		= 	I
+	macro sign($infinity(I)) 	= 	I
+	macro sign(Num:JSNumeric) 	= 	if numericValue(Num) >=Float 0.0 then 1 else -1 fi
+	
+	macro numericValue($n(F:Float))			= F
+	macro numericValue($n(I:Int))			= Int2Float(I)
+	macro numericValue($zero(I))			= 0.0
+	macro numericValue($infinity(I:Int))	= if I >=Int 0 then Infinity else -Infinity fi
+
+	macro $n(0) 		= $zero(1)
+	macro $n(0.0) 		= $zero(1)
+---	macro $n(-0.0) 		= $zero(-1)
+	macro $n(Infinity) 	= $infinity(1)
+	macro $n(-Infinity) = $infinity(-1)
+endkm
+
+kmod JS-PRIMITIVES is including JS-NUMBER
+
+	syntax Bool ::= boolValue( JSBoolean )
+	
+	syntax JSBoolean ::= $b( Bool )
+	syntax JSString ::= $s( String )
+	syntax JSPrimitive ::= $undefined | $null | JSBoolean | JSString | JSNumeric
+	
+	macro boolValue($b(B:Bool)) = B
+endkm
+
+kmod JS-SYNTAX is including JS-PRIMITIVES 
+
+	syntax JSObject ::= $regex( String ) | $o( List{JS} ) --- | #function!!!
+	syntax JSValue ::= JSPrimitive | JSObject
+	
+	syntax List{JS} ::= JS | .List{JS} | List{JS} , List{JS} [assoc id: .List{JS}]
 	
 	syntax JS ::= 
-			.none
-		|	JSValue
+			JSValue | .none 
+		|	#this
 		|	#nop
 		|	#id ( String ) 
 		| #staticAccess ( JS , JS ) [strict] 		--- Exp . Name

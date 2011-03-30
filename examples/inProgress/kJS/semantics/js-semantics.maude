@@ -1,225 +1,274 @@
-load ../syntax/js-syntax.maude
-
-mod JS-COERCION
-	is protecting JS-SYNTAX + PL-BUILTINS . 
+mod JS-CONVERSIONS is including JS-SYNTAX .
 	
-	      op #asFloat(_) :  JS -> JS   [metadata "location(js-semantics.k:6)"] .  op #asInt(_) :  JS -> JS   [metadata "location(js-semantics.k:6)"] .  op #asBool(_) :  JS -> JS   [metadata "location(js-semantics.k:6)"] .  op #asString(_) :  JS -> JS [metadata "location(js-semantics.k:6)"] . 
+	      op toPrimitive(_) :  List{JS} -> JS 
+		  [metadata "location(semantics/js-semantics.k:2)"] .  op toBoolean(_) :  JSValue -> JS   [metadata "location(semantics/js-semantics.k:3)"] .  op toNumber(_) :  JSValue -> JS   [metadata "location(semantics/js-semantics.k:3)"] .  op toString(_) :  JSValue -> JS [metadata "location(semantics/js-semantics.k:3)"] . 
 	
-	eq #asFloat (#n (F:Float))		=  #n (F) [metadata "location(js-semantics.k:8)"] .
-	eq #asFloat (#n (I:Int)) 		=  #n (Int2Float(I)) [metadata "location(js-semantics.k:9)"] .
-	eq #asFloat (#s (S:String))	=  #n (String2Float(S)) [metadata "location(js-semantics.k:10)"] .
-	eq #asFloat (Other:JS) 		=  #asInt (Other) [metadata "location(js-semantics.k:11)"] .
 	
-	eq #asInt (#n (F:Float)) 		=  #n (Float2Int(F)) [metadata "location(js-semantics.k:13)"] .
-	eq #asInt (#n (I:Int)) 		=  #n (I) [metadata "location(js-semantics.k:14)"] .
-	eq #asInt (#s (S:String)) 		=  #n (String2Int(S)) [metadata "location(js-semantics.k:15)"] .
-	eq #asInt (#b (true)) 			=  #n (1) [metadata "location(js-semantics.k:16)"] .
-	eq #asInt (#b (false)) 		=  #n (0) [metadata "location(js-semantics.k:17)"] .
-	eq #asInt (#null ) 			=  #n (0) [metadata "location(js-semantics.k:18)"] .
-	eq #asInt (#undefined ) 		=  #n (0) [metadata "location(js-semantics.k:19)"] .
-	eq #asInt ( ? )					=  #nan  [metadata "location(js-semantics.k:20)"] .
+	eq toPrimitive(Prim:JSPrimitive, .List{JS} ) 	=  Prim [metadata "location(semantics/js-semantics.k:7)"] . 
+	eq toPrimitive(Value:JSValue) 				=  toPrimitive(Value, $s ("number")) [metadata "location(semantics/js-semantics.k:8)"] . 
+	eq toPrimitive(Value, $s ("number"))			=  toNumber(Value) [metadata "location(semantics/js-semantics.k:9)"] .
+	eq toPrimitive(Value, $s ("string")) 			=  toString(Value) [metadata "location(semantics/js-semantics.k:10)"] .
 	
-	eq #asBool (#b (B:Bool)) 		=  #b (B) [metadata "location(js-semantics.k:22)"] .
-	eq #asBool (#n (0)) 			=  #b (false) [metadata "location(js-semantics.k:23)"] .
-	eq #asBool (#nan ) 			=  #b (false) [metadata "location(js-semantics.k:24)"] .
-	eq #asBool (#null ) 			=  #b (false) [metadata "location(js-semantics.k:25)"] .
-	eq #asBool (#undefined ) 		=  #b (false) [metadata "location(js-semantics.k:26)"] .
-	eq #asBool (#s ("")) 			=  #b (false) [metadata "location(js-semantics.k:27)"] .
-	eq #asBool ( ? ) 				=  #b (true) [metadata "location(js-semantics.k:28)"] .
-
-	eq #asString (#s (S)) =  #s (S) [metadata "location(js-semantics.k:30)"] .
-	eq #asString (#n (F:Float)) =  #s (Float2String(F)) [metadata "location(js-semantics.k:31)"] .
-	eq #asString (#n (I:Int)) =  #s (Int2String(I)) [metadata "location(js-semantics.k:32)"] .
-	eq #asString (#infinity (I)) =  if I >=Int  0 then #s ("Infinity") else #s ("-Infinity") fi [metadata "location(js-semantics.k:33)"] .
-	eq #asString (#nan ) =  #s ("NaN") [metadata "location(js-semantics.k:34)"] .
-	eq #asString (#b (true)) =  #s ("true") [metadata "location(js-semantics.k:35)"] .
-	eq #asString (#b (false)) =  #s ("false") [metadata "location(js-semantics.k:36)"] .
-	eq #asString (#null ) =  #s ("null") [metadata "location(js-semantics.k:37)"] .
-	eq #asString (#undefined ) =  #s ("undefined") [metadata "location(js-semantics.k:38)"] .
-	eq #asString ( ? ) =  #s ("[object Object]") [metadata "location(js-semantics.k:39)"] .
 	
-var S :  String . var F :  Float . var Other :  JS . var I :  Int . var B :  Bool .  endm 
+	eq toBoolean(Value) 	=  $b (isTruthy(Value)) [metadata "location(semantics/js-semantics.k:13)"] .
 
-mod JS-TYPEOF 
-	is protecting JS-SYNTAX . 
-
-	eq #typeof (#undefined ) 			=  #s ("undefined") [metadata "location(js-semantics.k:46)"] .
-	eq #typeof (#null ) 				=  #s ("object") [metadata "location(js-semantics.k:47)"] .
-	eq #typeof (#b ( ? )) 				=  #s ("boolean") [metadata "location(js-semantics.k:48)"] .
-	eq #typeof (Numeric:JSNumeric) 	=  #s ("number") [metadata "location(js-semantics.k:49)"] .
-	eq #typeof (#s ( ? )) 				=  #s ("string") [metadata "location(js-semantics.k:50)"] .
-	eq #typeof (#function ( ? ,  ? ,  ? ,  ? ))	=  #s ("function") [metadata "location(js-semantics.k:51)"] .
-	eq #typeof (#o ( ? )) 				=  #s ("object") [metadata "location(js-semantics.k:52)"] .
-
+	      op isTruthy(_) :  JSValue -> Bool [metadata "location(semantics/js-semantics.k:14)"] . 
+	
+	eq isTruthy($undefined ) 		=  false [metadata "location(semantics/js-semantics.k:17)"] .
+	eq isTruthy($null ) 			=  false [metadata "location(semantics/js-semantics.k:18)"] .
+	eq isTruthy($b (B:Bool)) 		=  B [metadata "location(semantics/js-semantics.k:19)"] .
+	eq isTruthy($zero (I:Int)) 	=  false [metadata "location(semantics/js-semantics.k:20)"] .
+	eq isTruthy($nan ) 			=  false [metadata "location(semantics/js-semantics.k:21)"] .
+	eq isTruthy($s ("")) 			=  false [metadata "location(semantics/js-semantics.k:22)"] .
+	eq isTruthy($o (Value)) 		=  true [metadata "location(semantics/js-semantics.k:23)"] .
+	
+	
+	eq toNumber(Numeric:JSNumeric)	=  Numeric [metadata "location(semantics/js-semantics.k:26)"] .
+	eq toNumber($undefined ) 			=  $nan  [metadata "location(semantics/js-semantics.k:27)"] .
+	eq toNumber($null ) 				=  $n (0) [metadata "location(semantics/js-semantics.k:28)"] .
+	eq toNumber($b (true)) 			=  $n (1) [metadata "location(semantics/js-semantics.k:29)"] .
+	eq toNumber($b (false)) 			=  $n (0) [metadata "location(semantics/js-semantics.k:30)"] .
+	eq toNumber($s (""))				=  $n (0) [metadata "location(semantics/js-semantics.k:31)"] .
+	eq toNumber($s (S:String))		=  $n (String2Float(S)) [metadata "location(semantics/js-semantics.k:32)"] .
+	eq toNumber(Obj:JSObject)		=  $nan  [metadata "location(semantics/js-semantics.k:33)"] .
 	
 	
 	
+	eq toString($undefined ) 			=  $s ("undefined") [metadata "location(semantics/js-semantics.k:37)"] .
+	eq toString($null ) 				=  $s ("null") [metadata "location(semantics/js-semantics.k:38)"] .
+	eq toString($b (true)) 			=  $s ("true") [metadata "location(semantics/js-semantics.k:39)"] .
+	eq toString($b (false)) 			=  $s ("false") [metadata "location(semantics/js-semantics.k:40)"] .
+	eq toString($nan ) 				=  $s ("NaN") [metadata "location(semantics/js-semantics.k:41)"] .
+	eq toString($n (I:Int)) 			=  $s (Int2String(I)) [metadata "location(semantics/js-semantics.k:42)"] .
+	eq toString($n (F:Float)) 		=  $s (Float2String(F)) [metadata "location(semantics/js-semantics.k:43)"] .
+	eq toString($infinity (1)) 		=  $s ("Infinity") [metadata "location(semantics/js-semantics.k:44)"] .
+	eq toString($infinity (-1)) 		=  $s ("-Infinity") [metadata "location(semantics/js-semantics.k:45)"] .
+	eq toString($zero (I)) 			=  $s ("0") [metadata "location(semantics/js-semantics.k:46)"] .
+	eq toString($s (S)) 				=  $s (S) [metadata "location(semantics/js-semantics.k:47)"] .
+	eq toString(Obj:JSObject) 		=  $s ("[object Object]") [metadata "location(semantics/js-semantics.k:48)"] .
+	
+var F : Float . var S : String . var Value : JSValue . var B : Bool . var Obj : JSObject . var I : Int . var Numeric : JSNumeric . var Prim : JSPrimitive .  endm 
+
+mod JS-TYPEOF is including JS-SYNTAX . 
+
+	
+	eq #typeof ($undefined ) 				=  $s ("undefined") [metadata "location(semantics/js-semantics.k:55)"] .
+	eq #typeof ($null ) 					=  $s ("object") [metadata "location(semantics/js-semantics.k:56)"] .
+	eq #typeof ($b (B:Bool)) 				=  $s ("boolean") [metadata "location(semantics/js-semantics.k:57)"] .
+	eq #typeof (Numeric:JSNumeric) 		=  $s ("number") [metadata "location(semantics/js-semantics.k:58)"] .
+	eq #typeof ($s (S:String)) 			=  $s ("string") [metadata "location(semantics/js-semantics.k:59)"] .
+	eq #typeof ($o (Value:JSValue)) 		=  $s ("object") [metadata "location(semantics/js-semantics.k:60)"] .
+	
+
 	
 	
 	
 	
 	
-var Numeric :  JSNumeric .  endm	
-
-mod JS-IDENTITY
-	is protecting JS-SYNTAX + JS-COERCION . 
-
-
-
-
-
-
-
-
-
-
-
-
-
-	eq #identical (#nan , #nan )				=  #b (false) [metadata "location(js-semantics.k:79)"] .
-	eq #identical (V1, V1) 					=  #b (true) [metadata "location(js-semantics.k:80)"] .
 	
-	eq #identical (#null , #undefined )			=  #b (true) [metadata "location(js-semantics.k:82)"] .
-	eq #identical (#undefined , #null )			=  #b (true) [metadata "location(js-semantics.k:83)"] .
-	eq #identical (#zero ( ? ), #zero ( ? ))		=  #b (true) [metadata "location(js-semantics.k:84)"] .
-	eq #identical (#n (F:Float), #n (I:Int)) 	=  #identical (#n (F), #asFloat (#n (I))) [metadata "location(js-semantics.k:85)"] .
-	eq #identical (#n (I), #n (F)) 				=  #identical (#asFloat (#n (I)), #n (F)) [metadata "location(js-semantics.k:86)"] .
 	
-	eq #identical (V1:JS, V2:JS) 				=  #b (false) [metadata "location(js-semantics.k:88)"] .
+	
+var S : String . var Value : JSValue . var B : Bool . var Numeric : JSNumeric .  endm
 
-	eq #notIdentical (V1, V2) 				=  #neg (#identical (V1, V2)) [metadata "location(js-semantics.k:90)"] .	
-var F :  Float . var I :  Int . var V2 :  JS . var V1 :  JS .  endm
+mod JS-UNARY is including JS-CONVERSIONS + PL-BOOL . 
+	
+	
+	eq #plus (Value) =  toNumber(Value) [metadata "location(semantics/js-semantics.k:76)"] .
 
-mod JS-ARITHMETIC
-	is protecting JS-SYNTAX + JS-COERCION + PL-BUILTINS . 
+	
+	eq #neg (Value) =  neg(Value) [metadata "location(semantics/js-semantics.k:79)"] .
+
+	      op neg(_) :  JSValue -> JSNumeric [metadata "location(semantics/js-semantics.k:81)"] . 
+	
+	eq neg($n (F:Float)) 		=  $n (-Float (F)) [metadata "location(semantics/js-semantics.k:83)"] .
+	eq neg($n (I:Int)) 		=  $n (-Int (I)) [metadata "location(semantics/js-semantics.k:84)"] .
+	eq neg($zero (F)) 		=  $zero (-Float (F)) [metadata "location(semantics/js-semantics.k:85)"] .
+	eq neg($infinity (F)) 	=  $infinity (-Float (F)) [metadata "location(semantics/js-semantics.k:86)"] .
+	eq neg($nan ) 			=  $nan  [metadata "location(semantics/js-semantics.k:87)"] .
+	eq neg(Value:JSValue) 	=  neg(toNumber(Value)) [metadata "location(semantics/js-semantics.k:88)"] .
+
+	
+	eq #not ($b (B:Bool)) 		=  not($b (B)) [metadata "location(semantics/js-semantics.k:91)"] .
+	eq #not (Value) 			=  not(toBoolean(Value)) [metadata "location(semantics/js-semantics.k:92)"] .
+
+	      op not(_) :  JSBoolean -> JSBoolean [metadata "location(semantics/js-semantics.k:94)"] . 
+	
+	eq not($b (B)) 			=  $b (notBool(B)) [metadata "location(semantics/js-semantics.k:96)"] .
+
+	
+	
+	
+	
+var F : Float . var Value : JSValue . var B : Bool . var I : Int .  endm
+
+mod JS-ARITHMETIC is including JS-UNARY + JS-SYNTAX . 
 
 	      op arith(_,_,_) :  String  JS  JS -> JS 
-				  [metadata "location(js-semantics.k:96)"] .  op #getInfinity(_,_) :  Int  Int -> JS 
-				  [metadata "location(js-semantics.k:97)"] .  op #getZero(_,_) :  Int  Int -> JS [metadata "location(js-semantics.k:98)"] . 
+				  [metadata "location(semantics/js-semantics.k:106)"] .  op getInfinity(_,_) :  Int  Int -> JS 
+				  [metadata "location(semantics/js-semantics.k:107)"] .  op getZero(_,_) :  Int  Int -> JS [metadata "location(semantics/js-semantics.k:108)"] . 
+			
+	eq getInfinity(Sign1:Int, Sign2:Int) 	=  $infinity (Sign1 *Int  Sign2) [metadata "location(semantics/js-semantics.k:110)"] .
+	eq getZero(Sign1, Sign2) 				=  $zero (Sign1 *Int  Sign2) [metadata "location(semantics/js-semantics.k:111)"] .
 	
-	      op asSignValue(_) :  JS -> Int [metadata "location(js-semantics.k:100)"] . 
 	
-	eq asSignValue(F:Float) 	=  	if F >=Float  0.0 then 1 else -1 fi [metadata "location(js-semantics.k:102)"] .
-	eq asSignValue(I:Int) 	=  	if I >=Int  0 then 1 else -1 fi [metadata "location(js-semantics.k:103)"] .
-
-	eq #getInfinity (I1:Int, I2:Int) 	=  #infinity (I1 *Int  I2) [metadata "location(js-semantics.k:105)"] .
-	eq #getZero (I1, I2) 		=  #zero (I1 *Int  I2) [metadata "location(js-semantics.k:106)"] .
-
-	eq #n (0) 	=  #zero (0) [metadata "location(js-semantics.k:108)"] .
-	eq #n (0.0) 	=  #zero (1) [metadata "location(js-semantics.k:109)"] .
-
+	eq #div (Left:JS, Right:JS) 	=  arith("div", Left, Right) [metadata "location(semantics/js-semantics.k:114)"] .
+	eq #mod (Left, Right) 		=  arith("mod", Left, Right) [metadata "location(semantics/js-semantics.k:115)"] .
+	eq #mul (Left, Right) 		=  arith("mul", Left, Right) [metadata "location(semantics/js-semantics.k:116)"] .
+	eq #sub (Left, Right) 		=  arith("sub", Left, Right) [metadata "location(semantics/js-semantics.k:117)"] .
+	eq #add (Left, Right) 		=  arith("add", toPrimitive(Left), toPrimitive(Right)) [metadata "location(semantics/js-semantics.k:118)"] .
 	
-	eq #neg (#n (F1)) =  #n (-Float (F1)) [metadata "location(js-semantics.k:112)"] .
-	eq #neg (#n (I1)) =  #n (-Int (I1)) [metadata "location(js-semantics.k:113)"] .
-	eq #neg (Other:JS) =  #neg (#asFloat (Other)) [metadata "location(js-semantics.k:114)"] .
-	eq #plus (Numeric:JSNumeric) =  Numeric [metadata "location(js-semantics.k:115)"] .
-	eq #plus (Other) =  #asFloat (Other) [metadata "location(js-semantics.k:116)"] .
 	
-	eq #div (Left:JS, Right:JS) =  arith("div", Left, Right) [metadata "location(js-semantics.k:118)"] .
-	eq #mod (Left, Right) =  arith("mod", Left, Right) [metadata "location(js-semantics.k:119)"] .
-	eq #mul (Left, Right) =  arith("mul", Left, Right) [metadata "location(js-semantics.k:120)"] .
-	eq #add (Left, Right) =  arith("add", Left, Right) [metadata "location(js-semantics.k:121)"] .
-	eq #sub (Left, Right) =  arith("sub", Left, Right) [metadata "location(js-semantics.k:122)"] .
-		
+	eq arith("div", $n (F1:Float), $n (F2:Float)) 	=  $n (F1 /Float  F2) [metadata "location(semantics/js-semantics.k:121)"] .
+	eq arith("mod", $n (F1), $n (F2)) 				=  $n (F1 %Float  F2) [metadata "location(semantics/js-semantics.k:122)"] .
+	eq arith("mul", $n (F1), $n (F2)) 				=  $n (F1 *Float  F2) [metadata "location(semantics/js-semantics.k:123)"] .
+	eq arith("add", $n (F1), $n (F2)) 				=  $n (F1 +Float  F2) [metadata "location(semantics/js-semantics.k:124)"] .
+	eq arith("sub", $n (F1), $n (F2)) 				=  $n (_-Float_(F1, F2)) [metadata "location(semantics/js-semantics.k:125)"] .
+
+	eq arith("div", $n (I1:Int), $n (I2:Int)) 		=  $n (I1 /Int  I2) [metadata "location(semantics/js-semantics.k:127)"] .
+	eq arith("mod", $n (I1), $n (I2)) 				=  $n (I1 %Int  I2) [metadata "location(semantics/js-semantics.k:128)"] .
+	eq arith("mul", $n (I1), $n (I2)) 				=  $n (I1 *Int  I2) [metadata "location(semantics/js-semantics.k:129)"] .
+	eq arith("add", $n (I1), $n (I2)) 				=  $n (I1 +Int  I2) [metadata "location(semantics/js-semantics.k:130)"] .
+	eq arith("sub", $n (I1), $n (I2)) 				=  $n (_-Int_(I1, I2)) [metadata "location(semantics/js-semantics.k:131)"] .
 	
-
-
-	eq arith("div", #n (F1:Float), #n (F2:Float)) =  #n (F1 /Float  F2) [metadata "location(js-semantics.k:127)"] .
-	eq arith("mod", #n (F1), #n (F2)) =  #n (F1 %Float  F2) [metadata "location(js-semantics.k:128)"] .
-	eq arith("mul", #n (F1), #n (F2)) =  #n (F1 *Float  F2) [metadata "location(js-semantics.k:129)"] .
-	eq arith("add", #n (F1), #n (F2)) =  #n (F1 +Float  F2) [metadata "location(js-semantics.k:130)"] .
-	eq arith("sub", #n (F1), #n (F2)) =  #n (_-Float_(F1, F2)) [metadata "location(js-semantics.k:131)"] .
-
-	eq arith("div", #n (I1:Int), #n (I2:Int)) =  #n (I1 /Int  I2) [metadata "location(js-semantics.k:133)"] .
-	eq arith("mod", #n (I1), #n (I2)) =  #n (I1 %Int  I2) [metadata "location(js-semantics.k:134)"] .
-	eq arith("mul", #n (I1), #n (I2)) =  #n (I1 *Int  I2) [metadata "location(js-semantics.k:135)"] .
-	eq arith("add", #n (I1), #n (I2)) =  #n (I1 +Int  I2) [metadata "location(js-semantics.k:136)"] .
-	eq arith("sub", #n (I1), #n (I2)) =  #n (_-Int_(I1, I2)) [metadata "location(js-semantics.k:137)"] .
-
+	
+	eq arith(OpId:String, $nan , Right) 	=  $nan  [metadata "location(semantics/js-semantics.k:134)"] .
+	eq arith(OpId, Left, $nan ) 			=  $nan  [metadata "location(semantics/js-semantics.k:135)"] .
 
 
 	
+	eq arith("mul", $infinity (Sign1), $infinity (Sign2)) 	=  getInfinity(Sign1, Sign2) [metadata "location(semantics/js-semantics.k:139)"] .
+	eq arith("mul", $zero (Sign1), $infinity (Sign2)) 		=  $nan  [metadata "location(semantics/js-semantics.k:140)"] . 
+	eq arith("mul", $infinity (Sign1), $zero (Sign2)) 		=  $nan  [metadata "location(semantics/js-semantics.k:141)"] . 
+	eq arith("mul", $zero (Sign1), Num:JSNumber) 			=  getZero(Sign1, sign(Num)) [metadata "location(semantics/js-semantics.k:142)"] .
+	eq arith("mul", Num, $zero (Sign2)) 					=  getZero(sign(Num), Sign2) [metadata "location(semantics/js-semantics.k:143)"] .
+	eq arith("mul", $infinity (Sign1), Num) 				=  getInfinity(Sign1, sign(Num)) [metadata "location(semantics/js-semantics.k:144)"] .
+	eq arith("mul", Num, $infinity (Sign2)) 				=  getInfinity(sign(Num), Sign2) [metadata "location(semantics/js-semantics.k:145)"] .
 	
 	
-	
-		
-	eq arith("add", #s (S1:String), #s (S2:String)) =  #s (_+String_(S1, S2)) [metadata "location(js-semantics.k:146)"] .
-
-	eq arith("add", #s (S1), Right) 	=  arith("add", #s (S1), #asString (Right)) [metadata "location(js-semantics.k:148)"] .
-	eq arith("add", Left, #s (S2)) 	=  arith("add", #asString (Left), #s (S2)) [metadata "location(js-semantics.k:149)"] .
-
-
-
-	eq arith(OpId:String, #nan , Right:JS) =  #nan  [metadata "location(js-semantics.k:153)"] .
-	eq arith(OpId, Left:JS, #nan ) =  #nan  [metadata "location(js-semantics.k:154)"] .
-
-
-	eq arith("div", #infinity ( ? ), #infinity ( ? )) =  #nan  [metadata "location(js-semantics.k:157)"] .	
-	eq arith("div", Num:JSNumber, #infinity (I2)) =  #getZero (asSignValue(Num), I2) [metadata "location(js-semantics.k:158)"] .
-	eq arith("div", #infinity (I1), Num) =  #getInfinity (I1, asSignValue(Num)) [metadata "location(js-semantics.k:159)"] .
-
-	eq arith("mod", #infinity ( ? ),  ? ) =  #nan  [metadata "location(js-semantics.k:161)"] .
-	eq arith("mod", Num, #infinity (I2)) =  Num [metadata "location(js-semantics.k:162)"] .
-
-	eq arith("mul", #infinity (I1), #infinity (I2)) =  #getInfinity (I1, I2) [metadata "location(js-semantics.k:164)"] .
-	eq arith("mul", #zero ( ? ), #infinity ( ? )) =  #nan  [metadata "location(js-semantics.k:165)"] . 
-	eq arith("mul", #infinity ( ? ), #zero ( ? )) =  #nan  [metadata "location(js-semantics.k:166)"] . 
-	eq arith("mul", Num, #infinity (I2)) =  #getInfinity (asSignValue(Num), I2) [metadata "location(js-semantics.k:167)"] .
-	eq arith("mul", #infinity (I1), Num) =  #getInfinity (I1, asSignValue(Num)) [metadata "location(js-semantics.k:168)"] .
-
-	eq arith("add", #infinity (I1), #infinity (I2)) =  #nan  [metadata "location(js-semantics.k:170)"] .
-	eq arith("add", Num, #infinity (I2)) =  #infinity (I2) [metadata "location(js-semantics.k:171)"] .
-	
-	eq arith("sub", #infinity (I1), #infinity (I1)) =  #nan  [metadata "location(js-semantics.k:173)"] .
-	eq arith("sub", Num, #infinity (I2)) =  #infinity (-Int (I2)) [metadata "location(js-semantics.k:174)"] .
-
-	eq arith(OpId, #infinity (I1), Num) =  #infinity (I1) [metadata "location(js-semantics.k:176)"] .
-	
-
-	
-	eq arith("div", #zero ( ? ), #zero ( ? )) =  #nan  [metadata "location(js-semantics.k:180)"] .
-	eq arith("div", #zero (I1), Num) =  #getZero (I1, asSignValue(Num)) [metadata "location(js-semantics.k:181)"] .
-	eq arith("div", Num, #zero (I2)) =  #getInfinity (asSignValue(Num), I2) [metadata "location(js-semantics.k:182)"] .
-
-	eq arith("mod", #zero (I1),  ? ) =  #zero (I1) [metadata "location(js-semantics.k:184)"] .
-	eq arith("mod",  ? , #zero ( ? )) =  #nan  [metadata "location(js-semantics.k:185)"] .
-
-
-	eq arith(OpId, #n (F1), Right) 	=  arith(OpId, #n (F1), #asFloat (Right)) [metadata "location(js-semantics.k:188)"] .
-	eq arith(OpId, Left, #n (F2)) 	=  arith(OpId, #asFloat (Left), #n (F2)) [metadata "location(js-semantics.k:189)"] .
-
-	eq arith(OpId, #n (I1), Right) 	=  arith(OpId, #n (I1), #asInt (Right)) [metadata "location(js-semantics.k:191)"] .
-	eq arith(OpId, Left, #n (I2)) 	=  arith(OpId, #asInt (Left), #n (I2)) [metadata "location(js-semantics.k:192)"] .
+	eq arith("div", $infinity (Sign1), $infinity (Sign2)) 	=  $nan  [metadata "location(semantics/js-semantics.k:148)"] .	
+	eq arith("div", $infinity (Sign1), Num) 				=  getInfinity(Sign1, sign(Num)) [metadata "location(semantics/js-semantics.k:149)"] .
+	eq arith("div", Num, $infinity (Sign2)) 				=  getZero(sign(Num), Sign2) [metadata "location(semantics/js-semantics.k:150)"] .
+	eq arith("div", $zero (Sign1), $zero (Sign2)) 			=  $nan  [metadata "location(semantics/js-semantics.k:151)"] .
+	eq arith("div", $zero (Sign1), Num) 					=  getZero(Sign1, sign(Num)) [metadata "location(semantics/js-semantics.k:152)"] .
+	eq arith("div", Num, $zero (Sign2)) 					=  getInfinity(sign(Num), Sign2) [metadata "location(semantics/js-semantics.k:153)"] .
 	
 	
+	eq arith("mod", $infinity (Sign1), Num) 	=  $nan  [metadata "location(semantics/js-semantics.k:156)"] .
+	eq arith("mod", Num, $zero (Sign2)) 		=  $nan  [metadata "location(semantics/js-semantics.k:157)"] .
+	eq arith("mod", Num, $infinity (Sign2)) 	=  Num [metadata "location(semantics/js-semantics.k:158)"] .
+	eq arith("mod", $zero (Sign1), Num) 		=  $zero (Sign1) [metadata "location(semantics/js-semantics.k:159)"] .
 	
 	
-var S1 :  String . var F :  Float . var Right :  JS . var OpId :  String . var I2 :  Int . var Other :  JS . var S2 :  String . var F2 :  Float . var Num :  JSNumber . var I :  Int . var Numeric :  JSNumeric . var F1 :  Float . var Left :  JS . var I1 :  Int .  endm
+	eq arith("add", $s (S1:String), $s (S2:String)) 	=  $s (_+String_(S1, S2)) [metadata "location(semantics/js-semantics.k:162)"] .
+	eq arith("add", $s (S1), Value:JSValue) 			=  arith("add", $s (S1), toString(Value)) [metadata "location(semantics/js-semantics.k:163)"] .
+	eq arith("add", Value, $s (S2)) 					=  arith("add", toString(Value), $s (S2)) [metadata "location(semantics/js-semantics.k:164)"] .
 
-mod JS-LOGIC
-	is protecting JS-SYNTAX + JS-COERCION + PL-BUILTINS . 
-
-	      op logic(_,_,_) :  String  JS  JS -> JS [metadata "location(js-semantics.k:202)"] . 
-
-	eq #not (#b (B1)) 								=  #b (notBool(B1)) [metadata "location(js-semantics.k:204)"] .
-	eq #not (Other:JS) 							=  #not (#asBool (Other)) [metadata "location(js-semantics.k:205)"] .
+	eq arith("add", $infinity (Sign1), $infinity (Sign2)) 	=  $nan  [metadata "location(semantics/js-semantics.k:166)"] .
+	eq arith("add", Num, $infinity (Sign2)) 				=  $infinity (Sign2) [metadata "location(semantics/js-semantics.k:167)"] .
+	eq arith("add", $infinity (Sign1), Num) 				=  $infinity (Sign1) [metadata "location(semantics/js-semantics.k:168)"] .
+	eq arith("add", $zero (Sign1), $zero (Sign2)) 			=  $zero (1) [metadata "location(semantics/js-semantics.k:169)"] .
+	eq arith("add", $zero (Sign1), Num) 					=  Num [metadata "location(semantics/js-semantics.k:170)"] .
+	eq arith("add", Num, $zero (Sign2)) 					=  Num [metadata "location(semantics/js-semantics.k:171)"] .
 	
-	eq #and (Left:JS, Right:JS) 					=  logic("and", Left, Right) [metadata "location(js-semantics.k:207)"] .
-	eq #or (Left, Right)  						=  logic("or", Left, Right) [metadata "location(js-semantics.k:208)"] .
 	
-	eq logic("and", #b (B1:Bool), #b (B2:Bool)) 	=  #b (B1 andBool B2) [metadata "location(js-semantics.k:210)"] .
-	eq logic("or", #b (B1), #b (B2)) 				=  #b (B1 orBool B2) [metadata "location(js-semantics.k:211)"] .
+	eq arith("sub", Left, Right) =  arith("add", Left, neg(Right)) [metadata "location(semantics/js-semantics.k:174)"] .
+	
+	
+	eq arith(OpId, Left, Right) 	=  arith(OpId, toNumber(Left), toNumber(Right)) [metadata "location(semantics/js-semantics.k:177)"] .
+	
+var S1 : String . var Value : JSValue . var Right : JS . var Sign2 : Int . var Sign1 : Int . var OpId : String . var I2 : Int . var S2 : String . var F2 : Float . var Num : JSNumber . var F1 : Float . var Left : JS . var I1 : Int .  endm
 
-	eq logic(OpId:String, #b (B1), Right) 		=  logic(OpId, #b (B1), #asBool (Right)) [metadata "location(js-semantics.k:213)"] .
-	eq logic(OpId, Left, #b (B2)) 				=  logic(OpId, #asBool (Left), #b (B2)) [metadata "location(js-semantics.k:214)"] .
-var Right :  JS . var B1 :  Bool . var OpId :  String . var Other :  JS . var B2 :  Bool . var Left :  JS .  endm
+mod JS-COMPARISON is including JS-UNARY + JS-SYNTAX + PL-BUILTINS .
+
 	
+	eq #lt (Left:JS, Right:JS) 	=  comparison(lessThan(Left, Right), true) [metadata "location(semantics/js-semantics.k:184)"] .
+	eq #gt (Left:JS, Right:JS) 	=  comparison(lessThan(Right, Left), true) [metadata "location(semantics/js-semantics.k:185)"] .
+	eq #lte (Left:JS, Right:JS) 	=  comparison(lessThan(Right, Left), false) [metadata "location(semantics/js-semantics.k:186)"] .
+	eq #lte (Left:JS, Right:JS) 	=  comparison(lessThan(Left, Right), false) [metadata "location(semantics/js-semantics.k:187)"] .
+
+	
+	
+	      op comparison(_,_) :  JSPrimitive  Bool -> JSBoolean [metadata "location(semantics/js-semantics.k:191)"] . 
+	      op lessThan(_,_) :  JSPrimitive  JSPrimitive -> JSPrimitive [metadata "location(semantics/js-semantics.k:192)"] . 
+	
+	eq comparison($undefined , B:Bool)	=  $b (false) [metadata "location(semantics/js-semantics.k:194)"] .
+	eq comparison($b (B:Bool), true)		=  $b (B) [metadata "location(semantics/js-semantics.k:195)"] .
+	eq comparison($b (B:Bool), false)		=  not($b (B)) [metadata "location(semantics/js-semantics.k:196)"] .
+	
+	eq lessThan($nan , Right)					 =  $undefined  [metadata "location(semantics/js-semantics.k:198)"] .
+	eq lessThan(Left, $nan )					 =  $undefined  [metadata "location(semantics/js-semantics.k:199)"] .
+	eq lessThan($s (S1:String), $s (S2:String)) =  $b (_<String_(S1, S2)) [metadata "location(semantics/js-semantics.k:200)"] .
+	eq lessThan($n (I1:Int), $n (I2:Int)) 	 	 =  $b (_<Int_(I1, I2)) [metadata "location(semantics/js-semantics.k:201)"] .
+	eq lessThan(N1:JSNumeric, N2:JSNumeric) 	 =  $b (_<Float_(numericValue(N1), numericValue(N2))) [metadata "location(semantics/js-semantics.k:202)"] .
+	eq lessThan(Left, Right) 				 =  lessThan(toNumber(Left), toNumber(Right)) [metadata "location(semantics/js-semantics.k:203)"] .	
+var N1 : JSNumeric . var S1 : String . var Right : JS . var N2 : JSNumeric . var B : Bool . var I2 : Int . var S2 : String . var Left : JS . var I1 : Int .  endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 mod JS-SEMANTICS
 	is including 
-	  JS-COERCION 
+	  JS-CONVERSIONS 
 	+ JS-TYPEOF
-	+ JS-IDENTITY
+	+ JS-UNARY
 	+ JS-ARITHMETIC
-	+ JS-LOGIC .
+	+ JS-COMPARISON .
+	
+	
+	
 endm

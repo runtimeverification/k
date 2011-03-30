@@ -1,107 +1,139 @@
-load ../json/json.maude
- 
- mod JS-SYNTAX 
- 	is including JSON .
- 
- 	  sort Number .    subsort Int <  Number .    subsort Float <  Number . 
- 	  sort JSNumber .    op #n(_) :  Number -> JSNumber   [metadata "location(../syntax/js-syntax.k:7)"] .  op #zero(_) :  Int -> JSNumber [metadata "location(../syntax/js-syntax.k:7)"] . 
- 	  sort JSNumeric .    subsort JSNumber <  JSNumeric .    op #infinity(_) :  Int -> JSNumeric   [metadata "location(../syntax/js-syntax.k:8)"] .  op #nan :  -> JSNumeric [metadata "location(../syntax/js-syntax.k:8)"] . 
- 	  sort JSValue .    subsort JSNumeric <  JSValue .    op #b(_) :  Bool -> JSValue   [metadata "location(../syntax/js-syntax.k:9)"] .  op #s(_) :  String -> JSValue   [metadata "location(../syntax/js-syntax.k:9)"] .  op #regex(_) :  String -> JSValue 
- 		  [metadata "location(../syntax/js-syntax.k:9)"] .  op #undefined :  -> JSValue   [metadata "location(../syntax/js-syntax.k:10)"] .  op #null :  -> JSValue   [metadata "location(../syntax/js-syntax.k:10)"] .  op #this :  -> JSValue   [metadata "location(../syntax/js-syntax.k:10)"] .  op #o(_) :  List{JS} -> JSValue [metadata "location(../syntax/js-syntax.k:10)"] . 
- 	
- 	     
- 			 op .none :  -> JS
- 			 [metadata "location(../syntax/js-syntax.k:12)"] .  subsort JSValue <  JS .
- 			  op #nop :  -> JS
- 			 [metadata "location(../syntax/js-syntax.k:15)"] .  op #id(_) :  String -> JS 
- 		  [metadata "location(../syntax/js-syntax.k:16)"] .  op #staticAccess(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:17) strict"] . 		
- 		   op #dynamicAccess(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:18) strict"] . 		
- 		   op #invocation(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:19) strict"] . 	
- 		
- 		   op #new(_) :  List{JS} -> JS  [  metadata "location(../syntax/js-syntax.k:21) strict"] .					
- 		
- 		   op #inc(_,_) :  JS  Bool -> JS  [  metadata "location(../syntax/js-syntax.k:23) strict"] .				
- 		   op #dec(_,_) :  JS  Bool -> JS  [  metadata "location(../syntax/js-syntax.k:24) strict"] .				
- 		
- 		   op #delete(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:26) strict"] .				
- 		
- 		   op #typeof(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:28) strict"] .				
- 		   op #not(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:29) strict"] .				
- 		   op #neg(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:30) strict"] . 				
- 		   op #plus(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:31) strict"] . 				
- 		
- 		   op #mul(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:33) strict"] . 			
- 		   op #div(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:34) strict"] . 			
- 		   op #mod(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:35) strict"] . 			
- 		
- 		   op #add(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:37) strict"] .			
- 		   op #sub(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:38) strict"] . 			
- 		
- 		   op #lt(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:40) strict"] . 			
- 		   op #lte(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:41) strict"] . 			
- 		   op #gt(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:42) strict"] . 			
- 		   op #gte(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:43) strict"] . 			
- 		   op #in(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:44) strict"] .				
- 		   op #instanceof(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:45) strict"] . 	
- 		
- 		   op #sameAs(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:47) strict"] . 		
- 		   op #notSameAs(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:48) strict"] . 		
- 		   op #identical(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:49) strict"] . 		
- 		   op #notIdentical(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:50) strict"] . 	
- 		
- 		   op #and(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:52) strict"] . 			
- 		
- 		   op #or(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:54) strict"] . 			
- 		
- 		   op #ternary(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:56) strict(1)"] .	
- 		
- 		
- 		   op #assignment(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:59) strict"] .  
- 		
- 		   op #arrayLit(_) :  List{JS} -> JS  [  metadata "location(../syntax/js-syntax.k:61) strict"] .				
- 		   op #objectLit(_) :  List{JS} -> JS  [  metadata "location(../syntax/js-syntax.k:62) strict"] .			
- 		   op #propertyLit(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:63) strict"] .	
- 		
- 		   op #return(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:65) strict"] .				
- 		   op #break(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:66) strict"] . 				
- 		   op #continue(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:67) strict"] . 				
- 		   op #throw(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:68) strict"] .				
- 		   op #label(_,_) :  String  JS -> JS 
- 		
- 		  [metadata "location(../syntax/js-syntax.k:69)"] .  op #exp(_) :  JS -> JS  [  metadata "location(../syntax/js-syntax.k:71) strict"] .				
- 		
- 		   op #stmts(_) :  List{JS} -> JS 		
- 		  [metadata "location(../syntax/js-syntax.k:73)"] .  op #block(_) :  List{JS} -> JS
- 		  [metadata "location(../syntax/js-syntax.k:74)"] .  op #comma(_) :  List{JS} -> JS
- 		  [metadata "location(../syntax/js-syntax.k:75)"] .  op #ifElse(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:76) strict(1)"] .	
- 		   op #try(_,_,_) :  JS  List{JS}  JS -> JS  [  metadata "location(../syntax/js-syntax.k:77) strict"] .	
- 		   op #catch(_,_) :  JS  JS -> JS
- 		
- 		  [metadata "location(../syntax/js-syntax.k:78)"] .  op #case(_,_) :  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:80) strict(1)"] .	 	
- 		   op #default(_) :  JS -> JS 					
- 		
- 		  [metadata "location(../syntax/js-syntax.k:81)"] .  op #switch(_,_,_) :  JS  List{JS}  Int -> JS  [  metadata "location(../syntax/js-syntax.k:83) strict(1)"] .	
- 			
- 		   op #for(_,_,_,_) :  JS  JS  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:85) strict(1)"] .		
- 			
- 		   op #forIn(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(../syntax/js-syntax.k:87) strict(2)"] .
- 			
- 		   op #while(_,_) :  JS  JS -> JS
- 			
- 		  [metadata "location(../syntax/js-syntax.k:89)"] .  op #do(_,_) :  JS  JS -> JS
- 			
- 			
- 		  [metadata "location(../syntax/js-syntax.k:91)"] .  op #labelledStmt(_,_) :  JS  JS -> JS	
- 			
- 		
- 		  [metadata "location(../syntax/js-syntax.k:94)"] .  op #varDeclarations(_) :  List{JS} -> JS  [  metadata "location(../syntax/js-syntax.k:97) strict"] .
- 		
- 		   op #function(_,_,_,_) :  Int  JS  List{JS}  JS -> JS
- 			
- 			
- 
- 		  [metadata "location(../syntax/js-syntax.k:99)"] .  op #program(_) :  List{JS} -> JS [metadata "location(../syntax/js-syntax.k:103)"] . 
- 			
-  subsorts JSProperties Builtin JSNumeric Number JSProperty JsonTerminal JSValue JsonLiteral < K . endm
- 			
- 			
+mod JS-NUMBER is including PL-BUILTINS .
+	
+	  sort MaudeNumber .    subsort Int <  MaudeNumber .    subsort Float <  MaudeNumber . 
+	  sort JSNumber .    op $n(_) :  MaudeNumber -> JSNumber   [metadata "location(syntax/js-syntax.k:3)"] .  op $zero(_) :  Int -> JSNumber [metadata "location(syntax/js-syntax.k:3)"] . 
+	  sort JSNumeric .    subsort JSNumber <  JSNumeric .    op $infinity(_) :  Int -> JSNumeric   [metadata "location(syntax/js-syntax.k:4)"] .  op $nan :  -> JSNumeric [metadata "location(syntax/js-syntax.k:4)"] . 
+	
+	      op sign(_) :  JSNumeric -> Int [metadata "location(syntax/js-syntax.k:6)"] . 
+	      op numericValue(_) :  JSNumeric -> Float [metadata "location(syntax/js-syntax.k:7)"] . 
+	
+	eq sign($zero (I)) 		=  	I [metadata "location(syntax/js-syntax.k:10)"] .
+	eq sign($infinity (I)) 	=  	I [metadata "location(syntax/js-syntax.k:11)"] .
+	eq sign(Num:JSNumeric) 	=  	if numericValue(Num) >=Float  0.0 then 1 else -1 fi [metadata "location(syntax/js-syntax.k:12)"] .
+	
+	eq numericValue($n (F:Float))			=  F [metadata "location(syntax/js-syntax.k:14)"] .
+	eq numericValue($n (I:Int))			=  Int2Float(I) [metadata "location(syntax/js-syntax.k:15)"] .
+	eq numericValue($zero (I))			=  0.0 [metadata "location(syntax/js-syntax.k:16)"] .
+	eq numericValue($infinity (I:Int))	=  if I >=Int  0 then Infinity else -Infinity fi [metadata "location(syntax/js-syntax.k:17)"] .
+
+	eq $n (0) 		=  $zero (1) [metadata "location(syntax/js-syntax.k:19)"] .
+	eq $n (0.0) 		=  $zero (1) [metadata "location(syntax/js-syntax.k:20)"] .
+
+	eq $n (Infinity) 	=  $infinity (1) [metadata "location(syntax/js-syntax.k:22)"] .
+	eq $n (-Infinity) =  $infinity (-1) [metadata "location(syntax/js-syntax.k:23)"] .
+var F : Float . var I : Int . var Num : JSNumeric .  endm
+
+mod JS-PRIMITIVES is including JS-NUMBER .
+
+	      op boolValue(_) :  JSBoolean -> Bool [metadata "location(syntax/js-syntax.k:28)"] . 
+	
+	  sort JSBoolean .    op $b(_) :  Bool -> JSBoolean [metadata "location(syntax/js-syntax.k:30)"] . 
+	  sort JSString .    op $s(_) :  String -> JSString [metadata "location(syntax/js-syntax.k:31)"] . 
+	  sort JSPrimitive .    op $undefined :  -> JSPrimitive   [metadata "location(syntax/js-syntax.k:32)"] .  op $null :  -> JSPrimitive   [metadata "location(syntax/js-syntax.k:32)"] .  subsort JSBoolean <  JSPrimitive .    subsort JSString <  JSPrimitive .    subsort JSNumeric <  JSPrimitive . 
+	
+	eq boolValue($b (B:Bool)) =  B [metadata "location(syntax/js-syntax.k:34)"] .
+var B : Bool .  endm
+
+mod JS-SYNTAX is including JS-PRIMITIVES . 
+
+	  sort JSObject .    op $regex(_) :  String -> JSObject   [metadata "location(syntax/js-syntax.k:39)"] .  op $o(_) :  List{JS} -> JSObject [metadata "location(syntax/js-syntax.k:39)"] .  
+	  sort JSValue .    subsort JSPrimitive <  JSValue .    subsort JSObject <  JSValue . 
+	
+	  sort List{JS} .    subsort JS <  List{JS} .    op .List{JS} :  -> List{JS}   [metadata "location(syntax/js-syntax.k:42)"] .  op _,_ : List{JS}  List{JS} -> List{JS}  [  assoc id: .List{JS} metadata "location(syntax/js-syntax.k:42)"] . 
+	
+	  sort JS .   
+			 subsort JSValue <  JS .    op .none :  -> JS 
+			 [metadata "location(syntax/js-syntax.k:45)"] .  op #this :  -> JS
+			 [metadata "location(syntax/js-syntax.k:46)"] .  op #nop :  -> JS
+			 [metadata "location(syntax/js-syntax.k:47)"] .  op #id(_) :  String -> JS 
+		  [metadata "location(syntax/js-syntax.k:48)"] .  op #staticAccess(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:49) strict"] . 		
+		   op #dynamicAccess(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:50) strict"] . 		
+		   op #invocation(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:51) strict"] . 	
+		
+		   op #new(_) :  List{JS} -> JS  [  metadata "location(syntax/js-syntax.k:53) strict"] .					
+		
+		   op #inc(_,_) :  JS  Bool -> JS  [  metadata "location(syntax/js-syntax.k:55) strict"] .				
+		   op #dec(_,_) :  JS  Bool -> JS  [  metadata "location(syntax/js-syntax.k:56) strict"] .				
+		
+		   op #delete(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:58) strict"] .				
+		
+		   op #typeof(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:60) strict"] .				
+		   op #not(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:61) strict"] .				
+		   op #neg(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:62) strict"] . 				
+		   op #plus(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:63) strict"] . 				
+		
+		   op #mul(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:65) strict"] . 			
+		   op #div(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:66) strict"] . 			
+		   op #mod(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:67) strict"] . 			
+		
+		   op #add(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:69) strict"] .			
+		   op #sub(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:70) strict"] . 			
+		
+		   op #lt(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:72) strict"] . 			
+		   op #lte(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:73) strict"] . 			
+		   op #gt(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:74) strict"] . 			
+		   op #gte(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:75) strict"] . 			
+		   op #in(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:76) strict"] .				
+		   op #instanceof(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:77) strict"] . 	
+		
+		   op #sameAs(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:79) strict"] . 		
+		   op #notSameAs(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:80) strict"] . 		
+		   op #identical(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:81) strict"] . 		
+		   op #notIdentical(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:82) strict"] . 	
+		
+		   op #and(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:84) strict"] . 			
+		
+		   op #or(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:86) strict"] . 			
+		
+		   op #ternary(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:88) strict(1)"] .	
+		
+		
+		   op #assignment(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:91) strict"] .  
+		
+		   op #arrayLit(_) :  List{JS} -> JS  [  metadata "location(syntax/js-syntax.k:93) strict"] .				
+		   op #objectLit(_) :  List{JS} -> JS  [  metadata "location(syntax/js-syntax.k:94) strict"] .			
+		   op #propertyLit(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:95) strict"] .	
+		
+		   op #return(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:97) strict"] .				
+		   op #break(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:98) strict"] . 				
+		   op #continue(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:99) strict"] . 				
+		   op #throw(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:100) strict"] .				
+		   op #label(_,_) :  String  JS -> JS 
+		
+		  [metadata "location(syntax/js-syntax.k:101)"] .  op #exp(_) :  JS -> JS  [  metadata "location(syntax/js-syntax.k:103) strict"] .				
+		
+		   op #stmts(_) :  List{JS} -> JS 		
+		  [metadata "location(syntax/js-syntax.k:105)"] .  op #block(_) :  List{JS} -> JS
+		  [metadata "location(syntax/js-syntax.k:106)"] .  op #comma(_) :  List{JS} -> JS
+		  [metadata "location(syntax/js-syntax.k:107)"] .  op #ifElse(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:108) strict(1)"] .	
+		   op #try(_,_,_) :  JS  List{JS}  JS -> JS  [  metadata "location(syntax/js-syntax.k:109) strict"] .	
+		   op #catch(_,_) :  JS  JS -> JS
+		
+		  [metadata "location(syntax/js-syntax.k:110)"] .  op #case(_,_) :  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:112) strict(1)"] .	 	
+		   op #default(_) :  JS -> JS 					
+		
+		  [metadata "location(syntax/js-syntax.k:113)"] .  op #switch(_,_,_) :  JS  List{JS}  Int -> JS  [  metadata "location(syntax/js-syntax.k:115) strict(1)"] .	
+			
+		   op #for(_,_,_,_) :  JS  JS  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:117) strict(1)"] .		
+			
+		   op #forIn(_,_,_) :  JS  JS  JS -> JS  [  metadata "location(syntax/js-syntax.k:119) strict(2)"] .
+			
+		   op #while(_,_) :  JS  JS -> JS
+			
+		  [metadata "location(syntax/js-syntax.k:121)"] .  op #do(_,_) :  JS  JS -> JS
+			
+			
+		  [metadata "location(syntax/js-syntax.k:123)"] .  op #labelledStmt(_,_) :  JS  JS -> JS	
+			
+		
+		  [metadata "location(syntax/js-syntax.k:126)"] .  op #varDeclarations(_) :  List{JS} -> JS  [  metadata "location(syntax/js-syntax.k:129) strict"] .
+		
+		   op #function(_,_,_,_) :  Int  JS  List{JS}  JS -> JS
+			
+			
+
+		  [metadata "location(syntax/js-syntax.k:131)"] .  op #program(_) :  List{JS} -> JS [metadata "location(syntax/js-syntax.k:135)"] . 
+			
+endm
+			
+			

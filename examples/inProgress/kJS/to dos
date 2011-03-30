@@ -26,3 +26,5 @@ check generation of NaN, Infinities and -0s from Narcissus
 
 how to do Ids and rules???
 refactor op strings to ids
+
+check if +"NaN" == NaN
