@@ -46,16 +46,29 @@ mod FORMULA-BUILTIN-MODULE is inc PL-BOOL + PL-STRING .
 
   eq Atom /\ Phi1 ===> Atom /\ Phi2 = Atom /\ Phi1 ===> Phi2 .
 
-  eq Phi ===> (NtPhi1 \/ NtPhi2) = (Phi ===> NtPhi1) \/ (Phi ===> NtPhi2) .
 
 --- very, very bad eqs
 ---   eq NtPhi /\ (NtPhi1 \/ NtPhi2) = (NtPhi /\ NtPhi1) \/ (NtPhi /\ NtPhi2) .
----   eq (NtPhi1 \/ NtPhi2) ===> Phi = (NtPhi1 ===> Phi) \/ (NtPhi2 ===> Phi) .
+---   eq (NtPhi1 \/ NtPhi2) ===> Phi = (NtPhi1 ===> Phi) /\ (NtPhi2 ===> Phi) .
 ---   eq Phi ===> (NtPhi1 \/ NtPhi2) = (Phi ===> NtPhi1) \/ (Phi ===> NtPhi2) .
 
---- bad, bad eq
   eq NtPhi /\ (NtPhi1 \/ NtPhi2) ===> NtPhi'
-   = (NtPhi /\ NtPhi1 ===> NtPhi') \/ (NtPhi /\ NtPhi2 ===> NtPhi') [owise] .
+   = NtPhi /\ NtPhi1 \/ NtPhi /\ NtPhi2 ===> NtPhi' [owise] .
+  eq NtPhi' ===> NtPhi /\ (NtPhi1 \/ NtPhi2)
+   = NtPhi' ===> NtPhi /\ NtPhi1 \/ NtPhi /\ NtPhi2 [owise] .
+  eq ~ (NtPhi1 /\ NtPhi2) ===> NtPhi
+   = ~ NtPhi1 \/ ~ NtPhi2 ===> NtPhi [owise] .
+  eq NtPhi ===> ~ (NtPhi1 /\ NtPhi2)
+   = NtPhi ===> ~ NtPhi1 \/ ~ NtPhi2 [owise] .
+  eq ~ (NtPhi1 \/ NtPhi2) ===> NtPhi
+   = ~ NtPhi1 /\ ~ NtPhi2 ===> NtPhi [owise] .
+  eq NtPhi ===> ~ (NtPhi1 \/ NtPhi2)
+   = NtPhi ===> ~ NtPhi1 /\ ~ NtPhi2 [owise] .
+  eq NtPhi1 \/ NtPhi2 ===> NtPhi
+   = (NtPhi1 ===> NtPhi) /\ (NtPhi2 ===> NtPhi) [owise] .
+  eq NtPhi ===> NtPhi1 \/ NtPhi2
+   = (NtPhi ===> NtPhi1) \/ (NtPhi ===> NtPhi2) [owise] .
+
 
   op VALID : Formula -> Bool .
   eq VALID(TrueFormula) = true .
