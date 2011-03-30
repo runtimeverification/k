@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+
 struct treeNode {
   int val;
   struct treeNode *left;
@@ -7,24 +8,20 @@ struct treeNode {
 };
 
 
-struct treeNode* newNode(int v)
+struct treeNode *newNode(int v)
 {
   struct treeNode *node;
   node = (struct treeNode *)malloc(sizeof(struct treeNode));
   node->val = v;
-  node->left=node->right = 0;
+  node->left = node->right = 0;
   return node;
 }
 
 
-struct treeNode* insertRecursive(struct treeNode *t, int v)
-/*@ pre  <config><env> t |-> ?root, v |-> v0 </env>
-                 <heap> tree(?root)(T), H </heap>
-                 C </config> /\ isBst(T) */
-/*@ post <config><env> ?rho </env>
-                 <heap> tree(?root)(?T), H </heap>
-                 C </config> /\ isBst(?T)
-                 /\ tree2mset(?T) = tree2mset(T) U {v0} /\ returns(?root) */
+struct treeNode *insertRecursive(struct treeNode *t, int v)
+/*@ cfg <heap_> tree(t)(T) => tree(?t)(?T) <_/heap>
+    req isBst(T) /\ v0 = v
+    ens isBst(?T) /\ tree2mset(?T) = tree2mset(T) U {v0} /\ returns(?t) */
 {
   if (t == 0)
     return newNode(v);
@@ -37,14 +34,8 @@ struct treeNode* insertRecursive(struct treeNode *t, int v)
   return t;
 }
 
-struct treeNode* insertIterative(struct treeNode *root, int v)
-/*@ pre  <config><env> t |-> ?root, v |-> v0 </env>
-                 <heap> tree(?root)(T), H </heap>
-                 C </config> /\ isBst(T) */
-/*@ post <config><env> ?rho </env>
-                 <heap> tree(?root)(?T), H </heap>
-                 C </config> /\ isBst(?T)
-                 /\ tree2mset(?T) = tree2mset(T) U {v0} /\ returns(?root) */
+
+struct treeNode *insertIterative(struct treeNode *root, int v)
 {
   struct treeNode *t;
   struct treeNode *p;
@@ -54,10 +45,6 @@ struct treeNode* insertIterative(struct treeNode *root, int v)
 
   p = 0;
   t = root;
-  /*@ invariant <config><env> root |-> ?root, t |-> ?root, p |-> 0 </env>
-                        <heap> tree(?root)(T), H </heap> C </config>
-                <config><env> root |-> ?root, t |-> ?t, p |-> ?p </env>
-                        <heap> ?p |-> tree(?t)(?T), H </heap> C </config> */
   while (t != 0) {
     p = t;
     if (v < t->val)
@@ -75,24 +62,34 @@ struct treeNode* insertIterative(struct treeNode *root, int v)
 }
 
 
-struct treeNode* findRecursive(struct treeNode *t, int v)
-/*@ pre  <config><env> t |-> root0, v |-> v0 </env>
-                 <heap> tree(root0)(T), H </heap>
-                 C </config> /\ isBst(T) */
-/*@ post <config><env> ?rho </env>
-                 <heap> tree(root0)(T), H </heap> 
-                 C </ config > /\ isBst(T) /\ returns(?t)
-                 /\ (~(?t = 0) /\ v0 in tree2mset(T)
-                     \/ ?t = 0 /\ ~(v0 in tree2mset(T))) */
+struct treeNode *findRecursive(struct treeNode *t, int v)
+/*@ cfg <heap_> tree(t0)(T) <_/heap>
+    req isBst(T) /\ t0 = t /\ v0 = v
+    ens isBst(T) /\ returns(?r)
+     /\ (~(?r = 0) /\ in(v0, tree2mset(T))
+        \/ ?r = 0 /\ ~(in(v0, tree2mset(T)))) */
 {
   if (t == 0)
     return 0;
   else if (v == t->val)
-    return t;
+    return 1;
   else if (v < t->val)
-    return find(t->left, v);
+    return findRecursive(t->left, v);
   else
-    return find(t->right, v);
+    return findRecursive(t->right, v);
+}
+
+
+struct treeNode *deleteRecursive(struct treeNode *t, int v)
+{
+  if (t == 0)
+    return 0;
+  else if (v == t->val)
+    return 1;
+  else if (v < t->val)
+    return findRecursive(t->left, v);
+  else
+    return findRecursive(t->right, v);
 }
 
 
@@ -102,11 +99,6 @@ int main()
 }
 
 
-/*@ var ?n ?root ?t : ?Int */
-/*@ var v0 root0 : FreeInt */
-/*@ var ?T : ?Tree */
-/*@ var T : FreeTree */
-/*@ var ?rho : ?MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
+//@ var r : Int
+//@ var T : Tree
 
