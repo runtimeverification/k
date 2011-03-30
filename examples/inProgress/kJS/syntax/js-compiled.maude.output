@@ -1,2 +1,0 @@
-[ERROR][40] in [js.k] @ [22]: [configuration (@ line 14) cannot be parsed --> not well-formed (invalid token) at line 18].
-Can't call method "getDocumentElement" on an undefined value at ../../../../tools/configuration_parser.pl line 740.

@@ -1,4 +1,0 @@
-in /Users/m3rabb/Dev/Maude/k-framework/k-prelude
-mod K-SHARED is including K . 
-	ops 'program1 : -> KLabel [metadata "generated label"] . 
-endm
