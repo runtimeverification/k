@@ -12,8 +12,6 @@ Language -> Exported {cons("Syntax")}
 Exp -> Language
 Stmts -> Language
 
-Stmts -> Start
-
 Decl -> Sentence
 Stmt -> Sentence
 Sentence* -> Stmts {right}
@@ -107,13 +105,13 @@ context-free priorities
 	Exp "==" Exp -> Exp {cons("Eq")}
 	Exp "!=" Exp -> Exp {cons("Neq")}
 } > {
+	"not" Exp -> Exp {cons("Not")}
+	"not" -> ID {reject}
+} > {
 	Exp "and" Exp -> Exp {left, cons("And")}
 	"and" -> ID {reject}
 	Exp "or" Exp -> Exp {left, cons("Or")}
 	"or" -> ID {reject}
-} > {
-	"not" Exp -> Exp {cons, cons("Not")}
-	"not" -> ID {reject}
 } > {
 	Exp "=" Exp -> Exp {right, cons("Assign")}
 }

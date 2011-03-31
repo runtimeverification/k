@@ -2,10 +2,13 @@ var n, m;
 
 function divide2(dummy1, r, dummy2) {
 	var q = 0;
+	var d;
+	
 	while not r <= 1 do {
 		r = r - 2;
 		q = q + 1;
 	}
+	d;
 	return q;
 }
 

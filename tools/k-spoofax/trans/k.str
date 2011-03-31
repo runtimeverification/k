@@ -42,8 +42,15 @@ rules // Main editor interface (defined by editor/K-Builders and -References.esv
     (node, position, ast, path, project-path) -> target
     where
       <debug(!"Resolve: ")> node; 
-      Type(type) := node; 
-      target     := <GetEntity> type
+      SyntaxId(type) := node;
+      //<debug(!"finding target: ")> type; 
+      target     := <GetVar> type
+   // editor-resolve:
+   //  (node, position, ast, path, project-path) -> target
+   //  where
+   //    <debug(!"Resolve: ")> node; 
+   //    SyntaxId(id) := node;
+   //    target     := <GetVar> id
 
   // Returns "hover help" information for a particular node in the editor.
   // For references, this rule is invoked using the resolved term.
