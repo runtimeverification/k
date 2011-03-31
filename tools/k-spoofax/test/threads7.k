@@ -1,0 +1,9 @@
+var x, y;
+
+function main() {
+	x = 1;
+	y = 0;
+	spawn x = 0;
+	while (1 <= x) do { y = y+1; }
+	write(y);
+}

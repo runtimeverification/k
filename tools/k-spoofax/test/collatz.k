@@ -21,3 +21,11 @@ function collatz() {
 	}
 	return s;
 }
+
+function main() {
+	m = 10;
+	for i = 1 to m do {
+		n = i;
+		write(collatz());
+	}
+}

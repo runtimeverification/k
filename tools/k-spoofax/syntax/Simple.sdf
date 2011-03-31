@@ -11,36 +11,74 @@ Language -> Exported {cons("Syntax")}
 	
 Exp -> Language
 Stmts -> Language
-		
+
 Stmts -> Start
 
 Decl -> Sentence
 Stmt -> Sentence
 Sentence* -> Stmts {right}
 
+
+%% Statements
 "{" Stmts "}" -> Stmt {cons("Block")}
 "return" Exp  ";" -> Stmt {cons("Return")}
+"return" -> ID {reject}
+
 Exp ";" -> Stmt {cons("ExpStmt")}
 "while" Exp "do" Stmt -> Stmt {cons("While")}
-"if" Exp "then" Stmt "else" Stmt -> Stmt
-"if" Exp "then" Stmt -> Stmt
+"while" -> ID {reject}
+"do" -> ID {reject}
 
-	
+"if" Exp "then" Stmt "else" Stmt -> Stmt {cons("IfThenElse")}
+"if" Exp "then" Stmt -> Stmt {cons("IfThen")}
+"if" -> ID {reject}
+"then" -> ID {reject}
+"else" -> ID {reject}
+
+"for" ID "=" Exp "to" Exp "do" Stmt -> Stmt {cons("For")}
+"for" -> ID {reject}
+"to" -> ID {reject}
+"do" -> ID {reject}
+
+"write" "(" Exp ")" ";" -> Stmt {cons("Write")}
+"write" -> ID {reject}
+
+"try" Stmt "catch" "(" ID ")" Stmt -> Stmt {cons("TryCatch")}
+"try" -> ID {reject}
+"catch"-> ID {reject}
+
+"throw" Exp ";" -> Stmt {cons("Throw")}
+"throw" -> ID {reject}
+
+"spawn" Stmt -> Stmt {cons("Spawn")}
+"spawn" -> ID {reject}
+"acquire" Exp ";" -> Stmt {cons("Acquire")}
+"acquire" -> ID {reject}
+"release" Exp ";" -> Stmt {cons("Release")}
+"release" -> ID {reject}
+"rendezvous" Exp ";" -> Stmt {cons("Rendezvous")}
+"rendezvous" -> ID {reject}
+
 "var" ListOfExp ";" -> Decl {cons("VarDecl")}
-%% "function" ID "(" ")" Stmt -> Decl
+"var" -> ID {reject}
+
+
 "function" ID "(" ListOfId ")" Stmt -> Decl {cons("FunDecl")}
+"function" -> ID {reject}
+
 
 INT -> Exp {cons("SyntaxInt"), avoid}
 BOOL -> Exp {cons("SyntaxBool"), avoid}
 ID -> Exp {cons("SyntaxId"), avoid}
 
-"++" Exp -> Exp
-"-" Exp -> Exp
+"-" Exp -> Exp {cons("Negative")}
 
-Exp "[" ListOfExp "]" -> Exp
-"sizeOf" "(" Exp ")" -> Exp
-ID "(" ListOfExp ")" -> Exp
-"read" "(" ")" -> Exp
+"sizeOf" "(" Exp ")" -> Exp {cons("Sizeof")}
+"sizeOf" -> ID {reject}
+
+"read" "(" ")" -> Exp {cons("Read")}
+"read" -> ID {reject}
+
 "(" Exp ")" -> Exp {bracket}
 
 {ID ","}* -> ListOfId
@@ -48,7 +86,13 @@ ID "(" ListOfExp ")" -> Exp
 
 
 context-free priorities
-{	
+{ 
+	"++" Exp -> Exp {cons("PreIncrement")}
+} > {
+	Exp "[" ListOfExp "]" -> Exp {cons("Array")}
+} > {
+	Exp "(" ListOfExp ")" -> Exp {cons("Application")}
+} > {	
 	Exp "*" Exp -> Exp {left, cons("Mult")}
 	Exp "/" Exp -> Exp {left, cons("Div")}
 	Exp "%" Exp -> Exp {left, cons("Mod")}
@@ -64,22 +108,16 @@ context-free priorities
 	Exp "!=" Exp -> Exp {cons("Neq")}
 } > {
 	Exp "and" Exp -> Exp {left, cons("And")}
+	"and" -> ID {reject}
 	Exp "or" Exp -> Exp {left, cons("Or")}
+	"or" -> ID {reject}
 } > {
 	"not" Exp -> Exp {cons, cons("Not")}
+	"not" -> ID {reject}
 } > {
 	Exp "=" Exp -> Exp {right, cons("Assign")}
 }
 
 lexical syntax
 
-
-%%                 | for Id = Exp to Exp do Stmt[prec 90]
-%%                 | write ( Exp ) ;            [strict]
-%%                 | try Stmt catch ( Id ) Stmt [prec 90]
-%%                 | throw Exp ; [strict]
-%%                 | spawn Stmt [prec 90]
-%%                 | acquire Exp ;              [strict]
-%%                 | release Exp ;              [strict]
-%%                 | rendezvous Exp ;           [strict]
 
