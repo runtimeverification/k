@@ -10,7 +10,7 @@ context-free syntax
 Language -> Exported {cons("Syntax")}
 	
 Exp -> Language
-Stmts -> Language
+Sentence+ -> Language
 
 Decl -> Sentence
 Stmt -> Sentence
@@ -64,6 +64,9 @@ Exp ";" -> Stmt {cons("ExpStmt")}
 "function" ID "(" ListOfId ")" Stmt -> Decl {cons("FunDecl")}
 "function" -> ID {reject}
 
+%% Expressions
+"~" Atom -> Exp {cons("Unquote")}
+%% Exported -> Atom {reject}
 
 INT -> Exp {cons("SyntaxInt"), avoid}
 BOOL -> Exp {cons("SyntaxBool"), avoid}

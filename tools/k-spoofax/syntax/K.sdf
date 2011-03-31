@@ -61,13 +61,14 @@ CellProperty* -> CellProperties
 ".K" -> K {cons("EmptyK")}
 NeK -> K
 INT -> K
-SyntacticK -> K {prefer}
+"`" SyntacticK -> K {cons("Quote")} %% {prefer}
 
 {K "~>"}+ "~>" {K "~>"}+ -> NeK {left,cons("SeqK")}
 KLabel "(" KList ")" -> NeK {cons("AppK")}
-K "=>" K -> NeK {cons("ReplaceK")}
+K "=>" K -> NeK {prefer, cons("ReplaceK")}
 "(" K ")" -> NeK {bracket}
 "[" "]" -> NeK {cons("Hole")}
+"[" "]" ":" Type -> NeK {cons("TypedHole")}
 
 {K ","}* -> KList {cons("KList")}
 KList "=>" KList -> KList {cons("ReplaceKList")}
@@ -78,33 +79,61 @@ ListItem+ -> List
 ".List" -> List
 "ListItem" "(" K ")" -> ListItem {cons("ListItem")}
 List "=>" List -> List {cons("ReplaceList")}
+"(" List ")" -> List {bracket}
 
 %% Maps
-MapItem+ -> Map
+MapItem+ -> Map {cons("MapItemList")}
 ".Map" -> Map
-K "|->" K -> MapItem {cons("MapItem")}
+K "|->" K -> MapItem {cons("MapsTo")}
 Map "=>" Map -> Map {cons("ReplaceMap")}
+Map "[" K "/" K "]" -> Map {cons("MapReplace")}
+"(" MapItem ")" -> MapItem {bracket}
+"(" Map ")" -> Map {bracket}
 
 %% Bags
-BagItem+ -> Bag
+BagItem+ -> Bag {cons("BagItemList")}
 ".Bag" -> Bag
 "BagItem" "(" K ")" -> BagItem {cons("BagItem")}
 Bag "=>" Bag -> Bag {cons("ReplaceBag")}
+"(" Bag ")" -> Bag {bracket}
 
 %% Sets
 SetItem+ -> Set
 ".Set" -> Set
 "SetItem" "(" K ")" -> SetItem {cons("SetItem")}
 Set "=>" Set -> Set {cons("ReplaceSet")}
+"(" Set ")" -> Set {bracket}
 
 %% Variables
-VarId ":" Type -> Variable {cons("TypedVariable")}
-Variable -> ConfigItem* {cons("ConfigVariable")}
-Variable -> ListItem* {cons("ListVariable")}
-Variable -> K {cons("KVariable")}
-Variable -> BagItem* {cons("BagVariable")}
-Variable -> MapItem* {cons("MapVariable")}
+VarId ":" Type -> Variable {cons("KVariable")}
+
+VarId ":" "Config" -> ConfigVariable {prefer, cons("ConfigVariable")}
+VarId ":" "List" -> ListVariable {prefer, cons("ListVariable")}
+VarId ":" "Bag" -> BagVariable {prefer, cons("BagVariable")}
+VarId ":" "Map" -> MapVariable {prefer, cons("MapVariable")}
+VarId ":" "Set" -> SetVariable {prefer, cons("SetVariable")}
+
+context-free restrictions
+Variable -/- [\:]
+context-free syntax
+
+Variable -> K {prefer, cons("KVariable")}
 Variable -> KLabel {cons("KLabelVariable")}
+
+Variable -> ConfigItem {avoid, cons("ConfigItemVariable")}
+Variable -> Config {cons("ConfigVariable")}
+
+Variable -> ListItem {avoid, cons("ListItemVariable")}
+Variable -> List {cons("ListVariable")}
+
+Variable -> BagItem {avoid, cons("BagItemVariable")}
+Variable -> Bag {cons("BagVariable")}
+
+Variable -> MapItem {avoid, cons("MapItemVariable")}
+Variable -> Map {cons("MapVariable")}
+
+Variable -> SetItem {avoid, cons("SetItemVariable")}
+Variable -> Set {cons("SetVariable")}
 
 %% Booleans
 %%K "=/=Bool" K -> Bool {cons("BoolKNeq")}
@@ -130,9 +159,9 @@ lexical syntax
 "_" -> VarId
 
 %% Types and Parameterized Types
-[A-Z][A-Za-z]* -> BasicType 
-BasicType -> Type
-BasicType "{" BasicType "}" -> Type
+[A-Z][A-Za-z]*("{" [A-Z][A-Za-z]* "}")? -> Type 
+%% BasicType -> Type
+%% BasicType "{" BasicType "}" -> Type
 
 VarId -> Variable {cons("Variable")}
 
