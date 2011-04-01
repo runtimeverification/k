@@ -16,6 +16,7 @@ module Language.K where
 
 import Text.Parsec
 import Control.Applicative ((<$>))
+import Internal.Lexer
 
 -- | A nice type synonym to reduce clutter while still keeping things generic.
 type GenParsecT a = (Stream s m Char) => ParsecT s u m a
@@ -79,14 +80,6 @@ maudeIdSpecialChars = "{}()[],"
 -- | ["x", "y", "z"] -> "(x) (y) (z)"
 parenthesize :: [String] -> String
 parenthesize = unwords . map (\x -> "(" ++ x ++ ")")
-
--- | @parens p@ parses @p@ enclosed in parenthesis
-parens :: (Stream s m Char) => ParsecT s u m a -> ParsecT s u m a
-parens = between (symbol "(") (symbol ")")
-
--- | Parse a string and skip trailing whitespace.
-symbol :: (Stream s m Char) => String -> ParsecT s u m String
-symbol s = do { r <- string s; spaces; return r }
 
 {- Test cases -}
 
