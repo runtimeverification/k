@@ -54,9 +54,11 @@ my $short_help_message =
   -eps : maudifies/compiles for generating eps output
   -png : maudifies/compiles for generating png output
   -crop : maudifies/compiles for generating a nice crop-pdf output
-     -style : useful for typesetting (optional)
-  -title title : specifies the title when generating a poster
-  -author name : specifies the name of the author in a poster
+  
+  The following options make sense only when Latex options are used:
+  -style : useful for typesetting (optional)
+  -title \"title\" : specifies the title when generating a poster
+  -author \"name\" : specifies the name of the author in a poster
   -output output_file : specifies the name of the generated (latex) file
 
   Compile only one program options
@@ -211,14 +213,14 @@ sub terminate {
   It typsets the specified modules reachable from the input
   file lang3.
   
-  kompile -latex LANG LANG-SEMANTICS LANG-SYNTAX -f lang3 
-  -title MyLang -author LangAuthor -output out
-  or
-  kompile lang3 -latex LANG LANG-SEMANTICS LANG-SYNTAX
-  -title MyLang -author LangAuthor -output out
+  kompile lang -latex LANG LANG-SEMANTICS LANG-SYNTAX 
+  -title \"MyLang Name\" -author \"LangAuthor anotherAuthor\"
+  -output out
   will generate a latex file called out.tex and
-  will also set the title and the author with \\maketitle
-  in the generated file.
+  will also set the title and the author via \\maketitle.
+  Note that after option -title you can have a string which
+  can include latex code but only latex commands (like \"\\Huge\",
+  etc. ). Also, note that -author will not count if -title is not used.
 
   The -pdf, -png, -ps, -eps and -crop options can be used in 
   the same way the -latex option is used in the example above.
