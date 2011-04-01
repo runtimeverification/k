@@ -31,13 +31,13 @@ kmod JS-CONFIGURATION is including JS-SYNTAX + K
 ---  rule I1:Int + I2:Int => I1 +Int I2
 endkm
 
-kmod JS-PROGRAMS is including JS-CONFIGURATION
+kmod JS-PROGRAMS is including JS-CONFIGURATION + JS-SEMANTICS
 	syntax K ::= program1
 
 	macro program1 = #program(#mul(#add($n(2), $n(3)), $n(4.0)))
 endkm
 
-kmod JS is including JS-CONFIGURATION
+kmod JS is including  JS-PROGRAMS
 	syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"] | pgm
 	macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
   	macro pgm = [['program1]]
