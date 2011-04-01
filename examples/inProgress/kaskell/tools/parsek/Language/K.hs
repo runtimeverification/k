@@ -23,18 +23,11 @@ type GenParsecT a = (Stream s m Char) => ParsecT s u m a
 
 -- | Parse a K term
 kterm :: GenParsecT String
-kterm = kempty <|> kbuiltin <|> kapp
+kterm = kempty <|> kapp
 
 -- | Parse the K identity element
 kempty :: GenParsecT String
 kempty = string ".List{K}"
-
--- | Parse a K builtin: Int 42(.List{K})
--- TODO: how to capture builtins generically?
-kbuiltin :: GenParsecT String
-kbuiltin = do
-    choice $ map symbol ["String", "Int"]
-    manyTill anyChar (try (symbol "(.List{K})"))
 
 -- | Parse a K application: KLabel(K1,,K2)
 kapp :: GenParsecT String
@@ -47,14 +40,40 @@ kapp = do
               | argc /= length argv = fail "unexpected number of arguments"
               | otherwise = return $ label ++ " " ++ parenthesize argv
 
+{- KLabels -}
+
+-- | A KLabel is its name and its number of arguments
+type KLabel = (String, Int)
+
+-- | Parse a KLabel
+klabel :: GenParsecT KLabel
+klabel = genklabel <|> kbuiltin
+
 -- | Parse generated K label: 'Foo___
--- TODO: this does not capture all K labels, only "generated" ones.
-klabel :: GenParsecT (String, Int)
-klabel = do
+genklabel :: GenParsecT KLabel
+genklabel = do
     char '\''
     name <- maudeIdentifier
     argc <- length <$> many (char '_')
     return (name, argc)
+
+-- | Parse a K builtin
+kbuiltin :: GenParsecT KLabel
+kbuiltin = flip (,) 0 <$> (kint <|> kstring)
+
+-- | Parse an Int builtin: Int 42
+kint :: GenParsecT String
+kint = do
+    symbol "Int"
+    i <- integer
+    return (show i)
+
+-- | Parse a String builtin: String "hello"
+kstring :: GenParsecT String
+kstring = do
+    symbol "String"
+    s <- stringLiteral
+    return (show s)
 
 {- Maude identifiers -}
 
