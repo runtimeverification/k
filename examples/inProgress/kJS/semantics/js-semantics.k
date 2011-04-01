@@ -1,7 +1,9 @@
 kmod JS-CONVERSIONS is including JS-SYNTAX + K
 	
-	syntax K ::= toPrimitive( K , String ) 
-		| toBoolean( JSValue ) | toNumber( JSValue ) | toString( JSValue )
+	syntax JSPrimitive ::= toPrimitive( K , String ) 
+	syntax JSBoolean ::= toBoolean( JSValue )
+	syntax JSNumeric ::= toNumber( JSValue )
+	syntax JSString ::= toString( JSValue )
 	
 	--- ECMA-262 9.1
 ---	macro toPrimitive(Prim:JSPrimitive, Hint:List{K}) 	= Prim 
@@ -73,8 +75,8 @@ kmod JS-UNARY is including JS-CONVERSIONS + PL-BOOL
 	
 	rule neg($n(F:Float)) 	=> $n(-Float(F))
 	rule neg($n(I:Int)) 	=> $n(-Int(I))
-	rule neg($zero(F)) 		=> $zero(-Float(F))
-	rule neg($infinity(F)) 	=> $infinity(-Float(F))
+	rule neg($zero(I)) 		=> $zero(-Int(I))
+	rule neg($infinity(I)) 	=> $infinity(-Int(I))
 	rule neg($nan) 			=> $nan
 	rule neg(Value:JSValue) => neg(toNumber(Value))
 
@@ -102,7 +104,7 @@ kmod JS-ARITHMETIC is including JS-UNARY + JS-SYNTAX
 	rule getZero(Sign1, Sign2) 				=> $zero(Sign1 *Int Sign2)
 	
 	--- arithmetic expressions
-	rule #div(Left:K, Right:K) 	=> arith("div", Left, Right)
+	rule #div(Left:JSValue, Right:JSValue) 	=> arith("div", Left, Right)
 	rule #mod(Left, Right) 		=> arith("mod", Left, Right)
 	rule #mul(Left, Right) 		=> arith("mul", Left, Right)
 	rule #sub(Left, Right) 		=> arith("sub", Left, Right)
@@ -172,15 +174,15 @@ endkm
 kmod JS-COMPARISON is including JS-UNARY + JS-SYNTAX + PL-BUILTINS
 
 	--- ECMA-262 11.8.1-4
-	rule #lt(Left:K, Right:K) 	=> comparison(lessThan(Left, Right), true)
-	rule #gt(Left:K, Right:K) 	=> comparison(lessThan(Right, Left), true)
-	rule #lte(Left:K, Right:K) 	=> comparison(lessThan(Right, Left), false)
-	rule #lte(Left:K, Right:K) 	=> comparison(lessThan(Left, Right), false)
+	rule #lt(Left:JSValue, Right:JSValue) 	=> comparison(lessThan(Left, Right), true)
+	rule #gt(Left, Right) 	=> comparison(lessThan(Right, Left), true)
+	rule #lte(Left, Right) 	=> comparison(lessThan(Right, Left), false)
+	rule #lte(Left, Right) 	=> comparison(lessThan(Left, Right), false)
 
 	--- ECMA-262 11.8.5
 	
 	syntax JSBoolean ::= comparison( JSPrimitive , Bool )
-	syntax JSPrimitive ::= lessThan( JSPrimitive , JSPrimitive )
+	syntax JSPrimitive ::= lessThan( JSValue , JSValue )
 	
 	rule comparison($undefined, B:Bool)	=> $b(false)
 	rule comparison($b(B:Bool), true)	=> $b(B)

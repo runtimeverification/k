@@ -34,7 +34,7 @@ endkm
 kmod JS-PROGRAMS is including JS-CONFIGURATION + JS-SEMANTICS
 	syntax K ::= program1
 
-	macro program1 = #program(#mul(#add($n(2), $n(3)), $n(4.0)))
+	macro program1 = #mul(#add($n(2), $n(3)), $n(4.0))
 endkm
 
 kmod JS is including  JS-PROGRAMS
