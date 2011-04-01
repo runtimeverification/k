@@ -14,8 +14,9 @@
 
 module Language.K where
 
-import Text.Parsec
 import Control.Applicative ((<$>))
+import Text.Parsec
+
 import Internal.Lexer
 
 -- | A nice type synonym to reduce clutter while still keeping things generic.
