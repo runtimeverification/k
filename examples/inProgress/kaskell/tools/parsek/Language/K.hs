@@ -19,19 +19,19 @@ import Text.Parsec
 
 import Internal.Lexer
 
--- | A nice type synonym to reduce clutter while still keeping things generic.
-type GenParsecT a = (Stream s m Char) => ParsecT s u m a
+-- | Reduce clutter while still keeping the types generic.
+type Parser a = (Stream s m Char) => ParsecT s u m a
 
 -- | Parse a K term
-kterm :: GenParsecT String
+kterm :: Parser String
 kterm = kempty <|> kapp
 
 -- | Parse the K identity element
-kempty :: GenParsecT String
+kempty :: Parser String
 kempty = string ".List{K}"
 
 -- | Parse a K application: KLabel(K1,,K2)
-kapp :: GenParsecT String
+kapp :: Parser String
 kapp = do
     (label, argc) <- klabel
     argv <- parens (kterm `sepBy` (symbol ",,"))
@@ -47,11 +47,11 @@ kapp = do
 type KLabel = (String, Int)
 
 -- | Parse a KLabel
-klabel :: GenParsecT KLabel
+klabel :: Parser KLabel
 klabel = genklabel <|> kbuiltin
 
 -- | Parse generated K label: 'Foo___
-genklabel :: GenParsecT KLabel
+genklabel :: Parser KLabel
 genklabel = do
     char '\''
     name <- maudeIdentifier
@@ -59,18 +59,18 @@ genklabel = do
     return (name, argc)
 
 -- | Parse a K builtin
-kbuiltin :: GenParsecT KLabel
+kbuiltin :: Parser KLabel
 kbuiltin = flip (,) 0 <$> (kint <|> kstring)
 
 -- | Parse an Int builtin: Int 42
-kint :: GenParsecT String
+kint :: Parser String
 kint = do
     symbol "Int"
     i <- integer
     return (show i)
 
 -- | Parse a String builtin: String "hello"
-kstring :: GenParsecT String
+kstring :: Parser String
 kstring = do
     symbol "String"
     s <- stringLiteral
@@ -81,13 +81,13 @@ kstring = do
 -- | Note that this does not capture all Maude identifiers since, for K, we
 -- assume identifiers will not contain '_'  and that '`' will not be used to
 -- escape spaces.
-maudeIdentifier :: GenParsecT String
+maudeIdentifier :: Parser String
 maudeIdentifier = many maudeIdChar
 
-maudeIdChar :: GenParsecT Char
+maudeIdChar :: Parser Char
 maudeIdChar = noneOf ("`_ " ++ maudeIdSpecialChars) <|> maudeIdEscape
 
-maudeIdEscape :: GenParsecT Char
+maudeIdEscape :: Parser Char
 maudeIdEscape = char '`' >> oneOf maudeIdSpecialChars
 
 -- | 3.1: The characters ‘{’, ‘}’, ‘(’, ‘)’, ‘[’, ‘]’ and ‘,’ are special, in
