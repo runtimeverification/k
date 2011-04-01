@@ -7,8 +7,9 @@ mod PL-META-TERM is including PL-BOOL + PL-QID .
 
 
 *** terms
-  sorts Constant Variable GroundTerm Term NeGroundTermList GroundTermList NeTermList TermList .
-  subsorts Constant Variable < Qid Term .
+  sorts Constant Variable ExtendedConstant .
+  sorts GroundTerm Term NeGroundTermList GroundTermList NeTermList TermList .
+  subsorts Constant Variable < ExtendedConstant < Qid Term .
   subsorts Constant < GroundTerm < Term NeGroundTermList < NeTermList .
   subsorts NeGroundTermList < NeTermList GroundTermList < TermList .
   op <Qids> : -> Constant [special (id-hook QuotedIdentifierSymbol (constantQid))] .

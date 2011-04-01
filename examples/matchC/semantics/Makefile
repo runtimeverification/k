@@ -49,11 +49,10 @@ build: $(EXT_COMPILED_FILE) \
 
 
 $(EXT_MAUDE_MAIN) $(EXT_MAUDE_SYNTAX): $(EXT_K_FILES)
-	#$(KC) -m -prelude $(ML_PRELUDE) $(EXT_K_MAIN)
-	$(KC) -m -shared $(ML_PRELUDE) $(EXT_K_MAIN)
+	$(KC) -m -prelude $(ML_PRELUDE) $(EXT_K_MAIN)
 
 $(LANG_MAUDE_MAIN) $(LANG_MAUDE_SYNTAX): $(LANG_K_FILES)
-	$(KC) -m -shared $(ML_PRELUDE) $(LANG_K_MAIN)
+	$(KC) -m -prelude $(ML_PRELUDE) $(LANG_K_MAIN)
 
 
 clean:

@@ -85,34 +85,13 @@ struct treeNode *deleteRecursive(struct treeNode *t, int v)
   if (t == 0)
     return 0;
   else if (v == t->val)
-  {
-    if (t->left && t->right)
-    {
-      t->val = min(t->right);
-      t->right = deleteRecursive(t->right, t->val);
-      return t;
-    }
-    else if (t->left)
-      return t->left;
-    else
-      return t->right;
-  }
+    return 1;
   else if (v < t->val)
-    return deleteRecursive(t->left, v);
+    return findRecursive(t->left, v);
   else
-    return deleteRecursive(t->right, v);
+    return findRecursive(t->right, v);
 }
 
-int min(struct treeNode *t)
-/*@ cfg <heap_> tree(t0)(T) <_/heap>
-    req isBst(T) /\ t0 = t /\ ~(t = 0) 
-    ens isBst(T) /\ returns(min(tree2mset(T))) */
-{
-  if (t->left)
-    return (t->left);
-  else
-    return t->val;
-}
 
 int main()
 {
