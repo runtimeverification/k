@@ -35,7 +35,7 @@ public class KDefinition
     cells.put(      "task",       new Cell("task"));
     cells.put(  "taskType",   new Cell("taskType", false));
     cells.put(    "config",     new Cell("config"));
-    cells.put(   "program",    new Cell("program",  true));
+    cells.put(   "program",    new Cell("program", false));
     cells.put(    "struct",     new Cell("struct", false));
     cells.put(       "fun",        new Cell("fun", false));
     cells.put(         "k",          new Cell("k",  true, 5));

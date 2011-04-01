@@ -112,6 +112,17 @@ public class VisualViewer implements ActionListener, TreeExpansionListener
   }
 
 
+  public static void expandTree(KTreeNode node)
+  {
+  }
+
+/*  
+  public static void expandTree(KTreeNode node, TreePath path)
+  {
+  }
+*/
+
+
   public static void main (String args[])
   {
     final KTreeNode root = MaudeSAXHandler.getKTree(args[0]);
