@@ -5,7 +5,6 @@ in syntax/js-syntax
 in semantics/js-semantics
 
 kmod JS-CONFIGURATION is including JS-SYNTAX + K
-	syntax K ::= JSValue | JS | List{JS}
 	syntax KResult ::= Int | Float | Bool | String | JSPrimitive
 
 	configuration <T> <k>.K</k> <state>.Map</state> </T>
@@ -33,7 +32,7 @@ kmod JS-CONFIGURATION is including JS-SYNTAX + K
 endkm
 
 kmod JS-PROGRAMS is including JS-CONFIGURATION
-	syntax JS  ::= program1
+	syntax K ::= program1
 
 	macro program1 = #program(#mul(#add($n(2), $n(3)), $n(4.0)))
 endkm

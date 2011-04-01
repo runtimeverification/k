@@ -34,105 +34,105 @@ kmod JS-PRIMITIVES is including JS-NUMBER
 	macro boolValue($b(B:Bool)) = B
 endkm
 
-kmod JS-SYNTAX is including JS-PRIMITIVES 
+kmod JS-SYNTAX is including JS-PRIMITIVES + K
 
-	syntax JSObject ::= $regex( String ) | $o( List{JS} ) --- | #function!!!
+	syntax JSObject ::= $regex( String ) | $o( List{K} ) --- | #function!!!
 	syntax JSValue ::= JSPrimitive | JSObject
 	
-	syntax List{JS} ::= JS | .List{JS} | List{JS} , List{JS} [assoc id: .List{JS}]
+	---syntax List{JS} ::= JS | .List{JS} | List{JS} , List{JS} [assoc id: .List{JS}]
 	
-	syntax JS ::= 
+	syntax K ::= 
 			JSValue | .none 
 		|	#this
 		|	#nop
 		|	#id ( String ) 
-		| #staticAccess ( JS , JS ) [strict] 		--- Exp . Name
-		| #dynamicAccess ( JS , JS ) [strict] 		--- Exp [ Exp ]
-		| #invocation ( JS , JS ) [strict] 	--- Exp ( CommaList )
+		| #staticAccess ( K , K ) [strict] 		--- Exp . Name
+		| #dynamicAccess ( K , K ) [strict] 		--- Exp [ Exp ]
+		| #invocation ( K , K ) [strict] 	--- Exp ( CommaList )
 		
-		| #new ( List{JS} ) [strict]					--- new InvocationExp
+		| #new ( List{K} ) [strict]					--- new InvocationExp
 		
-		| #inc ( JS , Bool ) [strict]				--- ++exp OR exp++
-		| #dec ( JS , Bool ) [strict]				--- --exp OR exp--
+		| #inc ( K , Bool ) [strict]				--- ++exp OR exp++
+		| #dec ( K , Bool ) [strict]				--- --exp OR exp--
 		
-		| #delete ( JS ) [strict]				--- delete TargetExp
+		| #delete ( K ) [strict]				--- delete TargetExp
 		
-		| #typeof ( JS ) [strict]				--- typeof Exp
-		| #not ( JS ) [strict]				--- ! Exp
-		| #neg ( JS ) [strict] 				--- - Exp
-		| #plus ( JS ) [strict] 				--- + Exp
+		| #typeof ( K ) [strict]				--- typeof Exp
+		| #not ( K ) [strict]				--- ! Exp
+		| #neg ( K ) [strict] 				--- - Exp
+		| #plus ( K ) [strict] 				--- + Exp
 		
-		| #mul ( JS , JS ) [strict] 			--- Exp * Exp
-		| #div ( JS , JS ) [strict] 			--- Exp / Exp
-		| #mod ( JS , JS ) [strict] 			--- Exp % Exp
+		| #mul ( K , K ) [strict] 			--- Exp * Exp
+		| #div ( K , K ) [strict] 			--- Exp / Exp
+		| #mod ( K , K ) [strict] 			--- Exp % Exp
 		
-		| #add ( JS , JS ) [strict]			--- Exp + Exp
-		| #sub ( JS , JS ) [strict] 			--- Exp - Exp
+		| #add ( K , K ) [strict]			--- Exp + Exp
+		| #sub ( K , K ) [strict] 			--- Exp - Exp
 		
-		| #lt ( JS , JS ) [strict] 			--- Exp < Exp
-		| #lte ( JS , JS ) [strict] 			--- Exp <= Exp
-		| #gt ( JS , JS ) [strict] 			--- Exp > Exp
-		| #gte ( JS , JS ) [strict] 			--- Exp >= Exp
-		| #in ( JS , JS ) [strict]				--- Exp in Exp
-		| #instanceof ( JS , JS ) [strict] 	--- Exp instanceof Exp
+		| #lt ( K , K ) [strict] 			--- Exp < Exp
+		| #lte ( K , K ) [strict] 			--- Exp <= Exp
+		| #gt ( K , K ) [strict] 			--- Exp > Exp
+		| #gte ( K , K ) [strict] 			--- Exp >= Exp
+		| #in ( K , K ) [strict]				--- Exp in Exp
+		| #instanceof ( K , K ) [strict] 	--- Exp instanceof Exp
 		
-		| #sameAs ( JS , JS ) [strict] 		--- Exp == Exp
-		| #notSameAs ( JS , JS ) [strict] 		--- Exp != Exp
-		| #identical ( JS , JS ) [strict] 		--- Exp === Exp
-		| #notIdentical ( JS , JS ) [strict] 	--- Exp !== Exp
+		| #sameAs ( K , K ) [strict] 		--- Exp == Exp
+		| #notSameAs ( K , K ) [strict] 		--- Exp != Exp
+		| #identical ( K , K ) [strict] 		--- Exp === Exp
+		| #notIdentical ( K , K ) [strict] 	--- Exp !== Exp
 		
-		| #and ( JS , JS ) [strict] 			--- Exp && Exp
+		| #and ( K , K ) [strict] 			--- Exp && Exp
 		
-		| #or ( JS , JS ) [strict] 			--- Exp || Exp
+		| #or ( K , K ) [strict] 			--- Exp || Exp
 		
-		| #ternary ( JS , JS , JS ) [strict(1)]	--- Exp ? Exp : Exp
+		| #ternary ( K , K , K ) [strict(1)]	--- Exp ? Exp : Exp
 		
 		
-		| #assignment ( JS , JS , JS ) [strict]  --- TargetExp AssignmentOp Exp
+		| #assignment ( K , K , K ) [strict]  --- TargetExp AssignmentOp Exp
 		
-		| #arrayLit ( List{JS} ) [strict]				--- [ CommaList{Exp} ]
-		| #objectLit ( List{JS} ) [strict]			--- { CommaList{Property} }
-		| #propertyLit ( JS , JS ) [strict]	--- PropertyName : Exp
+		| #arrayLit ( List{K} ) [strict]				--- [ CommaList{Exp} ]
+		| #objectLit ( List{K} ) [strict]			--- { CommaList{Property} }
+		| #propertyLit ( K , K ) [strict]	--- PropertyName : Exp
 		
-		| #return ( JS ) [strict]				--- return Exp | .
-		| #break ( JS ) [strict] 				--- break Label | .
-		| #continue ( JS ) [strict] 				--- continue Label | .
-		| #throw ( JS ) [strict]				--- throw Exp
-		| #label ( String , JS ) 
+		| #return ( K ) [strict]				--- return Exp | .
+		| #break ( K ) [strict] 				--- break Label | .
+		| #continue ( K ) [strict] 				--- continue Label | .
+		| #throw ( K ) [strict]				--- throw Exp
+		| #label ( String , K ) 
 		
-		| #exp ( JS ) [strict]				--- exp
+		| #exp ( K ) [strict]				--- exp
 		
-		| #stmts ( List{JS} ) 		--- List{Stmt}
-		| #block ( List{JS} )
-		| #comma ( List{JS} )
-		| #ifElse ( JS , JS , JS ) [strict(1)]	--- if (Exp) Block Block
-		| #try ( JS , List{JS} , JS ) [strict]	--- 
-		| #catch ( JS , JS )
+		| #stmts ( List{K} ) 		--- List{Stmt}
+		| #block ( List{K} )
+		| #comma ( List{K} )
+		| #ifElse ( K , K , K ) [strict(1)]	--- if (Exp) Block Block
+		| #try ( K , List{K} , K ) [strict]	--- 
+		| #catch ( K , K )
 		
-		| #case ( JS , JS ) [strict(1)]	 	--- case Exp : Stmt
-		| #default ( JS ) 					--- default : Stmt
+		| #case ( K , K ) [strict(1)]	 	--- case Exp : Stmt
+		| #default ( K ) 					--- default : Stmt
 		
-		| #switch ( JS , List{JS} , Int ) [strict(1)]	
+		| #switch ( K , List{K} , Int ) [strict(1)]	
 			--- switch (Exp) { List{Case} ; DefaultCase }
-		| #for ( JS , JS , JS , JS ) [strict(1)]		
+		| #for ( K , K , K , K ) [strict(1)]		
 			--- for ( Inits ; Cond ; Incrs ) Block
-		| #forIn ( JS , JS , JS ) [strict(2)]
+		| #forIn ( K , K , K ) [strict(2)]
 			--- for ( Name in Exp ) Block
-		| #while ( JS , JS )
+		| #while ( K , K )
 			--- while ( Exp ) Block
-		| #do ( JS , JS )
+		| #do ( K , K )
 			--- do Block while ( Exp )
 			
-		| #labelledStmt ( JS , JS )	
+		| #labelledStmt ( K , K )	
 			--- Label : Stmt
 		
-		| #varDeclarations ( List{JS} ) [strict]
+		| #varDeclarations ( List{K} ) [strict]
 		
-		| #function ( Int , JS , List{JS} , JS )
+		| #function ( Int , K , List{K} , K )
 			--- function ( Parameters ) { Program }
 			--- function Name ( Parameters ) { Program }
 
-		| #program ( List{JS} )
+		| #program ( List{K} )
 			--- List{VarDeclarationStmt} List{FunctionStmt} List{ExecutionStmt}
 endkm
 			
