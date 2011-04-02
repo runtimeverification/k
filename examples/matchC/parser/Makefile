@@ -2,6 +2,14 @@
 # to the list of known file extentions
 .SUFFIXES: .java .class
 
+# generic 
+JC = javac
+JAR = jar
+JVM = java
+CLASSPATH = antlrworks-1.4.jar:.
+JFLAGS = -classpath $(CLASSPATH)
+ANTLR_TOOL = org.antlr.Tool
+
 # compile a .java file into one or more .class files
 .java.class:
 	$(JC) $(JFLAGS) $<
@@ -9,15 +17,6 @@
 
 # default target is all
 all: build
-
-
-# generic 
-ANTLR_TOOL = org.antlr.Tool
-JC = javac
-JAR = jar
-JVM = java
-CLASSPATH = antlrworks-1.4.jar:.
-JFLAGS = -classpath $(CLASSPATH)
 
 
 #
@@ -116,11 +115,10 @@ MAIN = $(KERNELC_MAIN:.java=)
 
 # targets
 # build target
-build: $(CLASSES)
+build: $(PARSER_JAR)
 
 # build a jar
 $(PARSER_JAR): $(CLASSES)
-	@#$(JAR) -cf $@ $< 
 	$(JAR) -cf $@ $(CLASSES)
 
 # run target (depends on build)

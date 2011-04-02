@@ -2,10 +2,10 @@ load ../lib/ml-prelude.maude
 load matchC-syntax
 load matchC-semantics
 load ../lib/fol
-load ../heap_patterns/list
-load ../heap_patterns/binary_tree
-load ../heap_patterns/io
-load ../heap_patterns/stack
+load ../patterns/list
+load ../patterns/binary_tree
+load ../patterns/io
+load ../patterns/stack
 
 
 kmod MATCHC is
