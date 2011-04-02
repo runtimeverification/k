@@ -32,7 +32,7 @@ sub getResult {
 		printf "%d %d %s %d\n", ($reader->depth, $reader->nodeType, $reader->name, $reader->isEmptyElement);
 		die "XML: Found term without op or sort.";
 	}
-	if ($sort =~ /^(Qid|String|Sort|Variable|Constant|Term|NeTermList|GroundTerm|NeGroundTermList)$/) {
+	if ($sort =~ /^(NzNat|Qid|String|Sort|Variable|Constant|Term|NeTermList|GroundTerm|NeGroundTermList)$/) {
 		return getTerm($reader, $op, $sort);
 	} else {
 		return getMeta($reader, $op, $sort);
@@ -51,6 +51,8 @@ sub getTerm {
 		return getNormalTerm($reader, $op, $sort);
 	} elsif ($sort =~ /^(NeGroundTermList|NeTermList)$/) { # |GroundTerm|
 		return getArgumentList($reader, $op, $sort);
+	} elsif ($sort =~ /^(NzNat)$/) {
+		return getNumber($reader, $op, $sort);
 	} else {
 		die "unhandled sort: $sort\n";
 	}
@@ -60,6 +62,12 @@ sub getNormalThing {
 	my ($op) = (@_);
 	
 	return unquoteTerm($op);
+}
+
+sub getNumber {
+	my ($reader, $op, $sort) = (@_);
+	
+	return $reader->getAttribute('number');
 }
 
 sub getNormalTerm {
@@ -93,11 +101,16 @@ sub getArgumentList {
 sub getConstantThing {
 	my ($op) = (@_);
 	
-	if ($op =~ s/^'(.*)(\..*?)$/\($1\)$2/) {
+	if ($op =~ s/^'(.*)(\.[A-Za-z\{\}\?\!\+\`]*?)$/\($1\)$2/) {
 		return $op;
-	} else {
-		die "couldn't handle op: $op";
-	}
+	} 
+	# else {
+		# die "couldn't handle op: $op";
+	# }
+	
+	# for some reason, some constants aren't of the form op.sort
+	# here we hope for the best....
+	return unquoteTerm($op);
 }
 
 sub unquoteTerm {
@@ -136,8 +149,11 @@ sub getMeta {
 		}
 	}
 	
-	if ($sort =~ m/^(SubsortDeclSet|ImportList|OpDeclSet|MembAxSet|EquationSet|NeTypeList|RuleSet)$/) {
+	if ($sort =~ m/^(SubsortDeclSet|ImportList|OpDeclSet|MembAxSet|EquationSet|NeTypeList|RuleSet|NeNatList)$/) {
 		return join(' ', @arguments);
+	}
+	if ($sort =~ m/^(Attr)$/ and $op =~ m/^(strat)$/) {
+		$op = "$op(_)";
 	}
 	
 	my @operator = split(/_/, $op, -1); # -1 to allow trailing fields
