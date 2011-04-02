@@ -12,7 +12,7 @@ KCOMPILE ?= ../../../../../tools/kompile.pl
 LATEX_STYLE = bb
 
 
- MAIN_FILE = automata
+ MAIN_FILE = automata-generated
 
 # these are additional files that when changed will force rebuilding the semantics
 #ADDITIONAL_DEPENDENCIES = 
