@@ -86,17 +86,8 @@ mod CONFIG-BUILTIN-MODULE is
   sort Field .
   sort HeapLabel .
 
-
-***(
-  ops config program struct fun k env stack tenv heap in out : -> CellLabel .
-  ops counter : -> CellLabel .
-  ops task form subst : -> CellLabel .
-***)
-
-
   op skolemize : Nat Pattern -> Pattern .
   op co-skolemize : Nat Pattern -> Pattern .
-
 
   op returns _ : Value -> Formula .
   op unit : -> Value . 
@@ -105,6 +96,7 @@ mod CONFIG-BUILTIN-MODULE is
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
   op _|->_:_ : Int++ Value Field -> MapItem .
   op stream : List{MathObj++} -> ListItem .
+  op id`(_`) : String -> Id .
 
 
   *** [ERROR] Here subsorting Pattern to K gives all sort of errors,
@@ -137,8 +129,6 @@ mod CONFIG-BUILTIN-MODULE is
 
   op tree : -> HeapLabel .
   op treeList : -> HeapLabel .
-
-  op id`(_`) : String -> Id .
 endm
 
 

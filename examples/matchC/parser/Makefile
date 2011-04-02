@@ -1,62 +1,127 @@
 # add java (.java, and .class), and antlr (.g, and .tokens) extensions
 # to the list of known file extentions
-.SUFFIXES: .java .class .g .tokens
-
-# generic 
-ANTLR_ROOT_DIR = .
-ANTLR_TOOL = org.antlr.Tool
-JC = javac
-JVM = java
-CLASSPATH = $(ANTLR_ROOT_DIR)/antlrworks-1.4.jar:.
-JFLAGS = -classpath $(CLASSPATH)
-
-# generate .java and .tokens files for a .g file
-%.tokens %Lexer.java %Parser.java: %.g
-	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $<
-
-# generate .java and .tokens files for a .g file
-%.tokens %.java: %.g
-	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $<
+.SUFFIXES: .java .class
 
 # compile a .java file into one or more .class files
 .java.class:
 	$(JC) $(JFLAGS) $<
 
-#
-LANGUAGE = kernelC
-ANNOTATION = annot
-LEXER_GRAMMARS = k.g
-GRAMMARS = $(LANGUAGE).g $(ANNOTATION).g
-TREE_GRAMMARS = $(LANGUAGE)Pass1.g \
-                $(LANGUAGE)Pass2.g \
-                $(ANNOTATION)Pass1.g \
-                $(ANNOTATION)Pass2.g \
-                $(ANNOTATION)Pass3.g
-                #$(ANNOTATION)Pass4.g
-TOKENS = $(LEXER_GRAMMARS:.g=.tokens) \
-         $(GRAMMARS:.g=.tokens) \
-         $(TREE_GRAMMARS:.g=.tokens)
-LEXERS = $(LEXER_GRAMMARS:.g=.java) \
-         $(GRAMMARS:.g=Lexer.java)
-PARSERS = $(GRAMMARS:.g=Parser.java)
-WALKERS = $(TREE_GRAMMARS:.g=.java)
-JAVA_PRE = Table.java TreeUtils.java
-JAVA_POST = AnnotPreK.java $(LANGUAGE)Pass3.java KernelCPreK.java
 
-CLASSES = $(LEXERS:.java=.class) \
-          $(PARSERS:.java=.class) \
-          $(JAVA_PRE:.java=.class) \
-          $(WALKERS:.java=.class) \
-          $(JAVA_POST:.java=.class)
-MAIN = KernelCPreK
-
-
-# targets
 # default target is all
 all: build
 
+
+# generic 
+ANTLR_TOOL = org.antlr.Tool
+JC = javac
+JAR = jar
+JVM = java
+CLASSPATH = antlrworks-1.4.jar:.
+JFLAGS = -classpath $(CLASSPATH)
+
+
+#
+K = k
+K_LEXER_GRAMMAR = $(K).g
+K_TOKENS = $(K).tokens
+K_LEXER = $(K).java
+K_GENERATED = $(K_TOKENS) $(K_LEXER)
+
+ANNOT = annot
+ANNOT_GRAMMAR = $(ANNOT).g
+ANNOT_TOKENS = $(ANNOT).tokens
+ANNOT_LEXER = $(ANNOT)Lexer.java
+ANNOT_PARSER = $(ANNOT)Parser.java
+ANNOT_TREE_GRAMMAR_1 = $(ANNOT)Pass1.g
+ANNOT_TOKENS_1 = $(ANNOT)Pass1.tokens
+ANNOT_WALKER_1 = $(ANNOT)Pass1.java
+ANNOT_TREE_GRAMMAR_2 = $(ANNOT)Pass2.g
+ANNOT_TOKENS_2 = $(ANNOT)Pass2.tokens
+ANNOT_WALKER_2 = $(ANNOT)Pass2.java
+ANNOT_TREE_GRAMMAR_3 = $(ANNOT)Pass3.g
+ANNOT_TOKENS_3 = $(ANNOT)Pass3.tokens
+ANNOT_WALKER_3 = $(ANNOT)Pass3.java
+ANNOT_GENERATED_JAVA = $(ANNOT_LEXER) $(ANNOT_PARSER) \
+                       $(ANNOT_WALKER_1) $(ANNOT_WALKER_2) $(ANNOT_WALKER_3)
+ANNOT_GENERATED = $(ANNOT_GENERATED_JAVA) $(ANNOT_TOKENS) \
+                  $(ANNOT_TOKENS_1) $(ANNOT_TOKENS_2) $(ANNOT_TOKENS_3)
+ANNOT_MAIN = AnnotPreK.java
+
+KERNELC = kernelC
+KERNELC_GRAMMAR = $(KERNELC).g
+KERNELC_TOKENS = $(KERNELC).tokens
+KERNELC_LEXER = $(KERNELC)Lexer.java
+KERNELC_PARSER = $(KERNELC)Parser.java
+KERNELC_TREE_GRAMMAR_1 = $(KERNELC)Pass1.g
+KERNELC_TOKENS_1 = $(KERNELC)Pass1.tokens
+KERNELC_WALKER_1 = $(KERNELC)Pass1.java
+KERNELC_TREE_GRAMMAR_2 = $(KERNELC)Pass2.g
+KERNELC_TOKENS_2 = $(KERNELC)Pass2.tokens
+KERNELC_WALKER_2 = $(KERNELC)Pass2.java
+KERNELC_TREE_GRAMMAR_3 = $(KERNELC)Pass3.g
+KERNELC_TOKENS_3 = $(KERNELC)Pass3.tokens
+KERNELC_WALKER_3 = $(KERNELC)Pass3.java
+KERNELC_GENERATED_JAVA = $(KERNELC_LEXER) $(KERNELC_PARSER) \
+                         $(KERNELC_WALKER_1) $(KERNELC_WALKER_2) \
+                         $(KERNELC_WALKER_3)
+KERNELC_GENERATED = $(KERNELC_GENERATED_JAVA) $(KERNELC_TOKENS) \
+                    $(KERNELC_TOKENS_1) $(KERNELC_TOKENS_2) $(KERNELC_TOKENS_3)
+KERNELC_MAIN = KernelCPreK.java
+
+
+# make k tokens file
+$(K_TOKENS) $(K_LEXER): $(K_LEXER_GRAMMAR)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(K_LEXER_GRAMMAR)
+
+
+# make matching logic annotation parser
+$(ANNOT_TOKENS) $(ANNOT_LEXER) $(ANNOT_PARSER): $(ANNOT_GRAMMAR) $(K_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(ANNOT_GRAMMAR)
+
+$(ANNOT_TOKENS_1) $(ANNOT_WALKER_1): $(ANNOT_TREE_GRAMMAR_1) $(ANNOT_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(ANNOT_TREE_GRAMMAR_1)
+
+$(ANNOT_TOKENS_2) $(ANNOT_WALKER_2): $(ANNOT_TREE_GRAMMAR_2) $(ANNOT_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(ANNOT_TREE_GRAMMAR_2)
+
+$(ANNOT_TOKENS_3) $(ANNOT_WALKER_3): $(ANNOT_TREE_GRAMMAR_3) $(ANNOT_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(ANNOT_TREE_GRAMMAR_3)
+
+# make kernelc parser
+$(KERNELC_TOKENS) $(KERNELC_LEXER) $(KERNELC_PARSER): $(KERNELC_GRAMMAR) \
+                                                      $(K_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(KERNELC_GRAMMAR)
+
+$(KERNELC_WALKER_1) $(KERNELC_TOKENS_1): $(KERNELC_TREE_GRAMMAR_1) \
+                                         $(KERNELC_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(KERNELC_TREE_GRAMMAR_1)
+
+$(KERNELC_WALKER_2) $(KERNELC_TOKENS_2): $(KERNELC_TREE_GRAMMAR_2) \
+                                         $(KERNELC_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(KERNELC_TREE_GRAMMAR_2)
+
+$(KERNELC_WALKER_3) $(KERNELC_TOKENS_3): $(KERNELC_TREE_GRAMMAR_3) \
+                                         $(KERNELC_TOKENS)
+	$(JVM) $(JFLAGS) $(ANTLR_TOOL) $(KERNELC_TREE_GRAMMAR_3)
+
+
+# make java classes
+JAVA_SOURCES = Table.java $(K_LEXER) TreeUtils.java \
+               $(ANNOT_GENERATED_JAVA) $(ANNOT_MAIN) \
+               $(KERNELC_GENERATED_JAVA) $(KERNELC_MAIN)
+CLASSES = $(JAVA_SOURCES:.java=.class)
+PARSER_JAR = $(KERNELC)$(ANNOT).jar
+MAIN = $(KERNELC_MAIN:.java=)
+
+
+# targets
 # build target
 build: $(CLASSES)
+
+# build a jar
+$(PARSER_JAR): $(CLASSES)
+	@#$(JAR) -cf $@ $< 
+	$(JAR) -cf $@ $(CLASSES)
 
 # run target (depends on build)
 run: build
@@ -64,5 +129,6 @@ run: build
 
 # clean target removes the .class files and the files generated by antlr
 clean:
-	rm -rf $(CLASSES) $(LEXERS) $(PARSERS) $(WALKERS) *.tokens *.class *~
+	rm -rf $(K_GENERATED) $(ANNOT_GENERATED) $(KERNELC_GENERATED)
+	rm -rf $(PARSER_JAR) *.class
 

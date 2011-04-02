@@ -1,5 +1,5 @@
-K_ROOT_DIR = $(HOME)/k-framework
 ML_ROOT_DIR = ..
+K_ROOT_DIR = $(ML_ROOT_DIR)/../..
 
 LANG_NAME = kernelC
 EXT_NAME = matchC
@@ -8,8 +8,6 @@ K_TOOLS_DIR = $(K_ROOT_DIR)/tools
 KC = $(K_TOOLS_DIR)/kompile.pl
 ML_LIB_DIR = $(ML_ROOT_DIR)/lib
 ML_PRELUDE = $(ML_LIB_DIR)/ml-prelude.maude
-#ML_PRELUDE_STRING = `echo $(ML_PRELUDE) | sed 's/\//\\\//g'`
-ML_PRELUDE_STRING = ..\/lib\/ml-prelude.maude
 
 LANG_K_SYNTAX = $(LANG_NAME)-syntax.k
 LANG_K_SEMANTICS = $(LANG_NAME)-semantics.k
@@ -39,19 +37,17 @@ CLEAN_FILES = $(LANG_COMPILED_FILE) \
 
 %-compiled.maude: %.maude
 	$(KC) -c $<
-	@sed -i -e '1s/^.*k-prelude/load $(ML_PRELUDE_STRING)/' $@
 
 
 all: build
 
-build: $(EXT_COMPILED_FILE) \
-       $(EXT_MAUDE_SYNTAX)
+build: $(EXT_COMPILED_FILE)
 
 
-$(EXT_MAUDE_MAIN) $(EXT_MAUDE_SYNTAX): $(EXT_K_FILES)
+$(EXT_MAUDE_MAIN): $(EXT_K_FILES)
 	$(KC) -m -prelude $(ML_PRELUDE) $(EXT_K_MAIN)
 
-$(LANG_MAUDE_MAIN) $(LANG_MAUDE_SYNTAX): $(LANG_K_FILES)
+$(LANG_MAUDE_MAIN): $(LANG_K_FILES)
 	$(KC) -m -prelude $(ML_PRELUDE) $(LANG_K_MAIN)
 
 

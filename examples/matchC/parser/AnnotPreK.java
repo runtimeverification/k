@@ -25,7 +25,7 @@ public class AnnotPreK {
   public static final HashMap<String, String>
     tokenToWrapper = new HashMap<String, String>();
 
-  public static void init() {
+  static {
     coreK.add("_~>_");
     coreK.add("(.).K");
     coreK.add(".");
@@ -67,13 +67,11 @@ public class AnnotPreK {
     tokenToBuiltins.put(annotParser.CELL, "<_>_</_>");
     tokenToBuiltins.put(annotParser.FORMULA_TRUE, "TrueFormula");
     tokenToBuiltins.put(annotParser.FORMULA_FALSE, "FalseFormula");
-    tokenToBuiltins.put(kernelCParser.ID, "id`(_`)");
+    tokenToBuiltins.put(annotParser.ID, "id`(_`)");
   }
 
 
   public static String annotToMaudeString(String annotString) {
-    init();
-
     try {
       // Parsing
       InputStream is = new ByteArrayInputStream(annotString.getBytes("UTF-8"));

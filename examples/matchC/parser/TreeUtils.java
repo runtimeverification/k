@@ -35,7 +35,9 @@ public class TreeUtils {
   ) {
     // tansform the children
     for (int index = 0; index < tree.getChildCount(); index++) {
-      tree.setChild(index, unflat(tree.getChild(index), tokenType, opTokenType, idTokenType, opString, idString));
+      tree.setChild(index,
+                    unflat(tree.getChild(index), tokenType, opTokenType,
+                           idTokenType, opString, idString));
     }
 
     if (tree.getType() == tokenType) {

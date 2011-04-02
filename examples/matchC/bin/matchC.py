@@ -11,11 +11,12 @@ from ansi_colors import *
 import run_maude
 
 
-k_root_dir = os.path.expanduser(os.path.join('~', 'k-framework'))
-k_tools_dir = os.path.join(k_root_dir, 'tools')
-
 ml_lang = 'matchC'
+k_root_dir = os.path.expanduser(os.path.join('~', 'k-framework'))
 ml_root_dir = os.path.join(k_root_dir, 'examples', 'matchC')
+print(ml_root_dir)
+ml_root_dir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+print(ml_root_dir)
 ml_lib_dir = os.path.join(ml_root_dir, 'lib')
 ml_lib_utils = os.path.join(ml_lib_dir, 'utils.maude')
 ml_parser_dir = os.path.join(ml_root_dir, 'parser')
@@ -27,7 +28,7 @@ ml_viewer_dir = os.path.join(ml_root_dir, 'bin')
 ml_viewer_text_main_class = 'TextViewer'
 ml_viewer_visual_main_class = 'VisualViewer'
 
-antlr_jar = os.path.join(k_tools_dir, 'antlr', 'antlrworks-1.4.jar')
+antlr_jar = os.path.join(ml_parser_dir, 'antlrworks-1.4.jar')
 
 ml_prog = 'prog'
 ml_prog_header = ['load ' + ml_semantics_compiled + '\n',

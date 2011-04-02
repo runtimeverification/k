@@ -1,5 +1,4 @@
-K_ROOT_DIR = $(HOME)/k-framework
-ML_ROOT_DIR = $(K_ROOT_DIR)/examples/matchC
+ML_ROOT_DIR = .
 
 PARSER_DIR = $(ML_ROOT_DIR)/parser
 SEMANTICS_DIR = $(ML_ROOT_DIR)/semantics
