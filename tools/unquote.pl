@@ -117,7 +117,7 @@ sub getMeta {
 	$op = unBacktick($op);
 	
 	if ($reader->isEmptyElement) {
-		if ($sort =~ m/^(SubsortDeclSet|MembAxSet|TypeList)$/) {
+		if ($sort =~ m/^(SubsortDeclSet|MembAxSet|TypeList|RuleSet|EquationSet)$/) {
 			return "";
 		}
 		return $reader->getAttribute('op');
