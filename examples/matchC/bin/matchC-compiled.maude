@@ -1,4 +1,3 @@
-load /Users/andrei/k-framework/examples/matchC/lib/ml-prelude.maude
 
 mod MATCHC is including MATHEMATICAL-DOMAIN-BUILTIN-MODULE .
 including MATHEMATICAL-SEQUENCE-BUILTIN-MODULE .

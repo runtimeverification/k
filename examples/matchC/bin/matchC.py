@@ -19,6 +19,7 @@ ml_lib_dir = os.path.abspath(os.path.join(ml_bin_dir, '..', 'lib'))
 antlr_jar = os.path.join(ml_lib_dir, 'antlrworks-1.4.jar')
 ml_parser_jar = os.path.join(ml_bin_dir, 'matchCparser.jar')
 ml_parser_main_class = 'KernelCPreK'
+ml_prelude = os.path.join(ml_lib_dir, 'ml-prelude.maude')
 ml_semantics_compiled = os.path.join(ml_bin_dir, ml_lang + '-compiled.maude')
 ml_utils = os.path.join(ml_lib_dir, 'utils.maude')
 ml_viewer_jar = os.path.join(ml_bin_dir, 'matchCviewer.jar')
@@ -26,7 +27,8 @@ ml_viewer_text_main_class = 'TextViewer'
 ml_viewer_visual_main_class = 'VisualViewer'
 
 ml_prog = 'prog'
-ml_prog_header = ['load ' + ml_semantics_compiled + '\n',
+ml_prog_header = ['load ' + ml_prelude + '\n',
+    'load ' + ml_semantics_compiled + '\n',
     'load ' + ml_utils + '\n',
     'mod ' + ml_prog.upper() + ' is inc ' + ml_lang.upper() + ' + UTILS .\n']
 ml_prog_footer = ['endm\n\n',

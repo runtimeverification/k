@@ -46,6 +46,7 @@ CLEAN_FILES = $(LANG_COMPILED_FILE) \
 
 %-compiled.maude: %.maude
 	$(KC) -c -prelude $(ML_PRELUDE) $<
+	@sed -i -e '1d' $@
 
 
 all: build
