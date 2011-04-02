@@ -16,6 +16,12 @@ BEGIN {
 # add common functions file
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
+# add unquoting functions file
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'unquote.pl');
+require $path;
+
+# depending on the options given, different flags can be added here and they will be passed to maude when called
+my $additionalMaudeFlags = "";
 
 # check installed software
 my $maude_path = "maude";
@@ -23,11 +29,13 @@ my $input_file  = fresh("kompile_in", ".maude");
 my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");
 my $temp_file   = fresh("kompile_tmp", ".txt");
+my $maude_xml_file   = fresh("kompile_xml", ".xml");
 check_software();
 
 # add configuration parser
 $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
 require $path;
+
 
 my $verbose = 0;
 my $help = 0;
@@ -540,6 +548,7 @@ foreach (@ARGV) {
     elsif (/^--?u(nquote)?$/)
     {
 	$unquote = 1;
+	$additionalMaudeFlags .= " -xml-log=$maude_xml_file "
     }
     elsif (/^-prelude$/)
     {
@@ -1139,53 +1148,48 @@ sub compile {
     my $output_file_name = "$language_file_name-compiled.maude";
 
 # # Compiling the input module $language_module_name
-    if ($unquote)
-    {
-	# If unquote is set then do some changes
-	$_ = run_maude("Compiling the definition ... ",
-	    "load $language_file_name\n",
-	    "load $k_all_tools\n",
-	    # "loop compile .\n",
-	    # "(compile $language_module_name .)\n",
-	    "set print attribute off .\n",
-	    "rew compile('$language_module_name) .\n",
-	    "quit\n");
-	
-	my @lines = split(/\n/, $_);
-	shift @lines;
-	shift @lines;
-	shift @lines;
-	pop @lines;
-	my $errorSet = 0;
-	if ($lines[0] =~ s/result \[ModuleSet\]: (.*)$/$1/)
-	{
-	    $errorSet = 1;
-	}
-	$lines[0] =~ s/^result SModule: (.*)$/$1/;
-	$_ = join("\n", @lines);
-	$_ = unquote($_);
-	if ($errorSet)
-	{
-	    print "ERROR:\n";
-	    
-	    # fix tokens
-	    $_ =~ s/\(/\(/g;
-	    $_ =~ s/\)/\)/g;
-	    $_ =~ s/\{/\{/g;
-	    $_ =~ s/\}/\}/g;
-	    $_ =~ s/\,/\,/g;
-	    
-	    # fix spaces
-	    $_ =~ s/ \{ /\{/g;
-	    $_ =~ s/ \} /\}/g;
-	    $_ =~ s/ \( /\(/g;
-	    $_ =~ s/ \) /\)/g;
-	    $_ =~ s/ \, /\, /g;
-	    print $_;
-	    print "Aborting the compilation\n";
-	    exit(1);
-	}
-	$_ = "$begin_compiled_module$_$end_compiled_module";
+    if ($unquote) {
+		# If unquote is set then do some changes
+		$_ = run_maude("Compiling the definition ... ",
+			"load $language_file_name\n",
+			"load $k_all_tools\n",
+			"set print attribute off .\n",
+			"rew compile('$language_module_name) .\n",
+			"quit\n");
+		
+		my @lines = split(/\n/, $_);
+		shift @lines;
+		shift @lines;
+		shift @lines;
+		pop @lines;
+		my $errorSet = 0;
+		if ($lines[0] =~ s/result \[ModuleSet\]: (.*)$/$1/) {
+			$errorSet = 1;
+		}
+		if ($errorSet) {
+			print "ERROR:\n";
+			
+			# fix tokens
+			$_ =~ s/\(/\(/g;
+			$_ =~ s/\)/\)/g;
+			$_ =~ s/\{/\{/g;
+			$_ =~ s/\}/\}/g;
+			$_ =~ s/\,/\,/g;
+			
+			# fix spaces
+			$_ =~ s/ \{ /\{/g;
+			$_ =~ s/ \} /\}/g;
+			$_ =~ s/ \( /\(/g;
+			$_ =~ s/ \) /\)/g;
+			$_ =~ s/ \, /\, /g;
+			print $_;
+			print "Aborting the compilation\n";
+			unlink($maude_xml_file);
+			exit(1);
+		}
+		my $unquotedOutput = unquote($maude_xml_file);
+		unlink($maude_xml_file);
+		$_ = "$begin_compiled_module$unquotedOutput$end_compiled_module";
     }
     else
     {
@@ -1199,6 +1203,7 @@ sub compile {
 	    "loop compile .\n",
 	    "(compile $language_module_name .)\n",
 	    "quit\n");	
+		unlink($maude_xml_file);
     }
 
 # If the keyword "Error" begins a line in the output, then extract and report the error message
@@ -1245,7 +1250,7 @@ sub run_maude {
     close FILE;
 
     # call maude
-    my $status = system("$maude_path -no-banner -no-wrap $input_file >$output_file 2>$error_file");
+    my $status = system("$maude_path -no-banner -no-wrap $additionalMaudeFlags $input_file >$output_file 2>$error_file");
     
     my $err = get_file_content($error_file);
     my $out = get_file_content($output_file);
