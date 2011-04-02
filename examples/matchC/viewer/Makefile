@@ -38,7 +38,7 @@ build: $(VIEWER_JAR)
 
 # build a jar
 $(VIEWER_JAR): $(CLASSES)
-	$(JAR) -cf $@ $(CLASSES)
+	$(JAR) -cf $@ *.class
 
 # run target (depends on build)
 run: build

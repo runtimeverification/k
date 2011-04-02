@@ -12,27 +12,22 @@ import run_maude
 
 
 ml_lang = 'matchC'
-k_root_dir = os.path.expanduser(os.path.join('~', 'k-framework'))
-ml_root_dir = os.path.join(k_root_dir, 'examples', 'matchC')
-print(ml_root_dir)
-ml_root_dir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-print(ml_root_dir)
-ml_lib_dir = os.path.join(ml_root_dir, 'lib')
-ml_lib_utils = os.path.join(ml_lib_dir, 'utils.maude')
-ml_parser_dir = os.path.join(ml_root_dir, 'parser')
+
+ml_bin_dir = os.path.abspath(sys.path[0])
+ml_lib_dir = os.path.abspath(os.path.join(ml_bin_dir, '..', 'lib'))
+
+antlr_jar = os.path.join(ml_lib_dir, 'antlrworks-1.4.jar')
+ml_parser_jar = os.path.join(ml_bin_dir, 'matchCparser.jar')
 ml_parser_main_class = 'KernelCPreK'
-ml_semantics_dir = os.path.join(ml_root_dir, 'semantics')
-ml_semantics_compiled = os.path.join(ml_semantics_dir,
-                                     ml_lang + '-compiled.maude')
-ml_viewer_dir = os.path.join(ml_root_dir, 'bin')
+ml_semantics_compiled = os.path.join(ml_bin_dir, ml_lang + '-compiled.maude')
+ml_utils = os.path.join(ml_lib_dir, 'utils.maude')
+ml_viewer_jar = os.path.join(ml_bin_dir, 'matchCviewer.jar')
 ml_viewer_text_main_class = 'TextViewer'
 ml_viewer_visual_main_class = 'VisualViewer'
 
-antlr_jar = os.path.join(ml_parser_dir, 'antlrworks-1.4.jar')
-
 ml_prog = 'prog'
 ml_prog_header = ['load ' + ml_semantics_compiled + '\n',
-    'load ' + ml_lib_utils + '\n',
+    'load ' + ml_utils + '\n',
     'mod ' + ml_prog.upper() + ' is inc ' + ml_lang.upper() + ' + UTILS .\n']
 ml_prog_footer = ['endm\n\n',
     'set print attribute on .\n',
@@ -42,7 +37,7 @@ ml_prog_footer = ['endm\n\n',
 
 ### compile c program with ml annotation into labeled k (maude format)
 def compile(in_filename, out_filename):
-    cmd = ['java', '-cp', antlr_jar + ':' + ml_parser_dir, ml_parser_main_class]
+    cmd = ['java', '-cp', antlr_jar + ':' + ml_parser_jar, ml_parser_main_class]
     in_file = open(in_filename, 'r')
     out_file = open(out_filename, 'w')
 
@@ -163,7 +158,7 @@ def main():
     if verified: sys.exit(0)
 
     if not args.silent and not args.display:
-        cmd = ['java', '-cp', ml_viewer_dir, ml_viewer_text_main_class,
+        cmd = ['java', '-cp', ml_viewer_jar, ml_viewer_text_main_class,
               log_file, args.output]
 
         start = time.time()
@@ -179,7 +174,7 @@ def main():
         print('Check ' + args.output + ' for the complete output.')
 
     if args.display:
-        cmd = ['java', '-cp', ml_viewer_dir, ml_viewer_visual_main_class,
+        cmd = ['java', '-cp', ml_viewer_jar, ml_viewer_visual_main_class,
               log_file]
 
         retcode = subprocess.call(cmd)

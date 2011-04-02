@@ -6,7 +6,7 @@
 JC = javac
 JAR = jar
 JVM = java
-CLASSPATH = antlrworks-1.4.jar:.
+CLASSPATH = ../lib/antlrworks-1.4.jar:.
 JFLAGS = -classpath $(CLASSPATH)
 ANTLR_TOOL = org.antlr.Tool
 
@@ -109,7 +109,7 @@ JAVA_SOURCES = Table.java $(K_LEXER) TreeUtils.java \
                $(ANNOT_GENERATED_JAVA) $(ANNOT_MAIN) \
                $(KERNELC_GENERATED_JAVA) $(KERNELC_MAIN)
 CLASSES = $(JAVA_SOURCES:.java=.class)
-PARSER_JAR = $(KERNELC)$(ANNOT).jar
+PARSER_JAR = matchCparser.jar
 MAIN = $(KERNELC_MAIN:.java=)
 
 
@@ -119,7 +119,7 @@ build: $(PARSER_JAR)
 
 # build a jar
 $(PARSER_JAR): $(CLASSES)
-	$(JAR) -cf $@ $(CLASSES)
+	$(JAR) -cf $@ *.class
 
 # run target (depends on build)
 run: build

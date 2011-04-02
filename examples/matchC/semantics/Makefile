@@ -45,7 +45,7 @@ CLEAN_FILES = $(LANG_COMPILED_FILE) \
 
 
 %-compiled.maude: %.maude
-	$(KC) -c $<
+	$(KC) -c -prelude $(ML_PRELUDE) $<
 
 
 all: build
