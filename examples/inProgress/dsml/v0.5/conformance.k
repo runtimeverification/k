@@ -118,6 +118,6 @@ rule <k> checkOCL( OCL(E) L:List) => E~>checkOCL(L) <_/k>   [structural]
 // when an expression finished evaluating, it is placed at the end of the ocl constraints list
 
 // comment  when "executing" a model
-//rule <k> v => .K <_/k>
-//<metamodel_> <oclConstraints_> (.).List => result(v) </oclConstraints> <_/metamodel>  [structural]
+rule <k> v => .K <_/k>
+<metamodel_> <oclConstraints_> (.).List => result(v) </oclConstraints> <_/metamodel>  [structural]
 endkm
