@@ -39,7 +39,12 @@ ml_prog_footer = ['endm\n\n',
 
 ### compile c program with ml annotation into labeled k (maude format)
 def compile(in_filename, out_filename):
-    cmd = ['java', '-cp', antlr_jar + ':' + ml_parser_jar, ml_parser_main_class]
+    if os.name == 'posix' or os.name == 'mac':
+        cp_sep = ':'
+    elif os.name == 'nt':
+        cp_sep = ';' 
+    cp = ['-cp', antlr_jar + cp_sep + ml_parser_jar]
+    cmd = ['java'] + cp + [ml_parser_main_class]
     in_file = open(in_filename, 'r')
     out_file = open(out_filename, 'w')
 
@@ -145,14 +150,16 @@ def main():
         sys.exit('matchC: ' + args.file + ': no such file or directory')
 
     if not args.compile:
-        compiled_file = tempfile.mktemp('.maude')
+        (file_obj, compiled_file) = tempfile.mkstemp(suffix='.maude')
+        os.close(file_obj)
     else:
         compiled_file = args.output
     compile(args.file, compiled_file)
     if args.compile: return
 
     if not args.silent:
-        log_file = tempfile.mktemp('.xml')
+        (file_obj, log_file) = tempfile.mkstemp(suffix='.xml')
+        os.close(file_obj)
         verify(compiled_file, log=log_file)
     else:
         verify(compiled_file)

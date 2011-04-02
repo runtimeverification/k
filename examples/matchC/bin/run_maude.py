@@ -1,6 +1,5 @@
 #!/usr/local/bin/python3
 
-import pty
 import os
 import subprocess
 import sys
@@ -34,6 +33,7 @@ def run(args, filter=default_filter, epilog=''):
     maude = None
     if os.name == 'posix' or os.name == 'mac':
         try:
+            import pty
             (master, slave) = pty.openpty()
             maude_out = os.fdopen(master, 'r')
             maude = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=slave)
