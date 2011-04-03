@@ -65,7 +65,10 @@ Exp ";" -> Stmt {cons("ExpStmt")}
 "function" -> ID {reject}
 
 %% Expressions
-"~" Atom -> Exp {cons("Unquote")}
+
+%% Atom -> Exp {cons("Unquote")}
+
+
 %% Exported -> Atom {reject}
 
 INT -> Exp {cons("SyntaxInt"), avoid}
@@ -87,7 +90,11 @@ ID -> Exp {cons("SyntaxId"), avoid}
 
 
 context-free priorities
-{ 
+{ non-assoc:
+	"~" Atom -> Exp {cons("Unquote")}
+	"~" Atom -> ID {cons("Unquote")}
+	Exported -> K
+} > { 
 	"++" Exp -> Exp {cons("PreIncrement")}
 } > {
 	Exp "[" ListOfExp "]" -> Exp {cons("Array")}

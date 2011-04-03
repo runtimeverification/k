@@ -1,0 +1,30 @@
+module filter
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/K
+  lib/editor-common.generated
+  
+
+strategies
+// unquote = ?Unquote(Quote(x))
+// ; rules(use:+ amb(as) -> t where
+// <getfirst(?IntUse(x))> as => t)
+
+// disamb = unquote <+ use <+ all(disamb)
+//  
+// filter = io-wrap(disamb)
+
+// decl = ?VarDecl(IntType(), x)
+// ; rules(use:+ amb(as) -> t where
+// <getfirst(?IntUse(x))> as => t)
+// 
+// decl = ?VarDecl(FloatType(), x)
+// ; rules(use:+ amb(as) -> t where
+// <getfirst(?FloatUse(x))> as => t)
+
+// disamb = decl <+ use <+ all(disamb)
+// 
+// core-disamb = io-wrap(disamb)

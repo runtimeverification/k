@@ -61,7 +61,8 @@ CellProperty* -> CellProperties
 ".K" -> K {cons("EmptyK")}
 NeK -> K
 INT -> K
-"`" SyntacticK -> K {cons("Quote")} %% {prefer}
+%% "`" SyntacticK -> K {cons("Quote")} %% {prefer}
+SyntacticK -> K {avoid, cons("Quote")}
 
 {K "~>"}+ "~>" {K "~>"}+ -> NeK {left,cons("SeqK")}
 KLabel "(" KList ")" -> NeK {cons("AppK")}
@@ -76,14 +77,14 @@ KList "=>" KList -> KList {cons("ReplaceKList")}
 
 %% Lists
 ListItem+ -> List
-".List" -> List
+".List" -> List {cons("EmptyList")}
 "ListItem" "(" K ")" -> ListItem {cons("ListItem")}
 List "=>" List -> List {cons("ReplaceList")}
 "(" List ")" -> List {bracket}
 
 %% Maps
 MapItem+ -> Map {cons("MapItemList")}
-".Map" -> Map
+".Map" -> Map {cons("EmptyMap")}
 K "|->" K -> MapItem {cons("MapsTo")}
 Map "=>" Map -> Map {cons("ReplaceMap")}
 Map "[" K "/" K "]" -> Map {cons("MapReplace")}
@@ -92,14 +93,14 @@ Map "[" K "/" K "]" -> Map {cons("MapReplace")}
 
 %% Bags
 BagItem+ -> Bag {cons("BagItemList")}
-".Bag" -> Bag
+".Bag" -> Bag {cons("EmptyBag")}
 "BagItem" "(" K ")" -> BagItem {cons("BagItem")}
 Bag "=>" Bag -> Bag {cons("ReplaceBag")}
 "(" Bag ")" -> Bag {bracket}
 
 %% Sets
 SetItem+ -> Set
-".Set" -> Set
+".Set" -> Set {cons("EmptySet")}
 "SetItem" "(" K ")" -> SetItem {cons("SetItem")}
 Set "=>" Set -> Set {cons("ReplaceSet")}
 "(" Set ")" -> Set {bracket}
@@ -112,6 +113,16 @@ VarId ":" "List" -> ListVariable {prefer, cons("ListVariable")}
 VarId ":" "Bag" -> BagVariable {prefer, cons("BagVariable")}
 VarId ":" "Map" -> MapVariable {prefer, cons("MapVariable")}
 VarId ":" "Set" -> SetVariable {prefer, cons("SetVariable")}
+
+%% Builtins
+K "+Nat" K -> INT {cons("AddNat")}
+K "*Nat" K -> INT {cons("MultNat")}
+K "+Int" K -> INT {cons("AddInt")}
+K "*Int" K -> INT {cons("MultInt")}
+"sNat" "(" K ")" -> INT {cons("SuccNat")}
+
+
+
 
 context-free restrictions
 Variable -/- [\:]
