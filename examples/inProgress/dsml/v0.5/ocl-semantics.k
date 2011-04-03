@@ -46,14 +46,15 @@ rule not B1:Bool => notBool B1  [structural]
 
 // equality,  for all types
 
-rule (Id1:Id = Id2:Id) => Id1 ==Bool Id2 [structural]
+rule <k> (Id1:Id = Id2:Id) => Id1 ==Bool Id2 <_/k> [structural]//only in k to avoid undesired reds
 rule A1 = A2 => A1 ==Int A2  [structural]
 rule (Str1 = Str2) => Str1 ==Bool Str2 [structural]
 rule (B1 = B2:Bool) =>  B1 ==Bool B2 [structural]
 // for non-scalar types, equality = equality of bags
 // this relies on the invariant that there is at most
 // one pair (instance name, class name) per model.
-rule (val(C1) = val(C2)) => C1 ==Bool C2 [structural]
+//only in k  to avoid undesired reds
+rule <k> (val(C1) = val(C2)) => C1 ==Bool C2  <_/k>[structural] 
 
 
 //includes, excludes
@@ -233,6 +234,8 @@ rule <k>  val(B) ->select( Var| BEXP:Exp )
         N'|->  (EXP:Exp => EXP union (if BEXP[open(BI)/Var] then val(BI) else val(.Bag) endif))
  <_/mem>
       [structural]
+
+syntax K ::= toto
 
  rule <k>  * N => EXP <_/k>
  <mem_> ((N |-> [val(.Bag)->select(Var| BEXP:Exp), N'])
