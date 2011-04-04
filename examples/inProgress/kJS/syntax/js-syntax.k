@@ -1,19 +1,25 @@
 kmod JS-NUMBER is including PL-BUILTINS
 	
 	syntax MaudeNumber ::= Int | Float
-	syntax JSNumber ::= $n( MaudeNumber ) | $zero( Int )
-	syntax JSNumeric ::= JSNumber | $infinity( Int ) | $nan
+	syntax JSZero ::= $zero( Int )
+	syntax JSNonZero ::= $n( MaudeNumber )
+	syntax JSNumber ::= JSNonZero | JSZero
+	syntax JSInfinity ::= $infinity( Int )
+	syntax JSQuantity ::= JSNumber | JSInfinity
+	syntax JSNaN ::= $nan
+	---syntax JSNumericConcept ::= JSNaN | JSInfinity
+	syntax JSNumeric ::= JSQuantity | JSNaN
 	
-	syntax Int ::= sign( JSNumeric )
-	syntax Float ::= numericValue( JSNumeric )
+	syntax Int ::= sign( JSQuantity )
+	syntax Float ::= floatValue( JSNumber )
 	
-	macro sign($zero(I)) 		= 	I
-	macro sign($infinity(I)) 	= 	I
-	macro sign(Num:JSNumeric) 	= 	if numericValue(Num) >=Float 0.0 then 1 else -1 fi
+	macro sign($zero(I)) 			= 	I
+	macro sign($infinity(I)) 		= 	I
+	macro sign($n(N:MaudeNumber)) 	= 	if floatValue($n(N)) >=Float 0.0 then 1 else -1 fi
 	
-	macro numericValue($n(F:Float))			= F
-	macro numericValue($n(I:Int))			= Int2Float(I)
-	macro numericValue($zero(I))			= 0.0
+	macro floatValue($n(F:Float))			= F
+	macro floatValue($n(I:Int))			= Int2Float(I)
+	macro floatValue($zero(I))			= 0.0
 ---	macro numericValue($infinity(I:Int))	= if I >=Int 0 then Infinity else -Infinity fi
 
 	macro $n(0) 		= $zero(1)
@@ -29,7 +35,10 @@ kmod JS-PRIMITIVES is including JS-NUMBER
 	
 	syntax JSBoolean ::= $b( Bool )
 	syntax JSString ::= $s( String )
-	syntax JSPrimitive ::= $undefined | $null | JSBoolean | JSString | JSNumeric
+	syntax JSUndefined ::= $undefined
+	syntax JSNull ::= $null
+	syntax JSNone ::= JSUndefined | JSNull
+	syntax JSPrimitive ::= JSNone | JSBoolean | JSString | JSNumeric
 	
 	macro boolValue($b(B:Bool)) = B
 endkm
@@ -38,7 +47,13 @@ kmod JS-SYNTAX is including JS-PRIMITIVES + K
 
 	syntax JSObject ::= $regex( String ) | $o( List{K} ) --- | #function!!!
 	syntax JSValue ::= JSPrimitive | JSObject
+	syntax JSNonNumeric ::= JSObject | JSNone | JSBoolean | JSString
+	syntax JSNonString ::=  JSObject | JSNone | JSBoolean | JSNumeric
+	syntax JSNonNaN ::= 	JSNonNumeric | JSQuantity
+	syntax JSNonNumber ::=  JSNonNumeric | JSInfinity | JSNaN
+	syntax JSBooleanPlus ::=  JSBoolean | JSUndefined
 	
+
 	---syntax List{JS} ::= JS | .List{JS} | List{JS} , List{JS} [assoc id: .List{JS}]
 	
 	syntax K ::= 
