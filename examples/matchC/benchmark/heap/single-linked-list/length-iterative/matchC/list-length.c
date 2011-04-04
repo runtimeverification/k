@@ -8,14 +8,14 @@ struct listNode {
 };
 
 int length(struct listNode* x)
-//@ pre  <heap> list(x)(A), H </heap> /\ x = x0
-//@ post <heap> list(x0)(A), H </heap> /\ returns(len(A))
+/*@ cfg  <heap_> list(x)(A) => list(x0)(A) <_/heap>
+    req x = x0
+    ens returns(len(A)) */
 {
   int l;
   
   l = 0;
-  /*@ invariant <heap> lseg(x0,x)(?A1), list(x)(?A2), H </heap>
-                /\ A = ?A1 @ ?A2 /\ l = len(?A1) */
+//@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> /\ A = ?A1 @ ?A2 /\ l = len(?A1)
   while (x) {
     l += 1;
     x = x->next ;
@@ -41,12 +41,11 @@ struct listNode* create(int n)
 }
 
 void destroy(struct listNode* x)
-//@ pre  <heap> list(x)(?A), H </heap>
-//@ post <heap> H </heap>
+//@ cfg <heap_> list(x)(?A) => . <_/heap>
 {
   struct listNode *y;
 
-  //@ invariant <heap> list(x)(?A), H </heap>
+  //@ inv <heap_> list(x)(?A) <_/heap>
   while(x)
   {
     y = x->next;
@@ -55,12 +54,13 @@ void destroy(struct listNode* x)
   }
 }
 
+
 void print(struct listNode* x)
-//@ pre  <heap>  list(x)(A), H </heap><out> B </out> /\ x = x0
-//@ post <heap> list(x0)(A), H </heap><out> B @ A </out>
+/*@ cfg <heap_> list(x0)(A) <_/heap> <out_> epsilon => A </out>
+    req x = x0 */
 {
-  /*@ invariant <heap> lseg(x0,x)(?A1), list(x)(?A2), H </heap>
-                <out> B @ ?A1 </out> /\ A = ?A1 @ ?A2 */
+  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
+          /\ A = ?A1 @ ?A2 */
   while(x)
   {
     printf("%d ",x->val);
@@ -76,16 +76,15 @@ int main()
   int n;
 
   x = create(5);
-  //@ assert <heap> list(x)([1, 2, 3, 4, 5]) </heap>
+  //@ assert <heap_> list(x)([1, 2, 3, 4, 5]) <_/heap>
   n = length(x);
-  //@ assert <heap> list(x)([1, 2, 3, 4, 5]) </heap>
+  //@ assert <heap_> list(x)([1, 2, 3, 4, 5]) <_/heap>
   destroy(x);
-  //@ assert <heap> . </heap>
+  //@ assert <heap_> . <_/heap>
   return 0;
 }
 
 
 //@ var n : Int
 //@ var A, B, C : Seq
-//@ var H : MapItem
 
