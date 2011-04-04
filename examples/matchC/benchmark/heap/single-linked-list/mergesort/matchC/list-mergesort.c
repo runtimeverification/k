@@ -1,22 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
 
 
-struct nodeList* split(struct nodeList* p)
-/*@ pre  < config > < env > p |-> p0  </ env >
-                    < heap > list(p0)(A) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env >  ?rho </ env >
-                    < heap > list(p0)(?A1) list(?r)(?A2) H </ heap > 
-                    < form > returns ?r /\ (seq2mset(A) === (seq2mset(?A1) U seq2mset(?A2))) </ form > C </ config > */
+struct listNode* split(struct listNode* p)
+/*@ cfg <heap> list(p0)(A) => list(p0)(?A1), list(r)(?A2) </heap>
+    req p = p0 
+    ens returns(r) /\ (seq2mset(A) = (seq2mset(?A1) U seq2mset(?A2))) */
 {
-	struct nodeList* r;
+	struct listNode* r;
 	if ((p == 0) || (p->next==0)) r = 0;
 	else
 	{
@@ -27,19 +24,15 @@ struct nodeList* split(struct nodeList* p)
 	}
 	return r;
 }
-//breaker
-struct nodeList* merge(struct nodeList* p, struct nodeList* q)
-/*@ pre  < config > < env > p |-> p0 q |-> q0 </ env >
-                    < heap > list(p0)(A1) list(q0)(A2) H </ heap >
-                    < form > isSorted(A1) /\ isSorted(A2) </ form > C </ config > */
-/*@ post < config > < env >  ?rho </ env >
-                    < heap > list(?r)(?A) H </ heap > 
-                    < form > returns ?r /\ 
-                            (seq2mset(?A) === (seq2mset(A1) U seq2mset(A2))) /\ 
-                            isSorted(?A) /\ 
-                            ((?r === p0) \/ (?r === q0)) </ form > C </ config > */
+
+
+struct listNode* merge(struct listNode* p, struct listNode* q)
+/*@ cfg <heap> list(p)(A1), list(q)(A2) => list(r)(?A) </heap>
+    req p = p0 /\ q = q0 /\ isSorted(A1) /\ isSorted(A2)
+    ens returns(r) /\ (seq2mset(?A) = (seq2mset(A1) U seq2mset(A2))) /\ isSorted(?A) /\ ((r = p0) \/ (r = q0))
+    */
 {
-	struct nodeList* t;
+	struct listNode* t;
 	if (q==0) t = p;
 	else
 	{
@@ -48,7 +41,7 @@ struct nodeList* merge(struct nodeList* p, struct nodeList* q)
 		else
 		{
       p->next = p->next;
-			if (q->val < p->val)
+			if (q->val <p->val)
 			{
 				t = q;
 				q = q->next;
@@ -63,17 +56,15 @@ struct nodeList* merge(struct nodeList* p, struct nodeList* q)
 	}
 	return t;
 }
-//breaker
-struct nodeList* mergesort(struct nodeList* p)
-/*@ pre  < config > < env > p |-> p0  </ env >
-                    < heap > list(p0)(A) H </ heap >
-                    < form > TrueFormula </ form > C </ config > */
-/*@ post < config > < env >  ?rho </ env >
-                    < heap > list(?r)(?A) H </ heap > 
-                    < form > returns ?r /\ (seq2mset(A) === seq2mset(?A)) /\ isSorted(?A) </ form > C </ config > */
+
+
+struct listNode* mergesort(struct listNode* p)
+/*@ cfg <heap> list(p0)(A) => list(r)(?A) </heap>
+    req p = p0
+    ens returns(r) /\ (seq2mset(A) = seq2mset(?A)) /\ isSorted(?A)*/
 {
-	struct nodeList* r;
-	struct nodeList* q;
+	struct listNode* r;
+	struct listNode* q;
 	q = 0;
 	if ((p==0) || (p->next == 0)) r = p;
 	else
@@ -86,8 +77,9 @@ struct nodeList* mergesort(struct nodeList* p)
 	}
 	return r;
 }
-//breaker
-void print(struct nodeList* x)
+
+
+void print(struct listNode* x)
 {
 	while(x!=0)
 	{
@@ -96,56 +88,50 @@ void print(struct nodeList* x)
 	}
 	printf("\n");
 }
-//breaker
+
+
 int main()
 {
-	struct nodeList *x;
-  struct nodeList *y;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+	struct listNode *x;
+  struct listNode *y;
+  x = (struct listNode*)malloc(sizeof(struct listNode));
   x->val = 70;
   x->next = 0;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 6;
   y->next = x;
   x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 47;
   y->next = x;
   x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 52;
   y->next = x;
   x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 5;
   y->next = x;
   x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 1;
   y->next = x;
   x = y;
-  y = (struct nodeList*)malloc(sizeof(struct nodeList));
+  y = (struct listNode*)malloc(sizeof(struct listNode));
   y->val = 111;
   y->next = x;
   x = y;
  
-	print(x);
+	//print(x);
 	y = split(x);
-	print(x);
-	print(y);
+	//print(x);
+	//print(y);
 	x = merge(x,y);
 	x = mergesort(x);
 	print(x);
+  //@assert <out> 1 @ 5 @ 6 @ 47 @ 52 @ 70 @ 111 </out>
 	return 0;
 }
 
-
-
-/*@ var ?r : ?Int */
-/*@ var p0 q0 : FreeInt */
-/*@ var ?A ?A1 ?A2 : ?Seq */
-/*@ var A A1 A2 : FreeSeq */
-/*@ var ?rho : ?MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
+//@ var A : Seq
 
