@@ -1,6 +1,20 @@
-Prerequisites
+To install the K Framework, you simply need this package somewhere on your system.  Your languages will refer to its location.  See the /examples for how this works.
 
-Maude
-perl
- - XML perl module installed
+The system is properly installed when you can run "make test" in the /examples directory, and "make" in the /regressionTests directory.
 
+Prerequisites:
+
+- Maude (http://maude.cs.uiuc.edu/)
+	- Only versions 2.5 and later are supported
+- Perl
+	- Needs the following modules, installable through cpan (linux, cygwin) or ppm (windows):
+		- Regexp::Common
+		- XML::DOM
+		- XML::LibXML::Reader
+		- Tree::Nary
+		- Please let us know if you have to install any others.
+
+Optional:
+
+- Haskell (GHC)
+	- This is used with the output pretty printer in tools/OutputFilter, and is not required.
