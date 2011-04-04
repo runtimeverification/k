@@ -1,36 +1,35 @@
 #include <stdlib.h>
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
-struct nodeList* prefix(struct nodeList* x, int i)
-/*@ pre < config > < env > x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)([?i] @ A) </ heap > < form > returns ?x </ form > </ config > */
+struct listNode* prefix(struct listNode* x, int i)
+/*@ cfg  <heap> list(x)(A) => list(x)([i0] @ A) </heap>
+    req i = i0 
+    ens returns(x)*/
 {
-	struct nodeList* y;
-	y = (struct nodeList*) malloc (sizeof(struct nodeList));
+	struct listNode* y;
+	y = (struct listNode*) malloc (sizeof(struct listNode));
 	y->val = i;
 	y->next = x;
-	return y;
+  x = y;
+	return x;
 }
 
 int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
-  struct nodeList *x;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  struct listNode *x;
+  x = (struct listNode*)malloc(sizeof(struct listNode));
   x->val = 6;
   x->next = 0;
-  /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)([6]) </ heap > < form > TrueFormula </ form > </ config > */
+  //@ assert <heap> list(x)([6]) </heap>
   x = prefix(x,5) ;
+  //@ assert <heap> list(x)([5, 6]) </heap>
   return 0;
 }
 
 
+//@ var A : Seq
 
-/*@ var ?x ?i : ?Int */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
