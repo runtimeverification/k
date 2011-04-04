@@ -1,88 +1,105 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
 
-struct nodeList* insert(struct nodeList* x, int i)
-/*@ pre < config > < env > x |-> ?x i |-> ?i </ env > < heap > list(?x)(A) </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > list(?x)(?A) </ heap > < form > returns ?x /\ (seq2mset(?A) === seq2mset(A @ [?i])) </ form > </ config > */
+struct listNode* insert(struct listNode* x, int i)
+/* cfg  <heap_> list(x)(A) => list(x)(?A) <_/heap> 
+    req i = i0 /\ x = x0
+    ens returns(x) /\ (seq2mset(?A) = seq2mset(A @ [i0])) */
 {
-struct nodeList* iNode;
-	iNode = (struct nodeList*) malloc (sizeof(struct nodeList));
-	iNode->val = i;
-	iNode->next = 0;
-	if (x == 0) x = iNode;
+  
+  struct listNode* placement;
+  struct listNode* iterator;
+  struct listNode* iNode;
+
+	if (x == 0)
+  {
+  	iNode = (struct listNode*) malloc (sizeof(struct listNode));
+    iNode->val = i;
+    iNode->next = 0;
+    x = iNode;
+  }
 	else
 	{
-		if (x->val > i)
+    if (x->val > i)
 		{
+      iNode = (struct listNode*) malloc (sizeof(struct listNode));
+      iNode->val = i;
 			iNode->next = x;
 			x = iNode;
 		}
 		else
 		{
-			struct nodeList* placement;
-			struct nodeList* iterator;
-			placement = x->next;
-      iterator = placement->next;
-/*@ invariant 
-    < config > 
-    < env > x |-> ?x 
-            i |-> ?i
-            iNode |-> ?in
-            iterator |-> ?it
-            placement |-> ?p
-    </ env >
-    < heap > lseg(?x,?p)(?B)
-             ?p |-> ?v1 : (nodeList . val)
-             (?p +Int 1) |-> ?it : (nodeList . next)
-             ?it |-> ?v2 : (nodeList . val)
-             (?it +Int 1) |-> ?aux : (nodeList . next)
-             list(?aux)(?C)  
-             ?in |-> ?i : (nodeList . val)
-             (?in +Int 1) |-> 0 : (nodeList . next)
-    </ heap >
-    < form > A === (?B @ [?v1] @ [?v2] @ ?C) </ form > </ config > */
-			while (iterator!=0)
-			{
-				if(iterator->val > i)
-				{
-					iterator = iterator->next;
-				}
-				else
-				{
-					placement = iterator;
-					iterator = iterator->next;
-				}
-			}
-			iNode->next = placement->next;
-			placement->next = iNode;
+      iterator = x->next;
+      placement = iterator;
+    
+// inv <heap_> lseg(x,placement)(?B), lseg(placement,iterator)(?D), list(iterator)(?C) <_/heap> /\ A = (?B @ ?D @ ?C)
+      while (iterator)
+        {
+          if(iterator->val > i)
+          {
+            iterator = iterator->next;
+          }
+          else
+          {
+            placement = iterator;
+            iterator = iterator->next;
+          }
+        }
+      if (placement == 0)
+      {
+        iNode = (struct listNode*) malloc (sizeof(struct listNode));
+        iNode->val = i;
+        iNode->next = 0;
+        x->next = iNode;
+      }
+      else
+      {
+        iNode = (struct listNode*) malloc (sizeof(struct listNode));
+        iNode->val = i;
+        iNode->next = placement->next;
+        placement->next = iNode;
+      }
 		}
 	}
 	return x;
 }
 
+void print(struct listNode* x)
+/*@ cfg <heap_> list(x0)(A) <_/heap> <out_> epsilon => A </out>
+    req x = x0 */
+{
+  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
+          /\ A = ?A1 @ ?A2 */
+  while(x)
+  {
+    printf("%d ",x->val);
+    x = x->next;
+  }
+  printf("\n"); 
+}
 
 int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
 {
-  struct nodeList *x;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
+  struct listNode *x;
+  x = (struct listNode*)malloc(sizeof(struct listNode));
   x->val = 5;
   x->next = 0;
-  /*@ assert < config > < env > x |-> ?x </ env > < heap > list(?x)([5]) </ heap > < form > TrueFormula </ form > </ config > */
+  print(x);
+  //@ assert <heap_> list(x)([5]) <_/heap>
+  // odd behaviour, tool proves the function but cannot assert its precondition
   x = insert(x,8) ;
   x = insert(x,3) ;
+  x = insert(x,6) ;
+  print(x);
+  //@ assert <heap_> list(x)([3, 5, 6, 8]) <_/heap>
   return 0;
 }
 
-
-
-/*@ var ?x ?y ?it ?i ?in ?aux ?v1 ?v2 ?p : ?Int */
-/*@ var ?A ?B ?C ?D : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
+//@ var i, v1, v2 : Int
+//@ var A, B, C, D : Seq
