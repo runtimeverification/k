@@ -1,47 +1,84 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-struct nodeList {
+
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
-int length(struct nodeList* a)
-/*@ pre < config > 
-        < env > a |-> a0 </ env >
-        < heap > list(a0)(A) H </ heap > 
-        < form > TrueFormula </ form > </ config > */
-/*@ post < config > 
-         < env > ?rho </ env >
-         < heap > list(a0)(A) H </ heap > 
-         < form > ?l === len(A) /\ returns ?l </ form > </ config > */
+int length(struct listNode* x)
+/*@ cfg  <heap_> list(x)(A) => list(x0)(A) <_/heap> 
+    req x = x0
+    ens returns(len(A)) */
 {
-  int l;
-  struct nodeList* x;
-  l = 0;
-  if(a != 0)
+  if (x == 0) return 0;
+  else 
   {
-    x = a->next;
-    l = length(x) + 1 ;
+    return (length(x->next) + 1);
   }
-  return l;
 }
 
-int main()
-/*@ pre < config > < env > (.).Map </ env > < heap > (.).Map </ heap > < form > TrueFormula </ form > </ config > */
-/*@ post < config > < env > ?rho </ env > < heap > ?H </ heap > < form > TrueFormula </ form > </ config > */
+struct listNode* create(int n)
 {
-  int l;
-  struct nodeList* x;
-  x = (struct nodeList*)malloc(sizeof(struct nodeList));
-  x->val = 5;
-  x->next = 0;
-  l = length(x);
+  struct listNode *x;
+  struct listNode *y;
+  x = 0;
+  while (n)
+  {
+    y = x;
+    x = (struct listNode*)malloc(sizeof(struct listNode));
+    x->val = n;
+    x->next = y;
+    n -= 1;
+  }
+  return x;
+}
+
+void destroy(struct listNode* x)
+//@ cfg  <heap_> list(x)(?A) => . <_/heap>
+{
+  struct listNode *y;
+
+  //@ invariant <heap_> list(x)(?A) <_/heap>
+  while(x)
+  {
+    y = x->next;
+    free(x);
+    x = y;
+  }
+}
+
+void print(struct listNode* x)
+/*@ cfg <heap_> list(x0)(A) <_/heap> <out_> epsilon => A </out>
+    req x = x0 */
+{
+  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
+          /\ A = ?A1 @ ?A2 */
+  while(x)
+  {
+    printf("%d ",x->val);
+    x = x->next;
+  }
+  printf("\n"); 
+}
+
+
+int main()
+{
+  struct listNode *x;
+  int n;
+
+  x = create(5);
+  //@ assert <heap_> list(x)([1, 2, 3, 4, 5]) <_/heap>
+  n = length(x);
+  //@ assert <heap_> list(x)([1, 2, 3, 4, 5]) <_/heap>
+  destroy(x);
+  //@ assert <heap_> . <_/heap>
   return 0;
 }
 
-/*@ var ?x ?l : ?Int */
-/*@ var a0 : FreeInt */
-/*@ var ?A ?X : ?Seq */
-/*@ var A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var H : FreeMapItem */
+
+//@ var n : Int
+//@ var A, B, C : Seq
+
