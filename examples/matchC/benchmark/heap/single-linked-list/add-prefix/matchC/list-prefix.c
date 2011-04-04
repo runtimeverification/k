@@ -9,8 +9,9 @@ struct listNode {
 
 
 struct listNode* append(struct listNode *x, int i)
-//@ pre  <heap> list(x)(A), H </heap> /\ i = i0
-//@ post <heap> list(?x)([i0] @ A), H </heap> /\ returns(?x)
+/*@ cfg  <heap_> list(x)(A) => list(?x)([i0] @ A) <_/heap>
+    req i = i0
+    ens returns(?x) */
 {
   struct listNode *p;
   p = (struct listNode*)malloc(sizeof(struct listNode));
@@ -45,12 +46,11 @@ struct listNode* create(int n)
 }
 
 void destroy(struct listNode* x)
-//@ pre  <heap> list(x)(?A), H </heap>
-//@ post <heap> H </heap>
+//@ cfg <heap_> list(x)(?A) => . <_/heap>
 {
   struct listNode *y;
 
-  //@ invariant <heap> list(x)(?A), H </heap>
+  //@ inv <heap_> list(x)(?A) <_/heap>
   while(x)
   {
     y = x->next;
@@ -61,11 +61,11 @@ void destroy(struct listNode* x)
 
 
 void print(struct listNode* x)
-//@ pre  <heap>  list(x)(A), H </heap><out> B </out> /\ x = x0
-//@ post <heap> list(x0)(A), H </heap><out> B @ A </out>
+/*@ cfg <heap_> list(x0)(A) <_/heap> <out_> epsilon => A </out>
+    req x = x0 */
 {
-  /*@ invariant <heap> lseg(x0,x)(?A1), list(x)(?A2), H </heap>
-                <out> B @ ?A1 </out> /\ A = ?A1 @ ?A2 */
+  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
+          /\ A = ?A1 @ ?A2 */
   while(x)
   {
     printf("%d ",x->val);
@@ -93,5 +93,4 @@ int main()
 
 //@ var n, i : Int
 //@ var A, B, C : Seq
-//@ var H : MapItem
 
