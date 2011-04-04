@@ -8,15 +8,15 @@ struct listNode {
 };
 
 struct listNode* append(struct listNode *x, struct listNode *y)
-//@ pre  <heap> list(x)(A), list(y)(B), H </heap>
-//@ post <heap> list(?x)(A @ B), H </heap> /\ returns(?x)
+/*@ cfg <heap_> list(x)(A), list(y)(B) => list(?x)(A @ B) <_/heap>
+    ens returns(?x) */
 {
   struct listNode *p;
   if (x == 0)
    return y;
 
   p = x;
-  /*@ invariant <heap> lseg(x, p)(?A1), list(p)(?A2), !H </heap> 
+  /*@ inv <heap> lseg(x, p)(?A1), list(p)(?A2), !H </heap> 
                 /\ A = ?A1 @ ?A2 /\ ~(p = 0) /\ y = !y */
   while (p->next)
     p = p->next;
@@ -42,12 +42,11 @@ struct listNode* create(int n)
 }
 
 void destroy(struct listNode* x)
-//@ pre  <heap> list(x)(?A), H </heap>
-//@ post <heap> H </heap>
+//@ cfg <heap_> list(x)(?A) => . <_/heap>
 {
   struct listNode *y;
 
-  //@ invariant <heap> list(x)(?A), H </heap>
+  //@ inv <heap_> list(x)(?A) <_/heap>
   while(x)
   {
     y = x->next;
@@ -58,11 +57,11 @@ void destroy(struct listNode* x)
 
 
 void print(struct listNode* x)
-//@ pre  <heap>  list(x)(A), H </heap><out> B </out> /\ x = x0
-//@ post <heap> list(x0)(A), H </heap><out> B @ A </out>
+/*@ cfg <heap_> list(x0)(A) <_/heap> <out_> epsilon => A </out>
+    req x = x0 */
 {
-  /*@ invariant <heap> lseg(x0,x)(?A1), list(x)(?A2), H </heap>
-                <out> B @ ?A1 </out> /\ A = ?A1 @ ?A2 */
+  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
+          /\ A = ?A1 @ ?A2 */
   while(x)
   {
     printf("%d ",x->val);
@@ -80,17 +79,17 @@ int main()
   x = create(4);
   printf("x: ");
   print(x);
-  //@ assert <heap> list(x)(!A1) </heap>
+  //@ assert <heap_> list(x)(!A1) <_/heap>
   y = create(3);
   printf("y: ");
   print(y);
-  //@ assert <heap> list(x)(!A1), list(y)(!A2) </heap>
+  //@ assert <heap_> list(x)(!A1), list(y)(!A2) <_/heap>
   x = append(x, y);
   printf("append(x, y): ");
   print(x);
-  //@ assert <heap> list(x)(!A1 @ !A2) </heap>
+  //@ assert <heap_> list(x)(!A1 @ !A2) <_/heap>
   destroy(x);
-  //@ assert <heap> . </heap>
+  //@ assert <heap_> . </heap>
   
   return 0;
 }
