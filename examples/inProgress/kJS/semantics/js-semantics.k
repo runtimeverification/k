@@ -220,7 +220,7 @@ kmod JS-COMPARISON is including JS-UNARY + JS-SYNTAX + PL-BUILTINS
 
 	--- ECMA-262 11.8.5
 	syntax JSBoolean ::= comparison( JSBooleanPlus , Bool )
-	syntax JSBooleanPlus ::= primLessThan( JSPrimitive , JSPrimitive ) 
+	syntax JSBooleanPlus ::= primLessThan( JSValue , JSValue ) 
 			| lessThan( JSNumeric , JSNumeric )
 	
 	rule comparison($undefined, B:Bool)	=> $b(false)	[structural]
@@ -240,51 +240,51 @@ kmod JS-COMPARISON is including JS-UNARY + JS-SYNTAX + PL-BUILTINS
 endkm
 
 
---- kmod JS-IDENTITY is including JS-UNARY + JS-SYNTAX
---- 	syntax JSBool ::= identica( JSNonNaN , JSNonNaN )
---- 	
---- 	--- ECMA-262 11.9.4-6
---- 	
---- 	rule #notIdentical(Left:JSValue, Right:JSValue) => not(#identical(Left, Right))
---- 	
---- 	rule #identical($nan, Right) 						=> $b(false)
---- 	rule #identical(Left, $nan) 						=> $b(false)
---- 	rule #identical(Value1:JSNonNaN, Value2:JSNonNaN) 	=> identica(Value1, Value2)
---- 
---- 	--- rule #identical(Left, Right) => $b(false) if isEitherNaN(Left, Right)
---- 	--- rule #identical(Left, Right) => identical(Left, Right)
---- 	
---- 	rule identica(Num1:JSNumber, Num2:JSNumber) 
---- 			=> $b(floatValue(Num1) ==Bool floatValue(Num2)) [structural]
---- 	rule identica(Other1:JSNonNumber, Other2:JSNonNumber) 
---- 			=> $b(Other1 ==Bool Other2) [structural]
---- 	
---- endkm
---- 
---- kmod JS-EQUALITY is including JS-UNARY + JS-SYNTAX + JS-IDENTITY 
---- 	syntax JSBool ::= equal( JSValue , JSValue )
---- 	
---- 	--- ECMA-262 11.9.1-3
---- 	rule #notEqual(Left:JSValue, Right:JSValue) => not(#equal(Left, Right))
---- 	
---- 	rule #equal($nan, Right) 	=> $b(false)
---- 	rule #equal(Left, $nan) 	=> $b(false)
---- 	rule #equal(Left, Right) 	=> $b(true)  if identical(Left, Right)
---- 	rule #equal(Left, Right) 	=> equal(Left, Right) [owise]
---- 	
---- 	macro equal($null, $undefined)			= $b(true)
---- 	macro equal($undefined, $null)			= $b(true)
---- 	
---- 	macro equal(N1:JSNumeric, S2:String)	= #equal(N1, toNumeric(S2))
---- 	macro equal(S1:String, N2:JSNumeric)	= #equal(toNumeric(S1), N2)
---- 	macro equal(B1:JSBool, V2)				= #equal(toNumeric(B1), V2)
---- 	macro equal(V1, B2:JSBool)				= #equal(V1, toNumeric(B2))
---- 	macro equal(N1, O2:JSObject)			= #equal(N1, toPrimitive(O2, "N"))
---- 	macro equal(O1:JSObject, N2)			= #equal(toPrimitive(O1, "N"), N2)
---- 	macro equal(S1, O2)						= #equal(S1, toPrimitive(O2, "N"))
---- 	macro equal(O1, S2)						= #equal(toPrimitive(O1, "N"), S2)
---- 	macro equal(V1, V2)						= $b(false)
---- endkm
+kmod JS-IDENTITY is including JS-UNARY + JS-SYNTAX
+	syntax JSBool ::= identical( JSNonNaN , JSNonNaN )
+	
+	--- ECMA-262 11.9.4-6
+	
+	rule #notIdentical(Left:JSValue, Right:JSValue) => not(#identical(Left, Right))
+	
+	rule #identical($nan, Right) 						=> $b(false)
+	rule #identical(Left, $nan) 						=> $b(false)
+	rule #identical(Value1:JSNonNaN, Value2:JSNonNaN) 	=> identical(Value1, Value2)
+
+	--- rule #identical(Left, Right) => $b(false) if isEitherNaN(Left, Right)
+	--- rule #identical(Left, Right) => identical(Left, Right)
+	
+	rule identical(Num1:JSNumber, Num2:JSNumber) 
+			=> $b(floatValue(Num1) ==Bool floatValue(Num2)) [structural]
+	rule identical(Other1:JSNonNumber, Other2:JSNonNumber) 
+			=> $b(Other1 ==Bool Other2) [structural]
+	
+endkm
+
+kmod JS-EQUALITY is including JS-UNARY + JS-SYNTAX + JS-IDENTITY 
+	syntax JSBool ::= equal( JSValue , JSValue )
+	
+	--- ECMA-262 11.9.1-3
+	rule #notEqual(Left:JSValue, Right:JSValue) => not(#equal(Left, Right))
+	
+	rule #equal($nan, Right) 	=> $b(false)
+	rule #equal(Left, $nan) 	=> $b(false)
+	rule #equal(Left, Right) 	=> $b(true)  if identical(Left, Right)
+	rule #equal(Left, Right) 	=> equal(Left, Right) [owise]
+	
+	macro equal($null, $undefined)			= $b(true)
+	macro equal($undefined, $null)			= $b(true)
+	
+	macro equal(N1:JSNumeric, S2:String)	= #equal(N1, toNumeric(S2))
+	macro equal(S1:String, N2:JSNumeric)	= #equal(toNumeric(S1), N2)
+	macro equal(B1:JSBool, V2)				= #equal(toNumeric(B1), V2)
+	macro equal(V1, B2:JSBool)				= #equal(V1, toNumeric(B2))
+	macro equal(N1, O2:JSObject)			= #equal(N1, toPrimitive(O2, "N"))
+	macro equal(O1:JSObject, N2)			= #equal(toPrimitive(O1, "N"), N2)
+	macro equal(S1, O2)						= #equal(S1, toPrimitive(O2, "N"))
+	macro equal(O1, S2)						= #equal(toPrimitive(O1, "N"), S2)
+	macro equal(V1, V2)						= $b(false)
+endkm
 
 kmod JS-LOGIC is including JS-SYNTAX + JS-CONVERSIONS
 	

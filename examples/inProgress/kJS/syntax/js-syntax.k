@@ -47,13 +47,15 @@ kmod JS-SYNTAX is including JS-PRIMITIVES + K
 
 	syntax JSObject ::= $regex( String ) | $o( List{K} ) --- | #function!!!
 	syntax JSValue ::= JSPrimitive | JSObject
+	
 	syntax JSNonNumeric ::= JSObject | JSNone | JSBoolean | JSString
 	syntax JSNonString ::=  JSObject | JSNone | JSBoolean | JSNumeric
 	syntax JSNonNaN ::= 	JSNonNumeric | JSQuantity
 	syntax JSNonNumber ::=  JSNonNumeric | JSInfinity | JSNaN
 	syntax JSBooleanPlus ::=  JSBoolean | JSUndefined
 	
-
+	syntax JSValue ::= JSNonNumeric | JSNonString | JSNonNaN | JSNonNumber 
+	
 	---syntax List{JS} ::= JS | .List{JS} | List{JS} , List{JS} [assoc id: .List{JS}]
 	
 	syntax K ::= 
