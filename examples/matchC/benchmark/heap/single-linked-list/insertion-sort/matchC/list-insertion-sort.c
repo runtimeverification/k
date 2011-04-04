@@ -1,60 +1,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
 
-struct nodeList* insertionSort(struct nodeList* l)
-/*@ pre < config >
-        < env > l |-> l0 </ env >
-        < heap > list(l0)(L) H </ heap >
-        < form > TrueFormula </ form > C 
-        </ config > */
-/*@ post < config >
-         < env > ?rho </ env >
-         < heap > list(l0)(?L) H </ heap >
-         < form > returns l0 /\ (seq2mset(L) === seq2mset(?L)) /\ isSorted(?L) </ form > C 
-         </ config > */
+struct listNode* insertionSort(struct listNode* l)
+/*@ cfg <heap_> list(l)(L) => list(l)(?L) <_/heap>
+    req l = l0
+    ens returns(l) /\ (seq2mset(L) = seq2mset(?L)) /\ isSorted(?L) */
 {
-  struct nodeList* x;
-  struct nodeList* e;
-  struct nodeList* y;
+  struct listNode* x;
+  struct listNode* e;
+  struct listNode* y;
   x = l;
   l = 0;
-/*@ invariant < config >
-         < env > l |-> ?l x |-> ?x y |-> ?y e |-> ?e </ env >
-         < heap > list(?l)(?L) list (?x)(?X) H </ heap >
-         < form > (seq2mset(L) === seq2mset(?L) U seq2mset(?X)) /\
-                  isSorted(?L) 
-         </ form > C 
-         </ config > */
+/*@ inv <heap_> list(l)(?L), list (x)(?X) <_/heap> /\ (seq2mset(L) = seq2mset(?L) U seq2mset(?X)) /\  isSorted(?L) */
   while(x != 0)
   {
     e = x;
     x = x->next;
     if (l != 0)
     {
-      if(e->val > l->val)
+      if(e->val> l->val)
       {
         y = l;
-/*@ invariant < config >
-         < env > l |-> ?l x |-> ?x y |-> ?y e |-> ?e </ env >
-         < heap > lseg(?l,?y)(?A)
-                  ?y |-> ?u : (nodeList . val)
-                  (?y +Int 1) |-> ?n : (nodeList . next)
-                  list(?n)(?B)
-                  ?e |-> ?v : (nodeList . val)
-                  (?e +Int 1) |-> ?x : (nodeList . next)
-                   list(?x)(?X)
-         H </ heap >
-         < form > (seq2mset(L) === seq2mset(?L) U seq2mset([?v] @ ?X)) /\
-                  isSorted(?L) /\ (?L === (?A @ [?u] @ ?B)) /\ @(max(seq2mset(?A) U {| ?u |}) <Int ?v)
-         </ form > C 
-         </ config > */
-        while ((y->next != 0) && (e->val > y->next->val))
+/* inv <heap_> lseg(l,y)(?A), lseg(y,?n)([?u]), list(?n)(?B), lseg(e,x)([?v]), list(x)(?X) <_/heap> /\ (seq2mset(L) = seq2mset(?L) U seq2mset([?v] @ ?X)) /\ isSorted(?L) /\ (?L = (?A @ [?u] @ ?B)) /\ @(max(seq2mset(?A) U ({|?u|})) < (?v))*/
+        while ((y->next != 0) && (e->val> y->next->val))
         {
           y = y->next;
         }
@@ -76,40 +50,31 @@ struct nodeList* insertionSort(struct nodeList* l)
   return l;
 }
 
-struct nodeList* print(struct nodeList* x)
-/*@ pre < config > 
-             < env > x |-> x0 </ env > 
-             < heap > list(x0)(A) H </ heap > 
-             < form > TrueFormula </ form > C </ config > */
-/*@ post < config > 
-             < env > ?rho </ env > 
-             < heap > list(x0)(A) H </ heap > 
-             < form > returns x0 </ form > C </ config > */
+
+void print(struct listNode* x)
+/*@ cfg <heap_> list(x0)(A) <_/heap> <out_> epsilon => A </out>
+    req x = x0 */
 {
-  struct nodeList* smth;
-  smth = x;
-/*@ invariant < config > 
-             < env > x |-> x0  smth |-> ?s </ env > 
-             < heap > lseg(x0,?s)(?A) list(?s)(?A') H </ heap > 
-             < form > A === ?A @ ?A' </ form > C </ config > */
-  while(smth != 0)
+  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
+          /\ A = ?A1 @ ?A2 */
+  while(x)
   {
-    printf("%d ", smth->val);
-    smth = smth->next;
+    printf("%d ",x->val);
+    x = x->next;
   }
-  printf("\n");
-  return x;
+  printf("\n"); 
 }
 
-struct nodeList* create(int n)
+
+struct listNode* create(int n)
 {
-  struct nodeList *x;
-  struct nodeList *y;
+  struct listNode *x;
+  struct listNode *y;
   x = 0;
   while (n)
   {
     y = x;
-    x = (struct nodeList*)malloc(sizeof(struct nodeList));
+    x = (struct listNode*)malloc(sizeof(struct listNode));
     x->val = n;
     x->next = y;
     n -= 1;
@@ -119,8 +84,8 @@ struct nodeList* create(int n)
 
 int main()
 {
-  struct nodeList *x;
-  struct nodeList *y;
+  struct listNode *x;
+  struct listNode *y;
   x = create(5);
   x->val = 10;
   print(x);
@@ -129,11 +94,5 @@ int main()
   return 0;
 }
 
-
-/*@ var ?a ?b ?h ?t ?e ?n ?u ?v ?l ?x ?y ?s : ?Int */
-/*@ var x0 l0 : FreeInt */
-/*@ var ?A ?A' ?B ?B' ?C ?L ?X : ?Seq */
-/*@ var L A : FreeSeq */
-/*@ var ?rho ?H : ?MapItem */
-/*@ var H : FreeMapItem */
-/*@ var C : FreeBagItem */
+//@ var u, v, n : Int
+//@ var A, B, C, L, X : Seq
