@@ -17,7 +17,7 @@
 
 
 
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 my $path = ".";
 
 BEGIN {
