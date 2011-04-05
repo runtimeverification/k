@@ -3,7 +3,7 @@ require ../conformance
 
 kmod AUTOMATA is including OCL-SEMANTICS + CONFORMANCE
 
-syntax Id ::= x | y  | z
+syntax Id ::= x | y 
 syntax Id ::= automata
  | automaton
  | trace
@@ -16,6 +16,10 @@ syntax Id ::= automata
  | in
  | out
  | initialState
+ | tr
+ | st
+ | tr1
+ | tr2
 
 syntax Id ::= simple
  | a
@@ -65,11 +69,15 @@ syntax Bag ::= initConfig
 		OCL(allInstances(automaton)->forAll(x|(x#active).size() <= 1))
 		OCL(allInstances(transition)->forAll(x|(x#orig).size() >= 1))
 		OCL(allInstances(transition)->forAll(x|(x#orig).size() <= 1))
+		OCL(allInstances(transition)->forAll(x|(x#orig)->forAll(y|(y#out) includes x)))
 		OCL(allInstances(transition)->forAll(x|(x#dest).size() >= 1))
 		OCL(allInstances(transition)->forAll(x|(x#dest).size() <= 1))
+		OCL(allInstances(transition)->forAll(x|(x#dest)->forAll(y|(y#in) includes x)))
+		OCL(allInstances(state)->forAll(x|(x#in)->forAll(y|(y#dest) includes x)))
+		OCL(allInstances(state)->forAll(x|(x#out)->forAll(y|(y#orig) includes x)))
 		OCL((allInstances(initialState).size() = 1))
-		OCL((allInstances(transition)->forAll(x |not(((x#label) = "")))))
-		OCL((allInstances(state)->forAll(x |(x#out)->forAll(y |(x#out)->forAll(z |(((y#label)) = ((z#label))) implies (y = z))))))
+		OCL((allInstances(transition)->forAll(tr |not(((tr#label) = "")))))
+		OCL((allInstances(state)->forAll(st |(st#out)->forAll(tr1 |(st#out)->forAll(tr2 |(((tr1#label)) = ((tr2#label))) implies (tr1 = tr2))))))
 		.List
 	</oclConstraints>
 </metamodel>
@@ -119,7 +127,7 @@ syntax Bag ::= initConfig
 			<attributes>
 				(orig |->typedElt(val(BagItem(s0:state) ),state))
 				(dest |->typedElt(val(BagItem(s1:state) ),state))
-				(label |->typedElt(val(BagItem("b")),string))
+				(label |->typedElt(val(BagItem("a")),string))
 				.Map
 			</attributes>
 		</instance>
