@@ -36,26 +36,26 @@ syntax Id ::= object | undefined // to be extended later with class and instance
 
 
   configuration <T> 
-                  <metamodel?>
+                  <metamodel multiplicity ="?">
                     <name> undefined </name> 
                     <classes>
-                      <class*>
+                      <class multiplicity="*" >
                          <className> undefined </className> 
                          <extends> undefined </extends>
                          <declAttributes> .Map  </declAttributes>
-                      </class*>
+                      </class>
                     </classes>
                     <oclConstraints> .List </oclConstraints>
-                  </metamodel?>
+                  </metamodel>
                  <models>
-                   <model*> 
+                   <model multiplicity="*"> 
                       <modelName> undefined </modelName>
-                      <instance*>
+                      <instance multiplicity="*">
                          <instName> undefined </instName>
                          <ofClass> undefined </ofClass>
                          <attributes> .Map </attributes>
-                      </instance*>
-                   </model*>
+                      </instance>
+                   </model>
                  </models>
                 <k> .K </k> 
                 <mem> .Map </mem>
