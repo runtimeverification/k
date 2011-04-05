@@ -8,7 +8,6 @@ use Cwd 'abs_path';
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use English;
 
-
 BEGIN {
     unshift (@INC, (File::Basename::fileparse($0))[1]);
 }
@@ -30,6 +29,38 @@ my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");
 my $temp_file   = fresh("kompile_tmp", ".txt");
 my $maude_xml_file   = fresh("kompile_xml", ".xml");
+
+
+# here we trap control-c (and others) so we can clean up when that happens
+$SIG{'INT'} = 'interruptHandler'; # handle control-c 
+$SIG{'QUIT'} = 'interruptHandler';
+$SIG{'HUP' } = 'interruptHandler';
+$SIG{'TRAP'} = 'interruptHandler';
+$SIG{'ABRT'} = 'interruptHandler';
+$SIG{'STOP'} = 'interruptHandler';
+
+sub interruptHandler {
+	finalCleanup(); # call single cleanup point
+	exit(1); # since we were interrupted, we should exit with a non-zero code
+}
+
+# this block gets run at the end of a normally terminating program, whether it simply exits, or dies.  We use this to clean up.
+END {
+	my $retval = $?; # $? contains the value the program would normally have exited with
+	finalCleanup(); # call single cleanup point
+	exit($retval);
+}
+
+# this subroutine can be used as a way to ensure we clean up all resources whenever we exit.  This is going to be mostly temp files.  If the program terminates for almost any reason, this code will be executed.
+sub finalCleanup {
+	# clean(); # delete normal kompile files
+	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
+	
+	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
+}
+
+
+
 check_software();
 
 # add configuration parser
