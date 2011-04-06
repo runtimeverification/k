@@ -27,7 +27,7 @@ BEGIN {
 
 use lib $path;
 $path = (File::Basename::fileparse($0))[1];
-
+$path = abs_path($path);
 
 
 
@@ -554,11 +554,14 @@ sub  get_cell_line
 # and exits if there are errors
 sub create_xml_parser
 {
-	$path = abs_path($path);
+#	$path = abs_path($path);
 
+        # quote dots and array-like symbols in paths 
+        $path =~ s/(@|\.)/\\($1)/sg;
+    
 	# the newly generated perl file
 	# runs a xml parser which will detect 
-	# and die with some error message
+	# (and die with some error message)
 	# if the xml cannot be parsed
 	my $content =
 	"#!/usr/bin/perl
