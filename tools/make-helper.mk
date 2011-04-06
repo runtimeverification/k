@@ -33,8 +33,7 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) $(COMPILE_OPTIONS) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output
-#@cat $(COMPILED_FILE).output
+	$(KCOMPILE) $(LANGUAGE_FILE) $(COMPILE_OPTIONS) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output && exit $${PIPESTATUS[0]}
 
 # this should build the latex
 latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
@@ -68,7 +67,7 @@ true-test: $(COMPILED_FILE) $(foreach test, $(TESTS), results-$(test).xml) compi
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
 test-%.output: % $(COMPILED_FILE) 
-	@echo q | maude -no-wrap -no-ansi-color $< 2>&1 |tee $@
+	@echo q | maude -no-wrap -no-ansi-color $< 2>&1 |tee $@ && exit $${PIPESTATUS[0]}
 #@cat $@
 	
 results-%.xml: % test-%.output
