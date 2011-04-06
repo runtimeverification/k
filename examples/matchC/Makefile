@@ -9,7 +9,7 @@ VIEWER_JAR = $(VIEWER_DIR)/matchCviewer.jar
 BIN_DIR = $(ML_ROOT_DIR)/bin
 
 
-all:  build
+all: install
 
 build:
 	$(MAKE) -C $(PARSER_DIR)
