@@ -5,7 +5,7 @@ PARSER_JAR = $(PARSER_DIR)/matchCparser.jar
 SEMANTICS_DIR = $(ML_ROOT_DIR)/semantics
 SEMANTICS_COMPILED = $(SEMANTICS_DIR)/matchC-compiled.maude
 VIEWER_DIR = $(ML_ROOT_DIR)/viewer
-VIEWER_JAR = $(VIEWER_DIR)/matchCViewer.jar
+VIEWER_JAR = $(VIEWER_DIR)/matchCviewer.jar
 BIN_DIR = $(ML_ROOT_DIR)/bin
 
 
