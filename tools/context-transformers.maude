@@ -111,13 +111,17 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   eq solveEach(V, KC) = V .
  ceq solveEach(Q[Tl],KC) = Q[solveEachL(Tl,KC)] 
   if Q == ctor(Bag) .
-  ceq solveEach(T, KC)
-    = if getSons(KC') == none then T else plugCell(setContents(SC, contextTransformT(getLevel(KC') + 1, getContents(SC), getConf(KC')))) fi 
-   if SC := splitKCell(T) /\  KC' := getConfElement(getName(SC),KC) . --- [print "solving " Ct "[" T "]" ].
+ ceq solveEach(T, KC) = $solveEach(T, SC,  getConfElement(getName(SC),KC)) 
+  if SC := splitKCell(T) .
  ceq solveEach(Q[T,T'], KC)
    = Q[solveEach(T,KC), T'] 
   if Q == replaceS .
  ceq solveEach(Q[T],KC) = Q[T] if Q = itemCtor(Bag) .
+
+  op $solveEach : Term SplitCell KConf -> [Term] .
+  eq $solveEach(T, SC, KC') 
+   = if getSons(KC') == none then T else plugCell(setContents(SC, contextTransformT(getLevel(KC') + 1, getContents(SC), getConf(KC')))) fi .
+  eq $solveEach(T,SC, KC:[KConf]) = errorT(T, '`[`]:BagItem, "Cell " + string(getName(SC)) + " is not at the right level in the configuration.  Check the initial configuration for the definition matches the rule.") .
   
   op solveEachL : TermList KConf -> [TermList] .
   eq solveEachL((T, Tl), KC) = solveEach(T,KC),solveEachL(Tl,KC) .
@@ -126,6 +130,12 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   op bringToSameLevel : NzNat Term KConf -> Term .
   eq bringToSameLevel(Level, T, KC) 
    = mergeLevels(levelize(Level, term2Set(T, KC), KC), KC) .
+  
+  eq bringToSameLevel(Level, errorT(T,Cxt,Str),KC)
+   = errorT(T,Cxt,Str) .
+
+
+  var Cxt : Term . var Str : String .
   
   op mergeLevels : TermSetLevels KConf -> Term .
   eq mergeLevels({N,TS}, KC) = finalMultiplicity({N, TS}, KC) .
