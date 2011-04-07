@@ -9,7 +9,7 @@ struct listNode {
 
 
 struct listNode* reverse(struct listNode *x)
-/*@ rule <heap_> list(x)(A) => list(?p)(rev(A)) <_/heap>
+/*@ rule <heap_> list(old(x))(A) => list(?p)(rev(A)) <_/heap>
     if returns(?p) */
 {
   struct listNode *p;
@@ -28,7 +28,7 @@ struct listNode* reverse(struct listNode *x)
 }
 
 struct listNode* append(struct listNode *x, struct listNode *y)
-/*@ rule <heap_> list(x)(A), list(y)(B) => list(?x)(A @ B) <_/heap>
+/*@ rule <heap_> list(old(x))(A), list(old(y))(B) => list(?x)(A @ B) <_/heap>
     if returns(?x) */
 {
   struct listNode *p;
@@ -46,13 +46,13 @@ struct listNode* append(struct listNode *x, struct listNode *y)
 }
 
 int length(struct listNode* x)
-/*@ rule <heap_> list(x0)(A) <_/heap>
-    if x = x0 /\ returns(len(A)) */
+/*@ rule <heap_> list(old(x))(A) <_/heap>
+    if returns(len(A)) */
 {
   int l;
   
   l = 0;
-  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> 
+  /*@ inv <heap_> lseg(old(x),x)(?A1), list(x)(?A2) <_/heap> 
           /\ A = ?A1 @ ?A2 /\ l = len(?A1) */
   while (x) {
     l += 1;
@@ -80,7 +80,7 @@ struct listNode* create(int n)
 }
 
 void destroy(struct listNode* x)
-//@ rule <heap_> list(x)(A) => . <_/heap>
+//@ rule <heap_> list(old(x))(A) => . <_/heap>
 {
   struct listNode *y;
 
@@ -95,10 +95,9 @@ void destroy(struct listNode* x)
 
 
 void print(struct listNode* x)
-/*@ rule <heap_> list(x)(A) <_/heap> <out_> epsilon => A </out>
-    if x = x0 */
+//@ rule <heap_> list(old(x))(A) <_/heap> <out_> epsilon => A </out>
 {
-  /*@ inv <heap_> lseg(x0,x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
+  /*@ inv <heap_> lseg(old(x),x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
           /\ A = ?A1 @ ?A2 */
   while(x)
   {

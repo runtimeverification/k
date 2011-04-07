@@ -3,13 +3,13 @@
 
 
 int sum(int n)
-/*@ req n = n0 /\ n >= 0
-    ens returns((n * (n + 1)) / 2) */
+// rule <k> $ => return (n * (n + 1)) / 2; <_/k>
+//@ requires old(n) >= 0 ensures returns((old(n) * (old(n) + 1)) / 2)
 {
   int s;
 
   s = 0;
-  //@ invariant s = ((n0 - n) * (n0 + n + 1)) / 2 /\ n >= 0
+  //@ invariant s = ((old(n) - n) * (old(n) + n + 1)) / 2 /\ n >= 0
   while (n > 0)
   {
     s += n;

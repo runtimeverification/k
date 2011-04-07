@@ -87,6 +87,9 @@ tokens {
 
   FIELD;
 
+  RETURN = 'return';
+  DEFAULT_K = '$';
+
   IDENTIFIER;
   PRIME_IDENTIFIER;
   LETTER;
@@ -420,7 +423,13 @@ k_rewrite
   ;
 
 k_term
-  : formula (K_ARROW^ formula)*
+  : k_item (K_ARROW^ k_item)*
+  ;
+
+k_item
+  : formula
+  | DEFAULT_K
+  | RETURN^ mathematical_object ';'!
   ;
 
 
