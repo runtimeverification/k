@@ -36,6 +36,8 @@
  \end{quote}%
  \par} \makeatother
 
+\newcommand{\when}[1]{\hspace{2em} when \ensuremath{#1}\bigskip}
+ 
 
 \newlength{\syntaxlength}
 \definecolor{Grey}{rgb}{0.8,0.8,0.8}
@@ -45,7 +47,7 @@
 \newcommand{\rp}{)}
 \newcommand{\kconfig}[1]{\par{\sc initial configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
 \newcommand{\kccontext}[3]{\par\text{\scshape context:
-}$#2$\hspace{2em} when $#3$}
+}$#2$ \when{#3}}
 \newcommand{\kcontext}[2]{\par\text{\scshape context:
 }$#2$}
 \newcommand{\syntax}[3]{\par $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
@@ -63,16 +65,16 @@
 \newcommand{\kequation}[2]{
 \par\text{\scshape #1 rule:}\hspace{1em}$#2$\bigskip}
 \newcommand{\kcequation}[3]{
-\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \when{#3}}
 \newcommand{\krule}[2]{
 \par\indent\text{\scshape #1 rule:}\hspace{1em}$#2$\bigskip}
 \newcommand{\mrule}[3]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$\bigskip}
-\newcommand{\cmrule}[4]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \hspace{2em} when $#4$\bigskip}
+\newcommand{\cmrule}[4]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \when{#4}}
 \newcommand{\mequation}[3]{\par\text{\scshape #1 macro:}\hspace{1em}$#2 = #3$}
 \newcommand{\sorts}[1]{}
-\newcommand{\cmequation}[4]{\par\text{\scshape #1 equation:}\hspace{1em}$#2 = #3$ \hspace{2em} when $#4$}
+\newcommand{\cmequation}[4]{\par\text{\scshape #1 equation:}\hspace{1em}$#2 = #3$ \when{#4}}
 \newcommand{\kcrule}[3]{
-\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \hspace{2em} when $#3$\bigskip}
+\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \when{#3}}
 \newcommand{\kndrule}[2]{\par\text{\scshape #1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
 \newcommand{\myquote}[1]{\text{\rmfamily ``\ttfamily #1\rmfamily ''}}
 \newcommand{\mysinglequote}[1]{\text{\rmfamily "}}
