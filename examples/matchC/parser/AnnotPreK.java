@@ -33,6 +33,7 @@ public class AnnotPreK {
 
     tokenToK.put(annotParser.REW, "_=>_");
 
+    tokenToK.put(annotParser.CONDITIONAL_RULE, "@`cfg_->_if_");
     tokenToK.put(annotParser.SPECIFICATION, "@`cfg_->_req_ens_");
     tokenToK.put(annotParser.ASSUME, "@`assume_");
     tokenToK.put(annotParser.ASSERT, "@`assert_");
@@ -86,8 +87,7 @@ public class AnnotPreK {
       CommonTreeNodeStream nodes;
 
       completeConfig(tree);
-      if (tree.getType() == annotParser.SPECIFICATION)
-        splitConfig(tree);
+      splitConfig(tree);
 
       nodes = new CommonTreeNodeStream(tree);
       annotPass1 pass1 = new annotPass1(nodes);
@@ -340,17 +340,19 @@ public class AnnotPreK {
   }
 
   private static void splitConfig(CommonTree tree) {
-    if (tree.getType() == annotParser.SPECIFICATION) {
+    if (tree.getType() == annotParser.CONDITIONAL_RULE) {
+      CommonTree rewNode = splitTerm((CommonTree) tree.getChild(0));
+      tree.addChild(tree.getChild(1));
+      tree.setChild(0, rewNode.getChild(0));
+      tree.setChild(1, rewNode.getChild(1));
+    }
+    else if (tree.getType() == annotParser.SPECIFICATION) {
       CommonTree rewNode = splitTerm((CommonTree) tree.getChild(0));
       tree.addChild(tree.getChild(2));
       tree.setChild(2, tree.getChild(1));
       tree.setChild(0, rewNode.getChild(0));
       tree.setChild(1, rewNode.getChild(1));
     }
-    else
-      for (int i = 0; i < tree.getChildCount(); i++) {
-        splitConfig((CommonTree) tree.getChild(i));
-      }
   }
 
   private static CommonTree splitTerm(CommonTree tree) {

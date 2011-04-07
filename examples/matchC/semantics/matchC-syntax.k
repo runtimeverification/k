@@ -12,6 +12,7 @@ matching logic annotations
                       | @`inv List 
 
   syntax Annotation ::= @`cfg Bag -> Bag req Formula ens Formula
+                      | @`cfg Bag -> Bag if Formula
 
   syntax Annotation ::= @`verify
                       | @`skip

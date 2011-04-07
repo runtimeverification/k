@@ -277,7 +277,6 @@ inc MATCHC
   var Phi : Formula .
   var Subst1 Subst2 : Subst .
 
-
   --- apply default substitution on a pattern
   eq applyDefaultSubst(Pattern1 \/ Pattern2, Subst)
    = applyDefaultSubst(Pattern1, Subst) \/ applyDefaultSubst(Pattern2, Subst) .
@@ -285,7 +284,8 @@ inc MATCHC
    = applyDefaultSubst(Bag, Subst) /\ Phi .
 
   --- apply default substitution on a configuration
-  eq applyDefaultSubst(< CellLabel > Map1 </ CellLabel > Bag, (Map1 <- Map2) ;; Subst)
+  eq applyDefaultSubst(< CellLabel > Map1 </ CellLabel > Bag,
+                       (Map1 <- Map2) ;; Subst)
    = < CellLabel > Map2 </ CellLabel > applyDefaultSubst(Bag, Subst) .
   eq applyDefaultSubst(< CellLabel > K1 </ CellLabel > Bag, (K1 <- K2) ;; Subst)
    = < CellLabel > K2 </ CellLabel > applyDefaultSubst(Bag, Subst) .
@@ -293,7 +293,6 @@ inc MATCHC
    = < CellLabel > applyDefaultSubst(Bag1, Subst) </ CellLabel >
      applyDefaultSubst(Bag2, Subst) [owise] .
   eq applyDefaultSubst(Bag, Subst) = Bag [owise] .
-
 
   --- apply substitution on a pattern
   eq applySubst(Pattern1 \/ Pattern2, Subst)
@@ -318,7 +317,7 @@ inc MATCHC
   eq applySubst(Bag, Subst)
    = downTerm(substTerm(upTerm(Bag), upSubst(Subst)), errorBag) [owise] .
 
-  --- apply substitution on a substitution
+  --- apply substitution on a formula
   eq applySubst(Phi, Subst)
    = downTerm(substTerm(upTerm(Phi), upSubst(Subst)), errorFormula) .
 
@@ -354,6 +353,39 @@ mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST .
   var ObjList ObjList' : List{MathObj++} .
   eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
    = (Obj1 <- Obj1') ;; (Obj2 <- Obj2') ;; (ObjList <- ObjList') .
+
+  op filterPrePhiDefault : NtFormula Truth -> Formula .
+  var T : Truth .
+  var A : Atom .
+  var NtPhi NtPhi1 NtPhi2 : NtFormula .
+  eq filterPrePhi(T:Truth) = T .
+  eq filterPrePhi(NtPhi) = filterPrePhiDefault(NtPhi, TrueFormula) .
+  eq filterPrePhiDefault(NtPhi1 /\ NtPhi2, T)
+   = filterPrePhiDefault(NtPhi1, TrueFormula)
+     /\ filterPrePhiDefault(NtPhi2, TrueFormula) .
+  eq filterPrePhiDefault(~ NtPhi, T) = ~ filterPrePhiDefault(NtPhi, ~ T) .
+  eq filterPrePhiDefault(NtPhi1 \/ NtPhi2, T)
+   = filterPrePhiDefault(NtPhi1, FalseFormula)
+     \/ filterPrePhiDefault(NtPhi2, FalseFormula) .
+  eq filterPrePhiDefault(A, T)
+   = if isLhsTerm(upTerm(A)) then A else T fi .
+
+  op isLhsTerm : TermList -> Bool . 
+  var Q : Qid .
+  var QC : Constant .
+  var QT : Term .
+  var QTList : TermList .
+  var QTNeList : NeTermList .
+  eq isLhsTerm((QT : QTNeList)) = isLhsTerm(QT) andBool isLhsTerm(QTNeList) .
+  eq isLhsTerm(.emptyTermList) = true .
+  eq isLhsTerm(QC)
+   = substrString(string(getType(QC)), 0, 2) =/=Bool "PE" .
+ ceq isLhsTerm(Q[QTList]) = false
+  if substrString(string(Q), 0, 1) ==Bool "?" orBool Q ==Bool 'returns_ .
+ ceq isLhsTerm(Q[QTList]) = true
+  if Q ==Bool 'skolem .
+  eq isLhsTerm(Q[QTList]) = isLhsTerm(QTList) [owise] .
+
 
   var N : Nat .
   var Subst : Subst .

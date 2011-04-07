@@ -105,7 +105,7 @@ Function entry
         <program> checkContract(F) => .K <_/program>
         <struct> StructMap </struct>
         <fun>
-          T F(ParamList)[[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]]
+          T F(ParamList) [[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]]
             |-> S
           FunMap
         </fun>
@@ -119,7 +119,7 @@ Function entry
         <task_>
           <struct> StructMap </struct>
           <fun>
-            T F(ParamList)[[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]]
+            T F(ParamList) [[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]]
               |-> S
             FunMap
           </fun>
@@ -168,9 +168,66 @@ Function entry
 Function definition/declaration
 ***)
   rule
-    <program> T F(ParamList) [[Annot]] => .K <_/program>
-    <fun_> .Map => T F(ParamList) [[Annot]] |-> .K <_/fun>
+    <program>
+        T F(ParamList) [[@ cfg PreCfg -> PostCfg if Phi]]
+      =>
+        T F(ParamList) [[@ cfg PreCfg -> PostCfg req filterPrePhi(Phi) ens Phi]]
+    <_/program>
   [structural]
+  rule
+    <program>
+        T F(ParamList) [[@ cfg PreCfg -> PostCfg if Phi]] S
+      =>
+        T F(ParamList)
+        [[@ cfg PreCfg -> PostCfg req filterPrePhi(Phi) ens Phi]]
+        S
+    <_/program>
+  [structural]
+  rule
+    <program>
+      T F(ParamList) [[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]] => .K
+    <_/program>
+    <fun_>
+        .Map
+      =>
+        T F(ParamList)
+        [[@ cfg applyDefaultSubst(
+                  PreCfg,
+                  defaultMapItem("env") <- defaultFreeEnv(paramSet(ParamList))
+                )
+            ->
+                applyDefaultSubst(
+                  PostCfg,
+                  defaultMapItem("env") <- defaultEnv(paramSet(ParamList))
+                )
+            req PrePhi ens PostPhi]]
+        |-> .K
+    <_/fun>
+  [structural]
+  rule
+    <program>
+      T F(ParamList) [[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]] S => .K
+    <_/program>
+    <fun_>
+        .Map
+      =>
+        T F(ParamList)
+        [[@ cfg applyDefaultSubst(
+                  PreCfg,
+                  defaultMapItem("env") <- defaultFreeEnv(paramSet(ParamList))
+                )
+            ->
+                PostCfg
+                //applyDefaultSubst(
+                //  PostCfg,
+                //  defaultMapItem("env") <- defaultEnv(paramSet(ParamList))
+                //)
+            req PrePhi ens PostPhi]]
+        |-> (S ~> return tv(void, unit))
+    <_/fun>
+    <check_> .Set => SetItem(checkContract(F)) <_/check>
+  [structural]
+***(
   rule
     <program> T F(ParamList) [[Annot]] S => .K <_/program>
     <fun_>
@@ -178,6 +235,7 @@ Function definition/declaration
     <_/fun>
     <check_> .Set => SetItem(checkContract(F)) <_/check>
   [structural]
+***)
   rule
     <program> (@ verify  => .K) ~> T F(ParamList) S <_/program>
     <check_> .Set => SetItem(checkContract(F)) <_/check>
@@ -239,7 +297,7 @@ summary function calls
 ***)
   rule
     <fun_>
-      T F(ParamList)[[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]] |-> _
+      T F(ParamList) [[@ cfg PreCfg -> PostCfg req PrePhi ens PostPhi]] |-> _
     <_/fun>
     <k>
         _`(_`)(F, ArgList) ~> K
@@ -321,7 +379,8 @@ assumed patterns
                 (defaultMapItem("struct") <- StructMap) ;;
                 (defaultMapItem("fun") <- FunMap) ;;
                 ---(defaultKItem("k") <- K) ;;
-                (defaultMapItem("env") <- defaultEnv(Env)) ;;
+                (defaultMapItem("FreeEnv") <- defaultFreeEnv(keys(Env))) ;;
+                (defaultMapItem("env") <- defaultEnv(keys(Env))) ;;
                 (defaultKItem("fname") <- FName) ;;
                 (defaultMapItem("tenv") <- TEnv) ;;
                 (defaultKItem("counter") <- sNat N)
@@ -402,7 +461,8 @@ asserted patterns
               (defaultMapItem("struct") <- StructMap) ;;
               (defaultMapItem("fun") <- FunMap) ;;
               ---(defaultKItem("k") <- K) ;;
-              (defaultMapItem("env") <- defaultEnv(Env)) ;;
+              (defaultMapItem("FreeEnv") <- defaultFreeEnv(keys(Env))) ;;
+              (defaultMapItem("env") <- defaultEnv(keys(Env))) ;;
               (defaultKItem("fname") <- FName) ;;
               (defaultMapItem("tenv") <- TEnv) ;;
               (defaultKItem("counter") <- Counter) 
@@ -469,9 +529,21 @@ Helpers
   rule setToK(SetItem(K) Set) => K ~> setToK(Set) [structural]
   rule setToK(.Set) => .K [structural]
 
-  syntax Map ::= defaultEnv ( Map )
-  rule defaultEnv(X |-> _ Env) => X |-> ?var(X) defaultEnv(Env) [structural]
-  rule defaultEnv(.Map) => .Map [ structural]
+  syntax Set ::= paramSet ( List{KernelC} )
+  rule
+    paramSet((_ X;),,,ParamList) => SetItem(X) paramSet(ParamList)
+  [structural]
+  rule paramSet(.List{KernelC}) => .Set [structural]
+
+  syntax Map ::= defaultEnv ( Set )
+  rule defaultEnv(SetItem(X) Set) => X |-> ?var(X) defaultEnv(Set) [structural]
+  rule defaultEnv(.Set) => .Map [ structural]
+
+  syntax Map ::= defaultFreeEnv ( Set )
+  rule
+    defaultFreeEnv(SetItem(X) Set) => X |-> FreeVar(X) defaultFreeEnv(Set)
+  [structural]
+  rule defaultFreeEnv(.Set) => .Map [ structural]
 
   rule
     <k> cleanFrameSubst(VarRoot) => .K <_/k>

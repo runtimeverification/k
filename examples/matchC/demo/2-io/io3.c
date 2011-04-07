@@ -9,8 +9,8 @@ struct listNode {
 
 
 void readWrite(int n)
-/*@ cfg <in> A => epsilon <_/in> <out_> epsilon => A </out>
-    req len(A) = n */
+/*@ rule <in> A => epsilon <_/in> <out_> epsilon => A </out>
+    if len(A) = n */
 {
   int t;
 
@@ -25,8 +25,8 @@ void readWrite(int n)
 
 
 void readWriteBuffer(int n)
-/*@ cfg <in> A => epsilon <_/in> <out_> epsilon => rev(A) </out>
-    req len(A) = n */
+/*@ rule <in> A => epsilon <_/in> <out_> epsilon => rev(A) </out>
+    if len(A) = n */
 {
   int i;
   struct listNode *x;

@@ -14,8 +14,12 @@ tokens {
   END_ANNOT = '*/';
   LINE_ANNOT = '//@';
 
+  CONDITIONAL_RULE;
   SPECIFICATION;
   CONFIG;
+
+  RULE;
+  IF;
   REQUIRES;
   ENSURES;
   ASSUME;
@@ -84,6 +88,7 @@ tokens {
   FIELD;
 
   IDENTIFIER;
+  PRIME_IDENTIFIER;
   LETTER;
   DIGIT;
   FORMULA_TRUE = 'true';
@@ -124,19 +129,22 @@ annot
   ;
 
 function_annot
-  : config requires ensures { Table.genVarString(""); }
-    -> ^(SPECIFICATION config requires ensures)
+  : rule
+    ( condition { Table.genVarString(""); }
+      -> ^(CONDITIONAL_RULE rule condition)
+    | ( REQUIRES | ENSURES )=> requires ensures { Table.genVarString(""); }
+      -> ^(SPECIFICATION rule requires ensures)
+    )
   ;
 
-config
-  : config_keyword configuration -> ^(WRAPPER["wbag_"] configuration)
+rule
+  : RULE configuration -> ^(WRAPPER["wbag_"] configuration)
   | -> ^(WRAPPER["wbag_"] ^(CONFIG[""] BAG))
   ;
 
-config_keyword
-  : { "config".equals(input.LT(1).getText()) }? IDENTIFIER
-    -> CONFIG[$IDENTIFIER]
-  | CONFIG
+condition
+  : IF formula -> ^(WRAPPER["Formula_"] formula)
+  | -> ^(WRAPPER["Formula_"] FORMULA_TRUE)
   ;
 
 requires
@@ -180,31 +188,6 @@ sort
   | BAG_ITEM
   | MAP_ITEM 
   ;
-
-
-/*
-pattern
-  : disjunctive_pattern
-  ;
-
-disjunctive_pattern
-  : primary_pattern (DISJ^ primary_pattern)*
-  ;
-
-primary_pattern
-options { backtrack = true; }
-  : LPAREN pattern RPAREN
-    ( -> pattern
-    | CONJ formula -> ^(CONJ pattern formula)
-    )
-  | configuration
-    ( -> ^(CONJ["/\\"] configuration FORMULA_TRUE)
-    | CONJ formula -> ^(CONJ configuration formula)
-    )
-  | formula
-    -> ^(CONJ["/\\"] ^(CONFIG[""] BAG) formula)
-  ;
-*/
 
 
 pattern
@@ -512,6 +495,7 @@ unary_operator
 
 primary_term
   : IDENTIFIER
+  | PRIME_IDENTIFIER
   | constant
   | constructor
   | infix_term
@@ -554,7 +538,8 @@ K_LIST_UNIT : '.List{K}' ;
 K_LIST_COMMA : ',,' ;
 
 
-CONFIG : 'configuration' | 'cfg' ;
+RULE : 'rule' ;
+IF : 'if' ;
 REQUIRES : 'requires' | 'req' ;
 ENSURES : 'ensures' | 'ens' ;
 ASSUME : 'assume' ;
@@ -565,7 +550,11 @@ VERIFY : 'verify' ;
 BREAKPOINT : 'breakpoint' ;
 VAR : 'var' { isVar = true; };
 
-
+PRIME_IDENTIFIER
+  : LETTER (LETTER | DIGIT)* '\''
+    { if (!isVar) Table.annotIdentifiers.add($text); }
+  ;
+ 
 IDENTIFIER
   : ('?' | '!')? LETTER (LETTER | DIGIT)*
     { if (!isVar) Table.annotIdentifiers.add($text); }

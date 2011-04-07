@@ -32,6 +32,7 @@ mod CONFIG-BUILTIN-MODULE is
   op co-skolem : Nat FreeBagItem -> FEBagItem .
   op co-skolem : Nat FreeListItem -> FEListItem .
   op ?var : Id -> PEInt .
+  op FreeVar : Id -> FreeInt .
   op ?BagItem : String -> PEBagItem .
   op !BagItem : String -> FEBagItem .
   op FreeMapItem : String -> FreeMapItem .
@@ -58,6 +59,7 @@ mod CONFIG-BUILTIN-MODULE is
   op getFESubstItem : Formula -> Subst .
   op getFreeSubstItem : Formula -> Subst .
 
+  op filterPrePhi : Formula -> Formula .
   op filterAnonymousFreeSubst : Subst -> Subst .
   op filterFrame!Subst : Subst String -> Subst .
   op filterCallCoSkolemSubst : Subst -> Subst .
@@ -89,7 +91,7 @@ mod CONFIG-BUILTIN-MODULE is
   op skolemize : Nat Pattern -> Pattern .
   op co-skolemize : Nat Pattern -> Pattern .
 
-  op returns _ : Value -> Formula .
+  op returns _ : Value -> Atom .
   op unit : -> Value . 
   op tv`(_,_`) : ExpressionType Value -> TypedValue .
   op derive : -> KLabel .

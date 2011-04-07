@@ -3,8 +3,8 @@
 
 
 int sum(int n)
-/*@ req n = n0 /\ n0 >= 0
-    ens returns((n0 * (n0 + 1)) / 2) */
+/*@ req n = n0 /\ n >= 0
+    ens returns((n * (n + 1)) / 2) */
 {
   int s;
 
