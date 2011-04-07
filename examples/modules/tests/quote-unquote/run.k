@@ -15,5 +15,5 @@ load ../../while
 load programs
 
 kmod RUN is including QUOTE-UNQUOTE-PROGRAMS + BASIC-RUN 
-  configuration <T><k> .K </k> <nextId>0</nextId> <mem>.Map</mem> <nextLoc>0</nextLoc><out>.List</out></T>
+  configuration <T><k> .K </k> <nextId>0</nextId> <mem>.Map</mem> <nextLoc>0</nextLoc><in>.List</in><out>.List</out></T>
 endkm
