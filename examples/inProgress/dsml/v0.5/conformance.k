@@ -17,9 +17,15 @@ syntax K ::= checkConformance
 
 
 rule
-<k> checkConformance => checkStructure(INSTANCES)~>checkOCL(OCL)<_/k> 
-<metamodel_> <oclConstraints> OCL => . </oclConstraints> <_/metamodel>
-<models> <model> <modelName> nm </modelName> INSTANCES </model> </models>
+
+//<k> checkConformance => checkStructure(INSTANCES)~>checkOCL(OCL)<_/k> 
+//<metamodel_> <oclConstraints> OCL => . </oclConstraints> <_/metamodel>
+//<models> <model> <modelName> nm </modelName> INSTANCES </model> </models>
+
+
+<k> checkConformance => checkOCL(OCL)<_/k> 
+<metamodel_> <oclConstraints> OCL </oclConstraints> <_/metamodel>
+
 
 
 syntax K ::= checkStructure ( Bag )
@@ -71,8 +77,8 @@ rule  consistentAttributes( (attr |->  typedElt(v,T)) Map',
 
 // for non-scalar types (classes or collections of classes) : check that instances are also 
 // in the model and are of the correct (declared) type
-rule  <k> consistentAttributes( (attr |->  typedElt(v,T)) Map',  
-                            ((attr |-> T ) Map''), INSTANCES)
+rule  <k> consistentAttributes( (attr |->  typedElt(v,T)) Map',  //T here may be a subtype of
+                            ((attr |-> T ) Map''), INSTANCES)   // T here
       => 
       allPresentAndWellTyped(v,T, INSTANCES)~>consistentAttributes(Map',Map'',INSTANCES)
       <_/k>
@@ -114,10 +120,11 @@ rule <k> checkOCL(.) => . <_/k>   [structural]
 syntax ListItem ::= `OCL ( Exp ) | result ( Val )
 
 rule <k> checkOCL( OCL(E) L:List) => E~>checkOCL(L) <_/k>   [structural]
-
 // when an expression finished evaluating, it is placed at the end of the ocl constraints list
 
 // comment  when "executing" a model
 rule <k> v => .K <_/k>
-<metamodel_> <oclConstraints_> (.).List => result(v) </oclConstraints> <_/metamodel>  [structural]
+//<metamodel_> <oclConstraints_> (.).List => result(v) </oclConstraints> <_/metamodel>  [structural]
+
+<output_> (.).List => result(v) </output>   [structural]
 endkm

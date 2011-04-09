@@ -235,7 +235,7 @@ rule <k>  val(B) ->select( Var| BEXP:Exp )
  <_/mem>
       [structural]
 
-syntax K ::= toto
+
 
  rule <k>  * N => EXP <_/k>
  <mem_> ((N |-> [val(.Bag)->select(Var| BEXP:Exp), N'])

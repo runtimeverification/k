@@ -34,50 +34,74 @@ syntax Bag ::= initConfig
 
  macro initConfig = 
 <T>
-<metamodel> <name> automata </name>
+<metamodel>
+	<name>
+ 		automata
+	</name>
 	<classes>
-		<class> <className> automaton </className>
+		<class>
+			<className>
+				automaton
+			</className>
 			<declAttributes>
-				(trace |-> string)
-				(active |-> state)
-				 .Map
+				(trace|->string)
+				(active|->state)
+				.Map
 			</declAttributes>
 		</class>
-		<class> <className> transition </className>
+		<class>
+			<className>
+				transition
+			</className>
 			<declAttributes>
-				(label |-> string)
-				(orig |-> state)
-				(dest |-> state)
-				 .Map
+				(orig|->state)
+				(dest|->state)
+				(label|->string)
+				.Map
 			</declAttributes>
 		</class>
-		<class> <className> state </className>
+		<class>
+			<className>
+				state
+			</className>
 			<declAttributes>
-				(in |-> transition)
-				(out |-> transition)
-				 .Map
+				(out|->transition)
+				(in|->transition)
+				.Map
 			</declAttributes>
 		</class>
-		<class> <className> initialState </className>
+		<class>
+			<className>
+				initialState
+			</className>
+			<extends>
+				state, 
+			 .List{Id}
+			</extends>
 			<declAttributes>
-				 .Map
+				(out|->transition)
+				(in|->transition)
+				.Map
 			</declAttributes>
 		</class>
 	</classes>
 	<oclConstraints>
-		OCL(allInstances(automaton)->forAll(x|(x#active).size() >= 1))
-		OCL(allInstances(automaton)->forAll(x|(x#active).size() <= 1))
-		OCL(allInstances(transition)->forAll(x|(x#orig).size() >= 1))
-		OCL(allInstances(transition)->forAll(x|(x#orig).size() <= 1))
-		OCL(allInstances(transition)->forAll(x|(x#orig)->forAll(y|(y#out) includes x)))
-		OCL(allInstances(transition)->forAll(x|(x#dest).size() >= 1))
-		OCL(allInstances(transition)->forAll(x|(x#dest).size() <= 1))
-		OCL(allInstances(transition)->forAll(x|(x#dest)->forAll(y|(y#in) includes x)))
-		OCL(allInstances(state)->forAll(x|(x#in)->forAll(y|(y#dest) includes x)))
-		OCL(allInstances(state)->forAll(x|(x#out)->forAll(y|(y#orig) includes x)))
-		OCL((allInstances(initialState).size() = 1))
-		OCL((allInstances(transition)->forAll(tr |not(((tr#label) = "")))))
+		OCL(((allInstances(initialState).size()) = 2))
+		OCL((allInstances(transition)->forAll(tr |not((tr#label) = ""))))
 		OCL((allInstances(state)->forAll(st |(st#out)->forAll(tr1 |(st#out)->forAll(tr2 |(((tr1#label)) = ((tr2#label))) implies (tr1 = tr2))))))
+
+		OCL(allInstances(automaton)->forAll(x |(x#active).size() >= 1))
+		OCL(allInstances(automaton)->forAll(x |(x#active).size() <= 1))
+		OCL(allInstances(transition)->forAll(x |(x#orig).size() >= 1))
+		OCL(allInstances(transition)->forAll(x |(x#orig).size() <= 1))
+		OCL(allInstances(transition)->forAll(x|(x#orig)->forAll(y|(y#out) includes x)))
+		OCL(allInstances(transition)->forAll(x |(x#dest).size() >= 1))
+		OCL(allInstances(transition)->forAll(x |(x#dest).size() <= 1))
+		OCL(allInstances(transition)->forAll(x|(x#dest)->forAll(y|(y#in) includes x)))
+		OCL(allInstances(state)->forAll(x|(x#out)->forAll(y|(y#orig) includes x)))
+		OCL(allInstances(state)->forAll(x|(x#in)->forAll(y|(y#dest) includes x)))
+		OCL(allInstances(initialState)->forAll(x|(x#out)->forAll(y|(y#orig) includes x)))
+		OCL(allInstances(initialState)->forAll(x|(x#in)->forAll(y|(y#dest) includes x)))
 		.List
 	</oclConstraints>
 </metamodel>
@@ -89,13 +113,13 @@ syntax Bag ::= initConfig
 			<ofClass> automaton </ofClass>
 			<attributes>
 				(trace |->typedElt(val(BagItem("")),string))
-				(active |->typedElt(val(BagItem(s0:state) ),state))
+				(active |->typedElt(val(BagItem(s0:initialState) ),initialState))
 				.Map
 			</attributes>
 		</instance>
 		<instance>
 			<instName> s0 </instName>
-			<ofClass> state </ofClass>
+			<ofClass> initialState </ofClass>
 			<attributes>
 				(in |->typedElt(val(BagItem(t1:transition) ),transition))
 				(out |->typedElt(val(BagItem(t1:transition) BagItem(t2:transition) ),transition))
@@ -115,8 +139,8 @@ syntax Bag ::= initConfig
 			<instName> t1 </instName>
 			<ofClass> transition </ofClass>
 			<attributes>
-				(orig |->typedElt(val(BagItem(s0:state) ),state))
-				(dest |->typedElt(val(BagItem(s0:state) ),state))
+				(orig |->typedElt(val(BagItem(s0:initialState) ),initialState))
+				(dest |->typedElt(val(BagItem(s0:initialState) ),initialState))
 				(label |->typedElt(val(BagItem("a")),string))
 				.Map
 			</attributes>
@@ -125,7 +149,7 @@ syntax Bag ::= initConfig
 			<instName> t2 </instName>
 			<ofClass> transition </ofClass>
 			<attributes>
-				(orig |->typedElt(val(BagItem(s0:state) ),state))
+				(orig |->typedElt(val(BagItem(s0:initialState) ),initialState))
 				(dest |->typedElt(val(BagItem(s1:state) ),state))
 				(label |->typedElt(val(BagItem("a")),string))
 				.Map
@@ -144,6 +168,7 @@ syntax Bag ::= initConfig
 	</model>
 </models>
 <k>  checkConformance </k>
+<output>  .List </output>
 <mem>  .Map </mem>
 <nextLoc>  0 </nextLoc>
 </T>

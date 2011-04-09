@@ -28,29 +28,32 @@ syntax K ::= typedElt ( K , Id )
 */
 
 // always required (?)
-syntax K ::= Id
+syntax K ::= List{Id}
 syntax Id ::= object | undefined // to be extended later with class and instance names
 
 
+--- List{Id}
+ syntax List{Id}  ::= Id | .List{Id} 
+                    | List{Id} , List{Id} [prec 70 assoc id: .List{Id} strict hybrid]
 
-
+//syntax SetItem ::= class ( Id )
 
   configuration <T> 
-                  <metamodel multiplicity ="?">
+                  <metamodel multiplicity = "?">
                     <name> undefined </name> 
                     <classes>
-                      <class multiplicity="*" >
+                      <class multiplicity = "*" >
                          <className> undefined </className> 
-                         <extends> undefined </extends>
+                         <extends> .List{Id} </extends>
                          <declAttributes> .Map  </declAttributes>
                       </class>
                     </classes>
                     <oclConstraints> .List </oclConstraints>
-                  </metamodel>
+                  </metamodel>@latex("\\kBR")
                  <models>
-                   <model multiplicity="*"> 
+                   <model multiplicity = "*"> 
                       <modelName> undefined </modelName>
-                      <instance multiplicity="*">
+                      <instance multiplicity = "*">
                          <instName> undefined </instName>
                          <ofClass> undefined </ofClass>
                          <attributes> .Map </attributes>
@@ -58,6 +61,7 @@ syntax Id ::= object | undefined // to be extended later with class and instance
                    </model>
                  </models>
                 <k> .K </k> 
+                <output> .List</output>
                 <mem> .Map </mem>
                 <nextLoc> 0 </nextLoc>
                 </T>
