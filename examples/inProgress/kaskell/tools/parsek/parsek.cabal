@@ -10,7 +10,7 @@ Build-type:         Simple
 Cabal-version:      >=1.2
 
 Library
-  Exposed-modules:  Language.K
+  Exposed-modules:  Language.K.Parser.Parsec
   Build-depends:    base >= 4 && < 5, parsec > 3 
 
 Executable parsek

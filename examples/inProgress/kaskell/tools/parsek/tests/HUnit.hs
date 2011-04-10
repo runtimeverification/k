@@ -5,7 +5,7 @@ import System.Exit (exitFailure)
 import Test.HUnit
 import Text.Parsec (parse)
 
-import Language.K
+import Language.K.Parser.Parsec
 
 main :: IO ()
 main = do

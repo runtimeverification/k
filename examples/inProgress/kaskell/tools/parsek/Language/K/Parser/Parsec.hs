@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, Rank2Types #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Language.K
+-- Module      :  Language.K.Parser.Parsec
 -- Copyright   :  (c) David Lazar, 2011
 -- License     :  BSD3
 --
@@ -9,10 +9,10 @@
 -- Stability   :  experimental
 -- Portability :  non-portable
 --
--- A small, incomplete parser for low-level K.
+-- A small, incomplete Parsec parser for low-level K.
 -----------------------------------------------------------------------------
 
-module Language.K where
+module Language.K.Parser.Parsec where
 
 import Control.Applicative ((<$>))
 import Text.Parsec
