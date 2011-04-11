@@ -134,6 +134,7 @@ syntax Bag ::= initConfig
 			<ofClass> process </ofClass>
 			<attributes>
 				(time |->typedElt(val(BagItem(0)),int))
+				(activities |->typedElt(val( .Bag BagItem(a:activity) BagItem(b:activity) ),activity))
 				.Map
 			</attributes>
 		</instance>
@@ -145,9 +146,10 @@ syntax Bag ::= initConfig
 				(tmax |->typedElt(val(BagItem(8)),int))
 				(aS |->typedElt(val(BagItem(notStarted)),activityState))
 				(tS |->typedElt(val(BagItem(undefined)),timeState))
-				(resources |->typedElt(val(.BagBagItem(r:resource) ),resource))
+				(resources |->typedElt(val( .Bag BagItem(r:resource) ),resource))
 				(time |->typedElt(val(BagItem(0)),int))
-				(linkToPredecessor |->typedElt(val(.BagBagItem(w2:workSequence) ),workSequence))
+				(linkToPredecessor |->typedElt(val( .Bag BagItem(w2:workSequence) ),workSequence))
+				(activities |->typedElt(val( .Bag ),activity))
 				.Map
 			</attributes>
 		</instance>
@@ -159,9 +161,10 @@ syntax Bag ::= initConfig
 				(tmax |->typedElt(val(BagItem(8)),int))
 				(aS |->typedElt(val(BagItem(notStarted)),activityState))
 				(tS |->typedElt(val(BagItem(undefined)),timeState))
-				(resources |->typedElt(val(.BagBagItem(r:resource) ),resource))
+				(resources |->typedElt(val( .Bag BagItem(r:resource) ),resource))
 				(time |->typedElt(val(BagItem(0)),int))
-				(linkToPredecessor |->typedElt(val(.BagBagItem(w1:workSequence) ),workSequence))
+				(linkToPredecessor |->typedElt(val( .Bag BagItem(w1:workSequence) ),workSequence))
+				(activities |->typedElt(val( .Bag ),activity))
 				.Map
 			</attributes>
 		</instance>
@@ -177,10 +180,10 @@ syntax Bag ::= initConfig
 			<instName> w1 </instName>
 			<ofClass> workSequence </ofClass>
 			<attributes>
-				(startedToStart |->typedElt(val(.Bag),activity))
-				(startedToFinish |->typedElt(val(.Bag),activity))
-				(finishedToStart |->typedElt(val(.Bag),activity))
-				(finishedToFinish |->typedElt(val(.BagBagItem(a:activity) ),activity))
+				(startedToStart |->typedElt(val( .Bag ),activity))
+				(startedToFinish |->typedElt(val( .Bag ),activity))
+				(finishedToStart |->typedElt(val( .Bag ),activity))
+				(finishedToFinish |->typedElt(val( .Bag BagItem(a:activity) ),activity))
 				.Map
 			</attributes>
 		</instance>
@@ -188,10 +191,10 @@ syntax Bag ::= initConfig
 			<instName> w2 </instName>
 			<ofClass> workSequence </ofClass>
 			<attributes>
-				(startedToStart |->typedElt(val(.Bag),activity))
-				(startedToFinish |->typedElt(val(.Bag),activity))
-				(finishedToStart |->typedElt(val(.Bag),activity))
-				(finishedToFinish |->typedElt(val(.Bag),activity))
+				(startedToStart |->typedElt(val( .Bag ),activity))
+				(startedToFinish |->typedElt(val( .Bag ),activity))
+				(finishedToStart |->typedElt(val( .Bag ),activity))
+				(finishedToFinish |->typedElt(val( .Bag ),activity))
 				.Map
 			</attributes>
 		</instance>
