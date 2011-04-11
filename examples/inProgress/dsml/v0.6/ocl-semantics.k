@@ -15,41 +15,41 @@ syntax K ::= Exp
 // ARITHMETICAL EXPRESSIONS
 // Note : most mixed scalar/nonscalar combinations are handled in VALUES module
 // in a generic, operator-independent way
-rule A1:Int + A2:Int => A1 +Int A2  [structural]
-rule A1 * A2 => A1 *Int A2  [structural]
-rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)  [structural]
-rule (- A1) => -Int A1  [structural]
+rule <k> A1:Int + A2:Int => A1 +Int A2  <_/k> [structural]
+rule  <k> A1 * A2 => A1 *Int A2 <_/k> [structural]
+rule  <k>A1 / A2 => A1 /Int A2 <_/k> if notBool (A2 ==Int 0)  [structural]
+rule  <k> (- A1) => -Int A1 <_/k>  [structural]
 
-rule (val(B:Bag) .size()) => card(B)  [structural]
+rule <k> (val(B:Bag) .size()) => card(B) <_/k> [structural]
 // some mixed scalar/nonscalar non handled in VALUES (not "generic" enough)
-rule (I:Int .size()) => 1  [structural]
-rule (bbb:Bool .size()) => 1  [structural]
-rule (Str:String .size()) => 1  [structural]
+rule <k> (I:Int .size()) => 1 <_/k> [structural]
+rule <k> (bbb:Bool .size()) => 1  <_/k> [structural]
+rule <k> (Str:String .size()) => 1  <_/k> [structural]
 
 // BOOLEAN
-rule A1 < A2 => A1 <Int A2  [structural]
-rule A1 <= A2 => A1 <=Int A2  [structural]
-rule A1 > A2 => A1 >Int A2  [structural]
-rule A1 >= A2 => A1 >=Int A2  [structural]
+rule <k> A1 < A2 => A1 <Int A2 <_/k>   [structural]
+rule <k>  A1 <= A2 => A1 <=Int A2 <_/k>  [structural]
+rule <k>  A1 > A2 => A1 >Int A2 <_/k>  [structural]
+rule <k>  A1 >= A2 => A1 >=Int A2 <_/k>   [structural]
 // because and etc are strict only in first arg
-rule true and E:Exp => E  [structural]
-rule false and E => false  [structural]
+rule <k>  true and E:Exp => E   <_/k> [structural]
+rule <k>  false and E => false   <_/k> [structural]
 
-rule true or E => true  [structural]
-rule false or E => E  [structural]
+rule <k>  true or E => true  <_/k>  [structural]
+rule <k>  false or E => E  <_/k>   [structural]
 
-rule true implies E => E  [structural]
-rule false implies E => true  [structural]
+rule <k>  true implies E => E  <_/k>   [structural]
+rule <k>  false implies E => true  <_/k>  [structural]
 
-rule not B1:Bool => notBool B1  [structural]
+rule <k>  not B1:Bool => notBool B1  <_/k>  [structural]
 
 
 // equality,  for all types
 
 rule <k> (Id1:Id = Id2:Id) => Id1 ==Bool Id2 <_/k> [structural]//only in k to avoid undesired reds
-rule A1 = A2 => A1 ==Int A2  [structural]
-rule (Str1 = Str2) => Str1 ==Bool Str2 [structural]
-rule (B1 = B2:Bool) =>  B1 ==Bool B2 [structural]
+rule  <k> A1 = A2 => A1 ==Int A2  <_/k>  [structural]
+rule  <k> (Str1 = Str2) => Str1 ==Bool Str2  <_/k>  [structural]
+rule   <k> (B1 = B2:Bool) =>  B1 ==Bool B2  <_/k>  [structural]
 // for non-scalar types, equality = equality of bags
 // this relies on the invariant that there is at most
 // one pair (instance name, class name) per model.
@@ -58,18 +58,17 @@ rule <k> (val(C1) = val(C2)) => C1 ==Bool C2  <_/k>[structural]
 
 
 //includes, excludes
-rule val(C1:Bag) includes val(C2:Bag) => subset(C2,C1)  [structural]
-rule val(C1:Bag) excludes val(.Bag) => true  [structural]
-rule val(Bg:BagItem C1:Bag) excludes val(Bg':BagItem C2:Bag) => 
-if (Bg ==Bool Bg') 
-then false 
-else  val(Bg:BagItem C1:Bag) excludes val(C2:Bag) 
-fi  [structural]
+rule <k> val(C1:Bag) includes val(C2:Bag) => subset(C2,C1)  <_/k>  [structural]
 
+rule <k> val(C1:Bag) excludes val(.Bag) => true  <_/k> [structural]
+
+rule   <k> val(Bg:BagItem C1:Bag) excludes val(Bg:BagItem C2:Bag) => false <_/k>  [structural]
+rule  <k> val(C1:Bag) excludes val(Bg':BagItem C2:Bag) => 
+val(C1:Bag) excludes val(C2:Bag) <_/k> if notBool(Bg' in C1)  [structural]
 
 // isEmpty
-rule isEmpty(val(.Bag)) => true [structural]
-rule isEmpty(val(BagIt:BagItem _)) => false  [structural]
+rule <k> isEmpty(val(.Bag)) => true <_/k> [structural]
+rule  <k>isEmpty(val(BagIt:BagItem _)) => false <_/k> [structural]
 // no need to define isEmpty() for scalars (it should be an error)
 
 
@@ -79,6 +78,8 @@ rule isEmpty(val(BagIt:BagItem _)) => false  [structural]
 syntax Exp ::=  Exp [ K / Id ] [ditto]
 // base case
 rule <k> val(.Bag) ->forAll(_| _) => true <_/k> [structural]
+
+
 
 // inductive step
 rule <k>
@@ -107,7 +108,7 @@ endif
 [structural]
 
 //STRINGS
-rule Str1:String ++ Str2:String => Str1 +String Str2 [structural]
+rule <k>  Str1:String ++ Str2:String => Str1 +String Str2 <_/k> [structural]
 
 
 // COLLECTIONS
@@ -255,39 +256,39 @@ rule <k> if false then CEXP1 else CEXP2 endif => CEXP2 <_/k> [structural]
 // condition can be a non-scalar (non handled by generic rules in VALUES)
 rule <k> if val(BagItem(true)) then CEXP1:Exp else CEXP2:Exp endif => CEXP1 <_/k> [structural]
 rule <k> if val(BagItem(false)) then CEXP1 else CEXP2 endif => CEXP2 <_/k> [structural]
-
+/*
 //oclType : computes the type of an already evaluated expression
 // for arithmetical, boolean, string expressions: just returns their basic type
 // for collections: computes the lub (least upper bound) of types of elements inside
 
 // arithmetical, boolean, string
-rule oclType(A1) => int [structural]
-rule oclType(B1) => bool [structural]
-rule oclType(Str1) => string [structural]
+rule <k> oclType(A1) => int <_/k>[structural]
+rule <k> oclType(B1) => bool  <_/k> [structural]
+rule <k> oclType(Str1) => string  <_/k> [structural]
 
 // collections
 // the lattice is : top - everything (flat)
 // will change in the future when we add inheritance
 
-rule oclType(val(BagItem (A1))) => int  [structural]
-rule oclType(val(BagItem (B1))) => bool  [structural]
-rule oclType(val(BagItem (Str1))) => string  [structural]
+rule <k>  oclType(val(BagItem (A1))) => int  <_/k>  [structural]
+rule <k>  oclType(val(BagItem (B1))) => bool  <_/k> [structural]
+rule <k>  oclType(val(BagItem (Str1))) => string  <_/k> [structural]
 
 // collections of int, bool, string
-rule  oclType(val(BagItem (A1) BagItem(A2) B:Bag)) =>
-      oclType(val(BagItem(A2) B:Bag)) [structural]
-rule  oclType(val(BagItem (B1) BagItem(B2) B:Bag)) =>
-      oclType(val(BagItem(B2) B:Bag)) [structural]
-rule  oclType(val(BagItem (Str1) BagItem(Str2) B:Bag)) =>
-      oclType(val(BagItem(Str2) B:Bag)) [structural]
+rule  <k> oclType(val(BagItem (A1) BagItem(A2) B:Bag)) =>
+      oclType(val(BagItem(A2) B:Bag))  <_/k>  [structural]
+rule   <k> oclType(val(BagItem (B1) BagItem(B2) B:Bag)) =>
+      oclType(val(BagItem(B2) B:Bag))  <_/k>  [structural]
+rule  <k>  oclType(val(BagItem (Str1) BagItem(Str2) B:Bag)) =>
+      oclType(val(BagItem(Str2) B:Bag))  <_/k>  [structural]
 
 //mixtures : return top
-rule  oclType(val(BagItem (A1) BagItem(B1) _)) => top [structural]
-rule  oclType(val(BagItem (A1) BagItem(Str1) _)) => top [structural]
-rule  oclType(val(BagItem (A1) BagItem(_ : _) _)) => top [structural]
-rule  oclType(val(BagItem (B1) BagItem(Str1) _)) => top [structural]
-rule  oclType(val(BagItem (B1) BagItem(_ : _) _)) => top [structural]
-rule  oclType(val(BagItem (Str1) BagItem(_ : _) _)) => top [structural]
+rule <k>  oclType(val(BagItem (A1) BagItem(B1) _)) => top  <_/k> [structural]
+rule <k>  oclType(val(BagItem (A1) BagItem(Str1) _)) => top  <_/k> [structural]
+rule <k>  oclType(val(BagItem (A1) BagItem(_ : _) _)) => top  <_/k> [structural]
+rule <k>  oclType(val(BagItem (B1) BagItem(Str1) _)) => top  <_/k> [structural]
+rule <k>  oclType(val(BagItem (B1) BagItem(_ : _) _)) => top   <_/k>[structural]
+rule <k>  oclType(val(BagItem (Str1) BagItem(_ : _) _)) => top  <_/k> [structural]
 
 // isntances
 rule oclType(val(BagItem (_ : Cls))) => Cls  [structural]
@@ -299,6 +300,6 @@ rule oclType (val(BagItem (_ : Cls) BagItem (_ : Cls':Id)  _))
 => top if notBool (Cls ==Bool Cls')  [structural]
 // and finally, empty
 rule oclType(val(.Bag)) => top [structural]
- 
+ */
 endkm
 

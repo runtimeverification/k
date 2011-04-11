@@ -8,7 +8,7 @@ kmod CONFORMANCE is including META-MODEL + OCL-SYNTAX + VALUES
 
 kvar INSTANCES REST B RESTBAG RESTINSTANCES : Bag
 kvar ATTRCLS ATTRINST Map Map' Map'' : Map 
-kvar C T nm INSNAME attr : Id 
+kvar C T nm INSNAME attr x : Id 
 kvar OCL : List
 kvar LL : List{Id}
 kvar E : Exp
@@ -60,63 +60,73 @@ syntax K ::= consistentAttributes( Map , Map )
 rule <k> consistentAttributes( .Map, _ ) => . <_/k> 
 
 
-// for scalar types : just check that the attribute is declared in metamodel
+// for basic types : just check that the attribute is declared in metamodel
 rule  <k> consistentAttributes( (attr |->  typedElt(v,T)) Map',  
                             (attr |-> T ) Map'')
       =>
       consistentAttributes(Map',Map'') <_/k>
-      if notBool isClass(T)
+      if isBasic(T)
 
 
+//for enumerations : check that the attribute is declared with same enum type; check value
+//assumption (made in metamodels) : no class and enum have same name
+rule  <k> consistentAttributes( (attr |->  typedElt(val(BagItem(x)),T)) Map',  
+                            (attr |-> T ) Map'')
+      =>
+      consistentAttributes(Map',Map'') <_/k>
+<metamodel_>
+    <classes_>
+     <enumeration_>
+       <enumName> T </enumName>
+        BagItem(x)
+     <_/enumeration>
+     <_/classes>
+ <_/metamodel>
+      if notBool isBasic(T)
 
 
-// for non-scalar types (classes or collections of classes) : check that instances are also 
+// for classes or collections : check that instances are also 
 // in the model and are of the correct (declared) type
 rule  <k> consistentAttributes( (attr |->  typedElt(v,T)) Map',  //T here may be a subtype of
                             (attr |-> T ) Map'')   // T here
       => 
       allPresentAndWellTyped(v)~>consistentAttributes(Map',Map'')
       <_/k>
-      if isClass(T)    
+<metamodel_>
+    <classes_>
+     <class_>
+       <className> T </className>
+     <_/class>
+     <_/classes>
+ <_/metamodel>
+      if notBool isBasic (T)    
       [structural]
 
 //or of a supertype
 rule  <k> consistentAttributes( (attr |->  typedElt(v,T)) Map',  
                             ((attr |-> T':Id ) Map''))
       => 
-       sbType(T,T')~>allPresentAndWellTyped(v)~>consistentAttributes(Map',Map'')
+       allPresentAndWellTyped(v)~>consistentAttributes(Map',Map'')
       <_/k>
-      if isClass(T) andBool notBool (T ==Bool T')
-      [structural]
-
-
-syntax Bool ::= isClass ( Id )
-rule isClass(int) => false [structural]
-rule isClass(bool) => false [structural]
-rule isClass(string) => false [structural]
-rule isClass(C) => true 
-if (( C =/=Bool int) andBool (C =/=Bool bool) andBool  (C =/=Bool string)) [structural]
-
-
-
-syntax K ::= sbType( Id , Id )
-
-
-rule <k> sbType(T,T') => . <_/k>
 <metamodel_>
     <classes_>
      <class_>
        <className> T </className>
-       <extends> BagItem(T') B </extends>
+         <extends> BagItem(T') _ </extends>
      <_/class>
      <_/classes>
- <_/metamodel> 
+ <_/metamodel>
+      if notBool(isBasic(T)) andBool notBool (T ==Bool T')
+      [structural]
 
 
-//syntax K ::=  Id isIn  List{Id}
+syntax Bool ::= isBasic ( Id )
+rule isBasic(int) => true [structural]
+rule isBasic(bool) => true [structural]
+rule isBasic(string) => true [structural]
+rule isBasic(C) => false
+if (( C =/=Bool int) andBool (C =/=Bool bool) andBool  (C =/=Bool string)) [structural]
 
-//rule <k> (T isIn T )  => . <_/k> 
-//rule <k> T isIn  (T',L) =>  T isIn L <_/k> if notBool (T ==Bool T)
 
 
 

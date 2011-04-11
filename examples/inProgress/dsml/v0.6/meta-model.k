@@ -49,6 +49,10 @@ syntax Id ::= object | undefined // to be extended later with class and instance
                          <extends> .Bag </extends>
                          <declAttributes> .Map  </declAttributes>
                       </class>
+                     <enumeration multiplicity = "*" >
+                         <enumName> undefined </enumName> 
+                         .Bag
+                      </enumeration> 
                     </classes>
                     <oclConstraints> .List </oclConstraints>
                   </metamodel>@latex("\\kBR")
