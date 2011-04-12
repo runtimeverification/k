@@ -41,6 +41,7 @@ public class AnnotPreK {
     tokenToK.put(annotParser.SKIP, "@`skip");
     tokenToK.put(annotParser.VERIFY, "@`verify");
     tokenToK.put(annotParser.BREAKPOINT, "@`breakpoint");
+    tokenToK.put(annotParser.RETURN, "returnRule_");
 
     tokenToBuiltins.put(annotParser.DISJ, "_\\/_");
     tokenToBuiltins.put(annotParser.CONJ, "_/\\_");
@@ -183,6 +184,44 @@ public class AnnotPreK {
     if (cell.cells.isEmpty())
       newBag.addChild(newVar(cellLabel, cell.sort + "Item", cell.isDefault));
 
+    if ("env".equals(cellLabel) && "Free".equals(prefix)) {
+      t = new CommonToken(annotParser.REW);
+      CommonTree rewNode = new CommonTree(t);
+      newBag.addChild(rewNode);
+      rewNode.addChild(new CommonTree(new CommonToken(annotParser.MAP)));
+      t = new CommonToken(annotParser.MAPSTO);
+      CommonTree mapstoNode = new CommonTree(t);
+      rewNode.addChild(mapstoNode);
+      t = new CommonToken(annotParser.APP, "_`(_`)");
+      CommonTree leftAppNode = new CommonTree(t);
+      mapstoNode.addChild(leftAppNode);
+      t = new CommonToken(annotParser.BUILTIN, "Id_");
+      CommonTree idBuiltinNode = new CommonTree(t);
+      leftAppNode.addChild(idBuiltinNode);
+      t = new CommonToken(annotParser.ID, "id`(_`)");
+      CommonTree idWrapperNode = new CommonTree(t);
+      idBuiltinNode.addChild(idWrapperNode);
+      t = new CommonToken(annotParser.STRING_LITERAL, "\"__return__\"");
+      idWrapperNode.addChild(new CommonTree(t));
+      t = new CommonToken(annotParser.K_LIST, ".List`{K`}");
+      leftAppNode.addChild(new CommonTree(t));
+      t = new CommonToken(annotParser.APP, "_`(_`)");
+      CommonTree rightAppNode = new CommonTree(t);
+      mapstoNode.addChild(rightAppNode);
+      t = new CommonToken(annotParser.BUILTIN, "List`{MathObj++`}_");
+      CommonTree objBuiltinNode = new CommonTree(t);
+      rightAppNode.addChild(objBuiltinNode);
+      if(annotParser.retTree != null)
+        objBuiltinNode.addChild(annotParser.retTree);
+      else
+      {
+        t = new CommonToken(annotParser.VALUE, "unit");
+        objBuiltinNode.addChild(new CommonTree(t));
+      }
+      t = new CommonToken(annotParser.K_LIST, ".List`{K`}");
+      rightAppNode.addChild(new CommonTree(t));
+    }
+
     t = new CommonToken(annotParser.IDENTIFIER, cellLabel);
     newCell.addChild(new CommonTree(t));
   }
@@ -211,7 +250,6 @@ public class AnnotPreK {
           newContainer.addChild(newVar("right_" + cellLabel, cellItem, false));
         if (cellOpen == Table.Cell.BOTH)
           newContainer.addChild(newVar(cellLabel, cellItem, false));
-
         tree.setChild(1, newContainer);
       }
       else if (cellSort.equals(Table.Sort.LIST)) {
@@ -306,9 +344,10 @@ public class AnnotPreK {
         }
       }
 
-      Iterator<Table.Cell> cellIterator = cells.iterator();
-      while (cellIterator.hasNext()) {
-        Table.Cell cell = cellIterator.next();
+      //Iterator<Table.Cell> cellIterator = cells.iterator();
+      //while (cellIterator.hasNext()) {
+      for (Table.Cell cell : cells) {
+        //Table.Cell cell = cellIterator.next();
         addCell(cellBag, cell);
       }
 

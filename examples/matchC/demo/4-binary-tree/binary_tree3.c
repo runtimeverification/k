@@ -21,10 +21,8 @@ struct stackNode {
 
 struct listNode *toListRecursive(struct treeNode *t, struct listNode *l)
 /*@ rule
-      <heap_>
-        tree(old(t))(T), list(old(l))(A) => list(?l)(tree2list(T) @ A)
-      <_/heap>
-    if returns(?l) */
+      <k> $ => return ?l; </k>
+      <heap_> tree(t)(T), list(l)(A) => list(?l)(tree2list(T) @ A) <_/heap> */
 {
   struct listNode *ln;
 
@@ -42,8 +40,8 @@ struct listNode *toListRecursive(struct treeNode *t, struct listNode *l)
 
 
 struct listNode *toListIterative(struct treeNode *t)
-/*@ rule <heap_> tree(old(t))(T) => list(?l)(tree2list(T)) <_/heap>
-    if returns(?l) */
+/*@ rule <k> $ => return ?l; </k>
+         <heap_> tree(t)(T) => list(?l)(tree2list(T)) <_/heap> */
 {
   struct listNode *l;
   struct listNode *ln;

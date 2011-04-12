@@ -9,8 +9,10 @@ struct listNode {
 
 
 void readWrite(int n)
-/*@ rule <in> A => epsilon <_/in> <out_> epsilon => A </out>
-    if len(A) = old(n) */
+/*@ rule <k> $ => return; <_/k>
+         <in> A => epsilon <_/in>
+         <out_> epsilon => A </out>
+    if n = len(A) */
 {
   int t;
 
@@ -25,8 +27,10 @@ void readWrite(int n)
 
 
 void readWriteBuffer(int n)
-/*@ rule <in> A => epsilon <_/in> <out_> epsilon => rev(A) </out>
-    if len(A) = old(n) */
+/*@ rule <k> $ => return; <_/k>
+         <in> A => epsilon <_/in>
+         <out_> epsilon => rev(A) </out>
+    if n = len(A) */
 {
   int i;
   struct listNode *x;

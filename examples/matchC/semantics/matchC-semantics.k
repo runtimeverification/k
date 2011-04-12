@@ -250,7 +250,8 @@ Return & Assert
 ***)
   rule
     <k> returnAssert tv(_, V) ~> _ ~> assertLabel => .K <_/k>
-    <form> Phi => returns V /\ Phi </form>
+    ---<form> Phi => returns V /\ Phi </form>
+    <env_> .Map => id("__return__") |-> V <_/form>
 
 
 ***(
@@ -320,7 +321,7 @@ summary function calls
 *** retrieve the return value
   rule
     <k> getReturnValue(NvT) => tv(NvT, V) <_/k>
-    <form> Phi /\ returns V => Phi </form>
+    <env_> id("__return__") |-> V => .Map <_/env>
   [structural]
   rule <k> getReturnValue(void) => tv(void, unit) <_/k> [structural]
 
@@ -379,8 +380,8 @@ assumed patterns
                 (defaultMapItem("struct") <- StructMap) ;;
                 (defaultMapItem("fun") <- FunMap) ;;
                 ---(defaultKItem("k") <- K) ;;
-                (defaultMapItem("FreeEnv") <- defaultFreeEnv(keys(Env))) ;;
-                (defaultMapItem("env") <- defaultEnv(keys(Env))) ;;
+                (defaultMapItem("FreeEnv") <- defaultFreeEnv(keys(TEnv))) ;;
+                (defaultMapItem("env") <- defaultEnv(keys(TEnv))) ;;
                 (defaultKItem("fname") <- FName) ;;
                 (defaultMapItem("tenv") <- TEnv) ;;
                 (defaultKItem("counter") <- sNat N)
@@ -461,8 +462,8 @@ asserted patterns
               (defaultMapItem("struct") <- StructMap) ;;
               (defaultMapItem("fun") <- FunMap) ;;
               ---(defaultKItem("k") <- K) ;;
-              (defaultMapItem("FreeEnv") <- defaultFreeEnv(keys(Env))) ;;
-              (defaultMapItem("env") <- defaultEnv(keys(Env))) ;;
+              (defaultMapItem("FreeEnv") <- defaultFreeEnv(keys(TEnv))) ;;
+              (defaultMapItem("env") <- defaultEnv(keys(TEnv))) ;;
               (defaultKItem("fname") <- FName) ;;
               (defaultMapItem("tenv") <- TEnv) ;;
               (defaultKItem("counter") <- Counter) 
@@ -481,7 +482,7 @@ asserted patterns
     <tenv> TEnv </tenv>
     <counter> Counter </counter>
     <subst> Subst </subst>
-  [structural]
+  [structural print ">>>"]
   rule
     <task>
       <taskType> Run </taskType>

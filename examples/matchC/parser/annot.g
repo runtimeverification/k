@@ -104,6 +104,12 @@ tokens {
   WHITESPACE;
 
   ID;
+  VALUE;
+}
+
+
+@members {
+  static CommonTree retTree;
 }
 
 
@@ -112,15 +118,10 @@ tokens {
 }
 
 
-//annot
-//  : (BEGIN_ANNOT | LINE_ANNOT)
-//    ( pattern_directive pattern -> ^(pattern_directive ^(LIST pattern))
-//    | directive -> directive
-//    )+
-//    END_ANNOT?
-//  ;
-
 annot_text
+@init {
+  retTree = null;
+}
   : BEGIN_ANNOT! annot END_ANNOT!
   | LINE_ANNOT! annot
   ;
@@ -428,8 +429,10 @@ k_term
 
 k_item
   : formula
-  | DEFAULT_K
-  | RETURN^ mathematical_object ';'!
+  | DEFAULT_K -> K_UNIT[".K"]
+  | RETURN mathematical_object ';' { retTree = $mathematical_object.tree; }
+    -> K_UNIT[".K"]
+  | RETURN ';' -> K_UNIT[".K"]
   ;
 
 

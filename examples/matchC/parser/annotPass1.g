@@ -17,8 +17,7 @@ options { backtrack = true; }
     { !Table.varString.startsWith("!")
       && Table.progIdentifiers.contains($id.text)
       && !Table.funIdentifiers.contains($id.text) }?
-    //-> ^(IDENTIFIER["FreeVar"]
-    -> ^(IDENTIFIER["?var"]
+    -> ^(IDENTIFIER["FreeVar"]
          ^(ID["id"] STRING_LITERAL["\"" + $id.text + "\""]))
   | id=IDENTIFIER
     { Table.varString.startsWith("!")

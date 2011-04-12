@@ -9,8 +9,8 @@ struct listNode {
 
 
 struct listNode* reverse(struct listNode *x)
-/*@ rule <heap_> list(old(x))(A) => list(?p)(rev(A)) <_/heap>
-    if returns(?p) */
+/*@ rule <k> $ => return ?p; </k>
+         <heap_> list(x)(A) => list(?p)(rev(A)) <_/heap> */
 {
   struct listNode *p;
   struct listNode *y;
@@ -28,8 +28,8 @@ struct listNode* reverse(struct listNode *x)
 }
 
 struct listNode* append(struct listNode *x, struct listNode *y)
-/*@ rule <heap_> list(old(x))(A), list(old(y))(B) => list(?x)(A @ B) <_/heap>
-    if returns(?x) */
+/*@ rule <k> $ => return ?x; </k>
+         <heap_> list(x)(A), list(y)(B) => list(?x)(A @ B) <_/heap> */
 {
   struct listNode *p;
   if (x == 0)
@@ -46,8 +46,7 @@ struct listNode* append(struct listNode *x, struct listNode *y)
 }
 
 int length(struct listNode* x)
-/*@ rule <heap_> list(old(x))(A) <_/heap>
-    if returns(len(A)) */
+//@ rule <k> $ => return len(A); </k> <heap_> list(x)(A) <_/heap>
 {
   int l;
   
@@ -80,7 +79,7 @@ struct listNode* create(int n)
 }
 
 void destroy(struct listNode* x)
-//@ rule <heap_> list(old(x))(A) => . <_/heap>
+//@ rule <k> $ => return; </k><heap_> list(x)(A) => . <_/heap>
 {
   struct listNode *y;
 
@@ -95,7 +94,9 @@ void destroy(struct listNode* x)
 
 
 void print(struct listNode* x)
-//@ rule <heap_> list(old(x))(A) <_/heap> <out_> epsilon => A </out>
+/*@ rule <k> $ => return; </k>
+         <heap_> list(x)(A) <_/heap>
+         <out_> epsilon => A </out> */
 {
   /*@ inv <heap_> lseg(old(x),x)(?A1), list(x)(?A2) <_/heap> <out_> ?A1 </out>
           /\ A = ?A1 @ ?A2 */

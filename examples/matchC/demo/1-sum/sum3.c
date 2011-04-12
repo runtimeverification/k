@@ -3,8 +3,8 @@
 
 
 int sum(int n)
-// rule <k> $ => return (n * (n + 1)) / 2; <_/k>
-//@ requires old(n) >= 0 ensures returns((old(n) * (old(n) + 1)) / 2)
+//@ rule <k> $ => return (n * (n + 1)) / 2; <_/k> if n >= 0
+// requires n >= 0 ensures returns((n * (n + 1)) / 2)
 {
   int s;
 

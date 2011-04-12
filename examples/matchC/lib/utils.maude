@@ -284,9 +284,9 @@ inc MATCHC
    = applyDefaultSubst(Bag, Subst) /\ Phi .
 
   --- apply default substitution on a configuration
-  eq applyDefaultSubst(< CellLabel > Map1 </ CellLabel > Bag,
+  eq applyDefaultSubst(< CellLabel > Map1 Map </ CellLabel > Bag,
                        (Map1 <- Map2) ;; Subst)
-   = < CellLabel > Map2 </ CellLabel > applyDefaultSubst(Bag, Subst) .
+   = < CellLabel > Map2 Map </ CellLabel > applyDefaultSubst(Bag, Subst) .
   eq applyDefaultSubst(< CellLabel > K1 </ CellLabel > Bag, (K1 <- K2) ;; Subst)
    = < CellLabel > K2 </ CellLabel > applyDefaultSubst(Bag, Subst) .
   eq applyDefaultSubst(< CellLabel > Bag1 </ CellLabel > Bag2, Subst)
