@@ -6,5 +6,5 @@ kmod LAMBDA is including SUBSTITUTION
 
   macro lambda X:Id . E:K = aLambda([X]E)
 ---Function application (through beta-substitution)
-  rule <k> aLambda([X]E) E':K => E[E' / X]<_/k>
+  rule <k> aLambda([X]E) E':KResult => E[E' / X]<_/k>
 endkm
