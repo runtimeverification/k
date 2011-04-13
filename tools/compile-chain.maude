@@ -1,41 +1,54 @@
-mod COMPILE-ONE-STEP is
+mod COMPILE-ONESHOT is
  including MANY-MODULES-META + RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META --- + SANITY-CHECKS-META 
 + MISSING-SUBSORTS-META + DEFAULT-TERMS-META + CONTEXT-TRANSFORMERS-META + OPEN-CELLS-META + ANONYMOUS-VARIABLES-META + MAKE-K-RULES-META + REMOVE-SUBLISTS-META + LISTS-TO-WRAPPERS-META + SYNTAX-TO-K-META + ADD-KPROPER-META + LISTS-TO-K-META + SUBSORTS-TO-WRAPPERS-META + HOMOGENOUS-ARGUMENTS-META + MAKE-ALL-LABELS-META + STRICTOPS2CXT-META + STRICTCXT2EQS-META + ID-TO-STRING-META .
 
-  op compileOneStep : Module Qid ~> Module .
-  eq compileOneStep(M, 'MANY-MODULES) = compileMANY-MODULES(M) .
-  eq compileOneStep(M, 'RESOLVE-DITTO) = compileRESOLVE-DITTO(M) .
-  eq compileOneStep(M, 'COMPLETE-K-SORTS) = compileCOMPLETE-K-SORTS(M) .
-  eq compileOneStep(M, 'ANONYMOUS-CONSTANTS) = compileANONYMOUS-CONSTANTS(M) . 
----  eq compileOneStep(M, 'SANITY-CHECKS) = compileSANITY-CHECKS(M) . 
-  eq compileOneStep(M, 'MISSING-SUBSORTS) = compileMISSING-SUBSORTS(M) . 
-  eq compileOneStep(M, 'DEFAULT-TERMS) = compileDEFAULT-TERMS(M) . 
-  eq compileOneStep(M, 'CONTEXT-TRANSFORMERS) = compileCONTEXT-TRANSFORMERS(M) . 
-  eq compileOneStep(M, 'OPEN-CELLS) = compileOPEN-CELLS(M) . 
-  eq compileOneStep(M, 'ANONYMOUS-VARIABLES) = compileANONYMOUS-VARIABLES(M) . 
-  eq compileOneStep(M, 'MAKE-K-RULES) = compileMAKE-K-RULES(M) . 
-  eq compileOneStep(M, 'REMOVE-SUBLISTS) = compileREMOVE-SUBLISTS(M) . 
-  eq compileOneStep(M, 'LISTS-TO-WRAPPERS) = compileLISTS-TO-WRAPPERS(M) . 
-  eq compileOneStep(M, 'SYNTAX-TO-K) = compileSYNTAX-TO-K(M) . 
-  eq compileOneStep(M, 'ADD-KPROPER) = compileADD-KPROPER(M) . 
-  eq compileOneStep(M, 'LISTS-TO-K) = compileLISTS-TO-K(M) . 
-  eq compileOneStep(M, 'SUBSORTS-TO-WRAPPERS) = compileSUBSORTS-TO-WRAPPERS(M) . 
-  eq compileOneStep(M, 'HOMOGENOUS-ARGUMENTS) = compileHOMOGENOUS-ARGUMENTS(M) . 
-  eq compileOneStep(M, 'MAKE-ALL-LABELS) = compileMAKE-ALL-LABELS(M) . 
-  eq compileOneStep(M, 'STRICTOPS2CXT) = compileSTRICTOPS2CXT(M) . 
-  eq compileOneStep(M, 'STRICTCXT2EQS) = compileSTRICTCXT2EQS(M) . 
-  eq compileOneStep(M, 'ID-TO-STRING) = compileID-TO-STRING(M) . 
+  op compile : Module QidList ~> Module .
+  eq compile(M, nil) = M .
+  eq compile(M, Q QIL) = compile(compile1(M,Q), QIL) .
 
-  var M : Module . 
+  op compile1 : Module Qid ~> Module .
+  eq compile1(M, 'MANY-MODULES) = compileMANY-MODULES(M) .
+  eq compile1(M, 'RESOLVE-DITTO) = compileRESOLVE-DITTO(M) .
+  eq compile1(M, 'COMPLETE-K-SORTS) = compileCOMPLETE-K-SORTS(M) .
+  eq compile1(M, 'ANONYMOUS-CONSTANTS) = compileANONYMOUS-CONSTANTS(M) . 
+---  eq compile1(M, 'SANITY-CHECKS) = compileSANITY-CHECKS(M) . 
+  eq compile1(M, 'MISSING-SUBSORTS) = compileMISSING-SUBSORTS(M) . 
+  eq compile1(M, 'DEFAULT-TERMS) = compileDEFAULT-TERMS(M) . 
+  eq compile1(M, 'CONTEXT-TRANSFORMERS) = compileCONTEXT-TRANSFORMERS(M) . 
+  eq compile1(M, 'OPEN-CELLS) = compileOPEN-CELLS(M) . 
+  eq compile1(M, 'ANONYMOUS-VARIABLES) = compileANONYMOUS-VARIABLES(M) . 
+  eq compile1(M, 'MAKE-K-RULES) = compileMAKE-K-RULES(M) . 
+  eq compile1(M, 'REMOVE-SUBLISTS) = compileREMOVE-SUBLISTS(M) . 
+  eq compile1(M, 'LISTS-TO-WRAPPERS) = compileLISTS-TO-WRAPPERS(M) . 
+  eq compile1(M, 'SYNTAX-TO-K) = compileSYNTAX-TO-K(M) . 
+  eq compile1(M, 'ADD-KPROPER) = compileADD-KPROPER(M) . 
+  eq compile1(M, 'LISTS-TO-K) = compileLISTS-TO-K(M) . 
+  eq compile1(M, 'SUBSORTS-TO-WRAPPERS) = compileSUBSORTS-TO-WRAPPERS(M) . 
+  eq compile1(M, 'HOMOGENOUS-ARGUMENTS) = compileHOMOGENOUS-ARGUMENTS(M) . 
+  eq compile1(M, 'MAKE-ALL-LABELS) = compileMAKE-ALL-LABELS(M) . 
+  eq compile1(M, 'STRICTOPS2CXT) = compileSTRICTOPS2CXT(M) . 
+  eq compile1(M, 'STRICTCXT2EQS) = compileSTRICTCXT2EQS(M) . 
+  eq compile1(M, 'ID-TO-STRING) = compileID-TO-STRING(M) . 
+
+  op allSteps : -> QidList .
+  eq allSteps = 'MANY-MODULES 'RESOLVE-DITTO 'COMPLETE-K-SORTS 'ANONYMOUS-CONSTANTS --- 'SANITY-CHECKS 
+'MISSING-SUBSORTS 'DEFAULT-TERMS 'CONTEXT-TRANSFORMERS 'OPEN-CELLS 'ANONYMOUS-VARIABLES 'MAKE-K-RULES 'REMOVE-SUBLISTS 'LISTS-TO-WRAPPERS 'SYNTAX-TO-K 'ADD-KPROPER 'LISTS-TO-K 'SUBSORTS-TO-WRAPPERS 'HOMOGENOUS-ARGUMENTS  'MAKE-ALL-LABELS 'STRICTOPS2CXT 'STRICTCXT2EQS 'ID-TO-STRING .
+  
+  op compile : Module ~> Module .  
+  eq compile(M) = compile(M, allSteps) .
+  
+  op partialCompile : Module Qid ~> Module .
+  eq partialCompile(M,Q) = compile(M, upTo(allSteps,Q)) .
+  
+  var M : Module . var Q : Qid . var QIL : QidList .
 endm
 
-mod COMPILE-META is
+fmod COMPILE-META is
   including META-LEVEL .
   including META-MODULE-EXTRAS .
   including STRING-EXTRAS .
   including MODULE-META-PRETTY-PRINT .
   including PARSE-METADATA .
-  including COMPILE-ONE-STEP .
 
   op wrapper : Qid -> Module .
   eq wrapper(Q) = (mod 'MKKR is including Q . 
@@ -107,12 +120,15 @@ mod COMPILE-META is
   op compile : Module QidList ~> Module .
   eq compile(M,nil) = M [print "Final module: " M] .
   eq compile(M, Q QIL) =  $compile(M, Q, 
-    compileOneStep(M,Q), QIL) [print "applying transformation " Q " on module " M] .
+    downTerm(getTerm(
+             metaReduce(wrapper(qid(string(Q) + "-META")),
+                        qid("compile" + string(Q))[upTerm(M)])), error)
+     , QIL) [print "applying transformation " Q " on module " M] .
   
   op $compile : Module Qid Module QidList ~> Module .
   eq $compile(M, Q, moduleError(QIL), QIL') = moduleError(QIL) .
   eq $compile(M, Q, errorM(M', Trm, Cxt, Str, AS), QIL')
-   = moduleError('`[ 'ERROR '`] 'Error:  tokenize(getLocation(AS)) '\s '\s tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt) '`[ 'ENDERROR '`]) [print "module error generated"].
+   = moduleError('`[ 'ERROR '`] 'Error:  tokenize(getLocation(AS)) '\s '\s tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt) '`[ 'ENDERROR '`]) .
   eq $compile(M, Q, M', QIL)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL) else generateError(M,Q,M') fi [owise] .
 
   op print : [Module] -> QidList .
@@ -121,10 +137,10 @@ mod COMPILE-META is
   eq generateError(M, Q, M') = moduleError('`[ 'ERROR '`] 'Error 'while getPhaseName(Q) '`( 'module Q '`)  '`[ 'ENDERROR '`] '\n
    'To 'reproduce 'load 'k-prelude 'and 'then 'the 'generated 'module. '\n
    print(M) 
-) [print " Not well formed module.  " M'].
+) .
 
   var Q Q' : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .  var Trm Cxt : Term .  var AS : AttrSet .  var Str : String .
-endm
+endfm
 
 mod COMPILE-LOOP is
   including LOOP-MODE + COMPILE-META .
