@@ -34,3 +34,4 @@ rew run('p29, (Int 5(.List{K}),,Int 3(.List{K}),,Int 7(.List{K}),,Int 2(.List{K}
 
 search run('p30) =>! B:Bag .
 search run('p31) =>! B:Bag .
+search run('halt-threads) =>! B:Bag .

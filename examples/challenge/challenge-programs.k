@@ -469,4 +469,14 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
     }
     broadcast 0;
 
+
+
+  syntax Stmt ::= halt-threads 
+  macro halt-threads = 
+  var i;
+  spawn{if 1 <=i then haltSystem; else (i = i+1;)
+        print(i);
+       }
+  i = i+1;
+  print(i);
 endkm
