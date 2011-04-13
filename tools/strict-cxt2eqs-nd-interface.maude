@@ -3,10 +3,10 @@ load strict-cxt2eqs-nd
 mod STRICTCXT2EQS-METADATA-META is
   including STRICTCXT2EQS .
   including PARSE-METADATA .
-  var M : Module . var AS : AttrSet . var Str : String . var T : Term . var Sort : Type .  var Cond : TermList .
+  var M : Module . var AS : AttrSet . var Str : String . var T1 T2 : Term . var Sort : Type .  var Cond : TermList .
   var MAS : MembAxSet . var Eqs : EquationSet . var Rls : RuleSet .
-  eq strictCxt2eq(M, MAS, Eqs, Rls, T, AS metadata(Str), Cond)
-   = strictCxt2eq(M, MAS, Eqs, Rls, T, metadataParse(Str), Cond) .
+  eq strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, AS metadata(Str), Cond)
+   = strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, metadataParse(Str), Cond) .
 endm
 
 mod STRICTCXT2EQS-META is

@@ -5,7 +5,7 @@ fmod MAKE-K-RULES is
   including META-K-COOL .
   including META-LEVEL-EXTRAS .
   including META-K-CONDITION-SEARCH .
-  including PARSE-METADATA-RULES .
+  including PARSE-METADATA .
   var M Flat : Module .  var T T1 T2 : Term .  var AS : AttrSet . 
   var C : Term . var S : Sort .  var Ss : SortSet . var Subst : Substitution .
   var Ct : Constant . var V : Variable .
@@ -48,7 +48,7 @@ fmod MAKE-K-RULES is
 ---------
 
   op addCxtReplace : Module Module KContextSplit ~> Module .
-  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setContents(CSplit, replaceCxt(splitReplace(getContents(CSplit),1), getHoleReplacement(getContents(CSplit))))), M) .
+  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
 
   op addReplace : Module Module KRuleSplit Substitution ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural}, Subst)
