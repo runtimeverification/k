@@ -13,8 +13,8 @@ including K-PROPER .
 including K-WRAPPERS-LABELS .
 including MAUDE-IF-THEN-ELSE .
 including K-STRICTNESS .
-subsort Atom < Builtins .
-subsort Atom < Formula .
+subsort AtomFormula < Builtins .
+subsort AtomFormula < Formula .
 subsort Char < List{MathObj++}.
 subsort Char < MathObj++ .
 subsort Char < Set{MathObj++}.
@@ -191,7 +191,7 @@ subsort Tree < Set{MathObj++}.
 subsort Tree++ < Builtins .
 subsort Tree++ < List{MathObj++}.
 subsort Tree++ < Set{MathObj++}.
-subsort Truth < Builtins .
+subsort TruthFormula < Builtins .
 subsort TypedValue < Builtins .
 subsort Value < Builtins .
 subsort Value < List{MathObj++}.

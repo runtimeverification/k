@@ -91,7 +91,6 @@ mod CONFIG-BUILTIN-MODULE is
   op skolemize : Nat Pattern -> Pattern .
   op co-skolemize : Nat Pattern -> Pattern .
 
-  op returns _ : Value -> Atom .
   op unit : -> Value . 
   op tv`(_,_`) : ExpressionType Value -> TypedValue .
   op derive : -> KLabel .

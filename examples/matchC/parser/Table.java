@@ -67,6 +67,7 @@ public class Table {
   public static final Set<String> progIdentifiers = new HashSet<String>();
   public static final Set<String> funIdentifiers = new HashSet<String>();
   public static final Set<String> annotIdentifiers = new HashSet<String>();
+  public static final Set<String> ruleLeftIdentifiers = new HashSet<String>();
 
   public static final Map<String, String>
     varRootToSort = new HashMap<String, String>();

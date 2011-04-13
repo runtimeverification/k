@@ -44,7 +44,7 @@ mod MATHEMATICAL-MULTISET-BUILTIN-MODULE
 
   op size : MSet++ -> Int++ . 
   ops min max : MSet++ -> Int++ .
-  op in : MathObj++ MSet++ -> Atom .
+  op in : MathObj++ MSet++ -> AtomFormula .
 
   var Phi1 Phi2 : Formula .
   var I J : Int++ .

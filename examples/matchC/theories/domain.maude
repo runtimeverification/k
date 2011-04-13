@@ -25,7 +25,7 @@ mod MATHEMATICAL-DOMAIN-BUILTIN-MODULE is
 ***)
   eq tree2mset(TL [ Obj ] TR) = tree2mset(TL) U {| Obj |} U tree2mset(TR) .
   eq tree2mset(upsilon) = empty .
-  op isBst : Tree++ -> Atom .
+  op isBst : Tree++ -> AtomFormula .
   eq isBst(TL [I] TR) = @(max(tree2mset(TL)) <=Int I) /\
                         @(I <=Int min(tree2mset(TR))) /\
                         isBst(TL) /\ isBst(TR) .
@@ -44,7 +44,7 @@ mod MATHEMATICAL-DOMAIN-BUILTIN-MODULE is
   eq seq2mset([Obj]) = {| Obj |} .
   eq seq2mset(epsilon) = empty .
 
-  op isSorted : Seq++ -> Atom .
+  op isSorted : Seq++ -> AtomFormula .
   eq isSorted(NeA @ NeA')
    = @(min(seq2mset(NeA')) >=Int max(seq2mset(NeA))) /\
      isSorted(NeA) /\ isSorted(NeA') .

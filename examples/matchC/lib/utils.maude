@@ -354,11 +354,11 @@ mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST .
   eq (Obj1, Obj2, ObjList) <- (Obj1', Obj2', ObjList')
    = (Obj1 <- Obj1') ;; (Obj2 <- Obj2') ;; (ObjList <- ObjList') .
 
-  op filterPrePhiDefault : NtFormula Truth -> Formula .
-  var T : Truth .
-  var A : Atom .
+  op filterPrePhiDefault : NtFormula TruthFormula -> Formula .
+  var T : TruthFormula .
+  var A : AtomFormula .
   var NtPhi NtPhi1 NtPhi2 : NtFormula .
-  eq filterPrePhi(T:Truth) = T .
+  eq filterPrePhi(T) = T .
   eq filterPrePhi(NtPhi) = filterPrePhiDefault(NtPhi, TrueFormula) .
   eq filterPrePhiDefault(NtPhi1 /\ NtPhi2, T)
    = filterPrePhiDefault(NtPhi1, TrueFormula)
@@ -367,8 +367,10 @@ mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST .
   eq filterPrePhiDefault(NtPhi1 \/ NtPhi2, T)
    = filterPrePhiDefault(NtPhi1, FalseFormula)
      \/ filterPrePhiDefault(NtPhi2, FalseFormula) .
-  eq filterPrePhiDefault(A, T)
-   = if isLhsTerm(upTerm(A)) then A else T fi .
+  ceq filterPrePhiDefault(A, T) = A
+   if isLhsTerm(upTerm(A)) .
+  ceq filterPrePhiDefault(A, T) = T
+   if notBool isLhsTerm(upTerm(A)) .
 
   op isLhsTerm : TermList -> Bool . 
   var Q : Qid .

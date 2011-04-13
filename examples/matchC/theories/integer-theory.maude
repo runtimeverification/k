@@ -79,10 +79,15 @@ mod MATHEMATICAL-INT-BUILTIN-MODULE is
   
   op absolute : Int++ -> Int++ .
  ceq absolute(I) = I if (I >=Int 0) .
-  eq absolute(I) = (-Int I) [owise] .
+---  eq absolute(I) = (-Int I) [owise] .
   
   op fibon : Int++ -> Int++ .
  ceq fibon(I) = 1 if (I <=Int 1) .
-  eq fibon(I) = fibon(I -Int 1) +Int fibon(I -Int 2) .
+---  eq fibon(I) = fibon(I -Int 1) +Int fibon(I -Int 2) .
+
+  op fact : Int++ -> Int++ .
+  eq fact(0) = 1 .
+ ceq fact(I:Int) = I:Int *Int fact(-1 +Int I:Int) if I:Int >Int 0 .
+  eq fact(-1 +Int I) *Int I = fact(I) .
 endm
 

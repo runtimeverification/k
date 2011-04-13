@@ -47,7 +47,7 @@ mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
   op rev : Seq++ -> NeSeq++ .
   op len : Seq++ -> Int++ .
   op maximum : Seq++ -> Int++ .
-  op contain : Seq++ Int++ -> Atom .
+  op contain : Seq++ Int++ -> AtomFormula .
 
 
   var N : Nat .
