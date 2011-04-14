@@ -55,7 +55,7 @@ END {
 sub finalCleanup {
 	# clean(); # delete normal kompile files
 	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
-	
+#	clean() if !$verbose;
 	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
 }
 
@@ -99,6 +99,9 @@ my $short_help_message =
   -title \"title\" : specifies the title when generating a poster
   -author \"name\" : specifies the name of the author in a poster
   -output output_file : specifies the name of the generated (latex) file
+  -latex-header : includes the content of the argument file
+	after \\begin{document} but before first \\begin{module}
+	in the latex file
 
   Compile only one program options
   -pgm <filename> : the file where the program macro is
@@ -398,6 +401,7 @@ my @all_tokens = @builtin_tokens;
 # a map with frozen strings
 my %freeze_map = ();
 
+# variables to store command line arguments
 my $style = "bb";
 my $maudify_only = 0;
 my $compile_only = 0;
@@ -405,6 +409,7 @@ my $language_module_name = "";
 my $language_file_name = "";
 my $lang_name = "";
 my $output_latex_file = "";
+my $latex_header = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
@@ -482,6 +487,9 @@ foreach (@ARGV) {
     elsif (($author eq "?") && !/^-/) {
 	$author = $_;
     }
+    elsif (($latex_header eq "?") && !/^-/) {
+	$latex_header = $_;
+    }
     elsif (($output_latex_file eq "?") && !/^-/) {
 	$output_latex_file = $_;
     }
@@ -526,6 +534,9 @@ foreach (@ARGV) {
     }
     elsif (/^--?author$/) {
 	$author = "?";
+    }
+    elsif (/^--?latex\-header$/) {
+	$latex_header = "?";
     }
     elsif (/^--?nd$/) {
        $k_all_tools .= "-nd";
@@ -614,6 +625,7 @@ $output_latex_file = $lang_name if $output_latex_file eq "";
 
 # print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
 # print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\nTITLE:$title\nAUTHOR:$author\n\n";
+# print "Latex header $latex_header\n";
 
 my $args = "@ARGV";
 # print "ARGS: $args\n";
@@ -914,17 +926,25 @@ sub latexify {
         }
 	print FILE join("\n",@newcommands)."\n";
 
+	# hack: allows \\ as arg for author/title 
+	# 	in latex.
 	$title =~ s/\s\\\s/\\\\/sg;
 	$author =~ s/\s\\\s/\\\\/sg;
-#	print "Author: $author\n";
+
 	print FILE "\\title{$title}\n\\author{$author}\n" if ($title ne "" && $author ne "");
 	print FILE "\\title{$title}\n" if ($title ne "" && $author eq "");
 	print FILE "\n\\begin{document}\n\n";
 	print FILE "\\maketitle\n" if ($title ne "");
 	
+	# insert $latex_header here
+	my $header = get_file_content($latex_header);
+	print FILE "% begin latex header \n";
+	print FILE "$header\n";
+	print FILE "% end latex header \n\n";
+
 	my $latex_temp = join("\\newpage", @l_modules)."\n";
 	# $latex_temp = restore_intermodule_latex($latex_temp);
-
+	
 	print FILE $latex_temp;
 	print FILE "\\end{document}\n";
 	close FILE;
@@ -991,9 +1011,9 @@ sub get_file_content
 {
     my $filename = shift;
     
-    open FILE, "<", $filename or die "Could not open $filename:\n$!";
-    my @input = <FILE>;
-    close FILE;
+    open FILEHANDLE, "<", $filename or die "Could not open $filename:\n$!";
+    my @input = <FILEHANDLE>;
+    close FILEHANDLE;
     
     return "@input";
 }
@@ -2213,15 +2233,6 @@ sub add_subsorts
 	    
 	    if (scalar(@decllist) > 0)
 	    {
-		# remove all declared sorts from ssorts.
-#		for(my $i = 1; $i < scalar(@ssorts); $i++) 
-#		{
-#		    if ("@decllist" =~ /$ssorts[$i]/)
-#		    {
-#			delete $ssorts[$i];
-#		    }		    
-#		}
-		
                 # get module file
 		my $file = getModuleFile($_);
 	    
@@ -2309,6 +2320,7 @@ q
 	
 	exit();
 }
+
 # Latex top level patterns
 #my $latex_top_level_pattern = join("|", (
 #		"\\/\\/@(before|after)=([a-zA-Z\-]+)\s(.*?)(?=\n)",
@@ -2358,8 +2370,11 @@ sub restore_intermodule_latex
 	return $_;
 }
 
-
-# check available software
+# Args: no input
+# Return: null
+# Check installed software on local machine:
+# maude, perl XML::DOM package
+# Issue: doesn't work fine if other perl packages are not installed.
 sub check_software
 {
 	# check if maude is installed
