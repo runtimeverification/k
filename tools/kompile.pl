@@ -623,7 +623,7 @@ $lang_name =~ s/\..*?$//;
 # Set latex out file name
 $output_latex_file = $lang_name if $output_latex_file eq "";
 
-# print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
+#print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
 # print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\nTITLE:$title\nAUTHOR:$author\n\n";
 # print "Latex header $latex_header\n";
 
@@ -937,10 +937,13 @@ sub latexify {
 	print FILE "\\maketitle\n" if ($title ne "");
 	
 	# insert $latex_header here
-	my $header = get_file_content($latex_header);
-	print FILE "% begin latex header \n";
-	print FILE "$header\n";
-	print FILE "% end latex header \n\n";
+	if ($latex_header ne "")
+	{
+		my $header = get_file_content($latex_header);
+		print FILE "% begin latex header \n";
+		print FILE "$header\n";
+		print FILE "% end latex header \n\n";
+	}
 
 	my $latex_temp = join("\\newpage", @l_modules)."\n";
 	# $latex_temp = restore_intermodule_latex($latex_temp);
