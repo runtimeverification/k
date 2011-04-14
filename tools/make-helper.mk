@@ -2,7 +2,7 @@
 # defaults, are set only if they weren't set before
 MAIN_FILE ?= yourLanguage
 LANGUAGE_NAME ?= YOURLANGUAGE
-
+SHELL = /usr/bin/env bash
 ################################
 # You shouldn't need to change anything below here.
 # The things below are set based on what you set above
