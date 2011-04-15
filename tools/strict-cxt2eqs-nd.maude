@@ -72,7 +72,7 @@ mod STRICTCXT2EQS is
    =  (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T1)))
         = kWrap(Q, T1[hole <- mkVariable('Kcxt,KResult)])
        [metadata(AS metadata("cooling"))] .) 
-      (eq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
+      (eq 'cool[kra(kra(T2[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]], freezeTerm(M, T1)),'Rest:K)]
         = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
        [metadata(AS metadata("super cooling"))] .) .
 
