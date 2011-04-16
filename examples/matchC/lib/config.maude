@@ -84,7 +84,7 @@ mod CONFIG-BUILTIN-MODULE is
   subsort String < Value .
   sort Void NvExpressionType ExpressionType .  
   subsort Void NvExpressionType < ExpressionType .  
-  subsorts List{MathObj++} Set{MathObj++} < Builtins KResult .
+  subsorts List{MathObj++} < Builtins KResult .
   sort Field .
   sort HeapLabel .
 
@@ -136,7 +136,7 @@ endm
 mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-WHERE + K-CONDITION-SEARCH .
   subsort HeapLabel < Bag .
   subsorts Formula Subst MathObj++ < Builtins KResult .
-  subsorts List{MathObj++} Set{MathObj++} < Builtins KResult .
+  subsorts List{MathObj++} < Builtins KResult .
   subsort Id Field < Builtins KProper .
   subsort Value TypedValue ExpressionType < Builtins KResult .
 

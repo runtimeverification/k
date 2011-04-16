@@ -15,7 +15,7 @@ mod FORMULA-BUILTIN-MODULE is inc PL-BOOL + PL-STRING .
   op _\/_ : Formula Formula -> Formula [ditto] .
   op _===>_ : Formula Formula -> NtFormula [prec 61] .
 
-  op check-sat : Formula -> String .
+  op check-validity : Formula -> Bool .
 
   var Atom : AtomFormula .
   vars NtPhi NtPhi1 NtPhi2 NtPhi' : NtFormula .
@@ -84,9 +84,9 @@ Sort stands for ground, non-symbolic mathematical objects
 Sort++ stands for all the above
 ***)
   sorts PEMathObj FEMathObj FreeMathObj MathObj MathObj++ .
-  sorts List{MathObj++} Set{MathObj++} Container{MathObj++} .
+  sorts List{MathObj++} .
   subsort PEMathObj FEMathObj FreeMathObj MathObj < MathObj++ .
-  subsort MathObj++ < List{MathObj++} Set{MathObj++} < Container{MathObj++} .
+  subsort MathObj++ < List{MathObj++} .
   op skolem : Nat PEMathObj -> FreeMathObj .
   ---[strat(0)] .
   op co-skolem : Nat FreeMathObj -> FEMathObj .
@@ -96,17 +96,11 @@ Sort++ stands for all the above
   op _`,_ : List{MathObj++} List{MathObj++} -> List{MathObj++}
   [assoc id: .List{MathObj++}] .
 
-  op .Set{MathObj++} : -> Set{MathObj++} .
-  op _&_ : Set{MathObj++} Set{MathObj++} -> Set{MathObj++}
-  [assoc comm id: .Set{MathObj++}] .
-  eq Obj & Obj = Obj .
-
   op errorObj : -> [MathObj++] .
 
   --- must not be comm (not sure why is that)
   op _===_ : MathObj++ MathObj++ -> AtomFormula [comm] .
   op _===_ : List{MathObj++} List{MathObj++} -> AtomFormula [ditto] .
-
 
   vars Obj Obj1 Obj1' Obj2 Obj2' : MathObj++ .
   vars ObjList1 ObjList2 : List{MathObj++} .

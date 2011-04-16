@@ -1,71 +1,5 @@
-mod PL-META-TERM is including PL-BOOL + PL-QID .
-*** types
-  sorts Sort Kind Type .
-  subsorts Sort Kind < Type < Qid .
-  op <Qids> : -> Sort [special (id-hook QuotedIdentifierSymbol (sortQid))] .
-  op <Qids> : -> Kind [special (id-hook QuotedIdentifierSymbol (kindQid))] .
-
-
-*** terms
-  sorts Constant Variable ExtendedConstant .
-  sorts GroundTerm Term NeGroundTermList GroundTermList NeTermList TermList .
-  subsorts Constant Variable < ExtendedConstant < Qid Term .
-  subsorts Constant < GroundTerm < Term NeGroundTermList < NeTermList .
-  subsorts NeGroundTermList < NeTermList GroundTermList < TermList .
-  op <Qids> : -> Constant [special (id-hook QuotedIdentifierSymbol (constantQid))] .
-  op <Qids> : -> Variable [special (id-hook QuotedIdentifierSymbol (variableQid))] .
-  op .emptyTermList : -> GroundTermList [ctor] .
-  op _:_ : NeGroundTermList GroundTermList -> NeGroundTermList [ctor assoc id: .emptyTermList gather (e E) prec 121] .
-  op _:_ : GroundTermList NeGroundTermList -> NeGroundTermList [ctor ditto] .
-  op _:_ : GroundTermList GroundTermList -> GroundTermList [ctor ditto] .
-  op _:_ : NeTermList TermList -> NeTermList [ctor ditto] .
-  op _:_ : TermList NeTermList -> NeTermList [ctor ditto] .
-  op _:_ : TermList TermList -> TermList [ctor ditto] .
-  op _[_] : Qid NeGroundTermList -> GroundTerm [ctor] .
-  op _[_] : Qid NeTermList -> Term [ctor] .
-
-*** utils for constant/variables
-  op getName : Constant -> Qid .
-  op getType : Constant -> Type .
-  var C : Constant .
-  op getName : Variable -> Qid .
-  op getType : Variable -> Type .
-  var V : Variable .
-  eq getName (C) = qid (substrString (string (C), 0, rfindString (string (C), ".", lengthString (string (C))))) .
-  eq getType (C) = qid (substrString (string (C), rfindString (string (C), ".", lengthString (string (C))) +Nat 1, lengthString (string (C)))) .
-  eq getName (V) = qid (substrString (string (V), 0, rfindString (string (V), ":", lengthString (string (V))))) .
-  eq getType (V) = qid (substrString (string (V), rfindString (string (V), ":", lengthString (string (V))) +Nat 1, lengthString (string (V)))) .
-
-
-  sort Module .
-  sort ResultPair .
-  op metaReduce : Module Term ~> ResultPair
-     [special (
-        id-hook MetaLevelOpSymbol	(metaReduce)
-
-        op-hook qidSymbol		(<Qids> : ~> Qid)
-        op-hook metaTermSymbol		(_[_] : Qid NeTermList ~> Term)
-        op-hook metaArgSymbol		(_:_ : NeTermList NeTermList ~> NeTermList)
-
-        term-hook trueTerm		(true)
-        term-hook falseTerm		(false))] .
-
-
-  op downTerm : Term Universal -> Universal
-        [poly (2 0)
-         special (
-           id-hook MetaLevelOpSymbol	(metaDownTerm)
-           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
-
-
-  op upTerm : Universal -> Term
-        [poly (1) strat(0)
-         special (
-           id-hook MetaLevelOpSymbol	(metaUpTerm)
-           op-hook shareWith		(metaReduce : Module Term ~> ResultPair)
-) ] .
-endm
-
+load meta
+load smt
 
 mod CONST-UTILS is inc MATCHC .
   op errorPattern : -> [Pattern] .
@@ -73,70 +7,6 @@ mod CONST-UTILS is inc MATCHC .
   op errorFormula : -> [Formula] .
   op errorSubst : -> [Subst] .
 endm
-
-
-***(
-mod VAR-UTILS is inc MATCHC + PL-META-TERM + MAUDE-IF-THEN-ELSE + CONST-UTILS .
-  op get?VarSet : Formula -> Set{MathObj++} .
-  op get?VarSet : Bag -> Set{MathObj++} .
-  op get?VarSet : TermList -> Set{MathObj++} .
-  op get!VarSet : Formula -> Set{MathObj++} .
-  op get!VarSet : Bag -> Set{MathObj++} .
-  op get!VarSet : TermList -> Set{MathObj++} .
-  op getFreeVarSet : Formula -> Set{MathObj++} .
-  op getFreeVarSet : Bag -> Set{MathObj++} .
-  op getFreeVarSet : TermList -> Set{MathObj++} .
-
-  op getFreeMap : Bag -> Map .
-  op getFreeMap : TermList -> Map .
-  op getFreeBag : Bag -> Bag .
-  op getFreeBag : TermList -> Bag .
-
-  var Obj : MathObj++ .
-  var Phi : Formula .
-  var Cfgs : Bag .
-
-  eq get?VarSet(Cfgs) = get?VarSet(upTerm(Cfgs)) .
-  eq get?VarSet(Phi) = get?VarSet(upTerm(Phi)) .
-  eq get!VarSet(Cfgs) = get!VarSet(upTerm(Cfgs)) .
-  eq get!VarSet(Phi) = get!VarSet(upTerm(Phi)) .
-  eq getFreeVarSet(Cfgs) = getFreeVarSet(upTerm(Cfgs)) .
-  eq getFreeVarSet(Phi) = getFreeVarSet(upTerm(Phi)) .
-
-  eq getFreeMap(Cfgs) = getFreeMap(upTerm(Cfgs)) .
-  eq getFreeBag(Cfgs) = getFreeBag(upTerm(Cfgs)) .
-
-  var Q : Qid .
-  var QC : Constant .
-  vars QT NT NT' : Term .
-  var QTList : TermList .
-  var QTNeList : NeTermList .
-
-  eq get?VarSet((QT : QTNeList)) = get?VarSet(QT) & get?VarSet(QTNeList) .
-  eq get?VarSet(.emptyTermList) = .Set{MathObj++} .
-  eq get?VarSet(QC) = if downTerm(QC, errorObj) :: ?MathObj then
-     downTerm(QC, errorObj) else .Set{MathObj++} fi .
- ceq get?VarSet(Q[QT]) = downTerm(Q[QT], .Set{MathObj++})
-  if substrString(string(Q), 0, 1) ==Bool "?" .
-  eq get?VarSet(Q[QTList]) = get?VarSet(QTList) [owise] .
-
-  eq getFreeVarSet((QT : QTNeList))
-   = getFreeVarSet(QT) & getFreeVarSet(QTNeList) .
-  eq getFreeVarSet(.emptyTermList) = .Set{MathObj++} .
-  eq getFreeVarSet(QC) = if downTerm(QC, errorObj) :: FreeMathObj then
-     downTerm(QC, errorObj) else .Set{MathObj++} fi .
-  eq getFreeVarSet('skolem[NT : QT])
-   = downTerm('skolem[NT : QT], .Set{MathObj++}) .
-  eq getFreeVarSet(Q[QTList]) = getFreeVarSet(QTList) [owise] .
-
-  eq getFreeMap((QT : QTNeList))
-   = getFreeMap(QT) getFreeMap(QTNeList) .
-  eq getFreeMap(.emptyTermList) = (.).Map .
-  eq getFreeMap(QC) = if downTerm(QC, (.).Map) :: FreeMapItem then
-     downTerm(QC, (.).Map) else (.).Map fi [print QC] .
-  eq getFreeMap(Q[QTList]) = getFreeMap(QTList) [owise] .
-endm
-***)
 
 
 mod PATTERN-SKOLEM is
@@ -327,7 +197,7 @@ inc MATCHC
 endm
 
 
-mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST .
+mod UTILS is inc PATTERN-SKOLEM + APPLY-SUBST + SMT-LIB + SMT-INTERFACE .
   var I : Int++ .
   eq isInt(I) = I :: Int .
 

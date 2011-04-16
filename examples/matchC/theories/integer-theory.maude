@@ -43,7 +43,7 @@ mod MATHEMATICAL-INT-BUILTIN-MODULE is
   eq I -Int J = I +Int (-Int J) .
   eq -Int (I +Int J) = (-Int I) +Int (-Int J) .
 ---  stack overflow
-  eq I +Int (J /Int 2) = (I +Int I +Int J) /Int 2 .
+  --- eq I +Int (J /Int 2) = (I +Int I +Int J) /Int 2 .
 
   eq -Int I === 0 = I === 0 .
   eq I +Int K === J +Int K = I === J .
@@ -88,6 +88,5 @@ mod MATHEMATICAL-INT-BUILTIN-MODULE is
   op fact : Int++ -> Int++ .
   eq fact(0) = 1 .
  ceq fact(I:Int) = I:Int *Int fact(-1 +Int I:Int) if I:Int >Int 0 .
-  eq fact(-1 +Int I) *Int I = fact(I) .
 endm
 

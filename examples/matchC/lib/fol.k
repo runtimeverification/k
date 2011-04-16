@@ -499,11 +499,12 @@ kmod FOL is including MATCHC-SEMANTICS
 
 --- Step 6: Call external SMT solver to check the formula if the "in-house"
 --- approach failed
----  rule
----    <task_>
----      <taskType> Constrain </taskType>
----      <form> NtPhi1 ===> FalseFormula </form>
----    <_/task> 
----  if check-sat(~ NtPhi) ==Bool "unsat"
+  rule
+    <task_>
+      <taskType> Constrain </taskType>
+      <form> NtPhi => TrueFormula </form>
+    <_/task> 
+  if check-validity(NtPhi)
+  [structural]
 endkm
 

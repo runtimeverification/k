@@ -17,7 +17,6 @@ subsort AtomFormula < Builtins .
 subsort AtomFormula < Formula .
 subsort Char < List{MathObj++}.
 subsort Char < MathObj++ .
-subsort Char < Set{MathObj++}.
 subsort Char < Value .
 subsort ExpressionType < Builtins .
 subsort FEBagItem < Bag .
@@ -25,7 +24,6 @@ subsort FEBagItem < NeBag .
 subsort FEInt < Builtins .
 subsort FEInt < List{MathObj++}.
 subsort FEInt < MathObj++ .
-subsort FEInt < Set{MathObj++}.
 subsort FEInt < Value .
 subsort FEListItem < List .
 subsort FEListItem < NeList .
@@ -33,21 +31,17 @@ subsort FEMSet < Builtins .
 subsort FEMSet < List{MathObj++}.
 subsort FEMSet < MSet++ .
 subsort FEMSet < MathObj++ .
-subsort FEMSet < Set{MathObj++}.
 subsort FEMapItem < Map .
 subsort FEMapItem < NeMap .
 subsort FEMathObj < Builtins .
 subsort FEMathObj < List{MathObj++}.
-subsort FEMathObj < Set{MathObj++}.
 subsort FESeq < Builtins .
 subsort FESeq < List{MathObj++}.
 subsort FESeq < MathObj++ .
 subsort FESeq < Seq++ .
-subsort FESeq < Set{MathObj++}.
 subsort FETree < Builtins .
 subsort FETree < List{MathObj++}.
 subsort FETree < MathObj++ .
-subsort FETree < Set{MathObj++}.
 subsort Field < Builtins .
 subsort Formula < Builtins .
 subsort FreeBagItem < Bag .
@@ -55,7 +49,6 @@ subsort FreeBagItem < NeBag .
 subsort FreeInt < Builtins .
 subsort FreeInt < List{MathObj++}.
 subsort FreeInt < MathObj++ .
-subsort FreeInt < Set{MathObj++}.
 subsort FreeInt < Value .
 subsort FreeListItem < List .
 subsort FreeListItem < NeList .
@@ -63,68 +56,54 @@ subsort FreeMSet < Builtins .
 subsort FreeMSet < List{MathObj++}.
 subsort FreeMSet < MSet++ .
 subsort FreeMSet < MathObj++ .
-subsort FreeMSet < Set{MathObj++}.
 subsort FreeMapItem < Map .
 subsort FreeMapItem < NeMap .
 subsort FreeMathObj < Builtins .
 subsort FreeMathObj < List{MathObj++}.
-subsort FreeMathObj < Set{MathObj++}.
 subsort FreeSeq < Builtins .
 subsort FreeSeq < List{MathObj++}.
 subsort FreeSeq < MathObj++ .
 subsort FreeSeq < Seq++ .
-subsort FreeSeq < Set{MathObj++}.
 subsort FreeTree < Builtins .
 subsort FreeTree < List{MathObj++}.
 subsort FreeTree < MathObj++ .
-subsort FreeTree < Set{MathObj++}.
 subsort HeapLabel < Bag .
 subsort Id < Builtins .
 subsort Int < List{MathObj++}.
 subsort Int < MathObj++ .
-subsort Int < Set{MathObj++}.
 subsort Int < Value .
 subsort Int++ < Builtins .
 subsort Int++ < List{MathObj++}.
-subsort Int++ < Set{MathObj++}.
 subsort List{MathObj++}< Builtins .
 subsort MSet < Builtins .
 subsort MSet < List{MathObj++}.
 subsort MSet < MathObj++ .
-subsort MSet < Set{MathObj++}.
 subsort MSet++ < Builtins .
 subsort MSet++ < List{MathObj++}.
-subsort MSet++ < Set{MathObj++}.
 subsort MathObj < Builtins .
 subsort MathObj < List{MathObj++}.
-subsort MathObj < Set{MathObj++}.
 subsort MathObj++ < Builtins .
 subsort Nat < Int++ .
 subsort Nat < List{MathObj++}.
 subsort Nat < MathObj .
 subsort Nat < MathObj++ .
-subsort Nat < Set{MathObj++}.
 subsort Nat < Value .
 subsort NeMSet < Builtins .
 subsort NeMSet < List{MathObj++}.
 subsort NeMSet < MSet++ .
 subsort NeMSet < MathObj .
 subsort NeMSet < MathObj++ .
-subsort NeMSet < Set{MathObj++}.
 subsort NeMSet++ < Builtins .
 subsort NeMSet++ < List{MathObj++}.
 subsort NeMSet++ < MathObj++ .
-subsort NeMSet++ < Set{MathObj++}.
 subsort NeSeq < Builtins .
 subsort NeSeq < List{MathObj++}.
 subsort NeSeq < MathObj .
 subsort NeSeq < MathObj++ .
 subsort NeSeq < Seq++ .
-subsort NeSeq < Set{MathObj++}.
 subsort NeSeq++ < Builtins .
 subsort NeSeq++ < List{MathObj++}.
 subsort NeSeq++ < MathObj++ .
-subsort NeSeq++ < Set{MathObj++}.
 subsort NeSubst < Builtins .
 subsort NtFormula < Builtins .
 subsort NvExpressionType < Builtins .
@@ -133,20 +112,17 @@ subsort NzInt < Int++ .
 subsort NzInt < List{MathObj++}.
 subsort NzInt < MathObj .
 subsort NzInt < MathObj++ .
-subsort NzInt < Set{MathObj++}.
 subsort NzInt < Value .
 subsort NzNat < Int++ .
 subsort NzNat < List{MathObj++}.
 subsort NzNat < MathObj .
 subsort NzNat < MathObj++ .
-subsort NzNat < Set{MathObj++}.
 subsort NzNat < Value .
 subsort PEBagItem < Bag .
 subsort PEBagItem < NeBag .
 subsort PEInt < Builtins .
 subsort PEInt < List{MathObj++}.
 subsort PEInt < MathObj++ .
-subsort PEInt < Set{MathObj++}.
 subsort PEInt < Value .
 subsort PEListItem < List .
 subsort PEListItem < NeList .
@@ -154,55 +130,43 @@ subsort PEMSet < Builtins .
 subsort PEMSet < List{MathObj++}.
 subsort PEMSet < MSet++ .
 subsort PEMSet < MathObj++ .
-subsort PEMSet < Set{MathObj++}.
 subsort PEMapItem < Map .
 subsort PEMapItem < NeMap .
 subsort PEMathObj < Builtins .
 subsort PEMathObj < List{MathObj++}.
-subsort PEMathObj < Set{MathObj++}.
 subsort PESeq < Builtins .
 subsort PESeq < List{MathObj++}.
 subsort PESeq < MathObj++ .
 subsort PESeq < Seq++ .
-subsort PESeq < Set{MathObj++}.
 subsort PETree < Builtins .
 subsort PETree < List{MathObj++}.
 subsort PETree < MathObj++ .
-subsort PETree < Set{MathObj++}.
 subsort Pattern < List .
 subsort Seq < Builtins .
 subsort Seq < List{MathObj++}.
 subsort Seq < MathObj++ .
-subsort Seq < Set{MathObj++}.
 subsort Seq++ < Builtins .
 subsort Seq++ < List{MathObj++}.
-subsort Seq++ < Set{MathObj++}.
-subsort Set{MathObj++}< Builtins .
 subsort String < List{MathObj++}.
 subsort String < MathObj++ .
-subsort String < Set{MathObj++}.
 subsort Subst < Builtins .
 subsort SubstItem < Builtins .
 subsort SubstItem < Subst .
 subsort Tree < Builtins .
 subsort Tree < List{MathObj++}.
 subsort Tree < MathObj++ .
-subsort Tree < Set{MathObj++}.
 subsort Tree++ < Builtins .
 subsort Tree++ < List{MathObj++}.
-subsort Tree++ < Set{MathObj++}.
 subsort TruthFormula < Builtins .
 subsort TypedValue < Builtins .
 subsort Value < Builtins .
 subsort Value < List{MathObj++}.
-subsort Value < Set{MathObj++}.
 subsort Void < Builtins .
 subsort Void < ExpressionType .
 subsort Zero < Int++ .
 subsort Zero < List{MathObj++}.
 subsort Zero < MathObj .
 subsort Zero < MathObj++ .
-subsort Zero < Set{MathObj++}.
 subsort Zero < Value .
 op Bag_ : List{K}-> Bag .
 op List_ : List{K}-> List .
@@ -333,7 +297,7 @@ op 'read`(_`) : -> KProperLabel[metadata "arity 1 location(kernelC-syntax.k:111)
 op 'returnAssert_ : -> KProperLabel[metadata "arity 1 location(matchC-syntax.k:45) strict"].
 op 'return_ : -> KProperLabel[metadata "arity 1 location(kernelC-syntax.k:39) strict"].
 op 'runMain : -> KProperLabel[metadata "arity 0 location(kernelC-semantics.k:18)"].
-op 'setToK`(_`) : -> KProperLabel[metadata "arity 1 location(matchC-semantics.k:529)"].
+op 'setToK`(_`) : -> KProperLabel[metadata "arity 1 location(matchC-semantics.k:527)"].
 op 'sizeof_ : -> KProperLabel[metadata "arity 1 location(kernelC-syntax.k:98)"].
 op 'sizeof_ : -> KProperLabel[metadata "arity 1 location(kernelC-syntax.k:99)"].
 op 'store`(_`,_`,_`) : -> KProperLabel[metadata "arity 3 location(kernelC-syntax.k:110)"].
@@ -349,7 +313,6 @@ op Formula_ : Formula -> KResultLabel[metadata "builtin wrapper"].
 op Id_ : Id -> KProperLabel[metadata "builtin wrapper"].
 op List`{MathObj++`}_ : List{MathObj++}-> KResultLabel[metadata "builtin wrapper"].
 op Set_ : List{K}-> Set[metadata "latex(renameTo {\it{}Set}\mybracket{_})"].
-op Set`{MathObj++`}_ : Set{MathObj++}-> KResultLabel[metadata "builtin wrapper"].
 op Subst_ : Subst -> KResultLabel[metadata "builtin wrapper"].
 op TypedValue_ : TypedValue -> KResultLabel[metadata "builtin wrapper"].
 op _* : ExpressionType -> NvExpressionType[metadata "location(kernelC-syntax.k:8)"].
@@ -364,15 +327,15 @@ op _`[undef/_`] : Map List{K}-> Map[metadata "latex(renameTo _[\ensuremath{\bot\
 op _feasible`and_infeasible`paths : Nat Nat -> BagItem[metadata "location(matchC.k:28)"].
 op callContext`(_`,_`,_`,_`) : K K Map Map -> ListItem[metadata "location(kernelC-semantics.k:21)"].
 op check`(_`) : K -> BagItem[metadata "location(matchC.k:27)"].
-op defaultEnv`(_`) : Set -> Map[metadata "location(matchC-semantics.k:539)"].
-op defaultFreeEnv`(_`) : Set -> Map[metadata "location(matchC-semantics.k:543)"].
+op defaultEnv`(_`) : Set -> Map[metadata "location(matchC-semantics.k:537)"].
+op defaultFreeEnv`(_`) : Set -> Map[metadata "location(matchC-semantics.k:541)"].
 op initObject`(_`,_`,_`,_`) : Int++ Id K Nat -> Map[metadata "location(kernelC-semantics.k:327)"].
 op int : -> NvExpressionType[metadata "location(kernelC-syntax.k:5)"].
 op lengthList`{K`}_ : List{K}-> Nat[metadata "latex(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
 op listLen`(_`) : K -> Nat[metadata "location(kernelC-semantics.k:322)"].
 op localRef`(_`) : Id -> TypedValue[metadata "location(kernelC-semantics.k:335)"].
 op newObject : -> TypedValue[metadata "location(kernelC-semantics.k:20)"].
-op paramSet`(_`) : K -> Set[metadata "location(matchC-semantics.k:533)"].
+op paramSet`(_`) : K -> Set[metadata "location(matchC-semantics.k:531)"].
 op string : -> NvExpressionType[metadata "location(kernelC-syntax.k:6)"].
 op struct_ : Id -> NvExpressionType[prec 10 metadata "location(kernelC-syntax.k:7)"].
 op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
@@ -529,7 +492,7 @@ eq <_>_</_>(program,_~>_(_`(_`)('__`(_`),_`,`,_(_`(_`)(ExpressionType_(T:Express
 eq <_>_</_>(program,_~>_(_`(_`)('__`(_`)`[`[_`]`],_`,`,_(_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`}),_`,`,_(_`(_`)(Id_(F:Id),.List`{K`}),_`,`,_(_`(_`)('_`,`,`,_,ParamList:List{K}),_`(_`)('@`cfg_->_if_,_`,`,_(_`(_`)(wbag_(PreCfg:Bag),.List`{K`}),_`,`,_(_`(_`)(wbag_(PostCfg:Bag),.List`{K`}),_`(_`)(Formula_(Phi:Formula),.List`{K`})))))))),?15:K),program)= <_>_</_>(program,_~>_(_`(_`)('__`(_`)`[`[_`]`],_`,`,_(_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`}),_`,`,_(_`(_`)(Id_(F:Id),.List`{K`}),_`,`,_(_`(_`)('_`,`,`,_,ParamList:List{K}),_`(_`)('@`cfg_->_req_ens_,_`,`,_(_`(_`)(wbag_(PreCfg:Bag),.List`{K`}),_`,`,_(_`(_`)(wbag_(PostCfg:Bag),.List`{K`}),_`,`,_(_`(_`)(Formula_(filterPrePhi(Phi:Formula)),.List`{K`}),_`(_`)(Formula_(Phi:Formula),.List`{K`}))))))))),?15:K),program)[metadata "location(matchC-semantics.k:170-176) structural"].
 eq <_>_</_>(program,_~>_(_`(_`)('__`(_`)`[`[_`]`]_,_`,`,_(_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`}),_`,`,_(_`(_`)(Id_(F:Id),.List`{K`}),_`,`,_(_`(_`)('_`,`,`,_,ParamList:List{K}),_`,`,_(_`(_`)('@`cfg_->_if_,_`,`,_(_`(_`)(wbag_(PreCfg:Bag),.List`{K`}),_`,`,_(_`(_`)(wbag_(PostCfg:Bag),.List`{K`}),_`(_`)(Formula_(Phi:Formula),.List`{K`})))),S:K))))),?17:K),program)= <_>_</_>(program,_~>_(_`(_`)('__`(_`)`[`[_`]`]_,_`,`,_(_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`}),_`,`,_(_`(_`)(Id_(F:Id),.List`{K`}),_`,`,_(_`(_`)('_`,`,`,_,ParamList:List{K}),_`,`,_(_`(_`)('@`cfg_->_req_ens_,_`,`,_(_`(_`)(wbag_(PreCfg:Bag),.List`{K`}),_`,`,_(_`(_`)(wbag_(PostCfg:Bag),.List`{K`}),_`,`,_(_`(_`)(Formula_(filterPrePhi(Phi:Formula)),.List`{K`}),_`(_`)(Formula_(Phi:Formula),.List`{K`}))))),S:K))))),?17:K),program)[metadata "location(matchC-semantics.k:177-185) structural"].
 eq <_>_</_>(program,_~>_(_`(_`)('translationUnit_,KernelC:K),?4:K),program)= <_>_</_>(program,_~>_(KernelC:K,?4:K),program)[metadata "location(kernelC-semantics.k:57-59) structural"].
-eq <_>_</_>(task,__(TaskItems:Bag,<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(_\/_(Pattern1:Pattern,Pattern2:Pattern)),.List`{K`})),K:K),k)),config)),task)= __(<_>_</_>(task,__(TaskItems:Bag,<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(Pattern1:Pattern),.List`{K`})),K:K),k)),config)),task),<_>_</_>(task,__(TaskItems:Bag,<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(Pattern2:Pattern),.List`{K`})),K:K),k)),config)),task))[metadata "location(matchC-semantics.k:405-428) structural"].
+eq <_>_</_>(task,__(TaskItems:Bag,<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(_\/_(Pattern1:Pattern,Pattern2:Pattern)),.List`{K`})),K:K),k)),config)),task)= __(<_>_</_>(task,__(TaskItems:Bag,<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(Pattern1:Pattern),.List`{K`})),K:K),k)),config)),task),<_>_</_>(task,__(TaskItems:Bag,<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(Pattern2:Pattern),.List`{K`})),K:K),k)),config)),task))[metadata "location(matchC-semantics.k:403-426) structural"].
 eq <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(k,_~>_(_`(_`)('read`(_`),_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`})),K:K),k),<_>_</_>(in,__(stream(NeAlpha:NeSeq++),List:List),in)))),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)= __(<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(k,_~>_(_`(_`)('read`(_`),_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`})),K:K),k),<_>_</_>(in,List:List,in)))),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(epsilon,NeAlpha:NeSeq++))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task),<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(_+Int_(N:Nat,2)),.List`{K`}),counter),__(<_>_</_>(k,_~>_(_`(_`)('read`(_`),_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`})),K:K),k),<_>_</_>(in,__(ListItem(_`(_`)(List`{MathObj++`}_(FreeInt(N:Nat)),.List`{K`})),__(stream(FreeSeq(_+Int_(N:Nat,1))),List:List)),in)))),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(NeAlpha:NeSeq++,_@_(`[_`](FreeInt(N:Nat)),FreeSeq(_+Int_(N:Nat,1)))))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task))[metadata "location(../patterns/io.k:16-53) structural"].
 eq <_>_</_>(tasks,(.).Bag,tasks)=(.).Bag[metadata "location(matchC.k:75-79) structural"].
 eq __(<_>_</_>(config,__(?2:Bag,<_>_</_>(in,(.).List,in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))= __(<_>_</_>(config,__(?2:Bag,<_>_</_>(in,stream(epsilon),in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))[metadata "location(../patterns/io.k:55-58) structural"].
@@ -537,12 +500,12 @@ eq __(<_>_</_>(config,__(?2:Bag,<_>_</_>(out,(.).List,out)),config),<_>_</_>(tas
 eq __(<_>_</_>(config,__(?3:Bag,<_>_</_>(in,__(stream(epsilon),NeList:NeList),in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))= __(<_>_</_>(config,__(?3:Bag,<_>_</_>(in,NeList:NeList,in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))[metadata "location(../patterns/io.k:59-62) structural"].
 eq __(<_>_</_>(config,__(?6:Bag,<_>_</_>(in,__(?7:List,__(ListItem(_`(_`)(List`{MathObj++`}_(I:Int++),.List`{K`})),?8:List)),in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))= __(<_>_</_>(config,__(?6:Bag,<_>_</_>(in,__(?7:List,__(stream(`[_`](I:Int++)),?8:List)),in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "location(../patterns/io.k:72-75) structural"].
 eq __(<_>_</_>(config,__(?6:Bag,<_>_</_>(in,__(?7:List,__(stream(`[_`](I:Int++)),?8:List)),in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))= __(<_>_</_>(config,__(?6:Bag,<_>_</_>(in,__(?7:List,__(ListItem(_`(_`)(List`{MathObj++`}_(I:Int++),.List`{K`})),?8:List)),in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))[metadata "location(../patterns/io.k:63-66) structural"].
-eq __(<_>_</_>(config,__(?6:Bag,<_>_</_>(k,_~>_(_`(_`)('cleanCallSubst`(_`),_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`})),?7:K),k)),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))= __(<_>_</_>(config,__(?6:Bag,<_>_</_>(k,?7:K,k)),config),<_>_</_>(subst,_`(_`)(Subst_(filterCallCoSkolemSubst(Subst:Subst)),.List`{K`}),subst))[metadata "location(matchC-semantics.k:554-557) structural"].
+eq __(<_>_</_>(config,__(?6:Bag,<_>_</_>(k,_~>_(_`(_`)('cleanCallSubst`(_`),_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`})),?7:K),k)),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))= __(<_>_</_>(config,__(?6:Bag,<_>_</_>(k,?7:K,k)),config),<_>_</_>(subst,_`(_`)(Subst_(filterCallCoSkolemSubst(Subst:Subst)),.List`{K`}),subst))[metadata "location(matchC-semantics.k:552-555) structural"].
 eq __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_`(_`)`(_`)(list,0,Alpha:Seq++)),heap)),config),<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form))= __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,?8:Map,heap)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(epsilon,Alpha:Seq++))),.List`{K`}),form))[metadata "location(../patterns/list.k:75-78) structural"].
 eq __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_`(_`)`(_`)(list,P:Int++,epsilon)),heap)),config),<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form))= __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,?8:Map,heap)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(0,P:Int++))),.List`{K`}),form))[metadata "location(../patterns/list.k:79-82) structural"].
 eq __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_`(_`)`(_`)(tree,0,Tau:Tree++)),heap)),config),<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form))= __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,?8:Map,heap)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(upsilon,Tau:Tree++))),.List`{K`}),form))[metadata "location(../patterns/binary_tree.k:68-71) structural"].
 eq __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_`(_`)`(_`)(treeList,0,Alpha:Seq++)),heap)),config),<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form))= __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,?8:Map,heap)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(epsilon,Alpha:Seq++))),.List`{K`}),form))[metadata "location(../patterns/binary_tree.k:172-175) structural"].
-eq __(<_>_</_>(config,__(?7:Bag,<_>_</_>(k,_~>_(_`(_`)('cleanFrameSubst`(_`),_`(_`)(List`{MathObj++`}_(VarRoot:String),.List`{K`})),?8:K),k)),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))= __(<_>_</_>(config,__(?7:Bag,<_>_</_>(k,?8:K,k)),config),<_>_</_>(subst,_`(_`)(Subst_(filterFrame!Subst(Subst:Subst,VarRoot:String)),.List`{K`}),subst))[metadata "location(matchC-semantics.k:549-552) structural"].
+eq __(<_>_</_>(config,__(?7:Bag,<_>_</_>(k,_~>_(_`(_`)('cleanFrameSubst`(_`),_`(_`)(List`{MathObj++`}_(VarRoot:String),.List`{K`})),?8:K),k)),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))= __(<_>_</_>(config,__(?7:Bag,<_>_</_>(k,?8:K,k)),config),<_>_</_>(subst,_`(_`)(Subst_(filterFrame!Subst(Subst:Subst,VarRoot:String)),.List`{K`}),subst))[metadata "location(matchC-semantics.k:547-550) structural"].
 eq __(<_>_</_>(config,__(?8:Bag,<_>_</_>(heap,__(?9:Map,_`(_`)`(_`)(tree,P:Int++,upsilon)),heap)),config),<_>_</_>(form,_~>_(_`(_`)(Formula_(Phi:Formula),.List`{K`}),?10:K),form))= __(<_>_</_>(config,__(?8:Bag,<_>_</_>(heap,?9:Map,heap)),config),<_>_</_>(form,_~>_(_`(_`)(Formula_(_/\_(Phi:Formula,_===_(0,P:Int++))),.List`{K`}),?10:K),form))[metadata "location(../patterns/binary_tree.k:72-75) structural"].
 eq __(<_>_</_>(config,__(?8:Bag,<_>_</_>(in,__(?9:List,__(stream(_@_(NeAlpha:NeSeq++,NeBeta:NeSeq++)),?10:List)),in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))= __(<_>_</_>(config,__(?8:Bag,<_>_</_>(in,__(?9:List,__(stream(NeAlpha:NeSeq++),__(stream(NeBeta:NeSeq++),?10:List))),in)),config),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType))[metadata "location(../patterns/io.k:67-70) structural"].
 eq __(<_>_</_>(config,__(?8:Bag,<_>_</_>(in,__(?9:List,__(stream(Alpha:Seq++),__(stream(Beta:Seq++),?10:List))),in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))= __(<_>_</_>(config,__(?8:Bag,<_>_</_>(in,__(?9:List,__(stream(_@_(Alpha:Seq++,Beta:Seq++)),?10:List)),in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "location(../patterns/io.k:76-79) structural"].
@@ -562,15 +525,15 @@ eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(env,Env:Ma
 eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(heap,H:Map,heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(heap,FEH:FEMapItem,heap)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(heap,(.).Map,heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(heap,(.).Map,heap)),config),__(<_>_</_>(subst,_`(_`)(Subst_(_;;_(Subst:Subst,_<-_(FEH:FEMapItem,H:Map))),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:414-424) structural"].
 eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(in,List:List,in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(in,FEList:FEListItem,in)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(in,(.).List,in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(in,(.).List,in)),config),__(<_>_</_>(subst,_`(_`)(Subst_(_;;_(Subst:Subst,_<-_(FEList:FEListItem,List:List))),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:108-118) structural"].
 eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(in,stream(Obj1:MathObj++),in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(in,stream(Obj2:MathObj++),in)),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(in,(.).List,in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(in,(.).List,in)),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(Obj1:MathObj++,Obj2:MathObj++))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:439-449) structural"].
-eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(_/\_(<_>_</_>(config,CfgItems:Bag,config),Phi2:Formula)),.List`{K`})),?13:K),k)),config),<_>_</_>(form,_`(_`)(Formula_(Phi1:Formula),.List`{K`}),form))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))= __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,?13:K,k)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi1:Formula,Phi2:Formula)),.List`{K`}),form))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))[metadata "location(matchC-semantics.k:429-440) structural"].
+eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(_/\_(<_>_</_>(config,CfgItems:Bag,config),Phi2:Formula)),.List`{K`})),?13:K),k)),config),<_>_</_>(form,_`(_`)(Formula_(Phi1:Formula),.List`{K`}),form))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))= __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,?13:K,k)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi1:Formula,Phi2:Formula)),.List`{K`}),form))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))[metadata "location(matchC-semantics.k:427-438) structural"].
 eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(out,List:List,out)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(out,FEList:FEListItem,out)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(out,(.).List,out)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(out,(.).List,out)),config),__(<_>_</_>(subst,_`(_`)(Subst_(_;;_(Subst:Subst,_<-_(FEList:FEListItem,List:List))),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:143-153) structural"].
 eq __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(out,stream(Obj1:MathObj++),out)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(out,stream(Obj2:MathObj++),out)),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?11:Bag,__(<_>_</_>(config,__(?12:Bag,<_>_</_>(out,(.).List,out)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?13:Bag,__(<_>_</_>(config,__(?14:Bag,<_>_</_>(out,(.).List,out)),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(Obj1:MathObj++,Obj2:MathObj++))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:451-461) structural"].
 eq __(<_>_</_>(task,__(?15:Bag,__(<_>_</_>(config,__(?16:Bag,<_>_</_>(env,__(?17:Map,_|->_(_`(_`)(Id_(X:Id),.List`{K`}),_`(_`)(List`{MathObj++`}_(Obj1:MathObj++),.List`{K`}))),env)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?18:Bag,__(<_>_</_>(config,__(?19:Bag,<_>_</_>(env,__(?20:Map,_|->_(_`(_`)(Id_(X:Id),.List`{K`}),_`(_`)(List`{MathObj++`}_(Obj2:MathObj++),.List`{K`}))),env)),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?15:Bag,__(<_>_</_>(config,__(?16:Bag,<_>_</_>(env,?17:Map,env)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?18:Bag,__(<_>_</_>(config,__(?19:Bag,<_>_</_>(env,?20:Map,env)),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(Obj1:MathObj++,Obj2:MathObj++))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:212-222) structural"].
 eq __(<_>_</_>(task,__(?17:Bag,__(<_>_</_>(config,__(?18:Bag,<_>_</_>(heap,__(?19:Map,_`(_`)`(_`)(HPN:HeapLabel,ObjList:List{MathObj++},ObjList1:List{MathObj++})),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?20:Bag,__(<_>_</_>(config,__(?21:Bag,<_>_</_>(heap,__(?22:Map,_`(_`)`(_`)(HPN:HeapLabel,ObjList:List{MathObj++},ObjList2:List{MathObj++})),heap)),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?17:Bag,__(<_>_</_>(config,__(?18:Bag,<_>_</_>(heap,?19:Map,heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?20:Bag,__(<_>_</_>(config,__(?21:Bag,<_>_</_>(heap,?22:Map,heap)),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(ObjList1:List{MathObj++},ObjList2:List{MathObj++}))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:364-374) structural"].
 eq __(<_>_</_>(task,__(?17:Bag,__(<_>_</_>(config,__(?18:Bag,<_>_</_>(heap,__(?19:Map,_|->_:_(P:Int++,V1:Value,F:Field)),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?20:Bag,__(<_>_</_>(config,__(?21:Bag,<_>_</_>(heap,__(?22:Map,_|->_:_(P:Int++,V2:Value,F:Field)),heap)),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?17:Bag,__(<_>_</_>(config,__(?18:Bag,<_>_</_>(heap,?19:Map,heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?20:Bag,__(<_>_</_>(config,__(?21:Bag,<_>_</_>(heap,?22:Map,heap)),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(V1:Value,V2:Value))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:377-387) structural"].
 eq __(<_>_</_>(task,__(?19:Bag,__(<_>_</_>(config,__(?20:Bag,<_>_</_>(stack,List:List,stack)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(stack,FEList:FEListItem,stack)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))= __(<_>_</_>(task,__(?19:Bag,__(<_>_</_>(config,__(?20:Bag,<_>_</_>(stack,(.).List,stack)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(applySubst(TaskItems:Bag,_<-_(FEList:FEListItem,List:List)),__(<_>_</_>(config,__(applySubst(CfgItems:Bag,_<-_(FEList:FEListItem,List:List)),<_>_</_>(stack,(.).List,stack)),config),__(<_>_</_>(subst,_`(_`)(Subst_(_;;_(_<-_(FEList:FEListItem,List:List),applySubst(Subst:Subst,_<-_(FEList:FEListItem,List:List)))),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task))[metadata "location(../lib/fol.k:191-207) structural"].
-eq __(<_>_</_>(task,__(?24:Bag,__(<_>_</_>(config,__(?25:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(Counter:Nat),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('@`assert_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))= __(<_>_</_>(task,__(?24:Bag,__(<_>_</_>(config,__(?25:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(Counter:Nat),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('assertNormal`(_`),_`(_`)(wlist_(applySubst(applyDefaultSubst(Pattern:Pattern,_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("counter"),.List`{K`})),_`(_`)(List`{MathObj++`}_(Counter:Nat),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("fname"),.List`{K`})),_`(_`)(Id_(FName:Id),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("program"),.List`{K`})),Program:K),_;;_(_<-_(defaultMapItem("FreeEnv"),defaultFreeEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("env"),defaultEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("fun"),FunMap:Map),_;;_(_<-_(defaultMapItem("struct"),StructMap:Map),_<-_(defaultMapItem("tenv"),TEnv:Map))))))))),Subst:Subst)),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))[metadata "location(matchC-semantics.k:451-485) structural" print ">>>"].
-eq __(<_>_</_>(task,__(?26:Bag,__(<_>_</_>(config,__(?27:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('@`assume_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))= __(<_>_</_>(task,__(?26:Bag,__(<_>_</_>(config,__(?27:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(sNat_(N:Nat)),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(skolemize(N:Nat,applySubst(applyDefaultSubst(Pattern:Pattern,_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("counter"),.List`{K`})),_`(_`)(List`{MathObj++`}_(sNat_(N:Nat)),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("fname"),.List`{K`})),_`(_`)(Id_(FName:Id),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("program"),.List`{K`})),Program:K),_;;_(_<-_(defaultMapItem("FreeEnv"),defaultFreeEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("env"),defaultEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("fun"),FunMap:Map),_;;_(_<-_(defaultMapItem("struct"),StructMap:Map),_<-_(defaultMapItem("tenv"),TEnv:Map))))))))),Subst:Subst))),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))[metadata "location(matchC-semantics.k:367-404) structural"].
+eq __(<_>_</_>(task,__(?24:Bag,__(<_>_</_>(config,__(?25:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(Counter:Nat),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('@`assert_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))= __(<_>_</_>(task,__(?24:Bag,__(<_>_</_>(config,__(?25:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(Counter:Nat),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('assertNormal`(_`),_`(_`)(wlist_(applySubst(applyDefaultSubst(Pattern:Pattern,_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("counter"),.List`{K`})),_`(_`)(List`{MathObj++`}_(Counter:Nat),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("fname"),.List`{K`})),_`(_`)(Id_(FName:Id),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("program"),.List`{K`})),Program:K),_;;_(_<-_(defaultMapItem("FreeEnv"),defaultFreeEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("env"),defaultEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("fun"),FunMap:Map),_;;_(_<-_(defaultMapItem("struct"),StructMap:Map),_<-_(defaultMapItem("tenv"),TEnv:Map))))))))),Subst:Subst)),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))[metadata "location(matchC-semantics.k:449-483) structural" print ">>>"].
+eq __(<_>_</_>(task,__(?26:Bag,__(<_>_</_>(config,__(?27:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('@`assume_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))= __(<_>_</_>(task,__(?26:Bag,__(<_>_</_>(config,__(?27:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(sNat_(N:Nat)),.List`{K`}),counter),__(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('assumeNormal`(_`),_`(_`)(wlist_(skolemize(N:Nat,applySubst(applyDefaultSubst(Pattern:Pattern,_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("counter"),.List`{K`})),_`(_`)(List`{MathObj++`}_(sNat_(N:Nat)),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("fname"),.List`{K`})),_`(_`)(Id_(FName:Id),.List`{K`})),_;;_(_<-_(_`(_`)('defaultKItem`(_`),_`(_`)(List`{MathObj++`}_("program"),.List`{K`})),Program:K),_;;_(_<-_(defaultMapItem("FreeEnv"),defaultFreeEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("env"),defaultEnv`(_`)(keys_(TEnv:Map))),_;;_(_<-_(defaultMapItem("fun"),FunMap:Map),_;;_(_<-_(defaultMapItem("struct"),StructMap:Map),_<-_(defaultMapItem("tenv"),TEnv:Map))))))))),Subst:Subst))),.List`{K`})),K:K),k),__(<_>_</_>(program,Program:K,program),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,FunMap:Map,fun),__(<_>_</_>(struct,StructMap:Map,struct),<_>_</_>(tenv,TEnv:Map,tenv))))))))),config),<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst))),task),<_>_</_>(funId,_`(_`)(Id_(F:Id),.List`{K`}),funId))[metadata "location(matchC-semantics.k:365-402) structural"].
 eq __(<_>_</_>(task,__(?7:Bag,__(<_>_</_>(config,__(?8:Bag,<_>_</_>(env,Env:Map,env)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?9:Bag,__(<_>_</_>(config,__(?10:Bag,<_>_</_>(env,PEEnv:PEMapItem,env)),config),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task))= __(<_>_</_>(task,__(?7:Bag,__(<_>_</_>(config,__(?8:Bag,<_>_</_>(env,(.).Map,env)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?9:Bag,__(<_>_</_>(config,__(?10:Bag,<_>_</_>(env,(.).Map,env)),config),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task))[metadata "location(../lib/fol.k:237-246) structural"].
 eq __(<_>_</_>(task,__(?7:Bag,__(<_>_</_>(config,__(?8:Bag,<_>_</_>(heap,H:Map,heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?9:Bag,__(<_>_</_>(config,__(?10:Bag,<_>_</_>(heap,PEH:PEMapItem,heap)),config),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task))= __(<_>_</_>(task,__(?7:Bag,__(<_>_</_>(config,__(?8:Bag,<_>_</_>(heap,(.).Map,heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?9:Bag,__(<_>_</_>(config,__(?10:Bag,<_>_</_>(heap,(.).Map,heap)),config),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task))[metadata "location(../lib/fol.k:402-411) structural"].
 eq __(<_>_</_>(task,__(?7:Bag,__(<_>_</_>(config,__(?8:Bag,<_>_</_>(in,List:List,in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?9:Bag,__(<_>_</_>(config,__(?10:Bag,<_>_</_>(in,PEList:PEListItem,in)),config),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task))= __(<_>_</_>(task,__(?7:Bag,__(<_>_</_>(config,__(?8:Bag,<_>_</_>(in,(.).List,in)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))),task),<_>_</_>(task,__(?9:Bag,__(<_>_</_>(config,__(?10:Bag,<_>_</_>(in,(.).List,in)),config),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task))[metadata "location(../lib/fol.k:97-106) structural"].
@@ -638,8 +601,8 @@ eq _`(_`)('declParams`(_`),_`(_`)('_`,`,`,_,_`,`,_(Param:K,ParamList:List{K})))=
 eq _`(_`)('if`(_`)_else_,_`,`,_(_`(_`)(TypedValue_(tv`(_`,_`)(?5:ExpressionType,0)),.List`{K`}),_`,`,_(S1:K,S2:K)))= S2:K[metadata "location(kernelC-semantics.k:98) structural"].
 eq _`(_`)('if`(_`)_else_,_`,`,_(_`(_`)(TypedValue_(tv`(_`,_`)(?6:ExpressionType,NzI:NzInt)),.List`{K`}),_`,`,_(S1:K,S2:K)))= S1:K[metadata "location(kernelC-semantics.k:97) structural"].
 eq _`(_`)('nop,.List`{K`})=(.).K[metadata "location(kernelC-syntax.k:149) structural"].
-eq _`(_`)('setToK`(_`),_`(_`)(wset_(.),.List`{K`}))=(.).K[metadata "location(matchC-semantics.k:531) structural"].
-eq _`(_`)('setToK`(_`),_`(_`)(wset_(__(Set:Set,SetItem(K:K))),.List`{K`}))= _~>_(K:K,_`(_`)('setToK`(_`),_`(_`)(wset_(Set:Set),.List`{K`})))[metadata "location(matchC-semantics.k:530) structural"].
+eq _`(_`)('setToK`(_`),_`(_`)(wset_(.),.List`{K`}))=(.).K[metadata "location(matchC-semantics.k:529) structural"].
+eq _`(_`)('setToK`(_`),_`(_`)(wset_(__(Set:Set,SetItem(K:K))),.List`{K`}))= _~>_(K:K,_`(_`)('setToK`(_`),_`(_`)(wset_(Set:Set),.List`{K`})))[metadata "location(matchC-semantics.k:528) structural"].
 eq _`(_`)('sizeof_,_`(_`)(ExpressionType_(int),.List`{K`}))= _`(_`)(TypedValue_(tv`(_`,_`)(int,1)),.List`{K`})[metadata "location(kernelC-semantics.k:210) structural"].
 eq _`(_`)('sizeof_,_`(_`)(ExpressionType_(_*(T:ExpressionType)),.List`{K`}))= _`(_`)(TypedValue_(tv`(_`,_`)(int,1)),.List`{K`})[metadata "location(kernelC-semantics.k:211) structural"].
 eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
@@ -649,10 +612,10 @@ eq _in_(K:K,Bag:Bag)= false[owise].
 eq _in_(K:K,Set:Set)= false[owise].
 eq _in_(SetItem:SetItem,Set:Set)= false[owise].
 eq check`(_`)(K:K)= <_>_</_>(top,__(<_>_</_>(feasible,_`(_`)(List`{MathObj++`}_(-1),.List`{K`}),feasible),__(<_>_</_>(infeasible,_`(_`)(List`{MathObj++`}_(0),.List`{K`}),infeasible),__(<_>_</_>(mainOut,(.).List,mainOut),__(<_>_</_>(tasks,<_>_</_>(funTask,__(<_>_</_>(funId,(.).K,funId),<_>_</_>(task,__(<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType),__(<_>_</_>(form,_`(_`)(Formula_(TrueFormula),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(.Subst),.List`{K`}),subst),<_>_</_>(config,__(<_>_</_>(k,_`(_`)('disolveTask,.List`{K`}),k),__(<_>_</_>(program,_~>_(K:K,_`(_`)('checkContracts,.List`{K`})),program),__(<_>_</_>(fname,(.).K,fname),__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(0),.List`{K`}),counter),__(<_>_</_>(stack,(.).List,stack),__(<_>_</_>(in,(.).List,in),__(<_>_</_>(out,(.).List,out),__(<_>_</_>(struct,(.).Map,struct),__(<_>_</_>(fun,(.).Map,fun),__(<_>_</_>(env,(.).Map,env),__(<_>_</_>(tenv,(.).Map,tenv),<_>_</_>(heap,(.).Map,heap)))))))))))),config)))),task)),funTask),tasks),<_>_</_>(check,SetItem(_`(_`)('checkContract`(_`),_`(_`)(Id_(id`(_`)("main")),.List`{K`}))),check))))),top)[metadata "location(matchC.k:30)"].
-eq defaultEnv`(_`)(.)=(.).Map[metadata "location(matchC-semantics.k:541) structural"].
-eq defaultEnv`(_`)(__(Set:Set,SetItem(_`(_`)(Id_(X:Id),.List`{K`}))))= __(defaultEnv`(_`)(Set:Set),_|->_(_`(_`)(Id_(X:Id),.List`{K`}),_`(_`)(List`{MathObj++`}_(?var(X:Id)),.List`{K`})))[metadata "location(matchC-semantics.k:540) structural"].
-eq defaultFreeEnv`(_`)(.)=(.).Map[metadata "location(matchC-semantics.k:547) structural"].
-eq defaultFreeEnv`(_`)(__(Set:Set,SetItem(_`(_`)(Id_(X:Id),.List`{K`}))))= __(defaultFreeEnv`(_`)(Set:Set),_|->_(_`(_`)(Id_(X:Id),.List`{K`}),_`(_`)(List`{MathObj++`}_(FreeVar(X:Id)),.List`{K`})))[metadata "location(matchC-semantics.k:544-546) structural"].
+eq defaultEnv`(_`)(.)=(.).Map[metadata "location(matchC-semantics.k:539) structural"].
+eq defaultEnv`(_`)(__(Set:Set,SetItem(_`(_`)(Id_(X:Id),.List`{K`}))))= __(defaultEnv`(_`)(Set:Set),_|->_(_`(_`)(Id_(X:Id),.List`{K`}),_`(_`)(List`{MathObj++`}_(?var(X:Id)),.List`{K`})))[metadata "location(matchC-semantics.k:538) structural"].
+eq defaultFreeEnv`(_`)(.)=(.).Map[metadata "location(matchC-semantics.k:545) structural"].
+eq defaultFreeEnv`(_`)(__(Set:Set,SetItem(_`(_`)(Id_(X:Id),.List`{K`}))))= __(defaultFreeEnv`(_`)(Set:Set),_|->_(_`(_`)(Id_(X:Id),.List`{K`}),_`(_`)(List`{MathObj++`}_(FreeVar(X:Id)),.List`{K`})))[metadata "location(matchC-semantics.k:542-544) structural"].
 eq inKList(K:K,K':K)= false[owise].
 eq inStack(F1:Id,.)= FalseFormula[metadata "location(../patterns/stack.k:11) structural"].
 eq inStack(F1:Id,callContext`(_`,_`,_`,_`)(_`(_`)(Id_(F2:Id),.List`{K`}),?8:K,?9:Map,?10:Map))= @_(_==Bool_(F1:Id,F2:Id))[metadata "location(../patterns/stack.k:10) structural"].
@@ -661,8 +624,9 @@ eq initObject`(_`,_`,_`,_`)(?4:Int++,?5:Id,_`(_`)('_`,`,`,_,.List`{K`}),?6:Nat)=
 eq initObject`(_`,_`,_`,_`)(I:Int++,X:Id,_`(_`)('_`,`,`,_,_`,`,_(_`(_`)('__;,_`,`,_(_`(_`)(ExpressionType_(?15:ExpressionType),.List`{K`}),_`(_`)(Id_(F:Id),.List`{K`}))),KernelCList:List{K})),N:Nat)= __(_|->_:_(I:Int++,FreeInt(N:Nat),_._(X:Id,F:Id)),initObject`(_`,_`,_`,_`)(_+Int_(I:Int++,1),X:Id,_`(_`)('_`,`,`,_,KernelCList:List{K}),sNat_(N:Nat)))[metadata "location(kernelC-semantics.k:329-333) structural"].
 eq listLen`(_`)(_`(_`)('_`,`,`,_,.List`{K`}))= 0[metadata "location(kernelC-semantics.k:326) structural"].
 eq listLen`(_`)(_`(_`)('_`,`,`,_,_`,`,_(?4:List{K},KernelCList:List{K})))= sNat_(listLen`(_`)(_`(_`)('_`,`,`,_,KernelCList:List{K})))[metadata "location(kernelC-semantics.k:324-325) structural"].
-eq paramSet`(_`)(_`(_`)('_`,`,`,_,.List`{K`}))=(.).Set[metadata "location(matchC-semantics.k:537) structural"].
-eq paramSet`(_`)(_`(_`)('_`,`,`,_,_`,`,_(_`(_`)('__;,_`,`,_(_`(_`)(ExpressionType_(?6:ExpressionType),.List`{K`}),_`(_`)(Id_(X:Id),.List`{K`}))),ParamList:List{K})))= __(SetItem(_`(_`)(Id_(X:Id),.List`{K`})),paramSet`(_`)(_`(_`)('_`,`,`,_,ParamList:List{K})))[metadata "location(matchC-semantics.k:534-536) structural"].
+eq paramSet`(_`)(_`(_`)('_`,`,`,_,.List`{K`}))=(.).Set[metadata "location(matchC-semantics.k:535) structural"].
+eq paramSet`(_`)(_`(_`)('_`,`,`,_,_`,`,_(_`(_`)('__;,_`,`,_(_`(_`)(ExpressionType_(?6:ExpressionType),.List`{K`}),_`(_`)(Id_(X:Id),.List`{K`}))),ParamList:List{K})))= __(SetItem(_`(_`)(Id_(X:Id),.List`{K`})),paramSet`(_`)(_`(_`)('_`,`,`,_,ParamList:List{K})))[metadata "location(matchC-semantics.k:532-534) structural"].
+ceq <_>_</_>(task,__(?4:Bag,__(<_>_</_>(form,_`(_`)(Formula_(NtPhi:NtFormula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Constrain,.List`{K`}),taskType))),task)= <_>_</_>(task,__(?4:Bag,__(<_>_</_>(form,_`(_`)(Formula_(TrueFormula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Constrain,.List`{K`}),taskType))),task)if check-validity(NtPhi:NtFormula)= true[metadata "location(../lib/fol.k:502-508) structural"].
 ceq <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task)= <_>_</_>(task,__(applySubst(TaskItems:Bag,getPESubstItem(Phi:Formula)),__(<_>_</_>(form,_`(_`)(Formula_(applySubst(Phi:Formula,getPESubstItem(Phi:Formula))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType))),task)if _=/=Bool_(getPESubstItem(Phi:Formula),.Subst)= true[metadata "location(../lib/fol.k:329-336) structural"].
 ceq <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(k,_~>_(_`(_`)(derive,_`(_`)(List`{MathObj++`}_(P':Int++),.List`{K`})),K:K),k),<_>_</_>(heap,__(H:Map,_`(_`)`(_`)(list,P:Int++,Alpha:Seq++)),heap)))),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)= __(<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(k,_~>_(_`(_`)(derive,_`(_`)(List`{MathObj++`}_(P':Int++),.List`{K`})),K:K),k),<_>_</_>(heap,H:Map,heap)))),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_/\_(_===_(0,P:Int++),_===_(epsilon,Alpha:Seq++)))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task),<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(_+Int_(N:Nat,3)),.List`{K`}),counter),__(<_>_</_>(k,K:K,k),<_>_</_>(heap,__(H:Map,__(_`(_`)`(_`)(list,FreeInt(_+Int_(N:Nat,1)),FreeSeq(_+Int_(N:Nat,2))),__(_|->_:_(P:Int++,FreeInt(N:Nat),_._(id`(_`)("listNode"),id`(_`)("val"))),_|->_:_(_+Int_(P:Int++,1),FreeInt(_+Int_(N:Nat,1)),_._(id`(_`)("listNode"),id`(_`)("next")))))),heap)))),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_/\_(~_(_===_(0,P:Int++)),_===_(Alpha:Seq++,_@_(`[_`](FreeInt(N:Nat)),FreeSeq(_+Int_(N:Nat,2))))))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task))if VALID(_===>_(Phi:Formula,_\/_(_===_(P:Int++,P':Int++),_===_(P':Int++,_+Int_(P:Int++,1)))))= true[metadata "location(../patterns/list.k:15-58) structural"].
 ceq <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(k,_~>_(_`(_`)(derive,_`(_`)(List`{MathObj++`}_(P':Int++),.List`{K`})),K:K),k),<_>_</_>(heap,__(H:Map,_`(_`)`(_`)(lseg,_`,_(P:Int++,Q:Int++),Alpha:Seq++)),heap)))),config),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)= __(<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(<_>_</_>(k,_~>_(_`(_`)(derive,_`(_`)(List`{MathObj++`}_(P':Int++),.List`{K`})),K:K),k),<_>_</_>(heap,H:Map,heap)))),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_/\_(_===_(epsilon,Alpha:Seq++),_===_(Q:Int++,P:Int++)))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task),<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(_+Int_(N:Nat,3)),.List`{K`}),counter),__(<_>_</_>(k,K:K,k),<_>_</_>(heap,__(H:Map,__(_`(_`)`(_`)(lseg,_`,_(FreeInt(_+Int_(N:Nat,1)),Q:Int++),FreeSeq(_+Int_(N:Nat,2))),__(_|->_:_(P:Int++,FreeInt(N:Nat),_._(id`(_`)("listNode"),id`(_`)("val"))),_|->_:_(_+Int_(P:Int++,1),FreeInt(_+Int_(N:Nat,1)),_._(id`(_`)("listNode"),id`(_`)("next")))))),heap)))),config),__(<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_/\_(~_(_===_(Q:Int++,P:Int++)),_===_(Alpha:Seq++,_@_(`[_`](FreeInt(N:Nat)),FreeSeq(_+Int_(N:Nat,2))))))),.List`{K`}),form),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task))if VALID(_===>_(Phi:Formula,_\/_(_===_(P:Int++,P':Int++),_===_(P':Int++,_+Int_(P:Int++,1)))))= true[metadata "location(../patterns/list.k:104-147) structural"].
@@ -671,7 +635,7 @@ ceq <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,__(<_>_</_
 ceq <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task)= <_>_</_>(task,__(applySubst(TaskItems:Bag,getFESubstItem(Phi:Formula)),__(<_>_</_>(form,_`(_`)(Formula_(applySubst(Phi:Formula,getFESubstItem(Phi:Formula))),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(_;;_(getFESubstItem(Phi:Formula),applySubst(Subst:Subst,getFESubstItem(Phi:Formula)))),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType)))),task)if _=/=Bool_(getFESubstItem(Phi:Formula),.Subst)= true[metadata "location(../lib/fol.k:349-359) structural"].
 ceq <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(Subst:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)= <_>_</_>(task,__(applySubst(TaskItems:Bag,getFreeSubstItem(Phi:Formula)),__(<_>_</_>(form,_`(_`)(Formula_(applySubst(Phi:Formula,getFreeSubstItem(Phi:Formula))),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(_;;_(filterAnonymousFreeSubst(getFreeSubstItem(Phi:Formula)),applySubst(Subst:Subst,getFreeSubstItem(Phi:Formula)))),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)if _=/=Bool_(getFreeSubstItem(Phi:Formula),.Subst)= true[metadata "location(../lib/fol.k:303-316) structural"].
 ceq _`(_`)('if`(_`)_else_,_`,`,_(_`(_`)(TypedValue_(tv`(_`,_`)(?7:ExpressionType,I:Int++)),.List`{K`}),_`,`,_(?8:K,?9:K)))= _`(_`)('if`(_`)_else_,_`,`,_(_`(_`)('_?_:_,_`,`,_(_`(_`)(TypedValue_(tv`(_`,_`)(int,I:Int++)),.List`{K`}),_`,`,_(_`(_`)(TypedValue_(tv`(_`,_`)(int,1)),.List`{K`}),_`(_`)(TypedValue_(tv`(_`,_`)(int,0)),.List`{K`})))),_`,`,_(?8:K,?9:K)))if notBool_(isInt(I:Int++))= true[metadata "location(matchC-semantics.k:260-261) structural"].
-rl <_>_</_>(k,_~>_(_`(_`)('@`inv_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),_~>_(_`(_`)('while`(_`)_,_`,`,_(E:K,S:K)),K:K)),k)=> <_>_</_>(k,_~>_(_`(_`)('@`assert_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),_`(_`)('if`(_`)_else_,_`,`,_(E:K,_`,`,_(_~>_(S:K,_~>_(_`(_`)('@`assert_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),_`(_`)('disolveTask,.List`{K`}))),K:K)))),k)[metadata "computational location(matchC-semantics.k:353-359)"].
+rl <_>_</_>(k,_~>_(_`(_`)('@`inv_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),_~>_(_`(_`)('while`(_`)_,_`,`,_(E:K,S:K)),K:K)),k)=> <_>_</_>(k,_~>_(_`(_`)('@`assert_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),_`(_`)('if`(_`)_else_,_`,`,_(E:K,_`,`,_(_~>_(S:K,_~>_(_`(_`)('@`assert_,_`(_`)(wlist_(Pattern:Pattern),.List`{K`})),_`(_`)('disolveTask,.List`{K`}))),K:K)))),k)[metadata "computational location(matchC-semantics.k:351-357)"].
 rl __(<_>_</_>(config,__(?10:Bag,<_>_</_>(heap,__(?11:Map,__(_|->_:_(P:Int++,I:Int++,_._(id`(_`)("listNode"),id`(_`)("val"))),_|->_:_(_+Int_(P:Int++,1),Q:Int++,_._(id`(_`)("listNode"),id`(_`)("next"))))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?10:Bag,<_>_</_>(heap,__(?11:Map,_`(_`)`(_`)(lseg,_`,_(P:Int++,Q:Int++),`[_`](I:Int++))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/list.k:157-164)"].
 rl __(<_>_</_>(config,__(?10:Bag,<_>_</_>(heap,__(?11:Map,__(_`(_`)`(_`)(tree,I:Int++,Tau:Tree++),__(_|->_:_(P:Int++,I:Int++,_._(id`(_`)("stackNode"),id`(_`)("val"))),_|->_:_(_+Int_(P:Int++,1),0,_._(id`(_`)("stackNode"),id`(_`)("next")))))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?10:Bag,<_>_</_>(heap,__(?11:Map,_`(_`)`(_`)(treeList,P:Int++,`[_`](Tau:Tree++))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/binary_tree.k:177-185)"].
 rl __(<_>_</_>(config,__(?11:Bag,<_>_</_>(heap,__(?12:Map,__(_`(_`)`(_`)(list,P':Int++,Beta:Seq++),_`(_`)`(_`)(lseg,_`,_(P:Int++,P':Int++),Alpha:Seq++))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?11:Bag,<_>_</_>(heap,__(?12:Map,_`(_`)`(_`)(list,P:Int++,_@_(Alpha:Seq++,Beta:Seq++))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/list.k:175-182)"].
@@ -681,7 +645,7 @@ rl __(<_>_</_>(config,__(?13:Bag,<_>_</_>(heap,__(?14:Map,__(_`(_`)`(_`)(tree,Q:
 rl __(<_>_</_>(config,__(?13:Bag,<_>_</_>(heap,__(?14:Map,__(_`(_`)`(_`)(tree,Q:Int++,Tau:Tree++),__(_|->_:_(P:Int++,I:Int++,_._(id`(_`)("treeNode"),id`(_`)("val"))),__(_|->_:_(_+Int_(P:Int++,1),Q:Int++,_._(id`(_`)("treeNode"),id`(_`)("left"))),_|->_:_(_+Int_(P:Int++,2),0,_._(id`(_`)("treeNode"),id`(_`)("right"))))))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?13:Bag,<_>_</_>(heap,__(?14:Map,_`(_`)`(_`)(tree,P:Int++,_`[_`]_(Tau:Tree++,I:Int++,upsilon))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/binary_tree.k:87-96)"].
 rl __(<_>_</_>(config,__(?14:Bag,<_>_</_>(heap,__(?15:Map,__(_`(_`)`(_`)(tree,I:Int++,Tau:Tree++),__(_`(_`)`(_`)(treeList,Q:Int++,Alpha:Seq++),__(_|->_:_(P:Int++,I:Int++,_._(id`(_`)("stackNode"),id`(_`)("val"))),_|->_:_(_+Int_(P:Int++,1),Q:Int++,_._(id`(_`)("stackNode"),id`(_`)("next"))))))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?14:Bag,<_>_</_>(heap,__(?15:Map,_`(_`)`(_`)(treeList,P:Int++,_@_(`[_`](Tau:Tree++),Alpha:Seq++))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/binary_tree.k:187-196)"].
 rl __(<_>_</_>(config,__(?17:Bag,<_>_</_>(heap,__(?18:Map,__(_`(_`)`(_`)(tree,Q1:Int++,Tau:Tree++),__(_`(_`)`(_`)(tree,Q2:Int++,Sigma:Tree++),__(_|->_:_(P:Int++,I:Int++,_._(id`(_`)("treeNode"),id`(_`)("val"))),__(_|->_:_(_+Int_(P:Int++,1),Q1:Int++,_._(id`(_`)("treeNode"),id`(_`)("left"))),_|->_:_(_+Int_(P:Int++,2),Q2:Int++,_._(id`(_`)("treeNode"),id`(_`)("right")))))))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?17:Bag,<_>_</_>(heap,__(?18:Map,_`(_`)`(_`)(tree,P:Int++,_`[_`]_(Tau:Tree++,I:Int++,Sigma:Tree++))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/binary_tree.k:109-119)"].
-rl __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_|->_:_(N:Nat,?9:Value,?10:Field)),heap)),config),<_>_</_>(form,?11:K,form))=> __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_|->_:_(N:Nat,?9:Value,?10:Field)),heap)),config),<_>_</_>(form,_`(_`)(Formula_(FalseFormula),.List`{K`}),form))[metadata "computational location(matchC-semantics.k:338-340)"].
+rl __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_|->_:_(N:Nat,?9:Value,?10:Field)),heap)),config),<_>_</_>(form,?11:K,form))=> __(<_>_</_>(config,__(?7:Bag,<_>_</_>(heap,__(?8:Map,_|->_:_(N:Nat,?9:Value,?10:Field)),heap)),config),<_>_</_>(form,_`(_`)(Formula_(FalseFormula),.List`{K`}),form))[metadata "computational location(matchC-semantics.k:336-338)"].
 rl __(<_>_</_>(config,__(?8:Bag,<_>_</_>(heap,__(?9:Map,__(_|->_:_(P:Int++,I:Int++,_._(id`(_`)("listNode"),id`(_`)("val"))),_|->_:_(_+Int_(P:Int++,1),0,_._(id`(_`)("listNode"),id`(_`)("next"))))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?8:Bag,<_>_</_>(heap,__(?9:Map,_`(_`)`(_`)(list,P:Int++,`[_`](I:Int++))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/list.k:84-91)"].
 rl __(<_>_</_>(config,__(?9:Bag,<_>_</_>(heap,__(?10:Map,__(_|->_:_(P:Int++,I:Int++,_._(id`(_`)("treeNode"),id`(_`)("val"))),__(_|->_:_(_+Int_(P:Int++,1),0,_._(id`(_`)("treeNode"),id`(_`)("left"))),_|->_:_(_+Int_(P:Int++,2),0,_._(id`(_`)("treeNode"),id`(_`)("right")))))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))=> __(<_>_</_>(config,__(?9:Bag,<_>_</_>(heap,__(?10:Map,_`(_`)`(_`)(tree,P:Int++,_`[_`]_(upsilon,I:Int++,upsilon))),heap)),config),<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType))[metadata "computational location(../patterns/binary_tree.k:77-85)"].
 rl __(<_>_</_>(k,_~>_(_`(_`)('deleteObject`(_`,_`),_`,`,_(_`(_`)(List`{MathObj++`}_(I:Int++),.List`{K`}),_`(_`)(List`{MathObj++`}_(1),.List`{K`}))),?10:K),k),<_>_</_>(heap,__(?7:Map,_|->_:_(I:Int++,?8:Value,?9:Field)),heap))=> __(<_>_</_>(k,_~>_(_`(_`)(TypedValue_(tv`(_`,_`)(void,unit)),.List`{K`}),?10:K),k),<_>_</_>(heap,?7:Map,heap))[metadata "computational location(kernelC-semantics.k:273-275)"].
@@ -699,5 +663,6 @@ rl __(<_>_</_>(counter,_`(_`)(List`{MathObj++`}_(N:Nat),.List`{K`}),counter),__(
 rl __(<_>_</_>(fname,?17:K,fname),__(<_>_</_>(k,_~>_(_`(_`)('return_,_`(_`)(TypedValue_(TV:TypedValue),.List`{K`})),?18:K),k),__(<_>_</_>(stack,__(?19:List,callContext`(_`,_`,_`,_`)(_`(_`)(Id_(F:Id),.List`{K`}),K:K,TEnv:Map,Env:Map)),stack),__(<_>_</_>(env,?16:Map,env),<_>_</_>(tenv,?20:Map,tenv)))))=> __(<_>_</_>(fname,_`(_`)(Id_(F:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)(TypedValue_(TV:TypedValue),.List`{K`}),K:K),k),__(<_>_</_>(stack,?19:List,stack),__(<_>_</_>(env,Env:Map,env),<_>_</_>(tenv,TEnv:Map,tenv)))))[metadata "computational location(kernelC-semantics.k:121-126)"].
 rl __(<_>_</_>(fname,_`(_`)(Id_(FName:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('_`(_`),_`,`,_(_`(_`)(Id_(F:Id),.List`{K`}),_`(_`)('_`,`,`,_,ArgList:List{K}))),K:K),k),__(<_>_</_>(stack,?23:List,stack),__(<_>_</_>(env,Env:Map,env),__(<_>_</_>(fun,__(?22:Map,_|->_(_`(_`)('__`(_`),_`,`,_(_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`}),_`,`,_(_`(_`)(Id_(F:Id),.List`{K`}),_`(_`)('_`,`,`,_,ParamList:List{K})))),S:K)),fun),<_>_</_>(tenv,TEnv:Map,tenv))))))=> __(<_>_</_>(fname,_`(_`)(Id_(F:Id),.List`{K`}),fname),__(<_>_</_>(k,_~>_(_`(_`)('declParams`(_`),_`(_`)('_`,`,`,_,ParamList:List{K})),_~>_(_`(_`)('bindParams`(_`,_`),_`,`,_(_`(_`)('_`,`,`,_,ParamList:List{K}),_`(_`)('_`,`,`,_,ArgList:List{K}))),S:K)),k),__(<_>_</_>(stack,__(?23:List,callContext`(_`,_`,_`,_`)(_`(_`)(Id_(FName:Id),.List`{K`}),K:K,TEnv:Map,Env:Map)),stack),__(<_>_</_>(env,(.).Map,env),__(<_>_</_>(fun,__(?22:Map,_|->_(_`(_`)('__`(_`),_`,`,_(_`(_`)(ExpressionType_(T:ExpressionType),.List`{K`}),_`,`,_(_`(_`)(Id_(F:Id),.List`{K`}),_`(_`)('_`,`,`,_,ParamList:List{K})))),S:K)),fun),<_>_</_>(tenv,(.).Map,tenv))))))[metadata "computational location(kernelC-semantics.k:108-118)"].
 crl <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(_`(_`)('_?_:_,_`,`,_(_`(_`)(TypedValue_(tv`(_`,_`)(?22:ExpressionType,I:Int++)),.List`{K`}),_`,`,_(E1:K,E2:K))),K:K),k)),config),<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form))),task)=> __(<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(E1:K,K:K),k)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,~_(_===_(0,I:Int++)))),.List`{K`}),form))),task),<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems:Bag,<_>_</_>(k,_~>_(E2:K,K:K),k)),config),<_>_</_>(form,_`(_`)(Formula_(_/\_(Phi:Formula,_===_(0,I:Int++))),.List`{K`}),form))),task))if notBool_(isInt(I:Int++))= true[metadata "computational location(matchC-semantics.k:267-293)"].
-crl <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems1:Bag,<_>_</_>(k,_~>_(_`(_`)('assertNormal`(_`),_`(_`)(wlist_(_/\_(<_>_</_>(config,CfgItems2:Bag,config),Phi:Formula)),.List`{K`})),K:K),k)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst1:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)=> <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems1:Bag,<_>_</_>(k,_~>_(_`(_`)('@`assume_,_`(_`)(wlist_(_/\_(<_>_</_>(config,CfgItems2:Bag,config),Phi:Formula)),.List`{K`})),K:K),k)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst2:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)if __(<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType),__(<_>_</_>(subst,_`(_`)(Subst_(.Subst),.List`{K`}),subst),<_>_</_>(config,CfgItems1:Bag,config)))),task),<_>_</_>(task,__(<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(Subst1:Subst),.List`{K`}),subst),<_>_</_>(config,CfgItems2:Bag,config)))),task))=> <_>_</_>(task,__(<_>_</_>(taskType,_`(_`)('Constrain,.List`{K`}),taskType),__(<_>_</_>(form,_`(_`)(Formula_(TrueFormula),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(Subst2:Subst),.List`{K`}),subst),<_>_</_>(config,(.).Bag,config)))),task)[metadata "computational location(matchC-semantics.k:486-523)"].
+crl <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems1:Bag,<_>_</_>(k,_~>_(_`(_`)('assertNormal`(_`),_`(_`)(wlist_(_/\_(<_>_</_>(config,CfgItems2:Bag,config),Phi:Formula)),.List`{K`})),K:K),k)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst1:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)=> <_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(config,__(CfgItems1:Bag,<_>_</_>(k,_~>_(_`(_`)('@`assume_,_`(_`)(wlist_(_/\_(<_>_</_>(config,CfgItems2:Bag,config),Phi:Formula)),.List`{K`})),K:K),k)),config),__(<_>_</_>(subst,_`(_`)(Subst_(Subst2:Subst),.List`{K`}),subst),<_>_</_>(taskType,_`(_`)('Run,.List`{K`}),taskType)))),task)if __(<_>_</_>(task,__(TaskItems:Bag,__(<_>_</_>(taskType,_`(_`)('Hypothesis,.List`{K`}),taskType),__(<_>_</_>(subst,_`(_`)(Subst_(.Subst),.List`{K`}),subst),<_>_</_>(config,CfgItems1:Bag,config)))),task),<_>_</_>(task,__(<_>_</_>(taskType,_`(_`)('Conclusion,.List`{K`}),taskType),__(<_>_</_>(form,_`(_`)(Formula_(Phi:Formula),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(Subst1:Subst),.List`{K`}),subst),<_>_</_>(config,CfgItems2:Bag,config)))),task))=> <_>_</_>(task,__(<_>_</_>(taskType,_`(_`)('Constrain,.List`{K`}),taskType),__(<_>_</_>(form,_`(_`)(Formula_(TrueFormula),.List`{K`}),form),__(<_>_</_>(subst,_`(_`)(Subst_(Subst2:Subst),.List`{K`}),subst),<_>_</_>(config,(.).Bag,config)))),task)[metadata "computational location(matchC-semantics.k:484-521)"].
+crl __(<_>_</_>(config,__(?6:Bag,<_>_</_>(k,_~>_(_`(_`)(derive,_`(_`)(List`{MathObj++`}_(I:Int++),.List`{K`})),?7:K),k)),config),<_>_</_>(form,_`(_`)(Formula_(NtPhi:NtFormula),.List`{K`}),form))=> __(<_>_</_>(config,__(?6:Bag,<_>_</_>(k,_~>_(_`(_`)(derive,_`(_`)(List`{MathObj++`}_(I:Int++),.List`{K`})),?7:K),k)),config),<_>_</_>(form,_`(_`)(Formula_(FalseFormula),.List`{K`}),form))if check-validity(~_(NtPhi:NtFormula))= true[metadata "computational location(matchC-semantics.k:332-335)"].
 endm

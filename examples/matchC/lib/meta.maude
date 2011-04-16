@@ -1,0 +1,68 @@
+mod PL-META-TERM is including PL-BOOL + PL-QID .
+*** types
+  sorts Sort Kind Type .
+  subsorts Sort Kind < Type < Qid .
+  op <Qids> : -> Sort [special (id-hook QuotedIdentifierSymbol (sortQid))] .
+  op <Qids> : -> Kind [special (id-hook QuotedIdentifierSymbol (kindQid))] .
+
+
+*** terms
+  sorts Constant Variable ExtendedConstant .
+  sorts GroundTerm Term NeGroundTermList GroundTermList NeTermList TermList .
+  subsorts Constant Variable < ExtendedConstant < Qid Term .
+  subsorts Constant < GroundTerm < Term NeGroundTermList < NeTermList .
+  subsorts NeGroundTermList < NeTermList GroundTermList < TermList .
+  op <Qids> : -> Constant [special (id-hook QuotedIdentifierSymbol (constantQid))] .
+  op <Qids> : -> Variable [special (id-hook QuotedIdentifierSymbol (variableQid))] .
+  op .emptyTermList : -> GroundTermList [ctor] .
+  op _:_ : NeGroundTermList GroundTermList -> NeGroundTermList [ctor assoc id: .emptyTermList gather (e E) prec 121] .
+  op _:_ : GroundTermList NeGroundTermList -> NeGroundTermList [ctor ditto] .
+  op _:_ : GroundTermList GroundTermList -> GroundTermList [ctor ditto] .
+  op _:_ : NeTermList TermList -> NeTermList [ctor ditto] .
+  op _:_ : TermList NeTermList -> NeTermList [ctor ditto] .
+  op _:_ : TermList TermList -> TermList [ctor ditto] .
+  op _[_] : Qid NeGroundTermList -> GroundTerm [ctor] .
+  op _[_] : Qid NeTermList -> Term [ctor] .
+
+*** utils for constant/variables
+  op getName : Constant -> Qid .
+  op getType : Constant -> Type .
+  var C : Constant .
+  op getName : Variable -> Qid .
+  op getType : Variable -> Type .
+  var V : Variable .
+  eq getName (C) = qid (substrString (string (C), 0, rfindString (string (C), ".", lengthString (string (C))))) .
+  eq getType (C) = qid (substrString (string (C), rfindString (string (C), ".", lengthString (string (C))) +Nat 1, lengthString (string (C)))) .
+  eq getName (V) = qid (substrString (string (V), 0, rfindString (string (V), ":", lengthString (string (V))))) .
+  eq getType (V) = qid (substrString (string (V), rfindString (string (V), ":", lengthString (string (V))) +Nat 1, lengthString (string (V)))) .
+
+
+  sort Module .
+  sort ResultPair .
+  op metaReduce : Module Term ~> ResultPair
+     [special (
+        id-hook MetaLevelOpSymbol	(metaReduce)
+
+        op-hook qidSymbol		(<Qids> : ~> Qid)
+        op-hook metaTermSymbol		(_[_] : Qid NeTermList ~> Term)
+        op-hook metaArgSymbol		(_:_ : NeTermList NeTermList ~> NeTermList)
+
+        term-hook trueTerm		(true)
+        term-hook falseTerm		(false))] .
+
+
+  op downTerm : Term Universal -> Universal
+        [poly (2 0)
+         special (
+           id-hook MetaLevelOpSymbol	(metaDownTerm)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+
+  op upTerm : Universal -> Term
+        [poly (1) strat(0)
+         special (
+           id-hook MetaLevelOpSymbol	(metaUpTerm)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair)
+) ] .
+endm
+

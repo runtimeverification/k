@@ -329,12 +329,10 @@ summary function calls
 ***(
 Memory rearrangement
 ***)
-***(
   rule
     <k> derive(I) <_/k>
     <form> NtPhi => FalseFormula </form>
-  if check-sat(NtPhi) ==Bool "unsat"
-***)
+  if check-validity(~ NtPhi)
   rule
     <heap_> N |-> _:_ <_/heap>
     <form> _ => FalseFormula </form>
