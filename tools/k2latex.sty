@@ -147,10 +147,8 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 
 \newcommand{\latexComment}[1]{
 \medskip
-\fcolorbox{black!50}{black!25}{
-\parbox{7in}{\color{black} 
-#1  
-} } 
+\begin{tikzpicture}
+\node[rounded corners,draw,fill=black!10,text width=7in]{#1};
+\end{tikzpicture}
 \medskip
 }
-
