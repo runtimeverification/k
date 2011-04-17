@@ -1,7 +1,7 @@
 require ../ocl-semantics
 require ../conformance
 
-kmod  AUTOMATA  is including OCL-SEMANTICS + CONFORMANCE
+kmod  AUTOMATA is including OCL-SEMANTICS + CONFORMANCE
 
 syntax Id ::= x | y 
 syntax Id ::= automata
@@ -85,9 +85,9 @@ syntax Bag ::= initConfig
 		</class>
 	</classes>
 	<oclConstraints>
-		OCL(((allInstances(initialState).size()) = 1))
+		OCL(((allInstances(initialState).size()) = 2))
 		OCL((allInstances(transition)->forAll(tr |not((tr#label) = ""))))
-		OCL(((s0:initialState)->forAll(st |(st#out)->forAll(tr1 |(st#out)->forAll(tr2 |(((tr1#label)) = ((tr2#label))) implies (tr1 = tr2))))))
+		OCL((allInstances(state)->forAll(st |(st#out)->forAll(tr1 |(st#out)->forAll(tr2 |(((tr1#label)) = ((tr2#label))) implies (tr1 = tr2))))))
 
 		OCL(allInstances(automaton)->forAll(x |(x#active).size() >= 1))
 		OCL(allInstances(automaton)->forAll(x |(x#active).size() <= 1))
@@ -111,8 +111,8 @@ syntax Bag ::= initConfig
 			<instName> a </instName>
 			<ofClass> automaton </ofClass>
 			<attributes>
-				(trace |->typedElt(val(BagItem("")),string))
-				(active |->typedElt(val( .Bag BagItem(s0:state) ),state))
+				(trace |-> typedElt(val(BagItem("")),string))
+				(active |-> typedElt(val(.Bag  BagItem(s0:initialState)),state))
 				.Map
 			</attributes>
 		</instance>
@@ -120,8 +120,8 @@ syntax Bag ::= initConfig
 			<instName> s0 </instName>
 			<ofClass> initialState </ofClass>
 			<attributes>
-				(in |->typedElt(val( .Bag BagItem(t1:transition) ),transition))
-				(out |->typedElt(val( .Bag BagItem(t1:transition) BagItem(t2:transition) ),transition))
+				(in |-> typedElt(val(.Bag  BagItem(t1:transition)),transition))
+				(out |-> typedElt(val(.Bag  BagItem(t1:transition) BagItem(t2:transition)),transition))
 				.Map
 			</attributes>
 		</instance>
@@ -129,8 +129,8 @@ syntax Bag ::= initConfig
 			<instName> s1 </instName>
 			<ofClass> state </ofClass>
 			<attributes>
-				(in |->typedElt(val( .Bag BagItem(t2:transition) BagItem(t3:transition) ),transition))
-				(out |->typedElt(val( .Bag BagItem(t3:transition) ),transition))
+				(in |-> typedElt(val(.Bag  BagItem(t2:transition) BagItem(t3:transition)),transition))
+				(out |-> typedElt(val(.Bag  BagItem(t3:transition)),transition))
 				.Map
 			</attributes>
 		</instance>
@@ -138,9 +138,9 @@ syntax Bag ::= initConfig
 			<instName> t1 </instName>
 			<ofClass> transition </ofClass>
 			<attributes>
-				(orig |->typedElt(val( .Bag BagItem(s0:state) ),state))
-				(dest |->typedElt(val( .Bag BagItem(s0:state) ),state))
-				(label |->typedElt(val(BagItem("a")),string))
+				(orig |-> typedElt(val(.Bag  BagItem(s0:initialState)),state))
+				(dest |-> typedElt(val(.Bag  BagItem(s0:initialState)),state))
+				(label |-> typedElt(val(BagItem("a")),string))
 				.Map
 			</attributes>
 		</instance>
@@ -148,9 +148,9 @@ syntax Bag ::= initConfig
 			<instName> t2 </instName>
 			<ofClass> transition </ofClass>
 			<attributes>
-				(orig |->typedElt(val( .Bag BagItem(s0:state) ),state))
-				(dest |->typedElt(val( .Bag BagItem(s1:state) ),state))
-				(label |->typedElt(val(BagItem("b")),string))
+				(orig |-> typedElt(val(.Bag  BagItem(s0:initialState)),state))
+				(dest |-> typedElt(val(.Bag  BagItem(s1:state)),state))
+				(label |-> typedElt(val(BagItem("a")),string))
 				.Map
 			</attributes>
 		</instance>
@@ -158,9 +158,9 @@ syntax Bag ::= initConfig
 			<instName> t3 </instName>
 			<ofClass> transition </ofClass>
 			<attributes>
-				(orig |->typedElt(val( .Bag BagItem(s1:state) ),state))
-				(dest |->typedElt(val( .Bag BagItem(s1:state) ),state))
-				(label |->typedElt(val(BagItem("c")),string))
+				(orig |-> typedElt(val(.Bag  BagItem(s1:state)),state))
+				(dest |-> typedElt(val(.Bag  BagItem(s1:state)),state))
+				(label |-> typedElt(val(BagItem("c")),string))
 				.Map
 			</attributes>
 		</instance>
