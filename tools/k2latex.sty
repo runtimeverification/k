@@ -114,11 +114,13 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 }
 
 \newcommand{\kassoc}{assoc}
-\newcommand{\khybrid}{{\color{blue} hybrid}}
+\newcommand{\kcomm}{comm}
+\newcommand{\khybrid}{{\color{blue}hybrid}}
 \newcommand{\kid}[1]{id: {#1}}
 \newcommand{\kditto}{ditto}
+\newcommand{\karity}[1]{{\color{blue}arity(#1)}}
 
-\newcommand{\kstrict}[2]{{\bf\color{blue}strict%
+\newcommand{\kstrict}[2]{{\color{blue}strict%
 \ifx&#1&%
 \else%
 (#1)%
@@ -129,7 +131,7 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \fi}%
 }
 
-\newcommand{\kseqstrict}[2]{{\bf\color{blue}seqstrict%
+\newcommand{\kseqstrict}[2]{{\color{blue}seqstrict%
 \ifx&#1&%
 \else%
 (#1)%
