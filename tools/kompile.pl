@@ -96,10 +96,8 @@ my $short_help_message =
   
   The following options make sense only when Latex options are used:
   -style : useful for typesetting (optional)
-  -title \"title\" : specifies the title when generating a poster
-  -author \"name\" : specifies the name of the author in a poster
   -output output_file : specifies the name of the generated (latex) file
-  -latex-header : includes the content of the argument file
+  -preamble : includes the content of the argument file
 	after \\begin{document} but before first \\begin{module}
 	in the latex file
 
@@ -422,9 +420,6 @@ my $ps = 0;
 my $png = 0;
 my $crop = 0;
 
-my $title = "";
-my $author = "";
-
 # used for generating modules for KLabels
 my $klabels = "";
 
@@ -481,12 +476,6 @@ foreach (@ARGV) {
     elsif (($style eq "?") && !/^-/) {
 	$style = $_;
     }
-    elsif (($title eq "?") && !/^-/) {
-	$title = $_;
-    }
-    elsif (($author eq "?") && !/^-/) {
-	$author = $_;
-    }
     elsif (($latex_header eq "?") && !/^-/) {
 	$latex_header = $_;
     }
@@ -529,13 +518,7 @@ foreach (@ARGV) {
     elsif (/^--?file$/) {
 	$language_file_name = "?";
     }
-    elsif (/^--?title$/) {
-	$title = "?";
-    }
-    elsif (/^--?author$/) {
-	$author = "?";
-    }
-    elsif (/^--?latex\-header$/) {
+    elsif (/^--?preamble$/) {
 	$latex_header = "?";
     }
     elsif (/^--?nd$/) {
@@ -624,7 +607,7 @@ $lang_name =~ s/\..*?$//;
 $output_latex_file = $lang_name if $output_latex_file eq "";
 
 #print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
-# print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\nTITLE:$title\nAUTHOR:$author\n\n";
+# print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\n\n";
 # print "Latex header $latex_header\n";
 
 my $args = "@ARGV";
@@ -926,15 +909,7 @@ sub latexify {
         }
 	print FILE join("\n",@newcommands)."\n";
 
-	# hack: allows \\ as arg for author/title 
-	# 	in latex.
-	$title =~ s/\s\\\s/\\\\/sg;
-	$author =~ s/\s\\\s/\\\\/sg;
-
-	print FILE "\\title{$title}\n\\author{$author}\n" if ($title ne "" && $author ne "");
-	print FILE "\\title{$title}\n" if ($title ne "" && $author eq "");
 	print FILE "\n\\begin{document}\n\n";
-	print FILE "\\maketitle\n" if ($title ne "");
 	
 	# insert $latex_header here
 	if ($latex_header ne "")
