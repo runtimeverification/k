@@ -533,45 +533,39 @@ var Eq : Equation .  var Eqs : EquationSet .
     = (printTerm(M, T) '=> printTerm(M, T') 
       '/\ eMetaLatexPrint(M, Cond)) 
     [owise] .
-  eq eMetaLatexPrint(M, (assoc AtS))  
-    = ('assoc eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (comm AtS))   
-    = ('comm eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (memo AtS))   
-    = ('memo eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (idem AtS))   
-    = ('idem eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (id(T) AtS))
-    = ('id: eMetaLatexPrint(M, T) '\s eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (right-id(T) AtS))
-    = ('right 'id: eMetaLatexPrint(M, T) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (left-id(T) AtS))
-    = ('left 'id: eMetaLatexPrint(M, T) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (poly(NL) AtS))
-    = ('poly '`( eMetaLatexPrint(NL) '`) 
-       eMetaLatexPrint(M, AtS)) .
+  var NAtS : NeAttrSet .
+ ceq eMetaLatexPrint(M, (Attr:Attr NAtS))
+   = if QIL =/= nil then QIL '\s else nil fi eMetaLatexPrint(M, NAtS) 
+  if QIL :=  eMetaLatexPrint(M, Attr:Attr) .
+  eq eMetaLatexPrint(M, assoc)  
+    = '\kassoc '`{ '`} .
+  eq eMetaLatexPrint(M, comm)
+    = '\kcomm '`{ '`} .
+  eq eMetaLatexPrint(M, (memo ))   
+    = ('\kmemo '`{ '`}) .
+  eq eMetaLatexPrint(M, (idem ))   
+    = ('\kidem '`{ '`}) .
+  eq eMetaLatexPrint(M, (id(T) ))
+    = ('\kid '`{ eMetaLatexPrint(M, T) '`}) .
+  eq eMetaLatexPrint(M, (right-id(T) ))
+    = ('\krightid '`{ eMetaLatexPrint(M, T) '`}) .
+  eq eMetaLatexPrint(M, (left-id(T) ))
+    = ('\kleftid '`{ eMetaLatexPrint(M, T) '`}) .
+  eq eMetaLatexPrint(M, (poly(NL) ))
+    = ('\kpoly '`{ eMetaLatexPrint(NL) '`} 
+       ) .
 
-  eq eMetaLatexPrint(M, (karity(N) AtS))
-    = ('arity eMetaLatexPrint(N)  
-       eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (karity(N) ))
+    = ('\karity '`{ eMetaLatexPrint(N) '`}
+       ) .
 
----(
-  eq eMetaLatexPrint(M, (vstrict(QIL) AtS))
-    = ('strict '`( QIL '`) 
-       eMetaLatexPrint(M, AtS)) .
----)
 ---  op \wrapping{_} : Qid -> QidList .
   op \renameTo{_} : Qid -> QidList .
 
----(
-  eq eMetaLatexPrint(M, (kwrapping(Q) AtS))
-    = (\wrapping{Q} 
-       eMetaLatexPrint(M, AtS)) .
----)
   op eMetaLatexPrint : Module Nat AttrSet -> QidList .
-  eq eMetaLatexPrint(M, N, (krenameTo(Q) AtS))
+  eq eMetaLatexPrint(M, N, (krenameTo(Q) ))
     = (\renameTo{getRenamedKOp(Q, N, getOps(M))} 
-       eMetaLatexPrint(M, AtS)) .
+       ) .
   eq eMetaLatexPrint(M, N, AtS) = eMetaLatexPrint(M, AtS) [owise] .
 
   op getRenamedKOp : Qid Nat OpDeclSet -> Qid .
@@ -593,10 +587,10 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq getRenamedKOp(Q, AS metadata(Str) ) 
    = getName(Q, metadataParse(Str)) [owise] .
 
-  eq eMetaLatexPrint(M, (kaux AtS))
-    = ('aux eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (kditto AtS))
-    = ('ditto eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (kaux))
+    = ('\kaux '`{ '`}) .
+  eq eMetaLatexPrint(M, (kditto))
+    = ('\kditto '`{ '`}) .
 
 
   op strictCells : QidList -> QidList .
@@ -605,61 +599,62 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq strictCells(QIL) = 'in '`( QIL '`) [owise] .
 
   var NNL : NeNatList .
-  eq eMetaLatexPrint(M, (kstrict(nil,QIL) AtS))
-    = ('strict strictCells(QIL) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (klocation(Str) AtS)) 
-   = eMetaLatexPrint(M, AtS) .
-  eq eMetaLatexPrint(M, (kstrict(NNL, QIL) AtS))
-    = ('strict '`( eMetaLatexPrint(NNL) '`) strictCells(QIL)
-       eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (seqkstrict(nil,QIL) AtS))
-    = ('seqstrict strictCells(QIL) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (seqkstrict(NNL,QIL) AtS))
-    = ('seqstrict '`( eMetaLatexPrint(NNL) '`) strictCells(QIL)
-       eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (khybrid AtS))   
-    = ('hybrid eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (strat(NL) AtS))
-    = ('strat '`( eMetaLatexPrint(NL) '`) 
-       eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (memo AtS))   
-    = ('memo eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (prec(I) AtS))
-    = (---('prec eMetaLatexPrint(I)---) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (klatex(AS) AtS))
-    = (---('prec eMetaLatexPrint(I)---) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (gather(QIL) AtS))
-    = (---('gather '`( QIL '`)---) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (format(QIL) AtS))
-    = (---('format '`( QIL '`)---) eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (ctor AtS))   
-    = ('ctor eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (frozen(NL) AtS)) 
-    = ('frozen '`( eMetaLatexPrint(NL) '`) 
-       eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (iter AtS))   
-    = ('iter eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (special(HkL) AtS))
-    = (---('special '`( eMetaLatexPrint(M, HkL) '`)---) 
-       eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (config AtS))   
-    = ('config eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (object AtS))   
-    = ('object eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (msg AtS))   
-    = ('msg eMetaLatexPrint(M, AtS)) .
+  sort NeAttrSet .
+  subsort Attr < NeAttrSet < AttrSet .
+  op __ : NeAttrSet AttrSet -> NeAttrSet [ditto] .  
 
-  eq eMetaLatexPrint(M, (label(QI) AtS))
-    = ('label QI eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (metadata(St) AtS))
-    = ('metadata qid("\"" + St + "\"") 
-       eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (nonexec AtS))
-    = ('nonexec eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (owise AtS))
-    = ('owise eMetaLatexPrint(M, AtS)) .
-  eq eMetaLatexPrint(M, (print(QIL) AtS))
-    = ('print QIL eMetaLatexPrint(M, AtS)) .
+  eq eMetaLatexPrint(M, (klocation(Str))) 
+   = nil .
+ 
+
+  eq eMetaLatexPrint(M, (kstrict(NL, QIL)))
+    = ('\kstrict '`{ eMetaLatexPrint(NL) '`} '`{ strictCells(QIL) '`}
+       ) .
+  eq eMetaLatexPrint(M, (seqkstrict(NL, QIL)))
+    = ('\kseqstrict '`{ eMetaLatexPrint(NL) '`} '`{ strictCells(QIL) '`}
+       ) .
+  eq eMetaLatexPrint(M, (khybrid ))   
+    = ('\khybrid '`{ '`}) .
+  eq eMetaLatexPrint(M, (strat(NL) ))
+    = ('\kstrat '`{ eMetaLatexPrint(NL) '`} 
+       ) .
+  eq eMetaLatexPrint(M, (memo ))   
+    = ('\kmemo '`{ '`}) .
+  eq eMetaLatexPrint(M, (prec(I) ))
+    = nil .
+  eq eMetaLatexPrint(M, (klatex(AS) ))
+    = nil .
+  eq eMetaLatexPrint(M, (gather(QIL) ))
+    = nil .
+  eq eMetaLatexPrint(M, (format(QIL) ))
+    = nil .
+  eq eMetaLatexPrint(M, (ctor ))   
+    = ('\kctor '`{ '`}) .
+  eq eMetaLatexPrint(M, (frozen(NL) )) 
+    = ('\kfrozen '`{ eMetaLatexPrint(NL) '`} 
+       ) .
+  eq eMetaLatexPrint(M, (iter ))   
+    = ('\kiter '`{ '`}) .
+  eq eMetaLatexPrint(M, (special(HkL) ))
+    = nil .
+  eq eMetaLatexPrint(M, (config ))   
+    = ('\kconfig '`{ '`}) .
+  eq eMetaLatexPrint(M, (object ))   
+    = ('\kobject '`{ '`}) .
+  eq eMetaLatexPrint(M, (msg ))   
+    = ('\kmsg '`{ '`}) .
+
+  eq eMetaLatexPrint(M, (label(QI) ))
+    = ('\klabel '`{ QI '`} ) .
+  eq eMetaLatexPrint(M, (metadata(St) ))
+    = ('\kmetadata '`{ qid(St) '`} 
+      ) .
+  eq eMetaLatexPrint(M, (nonexec ))
+    = ('\knonexec '`{ '`}) .
+  eq eMetaLatexPrint(M, (owise ))
+    = ('\kowise '`{ '`}) .
+  eq eMetaLatexPrint(M, (print(QIL) ))
+    = ('\kprint '`{ QIL '`}) .
 
   eq eMetaLatexPrint(M, (none).AttrSet) = nil .
 

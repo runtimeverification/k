@@ -112,6 +112,34 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \vskip2ex}
 \end{tabular}
 }
+
+\newcommand{\kassoc}{assoc}
+\newcommand{\khybrid}{{\color{blue} hybrid}}
+\newcommand{\kid}[1]{id: {#1}}
+\newcommand{\kditto}{ditto}
+
+\newcommand{\kstrict}[2]{{\bf\color{blue}strict%
+\ifx&#1&%
+\else%
+(#1)%
+\fi%
+\ifx&#2&%
+\else%
+ in (#2)%
+\fi}%
+}
+
+\newcommand{\kseqstrict}[2]{{\bf\color{blue}seqstrict%
+\ifx&#1&%
+\else%
+(#1)%
+\fi%
+\ifx&#2&%
+\else%
+ in (#2)%
+\fi%
+}
+}
 \newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
 \newcommand{\reduceTopS}[2]{{#1}\rightharpoonup{#2}}
 \newcommand{\reduce}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hline{#2}\end{array}}
