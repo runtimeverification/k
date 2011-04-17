@@ -1280,6 +1280,10 @@ sub run_maude {
     print FILE "\n@commands\n";
     close FILE;
 
+	# clean error file and output file
+	unlink($output_file);
+	unlink($error_file);
+
     # call maude
     my $status = system("$maude_path -no-banner -no-wrap $additionalMaudeFlags $input_file >$output_file 2>$error_file");
     
@@ -1291,14 +1295,20 @@ sub run_maude {
     
     if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-	print "[ERROR] $1\n";
-	return -1;
+		print "[ERROR] $1\n";
+		return -1;
     }
     if ($out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-	print "[ERROR] $1\n";
-	return -1;
+		print "[ERROR] $1\n";
+		return -1;
     }
+
+
+	if ($err =~ /[^\s]/)
+	{
+		print $1 if $err =~ /(.*?\n)/sg;
+	}
     
     if (($status >>= 8) != 0)
     {
