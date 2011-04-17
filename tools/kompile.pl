@@ -819,6 +819,10 @@ if (!$maudify_only) {
     run_maude("Detecting Maude ... ", "quit\n");
 
 # Calling either the maude compiler or the latex/pdf compiler, depending upon $latex/$pdf
+
+    # add missing subsortations to K
+    add_subsorts();
+
     if ($latex || $pdf || $ps || $eps || $png || $crop) 
     {
 		make_latexify() if $latex;
@@ -1160,8 +1164,6 @@ sub make_crop
 sub compile {
 # Assumes $language_file_name is a file name with no extension
     
-    # add missing subsortations
-    add_subsorts();
 
 #    print "FILES: " . getFileList() . "\n\n";
 #    exit(1);
