@@ -1298,6 +1298,16 @@ sub run_maude {
 		print "[ERROR] $1\n";
 		return -1;
     }
+	elsif ($err =~ /[^\s]/)
+	{
+		if (countlines($err) > 5)
+		{
+			print "$&" if $err =~ /(.*?\n)(.*?\n)(.*?\n)(.*?\n)(.*?\n)/sg;
+			print "Check $error_file to find all errors.\n";
+		}
+		else { print $err; }
+#		return -1;
+	}
     if ($out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
 		print "[ERROR] $1\n";
@@ -1305,10 +1315,6 @@ sub run_maude {
     }
 
 
-	if ($err =~ /[^\s]/)
-	{
-		print $1 if $err =~ /(.*?\n)/sg;
-	}
     
     if (($status >>= 8) != 0)
     {
