@@ -407,7 +407,7 @@ my $language_module_name = "";
 my $language_file_name = "";
 my $lang_name = "";
 my $output_latex_file = "";
-my $latex_header = "";
+my $preamble = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
@@ -476,8 +476,8 @@ foreach (@ARGV) {
     elsif (($style eq "?") && !/^-/) {
 	$style = $_;
     }
-    elsif (($latex_header eq "?") && !/^-/) {
-	$latex_header = $_;
+    elsif (($preamble eq "?") && !/^-/) {
+	$preamble = $_;
     }
     elsif (($output_latex_file eq "?") && !/^-/) {
 	$output_latex_file = $_;
@@ -519,7 +519,7 @@ foreach (@ARGV) {
 	$language_file_name = "?";
     }
     elsif (/^--?preamble$/) {
-	$latex_header = "?";
+	$preamble = "?";
     }
     elsif (/^--?nd$/) {
        $k_all_tools .= "-nd";
@@ -608,7 +608,7 @@ $output_latex_file = $lang_name if $output_latex_file eq "";
 
 #print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
 # print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\n\n";
-# print "Latex header $latex_header\n";
+# print "Latex header $preamble\n";
 
 my $args = "@ARGV";
 # print "ARGS: $args\n";
@@ -911,10 +911,10 @@ sub latexify {
 
 	print FILE "\n\\begin{document}\n\n";
 	
-	# insert $latex_header here
-	if ($latex_header ne "")
+	# insert $preamble here
+	if ($preamble ne "")
 	{
-		my $header = get_file_content($latex_header);
+		my $header = get_file_content($preamble);
 		print FILE "% begin latex header \n";
 		print FILE "$header\n";
 		print FILE "% end latex header \n\n";
