@@ -11,9 +11,9 @@ rules
   // and tries to apply the record-entity rule.
   analyze:
     t -> t
-    with
-      //<topdown(try(record-entity))> t
-      <topdown(try(record-var))> t
+    // with
+    //   //<topdown(try(record-entity))> t
+    //   <topdown(try(record-var))> t
 
   // Records the definition of an entity in a dynamic rule GetEntity.
   record-entity:
@@ -23,14 +23,14 @@ rules
       rules(
         GetEntity :+ x -> x
       )
-  record-var:
-    VarDecl([SyntaxId(x)]) -> VarDecl([SyntaxId(x)])
-    with
-    	 //<debug(!"recordvar: ")> x;
-      // For a name 'x', GetVar will return the original 'x' tree node
-      rules(
-        GetVar :+ x -> x
-      )
+  // record-var:
+  //   VarDecl([SyntaxId(x)]) -> VarDecl([SyntaxId(x)])
+  //   with
+  //   	 //<debug(!"recordvar: ")> x;
+  //     // For a name 'x', GetVar will return the original 'x' tree node
+  //     rules(
+  //       GetVar :+ x -> x
+  //     )
 rules
     
   // Reports an error if a property type is undefined.

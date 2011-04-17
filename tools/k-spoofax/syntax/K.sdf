@@ -8,9 +8,10 @@ context-free start-symbols
 
 context-free syntax
 
+-> Start {cons("EmptyProgram")}
 %% K Module syntax
 "kmod" ModName "is" KModHeader KSentence* "endkm" -> Start {cons("KModule"),left}
-KModHeaderItem* -> KModHeader
+KModHeaderItem* -> KModHeader {cons("KModHeader")}
 "including" KModExp -> KModHeaderItem {cons("Including")}  
 {ModName "+"}+ -> KModExp {cons("ModuleSum")}  
 
@@ -34,7 +35,7 @@ KNonAttrSentence "[" KSentenceAttr* "]" -> KSentence {cons("AttributedSentence")
 "structural" -> KSentenceAttr {cons("Structural")}    
 
 %% Configurations
-ConfigItem* -> Config
+ConfigItem* -> Config {cons("Config")}
 StartCellClosed CellContents EndCellClosed -> ConfigItem {cons("ClosedCell")}  
 StartCellClosed CellContents EndCellOpen -> ConfigItem {cons("PrefixCell")}  
 StartCellOpen CellContents EndCellClosed -> ConfigItem {cons("SuffixCell")}  
@@ -47,20 +48,20 @@ Bag -> CellContents {cons("Bag")}
 Set -> CellContents {cons("Set")}
 Config -> CellContents {cons("Config")}
 
-"<" CellLabel CellProperties ">" -> StartCellClosed
-"<" CellLabel CellProperties "_>" -> StartCellOpen
-"<" CellLabel CellProperties ">..." -> StartCellOpen
-"</" CellLabel ">" -> EndCellClosed
-"<_/" CellLabel ">" -> EndCellOpen
-"...</" CellLabel ">" -> EndCellOpen
+"<" CellLabel CellProperties ">" -> StartCellClosed {cons("ClosedCellLeft")}
+"<" CellLabel CellProperties "_>" -> StartCellOpen {cons("OpenCellLeft")}
+"<" CellLabel CellProperties ">..." -> StartCellOpen {cons("OpenCellLeft")}
+"</" CellLabel ">" -> EndCellClosed {cons("ClosedCellRight")}
+"<_/" CellLabel ">" -> EndCellOpen {cons("OpenCellRight")}
+"...</" CellLabel ">" -> EndCellOpen {cons("OpenCellRight")}
 
-ID "=" "\"" CellValue "\"" -> CellProperty
-CellProperty* -> CellProperties
+ID "=" "\"" CellValue "\"" -> CellProperty {cons("CellProperty")}
+CellProperty* -> CellProperties {cons("CellProperties")}
 
 %% K
 ".K" -> K {cons("EmptyK")}
 NeK -> K
-INT -> K
+INT -> K {prefer, cons("SemanticInt")}
 %% "`" SyntacticK -> K {cons("Quote")} %% {prefer}
 SyntacticK -> K {avoid, cons("Quote")}
 
@@ -76,7 +77,7 @@ KList "=>" KList -> KList {cons("ReplaceKList")}
 
 
 %% Lists
-ListItem+ -> List
+ListItem+ -> List {cons("List")}
 ".List" -> List {cons("EmptyList")}
 "ListItem" "(" K ")" -> ListItem {cons("ListItem")}
 List "=>" List -> List {cons("ReplaceList")}
@@ -99,7 +100,7 @@ Bag "=>" Bag -> Bag {cons("ReplaceBag")}
 "(" Bag ")" -> Bag {bracket}
 
 %% Sets
-SetItem+ -> Set
+SetItem+ -> Set {cons("Set")}
 ".Set" -> Set {cons("EmptySet")}
 "SetItem" "(" K ")" -> SetItem {cons("SetItem")}
 Set "=>" Set -> Set {cons("ReplaceSet")}
@@ -153,7 +154,7 @@ Variable -> Set {cons("SetVariable")}
 BOOL -> KLabel {cons("Bool")}
 INT -> KLabel {cons("Int")}
 
-"notsurewhyineedthisitisreallysilly" -> SyntacticK
+"notsurewhyineedthisitisreallysilly" -> SyntacticK {cons("SillyProduction")}
 
 lexical syntax
 

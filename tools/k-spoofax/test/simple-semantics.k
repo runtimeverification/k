@@ -19,15 +19,15 @@ kmod SIMPLE-UNTYPED-SEMANTICS is
 	</T>
 	
 	//@ \subsection*{Variable declaration}
-	context var ~X = ~[];
-	rule <k> var ~X:Id = ~V; => .K ...</k>
+	context var X = [];
+	rule <k> var X:Id = V; => .K ...</k>
 		<env> Env:Map => Env[L:Nat/X] </env>
 		<store>... .K => L |-> V ...</store>
 		<nextLoc> L => sNat(L) </nextLoc>
 		
 	//@ \subsection*{Array declaration}
-	context var ~X[~_, ~[]:Exp, ~_];
-	rule <k> var ~X[~N:Nat]; => .K ...</k>
+	context var X[_, []:Exp, _];
+	rule <k> var X[N:Nat]; => .K ...</k>
 		<env> Env => Env[L / X] </env>
 		<store>... .Map => (L |-> 'array(sNat(L), N)) '..(sNat(L), sNat(L +Nat N)) |-> 0 ...</store>
 		<nextLoc> L => sNat(L +Nat N) </nextLoc>
@@ -39,18 +39,18 @@ kmod SIMPLE-UNTYPED-SEMANTICS is
 	*/
 	// syntax Id ::= freshId ( Nat )
 	rule 
-		<k> var ~X[~N, ~N':Nat, ~Vl]; 
-			=>	var ~X[~N];
-				 for ~'freshId(L) = 0 to ~(N +Int -1) do {
-				 	var ~'freshId(L +Nat 1)[~N', ~Vl];
-				 	~X[~'freshId(L)] = ~'freshId(L +Nat 1);
+		<k> var X[N, N':Nat, Vl]; 
+			=>	var X[N];
+				 for 'freshId(L) = 0 to (N +Int -1) do {
+				 	var 'freshId(L +Nat 1)[N', Vl];
+				 	X['freshId(L)] = 'freshId(L +Nat 1);
 				 }
 		...</k>
 		<nextLoc> L => L +Nat 2 </nextLoc>  
 
 
 
-	rule ~I1 * ~I2 => I1 *Int I2 
+	rule I1 * I2 => I1 *Int I2 
  	rule <k> X:Id => V:Val ...</k> <env>... X |-> L ...</env> <store>... L |-> V ...</store>
 	
 endkm

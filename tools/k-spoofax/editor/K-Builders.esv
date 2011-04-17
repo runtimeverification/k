@@ -14,7 +14,7 @@ builders
   provider                  : include/k.ctree                                                                                  
   provider                  : include/k-java.jar                                                                               
                                                                                                                                
-  observer                  : editor-analyze                                                                                   
+  observer                  : editor-analyze                                                                           
                                                                                                                                
   builder                   : "Generate Java code (for selection)"   = generate-java (openeditor) (realtime)                   
   builder                   : "Show abstract syntax (for selection)" = generate-aterm (openeditor) (realtime) (meta) (source)  

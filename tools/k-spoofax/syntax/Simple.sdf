@@ -7,14 +7,25 @@ context-free start-symbols
 
 context-free syntax
 	
-Language -> Exported {cons("Syntax")}
-	
-Exp -> Language
-Sentence+ -> Language
+Language -> Exported %%  {cons("Syntax")}
+Exp -> Language {cons("Language")}
+Sentence+ -> Language {cons("Language")}
+%% context-free priorities
+%% {
+%% 	Exp -> Language
+%% 	Exported -> K
+%% }
+%% context-free priorities
+%% {
+%% 	Sentence+ -> Language
+%% 	Exported -> K
+%% }
+
+context-free syntax
 
 Decl -> Sentence
 Stmt -> Sentence
-Sentence* -> Stmts {right}
+Sentence* -> Stmts {right, cons("Statements")}
 
 
 %% Statements
@@ -85,14 +96,17 @@ ID -> Exp {cons("SyntaxId"), avoid}
 
 "(" Exp ")" -> Exp {bracket}
 
-{ID ","}* -> ListOfId
-{Exp ","}* -> ListOfExp
+{ID ","}* -> ListOfId {cons("ListOfId")}
+{Exp ","}* -> ListOfExp {cons("ListOfExp")}
 
 
 context-free priorities
 { non-assoc:
-	"~" Atom -> Exp {cons("Unquote")}
-	"~" Atom -> ID {cons("Unquote")}
+	%% "~" Atom -> Exp {cons("Unquote")}
+	%% "~" Atom -> ID {cons("Unquote")}
+	Atom -> Stmt {cons("Unquote")}
+	Atom -> Exp {cons("Unquote")}
+	Atom -> Id {cons("Unquote")}
 	Exported -> K
 } > { 
 	"++" Exp -> Exp {cons("PreIncrement")}

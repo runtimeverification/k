@@ -1,7 +1,7 @@
-%%   macro if E:Exp then S:Stmt = if E then S else {}
-%%   macro (for X:Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
-%%   macro function F:Id() S = function F(.List{Id}) S
-%%   macro E() = E(.List{Id})
-%% 
-%%   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
-%%   macro var X; = var X=0;
+// %%   macro if E:Exp then S:Stmt = if E then S else {}
+// %%   macro (for X:Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
+// %%   macro function F:Id() S = function F(.List{Id}) S
+// %%   macro E() = E(.List{Id})
+// %% 
+// %%   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
+// %%   macro var X; = var X=0;

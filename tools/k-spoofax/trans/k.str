@@ -4,9 +4,12 @@ imports
   libstratego-lib
   libstratego-gpp
   libstratego-aterm
+  libstratego-sglr
+  libstratego-xtc
   include/K
   lib/editor-common.generated
   check
+  filter
   generate
 
 rules // Main editor interface (defined by editor/K-Builders and -References.esv)
@@ -21,6 +24,23 @@ rules // Main editor interface (defined by editor/K-Builders and -References.esv
       errors   := <collect-all(constraint-error, conc)> ast;
       warnings := <collect-all(constraint-warning, conc)> ast;
       notes    := <collect-all(constraint-note, conc)> ast
+  
+  
+   // signature
+   //    constructors
+   //      amb: List(x) -> x
+
+//     rules
+//       editor-analyze:
+//         (ast, path, project-path) -> (ast', [], [], [])
+//         with
+//           editor-init;
+//           ast' := <topdown(try(disambiguate)); debug(!"final: ")> ast
+// 
+//       disambiguate:
+//         amb([x | xs]) -> x
+//         with
+//           debug(!"disambiguating: ") 
   
   // Transforms a selection to Java
   generate-java:
@@ -38,19 +58,19 @@ rules // Main editor interface (defined by editor/K-Builders and -References.esv
   
   // Resolves a reference when the user control-clicks or presses F3 in the editor.
   // Only succeeds for nodes of the form Type(_) for which GetEntity is defined.
-  editor-resolve:
-    (node, position, ast, path, project-path) -> target
-    where
-      <debug(!"Resolve: ")> node; 
-      SyntaxId(type) := node;
-      //<debug(!"finding target: ")> type; 
-      target     := <GetVar> type
-   // editor-resolve:
-   //  (node, position, ast, path, project-path) -> target
-   //  where
-   //    <debug(!"Resolve: ")> node; 
-   //    SyntaxId(id) := node;
-   //    target     := <GetVar> id
+  // editor-resolve:
+  //   (node, position, ast, path, project-path) -> target
+  //   where
+  //     <debug(!"Resolve: ")> node; 
+  //     SyntaxId(type) := node;
+  //     //<debug(!"finding target: ")> type; 
+  //     target     := <GetVar> type
+  //  // editor-resolve:
+  //  //  (node, position, ast, path, project-path) -> target
+  //  //  where
+  //  //    <debug(!"Resolve: ")> node; 
+  //  //    SyntaxId(id) := node;
+  //  //    target     := <GetVar> id
 
   // Returns "hover help" information for a particular node in the editor.
   // For references, this rule is invoked using the resolved term.
