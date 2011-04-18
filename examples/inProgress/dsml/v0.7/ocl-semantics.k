@@ -57,24 +57,6 @@ rule   <k> (B1 = B2:Bool) =>  B1 ==Bool B2  <_/k>  [structural]
 rule <k> (val(C1) = val(C2)) => C1 ==Bool C2  <_/k>[structural] 
 
 
-// loop step : while *N is head of computation
- rule <k> * N <_/k>
-// perform one step - reduce expression at N, store intermediary result in N+1
- <mem_> N |->  [(val(BagItem(INAME : Cls) REMAINING:Bag) # AT:Id => val(REMAINING) # AT), N']
-             N' |-> val ( _ (.Bag => B))
- <_/mem>
-// find INSNAME, Cls instance in model
- <models>
- <model_>
- <instance>
- <instName> INAME </instName>
- <ofClass> Cls </ofClass>
-//use its attribute values at AT
- <attributes_> AT |-> typedElt(val(B:Bag),T:Id) <_/attributes>
- </instance>
- <_/model>
- </models>
-      [structural]
 //includes, excludes
 rule <k> val(C1:Bag) includes val(C2:Bag) => subset(C2,C1)  <_/k>  [structural]
 
