@@ -123,9 +123,29 @@ uni-dimensional arrays.
 ---------------------------------------
 
 /*@ \subsection*{Variable declaration}
-Recall that the syntax is desugared so that each variable is declared alone and is also
-initialized.  The rule below matches such initialized variable declarations on top of
-the \textsf{k} cell and allocates a fresh location $L$ for ...
+The SIMPLE syntax was desugared above so that each variable is declared alone and is also
+initialized.  The context declaration below says that the expression used for the initilization
+of the variable should be first evaluated (that expression can be any arithmetic expression,
+including array lookups, function calls, etc.).  The semantic rule below matches resulting
+variable declarations of the form ``$\texttt{var}\,X\,\texttt{=}\,V\texttt{;}$'' (with $V$ a
+value) on top of the \textsf{k} cell (indeed, note that the \textsf{k} cell is complete,
+or round, to the left, and is torn, or ruptured, to the right), allocates a fresh location
+$L$ in the store to hold the value $V$ (indeed, the unit ``$\kdot$'', or nothing, is matched
+anywhere in the map---note the tears at both sides---and replaced with the mapping
+$L\mapsto V$), and binds $X$ to $L$ in the local environment shadowing previous declarations
+of $X$, if any.  It is this possible shadowing of $X$ which dissallows us to use a similar
+technique for updating the environment as for updating the store, as we know that $L$ is not
+already bound in the store when we add $L \mapsto V$.  We prefer the approach used for updating
+the store whenever possible, because it offers more true concurrency than the latter; indeed,
+according to the concurrent semantics of $K$, the store is not frozen while $L\mapsto V$ is
+added to it, while the environment is frozen during the update operation $\textit{Env}[L/X]$.
+The variable declaration command is also removed from the top of the computation cell
+and the fresh location counter is incremented.  All the above happen in one step, with the rule
+below.  Note also how configuration abstraction allows us to only mention the needed cells;
+indeed, as the configuration above states, the \textsf{k} and \textsf{env} cells are actually
+located within a \textsf{thread} cell within the \textsf{threads} cell, but one needs not mention
+these: the configuration context of the rule is automatically transformed to match the declared
+configuration structure.
 */
   context var X = [HOLE];
   rule <k> var X:Id = V; => . <_/k>
