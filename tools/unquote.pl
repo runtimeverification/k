@@ -83,6 +83,11 @@ sub getNormalTerm {
 	my $arguments = getResult($reader);
 	$reader->nextSiblingElement;
 	
+	# special case for :: sorting operator
+	if ($oper =~ /_::`([A-Za-z\{\}\?\!\+\`]+)/) {
+		return "$arguments :: $1";
+	}
+	
 	return "$oper($arguments)";
 }
 
