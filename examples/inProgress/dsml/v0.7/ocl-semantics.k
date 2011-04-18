@@ -236,7 +236,6 @@ if notBool(Cls' ==Bool Cls)
 rule <k> val(C1) union val(C2)   => val(C1 C2) <_/k> [structural]
 // this case not handled by generic rule for mixing scalar/nonscalar due to circularity
 rule <k> Val1:Val union Val2:Val   => val(BagItem(Val1) BagItem(Val2)) <_/k> 
-// CARE !! enum types also scalar
 if isScalar((Val1)) andBool isScalar((Val2))
 [structural]
 

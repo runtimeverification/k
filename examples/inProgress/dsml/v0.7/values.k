@@ -1,8 +1,8 @@
-//require ../../../../k-prelude
+require ../../../../k-prelude
 
-require extracted-info.k
 
-kmod VALUES is including EXTRACTED-INFO
+
+kmod VALUES is including  K + PL-ID + PL-INT + PL-STRING
 syntax Collection ::=  val ( Bag ) 
 
 // values of expressions
@@ -89,5 +89,30 @@ rule KL:KLabel(val(BagItem(Val1:Val))) => KL:KLabel(Val1)
 if (unaryOp(KL))  
 andBool isScalar((Val1)) 
 [structural]
+
+
+// scalar values
+
+syntax Bool ::= isScalar ( Val )
+rule isScalar(I:Int) => true [structural]
+rule isScalar(bbb:Bool) => true [structural]
+rule isScalar(Str:String) => true [structural]
+// isEnumType defined in EXTRACTED-INFO
+rule isScalar((obj:Id):(typ:Id))  => isEnum(typ) [structural]
+
+rule isScalar(val(C1)) => false [structural]
+
+
+
+
+syntax Id ::= activityState | timeState 
+
+// enumeration types
+syntax Bool ::= isEnum ( Id )
+
+//rule isEnum ( activityState ) => true [structural]
+//rule isEnum(timeState) => true [structural]
+rule isEnum(Id:Id) => false
+if notBool( Id ==Bool activityState orBool Id ==Bool timeState)  [structural]
 
 endkm
