@@ -4,18 +4,42 @@
 
 kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
+/*@ \section*{Basic Semantic Infrastructure}
+Before one starts adding semantic rules to a \K definition, one needs to
+define the basic semantic infrastructure consisting of definitions for {\em values},
+{\em computations} and the {\em configuration}.  The values are needed to know when to
+stop applying the heating rules corresponding to strictness or context declarations;
+unfortunately, values cannot be detected automatically, so one cannot avoid this step.
+The computation structures, or simply computations, are needed to properly include the
+language syntax under the K sort, as the \K semantics operates only on terms of sort $K$;
+fortunately, this can be done mostly automatically, except for the special result
+computations.  Finally, the configuration serves as a backbone for the process of
+configuration abstraction which allows users to only mention the relevant cells in each
+semantic rule, the rest of the configuration context being infered automatically; the
+configuration could arguably be automatically infered from the rules, but it turned out
+that it is very useful for language designers/semanticists to actually think of and
+design their configuration explicitly, so the current implementation of \K requires one
+to define it.
+*/
+
 -------------------------------------------------------------
-/*@ \subsubsection*{Values} that various fragments of programs evaluate to */
+/*@ \subsubsection*{Values}
+We here define the values of the language that the various fragments of
+programs evaluate to.
+First, integers and booleans are values.  As discussed, arrays evaluate
+to special array reference values holding (1) a location from where the
+array's elements are contiguously allocated in the store, and (2) the size
+of the array.  Similarly, functions evaluate to function reference values
+telling where the actual function body is stored (we do not need to evaluate
+functions to closures because each function is executed in the fixed global
+environment (function definitions cannot be nested).  We also need to
+define a value construct for the function body, namely a
+{\em $\lambda$-abstraction}.  Working with array and function references
+makes the language more efficient, because reference values are small. */
 -------------------------------------------------------------
 
   syntax Val ::= Int | Bool
-               --- Array values are wrapped as specific reference values, where:
-               --- 1st argument = the location of the first element in the array, and
-               --- 2nd argument = the array size (array elements are contiguously allocated)
                | array ( Nat , Nat )
-               --- Function values; like arrays, functions also evaluate to their address
-               --- (wrapped as a specific "function" value) and the address contains
-               --- the actual function body (as an untyped "lambda" value")
                | function( Nat )
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
 
@@ -24,18 +48,51 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 
 -------------------------------------
-/*@ \subsubsection*{Computations} "swallow" syntax */
+/*@ \subsubsection*{Computations}
+Recall that in \K, the {\em computational structures} or simply {\em computations}
+``swallow'' the entire language syntax.  Thus, every fragment of program is a
+particular computation, that is, a term of sort $K$.  Also, recall that computations
+have quite a simple syntax: abstract syntax trees (where the original language constructs
+become AST node labels, i.e., constants of sort $\KLabel$) extended with the special
+{\em task sequentialization} construct $K ::= K \kra K$.  In addition to the sorts
+$K$ and $\KLabel$, \K also has one more important sort related to computations, namely
+$\KResult$.  Distinguishing terms of sort $\KResult$ is not necessary in theory, but it
+is crucial in \K tools, because they interpret such terms as irreducible and thus know
+when to stop the heating process associated to the strictness attributes.
+Below we state that all lists of values are terms of sort $\KResult$.  We use lists of
+values instead of values because, as discussed above, we want lists of expressions
+to evaluate to lists of values whenever scheduled for evaluation (by placing them on
+the top of the \textsf{k} cell).
+*/
 -------------------------------------
-
---- We have to subsort all the syntactic categories to K, and the lists of values
---- to KResult.  Recall that the second argument of a function application is a list
---- of expressions, so that becomes a result when it becomes a list of values
-  syntax K ::= List{Exp} | Stmts           --- Grigore: check why we can remove List{Exp} from here
   syntax KResult ::= List{Val}
 
 
 ---------------------
-/*@ \subsection*{Configuration}  */
+/*@ \subsection*{Configuration}
+The \K configuration of SIMPLE consists of a top level cell, \textsf{T},
+holding a \textsf{threads} cell, a global environment map cell \textsf{genv}
+mapping the global variables and function names to their locations, a shared
+store map cell \textsf{store} mapping each location to some value, a set cell
+\textsf{busy} holding the locks which have been acquired but not yet released
+by threads, \textsf{input} and \textsf{output} list cells, and a
+\textsf{nextLoc} cell holding a natural number indicating the next available
+location (one can think of locations as symbolic entities; e.g., location 17
+means the 17'th allocated location, which in implementations of the language
+may be different from memory cell 17 or may even be the same memory cell that
+was previously allocated and then freed).  The \textsf{threads} cell contains
+one \textsf{thread} cell for each existing thread in the program.  Note that
+the thread cell has multiplicity ``*'', which means that at any given moment
+there could be zero, one or more \textsf{thread} cells.  Each \textsf{thread}
+cell contains a computation cell \textsf{k}, a function stack \textsf{fstack}
+which is a list, an exception stack \textsf{xstack} which is also a list, a
+local environment map cell \textsf{env} mapping the thread local variables to 
+locations in the store, and finally a \textsf{holds} map cell indicating
+what locks have been acquired by the thread and not released so far and how
+many times (SIMPLE's locks are re-entrant).  Note that all cells except for
+\textsf{k} are also initialized, in that they contain a ground term of their
+corresponding sort.  The \textsf{k} cell needs not be initialized at this level,
+because it will be initialized with the program to evaluate later. */
 ---------------------
 
   configuration <T color="red">
@@ -58,10 +115,18 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 
 ---------------------------------------
-//@ \section*{Declarations and initialization} 
+/*@ \section*{Declarations and Initialization}
+We start by defining the semantics of declarations (for variables, arrays and functions).
+The trickiest of the rules below is the one for desugaring multi-dimensional arrays into
+uni-dimensional arrays.
+*/
 ---------------------------------------
 
-//@ \subsection*{Variable declaration}
+/*@ \subsection*{Variable declaration}
+Recall that the syntax is desugared so that each variable is declared alone and is also
+initialized.  The rule below matches such initialized variable declarations on top of
+the \textsf{k} cell and allocates a fresh location $L$ for ...
+*/
   context var X = [HOLE];
   rule <k> var X:Id = V; => . <_/k>
        <env> Env:Map => Env[L:Nat/X] </env>
