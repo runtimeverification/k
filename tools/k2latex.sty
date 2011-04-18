@@ -16,6 +16,7 @@
 \usepackage{ucs}
 \usepackage{ifthen}
 \usepackage{calc}
+\usepackage{xspace}
 %\usepackage{fancyhdr}
 %\pagestyle{fancy}
 %\setlength{\headheight}{14pt}
@@ -24,6 +25,10 @@
 %\fancyfoot[L]{\underline{\footnotesize\tt \hspace{-2em}Page \thepage{}}}
 %\renewcommand{\headrulewidth}{0pt} 
 %\renewcommand{\footrulewidth}{0pt}
+
+\newcommand{\K}{\mbox{$\mathbb{K}$}\xspace}
+\newcommand{\KLabel}{\textit{KLabel}\xspace}
+\newcommand{\KResult}{\textit{KResult}\xspace}
 
 \makeatletter
 \renewcommand{\@maketitle}{
@@ -94,7 +99,7 @@
 \draw[color=#1!20,line width=1.2pt](cw.east)--(ce.west);
 \draw[shift=(cell.north west)]plot coordinates{(0,-1.05pt)}
 node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=convex,/pgf/rounded rectangle west arc=convex,fill=#1!20,draw=#1!20,line width=1pt,minimum width=2em,minimum height=2.5ex,draw=#1!50!black]
-{#2};%
+{\textsf{\footnotesize #2}};%
 \draw[shift=(label.south east)]plot coordinates{(-.1pt,.5pt)} node[name=le,minimum size=.01pt,inner sep=0pt]{};
 \draw[shift=(label.south west)]plot coordinates{(.1pt,.5pt)} node[name=lw,     minimum size=.01pt,inner sep=0pt]{};
 \draw[color=#1!20,line width=1.2pt](lw.east)--(le.west);
@@ -180,5 +185,5 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \begin{tikzpicture}
 \node[rounded corners,draw,fill=black!10,text width=7in]{#1};
 \end{tikzpicture}
-\medskip
+%\medskip
 }
