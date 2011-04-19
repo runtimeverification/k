@@ -25,27 +25,21 @@ to define it.
 -------------------------------------------------------------
 /*@ \subsubsection*{Values}
 We here define the values of the language that the various fragments of
-programs evaluate to.
-First, integers and booleans are values.  As discussed, arrays evaluate
-to special array reference values holding (1) a location from where the
-array's elements are contiguously allocated in the store, and (2) the size
-of the array.  Similarly, functions evaluate to function reference values
-telling where the actual function body is stored (we do not need to evaluate
-functions to closures because each function is executed in the fixed global
-environment (function definitions cannot be nested).  We also need to
-define a value construct for the function body, namely a
-{\em $\lambda$-abstraction}.  Working with array and function references
-makes the language more efficient, because reference values are small. */
+programs evaluate to.  First, integers and booleans are values.  As discussed,
+arrays evaluate to special array reference values holding (1) a location from where
+the array's elements are contiguously allocated in the store, and (2) the size
+of the array.  Functions evaluate to function values as $\lambda$-abstractions
+(we do not need to evaluate functions to closures because each function is executed
+in the fixed global environment and function definitions cannot be nested).
+*/
 -------------------------------------------------------------
 
   syntax Val ::= Int | Bool
                | array ( Nat , Nat )
-               | function( Nat )
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
 
 --- the values are expressions
   syntax Exp ::= Val
-
 
 -------------------------------------
 /*@ \subsubsection*{Computations}
@@ -153,7 +147,7 @@ configuration structure.
 
 /*@ \subsection*{Array Declaration}
 Even though SIMPLE allows multi-dimensional arrays, we have desugared them into uni-dimensional
-arrays.  Thus, we only need to give semantics to unidimensional arrays.  The expressions
+arrays.  Thus, we only need to give semantics to unidimensional arrays.  The expression
 given as array size is first evaluated and then the array is dynamically allocated the
 corresponding number of locations.  Thus, we can dynamically allocate memory in SIMPLE by
 means of array declarations.  First, we need to evaluate all the dimension of the array:
@@ -165,18 +159,19 @@ above declaration of ordinary variables.  $N+1$ locations are allocated in the s
 for an array of size $N$, the additional location (chosen to be the first one allocated)
 holding the array reference value.  The array reference value \texttt{array(L,N)} states
 that the array has size $N$ and its elements are located contiguously in the store starting
-with location $L$.
+with location $L$.  Recall that $L..L'$ is the list of locations between $L$ and $L'$
+and that $L..L'\mapsto V$ initializes each location in the list $L..L'$ to value $V$.
 */
   rule <k> var X[N:Nat]; => . <_/k>
        <env> Env => Env[L/X] </env>
-       <store_> . => (L |-> array(sNat L, N)) sNat L..sNat L+Nat N |-> 0 <_/store>
-       <nextLoc> L => sNat L +Nat N </nextLoc>
+       <store_> . => (L |-> array(L +Nat 1, N)) L +Nat 1 .. L +Nat 1 +Nat N |-> 0 <_/store>
+       <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
 //@ \subsection*{Function declaration}
   rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
-       <nextLoc> L => L +Nat 2 </nextLoc>
-       <store_> . => L|->function(sNat L)  sNat(L)|->lambda(Xl,S) <_/store>
+       <store_> . => L|->lambda(Xl,S) <_/store>
+       <nextLoc> L => L +Nat 1 </nextLoc>
 
 /*@
  When we are done with the first pass (preprocessing), i.e., the computation
@@ -239,12 +234,20 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
   rule sizeOf(array(_,N)) => N
 
 //@ \subsection*{Function call} The environment and the computation are pushed onto the stack
+  rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val}) ~> K => S ~> return(0); </k>
+       <fstack> . => (Env,K) <_/fstack>
+       <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
+       <genv> GEnv:Map </genv>
+       <store_> . => N..N+Nat|Xl| |-> getList{K}(Vl) <_/store>
+       <nextLoc> N => N +Nat |Xl| </nextLoc>
+***(
   rule <k> _`(_`)(function(L),Vl:List{Val}) ~> K => S ~> return(0); </k>
        <fstack> . => (Env,K) <_/fstack>
        <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
        <genv> GEnv:Map </genv>
        <store_> L |-> lambda(Xl,S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
+***)
   rule <k> return(V); ~> _ => V ~> K </k>
        <fstack> (Env,K) => . <_/fstack>
        <env> _ => Env </env>

@@ -138,16 +138,14 @@ declared alone and is initialized, and that all arrays are uni-dimensional.
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X; = var X=0;
 
-***(
+/*@
 To desugar multi-dimensional arrays, we define three special
-identifiers, \verb|1|, \verb|2|, and \verb|3|.  The first one
+identifiers, \texttt{\$1}, \texttt{\$2}, and \texttt{\$3}.  The first one
 is used to hold the value of the currently desugared dimension expresion;
 we need to use a variable for that purpose because we need that expression
 twice and we cannot evaluate it twice due to possible side effects (e.g.,
-\verb|a[++x,++x]|).  The second special variable, \verb|2|, is assigned the array
+\texttt{a[++x,++x]}).  The second special variable, \texttt{\$2}, is assigned the array
 reference value of the current array, so that we can redeclare the array inside
-***)
-/*@
 the loop body with fewer dimensions.  Finally, the variable \texttt{\$3} iterates
 through and initializes each element of the current dimension:
 */
