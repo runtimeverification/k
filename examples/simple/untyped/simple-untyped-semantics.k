@@ -117,12 +117,10 @@ because it will be initialized with the program to evaluate later. */
 ---------------------------------------
 /*@ \section*{Declarations and Initialization}
 We start by defining the semantics of declarations (for variables, arrays and functions).
-The trickiest of the rules below is the one for desugaring multi-dimensional arrays into
-uni-dimensional arrays.
 */
 ---------------------------------------
 
-/*@ \subsection*{Variable declaration}
+/*@ \subsection*{Variable Declaration}
 The SIMPLE syntax was desugared above so that each variable is declared alone and is also
 initialized.  The context declaration below says that the expression used for the initilization
 of the variable should be first evaluated (that expression can be any arithmetic expression,
@@ -153,23 +151,26 @@ configuration structure.
        <store_> . => L|->V <_/store>
        <nextLoc> L => sNat(L) </nextLoc> 
 
-//@ \subsection*{Array declaration}
-  context var X[_,`[HOLE`]:Exp,_];
+/*@ \subsection*{Array Declaration}
+Even though SIMPLE allows multi-dimensional arrays, we have desugared them into uni-dimensional
+arrays.  Thus, we only need to give semantics to unidimensional arrays.  The expressions
+given as array size is first evaluated and then the array is dynamically allocated the
+corresponding number of locations.  Thus, we can dynamically allocate memory in SIMPLE by
+means of array declarations.  First, we need to evaluate all the dimension of the array:
+*/
+  context var X[`[HOLE`]:Exp];
+
+/*@ The \K semantics of the uni-dimensional array declaration is somehow similar to the
+above declaration of ordinary variables.  $N+1$ locations are allocated in the store
+for an array of size $N$, the additional location (chosen to be the first one allocated)
+holding the array reference value.  The array reference value \texttt{array(L,N)} states
+that the array has size $N$ and its elements are located contiguously in the store starting
+with location $L$.
+*/
   rule <k> var X[N:Nat]; => . <_/k>
        <env> Env => Env[L/X] </env>
        <store_> . => (L |-> array(sNat L, N)) sNat L..sNat L+Nat N |-> 0 <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc>
-
-
-/*@ The rule below lazily handles multi-dimensional arrays through code generation.  The reason for handling it here than as a syntactic desugaring is that we want to ensure the dimensions of the array are already evaluated before we generate the code, to avoid strange behaviors for code like var a[++x,++x]; 
-*/
-  syntax Id ::= freshId ( Nat )
-  rule <k> var X[N,N':Nat,Vl]; => 
-           __((var (X[N]);), 
-           for freshId(L) = 0 to N +Int -1 do {
-             (var freshId(L +Nat 1)[N',Vl];)
-             X[freshId(L)] = freshId(L +Nat 1); 
-           }) <_/k>  <nextLoc> L => L +Nat 2 </nextLoc>  
 
 //@ \subsection*{Function declaration}
   rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
