@@ -3,7 +3,6 @@ rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
 rew run('pArrays) .
-***(
 rew run('pExceptions1) .
 rew run('pExceptions2) .
 rew run('pExceptions3) .
@@ -39,4 +38,3 @@ rew run('pThreads9) .
 search run('pThreads9) =>! B:Bag .
 rew run('pThreads10) .
 search run('pThreads10) =>! B:Bag .
-***)
