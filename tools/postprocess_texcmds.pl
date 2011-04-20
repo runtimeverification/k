@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 use strict;
 use warnings;
 use File::Basename;
@@ -83,7 +83,7 @@ if ($option == 1)
 verification();
 
 # Notify user.
-print "File $out_file created in current directory.\nStatus: FINISHED.\n\n";
+# print "File $out_file created in current directory.\nStatus: FINISHED.\n\n";
 
 
 sub terminate
@@ -121,7 +121,7 @@ sub create_temp_tex_file
     # write output file.
     open MYFILE, ">", $out_file_ or die "Could not open file $out_file_!\n";
     print MYFILE "$new_lines";
-    close(MYFILE);
+    close MYFILE;
     
     print "File $out_file_ created.\n\n";
     return $out_file_;
@@ -136,16 +136,17 @@ sub verification
     my $temp = $lines;
     
     # close file
-    close(FILE);
+    close FILE;
     
-    if ($temp =~ m/\\begin\{document\}(.*)\\end\{document\}/sg)
+    if ($temp =~ m/\\begin{document}(.*)\\end{document}/sg)
     {
 	$temp = $1;
     }
     
     # match each command and replace it
-    while ($lines =~ m/\\newcommand{\\(.*?)}(\[(\d)\])?{(.*?)}\n/sg)
+    while ($lines =~ m/\\newcommand{\\(.*?)}(\[(\d)\])?(.*?)(?=(\\newcommand|\\begin{document}))/sg)
     {
+
 	# arg no
 	my $arg_no = 0;
 	if (defined($3))
@@ -154,13 +155,15 @@ sub verification
 	}
 	
 	# command name
-	my $command = $1;;
+	my $command = $1;
 	my $quote = quotemeta($command);
 
 	# command text
 	my $c_text = $4;
-
-	while ($temp =~ m/\\$quote([^A-Za-z])/g)
+	$c_text =~ s!^{!!sg;
+	$c_text =~ s!}\s*$!!sg;
+	    
+	while ($temp =~ m/\\$quote([^A-Za-z])/sg)
 	{
 	    my $remainder = $1 . substr $temp, pos($temp);
 	    my $match = $command . $remainder;
@@ -184,12 +187,14 @@ sub verification
 		$temp =~ s/\\$smatch/$repl/g;
 	    }
 	}
+	
     }
+    
     # replace all \newcommands "calls" with inline commands
     $lines =~ s/\\begin\{document\}(.*)\\end\{document\}/\\begin\{document\}$temp\\end\{document\}/sg;
 
     # remove useless \newcommands definitions
-    $lines =~ s/\\newcommand{\\(.*?)}(\[(\d)\])?{(.*?)}\n//sg;
+    $lines =~ s/\\newcommand{\\(.*?)}(\[(\d)\])?(.*?)(?=(\\newcommand|\\begin{document}))//sg;
 
     # write output file.
     open MYFILE, ">", $out_file or die "Could not open file $tex_file!\n";
