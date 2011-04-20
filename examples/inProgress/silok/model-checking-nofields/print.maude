@@ -1,0 +1,40 @@
+mod PRINT is
+  including INT + QID .
+
+  sorts Token Bubble  Rule Rules Pair .
+  subsort Qid Int < Token < Bubble .
+  subsort Pair < Bubble .
+  op nil : -> Token .
+  op __ : Bubble Bubble -> Bubble [assoc id: nil prec 70] .
+
+  ops wmap Id IntBot bot .List`{K`} |-> : -> Token .
+  op rl : -> Token [format (bn o)] .
+  op . : -> Token [format (b --ino)] .
+  op => : -> Token [format (bn++i on)] .
+  op `(_,_`) : Bubble Token -> Pair . 
+  op _,,_ :  Token Token -> Pair [prec 0] .
+
+  sort Var .
+  subsort Var < Bubble .
+  ops l1 l2 g1 g2 : -> Var .
+
+  op frz : Var -> Var .
+  op * : Bubble -> Bubble .
+  var T : Token .
+  vars B B' : Bubble .
+  var V : Var .
+
+  eq .List{K} = nil .
+  eq Id = nil .
+  eq IntBot = nil .
+  eq wmap = nil .
+  eq 'frz`(_`) V = frz(V) .
+---  eq '*_ = * .
+  eq '_`,_ = nil .
+  eq rl B (nil,, T) = rl (B,T)  . 
+  eq => B (nil,, T) = => (B,T)  .
+  eq (rl '*`(_`) B => B' .) = (rl (*(B)) => B' .) . 
+  eq (rl B => '*`(_`) B' .) = (rl B => (*(B')) .) .
+endm
+
+

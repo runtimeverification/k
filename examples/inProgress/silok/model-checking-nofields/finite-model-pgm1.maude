@@ -1,0 +1,196 @@
+mod FINITE-MODEL is including INT + QID .
+
+  sorts Heap Label HeapLabel Config Var IntBot .
+  subsort Int < IntBot .
+  subsort Qid < Label .
+  subsort Heap HeapLabel < Config .
+
+  
+  op bot : -> IntBot .
+
+  op . : -> Heap .
+  op _|->_ : Var IntBot -> Heap [prec 2] .
+  op __ : Heap Heap -> Heap [prec 70 assoc comm] .
+  op `(_,_`) : Heap Label -> HeapLabel . 
+
+  op * : Heap -> Config .
+
+  op frz : Var -> Var .
+
+  ops g1 g2 l1 l2 : -> Var .
+   
+rl *(.
+) 
+  =>
+ *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> bot l1 |-> bot l2 |-> bot) .
+ 
+rl *(.
+) 
+  =>
+ *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) .
+ 
+rl *(.
+) 
+  =>
+ *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> bot g2 |-> bot l1 |-> bot l2 |-> bot) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 1 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 3 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> 1) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 1 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> 1) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 3 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> bot) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 1 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 3 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 1 l1 |-> 0 l2 |-> 1) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 3 l1 |-> 0 l2 |-> 1) .
+ 
+rl *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 3 l1 |-> 0 l2 |-> 1) 
+  =>
+ (frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 3 l1 |-> 0 l2 |-> 1,'p0) .
+ 
+rl *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> bot l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) .
+ 
+rl *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) 
+  =>
+ (frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot,'p0) .
+ 
+rl *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> bot g2 |-> bot l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> bot l1 |-> bot l2 |-> bot) .
+ 
+rl *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> bot g2 |-> bot l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) .
+ 
+rl *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> bot g2 |-> bot l1 |-> bot l2 |-> bot) 
+  =>
+ (frz(g1) |-> bot frz(g2) |-> bot g1 |-> bot g2 |-> bot l1 |-> bot l2 |-> bot,'main) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 1 l1 |-> 2 l2 |-> 3) 
+  =>
+ (frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 1 l1 |-> 2 l2 |-> 3,'p0) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 3 l1 |-> 2 l2 |-> 3) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 1 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 1 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 3 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> bot) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> bot l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 1 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 3 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> bot) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> 3) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 1 l1 |-> 2 l2 |-> 3) .
+ 
+rl *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> 2 l2 |-> 3) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 3 l1 |-> 2 l2 |-> 3) .
+ 
+rl (frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 2 g2 |-> 3 l1 |-> 0 l2 |-> 1,'p0) 
+  =>
+ *(frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 2 g2 |-> 3 l1 |-> bot l2 |-> bot) .
+ 
+rl (frz(g1) |-> bot frz(g2) |-> bot g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot,'p0) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) .
+ 
+rl (frz(g1) |-> bot frz(g2) |-> bot g1 |-> bot g2 |-> bot l1 |-> bot l2 |-> bot,'main) 
+  =>
+ *(frz(g1) |-> bot frz(g2) |-> bot g1 |-> bot g2 |-> bot l1 |-> bot l2 |-> bot) .
+ 
+rl (frz(g1) |-> 2 frz(g2) |-> 3 g1 |-> 0 g2 |-> 1 l1 |-> 2 l2 |-> 3,'p0) 
+  =>
+ *(frz(g1) |-> 0 frz(g2) |-> 1 g1 |-> 0 g2 |-> 1 l1 |-> bot l2 |-> bot) .
+
+
+endm
+
+ in model-checker
+
+  mod FINITE-MODEL-PREDS is  
+    protecting FINITE-MODEL .  
+    including SATISFACTION .  
+    subsort Config < State .  
+    op defined : Var -> Prop .  
+    op eq : Var Var -> Prop .  
+    vars X Y : Var .  
+    var H : Heap .
+    vars I J : IntBot .  
+    var L : Label .
+    var C : Config .
+    var P : Prop .
+    eq (X |-> I  H) |= defined(X) = (I =/= bot) .
+    eq (X |-> I Y |-> J H) |= eq(X, Y) = (I == J) .
+    eq C |= eq(X, X) = true .
+    eq (H, L) |= P = (H |= P) .
+    eq *(H) |= P = (H |= P) .
+    eq C |= P = false [owise] . 
+  endm
+
+  mod FINITE-MODEL-CHECK is  
+    protecting FINITE-MODEL-PREDS .  
+    including MODEL-CHECKER .  
+    including LTL-SIMPLIFIER .       
+    op init : -> Config .   
+    eq init = *(.) .       
+  endm
+
+red modelCheck(init, [] (defined(g1) /\ defined(g2) -> ~ eq(g1, g2))) .
+red modelCheck(init, [] (defined(g1) /\ defined(g2) -> eq(g1, g2))) .
+
