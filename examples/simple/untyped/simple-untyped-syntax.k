@@ -128,8 +128,8 @@ derived ones before we start the semantics.
 All desugaring macros below are straighforward, except, perhaps, the one
 for multi-dimensional arrays.  For the semantics, we can therefore assume
 that all functions take a list of arguments, that each conditional has both
-branches, that there are only \texttt{while} loops, that each variable is
-declared alone and is initialized, and that all arrays are uni-dimensional.
+branches, that there are only \texttt{while} loops, and that each variable is
+declared alone and is initialized.
 */
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
@@ -138,22 +138,4 @@ declared alone and is initialized, and that all arrays are uni-dimensional.
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X; = var X=0;
 
-/*@
-To desugar multi-dimensional arrays, we define three special
-identifiers, \texttt{\$1}, \texttt{\$2}, and \texttt{\$3}.  The first one
-is used to hold the value of the currently desugared dimension expresion;
-we need to use a variable for that purpose because we need that expression
-twice and we cannot evaluate it twice due to possible side effects (e.g.,
-\texttt{a[++x,++x]}).  The second special variable, \texttt{\$2}, is assigned the array
-reference value of the current array, so that we can redeclare the array inside
-the loop body with fewer dimensions.  Finally, the variable \texttt{\$3} iterates
-through and initializes each element of the current dimension:
-*/
-  syntax Id ::= $1 | $2 | $3
-  macro var X[E1,E2,El]; =
-        var $1 = E1, X[$1], $2 = X;
-        for $3 = 0 to $1 - 1 do {
-          var X[E2,El];
-          $2[$3] = X;
-        }
 endkm

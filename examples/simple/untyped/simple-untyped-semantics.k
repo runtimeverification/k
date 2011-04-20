@@ -19,10 +19,8 @@ semantic rule, the rest of the configuration context being infered automatically
 configuration could arguably be automatically infered from the rules, but it turned out
 that it is very useful for language designers/semanticists to actually think of and
 design their configuration explicitly, so the current implementation of \K requires one
-to define it.
-*/
+to define it. */
 
--------------------------------------------------------------
 /*@ \subsubsection*{Values}
 We here define the values of the language that the various fragments of
 programs evaluate to.  First, integers and booleans are values.  As discussed,
@@ -30,18 +28,13 @@ arrays evaluate to special array reference values holding (1) a location from wh
 the array's elements are contiguously allocated in the store, and (2) the size
 of the array.  Functions evaluate to function values as $\lambda$-abstractions
 (we do not need to evaluate functions to closures because each function is executed
-in the fixed global environment and function definitions cannot be nested).
-*/
--------------------------------------------------------------
+in the fixed global environment and function definitions cannot be nested). */
 
   syntax Val ::= Int | Bool
                | array ( Nat , Nat )
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
-
---- the values are expressions
   syntax Exp ::= Val
 
--------------------------------------
 /*@ \subsubsection*{Computations}
 Recall that in \K, the {\em computational structures} or simply {\em computations}
 ``swallow'' the entire language syntax.  Thus, every fragment of program is a
@@ -56,13 +49,10 @@ when to stop the heating process associated to the strictness attributes.
 Below we state that all lists of values are terms of sort $\KResult$.  We use lists of
 values instead of values because, as discussed above, we want lists of expressions
 to evaluate to lists of values whenever scheduled for evaluation (by placing them on
-the top of the \textsf{k} cell).
-*/
--------------------------------------
+the top of the \textsf{k} cell). */
+
   syntax KResult ::= List{Val}
 
-
----------------------
 /*@ \subsection*{Configuration}
 The \K configuration of SIMPLE consists of a top level cell, \textsf{T},
 holding a \textsf{threads} cell, a global environment map cell \textsf{genv}
@@ -87,14 +77,15 @@ many times (SIMPLE's locks are re-entrant).  Note that all cells except for
 \textsf{k} are also initialized, in that they contain a ground term of their
 corresponding sort.  The \textsf{k} cell needs not be initialized at this level,
 because it will be initialized with the program to evaluate later. */
----------------------
 
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
                       <k color="green"> K:K </k>
-                      <fstack color="blue"> .List </fstack>
-                      <xstack color="purple"> .List </xstack>
+                      <control color="cyan">
+                        <fstack color="blue"> .List </fstack>
+                        <xstack color="purple"> .List </xstack>
+                      </control>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
                     </thread>
@@ -107,12 +98,8 @@ because it will be initialized with the program to evaluate later. */
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
-
----------------------------------------
 /*@ \section*{Declarations and Initialization}
-We start by defining the semantics of declarations (for variables, arrays and functions).
-*/
----------------------------------------
+We start by defining the semantics of declarations (for variables, arrays and functions). */
 
 /*@ \subsection*{Variable Declaration}
 The SIMPLE syntax was desugared above so that each variable is declared alone and is also
@@ -138,21 +125,26 @@ indeed, as the configuration above states, the \textsf{k} and \textsf{env} cells
 located within a \textsf{thread} cell within the \textsf{threads} cell, but one needs not mention
 these: the configuration context of the rule is automatically transformed to match the declared
 configuration structure.
-*/
+
+Note: The "trick" with using a \textsf{nextLoc} cell to generate fresh locations is
+rather low level and hopefully temporary; we indend to soon allow instead a side-condition
+of the form ``where $L$ fresh''. */
+
   context var X = [HOLE];
   rule <k> var X:Id = V; => . <_/k>
        <env> Env:Map => Env[L:Nat/X] </env>
        <store_> . => L|->V <_/store>
-       <nextLoc> L => sNat(L) </nextLoc> 
+       <nextLoc> L => L +Nat 1 </nextLoc> 
 
 /*@ \subsection*{Array Declaration}
-Even though SIMPLE allows multi-dimensional arrays, we have desugared them into uni-dimensional
-arrays.  Thus, we only need to give semantics to unidimensional arrays.  The expression
-given as array size is first evaluated and then the array is dynamically allocated the
-corresponding number of locations.  Thus, we can dynamically allocate memory in SIMPLE by
-means of array declarations.  First, we need to evaluate all the dimension of the array:
-*/
-  context var X[`[HOLE`]:Exp];
+SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we desugar them all into
+unidimensional arrays by code transformation.  This way, we will only need to give semantics
+to unidimensional arrays.  The expressions given as array dimensions are first evaluated and
+then the array is dynamically allocated the corresponding number of locations.  Thus, we can
+dynamically allocate memory in SIMPLE by means of array declarations.  First, we need to
+evaluate all the dimensions of the array: */
+
+  context var X[_,`[HOLE`]:Exp,_];
 
 /*@ The \K semantics of the uni-dimensional array declaration is somehow similar to the
 above declaration of ordinary variables.  $N+1$ locations are allocated in the store
@@ -160,51 +152,112 @@ for an array of size $N$, the additional location (chosen to be the first one al
 holding the array reference value.  The array reference value \texttt{array(L,N)} states
 that the array has size $N$ and its elements are located contiguously in the store starting
 with location $L$.  Recall that $L..L'$ is the list of locations between $L$ and $L'$
-and that $L..L'\mapsto V$ initializes each location in the list $L..L'$ to value $V$.
-*/
+and that $L..L'\mapsto V$ initializes each location in the list $L..L'$ to value $V$. */
+
   rule <k> var X[N:Nat]; => . <_/k>
        <env> Env => Env[L/X] </env>
        <store_> . => (L |-> array(L +Nat 1, N)) L +Nat 1 .. L +Nat 1 +Nat N |-> 0 <_/store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-//@ \subsection*{Function declaration}
+/*@ To desugar multi-dimensional arrays, we introduce two special unique variable
+identifiers, \texttt{\$1} and \texttt{\$2}.  The first, \texttt{\$1},
+is assigned the array reference value of the current array, so that we can redeclare
+the array inside the loop body with fewer dimensions.  The second variable,
+\texttt{\$2}, iterates through and initializes each element of the current dimension: */
+
+  syntax Id ::= $1 | $2
+  rule var X[N1,N2,Vl]; =>
+       var X[N1];
+       {
+         var $1 = X;
+         for $2 = 0 to _-_(N1,1) do   --- stupid parser
+         {
+           (var X[N2,Vl];)            --- stupid parser
+           $1[$2] = X;
+         }
+       }  [structural]
+
+/*@ Ideally, one would like to perform syntactic desugarings like above before we start
+the actual semantics.  Unfortunately, that was not possible in this case because we
+need to first evaluate the dimension expressions of the multi-dimensional array.
+Indeed, the desugaring rule above does not work if the dimensions of the declared
+array are arbitrary expressions, because they can have side effects
+(e.g., \texttt{a[++x,++x]}) and those side effects would be propagated each time the
+expression is evaluated in the desigaring code (note that both the loop condition and
+the nested multi-dimensional declaration need to evaluate expressions given originally
+array dimensions). */
+
+/*@ \subsection*{Function declaration}
+Functions are evaluated to $\lambda$-abstractions and stored like any other values
+in the store.  A binding is added into the environment for the function name to the
+location holding its body.  SIMPLE only allows function declarations at the top level
+of the program, like $C$.  More precisely, the subsequent semantics of SIMPLE only works
+well when one respects this requirement.  Indeed, the simplistic context-free parser
+generated by the grammar above is more generous than we may want, in that it allows
+function declarations anywhere any declaration is allowed, including inside arbitrary
+blocks.  However, as the rule below shows, we are {\em not} storing the declaration
+environment with the $\lambda$-abstraction value as closures do.  Instead, as seen
+shortly, we switch to the global environment whenever functions are invoked, which
+is consistent with our requirement that functions should only be declared at the top.
+Thus, if one declares local functions, then one may see unexpected behaviors (e.g.,
+when one shadows a global variable before declaring a local function).  The type
+checker of SIMPLE, also defined in \K (see examples/simple/typed/static),
+discards programs which do not respect this requirement. */
+
   rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <store_> . => L|->lambda(Xl,S) <_/store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
-/*@
- When we are done with the first pass (preprocessing), i.e., the computation
- contains only the token "execute" (see simple-untyped.k)
- and genv is empty, call main() and initialize the global environment
-*/
+/*@ When we are done with the first pass (pre-processing), the computation cell
+\textsf{k} contains only the token \texttt{execute} (see the module
+SIMPLE-UNTYPED in file \texttt{simple-untyped.k}, which adds the token \texttt{extend}
+at the end of the program) and the cell \textsf{genv} is empty.  In this case, we
+have to call \texttt{main()} and to initialize the global environment by transfering the
+contents of the local environment into it.  We prefer to do it this way, as oppossed to
+processing all the top level declarations directly within the global environment, because
+we want to avoid duplication of semantics: the syntax of the global declarations is
+identical to that of their corresponding local declarations, so the semantics of the latter
+suffices provided that we copy the local environment into the global one once we are done
+with the pre-processing.  We want this separate pre-processing step precisely because we
+want to create the global environment.  All (top-level) functions end up having their
+names bound in the global environment and, as seen below, they are executed in that same
+global environment; all these mean, in particular, that the functions ``see'' each other,
+allowing for mutual recursion, etc. */
+
   syntax K ::= execute
   rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
+/*@ \section*{Expressions}
+We next define the \K semantics of all the expression constructs, in the order in which
+their syntax was declared. */
 
--------------------
-//@ \section*{Expressions}
--------------------
+/*@ \subsection*{Variable lookup}
+When a variable $X$ is the first computational task (note the rupture of the \textsf{k} cell
+to the right), and $X$ is bound to some location $L$ in the environment (note the rupture of
+the \textsf{env} cell at both sides), and $L$ is mapped to some value $V$ in the store, then
+rewrite $X$ by $V$: */
 
-//@ \subsection*{Variable lookup}
   rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store>
 
-
 /*@ \subsection*{Variable/Array increment}
-
- This is tricky, because we want to allow all of {\tt ++x}, {\tt ++a[5]}
- Therefore, we need to extract the l-value of the expression to increment.
- To do that, we state that the expression to increment should be wrapped
- by the auxilliary ``l-value'' operation and then evaluated.
- The semantics of the auxilliary l-value operation is defined below.
- For now, all we need to know is that it takes an expression and evaluates
- to a location value, also introduced below with the auxilliary operations.
+This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
+Therefore, we need to extract the l-value of the expression to increment.
+To do that, we state that the expression to increment should be wrapped
+by the auxilliary ``l-value'' operation and then evaluated.
+The semantics of the auxilliary l-value operation is defined below.
+For now, all we need to know is that it takes an expression and evaluates
+to a location value, also introduced below with the auxilliary operations.
 */
+
   context ++([HOLE] => l-value([HOLE]))
   rule <k> ++loc(L) => I:Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store>
 
-//@ \subsection*{Arithmetic operators}
+/*@ \subsection*{Arithmetic operators}
+There is nothing special about the following rules.  They rewrite the language constructs to their
+library counterparts when their arguments become values of expected sorts: */
+
   rule I1:Int + I2:Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
@@ -222,32 +275,52 @@ and that $L..L'\mapsto V$ initializes each location in the list $L..L'$ to value
   rule not(T:Bool) => notBool(T)
 
 /*@ \subsection*{Array lookup}
+Untyped SIMPLE does not check array bounds (the dynamically typed version of it, in
+examples/simple/typed/dynamic, does check for array out of bounds).  The first rule below
+desugars multi-dimensional array access to uni-diminesional array access; recall that the
+array access operation was declared strict, so all subexpressions involved are already
+values at this stage.  The second rule rewrites the array access to a lookup operation
+at a precise location; we prefer to do it this way to avoid locking the store.
+Recall that ``--'' is an anonymous variable in \K matching any subterm (like in Prolog);
+informally, ``there is something there but we don't care what''.
+The semantics of the \texttt{lookup} operation is straighforward. */
 
-Untyped SIMPLE does not check array bounds
-We prefer to use a helper computation item, lookup, to avoid locking the store */
-  rule array(L,_)[N] => lookup(L +Int N) [structural]
   rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
-  syntax K ::= lookup Nat
-  rule <k> lookup L => V <_/k> <store_> L |-> V <_/store>
+  rule array(L,_)[N] => lookup(L +Int N) [structural]
+  syntax K ::= lookup ( Nat )
+  rule <k> lookup(L) => V <_/k> <store_> L |-> V <_/store>
 
-//@ \subsection*{Size of an array}
+/*@ \subsection*{Size of an array}
+The size of the array is stored in the array reference value, and the \texttt{sizeOf} construct
+was declared strict, so: */
+
   rule sizeOf(array(_,N)) => N
 
-//@ \subsection*{Function call} The environment and the computation are pushed onto the stack
+/*@ \subsection*{Function call}
+Function application was strict in both its arguments, so we can assume that both
+the function and its arguments are evaluated to values (the former expected to be a
+$\lambda$-abstraction).  The first rule below matches a well-formed function application
+on top of the computation and performs the following steps atomically: it switches to the
+function body followed by ``\texttt{return 0;}'' (a default return value for the case in
+which the programmer forgot to return a value); it pushes the remaining computation and the
+current environment onto the function stack (the remaining computation can thus also be
+discarded from the computation cell, because an unavoidable subsequent \texttt{return}
+statement will always recover it from the stack); it switches the current environment
+(which is being pushed on the function stack) to the global environment, which is where
+the free variables in the function body should be looked up; it binds the formal parameters
+to fresh locations in the new environment, and stores the actual arguments to those locations
+inthe store.  The second rule pops the computation and the environment from the stack when
+a \texttt{return} statement is the next computational task, passing the returned value
+to the poped computation (the popped computation was the context in which the returning
+function was called). */
+
+  syntax ListItem ::=  ( Map , K )
   rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val}) ~> K => S ~> return(0); </k>
        <fstack> . => (Env,K) <_/fstack>
        <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
        <genv> GEnv:Map </genv>
        <store_> . => N..N+Nat|Xl| |-> getList{K}(Vl) <_/store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
-***(
-  rule <k> _`(_`)(function(L),Vl:List{Val}) ~> K => S ~> return(0); </k>
-       <fstack> . => (Env,K) <_/fstack>
-       <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
-       <genv> GEnv:Map </genv>
-       <store_> L |-> lambda(Xl,S) (. => N..N+Nat|Xl| |-> getList{K}(Vl)) <_/store>
-       <nextLoc> N => N +Nat |Xl| </nextLoc>
-***)
   rule <k> return(V); ~> _ => V ~> K </k>
        <fstack> (Env,K) => . <_/fstack>
        <env> _ => Env </env>
@@ -355,7 +428,4 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
   syntax K ::= env ( Map )
   rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
   rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env> [structural]
-
-//@ \subsection*{Pairing construct} Nedeed for stacking
-  syntax ListItem ::=  ( Map , K )
 endkm
