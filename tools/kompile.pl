@@ -1825,7 +1825,12 @@ sub k2maude {
 					    (rule_attribute($1))?": $2 $1":"$1 : $2"!se;
 					  s!^mb(\s+)rule(\s+\[[^\[\]]*\]\s*:)!mb$2$1rule!s;
 				        }
-	case /^(context|configuration)/ { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/s; }
+        case /^context/                 { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/sg;
+					  s!(\[[^\[\]]*\]) : (KSentence)!
+					    (rule_attribute($1))?": $2 $1":"$1 : $2"!se;
+					  s!^mb(\s+)context(\s+\[[^\[\]]*\]\s*:)!mb$2$1context!s;
+				        }
+	case /^(configuration)/         { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/s; }
 	else                            { s/(\S)(\s*)$/$1 .$2/s; }
     }
     return $_;

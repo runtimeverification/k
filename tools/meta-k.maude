@@ -587,7 +587,7 @@ endfm
 fmod K-STRICTNESS-OPS is including META-LEVEL .
   including K-META-OPS .
   including K-META-CONFIG .
-  var S : String .  var T : Term . var Trl : TermList . var Q : Qid .
+  var S : String .  var T T' : Term . var Trl : TermList . var Q : Qid .
 
   op hole : -> Term .
   eq hole = '`[HOLE`]:K .
@@ -609,6 +609,10 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
    eq kWrap(Q, T) = mkCell(Q, kra(T,'Rest:K)) .
 --- replace the line above with the one below to get unrestricted strictness
 ---  eq kWrap(T) = T .
+
+
+  op getTopLabel : Term ~> Term .
+  eq getTopLabel('_`(_`)[T,T']) = T . 
 endfm
 
 
@@ -695,8 +699,11 @@ endfm
 fmod META-ATTRS is
   including META-MODULE .
   op metadata : AttrSet -> AttrSet .
+  op pair : String String -> Attr .
+  eq metadata(pair(Key,Value) AS) 
+   = metadata(metadata(Key + "=(" + Value + ")") AS) .
   eq metadata(metadata(S) AS) = metadata(S) AS [owise] .
-  var S : String .  var AS : AttrSet .
+  var S : String .  var AS : AttrSet . var Key Value : String .
 endfm
 
 fmod STRICT-ATTRS is

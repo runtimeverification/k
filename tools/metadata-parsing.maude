@@ -2,6 +2,7 @@ fmod PARSE-METADATA-BASIC  is
   including CONVERSION .
   including META-MODULE .
   including STRING-EXTRAS .
+  including META-ATTRS .
 
   sorts AttrStringPair .
   op {_,_} : AttrSet String -> AttrStringPair .
@@ -18,8 +19,15 @@ fmod PARSE-METADATA-BASIC  is
   eq metadataParse(op Q : TyL -> Ty [AS metadata(S) AS'] .) =  (op Q : TyL -> Ty [AS metadataParse(S) AS'] .).
   eq metadataParse(Max) = Max [owise] .
   eq metadataParse(Op) = Op [owise] .
+
+ ceq metadataStrippedParse(S)
+   = pair(substr(S, 0,N1),substr(S, N1 + 2, _-_(N2, N1 + 2))) 
+     metadataParse(substr(S, N2 + 1, length(S)))
+  if N1 := find(S, "=(",0) 
+  /\ not(find(substr(S,0,N1), " ", 0) :: Nat)
+  /\ N2 := find(S, ")", N1 + 2) .
  
-  var Trm : Term . var Sort : Sort . var AS AS' : AttrSet . var TyL : TypeList . var Ty : Type . 
+  var Trm : Term . var Sort : Sort . var AS AS' : AttrSet . var TyL : TypeList . var Ty : Type . var N1 N2 : Nat .
   var Q : Qid .  var Max : MembAx . var Op : OpDecl .
 endfm
 
@@ -64,7 +72,6 @@ fmod PARSE-METADATA-LOCATION is
  ceq getBeginningLocation(S) = if rat(substr(S,N1, _-_(N2, N1)), 10) :: Nat then rat(substr(S,N1, _-_(N2, N1)), 10)  else -1 fi
   if N1 := if find(S,":",0) :: Nat then find(S, ":", 0) + 1 else 0 fi 
   /\  N2 := if find(S, "-", N1) :: Nat then  find(S, "-", N1) else length(S) fi .
-
 endfm
 
 fmod PARSE-METADATA-SYNTAX is

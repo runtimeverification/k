@@ -52,14 +52,18 @@ fmod MAKE-K-RULES is
 
   op addReplace : Module Module KRuleSplit Substitution ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural}, Subst)
-   = addEqs((eq normalize(Flat,splitReplace(T,1)) = (normalize(Flat,splitReplace(T,2))[Subst]) [metadata(kstructural AS)] .), M) . 
+   = addEqs((eq normalize(Flat,splitReplace(T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(T,2)),Subst, AS) [metadata(kstructural AS)] .), M) . 
   eq addReplace(Flat, M, {kcrl, T, C, AS kstructural}, Subst)
-   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = (normalize(Flat,splitReplace(T,2))[Subst]) if C = trueCt [metadata(kstructural AS)] .), M) .
+   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(T,2)),Subst, AS) if C = trueCt [metadata(kstructural AS)] .), M) .
   eq addReplace(Flat, M, {krl, T, empty, AS}, Subst)
-    = addRls((rl normalize(Flat,splitReplace(T,1)) => (normalize(Flat,splitReplace(T,2))[Subst]) [metadata(kcomputational AS)] .), M) [owise] .
+    = addRls((rl normalize(Flat,splitReplace(T,1)) => handleTagSuperCooling(normalize(Flat,splitReplace(T,2)), Subst, AS) [metadata(kcomputational AS)] .), M) [owise] .
   eq addReplace(Flat, M, {kcrl, T, C, AS}, Subst) 
-    = addRls((crl normalize(Flat,splitReplace(T,1)) => (normalize(Flat, splitReplace(T,2))[Subst]) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
+    = addRls((crl normalize(Flat,splitReplace(T,1)) => handleTagSuperCooling(normalize(Flat, splitReplace(T,2)), Subst, AS) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
 
+
+  op handleTagSuperCooling : Term Substitution AttrSet -> Term .
+  eq handleTagSuperCooling(T, Subst, pair("nd","true") AS) = T[Subst] .
+  eq handleTagSuperCooling(T, Subst, AS) = T [owise] .
 
   op makeCondition : Term -> Condition .
  ceq makeCondition(O'[O[T1,T2]])

@@ -1511,7 +1511,7 @@ sub add_line_numbers
     # process rules first
     while ($used =~ /((rule|syntax|macro|context|configuration)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/sg)
     {
-        if ($2 eq "rule")
+        if ($2 eq "rule" or $2 eq "context")
         {
             my ($rule, $spaces, $attr) = ($1, $3, "");
             my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
@@ -1560,7 +1560,7 @@ sub add_line_no_mb
 	local $_ = shift;
 	my $temp = $_;
 
-	while($temp =~ /(mb\s+(configuration|context)\s.*?)(\s+\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
+	while($temp =~ /(mb\s+(configuration)\s.*?)(\s+\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
 	{
 		my ($content, $end, $line) = ($1, $3, $lines + countlines($`));
 		s/\Q$content$end\E/$content [metadata "location($file:$line)"]$end/sg;
