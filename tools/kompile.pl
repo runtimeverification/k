@@ -56,7 +56,7 @@ sub finalCleanup {
 	# clean(); # delete normal kompile files
 	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
 #	clean() if !$verbose;
-	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
+	#unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
 }
 
 
@@ -1213,23 +1213,10 @@ sub compile {
 		}
 		if ($errorSet) {
 			print "ERROR:\n";
-			
-			# fix tokens
-			$_ =~ s/\(/\(/g;
-			$_ =~ s/\)/\)/g;
-			$_ =~ s/\{/\{/g;
-			$_ =~ s/\}/\}/g;
-			$_ =~ s/\,/\,/g;
-			
-			# fix spaces
-			$_ =~ s/ \{ /\{/g;
-			$_ =~ s/ \} /\}/g;
-			$_ =~ s/ \( /\(/g;
-			$_ =~ s/ \) /\)/g;
-			$_ =~ s/ \, /\, /g;
-			print $_;
 			print "Aborting the compilation\n";
-			unlink($maude_xml_file);
+			my $unquotedOutput = unquote($maude_xml_file);
+			print "$unquotedOutput\n";
+			#unlink($maude_xml_file);
 			exit(1);
 		}
 		my $unquotedOutput = unquote($maude_xml_file);

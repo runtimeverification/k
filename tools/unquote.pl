@@ -60,7 +60,9 @@ sub getTerm {
 
 sub getNormalThing {
 	my ($op) = (@_);
-	
+	# if ($op eq "'---K-MAUDE-GENERATED-OUTPUT-BEGIN---") {
+		# goto caughtError;
+	# }
 	return unquoteTerm($op);
 }
 
@@ -144,7 +146,11 @@ sub getMeta {
 	my @arguments = ();
 	$reader->nextElement; # move to the first child
 	do {
-		push(@arguments, getResult($reader));
+		my $result = getResult($reader);
+		if ($result eq "---K-MAUDE-GENERATED-OUTPUT-BEGIN---") {
+			$reader->finish();
+		}
+		push(@arguments, $result);
 	} while ($reader->nextSiblingElement);
 	
 	if ($sort =~ m/^(Equation|OpDecl)$/) {
@@ -153,10 +159,11 @@ sub getMeta {
 			$op =~ s/\[_\]//;
 		}
 	}
-	
-	if ($sort =~ m/^(SubsortDeclSet|ImportList|OpDeclSet|MembAxSet|EquationSet|NeTypeList|RuleSet|NeNatList)$/) {
+
+	if ($sort =~ m/^(SubsortDeclSet|ImportList|OpDeclSet|MembAxSet|EquationSet|NeTypeList|RuleSet|NeNatList|NeQidList)$/) {
 		return join(' ', @arguments);
 	}
+	
 	if ($sort =~ m/^(Attr)$/ and $op =~ m/^(strat)$/) {
 		$op = "$op(_)";
 	}
