@@ -1,7 +1,5 @@
 require ../../../../k-prelude
 
-
-
 kmod VALUES is including  K + PL-ID + PL-INT + PL-STRING
 syntax Collection ::=  val ( Bag ) 
 
@@ -9,10 +7,9 @@ syntax Collection ::=  val ( Bag )
 syntax Val ::= Collection | Int | Bool | String
 // basic types
 syntax Id ::= top | int | bool | string 
-// and id's for class types, are possible values of expressions (the oclType function)
-//syntax Val ::=  Id 
 
-
+// typed values
+syntax K ::= typedElt ( Val , Id )
 
 // result of evaluation
 syntax KResult ::= Val
@@ -97,22 +94,9 @@ syntax Bool ::= isScalar ( Val )
 rule isScalar(I:Int) => true [structural]
 rule isScalar(bbb:Bool) => true [structural]
 rule isScalar(Str:String) => true [structural]
-// isEnumType defined in EXTRACTED-INFO
-rule isScalar((obj:Id):(typ:Id))  => isEnum(typ) [structural]
-
 rule isScalar(val(C1)) => false [structural]
 
 
 
-
-syntax Id ::= activityState | timeState 
-
-// enumeration types
-syntax Bool ::= isEnum ( Id )
-
-//rule isEnum ( activityState ) => true [structural]
-//rule isEnum(timeState) => true [structural]
-rule isEnum(Id:Id) => false
-if notBool( Id ==Bool activityState orBool Id ==Bool timeState)  [structural]
 
 endkm

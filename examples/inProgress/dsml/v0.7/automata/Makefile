@@ -7,7 +7,7 @@ KCOMPILE ?= ../../../../../tools/kompile.pl
  LANGUAGE_NAME = AUTOMATA
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = OCL-SYNTAX META-MODEL OCL-SEMANTICS
+LANGUAGE_MODULES = OCL-SYNTAX CONGIGURATION OCL-SEMANTICS
 
 LATEX_STYLE = bb
 

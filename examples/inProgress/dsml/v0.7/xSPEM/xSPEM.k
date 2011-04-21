@@ -1,36 +1,8 @@
-require ../ocl-semantics
 require ../conformance
 
-kmod  XSPEM  is including OCL-SEMANTICS + CONFORMANCE
+kmod  XSPEM  is including CONFORMANCE
 
 syntax Id ::= x | y 
-syntax Id ::= xSPEM
- | activityState
- | notStarted
- | inProgress
- | finished
- | timeState
- | undefined
- | tooEarly
- | ok
- | tooLate
- | process
- | time
- | activities
- | activity
- | tmin
- | tmax
- | aS
- | tS
- | linkToPredecessor
- | resources
- | workSequence
- | startedToStart
- | startedToFinish
- | finishedToStart
- | finishedToFinish
- | resource
- | available
 
 syntax Id ::= onexSPEM
  | p
@@ -45,79 +17,6 @@ syntax Bag ::= initConfig
 
  macro initConfig = 
 <T>
-<metamodel>
-	<name>
- 		xSPEM
-	</name>
-	<classes>
-		<enumeration>
-			<enumName>
-				activityState
-			</enumName>
-			BagItem(notStarted) 
-			BagItem(inProgress) 
-			BagItem(finished) 
-		</enumeration>
-		<enumeration>
-			<enumName>
-				timeState
-			</enumName>
-			BagItem(undefined) 
-			BagItem(tooEarly) 
-			BagItem(ok) 
-			BagItem(tooLate) 
-		</enumeration>
-		<class>
-			<className>
-				process
-			</className>
-			<declAttributes>
-				(activities|->activity)
-				(time|->int)
-				.Map
-			</declAttributes>
-		</class>
-		<class>
-			<className>
-				activity
-			</className>
-			<extends>
-				BagItem(process) 
-			</extends>
-			<declAttributes>
-				(tmax|->int)
-				(linkToPredecessor|->workSequence)
-				(resources|->resource)
-				(activities|->activity)
-				(aS|->activityState)
-				(time|->int)
-				(tmin|->int)
-				(tS|->timeState)
-				.Map
-			</declAttributes>
-		</class>
-		<class>
-			<className>
-				workSequence
-			</className>
-			<declAttributes>
-				(startedToStart|->activity)
-				(finishedToStart|->activity)
-				(finishedToFinish|->activity)
-				(startedToFinish|->activity)
-				.Map
-			</declAttributes>
-		</class>
-		<class>
-			<className>
-				resource
-			</className>
-			<declAttributes>
-				(available|->bool)
-				.Map
-			</declAttributes>
-		</class>
-	</classes>
 	<oclConstraints>
 		OCL(((allInstances(process).size()) = 1))
 
@@ -125,7 +24,6 @@ syntax Bag ::= initConfig
 		OCL(allInstances(activity)->forAll(x |(x#linkToPredecessor).size() <= 1))
 		.List
 	</oclConstraints>
-</metamodel>
 <models>
 	<model>
 	<modelName> onexSPEM </modelName> 
@@ -145,7 +43,7 @@ syntax Bag ::= initConfig
 				(tmin |-> typedElt(val(BagItem(5)),int))
 				(tmax |-> typedElt(val(BagItem(8)),int))
 				(aS |-> typedElt(val(BagItem(notStarted)),activityState))
-				(tS |-> typedElt(val(BagItem(undefined)),timeState))
+				(tS |-> typedElt(val(BagItem(undef)),timeState))
 				(resources |-> typedElt(val(.Bag  BagItem(r:resource)),resource))
 				(time |-> typedElt(val(BagItem(0)),int))
 				(linkToPredecessor |-> typedElt(val(.Bag  BagItem(w2:workSequence)),workSequence))
@@ -160,7 +58,7 @@ syntax Bag ::= initConfig
 				(tmin |-> typedElt(val(BagItem(5)),int))
 				(tmax |-> typedElt(val(BagItem(8)),int))
 				(aS |-> typedElt(val(BagItem(notStarted)),activityState))
-				(tS |-> typedElt(val(BagItem(undefined)),timeState))
+				(tS |-> typedElt(val(BagItem(undef)),timeState))
 				(resources |-> typedElt(val(.Bag  BagItem(r:resource)),resource))
 				(time |-> typedElt(val(BagItem(0)),int))
 				(linkToPredecessor |-> typedElt(val(.Bag  BagItem(w1:workSequence)),workSequence))

@@ -1,92 +1,61 @@
+require  values
 
-require ../../../../k-prelude
+kmod META-MODEL is including K + PL-ID + VALUES
 
-/*
-  A meta-model consists of a configuration including 
-     - the classes together with their relationships and
-     - the OCL constraints, 
-  and the set of rules describing the dynamic of the models.
-  A model is represented by a cell including instances of the classes. For each instance, we have
-  cells with the name of the instance, the name of the class owner, and the values of the attributes.
-*/
-kmod META-MODEL is including  K + PL-ID
+syntax K ::= Id
 
-  
-// for  attributes in metamodel instances
-syntax K ::= typedElt ( K , Id )
+syntax Id ::= 
+automaton
+| transition
+| state
+| initialState
+| out
+| trace
+| in
+| dest
+| label
+| active
+| orig
+| in
+| out
 
- 
+ syntax Bag ::= children ( Id )
 
-/*
-  A configuration for a metamodel consists of two cells: one for classes and one for OCL constraints.
-  The cell for classes is similar to that used in the definition of SKOOL and includes three cells: 
-  name of the class, name of the immediate ancestor (=object if it is a base class), and a cell for
-  the attribute declarations. The types of the attributes are specified as labels (meta-representation).
-  The associations between classes are represented by attributes describing the roles, where the type
-  of the attribute is chosen according to the multiplicity.
-  The cell for OCL constraints includes a list of formulas.
-*/
+rule children(automaton) => .Bag  [structural]
+rule children(transition) => .Bag  [structural]
+rule children(state) => .Bag BagItem(initialState) [structural]
+rule children(initialState) => .Bag  [structural]
 
-// always required (?)
-syntax K ::= Id 
+ syntax Map ::= attributeDecl ( Id )
 
-//syntax K ::= List{Id}
-syntax Id ::= undefined // to be extended later with class and instance names
+rule attributeDecl(automaton) => .Map
+(active |-> state)
+(trace |-> string)
+[structural]
+
+rule attributeDecl(transition) => .Map
+(dest |-> state)
+(orig |-> state)
+(label |-> string)
+[structural]
+
+rule attributeDecl(state) => .Map
+(out |-> transition)
+(in |-> transition)
+[structural]
+
+rule attributeDecl(initialState) => .Map
+(out |-> transition)
+(in |-> transition)
+[structural]
 
 
-//
-// syntax List{Id}  ::= Id | .List{Id} 
-//                    | List{Id} , List{Id} [prec 70 assoc id: .List{Id} strict hybrid]
+ syntax Bool ::= isEnum ( Id )
 
+rule isEnum(Id:Id) => false [structural]
 
+ syntax Bag ::= values ( Id )
 
-//syntax SetItem ::= class ( Id )
+rule values(Id) => .Bag [structural]
 
-  configuration <T> 
-                  <metamodel multiplicity = "?">
-                    <name> undefined </name> 
-                    <classes>
-                      <class multiplicity = "*" >
-                         <className> undefined </className> 
-                         <extends> .Bag </extends>
-                         <declAttributes> .Map  </declAttributes>
-                      </class>
-                     <enumeration multiplicity = "*" >
-                         <enumName> undefined </enumName> 
-                         .Bag
-                      </enumeration> 
-                    </classes>
-                    <oclConstraints> .List </oclConstraints>
-                  </metamodel>@latex("\\kBR")
-                 <models>
-                   <model multiplicity = "*"> 
-                      <modelName> undefined </modelName>
-                      <instance multiplicity = "*">
-                         <instName> undefined </instName>
-                         <ofClass> undefined </ofClass>
-                         <attributes> .Map </attributes>
-                      </instance>
-                   </model>
-                 </models>
-                <k color="green"> .K </k> 
-                <output> .List</output>
-                <mem> .Map </mem>
-                <nextLoc> 0 </nextLoc>
-                </T>
-
- 
 endkm
-
-
-
-
-
-
-
-/* 
-   A conformance checking traverses the model in parallel with the the configuration of the metamodel
-   and checks if the instance is defined in accord with the definition of the class and whether the
-   corresponding OCL constraints are satisfied.
-
-  ... to be done ...
-*/

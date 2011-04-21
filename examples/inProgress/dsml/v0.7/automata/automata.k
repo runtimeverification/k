@@ -1,21 +1,8 @@
-require ../ocl-semantics
 require ../conformance
 
-kmod  AUTOMATA is including OCL-SEMANTICS + CONFORMANCE
+kmod  AUTOMATA  is including CONFORMANCE
 
 syntax Id ::= x | y 
-syntax Id ::= automata
- | automaton
- | trace
- | active
- | transition
- | label
- | orig
- | dest
- | state
- | in
- | out
- | initialState
  | tr
  | st
  | tr1
@@ -34,56 +21,6 @@ syntax Bag ::= initConfig
 
  macro initConfig = 
 <T>
-<metamodel>
-	<name>
- 		automata
-	</name>
-	<classes>
-		<class>
-			<className>
-				automaton
-			</className>
-			<declAttributes>
-				(trace|->string)
-				(active|->state)
-				.Map
-			</declAttributes>
-		</class>
-		<class>
-			<className>
-				transition
-			</className>
-			<declAttributes>
-				(orig|->state)
-				(dest|->state)
-				(label|->string)
-				.Map
-			</declAttributes>
-		</class>
-		<class>
-			<className>
-				state
-			</className>
-			<declAttributes>
-				(out|->transition)
-				(in|->transition)
-				.Map
-			</declAttributes>
-		</class>
-		<class>
-			<className>
-				initialState
-			</className>
-			<extends>
-				BagItem(state) 
-			</extends>
-			<declAttributes>
-				(out|->transition)
-				(in|->transition)
-				.Map
-			</declAttributes>
-		</class>
-	</classes>
 	<oclConstraints>
 		OCL(((allInstances(initialState).size()) = 2))
 		OCL((allInstances(transition)->forAll(tr |not((tr#label) = ""))))
@@ -103,7 +40,6 @@ syntax Bag ::= initConfig
 		OCL(allInstances(initialState)->forAll(x|(x#in)->forAll(y|(y#dest) includes x)))
 		.List
 	</oclConstraints>
-</metamodel>
 <models>
 	<model>
 	<modelName> simple </modelName> 
