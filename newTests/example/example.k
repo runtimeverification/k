@@ -3,8 +3,7 @@ kmod ISSUE is
 	including K 
 	including K-CONTEXTS 
 	including K-PROPER
-	op test1 : -> KLabel
-	eq test1 = 'SomeLabel
-	op test2 : -> KLabel
-	eq test2 = 'SomeLabel
+	syntax K ::= test1 | test2
+	rule test1 => 'SomeLabel(.List{K}) [structural]
+	rule test2 => 'SomeLabel(.List{K}) [structural]
 endkm
