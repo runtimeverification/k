@@ -36,8 +36,8 @@ syn keyword maudeStatements op ops var vars kvars kvar eq ceq rl crl rule macro 
 syn keyword maudeCommands   reduce red rewrite rew parse frewrite frew search
 syn match   maudeComment    "\*\*\*.*"
 syn match   maudeComment    "---.*"
-syn region  maudeComment    start="/\*"  end="\*/" 
-syn match   maudeComment    "//.*"
+syn region  maudeComment    start="/\*"  end="\*/" contains=maudeTodo,@Spell
+syn match   maudeComment    "//.*" contains=maudeTodo,@Spell
 syn match   maudeOps        "->"
 syn match   maudeOps        "::="
 syn match   maudeOps        "|"
@@ -77,6 +77,8 @@ syn keyword maudeLiteral    true false
 syn match   maudeLiteral    "\<\(0[0-7]*\|0[xX]\x\+\|\d\+\)[lL]\=\>"
 syn match   maudeLiteral    "\(\<\d\+\.\d*\|\.\d\+\)\([eE][-+]\=\d\+\)\=[fFdD]\="
 
+syn keyword maudeTodo       contained TODO FIXME XXX NOTE BUG
+
 MaudeHiLink maudeModule     PreProc
 MaudeHiLink maudeImports    PreProc
 MaudeHiLink maudeAttrs      Comment
@@ -89,6 +91,7 @@ MaudeHiLink maudeCommands   Special
 MaudeHiLink maudeFlags      PreProc
 MaudeHiLink maudeSorts      Type
 MaudeHiLink maudeLiteral    String
+MaudeHiLink maudeTodo       Todo
 "hi def     maudeMisc       term=bold cterm=bold gui=bold
 
 delcommand MaudeHiLink
