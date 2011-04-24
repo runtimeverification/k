@@ -253,6 +253,7 @@ mod K-DESTRUCTORS is
   eq eraseKLabel(L,L'(Ks)) = L'(eraseKLabel(L,Ks)) [owise] .
   eq eraseKLabel(L, (NeKs1,,NeKs2)) = eraseKLabel(L, NeKs1),,eraseKLabel(L, NeKs2) .
   eq eraseKLabel(L,.List{K}) = .List{K} .
+  eq eraseKLabel(L,.) = . .
 endm
 
 --- K notation starts from here on
