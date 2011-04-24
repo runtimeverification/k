@@ -79,6 +79,8 @@ syn match   maudeLiteral    "\(\<\d\+\.\d*\|\.\d\+\)\([eE][-+]\=\d\+\)\=[fFdD]\=
 
 syn keyword maudeTodo       contained TODO FIXME XXX NOTE BUG
 
+syn region  maudeString     start=+"+ end=+"+ contains=@Spell
+
 MaudeHiLink maudeModule     PreProc
 MaudeHiLink maudeImports    PreProc
 MaudeHiLink maudeAttrs      Comment
@@ -92,6 +94,7 @@ MaudeHiLink maudeFlags      PreProc
 MaudeHiLink maudeSorts      Type
 MaudeHiLink maudeLiteral    String
 MaudeHiLink maudeTodo       Todo
+MaudeHiLink maudeString     String
 "hi def     maudeMisc       term=bold cterm=bold gui=bold
 
 delcommand MaudeHiLink
