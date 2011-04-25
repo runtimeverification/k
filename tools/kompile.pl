@@ -97,7 +97,7 @@ my $short_help_message =
   The following options make sense only when Latex options are used:
   -style : useful for typesetting (optional)
   -output output_file : specifies the name of the generated (latex) file
-  -preamble : includes the content of the argument file
+  -topmatter : includes the content of the argument file
 	after \\begin{document} but before first \\begin{module}
 	in the latex file
 
@@ -407,7 +407,7 @@ my $language_module_name = "";
 my $language_file_name = "";
 my $lang_name = "";
 my $output_latex_file = "";
-my $preamble = "";
+my $topmatter = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
@@ -476,8 +476,8 @@ foreach (@ARGV) {
     elsif (($style eq "?") && !/^-/) {
 	$style = $_;
     }
-    elsif (($preamble eq "?") && !/^-/) {
-	$preamble = $_;
+    elsif (($topmatter eq "?") && !/^-/) {
+	$topmatter = $_;
     }
     elsif (($output_latex_file eq "?") && !/^-/) {
 	$output_latex_file = $_;
@@ -518,8 +518,8 @@ foreach (@ARGV) {
     elsif (/^--?file$/) {
 	$language_file_name = "?";
     }
-    elsif (/^--?preamble$/) {
-	$preamble = "?";
+    elsif (/^--?topmatter$/) {
+	$topmatter = "?";
     }
     elsif (/^--?nd$/) {
        $k_all_tools .= "-nd";
@@ -608,7 +608,7 @@ $output_latex_file = $lang_name if $output_latex_file eq "";
 
 #print "MODULES:\n   PDF $pdf\n   LATEX $latex\n   PS: $ps\n   EPS: $eps\n   PNG: $png\n   CROP: $crop\n\n";
 # print "LANG: $language_module_name\nStyle:$style\nFile: $language_file_name\n\n";
-# print "Latex header $preamble\n";
+# print "Latex header $topmatter\n";
 
 my $args = "@ARGV";
 # print "ARGS: $args\n";
@@ -915,10 +915,10 @@ sub latexify {
 
 	print FILE "\n\n\\begin{document}\n\n";
 	
-	# insert $preamble here
-	if ($preamble ne "")
+	# insert $topmatter here
+	if ($topmatter ne "")
 	{
-		my $header = get_file_content($preamble);
+		my $header = get_file_content($topmatter);
 		print FILE "% begin latex header \n";
 		print FILE "$header\n";
 		print FILE "% end latex header \n\n";

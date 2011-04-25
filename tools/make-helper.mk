@@ -22,8 +22,8 @@ LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k;
 
 COMPILE_OPTIONS ?=
 
-ifdef LATEX_PREAMBLE
-  LATEX_EXTRA_ARGS += -preamble $(LATEX_PREAMBLE)
+ifdef LATEX_TOPMATTER
+  LATEX_EXTRA_ARGS += -topmatter $(LATEX_TOPMATTER)
 endif
 
 # phony tells make which targets aren't real files
