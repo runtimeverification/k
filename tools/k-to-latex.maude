@@ -225,7 +225,8 @@ var Eq : Equation .  var Eqs : EquationSet .
   op printTermL : Module NeTermList -> QidList .
   eq printTermL(U,(T,NeTl)) = printTerm(U,T) '`, printTermL(U,NeTl) .
   eq printTermL(U,T) = printTerm(U,T) .
-  ops \constant`{_`} \variable`{_`} : QidList -> Term .
+  ops \constant`{_`} : QidList -> Term . 
+  ops \variable`{_`}`{_`} : QidList QidList -> Term .
 ---(  ops \kprefix`{_`}`{_`} \ksuffix`{_`}`{_`} \kmiddle`{_`}`{_`} : Constant Term -> Term .
 ---)
   op \configCell`{_`}`{_`}`{_`} : Constant Term AttrSet -> Term .
@@ -245,7 +246,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   ceq printTerm(U,C) = \myquote{string(getName(C))} if getType(C) == 'String or getType(C) == 'Char  .
   
   eq printTerm(U,C) = \constant{getName(getOps(U),getName(C), getType(C))} [owise] .
-  eq printTerm(U,V) = \variable{ getName(V) } .
+  eq printTerm(U,V) = \variable{ getName(V) }{getType(V)} .
 
   op getName : OpDeclSet Qid Type -> Qid .
   eq getName( (op Q : nil -> Ty [AS metadata("builtin wrapper")] .) OPDS, Q, Ty) = '_ .
@@ -944,11 +945,11 @@ mod LATEX-PRINT-META is
   var T1 T2 : Term . var POS : PrintOptionSet . var Ct : Constant .
   var Q Q' : Qid . var Ql : QidList .
   
-  eq \constant{'?} = \variable{'AnyVar} .
-  eq \constant{'`[HOLE`]} = \variable{'`[HOLE`]} .
-  eq \variable{'`[HOLE`]} = \variable{'\ensuremath`{\square`}} .
-  eq \variable{'?} = \variable{'AnyVar} .
-  eq \variable{'AnyVar} = '\AnyVar .
+  eq \constant{'?} = \variable{'AnyVar}{'Universal} .
+  eq \constant{'`[HOLE`]} = \variable{'`[HOLE`]}{'Universal}.
+  eq \variable{'`[HOLE`]}{QIL} = \variable{'\ensuremath`{\square`}}{QIL} .
+  eq \variable{'?}{QIL} = \variable{'AnyVar}{QIL} .
+  eq \variable{'AnyVar}{QIL} = '\AnyVar '`{ QIL '`} .
   eq printVariable("Rho") = printVariable("\\ensuremath{\\rho}") .
   eq printVariable("Sigma") = printVariable("\\ensuremath{\\sigma}") .
 ---  eq \constant{'.empty} = '\kdot .
@@ -959,7 +960,7 @@ mod LATEX-PRINT-META is
 ---  eq \wrapping{Q} = 'wrapping printQid(Q) .
   eq \renameTo{'AnyVar} = 'renameTo .
   eq \renameTo{Q} = 'renameTo printOpQid(Q) [owise] .
-  eq \variable{Q} = '\variable '`{ printVariable(replaceAll(string(Q), ("$" |-> "\\$"))) '`} [owise] .
+  eq \variable{Q}{QIL} = '\variable '`{ printVariable(replaceAll(string(Q), ("$" |-> "\\$"))) '`} '`{ QIL '`}  [owise] .
   eq \constant{Q} = '\constant '`{ printQid(Q) '`} [owise] .
   eq printTerm(M, prefixOp(Q, T))
    = '\prefixOp '`{ printQid(Q)  '`} printTerm(M, T) .
