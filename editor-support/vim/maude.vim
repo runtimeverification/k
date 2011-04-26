@@ -31,7 +31,7 @@ command! -nargs=+ MaudeHiLink hi def link <args>
 syn keyword maudeModule     mod fmod omod endm endfm endm is kmod endkm
 syn keyword maudeImports    protecting including extending
 syn keyword maudeSortDecl   sort sorts subsort subsorts
-syn keyword maudeStatements op ops var vars kvars kvar eq ceq rl crl rule macro context configuration mb cmb KSentence syntax
+syn keyword maudeStatements op ops var vars kvars kvar eq ceq rl crl rule macro context configuration mb cmb KSentence syntax predicate
 "syn match   maudeFlags      "\[.*\]"
 syn keyword maudeCommands   reduce red rewrite rew parse frewrite frew search
 syn match   maudeComment    "\*\*\*.*"
@@ -54,6 +54,7 @@ syn match   maudeModules    "PL-INT"
 syn match   maudeModules    "PL-ID"
 
 syn keyword maudeSorts      K KResult KLabel KResultLabel List Bag Set Map
+syn match   maudeSorts      "'k-result"
 syn keyword maudeSorts      NeList NeMap NeBag NeSet
 syn keyword maudeSorts      KProper KProperLabel NeKProperList
 syn keyword maudeSorts      CellLabel ListItem BagItem SetItem MapItem
