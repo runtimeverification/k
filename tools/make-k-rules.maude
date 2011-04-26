@@ -26,6 +26,9 @@ fmod MAKE-K-RULES is
    = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas)
   if CSplit := splitKContext(metadataParse(Max)) .
   eq resolveReplace(Flat, M, Max, Mas) = resolveReplace(Flat, addMbs(Max, M), Mas) [owise] .
+  eq resolveReplace(Flat,  errorM(U:Module, Cxt:[Term], T:[Term], Str:String, AS:AttrSet), Mas)
+   = errorM(Flat, Cxt:[Term], T:[Term], Str:String, AS:AttrSet) .
+
 
 
 ---------  Hack to get rid of the potential attribute large
@@ -34,17 +37,17 @@ fmod MAKE-K-RULES is
 
 
   op addCxtReplace : Module Module KContextSplit ~> Module .
-  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
+  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(Flat, getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
 
   op addReplace : Module Module KRuleSplit ~> Module .
   eq addReplace(Flat, M,{krl,T,empty,AS kstructural})
-   = addEqs((eq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) [metadata(kstructural AS)] .), M) . 
+   = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = normalize(Flat,splitReplace(Flat, T,2)) [metadata(kstructural AS)] .), M) . 
   eq addReplace(Flat, M, {kcrl, T, C, AS kstructural})
-   = addEqs((ceq normalize(Flat,splitReplace(T,1)) = normalize(Flat,splitReplace(T,2)) if C = trueCt [metadata(kstructural AS)] .), M) .
+   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = normalize(Flat,splitReplace(Flat, T,2)) if C = trueCt [metadata(kstructural AS)] .), M) .
   eq addReplace(Flat, M, {krl, T, empty, AS})
-    = addRls((rl normalize(Flat,splitReplace(T,1)) => normalize(Flat,splitReplace(T,2)) [metadata(kcomputational AS)] .), M) [owise] .
+    = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => normalize(Flat,splitReplace(Flat, T,2)) [metadata(kcomputational AS)] .), M) [owise] .
   eq addReplace(Flat, M, {kcrl, T, C, AS}) 
-    = addRls((crl normalize(Flat,splitReplace(T,1)) => normalize(Flat, splitReplace(T,2)) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
+    = addRls((crl normalize(Flat,splitReplace(Flat, T,1)) => normalize(Flat, splitReplace(Flat, T,2)) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
 
 
   op makeCondition : Term -> Condition .

@@ -267,17 +267,29 @@ fmod META-K-RULES is including K-SORTS .
    = errorMb(Trm, Cxt, Str, AS) .
 
 
-  op splitReplace : Term Nat -> Term .
- ceq splitReplace(O[T1, T2],N) = if N == 1 then T1 else T2 fi
+  op splitReplace : Module Term Nat -> Term .
+ ceq splitReplace(M, O[T1, T2],N) = if N == 1 then checkReplaceFreeTl(M, T1) else checkReplaceFreeTl(M, T2) fi
   if O == replaceS .
-  eq splitReplace(O[Tl],N) = O[splitReplaceL(Tl,N)] [owise] .
-  eq splitReplace(Ct,N) = Ct .
-  eq splitReplace(V, N) = V .
+  eq splitReplace(M, O[Tl],N) = O[splitReplaceL(M, Tl,N)] [owise] .
+  eq splitReplace(M, Ct,N) = Ct .
+  eq splitReplace(M, V, N) = V .
 
-  op splitReplaceL : TermList Nat -> TermList .
-  eq splitReplaceL((T, Tl),N) = splitReplace(T,N), splitReplaceL(Tl,N) .
-  eq splitReplaceL(empty,N) = empty .
+  op splitReplaceL : Module TermList Nat -> TermList .
+  eq splitReplaceL(M, (T, Tl),N) = splitReplace(M, T,N), splitReplaceL(M, Tl,N) .
+  eq splitReplaceL(M, empty,N) = empty .
 
+
+  op checkReplaceFreeTl : Module TermList ~> TermList .
+  eq checkReplaceFreeTl(M, (O[Tl], Tl')) = if O == replaceS then errorT(O[Tl],mkVariable('`[`], leastSort(M,nth(Tl,0))), "K local rewrite could not be aliminated here.  maybe you have a rewrite within another rewrite?"), Tl' else $checkReplaceFreeTl(M, O[checkReplaceFreeTl(M, Tl)],Tl') fi .
+  eq checkReplaceFreeTl(M, (Ct,Tl')) = Ct, checkReplaceFreeTl(M,Tl') .
+  eq checkReplaceFreeTl(M, (V,Tl')) = V, checkReplaceFreeTl(M,Tl') .
+  eq checkReplaceFreeTl(M, empty) = empty .
+
+  op $checkReplaceFreeTl : Module Term TermList ~> TermList .
+  eq $checkReplaceFreeTl(M, T, Tl) = T, checkReplaceFreeTl(M, Tl) .
+  eq $checkReplaceFreeTl(M, T:[Term], Tl) = T:[Term], Tl [owise] .
+
+  var M : Module .  var Tl' : TermList .
 endfm
 
 fmod K-META-CONFIG is 

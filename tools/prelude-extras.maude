@@ -607,6 +607,8 @@ fmod META-MODULE-EXTRAS is
   eq addMbs(MAS, U) = setMbs(U, (MAS getMbs(U))) .
   eq addEqs(EqS, U) = setEqs(U, (EqS getEqs(U))) .
   eq addRls(RlS, U) = setRls(U, (RlS getRls(U))) .
+  eq addRls(errorRl(Cxt:[Term], T:[Term], Str:String, AS:AttrSet), U) 
+   = errorM(U, Cxt:[Term], T:[Term], Str:String, AS:AttrSet) .
   eq addImports(IL, U) = setImports(U, (getImports(U) IL)) .
 
   eq emptyFModule 
@@ -1174,7 +1176,9 @@ fmod META-LEVEL-EXTRAS is
    = sameKind(M, T, T') and-then sameKinds(M, s N, Tl, Nl, Tl', Nl') [owise] .
 
   op normalize : Module Term -> Term .
-  eq normalize(M,Trm) = getTerm(metaReduce(M, Trm)) .
+  eq normalize(M, Trm) = getTerm(metaReduce(M, Trm)) .
+  eq normalize(M, errorT(T1:[Term], T2:[Term], Str:String)) 
+   =  errorT(T1:[Term], T2:[Term], Str:String) .
 
   var Nl1 Nl2 Nl' : NatList .
 endfm
