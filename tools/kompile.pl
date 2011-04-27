@@ -340,6 +340,7 @@ my $k_nice_pdf = File::Spec->catfile($k_tools_dir, "nice-pdf.sh");
 
 my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
+my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
 my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large latex);           
 my $k_attributes_pattern = join("|",  @k_attributes);   
@@ -1583,7 +1584,9 @@ sub maudify_module {
     # print  "Stage:\n$_\n\n";
     
 # Step: Change K attributes to Maude metadata
+	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
     s!(\[(?:\\.|[^\]])*\])!make_metadata($1)!gse;
+	$_ = Unfreeze("NAMES", $_);
     # print  "Stage:\n$_\n\n";
 
 # Step: Change K statements into Maude statements
