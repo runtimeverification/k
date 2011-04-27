@@ -13,6 +13,7 @@ Library
   Exposed-modules:
     Language.K.Parser.Parsec
     Language.K.Parser.Attoparsec
+    Language.K.CellsToXml
 
   Build-depends:
     base >= 4 && < 5,
