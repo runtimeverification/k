@@ -23,4 +23,4 @@ Library
 
 Executable parsek
   Main-is:          Main.hs
-  Build-depends:    base >= 4 && < 5, parsec > 3 
+  Build-depends:    base >= 4 && < 5, parsec > 3
