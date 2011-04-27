@@ -241,17 +241,17 @@ Memory management
 *** new
   rule
     <k> new struct X => tv(struct X *, FreeInt(N)) <_/k>
-    <heap_> .Map => initObject(FreeInt(N), X, KernelCList, sNat N) <_/heap>
+    <heap_> .Map => initObject(FreeInt(N), X, KernelCList) <_/heap>
     <struct_> X |-> fieldList(KernelCList) <_/struct>
-    <counter> N => sNat N +Nat listLen(KernelCList) </counter>
+    <counter> N => sNat N </counter>
   rule
     <k> new int => tv(int *, FreeInt(N)) <_/k>
-    <heap_> .Map => FreeInt(N) |-> FreeInt(sNat N) <_/heap>
-    <counter> N => sNat sNat N </counter>
+    <heap_> .Map => FreeInt(N) |-> undef <_/heap>
+    <counter> N => sNat N </counter>
   rule
     <k> new (T *) => tv(T **, FreeInt(N)) <_/k>
-    <heap_> .Map => FreeInt(N) |-> FreeInt(sNat N) <_/heap>
-    <counter> N => sNat sNat N </counter>
+    <heap_> .Map => FreeInt(N) |-> undef <_/heap>
+    <counter> N => sNat N </counter>
 
 *** delete
   rule
@@ -325,13 +325,13 @@ Helpers
   [structural]
   rule listLen(.List{KernelC}) => 0 [structural]
 
-  syntax Map ::= initObject ( Int++ , Id , List{KernelC} , Nat )
+  syntax Map ::= initObject ( Int++ , Id , List{KernelC} )
   rule
-      initObject(I, X , (_ F;),,, KernelCList, N)
+      initObject(I, X , (_ F;),,, KernelCList)
     =>
-      I |-> FreeInt(N) : X . F initObject(I +Int 1, X , KernelCList, sNat N)
+      I |-> undef : X.F initObject(I +Int 1, X , KernelCList)
   [structural]
-  rule initObject(_, _ , .List{KernelC}, _) => .Map [structural]
+  rule initObject(_, _ , .List{KernelC}) => .Map [structural]
 
   syntax TypedValue ::= localRef ( Id )
   rule &X => localRef(X) [structural]

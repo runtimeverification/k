@@ -92,6 +92,7 @@ mod CONFIG-BUILTIN-MODULE is
   op co-skolemize : Nat Pattern -> Pattern .
 
   op unit : -> Value . 
+  op undef : -> Value . 
   op tv`(_,_`) : ExpressionType Value -> TypedValue .
   op derive : -> KLabel .
   op _`(_`)`(_`) : HeapLabel List{MathObj++} List{MathObj++} -> MapItem .
