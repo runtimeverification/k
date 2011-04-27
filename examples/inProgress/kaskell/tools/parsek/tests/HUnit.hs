@@ -1,11 +1,17 @@
+{-# LANGUAGE OverloadedStrings #-}
 -- HUnit test cases for the K parser.
--- Add more tests later.
+-- TODO: Add more tests later.
 import Control.Monad (when)
+import Data.Attoparsec.Char8 (parseOnly)
+import Data.ByteString.Char8 (ByteString, unpack)
+import Data.ByteString.Builder (toByteString)
+import Data.String (IsString)
 import System.Exit (exitFailure)
 import Test.HUnit
 import Text.Parsec (parse)
 
-import Language.K.Parser.Parsec
+import qualified Language.K.Parser.Parsec as S
+import qualified Language.K.Parser.Attoparsec as B
 
 main :: IO ()
 main = do
@@ -14,20 +20,40 @@ main = do
 
 tests :: Test
 tests = TestList
-    [ test001 `shouldParseTo` test001R
-    , test002 `shouldParseTo` test002R
-    , test003 `shouldParseTo` test003R
+    [ test001 `shouldParseToS` test001R
+    , test002 `shouldParseToS` test002R
+    , test003 `shouldParseToS` test003R
+    -- Attoparsec tests
+    , test001 `shouldParseToB` test001R
+    , test002 `shouldParseToB` test002R
+    , test003 `shouldParseToB` test003R
     ]
 
-shouldParseTo :: String -> String -> Test
-shouldParseTo input expected = TestCase (assertParse input expected)
+shouldParseToS :: String -> String -> Test
+shouldParseToS input expected = TestCase (assertParsec input expected)
 
-assertParse :: String -> String -> Assertion
-assertParse input expected = do
-    case parse kterm "" input of
+assertParsec :: String -> String -> Assertion
+assertParsec input expected = do
+    case parse S.kterm "" input of
         Left error   -> assertFailure $
             input ++ " failed to parse: " ++ show error
         Right result -> assertEqual input expected result
+
+shouldParseToB :: ByteString -> ByteString -> Test
+shouldParseToB input expected = TestCase (assertAttoparsec input expected)
+
+assertAttoparsec :: ByteString -> ByteString -> Assertion
+assertAttoparsec input expected = do
+    let sinput = unpack input
+    case parseOnly B.kterm input of
+        Left error    -> assertFailure $
+            sinput ++ " failed to parse: " ++ error
+        Right builder -> assertEqual sinput expected result
+            where result = toByteString builder
+
+test001, test001R :: (IsString a) => a
+test002, test002R :: (IsString a) => a
+test003, test003R :: (IsString a) => a
 
 test001  = "'NegApp_('Lit_('Int_(Int 42(.List{K}))))"
 test001R = "NegApp (Lit (Int (42)))"

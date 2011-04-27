@@ -10,8 +10,16 @@ Build-type:         Simple
 Cabal-version:      >=1.2
 
 Library
-  Exposed-modules:  Language.K.Parser.Parsec
-  Build-depends:    base >= 4 && < 5, parsec > 3 
+  Exposed-modules:
+    Language.K.Parser.Parsec
+    Language.K.Parser.Attoparsec
+
+  Build-depends:
+    base >= 4 && < 5,
+    parsec > 3,
+    attoparsec,
+    blaze-builder,
+    bytestring
 
 Executable parsek
   Main-is:          Main.hs
