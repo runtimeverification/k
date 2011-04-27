@@ -1581,17 +1581,22 @@ sub maudify_module {
     
 # Step: Replace remaining _ by ? (spaces were put around _ by spacify)
     s! _ ! ? !gs;
-    # print  "Stage:\n$_\n\n";
+#     print  "Stage:\n$_\n\n";
     
 # Step: Change K attributes to Maude metadata
 	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
+	s/".*?"/Freeze($&, "MPGF")/gse;
+	
     s!(\[(?:\\.|[^\]])*\])!make_metadata($1)!gse;
+#	s!(\[.*?\])!make_metadata($1)!gse;
+
 	$_ = Unfreeze("NAMES", $_);
-    # print  "Stage:\n$_\n\n";
+	$_ = Unfreeze("MPGF", $_);
+#     print  "Stage:\n$_\n\n";
 
 # Step: Change K statements into Maude statements
 	# freeze attributes first.. because sending parameters is dangerous: see ":"!!!
-    s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+    	s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
 	# also freeze rule names
 	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
 
@@ -1600,7 +1605,7 @@ sub maudify_module {
 
 	# unfreeze if there are still frozen attributes
 	$_ = Unfreeze("ATTR", $_);
-	# print  "Stage:\n$_\n\n";
+#	 print  "Stage:\n$_\n\n";
    
 # Step: add line numbers for configuration and context 
 	$_ = add_line_no_mb($file, $mno, $_);
@@ -1698,7 +1703,7 @@ sub make_ops {
 
 		# freeze strings before extracting the attributes because these can contain
 		# some [] which will cause a wrong extraction
-		$production =~ s/".*?"/Freeze($&, "MYSTRINGS")/gse;
+		$production =~ s/(?<=").*?(?=")/Freeze($&, "MYS")/gse;
 		$production =~ s/(\[[^\[\]]*\]\s*)$/
 						{
 							if (op_attribute($1)) {
@@ -1706,7 +1711,7 @@ sub make_ops {
 								"";
 							} else {$1;}
 						}/se;
-		$production = Unfreeze("MYSTRINGS", $production);
+		$production = Unfreeze("MYS", $production);
 #		print "ATTR: $attributes\n";
 
 # Removing the spaces before and after the actual production
@@ -1759,6 +1764,7 @@ sub make_ops {
 		$production =~ s/`($|$maude_special)/$1/gs;
 
 
+
 #	    print "PROD: $production\n";
 # Add a latex attribute in case $latex and there is not already a user-defined one
 		if (($latex || $pdf || $png || $ps || $eps || $crop) && ($attributes !~ /latex/)) {
@@ -1780,6 +1786,9 @@ sub make_ops {
 	$attributes =~ s/\[/[ metadata \"location($file:$absolute_line)\" / if ($attributes ne "" && $attributes !~ /metadata/);
 	# if no attributes just define a new attribute metadata and declare location
 	$attributes = "[metadata \"location($file:$absolute_line)\"]" if $attributes eq "";
+
+	# unfreeze here what was frozen in $production
+	$attributes = Unfreeze("MYS", $attributes);
 	
 
 # Generate the Maude replacement of the K syntactic construct
@@ -1866,27 +1875,50 @@ sub make_metadata {
 # Match the K specific attributes below and make them into metadata
 # Right now it assumes that no \" can appear inside the metadata string
 # Therefore, the latex attribute is expected to be outside
-    s!(ditto|large|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+"[^"]*?")|metadata\s+"([^"]*?)"!
+
+	# unfreeze ...
+	$_ = Unfreeze("MPGF", $_);
+
+	
+	# this freezes the all string, including those inside latex declarations
+	s/"(.*?)"/Freeze($&, "MTR")/gse;
+#	print "=========\nIN: $_\n=============\n";
+
+
+    s!(ditto|large|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+\w+)|metadata\s+(\w+)!
     my $out = "";
+#	print "\tMatched: $&\n\n";
 	if (defined $1) {
 	    local $_ = $1;
-            $have_k_attributes = 1;
-	    if (/^latex\s+"([^"]*?)"$/gs) 
+        $have_k_attributes = 1;
+		$_ = Unfreeze("MTR", $_);
+#		print "\tTDG: $_\n";
+		if (/^latex\s+"([^"]*?)"$/gs) 
 	    {
-#		print "Latex attribute $1\n";
-		push(@k_attributes, "latex(renameTo \\\\".get_newcommand($1).")") if ($latex || $pdf || $crop || $ps || $eps || $png);
+#			print "Latex attribute $1\n";
+			my $la = $1;
+			$la = Unfreeze("M", $la);
+			push(@k_attributes, "latex(renameTo \\\\".get_newcommand($la).")") if ($latex || $pdf || $crop || $ps || $eps || $png);
 	    }
 	    else {
-		push(@k_attributes, $_);
+#			print "Push: $_\n\n";
+			push(@k_attributes, $_);
 	    }
 	    $out = "ditto" if $1 =~ m/ditto/;
 	}
     else {
-	push(@k_attributes, $2);
+		my $data = $2;
+		$data = Unfreeze("MTR", $data);
+		$data =~ s/(^")|("$)//sg;
+#			print "Here: $data\n";
+		push(@k_attributes, $data);
       }
-    $out
-      !gse;
+		$out
+	!gse;
     
+	$_ = Unfreeze("MTR", $_);
+#	print "STILL: $_\n";
+	
 #    print "K attributes: @k_attributes\n==============\n\n";
 
     if (@k_attributes) {
