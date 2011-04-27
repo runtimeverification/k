@@ -222,6 +222,7 @@ public class DefaultTerm implements MaudeTerm
 
       // remove the empty list{k} applied to constant labels
       if (".List`{K`}".equals(subterms.get(1).getOp()))
+        if (!"freezeVar".equals(subterms.get(0).getOp()))
         return subterms.get(0);
     }
 
@@ -315,6 +316,9 @@ public class DefaultTerm implements MaudeTerm
   {
     String varNameString = var.subterms().get(0).subterms().get(0).getOp();
     String varName = varNameString.substring(1, varNameString.length() - 1);
+    // K bug, in one place the string is "List{K}", in the other  "List`{K`}"
+    if (varName.endsWith("List`{K`}"))
+      varName = varName.replace("List`{K`}", "List{K}");
     vars.put(varName, var.subterms().get(1));
   }
 
@@ -324,3 +328,4 @@ public class DefaultTerm implements MaudeTerm
   }
 
 }
+

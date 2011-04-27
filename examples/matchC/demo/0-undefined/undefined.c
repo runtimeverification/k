@@ -12,7 +12,7 @@ int main()
 {
   struct listNode *x;
   x = (struct listNode*)malloc(sizeof(struct listNode));
-  printf("%d\n", x->next-next);
+  printf("%d\n", x->next->next);
   return 0;
 }
 
