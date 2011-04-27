@@ -1086,7 +1086,7 @@ mod LATEX-PRINT-META is
    eq printConfig(M, Q[Tl]) 
     = if Q == ctor(Bag) then printConfigL(M,Tl) else printTerm(M,Q[Tl]) fi [owise print "Escaping to terms if Q is not __. Q: " Q "[" Tl "]"] .
    eq printConfig(M, C) 
-    = printTerm(M, C) if getName(C) == '. then eMetaLatexPrint(getType(C)) else nil fi [owise] .
+    = printTerm(M, C) [owise] .
    eq printConfig(M, V) = printTerm(M,V) .
 
 
