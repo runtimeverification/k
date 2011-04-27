@@ -1525,9 +1525,15 @@ sub maudify_module {
     
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
+	# freeze strings and attributes
+	s/".*?"/Freeze($&, "MYSTRINGS")/sge;
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
+
     s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
+
+	# unfreeze attributes if any
     $_ = Unfreeze("ATTRIBUTES", $_);
+	$_ = Unfreeze("MYSTRINGS", $_);
 #     print  "Stage:\n$_\n\n";
     
 # Step: Declare the on-the-fly variables
@@ -1631,7 +1637,10 @@ sub make_ops {
     my $sno = shift;
 	my $file = shift;
     local ($_) = @_;
+#	print "Frozen: $_\n";
     $_ = Unfreeze("ATTRIBUTES", $_);
+	$_ = Unfreeze("MYSTRINGS", $_);
+#	print "Unfrozen: $_\n";
 #    print "make_ops:\n$_\nat line $sno\n";
 
 # 	keep temporary four counting lines
@@ -1683,6 +1692,10 @@ sub make_ops {
 
 # Getting the operation attributes, if any
 		my $attributes = "";
+
+		# freeze strings before extracting the attributes because these can contain
+		# some [] which will cause a wrong extraction
+		$production =~ s/".*?"/Freeze($&, "MYSTRINGS")/gse;
 		$production =~ s/(\[[^\[\]]*\]\s*)$/
 						{
 							if (op_attribute($1)) {
@@ -1690,6 +1703,8 @@ sub make_ops {
 								"";
 							} else {$1;}
 						}/se;
+		$production = Unfreeze("MYSTRINGS", $production);
+#		print "ATTR: $attributes\n";
 
 # Removing the spaces before and after the actual production
 		my ($space4,$space5) = ("","");
