@@ -960,6 +960,7 @@ mod LATEX-PRINT-META is
   eq \renameTo{'AnyVar} = 'renameTo .
   eq \renameTo{Q} = 'renameTo printOpQid(Q) [owise] .
   eq \variable{Q}{QIL} = '\variable '`{ printVariable(replaceAll(string(Q), ("$" |-> "\\$"))) '`} '`{ printSortQid(QIL) '`}  [owise] .
+  eq \constant{'.}{QIL} = '\dotCt '`{ printSortQid(QIL) '`} .
   eq \constant{Q}{QIL} = '\constant '`{ printQid(Q) '`} '`{ printSortQid(QIL) '`} [owise] .
   eq printTerm(M, prefixOp(Q, T))
    = '\prefixOp '`{ printQid(Q)  '`} printTerm(M, T) .

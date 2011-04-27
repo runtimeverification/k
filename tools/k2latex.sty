@@ -159,9 +159,10 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\including}[1]{\par \text{\scshape imports}\ #1}
 \newcommand{\modulePlus}{$+$}
 \newcommand{\variable}[2]{\text{\itshape #1}\/}
+\newcommand{\dotCt}[1]{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
 \newcommand{\prefixOp}[1]{\text{\sffamily #1}}
-\newcommand{\constant}[1]{\text{\sffamily #1}}
+\newcommand{\constant}[2]{\text{\sffamily #1}}
 
 
 \newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
@@ -170,7 +171,7 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
-\newcommand{\bAnyVar}[1]{\mbox{---:#1}}
+\newcommand{\bAnyVar}[1]{\mbox{---}}
 
 
 \newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}

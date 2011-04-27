@@ -110,7 +110,7 @@ We prefer to tag their units with the corresponding sort to avoid confusion.
 -----------------------------------------------------------------------------
 --- List{Id}; the hybrid attribute says that a list of results becomes itself a result
   syntax List{Id} ::= Id
-                    | .List{Id} [latex "\kdot_{\it List\{Id\}}"]
+                    | .List{Id} [latex "\dotCt{List\{Id\}}"]
                     | List{Id} , List{Id} [strict hybrid assoc id: .List{Id} prec 70]
 
 --- List{Exp}
