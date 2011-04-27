@@ -90,7 +90,7 @@ maudeIdChar = noneOf ("`_ " ++ maudeIdSpecialChars) <|> maudeIdEscape
 maudeIdEscape :: Parser Char
 maudeIdEscape = char '`' >> oneOf maudeIdSpecialChars
 
--- | 3.1: The characters ‘{’, ‘}’, ‘(’, ‘)’, ‘[’, ‘]’ and ‘,’ are special, in
+-- | 3.1: The characters '{', '}', '(', ')', '[', ']' and ',' are special, in
 -- that they break a sequence of characters into several identifiers.
 maudeIdSpecialChars :: String
 maudeIdSpecialChars = "{}()[],"
