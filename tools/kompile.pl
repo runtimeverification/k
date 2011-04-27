@@ -1583,10 +1583,15 @@ sub maudify_module {
 # Step: Change K statements into Maude statements
 	# freeze attributes first.. because sending parameters is dangerous: see ":"!!!
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+	# also freeze rule names
+	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
+
+	# maudify
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
+
 	# unfreeze if there are still frozen attributes
 	$_ = Unfreeze("ATTR", $_);
-    # print  "Stage:\n$_\n\n";
+	# print  "Stage:\n$_\n\n";
    
 # Step: add line numbers for configuration and context 
 	$_ = add_line_no_mb($file, $mno, $_);
@@ -1799,7 +1804,11 @@ sub make_latex {
 
 sub k2maude {
     local ($_) = @_;
+#	print "TODO: $_\n";
+
     $_ = Unfreeze("ATTR", $_);
+	$_ = Unfreeze("NAMES", $_);
+
     s/macro(\s)/eq$1/gs;
     switch ($_) {
 	case /^kmod/                    { s/kmod/mod/; }
