@@ -55,7 +55,7 @@ rule  <k> consistentAttributes( (attr |->  typedElt(v,T)) Map',
 
 //for enumerations : check that the attribute is declared with same enum type; check value
 //assumption (made in metamodels) : no class and enum have same name
-rule  <k> consistentAttributes( (attr |->  typedElt(val(BagItem(x)),T)) Map',  
+rule  <k> consistentAttributes( (attr |->  typedElt(val(BagItem((x):(T))),T)) Map',  
                             (attr |-> T ) Map'')
       =>
       consistentAttributes(Map',Map'') <_/k>
@@ -113,7 +113,5 @@ rule <k> checkOCL( OCL(E) L:List) => E~>checkOCL(L) <_/k>   [structural]
 
 // comment  when "executing" a model
 rule <k> v => .K <_/k>
-//<metamodel_> <oclConstraints_> (.).List => result(v) </oclConstraints> <_/metamodel>  [structural]
-
 <output_> (.).List => result(v) </output>   [structural]
 endkm

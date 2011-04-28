@@ -11,7 +11,7 @@ syntax Id ::= undefined // to be extended later with class and instance names
   configuration <T>  
                  <oclConstraints> .List </oclConstraints>
                  <models>
-                   <model multiplicity = "*"> 
+                   <model> 
                       <modelName> undefined </modelName>
                       <instance multiplicity = "*">
                          <instName> undefined </instName>

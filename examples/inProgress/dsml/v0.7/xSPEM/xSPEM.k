@@ -12,17 +12,14 @@ syntax Id ::= onexSPEM
  | w1
  | w2
 
+syntax K ::= run
 
 syntax Bag ::= initConfig
 
  macro initConfig = 
 <T>
 	<oclConstraints>
-		OCL(((allInstances(process).size()) = 1))
-
-		OCL(allInstances(activity)->forAll(x |(x#linkToPredecessor).size() >= 1))
-		OCL(allInstances(activity)->forAll(x |(x#linkToPredecessor).size() <= 1))
-		.List
+		  .List
 	</oclConstraints>
 <models>
 	<model>
@@ -42,8 +39,8 @@ syntax Bag ::= initConfig
 			<attributes>
 				(tmin |-> typedElt(val(BagItem(5)),int))
 				(tmax |-> typedElt(val(BagItem(8)),int))
-				(aS |-> typedElt(val(BagItem(notStarted)),activityState))
-				(tS |-> typedElt(val(BagItem(undef)),timeState))
+				(aS |-> typedElt(val(BagItem(notStarted:activityState)),activityState))
+				(tS |-> typedElt(val(BagItem(undef:timeState)),timeState))
 				(resources |-> typedElt(val(.Bag  BagItem(r:resource)),resource))
 				(time |-> typedElt(val(BagItem(0)),int))
 				(linkToPredecessor |-> typedElt(val(.Bag  BagItem(w2:workSequence)),workSequence))
@@ -55,10 +52,10 @@ syntax Bag ::= initConfig
 			<instName> b </instName>
 			<ofClass> activity </ofClass>
 			<attributes>
-				(tmin |-> typedElt(val(BagItem(5)),int))
-				(tmax |-> typedElt(val(BagItem(8)),int))
-				(aS |-> typedElt(val(BagItem(notStarted)),activityState))
-				(tS |-> typedElt(val(BagItem(undef)),timeState))
+				(tmin |-> typedElt(val(BagItem(3)),int))
+				(tmax |-> typedElt(val(BagItem(7)),int))
+				(aS |-> typedElt(val(BagItem(notStarted:activityState)),activityState))
+				(tS |-> typedElt(val(BagItem(undef:timeState)),timeState))
 				(resources |-> typedElt(val(.Bag  BagItem(r:resource)),resource))
 				(time |-> typedElt(val(BagItem(0)),int))
 				(linkToPredecessor |-> typedElt(val(.Bag  BagItem(w1:workSequence)),workSequence))
@@ -98,7 +95,7 @@ syntax Bag ::= initConfig
 		</instance>
 	</model>
 </models>
-<k>  checkConformance </k>
+<k> run </k>
 <output>  .List </output>
 <mem>  .Map </mem>
 <nextLoc>  0 </nextLoc>
