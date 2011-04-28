@@ -456,15 +456,15 @@ asserted patterns
           applySubst(
             applyDefaultSubst(
               Pattern,
-              (defaultKItem("program") <- Program) ;;
-              (defaultMapItem("struct") <- StructMap) ;;
-              (defaultMapItem("fun") <- FunMap) ;;
-              ---(defaultKItem("k") <- K) ;;
+              //(defaultKItem("program") <- Program) ;;
+              //(defaultMapItem("struct") <- StructMap) ;;
+              //(defaultMapItem("fun") <- FunMap) ;;
+              //(defaultKItem("k") <- K) ;;
               (defaultMapItem("FreeEnv") <- defaultFreeEnv(keys(TEnv))) ;;
-              (defaultMapItem("env") <- defaultEnv(keys(TEnv))) ;;
-              (defaultKItem("fname") <- FName) ;;
-              (defaultMapItem("tenv") <- TEnv) ;;
-              (defaultKItem("counter") <- Counter) 
+              (defaultMapItem("env") <- defaultEnv(keys(TEnv)))
+              //(defaultKItem("fname") <- FName) ;;
+              //(defaultMapItem("tenv") <- TEnv) ;;
+              //(defaultKItem("counter") <- Counter) 
             ),
             Subst
           )

@@ -14,11 +14,11 @@ void readWrite(int n)
          <out_> epsilon => A </out>
     if n = len(A) */
 {
-  int t;
-
   /*@ inv <in> ?B <_/in> <out_> ?A </out>
           /\ n >= 0 /\ len(?B) = n /\ A = ?A @ ?B */
   while (n) {
+    int t;
+
     scanf("%d", &t);
     printf("%d ", t);
     n -= 1;
@@ -34,13 +34,14 @@ void readWriteBuffer(int n)
 {
   int i;
   struct listNode *x;
-  struct listNode *y;
 
   i = 0;
   x = 0;
   /*@ inv <in> ?B <_/in> <heap_> list(x)(?A) <_/heap>
           /\ i <= n /\ len(?B) = n - i /\ A = rev(?A) @ ?B */
   while (i < n) {
+    struct listNode *y;
+
     y = x;
     x = (struct listNode*) malloc(sizeof(struct listNode));
     scanf("%d", &(x->val));
@@ -50,6 +51,8 @@ void readWriteBuffer(int n)
 
   //@ inv <out_> ?A </out> <heap_> list(x)(?B) <_/heap> /\ A = rev(?A @ ?B)
   while (x) {
+    struct listNode *y;
+
     y = x->next;
     printf("%d ",x->val);
     free(x);

@@ -87,6 +87,7 @@ mod MATHEMATICAL-INT-BUILTIN-MODULE is
 
   op fact : Int++ -> Int++ .
   eq fact(0) = 1 .
- ceq fact(I:Int) = I:Int *Int fact(-1 +Int I:Int) if I:Int >Int 0 .
+ --- ceq fact(I:Int) = I:Int *Int fact(-1 +Int I:Int) if I:Int >Int 0 .
+ ceq fact(I) = I *Int fact(-1 +Int I) if I >Int 0 .
 endm
 

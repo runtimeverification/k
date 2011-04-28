@@ -272,20 +272,6 @@ kmod FOL is including MATCHC-SEMANTICS
 ---  [structural]
 
 
-***(
---- Step 1.6 : Eliminate the return value
-  rule
-    <task_>
-      <taskType> Hypothesis </taskType>
-      <form> Phi1 /\ returns(V1) => Phi1 </form>
-    <_/task>
-    <task_>
-      <taskType> Conclusion </taskType>
-      <form> Phi2 /\ returns(V2) => Phi2 /\ V1 === V2 </form>
-    <_/task>
-  [structural]
-***)
-
 --- Step 2: Get rid of variable equalities and propagate them via substitution
 --- Step 2.1 : Get rid of unbound variable equalities while executing the
 --- configuration. Since the running configuration becomes the hypothesis,

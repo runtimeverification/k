@@ -76,6 +76,7 @@ public class AnnotPreK {
   public static String annotToMaudeString(String annotString) {
     try {
       // Parsing
+      Table.annotLocalVariables.clear();
       InputStream is = new ByteArrayInputStream(annotString.getBytes("UTF-8"));
       ANTLRInputStream input = new ANTLRInputStream(is);
       annotLexer lexer = new annotLexer(input);
@@ -89,6 +90,15 @@ public class AnnotPreK {
 
       completeConfig(tree);
       splitConfig(tree);
+
+      if (annotParser.annotType == annotParser.RULE) {
+        Table.annotLogicalVariables.clear();
+        getLogicalVariables((CommonTree) tree.getChild(0));
+      }
+
+      nodes = new CommonTreeNodeStream(tree);
+      annotPass5 pass5 = new annotPass5(nodes);
+      tree = (CommonTree) pass5.downup(tree);
 
       nodes = new CommonTreeNodeStream(tree);
       annotPass1 pass1 = new annotPass1(nodes);
@@ -166,6 +176,77 @@ public class AnnotPreK {
     return var;
   }
 
+  private static CommonTree makeVarId(String varName) {
+    Token t;
+
+    t = new CommonToken(annotParser.ID);
+    CommonTree idWrapperNode = new CommonTree(t);
+    t = new CommonToken(annotParser.STRING_LITERAL, "\"" + varName + "\"");
+    idWrapperNode.addChild(new CommonTree(t));
+
+    return idWrapperNode;
+  }
+
+  private static CommonTree makeEnvVar(String varName, boolean isFree) {
+    Token t;
+    t = new CommonToken(annotParser.MAPSTO);
+    CommonTree mapstoNode = new CommonTree(t);
+
+    t = new CommonToken(annotParser.APP, "_`(_`)");
+    CommonTree leftAppNode = new CommonTree(t);
+    mapstoNode.addChild(leftAppNode);
+    t = new CommonToken(annotParser.BUILTIN, "Id_");
+    CommonTree idBuiltinNode = new CommonTree(t);
+    leftAppNode.addChild(idBuiltinNode);
+    idBuiltinNode.addChild(makeVarId(varName));
+    t = new CommonToken(annotParser.K_LIST, ".List`{K`}");
+    leftAppNode.addChild(new CommonTree(t));
+
+    t = new CommonToken(annotParser.APP, "_`(_`)");
+    CommonTree rightAppNode = new CommonTree(t);
+    mapstoNode.addChild(rightAppNode);
+    t = new CommonToken(annotParser.BUILTIN, "List`{MathObj++`}_");
+    CommonTree objBuiltinNode = new CommonTree(t);
+    rightAppNode.addChild(objBuiltinNode);
+    if (!"__return__".equals(varName))
+    {
+      if (isFree)
+        t = new CommonToken(annotParser.IDENTIFIER, "FreeVar");
+      else
+        t = new CommonToken(annotParser.IDENTIFIER, "?var");
+      CommonTree valNode = new CommonTree(t);
+      objBuiltinNode.addChild(valNode);
+      valNode.addChild(makeVarId(varName));
+    }
+    else
+    {
+      if(annotParser.retTree == null)
+      {
+        t = new CommonToken(annotParser.VALUE, "unit");
+        objBuiltinNode.addChild(new CommonTree(t));
+      }
+      else
+        objBuiltinNode.addChild(annotParser.retTree);
+    }
+    t = new CommonToken(annotParser.K_LIST, ".List`{K`}");
+    rightAppNode.addChild(new CommonTree(t));
+
+    return mapstoNode;
+  }
+
+  private static void addEnvVars(CommonTree map, boolean isFree, boolean isRet)
+  {
+    Token t;
+
+    for (String varName : Table.annotLocalVariables)
+    {
+      map.addChild(makeEnvVar(varName, isFree));
+    }
+
+    if (isRet)
+      map.addChild(makeEnvVar("__return__", isFree));
+  }
+
   private static void addCell(CommonTree cellBag, Table.Cell cell) {
     Token t;
     String cellLabel = cell.label;
@@ -178,49 +259,42 @@ public class AnnotPreK {
     newCell.addChild(new CommonTree(t));
 
     t = new CommonToken(annotParser.BAG, "BAG");
-    CommonTree newBag = new CommonTree(t);
-    newCell.addChild(newBag);
+    CommonTree container = new CommonTree(t);
+    newCell.addChild(container);
 
-    if (cell.cells.isEmpty())
-      newBag.addChild(newVar(cellLabel, cell.sort + "Item", cell.isDefault));
+    if ("env".equals(cellLabel)) {
+      switch (annotParser.annotType) {
+        case annotParser.RULE:
+          t = new CommonToken(annotParser.REW);
+          CommonTree rewNode = new CommonTree(t);
+          container.addChild(rewNode);
+          t = new CommonToken(annotParser.MAP);
+          CommonTree leftMapNode = new CommonTree(t);
+          rewNode.addChild(leftMapNode);
+          t = new CommonToken(annotParser.MAP);
+          CommonTree rightMapNode = new CommonTree(t);
+          rewNode.addChild(rightMapNode);
 
-    if ("env".equals(cellLabel) && "Free".equals(prefix)) {
-      t = new CommonToken(annotParser.REW);
-      CommonTree rewNode = new CommonTree(t);
-      newBag.addChild(rewNode);
-      rewNode.addChild(new CommonTree(new CommonToken(annotParser.MAP)));
-      t = new CommonToken(annotParser.MAPSTO);
-      CommonTree mapstoNode = new CommonTree(t);
-      rewNode.addChild(mapstoNode);
-      t = new CommonToken(annotParser.APP, "_`(_`)");
-      CommonTree leftAppNode = new CommonTree(t);
-      mapstoNode.addChild(leftAppNode);
-      t = new CommonToken(annotParser.BUILTIN, "Id_");
-      CommonTree idBuiltinNode = new CommonTree(t);
-      leftAppNode.addChild(idBuiltinNode);
-      t = new CommonToken(annotParser.ID, "id`(_`)");
-      CommonTree idWrapperNode = new CommonTree(t);
-      idBuiltinNode.addChild(idWrapperNode);
-      t = new CommonToken(annotParser.STRING_LITERAL, "\"__return__\"");
-      idWrapperNode.addChild(new CommonTree(t));
-      t = new CommonToken(annotParser.K_LIST, ".List`{K`}");
-      leftAppNode.addChild(new CommonTree(t));
-      t = new CommonToken(annotParser.APP, "_`(_`)");
-      CommonTree rightAppNode = new CommonTree(t);
-      mapstoNode.addChild(rightAppNode);
-      t = new CommonToken(annotParser.BUILTIN, "List`{MathObj++`}_");
-      CommonTree objBuiltinNode = new CommonTree(t);
-      rightAppNode.addChild(objBuiltinNode);
-      if(annotParser.retTree != null)
-        objBuiltinNode.addChild(annotParser.retTree);
-      else
-      {
-        t = new CommonToken(annotParser.VALUE, "unit");
-        objBuiltinNode.addChild(new CommonTree(t));
+          addEnvVars(leftMapNode, true, false);
+          addEnvVars(rightMapNode, false, true);
+
+          String oldPrefix = prefix;
+          prefix = "?";
+          rightMapNode.addChild(newVar("env", "MapItem", false));
+          prefix = oldPrefix;
+          break;
+        case annotParser.INVARIANT:
+        case annotParser.ASSERT:
+          addEnvVars(container, false, false);
+          container.addChild(newVar("env", "MapItem", false));
+          break;
+        default:
+          container.addChild(newVar("env", "MapItem", true));
+          break;
       }
-      t = new CommonToken(annotParser.K_LIST, ".List`{K`}");
-      rightAppNode.addChild(new CommonTree(t));
     }
+    else if (cell.cells.isEmpty())
+      container.addChild(newVar(cellLabel, cell.sort + "Item", cell.isDefault));
 
     t = new CommonToken(annotParser.IDENTIFIER, cellLabel);
     newCell.addChild(new CommonTree(t));
@@ -344,10 +418,7 @@ public class AnnotPreK {
         }
       }
 
-      //Iterator<Table.Cell> cellIterator = cells.iterator();
-      //while (cellIterator.hasNext()) {
       for (Table.Cell cell : cells) {
-        //Table.Cell cell = cellIterator.next();
         addCell(cellBag, cell);
       }
 
@@ -412,6 +483,18 @@ public class AnnotPreK {
 
     return rewNode;
   }
+
+
+  private static void getLogicalVariables(CommonTree tree) {
+    if (tree.getType() == annotParser.LOGICAL_VARIABLE)
+      Table.annotLogicalVariables.add(tree.getText());
+
+    for (int i = 0; i < tree.getChildCount(); i++) {
+      getLogicalVariables((CommonTree) tree.getChild(i));
+    }
+  }
+
+
 
   public static void main (String[] args) {
     annotToMaudeString("//@ assert <heap> . </heap>");

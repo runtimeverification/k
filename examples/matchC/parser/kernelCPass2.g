@@ -10,10 +10,10 @@ options {
 
 
 bottomup
-  : typed_value
+  : identifier
   ;
 
-typed_value
+identifier
   : IDENTIFIER -> ^(ID STRING_LITERAL["\"" + $IDENTIFIER.text + "\""])
   ;
 

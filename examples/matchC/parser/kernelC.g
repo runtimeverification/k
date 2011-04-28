@@ -92,6 +92,11 @@ tokens {
 }
 
 
+@members {
+  static boolean isVar = true;
+}
+
+
 //
 // Declarations
 //
@@ -107,7 +112,7 @@ definition_declaration
   ;
 
 function_definition
-  : type IDENTIFIER { Table.funIdentifiers.add($IDENTIFIER.text); }
+  : type IDENTIFIER
     '(' parameter_list ')'
     ( ANNOTATION compound_statement
       -> ^(ANNOT_FUN_DEF type IDENTIFIER parameter_list
@@ -125,7 +130,7 @@ declaration
   ;
 
 function_declaration
-  : type IDENTIFIER { Table.funIdentifiers.add($IDENTIFIER.text); }
+  : type IDENTIFIER
     '(' parameter_list ')'
     ( ANNOTATION SEP
       -> ^(ANNOT_FUN_DECL type IDENTIFIER parameter_list ANNOTATION)
@@ -139,12 +144,14 @@ struct_declaration
   ;
 
 struct_field_list
-  : declaration+
+  : { isVar = false; } declaration+ { isVar = true; }
     -> ^(LIST declaration+)
   ;
 
 variable_declaration
-  : type IDENTIFIER SEP -> ^(VAR_DECL type IDENTIFIER)
+  : type IDENTIFIER SEP
+    { if(isVar) Table.kernelCVariables.add($IDENTIFIER.text); }
+    -> ^(VAR_DECL type IDENTIFIER)
   ;
 
 parameter_list
@@ -154,7 +161,8 @@ parameter_list
   ;
 
 parameter
-  : type IDENTIFIER -> ^(PARAM type IDENTIFIER)
+  : type IDENTIFIER { Table.kernelCVariables.add($IDENTIFIER.text); }
+    -> ^(PARAM type IDENTIFIER)
   ;
 
 type
@@ -354,7 +362,7 @@ arithmetic_constant
 //
 // Tokens
 //
-IDENTIFIER : LETTER (LETTER | DIGIT)* { Table.progIdentifiers.add($text); } ;
+IDENTIFIER : LETTER (LETTER | DIGIT)* { Table.kernelCIdentifiers.add($text); } ;
   
 fragment
 LETTER

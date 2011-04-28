@@ -8,7 +8,7 @@ int sum(int n)
   int s;
 
   s = 0;
-  //@ invariant s = ((old(n) - n) * (old(n) + n + 1)) / 2 /\ n >= 0
+  //@ inv s = ((old(n) - n) * (old(n) + n + 1)) / 2 /\ n >= 0
   while (n > 0)
   {
     s += n;

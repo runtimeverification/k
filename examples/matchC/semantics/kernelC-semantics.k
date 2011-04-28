@@ -14,11 +14,14 @@ kmod KERNELC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX
   kvar KernelCList ParamList ArgList: List{KernelC}
   kvar Map Env TEnv : Map
   kvar Stack : List
+  kvar Set : Set
 
   syntax K ::= List{KernelC}
   syntax K ::= runMain
   syntax K ::= fieldList ( List{KernelC} )
+  syntax TypedValue ::= localRef ( Id )
   syntax TypedValue ::= newObject
+  syntax K ::= restoreEnv ( Set )
   syntax ListItem ::= callContext ( K , K , Map , Map )
 
 
@@ -93,10 +96,17 @@ Variable declaration
 Statements
 ***)
   rule TV ; => .K [structural]
-  rule <k> block(KernelC) => KernelC <_/k> [structural]
+  rule
+    <k> block(KernelC) => KernelC ~> restoreEnv(keys(Env)) <_/k>
+    <env> Env </env>
+  [structural print "\n===push===\n" Env "\n===push===\n"]
+  rule
+    <k> restoreEnv(Set) => .K <_/k>
+    <env> Env => filterMap(Env, Set) </env>
+    <tenv> TEnv => filterMap(TEnv, Set) </tenv>
+  [structural print "\n===pop===\n" Env "\n" Set "\n===pop===\n"]
   rule if(tv(_, NzI)) S1 else S2 => S1 [structural]
   rule if(tv(_, 0)) S1 else S2 => S2 [structural]
-  *** ERROR: kompile.pl does not put spaces around k in <_/k>
   rule <k> while (E) S => if (E) block(S ~~> while(E) S) else nop <_/ k >
   [structural]
 
@@ -148,6 +158,7 @@ Expressions
       X |-> fieldList(KernelCList,,, (T F;),,, _)
     <_/struct>
   [structural]
+  rule &X => localRef(X) [structural]
 
 *** dereferencing
   rule
@@ -333,7 +344,13 @@ Helpers
   [structural]
   rule initObject(_, _ , .List{KernelC}) => .Map [structural]
 
-  syntax TypedValue ::= localRef ( Id )
-  rule &X => localRef(X) [structural]
+  syntax Map ::= filterMap ( Map , Set )
+  --- rule filterMap(Map, Set) => Map [structural]
+  rule
+      filterMap((K1 |-> K2 Map), (SetItem(K1) Set))
+    =>
+      K1 |-> K2 filterMap(Map, Set)
+  [structural]
+  rule filterMap(Map, .Set) => .Map [structural]
 endkm
 

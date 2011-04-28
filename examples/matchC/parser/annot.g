@@ -105,13 +105,17 @@ tokens {
 
   ID;
   VALUE;
+
+  LOGICAL_VARIABLE;
+  PROGRAM_IDENTIFIER;
+  PROGRAM_VARIABLE;
 }
 
 
 @members {
+  static int annotType;
   static CommonTree retTree;
 }
-
 
 @lexer::members {
   boolean isVar = false;
@@ -120,6 +124,7 @@ tokens {
 
 annot_text
 @init {
+  annotType = -1;
   retTree = null;
 }
   : BEGIN_ANNOT! annot END_ANNOT!
@@ -134,11 +139,12 @@ annot
 
 function_annot
   : rule
-    ( condition { Table.genVarString(""); }
+    ( condition
       -> ^(CONDITIONAL_RULE rule condition)
-    | ( REQUIRES | ENSURES )=> requires ensures { Table.genVarString(""); }
+    | ( REQUIRES | ENSURES )=> requires ensures
       -> ^(SPECIFICATION rule requires ensures)
     )
+    { Table.genVarString(""); annotType = RULE; }
   ;
 
 rule
@@ -167,9 +173,9 @@ line_annot
   ;
 
 line_keyword
-  : ASSUME
-  | ASSERT
-  | INVARIANT
+  : ASSUME { annotType = ASSUME; }
+  | ASSERT { annotType = ASSERT; }
+  | INVARIANT { annotType = INVARIANT; }
   ;
 
 tool_annot
@@ -247,7 +253,7 @@ options { backtrack = true; }
   : points_to
   | maps_to
   | heap_pattern
-  | IDENTIFIER
+  | logical_variable
   | map_constructor
   //| infix_map
   | LPAREN! map RPAREN!
@@ -267,9 +273,9 @@ points_to
   ;
 
 mem_type
-  : IDENTIFIER
-    ( -> IDENTIFIER
-    | DOT mem_type -> ^(FIELD IDENTIFIER mem_type)
+  : program_identifier
+    ( -> program_identifier
+    | DOT mem_type -> ^(FIELD program_identifier mem_type)
     )
   ;
 
@@ -311,7 +317,7 @@ bag_unit
   ;
 
 bag_item
-  : IDENTIFIER
+  : logical_variable
   | bag_constructor
   | cell
   // | infix_bag
@@ -349,7 +355,7 @@ list_unit
   ;
 
 list_item
-  : IDENTIFIER
+  : logical_variable
   | list_constructor
   // | infix_list
   | LPAREN! list RPAREN!
@@ -506,12 +512,29 @@ unary_operator
   ;
 
 primary_term
-  : IDENTIFIER
+  : primary_identifier
   | PRIME_IDENTIFIER
-  | constant
   | constructor
   | infix_term
+  | constant
   | LPAREN! k RPAREN!
+  ;
+
+constructor
+  : '[' mathematical_object_list ']' -> ^(SEQ mathematical_object_list)
+  | '{' mathematical_object_list '}' -> ^(MSET mathematical_object_list)
+  ;
+
+infix_term
+  //: IDENTIFIER^ LPAREN! term_list RPAREN!
+  : IDENTIFIER LPAREN mathematical_object (COMMA mathematical_object)* RPAREN
+    -> ^(IDENTIFIER mathematical_object+)
+  ;
+
+primary_identifier
+  : logical_variable
+  | program_identifier
+  | program_variable
   ;
 
 constant
@@ -528,17 +551,22 @@ constant
   // | FLOATING_POINT_LITERAL
   ;
 
-constructor
-  : '[' mathematical_object_list ']' -> ^(SEQ mathematical_object_list)
-  | '{' mathematical_object_list '}' -> ^(MSET mathematical_object_list)
+
+logical_variable
+  : { !Table.kernelCIdentifiers.contains(input.LT(1).getText()) }?
+    IDENTIFIER -> LOGICAL_VARIABLE[$IDENTIFIER]
   ;
 
-infix_term
-  //: IDENTIFIER^ LPAREN! term_list RPAREN!
-  : IDENTIFIER LPAREN mathematical_object (COMMA mathematical_object)* RPAREN
-    -> ^(IDENTIFIER mathematical_object+)
+program_identifier
+  : { Table.kernelCIdentifiers.contains(input.LT(1).getText())
+      && !Table.kernelCVariables.contains(input.LT(1).getText()) }?
+    IDENTIFIER -> PROGRAM_IDENTIFIER[$IDENTIFIER]
   ;
 
+program_variable
+  : { Table.kernelCVariables.contains(input.LT(1).getText()) }?
+    IDENTIFIER -> PROGRAM_VARIABLE[$IDENTIFIER]
+  ;
 
 /*
  * Tokens
@@ -569,7 +597,14 @@ PRIME_IDENTIFIER
  
 IDENTIFIER
   : ('?' | '!')? LETTER (LETTER | DIGIT)*
-    { if (!isVar) Table.annotIdentifiers.add($text); }
+    {
+      if (!isVar)
+      {
+        Table.annotIdentifiers.add($text);
+        if (Table.kernelCVariables.contains($text))
+          Table.annotLocalVariables.add($text);
+      }
+    }
   ;
   
 fragment

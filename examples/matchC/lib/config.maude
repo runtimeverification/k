@@ -32,6 +32,7 @@ mod CONFIG-BUILTIN-MODULE is
   op co-skolem : Nat FreeBagItem -> FEBagItem .
   op co-skolem : Nat FreeListItem -> FEListItem .
   op ?var : Id -> PEInt .
+  op !var : Id -> FEInt .
   op FreeVar : Id -> FreeInt .
   op ?BagItem : String -> PEBagItem .
   op !BagItem : String -> FEBagItem .

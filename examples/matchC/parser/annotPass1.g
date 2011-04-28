@@ -7,30 +7,34 @@ options {
   filter = true;
 }
 
+
 bottomup
-  : progam_identifier
+  : program_identifier
+  | program_variable
+  | old_program_variable
   ;
 
-progam_identifier
+program_identifier
+  : id=PROGRAM_IDENTIFIERS
+    -> ^(ID STRING_LITERAL["\"" + $id.text + "\""])
+  ;
+
+program_variable
 options { backtrack = true; }
-  : id=IDENTIFIER
-    { !Table.varString.startsWith("!")
-      && Table.progIdentifiers.contains($id.text)
-      && !Table.funIdentifiers.contains($id.text) }?
+  : id=PROGRAM_VARIABLE { !Table.varString.startsWith("!") }?
     -> ^(IDENTIFIER["FreeVar"]
          ^(ID["id"] STRING_LITERAL["\"" + $id.text + "\""]))
-  | id=IDENTIFIER
-    { Table.varString.startsWith("!")
-      && Table.progIdentifiers.contains($id.text)
-      && !Table.funIdentifiers.contains($id.text) }?
+  | id=PROGRAM_VARIABLE { Table.varString.startsWith("!") }?
     -> ^(IDENTIFIER["?var"] ^(ID["id"] STRING_LITERAL["\"" + $id.text + "\""]))
-  | id=IDENTIFIER
-    { Table.funIdentifiers.contains($id.text) }?
-    -> ^(ID["id"] STRING_LITERAL["\"" + $id.text + "\""])
+  ;
+
+/*
   | id=PRIME_IDENTIFIER
     -> ^(IDENTIFIER["?var"]
          ^(ID["id"] STRING_LITERAL["\"" + $id.text.replace("\'", "") + "\""]))
-  | ^(old_wrapper=IDENTIFIER ^(var_wrapper=IDENTIFIER c=.))
+*/
+old_program_variable
+  : ^(old_wrapper=IDENTIFIER ^(var_wrapper=IDENTIFIER c=.))
     { "old".equals($old_wrapper.text) && "?var".equals($var_wrapper.text) }?
     -> ^(IDENTIFIER["FreeVar"] $c)
   ;

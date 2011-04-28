@@ -14,6 +14,7 @@ public class Table {
     public static final String MAP  = "Map";
   }
 
+
   static class Cell {
     public static final int NONE = 0;
     public static final int LEFT = 1;
@@ -61,21 +62,25 @@ public class Table {
     }
   }
 
+
   public static final Map<String, Cell>
     labelToCell = new HashMap<String, Cell>();
 
-  public static final Set<String> progIdentifiers = new HashSet<String>();
-  public static final Set<String> funIdentifiers = new HashSet<String>();
+  public static final Set<String> kernelCIdentifiers = new HashSet<String>();
+  public static final Set<String> kernelCVariables = new HashSet<String>();
   public static final Set<String> annotIdentifiers = new HashSet<String>();
-  public static final Set<String> ruleLeftIdentifiers = new HashSet<String>();
+  public static final Set<String> annotLeftIdentifiers = new HashSet<String>();
+  public static final Set<String> annotLocalVariables = new HashSet<String>();
+  public static final Set<String> annotLogicalVariables = new HashSet<String>();
 
   public static final Map<String, String>
     varRootToSort = new HashMap<String, String>();
   public static final Map<String, String>
     varToSort = new HashMap<String, String>();
 
+
   public static void makeVars() {
-    for (String id : progIdentifiers) {
+    for (String id : kernelCVariables) {
       if (!varRootToSort.containsKey(id))
         varRootToSort.put(id, "Int");
     }
@@ -98,8 +103,8 @@ public class Table {
     }
 
     for (String id : annotIdentifiers) {
-      if (!progIdentifiers.contains(id) && !varToSort.containsKey(id)) {
-        String rootId = id.replaceAll("[0-9]*\\z", "").replaceAll("\\?|!", "");
+      if (!kernelCIdentifiers.contains(id) && !varToSort.containsKey(id)) {
+        String rootId = id.replaceAll("^(\\?|!)?_*|_*[0-9]*$", "");
         if (varRootToSort.containsKey(rootId)) {
           String rootSort = varRootToSort.get(rootId);
 
