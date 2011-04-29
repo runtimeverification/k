@@ -2328,8 +2328,8 @@ sub add_subsorts
 # exit kompilation (the action is dedicated, the rest of the actions are ignored)
 sub compile_program
 {
-	if ($pgm eq "0" or $pmod eq "0") {
-		print "To compile a single program you need to specify at least -pgm and -pmod\n";
+	if ($pgm eq "0" or $cmod eq "0") {
+		print "To compile a single program you need to specify at least -pgm and -cmod\n";
 		exit();
 	}
 	if ($pmod eq "0") {
