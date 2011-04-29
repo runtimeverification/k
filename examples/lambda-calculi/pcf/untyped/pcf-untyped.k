@@ -1,4 +1,4 @@
-load ../../../../k-prelude.maude
+load ../../../../k-prelude
 
 kmod PCF-UNTYPED-SYNTAX is including PL-ID + K-LATEX
 
