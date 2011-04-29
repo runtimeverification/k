@@ -30,7 +30,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
       <nextLoc> 0 </nextLoc>
     </T>
 
-  kvar L N M : Nat
+  kvar L N : Nat
   kvar E E' : Exp
   kvar X : Id
   kvar V : Val
