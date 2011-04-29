@@ -14,7 +14,7 @@ LATEX_STYLE = bb
 MAIN_FILE = pcf-untyped
 
 # this is a space-separated list of basename maude files to run
-TESTS =
+TESTS = pcf-untyped-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk
