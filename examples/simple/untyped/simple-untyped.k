@@ -7,25 +7,63 @@ in simple-untyped-semantics
 --- Main module, including everything ---
 -----------------------------------------
 
+kmod SIMPLE-UNTYPED is
+  including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS
 
-kmod SIMPLE-UNTYPED-INPUT-TEST is including SIMPLE-UNTYPED-SEMANTICS
+/*@ This module puts everything together, namely syntax, semantics and
+programs (note that it includes the SIMPLE semantics, which includes
+the syntax, and the SIMPLE programs).  In the current implementation
+of the \K framework, the programs in the module SIMPLE-UNTYPED-PROGRAMS
+are given through macros of the form ``\texttt{macro pgm = ...}'',
+where \texttt{pgm} is a syntactic constant of sort \textit{Stmts} and
+where the dots stand for the actual program.  For example,
+\begin{verbatim}
+  macro pFactorial =
+       var x;
 
-  syntax List ::= input 
+       function f(y) {
+         var t=1;
+         for i = 1 to y do
+	   t = t*i;
+	 return t;
+       }
 
-  macro input = 
-List(7,,3,,
-654,,656,,54,,456,,436345647643567,,354654364356,,4357643576,,
-654,,656,,54,,456,,436345647643567,,354654364356,,4357643576,,
-654,,656,,54,,456,,436345647643567,,354654364356,,4357643576
-)
+       function main() {
+         x = 5;
+	 write(f(f(x)));
+       }
+\end{verbatim}
+Recall from the overview paper mentioned in the preamble of this language
+definition that, in theory, the syntax plays no role in \K; that is,
+the application of rules takes into account only the structure of the
+configuration, and not how the particular current program or fragment
+of program is parsed.  That means, in particular, that the distinction
+between concrete/abstract syntax and its representation as computational
+structure terms of sort $K$ is irrelevant in theory in \K.  However, it
+becomes quite relevant in implementations of \K tools, because one would
+like to use the defined language syntax as much as possible in the semantics,
+as we did in all the \K rules above, which means that one needs to combine a
+parser for the defined language with a parser for \K in order to parse the
+semantic rules, which is a highly non-trivial engineering endeavour.
+In our current implementation of \K, the internal representation of any
 
-endkm
 
-kmod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS + SIMPLE-UNTYPED-INPUT-TEST 
-  syntax Bag ::= run ( KLabel )
+
+The two configuration generator operations below are meant to help
+users initialize the configuration when executing programs, and not to
+be regarded as part of the SIMPLE semantics.
+
+
+ */
+
+  syntax Bag ::= run ( KLabel ) | run ( KLabel , List )
   macro run(PgmName:KLabel) =
           <T_>
              <k> PgmName(.List{K}) ~> execute </k>
-             <in> input </in>
+          <_/T>
+  macro run(PgmName,Input) =
+          <T_>
+             <k> PgmName(.List{K}) ~> execute </k>
+             <in> Input:List </in>
           <_/T>
 endkm

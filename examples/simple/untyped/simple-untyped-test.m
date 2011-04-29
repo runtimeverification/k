@@ -1,8 +1,17 @@
 load simple-untyped-compiled
+
 rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
-rew run('pArrays) .
+rew run('pArrays, 
+	    (ListItem(Int(6)(.List{K})) ListItem(Int(3)(.List{K}))
+	     ListItem(Int(1)(.List{K})) ListItem(Int(2)(.List{K})) ListItem(Int(3)(.List{K}))
+	     ListItem(Int(4)(.List{K})) ListItem(Int(5)(.List{K})) ListItem(Int(6)(.List{K}))
+	     ListItem(Int(7)(.List{K})) ListItem(Int(8)(.List{K})) ListItem(Int(9)(.List{K}))
+	     ListItem(Int(9)(.List{K})) ListItem(Int(8)(.List{K})) ListItem(Int(7)(.List{K}))
+	     ListItem(Int(6)(.List{K})) ListItem(Int(5)(.List{K})) ListItem(Int(4)(.List{K}))
+	     ListItem(Int(3)(.List{K})) ListItem(Int(2)(.List{K})) ListItem(Int(1)(.List{K}))
+	    )) .
 rew run('pExceptions1) .
 rew run('pExceptions2) .
 rew run('pExceptions3) .
