@@ -128,6 +128,7 @@ kmod PCF-UNTYPED-PROGRAMS is including PCF-UNTYPED-SEMANTICS
 
   macro fastfactorial = mu f . lambda x . cond (zero? x) 1 (fastmultiply x (f (pred x)))
   macro pgm019 = fastfactorial 0
+  macro pgm020 = fastfactorial 1
   macro pgm021 = fastfactorial 6
   macro pgm022 = fastfactorial 10
   macro pgm023 = fastfactorial 100
