@@ -1,4 +1,8 @@
-kmod GRAPH-COLORING-CONFIG is including GRAPH-COLORING-PROGRAMS
+kmod GRAPH-COLORING-CONFIG is including K + PL-INT + PL-STRING + PL-NAT
+  syntax GraphType ::= gtCards | gtColors | gtcg | gtng
+  syntax K ::= GraphType | servers( Nat ) | setup | start | run
+  syntax K ::= Int | String | Nat
+
   configuration
     <top>
       <k>.K</k>

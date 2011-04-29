@@ -1,14 +1,25 @@
+in ../../k/k-prelude
+in dot
+in graph-coloring-programs
 in graph-coloring-config
 
-kmod GRAPH-COLORING-PARSING is including GRAPH-COLORING-CONFIG + PL-CONVERSION
-  // syntax Bag ::= 
-  syntax K ::= GraphType | servers( Nat ) | setup | start | run
-  syntax GraphType ::= gtCards | gtColors | gtcg | gtng
-  syntax CellLabel ::= name | from | to | color | length | cost | type | todo
+kmod GRAPH-COLORING-PARSING is including GRAPH-COLORING-CONFIG + GRAPH-COLORING-PROGRAMS + PL-CONVERSION
+  // Running programs
+  syntax Bag ::= [[ K ]] | e1 | e2 | e3 | e4 | e
+  rule [[ P:K ]] => <top_> <k>P ~> servers(2) ~> setup ~> start ~> run</k> <_/top>
+  macro e1 = [[ pcolors ]]
+  macro e2 = [[ pcards ]]
+  macro e3 = [[ pcg ]]
+  macro e4 = [[ png ]]
+  macro e = [[ full ]]
 
+  // Parsing
+  syntax CellLabel ::= name | from | to | color | length | cost | type
   kvar G S S1 S2 N1 N2 N : K
   kvar L C : String
   kvar M : Bag
+  kvar Ds : Set
+  kvar SS : Nat
   
   rule Seq(S1, S2) => S1 ~> S2 [structural]
   rule None() => . [structural]
@@ -75,7 +86,6 @@ kmod GRAPH-COLORING-PARSING is including GRAPH-COLORING-CONFIG + PL-CONVERSION
          <ge-to> N2 </ge-to>
          <ge-color> S </ge-color>
          <ge-length> String2Int(C) </ge-length>
-         < todo > .K </ todo >
        <_/g-edge>)
   rule <dependencies_> SetItem(N) => . <_/dependencies>
        <g-edge_>
@@ -102,4 +112,19 @@ kmod GRAPH-COLORING-PARSING is including GRAPH-COLORING-CONFIG + PL-CONVERSION
          <ne-cost> String2Int(C) </ne-cost>
          <ne-servers> .Bag </ne-servers>
        <_/n-edge>)
+
+  // Generate servers at the master node
+  rule <k> servers(sNat SS) => servers(SS) <_/k>
+       <master> N </master>
+       <n-name> N </n-name>
+       <n-server-names_> . => SetItem(Int2String(SS)) <_/n-server-names>
+  rule <k> servers(0) => . <_/k>
+
+  // Cleanup
+  rule <k> setup <_/k>
+       <dependencies> Ds => .Set </dependencies>
+       <graphType> G => .K </graphType>
+       <meta> _ => .Bag </meta>
+       if Ds =/=Bool .Set
+
 endkm
