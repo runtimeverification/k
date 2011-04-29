@@ -13,7 +13,7 @@ LATEX_STYLE = bb
 #this is the basename of the main file
 MAIN_FILE = pcf-untyped
 
-# this is a space-separated list of basename maude files to run
+# this is a space-separated list of maude files to run
 TESTS = pcf-untyped-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
