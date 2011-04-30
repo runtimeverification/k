@@ -920,7 +920,7 @@ sub latexify {
 	if ($topmatter ne "")
 	{
 		my $header = get_file_content($topmatter);
-		print FILE "% begin latex header \n";
+	        print FILE "% begin latex header \n";
 		print FILE "$header\n";
 		print FILE "% end latex header \n\n";
 	}
@@ -942,8 +942,21 @@ sub latexify {
 	}
 	else
 	{  
-	    rename("thistemp.tex", "$lang_name-$format.tex");
-	    print "Latex version written in $output_file_name\n" if $verbose;
+	    # rename("thistemp.tex", "$lang_name-$format.tex");
+
+	    # this is an ugly fix. Perl inserts sometimes whitespaces before
+	    # each line
+	    
+	    my $elim_spaces = get_file_content("thistemp.tex");
+#	    unlink("thistemp.tex");
+	    open F,">", "$lang_name-$format.tex" or die "Cannot create $lang_name-$format.tex\n";
+	    $elim_spaces =~ s/\n\s*\\begin{verbatim}/\n\\begin{verbatim}/sgmi;
+	    $elim_spaces =~ s/\n\s*\\end{verbatim}/\n\\end{verbatim}/sgmi;
+	    print F $elim_spaces;;
+	    close F;
+	    
+	    
+	    print "Latex version written in $lang_name-$format.tex\n" if $verbose;
 	}
     }
     else {
