@@ -17,6 +17,7 @@ of the \K framework, the programs in the module SIMPLE-UNTYPED-PROGRAMS
 are given through macros of the form ``\texttt{macro pgm = ...}'',
 where \texttt{pgm} is a syntactic constant of sort \textit{Stmts} and
 where the dots stand for the actual program.  For example,
+\begin{minipage}{20ex}
 \begin{verbatim}
   macro pFactorial =
        var x;
@@ -33,19 +34,25 @@ where the dots stand for the actual program.  For example,
 	 write(f(f(x)));
        }
 \end{verbatim}
-Recall from the overview paper mentioned in the preamble of this language
-definition that, in theory, the syntax plays no role in \K; that is,
+\end{minipage}
+As explained in the overview paper mentioned in the preamble of this
+language definition, the syntax plays no special role in \K; that is,
 the application of rules takes into account only the structure of the
 configuration, and not how the particular current program or fragment
 of program is parsed.  That means, in particular, that the distinction
 between concrete/abstract syntax and its representation as computational
-structure terms of sort $K$ is irrelevant in theory in \K.  However, it
+structure terms of sort $K$ is irrelevant in the theory of \K.  However, it
 becomes quite relevant in implementations of \K tools, because one would
 like to use the defined language syntax as much as possible in the semantics,
 as we did in all the \K rules above, which means that one needs to combine a
 parser for the defined language with a parser for \K in order to parse the
 semantic rules, which is a highly non-trivial engineering endeavour.
-In our current implementation of \K, the internal representation of any
+In our current implementation of \K, the internal representation of the
+terms over the user-defined syntax
+
+syntactic 
+
+sort language syntax terms is 
 
 
 

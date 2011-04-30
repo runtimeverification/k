@@ -1,4 +1,5 @@
-kmod PFACTORIAL is
+
+kmod PFACTORIAL is including SYMPLE-UNTYPED-SYNTAX .
   macro pFactorial =
        var x;
 
