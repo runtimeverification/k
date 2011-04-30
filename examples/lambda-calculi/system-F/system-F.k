@@ -157,12 +157,10 @@ kmod SYSTEM-F is including SYSTEM-F-PROGRAMS
   program and puts it in the \K cell to execute.
   */
   syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"]
-  // syntax Bag ::= $ Type $
   macro [[KL:KLabel]] = getResult <T_> <k> KL(.List{K}) </k> <_/T>
+
   syntax Bag ::= getResult Bag
-  // syntax Builtins ::= ResultType
-  // subsort ResultType < Builtins
-  syntax CellLabel ::= resultCell
-  rule getResult (<T>... <k> T:Type ...</k> ...</T>) => <resultCell> T:Type </resultCell>  [structural]
+  syntax CellLabel ::= result
+  macro getResult <T_> <k> T:Type </k> <_/T> = <result> T:Type </result>
   
 endkm
