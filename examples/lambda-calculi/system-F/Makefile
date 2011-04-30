@@ -14,8 +14,8 @@ LATEX_TOPMATTER = topmatter.tex
 #this is the basename of the main file
 MAIN_FILE = system-F
 
-# this is a space-separated list of basename maude files to run
-TESTS =
+# this is a space-separated list of maude files to run
+TESTS = system-F-test.m
 
 TOOL_DIR = $(dir $(KCOMPILE))
 include $(TOOL_DIR)make-helper.mk
