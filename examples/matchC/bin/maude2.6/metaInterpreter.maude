@@ -1,0 +1,76 @@
+***(
+
+    This file is part of the Maude 2 interpreter.
+
+    Copyright 2009 SRI International, Menlo Park, CA 94025, USA.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+)
+
+***
+***	Maude meta-interpreters.
+***	Version 2.5.
+***
+
+mod META-INTERPRETER is
+  protecting META-LEVEL .
+  including CONFIGURATION .
+
+  op interpreter : Nat -> Oid .
+
+  op createInterpreter : Oid Oid -> Msg [ctor msg format (b o)] .
+  op createdInterpreter : Oid Oid Oid -> Msg [ctor msg format (m o)] .
+
+  op insertModule : Oid Oid Module -> Msg [ctor msg format (b o)] .
+  op insertedModule : Oid Oid -> Msg [ctor msg format (m o)] .
+
+  op showModule : Oid Oid Qid Bool -> Msg [ctor msg format (b o)] .
+  op showingModule : Oid Oid Module -> Msg [ctor msg format (m o)] .
+
+  op reduceTerm : Oid Oid Qid Term -> Msg [ctor msg format (b o)] .
+  op reducedTerm : Oid Oid Nat Term Sort -> Msg [ctor msg format (m o)] .
+
+  op rewriteTerm : Oid Oid Bound Qid Term -> Msg [ctor msg format (b o)] .
+  op rewroteTerm : Oid Oid Nat Term Sort -> Msg [ctor msg format (m o)] .
+
+  op frewriteTerm : Oid Oid Bound Nat Qid Term -> Msg [ctor msg format (b o)] .
+  op frewroteTerm : Oid Oid Nat Term Sort -> Msg [ctor msg format (m o)] .
+
+  op quit : Oid Oid -> Msg [ctor msg format (b o)] .
+  op bye : Oid Oid -> Msg [ctor msg format (m o)] .
+
+  op interpreterManager : -> Oid
+        [special (
+           id-hook InterpreterManagerSymbol
+           op-hook succSymbol			(s_ : Nat ~> NzNat)
+           op-hook interpreterOidSymbol		(interpreter : Nat ~> Oid)
+           op-hook createInterpreterMsg		(createInterpreter : Oid Oid ~> Msg)
+           op-hook createdInterpreterMsg	(createdInterpreter : Oid Oid Oid ~> Msg)
+           op-hook insertModuleMsg		(insertModule : Oid Oid Module ~> Msg)
+           op-hook insertedModuleMsg		(insertedModule : Oid Oid ~> Msg)
+           op-hook showModuleMsg		(showModule : Oid Oid Qid Bool ~> Msg)
+           op-hook showingModuleMsg		(showingModule : Oid Oid Module ~> Msg)
+           op-hook reduceTermMsg		(reduceTerm : Oid Oid Qid Term ~> Msg)
+           op-hook reducedTermMsg		(reducedTerm : Oid Oid Nat Term Sort ~> Msg)
+           op-hook rewriteTermMsg		(rewriteTerm : Oid Oid Bound Qid Term ~> Msg)
+           op-hook rewroteTermMsg		(rewroteTerm : Oid Oid Nat Term Sort ~> Msg)
+           op-hook frewriteTermMsg		(frewriteTerm : Oid Oid Bound Nat Qid Term ~> Msg)
+           op-hook frewroteTermMsg		(frewroteTerm : Oid Oid Nat Term Sort ~> Msg)
+           op-hook quitMsg			(quit : Oid Oid ~> Msg)
+           op-hook byeMsg			(bye : Oid Oid ~> Msg)
+           op-hook shareWith			(metaReduce : Module Term ~> ResultPair)
+        )] .
+endm

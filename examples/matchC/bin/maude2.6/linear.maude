@@ -1,0 +1,99 @@
+***(
+
+    This file is part of the Maude 2 interpreter.
+
+    Copyright 1997-2006 SRI International, Menlo Park, CA 94025, USA.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+)
+
+***
+***	Maude Diophantine solver.
+***	Version 2.3.
+***
+
+fmod VECTOR{X :: DEFAULT} is
+  protecting (ARRAY * (sort Entry{X,Y} to Entry{Y},
+                       sort Array{X,Y} to Vector{Y})
+             ){Nat, X} .
+endfm
+
+fmod INDEX-PAIR is
+  protecting NAT .
+  sort IndexPair .
+  op _,_ : Nat Nat -> IndexPair [ctor] .
+endfm
+
+view IndexPair from TRIV to INDEX-PAIR is
+  sort Elt to IndexPair .
+endv
+
+fmod MATRIX{X :: DEFAULT} is
+  protecting (ARRAY * (sort Entry{X,Y} to Entry{Y},
+                       sort Array{X,Y} to Matrix{Y})
+             ){IndexPair, X} .
+endfm
+
+fmod INT-VECTOR is
+  protecting VECTOR{Int0} * (sort Entry{Int0} to IntVectorEntry,
+                             sort Vector{Int0} to IntVector,
+                             op empty to zeroVector) .
+endfm
+
+view IntVector from TRIV to INT-VECTOR is
+  sort Elt to IntVector .
+endv
+
+fmod INT-MATRIX is
+  protecting MATRIX{Int0} * (sort Entry{Int0} to IntMatrixEntry,
+                             sort Matrix{Int0} to IntMatrix,
+		              op empty to zeroMatrix) .
+endfm
+
+fmod DIOPHANTINE is
+  protecting STRING .
+  protecting INT-MATRIX .
+  protecting SET{IntVector} * (sort NeSet{IntVector} to NeIntVectorSet,
+                               sort Set{IntVector} to IntVectorSet,
+		               op _,_ : Set{IntVector} Set{IntVector} -> Set{IntVector} to
+                               (_,_) [prec 121 format (d d ni d)]) .
+
+  sort IntVectorSetPair .
+  op [_|_] : IntVectorSet IntVectorSet -> IntVectorSetPair [format (d n++i n ni n-- d)] .
+
+  op natSystemSolve : IntMatrix IntVector String -> IntVectorSetPair
+     [special (
+        id-hook MatrixOpSymbol		(natSystemSolve)
+        op-hook succSymbol		(s_ : Nat ~> NzNat)
+        op-hook minusSymbol		(-_ : NzNat ~> Int)
+        op-hook stringSymbol		(<Strings> : ~> Char)
+
+        op-hook emptyVectorSymbol	(zeroVector : ~> IntVector)
+        op-hook vectorEntrySymbol	(_|->_ : Nat Int ~> IntVectorEntry)
+        op-hook vectorSymbol		(_;_ : IntVector IntVector ~> IntVector)
+
+        op-hook emptyMatrixSymbol	(zeroMatrix : ~> IntMatrix)
+        op-hook matrixEntrySymbol	(_|->_ : IndexPair Int ~> IntMatrixEntry)
+        op-hook matrixSymbol		(_;_ : IntMatrix IntMatrix ~> IntMatrix)
+        op-hook indexPairSymbol		(_,_ : Nat Nat ~> IndexPair)
+
+        op-hook emptyVectorSetSymbol	(empty : ~> IntVectorSet)
+        op-hook vectorSetSymbol		(_,_ : IntVectorSet IntVectorSet ~> IntVectorSet)
+        op-hook vectorSetPairSymbol	([_|_] : IntVectorSet IntVectorSet ~> IntVectorSetPair))] .
+
+  op natSystemSolve : IntMatrix IntVector -> IntVectorSetPair .
+  eq natSystemSolve(M:IntMatrix, V:IntVector) = natSystemSolve(M:IntMatrix, V:IntVector, "") .
+endfm
