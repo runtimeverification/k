@@ -16,9 +16,9 @@ the syntax, and the SIMPLE programs).  In the current implementation
 of the \K framework, the programs in the module SIMPLE-UNTYPED-PROGRAMS
 are given through macros of the form ``\texttt{macro pgm = ...}'',
 where \texttt{pgm} is a syntactic constant of sort \textit{Stmts} and
-where the dots stand for the actual program.  For example,
-\begin{minipage}{20ex}
-\begin{verbatim}
+where the dots stand for the actual program.  For example,*/
+
+/*@\begin{Verbatim}{frame=single}
   macro pFactorial =
        var x;
 
@@ -33,9 +33,9 @@ where the dots stand for the actual program.  For example,
          x = 5;
 	 write(f(f(x)));
        }
-\end{verbatim}
-\end{minipage}
-As explained in the overview paper mentioned in the preamble of this
+\end{Verbatim}*/
+
+/*@As explained in the overview paper mentioned in the preamble of this
 language definition, the syntax plays no special role in \K; that is,
 the application of rules takes into account only the structure of the
 configuration, and not how the particular current program or fragment

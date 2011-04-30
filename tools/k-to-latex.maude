@@ -1096,7 +1096,7 @@ mod LATEX-PRINT-META is
   eq printConfigL(M, T) = printConfig(M,T) [owise] .
   var MAS' : MembAxSet .
   eq eMetaLatexPrint(M, latex(Str) Prints) 
-   = ('\n '\n '\latexComment '`{ tokenize(stripSpaces(Str)) '`{ '`} '`} ) eMetaLatexPrint(M, Prints) .
+   = ('\n '\n '\begin '`{ 'latexComment '`} '\n tokenize(stripSpaces(Str)) '\n '\end '`{ 'latexComment '`} ) eMetaLatexPrint(M, Prints) .
   eq eMetaLatexPrint(M, config(T) Prints)
     = ('\n '\kconfig '`{ printConfig(M, T) 
                    '`} 

@@ -9,6 +9,8 @@
 \usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
 \usepackage{tikz}
 \usepackage{hyperref}
+\usepackage{fancyvrb,fancybox} 
+
 
 \usetikzlibrary{shapes.misc}
 \usetikzlibrary{positioning}
@@ -27,6 +29,20 @@
 %\fancyfoot[L]{\underline{\footnotesize\tt \hspace{-2em}Page \thepage{}}}
 %\renewcommand{\headrulewidth}{0pt} 
 %\renewcommand{\footrulewidth}{0pt}
+
+
+\newenvironment{latexComment}{%
+  \begin{Sbox}
+    \begin{minipage}{7in}
+}{%
+    \end{minipage}
+  \end{Sbox}
+      \medskip
+\begin{tikzpicture}
+\node[rounded corners,draw,fill=black!10,text width=7in]{\TheSbox};
+\end{tikzpicture}
+}
+
 
 \newcommand{\K}{\mbox{$\mathbb{K}$}\xspace}
 \newcommand{\KLabel}{\textit{KLabel}\xspace}
@@ -183,10 +199,10 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\mdot}{\cdot}
 \newcommand{\mAnyVar}[1]{\_}
 
-\newcommand{\latexComment}[1]{
-\medskip
-\begin{tikzpicture}
-\node[rounded corners,draw,fill=black!10,text width=7in]{#1};
-\end{tikzpicture}
+%\newcommand{\latexComment}[1]{
 %\medskip
-}
+%\begin{tikzpicture}
+%\node[rounded corners,draw,fill=black!10,text width=7in]{#1};
+%\end{tikzpicture}
+%\medskip
+%}

@@ -16,7 +16,7 @@
 
 \vspace*{3ex}
 
-\latexComment{
+\begin{latexComment}
 \section*{Abstract}
 This is the \K semantic definition of the untyped SIMPLE language.
 SIMPLE is intended to be a pedagogical language that captures the
@@ -28,7 +28,7 @@ nested and each program must have one function called \texttt{main},
 which is invoked when the program is executed.  To make it more
 interesting and to highlight some of \K's strengths, SIMPLE includes
 the following features in addition to the conventional imperative
-expression and statements constructs:
+expression and statement constructs:
 \begin{itemize}
 \item Multidimensional arrays and array references.  An array evaluates
 to an array reference, which is a special value holding a location where
@@ -52,7 +52,7 @@ an exception can be caught and bound).
 \item Concurrency via dynamic thread creation/termination and
 synchronization.  One can spawn a thread to execute any statement.
 The spawned thread shares with its parent its environment at creation time.
-Threads can be synchronized via re-entriant locks can be acquired and released,
+Threads can be synchronized via re-entriant locks which can be acquired and released,
 as well as through rendezvouz.
 \end{itemize}
 Like in many other languages, some of SIMPLE's constructs can be
@@ -73,6 +73,6 @@ Grigore Ro\c su, Traian-Florin \c Serb\u anu\c t\u a:
 Journal of Logic and Algebraic Programming, 79(6): 397-434 (2010)
 \end{quote}
 }
-}
+\end{latexComment}
 
 \vspace*{3ex}
