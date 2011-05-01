@@ -121,21 +121,56 @@ endkm
 
 
 kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX 
-/*@
-This module desugars some of SIMPLE's language constructs into core ones.
+/*@ This module desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.
 All desugaring macros below are straighforward, except, perhaps, the one
 for multi-dimensional arrays.  For the semantics, we can therefore assume
 that all functions take a list of arguments, that each conditional has both
 branches, that there are only \texttt{while} loops, and that each variable is
-declared alone and is initialized.
-*/
+declared alone and is initialized. */
+
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
   macro function F:Id() S = function F(.List{Id}) S
   macro E() = E(.List{Id})
-  macro var E1,E2,El:List{Exp}; = var E1; var E2,El;
+  macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X; = var X=0;
 
+/*@ The syntax of SIMPLE is now complete.  It is a good idea to test the
+syntax by parsing and desugaring a large variety of programs.  There are different
+ways to do that.  One approach, which we often follow, is to introduce a new module
+that defines many programs as macros.  For example, in our case here we introduce a
+module of the form
+\begin{verbatim}kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
+  syntax Id ::= f | i | t | x | y | ...
+  syntax Stmts ::= pFactorial | ...
+
+  macro pFactorial =
+        var x;
+
+        function f(y) {
+          var t=1;
+          for i = 1 to y do
+            t = t*i;
+          return t;
+        }
+
+        function main() {
+          x = 5;
+          write(f(f(x)));
+        }
+
+  ...
+endkm\end{verbatim}
+*/
+/*@
+The dots ``\texttt{...}'' stand for other elements of the same type; we only added one
+program in the above, together with all the syntactic constants that it needs.  In this
+approach, unfortunately, the user has to declare all these by hand as above.  If one has
+an external parser for the defined language, which is frequently the case when one defines
+languages with more complex syntax that \K's parser is not powerful enough to handle alone,
+then one can easily modify the external parser to generate all the necessary syntactic
+constants.  Anyway, here we define them by hand.
+*/
 endkm

@@ -626,4 +626,5 @@ results (at the begining of the SIMPLE semantics module). */
   syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
 
+/*@ The semantics of SIMPLE is now complete. */
 endkm
