@@ -66,7 +66,7 @@ def compile(in_filename, out_filename):
 
 
 def verify(prog_filename, log=None):
-    args = ['-no-banner', '-no-wrap', '-no-ansi-color']
+    args = ['-no-prelude', '-no-banner', '-no-wrap', '-no-ansi-color']
     if log != None:
         args += ['-xml-log=' + log]
     args += [prog_filename]
