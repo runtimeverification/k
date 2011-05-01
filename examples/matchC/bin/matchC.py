@@ -19,6 +19,7 @@ ml_lib_dir = os.path.abspath(os.path.join(ml_bin_dir, '..', 'lib'))
 antlr_jar = os.path.join(ml_lib_dir, 'antlrworks-1.4.jar')
 ml_parser_jar = os.path.join(ml_bin_dir, 'matchCparser.jar')
 ml_parser_main_class = 'KernelCPreK'
+maude_dir = os.path.join(ml_bin_dir, 'maude2.6')
 ml_prelude = os.path.join(ml_lib_dir, 'ml-prelude.maude')
 ml_semantics_compiled = os.path.join(ml_bin_dir, ml_lang + '-compiled.maude')
 ml_utils = os.path.join(ml_lib_dir, 'utils.maude')
@@ -69,7 +70,11 @@ def verify(prog_filename, log=None):
     if log != None:
         args += ['-xml-log=' + log]
     args += [prog_filename]
-    retcode = run_maude.run(args, filter=output_filter, epilog='DONE!')
+    retcode = run_maude.run(
+                  args,
+                  path=maude_dir,
+                  filter=output_filter,
+                  epilog='DONE!')
     if retcode != 0: sys.exit(retcode)
 
     if verified:

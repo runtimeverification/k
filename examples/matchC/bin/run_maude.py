@@ -24,8 +24,13 @@ def default_filter(line):
     return
 
 
-def run(args, filter=default_filter, epilog=''):
-    cmd = ['maude'] + args
+def run(args, path=None, filter=default_filter, epilog=''):
+    if path != None:
+
+        cmd = [os.path.abspath(os.path.join(path, 'maude'))]
+    else:
+        cmd = ['bin/maude2.6/maude']
+    cmd += args
 
     print("Loading Maude .......", end=' ')
     start = time.time()
