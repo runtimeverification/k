@@ -1,0 +1,249 @@
+module Cink-v0
+
+exports
+
+%%module Identifiers
+
+sorts Identifier Keyword
+
+
+lexical syntax
+
+"auto"			|
+"break"			|
+"case"			|
+"char"			|
+"const"			|
+"continue"		|
+"default"		|
+"do"			|
+"double"		|
+"else"			|
+"enum"			|
+"extern"		|
+"float"			|
+"for"			|
+"goto"			|
+"if"			|
+"int"			|
+"long"		  	|
+"register"		|
+"return"		|
+"short"			|
+"signed"		|
+"sizeof"		|
+"static"		|
+"struct"		|
+"switch"		|
+"typedef"		|
+"union"			|
+"unsigned"		|
+"void"			|
+"volatile"		|
+"while"			-> Keyword
+
+Keyword -> Identifier {reject}
+
+lexical syntax
+
+[a-zA-Z\_][a-zA-Z\_0-9]* -> Identifier {cons("Id")}
+
+lexical restrictions
+
+Identifier -/- [0-9a-zA-Z\_] 
+
+
+%% constants
+
+sorts IntegerConstant StringConstant
+
+lexical syntax
+[0-9]+ [uUlL]*		        	-> IntegerConstant {cons("Int")}
+
+
+[L]? [\"] ( ([\\]~[]) | ~[\\\"] )* [\"]	-> StringConstant
+
+lexical restrictions
+
+IntegerConstant 	-/- [0-9]
+
+%% declarators
+
+sorts Expression Parameters 
+
+context-free syntax
+
+Identifier 				-> Declarator {cons("Dtor")}
+"(" Declarator ")" 			-> Declarator {bracket, cons("Dtor")}
+Declarator "(" Parameters? ")" 		-> Declarator {cons("Dtor")}
+
+context-free priorities
+{
+Declarator "(" Parameters? ")" 		-> Declarator
+Declarator "[" Expression? "]" 	-> Declarator
+}
+
+%% expressions
+
+context-free syntax
+
+Identifier 				-> Expression {cons("Var")}
+IntegerConstant				-> Expression {cons("Const")}
+StringConstant 				-> Expression {cons("Const")}
+"(" Expression ")" 			-> Expression {bracket}
+
+context-free restrictions
+"&" -/- [\&]
+"-" -/- [\-]
+"+" -/- [\+]
+
+context-free priorities
+{
+Expression "++" 		           -> Expression {cons("PostInc")}
+Expression "--" 		           -> Expression {cons("PostDec")}
+} <0>
+> 
+{
+"++" Expression 		 -> Expression  {cons("PreInc")}
+"--" Expression 		 -> Expression  {cons("PreDec")}
+"&" Expression 		 -> Expression  {cons("Ref")}
+"*" Expression 	 	 -> Expression  {cons("Deref")}
+"+" Expression 		 -> Expression  {cons("UnPlus")}
+"-" Expression 		 -> Expression  {cons("UnMinus")}
+"~" Expression 		 -> Expression  {cons("BwNot")}
+"!" Expression 		 -> Expression  {cons("LNot")}
+"sizeof" Expression 	 -> Expression
+"(" TypeName ")" Expression -> Expression  {cons("Cast")}
+}
+> { left:
+Expression "*" Expression -> Expression {left, cons("Mult")}
+Expression "/" Expression -> Expression {left, cons("Div")}
+Expression "%" Expression -> Expression {left, cons("Rem")}}
+> { left:
+Expression "+" Expression -> Expression {left, cons("Plus")}
+Expression "-" Expression -> Expression {left, cons("Minus")}}
+> { left:
+Expression "<<" Expression -> Expression {left, cons("ShLeft")}
+Expression ">>" Expression -> Expression {left, cons("ShRight")}}
+> { left:
+Expression "<" Expression -> Expression {left, cons("Lt")}
+Expression ">" Expression -> Expression {left, cons("Gt")}
+Expression "<=" Expression -> Expression {left, cons("Leq")}
+Expression ">=" Expression -> Expression {left, cons("Geq")}
+} >
+{left:
+Expression "==" Expression -> Expression {left, cons("Eq")}
+Expression "!=" Expression -> Expression {left, cons("Neq")}
+}
+> Expression "&" Expression -> Expression {left, cons("BwAnd")}
+> Expression "^" Expression -> Expression {left, cons("BwXor")}
+> Expression "|" Expression -> Expression {left, cons("BwOr")}
+> Expression "&&" Expression -> Expression {left, cons("Land")}
+> Expression "||" Expression -> Expression {left, cons("Lor")}
+> Expression "?" Expression ":" Expression -> Expression {right, cons("Cond")}
+<0,4> > 
+{right:
+Expression "=" Expression -> Expression {right, cons("Assig")}
+Expression "*=" Expression -> Expression {right, cons("MultBy")}
+Expression "/=" Expression -> Expression {right, cons("DivBy")}
+Expression "%=" Expression -> Expression {right, cons("RemBy")}
+Expression "+=" Expression -> Expression {right, cons("PlusWith")}
+Expression "-=" Expression -> Expression {right, cons("MinusFrom")}
+Expression "<<=" Expression -> Expression {right}
+Expression ">>=" Expression -> Expression {right}
+Expression "&=" Expression -> Expression {right}
+Expression "^=" Expression -> Expression {right}
+Expression "|=" Expression -> Expression {right}
+}
+
+
+context-free priorities
+Expression "?" Expression ":" Expression -> Expression {right}
+ <0> >
+Expression "?" Expression ":" Expression -> Expression
+
+
+%% declarations
+
+sorts Declaration InitDeclarator Specifier Parameters 
+sorts Initializer TypeName Declarator Parameter
+
+context-free syntax
+Declarator                 -> InitDeclarator
+Declarator "=" Initializer -> InitDeclarator
+
+context-free syntax
+"void"			-> Specifier {cons("Type")}
+"int" 			-> Specifier {cons("Type")}
+
+context-free syntax
+Specifier+ {InitDeclarator ","}+ ";" -> Declaration {cons("VarDecl")}
+
+lexical restrictions
+	"return" -/- [0-9a-zA-Z\_] 
+
+context-free syntax
+{Parameter ","}+ -> Parameters
+
+context-free syntax
+Specifier Declarator 		-> Parameter
+Specifier AbstractDeclarator 	-> Parameter
+
+context-free syntax
+Expression 		  -> Initializer
+
+%% statements
+
+sorts Statement
+
+context-free syntax
+"{" Statement*  "}" 			-> Statement
+Identifier ":" Statement 				-> Statement
+";" 							-> Statement
+Expression ";" 						-> Statement
+"if" "(" Expression ")" Statement 		   	-> Statement
+"if" "(" Expression ")" Statement "else" Statement 	-> Statement
+"while" "(" Expression ")" Statement 			-> Statement
+"return" ";" 						-> Statement
+"return" Expression ";" 				-> Statement {cons("Return")}
+
+%% function declaration
+
+sorts FunctionDefinition
+
+context-free syntax
+Specifier* Declarator Declaration* "{" Declaration* Statement* "}" -> FunctionDefinition {cons("FunDecl")}
+
+%%whitespaces
+
+lexical syntax
+
+[\ \t\n\r\11\12] -> LAYOUT
+
+context-free restrictions
+
+LAYOUT? -/- [\ \t\n\r\11\12]
+
+%% Comments
+
+sorts Comment Asterisk
+
+lexical syntax
+	[\/][\*] ( ~[\*] | Asterisk )* [\*][\/] -> Comment {category("Comment")}
+	[\*] 				-> Asterisk
+
+lexical restrictions
+	Asterisk -/- [\/]
+
+lexical syntax
+  Comment -> LAYOUT
+
+lexical restrictions
+LAYOUT? -/- [\/].[\*]
+
+hiddens
+
+context-free start-symbols
+    FunctionDefinition
+    Expression
+
