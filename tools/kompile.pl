@@ -102,11 +102,12 @@ my $short_help_message =
 	in the latex file
 
   Compile only one program options
-  -pgm <filename> : the file where the program macro is
-  -cmod <module name> : the module where the language is
-  -pmod <module name> : the module where the macro is
+  -pgm <filename> : specify the file where the program macro is
+  -cmod <compiled module name> : specify the compiled module 
+			where the language is
+  -pmod <module name> : specify the module where the macro is
      If this is missing, <module name> will be considered ALLCAPS(pgm)
-  -pname <macro name> : the name of the macro
+  -pname <macro name> : specify the name of the macro
      If this is missing, <macro name> will be considered as being pgm
   \n";
 
