@@ -1,0 +1,39 @@
+module languages/ansi-c/syntax/C
+
+%% This grammar is a transformed version from the ANSI-C grammar.
+%% It has far less sorts, because more priorities have been used,
+%% and optionals and lists have been inlined.
+%%
+%% It accepts more than ANSI-C because:
+%%   * more combinations of Expressions are allowed, while still remaining 
+%%     unambiguous, and priorities are according to the ANSI-C standard.
+%%   * All type specifiers have been put into one non-terminal, so this
+%%     grammar accepts more type incorrect C code than the ANSI-C grammar.
+%%     For example: int main(static int a) is accepted, but illegal in ANSI-C.
+%%
+%% DONT: do not try to fully disambiguate this grammar because that would ruin
+%%       its declarative nature. C is ambiguous. However, the expression
+%%       grammar should be fully unambiguous (Expression).
+
+
+imports languages/ansi-c/syntax/Declarations
+imports languages/ansi-c/syntax/Statements
+
+exports
+
+sorts ExternalDeclaration FunctionDefinition TranslationUnit
+
+context-free syntax
+ExternalDeclaration+ 	-> TranslationUnit
+
+context-free syntax
+FunctionDefinition 	-> ExternalDeclaration
+Declaration 		-> ExternalDeclaration
+
+context-free syntax
+Specifier* Declarator Declaration* "{" Declaration* Statement* "}" -> FunctionDefinition
+
+
+
+
+
