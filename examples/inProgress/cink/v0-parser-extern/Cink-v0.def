@@ -1,3 +1,5 @@
+
+definition
 module Cink-v0
 
 exports
@@ -45,13 +47,10 @@ lexical syntax
 Keyword -> Identifier {reject}
 
 lexical syntax
-
 [a-zA-Z\_][a-zA-Z\_0-9]* -> Identifier {cons("Id")}
 
 lexical restrictions
-
 Identifier -/- [0-9a-zA-Z\_] 
-
 
 %% constants
 
@@ -64,7 +63,6 @@ lexical syntax
 [L]? [\"] ( ([\\]~[]) | ~[\\\"] )* [\"]	-> StringConstant
 
 lexical restrictions
-
 IntegerConstant 	-/- [0-9]
 
 %% declarators
@@ -75,7 +73,9 @@ context-free syntax
 
 Identifier 				-> Declarator {cons("Dtor")}
 "(" Declarator ")" 			-> Declarator {bracket, cons("Dtor")}
-Declarator "(" Parameters? ")" 		-> Declarator {cons("Dtor")}
+Identifier "(" Parameters? ")" 		-> Declarator {cons("DtorWParam")}
+
+
 
 %% expressions
 
@@ -102,8 +102,8 @@ Expression "--" 		           -> Expression {cons("PostDec")}
 "--" Expression 		 -> Expression  {cons("PreDec")}
 "&" Expression 		 -> Expression  {cons("Ref")}
 "*" Expression 	 	 -> Expression  {cons("Deref")}
-"+" Expression 		 -> Expression  {cons("UnPlus")}
-"-" Expression 		 -> Expression  {cons("UnMinus")}
+"+" Expression 		 -> Expression  {cons("Plus")}
+"-" Expression 		 -> Expression  {cons("Minus")}
 "~" Expression 		 -> Expression  {cons("BwNot")}
 "!" Expression 		 -> Expression  {cons("LNot")}
 "sizeof" Expression 	 -> Expression
@@ -166,8 +166,8 @@ Declarator                 -> InitDeclarator
 Declarator "=" Initializer -> InitDeclarator
 
 context-free syntax
-"void"			-> Specifier {cons("Type")}
-"int" 			-> Specifier {cons("Type")}
+"void"			-> Specifier 
+"int" 			-> Specifier 
 
 context-free syntax
 Specifier+ {InitDeclarator ","}+ ";" -> Declaration {cons("VarDecl")}
@@ -179,7 +179,7 @@ context-free syntax
 {Parameter ","}+ -> Parameters
 
 context-free syntax
-Specifier Declarator 		-> Parameter
+Specifier Declarator 		-> Parameter {cons("Param")}
 
 context-free syntax
 Expression 		  -> Initializer
@@ -189,14 +189,14 @@ Expression 		  -> Initializer
 sorts Statement
 
 context-free syntax
-"{" Statement*  "}" 			-> Statement
-Identifier ":" Statement 				-> Statement
-";" 							-> Statement
-Expression ";" 						-> Statement
-"if" "(" Expression ")" Statement 		   	-> Statement
-"if" "(" Expression ")" Statement "else" Statement 	-> Statement
-"while" "(" Expression ")" Statement 			-> Statement
-"return" ";" 						-> Statement
+"{" Statement*  "}" 			-> Statement {cons("Block")}
+Identifier ":" Statement 				-> Statement {cons("StLab")}
+";" 							-> Statement {cons("Seq")}
+Expression ";" 						-> Statement {cons("StExpr")}
+"if" "(" Expression ")" Statement 		   	-> Statement {cons("If")}
+"if" "(" Expression ")" Statement "else" Statement 	-> Statement {cons("IfElse")}
+"while" "(" Expression ")" Statement 			-> Statement {cons("While")}
+"return" ";" 						-> Statement {cons("Return")}
 "return" Expression ";" 				-> Statement {cons("Return")}
 
 %% function declaration
@@ -204,7 +204,7 @@ Expression ";" 						-> Statement
 sorts FunctionDefinition
 
 context-free syntax
-Specifier* Declarator Declaration* "{" Declaration* Statement* "}" -> FunctionDefinition {cons("FunDecl")}
+Specifier Declarator "{" Declaration* Statement* "}" -> FunctionDefinition {cons("FunDecl")}
 
 %%whitespaces
 
@@ -233,9 +233,12 @@ lexical syntax
 lexical restrictions
 LAYOUT? -/- [\/].[\*]
 
+module Main
+
+imports Cink-v0
+
 hiddens
 
 context-free start-symbols
     FunctionDefinition
     Expression
-
