@@ -15,7 +15,7 @@ bottomup
   ;
 
 program_identifier
-  : id=PROGRAM_IDENTIFIERS
+  : id=PROGRAM_IDENTIFIER
     -> ^(ID STRING_LITERAL["\"" + $id.text + "\""])
   ;
 
