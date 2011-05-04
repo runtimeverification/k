@@ -4,6 +4,7 @@ kmod CINK-SEMANTICS is including K + PL-ID + PL-INT + PL-CONVERSION
                   | `Minus [strict]
                   | `Mult [strict]
                   | `Gt [strict]
+                  | `Var
 
   /*@\subsubsection*{ASTs which are results.} */
 
@@ -34,9 +35,10 @@ kmod CINK-SEMANTICS is including K + PL-ID + PL-INT + PL-CONVERSION
   rule Mult(I1,, I2) => I1 *Int I2 [structural]
   rule Gt(I1,, I2) => Bool2Int(I1 >Int I2) [structural]
 
-  rule <k> Var(a) => I:Int <_/k> <env_> a |-> I <_/k>
+//  rule <k> Var(X:Id) => I:Int <_/k> <env_> X |-> I <_/env> 
 
-
+ syntax KLabel ::= test
+ rule test => Plus(1,, 2) [structural]
 
 endkm
 

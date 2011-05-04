@@ -1,0 +1,14 @@
+module Cink-v0-eval
+imports Cink-v0 libstratego-lib
+
+
+
+rules
+  E : [x] -> x
+
+
+strategies
+  main = io-wrap(eval)
+  eval = innermost(E)
+
+
