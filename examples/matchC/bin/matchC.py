@@ -95,7 +95,7 @@ def output_filter(line):
 
     line = line.strip()
     if line.startswith('rewrites'):
-        rewrites = purple_color + line.split()[1] + no_color
+        rewrites = cyan_color + line.split()[1] + no_color
         statistics = '[' + rewrites + ' rewrites, '
     elif line.startswith('< feasible >'):
         feasible = green_color + line.split()[3][15:-10] + no_color
