@@ -61,7 +61,7 @@ def compile(in_filename, out_filename):
     in_file.close()
     out_file.close()
     end = time.time()
-    elapsed = yellow_color + "%.3f" % round(end - start, 3) + "s" + no_color
+    elapsed = cyan_color + "%.3f" % round(end - start, 3) + "s" + no_color
     print(' DONE! [' + elapsed + ']')
 
 
@@ -95,7 +95,7 @@ def output_filter(line):
 
     line = line.strip()
     if line.startswith('rewrites'):
-        rewrites = cyan_color + line.split()[1] + no_color
+        rewrites = purple_color + line.split()[1] + no_color
         statistics = '[' + rewrites + ' rewrites, '
     elif line.startswith('< feasible >'):
         feasible = green_color + line.split()[3][15:-10] + no_color
@@ -182,7 +182,7 @@ def main():
         if retcode != 0: sys.exit(retcode)
 
         end = time.time()
-        elapsed = yellow_color + "%.3f" % round(end - start, 3) + "s" + no_color
+        elapsed = purple_color + "%.3f" % round(end - start, 3) + "s" + no_color
         print(' DONE! [' + elapsed + ']')
 
         print('Check ' + args.output + ' for the complete output.')
