@@ -12,54 +12,17 @@ kmod SIMPLE-UNTYPED is
 
 /*@ This module puts everything together, namely syntax, semantics and
 programs (note that it includes the SIMPLE semantics, which includes
-the syntax, and the SIMPLE programs).  In the current implementation
-of the \K framework, the programs in the module SIMPLE-UNTYPED-PROGRAMS
-are given through macros of the form ``\texttt{macro pgm = ...}'',
-where \texttt{pgm} is a syntactic constant of sort \textit{Stmts} and
-where the dots stand for the actual program.  For example,
-{\footnotesize
-\begin{verbatim}macro pFactorial =
-var x;
+the syntax, and the SIMPLE programs). */
 
-function f(y) {
-  var t=1;
-  for i = 1 to y do
-    t = t*i;
-  return t;
-}
-
-function main() {
-  x = 5;
-  write(f(f(x)));
-}\end{verbatim}
-}
-As explained in the overview paper mentioned in the preamble of this
-language definition, the syntax plays no special role in \K; that is,
-the application of rules takes into account only the structure of the
-configuration, and not how the particular current program or fragment
-of program is parsed.  That means, in particular, that the distinction
-between concrete/abstract syntax and its representation as computational
-structure terms of sort $K$ is irrelevant in the theory of \K.  However, it
-becomes quite relevant in implementations of \K tools, because one would
-like to use the defined language syntax as much as possible in the semantics,
-as we did in all the \K rules above, which means that one needs to combine a
-parser for the defined language with a parser for \K in order to parse the
-semantic rules, which is a highly non-trivial engineering endeavour.
-In our current implementation of \K, the internal representation of the
-terms over the user-defined syntax
-
-syntactic 
-
-sort language syntax terms is 
-
-
-
+/*@ \paragraph{Implementation-specific note:}
+To use the semantics, for example to execute the programs defined in the
+\texttt{SIMPLE-UNTYPED-PROGRAMS}, one needs to create initial configurations
+holding the programs one wants to execute and possibly other data, such as,
+for example, the program input.  This can be quite tedious.
+%
 The two configuration generator operations below are meant to help
 users initialize the configuration when executing programs, and not to
-be regarded as part of the SIMPLE semantics.
-
-
- */
+be regarded as part of the SIMPLE semantics: */
 
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List )
   macro run(PgmName:KLabel) =
@@ -71,4 +34,10 @@ be regarded as part of the SIMPLE semantics.
              <k> PgmName(.List{K}) ~> execute </k>
              <in> Input:List </in>
           <_/T>
+
+/*@ Note that the configurations above use ruptured cells, so they take advantage of
+\K's configuration abstraction mechanism.  They will be automatically completed and
+initialized to match the declared configuration of SIMPLE.  To run our sample program
+\texttt{pFactorial}, all we need to do (after compilation and loading the generated
+Maude file) is to type in the command ``\texttt{rewrite 'pFactorial}''. */
 endkm

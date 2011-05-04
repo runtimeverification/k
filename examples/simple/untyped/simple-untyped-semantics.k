@@ -37,8 +37,8 @@ in the fixed global environment and function definitions cannot be nested). */
   syntax Exp ::= Val
 
 /*@ \subsubsection*{Computations}
-Recall that in \K, the {\em computational structures} or simply {\em computations}
-``swallow'' the entire language syntax.  Thus, every fragment of program is a
+Recall that in \K, its computations ``swallow'' the entire language syntax (note that
+the builtin module \texttt{K} is included).  Thus, every fragment of program is a
 particular computation, that is, a term of sort $K$.  Also, recall that computations
 have quite a simple syntax: abstract syntax trees (where the original language constructs
 become AST node labels, i.e., constants of sort $\KLabel$) extended with the special

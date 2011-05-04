@@ -185,7 +185,7 @@ parentheses for $\KLabel$ constants (one for each syntactic construct), e.g.,
 ``\texttt{'try\_catch`(\_`)\_}'', and use ``\texttt{.List\{K\}}'' and ``\texttt{,,}''
 for the unit and the separator for lists of $K$ terms (to avoid conflicts with
 language syntax).  For example, the internal representation of the syntactic
-constant \texttt{pFactorial} above is \texttt{'pFactorial(.List{K})}, while
+constant \texttt{pFactorial} above is \texttt{'pFactorial(.List\{K\})}, while
 the representation of its corresponding program is
 
 {\footnotesize\begin{verbatim}
@@ -202,7 +202,18 @@ Our implementation allows users to use either concrete syntax (as we do) or abst
 syntax (as above) in their rules below.  We prefer the concrete syntax, but one may
 need to use the abstract syntax instead when one's syntax confuses our current
 (simplistic) parser.  One currently sees only abstract syntax as output
-from the tool (results, or stuck computations, etc.). */
+from the tool (results, or stuck computations, etc.).  Note that, in order to
+enable the internal \K representation discussed above, one needs to explicitly include
+the builtin module \texttt{K}.  Thus, since we did not include the module \texttt{K}
+explicitly, to test the syntax one needs to either include the module \texttt{K}
+as well in \texttt{SIMPLE-UNTYPED-PROGRAMS}, or better to create another module
+which includes both \texttt{SIMPLE-UNTYPED-PROGRAMS} and \texttt{K}.  We preffer the
+latter approach because the inclusion of module \texttt{K} automatically subsorts all
+the syntactic categories to $K$, which may lead to ambiguous parsing of more complex
+programs; this is, again, a limitation of our current implementation.  To check the 
+internal representation of the defined programs, first compile the \K definition,
+then load the generated Maude module into Maude, and then type in Maude commands
+like ``\texttt{rewrite 'pFactorial(.List\{K\})}''.  */
 endkm
 
 
@@ -223,11 +234,15 @@ declared alone and is initialized. */
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X; = var X=0;
 
-/*@
+/*@ \paragraph{Implementation-specific note:}
+If interested in checking how these desugaring rules change the programs
+already tested, then one should create a module that includes
+\texttt{SIMPLE-UNTYPED-DESUGARED-SYNTAX}, \texttt{SIMPLE-UNTYPED-PROGRAMS} and
+\texttt{K}, and then follow the same steps as above for checking the internal
+representation of programs (without desugaring).  For example, the command
+``\texttt{rewrite 'pFactorial(.List\{K\})}'' should yield the following term:\\
 
 {\footnotesize\begin{verbatim}
-rewrite 'pFactorial(.List{K}) .
-
 '__('var_;('_`,_('_=_(Id x(.List{K}),,Int 0(.List{K})))),,'__(
     'function_`(_`)_(Id f(.List{K}),,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_(
     '_=_(Id t(.List{K}),,Int 1(.List{K})))),,'__('`{_`}('__('var_;('_`,_('_=_(Id i(
