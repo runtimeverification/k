@@ -117,6 +117,92 @@ We prefer to tag their units with the corresponding sort to avoid confusion.
   syntax List{Exp} ::= Exp
                      | List{Id}
                      | List{Exp} , List{Exp} [ditto]
+
+/*@ \subsection*{Parsing programs}
+The syntax of SIMPLE is now complete.  It is a good idea to test the
+syntax by parsing a large variety of programs.
+*/
+
+/*@ \paragraph{Implementation-specific note:}
+There are different ways to parse programs using the defined syntax.  One approach
+supported in our current implementation, which we often follow, is to introduce a new
+module that defines many programs as macros.  For example, in our case here, we can
+introduce a module of the form\\
+
+{\footnotesize\begin{verbatim}
+kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
+  syntax Id ::= f | i | t | x | y | ...
+  syntax Stmts ::= pFactorial | ...
+
+  macro pFactorial =
+        var x;
+
+        function f(y) {
+          var t=1;
+          for i = 1 to y do
+            t = t*i;
+          return t;
+        }
+
+        function main() {
+          x = 5;
+          write(f(f(x)));
+        }
+
+  ...
+endkm\end{verbatim}}
+The dots ``{\footnotesize\texttt{...}}'' above replace possibly more elements of
+the same type; we only included one program in the module above, together with
+all the syntactic constants that it needs.  In this approach, unfortunately, the
+user has to declare all these syntactic constants by hand, as above.  If one has
+an external parser for the defined language, which is frequently the case when one
+defines languages with more complex syntax (currently, \K's parser is not very
+powerful), then one can easily modify the external parser to generate all the
+necessary syntactic constants. \\
+\vspace*{1ex}
+
+As explained in the overview paper mentioned in the preamble of this
+language definition, the entire language syntax is automatically included as
+constructors for the builtin sort $K$ of {\em computation structures}, or simply
+just {\em computations}.  Recall (see the same paper) that syntax plays no special
+role in \K; that is, the application of the subsequent semantic rules takes into
+account only the structure of the configuration, and not how the particular current
+program or fragment of program is parsed.  That means, in particular, that the
+distinction between concrete/abstract syntax and its representation as computations
+of sort $K$ is irrelevant in the theory of \K.  However, it becomes quite relevant
+in implementations of \K tools, because one would like to use the defined
+language syntax as much as possible in the semantics, as we will do in all the
+\K rules below, which means that one needs to combine a parser for the defined
+language with a parser for \K in order to parse the semantic rules, which is a
+highly non-trivial engineering endeavour.  In our current implementation of \K,
+the internal representation of the syntactic terms follows the simple
+abstract-syntax-tree (AST) syntax:
+$$
+K \ \ ::= \ \ \KLabel(\it List\{K\})
+$$
+where we use quoted identifiers with underscores for arguments and backquoted
+parentheses for $\KLabel$ constants (one for each syntactic construct), e.g.,
+``\texttt{'try\_catch`(\_`)\_}'', and use ``\texttt{.List\{K\}}'' and ``\texttt{,,}''
+for the unit and the separator for lists of $K$ terms (to avoid conflicts with
+language syntax).  For example, the internal representation of the syntactic
+constant \texttt{pFactorial} above is \texttt{'pFactorial(.List{K})}, while
+the representation of its corresponding program is
+
+{\footnotesize\begin{verbatim}
+'__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id f(.List{K}),
+    ,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(Id t(.List{K}),,Int 1(.List{
+    K})))),,'__('for_=_to_do_(Id i(.List{K}),,Int 1(.List{K}),,Id y(.List{K}),,'_;(
+    '_=_(Id t(.List{K}),,'_*_(Id t(.List{K}),,Id i(.List{K}))))),,'return_;(Id t(.List{
+    K})))))),,'function_`(`)_(Id main(.List{K}),,'`{_`}('__('_;('_=_(Id x(.List{K}),,
+    Int 5(.List{K}))),,'write`(_`);('_`(_`)(Id f(.List{K}),,'_`,_('_`(_`)(Id f(.List{
+    K}),,'_`,_(Id x(.List{K})))))))))))
+\end{verbatim}}
+
+Our implementation allows users to use either concrete syntax (as we do) or abstract
+syntax (as above) in their rules below.  We prefer the concrete syntax, but one may
+need to use the abstract syntax instead when one's syntax confuses our current
+(simplistic) parser.  One currently sees only abstract syntax as output
+from the tool (results, or stuck computations, etc.). */
 endkm
 
 
@@ -137,40 +223,22 @@ declared alone and is initialized. */
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X; = var X=0;
 
-/*@ The syntax of SIMPLE is now complete.  It is a good idea to test the
-syntax by parsing and desugaring a large variety of programs.  There are different
-ways to do that.  One approach, which we often follow, is to introduce a new module
-that defines many programs as macros.  For example, in our case here we introduce a
-module of the form
-\begin{verbatim}kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
-  syntax Id ::= f | i | t | x | y | ...
-  syntax Stmts ::= pFactorial | ...
-
-  macro pFactorial =
-        var x;
-
-        function f(y) {
-          var t=1;
-          for i = 1 to y do
-            t = t*i;
-          return t;
-        }
-
-        function main() {
-          x = 5;
-          write(f(f(x)));
-        }
-
-  ...
-endkm\end{verbatim}
-*/
 /*@
-The dots ``\texttt{...}'' stand for other elements of the same type; we only added one
-program in the above, together with all the syntactic constants that it needs.  In this
-approach, unfortunately, the user has to declare all these by hand as above.  If one has
-an external parser for the defined language, which is frequently the case when one defines
-languages with more complex syntax that \K's parser is not powerful enough to handle alone,
-then one can easily modify the external parser to generate all the necessary syntactic
-constants.  Anyway, here we define them by hand.
+
+{\footnotesize\begin{verbatim}
+rewrite 'pFactorial(.List{K}) .
+
+'__('var_;('_`,_('_=_(Id x(.List{K}),,Int 0(.List{K})))),,'__(
+    'function_`(_`)_(Id f(.List{K}),,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_(
+    '_=_(Id t(.List{K}),,Int 1(.List{K})))),,'__('`{_`}('__('var_;('_`,_('_=_(Id i(
+    .List{K}),,Int 0(.List{K})))),,'__('_;('_=_(Id i(.List{K}),,Int 1(.List{K}))),,
+    'while_do_('_<=_(Id i(.List{K}),,Id y(.List{K})),,'`{_`}('__('_;('_=_(Id t(.List{
+    K}),,'_*_(Id t(.List{K}),,Id i(.List{K})))),,'_;('_=_(Id i(.List{K}),,'_+_(Id i(
+    .List{K}),,Int 1(.List{K})))))))))),,'return_;(Id t(.List{K})))))),,
+    'function_`(_`)_(Id main(.List{K}),,'_`,_(.List{K}),,'`{_`}('__('_;('_=_(Id x(
+    .List{K}),,Int 5(.List{K}))),,'write`(_`);('_`(_`)(Id f(.List{K}),,'_`,_('_`(_`)(Id
+    f(.List{K}),,'_`,_(Id x(.List{K})))))))))))
+\end{verbatim}
+}
 */
 endkm

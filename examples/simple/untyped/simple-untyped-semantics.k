@@ -2,7 +2,8 @@
 --- SIMPLE-UNTYPED-SEMANTICS module ---
 ---------------------------------------
 
-kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
+kmod SIMPLE-UNTYPED-SEMANTICS is
+  including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 /*@ \section*{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
