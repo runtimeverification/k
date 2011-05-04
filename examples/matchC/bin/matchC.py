@@ -182,7 +182,7 @@ def main():
         if retcode != 0: sys.exit(retcode)
 
         end = time.time()
-        elapsed = purple_color + "%.3f" % round(end - start, 3) + "s" + no_color
+        elapsed = cyan_color + "%.3f" % round(end - start, 3) + "s" + no_color
         print(' DONE! [' + elapsed + ']')
 
         print('Check ' + args.output + ' for the complete output.')
