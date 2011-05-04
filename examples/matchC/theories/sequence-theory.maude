@@ -47,6 +47,8 @@ mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
   op rev : Seq++ -> NeSeq++ .
   op len : Seq++ -> Int++ .
   op maximum : Seq++ -> Int++ .
+  op hd : Seq++ -> MathObj++ .
+  op find : MathObj++ Seq++ -> AtomFormula .
   op contain : Seq++ Int++ -> AtomFormula .
 
 
@@ -77,6 +79,13 @@ mod MATHEMATICAL-SEQUENCE-BUILTIN-MODULE is
   eq len([Obj]) = 1 .
   eq len(epsilon) = 0 .
   
+  eq hd(NeA1 @ NeA2) = hd(NeA1) .
+  eq hd([Obj]) = Obj .
+
+  eq find(Obj, NeA1 @ NeA2) = find(Obj, NeA1) \/ find(Obj, NeA2) .
+  eq find([Obj1] , Obj2) = (Obj1 === Obj2) .
+  eq find(epsilon , Obj) = FalseFormula .
+
   eq contain(NeA1 @ NeA2 , I) = contain(NeA1 , I) \/ contain(NeA2 , I) .
   eq contain([J] , I) = (I === J) .
   eq contain(epsilon , I) = FalseFormula .

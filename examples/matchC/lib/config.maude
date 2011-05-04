@@ -100,6 +100,7 @@ mod CONFIG-BUILTIN-MODULE is
   op _|->_:_ : Int++ Value Field -> MapItem .
   op stream : List{MathObj++} -> ListItem .
   op id`(_`) : String -> Id .
+  op obj`(_`) : Id -> MathObj++ .
 
 
   *** [ERROR] Here subsorting Pattern to K gives all sort of errors,
@@ -152,7 +153,5 @@ mod ML-K is inc CONFIG-BUILTIN-MODULE + K + K-WHERE + K-CONDITION-SEARCH .
   --- op applySubst : KResult Subst -> KResult .
   op _._ : Id Id -> Field .
   op _._ : Field Id -> Field .
-
-  op inStack : Id List -> NtFormula .
 endm
 
