@@ -16,7 +16,7 @@ bottomup
 
 program_identifier
   : id=PROGRAM_IDENTIFIER
-    -> ^(ID STRING_LITERAL["\"" + $id.text + "\""])
+    -> ^(IDENTIFIER["obj`(_`)"] ^(ID STRING_LITERAL["\"" + $id.text + "\""]))
   ;
 
 program_variable
