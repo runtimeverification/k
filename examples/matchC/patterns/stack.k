@@ -9,5 +9,8 @@ kmod STACK-PATTERN is
   [structural print "\{print\} inStack split"]
   rule inStack(F1, callContext(F2, _, _, _)) => @(F1 ==Bool F2) [structural]
   rule inStack(F1, .List) => FalseFormula [structural]
+
+  rule topStack(NeList1 NeList2) => topStack(NeList1) [structural]
+  rule topStack(callContext(F, _, _, _)) => F [structural]
 endkm
 
