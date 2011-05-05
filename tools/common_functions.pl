@@ -1887,18 +1887,11 @@ sub solve_latex
 	local $_ = shift;
 	my $file = shift;
 
-	my @arr = ();
-	s/(k?mod.*?endk?m)/{push(@arr, (countlines($`)));$&;}/sge;
-
-	my $i = -1;
-	s/($latex_comment)/Freeze($&, "LCOMM")/sge;
 	s/(k?mod.*?endk?m)/
 	{
-		$i++;
-		solve_latex_comments($&, $arr[$i], $file);
+		solve_latex_comments($&, countlines($`), $file);
 	}
 	/sge;
-	$_ = Unfreeze("LCOMM", $_);
 	$_;
 }
 
@@ -1910,8 +1903,6 @@ sub solve_latex_comments
 {
 	# get k module
 	local $_ = shift;
-
-	$_ = Unfreeze("LCOMM", $_);
 
 	# get k module line no and file name
 	my $lno = shift;
