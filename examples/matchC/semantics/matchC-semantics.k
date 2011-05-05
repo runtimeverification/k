@@ -311,7 +311,7 @@ summary function calls
         ~> return getReturnValue(T)
 
     </k>
-    <stack_> .List => callContext(FName, K, TEnv, Env) </stack>
+    <stack> .List => callContext(FName, K, TEnv, Env) <_/stack>
     <fname> FName </fname>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>

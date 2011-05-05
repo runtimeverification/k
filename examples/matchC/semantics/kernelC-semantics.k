@@ -122,7 +122,7 @@ Function call/return
       =>
         declParams(ParamList) ~> bindParams(ParamList, ArgList) ~> S
     </k>
-    <stack_> .List => callContext(FName, K, TEnv, Env) </stack>
+    <stack> .List => callContext(FName, K, TEnv, Env) <_/stack>
     <fname> FName => F </fname>
     <tenv> TEnv => .Map </tenv>
     <env> Env => .Map </env>
@@ -130,7 +130,7 @@ Function call/return
 *** return
   rule
     <k> return TV ~> _ => TV ~> K </k>
-    <stack_> callContext(F, K, TEnv, Env) => .List </stack>
+    <stack> callContext(F, K, TEnv, Env) => .List <_/stack>
     <fname> _ => F </fname>
     <tenv> _ => TEnv </tenv>
     <env> _ => Env </env>

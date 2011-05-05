@@ -45,6 +45,9 @@ mod FORMULA-BUILTIN-MODULE is inc PL-BOOL + PL-STRING .
 
 
   eq Atom /\ Phi1 ===> Atom /\ Phi2 = Atom /\ Phi1 ===> Phi2 .
+  eq ~(NtPhi) /\ Phi1 ===> ~(NtPhi) /\ Phi2 = ~(NtPhi) /\ Phi1 ===> Phi2 .
+  eq (NtPhi1 \/ NtPhi2) /\ Phi1 ===> (NtPhi1 \/ NtPhi2) /\ Phi2
+   = (NtPhi1 \/ NtPhi2) /\ Phi1 ===> Phi2 .
 
 
 --- very, very bad eqs

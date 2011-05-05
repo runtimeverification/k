@@ -7,19 +7,19 @@ void any(int n);
 
 
 void trusted(int n)
-/*@ cfg <stack> S </stack> <out> ?Out </out>
-    req n >= 10 \/ inStack(trusted, S) \/ inStack(main, S) */
+/*@ rule <k> $ => return; </k> <stack> S </stack> <out_> epsilon => A </out>
+    if n >= 10 \/ in(hd(ids(S)), {main, trusted}) */
 {
   printf("%d ", n);
-  untrusted(n);
+  //untrusted(n);
   any(n);
   if (n)
     trusted(n - 1);
 }
 
 void untrusted(int n)
-/*@ cfg <stack> S </stack> <out> ?Out </out>
-    req inStack(trusted, S) */
+/*@ rule <k> $ => return; </k> <stack> S </stack> <out_> epsilon => A </out>
+    if find(trusted, ids(S)) /\ n = n */
 {
   printf("%d ", -n);
   if (n)
@@ -45,5 +45,5 @@ int main()
 
 
 //@ var S : ListItem
-//@ var Out : Seq
+//@ var A : Seq
 
