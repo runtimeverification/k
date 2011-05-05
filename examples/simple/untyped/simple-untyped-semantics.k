@@ -468,7 +468,7 @@ $S_1$ in a ``\texttt{try $S_1$ catch($X$) $S_2$}'' block which can throw an exce
 caught by the function but instead is propagated to the ``\texttt{try $S_1$ catch($X$) $S_2$}'' block
 that called the function.  Therefore, we have to make sure that the function stack as well as other
 potential control structures are also properly modified when the exception is thrown to
-correctly recover the execution context.  This can be easily achived by pushing/popping the
+correctly recover the execution context.  This can be easily achieved by pushing/popping the
 entire current control context onto the exception stack.  The three rules below modularly do
 precisely all the above. */
 
@@ -493,7 +493,7 @@ giving the semantics of these operations below. */
 Threads can be created by any other threads using the ``\texttt{spawn($S$)}'' statement.
 The spawn statement in the creating thread dissolves, at the same time adding a new thread
 cell to the configuration sharing the same environment.  Note that the created \textsf{thread}
-cell is torn.  That means that the remining cells are added and initialized automatically as
+cell is torn.  That means that the remaining cells are added and initialized automatically as
 described in the definition of SIMPLE's configuration.  This is part of \K's
 configuration abstraction/concretization mechanism. */
 
@@ -505,7 +505,7 @@ Dually to the above, when a thread terminates its assigned computation (so the c
 \textsf{k} cell is empty) it can be dissolved.  However, since no discipline is imposed on how
 locks are acquired and released, it can be the case that a terminating thread still holds
 locks.  Those locks must be released, so other threads attempting to acquire them do not deadlock.
-We achive that by removing all the locks held by the terminating thread in its \textsf{holds}
+We achieve that by removing all the locks held by the terminating thread in its \textsf{holds}
 cell from the set of busy locks in the \textsf{busy} cell (\texttt{keys($H$)} returns the domain
 of the map $H$ as a set, that is, only the locks themselves ignoring their multiplicity).
 As seen below, a lock is added to the \textsf{busy} cell as soon as it is acquired
@@ -576,11 +576,11 @@ current implementation of \K, so we need to define them as above. */
 
 /*@ \subsection*{l-value and loc}
 For convenience in giving the semantics of constructs like the increment and the assignment, that
-we want to operate the same way on variables and on array elements, we used an auxilliary
+we want to operate the same way on variables and on array elements, we used an auxiliary
 \texttt{l-value($E$)} construct which was expected to evaluate to the l-value of the expression $E$.
-This is only defined when $E$ has an l-value, that is, when $E$ is either a variable or evauates to
+This is only defined when $E$ has an l-value, that is, when $E$ is either a variable or evaluates to
 an array element.  The value that \texttt{l-value($E$)} evaluates to has the form \texttt{loc($L$)},
-where $L$ is a location, i.e., a natural number; we prefer to structually distinguish natural
+where $L$ is a location, i.e., a natural number; we prefer to structurally distinguish natural
 numbers from location values for clarity.  Therefore, there are two cases to consider.
 (1) If $E$ is a variable, then all we need to do is to grab its location from the environment.
 (2) If $E$ is an array element, then we first evaluate the array and its index in order to identify
@@ -602,7 +602,7 @@ its corresponding store lookup operation. */
 
 /*@ \subsection*{Length}
 The following operation calculates the length of a list of identifiers.
-We make the two rules structural so thay they do not count as computations. */
+We make the two rules structural so they they do not count as computations. */
 
   syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
   rule |.List{Id}| => 0 [structural]
@@ -621,8 +621,8 @@ The two rules below are structural, for the same reason as above. */
 Currently we have to explicitly declare the syntactic lists
 (they will be eventually builtin).  We need lists of values as a separate syntactic
 category because we want to allow lists of expressions (e.g., function arguments) to
-evalaute to such lists of values.  Note also that we defined lists of values as \K
-results (at the begining of the SIMPLE semantics module). */
+evaluate to such lists of values.  Note also that we defined lists of values as \K
+results (at the beginning of the SIMPLE semantics module). */
 
   syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
   syntax List{Exp} ::= List{Val}
