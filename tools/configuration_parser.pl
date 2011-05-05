@@ -27,7 +27,7 @@ BEGIN {
 
 use lib $path;
 $path = (File::Basename::fileparse($0))[1];
-$path = abs_path($path);
+$path = File::Spec->rel2abs($path);
 
 
 
@@ -36,7 +36,7 @@ $path = abs_path($path);
 
 # imports
 use Switch;
-use Cwd 'abs_path';
+use File::Spec;
 use XML::DOM;
 
 
@@ -554,7 +554,7 @@ sub  get_cell_line
 # and exits if there are errors
 sub create_xml_parser
 {
-#	$path = abs_path($path);
+#	$path = File::Spec->rel2abs($path);
 
         # quote dots and array-like symbols in paths 
         $path =~ s/(@|\.)/\\($1)/sg;

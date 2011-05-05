@@ -1948,7 +1948,7 @@ sub run_maude_
 
 	# call maude
     
-    my $input = abs_path($input_file);
+    my $input = File::Spec->rel2abs($input_file);
 	my $result = `$maude $input 2>&1`;
 
 	# clean

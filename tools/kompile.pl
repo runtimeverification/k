@@ -3,8 +3,7 @@ use strict;
 use File::Basename;
 use File::Spec;
 use Switch;
-use Cwd; 
-use Cwd 'abs_path';
+use Cwd;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use English;
 
@@ -583,7 +582,7 @@ foreach (@ARGV) {
     }
     elsif ($shared)
     {
-	$k_prelude = abs_path($_);
+	$k_prelude = File::Spec->rel2abs($_);
 	$shared = 0;
     }
     elsif (/^-/) {
@@ -765,7 +764,7 @@ if (!$compile_only) {
 		my $tmp = "ops @tmp : -> KLabel [metadata \"generated label\"] . ";
 		my $dir = cwd;
 		open FILE,">",$kshared or die "Cannot create $kshared\n";
-		my $kprelude = abs_path($k_prelude);
+		my $kprelude = File::Spec->rel2abs($k_prelude);
 		my $prelude = basename($k_prelude);
 		print FILE "in $kprelude\nmod K-SHARED is including K . \n\t$tmp\nendm";
 		close FILE;
@@ -1396,7 +1395,7 @@ sub maudify_file {
     $file = getFullName($file);
     
 #    print "Process file: $file\n";
-    addFile(abs_path($file));
+    addFile(File::Spec->rel2abs($file));
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";
 
