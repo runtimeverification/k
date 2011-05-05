@@ -70,7 +70,7 @@ Functions are allowed to abruptly return.
 The exceptions are parametric, i.e., one can throw a value which is bound
 to the variable declared by \texttt{catch}.
 Threads can be dynamically created and terminated, and can synchronize with
-\texttt{acquire}, \texttt{release} and \texttt{randezvous}.
+\texttt{acquire}, \texttt{release} and \texttt{rendezvous}.
 Note that the strictness attributes obey the intended evaluation strategy
 of the various constructs.  In particular, the if-then-else construct is
 strict only in its first argument (the if-then construct will be desugared
@@ -207,7 +207,7 @@ enable the internal \K representation discussed above, one needs to explicitly i
 the builtin module \texttt{K}.  Thus, since we did not include the module \texttt{K}
 explicitly, to test the syntax one needs to either include the module \texttt{K}
 as well in \texttt{SIMPLE-UNTYPED-PROGRAMS}, or better to create another module
-which includes both \texttt{SIMPLE-UNTYPED-PROGRAMS} and \texttt{K}.  We preffer the
+which includes both \texttt{SIMPLE-UNTYPED-PROGRAMS} and \texttt{K}.  We prefer the
 latter approach because the inclusion of module \texttt{K} automatically subsorts all
 the syntactic categories to $K$, which may lead to ambiguous parsing of more complex
 programs; this is, again, a limitation of our current implementation.  To check the 
@@ -221,7 +221,7 @@ kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX
 /*@ This module desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.
-All desugaring macros below are straighforward, except, perhaps, the one
+All desugaring macros below are straightforward, except, perhaps, the one
 for multi-dimensional arrays.  For the semantics, we can therefore assume
 that all functions take a list of arguments, that each conditional has both
 branches, that there are only \texttt{while} loops, and that each variable is
