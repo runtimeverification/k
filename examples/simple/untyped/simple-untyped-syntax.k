@@ -27,7 +27,7 @@ expression rather than a variable because it can also increment an array element
 Arrays can be multidimensional and can hold other arrays, so their lookup operation
 takes a list of expressions as argument and applies to an expression (which can
 in particular be another array lookup), respectively.
-The construct \texttt{sizeof} gives the size of an array in number of elements.
+The construct \texttt{sizeof} gives the size of an array in number of elements of its first dimension.
 Like for the declaration of functions above, we have separate syntax for function
 calls with zero arguments.
 Note that almost all constructs are strict.  Exceptions are the increment (since
