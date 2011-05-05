@@ -153,11 +153,10 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 endkm\end{verbatim}}
 The dots ``{\footnotesize\texttt{...}}'' above replace possibly more elements of
 the same type; we only included one program in the module above, together with
-all the syntactic constants that it needs.  In this approach, unfortunately, the
+all the syntactic constants it needs.  In this approach, unfortunately, the
 user has to declare all these syntactic constants by hand, as above.  If one has
 an external parser for the defined language, which is frequently the case when one
-defines languages with more complex syntax (currently, \K's parser is not very
-powerful), then one can easily modify the external parser to generate all the
+defines languages with more complex syntax (as the implicit parser currently used by the \K tool is not very powerful), then one can easily modify the external parser to generate all the
 necessary syntactic constants. \\
 \vspace*{1ex}
 
@@ -221,8 +220,7 @@ kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX
 /*@ This module desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.
-All desugaring macros below are straightforward, except, perhaps, the one
-for multi-dimensional arrays.  For the semantics, we can therefore assume
+All desugaring macros below are straighforward.  For the semantics, we can therefore assume
 that all functions take a list of arguments, that each conditional has both
 branches, that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */

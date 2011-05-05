@@ -37,7 +37,12 @@ be regarded as part of the SIMPLE semantics: */
 
 /*@ Note that the configurations above use ruptured cells, so they take advantage of
 \K's configuration abstraction mechanism.  They will be automatically completed and
-initialized to match the declared configuration of SIMPLE.  To run our sample program
+initialized to match the declared configuration of SIMPLE.  
+
+To run our sample program
 \texttt{pFactorial}, all we need to do (after compilation and loading the generated
-Maude file) is to type in the command ``\texttt{rewrite 'pFactorial}''. */
+Maude file) is to type in the command ``\texttt{rewrite run('pFactorial) .}''.
+
+If, instead, one wants to search for all possible final states which could be obtained upon running the program, then one would need to use the command  ``\texttt{search run('pFactorial) =>! Final:Bag .}''.  
+ */
 endkm

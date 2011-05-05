@@ -9,15 +9,15 @@ kmod SIMPLE-UNTYPED-SEMANTICS is
 Before one starts adding semantic rules to a \K definition, one needs to
 define the basic semantic infrastructure consisting of definitions for {\em values},
 {\em computations} and the {\em configuration}.  The values are needed to know when to
-stop applying the heating rules corresponding to strictness or context declarations;
-unfortunately, values cannot be detected automatically, so one cannot avoid this step.
+stop applying the heating rules corresponding to strictness or context declarations.
+ As values carry semantic, language dependent meaning, they cannot be  automatically inferred, so one cannot avoid this step.
 The computation structures, or simply computations, are needed to properly include the
 language syntax under the K sort, as the \K semantics operates only on terms of sort $K$;
 fortunately, this can be done mostly automatically, except for the special result
 computations.  Finally, the configuration serves as a backbone for the process of
 configuration abstraction which allows users to only mention the relevant cells in each
-semantic rule, the rest of the configuration context being inferred automatically; the
-configuration could arguably be automatically inferred from the rules, but it turned out
+semantic rule, the rest of the configuration context being inferred automatically. Although the
+configuration could potentially be automatically inferred from the rules, we believe 
 that it is very useful for language designers/semanticists to actually think of and
 design their configuration explicitly, so the current implementation of \K requires one
 to define it. */
@@ -37,16 +37,15 @@ in the fixed global environment and function definitions cannot be nested). */
   syntax Exp ::= Val
 
 /*@ \subsubsection*{Computations}
-Recall that in \K, its computations ``swallow'' the entire language syntax (note that
+Recall that in \K, the computations ``swallow'' the entire language syntax (note that
 the builtin module \texttt{K} is included).  Thus, every fragment of program is a
 particular computation, that is, a term of sort $K$.  Also, recall that computations
 have quite a simple syntax: abstract syntax trees (where the original language constructs
 become AST node labels, i.e., constants of sort $\KLabel$) extended with the special
 {\em task sequentialization} construct $K ::= K \kra K$.  In addition to the sorts
-$K$ and $\KLabel$, \K also has one more important sort related to computations, namely
+$K$ and $\KLabel$, the \K tool also has one more important sort related to computations, namely
 $\KResult$.  Distinguishing terms of sort $\KResult$ is not necessary in theory, but it
-is crucial in \K tools, because they interpret such terms as irreducible and thus know
-when to stop the heating process associated to the strictness attributes.
+is crucial in implementations of the \K framework, because it allow to distinguish a class of terms as irreducible and thus to more efficienlty implement the heating/cooling process associated to the strictness attributes.
 Below we state that all lists of values are terms of sort $\KResult$.  We use lists of
 values instead of values because, as discussed above, we want lists of expressions
 to evaluate to lists of values whenever scheduled for evaluation (by placing them on
@@ -126,7 +125,7 @@ the store whenever possible, because it offers more true concurrency than the la
 according to the concurrent semantics of $K$, the store is not frozen while $L\mapsto V$ is
 added to it, while the environment is frozen during the update operation $\textit{Env}[L/X]$.
 The variable declaration command is also removed from the top of the computation cell
-and the fresh location counter is incremented.  All the above happen in one step, with the rule
+and the fresh location counter is incremented.  All the above happen in one transactional step, with the rule
 below.  Note also how configuration abstraction allows us to only mention the needed cells;
 indeed, as the configuration above states, the \textsf{k} and \textsf{env} cells are actually
 located within a \textsf{thread} cell within the \textsf{threads} cell, but one needs not mention
@@ -144,29 +143,28 @@ of the form ``where $L$ fresh''.} */
        <nextLoc> L => L +Nat 1 </nextLoc> 
 
 /*@ \subsection*{Array Declaration}
-SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we desugar them all into
-uni-dimensional arrays by code transformation.  This way, we will only need to give semantics
-to uni-dimensional arrays.  The expressions given as array dimensions are first evaluated and
-then the array is dynamically allocated the corresponding number of locations.  Thus, we can
-dynamically allocate memory in SIMPLE by means of array declarations.  First, we need to
-evaluate all the dimensions of the array: */
-
-  context var X[_,`[HOLE`]:Exp,_];
-
-/*@ The \K semantics of the uni-dimensional array declaration is somehow similar to the
+The \K semantics of the uni-dimensional array declaration is somehow similar to the
 above declaration of ordinary variables.  $N+1$ locations are allocated in the store
 for an array of size $N$, the additional location (chosen to be the first one allocated)
 holding the array reference value.  The array reference value \texttt{array(L,N)} states
 that the array has size $N$ and its elements are located contiguously in the store starting
 with location $L$.  Recall that $L..L'$ is the list of locations between $L$ and $L'$
-and that $L..L'\mapsto V$ initializes each location in the list $L..L'$ to value $V$. */
+and that $L..L'\mapsto V$ initializes each location in the list $L..L'$ to value $V$.  Note that, since the dimensions of array declarations can be arbitrary expressions, this virtually means that we can
+dynamically allocate memory in SIMPLE by means of array declarations. */
 
   rule <k> var X[N:Nat]; => . <_/k>
        <env> Env => Env[L/X] </env>
        <store_> . => (L |-> array(L +Nat 1, N)) L +Nat 1 .. L +Nat 1 +Nat N |-> 0 <_/store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-/*@ To desugar multi-dimensional arrays, we introduce two special unique variable
+/*@
+SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we desugar them all into
+uni-dimensional arrays by code transformation.  This way, we will only need to give semantics
+to uni-dimensional arrays.  First, the context rule below is used to request the evaluation of array dimensions: */
+
+  context var X[_,`[HOLE`]:Exp,_];
+
+/*@  Upon evaluating the array dimensions, the code generation rule below desugars multi-dimensional array declaration to uni-dimensional declarations. To this aim, we introduce two special unique variable
 identifiers, \texttt{\$1} and \texttt{\$2}.  The first, \texttt{\$1},
 is assigned the array reference value of the current array, so that we can redeclare
 the array inside the loop body with fewer dimensions.  The second variable,
@@ -184,21 +182,19 @@ the array inside the loop body with fewer dimensions.  The second variable,
          }
        }  [structural]
 
-/*@ Ideally, one would like to perform syntactic desugarings like above before we start
-the actual semantics.  Unfortunately, that was not possible in this case because we
-need to first evaluate the dimension expressions of the multi-dimensional array.
+/*@ Ideally, one would like to perform syntactic desugarings like the one above before 
+the actual semantics.  Unfortunately, that was not possible in this case because the dimension expressions of the multi-dimensional array need to be evaluated first.
 Indeed, the desugaring rule above does not work if the dimensions of the declared
 array are arbitrary expressions, because they can have side effects
 (e.g., \texttt{a[++x,++x]}) and those side effects would be propagated each time the
 expression is evaluated in the desugaring code (note that both the loop condition and
-the nested multi-dimensional declaration need to evaluate expressions given originally
-array dimensions). */
+the nested multi-dimensional declaration would need to evaluate the expressions given as array dimensions). */
 
 /*@ \subsection*{Function declaration}
 Functions are evaluated to $\lambda$-abstractions and stored like any other values
 in the store.  A binding is added into the environment for the function name to the
-location holding its body.  SIMPLE only allows function declarations at the top level
-of the program, like $C$.  More precisely, the subsequent semantics of SIMPLE only works
+location holding its body.  Similarly to the C language, SIMPLE only allows function declarations at the top level
+of the program.  More precisely, the subsequent semantics of SIMPLE only works
 well when one respects this requirement.  Indeed, the simplistic context-free parser
 generated by the grammar above is more generous than we may want, in that it allows
 function declarations anywhere any declaration is allowed, including inside arbitrary
@@ -218,7 +214,7 @@ discards programs which do not respect this requirement. */
 
 /*@ When we are done with the first pass (pre-processing), the computation cell
 \textsf{k} contains only the token \texttt{execute} (see the module
-SIMPLE-UNTYPED in file \texttt{simple-untyped.k}, which adds the token \texttt{extend}
+SIMPLE-UNTYPED below, whose rule for initiating the execution of a program adds the token \texttt{execute}
 at the end of the program) and the cell \textsf{genv} is empty.  In this case, we
 have to call \texttt{main()} and to initialize the global environment by transferring the
 contents of the local environment into it.  We prefer to do it this way, as opposed to
@@ -288,7 +284,7 @@ desugars multi-dimensional array access to uni-dimensional array access; recall 
 array access operation was declared strict, so all sub-expressions involved are already
 values at this stage.  The second rule rewrites the array access to a lookup operation
 at a precise location; we prefer to do it this way to avoid locking the store.
-Recall that ``--'' is an anonymous variable in \K matching any subterm (like in Prolog);
+Recall that ``---'' is an anonymous variable in \K matching any subterm (like in Prolog);
 informally, ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
@@ -376,7 +372,7 @@ so we define it together with other auxiliary operations at the end of the seman
 Recall that we allow local variable declarations, whose scope is the block enclosing them.
 That is the reason for which we have to recover the environment after the block.
 This allows us to have a very simple semantics for variable declarations, as we did above.
-One can make the two rules below computational if one doesn't want them to count as
+One can make the two rules below computational if one wants them to count as
 computational steps. */
 
   rule {} => . [structural]
@@ -399,7 +395,7 @@ that variables in rules are typically represented as pointers in implementations
 operations. */
 
 /*@ \subsection*{Sequential composition}
-Sequential composition is desugared into \K's builtin sequentialization operation (recall that
+Sequential composition is desugared into \K's builtin sequentialization operation (recall that, like in C,
 the semi-colon ``\texttt{;}'' is not a statement separator in SIMPLE---it is either a statement
 terminator or a construct for a statement from an expression).
 The rule below is computational, so it does count as a computational step.
@@ -409,8 +405,8 @@ dissolve from the top of the computation when they are completed; this is in sha
 (artificially) ``evaluating'' them to a special \texttt{skip} statement value and then getting
 rid of that special value, as it is the case in other semantic approaches (where everything
 must evaluate to something).  This means that once $S_1$ completes in the rule below, $S_2$
-becomes automatically the next computation item without any other explicit or implicit
-additional rules. */
+becomes automatically the next computation item without any additional (explicit or implicit)
+rules. */
 
   rule S1:Stmt S2:Stmt => S1~>S2
 
@@ -478,11 +474,11 @@ precisely all the above. */
        <control> <xstack> . => (X,S2,K,Env,C) <_/xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . <_/k> <xstack> _:ListItem => . <_/xstack>
-  rule <k> throw V; ~> _ => S2 ~> env(Env) ~> K </k>
+  rule <k> throw V; ~> _ => {var X=V; S2} ~> K </k>
        <control> <xstack> (X,S2,K,Env,C) => . <_/xstack> (_ => C) </control>
-       <env> _ => Env[L/X] </env>
-       <store_> . => L |-> V <_/store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <env> _ => Env </env>
+
+/*@ The catch statement $S_2$ needs to be executed in the original environment, but where the thrown value $V$ was bound to the catch variable $X$.  Instead of giving a direct semantics for these actions, we here chose to rely on previously defined constructs which achieve the same goal: (1) the variable declaration with initialization, for binding $X$ for $V$; and (2) the block construct for preventing $X$ from shadowing variables in the original environment upon the completion of $S_2$. */
 
 /*@ \subsection*{Threads}
 SIMPLE's threads can be created and terminated dynamically, and can synchronize by
@@ -490,9 +486,9 @@ acquiring and releasing re-entrant locks and by rendezvous.  We discuss the 7 ru
 giving the semantics of these operations below. */
 
 /*@ \subsubsection*{Thread creation}
-Threads can be created by any other threads using the ``\texttt{spawn($S$)}'' statement.
-The spawn statement in the creating thread dissolves, at the same time adding a new thread
-cell to the configuration sharing the same environment.  Note that the created \textsf{thread}
+Threads can be created by any other threads using the ``\texttt{spawn $S$}'' statement.
+The spawn statement is consumed in the creating thread and, at the same time,  a new thread
+cell  is added to the to the configuration initialized with the $S$ statement and sharing the same environment with the spawning thread.  Note that the newly created \textsf{thread}
 cell is torn.  That means that the remaining cells are added and initialized automatically as
 described in the definition of SIMPLE's configuration.  This is part of \K's
 configuration abstraction/concretization mechanism. */
@@ -501,8 +497,8 @@ configuration abstraction/concretization mechanism. */
         (. => <thread_> <k> S </k> <env> Env </env> <_/thread>)
 
 /*@ \subsubsection*{Thread termination}
-Dually to the above, when a thread terminates its assigned computation (so the contents of its
-\textsf{k} cell is empty) it can be dissolved.  However, since no discipline is imposed on how
+Dually to the above, when a thread terminates its assigned computation (the contents of its
+\textsf{k} cell) is empty, so the thread can be dissolved.  However, since no discipline is imposed on how
 locks are acquired and released, it can be the case that a terminating thread still holds
 locks.  Those locks must be released, so other threads attempting to acquire them do not deadlock.
 We achieve that by removing all the locks held by the terminating thread in its \textsf{holds}
@@ -579,9 +575,9 @@ For convenience in giving the semantics of constructs like the increment and the
 we want to operate the same way on variables and on array elements, we used an auxiliary
 \texttt{l-value($E$)} construct which was expected to evaluate to the l-value of the expression $E$.
 This is only defined when $E$ has an l-value, that is, when $E$ is either a variable or evaluates to
-an array element.  The value that \texttt{l-value($E$)} evaluates to has the form \texttt{loc($L$)},
-where $L$ is a location, i.e., a natural number; we prefer to structurally distinguish natural
-numbers from location values for clarity.  Therefore, there are two cases to consider.
+an array element.  \texttt{l-value($E$)} evaluates to a value of the form \texttt{loc($L$)},
+where $L$ is the location where the value of $E$ can be found; for clarity, we use \texttt{loc} to structually distinguish natural
+numbers from location values.  In giving semantics to \texttt{l-value} there are two cases to consider.
 (1) If $E$ is a variable, then all we need to do is to grab its location from the environment.
 (2) If $E$ is an array element, then we first evaluate the array and its index in order to identify
 the exact location of the element of concern, and then return that location; the last rule below
