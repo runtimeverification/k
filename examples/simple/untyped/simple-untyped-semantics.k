@@ -9,18 +9,17 @@ kmod SIMPLE-UNTYPED-SEMANTICS is
 Before one starts adding semantic rules to a \K definition, one needs to
 define the basic semantic infrastructure consisting of definitions for {\em values},
 {\em computations} and the {\em configuration}.  The values are needed to know when to
-stop applying the heating rules corresponding to strictness or context declarations.
- As values carry semantic, language dependent meaning, they cannot be  automatically inferred, so one cannot avoid this step.
-The computation structures, or simply computations, are needed to properly include the
-language syntax under the K sort, as the \K semantics operates only on terms of sort $K$;
-fortunately, this can be done mostly automatically, except for the special result
-computations.  Finally, the configuration serves as a backbone for the process of
+stop applying the heating rules corresponding to strictness or context declarations. As values
+carry semantic, language dependent meaning, they cannot be  automatically inferred, so one
+cannot avoid this step.  The computation structures, or simply computations, are needed to
+properly include the language syntax under the K sort, as the \K semantics operates only on
+terms of sort $K$; fortunately, this can be done mostly automatically, except for the special
+result computations.  Finally, the configuration serves as a backbone for the process of
 configuration abstraction which allows users to only mention the relevant cells in each
 semantic rule, the rest of the configuration context being inferred automatically. Although the
-configuration could potentially be automatically inferred from the rules, we believe 
-that it is very useful for language designers/semanticists to actually think of and
-design their configuration explicitly, so the current implementation of \K requires one
-to define it. */
+configuration could potentially be automatically inferred from the rules, we believe that it is
+very useful for language designers/semanticists to actually think of and design their
+configuration explicitly, so the current implementation of \K requires one to define it. */
 
 /*@ \subsubsection*{Values}
 We here define the values of the language that the various fragments of
@@ -45,11 +44,12 @@ become AST node labels, i.e., constants of sort $\KLabel$) extended with the spe
 {\em task sequentialization} construct $K ::= K \kra K$.  In addition to the sorts
 $K$ and $\KLabel$, the \K tool also has one more important sort related to computations, namely
 $\KResult$.  Distinguishing terms of sort $\KResult$ is not necessary in theory, but it
-is crucial in implementations of the \K framework, because it allow to distinguish a class of terms as irreducible and thus to more efficienlty implement the heating/cooling process associated to the strictness attributes.
-Below we state that all lists of values are terms of sort $\KResult$.  We use lists of
-values instead of values because, as discussed above, we want lists of expressions
-to evaluate to lists of values whenever scheduled for evaluation (by placing them on
-the top of the \textsf{k} cell). */
+is crucial in implementations of the \K framework, because it allows to distinguish a class of
+terms as irreducible and thus to more efficiently implement the heating/cooling process
+associated to the strictness attributes.  Below we state that all lists of values are terms of
+sort $\KResult$.  We use lists of values instead of values because, as discussed above, we want
+lists of expressions to evaluate to lists of values whenever scheduled for evaluation (by
+placing them on the top of the \textsf{k} cell). */
 
   syntax KResult ::= List{Val}
 
@@ -576,14 +576,15 @@ we want to operate the same way on variables and on array elements, we used an a
 \texttt{l-value($E$)} construct which was expected to evaluate to the l-value of the expression $E$.
 This is only defined when $E$ has an l-value, that is, when $E$ is either a variable or evaluates to
 an array element.  \texttt{l-value($E$)} evaluates to a value of the form \texttt{loc($L$)},
-where $L$ is the location where the value of $E$ can be found; for clarity, we use \texttt{loc} to structually distinguish natural
-numbers from location values.  In giving semantics to \texttt{l-value} there are two cases to consider.
-(1) If $E$ is a variable, then all we need to do is to grab its location from the environment.
-(2) If $E$ is an array element, then we first evaluate the array and its index in order to identify
-the exact location of the element of concern, and then return that location; the last rule below
-works because its preceding context declarations ensure that the array and its index are evaluated,
-and then the rule for array lookup (defined above) rewrites the evaluated array access construct to
-its corresponding store lookup operation. */
+where $L$ is the location where the value of $E$ can be found; for clarity, we use \texttt{loc}
+to structurally distinguish natural numbers from location values.  In giving semantics to
+\texttt{l-value} there are two cases to consider.  (1) If $E$ is a variable, then all we need
+to do is to grab its location from the environment.  (2) If $E$ is an array element, then we
+first evaluate the array and its index in order to identify the exact location of the element
+of concern, and then return that location; the last rule below works because its preceding
+context declarations ensure that the array and its index are evaluated, and then the rule for
+array lookup (defined above) rewrites the evaluated array access construct to its corresponding
+store lookup operation. */
 
   syntax Exp ::= l-value ( K )    --- for parsing reasons, we prefer to allow l-value to take a K
   syntax Val ::= loc ( Nat )
