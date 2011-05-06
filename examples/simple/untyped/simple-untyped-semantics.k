@@ -35,6 +35,10 @@ in the fixed global environment and function definitions cannot be nested). */
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
   syntax Exp ::= Val
 
+/*@
+  The inclusion of values in expressions follows the methodology of syntactic definitions (as, e.g., SOS):  extend the syntax of the language to encompass all values and additional construct needed in giving semantics.   In addition to that, it allows us to write the semantic rules using the original syntax of the language, and to parse them with the same (now extended with additional values) parser.  If writing the semantics directly on the \K AST, using the associated labels instead of the syntactic constructs, then one would not need to include values in expressions.
+*/
+
 /*@ \subsubsection*{Computations}
 Recall that in \K, the computations ``swallow'' the entire language syntax (note that
 the builtin module \texttt{K} is included).  Thus, every fragment of program is a
@@ -61,10 +65,7 @@ store map cell \textsf{store} mapping each location to some value, a set cell
 \textsf{busy} holding the locks which have been acquired but not yet released
 by threads, \textsf{input} and \textsf{output} list cells, and a
 \textsf{nextLoc} cell holding a natural number indicating the next available
-location (one can think of locations as symbolic entities; e.g., location 17
-means the 17'th allocated location, which in implementations of the language
-may be different from memory cell 17 or may even be the same memory cell that
-was previously allocated and then freed).  The \textsf{threads} cell contains
+location.  For simplicity, the location counter in \textsf{nextLoc} models an actual physical location in the store (and assumes no garbage collection).  In other definitions (such as KERNELC) we show how one can model locations in the store to be symbolic and thus abstract away form the memory allocator library.   The \textsf{threads} cell contains
 one \textsf{thread} cell for each existing thread in the program.  Note that
 the thread cell has multiplicity ``*'', which means that at any given moment
 there could be zero, one or more \textsf{thread} cells.  Each \textsf{thread}
@@ -366,9 +367,7 @@ We next define the \K semantics of statements, also in the order their syntax wa
 /*@ \subsection*{Blocks}
 Empty blocks are simply discarded, as shown in the first rule below.
 For non-empty blocks, we schedule the enclosed statement but we have to
-make sure the environment is recovered after the enclosed statement executes;
-the environment recovery computation task \texttt{env(...)} is used in other places, too,
-so we define it together with other auxiliary operations at the end of the semantics.
+make sure the environment is recovered after the enclosed statement executes.
 Recall that we allow local variable declarations, whose scope is the block enclosing them.
 That is the reason for which we have to recover the environment after the block.
 This allows us to have a very simple semantics for variable declarations, as we did above.
@@ -377,6 +376,18 @@ computational steps. */
 
   rule {} => . [structural]
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env </env> [structural]
+
+/*@ The definition of environment recovery is straightforward: */
+
+  syntax K ::= env ( Map )
+  rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
+
+/* In fact, the above follows a common convention in \K for recovery operations of cell contents.
+More precisely, the conventional meaning of a computation task of the form \texttt{cell($C$)} that
+reaches the top of the computation is that the current contents of cell \textsf{cell} is discarded
+and gets replaced with $C$.  We did not add support for these special computation tasks in our
+current implementation of \K, so we need to define them as above. */
+
 
 /*@ 
 There are two common alternatives to the above semantics of blocks.  One is to keep track of
@@ -389,10 +400,9 @@ and pop it when exiting it.  This way, one does more work when accessing variabl
 to search the variable in the environment stack in a top-down manner), but on the other hand uses
 smaller environments and the definition gets closer to an implementation.  Based on experience with
 dozens of language semantics and other \K definitions, we have found that our approach above is the
-best trade-off between elegance and efficiency, so it is the one that we follow in general.  Recall
-that variables in rules are typically represented as pointers in implementations of rewriting, so
-``storing/recovering the current environment in/from the computation'' are computationally very cheap
-operations. */
+best trade-off between elegance and efficiency (especially since rewrite engines have built-in techniques to lazily copy terms, by need, thus not creating unnecessary copies) , so it is the one that we follow in general.  */
+
+
 
 /*@ \subsection*{Sequential composition}
 Sequential composition is desugared into \K's builtin sequentialization operation (recall that, like in C,
@@ -478,7 +488,9 @@ precisely all the above. */
        <control> <xstack> (X,S2,K,Env,C) => . <_/xstack> (_ => C) </control>
        <env> _ => Env </env>
 
-/*@ The catch statement $S_2$ needs to be executed in the original environment, but where the thrown value $V$ was bound to the catch variable $X$.  Instead of giving a direct semantics for these actions, we here chose to rely on previously defined constructs which achieve the same goal: (1) the variable declaration with initialization, for binding $X$ for $V$; and (2) the block construct for preventing $X$ from shadowing variables in the original environment upon the completion of $S_2$. */
+/*@ The catch statement $S_2$ needs to be executed in the original environment, but where the thrown value $V$ was bound to the catch variable $X$.  We here chose to rely on two previously defined constructs when giving semantics to the catch part of the statement: (1) the variable declaration with initialization, for binding $X$ for $V$; and (2) the block construct for preventing $X$ from shadowing variables in the original environment upon the completion of $S_2$. 
+Note, however, that the semantics of {\tt throw} can also be given directly, in one computational step, especially in languages without variable initializers and blocks.
+*/
 
 /*@ \subsection*{Threads}
 SIMPLE's threads can be created and terminated dynamically, and can synchronize by
@@ -555,20 +567,6 @@ to concretize the rule below to the actual configuration of SIMPLE is to include
 ----------------------------------------------
 //@ \section*{Auxiliary declarations and operations}
 ----------------------------------------------
-
-/*@ \subsection*{Environment recovery}
-We needed the environment recovery operation twice in our semantics above,
-the first time for blocks and the second time for exceptions.  Its definition
-is straightforward: */
-
-  syntax K ::= env ( Map )
-  rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
-
-/*@ In fact, the above follows a common convention in \K for recovery operations of cell contents.
-More precisely, the conventional meaning of a computation task of the form \texttt{cell($C$)} that
-reaches the top of the computation is that the current contents of cell \textsf{cell} is discarded
-and gets replaced with $C$.  We did not add support for these special computation tasks in our
-current implementation of \K, so we need to define them as above. */
 
 /*@ \subsection*{l-value and loc}
 For convenience in giving the semantics of constructs like the increment and the assignment, that

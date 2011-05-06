@@ -14,12 +14,11 @@ automatically (when one uses an external parser) or manually (when one writes th
 
 /*@ \subsection*{Declarations}
 There are two types of declarations: for variables (including arrays) and for functions.
-As syntactic sugar, functions taking zero arguments are given separate syntax, so one needs
-not write the empty list constant.
+As our current parser is ``algebraic'', the empty list needs to be identifiable as a constant (unlike CFG grammars, where it can simply be the empty string/epsilon production).  Therefore, if only using the first syntactic production for function declarations, one would need to explicitly specify the empty list constant for declaring a function with zero arguments.  To avoid having to do that, we add a separate function declaration production with explicitly no arguments; this is desugared into the first one.
 */
   syntax Decl ::= var List{Exp} ;
-                | function Id ( ) Stmt
                 | function Id ( List{Id} ) Stmt
+                | function Id ( ) Stmt
 
 /*@ \subsection*{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes an
