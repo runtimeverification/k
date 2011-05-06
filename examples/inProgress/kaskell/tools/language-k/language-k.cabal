@@ -1,6 +1,6 @@
-Name:               parsek
+Name:               language-k
 Version:            0.1.0
-Synopsis:           A parser for low-level K.
+Synopsis:           Parsing tools for the K semantic framework.
 License:            BSD3
 License-file:       LICENSE
 Author:             David Lazar
