@@ -28,7 +28,6 @@ import Data.List hiding (sort)
 import Data.Maybe
 import Data.Char
 import System.Console.CmdArgs
-import System.Console.CmdArgs.Explicit
 import System.Directory
 import System.Exit
 import System.FilePath
@@ -40,7 +39,6 @@ data KCP = KCP
     { load     :: [String]  -- ^ Files to load in the generated K module
     , include  :: [String]  -- ^ Modules to include in the generated K module
     , sort     :: String    -- ^ Sort the program should belong to
---    , morehelp :: Bool      -- ^ Print the detailed help message?
     , language :: String    -- ^ Name of the language the program is written in
     , infile   :: FilePath  -- ^ File containing the program to compile
     } deriving (Eq, Show, Data, Typeable)
@@ -50,7 +48,6 @@ kcpinit = KCP
     { load = ["-compiled"] &= typ "FILE [+]" &= help "Files to load in the generated K module"
     , include = [] &= typ "MODULE [+]" &= help "Modules to include in the generated K module"
     , sort = "Pgm" &= typ "SORT" &= help "Sort the program should belong to (default is Pgm)"
---    , morehelp = def &= explicit &= name "H" &= name "Help" &= help "Print the detailed help message"
     , language = def &= typ "LANGUAGE" &= argPos 0
     , infile = def &= typFile &= argPos 1
     } &= help "Compile a program into its K Core representation."
@@ -59,8 +56,6 @@ kcpinit = KCP
 
 main :: IO ()
 main = do
---    let mode = cmdArgsMode kcpinit
---    cmdargs <- processArgs mode
     kcp' <- cmdArgs kcpinit
     let kcp = completeKCP kcp'
 
