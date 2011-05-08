@@ -15,6 +15,7 @@
 module Language.K.Parser.Parsec where
 
 import Control.Applicative ((<$>))
+import Data.Char (isAlphaNum)
 import Text.Parsec
 
 import Internal.Lexer
@@ -40,7 +41,13 @@ kapp = do
 -- | Combine a KLabel and a list of arguments to form the original
 -- abstract syntax.
 zipSyntax (Syntax s : xs) as = s : zipSyntax xs as
-zipSyntax (Arg : xs) (a : as) = ("(" ++ a ++ ")") : zipSyntax xs as
+zipSyntax (Arg : xs) (a : as)
+    -- somewhat hackish way to reduce parentheses in output
+    -- TODO: this breaks test cases
+    -- TODO: will this make parsing harder in other places?
+    --  Perhaps this feature should be configurable.
+    | all isAlphaNum a = a : zipSyntax xs as
+    | otherwise = ("(" ++ a ++ ")") : zipSyntax xs as
 zipSyntax _ _ = []
 
 {- KLabels -}
