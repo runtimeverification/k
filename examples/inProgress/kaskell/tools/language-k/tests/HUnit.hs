@@ -78,3 +78,12 @@ test005R = "forall t1 . (forall t2 . ((t1 -> t2) -> (forall t3 . ((t2 -> t3) -> 
 
 test006  = "'_->_('int(.List{K}),,'int(.List{K}))"
 test006R = "int -> int"
+
+test007  = "'`{_`}('_`,_('_:_('age(.List{K}),,'int(.List{K})),,'_:_('height(.List{K}),,'int(.List{K}))))"
+test007R = "{ ((age : int) , (height : int)) }"
+
+test008  = "'`{_`}('_`,_('_:_('foo(.List{K}),,'_->_('`{_`}('_`,_('_:_('bar(.List{K}),,'bool(.List{K})))),,'bool(.List{K}))),,'_:_('random(.List{K}),,'int(.List{K}))))"
+test008R = "{ ((foo : (({ ((bar : bool) ,) }) -> bool)) , (random : int)) }" -- yuck
+
+test009  = "'_->_('_->_('`{_`}('_`,_('_:_('age(.List{K}),,'int(.List{K})),,'_:_('foo(.List{K}),,'int(.List{K})))),,'`{_`}('_`,_('_:_('height(.List{K}),,'int(.List{K}))))),,'int(.List{K}))"
+test009R = "(({ ((age : int) , (foo : int)) }) -> ({ ((height : int) ,) })) -> int" -- yuck
