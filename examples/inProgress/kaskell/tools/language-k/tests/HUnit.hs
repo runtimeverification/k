@@ -26,6 +26,9 @@ tests = TestList
     , test004 `shouldParseToS` test004R
     , test005 `shouldParseToS` test005R
     , test006 `shouldParseToS` test006R
+    , test007 `shouldParseToS` test007R
+    , test008 `shouldParseToS` test008R
+    , test009 `shouldParseToS` test009R
     -- Attoparsec tests
     , test001 `shouldParseToB` test001R
     , test002 `shouldParseToB` test002R
@@ -60,6 +63,9 @@ test003, test003R :: (IsString a) => a
 test004, test004R :: (IsString a) => a
 test005, test005R :: (IsString a) => a
 test006, test006R :: (IsString a) => a
+test007, test007R :: (IsString a) => a
+test008, test008R :: (IsString a) => a
+test009, test009R :: (IsString a) => a
 
 test001  = "'NegApp_('Lit_('Int_(Int 42(.List{K}))))"
 test001R = "NegApp (Lit (Int (42)))"
