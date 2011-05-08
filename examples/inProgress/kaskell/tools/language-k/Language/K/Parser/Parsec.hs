@@ -33,18 +33,22 @@ kempty = string ".List{K}"
 -- | Parse a K application: KLabel(K1,,K2)
 kapp :: Parser String
 kapp = do
-    (label, argc) <- klabel
+    kl <- klabel
     argv <- parens (kterm `sepBy` (symbol ",,"))
-    proceed label argc argv
-    where proceed label argc argv
-              | argc == 0 = return label
-              | argc /= length argv = fail "unexpected number of arguments"
-              | otherwise = return $ label ++ " " ++ parenthesize argv
+    return . unwords $ zipSyntax kl argv
+
+-- | Combine a KLabel and a list of arguments to form the original
+-- abstract syntax.
+zipSyntax (Syntax s : xs) as = s : zipSyntax xs as
+zipSyntax (Arg : xs) (a : as) = ("(" ++ a ++ ")") : zipSyntax xs as
+zipSyntax _ _ = []
 
 {- KLabels -}
 
--- | A KLabel is its name and its number of arguments
-type KLabel = (String, Int)
+data KLabelPart = Syntax String | Arg
+    deriving (Eq, Show)
+
+type KLabel = [KLabelPart]
 
 -- | Parse a KLabel
 klabel :: Parser KLabel
@@ -52,15 +56,17 @@ klabel = genklabel <|> kbuiltin
 
 -- | Parse generated K label: 'Foo___
 genklabel :: Parser KLabel
-genklabel = do
-    char '\''
-    name <- maudeIdentifier
-    argc <- length <$> many (char '_')
-    return (name, argc)
+genklabel = char '\'' >> many1 klabelpart
+
+-- | Parse part of a K label (an '_' arg or syntax)
+klabelpart :: Parser KLabelPart
+klabelpart = syntax <|> arg
+    where syntax = Syntax <$> maudeIdentifier
+          arg = char '_' >> return Arg
 
 -- | Parse a K builtin
 kbuiltin :: Parser KLabel
-kbuiltin = flip (,) 0 <$> (kint <|> kstring)
+kbuiltin = (:[]) . Syntax <$> (kint <|> kstring)
 
 -- | Parse an Int builtin: Int 42
 kint :: Parser String
@@ -82,7 +88,7 @@ kstring = do
 -- assume identifiers will not contain '_'  and that '`' will not be used to
 -- escape spaces.
 maudeIdentifier :: Parser String
-maudeIdentifier = many maudeIdChar
+maudeIdentifier = many1 maudeIdChar
 
 maudeIdChar :: Parser Char
 maudeIdChar = noneOf ("`_ " ++ maudeIdSpecialChars) <|> maudeIdEscape
@@ -94,9 +100,3 @@ maudeIdEscape = char '`' >> oneOf maudeIdSpecialChars
 -- in that they break a sequence of characters into several identifiers.
 maudeIdSpecialChars :: String
 maudeIdSpecialChars = "{}()[],"
-
-{- Utilities -}
-
--- | ["x", "y", "z"] -> "(x) (y) (z)"
-parenthesize :: [String] -> String
-parenthesize = unwords . map (\x -> "(" ++ x ++ ")")
