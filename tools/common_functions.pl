@@ -1887,7 +1887,7 @@ sub solve_latex
 	local $_ = shift;
 	my $file = shift;
 
-	s/(k?mod.*?endk?m)/
+	s/(k?mod.*?endk?m)(?!\\end\{)/
 	{
 		solve_latex_comments($&, countlines($`), $file);
 	}
@@ -1907,8 +1907,6 @@ sub solve_latex_comments
 	# get k module line no and file name
 	my $lno = shift;
 	my $file = shift;
-        #	s/\t/$TAB/sg;
-        #        s/\n/" +String \n"/sg;
 
 	s!($latex_comment)!{
 		my $l = countlines($`) + $lno - 1;
