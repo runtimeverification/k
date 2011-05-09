@@ -6,8 +6,14 @@ Prerequisites:
 
 - Maude (http://maude.cs.uiuc.edu/)
 	- Only versions 2.5 and later are supported
+        - The Maude executable must renamed into `maude` 
+          (alternatively, you could create a symbolic link for it,
+                       or set $maude_path variable in tools/kompile.pl:26) 
+        - the MAUDE_LIB environment variable need to point to the Maude dir
+
 - Perl
-	- Needs the following modules, installable through cpan (linux, cygwin) or ppm (windows):
+	- Needs the following modules, installable through cpan (linux, cygwin) 
+                                                        or ppm (windows)
 		- Regexp::Common
 		- XML::DOM
 		- XML::LibXML::Reader
@@ -18,3 +24,6 @@ Optional:
 
 - Haskell (GHC)
 	- This is used with the output pretty printer in tools/OutputFilter, and is not required.
+
+
+More instructions on witing, compiling, and execution K definitions can be found in the README file.
