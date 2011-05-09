@@ -335,6 +335,7 @@
   {\sc configuration:}%
   \setlength{\parindent}{2em}%
   \par $#1$%
+  \k@markPosition%
   \setlength{\parindent}{1em}%
 }
 
@@ -623,49 +624,69 @@
   }%
 }
 
-\newcommand{\kequation}[2]{\par%
-  \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
+\newcommand{\kequation}[2]{%
+  \par\hbox{%
+    \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
+  }%
   \k@markPosition%
   \bigskip%
 }
 \newcommand{\kcequation}[3]{\par%
   \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   \when{#3}
-}
-\newcommand{\mequation}[3]{\par%
-  \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
   \k@markPosition%
 }
-\newcommand{\cmequation}[4]{\par%
-  \k@ruleLabel{#1}{equation}\hspace{1em}$#2 = #3$%
-  \when{#4}%
+\newcommand{\mequation}[3]{%
+  \par\hbox{%
+    \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
+  }%
+  \k@markPosition%
+}
+\newcommand{\cmequation}[4]{%
+  \par\hbox{%
+    \k@ruleLabel{#1}{equation}\hspace{1em}$#2 = #3$%
+    \when{#4}%
+  }%
+  \k@markPosition%
 }
 
 %%% Rules.
 
-\newcommand{\krule}[2]{\par%
-  \indent\k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
+\newcommand{\krule}[2]{%
+  \par\indent\hbox{%
+    \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
+  }%
+  \k@markPosition%
   \bigskip%
 }
-\newcommand{\kcrule}[3]{\par%
-  \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
-  \when{#3}%
+\newcommand{\kcrule}[3]{%
+  \par\hbox{%
+    \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
+    \when{#3}%
+  }%
+  \k@markPosition%
 }
 \newcommand{\kndrule}[2]{\par%
   \k@ruleLabel{#1}{non-det rule}%
   \setlength{\parindent}{3em}%
-  \par$#2$%
+  \par\hbox{$#2$}%
+  \k@markPosition%
   \setlength{\parindent}{2em}%
   \bigskip%
 }
-\newcommand{\mrule}[3]{\par%
-  \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
+\newcommand{\mrule}[3]{%
+  \par\hbox{%
+    \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
+  }%
   \k@markPosition%
   \bigskip%
 }
-\newcommand{\cmrule}[4]{\par%
-  \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
-  \when{#4}%
+\newcommand{\cmrule}[4]{%
+  \par\hbox{%
+    \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
+    \when{#4}%
+  }%
+  \k@markPosition%
 }
 
 
