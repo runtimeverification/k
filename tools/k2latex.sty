@@ -14,7 +14,6 @@
 \usepackage[scaled]{beramono}
 
 \usepackage[small,compact]{titlesec}
-\usepackage{arydshln}
 \usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
 
 % PDF link colors
@@ -350,16 +349,43 @@
 
 \newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
 \newcommand{\reduceTopS}[2]{{#1}\rightharpoonup{#2}}
-\newcommand{\reduce}[2]{%
-  \begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}%
-  {#1}\\\hline{#2}%
-  \end{array}%
-}
-\newcommand{\reduceS}[2]{%
-  \begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}
-  {#1}\\\hdashline[1pt/1pt]{#2}%
-  \end{array}%
-}
+\newcommand{\reduce}[2]{\hbox{%
+  \begin{tikzpicture}[baseline=(top.base),
+                      inner xsep=0pt,
+                      inner ysep=.3333ex]
+    \path node (top) {$#1$\strut}
+          (top.south)
+          node (bottom) [anchor=north, inner ysep=.5ex] {$#2$\strut};
+    %%% Draw the horizontal line:
+    % Line with chevron.
+    %\path[draw,thin,solid] let \p1 = (current bounding box.west),
+    %                           \p2 = (current bounding box.east),
+    %                           \p3 = (top.south)
+    %                       in (top.south) ++(0,-1.5pt) -- ++(-2pt,1.5pt) -- (\x1,\y3)
+    %                          (top.south) ++(0,-1.5pt) -- ++(2pt,1.5pt)  -- (\x2,\y3);
+    %%% Other options:
+    % Solid line.
+    \path[draw,thin,solid] let \p1 = (current bounding box.west),
+                               \p2 = (current bounding box.east),
+                               \p3 = (top.south)
+                           in (\x1,\y3) -- (\x2,\y3);
+    % Solid arrow (augmenting the solid line).
+    \path[fill] (top.south) ++(2pt,0) -- ++(-4pt,0) -- ++(2pt,-1.5pt) -- cycle;
+  \end{tikzpicture}%
+}}
+\newcommand{\reduceS}[2]{\hbox{%
+  \begin{tikzpicture}[baseline=(top.base),
+                      inner xsep=0pt,
+                      inner ysep=.3333ex]
+    \path node (top) {$#1$\strut}
+          (top.south)
+          node (bottom) [anchor=north] {$#2$\strut};
+    \path[draw,thin,densely dashed] let \p1 = (current bounding box.west),
+                                        \p2 = (current bounding box.east),
+                                        \p3 = (top.south)
+                                    in (\x1,\y3) -- (\x2,\y3);
+  \end{tikzpicture}%
+}}
 \newcommand{\kra}{\curvearrowright}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
 \newcommand{\constant}[2]{%
@@ -402,7 +428,7 @@
 \newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
-\newcommand{\bAnyVar}[1]{\mbox{---}}
+\newcommand{\bAnyVar}[1]{\mbox{--}}
 
 \tikzset{
   cell/.style={
