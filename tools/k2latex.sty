@@ -429,7 +429,11 @@
 \newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
-\newcommand{\bAnyVar}[1]{\mbox{--}}
+\newcommand{\bAnyVar}[1]{%
+  \pdfmarkupcomment[author={Variable Sort},markup=Underline,color=Khaki,opacity=0.0]{%
+    \mbox{--}%
+  }{#1}%
+}
 
 \tikzset{
   cell/.style={
