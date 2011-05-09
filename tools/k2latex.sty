@@ -23,8 +23,9 @@
 %%% PDF functionality.
 
 \usepackage[pdftex]{hyperref}
+\usepackage{pdfcomment}
 
-%%% Auxiliary packages .
+%%% Auxiliary packages.
 
 \usepackage{calc}
 \usepackage{ifthen}
@@ -303,8 +304,16 @@
 }
 \newcommand{\kra}{\curvearrowright}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
-\newcommand{\constant}[2]{\text{\sffamily #1}}
-\newcommand{\variable}[2]{\text{{\itshape #1}\/}}
+\newcommand{\constant}[2]{%
+  \pdfmarkupcomment[author={Constant Sort},markup=Underline,color=Red,opacity=0.0]{%
+    \text{\sffamily #1}%
+  }{#2}%
+}
+\newcommand{\variable}[2]{%
+  \pdfmarkupcomment[author={Variable Sort},markup=Underline,color=Khaki,opacity=0.0]{%
+    \text{{\itshape #1}\/}%
+  }{#2}%
+}
 \newcommand{\prefixOp}[1]{\text{\sffamily #1}}
 \newcommand{\dotCt}[1]{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
 
