@@ -1,6 +1,7 @@
 %%% Layout and design imports.
 
 \usepackage{times}
+\usepackage{microtype}
 \usepackage[small,compact]{titlesec}
 \usepackage{arydshln}
 
@@ -15,10 +16,7 @@
 \usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{shapes.misc}
-\usetikzlibrary{positioning}
 \usetikzlibrary{calc}
-\usetikzlibrary{fit}
-\usetikzlibrary{decorations.pathmorphing}
 
 %%% PDF functionality.
 
@@ -315,7 +313,7 @@
   }{#2}%
 }
 \newcommand{\prefixOp}[1]{\text{\sffamily #1}}
-\newcommand{\dotCt}[1]{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
+\newcommand{\dotCt}[1]{\raise.3ex\hbox{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}}
 
 %%% Mathematical notation.
 
@@ -334,7 +332,7 @@
 \newcommand{\ballLarge}[3]{%
   \kcell{#1}%
         {#2}%
-        {$\begin{array}{@{}c@{}}%
+        {$\begin{array}[t]{@{}c@{}}%
             #3%
           \end{array}$}%
         {convex}%
@@ -346,36 +344,165 @@
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
 \newcommand{\bAnyVar}[1]{\mbox{---}}
 
-\newcommand{\kcell}[5]{
-\begin{tabular}{@{}c@{}}
-\vtop{
-\vskip-1ex
-\hbox{
-\begin{tikzpicture}
-  \node[draw=#1!50!black,line width=1pt,name=cell,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=#5,/pgf/rounded rectangle west arc=#4,fill=#1!20,minimum height=4ex,minimum width=3em]{#3};
-\draw[shift=(cell.north east)]plot coordinates{(-.1pt,-.5pt)} node[name=ce,minimum size=.01pt,inner sep=0pt]{};
-\draw[shift=(cell.north west)]plot coordinates{(.1pt,-.5pt)} node[name=cw,     minimum size=.01pt,inner sep=0pt]{};
-\draw[color=#1!20,line width=1.2pt](cw.east)--(ce.west);
-\draw[shift=(cell.north west)]plot coordinates{(0,-1.05pt)}
-node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rounded rectangle arc length=180,/pgf/rounded rectangle east arc=convex,/pgf/rounded rectangle west arc=convex,fill=#1!20,draw=#1!20,line width=1pt,minimum width=2em,minimum height=2.5ex,draw=#1!50!black]
-{\textsf{\footnotesize #2}};%
-\draw[shift=(label.south east)]plot coordinates{(-.1pt,.5pt)} node[name=le,minimum size=.01pt,inner sep=0pt]{};
-\draw[shift=(label.south west)]plot coordinates{(.1pt,.5pt)} node[name=lw,     minimum size=.01pt,inner sep=0pt]{};
-\draw[color=#1!20,line width=1.2pt](lw.east)--(le.west);
-\draw[color=#1!50!black,line width=1pt](le.west) -- (ce.east);
-\ifthenelse{\equal{#4}{none}}{%
-\draw[fill,color=#1!50!black,decorate,decoration={coil,aspect=0,segment length=.5ex,amplitude=1pt}](cell.south west)--(cell.north west);%
-}{
+\tikzset{
+  cell/.style={
+    line width=1pt,
+    draw=#1!50!black,
+    shade,
+    shading=axis,
+    top color=#1!20,
+    bottom color=#1!20!white!90!black,
+  },
+  body/.style={
+    rounded rectangle,
+    rounded rectangle arc length=180,
+    minimum width=3em,
+    minimum height=4ex,
+    inner ysep=.3333em,
+    inner xsep=.3333em
+  },
+  label/.style={
+    rectangle,
+    inner xsep=.5ex,
+    inner ysep=.5ex,
+    text depth=.15em,
+%    font=\sffamily\footnotesize
+  },
 }
-\ifthenelse{\equal{#5}{none}}{%
-\draw[fill,color=#1!50!black,decorate,decoration={coil,aspect=0,segment length=.5ex,amplitude=1pt}](cell.north east)--(cell.south east);%
-}{
-}
-\end{tikzpicture}%
-}
-\vskip2ex}
-\end{tabular}
-}
+
+
+%%% The main bubble drawing method \kcell.
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\newlength{\k@cellContentWidth}
+\newlength{\k@cellContentHeight}
+\newlength{\k@labelXShift}
+\newlength{\k@ruptureStepSize}
+
+% Cell drawing happens roughly as follows:
+% 1) The cell content is placed in the image.
+% 2) TikZ fits a 'rounded rectangle' node around the content.  This node, which
+%    we call 'body' here, remains invisible; its anchors serve as reference points.
+% 3) The label is placed on the top left of the cell body.
+% 4) The cell outline is drawn and filled on the background layer, that is,
+%    behind the already placed cell content.
+% 5) Some vertical space is added around the whole drawing.
+\newcommand{\kcell}[5]{\hbox{%
+  \begingroup
+  \def\cellColor{#1}%
+  \def\cellLabel{\textsf{\footnotesize\strut #2}}% The strut ensures even label height.
+  \def\cellContent{#3}%
+  % Parameters #4 and #5 determine whether the west and east arc are curved
+  % or straight ("whole" or "ruptured").
+
+  \begin{tikzpicture}[baseline=(cell content.base)]
+    \begin{scope}[inner sep=0pt,outer sep=0pt,anchor=base west]
+      % Beside the cell content, also draw an empty node a bit wider than
+      % the cell label.  That way, the cell body will always be wide enough
+      % for the label.
+      \path node (cell content) {\cellContent}
+            node                {\phantom{\cellLabel}\hbox to 2em {}};
+    \end{scope}
+    % Determine the size of the cell content.
+    \def\k@cellContentBBox{\pgfpointdiff{\pgfpointanchor{current bounding box}{south west}}
+                                        {\pgfpointanchor{current bounding box}{north east}}}
+    \pgfextractx{\k@cellContentWidth}{\k@cellContentBBox}%
+    \pgfextracty{\k@cellContentHeight}{\k@cellContentBBox}%
+    
+    \begin{pgfonlayer}{background}
+      % Let TikZ find the best rounded rectangle around the content.
+      \path (cell content.center)
+            node (cell body) [body,
+                              anchor=center,
+                              text width=\k@cellContentWidth,
+                              text height=\k@cellContentHeight,
+                              rounded rectangle west arc=#4,
+                              rounded rectangle east arc=#5] {};
+    \end{pgfonlayer}
+
+    % Place the cell label relative to the rounded rectangle.  If the left side
+    % is straight, shift the label a little to the right to avoid an ugly
+    % long vertical left side.
+    \ifthenelse{\equal{#4}{convex}}{%
+      \setlength{\k@labelXShift}{0pt}%
+    }{
+      \setlength{\k@labelXShift}{1ex}
+    }%
+
+    \path (cell body.north west)
+          ++(\k@labelXShift,0pt)
+          node (cell label) [label,anchor=base west] {\cellLabel};
+
+    % Finally, draw the background of the cell behind the content.
+    \begin{pgfonlayer}{background}
+      % Decide how to draw the cell's west and east side.
+      \ifthenelse{\equal{#4}{convex}}{%
+        \def\cellWestArc{ arc (90:270:\n3) -- (cell body.south west) }%
+      }{%
+        % This yields a rounded zig zag pattern (starting outward).
+        \def\cellWestArc{ { [rounded corners=.25ex]
+                            \foreach \signPrefix in {-,0,-,0,-,0,-,0} {%
+                              -- ++(\signPrefix{}.75\k@ruptureStepSize,-\k@ruptureStepSize)}
+                          }
+                        }%
+      }%
+      \ifthenelse{\equal{#5}{convex}}{%
+        \def\cellEastArc{ arc (-90:90:\n3) }%
+      }{%
+        \def\cellEastArc{ { [rounded corners=.25ex]
+                            \foreach \signPrefix in {0,-,0,-,0,-,0,-} {%
+                              -- ++(\signPrefix{}.75\k@ruptureStepSize,\k@ruptureStepSize)}
+                          }
+                        }%
+      }
+
+      % Draw the cell outline
+      \path[cell=\cellColor]
+                    % Compute half of the body's height.  The value is the
+                    % radius for the arced sides; it also determines the size
+                    % of the zig zag pattern of ruptured sides.
+                    let \p1 = (cell body.north east),
+                        \p2 = (cell body.center),
+                        \n3 = {\y1 - \y2}
+                    in
+                    \pgfextra{%
+                      \setlength{\k@ruptureStepSize}{\n3}%
+                      \setlength{\k@ruptureStepSize}{.25\k@ruptureStepSize}%
+                     }%
+                     
+                    % Draw counter-clock-wise, starting from the
+                    % lower right corner.
+                    (cell body.south east)
+
+                    % Right
+                    \cellEastArc
+
+                    % Top
+                    { [rounded corners=.2em]
+                                  -- (cell label.base east)
+                                  -- (cell label.north east)
+                                  -- (cell label.north west)
+                                  -- (cell label.base west)
+                                  -- (cell body.north west)
+                    }
+                    % A little offset to the left for a more pleasant look
+                    -- ++(-.2em,0pt)
+
+                    % Left
+                    \cellWestArc
+
+                    % Bottom (just close the path)
+                    -- cycle;
+    \end{pgfonlayer}
+    
+    % Add extra space above and below the cell.
+    \path[use as bounding box] (current bounding box.south west) ++(0,-.3333em)
+                               rectangle (current bounding box.north east) ++(0,.3333em);
+  \end{tikzpicture}%
+  \endgroup
+}}
 
 
 % Rules and Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
