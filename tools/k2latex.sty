@@ -196,7 +196,13 @@
 % Turn off section numbering: all headings will look like they were starred.
 % However, they will still appear in the table of contents (and the bookmarks
 % that hyperref generates for the PDF).
-\setcounter{secnumdepth}{0}
+%
+% Note that hyperref seems to rely on the "secnumdepth" counter for bookmark
+% generation.  Thus, the "traditional" approach \setcounter{secnumdepth}{0}
+% leads to (rather) arbitrary bookmark nestings.
+%
+% Simply remove the labeling number from all titles.
+\titlelabel{}
 % Create TOC entries down to subsections.
 \setcounter{tocdepth}{4}
 % Show the TOC by default.
