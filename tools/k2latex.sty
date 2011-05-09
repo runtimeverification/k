@@ -1,32 +1,35 @@
+%%% Layout and design imports.
+
 \usepackage{times}
 \usepackage[small,compact]{titlesec}
 \usepackage{arydshln}
+
+%%% Additional symbols and notation.
+
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{stmaryrd}
+
+%%% Graphics.
+
 \usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
 \usepackage{tikz}
-\usepackage{hyperref}
-\usepackage{fancyvrb,fancybox}
-
-
 \usetikzlibrary{shapes.misc}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
 \usetikzlibrary{fit}
 \usetikzlibrary{decorations.pathmorphing}
-\usepackage{ucs}
-\usepackage{ifthen}
+
+%%% PDF functionality.
+
+\usepackage[pdftex]{hyperref}
+
+%%% Auxiliary packages .
+
 \usepackage{calc}
+\usepackage{ifthen}
+\usepackage{ucs}
 \usepackage{xspace}
-%\usepackage{fancyhdr}
-%\pagestyle{fancy}
-%\setlength{\headheight}{14pt}
-%\fancyhf{}
-%\fancyhead[L]{\underline{\footnotesize\tt \hspace{-2em}Page \thepage{}}}
-%\fancyfoot[L]{\underline{\footnotesize\tt \hspace{-2em}Page \thepage{}}}
-%\renewcommand{\headrulewidth}{0pt} 
-%\renewcommand{\footrulewidth}{0pt}
 
 
 
@@ -128,83 +131,211 @@
 }
 
 
+% Title %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-\newenvironment{latexComment}{%
-  \begin{Sbox}
-    \begin{minipage}{7in}
-}{%
-    \end{minipage}
-  \end{Sbox}
-      \medskip
-\begin{tikzpicture}
-\node[rounded corners,draw,fill=black!10,text width=7in]{\TheSbox};
-\end{tikzpicture}%
-\k@markPosition%
-}
-
-
-\newcommand{\K}{\mbox{$\mathbb{K}$}\xspace}
-\newcommand{\KLabel}{\textit{KLabel}\xspace}
-\newcommand{\KResult}{\textit{KResult}\xspace}
-
-\makeatletter
 \renewcommand{\@maketitle}{
-%\newpage
  \null
  \vskip 2em%
  \begin{quote}%
   {\LARGE \@title \par}%
-  {\Large \@author\par}
+  {\Large \@author\par}%
  \end{quote}%
- \par}
+ \par%
+}
 
-\newcommand{\when}[1]{\hspace{2em} when \ensuremath{#1}\bigskip}
- 
 
-\newlength{\syntaxlength}
-\definecolor{Grey}{rgb}{0.8,0.8,0.8}
-\newcommand{\nothing}{}
-\newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
+% Source Comments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{fancyvrb}
+\usepackage{fancybox}
+
+\tikzset{comment/.style={
+    rectangle,
+    rounded corners,
+    draw,
+    fill=black!10,
+    inner sep=.75em
+  }
+}
+
+
+% The comment environment.
+\newenvironment{latexComment}{%
+  \begin{Sbox}%
+    \begin{minipage}{50em}%
+}{%
+    \end{minipage}%
+  \end{Sbox}%
+  \bigskip%
+  \begin{tikzpicture}
+    \node[comment]{\TheSbox};
+  \end{tikzpicture}%
+  \k@markPosition%
+  \medskip%
+}
+
+% Macros for use in the comments.
+\newcommand{\K}{\mbox{$\mathbb{K}$}\xspace}
+\newcommand{\KLabel}{\textit{KLabel}\xspace}
+\newcommand{\KResult}{\textit{KResult}\xspace}
+
+
+% Special Glyphs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \newcommand{\lp}{(}
 \newcommand{\rp}{)}
-\newcommand{\kconfig}[1]{\par{\sc configuration:}\setlength{\parindent}{2em}\par$#1$\setlength{\parindent}{1em}}
-\newcommand{\kccontext}[3]{\par\text{\scshape context:
-}$#2$ \when{#3}}
-\newcommand{\kcontext}[2]{\par\text{\scshape context:
-}$#2$}
-\newcommand{\syntax}[3]{\par $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
-\newcommand{\syntaxCont}[3]{\par $\setlength{\syntaxlength}{\widthof{$#1::\;$}}\hspace{\syntaxlength}\mid{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}}
-\newcommand{\cellDecl}[2]{\par \text{\scshape cell:
-}$#1$ wraps $#2$}
-\newcommand{\nonTerminal}[1]{\text{\itshape #1}\/}
-\newcommand{\somespace}{\mathbin{}}
-\newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
-\newcommand{\kBR}{\\}
-\newcommand{\terminal}[1]{\ensuremath\mathrel{\text{\ttfamily #1}}}
-\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\text{\ttfamily #1}}}
-\newcommand{\sort}[1]{\text{\itshape #1}}
-\newcommand{\kind}[1]{\text{\itshape #1}}
-\newcommand{\kequation}[2]{
-\par\text{\scshape #1 rule:}\hspace{1em}$#2$\k@markPosition\bigskip}
-\newcommand{\kcequation}[3]{
-\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \when{#3}\k@markPosition}
-\newcommand{\krule}[2]{
-\par\indent\text{\scshape #1 rule:}\hspace{1em}$#2$\bigskip}
-\newcommand{\mrule}[3]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$\k@markPosition\bigskip}
-\newcommand{\cmrule}[4]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \when{#4}\k@markPosition}
-\newcommand{\mequation}[3]{\par\text{\scshape #1 macro:}\hspace{1em}$#2 = #3$}
-\newcommand{\sorts}[1]{}
-\newcommand{\cmequation}[4]{\par\text{\scshape #1 equation:}\hspace{1em}$#2 = #3$ \when{#4}\k@markPosition}
-\newcommand{\kcrule}[3]{
-\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \when{#3}}
-\newcommand{\kndrule}[2]{\par\text{\scshape #1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
 \newcommand{\myquote}[1]{\text{\rmfamily ``\ttfamily #1\rmfamily ''}}
 \newcommand{\mysinglequote}[1]{\text{\rmfamily "}}
 \newcommand{\mybracket}[1]{(#1)}
 \newcommand{\sqbracket}[1]{[#1]}
 \newcommand{\crlbracket}[1]{{#1}}
+
+\newcommand{\nothing}{}
+\newcommand{\somespace}{\mathbin{}}
+\newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
+
+\newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
+\newcommand{\kBR}{\\}
+
+
+% Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{module}[1]{%
+  \par\noindent%
+  \text{\scshape Module #1}%
+  \setlength{\parindent}{1em}%
+}{%
+  \par\noindent\text{\scshape end module}%
+}
+\newcommand{\moduleName}[1]{#1}
+\newcommand{\including}[1]{\par\text{\scshape imports}\ #1}
+\newcommand{\modulePlus}{$+$}
+
+
+% Syntax %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sorts and kinds.
+\newcommand{\sorts}[1]{}
+\newcommand{\sort}[1]{\text{\itshape #1}}
+\newcommand{\kind}[1]{\text{\itshape #1}}
+
+% Syntax rules.
+\newlength{\syntaxlength}  % The amount of indention for continued rules.
+
+\newcommand{\syntax}[3]{\par%
+ $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+}
+\newcommand{\syntaxCont}[3]{\par%
+  $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
+  \setlength{\syntaxlength}{.5\syntaxlength}%
+  \addtolength{\syntaxlength}{\widthof{$#1$}}%
+  \hspace{\syntaxlength}%
+  \;\;\!\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+}
+
+% Non-terminals.
+\newcommand{\nonTerminal}[1]{\text{\itshape #1}\/}
+
+% Terminals.
+\newcommand{\terminal}[1]{\ensuremath\mathrel{\text{\ttfamily #1}}}
+\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\text{\ttfamily #1}}}
+
+% Tags.
+\newcommand{\kassoc}{assoc}
+\newcommand{\kcomm}{comm}
+\newcommand{\khybrid}{{\color{blue}hybrid}}
+\newcommand{\kid}[1]{id: {#1}}
+\newcommand{\kditto}{ditto}
+\newcommand{\karity}[1]{{\color{blue}arity(#1)}}
+\newcommand{\kstrict}[2]{{%
+  \color{blue}strict%
+  \ifx&#1&%
+  \else%
+    (#1)%
+  \fi%
+  \ifx&#2&%
+  \else%
+    in (#2)%
+  \fi%
+}}
+\newcommand{\kseqstrict}[2]{{%
+  \color{blue}seqstrict%
+  \ifx&#1&%
+  \else%
+    (#1)%
+  \fi%
+  \ifx&#2&%
+  \else%
+    in (#2)%
+  \fi%
+}}
+
+
+% Configuration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\kconfig}[1]{\par%
+  {\sc configuration:}%
+  \setlength{\parindent}{2em}%
+  \par $#1$%
+  \setlength{\parindent}{1em}%
+}
+
+
+% Cells %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\cellDecl}[2]{\par%
+  \text{\scshape cell:} $#1$ wraps $#2$%
+}
+
+%%% Cell contents.
+
+\newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
+\newcommand{\reduceTopS}[2]{{#1}\rightharpoonup{#2}}
+\newcommand{\reduce}[2]{%
+  \begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}%
+  {#1}\\\hline{#2}%
+  \end{array}%
+}
+\newcommand{\reduceS}[2]{%
+  \begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}
+  {#1}\\\hdashline[1pt/1pt]{#2}%
+  \end{array}%
+}
+\newcommand{\kra}{\curvearrowright}
+\newcommand{\kvalue}[1]{{\color{red}#1}}
+\newcommand{\constant}[2]{\text{\sffamily #1}}
+\newcommand{\variable}[2]{\text{{\itshape #1}\/}}
+\newcommand{\prefixOp}[1]{\text{\sffamily #1}}
+\newcommand{\dotCt}[1]{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
+
+%%% Mathematical notation.
+
+\newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
+\newcommand{\mallLarge}[3]{\left\langle\begin{array}{c}#3\end{array}\right\rangle_{{\sf #2}}}
+\newcommand{\ellipses}{\mathrel{\cdot\!\!\cdot\!\!\cdot}}
+\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ \ellipses}}
+\newcommand{\msuffix}[3]{\mall{#1}{#2}{\ellipses\ {#3}}}
+\newcommand{\mmiddle}[3]{\mall{#1}{#2}{\ellipses\ {#3}\ \ellipses}}
+\newcommand{\mdot}{\cdot}
+\newcommand{\mAnyVar}[1]{\_}
+
+%%% Bubble notation.
+
+\newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
+\newcommand{\ballLarge}[3]{%
+  \kcell{#1}%
+        {#2}%
+        {$\begin{array}{@{}c@{}}%
+            #3%
+          \end{array}$}%
+        {convex}%
+        {convex}%
+}
+\newcommand{\bprefix}[3]{\kcell{#1}{#2}{$#3$}{convex}{none}}
+\newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
+\newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
+\newcommand{\bdot}{{\scriptscriptstyle\bullet}}
+\newcommand{\bAnyVar}[1]{\mbox{---}}
 
 \newcommand{\kcell}[5]{
 \begin{tabular}{@{}c@{}}
@@ -237,74 +368,75 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \end{tabular}
 }
 
-\newcommand{\kassoc}{assoc}
-\newcommand{\kcomm}{comm}
-\newcommand{\khybrid}{{\color{blue}hybrid}}
-\newcommand{\kid}[1]{id: {#1}}
-\newcommand{\kditto}{ditto}
-\newcommand{\karity}[1]{{\color{blue}arity(#1)}}
 
-\newcommand{\kstrict}[2]{{\color{blue}strict%
-\ifx&#1&%
-\else%
-(#1)%
-\fi%
-\ifx&#2&%
-\else%
- in (#2)%
-\fi}%
+% Rules and Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\when}[1]{%
+  \hspace{2em} when \ensuremath{#1}%
+  \k@markPosition%
+  \bigskip%
 }
 
-\newcommand{\kseqstrict}[2]{{\color{blue}seqstrict%
-\ifx&#1&%
-\else%
-(#1)%
-\fi%
-\ifx&#2&%
-\else%
- in (#2)%
-\fi%
+%%% Context
+
+% Context.
+\newcommand{\kcontext}[2]{\par%
+  \text{\scshape context:} $#2$%
+  \k@markPosition%
 }
+% Conditional context.
+\newcommand{\kccontext}[3]{\par%
+  \text{\scshape context:} $#2$ %
+  \when{#3}%
 }
-\newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
-\newcommand{\reduceTopS}[2]{{#1}\rightharpoonup{#2}}
-\newcommand{\reduce}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hline{#2}\end{array}}
-\newcommand{\reduceS}[2]{\begin{array}[t]{@{\extracolsep{0ex}}c@{\extracolsep{0ex}}}{#1}\\\hdashline[1pt/1pt]{#2}\end{array}}
-\newcommand{\kra}{\curvearrowright}
-\newenvironment{module}[1]{\par\noindent\text{\scshape Module #1}\setlength{\parindent}{1em}}{\par\noindent\text{\scshape end module}}
-\newcommand{\moduleName}[1]{#1}
-\newcommand{\including}[1]{\par \text{\scshape imports}\ #1}
-\newcommand{\modulePlus}{$+$}
-\newcommand{\variable}[2]{\text{{\itshape #1}\/}}
-\newcommand{\dotCt}[1]{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
-\newcommand{\kvalue}[1]{{\color{red}#1}}
-\newcommand{\prefixOp}[1]{\text{\sffamily #1}}
-\newcommand{\constant}[2]{\text{\sffamily #1}}
 
+%%% Equations and structural rules.
 
-\newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
-\newcommand{\ballLarge}[3]{\kcell{#1}{#2}{$\begin{array}{@{}c@{}}#3\end{array}$}{convex}{convex}}
-\newcommand{\bprefix}[3]{\kcell{#1}{#2}{$#3$}{convex}{none}}
-\newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
-\newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
-\newcommand{\bdot}{{\scriptscriptstyle\bullet}}
-\newcommand{\bAnyVar}[1]{\mbox{---}}
+\newcommand{\kequation}[2]{\par%
+  \text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \k@markPosition%
+  \bigskip%
+}
+\newcommand{\kcequation}[3]{\par%
+  \text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \when{#3}
+}
+\newcommand{\mequation}[3]{\par%
+  \text{\scshape #1 macro:}\hspace{1em}$#2 = #3$%
+  \k@markPosition%
+}
+\newcommand{\cmequation}[4]{\par%
+  \text{\scshape #1 equation:}\hspace{1em}$#2 = #3$%
+  \when{#4}%
+}
 
+%%% Rules.
 
-\newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
-\newcommand{\mallLarge}[3]{\left\langle\begin{array}{c}#3\end{array}\right\rangle_{{\sf #2}}}
-\newcommand{\ellipses}{\mathrel{\cdot\!\!\cdot\!\!\cdot}}
-\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ \ellipses}}
-\newcommand{\msuffix}[3]{\mall{#1}{#2}{\ellipses\ {#3}}}
-\newcommand{\mmiddle}[3]{\mall{#1}{#2}{\ellipses\ {#3}\ \ellipses}}
-\newcommand{\mdot}{\cdot}
-\newcommand{\mAnyVar}[1]{\_}
+\newcommand{\krule}[2]{\par%
+  \indent\text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \bigskip%
+}
+\newcommand{\kcrule}[3]{\par%
+  \text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \when{#3}%
+}
+\newcommand{\kndrule}[2]{\par%
+  \text{\scshape #1 non-det rule:}%
+  \setlength{\parindent}{3em}%
+  \par$#2$%
+  \setlength{\parindent}{2em}%
+  \bigskip%
+}
+\newcommand{\mrule}[3]{\par%
+  \text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$%
+  \k@markPosition%
+  \bigskip%
+}
+\newcommand{\cmrule}[4]{\par%
+  \text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$%
+  \when{#4}%
+}
+
 
 \makeatother
-%\newcommand{\latexComment}[1]{
-%\medskip
-%\begin{tikzpicture}
-%\node[rounded corners,draw,fill=black!10,text width=7in]{#1};
-%\end{tikzpicture}
-%\medskip
-%}
+
