@@ -5,14 +5,14 @@ kmod KERNELC-SEMANTICS is
 
   configuration 
   <T multiplicity="?"> 
-      <k> .K </k> 
-      <env> .Map </env> 
-      <funs> .Map </funs>               @latex("\\kBR")
-      <fstack> .List </fstack>
-      <in> .List </in> 
-      <out> "" </out> 
-      <mem> .Map </mem> 
-      <ptr> .Map </ptr> 
+      <k color="green"> .K </k> 
+      <env color="yellow"> .Map </env> 
+      <funs color="ForestGreen"> .Map </funs>               @latex("\\kBR")
+      <fstack color="LawnGreen"> .List </fstack>
+      <in color="magenta"> .List </in> 
+      <out color="Fuchsia"> "" </out> 
+      <mem color="orange"> .Map </mem> 
+      <ptr color="OrangeRed"> .Map </ptr> 
       <next> 0 </next> 
       <rand> 0 </rand>
   </T> 
