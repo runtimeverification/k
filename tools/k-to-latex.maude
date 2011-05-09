@@ -566,7 +566,12 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint(M, N, (krenameTo(Q) ))
     = (\renameTo{getRenamedKOp(Q, N, getOps(M))} 
        ) .
-  eq eMetaLatexPrint(M, N, AtS) = eMetaLatexPrint(M, AtS) [owise] .
+  eq eMetaLatexPrint(M, N, AtS) = eMetaLatexPrint(M, testDitto(AtS)) [owise] .
+
+
+  op testDitto : AttrSet -> AttrSet .
+  eq testDitto(kditto AS) = kditto .
+  eq testDitto(AS) = AS [owise] .
 
   op getRenamedKOp : Qid Nat OpDeclSet -> Qid .
   eq getRenamedKOp(Q, N, OPDS) 
