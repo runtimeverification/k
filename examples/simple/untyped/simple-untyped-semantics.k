@@ -5,7 +5,7 @@
 kmod SIMPLE-UNTYPED-SEMANTICS is
   including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
-/*@ \section*{Basic Semantic Infrastructure}
+/*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
 define the basic semantic infrastructure consisting of definitions for {\em values},
 {\em computations} and the {\em configuration}.  The values are needed to know when to
@@ -21,7 +21,7 @@ configuration could potentially be automatically inferred from the rules, we bel
 very useful for language designers/semanticists to actually think of and design their
 configuration explicitly, so the current implementation of \K requires one to define it. */
 
-/*@ \subsubsection*{Values}
+/*@ \subsubsection{Values}
 We here define the values of the language that the various fragments of
 programs evaluate to.  First, integers and Booleans are values.  As discussed,
 arrays evaluate to special array reference values holding (1) a location from where
@@ -39,7 +39,7 @@ in the fixed global environment and function definitions cannot be nested). */
   The inclusion of values in expressions follows the methodology of syntactic definitions (as, e.g., SOS):  extend the syntax of the language to encompass all values and additional construct needed in giving semantics.   In addition to that, it allows us to write the semantic rules using the original syntax of the language, and to parse them with the same (now extended with additional values) parser.  If writing the semantics directly on the \K AST, using the associated labels instead of the syntactic constructs, then one would not need to include values in expressions.
 */
 
-/*@ \subsubsection*{Computations}
+/*@ \subsubsection{Computations}
 Recall that in \K, the computations ``swallow'' the entire language syntax (note that
 the builtin module \texttt{K} is included).  Thus, every fragment of program is a
 particular computation, that is, a term of sort $K$.  Also, recall that computations
@@ -57,7 +57,7 @@ placing them on the top of the \textsf{k} cell). */
 
   syntax KResult ::= List{Val}
 
-/*@ \subsection*{Configuration}
+/*@ \subsection{Configuration}
 The \K configuration of SIMPLE consists of a top level cell, \textsf{T},
 holding a \textsf{threads} cell, a global environment map cell \textsf{genv}
 mapping the global variables and function names to their locations, a shared
@@ -105,10 +105,10 @@ at this level, because it will be initialized with the program to evaluate later
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
-/*@ \section*{Declarations and Initialization}
+/*@ \section{Declarations and Initialization}
 We start by defining the semantics of declarations (for variables, arrays and functions). */
 
-/*@ \subsection*{Variable Declaration}
+/*@ \subsection{Variable Declaration}
 The SIMPLE syntax was desugared above so that each variable is declared alone and is also
 initialized.  The context declaration below says that the expression used for the initialization
 of the variable should be first evaluated (that expression can be any arithmetic expression,
@@ -143,7 +143,7 @@ of the form ``where $L$ fresh''.} */
        <store_> . => L|->V <_/store>
        <nextLoc> L => L +Nat 1 </nextLoc> 
 
-/*@ \subsection*{Array Declaration}
+/*@ \subsection{Array Declaration}
 The \K semantics of the uni-dimensional array declaration is somehow similar to the
 above declaration of ordinary variables.  $N+1$ locations are allocated in the store
 for an array of size $N$, the additional location (chosen to be the first one allocated)
@@ -191,7 +191,7 @@ array are arbitrary expressions, because they can have side effects
 expression is evaluated in the desugaring code (note that both the loop condition and
 the nested multi-dimensional declaration would need to evaluate the expressions given as array dimensions). */
 
-/*@ \subsection*{Function declaration}
+/*@ \subsection{Function declaration}
 Functions are evaluated to $\lambda$-abstractions and stored like any other values
 in the store.  A binding is added into the environment for the function name to the
 location holding its body.  Similarly to the C language, SIMPLE only allows function declarations at the top level
@@ -232,11 +232,11 @@ allowing for mutual recursion, etc. */
   syntax K ::= execute
   rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
-/*@ \section*{Expressions}
+/*@ \section{Expressions}
 We next define the \K semantics of all the expression constructs, in the order in which
 their syntax was declared. */
 
-/*@ \subsection*{Variable lookup}
+/*@ \subsection{Variable lookup}
 When a variable $X$ is the first computational task (note the rupture of the \textsf{k} cell
 to the right), and $X$ is bound to some location $L$ in the environment (note the rupture of
 the \textsf{env} cell at both sides), and $L$ is mapped to some value $V$ in the store, then
@@ -244,7 +244,7 @@ rewrite $X$ by $V$: */
 
   rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store>
 
-/*@ \subsection*{Variable/Array increment}
+/*@ \subsection{Variable/Array increment}
 This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
 Therefore, we need to extract the l-value of the expression to increment.
 To do that, we state that the expression to increment should be wrapped
@@ -258,7 +258,7 @@ to a location value, also introduced below with the auxiliary operations.
   rule <k> ++loc(L) => I:Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store>
 
-/*@ \subsection*{Arithmetic operators}
+/*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the language constructs to their
 library counterparts when their arguments become values of expected sorts: */
 
@@ -278,7 +278,7 @@ library counterparts when their arguments become values of expected sorts: */
   rule T1 or T2 => T1 orBool T2
   rule not(T:Bool) => notBool(T)
 
-/*@ \subsection*{Array lookup}
+/*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of it, in
 examples/simple/typed/dynamic, does check for array out of bounds).  The first rule below
 desugars multi-dimensional array access to uni-dimensional array access; recall that the
@@ -294,13 +294,13 @@ The semantics of the \texttt{lookup} operation is straightforward. */
   syntax K ::= lookup ( Nat )
   rule <k> lookup(L) => V <_/k> <store_> L |-> V <_/store>
 
-/*@ \subsection*{Size of an array}
+/*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the \texttt{sizeOf} construct
 was declared strict, so: */
 
   rule sizeOf(array(_,N)) => N
 
-/*@ \subsection*{Function call}
+/*@ \subsection{Function call}
 Function application was strict in both its arguments, so we can assume that both
 the function and its arguments are evaluated to values (the former expected to be a
 $\lambda$-abstraction).  The first rule below matches a well-formed function application
@@ -334,7 +334,7 @@ should be irrelevant once the function returns). */
        <control> <fstack> (Env,K,C) => . <_/fstack> (_ => C) </control>
        <env> _ => Env </env>
 
-/*@ \subsection*{Read}
+/*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next input value, at the
 same time discarding the input value from the \textsf{in} cell.  In an implementation of the
 SIMPLE language, one would likely want to make the input buffer interactive, prompting the
@@ -345,7 +345,7 @@ construct and no input item is available. */
 
   rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in>
 
-/*@ \subsection*{Assignment}
+/*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement constructs.
 To make it a statement all one needs to do is to follow it by a semi-colon ``\texttt{;}''
 (see the semantics for expression statements below).
@@ -360,11 +360,11 @@ location value \texttt{loc(...)}. */
   rule <k> loc(L)=V => V <_/k> <store_> L|->(_=>V) <_/store>
 
 
-/*@ \section*{Statements}
+/*@ \section{Statements}
 We next define the \K semantics of statements, also in the order their syntax was given.
 */
 
-/*@ \subsection*{Blocks}
+/*@ \subsection{Blocks}
 Empty blocks are simply discarded, as shown in the first rule below.
 For non-empty blocks, we schedule the enclosed statement but we have to
 make sure the environment is recovered after the enclosed statement executes.
@@ -404,7 +404,7 @@ best trade-off between elegance and efficiency (especially since rewrite engines
 
 
 
-/*@ \subsection*{Sequential composition}
+/*@ \subsection{Sequential composition}
 Sequential composition is desugared into \K's builtin sequentialization operation (recall that, like in C,
 the semi-colon ``\texttt{;}'' is not a statement separator in SIMPLE---it is either a statement
 terminator or a construct for a statement from an expression).
@@ -420,14 +420,14 @@ rules. */
 
   rule S1:Stmt S2:Stmt => S1~>S2
 
-/*@ \subsection*{Expression statements}
+/*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result value
 is simply discarded.  Common examples of expression statements are ones of the form
 ``\texttt{++x;}'', ``\texttt{x=e;}'', ``\texttt{e1[e2]=e3;}'', etc. */
 
   rule V; => .
 
-/*@ \subsection*{Conditional}
+/*@ \subsection{Conditional}
 Since the conditional was declared with the \texttt{strict(1)} attribute, we can assume
 that its first argument will eventually be evaluated.  The rules below cover the only
 two possibilities in which the conditional is allowed to proceed (otherwise the rewriting process
@@ -436,7 +436,7 @@ gets stuck). */
   rule if  true then S else _ => S
   rule if false then _ else S => S
 
-/*@ \subsection*{While loop}
+/*@ \subsection{While loop}
 The simplest way to give the semantics of the while loop is by unrolling.
 Note, however, that its unrolling is only allowed when the while loop reaches the top of the
 computation (to avoid non-termination of unrolling).  We prefer the rule below to be structural,
@@ -448,7 +448,7 @@ would need a completely different semantics, which would also involve the \texts
 
   rule <k> while B:Exp do S  => if B then {S while B do S} else {} <_/k> [structural]
 
-/*@ \subsection*{Write}
+/*@ \subsection{Write}
 The write statement appends its evaluated argument (recall that \texttt{write} was declared strict)
 to the output list.  Like in the case of the \texttt{read()} construct, implementations of SIMPLE
 may choose to display the output incrementally, as it is being generated; in semantics, we do not
@@ -456,7 +456,7 @@ need to worry about that and simply collect all the output in the \textsf{out} c
 
   rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out>
 
-/*@ \subsection*{Exceptions}
+/*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a particular value.
 The statement ``\texttt{try $S_1$ catch($X$) $S_2$}'' proceeds with the evaluation of 
 $S_1$.  If $S_1$ evaluates normally, i.e., without any exception thrown, then $S_2$ is
@@ -492,12 +492,12 @@ precisely all the above. */
 Note, however, that the semantics of {\tt throw} can also be given directly, in one computational step, especially in languages without variable initializers and blocks.
 */
 
-/*@ \subsection*{Threads}
+/*@ \subsection{Threads}
 SIMPLE's threads can be created and terminated dynamically, and can synchronize by
 acquiring and releasing re-entrant locks and by rendezvous.  We discuss the 7 rules
 giving the semantics of these operations below. */
 
-/*@ \subsubsection*{Thread creation}
+/*@ \subsubsection{Thread creation}
 Threads can be created by any other threads using the ``\texttt{spawn $S$}'' statement.
 The spawn statement is consumed in the creating thread and, at the same time,  a new thread
 cell  is added to the to the configuration initialized with the $S$ statement and sharing the same environment with the spawning thread.  Note that the newly created \textsf{thread}
@@ -508,7 +508,7 @@ configuration abstraction/concretization mechanism. */
    rule <thread_> <k> spawn S => . <_/k> <env> Env </env> <_/thread>
         (. => <thread_> <k> S </k> <env> Env </env> <_/thread>)
 
-/*@ \subsubsection*{Thread termination}
+/*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the contents of its
 \textsf{k} cell) is empty, so the thread can be dissolved.  However, since no discipline is imposed on how
 locks are acquired and released, it can be the case that a terminating thread still holds
@@ -522,7 +522,7 @@ for the first time by a thread. */
    rule (<thread_> <k>.</k> <holds> H:Map </holds> <_/thread> => .)
         <busy> Busy:Set => Busy -Set keys(H) </busy>
 
-/*@ \subsubsection*{Acquire lock}
+/*@ \subsubsection{Acquire lock}
 There are two cases to distinguish when a thread attempts to acquire a lock (in SIMPLE any value
 can be used as a lock):
 (1) The thread does not currently have the lock, in which case it has to
@@ -536,7 +536,7 @@ These two cases are captured by the two rules below: */
      if notBool(V in Busy)
    rule <k>acquire V; => .<_/k> <holds_>V|->(N => N +Nat 1)<_/holds>
 
-/*@ \subsubsection*{Release lock}
+/*@ \subsubsection{Release lock}
 Similarly, there are two corresponding cases to distinguish when a thread releases a lock:
 (1) The thread holds the lock more than once, in which case all it needs to do is to decrement
 the lock counter.
@@ -548,7 +548,7 @@ acquire it if they need to. */
      if N >Nat 0
    rule <k>release V; => .<_/k> <holds_>V|->0 => .<_/holds> <busy_>SetItem(V)=>.<_/busy>
 
-/*@ \subsubsection*{Rendezvous synchronization}
+/*@ \subsubsection{Rendezvous synchronization}
 In addition to synchronization through acquire and release of locks, SIMPLE also provides
 a construct for rendezvous synchronization.  A thread whose next statement to execute is
 \texttt{rendezvous($V$)} gets stuck until another thread reaches an identical statement;
@@ -565,10 +565,10 @@ to concretize the rule below to the actual configuration of SIMPLE is to include
    rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k>
 
 ----------------------------------------------
-//@ \section*{Auxiliary declarations and operations}
+//@ \section{Auxiliary declarations and operations}
 ----------------------------------------------
 
-/*@ \subsection*{l-value and loc}
+/*@ \subsection{l-value and loc}
 For convenience in giving the semantics of constructs like the increment and the assignment, that
 we want to operate the same way on variables and on array elements, we used an auxiliary
 \texttt{l-value($E$)} construct which was expected to evaluate to the l-value of the expression $E$.
@@ -595,7 +595,7 @@ store lookup operation. */
   rule <k> l-value(lookup(L)) => loc(L) <_/k>
 
 
-/*@ \subsection*{Length}
+/*@ \subsection{Length}
 The following operation calculates the length of a list of identifiers.
 We make the two rules structural so they they do not count as computations. */
 
@@ -603,7 +603,7 @@ We make the two rules structural so they they do not count as computations. */
   rule |.List{Id}| => 0 [structural]
   rule |X,Xl| => |Xl| +Nat 1 [structural]
 
-/*@ \subsection*{Sequences of locations}
+/*@ \subsection{Sequences of locations}
 The following operation expands to the list of natural numbers between two given numbers.
 The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
@@ -612,7 +612,7 @@ The two rules below are structural, for the same reason as above. */
   rule N1:Nat..N1 => .List{K} [structural]
   rule N1..N2:Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <Nat N2 [structural]
 
-/*@ \subsection*{Lists of values}
+/*@ \subsection{Lists of values}
 Currently we have to explicitly declare the syntactic lists
 (they will be eventually builtin).  We need lists of values as a separate syntactic
 category because we want to allow lists of expressions (e.g., function arguments) to

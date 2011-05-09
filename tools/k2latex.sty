@@ -145,6 +145,13 @@
 
 % Source Comments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Turn off section numbering: all headings will look like they were starred.
+% However, they will still be used in the table of contents (and the bookmarks
+% that hyperref generates for the PDF).
+\setcounter{secnumdepth}{0}
+% Create TOC entries down to subsections.
+\setcounter{tocdepth}{4}
+
 \usepackage{fancyvrb}
 \usepackage{fancybox}
 
@@ -156,7 +163,6 @@
     inner sep=.75em
   }
 }
-
 
 % The comment environment.
 \newenvironment{latexComment}{%

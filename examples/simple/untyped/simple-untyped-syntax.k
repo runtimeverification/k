@@ -4,7 +4,7 @@
 
 kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
 
-/*@ \subsection*{Identifiers}
+/*@ \subsection{Identifiers}
 The special identifier for the function ``main'' belongs to all programs.
 Each program may use additional identifiers, which need to be declared either
 automatically (when one uses an external parser) or manually (when one writes the program).
@@ -12,7 +12,7 @@ automatically (when one uses an external parser) or manually (when one writes th
   syntax Id ::= main
 
 
-/*@ \subsection*{Declarations}
+/*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and for functions.
 As our current parser is ``algebraic'', the empty list needs to be identifiable as a constant (unlike CFG grammars, where it can simply be the empty string/epsilon production).  Therefore, if only using the first syntactic production for function declarations, one would need to explicitly specify the empty list constant for declaring a function with zero arguments.  To avoid having to do that, we add a separate function declaration production with explicitly no arguments; this is desugared into the first one.
 */
@@ -20,7 +20,7 @@ As our current parser is ``algebraic'', the empty list needs to be identifiable 
                 | function Id ( List{Id} ) Stmt
                 | function Id ( ) Stmt
 
-/*@ \subsection*{Expressions}
+/*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes an
 expression rather than a variable because it can also increment an array element.
 Arrays can be multidimensional and can hold other arrays, so their lookup operation
@@ -58,7 +58,7 @@ is only strict in its second argument (for the same reason as the increment).
                | read ( )
                | Exp = Exp         [strict(2) prec 40  gather (e E)]
 
-/*@ \subsection*{Statements}
+/*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
 We also syntactically distinguish between empty and non-empty blocks.
 Variables can be declared anywhere inside a block, their scope ending
@@ -98,7 +98,7 @@ arguments.
 
 
 -----------------------------------------------------------------------------
-/*@ \subsubsection*{Lists}
+/*@ \subsubsection{Lists}
 Currently we have to explicitly declare the syntactic lists
 (they will be eventually builtin).
 Note that they are associative, strict and hybrid, which means that once they
@@ -117,7 +117,7 @@ We prefer to tag their units with the corresponding sort to avoid confusion.
                      | List{Id}
                      | List{Exp} , List{Exp} [ditto]
 
-/*@ \subsection*{Parsing programs}
+/*@ \subsection{Parsing programs}
 The syntax of SIMPLE is now complete.  It is a good idea to test the
 syntax by parsing a large variety of programs.
 */
