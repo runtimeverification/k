@@ -1,9 +1,35 @@
-%%% Layout and design imports.
+%%% PDF functionality.
+
+\usepackage[pdftex]{hyperref}
+\usepackage{pdfcomment}
+
+%%% Layout and design.
+
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{microtype}
 
 \usepackage{times}
-\usepackage{microtype}
+\usepackage[scaled]{berasans}
+\usepackage[scaled]{beramono}
+
 \usepackage[small,compact]{titlesec}
 \usepackage{arydshln}
+\usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
+
+% PDF link colors
+% The color values and names come from the Tango Icon Scheme
+\definecolor{SkyBlue2}{rgb}{.204, .396, .643}
+\definecolor{ScarletRed3}{rgb}{.643, 0, 0}
+\definecolor{Chocolate3}{rgb}{.561, .349, .008}
+
+\hypersetup{%
+  % Color the text of links instead of framing them.
+  colorlinks=true,
+  linkcolor=SkyBlue2,
+  urlcolor=ScarletRed3,
+  filecolor=Chocolate3
+}
 
 %%% Additional symbols and notation.
 
@@ -13,15 +39,9 @@
 
 %%% Graphics.
 
-\usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{shapes.misc}
 \usetikzlibrary{calc}
-
-%%% PDF functionality.
-
-\usepackage[pdftex]{hyperref}
-\usepackage{pdfcomment}
 
 %%% Auxiliary packages.
 
@@ -56,6 +76,13 @@
 % [1] (At least) two runs are necessary anyway: cross-referencing and indexing
 %     require them, and so do PDF annotations.
 
+\pagestyle{empty}
+
+%%% PDF default view
+
+% Most PDF viewers seem to default to the "fit whole page" view mode.  A single,
+% long page badly fits this behavior, so we request "fit page width" instead.
+\hypersetup{pdfstartview=FitH}
 
 %%% Use the 'preview' package to typeset everything onto a single page.
 
@@ -134,23 +161,50 @@
 
 \renewcommand{\@maketitle}{
  \null
- \vskip 2em%
- \begin{quote}%
-  {\LARGE \@title \par}%
-  {\Large \@author\par}%
- \end{quote}%
- \par%
+ \vspace*{3ex}
+ {\Huge \@title}
+ \par\vspace*{2ex}
+ {\Large \@author}
+ \par\vspace*{1ex}
+ {\large \@organization}
+ \par\vspace*{3ex}
+}
+
+% Also add respective PDF meta information
+\hypersetup{
+  pdftitle={\@title},
+  pdfauthor={\@author}
+}
+
+\let\k@oldTitle=\title
+\renewcommand{\title}[1]{%
+  \k@oldTitle{#1}%
+  \hypersetup{pdftitle={#1}}%
+}
+\let\k@oldAuthor=\author
+\renewcommand{\author}[1]{%
+  \k@oldAuthor{#1}%
+  \hypersetup{pdfauthor={#1}}%
+}
+\let\@organization=\@empty
+\newcommand{\organization}[1]{%
+  \def\@organization{#1}%
 }
 
 
 % Source Comments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Turn off section numbering: all headings will look like they were starred.
-% However, they will still be used in the table of contents (and the bookmarks
+% However, they will still appear in the table of contents (and the bookmarks
 % that hyperref generates for the PDF).
 \setcounter{secnumdepth}{0}
 % Create TOC entries down to subsections.
 \setcounter{tocdepth}{4}
+% Show the TOC by default.
+\hypersetup{%
+  bookmarksopen=true,
+  bookmarksopenlevel=2
+}
 
 \usepackage{fancyvrb}
 \usepackage{fancybox}
@@ -534,48 +588,57 @@
 
 %%% Equations and structural rules.
 
+\newcommand{\k@ruleLabel}[2]{%
+  \text{%
+    \scshape%
+    % Avoid the extra space if the prefix is empty.
+    \ifthenelse{\equal{#1}{}}{}{#1 }%
+    #2:%
+  }%
+}
+
 \newcommand{\kequation}[2]{\par%
-  \text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   \k@markPosition%
   \bigskip%
 }
 \newcommand{\kcequation}[3]{\par%
-  \text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   \when{#3}
 }
 \newcommand{\mequation}[3]{\par%
-  \text{\scshape #1 macro:}\hspace{1em}$#2 = #3$%
+  \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
   \k@markPosition%
 }
 \newcommand{\cmequation}[4]{\par%
-  \text{\scshape #1 equation:}\hspace{1em}$#2 = #3$%
+  \k@ruleLabel{#1}{equation}\hspace{1em}$#2 = #3$%
   \when{#4}%
 }
 
 %%% Rules.
 
 \newcommand{\krule}[2]{\par%
-  \indent\text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \indent\k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   \bigskip%
 }
 \newcommand{\kcrule}[3]{\par%
-  \text{\scshape #1 rule:}\hspace{1em}$#2$%
+  \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   \when{#3}%
 }
 \newcommand{\kndrule}[2]{\par%
-  \text{\scshape #1 non-det rule:}%
+  \k@ruleLabel{#1}{non-det rule}%
   \setlength{\parindent}{3em}%
   \par$#2$%
   \setlength{\parindent}{2em}%
   \bigskip%
 }
 \newcommand{\mrule}[3]{\par%
-  \text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$%
+  \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
   \k@markPosition%
   \bigskip%
 }
 \newcommand{\cmrule}[4]{\par%
-  \text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$%
+  \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
   \when{#4}%
 }
 
