@@ -1,7 +1,5 @@
 \usepackage{times}
 \usepackage[small,compact]{titlesec}
-\usepackage{geometry}
-\usepackage{fullpage}
 \usepackage{arydshln}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -9,7 +7,7 @@
 \usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
 \usepackage{tikz}
 \usepackage{hyperref}
-\usepackage{fancyvrb,fancybox} 
+\usepackage{fancyvrb,fancybox}
 
 
 \usetikzlibrary{shapes.misc}
@@ -31,6 +29,108 @@
 %\renewcommand{\footrulewidth}{0pt}
 
 
+
+\makeatletter
+
+% Page Setup %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% To output all definitions, rules, and comments onto a single, long page, we
+% take the following steps:
+%
+% - Wrap the whole document in a 'kdefinition' environment and tell the
+%   'preview' package to typeset it onto a single page.  This gives us a single
+%   page of output.  Setting a suitable border and the 'tightpage' option
+%   adjusts the page height to match the content.
+%
+% - Finding the correct page width requires two runs of TeX[1].  In the first
+%   run, we mark the width of every typeset block (rules, comments, etc.).
+%   This information is is written into an auxiliary file of name
+%   '\jobname.mrk'.  At the beginning of the second run, we read this file
+%   (if it exists), determine the maximum width, and use the maximum as
+%   the text width.  If no width information is available, we default to
+%   a text width of 16 inches.
+%
+% ---
+% [1] (At least) two runs are necessary anyway: cross-referencing and indexing
+%     require them, and so do PDF annotations.
+
+
+%%% Use the 'preview' package to typeset everything onto a single page.
+
+\usepackage[active,tightpage,pdftex]{preview}
+\setlength\PreviewBorder{5pt}
+
+% Everything within an environment that is marked as \PreviewEnvironment
+% is put onto its own page.  Thus, by defining a global environment that
+% wraps the whole document, we get all output on a single page.
+%
+% The 'kompile.pl' script takes care of the wrapping.
+\newenvironment{kdefinition}{}{}
+\PreviewEnvironment{kdefinition}
+
+
+%%% Determine the text width from markers put at the lower right end of
+%   each content block.
+
+% The system layer of the 'PGF' package hides the gory details.
+% (See "Position Tracking Commands" in Part XIII of the PGF manual.)
+\usepackage{pgfsys}
+
+% Try to load the marker positions from the previous run.
+\newcounter{k@prevMarkerCount}%
+\InputIfFileExists{\jobname.mrk}{}{}%
+
+% Set the text width to the maximum of the X coordinates.
+\newlength{\k@maxX}%
+\newlength{\k@currentMarkerX}%
+
+\whiledo{\value{k@prevMarkerCount} > 0}{%
+  \addtocounter{k@prevMarkerCount}{-1}%
+  \pgfsys@getposition{k@marker@\the\c@k@prevMarkerCount}{\k@currentMarker}%
+  \pgfextractx{\k@currentMarkerX}{\k@currentMarker}%
+    \ifthenelse{\lengthtest{\k@currentMarkerX > \k@maxX}}{%
+      \setlength{\k@maxX}{\k@currentMarkerX}%
+    }{}%
+}%
+\ifthenelse{\lengthtest{\k@maxX > 0pt}}{%
+  \setlength{\textwidth}{\k@maxX}%
+}{%
+  \setlength{\textwidth}{16in}%
+}%
+
+
+% To mark the position, we use the PGF system layer macro \pgfsys@markposition.
+% However, this macro usually writes to the main auxiliary file '\jobname.aux'.
+% This will not work in our setting because the marker positions would then
+% only be available just before the document starts, which is too late to set
+% the text width.  Thus we use our own auxiliary file.
+
+% Open the marker file for writing.
+\newwrite\k@markerOut
+\immediate\openout\k@markerOut=\jobname.mrk
+
+\newcounter{k@marker}
+% The marker macro generates the marker names and briefly swaps the output
+% stream that \pgfsys@markposition uses before calling it.
+\newcommand{\k@markPosition}{%
+  \let\k@tmpAuxOut=\pgfutil@auxout%
+  \let\pgfutil@auxout=\k@markerOut%
+  \pgfsys@markposition{k@marker@\the\c@k@marker}%
+  \let\pgfutil@auxout=\k@tmpAuxOut%
+  \addtocounter{k@marker}{1}%
+}
+
+% Also store the number of set markers for the next run (for easier looping).
+\AtEndDocument{%
+  \immediate\write\k@markerOut{%
+    \string\setcounter{k@prevMarkerCount}{\the\c@k@marker}%
+  }{}%
+}
+
+
+
+
+
 \newenvironment{latexComment}{%
   \begin{Sbox}
     \begin{minipage}{7in}
@@ -40,7 +140,8 @@
       \medskip
 \begin{tikzpicture}
 \node[rounded corners,draw,fill=black!10,text width=7in]{\TheSbox};
-\end{tikzpicture}
+\end{tikzpicture}%
+\k@markPosition%
 }
 
 
@@ -57,7 +158,7 @@
   {\LARGE \@title \par}%
   {\Large \@author\par}
  \end{quote}%
- \par} \makeatother
+ \par}
 
 \newcommand{\when}[1]{\hspace{2em} when \ensuremath{#1}\bigskip}
  
@@ -86,16 +187,16 @@
 \newcommand{\sort}[1]{\text{\itshape #1}}
 \newcommand{\kind}[1]{\text{\itshape #1}}
 \newcommand{\kequation}[2]{
-\par\text{\scshape #1 rule:}\hspace{1em}$#2$\bigskip}
+\par\text{\scshape #1 rule:}\hspace{1em}$#2$\k@markPosition\bigskip}
 \newcommand{\kcequation}[3]{
-\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \when{#3}}
+\par\text{\scshape #1 rule:}\hspace{1em}$#2$ \when{#3}\k@markPosition}
 \newcommand{\krule}[2]{
 \par\indent\text{\scshape #1 rule:}\hspace{1em}$#2$\bigskip}
-\newcommand{\mrule}[3]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$\bigskip}
-\newcommand{\cmrule}[4]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \when{#4}}
+\newcommand{\mrule}[3]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$\k@markPosition\bigskip}
+\newcommand{\cmrule}[4]{\par\text{\scshape #1 rule:}\hspace{1em}$#2 \Rightarrow #3$ \when{#4}\k@markPosition}
 \newcommand{\mequation}[3]{\par\text{\scshape #1 macro:}\hspace{1em}$#2 = #3$}
 \newcommand{\sorts}[1]{}
-\newcommand{\cmequation}[4]{\par\text{\scshape #1 equation:}\hspace{1em}$#2 = #3$ \when{#4}}
+\newcommand{\cmequation}[4]{\par\text{\scshape #1 equation:}\hspace{1em}$#2 = #3$ \when{#4}\k@markPosition}
 \newcommand{\kcrule}[3]{
 \par\text{\scshape #1 rule:}\hspace{1em}$#2$ \when{#3}}
 \newcommand{\kndrule}[2]{\par\text{\scshape #1 non-det rule:}\setlength{\parindent}{3em}\par$#2$\setlength{\parindent}{2em}\bigskip}
@@ -174,7 +275,7 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\moduleName}[1]{#1}
 \newcommand{\including}[1]{\par \text{\scshape imports}\ #1}
 \newcommand{\modulePlus}{$+$}
-\newcommand{\variable}[2]{\text{\itshape #1}\/}
+\newcommand{\variable}[2]{\text{{\itshape #1}\/}}
 \newcommand{\dotCt}[1]{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
 \newcommand{\prefixOp}[1]{\text{\sffamily #1}}
@@ -199,6 +300,7 @@ node[name=label,inner sep=0pt,anchor=south west,shape=rounded rectangle,/pgf/rou
 \newcommand{\mdot}{\cdot}
 \newcommand{\mAnyVar}[1]{\_}
 
+\makeatother
 %\newcommand{\latexComment}[1]{
 %\medskip
 %\begin{tikzpicture}
