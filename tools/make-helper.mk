@@ -20,10 +20,13 @@ COMPILED_FILE = $(MAIN_FILE)-compiled.maude
 LATEX_STYLE ?= mm
 LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k; fi), $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi)))
 
-COMPILE_OPTIONS ?=
+COMPILE_OPTIONS ?= $(DRAFT)
 
 ifdef LATEX_TOPMATTER
   LATEX_EXTRA_ARGS += -topmatter $(LATEX_TOPMATTER)
+endif
+ifdef LATEX_DRAFT
+  LATEX_EXTRA_ARGS += -draft
 endif
 
 # phony tells make which targets aren't real files
