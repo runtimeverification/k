@@ -1,5 +1,5 @@
 module Cink-v0-eval
-imports Cink-v0 libstratego-lib
+imports Cink libstrategolib
 
 
 
