@@ -96,6 +96,7 @@ my $short_help_message =
   The following options make sense only when Latex options are used:
   -style : useful for typesetting (optional)
   -output output_file : specifies the name of the generated (latex) file
+  -draft : include [draft] in\ documentclass
   -topmatter : includes the content of the argument file
 	after \\begin{document} but before first \\begin{module}
 	in the latex file
@@ -420,6 +421,7 @@ my $eps = 0;
 my $ps = 0;
 my $png = 0;
 my $crop = 0;
+my $draft = 0;
 
 # used for generating modules for KLabels
 my $klabels = "";
@@ -527,6 +529,10 @@ foreach (@ARGV) {
     }
     elsif (/^--?lint$/) {
        $k_all_tools =  File::Spec->catfile($k_tools_dir,"lint");
+    }
+    elsif (/^--?draft$/)
+    {
+	$draft = 1;
     }
     elsif (/^--?flat$/) {
 	$flat = 1;
@@ -906,7 +912,8 @@ sub latexify {
 # File name where the compiled output will be stored:
 	my $output_file_name = "$lang_name-$format.tex";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
-	print FILE "\\documentclass{article}\n";
+	print FILE "\\documentclass{article}\n" if !$draft;
+	print FILE "\\documentclass[draft]{article}\n" if $draft;
 	print FILE "\\usepackage{import}\n";
 	print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
         if (-e "$language_file_name.sty") {
