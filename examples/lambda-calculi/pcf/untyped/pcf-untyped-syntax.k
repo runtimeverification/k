@@ -1,4 +1,7 @@
 kmod PCF-UNTYPED-SYNTAX is including PL-ID + K-LATEX
+  /*@ \section*{Syntax}
+  This module defines the syntax for PCF.
+  */
 
   syntax Val ::= Bool
                | Nat
