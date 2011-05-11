@@ -600,7 +600,7 @@ mod PL-FLOAT is
   op <Floats> : -> Float [ditto] .
 
   op -Float_ : Float -> Float
-        [prec 15
+        [prec 15 metadata "latex(renameTo \\ensuremath{-{}}\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (-)
                   op-hook floatSymbol (<Floats> : ~> Float))] .
 
