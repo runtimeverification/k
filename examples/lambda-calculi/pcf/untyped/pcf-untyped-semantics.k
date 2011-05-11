@@ -56,7 +56,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
        <env> Env' => Env </env> 
 
   //@ \textbf{Environment recovery}
-  syntax K ::= env ( Map )
+  syntax K ::= env ( Map ) [latex "\textsf{env}({#1})"]
   rule <k> V ~> (env(Env) => .) <_/k>
        <env> _ => Env </env>
        [structural]
