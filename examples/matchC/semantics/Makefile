@@ -5,7 +5,7 @@ LANG_NAME = kernelC
 EXT_NAME = matchC
 
 K_TOOLS_DIR = $(K_ROOT_DIR)/tools
-KC = $(K_TOOLS_DIR)/kompile.pl
+KC = $(K_TOOLS_DIR)/kompile
 ML_LIB_DIR = $(ML_ROOT_DIR)/lib
 ML_PATTERNS_DIR = $(ML_ROOT_DIR)/patterns
 ML_PRELUDE = $(ML_LIB_DIR)/ml-prelude.maude
