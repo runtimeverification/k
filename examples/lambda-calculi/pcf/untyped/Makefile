@@ -9,6 +9,7 @@ LANGUAGE_NAME = PCF-UNTYPED
 LANGUAGE_MODULES = PCF-UNTYPED-SYNTAX PCF-UNTYPED-SEMANTICS PCF-UNTYPED
 
 LATEX_STYLE = bb
+LATEX_TOPMATTER = topmatter.tex
 
 #this is the basename of the main file
 MAIN_FILE = pcf-untyped
