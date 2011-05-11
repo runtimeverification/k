@@ -16,6 +16,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
   kvar X : Id
   kvar V : Val
 
+  //@ \textbf{Basic constructs}
   rule succ N => sNat(N)
 
   rule pred 0 => 0
@@ -29,10 +30,12 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
 
   kvar Env Env' : Map
 
+  //@ \textbf{Variable lookup}
   rule <k> X => E <_/k>
        <env_> X |-> L <_/env>
        <store_> L |-> E <_/store>
 
+  //@ \textbf{$\lambda$-abstraction}
   syntax Val ::= closure-lambda ( Map , Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
   rule <k> lambda X . E => closure-lambda(Env, X, E) <_/k>
        <env> Env </env> 
@@ -42,6 +45,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
        <store_> . => L |-> V <_/store>
        <nextLoc> L => L +Nat 1 </nextLoc> 
 
+  //@ \textbf{$\mu$-abstraction}
   syntax Exp ::= closure-mu ( Map , Exp ) [latex "\textsf{closure}_\mu({#1},{#2})"]
   rule <k> mu X . E => closure-mu(Env[L / X], E) <_/k>
        <env> Env </env>
@@ -51,7 +55,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
   rule <k> closure-mu(Env, E) => E ~> env(Env') <_/k>
        <env> Env' => Env </env> 
 
-  // environment recovery
+  //@ \textbf{Environment recovery}
   syntax K ::= env ( Map )
   rule <k> V ~> (env(Env) => .) <_/k>
        <env> _ => Env </env>
