@@ -22,7 +22,7 @@ require $path;
 my $additionalMaudeFlags = "";
 
 # check installed software
-my $maude_path = "maude";
+my $maude_path = "kmaude";
 my $input_file  = fresh("kompile_in", ".maude");
 my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");

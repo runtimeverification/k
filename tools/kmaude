@@ -1,0 +1,8 @@
+#!/bin/bash
+MAUDE_LIB=maude-bin echo "" | maude-bin/maude &>/dev/null
+if [ "$?" -eq "0" ];
+then
+  MAUDE_LIB=maude-bin maude-bin/maude "$@"
+else
+  maude "$@"
+fi
