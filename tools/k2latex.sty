@@ -341,7 +341,7 @@
 \newcommand{\kconfig}[1]{\par%
   {\sc configuration:}%
   \setlength{\parindent}{2em}%
-  \par $#1$%
+  \par\hbox{\ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}}%
   \k@markPosition%
   \setlength{\parindent}{1em}%
 }
