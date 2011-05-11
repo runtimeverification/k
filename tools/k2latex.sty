@@ -534,14 +534,23 @@
     \pgfextracty{\k@cellContentHeight}{\k@cellContentBBox}%
     
     \begin{pgfonlayer}{background}
-      % Let TikZ find the best rounded rectangle around the content.
-      \path (cell content.center)
-            node (cell body) [body,
-                              anchor=center,
-                              text width=\k@cellContentWidth,
-                              text height=\k@cellContentHeight,
-                              rounded rectangle west arc=#4,
-                              rounded rectangle east arc=#5] {};
+      \ifdraft{%
+        \path (cell content.center)
+              node (cell body) [body,
+                                rectangle,
+                                anchor=center,
+                                text width=\k@cellContentWidth,
+                                text height=\k@cellContentHeight] {};
+      }{%
+        % Let TikZ find the best rounded rectangle around the content.
+        \path (cell content.center)
+              node (cell body) [body,
+                                anchor=center,
+                                text width=\k@cellContentWidth,
+                                text height=\k@cellContentHeight,
+                                rounded rectangle west arc=#4,
+                                rounded rectangle east arc=#5] {};
+      }
     \end{pgfonlayer}
 
     % Place the cell label relative to the rounded rectangle.  If the left side
@@ -563,22 +572,30 @@
       \ifthenelse{\equal{#4}{convex}}{%
         \def\cellWestArc{ arc (90:270:\n3) -- (cell body.south west) }%
       }{%
-        % This yields a rounded zig zag pattern (starting outward).
-        \def\cellWestArc{ { [rounded corners=.25ex]
-                            \foreach \signPrefix in {-,0,-,0,-,0,-,0} {%
-                              -- ++(\signPrefix{}.75\k@ruptureStepSize,-\k@ruptureStepSize)}
-                          }
-                        }%
+        \ifdraft{%
+          \def\cellWestArc{ |- (cell body.south west) }
+        }{%
+          % This yields a rounded zig zag pattern (starting outward).
+          \def\cellWestArc{ { [rounded corners=.25ex]
+                              \foreach \signPrefix in {-,0,-,0,-,0,-,0} {%
+                                -- ++(\signPrefix{}.75\k@ruptureStepSize,-\k@ruptureStepSize)}
+                            }
+                          }%
+        }%
       }%
       \ifthenelse{\equal{#5}{convex}}{%
         \def\cellEastArc{ arc (-90:90:\n3) }%
       }{%
-        \def\cellEastArc{ { [rounded corners=.25ex]
-                            \foreach \signPrefix in {0,-,0,-,0,-,0,-} {%
-                              -- ++(\signPrefix{}.75\k@ruptureStepSize,\k@ruptureStepSize)}
-                          }
-                        }%
-      }
+        \ifdraft{%
+          \def\cellEastArc{ -- (cell body.north east) }
+        }{%
+          \def\cellEastArc{ { [rounded corners=.25ex]
+                              \foreach \signPrefix in {0,-,0,-,0,-,0,-} {%
+                                -- ++(\signPrefix{}.75\k@ruptureStepSize,\k@ruptureStepSize)}
+                            }
+                          }%
+        }%
+      }%
 
       % Draw the cell outline
       \path[cell=\cellColor]
