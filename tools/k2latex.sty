@@ -360,7 +360,8 @@
 \newcommand{\reduce}[2]{\hbox{%
   \begin{tikzpicture}[baseline=(top.base),
                       inner xsep=0pt,
-                      inner ysep=.3333ex]
+                      inner ysep=.3333ex,
+                      minimum width=2em]
     \path node (top) {$#1$\strut}
           (top.south)
           node (bottom) [anchor=north, inner ysep=.5ex] {$#2$\strut};
@@ -384,7 +385,8 @@
 \newcommand{\reduceS}[2]{\hbox{%
   \begin{tikzpicture}[baseline=(top.base),
                       inner xsep=0pt,
-                      inner ysep=.3333ex]
+                      inner ysep=.3333ex,
+                      minimum width=2em]
     \path node (top) {$#1$\strut}
           (top.south)
           node (bottom) [anchor=north] {$#2$\strut};
@@ -415,7 +417,17 @@
   }%
 }
 \newcommand{\prefixOp}[1]{\text{\sffamily #1}}
-\newcommand{\dotCt}[1]{\raise.3ex\hbox{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}}
+\newcommand{\dotCt}[1]{%
+  \ifdraft{%
+    \raise.3ex\hbox{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
+  }{%
+    \pdfmarkupcomment[author={Constant Sort},
+                      markup=Underline,
+                      color=Red,
+                      opacity=0.0]
+                      {\raise.3ex\hbox{\ensuremath{\kdot}}}{#1}%
+  }%
+}
 
 %%% Mathematical notation.
 
@@ -542,7 +554,7 @@
     }%
 
     \path (cell body.north west)
-          ++(\k@labelXShift,0pt)
+          ++(\k@labelXShift,.6ex)
           node (cell label) [label,anchor=base west] {\cellLabel};
 
     % Finally, draw the background of the cell behind the content.
@@ -591,11 +603,9 @@
 
                     % Top
                     { [rounded corners=.2em]
-                                  -- (cell label.base east)
-                                  -- (cell label.north east)
+                                  -| (cell label.north east)
                                   -- (cell label.north west)
-                                  -- (cell label.base west)
-                                  -- (cell body.north west)
+                                  |- (cell body.north west)
                     }
                     % A little offset to the left for a more pleasant look
                     -- ++(-.2em,0pt)
