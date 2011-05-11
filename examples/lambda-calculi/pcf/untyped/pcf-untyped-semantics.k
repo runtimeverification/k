@@ -40,13 +40,13 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
   rule <k> closure-lambda(Env, X, E) V => E ~> env(Env') <_/k>
        <env> Env' =>  Env[L / X] </env>
        <store_> . => L |-> V <_/store>
-       <nextLoc> L => sNat L </nextLoc> 
+       <nextLoc> L => L +Nat 1 </nextLoc> 
 
   syntax Exp ::= closure-mu ( Map , Exp ) [latex "\textsf{closure}_\mu({#1},{#2})"]
   rule <k> mu X . E => closure-mu(Env[L / X], E) <_/k>
        <env> Env </env>
        <store_> . => L |-> closure-mu(Env[L / X], E) <_/store>
-       <nextLoc> L => sNat L </nextLoc> 
+       <nextLoc> L => L +Nat 1 </nextLoc> 
 
   rule <k> closure-mu(Env, E) => E ~> env(Env') <_/k>
        <env> Env' => Env </env> 
