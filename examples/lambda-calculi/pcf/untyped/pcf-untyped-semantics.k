@@ -4,11 +4,11 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
   syntax KResult ::= Val
 
   configuration
-    <T>
-      <k> .K </k>
-      <env> .Map </env>
-      <store> .Map </store>
-      <nextLoc> 0 </nextLoc>
+    <T color="yellow">
+      <k color="LightGreen"> .K </k>
+      <env color="LightSkyBlue"> .Map </env>
+      <store color="white"> .Map </store>
+      <nextLoc color="gray"> 0 </nextLoc>
     </T>
 
   kvar L N : Nat
