@@ -1,5 +1,5 @@
 -- A simple frontend to the parser.
-import Language.K.Parser.Parsec
+import Language.K.Core.Parser.Parsec
 import Text.Parsec (parse)
 
 parseK :: String -> String

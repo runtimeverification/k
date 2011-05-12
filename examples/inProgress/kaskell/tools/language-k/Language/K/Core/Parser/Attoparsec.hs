@@ -12,7 +12,7 @@
 -- A small, incomplete Attoparsec parser for low-level K.
 -----------------------------------------------------------------------------
 
-module Language.K.Parser.Attoparsec where
+module Language.K.Core.Parser.Attoparsec where
 
 import Control.Applicative ((<|>), (<$>))
 import Data.Attoparsec.Char8

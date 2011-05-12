@@ -12,7 +12,7 @@
 -- A small, incomplete Parsec parser for low-level K.
 -----------------------------------------------------------------------------
 
-module Language.K.Parser.Parsec where
+module Language.K.Core.Parser.Parsec where
 
 import Control.Applicative ((<$>))
 import Data.Char (isAlphaNum)

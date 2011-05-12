@@ -10,8 +10,8 @@ import System.Exit (exitFailure)
 import Test.HUnit
 import Text.Parsec (parse)
 
-import qualified Language.K.Parser.Parsec as S
-import qualified Language.K.Parser.Attoparsec as B
+import qualified Language.K.Core.Parser.Parsec as S
+import qualified Language.K.Core.Parser.Attoparsec as B
 
 main :: IO ()
 main = do
