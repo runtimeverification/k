@@ -21,7 +21,7 @@ import Text.Parsec
 import Internal.Lexer
 
 parseKterm :: String -> Either ParseError String
-parseKterm = parse kterm ""
+parseKterm = parse (spaces >> kterm) ""
 
 -- | Reduce clutter while still keeping the types generic.
 type Parser a = (Stream s m Char) => ParsecT s u m a
