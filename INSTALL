@@ -2,7 +2,7 @@
 The installation of K consists of three steps: installing and checking the prerequisites, downloading and saving the k-framework directory for your platform, and finally configuring and testing K.
 
 
-More instructions on writing, compiling, and execution K definitions can be found in the README file.
+More instructions on writing, compiling, and executing K definitions can be found in the README file.
 
 Detailed instructions
 ---------------------
@@ -37,7 +37,7 @@ and uncompress it somewhere.
 Set the PATH
 Add the tools directory (from the root of the k-framework directory) to the PATH environment variable
 
-4) To test the installation  execute
+3) To test the installation, execute
   make 
 in the regressionTests directory.  All tests should pass
 
