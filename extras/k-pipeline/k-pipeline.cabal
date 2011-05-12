@@ -1,0 +1,26 @@
+Name:               k-pipeline
+Version:            0.1.0
+Synopsis:           Utilities that are commonly apart of K execution pipelines
+License:            MIT
+License-file:       LICENSE
+Author:             David Lazar
+Maintainer:         David Lazar <lazar6@illinois.edu>
+Category:           Language
+Build-type:         Simple
+Cabal-version:      >=1.6
+
+
+Executable simplemaude
+  Hs-source-dirs:   src
+  Main-is:          simplemaude.hs
+  Build-depends:    base >= 4 && < 5, cmdargs, maude
+
+Executable cellstoxml
+  Hs-source-dirs:   src
+  Main-is:          cellstoxml.hs
+  Build-depends:    base >= 4 && < 5, bytestring, language-k
+
+Executable unlabel
+  Hs-source-dirs:   src
+  Main-is:          unlabel.hs
+  Build-depends:    base >= 4 && < 5, language-k
