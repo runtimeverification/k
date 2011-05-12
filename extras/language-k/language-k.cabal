@@ -11,8 +11,7 @@ Cabal-version:      >=1.2
 
 Library
   Exposed-modules:
-    Language.K.Core.Parser.Parsec
-    Language.K.Core.Parser.Attoparsec
+    Language.K.Core.Parser
     Language.K.CellsToXml
     Data.Attoparsec.Extra
 
