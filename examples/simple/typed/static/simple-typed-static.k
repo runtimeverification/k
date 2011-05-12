@@ -1,4 +1,4 @@
-in ../../../../k-prelude.maude
+
 in simple-typed-static-syntax
 in ../simple-typed-programs
 

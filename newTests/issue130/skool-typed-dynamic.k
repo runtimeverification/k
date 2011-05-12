@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 in skool-typed-dynamic-syntax
 in skool-typed-dynamic-semantics
 

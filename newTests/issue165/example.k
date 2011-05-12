@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL
 
 

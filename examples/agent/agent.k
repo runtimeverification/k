@@ -1,4 +1,4 @@
-load ../../k-prelude
+
 
 load ../modules/exp
 load ../modules/if

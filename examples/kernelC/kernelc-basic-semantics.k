@@ -1,6 +1,6 @@
 ---(
 require pl-builtins
-require k-prelude
+
 require kernelc-syntax
 ---)
 kmod KERNELC-BASIC-SEMANTICS is including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION 

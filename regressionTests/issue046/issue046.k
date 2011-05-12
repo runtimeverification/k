@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 
 kmod ISSUE046 is including K
  syntax K ::= a | b | c

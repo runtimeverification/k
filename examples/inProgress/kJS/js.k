@@ -1,6 +1,6 @@
 --- This file needs to be processed by the K-Maude tool
 
-in ../../../k-prelude
+
 in syntax/js-syntax
 in semantics/js-semantics
 

@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 kmod ASSOC is
 	including K + PL-BOOL + PL-INT + PL-ID
 	

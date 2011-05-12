@@ -1,4 +1,4 @@
-require ../../../../k-prelude
+
 
 kmod VALUES is including K + PL-ID + PL-INT + PL-STRING
 syntax Collection ::=  val ( Bag ) 

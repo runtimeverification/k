@@ -1,4 +1,4 @@
-load ../../k-prelude
+
 kmod BF is
 	including K-PROPER
 	including PL-INT

@@ -1,5 +1,5 @@
 
-require ../../../../k-prelude
+
 
 /*
   A meta-model consists of a configuration including 

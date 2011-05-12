@@ -1,4 +1,4 @@
-load ../../../../k-prelude
+
 load ../../substitution/substitution
 kmod LAMBDA-CALL-BY-NEED is  including SUBSTITUTION +  K-STRICTNESS
   syntax Exp ::= Val

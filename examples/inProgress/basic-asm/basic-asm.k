@@ -1,4 +1,4 @@
-load ../../../k-prelude
+
 kmod BASIC-ASM-SYNTAX is including PL-INT
   syntax Label ::= start
   syntax Reg ::= ax | bx | cx

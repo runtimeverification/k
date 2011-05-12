@@ -8,7 +8,7 @@
 */
 
 
-require ../../../k-prelude
+
 
 
 kmod SILOK-SYNTAX is including PL-ID

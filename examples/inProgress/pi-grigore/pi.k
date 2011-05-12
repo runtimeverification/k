@@ -1,4 +1,4 @@
-load ../../../k-prelude
+
 
 kmod SUBSTITUTION is  including PL-ID + K
   syntax Bool ::= fresh ( Id )

@@ -1,4 +1,4 @@
-require ../../../../k-prelude
+
 kmod CINK-SYNTAX is
   including PL-INT +  PL-ID + K 
 

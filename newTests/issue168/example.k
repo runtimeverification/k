@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 kmod IDRLS is
 	including K + PL-BOOL + PL-INT + PL-ID
 	

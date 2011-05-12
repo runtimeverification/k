@@ -7,7 +7,7 @@
 --- to K-Maude, then one may want to choose a fully-labeled or a
 --- labeled-syntax style, to completely avoid any syntactic complications.
 
-in ../../k-prelude
+
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
   syntax AExp ::= Id | Int

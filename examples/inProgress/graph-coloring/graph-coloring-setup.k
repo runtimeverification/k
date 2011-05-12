@@ -1,4 +1,4 @@
-in ../../k/k-prelude
+
 in graph-coloring-config
 
 kmod GRAPH-COLORING-SETUP is including GRAPH-COLORING-CONFIG

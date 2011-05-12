@@ -1,4 +1,4 @@
-in ../../k-prelude.maude
+
 in imppp-syntax
 in imppp-programs
 

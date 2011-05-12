@@ -1,4 +1,4 @@
-load ../../k-prelude
+
 kmod KERNELC-SYNTAX is
   including PL-INT +  PL-ID
   syntax PointerId ::= Id | * PointerId [prec 25 strict]

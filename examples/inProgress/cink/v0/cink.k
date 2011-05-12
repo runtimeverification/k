@@ -1,4 +1,4 @@
-load ../../../../k-prelude
+
 load cink-syntax
 load cink-programs
 load cink-semantics

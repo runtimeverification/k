@@ -1,4 +1,4 @@
-require ../../../../k-prelude
+
 
 kmod OCL-SYNTAX is including PL-ID + PL-INT  + PL-BOOL + PL-STRING
 

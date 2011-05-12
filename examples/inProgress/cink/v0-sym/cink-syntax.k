@@ -1,4 +1,4 @@
-require ../../../../k-prelude
+
 require sym-int
 
 kmod CINK-SYNTAX is

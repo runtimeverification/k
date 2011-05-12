@@ -1,4 +1,4 @@
-in ../../../k-prelude.maude
+
 in fun-untyped-syntax
 in ../fun-programs
 in fun-untyped-semantics

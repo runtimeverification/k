@@ -1,4 +1,4 @@
-in ../../../k-prelude
+
 
 kmod SKEME-SYNTAX is including PL-INT + PL-CONVERSION + PL-ID 
 

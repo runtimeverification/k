@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 
 
 kmod OCL-SOLVER is including K + PL-ID

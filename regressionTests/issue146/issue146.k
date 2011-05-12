@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 
 kmod ISSUE146 is including K + PL-CONVERSION
   syntax K ::= Id | String | test

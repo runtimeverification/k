@@ -1,4 +1,3 @@
-//require ../../../../k-prelude
 
 require extracted-info.k
 

@@ -4,7 +4,7 @@
 //in previous bug if "in" was inside this would fail another in
 
 
-in ../../k-prelude
+
 kmod ISSUE082 is // another comment
 	including K  + PL-STRING //
     configuration <T> <k> .K </k> /* multiline on single line */ </T>

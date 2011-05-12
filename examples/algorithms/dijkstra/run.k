@@ -1,4 +1,4 @@
-load ../../../k-prelude
+
 load nat-inf
 load dijkstra
 

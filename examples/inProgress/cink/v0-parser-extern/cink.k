@@ -1,4 +1,4 @@
-load ../../../../k-prelude
+
 load cink-semantics
 
 kmod CINK is including CINK-SEMANTICS

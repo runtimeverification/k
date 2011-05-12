@@ -1,4 +1,4 @@
-load ../../../../k-prelude
+
 load ../../substitution/substitution
 kmod LAMBDA-CALL-BY-NAME is including SUBSTITUTION
   syntax Exp ::= Val 

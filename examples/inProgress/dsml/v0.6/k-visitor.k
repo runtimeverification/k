@@ -1,4 +1,4 @@
-require ../../../../k-prelude
+
 
 kmod K-VISITOR is including K + K-WRAPPERS
   syntax K ::= visit List{K} applying KLabel if label in Set 

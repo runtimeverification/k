@@ -1,4 +1,4 @@
-require ../../k-prelude.maude
+
 require ssrisc-time-model
 require ssrisc-syntax
 require ssrisc-semantics

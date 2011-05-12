@@ -1,4 +1,4 @@
-load ../../../../k-prelude
+
 load ../../substitution/substitution
 kmod LAMBDA-CALL-BY-VALUE is including SUBSTITUTION
   syntax K ::= K K [strict]

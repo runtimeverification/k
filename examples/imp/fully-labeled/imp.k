@@ -7,7 +7,7 @@
 --- already has an external parser.  The disadvantage of this approach is that the ASTs
 --- look rather heavy.  One may want to try the labeled-syntax style instead.
 
-in ../../../k-prelude
+
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID + K
 

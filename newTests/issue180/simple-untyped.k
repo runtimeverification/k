@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 in simple-untyped-syntax
 in simple-untyped-programs
 in simple-untyped-semantics

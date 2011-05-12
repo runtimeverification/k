@@ -1,4 +1,4 @@
-load ../../../k-prelude
+
 
 kmod PRIMES is including K + PL-NAT
   configuration <primes> .Bag </primes>

@@ -3,7 +3,7 @@
 */
 
 load ../../pl-builtins
-load ../../k-prelude
+
 
 kmod HASKELL-SYNTAX is
     including PL-STRING

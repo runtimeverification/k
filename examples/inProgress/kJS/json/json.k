@@ -1,6 +1,6 @@
 --- This file needs to be processed by the K-Maude tool
 
-in ../../../../k-prelude
+
 
 kmod JSON-LIST
 	is including PL-INT + PL-FLOAT + PL-STRING + PL-ID

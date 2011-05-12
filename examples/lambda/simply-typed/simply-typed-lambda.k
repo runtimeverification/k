@@ -1,4 +1,4 @@
-load ../../../k-prelude
+
 
 kmod SUBSTITUTION is including K + PL-ID
   syntax List{K} ::= List{K} [ K /-/ Id ] [prec 0]

@@ -1,4 +1,4 @@
-in ../../k/k-prelude
+
 in dot
 in graph-coloring-programs
 in graph-coloring-config

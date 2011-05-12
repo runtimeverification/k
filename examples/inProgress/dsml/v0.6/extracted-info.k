@@ -1,5 +1,5 @@
 // handwritten extracted info module for xSPEM
-require ../../../../k-prelude
+
 
 kmod EXTRACTED-INFO is including K + PL-ID + PL-INT + PL-STRING
 // scalar values

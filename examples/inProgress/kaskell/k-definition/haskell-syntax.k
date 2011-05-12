@@ -2,7 +2,7 @@
     Definition of Haskell's abstract syntax in K, as based off of Language.Haskell.Exts.Syntax
 */
 
-load ../../../../k-prelude
+
 load hsStructs
 
 kmod HASKELL-SYNTAX is

@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 kmod ISSUE151 is
 	including K 
     

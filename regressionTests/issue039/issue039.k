@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 
 kmod LANG-SYNTAX is including PL-INT + PL-ID
 --- The main syntactic categories: Program, Class, Decl, Method, Exp and Stmt

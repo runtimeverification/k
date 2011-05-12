@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 
 kmod ISSUE034 is including K + PL-NAT + PL-ID
   syntax KResult ::= Type | Field | Id

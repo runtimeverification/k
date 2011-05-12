@@ -1,4 +1,4 @@
-in funny-directory/../../../k-prelude
+
 kmod COMMON is
 	including K 
 	including K-CONTEXTS 

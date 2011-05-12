@@ -1,4 +1,4 @@
-in ../../../../k-prelude
+
 in skool-typed-static-syntax
 in skool-typed-static-semantics
 in ../skool-typed-programs

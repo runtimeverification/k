@@ -5,7 +5,7 @@
 --- "constant(.Label{K})".  However, to use this style one also probably wants to
 --- have an external parser for the defined language.
 
-in ../../../k-prelude
+
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID + K
 

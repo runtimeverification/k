@@ -1,4 +1,4 @@
-load ../../../k-prelude
+
 load sort
 
 load programs

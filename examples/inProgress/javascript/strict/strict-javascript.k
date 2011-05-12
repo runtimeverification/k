@@ -1,6 +1,6 @@
 --- This file needs to be processed by the K-Maude tool
 
-in ../../../../k-prelude
+
 load strict-javascript-syntax.k
 load strict-javascript-programs.k
 

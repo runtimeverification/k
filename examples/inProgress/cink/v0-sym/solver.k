@@ -1,5 +1,5 @@
 require sym-int
-require ../../../../k-prelude
+
 
 kmod SOLVER is including SYM-INT + K + K-CONDITION-SEARCH
 

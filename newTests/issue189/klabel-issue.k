@@ -1,4 +1,4 @@
-in ../../k-prelude
+
 kmod KLABEL-ISSUE is including PL-ID + K
     syntax Exp ::= Int
                  | { List{Field} }

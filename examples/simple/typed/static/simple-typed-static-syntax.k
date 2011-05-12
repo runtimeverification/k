@@ -1,4 +1,3 @@
----in ../../../../k-prelude
 
 kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
 

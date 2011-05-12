@@ -1,4 +1,4 @@
-in ../../../../k-prelude.maude
+
 in simple-typed-dynamic-syntax
 in ../simple-typed-programs
 in simple-typed-dynamic-semantics
