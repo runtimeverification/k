@@ -8,7 +8,7 @@ TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
         simple/untyped simple/typed/dynamic simple/typed/static \
         skool/typed/dynamic \
 	exp/untyped exp/type-inference fun/untyped \
-	Thue bf befunge93
+	Thue bf-k befunge93
 
 .PHONY: all build test clean
 
