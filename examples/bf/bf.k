@@ -1,5 +1,5 @@
 kmod BF is
-	/*@ \par{This is a formal semantics for the turing complete language ``brainfuck''.  Brainfuck was designed by Urban M\"uller in 1993.  More information can be found at \url{http://en.wikipedia.org/wiki/Brainfuck}.}  Some comments below are adapted from the Wikipedia article.
+	/* \par{This is a formal semantics for the turing complete language ``brainfuck''.  Brainfuck was designed by Urban M\"uller in 1993.  More information can be found at \url{http://en.wikipedia.org/wiki/Brainfuck}.}  Some comments below are adapted from the Wikipedia article.
 	
 	\par{K formal semantics for BF written by Chucky Ellison (\href{mailto:celliso2@illinois.edu}{celliso2@illinois.edu}).  It is written in the ``fully labeled'' style.}
 	*/
@@ -34,38 +34,6 @@ Concrete	& Abstract\\
 Note: the \texttt{\[} and \texttt{\]} commands of BF are assumed to be matching, and are represented by a single ``While'' construct.
 
 */
-
-/*@
-Everything in a BF program that is not one of the eight characters on the left side of the chart above are comment characters.  Below is a commented ``Hello World!'' program:
-
-\begin{lstlisting}[
-	tabsize=2,
-	columns=flexible,
-	basicstyle=\ttfamily,
-]
-+++++ +++++                    initialize counter (cell #0) to 10
-[                              use loop to set the next four cells to 70/100/30/10
-    > +++++ ++                 add  7 to cell #1
-    > +++++ +++++              add 10 to cell #2 
-    > +++                      add  3 to cell #3
-    > +                        add  1 to cell #4
-    <<<< -                     decrement counter (cell #0)
-]                   
-> ++ .                         print 'H'
-> + .                          print 'e'
-+++++ ++ .                     print 'l'
-.                              print 'l'
-+++ .                          print 'o'
-> ++ .                         print ' '
-<< +++++ +++++ +++++ .         print 'W'
-> .                            print 'o'
-+++ .                          print 'r'
------ - .                      print 'l'
------ --- .                    print 'd'
-> + .                          print '!'
-> .                            print '\n'
-\end{lstlisting}
-	*/
 	// comments from http://en.wikipedia.org/wiki/Brainfuck
 	syntax KLabel ::= `Seq
 	syntax KLabel ::= `GoRight
