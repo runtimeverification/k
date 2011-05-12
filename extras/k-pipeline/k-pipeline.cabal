@@ -24,3 +24,8 @@ Executable unlabel
   Hs-source-dirs:   src
   Main-is:          unlabel.hs
   Build-depends:    base >= 4 && < 5, language-k
+
+Executable kcp
+  Hs-source-dirs:   src
+  Main-is:          kcp.hs
+  Build-depends:    base >= 4 && < 5, process, directory, filepath, cmdargs
