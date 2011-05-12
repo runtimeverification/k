@@ -14,7 +14,7 @@ The system is properly installed when you can run "make test" in the /examples d
 		- Tree::Nary
         - if using a Perl package manager to install them, you will also need:
              - GNU gcc and make
-             - the developement packaged for the following libraries  
+             - the developement packages for the following libraries  
                 -  expat --- pulled in by dependencies to XML::DOM
                 -  zlib and xml2  --- pulled in by XML::LibXML::Reader
               
