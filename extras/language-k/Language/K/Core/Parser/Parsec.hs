@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, Rank2Types #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Language.K.Parser.Parsec
+-- Module      :  Language.K.Core.Parser.Parsec
 -- Copyright   :  (c) David Lazar, 2011
 -- License     :  MIT
 --

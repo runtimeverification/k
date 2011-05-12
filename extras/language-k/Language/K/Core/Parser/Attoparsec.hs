@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Language.K.Parser.Attoparsec
+-- Module      :  Language.K.Core.Parser.Attoparsec
 -- Copyright   :  (c) David Lazar, 2011
 -- License     :  MIT
 --
