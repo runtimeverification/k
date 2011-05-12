@@ -50,6 +50,10 @@ latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
+# this should build the pdf in draft mode
+pdfdraft:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS) -draft
+
 # this should build the png
 png:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -png $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
