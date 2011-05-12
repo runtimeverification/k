@@ -1,4 +1,4 @@
-
+load /Users/tserban2/Documents/k/trunk/tools/../k-prelude
 load kernelc-syntax
 load kernelc-semantics
 load kernelc-threads-syntax

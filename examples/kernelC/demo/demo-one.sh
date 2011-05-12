@@ -5,7 +5,8 @@ echo -en "\033[1;34m"
 echo "This might take a while..."
 echo "kompile.pl kernelc"
 echo -en "\033[0m"
-kompile.pl kernelc
+cd ..
+kompile kernelc
 cp kernelc-compiled.maude kernelc-compiled-demo.maude
 echo -en "\033[1;34m"
 echo -n "Done. Now let's compile pAccount" 
@@ -15,7 +16,7 @@ echo -en "\033[1;34m"
 echo "kcompile-program.sh pAccount.k KERNELC  KERNELC-ACCOUNT pAccount"
 echo -en "\033[0m"
 cp pAccount.c pAccount.k
-kcompile-program.sh pAccount.k KERNELC  KERNELC-ACCOUNT pAccount
+kompile -pgm pAccount  -cmod KERNELC -pmod KERNELC-ACCOUNT 
 echo -en "\033[1;34m"
 echo "Done. Now, let's execute it"
 echo -en "\033[0m"
