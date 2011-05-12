@@ -73,7 +73,7 @@ Note: the \texttt{\[} and \texttt{\]} commands of BF are assumed to be matching,
 		[structural]
 
 	rule [Finish]: 
-		< T > S:Bag < k > .K </ k > < output > K:K </ output > </ T > 
+		< T > ?:Bag < k > .K </ k > < output > K:K </ output > </ T > 
 			=> < result > K:K </ result >
 		[structural]
 		
