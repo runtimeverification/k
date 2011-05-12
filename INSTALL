@@ -1,6 +1,12 @@
-To install the K Framework, you simply need this to put this package somewhere on your system and to add the `tools' directory to your path.  
 
-The system is properly installed when you can run "make test" in the /examples directory, and "make" in the /regressionTests directory.
+The installation of K consists of three steps: installing and checking the prerequisites, downloading and saving the k-framework directory for your platform, and finally configuring and testing K.
+
+
+More instructions on writing, compiling, and execution K definitions can be found in the README file.
+
+Detailed instructions
+---------------------
+
 
 1) Prerequisites:
 
@@ -28,18 +34,16 @@ The system is properly installed when you can run "make test" in the /examples d
    http://code.google.com/p/k-framework/downloads
 and uncompress it somewhere.
 
-3) Setting the PATH
+Set the PATH
 Add the tools directory (from the root of the k-framework directory) to the PATH environment variable
 
-4) Test the installation. 
-Execute
+4) To test the installation  execute
   make 
 in the regressionTests directory.  All tests should pass
 
-5) To test the generation of PDFs, you execute
+To test the generation of PDFs, execute
   make pdf
 in the examples/simple/untyped
 
 This should generate a PDF of the definition which is a good starter for understanding more about K definitions and the process of developing and testing them.
 
-More instructions on writing, compiling, and execution K definitions can be found in the README file.
