@@ -1683,7 +1683,7 @@ sub resolve_where_macro($)
 
 				# replace macro
 				#				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z0-9])/{print "BEFORE: $_\n"; ++$i; print "R: $round\n";}$macro_map{$macro_order{$round}}/sge;
-				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z])/$macro_map{$macro_order{$round}}/sg;
+				s/(?<=[^a-zA-Z])\Q$macro_order{$round}\E(?=[^a-zA-Z])/$macro_map{$macro_order{$round}}/sg if (defined($macro_order{$round}) && defined($macro_map{$macro_order{$round}}));
 
 				# decrement limit
 				$limit --;
