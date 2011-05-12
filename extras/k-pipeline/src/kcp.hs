@@ -12,8 +12,6 @@
 -- Compile a program into its K Core representation.
 --
 -- TODO:
---   * Use a template file instead of having to specify loads and includes
---     on the command-line.
 --   * Use kompile.pl's program compilation instead of kcompile-program.sh.
 --   * Support compilation of several programs at the same time.
 --   * Reproduce the functionality of kcompile-program.sh directly in this
@@ -36,28 +34,22 @@ import System.Process
 import Text.Printf
 
 data KCP = KCP
-    { load     :: [String]  -- ^ Files to load in the generated K module
-    , include  :: [String]  -- ^ Modules to include in the generated K module
-    , sort     :: String    -- ^ Sort the program should belong to
-    , language :: String    -- ^ Name of the language the program is written in
-    , infile   :: FilePath  -- ^ File containing the program to compile
+    { kcpTemplate :: FilePath  -- ^ File containing the KCP template
+    , kcpLanguage :: String    -- ^ Name of the language the program is written in
+    , kcpInfile   :: FilePath  -- ^ File containing the program to compile
     } deriving (Eq, Show, Data, Typeable)
 
 kcpinit :: KCP
 kcpinit = KCP
-    { load = ["-compiled"] &= typ "FILE [+]" &= help "Files to load in the generated K module"
-    , include = [] &= typ "MODULE [+]" &= help "Modules to include in the generated K module"
-    , sort = "Pgm" &= typ "SORT" &= help "Sort the program should belong to (default is Pgm)"
-    , language = def &= typ "LANGUAGE" &= argPos 0
-    , infile = def &= typFile &= argPos 1
+    { kcpTemplate = "kcp_template.k" &= typFile &= explicit &= name "t" &= name "template"
+    , kcpLanguage = def &= typ "LANGUAGE" &= argPos 0
+    , kcpInfile = def &= typFile &= argPos 1
     } &= help "Compile a program into its K Core representation."
       &= summary "kcp v0.1.0"
-      &= details (["[+] marked options can be specified multiple times"] ++ detailedHelp)
 
 main :: IO ()
 main = do
-    kcp' <- cmdArgs kcpinit
-    let kcp = completeKCP kcp'
+    kcp <- cmdArgs kcpinit
 
     kmodf <- generateKModule kcp
     (mmodf, cmodf) <- compileKModule kcp kmodf
@@ -77,23 +69,16 @@ generateKModule :: KCP -> IO FilePath
 generateKModule kcp = do
     currDir <- getCurrentDirectory
     (f, h) <- openTempFile currDir "pgm.k"
-    let w  = hPutStr   h
-    let wl = hPutStrLn h 
-    mapM_ (wl . ("load " ++)) (load kcp)
-    wl "kmod KCP-GENERATED is"
-    when (not . null $ include kcp) $ do
-        w "  including "
-        wl . intercalate " + " $ include kcp
-    w "  syntax " >> w (sort kcp) >> wl " ::= pgm"
-    pgm <- readFile (infile kcp)
-    w "  macro pgm = " >> wl pgm
-    wl "endkm"
+    template <- readFile (kcpTemplate kcp)
+    pgm <- readFile (kcpInfile kcp)
+    let kmod = printf template pgm
+    hPutStrLn h kmod
     hClose h
     return f
 
 compileKModule :: KCP -> FilePath -> IO (FilePath, FilePath)
 compileKModule kcp kmodf = do
-    let cmd = printf cmdfmt kmodf (language kcp)
+    let cmd = printf cmdfmt kmodf (map toUpper $ kcpLanguage kcp)
     h <- runCommand cmd
     waitForProcess h
     exists <- doesFileExist cmodf
@@ -101,12 +86,12 @@ compileKModule kcp kmodf = do
         hPutStrLn stderr "Error running kcompile-program.sh; see generated outputs."
         exitWith (ExitFailure 2)
     return (mmodf, cmodf)
-    where cmdfmt = "kcompile-program.sh %s %s KCP-GENERATED pgm > /dev/null"
+    where cmdfmt = "kcompile-program.sh %s %s KCP pgm > /dev/null"
           mmodf = replaceExtension kmodf ".maude"
           cmodf = "pgm-compiled.maude"
 
 getCompiledPgm :: String -> Maybe String
-getCompiledPgm = liftM snd
+getCompiledPgm = liftM (dropWhile isSpace . snd)
                . listToMaybe
                . filter (isInfixOf "'pgm" . fst)
                . mapMaybe parseEq
@@ -121,18 +106,8 @@ parseEq s = clean . break (== '=') =<< stripPrefix "eq " s
     where clean (l, '=':r) = Just (l, init r)
           clean _ = Nothing
 
--- | Expand "-foo" loads/includes into "LANGUAGE-foo" and ensure they are
--- properly capitalized.
-completeKCP :: KCP -> KCP
-completeKCP kcp = kcp
-    { language = language'
-    , load = map (map toLower . expand) (load kcp)
-    , include = map (map toUpper . expand) (include kcp)
-    } where
-        language' = map toUpper (language kcp)
-        expand r@('-':rs) = language' ++ r
-        expand r = r
-
+{-
+TODO: rewrite the help message to explain the new template-based usage.
 detailedHelp =
     [ ""
     , "kcp is a frontend to kcompile-program.sh. It generates a K module"
@@ -151,3 +126,4 @@ detailedHelp =
     , "includes system-F-syntax, and has the program in fib.sf as a macro"
     , "subsorted to Exp. This K module is then compiled by kcompile-program.sh"
     ]
+-}
