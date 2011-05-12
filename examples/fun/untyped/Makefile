@@ -1,6 +1,6 @@
 # KCOMPILE can be set by whoever calls this file
 # e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= ../../../tools/kompile
+KCOMPILE ?= $(shell which kompile)
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = FUN-UNTYPED

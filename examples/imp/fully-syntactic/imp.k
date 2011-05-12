@@ -1,3 +1,4 @@
+
 /*@before=IMP-SNTAX 
 This is the prefered style to define languages in K-Maude.
 The language syntax is defined as a BNF grammar,
@@ -8,8 +9,6 @@ If one prefers to define an external parser and pass the ASTs
 to K-Maude, then one may want to choose a fully-labeled or a
 labeled-syntax style, to completely avoid any syntactic complications.
 */
-
-in ../../../k-prelude
 
 kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
   syntax AExp ::= Id | Int
