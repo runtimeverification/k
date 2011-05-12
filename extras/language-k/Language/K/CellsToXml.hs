@@ -7,7 +7,7 @@
 --
 -- Maintainer  :  lazar6@illinois.edu
 -- Stability   :  experimental
--- Portability :  non-portable
+-- Portability :  unknown
 --
 -- This module provides an Attoparsec parser for transforming the output of
 -- the KMaude tool into valid XML.  See 'cellsToXml'.

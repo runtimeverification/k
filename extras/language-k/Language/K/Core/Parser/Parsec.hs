@@ -7,7 +7,7 @@
 --
 -- Maintainer  :  lazar6@illinois.edu
 -- Stability   :  experimental
--- Portability :  non-portable
+-- Portability :  unknown
 --
 -- A small, incomplete Parsec parser for low-level K.
 -----------------------------------------------------------------------------
