@@ -1,7 +1,7 @@
 #####################################################################
 # KCOMPILE can be set by whoever calls this file
 # e.g., `make KCOMPILE=xxxxx`
-#KCOMPILE ?= ../tools/kompile
+#KCOMPILE ?= $(shell which kompile)
 #TOOL_DIR = $(dir $(KCOMPILE))
 #include $(TOOL_DIR)make-helper.mk
 #####################################################################
