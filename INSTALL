@@ -1,29 +1,45 @@
-To install the K Framework, you simply need this package somewhere on your system.  Your languages will refer to its location.  See the /examples for how this works.
+To install the K Framework, you simply need this to put this package somewhere on your system and to add the `tools' directory to your path.  
 
 The system is properly installed when you can run "make test" in the /examples directory, and "make" in the /regressionTests directory.
 
-Prerequisites:
+1) Prerequisites:
 
-- Maude (http://maude.cs.uiuc.edu/)
-	- Only versions 2.5 and later are supported
-        - The Maude executable must renamed into `maude` 
-          (alternatively, you could create a symbolic link for it,
-                       or set $maude_path variable in tools/kompile.pl:26) 
-        - the MAUDE_LIB environment variable need to point to the Maude dir
-
-- Perl
+- GNU make --- to be able to take advantage of the Makefiles provided with the example definitions
+- Perl --- as our compilation scripts are writen in Perl
 	- Needs the following modules, installable through cpan (linux, cygwin) 
                                                         or ppm (windows)
 		- Regexp::Common
 		- XML::DOM
 		- XML::LibXML::Reader
 		- Tree::Nary
-		- Please let us know if you have to install any others.
+        - if using a Perl package manager to install them, you will also need:
+             - GNU gcc and make
+             - the developement packaged for the following libraries  
+                -  expat --- pulled in by dependencies to XML::DOM
+                -  zlib and xml2  --- pulled in by XML::LibXML::Reader
+              
+- LaTeX --- optional, but recommended for typesetting definitions 
+        -  Besides basic packages, the following (texlive) packages are needed:
+           bera datetime ec fancybox fancyvrb import marginnote microtype ms
+           pdfcomment pgf preview stmaryrd times titlesec ucs url xcolor 
+           xkeyval 
 
-Optional:
+2) Download the architecture specific archive from 
+   http://code.google.com/p/k-framework/downloads
+and uncompress it somewhere.
 
-- Haskell (GHC)
-	- This is used with the output pretty printer in tools/OutputFilter, and is not required.
+3) Setting the PATH
+Add the tools directory (from the root of the k-framework directory) to the PATH environment variable
 
+4) Test the installation. 
+Execute
+  make 
+in the regressionTests directory.  All tests should pass
 
-More instructions on witing, compiling, and execution K definitions can be found in the README file.
+5) To test the generation of PDFs, you execute
+  make pdf
+in the examples/simple/untyped
+
+This should generate a PDF of the definition which is a good starter for understanding more about K definitions and the process of developing and testing them.
+
+More instructions on writing, compiling, and execution K definitions can be found in the README file.

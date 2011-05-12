@@ -353,6 +353,37 @@
   \text{\scshape cell:} $#1$ wraps $#2$%
 }
 
+%%% Tooltips.
+
+% Following a how-to guide for Adobe InDesign, we create tooltips for items by
+% overlaying them with a transparent button.
+%
+% For documentation on the JavaScript objects, see the JavaScript for Acrobat
+% API Reference at http://www.adobe.com/devnet/acrobat/javascript.html
+
+\newcounter{k@tooltipCounter}
+\newcommand{\k@withTooltip}[2]{\hbox{%
+  % #1 is the target / box, #2 is the tooltip
+  \PushButton[name=tooltip\the\c@k@tooltipCounter,
+              % The format handler executes automatically, so the button
+              % style is set on load.  Note that argument #2 now is a
+              % JavaScript string. (Yes, this is fugly.)
+              % The stroke color is set to transparent; highligh controls
+              % the button's interaction, which is set to none.
+              format={ var t = this.getField("tooltip\the\c@k@tooltipCounter");
+                       t.userName = "#2";
+                       t.strokeColor = ["T"]; 
+                       t.highlight = highlight.n;
+                       t.lineWidth = 0; }
+             ]{#1}%
+  \addtocounter{k@tooltipCounter}{1}%
+}}
+
+% Buttons are form elements and require a surrounding Form environment.
+\AtBeginDocument{\begin{Form}}
+\AtEndDocument{\end{Form}}
+
+
 %%% Cell contents.
 
 \newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
@@ -399,34 +430,14 @@
 \newcommand{\kra}{\curvearrowright}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
 \newcommand{\constant}[2]{%
-  \ifdraft{%
-   \text{\sffamily #1}%
-  }{%
-  \pdfmarkupcomment[author={Constant Sort},markup=Underline,color=Red,opacity=0.0]{%
-    \text{\sffamily #1}%
-  }{#2}%
-  }%
+  \k@withTooltip{\text{\sffamily #1}}{Constant Sort: #2}%
 }
 \newcommand{\variable}[2]{%
-  \ifdraft{%
-    \text{{\itshape #1}\/}%
-  }{%
-  \pdfmarkupcomment[author={Variable Sort},markup=Underline,color=Khaki,opacity=0.0]{%
-    \text{{\itshape #1}\/}%
-  }{#2}%
-  }%
+  \k@withTooltip{\text{\itshape #1}\/}{Variable Sort: #2}%
 }
 \newcommand{\prefixOp}[1]{\text{\sffamily #1}}
 \newcommand{\dotCt}[1]{%
-%  \ifdraft{%
-    \raise.3ex\hbox{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
-%  }{%
-%    \pdfmarkupcomment[author={Constant Sort},
-%                      markup=Underline,
-%                      color=Red,
-%                      opacity=0.0]
-%                      {\raise.3ex\hbox{\ensuremath{\kdot}}}{#1}%
-%  }%
+  \k@withTooltip{\raise.3ex\hbox{\ensuremath{\kdot}}}{#1}%
 }
 
 %%% Mathematical notation.
@@ -457,13 +468,7 @@
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
 \newcommand{\bAnyVar}[1]{%
-  \ifdraft{%
-     #1%
-  }{%
-  \pdfmarkupcomment[author={Variable Sort},markup=Underline,color=Khaki,opacity=0.0]{%
-    \mbox{--}%
-  }{#1}%
-  }%
+  \k@withTooltip{\mbox{--}}{#1}%
 }
 
 \tikzset{
