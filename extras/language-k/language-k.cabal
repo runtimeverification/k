@@ -12,8 +12,10 @@ Cabal-version:      >=1.2
 Library
   Exposed-modules:
     Language.K.Core.Parser
+    Language.K.Core.Parser.Parsec
     Language.K.CellsToXml
     Data.Attoparsec.Extra
+    Internal.Lexer
 
   Build-depends:
     base >= 4 && < 5,
