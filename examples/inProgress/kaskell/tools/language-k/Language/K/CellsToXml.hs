@@ -17,6 +17,7 @@ module Language.K.CellsToXml
     (
     -- * Run the parser
       cellsToXml
+    , cellsToXml'
     -- * Parser components
     , koutput
     , cell
@@ -50,6 +51,10 @@ import Data.Char (isAlphaNum)
 -- TODO: use parseOnly here.
 cellsToXml :: ByteString -> Result ByteString
 cellsToXml s = feed (parse koutput s) B.empty
+
+-- | Same as 'cellsToXml' but lifted to 'Either'.
+cellsToXml' :: ByteString -> Either String ByteString
+cellsToXml' = eitherResult . cellsToXml
 
 -- | Parses several cells that make up K output.  The result is wrapped in a
 -- \<root\> element because valid XML documents have only one root.
