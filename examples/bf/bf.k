@@ -100,11 +100,11 @@ Note: the \texttt{\[} and \texttt{\]} commands of BF are assumed to be matching,
 	*/
 	rule [GoRight]: 
 		< k > GoRight(.List{K}) => .K ...</ k > 
-		< memory > Li:ListItem L:List => L:List Li:ListItem </ memory > 
+		< memory > (Li:ListItem => .List) L:List (.List => Li:ListItem) </ memory > 
 	/*@ \texttt{GoLeft}: decrement the data pointer (to point to the next cell to the left). */
 	rule [GoLeft]: 
 		< k > GoLeft(.List{K}) => .K ...</ k > 
-		< memory > L:List Li:ListItem => Li:ListItem L:List </ memory > 
+		< memory > (.List => Li:ListItem) L:List (Li:ListItem => .List) </ memory > 
 	
 	/*@ \texttt{While}: if the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it past the end of the loop.  If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, enter the loop.
 	*/
