@@ -76,7 +76,7 @@ klabelpart = syntax <|> arg
 
 -- | Parse a K builtin
 kbuiltin :: Parser KLabel
-kbuiltin = (:[]) . Syntax <$> (try kid <|> kint <|> kstring)
+kbuiltin = (:[]) . Syntax <$> (try kid <|> knum <|> kstring)
 
 -- | Parse an Id builtin: Id x
 kid :: Parser String
@@ -85,10 +85,10 @@ kid = do
     id <- many1 alphaNum
     return id
 
--- | Parse an Int builtin: Int 42
-kint :: Parser String
-kint = do
-    symbol "Int"
+-- | Parse an Number builtin: Int 42 or Nat 42
+knum :: Parser String
+knum = do
+    symbol "Int" <|> symbol "Nat"
     i <- integer
     return (show i)
 
