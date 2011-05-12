@@ -23,7 +23,7 @@ require $path;
 my $additionalMaudeFlags = "";
 
 # check installed software
-my $maude_path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'kmaude');
+my $maude_path = 'maude';
 my $input_file  = fresh("kompile_in", ".maude");
 my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");
