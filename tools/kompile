@@ -2,6 +2,7 @@
 use strict;
 use File::Basename;
 use File::Spec;
+use File::Copy;
 use Switch;
 use Cwd;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
@@ -413,6 +414,7 @@ my $topmatter = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
+my $prelude_detected = 0;
 
 # latex, pdf, eps, ps, png, crop
 my $pdf = 0;
@@ -756,12 +758,36 @@ if (!$compile_only) {
 # Maudify the .k|.kmaude files reachable from file "$language_file_name"
     print_header("Maudifying $language_file_name") if $verbose;
 
+# trick: keep original main file into another file in order to include k-prelude
+	my $original = "temp-$language_file_name";
+	copy($language_file_name, $original);
+
+    # detect if k-prelude has been included by user
+	detect_prelude($language_file_name);
+
+#	print "PRELUDE: $prelude_detected\n";
+
+	# include k-prelude automatically if it is not already there...
+	if (!$prelude_detected)
+	{
+		my $mfile = getFullName($language_file_name);
+		my $main_file = get_file_content($mfile);
+		my $kprelude = File::Spec->rel2abs($k_prelude);
+		$main_file =~ s/^/load $kprelude\n/sg;
+		$main_file =~ s/^\s//sgm;			
+
+		open FILE,">",$mfile or die "Cannot open $mfile\n";
+		print FILE $main_file;
+		close FILE;
+	}
+
     # maudify
     maudify_file("$language_file_name","");
 #    print "Maudification: $language_file_name\n\n";
     
 	# Check incompatible sorts
 	check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
+
 
     if ($klabels ne "")
     {
@@ -798,7 +824,11 @@ if (!$compile_only) {
 				}
 			}
 		}
-}
+	}
+
+	
+	rename($original, $language_file_name);
+
     
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
@@ -1450,7 +1480,9 @@ sub maudify_file {
 		}
 		elsif (m!^(?:in|load)\s+(\S+)!) 
 		{
-			maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
+			my $imported = $1;
+			$prelude_detected = 1 if $imported =~ /k\-prelude/sg;
+			maudify_file(File::Spec->catfile((fileparse($file))[1],$imported),$indent);
 			s!\.k(maude)?\s*$!\.maude!s;
 		}
 		elsif (m!^(?:require)\s+(\S+)!) 
@@ -1458,7 +1490,9 @@ sub maudify_file {
 			# print "File $file require: $1\n";
 			if (required($file, $1))
 			{
-				maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
+				my $imported = $1;
+				$prelude_detected = 1 if $imported =~ /k\-prelude/sg;
+				maudify_file(File::Spec->catfile((fileparse($file))[1],$imported),$indent);
 				s!\.k(maude)?\s*$!\.maude!s;
 				s!require!in!;
 			}
@@ -2474,4 +2508,29 @@ sub check_software
 	}
 
 #	exit(0);
+}
+
+sub detect_prelude
+{
+	my $file = getFullNameCustom(shift);
+
+	if ($file ne "") # ignore anything which cannot be opened
+	{
+		my $cnt = get_file_content($file);
+	
+
+		while ($cnt =~ /^\s*(in|load|require)\s+(\S+)/gsm)
+		{
+			my $imported = $2;
+			if ($imported =~ m!k\-prelude!sg)
+			{
+				$prelude_detected = 1;
+				last;
+			}
+			else
+			{
+				detect_prelude(File::Spec->catfile((fileparse($file))[1],$imported));
+			}
+		}
+	}
 }
