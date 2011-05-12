@@ -29,6 +29,6 @@ endm
 
 
 rew eval(pHelloWorld(.List{K})) .
-rew eval(pUpperCase(.List{K}), inject("thiswasinlowercase\n")(.List{K})) .
-rew eval(pCollatz(.List{K}), inject("10\n" +String charString(0))(.List{K})) .
-rew eval(pPrimes(.List{K}), inject("14\n")(.List{K})) .
+rew eval-inp(pUpperCase(.List{K}), str("thiswasinlowercase\n")(.List{K})) .
+rew eval-inp(pCollatz(.List{K}), str("10\n" +String charString(0))(.List{K})) .
+rew eval-inp(pPrimes(.List{K}), str("14\n")(.List{K})) .

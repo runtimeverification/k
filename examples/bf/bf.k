@@ -1,70 +1,87 @@
-
 kmod BF is
-	including K-PROPER
+	/*@ \par{This is a formal semantics for the turing complete language ``brainfuck''.  Brainfuck was designed by Urban M\"uller in 1993.  More information can be found at \url{http://en.wikipedia.org/wiki/Brainfuck}.}  Some comments below are adapted from the Wikipedia article.
+	
+	\par{K formal semantics for BF written by Chucky Ellison (\href{mailto:celliso2@illinois.edu}{celliso2@illinois.edu}).  It is written in the ``fully labeled'' style.}
+	*/
+	including K
 	including PL-INT
 	including PL-STRING
-	including K
---- Syntax
-	op memory : -> CellLabel
-	op output : -> CellLabel
-	op result : -> CellLabel
-	op input : -> CellLabel
-	op k : -> CellLabel
+	
+// Syntax
+	syntax CellLabel ::= memory
+	syntax CellLabel ::= output
+	syntax CellLabel ::= result
+	syntax CellLabel ::= input
+	syntax CellLabel ::= k
 
-	--- comments from http://en.wikipedia.org/wiki/Brainfuck
-	op Seq : -> KProperLabel [metadata "arity 2"]
-	op GoRight : -> KProperLabel [metadata "arity 0"] --- increment the data pointer (to point to the next cell to the right).
-	op GoLeft : -> KProperLabel [metadata "arity 0"] --- decrement the data pointer (to point to the next cell to the left).
-	op Increase : -> KProperLabel [metadata "arity 0"] --- increment (increase by one) the byte at the data pointer.
-	op Decrease : -> KProperLabel [metadata "arity 0"] --- decrement (decrease by one) the byte at the data pointer.
-	op Print : -> KProperLabel [metadata "arity 0"] --- output the value of the byte at the data pointer.
-	op Read : -> KProperLabel [metadata "arity 0"] --- accept one byte of input, storing its value in the byte at the data pointer.
-	op While : -> KProperLabel [metadata "arity 1"]
-	--- [ 	if the byte at the data pointer is zero, then instead of moving 
-	---		the instruction pointer forward to the next command, jump it 
-	---		forward to the command after the matching ] command*.
-	--- ] 	if the byte at the data pointer is nonzero, then instead of moving 
-	---		the instruction pointer forward to the next command, jump it back 
-	---		to the command after the matching [ command*.
+	/*@ We use an abstract syntax in this formal semantics.  The mapping from concrete to abstract syntax is given by the following chart:
 	
---- Semantics
-	op sentinel : -> KLabel
-	op eval : K -> Bag
-	op eval : K K -> Bag
-	op inject : Int -> KResultLabel
-	op inject : String -> KResultLabel
-	
-	--- helper functions.  can the basic ones be auto generated?
-	op eightbit : -> KLabel
-	rule 
-		eightbit(inject(I:Int)(.List{K})) 
-		=> inject((((I:Int %Int 256) +Int 256) %Int 256))(.List{K})
-	
-	op kcharString : -> KLabel
-	rule 
-		kcharString(inject(N:Nat)(.List{K})) 
-		=> inject(charString(N:Nat))(.List{K})
+\begin{tabular}{@{}ll@{}}
+\toprule
+Concrete	& Abstract\\
+\midrule
+\texttt{+}	& \texttt{Increase}\\
+\texttt{-}	& \texttt{Decrease}\\
+\texttt{>}	& \texttt{GoRight}\\
+\texttt{<}	& \texttt{GoLeft}\\
+\texttt{\[}	& \multirow{2}{*}{\texttt{While}}\\
+\texttt{\]}	&\\
+\texttt{.}	& \texttt{Print}\\
+\texttt{,}	& \texttt{Read}\\
+\bottomrule
+\end{tabular}
 
-	op +String : -> KLabel
-	rule 
-		+String(inject(S1:String)(.List{K}),, inject(S2:String)(.List{K})) 
-		=> inject(S1:String +String S2:String)(.List{K})
-		
+Note: the \texttt{\[} and \texttt{\]} commands of BF are assumed to be matching, and are represented by a single ``While'' construct.
+
+*/
+
+/*@
+Everything in a BF program that is not one of the eight characters on the left side of the chart above are comment characters.  Below is a commented ``Hello World!'' program:
+
+\begin{lstlisting}[
+	tabsize=2,
+	columns=flexible,
+	basicstyle=\ttfamily,
+]
++++++ +++++                    initialize counter (cell #0) to 10
+[                              use loop to set the next four cells to 70/100/30/10
+    > +++++ ++                 add  7 to cell #1
+    > +++++ +++++              add 10 to cell #2 
+    > +++                      add  3 to cell #3
+    > +                        add  1 to cell #4
+    <<<< -                     decrement counter (cell #0)
+]                   
+> ++ .                         print 'H'
+> + .                          print 'e'
++++++ ++ .                     print 'l'
+.                              print 'l'
++++ .                          print 'o'
+> ++ .                         print ' '
+<< +++++ +++++ +++++ .         print 'W'
+> .                            print 'o'
++++ .                          print 'r'
+----- - .                      print 'l'
+----- --- .                    print 'd'
+> + .                          print '!'
+> .                            print '\n'
+\end{lstlisting}
+	*/
+	// comments from http://en.wikipedia.org/wiki/Brainfuck
+	syntax KLabel ::= `Seq
+	syntax KLabel ::= `GoRight
+	syntax KLabel ::= `GoLeft
+	syntax KLabel ::= `Increase
+	syntax KLabel ::= `Decrease
+	syntax KLabel ::= `Print
+	syntax KLabel ::= `Read
+	syntax KLabel ::= `While
 	
-	op firstChar : -> KProperLabel [arity 1]
-	op butFirstChar : -> KProperLabel [arity 1]
-	op charToAscii : -> KProperLabel [arity 1]
-	
-	rule [firstChar]:
-		firstChar(inject(S:String)(.List{K})) => inject(substrString(S:String, 0, 1))(.List{K})
-		 [structural]
-	rule [charToAscii]: 
-		charToAscii(inject(C:Char)(.List{K})) => inject(asciiString(C:Char))(.List{K})
-		 [metadata "structural"]
-	rule [butFirstChar]: 
-		butFirstChar(inject(S:String)(.List{K})) => inject(substrString(S:String, 1, lengthString(S:String)))(.List{K})
-		 [metadata "structural"]
-	--- end helper functions
+// Semantics
+	syntax KLabel ::= sentinel
+	syntax Bag ::= eval( K )
+	syntax Bag ::= eval-inp( K , K )
+	syntax KResultLabel ::= int( Int )
+	syntax KResultLabel ::= str( String )
 	
 	configuration 
 		< T >
@@ -75,73 +92,107 @@ kmod BF is
 		</ T >  
 		< result > K:K </ result > 
 		
-	
-	eq [Start]: eval(K:K) =
-		< T >
-			< k > K:K </ k >
-			< memory > ListItem(sentinel(.List{K})) </ memory >
-			< output > inject("")(.List{K}) </ output >
-			< input > inject("")(.List{K}) </ input >
-		</ T >
+	rule [Start]: eval(K:K) => eval-inp(K:K, str("")(.List{K})) [structural]
 		
-	eq [Start-With-Input]: eval(K:K, K':K) = 
+	rule [Start-With-Input]: 
+		eval-inp(K:K, K':K) => 
 		< T >
 			< k > K:K </ k >
 			< memory > ListItem(sentinel(.List{K})) </ memory >
-			< output > inject("")(.List{K}) </ output >
+			< output > str("")(.List{K}) </ output >
 			< input > K':K </ input >
 		</ T >
+		[structural]
 
 	rule [Finish]: 
 		< T > S:Bag < k > .K </ k > < output > K:K </ output > </ T > 
 			=> < result > K:K </ result >
-		  [metadata "structural"]
+		[structural]
 		
+	/*@ We use a sentinel to denote the edge of memory, and automatically create more memory when it is reached, */
 	rule
-		< memory > ListItem(sentinel(.List{K})) => ListItem(inject(0)(.List{K})) ListItem(sentinel(.List{K})) ...</ memory > 
-		 [metadata "structural"]
-		
+		< memory > (.List => ListItem(int(0)(.List{K}))) ListItem(sentinel(.List{K})) ...</ memory > 
+		[structural]
+	
+	/*@ This rule simply turns sequenced commands into the first command followed by the rest, */
 	rule [Sequence]: 
 		Seq(K1:K,, K2:K) => K1:K ~> K2:K
-		 [metadata "structural"]
-		
+		[structural]
+
+	/*@ \texttt{Increase}: increment (increase by one) the byte at the data pointer. */
 	rule [Increase]: 
 		< k > Increase(.List{K}) => .K ...</ k >
-		< memory > ListItem((inject(I:Int)(.List{K}) => (inject(I:Int +Int 1))(.List{K}))) ...</ memory > 
-		 [metadata "structural"]
+		< memory > ListItem((int(I:Int)(.List{K}) => (int(I:Int +Int 1))(.List{K}))) ...</ memory > 
+	/*@ \texttt{Decrease}: decrement (decrease by one) the byte at the data pointer. */
 	rule [Decrease]: 
 		< k > Decrease(.List{K}) => .K ...</ k >
-		< memory > ListItem((inject(I:Int)(.List{K}) => (inject(I:Int -Int 1))(.List{K}))) ...</ memory > 
-		 [metadata "structural"]
-	
-	rule [WhileNZ-NZ]: 
-		< k > While(K:K) => K:K ~> While(K:K) ...</ k > 
-		< memory > ListItem(inject(I:Int)(.List{K})) ...</ memory > 
-		if (I:Int =/=Bool 0) 
-		 [metadata "structural"]
-	rule [WhileNZ-Z]: 
-		< k > While(K:K) => .K ...</ k >
-		< memory > ListItem(inject(0)(.List{K})) ...</ memory > 
-		 [metadata "structural"]
-		
+		< memory > ListItem((int(I:Int)(.List{K}) => (int(I:Int -Int 1))(.List{K}))) ...</ memory > 
+
+	/*@ \texttt{GoRight}: increment the data pointer (to point to the next cell to the right).  Note that the ``data pointer'' is represented by whatever is left-most in the memory cell.  Thus, to move the pointer right, we simply roll the contents of the cell to the left.
+	*/
 	rule [GoRight]: 
 		< k > GoRight(.List{K}) => .K ...</ k > 
 		< memory > Li:ListItem L:List => L:List Li:ListItem </ memory > 
-		 [metadata "structural"]
+	/*@ \texttt{GoLeft}: decrement the data pointer (to point to the next cell to the left). */
 	rule [GoLeft]: 
 		< k > GoLeft(.List{K}) => .K ...</ k > 
 		< memory > L:List Li:ListItem => Li:ListItem L:List </ memory > 
-		 [metadata "structural"]
-		
+	
+	/*@ \texttt{While}: if the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it past the end of the loop.  If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, enter the loop.
+	*/
+	rule [WhileNZ-NZ]: 
+		< k > While(K:K) => K:K ~> While(K:K) ...</ k > 
+		< memory > ListItem(int(I:Int)(.List{K})) ...</ memory > 
+		if (I:Int =/=Bool 0) 
+	rule [WhileNZ-Z]: 
+		< k > While(K:K) => .K ...</ k >
+		< memory > ListItem(int(0)(.List{K})) ...</ memory > 
+	
+	/*@ \texttt{Print}: output the value of the byte at the data pointer. */
 	rule [Output]: 
 		< k > Print(.List{K}) => .K ...</ k > 
 		< memory > ListItem(I:K) ...</ memory > 
 		< output > S:K => +String(S:K,, kcharString(eightbit(I:K))) </ output > 
-		 [metadata "structural"]
+	/*@ \texttt{Read}: accept one byte of input, storing its value in the byte at the data pointer.
+	*/
 	rule [Input]: 
 		< k > Read(.List{K}) => .K ...</ k >
-		< memory > ListItem((inject(I:Int)(.List{K}) => charToAscii(firstChar(Input:K)))) ...</ memory > 
+		< memory > ListItem((int(I:Int)(.List{K}) => charToAscii(firstChar(Input:K)))) ...</ memory > 
 		< input > Input:K => butFirstChar(Input:K) </ input > 
-		 [metadata "structural"]
+		 
+		
+	/*@ The rest of the definition is simply helper functions. */
+	syntax KLabel ::= eightbit
+	rule 
+		eightbit(int(I:Int)(.List{K})) 
+		=> int((((I:Int %Int 256) +Int 256) %Int 256))(.List{K})
+		[structural]
+	
+	syntax KLabel ::= kcharString
+	rule 
+		kcharString(int(N:Nat)(.List{K})) 
+		=> str(charString(N:Nat))(.List{K})
+		[structural]
+
+	syntax KLabel ::= +String
+	rule 
+		+String(str(S1:String)(.List{K}),, str(S2:String)(.List{K})) 
+		=> str(S1:String +String S2:String)(.List{K})
+		[structural]
+		
+	syntax KLabel ::= firstChar
+	syntax KLabel ::= butFirstChar
+	syntax KLabel ::= charToAscii
+	
+	rule [firstChar]:
+		firstChar(str(S:String)(.List{K})) => str(substrString(S:String, 0, 1))(.List{K})
+		 [structural]
+	rule [charToAscii]: 
+		charToAscii(str(C:Char)(.List{K})) => int(asciiString(C:Char))(.List{K})
+		 [structural]
+	rule [butFirstChar]: 
+		butFirstChar(str(S:String)(.List{K})) => str(substrString(S:String, 1, lengthString(S:String)))(.List{K})
+		 [structural]
+	// end helper functions
 endkm
 

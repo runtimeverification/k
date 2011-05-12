@@ -11,6 +11,9 @@ LANGUAGE_MODULES = BF
 #this is the basename of the main file
 MAIN_FILE = bf
 
+LATEX_STYLE = bb
+LATEX_TOPMATTER = topmatter.tex
+
 # this is a space-separated list of basename maude files to run
 TESTS = test.maude
 
