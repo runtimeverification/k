@@ -3,7 +3,7 @@
 -- |
 -- Module      :  Language.K.Parser.Attoparsec
 -- Copyright   :  (c) David Lazar, 2011
--- License     :  BSD3
+-- License     :  MIT
 --
 -- Maintainer  :  lazar6@illinois.edu
 -- Stability   :  experimental

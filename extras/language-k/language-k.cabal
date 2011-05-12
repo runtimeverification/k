@@ -1,7 +1,7 @@
 Name:               language-k
 Version:            0.1.0
 Synopsis:           Parsing tools for the K semantic framework.
-License:            BSD3
+License:            MIT
 License-file:       LICENSE
 Author:             David Lazar
 Maintainer:         lazar6@illinois.edu
