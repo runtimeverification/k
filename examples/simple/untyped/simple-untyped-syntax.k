@@ -175,13 +175,13 @@ in implementations of \K tools, because one would like to use the defined
 language syntax as much as possible in the semantics, as we will do in all the
 \K rules below, which means that one needs to combine a parser for the defined
 language with a parser for \K in order to parse the semantic rules, which is a
-highly non-trivial engineering endeavour.  In our current implementation of \K,
+highly non-trivial engineering endeavor.  In our current implementation of \K,
 the internal representation of the syntactic terms follows the simple
 abstract-syntax-tree (AST) syntax:
 $$
 K \ \ ::= \ \ \KLabel(\it List\{K\})
 $$
-where we use quoted identifiers with underscores for arguments and backquoted
+where we use quoted identifiers with underscores for arguments and back-quoted
 parentheses or commas for $\KLabel$ constants (one for each syntactic construct),
 e.g., ``\texttt{'try\_catch`(\_`)\_}'' or ``\texttt{'\_`,\_}'', and use
 ``\texttt{.List\{K\}}'' and ``\texttt{,,}'' for the unit and the separator for lists
