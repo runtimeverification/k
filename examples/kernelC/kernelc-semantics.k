@@ -4,13 +4,13 @@ kmod KERNELC-SEMANTICS is
   including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION + PL-RANDOM
 
   /*@ 
-     \section{KERNELC semantics}
+     \section{\KERNELC semantics}
 
-       This module describes the basic configuration and semantics for the KERNELC language.  The semantics contains 30 semantic rules and 16 translation macros.
+       This module describes the basic configuration and semantics for the \KERNELC language.  The semantics contains 30 semantic rules and 16 translation macros.
 
      \subsection{Configuration}
       
-     The basic configuration for KERNELC contains a computation cell {\sf k}, an environment cell mapping (local) variables to values, a function stack cell for  saving the control context upon calling a function, input and output cells, a memory cell mapping location (represented as naturals) to values (integers), a ptr cell for maintaining information about memory blocks allocation sizes,  a counter for generating fresh locations and integers, and a {\sf rand} cell to help in the random number generation process.
+     The basic configuration for \KERNELC contains a computation cell {\sf k}, an environment cell mapping (local) variables to values, a function stack cell for  saving the control context upon calling a function, input and output cells, a memory cell mapping location (represented as naturals) to values (integers), a ptr cell for maintaining information about memory blocks allocation sizes,  a counter for generating fresh locations and integers, and a {\sf rand} cell to help in the random number generation process.
   */
   configuration 
   <T multiplicity="?"> 
@@ -28,7 +28,7 @@ kmod KERNELC-SEMANTICS is
   <result multiplicity="?"> "" </result>
 
   /*@ \subsection{Operations on local variables}
-      Local variables in KERNELC are restricted.  They cannot be shared, cannot be addressed, and therefore reside in a separate space called the environment.
+      Local variables in \KERNELC are restricted.  They cannot be shared, cannot be addressed, and therefore reside in a separate space called the environment.
 
       Since their behavior does not depand on the interaction of threads, accesses to them are considered structural when analyzing thread interactions.
   */

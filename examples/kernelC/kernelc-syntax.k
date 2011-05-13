@@ -1,9 +1,9 @@
 --- 33 C language constructs
 kmod KERNELC-SYNTAX is
   including PL-INT +  PL-ID + K-LATEX
-   /*@\section{KERNELC syntax}
+   /*@\section{\KERNELC syntax}
 
-       This module specifies the syntax of KERNELC.  The syntax has been kept as close to the C syntax as possible to allow a resonably large class of C programs to be parsed and executed with the KERNELC definition.  Nevertheless, the syntax is quite small, covering only 33 constructs of the C language.
+       This module specifies the syntax of \KERNELC.  The syntax has been kept as close to the C syntax as possible to allow a resonably large class of C programs to be parsed and executed with the \KERNELC definition.  Nevertheless, the syntax is quite small, covering only 33 constructs of the C language.
 
 
    \subsection{Arithmetic expresions}
@@ -77,7 +77,7 @@ kmod KERNELC-SYNTAX is
                   | void PointerId [prec 40]
 
   syntax StmtList ::= stdio.h | stdlib.h
-  //@ The above constants are introduced so that KERNELC accepts a subset of the C programs.
+  //@ The above constants are introduced so that \KERNELC accepts a subset of the C programs.
 
   sort Bottom 
   syntax List{Bottom} ::= () | Bottom | List{Bottom} , List{Bottom}  [assoc id: () strict hybrid prec 45]
