@@ -1,39 +1,68 @@
-
+--- 33 C language constructs
 kmod KERNELC-SYNTAX is
   including PL-INT +  PL-ID
-  syntax PointerId ::= Id | * PointerId [prec 25 strict]
-  syntax DeclId ::= int Exp [prec 40] | void PointerId [prec 40]
----  syntax DeclExp ::= DeclId | int List{PointerId} [ditto]
-  syntax Exp ::= Int | PointerId
-               | Exp + Exp [gather (E e) prec 33 strict] | Exp - Exp [gather (E e) prec 33 strict]
-               | Exp == Exp [prec 37 strict] | Exp != Exp [prec 37 strict] 
-               | Exp <= Exp [prec 37 strict] 
-               | `! Exp | Exp && Exp | Exp `|| Exp | Exp `? Exp : Exp [prec 39] 
-               | Exp = Exp [strict(2) prec 40 gather (e E)] | printf ( "%d;" , Exp ) [strict] 
-               | scanf ( "%d" , Exp ) [strict] | scanf ( "%d" , & Exp )
-               | Id ( List{Exp} ) [prec 0 strict(2)] | Id ( ) [prec 0]
-               | DeclId
----               | ++ Exp [prec 0]
+---arithmetic expresions
+  syntax Exp ::= Int | Id | DeclId
+               | Exp + Exp [gather (E e) prec 33 strict] 
+               | Exp - Exp [gather (E e) prec 33 strict]
                | Exp ++ [prec 0]
+               | Exp == Exp [prec 37 strict] 
+               | Exp != Exp [prec 37 strict] 
+               | Exp <= Exp [prec 37 strict] 
+               | Exp < Exp [prec 37 strict] 
+               | Exp % Exp [prec 32 strict]
+---logical operations
+               | `! Exp | Exp && Exp | Exp `|| Exp 
+               | Exp `? Exp : Exp [prec 39] 
+---input/output
+               | printf ( "%d;" , Exp ) [strict] 
+               | scanf ( "%d" , Exp ) [strict] 
+               | scanf ( "%d" , & Exp )
+--- memory allocation and addressing
+               | `NULL
+               | PointerId 
+               | ( int * ) malloc ( Exp * sizeof ( int ) ) [strict] 
+               | free ( Exp ) [strict] 
+               | * Exp [prec 25 strict]
+               | Exp [ Exp ] [prec 0]
+--- Assignment
+               | Exp = Exp [strict(2) prec 40 gather (e E)] 
+--- Function invocation
+               | Id ( List{Exp} ) [prec 0 strict(2)] 
+               | Id ( ) [prec 0]
+--- Random 
+               | srandom ( Exp ) [strict]
+               | random ( ) 
 
---- malloc additions
-  syntax Exp ::= `NULL | free ( Exp ) [strict] | * Exp [ditto] | ( int * ) malloc ( Exp * sizeof ( int ) ) [strict] | Exp [ Exp ] [prec 0]
-
---- thread additions
-  syntax Exp ::= spawn Exp | acquire ( Exp ) [strict] | release ( Exp ) [strict] | join ( Exp ) [strict]
-
-  syntax Stmt ::= Exp ; [prec 45 strict] | { } | { StmtList } | if ( Exp ) Stmt [prec 47]
+  syntax Stmt ::= { } 
+                | Exp ; [prec 45 strict] 
+                | { StmtList } 
+                | if ( Exp ) Stmt [prec 47]
                 | if ( Exp ) Stmt else Stmt [prec 46 strict(1)]
                 | while ( Exp ) Stmt 
-                | DeclId List{DeclId} { StmtList }
-                | DeclId List{DeclId} { StmtList return Exp ; }
-                | #include < StmtList >
+                | return Exp ; [strict]
 
-  syntax Id ::= main
+
+
+
+--- Function declaration
+                | DeclId List{DeclId} { StmtList }
+--- For fragmenting definitions into parts
+                | #include < StmtList >
 
   syntax StmtList ::= Stmt | StmtList StmtList [prec 100 gather (e E)]
 
   syntax Pgm ::= StmtList 
+
+  syntax Id ::= main
+
+  syntax PointerId ::= Id 
+                     | * PointerId [ditto]
+  syntax DeclId ::= int Exp [prec 40] 
+                  | void PointerId [prec 40]
+
+--- to write C-compatible definitions
+  syntax StmtList ::= stdio.h | stdlib.h
 
   sort Bottom 
   syntax List{Bottom} ::= () | Bottom | List{Bottom} , List{Bottom}  [assoc id: () strict hybrid prec 45]
@@ -49,17 +78,18 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro if(E) St:Stmt = if(E) St else {}
   macro NULL = 0
   macro I:Id () = I (())
-  macro DeclId:DeclId(DeclIds:List{DeclId}) { Stmts:StmtList } = DeclId(DeclIds) { Stmts return 0 ;}  
+---  macro DeclId:DeclId(DeclIds:List{DeclId}) { Stmts:StmtList } = DeclId(DeclIds) { Stmts return 0 ;}  
 
-  macro void PointerId:PointerId = int PointerId
-  macro int * PointerId = int PointerId
-  macro #include<Stmts> = Stmts
+  macro int * PointerId:PointerId = int PointerId
+  macro #include<Stmts> = Stmts:StmtList
   macro E1[E2] = *(E1 + E2)
   macro scanf("%d", & * E) = scanf("%d", E)
   macro (int * PointerId = E) = (int PointerId = E)
   macro (int X:Id = E ;) = int X ; X = E ;
----  macro ++ E = (E = E + 1)
+  macro stdio.h = {} 
+  macro stdlib.h = {}
 endkm
+
 
 
 
