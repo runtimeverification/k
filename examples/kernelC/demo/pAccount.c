@@ -60,6 +60,7 @@ int main() {
   join(t1); join(t2);
   printf("%d;", balance(a));
   printf("%d;", balance(b));
+  return 0;
 }
 
 
