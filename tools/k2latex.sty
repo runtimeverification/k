@@ -668,11 +668,22 @@
 %%% Equations and structural rules.
 
 \newcommand{\k@ruleLabel}[2]{%
+  \ifdraft{%
   \text{%
     \scshape%
     % Avoid the extra space if the prefix is empty.
     \ifthenelse{\equal{#1}{}}{}{#1 }%
     #2:%
+  }%
+  }{%
+  \ifthenelse{\equal{#1}{}}{\text{\scshape #2:}}{%
+    \pdfmarkupcomment[author={Rule Label},markup=Underline,color=Blue,opacity=0.0]{%
+  \text{%
+    \scshape%
+    #2:%
+  }%
+  }{#1}%
+  }%
   }%
 }
 
