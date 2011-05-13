@@ -1,2 +1,0 @@
-generation of maude constants for ML variable in Table.java
-
