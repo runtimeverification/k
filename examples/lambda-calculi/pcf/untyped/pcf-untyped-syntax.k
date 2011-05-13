@@ -9,6 +9,9 @@ kmod PCF-UNTYPED-SYNTAX is including PL-ID + K-LATEX
                | pred
                | zero?
 
+  /*@ Removing the strictness attribute on the production for application gives
+  us a call-by-name variant of PCF.
+  */
   syntax Exp ::= Val
                | Id
                | Exp Exp            [strict prec 10 gather(E e)]

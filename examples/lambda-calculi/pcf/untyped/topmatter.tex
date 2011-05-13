@@ -1,13 +1,17 @@
 \setlength{\parindent}{1em}
-\title{PCF --- Dynamic Semantics}
-\author{David Lazar}
-\organization{University of Illinois at Urbana-Champaign}
+\title{PCF --- Dynamic}
 
 \maketitle
 
 \begin{latexComment}
 \section*{Abstract}
-This is the \K semantic definition of Programming Computable Functions, or PCF for short. In particular, this definition captures the dynamic semantics of PCF, which does not include types. The type system for PCF can be defined separately.
+This is the \K semantic definition of Programming Computable Functions, or PCF for short. PCF is a programming language for computable functions, introduced by Plotkin in 1977. It is based on Scott's logic of computable functions.
+
+This definition specifically captures the dynamic semantics of call-by-value PCF.  The dynamic semantics does not include types---the static type system for PCF can be defined separately. A call-by-name variant of PCF can easily be obtained by making two slight modifications to the definition, as noted below.
+
+Although calculi such as PCF typically have substitution-based definitions, the definition that follows is environment-based due to the simplicity of working with environments in \K.
+
+This \K definition is authored and maintained by David Lazar (\href{mailto:lazar6@illinois.edu}{lazar6@illinois.edu}).
 \end{latexComment}
 
 \vspace*{3ex}
