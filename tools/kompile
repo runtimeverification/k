@@ -56,8 +56,8 @@ sub finalCleanup {
 	# clean(); # delete normal kompile files
 	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
 #	clean() if !$verbose;
-	unlink(" $original.k");
-	unlink(" $original.maude");
+#	unlink(" $original.k");
+#	unlink(" $original.maude");
 	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
 }
 
@@ -761,8 +761,10 @@ if (!$compile_only) {
     print_header("Maudifying $language_file_name") if $verbose;
 
 # trick: keep original main file into another file in order to include k-prelude
-	my $full_name = getFullName($language_file_name);
-	copy($full_name, " $full_name");
+	copy($language_file_name, " $language_file_name");
+	$language_file_name = " $language_file_name";
+#	my $full_name = getFullName($language_file_name);
+#	copy($full_name, " $full_name");
 	my $newline = 0;
 
     # detect if k-prelude has been included by user
@@ -773,7 +775,7 @@ if (!$compile_only) {
 	# include k-prelude automatically if it is not already there...
 	if (!$prelude_detected)
 	{
-		my $mfile = " $full_name";
+		my $mfile = getFullName($language_file_name);
 		my $main_file = get_file_content($mfile);
 		my $kprelude = File::Spec->rel2abs($k_prelude);
 		$newline = 1 if $main_file =~ /^\s*\n/g;		
@@ -788,18 +790,17 @@ if (!$compile_only) {
 	}
 
     # maudify
-    maudify_file(" $full_name","");
+    maudify_file($language_file_name,"");
 #    print "Maudification: $language_file_name\n\n";
     
 	# Check incompatible sorts
-	check_incompatible(" $full_name", $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
+	check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
 
-	$language_file_name =~ s/(\.k|\.kmaude)$//;
+	$language_file_name =~ s/(\.k|\.kmaude|\.m|\.maude)$//;
 
 	# change locations
-	$full_name =~ s/\.k(maude)?//sg; 	$full_name =~ s/\.m(aude)?//sg;
-	$original = $full_name;
-	my $main_content = get_file_content(" $full_name.maude");
+	$original = $language_file_name;
+	my $main_content = get_file_content("$language_file_name.maude");
 	$main_content =~ s/^\s//sgm;
 	
 	if (!$newline)
@@ -830,29 +831,21 @@ if (!$compile_only) {
 		print FILE "in $kprelude\nmod K-SHARED is including K . \n\t$tmp\nendm";
 		close FILE;
 	
-		my $filess = getFileList();
-		if ($filess ne "")
-		{
-			my @files = split(/\s+/, $filess);
-			foreach my $f(@files)
+
+		# k-prelude is only here...
+		my $maudified = get_file_content("$language_file_name.maude");
+		if ($maudified =~ /^\s*(in|load).*($prelude)(\.maude)?((\s*?\n)|(\s*\-\-\-.*?\n))/sgm)
 			{
-				$f =~ s/\.k$/\.maude/s;
-				my $maudified = get_file_content($f);
-		#		print "F: $f\nM: $maudified\n\n";
-				if ($maudified =~ /^\s*(in|load).*($prelude)(\.maude)?((\s*?\n)|(\s*\-\-\-.*?\n))/sgm)
-				{
-					$prelude =~ s/\.maude$//sg;
-					$maudified =~ s/^\s*(in|load).*($prelude)(\.maude)?((\s*?\n)|(\s*\-\-\-.*?\n))/in $kshared$+/sgm;
-				
-					# hardcoded
-					$maudified =~ s/\n\s/\n/g;
-				
-					open FILE,">",$f or die "Cannot open $f\n";
-					print FILE $maudified;
-					close FILE;
-				}
+				$prelude =~ s/\.maude$//sg;
+				$maudified =~ s/^\s*(in|load).*($prelude)(\.maude)?((\s*?\n)|(\s*\-\-\-.*?\n))/in $kshared$+/sgm;
+			
+				# hardcoded
+				$maudified =~ s/\n\s/\n/g;
+			
+				open FILE,">","$language_file_name.maude" or die "Cannot open  $language_file_name.maude\n";
+				print FILE $maudified;
+				close FILE;
 			}
-		}
 	}
 
 #    print_header("Done with maudifying $language_file_name") if $verbose;
@@ -883,8 +876,15 @@ if (!$maudify_only) {
 
 # Calling either the maude compiler or the latex/pdf compiler, depending upon $latex/$pdf
 
+
     # add missing subsortations to K
     add_subsorts();
+
+	# this is the most stupid line ever...
+	# restore the real name...
+	$language_file_name =~ s/^\s//sg;
+	rename(" $language_file_name.maude", "$language_file_name.maude");
+
 
     if ($latex || $pdf || $ps || $eps || $png || $crop) 
     {
