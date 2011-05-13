@@ -1,71 +1,170 @@
+# Overview
 
-The installation of K consists of three steps: installing and checking the prerequisites, downloading and saving the k-framework directory for your platform, and finally configuring and testing K.
+The K Framework tool has been tested and is known to work on linux machines (either 32bits or 64bits) and on Mac OSX.
 
+The installation of K Framework consists of three steps: installing the dependencies,
+downloading the `k-framework` directory, and finally configuring and testing K.
 
-More instructions on writing, compiling, and executing K definitions can be found in the README file.
+Instructions on writing, compiling, and executing K definitions can be found in
+the `README` file.
 
-Detailed instructions
----------------------
+The K Framework tool depends on the following software:
 
+* *[Maude](http://maude.cs.uiuc.edu)* The K Framework uses the Maude rewrite
+  system as a backend for execution, exploring executions, and model checking.
+* *GNU Make* Our example K definitions use GNU Makefiles for compilation.
+* *Perl* Our compilation scripts are written in Perl. In addition, the K
+  framework depends on the following Perl modules:
+    * Regexp::Common
+    * XML::DOM
+    * XML::LibXML::Reader
+    * Tree::Nary
+* *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
+  packages, the following (texlive) packages are needed: bera, datetime, ec,
+  fancybox, fancyvrb, import, marginnote, microtype, ms, pdfcomment, pgf,
+  preview, stmaryrd, times, titlesec, ucs, url, xcolor, and xkeyval.
 
-1) Prerequisites:
+# Installation instructions
 
-- Maude --- the K Framework uses the Maude rewrite system as a backend for 
-      executing, explring executions, and model checking.
-  - Maude can be obtained from http://maude.cs.uiuc.edu/download
-  - besides following the installation instructions there, you should
-    - add the Maude directory to the path
-    - set the MAUDE_LIB environment variable to the Maude directory
-    - rename the executable to `maude', or create a symlink
+## Install Maude
 
-  To test that Maude runs execute
-    echo "" | maude
-  If everything went fine, you should see something like 
+First, obtain Maude from <http://maude.cs.uiuc.edu/download>. Perform any
+installation instructions included with Maude. Then,
+
+* add the `maude` directory to your system's `PATH`,
+* set the `MAUDE_LIB` environment variable to the `maude` directory,
+* and rename the appropriate executable to `maude`, or create a symlink.
+
+To test the installation of Maude, run:
+
     $ echo "" | maude
-		     \||||||||||||||||||/
-		   --- Welcome to Maude ---
-		     /||||||||||||||||||\
-	    Maude 2.6 built: Dec 10 2010 11:12:39
-	    Copyright 1997-2010 SRI International
-		   Thu May 12 18:55:18 2011
+
+If everything went fine, you should see something like 
+
+    $ echo "" | maude
+             \||||||||||||||||||/
+           --- Welcome to Maude ---
+             /||||||||||||||||||\
+        Maude 2.6 built: Dec 10 2010 11:12:39
+        Copyright 1997-2010 SRI International
+           Thu May 12 18:55:18 2011
     Maude> Bye.
-  without any additional  `Warning' or `Error' messages.
 
-    
-- GNU make --- to be able to take advantage of the Makefiles provided with the example definitions
-- Perl --- as our compilation scripts are written in Perl
-	- Needs the following modules, installable through cpan (linux, cygwin) 
-                                                        or ppm (windows)
-		- Regexp::Common
-		- XML::DOM
-		- XML::LibXML::Reader
-		- Tree::Nary
-        - if using a Perl package manager to install them, you will also need:
-             - GNU gcc and make
-             - the development packages for the following libraries  
-                -  expat --- pulled in by dependencies to XML::DOM
-                -  zlib and xml2  --- pulled in by XML::LibXML::Reader
-              
-- LaTeX --- optional, but recommended for typesetting definitions 
-        -  Besides basic packages, the following (texlive) packages are needed:
-           bera datetime ec fancybox fancyvrb import marginnote microtype ms
-           pdfcomment pgf preview stmaryrd times titlesec ucs url xcolor 
-           xkeyval 
+without any additional *Warning* or *Error* messages.
 
-2) Download the architecture specific archive from 
-   http://code.google.com/p/k-framework/downloads
-and uncompress it somewhere.
+## Install GNU Make and Perl Dependencies
 
-Set the PATH
-Add the tools directory (from the root of the k-framework directory) to the PATH environment variable
+This step varies from distribution to distribution. Here we give
+distro-specific instructions for the most popular distributions.
 
-3) To test the installation, execute
-  make 
-in the regressionTests directory.  All tests should pass
+### Debian/Ubuntu
 
-To test the generation of PDFs, execute
-  make pdf
+First, install the build-essential package which includes gcc, make, and
+other packages needed to build and compile software:
+
+    # apt-get install build-essential
+
+Next, install some of the K Framework's Perl dependencies:
+
+    # apt-get install libregexp-common-perl libxml-libxml-perl libxml-dom-perl
+
+Unfortunately, Debian does not include a package for the Tree::Nary Perl
+module, so it must be installed manually:
+
+    # cpan -i Tree::Nary
+
+Now you're ready to jump to the section on downloading K.
+
+### Mac OSX
+
+First install XCode from <http://developer.apple.com/xcode>.  This will provide you with a minimal building environment, including perl, gcc, make, and svn.  
+
+Then follow the instructions below for installing Perl dependencies.
+
+### Other
+
+Use your distribution's package manager to install GNU Make and Perl.
+
+On most distributions, the following command will install all the needed
+Perl dependencies:
+
+    # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary
+
+Once GNU Make, Perl, and the Perl modules are installed, jump to the
+section on downloading K.
+
+
+## Download the K Framework
+
+The K Framework can be installed from SVN or from nightly release snapshots.
+The nightly release snapshots are about a day behind the SVN repository and
+don't contain SVN information, but they do contain pre-compiled PDFs and K
+definitions.
+
+To install K from the nightly release snapshots, go to:
+
+<http://code.google.com/p/k-framework/downloads>
+
+and download `k-framework-nightly.tar.gz`. Extract it as follows:
+
+    $ tar zxvf k-framework-nightly.tar.gz
+
+To download K from SVN, use the following command:
+
+    $ svn checkout https://k-framework.googlecode.com/svn/tags/latest/ k-framework
+
+Both approaches will leave you with a new directory called `k-framework` in
+your current directory.
+
+
+## Install the K Framework
+
+To complete the installation of the K Framework, add the k-framework/tools
+directory to your system's PATH variable.
+
+### Linux/OSX/UNIX/etc
+
+On most operating systems, the following command will add the tools
+directory to your `PATH` (be sure to replace <somedir> with the directory
+that contains the k-framework directory):
+
+    $ export PATH=<somedir>/k-framework/tools:$PATH
+
+To make this change persistent across logins/shells, you will need to add
+the command to a file like `~/.profile`.
+
+#
+## Test your installation
+
+Once the necessary dependencies are installed and the necessary paths are set,
+you should be able to type `make` in the `k-framework/regressionTests`
+directory and have all of the test cases pass.
+
+
+## Test the K LaTeX backend
+
+If the above step succeeded, K can already generate LaTeX code for definitions. 
+Executing
+    make latex
+in one of the examples directories, e.g., `examples/simple/untyped`
+should produce a file `simple-untyped.tex`  containing the latex code 
+corresponding to the definition.
+
+Assuming a sufficienty recent distribution of LaTeX with 
+all the packages mentioned in prerequisites installed, one can compile K 
+definitions into good-looking PDFs which are nicer to read than their 
+ASCII counterparts.
+
+To test the generation of PDFs works, either use `pdflatex` to  compile the 
+above obtained `.tex`, or execute
+    make pdf
 in the examples/simple/untyped
 
-This should generate a PDF of the definition which is a good starter for understanding more about K definitions and the process of developing and testing them.
+This should generate a PDF of the `SIMPLE-UNTYPED` definition which is a good 
+starter for understanding more about K definitions and the process of 
+developing and testing them.
 
+# Problems / Questions
+
+If you experience any problems installing K, please do not hesitate to contact
+us at <k-user@cs.uiuc.edu>.
