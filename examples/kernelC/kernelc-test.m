@@ -1,3 +1,4 @@
+load kernelc-compiled
 ---(
 rew run('pSum) .
 rew run('pCollatz) .
@@ -9,6 +10,7 @@ rew run('pConcQuickSort, pSeqQuickSort.in) .
 ---)
 ---search[1] run('pConcQuickSort, pSeqQuickSort.in) =>*  < raceDetected > B:Bag </ raceDetected > .
 rew run('pAccount2) .
+search run('pAccount2) =>! B:Bag .
 ---search[1] run('pAccount2) =>* < raceDetected > B:Bag </ raceDetected > .
 ---search[1] run('pAccount4) =>* < raceDetected > B:Bag </ raceDetected > .
 ---search[1] run('pAccount4) =>! < T > B:Bag </ T > .

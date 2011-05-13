@@ -1,4 +1,4 @@
-kmod KERNELC-PROGRAMS is including KERNELC-SYNTAX 
+kmod KERNELC-PROGRAMS is including KERNELC-THREADS-SYNTAX 
   syntax Pgm ::= pSum | pCollatz | pBufferOverflow | pSimpTest  | pStrErr | pStrTest
                | pAllocateBadPrint | pAllocatePrintReversePrintFree | pAllocatePrintFree
   syntax Stmt ::= pPrint.c  | pAllocateLoop.c | pAllocateGood.c | pAllocateBad.c | pReverse.c
@@ -25,6 +25,7 @@ syntax Id ::= strDup | strRead | strPrint | strCpy | strLen | string | string2 |
            i = i - 1 ;
          } 
          printf("%d;",s);
+         return 0;
     }
 
   macro pCollatz = 
@@ -48,6 +49,7 @@ syntax Id ::= strDup | strRead | strPrint | strCpy | strLen | string | string2 |
            }
          } 
          printf("%d;",steps);
+         return 0;
   } 
 
   macro pPrint.c =
@@ -160,6 +162,7 @@ int * strRead() {
       int * y = strRead(); strPrint(y);
       strCpy(x,y);
       strPrint(x); strPrint(y);
+      return 0;
     }
 
   syntax List{Exp} ::= pBufferOverflow.in1 | pBufferOverflow.in2 | pBufferOverflow.in3 
@@ -189,6 +192,7 @@ int * strRead() {
    strPrint(y);
    free(x);
    free(y);
+   return 0;
 }
 
   macro pStrErr =
@@ -203,6 +207,7 @@ int * strRead() {
    strPrint(x);
    free(x);
    free(y);
+   return 0;
 }
 
 macro pAllocatePrintFree =
@@ -213,6 +218,7 @@ macro pAllocatePrintFree =
     #include<pFree.c>
     int main() {
       int * a = allocateLoop(5,NULL); print(a); freeList(a);
+      return 0;
     } 
 
 macro pAllocatePrintReversePrintFree =
@@ -224,6 +230,7 @@ macro pAllocatePrintReversePrintFree =
     #include<pReverse.c>
     int main() {
       int * a = allocateLoop(7,NULL); print(a); a = reverse(a); print(a); free(a);
+      return 0;
     } 
 
 macro pAllocateBadPrint =
@@ -234,6 +241,7 @@ macro pAllocateBadPrint =
     #include<pFree.c>
     int main() {
       int * a = allocateLoop(2,(int *)malloc(2*sizeof(int))); print(a); free(a);
+      return 0;
     } 
 
 macro pSimpTest =
@@ -242,6 +250,7 @@ macro pSimpTest =
     int main() {
      int * x = (int *)malloc(3*sizeof(int));
      if (x == NULL) printf("%d;",-1); else printf("%d;",x);
+     return 0;
 } 
 
  
@@ -303,6 +312,7 @@ int main() {
   quickSort(a,a+strLen(a));
   strPrint(a);
   free(a);
+  return 0;
 }
 
 syntax List{Exp} ::= pSeqQuickSort.in
@@ -340,6 +350,7 @@ int main() {
   quickSort(a+1,a+a[0]+1);
   printArray(a);
   free(a);
+  return 0;
 }
 
 syntax Pgm ::= pRace1 | pRace2 | pRace3 
@@ -358,6 +369,7 @@ int main() {
   join(t1);
   join(t2);
   printf("%d;",*a);
+  return 0;
 }
 
 
@@ -490,6 +502,7 @@ int main() {
   join(t1); join(t2);
   printf("%d;", balance(a));
   printf("%d;", balance(b));
+  return 0;
 }
 
 macro pAccount3 = pAccountDriver1(cSynchronizedAccount)
