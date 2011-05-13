@@ -78,7 +78,7 @@ true-test: $(COMPILED_FILE) $(foreach test, $(TESTS), results-$(test).xml) compi
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
 test-%.output: % $(COMPILED_FILE) 
-	@echo q | $(TOOL_DIR)/kmaude -no-wrap -no-ansi-color $< 2>&1 |tee $@ && exit $${PIPESTATUS[0]}
+	@echo q | maude -no-wrap -no-ansi-color $< 2>&1 |tee $@ && exit $${PIPESTATUS[0]}
 #@cat $@
 	
 results-%.xml: % test-%.output
