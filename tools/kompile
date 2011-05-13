@@ -1599,10 +1599,9 @@ sub maudify_module {
     
 # Step: Add missing spaces around tokens
      # freeze all strings before spacifying
-    s/(?=[^'])""/Freeze($&,"STRINGS")/sge;
-   	s/(?=[^'])("[^((?<=\\)")]*?[^']")/Freeze($&,"STRINGS")/sge;
-	
-#	s/"[^((?<=\\)")]*?"/($&,"STRINGS")/sge;
+     s/(?=[^'])""/Freeze($&,"STRINGS")/sge;
+     s/(?=[^'])("[^"]*?[^']")/Freeze($&,"STRINGS")/sge;
+	     
 
      # freeze KLabels before spacifying
      my $klabelss = $decl;
