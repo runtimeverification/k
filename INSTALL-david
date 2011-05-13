@@ -79,7 +79,9 @@ TODO
 
 ### Mac OSX
 
-TODO
+First, install XCode from <http://developer.apple.com/xcode>.  This will provide you with a minimal building environment, including perl, gcc, make, and svn.  
+
+Then follow the instructions below for installing Perl dependencies.
 
 ### Other
 
