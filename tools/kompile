@@ -29,7 +29,7 @@ my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");
 my $temp_file   = fresh("kompile_tmp", ".txt");
 my $maude_xml_file   = fresh("kompile_xml", ".xml");
-
+my $original = "";
 
 # here we trap control-c (and others) so we can clean up when that happens
 $SIG{'INT'} = 'interruptHandler'; # handle control-c 
@@ -56,6 +56,8 @@ sub finalCleanup {
 	# clean(); # delete normal kompile files
 	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
 #	clean() if !$verbose;
+	unlink(" $original.k");
+	unlink(" $original.maude");
 	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
 }
 
@@ -759,8 +761,9 @@ if (!$compile_only) {
     print_header("Maudifying $language_file_name") if $verbose;
 
 # trick: keep original main file into another file in order to include k-prelude
-	my $original = "temp-$language_file_name";
-	copy($language_file_name, $original);
+	my $full_name = getFullName($language_file_name);
+	copy($full_name, " $full_name");
+	my $newline = 0;
 
     # detect if k-prelude has been included by user
 	detect_prelude($language_file_name);
@@ -770,10 +773,13 @@ if (!$compile_only) {
 	# include k-prelude automatically if it is not already there...
 	if (!$prelude_detected)
 	{
-		my $mfile = getFullName($language_file_name);
+		my $mfile = " $full_name";
 		my $main_file = get_file_content($mfile);
 		my $kprelude = File::Spec->rel2abs($k_prelude);
+		$newline = 1 if $main_file =~ /^\s*\n/g;		
+#		print "NEWLINE: $newline\n";
 		$main_file =~ s/^/load $kprelude\n/sg;
+		# $main_file = "load $kprelude\n" . $main_file;
 		$main_file =~ s/^\s//sgm;			
 
 		open FILE,">",$mfile or die "Cannot open $mfile\n";
@@ -782,12 +788,35 @@ if (!$compile_only) {
 	}
 
     # maudify
-    maudify_file("$language_file_name","");
+    maudify_file(" $full_name","");
 #    print "Maudification: $language_file_name\n\n";
     
 	# Check incompatible sorts
-	check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
+	check_incompatible(" $full_name", $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
 
+	$language_file_name =~ s/(\.k|\.kmaude)$//;
+
+	# change locations
+	$full_name =~ s/\.k(maude)?//sg; 	$full_name =~ s/\.m(aude)?//sg;
+	$original = $full_name;
+	my $main_content = get_file_content(" $full_name.maude");
+	$main_content =~ s/^\s//sgm;
+	
+	if (!$newline)
+	{
+		$main_content =~ s/(location\()(.*?:)(.*?)(\))/
+		{
+			my ($loc, $fname, $no, $rpar)= ($1, $2, $3, $4);
+			local $_ = $no;
+			s!([0-9]+)!{$1-1;}!sge;
+			# print "$loc with:$_\n";
+			"$loc$fname$_$rpar";
+		}/gsme;
+	}
+
+	open FILE,">","$language_file_name.maude" or die "Cannot open $language_file_name.maude\n";
+	print FILE $main_content;
+	close FILE;
 
     if ($klabels ne "")
     {
@@ -826,19 +855,16 @@ if (!$compile_only) {
 		}
 	}
 
-	
-	rename($original, $language_file_name);
-
-    
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
     print "Sorts:\n------\n@all_sorts\n\n" if $verbose;
     print "Tokens:\n-------\n@all_tokens\n" if $verbose;
-    $language_file_name =~ s/(\.k|\.kmaude)$//;
+    
     print "\n" if $verbose;
 
     print_header("New commands that will be added to the generated latex file") if $verbose && ($latex || $pdf || $crop || $ps || $eps || $png);
     print join("\n",@newcommands)."\n" if $verbose && ($latex || $pdf || $crop || $ps || $eps || $png);
+
 }
 
 # Following is executed whenever the option -m was not selected
