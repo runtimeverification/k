@@ -1,9 +1,9 @@
 kmod KERNELC-CONSISTENT-THREADS is including KERNELC-BASIC-SEMANTICS + KERNELC-CONSISTENT-MEMORY
-  configuration <T ?> <threads> <thread*> <k> .K </k> <env> .Map </env> <id> 0 </id> </thread*> 
+  configuration <T multiplicity="?"> <threads> <thread multiplicity="*"> <k> .K </k> <env> .Map </env> <id> 0 </id> </thread> 
                     </threads> <locks> .Map </locks>  <cthreads> .Set </cthreads> @latex("\\kBR")                     <funs> .Map </funs> <in> .List </in> <out> "" </out> 
                    <mem> .Map </mem> <ptr> .Map </ptr> 
-                   <next> initialLoc </next> </T ?> 
-                <result ?> "" </result ?>
+                   <next> initialLoc </next> </T> 
+                <result multiplicity="?"> "" </result>
 
   context 'spawn_('_`(_`)(_,,`[HOLE`]:K)) 
   rule <k> 'spawn_('_`(_`)(X:Id,,Vl:List{Val})) => N <_/k> <next> N:Nat => increment(N,1) </next> (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> N </id> <_/thread>) 
