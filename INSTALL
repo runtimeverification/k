@@ -10,6 +10,28 @@ Detailed instructions
 
 1) Prerequisites:
 
+- Maude --- the K Framework uses the Maude rewrite system as a backend for 
+      executing, explring executions, and model checking.
+  - Maude can be obtained from http://maude.cs.uiuc.edu/download
+  - besides following the installation instructions there, you should
+    - add the Maude directory to the path
+    - set the MAUDE_LIB environment variable to the Maude directory
+    - rename the executable to `maude', or create a symlink
+
+  To test that Maude runs execute
+    echo "" | maude
+  If everything went fine, you should see something like 
+    $ echo "" | maude
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.6 built: Dec 10 2010 11:12:39
+	    Copyright 1997-2010 SRI International
+		   Thu May 12 18:55:18 2011
+    Maude> Bye.
+  without any additional  `Warning' or `Error' messages.
+
+    
 - GNU make --- to be able to take advantage of the Makefiles provided with the example definitions
 - Perl --- as our compilation scripts are written in Perl
 	- Needs the following modules, installable through cpan (linux, cygwin) 
