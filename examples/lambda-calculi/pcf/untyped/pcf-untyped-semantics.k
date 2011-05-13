@@ -20,13 +20,13 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
   kvar V : Val
 
   //@ \textbf{Basic constructs}
-  rule succ N => sNat(N)
+  rule succ N => N +Nat 1
 
   rule pred 0 => 0
   rule pred (sNat N) => N
 
   rule zero? 0 => true
-  rule zero? (sNat N) => false
+  rule zero? N => false if N >Nat 0
 
   rule cond true E E' => E
   rule cond false E E' => E'
