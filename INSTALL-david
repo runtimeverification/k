@@ -1,63 +1,111 @@
---------------------------
--- Install Dependencies --
---------------------------
+# Overview
+
+The installation of K consists of three steps: installing the dependencies,
+downloading the `k-framework` directory, and finally configuring and testing K.
+
+Instructions on writing, compiling, and executing K definitions can be found in
+the `README` file.
+
+The K Framework tool depends on the following software:
+
+* *[Maude](http://maude.cs.uiuc.edu)* The K Framework uses the Maude rewrite
+  system as a backend for execution, exploring executions, and model checking.
+* *GNU Make* Our example K definitions use GNU Makefiles for compilation.
+* *Perl* Our compilation scripts are written in Perl. In addition, the K
+  framework depends on the following Perl modules:
+    * Regexp::Common
+    * XML::DOM
+    * XML::LibXML::Reader
+    * Tree::Nary
+* *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
+  packages, the following (texlive) packages are needed: bera, datetime, ec,
+  fancybox, fancyvrb, import, marginnote, microtype, ms, pdfcomment, pgf,
+  preview, stmaryrd, times, titlesec, ucs, url, xcolor, and xkeyval.
+
+# Installation instructions
+
+## Install Maude
+
+First, obtain Maude from <http://maude.cs.uiuc.edu/download>. Perform any
+installation instructions included with Maude. Then,
+
+* add the `maude` directory to your system's `PATH`,
+* set the `MAUDE_LIB` environment variable to the `maude` directory,
+* and rename the appropriate executable to `maude`, or create a symlink.
+
+To test the installation of Maude, run:
+
+    $ echo "" | maude
+
+If everything went fine, you should see something like 
+
+    $ echo "" | maude
+             \||||||||||||||||||/
+           --- Welcome to Maude ---
+             /||||||||||||||||||\
+        Maude 2.6 built: Dec 10 2010 11:12:39
+        Copyright 1997-2010 SRI International
+           Thu May 12 18:55:18 2011
+    Maude> Bye.
+
+without any additional *Warning* or *Error* messages.
+
+## Install GNU Make and Perl Dependencies
 
 This step varies from distribution to distribution. Here we give
 distro-specific instructions for the most popular distributions.
 
-Debian/Ubuntu:
+### Debian/Ubuntu
 
-    First, install the build-essential package which includes gcc, make, and
-    other packages needed to build and compile software:
+First, install the build-essential package which includes gcc, make, and
+other packages needed to build and compile software:
 
-        # apt-get install build-essential
+    # apt-get install build-essential
 
-    Next, install some of the K Framework's Perl dependencies:
+Next, install some of the K Framework's Perl dependencies:
 
-        # apt-get install libregexp-common-perl libxml-libxml-perl libxml-dom-perl
+    # apt-get install libregexp-common-perl libxml-libxml-perl libxml-dom-perl
 
-    Unfortunately, Debian does not include a package for the Tree::Nary Perl
-    module, so it must be installed manually:
+Unfortunately, Debian does not include a package for the Tree::Nary Perl
+module, so it must be installed manually:
 
-        # cpan -i Tree::Nary
+    # cpan -i Tree::Nary
 
-    Now you're ready to jump to the section on downloading K.
+Now you're ready to jump to the section on downloading K.
 
-Windows:
+### Windows
 
-    ...
+TODO
 
-Mac OSX:
+### Mac OSX
 
-    ...
+TODO
 
-Other:
+### Other
 
-    Use your distribution's package manager to install GNU Make and Perl.
+Use your distribution's package manager to install GNU Make and Perl.
 
-    On most distributions, the following command will install all the needed
-    Perl dependencies:
+On most distributions, the following command will install all the needed
+Perl dependencies:
 
-        # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary
+    # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary
 
-    Once GNU Make, Perl, and the Perl modules are installed, jump to the
-    section on downloading K.
+Once GNU Make, Perl, and the Perl modules are installed, jump to the
+section on downloading K.
 
 
-------------------------------
--- Download the K Framework --
-------------------------------
+## Download the K Framework
 
 The K Framework can be installed from SVN or from nightly release snapshots.
 The nightly release snapshots are about a day behind the SVN repository and
 don't contain SVN information, but they do contain pre-compiled PDFs and K
 definitions.
 
-To install K from the nightly release snapshots, go to
-    
-    http://code.google.com/p/k-framework/downloads
+To install K from the nightly release snapshots, go to:
 
-and download k-framework-nightly.tar.gz. Extract it as follows:
+<http://code.google.com/p/k-framework/downloads>
+
+and download `k-framework-nightly.tar.gz`. Extract it as follows:
 
     $ tar zxvf k-framework-nightly.tar.gz
 
@@ -65,45 +113,39 @@ To download K from SVN, use the following command:
 
     $ svn checkout https://k-framework.googlecode.com/svn/tags/latest/ k-framework
 
-Both approaches will leave you with a new directory called k-framework in your
-current directory.
+Both approaches will leave you with a new directory called `k-framework` in
+your current directory.
 
 
------------------------------
--- Install the K Framework --
------------------------------
+## Install the K Framework
 
 To complete the installation of the K Framework, add the k-framework/tools
 directory to your system's PATH variable.
 
-Linux/OSX/UNIX/etc:
+### Linux/OSX/UNIX/etc
 
-    On most operating systems, the following command will add the tools
-    directory to your PATH (be sure to replace <somedir> with the directory
-    that contains the k-framework directory):
+On most operating systems, the following command will add the tools
+directory to your `PATH` (be sure to replace <somedir> with the directory
+that contains the k-framework directory):
 
-        $ export PATH=<somedir>/k-framework/tools:$PATH
+    $ export PATH=<somedir>/k-framework/tools:$PATH
 
-    To make this change persistent across logins/shells, you will need to add
-    the command to somewhere like ~/.profile.
+To make this change persistent across logins/shells, you will need to add
+the command to a file like `~/.profile`.
 
-Windows:
+### Windows
 
-    ...
+TODO
 
 
-----------------------------
--- Test your installation --
-----------------------------
+## Test your installation
 
 Once the necessary dependencies are installed and the necessary paths are set,
-you should be able to type 'make' in the k-framework/regressionTests directory
-and have all of the test cases pass.
+you should be able to type `make` in the `k-framework/regressionTests`
+directory and have all of the test cases pass.
 
 
----------------------------------
--- Install the K LaTeX backend --
----------------------------------
+## Install the K LaTeX backend
 
 This step is optional, but it lets you compile K definitions into good-looking
 PDFs which are nicer to read than the ASCII definitions.
@@ -111,9 +153,7 @@ PDFs which are nicer to read than the ASCII definitions.
 ...describe LaTeX-specific steps here...
 
 
---------------------------
--- Problems / Questions --
---------------------------
+## Problems / Questions
 
 If you experience any problems installing K, please do not hesitate to contact
 us at <email>.
