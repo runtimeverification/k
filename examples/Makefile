@@ -7,7 +7,7 @@ TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
         challenge imp/fully-labeled imp/fully-syntactic imp/labeled-syntax imppp \
         simple/untyped simple/typed/dynamic simple/typed/static \
         skool/typed/dynamic \
-	kernelc \
+	kernelC \
 	exp/untyped exp/type-inference fun/untyped \
 	Thue bf befunge93
 
