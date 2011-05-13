@@ -7,15 +7,20 @@ kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
 /*@ \subsection{Identifiers}
 The special identifier for the function ``main'' belongs to all programs.
 Each program may use additional identifiers, which need to be declared either
-automatically (when one uses an external parser) or manually (when one writes the program).
-*/
+automatically (when one uses an external parser) or manually (when one writes the program). */
+
   syntax Id ::= main
 
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and for functions.
-As our current parser is ``algebraic'', the empty list needs to be identifiable as a constant (unlike CFG grammars, where it can simply be the empty string/epsilon production).  Therefore, if only using the first syntactic production for function declarations, one would need to explicitly specify the empty list constant for declaring a function with zero arguments.  To avoid having to do that, we add a separate function declaration production with explicitly no arguments; this is desugared into the first one.
-*/
+As our current parser is ``algebraic'', the empty list needs to be identifiable as a constant
+(unlike CFG grammars, where it can simply be the empty string/epsilon production).  Therefore,
+if only using the first syntactic production for function declarations, one would need to
+explicitly specify the empty list constant for declaring a function with zero arguments.
+To avoid having to do that, we add a separate function declaration production with explicitly
+no arguments; this is desugared into the first one. */
+
   syntax Decl ::= var List{Exp} ;
                 | function Id ( List{Id} ) Stmt
                 | function Id ( ) Stmt
@@ -26,14 +31,15 @@ expression rather than a variable because it can also increment an array element
 Arrays can be multidimensional and can hold other arrays, so their lookup operation
 takes a list of expressions as argument and applies to an expression (which can
 in particular be another array lookup), respectively.
-The construct \texttt{sizeof} gives the size of an array in number of elements of its first dimension.
+The construct \texttt{sizeof} gives the size of an array in number of elements of
+its first dimension.
 Like for the declaration of functions above, we have separate syntax for function
 calls with zero arguments.
 Note that almost all constructs are strict.  Exceptions are the increment (since
 its first argument gets updated, so it cannot be evaluated), the function call
 with zero arguments (because it will get desugared), and the assignment which
-is only strict in its second argument (for the same reason as the increment).
-*/
+is only strict in its second argument (for the same reason as the increment). */
+
   syntax Exp ::= Int | Bool | Id
                | ++ Exp            [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
@@ -74,8 +80,7 @@ Note that the strictness attributes obey the intended evaluation strategy
 of the various constructs.  In particular, the if-then-else construct is
 strict only in its first argument (the if-then construct will be desugared
 into if-then-else), while the loops constructs are not strict in any
-arguments.
-*/
+arguments. */
 
   syntax Stmt ::= { }
                 | { Stmts }
@@ -97,16 +102,14 @@ arguments.
                  | Stmts Stmts                 [prec 100 gather(e E)]
 
 
------------------------------------------------------------------------------
 /*@ \subsubsection{Lists}
 Currently we have to explicitly declare the syntactic lists
 (they will be eventually builtin).
 Note that they are associative, strict and hybrid, which means that once they
 reach the top of the computation each of their elements is evaluated to a result
 and the obtained list of results is automatically considered to be a result.
-We prefer to tag their units with the corresponding sort to avoid confusion.
-*/
------------------------------------------------------------------------------
+We prefer to tag their units with the corresponding sort to avoid confusion. */
+
 --- List{Id}; the hybrid attribute says that a list of results becomes itself a result
   syntax List{Id} ::= Id
                     | .List{Id} [latex "\dotCt{List\{Id\}}"]
@@ -119,8 +122,7 @@ We prefer to tag their units with the corresponding sort to avoid confusion.
 
 /*@ \subsection{Parsing programs}
 The syntax of SIMPLE is now complete.  It is a good idea to test the
-syntax by parsing a large variety of programs.
-*/
+syntax by parsing a large variety of programs. */
 
 /*@ \paragraph{Implementation-specific note:}
 There are different ways to parse programs using the defined syntax.  One approach
@@ -150,6 +152,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
   ...
 endkm\end{verbatim}}
+
 The dots ``{\footnotesize\texttt{...}}'' above replace possibly more elements of
 the same type; we only included one program in the module above, together with
 all the syntactic constants it needs.  In this approach, unfortunately, the
@@ -157,8 +160,7 @@ user has to declare all these syntactic constants by hand, as above.  If one has
 an external parser for the defined language, which is frequently the case when one
 defines languages with more complex syntax (as the implicit parser currently
 used by the \K tool is not very powerful), then one can easily modify the
-external parser to generate all the necessary syntactic constants. \\
-\vspace*{1ex}
+external parser to generate all the necessary syntactic constants.
 
 As explained in the overview paper mentioned in the preamble of this
 language definition, the entire language syntax is automatically included as
@@ -180,12 +182,13 @@ $$
 K \ \ ::= \ \ \KLabel(\it List\{K\})
 $$
 where we use quoted identifiers with underscores for arguments and backquoted
-parentheses for $\KLabel$ constants (one for each syntactic construct), e.g.,
-``\texttt{'try\_catch`(\_`)\_}'', and use ``\texttt{.List\{K\}}'' and ``\texttt{,,}''
-for the unit and the separator for lists of $K$ terms (to avoid conflicts with
-language syntax).  For example, the internal representation of the syntactic
-constant \texttt{pFactorial} above is \texttt{'pFactorial(.List\{K\})}, while
-the representation of its corresponding program is
+parentheses or commas for $\KLabel$ constants (one for each syntactic construct),
+e.g., ``\texttt{'try\_catch`(\_`)\_}'' or ``\texttt{'\_`,\_}'', and use
+``\texttt{.List\{K\}}'' and ``\texttt{,,}'' for the unit and the separator for lists
+of $K$ terms (to avoid conflicts with language syntax).  For example, the internal
+representation of the syntactic constant \texttt{pFactorial} above is
+\texttt{'pFactorial(.List\{K\})}, while the representation of its corresponding
+program is
 
 {\footnotesize\begin{verbatim}
 '__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id f(.List{K}),
@@ -212,7 +215,12 @@ the syntactic categories to $K$, which may lead to ambiguous parsing of more com
 programs; this is, again, a limitation of our current implementation.  To check the 
 internal representation of the defined programs, first compile the \K definition,
 then load the generated Maude module into Maude, and then type in Maude commands
-like ``\texttt{rewrite 'pFactorial(.List\{K\})}''.  */
+like
+
+{\footnotesize\begin{verbatim}
+  rewrite 'pFactorial(.List\{K\})
+\end{verbatim}}
+*/
 endkm
 
 
@@ -238,7 +246,11 @@ already tested, then one should create a module that includes
 \texttt{SIMPLE-UNTYPED-DESUGARED-SYNTAX}, \texttt{SIMPLE-UNTYPED-PROGRAMS} and
 \texttt{K}, and then follow the same steps as above for checking the internal
 representation of programs (without desugaring).  For example, the command
-``\texttt{rewrite 'pFactorial(.List\{K\})}'' should yield the following term:\\
+
+{\footnotesize\begin{verbatim}
+  rewrite 'pFactorial(.List{K}) .
+\end{verbatim}}
+should yield the following term:
 
 {\footnotesize\begin{verbatim}
 '__('var_;('_`,_('_=_(Id x(.List{K}),,Int 0(.List{K})))),,'__(
