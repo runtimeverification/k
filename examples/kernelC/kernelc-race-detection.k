@@ -16,7 +16,7 @@ kmod KERNELC-RACE-DETECTION is  including  KERNELC
        <env> .Map </env>
        <fstack> .List </fstack>
         <id> 0 </id> 
-     </thread*> </threads>
+     </thread> </threads>
      <locks> .Map </locks> 
      <cthreads> .Set </cthreads>       @latex("\\kBR")    
      <funs> .Map </funs>              
