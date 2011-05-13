@@ -99,7 +99,7 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro int * PointerId:PointerId = int PointerId
   macro #include<Stmts> = Stmts:StmtList
   macro E1[E2] = *(E1 + E2)
-  macro scanf("%d", & * E) = scanf("%d", E)
+  macro scanf( "%d" , & * E) = scanf("%d", E)
   macro (int * PointerId = E) = (int PointerId = E)
   macro (int X:Id = E ;) = int X ; X = E ;
   macro stdio.h = {} 
