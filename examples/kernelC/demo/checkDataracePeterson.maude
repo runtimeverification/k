@@ -1,3 +1,0 @@
-load pPeterson-compiled
-search[1] run('pPeterson) =>* < raceDetected > B:Bag </ raceDetected > .
-q

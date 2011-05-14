@@ -1,3 +1,0 @@
-load pPeterson-compiled
-search run('pPeterson) =>! B:Bag .
-q

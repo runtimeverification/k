@@ -1,3 +1,0 @@
-load pPeterson-compiled
-rewrite run('pPeterson) .
-q
