@@ -9,7 +9,7 @@ TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
         skool/typed/dynamic \
 	kernelC \
 	exp/untyped exp/type-inference fun/untyped \
-	Thue bf befunge93
+	languages/esolangs/Thue languages/esolangs/bf languages/esolangs/befunge93
 
 .PHONY: all build test clean
 

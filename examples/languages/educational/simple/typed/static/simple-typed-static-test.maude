@@ -1,0 +1,6 @@
+load simple-typed-static-compiled.maude
+rew run('pFactorial) .
+rew run('pCollatz) .
+rew run('pSorting) .
+rew run('pX01) .
+
