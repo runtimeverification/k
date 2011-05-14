@@ -3,8 +3,9 @@
 The K Framework tool has been tested and is known to work on Linux (either
 32-bits or 64-bits) and on Mac OSX.
 
-The installation of K Framework consists of three steps: installing the dependencies,
-downloading the `k-framework` directory, and finally configuring and testing K.
+The installation of K Framework consists of three steps: installing the 
+dependencies, downloading the `k-framework` directory, and finally configuring 
+and testing K.
 
 Instructions on writing, compiling, and executing K definitions can be found in
 the `README` file.
@@ -56,12 +57,12 @@ without any additional *Warning* or *Error* messages.
 ## Install GNU Make and Perl Dependencies
 
 This step varies from distribution to distribution. Here we give
-distro-specific instructions for the most popular distributions.
+distro-specific instructions for a couple of popular distributions.
 
 ### Debian/Ubuntu
 
-First, install the build-essential package which includes gcc, make, and
-other packages needed to build and compile software:
+First, install the build-essential package which includes gcc, make, 
+and other packages needed to build and compile software:
 
     # apt-get install build-essential
 
@@ -78,8 +79,9 @@ Now you're ready to jump to the section on downloading K.
 
 ### Mac OSX
 
-First install XCode from <http://developer.apple.com/xcode>.  This will provide
-you with a minimal building environment, including perl, gcc, make, and svn.  
+First install XCode from <http://developer.apple.com/xcode>.  
+This will provide you with a minimal building environment, 
+including perl, gcc, make, and svn.  
 
 Then follow the instructions below for installing Perl dependencies.
 
@@ -121,16 +123,16 @@ your current directory.
 
 ## Install the K Framework
 
-To complete the installation of the K Framework, add the k-framework/tools
-directory to your system's PATH variable.
+To complete the installation of the K Framework, add the `k-framework/core`
+directory to your system's `PATH` variable.
 
 ### Linux/OSX/UNIX/etc
 
-On most operating systems, the following command will add the tools
+On most operating systems, the following command will add the `core`
 directory to your `PATH` (be sure to replace <somedir> with the directory
 that contains the k-framework directory):
 
-    $ export PATH=<somedir>/k-framework/tools:$PATH
+    $ export PATH=<somedir>/k-framework/core:$PATH
 
 To make this change persistent across logins/shells, you will need to add
 the command to a file like `~/.profile`.
@@ -139,7 +141,7 @@ the command to a file like `~/.profile`.
 ## Test your installation
 
 Once the necessary dependencies are installed and the necessary paths are set,
-you should be able to type `make` in the `k-framework/regressionTests`
+you should be able to type `make` in the `k-framework/tests/regression`
 directory and have all of the test cases pass.
 
 
@@ -150,7 +152,8 @@ Executing
 
     $ make latex
 
-in one of the examples directories, e.g., `examples/simple/untyped`
+in one of the examples directories, e.g., 
+  examples/languages/educational/simple/untyped
 should produce a file `simple-untyped.tex`  containing the latex code 
 corresponding to the definition.
 
@@ -163,7 +166,7 @@ the `.tex` file obtained above, or execute
 
     $ make pdf
 
-in the `examples/simple/untyped` directory.
+in the `examples/languages/educational/simple/untyped` directory.
 
 This should generate a PDF of the `SIMPLE-UNTYPED` definition which is a good
 starting point for understanding more about K definitions and the process of
