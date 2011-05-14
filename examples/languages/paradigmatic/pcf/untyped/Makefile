@@ -17,5 +17,5 @@ MAIN_FILE = pcf-untyped
 # this is a space-separated list of maude files to run
 TESTS = pcf-untyped-test.m
 
-TOOL_DIR = $(dir $(KCOMPILE))
+TOOL_DIR = $(dir $(KCOMPILE))../tools/
 include $(TOOL_DIR)make-helper.mk

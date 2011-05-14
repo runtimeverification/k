@@ -14,5 +14,5 @@ MAIN_FILE = exp-type-inference
 # this is a space-separated list of basename maude files to run
 TESTS = exp-type-inference-test.m
 
-TOOL_DIR = $(dir $(KCOMPILE))
+TOOL_DIR = $(dir $(KCOMPILE))../tools/
 include $(TOOL_DIR)make-helper.mk

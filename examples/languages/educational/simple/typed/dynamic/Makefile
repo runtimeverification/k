@@ -16,5 +16,5 @@ MAIN_FILE = simple-typed-dynamic
 # this is a space-separated list of basename maude files to run
 TESTS = simple-typed-dynamic-test.m
 
-TOOL_DIR = $(dir $(KCOMPILE))
+TOOL_DIR = $(dir $(KCOMPILE))../tools/
 include $(TOOL_DIR)make-helper.mk

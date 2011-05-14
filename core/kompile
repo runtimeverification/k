@@ -971,7 +971,7 @@ sub latexify {
 	print FILE "\\documentclass[draft]{article}\n" if $draft;
 	print FILE "\\usepackage{import}\n";
         my $latex_tools_dir =  File::Spec->catfile($k_tools_dir, '..','..','latex');
-	print FILE "\\import{$latex_tools_dir}{k2latex.$style.sty}\n";
+	print FILE "\\import{$latex_tools_dir/}{k2latex.$style.sty}\n";
         if (-e "$language_file_name.sty") {
 	   print FILE "\\input{$language_file_name.sty}\n";
         }

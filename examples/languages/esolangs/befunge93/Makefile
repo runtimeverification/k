@@ -17,5 +17,5 @@ LATEX_TOPMATTER = topmatter.tex
 # this is a space-separated list of basename maude files to run
 TESTS = test.m test-b93.m test-string.m
 
-TOOL_DIR = $(dir $(KCOMPILE))
+TOOL_DIR = $(dir $(KCOMPILE))../tools/
 include $(TOOL_DIR)make-helper.mk
