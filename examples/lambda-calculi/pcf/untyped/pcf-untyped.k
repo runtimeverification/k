@@ -13,6 +13,9 @@ kmod PCF-UNTYPED is including PCF-UNTYPED-PROGRAMS
   syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"]
   macro [[KL:KLabel]] = getResult <T_> <k> KL(.List{K}) </k> <_/T>
 
+  syntax Bag ::= [[ K ]] [latex "\llbracket\,{#1}\,\rrbracket"]
+  macro [[K:K]] = getResult <T_> <k> K:K </k> <_/T>
+
   syntax Bag ::= getResult Bag
   syntax CellLabel ::= result
   macro getResult <T_> <k> KR:KResult </k> <_/T> = <result> KR:KResult </result>
