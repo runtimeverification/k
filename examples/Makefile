@@ -11,7 +11,6 @@ TEST_DIRS = algorithms/sort \
 	    languages/paradigmatic/imp/fully-labeled \
 	    languages/paradigmatic/imp/fully-syntactic \
 	    languages/paradigmatic/imp/labeled-syntax \
-	    languages/paradigmatic/imp/no-syntax \
 	    languages/paradigmatic/exp/untyped \
 	    languages/paradigmatic/exp/type-inference \
 	    languages/paradigmatic/simply-typed \
@@ -28,7 +27,8 @@ TEST_DIRS = algorithms/sort \
 	    languages/educational/fun/untyped \
 	    languages/esolangs/Thue \
 	    languages/esolangs/bf \
-	    languages/esolangs/befunge93
+	    languages/esolangs/befunge93 \
+	    #languages/paradigmatic/imp/no-syntax 
 
 .PHONY: all build test clean
 
