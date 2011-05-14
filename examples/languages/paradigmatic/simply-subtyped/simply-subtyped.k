@@ -1,6 +1,6 @@
 
-load ../../modules/k-visitor
-load ../../modules/substitution
+load ../../../modules/k-visitor
+load ../../../modules/substitution
 
 kmod SIMPLY-SUBTYPED-SYNTAX is including PL-ID + PL-INT + K
   /*@ \section*{Syntax}
@@ -47,7 +47,7 @@ kmod SIMPLY-SUBTYPED-SEMANTICS is including SIMPLY-SUBTYPED-SYNTAX + K + SUBSTIT
   In the static semantics, expressions represent computations and types represent
   final values, so we subsort \emph{Exp} to $\K$ and \emph{Type} to $\KResult$.
   */
-  syntax K ::= Exp
+  syntax K ::= Exp | List{Field}
   syntax KResult ::= Type
 
   /*@ \subsection*{Configuration}
