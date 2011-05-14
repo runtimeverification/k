@@ -1,4 +1,4 @@
 #!/bin/sh
-PARSER=../../../../examples/bf/parser.py
-COMPILED=../../../../examples/bf/bf-compiled.maude
+PARSER=../../../../../examples/bf/parser.py
+COMPILED=../../../../../examples/bf/bf-compiled.maude
 cat $1 | python2 $PARSER | tr -d ' ' | simplemaude "eval-inp(%s, str(\"${2}\")(.List{K}))" $COMPILED | cellstoxml | xpath "//result/text()" 2> /dev/null ; echo ""

@@ -336,11 +336,10 @@ my $default_freezer = "FREEZER";
 # Choose a symbol which will never appear in any programming language or program
 my $specialSymbol = "K";
 
-my $k_tools_dir = (File::Basename::fileparse($0))[1];
+my $k_tools_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maude','compiler');
 my $k_all_tools = File::Spec->catfile($k_tools_dir,"all-tools");
 my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
-my $k_prelude = File::Spec->catfile(File::Spec->catfile($k_tools_dir,".."),"k-prelude");
-my $k_nice_pdf = File::Spec->catfile($k_tools_dir, "nice-pdf.sh");
+my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 
 my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
@@ -971,7 +970,8 @@ sub latexify {
 	print FILE "\\documentclass{article}\n" if !$draft;
 	print FILE "\\documentclass[draft]{article}\n" if $draft;
 	print FILE "\\usepackage{import}\n";
-	print FILE "\\import{$k_tools_dir}{k2latex.$style.sty}\n";
+        my $latex_tools_dir =  File::Spec->catfile($k_tools_dir, '..','..','latex');
+	print FILE "\\import{$latex_tools_dir}{k2latex.$style.sty}\n";
         if (-e "$language_file_name.sty") {
 	   print FILE "\\input{$language_file_name.sty}\n";
         }
@@ -998,7 +998,7 @@ sub latexify {
 	close FILE;
 	
 	# call the post-processor for latex
-	my $postprocessor = File::Spec->catfile($k_tools_dir, "postprocess_texcmds.pl");
+	my $postprocessor = File::Spec->catfile($k_tools_dir, '..','..', "postprocess_texcmds.pl");
 	my $stat = system("perl $postprocessor $output_file_name thistemp");
 	if (($stat >>= 8) != 0)
 	{
