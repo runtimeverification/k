@@ -1,6 +1,6 @@
 # KCOMPILE can be set by whoever calls this file
 # e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= $(shell which kompile)
+KCOMPILE ?= $(K_CORE)/kompile
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = SIMPLE-TYPED-DYNAMIC

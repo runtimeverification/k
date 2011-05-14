@@ -1,6 +1,6 @@
 # KCOMPILE can be set by whoever calls this file
 # e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= $(shell which kompile)
+KCOMPILE ?= $(K_CORE)/kompile
 COMPILE_OPTIONS ?= -nd
 
 # this is the name of the main maude module 
