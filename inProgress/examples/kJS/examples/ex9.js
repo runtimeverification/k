@@ -1,1 +1,0 @@
-lines.forEach(function (line) {});

@@ -1,4 +1,0 @@
-in /Users/rusu/Desktop/Work/Vlad.Rusu@inria.fr/trunk/k-prelude
-mod K-SHARED is including K . 
-	ops 'String 'b 'K 'Id 'List`{K`} 'a : -> KLabel [metadata "generated label"] . 
-endm

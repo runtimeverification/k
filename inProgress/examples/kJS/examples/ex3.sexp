@@ -1,1 +1,0 @@
-("toplevel",,(($var,,(("x"),,("y"),,("z"))),,($stat,,("assign",,true,,("name",,"x"),,("num",,1))),,($stat,,("assign",,true,,("name",,"y"),,("num",,2))),,($stat,,("assign",,true,,("name",,"z"),,("binary",,"+",,("unary-postfix",,"++",,("name",,"x")),,("unary-prefix",,"++",,("name",,"y"))))),,($stat,,("assign",,"+",,("name",,"z"),,("num",,3)))))

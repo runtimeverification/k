@@ -1,1 +1,0 @@
-someUnboundVariable = 12;

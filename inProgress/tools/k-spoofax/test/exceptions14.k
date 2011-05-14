@@ -1,8 +1,0 @@
-function main() {
-	try {
-		15;
-	} catch ( e ) {
-		write ( e );
-	}
-	write ( 42 );
-}

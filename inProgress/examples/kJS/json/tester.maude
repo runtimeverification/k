@@ -1,6 +1,0 @@
-in ../../../../k-prelude
-load json.maude
-
-set print with parentheses on .
---- set print mixfix off .
-
