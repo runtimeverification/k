@@ -1,8 +1,9 @@
-TEST_DIRS = modules/tests/exp modules/tests/lambda modules/tests/mu \
-	    modules/tests/io modules/tests/imp modules/tests/halt \
-	    modules/tests/callcc modules/tests/threads modules/tests/agents \
-	    modules/tests/quote-unquote \
-	    algorithms/sort \
+#modules/tests/exp modules/tests/lambda modules/tests/mu
+#modules/tests/io modules/tests/imp modules/tests/halt
+#modules/tests/callcc modules/tests/threads modules/tests/agents
+#modules/tests/quote-unquote
+
+TEST_DIRS = algorithms/sort \
 	    algorithms/dijkstra \
 	    algorithms/primes \
 	    algorithms/sudoku/1-direct-definition \
