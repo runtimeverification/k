@@ -1,9 +1,0 @@
-# Whitelist the following cells
-T: show
-k: show
-env: show
-threads: show
-thread: show
-callStack: recursively-hide
-blockStack: recursively-hide
-local: show
