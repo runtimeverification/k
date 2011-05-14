@@ -1,0 +1,130 @@
+mod STRICTCXT2EQS is
+  including K-SORTS .
+  including K-META-OPS .
+  including STRICT-ATTRS .
+  including K-STRICTNESS-OPS .
+  including META-TERM-EXTRAS .
+  including STRING-EXTRAS .
+  including META-MODULE-EXTRAS .
+  including META-K-MODULE .
+  including META-K-CONTEXTS .
+  including META-K-COOL .
+  including META-K-RULES .
+  including METADATA-EXTRAS .
+  var T : Term . var V : Variable .  var Trl : TermList .  
+  var Sort S : Sort .  var Ss : SortSet .
+  var AS : AttrSet . var MAS : MembAxSet . var Mb : MembAx .
+  var Eqs Eqs' : EquationSet . var Rls Rls' : RuleSet . var Q : Qid .
+  vars Type Type' : Type .  var OPDS : OpDeclSet . var KCS : KContextSplit .
+  vars T1 T2 : Term . var Cond : TermList .
+  sort MASEqsPair .
+
+
+  op strictCxt2eqs : Qid Qid Module Module SortSet ~> Module .
+  var Syntax StrictEqs : Qid . var M Flat : Module .
+
+  eq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss) = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M)), Ss) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
+
+  op strictCxt2eqs : Qid Qid MASEqsPair SortSet ~> Module .
+  eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss) 
+   = addOps(coolOps,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) .
+
+
+  op coolOps : -> OpDeclSet .
+  eq coolOps 
+   = (op 'cool : K -> K [none] .) 
+---     (op '_~>_ : KProper K -> KProper [assoc id('..K) prec(100)] .) 
+  .
+
+  op defaultCoolEqs : SortSet -> EquationSet .
+  eq defaultCoolEqs(S ; Ss)
+   = (eq mkCell(cool(S), mkVariable('K,K)) 
+       = mkCell(S, 'cool[mkVariable('K,K)]) 
+      [metadata("super cooling start")] .)
+     defaultCoolEqs(Ss) .
+  eq defaultCoolEqs(none) 
+   = (eq 'cool[mkVariable('zk,K)] = mkVariable('zk,K) 
+      [owise metadata("super cooling end")] .) .
+
+  op {_,_,_} : MembAxSet EquationSet RuleSet -> MASEqsPair [ctor] .
+
+  op strictCxt2eqs : Module MembAxSet ~> MASEqsPair .
+  eq strictCxt2eqs(M,MAS) = strictCxt2eqs(M, MAS, none, none) .
+  op strictCxt2eqs : Module MembAxSet EquationSet RuleSet ~> MASEqsPair . 
+ ceq strictCxt2eqs(M, Mb MAS, Eqs, Rls)
+   = strictCxt2eq(M, MAS, Eqs, Rls, pReplaceCxt(T,1),pReplaceCxt(T,2), getAttrs(KCS), getCondition(KCS))
+  if KCS := splitKContext(Mb) /\ T := getContents(KCS) .
+  eq strictCxt2eqs(M, MAS,Eqs, Rls) = {MAS,Eqs, Rls} [owise] . 
+
+  op strictCxt2eq : Module MembAxSet EquationSet RuleSet Term Term AttrSet TermList ~> MASEqsPair .
+  eq strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, kstrict(nil,Q) AS, Cond) 
+   = strictCxt2eqs(M, MAS, Eqs coolingEqs(M, T1, T2, Q, AS), Rls, heating(M, T1, T2, Q, Cond, AS)) .
+
+  eq strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, AS, Cond)
+   = strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, kstrict(nil,klabel) AS, Cond) [owise] .
+
+  op strictCxt2eqs : Module MembAxSet EquationSet RuleSet MASEqsPair ~> MASEqsPair . 
+  eq strictCxt2eqs(M, MAS, Eqs, Rls, {none, Eqs', Rls'})
+   = strictCxt2eqs(M, MAS, Eqs Eqs', Rls Rls') [print "Eqs: " Eqs' " and Rls: " Rls'] .
+   
+  
+  op heating : Module Term Term Qid TermList AttrSet -> MASEqsPair .
+  eq heating(M, T1, T2, Q, Cond, AS)
+   = strictCxtHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,KProper)], freezeTerm(M, T1))), Cond[hole <- mkVariable('Kcxt,KProper)], AS) .
+
+  op coolingEqs : Module Term Term Qid AttrSet -> EquationSet .
+  eq coolingEqs(M, T1, T2, Q, AS)
+   =  (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T1)))
+        = kWrap(Q, T1[hole <- mkVariable('Kcxt,KResult)])
+       [metadata(AS metadata("cooling"))] .) 
+      if T2 == hole then 
+          (eq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
+        = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
+       [metadata(AS metadata("super cooling"))] .)
+      else 
+     (ceq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
+        = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
+        if '_=/=Bool_[getTopLabel(T2),mkVariable('KcxtL,KLabel)] = 'true.Bool 
+       [metadata(AS metadata("super cooling"))] .)
+     (ceq 'cool[kra(kra(T2[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]], freezeTerm(M, T1)),'Rest:K)]
+        = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
+        if '_::`KResultLabel[mkVariable('KcxtL,KLabel)] = 'false.Bool 
+       [metadata(AS metadata("super cooling"))] .)
+     fi  .
+
+  op strictCxtHeat : Term Term TermList AttrSet ~> MASEqsPair .
+  eq strictCxtHeat(T1,T2,empty, AS pair("nd","true"))
+   = {none, none, (rl T1 => T2 [metadata(AS pair("nd","true") metadata("heating"))] .)} .
+  eq strictCxtHeat(T1,T2,T, AS pair("nd","true"))
+   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS pair("nd","true") metadata("heating"))] .)} .
+  eq strictCxtHeat(T1,T2,empty, AS)
+   = {none, (eq T1 = T2 [metadata(AS metadata("heating"))] .), none} [owise] .
+  eq strictCxtHeat(T1,T2,T, AS)
+   = {none, (ceq T1 = T2 if T = trueCt [metadata(AS metadata("heating"))] .), none} [owise] .
+
+  op freezeTerm : Module Term -> Term .
+  eq freezeTerm(M, T) = kApply(
+   freezeLabel(untokenize(metaPrettyPrint(M,T, mixfix flat number rat))),
+   freezeVariables(M, removeHole(noDuplicates(getVars(T))))) .
+
+  op freezeVariables : Module TermList ~> TermList .
+  op freezeVariable : Module Variable ~> Variable .
+  eq freezeVariables(M, (V,Trl)) 
+   = (freezeVariable(M, V),freezeVariables(M, Trl)) .
+  eq freezeVariables(M, empty) = empty .
+
+  eq freezeVariable(M, V) = freezeVariable(string(V),makeK(M,V, getType(V))) .
+
+  op makeK : Module Variable Type ~> Term . 
+  eq makeK(M, V, Type) = makeK(M, V, Type, sortLeq(M, Type, KList)) .
+
+  op makeK : Module Variable Type Bool ~> Term . 
+  eq makeK(M, V, Type, true) = V .
+  eq makeK(M, V, Type, B:[Bool]) 
+   = kApply(findWrapper(getOps(M), Type)[V],empty) .
+
+  op findWrapper : OpDeclSet Type ~> Qid .
+  eq findWrapper(OPDS op Q : Type -> Type' [AS metadata("builtin wrapper")] ., Type) = Q .
+
+endm
+

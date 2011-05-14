@@ -1,0 +1,80 @@
+mod STRICTCXT2EQS is
+  including K-SORTS .
+  including K-META-OPS .
+  including STRICT-ATTRS .
+  including K-STRICTNESS-OPS .
+  including META-TERM-EXTRAS .
+  including STRING-EXTRAS .
+  including META-MODULE-EXTRAS .
+  including META-K-MODULE .
+  including META-K-CONTEXTS .
+  including META-K-RULES .
+  including METADATA-EXTRAS .
+  var T : Term . var V : Variable .  var Trl : TermList .  var Sort : Sort .
+  var AS : AttrSet . var MAS : MembAxSet . var Mb : MembAx .
+  var Eqs : EquationSet . var Q : Qid .
+  vars Type Type' : Type .  var OPDS : OpDeclSet . var KCS : KContextSplit .
+  vars T1 T2 : Term . var Cond : TermList .
+  sort MASEqsPair .
+  op {_,_} : MembAxSet EquationSet -> MASEqsPair [ctor] .
+
+  op strictCxt2eqs : Module MembAxSet ~> MASEqsPair .
+  eq strictCxt2eqs(M,MAS) = strictCxt2eqs(M, MAS, none) .
+  op strictCxt2eqs : Module MembAxSet EquationSet ~> MASEqsPair . 
+ ceq strictCxt2eqs(M, Mb MAS, Eqs)
+   = strictCxt2eqs(M, MAS, Eqs strictCxt2eq(M, pReplaceCxt(T,1), pReplaceCxt(T,2), getAttrs(KCS), getCondition(KCS)))
+  if KCS := splitKContext(Mb) /\ T := getContents(KCS) .
+  eq strictCxt2eqs(M, MAS,Eqs) = {MAS,Eqs} [owise] . 
+
+  op strictCxt2eq : Module Term Term AttrSet TermList ~> EquationSet .
+  eq strictCxt2eq(M, T1, T2, kstrict(nil,Q) AS, Cond) 
+   = strictCxt2eqHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,KProper)], freezeTerm(M, T1))), Cond[hole <- mkVariable('Kcxt,KProper)], AS) 
+      (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T1)))
+        = kWrap(Q, T1[hole <- mkVariable('Kcxt,KResult)])
+       [metadata(AS metadata("cooling"))] .) .
+
+  eq strictCxt2eq(M, T1, T2, AS, Cond)
+   = strictCxt2eq(M, T1, T2, kstrict(nil,klabel) AS, Cond) [owise].
+  
+
+  op strictCxt2eqHeat : Term Term TermList AttrSet ~> Equation .
+  eq strictCxt2eqHeat(T1,T2,empty, AS)
+   = (eq T1 = T2 [metadata(AS metadata("heating"))] .) .
+  eq strictCxt2eqHeat(T1,T2,T, AS)
+   = (ceq T1 = T2 if T = trueCt [metadata(AS metadata("heating"))] .) .
+
+  op freezeTerm : Module Term -> Term .
+  eq freezeTerm(M, T) = kApply(
+   freezeLabel(untokenize(metaPrettyPrint(M,T, mixfix flat number rat))),
+   freezeVariables(M, removeHole(noDuplicates(getVars(T))))) .
+
+  op freezeVariables : Module TermList ~> TermList .
+  op freezeVariable : Module Variable ~> Variable .
+  eq freezeVariables(M, (V,Trl)) 
+   = (freezeVariable(M, V),freezeVariables(M, Trl)) .
+  eq freezeVariables(M, empty) = empty .
+
+  eq freezeVariable(M, V) = freezeVariable(string(V),makeK(M,V, getType(V))) .
+
+  op makeK : Module Variable Type ~> Term . 
+  eq makeK(M, V, Type) = makeK(M, V, Type, sortLeq(M, Type, KList)) .
+
+  op makeK : Module Variable Type Bool ~> Term . 
+  eq makeK(M, V, Type, true) = V .
+  eq makeK(M, V, Type, B:[Bool]) 
+   = kApply(findWrapper(getOps(M), Type)[V],empty) .
+
+  op findWrapper : OpDeclSet Type ~> Qid .
+  eq findWrapper(OPDS op Q : Type -> Type' [AS metadata("builtin wrapper")] ., Type) = Q .
+
+  op strictCxt2eqs : Qid Qid Module Module ~> Module .
+  var Syntax StrictEqs : Qid . var M Flat : Module .
+
+  eq strictCxt2eqs(Syntax,StrictEqs,M,Flat) = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M))) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
+
+  op strictCxt2eqs : Qid Qid MASEqsPair ~> Module .
+  eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs}) 
+   = setMbs(addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))), MAS) .
+endm
+
+

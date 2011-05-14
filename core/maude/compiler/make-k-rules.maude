@@ -1,0 +1,62 @@
+fmod MAKE-K-RULES is
+  including META-MODULE-EXTRAS .
+  including  META-K-RULES .
+  including  META-K-CONTEXTS .
+  including META-LEVEL-EXTRAS .
+  including META-K-CONDITION-SEARCH .
+  including PARSE-METADATA .
+  var M Flat : Module .  var T T1 T2 : Term .  var AS : AttrSet . 
+  var C : Term . var S : Sort . var Ct : Constant . var V : Variable .
+  var O O' : Qid . var N : Nat . var Tl : TermList .
+  var KRuleType : KRuleKind .  var Split : KRuleSplit .
+  var Mas : MembAxSet . var Max : MembAx .
+  
+  op resolveKRules : Qid Module Module -> Module .
+  eq resolveKRules(O, M, Flat) = setName(resolveReplace(setOps(setEqs(setRls(Flat,none),none),clearReductionAttrs(getOps(Flat))), setMbs(removeImports(M, (including 'K-RULES .) (including 'K-CONDITION-SEARCH .)),none), getMbs(M)), O) .
+
+  op resolveReplace : Module Module MembAxSet -> Module .
+  eq resolveReplace(Flat, M, none) = M .
+  eq resolveReplace(Flat, M, Max Mas)
+   = resolveReplace(Flat, M, Max, Mas) .
+  op resolveReplace : Module Module MembAx MembAxSet -> Module .
+ ceq resolveReplace(Flat, M, Max, Mas)
+   = resolveReplace(Flat, addReplace(Flat, M, Split), Mas)
+  if Split := splitKRule(metadataParse(Max)) .
+ ceq resolveReplace(Flat, M, Max, Mas)
+   = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas)
+  if CSplit := splitKContext(metadataParse(Max)) .
+  eq resolveReplace(Flat, M, Max, Mas) = resolveReplace(Flat, addMbs(Max, M), Mas) [owise] .
+  eq resolveReplace(Flat,  errorM(U:Module, Cxt:[Term], T:[Term], Str:String, AS:AttrSet), Mas)
+   = errorM(Flat, Cxt:[Term], T:[Term], Str:String, AS:AttrSet) .
+
+
+
+---------  Hack to get rid of the potential attribute large
+  eq klarge = none . 
+---------
+
+
+  op addCxtReplace : Module Module KContextSplit ~> Module .
+  eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(Flat, getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
+
+  op addReplace : Module Module KRuleSplit ~> Module .
+  eq addReplace(Flat, M,{krl,T,empty,AS kstructural})
+   = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = normalize(Flat,splitReplace(Flat, T,2)) [metadata(kstructural AS)] .), M) . 
+  eq addReplace(Flat, M, {kcrl, T, C, AS kstructural})
+   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = normalize(Flat,splitReplace(Flat, T,2)) if C = trueCt [metadata(kstructural AS)] .), M) .
+  eq addReplace(Flat, M, {krl, T, empty, AS})
+    = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => normalize(Flat,splitReplace(Flat, T,2)) [metadata(kcomputational AS)] .), M) [owise] .
+  eq addReplace(Flat, M, {kcrl, T, C, AS}) 
+    = addRls((crl normalize(Flat,splitReplace(Flat, T,1)) => normalize(Flat, splitReplace(Flat, T,2)) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
+
+
+  op makeCondition : Term -> Condition .
+ ceq makeCondition(O'[O[T1,T2]])
+   = T1 => T2 
+  if O' = searchS /\ O = replaceS .
+  eq makeCondition(T) = T = trueCt [owise] .
+      
+
+  var CSplit : KContextSplit .
+endfm
+

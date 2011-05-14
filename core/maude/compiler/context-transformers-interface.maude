@@ -1,0 +1,47 @@
+load context-transformers
+
+mod CONTEXT-TRANSFORMERS-META is
+  including CONTEXT-TRANSFORMERS .
+  including META-LEVEL .
+  var KCxt NoKCxt Config : String .  var M : Module .
+  var QKCxt QNoKCxt QConfig : Qid .
+  op resolveKCxt : String String String ~> Module .
+  eq resolveKCxt(KCxt, NoKCxt, Config) 
+   = resolveKCxt(qid(KCxt), qid(NoKCxt), qid(Config)) .
+  op resolveKCxt : Qid Qid Qid ~> Module .
+  eq resolveKCxt(QKCxt,QNoKCxt,QConfig) 
+   = resolveKCxt(QNoKCxt, upModule(QKCxt, false), extractConfTerm(upModule(QConfig,false))) .
+
+
+  var T : [Term] . 
+  op resolveKCxt : Qid Module Term ~> Module .
+  eq resolveKCxt(QNoKCxt, M, T) 
+   = if T :: Term then contextTransformers(QNoKCxt, M, T) else M fi .
+
+  op compileCONTEXT-TRANSFORMERS : Module ~> Module .
+  eq compileCONTEXT-TRANSFORMERS(M) = resolveKCxt(getName(M), M, extractConfTerm(M)) .
+endm
+
+mod CONTEXT-TRANSFORMERS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op context-transformers : -> System .
+  op idle : -> State .
+  var Q KCxt NoKCxt Config : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq context-transformers = [nil, idle, 
+ 'Usage: 'resolveKCxt '<SourceModule> '<DestModule> '<ConfigModule> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveKCxt KCxt NoKCxt Config QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(KCxt,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('CONTEXT-TRANSFORMERS-META),
+                        'resolveKCxt[upTerm(string(KCxt)),upTerm(string(NoKCxt)), upTerm(string(Config))])),error) .
+endm

@@ -1,0 +1,9 @@
+# Whitelist the following cells
+T: show
+k: show
+env: show
+threads: show
+thread: show
+callStack: show
+blockStack: show
+local: show

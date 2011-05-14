@@ -1,0 +1,30 @@
+set include PL-BOOL off .
+set include BOOL on .
+load prelude-extras
+load meta-k
+load printing
+load metadata-parsing
+load many-modules-interface
+load resolve-ditto-interface
+load complete-k-sorts-interface
+load default-terms-interface
+load open-cells-interface
+load sanity-checks-interface
+load missing-subsorts-interface
+load anon-consts-interface
+load context-transformers-interface
+load anon-vars-interface
+load make-k-rules-interface
+load lists-to-wrappers-interface
+load remove-sublists-interface
+load syntax-to-k-interface
+load add-k-proper-interface
+load lists-to-k-interface
+load subsorts-to-wrappers-interface
+load homogenous-arguments-interface
+load make-all-labels-interface
+load strict-ops2cxt-interface
+load strict-cxt2eqs-interface
+load id-to-string-interface
+load compile-program
+load compile-chain

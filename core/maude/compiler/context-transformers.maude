@@ -1,0 +1,265 @@
+fmod CONTEXT-TRANSFORMERS is
+  including META-MODULE-EXTRAS .
+  including K-META-CONFIG .
+  including META-ANONYMOUS-VARIABLE . 
+  including K-META-OPEN-CELLS .
+  including INT .
+  var M : Module .  var T T' : Term . var O Q : Qid .  var Ct : Constant . 
+  var Tl Tl' : TermList .  var N : Nat .
+  var Ss : SortSet .  var V : Variable .
+  var MAS : MembAxSet .  var MAx : MembAx . var SC : SplitCell .
+  var KRS : KRuleSplit .
+  sort DefaultTerm .
+  op default : Term -> DefaultTerm .
+  sort Descendants .
+  subsort SortSet DefaultTerm < Descendants .
+
+  var Ds : Descendants .
+  
+  op contextTransformers : Qid Module Term ~> Module .
+  var IL : ImportList . var SSDS : SubsortDeclSet . 
+  eq contextTransformers(Q, M, T) = removeImports(setName(contextTransformers1(setMbs(M, contextTransformMbs(removeConfTerm(getMbs(M)),getConf(T)))),Q),(including 'K-CONFIG .)) [print "Applying context transformers."] . 
+
+  op contextTransformers1 : [Module] -> [Module] .
+  eq contextTransformers1(M) = M [print "Context transformers applied succesfully."] .
+  eq contextTransformers1(M:[Module]) = M:[Module] [print "Error applying context transformers. Obtained (bad) module:" M:[Module]] .
+
+  sort KConf KConfElement . 
+  subsort KConfElement < KConf .
+  var KC KC' : KConf . var Cond : TermList .
+  op {_,_,_,_,_,_} : Qid Nat Bool Qid Descendants KConf -> KConfElement .
+--- KConfElement ::= { 
+---  CellLabel(Qid),
+---  Level(Nat),
+---  Multiplicity(Bool),
+---  Parent(Qid),
+---  Descendants(SortSet),
+---  SubConfiguration(KConf)
+--- } 
+  op getMultiplicity : KConfElement -> Bool .
+  eq getMultiplicity({Q, Level, B, Q', Ds, KC'}) = B .
+
+  op getLevel : KConfElement ~> Nat .
+  eq getLevel({Q, N, B, Q', Ds, KC'}) = N .
+
+  op getSons : KConfElement -> SortSet .
+  eq getSons({Q, Level, B, Q', Ss, KC'}) = Ss .
+  eq getSons({Q, Level, B, Q', Ds, KC'}) = none [owise] .
+
+  op getDefaultValue : KConfElement -> Term .
+  eq getDefaultValue({Q, Level, B, Q', default(T), KC'}) = T .
+  eq getDefaultValue({Q, Level, B, Q', Ds, KC'}) = emptyCt(Bag) .
+
+  op getConf : KConfElement -> KConf .
+  eq getConf({Q, Level, B, Q', Ds, KC'}) = KC' .
+ 
+  op getConfElement : Qid KConf ~> KConfElement .
+  eq getConfElement(Q,  {Q, N, B, Q', Ds, KC'} KC) = {Q, N, B, Q', Ds, KC'} .
+
+  op __ : KConf KConf -> KConf [assoc comm id: none] .
+  op none : -> KConf .
+  op getConf : Term -> KConf .
+  eq getConf(T) = getConfL('NONE, 1, getConfList(T)) .
+---  eq getConf(T) = none [print T] .
+  op getConf : Qid Bool Nat Qid TermList -> KConf .
+  var Q' : Qid .
+  eq getConf(Q, B, N, Q', Tl) = {Q, N, B, Q', getCellNames(Tl), getConfL(Q, N + 1, Tl)} getConfL(Q, N + 1, Tl) .
+
+  op getCellNames_ : TermList ~> Descendants .
+ ceq getCellNames(T, Tl) 
+   = getName(SC) ; $getCellNames(Tl) 
+  if SC := splitKCell(T) .
+  eq getCellNames(T) = default(T) [owise] .
+  eq getCellNames(T,T',Tl) = default(ctor(Bag)[T, T', Tl]) [owise] .
+
+  op $getCellNames_ : TermList ~> SortSet .
+ ceq $getCellNames(T, Tl) 
+   = getName(SC) ; $getCellNames(Tl) 
+  if SC := splitKCell(T) .
+  eq $getCellNames(empty) = none .
+
+  op getConfL : Qid Nat TermList -> KConf .
+ ceq getConfL(Q, N, (T, Tl))
+   = getConf(getName(SC), getMultiplicity(SC) == some or getMultiplicity(SC) == any, N, Q, getConfList(getContents(SC))) getConfL(Q, N, Tl) 
+  if SC := splitKCell(T) .
+  eq getConfL(Q, N, Tl) = none [owise] .
+
+  op getConfList : TermList -> TermList .
+ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl')) 
+ if Q = ctor(Bag) . 
+  eq getConfList((T,Tl)) = (T,getConfList(Tl)) [owise] .
+  eq getConfList(empty) = empty .
+
+  op contextTransformMbs : MembAxSet KConf -> [MembAxSet] . 
+  eq contextTransformMbs(MAx MAS, KC) 
+   = contextTransformKR(MAx, splitKRule(MAx), KC) contextTransformMbs(MAS,KC) .
+
+  op contextTransformKR : MembAx KRuleSplit KConf -> MembAx .
+  eq contextTransformKR(MAx,KRS,KC)
+   = plugKRule(setContents(KRS,contextTransformT(getMinLevel(getContents(KRS),KC), getContents(KRS), KC))) .
+  eq contextTransformKR(MAx,RS:[KRuleSplit],KC) = MAx [owise print RS:[KRuleSplit]] .
+ 
+  eq contextTransformMbs(none, KC) = none [print "Done. Configuration used: " KC] .
+
+  op contextTransformT : Int Term KConf -> [Term] .
+  var Level : NzNat . var B B' : Bool .
+  eq contextTransformT(Level, T,KC) 
+   = bringToSameLevel(Level,solveEach(T, KC),KC)  .
+  eq contextTransformT(I:[Int], T, KC) = T [owise print "cannot bring " T " to  level " I:[Int]] . 
+  op solveEach : Term KConf -> [Term] .
+  ceq solveEach(Ct,KC) = Ct if getName(Ct) == anyVarS or-else Ct == emptyCt(Bag) .
+  eq solveEach(V, KC) = V .
+ ceq solveEach(Q[Tl],KC) = Q[solveEachL(Tl,KC)] 
+  if Q == ctor(Bag) .
+ ceq solveEach(T, KC) = $solveEach(T, SC,  getConfElement(getName(SC),KC)) 
+  if SC := splitKCell(T) .
+ ceq solveEach(Q[T,T'], KC)
+   = Q[solveEach(T,KC), T'] 
+  if Q == replaceS .
+ ceq solveEach(Q[T],KC) = Q[T] if Q = itemCtor(Bag) .
+
+  op $solveEach : Term SplitCell KConf -> [Term] .
+  eq $solveEach(T, SC, KC') 
+   = if getSons(KC') == none then T else plugCell(setContents(SC, contextTransformT(getLevel(KC') + 1, getContents(SC), getConf(KC')))) fi .
+  eq $solveEach(T,SC, KC:[KConf]) = errorT(T, '`[`]:BagItem, "Cell " + string(getName(SC)) + " is not at the right level in the configuration.  Check the initial configuration for the definition matches the rule.") .
+  
+  op solveEachL : TermList KConf -> [TermList] .
+  eq solveEachL((T, Tl), KC) = solveEach(T,KC),solveEachL(Tl,KC) .
+  eq solveEachL(empty,KC) = empty .
+
+  op bringToSameLevel : NzNat Term KConf -> Term .
+  eq bringToSameLevel(Level, T, KC) 
+   = mergeLevels(levelize(Level, term2Set(T, KC), KC), KC) .
+  
+  eq bringToSameLevel(Level, errorT(T,Cxt,Str),KC)
+   = errorT(T,Cxt,Str) .
+
+
+  var Cxt : Term . var Str : String .
+  
+  op mergeLevels : TermSetLevels KConf -> Term .
+  eq mergeLevels({N,TS}, KC) = finalMultiplicity({N, TS}, KC) .
+  eq mergeLevels({N, emptyTS} || TSLs, KC) = mergeLevels(TSLs, KC) [owise] .
+  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, Q', Ds, KC'} KC)
+   = mergeLevels(upgrade(N, Q', getMultiplicity(getConfElement(Q', KC)), getSons(getConfElement(Q', KC)), qt(Q, B', T),TS) || TSLs, {Q, Level, B, Q', Ds, KC'} KC) [owise] .
+  op upgrade : Nat Qid Bool SortSet TermSet TermSet -> TermSetLevels .
+  eq upgrade(N, Q', B, Q ; Ds, TS, qt(Q, B', T) && TS')
+   = upgrade(N, Q', B, Q ; Ds, TS && qt(Q, B', T), TS') .
+  eq upgrade(s(N), Q', B, Ds, TS, TS') 
+   = {s(N), TS'} || {N, qt(Q', B, resolveMultiplicity(Q', B, TS))} [owise] .
+
+  op finalMultiplicity : TermSetLevel KConf -> Term .
+  eq finalMultiplicity({s(N), qt(Q, false, T) &&  qt(Q, false, T') && TS'}, KC)
+   = mergeLevels({s(N), qt(Q, false, T) &&  qt(Q, false, T') && TS'} || {N, emptyTS}, KC) .
+  vars Level' : Nat  . vars B1 B1' : Bool . var Ds' : Descendants . 
+  vars KC1 KC1' : KConf . vars QP QP' : Qid .
+  ceq finalMultiplicity({s(N), qt(Q, B, T) && qt(Q', B', T') && TS},  {Q, Level, B1, QP, Ds, KC1} {Q', Level', B1', QP', Ds', KC1'} KC)
+    = mergeLevels({s(N), qt(Q, B, T) && qt(Q', B', T') && TS} || {N, emptyTS},  {Q, Level, B1, QP, Ds, KC1} {Q', Level', B1', QP', Ds', KC1'} KC) 
+   if QP =/= QP' .
+
+  eq finalMultiplicity({N, TS}, KC) = flattenTS(TS) [owise] .
+
+  op resolveMultiplicity : Qid Bool TermSet -> [Term] .
+  eq resolveMultiplicity(Q, false, TS) 
+   = mkCell(Q, ctor(Bag)[anyVar(Bag),flattenTS(TS)]) .
+  eq resolveMultiplicity(Q, true, TS)
+   = flattenTS(flattenTSL(Q, splitTS(TS, {1, emptyTS}))) .
+  
+  op splitTS : TermSet TermSetLevel -> TermSetLevels .
+  eq splitTS(emptyTS, TSLs) = TSLs .
+  ceq splitTS(qt(Q, B, T) && TS, {Level, TS'})
+    = splitTS(TS, {Level, qt(Q, B, T) && TS'})
+   if not(Q in TS') .
+  eq splitTS(TS, {Level, TS'}) 
+   = {Level, TS'} || splitTS(TS, {Level + 1, emptyTS}) .
+
+  op _in_ : Qid TermSet -> Bool .
+  eq Q in qt(Q, B, T) && TS = true .
+  eq Q in TS = false [owise] .
+
+  eq mergeLevels(nilTSL, KC) = emptyCt(Bag) .
+
+  op flattenTS : TermSet -> Term .
+  eq flattenTS(qt(Q, B', T)) = T .
+  eq flattenTS(var(T)) = T .
+  eq flattenTS(TS) = ctor(Bag)[flattenTSl(TS)] [owise] .
+
+  op flattenTSl : TermSet -> TermList .
+  eq flattenTSl(emptyTS) = empty .
+  eq flattenTSl(var(T) && TS) = (T, flattenTSl(TS)) . 
+  eq flattenTSl(qt(Q, B', T) && TS) = (T,flattenTSl(TS)) .
+
+  op flattenTSL : Qid TermSetLevel -> TermSet .
+  eq flattenTSL(Q, {N, TS} || TSLs) 
+   = qt(Q, true, mkCell(Q, ctor(Bag)[anyVar(Bag),flattenTS(TS)]))
+     && flattenTSL(Q, TSLs) .
+  eq flattenTSL(Q, nilTSL) = emptyTS .
+
+  sorts TermSet VariableSet . subsort VariableSet < TermSet .
+  op qt : Qid Bool Term -> TermSet .  op var : Term -> VariableSet .
+  op emptyTS : -> VariableSet .
+  op _&&_ : VariableSet VariableSet -> VariableSet [assoc comm id: emptyTS] .
+  op _&&_ : TermSet TermSet -> TermSet [ditto] .
+  eq qt(Q, true, T) && qt(Q, true, T') = qt(Q, true, ctor(Bag)[T,T']) .
+
+  op term2Set : Term KConf -> [TermSet] .
+  ceq term2Set(Ct, KC) = emptyTS if Ct = emptyCt(Bag) .
+  ceq term2Set(Ct, KC) = var(Ct) if getName(Ct) == anyVarS .
+  eq term2Set(V, KC) = var(V) .
+  ceq term2Set(O[Tl],KC) = term2SetL(Tl,KC) if O == ctor(Bag) .
+  ceq term2Set(T, KC) = qt(getName(SC), getMultiplicity(getConfElement(getName(SC),KC)), T) 
+   if SC := splitKCell(T)  .
+  ceq term2Set(Q[T,T'], KC) 
+    = term2SetReplace(Q[T,T'],term2Set(T,KC),term2Set(T',KC)) 
+   if Q == replaceS .
+  ceq term2Set(Q[T],KC) = var(Q[T]) if Q == itemCtor(Bag) .
+
+  op term2SetReplace : Term TermSet TermSet ~> TermSet .
+  eq term2SetReplace(T, qt(Q,B, T'':Term) && TS, TS':[TermSet]) = qt(Q,B,T) .
+  eq term2SetReplace(T, TS':[TermSet], qt(Q,B, T'':Term) && TS) = qt(Q,B,T) .
+  eq term2SetReplace(Q[T,T'],  var(T) && TS ,  TS':[TermSet]) = var(Q[T,T']) .
+  eq term2SetReplace(Q[T,T'],  TS':[TermSet],  TS && var(T') ) = var(Q[T,T']) [owise] .
+
+  op term2SetL : TermList KConf -> TermSet .
+  eq term2SetL((T,Tl),KC) = term2Set(T,KC) && term2SetL(Tl,KC) .
+  eq term2SetL(empty,KC) = emptyTS .
+
+  sort TermSetLevel TermSetLevels .  subsort TermSetLevel < TermSetLevels .
+  op {_,_} : Nat TermSet -> TermSetLevel .
+  op _||_ : TermSetLevels TermSetLevels -> TermSetLevels [assoc id: nilTSL] .
+  op nilTSL : -> TermSetLevels .
+  eq {N, TS} || {N, TS'} = {N, TS && TS'} .
+  
+  op levelize : Nat TermSet KConf -> TermSetLevels .
+  var TS TS' : TermSet . var TSLs : TermSetLevels .
+  eq levelize(Level, emptyTS, KC) = nilTSL .
+  eq levelize(s(Level), VS:VariableSet, KC) = {Level, VS:VariableSet} [owise] .
+  eq levelize(N, TS, KC) = levelize(N, TS, emptyTS, KC) [owise] .
+  op levelize : Nat TermSet TermSet KConf -> TermSetLevels .
+  eq levelize(Level, qt(Q, B', T) && TS, TS', {Q, Level, B, Q', Ds, KC'} KC)
+   = levelize(Level, TS, qt(Q, B', T) && TS', {Q, Level, B, Q', Ds, KC'} KC) .
+  eq levelize(Level, TS, TS', KC) 
+   = levelize(Level + 1, TS, KC) || {Level,TS'} [owise] .
+
+  op getMinLevel : Term KConf -> [Nat] .
+ ceq getMinLevel(Ct, KC) = 100 if Ct == emptyCt(Bag) .
+ ceq getMinLevel(T,KC) = getLevel(getConfElement(getName(SC), KC)) 
+  if SC := splitKCell(T) .
+ ceq getMinLevel(O[T,Tl], KC) = getMinLevelL(getMinLevel(T,KC), Tl, KC) 
+  if O == ctor(Bag) .
+ ceq getMinLevel(O[T,T'], KC) 
+   = getMinLevelL(getMinLevel(T,KC), T', KC) 
+  if O == replaceS  .
+
+  op getMinLevelL : TermList KConf -> [Nat] .
+  eq getMinLevelL((T,T',Tl),KC) = getMinLevelL(getMinLevel(T,KC),(T',Tl), KC) .
+
+ 
+  op getMinLevelL : Int TermList KConf -> [Nat] .
+  eq getMinLevelL(Level, (T,Tl), KC) 
+   = getMinLevelL(min(Level, getMinLevel(T,KC)), Tl, KC) .
+  eq getMinLevelL(N, empty, KC) = N .
+
+
+  eq min(Level, L:[Int]) = Level [owise] .
+endfm

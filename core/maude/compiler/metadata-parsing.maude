@@ -1,0 +1,262 @@
+fmod PARSE-METADATA-BASIC  is
+  including CONVERSION .
+  including META-MODULE .
+  including STRING-EXTRAS .
+  including META-ATTRS .
+
+  sorts AttrStringPair .
+  op {_,_} : AttrSet String -> AttrStringPair .
+
+  var S : String .
+  op metadataParse : String -> AttrSet .
+  eq metadataParse(S) = metadataStrippedParse(stripSpaces(S)) .
+  op metadataStrippedParse : String -> AttrSet .
+  eq metadataStrippedParse("") = none .
+
+  op metadataParse : MembAx -> MembAx .
+  op metadataParse : OpDecl -> OpDecl .
+  eq metadataParse(mb Trm : Sort [AS metadata(S) AS'] .) = (mb Trm : Sort [AS metadataParse(S) AS'] .) .
+  eq metadataParse(op Q : TyL -> Ty [AS metadata(S) AS'] .) =  (op Q : TyL -> Ty [AS metadataParse(S) AS'] .).
+  eq metadataParse(Max) = Max [owise] .
+  eq metadataParse(Op) = Op [owise] .
+
+ ceq metadataStrippedParse(S)
+   = pair(substr(S, 0,N1),substr(S, N1 + 2, _-_(N2, N1 + 2))) 
+     metadataParse(substr(S, N2 + 1, length(S)))
+  if N1 := find(S, "=(",0) 
+  /\ not(find(substr(S,0,N1), " ", 0) :: Nat)
+  /\ N2 := find(S, ")", N1 + 2) .
+ 
+  var Trm : Term . var Sort : Sort . var AS AS' : AttrSet . var TyL : TypeList . var Ty : Type . var N1 N2 : Nat .
+  var Q : Qid .  var Max : MembAx . var Op : OpDecl .
+endfm
+
+fmod PARSE-METADATA-LOCATION is 
+  including PARSE-METADATA-BASIC .
+  including LOCATION-ATTRS .
+  var S S' : String . var N N1 N2 : Nat . var AS AS' : AttrSet .
+  ceq metadataStrippedParse(S) = AS metadataParse(S')
+   if  "location" = substr(S,0,length("location")) 
+   /\ {AS, S'} := locationParse(stripSpaces(substr(S, length("location"), length(S))))  .
+
+  op locationParse : String -> AttrStringPair .
+  ceq locationParse(S) 
+    = {klocation(stripSpaces(substr(S,1,N))), substr(S, N + 2, length(S))}
+   if "(" = substr(S, 0, 1)
+   /\ s(N) := find(S, ")", 0)  .
+
+  op getLocation : AttrSet -> String .
+  eq getLocation(AS metadata(S) AS') = getLocation(AS metadataParse(S) AS') .
+  eq getLocation(AS) = "" [owise print "could not find location for " AS] .
+
+  op getLocation : OpDecl -> String .
+  op getLocation : Equation -> String .
+  op getLocation : MembAx -> String .
+  op getLocation : Rule -> String .
+
+  eq getLocation(op Q : Tyl -> Ty [AS] .) = getLocation(AS) .
+  eq getLocation(eq Trm1 = Trm2 [AS] .) = getLocation(AS) .
+  eq getLocation(rl Trm1 => Trm2 [AS] .) = getLocation(AS) .
+  eq getLocation(ceq Trm1 = Trm2 if Cond [AS] .) = getLocation(AS) .
+  eq getLocation(crl Trm1 => Trm2 if Cond [AS] .) = getLocation(AS) .
+  eq getLocation(mb Trm : Ty [AS] .) = getLocation(AS) .
+  eq getLocation(cmb Trm : Ty if Cond [AS] .) = getLocation(AS) .
+
+  var Q : Qid . var Tyl : TypeList . var Ty : Type . 
+  var Trm Trm1 Trm2 : Term .  var Cond : Condition .
+
+  eq getLocation(AS klocation(S) AS') = S .
+  eq getLocation(AS) = "" [owise] .
+
+  op getBeginningLocation : String -> Int .
+ ceq getBeginningLocation(S) = if rat(substr(S,N1, _-_(N2, N1)), 10) :: Nat then rat(substr(S,N1, _-_(N2, N1)), 10)  else -1 fi
+  if N1 := if find(S,":",0) :: Nat then find(S, ":", 0) + 1 else 0 fi 
+  /\  N2 := if find(S, "-", N1) :: Nat then  find(S, "-", N1) else length(S) fi .
+endfm
+
+fmod PARSE-METADATA-SYNTAX is
+  including PARSE-METADATA-BASIC .
+  including SYNTAX-ATTRS .
+  var S S' S1 : String . var F : FindResult .  var Q : Qid .
+  var N : Nat .  var AS AS' : AttrSet .
+  ceq metadataStrippedParse(S) = kditto  metadataParse(stripSpaces(S'))
+   if "ditto" = substr(S,0,length("ditto")) 
+   /\ S' := (substr(S,length("ditto"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+
+  ceq metadataStrippedParse(S) = kaux  metadataParse(stripSpaces(S'))
+   if "aux" = substr(S,0,length("aux")) 
+   /\ S' := (substr(S,length("aux"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) = kdisolve metadataParse(stripSpaces(S'))
+   if "disolve" = substr(S,0,length("disolve")) 
+   /\ S' := (substr(S,length("disolve"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) = ksyntax metadataParse(stripSpaces(S'))
+   if "syntax" = substr(S,0,length("syntax")) 
+   /\ S' := (substr(S,length("syntax"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+ ceq metadataStrippedParse(S) = krenameTo(Q) metadataParse(S')
+   if "renameTo " = substr(S,0,length("renameTo ")) 
+   /\ S1 := stripSpaces(substr(S,length("renameTo "),length(S))) 
+   /\ F :=   find(S1," ", 0)
+   /\ Q := qid(if (F == notFound) then  S1 else substr(S1, 0,F) fi)
+   /\ S' := if (F == notFound) then "" 
+            else stripSpaces(substr(S1, find(S1," ",0),length(S1))) fi .
+  ceq metadataStrippedParse(S) = kcolor(Q) metadataParse(S1) 
+   if "color:" == substr(S,0,length("color:")) 
+   /\ S' := stripSpaces(substr(S,length("color:"), length(S))) + " " 
+   /\ N := find(S', " ", 0)
+   /\ Q := qid(substr(S', 0, N))
+   /\ S1 := substr(S', N, length(S')) .
+  ceq metadataStrippedParse(S) = klatex(AS) metadataParse(S')
+   if  "latex" = substr(S,0,length("latex")) 
+   /\ {AS, S'} := latexParse(stripSpaces(substr(S, length("latex"), length(S))))  .
+
+  op latexParse : String -> AttrStringPair .
+  ceq latexParse(S) 
+    = {metadataParse(substr(S,1,N)), substr(S, N + 2, length(S))}
+   if "(" = substr(S, 0, 1)
+   /\ s(N) := find(S, ")", 0)  .
+endfm
+
+fmod PARSE-METADATA-STRICT is
+  including PARSE-METADATA-BASIC .
+  including STRICT-ATTRS .
+  including K-META-OPS .
+  var Q : Qid . var AS : AttrSet . var Nl : IntList .
+  var A : Attr . var S S' S1 S2  S3 : String . var F : FindResult .
+  var P P' P'' : Nat .  var T : Type .
+
+  ceq metadataStrippedParse(S) = khybrid  metadataParse(stripSpaces(S'))
+   if "hybrid" = substr(S,0,length("hybrid")) 
+   /\ S' := (substr(S,length("hybrid"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+
+--- ceq metadataStrippedParse(S) = klist(N,Q,T) metadataParse(S')
+---   if "list(" = substr(S,0,length("list(")) 
+---   /\ S1 := stripSpaces(substr(S,length("list("),length(S))) 
+---   /\ P :=   find(S1,")", 0)
+---   /\ S2 := substr(S1, 0, P) 
+---   /\ P' := find(S2,":",0)
+---   /\ N := rat(stripSpaces(substr(S2,0, P')), 10)
+---   /\ S3 := substr(S2,P' + 1, length(S2))
+---   /\ P'' := rfind(S3,":",length(S3))
+---   /\ Q := qid(stripSpaces(substr(S3,0,P'')))
+---   /\ T := qid(stripSpaces(substr(S3,P'' + 1, length(S3))))
+---   /\ S' := stripSpaces(substr(S1, P + 1,length(S1)))  .
+
+ ceq metadataStrippedParse(S) = karity(N) metadataParse(S')
+   if "arity " = substr(S,0,length("arity ")) 
+   /\ S1 := stripSpaces(substr(S,length("arity "),length(S))) 
+   /\ F :=   find(S1," ", 0)
+   /\ N := rat(if (F == notFound) then  S1 else substr(S1, 0,F) fi,10)
+   /\ S' := if (F == notFound) then "" 
+            else stripSpaces(substr(S1, find(S1," ",0),length(S1))) fi .
+
+  ceq metadataStrippedParse(S) = A metadataParse(S')
+   if  "strict" = substr(S,0,length("strict")) 
+   /\ {A, S'} := lookForCellMarkers(strictParse(stripSpaces(substr(S, length("strict"), length(S)))))  .
+  ceq metadataStrippedParse(S) = conv2SeqStrict(A) metadataParse(S')
+   if  "seqstrict" = substr(S,0,length("seqstrict")) 
+   /\ {A, S'} := lookForCellMarkers(strictParse(stripSpaces(substr(S, length("seqstrict"), length(S))))) .
+  ops conv2SeqStrict : Attr -> Attr .
+  eq conv2SeqStrict(kstrict(Nl, Ql)) = seqkstrict(Nl, Ql) .
+---  eq conv2SeqStrict(vstrict(Ql)) = seqvstrict(Ql) .
+
+  op lookForCellMarkers : AttrStringPair -> AttrStringPair .
+  ceq lookForCellMarkers({kstrict(Nl,nil),S}) = {kstrict(Nl, tokenize(stripSpaces(substr(S1,1,N)))), substr(S1,N + 2, length(S1))}
+   if S2 := stripSpaces(S)
+   /\ "in" = substr(S2,0, length("in"))
+   /\ S1 := stripSpaces(substr(S2,length("in"),length(S2)))
+   /\ "(" = substr(S1,0,1)
+   /\ s(N) := find(S1,")",0) .
+   eq lookForCellMarkers({kstrict(Nl,nil),S}) = {kstrict(Nl,klabel),S} [owise print S] .
+
+  op strictParse : String -> AttrStringPair .
+  var N : Int . var Ql : QidList .
+  ceq strictParse(S) 
+    = {strictListParse(tokenize(stripSpaces(substr(S,1,N)))), substr(S, N + 2, length(S))}
+   if "(" = substr(S, 0, 1)
+   /\ s(N) := find(S, ")", 0)  .
+  eq strictParse(S) = {kstrict(nil, nil), S} [owise] .
+
+  op strictListParse : QidList -> Attr .
+  ceq strictListParse(Q Ql) = kstrict(parseIntList(Q Ql), nil) 
+   if (rat(string(Q),10) :: Int) .
+  eq strictListParse(Ql) = none [owise print "error parsing strict arguments" Ql] .
+---     else vstrict(Q Ql) fi .
+
+endfm
+
+fmod PARSE-METADATA-CONFIGURATION is
+  including PARSE-METADATA-BASIC .
+  including CONFIGURATION-ATTRS .
+  var S S' S1 : String . var F : FindResult .  var Q : Qid .  var N : Nat .
+  ceq metadataStrippedParse(S) = kwrapping(Q) metadataParse(S1) 
+   if "wrapping " == substr(S,0,length("wrapping ")) 
+   /\ S' := stripSpaces(substr(S,length("wrapping "), length(S))) + " " 
+   /\ N := find(S', " ", 0)
+   /\ Q := qid(substr(S', 0, N))
+   /\ S1 := substr(S', N, length(S')) .
+endfm
+
+fmod PARSE-METADATA-RULES is
+  including PARSE-METADATA-BASIC .
+  including RULES-ATTRS .
+  ceq metadataStrippedParse(S) =  metadataParse(stripSpaces(S'))
+   if "computational" = substr(S,0,length("computational")) 
+   /\ S' := (substr(S,length("computational"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) =  metadataParse(stripSpaces(S'))
+   if "rule" = substr(S,0,length("rule")) 
+   /\ S' := (substr(S,length("rule"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) = kcomputational  metadataParse(stripSpaces(S'))
+   if "computational" = substr(S,0,length("computational")) 
+   /\ S' := (substr(S,length("computational"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) = kstructural  metadataParse(stripSpaces(S'))
+   if "structural" = substr(S,0,length("structural")) 
+   /\ S' := (substr(S,length("structural"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+  ceq metadataStrippedParse(S) = klarge  metadataParse(stripSpaces(S'))
+   if "large" = substr(S,0,length("large")) 
+   /\ S' := (substr(S,length("large"),length(S))) 
+   /\ S' == "" or-else substr(S',0,1) == " " .
+
+  var S S' : String .
+endfm
+
+fmod PARSE-METADATA is
+  including PARSE-METADATA-STRICT .
+  including PARSE-METADATA-CONFIGURATION .
+  including PARSE-METADATA-SYNTAX .
+  including PARSE-METADATA-RULES .
+  including PARSE-METADATA-LOCATION .
+endfm
+---(
+red metadataParse("") .
+red metadataParse("strict") .
+red metadataParse("strict(1)") .
+red metadataParse("strict(1 3 2)") .
+red metadataParse("  strict   (  1  3  2   )   ") .
+red metadataParse("strict(1 3 2)") .
+red metadataParse("strict(ala bala portocala)") .
+red metadataParse("aux") .
+red metadataParse("strict seqstrict(1) in (state) strict(1 3 2) seqstrict  seqstrict   (  1  3  2   )   ") .
+red metadataParse("strict seqstrict(1)   seqstrict   (  1  3  2   )   ") .
+red metadataParse("disolve renameTo _ana") .
+red metadataParse("strict disolve renameTo _are") .
+red metadataParse("renameTo mere_ strict(1) disolve") .
+red metadataParse("  strict   (  1  3  2   )   ") .
+red metadataParse("strict renameTo _gina_ disolve seqstrict(1) strict(1 3 2) seqstrict  seqstrict   (  1  3  2   )   ") .
+red metadataParse("strict seqstrict(1) renameTo _are_   seqstrict   (  1  3  2   )   ") .
+red metadataParse("strict seqstrict(1) renameTo _are_   disolve seqstrict   (  1  3  2   )   ") .
+red metadataParse("strict seqstrict(1) arity 5 renameTo _are_  arity 9 disolve wrapping K seqstrict   (  1  3  2   )   ") .
+red metadataParse("wrapping Set`{ConfigItem`}") .
+red metadataParse("latex ( color: red wrapping Me)") .
+red metadataParse("arity 1 list(1:_`,_:K) strict(1) hybrid") .
+q
+---)
+

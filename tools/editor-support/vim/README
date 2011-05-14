@@ -1,0 +1,12 @@
+K/Maude syntax highlighter for vim
+
+To install, copy (or link) "maude.vim" file into the ~/.vim directory 
+and add the following to your ~/.vimrc file
+
+au BufRead,BufNewFile *.maude set filetype=maude
+au BufRead,BufNewFile *.kmaude set filetype=maude
+au BufRead,BufNewFile *.k set filetype=maude
+au BufRead,BufNewFile *.m set filetype=maude
+au! Syntax maude source maude.vim
+syn on
+

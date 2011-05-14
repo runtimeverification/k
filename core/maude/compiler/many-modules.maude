@@ -1,0 +1,24 @@
+fmod MANY-MODULES is
+  including META-MODULE-EXTRAS .
+  including  META-K-MODULE .
+  including META-K-MODULES .
+  including META-K-BUILTINS .
+  including K-META-CONFIG .
+  including META-K-ERROR .
+  var M M' : Module . 
+  var SS SS' : SortSet .
+  var O : Qid .
+  var MS : ModuleSet .
+  var Ms : Modules .
+  var T : [Term] .
+  
+  op manyModules : Qid Modules ~> Module .
+  eq manyModules(O, Ms) 
+   = checkModule(removeImports(setImports(setName(manyModules(emptySModule, getModules(Ms), 'noConfig), O), getImports(Ms)), (including 'K-LATEX .))) .
+
+  op manyModules : Module ModuleSet  Term ~> Module .
+  eq manyModules(M, M' MS, T) 
+   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS, T) else manyModules(addModule(setImports(M',nil),M), MS, extractConfTerm(M')) fi [owise print T] .
+  eq manyModules(M, empty, T) = M .
+endfm
+

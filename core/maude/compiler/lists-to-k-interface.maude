@@ -1,0 +1,39 @@
+load lists-to-k
+
+mod LISTS-TO-K-META is
+  including LISTS-TO-K .
+  including META-LEVEL-EXTRAS .
+  var NoLists2k Lists2k : String .  var M : Module .
+  var Q QNoLists2k QLists2k : Qid .  var IL : ImportList .
+  op makeLists2k : String String ~> Module .
+  eq makeLists2k(NoLists2k, Lists2k) = makeLists2k(qid(NoLists2k), qid(Lists2k)) .
+  op makeLists2k : Qid Qid ~> Module .
+  eq makeLists2k(QNoLists2k,QLists2k) = makeLists2k(QLists2k, upModule(QNoLists2k, false), upModule(QNoLists2k, true), upImports(getImports(upModule(QNoLists2k, false)))) .
+
+  op compileLISTS-TO-K : Module ~> Module .
+  eq compileLISTS-TO-K(M) = setName(makeLists2k(getName(M), M, flatten(M), empty), getName(M)) .
+endm
+
+mod LISTS-TO-K-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op lists-to-k : -> System .
+  op idle : -> State .
+  var Q NoLists2k Lists2k : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq lists-to-k = [nil, idle, 
+ 'Usage: 'makeLists2k '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['makeLists2k NoLists2k Lists2k QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoLists2k,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('LISTS-TO-K-META),
+                        'makeLists2k[upTerm(string(NoLists2k)),upTerm(string(Lists2k))])),error) .
+endm
