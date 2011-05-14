@@ -1,0 +1,20 @@
+load pMonteCarlo-compiled
+rewrite run('pMonteCarlo, 
+(
+Int 0(.List{K}),,
+Int 10(.List{K}),,
+Int 1(.List{K}),,
+Int 1(.List{K}),,
+
+Int 0(.List{K}),,
+Int 1(.List{K}),,
+Int 1(.List{K}),,
+Int 3(.List{K}),,
+Int 2(.List{K}),,
+Int 1(.List{K}),,
+Int 4(.List{K}),,
+Int 1(.List{K}),,
+Int 8(.List{K}),,
+Int 1(.List{K})
+)) .
+q

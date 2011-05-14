@@ -1,0 +1,37 @@
+% Type the command ``make pdf'' to generate the PDF poster of this language.
+% Alternatively, type in the equivalent command
+% kompile kernelc.k -l KERNELC -style bb -pdf KERNELC-SYNTAX KERNELC-THREADS-SYNTAX KERNELC-DESUGARED-SYNTAX KERNELC-SEMANTICS  KERNELC-SIMPLE-MALLOC  KERNELC-CONSISTENT-MEMORY KERNELC-CONSISTENT-THREADS KERNELC -topmatter README.tex
+% The generated simple-untyped.pdf file is easier to read than the actual ASCII files.
+\newcommand{\KERNELC}{{\sc KernelC}\xspace}
+\setlength{\parindent}{1em}
+\title{\KERNELC --- a C-like language}
+\author{Traian Florin \c{S}erb\u{a}nu\c{t}\u{a} and Grigore Ro\c{s}u}
+\organization{University of Illinois at Urbana-Champaign}
+
+\maketitle
+
+\begin{latexComment}
+\section{Abstract}
+\KERNELC is a non-trivial subset of the C language (including memory allocation and pointer arithmetic), which is used to exemplify several runtime analysis capabilities of \K definitions, as well as concurrency power and easiness in defining and exploring relaxed memory models.
+
+
+\subsection{Research based on \KERNELC}
+\KERNELC originated in the study of memory safety for C and first presented in the following paper:
+\begin{quote}
+Grigore Ro\c su, Wolfram Schulte, and Traian-Florin \c Serb\u anu\c t\u a:
+\href{http://dx.doi.org/10.1007/978-3-642-04694-0_10}{Runtime Verification of C Memory Safety}.
+
+Runtime Verification (RV'09), Lecture Notes in Computer Science 5779: 132--151. 2009
+\end{quote}
+
+Since then it has been expanded and used for expressing and verifing concurrency features and anomalies for both sequentially-consistent and relaxed memory models, as detailed in Chapter 5 of:
+
+\begin{quote}
+  Traian-Florin \c Serb\u anu\c t\u a: \href{https://www.ideals.illinois.edu/handle/2142/18252}{A Rewriting Approach to Concurrent Programming Language Design and Semantics}
+
+  PhD Thesis, University of Illinois, December 2010
+\end{quote}
+
+\end{latexComment}
+
+\vspace*{3ex}

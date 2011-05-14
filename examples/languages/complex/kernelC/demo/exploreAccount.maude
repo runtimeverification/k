@@ -1,0 +1,3 @@
+load pAccount-compiled
+search run('pAccount) =>! B:Bag .
+q

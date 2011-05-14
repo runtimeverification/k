@@ -1,0 +1,396 @@
+kmod BEFUNGE is
+	including K
+	including PL-BUILTINS
+	
+--- Syntax
+	---- Comments from Chris Pressey, http://catseye.tc/projects/befunge93/doc/befunge93.html
+	--- COMMAND         INITIAL STACK (bot->top)	RESULT (STACK)
+	
+--- Configuration
+	syntax CellLabel ::= stack
+	syntax CellLabel ::= direction
+	syntax CellLabel ::= mode
+	syntax CellLabel ::= program
+	syntax CellLabel ::= pc
+	syntax CellLabel ::= output
+	syntax CellLabel ::= input
+	syntax CellLabel ::= k
+	syntax CellLabel ::= result
+	
+--- Semantics
+	syntax Bag ::= eval( K )
+	syntax Bag ::= eval-inp( K , K )
+	
+	syntax KLabel ::= injectM( Map )
+	syntax KLabel ::= injectL( List )
+	
+	syntax KLabel ::= inject( Int )
+	syntax KLabel ::= inject( Char )
+	syntax KLabel ::= inject( String )
+	
+	syntax KLabel ::= coord
+	syntax KLabel ::= load
+	syntax KLabel ::= defaultmode
+	syntax KLabel ::= movePC
+	syntax KLabel ::= stringmode
+	syntax KLabel ::= push
+
+	syntax KLabel ::= right
+	syntax KLabel ::= left
+	syntax KLabel ::= up
+	syntax KLabel ::= down
+	
+	configuration 
+		< T >
+			< k > K:K </ k >
+			< stack > L:List </ stack >
+			< direction > K:K </ direction >
+			< pc > K:K </ pc >
+			< mode > K:K </ mode >
+			< program > M:Map </ program >
+			< output > K:K </ output >
+			< input > L:List </ input >
+		</ T >  
+		< result > K:K </ result >
+	
+	rule [Start]: eval(injectM(M:Map)(.List{K})) => eval-inp(injectM(M:Map)(.List{K}), injectL(.List)(.List{K}))
+	rule [Start-With-Input]: eval-inp(injectM(M:Map)(.List{K}), injectL(L:List)(.List{K})) =>
+		< T >
+			< k > .K </ k >
+			< stack > .List </ stack >
+			< direction > right(.List{K}) </ direction >
+			< pc > coord(inject(0)(.List{K}),, inject(0)(.List{K})) </ pc >
+			< mode > defaultmode(.List{K}) </ mode >
+			< program > M:Map </ program >
+			< output > inject("")(.List{K}) </ output >
+			< input > L:List </ input >
+		</ T >
+		
+	--- @ (end)                                 ends program
+	rule [Finish]: 
+		< T > S:Bag < k > inject("@")(.List{K}) ...</ k > < output > K:K </ output > </ T > 
+			=> < result > K:K </ result >
+		[structural]
+		
+	---------------------------
+	---- very structural
+	
+	rule [Next]:
+		< k > .K => load(.List{K}) ~> movePC(.List{K}) </ k >
+		[structural]
+		
+	rule [startStack]:
+		< stack > .List => ListItem(inject(0)(.List{K})) </ stack >
+		[structural]
+	rule [refillStack]:
+		< stack > Li:ListItem => Li:ListItem ListItem(inject(0)(.List{K})) </ stack >
+		[structural]
+	
+	rule [Load]:
+		< k > load(.List{K}) => inject(C:Char)(.List{K}) ...</ k >
+		< pc > Loc:K </ pc >
+		< program >... Loc:K |-> inject(C:Char)(.List{K}) ...</ program >
+		[structural]
+	rule [Load-default]:
+		< k > load(.List{K}) => inject(" ")(.List{K}) ...</ k >
+		< pc > coord(inject(X:Int)(.List{K}),, inject(Y:Int)(.List{K})) </ pc >
+		< program > M:Map </ program >
+		if notBool($hasMapping(M:Map, coord(inject(X:Int)(.List{K}),, inject(Y:Int)(.List{K}))))
+			andBool (X:Int >=Int 0)
+			andBool (Y:Int >=Int 0)
+			andBool (X:Int <Int 80)
+			andBool (Y:Int <Int 25)
+		[structural]
+	
+	rule [MovePC-right]: 
+		< k > movePC(.List{K}) => .K ...</ k >
+		< direction > right(.List{K}) </ direction >
+		< pc > coord(inject(I:Int)(.List{K}),, K:K) => coord(inject((I:Int +Int 1) %Int 80)(.List{K}),, K:K) </ pc >
+		[structural]
+	rule [MovePC-left]: 
+		< k > movePC(.List{K}) => .K ...</ k >
+		< direction > left(.List{K}) </ direction >
+		< pc > coord(inject(I:Int)(.List{K}),, K:K) => coord(inject(((I:Int -Int 1) +Int 80) %Int 80)(.List{K}),, K:K) </ pc >
+		[structural]
+	rule [MovePC-up]: 
+		< k > movePC(.List{K}) => .K ...</ k >
+		< direction > up(.List{K}) </ direction >
+		< pc > coord(K:K,, inject(I:Int)(.List{K})) => coord(K:K,, inject(((I:Int -Int 1) +Int 25) %Int 25)(.List{K})) </ pc >
+		[structural]
+	rule [MovePC-down]: 
+		< k > movePC(.List{K}) => .K ...</ k >
+		< direction > down(.List{K}) </ direction >
+		< pc > coord(K:K,, inject(I:Int)(.List{K})) => coord(K:K,, inject((I:Int +Int 1) %Int 25)(.List{K})) </ pc >
+		[structural]
+	
+	syntax KLabel ::= charToAscii
+	rule [charToAscii]:
+		charToAscii(inject(C:Char)(.List{K})) => inject(asciiString(C:Char))(.List{K})
+		[structural]
+	
+	syntax KLabel ::= charToNumber
+	rule [charToNumber]:
+		charToNumber(inject(C:Char)(.List{K})) => inject(asciiString(C:Char) -Int asciiString("0"))(.List{K})
+		[structural]
+	---- end structural
+	---------------------------
+
+	--- " (stringmode)                          Toggles 'stringmode'
+	rule [stringmode-on]:
+		< k > inject(C:Char)(.List{K}) => .K ...</ k >
+		< mode > defaultmode(.List{K}) => stringmode(.List{K}) </ mode >
+		if C:Char ==Bool charString(34)
+		// have to do this instead of matching "\"" because the k frontend doesn't allow quotes in strings.
+		
+	rule [stringmode-off]:
+		< k > inject(C:Char)(.List{K}) => .K ...</ k >
+		< mode > stringmode(.List{K}) => defaultmode(.List{K}) </ mode >
+		if C:Char ==Bool charString(34)
+		
+	rule [stringmode-push]:
+		< k > inject(C:Char)(.List{K}) => push(charToAscii(inject(C:Char)(.List{K}))) ...</ k >
+		< mode > stringmode(.List{K}) </ mode >
+		if (C:Char =/=Bool charString(34))
+		[structural]
+	rule [defaultmode-push-number]:
+		< k > inject(C:Char)(.List{K}) => push(charToNumber(inject(C:Char)(.List{K}))) ...</ k >
+		< mode > defaultmode(.List{K}) </ mode >
+		if (C:Char ==Bool "0") 
+			orBool (C:Char ==Bool "1") 
+			orBool (C:Char ==Bool "2")
+			orBool (C:Char ==Bool "3") 
+			orBool (C:Char ==Bool "4")
+			orBool (C:Char ==Bool "5")
+			orBool (C:Char ==Bool "6")
+			orBool (C:Char ==Bool "7")
+			orBool (C:Char ==Bool "8")
+			orBool (C:Char ==Bool "9")
+		[structural]
+		
+	
+	rule [push]:
+		< k > push(K:K) => .K ...</ k >
+		< stack > .List => ListItem(K:K) ...</ stack >
+		
+		
+	--- > (right)                               PC -> right
+	rule [right]:
+		< k > inject(">")(.List{K}) => .K ...</ k >
+		< direction > K:K => right(.List{K}) </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- < (left)                                PC -> left
+	rule [left]:
+		< k > inject("<")(.List{K}) => .K ...</ k >
+		< direction > K:K => left(.List{K}) </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- ^ (up)                                  PC -> up
+	rule [up]:
+		< k > inject("^")(.List{K}) => .K ...</ k >
+		< direction > K:K => up(.List{K}) </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- v (down)                                PC -> down
+	rule [down]:
+		< k > inject("v")(.List{K}) => .K ...</ k >
+		< direction > K:K => down(.List{K}) </ direction >
+		< mode > defaultmode(.List{K}) </ mode >
+				
+		
+	--- ? (random)                              PC -> right? left? up? down? ???
+	rule [random-right]:
+		< k > inject("?")(.List{K}) => inject(">")(.List{K}) ...</ k >
+		
+	rule [random-left]:
+		< k > inject("?")(.List{K}) => inject("<")(.List{K}) ...</ k >
+		
+	rule [random-up]:
+		< k > inject("?")(.List{K}) => inject("^")(.List{K}) ...</ k >
+		
+	rule [random-down]:
+		< k > inject("?")(.List{K}) => inject("v")(.List{K}) ...</ k >
+		
+		
+	
+	--- : is the duplication command.  It makes a copy of the top element of the stack
+	--- : (dup)         <value>                 <value> <value>
+	rule [dup]:
+		< k > inject(":")(.List{K}) => .K ...</ k >
+		< stack > Li:ListItem => Li:ListItem  Li:ListItem ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+			
+	
+	--- # is the 'bridge' command... it causes the next command which would normally be executed to be skipped over, and not executed.
+	--- # (bridge)                              'jumps' PC one farther; skips over next command
+	rule [bridge]:
+		< k > inject("#")(.List{K}) => movePC(.List{K}) ...</ k >
+		< mode > defaultmode(.List{K}) </ mode >
+			
+		
+	--- The standard 'if' statement in Befunge-93 is either _ or |, depending on how you want to branch.  Both of these instructions pop a value off the stack and check to see if it is true (non-zero,) and change the direction of the PC accordingly:
+	--- _ acts like < if the value is true or > if it is false
+	--- _ (horizontal if) <boolean value>       PC->left if <value>, else PC->right
+	rule [horizontalIf-false]:
+		< k > inject("_")(.List{K}) => inject(">")(.List{K}) ...</ k >
+		< stack > ListItem(inject(0)(.List{K})) => .List ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+			
+	rule [horizontalIf-true]:
+		< k > inject("_")(.List{K}) => inject("<")(.List{K}) ...</ k >
+		< stack > ListItem(inject(I:Int)(.List{K})) => .List ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+		if (I:Int =/=Bool 0)
+		
+    --- | acts like ^ if the value is true or v if it is false.
+	--- | (vertical if)   <boolean value>       PC->up if <value>, else PC->down	
+	rule [verticalIf-false]:
+		< k > inject("|")(.List{K}) => inject("v")(.List{K}) ...</ k >
+		< stack > ListItem(inject(0)(.List{K})) => .List ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+			
+	rule [verticalIf-true]:
+		< k > inject("|")(.List{K}) => inject("^")(.List{K}) ...</ k >
+		< stack > ListItem(inject(I:Int)(.List{K})) => .List ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+		if (I:Int =/=Bool 0)
+		
+		
+	
+	--- The . command will pop a value off the stack and output it as a decimal integer, followed by a space, somewhat like Forth. 
+	--- . (output value)	<value>             outputs <value> as integer
+	rule [printNumber]:
+		< k > inject(".")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I:Int)(.List{K})) => .List ...</ stack >
+		< output > inject(S:String)(.List{K}) => inject(S:String +String Int2String(absInt(I:Int)) +String " ")(.List{K}) </ output >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- ,  will pop a value, interpret it as the ASCII value of a character, and output that character (not followed by a space.)
+	--- , (output character)	<value>         outputs <value> as ASCII
+	rule [printCharacter]:
+		< k > inject(",")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I:Int)(.List{K})) => .List ...</ stack >
+		< output > inject(S:String)(.List{K}) => inject(S:String +String charString(absInt(I:Int %Int 256)))(.List{K}) </ output >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- The & (ampersand) command will get a numeric value (in decimal) from the standard input and push it on the stack.
+	--- & (input value)                         <value user entered>
+	rule [readNumber]:
+		< k > inject("&")(.List{K}) => .K ...</ k >
+		< stack > .List => Li:ListItem ...</ stack >
+		< input > Li:ListItem => .List ...</ input >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- ~ (tilde) will get the next ASCII character from standard input and push it on the stack.
+	--- ~ (input character)                     <character user entered>
+	rule [readCharacter]:
+		< k > inject("~")(.List{K}) => .K ...</ k >
+		< stack > .List => ListItem(inject(asciiString(C:Char))(.List{K})) ...</ stack >
+		< input > ListItem(inject(C:Char)(.List{K})) => .List ...</ input >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+	---- I think something is wrong with my input definitions.  they assume the user puts in the "right" type
+	
+	--- --- Note that   (space) is a null command which does nothing.
+	--- [space] (nop)
+	rule [nop]:
+		< k > inject(" ")(.List{K}) => .K ...</ k >	
+		< mode > defaultmode(.List{K}) </ mode >		
+		
+		
+	--- $ (pop)         <value>                 pops <value> but does nothing
+	rule [pop]:
+		< k > inject("$")(.List{K}) => .K ...</ k >
+		< stack > Li:ListItem => .List ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >		
+		
+	
+	--- \ (swap)        <value1> <value2>       <value2> <value1>
+	rule [swap]:
+		< k > inject("\\")(.List{K}) => .K ...</ k >
+		< stack > Li1:ListItem Li2:ListItem => Li2:ListItem Li1:ListItem ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+	
+	--- g (get)         <x> <y>                 <value at (x,y)>
+	rule [metaGet]:
+		< k > inject("g")(.List{K}) => .K ...</ k >
+		< stack > ListItem(Y:K) ListItem(X:K) => ListItem(charToAscii(K:K)) ...</ stack >
+		< program >... coord(X:K,, Y:K) |-> K:K ...</ program >
+		< mode > defaultmode(.List{K}) </ mode >	
+		
+	rule [metaGet-empty]:
+		< k > inject("g")(.List{K}) => .K ...</ k >
+		< stack > ListItem(Y:K) ListItem(X:K) => ListItem(charToAscii(inject(" ")(.List{K}))) ...</ stack >
+		< program > M:Map </ program >
+		< mode > defaultmode(.List{K}) </ mode >
+		if notBool($hasMapping(M:Map, coord(X:K,, Y:K)))
+		
+		
+	--- p (put)         <value> <x> <y>         puts <value> at (x,y)
+	rule [metaPut]:
+		< k > inject("p")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(Y:Int)(.List{K})) ListItem(inject(X:Int)(.List{K})) ListItem(inject(V:Int)(.List{K})) => .List ...</ stack >
+		< program > M:Map => M:Map[inject(charString(absInt(V:Int %Int 256)))(.List{K}) / coord(inject(X:Int)(.List{K}),, inject(Y:Int)(.List{K}))] </ program >
+		< mode > defaultmode(.List{K}) </ mode >
+		if (X:Int >=Int 0)		
+			andBool (Y:Int >=Int 0)
+			andBool (X:Int <Int 80)
+			andBool (Y:Int <Int 25)
+		
+		
+	--- ! (not)         <value>                 <0 if value non-zero, 1 otherwise>
+	rule [not]:
+		< k > inject("!")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I:Int)(.List{K})) => ListItem(inject(if (I:Int ==Bool 0) then 1 else 0 fi)(.List{K})) ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >		
+		
+		
+	--- ` (greater)     <value1> <value2>       <1 if value1 > value2, 0 otherwise
+	rule [greater]:
+		< k > inject("`")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I2:Int)(.List{K})) ListItem(inject(I1:Int)(.List{K})) => ListItem(inject(if (I1:Int >Int I2:Int) then 1 else 0 fi)(.List{K})) ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >		
+		
+		
+	--- + (add)         <value1> <value2>       <value1 + value2>
+	rule [add]:
+		< k > inject("+")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I1:Int)(.List{K})) ListItem(inject(I2:Int)(.List{K})) => ListItem(inject(I2:Int +Int I1:Int)(.List{K})) ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+	
+	--- - (subtract)    <value1> <value2>       <value1 - value2>
+	rule [subtract]:
+		< k > inject("-")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I1:Int)(.List{K})) ListItem(inject(I2:Int)(.List{K})) => ListItem(inject(I2:Int -Int I1:Int)(.List{K})) ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- * (multiply)    <value1> <value2>       <value1 * value2>
+	rule [multiply]:
+		< k > inject("*")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I1:Int)(.List{K})) ListItem(inject(I2:Int)(.List{K})) => ListItem(inject(I2:Int *Int I1:Int)(.List{K})) ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+		
+	--- / (divide)      <value1> <value2>       <value1 / value2> (nb. integer)
+	rule [divide]:
+		< k > inject("/")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I1:Int)(.List{K})) ListItem(inject(I2:Int)(.List{K})) => ListItem(inject(I2:Int /Int I1:Int)(.List{K})) ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+		
+	
+	--- % (modulo)      <value1> <value2>       <value1 mod value2>
+	rule [modulo]:
+		< k > inject("%")(.List{K}) => .K ...</ k >
+		< stack > ListItem(inject(I1:Int)(.List{K})) ListItem(inject(I2:Int)(.List{K})) => ListItem(inject(I2:Int %Int I1:Int)(.List{K})) ...</ stack >
+		< mode > defaultmode(.List{K}) </ mode >
+			
+endkm
