@@ -1,32 +1,32 @@
 
 
-load ../modules/exp
-load ../modules/if
-load ../modules/k-visitor
-load ../modules/substitution
-load ../modules/lambda
-load ../modules/mu
-load ../modules/callcc
-load ../modules/halt
-load ../modules/seq
-load ../modules/io
-load ../modules/ref
-load ../modules/while
-load ../modules/threads
-load ../modules/agents
-load ../modules/quote-unquote
+load ../../../modules/exp
+load ../../../modules/if
+load ../../../modules/k-visitor
+load ../../../modules/substitution
+load ../../../modules/lambda
+load ../../../modules/mu
+load ../../../modules/callcc
+load ../../../modules/halt
+load ../../../modules/seq
+load ../../../modules/io
+load ../../../modules/ref
+load ../../../modules/while
+load ../../../modules/threads
+load ../../../modules/agents
+load ../../../modules/quote-unquote
 
-load ../modules/tests/ids
-load ../modules/tests/exp/programs
-load ../modules/tests/lambda/programs
-load ../modules/tests/mu/programs
-load ../modules/tests/callcc/programs
-load ../modules/tests/halt/programs
-load ../modules/tests/io/programs
-load ../modules/tests/imp/programs
-load ../modules/tests/threads/programs
-load ../modules/tests/agents/programs
-load ../modules/tests/quote-unquote/programs
+load ../../../tests/issues/ids
+load ../../../tests/issues/exp/programs
+load ../../../tests/issues/lambda/programs
+load ../../../tests/issues/mu/programs
+load ../../../tests/issues/callcc/programs
+load ../../../tests/issues/halt/programs
+load ../../../tests/issues/io/programs
+load ../../../tests/issues/imp/programs
+load ../../../tests/issues/threads/programs
+load ../../../tests/issues/agents/programs
+load ../../../tests/issues/quote-unquote/programs
 
 kmod AGENT is 
   including EXP 

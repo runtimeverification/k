@@ -7,18 +7,18 @@ kmod SUDOKU-CONFIGURATION is including K
 --- I wish I was able to use the same cell names below (lx -> x, etc.), but didn't work
   configuration <T>
                   <cells>
-                    <cell*>
+                    <cell multiplicity="*">
                       <x>0</x>
                       <y>0</y>
                       <i>0</i>
                       <j>0</j>
                       <v>.Bag</v>
-                    </cell*>
+                    </cell>
                   </cells>
                   <data-structures>
-                    <squares> <square*> <si>0</si> <sj>0</sj> <sc>.Map</sc> </square*> </squares>
-                    <lines>   <line*>   <lx>0</lx> <lc>.Map</lc> </line*>   </lines>
-                    <columns> <column*> <cy>0</cy> <cc>.Map</cc> </column*> </columns>
+                    <squares> <square multiplicity="*"> <si>0</si> <sj>0</sj> <sc>.Map</sc> </square> </squares>
+                    <lines>   <line multiplicity="*">   <lx>0</lx> <lc>.Map</lc> </line>   </lines>
+                    <columns> <column multiplicity="*"> <cy>0</cy> <cc>.Map</cc> </column> </columns>
                   </data-structures>
                 </T>
 endkm

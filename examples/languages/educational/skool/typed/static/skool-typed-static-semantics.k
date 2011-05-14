@@ -29,7 +29,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                      <classes>
                            <class multiplicity="*"> 
                                     <className> Id:Id </className>
-                                    <extends?> Id:Id </extends?>
+                                    <extends multiplicity="?"> Id:Id </extends>
                                     <ctenv> .Map </ctenv>
                            </class>
                      </classes>

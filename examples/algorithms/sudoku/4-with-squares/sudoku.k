@@ -6,33 +6,33 @@ kmod SUDOKU-CONFIGURATION is including K
 --- I wish I was able to use the same cell names below (lx -> x, etc.), but didn't work
   configuration <T>
                   <squares>
-                    <square*>
+                    <square multiplicity="*">
                       <i>0</i>
                       <j>0</j>
                       <cells>
-                        <cell*>
+                        <cell multiplicity="*">
                           <x>0</x>
                           <y>0</y>
                           <v>.Bag</v>
-                        </cell*>
+                        </cell>
                       </cells>
                       <sc>.Map</sc>
-                      <sdec*> .Bag </sdec*> 
-                    </square*>
+                      <sdec multiplicity="*"> .Bag </sdec> 
+                    </square>
                   </squares>
                   <lines>
-                    <line*>
+                    <line multiplicity="*">
                       <lx>0</lx>
                       <lc>.Map</lc>
-                      <ldec*>.Bag</ldec*>
-                    </line*>
+                      <ldec multiplicity="*">.Bag</ldec>
+                    </line>
                   </lines>
                   <columns>
-                    <column*>
+                    <column multiplicity="*">
                       <cy>0</cy>
                       <cc>.Map</cc>
-                      <cdec*>.Bag</cdec*>
-                    </column*>
+                      <cdec multiplicity="*">.Bag</cdec>
+                    </column>
                   </columns>
                 </T>
 endkm

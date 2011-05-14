@@ -2,7 +2,7 @@
 
 kmod SUDOKU-CONFIGURATION is including K
   syntax K ::= Nat
-  configuration <T> <cell*> <x>0</x> <y>0</y> <v>.Bag</v> </cell*> </T>
+  configuration <T> <cell multiplicity="*"> <x>0</x> <y>0</y> <v>.Bag</v> </cell> </T>
 endkm
 
 kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
