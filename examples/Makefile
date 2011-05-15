@@ -25,9 +25,9 @@ TEST_DIRS = algorithms/sort \
 	    languages/research/agent \
 	    languages/research/challenge \
 	    languages/research/kernelC \
-	    languages/esotheric/Thue \
-	    languages/esotheric/bf \
-	    languages/esotheric/befunge93 \
+	    languages/esoteric/Thue \
+	    languages/esoteric/bf \
+	    languages/esoteric/befunge93 \
 	    #languages/classic/imp/no-syntax 
 
 .PHONY: all build test clean
