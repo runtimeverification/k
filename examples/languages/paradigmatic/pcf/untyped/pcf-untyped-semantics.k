@@ -3,7 +3,6 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
   This module captures the dynamic semantics of PCF.
   */
 
-  syntax K ::= Exp
   syntax KResult ::= Val
 
   configuration
