@@ -290,12 +290,12 @@
 \newlength{\syntaxlength}  % The amount of indention for continued rules.
 
 \newcommand{\syntax}[3]{\par%
- $#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+\mbox{\scshape syntax}\hspace{1em}$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
 }
 \newcommand{\syntaxCont}[3]{\par%
   $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
   \setlength{\syntaxlength}{.5\syntaxlength}%
-  \addtolength{\syntaxlength}{\widthof{$#1$}}%
+  \addtolength{\syntaxlength}{\widthof{\mbox{\scshape syntax}\hspace{1em}$#1$}}%
   \hspace{\syntaxlength}%
   \;\;\!\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
 }
@@ -342,10 +342,10 @@
 
 \newcommand{\kconfig}[1]{\par%
   {\sc configuration:}%
-  \setlength{\parindent}{2em}%
+  \begin{quote}
   \par\hbox{\ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}}%
+  \end{quote}
   \k@markPosition%
-  \setlength{\parindent}{1em}%
 }
 
 
@@ -354,6 +354,63 @@
 \newcommand{\cellDecl}[2]{\par%
   \text{\scshape cell:} $#1$ wraps $#2$%
 }
+
+%%% Tooltips.
+
+% Following a how-to guide for Adobe InDesign, we create tooltips for items by
+% overlaying them with a transparent button.
+%
+% For documentation on the JavaScript objects, see the JavaScript for Acrobat
+% API Reference at http://www.adobe.com/devnet/acrobat/javascript.html
+%
+% For documentation on the PDF code, see the PDF reference manual at
+% http://www.adobe.com/devnet/pdf/pdf_reference.html
+
+% These definitions will hold the payload.  They have to be global because
+% hyperref definitions vanish when the document starts(?).
+\def\k@tooltipText{}%
+\edef\k@tooltipString{}%
+
+% The "user name" of fields is the user visible name of this entity.  For
+% (non-readonly) buttons, it shows up as tooltip when the mouse hovers over it.
+% Unfortunately, the hyperref package does not allow specifying the user name;
+% thus, by means of a small hack, we push in some raw PDF code when hyperref
+% creates a PushButton object.  The raw PDF code is appended to the "flags"
+% field \Fld@flags.  See the button creation macro "\PDFForm@Push" in the
+% hpdftex.def driver.
+%
+% For the definition of the user name property of fields, see section 12.7.3.1
+% in the PDF specification.
+\let\k@hyPushButtonFlags=\HyField@FlagsPushButton
+\gdef\HyField@FlagsPushButton{%
+  % Execute the original macro
+  \k@hyPushButtonFlags%
+  % Save the current flags and add the user visible name via /TU ("text user"?).
+  \let\k@currentFlags=\Fld@flags%
+  \pdfstringdef\k@tooltipString{\k@tooltipText}%
+  \edef\Fld@flags{/TU (\k@tooltipString)\k@currentFlags}%
+  \edef\Fld@bordercolor{\space}%
+}
+
+\newcounter{k@tooltipCounter}
+
+\newcommand{\k@withTooltip}[2]{%
+  % #1 is the target / box, #2 is the tooltip
+  \def\k@tooltipText{#2}
+  \hbox{\PushButton[name=tooltip\the\c@k@tooltipCounter,
+              borderwidth=0,
+              % The focus handler executes before the click happens, so the
+              % button is set to "not interact" just before it would change
+              % its visual appearance.
+              onfocus={ var t = this.getField("tooltip\the\c@k@tooltipCounter");
+                       t.highlight = highlight.n; }
+             ]{#1}}%
+  \addtocounter{k@tooltipCounter}{1}%
+}
+
+% Buttons are form elements and require a surrounding Form environment.
+\AtBeginDocument{\begin{Form}}
+\AtEndDocument{\end{Form}}
 
 %%% Cell contents.
 
@@ -401,34 +458,14 @@
 \newcommand{\kra}{\curvearrowright}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
 \newcommand{\constant}[2]{%
-  \ifdraft{%
-   \text{\sffamily #1}%
-  }{%
-  \pdfmarkupcomment[author={Constant Sort},markup=Underline,color=Red,opacity=0.0]{%
-    \text{\sffamily #1}%
-  }{#2}%
-  }%
+  \k@withTooltip{\text{\sffamily #1}}{Constant Sort: #2}%
 }
 \newcommand{\variable}[2]{%
-  \ifdraft{%
-    \text{{\itshape #1}\/}%
-  }{%
-  \pdfmarkupcomment[author={Variable Sort},markup=Underline,color=Khaki,opacity=0.0]{%
-    \text{{\itshape #1}\/}%
-  }{#2}%
-  }%
+  \k@withTooltip{\text{\itshape #1}\/}{Variable Sort: #2}%
 }
 \newcommand{\prefixOp}[1]{\text{\sffamily #1}}
 \newcommand{\dotCt}[1]{%
-%  \ifdraft{%
-    \raise.3ex\hbox{\ensuremath{\kdot_{\scriptscriptstyle\color{gray}\it #1}}}
-%  }{%
-%    \pdfmarkupcomment[author={Constant Sort},
-%                      markup=Underline,
-%                      color=Red,
-%                      opacity=0.0]
-%                      {\raise.3ex\hbox{\ensuremath{\kdot}}}{#1}%
-%  }%
+  \k@withTooltip{\raise.3ex\hbox{\ensuremath{\kdot}}}{Constant Sort: #1}%
 }
 
 %%% Mathematical notation.
@@ -459,13 +496,7 @@
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
 \newcommand{\bAnyVar}[1]{%
-  \ifdraft{%
-     #1%
-  }{%
-  \pdfmarkupcomment[author={Variable Sort},markup=Underline,color=Khaki,opacity=0.0]{%
-    \mbox{--}%
-  }{#1}%
-  }%
+  \k@withTooltip{\mbox{--}}{Variable Sort: #1}%
 }
 
 \tikzset{
@@ -668,45 +699,29 @@
 %%% Equations and structural rules.
 
 \newcommand{\k@ruleLabel}[2]{%
-  \ifdraft{%
-  \text{%
-    \scshape%
-    % Avoid the extra space if the prefix is empty.
-    \ifthenelse{\equal{#1}{}}{}{#1 }%
-    #2:%
-  }%
-  }{%
-  \ifthenelse{\equal{#1}{}}{\text{\scshape #2:}}{%
-    \pdfmarkupcomment[author={Rule Label},markup=Underline,color=Blue,opacity=0.0]{%
-  \text{%
-    \scshape%
-    #2:%
-  }%
-  }{#1}%
-  }%
-  }%
+  \ifthenelse{\equal{#1}{}}{\mbox{\scshape #2}}{\k@withTooltip{\mbox{\scshape #2}}{Rule Label: #1}}%
 }
 
 \newcommand{\kequation}[2]{%
-  \par\hbox{%
+  \par\indent\hbox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   }%
   \k@markPosition%
   \bigskip%
 }
-\newcommand{\kcequation}[3]{\par%
+\newcommand{\kcequation}[3]{\par\indent%
   \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   \when{#3}
   \k@markPosition%
 }
 \newcommand{\mequation}[3]{%
-  \par\hbox{%
+  \par\indent\hbox{%
     \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
   }%
   \k@markPosition%
 }
 \newcommand{\cmequation}[4]{%
-  \par\hbox{%
+  \par\indent\hbox{%
     \k@ruleLabel{#1}{equation}\hspace{1em}$#2 = #3$%
     \when{#4}%
   }%
@@ -723,7 +738,7 @@
   \bigskip%
 }
 \newcommand{\kcrule}[3]{%
-  \par\hbox{%
+  \par\indent\hbox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
     \when{#3}%
   }%
@@ -731,21 +746,19 @@
 }
 \newcommand{\kndrule}[2]{\par%
   \k@ruleLabel{#1}{non-det rule}%
-  \setlength{\parindent}{3em}%
-  \par\hbox{$#2$}%
+  \par\indent\hbox{$#2$}%
   \k@markPosition%
-  \setlength{\parindent}{2em}%
   \bigskip%
 }
 \newcommand{\mrule}[3]{%
-  \par\hbox{%
+  \par\indent\hbox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
   }%
   \k@markPosition%
   \bigskip%
 }
 \newcommand{\cmrule}[4]{%
-  \par\hbox{%
+  \par\indent\hbox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
     \when{#4}%
   }%
