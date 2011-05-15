@@ -11,5 +11,5 @@ MAIN_FILE = challenge
 # this is a space-separated list of basename maude files to run
 TESTS = challenge-test.m
 
-TOOL_DIR =  $(K_CORE)/../tools/
+TOOL_DIR =  $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk

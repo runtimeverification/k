@@ -124,20 +124,22 @@ your current directory.
 
 ## Install the K Framework
 
-To complete the installation of the K Framework, add the `k-framework/core`
-directory to your system's `PATH` variable.
+To complete the installation of the K Framework, set the `K_BASE` environment 
+variable to the absolute path of the `k-framework` deirectory;  
+you might also want to add `k-framework/core` and `k-framework/tools` 
+directories to your system's `PATH` variable if you plan on calling kompile 
+directly (without using the `make` tool).
 
 ### Linux/OSX/UNIX/etc
 
-On most operating systems, the following command will add the `core`
-directory to your `PATH` (be sure to replace <somedir> with the directory
-that contains the k-framework directory):
+On most operating systems, the following command will set `K_BASE`
+(be sure to replace <somedir> with the directory that contains 
+the k-framework directory):
 
-    $ export PATH=<somedir>/k-framework/core:$PATH
+    $ export K_BASE=<somedir>/k-framework
 
 To make this change persistent across logins/shells, you will need to add
 the command to a file like `~/.profile`.
-
 
 ## Test your installation
 
@@ -155,7 +157,7 @@ Executing
 
 in one of the examples directories, e.g., 
 
-    examples/languages/educational/simple/untyped
+    examples/languages/research/simple/untyped
 
 should produce a file `simple-untyped.tex` containing the LaTeX code 
 corresponding to the definition.
@@ -169,7 +171,7 @@ the `.tex` file obtained above, or execute
 
     $ make pdf
 
-in the `examples/languages/educational/simple/untyped` directory.
+in the `examples/languages/research/simple/untyped` directory.
 
 This should generate a PDF of the `SIMPLE-UNTYPED` definition which is a good
 starting point for understanding more about K definitions and the process of

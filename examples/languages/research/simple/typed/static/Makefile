@@ -13,6 +13,6 @@ MAIN_FILE = simple-typed-static
 # this is a space-separated list of basename maude files to run
 TESTS = simple-typed-static-test.maude
 
-TOOL_DIR =  $(K_CORE)/../tools/
+TOOL_DIR =  $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk
 

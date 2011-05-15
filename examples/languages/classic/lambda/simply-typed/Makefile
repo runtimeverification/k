@@ -11,5 +11,5 @@ MAIN_FILE = simply-typed-lambda
 # this is a space-separated list of basename maude files to run
 TESTS = simply-typed-lambda-test.m
 
-TOOL_DIR =  $(K_CORE)/../tools/
+TOOL_DIR =  $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk

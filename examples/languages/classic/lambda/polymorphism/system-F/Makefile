@@ -14,5 +14,5 @@ MAIN_FILE = system-F
 # this is a space-separated list of maude files to run
 TESTS = system-F-test.m
 
-TOOL_DIR =  $(K_CORE)/../tools/
+TOOL_DIR =  $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk
