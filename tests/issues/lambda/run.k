@@ -1,11 +1,11 @@
-load basic-run
-load k-visitor
-load substitution
-load lambda
+in /modules/basic-run
+in /modules/k-visitor
+in /modules/substitution
+in /modules/lambda
 
 load ../ids
-load exp
-load if
+in /modules/exp
+in /modules/if
 load programs
 
 kmod RUN is including BASIC-RUN + LAMBDA-PROGRAMS 

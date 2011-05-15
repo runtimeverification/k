@@ -337,6 +337,7 @@ my $default_freezer = "FREEZER";
 my $specialSymbol = "K";
 
 my $k_tools_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maude','compiler');
+my $k_base =  File::Spec->catfile((File::Basename::fileparse($0))[1], "..");
 my $k_all_tools = File::Spec->catfile($k_tools_dir,"all-tools");
 my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
 my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
@@ -800,6 +801,7 @@ if (!$compile_only) {
 	$original = $full_name;
 	my $main_content = get_file_content(" $full_name.maude");
 	$main_content =~ s/^\s//sgm;
+        $main_content =~ s/^\s*in\s+\/modules\//in $k_base\/modules\//sgm;
 	
 	if (!$newline)
 	{

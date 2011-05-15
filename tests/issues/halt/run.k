@@ -1,13 +1,13 @@
-load basic-run
-load halt
+in /modules/basic-run
+in /modules/halt
 
 load ../ids
-load exp
-load if
-load k-visitor
-load substitution
-load lambda
-load mu
+in /modules/exp
+in /modules/if
+in /modules/k-visitor
+in /modules/substitution
+in /modules/lambda
+in /modules/mu
 load programs
 
 kmod RUN is including BASIC-RUN + HALT-PROGRAMS 

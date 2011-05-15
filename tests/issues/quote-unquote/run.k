@@ -1,17 +1,17 @@
-load basic-run
-load k-visitor
-load quote-unquote
+in /modules/basic-run
+in /modules/k-visitor
+in /modules/quote-unquote
 
 load ../ids
-load exp
-load if
-load substitution
-load lambda
-load mu
-load seq
-load ref
-load io
-load while
+in /modules/exp
+in /modules/if
+in /modules/substitution
+in /modules/lambda
+in /modules/mu
+in /modules/seq
+in /modules/ref
+in /modules/io
+in /modules/while
 load programs
 
 kmod RUN is including QUOTE-UNQUOTE-PROGRAMS + BASIC-RUN 

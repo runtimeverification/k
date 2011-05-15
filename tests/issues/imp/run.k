@@ -1,14 +1,14 @@
-load basic-run
-load seq
-load if
-load while
+in /modules/basic-run
+in /modules/seq
+in /modules/if
+in /modules/while
 
 load ../ids
-load exp
-load k-visitor
-load substitution
-load lambda
-load ref
+in /modules/exp
+in /modules/k-visitor
+in /modules/substitution
+in /modules/lambda
+in /modules/ref
 load programs
 
 kmod RUN is including IMP-PROGRAMS + BASIC-RUN

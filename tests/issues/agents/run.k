@@ -1,17 +1,17 @@
-load basic-run
-load seq
-load agents
+in /modules/basic-run
+in /modules/seq
+in /modules/agents
 
 load ../ids
-load exp
-load if
-load k-visitor
-load substitution
-load lambda
-load ref
-load io
-load while
-load threads
+in /modules/exp
+in /modules/if
+in /modules/k-visitor
+in /modules/substitution
+in /modules/lambda
+in /modules/ref
+in /modules/io
+in /modules/while
+in /modules/threads
 load programs
 
 kmod RUN is including AGENTS-PROGRAMS + BASIC-RUN

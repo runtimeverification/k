@@ -16,6 +16,7 @@ use lib $path;
 use Regexp::Common;
 use Tree::Nary;
   
+my $k_base =  File::Spec->catfile((File::Basename::fileparse($0))[1], "..");
 my $maude = "maude";
 my $language_file_name = "?";
 my $config_tree;
@@ -582,7 +583,7 @@ sub getFullName
     {
 	return $file;
     }
-
+    
     #  hardcoded to avoid maudification for shared.maude
     if ($file =~ /shared\.maude$/)
     {
@@ -590,6 +591,11 @@ sub getFullName
     }
     
     $file =~ s/^\.\///;
+
+    # if a file is given in absolute path that is understood absolute w.r.t. the K base directory
+    if ($file =~ /^\/modules/) {
+      $file = File::Spec->catfile($k_base,$file);
+    }
 
     # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
     

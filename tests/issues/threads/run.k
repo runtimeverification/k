@@ -1,17 +1,17 @@
-load basic-run
-load seq
-load threads
+in /modules/basic-run
+in /modules/seq
+in /modules/threads
 
 load ../ids
-load exp
-load if
-load k-visitor
-load substitution
-load lambda
-load halt
-load io
-load ref
-load while
+in /modules/exp
+in /modules/if
+in /modules/k-visitor
+in /modules/substitution
+in /modules/lambda
+in /modules/halt
+in /modules/io
+in /modules/ref
+in /modules/while
 load programs
 
 kmod RUN is including BASIC-RUN + THREADS-PROGRAMS

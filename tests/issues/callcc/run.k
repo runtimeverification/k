@@ -1,12 +1,12 @@
-load basic-run
-load k-visitor
-load substitution
-load lambda
-load callcc
+in /modules/basic-run
+in /modules/k-visitor
+in /modules/substitution
+in /modules/lambda
+in /modules/callcc
 
 load ../ids
-load exp
-load if
+in /modules/exp
+in /modules/if
 load programs
 
 kmod RUN is including BASIC-RUN + CALLCC-PROGRAMS 
