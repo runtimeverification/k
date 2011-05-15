@@ -754,7 +754,7 @@ mod PL-STRING is
                   op-hook stringSymbol (<Strings> : ~> Char)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
-  op charString : Nat -> Char
+  op charString : Int -> Char
         [special (id-hook StringOpSymbol (char)
                   op-hook stringSymbol (<Strings> : ~> Char)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
@@ -769,18 +769,18 @@ mod PL-STRING is
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
-  op substrString : String Nat Nat -> String
+  op substrString : String Int Int -> String
         [special (id-hook StringOpSymbol (substr)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 
-  op findString : String String Nat -> Int
+  op findString : String String Int -> Int
         [special (id-hook StringOpSymbol (find)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   term-hook notFoundTerm (-1))] .
 
-  op rfindString : String String Nat -> Int
+  op rfindString : String String Int -> Int
         [special (id-hook StringOpSymbol (rfind)
                   op-hook stringSymbol (<Strings> : ~> String)
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)

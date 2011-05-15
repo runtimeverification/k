@@ -183,7 +183,7 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	rule [printNumber]:
 		< k > "." => .K ...</ k >
 		< stack > ListItem(I:Int) => .List ...</ stack >
-		< output > S:String => S:String +String Int2String(absInt(I:Int)) +String " " </ output >
+		< output > S:String => S:String +String Int2String((I:Int)) +String " " </ output >
 		< mode > defaultmode </ mode >
 		
 	/*@ \lstinline|,| (output character): This command pops a number off of the stack, interprets that number as an ascii code, and outputs the corresponding character.
@@ -191,7 +191,7 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	rule [printCharacter]:
 		< k > "," => .K ...</ k >
 		< stack > ListItem(I:Int) => .List ...</ stack >
-		< output > S:String => S:String +String charString(absInt(I:Int %Int 256)) </ output >
+		< output > S:String => S:String +String charString(I:Int %Int 256) </ output >
 		< mode > defaultmode </ mode >
 		
 	/*@ \lstinline|&| (input value): This command reads a numeric value (in decimal) from the standard input, and pushes it onto the stack.  E.g., if the user types in ``32'', it will push 32 onto the stack.
@@ -252,7 +252,7 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	rule [metaPut]:
 		< k > "p" => .K ...</ k >
 		< stack > ListItem(Y:Int) ListItem(X:Int) ListItem(V:Int) => .List ...</ stack >
-		< program > M:Map => M:Map[charString(absInt(V:Int %Int 256)) / coord(X:Int, Y:Int)] </ program >
+		< program > M:Map => M:Map[charString(V:Int %Int 256) / coord(X:Int, Y:Int)] </ program >
 		< mode > defaultmode </ mode >
 		if (X:Int >=Int 0)		
 			andBool (Y:Int >=Int 0)
@@ -266,48 +266,48 @@ The following is a ``Hello world!'' program written in Befunge-93.
 		< stack > ListItem(I:Int) => ListItem(if (I:Int ==Bool 0) then 1 else 0 fi) ...</ stack >
 		< mode > defaultmode </ mode >		
 		
-	/*@ \lstinline|`| (greater): This command pops the top two elements $b$ and $a$ from the stack and pushes a 1 if $a > b$, and a 0 otherwise.
+	/*@ \lstinline|`| (greater): This command pops the top two elements $B$ and $A$ from the stack and pushes a 1 if $A > B$, and a 0 otherwise.
 	
 	The rule below should show a backtick \lstinline|`| character, but due to a bug in the latex generator, it does not.
 	*/
 	rule [greater]:
 		< k > "`" => .K ...</ k >
-		< stack > ListItem(I2:Int) ListItem(I1:Int) => ListItem(if (I1:Int >Int I2:Int) then 1 else 0 fi) ...</ stack >
+		< stack > ListItem(B:Int) ListItem(A:Int) => ListItem(if (A:Int >Int B:Int) then 1 else 0 fi) ...</ stack >
 		< mode > defaultmode </ mode >		
 		
 	/*@ \lstinline|+| (add): This command pops the top two elements of the stack and replaces them with their sum.
 	*/
 	rule [add]:
 		< k > "+" => .K ...</ k >
-		< stack > ListItem(I1:Int) ListItem(I2:Int) => ListItem(I2:Int +Int I1:Int) ...</ stack >
+		< stack > ListItem(B:Int) ListItem(A:Int) => ListItem(A:Int +Int B:Int) ...</ stack >
 		< mode > defaultmode </ mode >
 		
 	/*@ \lstinline|-| (subtract): This command pops elements $b$ and $a$ from the stack and replaces them with the difference $a - b$.
 	*/
 	rule [subtract]:
 		< k > "-" => .K ...</ k >
-		< stack > ListItem(I1:Int) ListItem(I2:Int) => ListItem(I2:Int -Int I1:Int) ...</ stack >
+		< stack > ListItem(B:Int) ListItem(A:Int) => ListItem(A:Int -Int B:Int) ...</ stack >
 		< mode > defaultmode </ mode >
 		
 	/*@ \lstinline|*| (multiply): This command pops the top two elements of the stack and replaces them with their product.
 	*/
 	rule [multiply]:
 		< k > "*" => .K ...</ k >
-		< stack > ListItem(I1:Int) ListItem(I2:Int) => ListItem(I2:Int *Int I1:Int) ...</ stack >
+		< stack > ListItem(B:Int) ListItem(A:Int) => ListItem(A:Int *Int B:Int) ...</ stack >
 		< mode > defaultmode </ mode >
 		
 	/*@ \lstinline|/| (divide): This command pops elements $b$ and $a$ from the stack and replaces them with the integer quotient $\frac{a}{b}$.
 	*/
 	rule [divide]:
 		< k > "/" => .K ...</ k >
-		< stack > ListItem(I1:Int) ListItem(I2:Int) => ListItem(I2:Int /Int I1:Int) ...</ stack >
+		< stack > ListItem(B:Int) ListItem(A:Int) => ListItem(A:Int /Int B:Int) ...</ stack >
 		< mode > defaultmode </ mode >
 		
 	/*@ \lstinline|%| (modulo): This command pops elements $b$ and $a$ from the stack and replaces them with the modulus $a \% b$.
 	*/
 	rule [modulo]:
 		< k > "%" => .K ...</ k >
-		< stack > ListItem(I1:Int) ListItem(I2:Int) => ListItem(I2:Int %Int I1:Int) ...</ stack >
+		< stack > ListItem(B:Int) ListItem(A:Int) => ListItem(A:Int %Int B:Int) ...</ stack >
 		< mode > defaultmode </ mode >
 	
 	/*@ Any number: If the next command to execute is a digit, then the value of that digit should be pushed onto the stack.
@@ -349,7 +349,7 @@ The following is a ``Hello world!'' program written in Befunge-93.
 		< stack > .List => ListItem(0) </ stack >
 		[structural]
 	rule [refillStack]:
-		< stack > Li:ListItem => Li:ListItem ListItem(0) </ stack >
+		< stack > _:ListItem (.List => ListItem(0)) </ stack >
 		[structural]
 	
 	rule [Load]:
@@ -371,22 +371,22 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	rule [MovePC-right]: 
 		< k > movePC => .K ...</ k >
 		< direction > right </ direction >
-		< pc > coord(I:Int, K:K) => coord((I:Int +Int 1) %Int 80, K:K) </ pc >
+		< pc > coord(I:Int => (I:Int +Int 1) %Int 80, _:K) </ pc >
 		[structural]
 	rule [MovePC-left]: 
 		< k > movePC => .K ...</ k >
 		< direction > left </ direction >
-		< pc > coord(I:Int, K:K) => coord(((I:Int -Int 1) +Int 80) %Int 80, K:K) </ pc >
+		< pc > coord(I:Int => ((I:Int -Int 1) +Int 80) %Int 80, _:K) </ pc >
 		[structural]
 	rule [MovePC-up]: 
 		< k > movePC => .K ...</ k >
 		< direction > up </ direction >
-		< pc > coord(K:K, I:Int) => coord(K:K, ((I:Int -Int 1) +Int 25) %Int 25) </ pc >
+		< pc > coord(_:K, I:Int => ((I:Int -Int 1) +Int 25) %Int 25)  </ pc >
 		[structural]
 	rule [MovePC-down]: 
 		< k > movePC => .K ...</ k >
 		< direction > down </ direction >
-		< pc > coord(K:K, I:Int) => coord(K:K, (I:Int +Int 1) %Int 25) </ pc >
+		< pc > coord(_:K, I:Int => (I:Int +Int 1) %Int 25) </ pc >
 		[structural]
 	
 	syntax KLabel ::= charToAscii
@@ -397,7 +397,5 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	syntax KLabel ::= charToNumber
 	rule [charToNumber]:
 		charToNumber(C:Char) => asciiString(C:Char) -Int asciiString("0")
-		[structural]
-	// end structural
-	
+		[structural]	
 endkm
