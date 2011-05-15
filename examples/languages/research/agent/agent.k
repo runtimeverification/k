@@ -1,20 +1,20 @@
 
 
-load /modules/exp
-load /modules/if
-load /modules/k-visitor
-load /modules/substitution
-load /modules/lambda
-load /modules/mu
-load /modules/callcc
-load /modules/halt
-load /modules/seq
-load /modules/io
-load /modules/ref
-load /modules/while
-load /modules/threads
-load /modules/agents
-load /modules/quote-unquote
+in /modules/exp
+in /modules/if
+in /modules/k-visitor
+in /modules/substitution
+in /modules/lambda
+in /modules/mu
+in /modules/callcc
+in /modules/halt
+in /modules/seq
+in /modules/io
+in /modules/ref
+in /modules/while
+in /modules/threads
+in /modules/agents
+in /modules/quote-unquote
 
 load ../../../../tests/regression/ids
 load ../../../../tests/regression/exp/programs
