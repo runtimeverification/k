@@ -1,6 +1,3 @@
-# KCOMPILE can be set by whoever calls this file
-# e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= $(K_CORE)/kompile
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = THUE
@@ -14,5 +11,5 @@ MAIN_FILE = thue
 # this is a space-separated list of basename maude files to run
 TESTS = test.maude
 
-TOOL_DIR = $(dir $(KCOMPILE))../tools/
+TOOL_DIR =  $(K_CORE)/../tools/
 include $(TOOL_DIR)make-helper.mk

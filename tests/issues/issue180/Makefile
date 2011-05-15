@@ -1,6 +1,3 @@
-# KCOMPILE can be set by whoever calls this file
-# e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= $(K_CORE)/kompile
 COMPILE_OPTIONS ?= -nd
 
 # this is the name of the main maude module 
@@ -18,5 +15,5 @@ MAIN_FILE = simple-untyped
 # this is a space-separated list of basename maude files to run
 TESTS = simple-untyped-test.m
 
-TOOL_DIR = $(dir $(KCOMPILE))../tools/
+TOOL_DIR =  $(K_CORE)/../tools/
 include $(TOOL_DIR)make-helper.mk

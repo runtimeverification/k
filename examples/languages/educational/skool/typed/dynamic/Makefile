@@ -1,6 +1,3 @@
-# KCOMPILE can be set by whoever calls this file
-# e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= $(K_CORE)/kompile
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = SKOOL-TYPED-DYNAMIC
@@ -19,6 +16,6 @@ ADDITIONAL_DEPENDENCIES = ../skool-typed-programs.k
 # this is a space-separated list of basename maude files to run
 TESTS = skool-typed-dynamic-test.m
 
-TOOL_DIR = $(dir $(KCOMPILE))../tools/
+TOOL_DIR =  $(K_CORE)/../tools/
 include $(TOOL_DIR)make-helper.mk
 

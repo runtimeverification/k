@@ -1,5 +1,6 @@
 
 # defaults, are set only if they weren't set before
+KCOMPILE ?= $(K_CORE)/kompile
 MAIN_FILE ?= yourLanguage
 LANGUAGE_NAME ?= YOURLANGUAGE
 SHELL = /usr/bin/env bash

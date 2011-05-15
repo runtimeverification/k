@@ -1,6 +1,3 @@
-# KCOMPILE can be set by whoever calls this file
-# e.g., `make KCOMPILE=xxxxx`
-KCOMPILE ?= $(K_CORE)/kompile
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = PCF-UNTYPED
@@ -17,5 +14,5 @@ MAIN_FILE = pcf-untyped
 # this is a space-separated list of maude files to run
 TESTS = pcf-untyped-test.m
 
-TOOL_DIR = $(dir $(KCOMPILE))../tools/
+TOOL_DIR =  $(K_CORE)/../tools/
 include $(TOOL_DIR)make-helper.mk
