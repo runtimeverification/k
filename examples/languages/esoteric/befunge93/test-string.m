@@ -3,7 +3,7 @@ mod BEFUNGE-TEST is
 	including BEFUNGE .
 	
 	--- equivalent to the string program from the fungus test suite found at http://www.phlamethrower.co.uk/befunge/fungus.php
-	op pString : -> KProperLabel [metadata "arity 0"] .
+	op pString : -> KProperLabel .
 	eq pString = injectM( __((.).Map,((.).Map 
 	'coord`(_`,_`)(Int 0(.List{K}),, Int 0(.List{K})) |-> String "v"(.List{K})
 	'coord`(_`,_`)(Int 1(.List{K}),, Int 0(.List{K})) |-> String " "(.List{K})
@@ -1356,3 +1356,4 @@ endm
 
 ---set trace on .
 rew eval(pString(.List{K})) .
+q

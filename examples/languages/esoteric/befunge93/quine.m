@@ -54,3 +54,4 @@ mod BEFUNGE-TEST is
 
 endm
 rew eval(quine(.List{K})) .
+q

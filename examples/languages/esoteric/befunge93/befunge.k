@@ -28,15 +28,16 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	syntax CellLabel ::= input
 	syntax CellLabel ::= k
 	syntax CellLabel ::= result
+	syntax CellLabel ::= resultProgram
+	
 	
 	syntax Bag ::= eval( K )
 	syntax Bag ::= eval-inp( K , K )
 	
 	syntax KLabel ::= injectM( Map )
-	syntax KLabel ::= injectL( List )
 	
 	
-	syntax K ::= Int | Char | String
+	syntax K ::= Int | Char | String | Bool
 	// syntax KLabel ::= inject( Int )
 	// syntax KLabel ::= inject( Char )
 	// syntax KLabel ::= inject( String )
@@ -63,19 +64,26 @@ The following is a ``Hello world!'' program written in Befunge-93.
 			< mode > defaultmode </ mode >
 			< program > .Map </ program >
 			< output > "" </ output >
-			< input > .List </ input >
+			< input > .K </ input >
 		</ T >  
-		< result > K:K </ result >
+		< result > "" </ result >
+		< resultProgram > "" </ resultProgram >
 	
-	rule [Start]: eval(injectM(M:Map)(.List{K})) => eval-inp(injectM(M:Map)(.List{K}), injectL(.List)(.List{K}))
-	rule [Start-With-Input]: eval-inp(injectM(M:Map)(.List{K}), injectL(L:List)(.List{K})) =>
+	rule [Start]: eval(injectM(M:Map)(.List{K})) => eval-inp(injectM(M:Map)(.List{K}), "")
+	rule [Start-With-Input]: eval-inp(injectM(M:Map)(.List{K}), Input:K) =>
 		< T >...
 			< program > M:Map </ program >
-			< input > L:List </ input >
+			< input > Input:K </ input >
 		...</ T >
 		
 	/*@ \lstinline|@| (end): This command ends the program.
 	*/
+	rule [Finish]: 
+		< T > S:Bag < k > "@" ...</ k > < output > S:String </ output > < program > M:Map </ program > </ T > 
+			=> < resultProgram > printProgram(M:Map) </ resultProgram >
+			< result > S:String </ result >
+		[structural]
+			
 	rule [Finish]: 
 		< T > S:Bag < k > "@" ...</ k > < output > K:K </ output > </ T > 
 			=> < result > K:K </ result >
@@ -191,15 +199,14 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	rule [printCharacter]:
 		< k > "," => .K ...</ k >
 		< stack > ListItem(I:Int) => .List ...</ stack >
-		< output > S:String => S:String +String charString(I:Int %Int 256) </ output >
+		< output > S:String => S:String +String safeIntToChar(I:Int) </ output >
 		< mode > defaultmode </ mode >
 		
-	/*@ \lstinline|&| (input value): This command reads a numeric value (in decimal) from the standard input, and pushes it onto the stack.  E.g., if the user types in ``32'', it will push 32 onto the stack.
+	/*@ \lstinline|&| (input value): This command reads a numeric value (in decimal) from the standard input, and pushes it onto the stack.  E.g., if the user types in ``32 '', it will push 32 onto the stack.
 	*/
+	syntax K ::= readNumber( K , K )
 	rule [readNumber]:
-		< k > "&" => .K ...</ k >
-		< stack > .List => Li:ListItem ...</ stack >
-		< input > Li:ListItem => .List ...</ input >
+		< k > "&" => readNumber(false, 0) ...</ k >
 		< mode > defaultmode </ mode >
 		
 		
@@ -252,7 +259,7 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	rule [metaPut]:
 		< k > "p" => .K ...</ k >
 		< stack > ListItem(Y:Int) ListItem(X:Int) ListItem(V:Int) => .List ...</ stack >
-		< program > M:Map => M:Map[charString(V:Int %Int 256) / coord(X:Int, Y:Int)] </ program >
+		< program > M:Map => M:Map[safeIntToChar(V:Int) / coord(X:Int, Y:Int)] </ program >
 		< mode > defaultmode </ mode >
 		if (X:Int >=Int 0)		
 			andBool (Y:Int >=Int 0)
@@ -315,16 +322,7 @@ The following is a ``Hello world!'' program written in Befunge-93.
 	rule [defaultmode-push-number]:
 		< k > C:Char => push(charToNumber(C:Char)) ...</ k >
 		< mode > defaultmode </ mode >
-		if (C:Char ==Bool "0") 
-			orBool (C:Char ==Bool "1") 
-			orBool (C:Char ==Bool "2")
-			orBool (C:Char ==Bool "3") 
-			orBool (C:Char ==Bool "4")
-			orBool (C:Char ==Bool "5")
-			orBool (C:Char ==Bool "6")
-			orBool (C:Char ==Bool "7")
-			orBool (C:Char ==Bool "8")
-			orBool (C:Char ==Bool "9")
+		if isDigit(C:Char)
 	
 	/*@ Any character in stringmode: If the current mode of execution is ``stringmode'', then any character other than \lstinline|"| will have its ascii value pushed onto the stack.
 	*/
@@ -388,14 +386,80 @@ The following is a ``Hello world!'' program written in Befunge-93.
 		< direction > down </ direction >
 		< pc > coord(_:K, I:Int => (I:Int +Int 1) %Int 25) </ pc >
 		[structural]
+		
+	rule [readNumber-single]:
+		< k > readNumber(B:Bool => true, I:Int => I:Int +Int charToNumber(firstChar(S:String))) ...</ k >
+		< input > S:String => butFirstChar(S:String) </ input >
+		< mode > defaultmode </ mode >
+		if isDigit(firstChar(S:String))
+		[structural]
+	rule [readNumber-done]:
+		< k > readNumber(true, I:Int) => .K ...</ k >
+		< stack > .List => ListItem(I:Int) ...</ stack >
+		< input > S:String </ input >
+		if notBool isDigit(firstChar(S:String))
+		[structural]
+		
+	syntax String ::= printProgram( Map )
+	syntax String ::= printProgram-aux( Int , Int , Map )
+	rule printProgram(M:Map) => printProgram-aux(0, 0, M:Map) [structural]
+	rule printProgram-aux(X:Int, Y:Int, M:Map) 
+		=> k2string(M:Map(coord(X:Int, Y:Int))) +String printProgram-aux(X:Int +Int 1, Y:Int, M:Map) 
+		if $hasMapping(M:Map, coord(X:Int, Y:Int))
+		[structural]
+	rule printProgram-aux(X:Int, Y:Int, M:Map) 
+		=> " " +String printProgram-aux(X:Int +Int 1, Y:Int, M:Map)
+		if notBool $hasMapping(M:Map, coord(X:Int, Y:Int))
+		andBool X:Int <Int 80
+		andBool Y:Int <Int 25
+		[structural]
+	rule printProgram-aux(80, Y:Int, M:Map) => "\n" +String printProgram-aux(0, Y:Int +Int 1, M:Map)
+		[structural]
+	rule printProgram-aux(0, 25, M:Map) 
+		=> ""
+		[structural]
+		
+	syntax String ::= k2string( K )
+	rule k2string(S:String) => S:String [structural]
+		
+	syntax Bool ::= isDigit( K )
+	rule [isDigit]:
+		isDigit(K:K) => 
+			if (K:K ==Bool "0") 
+			orBool (K:K ==Bool "1") 
+			orBool (K:K ==Bool "2")
+			orBool (K:K ==Bool "3") 
+			orBool (K:K ==Bool "4")
+			orBool (K:K ==Bool "5")
+			orBool (K:K ==Bool "6")
+			orBool (K:K ==Bool "7")
+			orBool (K:K ==Bool "8")
+			orBool (K:K ==Bool "9") 
+			then true else false fi
+		[structural]
+		
+		
+	syntax String ::= safeIntToChar( K )
+	rule safeIntToChar(I:Int) => charString(((I:Int %Int 256) +Int 256) %Int 256) [structural]
+	
+	syntax K ::= butFirstChar( K )
+	rule [butFirstChar]: 
+		butFirstChar(S:String) => substrString(S:String, 1, lengthString(S:String))
+		[structural]
+	syntax K ::= firstChar( K )
+	rule [firstChar]: 
+		firstChar(S:String) => substrString(S:String, 0, 1)
+		[structural]
 	
 	syntax KLabel ::= charToAscii
 	rule [charToAscii]:
 		charToAscii(C:Char) => asciiString(C:Char)
 		[structural]
 	
-	syntax KLabel ::= charToNumber
+	syntax Int ::= charToNumber( K )
 	rule [charToNumber]:
 		charToNumber(C:Char) => asciiString(C:Char) -Int asciiString("0")
-		[structural]	
+		[structural]
+		
+	//rule asciiString(charString(I:Int)) => I:Int [structural]
 endkm

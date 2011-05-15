@@ -3,7 +3,7 @@ mod BEFUNGE-TEST is
 	including BEFUNGE .
 	
 	--- Programs
-  	op pHelloWorld : -> KProperLabel [metadata "arity 0"] .
+  	op pHelloWorld : -> KProperLabel .
 		
 	--- "olleH">:#,_@
 	eq pHelloWorld = injectM((
@@ -621,5 +621,6 @@ endm
 
 ---set trace on .
 rew eval(pHelloWorld(.List{K})) .
-rew eval-inp(pFactorial(.List{K}), injectL(List(Int 6(.List{K})))(.List{K})) .
+rew eval-inp(pFactorial(.List{K}), String "6"(.List{K})) .
 rew eval(pCompat(.List{K})) .
+q

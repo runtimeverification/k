@@ -7,6 +7,18 @@ import sys
 s = sys.stdin.read()
 x = 0
 y = 0
+
+
+print """
+load befunge-compiled
+mod BEFUNGE-TEST is
+	including BEFUNGE .
+	
+	--- Programs
+  	op pProgram : -> KProperLabel .
+	eq pProgram = 
+"""
+
 print "injectM( __((.).Map,((.).Map "
 for line in s.splitlines():
 	x = 0
@@ -20,3 +32,11 @@ for line in s.splitlines():
 		x += 1
 	y += 1
 print ")))"
+
+print """
+.
+endm
+rew eval(pProgram(.List{K})) .
+q
+
+"""
