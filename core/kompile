@@ -1007,9 +1007,12 @@ sub latexify {
 	print FILE "\\documentclass[draft]{article}\n" if $draft;
 	print FILE "\\usepackage{import}\n";
 	print FILE "\\import{$k_latex_dir/}{k2latex.$style.sty}\n";
-        if (-e "$language_file_name.sty") {
-	   print FILE "\\input{$language_file_name.sty}\n";
-        }
+	
+	my $abs_filename = $compile_file;
+	$abs_filename =~ s/\..*?$//;
+    if (-e "$abs_filename.sty") {
+	   print FILE "\\input{$abs_filename.sty}\n";
+    }
 	print FILE join("\n",@newcommands)."\n";
 
 	print FILE "\n\n\\begin{document}\n";
