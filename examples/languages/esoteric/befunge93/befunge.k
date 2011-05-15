@@ -413,7 +413,7 @@ The following is a ``Hello world!'' program written in Befunge-93.
 		andBool X:Int <Int 80
 		andBool Y:Int <Int 25
 		[structural]
-	rule printProgram-aux(80, Y:Int, M:Map) => "\n" +String printProgram-aux(0, Y:Int +Int 1, M:Map)
+	rule printProgram-aux(80, Y:Int, M:Map) => charString(10) +String printProgram-aux(0, Y:Int +Int 1, M:Map)
 		[structural]
 	rule printProgram-aux(0, 25, M:Map) 
 		=> ""
