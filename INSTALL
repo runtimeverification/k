@@ -154,8 +154,10 @@ Executing
     $ make latex
 
 in one of the examples directories, e.g., 
-  examples/languages/educational/simple/untyped
-should produce a file `simple-untyped.tex`  containing the latex code 
+
+    examples/languages/educational/simple/untyped
+
+should produce a file `simple-untyped.tex` containing the LaTeX code 
 corresponding to the definition.
 
 Assuming a sufficiently recent distribution of LaTeX with all the packages
