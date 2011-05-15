@@ -1,4 +1,4 @@
-load ../../../../core/maude/lib/k-prelude
+
 mod THUE is
 	including K .
 	including PL-BUILTINS .
