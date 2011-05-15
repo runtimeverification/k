@@ -1,6 +1,6 @@
 
-load ../../../../modules/k-visitor
-load ../../../../modules/substitution
+in /modules/k-visitor
+in /modules/substitution
 
 kmod SIMPLY-SUBTYPED-SYNTAX is including PL-ID + PL-INT + K
   /*@ \section*{Syntax}

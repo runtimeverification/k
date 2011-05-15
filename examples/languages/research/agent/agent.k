@@ -1,32 +1,32 @@
 
 
-load ../../../modules/exp
-load ../../../modules/if
-load ../../../modules/k-visitor
-load ../../../modules/substitution
-load ../../../modules/lambda
-load ../../../modules/mu
-load ../../../modules/callcc
-load ../../../modules/halt
-load ../../../modules/seq
-load ../../../modules/io
-load ../../../modules/ref
-load ../../../modules/while
-load ../../../modules/threads
-load ../../../modules/agents
-load ../../../modules/quote-unquote
+load /modules/exp
+load /modules/if
+load /modules/k-visitor
+load /modules/substitution
+load /modules/lambda
+load /modules/mu
+load /modules/callcc
+load /modules/halt
+load /modules/seq
+load /modules/io
+load /modules/ref
+load /modules/while
+load /modules/threads
+load /modules/agents
+load /modules/quote-unquote
 
-load ../../../tests/issues/ids
-load ../../../tests/issues/exp/programs
-load ../../../tests/issues/lambda/programs
-load ../../../tests/issues/mu/programs
-load ../../../tests/issues/callcc/programs
-load ../../../tests/issues/halt/programs
-load ../../../tests/issues/io/programs
-load ../../../tests/issues/imp/programs
-load ../../../tests/issues/threads/programs
-load ../../../tests/issues/agents/programs
-load ../../../tests/issues/quote-unquote/programs
+load ../../../../tests/regression/ids
+load ../../../../tests/regression/exp/programs
+load ../../../../tests/regression/lambda/programs
+load ../../../../tests/regression/mu/programs
+load ../../../../tests/regression/callcc/programs
+load ../../../../tests/regression/halt/programs
+load ../../../../tests/regression/io/programs
+load ../../../../tests/regression/imp/programs
+load ../../../../tests/regression/threads/programs
+load ../../../../tests/regression/agents/programs
+load ../../../../tests/regression/quote-unquote/programs
 
 kmod AGENT is 
   including EXP 

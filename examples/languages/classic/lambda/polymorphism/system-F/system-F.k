@@ -1,6 +1,6 @@
 
-load ../../../../modules/k-visitor
-load ../../../../modules/substitution
+in /modules/k-visitor
+in /modules/substitution
 
 kmod SYSTEM-F-SYNTAX is including PL-ID + K-LATEX
   /*@ \section*{Syntax}
