@@ -21,6 +21,7 @@ The K Framework tool depends on the following software:
     * XML::DOM
     * XML::LibXML::Reader
     * Tree::Nary
+    * Text::Diff
 * *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
   packages, the following (texlive) packages are needed: bera, datetime, ec,
   fancybox, fancyvrb, import, marginnote, microtype, ms, pdfcomment, pgf,
@@ -68,7 +69,7 @@ and other packages needed to build and compile software:
 
 Next, install some of the K Framework's Perl dependencies:
 
-    # apt-get install libregexp-common-perl libxml-libxml-perl libxml-dom-perl
+    # apt-get install libregexp-common-perl libxml-libxml-perl libxml-dom-perl libtext-diff-perl
 
 Unfortunately, Debian does not include a package for the Tree::Nary Perl
 module, so it must be installed manually:
@@ -92,7 +93,7 @@ Use your distribution's package manager to install GNU Make and Perl.
 On most distributions, the following command will install all the needed
 Perl dependencies:
 
-    # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary
+    # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary Text::Diff
 
 Once GNU Make, Perl, and the Perl modules are installed, jump to the
 section on downloading K.
