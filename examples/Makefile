@@ -5,9 +5,6 @@ TEST_DIRS = algorithms/sort \
 	    algorithms/sudoku/2-with-counters \
 	    algorithms/sudoku/3-with-decrement \
 	    algorithms/sudoku/4-with-squares \
-	    languages/classic/imp/fully-labeled \
-	    languages/classic/imp/fully-syntactic \
-	    languages/classic/imp/labeled-syntax \
 	    languages/classic/exp/untyped \
 	    languages/classic/exp/type-inference \
 	    languages/classic/lambda/simply-typed \
@@ -27,6 +24,9 @@ TEST_DIRS = algorithms/sort \
 	    languages/esoteric/Thue \
 	    languages/esoteric/bf \
 	    languages/esoteric/befunge93 \
+	    #languages/classic/imp/fully-labeled \
+	    #languages/classic/imp/fully-syntactic \
+	    #languages/classic/imp/labeled-syntax \
 	    #languages/classic/imp/no-syntax 
 
 .PHONY: all build test clean
