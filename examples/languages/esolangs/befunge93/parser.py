@@ -15,7 +15,7 @@ for line in s.splitlines():
 			c = '\\\\'
 		if c == '"':
 			c = '\\"'
-		print "\tcoord(inject(%(x)d)(.List{K}),, inject(%(y)d)(.List{K})) |-> inject(\"%(c)s\")(.List{K})" % {'x': x, 'y': y, 'c': c}
+		print "\t'coord`(_`,_`)(Int %(x)d(.List{K}),, Int %(y)d(.List{K})) |-> String \"%(c)s\"(.List{K})" % {'x': x, 'y': y, 'c': c}
 		#print x, y, c
 		x += 1
 	y += 1
