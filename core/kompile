@@ -29,7 +29,16 @@ my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");
 my $temp_file   = fresh("kompile_tmp", ".txt");
 my $maude_xml_file   = fresh("kompile_xml", ".xml");
-my $original = "";
+my $compile_file = "";
+my $compile_marker = "compile_";
+
+# this variable is set if the file which has to be compiled
+# starts with a new line
+# this is needed since k-prelude is included automatically
+# on the first line
+# $new_line is used because s/^/k-prelude\n/ puts k-prelude 
+# on the new line without increasing the line number
+my $new_line = 0;
 
 # here we trap control-c (and others) so we can clean up when that happens
 $SIG{'INT'} = 'interruptHandler'; # handle control-c 
@@ -56,12 +65,69 @@ sub finalCleanup {
 	# clean(); # delete normal kompile files
 	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
 #	clean() if !$verbose;
-	unlink(" $original.k");
-	unlink(" $original.maude");
+	compilation_cleanup();
+	unlink("cfg_temp.tmp");
+	unlink("xml-parser.pl");
 	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
 }
 
+sub compilation_cleanup
+{
+	# first, adjust metadata names and locations
+	# remove extension
+	$compile_file =~ s/\..*?$//;
 
+	if (-e "$compile_marker$compile_file.maude")
+	{
+		my $main_content = get_file_content("$compile_marker$compile_file.maude");
+
+		# delete marker from everywhere
+		$main_content =~ s/($compile_marker)//sg;
+
+		# decrease with 1 line numbers if k-prelude introduce a new line
+		if (!$new_line)
+		{
+			$main_content =~ s/(location\()(.*?:)(.*?)(\))/
+			{
+				my ($loc, $fname, $no, $rpar)= ($1, $2, $3, $4);
+				local $_ = $no;
+				s!([0-9]+)!{$1-1;}!sge;
+				# print "$loc with:$_\n";
+				"$loc$fname$_$rpar";
+			}/gsme;
+		}
+
+		# save
+		open FILE,">","$compile_marker$compile_file.maude" or die "Cannot open $compile_marker$compile_file.maude\n";
+		print FILE $main_content;
+		close FILE;
+	}
+
+	# second: delete $compile_marker$compile_file.k
+	unlink("$compile_marker$compile_file.k");
+
+	# third: rename all files from cwd which start with $compile_marker 
+	my $directory = cwd;
+	opendir(DIR, $directory);
+	my @all_files = readdir(DIR);
+	for(@all_files)
+	{
+		if (/($compile_marker)(.*)/sg)
+		{
+			# check if the file is a maude file
+			if (!(-e $2))
+			{
+				# if not, rename it
+             	move($_, $2);
+			}
+			else
+			{
+				# if yes, then delete the temporary file
+				unlink($_);
+			}
+		}
+	}
+}
 
 check_software();
 
@@ -340,6 +406,7 @@ my $k_tools_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maude
 my $k_base =  File::Spec->catfile((File::Basename::fileparse($0))[1], "..");
 my $k_all_tools = File::Spec->catfile($k_tools_dir,"all-tools");
 my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
+my $k_latex_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'latex');
 my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 
 my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
@@ -416,7 +483,6 @@ my $topmatter = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
-my $prelude_detected = 0;
 
 # latex, pdf, eps, ps, png, crop
 my $pdf = 0;
@@ -607,6 +673,7 @@ foreach (@ARGV) {
 	$language_file_name = $_;
     }
 }
+
 # if I want to compile only a program
 compile_program() if $compileProgram;
 
@@ -731,13 +798,33 @@ if ($crop == 1 && !@crop_modules) {
 	$language_module_name =~ s/\.K$|\.KMAUDE$|\.MAUDE$|\.M$//;
     }
 
+
+# store the compile_file name
+$compile_file = getFullName($language_file_name);
+copy($compile_file, "$compile_marker$compile_file");
+$language_file_name = "$compile_marker$compile_file";
+
+# add k-prelude automatically to $language_file_name
+my $content = get_file_content($language_file_name);
+my $abs_kprelude = File::Spec->rel2abs($k_prelude);
+# set $new_line if $content starts with newline
+$new_line = 1 if $content =~ /^\s*?\n/sg;
+$content =~ s!^\s*(in|load|require)\s+\/modules\/!$1 $k_base\/modules\/!sgm;
+$content =~ s/^/in $abs_kprelude\n/sg;
+	# save
+	$content =~ s/^\s//sgm;
+	open FILE,">",$language_file_name or die "Cannot open $language_file_name\n";
+	print FILE $content;
+	close FILE;
+
+
+
 # Check the file for syntax errors
     setVerbose() if $verbose;
-    #syntax_common_check($language_file_name);
     
 # build inclusion trees
-    appendFileInTree("$language_file_name", "");
-    recurseIntoFiles($language_file_name);
+appendFileInTree("$language_file_name", "");
+recurseIntoFiles($language_file_name);
 
 # flatten and maudify
 if ($flat && $maudify_only)
@@ -760,64 +847,12 @@ if (!$compile_only) {
 # Maudify the .k|.kmaude files reachable from file "$language_file_name"
     print_header("Maudifying $language_file_name") if $verbose;
 
-# trick: keep original main file into another file in order to include k-prelude
-	my $full_name = getFullName($language_file_name);
-	copy($full_name, " $full_name");
-	my $newline = 0;
-
-    # detect if k-prelude has been included by user
-	detect_prelude($language_file_name);
-
-#	print "PRELUDE: $prelude_detected\n";
-
-	# include k-prelude automatically if it is not already there...
-	if (!$prelude_detected)
-	{
-		my $mfile = " $full_name";
-		my $main_file = get_file_content($mfile);
-		my $kprelude = File::Spec->rel2abs($k_prelude);
-		$newline = 1 if $main_file =~ /^\s*\n/g;		
-#		print "NEWLINE: $newline\n";
-		$main_file =~ s/^/load $kprelude\n/sg;
-		# $main_file = "load $kprelude\n" . $main_file;
-		$main_file =~ s/^\s//sgm;			
-
-		open FILE,">",$mfile or die "Cannot open $mfile\n";
-		print FILE $main_file;
-		close FILE;
-	}
-
     # maudify
-    maudify_file(" $full_name","");
+    maudify_file("$language_file_name","");
 #    print "Maudification: $language_file_name\n\n";
     
 	# Check incompatible sorts
-	check_incompatible(" $full_name", $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
-
-	$language_file_name =~ s/(\.k|\.kmaude)$//;
-
-	# change locations
-	$full_name =~ s/\.k(maude)?//sg; 	$full_name =~ s/\.m(aude)?//sg;
-	$original = $full_name;
-	my $main_content = get_file_content(" $full_name.maude");
-	$main_content =~ s/^\s//sgm;
-        $main_content =~ s/^\s*in\s+\/modules\//in $k_base\/modules\//sgm;
-	
-	if (!$newline)
-	{
-		$main_content =~ s/(location\()(.*?:)(.*?)(\))/
-		{
-			my ($loc, $fname, $no, $rpar)= ($1, $2, $3, $4);
-			local $_ = $no;
-			s!([0-9]+)!{$1-1;}!sge;
-			# print "$loc with:$_\n";
-			"$loc$fname$_$rpar";
-		}/gsme;
-	}
-
-	open FILE,">","$language_file_name.maude" or die "Cannot open $language_file_name.maude\n";
-	print FILE $main_content;
-	close FILE;
+	check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png));
 
     if ($klabels ne "")
     {
@@ -854,18 +889,17 @@ if (!$compile_only) {
 				}
 			}
 		}
-	}
-
+}
+    
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
     print "Sorts:\n------\n@all_sorts\n\n" if $verbose;
     print "Tokens:\n-------\n@all_tokens\n" if $verbose;
-    
+    $language_file_name =~ s/(\.k|\.kmaude)$//;
     print "\n" if $verbose;
 
     print_header("New commands that will be added to the generated latex file") if $verbose && ($latex || $pdf || $crop || $ps || $eps || $png);
     print join("\n",@newcommands)."\n" if $verbose && ($latex || $pdf || $crop || $ps || $eps || $png);
-
 }
 
 # Following is executed whenever the option -m was not selected
@@ -972,8 +1006,7 @@ sub latexify {
 	print FILE "\\documentclass{article}\n" if !$draft;
 	print FILE "\\documentclass[draft]{article}\n" if $draft;
 	print FILE "\\usepackage{import}\n";
-        my $latex_tools_dir =  File::Spec->catfile($k_tools_dir, '..','..','latex');
-	print FILE "\\import{$latex_tools_dir/}{k2latex.$style.sty}\n";
+	print FILE "\\import{$k_latex_dir/}{k2latex.$style.sty}\n";
         if (-e "$language_file_name.sty") {
 	   print FILE "\\input{$language_file_name.sty}\n";
         }
@@ -1000,7 +1033,7 @@ sub latexify {
 	close FILE;
 	
 	# call the post-processor for latex
-	my $postprocessor = File::Spec->catfile($k_tools_dir, '..','..', "postprocess_texcmds.pl");
+	my $postprocessor = File::Spec->catfile((File::Basename::fileparse($0))[1], 'postprocess_texcmds.pl');
 	my $stat = system("perl $postprocessor $output_file_name thistemp");
 	if (($stat >>= 8) != 0)
 	{
@@ -1508,9 +1541,7 @@ sub maudify_file {
 		}
 		elsif (m!^(?:in|load)\s+(\S+)!) 
 		{
-			my $imported = $1;
-			$prelude_detected = 1 if $imported =~ /k\-prelude/sg;
-			maudify_file(File::Spec->catfile((fileparse($file))[1],$imported),$indent);
+			maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
 			s!\.k(maude)?\s*$!\.maude!s;
 		}
 		elsif (m!^(?:require)\s+(\S+)!) 
@@ -1518,9 +1549,7 @@ sub maudify_file {
 			# print "File $file require: $1\n";
 			if (required($file, $1))
 			{
-				my $imported = $1;
-				$prelude_detected = 1 if $imported =~ /k\-prelude/sg;
-				maudify_file(File::Spec->catfile((fileparse($file))[1],$imported),$indent);
+				maudify_file(File::Spec->catfile((fileparse($file))[1],$1),$indent);
 				s!\.k(maude)?\s*$!\.maude!s;
 				s!require!in!;
 			}
@@ -1629,8 +1658,7 @@ sub maudify_module {
      # freeze all strings before spacifying
      s/(?=[^'])""/Freeze($&,"STRINGS")/sge;
      s/(?=[^'])("[^"]*?[^']")/Freeze($&,"STRINGS")/sge;
-	     
-
+     
      # freeze KLabels before spacifying
      my $klabelss = $decl;
      $klabelss =~ s/\s+$//s;
@@ -2537,29 +2565,4 @@ sub check_software
 	}
 
 #	exit(0);
-}
-
-sub detect_prelude
-{
-	my $file = getFullNameCustom(shift);
-
-	if ($file ne "") # ignore anything which cannot be opened
-	{
-		my $cnt = get_file_content($file);
-	
-
-		while ($cnt =~ /^\s*(in|load|require)\s+(\S+)/gsm)
-		{
-			my $imported = $2;
-			if ($imported =~ m!k\-prelude!sg)
-			{
-				$prelude_detected = 1;
-				last;
-			}
-			else
-			{
-				detect_prelude(File::Spec->catfile((fileparse($file))[1],$imported));
-			}
-		}
-	}
 }
