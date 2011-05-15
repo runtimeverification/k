@@ -5,30 +5,30 @@ TEST_DIRS = algorithms/sort \
 	    algorithms/sudoku/2-with-counters \
 	    algorithms/sudoku/3-with-decrement \
 	    algorithms/sudoku/4-with-squares \
-	    languages/agent \
-	    languages/challenge \
-	    languages/kernelC \
-	    languages/paradigmatic/imp/fully-labeled \
-	    languages/paradigmatic/imp/fully-syntactic \
-	    languages/paradigmatic/imp/labeled-syntax \
-	    languages/paradigmatic/exp/untyped \
-	    languages/paradigmatic/exp/type-inference \
-	    languages/paradigmatic/simply-typed \
-	    languages/paradigmatic/simply-subtyped \
-	    languages/paradigmatic/pcf/untyped \
-	    languages/paradigmatic/system-F \
-	    languages/educational/imppp \
-	    languages/educational/simple/untyped \
-	    languages/educational/simple/typed/dynamic \
-	    languages/educational/simple/typed/static \
-	    languages/educational/skool/typed/dynamic \
-	    languages/educational/skool/typed/static \
-	    languages/educational/skool/untyped \
-	    languages/educational/fun/untyped \
-	    languages/esolangs/Thue \
-	    languages/esolangs/bf \
-	    languages/esolangs/befunge93 \
-	    #languages/paradigmatic/imp/no-syntax 
+	    languages/classic/imp/fully-labeled \
+	    languages/classic/imp/fully-syntactic \
+	    languages/classic/imp/labeled-syntax \
+	    languages/classic/exp/untyped \
+	    languages/classic/exp/type-inference \
+	    languages/classic/lambda/simply-typed \
+	    languages/classic/lambda/polymorphism/simply-subtyped \
+	    languages/classic/pcf/untyped \
+	    languages/classic/lambda/polymorphism/system-F \
+	    languages/research/imppp \
+	    languages/research/simple/untyped \
+	    languages/research/simple/typed/dynamic \
+	    languages/research/simple/typed/static \
+	    languages/research/skool/typed/dynamic \
+	    languages/research/skool/typed/static \
+	    languages/research/skool/untyped \
+	    languages/research/fun/untyped \
+	    languages/research/agent \
+	    languages/research/challenge \
+	    languages/research/kernelC \
+	    languages/esotheric/Thue \
+	    languages/esotheric/bf \
+	    languages/esotheric/befunge93 \
+	    #languages/classic/imp/no-syntax 
 
 .PHONY: all build test clean
 
