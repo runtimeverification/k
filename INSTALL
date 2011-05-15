@@ -30,7 +30,7 @@ The K Framework tool depends on the following software:
 
 ## Install Maude
 
-First, obtain Maude from <http://maude.cs.uiuc.edu/download>. Perform any
+First, obtain Core Maude from <http://maude.cs.uiuc.edu/download>. Perform any
 installation instructions included with Maude. Then,
 
 * add the `maude` directory to your system's `PATH`,
