@@ -894,10 +894,10 @@ sub recurseFlat
 	local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
 	$out = "\n--------- File: $file -----------------\n\n";
-	while (s/^(\s*)($top_level_pattern)(\s*)//sm) 
+	while ( s/^(\s*)($top_level_pattern)(\s*)//sm ) 
 	{
 		(my $before, local $_, my $after) = ($1,$2,$3);
-		if (m!^(?:in|load)\s+(\S+)!) 
+		if ( m!^(?:in|load)\s+(\S+)! ) 
 		{
 			#~ do nothing;
 			my $line = $_;
@@ -916,38 +916,35 @@ sub recurseFlat
 	$flatten .= $out;
 }
 
-# determine whether a file can include other files
-sub required()
-{
-#    printTree();
-    my ($p, $c) = (shift, shift);
-#    print "P: $p C: $c\n";
+###################
+# require stuff   #
+###################
 
-    $p =~ s/^\.\///;
-    
-    $p = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
-	$Tree::Nary::TRAVERSE_ALL, getFullName($p));
-    
-    if (defined $p->{data})
-    {
-	while ($p->{data} =~ m/(\.\.\/)/g)
-	{
-	    $c = $1 . $c;
-	}
-    }
-#    my $c = File::Spec->catfile((fileparse($file))[1], $c);
-#    print "Child: $c\n";
-    my $n = Tree::Nary->find_child($p, $Tree::Nary::TRAVERSE_ALL, getFullName($c));
-#    print "\n NODE: " . $n->{data} . "\n\n";
-    
-    if (!$n)
-    {
-	return 0;
-    }
-#    print "Found! " . $p->{data} . " parent for " . getFullName($c) . "\n\n\n";
-    return 1;
+my @imports = ();
+
+sub store_import
+{
+	push(@imports, shift);
 }
 
+# determine whether a file can include other files
+sub required
+{
+	my $req_file = shift;
+	
+	$req_file = basename($req_file);
+
+	foreach(@imports)
+	{
+		return 0 if (/\Q$req_file\E/);
+	}
+
+	return 1;
+}
+
+#####################
+# end require       #
+#####################
 
 # builds a configuration tree without considering ? or * or + in cells
 sub build_config_tree
