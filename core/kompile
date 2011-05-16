@@ -65,7 +65,7 @@ sub finalCleanup {
 	# clean(); # delete normal kompile files
 	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
 #	clean() if !$verbose;
-	compilation_cleanup();
+ #  compilation_cleanup();
 	unlink("cfg_temp.tmp");
 	unlink("xml-parser.pl");
 	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
