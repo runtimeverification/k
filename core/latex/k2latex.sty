@@ -289,15 +289,19 @@
 % Syntax rules.
 \newlength{\syntaxlength}  % The amount of indention for continued rules.
 
-\newcommand{\syntax}[3]{\par%
+\newcommand{\syntax}[3]{\par\indent%
+\hbox{%
 \mbox{\scshape syntax}\hspace{1em}$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+}\k@markPosition%
 }
-\newcommand{\syntaxCont}[3]{\par%
+\newcommand{\syntaxCont}[3]{\par\indent%
+\hbox{%
   $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
   \setlength{\syntaxlength}{.5\syntaxlength}%
   \addtolength{\syntaxlength}{\widthof{\mbox{\scshape syntax}\hspace{1em}$#1$}}%
   \hspace{\syntaxlength}%
   \;\;\!\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+  }\k@markPosition%
 }
 
 % Non-terminals.
@@ -343,7 +347,7 @@
 \newcommand{\kconfig}[1]{\par%
   {\sc configuration:}%
   \begin{quote}
-  \par\hbox{\ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}}%
+    \par\indent\hbox{\ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}}%
   \end{quote}
   \k@markPosition%
 }
