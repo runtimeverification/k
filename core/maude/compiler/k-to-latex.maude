@@ -954,7 +954,45 @@ mod LATEX-PRINT-META is
   eq \variable{'`[HOLE`]}{QIL} = \variable{'\ensuremath`{\square`}}{QIL} .
   eq \variable{'?}{QIL} = \variable{'AnyVar}{QIL} .
   eq \variable{'AnyVar}{QIL} = '\AnyVar '`{ printSortQid(QIL) '`} .
-  eq printVariable("Rho") = printVariable("\\ensuremath{\\rho}") .
+  
+
+  op isGreek : String -> Bool .
+  eq isGreek("Alpha") = true . 
+  eq isGreek("Beta") = true .
+  eq isGreek("Gamma") = true .
+  eq isGreek("Delta") = true .
+  eq isGreek("Epsilon") = true .
+  eq isGreek("VarEpsilon") = true .
+  eq isGreek("Chi") = true .
+  eq isGreek("Zeta") = true .
+  eq isGreek("Eta") = true .
+  eq isGreek("Theta") = true .
+  eq isGreek("VarTheta") = true .
+  eq isGreek("Iota") = true .
+  eq isGreek("Kappa") = true .
+  eq isGreek("Lambda") = true .
+  eq isGreek("Mu") = true .
+  eq isGreek("Nu") = true .
+  eq isGreek("Xi") = true .
+  eq isGreek("Pi") = true .
+  eq isGreek("VarPi") = true .
+  eq isGreek("Rho") = true .
+  eq isGreek("VarRho") = true .
+  eq isGreek("Sigma") = true .
+  eq isGreek("VarSigma") = true .
+  eq isGreek("Tau") = true .
+  eq isGreek("Upsilon") = true .
+  eq isGreek("Phi") = true .
+  eq isGreek("VarPhi") = true .
+  eq isGreek("Chi") = true .
+  eq isGreek("Psi") = true .
+  eq isGreek("Omega") = true .
+  eq isGreek(St) = false [owise] .
+
+  op \greek{_} : String -> String .
+  eq \greek{St} = "\\displayGreek{\\" + smallCaps(St) + "}" .
+
+ ceq printVariable(St) = printVariable(\greek{St}) if isGreek(St) .
   eq printVariable("Sigma") = printVariable("\\ensuremath{\\sigma}") .
 ---  eq \constant{'.empty} = '\kdot .
 ---  eq \constant{'.K} = '\kdot .
