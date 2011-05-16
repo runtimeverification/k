@@ -65,7 +65,7 @@ sub finalCleanup {
 	# clean(); # delete normal kompile files
 	# Andrei, maybe you can put some logic here that keeps the files if a user specifies to keep them
 #	clean() if !$verbose;
-  compilation_cleanup();
+	compilation_cleanup();
 	unlink("cfg_temp.tmp");
 	unlink("xml-parser.pl");
 	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
@@ -123,7 +123,7 @@ sub compilation_cleanup
 			else
 			{
 				# if yes, then delete the temporary file
- #  			unlink($_);
+				# unlink($_);
 			}
 		}
 	}
@@ -424,6 +424,10 @@ my $comment = join("|", (
 		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
 		"\\*\\*\\*.*?\$"
 ));
+
+# my $string_pattern = quotemeta("(?<![^\\]\\)\".*?(?<![^\\]\\)\"");
+my $string_pattern = "\(?<![^\\\\]\\\\\)\".*?\(?<![^\\\\]\\\\\)\"";
+my $string_pattern_contents = quotemeta("(?<![^\\]\\)(\")(.*?)(?<![^\\]\\)(\")");
 
 # Top level patterns
 my $top_level_pattern = join("|", (
@@ -1629,7 +1633,13 @@ sub maudify_module {
     s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
 
     # get KLabels
+	# freeze strings :D
+#	print "$_\n\n";
+    s/($string_pattern)/Freeze($&,"STRINGS")/sge;	
+#	print "$_\n\n";
     my $decl = getKLabelDeclarations($_);
+	# unfreeze strings
+	$_ = Unfreeze("STRINGS", $_);
 
 # Step: Add to @all_sorts all sorts defined a la Maude, with "sort(s)"
     add_sorts($_);
@@ -1642,9 +1652,8 @@ sub maudify_module {
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
 	# freeze strings and attributes
-	s/".*?"/Freeze($&, "MYSTRINGS")/sge;
+   	s/($string_pattern)/Freeze($&,"MYSTRINGS")/sge;
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
-
     s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
 
 	# unfreeze attributes if any
@@ -1660,12 +1669,12 @@ sub maudify_module {
     s/\sops?\s(.*?):/Freeze($&,"OPS")/gse;
     s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
     s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
-#    print  "Stage:\n$_\n\n";
     $_ = Unfreeze("OPS", $_);
+#    print  "Stage:\n$_\n\n";
     
 # Step: Declare cell labels as operations
     $_ = add_cell_label_ops($_);
-    # print  "Stage:\n$_\n\n";
+#    print  "Stage:\n$_\n\n";
     
 # Step: Add the module's newly defined tokens to @tokens
     add_tokens($_);
@@ -1673,22 +1682,9 @@ sub maudify_module {
     
 # Step: Add missing spaces around tokens
      # freeze all strings before spacifying
-     s/(?=[^'])""/Freeze($&,"STRINGS")/sge;
-     s/(?=[^'])("[^"]*?[^']")/Freeze($&,"STRINGS")/sge;
-     
-     # freeze KLabels before spacifying
-     my $klabelss = $decl;
-     $klabelss =~ s/\s+$//s;
-     my @kls = split(/\s+/, $klabelss);
-     foreach my $kl (@kls)
-     {
-         s/(\Q$kl\E)/Freeze($kl, "KLABELS")/sge;
-     }
-
-     $_ = spacify($_);
-     $_ = Unfreeze("STRINGS", $_);
-     $_ = Unfreeze("KLABELS", $_);
-# print  "Stage:\n$_\n\n";
+	s/($string_pattern)/Freeze($&,"STRINGS")/sge;	
+	$_ = spacify($_);
+	$_ = Unfreeze("STRINGS", $_);
     
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
@@ -1700,10 +1696,10 @@ sub maudify_module {
     
 # Step: Change K attributes to Maude metadata
 	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
-	s/".*?"/Freeze($&, "MPGF")/gse;
+   	s/($string_pattern)/Freeze($&,"MPGF")/sge;
 	
     s!(\[(?:\\.|[^\]])*\])!make_metadata($1)!gse;
-#	s!(\[.*?\])!make_metadata($1)!gse;
+	#	s!(\[.*?\])!make_metadata($1)!gse;
 
 	$_ = Unfreeze("NAMES", $_);
 	$_ = Unfreeze("MPGF", $_);
@@ -1818,7 +1814,7 @@ sub make_ops {
 
 		# freeze strings before extracting the attributes because these can contain
 		# some [] which will cause a wrong extraction
-		$production =~ s/(?<=").*?(?=")/Freeze($&, "MYS")/gse;
+		$production =~ s/($string_pattern)/Freeze($&,"MYS")/sge;	
 		$production =~ s/(\[[^\[\]]*\]\s*)$/
 						{
 							if (op_attribute($1)) {
@@ -1894,7 +1890,9 @@ sub make_ops {
 		    $attributes =~ s/^\[/[latex "$latex_text" /;
 		}
 
-# Add metadata location for each op 
+# Add metadata location for each op
+# print "Add metadata to: $attributes\n\n";
+ 
 	# if there are already some attributes then add metadata if other metadata is there
 	$attributes =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 location($file:$absolute_line)\" / if ($attributes ne "" && $attributes =~ /metadata/);
 	# if there are already some attributes then add metadata if not already
@@ -1905,6 +1903,7 @@ sub make_ops {
 	# unfreeze here what was frozen in $production
 	$attributes = Unfreeze("MYS", $attributes);
 	
+# print "2Add metadata to: $attributes\n\n";
 
 # Generate the Maude replacement of the K syntactic construct
 		my $random = fresh("a", "b");
@@ -1994,9 +1993,12 @@ sub make_metadata {
 	# unfreeze ...
 	$_ = Unfreeze("MPGF", $_);
 
+	# freeze locations
+#	s/location\(.*?\)/Freeze($&, "LOCATIONS")/sge;
 	
 	# this freezes the all string, including those inside latex declarations
-	s/"(.*?)"/Freeze($&, "MTR")/gse;
+   	s/($string_pattern)/Freeze($&,"MTR")/sge;
+
 #	print "=========\nIN: $_\n=============\n";
 
 
@@ -2036,22 +2038,26 @@ sub make_metadata {
 	
 #    print "K attributes: @k_attributes\n==============\n\n";
 
-    if (@k_attributes) {
+    if (@k_attributes) 
+	{
 #	print "->@k_attributes<-\n";
-	
-# ugly hack for multiple occurences of ditto => eliminate duplicates from @k_attributes
-#        my %hash = map { $_, 1 } @k_attributes;
-#	my @unique_attr = keys %hash;
-#	s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@unique_attr\"\]"!se;
-#	print "Keep: @unique_attr\nOut: $_\n";
 
-#       original version
-	s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@k_attributes\"\]"!se;
-#	print "$_\n";
+# print "META: $_\n";
+		if (/(metadata\s+)($string_pattern)/sg)
+		{
+			s!(metadata\s+)(\")(.*?)(\")!"$1$2$3 @k_attributes$4"!se;
+		}
+		else
+		{
+			s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@k_attributes\"\]"!se;
+		}
+	#	print "$_\n";
     }
     elsif ($have_k_attributes) {
         s/^\s*\[\s*\]\s*$//gs;
     }
+
+#	print "OUT: $_\n\n";
    return $_;
 }
 
