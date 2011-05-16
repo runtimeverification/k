@@ -1,5 +1,5 @@
 in haskell-syntax.k
-in ../../../modules/k-visitor.k
+in /modules/k-visitor.k
 
 kmod ISSUE152 is including HASKELL-SYNTAX + K + K-VISITOR 
 
