@@ -14,8 +14,8 @@ The K Framework tool depends on the following software:
 
 * *[Maude](http://maude.cs.uiuc.edu)* The K Framework uses the Maude rewrite
   system as a backend for execution, exploring executions, and model checking.
-* *GNU Make* Our example K definitions use GNU Makefiles for compilation.
-* *Perl* Our compilation scripts are written in Perl. In addition, the K
+* *GNU Make* The example K definitions use GNU Makefiles for compilation.
+* *Perl* The compilation scripts are written in Perl. In addition, the K
   framework depends on the following Perl modules:
     * Regexp::Common
     * XML::DOM
@@ -57,7 +57,7 @@ without any additional *Warning* or *Error* messages.
 
 ## Install GNU Make and Perl Dependencies
 
-This step varies from distribution to distribution. Here we give
+This step varies from distribution to distribution. Here are
 distro-specific instructions for a couple of popular distributions.
 
 ### Debian/Ubuntu
@@ -94,6 +94,8 @@ On most distributions, the following command will install all the needed
 Perl dependencies:
 
     # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary Text::Diff
+	
+Sometimes this needs to be done as root.
 
 Once GNU Make, Perl, and the Perl modules are installed, jump to the
 section on downloading K.
@@ -125,7 +127,7 @@ your current directory.
 ## Install the K Framework
 
 To complete the installation of the K Framework, set the `K_BASE` environment 
-variable to the absolute path of the `k-framework` deirectory;  
+variable to the absolute path of the `k-framework` directory;  
 you might also want to add `k-framework/core` and `k-framework/tools` 
 directories to your system's `PATH` variable if you plan on calling kompile 
 directly (without using the `make` tool).
@@ -139,7 +141,7 @@ the k-framework directory):
     $ export K_BASE=<somedir>/k-framework
 
 To make this change persistent across logins/shells, you will need to add
-the command to a file like `~/.profile`.
+the command to a file like `~/.profile` or `~/.bashrc`.
 
 ## Test your installation
 
@@ -180,4 +182,5 @@ developing and testing them.
 # Problems / Questions
 
 If you experience any problems installing K, please do not hesitate to contact
-us at <k-user@cs.uiuc.edu>.
+the development team at <k-user@cs.uiuc.edu>.  Also, please let us know about 
+installation steps you had to perform that we did not mention.

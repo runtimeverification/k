@@ -1,3 +1,5 @@
+For installation instructions, please see the INSTALL file.
+
 The languages defined so far using the K framework can be found in the examples directory. For example, the directory examples/simple contains 2 directories, untyped containing the definition of the untyped version of the language, and typed which in turn contains three directories with definitions: static , for the static semantics, i.e., the type checker, dynamic , for the dynamically typed version of simple, and dynamic-typed-locations which is a variant of dynamic , in which the type information is maintained in the environment.
 
 Please update regularly using `svn up' from the base directory to benefit of the latest fixes and features.
