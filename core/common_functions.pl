@@ -932,7 +932,7 @@ sub required
 {
 	my $req_file = shift;
 	
-	$req_file = basename($req_file);
+	# $req_file = basename($req_file);
 
 	foreach(@imports)
 	{
