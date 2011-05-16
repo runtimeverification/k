@@ -1565,10 +1565,11 @@ sub maudify_file {
 		{
 			# print "File $file require: $1\n";
 			my $import = $1;
-			if (required($file, $import))
+			if (required($import))
 			{
 				maudify($import, $indent, $file);
 				s!\.k(maude)?\s*$!\.maude!s;
+				s!require!in!sg;
 			}
 			else
 			{
@@ -2594,6 +2595,9 @@ sub maudify
 		$m_import =~ s!^\/!!sg;
 #		print "IMPORT: |$import|\n";
 #		print "M_IMPORT: |$m_import|\n";
+
+		# store imported module
+		store_import($import);
 
 		# solve local files
 		if (-e File::Spec->catfile((fileparse($file))[1], $import))
