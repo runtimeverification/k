@@ -680,7 +680,6 @@
 \newcommand{\when}[1]{%
   \hspace{2em} when \ensuremath{#1}%
   \k@markPosition%
-  \bigskip%
 }
 
 %%% Context
@@ -689,11 +688,13 @@
 \newcommand{\kcontext}[2]{\par%
   \text{\scshape context:} $#2$%
   \k@markPosition%
+  \bigskip%
 }
 % Conditional context.
 \newcommand{\kccontext}[3]{\par%
   \text{\scshape context:} $#2$ %
   \when{#3}%
+  \bigskip%
 }
 
 %%% Equations and structural rules.
@@ -713,12 +714,14 @@
   \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   \when{#3}
   \k@markPosition%
+  \bigskip%
 }
 \newcommand{\mequation}[3]{%
   \par\indent\hbox{%
     \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
   }%
   \k@markPosition%
+  \bigskip%
 }
 \newcommand{\cmequation}[4]{%
   \par\indent\hbox{%
@@ -726,6 +729,7 @@
     \when{#4}%
   }%
   \k@markPosition%
+  \bigskip%
 }
 
 %%% Rules.
@@ -743,6 +747,7 @@
     \when{#3}%
   }%
   \k@markPosition%
+  \bigskip%
 }
 \newcommand{\kndrule}[2]{\par%
   \k@ruleLabel{#1}{non-det rule}%
@@ -763,6 +768,7 @@
     \when{#4}%
   }%
   \k@markPosition%
+  \bigskip%
 }
 
 
