@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, PatternGuards #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Main
@@ -12,24 +12,20 @@
 -- Compile a program into its K Core representation.
 --
 -- TODO:
---   * Use kompile.pl's program compilation instead of kcompile-program.sh.
 --   * Support compilation of several programs at the same time.
---   * Reproduce the functionality of kcompile-program.sh directly in this
---     executable.
 --   * Print detailed help separately from usage message.
 -----------------------------------------------------------------------------
 
 module Main where
 
-import Control.Monad
-import Data.List hiding (sort)
-import Data.Maybe
+import Control.Concurrent
+import Data.List
 import Data.Char
 import System.Console.CmdArgs
-import System.Directory
+import System.Environment
 import System.Exit
-import System.FilePath
 import System.IO
+import System.IO.Error
 import System.Process
 import Text.Printf
 
@@ -41,61 +37,141 @@ data KCP = KCP
 
 kcpinit :: KCP
 kcpinit = KCP
-    { kcpTemplate = "kcp_template.k" &= typFile &= explicit &= name "t" &= name "template"
+    { kcpTemplate = "kcp_template.maude" &= typFile &= explicit &= name "t" &= name "template"
     , kcpLanguage = def &= typ "LANGUAGE" &= argPos 0
     , kcpInfile = def &= typFile &= argPos 1
     } &= help "Compile a program into its K Core representation."
-      &= summary "kcp v0.1.0"
+      &= summary "kcp v0.2.0"
+
+data KCPError = PgmNotFound
+              | UnexpectedEOF
+              | MaudeError
+    deriving (Eq, Show)
+
+errMsg :: KCPError -> String
+errMsg PgmNotFound = "Could not find 'pgm in the generated Maude module."
+errMsg UnexpectedEOF = "Got unexpected EOF trying to read Maude's output."
+errMsg MaudeError = "Maude reported a warning or an error."
 
 main :: IO ()
 main = do
     kcp <- cmdArgs kcpinit
+    kBase <- getKBase
+    let compileDir = kBase ++ "/core/maude/compiler/"
+    r <- kcompilePgm kcp compileDir
 
-    kmodf <- generateKModule kcp
-    (mmodf, cmodf) <- compileKModule kcp kmodf
-    mmod <- readFile cmodf
+    case r of
+        Right s -> do
+            putStrLn s
+            exitSuccess
+        Left (e, eout) -> do
+            errln $ "Fatal KCP error: " ++ errMsg e
+            if null eout
+                then errln "There are no Maude error messages to report."
+                else do
+                    errln "Maude errors:"
+                    mapM_ errln eout
+            exitFailure
 
-    case getCompiledPgm mmod of
-        Just pgm -> putStrLn pgm
-        Nothing -> do
-            hPutStrLn stderr "Error parsing the compiled maude file."
-            exitWith (ExitFailure 3)
+-- | Get the $K_BASE environment variable or exit if the variable is not found.
+getKBase :: IO String
+getKBase = catch (getEnv "K_BASE")
+    (\e -> if isDoesNotExistError e
+        then do
+            errln "Fatal: Please set the K_BASE environment variable."
+            exitFailure 
+        else ioError e)
 
-    removeFile kmodf
-    removeFile mmodf
-    removeFile cmodf
-
-generateKModule :: KCP -> IO FilePath
-generateKModule kcp = do
-    currDir <- getCurrentDirectory
-    (f, h) <- openTempFile currDir "pgm.k"
+-- | Run Maude to compile the input program.
+kcompilePgm :: KCP -> FilePath -> IO (Either (KCPError, [String]) String)
+kcompilePgm kcp compileDir = do
+    -- Read in the template file and input file. 
     template <- readFile (kcpTemplate kcp)
     pgm <- readFile (kcpInfile kcp)
-    let kmod = printf template pgm
-    hPutStrLn h kmod
-    hClose h
-    return f
+    
+    -- Combine the template and the program to form the program module that
+    -- will be compiled.
+    let pgmmod = printf template pgm
 
-compileKModule :: KCP -> FilePath -> IO (FilePath, FilePath)
-compileKModule kcp kmodf = do
-    let cmd = printf cmdfmt kmodf (map toUpper $ kcpLanguage kcp)
-    h <- runCommand cmd
-    waitForProcess h
-    exists <- doesFileExist cmodf
-    when (not exists) $ do
-        hPutStrLn stderr "Error running kcompile-program.sh; see generated outputs."
-        exitWith (ExitFailure 2)
-    return (mmodf, cmodf)
-    where cmdfmt = "kcompile-program.sh %s %s KCP pgm > /dev/null"
-          mmodf = replaceExtension kmodf ".maude"
-          cmodf = "pgm-compiled.maude"
+    -- Start Maude.
+    (ih, oh, eh, ph) <- runInteractiveProcess "maude" maudeArgs Nothing Nothing
+    hSetBinaryMode ih False
+    hSetBinaryMode oh False
 
-getCompiledPgm :: String -> Maybe String
-getCompiledPgm = liftM (dropWhile isSpace . snd)
-               . listToMaybe
-               . filter (isInfixOf "'pgm" . fst)
-               . mapMaybe parseEq
-               . lines
+    -- rmv will hold a Result
+    rmv <- newEmptyMVar
+
+    -- Start the stdout reader thread.
+    otid <- forkIO $ outputReader oh rmv
+
+    -- emv will hold any lines Maude prints to stderr.
+    emv <- newEmptyMVar
+
+    -- Start the stderr reader thread.
+    etid <- forkIO $ errorReader eh emv rmv
+
+    -- Write the commands that will compile the program to Maude's stdin.
+    let w s = hPutStrLn ih s
+    w pgmmod
+    w "set include PL-BOOL off ."
+    w "set include BOOL on ."
+    let loadc m = w $ "load " ++ compileDir ++  m
+    mapM_ loadc [ "prelude-extras"
+                , "meta-k"
+                , "printing"
+                , "compile-program-interface"
+                ]
+    w "loop compile-program ."
+    w $ printf "(compileProgram %s KCP pgm .)" (kcpLanguage kcp)
+    w "quit"
+    hFlush ih
+    hClose ih
+
+    -- Wait for the result.
+    r <- takeMVar rmv
+
+    -- Clean up.
+    hClose oh
+    hClose eh
+
+    -- Add Maude's stderr output to the Left component.
+    case r of
+        Right s -> return $ Right s
+        Left  e -> do
+            eout <- takeMVar emv
+            return $ Left (e, eout)
+
+-- Convenient type synonym used by the types of 'outputReader' and
+-- 'errorReader'.
+type Result = Either KCPError String
+
+-- | Consume Maude's stdout looking for the compiled program.
+outputReader :: Handle -> MVar Result -> IO ()
+outputReader oh rmv =
+    catch (handleln =<< hGetLine oh)
+          (\e -> if isEOFError e
+                   then putMVar rmv $ Left UnexpectedEOF
+                   else ioError e)
+    where
+        handleln l
+            | l == endMarker
+            = putMVar rmv $ Left PgmNotFound
+
+            | Just (rhs, lhs) <- parseEq l
+            , "'pgm" `isInfixOf` rhs
+            = putMVar rmv $ Right lhs
+
+            | otherwise = outputReader oh rmv
+
+        endMarker = "---K-MAUDE-GENERATED-OUTPUT-END-----"
+
+-- | Consume Maude's stderr. If Maude ever writes to stderr, kcp gracefully
+-- fails.
+errorReader :: Handle -> MVar [String] -> MVar Result -> IO ()
+errorReader eh emv rmv = do
+    e <- hGetLines eh
+    putMVar emv e
+    putMVar rmv $ Left MaudeError
 
 -- | Parse a Maude equation line into its left-hand side and right-hand side.
 --
@@ -103,8 +179,37 @@ getCompiledPgm = liftM (dropWhile isSpace . snd)
 -- Just ("foo", "bar")
 parseEq :: String -> Maybe (String, String)
 parseEq s = clean . break (== '=') =<< stripPrefix "eq " s
-    where clean (l, '=':r) = Just (l, init r)
+    where clean (l, '=':r) = Just (l, trim $ init r)
           clean _ = Nothing
+
+-- | Convenient alias for writing to stderr.
+errln :: String -> IO ()
+errln = hPutStrLn stderr
+
+-- | Read several lines from the given 'Handle'.
+hGetLines :: Handle -> IO [String]
+hGetLines h = do
+    eof <- hIsEOF h
+    if not eof
+        then do
+            l <- hGetLine h
+            ls <- hGetLines h
+            return (l:ls)
+        else return []
+
+-- | Remove leading and trailing whitespace from a string.
+trim :: String -> String
+trim = f . f
+    where f = reverse . dropWhile isSpace
+
+-- | Arguments passed to Maude to make its output as relevant as possible.
+maudeArgs :: [String]
+maudeArgs =
+    [ "-no-banner"
+    , "-no-advise"
+    , "-no-wrap"
+    , "-no-ansi-color"
+    ]
 
 {-
 TODO: rewrite the help message to explain the new template-based usage.
