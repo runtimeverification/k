@@ -602,7 +602,7 @@ sub getFullName
     if ($file =~ /\.k?(maude)?$/) {
 	if (! -e $file) {
 #		print("File $file does not exist\n");
-		print ("ERROR", 1, $file, "unknown line", "file $file does not exist");
+		print generate_error("ERROR", 1, $file, "unknown line", "file $file does not exist");
 		exit(1);
 	}
 	return $file;
@@ -624,7 +624,7 @@ sub getFullName
 	# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
 	else {
 #		print("Neither of $file.k, $file.kmaude, or $file.maude exist\n");
-		print ("ERROR", 1, "$file.k", "unknown line", "Neither of $file.k, $file.kmaude, or $file.maude exist");
+		print generate_error("ERROR", 1, "$file.k", "unknown line", "Neither of $file.k, $file.kmaude, or $file.maude exist");
 		exit(1);
 	}
     }
