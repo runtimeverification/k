@@ -1,49 +1,95 @@
-For installation instructions, please see the INSTALL file. 
+
+# Overview
+
+K is an executable semantic framework in which programming languages, 
+calculi, as well as type systems or formal analysis tools can be 
+defined making use of configurations, computations and rules.
+
+* *Configurations* organize the system/program state in units called cells, 
+which are labeled and can be nested.
+* *Computations* carry "computational meaning" as special nested list 
+structures sequentializing computational tasks, such as fragments of 
+program; in particular, computations extend the original language or 
+calculus syntax.
+* *K (rewrite) rules* generalize conventional rewrite rules by making it 
+explicit which parts of the term they read-only, write-only, or do not 
+care about. This distinction makes K a suitable framework for defining 
+truly concurrent languages or calculi even in the presence of sharing.
+
+Since computations can be handled like any other terms in a rewriting 
+environment, that is, they can be matched, moved from one place to another 
+in the original term, modified, or even deleted, K is particularly suitable 
+for defining control-intensive language features such as abrupt termination, 
+exceptions or call/cc.
+
+## The K Prototype
+The K Framework project is a prototype implementation of the K Framework 
+written in Maude and using Maude to give a rewriting executable semantics 
+to K definitions.
+
+The K prototype is developed by a joint team of faculty and students from 
+University of Illinois at Urbana-Champaign (the FSL group, led by 
+professor Grigore Rosu), and University Alexandru Ioan Cuza, Iasi, Romania 
+(the FMSE group, led by professor Dorel Lucanu).
+
+A current list of the people involved in the project and their specific roles
+can be accessed at http://code.google.com/p/k-framework/people/list.
+
+# Installation
+
+For detailed installation instructions, please see the INSTALL file. 
+
+As the tool is still under active development, it is recommended that you 
+install K directly form the svn repository an update it regularly using 
+ svn up 
+from the base directory to benefit of the latest fixes and features. 
+
+# Usage
 
 The languages defined so far using the K framework can be found in the 
-examples directory. For example, the directory examples/simple contains 
-2 directories, untyped containing the definition of the untyped version 
-of the language, and typed which in turn contains three directories with 
-definitions: static , for the static semantics, i.e., the type checker, 
-dynamic , for the dynamically typed version of simple, and 
-dynamic-typed-locations which is a variant of dynamic , in which the 
+examples directory. For example, the directory 
+ examples/languages/research/simple 
+contains 2 directories, untyped containing the definition of the 
+untyped version of the language, and typed which in turn contains three 
+directories with definitions: static , for the static semantics, i.e., 
+the type checker, dynamic , for the dynamically typed version of simple, 
+and dynamic-typed-locations which is a variant of dynamic , in which the 
 type information is maintained in the environment. 
 
-Please update regularly using `svn up' from the base directory to 
-benefit of the latest fixes and features. 
 
-When writing new definitions: all definitions should load the 
-k-prelude.maude file, and the semantics should include the K module. The 
-name of the main module of a definition should be the capitalized 
-version of the name of the file containing it. 
+## When writing new definitions 
+All semantics modules should include directly or indirectly the K module. 
+It is recommended that the name of the main module of a definition 
+is the capitalized version of the name of the file containing it. 
 
 When adding new rules to a definition, keep in mind the following 
-important restrictions: (1) never define two operations with the same 
-name (but different arities), and (2) any operation should be applied on 
-terms of sorts lower than those declared in the arity (that is, no 
+important restrictions: (1) avoid defining constructs with the same 
+name (but different arities), and (2) any construct should be applied on 
+terms of the syntaxtic types the construct was declared to accept (that is, no 
 subterm appearing in the definition should parse to a kind; if desired, 
 overload the operations to extend their range). 
 
-To compile a definition: execute the kompile.pl script passing as 
+To compile a definition: execute the `kompile` script passing as 
 parameter the name of the file containing the main module. If the 
 compilation succeeds, the output would be placed in 
-name-of-the-file-compiled.maude . Currently, the script only runs under 
-Unix. 
+name-of-the-file-compiled.maude . Currently, the script has only 
+been tested on Unix-like systems, including MacOSX. 
 
 Recommendations on running the script:
-- The Maude executable should be on the path and MAUDE_LIB should point
-to the location where prelude.maude resides
-- the script should be run from the directory where the definition 
-resides, e.g., by providing the relative path to the script. The 
-scripts should not be moved from the tools directory.
+* The directory of the script and thad of the Maude executable should be 
+on the path, named `maude` and `MAUDE_LIB` should point to the location 
+where `prelude.maude` resides
+* the script should not be moved from the core directory.
+* the script should be run from the directory where the definition 
+resides. 
 
-Example of usage: from the examples/simple/untyped directory run 
-the script as:
-  MAUDE_LIB=<maudeDir> ../../../tools/kompile.pl simple-untyped.maude
-where <maudeDir> should be replaced by the path where prelude.maude 
-reside Alternatively, you could set MAUDE_LIB in your .bash_profile 
-and add the tools directory to the path, and run the script as:
-  kompile.pl simple-untyped.maude
+Assumin the above suggestions were followed, to compile the untyped version 
+of the simple language mentioned above, execute
+  kompile simple-untyped
+in the `examples/research/simple/untyped` directory.
+
+
+# Reporting Issues/Bugs/Feature requests
 
 Please report issues here: http://k-framework.googlecode.com
 
@@ -58,39 +104,41 @@ descriptions follow.
 
 
 
-Test cases for new bugs should be placed in /trunk/newTests in the 
+Test cases for new bugs should be placed in `/trunk/test/issues` in the 
 following manner:
-$ cd trunk/newTests
-$ svn cp example issueXXX
+ $ cd trunk/tests/issues
+ $ svn cp example issueXXX
 This copies the example test to a new directory so you can edit it.
 XXX is intended to be the # of the issue you post on google code.
 
-Now, edit the files in the issueXXX directory to reflect your bug.
-You must keep the Makefile, which you can adjust to suit the filenames you use.  In your test.m file, writing
-rew test1(.List{K}) . ---@ foo 'SomeLabel(.List{K})
-causes the test to reduce "test1(.List{K})" and ensures that the result
-contains the substring "'SomeLabel(.List{K})", in addition to naming the test "foo".
+Now, edit the files in the `issueXXX` directory to reflect your bug.
+You must keep the `Makefile`, which you can adjust to suit the filenames 
+you use.  In your `test.m` file, writing
+ rew test1(.List{K}) . ---@ foo 'SomeLabel(.List{K})
+causes the test to reduce `test1(.List{K})` and ensures that the result
+contains the substring `'SomeLabel(.List{K})`, in addition to naming the test "foo".
 It's parsed like this:
-[rew|red|etc] [testString] . ---@ [testNameWithNoSpaces] [resultString]
+ [rew|red|etc] [testString] . ---@ [testNameWithNoSpaces] [resultString]
 
 Writing:
-rew test1(.List{K}) .
+ rew test1(.List{K}) .
 simply checks that it reduces at all.  It's not a very strong test.
 
 Your test is in the correct form is you can type "make true-test" 
 and an .xml file is created.
-$ cd trunk/newTests/issueXXX
-$ make true-test
-$ cat *.xml
-<?xml version='1.0' encoding='UTF-8' ?>
-<testsuite name='issuexxx.test' time='0'>
+ $ cd trunk/tests/issues/issueXXX
+ $ make true-test
+ $ cat *.xml
+ <?xml version='1.0' encoding='UTF-8' ?>
+ <testsuite name='issuexxx.test' time='0'>
         <testcase name='test1' time='0'>
                 <failure>Failure</failure>
         </testcase>
         <testcase name='test2' time='0'>
                 Success
         </testcase>
-</testsuite>
+ </testsuite>
 
 Since you are adding this test because you have a bug, at least one of
 your individual tests should give a failure message.
+
