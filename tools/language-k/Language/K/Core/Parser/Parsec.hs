@@ -76,7 +76,7 @@ klabelpart = syntax <|> arg
 
 -- | Parse a K builtin
 kbuiltin :: Parser KLabel
-kbuiltin = (:[]) . Syntax <$> (try kid <|> knum <|> kstring)
+kbuiltin = (:[]) . Syntax <$> (try kid <|> knum <|> kstring <|> kbool)
 
 -- | Parse an Id builtin: Id x
 kid :: Parser String
@@ -98,6 +98,13 @@ kstring = do
     symbol "String"
     s <- stringLiteral
     return (show s)
+
+-- | Parse a Bool builtin: Bool true or Bool false
+kbool :: Parser String
+kbool = do
+    symbol "Bool"
+    s <- string "true" <|> string "false"
+    return s
 
 {- Maude identifiers -}
 
