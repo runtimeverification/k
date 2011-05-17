@@ -1,2 +1,30 @@
 \title{Befunge-93---A Formal Semantics}
 \maketitle
+
+\begin{latexComment}
+\section*{Abstract}
+This is a formal semantics for the language ``Befunge-93''.  Befunge-93 was designed by Chris Pressey in 1993.  It is a reflective, stack-based, two-dimensional language.  The language is not turing complete (there are a finite number of allowable input programs).  More information can be found at \url{http://en.wikipedia.org/wiki/Befunge} and \url{http://catseye.tc/projects/befunge93/}.  Some comments below are adapted from the Wikipedia article and from the catseye webpage.
+	
+K formal semantics for Befunge-93 written by Chucky Ellison (\href{mailto:celliso2@illinois.edu}{celliso2@illinois.edu}).
+\end{latexComment}
+
+\begin{latexComment}
+Befunge is a two-dimensional language, meaning the programs are not merely a linear sequence of commands, but an $80\times25$ grid of commands laid out on a plane.  Instructions are each a single character, and are laid out in a grid where the top left corner is coordinate $(0, 0)$, the top right is $(79, 0)$, the bottom left is $(0, 24)$, and the bottom right is $(79, 24)$. The instruction pointer, or ``program counter'' is not just a scalar offset, but is actually an ordered pair $(x, y)$ with a direction (right, left, up, or down).  If programs are smaller than $80\times25$, they are assumed to be placed in the upper left corner with the rest of the grid being composed of spaces.  Finally, the space is assumed to be a torus, where running off of the right or left sides would bring the program counter back to the left or right sides respectively, and similarly for the top and bottom.
+
+The program starts with the right-pointing program counter at $(0, 0)$.  As evaluation continues, certain commands can cause the program counter to point in a different direction.  For example, executing the commands \lstinline{>}, \lstinline{<}, \lstinline{^}, or \lstinline{v} cause the program counter to change direction to go right, left, up, or down, respectively.  This means the program:
+\begin{lstlisting}
+>v
+^<
+\end{lstlisting}
+is a simple infinite loop, where the program counter actually moves around in a tight circle.
+
+The language is stack based.  There are a number of commands that push data onto the stack.  For example, executing ``0''--``9'', pushes the corresponding decimal number onto the stack.  Most of the remaining commands offer ways of manipulating the stack.
+
+The following is a ``Hello world!'' program.  We denote explicit spaces with \lstinline{ }.  As mentioned above, missing characters are also considered to be spaces.
+\begin{lstlisting}
+                 v
+>v"Hello world!"0<
+,:
+^_25*,@
+\end{lstlisting}
+\end{latexComment}
