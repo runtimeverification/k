@@ -715,7 +715,7 @@ sub recurseIntoFiles
     my $file = getFullName(shift);
     if ($file =~ m/(k\-prelude|pl\-builtins|shared)/)
     {
-	return;
+		return;
     }
     
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
@@ -727,26 +727,24 @@ sub recurseIntoFiles
 	$_;
     }/gsme;
     
-    while (s/^(\s*)($top_level_pattern)(\s*)//sm) 
+    while ( s/^(\s*)($top_level_pattern)(\s*)//sm ) 
     {
-	(my $before, local $_, my $after) = ($1,$2,$3);
-        if (m!^kmod\s+(\S+)!) {
-	    $declaredKLabels .= " " . getDeclaredKLabelList($_);
-#	    print "Declared: $declaredKLabels\n";
-	}
-	elsif (m!^(?:in|load|require)\s+(\S+)!) {
-	    my $in = File::Spec->catfile((fileparse($file))[1], $1);
-	    my $v_node = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
-	    $Tree::Nary::TRAVERSE_ALL, getFullName($in));
-#	    print "\nFile $in \n\n";
-	    if (!$v_node)
-	    {
-#		print "IF $in\n";
-		appendFileInTree($in,$file);
-		recurseIntoFiles($in);
-	    }
-#	    printTree();
-	}
+		(my $before, local $_, my $after) = ($1,$2,$3);
+		    if ( m!^kmod\s+(\S+)! ) {
+			$declaredKLabels .= " " . getDeclaredKLabelList($_);
+		}
+		elsif ( m!^(?:in|load|require)\s+(\S+)! ) 
+		{
+				my $in = maudify($1, $file);
+				my $v_node = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
+				$Tree::Nary::TRAVERSE_ALL, getFullName($in));
+				if (!$v_node)
+				{
+					appendFileInTree($in,$file);
+					recurseIntoFiles($in);
+				}
+#			    printTree();
+		}
     }
 }
 
@@ -2046,6 +2044,75 @@ sub check_incompatible
 		}
 	}
 }
+
+
+
+# Args: file, and the relative path of imported file
+# Return: file path
+# search the apropriate import
+sub maudify
+{
+		my $import = shift;
+		my $file = shift;
+
+		my $m_import = $import;
+		$m_import =~ s!^\/!!sg;
+
+		# solve local files
+		if (-e File::Spec->catfile((fileparse($file))[1], $import))
+		{
+			# $import is a local file, $import contains extension
+			return File::Spec->catfile((fileparse($file))[1], $import);
+		}
+		elsif (-e File::Spec->catfile((fileparse($file))[1], "$import.k"))
+		{
+			# $import is a local file, $import is a k file
+			return File::Spec->catfile((fileparse($file))[1], "$import.k");
+		}
+		elsif (-e File::Spec->catfile((fileparse($file))[1], "$import.maude"))
+		{
+			# $import is a local file, $import is a maude file
+			return File::Spec->catfile((fileparse($file))[1], "$import.maude");
+		}
+		
+		# solve absolute paths
+		elsif (-e $import)
+		{
+			# $import contains extension
+			return $import;
+		}
+		elsif (-e "$import.k")
+		{
+			# $import is a k file
+			return "$import.k";
+		}
+		elsif (-e "$import.maude")
+		{
+			# $import is a local file, $import is a maude file
+			return "$import.maude";
+		}
+		
+		# solve imports from K_BASE modules
+		elsif (-e File::Spec->catfile($k_base, $m_import))
+		{
+			# $import contains extension
+			return File::Spec->catfile($k_base, $m_import);	
+		}
+		elsif (-e File::Spec->catfile($k_base, "$m_import.k"))
+		{
+			# $import is a k file
+			return File::Spec->catfile($k_base, "$m_import.k");
+		}
+		elsif (-e File::Spec->catfile($k_base, "$m_import.maude"))
+		{
+			# $import is a maude file
+			return File::Spec->catfile($k_base, "$m_import.maude");
+		}
+
+ 		print generate_error("ERROR", 1, $file, "unknown line", "File $import needed by $file cannot be found! Please check if the path is correct.");
+}
+
+
 
 1;
 
