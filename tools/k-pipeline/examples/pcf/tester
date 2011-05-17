@@ -1,0 +1,38 @@
+#!/bin/bash
+shopt -s extglob
+
+teststotal=0
+testspassed=0
+
+while read line; do
+    if [[ $line == '>'* ]]; then
+        let teststotal++
+
+        testcase=${line##>*([[:space:]])} # drop the '>' and leading whitespace
+        echo -e "Test:\t$testcase"
+
+        read expected
+        echo -e "Expect:\t$expected"
+
+        actual=$(echo $testcase | ./runpcf)
+        echo -e "Got:\t$actual"
+
+        if [[ "$actual" == "$expected" ]]; then
+            echo -e "\e[92mPassed\e[0m"
+            let testspassed++
+        else
+            echo -e "\e[91mFailed\e[0m"
+        fi
+        echo
+    fi
+done < tests.txt
+
+let testsfailed=teststotal-testspassed
+
+if (( testsfailed > 0 )); then
+    echo -e "\e[91m$testsfailed of $teststotal tests failed!\e[0m"
+else
+    echo -e "\e[92m$testspassed of $teststotal tests passed!\e[0m"
+fi
+
+exit $testsfailed
