@@ -115,7 +115,7 @@ kcompilePgm kcp compileDir = do
     w pgmmod
     w "set include PL-BOOL off ."
     w "set include BOOL on ."
-    let loadc m = w $ "load " ++ compileDir ++  m
+    let loadc m = w $ "load " ++ compileDir ++ m
     mapM_ loadc [ "prelude-extras"
                 , "meta-k"
                 , "printing"
