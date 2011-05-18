@@ -120,7 +120,7 @@ and download `k-framework-nightly.tar.gz`. Extract it as follows:
 
 To download K from SVN, use the following command:
 
-    $ svn checkout https://k-framework.googlecode.com/svn/tags/latest/ k-framework
+    $ svn checkout http://k-framework.googlecode.com/svn/tags/latest/ k-framework
 
 Both approaches will leave you with a new directory called `k-framework` in
 your current directory.
