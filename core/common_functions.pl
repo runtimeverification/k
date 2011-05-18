@@ -934,7 +934,10 @@ sub required
 
 	foreach(@imports)
 	{
-		return 0 if (/\Q$req_file\E/);
+		if (defined $req_file)
+		{
+			return 0 if (/\Q$req_file\E/);
+		}
 	}
 
 	return 1;
