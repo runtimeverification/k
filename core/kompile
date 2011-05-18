@@ -1744,9 +1744,23 @@ sub maudify_module {
     
 # Step: Add missing spaces around tokens
      # freeze all strings before spacifying
-	s/($string_pattern)/Freeze($&,"STRINGS")/sge;	
+#	print "$_\n\n";
+	s/($string_pattern)/Freeze($&,"STRINGS")/sge;
+#	print "$_\n\n";
+	my $klabelss = $decl;		
+	$klabelss =~ s/\s+$//s;		
+	my @kls = split(/\s+/, $klabelss);		
+	foreach my $kl (@kls)		
+	{		
+		s/(\Q$kl\E)/Freeze($kl, "KLABEL")/sge;		
+	}
+
 	$_ = spacify($_);
 	$_ = Unfreeze("STRINGS", $_);
+#	print "$_\n\n";	
+	$_ = Unfreeze("KLABEL", $_);
+#	print "$_\n\n";
+#	print "============================\n\n\n";
     
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
