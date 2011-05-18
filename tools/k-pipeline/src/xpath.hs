@@ -22,7 +22,7 @@ main = do
         >>>
         getXPathTrees query
         >>>
-        -- Is this the right thing to do?
+        -- Is this the best thing to do?
         xshow this
 
     mapM_ putStrLn rs
