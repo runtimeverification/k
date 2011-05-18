@@ -14,23 +14,28 @@ Executable simplemaude
   Hs-source-dirs:   src
   Main-is:          simplemaude.hs
   Build-depends:    base >= 4 && < 5, cmdargs, maude
+  ghc-options:      -Wall
 
 Executable cellstoxml
   Hs-source-dirs:   src
   Main-is:          cellstoxml.hs
   Build-depends:    base >= 4 && < 5, bytestring, language-k
+  ghc-options:      -Wall
 
 Executable unlabel
   Hs-source-dirs:   src
   Main-is:          unlabel.hs
   Build-depends:    base >= 4 && < 5, language-k
+  ghc-options:      -Wall
 
 Executable kcp
   Hs-source-dirs:   src
   Main-is:          kcp.hs
   Build-depends:    base >= 4 && < 5, process, directory, filepath, cmdargs
+  ghc-options:      -Wall
 
 Executable xpath
   Hs-source-dirs:   src
   Main-is:          xpath.hs
   Build-depends:    base >= 4 && < 5, hxt, hxt-xpath
+  ghc-options:      -Wall
