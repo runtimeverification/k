@@ -29,3 +29,8 @@ Executable kcp
   Hs-source-dirs:   src
   Main-is:          kcp.hs
   Build-depends:    base >= 4 && < 5, process, directory, filepath, cmdargs
+
+Executable xpath
+  Hs-source-dirs:   src
+  Main-is:          xpath.hs
+  Build-depends:    base >= 4 && < 5, hxt, hxt-xpath
