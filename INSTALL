@@ -22,6 +22,7 @@ The K Framework tool depends on the following software:
     * XML::LibXML::Reader
     * Tree::Nary
     * Text::Diff
+* *Subversion* for downloading the latest version of K.
 * *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
   packages, the following (texlive) packages are needed: bera, datetime, ec,
   fancybox, fancyvrb, import, marginnote, microtype, ms, pdfcomment, pgf,
@@ -105,25 +106,12 @@ section on downloading K.
 
 ## Download the K Framework
 
-The K Framework can be installed from SVN or from nightly release snapshots.
-The nightly release snapshots are about a day behind the SVN repository and
-don't contain SVN information, but they do contain pre-compiled PDFs and K
-definitions.
-
-To install K from the nightly release snapshots, go to:
-
-<http://code.google.com/p/k-framework/downloads>
-
-and download `k-framework-nightly.tar.gz`. Extract it as follows:
-
-    $ tar zxvf k-framework-nightly.tar.gz
-
-To download K from SVN, use the following command:
+To download the K framework, use the following SVN command:
 
     $ svn checkout http://k-framework.googlecode.com/svn/tags/latest/ k-framework
 
-Both approaches will leave you with a new directory called `k-framework` in
-your current directory.
+This will leave you with a new directory called `k-framework` in your current
+directory.
 
 
 ## Install the K Framework
