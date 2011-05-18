@@ -9,6 +9,9 @@ Category:           Language
 Build-type:         Simple
 Cabal-version:      >=1.6
 
+Flag static
+  Description:      Build a static binary
+  Default:          False
 
 Executable simplemaude
   Hs-source-dirs:   src
@@ -16,11 +19,17 @@ Executable simplemaude
   Build-depends:    base >= 4 && < 5, cmdargs, maude
   ghc-options:      -Wall
 
+  if flag(static)
+    ghc-options:    -static -optl-static -optl-pthread
+
 Executable cellstoxml
   Hs-source-dirs:   src
   Main-is:          cellstoxml.hs
   Build-depends:    base >= 4 && < 5, bytestring, language-k
   ghc-options:      -Wall
+
+  if flag(static)
+    ghc-options:    -static -optl-static -optl-pthread
 
 Executable unlabel
   Hs-source-dirs:   src
@@ -28,14 +37,23 @@ Executable unlabel
   Build-depends:    base >= 4 && < 5, language-k
   ghc-options:      -Wall
 
+  if flag(static)
+    ghc-options:    -static -optl-static -optl-pthread
+
 Executable kcp
   Hs-source-dirs:   src
   Main-is:          kcp.hs
   Build-depends:    base >= 4 && < 5, process, directory, filepath, cmdargs
   ghc-options:      -Wall
 
+  if flag(static)
+    ghc-options:    -static -optl-static -optl-pthread
+
 Executable xpath
   Hs-source-dirs:   src
   Main-is:          xpath.hs
   Build-depends:    base >= 4 && < 5, hxt, hxt-xpath
   ghc-options:      -Wall
+
+  if flag(static)
+    ghc-options:    -static -optl-static -optl-pthread
