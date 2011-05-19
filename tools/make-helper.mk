@@ -41,6 +41,9 @@ build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
 $(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
+	$(KCOMPILE) $(LANGUAGE_FILE) $(COMPILE_OPTIONS) -l $(LANGUAGE_NAME)
+# PLEASE KEEP THIS IN SYNC WITH THE ABOVE.  it has been split apart so people won't see output files when they run make.
+$(COMPILED_FILE).output: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) $(COMPILE_OPTIONS) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output && exit $${PIPESTATUS[0]}
 
 # this should build the latex
@@ -78,7 +81,8 @@ test: $(COMPILED_FILE) $(addprefix test-,$(addsuffix .output,$(TESTS)))
 true-test: $(COMPILED_FILE) $(foreach test, $(TESTS), results-$(test).xml) compilation.xml
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
-test-%.output: % $(COMPILED_FILE) 
+# technically this relies on $(COMPILED_FILE), but I'm trying to avoid leaving output files when people run make
+test-%.output: % $(COMPILED_FILE).output
 	@echo q | maude -no-wrap -no-ansi-color $< 2>&1 |tee $@ && exit $${PIPESTATUS[0]}
 #@cat $@
 	
