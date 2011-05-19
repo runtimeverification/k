@@ -94,7 +94,7 @@ kcompilePgm kcp compileDir = do
     let pgmmod = printf template pgm
 
     -- Start Maude.
-    (ih, oh, eh, ph) <- runInteractiveProcess "maude" maudeArgs Nothing Nothing
+    (ih, oh, eh, _) <- runInteractiveProcess "maude" maudeArgs Nothing Nothing
     hSetBinaryMode ih False
     hSetBinaryMode oh False
 
@@ -102,13 +102,13 @@ kcompilePgm kcp compileDir = do
     rmv <- newEmptyMVar
 
     -- Start the stdout reader thread.
-    otid <- forkIO $ outputReader oh rmv
+    _ <- forkIO $ outputReader oh rmv
 
     -- emv will hold any lines Maude prints to stderr.
     emv <- newEmptyMVar
 
     -- Start the stderr reader thread.
-    etid <- forkIO $ errorReader eh emv rmv
+    _ <- forkIO $ errorReader eh emv rmv
 
     -- Write the commands that will compile the program to Maude's stdin.
     let w s = hPutStrLn ih s
