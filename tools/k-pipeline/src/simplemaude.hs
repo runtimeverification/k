@@ -13,6 +13,7 @@ data SimpleMaude = SimpleMaude
     , loads  :: [FilePath]
     } deriving (Eq, Show, Data, Typeable)
 
+simplemaude :: SimpleMaude
 simplemaude = SimpleMaude
     { fmtStr = def &= typ "FORMAT" &= opt "%s" &= argPos 0
     , loads  = def &= typ "FILES"  &= args
