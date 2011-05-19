@@ -16,7 +16,7 @@ Flag static
 Executable simplemaude
   Hs-source-dirs:   src
   Main-is:          simplemaude.hs
-  Build-depends:    base >= 4 && < 5, cmdargs, maude
+  Build-depends:    base >= 4 && < 5, cmdargs, maude >= 0.1.4
   ghc-options:      -Wall
 
   if flag(static)
