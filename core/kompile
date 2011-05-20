@@ -22,7 +22,6 @@ require $path;
 # depending on the options given, different flags can be added here and they will be passed to maude when called
 my $additionalMaudeFlags = "";
 
-# check installed software
 my $maude_path = 'maude';
 my $input_file  = fresh("kompile_in", ".maude");
 my $error_file  = fresh("kompile_err", ".txt");
@@ -161,6 +160,7 @@ sub compilation_cleanup
 
 }
 
+# check installed software
 check_software();
 
 # add configuration parser
@@ -2628,6 +2628,15 @@ sub restore_intermodule_latex
 sub check_software
 {
 	# check if maude is installed
+
+	# first check if MAUDE_LIB is set
+#	my $maude_lib = $ENV{'MAUDE_LIB'};
+#	if ($maude_lib eq "")
+#	{
+#		print "Variable MAUDE_LIB is not set. \n";
+#		exit(2);
+#	}
+
 	local $_ = run_maude("Check maude...", "q");
 	$_ = /Bye/sm?1:-1;
 
