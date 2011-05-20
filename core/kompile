@@ -485,7 +485,7 @@ my $exclude = join("|",
 		   "kmod\\s+(?:\\S*(?=\\s))",                               # kmodule name
 		   "including(?:.*?(?=\\s+(?=$kmaude_keywords_pattern)))",  # included module expressions
 		   "(?<!:):$ksort",                                         # sort declarations for other than ordinary $kvar
-		   "(?<=\s)ops?\\s+.*?(?=\\s+(?=$kmaude_keywords_pattern))",       # operation declarations
+		   "(?<!\S)ops?\\s+.*?(?=\\s+(?=$kmaude_keywords_pattern))",       # operation declarations
 		   "$klabel",                                               # K labels
 		   "rule\\s*\\[[^\\[\\]]*\\]\\s*:",                         # rule labels
 		   "\\d+\\.\\d+",                                           # real numbers
