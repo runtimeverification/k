@@ -2021,6 +2021,9 @@ sub check_incompatible
 			"q" 
 	);
 
+	# silently exit this check if maude returned emply string
+	return if !(defined $_);
+	
 	my $out = $_;
 	while ($out =~ /reduce\s+in\s+META-LEVEL\s+:\s+sameKind\(upModule\('$module,\s+true\),\s+'([a-zA-Z]+),\s'([a-zA-Z]+)\)(.*?)result\s+Bool:\s+(true|false)/sg)
 	{
