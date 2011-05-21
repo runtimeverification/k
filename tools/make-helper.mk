@@ -76,13 +76,14 @@ crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
 
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
-test: $(COMPILED_FILE).output $(addprefix test-,$(addsuffix .output,$(TESTS)))
+test: $(COMPILED_FILE) $(addprefix test-,$(addsuffix .output,$(TESTS)))
+	@rm -f $(addprefix test-,$(addsuffix .output,$(TESTS)))
 
 true-test: $(COMPILED_FILE).output $(foreach test, $(TESTS), results-$(test).xml) compilation.xml
 
 # this is how to satisfy the target "test-%" for some %.  It requires file % to exist.  It then runs it through maude
 # technically this relies on $(COMPILED_FILE), but I'm trying to avoid leaving output files when people run make
-test-%.output: % $(COMPILED_FILE).output
+test-%.output: % $(COMPILED_FILE)
 	@echo q | maude -no-wrap -no-ansi-color $< 2>&1 |tee $@ && exit $${PIPESTATUS[0]}
 #@cat $@
 	
