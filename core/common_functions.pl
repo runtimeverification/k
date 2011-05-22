@@ -1621,10 +1621,14 @@ sub add_line_no_mb
 
 sub countlines
 {
-    (local $_, my $count) = (shift, 1);
-    return 0 if $_ eq "";
-    while(/\n/sg) { $count ++; }
-    return $count;
+	my ($text) = (@_);
+	return $text =~ tr/\n//;
+
+
+    # (local $_, my $count) = (shift, 1);
+    # return 0 if $_ eq "";
+    # while(/\n/sg) { $count ++; }
+    # return $count;
 }
 
 
