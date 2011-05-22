@@ -2649,13 +2649,13 @@ sub add_kprelude_sorts
 		my $fullname = File::Spec->file_name_is_absolute($to_load) ? $to_load : File::Spec->catfile($to_load_dir, $to_load);
 		$fullname = getFullName($fullname);
 
-		local $_ = get_file_content($fullname);
-		add_sorts($_);
-		add_tokens($_);
+		my $var = get_file_content($fullname);
+		add_sorts($var);
+		add_tokens($var);
 
 #		print "@all_sorts\n\n@all_tokens\n\n\n\n";
 
-		while ( m!^\s*(in|load)\s+(\S+)!sgm )
+		while ( $var =~ m!^\s*(in|load)\s+(\S+)!sgm )
 		{
 			add_kprelude_sorts($2, dirname($fullname));
 		}
