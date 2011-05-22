@@ -1607,6 +1607,20 @@ sub maudify_module {
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
 
+	# add K or K-LATEX automatically
+	 if (/\b(syntax|configuration|rule)\b/sg)
+		{
+			# include K if syntax, configuration or rule keywords are used in module
+			s!(k?mod\s+\S+\s+is\s)!$1 including K !sg
+		}
+	else
+		{
+			# include only K-LATEX
+			s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX !sg
+		}
+
+#	 print "$_\n\n\n";
+
 # Step: resolve macros
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
