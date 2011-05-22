@@ -2064,6 +2064,8 @@ sub maudify
 		my $m_import = $import;
 		$m_import =~ s!^\/!!sg;
 
+#		print "\n\nIMP: $import\nFILE: $file\n\n";
+
 		# solve local files
 		if (-e File::Spec->catfile((fileparse($file))[1], $import))
 		{
