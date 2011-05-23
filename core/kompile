@@ -407,6 +407,8 @@ my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large latex);           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
+my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#CellKey#CellAttribute#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero";
+
 my $comment = join("|", (
 	        "\\/\\/.*?\n",
 	        "\\/\\*.*?\\*\\/",
@@ -1604,22 +1606,11 @@ sub maudify_file {
 sub maudify_module {
     (my $file,my $mno, local $_) = @_;
 
+	# add K or K-LATEX automatically.
+    $_ = addKandKLATEX($_);
+
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
-
-	# add K or K-LATEX automatically
-	 if (/\b(syntax|configuration|rule)\b/sg)
-		{
-			# include K if syntax, configuration or rule keywords are used in module
-			s!(k?mod\s+\S+\s+is\s)!$1 including K !sg
-		}
-	else
-		{
-			# include only K-LATEX
-			s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX !sg
-		}
-
-#	 print "$_\n\n\n";
 
 # Step: resolve macros
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
@@ -1753,16 +1744,13 @@ sub maudify_module {
 		$mset = 1;
     }
 #    print  "Stage:\n$_\n\n";
- 
-# Step: Add KLabel generated definitions
-# s!(?=endk?m)!$decl!se;
 
 # Step: register all subsort relations
     register_subsorts($_);
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-#    print "Warning: Unbalanced parentheses in module $module_name\nMaude might not finish.\n" if (!balanced($_, '(', ')', '`'));
+
 	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
 
     return $_;
@@ -2392,7 +2380,6 @@ sub add_subsorts
 {
     my $supersorts = find_super_sorts();
     my @modules = split(/\s+/, getModuleList());
-    my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#CellKey#CellAttribute#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero";
     my $dir = cwd;
     
     return if (scalar(@modules) == 0);
@@ -2402,7 +2389,7 @@ sub add_subsorts
     $supersorts = "";
     foreach(@sorts)
     {
-	$supersorts .= "$_ " if ($k_sorts !~ /#$_#/);
+		$supersorts .= "$_ " if ($k_sorts !~ /#$_#/);
     }
     
     return if ($supersorts eq "");
@@ -2413,43 +2400,45 @@ sub add_subsorts
     # search through all modules
     foreach(@modules)
     {
-	my $cmod = $_;
-	# get sorts for current module
-	my $sortlist = "#" . getModuleSorts($cmod) . "#" if defined(getModuleSorts($cmod));
-	$sortlist =~ s/ /#/g if defined($sortlist);
+		my $cmod = $_;
+		# get sorts for current module
+		my $sortlist = "#" . getModuleSorts($cmod) . "#" if defined(getModuleSorts($cmod));
+		$sortlist =~ s/ /#/g if defined($sortlist);
 	
-	# if this module contains sorts
-	# and it is a module which includes K
-	# then add apropriate subsortations
-	if (defined($sortlist) && includesK($cmod))
-	{
-	    # will collect declared sorts
-	    my @decllist = ();
-	    # search through supersorts all sorts contained by this module
-	    foreach my $ss (@ssorts)
-	    {
-		push(@decllist, $ss) if ($sortlist =~ /#$ss#/);
-	    }
-	    
-	    if (scalar(@decllist) > 0)
-	    {
-                # get module file
-		my $file = getModuleFile($_);
-	    
-		# access its maude corresponding file
-		$file =~ s/\.k$/\.maude/;
+#		print "File: " . getModuleFile($_) . ", SORTS: $sortlist\n\n";
 
-		# get content
-		my $content = get_file_content("$dir/$file");
+		# if this module contains sorts
+		# and it is a module which includes K
+		# then add apropriate subsortations
+		if (defined($sortlist) && includesK($cmod))
+		{
+			# will collect declared sorts
+			my @decllist = ();
+			# search through supersorts all sorts contained by this module
+			foreach my $ss (@ssorts)
+			{
+				push(@decllist, $ss) if ($sortlist =~ /#$ss#/);
+			}
+
+			if (scalar(@decllist) > 0)
+			{
+		        # get module file
+				my $file = getModuleFile($_);
+			
+				# access its maude corresponding file
+				$file =~ s/\.k$/\.maude/;
+
+				# get content
+				my $content = get_file_content("$dir/$file");
 		
-		my $o = "@decllist";
-		$content =~ s/mod(\s+)$_(\s.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
-		
-		open FILE,">",$file or die "Cannot create $file\n";
-		print FILE $content;
-		close FILE;
-	    }
-	}
+				my $o = "@decllist";
+				$content =~ s/mod(\s+)$_(\s.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
+
+				open FILE,">",$file or die "Cannot create $file\n";
+				print FILE $content;
+				close FILE;
+			}
+		}
     }
     
 #    print "SUPERSORTS: $supersorts\n";
@@ -2649,17 +2638,51 @@ sub add_kprelude_sorts
 		my $fullname = File::Spec->file_name_is_absolute($to_load) ? $to_load : File::Spec->catfile($to_load_dir, $to_load);
 		$fullname = getFullName($fullname);
 
-		my $var = get_file_content($fullname);
-		add_sorts($var);
-		add_tokens($var);
+		local $_ = get_file_content($fullname);
+		add_sorts($_);
+		add_tokens($_);
 
 #		print "@all_sorts\n\n@all_tokens\n\n\n\n";
 
-		while ( $var =~ m!^\s*(in|load)\s+(\S+)!sgm )
+		while ( m!^\s*(in|load)\s+(\S+)!sgm )
 		{
 			add_kprelude_sorts($2, dirname($fullname));
 		}
 
 	}
 
+}
+
+sub addKandKLATEX
+{
+	my $content = shift;
+	my $k = 0;
+	my $k_latex = 0;
+
+	# get list of imported modules
+	while ( $content =~ /\s+including([\sA-Z\-+]*)/sgm )
+	{
+		$k = 1 if $1 =~ /\sK\s/sg;
+		$k_latex = 1 if $1 =~ /\sK-LATEX\s/sg;
+	}
+
+	return $content if $k;
+	
+	my $prelude_sorts = $k_sorts;
+	$prelude_sorts =~ s/#/\|/sg;
+	$prelude_sorts =~ s/^\s*\|//;
+	$prelude_sorts =~ s/\|\s*$//;
+#	print "SORTS: $prelude_sorts\n\n";
+	if ($content =~ /\s(syntax\s+($prelude_sorts)|configuration|rule)\s/sg)
+	{
+		# include K if syntax, configuration or rule keywords are used in module
+		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K !sg
+	}
+	else
+	{
+		# include only K-LATEX
+		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX !sg if !$k_latex;
+	}
+
+	$content;
 }

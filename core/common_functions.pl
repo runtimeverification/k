@@ -1211,31 +1211,41 @@ sub build_module_tree
     my $module = "?";
     my $req = "?";
     my @modules = ();
-    
+    my @amodules = ();
+
     if (/k?mod\s+([^\s]*?)\s+/)
     {
-	$module = "$1";
-	$module =~ s/\s//g;
-	$moduleList .= " $module";
-	$ModuleFileMap{$module} = $file;
-	my $tempMod = $module;
-	$tempMod = $FileModuleMap{$file} . " $tempMod" if defined($FileModuleMap{$file});
-	$FileModuleMap{$file} = $tempMod;
-    }
+		$module = "$1";
+		$module =~ s/\s//g;
+		$moduleList .= " $module";
+		$ModuleFileMap{$module} = $file;
+		my $tempMod = $module;
+		$tempMod = $FileModuleMap{$file} . " $tempMod" if defined($FileModuleMap{$file});
+		$FileModuleMap{$file} = $tempMod;
+	}
     
-    if (/is\s+including([A-Z\s\-\+]+)/)
+	my $temp = $_;
+
+    while ($temp =~ m/including([A-Z\s\-\+]+)/sg)
     {
-	$req = "$1";
-	$req =~ s/^\s*//g;
-	$req =~ s/\s*$//g;
-	@modules = split(/\s+\+\s+/, $req);
-	$moduleMap{$module} = @modules;
-	$moduleList .= " @modules";
+		$req = "$1";
+		$req =~ s/^\s*//g;
+		$req =~ s/\s*$//g;
+		@modules = split(/\s+\+\s+/, $req);
+		foreach(@modules)
+		{
+			push(@amodules, @modules);
+		}
     }
-    
+
+	$moduleMap{$module} = @amodules;
+	$moduleList .= " @amodules";
+   
+#	print "MOD: $module\nMAP:@amodules\n\n\n";
+
     if ($module ne "?")
     {
-	$moduleMap{$module} = "@modules";
+		$moduleMap{$module} = "@amodules";
     }
         
 #    print "\nModule:\n";
@@ -1278,34 +1288,38 @@ sub register_subsorts
     # get module name
     if (/k?mod\s+(\S*)\s+/)
     {
-	$module = $1;
+		$module = $1;
     }
     
+	my $local = $_;
+
     # register sorts
-    while (/sort\s+([^<]*?)\s+\./sg)
+    while ($local =~ /sort\s+([^<]*?)\s+\./sg)
     {
-	$sorts_ .= "$1 ";
-	$localsorts .= "$1 ";
-	# only for declarations of sorts
-	$sortMap{$1} = $module;
+		$sorts_ .= "$1 ";
+		$localsorts .= "$1 ";
+		# only for declarations of sorts
+		$sortMap{$1} = $module;
     }
     
     # register subsorts and undeclared sorts
-    while (/subsort\s+(\S+?)\s+<\s+(\S+?)\s+\./sg)
+    while ($local =~ /subsort\s+(\S+?)\s+<\s+(\S+?)\s+\./sg)
     {
-	my $t1 = $1;
-	my $t2 = $2;
+		my $t1 = $1;
+		my $t2 = $2;
 
-	$subsortations .= "$t1 < $t2\n";
-	$sorts_ .= "$t1 " if $sorts_ !~ /$t1/sg;
-	$sorts_ .= "$t2 " if $sorts_ !~ /$t2/sg;
-	$localsorts .= "$t1 " if $localsorts !~ /$t1/sg;
-	$localsorts .= "$t2 " if $localsorts !~ /$t2/sg;
+		$subsortations .= "$t1 < $t2\n";
+		$sorts_ .= "$t1 " if $sorts_ !~ /$t1/sg;
+		$sorts_ .= "$t2 " if $sorts_ !~ /$t2/sg;
+		$localsorts .= "$t1 " if $localsorts !~ /$t1/sg;
+		$localsorts .= "$t2 " if $localsorts !~ /$t2/sg;
     }
 
     # TODO: add all sorts included by included modules
     $localsorts .= " " . getAllModules($module);
     
+#	print "ALL: $localsorts\n";
+
     # add all sorts into %sortMod
     # $localsorts =~ s/\s+$//s;
     $sortMod{$module} = $localsorts;
@@ -1318,8 +1332,11 @@ sub register_subsorts
 
 }
 
+my $deep = 0;
+
 sub getAllModules
 {
+	$deep ++;
     my $mod = shift;
     my $lsorts = "";
     $lsorts = $sortMod{$mod} if (defined($sortMod{$mod}));
@@ -1328,9 +1345,10 @@ sub getAllModules
     
     foreach (@incl)
     {
-        $lsorts .= " " . getAllModules($_);	
+        $lsorts .= " " . getAllModules($_) if $deep < 300;	
     }
     
+#	print "DEEP: $deep\n";
     $lsorts;
 }
 
@@ -1338,6 +1356,7 @@ sub getAllModules
 sub includesK
 {
     my $module = shift;
+	
     return 1 if $module eq "K";
     
     if (!defined($moduleMap{$module})) { return 0; }
@@ -1346,14 +1365,14 @@ sub includesK
     
     if (scalar(@mlist) > 0)
     {
-	foreach(@mlist)
-	{
-	    return 1 if $_ eq "K";
-	}
-	foreach(@mlist)
-	{
-	    return 1 if includesK($_);
-	}
+		foreach(@mlist)
+		{
+			return 1 if $_ eq "K";
+		}
+		foreach(@mlist)
+		{
+			return 1 if includesK($_);
+		}
     }
 
     return 0;
@@ -1623,12 +1642,6 @@ sub countlines
 {
 	my ($text) = (@_);
 	return $text =~ tr/\n//;
-
-
-    # (local $_, my $count) = (shift, 1);
-    # return 0 if $_ eq "";
-    # while(/\n/sg) { $count ++; }
-    # return $count;
 }
 
 
