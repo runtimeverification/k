@@ -213,6 +213,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
     = term2SetReplace(Q[T,T'],term2Set(T,KC),term2Set(T',KC)) 
    if Q == replaceS .
   ceq term2Set(Q[T],KC) = var(Q[T]) if Q == itemCtor(Bag) .
+   eq term2Set(T,KC) = var(T) [owise print "might be a dirty hack.  to revisit if it proves buggy"] .
 
   op term2SetReplace : Term TermSet TermSet ~> TermSet .
   eq term2SetReplace(T, qt(Q,B, T'':Term) && TS, TS':[TermSet]) = qt(Q,B,T) .
