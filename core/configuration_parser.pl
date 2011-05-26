@@ -704,7 +704,7 @@ sub generate_error
     my $line = shift;
     my $message = shift;
 
-    return "[$type][$code] in [$file] @ [$line]: [$message]";
+    return "[$type][$code] in [$file] @ [$line]: [$message]\n";
 }
 
 
