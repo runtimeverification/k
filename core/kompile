@@ -3,6 +3,7 @@ use strict;
 use File::Basename;
 use File::Spec;
 use File::Copy;
+use File::Path;
 use Switch;
 use Cwd;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
@@ -10,7 +11,6 @@ use English;
 
 BEGIN {
     unshift (@INC, (File::Basename::fileparse($0))[1]);
-
 }
 
 # check installed software
@@ -55,6 +55,7 @@ $SIG{'TRAP'} = 'interruptHandler';
 $SIG{'ABRT'} = 'interruptHandler';
 $SIG{'STOP'} = 'interruptHandler';
 
+
 sub interruptHandler {
 	finalCleanup(); # call single cleanup point
 	exit(1); # since we were interrupted, we should exit with a non-zero code
@@ -70,10 +71,10 @@ END {
 # this subroutine can be used as a way to ensure we clean up all resources whenever we exit.  This is going to be mostly temp files.  If the program terminates for almost any reason, this code will be executed.
 sub finalCleanup {
 	# clean(); # delete normal kompile files
-	compilation_cleanup();
 	unlink("cfg_temp.tmp");
 	unlink("xml-parser.pl");
 	unlink($maude_xml_file); # we don't want to put this in clean, since clean gets called before the xml file is used
+	compilation_cleanup();
 }
 
 
@@ -661,6 +662,9 @@ foreach (@ARGV) {
 	$language_file_name = $_;
     }
 }
+
+# remove .k dir when a new compilation starts
+File::Path->remove_tree($k_dir) if !$compileProgram;
 
 # if I want to compile only a program
 compile_program() if $compileProgram;
