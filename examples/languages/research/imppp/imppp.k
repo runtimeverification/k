@@ -67,7 +67,7 @@ kmod IMPPP-SEMANTICS is including IMPPP-CONFIGURATION
        <out_> . => ListItem(I) </out>
 
   /*@ \textbf{Spawn thread} */
-  rule <k>spawn S => .<_/k>
+  rule <k> spawn S => . <_/k>
        <env> Rho </env>
        (. => <thread_> <k> S </k> <env> Rho </env> <_/thread>)
 
@@ -78,7 +78,7 @@ kmod IMPPP-SEMANTICS is including IMPPP-CONFIGURATION
   rule <k> haltThread; ~> _ => .</k>
 
   /*@ \textbf{Variable declaration} */
-  rule <k> var X; => .<_/k>
+  rule <k> var X; => . <_/k>
        <env> Rho => Rho[N/X] </env> 
        <store_> . => N |-> 0 <_/store>
        <nextLoc> N => sNat N </nextLoc>
