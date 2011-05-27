@@ -13,6 +13,7 @@ kmod IMPPP-CONFIGURATION is including IMPPP-SYNTAX + K
           <env color="LightSkyBlue">.Map</env>
         </thread>
      </threads>
+     <br/>
      <store color="white">.Map</store>
      <nextLoc color="gray">0</nextLoc>
      <in color="magenta">.List</in>
