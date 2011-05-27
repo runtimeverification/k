@@ -3,7 +3,7 @@
 LANGUAGE_NAME = IMPPP
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = IMPPP-SYNTAX IMPPP-SEMANTICS IMPPP
+LANGUAGE_MODULES = IMPPP-SYNTAX IMPPP-CONFIGURATION IMPPP-SEMANTICS IMPPP
 
 #this is the basename of the main file
 MAIN_FILE = imppp
