@@ -83,6 +83,15 @@ module, so it must be installed manually:
 
 Now you're ready to jump to the section on downloading K.
 
+### Arch Linux
+
+Install some of the Perl dependencies with pacman:
+
+    # pacman -S perl-xml-libxml perl-text-diff 
+
+Install `perl-xml-dom` and `perl-regexp-common` from AUR. Finally, use `cpan`
+to install the `Tree::Nary` package.
+
 ### Mac OSX
 
 First install XCode from <http://developer.apple.com/xcode>.  
