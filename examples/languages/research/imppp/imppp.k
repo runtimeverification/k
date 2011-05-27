@@ -7,17 +7,17 @@ kmod IMPPP-CONFIGURATION is including IMPPP-SYNTAX + K
   syntax KResult ::= Bool | Int
 
   configuration
-    <T>
-      <threads>
-        <thread multiplicity="*">
-          <k>.K</k>
-          <env>.Map</env>
+    <T color="yellow">
+      <threads color="orange">
+        <thread multiplicity="*" color="red">
+          <k color="green">.K</k>
+          <env color="LightSkyBlue">.Map</env>
         </thread>
      </threads>
-     <store>.Map</store>
-     <nextLoc>0</nextLoc>
-     <in>.List</in>
-     <out>.List</out>
+     <store color="white">.Map</store>
+     <nextLoc color="gray">0</nextLoc>
+     <in color="magenta">.List</in>
+     <out color="Orchid">.List</out>
     </T>
 endkm
 
