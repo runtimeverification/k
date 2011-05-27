@@ -93,8 +93,14 @@ endkm
 
 
 kmod IMP-SEMANTICS is including IMP-SYNTAX + K
-  syntax K ::= AExp | BExp | Stmt
-  syntax KResult ::= Int | Bool
+/*@ \section*{Semantics}
+This module defines the semantics of IMP.  We first define
+its configuration, then its results, and then its semantic rules. */
+
+/*@ \subsection*{Configuration}
+The configuration of IMP is trivial: it only contains two cells, one for
+for the computation and another for the state.  For good encapsulation
+and clarity, we place the two cells inside another cell, the ``top'' cell. */
 
   configuration <T color="yellow">
                   <k color="green"> .K </k>
