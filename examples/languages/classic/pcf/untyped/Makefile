@@ -1,4 +1,3 @@
-
 # this is the name of the main maude module 
 LANGUAGE_NAME = PCF-UNTYPED
 
