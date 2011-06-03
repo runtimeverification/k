@@ -81,9 +81,9 @@ content = takeWhile1 (not . needsEscape) <|> escape <$> satisfy needsEscape
 startTag :: Parser ByteString
 startTag = do
     char '<'
-    spaces
+    skipSpace1
     name <- takeWhile1 isAlphaNum
-    spaces
+    skipSpace1
     char '>'
     return name
 
@@ -91,9 +91,9 @@ startTag = do
 endTag :: ByteString -> Parser ()
 endTag tag = do
     string "</"
-    spaces
+    skipSpace1
     string tag
-    spaces
+    skipSpace1
     char '>'
     return ()
 
