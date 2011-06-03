@@ -20,3 +20,7 @@ parens = between (symbol "(") (symbol ")")
 -- | Alias for Attoparsec's 'skipSpace'.
 spaces :: Parser ()
 spaces = skipSpace
+
+-- | Skip over whitespace, consuming at least one space.
+skipSpace1 :: Parser ()
+skipSpace1 = space >> skipSpace
