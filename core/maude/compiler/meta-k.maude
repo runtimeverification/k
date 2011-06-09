@@ -280,7 +280,7 @@ fmod META-K-RULES is including K-SORTS .
 
 
   op checkReplaceFreeTl : Module TermList ~> TermList .
-  eq checkReplaceFreeTl(M, (O[Tl], Tl')) = if O == replaceS then errorT(O[Tl],mkVariable('`[`], leastSort(M,nth(Tl,0))), "K local rewrite could not be aliminated here.  maybe you have a rewrite within another rewrite?"), Tl' else $checkReplaceFreeTl(M, O[checkReplaceFreeTl(M, Tl)],Tl') fi .
+  eq checkReplaceFreeTl(M, (O[Tl], Tl')) = if O == replaceS then errorT(O[Tl],mkVariable('`[`], leastSort(M,nth(Tl,0))), "K local rewrite could not be eliminated here.  maybe you have a rewrite within another rewrite?"), Tl' else $checkReplaceFreeTl(M, O[checkReplaceFreeTl(M, Tl)],Tl') fi .
   eq checkReplaceFreeTl(M, (Ct,Tl')) = Ct, checkReplaceFreeTl(M,Tl') .
   eq checkReplaceFreeTl(M, (V,Tl')) = V, checkReplaceFreeTl(M,Tl') .
   eq checkReplaceFreeTl(M, empty) = empty .
