@@ -22,6 +22,7 @@ for defining control-intensive language features such as abrupt termination,
 exceptions or call/cc.
 
 ## The K Prototype
+
 The K Framework project is a prototype implementation of the K Framework 
 written in Maude and using Maude to give a rewriting executable semantics 
 to K definitions.
@@ -34,14 +35,16 @@ professor Grigore Rosu), and University Alexandru Ioan Cuza, Iasi, Romania
 A current list of the people involved in the project and their specific roles
 can be accessed at http://code.google.com/p/k-framework/people/list.
 
+
 # Installation
 
 For detailed installation instructions, please see the INSTALL file. 
 
 As the tool is still under active development, it is recommended that you 
-install K directly form the svn repository an update it regularly using 
+install K directly form the svn repository and update it regularly using 
  svn up 
 from the base directory to benefit of the latest fixes and features. 
+
 
 # Usage
 
@@ -50,13 +53,13 @@ examples directory. For example, the directory
  examples/languages/research/simple 
 contains 2 directories, untyped containing the definition of the 
 untyped version of the language, and typed which in turn contains three 
-directories with definitions: static , for the static semantics, i.e., 
+directories with definitions: static, for the static semantics, i.e., 
 the type checker, dynamic, for the dynamically typed version of simple, 
-and dynamic-typed-locations which is a variant of dynamic , in which the 
+and dynamic-typed-locations which is a variant of dynamic, in which the 
 type information is maintained in the environment. 
 
-
 ## When writing new definitions 
+
 All semantics modules should include directly or indirectly the K module. 
 It is recommended that the name of the main module of a definition 
 is the capitalized version of the name of the file containing it. 
@@ -64,7 +67,7 @@ is the capitalized version of the name of the file containing it.
 When adding new rules to a definition, keep in mind the following 
 important restrictions: (1) avoid defining constructs with the same 
 name (but different arities), and (2) any construct should be applied on 
-terms of the syntaxtic types the construct was declared to accept (that is, no 
+terms of the syntactic types the construct was declared to accept (that is, no
 subterm appearing in the definition should parse to a kind; if desired, 
 overload the operations to extend their range). 
 
@@ -75,9 +78,9 @@ name-of-the-file-compiled.maude . Currently, the script has only
 been tested on Unix-like systems, including MacOSX. 
 
 Recommendations on running the script:
-* The directory of the script and thad of the Maude executable should be 
-on the path, named `maude` and `MAUDE_LIB` should point to the location 
-where `prelude.maude` resides
+* The Maude executable should be on the path, named `maude` and `MAUDE_LIB` 
+should point to the location where `prelude.maude` resides
+* The `kompile` script should also be on the path
 * the script should not be moved from the core directory.
 * the script should be run from the directory where the definition 
 resides. 
@@ -177,20 +180,26 @@ configuration of LANGUAGE.
 These helper operators are placed in a module, together with the 
 inclusion of the programs and semantics. 
 
-kmod LANGUAGE is including LANGUAGE-SEMANTICS including 
-LANGUAGE-PROGRAMS ...[above configuration macros]... endkm 
+kmod LANGUAGE is 
+	including LANGUAGE-SEMANTICS 
+	including LANGUAGE-PROGRAMS 
+	...[above configuration macros]... 
+endkm 
 
 The idea now is that we will use the K tool to compile LANGUAGE, and 
-then use the Maude backend to execute that the program using the 
+then use the Maude backend to execute the program using the 
 semantics. 
 
 To run our sample program "pFactorial", all we need to do is something 
 like this: 
 
 $ kompile language.k $ maude language-compiled.maude 
-  \||||||||||||||||||/ 
---- Welcome to Maude ---
-  /||||||||||||||||||\
+                     \||||||||||||||||||/
+                   --- Welcome to Maude ---
+                     /||||||||||||||||||\
+            Maude 2.6 built: Dec  9 2010 18:28:39
+            Copyright 1997-2010 SRI International
+                   Fri Jun 10 13:25:37 2011
 Maude> rewrite run('pFactorial) . 
 
 After which we see: 
@@ -221,19 +230,25 @@ No more solutions.
 states: 28416 rewrites: 224454 in 3093ms cpu (3095ms real) 
 (72555 rewrites/second) 
 
-You can also put those put those commands into a single file, and then 
+You can also put those commands into a single file, and then 
 simply call maude on that file. See 
 examples/languages/classic/imp/imp-test.m and 
 examples/languages/research/simple/untyped/simple-untyped-test.m for 
 examples of this. 
 
 
-
 # Reporting Issues/Bugs/Feature requests
 
 Please report issues here: http://k-framework.googlecode.com
 
-Test cases:
+If you are an end user of K and do not have write permissions to our 
+repository, you can simply post your test case, or explain your problem, 
+under "issues" at http://k-framework.googlecode.com.  For those users 
+who have write permissions to our repository, you can add a test case
+to the repository yourself using the directions that follow.
+
+## Test cases:
+
 When filing a bug, it is important to add an automated test case that 
 exhibits the bug. This allows us to test our fixes and helps catch 
 regressions in the future. We use a simple Makefile based test system 
@@ -241,8 +256,6 @@ that is set up in the following way. If you use our example Makefile
 (provided in the example directory and described below) it should be 
 very easy to add a new test to the system. Just copy and edit. Detailed 
 descriptions follow. 
-
-
 
 Test cases for new bugs should be placed in `/trunk/test/issues` in the 
 following manner:
@@ -264,7 +277,7 @@ Writing:
  rew test1(.List{K}) .
 simply checks that it reduces at all.  It's not a very strong test.
 
-Your test is in the correct form is you can type "make true-test" 
+Your test is in the correct form if you can type "make true-test" 
 and an .xml file is created.
  $ cd trunk/tests/issues/issueXXX
  $ make true-test
