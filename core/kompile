@@ -1822,10 +1822,10 @@ sub make_ops {
 #	        $production =~ s/\s*\n\s*$//sg;
 	    
 		# count line numbers
-		my $absolute_line = countlines($PREMATCH) + $sno if ($temporary =~ /\Q$production\E/);
+		my $absolute_line = countlines($PREMATCH) + $sno - 1 if ($temporary =~ /\Q$production\E/);
 #		print "Production up0: $production at line $absolute_line\n";
-		# $absolute_line = ($absolute_line == 0) ? $sno : $absolute_line + $sno - 1;
-#		print "Production up1: $production at line $absolute_line\n";
+#	        $absolute_line = ($absolute_line == 0) ? $sno : $absolute_line + $sno - 1;
+#		print "Temp:&$temporary&\nProduction up1: |$production|\nat line $absolute_line\n";
 
 # Removing the | separator
 		$production =~ s/(\s)\|(\s)/$1$2/gs;
