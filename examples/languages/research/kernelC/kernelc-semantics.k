@@ -1,7 +1,8 @@
 // 30 semantic rules
 // 16 syntax translation macros
 kmod KERNELC-SEMANTICS is 
-  including KERNELC-DESUGARED-SYNTAX + K + PL-CONVERSION + PL-RANDOM
+  including K
+  including KERNELC-DESUGARED-SYNTAX + PL-CONVERSION + PL-RANDOM
 
   /*@ 
      \section{\KERNELC semantics}
