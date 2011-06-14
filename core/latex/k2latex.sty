@@ -250,7 +250,9 @@
 
 \newcommand{\lp}{(}
 \newcommand{\rp}{)}
-\newcommand{\myquote}[1]{\text{\rmfamily ``\ttfamily #1\rmfamily ''}}
+\newcommand{\myquote}[1]{
+  \k@withTooltip{\text{\rmfamily ``\ttfamily #1\rmfamily ''}}{Constant Sort: String}%
+}
 \newcommand{\mysinglequote}[1]{\text{\rmfamily "}}
 \newcommand{\mybracket}[1]{(#1)}
 \newcommand{\sqbracket}[1]{[#1]}

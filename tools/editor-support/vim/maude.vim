@@ -61,7 +61,7 @@ syn keyword maudeSorts      CellLabel ListItem BagItem SetItem MapItem
 
 syn keyword maudeAttrs      assoc comm idem iter id left-id right-id strat memo
 syn keyword maudeAttrs      prec gather format ctor config object msg frozen
-syn keyword maudeAttrs      poly special label metadata owise nonexec
+syn keyword maudeAttrs      poly special label metadata owise nonexec ditto
 syn keyword maudeAttrs      seqstrict strict structural hybrid nondet bidirectional large
 syn keyword maudeAttrs      latex
 
