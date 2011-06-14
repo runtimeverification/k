@@ -1,5 +1,8 @@
-
-kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
+kmod IMP-SYNTAX is including PL-INT + PL-ID
+/*@ The following constructs are given the expected strictnesses, except for
+\textsf{and}, which is only strict in its first argument, because we will
+give it a short-circuited semantics (its second argument will only be
+evaluated when the first evaluates to true). */
   syntax AExp ::= Id | Int
                 | AExp + AExp                  [prec 33 gather (E e) strict]
                 | AExp / AExp                  [prec 31 gather (E e) strict]
@@ -98,9 +101,10 @@ This module defines the semantics of IMP.  We first define
 its configuration, then its results, and then its semantic rules. */
 
 /*@ \subsection*{Configuration}
-The configuration of IMP is trivial: it only contains two cells, one for
+The configuration of IMP is trivial: it only contains two cells, one
 for the computation and another for the state.  For good encapsulation
-and clarity, we place the two cells inside another cell, the ``top'' cell. */
+and clarity, we place the two cells inside another cell, the ``top'' cell
+which is labelled $\top$. */
 
   configuration <T color="yellow">
                   <k color="green"> .K </k>
@@ -121,7 +125,8 @@ A program variable $X$ is looked up in state $\Large\sigma$ using the
 builtin map lookup operation ${\Large\sigma}(X)$.  Note that this
 operation requires $\Large\sigma$ to be defined in $X$; otherwise the
 rewriting process will get stuck.  This means that our semantics of
-IMP disallows uses of uninitialized variables. */
+IMP disallows uses of uninitialized variables.  Variables are initialized
+using the assignment statement whose semantics is defined below. */
 
   rule <k> X:Id => Sigma(X) <_/k> <state> Sigma:Map </state>
 
