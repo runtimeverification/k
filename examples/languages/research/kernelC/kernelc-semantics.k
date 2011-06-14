@@ -99,10 +99,10 @@ kmod KERNELC-SEMANTICS is
   rule <k> V ~> (. => K) </k> <env> _ => Env </env> 
        <fstack> _ # Env # K => . <_/fstack> [structural]
 
-  rule <k> random() => randomRandom(N') <_/k>
+  rule <k> rand() => randomRandom(N') <_/k>
        <rand> N':Nat => N' +Nat 1 </rand>
 
-  rule <k> srandom(I) => void <_/k>
+  rule <k> srand(I) => void <_/k>
 
   context *[HOLE]=_
   context (*[HOLE])++
