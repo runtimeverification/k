@@ -1532,6 +1532,8 @@ sub maudify_file {
 			print $indent."K module $1 ... " if $verbose;
 			push(@kmodules,$1);
 			my $mno = countlines($`) if ($temporary =~ /\Q$_\E/);
+		    # print "$_\n\n$mno\n\n";
+		    
 			$_ = maudify_module($file, $mno, $_);
 			print "DONE\n" if $verbose;
 		}
@@ -1767,8 +1769,11 @@ sub maudify_module {
 # Takes a syntax statement and extracts sorts, subsorts and operations
 sub make_ops {
     my $sno = shift;
-	my $file = shift;
+    my $file = shift;
     local ($_) = @_;
+    
+#    print "$_\n\n$sno\n\n\n";
+    
 #	print "Frozen: $_\n";
     $_ = Unfreeze("ATTRIBUTES", $_);
 	$_ = Unfreeze("MYSTRINGS", $_);
@@ -1813,10 +1818,13 @@ sub make_ops {
 #        print "PRODS: ".join("#",@productions)."\n";
 
 	foreach my $production (@productions) {
-	
+
+#	        $production =~ s/\s*\n\s*$//sg;
+	    
 		# count line numbers
-		my $absolute_line = countlines($`) if ($temporary =~ /\Q$production\E/);
-		$absolute_line = ($absolute_line == 0) ? $sno : $absolute_line + $sno - 1;
+		my $absolute_line = countlines($PREMATCH) + $sno if ($temporary =~ /\Q$production\E/);
+#		print "Production up0: $production at line $absolute_line\n";
+		# $absolute_line = ($absolute_line == 0) ? $sno : $absolute_line + $sno - 1;
 #		print "Production up1: $production at line $absolute_line\n";
 
 # Removing the | separator
