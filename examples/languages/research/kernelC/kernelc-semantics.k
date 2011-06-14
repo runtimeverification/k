@@ -46,9 +46,11 @@ kmod KERNELC-SEMANTICS is
   rule I1 < I2 => Bool2Int(I1 <Int I2) [structural]
   rule I1:Int == I2:Int => Bool2Int(I1 ==Int I2) [structural] 
   rule I1 != I2 =>  Bool2Int((I1 !=Int I2)) [structural]
-  rule '_?_:_ => 'if`(_`)_else_  [structural]
 
   //@ \subsection{Conditional and loop}
+  //@ Expression conditional is desugared into the statement conditional.
+  rule '_?_:_ => 'if`(_`)_else_  [structural]
+
   rule if(I)_ else St:Stmt => St if I ==Int 0 [structural]
   rule if(I:Int) St else _ => St if notBool(I ==Int 0) [structural]
   rule <k> while(E:Exp) St => if (E) {St while(E) St} else {} <_/k> 

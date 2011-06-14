@@ -1,17 +1,14 @@
 kmod KERNELC-PROGRAMS is including KERNELC-THREADS-SYNTAX 
   syntax Pgm ::= pSum | pCollatz | pBufferOverflow | pSimpTest  | pStrErr | pStrTest
                | pAllocateBadPrint | pAllocatePrintReversePrintFree | pAllocatePrintFree
-  syntax Stmt ::= pPrint.c  | pAllocateLoop.c | pAllocateGood.c | pAllocateBad.c | pReverse.c
-                    | pFree.c | pStrLen.c | pStrCpy.c | pStrRead.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c | stdio.h | stdlib.h
+  syntax CompilationUnit ::= pPrint.c  | pAllocateLoop.c | pAllocateGood.c | pAllocateBad.c | pReverse.c
+                    | pFree.c | pStrLen.c | pStrCpy.c | pStrRead.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c 
   syntax Id ::= a | b | c | d | e | i | l 
           | limit | nr | nn | n | p | q | r | s | steps | t | t1 | t2 | x | y | z 
 
   syntax Id ::= print | allocateLoop | reverse | quickSort
 
 syntax Id ::= strDup | strRead | strPrint | strCpy | strLen | string | string2 | freeList 
-
-  macro stdio.h = {}
-  macro stdlib.h = {}
 
   macro pSum = 
     #include<stdio.h>
@@ -52,7 +49,7 @@ syntax Id ::= strDup | strRead | strPrint | strCpy | strLen | string | string2 |
          return 0;
   } 
 
-  macro pPrint.c =
+  macro #include<pPrint.c> =
 void print(int *a) {
   int * p = a ;
  while (p) {
@@ -61,7 +58,7 @@ void print(int *a) {
  }
 }
  
-  macro pAllocateLoop.c = 
+  macro #include<pAllocateLoop.c> = 
 int allocateLoop(int a,int * p) {
  int n = 0 ;
  int * q ;
@@ -79,7 +76,7 @@ int allocateLoop(int a,int * p) {
 
 ---  macro pAllocateBad = allocateLoop(a, malloc(2), o) ;
 
-  macro pReverse.c = int reverse(int *p) {
+  macro #include<pReverse.c> = int reverse(int *p) {
   int * x ; int * y ;
  if (p) {
   x = *(p + 1) ;
@@ -94,7 +91,7 @@ int allocateLoop(int a,int * p) {
  return p ;
 }
 
-  macro pFree.c = void freeList(int * p) {
+  macro #include<pFree.c> = void freeList(int * p) {
 int * q;
  while (p) {
   q = * (p + 1) ;
@@ -103,29 +100,29 @@ int * q;
  }
 }
 
-  macro pStrLen.c = int strLen(int * a) {
+  macro #include<pStrLen.c> = int strLen(int * a) {
    int l = 0;
    while(* a++) {l++;}
    return l;
 }
 
-  macro pStrCpy.c = void strCpy(int * a, int * b) {
+  macro #include<pStrCpy.c> = void strCpy(int * a, int * b) {
    while (*a++=*b++) {} 
 }
 
-  macro pStrDup.c = int * strDup(int * a) {
+  macro #include<pStrDup.c> = int * strDup(int * a) {
     int * p = (int *)malloc((strLen(a)+1)*sizeof(int)) ;
     strCpy(p,a);
     return p;
   }
 
-  macro pString.c = int * string() {
+  macro #include<pString.c> = int * string() {
     int * p =  (int *)malloc(5*sizeof(int));
     p[0] = 1; p[1] = 2 ; p[2] = 3 ; p[3] = 4 ; p[4] = 0 ;
     return p;
 }
 
-  macro pString2.c =  int * string2() {
+  macro #include<pString2.c> =  int * string2() {
     int * p =  (int *)malloc(100*sizeof(int));
     int i = 0 ;
     while (i <= 98) {
@@ -137,7 +134,7 @@ int * q;
 }
 
 
-macro pStrRead.c =
+macro #include<pStrRead.c> =
 int * strRead() {
   int n ;
   scanf("%d",&n);
@@ -172,7 +169,7 @@ int * strRead() {
   macro pBufferOverflow.in3 = (4,10,11,12,13,6,20,21,22,23,24,25) 
 
   
-  macro pStrPrint.c =  void strPrint(int *a) {
+  macro #include<pStrPrint.c> =  void strPrint(int *a) {
    while (* a) {
      printf("%d;",* a++);
    }
@@ -254,9 +251,9 @@ macro pSimpTest =
 } 
 
  
-syntax Stmt ::= fNewArray.c  | fPrintArray.c
+syntax CompilationUnit ::= fNewArray.c  | fPrintArray.c
 syntax Id ::= newArray | printArray
-macro fNewArray.c = 
+macro #include<fNewArray.c> = 
 int * newArray() {
   int n ;
   scanf("%d",&n);
@@ -270,7 +267,7 @@ int * newArray() {
   return a;
 }
 
-macro fPrintArray.c = 
+macro #include<fPrintArray.c> = 
 void printArray(int * a) {
   int i = 1;
   while (i <= a[0]) { 
