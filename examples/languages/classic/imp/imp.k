@@ -104,7 +104,7 @@ its configuration, then its results, and then its semantic rules. */
 The configuration of IMP is trivial: it only contains two cells, one
 for the computation and another for the state.  For good encapsulation
 and clarity, we place the two cells inside another cell, the ``top'' cell
-which is labelled $\top$. */
+which is labeled $\top$. */
 
   configuration <T color="yellow">
                   <k color="green"> .K </k>
@@ -190,7 +190,7 @@ framework, so one needs to structurally (or via strategies, which
 \K does not support for model-theoretical reasons) inhibit the
 application of rewrite rules; this is in contrast to SOS, where one
 needs to explicitly give permission (through conditional rules) to
-reductions inside constructs' arguments.  Also note that we prefered
+reductions inside constructs' arguments.  Also note that we preferred
 to make the rule below structural.  If one wants this unrolling step
 to count as a computational step (though we beg one to reconsider)
 then one can remove the ``structural'' tag.  */
