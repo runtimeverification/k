@@ -1640,8 +1640,9 @@ sub add_line_no_mb
 
 sub countlines
 {
-	my ($text) = (@_);
-	return $text =~ tr/\n//;
+    my ($text) = (@_);
+    my $lno = ($text =~ tr/\n//);
+    return $lno == 0 ? $lno : $lno - 1;
 }
 
 
