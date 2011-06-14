@@ -117,21 +117,34 @@ Currently we have to explicitly declare the syntactic lists (they will be eventu
 endkm
 
 kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX 
-  //@ \section{Desugaring}    Expressing some constructs in terms of others to reduce the amount of constructs to which semantics needs to be given.
+  //@ \subsection{Desugaring}    Expressing some constructs in terms of others to reduce the amount of constructs to which semantics needs to be given.
+
+  //@ \paragraph{Logical operators} are desugared into instances of the conditional expression, thus also ensuring a shortcut semantics for them.
   macro ! E:Exp = E ? 0 : 1
   macro E1:Exp && E2:Exp = E1 ? E2 : 0
   macro E1 || E2 = E1 ? 1 : E2
+ 
   macro if(E) St:Stmt = if(E) St else {}
   macro NULL = 0
+
+  //@ Calling a function with zero arguments is desugared in the normal call with the empty list `()' as argument
   macro I:Id () = I (())
 ---  macro DeclId:DeclId(DeclIds:List{DeclId}) { Stmts:StmtList } = DeclId(DeclIds) { Stmts return 0 ;}  
 
-  macro int * PointerId:PointerId = int PointerId
+  //@ \paragraph{Standard header inclusion} is ignored, as we give direct semantics for the supported functions.
   macro #include<stdio.h> = {}
   macro #include<stdlib.h> = {}
+
+  //@ Array access is pointer dereference
   macro E1[E2] = *(E1 + E2)
+  //@ Simplifying ``{\tt \& * E}'' in the context of {\tt scanf}
   macro scanf( "%d" , & * E) = scanf("%d", E)
+
+  //@ As currently we don't perform any type checking, either static or dynamic, we here forget typing information for variable declarations.
+  macro int * PointerId:PointerId = int PointerId
   macro (int * PointerId = E) = (int PointerId = E)
+
+  //@ Declaration with initialization is desugared into the composing operations.
   macro (int X:Id = E ;) = int X ; X = E ;
 endkm
 
