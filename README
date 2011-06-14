@@ -42,7 +42,9 @@ For detailed installation instructions, please see the INSTALL file.
 
 As the tool is still under active development, it is recommended that you 
 install K directly form the svn repository and update it regularly using 
- svn up 
+
+  svn up 
+
 from the base directory to benefit of the latest fixes and features. 
 
 
@@ -78,52 +80,57 @@ name-of-the-file-compiled.maude . Currently, the script has only
 been tested on Unix-like systems, including MacOSX. 
 
 Recommendations on running the script:
-* The Maude executable should be on the path, named `maude` and `MAUDE_LIB` 
-should point to the location where `prelude.maude` resides
+* The Maude executable should be on the path and should be named `maude`;
+moreover, the environment variable `MAUDE_LIB` should point to the location
+where `prelude.maude` resides
 * The `kompile` script should also be on the path
-* the script should not be moved from the core directory.
-* the script should be run from the directory where the definition 
+* The `kompile` script should not be moved from the core directory
+* The `kompile` script should be run from the directory where the definition 
 resides. 
 
 Assuming the above suggestions were followed, to compile the untyped version 
 of the simple language mentioned above, execute
+
   kompile simple-untyped
+
 in the `examples/research/simple/untyped` directory.
 
 
 # How It Works
- In order to actually interpret (or perform state-space search on) 
+
+In order to actually interpret (or perform state-space search on) 
 programs using a semantics written in K, there needs to be a way to give 
 the programs to the tool. The simplest way to do this is by introducing 
 a new module that defines programs as macros, letting the K tool turn 
 this into its internal representation, and then use Maude on the 
-generated code. We briefly outline the process below. 
+generated code. We briefly outline the process below.
 
 (For more information, see the language examples in the /examples 
 directory; in particular, take a look at /examples/languages/classic/imp 
 and /examples/languages/research/simple/untyped, as these are 
 particularly well-documented, familiar, and small.) 
 
-For example, for a language LANGUAGE, we can introduce a module of the 
-form: 
+For example, for a language LANGUAGE, we can introduce a module of the form: 
 
-kmod LANGUAGE-PROGRAMS is including LANGUAGE-SYNTAX
-	syntax Id ::= f | i | t | x | y | ...
-	syntax Stmts ::= pFactorial | ...
-	macro pFactorial =
-		var x;
-		function f(y) {
-			var t=1;
-			for i = 1 to y do
-			t = t*i;
-			return t;
-		}
-		function main() {
-			x = 5;
-			write(f(x));
-		}
-	...
-endkm
+  kmod LANGUAGE-PROGRAMS is including LANGUAGE-SYNTAX
+    syntax Id ::= f | i | t | x | y | ...
+    syntax Stmts ::= pFactorial | ...
+
+    macro pFactorial =
+      var x;
+      function f(y) {
+        var t=1;
+        for i = 1 to y do
+          t = t*i;
+        return t;
+      }
+      function main() {
+        x = 5;
+        write(f(x));
+      }
+
+    ...
+  endkm
 
 Obviously, the above program is just an example (borrowed from 
 examples/languages/research/simple/untyped); you'll have to write 
@@ -143,21 +150,23 @@ applied to them. In addition, in our current implementation of K, the
 internal representation of the syntactic terms follows the simple 
 abstract-syntax-tree (AST) syntax: 
 
-K ::= KLabel(List{K}) 
+  K ::= KLabel(List{K}) 
 
 We use ".List{K}" for the unit of List{K}. For example, the internal 
 representation of the syntactic program constant pFactorial above is 
 'pFactorial(.List{K}). As a more complex example showing elements that 
 need to be escaped, the program term itself is represented internally 
-by: '__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id 
-f(.List{K}), ,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(Id 
-t(.List{K}),,Int 1(.List{ K})))),,'__('for_=_to_do_(Id i(.List{K}),,Int 
-1(.List{K}),,Id y(.List{K}),,'_;( '_=_(Id t(.List{K}),,'_*_(Id 
-t(.List{K}),,Id i(.List{K}))))),,'return_;(Id t(.List{ 
-K})))))),,'function_`(`)_(Id main(.List{K}),,'`{_`}('__('_;('_=_(Id 
-x(.List{K}),, Int 5(.List{K}))),,'write`(_`);('_`(_`)(Id 
-f(.List{K}),,'_`,_('_`(_`)(Id f(.List{ K}),,'_`,_(Id 
-x(.List{K}))))))))))) 
+by:
+
+  '__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id 
+  f(.List{K}), ,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(Id 
+  t(.List{K}),,Int 1(.List{ K})))),,'__('for_=_to_do_(Id i(.List{K}),,Int 
+  1(.List{K}),,Id y(.List{K}),,'_;( '_=_(Id t(.List{K}),,'_*_(Id 
+  t(.List{K}),,Id i(.List{K}))))),,'return_;(Id t(.List{ 
+  K})))))),,'function_`(`)_(Id main(.List{K}),,'`{_`}('__('_;('_=_(Id 
+  x(.List{K}),, Int 5(.List{K}))),,'write`(_`);('_`(_`)(Id 
+  f(.List{K}),,'_`,_('_`(_`)(Id f(.List{ K}),,'_`,_(Id 
+  x(.List{K})))))))))))
 
 One needs to create initial configurations holding the programs one 
 wants to execute and possibly other data, such as, for example, the 
@@ -165,12 +174,12 @@ program input. The two configuration generator operations below are
 meant to help users initialize the configuration when executing 
 programs, and not to be regarded as part of the theoretical semantics: 
 
-syntax Bag ::= run( KLabel ) | run( KLabel , List ) 
+  syntax Bag ::= run( KLabel ) | run( KLabel , List ) 
 
-macro run(PgmName:KLabel) = 
-<T_> <k> PgmName(.List{K}) ~> execute </k> <_/T> 
-macro run(PgmName:KLabel, Input:List) = 
-<T_> <k> PgmName(.List{K}) ~> execute <k> <input> Input <input> <_/T> 
+  macro run(PgmName:KLabel) =
+        <T_> <k> PgmName(.List{K}) ~> execute </k> <_/T>
+  macro run(PgmName:KLabel, Input:List) = 
+        <T_> <k> PgmName(.List{K}) ~> execute <k> <input> Input <input> <_/T>
 
 Note that the configurations above use ruptured cells, so they take 
 advantage of K's configuration abstraction mechanism. They will be 
@@ -180,58 +189,57 @@ configuration of LANGUAGE.
 These helper operators are placed in a module, together with the 
 inclusion of the programs and semantics. 
 
-kmod LANGUAGE is 
-	including LANGUAGE-SEMANTICS 
-	including LANGUAGE-PROGRAMS 
-	...[above configuration macros]... 
-endkm 
+  kmod LANGUAGE is 
+    including LANGUAGE-SEMANTICS 
+    including LANGUAGE-PROGRAMS 
+    ...[above configuration macros]... 
+  endkm 
 
 The idea now is that we will use the K tool to compile LANGUAGE, and 
-then use the Maude backend to execute the program using the 
-semantics. 
+then use the Maude backend to execute the program using the semantics. 
 
 To run our sample program "pFactorial", all we need to do is something 
 like this: 
 
-$ kompile language.k $ maude language-compiled.maude 
-                     \||||||||||||||||||/
-                   --- Welcome to Maude ---
-                     /||||||||||||||||||\
-            Maude 2.6 built: Dec  9 2010 18:28:39
-            Copyright 1997-2010 SRI International
-                   Fri Jun 10 13:25:37 2011
-Maude> rewrite run('pFactorial) . 
+  $ kompile language.k $ maude language-compiled.maude 
+                       \||||||||||||||||||/
+                     --- Welcome to Maude ---
+                       /||||||||||||||||||\
+              Maude 2.6 built: Dec  9 2010 18:28:39
+              Copyright 1997-2010 SRI International
+                     Fri Jun 10 13:25:37 2011
+  Maude> rewrite run('pFactorial) .
 
 After which we see: 
 
-rewrite in LANGUAGE : run('pFactorial) . 
-rewrites: 6419 in 99ms cpu (99ms real) (64199 rewrites/second) 
-result BagItem: < T > < out > ListItem(Int 120(.List{K})) </ out > ...
-[We omit here the contents of the other cells that exist at program 
-termination, and show only the output.]... </ T > 
+  rewrite in LANGUAGE : run('pFactorial) . 
+  rewrites: 6419 in 99ms cpu (99ms real) (64199 rewrites/second) 
+  result BagItem: < T > < out > ListItem(Int 120(.List{K})) </ out > ...
+  [We omit here the contents of the other cells that exist at program 
+  termination, and show only the output.]... </ T > 
 
 If, instead, one wants to search for all possible final states which 
 could be obtained upon running the program, then one would need to use 
 the command 
 
-Maude> search run('pFactorial) =>! Final:Bag . 
+  Maude> search run('pFactorial) =>! Final:Bag . 
 
 And we get the result: 
 
-search in SIMPLE-UNTYPED : run('pFactorial) =>! Final:Bag . 
+  search in SIMPLE-UNTYPED : run('pFactorial) =>! Final:Bag . 
 
-Solution 1 (state 28364) 
-states: 28416 
-rewrites: 224116 in 3089ms cpu (3091ms real) (72540 rewrites/second) 
-Final:Bag --> < T > < out > 
-ListItem(Int 120(.List{K})) </ out > ... </ T > 
+  Solution 1 (state 28364) 
+  states: 28416 
+  rewrites: 224116 in 3089ms cpu (3091ms real) (72540 rewrites/second) 
+  Final:Bag --> < T > < out > 
+  ListItem(Int 120(.List{K})) </ out > ... </ T > 
 
-No more solutions. 
-states: 28416 rewrites: 224454 in 3093ms cpu (3095ms real) 
-(72555 rewrites/second) 
+  No more solutions. 
+  states: 28416 rewrites: 224454 in 3093ms cpu (3095ms real) 
+  (72555 rewrites/second) 
 
 You can also put those commands into a single file, and then 
-simply call maude on that file. See 
+simply call maude on that file. See
 examples/languages/classic/imp/imp-test.m and 
 examples/languages/research/simple/untyped/simple-untyped-test.m for 
 examples of this. 
@@ -244,7 +252,7 @@ Please report issues here: http://k-framework.googlecode.com
 If you are an end user of K and do not have write permissions to our 
 repository, you can simply post your test case, or explain your problem, 
 under "issues" at http://k-framework.googlecode.com.  For those users 
-who have write permissions to our repository, you can add a test case
+who have write permissions to our repository, Please add a test case
 to the repository yourself using the directions that follow.
 
 ## Test cases:
@@ -259,38 +267,46 @@ descriptions follow.
 
 Test cases for new bugs should be placed in `/trunk/test/issues` in the 
 following manner:
- $ cd trunk/tests/issues
- $ svn cp example issueXXX
+
+  $ cd trunk/tests/issues
+  $ svn cp example issueXXX
+
 This copies the example test to a new directory so you can edit it.
 XXX is intended to be the # of the issue you post on google code.
 
 Now, edit the files in the `issueXXX` directory to reflect your bug.
 You must keep the `Makefile`, which you can adjust to suit the filenames 
 you use.  In your `test.m` file, writing
- rew test1(.List{K}) . ---@ foo 'SomeLabel(.List{K})
+
+  rew test1(.List{K}) . ---@ foo 'SomeLabel(.List{K})
+
 causes the test to reduce `test1(.List{K})` and ensures that the result
-contains the substring `'SomeLabel(.List{K})`, in addition to naming the test "foo".
-It's parsed like this:
- [rew|red|etc] [testString] . ---@ [testNameWithNoSpaces] [resultString]
+contains the substring `'SomeLabel(.List{K})`, in addition to naming
+the test "foo".  It's parsed like this:
+
+  [rew|red|etc] [testString] . ---@ [testNameWithNoSpaces] [resultString]
 
 Writing:
- rew test1(.List{K}) .
+
+  rew test1(.List{K}) .
+
 simply checks that it reduces at all.  It's not a very strong test.
 
 Your test is in the correct form if you can type "make true-test" 
 and an .xml file is created.
- $ cd trunk/tests/issues/issueXXX
- $ make true-test
- $ cat *.xml
- <?xml version='1.0' encoding='UTF-8' ?>
- <testsuite name='issuexxx.test' time='0'>
-        <testcase name='test1' time='0'>
-                <failure>Failure</failure>
-        </testcase>
-        <testcase name='test2' time='0'>
-                Success
-        </testcase>
- </testsuite>
+
+  $ cd trunk/tests/issues/issueXXX
+  $ make true-test
+  $ cat *.xml
+  <?xml version='1.0' encoding='UTF-8' ?>
+  <testsuite name='issuexxx.test' time='0'>
+    <testcase name='test1' time='0'>
+      <failure>Failure</failure>
+    </testcase>
+    <testcase name='test2' time='0'>
+      Success
+    </testcase>
+  </testsuite>
 
 Since you are adding this test because you have a bug, at least one of
 your individual tests should give a failure message.
