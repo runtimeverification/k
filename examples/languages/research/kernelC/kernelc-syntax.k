@@ -1,6 +1,6 @@
 --- 33 C language constructs
 kmod KERNELC-SYNTAX is
-  including PL-INT +  PL-ID + K-LATEX
+  including PL-INT +  PL-ID 
    /*@\section{\KERNELC syntax}
 
        This module specifies the syntax of \KERNELC.  The syntax has been kept as close to the C syntax as possible to allow a resonably large class of C programs to be parsed and executed with the \KERNELC definition.  Nevertheless, the syntax is quite small, covering only 33 constructs of the C language.
@@ -35,7 +35,7 @@ KERNELC is considered an expression introduced by the type {\tt int} and definin
                      | * PointerId [prec 25 strict]
 
   /*@ \subsection{Memory allocation and addressing}
-      Again, for simplicity  we spell out a fixed syntax for malloc, using the size of integers as a multiplication factor and the result to a integer pointer.
+      Again, for simplicity  we spell out a fixed syntax for malloc, using the size of integers as a multiplication factor and the result to an integer pointer.
   */
   syntax Exp ::=  `NULL
                | * Exp [ditto]
@@ -44,7 +44,7 @@ KERNELC is considered an expression introduced by the type {\tt int} and definin
                | free ( Exp ) [strict] 
 
   /*@ \subsection{Assignment}
-      We have {\it Exp} in the left side to allow both assigning to variables and heap locations.
+      We have {\it Exp} in the left side to allow assigning to both variables and heap locations.
   */
   syntax Exp ::= Exp = Exp [strict(2) prec 40 gather (e E)] 
 
@@ -57,9 +57,10 @@ KERNELC is considered an expression introduced by the type {\tt int} and definin
   syntax Stmt ::= DeclId List{DeclId} { StmtList }
   syntax DeclId ::= void PointerId [prec 40]
 
-  //@ \subsubsection{Function invocation}
+  //@ \subsubsection{Function invocation and return}
   syntax Exp ::= Id ( List{Exp} ) [prec 0 strict(2)] 
                | Id ( ) [prec 0]
+  syntax Stmt ::= return Exp ; [strict]
 
 /*@As our current parser is ``algebraic'', the empty list needs to be identifiable as a constant (unlike CFG grammars, where it can simply be the empty string/epsilon production). Therefore, if only using the first syntactic production for function invocation, one would need to explicitly specify the empty list constant for calling a function with zero arguments. To avoid having to do that, we add a separate production with explicitly no arguments; this is desugared into the first one in the {\tt KERNELC-DESUGARED-SYNTAX} module.
   */
@@ -71,7 +72,6 @@ KERNELC is considered an expression introduced by the type {\tt int} and definin
                 | if ( Exp ) Stmt [prec 47]
                 | if ( Exp ) Stmt else Stmt [prec 46 strict(1)]
                 | while ( Exp ) Stmt 
-                | return Exp ; [strict]
 
   syntax StmtList ::= Stmt 
                     | StmtList StmtList [prec 100 gather (e E)]
@@ -117,7 +117,7 @@ Currently we have to explicitly declare the syntactic lists (they will be eventu
 endkm
 
 kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX 
-  //@ \subsection{Desugaring}    Expressing some constructs in terms of others to reduce the amount of constructs to which semantics needs to be given.
+  //@ \section{Desugaring}    Expressing some constructs in terms of others to reduce the amount of constructs to which semantics needs to be given.
 
   //@ \paragraph{Logical operators} are desugared into instances of the conditional expression, thus also ensuring a shortcut semantics for them.
   macro ! E:Exp = E ? 0 : 1
@@ -127,7 +127,7 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro if(E) St:Stmt = if(E) St else {}
   macro NULL = 0
 
-  //@ Calling a function with zero arguments is desugared in the normal call with the empty list `()' as argument
+  //@ \paragraph{Calling a function with zero arguments} is desugared in the normal call with the empty list `()' as argument
   macro I:Id () = I (())
 ---  macro DeclId:DeclId(DeclIds:List{DeclId}) { Stmts:StmtList } = DeclId(DeclIds) { Stmts return 0 ;}  
 
@@ -135,16 +135,17 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro #include<stdio.h> = {}
   macro #include<stdlib.h> = {}
 
-  //@ Array access is pointer dereference
+  //@ \paragraph{Array access} is pointer dereference
   macro E1[E2] = *(E1 + E2)
-  //@ Simplifying ``{\tt \& * E}'' in the context of {\tt scanf}
+
+  //@ \paragraph{Simplifying ``{\tt \& * E}''} in the context of {\tt scanf}
   macro scanf( "%d" , & * E) = scanf("%d", E)
 
-  //@ As currently we don't perform any type checking, either static or dynamic, we here forget typing information for variable declarations.
+  //@ \paragraph{Flattening types.} As currently we don't perform any type checking, either static or dynamic, we here forget typing information for variable declarations.
   macro int * PointerId:PointerId = int PointerId
   macro (int * PointerId = E) = (int PointerId = E)
 
-  //@ Declaration with initialization is desugared into the composing operations.
+  //@ \paragraph{Declaration with initialization} is desugared into the composing operations.
   macro (int X:Id = E ;) = int X ; X = E ;
 endkm
 
