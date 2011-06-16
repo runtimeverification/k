@@ -24,9 +24,9 @@ The K Framework tool depends on the following software:
     * Text::Diff
 * *Subversion* for downloading the latest version of K.
 * *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
-  packages, the following (texlive) packages are needed: bera, datetime, ec,
-  fancybox, fancyvrb, import, marginnote, microtype, ms, pdfcomment, pgf,
-  preview, stmaryrd, times, titlesec, ucs, url, xcolor, and xkeyval.
+  packages, the following (texlive) packages are needed: `bera`, `datetime`, `ec`,
+  `fancybox`, `fancyvrb`, `import`, `marginnote`, `microtype`, `ms`, `pdfcomment`, `pgf`,
+  `preview`, `stmaryrd`, `times`, `titlesec`, `ucs`, `url`, `xcolor`, and `xkeyval`.
 
 In the installation instructions that follow, commands that start with `$` may
 be performed as a non-root user whereas commands that start with `#` should be
@@ -109,9 +109,32 @@ Perl dependencies:
 
     # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary Text::Diff
 	
-Once GNU Make, Perl, and the Perl modules are installed, jump to the
-section on downloading K.
 
+## Installing LaTeX
+
+We present here some instructions for installing TeX Live on Unix-like machines.
+First choice  is to install TeX Live and the packages mentioned above using your 
+package manager (or a binary distribution on Mac);  alternatively you can use
+the TeX Live Quick install method <http://www.tug.org/texlive/quickinstall.html>.
+
+A full TeX Live installation should provide all the above mentioned packages; 
+note however that our LaTeX macros rely on a quite recent version of the pgf 
+package which is not provided with the 2010 TeX Live distribution, but which can 
+be obtained by upgrading the pgf package using the TeX Live package manager.
+   
+    # tlmgr update pgf 
+
+If using a partial TeX Live installation and you cannot find the specified 
+packages in the installation packages provided by your distribution, you can 
+install them using the same `tlmgr` command:
+    
+    # tlmgr install  bera datetime ec fancybox fancyvrb import marginnote \
+                     microtype ms pdfcomment pgf preview stmaryrd times \
+                     titlesec ucs url xcolor xkeyval
+
+
+Once GNU Make, Perl, the Perl modules, and a good enough LaTeX distribution 
+are installed, jump to the section on downloading K.
 
 ## Download the K Framework
 
@@ -145,7 +168,6 @@ directly (without using the `make` tool).
 Once the necessary dependencies are installed and the necessary paths are set,
 you should be able to type `make` in the `k-framework/tests/regression`
 directory and have all of the test cases pass.
-
 
 ## Test the K LaTeX backend
 
