@@ -505,8 +505,9 @@ cell is torn.  That means that the remaining cells are added and initialized aut
 described in the definition of SIMPLE's configuration.  This is part of \K's
 configuration abstraction/concretization mechanism. */
 
-   rule <thread_> <k> spawn S => . <_/k> <env> Env </env> <_/thread>
-        (. => <thread_> <k> S </k> <env> Env </env> <_/thread>)
+   rule <T><threads><thread_> <k> spawn S => . <_/k> <env> Env </env> <_/thread>
+        (. => <thread_> <k> S </k> <env> Env </env>
+<_/thread>)</threads></T>
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the contents of its

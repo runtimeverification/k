@@ -112,15 +112,22 @@ Perl dependencies:
 
 ## Installing LaTeX
 
-We present here some instructions for installing TeX Live on Unix-like machines.
-First choice  is to install TeX Live and the packages mentioned above using a 
-package manager (or a binary distribution on Mac);  alternatively one can use
-the TeX Live Quick install method <http://www.tug.org/texlive/quickinstall.html>.
 
-A full TeX Live installation should provide all the above mentioned packages; 
-note however that our LaTeX macros rely on a quite recent version of the pgf 
-package which is not provided with the 2010 TeX Live distribution, but which can 
-be obtained by upgrading the pgf package using the TeX Live package manager.
+We present here some instructions for installing TeX Live on Unix-like machines.
+Although most linux users prefer using a package manager we strongly advise 
+them to install texlive manually as our latex compilation is only known to work 
+with a texlive 2010 distribution and the most recent version of the pgf package. 
+
+To do that one can use the TeX Live Quick install method 
+<http://www.tug.org/texlive/quickinstall.html>.
+
+For Mac OSX users the preferred method is to install MacTex
+<http://www.tug.org/mactex/>
+
+A full TeX Live installation should provide all the latex packages mentioned
+in the prerequisites. Note however that our LaTeX macros rely on a quite 
+recent version of the pgf package. To make sure you have the latest version
+of this package you can upgrade it using the TeX Live package manager.
    
     # tlmgr update pgf 
 
