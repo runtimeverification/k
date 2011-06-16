@@ -113,8 +113,8 @@ Perl dependencies:
 ## Installing LaTeX
 
 We present here some instructions for installing TeX Live on Unix-like machines.
-First choice  is to install TeX Live and the packages mentioned above using your 
-package manager (or a binary distribution on Mac);  alternatively you can use
+First choice  is to install TeX Live and the packages mentioned above using a 
+package manager (or a binary distribution on Mac);  alternatively one can use
 the TeX Live Quick install method <http://www.tug.org/texlive/quickinstall.html>.
 
 A full TeX Live installation should provide all the above mentioned packages; 
@@ -124,9 +124,8 @@ be obtained by upgrading the pgf package using the TeX Live package manager.
    
     # tlmgr update pgf 
 
-If using a partial TeX Live installation and you cannot find the specified 
-packages in the installation packages provided by your distribution, you can 
-install them using the same `tlmgr` command:
+If using a partial TeX Live installation which does not provide all the 
+TeX Live packages specified above, these can be installed with the command:
     
     # tlmgr install  bera datetime ec fancybox fancyvrb import marginnote \
                      microtype ms pdfcomment pgf preview stmaryrd times \
