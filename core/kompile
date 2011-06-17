@@ -3,7 +3,7 @@ use strict;
 use File::Basename;
 use File::Spec;
 use File::Copy;
-use File::Path;
+use File::Path 2.07 qw( make_path remove_tree );
 use Switch;
 use Cwd;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
