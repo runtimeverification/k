@@ -14,7 +14,11 @@ BEGIN {
 }
 
 # check installed software
-check_perl_packages();
+check_perl_packages("XML::DOM");
+check_perl_packages("Regexp::Common");
+check_perl_packages("XML::LibXML::Reader");
+check_perl_packages("Tree::Nary");
+check_perl_packages("Text::Diff");
 
 # add common functions file
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
@@ -2517,7 +2521,7 @@ q
 	$comp =~ /$begin_compiled_module(.*?)$end_compiled_module/s;
 	#print $1;
 
-	unlink("programCompile.tmp");
+#	unlink("programCompile.tmp");
 
 	open MYFILE,">","$pgm-compiled.maude" or die "Cannot create $tempFile\n";
 	print MYFILE "load \"$pgm\"\n$1";
@@ -2584,27 +2588,20 @@ sub restore_intermodule_latex
 sub check_perl_packages
 {
 	# check if maude is installed
-
-	# first check if MAUDE_LIB is set
-#	my $maude_lib = $ENV{'MAUDE_LIB'};
-#	if ($maude_lib eq "")
-#	{
-#		print "Variable MAUDE_LIB is not set. \n";
-#		exit(2);
-#	}
+        my $pack = shift;
 
 	# check if XML::DOM package is installed
-	$_ = `perl -e 'use XML::DOM;print "okay"'`;
+	$_ = `perl -e 'use $pack;print "okay"'`;
 	my $found = $_ eq "okay"?1:0;
 
 	if (!$found)
 	{
-		print "[ERROR] Package XML::DOM is not installed. You can install XML::DOM using cpan tool:\n\troot# cpan\n\tcpan[1]> install XML::DOM\n";
+		print "[ERROR] Perl package $pack is not installed.\n";
 		exit(1);
 	}
 	else
 	{
-		print "Package XML::DOM installed...\n" if $verbose;
+		print "Package $pack installed...\n" if $verbose;
 	}
 
 }
