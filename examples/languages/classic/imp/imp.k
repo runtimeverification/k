@@ -152,7 +152,7 @@ There is one rule per statement construct except for the conditional,
 which needs two rules. */
 
 /*@ \subsubsection{Skip}
-The \texttt{skip} statement is simply dissolved.  One can make this
+The \texttt{skip} is simply dissolved.  One can make this
 rule structural if one does not want it to count as a computational step. */
 
   rule skip; => .
@@ -186,13 +186,13 @@ We give the semantics of the \texttt{while} loop by unrolling.
 Note that the unrolling takes place only when the loop statement
 reaches the top of the computation cell; otherwise the unrolling
 process may not terminate.  Recall that \K is a rewriting
-framework, so one needs to structurally (or via strategies, which
-\K does not support for model-theoretical reasons) inhibit the
-application of rewrite rules; this is in contrast to SOS, where one
-needs to explicitly give permission (through conditional rules) to
-reductions inside constructs' arguments.  Also note that we preferred
-to make the rule below structural.  If one wants this unrolling step
-to count as a computational step (though we beg one to reconsider)
+framework, so one needs to structurally inhibit the
+application of rewrite rules; this is in contrast to structural
+operational semantics (SOS), where one needs to explicitly give
+permission (through conditional rules) to reductions inside
+constructs' arguments.  Also note that we preferred to make the
+rule below structural.  If one wants this unrolling step to count
+as a computational step (though we beg one to reconsider)
 then one can remove the ``structural'' tag.  */
 
   rule <k> while B do S => if B then (S while B do S) else skip; <_/k> [structural]
