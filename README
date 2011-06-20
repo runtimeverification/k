@@ -1,18 +1,18 @@
 # Overview
 
-K is an executable semantic framework in which programming languages, 
-calculi, as well as type systems or formal analysis tools can be 
+K is an executable semantic framework in which programming languages,
+calculi, as well as type systems or formal analysis tools can be
 defined making use of configurations, computations and rules.
 
-* *Configurations* organize the system/program state in units called cells, 
+* *Configurations* organize the system/program state in units called cells,
 which are labeled and can be nested.
-* *Computations* carry "computational meaning" as special nested list 
-structures sequentializing computational tasks, such as fragments of 
-program; in particular, computations extend the original language or 
+* *Computations* carry "computational meaning" as special nested list
+structures sequentializing computational tasks, such as fragments of
+program; in particular, computations extend the original language or
 calculus syntax.
-* *K (rewrite) rules* generalize conventional rewrite rules by making it 
-explicit which parts of the term they read-only, write-only, or do not 
-care about. This distinction makes K a suitable framework for defining 
+* *K (rewrite) rules* generalize conventional rewrite rules by making it
+explicit which parts of the term they read-only, write-only, or do not
+care about. This distinction makes K a suitable framework for defining
 truly concurrent languages or calculi even in the presence of sharing.
 
 Since computations can be handled like any other terms in a rewriting 
@@ -23,13 +23,13 @@ exceptions or call/cc.
 
 ## The K Prototype
 
-The K Framework project is a prototype implementation of the K Framework 
-written in Maude and using Maude to give a rewriting executable semantics 
-to K definitions.
+The k-framework.googlecode project, also called the "K prototype" from here on,
+is a prototype implementation of the K Framework written in Maude and using
+Maude to give a rewriting executable semantics to K definitions.
 
-The K prototype is developed by a joint team of faculty and students from 
-University of Illinois at Urbana-Champaign (the FSL group, led by 
-professor Grigore Rosu), and University Alexandru Ioan Cuza, Iasi, Romania 
+The K prototype is developed by a joint team of faculty and students from
+University of Illinois at Urbana-Champaign (the FSL group, led by
+professor Grigore Rosu), and University Alexandru Ioan Cuza, Iasi, Romania
 (the FMSE group, led by professor Dorel Lucanu).
 
 A current list of the people involved in the project and their specific roles
@@ -41,42 +41,43 @@ can be accessed at http://code.google.com/p/k-framework/people/list.
 For detailed installation instructions, please see the INSTALL file. 
 
 As the tool is still under active development, it is recommended that you 
-install K directly form the svn repository and update it regularly using 
+install K directly from the svn repository and update it regularly using
 
   svn up 
 
-from the base directory to benefit of the latest fixes and features. 
+from the base directory to benefit of the latest fixes and features.
 
 
 # Usage
 
-The languages defined so far using the K framework can be found in the 
-examples directory. For example, the directory 
+The languages defined so far using the K framework can be found in the
+examples directory. For example, the directory
  examples/languages/research/simple 
 contains 2 directories, untyped containing the definition of the 
-untyped version of the language, and typed which in turn contains three 
-directories with definitions: static, for the static semantics, i.e., 
-the type checker, dynamic, for the dynamically typed version of simple, 
-and dynamic-typed-locations which is a variant of dynamic, in which the 
-type information is maintained in the environment. 
+untyped version of the language, and typed which in turn contains three
+directories with definitions: static, for the static semantics, i.e.,
+the type checker, dynamic, for the dynamically typed version of simple,
+and dynamic-typed-locations which is a variant of dynamic, in which the
+type information is maintained in the environment.
 
-## When writing new definitions 
+## When writing new definitions
 
-All semantics modules should include directly or indirectly the K module. 
-It is recommended that the name of the main module of a definition 
-is the capitalized version of the name of the file containing it. 
+All semantics modules should include directly or indirectly the K module.
+It is recommended that the name of the main module of a definition
+is the capitalized version of the name of the file containing it.
 
-When adding new rules to a definition, keep in mind the following 
-important restrictions: (1) avoid defining constructs with the same 
-name (but different arities), and (2) any construct should be applied on 
-terms of the syntactic types the construct was declared to accept (that is, no
-subterm appearing in the definition should parse to a kind; if desired, 
-overload the operations to extend their range). 
+When adding new rules to a definition, keep in mind the following
+important restrictions: (1) avoid defining multiple constructs with the
+same name, except for the case below;
+(2) in rules, any construct should be applied on terms of
+the syntactic types the construct was declared to accept (that is, no
+subterm appearing in any rule should parse to a kind); if desired,
+overload the operations to extend their range.
 
 To compile a definition: execute the `kompile` script passing as 
 parameter the name of the file containing the main module. If the 
-compilation succeeds, the output would be placed in 
-name-of-the-file-compiled.maude . Currently, the script has only 
+compilation succeeds, the output would be placed in
+name-of-the-file-compiled.maude. Currently, the script has only 
 been tested on Unix-like systems, including MacOSX. 
 
 Recommendations on running the script:
@@ -84,9 +85,9 @@ Recommendations on running the script:
 moreover, the environment variable `MAUDE_LIB` should point to the location
 where `prelude.maude` resides
 * The `kompile` script should also be on the path
-* The `kompile` script should not be moved from the core directory
-* The `kompile` script should be run from the directory where the definition 
-resides. 
+* The `kompile` script should not be moved from the `core` directory
+* The `kompile` script should be run from the directory where the definition
+resides.
 
 Assuming the above suggestions were followed, to compile the untyped version 
 of the simple language mentioned above, execute
@@ -101,16 +102,16 @@ in the `examples/research/simple/untyped` directory.
 In order to actually interpret (or perform state-space search on) 
 programs using a semantics written in K, there needs to be a way to give 
 the programs to the tool. The simplest way to do this is by introducing 
-a new module that defines programs as macros, letting the K tool turn 
-this into its internal representation, and then use Maude on the 
+a new module that defines programs as macros, letting the K tool turn
+this into its internal representation, and then use Maude on the
 generated code. We briefly outline the process below.
 
-(For more information, see the language examples in the /examples 
-directory; in particular, take a look at /examples/languages/classic/imp 
-and /examples/languages/research/simple/untyped, as these are 
-particularly well-documented, familiar, and small.) 
+(For more information, see the language examples in the /examples
+directory; in particular, take a look at /examples/languages/classic/imp
+and /examples/languages/research/simple/untyped, as these are
+particularly well-documented, familiar, and small.)
 
-For example, for a language LANGUAGE, we can introduce a module of the form: 
+For example, for a language LANGUAGE, we can introduce a module of the form:
 
   kmod LANGUAGE-PROGRAMS is including LANGUAGE-SYNTAX
     syntax Id ::= f | i | t | x | y | ...
@@ -132,31 +133,35 @@ For example, for a language LANGUAGE, we can introduce a module of the form:
     ...
   endkm
 
-Obviously, the above program is just an example (borrowed from 
-examples/languages/research/simple/untyped); you'll have to write 
-programs using the syntax of the language you are defining. In this 
-approach, unfortunately, the user has to declare all these syntactic 
-constants by hand, as above. One can avoid this issue by using an 
-external parser, but this is a more advanced technique, and we do not 
-describe it here. You should contact info@k-framework.org if you want to 
-know more about how to get this to work. 
+Obviously, the above program is just an example (borrowed from
+examples/languages/research/simple/untyped); you'll have to write
+programs using the syntax of the language you are defining. In this
+approach, unfortunately, the user has to declare all these syntactic
+constants by hand, as above. One can avoid this issue by using an
+external parser, but this is a more advanced technique, and we do not
+describe it here. You should contact info@k-framework.org if you want to
+know more about how to get this to work.
 
-One quick piece of technical information: syntax for some operator "op" 
-gets turned into a KLabel of the form 'op by the K tool. There are some 
-exceptions about how this process works (for example, quotes in the 
-operator itself need to be escaped), but as long as you simply name your 
-programs using an alphanumeric name, they will just have a single-quote 
-applied to them. In addition, in our current implementation of K, the 
-internal representation of the syntactic terms follows the simple 
-abstract-syntax-tree (AST) syntax: 
+One quick piece of technical information: syntax for some operator "op"
+gets turned into a KLabel of the form 'op by the K tool. There are some
+exceptions about how this process works (for example, quotes in the
+operator itself need to be escaped), but as long as you simply name your
+programs using an alphanumeric name, they will just have a single-quote
+applied to them. In addition, in our current implementation of K, the
+internal representation of the syntactic terms follows the simple
+abstract-syntax-tree (AST) syntax:
 
-  K ::= KLabel(List{K}) 
+  K ::= KLabel(List{K})
 
-We use ".List{K}" for the unit of List{K}. For example, the internal 
-representation of the syntactic program constant pFactorial above is 
-'pFactorial(.List{K}). As a more complex example showing elements that 
-need to be escaped, the program term itself is represented internally 
-by:
+List{K} is a non-terminal standing for lists of K terms separated by
+double-comma `,,` (we chose double-comma to avoid conflicts with
+user-defined language syntax, for example comma).  We use ".List{K}"
+for the unit of List{K}. This way, from an internal representation
+point of view, a language syntax is nothing but a finite set of KLabel
+constants.  For example, the internal representation of the syntactic
+program constant pFactorial above is 'pFactorial(.List{K}). As a more
+complex example showing elements that need to be escaped, the program
+term itself is represented internally by:
 
   '__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id 
   f(.List{K}), ,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(Id 
@@ -168,40 +173,41 @@ by:
   f(.List{K}),,'_`,_('_`(_`)(Id f(.List{ K}),,'_`,_(Id 
   x(.List{K})))))))))))
 
-One needs to create initial configurations holding the programs one 
-wants to execute and possibly other data, such as, for example, the 
-program input. The two configuration generator operations below are 
-meant to help users initialize the configuration when executing 
-programs, and not to be regarded as part of the theoretical semantics: 
+One needs to create initial configurations holding the programs one
+wants to execute and possibly other data, such as, for example, the
+program input. The two configuration generator operations below are
+meant to help users initialize the configuration when executing
+programs, and not to be regarded as part of the theoretical semantics:
 
-  syntax Bag ::= run( KLabel ) | run( KLabel , List ) 
+  syntax Bag ::= run( KLabel ) | run( KLabel , List )
 
   macro run(PgmName:KLabel) =
         <T_> <k> PgmName(.List{K}) ~> execute </k> <_/T>
-  macro run(PgmName:KLabel, Input:List) = 
+  macro run(PgmName:KLabel, Input:List) =
         <T_> <k> PgmName(.List{K}) ~> execute <k> <input> Input <input> <_/T>
 
-Note that the configurations above use ruptured cells, so they take 
-advantage of K's configuration abstraction mechanism. They will be 
-automatically completed and initialized to match the declared 
-configuration of LANGUAGE. 
+Note that the configurations above use ruptured cells, so they take
+advantage of K's configuration abstraction mechanism. They will be
+automatically completed and initialized to match the declared
+configuration of LANGUAGE.
 
 These helper operators are placed in a module, together with the 
 inclusion of the programs and semantics. 
 
-  kmod LANGUAGE is 
-    including LANGUAGE-SEMANTICS 
-    including LANGUAGE-PROGRAMS 
-    ...[above configuration macros]... 
-  endkm 
+  kmod LANGUAGE is
+    including LANGUAGE-SEMANTICS
+    including LANGUAGE-PROGRAMS
+    ...[above configuration macros]...
+  endkm
 
-The idea now is that we will use the K tool to compile LANGUAGE, and 
-then use the Maude backend to execute the program using the semantics. 
+The idea now is that we will use the K tool to compile LANGUAGE, and
+then use the Maude backend to execute the program using the semantics.
 
-To run our sample program "pFactorial", all we need to do is something 
-like this: 
+To run our sample program "pFactorial", all we need to do is something
+like this:
 
-  $ kompile language.k $ maude language-compiled.maude 
+  $ kompile language.k
+  $ maude language-compiled.maude 
                        \||||||||||||||||||/
                      --- Welcome to Maude ---
                        /||||||||||||||||||\
@@ -218,54 +224,53 @@ After which we see:
   [We omit here the contents of the other cells that exist at program 
   termination, and show only the output.]... </ T > 
 
-If, instead, one wants to search for all possible final states which 
-could be obtained upon running the program, then one would need to use 
-the command 
+If, instead, one wants to search for all possible final states which
+could be obtained upon running the program, then one would need to use
+the command
 
   Maude> search run('pFactorial) =>! Final:Bag . 
 
-And we get the result: 
+And we get the result:
 
-  search in SIMPLE-UNTYPED : run('pFactorial) =>! Final:Bag . 
+  search in SIMPLE-UNTYPED : run('pFactorial) =>! Final:Bag .
 
-  Solution 1 (state 28364) 
-  states: 28416 
-  rewrites: 224116 in 3089ms cpu (3091ms real) (72540 rewrites/second) 
-  Final:Bag --> < T > < out > 
-  ListItem(Int 120(.List{K})) </ out > ... </ T > 
+  Solution 1 (state 28364)
+  states: 28416
+  rewrites: 224116 in 3089ms cpu (3091ms real) (72540 rewrites/second)
+  Final:Bag --> < T > < out > ListItem(Int 120(.List{K})) </ out > ... </ T >
 
-  No more solutions. 
-  states: 28416 rewrites: 224454 in 3093ms cpu (3095ms real) 
-  (72555 rewrites/second) 
+  No more solutions.
+  states: 28416 rewrites: 224454 in 3093ms cpu (3095ms real)
+  (72555 rewrites/second)
 
-You can also put those commands into a single file, and then 
-simply call maude on that file. See
-examples/languages/classic/imp/imp-test.m and 
+You can also put those commands into a single file, and then simply call
+Maude on that file. See examples/languages/classic/imp/imp-test.m and 
 examples/languages/research/simple/untyped/simple-untyped-test.m for 
-examples of this. 
+examples of this.
 
 
 # Reporting Issues/Bugs/Feature requests
 
 Please report issues here: http://k-framework.googlecode.com
 
-If you are an end user of K and do not have write permissions to our 
-repository, you can simply post your test case, or explain your problem, 
-under "issues" at http://k-framework.googlecode.com.  For those users 
-who have write permissions to our repository, Please add a test case
-to the repository yourself using the directions that follow.
+If you are an end user of K and do not have write permissions to our
+repository, you can simply post your test case, or explain your problem,
+under "issues" at http://k-framework.googlecode.com.  For those users
+who have write permissions to our repository, please add a test case
+to the repository yourself using the directions that follow (do this
+in addition to posting an issue, because you need the issue number).
 
 ## Test cases:
 
-When filing a bug, it is important to add an automated test case that 
-exhibits the bug. This allows us to test our fixes and helps catch 
-regressions in the future. We use a simple Makefile based test system 
-that is set up in the following way. If you use our example Makefile 
-(provided in the example directory and described below) it should be 
-very easy to add a new test to the system. Just copy and edit. Detailed 
-descriptions follow. 
+When filing a bug, it is important to add an automated test case that
+exhibits the bug. This allows us to test our fixes and helps catch
+regressions in the future. We use a simple Makefile based test system
+that is set up in the following way. If you use our example Makefile
+(provided in the example directory and described below) it should be
+very easy to add a new test to the system. Just copy and edit. Detailed
+descriptions follow.
 
-Test cases for new bugs should be placed in `/trunk/test/issues` in the 
+Test cases for new bugs should be placed in `/trunk/test/issues` in the
 following manner:
 
   $ cd trunk/tests/issues
@@ -275,7 +280,7 @@ This copies the example test to a new directory so you can edit it.
 XXX is intended to be the # of the issue you post on google code.
 
 Now, edit the files in the `issueXXX` directory to reflect your bug.
-You must keep the `Makefile`, which you can adjust to suit the filenames 
+You must keep the `Makefile`, which you can adjust to suit the filenames
 you use.  In your `test.m` file, writing
 
   rew test1(.List{K}) . ---@ foo 'SomeLabel(.List{K})
@@ -292,7 +297,7 @@ Writing:
 
 simply checks that it reduces at all.  It's not a very strong test.
 
-Your test is in the correct form if you can type "make true-test" 
+Your test is in the correct form if you can type "make true-test"
 and an .xml file is created.
 
   $ cd trunk/tests/issues/issueXXX
