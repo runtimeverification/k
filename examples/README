@@ -7,7 +7,7 @@ please do not hesitate to contact us at info@k-framework.org.
 In order for a K definition to be included in the distribution, for
 uniformity we strongly recommend that certain conventions be respected:
 
-1) Include a README.tex file, which should work when kompile is called
+1) Include a README.tex file, which should work when `kompile` is called
 with the -topmatter option.  The README.tex file should include a title
 and one or more authors, with their email addresses.  Take a look at
 existing README.tex files and try to follow the same format and conventions.
