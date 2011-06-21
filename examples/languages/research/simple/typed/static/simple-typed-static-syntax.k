@@ -3,8 +3,7 @@ kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
 
   sorts Var Exp Decl Stmt Stmts
 
-  syntax Type ::=
-                | int 
+  syntax Type ::= int 
                 | bool 
                 | void 
                 | Type [ ] [prec 0]
@@ -67,8 +66,7 @@ kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
                 | read ( )
 
 --- declarations
-  syntax Decl ::=
-                | var Var : Type ; [prec 2] 
+  syntax Decl ::= var Var : Type ; [prec 2] 
                 | function Id ( ) : Type Stmt 
                 | function  Id ( List{IdType} ) : Type Stmt 
 
