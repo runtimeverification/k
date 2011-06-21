@@ -71,7 +71,12 @@ fmod PARSE-METADATA-LOCATION is
   op getBeginningLocation : String -> Int .
  ceq getBeginningLocation(S) = if rat(substr(S,N1, _-_(N2, N1)), 10) :: Nat then rat(substr(S,N1, _-_(N2, N1)), 10)  else -1 fi
   if N1 := if find(S,":",0) :: Nat then find(S, ":", 0) + 1 else 0 fi 
-  /\  N2 := if find(S, "-", N1) :: Nat then  find(S, "-", N1) else length(S) fi .
+  /\  N2 := if find(S, "-", N1) :: Nat then  find(S, "-", N1) else if find(S, ":", N1) :: Nat then  find(S, ":", N1) else length(S) fi fi .
+
+  op getOffsetLocation : String -> Int .
+ ceq getOffsetLocation(S)
+   = if rat(substr(S,N:[Nat] + 1, length(S)), 10) :: Nat then  rat(substr(S,N:[Nat] + 1, length(S)), 10) else 0 fi
+   if N:[Nat] := find(S,":",find(S,":",0) + 1) .
 endfm
 
 fmod PARSE-METADATA-SYNTAX is

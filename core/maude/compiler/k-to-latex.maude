@@ -164,11 +164,12 @@ mod DECL-META-LATEX-PRINT is
   op empty : -> Printables .
   op __ : Printables Printables -> Printables [assoc id: empty] .  
 
-  var P P1 P2 : Printable . var Prints : Printables .  var N1 N2 : Nat .
+  var P P1 P2 : Printable . var Prints : Printables .  var N1 N2 : Nat . var I1 I2 : Nat .
 
-  op loc : Int Printable -> Printable .
-  eq loc(-1, P) = P .
-  ceq loc(N1,P1) loc(N2,P2) = loc(N2,P2) loc(N1,P1) if N2 < N1 .
+  op loc : Int Int Printable -> Printable .
+  eq loc(-1,I1, P) = P .
+  ceq loc(N1,I1,P1) loc(N2,I2,P2) = loc(N2,I2,P2) loc(N1,I1,P1) if N2 < N1 .
+  ceq loc(N,I1,P1) loc(N,I2,P2) = loc(N,I2,P2) loc(N,I1,P1) if I2 < I1 .
 
   op op : OpDecl -> Printable .
   op mb : MembAx -> Printable .
@@ -186,20 +187,20 @@ var Eq : Equation .  var Eqs : EquationSet .
   var Rl : Rule . var Rls : RuleSet .
 
   op ops : OpDeclSet -> Printables .
-  eq ops(Op OPDS) = loc(getBeginningLocation(getLocation(Op)),op(Op)) ops(OPDS) .
+  eq ops(Op OPDS) = loc(getBeginningLocation(getLocation(Op)),getOffsetLocation(getLocation(Op)), op(Op)) ops(OPDS) .
   eq ops(none) = empty .
 
 
   op mbs : MembAxSet -> Printables .
-  eq mbs(Mb MAS) = loc(getBeginningLocation(getLocation(Mb)),mb(Mb)) mbs(MAS) .
+  eq mbs(Mb MAS) = loc(getBeginningLocation(getLocation(Mb)),0, mb(Mb)) mbs(MAS) .
   eq mbs(none) = empty .
 
   op eqs : EquationSet -> Printables .
-  eq eqs(Eq Eqs) = loc(getBeginningLocation(getLocation(Eq)),eq(Eq)) eqs(Eqs) .
+  eq eqs(Eq Eqs) = loc(getBeginningLocation(getLocation(Eq)), 0, eq(Eq)) eqs(Eqs) .
   eq eqs(none) = empty .
 
   op rls : RuleSet -> Printables .
-  eq rls(Rl Rls) = loc(getBeginningLocation(getLocation(Rl)),rl(Rl)) rls(Rls) .
+  eq rls(Rl Rls) = loc(getBeginningLocation(getLocation(Rl)), 0, rl(Rl)) rls(Rls) .
   eq rls(none) = empty .
 
 
@@ -472,7 +473,7 @@ var Eq : Equation .  var Eqs : EquationSet .
     [owise] .
 ---)
 
-  eq loc(I,empty) = empty .
+  eq loc(I,N,empty) = empty .
   eq eq(eq T = T' [metadata("simplify")] .) = empty .
   eq eq(eq T = T' [AtS] .) = mequation(getLabel(AtS),T,T') [owise] .
   eq eMetaLatexPrint(M, mequation(Str, T, T') Prints)
@@ -1086,6 +1087,7 @@ mod LATEX-PRINT-META is
    if Str := string(Q) [print "testying for LaTeX " Str] .
 
    var Str : String . var N : Nat . var Nz : NzNat . var NeTl : NeTermList .
+  var I : Int .
   ceq splitMixFix(Str) 
     = \textsf{qid(substr(Str, 0, N))} splitMixFix(substr(Str, N + 1, length(Str)))
    if N := find(Str, "_", 0) .
@@ -1094,14 +1096,14 @@ mod LATEX-PRINT-META is
   var M : Module .  var MAS : MembAxSet . var OPDS : OpDeclSet .
   var QIL QIL' : QidList .
   var P : Printable . var Prints : Printables .
-  eq eMetaLatexPrint(M, loc(N,P) Prints) = eMetaLatexPrint(M, P Prints) [print Prints] .
+  eq eMetaLatexPrint(M, loc(N,I,P) Prints) = eMetaLatexPrint(M, P Prints) [print Prints] .
   eq eMetaLatexPrint(M, syntax(QIL, QIL', #Types(N) AS) Prints)
    = ('\n '\syntax '`{ QIL '`} '`{ QIL' '`} '`{ eMetaLatexPrint(M, N, AS)  '`} eMetaLatexPrintQ(M, QIL, Prints)) [owise] .
 ---  eq \subsort{QIL}{QIL'} = \syntax{QIL'}{QIL}{none} .
 
 
   op eMetaLatexPrintQ : Module QidList Printables -> QidList .
-  eq eMetaLatexPrintQ(M, QIL, loc(N,P) Prints) = eMetaLatexPrintQ(M, QIL,  P Prints) .
+  eq eMetaLatexPrintQ(M, QIL, loc(N,I,P) Prints) = eMetaLatexPrintQ(M, QIL,  P Prints) .
   eq eMetaLatexPrintQ(M, QIL, syntax(QIL, QIL', #Types(N) AS) Prints)
    = ('\n '\syntaxCont '`{ QIL '`} '`{ 
       QIL' '`} '`{ eMetaLatexPrint(M, N, AS) '`} eMetaLatexPrintQ(M, QIL, Prints)) .
