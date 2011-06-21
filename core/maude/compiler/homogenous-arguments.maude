@@ -139,6 +139,9 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
  op homogenousT : Term Type Module OpDeclSet OpDeclWrapListMap ~> Term .
  eq homogenousT(C, T, M, OPDS, OPDM ) = C .
  eq homogenousT(V, T, M, OPDS, OPDM) = V .
+ceq homogenousT(Q[T1, T2], T, M, OPDS, OPDM)
+  = Q[homogenousT(T1,leastSortsT(M,T1),M, OPDS, OPDM),homogenousT(T2,leastSortsT(M,T2),M, OPDS, OPDM)]
+  if Q = replaceS .
  eq homogenousT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
   = 'if_then_else_fi[homogenousTs(Trms, 'Bool T T, M, OPDS,OPDM)] .
 --- eq homogenousT('_==Bool_[T1,T2],T,M,OPDS,OPDM)

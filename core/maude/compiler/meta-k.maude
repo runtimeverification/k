@@ -858,6 +858,7 @@ endfm
 fmod META-K-LEAST-SORTS is
   including META-LEVEL-EXTRAS .
   including META-K-RULES .
+  including META-K-BUILTINS .
 
  op errorT : Term Type -> [Type] .
 
@@ -895,8 +896,12 @@ fmod META-K-LEAST-SORTS is
  eq leastSortsT(M, Trm, SS:[SortSet], SS', TlSK) 
   = leastSortsT(M, Trm, SS', TlSK) [owise] .
 
+
+ op removeBuiltins : SortSet -> SortSet .
+ eq removeBuiltins(SS) = removeSorts(SS, Builtins) .
+
  eq $leastSortsT(M, 'if_then_else_fi[Trms], T T' T'') 
-  = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, 'Bool), lubSorts(M, T', T'')) .
+  = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, 'Bool), removeBuiltins(lubSorts(M, T', T''))) .
 
  eq $leastSortsT(M, 'configuration_[Trm], S) = 'KSentence .
  eq $leastSortsT(M, 'rule_[Trm], S) = 'KSentence .
@@ -905,8 +910,8 @@ ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
 ceq $leastSortsT(M, 'context_if_[Trms], S T') = 'KSentence if sortLeq(M,T','Bool).
 
 ceq $leastSortsT(M, Q[T1,T2], T T') 
-  = leastSortsRed(Q[T1,T2], leastSort(M, Q[T1,T2]), lubSorts(M, T, T')) 
- if Q == replaceS . 
+  = leastSortsRed(Q[T1,T2], leastSort(M, Q[T1,T2]), removeBuiltins(lubSorts(M, T, T'))) 
+ if Q == replaceS [print "leastSortsRed: " T1 "; " T2 "; " T "; " T'] . 
  eq $leastSortsT(M, Q[Trms], Tl) = leastSort(M, Q[genXVars(Tl)]) [owise ] .
 
  op leastSortsIf : Term Type Bool TypeSet ~> SortSet .

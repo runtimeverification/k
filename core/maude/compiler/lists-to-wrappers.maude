@@ -202,8 +202,10 @@ fmod LISTS-TO-WRAPPERS is
     else Q[lists2wTs(Trms, M, OPDS, OPDS', CTORS)]
     fi .
 
+---(
  eq lists2wT(Trm, M, OPDS, OPDS', CTORS, Op:[OpDecl])
   = errorT(Trm, mkVariable('`[`],leastSort(M,Trm)),"Could not find an operation to match the top of the given term. Perhaps the term does not have a least sort?") .
+---)
 
  op lists2wTKs : TermList TypeList Module OpDeclSet OpDeclSet CTORSMap ~> TermList .
  eq lists2wTKs(empty, nil, M, OPDS, OPDS', CTORS) = empty .
