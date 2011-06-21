@@ -67,13 +67,13 @@ Please see examples/README for instructions on how to do it.
 
 ## When writing new definitions
 
-All semantics modules should include directly or indirectly the K module.
 It is recommended that the name of the main module of a definition
 is the capitalized version of the name of the file containing it.
 
 When adding new rules to a definition, keep in mind the following
-important restrictions: (1) avoid defining multiple constructs with the
-same name, except for the case below;
+important restrictions:
+(1) avoid defining multiple constructs with the same name,
+except for the case below;
 (2) in rules, any construct should be applied on terms of
 the syntactic types the construct was declared to accept (that is, no
 subterm appearing in any rule should parse to a kind); if desired,
