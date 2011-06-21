@@ -1481,48 +1481,50 @@ sub maudify_file {
     # hardcoded for avoiding maudification for shared.maude
     if ($file =~ /shared\.maude/)
     {
-		return;
+	return;
     }
     
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
-#Step: resolve latex comments
+# Step: resolve latex comments
 	# store_intermodule_latex($_);
-	$_ = solve_latex($_, $file) if ($latex || $png || $pdf || $ps || $crop || $eps);
+    $_ = solve_latex($_) if ($latex || $png || $pdf || $ps || $crop || $eps);
 
-	# save comments
-	my ($noComments, $myComments) = remove_comments($_);
-	$_ = $noComments;
-
-	# Parse the configuration
-	if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
-	{
-		# print "FILE: $file\n";
-		parse_configuration($1, countlines($`), $file);
-	}
-
+    # save comments
+    my ($noComments, $myComments) = remove_comments($_);
+    $_ = $noComments;
+    
+    # Parse the configuration
+    if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
+    {
+	# print "FILE: $file\n";
+	parse_configuration($1, countlines($`), $file);
+    }
+    
+    
+    
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
-#    print $_;
-#    exit(1);
 
+#    print ;
+    
 # dots issue: change <cell>.</cell> into <cell> . </cell>
     s!<(.*?)>\.</\1>!<$1> \. </$1>!g;
     
 # solve modules in imports
-	s!^(\s*)(in|load|require)(\s+)(\S+)!
+    s!^(\s*)(in|load|require)(\s+)(\S+)!
+    {
+	my ($spaces1, $imp, $spaces2, $path_imp) = ($1, $2, $3, $4);
+	if ( $path_imp =~ m/modules/ )
 	{
-		my ($spaces1, $imp, $spaces2, $path_imp) = ($1, $2, $3, $4);
-		if ( $path_imp =~ m/modules/ )
-		{
-			$path_imp =~ s/^\///sg;
-			$path_imp = File::Spec->catfile($k_base, $path_imp);
-		}
-		"$spaces1$imp$spaces2$path_imp";
+	    $path_imp =~ s/^\///sg;
+	    $path_imp = File::Spec->catfile($k_base, $path_imp);
 	}
-	!sgme;
-
+	"$spaces1$imp$spaces2$path_imp";
+    }
+    !sgme;
+    
 # Replacing dots    
     $_ = replace_dots($_);
 	my $temporary = $_;
@@ -1583,7 +1585,6 @@ sub maudify_file {
         $maudified = "$maudified$before$_$after";
     }
 
-    
     if (/\S/) 
     {
 #        print "ERROR: Cannot finish processing $file\n";
@@ -1740,9 +1741,9 @@ sub maudify_module {
 	$_ = Unfreeze("ATTR", $_);
 #	 print  "Stage:\n$_\n\n";
    
-# Step: add line numbers for configuration and context 
+# Step: add line numbers for mb configuration and latex 
 	$_ = add_line_no_mb($file, $mno, $_);
-	# print $_;
+#	print $_;
 	
 # Step: Unfreeze everything still frozen
     $_ = Unfreeze("ANONYMOUS", $_);
@@ -1780,7 +1781,7 @@ sub make_ops {
     
 #	print "Frozen: $_\n";
     $_ = Unfreeze("ATTRIBUTES", $_);
-	$_ = Unfreeze("MYSTRINGS", $_);
+    $_ = Unfreeze("MYSTRINGS", $_);
 #	print "Unfrozen: $_\n";
 #    print "make_ops:\n$_\nat line $sno\n";
 
@@ -1801,9 +1802,7 @@ sub make_ops {
 
 # Report error and stop if the sort name does not match $ksort
 	if ($result_sort !~ /^$ksort$/) {
-#	    print "ERROR: Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\n";
-#	    print "ERROR: Syntactic categories must currently match this pattern\n";
-		print generate_error("ERROR", 1, $file, "unknown line", "Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\nSyntactic categories must currently match this pattern\n");
+	    print generate_error("ERROR", 1, $file, "unknown line", "Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\nSyntactic categories must currently match this pattern\n");
 	    exit(1);
 	}
 
@@ -1811,25 +1810,19 @@ sub make_ops {
 	my $sort_decl = "";
 	if ( ! (grep { "$_" eq "$result_sort" } @all_sorts) ) {
 	    $sort_decl = "sort $result_sort";
-	    push(@all_sorts, $result_sort);
-
+	    push(@all_sorts, $result_sort);	    
 	}
-	my $result = "$spaces1 $sort_decl $spaces2";
+
+        my $result = "$spaces1 $sort_decl $spaces2";
 
 # Extract all productions in @productions
 	my @productions = ($productions =~ /(.*?\S.*?(?:\s\|\s|$))/gs);
 
 #        print "PRODS: ".join("#",@productions)."\n";
-
 	foreach my $production (@productions) {
-
-#	        $production =~ s/\s*\n\s*$//sg;
 	    
 		# count line numbers
 		my $absolute_line = countlines($PREMATCH) + $sno - 1 if ($temporary =~ /\Q$production\E/);
-#		print "Production up0: $production at line $absolute_line\n";
-#	        $absolute_line = ($absolute_line == 0) ? $sno : $absolute_line + $sno - 1;
-#		print "Temp:&$temporary&\nProduction up1: |$production|\nat line $absolute_line\n";
 
 # Removing the | separator
 		$production =~ s/(\s)\|(\s)/$1$2/gs;
@@ -1874,7 +1867,7 @@ sub make_ops {
 	    # to avoid replacing spaces inside strings
 	    my $strings = "";
 	    $production =~ s/(\".*?\")/ { 
-		$strings .= "!&!&!$1"; 
+			$strings .= "!&!&!$1"; 
 	    }
 	    "!&!&!"
 	    /gse;
@@ -1886,8 +1879,8 @@ sub make_ops {
 	    # put the strings back
 	    while ($strings =~ m/!&!&!(\".*?\")/g)
 	    {
-		my $str = $1;
-		$production =~ s/!&!&!/$str/;
+			my $str = $1;
+			$production =~ s/!&!&!/$str/;
 	    }
 	    
 	    
@@ -1904,40 +1897,36 @@ sub make_ops {
 #	    print "PROD: $production\n";
 # Add a latex attribute in case $latex and there is not already a user-defined one
 		if (($latex || $pdf || $png || $ps || $eps || $crop) && ($attributes !~ /latex/)) {
-		    my $latex_text = $production;
-		    my $counter = 0;
-		    $latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
-		    $latex_text =~ s/_/$counter++;"{#$counter}"/ges;
-		    $latex_text =~ s/"/&!&!&!/g;
-		    if ($attributes eq "") {
-			$attributes = "[]";
+				my $latex_text = $production;
+				my $counter = 0;
+				$latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
+				$latex_text =~ s/_/$counter++;"{#$counter}"/ges;
+				$latex_text =~ s/"/&!&!&!/g;
+				if ($attributes eq "") {
+				$attributes = "[]";
 		    }
 		    $attributes =~ s/^\[/[latex "$latex_text" /;
 		}
 
-# Add metadata location for each op
-# print "Add metadata to: $attributes\n\n";
- 
-	# if there are already some attributes then add metadata if other metadata is there
-	$attributes =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 location($file:$absolute_line)\" / if ($attributes ne "" && $attributes =~ /metadata/);
-	# if there are already some attributes then add metadata if not already
-	$attributes =~ s/\[/[ metadata \"location($file:$absolute_line)\" / if ($attributes ne "" && $attributes !~ /metadata/);
-	# if no attributes just define a new attribute metadata and declare location
-	$attributes = "[metadata \"location($file:$absolute_line)\"]" if $attributes eq "";
 
 	# unfreeze here what was frozen in $production
 	$attributes = Unfreeze("MYS", $attributes);
 	
-# print "2Add metadata to: $attributes\n\n";
+# print "Add metadata to: $attributes\n\n";
 
+#		print "PROD: $production\n\n";
 # Generate the Maude replacement of the K syntactic construct
 		my $random = fresh("a", "b");
 		unlink($random);
 		$random =~ s/[a-z_]//sg;
 		if ($latex || $pdf || $ps || $crop || $eps || $png)
 		{
+#			my $tmp_attr = $attributes;
+#			$tmp_attr =~ s/\[/[metadata \"latex(renameTo \\\\crlbracket)\"/s if ($attributes ne "" && $attributes !~ /metadata/s);
+#			$tmp_attr =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 latex(renameTo \\\\crlbracket)\" /s if ($attributes ne "" && $attributes =~ /metadata/s);
+			
 			$result .= ($production eq "_")
-						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort$random"."_ : @sorts -> $result_sort [metadata \"latex(renameTo \\\\crlbracket) location($file:$absolute_line)\"] $space5 "
+						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort$random"."_ : @sorts -> $result_sort $attributes $space5 "
 						: "$space4 op $production : @sorts -> $result_sort$space5 $attributes ";
 		}
 		else {

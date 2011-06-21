@@ -32,6 +32,8 @@ my $comment = join("|", (
 		"\\*\\*\\*.*?\$"
 ));
 
+my $string_pattern = "\(?<![^\\\\]\\\\\)\".*?\(?<![^\\\\]\\\\\)\"";                                                                                         
+
 my $latex_comment = join("|", (
         "\\/\\/@(.*?)(?=\n)",
         "\\/\\*@(.*?)\\*\\/",	
@@ -1561,65 +1563,151 @@ my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather di
 my $k_attributes_pattern = join("|",  @k_attributes);
 
 
+sub line_numbers
+{
+	my ($statement, $operation, $spaces, $file) = (shift, shift, shift, shift);
+
+#	print "CHECK: $statement\n";
+
+    if ( $operation eq "rule" or $operation eq "context" )
+    {
+        my ($rule, $spaces, $attr) = ($statement, $spaces, "");
+        my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
+
+        $rule =~ s!\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$!{$attr = $1;}""!gse;
+        if ($attr eq "")
+        {
+            $rule .= " [metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
+            $rule .= " [metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+        }
+        else
+        {
+            $rule .= "[$attr metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
+            $rule .= "[$attr metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+        }
+
+		return $rule . $spaces;
+    }
+     elsif ($2 eq "macro")
+     {
+ 		# macros
+         my $macro = $1;
+         my $macro_line = countlines($`);
+ #            $temp =~ s/\Q$macro\E/$macro [metadata "location($file:$macro_line)"]/s;
+ 		return "$macro [metadata \"location($file:$macro_line)\"]" . $spaces;
+     }
+	elsif ($2 eq "mb")
+	{
+		# mb latex from latex comments
+		my $mb = $1;
+		my $temp_mb = $mb;
+		my $mb_line = countlines($`);
+		
+		$mb =~ s/(mb\s+latex\s.*)(\s\.\s*$)/$1 [metadata "location($file:$mb_line)"]$2/s;
+
+		return $mb . $spaces;
+	}
+	elsif ($2 eq "syntax")
+	{
+		# get the syntax
+		my $syntax = $1;
+		my $prematch_lines = countlines($`);
+		my $original_syntax = $syntax;
+
+		# get productions from syntax block
+		if ( $syntax =~ m!syntax\s+(.*)!sg )
+		{
+			# get all productions
+			my $productions_string = $1;
+			my $new_prod = "";
+	#		print "PROD: $productions_string\n";
+	
+			my $counter = 1;	
+			while ($productions_string =~ /(.*?\S.*?(?:\s\|\s|$))/gs)
+			{
+				# process each production
+				my $production = $1;
+				my $pre = countlines($`);
+				my $attributes = "";                                                                                                                        
+
+				# freeze strings before extracting the attributes because these can contain
+				# some [] which will cause a wrong extraction
+				$production =~ s/($string_pattern)/Freeze($&,"MYS")/sge;
+				$production =~ s/(\[[^\[\]]*\]\s*\|?\s*)$/                                                                                    
+				{
+					if (op_attribute($1)) {
+						$attributes = $1;
+						"";
+					} else {$1;}
+				}
+				/se;
+				$production = Unfreeze("MYS", $production); 
+
+				# compute line number
+				my $absolute_line = $prematch_lines + $pre - 1;
+
+				# print "Production1: $production &$attributes&\n";
+
+				# if there are already some attributes then add metadata if other metadata is there
+				$attributes =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 location($file:$absolute_line:$counter)\" / if ($attributes ne "" && $attributes =~ /metadata/);      
+				# if there are already some attributes then add metadata if not already                                                                             
+				$attributes =~ s/\[/[ metadata \"location($file:$absolute_line:$counter)\" / if ($attributes ne "" && $attributes !~ /metadata/);
+				# if no attributes just define a new attribute metadata and declare location
+				$attributes = "[metadata \"location($file:$absolute_line:$counter)\"]" if $attributes eq "";
+
+				# increase counter
+				$counter++;
+				
+				# unfreeze here what was frozen in $production
+				$attributes = Unfreeze("MYS", $attributes);
+
+				#		    print "Production2: $production &$attributes&\n";
+
+				if ($production !~ /(?<!`)\|\s*$/s)
+				{
+#						print "Production3: $production &$attributes&\n";
+					$production .= " $attributes";
+				}
+				else 
+				{
+					$production =~ s/(\|\s*$)/$attributes $1/s;
+				}
+
+#					print "PRODUCTION: $production\n\n";
+
+				$new_prod .= $production;
+			}
+
+			$original_syntax =~ s/\Q$productions_string\E/$new_prod/sg;
+		}
+
+		# $temp =~ s/\Q$syntax\E/$original_syntax/s;
+		return $original_syntax . $spaces;
+	}
+ 	else { return $statement . $spaces;	}
+}
+
 sub add_line_numbers
 {
     (local $_, my $file) = (shift, shift);
 
-    s/($comment)/                                                                                    
-    {                                                                                                
-	local $_=$1;                                                                                 
-	s!\S!!gs;                                                                                    
-	$_;                                                                                          
+    s/($comment)/
+	{
+		local $_=$1;
+		s!\S!!gs;
+		$_;
     }/gsme; 
     
-    # print $_; 
-    
-    my $temp = $_;
-    my $used = $_; # due to perl 5.8.8
- 
-    # process rules first
-    while ($used =~ /((rule|syntax|macro|context|configuration)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/sg)
+	my $temp;
+	s/(?<!\S)((rule|syntax|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
     {
-        if ($2 eq "rule" or $2 eq "context")
-        {
-            my ($rule, $spaces, $attr) = ($1, $3, "");
-            my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
-
-            $rule =~ s/\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$/{$attr = $1;}""/gse;
-            if ($attr eq "")
-            {
-                $rule .= " [metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
-                $rule .= " [metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
-            }
-            else
-            {
-                $rule .= "[$attr metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
-                $rule .= "[$attr metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
-            }
-
-            $temp =~ s/\Q$tmp\E/$rule/sg;
-        }
-        elsif ($2 eq "macro")
-        {
-            my $macro = $1;
-            my $macro_line = countlines($`);
-            $temp =~ s/\Q$macro\E/$macro [metadata "location($file:$macro_line)"]/s;
-        }
-#		elsif ($2 eq "context")
-#		{
-#			my $context_line = countlines($`);
-#			my $context = $1;
-#			$temp =~ s/\Q$context\E/$context [metadata "location($file:$context_line)"]/sg;
-#		}
-#		elsif ($2 eq "configuration")
-#		{
-#			my $config_line = countlines($`);
-#			my $config = $1;
-#			$temp =~ s/\Q$config\E/$config [metadata "location($file:$config_line)"]/sg;			
-#		}
+ 		$temp = line_numbers($1, $2, $3, $file);
     }
-    
-    return $temp;
+	$temp/sge;
+
+#	print ;
+
+    $_;
 }
 
 sub add_line_no_mb
@@ -1629,7 +1717,7 @@ sub add_line_no_mb
 	local $_ = shift;
 	my $temp = $_;
 
-	while($temp =~ /(mb\s+(configuration)\s.*?)(\s+\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
+	while($temp =~ /(mb\s+(configuration)\s.*?)(\s\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
 	{
 		my ($content, $end, $line) = ($1, $3, $lines + countlines($`));
 		s/\Q$content$end\E/$content [metadata "location($file:$line)"]$end/sg;
@@ -1642,7 +1730,10 @@ sub countlines
 {
     my ($text) = (@_);
     my $lno = ($text =~ tr/\n//);
-    return $lno == 0 ? $lno : $lno - 1;
+    
+#    return 1 if $lno == 0;
+#    return $lno if $text =~ /\n$/;
+    return $lno + 1;
 }
 
 
@@ -1953,13 +2044,13 @@ sub put_back_comments($)
 sub solve_latex
 {
 	local $_ = shift;
-	my $file = shift;
 
 	s/(k?mod.*?endk?m)(?!\\end\{)/
 	{
-		solve_latex_comments($&, countlines($`), $file);
+	    solve_latex_comments($&);
 	}
 	/sge;
+    
 	$_;
 }
 
@@ -1969,22 +2060,17 @@ sub solve_latex
 # with mb declarations
 sub solve_latex_comments
 {
-	# get k module
-	local $_ = shift;
-
-	# get k module line no and file name
-	my $lno = shift;
-	my $file = shift;
-
-	s!($latex_comment)!{
-		my $l = countlines($`) + $lno - 1;
-		local $_ = $+;
-	        my $me = $_;
-	        $me =~ s/[^\n]//sg;
-		"mb latex \"\\\\".get_newcommand($_)."\" : KSentence [metadata \"location($file:$l)\"] .$me";
-	}!sge;
-
-	$_;
+    # get k module
+    local $_ = shift;
+        
+    s!($latex_comment)!{
+	local $_ = $+;
+	my $me = $_;
+	$me =~ s/[^\n]//sg;
+	"mb latex \"\\\\".get_newcommand($_)."\" : KSentence .$me";
+    }!sge;
+    
+    $_;
 }
 
 ######################
