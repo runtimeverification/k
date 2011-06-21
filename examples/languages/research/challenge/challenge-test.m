@@ -1,4 +1,7 @@
 load challenge-compiled
+rew run('baris) .
+q
+
 rew run('p1) .
 rew run('p2) .
 search run('p3) =>! B:Bag .

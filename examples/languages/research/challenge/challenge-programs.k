@@ -479,4 +479,13 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
        }
   i = i+1;
   print(i);
+
+  syntax Exp ::= baris
+---  macro baris = quote (eval (unquote (quote 2)))
+---  macro baris = lambda y . (quote(lambda x . ((unquote (lift y));));) 
+---  macro baris = quote(lambda x . (2+1;)) 
+  macro baris = quote(lambda x . (x;)) 
+
+---  macro baris = quote(unquote (lift 2))
+
 endkm

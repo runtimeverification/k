@@ -3,6 +3,7 @@ kmod IMP-SYNTAX is including PL-INT + PL-ID
 \textsf{and}, which is only strict in its first argument, because we will
 give it a short-circuited semantics (its second argument will only be
 evaluated when the first evaluates to true). */
+
   syntax AExp ::= Id | Int
                 | AExp + AExp                  [prec 33 gather (E e) strict]
                 | AExp / AExp                  [prec 31 gather (E e) strict]
@@ -95,7 +96,7 @@ macro countPrimesPgm = (
 endkm
 
 
-kmod IMP-SEMANTICS is including IMP-SYNTAX + K
+kmod IMP-SEMANTICS is including IMP-SYNTAX
 /*@ \section*{Semantics}
 This module defines the semantics of IMP.  We first define
 its configuration, then its results, and then its semantic rules. */
