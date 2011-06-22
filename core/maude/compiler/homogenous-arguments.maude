@@ -129,14 +129,16 @@ ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
     ~> TermList .
  eq homogenousTs(Trms, Tl, M, OPDS, OPDM, nil, N) 
   = homogenousTs(Trms, Tl, M, OPDS, OPDM) .
+---(
 ceq homogenousTs((Q[T1,T2],Trms),T Tl, M, OPDS, OPDM, ([N : Q'], WrapList), N)
   = Q[Q'[homogenousT(T1,T,M, OPDS,OPDM)],Q'[homogenousT(T2,T,M, OPDS,OPDM)]],
     homogenousTs(Trms, Tl, M, OPDS, OPDM, WrapList, s N)
  if Q = replaceS .
-ceq homogenousTs((Trm,Trms),T Tl, M, OPDS, OPDM, ([N : Q], WrapList), N)
+---)
+ eq homogenousTs((Trm,Trms),T Tl, M, OPDS, OPDM, ([N : Q], WrapList), N)
   = Q[homogenousT(Trm,T,M, OPDS,OPDM)], 
-    homogenousTs(Trms, Tl, M, OPDS, OPDM, WrapList, s N) 
- if topOpSymbol(Trm) =/= replaceS .
+    homogenousTs(Trms, Tl, M, OPDS, OPDM, WrapList, s N) .
+--- if topOpSymbol(Trm) =/= replaceS .
  eq homogenousTs((Trm,Trms),T Tl, M, OPDS, OPDM, WrapList, N)
   = homogenousT(Trm,T,M, OPDS,OPDM), 
     homogenousTs(Trms, Tl, M, OPDS, OPDM, WrapList, s N) [owise] .

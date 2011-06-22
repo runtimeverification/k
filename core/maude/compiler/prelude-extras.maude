@@ -326,8 +326,8 @@ fmod META-TERM-EXTRAS is
   eq nth((Tr, Trl), 0) = Tr .
   eq nth((Tr, Trl), s(N)) = nth(Trl, N) .
 
-  op topOpSymbol : Term ~> Qid .
-  eq topOpSymbol(Q[Trl]) = Q .
+  op getTopSymbol : Term ~> Qid .
+  eq getTopSymbol(Q[Trl]) = Q .
 endfm
 
 

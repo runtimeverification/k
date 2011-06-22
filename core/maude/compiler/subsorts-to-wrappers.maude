@@ -16,6 +16,8 @@ var Mbs : MembAxSet . var Mb : MembAx .
  var Eqs : EquationSet .  var Eq : Equation . 
  var Rls : RuleSet . var Rl : Rule .
  var T1 T2 : Term . var Cond : Condition .
+ var KRS : KRuleSplit .
+
 
  op resolveKSubsorts : Qid Module Module ModuleSet ~> Module .
  eq resolveKSubsorts(Q, M, Flat, MS) 
@@ -43,8 +45,14 @@ var Mbs : MembAxSet . var Mb : MembAx .
  op filteredProject : SubsortDeclMap SubsortDeclSet -> OpDeclSet .
  eq filteredProject((empty).SubsortDeclMap, SSDS) = none .
  eq filteredProject(SSDM [SSD |-> Op'], SSDS) 
-  = if SSD in SSDS then Op' filteredProject(SSDM,SSDS) 
+  = if SSD in SSDS then Op' replaceOp(Op') ruleOps(Op') filteredProject(SSDM,SSDS) 
     else filteredProject(SSDM,SSDS) fi .
+
+ op replaceOp : OpDecl ~> OpDecl .
+ eq replaceOp(op Q : T -> T' [AS] .) = (op replaceS : T T -> T [prec(125)] .) .
+
+ op ruleOps : OpDecl ~> OpDecl .
+ eq ruleOps(op Q : T -> T' [AS] .) = (op symbol kcrl : T 'Bool -> '`[KSentence`] [prec(126) format('b 'o 'b 'o 'd)] .) (op symbol krl : T -> '`[KSentence`] [prec(126) format('b 'o 'd)] .) .
 
  op subsorts2wrappersImports : ModuleSet ~> ImportList .
  eq subsorts2wrappersImports(M' MS)
@@ -56,7 +64,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
  
  op subsorts2wrappers : Module Module SubsortDeclSet SubsortDeclMap ~> Module .
  eq subsorts2wrappers(M, Flat, SSDS, SSDM)
-  = setMbs(setRls(setEqs(removeSubsorts(M,SSDS), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
+  = setMbs(setRls(setEqs(removeSubsorts(addOps(filteredProject(SSDM,SSDS), M),SSDS), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
  
  op subsorts2wrappers : SubsortDeclSet ~> SubsortDeclMap .
  eq subsorts2wrappers((subsort S < S' .) SSDS)
@@ -70,8 +78,11 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq subsorts2wrappersMbs(none, M, OPDS, SSDM)  = none .
 
  op subsorts2wrappersMb : MembAx Module OpDeclSet SubsortDeclMap ~> MembAx .
+ceq subsorts2wrappersMb(Mb, M, OPDS, SSDM)
+  = plugKRule(setContents(setCondition(KRS, findPurifyRedexCond(getCondition(KRS),M, OPDS, SSDM)),Q[findPurifyRedex(T1, rewriteType(M, T1, T2), M, OPDS, SSDM), findPurifyRedex(T2, rewriteType(M, T1, T2), M, OPDS, SSDM)]))
+ if KRS := splitKRule(Mb) /\  Q[T1,T2] := getContents(KRS) /\ Q = replaceS [print "applying subsorts2wrappers with replace on " Mb].
  eq subsorts2wrappersMb((mb T1 : T [AS] .), M, OPDS, SSDM)
-  = (mb findPurifyRedex(T1, getKind(M,T), M, OPDS, SSDM) : T [AS] .) [print "finding purify redexes for " T1].
+  = (mb findPurifyRedex(T1, getKind(M,T), M, OPDS, SSDM) : T [AS] .) [print "finding purify redexes for " T1 owise].
  eq subsorts2wrappersMb((cmb T1 : T if Cond [AS] .), M, OPDS, SSDM)
   = (cmb findPurifyRedex(T1, getKind(M,T), M, OPDS, SSDM) : T if subsort2wrappersCond(Cond,M,OPDS,SSDM) [AS] .) .
 
@@ -108,10 +119,6 @@ var Mbs : MembAxSet . var Mb : MembAx .
 , M, OPDS, SSDM) : S)
     /\ subsort2wrappersCond(Cond, M, OPDS, SSDM) .
 
-
-
-
-
  op kind-if-not-k : Module Type -> Type .
  eq kind-if-not-k(M, T) = if isKSort(T) or-else isKListSort(T) then T else getKind(M,T) fi [print "Of type: " T] .
 
@@ -142,13 +149,21 @@ var Mbs : MembAxSet . var Mb : MembAx .
     findPurifyRedexes(Trms,Tl,M,OPDS, SSDM) .
  eq findPurifyRedexes(empty, nil, M, OPDS, SSDM) = empty .
 
+
+ op findPurifyRedexCond : TermList Module OpDeclSet SubsortDeclMap ~> TermList .
+ eq findPurifyRedexCond(empty, M, OPDS, SSDM) = empty .
+ eq findPurifyRedexCond(Trm, M, OPDS, SSDM) = findPurifyRedex(Trm, leastSort(M, Trm), M, OPDS, SSDM) .
+
  op findPurifyRedex : Term Type Module OpDeclSet SubsortDeclMap ~> Term .
 ceq findPurifyRedex('if_then_else_fi[Trm,T1,T2], T, M, OPDS, SSDM)
   = 'if_then_else_fi[findPurifyRedex(Trm, 'Bool, M, OPDS, SSDM), findPurifyRedex(T1, T, M, OPDS, SSDM), findPurifyRedex(T2, T, M, OPDS, SSDM)]
  if sortLeq(M, leastSortsT(M, Trm), 'Bool) [print "if " Trm " then " T1 " else " T2 " fi. target type: " T] .
+
+---(
 ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)
   = Q[findPurifyRedex(T1, upgradeToK(M,T), M, OPDS, SSDM), findPurifyRedex(T2, upgradeToK(M,T), M, OPDS, SSDM)]
  if Q = replaceS [print "replaceS " T1 "; " T2 "; " T] .
+---)
  eq findPurifyRedex(Trm, T, M, OPDS, SSDM)
   = findPurifyRedex(Trm, T, M, OPDS, SSDM, isKSort(T) or-else isKListSort(T))
  [owise] .
@@ -176,7 +191,7 @@ ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)
 --- subsorted terms becoming klabels
 ceq kPurifyTerm(Trm, T, M, OPDS, SSDM [(subsort S < S' .) |-> (op Q : S -> T' [AS] .)], true)
   = Q[findPurifyRedex(Trm,S,M,OPDS, SSDM [(subsort S < S' .) |-> (op Q : S -> T' [AS] .)])] 
- if topOpSymbol(Trm) =/= replaceS /\ matchTermSorts(M, Trm, S) [print "wrapping " Trm " of type " T " with " Q] .
+ if getTopSymbol(Trm) =/= replaceS /\ matchTermSorts(M, Trm, S) [print "wrapping " Trm " of type " T " with " Q] .
 
 --- applied operators 
  eq kPurifyTerm(Q[Trms], T, M, OPDS, SSDM, true)
