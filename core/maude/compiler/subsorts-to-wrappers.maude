@@ -21,6 +21,16 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq resolveKSubsorts(Q, M, Flat, MS) 
   = setName(subsorts2wrappers(suffixImports(Q, M,subsorts2wrappersImports(MS)), Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(maximalKSubsorts(Flat))), qid(string(getName(M)) + string(Q))) .
 
+
+ op resolveKSubsortsDeclare : Qid Module Module ModuleSet ~> Module .
+ eq resolveKSubsortsDeclare(Q, M, Flat, MS) 
+  = setName(subsorts2wrappersDeclare(M, Flat,  pseudoKSubsorts(getSubsorts(M)), subsorts2wrappers(maximalKSubsorts(Flat))), qid(string(getName(M)) + string(Q))) .
+
+ op subsorts2wrappersDeclare : Module Module SubsortDeclSet SubsortDeclMap ~> Module .
+ eq subsorts2wrappersDeclare(M, Flat, SSDS, SSDM)
+  = addOps(filteredProject(SSDM,SSDS), M)  .
+ 
+
  sorts SubsortDeclMapItem SubsortDeclMap .
  subsort SubsortDeclMapItem < SubsortDeclMap .
  op [_|->_] : SubsortDecl OpDecl -> SubsortDeclMapItem .
@@ -46,7 +56,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
  
  op subsorts2wrappers : Module Module SubsortDeclSet SubsortDeclMap ~> Module .
  eq subsorts2wrappers(M, Flat, SSDS, SSDM)
-  = setMbs(setRls(setEqs(addOps(filteredProject(SSDM,SSDS), removeSubsorts(M,SSDS)), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
+  = setMbs(setRls(setEqs(removeSubsorts(M,SSDS), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
  
  op subsorts2wrappers : SubsortDeclSet ~> SubsortDeclMap .
  eq subsorts2wrappers((subsort S < S' .) SSDS)
@@ -148,7 +158,7 @@ ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)
 
  op findPurifyRedex : Term Type Module OpDeclSet SubsortDeclMap Bool ~> Term .
  eq findPurifyRedex(Trm, T, M, OPDS, SSDM, true)  
-  = kPurifyTerm(Trm,T,M, OPDS, SSDM) [print "purifying " Trm] .
+  = kPurifyTerm(Trm,T,M, OPDS, SSDM) [print "starting to purify " Trm] .
  eq findPurifyRedex(Q[Trms], T, M, OPDS, SSDM, false)
   = Q[findPurifyRedexes(Trms, getTypes(countTerms(Trms),findOp(M, OPDS, Q, leastSortsTs(M,Trms), T)), M, OPDS, SSDM)] .
  eq findPurifyRedex(C, T, M, OPDS, SSDM, false) = C .
@@ -166,7 +176,7 @@ ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)
 --- subsorted terms becoming klabels
 ceq kPurifyTerm(Trm, T, M, OPDS, SSDM [(subsort S < S' .) |-> (op Q : S -> T' [AS] .)], true)
   = Q[findPurifyRedex(Trm,S,M,OPDS, SSDM [(subsort S < S' .) |-> (op Q : S -> T' [AS] .)])] 
- if matchTermSorts(M, Trm, S) .
+ if topOpSymbol(Trm) =/= replaceS /\ matchTermSorts(M, Trm, S) [print "wrapping " Trm " of type " T " with " Q] .
 
 --- applied operators 
  eq kPurifyTerm(Q[Trms], T, M, OPDS, SSDM, true)

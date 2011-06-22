@@ -20,8 +20,7 @@ load remove-sublists-interface
 load syntax-to-k-interface
 load add-k-proper-interface
 load lists-to-k-interface
-load subsorts-to-wrappers-declare-interface
----load subsorts-to-wrappers-interface
+load subsorts-to-wrappers-interface
 load homogenous-arguments-interface
 load make-all-labels-interface
 load strict-ops2cxt-interface

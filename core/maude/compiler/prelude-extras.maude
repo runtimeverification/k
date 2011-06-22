@@ -325,6 +325,9 @@ fmod META-TERM-EXTRAS is
   op nth : TermList Nat ~> Term .
   eq nth((Tr, Trl), 0) = Tr .
   eq nth((Tr, Trl), s(N)) = nth(Trl, N) .
+
+  op topOpSymbol : Term ~> Qid .
+  eq topOpSymbol(Q[Trl]) = Q .
 endfm
 
 
