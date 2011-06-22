@@ -1,6 +1,9 @@
-in dekker
+-------------------------------------------------------------------
+--- Lots of SIMPLE programs to be used first to test the syntax ---
+--- and then to test the semantics.                             ---
+-------------------------------------------------------------------
 
-kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX + DEKKER-ALGORITHM
+kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
   syntax Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m 
               | n | o | p | q | r | s | t | u | v | w | x | y | z 
@@ -207,55 +210,55 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX + DEKKER-ALGORIT
 
 
   macro pHeapSort =
-        var numbers[100];
+       var numbers[100];
 
-        function siftDown(root, bottom) {
-       	var done = false, maxChild, temp;
-       
-       	while (root*2 <= bottom and not done) do {
-       	if (root*2 == bottom) then {
-        	    maxChild = root*2;
-          }
-	  else if (numbers[root*2] > numbers[root*2 + 1]) then {
-                   maxChild = root*2;
-               }
-	       else { maxChild = root*2 + 1; }
-          if (numbers[root] < numbers[maxChild]) then {
-            temp = numbers[root];
-            numbers[root] = numbers[maxChild];
-            numbers[maxChild] = temp;
-            root = maxChild;
-          }
-          else {done = true;}
+       function siftDown(root, bottom) {
+         var done = false, maxChild, temp;
+
+         while (root*2 <= bottom and not done) do {
+           if (root*2 == bottom) then {
+             maxChild = root*2;
+           }
+           else if (numbers[root*2] > numbers[root*2 + 1]) then {
+                  maxChild = root*2;
+                }
+                else { maxChild = root*2 + 1; }
+           if (numbers[root] < numbers[maxChild]) then {
+             temp = numbers[root];
+             numbers[root] = numbers[maxChild];
+             numbers[maxChild] = temp;
+             root = maxChild;
+           }
+           else {done = true;}
+         }
        }
-    }
 
-    function heapSort(size){
-      var temp, i = (size/2) - 1;
-      while (i >= 0) do {
-         siftDown(i, size - 1);
-         i = i - 1;
+      function heapSort(size){
+        var temp, i = (size/2) - 1;
+        while (i >= 0) do {
+          siftDown(i, size - 1);
+          i = i - 1;
+        }
+        i = size - 1;
+        while (i >= 1 ) do {
+          temp = numbers[0];
+          numbers[0] = numbers[i];
+          numbers[i] = temp;
+          siftDown(0, i - 1);
+          i = i - 1;
+        }
       }
-      i = size - 1;
-      while (i >= 1 ) do {
-        temp = numbers[0];
-        numbers[0] = numbers[i];
-        numbers[i] = temp;
-        siftDown(0, i - 1);
-        i = i - 1;
-      }
-    }
 
-    function main() {
-      var x = read() ;
-      for i = 0 to (x - 1) do {
-        numbers[i] = read();
+      function main() {
+        var x = read() ;
+        for i = 0 to (x - 1) do {
+          numbers[i] = read();
+        }
+        heapSort(x) ;
+        for i = 0 to (x - 1) do {
+          write(numbers[i]);
+        }
       }
-      heapSort(x) ;
-      for i = 0 to (x - 1) do {
-        write(numbers[i]);
-      }
-    }
 
 
   macro pSorting =
@@ -366,52 +369,56 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX + DEKKER-ALGORIT
        }
 
   macro pArrays =
-    function readArray(a) {
-      var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1;
-      for i = 0 to m do
-          for j = 0 to n do a[i][j]=read();
-    }
-    function printArray(a) {
-      var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1;
-      for i = 0 to m do
-          for j = 0 to n do write(a[i,j]);
-    }
-    function transArray(a) {
-      var  m = sizeOf(a) - 1,  n = sizeOf(a[0]) - 1, b[n+1,m+2];
-      for i = 0 to m do
-          for j = 0 to n do
-              b[j,i]=a[i,j];
-      return b;
-    }
-    function mulArray(a,b) {
-      var m = sizeOf(a) - 1, n=sizeOf(b) - 1, p=sizeOf(b[0]) - 1, c[m+1,p+1];
-      for i=0 to m do for j=0 to p do for k=0 to n do
-          c[i,j]=c[i,j]+a[i,k]*b[k,j];
-      return c;
-    }
-    function main() {
-      var x = read(), y = read(), a[x,y];
-      readArray(a);
-      printArray(mulArray(a,transArray(a)));
-    }
+       function readArray(a) {
+         var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1;
+         for i = 0 to m do
+           for j = 0 to n do a[i][j]=read();
+       }
+
+       function printArray(a) {
+         var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1;
+         for i = 0 to m do
+           for j = 0 to n do write(a[i,j]);
+       }
+
+       function transArray(a) {
+         var  m = sizeOf(a) - 1,  n = sizeOf(a[0]) - 1, b[n+1,m+2];
+         for i = 0 to m do
+           for j = 0 to n do
+             b[j,i]=a[i,j];
+         return b;
+       }
+
+       function mulArray(a,b) {
+         var m=sizeOf(a) - 1, n=sizeOf(b) - 1, p=sizeOf(b[0]) - 1, c[m+1,p+1];
+         for i=0 to m do for j=0 to p do for k=0 to n do
+           c[i,j]=c[i,j]+a[i,k]*b[k,j];
+         return c;
+       }
+
+       function main() {
+         var x = read(), y = read(), a[x,y];
+         readArray(a);
+         printArray(mulArray(a,transArray(a)));
+       }
 
 
 --- programs to test exceptions
 
   syntax Stmts ::= pExceptions1
   macro pExceptions1 =
-    function main() {
-      var e = 100;
-      try {
-        var x = 5;
-        if (x >= 0) then throw x+2;
-        write(20);  --- should not be written
-      } catch(e) {
-        write(e);   --- should write 7
-      }
-      write(e);     --- should write 100
-      write(10);
-    }
+       function main() {
+         var e = 100;
+         try {
+           var x = 5;
+           if (x >= 0) then throw x+2;
+           write(20);  --- should not be written
+         } catch(e) {
+           write(e);   --- should write 7
+         }
+         write(e);     --- should write 100
+         write(10);
+       }
 --- 7 100 10
 
   syntax Id ::= foo
@@ -828,5 +835,44 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX + DEKKER-ALGORIT
     }
 --- 2 3 (twice - depending upon which of the two threads allocates first)
 --- 3 2 (twice - same)
+
+
+--- Dekker's algorithm; not meant to be executed, but only model checked
+  syntax Id ::= task1 | task2 | dekker1 | dekker2 | flag1 | flag2
+              | critical1 | critical2 | turn
+  syntax Stmts ::= pDekker
+  macro pDekker =
+       var flag1 = 0, flag2 = 0, turn = 1, critical1 = 0, critical2 = 0;
+
+       function dekker1() {
+         flag1 = 1; turn = 2;
+         while((flag2 == 1) and (turn == 2)) do { }
+
+         // Enter critical section
+         critical1 = 1;
+         // Critical stuff ...
+         // Leave critical section
+         critical1 = 0;
+
+         flag1 = 0;
+       }
+
+       function dekker2() {
+         flag2 = 1; turn = 1;
+         while((flag1 == 1) and (turn == 1)) do { }
+
+         // Enter critical section
+         critical2 = 1;
+         // Critical stuff ...
+         // Leave critical section
+         critical2 = 0;
+
+         flag2 = 0;
+       }
+
+       function main() {
+         spawn while(true) do { dekker1(); }
+         spawn while(true) do { dekker2(); }
+       }
 
 endkm

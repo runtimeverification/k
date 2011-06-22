@@ -14,8 +14,8 @@
 \begin{latexComment}
 \section{Abstract}
 This is the \K semantic definition of the untyped SIMPLE language.
-SIMPLE is intended to be a pedagogical language that captures the
-essence of the imperative programming paradigm, extended with several
+SIMPLE is intended to be a pedagogical and reasearch language that captures
+the essence of the imperative programming paradigm, extended with several
 features often encountered in imperative programming languages.
 A program consists of a set of global variable declarations and
 function definitions.  Like in C, function definitions cannot be
@@ -26,18 +26,18 @@ the following features in addition to the conventional imperative
 expression and statement constructs:
 \begin{itemize}
 \item Multidimensional arrays and array references.  An array evaluates
-to an array reference, which is a special value holding a location where
-the elements of the array start together with the size of the array;
-the elements of the array can be array references themselves when the
-array is multi-dimensional.  Array references are ordinary values, so
-they can be assigned to variables and passed/received by functions.
+to an array reference, which is a special value holding a location (where
+the elements of the array start) together with the size of the array;
+the elements of the array can be array references themselves (particularly
+when the array is multi-dimensional).  Array references are ordinary values,
+so they can be assigned to variables and passed/received by functions.
 \item Functions and function references.  Functions can have zero or
 more parameters and can return abruptly using a \texttt{return} statement.
-SIMPLE is call-by-value with static scoping.  Function names evaluate to
-function references, which hereby become ordinary values in the language,
-same like the array references.
-\item Blocks with locals.  SIMPLE allows variables to be declared
-anywhere, their scope being the most nested block containing them.
+SIMPLE follows a call-by-value parameter passing style, with static scoping.
+Function names evaluate to function references, which hereby become ordinary
+values in the language, same like the array references.
+\item Blocks with locals.  SIMPLE variables can be declared
+anywhere, their scope being the most nested enclosing block.
 \item Input/Output.  The expression \texttt{read()} evaluates to the
 next value in the input buffer, and the statement \texttt{write(e)}
 evaluates \texttt{e} and outputs its value to the output buffer.  The
@@ -57,11 +57,11 @@ dedicated module between the syntax and the semantics, and we only
 give semantics to the core constructs.
 
 \paragraph{Note:}{
-This \K semantic definition of SIMPLE below is more commented than most
-of our other \K definitions, because it is intended to be the first
-non-trivial \K definition that the new user of the \K framework sees, and
-because it actually can serve as a quick introduction to \K.  The reader
-interested in reading more about \K is referred to
+This definition is commented slightly more than others, because it is
+intended to be one of the first that the new user of \K sees.
+For a quick introduction to the \K prototype, you are referred to
+the README file at the root of this k-framework distribution.  If you are
+interested in reading more about \K, please check the following paper:
 \begin{quote}
 Grigore Ro\c su, Traian-Florin \c Serb\u anu\c t\u a:
 \href{http://dx.doi.org/10.1016/j.jlap.2010.03.012}{An overview of the K semantic framework}.
