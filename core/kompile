@@ -1487,6 +1487,19 @@ sub maudify_file {
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
 
+	# freeze
+	s/($comment)/Freeze($&, "CMTS")/sge;
+
+	# replace module with kmod and 
+	# endmodule with endkm
+	s/(?<!\S)(module)(.*?\s)(endmodule)/kmod$2endkm/sg;
+	
+	# replace including with imports
+	s/(?<!\S)imports(?!\S)/including/sg;
+	
+	$_ = Unfreeze("CMTS", $_);
+
+
 # Step: resolve latex comments
 	# store_intermodule_latex($_);
     $_ = solve_latex($_) if ($latex || $png || $pdf || $ps || $crop || $eps);
