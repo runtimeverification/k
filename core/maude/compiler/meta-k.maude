@@ -732,11 +732,14 @@ fmod STRICT-ATTRS is
 
   eq metadata(khybrid AS) = metadata(metadata("hybrid") AS) .
   eq metadata(karity(N) AS) = metadata(metadata("arity " + string(N,10)) AS) .
-  eq metadata(kstrict(Il, Ql) AS) = metadata(metadata("strict(" + IntList2String(Il) + ") in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(seqkstrict(Il, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(Il) + ") in (" + QidList2String(Ql) + ")") AS) . 
+  
+  eq metadata(kstrict(nil, Ql) AS) = metadata(metadata("strict in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(seqkstrict(nil, Ql) AS) = metadata(metadata("seqstrict in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(kstrict(NeIl, Ql) AS) = metadata(metadata("strict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(seqkstrict(NeIl, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
 
   var AS : AttrSet . var A : Attr .  var N : Nat .  var Ql : QidList . 
-  var Il : IntList .
+  var NeIl : NeIntList .
 endfm
 
 fmod SYNTAX-ATTRS is
