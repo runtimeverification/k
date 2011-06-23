@@ -1,3 +1,5 @@
+require seq
+
 kmod IO is including SEQ + PL-INT
   configuration <k> .K </k>  
                 <in> .List </in> <out> .List </out>

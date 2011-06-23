@@ -1,4 +1,4 @@
-kmod SEQ is including K
+kmod SEQ is
   syntax K ::= K ; K                  [prec 100 gather(e E) strict(1)]
   syntax KResult ::= skip
   

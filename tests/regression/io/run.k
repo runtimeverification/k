@@ -1,15 +1,15 @@
-in /modules/basic-run
-in /modules/seq
-in /modules/io
+require /modules/basic-run
+require /modules/seq
+require /modules/io
 
-load ../ids
-in /modules/exp
-in /modules/if
-in /modules/k-visitor
-in /modules/substitution
-in /modules/lambda
-in /modules/mu
-load programs
+require ../ids
+require /modules/exp
+require /modules/if
+require /modules/k-visitor
+require /modules/substitution
+require /modules/lambda
+require /modules/mu
+require programs
 
 kmod RUN is including IO-PROGRAMS + BASIC-RUN
   configuration <T> <k> .K </k>  <nextId> 0 </nextId>

@@ -1,12 +1,12 @@
-in /modules/basic-run
-in /modules/k-visitor
-in /modules/substitution
-in /modules/lambda
+require /modules/basic-run
+require /modules/k-visitor
+require /modules/substitution
+require /modules/lambda
 
-load ../ids
-in /modules/exp
-in /modules/if
-load programs
+require ../ids
+require /modules/exp
+require /modules/if
+require programs
 
 kmod RUN is including BASIC-RUN + LAMBDA-PROGRAMS 
   configuration <T> <k> .K </k> <nextId> 0 </nextId> </T>

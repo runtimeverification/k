@@ -1,4 +1,6 @@
-kmod IF is including PL-BOOL + K
+
+
+kmod IF is including PL-BOOL
   syntax K ::= if K then K else K   [strict(1)]
   syntax KResult ::= Bool
 

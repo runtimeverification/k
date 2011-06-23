@@ -1,18 +1,18 @@
-in /modules/basic-run
-in /modules/k-visitor
-in /modules/quote-unquote
+require /modules/basic-run
+require /modules/k-visitor
+require /modules/quote-unquote
 
-load ../ids
-in /modules/exp
-in /modules/if
-in /modules/substitution
-in /modules/lambda
-in /modules/mu
-in /modules/seq
-in /modules/ref
-in /modules/io
-in /modules/while
-load programs
+require ../ids
+require /modules/exp
+require /modules/if
+require /modules/substitution
+require /modules/lambda
+require /modules/mu
+require /modules/seq
+require /modules/ref
+require /modules/io
+require /modules/while
+require programs
 
 kmod RUN is including QUOTE-UNQUOTE-PROGRAMS + BASIC-RUN 
   configuration <T><k> .K </k> <nextId>0</nextId> <mem>.Map</mem> <nextLoc>0</nextLoc><in>.List</in><out>.List</out></T>

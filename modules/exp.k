@@ -1,4 +1,4 @@
-kmod EXP is including PL-INT + K
+kmod EXP is including PL-INT
 --- Basic arithmetic and boolean operations;
   syntax K ::= K + K   [gather(E e) prec 33 strict]       --- addition
              | K * K   [gather(E e) prec 31 strict]       --- multiplication

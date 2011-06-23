@@ -1,4 +1,4 @@
-kmod K-VISITOR is including K + K-WRAPPERS
+kmod K-VISITOR is including K-WRAPPERS
   syntax K ::= visit List{K} applying KLabel if label in Set 
     [latex "\mbox{apply }{#2}\mbox{ to }{#3}\mbox{ in }{#1}"]
   --- "boxed" versions of the K constructors (all of them are strict)

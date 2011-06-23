@@ -1,3 +1,5 @@
+require seq
+
 kmod REF is including SEQ
   configuration <k> .K </k>  
                 <mem> .Map </mem> <nextLoc> 0 </nextLoc>

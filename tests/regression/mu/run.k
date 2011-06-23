@@ -1,13 +1,13 @@
-in /modules/basic-run
-in /modules/k-visitor
-in /modules/substitution
-in /modules/mu
+require /modules/basic-run
+require /modules/k-visitor
+require /modules/substitution
+require /modules/mu
 
-load ../ids
-in /modules/exp
-in /modules/if
-in /modules/lambda
-load programs
+require ../ids
+require /modules/exp
+require /modules/if
+require /modules/lambda
+require programs
 
 kmod RUN is including BASIC-RUN + MU-PROGRAMS 
   configuration <T> <k> .K </k> <nextId> 0 </nextId> </T>

@@ -1,3 +1,5 @@
+require seq
+
 kmod AGENTS is  including SEQ + PL-INT
   configuration
       <agent multiplicity="*"> 

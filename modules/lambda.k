@@ -1,3 +1,5 @@
+require substitution
+
 kmod LAMBDA is including SUBSTITUTION
   syntax K ::= lambda Id . K [latex "\lambda{#1}.{#2}"]
              | K K  [strict]

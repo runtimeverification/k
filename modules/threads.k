@@ -1,3 +1,5 @@
+require seq
+
 kmod THREADS is including SEQ + PL-NAT
   configuration <thread multiplicity="*"> 
                   <k> .K </k> <holds> .Map </holds>

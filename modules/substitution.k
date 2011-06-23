@@ -1,3 +1,5 @@
+require k-visitor
+
 kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
 ---beta-substitution definition using the K AST visitor pattern
 ---assuming the binding operator is [_]_

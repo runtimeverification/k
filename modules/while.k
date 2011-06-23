@@ -1,3 +1,6 @@
+require seq
+require if
+
 kmod WHILE is including SEQ + IF
   syntax K ::= while K do K
   

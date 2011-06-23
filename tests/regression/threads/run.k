@@ -1,18 +1,18 @@
-in /modules/basic-run
-in /modules/seq
-in /modules/threads
+require /modules/basic-run
+require /modules/seq
+require /modules/threads
 
-load ../ids
-in /modules/exp
-in /modules/if
-in /modules/k-visitor
-in /modules/substitution
-in /modules/lambda
-in /modules/halt
-in /modules/io
-in /modules/ref
-in /modules/while
-load programs
+require ../ids
+require /modules/exp
+require /modules/if
+require /modules/k-visitor
+require /modules/substitution
+require /modules/lambda
+require /modules/halt
+require /modules/io
+require /modules/ref
+require /modules/while
+require programs
 
 kmod RUN is including BASIC-RUN + THREADS-PROGRAMS
   configuration <T> 

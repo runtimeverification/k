@@ -1,32 +1,30 @@
 
 
-in /modules/exp
-in /modules/if
-in /modules/k-visitor
-in /modules/substitution
-in /modules/lambda
-in /modules/mu
-in /modules/callcc
-in /modules/halt
-in /modules/seq
-in /modules/io
-in /modules/ref
-in /modules/while
-in /modules/threads
-in /modules/agents
-in /modules/quote-unquote
+require /modules/exp
+require /modules/if
+require /modules/lambda
+require /modules/mu
+require /modules/callcc
+require /modules/halt
+require /modules/seq
+require /modules/io
+require /modules/ref
+require /modules/while
+require /modules/threads
+require /modules/agents
+require /modules/quote-unquote
 
-load ../../../../tests/regression/ids
-load ../../../../tests/regression/exp/programs
-load ../../../../tests/regression/lambda/programs
-load ../../../../tests/regression/mu/programs
-load ../../../../tests/regression/callcc/programs
-load ../../../../tests/regression/halt/programs
-load ../../../../tests/regression/io/programs
-load ../../../../tests/regression/imp/programs
-load ../../../../tests/regression/threads/programs
-load ../../../../tests/regression/agents/programs
-load ../../../../tests/regression/quote-unquote/programs
+require ../../../../tests/regression/ids
+require ../../../../tests/regression/exp/programs
+require ../../../../tests/regression/lambda/programs
+require ../../../../tests/regression/mu/programs
+require ../../../../tests/regression/callcc/programs
+require ../../../../tests/regression/halt/programs
+require ../../../../tests/regression/io/programs
+require ../../../../tests/regression/imp/programs
+require ../../../../tests/regression/threads/programs
+require ../../../../tests/regression/agents/programs
+require ../../../../tests/regression/quote-unquote/programs
 
 kmod AGENT is 
   including EXP 

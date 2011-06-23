@@ -934,11 +934,11 @@ sub required
 	
 	# $req_file = basename($req_file);
 
-	foreach(@imports)
+	if (defined $req_file && scalar @imports > 0)
 	{
-		if (defined $req_file)
+		foreach(@imports)
 		{
-			return 0 if (/\Q$req_file\E/);
+			return 0 if (defined $_ && /\Q$req_file\E/);
 		}
 	}
 

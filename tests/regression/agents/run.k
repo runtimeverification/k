@@ -1,18 +1,18 @@
-in /modules/basic-run
-in /modules/seq
-in /modules/agents
+require /modules/basic-run
+require /modules/seq
+require /modules/agents
 
-load ../ids
-in /modules/exp
-in /modules/if
-in /modules/k-visitor
-in /modules/substitution
-in /modules/lambda
-in /modules/ref
-in /modules/io
-in /modules/while
-in /modules/threads
-load programs
+require ../ids
+require /modules/exp
+require /modules/if
+require /modules/k-visitor
+require /modules/substitution
+require /modules/lambda
+require /modules/ref
+require /modules/io
+require /modules/while
+require /modules/threads
+require programs
 
 kmod RUN is including AGENTS-PROGRAMS + BASIC-RUN
   configuration

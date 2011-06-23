@@ -1,3 +1,5 @@
+require k-visitor
+
 kmod QUOTE-UNQUOTE is including K-VISITOR + PL-NAT
   syntax K ::= quote K
              | unquote K
