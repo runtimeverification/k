@@ -30,6 +30,7 @@
 mod PL-LTL-BUILTIN-MODULE is
   protecting PL-BOOL .
   sort LTLFormula .
+  subsort LTLFormula < Builtins .
 
   --- primitive LTL operators
   ops LTLTrue LTLFalse : -> LTLFormula [ctor format (g o)] .
@@ -83,6 +84,8 @@ mod PL-LTL-SIMPLIFIER-BUILTIN-MODULE is
   sorts TrueLTLFormula FalseLTLFormula PureLTLFormula PE-LTLFormula PU-LTLFormula .
   subsort TrueLTLFormula FalseLTLFormula < PureLTLFormula <
 	  PE-LTLFormula PU-LTLFormula < LTLFormula .
+	  
+  subsort TrueLTLFormula FalseLTLFormula PureLTLFormula PE-LTLFormula PU-LTLFormula < Builtins .
 
   op LTLTrue : -> TrueLTLFormula [ctor ditto] .
   op LTLFalse : -> FalseLTLFormula [ctor ditto] .
@@ -179,6 +182,7 @@ mod PL-SAT-SOLVER-BUILTIN-MODULE is
 
   --- formula lists and results
   sorts LTLFormulaList SatSolveResult TautCheckResult .
+  subsort LTLFormulaList SatSolveResult TautCheckResult < Builtins .
   subsort LTLFormula < LTLFormulaList .
   subsort Bool < SatSolveResult TautCheckResult .
   op LTLnil : -> LTLFormulaList [ctor] .
@@ -218,6 +222,7 @@ endm
 mod PL-SATISFACTION-BUILTIN-MODULE is
   protecting PL-BOOL .
   sorts Model-Checker-State Prop .
+  subsorts Model-Checker-State Prop < Builtins .
   op _LTL|=_ : Model-Checker-State Prop -> Bool [frozen] .
 endm
 
@@ -229,6 +234,7 @@ mod PL-MODEL-CHECKER-BUILTIN-MODULE is
 
   --- transitions and results
   sorts RuleName Transition TransitionList ModelCheckResult .
+  subsorts RuleName Transition TransitionList ModelCheckResult < Builtins .
   subsort Qid < RuleName .
   subsort Transition < TransitionList .
   subsort Bool < ModelCheckResult .
