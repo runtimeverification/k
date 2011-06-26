@@ -829,7 +829,7 @@ mod PL-CONVERSION is
   protecting PL-STRING .
   sort DecFloat .
   subsort DecFloat < Builtins .
-  op <_,_,_>Conversion : Int String Int -> DecFloat [ctor] .
+  op DecFloat : Int String Int -> DecFloat [ctor] .
 
 
   op Bool2Int : Bool -> Int .
@@ -894,7 +894,7 @@ ceq String2Int(S:String) = I:Int if I:Int := String2Rat(S:String,10) .
                   op-hook succSymbol (sNat_ : Nat ~> NzNat)
                   op-hook minusSymbol (-Int_ : NzNat ~> Int)
                   op-hook decFloatSymbol 
-                          (<_,_,_>Conversion : Int String Int ~> DecFloat))] .
+                          (DecFloat : Int String Int ~> DecFloat))] .
 
   op Id2String : Id -> String .
 endm
@@ -945,7 +945,7 @@ including PL-INT .
 including PL-RAT .
 including PL-FLOAT .
 including PL-STRING .
-including PL-CONVERSION .
+---including PL-CONVERSION .
 including PL-QID .
 including PL-RANDOM .
 including PL-COUNTER .
