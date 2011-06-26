@@ -462,6 +462,7 @@ endm
 
 mod K is 
   including K-TECHNIQUE .
+  including PL-BUILTINS .
   including K-RULES .               --- to write k rules with in-place rewriting
   including K-CONFIG .              --- to specify the global configuration term
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
