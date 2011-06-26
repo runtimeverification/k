@@ -945,7 +945,7 @@ including PL-INT .
 including PL-RAT .
 including PL-FLOAT .
 including PL-STRING .
----including PL-CONVERSION .
+including PL-CONVERSION .
 including PL-QID .
 including PL-RANDOM .
 including PL-COUNTER .
