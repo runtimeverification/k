@@ -483,6 +483,10 @@ my $topmatter = "";
 my $unquote = 0;
 my $flat = 0;
 my $shared = 0;
+my $k_auto_incl = 0;
+my $kmain = "kmain-";
+my $require_k_main = 0;
+
 
 # latex, pdf, eps, ps, png, crop
 my $pdf = 0;
@@ -1280,6 +1284,20 @@ sub compile {
 # File name where the compiled output will be stored:
     my $output_file_name = "$language_file_name-compiled.maude";
 
+	my $old_language_file = $language_file_name;
+	my $old_language_module = $language_module_name;
+#	if ($require_k_main)
+#	{
+#		$language_file_name = $kmain . $language_file_name . ".maude";
+#		$language_module_name = uc($kmain) . $language_module_name;
+#		
+#		open TEMP, ">", $language_file_name or die "Cannot open $language_file_name";
+#		print TEMP "in $old_language_file\n";
+#		print TEMP "mod $language_module_name is including K + $old_language_module . endm\n";
+#		close TEMP;
+#		push(@generated_files, $language_file_name);
+#	}
+
 # # Compiling the input module $language_module_name
     if ($unquote) {
 		# If unquote is set then do some changes
@@ -1344,7 +1362,12 @@ sub compile {
 		print FILE $1;
 		close FILE;
 		push(@generated_files, $output_file_name);
-		print "Compiled version written in $output_file_name\n" if $verbose;
+		
+#		if ($require_k_main)
+#		{
+#		}
+		
+		print "Compiled version written in $output_file_name.\n";
     }
 
 # Otherwise there must be some error that the script is now aware of, so show the whole thing
@@ -1386,9 +1409,10 @@ sub run_maude {
 #    print "ERR: " . get_file_content($error_file) . "\n\n";
 #    print "OUT: " . get_file_content($output_file) . "\n\n";
     
-    if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
+    if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg || $out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
 		print "[ERROR] $1\n";
+		print "Check $k_dir/$error_file to find all errors.\n";
 		return -1;
     }
 	elsif ($err =~ /[^\s]/)
@@ -1396,7 +1420,7 @@ sub run_maude {
 		if (countlines($err) > 5)
 		{
 			print "$&" if $err =~ /(.*?\n)(.*?\n)(.*?\n)(.*?\n)(.*?\n)/sg;
-			print "Check $error_file to find all errors.\n";
+			print "Check $k_dir/$error_file to find all errors.\n";
 		}
 		else { print $err; }
 #		return -1;
@@ -1420,7 +1444,7 @@ sub run_maude {
 
     if ($? == 0) {
 	if (-s $error_file) {
-	    open FILE,"<",$error_file or die "Cannot open $error_file\n";
+	    open FILE,"<",$error_file or die "Cannot open $k_dir/$error_file\n";
 	    print "ERROR:\n";
 	    my $i = -1;
 	    while (<FILE>) {
@@ -1481,7 +1505,7 @@ sub maudify_file {
     # hardcoded for avoiding maudification for shared.maude
     if ($file =~ /shared\.maude/)
     {
-	return;
+		return;
     }
     
 # Slurp all $file into $_;
@@ -1496,7 +1520,11 @@ sub maudify_file {
 	
 	# replace including with imports
 	s/(?<!\S)imports(?!\S)/including/sg;
+
+	# append "is" if necessary
+	s/(kmod\s+\S+)(\s+)(?!is)/$1 is$2/sg;
 	
+	# unfreeze
 	$_ = Unfreeze("CMTS", $_);
 
 
@@ -1634,10 +1662,18 @@ sub maudify_module {
     (my $file,my $mno, local $_) = @_;
 
 	# add K or K-LATEX automatically.
-    $_ = addKandKLATEX($_);
+    $_ = addKandKLATEX($_, $file, $mno);
 
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
+
+	my $mname = $1 if /kmod\s+(\S+)/sg;
+	
+	if (!$k_auto_incl && $mname eq $language_module_name && !includesK($language_module_name))
+	{
+		print "[Warning] K could not be automatically included in module $language_module_name ($file:$mno)\n";
+#		$require_k_main = 1;
+	}
 
 # Step: resolve macros
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
@@ -2670,8 +2706,13 @@ sub add_kprelude_sorts
 sub addKandKLATEX
 {
 	my $content = shift;
+	my $file = shift;
+	my $mno = shift;
 	my $k = 0;
 	my $k_latex = 0;
+
+	# extract module name
+	my $mod = $1 if $content =~ /kmod\s+(.*?)\s/sg;
 
 	# get list of imported modules
 	while ( $content =~ /\s+including([\sA-Z\-+]*)/sgm )
@@ -2690,7 +2731,10 @@ sub addKandKLATEX
 	if ($content =~ /\s(syntax\s+($prelude_sorts)|configuration|rule)\s/sg)
 	{
 		# include K if syntax, configuration or rule keywords are used in module
-		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K !sg
+		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K !sg;
+
+#		print "MOD: |$mod|\nMDD: |$language_module_name|\n\n";
+		$k_auto_incl = 1 if $mod eq $language_module_name;
 	}
 	else
 	{
