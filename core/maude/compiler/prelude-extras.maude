@@ -325,6 +325,9 @@ fmod META-TERM-EXTRAS is
   op nth : TermList Nat ~> Term .
   eq nth((Tr, Trl), 0) = Tr .
   eq nth((Tr, Trl), s(N)) = nth(Trl, N) .
+
+  op getTopSymbol : Term ~> Qid .
+  eq getTopSymbol(Q[Trl]) = Q .
 endfm
 
 
@@ -973,6 +976,8 @@ fmod META-LEVEL-EXTRAS is
    =  (op Q : nil -> 'String [none] .) .
   eq findOp(M, OPDS, Q, nil, 'Char)
    =  (op Q : nil -> 'Char [none] .) .
+  eq findOp(M, OPDS, '_=>_, T T', T'')
+   =  (op '_=>_ : T'' T'' -> T'' [none] .) .
   eq findOp(M, OPDS, '_==Bool_, T T', T'')
    =  (op '_==Bool_ : dup(lubSorts(M,T,T'),2) -> 'Bool [none] .) .
   eq findOp(M, OPDS, '_=/=Bool_, T T', T'')

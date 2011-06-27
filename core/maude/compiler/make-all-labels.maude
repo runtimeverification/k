@@ -137,6 +137,9 @@ fmod MAKE-ALL-LABELS is
   = if getType(C) == 'Qid then mkConstant(downKLabel(getName(C)),KLabel) 
     else labelsT(C, T, M, OPDS, OPDM, findOp(M, OPDS, getName(C), nil, getType(C))) fi .
  eq labelsT(V, T, M, OPDS, OPDM) = V .
+ceq labelsT(Q[T1,T2], T, M, OPDS, OPDM)
+  = Q[labelsT(T1, leastSort(M,T1), M, OPDS, OPDM),labelsT(T2, leastSort(M,T2), M, OPDS, OPDM)]
+ if Q = replaceS .
  eq labelsT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
   = 'if_then_else_fi[labelsTs(Trms, 'Bool T T, M, OPDS,OPDM)] .
 --- eq labelsT('_==Bool_[T1,T2],T,M,OPDS,OPDM)

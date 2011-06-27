@@ -10,36 +10,26 @@ mod K-TECHNIQUE is
   var K : K . var Ks : List{K} .
   var LItem : ListItem .  var List : List .
 
-  sorts KResult NeK K .
-  subsorts KResult < NeK < K .
-  subsorts KResult < K .
+  sorts NeK K .
+  subsorts NeK < K .
   op . : -> K .
   op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
 
-  sorts List{KResult} NeList{KResult} List{K} NeList{K} .
+  sorts List{K} NeList{K} .
 
   subsort K < NeList{K} < List{K} .
-  op .List{K} : -> List{KResult} [metadata "latex(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
-  subsort List{KResult} < List{K} .
-  subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
+  op .List{K} : -> List{K} [metadata "latex(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
 
   op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121 metadata "latex(renameTo _\\ensuremath{,\\!\\!,}_)"] .
   --- One should not modify the precedence above.  
   --- Might cause the compilation to fail.
   op _`,`,_ : NeList{K} List{K} -> NeList{K} [ditto] .
   op _`,`,_ : List{K} NeList{K} -> NeList{K} [ditto] .
-  op _`,`,_ : List{KResult} List{KResult} -> List{KResult} [ditto] .
-  op _`,`,_ : NeList{KResult} List{KResult} -> NeList{KResult} [ditto] .
-  op _`,`,_ : List{KResult} NeList{KResult} -> NeList{KResult} [ditto] .
 
 
-  sorts KLabel KResultLabel KHybridLabel .
+  sorts KLabel .
 
-  subsorts KResultLabel KHybridLabel < KLabel .
-  
   op _`(_`) : KLabel List{K} -> NeK [prec 0 gather(& &)] .
-  op _`(_`) : KResultLabel List{K} -> KResult [ditto] .
-  op _`(_`) : KHybridLabel List{KResult} -> KResult [ditto] .
 
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
@@ -263,10 +253,40 @@ mod K-SENTENCE is
   sort KSentence . 
 endm
 
+
+--- KResult level
+mod K-RESULT is
+  including K-TECHNIQUE .
+  var K : K . var Ks : List{K} .
+  var LItem : ListItem .  var List : List .
+
+  sorts KResult .
+  subsorts KResult < NeK < K .
+  subsorts KResult < K .
+
+  sorts List{KResult} NeList{KResult} .
+
+  op .List{K} : -> List{KResult} [ditto metadata "latex(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+  subsort List{KResult} < List{K} .
+  subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
+
+  op _`,`,_ : List{KResult} List{KResult} -> List{KResult} [ditto] .
+  op _`,`,_ : NeList{KResult} List{KResult} -> NeList{KResult} [ditto] .
+  op _`,`,_ : List{KResult} NeList{KResult} -> NeList{KResult} [ditto] .
+
+
+  sorts KResultLabel KHybridLabel .
+
+  subsorts KResultLabel KHybridLabel < KLabel .
+  
+  op _`(_`) : KResultLabel List{K} -> KResult [ditto] .
+  op _`(_`) : KHybridLabel List{KResult} -> KResult [ditto] .
+endm
+
 --- KProper Level
 
 mod K-PROPER is
-  including K-TECHNIQUE .
+  including K-RESULT .
   sort KProper .
   subsort KProper < NeK K .
 --- next line is useful only if not using <k> wrappers for strictness
@@ -298,6 +318,12 @@ mod K-CONTEXTS is
   op wrap-with : K K -> K .
 endm
 
+mod K-PREDICATES is
+  including K-TECHNIQUE .
+  including K-SENTENCE .
+  ops predicate_ : K -> [KSentence] [prec 126] .
+  ops predicate_if_ : K K -> [KSentence] [prec 126] .
+endm
 
 --- Quoted Labels for syntax
 
@@ -357,16 +383,21 @@ mod K-RULES is
   ops rule_if_ : Set Bool -> [KSentence] [prec 126 format(b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
   op _=>_ : K K -> K [prec 125] .
-  op _=>_ : KResult KResult -> KResult [prec 125] .
   op _=>_ : KLabel KLabel -> KLabel [prec 125] .
   op _=>_ : CellLabel CellLabel -> CellLabel [prec 125] .
-  op _=>_ : KResultLabel KResultLabel -> KResultLabel [prec 125] .
   op _=>_ : List{K} List{K} -> List{K} [prec 125] .
-  op _=>_ : List{KResult} List{KResult} -> List{KResult} [prec 125] .
   op _=>_ : Map Map -> Map [prec 125] .
   op _=>_ : List List -> List [prec 125] .
   op _=>_ : Bag Bag -> Bag [prec 125] .
   op _=>_ : Set Set -> Set [prec 125] .
+endm
+
+mod K-RULES-RESULT is
+  including K-RULES .
+  including K-RESULT .
+  op _=>_ : KResult KResult -> KResult [prec 125] .
+  op _=>_ : KResultLabel KResultLabel -> KResultLabel [prec 125] .
+  op _=>_ : List{KResult} List{KResult} -> List{KResult} [prec 125] .
 endm
 
 --- rule where level
@@ -463,6 +494,7 @@ endm
 mod K is 
   including K-TECHNIQUE .
   including PL-BUILTINS .
+  including K-RESULT .              --- to express results syntactically
   including K-RULES .               --- to write k rules with in-place rewriting
   including K-CONFIG .              --- to specify the global configuration term
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
@@ -470,6 +502,7 @@ mod K is
 ---  including K-QUOTED-LABELS .   
 ---Qids no longer included by default, they should be generated as constants
   including K-CONTEXTS .
+  including K-PREDICATES .
   including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-EXTRAS .              --- defines a KLabel substitution 

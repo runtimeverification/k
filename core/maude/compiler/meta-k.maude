@@ -57,7 +57,7 @@ fmod META-K-MODULES is
   including META-MODULE .
   op kModules : ~> SortSet [memo] .
   eq kModules 
-   = 'K-TECHNIQUE ; 'K-SENTENCE ; 'K-WHERE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
+   = 'K-TECHNIQUE ; 'K-RESULT ; 'K-SENTENCE ; 'K-WHERE ; 'K-PROPER ; 'K-STRICNESS ; 'K-CONTEXTS ; 
      'K-WRAPPERS-LABELS ; 'K-WRAPPERS ; 'K-RULES ; 'K-POLYMORPHIC-VARIABLES ; 
      'K-OPEN-CELLS ; 'K-CONFIG ; 'K-DESTRUCTORS ; 'K-QUOTED-LABELS ;
      'K-CONDITION-SEARCH ; 'K-LATEX .
@@ -218,7 +218,7 @@ endfm
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE-EXTRAS .
   var O Q : Qid . var T T' T1 T2 Trm Cxt : Term . var S : Type . var C : Term . 
-  var Cond Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
+  var Cond Cond' Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
   var AS : AttrSet .  var RK : KRuleKind . var Str : String .
 
   sort KRuleKind .
@@ -259,6 +259,9 @@ fmod META-K-RULES is including K-SORTS .
   eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
   eq setContents({RK,T,Cond,AS}, errorT(Trm,Cxt,Str)) 
    = {RK,errorT(Trm,T,Str),Cond,AS} .
+
+  op setCondition : KRuleSplit TermList -> KRuleSplit .
+  eq setCondition({RK,T,Cond,AS}, Cond') = {RK,T,Cond',AS} .
 
   op plugKRule : KRuleSplit ~> MembAx .
   eq plugKRule({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
@@ -729,11 +732,14 @@ fmod STRICT-ATTRS is
 
   eq metadata(khybrid AS) = metadata(metadata("hybrid") AS) .
   eq metadata(karity(N) AS) = metadata(metadata("arity " + string(N,10)) AS) .
-  eq metadata(kstrict(Il, Ql) AS) = metadata(metadata("strict(" + IntList2String(Il) + ") in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(seqkstrict(Il, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(Il) + ") in (" + QidList2String(Ql) + ")") AS) . 
+  
+  eq metadata(kstrict(nil, Ql) AS) = metadata(metadata("strict in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(seqkstrict(nil, Ql) AS) = metadata(metadata("seqstrict in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(kstrict(NeIl, Ql) AS) = metadata(metadata("strict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(seqkstrict(NeIl, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
 
   var AS : AttrSet . var A : Attr .  var N : Nat .  var Ql : QidList . 
-  var Il : IntList .
+  var NeIl : NeIntList .
 endfm
 
 fmod SYNTAX-ATTRS is
@@ -858,6 +864,7 @@ endfm
 fmod META-K-LEAST-SORTS is
   including META-LEVEL-EXTRAS .
   including META-K-RULES .
+  including META-K-BUILTINS .
 
  op errorT : Term Type -> [Type] .
 
@@ -895,8 +902,12 @@ fmod META-K-LEAST-SORTS is
  eq leastSortsT(M, Trm, SS:[SortSet], SS', TlSK) 
   = leastSortsT(M, Trm, SS', TlSK) [owise] .
 
+
+ op removeBuiltins : SortSet -> SortSet .
+ eq removeBuiltins(SS) = removeSorts(SS, Builtins) .
+
  eq $leastSortsT(M, 'if_then_else_fi[Trms], T T' T'') 
-  = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, 'Bool), lubSorts(M, T', T'')) .
+  = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, 'Bool), removeBuiltins(lubSorts(M, T', T''))) .
 
  eq $leastSortsT(M, 'configuration_[Trm], S) = 'KSentence .
  eq $leastSortsT(M, 'rule_[Trm], S) = 'KSentence .
@@ -905,8 +916,8 @@ ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
 ceq $leastSortsT(M, 'context_if_[Trms], S T') = 'KSentence if sortLeq(M,T','Bool).
 
 ceq $leastSortsT(M, Q[T1,T2], T T') 
-  = leastSortsRed(Q[T1,T2], leastSort(M, Q[T1,T2]), lubSorts(M, T, T')) 
- if Q == replaceS . 
+  = leastSortsRed(Q[T1,T2], leastSort(M, Q[T1,T2]), removeBuiltins(lubSorts(M, T, T'))) 
+ if Q == replaceS [print "leastSortsRed: " T1 "; " T2 "; " T "; " T'] . 
  eq $leastSortsT(M, Q[Trms], Tl) = leastSort(M, Q[genXVars(Tl)]) [owise ] .
 
  op leastSortsIf : Term Type Bool TypeSet ~> SortSet .
