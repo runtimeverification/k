@@ -239,7 +239,7 @@ including META-K-WRAPPERS .
 
  var TS : TypeSet .
  op sanityCheckT : Term Module TypeSet ~> Bool .
- eq sanityCheckT(Trm, M, errorT(Trm', T')) = error(Trm', T') .
+ eq sanityCheckT(Trm, M, errorS(Trm', T', S:String)) = error(Trm', T') .
  eq sanityCheckT(Trm, M, S ; TS) = true .
  eq sanityCheckT(Trm, M, TS) = error(Trm, leastSort(M,Trm)) [owise print "got " TS] .
  

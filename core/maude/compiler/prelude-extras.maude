@@ -656,8 +656,8 @@ fmod META-MODULE-EXTRAS is
   op $intersect : TypeSet TypeSet TypeSet -> TypeSet .
   var A : TypeSet .
 
-  eq intersection (TS, none) = none .
-  eq intersection (TS, TS') = $intersect (TS, TS', none) [owise] .
+  eq intersection (TS, none) = none [print "empty intersection"] .
+  eq intersection (TS, TS') = $intersect (TS, TS', none) [owise print "intersecting " TS " with " TS'] .
   eq $intersect (none, TS', A) = A .
   eq $intersect (T ; TS, TS', A) = $intersect (TS, TS', if T in TS' then T ; A else A fi) .
 
@@ -1023,14 +1023,14 @@ fmod META-LEVEL-EXTRAS is
   eq getRelatedSorts(M, none) = none .
 
   op lubSorts : Module Type Type -> TypeSet .
-  eq lubSorts(M, S, S') = minimalSort(M, intersection(greaterSorts(M, S), greaterSorts(M, S'))) .
+  eq lubSorts(M, S, S') = minimalSort(M, intersection(greaterSorts(M, S), greaterSorts(M, S'))) [print "Computing the minimal sorts for " S " and " S'].
   eq lubSorts(M, S, T) = T [owise] .
   eq lubSorts(M, T, S') = T [owise] .
  ceq lubSorts(M, T, T') = completeName(M,T) if sameKind(M, T, T') [owise] .
 
   op minimalSort : Module SortSet ~> SortSet .
   ceq minimalSort(M, S ; S' ; SS) = minimalSort(M, S' ; SS) if sortLeq(M, S',S) .
-  eq minimalSort(M, SS) = SS [owise] .
+  eq minimalSort(M, SS) = SS [owise print "minimal sort: " SS] .
 
   op lubSort : Module Term Term ~> Sort .
   eq lubSort(M, Trm, Trm') = lubSorts(M, leastSort(M, Trm), leastSort(M, Trm')) .
@@ -1129,6 +1129,10 @@ fmod META-LEVEL-EXTRAS is
    = if S' in getSorts(M) then (subsort S < S' .) generateSubsort(M, S, SS) else generateSubsort(M,S, SS) fi
   [owise] .
 
+  op checkSubsorts : Module TypeSet Type ~> Bool .
+  eq checkSubsorts(M, T ; TS, T') = sortLeq(M, T, T') and-then checkSubsorts(M, TS, T') . 
+  eq checkSubsorts(M, none, T') = true .
+
   op minimalOps : Module OpDeclSet ~> OpDeclSet .
   eq minimalOps(M, none) = none .
   eq minimalOps(M, Op) = Op .
@@ -1190,5 +1194,6 @@ fmod META-LEVEL-EXTRAS is
    =  errorT(T1:[Term], T2:[Term], Str:String) .
 
   var Nl1 Nl2 Nl' : NatList .
+  var TS : TypeSet .
 endfm
 
