@@ -29,9 +29,9 @@ mod PL-LIST{X :: TRIV} is
   subsort X$Elt < NeList{X} < List{X} .
 
   op nil : -> List{X} [ctor] .
-  op __ : List{X} List{X} -> List{X} [ctor assoc id: nil prec 25] .
-  op __ : NeList{X} List{X} -> NeList{X} [ctor ditto] .
-  op __ : List{X} NeList{X} -> NeList{X} [ctor ditto] .
+  op _plList_ : List{X} List{X} -> List{X} [ctor assoc id: nil prec 25] .
+  op _plList_ : NeList{X} List{X} -> NeList{X} [ctor ditto] .
+  op _plList_ : List{X} NeList{X} -> NeList{X} [ctor ditto] .
 
   var E E' : X$Elt .
   vars A L : List{X} .
@@ -40,23 +40,23 @@ mod PL-LIST{X :: TRIV} is
   op append : List{X} List{X} -> List{X} .
   op append : NeList{X} List{X} -> NeList{X} .
   op append : List{X} NeList{X} -> NeList{X} .
-  eq append(A, L) = A L .
+  eq append(A, L) = A plList L .
 
   op head : NeList{X} -> X$Elt .
-  eq head(E L) = E .
+  eq head(E plList L) = E .
 
   op tail : NeList{X} -> List{X} .
-  eq tail(E L) = L .
+  eq tail(E plList L) = L .
 
   op last : NeList{X} -> X$Elt .
-  eq last(L E) = E .
+  eq last(L plList E) = E .
 
   op front : NeList{X} -> List{X} .
-  eq front(L E) = L .
+  eq front(L plList E) = L .
 
   op occurs : X$Elt List{X} -> Bool .
   eq occurs(E, nil) = false .
-  eq occurs(E, E' L) = if E ==Bool E' then true else occurs(E, L) fi .
+  eq occurs(E, E' plList L) = if E ==Bool E' then true else occurs(E, L) fi .
 
   op reverse : List{X} -> List{X} .
   op reverse : NeList{X} -> NeList{X} .
@@ -64,7 +64,7 @@ mod PL-LIST{X :: TRIV} is
 
   op $reverse : List{X} List{X} -> List{X} .
   eq $reverse(nil, A) = A .
-  eq $reverse(E L, A) = $reverse(L, E A).
+  eq $reverse(E plList L, A) = $reverse(L, E plList A).
 
   op size : List{X} -> Nat .
   op size : NeList{X} -> NzNat .
@@ -72,7 +72,7 @@ mod PL-LIST{X :: TRIV} is
 
   op $size : List{X} Nat -> Nat .
   eq $size(nil, C) = C .
-  eq $size(E L, C) = $size(L, C +Nat 1) .
+  eq $size(E plList L, C) = $size(L, C +Nat 1) .
 endm
 
 mod PL-SET{X :: TRIV} is
@@ -265,9 +265,9 @@ mod PL-META-MODULE is
   subsorts Type < NeTypeList < TypeList < QidList .
   subsorts NeTypeList < NeQidList .
   op nil : -> TypeList [ctor] .
-  op __ : TypeList TypeList -> TypeList [ctor ditto] .
-  op __ : NeTypeList TypeList -> NeTypeList [ctor ditto] .
-  op __ : TypeList NeTypeList -> NeTypeList [ctor ditto] .
+  op _plList_ : TypeList TypeList -> TypeList [ctor ditto] .
+  op _plList_ : NeTypeList TypeList -> NeTypeList [ctor ditto] .
+  op _plList_ : TypeList NeTypeList -> NeTypeList [ctor ditto] .
   eq T:TypeList ; T:TypeList = T:TypeList .
 
 *** sets of type lists
@@ -569,7 +569,7 @@ mod PL-META-VIEW is
   eq getOpMappings(view Q from ME to ME' is SMS OMS endv) = OMS .
 endm
 
-mod PL-META-LEVEL is
+mod PL-META-LEVEL-BUILTIN-MODULE is
   protecting PL-META-VIEW .
 
 *** bounds
@@ -710,10 +710,10 @@ mod PL-META-LEVEL is
                 (__ : SubsortDeclSet SubsortDeclSet ~> SubsortDeclSet)
 
         op-hook nilQidListSymbol	(nil : ~> QidList)
-        op-hook qidListSymbol		(__ : QidList QidList ~> QidList)
+        op-hook qidListSymbol		(_plList_ : QidList QidList ~> QidList)
 
         op-hook succSymbol		(sNat_ : Nat ~> NzNat)
-        op-hook natListSymbol		(__ : NeNatList NeNatList ~> NeNatList)
+        op-hook natListSymbol		(_plList_ : NeNatList NeNatList ~> NeNatList)
         op-hook unboundedSymbol		(unbounded : ~> Bound)
 
         op-hook stringSymbol		(<Strings> : ~> String)
