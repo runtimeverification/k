@@ -166,8 +166,8 @@ mod PL-META-TERM is
   protecting PL-QID .
 
 *** types
-  sorts Sort Kind Type .
-  subsorts Sort Kind < Type < Qid .
+  sorts Sort Kind TypeMeta .
+  subsorts Sort Kind < TypeMeta < Qid .
   op <Qids> : -> Sort [special (id-hook QuotedIdentifierSymbol (sortQid))] .
   op <Qids> : -> Kind [special (id-hook QuotedIdentifierSymbol (kindQid))] .
 
@@ -190,22 +190,22 @@ mod PL-META-TERM is
 
 *** extraction of names and types
   op getName : Constant -> Qid .
-  op getType : Constant -> Type .
+  op getTypeMeta : Constant -> TypeMeta .
   var C : Constant .
   eq getName(C) = qid(substrString(string(C),
                              0,
                              rfindString(string(C), ".", lengthString(string(C))))) .
-  eq getType(C) = qid(substrString(string(C),
+  eq getTypeMeta(C) = qid(substrString(string(C),
                              rfindString(string(C), ".", lengthString(string(C))) +Nat 1,
                              lengthString(string(C)))) .
 
   op getName : Variable -> Qid .
-  op getType : Variable -> Type .
+  op getTypeMeta : Variable -> TypeMeta .
   var V : Variable .
   eq getName(V) = qid(substrString(string(V),
                              0,
                              rfindString(string(V), ":", lengthString(string(V))))) .
-  eq getType(V) = qid(substrString(string(V),
+  eq getTypeMeta(V) = qid(substrString(string(V),
                              rfindString(string(V), ":", lengthString(string(V))) +Nat 1,
                              lengthString(string(V)))) .
 
@@ -246,34 +246,34 @@ mod PL-META-MODULE is
   eq S:SubsortDecl S:SubsortDecl = S:SubsortDecl .
 
 *** sort, kind and type sets
-  sorts EmptyTypeSet NeSortSet NeKindSet NeTypeSet SortSet KindSet TypeSet .
-  subsort EmptyTypeSet < SortSet KindSet < TypeSet < QidSet .
+  sorts EmptyTypeMetaSet NeSortSet NeKindSet NeTypeMetaSet SortSet KindSet TypeMetaSet .
+  subsort EmptyTypeMetaSet < SortSet KindSet < TypeMetaSet < QidSet .
   subsort Sort < NeSortSet < SortSet .
   subsort Kind < NeKindSet < KindSet .
-  subsort Type NeSortSet NeKindSet < NeTypeSet < TypeSet NeQidSet .
-  op none : -> EmptyTypeSet [ctor] .
-  op _;_ : TypeSet TypeSet -> TypeSet [ctor ditto] .
-  op _;_ : NeTypeSet TypeSet -> NeTypeSet [ctor ditto] .
+  subsort TypeMeta NeSortSet NeKindSet < NeTypeMetaSet < TypeMetaSet NeQidSet .
+  op none : -> EmptyTypeMetaSet [ctor] .
+  op _;_ : TypeMetaSet TypeMetaSet -> TypeMetaSet [ctor ditto] .
+  op _;_ : NeTypeMetaSet TypeMetaSet -> NeTypeMetaSet [ctor ditto] .
   op _;_ : SortSet SortSet -> SortSet [ctor ditto] .
   op _;_ : NeSortSet SortSet -> NeSortSet [ctor ditto] .
   op _;_ : KindSet KindSet -> KindSet [ctor ditto] .
   op _;_ : NeKindSet KindSet -> NeKindSet [ctor ditto] .
-  op _;_ : EmptyTypeSet EmptyTypeSet -> EmptyTypeSet [ctor ditto] .
+  op _;_ : EmptyTypeMetaSet EmptyTypeMetaSet -> EmptyTypeMetaSet [ctor ditto] .
 
 *** type lists
-  sort NeTypeList TypeList .
-  subsorts Type < NeTypeList < TypeList < QidList .
-  subsorts NeTypeList < NeQidList .
-  op nil : -> TypeList [ctor] .
-  op _plList_ : TypeList TypeList -> TypeList [ctor ditto] .
-  op _plList_ : NeTypeList TypeList -> NeTypeList [ctor ditto] .
-  op _plList_ : TypeList NeTypeList -> NeTypeList [ctor ditto] .
-  eq T:TypeList ; T:TypeList = T:TypeList .
+  sort NeTypeMetaList TypeMetaList .
+  subsorts TypeMeta < NeTypeMetaList < TypeMetaList < QidList .
+  subsorts NeTypeMetaList < NeQidList .
+  op nil : -> TypeMetaList [ctor] .
+  op _plList_ : TypeMetaList TypeMetaList -> TypeMetaList [ctor ditto] .
+  op _plList_ : NeTypeMetaList TypeMetaList -> NeTypeMetaList [ctor ditto] .
+  op _plList_ : TypeMetaList NeTypeMetaList -> NeTypeMetaList [ctor ditto] .
+  eq T:TypeMetaList ; T:TypeMetaList = T:TypeMetaList .
 
 *** sets of type lists
-  sort TypeListSet .
-  subsort TypeList TypeSet < TypeListSet .
-  op _;_ : TypeListSet TypeListSet -> TypeListSet [ctor ditto] .
+  sort TypeMetaListSet .
+  subsort TypeMetaList TypeMetaSet < TypeMetaListSet .
+  op _;_ : TypeMetaListSet TypeMetaListSet -> TypeMetaListSet [ctor ditto] .
 
 *** attribute sets
   sorts Attr AttrSet .
@@ -288,7 +288,7 @@ mod PL-META-MODULE is
   op sort_to_ : Qid Qid -> Renaming [ctor] .
   op op_to_[_] : Qid Qid AttrSet -> Renaming
     [ctor format (d d d d s d d d)] .
-  op op_:_->_to_[_] : Qid TypeList Type Qid AttrSet -> Renaming
+  op op_:_->_to_[_] : Qid TypeMetaList TypeMeta Qid AttrSet -> Renaming
     [ctor format (d d d d d d d d s d d d)] .
   op label_to_ : Qid Qid -> Renaming [ctor] .
   op _,_ : RenamingSet RenamingSet -> RenamingSet
@@ -374,7 +374,7 @@ mod PL-META-MODULE is
 *** operator declarations
   sorts OpDecl OpDeclSet .
   subsort OpDecl < OpDeclSet .
-  op (op_:_->_[_].) : Qid TypeList Type AttrSet -> OpDecl
+  op (op_:_->_[_].) : Qid TypeMetaList TypeMeta AttrSet -> OpDecl
     [ctor format (d d d d d d s d d s d)] .
   op none : -> OpDeclSet [ctor] .
   op __ : OpDeclSet OpDeclSet -> OpDeclSet
@@ -534,7 +534,7 @@ mod PL-META-VIEW is
   subsort OpMapping < OpMappingSet .
 
   op (op_to_.) : Qid Qid -> OpMapping [ctor] .
-  op (op_:_->_to_.) : Qid TypeList Type Qid -> OpMapping [ctor] .
+  op (op_:_->_to_.) : Qid TypeMetaList TypeMeta Qid -> OpMapping [ctor] .
   op (op_to term_.) : Term Term -> OpMapping [ctor] .
 
   op none : -> OpMappingSet [ctor] .
@@ -578,9 +578,9 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
   op unbounded : -> Bound [ctor] .
 
 *** argument values
-  sort Type? .
-  subsort Type < Type? .
-  op anyType : -> Type? [ctor] .
+  sort TypeMeta? .
+  subsort TypeMeta < TypeMeta? .
+  op anyTypeMeta : -> TypeMeta? [ctor] .
 
 *** options for metaPrettyPrint()
   sorts PrintOption PrintOptionSet .
@@ -599,13 +599,13 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
   sorts ResultPair ResultTriple Result4Tuple MatchPair TraceStep Trace
     UnificationPair UnificationTriple .
   subsort TraceStep < Trace .
-  op {_,_} : Term Type -> ResultPair [ctor] .
-  op {_,_,_} : Term Type Substitution -> ResultTriple [ctor] .
-  op {_,_,_,_} : Term Type Substitution Context -> Result4Tuple [ctor] .
+  op {_,_} : Term TypeMeta -> ResultPair [ctor] .
+  op {_,_,_} : Term TypeMeta Substitution -> ResultTriple [ctor] .
+  op {_,_,_,_} : Term TypeMeta Substitution Context -> Result4Tuple [ctor] .
   op {_,_} : Substitution Context -> MatchPair [ctor] .
   op {_,_} : Substitution Nat -> UnificationPair [ctor] .
   op {_,_,_} : Substitution Substitution Nat -> UnificationTriple [ctor] .
-  op {_,_,_} : Term Type Rule -> TraceStep [ctor] .
+  op {_,_,_} : Term TypeMeta Rule -> TraceStep [ctor] .
   op nil : -> Trace [ctor] .
   op __ : Trace Trace -> Trace [ctor assoc id: nil format (d n d)] .
 
@@ -634,25 +634,25 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
 
 *** projection functions
   op getTerm : ResultPair -> Term .
-  eq getTerm({T:Term, T:Type}) = T:Term .
-  op getType : ResultPair -> Type .
-  eq getType({T:Term, T:Type}) = T:Type .
+  eq getTerm({T:Term, T:TypeMeta}) = T:Term .
+  op getTypeMeta : ResultPair -> TypeMeta .
+  eq getTypeMeta({T:Term, T:TypeMeta}) = T:TypeMeta .
 
   op getTerm : ResultTriple -> Term .
-  eq getTerm({T:Term, T:Type, S:Substitution}) = T:Term .
-  op getType : ResultTriple -> Type .
-  eq getType({T:Term, T:Type, S:Substitution}) = T:Type .
+  eq getTerm({T:Term, T:TypeMeta, S:Substitution}) = T:Term .
+  op getTypeMeta : ResultTriple -> TypeMeta .
+  eq getTypeMeta({T:Term, T:TypeMeta, S:Substitution}) = T:TypeMeta .
   op getSubstitution : ResultTriple -> Substitution .
-  eq getSubstitution({T:Term, T:Type, S:Substitution}) = S:Substitution .
+  eq getSubstitution({T:Term, T:TypeMeta, S:Substitution}) = S:Substitution .
 
   op getTerm : Result4Tuple -> Term .
-  eq getTerm({T:Term, T:Type, S:Substitution, C:Context}) = T:Term .
-  op getType : Result4Tuple -> Type .
-  eq getType({T:Term, T:Type, S:Substitution, C:Context}) = T:Type .
+  eq getTerm({T:Term, T:TypeMeta, S:Substitution, C:Context}) = T:Term .
+  op getTypeMeta : Result4Tuple -> TypeMeta .
+  eq getTypeMeta({T:Term, T:TypeMeta, S:Substitution, C:Context}) = T:TypeMeta .
   op getSubstitution : Result4Tuple -> Substitution .
-  eq getSubstitution({T:Term, T:Type, S:Substitution, C:Context}) = S:Substitution .
+  eq getSubstitution({T:Term, T:TypeMeta, S:Substitution, C:Context}) = S:Substitution .
   op getContext : Result4Tuple -> Context .
-  eq getContext({T:Term, T:Type, S:Substitution, C:Context}) = C:Context .
+  eq getContext({T:Term, T:TypeMeta, S:Substitution, C:Context}) = C:Context .
 
   op getSubstitution : MatchPair -> Substitution .
   eq getSubstitution({S:Substitution, C:Context}) = S:Substitution .
@@ -684,7 +684,7 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
         op-hook sortRenamingSymbol	(sort_to_ : Qid Qid ~> Renaming)
         op-hook opRenamingSymbol	(op_to_[_] : Qid Qid AttrSet ~> Renaming)
         op-hook opRenamingSymbol2
-                (op_:_->_to_[_] : Qid TypeList Type Qid AttrSet ~> Renaming)
+                (op_:_->_to_[_] : Qid TypeMetaList TypeMeta Qid AttrSet ~> Renaming)
         op-hook labelRenamingSymbol	(label_to_ : Qid Qid ~> Renaming)
         op-hook renamingSetSymbol	(_,_ : RenamingSet RenamingSet ~> RenamingSet)
 
@@ -749,7 +749,7 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
         op-hook printSymbol		(print : QidList ~> Attr)
 
         op-hook opDeclSymbol
-                (op_:_->_[_]. : Qid TypeList Type AttrSet ~> OpDecl)
+                (op_:_->_[_]. : Qid TypeMetaList TypeMeta AttrSet ~> OpDecl)
         op-hook emptyOpDeclSetSymbol	(none : ~> OpDeclSet)
         op-hook opDeclSetSymbol		(__ : OpDeclSet OpDeclSet ~> OpDeclSet)
 
@@ -802,7 +802,7 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
                 (__ : SortMappingSet SortMappingSet ~> SortMappingSet)
 
         op-hook opMappingSymbol		(op_to_. : Qid Qid ~> OpMapping)
-        op-hook opSpecificMappingSymbol	(op_:_->_to_. : Qid TypeList Type Qid ~> OpMapping)
+        op-hook opSpecificMappingSymbol	(op_:_->_to_. : Qid TypeMetaList TypeMeta Qid ~> OpMapping)
         op-hook opTermMappingSymbol	(op_to`term_. : Term Term ~> OpMapping)
 
 	op-hook emptyOpMappingSetSymbol	(none : ~> OpMappingSet)
@@ -813,22 +813,22 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
                 (view_from_to_is__endv : Header ModuleExpression ModuleExpression
                  SortMappingSet OpMappingSet ~> View)
 
-        op-hook anyTypeSymbol		(anyType : ~> Type?)
+        op-hook anyTypeSymbol		(anyTypeMeta : ~> TypeMeta?)
 
 	op-hook unificandPairSymbol	(_=?_ : Term Term ~> UnificandPair)
         op-hook unificationConjunctionSymbol
                 (_/\_ : UnificationProblem UnificationProblem ~> UnificationProblem)
 
-        op-hook resultPairSymbol	({_,_} : Term Type ~> ResultPair)
+        op-hook resultPairSymbol	({_,_} : Term TypeMeta ~> ResultPair)
         op-hook resultTripleSymbol
-                ({_,_,_} : Term Type Substitution ~> ResultTriple)
+                ({_,_,_} : Term TypeMeta Substitution ~> ResultTriple)
         op-hook result4TupleSymbol
-                ({_,_,_,_} : Term Type Substitution Context ~> Result4Tuple)
+                ({_,_,_,_} : Term TypeMeta Substitution Context ~> Result4Tuple)
         op-hook matchPairSymbol		({_,_} : Substitution Context ~> MatchPair)
         op-hook unificationPairSymbol	({_,_} : Substitution Nat ~> UnificationPair)
         op-hook unificationTripleSymbol	({_,_,_} : Substitution Substitution Nat ~> UnificationTriple)
 
-        op-hook traceStepSymbol		({_,_,_} : Term Type Rule ~> TraceStep)
+        op-hook traceStepSymbol		({_,_,_} : Term TypeMeta Rule ~> TraceStep)
         op-hook nilTraceSymbol		(nil : ~> Trace)
         op-hook traceSymbol		(__ : Trace Trace ~> Trace)
 
@@ -920,37 +920,37 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
            id-hook MetaLevelOpSymbol	(metaNarrow2)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op sortLeq : Module Type Type ~> Bool
+  op sortLeq : Module TypeMeta TypeMeta ~> Bool
         [special (
            id-hook MetaLevelOpSymbol	(metaSortLeq)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op sameKind : Module Type Type ~> Bool
+  op sameKind : Module TypeMeta TypeMeta ~> Bool
         [special (
            id-hook MetaLevelOpSymbol	(metaSameKind)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op lesserSorts : Module Type ~> SortSet
+  op lesserSorts : Module TypeMeta ~> SortSet
         [special (
            id-hook MetaLevelOpSymbol	(metaLesserSorts)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op glbSorts : Module Type Type ~> TypeSet
+  op glbSorts : Module TypeMeta TypeMeta ~> TypeMetaSet
         [special (
            id-hook MetaLevelOpSymbol	(metaGlbSorts)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op leastSort : Module Term ~> Type
+  op leastSort : Module Term ~> TypeMeta
         [special (
            id-hook MetaLevelOpSymbol	(metaLeastSort)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op completeName : Module Type ~> Type
+  op completeName : Module TypeMeta ~> TypeMeta
         [special (
            id-hook MetaLevelOpSymbol	(metaCompleteName)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op metaParse : Module QidList Type? ~> ResultPair?
+  op metaParse : Module QidList TypeMeta? ~> ResultPair?
         [special (
            id-hook MetaLevelOpSymbol	(metaParse)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
@@ -975,7 +975,7 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
            id-hook MetaLevelOpSymbol	(metaWellFormedSubstitution)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op getKind : Module Type ~> Kind
+  op getKind : Module TypeMeta ~> Kind
         [special (
            id-hook MetaLevelOpSymbol	(metaGetKind)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
@@ -995,7 +995,7 @@ mod PL-META-LEVEL-BUILTIN-MODULE is
            id-hook MetaLevelOpSymbol	(metaMinimalSorts)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
 
-  op maximalAritySet : Module Qid TypeList Sort ~> TypeListSet
+  op maximalAritySet : Module Qid TypeMetaList Sort ~> TypeMetaListSet
         [special (
            id-hook MetaLevelOpSymbol	(metaMaximalAritySet)
            op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .

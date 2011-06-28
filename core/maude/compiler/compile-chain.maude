@@ -53,7 +53,10 @@ mod COMPILE-ONESHOT is
   op partialCompile : Module Qid ~> Module .
   eq partialCompile(M,Q) = compile(M, upTo(allSteps,Q)) .
   
-  var M : Module . var Q : Qid . var QIL : QidList .
+  op partialCompile : Qid Qid ~> Module .
+  eq partialCompile(Q, Q') = partialCompile(upModule(Q, false), Q') .
+
+  var M : Module . var Q Q' : Qid . var QIL : QidList .
 endm
 
 fmod COMPILE-META is
