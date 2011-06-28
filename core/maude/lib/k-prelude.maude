@@ -319,13 +319,6 @@ mod K-CONTEXTS is
   op wrap-with : K K -> K .
 endm
 
-mod K-PREDICATES is
-  including K-TECHNIQUE .
-  including K-SENTENCE .
-  ops predicate_ : K -> [KSentence] [prec 126] .
-  ops predicate_if_ : K K -> [KSentence] [prec 126] .
-endm
-
 --- Quoted Labels for syntax
 
 mod K-QUOTED-LABELS is
@@ -500,10 +493,7 @@ mod K is
   including K-CONFIG .              --- to specify the global configuration term
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
----  including K-QUOTED-LABELS .   
----Qids no longer included by default, they should be generated as constants
   including K-CONTEXTS .
-  including K-PREDICATES .
   including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-EXTRAS .              --- defines a KLabel substitution 

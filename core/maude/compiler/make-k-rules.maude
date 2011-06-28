@@ -7,15 +7,16 @@ fmod MAKE-K-RULES is
   including PARSE-METADATA .
   var M Flat : Module .  var T T1 T2 : Term .  var AS : AttrSet . 
   var C : Term . var S : Sort . var Ct : Constant . var V : Variable .
-  var O O' : Qid . var N : Nat . var Tl : TermList .
+  var O O'  Q : Qid . var N : Nat . var Tl : TermList .
   var KRuleType : KRuleKind .  var Split : KRuleSplit .
   var Mas : MembAxSet . var Max : MembAx .
+  var OPDS : OpDeclSet . var Op : OpDecl .  var Ty : Type .
   
   op resolveKRules : Qid Module Module -> Module .
   eq resolveKRules(O, M, Flat) = setName(resolveReplace(setOps(setEqs(setRls(Flat,none),none),clearReductionAttrs(getOps(Flat))), setMbs(removeImports(M, (including 'K-RULES .) (including 'K-CONDITION-SEARCH .)),none), getMbs(M)), O) .
 
   op resolveReplace : Module Module MembAxSet -> Module .
-  eq resolveReplace(Flat, M, none) = M .
+  eq resolveReplace(Flat, M, none) = removeReplaceOps(M) .
   eq resolveReplace(Flat, M, Max Mas)
    = resolveReplace(Flat, M, Max, Mas) .
   op resolveReplace : Module Module MembAx MembAxSet -> Module .
@@ -29,6 +30,18 @@ fmod MAKE-K-RULES is
   eq resolveReplace(Flat,  errorM(U:Module, Cxt:[Term], T:[Term], Str:String, AS:AttrSet), Mas)
    = errorM(Flat, Cxt:[Term], T:[Term], Str:String, AS:AttrSet) .
 
+  op removeReplaceOps : Module -> Module .
+  eq removeReplaceOps(M) = setOps(M, removeReplaceOps(getOps(M))) .
+  
+  op removeReplaceOps : OpDeclSet -> OpDeclSet .
+  eq removeReplaceOps((op Q : Ty Ty -> Ty [AS] .) OPDS) 
+   = if Q == replaceS then removeReplaceOps(OPDS) else (op Q : Ty Ty -> Ty [AS] .) removeReplaceOps(OPDS) fi .
+ ceq removeReplaceOps((op Q : Ty 'Bool -> '`[KSentence`] [AS] .) OPDS)
+   = removeReplaceOps(OPDS) if Q = symbol kcrl .
+ ceq removeReplaceOps((op Q : Ty -> '`[KSentence`] [AS] .) OPDS)
+   = removeReplaceOps(OPDS) if Q = symbol krl .
+  eq removeReplaceOps(Op OPDS) = Op removeReplaceOps(OPDS) [owise] .
+  eq removeReplaceOps(none) = none .
 
 
 ---------  Hack to get rid of the potential attribute large
