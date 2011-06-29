@@ -9,8 +9,8 @@ mod ID-TO-STRING-META is
   op id2String : Qid ~> Module .
   eq id2String(QNoInSane) = id2String(upModule(QNoInSane, false), upModule(QNoInSane, true)) .
   
-  op compileID-TO-STRING : Module ~> Module .
-  eq compileID-TO-STRING(M) = id2String(M, flatten(M)) .
+  op compileID-TO-STRING : Module AttrSet ~> Module .
+  eq compileID-TO-STRING(M, AS:AttrSet) = id2String(M, flatten(M)) .
 endm
 
 mod ID-TO-STRING-LOOP is 

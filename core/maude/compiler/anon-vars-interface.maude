@@ -12,8 +12,8 @@ mod ANONYMOUS-VARIABLES-META is
   eq resolveAnonVars(QAnonVars,QNoAnonVars) 
    = resolveAnonymousVars(QNoAnonVars, upModule(QAnonVars, false)) .
 
-  op compileANONYMOUS-VARIABLES : Module ~> Module .
-  eq compileANONYMOUS-VARIABLES(M) = resolveAnonymousVars(getName(M), M) .
+  op compileANONYMOUS-VARIABLES : Module AttrSet ~> Module .
+  eq compileANONYMOUS-VARIABLES(M, AS:AttrSet) = resolveAnonymousVars(getName(M), M) .
 endm
 
 mod ANONYMOUS-VARIABLES-LOOP is 

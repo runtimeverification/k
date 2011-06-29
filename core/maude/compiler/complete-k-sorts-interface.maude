@@ -13,8 +13,8 @@ mod COMPLETE-K-SORTS-META is
   op completeKSorts : Qid Qid ~> Module .
   eq completeKSorts(QNoCompleteKSorts,QCompleteKSorts) = completeKSorts(QCompleteKSorts,  upModule(QNoCompleteKSorts, false), upModule(QNoCompleteKSorts, true)) .
 
-  op compileCOMPLETE-K-SORTS : Module ~> Module .
-  eq compileCOMPLETE-K-SORTS(M) = completeKSorts(getName(M), M, flatten(M)) .
+  op compileCOMPLETE-K-SORTS : Module AttrSet ~> Module .
+  eq compileCOMPLETE-K-SORTS(M, AS:AttrSet) = completeKSorts(getName(M), M, flatten(M)) .
 endm
 
 mod COMPLETE-K-SORTS-LOOP is 

@@ -17,8 +17,8 @@ mod DEFAULT-TERMS-META is
   eq resolveDefaultTerms(QNoDefaultTerms,M,T)
    = if T :: Term then defaultTerms(QNoDefaultTerms,M,T) else M fi .
 
-  op compileDEFAULT-TERMS : Module ~> Module .
-  eq compileDEFAULT-TERMS(M) = resolveDefaultTerms(getName(M), M, extractConfTerm(M)) .
+  op compileDEFAULT-TERMS : Module AttrSet ~> Module .
+  eq compileDEFAULT-TERMS(M, AS:AttrSet) = resolveDefaultTerms(getName(M), M, extractConfTerm(M)) .
 endm
 
 mod DEFAULT-TERMS-LOOP is 

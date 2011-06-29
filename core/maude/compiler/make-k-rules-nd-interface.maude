@@ -10,8 +10,8 @@ mod MAKE-K-RULES-META is
   op resolveKRules : Qid Qid ~> Module .
   eq resolveKRules(QKRules,QNoKRules) = resolveKRules(QNoKRules, upModule(QKRules, false), upModule(QKRules, true), 'k) .
 
-  op compileMAKE-K-RULES : Module ~> Module .
-  eq compileMAKE-K-RULES(M) = resolveKRules(getName(M), M, flatten(M), 'k) .
+  op compileMAKE-K-RULES : Module AttrSet ~> Module .
+  eq compileMAKE-K-RULES(M, AS:AttrSet) = resolveKRules(getName(M), M, flatten(M), 'k) .
 endm
 
 mod MAKE-K-RULES-LOOP is 

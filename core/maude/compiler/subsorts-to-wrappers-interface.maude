@@ -10,8 +10,8 @@ mod SUBSORTS-TO-WRAPPERS-META is
   op resolveKSubsorts : Qid Qid ~> Module .
   eq resolveKSubsorts(QKSubsorts,QNoKSubsorts) = resolveKSubsorts(QNoKSubsorts, upModule(QKSubsorts, false), upModule(QKSubsorts, true), upImports(getImports(upModule(QKSubsorts, false)))) .
 
-  op compileSUBSORTS-TO-WRAPPERS : Module ~> Module .
-  eq compileSUBSORTS-TO-WRAPPERS(M) = setName(resolveKSubsorts(getName(M), M, flatten(M), empty),getName(M)) .
+  op compileSUBSORTS-TO-WRAPPERS : Module AttrSet ~> Module .
+  eq compileSUBSORTS-TO-WRAPPERS(M, AS:AttrSet) = setName(resolveKSubsorts(getName(M), M, flatten(M), empty),getName(M)) .
 endm
 
 mod SUBSORTS-TO-WRAPPERS-DECLARE-META is

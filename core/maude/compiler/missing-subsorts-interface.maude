@@ -9,8 +9,8 @@ mod MISSING-SUBSORTS-META is
   op missingSubsorts : Qid ~> Module .
   eq missingSubsorts(QNoInSane) = missingSubsorts(upModule(QNoInSane, false), upModule(QNoInSane, true)) .
   
-  op compileMISSING-SUBSORTS : Module ~> Module .
-  eq compileMISSING-SUBSORTS(M) = missingSubsorts(M, flatten(M)) .
+  op compileMISSING-SUBSORTS : Module AttrSet ~> Module .
+  eq compileMISSING-SUBSORTS(M, AS:AttrSet) = missingSubsorts(M, flatten(M)) .
 endm
 
 mod MISSING-SUBSORTS-LOOP is 

@@ -12,8 +12,8 @@ mod OPEN-CELLS-META is
   op resolveOpenCells : Qid Qid ~> Module .
   eq resolveOpenCells(QOpenCells,QNoOpenCells) 
    = resolveOpenCells(QNoOpenCells, upModule(QOpenCells, false), upModule(QOpenCells, true)) .
-  op compileOPEN-CELLS : Module ~> Module .
-  eq compileOPEN-CELLS(M) = resolveOpenCells(getName(M), M, flatten(M)) .
+  op compileOPEN-CELLS : Module AttrSet ~> Module .
+  eq compileOPEN-CELLS(M, AS:AttrSet) = resolveOpenCells(getName(M), M, flatten(M)) .
 endm
 
 mod OPEN-CELLS-LOOP is 

@@ -11,8 +11,8 @@ mod POLYMORPHIC-CONSTANTS-META is
   op resolvePolyConsts : Qid Qid ~> Module .
   eq resolvePolyConsts(QPolyConsts,QNoPolyConsts) 
    = resolvePolymorphicConsts(QNoPolyConsts, upModule(QPolyConsts, false), upModule(QPolyConsts, true)) .
-  op compilePOLYMORPHIC-CONSTANTS : Module ~> Module .
-  eq compilePOLYMORPHIC-CONSTANTS(M) = resolvePolymorphicConsts(getName(M),M, flatten(M)) .
+  op compilePOLYMORPHIC-CONSTANTS : Module AttrSet ~> Module .
+  eq compilePOLYMORPHIC-CONSTANTS(M, AS:AttrSet) = resolvePolymorphicConsts(getName(M),M, flatten(M)) .
 endm
 
 mod POLYMORPHIC-CONSTANTS-LOOP is 

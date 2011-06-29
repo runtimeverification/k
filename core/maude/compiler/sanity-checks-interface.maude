@@ -44,8 +44,8 @@ mod SANITY-CHECKS-META is
   eq extractError(Flat, errorM(Trm, T, AS, Tl, Ops, N))
    = error('\g 'rule '\o getLocationInformation(AS) '\o,  metaPrettyPrint(Flat, Trm), T '\o '. 'A 'possible 'candidate 'is 'argument qid(string(s(N),10)) 'whose 'type 'is nth(Tl,N)) [print "ErrorM.  Trm: " Trm "; T: " T "; AS: " AS "; Tl: " Tl "; Ops: " Ops "; N: " N] .
 
-  op compileSANITY-CHECKS : Module ~> Module .
-  eq compileSANITY-CHECKS(M) = $compile(flatten(M), sanityChecks(M, flatten(M))) .
+  op compileSANITY-CHECKS : Module AttrSet ~> Module .
+  eq compileSANITY-CHECKS(M, AS:AttrSet) = $compile(flatten(M), sanityChecks(M, flatten(M))) .
   
   op $compile : Module Module ~> Module .
   eq $compile(Flat, MM) = if MM :: Module then MM else moduleError(extractError(Flat,MM)) fi .

@@ -20,8 +20,8 @@ mod STRICTOPS2CXT-META is
   eq strictOps2cxt(QSyntax,QCxtStrict) 
    = setName(addModule(setImports(strictOps2cxt(QCxtStrict, upModule(QSyntax, true)), including 'K-CONTEXTS .), upModule(QSyntax, false)), QCxtStrict) .
 
-  op compileSTRICTOPS2CXT : Module ~> Module .
-  eq compileSTRICTOPS2CXT(M) = addModule(setImports(strictOps2cxt(getName(M),flatten(M)),including 'K-CONTEXTS .),M) .
+  op compileSTRICTOPS2CXT : Module AttrSet ~> Module .
+  eq compileSTRICTOPS2CXT(M, AS:AttrSet) = addModule(setImports(strictOps2cxt(getName(M),flatten(M)),including 'K-CONTEXTS .),M) .
 endm
 
 mod STRICTOPS2CXT-LOOP is 

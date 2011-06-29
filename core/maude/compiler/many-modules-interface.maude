@@ -13,8 +13,8 @@ mod MANY-MODULES-META is
   op manyModules : Qid Qid ~> Module .
   eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules  , "-BUILTIN-MODULE")) .
 
-  op compileMANY-MODULES : Module ~> Module .
-  eq compileMANY-MODULES(M) = manyModules(getName(M), getAllImportsBut(M,  nil, kModules ; builtinModules ; getName(M), "-BUILTIN-MODULE", none, empty, nil)) .
+  op compileMANY-MODULES : Module AttrSet ~> Module .
+  eq compileMANY-MODULES(M, AS:AttrSet) = manyModules(getName(M), getAllImportsBut(M,  nil, kModules ; builtinModules ; getName(M), "-BUILTIN-MODULE", none, empty, nil)) .
 
 
   eq modules(MS, IL (including 'K-LATEX .) IL') = modules(MS, IL IL') .

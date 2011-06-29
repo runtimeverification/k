@@ -10,8 +10,8 @@ mod DISAMBIGUATE-OPS-META is
   op makeUnambiguous : Qid Qid ~> Module .
   eq makeUnambiguous(QAmbiguous,QUnambiguous) = makeUnambiguous(QUnambiguous, upModule(QAmbiguous, false), upModule(QAmbiguous, true), upImports(getImports(upModule(QAmbiguous, false)))) .
 
-  op compileDISAMBIGUATE-OPS : Module ~> Module .
-  eq compileDISAMBIGUATE-OPS(M) = setName(makeUnambiguous('-LABELS, M, flatten(M), upModule('K-WRAPPERS,false)), getName(M)) .
+  op compileDISAMBIGUATE-OPS : Module AttrSet ~> Module .
+  eq compileDISAMBIGUATE-OPS(M, AS:AttrSet) = setName(makeUnambiguous('-LABELS, M, flatten(M), upModule('K-WRAPPERS,false)), getName(M)) .
 endm
 
 mod DISAMBIGUATE-OPS-LOOP is 

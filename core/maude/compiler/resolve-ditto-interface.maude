@@ -13,8 +13,8 @@ mod RESOLVE-DITTO-META is
   op resolveDitto : Qid Qid ~> Module .
   eq resolveDitto(QNoResolveDitto,QResolveDitto) = resolveDitto(QResolveDitto,  upModule(QNoResolveDitto, false)) .
 
-  op compileRESOLVE-DITTO : Module ~> Module .
-  eq compileRESOLVE-DITTO(M) = resolveDitto(getName(M), M) .
+  op compileRESOLVE-DITTO : Module AttrSet ~> Module .
+  eq compileRESOLVE-DITTO(M, AS:AttrSet) = resolveDitto(getName(M), M) .
 endm
 
 mod RESOLVE-DITTO-LOOP is 
