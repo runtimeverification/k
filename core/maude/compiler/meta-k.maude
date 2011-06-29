@@ -814,6 +814,10 @@ fmod LOCATION-ATTRS is
   var AS : AttrSet . var S : String .
 endfm
 
+fmod COMPILATION-ATTRS is
+  including META-ATTRS .
+endfm
+
 fmod K-ATTRS is 
   including SYNTAX-ATTRS .
   including STRICT-ATTRS .
@@ -966,6 +970,4 @@ fmod META-K-COOL is
   
   var Q : Qid .
 endfm
-
-
 

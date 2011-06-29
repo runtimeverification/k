@@ -20,16 +20,6 @@ mod STRICTCXT2EQS is
   sort MASEqsPair .
 
 
-  op strictCxt2eqs : Qid Qid Module Module SortSet ~> Module .
-  var Syntax StrictEqs : Qid . var M Flat : Module .
-
-  eq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss) = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M)), Ss) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
-
-  op strictCxt2eqs : Qid Qid MASEqsPair SortSet ~> Module .
-  eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss) 
-   = addOps(coolOps,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) .
-
-
   op coolOps : -> OpDeclSet .
   eq coolOps 
    = (op 'cool : K -> K [none] .) 
@@ -125,6 +115,18 @@ mod STRICTCXT2EQS is
 
   op findWrapper : OpDeclSet Type ~> Qid .
   eq findWrapper(OPDS op Q : Type -> Type' [AS metadata("builtin wrapper")] ., Type) = Q .
+
+
+  op strictCxt2eqs : Qid Qid Module Module SortSet AttrSet ~> Module .
+  var Syntax StrictEqs : Qid . var M Flat : Module .
+
+  eq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS) 
+   = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M)), Ss) . --- [print "Syntax: " Syntax ", StrictEqs: " StrictEqs ", StrictCxt: " M] .
+
+  op strictCxt2eqs : Qid Qid MASEqsPair SortSet ~> Module .
+  eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss) 
+   = addOps(coolOps,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), 
+        addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) .
 
 endm
 

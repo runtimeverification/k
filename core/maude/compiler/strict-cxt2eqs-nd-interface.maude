@@ -21,11 +21,11 @@ mod STRICTCXT2EQS-META is
 
   op strictCxt2eqs : Qid Qid ~> Module .
   eq strictCxt2eqs(QStrictCxt, QStrictEqs) 
-   = setName(addModule(setImports(strictCxt2eqs(QStrictCxt, QStrictCxt, upModule(QStrictCxt,false), upModule(QStrictCxt,true), 'k), including 'K-STRICTNESS .),setMbs(removeImports(upModule(QStrictCxt, false), including 'K-CONTEXTS .),none)), QStrictEqs)
+   = setName(addModule(setImports(strictCxt2eqs(QStrictCxt, QStrictCxt, upModule(QStrictCxt,false), upModule(QStrictCxt,true), 'k, none), including 'K-STRICTNESS .),setMbs(removeImports(upModule(QStrictCxt, false), including 'K-CONTEXTS .),none)), QStrictEqs)
  .
 
   op compileSTRICTCXT2EQS : Module AttrSet ~> Module .
-  eq compileSTRICTCXT2EQS(M, AS:AttrSet) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M), 'k), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
+  eq compileSTRICTCXT2EQS(M, AS:AttrSet) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M), 'k, AS:AttrSet), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
 endm
 
 mod STRICTCXT2EQS-LOOP is 
