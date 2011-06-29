@@ -970,7 +970,17 @@ fmod META-LEVEL-EXTRAS is
   [owise] .
   eq sortsLeq(M, nil,nil) = true .
 
+ op errorS : Term Type String -> [Type] .
+ op errorSOp : Term Type String -> [OpDecl] .
+
   op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
+
+  eq findOp(M, OPDS, Q, Tl1 errorS(Trm, T, Str) Tl2, T') 
+   = errorSOp(Trm, T, Str) .
+   
+  eq findOp(M, OPDS, Q, Tl,  errorS(Trm, T, Str)) 
+   = errorSOp(Trm, T, Str) .
+   
   eq findOp(M, OPDS, Q, nil, 'FiniteFloat)
    =  (op Q : nil -> 'FiniteFloat [none] .) .
   eq findOp(M, OPDS, Q, nil, 'String)

@@ -868,8 +868,6 @@ fmod META-K-LEAST-SORTS is
   including META-K-MODULE .
 
 
- op errorS : Term Type String -> [Type] .
-
  op leastSortsT : Module Term ~> Type .
  eq leastSortsT(M,C) = leastSort(M,C) .
  eq leastSortsT(M,V) = getType(V) .
@@ -881,7 +879,7 @@ fmod META-K-LEAST-SORTS is
  eq leastSortsTs(M, Trms) = leastSortsTs(M, Trms, nil) .
  eq leastSortsTs(M, empty, TlS) = TlS .
  eq leastSortsTs(M, (Trm, Trms), TlS) = leastSortsTs(M, Trms, leastSortsT(M, Trm), TlS) .
---- eq leastSortsTs(M, Trms, errorT(Trm,T), TlS) = errorT(Trm,T) .
+ eq leastSortsTs(M, Trms, errorS(Trm,T,Str), TlS) = errorS(Trm,T, Str) .
  eq leastSortsTs(M, Trms, SS, TlS) = leastSortsTs(M, Trms, TlS # SS) [print "leastSortsTs " Trms "; " TlS "; " SS].
 
  op leastSortsT : Module Term TypeListSet ~> SortSet .
@@ -936,7 +934,7 @@ ceq $leastSortsT(M, Q[T1,T2], T T')
   var Trm Trm' T1 T2 : Term .  var C : Constant . var V : Variable .
   var T T' T'' : Type . var S : Sort .   var Tl : TypeList .
   var SS SS' : SortSet . var NSS : NeSortSet . var TS : TypeSet .
-  var TlS : TypeListSet .  var TlSK : [TypeListSet] .
+  var TlS : TypeListSet .  var TlSK : [TypeListSet] .  var Str : String .
 endfm
 
 

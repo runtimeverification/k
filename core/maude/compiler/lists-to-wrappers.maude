@@ -33,7 +33,7 @@ fmod LISTS-TO-WRAPPERS is
  var C : Constant . var V : Variable .
  vars OPDS OPDS' Ops : OpDeclSet . var Op Op' : OpDecl .
  var SSDS : SubsortDeclSet . var SSD : SubsortDecl .
- var AS AS' : AttrSet .
+ var AS AS' : AttrSet .  var Str : String .
  var CTORS : CTORSMap .
 
  op lists2wrappersImports : ModuleSet ~> ImportList .
@@ -202,10 +202,8 @@ fmod LISTS-TO-WRAPPERS is
     else Q[lists2wTs(Trms, M, OPDS, OPDS', CTORS)]
     fi .
 
----(
- eq lists2wT(Trm, M, OPDS, OPDS', CTORS, Op:[OpDecl])
-  = errorT(Trm, mkVariable('`[`],leastSort(M,Trm)),"Could not find an operation to match the top of the given term. Perhaps the term does not have a least sort?") .
----)
+ eq lists2wT(Trm', M, OPDS, OPDS', CTORS, errorSOp(Trm, T, Str))
+  = errorT(Trm, mkVariable('`[`],leastSort(M,Trm)), Str) .
 
  op lists2wTKs : TermList TypeList Module OpDeclSet OpDeclSet CTORSMap ~> TermList .
  eq lists2wTKs(empty, nil, M, OPDS, OPDS', CTORS) = empty .
