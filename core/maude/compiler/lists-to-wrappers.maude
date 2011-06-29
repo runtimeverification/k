@@ -203,7 +203,7 @@ fmod LISTS-TO-WRAPPERS is
     fi .
 
  eq lists2wT(Trm', M, OPDS, OPDS', CTORS, errorSOp(Trm, T, Str))
-  = errorT(Trm, mkVariable('`[`],leastSort(M,Trm)), Str) .
+  = errorT(Trm, mkVariable('`[`],leastSort(M,Trm')), Str) [print "errorT " Trm Str] .
 
  op lists2wTKs : TermList TypeList Module OpDeclSet OpDeclSet CTORSMap ~> TermList .
  eq lists2wTKs(empty, nil, M, OPDS, OPDS', CTORS) = empty .

@@ -27,8 +27,8 @@ fmod MAKE-K-RULES is
    = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas)
   if CSplit := splitKContext(metadataParse(Max)) .
   eq resolveReplace(Flat, M, Max, Mas) = resolveReplace(Flat, addMbs(Max, M), Mas) [owise] .
-  eq resolveReplace(Flat,  errorM(U:Module, Cxt:[Term], T:[Term], Str:String, AS:AttrSet), Mas)
-   = errorM(Flat, Cxt:[Term], T:[Term], Str:String, AS:AttrSet) .
+  eq resolveReplace(Flat,  errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U:Module), Mas)
+   = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], Flat) .
 
   op removeReplaceOps : Module -> Module .
   eq removeReplaceOps(M) = setOps(M, removeReplaceOps(getOps(M))) .
