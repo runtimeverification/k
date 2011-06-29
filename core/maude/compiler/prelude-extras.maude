@@ -925,9 +925,10 @@ fmod META-LEVEL-EXTRAS is
   including NAT-LIST-EXTRAS .
   including STRING-EXTRAS .
 
-  var M M' : Module . var T T' T'' : Type . var K : Kind . var Tl Tl' : TypeList .
+  var M M' : Module . var K : Kind . 
+  var Tl Tl' Tl1 Tl2 : TypeList . var T T' T'' T1 T2 : Type .
   var OPDS OPDS' : OpDeclSet .  var Op Op' : OpDecl .
-  var AS AS' : AttrSet . var Q Q' : Qid .  var Ct : Constant .
+  var AS AS' AS1 AS2 : AttrSet . var Q Q' : Qid .  var Ct : Constant .
   var Trm Trm' : Term . var Trms : TermList .  var Nl : NatList .
   var S S' : Sort  . var SS SS' : SortSet . var NeSS : NeSortSet .
   var N N' : Nat .  var IL : ImportList .  var MS : ModuleSet .
@@ -985,13 +986,23 @@ fmod META-LEVEL-EXTRAS is
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
    =  (op 'sNat_ : Tl' -> T' [AS] .)
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
- ceq findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, S)
+  eq findOp(M, OPDS (op Q : Tl1 -> T1 [AS1] .) (op Q : Tl2 -> T2 [AS2] .), Q, Tl, T)
+   = $findOp(M, OPDS (op Q : Tl1 -> T1 [AS1] .) (op Q : Tl2 -> T2 [AS2] .), Q, Tl, T) .
+
+  eq findOp(M, OPDS (op Q : Tl' -> T' [AS poly(Nl)] .), Q, Tl, T) 
+   = $findOp(M, OPDS (op Q : Tl' -> T' [AS poly(Nl)] .), Q, Tl, T) .
+
+  eq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T) 
+   = (op Q : Tl' -> T' [AS] .) [owise] .
+  
+  op $findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
+ ceq $findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, S)
    = (op Q : T' T' -> T' [AS assoc] .) 
   if sortLeq(M,S,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl))) .
- ceq findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, T)
+ ceq $findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, T)
    = (op Q : T' T' -> T' [AS assoc] .) 
   if sameKind(M,T,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl))) [owise] .
- ceq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
+ ceq $findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
    = (op Q : mergeTypes(Tl, Tl', 1, getPoly(AS)) -> mergeTypes(T, T', 0, getPoly(AS)) [AS] .)
   if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise] .
 
