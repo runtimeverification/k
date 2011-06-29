@@ -1314,7 +1314,7 @@ sub compile {
 			"load $language_file_name\n",
 			"load $k_all_tools\n",
 			"set print attribute off .\n",
-			"rew compile('$language_module_name) .\n",
+			"rew compile('$language_module_name, none) .\n",
 			"quit\n");
 		
 		my @lines = split(/\n/, $_);
