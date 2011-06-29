@@ -150,7 +150,7 @@ fmod COMPILE-META is
   eq compile(M, Q QIL, AS) =  $compile(M, Q, 
     downTerm(getTerm(
              metaReduce(wrapper(qid(string(Q) + "-META")),
-                        qid("compile" + string(Q))[upTerm(M)])), error)
+                        qid("compile" + string(Q))[upTerm(M),upTerm(AS)])), error)
      , QIL, AS) [print "applying transformation " Q " on module " M] .
   
   op $compile : Module Qid Module QidList AttrSet ~> Module .
