@@ -3,6 +3,7 @@ load lists-to-k
 mod LISTS-TO-K-META is
   including LISTS-TO-K .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var NoLists2k Lists2k : String .  var M : Module .
   var Q QNoLists2k QLists2k : Qid .  var IL : ImportList .
   op makeLists2k : String String ~> Module .

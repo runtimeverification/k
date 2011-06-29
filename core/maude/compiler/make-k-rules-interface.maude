@@ -3,6 +3,7 @@ load make-k-rules
 mod MAKE-K-RULES-META is
   including MAKE-K-RULES .
   including META-LEVEL .
+  including COMPILATION-ATTRS .
   var KRules NoKRules : String .
   var QKRules QNoKRules : Qid .  var M : Module .
   op resolveKRules : String String ~> Module .

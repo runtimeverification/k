@@ -3,6 +3,7 @@ load remove-sublists
 mod REMOVE-SUBLISTS-META is
   including REMOVE-SUBLISTS .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var Syntax NoSyntax : String .  var M : Module .
   var Q QSyntax QNoSyntax : Qid .  var IL : ImportList .
   op removeSublists : String String ~> Module .

@@ -816,6 +816,11 @@ endfm
 
 fmod COMPILATION-ATTRS is
   including META-ATTRS .
+  including RULES-ATTRS .
+
+  op structurals : AttrSet -> Attr .
+  op computationals : AttrSet -> Attr .
+  op supercools : AttrSet -> Attr .
 endfm
 
 fmod K-ATTRS is 

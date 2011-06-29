@@ -3,6 +3,7 @@ load anon-vars
 mod ANONYMOUS-VARIABLES-META is
   including ANONYMOUS-VARIABLES .
   including META-LEVEL .
+  including COMPILATION-ATTRS .
   var AnonVars NoAnonVars : String .  var M : Module .
   var QAnonVars QNoAnonVars : Qid .
   op resolveAnonVars : String String ~> Module .

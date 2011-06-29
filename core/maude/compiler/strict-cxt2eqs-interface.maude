@@ -13,6 +13,7 @@ mod STRICTCXT2EQS-META is
   including STRICTCXT2EQS-METADATA-META .
   including STRICTCXT2EQS .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var StrictCxt StrictEqs : String .  var M : Module .
   var QStrictCxt QStrictEqs : Qid .
   op strictCxt2eqs : String String ~> Module .

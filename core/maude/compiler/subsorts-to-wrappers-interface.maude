@@ -3,6 +3,7 @@ load subsorts-to-wrappers
 mod SUBSORTS-TO-WRAPPERS-META is
   including SUBSORTS-TO-WRAPPERS .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var KSubsorts NoKSubsorts : String .  var M : Module .
   var Q QKSubsorts QNoKSubsorts : Qid .  var IL : ImportList .
   op resolveKSubsorts : String String ~> Module .

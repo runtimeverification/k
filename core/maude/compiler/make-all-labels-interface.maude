@@ -3,6 +3,7 @@ load make-all-labels
 mod MAKE-ALL-LABELS-META is
   including MAKE-ALL-LABELS .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var NoAllLabels AllLabels : String .  var M : Module .
   var Q QNoAllLabels QAllLabels : Qid .  var IL : ImportList .
   op makeAllLabels : String String ~> Module .

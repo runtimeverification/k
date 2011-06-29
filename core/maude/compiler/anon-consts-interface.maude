@@ -3,6 +3,7 @@ load anon-consts
 mod ANONYMOUS-CONSTANTS-META is
   including ANONYMOUS-CONSTANTS .
   including META-LEVEL .
+  including COMPILATION-ATTRS .
   var AnonConsts NoAnonConsts : String .
   var QAnonConsts QNoAnonConsts : Qid .  var M : Module .
   op resolveAnonConsts : String String ~> Module .

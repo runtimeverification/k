@@ -12,6 +12,7 @@ mod STRICTOPS2CXT-META is
   including STRICTOPS2CXT .
   including  STRICTOPS2CXT-METADATA-META .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var Syntax CxtStrict : String .  var M : Module .
   var QSyntax QCxtStrict : Qid .
   op strictOps2cxt : String String ~> Module .

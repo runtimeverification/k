@@ -5,6 +5,8 @@ mod RESOLVE-DITTO-META is
   including META-LEVEL-EXTRAS .
   including META-K-MODULES .
   including META-K-BUILTINS .
+  including COMPILATION-ATTRS .
+
   var NoResolveDitto ResolveDitto : String .
   var Q QNoResolveDitto QResolveDitto : Qid .
   var M : Module .

@@ -5,6 +5,7 @@ mod HOMOGENOUS-ARGUMENTS-META is
   including META-LEVEL-EXTRAS .
   including META-K-MODULES .
   including META-K-BUILTINS .
+  including COMPILATION-ATTRS .
   var NoHomogenousArgs HomogenousArgs : String .  var M : Module .
   var Q QNoHomogenousArgs QHomogenousArgs : Qid .  var IL : ImportList .
   op makeHomogenousArgs : String String ~> Module .

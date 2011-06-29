@@ -5,6 +5,7 @@ mod LISTS-TO-WRAPPERS-META is
   including META-LEVEL-EXTRAS .
   including META-K-BUILTINS .
   including META-K-MODULES .
+  including COMPILATION-ATTRS .
   var NoLists2wrappers Lists2wrappers : String .  var M : Module .
   var Q QNoLists2wrappers QLists2wrappers : Qid .  var IL : ImportList .
   op makeLists2wrappers : String String ~> Module .

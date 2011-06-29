@@ -3,6 +3,7 @@ load missing-subsorts
 mod MISSING-SUBSORTS-META is
   including MISSING-SUBSORTS .
   including META-LEVEL .
+  including COMPILATION-ATTRS .
   var NoInSane : String .  var M : Module .  var Q QNoInSane : Qid . 
   op missingSubsorts : String ~> Module .
   eq missingSubsorts(NoInSane) = missingSubsorts(qid(NoInSane)) .

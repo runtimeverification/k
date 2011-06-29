@@ -3,6 +3,7 @@ load syntax-to-k
 mod SYNTAX-TO-K-META is
   including SYNTAX-TO-K .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var Syntax NoSyntax : String .  var M : Module .
   var Q QSyntax QNoSyntax : Qid .  var IL : ImportList .
   op syntax2k : String String ~> Module .

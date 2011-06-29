@@ -3,6 +3,7 @@ load id-to-string
 mod ID-TO-STRING-META is
   including ID-TO-STRING .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var NoInSane : String .  var M : Module .  var Q QNoInSane : Qid . 
   op id2String : String ~> Module .
   eq id2String(NoInSane) = id2String(qid(NoInSane)) .

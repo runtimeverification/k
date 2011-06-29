@@ -3,6 +3,7 @@ load default-terms
 mod DEFAULT-TERMS-META is
   including DEFAULT-TERMS .
   including META-LEVEL .
+  including COMPILATION-ATTRS .
   var DefaultTerms NoDefaultTerms Config : String .  var M : Module .
   var QDefaultTerms QNoDefaultTerms QConfig : Qid .
   op resolveDefaultTerms : String String String ~> Module .

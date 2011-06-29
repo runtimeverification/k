@@ -5,6 +5,7 @@ mod COMPLETE-K-SORTS-META is
   including META-LEVEL-EXTRAS .
   including META-K-MODULES .
   including META-K-BUILTINS .
+  including COMPILATION-ATTRS .
   var NoCompleteKSorts CompleteKSorts : String .
   var Q QNoCompleteKSorts QCompleteKSorts : Qid .
   var M : Module .

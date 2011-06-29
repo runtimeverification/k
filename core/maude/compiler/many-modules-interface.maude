@@ -5,6 +5,8 @@ mod MANY-MODULES-META is
   including META-LEVEL-EXTRAS .
   including META-K-MODULES .
   including META-K-BUILTINS .
+  including COMPILATION-ATTRS .
+
   var NoManyModules ManyModules : String .
   var Q QNoManyModules QManyModules : Qid .
   var M : Module . var MS : ModuleSet .

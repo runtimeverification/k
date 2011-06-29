@@ -3,6 +3,7 @@ load open-cells
 mod OPEN-CELLS-META is
   including OPEN-CELLS .
   including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
   var OpenCells NoOpenCells : String .
   var QOpenCells QNoOpenCells : Qid .
   var M : Module .
