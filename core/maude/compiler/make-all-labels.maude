@@ -51,16 +51,6 @@ fmod MAKE-ALL-LABELS is
   = if Op in OPDS then LabelOp filteredProject(OPDM,OPDS) 
     else filteredProject(OPDM,OPDS) fi .
 
- op getAuxKLabels : OpDeclSet OpDeclSet -> OpDeclSet .
- eq getAuxKLabels(OPDS, Op OPDS') = getAuxKLabel(OPDS, Op) getAuxKLabels(OPDS, OPDS') .
- eq getAuxKLabels(OPDS, none) = none [print "Done finding aux labels for " OPDS].
-
- op getAuxKLabel : OpDeclSet OpDecl -> OpDeclSet .
- eq getAuxKLabel(OPDS (op Q : nil -> T [metadata("generated label")] .), op Q : nil -> T' [AS] .) 
-  =  (op Q : nil -> T [metadata("generated label")] .) [print "generated label " Q] .
- eq getAuxKLabel(OPDS, Op) = none [owise print "no generated label for " Op] .
-  
-
  op applyLabels : Module  Module OpDeclOpDeclSetMap ~> Module .
  eq applyLabels(M, Flat, OPDM)
   = 

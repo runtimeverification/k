@@ -578,7 +578,7 @@ endfm
 fmod META-K-LABELS is
   including META-K-MODULE .
   including META-LEVEL .
-  var Q : Qid . var T : Type .  var Str : String .
+  var Q : Qid . var T T' : Type .  var Str : String .
 
   op klistLabelS : -> Qid .
   eq klistLabelS = 'kList .
@@ -597,6 +597,26 @@ fmod META-K-LABELS is
    = if find(Str,"hybrid",0) :: Nat then KHybridLabel
      else if T == KProper then KProperLabel
      else if T == KResult then KResultLabel else KLabel fi fi fi .
+
+  op getAuxKLabels : OpDeclSet OpDeclSet -> OpDeclSet .
+  eq getAuxKLabels(OPDS, Op OPDS') = getAuxKLabel(OPDS, Op) getAuxKLabels(OPDS, OPDS') .
+  eq getAuxKLabels(OPDS, none) = none [print "Done finding aux labels for " OPDS].
+
+  op getAuxKLabel : OpDeclSet OpDecl -> OpDeclSet .
+  eq getAuxKLabel(OPDS (op Q : nil -> T [metadata("generated label")] .), op Q : nil -> T' [AS] .) 
+   =  (op Q : nil -> T [metadata("generated label")] .) [print "generated label " Q] .
+  eq getAuxKLabel(OPDS, Op) = none [owise print "no generated label for " Op] .
+
+  op getGeneratedLabels : OpDeclSet -> OpDeclSet .
+  eq getGeneratedLabels(Op OPDS) = if isGeneratedLabel(Op) then Op  getGeneratedLabels(OPDS) else getGeneratedLabels(OPDS) fi .
+  eq getGeneratedLabels(none) = none .
+
+  op isGeneratedLabel : OpDecl -> Bool .
+  eq isGeneratedLabel((op Q : nil -> T [metadata("generated label")] .)) = true .
+  eq isGeneratedLabel(Op) = false [owise] . 
+  
+
+  var OPDS OPDS' : OpDeclSet .  var Op : OpDecl .  var AS : AttrSet .
 endfm
 
 fmod K-STRICTNESS-OPS is including META-LEVEL .

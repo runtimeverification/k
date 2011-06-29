@@ -72,6 +72,10 @@ fmod LISTS-TO-K is
  
  op lists2kModule : Module  Module CTORSMap ~> Module .
  eq lists2kModule(M, Flat, CTORS)
+  = lists2kModule(M, Flat, CTORS, lists2kOps(CTORS, getOps(M)), getGeneratedLabels(getOps(M))) .
+
+ op lists2kModule : Module  Module CTORSMap OpDeclSet OpDeclSet ~> Module .
+ eq lists2kModule(M, Flat, CTORS, OPDS, OPDS')
   = setOps(
    setRls(
    setEqs(
@@ -85,7 +89,7 @@ fmod LISTS-TO-K is
     , lists2kMbs(Flat, getOps(Flat), CTORS, getMbs(M)))
     , lists2kEqs(Flat, getOps(Flat), CTORS, getEqs(M)))
     , lists2kRls(Flat, getOps(Flat), CTORS, getRls(M)))
-    , lists2kOps(CTORS, getOps(M)))
+    , removeOps(OPDS, getAuxKLabels(OPDS', removeOps(OPDS,OPDS'))))
   .
 
  op lists2kOps : CTORSMap OpDeclSet ~> OpDeclSet .
