@@ -25,7 +25,7 @@ Executable simplemaude
 Executable cellstoxml
   Hs-source-dirs:   src
   Main-is:          cellstoxml.hs
-  Build-depends:    base >= 4 && < 5, bytestring, language-k
+  Build-depends:    base >= 4 && < 5, bytestring, language-k >= 0.2.0
   ghc-options:      -Wall
 
   if flag(static)
@@ -34,7 +34,7 @@ Executable cellstoxml
 Executable unlabel
   Hs-source-dirs:   src
   Main-is:          unlabel.hs
-  Build-depends:    base >= 4 && < 5, language-k
+  Build-depends:    base >= 4 && < 5, language-k >= 0.2.0
   ghc-options:      -Wall
 
   if flag(static)
