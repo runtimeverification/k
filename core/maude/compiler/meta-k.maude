@@ -219,7 +219,8 @@ fmod META-K-RULES is including K-SORTS .
   including META-MODULE-EXTRAS .
   var O Q : Qid . var T T' T1 T2 Trm Cxt : Term . var S : Type . var C : Term . 
   var Cond Cond' Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
-  var AS : AttrSet .  var RK : KRuleKind . var Str : String .
+  var AS : AttrSet .  var RK : KRuleKind . var Str : String . 
+  var Op : OpDecl .  var OPDS : OpDeclSet .
 
   sort KRuleKind .
   ops krl kcrl : -> KRuleKind .
@@ -231,6 +232,10 @@ fmod META-K-RULES is including K-SORTS .
 
   op replaceS : -> Qid .
   eq replaceS = '_=>_ .
+
+  op removeRuleOps : OpDeclSet -> OpDeclSet .
+  eq removeRuleOps(Op OPDS) = if getName(Op) == symbol krl or-else getName(Op) == symbol kcrl then removeRuleOps(OPDS) else Op removeRuleOps(OPDS) fi .
+  eq removeRuleOps(none) = none .
 
   op getKRuleKind : Qid ~> KRuleKind . 
   eq getKRuleKind(Q) = if Q == symbol krl then krl else if Q == symbol kcrl then kcrl else error(Q) fi fi .

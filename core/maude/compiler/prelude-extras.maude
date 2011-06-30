@@ -764,6 +764,9 @@ fmod META-MODULE-EXTRAS is
   eq generateImports(S ; SS) = (including S .) generateImports(SS) .
 
 
+  op getName : OpDecl -> Qid .
+  eq getName((op Q : Tl -> T [AS] .)) = Q .
+
   op coGetOps : OpDeclSet SortSet ~> OpDeclSet .
   eq coGetOps(none, SS) = none .
   eq coGetOps(OPDS, SS) = $coGetOps(OPDS, SS, none) [owise] .

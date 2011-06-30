@@ -53,7 +53,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op makeLists2wrappers : Module Module SubsortDeclSet ~> Module .
  eq makeLists2wrappers(M, Flat, SSDS) 
-  = lists2wModule(M, Flat, coGetOps(removeOps(getOps(Flat), getOps(getOps(Flat),getSubsorts(getList2KSubsorts(Flat)))),K ; getSubsorts(getList2KSubsorts(Flat))),  processSubsorts(getOps(Flat), SSDS)) [print "list2w subsorts: " SSDS] .
+  = lists2wModule(M, Flat, coGetOps(removeRuleOps(removeOps(getOps(Flat), getOps(getOps(Flat),getSubsorts(getList2KSubsorts(Flat))))),K ; getSubsorts(getList2KSubsorts(Flat))),  processSubsorts(getOps(Flat), SSDS)) [print "list2w subsorts: " SSDS] .
  
  op lists2wModule : Module  Module OpDeclSet CTORSMap ~> Module .
  eq lists2wModule(M, Flat, OPDS, CTORS)
@@ -117,7 +117,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op lists2wOp : OpDecl CTORSMap ~> OpDeclSet .
  eq lists2wOp((op Q : Tl -> T [AS] .), CTORS (subsort T < T' .) |-> Q[Trm])
-  = (op listWrapperS(T) : T -> T' [metadata("list wrapper")] .) (op Q : Tl -> T [AS] .) .
+  = (op symbol kcrl : T 'Bool -> '`[KSentence`] [prec(126) format('b 'o 'b 'o 'd)] .) (op symbol krl : T -> '`[KSentence`] [prec(126) format('b 'o 'd)] .) (op listWrapperS(T) : T -> T' [metadata("list wrapper")] .) (op Q : Tl -> T [AS] .) .
  eq lists2wOp(Op, CTORS) = Op [owise] .
 
  op lists2wMbs : Module OpDeclSet OpDeclSet CTORSMap MembAxSet ~> MembAxSet .
@@ -197,7 +197,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op lists2wT : Term Module OpDeclSet OpDeclSet CTORSMap OpDecl ~> Term .
  eq lists2wT(Q[Trms], M, OPDS, OPDS', CTORS, Op)
-  = if Op in OPDS' 
+  = if Op in OPDS'
     then Q[lists2wTKs(Trms, getTypes(countTerms(Trms),Op), M, OPDS, OPDS', CTORS)]
     else Q[lists2wTs(Trms, M, OPDS, OPDS', CTORS)]
     fi .

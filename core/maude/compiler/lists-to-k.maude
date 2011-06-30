@@ -89,8 +89,8 @@ fmod LISTS-TO-K is
     , lists2kMbs(Flat, getOps(Flat), CTORS, getMbs(M)))
     , lists2kEqs(Flat, getOps(Flat), CTORS, getEqs(M)))
     , lists2kRls(Flat, getOps(Flat), CTORS, getRls(M)))
-    , removeOps(OPDS, getAuxKLabels(OPDS', removeOps(OPDS,OPDS'))))
-  .
+    , removeOps(OPDS, getAuxKLabels(OPDS', removeOps(OPDS,OPDS')))
+      ) .
 
  op lists2kOps : CTORSMap OpDeclSet ~> OpDeclSet .
  eq lists2kOps(CTORS, Ops Op)
