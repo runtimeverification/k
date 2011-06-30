@@ -494,7 +494,7 @@ my $flat = 0;
 my $shared = 0;
 my $k_auto_incl = 0;
 my $require_k_main = 0;
-my $k_nd = 0;
+my $k_nd = "";
 
 # latex, pdf, eps, ps, png, crop
 my $pdf = 0;
