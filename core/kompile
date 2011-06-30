@@ -601,7 +601,8 @@ foreach (@ARGV) {
 	$topmatter = "?";
     }
     elsif (/^--?nd$/) {
-       $k_all_tools .= "-nd";
+       # $k_all_tools .= "-nd";
+       $k_nd = "-nd";
     }
     elsif (/^--?lint$/) {
        $k_all_tools =  File::Spec->catfile($k_tools_dir,"lint");
@@ -1314,7 +1315,7 @@ sub compile {
 			"load $language_file_name\n",
 			"load $k_all_tools\n",
 			"set print attribute off .\n",
-			"rew compile('$language_module_name, none) .\n",
+			"rew compile$k_nd('$language_module_name) .\n",
 			"quit\n");
 		
 		my @lines = split(/\n/, $_);
@@ -1349,7 +1350,7 @@ sub compile {
             "quit\n",
             "---)\n",
 	    "loop compile .\n",
-	    "(compile $language_module_name .)\n",
+	    "(compile$k_nd $language_module_name .)\n",
 	    "quit\n");	
 		unlink($maude_xml_file);
     }
