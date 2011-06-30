@@ -2,32 +2,49 @@ fmod MAKE-K-RULES is
   including META-MODULE-EXTRAS .
   including  META-K-RULES .
   including  META-K-CONTEXTS .
+  including META-K-COOL .
   including META-LEVEL-EXTRAS .
   including META-K-CONDITION-SEARCH .
   including PARSE-METADATA .
-  var M Flat : Module .  var T T1 T2 : Term .  var AS : AttrSet . 
-  var C : Term . var S : Sort . var Ct : Constant . var V : Variable .
-  var O O'  Q : Qid . var N : Nat . var Tl : TermList .
+  including COMPILATION-ATTRS .
+  var M Flat : Module .  var T T1 T2 : Term .  
+  var AS AS' AS'' : AttrSet .  var A : Attr .
+  var C : Term . var S : Sort .  var Ss : SortSet . var Subst : Substitution .
+  var Ct : Constant . var V : Variable .
+  var O O' Q : Qid . var N : Nat . var Tl : TermList .
   var KRuleType : KRuleKind .  var Split : KRuleSplit .
   var Mas : MembAxSet . var Max : MembAx .
   var OPDS : OpDeclSet . var Op : OpDecl .  var Ty : Type .
   
-  op resolveKRules : Qid Module Module -> Module .
-  eq resolveKRules(O, M, Flat) = setName(resolveReplace(setOps(setEqs(setRls(Flat,none),none),clearReductionAttrs(getOps(Flat))), setMbs(removeImports(M, (including 'K-RULES .) (including 'K-CONDITION-SEARCH .)),none), getMbs(M)), O) .
+  op resolveKRules : Qid Module Module SortSet AttrSet -> Module .
+  eq resolveKRules(O, M, Flat, Ss, AS) = setName(resolveReplace(setOps(setEqs(setRls(Flat,none),none),clearReductionAttrs(getOps(Flat)) coolCellOps(Ss)), addOps(coolCellOps(Ss),setMbs(removeImports(M, (including 'K-RULES .) (including 'K-CONDITION-SEARCH .)),none)), getMbs(M), coolSubst(Ss), AS), O) .
+  
+  op coolCellOps : SortSet -> OpDeclSet .
+  eq coolCellOps(none) = none .
+  eq coolCellOps(S ; Ss) 
+   = (op cool(S) : nil -> CellLabel [none] .)
+     coolCellOps(Ss) .
 
-  op resolveReplace : Module Module MembAxSet -> Module .
-  eq resolveReplace(Flat, M, none) = removeReplaceOps(M) .
-  eq resolveReplace(Flat, M, Max Mas)
-   = resolveReplace(Flat, M, Max, Mas) .
-  op resolveReplace : Module Module MembAx MembAxSet -> Module .
- ceq resolveReplace(Flat, M, Max, Mas)
-   = resolveReplace(Flat, addReplace(Flat, M, Split), Mas)
+  op coolSubst : SortSet -> Substitution .
+  eq coolSubst(none) = none .
+  eq coolSubst(S ; Ss)
+   = (mkCellLabel(S) <- mkCellLabel(cool(S))) ;
+     coolSubst(Ss) .
+
+  op resolveReplace : Module Module MembAxSet Substitution AttrSet -> Module .
+  eq resolveReplace(Flat, M, none, Subst, AS) = removeReplaceOps(M) .
+  eq resolveReplace(Flat, M, Max Mas, Subst, AS)
+   = resolveReplace(Flat, M, Max, Mas, Subst, AS) .
+  op resolveReplace : Module Module MembAx MembAxSet Substitution AttrSet -> Module .
+ ceq resolveReplace(Flat, M, Max, Mas, Subst, AS)
+   = resolveReplace(Flat, addReplace(Flat, M, Split, Subst, AS), Mas, Subst, AS)
   if Split := splitKRule(metadataParse(Max)) .
- ceq resolveReplace(Flat, M, Max, Mas)
-   = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas)
+ ceq resolveReplace(Flat, M, Max, Mas, Subst, AS)
+   = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas, Subst, AS)
   if CSplit := splitKContext(metadataParse(Max)) .
-  eq resolveReplace(Flat, M, Max, Mas) = resolveReplace(Flat, addMbs(Max, M), Mas) [owise] .
-  eq resolveReplace(Flat,  errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U:Module), Mas)
+  eq resolveReplace(Flat, M, Max, Mas, Subst, AS) 
+   = resolveReplace(Flat, addMbs(Max, M), Mas, Subst, AS) [owise] .
+  eq resolveReplace(Flat,  errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U:Module), Mas, Subst, AS')
    = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], Flat) .
 
   op removeReplaceOps : Module -> Module .
@@ -48,27 +65,39 @@ fmod MAKE-K-RULES is
   eq klarge = none . 
 ---------
 
-
   op addCxtReplace : Module Module KContextSplit ~> Module .
   eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(Flat, getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
 
-  op addReplace : Module Module KRuleSplit ~> Module .
-  eq addReplace(Flat, M,{krl,T,empty,AS kstructural})
-   = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = normalize(Flat,splitReplace(Flat, T,2)) [metadata(kstructural AS)] .), M) . 
-  eq addReplace(Flat, M, {kcrl, T, C, AS kstructural})
-   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = normalize(Flat,splitReplace(Flat, T,2)) if C = trueCt [metadata(kstructural AS)] .), M) .
-  eq addReplace(Flat, M, {krl, T, empty, AS})
-    = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => normalize(Flat,splitReplace(Flat, T,2)) [metadata(kcomputational AS)] .), M) [owise] .
-  eq addReplace(Flat, M, {kcrl, T, C, AS}) 
-    = addRls((crl normalize(Flat,splitReplace(Flat, T,1)) => normalize(Flat, splitReplace(Flat, T,2)) if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
+  op addReplace : Module Module KRuleSplit Substitution AttrSet ~> Module .
+  eq addReplace(Flat, M,{krl,T,empty,AS A}, Subst, AS' structurals(A AS''))
+   = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS A, AS') [metadata(A AS)] .), M) . 
+  eq addReplace(Flat, M, {kcrl, T, C, AS A}, Subst, AS' structurals(A AS''))
+   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS A, AS') if C = trueCt [metadata(A AS)] .), M) .
 
+  eq addReplace(Flat, M, {krl, T, empty, AS A}, Subst, AS' computationals(A AS''))
+    = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS A, AS') [metadata(A AS)] .), M) .
+  eq addReplace(Flat, M, {kcrl, T, C, A AS}, Subst, AS' computationals(A AS'')) 
+    = addRls((crl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat, splitReplace(Flat, T,2)), Subst, A AS, AS') if makeCondition(C)  [metadata(A AS)] .), M) .
+
+  eq addReplace(Flat, M, {krl, T, empty, AS}, Subst, AS' computationals(none))
+    = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS kcomputational, AS') [metadata(kcomputational AS)] .), M) [owise] .
+  eq addReplace(Flat, M, {kcrl, T, C, AS}, Subst, AS' computationals(none)) 
+    = addRls((crl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat, splitReplace(Flat, T,2)), Subst, kcomputational AS, AS') if makeCondition(C)  [metadata(kcomputational AS)] .), M) [owise] .
+
+ eq addReplace(Flat, M,{krl,T,empty,AS}, Subst, AS' computationals(A AS''))
+   = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS kstructural, AS') [metadata(kstructural AS)] .), M) [owise] . 
+  eq addReplace(Flat, M, {kcrl, T, C, AS}, Subst, AS' computationals(A AS''))
+   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS kstructural, AS') if C = trueCt [metadata(kstructural AS)] .), M) [owise] .
+
+  op handleTagSuperCooling : Term Substitution AttrSet AttrSet -> Term .
+  eq handleTagSuperCooling(T, Subst, A AS, AS' supercools(A AS'')) = T[Subst] .
+  eq handleTagSuperCooling(T, Subst, AS, AS') = T [owise] .
 
   op makeCondition : Term -> Condition .
  ceq makeCondition(O'[O[T1,T2]])
    = T1 => T2 
   if O' = searchS /\ O = replaceS .
   eq makeCondition(T) = T = trueCt [owise] .
-      
 
   var CSplit : KContextSplit .
 endfm

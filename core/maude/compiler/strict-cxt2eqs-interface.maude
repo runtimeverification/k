@@ -3,17 +3,16 @@ load strict-cxt2eqs
 mod STRICTCXT2EQS-METADATA-META is
   including STRICTCXT2EQS .
   including PARSE-METADATA .
-  var M : Module . var AS : AttrSet . var Str : String . var T1 T2 : Term . 
-  var Sort : Type .  var Cond : TermList .
-  eq strictCxt2eq(M, T1, T2, AS metadata(Str), Cond)
-   = strictCxt2eq(M, T1, T2, metadataParse(Str), Cond) .
+  var M : Module . var AS AS' : AttrSet . var Str : String . var T1 T2 : Term . var Sort : Type .  var Cond : TermList .
+  var MAS : MembAxSet . var Eqs : EquationSet . var Rls : RuleSet .
+  eq strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, AS metadata(Str), Cond, AS')
+   = strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, metadataParse(Str), Cond, AS') .
 endm
 
 mod STRICTCXT2EQS-META is
   including STRICTCXT2EQS-METADATA-META .
   including STRICTCXT2EQS .
   including META-LEVEL-EXTRAS .
-  including COMPILATION-ATTRS .
   var StrictCxt StrictEqs : String .  var M : Module .
   var QStrictCxt QStrictEqs : Qid .
   op strictCxt2eqs : String String ~> Module .
@@ -22,11 +21,11 @@ mod STRICTCXT2EQS-META is
 
   op strictCxt2eqs : Qid Qid ~> Module .
   eq strictCxt2eqs(QStrictCxt, QStrictEqs) 
-   = setName(addModule(setImports(strictCxt2eqs(QStrictCxt, QStrictCxt, upModule(QStrictCxt,false), upModule(QStrictCxt,true)), including 'K-STRICTNESS .),setMbs(removeImports(upModule(QStrictCxt, false), including 'K-CONTEXTS .),none)), QStrictEqs)
+   = setName(addModule(setImports(strictCxt2eqs(QStrictCxt, QStrictCxt, upModule(QStrictCxt,false), upModule(QStrictCxt,true), 'k, none), including 'K-STRICTNESS .),setMbs(removeImports(upModule(QStrictCxt, false), including 'K-CONTEXTS .),none)), QStrictEqs)
  .
 
   op compileSTRICTCXT2EQS : Module AttrSet ~> Module .
-  eq compileSTRICTCXT2EQS(M, AS:AttrSet) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M)), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
+  eq compileSTRICTCXT2EQS(M, AS:AttrSet) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M), 'k, AS:AttrSet), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
 endm
 
 mod STRICTCXT2EQS-LOOP is 

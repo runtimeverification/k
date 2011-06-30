@@ -3,16 +3,15 @@ load make-k-rules
 mod MAKE-K-RULES-META is
   including MAKE-K-RULES .
   including META-LEVEL .
-  including COMPILATION-ATTRS .
   var KRules NoKRules : String .
   var QKRules QNoKRules : Qid .  var M : Module .
   op resolveKRules : String String ~> Module .
   eq resolveKRules(KRules, NoKRules) = resolveKRules(qid(KRules), qid(NoKRules)) .
   op resolveKRules : Qid Qid ~> Module .
-  eq resolveKRules(QKRules,QNoKRules) = resolveKRules(QNoKRules, upModule(QKRules, false), upModule(QKRules, true)) .
+  eq resolveKRules(QKRules,QNoKRules) = resolveKRules(QNoKRules, upModule(QKRules, false), upModule(QKRules, true), 'k, none) .
 
   op compileMAKE-K-RULES : Module AttrSet ~> Module .
-  eq compileMAKE-K-RULES(M, AS:AttrSet) = resolveKRules(getName(M), M, flatten(M)) .
+  eq compileMAKE-K-RULES(M, AS:AttrSet) = resolveKRules(getName(M), M, flatten(M), 'k, AS:AttrSet) .
 endm
 
 mod MAKE-K-RULES-LOOP is 
