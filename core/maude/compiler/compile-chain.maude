@@ -199,9 +199,9 @@ mod COMPILE-LOOP is
 
   eq print(moduleError(QIL)) = QIL .
   rl ['compile Q QIL, idle, QIL'] 
-   => [QIL, idle, print(compile(Q, structurals(kstructural) computationals(kcomputational) supercools(none)) )] .
+   => [QIL, idle, print(compile(Q, structurals(kstructural) computationals(none) supercools(none)) )] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', structurals(kstructural) computationals(kcomputational) supercools(none)) )] .
+   => [QIL, idle, print(pcompile(Q,Q', structurals(kstructural) computationals(none) supercools(none)) )] .
 
   rl ['compile-nd Q QIL, idle, QIL']
   => [QIL, idle, print(compile(Q, structurals(kstructural) computationals(kcomputational pair("nd","true")) supercools(pair("nd","true"))))] .

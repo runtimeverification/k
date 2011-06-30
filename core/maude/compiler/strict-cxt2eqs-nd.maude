@@ -14,7 +14,8 @@ mod STRICTCXT2EQS is
   including COMPILATION-ATTRS .
   var T : Term . var V : Variable .  var Trl : TermList .  
   var Sort S : Sort .  var Ss : SortSet .
-  var AS AS' : AttrSet . var MAS : MembAxSet . var Mb : MembAx .
+  var AS AS' AS'' : AttrSet . var A : Attr .
+  var MAS : MembAxSet . var Mb : MembAx .
   var Eqs Eqs' : EquationSet . var Rls Rls' : RuleSet . var Q : Qid .
   vars Type Type' : Type .  var OPDS : OpDeclSet . var KCS : KContextSplit .
   vars T1 T2 : Term . var Cond : TermList .
@@ -84,10 +85,10 @@ mod STRICTCXT2EQS is
      fi  .
 
   op strictCxtHeat : Term Term TermList AttrSet AttrSet ~> MASEqsPair .
-  eq strictCxtHeat(T1,T2,empty, AS pair("nd","true"), AS')
-   = {none, none, (rl T1 => T2 [metadata(AS pair("nd","true") metadata("heating"))] .)} .
-  eq strictCxtHeat(T1,T2,T, AS pair("nd","true"), AS')
-   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS pair("nd","true") metadata("heating"))] .)} .
+  eq strictCxtHeat(T1,T2,empty, AS A, AS' computationals(A AS''))
+   = {none, none, (rl T1 => T2 [metadata(AS A metadata("heating"))] .)} .
+  eq strictCxtHeat(T1,T2,T, AS A, AS' computationals(A AS''))
+   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS A metadata("heating"))] .)} .
   eq strictCxtHeat(T1,T2,empty, AS, AS')
    = {none, (eq T1 = T2 [metadata(AS metadata("heating"))] .), none} [owise] .
   eq strictCxtHeat(T1,T2,T, AS, AS')
