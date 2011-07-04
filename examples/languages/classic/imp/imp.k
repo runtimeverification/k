@@ -1,4 +1,4 @@
-Module IMP-SYNTAX imports PL-INT + PL-ID
+module IMP-SYNTAX imports PL-INT + PL-ID
 /*@ The following constructs are given the expected strictnesses, except for
 \textsf{and}, which is only strict in its first argument, because we will
 give it a short-circuited semantics (its second argument will only be
@@ -16,10 +16,10 @@ evaluated when the first evaluates to true). */
                 | Stmt Stmt                    [prec 60 gather (e E)]
                 | if BExp then Stmt else Stmt  [prec 59 strict(1)]
                 | while BExp do Stmt           [prec 59]
-End Module
+end module
 
 
-Module IMP-PROGRAMS imports IMP-SYNTAX
+module IMP-PROGRAMS imports IMP-SYNTAX
   syntax Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
                 | n | o | p | q | r | s | t | u | v | w | x | y | z
   syntax Stmt ::= sumPgm
@@ -93,10 +93,10 @@ macro countPrimesPgm = (
    )
 )
 
-End Module
+end module
 
 
-Module IMP-SEMANTICS imports IMP-SYNTAX
+module IMP-SEMANTICS imports IMP-SYNTAX
 /*@ \section*{Semantics}
 This module defines the semantics of IMP.  We first define
 its configuration, then its results, and then its semantic rules. */
@@ -197,9 +197,9 @@ as a computational step (though we beg one to reconsider)
 then one can remove the ``structural'' tag.  */
 
   rule <k> while B do S => if B then (S while B do S) else skip; <_/k> [structural]
-End Module
+end module
 
-Module IMP imports IMP-PROGRAMS + IMP-SEMANTICS 
+module IMP imports IMP-PROGRAMS + IMP-SEMANTICS 
   syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"]
   macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
-End Module
+end module
