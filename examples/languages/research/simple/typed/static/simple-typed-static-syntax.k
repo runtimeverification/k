@@ -7,7 +7,7 @@ kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
                 | bool 
                 | void 
                 | Type [ ] [prec 0]
-                | List{Type} -> Type [metadata "latex(renameTo _\\ensuremath\\rightarrow_)"]
+                | List{Type} -> Type [latex(renameTo _\\ensuremath\\rightarrow_)]
 
 
 
@@ -50,10 +50,10 @@ kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
                 | Exp / Exp [gather(E e) prec 31 strict]
                 | Exp % Exp [gather(E e) prec 31 strict]
                 |  - Exp [strict]
-                | Exp < Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
-                | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
-                | Exp > Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
-                | Exp >= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+                | Exp < Exp [prec 37 latex(renameTo _\\ensuremath<_) strict] 
+                | Exp <= Exp [prec 37 latex(renameTo _\\ensuremath\\leq_) strict] 
+                | Exp > Exp [prec 37 latex(renameTo _\\ensuremath>_) strict] 
+                | Exp >= Exp [prec 37 latex(renameTo _\\ensuremath\\geq_) strict] 
                 | Exp == Exp [prec 37 strict] 
                 | Exp != Exp [prec 37 strict] 
                 | Exp and Exp [gather(E e) prec 55 strict] 
@@ -72,8 +72,8 @@ kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID
 
 --- instructions
   syntax Stmt ::= 
-                  { } [metadata "latex(renameTo \\{\\})"]
-                | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
+                  { } [latex(renameTo \\{\\})]
+                | { Stmts } [gather(&) latex(renameTo \\{\_\\})]
                 | Exp = Exp ; [prec 2 strict(2)]
                 | Exp ; [prec 50 strict]
                 | if Exp then Stmt else Stmt [strict]
