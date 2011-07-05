@@ -2263,7 +2263,7 @@ sub op_tags
 	s/assoc/{$assoc = $&;"";}/sge;
 	s/gather\s*\(.*?(?<!\\)\)/{$gather = $&;"";}/sge;
 #	s/strict(\s*\(.*?(?<!\\)\))?/{$strict = $&;"";}/sge;
-	s/id\s*:\s*\S+/{$id = $&;"";}/sge;
+	s/id\s*:\s*(([^`\(\)\{\}\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))/{$id = $&;"";}/sge;
 	s/prec\s+[0-9]+/{$prec=$&;"";}/sge;
 	s/ditto/{$ditto = $&;}/sge;
 	
@@ -2289,6 +2289,8 @@ sub op_tags
 	{
 		$map{$1} = "(renameTo \\\\". get_newcommand($2) . ")" if $latex =~ /(latex)\s+"(.*?(?<!\\))"/sg;
 	}
+	
+	
 	
 	my $attr_string = "";
 #	$attr_string .= "ditto=() " if $ditto ne "";
