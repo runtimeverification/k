@@ -2366,7 +2366,7 @@ sub rule_tags
     }
 
     # context
-    while ($bleah =~ /\bcontext(.*?)(?=$kmaude_keywords_pattern)/sg)
+    while ($bleah =~ /\bcontext(.*?\s)(?=$kmaude_keywords_pattern)/sg)
     {
     	my $temp = $1;
     	my $context_body = $1;
