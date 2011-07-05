@@ -2,7 +2,7 @@
 kmod ISSUE is
 	including K
 	
-	syntax K ::= test1 | test2
-	rule test1 => 'SomeLabel(.List{K}) [structural]
-	rule test2 => 'SomeLabel(.List{K})
+	syntax K ::= test1 
+	eq test1 = 'SomeLabel(.List{K}) [owise]
+	rule test1 => 'OtherLabel(.List{K}) [metadata "computational"]
 endkm

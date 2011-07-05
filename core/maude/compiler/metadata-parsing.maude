@@ -209,10 +209,12 @@ endfm
 fmod PARSE-METADATA-RULES is
   including PARSE-METADATA-BASIC .
   including RULES-ATTRS .
+---(
   ceq metadataStrippedParse(S) =  metadataParse(stripSpaces(S'))
    if "computational" = substr(S,0,length("computational")) 
    /\ S' := (substr(S,length("computational"),length(S))) 
    /\ S' == "" or-else substr(S',0,1) == " " .
+---)
   ceq metadataStrippedParse(S) =  metadataParse(stripSpaces(S'))
    if "rule" = substr(S,0,length("rule")) 
    /\ S' := (substr(S,length("rule"),length(S))) 
