@@ -2373,7 +2373,7 @@ sub rule_tags
     	my $tags_regex = get_tags_regex();    	
     	$context_body =~ s/(.*?\S)(\s+)(\[\s*($tags_regex).*?(?<!`)\])(\s*)$/
     	{
-    		"$1$2" . compress_tags("", $3) . $4;
+    		"$1$2" . compress_tags("", $3) . $5;
     	}/sge;	
 
 		s/\Q$temp\E/$context_body/sg;
