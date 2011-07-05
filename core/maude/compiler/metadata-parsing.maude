@@ -36,17 +36,6 @@ fmod PARSE-METADATA-LOCATION is
   including LOCATION-ATTRS .
   var S S' : String . var N N1 N2 : Nat . var AS AS' : AttrSet .
   eq pair("location",S) = klocation(S) .
----(
-  ceq metadataStrippedParse(S) = AS metadataParse(S')
-   if  "location" = substr(S,0,length("location")) 
-   /\ {AS, S'} := locationParse(stripSpaces(substr(S, length("location"), length(S))))  .
-
-  op locationParse : String -> AttrStringPair .
-  ceq locationParse(S) 
-    = {klocation(stripSpaces(substr(S,1,N))), substr(S, N + 2, length(S))}
-   if "(" = substr(S, 0, 1)
-   /\ s(N) := find(S, ")", 0)  .
----)
 
   op getLocation : AttrSet -> String .
   eq getLocation(AS metadata(S) AS') = getLocation(AS metadataParse(S) AS') .
@@ -87,23 +76,8 @@ fmod PARSE-METADATA-SYNTAX is
   including SYNTAX-ATTRS .
   var S S' S1 : String . var F : FindResult .  var Q : Qid .
   var N : Nat .  var AS AS' : AttrSet .
-  ceq metadataStrippedParse(S) = kditto  metadataParse(stripSpaces(S'))
-   if "ditto" = substr(S,0,length("ditto")) 
-   /\ S' := (substr(S,length("ditto"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
+  eq pair("ditto","") = kditto .
 
-  ceq metadataStrippedParse(S) = kaux  metadataParse(stripSpaces(S'))
-   if "aux" = substr(S,0,length("aux")) 
-   /\ S' := (substr(S,length("aux"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
-  ceq metadataStrippedParse(S) = kdisolve metadataParse(stripSpaces(S'))
-   if "disolve" = substr(S,0,length("disolve")) 
-   /\ S' := (substr(S,length("disolve"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
-  ceq metadataStrippedParse(S) = ksyntax metadataParse(stripSpaces(S'))
-   if "syntax" = substr(S,0,length("syntax")) 
-   /\ S' := (substr(S,length("syntax"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
  ceq metadataStrippedParse(S) = krenameTo(Q) metadataParse(S')
    if "renameTo " = substr(S,0,length("renameTo ")) 
    /\ S1 := stripSpaces(substr(S,length("renameTo "),length(S))) 
@@ -177,24 +151,9 @@ endfm
 fmod PARSE-METADATA-RULES is
   including PARSE-METADATA-BASIC .
   including RULES-ATTRS .
-  ceq metadataStrippedParse(S) =  metadataParse(stripSpaces(S'))
-   if "rule" = substr(S,0,length("rule")) 
-   /\ S' := (substr(S,length("rule"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
-  ceq metadataStrippedParse(S) = kcomputational  metadataParse(stripSpaces(S'))
-   if "computational" = substr(S,0,length("computational")) 
-   /\ S' := (substr(S,length("computational"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
-  ceq metadataStrippedParse(S) = kstructural  metadataParse(stripSpaces(S'))
-   if "structural" = substr(S,0,length("structural")) 
-   /\ S' := (substr(S,length("structural"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
-  ceq metadataStrippedParse(S) = klarge  metadataParse(stripSpaces(S'))
-   if "large" = substr(S,0,length("large")) 
-   /\ S' := (substr(S,length("large"),length(S))) 
-   /\ S' == "" or-else substr(S',0,1) == " " .
-
-  var S S' : String .
+  eq pair("large","") = klarge .
+  eq pair("structural","") = kstructural .
+  eq pair("computational","") = kcomputational .
 endfm
 
 fmod PARSE-METADATA is

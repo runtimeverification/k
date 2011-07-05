@@ -783,10 +783,7 @@ fmod SYNTAX-ATTRS is
   op kcolor : Qid -> Attr .
   op kditto : -> Attr .
 
-  eq metadata(kditto AS) = metadata(metadata("ditto") AS) .
-  eq metadata(kaux AS) = metadata(metadata("aux") AS) .
-  eq metadata(kdisolve AS) = metadata(metadata("disolve") AS) .
-  eq metadata(ksyntax AS) = metadata(metadata("syntax") AS) .
+  eq metadata(kditto AS) = metadata(metaPair("ditto","") AS) .
   eq metadata(krenameTo(Q) AS) = metadata(metadata("renameTo " + string(Q)) AS) .
   eq metadata(kcolor(Q) AS) = metadata(metadata("color: " + string(Q)) AS) .
   ceq metadata(klatex(AS') AS) = metadata(metaPair("latex", S) AS) 
@@ -808,11 +805,11 @@ endfm
 
 fmod RULES-ATTRS is
   including META-ATTRS .
-  ops kcomputational kstructural klarge : -> Attr . 
+  ops klarge kstructural kcomputational : -> Attr . 
 
-  eq metadata(kcomputational AS) = metadata(metadata("computational") AS) .
-  eq metadata(kstructural AS) = metadata(metadata("structural") AS) .
-  eq metadata(klarge AS) = metadata(metadata("large") AS) .
+  eq metadata(klarge AS) = metadata(metaPair("large","") AS) .
+  eq metadata(kstructural AS) = metadata(metaPair("structural","") AS) .
+  eq metadata(kcomputational AS) = metadata(metaPair("computational","") AS) .
 
   var AS : AttrSet .
 endfm
