@@ -97,7 +97,7 @@ kmod UNIFICATION is including TYPES + K
 
   op _`[_`] : Set Type -> Type 
 
-  syntax List{Type} ::= Set [[ List{Type} ]] [latex({#1}\llbracket\,{#2}\,\rrbracket)]
+  syntax List{Type} ::= Set [[ List{Type} ]] [latex "{#1}\llbracket\,{#2}\,\rrbracket"]
 ---  op _`[`[_`]`] : Set List{Type} -> List{Type} 
 --- I would like to use the following operation name instead, but K-Maude does not like it ..
 ---  op _`[_`] : Set List{Type} -> List{Type} 
