@@ -11,15 +11,13 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
-  syntax List{Id}  ::= 
-                 Id 
+  syntax List{Id}  ::=  Id 
                | .List{Id}
                | List{Id} , List{Id} [prec 70 assoc id: .List{Id} strict hybrid]
 
 --- <SKOOL modified>
 --- List{Var}
-  syntax List{Var} ::=
-                 Var 
+  syntax List{Var} ::= Var 
                | List{Id} 
                | List{Var} , List{Var} [ditto]
 
@@ -43,12 +41,12 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
                | Exp - Exp [gather(E e) prec 33 strict]
                | Exp * Exp [gather(E e) prec 31 strict]
                | Exp / Exp [gather(E e) prec 31 strict]
-               | Exp % Exp [gather(E e) prec 31 metadata "latex(renameTo _\\ensuremath\\%_)" strict]
+               | Exp % Exp [gather(E e) prec 31 latex(renameTo _\\ensuremath\\%_) strict]
                | - Exp [strict]
-               | Exp < Exp [prec 37 metadata "latex(renameTo _\\ensuremath<_)" strict] 
-               | Exp <= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\leq_)" strict] 
-               | Exp > Exp [prec 37 metadata "latex(renameTo _\\ensuremath>_)" strict] 
-               | Exp >= Exp [prec 37 metadata "latex(renameTo _\\ensuremath\\geq_)" strict] 
+               | Exp < Exp [prec 37 latex(renameTo _\\ensuremath<_) strict]
+               | Exp <= Exp [prec 37 latex(renameTo _\\ensuremath\\leq_) strict] 
+               | Exp > Exp [prec 37 latex(renameTo _\\ensuremath>_) strict] 
+               | Exp >= Exp [prec 37 latex(renameTo _\\ensuremath\\geq_) strict] 
                | Exp == Exp [prec 37 strict] 
                | Exp != Exp [prec 37 strict] 
                | Exp and Exp [gather(E e) prec 55 strict] 
@@ -90,8 +88,8 @@ kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
 
 --- instructions
   syntax Stmt ::=
-                 { } [metadata "latex(renameTo \\{\\})"]
-               | { Stmts } [gather(&) metadata "latex(renameTo \\{\_\\})"]
+                 { } [latex(renameTo \\{\\})]
+               | { Stmts } [gather(&) latex(renameTo \\{\_\\})]
                | Exp = Exp ; [prec 2 strict(2)]
                | Exp ; [prec 50 strict]
                | if Exp then Stmt else Stmt [strict(1)]

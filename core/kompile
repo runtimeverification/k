@@ -418,7 +418,7 @@ my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax k
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
-my @k_attributes = qw(strict metadata prec format assoc comm id hybrid gather ditto seqstrict structural large latex hybrid);           
+my @k_attributes = qw(strict metadata prec format assoc comm id: hybrid gather ditto seqstrict structural large latex );           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#CellKey#CellAttribute#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero";
@@ -1562,13 +1562,13 @@ sub maudify_file {
 # solve modules in imports
     s!^(\s*)(in|load|require)(\s+)(\S+)!
     {
-	my ($spaces1, $imp, $spaces2, $path_imp) = ($1, $2, $3, $4);
-	if ( $path_imp =~ m/modules/ )
-	{
-	    $path_imp =~ s/^\///sg;
-	    $path_imp = File::Spec->catfile($k_base, $path_imp);
-	}
-	"$spaces1$imp$spaces2$path_imp";
+		my ($spaces1, $imp, $spaces2, $path_imp) = ($1, $2, $3, $4);
+		if ( $path_imp =~ m/modules/ )
+		{
+			$path_imp =~ s/^\///sg;
+			$path_imp = File::Spec->catfile($k_base, $path_imp);
+		}
+		"$spaces1$imp$spaces2$path_imp";
     }
     !sgme;
     
@@ -1745,10 +1745,13 @@ sub maudify_module {
 #     print  "Stage:\n$_\n\n";
     
 # Step: Add missing spaces around tokens
-     # freeze all strings before spacifying
-#	print "$_\n\n";
+	# freeze all attributes
+	s/((?<!`)\[\s*($k_attributes_pattern).*?(?<!`)\])(\s*)(?=$kmaude_keywords_pattern)/{Freeze($1, "ATTR").$3;}/gse;
+
+#print "FROZEN: $_\n\n";
+
+    # freeze all strings before spacifying
 	s/($string_pattern)/Freeze($&,"STRINGS")/sge;
-#	print "$_\n\n";
 	my $klabelss = $decl;		
 	$klabelss =~ s/\s+$//s;		
 	my @kls = split(/\s+/, $klabelss);		
@@ -1758,9 +1761,11 @@ sub maudify_module {
 	}
 
 	$_ = spacify($_);
+
+	$_ = Unfreeze("ATTR", $_);
 	$_ = Unfreeze("STRINGS", $_);
-#	print "$_\n\n";	
 	$_ = Unfreeze("KLABEL", $_);
+
 #	print "$_\n\n";
 #	print "============================\n\n\n";
     
@@ -1775,7 +1780,8 @@ sub maudify_module {
 
 # Step: Change K statements into Maude statements
 	# freeze attributes first.. because sending parameters is dangerous: see ":"!!!
-    	s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+	s/((?<!`)\[\s*($k_attributes_pattern).*?(?<!`)\])(\s*)(?=$kmaude_keywords_pattern)/{Freeze($1, "ATTR").$3;}/gse;
+#	s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
 	
 	# also freeze rule names
 	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;

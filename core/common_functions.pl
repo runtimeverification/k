@@ -1575,11 +1575,13 @@ sub line_numbers
         my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
 
 #        $rule =~ s!\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$!{$attr = $1;}""!gse;
-		$rule =~ s/(\[.*?(?<!\\)\])\s*$/{$attr = $1;"";}/gse;
+		my $tags_regex = get_tags_regex();
+		my $space = "";
+		$rule =~ s/(\[\s*($tags_regex).*?(?<!`)\])/{$attr = $1;"";}/gse;
         if ($attr eq "")
         {
-            $rule .= " [metadata \"location=($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
-            $rule .= " [metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+            $rule .= " [metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
+            $rule .= " [metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
         }
         else
         {
@@ -1588,15 +1590,15 @@ sub line_numbers
         		my $loc = ($rule_size + $rule_line - 1);
         		$attr =~ s/(metadata\s+")/$1location=($file:$rule_line) /sg if $rule_size == 0 || $rule_size == 1;
 				$attr =~ s/(metadata\s+")/$1location=($file:$rule_line-$loc) /sg if $rule_size > 1;
-            	$rule .= "$attr";
+            	$rule .= "$attr$space";
             	
             	#metadata \"location=($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
             	#$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" 
         	}
         	else
         	{
-            	$rule .= "[$attr metadata \"location=($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
-            	$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+            	$rule .= "[$attr metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
+            	$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
             }
         }
 
@@ -2340,7 +2342,7 @@ sub rule_tags
 	
 	
     # rules
-    while ($bleah =~ /\brule(.*?)(?=$kmaude_keywords_pattern)/sg)
+    while ($bleah =~ /\brule(.*?\s)(?=$kmaude_keywords_pattern)/sg)
     {
 #		print "Called: $&\n";
     	my $temp = $1;
@@ -2351,10 +2353,13 @@ sub rule_tags
 #		print "RULEBODY: $rule_body\n";    	
     	$rule_body =~ s/^\s*\[([a-zA-Z_\-]+?)\]\s*:/{$tag = $1;"";}/sge;
     	
-    	$rule_body =~ s/(.*?\S)(\s+)(\[[^\[]*?(?<!\\)\])(\s*)$/
+#    	print "TAG: $tag\n";
+    	
+    	my $tags_regex = get_tags_regex();
+    	$rule_body =~ s/(.*?\S)(\s+)(\[\s*($tags_regex).*?(?<!`)\])(\s*)$/
     	{
 #    		print "AROUND\n";
-    		"$1$2" . compress_tags($tag, $3) . $4;
+    		"$1$2" . compress_tags($tag, $3) . $5;
     	}/sge;	
 
 		s/\Q$temp\E/$rule_body/sg;
@@ -2365,8 +2370,8 @@ sub rule_tags
     {
     	my $temp = $1;
     	my $context_body = $1;
-    	
-    	$context_body =~ s/(.*?\S)(\s+)(\[[^\[]*?(?<!\\)\])(\s*)$/
+    	my $tags_regex = get_tags_regex();    	
+    	$context_body =~ s/(.*?\S)(\s+)(\[\s*($tags_regex).*?(?<!`)\])(\s*)$/
     	{
     		"$1$2" . compress_tags("", $3) . $4;
     	}/sge;	
@@ -2398,7 +2403,7 @@ sub compress_tags
 	
 	my %map = ();
 	my $rest = $_;
-	while ($rest =~ /\b([a-zA-Z_\-]+)(\s*\(.*?(?<!\\)\))?/sg)
+	while ($rest =~ /\b([a-zA-Z_\-]+)(\s*\(.*?(?<!`)\))?/sg)
 	{
 		my $attr_name = $1;
 		my $attr_value = "()";
@@ -2441,6 +2446,24 @@ sub compress_tags
 	$attributes =~ s/\s+$//sg;
 	
 	"[$attributes]";
+}
+
+
+#########################
+# TAGS  				#
+#########################
+
+# predefined tags
+my @tags = split(",", "metadata,location,ditto,latex,hybrid,arity,strict,seqstrict,wrapping,structural,computational,large, tags");
+
+sub declare_tag
+{
+	push(@tags, shift);
+}
+
+sub get_tags_regex
+{
+	return join('|', @tags);
 }
 
 1;
