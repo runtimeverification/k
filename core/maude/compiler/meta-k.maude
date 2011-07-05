@@ -741,9 +741,12 @@ fmod META-ATTRS is
   op metadata : AttrSet -> AttrSet .
   op pair : String String -> Attr .
   eq metadata(pair(Key,Value) AS) 
-   = metadata(metadata(Key + "=(" + Value + ")") AS) .
+   = metadata(metadata(metaPair(Key,Value)) AS) .
   eq metadata(metadata(S) AS) = metadata(S) AS [owise] .
   var S : String .  var AS : AttrSet . var Key Value : String .
+
+  op metaPair : String String -> Attr .
+  eq metaPair(Key,Value) = metadata(Key + "=(" + Value + ")") .
 endfm
 
 fmod STRICT-ATTRS is
@@ -755,16 +758,20 @@ fmod STRICT-ATTRS is
   op karity : Nat -> Attr .
   op khybrid : -> Attr .
 
-  eq metadata(khybrid AS) = metadata(metadata("hybrid") AS) .
+  eq metadata(khybrid AS) = metadata(metaPair("hybrid","") AS) .
   eq metadata(karity(N) AS) = metadata(metadata("arity " + string(N,10)) AS) .
   
+  eq metadata(kstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-strict", IntList2String(Il)) AS) .  
+
+---(
   eq metadata(kstrict(nil, Ql) AS) = metadata(metadata("strict in (" + QidList2String(Ql) + ")") AS) . 
   eq metadata(seqkstrict(nil, Ql) AS) = metadata(metadata("seqstrict in (" + QidList2String(Ql) + ")") AS) . 
   eq metadata(kstrict(NeIl, Ql) AS) = metadata(metadata("strict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
   eq metadata(seqkstrict(NeIl, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
+---)
 
-  var AS : AttrSet . var A : Attr .  var N : Nat .  var Ql : QidList . 
-  var NeIl : NeIntList .
+  var AS : AttrSet . var A : Attr .  var N : Nat .  var Q : Qid . 
+  var Il : IntList .
 endfm
 
 fmod SYNTAX-ATTRS is
@@ -782,7 +789,7 @@ fmod SYNTAX-ATTRS is
   eq metadata(ksyntax AS) = metadata(metadata("syntax") AS) .
   eq metadata(krenameTo(Q) AS) = metadata(metadata("renameTo " + string(Q)) AS) .
   eq metadata(kcolor(Q) AS) = metadata(metadata("color: " + string(Q)) AS) .
-  ceq metadata(klatex(AS') AS) = metadata(metadata("latex(" + S + ")") AS) 
+  ceq metadata(klatex(AS') AS) = metadata(metaPair("latex", S) AS) 
    if metadata(S) := metadata(AS') .
 
 
@@ -814,7 +821,7 @@ fmod LOCATION-ATTRS is
   including META-ATTRS .
   op klocation : String -> Attr .
 
-  eq metadata(klocation(S) AS) = metadata(metadata("location(" + S + ")") AS) .
+  eq metadata(klocation(S) AS) = metadata(metaPair("location", S) AS) .
 
   var AS : AttrSet . var S : String .
 endfm

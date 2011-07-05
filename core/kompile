@@ -1544,11 +1544,12 @@ sub maudify_file {
     # Parse the configuration
     if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
     {
-	# print "FILE: $file\n";
-	parse_configuration($1, countlines($`), $file);
+		# print "FILE: $file\n";
+		parse_configuration($1, countlines($`), $file);
     }
     
-    
+    # resolve rule tags
+	$_ = rule_tags($_);    
     
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
@@ -1692,7 +1693,7 @@ sub maudify_module {
     s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
 
     # get KLabels
-	# freeze strings :D
+	# freeze strings :-D
 #	print "$_\n\n";
     s/($string_pattern)/Freeze($&,"STRINGS")/sge;	
 #	print "$_\n\n";
@@ -1771,20 +1772,11 @@ sub maudify_module {
     s! _ ! ? !gs;
 #     print  "Stage:\n$_\n\n";
     
-# Step: Change K attributes to Maude metadata
-	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
-   	s/($string_pattern)/Freeze($&,"MPGF")/sge;
-	
-    s!(\[(?:\\.|[^\]])*\])!make_metadata($1)!gse;
-	#	s!(\[.*?\])!make_metadata($1)!gse;
-
-	$_ = Unfreeze("NAMES", $_);
-	$_ = Unfreeze("MPGF", $_);
-#     print  "Stage:\n$_\n\n";
 
 # Step: Change K statements into Maude statements
 	# freeze attributes first.. because sending parameters is dangerous: see ":"!!!
     	s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+	
 	# also freeze rule names
 	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
 
@@ -1963,10 +1955,14 @@ sub make_ops {
 		}
 
 
+	
 	# unfreeze here what was frozen in $production
 	$attributes = Unfreeze("MYS", $attributes);
+
+	$attributes = op_tags($attributes);
 	
-# print "Add metadata to: $attributes\n\n";
+#	print "Add metadata to: $attributes\n\n";
+
 
 #		print "PROD: $production\n\n";
 # Generate the Maude replacement of the K syntactic construct
@@ -1975,10 +1971,6 @@ sub make_ops {
 		$random =~ s/[a-z_]//sg;
 		if ($latex || $pdf || $ps || $crop || $eps || $png)
 		{
-#			my $tmp_attr = $attributes;
-#			$tmp_attr =~ s/\[/[metadata \"latex(renameTo \\\\crlbracket)\"/s if ($attributes ne "" && $attributes !~ /metadata/s);
-#			$tmp_attr =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 latex(renameTo \\\\crlbracket)\" /s if ($attributes ne "" && $attributes =~ /metadata/s);
-			
 			$result .= ($production eq "_")
 						? "$space4 subsort @sorts < $result_sort op k2Latex@sorts"."2$result_sort$random"."_ : @sorts -> $result_sort $attributes $space5 "
 						: "$space4 op $production : @sorts -> $result_sort$space5 $attributes ";
@@ -2013,24 +2005,27 @@ sub make_latex {
 
 sub k2maude {
     local ($_) = @_;
-#	print "TODO: $_\n";
 
     $_ = Unfreeze("ATTR", $_);
 	$_ = Unfreeze("NAMES", $_);
 
+#	print "TODO: $_\n";
+
+	# macros
     s/macro(\s)/eq$1/gs;
+    
     switch ($_) {
 	case /^kmod/                    { s/kmod/mod/; }
 	case /^endkm/                   { s/endkm/endm/; }
 	case /^$default_freezer/        {}
 	case /^mb/						{}
 	case /^kvar/                    { s/k(var.*\S)(?=\s*)/$1 ./; }
-	case /^rule/                    { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/sg;
-					  s!(\[[^\[\]]*\]) : (KSentence)!
-					    (rule_attribute($1))?": $2 $1":"$1 : $2"!se;
-					  s!^mb(\s+)rule(\s+\[[^\[\]]*\]\s*:)!mb$2$1rule!s;
-				        }
-        case /^context/                 { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/sg;
+ 	case /^rule/                    { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/sg;
+ 								  s!(\[[^\[\]]*\]) : (KSentence)!
+ 									(rule_attribute($1))?": $2 $1":"$1 : $2"!se;
+ 								  s!^mb(\s+)rule(\s+\[[^\[\]]*\]\s*:)!mb$2$1rule!s;
+ 									}
+	case /^context/                 { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/sg;
 					  s!(\[[^\[\]]*\]) : (KSentence)!
 					    (rule_attribute($1))?": $2 $1":"$1 : $2"!se;
 					  s!^mb(\s+)context(\s+\[[^\[\]]*\]\s*:)!mb$2$1context!s;
@@ -2083,7 +2078,7 @@ sub make_metadata {
 #			print "Latex attribute $1\n";
 			my $la = $1;
 			$la = Unfreeze("M", $la);
-			push(@k_attributes, "latex(renameTo \\\\".get_newcommand($la).")") if ($latex || $pdf || $crop || $ps || $eps || $png);
+			push(@k_attributes, "latex=(renameTo \\\\".get_newcommand($la).")") if ($latex || $pdf || $crop || $ps || $eps || $png);
 	    }
 	    else {
 #			print "Push: $_\n\n";
@@ -2138,9 +2133,10 @@ sub get_newcommand
     my $n = $newcommand_counter++;
     my $newcommand = $newcommand_prefix.chr(65 + $n % $newcommand_base);
     while ($n >= $newcommand_base) {
-	$n /= $newcommand_base;
-	$newcommand .= chr(65 + $n % $newcommand_base);
+		$n /= $newcommand_base;
+		$newcommand .= chr(65 + $n % $newcommand_base);
     }
+
     my @args = sort /{#(\d+)}/gms;
     my $max = $args[$#args];
     my $args = @args ? "\[$max\]" : "";

@@ -1574,17 +1574,33 @@ sub line_numbers
         my ($rule, $spaces, $attr) = ($statement, $spaces, "");
         my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
 
-        $rule =~ s!\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$!{$attr = $1;}""!gse;
+#        $rule =~ s!\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$!{$attr = $1;}""!gse;
+		$rule =~ s/(\[.*?(?<!\\)\])\s*$/{$attr = $1;"";}/gse;
         if ($attr eq "")
         {
-            $rule .= " [metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
-            $rule .= " [metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+            $rule .= " [metadata \"location=($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
+            $rule .= " [metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
         }
         else
         {
-            $rule .= "[$attr metadata \"location($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
-            $rule .= "[$attr metadata \"location($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+        	if ($attr =~ /metadata/sg)
+        	{
+        		my $loc = ($rule_size + $rule_line - 1);
+        		$attr =~ s/(metadata\s+")/$1location=($file:$rule_line) /sg if $rule_size == 0 || $rule_size == 1;
+				$attr =~ s/(metadata\s+")/$1location=($file:$rule_line-$loc) /sg if $rule_size > 1;
+            	$rule .= "$attr";
+            	
+            	#metadata \"location=($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
+            	#$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" 
+        	}
+        	else
+        	{
+            	$rule .= "[$attr metadata \"location=($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
+            	$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" if $rule_size > 1;
+            }
         }
+
+#		print "RULE: $rule\n\n";
 
 		return $rule . $spaces;
     }
@@ -1594,7 +1610,7 @@ sub line_numbers
          my $macro = $1;
          my $macro_line = countlines($`);
  #            $temp =~ s/\Q$macro\E/$macro [metadata "location($file:$macro_line)"]/s;
- 		return "$macro [metadata \"location($file:$macro_line)\"]" . $spaces;
+ 		return "$macro [metadata \"location=($file:$macro_line)\"]" . $spaces;
      }
 	elsif ($2 eq "mb")
 	{
@@ -1603,7 +1619,7 @@ sub line_numbers
 		my $temp_mb = $mb;
 		my $mb_line = countlines($`);
 		
-		$mb =~ s/(mb\s+latex\s.*)(\s\.\s*$)/$1 [metadata "location($file:$mb_line)"]$2/s;
+		$mb =~ s/(mb\s+latex\s.*)(\s\.\s*$)/$1 [metadata "location=($file:$mb_line)"]$2/s;
 
 		return $mb . $spaces;
 	}
@@ -1649,11 +1665,11 @@ sub line_numbers
 				# print "Production1: $production &$attributes&\n";
 
 				# if there are already some attributes then add metadata if other metadata is there
-				$attributes =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 location($file:$absolute_line:$counter)\" / if ($attributes ne "" && $attributes =~ /metadata/);      
+				$attributes =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 location=($file:$absolute_line:$counter)\" / if ($attributes ne "" && $attributes =~ /metadata/);      
 				# if there are already some attributes then add metadata if not already                                                                             
-				$attributes =~ s/\[/[ metadata \"location($file:$absolute_line:$counter)\" / if ($attributes ne "" && $attributes !~ /metadata/);
+				$attributes =~ s/\[/[ metadata \"location=($file:$absolute_line:$counter)\" / if ($attributes ne "" && $attributes !~ /metadata/);
 				# if no attributes just define a new attribute metadata and declare location
-				$attributes = "[metadata \"location($file:$absolute_line:$counter)\"]" if $attributes eq "";
+				$attributes = "[metadata \"location=($file:$absolute_line:$counter)\"]" if $attributes eq "";
 
 				# increase counter
 				$counter++;
@@ -1720,7 +1736,7 @@ sub add_line_no_mb
 	while($temp =~ /(mb\s+(configuration)\s.*?)(\s\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
 	{
 		my ($content, $end, $line) = ($1, $3, $lines + countlines($`));
-		s/\Q$content$end\E/$content [metadata "location($file:$line)"]$end/sg;
+		s/\Q$content$end\E/$content [metadata "location=($file:$line)"]$end/sg;
 	}
 
 	return $_;
@@ -2224,7 +2240,206 @@ sub maudify
  		print generate_error("ERROR", 1, $file, "unknown line", "File $import needed by $file cannot be found! Please check if the path is correct.");
 }
 
+sub op_tags
+{
+	local $_ = shift;
+	my $sp = /(\s+$)/sg ? $1 : "";
 
+#	print "ATTR: $_\n";
+	
+	my $latex = "";
+	my $comm = "";
+	my $assoc = "";
+	my $id = "";
+	my $strict = "";
+	my $gather = "";
+	my $metadata = "";	
+	my $prec = "";
+	my $ditto = "";
+	
+	s/latex\s+".*?(?<!\\)"/{$latex = $&;"";}/sge;
+	s/metadata\s+".*?(?<!\\)"/{$metadata = $&;"";}/sge;
+	s/comm/{$comm = $&;"";}/sge;
+	s/assoc/{$assoc = $&;"";}/sge;
+	s/gather\s*\(.*?(?<!\\)\)/{$gather = $&;"";}/sge;
+#	s/strict(\s*\(.*?(?<!\\)\))?/{$strict = $&;"";}/sge;
+	s/id\s*:\s*\S+/{$id = $&;"";}/sge;
+	s/prec\s+[0-9]+/{$prec=$&;"";}/sge;
+	s/ditto/{$ditto = $&;}/sge;
+	
+#	print "LATEX: $latex\nMETA: $metadata\nCOMM: $comm\nASSOC: $assoc\nGATH: $gather\nSTRICT: $strict\nID: $id\nPREC: $prec\nDITTO: $ditto\n";
+#	print "REST: $_\n\n";
+	
+	# push everything left in a hashmap
+	my %map = ();
+	
+	my $rest = $_;
+	while ($rest =~ /\b([a-zA-Z_\-]+)(\s*\(.*?(?<!\\)\))?/sg)
+	{
+		my $attr_name = $1;
+		my $attr_value = "()";
+		$attr_value = $2 if defined $2;
+		
+		# push in map
+		$map{$attr_name} = $attr_value;
+	}
+	
+	# push latex in map
+	if ($latex ne "")
+	{
+		$map{$1} = "(renameTo \\\\". get_newcommand($2) . ")" if $latex =~ /(latex)\s+"(.*?(?<!\\))"/sg;
+	}
+	
+	my $attr_string = "";
+#	$attr_string .= "ditto=() " if $ditto ne "";
+	while (my ($key, $value) = each(%map) )
+	{
+		$key =~ s/^\s+//sg;
+		$key =~ s/\s+$//sg;
+		$value =~ s/^\s+//sg;
+		$value =~ s/\s+$//sg;
+		$attr_string .= "$key=$value ";
+	}
+	
+	# put string in metadata
+	if ($metadata ne "")
+	{
+		# replace first " with "$attr_string
+		$metadata =~ s/"/"$attr_string/s;
+	}
+	else
+	{
+		$metadata = "metadata \"$attr_string\"";
+	}
+
+#	print "METAD: $metadata\n";
+
+	my $attributes = $metadata . " ";
+#	$attributes .= $latex . " ";
+#	$attributes .= $strict . " ";
+	$attributes .= $prec . " ";
+	$attributes .= $gather . " ";
+	$attributes .= $id . " ";
+	$attributes .= $comm . " ";
+	$attributes .= $assoc . " ";
+	$attributes .= $ditto . " ";
+	
+#	print "ATTRIBUTES: $attributes";
+	
+#	print "\n\n\n";
+	
+	"[$attributes]$sp";
+}
+
+sub rule_tags
+{
+	my $bleah = shift;
+	local $_ = $bleah;
+	
+	
+    # rules
+    while ($bleah =~ /\brule(.*?)(?=$kmaude_keywords_pattern)/sg)
+    {
+#		print "Called: $&\n";
+    	my $temp = $1;
+    	my $rule_body = $1;
+    	
+    	my $tag = "";
+
+#		print "RULEBODY: $rule_body\n";    	
+    	$rule_body =~ s/^\s*\[([a-zA-Z_\-]+?)\]\s*:/{$tag = $1;"";}/sge;
+    	
+    	$rule_body =~ s/(.*?\S)(\s+)(\[[^\[]*?(?<!\\)\])(\s*)$/
+    	{
+#    		print "AROUND\n";
+    		"$1$2" . compress_tags($tag, $3) . $4;
+    	}/sge;	
+
+		s/\Q$temp\E/$rule_body/sg;
+    }
+
+    # context
+    while ($bleah =~ /\bcontext(.*?)(?=$kmaude_keywords_pattern)/sg)
+    {
+    	my $temp = $1;
+    	my $context_body = $1;
+    	
+    	$context_body =~ s/(.*?\S)(\s+)(\[[^\[]*?(?<!\\)\])(\s*)$/
+    	{
+    		"$1$2" . compress_tags("", $3) . $4;
+    	}/sge;	
+
+		s/\Q$temp\E/$context_body/sg;
+    }
+
+
+	return $_;
+}
+
+sub compress_tags
+{
+	my $tag =  shift;
+	local $_ = shift;
+	
+#	print "WHAT:$_\n";
+#	print "TAG: $tag\n";
+	
+	my $metadata = "";
+#	my $structural = "";
+#	my $large = "";
+
+	s/metadata\s+".*?(?<!\\)"/{$metadata = $&;"";}/sge;
+#	s/structural/{$structural=$&;"";}/sge;
+#	s/large/{$structural=$&;"";}/sge;
+
+#	print "METADATA: $metadata\n";
+	
+	my %map = ();
+	my $rest = $_;
+	while ($rest =~ /\b([a-zA-Z_\-]+)(\s*\(.*?(?<!\\)\))?/sg)
+	{
+		my $attr_name = $1;
+		my $attr_value = "()";
+		$attr_value = $2 if defined $2;
+		
+#		print "REST:$attr_name\n\t$attr_value\n";
+		
+		# push in map
+		$map{$attr_name} = $attr_value;
+	}
+	
+	my $attr_string = "" ne $tag ? "$tag=() " : "";
+	while (my ($key, $value) = each(%map) )
+	{
+		$key =~ s/^\s+//sg;
+		$key =~ s/\s+$//sg;
+		$value =~ s/^\s+//sg;
+		$value =~ s/\s+$//sg;
+		$attr_string .= "$key=$value ";
+	}
+	
+	# put string in metadata
+	if ($metadata ne "")
+	{
+		# replace first " with "$attr_string
+		$metadata =~ s/"/"$attr_string/s;
+	}
+	else
+	{
+		$metadata = "metadata \"$attr_string\"";
+	}
+	
+	my $attributes = $metadata . " ";
+	$attributes .= "label $tag" if $tag ne "";
+	
+#	print "ATTRIBUTES: $attributes";
+	
+#	print "\n\n\n";
+	
+	$attributes =~ s/\s+$//sg;
+	
+	"[$attributes]";
+}
 
 1;
 

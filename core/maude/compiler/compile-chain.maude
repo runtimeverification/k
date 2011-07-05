@@ -198,20 +198,20 @@ mod COMPILE-LOOP is
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
 
   op compile : Qid -> [Module] .
-  eq compile(Q) = compile(Q, structurals(kstructural) computationals(none) supercools(none)) .
+  eq compile(Q) = compile(Q, structurals(pair("structural","")) computationals(none) supercools(none)) .
   op compile-nd : Qid -> [Module] .
-  eq compile-nd(Q) = compile(Q, structurals(kstructural) computationals(kcomputational pair("nd","true")) supercools(pair("nd","true"))) .
+  eq compile-nd(Q) = compile(Q, structurals(pair("structural","")) computationals(pair("computational","") pair("nd","true")) supercools(pair("nd","true"))) .
 
   eq print(moduleError(QIL)) = QIL .
   rl ['compile Q QIL, idle, QIL'] 
    => [QIL, idle, print(compile(Q) )] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', structurals(kstructural) computationals(none) supercools(none)) )] .
+   => [QIL, idle, print(pcompile(Q,Q', structurals(pair("structural","")) computationals(none) supercools(none)) )] .
 
   rl ['compile-nd Q QIL, idle, QIL']
   => [QIL, idle, print(compile-nd(Q))] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', structurals(kstructural) computationals(kcomputational pair("nd","true")) supercools(pair("nd","true"))) )] .
+   => [QIL, idle, print(pcompile(Q,Q', structurals(pair("structural","")) computationals(pair("computational","") pair("nd","true")) supercools(pair("nd","true"))) )] .
 
 
   var AS : AttrSet .
