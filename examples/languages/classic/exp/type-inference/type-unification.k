@@ -5,10 +5,10 @@ kmod TYPES is including PL-NAT + PL-IF-THEN-ELSE
 
   ops int bool : -> BasicType 
   op tvar : Nat -> TypeVar 
-  op _->_ : Type Type -> Type [prec 10 gather(e E) metadata "latex(renameTo _\\ensuremath\\rightarrow_)"] 
-  op forall_._ : List{TypeVar} Type -> TypeSchema [metadata "latex(renameTo \\ensuremath\\forall_._)"]
+  op _->_ : Type Type -> Type [prec 10 gather(e E) latex(renameTo _\\ensuremath\\rightarrow_)] 
+  op forall_._ : List{TypeVar} Type -> TypeSchema [latex(renameTo \\ensuremath\\forall_._)]
 
-  op _+Type_ : TypeVar Nat -> TypeVar [metadata "latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Type}}\_)"]
+  op _+Type_ : TypeVar Nat -> TypeVar [latex(renameTo _+\\subscript{{\\scriptstyle\\it{}Type}}\_)]
   eq tvar(N) +Type M = tvar(N +Nat M) 
 
 --- free type variables
@@ -24,11 +24,11 @@ kmod TYPES is including PL-NAT + PL-IF-THEN-ELSE
   eq mergeVars((Tvl1:List`{TypeVar`},Tv,Tvl2:List`{TypeVar`}),(Tvl1':List`{TypeVar`},Tv,Tvl2':List`{TypeVar`})) = mergeVars((Tvl1,Tv,Tvl2),(Tvl1',Tvl2')) 
   eq mergeVars(Tvl,Tvl':List`{TypeVar`}) = Tvl,Tvl' [owise] 
 
-  op _\_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [metadata "latex(renameTo _\\ensuremath\\setminus_)"]
+  op _\_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [latex(renameTo _\\ensuremath\\setminus_)]
   eq (Tvl1,Tv,Tvl2) \ (Tvl1',Tv,Tvl2') = (Tvl1,Tvl2) \ (Tvl1',Tvl2') 
   eq Tvl \ Tvl' = Tvl [owise] 
 
-  op |_| : List{TypeVar} -> Nat [metadata "latex(renameTo \\ensuremath|_\\ensuremath|)"] 
+  op |_| : List{TypeVar} -> Nat [latex(renameTo \\ensuremath|_\\ensuremath|)] 
   eq | Tv,Tvl | = 1 +Nat | Tvl | 
   eq | .List{TypeVar} | = 0 
 
@@ -59,7 +59,7 @@ kmod TYPES is including PL-NAT + PL-IF-THEN-ELSE
 --- List{TypeVar}
   sort List{TypeVar} 
   subsort TypeVar < List{TypeVar} 
-  op .List{TypeVar} : -> List{TypeVar} [metadata "latex(renameTo $\\kdot$\\subscript{{\\scriptstyle\\it{}List\\{TypeVar\\}}})"]
+  op .List{TypeVar} : -> List{TypeVar} [latex(renameTo $\\kdot$\\subscript{{\\scriptstyle\\it{}List\\{TypeVar\\}}})]
   op _`,_ : List{TypeVar} List{TypeVar} -> List{TypeVar} [prec 70 assoc id: .List{TypeVar}] 
 --- List{Type}
   sort List{Type} 
@@ -97,7 +97,7 @@ kmod UNIFICATION is including TYPES + K
 
   op _`[_`] : Set Type -> Type 
 
-  syntax List{Type} ::= Set [[ List{Type} ]] [latex "{#1}\llbracket\,{#2}\,\rrbracket"]
+  syntax List{Type} ::= Set [[ List{Type} ]] [latex({#1}\llbracket\,{#2}\,\rrbracket)]
 ---  op _`[`[_`]`] : Set List{Type} -> List{Type} 
 --- I would like to use the following operation name instead, but K-Maude does not like it ..
 ---  op _`[_`] : Set List{Type} -> List{Type} 
