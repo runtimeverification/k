@@ -2085,7 +2085,7 @@ sub solve_latex_comments
 	local $_ = $+;
 	my $me = $_;
 	$me =~ s/[^\n]//sg;
-	"mb latex \"\\\\".get_newcommand($_)."\" : KSentence .$me";
+	"mb latex \"\\\\".get_newcommand($_)."\" : KSentence $me";
     }!sge;
     
     $_;
