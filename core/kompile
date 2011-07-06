@@ -847,7 +847,7 @@ if (!$compile_only) {
     {
 		my @tmp = split(/\s+/, $klabels);
 		@tmp = uniq(@tmp);
-		my $tmp = "ops @tmp : -> KLabel [metadata \"generated label\"] . ";
+		my $tmp = "ops @tmp : -> KLabel [metadata \"generated-label=()\"] . ";
 		my $dir = cwd;
 		open FILE,">",$kshared or die "Cannot create $kshared\n";
 		my $prelude = basename($k_prelude);
