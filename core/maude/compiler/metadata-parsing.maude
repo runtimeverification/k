@@ -153,8 +153,6 @@ fmod PARSE-METADATA-RULES is
   including PARSE-METADATA-BASIC .
   including RULES-ATTRS .
   eq pair("large","") = klarge .
-  eq pair("structural","") = kstructural .
-  eq pair("computational","") = kcomputational .
 endfm
 
 fmod PARSE-METADATA is

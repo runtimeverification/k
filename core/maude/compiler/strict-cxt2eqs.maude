@@ -85,14 +85,18 @@ mod STRICTCXT2EQS is
      fi  .
 
   op strictCxtHeat : Term Term TermList AttrSet AttrSet ~> MASEqsPair .
-  eq strictCxtHeat(T1,T2,empty, AS A, AS' computationals(A AS''))
-   = {none, none, (rl T1 => T2 [metadata(AS A metadata("heating"))] .)} .
-  eq strictCxtHeat(T1,T2,T, AS A, AS' computationals(A AS''))
-   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS A metadata("heating"))] .)} .
+  eq strictCxtHeat(T1,T2,empty, AS A, AS' supercools(A AS''))
+   = {none, none, (rl T1 => T2 [metadata(AS A pair("heating",""))] .)} .
+  eq strictCxtHeat(T1,T2,T, AS A, AS' supercools(A AS''))
+   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS A pair("heating",""))] .)} .
+  eq strictCxtHeat(T1,T2,empty, AS, AS' supercools(pair("default","") AS''))
+   = {none, none, (rl T1 => T2 [metadata(AS pair("default","") pair("heating",""))] .)} .
+  eq strictCxtHeat(T1,T2,T, AS, AS' supercools(pair("default","") AS''))
+   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS pair("default","") pair("heating",""))] .)} .
   eq strictCxtHeat(T1,T2,empty, AS, AS')
-   = {none, (eq T1 = T2 [metadata(AS metadata("heating"))] .), none} [owise] .
+   = {none, (eq T1 = T2 [metadata(AS pair("heating",""))] .), none} [owise] .
   eq strictCxtHeat(T1,T2,T, AS, AS')
-   = {none, (ceq T1 = T2 if T = trueCt [metadata(AS metadata("heating"))] .), none} [owise] .
+   = {none, (ceq T1 = T2 if T = trueCt [metadata(AS pair("heating",""))] .), none} [owise] .
 
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(

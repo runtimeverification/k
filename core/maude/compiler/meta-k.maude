@@ -805,11 +805,9 @@ endfm
 
 fmod RULES-ATTRS is
   including META-ATTRS .
-  ops klarge kstructural kcomputational : -> Attr . 
+  ops klarge : -> Attr . 
 
   eq metadata(klarge AS) = metadata(metaPair("large","") AS) .
-  eq metadata(kstructural AS) = metadata(metaPair("structural","") AS) .
-  eq metadata(kcomputational AS) = metadata(metaPair("computational","") AS) .
 
   var AS : AttrSet .
 endfm

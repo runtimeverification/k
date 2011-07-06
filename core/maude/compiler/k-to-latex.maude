@@ -1148,6 +1148,7 @@ mod LATEX-PRINT-META is
        eMetaLatexPrint(M, Prints)) .
 
   var Cnd : Term .
+---(
   eq eMetaLatexPrint(M, rule(Str, {krl,T,empty, kstructural AS}) Prints)
     = ('\n '\kequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} 
@@ -1156,6 +1157,7 @@ mod LATEX-PRINT-META is
     = ('\n '\kcequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrint(M, Prints)) .
+---)
   eq eMetaLatexPrint(M, (rule(Str, {krl,T, empty, AS})) Prints)
     = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} 
