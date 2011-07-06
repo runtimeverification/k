@@ -7,13 +7,14 @@ fmod MAKE-K-RULES is
   including META-K-CONDITION-SEARCH .
   including PARSE-METADATA .
   including COMPILATION-ATTRS .
-  var M Flat : Module .  var T T1 T2 : Term .  
+  var M Flat : Module .  var T T1 T2 Trm Cxt : Term .  
   var AS AS' AS'' : AttrSet .  var A : Attr .
   var C : Term . var S : Sort .  var Ss : SortSet . var Subst : Substitution .
   var Ct : Constant . var V : Variable .
   var O O' Q : Qid . var N : Nat . var Tl : TermList .
   var KRuleType : KRuleKind .  var Split : KRuleSplit .
   var Mas : MembAxSet . var Max : MembAx .
+  var Str : String .
   var OPDS : OpDeclSet . var Op : OpDecl .  var Ty : Type .
   
   op resolveKRules : Qid Module Module SortSet AttrSet -> Module .
@@ -34,18 +35,19 @@ fmod MAKE-K-RULES is
   op resolveReplace : Module Module MembAxSet Substitution AttrSet -> Module .
   eq resolveReplace(Flat, M, none, Subst, AS) = removeReplaceOps(M) .
   eq resolveReplace(Flat, M, Max Mas, Subst, AS)
-   = resolveReplace(Flat, M, Max, Mas, Subst, AS) .
+   = resolveReplace(Flat, M, metadataParse(Max), Mas, Subst, AS) .
   op resolveReplace : Module Module MembAx MembAxSet Substitution AttrSet -> Module .
  ceq resolveReplace(Flat, M, Max, Mas, Subst, AS)
    = resolveReplace(Flat, addReplace(Flat, M, Split, Subst, AS), Mas, Subst, AS)
-  if Split := splitKRule(metadataParse(Max)) .
+  if Split := splitKRule(Max) .
  ceq resolveReplace(Flat, M, Max, Mas, Subst, AS)
    = resolveReplace(Flat, addCxtReplace(Flat, M, CSplit), Mas, Subst, AS)
-  if CSplit := splitKContext(metadataParse(Max)) .
+  if CSplit := splitKContext(Max) .
   eq resolveReplace(Flat, M, Max, Mas, Subst, AS) 
    = resolveReplace(Flat, addMbs(Max, M), Mas, Subst, AS) [owise] .
   eq resolveReplace(Flat,  errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U:Module), Mas, Subst, AS')
    = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], Flat) .
+  eq resolveReplace(Flat, M, errorMb(Trm,Cxt,Str,AS), Mas, Subst, AS')  = errorM(AS, Str, Trm, Cxt, Flat)  [print "errorMb propagated to module"] .
 
   op removeReplaceOps : Module -> Module .
   eq removeReplaceOps(M) = setOps(M, removeReplaceOps(getOps(M))) .
