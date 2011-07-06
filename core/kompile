@@ -1350,8 +1350,8 @@ sub compile {
     my $compile_supercools = '""';    
     if ($k_nd)
     {
-      $compile_computationals = '"computational=() nd=(true)"';
-      $compile_supercools = '"nd=(true)"';    
+		$compile_computationals = '"computational=() nd=(true)"';
+		$compile_supercools = '"nd=(true)"';    
     }
 	$_ = run_maude("Compiling the definition ... ",
 		"load $k_prelude\n",

@@ -651,7 +651,7 @@ sub get_cell_declaration
     my $color = $cell->getAttribute("color");
 
     # append the declaration 
-    $temp_var .= " op $cellname : -> CellLabel [metadata \"latex(color: $color)\"]" if $color ne "";
+    $temp_var .= " op $cellname : -> CellLabel [metadata \"latex=(color: $color)\"]" if $color ne "";
     $temp_var .= " op $cellname : -> CellLabel" if $color eq "";
 }
 
