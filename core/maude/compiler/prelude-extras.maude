@@ -340,21 +340,34 @@ fmod META-K-ERROR is
   op errorAS :  String String -> [Attr] .
   op errorT : [Term] Term String -> [Term] .
   op errorMb : [Term] Term String AttrSet -> [MembAx] .
+  op errorOp : String AttrSet -> [OpDecl] .
   op errorEq : [Term] Term String AttrSet -> [Equation] .
   op errorRl : [Term] Term String AttrSet -> [Rule] .
   op errorM : AttrSet String [Term] Term Module -> [Module] .
   eq Q[Trms,errorT(Trm, Cxt, Str),Trms'] = errorT(Trm, Q[Trms,Cxt,Trms'], Str) [print "errorT propagated past " Q] .
+
+  eq (op Q : Types -> Type [AS errorAS(Str, Str')] .) = errorOp(Str' + " '" + Str + "'",AS) .
+
   eq (mb errorT(Trm,Cxt,Str) : Type [AS] .) = errorMb(Trm,Cxt,Str,AS) [print "errorT propagated past mb"] .
   eq (cmb errorT(Trm,Cxt,Str) : Type if Cond [AS] .) = errorMb(Trm,Cxt,Str,AS)  [print "errorT propagated past cmb"] .
-  eq mod Q is Including sorts Sorts . Subsorts OPDS (errorMb(Trm,Cxt,Str,AS) Mbs) Eqs Rls endm = errorM(AS, Str, Trm, Cxt, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm)  [print "errorT propagated to module"] .
+  eq (cmb Trm : Type if Cond [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,'`[`]:K,Str' + Str,AS) .
+  eq (mb Trm : Type [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,'`[`]:K,Str' + Str,AS) .
   eq (ceq errorT(Trm,Cxt,Str) = Trm' if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (ceq Trm' = errorT(Trm,Cxt,Str) if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (eq errorT(Trm,Cxt,Str) = Trm' [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (eq Trm' = errorT(Trm,Cxt,Str) [AS] .) = errorEq(Trm,Cxt,Str,AS) .
+  eq (ceq Trm = Trm' if Cond [AS errorAS(Str, Str')] .) = errorEq('`[`]:K,'`[`]:K,Str' + Str,AS) .
+  eq (eq Trm = Trm' [AS errorAS(Str, Str')] .) = errorEq('`[`]:K,'`[`]:K,Str' + Str,AS) .
   eq (crl errorT(Trm,Cxt,Str) => Trm' if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (crl Trm' => errorT(Trm,Cxt,Str) if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (rl errorT(Trm,Cxt,Str) => Trm' [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (rl Trm' => errorT(Trm,Cxt,Str) [AS] .) = errorRl(Trm,Cxt,Str,AS) .
+  eq (crl Trm' => errorT(Trm,Cxt,Str) if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
+  eq (crl Trm => Trm' if Cond [AS errorAS(Str, Str')] .) = errorRl('`[`]:K,'`[`]:K,Str' + Str,AS) .
+  eq (rl Trm => Trm' [AS errorAS(Str, Str')] .) = errorRl('`[`]:K,'`[`]:K,Str' + Str,AS) .
+  eq mod Q is Including sorts Sorts . Subsorts (errorOp(Str,AS) OPDS) ( Mbs) Eqs Rls endm = errorM(AS, Str, '`[`]:K, '`[`]:K, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm)  [print "errorT propagated to module"] .
+  eq errorOp(Str, AS) errorOp(Str', AS') = errorOp(Str, AS) .
+  eq mod Q is Including sorts Sorts . Subsorts OPDS (errorMb(Trm,Cxt,Str,AS) Mbs) Eqs Rls endm = errorM(AS, Str, Trm, Cxt, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm)  [print "errorT propagated to module"] .
   eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) (errorEq(Trm,Cxt,Str,AS) Eqs) Rls endm = errorM(AS, Str, Trm, Cxt, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm) .
   eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) ( Eqs) (errorRl(Trm,Cxt,Str,AS)Rls) endm = errorM(AS, Str, Trm, Cxt, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm) .
 
@@ -368,9 +381,10 @@ fmod META-K-ERROR is
 
 
 
-  vars Trm Trm' Cxt : [Term] . vars Trms Trms' : TermList . var Q : Qid . var Str : String . var Including : ImportList . var Cond : Condition .
-  var AS : AttrSet .  var Subsorts : SubsortDeclSet . var OPDS : OpDeclSet . var Mbs : [MembAxSet] . var Eqs : [EquationSet] . 
-  var Rls : [RuleSet] . vars Sorts : SortSet .  var Type : Type .  var M : Module .
+  vars Trm Trm' Cxt : [Term] . vars Trms Trms' : TermList . var Q : Qid . var Str Str' : String . var Including : ImportList . var Cond : Condition .
+  var AS AS' : AttrSet .  var Subsorts : SubsortDeclSet . var OPDS : OpDeclSet . var Mbs : [MembAxSet] . var Eqs : [EquationSet] . 
+  var Rls : [RuleSet] . vars Sorts : SortSet .  
+  var Type : Type .  var Types : TypeList . var M : Module .
 endfm
 
 
@@ -415,6 +429,10 @@ fmod META-MODULE-EXTRAS is
   op addModule : Module Module -> Module .
   eq addModule(M, M')
    = addRls(getRls(M),addEqs(getEqs(M),addMbs(getMbs(M),addOps(getOps(M),addSubsorts(getSubsorts(M),addSorts(getSorts(M),addImports(getImports(M), M'))))))) .
+  eq addModule(M:[Module], errorM(AS, Str, Trm, Cxt, U)) 
+   = errorM(AS, Str, Trm, Cxt, U) .
+  eq addModule(errorM(AS, Str, Trm, Cxt, U), M:[Module]) 
+   = errorM(AS, Str, Trm, Cxt, U) .
 
   op removeSorts : SortSet SortSet -> SortSet .
   eq removeSorts(SS ; S, SS' ; S) = removeSorts(SS, SS' ; S) .
@@ -525,6 +543,8 @@ fmod META-MODULE-EXTRAS is
     = fmod H is IL' sorts SS . SSDS OPDS MAS EqS endfm .
   eq setImports(fth H is IL sorts SS . SSDS OPDS MAS EqS endfth, IL')
     = fth H is IL' sorts SS . SSDS OPDS MAS EqS endfth .
+  eq setImports(errorM(AS, Str, Trm, Cxt, U), IL:[ImportList]) 
+   = errorM(AS, Str, Trm, Cxt, U) .
 
   eq setOps(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, OPDS')
     = mod H is IL sorts SS . SSDS OPDS' MAS EqS RlS endm .

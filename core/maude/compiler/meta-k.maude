@@ -608,8 +608,8 @@ fmod META-K-LABELS is
   eq getAuxKLabels(OPDS, none) = none [print "Done finding aux labels for " OPDS].
 
   op getAuxKLabel : OpDeclSet OpDecl -> OpDeclSet .
-  eq getAuxKLabel(OPDS (op Q : nil -> T [metadata("generated label")] .), op Q : nil -> T' [AS] .) 
-   =  (op Q : nil -> T [metadata("generated label")] .) [print "generated label " Q] .
+  eq getAuxKLabel(OPDS (op Q : nil -> T [metadata("generated-label=()")] .), op Q : nil -> T' [AS] .) 
+   =  (op Q : nil -> T [metadata("generated-label=()")] .) [print "generated label " Q] .
   eq getAuxKLabel(OPDS, Op) = none [owise print "no generated label for " Op] .
 
   op getGeneratedLabels : OpDeclSet -> OpDeclSet .
@@ -617,7 +617,7 @@ fmod META-K-LABELS is
   eq getGeneratedLabels(none) = none .
 
   op isGeneratedLabel : OpDecl -> Bool .
-  eq isGeneratedLabel((op Q : nil -> T [metadata("generated label")] .)) = true .
+  eq isGeneratedLabel((op Q : nil -> T [metadata("generated-label=()")] .)) = true .
   eq isGeneratedLabel(Op) = false [owise] . 
   
 

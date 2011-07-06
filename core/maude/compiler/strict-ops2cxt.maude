@@ -40,6 +40,8 @@ mod STRICTOPS2CXT is
   eq strictOps2cxtOp(op Q : nil -> Ty [AS seqkstrict(Ints, Q')] .)
    = seqstrictOps2cxtMbs(mkConstant(Q, Ty), Ints, Q', -1, AS) [owise] .
   eq strictOps2cxtOp(Op) = none [owise] .
+  eq strictOps2cxtOp(errorOp(Str, AS)) 
+   = errorMb('`[`]:K,'`[`]:K,Str,AS) .
 
   op strictOps2cxtMbs : Qid IntList Qid Int  AttrSet ~> MembAxSet .
 --- regardless of arity

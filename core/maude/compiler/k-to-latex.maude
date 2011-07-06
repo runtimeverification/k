@@ -395,7 +395,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   op syntax : QidList QidList AttrSet -> Printable .
   op \cellLabel{_}{_} : Qid AttrSet -> OpDecl .
   eq op(op F : nil -> 'CellLabel [AS] .) = empty .
-  eq op(op F : TyL -> Ty [ metadata("generated label") AS] .) = empty .
+  eq op(op F : TyL -> Ty [ metadata("generated-label=()") AS] .) = empty .
   eq op(op F : TyL -> Ty [ metadata(St) AS] .)
    = op(op F : TyL -> Ty [ metadataParse(St) AS] .) [owise] .
 
