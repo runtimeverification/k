@@ -73,7 +73,8 @@ fmod COMPILE-META is
   op error : -> [Module] .
 
   op compile : Qid AttrSet ~> Module .
-  eq compile(Q, AS) = compile(upModule(Q, false), AS) .
+  eq compile(Q, AS) = compile(upModule(Q, false), AS) [print "compiling module " Q " with attributes " AS] .
+  eq compile(Q, AS:[AttrSet]) = errorM(none, "Could not parse compilation attributes", '`[`]:K, '`[`]:K, upModule(Q, false)) [print "Could not parse compilation attributes: " AS:[AttrSet]] .
 
   op pcompile : Qid Qid AttrSet ~> Module .
   eq pcompile(Q, Q', AS) = partialCompile(upModule(Q, false), Q', AS) .
@@ -203,10 +204,13 @@ mod COMPILE-LOOP is
   eq compile-nd(Q) = compile(Q, structurals(pair("structural","")) computationals(pair("computational","") pair("nd","true")) supercools(pair("nd","true"))) .
 
   eq print(moduleError(QIL)) = QIL .
-  rl ['compile Q QIL, idle, QIL'] 
-   => [QIL, idle, print(compile(Q) )] .
+  rl ['compile Q 'structurals QStr 'computationals QComp 'supercools QSuper QIL, idle, QIL'] 
+   => [QIL, idle, print(compile(Q, structurals(metadataQParse(QStr)) computationals(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] [print QStr QComp QSuper] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
    => [QIL, idle, print(pcompile(Q,Q', structurals(pair("structural","")) computationals(none) supercools(none)) )] .
+
+  op metadataQParse : Qid -> AttrSet .
+  eq metadataQParse(Q) = metadataParse(substr(string(Q),1,_-_(length(string(Q)),2))) .
 
   rl ['compile-nd Q QIL, idle, QIL']
   => [QIL, idle, print(compile-nd(Q))] .
@@ -214,5 +218,5 @@ mod COMPILE-LOOP is
    => [QIL, idle, print(pcompile(Q,Q', structurals(pair("structural","")) computationals(pair("computational","") pair("nd","true")) supercools(pair("nd","true"))) )] .
 
 
-  var AS : AttrSet .
+  var AS : AttrSet .  var QStr QComp QSuper : Qid .
 endm

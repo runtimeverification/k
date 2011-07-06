@@ -14,14 +14,14 @@ mod K-TECHNIQUE is
   sorts NeK K .
   subsorts NeK < K .
   op . : -> K .
-  op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex(renameTo _\\ensuremath{\\kra}_)"] .
+  op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
 
   sorts List{K} NeList{K} .
 
   subsort K < NeList{K} < List{K} .
-  op .List{K} : -> List{K} [metadata "latex(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+  op .List{K} : -> List{K} [metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
 
-  op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121 metadata "latex(renameTo _\\ensuremath{,\\!\\!,}_)"] .
+  op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121 metadata "latex=(renameTo _\\ensuremath{,\\!\\!,}_)"] .
   --- One should not modify the precedence above.  
   --- Might cause the compilation to fail.
   op _`,`,_ : NeList{K} List{K} -> NeList{K} [ditto] .
@@ -36,7 +36,7 @@ mod K-TECHNIQUE is
   subsort ListItem < NeList < List .
   subsort ListItem < List .
   op . : -> List .
-  op ListItem : K -> ListItem  [metadata "latex(renameTo _)"] .
+  op ListItem : K -> ListItem  [metadata "latex=(renameTo _)"] .
   op __ : List List -> List [assoc id: .] .
   op __ : NeList List -> NeList [ditto] .
   op __ : List NeList -> NeList [ditto] .
@@ -45,7 +45,7 @@ mod K-TECHNIQUE is
   subsort BagItem < NeBag < Bag .
   subsort BagItem < Bag .
   op . : -> Bag .
-  op BagItem : K -> BagItem [metadata "latex(renameTo _)"] .
+  op BagItem : K -> BagItem [metadata "latex=(renameTo _)"] .
   op __ : Bag Bag -> Bag [assoc comm id: .] .
   op __ : NeBag Bag -> NeBag [ditto] .
 
@@ -53,7 +53,7 @@ mod K-TECHNIQUE is
   subsort SetItem < NeSet < Set .
   subsort SetItem < Set .
   op . : -> Set .
-  op SetItem : K -> SetItem [metadata "latex(renameTo _)"] .
+  op SetItem : K -> SetItem [metadata "latex=(renameTo _)"] .
   op __ : Set Set -> Set [assoc comm id: .] .
   op __ : NeSet Set -> NeSet [ditto] .
 
@@ -63,7 +63,7 @@ mod K-TECHNIQUE is
   subsort MapItem < NeMap < Map .
   subsort MapItem < Map .
   op . : -> Map .
-  op _|->_ : K K -> MapItem [metadata "latex(renameTo _\\ensuremath{\\mapsto}_)"] .
+  op _|->_ : K K -> MapItem [metadata "latex=(renameTo _\\ensuremath{\\mapsto}_)"] .
   op __ : Map Map -> Map [assoc comm id: . prec 120] .
   op __ : NeMap Map -> NeMap [ditto] .
 
@@ -83,12 +83,12 @@ mod K-LISTK-EXTRAS is
   including K-TECHNIQUE .
   var Ks : List{K} .
 
-  op lengthList{K}_ : List{K} -> Nat [metadata "latex(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
+  op lengthList{K}_ : List{K} -> Nat [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
   eq lengthList{K}(.List`{K`}) = 0 .
   eq lengthList{K}(K:K,,Ks) = sNat lengthList{K}(Ks) . 
 
-  op headList{K}_ : NeList{K} -> K [metadata "latex(renameTo head\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
-  op tailList{K}_ : NeList{K} -> List{K} [metadata "latex(renameTo tail\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
+  op headList{K}_ : NeList{K} -> K [metadata "latex=(renameTo head\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
+  op tailList{K}_ : NeList{K} -> List{K} [metadata "latex=(renameTo tail\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
 
   eq headList{K}(K:K,,Ks) = K:K .
   eq tailList{K}(K:K,,Ks) = Ks .
@@ -147,7 +147,7 @@ mod K-MAP-EXTRAS is
   eq Map[List / .List`{K`}] = Map .
 
 
-  op _[undef/_] : Map List{K} -> Map [metadata "latex(renameTo _[\\ensuremath{\\bot\\;}/_])"] .
+  op _[undef/_] : Map List{K} -> Map [metadata "latex=(renameTo _[\\ensuremath{\\bot\\;}/_])"] .
   eq Map[undef/ K1,,NList1] = Map[undef/ K1][undef/ NList1] .
   eq Map[undef/ .List{K}] = Map .
   eq (Map K1 |-> K2)[undef/ K1] = Map .
@@ -155,7 +155,7 @@ mod K-MAP-EXTRAS is
 
 
   
-  op $hasMapping : Map K -> Bool   [metadata "latex(renameTo \\$hasMapping\\mybracket{_,_})"] .
+  op $hasMapping : Map K -> Bool   [metadata "latex=(renameTo \\$hasMapping\\mybracket{_,_})"] .
   eq $hasMapping ((M:Map (D:K |-> R:K)), D:K) = true .
   eq $hasMapping (M:Map, D:K) = false [owise] .
 
@@ -168,7 +168,7 @@ mod K-SET-EXTRAS is
   including K-TECHNIQUE .
   including PL-IF-THEN-ELSE .
   var K : K . var Ks : List{K} . var Set Set' : Set . var SetItem : SetItem .
-  op Set_ : List{K} -> Set [metadata "latex(renameTo {\\it{}Set}\\mybracket{_})"] .
+  op Set_ : List{K} -> Set [metadata "latex=(renameTo {\\it{}Set}\\mybracket{_})"] .
   eq Set(.List{K}) = . .
   eq Set(K,, Ks) = SetItem(K) Set(Ks) .
 
@@ -180,7 +180,7 @@ mod K-SET-EXTRAS is
   eq SetItem in Set SetItem = true .
   eq SetItem in Set = false [owise] .
 
-  op _-Set_ : Set Set -> Set [metadata "latex(renameTo _-\\subscript{{\\scriptstyle\\it{}Set}}_)"] .
+  op _-Set_ : Set Set -> Set [metadata "latex=(renameTo _-\\subscript{{\\scriptstyle\\it{}Set}}_)"] .
   eq . -Set Set = . .
   eq (SetItem Set) -Set Set' = if SetItem in Set' then Set -Set Set' else SetItem (Set -Set Set') fi .
 endm
@@ -201,7 +201,7 @@ mod K-BAG-EXTRAS is
   eq BagItem in Bag BagItem = true .
   eq BagItem in Bag = false [owise] .
 
-  op _-Bag_ : Bag Bag -> Bag [metadata "latex(renameTo _-\\subscript{{\\scriptstyle\\it{}Bag}}_)"] .
+  op _-Bag_ : Bag Bag -> Bag [metadata "latex=(renameTo _-\\subscript{{\\scriptstyle\\it{}Bag}}_)"] .
   eq . -Bag Bag = . .
   eq (BagItem Bag) -Bag Bag' = if BagItem in Bag' then Bag -Bag Bag' else BagItem (Bag -Bag Bag') fi .
 endm
@@ -233,8 +233,8 @@ endm
 
 mod K-DESTRUCTORS is
   including K-LIST-EXTRAS .
-  op getKLabel_ : K -> KLabel [metadata "latex(renameTo getKLabel\\mybracket{_})"] .
-  op getList`{K`}_ : K -> List{K} [metadata "latex(renameTo _)"]  .
+  op getKLabel_ : K -> KLabel [metadata "latex=(renameTo getKLabel\\mybracket{_})"] .
+  op getList`{K`}_ : K -> List{K} [metadata "latex=(renameTo _)"]  .
   --- op getKArg : K NzNat -> K  .
   op eraseKLabel : KLabel List{K} -> List{K} .
   var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .  var N : NzNat .
@@ -267,7 +267,7 @@ mod K-RESULT is
 
   sorts List{KResult} NeList{KResult} .
 
-  op .List{K} : -> List{KResult} [ditto metadata "latex(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+  op .List{K} : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
 

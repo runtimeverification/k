@@ -165,7 +165,7 @@ fmod PARSE-METADATA is
   including PARSE-METADATA-LOCATION .
   including META-K-ERROR .
   eq metadataStrippedParse(S) 
-   = errorAS(S, "Could not parse attributes") [owise] .
+   = errorAS(S, "Could not parse attributes") [owise print "Could not parse metadata: " S] .
  
   var S : String .
 endfm
