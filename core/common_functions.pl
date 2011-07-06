@@ -850,7 +850,7 @@ sub getKLabelDeclarations
   }
 
   # print "$labels : -> KLabel [metadata \"generated label\"] ";
-  return "$labels : -> KLabel [metadata \"generated label\"] . ";
+  return "$labels : -> KLabel [metadata \"generated-label=()\"] . ";
 }
 
 my $flatten = "";
