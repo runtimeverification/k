@@ -3,6 +3,7 @@ fmod PARSE-METADATA-BASIC  is
   including META-MODULE .
   including STRING-EXTRAS .
   including META-ATTRS .
+  including META-K-ERROR .
 
   sorts AttrStringPair .
   op {_,_} : AttrSet String -> AttrStringPair .
@@ -26,6 +27,10 @@ fmod PARSE-METADATA-BASIC  is
   if N1 := find(S, "=(",0) 
   /\ not(find(substr(S,0,N1), " ", 0) :: Nat)
   /\ N2 := find(S, ")", N1 + 2) .
+
+
+  eq metadataStrippedParse(S) 
+   = errorAS(S, "Could not parse attributes") [owise] .
  
   var Trm : Term . var Sort : Sort . var AS AS' : AttrSet . var TyL : TypeList . var Ty : Type . var N1 N2 : Nat .
   var Q : Qid .  var Max : MembAx . var Op : OpDecl .

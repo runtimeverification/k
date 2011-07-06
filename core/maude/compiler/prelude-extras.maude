@@ -337,6 +337,7 @@ fmod META-K-ERROR is
 
   op moduleError : QidList -> [Module] .
   
+  op errorAS :  String String -> [Attr] .
   op errorT : [Term] Term String -> [Term] .
   op errorMb : [Term] Term String AttrSet -> [MembAx] .
   op errorEq : [Term] Term String AttrSet -> [Equation] .
