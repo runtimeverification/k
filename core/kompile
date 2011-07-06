@@ -494,7 +494,7 @@ my $flat = 0;
 my $shared = 0;
 my $k_auto_incl = 0;
 my $require_k_main = 0;
-my $k_nd = "";
+my $k_nd = 0;
 
 # latex, pdf, eps, ps, png, crop
 my $pdf = 0;
@@ -602,7 +602,7 @@ foreach (@ARGV) {
     }
     elsif (/^--?nd$/) {
        # $k_all_tools .= "-nd";
-       $k_nd = "-nd";
+       $k_nd = 1;
     }
     elsif (/^--?lint$/) {
        $k_all_tools =  File::Spec->catfile($k_tools_dir,"lint");
@@ -1309,13 +1309,17 @@ sub compile {
 
 # # Compiling the input module $language_module_name
     if ($unquote) {
+        my $compile_command = "compile";
+        if ($k_nd) {
+          $compile_command .= "-nd";
+        }
 		# If unquote is set then do some changes
 		$_ = run_maude("Compiling the definition ... ",
 			"load $k_prelude\n",
 			"load $language_file_name\n",
 			"load $k_all_tools\n",
 			"set print attribute off .\n",
-			"rew compile$k_nd('$language_module_name) .\n",
+			"rew $compile_command('$language_module_name) .\n",
 			"quit\n");
 		
 		my @lines = split(/\n/, $_);
@@ -1341,16 +1345,25 @@ sub compile {
     }
     else
     {
+    my $compile_structurals = '"structural=()"';
+    my $compile_computationals = '""';
+    my $compile_supercools = '""';    
+    if ($k_nd)
+    {
+      $compile_computationals = '"computational=() nd=(true)"';
+      $compile_supercools = '"nd=(true)"';    
+    }
 	$_ = run_maude("Compiling the definition ... ",
 		"load $k_prelude\n",
 	    "load $language_file_name\n",
 	    "load $k_all_tools\n",
             "---(\n",
-            "red in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???) .\n",
+            "red in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???,\n",
+            "structurals(kstructural) computationals(none) supercools(none)) .\n",
             "quit\n",
             "---)\n",
 	    "loop compile .\n",
-	    "(compile$k_nd $language_module_name .)\n",
+	    "(compile $language_module_name structurals $compile_structurals computationals $compile_computationals supercools $compile_supercools .)\n",
 	    "quit\n");	
 		unlink($maude_xml_file);
     }
