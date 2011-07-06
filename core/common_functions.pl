@@ -2466,5 +2466,26 @@ sub get_tags_regex
 	return join('|', @tags);
 }
 
+
+sub process_tags
+{
+	my $arg = shift;
+	my @args = ();
+	
+#	print "TODO: $arg\n";
+	
+	while ($arg =~ /\s*([^(?<!`)\(\s]+)\s*((?<!`)\(.*?(?<!`)\))?/sg)
+	{
+#		print "STEP: $1=$2\n";
+	
+		last if $1 =~ /^-/sg;
+#		print "PUSHED\n";
+		push(@args, "$1=$2") if defined $2;
+		push(@args, "$1=()") if ! defined $2;
+	}
+	
+	"@args";
+}
+
 1;
 
