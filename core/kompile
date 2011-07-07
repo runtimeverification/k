@@ -162,7 +162,15 @@ my $short_help_message =
   -lint : only maudify and sanity checks, do not kompile
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
-  -nd : compile for full non-determinism in heating/cooling
+
+  Controlling non-determinism
+  -structural \"<tags>\" : tags to become equations 
+  -computational \"<tags>\": tags to become rewrite rules
+  -ndstrict \"<tags>\": tags for nondeterministic strictness
+  tags are space-separated and can include the tag default
+  default values: the name of the option.
+
+  Productivity options
   -prelude file.m(aude) : specifies the k-prelude file
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
@@ -232,7 +240,7 @@ sub terminate {
   applied on files directly or indirectly loaded by <source_file>.
 
   As part of the Maude-ification process, a corresponding
-  file.maude file will be associated to each file.kmaude
+  file.maude file will be associated to each file.k
   file directly or indirectly loaded by <source_file>.
   Note that these are only intermediate representation files,
   which are not executable.
@@ -246,7 +254,7 @@ sub terminate {
   $short_help_message
 
   The option -m generates all the Maude files file.maude
-  corresponding to all the files file.kmaude reachable from
+  corresponding to all the files file.k reachable from
   <source_file>.  Note that Maude files are also allowed to
   load K-Maude files, which, as explained above, is the default
   choice whenever an extension is not given for the loaded file.
@@ -255,7 +263,7 @@ sub terminate {
 
   The option -c assumes that the K definition is already
   Maude-ified (either manually or using the above -m option).
-  In particular, files with the extension .kmaude cannot be
+  In particular, files with the extension .k cannot be
   loaded anymore: the program terminates with an error if one
   attempts to do so, and the default extension is .maude.
    
@@ -272,14 +280,14 @@ sub terminate {
   -l is not used, then <source_file> must include a module
   with the same root name, but capitalized.
 
-  Technically, the command \"kompile lang.kmaude\" is equivalent to
-  \"kompile -m lang.kmaude\" followed by \"kompile -c lang.maude\".
-  Since \"kompile -m lang.kmaude\" associates a corresponding .maude
-  file to each reachable .kmaude file while it does not modify
+  Technically, the command \"kompile lang.k\" is equivalent to
+  \"kompile -m lang.k\" followed by \"kompile -c lang.maude\".
+  Since \"kompile -m lang.k\" associates a corresponding .maude
+  file to each reachable .k file while it does not modify
   any of the reachable .maude files, in order for
   \"kompile -c lang.maude\" to work one is advised to not use
   extensions for the loaded file names; in other words, write, e.g.,
-  \"in/load lang-syntax\" instead of \"in/load lang-syntax.kmaude\".
+  \"in/load lang-syntax\" instead of \"in/load lang-syntax.k\".
 
   The option -latex is used for typesetting a K definition.  It can
   be used in combination with any of the other options above.  If
@@ -302,19 +310,35 @@ sub terminate {
   directory, it will be included in the generated latex file after the
   above mentioned style, and thus could be used to alter the default
   typesetting macros.
+  
+  The options -structural, -computational, and -ndstrict are designed
+  to help fine-tuning the non-determinsm exposed by a definition by 
+  changing the abstraction level of the rules and stricness axioms.
+  By default, only rules tagged with the 'computational' tag are turned 
+  into rewrite rules and strictness rules tagged with 'ndstrict' 
+  generate heating rewrite rules, while rules tagged with 'ndstrict'
+  force the computation to cool completely before any other rule applies.
+  If a rule is tagged both structural and computational, it is considered
+  structural and thus turned into an equation. All rules with no specific 
+  computational/structural tag are considered structural.
+  The above options allow to change this behavior by specifying explicit
+  sets of tags which are to be handled as structural/computational/ndstrict.
+  In addition one can add the reserved tag default to one of the categories
+  to dictate the behavior for the rules with none of the specified tags.
+  
  
   Examples
 
-  kompile lang.kmaude : compiles the K language definition
-  found in file lang.kmaude into an executable Maude
+  kompile lang.k : compiles the K language definition
+  found in file lang.k into an executable Maude
   specification saved in file lang-compiled.maude.
-  The file lang.kmaude must contain a module named LANG.
+  The file lang.k must contain a module named LANG.
 
-  kompile lang3.kmaude -l LANG : compiles the K language
-  definition reachable from module LANG of file lang3.kmaude
+  kompile lang3.k -l LANG : compiles the K language
+  definition reachable from module LANG of file lang3.k
   into a Maude specification saved in file lang3-compiled.maude.
 
-  kompile -v -m lang3.kmaude : it only (verbosely) Maude-ifies
+  kompile -v -m lang3.k : it only (verbosely) Maude-ifies
   the K language definition reachable as above, saving it in
   file lang3.maude (and similarly for loaded files). To further
   compile the Maude-ified K definition, use the following:
@@ -356,6 +380,18 @@ sub terminate {
   lang-flat.k which contains all the defintion of the language
   and
   lang-flat.maude which is lang-flat.k maudified.
+
+  kompile lang -computational \"default\"
+  will transform into rewrite rules all rules which are tagged 
+  as structural.
+
+  kompile lang -structural \"nd(false) computational\" \\
+      -computational \"structural\" -ndstrict \"default\"
+  will transform into equations all rules which are tagged with either 
+  computational or nd(false), into rules all those tagged with 
+  structural, will generate rewrite rules for all heating rules, and 
+  will enforce complete cooling for all K rules containing the k cell.
+
 
 " if ($verbose || $help); 
     print "\nERROR: $_[0]\n\n" if defined $_[0];
@@ -608,10 +644,6 @@ foreach (@ARGV) {
     elsif (/^--?topmatter$/) {
 	$topmatter = "?";
     }
-    elsif (/^--?nd$/) {
-       # $k_all_tools .= "-nd";
-       $k_nd = 1;
-    }
     elsif (/^--?lint$/) {
        $k_all_tools =  File::Spec->catfile($k_tools_dir,"lint");
     }
@@ -652,7 +684,7 @@ foreach (@ARGV) {
     elsif (/^--?ndstrict$/) {
 		$nd_strict = 1;
     }
- 	elsif (/^--?pgm$/) { # start compile program param check
+    elsif (/^--?pgm$/) { # start compile program param check
 		$compileProgram = 1;
 		$pgm = "?";
     }
