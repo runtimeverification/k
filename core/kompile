@@ -1600,6 +1600,8 @@ sub maudify_file {
     # resolve rule tags
 	$_ = rule_tags($_);    
     
+#    print ;
+    
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
 

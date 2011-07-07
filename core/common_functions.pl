@@ -1621,7 +1621,8 @@ sub line_numbers
 		my $temp_mb = $mb;
 		my $mb_line = countlines($`);
 		
-		$mb =~ s/(mb\s+latex\s.*)(\s\.\s*$)/$1 [metadata "location=($file:$mb_line)"]$2/s;
+		$mb =~ s/(mb\s+latex.*)/$1 [metadata "location=($file:$mb_line)"]/sm;
+		# $mb =~ s/(mb\s+latex\s.*?)(\s*)(?=$kmaude_keywords_pattern)/$1 [metadata "location=($file:$mb_line)"]$2/s;
 
 		return $mb . $spaces;
 	}
