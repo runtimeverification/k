@@ -8,6 +8,7 @@ fmod MAKE-ALL-LABELS is
  including METADATA-EXTRAS .
  including CONVERSION .
  including META-K-LEAST-SORTS .
+ including PARSE-METADATA .
 
  var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
  var N : Nat . var Nl : NatList .
@@ -18,7 +19,7 @@ fmod MAKE-ALL-LABELS is
  var Trms : TermList . vars T1 T2 Trm : Term .  var Cond : Condition .
  var C : Constant . var V : Variable .
  vars OPDS OPDS' Wrappers Labels : OpDeclSet . var Op Op' : OpDecl .
- var AS AS' : AttrSet .
+ var AS AS' : AttrSet .  var Str : String .
  var OPDM : OpDeclOpDeclSetMap .  var LabelOp : OpDeclSet .
 
  op allLabelsImports : ModuleSet ~> ImportList .
@@ -173,12 +174,15 @@ ceq labelsT(Q[T1,T2], T, M, OPDS, OPDM)
  eq processOps(none) = empty .
 
  op processOp : OpDecl ~> OpDeclSet .
- eq processOp(op Q : T -> T' [AS metadata("builtin wrapper")] .)
-  = (op Q : T -> mkKLabelSort(T',"") [AS metadata("builtin wrapper")] .) .
- eq processOp(op Q : T -> T' [AS metadata("list wrapper")] .)
+  
+ eq processOp(op Q : T -> T' [AS metadata(Str)] .)
+  = processOp(op Q : T -> T' [AS metadataParse(Str)] .) .
+ eq processOp(op Q : T -> T' [AS pair("wrapper", "builtin")] .)
+  = (op Q : T -> mkKLabelSort(T',none) [metadata(AS  pair("wrapper", "builtin"))] .) .
+ eq processOp(op Q : T -> T' [AS pair("wrapper", "list")] .)
   = none .
  eq processOp(op Q : Tl -> T [AS] .)
-  = (op mkKLabel(Q) : nil -> mkKLabelSort(T,metadataString(AS)) [removeNaryAttrs(AS) metadata("arity " + string(arity(Tl),10))] .) [owise] .
+  = (op mkKLabel(Q) : nil -> mkKLabelSort(T,AS) [metadata(removeNaryAttrs(AS) pair("arity", string(arity(Tl),10)))] .) [owise] .
 endfm
 
 

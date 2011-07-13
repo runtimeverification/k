@@ -5,6 +5,7 @@ fmod HOMOGENOUS-ARGUMENTS is
  including META-K-MODULE .
  including META-K-WRAPPERS .
  including META-K-LEAST-SORTS .
+ including PARSE-METADATA .
 
  var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
  var N : Nat . var Nl : NatList .

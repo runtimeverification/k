@@ -8,7 +8,6 @@ fmod PARSE-METADATA-BASIC  is
   op {_,_} : AttrSet String -> AttrStringPair .
 
   var S : String .
-  op metadataParse : String -> AttrSet .
   eq metadataParse(S) = metadataStrippedParse(stripSpaces(S)) .
   op metadataStrippedParse : String -> AttrSet .
   eq metadataStrippedParse("") = none .

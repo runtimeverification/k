@@ -31,6 +31,10 @@ fmod K-META-OPS is including META-TERM .
 
   op kApply : Term TermList -> Term .
   eq kApply(T, Trl) = kApplyS[T,kList(Trl)] .
+
+  ops bool2K : Term -> Term .
+   eq bool2K(T) = kApply('Bool[T],nilKList) .
+
 endfm
 
 fmod META-K-BUILTINS is
@@ -51,6 +55,21 @@ fmod META-K-BUILTINS is
   eq isBuiltinModule(S) = find(S, "-BUILTINS",0) :: Nat .
 
   var M : Module . var S : String .
+endfm
+
+fmod META-ATTRS is
+  including META-MODULE .
+  op metadata : AttrSet -> AttrSet .
+  op metadataParse : String -> AttrSet .
+  op pair : String String -> Attr .
+  eq metadata(pair(Key,Value) AS) 
+   = metadata(metadata(metaPair(Key,Value)) AS) .
+  eq metadata(metadata(S) AS) = metadata(S) AS [owise] .
+  eq metadata(AS) = AS [owise] .
+  var S : String .  var AS : AttrSet . var Key Value : String .
+
+  op metaPair : String String -> Attr .
+  eq metaPair(Key,Value) = metadata(Key + "=(" + Value + ")") .
 endfm
 
 fmod META-K-MODULES is
@@ -552,16 +571,17 @@ fmod META-K-WRAPPERS is
   including META-LEVEL-EXTRAS .
   including META-K-MODULE .
   including K-META-CONFIG  .
+  including META-ATTRS .
   vars T T' : Type . var Q : Qid . var AS : AttrSet . var OPDS : OpDeclSet .
 
   op builtin-wrappers : -> OpDeclSet [memo] .
   eq builtin-wrappers = getOps(upModule('K-WRAPPERS, false)) .
 
   op getWrappers : OpDeclSet -> OpDeclSet .
-  eq getWrappers((op Q : T -> T' [metadata("builtin wrapper") AS] .) OPDS)
-   = (op Q : T -> T' [metadata("builtin wrapper") AS] .) getWrappers(OPDS) .
-  eq getWrappers((op Q : T -> T' [metadata("list wrapper") AS] .) OPDS)
-   = (op Q : T -> T' [metadata("list wrapper") AS] .) getWrappers(OPDS) .
+  eq getWrappers((op Q : T -> T' [pair("wrapper", Str) AS] .) OPDS)
+   = (op Q : T -> T' [pair("wrapper", Str) AS] .) getWrappers(OPDS) .
+  eq getWrappers((op Q : T -> T' [metadata(Str) AS] .) OPDS)
+   = getWrappers((op Q : T -> T' [metadataParse(Str) AS] .) OPDS) [owise] .
   eq getWrappers(OPDS) = none [owise] .
 
   op mkSubsortWrapper : Type Type -> Qid .
@@ -576,13 +596,44 @@ fmod META-K-WRAPPERS is
   eq isWrapped(OPDS (op Q : T -> T' [AS] .), T) = true .
   eq isWrapped(OPDS, T) = false [owise] .
 
-  var M : Module . var Op : OpDecl . 
+  op findWrapper : OpDeclSet Type ~> Qid .
+  eq findWrapper(OPDS op Q : T -> T' [AS pair("wrapper",Str)] ., T) = Q .
+  eq findWrapper(OPDS op Q : T -> T' [AS metadata(Str)] ., T) 
+   = findWrapper(OPDS op Q : T -> T' [AS metadataParse(Str)] ., T) [owise] .
+
+  var M : Module . var Op : OpDecl .  var Str : String .
 endfm
 
+fmod STRICT-ATTRS is
+  including META-ATTRS .
+  including NAT-LIST-EXTRAS .
+  including QID-EXTRAS .
+---  including LIST-ATTRS .
+  ops kstrict seqkstrict : IntList QidList -> Attr .
+  op karity : Nat -> Attr .
+  op khybrid : -> Attr .
+
+  eq metadata(khybrid AS) = metadata(metaPair("hybrid","") AS) .
+  eq metadata(karity(N) AS) = metadata(metadata("arity " + string(N,10)) AS) .
+  
+  eq metadata(kstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-strict", IntList2String(Il)) AS) .  
+  eq metadata(seqkstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-seqstrict", IntList2String(Il)) AS) .  
+
+---(
+  eq metadata(kstrict(nil, Ql) AS) = metadata(metadata("strict in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(seqkstrict(nil, Ql) AS) = metadata(metadata("seqstrict in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(kstrict(NeIl, Ql) AS) = metadata(metadata("strict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
+  eq metadata(seqkstrict(NeIl, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
+---)
+
+  var AS : AttrSet . var A : Attr .  var N : Nat .  var Q : Qid . 
+  var Il : IntList .
+endfm
 
 fmod META-K-LABELS is
   including META-K-MODULE .
   including META-LEVEL .
+  including STRICT-ATTRS .
   var Q : Qid . var T T' : Type .  var Str : String .
 
   op klistLabelS : -> Qid .
@@ -597,11 +648,11 @@ fmod META-K-LABELS is
   op mkListLabel : Qid -> Term .
   eq mkListLabel(Q) = klistLabelS[upTerm(string(Q))] .
 
-  op mkKLabelSort : Type String -> Type .
-  eq mkKLabelSort(T,Str) 
-   = if find(Str,"hybrid",0) :: Nat then KHybridLabel
-     else if T == KProper then KProperLabel
-     else if T == KResult then KResultLabel else KLabel fi fi fi .
+  op mkKLabelSort : Type AttrSet -> Type .
+  eq mkKLabelSort(T,khybrid AS) = KHybridLabel .
+  eq mkKLabelSort(T, AS) =
+     if T == KProper then KProperLabel
+     else if T == KResult then KResultLabel else KLabel fi fi [owise] .
 
   op getAuxKLabels : OpDeclSet OpDeclSet -> OpDeclSet .
   eq getAuxKLabels(OPDS, Op OPDS') = getAuxKLabel(OPDS, Op) getAuxKLabels(OPDS, OPDS') .
@@ -625,6 +676,7 @@ fmod META-K-LABELS is
 endfm
 
 fmod K-STRICTNESS-OPS is including META-LEVEL .
+  including META-K-LABELS .
   including K-META-OPS .
   including K-META-CONFIG .
   var S : String .  var T T' : Term . var Trl : TermList . var Q : Qid .
@@ -653,6 +705,13 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
 
   op getTopLabel : Term ~> Term .
   eq getTopLabel('_`(_`)[T,T']) = T . 
+
+
+   op kresultLabel : -> Term .
+   eq kresultLabel = resultLabel(klabel) .
+   
+   op resultLabel : Qid -> Term .
+   eq resultLabel(Q) = mkConstant(mkKLabel(qid(string(Q) + "-result")),KLabel) .
 endfm
 
 
@@ -736,43 +795,6 @@ fmod LIST-ATTRS is
 endfm
 ---)
 
-fmod META-ATTRS is
-  including META-MODULE .
-  op metadata : AttrSet -> AttrSet .
-  op pair : String String -> Attr .
-  eq metadata(pair(Key,Value) AS) 
-   = metadata(metadata(metaPair(Key,Value)) AS) .
-  eq metadata(metadata(S) AS) = metadata(S) AS [owise] .
-  var S : String .  var AS : AttrSet . var Key Value : String .
-
-  op metaPair : String String -> Attr .
-  eq metaPair(Key,Value) = metadata(Key + "=(" + Value + ")") .
-endfm
-
-fmod STRICT-ATTRS is
-  including META-ATTRS .
-  including NAT-LIST-EXTRAS .
-  including QID-EXTRAS .
----  including LIST-ATTRS .
-  ops kstrict seqkstrict : IntList QidList -> Attr .
-  op karity : Nat -> Attr .
-  op khybrid : -> Attr .
-
-  eq metadata(khybrid AS) = metadata(metaPair("hybrid","") AS) .
-  eq metadata(karity(N) AS) = metadata(metadata("arity " + string(N,10)) AS) .
-  
-  eq metadata(kstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-strict", IntList2String(Il)) AS) .  
-
----(
-  eq metadata(kstrict(nil, Ql) AS) = metadata(metadata("strict in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(seqkstrict(nil, Ql) AS) = metadata(metadata("seqstrict in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(kstrict(NeIl, Ql) AS) = metadata(metadata("strict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(seqkstrict(NeIl, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
----)
-
-  var AS : AttrSet . var A : Attr .  var N : Nat .  var Q : Qid . 
-  var Il : IntList .
-endfm
 
 fmod SYNTAX-ATTRS is
   including META-ATTRS .

@@ -328,6 +328,12 @@ fmod META-TERM-EXTRAS is
 
   op getTopSymbol : Term ~> Qid .
   eq getTopSymbol(Q[Trl]) = Q .
+
+
+  --- defined only for Constants and Variables
+  op setType : Term Type ~> Term .
+  eq setType(C, T) = mkConstant(getName(C), T) .
+  eq setType(V, T) = mkVariable(getName(V), T) .
 endfm
 
 

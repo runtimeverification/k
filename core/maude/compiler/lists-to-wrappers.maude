@@ -117,7 +117,7 @@ fmod LISTS-TO-WRAPPERS is
 
  op lists2wOp : OpDecl CTORSMap ~> OpDeclSet .
  eq lists2wOp((op Q : Tl -> T [AS] .), CTORS (subsort T < T' .) |-> Q[Trm])
-  = (op symbol kcrl : T 'Bool -> '`[KSentence`] [prec(126) format('b 'o 'b 'o 'd)] .) (op symbol krl : T -> '`[KSentence`] [prec(126) format('b 'o 'd)] .) (op listWrapperS(T) : T -> T' [metadata("list wrapper")] .) (op Q : Tl -> T [AS] .) .
+  = (op symbol kcrl : T 'Bool -> '`[KSentence`] [prec(126) format('b 'o 'b 'o 'd)] .) (op symbol krl : T -> '`[KSentence`] [prec(126) format('b 'o 'd)] .) (op listWrapperS(T) : T -> T' [metadata(pair("wrapper","list"))] .) (op Q : Tl -> T [AS] .) .
  eq lists2wOp(Op, CTORS) = Op [owise] .
 
  op lists2wMbs : Module OpDeclSet OpDeclSet CTORSMap MembAxSet ~> MembAxSet .

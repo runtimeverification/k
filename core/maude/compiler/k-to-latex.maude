@@ -249,7 +249,6 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq printTerm(U,V) = \variable{ getName(V) }{getType(V)} .
 
   op getName : OpDeclSet Qid Type -> Qid .
-  eq getName( (op Q : nil -> Ty [AS metadata("builtin wrapper")] .) OPDS, Q, Ty) = '_ .
   eq getName( (op Q : nil -> Ty [AS metadata(Str) ] .) OPDS, Q, Ty)
    = getName(Q, metadataParse(Str)) [owise] .
  ceq getName(OPDS, Q, Ty) 
@@ -258,7 +257,6 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq getName(OPDS, Q, Ty) = Q [owise] .
 
   op getLabelName : OpDeclSet Qid -> Qid .
-  eq getLabelName( (op Q : TyL -> Ty [AS metadata("builtin wrapper") ] .) OPDS, Q) = '_ .
   eq getLabelName( (op Q : TyL -> Ty [AS metadata(Str) ] .) OPDS, Q)
    = addParams(getName(Q, metadataParse(Str)),arity(TyL)) [owise] .
   eq getLabelName( (op Q : TyL -> Ty [AS] .) OPDS, Q)
@@ -270,6 +268,7 @@ var Eq : Equation .  var Eqs : EquationSet .
 
   var Q' : Qid . var  AS1 AS2 : AttrSet .
   op getName : Qid AttrSet -> Qid .
+  eq getName(Q, AS pair("wrapper",Str)) = '_ .
   eq getName(Q, AS1 klatex(AS2 krenameTo(Q') ) ) = Q' [print Q " renamed to " Q'].
   eq getName(Q, AS) = latexify(Q) [owise] .
 
@@ -311,7 +310,6 @@ var Eq : Equation .  var Eqs : EquationSet .
 
   var TyL' : TypeList .  var Ty' : Type .
   op getRenamedQid : Qid OpDeclSet -> [Qid] .
-  eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata("builtin wrapper") ] .) OPDS) = '_ .
   eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata(Str) ] .) OPDS) = getName(Q,metadataParse(Str)) [owise print Q " -> " Str "?"] .
   eq getRenamedQid(Q, OPDS) = latexify(Q) [owise] . --- print Op:[OpDecl]] .
  
@@ -399,7 +397,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq op(op F : TyL -> Ty [ metadata(St) AS] .)
    = op(op F : TyL -> Ty [ metadataParse(St) AS] .) [owise] .
 
-  eq metadata("builtin wrapper") = none .
+---  eq metadata("builtin wrapper") = none .
 
   op subsort(_, _) : QidList QidList -> Printable .
   var Sort Sort' : Sort .
@@ -588,8 +586,6 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq getRenamedKOp(Q, TyL, OPDS) = Q [owise] .
  
   op getRenamedKOp : Qid AttrSet -> Qid .
-  eq getRenamedKOp(Q, AS metadata("builtin wrapper") ) 
-   = '_ .
   eq getRenamedKOp(Q, AS metadata(Str) ) 
    = getName(Q, metadataParse(Str)) [owise] .
 

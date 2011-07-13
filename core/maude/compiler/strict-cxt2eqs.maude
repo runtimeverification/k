@@ -12,6 +12,7 @@ mod STRICTCXT2EQS is
   including META-K-RULES .
   including METADATA-EXTRAS .
   including COMPILATION-ATTRS .
+  including META-K-WRAPPERS .
   var T : Term . var V : Variable .  var Trl : TermList .  
   var Sort S : Sort .  var Ss : SortSet .
   var AS AS' AS'' : AttrSet . var A : Attr .
@@ -32,11 +33,11 @@ mod STRICTCXT2EQS is
   eq defaultCoolEqs(S ; Ss)
    = (eq mkCell(cool(S), mkVariable('K,K)) 
        = mkCell(S, 'cool[mkVariable('K,K)]) 
-      [metadata("super cooling start")] .)
+      [metadata(pair("super-cooling","start"))] .)
      defaultCoolEqs(Ss) .
   eq defaultCoolEqs(none) 
    = (eq 'cool[mkVariable('zk,K)] = mkVariable('zk,K) 
-      [owise metadata("super cooling end")] .) .
+      [owise metadata(pair("super cooling","end"))] .) .
 
   op {_,_,_} : MembAxSet EquationSet RuleSet -> MASEqsPair [ctor] .
 
@@ -68,20 +69,20 @@ mod STRICTCXT2EQS is
   eq coolingEqs(M, T1, T2, Q, AS)
    =  (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T1)))
         = kWrap(Q, T1[hole <- mkVariable('Kcxt,KResult)])
-       [metadata(AS metadata("cooling"))] .) 
+       [metadata(AS pair("cooling",""))] .) 
       if T2 == hole then 
           (eq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
         = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
-       [metadata(AS metadata("super cooling"))] .)
+       [metadata(AS pair("super-cooling",""))] .)
       else 
      (ceq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
         = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
         if '_=/=Bool_[getTopLabel(T2),mkVariable('KcxtL,KLabel)] = 'true.Bool 
-       [metadata(AS metadata("super cooling result"))] .)
+       [metadata(AS pair("super-cooling", "result"))] .)
      (ceq 'cool[kra(kra(T2[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]], freezeTerm(M, T1)),'Rest:K)]
         = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
         if '_::`KResultLabel[mkVariable('KcxtL,KLabel)] = 'false.Bool 
-       [metadata(AS metadata("super cooling wrapper"))] .)
+       [metadata(AS pair("super-cooling", "wrapper"))] .)
      fi  .
 
   op strictCxtHeat : Term Term TermList AttrSet AttrSet ~> MASEqsPair .
@@ -97,6 +98,8 @@ mod STRICTCXT2EQS is
    = {none, (eq T1 = T2 [metadata(AS pair("heating",""))] .), none} [owise] .
   eq strictCxtHeat(T1,T2,T, AS, AS')
    = {none, (ceq T1 = T2 if T = trueCt [metadata(AS pair("heating",""))] .), none} [owise] .
+
+
 
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(
@@ -118,9 +121,6 @@ mod STRICTCXT2EQS is
   eq makeK(M, V, Type, true) = V .
   eq makeK(M, V, Type, B:[Bool]) 
    = kApply(findWrapper(getOps(M), Type)[V],empty) .
-
-  op findWrapper : OpDeclSet Type ~> Qid .
-  eq findWrapper(OPDS op Q : Type -> Type' [AS metadata("builtin wrapper")] ., Type) = Q .
 
 
   op strictCxt2eqs : Qid Qid Module Module SortSet AttrSet ~> Module .
