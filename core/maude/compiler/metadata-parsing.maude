@@ -102,7 +102,6 @@ fmod PARSE-METADATA-STRICT is
   var A : Attr . var S S' S1 S2  S3 : String . var F : FindResult .
   var P P' P'' : Nat .  var T : Type . var N : Int . 
 
-  eq pair("hybrid","") = khybrid .
   eq pair("strict",S) = kstrict(getStrictList(S),klabel) .
   eq pair("seqstrict",S) = seqkstrict(getStrictList(S),klabel) .
  ceq pair(S,S') = kstrict(getStrictList(S'),qid(substr(S,0,  _-_(length(S),length("-strict")))))

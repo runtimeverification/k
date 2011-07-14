@@ -615,7 +615,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint(M, (seqkstrict(NL, QIL)))
     = ('\kseqstrict '`{ eMetaLatexPrint(NL) '`} '`{ strictCells(QIL) '`}
        ) .
-  eq eMetaLatexPrint(M, (khybrid ))   
+  eq eMetaLatexPrint(M, (pair("hybrid","") ))   
     = ('\khybrid '`{ '`}) .
   eq eMetaLatexPrint(M, (strat(NL) ))
     = ('\kstrat '`{ eMetaLatexPrint(NL) '`} 

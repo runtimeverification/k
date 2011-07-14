@@ -611,20 +611,11 @@ fmod STRICT-ATTRS is
 ---  including LIST-ATTRS .
   ops kstrict seqkstrict : IntList QidList -> Attr .
   op karity : Nat -> Attr .
-  op khybrid : -> Attr .
 
-  eq metadata(khybrid AS) = metadata(metaPair("hybrid","") AS) .
-  eq metadata(karity(N) AS) = metadata(metadata("arity " + string(N,10)) AS) .
+  eq metadata(karity(N) AS) = metadata(metaPair("arity ",string(N,10)) AS) .
   
   eq metadata(kstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-strict", IntList2String(Il)) AS) .  
   eq metadata(seqkstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-seqstrict", IntList2String(Il)) AS) .  
-
----(
-  eq metadata(kstrict(nil, Ql) AS) = metadata(metadata("strict in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(seqkstrict(nil, Ql) AS) = metadata(metadata("seqstrict in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(kstrict(NeIl, Ql) AS) = metadata(metadata("strict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
-  eq metadata(seqkstrict(NeIl, Ql) AS) = metadata(metadata("seqstrict(" + IntList2String(NeIl) + ") in (" + QidList2String(Ql) + ")") AS) . 
----)
 
   var AS : AttrSet . var A : Attr .  var N : Nat .  var Q : Qid . 
   var Il : IntList .
@@ -634,6 +625,7 @@ fmod META-K-LABELS is
   including META-K-MODULE .
   including META-LEVEL .
   including STRICT-ATTRS .
+  
   var Q : Qid . var T T' : Type .  var Str : String .
 
   op klistLabelS : -> Qid .
@@ -649,7 +641,9 @@ fmod META-K-LABELS is
   eq mkListLabel(Q) = klistLabelS[upTerm(string(Q))] .
 
   op mkKLabelSort : Type AttrSet -> Type .
-  eq mkKLabelSort(T,khybrid AS) = KHybridLabel .
+  eq mkKLabelSort(T,AS metadata(Str))
+   = mkKLabelSort(T,AS metadataParse(Str)) .
+  eq mkKLabelSort(T,pair("hybrid","") AS) = KHybridLabel .
   eq mkKLabelSort(T, AS) =
      if T == KProper then KProperLabel
      else if T == KResult then KResultLabel else KLabel fi fi [owise] .
