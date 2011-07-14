@@ -33,7 +33,7 @@ fmod K-META-OPS is including META-TERM .
   eq kApply(T, Trl) = kApplyS[T,kList(Trl)] .
 
   ops bool2K : Term -> Term .
-   eq bool2K(T) = kApply('Bool[T],nilKList) .
+   eq bool2K(T) = kApply('Bool_[T],nilKList) .
 endfm
 
 fmod META-K-BUILTINS is

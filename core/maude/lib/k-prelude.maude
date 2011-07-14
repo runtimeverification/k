@@ -284,6 +284,12 @@ mod K-RESULT is
   op _`(_`) : KHybridLabel List{KResult} -> KResult [ditto] .
 endm
 
+
+mod K-RESULT-LABELS is
+  including K-TECHNIQUE .
+  op 'k-result : -> KLabel .
+endm
+
 --- KProper Level
 
 mod K-PROPER is
@@ -315,7 +321,7 @@ mod K-CONTEXTS is
   including K-TECHNIQUE .
   including K-SENTENCE .
   ops context_ : K -> [KSentence] [prec 126] .
-  ops context_if_ : K Bool -> [KSentence] [prec 126] .
+  ops context_if_ : K K -> [KSentence] [prec 126] .
   op wrap-with : K K -> K .
 endm
 
@@ -369,12 +375,12 @@ mod K-RULES is
   ops rule_ : List -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Bag -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Set -> [KSentence] [prec 126 format(b o d)] .
-  ops rule_if_ : KLabel Bool -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : List{K} Bool -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : Map Bool -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : List Bool -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : Bag Bool -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : Set Bool -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : KLabel K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : List{K} K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : Map K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : List K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : Bag K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_if_ : Set K -> [KSentence] [prec 126 format(b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
   op _=>_ : K K -> K [prec 125] .
   op _=>_ : KLabel KLabel -> KLabel [prec 125] .

@@ -74,7 +74,7 @@ fmod MAKE-K-RULES is
   eq addReplace(Flat, M,{krl,T,empty,AS A}, Subst, AS' structurals(A AS''))
    = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS A, AS') [metadata(A AS)] .), M) . 
   eq addReplace(Flat, M, {kcrl, T, C, AS A}, Subst, AS' structurals(A AS''))
-   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS A, AS') if C = trueCt [metadata(A AS)] .), M) .
+   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS A, AS') if C = bool2K(trueCt) [metadata(A AS)] .), M) .
 
   eq addReplace(Flat, M, {krl, T, empty, AS A}, Subst, AS' computationals(A AS''))
     = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS A, AS') [metadata(A AS)] .), M) .
@@ -89,7 +89,7 @@ fmod MAKE-K-RULES is
  eq addReplace(Flat, M,{krl,T,empty,AS}, Subst, AS')
    = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS, AS') [metadata(pair("default","") AS)] .), M) [owise] . 
   eq addReplace(Flat, M, {kcrl, T, C, AS}, Subst, AS')
-   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS, AS') if C = trueCt [metadata(pair("default","") AS)] .), M) [owise] .
+   = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS, AS') if C = bool2K(trueCt) [metadata(pair("default","") AS)] .), M) [owise] .
 
   op handleTagSuperCooling : Term Substitution AttrSet AttrSet -> Term .
   eq handleTagSuperCooling(T, Subst, A AS, AS' supercools(A AS'')) = T[Subst] .
@@ -100,7 +100,7 @@ fmod MAKE-K-RULES is
  ceq makeCondition(O'[O[T1,T2]])
    = T1 => T2 
   if O' = searchS /\ O = replaceS .
-  eq makeCondition(T) = T = trueCt [owise] .
+  eq makeCondition(T) = T = bool2K(trueCt) [owise] .
 
   var CSplit : KContextSplit .
 endfm

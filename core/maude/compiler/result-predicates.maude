@@ -8,7 +8,7 @@ mod RESULT-PREDICATES is
  
   op resultPredicates : Module -> Module .
   eq resultPredicates(M)
-   = setRls(setEqs(setMbs(setOps(M, flattenLabelsOps(getOps(M))), resultPredMbs(getMbs(M))  resultPredicates(getOps(M))), resultPredEqs(getEqs(M))), resultPredRls(getRls(M))) .
+   = addImports(including 'K-RESULT-LABELS ., removeImports(setRls(setEqs(setMbs(setOps(M, flattenLabelsOps(getOps(M))), resultPredMbs(getMbs(M))  resultPredicates(getOps(M))), resultPredEqs(getEqs(M))), resultPredRls(getRls(M))), including 'K-RESULT .)) .
 
 
  op resultPredicates : OpDeclSet ~> MembAxSet .
@@ -17,6 +17,7 @@ mod RESULT-PREDICATES is
    = if T == KResultLabel then resultPredicate(Q, AS) resultPredicates(OPDS)
      else if T == KHybridLabel then hybridPredicate(Q, AS) resultPredicates(OPDS)
      else resultPredicates(OPDS) fi fi .
+  eq resultPredicates(OPDS) = none [owise] .
 
   
   op resultPredicate : Qid AttrSet ~> MembAx .
@@ -29,11 +30,12 @@ mod RESULT-PREDICATES is
   op flattenLabelsOps : OpDeclSet ~> OpDeclSet .
   eq flattenLabelsOps(Op OPDS)
    = flattenLabelsOps(OPDS, Op) .
+  eq flattenLabelsOps(none) = none .
 
   op flattenLabelsOps : OpDeclSet OpDecl ~> OpDeclSet .
   eq flattenLabelsOps(OPDS, (op Q : nil -> T [AS] .))
    = if T == KProperLabel or-else T == KResultLabel or-else T == KHybridLabel
-     then (op Q : nil -> KLabel [AS pair(string(T),"")] .)
+     then (op Q : nil -> KLabel [metadata(AS pair(string(T),""))] .)
      else (op Q : nil -> T [AS] .)
      fi flattenLabelsOps(OPDS) .
   eq flattenLabelsOps(OPDS, Op) = Op flattenLabelsOps(OPDS) [owise] .
@@ -53,9 +55,10 @@ mod RESULT-PREDICATES is
                else CV 
                fi
           fi
-     fi .
+     fi, flattenResultsT(Tl') .
 
   op resultVars_ : TermList ~> TermList .
+  eq resultVars(empty) = empty .
   eq resultVars(V,Tl) 
    = if getType(V) == KResult or-else getType(V) == ResultList
      then V,resultVars(Tl) else resultVars(Tl) fi .

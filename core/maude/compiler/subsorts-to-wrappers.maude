@@ -153,7 +153,7 @@ ceq subsorts2wrappersMb(Mb, M, OPDS, SSDM)
 
  op findPurifyRedexCond : TermList Module OpDeclSet SubsortDeclMap ~> TermList .
  eq findPurifyRedexCond(empty, M, OPDS, SSDM) = empty .
- eq findPurifyRedexCond(Trm, M, OPDS, SSDM) = findPurifyRedex(Trm, leastSort(M, Trm), M, OPDS, SSDM) .
+ eq findPurifyRedexCond(Trm, M, OPDS, SSDM) = findPurifyRedex(Trm, K, M, OPDS, SSDM) .
 
  op findPurifyRedex : Term Type Module OpDeclSet SubsortDeclMap ~> Term .
 ceq findPurifyRedex('if_then_else_fi[Trm,T1,T2], T, M, OPDS, SSDM)
