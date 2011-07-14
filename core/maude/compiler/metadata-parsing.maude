@@ -125,6 +125,10 @@ fmod PARSE-METADATA-STRICT is
 ---   /\ T := qid(stripSpaces(substr(S3,P'' + 1, length(S3))))
 ---   /\ S' := stripSpaces(substr(S1, P + 1,length(S1)))  .
 
+ ceq pair("arity",S) = karity(N)
+  if N := rat(S,10) .
+
+---(
  ceq metadataStrippedParse(S) = karity(N) metadataParse(S')
    if "arity " = substr(S,0,length("arity ")) 
    /\ S1 := stripSpaces(substr(S,length("arity "),length(S))) 
@@ -132,7 +136,7 @@ fmod PARSE-METADATA-STRICT is
    /\ N := rat(if (F == notFound) then  S1 else substr(S1, 0,F) fi,10)
    /\ S' := if (F == notFound) then "" 
             else stripSpaces(substr(S1, find(S1," ",0),length(S1))) fi .
-
+---)
 endfm
 
 fmod PARSE-METADATA-CONFIGURATION is

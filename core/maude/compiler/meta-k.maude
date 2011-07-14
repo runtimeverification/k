@@ -612,7 +612,7 @@ fmod STRICT-ATTRS is
   ops kstrict seqkstrict : IntList QidList -> Attr .
   op karity : Nat -> Attr .
 
-  eq metadata(karity(N) AS) = metadata(metaPair("arity ",string(N,10)) AS) .
+  eq metadata(karity(N) AS) = metadata(metaPair("arity",string(N,10)) AS) .
   
   eq metadata(kstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-strict", IntList2String(Il)) AS) .  
   eq metadata(seqkstrict(Il,Q) AS) = metadata(metaPair(string(Q) + "-seqstrict", IntList2String(Il)) AS) .  
