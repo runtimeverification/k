@@ -10,10 +10,10 @@ kmod ISSUE is
 
         syntax K ::= test C  [strict]
 
-        rule test vpair(b,b) => 'SomeLabel(.List{K}) 
+        syntax Bag ::= startBag | goodBag
 
-	syntax K ::= test1 
-	rule test1 => test vpair(a,a)
+        rule startBag =>  <k> test vpair(a,a) </k>
+        rule <k> test vpair(b,b) <_/k> => goodBag 
 
         rule <k> a => b <_/k>
      

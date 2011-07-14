@@ -5,10 +5,10 @@ mod THUE is
 	including K-LIST-EXTRAS .
 	
 --- Syntax
-	op subst : -> KLabel [metadata "arity 2"] .
-	op write : -> KLabel [metadata "arity 2"] .
-	op read : -> KLabel [metadata "arity 2"] .
-	op start : -> KLabel [metadata "arity 1"] .
+	op subst : -> KLabel [metadata "arity=(2)"] .
+	op write : -> KLabel [metadata "arity=(2)"] .
+	op read : -> KLabel [metadata "arity=(2)"] .
+	op start : -> KLabel [metadata "arity=(1)"] .
 	
 --- Configuration
 	op output : -> CellLabel .
@@ -39,8 +39,8 @@ mod THUE is
 	op injectM : Map -> KLabel .
 	op injectL : List -> KLabel .
 
-	op explode : -> KLabel [metadata "arity 1"] .
-	op join : -> KLabel [metadata "arity 1"] .
+	op explode : -> KLabel [metadata "arity=(1)"] .
+	op join : -> KLabel [metadata "arity=(1)"] .
 	op string : -> KResultLabel .
 	
 	---- define explode of a string
