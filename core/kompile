@@ -1824,14 +1824,25 @@ sub maudify_module {
 #    print  "Stage:\n$_\n\n";
     
 # Step: Add the module's newly defined tokens to @tokens
-    add_tokens($_);
+	my $klabelss = $decl . getDeclLabels();		
+	$klabelss =~ s/\s+$//s;		
+	my @kls = split(/\s+/, $klabelss);		
+# print "LABELS: @kls\n\n";
+	foreach my $kl (@kls)		
+	{
+	    if ( $kl =~ /'/sg )
+            {
+		s/(\Q$kl\E)/Freeze($kl, "KLABEL1")/sge;		
+	    }
+       }
+       add_tokens($_);
+       $_ = Unfreeze("KLABEL1", $_);
 #     print  "Stage:\n$_\n\n";
     
 # Step: Add missing spaces around tokens
 	# freeze all attributes
 	s/((?<!`)\[\s*($k_attributes_pattern).*?(?<!`)\])(\s*)(?=$kmaude_keywords_pattern)/{Freeze($1, "ATTR").$3;}/gse;
-
-#print "FROZEN: $_\n\n";
+        # print "FROZEN: $_\n\n";
 
     # freeze all strings before spacifying
 	s/($string_pattern)/Freeze($&,"STRINGS")/sge;
@@ -2323,6 +2334,7 @@ sub add_tokens {
 # Put all operations in one string
     $_ = "@ops";
 
+#    print "SOPS: $_\n";
     # Exclude strings because they can contain whitespaces
     my $strings = "";
     s/(\".*?\")/{$strings .= "$1!&!&!"; } "!&!&!"/gse;
@@ -2331,7 +2343,7 @@ sub add_tokens {
 # Keep those operation names which have no _ or ` as tokens
     my @tokens = grep(!/[_`]/,split(/\s+/s));
 
-#    print "TOKENS: @tokens\n";
+    # print "TOKENS: @tokens\n";
 # Extract all tokens that appear in operations
     @tokens = (@tokens, /$maude_special?($maude_unspecial+)/g) ;
 

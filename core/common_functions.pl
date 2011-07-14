@@ -773,6 +773,11 @@ sub getDeclaredKLabelList
     return "";
 }
 
+sub getDeclLabels
+{
+    return $declaredKLabels;
+}
+
 sub isDeclaredKLabel
 {
     my $label = (shift);
