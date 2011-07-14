@@ -484,10 +484,25 @@ mod K-LATEX is
   ops latex_ : String -> [KSentence] [prec 126 format(b o d)] .
 endm
 
+mod K-BUILTINS is
+  including K-TECHNIQUE .
+  including PL-BUILTINS .
+  subsort Bool < K .
+  op andBool : -> KLabel .
+
+  var NeKList : NeList{K} .
+  var T1 T2 : Bool .
+
+  eq andBool(T1,, T2,, NeKList)
+   = andBool(T1 andBool T2,, NeKList) .
+
+  eq andBool(T1,, T2)
+   = T1 andBool T2 .
+endm
 
 mod K is 
   including K-TECHNIQUE .
-  including PL-BUILTINS .
+  including K-BUILTINS .
   including K-RESULT .              --- to express results syntactically
   including K-RULES .               --- to write k rules with in-place rewriting
   including K-CONFIG .              --- to specify the global configuration term

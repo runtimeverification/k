@@ -1,0 +1,39 @@
+load result-predicates
+
+mod RESULT-PREDICATES-META is
+  including RESULT-PREDICATES .
+  including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
+  var Result : String .  var M : Module .  var Q QResult : Qid . 
+  op resultPredicates : String ~> Module .
+  eq resultPredicates(Result) = resultPredicates(qid(Result)) .
+  op resultPredicates : Qid ~> Module .
+  eq resultPredicates(QResult) = resultPredicates(upModule(QResult, false)) .
+  
+  op compileRESULT-PREDICATES : Module AttrSet ~> Module .
+  eq compileRESULT-PREDICATES(M, AS:AttrSet) = resultPredicates(M) .
+endm
+
+mod RESULT-PREDICATES-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op result-predicates : -> System .
+  op idle : -> State .
+  var Q Result : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq result-predicates = [nil, idle, 
+ 'Usage: 'resultPredicates '<Name> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : [Module] -> QidList .
+  var Str : String . var M FM' : Module . 
+  eq print(moduleError(QIL)) = QIL '\n .
+  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) .
+  rl ['resultPredicates Result QIL, idle, QIL'] 
+   => [QIL, idle, print(downTerm(getTerm(
+             metaReduce(wrapper('RESULT-PREDICATES-META),
+                        'resultPredicates[upTerm(string(Result))])), error))] .
+endm

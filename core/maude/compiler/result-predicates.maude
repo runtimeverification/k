@@ -1,0 +1,133 @@
+mod RESULT-PREDICATES is
+  including META-MODULE-EXTRAS .
+  including META-K-RULES .
+  including META-K-CONTEXTS .
+  including META-LEVEL-EXTRAS .
+  including PARSE-METADATA .
+
+ 
+  op resultPredicates : Module -> Module .
+  eq resultPredicates(M)
+   = setRls(setEqs(setMbs(setOps(M, flattenLabelsOps(getOps(M))), resultPredMbs(getMbs(M))  resultPredicates(getOps(M))), resultPredEqs(getEqs(M))), resultPredRls(getRls(M))) .
+
+
+ op resultPredicates : OpDeclSet ~> MembAxSet .
+
+  eq resultPredicates((op Q : nil -> T [AS] .) OPDS)
+   = if T == KResultLabel then resultPredicate(Q, AS) resultPredicates(OPDS)
+     else if T == KHybridLabel then hybridPredicate(Q, AS) resultPredicates(OPDS)
+     else resultPredicates(OPDS) fi fi .
+
+  
+  op resultPredicate : Qid AttrSet ~> MembAx .
+  eq resultPredicate(Q, AS) = plugKRule({krl, replaceS[kApply(kresultLabel,kApply(mkConstant(mkKLabel(Q), KLabel), mkVariable('L,KList))),bool2K(trueCt)],empty, AS metadata(pair("predicate","") pair("KResult",""))}) .
+
+  op hybridPredicate : Qid AttrSet ~> MembAxSet .
+  eq hybridPredicate(Q, AS) = plugKRule({kcrl, replaceS[kApply(kresultLabel,kApply(mkConstant(mkKLabel(Q), KLabel), mkVariable('L,KList))),bool2K(trueCt)],kApply(kresultLabel,mkVariable('L,KList)), AS metadata(pair("predicate","") pair("KHybrid",""))}) .
+
+
+  op flattenLabelsOps : OpDeclSet ~> OpDeclSet .
+  eq flattenLabelsOps(Op OPDS)
+   = flattenLabelsOps(OPDS, Op) .
+
+  op flattenLabelsOps : OpDeclSet OpDecl ~> OpDeclSet .
+  eq flattenLabelsOps(OPDS, (op Q : nil -> T [AS] .))
+   = if T == KProperLabel or-else T == KResultLabel or-else T == KHybridLabel
+     then (op Q : nil -> KLabel [AS pair(string(T),"")] .)
+     else (op Q : nil -> T [AS] .)
+     fi flattenLabelsOps(OPDS) .
+  eq flattenLabelsOps(OPDS, Op) = Op flattenLabelsOps(OPDS) [owise] .
+
+  op flattenResultsT_ : TermList ~> TermList .
+  eq flattenResultsT(Q[Tl],Tl') = Q[flattenResultsT(Tl)],flattenResultsT(Tl') .
+  eq flattenResultsT(empty) = empty .
+  eq flattenResultsT(CV, Tl')  
+   = if getType(CV) == KProperLabel 
+     or-else getType(CV) == KResultLabel 
+     or-else getType(CV) == KHybridLabel
+     then setType(CV, KLabel) 
+     else if getType(CV) == KProper or-else getType(CV) == KResult
+          then setType(CV, K)
+          else if getType(CV) == ResultList 
+               then setType(CV, KList)
+               else CV 
+               fi
+          fi
+     fi .
+
+  op resultVars_ : TermList ~> TermList .
+  eq resultVars(V,Tl) 
+   = if getType(V) == KResult or-else getType(V) == ResultList
+     then V,resultVars(Tl) else resultVars(Tl) fi .
+
+  op resultCondition_ : TermList ~> TermList .
+  eq resultCondition(empty) = empty .
+  eq resultCondition(NTl) = kApply(kresultLabel,kList(NTl)) .
+
+
+ op resultPredMbs : MembAxSet ~> MembAxSet .
+ eq resultPredMbs(Mbs Mb)
+  =  resultPredMbs(Mbs) resultPredMb(Mb) .
+ eq resultPredMbs(none) = none .
+
+ op resultPredMb : MembAx ~> MembAx .
+ceq resultPredMb(Mb)
+  = resultPredKRl(KRS, resultPredT(getContents(KRS)), resultCondition(resultVars(noDuplicates(getVars(getContents(KRS))))))
+ if KRS := splitKRule(Mb) .
+ceq resultPredMb(Mb)
+  = resultPredKCxt(KCS, resultPredT(getContents(KCS)), resultCondition(resultVars(noDuplicates(getVars(getContents(KCS))))))
+ if KCS := splitKContext(Mb) .
+ eq resultPredMb(Mb)
+  = plugMb(resultPredT(getTerm(Mb)), getType(Mb), getAttrs(Mb), mkCondition(resultCondition(resultVars(noDuplicates(getVars(getTerm(Mb)))))) /\ resultPredCond(getCond(Mb))) [owise] .
+
+ op resultPredKCxt : KContextSplit Term TermList ~> MembAx .
+ eq resultPredKCxt(KCS, T1, Tl) = plugKContext(setCondition(setContents(KCS, T1), andBool(Tl,getCondition(KCS)))) .
+
+ op resultPredKRl : KRuleSplit Term TermList ~> MembAx .
+ eq resultPredKRl(KRS, T1, Tl) = plugKRule(setCondition(setContents(KRS, T1), andBool(Tl,getCondition(KRS)))) .
+
+ op resultPredEqs : EquationSet ~> EquationSet .
+ eq resultPredEqs(Eqs Eq)
+  =  resultPredEqs(Eqs) plugEq(resultPredT(getLhs(Eq)), resultPredT(getRhs(Eq)), getAttrs(Eq), mkCondition(resultCondition(resultVars(noDuplicates(getVars(getLhs(Eq)))))) /\ resultPredCond(getCond(Eq))) .
+ eq resultPredEqs(none) = none .
+
+ op resultPredRls : RuleSet ~> RuleSet .
+ eq resultPredRls(Rls Rl)
+  =  resultPredRls(Rls) plugRl(resultPredT(getLhs(Rl)), resultPredT(getRhs(Rl)), getAttrs(Rl), mkCondition(resultCondition(resultVars(noDuplicates(getVars(getLhs(Rl)))))) /\ resultPredCond(getCond(Rl))) .
+ eq resultPredRls(none) = none .
+
+ op resultPredCond : Condition ~> Condition .
+ eq resultPredCond(T1 = T2 /\ Cond)
+  = resultPredT(T1) = resultPredT(T2)
+    /\ resultPredCond(Cond) .
+ eq resultPredCond(T1 := T2 /\ Cond)
+  = resultPredT(T1) := resultPredT(T2)
+    /\ resultPredCond(Cond) .
+ eq resultPredCond(T1 => T2 /\ Cond)
+  = resultPredT(T1) => resultPredT(T2)
+    /\ resultPredCond(Cond) .
+ eq resultPredCond(Trm : T /\ Cond)
+  = resultPredT(Trm) : T
+    /\ resultPredCond(Cond) .
+ eq resultPredCond(nil) = nil .
+
+
+ op resultPredT : Term ~> Term .
+ eq resultPredT(T1) = flattenResultsT(T1) .
+
+  op mkCondition : TermList ~> Condition .
+  eq mkCondition(empty) = nil .
+  eq mkCondition(Trm) = (Trm = bool2K(trueCt)) .
+
+  var CV T1 T2 Trm : Term .  var Tl Tl' : TermList . var NTl : NeTermList .
+  var V : Variable .  var Q : Qid .
+  var Cond : Condition .
+  var T : Type .
+
+  var OPDS : OpDeclSet . var Op : OpDecl .  var AS : AttrSet .
+  var Mbs : MembAxSet . var Mb : MembAx . 
+  var Eqs : EquationSet . var Eq : Equation .
+  var Rls : RuleSet . var Rl : Rule .
+  var KRS : KRuleSplit . var KCS : KContextSplit .
+  var M : Module .
+endm

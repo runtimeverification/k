@@ -892,6 +892,44 @@ fmod META-MODULE-EXTRAS is
   eq clearReductionAttrs(strat(Nl:NeNatList) AS) = clearReductionAttrs(AS) .
   eq clearReductionAttrs(AS) = AS [owise] .
 
+  op getLhs : Rule -> Term .
+  eq getLhs(rl T1 => T2 [AS] .) = T1 .
+  eq getLhs(crl T1 => T2 if Cond [AS] .) = T1 .
+
+  op getLhs : Equation -> Term .
+  eq getLhs(eq T1 = T2 [AS] .) = T1 .
+  eq getLhs(ceq T1 = T2 if Cond [AS] .) = T1 .
+
+  op getRhs : Rule -> Term .
+  eq getRhs(rl T1 => T2 [AS] .) = T2 .
+  eq getRhs(crl T1 => T2 if Cond [AS] .) = T2 .
+
+  op getRhs : Equation -> Term .
+  eq getRhs(eq T1 = T2 [AS] .) = T2 .
+  eq getRhs(ceq T1 = T2 if Cond [AS] .) = T2 .
+
+  op getCond : Rule -> Condition .
+  eq getCond(rl T1 => T2 [AS] .) = nil .
+  eq getCond(crl T1 => T2 if Cond [AS] .) = Cond .
+
+  op getCond : Equation -> Condition .
+  eq getCond(eq T1 = T2 [AS] .) = nil .
+  eq getCond(ceq T1 = T2 if Cond [AS] .) = Cond .
+
+  op getCond : MembAx -> Condition .
+  eq getCond(mb T1 : T [AS] .) = nil .
+  eq getCond(cmb T1 : T if Cond [AS] .) = Cond .
+
+  op getTerm : MembAx -> Term .
+  eq getTerm(mb T1 : T [AS] .) = T1 .
+  eq getTerm(cmb T1 : T if Cond [AS] .) = T1 .
+
+  op getType : MembAx -> Type .
+  eq getType(mb T1 : T [AS] .) = T .
+  eq getType(cmb T1 : T if Cond [AS] .) = T .
+
+
+
 
   op getAttrs : MembAx -> AttrSet .
   op getAttrs : OpDecl -> AttrSet .
@@ -919,6 +957,28 @@ fmod META-MODULE-EXTRAS is
   op nth : TypeList Nat ~> Type .
   eq nth(T Tl, 0) = T .
   eq nth(T Tl, s(N)) = nth(Tl, N) .
+
+ op plugMb : Term Type AttrSet Condition -> MembAx .
+ eq plugMb(Trm, T, AS, Cond) 
+  = if Cond == nil
+    then (mb Trm : T [AS] .)
+    else (cmb Trm : T if Cond [AS] .)
+    fi .
+
+ op plugEq : Term Term AttrSet Condition ~> Equation .
+ eq plugEq(T1, T2, AS, Cond) 
+  = if Cond == nil 
+    then (eq T1 = T2 [AS] .) 
+    else (ceq T1 = T2 if Cond [AS] .) 
+    fi .
+
+ op plugRl : Term Term AttrSet Condition ~> Rule .
+ eq plugRl(T1, T2, AS, Cond) 
+  = if Cond == nil 
+    then (rl T1 => T2 [AS] .) 
+    else (crl T1 => T2 if Cond [AS] .) 
+    fi .
+
 
   var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
   vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .

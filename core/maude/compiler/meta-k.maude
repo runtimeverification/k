@@ -34,7 +34,6 @@ fmod K-META-OPS is including META-TERM .
 
   ops bool2K : Term -> Term .
    eq bool2K(T) = kApply('Bool[T],nilKList) .
-
 endfm
 
 fmod META-K-BUILTINS is
@@ -625,8 +624,9 @@ fmod META-K-LABELS is
   including META-K-MODULE .
   including META-LEVEL .
   including STRICT-ATTRS .
+  including K-META-OPS .
   
-  var Q : Qid . var T T' : Type .  var Str : String .
+  var Q : Qid . var T T' : Type .  var Str : String . 
 
   op klistLabelS : -> Qid .
   eq klistLabelS = 'kList .
@@ -665,6 +665,12 @@ fmod META-K-LABELS is
   eq isGeneratedLabel((op Q : nil -> T [metadata("generated-label=()")] .)) = true .
   eq isGeneratedLabel(Op) = false [owise] . 
   
+  var Trl : TermList .  var Trm : Term .
+
+  op andBool_ : TermList -> TermList .
+  eq andBool(empty) = empty .
+  eq andBool(Trm) = Trm .
+  eq andBool(Trl) = kApply(mkConstant('andBool,KLabel),kList(Trl)) .
 
   var OPDS OPDS' : OpDeclSet .  var Op : OpDecl .  var AS : AttrSet .
 endfm
@@ -712,7 +718,8 @@ endfm
 fmod META-K-CONTEXTS is including K-SORTS .
   including META-MODULE-EXTRAS .
   including K-STRICTNESS-OPS .
-  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  var Cond : TermList .
+  var Q : Qid . var T T' : Term . var S : Type . var C : Term .  
+  var Cond Cond' : TermList .
   var AS AS' : AttrSet .  var RK : KContextKind .
 
   sort KContextKind .
@@ -751,6 +758,9 @@ fmod META-K-CONTEXTS is including K-SORTS .
 
   op setContents : KContextSplit Term -> KContextSplit .
   eq setContents({RK,T,Cond,AS}, T') = {RK,T',Cond,AS} .
+
+  op setCondition : KContextSplit TermList -> KContextSplit .
+  eq setCondition({RK,T,Cond,AS}, Cond') = {RK,T,Cond',AS} .
 
   op plugKContext : KContextSplit ~> MembAx .
   eq plugKContext({RK,T,empty,AS}) = (mb symbol(RK)[T] : KSentence [AS] .) .
