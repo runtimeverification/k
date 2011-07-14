@@ -1,5 +1,5 @@
 kmod ISSUE is
-        op '_andBool_ : -> KLabel 
+        syntax KLabel ::=  '_andBool_ 
 	
         rule 'test(Kl':List{K}) => 'SomeLabel(.List{K})
 endkm
