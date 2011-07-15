@@ -89,15 +89,15 @@ mod STRICTCXT2EQS is
   eq strictCxtHeat(T1,T2,empty, AS A, AS' supercools(A AS''))
    = {none, none, (rl T1 => T2 [metadata(AS A pair("heating",""))] .)} .
   eq strictCxtHeat(T1,T2,T, AS A, AS' supercools(A AS''))
-   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS A pair("heating",""))] .)} .
+   = {none, none, (crl T1 => T2 if T = bool2K(trueCt) [metadata(AS A pair("heating",""))] .)} .
   eq strictCxtHeat(T1,T2,empty, AS, AS' supercools(pair("default","") AS''))
    = {none, none, (rl T1 => T2 [metadata(AS pair("default","") pair("heating",""))] .)} .
   eq strictCxtHeat(T1,T2,T, AS, AS' supercools(pair("default","") AS''))
-   = {none, none, (crl T1 => T2 if T = trueCt [metadata(AS pair("default","") pair("heating",""))] .)} .
+   = {none, none, (crl T1 => T2 if T = bool2K(trueCt) [metadata(AS pair("default","") pair("heating",""))] .)} .
   eq strictCxtHeat(T1,T2,empty, AS, AS')
    = {none, (eq T1 = T2 [metadata(AS pair("heating",""))] .), none} [owise] .
   eq strictCxtHeat(T1,T2,T, AS, AS')
-   = {none, (ceq T1 = T2 if T = trueCt [metadata(AS pair("heating",""))] .), none} [owise] .
+   = {none, (ceq T1 = T2 if T = bool2K(trueCt) [metadata(AS pair("heating",""))] .), none} [owise] .
 
 
 
