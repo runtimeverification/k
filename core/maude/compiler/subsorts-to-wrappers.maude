@@ -53,7 +53,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq replaceOp(op Q : T -> T' [AS] .) = (op replaceS : T T -> T [prec(125)] .) .
 
  op ruleOps : OpDecl ~> OpDecl .
- eq ruleOps(op Q : T -> T' [AS] .) = (op symbol kcrl : T 'Bool -> '`[KSentence`] [prec(126) format('b 'o 'b 'o 'd)] .) (op symbol krl : T -> '`[KSentence`] [prec(126) format('b 'o 'd)] .) .
+ eq ruleOps(op Q : T -> T' [AS] .) = (op symbol kcrl : T K -> '`[KSentence`] [prec(126) format('b 'o 'b 'o 'd)] .) (op symbol krl : T -> '`[KSentence`] [prec(126) format('b 'o 'd)] .) .
 
  op subsorts2wrappersImports : ModuleSet ~> ImportList .
  eq subsorts2wrappersImports(M' MS)
@@ -147,7 +147,7 @@ ceq subsorts2wrappersMb(Mb, M, OPDS, SSDM)
  op findPurifyRedexes : TermList TypeList Module OpDeclSet SubsortDeclMap ~> TermList .
  eq findPurifyRedexes((Trm,Trms),(T Tl),M,OPDS, SSDM)
   = findPurifyRedex(Trm,T, M, OPDS, SSDM),
-    findPurifyRedexes(Trms,Tl,M,OPDS, SSDM) .
+    findPurifyRedexes(Trms,Tl,M,OPDS, SSDM) [print "findPurifyRedex(" Trm ", " T ")"].
  eq findPurifyRedexes(empty, nil, M, OPDS, SSDM) = empty .
 
 
@@ -176,7 +176,7 @@ ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)
  eq findPurifyRedex(Trm, T, M, OPDS, SSDM, true)  
   = kPurifyTerm(Trm,T,M, OPDS, SSDM) [print "starting to purify " Trm] .
  eq findPurifyRedex(Q[Trms], T, M, OPDS, SSDM, false)
-  = Q[findPurifyRedexes(Trms, getTypes(countTerms(Trms),findOp(M, OPDS, Q, leastSortsTs(M,Trms), T)), M, OPDS, SSDM)] .
+  = Q[findPurifyRedexes(Trms, getTypes(countTerms(Trms),findOp(M, OPDS, Q, leastSortsTs(M,Trms), T)), M, OPDS, SSDM)] [print "finding purify redexes for " Trms].
  eq findPurifyRedex(C, T, M, OPDS, SSDM, false) = C .
  eq findPurifyRedex(V, T, M, OPDS, SSDM, false) = V .
 

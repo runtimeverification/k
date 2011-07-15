@@ -1093,18 +1093,18 @@ fmod META-LEVEL-EXTRAS is
    = $findOp(M, OPDS (op Q : Tl' -> T' [AS poly(Nl)] .), Q, Tl, T) .
 
   eq findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T) 
-   = (op Q : Tl' -> T' [AS] .) [owise] .
+   = (op Q : Tl' -> T' [AS] .) [owise print "Op found: " Q " : " Tl' " -> " T] .
   
   op $findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
  ceq $findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, S)
    = (op Q : T' T' -> T' [AS assoc] .) 
-  if sortLeq(M,S,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl))) .
+  if sortLeq(M,S,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl)))  [print "Op found: " Q " : " T' T' " -> " T'].
  ceq $findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, T)
    = (op Q : T' T' -> T' [AS assoc] .) 
-  if sameKind(M,T,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl))) [owise] .
+  if sameKind(M,T,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl))) [owise print "Op found: " Q " : " T T' " -> " T] .
  ceq $findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
    = (op Q : mergeTypes(Tl, Tl', 1, getPoly(AS)) -> mergeTypes(T, T', 0, getPoly(AS)) [AS] .)
-  if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise] .
+  if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise print "Op found: " Q Tl Tl' T T'] . 
 
   op getTopOp : Module Term ~> OpDecl .
   eq getTopOp(M, Q[Trms]) = (op Q : getTermKinds(M, Trms) -> getTermKind(M, Q[Trms]) [none] .) .
