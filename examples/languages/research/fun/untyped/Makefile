@@ -2,9 +2,11 @@
 # this is the name of the main maude module 
 LANGUAGE_NAME = FUN-UNTYPED
 
-
+# the interesting modules we want to visualize
 LANGUAGE_MODULES = FUN-SYNTAX FUN-DESUGARED-SYNTAX FUN-UNTYPED-SEMANTICS
-#ADDITIONAL_DEPENDENCIES = ../fun-programs.k
+
+LATEX_STYLE = bb
+LATEX_TOPMATTER = README.tex
 
 #this is the basename of the main file
 MAIN_FILE = fun-untyped
