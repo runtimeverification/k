@@ -413,6 +413,9 @@ fmod META-MODULE-EXTRAS is
   op trueCt : -> Constant .
   eq trueCt = 'true.Bool .
   
+  op falseCt : -> Constant .
+  eq falseCt = 'false.Bool .
+  
   op nullHeader : -> Header .
 
   op setName : Module ModuleExpression -> Module .
@@ -947,6 +950,14 @@ fmod META-MODULE-EXTRAS is
   op genXVars : TypeList -> TermList .
   eq genXVars(nil) = empty .
   eq genXVars(T Tl) = mkVariable('X,T),genXVars(Tl) .
+
+  op genVars : TypeList String -> TermList .
+  eq genVars(Tl, Str) = genVars(Tl, Str, 1) .
+
+  op genVars : TypeList String Nat -> TermList .
+  eq genVars(nil,Str, N) = empty .
+  eq genVars((T Tl), Str, N) 
+   = mkVariable(qid(Str + string(N,10)),T), genVars(Tl, Str, s(N)) .
 
   op _#_ : TypeListSet TypeSet -> TypeListSet .
   eq (Tl ; TlS) # (T ; TS) = (Tl T) ; (Tl # TS) ; (TlS # (T ; TS)) .

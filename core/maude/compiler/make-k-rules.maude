@@ -71,24 +71,24 @@ fmod MAKE-K-RULES is
   eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(Flat, getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
 
   op addReplace : Module Module KRuleSplit Substitution AttrSet ~> Module .
-  eq addReplace(Flat, M,{krl,T,empty,AS A}, Subst, AS' structurals(A AS''))
+  eq addReplace(Flat, M,R{T,empty,AS A}, Subst, AS' structurals(A AS''))
    = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS A, AS') [metadata(A AS)] .), M) . 
-  eq addReplace(Flat, M, {kcrl, T, C, AS A}, Subst, AS' structurals(A AS''))
+  eq addReplace(Flat, M, R{T, C, AS A}, Subst, AS' structurals(A AS''))
    = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS A, AS') if C = bool2K(trueCt) [metadata(A AS)] .), M) .
 
-  eq addReplace(Flat, M, {krl, T, empty, AS A}, Subst, AS' computationals(A AS''))
+  eq addReplace(Flat, M, R{T, empty, AS A}, Subst, AS' computationals(A AS''))
     = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS A, AS') [metadata(A AS)] .), M) .
-  eq addReplace(Flat, M, {kcrl, T, C, A AS}, Subst, AS' computationals(A AS'')) 
+  eq addReplace(Flat, M, R{T, C, A AS}, Subst, AS' computationals(A AS'')) 
     = addRls((crl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat, splitReplace(Flat, T,2)), Subst, A AS, AS') if makeCondition(C)  [metadata(A AS)] .), M) .
 
-  eq addReplace(Flat, M, {krl, T, empty, AS}, Subst, AS' computationals(pair("default","") AS''))
+  eq addReplace(Flat, M, R{T, empty, AS}, Subst, AS' computationals(pair("default","") AS''))
     = addRls((rl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS, AS') [metadata(pair("default","") AS)] .), M) [owise] .
-  eq addReplace(Flat, M, {kcrl, T, C, AS}, Subst, AS' computationals(pair("default","") AS'')) 
+  eq addReplace(Flat, M, R{T, C, AS}, Subst, AS' computationals(pair("default","") AS'')) 
     = addRls((crl normalize(Flat,splitReplace(Flat, T,1)) => handleTagSuperCooling(normalize(Flat, splitReplace(Flat, T,2)), Subst, AS, AS') if makeCondition(C)  [metadata(pair("default","") AS)] .), M) [owise] .
 
- eq addReplace(Flat, M,{krl,T,empty,AS}, Subst, AS')
+ eq addReplace(Flat, M,R{T,empty,AS}, Subst, AS')
    = addEqs((eq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS, AS') [metadata(pair("default","") AS)] .), M) [owise] . 
-  eq addReplace(Flat, M, {kcrl, T, C, AS}, Subst, AS')
+  eq addReplace(Flat, M, R{ T, C, AS}, Subst, AS')
    = addEqs((ceq normalize(Flat,splitReplace(Flat, T,1)) = handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS, AS') if C = bool2K(trueCt) [metadata(pair("default","") AS)] .), M) [owise] .
 
   op handleTagSuperCooling : Term Substitution AttrSet AttrSet -> Term .

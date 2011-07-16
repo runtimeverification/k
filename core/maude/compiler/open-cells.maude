@@ -1,10 +1,11 @@
-fmod OPEN-CELLS is
+mod OPEN-CELLS is
   including META-MODULE-EXTRAS .
   including META-TERM-EXTRAS .
   including META-LEVEL-EXTRAS .
   including META-ANONYMOUS-VARIABLE .
   including K-META-OPEN-CELLS .
   including META-K-RULES .
+  including COUNTER .
 
   var M Flat : Module . var Q : Qid .
   var Mbs : MembAxSet . var Mb : MembAx .  
@@ -83,4 +84,4 @@ fmod OPEN-CELLS is
           fi
      fi .
 
-endfm
+endm

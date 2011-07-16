@@ -26,7 +26,6 @@ mod STRICTCXT2EQS is
   op coolOps : -> OpDeclSet .
   eq coolOps 
    = (op 'cool : K -> K [none] .) 
----     (op '_~>_ : KProper K -> KProper [assoc id('..K) prec(100)] .) 
   .
 
   op defaultCoolEqs : SortSet -> EquationSet .
@@ -63,12 +62,13 @@ mod STRICTCXT2EQS is
   
   op heating : Module Term Term Qid TermList AttrSet AttrSet -> MASEqsPair .
   eq heating(M, T1, T2, Q, Cond, AS, AS')
-   = strictCxtHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,KProper)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,KProper)], freezeTerm(M, T1))), Cond[hole <- mkVariable('Kcxt,KProper)], AS, AS') .
+   = strictCxtHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,K)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,K)], freezeTerm(M, T1))), andBool(strictCond(mkVariable('Kcxt,K),Q),Cond[hole <- mkVariable('Kcxt,K)]), AS, AS') .
 
   op coolingEqs : Module Term Term Qid AttrSet -> EquationSet .
   eq coolingEqs(M, T1, T2, Q, AS)
-   =  (eq kWrap(Q, kra(mkVariable('Kcxt,KResult), freezeTerm(M, T1)))
-        = kWrap(Q, T1[hole <- mkVariable('Kcxt,KResult)])
+   =  (ceq kWrap(Q, kra(mkVariable('Kcxt,K), freezeTerm(M, T1)))
+         = kWrap(Q, T1[hole <- mkVariable('Kcxt,K)])
+        if strictCondTerm(mkVariable('Kcxt,K),Q) = bool2K(trueCt)
        [metadata(AS pair("cooling",""))] .) 
       if T2 == hole then 
           (eq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
@@ -81,9 +81,10 @@ mod STRICTCXT2EQS is
        [metadata(AS pair("super-cooling", "result"))] .)
      (ceq 'cool[kra(kra(T2[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]], freezeTerm(M, T1)),'Rest:K)]
         = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
-        if '_::`KResultLabel[mkVariable('KcxtL,KLabel)] = 'false.Bool 
+        if neqBool(strictCondTerm('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)],Q), bool2K(trueCt)) = bool2K(trueCt)  
        [metadata(AS pair("super-cooling", "wrapper"))] .)
-     fi  .
+     fi  
+     placeHolder(Q) .
 
   op strictCxtHeat : Term Term TermList AttrSet AttrSet ~> MASEqsPair .
   eq strictCxtHeat(T1,T2,empty, AS A, AS' supercools(A AS''))
@@ -123,6 +124,14 @@ mod STRICTCXT2EQS is
    = kApply(findWrapper(getOps(M), Type)[V],empty) .
 
 
+  op strictCondTerm : Term Qid ~> Term .
+  eq strictCondTerm(T, Q) = kApply(resultLabel(Q),T) .
+
+  op strictCond : Term Qid ~> Term .
+  eq strictCond(T, Q)
+   = neqBool(strictCondTerm(T,Q),bool2K(trueCt)) .
+  
+
   op strictCxt2eqs : Qid Qid Module Module SortSet AttrSet ~> Module .
   var Syntax StrictEqs : Qid . var M Flat : Module .
 
@@ -131,8 +140,24 @@ mod STRICTCXT2EQS is
 
   op strictCxt2eqs : Qid Qid MASEqsPair SortSet ~> Module .
   eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss) 
-   = addOps(coolOps,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), 
-        addEqs(Eqs, addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) .
+   = addOps(declareResultLabels(Eqs) coolOps,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), 
+        addEqs(generateResultEquations(Eqs), addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) .
 
+
+  op placeHolder : Qid -> Equation .
+
+
+  op declareResultLabels : EquationSet -> OpDeclSet .
+  eq declareResultLabels(placeHolder(Q) Eqs) = (op getName(resultLabel(Q)) : nil -> KLabel [none] .) declareResultLabels(Eqs) .
+  eq declareResultLabels(Eqs) = none [owise] .
+
+
+  op generateResultEquations : EquationSet -> EquationSet .
+  eq generateResultEquations(placeHolder(Q) Eqs)
+   = generateResultEquations(Eqs) .
+---(
+   = generateResultEquations(Eqs) (eq kApply(resultLabel(Q),mkVariable('L,KList)) = bool2K(falseCt) [owise] .) .
+---)
+  eq generateResultEquations(Eqs) = Eqs [owise] .
 endm
 
