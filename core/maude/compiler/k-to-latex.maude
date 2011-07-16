@@ -1145,28 +1145,28 @@ mod LATEX-PRINT-META is
 
   var Cnd : Term .
 ---(
-  eq eMetaLatexPrint(M, rule(Str, {krl,T,empty, kstructural AS}) Prints)
+  eq eMetaLatexPrint(M, rule(Str, R{T,empty, kstructural AS}) Prints)
     = ('\n '\kequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} 
        eMetaLatexPrint(M, Prints)) .
-  eq eMetaLatexPrint(M, rule(Str, {kcrl,T,Cnd, kstructural AS}) Prints)
+  eq eMetaLatexPrint(M, rule(Str, R{T,Cnd, kstructural AS}) Prints)
     = ('\n '\kcequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrint(M, Prints)) .
 ---)
-  eq eMetaLatexPrint(M, (rule(Str, {krl,T, empty, AS})) Prints)
+  eq eMetaLatexPrint(M, (rule(Str, R{T, empty, AS})) Prints)
     = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} 
        eMetaLatexPrint(M, Prints)) [owise] .
-  eq eMetaLatexPrint(M, (rule(Str, {kcrl,T, Cnd, AS})) Prints)
+  eq eMetaLatexPrint(M, (rule(Str, R{T, Cnd, AS})) Prints)
     = ('\n '\kcrule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrint(M, Prints)) [owise] .
-  eq eMetaLatexPrint(M, (context(Str, {kcxt,T, empty, AS})) Prints)
+  eq eMetaLatexPrint(M, (context(Str, C{T, empty, AS})) Prints)
     = ('\n '\kcontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} 
        eMetaLatexPrint(M, Prints)) [owise] .
-  eq eMetaLatexPrint(M, (context(Str, {kccxt,T, Cnd, AS})) Prints)
+  eq eMetaLatexPrint(M, (context(Str, C{T, Cnd, AS})) Prints)
     = ('\n '\kccontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
        eMetaLatexPrint(M, Prints)) [owise] .
