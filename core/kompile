@@ -1426,7 +1426,7 @@ sub compile {
 	    "load $language_file_name\n",
 	    "load $k_all_tools\n",
             "---(\n",
-            "red in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???,\n",
+            "rew in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???,\n",
             "structurals(metadataParse(\"$flag_structural\")) computationals(metadataParse(\"$flag_computational\")) supercools(metadataParse(\"$flag_nd_strict\"))) .\n",
             "quit\n",
             "---)\n",

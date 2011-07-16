@@ -77,10 +77,10 @@ mod OPEN-CELLS is
   op resolveCellsSC : Module SplitCell Term Ellipses Type ~> Term .
   eq resolveCellsSC(M,SC,Trm,E,T) 
    = if T == Bag or-else T == Set or-else T == Map or-else E == left
-     then plugCell(setContents(SC, ctor(T)[anyVar(T),Trm]))
+     then plugCell(setContents(SC, ctor(T)[anyVar("C",counter,T),Trm]))
      else if E == right 
-          then plugCell(setContents(SC, ctor(T)[Trm,anyVar(T)]))
-          else plugCell(setContents(SC, ctor(T)[anyVar(T),Trm,anyVar(T)])) 
+          then plugCell(setContents(SC, ctor(T)[Trm,anyVar("C",counter,T)]))
+          else plugCell(setContents(SC, ctor(T)[anyVar("C",counter,T),Trm,anyVar("C",counter,T)])) 
           fi
      fi .
 

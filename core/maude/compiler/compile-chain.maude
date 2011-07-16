@@ -169,8 +169,8 @@ fmod COMPILE-META is
   eq compile(M,nil, AS) = M [print "Final module: " M] .
   eq compile(M, Q QIL, AS) =  $compile(M, Q, 
     downTerm(getTerm(
-             metaReduce(wrapper(qid(string(Q) + "-META")),
-                        qid("compile" + string(Q))[upTerm(M),upTerm(AS)])), error)
+             metaRewrite(wrapper(qid(string(Q) + "-META")),
+                        qid("compile" + string(Q))[upTerm(M),upTerm(AS)], unbounded)), error)
      , QIL, AS) [print "applying transformation " Q " on module " M] .
   
   op $compile : Module Qid Module QidList AttrSet ~> Module .
