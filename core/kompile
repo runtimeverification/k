@@ -51,7 +51,7 @@ my $maudify_only = 0;
 my $k_prelude_loaded = 0;
 
 # K tags variables
-my $flag_structural = "structural=()";
+my $flag_structural = "structural=() predicate=() function=()";
 my $flag_computational = "computational=()";
 my $flag_nd_strict = "ndstrict=()";
 my $structural = 0;
