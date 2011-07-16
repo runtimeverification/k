@@ -55,7 +55,7 @@ fmod MAKE-K-RULES is
   op removeReplaceOps : OpDeclSet -> OpDeclSet .
   eq removeReplaceOps((op Q : Ty Ty -> Ty [AS] .) OPDS) 
    = if Q == replaceS then removeReplaceOps(OPDS) else (op Q : Ty Ty -> Ty [AS] .) removeReplaceOps(OPDS) fi .
- ceq removeReplaceOps((op Q : Ty 'Bool -> '`[KSentence`] [AS] .) OPDS)
+ ceq removeReplaceOps((op Q : Ty 'K -> '`[KSentence`] [AS] .) OPDS)
    = removeReplaceOps(OPDS) if Q = symbol kcrl .
  ceq removeReplaceOps((op Q : Ty -> '`[KSentence`] [AS] .) OPDS)
    = removeReplaceOps(OPDS) if Q = symbol krl .

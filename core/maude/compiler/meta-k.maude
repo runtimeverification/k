@@ -973,9 +973,9 @@ fmod META-K-LEAST-SORTS is
 
  eq $leastSortsT(M, 'configuration_[Trm], S) = 'KSentence .
  eq $leastSortsT(M, 'rule_[Trm], S) = 'KSentence .
-ceq $leastSortsT(M, 'rule_if_[Trms], S T') = 'KSentence if sortLeq(M,T','Bool).
+ceq $leastSortsT(M, 'rule_if_[Trms], S T') = 'KSentence if sortLeq(M,T',K).
 ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
-ceq $leastSortsT(M, 'context_if_[Trms], S T') = 'KSentence if sortLeq(M,T','Bool).
+ceq $leastSortsT(M, 'context_if_[Trms], S T') = 'KSentence if sortLeq(M,T',K).
 
 ceq $leastSortsT(M, Q[T1,T2], T T') 
   = leastSortsRed(M, Q[T1,T2], leastSort(M, Q[T1,T2]), removeBuiltins(lubSorts(M, T, T'))) 
