@@ -32,7 +32,7 @@ sub getResult {
 		printf "%d %d %s %d\n", ($reader->depth, $reader->nodeType, $reader->name, $reader->isEmptyElement);
 		die "XML: Found term without op or sort.";
 	}
-	if ($sort =~ /^(NzNat|Qid|String|Sort|Variable|Constant|Term|NeTermList|GroundTerm|NeGroundTermList)$/) {
+	if ($sort =~ /^(NzNat|Qid|String|Sort|Kind|Variable|Constant|Term|NeTermList|GroundTerm|NeGroundTermList)$/) {
 		return getTerm($reader, $op, $sort);
 	} else {
 		return getMeta($reader, $op, $sort);
@@ -45,6 +45,8 @@ sub getTerm {
 		return $op;
 	} elsif ($sort =~ /^(Qid|Sort|Variable)$/) {
 		return getNormalThing($op);
+	} elsif ($sort =~ /^(Kind)$/) {
+		return getKindThing($op);
 	} elsif ($sort =~ /^Constant$/) {
 		return getConstantThing($op);
 	} elsif ($sort =~ /^(Term|GroundTerm)$/) { # |GroundTerm|NeGroundTermList|NeTermList
@@ -64,6 +66,14 @@ sub getNormalThing {
 		# goto caughtError;
 	# }
 	return unquoteTerm($op);
+}
+
+sub getKindThing {
+	my ($op) = (@_);
+	my $term = unquoteTerm($op);
+	$term =~ s/`\[/\[/g;
+	$term =~ s/`\]/\]/g;
+	return $term;
 }
 
 sub getNumber {
@@ -164,7 +174,7 @@ sub getMeta {
 		return join(' ', @arguments);
 	}
 	
-	if ($sort =~ m/^(Attr)$/ and $op =~ m/^(strat)$/) {
+	if ($sort =~ m/^(Attr)$/ and $op =~ m/^(strat|format)$/) {
 		$op = "$op(_)";
 	}
 	
