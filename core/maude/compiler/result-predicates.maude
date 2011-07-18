@@ -4,6 +4,7 @@ mod RESULT-PREDICATES is
   including META-K-CONTEXTS .
   including META-LEVEL-EXTRAS .
   including PARSE-METADATA .
+  including METADATA-EXTRAS .
 
  
   op resultPredicates : Module -> Module .
@@ -14,8 +15,8 @@ mod RESULT-PREDICATES is
  op resultPredicates : OpDeclSet ~> MembAxSet .
 
   eq resultPredicates((op Q : Tyl -> T [AS] .) OPDS)
-   = if T == KResultLabel then resultPredicate(Q, Tyl, AS) resultPredicates(OPDS)
-     else if T == KHybridLabel then hybridPredicate(Q, Tyl, AS) resultPredicates(OPDS)
+   = if T == KResultLabel then resultPredicate(Q, Tyl, removeOpAttrs(AS)) resultPredicates(OPDS)
+     else if T == KHybridLabel then hybridPredicate(Q, Tyl, removeOpAttrs(AS)) resultPredicates(OPDS)
      else resultPredicates(OPDS) fi fi .
   eq resultPredicates(OPDS) = none [owise] .
 
