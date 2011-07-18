@@ -218,7 +218,7 @@ mod COMPILE-LOOP is
   rl ['compile-nd Q QIL, idle, QIL']
   => [QIL, idle, print(compile-nd(Q))] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', structurals(pair("structural","")) computationals(pair("computational","") pair("nd","true")) supercools(pair("nd","true"))) )] .
+   => [QIL, idle, print(pcompile(Q,Q', structurals(pair("structural","") pair("predicate","")) computationals(pair("computational","")) supercools(pair("nd","true"))) )] .
 
 
   var AS : AttrSet .  var QStr QComp QSuper : Qid .

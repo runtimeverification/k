@@ -11,7 +11,7 @@ kmod REF is including SEQ
 
   context * [HOLE] := _
   rule <k> ref V:KResult => N:Nat <_/k> 
-       <mem_> . => N |-> V <_/mem> <nextLoc> N => sNat N </nextLoc>
-  rule <k> * N => V <_/k> <mem_> N |-> V <_/mem>
-  rule <k> * N := V => skip <_/k> <mem_> N |-> (_ => V) <_/mem>
+       <mem_> . => N |-> V <_/mem> <nextLoc> N => sNat N </nextLoc> 
+  rule <k> * N => V <_/k> <mem_> N |-> V <_/mem> [computational]
+  rule <k> * N := V => skip <_/k> <mem_> N |-> (_ => V) <_/mem> [computational]
 endkm
