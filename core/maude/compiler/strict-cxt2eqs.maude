@@ -154,7 +154,7 @@ mod STRICTCXT2EQS is
 
   op generateResultEquations : EquationSet -> EquationSet .
   eq generateResultEquations(placeHolder(Q) Eqs)
-   = generateResultEquations(Eqs) (eq kApply(resultLabel(Q), (mkVariable('K1,K),mkVariable('K2,K), mkVariable('L,KList))) = andBool(kApply(resultLabel(Q), (mkVariable('K1,K))), kApply(resultLabel(Q), (mkVariable('K2,K), mkVariable('L,KList)))) [none] .) .
+   = generateResultEquations(Eqs) (eq kApply(resultLabel(Q), (mkVariable('K1,K),mkVariable('K2,K), mkVariable('L,KList))) = andBool(kApply(resultLabel(Q), (mkVariable('K1,K))), kApply(resultLabel(Q), (mkVariable('K2,K), mkVariable('L,KList)))) [none] .) (eq kApply(resultLabel(Q), nilKList) = bool2K(trueCt) [none] .) .
 ---(
    = generateResultEquations(Eqs) (eq kApply(resultLabel(Q),mkVariable('L,KList)) = bool2K(falseCt) [owise] .) .
 ---)
