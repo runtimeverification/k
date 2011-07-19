@@ -62,13 +62,13 @@ mod STRICTCXT2EQS is
   
   op heating : Module Term Term Qid TermList AttrSet AttrSet -> MASEqsPair .
   eq heating(M, T1, T2, Q, Cond, AS, AS')
-   = strictCxtHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,K)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,K)], freezeTerm(M, T1))), andBool(strictCond(mkVariable('Kcxt,K),Q),Cond[hole <- mkVariable('Kcxt,K)]), AS, AS') .
+   = strictCxtHeat(kWrap(Q, T1[hole <- mkVariable('Kcxt,NeK)]), kWrap(Q, kra(T2[hole <- mkVariable('Kcxt,NeK)], freezeTerm(M, T1))), andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)]), AS, AS') .
 
   op coolingEqs : Module Term Term Qid AttrSet -> EquationSet .
   eq coolingEqs(M, T1, T2, Q, AS)
-   =  (ceq kWrap(Q, kra(mkVariable('Kcxt,K), freezeTerm(M, T1)))
-         = kWrap(Q, T1[hole <- mkVariable('Kcxt,K)])
-        if strictCondTerm(mkVariable('Kcxt,K),Q) = bool2K(trueCt)
+   =  (ceq kWrap(Q, kra(mkVariable('Kcxt,NeK), freezeTerm(M, T1)))
+         = kWrap(Q, T1[hole <- mkVariable('Kcxt,NeK)])
+        if strictCondTerm(mkVariable('Kcxt,NeK),Q) = bool2K(trueCt)
        [metadata(AS pair("cooling",""))] .) 
       if T2 == hole then 
           (eq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
