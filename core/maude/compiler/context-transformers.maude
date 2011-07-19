@@ -161,7 +161,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
 
   op resolveMultiplicity : Qid Bool TermSet -> [Term] .
   eq resolveMultiplicity(Q, false, TS) 
-   = mkCell(Q, ctor(Bag)[anyVar(Bag),flattenTS(TS)]) .
+   = plugCell({mkConstant(Q,CellLabel), flattenTS(TS), ellipses |-> both}) .
   eq resolveMultiplicity(Q, true, TS)
    = flattenTS(flattenTSL(Q, splitTS(TS, {1, emptyTS}))) .
   
@@ -191,7 +191,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
 
   op flattenTSL : Qid TermSetLevel -> TermSet .
   eq flattenTSL(Q, {N, TS} || TSLs) 
-   = qt(Q, true, mkCell(Q, ctor(Bag)[anyVar(Bag),flattenTS(TS)]))
+   = qt(Q, true, plugCell({mkConstant(Q,CellLabel), flattenTS(TS), ellipses |-> both}))
      && flattenTSL(Q, TSLs) .
   eq flattenTSL(Q, nilTSL) = emptyTS .
 
