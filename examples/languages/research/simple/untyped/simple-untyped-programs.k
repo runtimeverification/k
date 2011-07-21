@@ -368,6 +368,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          map(f,x);
        }
 
+
   macro pArrays =
        function readArray(a) {
          var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1;
@@ -421,6 +422,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
        }
 --- 7 100 10
 
+
   syntax Id ::= foo
   syntax Stmts ::= pExceptions2
   macro pExceptions2 =
@@ -442,6 +444,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
     }
 --- 7
 
+
   syntax Stmts ::= pExceptions3
   macro pExceptions3 =
     function main() {
@@ -452,6 +455,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
     }
 --- 3
 
+
   syntax Stmts ::= pExceptions4
   macro pExceptions4 =
     function main() {
@@ -461,6 +465,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       write(x);
     }
 --- 7 1
+
 
   syntax Stmts ::= pExceptions5
   macro pExceptions5 =
@@ -486,6 +491,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
     }
 --- 1 15 120
 
+
   syntax Stmts ::= pExceptions6
   macro pExceptions6 =
     var x;
@@ -509,6 +515,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
     }
 --- 1 8 120
 
+
   syntax Stmts ::= pExceptions7
   macro pExceptions7 =
     function main() {
@@ -517,6 +524,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       catch(e) { write(e); }
     }
 --- 2 6 or 2 5
+
 
   syntax Stmts ::= pExceptions8
   macro pExceptions8 =
@@ -545,6 +553,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
    }
 --- 1 2 3 4 5
 
+
   syntax Stmts ::= pExceptions9
   macro pExceptions9 =
     var x, y, z;
@@ -571,6 +580,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
     }
 --- 15 5 10
 
+
   syntax Stmts ::= pExceptions10
   macro pExceptions10 =
     var x;
@@ -585,6 +595,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       }
     }
 --- 3
+
 
   syntax Stmts ::= pExceptions11
   macro pExceptions11 =
@@ -601,6 +612,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
     }
 --- 1 2 3 20 15
 
+
   syntax Stmts ::= pExceptions12
   macro pExceptions12 =
     var i, j;
@@ -615,6 +627,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       write(i);
      }
 --- 1 2 3 10 15
+
 
   syntax Stmts ::= pExceptions13
   macro pExceptions13 =
@@ -685,6 +698,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 --- 120
 --- only execute, do not search; too slow
 
+
   syntax Stmts ::= pThreads2
   macro pThreads2 =
     function main() {
@@ -694,7 +708,8 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       spawn x=11;
       spawn write(x);
     }
---- there are 43 solutions
+--- there are 42 solutions
+
 
   syntax Stmts ::= pThreads3
   macro pThreads3 =
@@ -709,6 +724,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       rendezvous 3; rendezvous 4;
     }
 --- 1 2 3
+
 
   syntax Stmts ::= pThreads4
   macro pThreads4 =
@@ -735,6 +751,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       write(x);
     }
 --- 3
+
 
   syntax Stmts ::= pThreads6
   macro pThreads6 =
@@ -786,7 +803,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
        }
      }
    }
---- lots of solutions, outputing each two 1, two 2, two 3, two 4 and two 5
+--- 221 solutions, outputing each two 1, two 2, two 3, two 4 and two 5
 
 
   syntax Stmts ::= pThreads7
@@ -833,8 +850,8 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       spawn { var x = 2; write(x); }
       spawn { var x = 3; write(x); }
     }
---- 2 3 (twice - depending upon which of the two threads allocates first)
---- 3 2 (twice - same)
+--- 2 3
+--- 3 2
 
 
 --- Dekker's algorithm; not meant to be executed, but only model checked

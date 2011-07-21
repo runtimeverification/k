@@ -1,6 +1,5 @@
 load simple-untyped-compiled
 
-***(
 -------------------------------
 --- Execute SIMPLE programs ---
 -------------------------------
@@ -47,17 +46,17 @@ rew run('pExceptions15) .
 rew run('pThreads1) .
 ---search run('pThreads1) =>! B:Bag .  --- too many interleavings
 rew run('pThreads2) .
----search run('pThreads2) =>! B:Bag .  --- 43 solutions
+search run('pThreads2) =>! B:Bag .     --- 42 solutions (with nondet as transitions)
 rew run('pThreads3) .
----search run('pThreads3) =>! B:Bag .
+search run('pThreads3) =>! B:Bag .
 rew run('pThreads4) .
 search run('pThreads4) =>! B:Bag .
 rew run('pThreads5) .
----search run('pThreads5) =>! B:Bag .
+search run('pThreads5) =>! B:Bag .
 rew run('pThreads6) .
----search run('pThreads6) =>! B:Bag .
+search run('pThreads6) =>! B:Bag .
 rew run('pThreads7) .
----search run('pThreads7) =>! B:Bag .  --- infinitely many
+---search run('pThreads7) =>! B:Bag .     --- infinitely many
 rew run('pThreads8) .
 search run('pThreads8) =>! B:Bag .
 rew run('pThreads9) .
@@ -65,17 +64,16 @@ search run('pThreads9) =>! B:Bag .
 rew run('pThreads10) .
 search run('pThreads10) =>! B:Bag .
 
-***)
 
----------------------------------
---- Search and Model checking ---
----------------------------------
+----------------------
+--- Model checking ---
+----------------------
 
 select SIMPLE-UNTYPED .
 
 mod DEKKER-PREDICATES is
   including SIMPLE-UNTYPED .
-  including PL-MODEL-CHECKER-BUILTIN-MODULE .
+  including #MODEL-CHECKER .
 
   op cfg : Bag -> Model-Checker-State .
   op start : -> Model-Checker-State .
