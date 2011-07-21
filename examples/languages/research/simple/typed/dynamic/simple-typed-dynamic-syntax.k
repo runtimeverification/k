@@ -2,7 +2,7 @@
 --- SIMPLE-TYPED-SYNTAX module ---
 ----------------------------------
 
-kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
+kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID 
 
 --- Types; we declare here all the types that we will need for declarations
   syntax Type ::= int | bool | void                                 --- basic types

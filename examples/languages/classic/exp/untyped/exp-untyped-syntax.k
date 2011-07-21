@@ -7,7 +7,7 @@
 --- want to use the same file exp-programs.k for both the untyped and the
 --- type inferenced versions of the EXP languages.
 
-kmod EXP-SYNTAX is including PL-INT + PL-ID
+kmod EXP-SYNTAX is including #INT + #ID
   syntax Exp ::= Int | Bool
                | Id
                | Exp + Exp                [strict prec 33 gather(E e)]

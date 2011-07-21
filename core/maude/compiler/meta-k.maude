@@ -45,13 +45,13 @@ fmod META-K-BUILTINS is
 ---  eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
   eq builtinSorts(M:Module) = getSubsorts(flatten(M:Module), Builtins) .
   op builtinModules : ~> SortSet [memo] .
-  eq builtinModules 
-   = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
+  eq builtinModules = none .
+   --- = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
   
   op isBuiltin : Module ~> Bool .
   eq isBuiltin(M) = isBuiltinModule(string(getName(M))) .
   op isBuiltinModule  : String -> Bool .
-  eq isBuiltinModule(S) = find(S, "-BUILTINS",0) :: Nat .
+  eq isBuiltinModule(S) = find(S, "#",0) == 0 .
 
   var M : Module . var S : String .
 endfm

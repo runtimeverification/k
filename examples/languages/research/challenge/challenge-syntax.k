@@ -1,4 +1,4 @@
-kmod CHALLENGE-SYNTAX is including PL-INT + PL-FLOAT + PL-ID
+kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
 --- There are two main syntactic categories, Exp and Stmt
 
 --- Basic constructs for expressions

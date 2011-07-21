@@ -1,4 +1,4 @@
-module IMP-SYNTAX imports PL-INT + PL-ID
+module IMP-SYNTAX imports #INT + #ID
 /*@ The following constructs are given the expected strictnesses, except for
 \textsf{and}, which is only strict in its first argument, because we will
 give it a short-circuited semantics (its second argument will only be

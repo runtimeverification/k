@@ -14,7 +14,7 @@ The differences from the actual exp language K-annotated syntax are:
 --- type inferenced versions of the EXP languages.
 
 
-kmod EXP-SYNTAX is including PL-INT + PL-ID
+kmod EXP-SYNTAX is including #INT + #ID
 
   syntax Exp ::= Int | Bool
                | Id

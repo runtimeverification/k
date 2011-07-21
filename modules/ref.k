@@ -1,6 +1,6 @@
 require seq
 
-kmod REF is including SEQ
+module REF imports SEQ
   configuration <k> .K </k>  
                 <mem> .Map </mem> <nextLoc> 0 </nextLoc>
   
@@ -14,4 +14,4 @@ kmod REF is including SEQ
        <mem_> . => N |-> V <_/mem> <nextLoc> N => sNat N </nextLoc> 
   rule <k> * N => V <_/k> <mem_> N |-> V <_/mem> [computational]
   rule <k> * N := V => skip <_/k> <mem_> N |-> (_ => V) <_/mem> [computational]
-endkm
+end module

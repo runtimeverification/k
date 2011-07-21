@@ -2,7 +2,7 @@
 // require k-visitor
 require substitution
 
-kmod OCL-SYNTAX is including K  + PL-ID + PL-INT  + PL-BOOL  + SUBSTITUTION
+kmod OCL-SYNTAX is including K  + #ID + #INT  + #BOOL  + SUBSTITUTION
 
 
   syntax Var ::= Id

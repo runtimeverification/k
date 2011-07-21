@@ -1,4 +1,4 @@
-kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID 
+kmod SKOOL-TYPED-SYNTAX is including #INT + #ID 
 
 --- List{Id}
   syntax List{Id}  ::= Id | .List{Bottom} [latex "\kdot{\it List\{Bottom\}}"]

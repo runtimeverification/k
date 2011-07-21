@@ -13,10 +13,10 @@ mod MANY-MODULES-META is
   op manyModules : String String ~> Module .
   eq manyModules(NoManyModules, ManyModules) = manyModules(qid(NoManyModules), qid(ManyModules)) .
   op manyModules : Qid Qid ~> Module .
-  eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules  , "-BUILTIN-MODULE")) .
+  eq manyModules(QNoManyModules,QManyModules) = manyModules(QManyModules,  getAllImportsBut(QNoManyModules, kModules ; builtinModules  , "#")) .
 
   op compileMANY-MODULES : Module AttrSet ~> Module .
-  eq compileMANY-MODULES(M, AS:AttrSet) = manyModules(getName(M), getAllImportsBut(M,  nil, kModules ; builtinModules ; getName(M), "-BUILTIN-MODULE", none, empty, nil)) .
+  eq compileMANY-MODULES(M, AS:AttrSet) = manyModules(getName(M), getAllImportsBut(M,  nil, kModules ; builtinModules ; getName(M), "#", none, empty, nil)) .
 
 
   eq modules(MS, IL (including 'K-LATEX .) IL') = modules(MS, IL IL') .

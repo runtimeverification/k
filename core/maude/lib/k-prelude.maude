@@ -6,7 +6,7 @@ load k-model-checker.maude
 --- Level 0
 
 mod K-TECHNIQUE is 
-  including PL-NAT .
+  including #NAT .
 
   var K : K . var Ks : List{K} .
   var LItem : ListItem .  var List : List .
@@ -116,7 +116,7 @@ endm
 
 mod K-MAP-EXTRAS is
   including K-TECHNIQUE .
-  including PL-BOOL .
+  including #BOOL .
   var Map Map' : Map .  var List : List{K} . var NList1 NList2 : NeList{K} .
   vars K1 K2 K2' K : K .
 
@@ -166,7 +166,7 @@ endm
 
 mod K-SET-EXTRAS is
   including K-TECHNIQUE .
-  including PL-IF-THEN-ELSE .
+  including #IF-THEN-ELSE .
   var K : K . var Ks : List{K} . var Set Set' : Set . var SetItem : SetItem .
   op Set_ : List{K} -> Set [metadata "latex=(renameTo {\\it{}Set}\\mybracket{_})"] .
   eq Set(.List{K}) = . .
@@ -187,7 +187,7 @@ endm
 
 mod K-BAG-EXTRAS is
   including K-TECHNIQUE .
-  including PL-IF-THEN-ELSE .
+  including #IF-THEN-ELSE .
   var K : K . var Bag Bag' : Bag . var BagItem : BagItem .  var Ks : List{K} .
   op Bag_ : List{K} -> Bag .
   eq Bag(.List{K}) = . .
@@ -208,7 +208,7 @@ endm
 
 mod K-LIST-EXTRAS is
   including K-TECHNIQUE .
-  including PL-BOOL .
+  including #BOOL .
 
   var K K1 K2 K' : K .  var Ks : List{K} .  var LItem : ListItem .  var List : List .  var N : NzNat .
 
@@ -312,7 +312,7 @@ endm
 
 mod K-STRICTNESS is 
   including K-TECHNIQUE .
-  including PL-STRING .
+  including #STRING .
   op freezer : String -> KLabel .
   op freezeVar : String -> KLabel .
 endm
@@ -329,7 +329,7 @@ endm
 
 mod K-QUOTED-LABELS is
   including K-TECHNIQUE .
-  including PL-QID .
+  including #QID .
   subsort Qid < KLabel .
 endm
 
@@ -338,7 +338,7 @@ endm
 
 mod K-WRAPPERS-LABELS is
   including K-TECHNIQUE .
-  including PL-STRING .
+  including #STRING .
   op wklabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op wcelllabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op kList : String -> KLabel [metadata "wrapper=(list)"] .
@@ -367,7 +367,7 @@ endm
 
 mod K-RULES is
   including K-SENTENCE .
-  including PL-BOOL .
+  including #BOOL .
   including K-TECHNIQUE .
   ops rule_ : KLabel -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : List{K} -> [KSentence] [prec 126 format(b o d)] .
@@ -436,7 +436,7 @@ endm
 
 mod K-CELL-ATTRS is
   including K-TECHNIQUE .
-  including PL-STRING .
+  including #STRING .
   sort CellAttribute CellKey  .
 
   op __ : CellLabel CellAttribute -> CellLabel .
@@ -485,7 +485,7 @@ endm
 mod K-LATEX is
   including K-TECHNIQUE .
   including K-SENTENCE .
-  including PL-STRING .
+  including #STRING .
   op @latex : String -> BagItem .
   ops latex_ : String -> [KSentence] [prec 126 format(b o d)] .
 endm

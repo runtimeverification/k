@@ -1,6 +1,6 @@
 require k-visitor
 
-kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
+kmod SUBSTITUTION is including #ID + #INT + K-VISITOR
 ---beta-substitution definition using the K AST visitor pattern
 ---assuming the binding operator is [_]_
   syntax K ::= Id  | Nat

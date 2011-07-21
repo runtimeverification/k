@@ -1,7 +1,7 @@
 
 
 
-kmod OCL-SOLVER is including K + PL-ID
+kmod OCL-SOLVER is including K + #ID
   syntax Formula ::=  `True | `False | forAll ( Id : Id `| Bool )
   syntax Builtins ::= Formula 
 endkm

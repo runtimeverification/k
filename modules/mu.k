@@ -1,6 +1,6 @@
 require substitution
 
-kmod MU is including SUBSTITUTION
+module MU imports SUBSTITUTION
   syntax K ::= mu Id . K [latex "\mu{#1}.{#2}"]
              | aMu K [latex "\mu{#1}"]
 
@@ -8,4 +8,4 @@ kmod MU is including SUBSTITUTION
 
 ---Fix point operator (through beta-substitution)
   rule <k> aMu ([X]E) => E[aMu ([X]E) / X]<_/k>
-endkm
+end module

@@ -1,4 +1,4 @@
-kmod NAT-INF is including K + PL-NAT
+kmod NAT-INF is including K + #NAT
   syntax K ::= NatInf | Bool 
   syntax NatInf ::= Nat | infty [latex "\infty"]
                   | NatInf +Nat NatInf [ditto latex "{#1}\mathrel{\texttt{+}_{\textit{\scriptsize Nat}}}{#2}"]

@@ -1,4 +1,4 @@
-kmod TYPES is including PL-NAT + PL-IF-THEN-ELSE
+kmod TYPES is including #NAT + #IF-THEN-ELSE
   sorts BasicType TypeVar Type TypeSchema 
   subsort BasicType TypeVar < Builtins Type 
   subsort Type < TypeSchema 

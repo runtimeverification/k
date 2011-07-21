@@ -1,5 +1,5 @@
 --- 33 C language constructs
-kmod KERNELC-SYNTAX is including PL-INT +  PL-ID 
+kmod KERNELC-SYNTAX is including #INT +  #ID 
 
 /*@ \section{\KERNELC syntax}
 This module specifies the syntax of \KERNELC.  The syntax has been kept 

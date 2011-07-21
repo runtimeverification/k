@@ -1,6 +1,6 @@
 
 
-kmod LANG-SYNTAX is including PL-INT + PL-ID
+kmod LANG-SYNTAX is including #INT + #ID
 --- The main syntactic categories: Program, Class, Decl, Method, Exp and Stmt
 
 --- Basic constructs for expressions
@@ -24,7 +24,7 @@ kmod LANG-SYNTAX is including PL-INT + PL-ID
 endkm
 
 
-kmod LANG-SEMANTICS is including LANG-SYNTAX + K + PL-CONVERSION
+kmod LANG-SEMANTICS is including LANG-SYNTAX + K + #CONVERSION
 
   syntax K ::= List{Exp} 
 

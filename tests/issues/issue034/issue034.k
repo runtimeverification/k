@@ -1,6 +1,6 @@
 
 
-kmod ISSUE034 is including K + PL-NAT + PL-ID
+kmod ISSUE034 is including K + #NAT + #ID
   syntax KResult ::= Type | Field | Id
   syntax Type ::= structType ( Id , List{KResult} ) 
   syntax Field ::= typedField ( Type , Id ) 

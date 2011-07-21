@@ -1,6 +1,6 @@
 
 kmod ISSUE154 is
-	including K + PL-STRING
+	including K + #STRING
     configuration <T> <k> .K </k> </T>
 
     op test : -> String

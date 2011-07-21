@@ -6,7 +6,7 @@
 
 
 kmod ISSUE082 is // another comment
-	including K  + PL-STRING //
+	including K  + #STRING //
     configuration <T> <k> .K </k> /* multiline on single line */ </T>
     //"and another comment"
     // something like ---"something" would fail (maude bug)

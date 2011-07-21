@@ -1,5 +1,5 @@
 
-kmod KLABEL-ISSUE is including PL-ID + K
+kmod KLABEL-ISSUE is including #ID + K
     syntax Exp ::= Int
                  | { List{Field} }
 

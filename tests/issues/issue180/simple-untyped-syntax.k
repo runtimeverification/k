@@ -2,7 +2,7 @@
 --- SIMPLE-UNTYPED-SYNTAX module ---
 ------------------------------------
 
-kmod SIMPLE-UNTYPED-SYNTAX is including PL-INT + PL-ID + K-LATEX
+kmod SIMPLE-UNTYPED-SYNTAX is including #INT + #ID + K-LATEX
 
 /*@ \subsection*{Identifiers}
 The special identifier for the function ``main'' belongs to all programs.

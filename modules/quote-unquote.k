@@ -1,6 +1,6 @@
 require k-visitor
 
-kmod QUOTE-UNQUOTE is including K-VISITOR + PL-NAT
+module QUOTE-UNQUOTE imports K-VISITOR
   syntax K ::= quote K
              | unquote K
              | lift K    [strict]
@@ -21,4 +21,4 @@ kmod QUOTE-UNQUOTE is including K-VISITOR + PL-NAT
 
   rule lift V:KResult => visitedK(V)
   rule eval visitedK(K) => K
-endkm
+end module

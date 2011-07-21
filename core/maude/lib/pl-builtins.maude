@@ -27,7 +27,7 @@ mod BUILTINS is
   sort Builtins .
 endm
 
-mod PL-BOOL is
+mod #BOOL is
   including BUILTINS .
   sort Bool .
   subsort Bool < Builtins .
@@ -59,11 +59,11 @@ mod PL-BOOL is
   eq A impliesBool B = notBool(A xorBool A andBool B) .
 endm
 
-mod PL-IF-THEN-ELSE is including PL-BOOL .
+mod #IF-THEN-ELSE is including #BOOL .
   op if_then_else_fi : Bool Universal Universal -> Universal [poly (2 3 0)] .
 endm
 
-mod MAUDE-IF-THEN-ELSE is including PL-BOOL .
+mod MAUDE-IF-THEN-ELSE is including #BOOL .
   op if_then_else_fi : Bool Universal Universal -> Universal 
     [poly (2 3 0) special (
     id-hook BranchSymbol
@@ -71,8 +71,8 @@ mod MAUDE-IF-THEN-ELSE is including PL-BOOL .
     term-hook 2 (false))] .
 endm
 
-mod PL-EXT-BOOL is
-  protecting PL-BOOL .
+mod #EXT-BOOL is
+  protecting #BOOL .
   op _and-then_ : Bool Bool -> Bool [strat (1 0) gather (e E) prec 55] .
   op _or-else_ : Bool Bool -> Bool [strat (1 0) gather (e E) prec 59] .
   var B : [Bool] .
@@ -83,8 +83,8 @@ mod PL-EXT-BOOL is
 endm
 
 
-mod PL-NAT is
-  protecting PL-BOOL .
+mod #NAT is
+  protecting #BOOL .
   sorts Zero NzNat Nat .
   subsort Zero NzNat < Nat < Builtins .
   subsort Zero < Builtins .
@@ -224,8 +224,8 @@ mod PL-NAT is
                   term-hook falseTerm (false))] .
 endm
 
-mod PL-INT is
-  protecting PL-NAT .
+mod #INT is
+  protecting #NAT .
   sorts NzInt Int .
   subsorts NzNat < NzInt Nat < Int < Builtins .
   subsort Zero NzNat < Int . 
@@ -412,8 +412,8 @@ mod PL-INT is
 endm
 
 
-mod PL-RAT is
-  protecting PL-INT .
+mod #RAT is
+  protecting #INT .
   sorts PosRat NzRat Rat .
   subsorts NzInt < NzRat Int < Rat < Builtins .
   subsorts NzNat < PosRat < NzRat .
@@ -591,8 +591,8 @@ mod PL-RAT is
   eq ceilingRat(-Int N /Rat M) = -Int floorRat(N /Rat M) .
 endm
 
-mod PL-FLOAT is
-  protecting PL-BOOL .
+mod #FLOAT is
+  protecting #BOOL .
   sorts FiniteFloat Float .
   subsort FiniteFloat < Float < Builtins .
 
@@ -737,8 +737,8 @@ mod PL-FLOAT is
 endm
 
 
-mod PL-STRING is
-  protecting PL-INT .
+mod #STRING is
+  protecting #INT .
   sorts String Char .
   subsort Char < String < Builtins .
   subsort Char < Builtins .
@@ -816,17 +816,17 @@ mod PL-STRING is
                   term-hook falseTerm (false))] .
 endm
 
-mod PL-ID is
+mod #ID is
   including BUILTINS .
   sort Id .
   subsort Id < Builtins .
 endm
 
-mod PL-CONVERSION is
-  protecting PL-ID .
-  protecting PL-RAT .
-  protecting PL-FLOAT .
-  protecting PL-STRING .
+mod #CONVERSION is
+  protecting #ID .
+  protecting #RAT .
+  protecting #FLOAT .
+  protecting #STRING .
   sort DecFloat .
   subsort DecFloat < Builtins .
   op DecFloat : Int String Int -> DecFloat [ctor] .
@@ -899,8 +899,8 @@ ceq String2Int(S:String) = I:Int if I:Int := String2Rat(S:String,10) .
   op Id2String : Id -> String .
 endm
 
-mod PL-QID is
-  protecting PL-STRING .
+mod #QID is
+  protecting #STRING .
   sort Qid .
 
 *** pseudo constructor for the infinite set of quoted identifiers
@@ -919,15 +919,15 @@ endm
 
 
 
-mod PL-RANDOM is
-  protecting PL-NAT .
+mod #RANDOM is
+  protecting #NAT .
   op randomRandom : Nat -> Nat
         [special (id-hook RandomOpSymbol
                   op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
 endm
 
-mod PL-COUNTER is
-  protecting PL-NAT .
+mod #COUNTER is
+  protecting #NAT .
   op counter : -> [Nat] [special (
     id-hook CounterSymbol
     op-hook succSymbol (sNat_ : Nat ~> NzNat))] .
@@ -936,24 +936,23 @@ mod PL-COUNTER is
 endm
 
 
----mod BASIC-PL-BUILTINS is
 mod PL-BUILTINS is
-including PL-BOOL .
-including PL-EXT-BOOL .
-including PL-NAT .
-including PL-INT .
-including PL-RAT .
-including PL-FLOAT .
-including PL-STRING .
-including PL-CONVERSION .
----including PL-QID .
-including PL-RANDOM .
-including PL-COUNTER .
-including PL-BOOL .
-including PL-ID .
-including PL-IF-THEN-ELSE .
+including #BOOL .
+including #EXT-BOOL .
+including #NAT .
+including #INT .
+including #RAT .
+including #FLOAT .
+including #STRING .
+including #CONVERSION .
+---including #QID .
+including #RANDOM .
+including #COUNTER .
+including #BOOL .
+including #ID .
+including #IF-THEN-ELSE .
 endm
 
----set include PL-BOOL on .
+---set include #BOOL on .
 set show advisories on .
 

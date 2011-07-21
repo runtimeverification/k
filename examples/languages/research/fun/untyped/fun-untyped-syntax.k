@@ -2,7 +2,7 @@
 --- FUN-UNTYPED-SYNTAX module ---
 ---------------------------------
 
-kmod FUN-SYNTAX is including PL-INT + PL-ID
+kmod FUN-SYNTAX is including #INT + #ID
 
   syntax Exp ::= Int | Bool
                | Id

@@ -22,8 +22,8 @@
 ***)
 
 
-mod PL-NAT-LIST is
-  including PL-NAT .
+mod #NAT-LIST is
+  including #NAT .
   sorts NeNatList NatList .
   subsort Nat < NeNatList < NatList .
 
@@ -33,8 +33,8 @@ mod PL-NAT-LIST is
   op _plNatList_ : NatList NeNatList -> NeNatList [ctor ditto] .
 endm  
 
-mod PL-QID-LIST is
-  including PL-QID .
+mod #QID-LIST is
+  including #QID .
   sorts NeQidList QidList .
   subsort Qid < NeQidList < QidList .
 
@@ -44,8 +44,8 @@ mod PL-QID-LIST is
   op _plQidList_ : QidList NeQidList -> NeQidList [ctor ditto] .
 endm
 
-mod PL-QID-SET is
-  including PL-QID .
+mod #QID-SET is
+  including #QID .
   sorts NeQidSet QidSet .
   subsort Qid < NeQidSet < QidSet .
 
@@ -54,8 +54,8 @@ mod PL-QID-SET is
   op _;QidSet_ : NeQidSet QidSet -> NeQidSet [ctor ditto] .
 endm
 
-mod PL-META-TERM is
-  protecting PL-QID .
+mod #META-TERM is
+  protecting #QID .
 
 *** types
   sorts Sort Kind TypeMeta .
@@ -122,11 +122,11 @@ mod PL-META-TERM is
   op _[_] : Qid NeCTermList -> Context [ctor] .
 endm
 
-mod PL-META-MODULE is
-  protecting PL-META-TERM .
-  protecting PL-NAT-LIST .
-  protecting PL-QID-LIST .
-  protecting PL-QID-SET .
+mod #META-MODULE is
+  protecting #META-TERM .
+  protecting #NAT-LIST .
+  protecting #QID-LIST .
+  protecting #QID-SET .
 
 *** subsort declarations
   sorts SubsortDecl SubsortDeclSet .
@@ -409,8 +409,8 @@ mod PL-META-MODULE is
   eq getRls(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = RLS .
 endm
 
-mod PL-META-VIEW is
-  protecting PL-META-MODULE .
+mod #META-VIEW is
+  protecting #META-MODULE .
 
 *** sort mappings
   sorts SortMapping SortMappingSet .
@@ -461,8 +461,8 @@ mod PL-META-VIEW is
   eq getOpMappings(view Q from ME to ME' is SMS OMS endv) = OMS .
 endm
 
-mod PL-META-LEVEL-BUILTIN-MODULE is
-  protecting PL-META-VIEW .
+mod #META-LEVEL is
+  protecting #META-VIEW .
 
 *** bounds
   sort Bound .

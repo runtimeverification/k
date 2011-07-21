@@ -1,7 +1,7 @@
 
 kmod ISSUE is
 	including K
-	including PL-BUILTINS
+	including #BUILTINS
 	
 	syntax Exp ::= Int | Exp + Exp
 	syntax List{Exp} ::= Exp | () | Exp , Exp [strict assoc hybrid id:()]

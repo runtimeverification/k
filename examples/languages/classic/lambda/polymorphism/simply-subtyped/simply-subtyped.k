@@ -2,7 +2,7 @@
 in /modules/k-visitor
 in /modules/substitution
 
-kmod SIMPLY-SUBTYPED-SYNTAX is including PL-ID + PL-INT + K
+kmod SIMPLY-SUBTYPED-SYNTAX is including #ID + #INT + K
   /*@ \section*{Syntax}
   This module defines the syntax for this calculus.
   */

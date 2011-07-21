@@ -1,4 +1,4 @@
-set include PL-BOOL off .
+set include #BOOL off .
 set include BOOL on .
 load prelude-extras
 load meta-k

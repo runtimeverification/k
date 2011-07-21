@@ -35,7 +35,7 @@ fmod MAKE-ALL-LABELS is
 
  op makeAllLabels : Qid Module Module ModuleSet ~> Module .
  eq makeAllLabels(Q, M, Flat, MS)
-  = makeAllLabels(setName(suffixImports(Q,removeImports(M, including 'K-QUOTED-LABELS . including 'PL-IF-THEN-ELSE .),allLabelsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, processOps(pseudoKOps(getOps(Flat)))) .
+  = makeAllLabels(setName(suffixImports(Q,removeImports(M, including 'K-QUOTED-LABELS . including '#IF-THEN-ELSE .),allLabelsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, processOps(pseudoKOps(getOps(Flat)))) .
 
  op makeAllLabels : Module Module OpDeclOpDeclSetMap ~> Module .
  eq makeAllLabels(M, Flat, OPDM) 

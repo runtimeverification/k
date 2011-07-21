@@ -27,8 +27,8 @@
 ---	Version 2.3.
 ---
 
-mod PL-LTL-BUILTIN-MODULE is
-  protecting PL-BOOL .
+mod #LTL is
+  protecting #BOOL .
   sort LTLFormula .
   subsort LTLFormula < Builtins .
 
@@ -73,8 +73,8 @@ mod PL-LTL-BUILTIN-MODULE is
   eq LTL~(f LTLR g) = (LTL~ f) LTLU (LTL~ g) .
 endm
 
-mod PL-LTL-SIMPLIFIER-BUILTIN-MODULE is
-  including PL-LTL-BUILTIN-MODULE .
+mod #LTL-SIMPLIFIER is
+  including #LTL .
 
   --- The simplifier is based on:
   ---   Kousha Etessami and Gerard J. Holzman,
@@ -177,8 +177,8 @@ mod PL-LTL-SIMPLIFIER-BUILTIN-MODULE is
   ceq p LTLR (q LTLR r) = q LTLR r if q <= p .
 endm
 
-mod PL-SAT-SOLVER-BUILTIN-MODULE is
-  protecting PL-LTL-BUILTIN-MODULE .
+mod #SAT-SOLVER is
+  protecting #LTL .
 
   --- formula lists and results
   sorts LTLFormulaList SatSolveResult TautCheckResult .
@@ -219,17 +219,17 @@ mod PL-SAT-SOLVER-BUILTIN-MODULE is
   eq LTL$invert(LTLmodel(L, C)) = LTLcounterexample(L, C) .
 endm
 
-mod PL-SATISFACTION-BUILTIN-MODULE is
-  protecting PL-BOOL .
+mod #SATISFACTION is
+  protecting #BOOL .
   sorts Model-Checker-State Prop .
   subsorts Model-Checker-State Prop < Builtins .
   op _LTL|=_ : Model-Checker-State Prop -> Bool [frozen] .
 endm
 
-mod PL-MODEL-CHECKER-BUILTIN-MODULE is
-  protecting PL-QID .
-  including PL-SATISFACTION-BUILTIN-MODULE .
-  including PL-LTL-BUILTIN-MODULE .
+mod #MODEL-CHECKER is
+  protecting #QID .
+  including #SATISFACTION .
+  including #LTL .
   subsort Prop < LTLFormula .
 
   --- transitions and results

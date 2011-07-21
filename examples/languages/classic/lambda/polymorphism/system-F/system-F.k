@@ -1,7 +1,7 @@
 in /modules/k-visitor
 in /modules/substitution
 
-kmod SYSTEM-F-SYNTAX is including PL-ID + K-LATEX
+kmod SYSTEM-F-SYNTAX is including #ID + K-LATEX
   /*@ \section*{Syntax}
   This module defines the syntax for System F.
   */

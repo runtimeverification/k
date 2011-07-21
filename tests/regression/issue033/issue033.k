@@ -1,6 +1,6 @@
 
 
-kmod ISSUE033A is including K + PL-NAT + PL-ID
+kmod ISSUE033A is including K + #NAT + #ID
   syntax KResult ::= Type
   syntax Type ::= arrayType ( Type , Nat )
                 | bool
@@ -10,7 +10,7 @@ kmod ISSUE033A is including K + PL-NAT + PL-ID
    if notBool($hasMapping(Cache:Map, arrayType(T:Type, N:Nat)))
 endkm
 
-kmod ISSUE033B is including K + PL-NAT + PL-ID
+kmod ISSUE033B is including K + #NAT + #ID
  syntax K ::= kpair ( K , List )
             | case ( Nat ,  BaseValue ) 
             | Nat | BaseValue | Id

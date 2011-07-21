@@ -1,4 +1,4 @@
-kmod DIJKSTRA is including NAT-INF + PL-ID
+kmod DIJKSTRA is including NAT-INF + #ID
   configuration <graph> .Set </graph> <shortest> .Map </shortest>
 
   syntax Edge ::= Id - Nat -> Id [latex "{#1}\xrightarrow{{#2}}{#3}"]

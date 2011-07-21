@@ -1,4 +1,4 @@
-mod SYMBOLIC-INT is extending PL-INT .
+mod SYMBOLIC-INT is extending #INT .
   op symNzNat_ : Nat -> NzNat .
   op symInt_ : Nat -> Int .
   eq 0 >=Int N:NzNat = false .

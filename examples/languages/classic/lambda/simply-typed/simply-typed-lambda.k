@@ -1,6 +1,6 @@
 
 
-kmod SUBSTITUTION is including K + PL-ID
+kmod SUBSTITUTION is including K + #ID
   syntax List{K} ::= List{K} [ K /-/ Id ] [prec 0]
   syntax K ::= K [ K / Id ] [prec 0]
   syntax K ::= Id 

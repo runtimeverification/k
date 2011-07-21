@@ -5,7 +5,7 @@
 --- SKOOL-UNTYPED-SYNTAX module ---
 -----------------------------------
 
-kmod SKOOL-UNTYPED-SYNTAX is including PL-INT + PL-ID
+kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
 
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---

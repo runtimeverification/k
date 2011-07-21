@@ -1,5 +1,5 @@
 
-kmod SIMPLE-TYPED-SYNTAX is including PL-INT + PL-ID 
+kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID 
 
   sorts Var Exp Decl Stmt Stmts
 

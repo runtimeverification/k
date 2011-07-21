@@ -9,7 +9,7 @@
 
 
 
-kmod IMP-SYNTAX is including PL-INT + PL-ID   --- built-in integers and variable identifiers
+kmod IMP-SYNTAX is including #INT + #ID   --- built-in integers and variable identifiers
   syntax AExp ::= Id | Int
                 | AExp + AExp [prec 33 gather (E e) format(d b o d) strict]
                 | AExp / AExp [prec 31 gather (E e) format(d b o d) strict]

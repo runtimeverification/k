@@ -1,4 +1,4 @@
-kmod EXP is including PL-INT
+module EXP
 --- Basic arithmetic and boolean operations;
   syntax K ::= K + K   [gather(E e) prec 33 strict]       --- addition
              | K * K   [gather(E e) prec 31 strict]       --- multiplication
@@ -17,4 +17,4 @@ kmod EXP is including PL-INT
   rule  not T:Bool => notBool T
   rule  true and E:K => E
   rule  false and E => false
-endkm
+end module

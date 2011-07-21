@@ -1,6 +1,6 @@
 require seq
 
-kmod THREADS is including SEQ + PL-NAT
+module THREADS imports SEQ
   configuration <thread multiplicity="*"> 
                   <k> .K </k> <holds> .Map </holds>
                 </thread>
@@ -38,4 +38,4 @@ kmod THREADS is including SEQ + PL-NAT
   rule [rendezvous] : <k>rendezvous V 
                       => skip<_/k> <k>rendezvous V 
                                    => skip<_/k>  [computational]
-endkm
+end module

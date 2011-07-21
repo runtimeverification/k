@@ -26,7 +26,7 @@
 ---	Version 2.3.
 ---
 
-mod CONFIGURATION-BUILTIN-MODULE is
+mod #CONFIGURATION is
   sorts Socket-Attribute Socket-AttributeSet .
   subsort Socket-Attribute < Socket-AttributeSet .
   op .AttributeSet : -> Socket-AttributeSet [ctor] .
@@ -40,9 +40,9 @@ mod CONFIGURATION-BUILTIN-MODULE is
   op <> : -> Socket-Portal [ctor] .
 endm
 
-mod SOCKET-BUILTIN-MODULE is
-  protecting PL-STRING .
-  including CONFIGURATION-BUILTIN-MODULE .
+mod #SOCKET is
+  protecting #STRING .
+  including #CONFIGURATION .
 
   op socket : Nat -> Socket-Oid [ctor] .
 

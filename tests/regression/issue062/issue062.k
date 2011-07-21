@@ -1,6 +1,6 @@
 
 
-kmod ISSUE062 is including K + PL-INT + PL-ID
+kmod ISSUE062 is including K + #INT + #ID
 
 	
 	syntax Exp ::= Int

@@ -1,6 +1,6 @@
 
 kmod IDRLS is
-	including K + PL-BOOL + PL-INT + PL-ID
+	including K + #BOOL + #INT + #ID
 	
 	syntax Exp ::= Id | Val | Exp + Exp
 	syntax Val ::= Int | Bool

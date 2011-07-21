@@ -1,6 +1,7 @@
 require k-visitor
 
-kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
+module SUBSTITUTION 
+  imports K-VISITOR
 ---beta-substitution definition using the K AST visitor pattern
 ---assuming the binding operator is [_]_
   syntax K ::= Id  | Nat
@@ -32,4 +33,4 @@ kmod SUBSTITUTION is including PL-ID + PL-INT + K-VISITOR
       = visit K' applying beta[K/Y] 
                        if label in SetItem(wklabel('`[_`]_)) SetItem(wklabel(getKLabel(Y)))
 
-endkm
+end module

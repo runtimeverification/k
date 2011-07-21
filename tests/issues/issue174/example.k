@@ -3,7 +3,7 @@ kmod ISSUE is
 	including K 
 	including K-CONTEXTS 
 	including K-PROPER
-	including PL-BUILTINS
+	including #BUILTINS
 	
 	ops foo1 foo2 : -> K
 	

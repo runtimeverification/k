@@ -1,4 +1,4 @@
-kmod IMPPP-SYNTAX is including PL-INT + PL-ID
+kmod IMPPP-SYNTAX is including #INT + #ID
 
   syntax AExp ::= Int | Id
                 | AExp + AExp [gather(E e) prec 33 strict]

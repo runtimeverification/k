@@ -1,6 +1,6 @@
 --- 33 C language constructs
 kmod KERNELC-SYNTAX is
-  including PL-INT +  PL-ID
+  including #INT +  #ID
 ---arithmetic expresions
   syntax Exp ::= Int | Id | DeclId
                | Exp + Exp [gather (E e) prec 33 strict] 

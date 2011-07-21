@@ -1,6 +1,6 @@
 
 
-kmod PRIMES is including K + PL-NAT
+kmod PRIMES is including K + #NAT
   configuration <primes> .Bag </primes>
   syntax K ::= NzNat
   rule <primes_> BagItem(N:NzNat) (BagItem(M:NzNat)=>.) <_/primes>

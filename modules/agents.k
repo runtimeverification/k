@@ -1,6 +1,6 @@
 require seq
 
-kmod AGENTS is  including SEQ + PL-INT
+module AGENTS imports SEQ
   configuration
       <agent multiplicity="*"> 
           <me>0</me>
@@ -63,4 +63,4 @@ kmod AGENTS is  including SEQ + PL-INT
   rule [leave-barrier] : <me>N</me> <k>barrier => skip<_/k> <barrier>false</barrier>
        <waiting_>(SetItem(N) => .)<_/waiting>
   rule [lowering-barrier] : <barrier>false => true</barrier> <waiting>.Set</waiting>
-endkm
+end module

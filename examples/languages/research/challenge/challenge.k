@@ -2,7 +2,7 @@
 in challenge-syntax
 in challenge-programs
 
-kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + PL-CONVERSION 
+kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSION 
   syntax Val ::= Bool | Int | Float
   syntax Exp ::= Val
   syntax K ::= List{Exp} | Stmt

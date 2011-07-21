@@ -1,5 +1,5 @@
 
-kmod SKOOL-TYPED-SYNTAX is including PL-INT + PL-ID 
+kmod SKOOL-TYPED-SYNTAX is including #INT + #ID 
 
 --- Identifiers
 --- Special identifiers for the class and method "main", and for the class "object"

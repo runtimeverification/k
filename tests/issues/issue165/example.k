@@ -1,5 +1,5 @@
 
-kmod OCL-SYNTAX is including K + PL-ID + PL-INT + PL-BOOL
+kmod OCL-SYNTAX is including K + #ID + #INT + #BOOL
 
 
   syntax Var ::= Id

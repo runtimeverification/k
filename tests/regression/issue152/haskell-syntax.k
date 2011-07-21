@@ -5,7 +5,7 @@
 
 
 kmod HASKELL-SYNTAX is
-    including PL-STRING
+    including #STRING
     including K
 
     syntax K ::= Literal
