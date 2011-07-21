@@ -420,10 +420,25 @@ computational if one wants them to count as computational steps. */
   rule {} => . [structural]
   rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env </env> [structural]
 
-/*@ The definition of environment recovery is straightforward: */
+/*@ The basic definition of environment recovery is straightforward: */
 
   syntax K ::= env ( Map )
   rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
+
+/*@  While theoretically sufficient, the basic definition for environment
+recovery alone is suboptimal.  Consider a loop \texttt{while B do S},
+whose semantics (see below) is given by unrolling.  Typically \texttt{S}
+is a block.  Then the semantics of blocks above, together with the
+unrolling semantics of the while loop below, will yield a computation
+structure in the \textsf{k} cell that increasingly grows, adding a new
+environment recovery task right in front of the already existing sequence of
+similar environment recovery tasks (this phenomenon is similar to the "tail
+recursion" problem).  Of course, when we have a sequence of environment
+recovery tasks, we only need to keep the last one.  The elegant rule below
+does precisely that, thus abvoiding the unnecessary computation explosion
+problem:  */
+
+  rule (env(_) => .) ~> env(_) [structural]
 
 /* In fact, the above follows a common convention in \K for recovery
 operations of cell contents.  More precisely, the conventional meaning of a

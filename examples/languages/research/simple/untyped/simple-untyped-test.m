@@ -71,12 +71,11 @@ search run('pThreads10) =>! B:Bag .
 --- Search and Model checking ---
 ---------------------------------
 
-load ../../../../../core/maude/lib/k-model-checker
 select SIMPLE-UNTYPED .
 
 mod DEKKER-PREDICATES is
   including SIMPLE-UNTYPED .
-  including PL-MODEL-CHECKER .
+  including PL-MODEL-CHECKER-BUILTIN-MODULE .
 
   op cfg : Bag -> Model-Checker-State .
   op start : -> Model-Checker-State .
@@ -88,7 +87,7 @@ mod DEKKER-PREDICATES is
   eq cfg(< T > B
 	   < genv > M1 Id X(.List{K}) |-> Loc </ genv >
            < store > M2 Loc |-> Int 1(.List{K}) </ store >
-	 </ T >) |= enabled(X) = true .
+	 </ T >) LTL|= enabled(X) = true .
 endm
 
-reduce modelCheck(start, [] ~(enabled(critical1) /\ enabled(critical2))) .
+reduce modelCheck(start, LTL[] LTL~(enabled(critical1) LTL/\ enabled(critical2))) .
