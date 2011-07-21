@@ -181,7 +181,7 @@ as local variables have no concurrency role. */
 /*@ \subsubsection{Random}
 The semantics of rand is given through the Maude built-in Mersenne Twister 
 Random Number Generator algorithm which is exposed by the 
-{\tt randomRandom} function provided in the {\tt #RANDOM} module which 
+{\tt randomRandom} function provided in the {\tt \#RANDOM} module which 
 gives the Nth number in the Mersene Twister sequence.
 
 As initializing the seed for the Mersenne twister is done in Maude at 
