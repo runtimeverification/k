@@ -2460,7 +2460,7 @@ sub compress_tags
 #########################
 
 # predefined tags
-my @tags = split(",", "metadata,location,ditto,latex,hybrid,arity,strict,seqstrict,wrapping,structural,computational,large, tags");
+my @tags = split(",", "metadata,location,ditto,latex,hybrid,arity,strict,seqstrict,wrapping,structural,computational,nondet,supercool,large, tags");
 
 sub declare_tag
 {
