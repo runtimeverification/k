@@ -858,7 +858,7 @@ mod UNIT-META-LATEX-PRINT is
   eq eMetaLatexPrintPL(QI) = \moduleName{QI} .
   var Q : Qid .
   op \moduleName{_} : Qid -> Qid .
-  eq eMetaLatexPrintME(Q) = \moduleName{Q} .
+  eq eMetaLatexPrintME(Q) = \moduleName{latexify(Q)} .
 
   op renamingSet2QidList : RenamingSet -> QidList .
   eq renamingSet2QidList(((op F to F' [AtS]), RS:RenamingSet))
