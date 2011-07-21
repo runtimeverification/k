@@ -21,9 +21,6 @@ TEST_DIRS = algorithms/sort \
 	    languages/research/agent \
 	    languages/research/challenge \
 	    languages/research/kernelC \
-	    languages/esoteric/Thue \
-	    languages/esoteric/bf \
-	    languages/esoteric/befunge93 \
 	    #languages/classic/imp/fully-labeled \
 	    #languages/classic/imp/fully-syntactic \
 	    #languages/classic/imp/labeled-syntax \
