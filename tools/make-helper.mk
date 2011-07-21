@@ -8,8 +8,9 @@ SHELL = /usr/bin/env bash
 # You shouldn't need to change anything below here.
 # The things below are set based on what you set above
 # ADDITIONAL_DEPENDENCIES ?=
-ALL_MAUDE_FILES = $(wildcard *.k) $(wildcard *.k) $(wildcard */*.k) $(wildcard */*/*.k) $(wildcard *.m) $(wildcard *.m) $(wildcard */*.m) $(wildcard */*/*.m)  $(wildcard *.kmaude) $(wildcard *.kmaude) $(wildcard */*.kmaude) $(wildcard */*/*.kmaude) $(wildcard *.maude) $(wildcard *.maude) $(wildcard */*.maude) $(wildcard */*/*.maude)
-MAUDE_FILES = $(filter-out compile_%.maude %-compiled.maude,$(ALL_MAUDE_FILES))
+ALL_K_FILES = $(wildcard *.k) $(wildcard *.k) $(wildcard */*.k) $(wildcard */*/*.k)
+# $(wildcard *.m) $(wildcard *.m) $(wildcard */*.m) $(wildcard */*/*.m)  $(wildcard *.kmaude) $(wildcard *.kmaude) $(wildcard */*.kmaude) $(wildcard */*/*.kmaude) $(wildcard *.maude) $(wildcard *.maude) $(wildcard */*.maude) $(wildcard */*/*.maude)
+K_FILES = $(filter-out compile_%.maude %-compiled.maude,$(ALL_K_FILES))
 TOOL_DIR_FILES = $(wildcard $(TOOL_DIR)/*)
 COMPILED_FILE = $(MAIN_FILE)-compiled.maude
 # LATEX_FILE = $(MAIN_FILE).tex
@@ -40,38 +41,38 @@ all: build
 build: $(COMPILED_FILE)
 
 # this just builds the $(COMPILED_FILE) by running $(KCOMPILE)
-$(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
+$(COMPILED_FILE): $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) $(COMPILE_OPTIONS) -l $(LANGUAGE_NAME)
 # PLEASE KEEP THIS IN SYNC WITH THE ABOVE.  it has been split apart so people won't see output files when they run make.
-$(COMPILED_FILE).output: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
+$(COMPILED_FILE).output: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) $(ADDITIONAL_DEPENDENCIES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) $(COMPILE_OPTIONS) -l $(LANGUAGE_NAME) 2>&1 |tee $(COMPILED_FILE).output && exit $${PIPESTATUS[0]}
 
 # this should build the latex
-latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -latex $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the pdf
-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the pdf in draft mode
-pdfdraft:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+pdfdraft:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS) -draft
 
 # this should build the png
-png:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+png:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -png $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the eps
-eps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+eps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -eps $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the ps
-ps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+ps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -ps $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the crop-pdf
-crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(MAUDE_FILES) Makefile
+crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -crop $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 
