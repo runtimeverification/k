@@ -52,12 +52,15 @@ fmod META-K-BUILTINS is
   eq builtinModules = none .
    --- = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
   
+  op builtinSorts : Module SortSet -> SortSet .
+  eq builtinSorts(M, SS) = intersection(builtinSorts(M), SS) .
+
   op isBuiltin : Module ~> Bool .
   eq isBuiltin(M) = isBuiltinModule(string(getName(M))) .
   op isBuiltinModule  : String -> Bool .
   eq isBuiltinModule(S) = find(S, "#",0) == 0 .
 
-  var M : Module . var S : String .
+  var M : Module . var S : String .  var SS : SortSet .
 endfm
 
 fmod META-ATTRS is
@@ -195,6 +198,9 @@ fmod META-K-MODULE is
   op getListSorts : Module -> SortSet .
   eq getListSorts(M) = removeSorts(getListSorts(getOps(M)), metaAssocSorts ; builtinSorts(M)) .
 
+  op listSorts : Module SortSet -> SortSet .
+  eq listSorts(M, SS) = intersection(getListSorts(M), SS) .
+
   op isListSort : Module Type -> Bool .
   eq isListSort(M,T) = isListSort(getListSorts(M),T) .
   
@@ -209,6 +215,21 @@ fmod META-K-MODULE is
   op getListSortsOp : OpDecl -> TypeSet .
   eq getListSortsOp(op Q : T1 T2 -> T [assoc AS] .) = T1 ; T2 ; T .
   eq getListSortsOp(Op) = none [owise] .
+
+
+  op getListSymbol : Module Type -> Qid .
+  eq getListSymbol(M, T) = getListSymbol(getOps(flatten(M)), T) .
+
+  op getListSymbol : OpDeclSet Type -> Qid .
+  eq getListSymbol(OPDS (op Q : T1 T2 -> T [assoc AS] .), T) = Q .
+
+  op createListSorts : Module SortSet -> SortSet .
+  eq createListSorts(M, S ; SS) = createListSort(M, S) ; createListSorts(M, SS) .
+  eq createListSorts(M, none) = none .
+
+  op createListSort : Module Type -> Sort .
+  eq createListSort(M, T) = qid("List" + encodeString(string(getListSymbol(M, T)))) .
+
 
   op getListSubsorts : Module -> SubsortDeclSet .
   eq getListSubsorts(M) = makeSubsorts(M, getListSorts(M), getMaximalSorts(M, getListSorts(M))) .

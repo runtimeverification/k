@@ -58,7 +58,7 @@ fmod NAT-LIST-EXTRAS is
 endfm
 
 fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
-	including QID-LIST . including EXT-BOOL .
+	including QID-LIST . including EXT-BOOL .  including CONVERSION .
   op stripSpaces : String -> String .
   var S : String . var N : Nat .
   ceq stripSpaces(S) = stripSpaces(substr(S, 1, length(S))) 
@@ -185,6 +185,12 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
 
   op _ends-with_ : String String -> Bool .
   eq S ends-with S' = rfind(S, S', length(S)) :: Nat .
+
+
+  op encodeString : String -> String .
+  eq encodeString("") = "" .
+  eq encodeString(S) = "C" + string(ascii(substr(S,0,1)), 10) + encodeString(substr(S,1,length(S))) .
+
   var S' : String .
 endfm
 
@@ -1272,17 +1278,18 @@ fmod META-LEVEL-EXTRAS is
   [owise] .
 
   op generateSubsorts : Module SortSet SortSet ~> SubsortDeclSet .
-  eq generateSubsorts(M, none, SS) = none .
-  eq generateSubsorts(M, S ; SS, SS') 
-   = if S in getSorts(M) then generateSubsorts(M, SS, SS') generateSubsort(M, S, SS') 
-     else generateSubsorts(M, SS, SS') fi .
+  eq generateSubsorts(M, SS, SS')  = generateSubsorts(intersection(getSorts(M),SS),intersection(getSorts(M), SS')) .
 
-  op generateSubsort : Module Sort SortSet ~> SubsortDeclSet .
-  eq generateSubsort(M, S, none) = none .
-  eq generateSubsort(M, S, S ; SS) = makeSubsort(M, S, SS) .
-  eq generateSubsort(M, S, S' ; SS) 
-   = if S' in getSorts(M) then (subsort S < S' .) generateSubsort(M, S, SS) else generateSubsort(M,S, SS) fi
-  [owise] .
+  op generateSubsorts : SortSet SortSet ~> SubsortDeclSet .
+  eq generateSubsorts(none, SS) = none .
+  eq generateSubsorts(S ; SS, SS') 
+   = generateSubsorts(SS, SS') generateSubsort(S, SS')  .
+
+  op generateSubsort : Sort SortSet ~> SubsortDeclSet .
+  eq generateSubsort(S, none) = none .
+  eq generateSubsort(S, S ; SS) = generateSubsort(S, SS) .
+  eq generateSubsort(S, S' ; SS) 
+   = (subsort S < S' .) generateSubsort(S, SS) [owise] .
 
   op checkSubsorts : Module TypeSet Type ~> Bool .
   eq checkSubsorts(M, T ; TS, T') = sortLeq(M, T, T') and-then checkSubsorts(M, TS, T') . 
