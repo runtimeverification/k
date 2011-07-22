@@ -1,0 +1,52 @@
+mod SYNTAX-PREDICATES is
+  including META-MODULE-EXTRAS .
+  including META-K-RULES .
+  including META-LEVEL-EXTRAS .
+  including PARSE-METADATA .
+  including METADATA-EXTRAS .
+  including META-K-MODULE .
+  including K-META-OPS .
+  including  META-K-PREDICATES .
+ 
+  op syntaxPreds : Module -> Module .
+  eq syntaxPreds(M)
+   = syntaxPreds(M, flatten(M)) .
+
+  op syntaxPreds : Module Module -> Module .
+  eq syntaxPreds(M, Flat)
+   = syntaxPreds(M, removeSorts(lesserSorts(Flat, K), NeK ; K), makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getOps(Flat)) .
+
+  op syntaxPreds : Module SortSet  SubsortDeclSet OpDeclSet -> Module .
+  eq syntaxPreds(M, SS, SSDS, OPDS)
+   = addMbs(syntaxPreds(getSubsorts(SSDS, SS)) 
+              syntaxPreds(getOps(OPDS, SS)), 
+            addOps(syntaxPreds(SS), M)) .
+
+ op syntaxPreds : OpDeclSet ~> MembAxSet .
+ eq syntaxPreds((op Q : nil -> T [AS] .) OPDS)
+   = plugKRule(R{replaceS[kApply(predicateLabel(T),mkConstant(Q,T)),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",""))}) 
+     syntaxPreds(OPDS) .
+ eq syntaxPreds((op Q : NeTyl -> T [AS] .) OPDS)
+   = plugKRule(R{replaceS[kApply(predicateLabel(T),Q[genVars(Universal2K(NeTyl), "Is", 1)]),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",""))}) 
+     syntaxPreds(OPDS) .
+ eq syntaxPreds((none).OpDeclSet) = none .
+
+ op syntaxPreds : SubsortDeclSet ~> MembAxSet .
+ eq syntaxPreds((subsort S < S' .) SSDS)
+  = plugKRule(R{replaceS[kApply(predicateLabel(S'),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",""))}) 
+    syntaxPreds(SSDS) .
+ eq syntaxPreds((none).SubsortDeclSet) = none .
+
+  op syntaxPreds : SortSet ~> OpDeclSet .
+  eq syntaxPreds(S ; SS) 
+   = (op predicateLabelS(S) : nil -> KLabel [metadata(pair("predicate", ""))] .) 
+     syntaxPreds(SS) .
+  eq syntaxPreds((none).SortSet) = none .
+  
+  var Q : Qid .
+  var T : Type . var NeTyl : NeTypeList .
+
+  var OPDS : OpDeclSet . var Op : OpDecl .  var AS : AttrSet .
+  var SSDS : SubsortDeclSet .  var SS : SortSet . var S S' : Sort .
+  var M Flat : Module .
+endm

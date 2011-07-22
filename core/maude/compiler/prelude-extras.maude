@@ -760,6 +760,7 @@ fmod META-MODULE-EXTRAS is
   op removeOpAttr : Attr -> AttrSet .
   eq removeOpAttr(ctor) = none .
   eq removeOpAttr(assoc) = none .
+  eq removeOpAttr(comm) = none .
   eq removeOpAttr(id(Trm)) = none .
   eq removeOpAttr(idem) = none .
   eq removeOpAttr(memo) = none .
@@ -772,10 +773,11 @@ fmod META-MODULE-EXTRAS is
   eq removeOpAttr(format(QIL)) = none .
   eq removeOpAttr(frozen(NL)) = none .
   eq removeOpAttr(iter) = none .
+  eq removeOpAttr(special(Hooks)) = none .
   eq removeOpAttr(Attr) = Attr [owise] .
 
 
-   var NL : NatList . 
+   var NL : NatList .   var Hooks : NeHookList .
 
 
   op naryAttr : Attr -> Bool .

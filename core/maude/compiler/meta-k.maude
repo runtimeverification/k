@@ -235,6 +235,12 @@ fmod META-K-MODULE is
    = if isListSort(M, T') 
      then (subsort T < T' .)  getK2ListSubsorts(M, SSDS) 
      else getK2ListSubsorts(M, SSDS) fi .
+
+
+  op Universal2K : TypeList -> TypeList .
+  eq Universal2K(T Tl) 
+   = if T == 'Universal then K else T fi Universal2K(Tl) .
+  eq Universal2K(nil) = nil .
 endfm
 
 fmod META-K-RULES is including K-SORTS .
@@ -1012,6 +1018,17 @@ ceq $leastSortsT(M, Q[T1,T2], T T')
   var T T' T'' : Type . var S : Sort .   var Tl : TypeList .
   var SS SS' : SortSet . var NSS : NeSortSet . var TS : TypeSet .
   var TlS : TypeListSet .  var TlSK : [TypeListSet] .  var Str : String .
+endfm
+
+fmod META-K-PREDICATES is
+  including META-TERM-EXTRAS .
+  including META-K-MODULE .
+  var S : Sort .
+  op predicateLabelS : Sort -> Qid .
+  eq predicateLabelS(S) = qid("is" + string(S)) .
+
+  op predicateLabel : Sort -> Constant .
+  eq predicateLabel(S) = mkConstant(predicateLabelS(S), KLabel) .
 endfm
 
 

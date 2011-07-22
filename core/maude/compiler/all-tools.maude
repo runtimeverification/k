@@ -12,6 +12,7 @@ load resolve-ditto-interface
 load complete-k-sorts-interface
 load anon-consts-interface
 load missing-subsorts-interface
+load syntax-predicates-interface
 load remove-sublists-interface
 load lists-to-wrappers-interface
 load syntax-to-k-interface
