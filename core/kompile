@@ -51,8 +51,8 @@ my $maudify_only = 0;
 my $k_prelude_loaded = 0;
 
 # K tags variables
-my $flag_structural = "structural=() predicate=() function=()";
-my $flag_computational = "computational=()";
+my $flag_structural = "structural=()";
+my $flag_computational = "transition=()";
 my $flag_nd_strict = "supercool=()";
 my $structural = 0;
 my $computational = 0;
@@ -166,7 +166,7 @@ my $short_help_message =
 
   Controlling non-determinism
   -structural \"<tags>\" : tags to become equations 
-  -nondet \"<tags>\": tags to become rewrite rules 
+  -transition \"<tags>\": tags to become rewrite rules 
               also nondetermistic choice for strictness
   -supercool \"<tags>\": tags for super cooling rules
   tags are space-separated and can include the tag default
@@ -313,18 +313,18 @@ sub terminate {
   above mentioned style, and thus could be used to alter the default
   typesetting macros.
   
-  The options -structural, -nondet, and -supercool are designed
+  The options -structural, -transition, and -supercool are designed
   to help fine-tuning the non-determinsm exposed by a definition by 
   changing the abstraction level of the rules and stricness axioms.
-  By default, only rules and heating rules tagged with the 'nondet' tag 
+  By default, only rules and heating rules tagged with the 'transition' tag 
   are turned into rewrite rules and strictness rules tagged with 'supercool' 
   generate heating rewrite rules, while rules tagged with 'supercool'
   force the computation to cool completely before any other rule applies.
-  If a rule is tagged both structural and nondet, it is considered
+  If a rule is tagged both structural and transition, it is considered
   structural and thus turned into an equation. All rules with no specific 
-  nondet/structural tag are considered structural.
+  transition/structural tag are considered structural.
   The above options allow to change this behavior by specifying explicit
-  sets of tags which are to be handled as structural/nondet/supercool.
+  sets of tags which are to be handled as structural/transition/supercool.
   In addition one can add the reserved tag default to one of the categories
   to dictate the behavior for the rules with none of the specified tags.
   
@@ -388,7 +388,7 @@ sub terminate {
   as structural.
 
   kompile lang -structural \"nd(false) computational\" \\
-      -nondet \"structural\" -supercool \"default\"
+      -transition \"structural\" -supercool \"default\"
   will transform into equations all rules which are tagged with either 
   computational or nd(false), into rules all those tagged with 
   structural, will generate rewrite rules for all heating rules tagged 
@@ -685,7 +685,7 @@ foreach (@ARGV) {
     elsif (/^--?structural$/) {
 		$structural = 1;
     }
-    elsif (/^--?nondet$/) {
+    elsif (/^--?transition$/) {
 		$computational = 1;
     }
     elsif (/^--?supercool$/) {
@@ -813,7 +813,7 @@ if ($args =~ /\-\-?structural\s(.*)/s)
 	$flag_structural = process_tags($1);
 }
 
-if ($args =~ /\-\-?nondet\s(.*)/s)
+if ($args =~ /\-\-?transition\s(.*)/s)
 {
 	$flag_computational = process_tags($1);
 }

@@ -11,7 +11,7 @@ MAIN_FILE = example
 # this is a space-separated list of basename maude files to run
 TESTS = test.m
 
-COMPILE_OPTIONS = -supercool "nd(true)"
+COMPILE_OPTIONS = -transition "computational"
 
 TOOL_DIR = $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk
