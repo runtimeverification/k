@@ -11,7 +11,7 @@ LATEX_TOPMATTER = README.tex
 #this is the basename of the main file
 MAIN_FILE = simple-untyped
 
-COMPILE_OPTIONS = -nondet "nondet"
+COMPILE_OPTIONS = -transition "nondet"
 
 # this is a space-separated list of basename maude files to run
 TESTS = simple-untyped-test.m

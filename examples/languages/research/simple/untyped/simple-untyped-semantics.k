@@ -279,7 +279,7 @@ When a variable $X$ is the first computational task (note the rupture of the
 environment (note the rupture of the \textsf{env} cell at both sides), and
 $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
-  rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store> [nondet]
+  rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store> [tags nondet]
 
 /*@ \subsection{Variable/Array increment}
 This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
@@ -292,7 +292,7 @@ to a location value, also introduced below with the auxiliary operations. */
 
   context ++([HOLE] => l-value([HOLE]))
   rule <k> ++loc(L) => I:Int +Int 1 <_/k>
-       <store_> L |-> (I => I +Int 1) <_/store> [nondet]
+       <store_> L |-> (I => I +Int 1) <_/store> [tags nondet]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
@@ -330,7 +330,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
   rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
   rule array(L,_)[N] => lookup(L +Int N) [structural]
   syntax K ::= lookup ( Nat )
-  rule <k> lookup(L) => V <_/k> <store_> L |-> V <_/store> [nondet]
+  rule <k> lookup(L) => V <_/k> <store_> L |-> V <_/store> [tags nondet]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -385,7 +385,7 @@ input values are given before the program is executed; thus, the rewrite
 process gets stuck if the next computation item is a \texttt{read()} expression
 construct and no input item is available. */
 
-  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in> [nondet]
+  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in> [tags nondet]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -400,7 +400,7 @@ that \texttt{l-value(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
   context ([HOLE] => l-value([HOLE])) = _
-  rule <k> loc(L)=V => V <_/k> <store_> L|->(_=>V) <_/store> [nondet]
+  rule <k> loc(L)=V => V <_/k> <store_> L|->(_=>V) <_/store> [tags nondet]
 
 
 /*@ \section{Statements}
@@ -522,7 +522,7 @@ output incrementally, as it is being generated; in semantics, we do not need
 to worry about that and simply collect all the output in the \textsf{out}
 cell. */
 
-  rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out> [nondet]
+  rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out> [tags nondet]
 
 /*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a
@@ -616,7 +616,7 @@ by the two rules below: */
 
    rule <k>acquire V; => .<_/k> <holds_>. => V|->0<_/holds>
         <busy>Busy (.=>SetItem(V))</busy>
-     if notBool(V in Busy) [nondet]
+     if notBool(V in Busy) [tags nondet]
    rule <k>acquire V; => .<_/k> <holds_>V|->(N => N +Nat 1)<_/holds>
 
 /*@ \subsubsection{Release lock}
@@ -650,7 +650,7 @@ the \textsf{thread} cell, the only way to concretize the rule below to the
 actual configuration of SIMPLE is to include each \textsf{k} cell in a
 \textsf{thread} cell. */
 
-   rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k> [nondet]
+   rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k> [tags nondet]
 
 ----------------------------------------------
 //@ \section{Auxiliary declarations and operations}
