@@ -66,6 +66,7 @@ fmod COMPILE-META is
   including META-MODULE-EXTRAS .
   including STRING-EXTRAS .
   including MODULE-META-PRETTY-PRINT .
+  including PURE-MODULE-META-PRETTY-PRINT .
   including PARSE-METADATA .
   including COMPILATION-ATTRS .
 
@@ -179,6 +180,8 @@ fmod COMPILE-META is
    = moduleError('`[ 'ERROR '`] 'Error:  tokenize(getLocation(AS)) '\s '\s tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt) '`[ 'ENDERROR '`]) .
   eq $compile(M, Q, M', QIL, AS)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL, AS) else generateError(M,Q,M') fi [owise] .
 
+  op purePrint : [Module] -> QidList .
+  eq purePrint(M) = pureEMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op print : [Module] -> QidList .
   eq print(M) = eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op generateError : Module Qid [Module] -> [Module] .
@@ -191,7 +194,7 @@ fmod COMPILE-META is
 endfm
 
 mod COMPILE-LOOP is
-  including LOOP-MODE + COMPILE-META .
+  including LOOP-MODE + COMPILE-META + META-LEVEL-EXTRAS .
   op compile : -> System .
   op idle : -> State .
   var Q Q' : Qid . var QIL QIL' : QidList . var FM : Module .
@@ -207,6 +210,7 @@ mod COMPILE-LOOP is
   eq compile-nd(Q) = compile(Q, structurals(pair("structural","")) computationals(pair("computational","") pair("nd","true")) supercools(pair("nd","true"))) .
 
   eq print(moduleError(QIL)) = QIL .
+  eq purePrint(moduleError(QIL)) = QIL .
   rl ['compile Q 'structurals QStr 'computationals QComp 'supercools QSuper QIL, idle, QIL'] 
    => [QIL, idle, print(compile(Q, structurals(metadataQParse(QStr)) computationals(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] [print QStr QComp QSuper] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
@@ -220,6 +224,8 @@ mod COMPILE-LOOP is
   rl ['pcompile Q Q' QIL, idle, QIL'] 
    => [QIL, idle, print(pcompile(Q,Q', structurals(pair("structural","") pair("predicate","")) computationals(pair("computational","")) supercools(pair("nd","true"))) )] .
 
+  rl ['purify Q QIL, idle, QIL'] 
+   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES, structurals(pair("structural","") pair("predicate","")) computationals(pair("computational","")) supercools(pair("nd","true"))),'PURE-K-TECHNIQUE))] .
 
   var AS : AttrSet .  var QStr QComp QSuper : Qid .
 endm

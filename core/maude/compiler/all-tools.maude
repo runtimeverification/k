@@ -2,8 +2,9 @@ set include #BOOL off .
 set include BOOL on .
 load prelude-extras
 load meta-k
-load printing
 load metadata-parsing
+load printing
+load pure-printing
 load sanity-checks-interface
 
 load many-modules-interface

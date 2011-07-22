@@ -21,10 +21,14 @@ fmod K-META-OPS is including META-TERM .
  
   var T : Term .  var Trl Trl1 Trl2 : TermList . 
 
-  op kList : TermList -> Term .
+  op kList_ : TermList -> Term .
   eq kList(T) = T .
   eq kList(empty) = nilKList .
-  eq kList(Trl) = '_`,`,_[Trl] [owise] .
+  
+  op kListS : -> Qid .
+  eq kListS = '_`,`,_ .
+
+  eq kList(Trl) = kListS[Trl] [owise] .
 
   op kApplyS : -> Qid .
   eq kApplyS = '_`(_`) .
@@ -793,8 +797,10 @@ fmod META-K-CONTEXTS is including K-SORTS .
   op pReplaceCxt : Term Nat -> Term .
   eq pReplaceCxt('wrap-with[T1, T2], 1) = T1 .
   eq pReplaceCxt('wrap-with[T1, T2], 2) = T2 .
-  eq pReplaceCxt('_`(_`)[''wrap-with.KLabel,'_`,`,_[T1,T2]], 1) = T1 .
-  eq pReplaceCxt('_`(_`)[''wrap-with.KLabel,'_`,`,_[T1,T2]], 2) = T2 .
+ ceq pReplaceCxt('_`(_`)[''wrap-with.KLabel,Q[T1,T2]], 1) = T1 
+  if Q = kListS .
+ ceq pReplaceCxt('_`(_`)[''wrap-with.KLabel,Q[T1,T2]], 2) = T2
+  if Q = kListS .
 
 endfm
 

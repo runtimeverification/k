@@ -445,6 +445,10 @@ fmod META-MODULE-EXTRAS is
   eq addModule(errorM(AS, Str, Trm, Cxt, U), M:[Module]) 
    = errorM(AS, Str, Trm, Cxt, U) .
 
+  op removeModule : Module Module -> Module .
+  eq removeModule(M, M')
+   = removeImports(removeSorts(removeSubsorts(removeOps(removeMbs(removeEqs(removeRls(M, getRls(M')),getEqs(M')), getMbs(M')), getOps(M')), getSubsorts(M')), getSorts(M')),getImports(M')) .
+
   op removeSorts : SortSet SortSet -> SortSet .
   eq removeSorts(SS ; S, SS' ; S) = removeSorts(SS, SS' ; S) .
   eq removeSorts(SS, SS') = SS [owise print "remaining sorts: " SS] .
@@ -472,6 +476,27 @@ fmod META-MODULE-EXTRAS is
 
   op removeOps : Module OpDeclSet -> Module .
   eq removeOps(M, OPDS) = setOps(M, removeOps(getOps(M), OPDS)) .
+
+  op removeMbs : MembAxSet MembAxSet -> MembAxSet .
+  eq removeMbs(Mbs Mb, Mbs' Mb) = removeMbs(Mbs, Mbs' Mb) .
+  eq removeMbs(Mbs, Mbs') = Mbs [owise] .
+
+  op removeMbs : Module MembAxSet -> Module .
+  eq removeMbs(M, Mbs) = setMbs(M, removeMbs(getMbs(M), Mbs)) .
+
+  op removeEqs : EquationSet EquationSet -> EquationSet .
+  eq removeEqs(Eqs Eq, Eqs' Eq) = removeEqs(Eqs, Eqs' Eq) .
+  eq removeEqs(Eqs, Eqs') = Eqs [owise] .
+
+  op removeEqs : Module EquationSet -> Module .
+  eq removeEqs(M, Eqs) = setEqs(M, removeEqs(getEqs(M), Eqs)) .
+
+  op removeRls : RuleSet RuleSet -> RuleSet .
+  eq removeRls(Rls Rl, Rls' Rl) = removeRls(Rls, Rls' Rl) .
+  eq removeRls(Rls, Rls') = Rls [owise] .
+
+  op removeRls : Module RuleSet -> Module .
+  eq removeRls(M, Rls) = setRls(M, removeRls(getRls(M), Rls)) .
 
   op removeImports : Module ImportList -> Module .
   eq removeImports(M, IL) = setImports(M, removeImports(getImports(M), IL)) .
@@ -996,9 +1021,9 @@ fmod META-MODULE-EXTRAS is
   var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
   vars SSDS SSDS' SSDS'' : SubsortDeclSet .  vars SSD : SubsortDecl .
   vars OPDS OPDS' : OpDeclSet .  var Op : OpDecl .
-  vars MAS MAS' : MembAxSet .  var Mb : MembAx .
-  vars EqS EqS' : EquationSet . var Eq : Equation .
-  vars RlS RlS' : RuleSet . var Rl : Rule .
+  vars MAS MAS' Mbs Mbs' : MembAxSet .  var Mb : MembAx .
+  vars EqS EqS' Eqs Eqs' : EquationSet . var Eq : Equation .
+  vars RlS RlS' Rls Rls' : RuleSet . var Rl : Rule .
   vars SS SS' : SortSet .  var S S' : Sort .
   vars TS TS' : TypeSet .  var TlS : TypeListSet .
   vars IL IL' IL'' : ImportList .  var I : Import .
@@ -1184,6 +1209,10 @@ fmod META-LEVEL-EXTRAS is
   eq getModules(modules(MS, IL)) = MS .
   op getImports : Modules -> ImportList .
   eq getImports(modules(MS, IL)) = IL .
+
+
+  op extractModule : Module Qid ~> Module .
+  eq extractModule(M, Q) = addImports((including Q .),removeModule(M, upModule(Q, false))) .
 
   var Str : String .  
 
