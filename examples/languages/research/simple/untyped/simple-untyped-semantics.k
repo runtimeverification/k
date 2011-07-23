@@ -692,7 +692,7 @@ corresponding store lookup operation. */
 The following operation calculates the length of a list of identifiers.
 We make the two rules structural so they they do not count as computations. */
 
-  syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
+  syntax Nat ::= `| List{Id} `| [latex "\mid\!{#1}\!\mid"]
   rule |.List{Id}| => 0 [structural]
   rule |X,Xl| => |Xl| +Nat 1 [structural]
 
