@@ -4,8 +4,6 @@ load simple-untyped-compiled
 --- Execute SIMPLE programs ---
 -------------------------------
 
-search run('pNondet) =>! B:Bag .
-
 rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
@@ -44,6 +42,9 @@ rew run('pExceptions15) .
 ------------------------------------------
 --- Execute and search the state space ---
 ------------------------------------------
+
+rew run('pNondet) .
+search run('pNondet) =>! B:Bag .       --- 5 solutions, one of them undefined
 
 rew run('pThreads1) .
 ---search run('pThreads1) =>! B:Bag .  --- too many interleavings

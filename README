@@ -15,11 +15,11 @@ explicit which parts of the term they read-only, write-only, or do not
 care about. This distinction makes K a suitable framework for defining
 truly concurrent languages or calculi even in the presence of sharing.
 
-Since computations can be handled like any other terms in a rewriting 
-environment, that is, they can be matched, moved from one place to another 
-in the original term, modified, or even deleted, K is particularly suitable 
-for defining control-intensive language features such as abrupt termination, 
-exceptions or call/cc.
+Since computations can be handled like any other terms in a rewriting
+environment, that is, they can be matched, moved from one place to another
+in the original term, modified, or even deleted, K is particularly suitable
+for defining control-intensive language features such as abrupt termination,
+exceptions, call/cc, concurrency, etc.
 
 ## The K Prototype
 
@@ -28,9 +28,9 @@ is a prototype implementation of the K Framework written in Maude and using
 Maude to give a rewriting executable semantics to K definitions.
 
 The K prototype is developed by a joint team of faculty and students from
-University of Illinois at Urbana-Champaign (the FSL group, led by
-professor Grigore Rosu), and University Alexandru Ioan Cuza, Iasi, Romania
-(the FMSE group, led by professor Dorel Lucanu).
+University of Illinois at Urbana-Champaign (the FSL group, led by professor
+Grigore Rosu), and University Alexandru Ioan Cuza, Iasi, Romania (the FMSE
+group, led by professor Dorel Lucanu).
 
 A current list of the people involved in the project and their specific roles
 can be accessed at http://code.google.com/p/k-framework/people/list.
@@ -62,7 +62,7 @@ the type checker; "dynamic", for the dynamically typed version of simple;
 and "dynamic-typed-locations" which is a variant of dynamic, in which the
 type information is maintained in the environment.
 
-We encourage any user of K to contribute with examples to our distribution.
+We encourage you to contribute with examples to our distribution.
 Please see examples/README for instructions on how to do it.
 
 ## When writing new definitions
@@ -79,11 +79,10 @@ the syntactic types the construct was declared to accept (that is, no
 subterm appearing in any rule should parse to a kind); if desired,
 overload the operations to extend their range.
 
-To compile a definition: execute the `kompile` script passing as 
-parameter the name of the file containing the main module. If the 
-compilation succeeds, the output would be placed in
-name-of-the-file-compiled.maude. Currently, the script has only 
-been tested on Unix-like systems, including MacOSX. 
+To compile a definition: execute the `kompile` script passing as parameter
+the name of the file containing the main module.  If the compilation succeeds,
+the output would be placed in name-of-the-file-compiled.maude. Currently, the
+script has only been tested on Unix-like systems, including MacOSX.
 
 Recommendations on running the script:
 * The Maude executable should be on the path and should be named `maude`;
@@ -104,21 +103,39 @@ in the `examples/research/simple/untyped` directory.
 
 # How It Works
 
-In order to actually interpret (or perform state-space search on) 
-programs using a semantics written in K, there needs to be a way to give 
-the programs to the tool. The simplest way to do this is by introducing 
-a new module that defines programs as macros, letting the K tool turn
-this into its internal representation, and then use Maude on the
-generated code. We briefly outline the process below.
+We recommend the K overview paper
 
-(For more information, see the language examples in the /examples
-directory; in particular, take a look at /examples/languages/classic/imp
-and /examples/languages/research/simple/untyped, as these are
-particularly well-documented, familiar, and small.)
+  An overview of the K semantic framework
+  Grigore Rosu, Traian-Florin Serbanuta
+  Journal of Logic and Algebraic Programming, Volume 79(6), pp 397-434. 2010 
+  http://dx.doi.org/10.1016/j.jlap.2010.03.012
 
-For example, for a language LANGUAGE, we can introduce a module of the form:
+for a broader understanding of K.  Here we only discuss how our current K
+prototype works, reminding the reader important facts about K in general on
+a by-need basis.
 
-  kmod LANGUAGE-PROGRAMS is including LANGUAGE-SYNTAX
+In order to actually interpret or analyze programs using a semantics written in
+K, there needs to be a way to give the programs to the tool.  Currently, the
+simplest way to do this is by introducing a new module that defines programs as
+macros, letting the K tool turn this into its internal representation, and then
+use Maude on the generated code.  We briefly outline the process below.
+
+(For examples, see the language examples in the /examples directory;
+in particular, /examples/languages/research/simple/untyped is
+familiar and well-documented.)
+
+## Parsing Programs
+
+You may prefer to first define the syntax and then the semantics.
+That is how most of the languages in the examples directory are defined.
+For example, suppose that we want to define a language LANGUAGE and that
+we have already defined its syntax in a module LANGUAGE-SYNTAX.
+Before even attempting to define the semantics, it is a good idea
+to test the syntax by parsing a large variety of programs.
+In our generic case, we can introduce a module of the form:
+
+  module LANGUAGE-PROGRAMS
+    imports LANGUAGE-SYNTAX
     syntax Id ::= f | i | t | x | y | ...
     syntax Stmts ::= pFactorial | ...
 
@@ -136,78 +153,126 @@ For example, for a language LANGUAGE, we can introduce a module of the form:
       }
 
     ...
-  endkm
+  end module
 
 Obviously, the above program is just an example (borrowed from
 examples/languages/research/simple/untyped); you'll have to write
-programs using the syntax of the language you are defining. In this
-approach, unfortunately, the user has to declare all these syntactic
-constants by hand, as above. One can avoid this issue by using an
-external parser, but this is a more advanced technique, and we do not
-describe it here. You should contact info@k-framework.org if you want to
-know more about how to get this to work.
+programs using the syntax of the language you are defining.  The dots
+"..." above replace possibly more elements of the same type; we only
+included one program in the module above, together with all the syntactic
+constants it needs.  In this approach, unfortunately, you have to
+declare all these syntactic constants by hand, as above.  You can avoid
+this issue by using an external parser, but this is a more advanced
+technique, and we do not describe it here.  You should contact us at
+info@k-framework.org if you want to know more about how to get an external
+parser to work with K.
 
-One quick piece of technical information: syntax for some operator "op"
-gets turned into a KLabel of the form 'op by the K tool. There are some
-exceptions about how this process works (for example, quotes in the
-operator itself need to be escaped), but as long as you simply name your
-programs using an alphanumeric name, they will just have a single-quote
-applied to them. In addition, in our current implementation of K, the
-internal representation of the syntactic terms follows the simple
-abstract-syntax-tree (AST) syntax:
+As explained in the overview paper mentioned above, the entire language
+syntax is automatically included as constructors for the builtin sort
+K of computation structures, or simply just computations.  Recall (see
+the same paper) that syntax plays no special role in K; that is, the
+application of the semantic rules takes into account only the structure
+of the configuration, and not how the particular current program or
+fragment of program is parsed.  That means, in particular, that the
+distinction between concrete/abstract syntax and its representation
+as computations of sort K is irrelevant in the theory of K.  However,
+it becomes quite relevant in implementations of K tools, because we want
+to use the defined language syntax as much as possible in the semantics,
+which means that we need to combine a parser for the defined language
+with a parser for K in order to parse the semantic rules, which is a
+non-trivial engineering endeavor.
+
+In our current implementation of K, the internal representation of the
+syntactic terms follows the simple abstract-syntax-tree (AST) syntax:
 
   K ::= KLabel(List{K})
 
 List{K} is a non-terminal standing for lists of K terms separated by
-double-comma `,,` (we chose double-comma to avoid conflicts with
+double-comma ",," (we chose double-comma to avoid conflicts with
 user-defined language syntax, for example comma).  We use ".List{K}"
-for the unit of List{K}. This way, from an internal representation
+for the unit of List{K}.  This way, from an internal representation
 point of view, a language syntax is nothing but a finite set of KLabel
 constants.  For example, the internal representation of the syntactic
-program constant pFactorial above is 'pFactorial(.List{K}). As a more
+program constant pFactorial above is 'pFactorial(.List{K}).  As a more
 complex example showing elements that need to be escaped, the program
 term itself is represented internally by:
 
-  '__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id 
-  f(.List{K}), ,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(Id 
-  t(.List{K}),,Int 1(.List{ K})))),,'__('for_=_to_do_(Id i(.List{K}),,Int 
-  1(.List{K}),,Id y(.List{K}),,'_;( '_=_(Id t(.List{K}),,'_*_(Id 
-  t(.List{K}),,Id i(.List{K}))))),,'return_;(Id t(.List{ 
-  K})))))),,'function_`(`)_(Id main(.List{K}),,'`{_`}('__('_;('_=_(Id 
-  x(.List{K}),, Int 5(.List{K}))),,'write`(_`);('_`(_`)(Id 
-  f(.List{K}),,'_`,_('_`(_`)(Id f(.List{ K}),,'_`,_(Id 
-  x(.List{K})))))))))))
+    '__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id f(
+    .List{K}),,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(Id t(.List{
+    K}),,Int 1(.List{K})))),,'__('for_=_to_do_(Id i(.List{K}),,Int 1(.List{K})
+    ,,Id y(.List{K}),,'_;('_=_(Id t(.List{K}),,'_*_(Id t(.List{K}),,Id i(.List{
+    K}))))),,'return_;(Id t(.List{K})))))),,'function_`(`)_(Id main(.List{K}),,
+    '`{_`}('__('_;('_=_(Id x(.List{K}),,Int 5(.List{K}))),,'write`(_`);(
+    '_`(_`)(Id f(.List{K}),,'_`,_('_`(_`)(Id f(.List{K}),,'_`,_(Id x(.List{
+    K})))))))))))
 
-One needs to create initial configurations holding the programs one
-wants to execute and possibly other data, such as, for example, the
-program input. The two configuration generator operations below are
-meant to help users initialize the configuration when executing
-programs, and not to be regarded as part of the theoretical semantics:
+Our current implementation allows you to use either concrete syntax
+or abstract syntax (as above) in your semantic rules.  We typically prefer
+the concrete syntax, but you may need to use the abstract syntax instead
+when your syntax confuses our current (simplistic) parser.  Unfortunately,
+we currently display only abstract syntax as output of our tool (results,
+or stuck computations, etc.).
+
+In order to enable the internal K representation discussed above, the
+builtin module K needs to be imported directly or indirectly.  The K module
+is imported indirectly as soon as you start the semantics, indicated by the
+use of the "configuration" or "rule" keywords.  It is not imported
+automatically in the syntactic modules.  Thus, since in our generic example
+we did not import the module K explicitly, to test the syntax we need to
+either include the module K as well in LANGUAGE-PROGRAMS, or better to create
+another module which imports both LANGUAGE-PROGRAMS and K.  We prefer the
+latter approach because the inclusion of module K automatically subsorts all
+the syntactic categories to K, which may lead to ambiguous parsing of more
+complex programs; this is, again, a limitation of our current implementation:
+
+  module LANGUAGE
+    imports LANGUAGE-PROGRAMS
+    imports K
+  --- The semantics will be imported later.
+  --- Until then, we have to import K explicitly in order to
+  --- see the internal representation of the programs.
+  endkm
+
+To check the internal representation of the programs defined in
+LANGUAGE-PROGRAMS, first kompile LANGUAGE (type "kompile -v" for instructions
+on how to use kompile), then load the generated Maude module into Maude, and
+then type in Maude commands like
+
+  rewrite ’pFactorial(.List\{K\})
+
+## Running Programs
+
+To run programs, you need to create initial configurations holding the
+programs you want to execute and possibly other data, such as, for example,
+the program input.  K gives you complete freedom on how to create the initial
+configurations, which is both good and bad.  Our current approach to
+defining initial configurations is to introduce macros like the following:
 
   syntax Bag ::= run( KLabel ) | run( KLabel , List )
-
   macro run(PgmName:KLabel) =
         <T_> <k> PgmName(.List{K}) ~> execute </k> <_/T>
   macro run(PgmName:KLabel, Input:List) =
         <T_> <k> PgmName(.List{K}) ~> execute <k> <input> Input <input> <_/T>
 
-Note that the configurations above use ruptured cells, so they take
-advantage of K's configuration abstraction mechanism. They will be
-automatically completed and initialized to match the declared
+The two configuration generator operations above are meant to only help
+users initialize the configuration with their programs by just passing
+the program Klabel, and not to be regarded as part of the theoretical
+semantics of the language.  Note that the configurations above use ruptured
+cells, so they take advantage of K's configuration abstraction mechanism:
+they will be automatically completed and initialized to match the declared
 configuration of LANGUAGE.
 
 These helper operators are placed in a module, together with the 
-inclusion of the programs and semantics. 
+inclusion of the programs and semantics, e.g.:
 
-  kmod LANGUAGE is
-    including LANGUAGE-SEMANTICS
+  module LANGUAGE is
     including LANGUAGE-PROGRAMS
+    including LANGUAGE-SEMANTICS
     ...[above configuration macros]...
-  endkm
+  end module
 
-The idea now is that we will use the K tool to compile LANGUAGE, and
+The idea now is that we can use the K tool to compile LANGUAGE, and
 then use the Maude backend to execute the program using the semantics.
-
 To run our sample program "pFactorial", all we need to do is something
 like this:
 
@@ -248,10 +313,28 @@ And we get the result:
   states: 28416 rewrites: 224454 in 3093ms cpu (3095ms real)
   (72555 rewrites/second)
 
-You can also put those commands into a single file, and then simply call
-Maude on that file. See examples/languages/classic/imp/imp-test.m and 
-examples/languages/research/simple/untyped/simple-untyped-test.m for 
-examples of this.
+Similarly, if you want to model check a non-deterministic or concurrent
+program, then you can use Maude's builtin LTL model-checker.  In order to do
+that, you need to define state predicates (or better say configuration
+predicates).  This is a bit technical but it follows Maude's approach
+ad literam, so we do not explain it here.  The reader is refered to Maude's
+manual for more information on how to use its LTL model-checker, and again to 
+simple/untyped for an example (showing how to model-check Dekker's algorithm).
+
+You can also put such Maude commands into a single file, and then simply call
+Maude on that file.  See
+  examples/languages/research/simple/untyped/simple-untyped-test.m
+for examples of this.
+
+Important note: when defining programming languages with concurrency and/or
+with constructs evaluating their arguments in non-deterministic order, the
+state-space to be searched can be huge.  To reduce the state-space, you can
+limit the amount of non-determinism by saying explicitly which rules you want
+to count as transitions and which operations you want to evaluate their
+arguments non-deterministically.  This is done by associating tags to rules
+or operations, and then kompiling the definition with certain options
+stating which tags count as transitions and which as non-deterministic steps.
+See, again, the simple/untyped example (the Makefile shows the kompile options).
 
 
 # Reporting Issues/Bugs/Feature requests

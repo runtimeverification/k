@@ -16,15 +16,6 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
                  | pHeapSort | pSorting | pex01 | pArrays  
 
 	
-	syntax Stmts ::= pNondet
- 
-	macro pNondet =
-		var x;
-		function main() {
-			x = 1 ;
-			x = ++ x / (++ x / x);
-			write(x);
-		}
   macro pFactorial =
        var x;
 
@@ -680,6 +671,23 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
       }
     }
 --- 1
+
+
+--- programs to test non-deterministic evaluation
+
+  syntax Stmts ::= pNondet
+  macro pNondet =
+    var x;
+    function main() {
+      x = 1 ;
+      x = ++ x / (++ x / x);
+      write(x);
+}
+--- 0
+--- 1
+--- 2
+--- 3
+--- undefined (gets stuck with division-by-zero at top of computation)
 
 
 --- programs to test dynamic threads and synchronization
