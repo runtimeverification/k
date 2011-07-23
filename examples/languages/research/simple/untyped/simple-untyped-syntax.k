@@ -52,7 +52,7 @@ strict in its second argument (for the same reason as the increment). */
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
                | Exp * Exp         [strict prec 31 gather(E e)]
-               | Exp / Exp         [strict prec 31 gather(E e)]
+               | Exp / Exp         [strict prec 31 gather(E e) nd]
                | Exp % Exp         [strict prec 31 gather(E e)]
                | - Exp             [strict]
                | Exp < Exp         [strict prec 37]

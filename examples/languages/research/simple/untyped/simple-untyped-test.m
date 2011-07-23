@@ -4,6 +4,8 @@ load simple-untyped-compiled
 --- Execute SIMPLE programs ---
 -------------------------------
 
+search run('pNondet) =>! B:Bag .
+
 rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
