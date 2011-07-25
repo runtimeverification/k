@@ -2,8 +2,8 @@
 --- SIMPLE-UNTYPED-SEMANTICS module ---
 ---------------------------------------
 
-kmod SIMPLE-UNTYPED-SEMANTICS is
-  including SIMPLE-UNTYPED-DESUGARED-SYNTAX
+module SIMPLE-UNTYPED-SEMANTICS
+  imports SIMPLE-UNTYPED-DESUGARED-SYNTAX
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
@@ -161,9 +161,9 @@ fresh locations is rather low level and hopefully temporary; we intend to
 soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
   context var X = [HOLE];
-  rule <k> var X:Id = V; => . <_/k>
+  rule <k> var X:Id = V; => . ...</k>
        <env> Env:Map => Env[L:Nat/X] </env>
-       <store_> . => L|->V <_/store>
+       <store>... . => L|->V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
@@ -179,10 +179,10 @@ Note that, since the dimensions of array declarations can be arbitrary
 expressions, this virtually means that we can dynamically allocate memory in
 SIMPLE by means of array declarations. */
 
-  rule <k> var X[N:Nat]; => . <_/k>
+  rule <k> var X[N:Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store_> . => L |-> array(L +Nat 1, N)
-                     L +Nat 1 .. L +Nat 1 +Nat N |-> 0 <_/store>
+       <store>... . => L |-> array(L +Nat 1, N)
+                       L +Nat 1 .. L +Nat 1 +Nat N |-> 0 ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
 /*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
@@ -243,9 +243,9 @@ global variable before declaring a local function).  The type checker of
 SIMPLE, also defined in \K (see examples/simple/typed/static),
 discards programs which do not respect this requirement. */
 
-  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
+  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . ...</k>
        <env> Env => Env[L/F] </env>
-       <store_> . => L|->lambda(Xl,S) <_/store>
+       <store>... . => L|->lambda(Xl,S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
 /*@ When we are done with the first pass (pre-processing), the computation
@@ -279,7 +279,7 @@ When a variable $X$ is the first computational task (note the rupture of the
 environment (note the rupture of the \textsf{env} cell at both sides), and
 $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
-  rule <k> X => V:Val <_/k> <env_> X|->L <_/env> <store_> L|->V <_/store> [tags nondet]
+  rule <k> X => V:Val ...</k> <env>...X|->L...</env> <store>...L|->V...</store> [tags nondet]
 
 /*@ \subsection{Variable/Array increment}
 This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
@@ -291,8 +291,8 @@ For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
   context ++([HOLE] => l-value([HOLE]))
-  rule <k> ++loc(L) => I:Int +Int 1 <_/k>
-       <store_> L |-> (I => I +Int 1) <_/store> [tags nondet]
+  rule <k> ++loc(L) => I:Int +Int 1 ...</k>
+       <store>... L |-> (I => I +Int 1) ...</store> [tags nondet]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
@@ -330,7 +330,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
   rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
   rule array(L,_)[N] => lookup(L +Int N) [structural]
   syntax K ::= lookup ( Nat )
-  rule <k> lookup(L) => V <_/k> <store_> L |-> V <_/store> [tags nondet]
+  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [tags nondet]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -366,13 +366,13 @@ modification should be irrelevant once the function returns). */
 
   syntax ListItem ::=  ( Map , K , Bag )
   rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val}) ~> K => S ~> return(0); </k>
-       <control> <fstack> . => (Env,K,C) <_/fstack> C:Bag </control>
+       <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
        <genv> GEnv:Map </genv>
-       <store_> . => N..N+Nat|Xl| |-> getList{K}(Vl) <_/store>
+       <store>... . => N..N+Nat|Xl| |-> getList{K}(Vl) ...</store>
        <nextLoc> N => N +Nat |Xl| </nextLoc>
   rule <k> return(V); ~> _ => V ~> K </k>
-       <control> <fstack> (Env,K,C) => . <_/fstack> (_ => C) </control>
+       <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
 
 /*@ \subsection{Read}
@@ -385,7 +385,7 @@ input values are given before the program is executed; thus, the rewrite
 process gets stuck if the next computation item is a \texttt{read()} expression
 construct and no input item is available. */
 
-  rule <k> read() => I <_/k> <in> ListItem(I) => . <_/in> [tags nondet]
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [tags nondet]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -400,7 +400,7 @@ that \texttt{l-value(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
   context ([HOLE] => l-value([HOLE])) = _
-  rule <k> loc(L)=V => V <_/k> <store_> L|->(_=>V) <_/store> [tags nondet]
+  rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [tags nondet]
 
 
 /*@ \section{Statements}
@@ -418,12 +418,12 @@ for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps. */
 
   rule {} => . [structural]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) <_/k> <env> Env </env> [structural]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [structural]
 
 /*@ The basic definition of environment recovery is straightforward: */
 
   syntax K ::= env ( Map )
-  rule <k> env(Env) => . <_/k> <env> _ => Env </env> [structural]
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [structural]
 
 /*@  While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop \texttt{while B do S},
@@ -512,7 +512,7 @@ allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
   rule <k> while B:Exp do S
-    => if B then {S while B do S} else {} <_/k> [structural]
+    => if B then {S while B do S} else {} ...</k> [structural]
 
 /*@ \subsection{Write}
 The write statement appends its evaluated argument (recall that \texttt{write}
@@ -522,7 +522,7 @@ output incrementally, as it is being generated; in semantics, we do not need
 to worry about that and simply collect all the output in the \textsf{out}
 cell. */
 
-  rule <k> write(I); => . <_/k> <out_> . => ListItem(I) </out> [tags nondet]
+  rule <k> write(I); => . ...</k> <out>... . => ListItem(I) </out> [tags nondet]
 
 /*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a
@@ -553,11 +553,11 @@ exception stack.  The three rules below modularly do precisely the above. */
   syntax ListItem ::= ( Id , Stmt , K , Map , Bag )
   syntax K ::= popx
   rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
-       <control> <xstack> . => (X,S2,K,Env,C) <_/xstack> C:Bag </control>
+       <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
-  rule <k> popx => . <_/k> <xstack> _:ListItem => . <_/xstack>
+  rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
   rule <k> throw V; ~> _ => {var X=V; S2} ~> K </k>
-       <control> <xstack> (X,S2,K,Env,C) => . <_/xstack> (_ => C) </control>
+       <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
 /*@ The catch statement $S_2$ needs to be executed in the original environment,
@@ -585,8 +585,8 @@ that the remaining cells are added and initialized automatically as described
 in the definition of SIMPLE's configuration.  This is part of \K's
 configuration abstraction/concretization mechanism. */
 
-   rule <thread_> <k> spawn S => . <_/k> <env> Env </env> <_/thread>
-        (. => <thread_> <k> S </k> <env> Env </env> <_/thread>)
+   rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
+        (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the
@@ -601,7 +601,7 @@ the locks themselves ignoring their multiplicity).  As seen below, a lock is
 added to the \textsf{busy} cell as soon as it is acquired for the first time
 by a thread. */
 
-   rule (<thread_> <k>.</k> <holds> H:Map </holds> <_/thread> => .)
+   rule (<thread>... <k>.</k> <holds> H:Map </holds> ...</thread> => .)
         <busy> Busy:Set => Busy -Set keys(H) </busy>
 
 /*@ \subsubsection{Acquire lock}
@@ -614,10 +614,10 @@ the side condition of the first rule).
 counter for the lock (the locks are re-entrant).  These two cases are captured
 by the two rules below: */
 
-   rule <k>acquire V; => .<_/k> <holds_>. => V|->0<_/holds>
-        <busy>Busy (.=>SetItem(V))</busy>
+   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
+        <busy> Busy (. => SetItem(V)) </busy>
      if notBool(V in Busy) [tags nondet]
-   rule <k>acquire V; => .<_/k> <holds_>V|->(N => N +Nat 1)<_/holds>
+   rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
 
 /*@ \subsubsection{Release lock}
 Similarly, there are two corresponding cases to distinguish when a thread
@@ -628,11 +628,11 @@ is to decrement the lock counter.
 from its \textsf{holds} cell and also from the the shared \textsf{busy} cell,
 so other threads can acquire it if they need to. */
 
-   rule <k>release V; => .<_/k> <holds_>V|->(N => _-Int_(N,1))<_/holds>
+   rule <k> release V; => . ...</k> <holds>... V|->(N => _-Int_(N,1)) ...</holds>
      if N >Nat 0
    --- used prefix notation for -Int because of parsing problems
-   rule <k>release V; => .<_/k> <holds_>V|->0 => .<_/holds>
-        <busy_>SetItem(V)=>.<_/busy>
+   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
+        <busy>... SetItem(V)=>. ...</busy>
 
 /*@ \subsubsection{Rendezvous synchronization}
 In addition to synchronization through acquire and release of locks, SIMPLE
@@ -650,7 +650,7 @@ the \textsf{thread} cell, the only way to concretize the rule below to the
 actual configuration of SIMPLE is to include each \textsf{k} cell in a
 \textsf{thread} cell. */
 
-   rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k> [tags nondet]
+   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [tags nondet]
 
 ----------------------------------------------
 //@ \section{Auxiliary declarations and operations}
@@ -679,13 +679,13 @@ corresponding store lookup operation. */
   syntax Exp ::= l-value ( K )
   syntax Val ::= loc ( Nat )
 --- Local variable
-  rule <k> l-value(X) => loc(L:Nat) <_/k> <env_> X|->L <_/env>
+  rule <k> l-value(X) => loc(L:Nat) ...</k> <env>... X|->L ...</env>
 --- Array element: evaluate the array and its index;
 --- then the array lookup rule above applies.
   context l-value(_[_,`[HOLE`]:Exp,_])
   context l-value([HOLE][_])
 --- Finally, return the address of the desired object member
-  rule <k> l-value(lookup(L)) => loc(L) <_/k>
+  rule <k> l-value(lookup(L)) => loc(L) ...</k>
 
 
 /*@ \subsection{Length}
@@ -716,4 +716,4 @@ as \K results (at the beginning of the SIMPLE semantics module). */
   syntax List{Exp} ::= List{Val}
 
 /*@ The semantics of SIMPLE is now complete. */
-endkm
+end module

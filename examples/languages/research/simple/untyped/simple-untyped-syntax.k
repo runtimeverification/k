@@ -2,7 +2,7 @@
 --- SIMPLE-UNTYPED-SYNTAX module ---
 ------------------------------------
 
-kmod SIMPLE-UNTYPED-SYNTAX is 
+module SIMPLE-UNTYPED-SYNTAX
 
 /*@ \section{Syntax}
 We start by defining the SIMPLE syntax.  The language constructs discussed
@@ -140,10 +140,11 @@ syntactic detail. */
 /*@ The SIMPLE syntax is complete.  Now it is a good moment to test it by
 parsing dozens of SIMPLE programs.  Check the README file under k-framework
 for instructions on how to do it. */
-endkm
+end module
 
 
-kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX 
+module SIMPLE-UNTYPED-DESUGARED-SYNTAX
+  imports SIMPLE-UNTYPED-SYNTAX 
 /*@ \section{Desugared Syntax}
 This module desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
@@ -160,4 +161,4 @@ declared alone and is initialized. */
   macro E() = E(.List{Id})
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X; = var X=0;
-endkm
+end module

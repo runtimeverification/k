@@ -7,8 +7,8 @@ in simple-untyped-semantics
 --- Main module, including everything ---
 -----------------------------------------
 
-kmod SIMPLE-UNTYPED is
-  including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS
+module SIMPLE-UNTYPED
+  imports SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS
 
 /*@ \section{Putting Them All Together} This module puts everything together,
 namely syntax, semantics and programs (note that it includes the SIMPLE
@@ -19,12 +19,12 @@ more information on configuration initializers.  */
 
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List )
   macro run(PgmName:KLabel) =
-          <T_>
+          <T>...
              <k> PgmName(.List{K}) ~> execute </k>
-          <_/T>
+          ...</T>
   macro run(PgmName,Input) =
-          <T_>
+          <T>...
              <k> PgmName(.List{K}) ~> execute </k>
              <in> Input:List </in>
-          <_/T>
-endkm
+          ...</T>
+end module
