@@ -615,8 +615,10 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint(M, (seqkstrict(NL, QIL)))
     = ('\kseqstrict '`{ eMetaLatexPrint(NL) '`} '`{ strictCells(QIL) '`}
        ) .
-  eq eMetaLatexPrint(M, (pair("hybrid","") ))   
-    = ('\khybrid '`{ '`}) .
+  eq eMetaLatexPrint(M, (pair(Str,"") ))   
+    = ('\kattribute '`{ tokenize(latexify(Str)) '`}) .
+  eq eMetaLatexPrint(M, (pair(Str,Str') ))   
+    = ('\kattribute  '`( tokenize(latexify(Str)) '`( tokenize(latexify(Str')) '`) '`}) .
   eq eMetaLatexPrint(M, (strat(NL) ))
     = ('\kstrat '`{ eMetaLatexPrint(NL) '`} 
        ) .
@@ -678,6 +680,9 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint((I NL)) = (qid(string(I, 10)) eMetaLatexPrint(NL)) .
   eq eMetaLatexPrint((nil).NatList) = nil .
 
+
+  var Str' : String .
+
 endm
 
 
@@ -732,6 +737,7 @@ mod UNIT-META-LATEX-PRINT is
 
   var I : Import .
   op removeKModules : ModuleExpression ImportList -> ImportList .
+  eq removeKModules(ME, (including 'PL-BUILTINS .) IL) = removeKModules(ME, IL) .
   eq removeKModules(ME, (including 'K-RULES .) IL) = removeKModules(ME, IL) .
   eq removeKModules(ME, (including 'BOOL .) IL) = removeKModules(ME, IL) .
   ceq removeKModules(ME, (including Q .) IL) 

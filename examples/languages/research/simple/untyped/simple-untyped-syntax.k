@@ -2,7 +2,7 @@
 --- SIMPLE-UNTYPED-SYNTAX module ---
 ------------------------------------
 
-kmod SIMPLE-UNTYPED-SYNTAX is including #INT + #ID
+kmod SIMPLE-UNTYPED-SYNTAX is 
 
 /*@ \section{Syntax}
 We start by defining the SIMPLE syntax.  The language constructs discussed
