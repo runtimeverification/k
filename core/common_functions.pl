@@ -5,6 +5,7 @@ use File::Spec;
 use File::Basename;
 use File::Temp qw / tempfile /;
 
+our @checksum_files; # used in checksumming kompile program to detect version changes
 my $path = ".";
 
 BEGIN {
@@ -2491,6 +2492,17 @@ sub process_tags
 	}
 	
 	"@args";
+}
+
+sub get_checksum {
+	my $md5 = Digest::MD5->new;
+	
+	foreach my $file (@checksum_files) {
+		open(F, $file);
+		$md5->addfile(*F);
+		close(F);
+	}
+	return $md5->hexdigest;
 }
 
 1;

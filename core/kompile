@@ -20,12 +20,18 @@ check_perl_packages("XML::LibXML::Reader");
 check_perl_packages("Tree::Nary");
 check_perl_packages("Text::Diff");
 
+our @checksum_files = (); # used in checksumming kompile program to detect version changes
+push(@checksum_files, File::Spec->catfile((File::Basename::fileparse($0))[1], 'kompile'));
+
+
 # add common functions file
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $path;
+push(@checksum_files, $path);
 # add unquoting functions file
 $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'unquote.pl');
 require $path;
+push(@checksum_files, $path);
 
 # depending on the options given, different flags can be added here and they will be passed to maude when called
 my $additionalMaudeFlags = "";
@@ -151,6 +157,7 @@ sub compilation_cleanup
 # add configuration parser
 $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
 require $path;
+push(@checksum_files, $path);
 
 
 my $short_help_message = 
@@ -1448,6 +1455,7 @@ sub compile {
     if (/$begin_compiled_module(.*?)$end_compiled_module/s) {
 		open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	#	print FILE "\*\*\*\(\n$k_license\n\)\*\*\*\n\n\n";	
+		print FILE "--- Compiler checksum: " . get_checksum() . "\n";
 		print FILE "load $k_prelude\n";
 		print FILE $1;
 		close FILE;

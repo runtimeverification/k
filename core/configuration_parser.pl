@@ -41,6 +41,8 @@ use XML::DOM;
 # SETUP #
 #########
 
+our @checksum_files; # used in checksumming kompile program to detect version changes
+
 # keep k valid attributes and values into this map
 my %xml_attr = ();
 
@@ -54,6 +56,7 @@ my $session = 0;
 # K configuration files
 # my $k_attributes = "k_attributes.xml";
 my $k_attributes = File::Spec->catfile((File::Basename::fileparse($0))[1], 'k_attributes.xml');
+push(@checksum_files, $k_attributes);
 
 # This is specific to $k_attributes configuration file
 # keep k attributes tag names
