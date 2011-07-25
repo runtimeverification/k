@@ -27,10 +27,11 @@ rew run('p24) .
 rew run('p25) .
 rew run('p26-1) .
 rew run('p26-2) .
+q
 rew run('p27-1) .
 rew run('p27-2) .
 rew run('p27-3) .
 rew run('p28) .
 rew run('p29) .
 rew run('p30) .
----rew run('p31) .
+rew run('p31) .
