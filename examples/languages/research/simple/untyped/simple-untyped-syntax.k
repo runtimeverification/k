@@ -61,9 +61,9 @@ strict in its second argument (for the same reason as the increment). */
                | Exp >= Exp        [strict prec 37]
                | Exp == Exp        [strict prec 37]
                | Exp != Exp        [strict prec 37]
-               | Exp and Exp       [strict prec 39 gather(E e)]
-               | Exp or Exp        [strict prec 39 gather(E e)]
-               | not Exp           [strict prec 38]
+               | Exp and Exp       [strict prec 55 gather(E e)]
+               | Exp or Exp        [strict prec 59 gather(E e)]
+               | not Exp           [strict prec 53]
                | Exp [ List{Exp} ] [strict prec 1]
                | sizeOf ( Exp )    [strict]
                | Exp ( )
