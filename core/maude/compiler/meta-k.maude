@@ -629,12 +629,14 @@ fmod META-K-WRAPPERS is
   eq isWrapped(OPDS (op Q : T -> T' [AS] .), T) = true .
   eq isWrapped(OPDS, T) = false [owise] .
 
-  op findWrapper : OpDeclSet Type ~> Qid .
-  eq findWrapper(OPDS op Q : T -> T' [AS pair("wrapper",Str)] ., T) = Q .
-  eq findWrapper(OPDS op Q : T -> T' [AS metadata(Str)] ., T) 
-   = findWrapper(OPDS op Q : T -> T' [AS metadataParse(Str)] ., T) [owise] .
+  op findWrapper : Module Type ~> Qid .
+  eq findWrapper(M, T) = findWrapper(M, getWrappers(getOps(M)), T) .
+  op findWrapper : Module OpDeclSet Type ~> Qid .
+ ceq findWrapper(M, OPDS op Q : T -> T' [AS pair("wrapper",Str)] ., T'') = Q 
+  if sortLeq(M, T'', T) .
+  eq findWrapper(M, OPDS, T) = qid("Could Not Find Wrapper for Type " + string(T)) [owise] .
 
-  var M : Module . var Op : OpDecl .  var Str : String .
+  var M : Module . var Op : OpDecl .  var Str : String .  var T'' : Type .
 endfm
 
 fmod STRICT-ATTRS is

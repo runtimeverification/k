@@ -121,7 +121,7 @@ mod STRICTCXT2EQS is
   op makeK : Module Variable Type Bool ~> Term . 
   eq makeK(M, V, Type, true) = V .
   eq makeK(M, V, Type, B:[Bool]) 
-   = kApply(findWrapper(getOps(M), Type)[V],empty) .
+   = kApply(findWrapper(M, Type)[V],empty) .
 
 
   op strictCondTerm : Term Qid ~> Term .
