@@ -981,21 +981,14 @@ if (!$maudify_only) {
     $language_file_name =~ s/\.maude$//;
     $language_file_name =~ s/\.k(maude)?$//;
 
-# Since we eventually call Maude on $language_file_name, $language_file_name.maude must exist
-    if (! -e "$language_file_name.maude") {
-		print "HERE!\n\n";
-#		terminate("File $language_file_name.maude does not exist");
-    }
-
-
 
 # Checking whether Maude is available
     # run_maude("Detecting Maude ... ", "quit\n");
-	check_maude_instalation();	
+    check_maude_instalation();	
 
 
-	# Check incompatible sorts
-	check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png || $maudify_only));
+    # Check incompatible sorts
+    check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png || $maudify_only));
 
 
 # Calling either the maude compiler or the latex/pdf compiler, depending upon $latex/$pdf
@@ -1005,15 +998,15 @@ if (!$maudify_only) {
 
     if ($latex || $pdf || $ps || $eps || $png || $crop) 
     {
-		make_latexify() if $latex;
-		make_pdf() if $pdf;
-		make_eps() if $eps;
-		make_ps() if $ps;
-		make_png() if $png;
-		make_crop() if $crop;
+	make_latexify() if $latex;
+	make_pdf() if $pdf;
+	make_eps() if $eps;
+	make_ps() if $ps;
+	make_png() if $png;
+	make_crop() if $crop;
     }
     else {
-		compile();
+	compile();
     }
 }
 
@@ -1445,30 +1438,30 @@ sub compile {
 
 # If the keyword "Error" begins a line in the output, then extract and report the error message
     if (/^Error: (.*?)Bye/sm) {
-		print "ERROR:\n";
-		print $1;
-		print "Aborting the compilation\n";
-		exit(1);
+	print "ERROR:\n";
+	print $1;
+	print "Aborting the compilation\n";
+	exit(1);
     }
 
 # If the output contains a generated Maude file, then write it in $output_file_name
     if (/$begin_compiled_module(.*?)$end_compiled_module/s) {
-		open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
+	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	#	print FILE "\*\*\*\(\n$k_license\n\)\*\*\*\n\n\n";	
-		print FILE "--- Compiler checksum: " . get_checksum() . "\n";
-		print FILE "load $k_prelude\n";
-		print FILE $1;
-		close FILE;
-		push(@generated_files, $output_file_name);
-		
-		print "Compiled version written in $output_file_name.\n";
+	print FILE "--- Compiler checksum: " . get_checksum() . "\n";
+	print FILE "load $k_prelude\n";
+	print FILE $1;
+	close FILE;
+	push(@generated_files, $output_file_name);
+	
+	print "Compiled version written in $output_file_name.\n";
     }
 
 # Otherwise there must be some error that the script is now aware of, so show the whole thing
     else {
-		print "Unknown ERROR: cannot parse the output below (returned by the compiler):\n$_\n" if $_ ne "-1";
-		print "Aborting the compilation\n";
-		exit(1);
+	print "Unknown ERROR: cannot parse the output below (returned by the compiler):\n$_\n" if $_ ne "-1";
+	print "Aborting the compilation\n";
+	exit(1);
     }
 }
 
@@ -1496,7 +1489,7 @@ sub run_maude {
 
     # call maude
     my $status = system("$maude_path -no-banner -no-wrap $additionalMaudeFlags $input_file >$output_file 2>$error_file");
-    
+ 
     my $err = get_file_content($error_file);
     my $out = get_file_content($output_file);
     
@@ -1505,35 +1498,34 @@ sub run_maude {
     
     if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg || $out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-		print "[ERROR] $1\n";
-		print "Check $k_dir/$error_file to find all errors.\n";
-		return -1;
+	print "[ERROR] $1\n";
+	print "Check $k_dir/$error_file to find all errors.\n";
+	return -1;
     }
-	elsif ($err =~ /[^\s]/)
+    elsif ($err =~ /[^\s]/)
+    {
+	if (countlines($err) > 5)
 	{
-		if (countlines($err) > 5)
-		{
-			print "$&" if $err =~ /(.*?\n)(.*?\n)(.*?\n)(.*?\n)(.*?\n)/sg;
-			print "Check $k_dir/$error_file to find all errors.\n";
-		}
-		else { print $err; }
-#		return -1;
+	    print "$&" if $err =~ /(.*?\n)(.*?\n)(.*?\n)(.*?\n)(.*?\n)/sg;
+	    print "Check $k_dir/$error_file to find all errors.\n";
 	}
+#	else { print $err; }
+#		return -1;
+    }
     if ($out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-		print "[ERROR] $1\n";
-		return -1;
+	print "[ERROR] $1\n";
+	return -1;
     }
-
 
     
     if (($status >>= 8) != 0)
     {
-		$err = get_file_content($error_file);
-		$err =~ s/\n.*?$//sg;
-		# print "$err\nFailed to run maude.\nExit status $status.\n" ;
-		return -1 ;
-		# exit(1);
+	$err = get_file_content($error_file);
+	$err =~ s/\n.*?$//sg;
+	# print "$err\nFailed to run maude.\nExit status $status.\n" ;
+	return -1 ;
+	# exit(1);
     }
 
     if ($? == 0) {
