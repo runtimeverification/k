@@ -650,7 +650,7 @@ var Eq : Equation .  var Eqs : EquationSet .
     = ('\kmsg '`{ '`}) .
 
   eq eMetaLatexPrint(M, (label(QI) ))
-    = ('\klabel '`{ QI '`} ) .
+    = nil . --- '\klabel '`{ QI '`}  .
   eq eMetaLatexPrint(M, (metadata(St) ))
     = ('\kmetadata '`{ qid(St) '`} 
       ) .
