@@ -1590,7 +1590,7 @@ sub maudify_file {
 # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
     
     # print "Process file: $file\n";
-	$file = getFullName($file);
+    $file = getFullName($file);
     
     addFile(File::Spec->rel2abs($file));
     print $indent."Processing file $file\n" if $verbose;
@@ -1604,7 +1604,6 @@ sub maudify_file {
     
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
-
 	# freeze
 	s/($comment)/Freeze($&, "CMTS")/sge;
 
@@ -1633,12 +1632,12 @@ sub maudify_file {
     # Parse the configuration
     if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
     {
-		# print "FILE: $file\n";
-		parse_configuration($1, countlines($`), $file);
+	# print "FILE: $file\n";
+	parse_configuration($1, countlines($`), $file);
     }
     
     # resolve rule tags
-	$_ = rule_tags($_);    
+    $_ = rule_tags($_);
     
 #    print ;
     
@@ -1669,57 +1668,57 @@ sub maudify_file {
 
     my $maudified = "";
     while ( s!^(\s*)($top_level_pattern)(\s*)!!sm ) 
+    {
+	(my $before, local $_, my $after) = ($1,$2,$3);
+	if ( m!^kmod\s+(\S+)! ) 
 	{
-		(my $before, local $_, my $after) = ($1,$2,$3);
-		if ( m!^kmod\s+(\S+)! ) 
-		{
-			print $indent."K module $1 ... " if $verbose;
-			push(@kmodules,$1);
-			my $mno = countlines($`) if ($temporary =~ /\Q$_\E/);
-		    # print "$_\n\n$mno\n\n";
-		    
-			$_ = maudify_module($file, $mno, $_);
-			print "DONE\n" if $verbose;
-		}
-		elsif ( m!^f?mod\s+(\S+)! ) 
-		{
-			print $indent."Maude module $1 ... " if $verbose;
-			add_sorts($_);
-			add_tokens($_);
-			print "DONE\n" if $verbose;
-		}
-		elsif ( m!^(?:in|load)\s+(\S+)! ) 
-		{
-			maudify_file(maudify($1, $file), $indent);
-
-			# store imported module
-			store_import($1);
-
-			s!\.k(maude)?\s*$!\.maude!s;
-		}
-		elsif ( m!^(?:require)\s+(\S+)! ) 
-		{
-			# print "File $file require: $1\n";
-			my $import = $1;
-			if (required($import))
-			{
-				maudify_file(maudify($1, $file), $indent);
-
-				# store imported module
-				store_import($import);
-
-				s!\.k(maude)?\s*$!\.maude!s;
-				s!require!in!sg;
-			}
-			else
-			{
-				s!require\s+\S+!!;
-			}
-		}
-		else 
-		{
-		#	    print "Top level pattern:\n$_\n" if $verbose;
-		}
+	    print $indent."K module $1 ... " if $verbose;
+	    push(@kmodules,$1);
+	    my $mno = countlines($`) if ($temporary =~ /\Q$_\E/);
+	    # print "$_\n\n$mno\n\n";
+	    
+	    $_ = maudify_module($file, $mno, $_);
+	    print "DONE\n" if $verbose;
+	}
+	elsif ( m!^f?mod\s+(\S+)! ) 
+	{
+	    print $indent."Maude module $1 ... " if $verbose;
+	    add_sorts($_);
+	    add_tokens($_);
+	    print "DONE\n" if $verbose;
+	}
+	elsif ( m!^(?:in|load)\s+(\S+)! ) 
+	{
+	    maudify_file(maudify($1, $file), $indent);
+	    
+	    # store imported module
+	    store_import($1);
+	    
+	    s!\.k(maude)?\s*$!\.maude!s;
+	}
+	elsif ( m!^(?:require)\s+(\S+)! ) 
+	{
+	    # print "File $file require: $1\n";
+	    my $import = $1;
+	    if (required($import))
+	    {
+		maudify_file(maudify($1, $file), $indent);
+		
+		# store imported module
+		store_import($import);
+		
+		s!\.k(maude)?\s*$!\.maude!s;
+		s!require!in!sg;
+	    }
+	    else
+	    {
+		s!require\s+\S+!!;
+	    }
+	}
+	else 
+	{
+	    #	    print "Top level pattern:\n$_\n" if $verbose;
+	}
         $maudified = "$maudified$before$_$after";
     }
 
@@ -1764,19 +1763,17 @@ sub maudify_module {
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
 
-	my $mname = $1 if /kmod\s+(\S+)/sg;
-	
-	if (!$k_auto_incl && $mname eq $language_module_name && !includesK($language_module_name))
-	{
-#		print "[Warning] K could not be automatically included in module $language_module_name ($file:$mno)\n";
-		$require_k_main = 1;
-	}
+    my $mname = $1 if /kmod\s+(\S+)/sg;
+    if (!$k_auto_incl && $mname eq $language_module_name && !includesK($language_module_name))
+    {
+	$require_k_main = 1;
+    }
 
 # Step: resolve macros
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
-	$_ = Unfreeze("ATTR", $_);
-
+    $_ = Unfreeze("ATTR", $_);
+    
 # Step: desugar latex newline <br/>
     $_ = desugar_latex($_);
 
@@ -1784,17 +1781,14 @@ sub maudify_module {
     s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
 
     # get KLabels
-	# freeze strings :-D
-#	print "$_\n\n";
     s/($string_pattern)/Freeze($&,"STRINGS")/sge;	
-#	print "$_\n\n";
     my $decl = getKLabelDeclarations($_);
-	# unfreeze strings
-	$_ = Unfreeze("STRINGS", $_);
+# unfreeze strings
+    $_ = Unfreeze("STRINGS", $_);
 
 # Step: Add to @all_sorts all sorts defined in  k-prelude
-	add_kprelude_sorts($k_prelude, dirname($k_prelude)) if !$k_prelude_loaded;
-	$k_prelude_loaded = 1;
+    add_kprelude_sorts($k_prelude, dirname($k_prelude)) if !$k_prelude_loaded;
+    $k_prelude_loaded = 1;
 
 # Step: Add to @all_sorts all sorts defined a la Maude, with "sort(s)"
     add_sorts($_);
@@ -1807,13 +1801,13 @@ sub maudify_module {
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
 	# freeze strings and attributes
-   	s/($string_pattern)/Freeze($&,"MYSTRINGS")/sge;
+    s/($string_pattern)/Freeze($&,"MYSTRINGS")/sge;
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
     s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
 
 	# unfreeze attributes if any
     $_ = Unfreeze("ATTRIBUTES", $_);
-	$_ = Unfreeze("MYSTRINGS", $_);
+    $_ = Unfreeze("MYSTRINGS", $_);
 #     print  "Stage:\n$_\n\n";
     
 # Step: Declare the on-the-fly variables
@@ -1822,8 +1816,15 @@ sub maudify_module {
     
 # Step: Reduce cell notation with _ to cell notation with ...
     s/\sops?\s(.*?):/Freeze($&,"OPS")/gse;
+    
+    # Sub-step: _ : this is deprecated!
     s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
     s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
+    
+    # Sub-step: <> ... goes into <>... 
+    s!(<\s*[^\s>]+\s*>)\s*(\.\.\.)!$1$2 !gs;
+    s!(\.\.\.)\s*(<\s*\/\s*[^\s>]+\s*>)! $1$2!gs;
+
     $_ = Unfreeze("OPS", $_);
 #    print  "Stage:\n$_\n\n";
     
@@ -1907,9 +1908,9 @@ sub maudify_module {
 # Step: Add KLabel generated definitions - do that in shared.k for now
     if ($decl ne "")
     {
-		$klabels .= $decl;
-		s!mod(\s+)([\S]+)(\s+)is(\s+)!"mod$1$2$3is including K-SHARED .$4"!se;
-		$mset = 1;
+	$klabels .= $decl;
+	s!mod(\s+)([\S]+)(\s+)is(\s+)!"mod$1$2$3is including K-SHARED .$4"!se;
+	$mset = 1;
     }
 #    print  "Stage:\n$_\n\n";
 
@@ -1918,8 +1919,7 @@ sub maudify_module {
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-
-	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
+    print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
 
     return $_;
 }
@@ -2050,17 +2050,20 @@ sub make_ops {
 
 #	    print "PROD: $production\n";
 # Add a latex attribute in case $latex and there is not already a user-defined one
-		if (($latex || $pdf || $png || $ps || $eps || $crop) && ($attributes !~ /latex/)) {
-				my $latex_text = $production;
-				my $counter = 0;
-				$latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
-				$latex_text =~ s/_/$counter++;"{#$counter}"/ges;
-				$latex_text =~ s/"/&!&!&!/g;
-				if ($attributes eq "") {
-				$attributes = "[]";
-		    }
-		    $attributes =~ s/^\[/[latex "$latex_text" /;
+	    if (($latex || $pdf || $png || $ps || $eps || $crop) && ($attributes !~ /latex/)) 
+	    {
+		my $latex_text = $production;
+		my $counter = 0;
+		$latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
+		$latex_text =~ s/_/$counter++;"{#$counter}"/ges;
+		$latex_text =~ s/"/&!&!&!/g;
+                if ($attributes eq "") 
+                {
+                    $attributes = "[]";
 		}
+                 
+                $attributes =~ s/^\[/[latex "$latex_text" /;
+	    }
 
 
 	
