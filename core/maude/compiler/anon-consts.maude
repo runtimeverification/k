@@ -6,7 +6,7 @@ fmod ANONYMOUS-CONSTANTS is
   including K-STRICTNESS-OPS .
   including META-ANONYMOUS-VARIABLE .
 
-  var M Flat : Module . var Q : Qid .
+  var M Flat : Module . var Q : Qid .  var Str : String .
   var Mbs : MembAxSet . var Mb : MembAx .  
   var Eqs : EquationSet . var Eq : Equation .
   var Rls : RuleSet . var Rl : Rule .
@@ -66,6 +66,8 @@ fmod ANONYMOUS-CONSTANTS is
 
   op fixHole : Module Qid Type ~> Type .
   eq fixHole(M,Q,T) = if Q == getName(hole) and-then sortLeq(M,K,T) then K else T fi . 
+  eq fixHole(M, Q, errorS(Trm, T, Str)) 
+   = errorS(mkConstant(Q,T), T, Str) .
 
   op resolveConstsTl : Module TermList Nat TypeListSet TypeSet ~> TermList .
   eq resolveConstsTl(M, empty, N, TLS, SS) = empty .
@@ -86,4 +88,5 @@ fmod ANONYMOUS-CONSTANTS is
   op checkCommonType : Type TypeListSet ~> Type .
   eq checkCommonType(T, none) = T .
   eq checkCommonType(T, T Tl ; TLS) = checkCommonType(T, TLS) .
+  eq checkCommonType(T, TLS) = errorS('`[`].K, T, "Cannot get common type") .
 endfm

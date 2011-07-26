@@ -359,6 +359,7 @@ fmod K-META-CONFIG is
   var Q Q' : Qid .  var B B' : Multiplicity . var E E' : Ellipses .  var M : Module .  
   var AS AS' : AttrSet .  var MAS : MembAxSet .  var S : Sort .  var Str : String .
   var SC : SplitCell .
+  var Trm Cxt : Term .
 
 
 
@@ -491,6 +492,7 @@ fmod K-META-CONFIG is
   eq getContents({T,Contents,AS}) = Contents .
   op setContents : SplitCell Term -> SplitCell .
   eq setContents({T,Contents,AS}, Contents') = {T,Contents',AS} .
+  eq setContents({T,Contents,AS}, errorT(Trm, Cxt, Str)) = {T,errorT(Trm, Cxt, Str),AS} .
 
   op getMultiplicity : SplitCell -> Multiplicity .
   eq getMultiplicity({T,Contents,AS}) = AS[multiplicity] .
@@ -499,6 +501,8 @@ fmod K-META-CONFIG is
 
   op plugCell : SplitCell -> Term .
   eq plugCell({T,Contents,AS}) = symbolE none[plugAttributes(T,AS - initialCellAttrs),Contents,T] .
+  eq plugCell({T,errorT(Trm, Cxt, Str),AS}) = errorT(Trm,  symbolE none[plugAttributes(T,AS - initialCellAttrs),Cxt,T], Str) .
+
 
   op plugAttributes : Term AttrSet ~> Term .
   eq plugAttributes(LabelT, AK |-> AV AS)
@@ -800,6 +804,7 @@ fmod META-K-CONTEXTS is including K-SORTS .
 
   op setContents : KContextSplit Term -> KContextSplit .
   eq setContents(C{T,Cond,AS}, T') = C{T',Cond,AS} .
+  eq setContents(C{T,Cond,AS}, errorT(T, Cxt, Str)) = C{errorT(T, Cxt, Str),Cond,AS} .
 
   op setCondition : KContextSplit TermList -> KContextSplit .
   eq setCondition(C{T,Cond,AS}, Cond') = C{T,Cond',AS} .
@@ -807,6 +812,8 @@ fmod META-K-CONTEXTS is including K-SORTS .
   op plugKContext : KContextSplit ~> MembAx .
   eq plugKContext(C{T,empty,AS}) = (mb symbol(kcxt)[T] : KSentence [AS] .) .
   eq plugKContext(C{T,C,AS}) = (mb symbol(kccxt)[T,C] : KSentence [AS] .) [owise] .
+  eq plugKContext(C{errorT(T, Cxt, Str), Cond, AS})
+   = errorMb(T, Cxt, Str, AS) .
 
   op getHoleReplacement_ : TermList ~> Term .
  ceq getHoleReplacement(O[T1, T2],Tl) = T2 if O = replaceS /\ getName(T1) = getName(hole) .
@@ -817,7 +824,7 @@ fmod META-K-CONTEXTS is including K-SORTS .
 
 
   var O : Qid . var Ct : Constant . var V : Variable .
-  var T1 T2 : Term . var Tl Tl' : TermList .  
+  var T1 T2 Cxt : Term . var Tl Tl' : TermList .   var Str : String .
 
   op replaceCxt : Term Term -> Term .
   eq replaceCxt(T1, T2) = 'wrap-with[T1,T2] .

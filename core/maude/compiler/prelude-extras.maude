@@ -278,9 +278,12 @@ endfm
 
 fmod META-TERM-EXTRAS is
   including META-TERM .
+  op errorT : [Term] Term String -> [Term] .
+ op errorS : Term Type String -> [Type] .
+
   var V : Variable . var Trl' Trl Trl'' : TermList .  var Tr Tr' : Term .
   var C : Constant . var Nz : NzNat . var N : Nat .  var Q : Qid .
-  var Subst : Substitution .  var T : Type . 
+  var Subst : Substitution .  var T : Type .   var Str : String .
 
   op countTerms : TermList -> Nat .
   eq countTerms(empty) = 0 .
@@ -328,6 +331,7 @@ fmod META-TERM-EXTRAS is
 
   op mkVariable : Qid Type -> Variable .
   eq mkVariable(Q, T) = qid(string(Q) + ":" + string(T)) .
+  eq mkVariable(Q, errorS(Tr, T, Str)) = errorT(Tr, '`[`]:K, Str) .
 
 
   op nth : TermList Nat ~> Term .
@@ -352,7 +356,6 @@ fmod META-K-ERROR is
   op moduleError : QidList -> [Module] .
   
   op errorAS :  String String -> [Attr] .
-  op errorT : [Term] Term String -> [Term] .
   op errorMb : [Term] Term String AttrSet -> [MembAx] .
   op errorOp : String AttrSet -> [OpDecl] .
   op errorEq : [Term] Term String AttrSet -> [Equation] .
@@ -1106,7 +1109,6 @@ fmod META-LEVEL-EXTRAS is
   [owise] .
   eq sortsLeq(M, nil,nil) = true .
 
- op errorS : Term Type String -> [Type] .
  op errorSOp : Term Type String -> [OpDecl] .
 
   op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
