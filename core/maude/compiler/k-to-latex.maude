@@ -615,10 +615,11 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint(M, (seqkstrict(NL, QIL)))
     = ('\kseqstrict '`{ eMetaLatexPrint(NL) '`} '`{ strictCells(QIL) '`}
        ) .
+  eq pair("tags","") = none .   
   eq eMetaLatexPrint(M, (pair(Str,"") ))   
     = ('\kattribute '`{ tokenize(latexify(Str)) '`}) .
   eq eMetaLatexPrint(M, (pair(Str,Str') ))   
-    = ('\kattribute  '`( tokenize(latexify(Str)) '`( tokenize(latexify(Str')) '`) '`}) .
+    = ('\kattribute  '`( tokenize(latexify(Str)) '`( tokenize(latexify(Str')) '`) '`}) [owise] .
   eq eMetaLatexPrint(M, (strat(NL) ))
     = ('\kstrat '`{ eMetaLatexPrint(NL) '`} 
        ) .
@@ -1150,31 +1151,21 @@ mod LATEX-PRINT-META is
        eMetaLatexPrint(M, Prints)) .
 
   var Cnd : Term .
----(
-  eq eMetaLatexPrint(M, rule(Str, R{T,empty, kstructural AS}) Prints)
-    = ('\n '\kequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
-                   '`} 
-       eMetaLatexPrint(M, Prints)) .
-  eq eMetaLatexPrint(M, rule(Str, R{T,Cnd, kstructural AS}) Prints)
-    = ('\n '\kcequation '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(setName(M,'STRUCTURAL), T, AS) 
-                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
-       eMetaLatexPrint(M, Prints)) .
----)
   eq eMetaLatexPrint(M, (rule(Str, R{T, empty, AS})) Prints)
     = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
-                   '`} 
+                   '`} '`{ '`} '`{ eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
   eq eMetaLatexPrint(M, (rule(Str, R{T, Cnd, AS})) Prints)
-    = ('\n '\kcrule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
-                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
+    = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
+                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`}  '`{  eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
   eq eMetaLatexPrint(M, (context(Str, C{T, empty, AS})) Prints)
     = ('\n '\kcontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
-                   '`} 
+                   '`} '`{ '`} '`{  eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
   eq eMetaLatexPrint(M, (context(Str, C{T, Cnd, AS})) Prints)
-    = ('\n '\kccontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
-                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`} 
+    = ('\n '\kcontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
+                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`} '`{  eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
 
   op printTerm0 : Module Term AttrSet -> QidList .

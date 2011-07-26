@@ -696,8 +696,14 @@
 %%% Context
 
 % Context.
-\newcommand{\kcontext}[2]{\par%
+\newcommand{\kcontext}[4]{\par%
   \text{\scshape context:} $#2$%
+  \ifthenelse{\equal{#3}{}}{}{%
+    \when{#3}%
+  }%
+  \ifthenelse{\equal{#4}{}}{}{%  
+   [#4]% 
+  }%
   \k@markPosition%
   \bigskip%
 }
@@ -745,25 +751,17 @@
 
 %%% Rules.
 
-\newcommand{\krule}[2]{%
+\newcommand{\krule}[4]{%
   \par\indent\hbox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   }%
-  \k@markPosition%
-  \bigskip%
-}
-\newcommand{\kcrule}[3]{%
-  \par\indent\hbox{%
-    \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
+  \ifthenelse{\equal{#3}{}}{}{%
     \when{#3}%
   }%
   \k@markPosition%
-  \bigskip%
-}
-\newcommand{\kndrule}[2]{\par%
-  \k@ruleLabel{#1}{non-det rule}%
-  \par\indent\hbox{$#2$}%
-  \k@markPosition%
+  \ifthenelse{\equal{#4}{}}{}{%  
+   \hfill[#4]% 
+  }%
   \bigskip%
 }
 \newcommand{\mrule}[3]{%
