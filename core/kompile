@@ -1610,7 +1610,7 @@ sub maudify_file {
 
 	# replace module with kmod and 
 	# endmodule with endkm
-	s/(module)(.*?\s)(end\s+?module)/kmod$2endkm/sg;
+	s/(module)(.*?)(end\s+?module)/kmod$2endkm/sg;
 	
 	# replace including with imports
 	s/(?<!\S)imports(?!\S)/including/sg;
