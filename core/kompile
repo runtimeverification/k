@@ -1769,6 +1769,10 @@ sub maudify_module {
 	$require_k_main = 1;
     }
 
+# Step: [#] and  [HOLE] -> `[HOLE`] 
+    s!\[#\]!`[HOLE`]!sg;
+#    s!\[HOLE\]!`[HOLE`]!sg;
+    
 # Step: resolve macros
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
