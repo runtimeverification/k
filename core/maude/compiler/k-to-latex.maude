@@ -417,9 +417,11 @@ var Eq : Equation .  var Eqs : EquationSet .
   op \algebraicOp{_}{_}{_}{_} : Qid TypeList  Type AttrSet -> OpDecl .
 
   op eMetaLatexPrint1 : Module AttrSet -> QidList .
+  eq eMetaLatexPrint1(M,label(Q) AtS) = eMetaLatexPrint1(M,AtS) .
+  eq eMetaLatexPrint1(M,klarge AtS) = eMetaLatexPrint1(M,AtS) .
   eq eMetaLatexPrint1(M,(none).AttrSet) = nil .
   eq eMetaLatexPrint1(M,AtS)
-   =  '`[ eMetaLatexPrint(M,AtS) '`] .
+   =  '`[ eMetaLatexPrint(M,AtS) '`] [owise] .
 
   ops rule : String KRuleSplit -> Printable .
   ops mequation : String Term Term -> Printable .
@@ -536,6 +538,8 @@ var Eq : Equation .  var Eqs : EquationSet .
  ceq eMetaLatexPrint(M, (Attr:Attr NAtS))
    = if QIL =/= nil then QIL '\s else nil fi eMetaLatexPrint(M, NAtS) 
   if QIL :=  eMetaLatexPrint(M, Attr:Attr) .
+  eq eMetaLatexPrint(M, klarge)  
+    = nil .
   eq eMetaLatexPrint(M, assoc)  
     = '\kassoc '`{ '`} .
   eq eMetaLatexPrint(M, comm)
