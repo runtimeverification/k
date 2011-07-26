@@ -10,8 +10,8 @@ in simple-typed-dynamic-semantics
 kmod SIMPLE-TYPED-DYNAMIC is including SIMPLE-TYPED-DYNAMIC-SEMANTICS + SIMPLE-TYPED-PROGRAMS 
   syntax Bag ::= run ( KLabel )
   macro run(PgmName:KLabel) =
-          <T_>
-             <k> PgmName(.List{K}) </k>
+          <T>...
+             <k> PgmName(.List{K}) ~> execute </k>
              <in> List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576) </in>
-          <_/T>
+          ...</T>
 endkm
