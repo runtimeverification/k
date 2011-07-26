@@ -107,7 +107,7 @@ fmod PARSE-METADATA-STRICT is
   eq pair("seqstrict",S) = seqkstrict(getStrictList(S),klabel) .
  ceq pair(S,S') = kstrict(getStrictList(S'),qid(substr(S,0,  _-_(length(S),length("-strict")))))
   if "-strict" = substr(S, _-_(length(S),length("-strict")), length(S)) .
- ceq pair(S,S') = kstrict(getStrictList(S'),qid(substr(S,0,  _-_(length(S),length("-seqstrict")))))
+ ceq pair(S,S') = seqkstrict(getStrictList(S'),qid(substr(S,0,  _-_(length(S),length("-seqstrict")))))
   if "-seqstrict" = substr(S, _-_(length(S),length("-seqstrict")), length(S)) .
 
   op getStrictList : String -> IntList .
