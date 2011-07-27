@@ -8,10 +8,16 @@ in simple-typed-dynamic-semantics
 -----------------------------------------
 
 kmod SIMPLE-TYPED-DYNAMIC is including SIMPLE-TYPED-DYNAMIC-SEMANTICS + SIMPLE-TYPED-PROGRAMS 
-  syntax Bag ::= run ( KLabel )
+//@ \section{Putting Them All Together}
+  syntax Bag ::= run ( KLabel ) | run ( KLabel , List )
   macro run(PgmName:KLabel) =
           <T>...
              <k> PgmName(.List{K}) ~> execute </k>
-             <in> List(7,,23,,654,,656,,54,,456,,436345647643567,,354654364356,,4357643576) </in>
+          ...</T>
+  macro run(PgmName,Input) =
+          <T>...
+             <k> PgmName(.List{K}) ~> execute </k>
+             <in> Input:List </in>
           ...</T>
 endkm
+

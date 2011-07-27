@@ -62,7 +62,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
        function init(n:int):int[] {
          var x[n]:int[];
          for i = 0 to n - 1 do
-           x[i] = i;
+           x[i] = read();
          return x;
        }
 
@@ -166,8 +166,7 @@ kmod SIMPLE-TYPED-PROGRAMS is including SIMPLE-TYPED-SYNTAX
        function main():void {
          var x:int[];
          var n:int;
-         n = 10;
-         x = init(n);
+         x = init(read());
          var f[11]:(int[]->void)[];
          f[ 0] = writeArray;
          f[ 1] = reverse;

@@ -127,24 +127,21 @@ functions). */
 
 /*@ \subsection{Variable Declaration}
 The SIMPLE syntax was desugared above so that each variable is declared alone
-and is also initialized.  The context declaration below says that the
-expression used for the initialization of the variable should be first
-evaluated (that expression can be any arithmetic expression, including array
-lookups, function calls, etc.).  The semantic rule below matches resulting
+and its initialization is done as a a separate statement.
+The semantic rule below matches resulting
 variable declarations of the form
-``$\texttt{var}\,X\,\texttt{=}\,V\texttt{;}$'' (with $V$ a
-value) on top of the \textsf{k} cell (indeed, note that the \textsf{k} cell
+``$\texttt{var}\,X\texttt{;}$'' on top of the \textsf{k} cell (indeed, note that the \textsf{k} cell
 is complete, or round, to the left, and is torn, or ruptured, to the right),
-allocates a fresh location $L$ in the store to hold the value $V$ (indeed,
+allocates a fresh location $L$ in the store which is initialized with a special value $\bot$ (indeed,
 the unit ``$\kdot$'', or nothing, is matched anywhere in the map---note the
 tears at both sides---and replaced with the mapping $L\mapsto V$), and binds
 $X$ to $L$ in the local environment shadowing previous declarations of $X$,
 if any.  It is this possible shadowing of $X$ which disallows us to use a
 similar technique for updating the environment as for updating the store, as
-we know that $L$ is not already bound in the store when we add $L \mapsto V$.
+we know that $L$ is not already bound in the store when we add $L \mapsto \bot$.
 We prefer the approach used for updating the store whenever possible, because
 it offers more true concurrency than the latter; indeed, according to the
-concurrent semantics of $K$, the store is not frozen while $L\mapsto V$ is
+concurrent semantics of $K$, the store is not frozen while $L\mapsto \bot$ is
 added to it, while the environment is frozen during the update operation
 $\textit{Env}[L/X]$.  The variable declaration command is also removed from
 the top of the computation cell and the fresh location counter is incremented.
@@ -160,10 +157,11 @@ configuration structure.
 fresh locations is rather low level and hopefully temporary; we intend to
 soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
-  context var X = [HOLE];
+  syntax K ::= undefined [latex "\bot"]
+
   rule <k> var X:Id = V; => . ...</k>
        <env> Env:Map => Env[L:Nat/X] </env>
-       <store>... . => L|->V ...</store>
+       <store>... . => L|->undefined ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
@@ -182,7 +180,7 @@ SIMPLE by means of array declarations. */
   rule <k> var X[N:Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> array(L +Nat 1, N)
-                       L +Nat 1 .. L +Nat 1 +Nat N |-> 0 ...</store>
+                       L +Nat 1 .. L +Nat 1 +Nat N |-> undefined ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
 /*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
@@ -191,7 +189,7 @@ This way, we will only need to give semantics to uni-dimensional arrays.
 First, the context rule below is used to request the evaluation of array
 dimensions: */
 
-  context var X[_,`[HOLE`]:Exp,_];
+  context var X[_,[#]:Exp,_];
 
 /*@  Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
@@ -281,6 +279,9 @@ $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
   rule <k> X => V:Val ...</k> <env>...X|->L...</env> <store>...L|->V...</store> [tags nondet]
 
+/*@ Note that this excludes reading $\bot$, as $\bot$ is not a value.
+*/
+
 /*@ \subsection{Variable/Array increment}
 This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
 Therefore, we need to extract the l-value of the expression to increment.
@@ -290,7 +291,7 @@ The semantics of the auxiliary l-value operation is defined below.
 For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
-  context ++([HOLE] => l-value([HOLE]))
+  context ++([#] => l-value([#]))
   rule <k> ++loc(L) => I:Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [tags nondet]
 
@@ -399,7 +400,7 @@ that appears in an assignment.  Like for the increment, all we need to know is
 that \texttt{l-value(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
-  context ([HOLE] => l-value([HOLE])) = _
+  context ([#] => l-value([#])) = _
   rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [tags nondet]
 
 
@@ -682,8 +683,8 @@ corresponding store lookup operation. */
   rule <k> l-value(X) => loc(L:Nat) ...</k> <env>... X|->L ...</env>
 --- Array element: evaluate the array and its index;
 --- then the array lookup rule above applies.
-  context l-value(_[_,`[HOLE`]:Exp,_])
-  context l-value([HOLE][_])
+  context l-value(_[_,[#]:Exp,_])
+  context l-value([#][_])
 --- Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) ...</k>
 

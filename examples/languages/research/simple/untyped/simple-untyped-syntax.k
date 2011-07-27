@@ -160,5 +160,5 @@ declared alone and is initialized. */
   macro function F:Id() S = function F(.List{Id}) S
   macro E() = E(.List{Id})
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
-  macro var X; = var X=0;
+  macro var X = E; = var X; X = E;
 end module
