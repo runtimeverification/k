@@ -72,7 +72,7 @@ abstraction, function application, let and letrec binders, and conditional.
 --- List{Id}
   syntax List{Id} ::= Id
                     | ( )
-                    | List{Id} , List{Id} [strict hybrid assoc id:() prec 70]
+                    | List{Id} , List{Id} [strict hybrid assoc id: `(`) prec 70]
 
 --- List{Exp}
   syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]

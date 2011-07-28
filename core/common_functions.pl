@@ -58,7 +58,7 @@ my $top_level_pattern = join("|", (
                     "(?:in|load|require)\\s+\\S+"
     ));
 
-my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
+my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 my $parentheses = "\Q{}[]()\E";
@@ -1571,47 +1571,72 @@ my $k_attributes_pattern = join("|",  @k_attributes);
 
 sub line_numbers
 {
-	my ($statement, $operation, $spaces, $file) = (shift, shift, shift, shift);
+    my ($statement, $operation, $spaces, $file) = (shift, shift, shift, shift);
 
 #	print "CHECK: $statement\n";
 
     if ( $operation eq "rule" or $operation eq "context" )
     {
-        my ($rule, $spaces, $attr) = ($statement, $spaces, "");
+        my ($rule, $spaces) = ($statement, $spaces);
         my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
 
 #        $rule =~ s!\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$!{$attr = $1;}""!gse;
-		my $tags_regex = get_tags_regex();
-		my $space = "";
-		$rule =~ s/(\[\s*($tags_regex).*?(?<!`)\])/{$attr = $1;"";}/gse;
-        if ($attr eq "")
+	my $attr = "";
+	my $space = "";
+	my $bool = 0;
+	
+#	print "RULE: $rule\n";
+	$rule =~ s/(?<=\s)\[([^\[]*?)\](\s*)$/
+	{ 
+	    $attr = $1; 
+	    $space = $2;
+	    
+#	    print "ATTR: $attr\n";
+	    my @ttags = get_tags();
+	    foreach(@ttags)
+	    {
+		if ($attr =~ m!\b\Q$_\E\b!sg)
+		{
+#		    print "AICI! $attr\n\n";
+		    $bool = 1;
+		}
+	    }
+	    ""; 
+	}/gse;
+        
+	
+	if ($bool == 0 && $attr ne "")
+	{
+	    $rule .= "[$attr]$space";
+	    $attr = "";
+	}
+	
+#	print "ATT: $attr\n";
+	
+	if ($attr eq "")
         {
-            $rule .= " [metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
+           $rule .= " [metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
             $rule .= " [metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
         }
         else
         {
-        	if ($attr =~ /metadata/sg)
-        	{
-        		my $loc = ($rule_size + $rule_line - 1);
-        		$attr =~ s/(metadata\s+")/$1location=($file:$rule_line) /sg if $rule_size == 0 || $rule_size == 1;
-				$attr =~ s/(metadata\s+")/$1location=($file:$rule_line-$loc) /sg if $rule_size > 1;
-            	$rule .= "$attr$space";
-            	
-            	#metadata \"location=($file:$rule_line)\"]" if $rule_size == 0 || $rule_size == 1;
-            	#$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]" 
-        	}
-        	else
-        	{
-            	$rule .= "[$attr metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
-            	$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
+	    if ($attr =~ /metadata/sg)
+	    {
+		my $loc = ($rule_size + $rule_line - 1);
+		$attr =~ s/(metadata\s+")/$1location=($file:$rule_line) /sg if $rule_size == 0 || $rule_size == 1;
+                $attr =~ s/(metadata\s+")/$1location=($file:$rule_line-$loc) /sg if $rule_size > 1;
+                $rule .= "[$attr]$space";
             }
+            else
+            {
+		$rule .= "[$attr metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
+		$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
+	    }
         }
-
-#		print "RULE: $rule\n\n";
-
-		return $rule . $spaces;
-    }
+      
+#        print "Rule: $rule\n\n\n";
+        return $rule . $spaces;
+     }
      elsif ($2 eq "macro")
      {
  		# macros
@@ -2187,323 +2212,377 @@ sub check_incompatible
 # search the apropriate import
 sub maudify
 {
-		my $import = shift;
-		my $file = shift;
-
-		my $m_import = $import;
-		$m_import =~ s!^\/!!sg;
-
+    my $import = shift;
+    my $file = shift;
+    
+    my $m_import = $import;
+    $m_import =~ s!^\/!!sg;
+    
 #		print "\n\nIMP: $import\nFILE: $file\n\n";
-
-		# solve local files
-		if (-e File::Spec->catfile((fileparse($file))[1], $import))
-		{
-			# $import is a local file, $import contains extension
-			return File::Spec->catfile((fileparse($file))[1], $import);
-		}
-		elsif (-e File::Spec->catfile((fileparse($file))[1], "$import.k"))
-		{
-			# $import is a local file, $import is a k file
-			return File::Spec->catfile((fileparse($file))[1], "$import.k");
-		}
-		elsif (-e File::Spec->catfile((fileparse($file))[1], "$import.maude"))
-		{
-			# $import is a local file, $import is a maude file
-			return File::Spec->catfile((fileparse($file))[1], "$import.maude");
-		}
-		
-		# solve absolute paths
-		elsif (-e $import)
-		{
-			# $import contains extension
-			return $import;
-		}
-		elsif (-e "$import.k")
-		{
-			# $import is a k file
-			return "$import.k";
-		}
-		elsif (-e "$import.maude")
-		{
-			# $import is a local file, $import is a maude file
-			return "$import.maude";
-		}
-		
-		# solve imports from K_BASE modules
-		elsif (-e File::Spec->catfile($k_base, $m_import))
-		{
-			# $import contains extension
-			return File::Spec->catfile($k_base, $m_import);	
-		}
-		elsif (-e File::Spec->catfile($k_base, "$m_import.k"))
-		{
-			# $import is a k file
-			return File::Spec->catfile($k_base, "$m_import.k");
-		}
-		elsif (-e File::Spec->catfile($k_base, "$m_import.maude"))
-		{
-			# $import is a maude file
-			return File::Spec->catfile($k_base, "$m_import.maude");
-		}
-
- 		print generate_error("ERROR", 1, $file, "unknown line", "File $import needed by $file cannot be found! Please check if the path is correct.");
-}
-
-sub op_tags
-{
-	local $_ = shift;
-	my $sp = /(\s+$)/sg ? $1 : "";
-
-#	print "ATTR: $_\n";
-	
-	my $latex = "";
-	my $comm = "";
-	my $assoc = "";
-	my $id = "";
-	my $strict = "";
-	my $gather = "";
-	my $metadata = "";	
-	my $prec = "";
-	my $ditto = "";
-	
-	s/latex\s+".*?(?<!\\)"/{$latex = $&;"";}/sge;
-	s/metadata\s+".*?(?<!\\)"/{$metadata = $&;"";}/sge;
-	s/comm/{$comm = $&;"";}/sge;
-	s/assoc/{$assoc = $&;"";}/sge;
-	s/gather\s*\(.*?(?<!\\)\)/{$gather = $&;"";}/sge;
-#	s/strict(\s*\(.*?(?<!\\)\))?/{$strict = $&;"";}/sge;
-	s/id\s*:\s*(([^`\[\],\s]*(`[^`])?)*)(?=($|[\(\)\{\}\[\],\s]))/{$id = $&;"";}/sge;
-	s/prec\s+[0-9]+/{$prec=$&;"";}/sge;
-	s/ditto/{$ditto = $&;}/sge;
-	
-#	print "LATEX: $latex\nMETA: $metadata\nCOMM: $comm\nASSOC: $assoc\nGATH: $gather\nSTRICT: $strict\nID: $id\nPREC: $prec\nDITTO: $ditto\n";
-#	print "REST: $_\n\n";
-	
-	# push everything left in a hashmap
-	my %map = ();
-	
-	my $rest = $_;
-	while ($rest =~ /\b([a-zA-Z_\-]+)(\s*\(.*?(?<!\\)\))?/sg)
-	{
-		my $attr_name = $1;
-		my $attr_value = "()";
-		$attr_value = $2 if defined $2;
-		
-		# push in map
-		$map{$attr_name} = $attr_value;
-	}
-	
-	# push latex in map
-	if ($latex ne "")
-	{
-		$map{$1} = "(renameTo \\\\". get_newcommand($2) . ")" if $latex =~ /(latex)\s+"(.*?(?<!\\))"/sg;
-	}
-	
-	
-	
-	my $attr_string = "";
-#	$attr_string .= "ditto=() " if $ditto ne "";
-	while (my ($key, $value) = each(%map) )
-	{
-		$key =~ s/^\s+//sg;
-		$key =~ s/\s+$//sg;
-		$value =~ s/^\s+//sg;
-		$value =~ s/\s+$//sg;
-		$attr_string .= "$key=$value ";
-	}
-	
-	# put string in metadata
-	if ($metadata ne "")
-	{
-		# replace first " with "$attr_string
-		$metadata =~ s/"/"$attr_string/s;
-	}
-	else
-	{
-		$metadata = "metadata \"$attr_string\"";
-	}
-
-#	print "METAD: $metadata\n";
-
-	my $attributes = $metadata . " ";
-#	$attributes .= $latex . " ";
-#	$attributes .= $strict . " ";
-	$attributes .= $prec . " ";
-	$attributes .= $gather . " ";
-	$attributes .= $id . " ";
-	$attributes .= $comm . " ";
-	$attributes .= $assoc . " ";
-	$attributes .= $ditto . " ";
-	
-#	print "ATTRIBUTES: $attributes";
-	
-#	print "\n\n\n";
-	
-	"[$attributes]$sp";
-}
-
-sub rule_tags
-{
-	my $bleah = shift;
-	local $_ = $bleah;
-	
-	
-    # rules
-    while ($bleah =~ /\brule(.*?\s)(?=$kmaude_keywords_pattern)/sg)
+    
+    # solve local files
+    if (-e File::Spec->catfile((fileparse($file))[1], $import))
     {
-#		print "Called: $&\n";
-    	my $temp = $1;
-    	my $rule_body = $1;
-    	
-    	my $tag = "";
-
-#		print "RULEBODY: $rule_body\n";    	
-    	$rule_body =~ s/^\s*\[([a-zA-Z_\-]+?)\]\s*:/{$tag = $1;"";}/sge;
-    	
-#    	print "TAG: $tag\n";
-    	
-    	my $tags_regex = get_tags_regex();
-    	$rule_body =~ s/(.*?\S)(\s+)(\[\s*($tags_regex).*?(?<!`)\])(\s*)$/
-    	{
-#    		print "AROUND\n";
-    		"$1$2" . compress_tags($tag, $3) . $5;
-    	}/sge;	
-
-		s/\Q$temp\E/$rule_body/sg;
+	# $import is a local file, $import contains extension
+	return File::Spec->catfile((fileparse($file))[1], $import);
     }
-
-    # context
-    while ($bleah =~ /\bcontext(.*?\s)(?=$kmaude_keywords_pattern)/sg)
+    elsif (-e File::Spec->catfile((fileparse($file))[1], "$import.k"))
     {
-    	my $temp = $1;
-    	my $context_body = $1;
-    	my $tags_regex = get_tags_regex();    	
-    	$context_body =~ s/(.*?\S)(\s+)(\[\s*($tags_regex).*?(?<!`)\])(\s*)$/
-    	{
-    		"$1$2" . compress_tags("", $3) . $5;
-    	}/sge;	
-
-		s/\Q$temp\E/$context_body/sg;
+	# $import is a local file, $import is a k file
+	return File::Spec->catfile((fileparse($file))[1], "$import.k");
     }
-
-
-	return $_;
+    elsif (-e File::Spec->catfile((fileparse($file))[1], "$import.maude"))
+    {
+	# $import is a local file, $import is a maude file
+	return File::Spec->catfile((fileparse($file))[1], "$import.maude");
+    }
+    
+    # solve absolute paths
+    elsif (-e $import)
+    {
+	# $import contains extension
+	return $import;
+    }
+    elsif (-e "$import.k")
+    {
+	# $import is a k file
+	return "$import.k";
+    }
+    elsif (-e "$import.maude")
+    {
+	# $import is a local file, $import is a maude file
+	return "$import.maude";
+    }
+    
+    # solve imports from K_BASE modules
+    elsif (-e File::Spec->catfile($k_base, $m_import))
+    {
+	# $import contains extension
+	return File::Spec->catfile($k_base, $m_import);	
+    }
+    elsif (-e File::Spec->catfile($k_base, "$m_import.k"))
+    {
+	# $import is a k file
+	return File::Spec->catfile($k_base, "$m_import.k");
+    }
+    elsif (-e File::Spec->catfile($k_base, "$m_import.maude"))
+    {
+	# $import is a maude file
+	return File::Spec->catfile($k_base, "$m_import.maude");
+    }
+    
+    print generate_error("ERROR", 1, $file, "unknown line", "File $import needed by $file cannot be found! Please check if the path is correct.");
 }
-
-sub compress_tags
-{
-	my $tag =  shift;
-	local $_ = shift;
-	
-#	print "WHAT:$_\n";
-#	print "TAG: $tag\n";
-	
-	my $metadata = "";
-#	my $structural = "";
-#	my $large = "";
-
-	s/metadata\s+".*?(?<!\\)"/{$metadata = $&;"";}/sge;
-#	s/structural/{$structural=$&;"";}/sge;
-#	s/large/{$structural=$&;"";}/sge;
-
-#	print "METADATA: $metadata\n";
-	
-	my %map = ();
-	my $rest = $_;
-	while ($rest =~ /\b([a-zA-Z_\-]+)(\s*\(.*?(?<!`)\))?/sg)
-	{
-		my $attr_name = $1;
-		my $attr_value = "()";
-		$attr_value = $2 if defined $2;
-		
-#		print "REST:$attr_name\n\t$attr_value\n";
-		
-		# push in map
-		$map{$attr_name} = $attr_value;
-	}
-	
-	my $attr_string = "" ne $tag ? "$tag=() " : "";
-	while (my ($key, $value) = each(%map) )
-	{
-		$key =~ s/^\s+//sg;
-		$key =~ s/\s+$//sg;
-		$value =~ s/^\s+//sg;
-		$value =~ s/\s+$//sg;
-		$attr_string .= "$key=$value ";
-	}
-	
-	# put string in metadata
-	if ($metadata ne "")
-	{
-		# replace first " with "$attr_string
-		$metadata =~ s/"/"$attr_string/s;
-	}
-	else
-	{
-		$metadata = "metadata \"$attr_string\"";
-	}
-	
-	my $attributes = $metadata . " ";
-	$attributes .= "label $tag" if $tag ne "";
-	
-#	print "ATTRIBUTES: $attributes";
-	
-#	print "\n\n\n";
-	
-	$attributes =~ s/\s+$//sg;
-	
-	"[$attributes]";
-}
-
-
-#########################
-# TAGS  				#
-#########################
-
-# predefined tags
-my @tags = split(",", "metadata,location,ditto,latex,hybrid,arity,strict,seqstrict,wrapping,structural,transition,supercool,computational,large,tags");
-
-sub declare_tag
-{
-	push(@tags, shift);
-}
-
-sub get_tags_regex
-{
-	return join('|', @tags);
-}
-
 
 sub process_tags
 {
-	my $arg = shift;
-	my @args = ();
+    my $arg = shift;
+    my @args = ();
+    
+    while ($arg =~ /\s*([^(?<!`)\(\s]+)\s*((?<!`)\(.*?(?<!`)\))?/sg)
+    {
+	last if $1 =~ /^-/sg;
+	push(@args, "$1=$2") if defined $2;
+	push(@args, "$1=()") if ! defined $2;
+    }
+    
+    "@args";
+}
+
+    
+    
+sub get_checksum 
+{
+    my $md5 = Digest::MD5->new;
+    
+    foreach my $file (@checksum_files) 
+    {
+	open(F, $file);
+	$md5->addfile(*F);
+	close(F);
+    }
+    return $md5->hexdigest;
+}
+
+#########################
+# TAGS                  #
+#########################
+
+# predefined tags
+my @tags = split(",", "metadata,location,ditto,latex,hybrid,arity,seqstrict,strict,wrapping,structural,transition,supercool,computational,large,tag");
+
+
+sub get_tags
+{
+    return @tags;
+}
+
+# tags : nondet etc mytag
+# parse all tags and put them in @tags
+sub parse_tags
+{
+    local $_ = shift;
+    s/([^(?<!`)\(\s]+(\s*(?<!`)\(.*?(?<!`)\))?)/
+    {
+	push(@tags, $1);
+	"";
+    }
+    /sge;
+}
+
+
+sub rule_tags
+{
+    my $all = shift;
+    $_ = $all;
+    
+    while ( $all =~ /rule(.*?\s)(?=$kmaude_keywords_pattern)/sg )
+    {
+#	print "rule$1\n";
 	
-#	print "TODO: $arg\n";
+	my $body = $1;
 	
-	while ($arg =~ /\s*([^(?<!`)\(\s]+)\s*((?<!`)\(.*?(?<!`)\))?/sg)
+	# get rule name 
+	my $rule_name = "";
+	$rule_name = $1 if $body =~ /^\s*\[\s*(\S+)\s*\]\s*:/sg;
+	
+	# get attributes
+	my $attributes = "";
+	my $spaces = "";
+	if ($body =~ /(?<=\s)(\[[^\[]*?\])(\s*)$/sg)
 	{
-#		print "STEP: $1=$2\n";
-	
-		last if $1 =~ /^-/sg;
-#		print "PUSHED\n";
-		push(@args, "$1=$2") if defined $2;
-		push(@args, "$1=()") if ! defined $2;
+	    my $attributes = $1;
+	    
+#	    print "ATTR: $attributes\n\n";
+	    
+	    my $spaces = $2;
+	    my $temp_attributes = $attributes;
+	  
+	    my @tagss = ();
+	    
+	    # keep metadata into another variable
+	    my $metadata = "";
+	    $attributes =~ s/metadata\s+"(.*?(?<!\\))"/
+	    {
+		$metadata = $1;
+		"";
+	    }/sge;
+	    
+#	    print "Body: $body\nATTR: $attributes\n";
+	    # first: collect tag:mytag declarations in @tags
+	    $attributes =~ s/\btag\s*:\s*([^(?<!`)\(\s\]]+((?<!`)\(.*?(?<!`)\))?)/
+	    {
+		push(@tags, $1);
+		push(@tagss, $1);
+		"";
+	    }
+	    /sge;
+	    
+	    # remove all declared tags from attributes
+	    # those attributes which are not removed are not declared..
+	    # collect them in @tagss
+	    foreach(@tags)
+	    {
+		push(@tagss, $_) if $attributes =~ /\b\Q$_\E\b/sg;
+		$attributes =~ s/\b\Q$_\E\b//sg;
+	    }
+	    
+	    # clean [, ] and \s* => $attributes should be clean ...
+	    $attributes =~ s/^\s*\[//s;
+	    $attributes =~ s/\]\s*$//s;
+	    # $attributes =~ s/\s+//sg; 
+
+	    if ($attributes =~ /\S/sg)
+	    {
+		print "[ERROR] at $metadata: You have some undeclared tags: \"$attributes\"\n";
+		exit(1);
+	    }
+	   
+	    # re-build the attributes
+     	    $attributes = "";
+	    
+	    # complete metadata
+	    foreach(@tagss)
+	    {
+		s/(?<!`)\(/=(/s if /(?<!`)\(/sg;
+		$_ .= "=()" if $_ !~ /(?<!`)\(/sg;
+		$metadata .= " $_"
+	    }
+
+	    my $keep = "";
+	    $keep = "label $rule_name" if $rule_name ne "";
+	    $metadata .= " $rule_name=()" if $rule_name ne "";
+		
+	    $attributes  = "metadata \"$metadata\" $keep";
+
+#	    print "AFTER: $attributes\n";
+		
+	    # update body
+	    my $temp_body = $body;
+	    $body =~ s/\Q$temp_attributes\E/[$attributes]/s;
+
+	    $body =~ s/^\s*\[\s*(\S+)\s*\]\s*://sg;
+		
+	    # update rule
+	    s/\Qrule$temp_body\E/rule$body/s;
+	       
 	}
+    }
+    
+    $_;
+}
+    
+
+sub op_tags
+{
+    local $_ = shift;
+    
+    my $attributes = $_;
+    my @tagss = ();
+  
+    my $spaces = $1 if $attributes =~ /(\s*$)/sg;
+    
+#    print "ATTR: $attributes\n";
+    
+    # keep metadata into another variable
+    my $metadata = "";
+    $attributes =~ s/metadata\s+"(.*?(?<!\\))"/
+    {
+	$metadata = $1;
+	"";
+    }/sge;
+	    
+    my $keep = "";
+    
+    # prec
+    $attributes =~ s/\b(prec\s*[0-9]+)/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+
+    # strict
+    $attributes =~ s/\b((seq)?strict\s*\(.*?\))/
+    {
+	my $strict_p = $1;
+	$strict_p =~ s!\(!=(!s;
+	$metadata .= " $strict_p";
+	"";
+    }
+    /sge;
+    
+    # gather
+    $attributes =~ s/\b(gather\s*\(.*?\))/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+
+    # latex
+    $attributes =~ s/\b(latex\s*".*?")/
+    {
+	local $_ = " $1";
+	s!latex\s*"(.*?)"!{ "latex=(renameTo \\\\" . get_newcommand($1) . ")"; }!se;
+	$metadata .= " $_";
+	"";
+    }
+    /sge;
+    
+    # ditto
+    $attributes =~ s/\b(ditto)\b/
+    {
+	$keep .= " $1";
+	$metadata .= " $1=()";
+	"";
+    }
+    /sge;
+
+    # id
+    $attributes =~ s/\b(id\s*:\s+[^\s\]]+)/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+
+    # assoc
+    $attributes =~ s/\b(assoc)\b/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+
+    # comm
+    $attributes =~ s/\b(comm)\b/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+
+    # format
+    $attributes =~ s/\b(format\s*\(.*?\))/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+    
+    
+
+#    print "1-ATTR: $attributes\n";
+    # first: collect tag:mytag declarations in @tags
+    $attributes =~ s/\btag\s*:\s*([^(?<!`)\(\s\]]+((?<!`)\(.*?(?<!`)\))?)/
+    {
+	push(@tags, $1);
+	push(@tagss, $1);
+	"";
+    }
+    /sge;
+    
+    # remove all declared tags from attributes
+    # those attributes which are not removed are not declared..
+    # collect them in @tagss
+    foreach(@tags)
+    {
+	push(@tagss, $_) if $attributes =~ /\b\Q$_\E\b/sg;
+	$attributes =~ s/\b\Q$_\E\b//sg;
+    }
+
+    
+    
+    # clean [, ] and \s* => $attributes should be clean ...
+    $attributes =~ s/^\s*\[//s;
+    $attributes =~ s/\]\s*$//s;
+    # $attributes =~ s/\s+//sg; 
+    
+    if ($attributes =~ /\S/sg)
+    {
+	print "[ERROR] at $metadata: Undeclared tag(s): \"$attributes\"\n";
+	exit(1);
+    }
+    
+    # re-build the attributes
+    $attributes = "";
+    
+    # complete metadata
+    foreach(@tagss)
+    {
+	s/(?<!`)\(/=(/s if /(?<!`)\(/sg;
+	$_ .= "=()" if $_ !~ /(?<!`)\(/sg;
+        $metadata .= " $_"
+    }
 	
-	"@args";
+    $attributes  = "$keep metadata \"$metadata\"";
+	   
+ #   print "LAST: $attributes\n\n";
+	
+    "[$attributes]$spaces";
 }
 
-sub get_checksum {
-	my $md5 = Digest::MD5->new;
-	
-	foreach my $file (@checksum_files) {
-		open(F, $file);
-		$md5->addfile(*F);
-		close(F);
-	}
-	return $md5->hexdigest;
-}
-
+    
 1;
 

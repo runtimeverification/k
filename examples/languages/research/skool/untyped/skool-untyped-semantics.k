@@ -23,7 +23,7 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
 ---    their address (wrapped as a specific value)
   syntax Val ::= function( Nat )
   ---  op function : Nat -> Val   
-  syntax Val ::= lambda ( List{Id} , Stmt ) [latex(renameTo \\ensuremath\\lambda_._)]
+  syntax Val ::= lambda ( List{Id} , Stmt ) [latex "\ensuremath\lambda{#1}.{#2}"]
 
 --- the values are expressions
   syntax Exp ::= Val
@@ -99,7 +99,7 @@ kmod SKOOL-UNTYPED-SEMANTICS is including SKOOL-UNTYPED-DESUGARED-SYNTAX + K
   rule getloc(X, .) => null [structural]
 
 --- an object evironment layer is a map from the class name to the environm. corresp. to local fields
-  syntax ListItem ::= Id :: Map [latex(renameTo _\\ensuremath{\\mathrel{::}}_)]
+  syntax ListItem ::= Id :: Map [latex "{#1}\ensuremath{\mathrel{::}}{#2}"]
 --- the following is nedeed for stacking
   syntax ListItem ::=  [ Id , Map , K ]
 --- the following are needed at the creation of a new object and at a method call

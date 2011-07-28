@@ -75,6 +75,7 @@ endfm
 fmod PARSE-METADATA-SYNTAX is
   including PARSE-METADATA-BASIC .
   including SYNTAX-ATTRS .
+  including META-K-ERROR .
   var S S' S1 : String . var F : FindResult .  var Q : Qid .
   var N : Nat .  var AS AS' : AttrSet .
   eq pair("ditto","") = kditto .
@@ -93,6 +94,7 @@ fmod PARSE-METADATA-SYNTAX is
    /\ Q := qid(substr(S', 0, N))
    /\ S1 := substr(S', N, length(S')) .
    eq pair("latex",S) = klatex(metadataParse(S)) .
+   eq klatex(errorAS(S, S')) = errorAS(S, S') .
 endfm
 
 fmod PARSE-METADATA-STRICT is

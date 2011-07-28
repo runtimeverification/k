@@ -468,7 +468,7 @@ my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
 my $k_latex_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'latex');
 my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 
-my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb);
+my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
@@ -1596,10 +1596,14 @@ sub maudify_file {
     
 # Slurp all $file into $_;
     local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
-	# freeze
+
+        # freeze
 	s/($comment)/Freeze($&, "CMTS")/sge;
 
-	# replace module with kmod and 
+    # Step: remove tags
+    s!tags(\s.*?\S)(\s*)(?=$kmaude_keywords_pattern|CMTS)!{parse_tags($1);"$2";}!sge;    
+
+        # replace module with kmod and
 	# endmodule with endkm
 	s/(module)(.*?)(end\s+?module)/kmod$2endkm/sg;
 	
@@ -1628,15 +1632,15 @@ sub maudify_file {
 	parse_configuration($1, countlines($`), $file);
     }
     
-    # resolve rule tags
-    $_ = rule_tags($_);
-    
-#    print ;
     
 # add line numbers metadata
     $_ = add_line_numbers($_, $file);
 
-#    print ;
+#    print $_;
+    
+    # resolve rule tags
+    $_ = rule_tags($_);
+    
     
 # dots issue: change <cell>.</cell> into <cell> . </cell>
     s!<(.*?)>\.</\1>!<$1> \. </$1>!g;
@@ -1656,7 +1660,7 @@ sub maudify_file {
     
 # Replacing dots    
     $_ = replace_dots($_);
-	my $temporary = $_;
+    my $temporary = $_;
 
     my $maudified = "";
     while ( s!^(\s*)($top_level_pattern)(\s*)!!sm ) 
@@ -1760,10 +1764,11 @@ sub maudify_module {
     {
 	$require_k_main = 1;
     }
-
+    
 # Step: [#] and  [HOLE] -> `[HOLE`] 
     s!\[#\]!`[HOLE`]!sg;
 #    s!\[HOLE\]!`[HOLE`]!sg;
+    
     
 # Step: resolve macros
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
@@ -1779,7 +1784,8 @@ sub maudify_module {
     # get KLabels
     s/($string_pattern)/Freeze($&,"STRINGS")/sge;	
     my $decl = getKLabelDeclarations($_);
-# unfreeze strings
+
+    # unfreeze strings
     $_ = Unfreeze("STRINGS", $_);
 
 # Step: Add to @all_sorts all sorts defined in  k-prelude
@@ -1808,12 +1814,12 @@ sub maudify_module {
     
 # Step: Declare the on-the-fly variables
     $_ = on_the_fly_kvars($_);
-    # print  "Stage:\n$_\n\n";
+    #  print  "Stage:\n$_\n\n";
     
 # Step: Reduce cell notation with _ to cell notation with ...
     s/\sops?\s(.*?):/Freeze($&,"OPS")/gse;
     
-    # Sub-step: _ : this is deprecated!
+    # Sub-step: _ -> ... : Deprecated!
     s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
     s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
     
@@ -1859,7 +1865,7 @@ sub maudify_module {
 		s/(\Q$kl\E)/Freeze($kl, "KLABEL")/sge;		
 	}
 
-	$_ = spacify($_);
+ 	$_ = spacify($_);
 
 	$_ = Unfreeze("ATTR", $_);
 	$_ = Unfreeze("STRINGS", $_);
@@ -1885,7 +1891,8 @@ sub maudify_module {
 	# also freeze rule names
 	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
 
-	# maudify
+
+    # maudify
     s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
 
 	# unfreeze if there are still frozen attributes
@@ -2068,10 +2075,7 @@ sub make_ops {
 
 	$attributes = op_tags($attributes);
 	
-#	print "Add metadata to: $attributes\n\n";
 
-
-#		print "PROD: $production\n\n";
 # Generate the Maude replacement of the K syntactic construct
 		my $random = fresh("a", "b");
 		unlink($random);
@@ -2114,8 +2118,8 @@ sub k2maude {
     local ($_) = @_;
 
     $_ = Unfreeze("ATTR", $_);
-	$_ = Unfreeze("NAMES", $_);
-
+    $_ = Unfreeze("NAMES", $_);
+    
 #	print "TODO: $_\n";
 
 	# macros
@@ -2125,9 +2129,7 @@ sub k2maude {
 	case /^kmod/                    { s/kmod/mod/; }
 	case /^endkm/                   { s/endkm/endm/; }
 	case /^$default_freezer/        {}
-	case /^mb/						{
-										s/^mb\s+latex(.*\S)(\s*)$/mb latex $1 .$2/sg;
-									}
+	case /^mb/			{ s/^mb\s+latex(.*\S)(\s*)$/mb latex $1 .$2/sg }
 	case /^kvar/                    { s/k(var.*\S)(?=\s*)/$1 ./; }
  	case /^rule/                    { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/sg;
 									  s!(\[[^\[\]]*\]) : (KSentence)!

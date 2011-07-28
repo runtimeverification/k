@@ -41,12 +41,12 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
                | Exp - Exp [gather(E e) prec 33 strict]
                | Exp * Exp [gather(E e) prec 31 strict]
                | Exp / Exp [gather(E e) prec 31 strict]
-               | Exp % Exp [gather(E e) prec 31 latex(renameTo _\\ensuremath\\%_) strict]
+               | Exp % Exp [gather(E e) prec 31 latex "{#1}\ensuremath\%{#2}" strict]
                | - Exp [strict]
-               | Exp < Exp [prec 37 latex(renameTo _\\ensuremath<_) strict]
-               | Exp <= Exp [prec 37 latex(renameTo _\\ensuremath\\leq_) strict] 
-               | Exp > Exp [prec 37 latex(renameTo _\\ensuremath>_) strict] 
-               | Exp >= Exp [prec 37 latex(renameTo _\\ensuremath\\geq_) strict] 
+               | Exp < Exp [prec 37 latex "{#1}\ensuremath<{#2}" strict]
+               | Exp <= Exp [prec 37 latex "{#1}\ensuremath\leq{#2}" strict] 
+               | Exp > Exp [prec 37 latex "{#1}\ensuremath>{#2}" strict] 
+               | Exp >= Exp [prec 37 latex "{#1}\ensuremath\geq{#2}" strict] 
                | Exp == Exp [prec 37 strict] 
                | Exp != Exp [prec 37 strict] 
                | Exp and Exp [gather(E e) prec 55 strict] 
@@ -88,8 +88,8 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
 
 --- instructions
   syntax Stmt ::=
-                 { } [latex(renameTo \\{\\})]
-               | { Stmts } [gather(&) latex(renameTo \\{\_\\})]
+                 { } [latex "\{\}"]
+               | { Stmts } [gather(&) latex "\{{#1}\}"]
                | Exp = Exp ; [prec 2 strict(2)]
                | Exp ; [prec 50 strict]
                | if Exp then Stmt else Stmt [strict(1)]
