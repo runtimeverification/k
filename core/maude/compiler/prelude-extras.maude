@@ -363,6 +363,11 @@ fmod META-K-ERROR is
   op errorM : AttrSet String [Term] Term Module -> [Module] .
   eq Q[Trms,errorT(Trm, Cxt, Str),Trms'] = errorT(Trm, Q[Trms,Cxt,Trms'], Str) [print "errorT propagated past " Q] .
 
+
+ ceq errorM(AS, "no suitable least sorts found", Q[Trms, ETrm, Trms'], Cxt, M)
+   = errorM(AS,  "no suitable least sorts found", ETrm, Cxt, M)
+  if leastSort(M, ETrm) :: Sort = false .
+
   eq (op Q : Types -> Type [AS errorAS(Str, Str')] .) = errorOp(Str' + " '" + Str + "'",AS) .
 
   eq (mb errorT(Trm,Cxt,Str) : Type [AS] .) = errorMb(Trm,Cxt,Str,AS) [print "errorT propagated past mb"] .
@@ -400,7 +405,7 @@ fmod META-K-ERROR is
 
   vars Trm Trm' Cxt : [Term] . vars Trms Trms' : TermList . var Q : Qid . var Str Str' : String . var Including : ImportList . var Cond : Condition .
   var AS AS' : AttrSet .  var Subsorts : SubsortDeclSet . var OPDS : OpDeclSet . var Mbs : [MembAxSet] . var Eqs : [EquationSet] . 
-  var Rls : [RuleSet] . vars Sorts : SortSet .  
+  var Rls : [RuleSet] . vars Sorts : SortSet .  var ETrm : Term .
   var Type : Type .  var Types : TypeList . var M : Module .
 endfm
 
@@ -1186,6 +1191,7 @@ fmod META-LEVEL-EXTRAS is
   eq lubSorts(M, S, T) = T [owise] .
   eq lubSorts(M, T, S') = T [owise] .
  ceq lubSorts(M, T, T') = completeName(M,T) if sameKind(M, T, T') [owise] .
+  eq lubSorts(M, errorS(Trm, T, Str), T') = errorS(Trm, T, Str) .
 
   op minimalSort : Module SortSet ~> SortSet .
   ceq minimalSort(M, S ; S' ; SS) = minimalSort(M, S' ; SS) if sortLeq(M, S',S) .

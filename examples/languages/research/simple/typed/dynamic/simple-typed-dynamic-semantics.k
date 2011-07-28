@@ -59,17 +59,26 @@ module SIMPLE-TYPED-DYNAMIC-SEMANTICS
 --- Declarations and initialization ---
 ---------------------------------------
 
---- Variable declaration
+/*@\subsection{Variable declaration}
+
+Changes:  the undefined construct is now parameterized by the type
+*/
+
+
+  syntax Exp ::= undefined ( Type )
+  
+
   rule <k> var X:Id : Tp:Type ; => . ...</k>
        <env> Env:Map => Env[L:Nat/X] </env>
-       <store>... . => L|->initVal(Tp) ...</store>     --- intialized with default value for its type
+       <store>... . => L|->undefined(Tp) ...</store>     
        <nextLoc> L => sNat(L) </nextLoc>
 
-//@ \subsection{Array Declaration}
+//@ \subsection{Array declaration}
   rule <k> var X[N:Nat] : Tp[]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(Tp[], sNat L, N) ...</store>
-       <nextLoc> L => sNat L +Nat N </nextLoc>
+       <store>... . => L |-> array(Tp[], sNat L, N) 
+                       L +Nat 1 .. L +Nat 1 +Nat N |-> undefined(Tp) ...</store>
+       <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
   context var X[_,[#]:Exp,_] : Tp[];
 
@@ -135,7 +144,7 @@ module SIMPLE-TYPED-DYNAMIC-SEMANTICS
   We prefer to use a helper computation item, lookup, to avoid locking the store
 */
   rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
-  rule <k> array(_,L,M:Nat)[N] => lookup(L +Int N) ...</k> if N >=Nat 0 andBool N <=Nat M [structural]
+  rule array(_,L,M:Nat)[N] => lookup(L +Int N) if N >=Nat 0 andBool N <=Nat M [structural]
   syntax K ::= lookup ( Nat )
   rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>
 
@@ -149,7 +158,7 @@ module SIMPLE-TYPED-DYNAMIC-SEMANTICS
   syntax ListItem ::=  ( Map , K , Bag )
 
 
-  rule <k> _`(_`)(lambda(Tpl:List{Type}->Tp,Xl:List{Id},S),Vl:List{Val}) ~> K => S ~> return(initVal(Tp)); </k>
+  rule <k> _`(_`)(lambda(Tpl:List{Type}->Tp,Xl:List{Id},S),Vl:List{Val}) ~> K => S ~> return(undefined(Tp)); </k>
        <control>
          <fstack> . => (Env,K,<return> Tp' </return> C) ...</fstack>
          <return> Tp':Type => Tp </return>
@@ -177,8 +186,8 @@ module SIMPLE-TYPED-DYNAMIC-SEMANTICS
 
   context ([#]:Exp => l-value([#]:Exp)) = _
 
-  rule <k> loc(L)=V1 => V1 ...</k> <store>... L|->(V2=>V1) ...</store>
-    if typeOf(V1) ==Bool typeOf(V2) 
+  rule <k> loc(L)=V => V ...</k> <store>... L|->(E=>V) ...</store>
+    if typeOf(V) ==Bool typeOf(E:Exp) 
 
 
 //@\section{Statements}
@@ -252,7 +261,7 @@ Semantics by unrolling the loop at the top of the computation (to avoid non-term
 
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
-     if notBool(V in Busy) [tags nondet]
+     if notBool(V in Busy) 
    rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
 
 //@ \subsubsection{Release lock}
@@ -265,23 +274,17 @@ Semantics by unrolling the loop at the top of the computation (to avoid non-term
 
 //@ \subsubsection{Rendezvous synchronization}
 
-   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [tags nondet]
+   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> 
 
 //@\section{Auxilliary declarations and operations}
 
 //@\subsection{Initial value for each type}
-  syntax Val ::= none | initVal ( Type )
-/*
-  macro initVal(int) = 0
-  macro initVal(bool) = false
-  macro initVal(void) = none
-  macro initVal(Tp[]) = array(Tp[],0,0)
-  macro initVal(Tpl->Tp) = lambda(Tpl->Tp,.List{Bottom},{})
-*/
+  syntax Val ::= none 
+  macro undefined(void) = none
 
 //@\subsection{Type of each value and of list of values}
-  syntax List{Type} ::= typeOf ( List{Val} )  
-  macro typeOf(initVal(Tp)) = Tp 
+  syntax List{Type} ::= typeOf ( List{Exp} )  
+  macro typeOf(undefined(Tp)) = Tp 
   macro typeOf(I) = int
   macro typeOf(T) = bool
   macro typeOf(none) = void

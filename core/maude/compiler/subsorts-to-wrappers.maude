@@ -12,12 +12,12 @@ fmod SUBSORTS-TO-WRAPPERS is
  var Q O : Qid . var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
  var AS AS' : AttrSet .  var HL : HookList .
  var MS : ModuleSet . var M M' Flat : Module .  var SSDM : SubsortDeclMap . 
- var Trm : Term . var Trms : TermList . var V : Variable . var C : Constant .
+ var Trm Trm' : Term . var Trms : TermList . var V : Variable . var C : Constant .
 var Mbs : MembAxSet . var Mb : MembAx .
  var Eqs : EquationSet .  var Eq : Equation . 
  var Rls : RuleSet . var Rl : Rule .
  var T1 T2 : Term . var Cond : Condition .
- var KRS : KRuleSplit .
+ var KRS : KRuleSplit . var Str : String .
 
 
  op resolveKSubsorts : Qid Module Module ModuleSet ~> Module .
@@ -122,6 +122,7 @@ ceq subsorts2wrappersMb(Mb, M, OPDS, SSDM)
 
  op kind-if-not-k : Module Type -> Type .
  eq kind-if-not-k(M, T) = if isKSort(T) or-else isKListSort(T) then T else getKind(M,T) fi [print "Of type: " T] .
+ eq kind-if-not-k(M, errorS(Trm, T, Str)) = errorS(Trm, T, Str) .
 
  op subsorts2wrappersRls : RuleSet Module OpDeclSet SubsortDeclMap ~> RuleSet .
  eq subsorts2wrappersRls(Rls Rl, M, OPDS, SSDM)
@@ -159,6 +160,9 @@ ceq subsorts2wrappersMb(Mb, M, OPDS, SSDM)
 ceq findPurifyRedex('if_then_else_fi[Trm,T1,T2], T, M, OPDS, SSDM)
   = 'if_then_else_fi[findPurifyRedex(Trm, 'Bool, M, OPDS, SSDM), findPurifyRedex(T1, T, M, OPDS, SSDM), findPurifyRedex(T2, T, M, OPDS, SSDM)]
  if sortLeq(M, leastSortsT(M, Trm), 'Bool) [print "if " Trm " then " T1 " else " T2 " fi. target type: " T] .
+
+ eq findPurifyRedex(Trm, errorS(Trm', T, Str), M, OPDS, SSDM)
+  = errorT(Trm, '`[`]:K, Str) .
 
 ---(
 ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)
