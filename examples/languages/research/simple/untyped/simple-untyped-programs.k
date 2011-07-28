@@ -383,7 +383,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
        }
 
        function transArray(a) {
-         var  m = sizeOf(a) - 1,  n = sizeOf(a[0]) - 1, b[n+1,m+2];
+         var  m = sizeOf(a) - 1,  n = sizeOf(a[0]) - 1, b[n+1,m+1];
          for i = 0 to m do
            for j = 0 to n do
              b[j,i]=a[i,j];
@@ -392,8 +392,11 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
        function mulArray(a,b) {
          var m=sizeOf(a) - 1, n=sizeOf(b) - 1, p=sizeOf(b[0]) - 1, c[m+1,p+1];
-         for i=0 to m do for j=0 to p do for k=0 to n do
-           c[i,j]=c[i,j]+a[i,k]*b[k,j];
+         for i=0 to m do for j=0 to p do {
+           c[i,j]=0;
+           for k=0 to n do
+             c[i,j]=c[i,j]+a[i,k]*b[k,j];
+         }
          return c;
        }
 
@@ -599,7 +602,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
   syntax Stmts ::= pExceptions11
   macro pExceptions11 =
-    var i, j;
+    var i, j = 0;
 
     function main() {
       i = 0;

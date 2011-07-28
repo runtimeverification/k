@@ -3,6 +3,7 @@
 ------------------------------------
 
 module SIMPLE-UNTYPED-SYNTAX
+  tags nd
 
 /*@ \section{Syntax}
 We start by defining the SIMPLE syntax.  The language constructs discussed
