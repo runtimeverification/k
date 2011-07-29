@@ -80,6 +80,8 @@ fmod LISTS-TO-K is
   = lists2kModule(M, Flat, CTORS, lists2kOps(CTORS, getOps(M)), getGeneratedLabels(getOps(M))) .
 
  op lists2kModule : Module  Module CTORSMap OpDeclSet OpDeclSet ~> Module .
+ eq lists2kModule(M, Flat, CTORS, errorOp(Str, AS) OPDS:[OpDeclSet], OPDS':[OpDeclSet])
+  = errorM(AS, Str, '`[`]:K,'`[`]:K,M) .
  eq lists2kModule(M, Flat, CTORS, OPDS, OPDS')
   = setOps(
    setRls(
@@ -113,6 +115,7 @@ ceq lists2kOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
   = none .
  eq lists2kOp((op Q : Tl -> T [AS] .), CTORS)
   = (op Q : lists2kTypes(Tl, CTORS) -> lists2kTypes(T, CTORS) [metadata(AS)] .) [owise].
+ eq lists2kOp(errorOp(Str, AS), CTORS) = errorOp(Str, AS) .
 
  op lists2kTypes : TypeList CTORSMap ~> TypeList .
  eq lists2kTypes(T Tl, CTORS (subsort T' < T .) |-> Trm) 
