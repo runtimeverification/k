@@ -5,14 +5,14 @@ give it a short-circuited semantics (its second argument will only be
 evaluated when the first evaluates to true). */
 
   syntax AExp ::= Id | Int
-                | AExp + AExp                  [prec 33 gather (E e) strict tag: gag]
+                | AExp + AExp                  [prec 33 gather (E e) strict]
                 | AExp / AExp                  [prec 31 gather (E e) strict]
   syntax BExp ::= Bool
                 | AExp <= AExp                 [prec 37 strict]
                 | not BExp                     [prec 53 strict]
-                | BExp and BExp                [prec 55 strict(1) tag: Ab]
+                | BExp and BExp                [prec 55 strict(1)]
   syntax Stmt ::= skip ;
-                | Id = AExp ;                  [prec 40 strict(2) tag :sgofsjglf]
+                | Id = AExp ;                  [prec 40 strict(2)]
                 | Stmt Stmt                    [prec 60 gather (e E)]
                 | if BExp then Stmt else Stmt  [prec 59 strict(1)]
                 | while BExp do Stmt           [prec 59]
@@ -129,9 +129,7 @@ rewriting process will get stuck.  This means that our semantics of
 IMP disallows uses of uninitialized variables.  Variables are initialized
 using the assignment statement whose semantics is defined below. */
 
-  tags nondet stricot(t) sdafd( ) dsffds
-
-  rule [my-rule]: <k> X:Id => Sigma(X) <_/k> <state> Sigma:Map </state> [stricot(t) nondet sdafd( ) tag :treyry(faSAA ) tag : toba]
+  rule [my-rule]: <k> X:Id => Sigma(X) <_/k> <state> Sigma:Map </state>
 
 /*@ \subsubsection{Arithmetic operators}
 There is nothing special about these, except that the rule for division
