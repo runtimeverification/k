@@ -308,7 +308,8 @@ fmod META-TERM-EXTRAS is
 
   op getString : Constant ~> String .
  ceq getString(C) 
-   = substr(string(getName(C)),1, _-_(length(string(getName(C))),2))
+   = downTerm(mkConstant(getName(C), 'String), "") 
+---   = substr(string(getName(C)),1, _-_(length(string(getName(C))),2))
   if getType(C) == String or-else getType(C) == Char .
 
   op errorT : [Term] Term String -> [Term] .
