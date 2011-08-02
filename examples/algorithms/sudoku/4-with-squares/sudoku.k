@@ -1,7 +1,7 @@
 
 
 kmod SUDOKU-CONFIGURATION is including K
-  syntax K ::= Nat
+  syntax K ::= #Nat
 
 --- I wish I was able to use the same cell names below (lx -> x, etc.), but didn't work
   configuration <T>
@@ -41,7 +41,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 --- naked single: square
   rule
        <cell_> <v>B:BagItem</v> <_/cell>
-       <x>X:Nat</x> <y>Y:Nat</y> <v_>B=>.<_/v> (.Bag => <sdec>B</sdec>)
+       <x>X:#Nat</x> <y>Y:#Nat</y> <v_>B=>.<_/v> (.Bag => <sdec>B</sdec>)
        <lx>X</lx>  (.Bag => <ldec>B</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>B</cdec>)
   [structural]
@@ -65,7 +65,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 
 --- hidden single: square
   rule
-       <x>X:Nat</x> <y>Y:Nat</y> <v>BagItem(V:Nat) (Bs:NeBag=>.)</v>
+       <x>X:#Nat</x> <y>Y:#Nat</y> <v>BagItem(V:#Nat) (Bs:NeBag=>.)</v>
        <sc_>V|->1<_/sc>  (.Bag => <sdec>Bs</sdec>)
        <lx>X</lx>  (.Bag => <ldec>Bs</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>Bs</cdec>)
@@ -73,7 +73,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 
 --- hidden single: line
   rule
-       <x>X:Nat</x> <y>Y:Nat</y> <v>BagItem(V) (Bs=>.)</v>
+       <x>X:#Nat</x> <y>Y:#Nat</y> <v>BagItem(V) (Bs=>.)</v>
        (.Bag => <sdec>Bs</sdec>)
        <lx>X</lx> <lc_>V|->1<_/lc>  (.Bag => <ldec>Bs</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>Bs</cdec>)
@@ -81,7 +81,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 
 --- hidden single: column
   rule
-       <x>X:Nat</x> <y>Y:Nat</y> <v>BagItem(V) (Bs=>.)</v>
+       <x>X:#Nat</x> <y>Y:#Nat</y> <v>BagItem(V) (Bs=>.)</v>
        (.Bag => <sdec>Bs</sdec>)
        <lx>X</lx>  (.Bag => <ldec>Bs</ldec>)
        <cy>Y</cy> <cc_>V|->1<_/cc>  (.Bag => <cdec>Bs</cdec>)
@@ -95,15 +95,15 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 
 
 --- square decrement
-  rule <sdec_>BagItem(V:Nat)=>.<_/sdec> <sc_>V |-> (sNat(N:Nat)=>N)<_/sc> [structural]
+  rule <sdec_>BagItem(V:#Nat)=>.<_/sdec> <sc_>V |-> (sNat(N:#Nat)=>N)<_/sc> [structural]
   rule <sdec> .Bag </sdec> => . [structural]
 
 --- line decrement
-  rule <ldec_>BagItem(V:Nat)=>.<_/ldec> <lc_>V |-> (sNat(N)=>N)<_/lc> [structural]
+  rule <ldec_>BagItem(V:#Nat)=>.<_/ldec> <lc_>V |-> (sNat(N)=>N)<_/lc> [structural]
   rule <ldec> .Bag </ldec> => . [structural]
 
 --- column decrement
-  rule <cdec_>BagItem(V:Nat)=>.<_/cdec> <cc_>V |-> (sNat(N)=>N)<_/cc> [structural]
+  rule <cdec_>BagItem(V:#Nat)=>.<_/cdec> <cc_>V |-> (sNat(N)=>N)<_/cc> [structural]
   rule <cdec> .Bag </cdec> => . [structural]
 endkm
 
@@ -115,10 +115,10 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
 
 --- [_] transforms a sudoku board given as list into a K configuration
   syntax Bag ::= [ List{K} ]
-               | mkConfig ( NeBag , List{K} , Nat , Bag , Bag , Bag )
-               | addSquare ( NeBag , Nat , Nat , Nat , Nat , Bag )
-               | addLine ( NeBag , Nat , Bag )
-               | addColumn ( NeBag , Nat , Bag )
+               | mkConfig ( NeBag , List{K} , #Nat , Bag , Bag , Bag )
+               | addSquare ( NeBag , #Nat , #Nat , #Nat , #Nat , Bag )
+               | addLine ( NeBag , #Nat , Bag )
+               | addColumn ( NeBag , #Nat , Bag )
   syntax Map ::= inc ( Bag , Map )
 
   op headListK_ : List{K} -> K
@@ -126,9 +126,9 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
   eq headListK(K:K,,Ks:List{K}) = K
   eq tailListK(K,,Ks) = Ks
 
-  macro [V:Nat,,Vl:List{K}] = mkConfig(BagItem(V),Vl,0,.Bag,.Bag,.Bag)
+  macro [V:#Nat,,Vl:List{K}] = mkConfig(BagItem(V),Vl,0,.Bag,.Bag,.Bag)
 
-  rule mkConfig(Bs:NeBag,Vl,N:Nat,Squares:Bag,Lines:Bag,Columns:Bag)
+  rule mkConfig(Bs:NeBag,Vl,N:#Nat,Squares:Bag,Lines:Bag,Columns:Bag)
     => mkConfig(BagItem(headListK(Vl)),tailListK(Vl),sNat(N),
                 addSquare(Bs, (N /Nat 9) /Nat 3, (N %Nat 9) /Nat 3, N /Nat 9, N %Nat 9, Squares),
                 addLine(Bs, N /Nat 9, Lines),
@@ -139,8 +139,8 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
     => <T_> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns> <_/T>
   [structural]
 
-  rule addSquare(Bs, I:Nat, J:Nat, X:Nat, Y:Nat,
-                 <square_> <i>I':Nat</i> <j>J':Nat</j> <sc>Map:Map</sc> <cells>Cells:Bag</cells> <_/square> Squares)
+  rule addSquare(Bs, I:#Nat, J:#Nat, X:#Nat, Y:#Nat,
+                 <square_> <i>I':#Nat</i> <j>J':#Nat</j> <sc>Map:Map</sc> <cells>Cells:Bag</cells> <_/square> Squares)
     => if I ==Bool I' andBool J ==Bool J'
        then <square_> <i>I</i> <j>J</j> <sc>inc(Bs,Map)</sc>
                      <cells> Cells <cell> <x>X</x> <y>Y</y> <v>Bs</v> </cell> </cells> <_/square> Squares
@@ -151,14 +151,14 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
     => <square_> <i>I</i> <j>J</j> <sc>inc(Bs,initMap)</sc> <cells> <cell> <x>X</x> <y>Y</y> <v>Bs</v> </cell> </cells> <_/square>
   [structural]
 
-  rule addLine(Bs,X:Nat, <line_> <lx>X':Nat</lx> <lc>Map</lc> <_/line> Lines)
+  rule addLine(Bs,X:#Nat, <line_> <lx>X':#Nat</lx> <lc>Map</lc> <_/line> Lines)
     => if X ==Bool X' then <line_> <lx>X</lx> <lc>inc(Bs,Map)</lc> <_/line> Lines
        else <line_> <lx>X'</lx> <lc>Map</lc> <_/line> addLine(Bs,X,Lines) fi
   [structural]
 
   rule addLine(Bs,X,.Bag) => <line_> <lx>X</lx> <lc>inc(Bs,initMap)</lc> <_/line> [structural]
 
-  rule addColumn(Bs,Y:Nat, <column_> <cy>Y':Nat</cy> <cc>Map</cc> <_/column> Columns)
+  rule addColumn(Bs,Y:#Nat, <column_> <cy>Y':#Nat</cy> <cc>Map</cc> <_/column> Columns)
     => if Y ==Bool Y' then <column_> <cy>Y</cy> <cc>inc(Bs,Map)</cc> <_/column> Columns
        else <column_> <cy>Y'</cy> <cc>Map</cc> <_/column> addColumn(Bs,Y,Columns) fi
   [structural]

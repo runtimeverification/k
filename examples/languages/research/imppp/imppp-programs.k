@@ -1,7 +1,8 @@
 kmod IMPPP-PROGRAMS is including IMPPP-SYNTAX
-  syntax Id ::= a | b | c | f | i | j | k | m | n | q | s | t | x | y | z 
+  syntax #Id ::= a | b | c | f | i | j | k | m | n | q | s | t | x | y | z 
               | odd | even | odd-calls | even-calls | goto | exit
-  syntax AExp ::= p1 | p2
+  syntax AExp ::= p1 
+  syntax BExp ::= p2
   syntax Stmt ::= p6 | p7 | p13 | p14 | p15 | p16 | p17
 
   macro p1 = 3+5

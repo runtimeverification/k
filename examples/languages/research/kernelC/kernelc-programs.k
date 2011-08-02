@@ -3,12 +3,12 @@ kmod KERNELC-PROGRAMS is including KERNELC-THREADS-SYNTAX
                | pAllocateBadPrint | pAllocatePrintReversePrintFree | pAllocatePrintFree
   syntax CompilationUnit ::= pPrint.c  | pAllocateLoop.c | pAllocateGood.c | pAllocateBad.c | pReverse.c
                     | pFree.c | pStrLen.c | pStrCpy.c | pStrRead.c | pStrPrint.c | pStrDup.c | pString.c | pString2.c 
-  syntax Id ::= a | b | c | d | e | i | l 
+  syntax #Id ::= a | b | c | d | e | i | l 
           | limit | nr | nn | n | p | q | r | s | steps | t | t1 | t2 | x | y | z 
 
-  syntax Id ::= print | allocateLoop | reverse | quickSort
+  syntax #Id ::= print | allocateLoop | reverse | quickSort
 
-syntax Id ::= strDup | strRead | strPrint | strCpy | strLen | string | string2 | freeList 
+syntax #Id ::= strDup | strRead | strPrint | strCpy | strLen | string | string2 | freeList 
 
   macro pSum = 
     #include<stdio.h>
@@ -252,7 +252,7 @@ macro pSimpTest =
 
  
 syntax CompilationUnit ::= fNewArray.c  | fPrintArray.c
-syntax Id ::= newArray | printArray
+syntax #Id ::= newArray | printArray
 macro #include<fNewArray.c> = 
 int * newArray() {
   int n ;
@@ -351,7 +351,7 @@ int main() {
 }
 
 syntax Pgm ::= pRace1 | pRace2 | pRace3 
-syntax Id ::= inc
+syntax #Id ::= inc
 macro pRace1 =
 #include<stdio.h>
 #include<stdlib.h>
@@ -396,7 +396,7 @@ void print(int *a) {
   printf("%d;",*a);
 }
 
-syntax Id ::= newAccount | deposit | withdraw | transfer | balance | m | run | run1 | run2
+syntax #Id ::= newAccount | deposit | withdraw | transfer | balance | m | run | run1 | run2
 
 syntax Stmt ::= fTransfer | fDTransfer | fGTransfer
 
@@ -537,7 +537,7 @@ void main() {
 
 
   syntax Pgm ::= pPeterson.c | pPeterson1.c
-  syntax Id ::= flag | turn | peterson
+  syntax #Id ::= flag | turn | peterson
   macro pPeterson.c = 
 #include <stdio.h>
 #include <stdlib.h>

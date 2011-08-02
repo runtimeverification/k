@@ -118,7 +118,7 @@ sub getArgumentList {
 sub getConstantThing {
 	my ($op) = (@_);
 	
-	if ($op =~ s/^'(.*)(\.[A-Za-z\{\}\?\!\+\`]*?)$/\($1\)$2/) {
+	if ($op =~ s/^'(.*)(\.[#A-Za-z\{\}\?\!\+\`]*?)$/\($1\)$2/) {
 		return $op;
 	} 
 	# else {

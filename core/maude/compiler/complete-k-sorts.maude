@@ -10,5 +10,5 @@ fmod COMPLETE-K-SORTS is
   
  op completeKSorts : Module Module SortSet ~> Module .
  eq completeKSorts(M, Flat, SS) 
-  = addSubsorts(generateSubsorts(Flat,removeSorts(getSorts(Flat), SS ; Builtins ), K), M) [print "syntax sorts: " SS] .
+  = addSubsorts(generateSubsorts(Flat,removeSorts(getSorts(Flat), SS), K), M) [print "syntax sorts: " SS] .
 endfm

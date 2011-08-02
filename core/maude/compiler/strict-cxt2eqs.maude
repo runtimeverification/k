@@ -77,7 +77,7 @@ mod STRICTCXT2EQS is
       else 
      (ceq 'cool[kra(kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1)),'Rest:K)]
         = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]
-        if '_=/=Bool_[getTopLabel(T2),mkVariable('KcxtL,KLabel)] = 'true.Bool 
+        if '_=/=Bool_[getTopLabel(T2),mkVariable('KcxtL,KLabel)] = trueCt 
        [metadata(AS pair("supercool", "result"))] .)
      (ceq 'cool[kra(kra(T2[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]], freezeTerm(M, T1)),'Rest:K)]
         = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],'Rest:K)]

@@ -1,6 +1,6 @@
 kmod EXP-UNTYPED-SEMANTICS is including EXP-UNTYPED-DESUGARED-SYNTAX + K 
 
-  syntax Val ::= Int | Bool
+  syntax Val ::= #Int | #Bool
   syntax Exp ::= Val
   syntax K ::= Exp
   syntax KResult ::= Val
@@ -11,25 +11,25 @@ kmod EXP-UNTYPED-SEMANTICS is including EXP-UNTYPED-DESUGARED-SYNTAX + K
                      <nextLoc> 0 </nextLoc>
                 </T>
 
-  rule <k> X:Id => E:Exp <_/k> <env_> X |-> L:Nat <_/env> <store_> L |-> E <_/store>
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule <k> X:#Id => E:Exp <_/k> <env_> X |-> L:#Nat <_/env> <store_> L |-> E <_/store>
+  rule I1:#Int + I2:#Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
   rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
-  rule - I:Int => -Int I
+  rule - I:#Int => -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
-  rule T1:Bool and T2:Bool => T1 andBool T2
+  rule T1:#Bool and T2:#Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
-  rule not(T:Bool) => notBool(T)
+  rule not(T:#Bool) => notBool(T)
   rule if  true then E else  _  => E
   rule if false then  _  else E => E
-  syntax Val ::= closure-lambda ( Map , Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
+  syntax Val ::= closure-lambda ( Map , #Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
   rule <k> lambda X . E => closure-lambda(Env:Map,X,E) <_/k> <env> Env </env> 
   rule <k> closure-lambda(Env,X,E) V:Val => E ~> env(Env') <_/k> <env> Env':Map =>  Env[L/X] </env>
           <store_> . => L|->V <_/store> <nextLoc> L => sNat L </nextLoc> 

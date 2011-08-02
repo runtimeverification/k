@@ -1,5 +1,5 @@
 kmod EXP-PROGRAMS is including EXP-SYNTAX
-  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k
+  syntax #Id ::= a | b | c | d | e | f | g | h | i | j | k
               | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
               | f00 | f01 | f02 | f03 | f04 | f05 | f06 | f07 | f08 | f09 | f10 | f11 | f12 | f13 | f14
 

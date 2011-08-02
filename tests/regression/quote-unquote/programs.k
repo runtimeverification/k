@@ -27,7 +27,7 @@ kmod QUOTE-UNQUOTE-PROGRAMS is including QUOTE-UNQUOTE + IO + WHILE + REF + MU +
    (lambda x . 
    print(eval(quote(1 + 2 + unquote(x) + 4 + 5)))) (quote 2) 
 
-  ops genpow cube : -> Id
+  ops genpow cube : -> #Id
 
   op p29 : -> K
   macro p29 = 

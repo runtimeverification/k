@@ -1,5 +1,5 @@
 kmod FUN-PROGRAMS is including FUN-SYNTAX
-  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k 
+  syntax #Id ::= a | b | c | d | e | f | g | h | i | j | k 
               | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
               | factorial | max | map | return | throw | aux | continuation | value | exit | goto | cadr
               | f00 | f01 | f02 | f03 | f04 | f05 | f06 | f07 | f08 | f09 | f10 | f11 | f12 | f13 | f14
@@ -338,9 +338,9 @@ kmod FUN-PROGRAMS is including FUN-SYNTAX
 
 
 --- using callcc to define generic exceptions
-  syntax Exp ::= try Exp catch ( Id ) Exp
+  syntax Exp ::= try Exp catch ( #Id ) Exp
 --- assume that continuation and value are not free in E and E'
-  macro try E catch(X:Id) E':Exp
+  macro try E catch(X:#Id) E':Exp
       = callcc (fun continuation -> (fun throw -> E:Exp)(fun value -> continuation ((fun X -> E') value)))
 --- the following is also efficient and uses try/catch
   macro p27-3 = (

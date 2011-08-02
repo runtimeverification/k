@@ -3,7 +3,7 @@ fmod K-SORTS is including QID .
   eq KSentence = 'KSentence .
 endfm
 
-fmod K-META-OPS is including META-TERM .
+fmod K-META-OPS is including META-TERM-EXTRAS .
   op nilKList : -> Qid .
   eq nilKList = '.List`{K`}.List`{K`} .
 
@@ -37,18 +37,18 @@ fmod K-META-OPS is including META-TERM .
   eq kApply(T, Trl) = kApplyS[T,kList(Trl)] .
 
   ops bool2K : Term -> Term .
-   eq bool2K(T) = kApply('Bool_[T],nilKList) .
+   eq bool2K(T) = kApply(qid(string(Bool) + "_")[T],nilKList) .
 endfm
 
 fmod META-K-BUILTINS is
   including META-LEVEL-EXTRAS .
   including META-MODULE-EXTRAS .
-  op Builtins : -> Sort .
-  eq Builtins = 'Builtins .
   op builtinSorts : Module -> SortSet [memo] .
----  eq builtinSorts = getSorts(upModule('PL-BUILTINS, true)) .
-  eq builtinSorts(M:Module) = getSubsorts(flatten(M:Module), Builtins) .
-  op builtinModules : ~> SortSet [memo] .
+  eq builtinSorts(M:Module) = builtinSorts(getSorts(flatten(M:Module))) .
+  op builtinSorts : SortSet -> SortSet [memo] .
+  eq builtinSorts(S ; SS) = if substr(string(S),0,1) == "#" then S ; builtinSorts(SS) else  builtinSorts(SS) fi .
+
+  op builtinModules : ~> SortSet .
   eq builtinModules = none .
    --- = getImportNames(getImports(upModule('PL-BUILTINS, false))) .
   
@@ -58,9 +58,9 @@ fmod META-K-BUILTINS is
   op isBuiltin : Module ~> Bool .
   eq isBuiltin(M) = isBuiltinModule(string(getName(M))) .
   op isBuiltinModule  : String -> Bool .
-  eq isBuiltinModule(S) = find(S, "#",0) == 0 .
+  eq isBuiltinModule(Str) = substr(Str, 0,1) == "#" .
 
-  var M : Module . var S : String .  var SS : SortSet .
+  var M : Module . var Str : String .  var S : Sort .  var SS : SortSet .
 endfm
 
 fmod META-ATTRS is
@@ -111,7 +111,7 @@ fmod META-K-MODULE is
   eq klistSorts = NeProperList ; ResultList ; NeResultList ; NeKList ; KList .
 
   op isKSort : Type -> Bool [memo] .
-  eq isKSort(T) = T in (ksorts ; Builtins) .
+  eq isKSort(T) = T in ksorts .
 
   op isKListSort : Type -> Bool [memo] .
   eq isKListSort(T) = T in klistSorts .
@@ -123,7 +123,6 @@ fmod META-K-MODULE is
     subsort KProper < K .
     subsort KResult < K .
     subsort NeK < K .
-    subsort Builtins < NeK .
     ) .
 
   op klabelsubsorts : -> SubsortDeclSet [memo] .
@@ -422,7 +421,7 @@ fmod K-META-CONFIG is
   op error : -> [AttrKey] .
 
   op parseAttribute : Term -> Attr . 
- ceq parseAttribute(Q[MKey,MVal]) = (getAttributeKey(getName(MKey))) |-> parseAttributeVal(getAttributeKey(getName(MKey)),downTerm(MVal,""))
+ ceq parseAttribute(Q[MKey,MVal]) = (getAttributeKey(getName(MKey))) |-> parseAttributeVal(getAttributeKey(getName(MKey)),getString(MVal))
   if Q = attrCtorS /\ getType(MKey) = CellKey .
 
   op getAttributeKey_ : Qid -> AttrKey .
@@ -506,7 +505,7 @@ fmod K-META-CONFIG is
 
   op plugAttributes : Term AttrSet ~> Term .
   eq plugAttributes(LabelT, AK |-> AV AS)
-   = plugAttributes(attrsCtorS[LabelT,attrCtorS[mkConstant(symbolAK AK,CellKey), upTerm(mkString(AK,AV))]],AS) .
+   = plugAttributes(attrsCtorS[LabelT,attrCtorS[mkConstant(symbolAK AK,CellKey), stringCt(mkString(AK,AV))]],AS) .
   eq plugAttributes(LabelT, none) = LabelT .
   
   op mkString : AttrKey AttrVal ~> String .
@@ -678,7 +677,7 @@ fmod META-K-LABELS is
   eq downKLabel(Q) = Q .
 
   op mkListLabel : Qid -> Term .
-  eq mkListLabel(Q) = klistLabelS[upTerm(string(Q))] .
+  eq mkListLabel(Q) = klistLabelS[stringCt(string(Q))] .
 
   op mkKLabelSort : Type AttrSet -> Type .
   eq mkKLabelSort(T,AS metadata(Str))
@@ -735,10 +734,10 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   eq removeHole(empty) = empty .
 
   op freezeLabel : String -> Term .
-  eq freezeLabel(S) = 'freezer[upTerm(S)] .
+  eq freezeLabel(S) = 'freezer[stringCt(S)] [print "freezing " S] .
 
   op freezeVariable : String Term -> Term .
-  eq freezeVariable(S, V:Term) = kApply('freezeVar[upTerm(S)],V:Term) .
+  eq freezeVariable(S, V:Term) = kApply('freezeVar[stringCt(S)],V:Term) .
 
   op kWrap : Term -> Term .
   eq kWrap(T) = kWrap(klabel,T) .
@@ -1016,11 +1015,14 @@ fmod META-K-LEAST-SORTS is
   = leastSortsT(M, Trm, SS', TlSK) [print "Defaulting to " SS' "; reason: " SS:[SortSet] owise] .
 
 
+---(
  op removeBuiltins : SortSet -> SortSet .
  eq removeBuiltins(SS) = removeSorts(SS, Builtins) .
+---)
 
  eq $leastSortsT(M, 'if_then_else_fi[Trms], T T' T'') 
-  = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, 'Bool), removeBuiltins(lubSorts(M, T', T''))) .
+  = leastSortsIf('if_then_else_fi[Trms], leastSort(M, 'if_then_else_fi[Trms]), sortLeq(M, T, Bool), --- removeBuiltins(
+    lubSorts(M, T', T'')) .
 
  eq $leastSortsT(M, 'configuration_[Trm], S) = 'KSentence .
  eq $leastSortsT(M, 'rule_[Trm], S) = 'KSentence .
@@ -1029,7 +1031,8 @@ ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
 ceq $leastSortsT(M, 'context_if_[Trms], S T') = 'KSentence if sortLeq(M,T',K).
 
 ceq $leastSortsT(M, Q[T1,T2], T T') 
-  = leastSortsRed(M, Q[T1,T2], leastSort(M, Q[T1,T2]), removeBuiltins(lubSorts(M, T, T'))) 
+  = leastSortsRed(M, Q[T1,T2], leastSort(M, Q[T1,T2]), --- removeBuiltins(
+    lubSorts(M, T, T')) 
  if Q == replaceS [print "leastSortsRed: " T1 "; " T2 "; " T "; " T'] . 
  eq $leastSortsT(M, Q[Trms], Tl) = leastSort(M, Q[genXVars(Tl)]) [owise ] .
 

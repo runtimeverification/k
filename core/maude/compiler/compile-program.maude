@@ -26,13 +26,13 @@ fmod COMPILE-PROGRAM is
   eq compileProgram(Compiled, Syntax, Q, Trm)
    = compileProgram(Compiled, Syntax, Q, Trm, getOps(Compiled)) .
   eq compileProgram(Compiled, Syntax, Q, errorTrm(Trm, 'Error))
-   = errorM('0.Zero, 'Int, qid(downTerm(Trm,""))) .
+   = errorM('0.#Zero, '#Int, qid(downTerm(Trm,""))) .
 
   eq compileProgram(Compiled, Syntax, Q, errorTrm(Trm, T))
    = errorM(Trm, T, Q) [owise] .
 
   op compileProgram : Module Module Qid Term OpDeclSet ~> Module .
-  eq compileProgram(Compiled, Syntax, Q, Trm, (op 'Id2String : 'Id -> 'String [AS] .) Ops)
+  eq compileProgram(Compiled, Syntax, Q, Trm, (op 'Id2String : '#Id -> '#String [AS] .) Ops)
    = compileProgram(Compiled, Syntax, Q, Trm, missingConsts(Ops, Trm), id2String(missingConsts(Ops,Trm))) .
   eq compileProgram(Compiled, Syntax, Q, Trm, Ops)
    = compileProgram(Compiled, Syntax, Q, Trm, missingConsts(Ops, Trm), none) [owise] .
@@ -48,7 +48,7 @@ fmod COMPILE-PROGRAM is
 
   op missingConsts : OpDeclSet Qid Type TermList ~> OpDeclSet .
 ceq missingConsts(Ops, Q, T, Trms) = missingConsts(Ops, Trms)
-  if T == KLabel or-else T == 'String or-else T == 'FiniteFloat or-else T == 'Char .
+  if T == KLabel or-else T == String or-else T == FiniteFloat or-else T == Char .
   eq missingConsts(Ops op Q : nil -> T [AS] ., Q, T, Trms) 
    = missingConsts(Ops op Q : nil -> T [AS] ., Trms) .
   eq missingConsts(Ops, Q, T, Trms) 

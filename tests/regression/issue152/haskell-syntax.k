@@ -5,12 +5,10 @@
 
 
 kmod HASKELL-SYNTAX is
-    including #STRING
-    including K
 
     syntax K ::= Literal
                | Exp
-               | Int
+               | #Int
 
     syntax Literal ::= `Int K
 

@@ -1,9 +1,9 @@
 
-kmod SKOOL-TYPED-SYNTAX is including #INT + #ID 
+kmod SKOOL-TYPED-SYNTAX is
 
 --- Identifiers
 --- Special identifiers for the class and method "main", and for the class "object"
-  syntax Id ::=  main
+  syntax #Id ::=  main
                | object
 
 --- Types
@@ -11,15 +11,15 @@ kmod SKOOL-TYPED-SYNTAX is including #INT + #ID
                 | bool 
                 | void 
                 | Type [ ] [prec 0]                                 --- array type
-                | Id [ ] [prec 0]                                   --- syntax "trick" to allow arrays of objects
+                | #Id [ ] [prec 0]                                   --- syntax "trick" to allow arrays of objects
                 | List{Type} -> Type [latex "{#1}\rightarrow{#2}"]  --- function type
 
 --- Typed identifiers
 --- To be used as function parameters
-  syntax VarType ::= Var : Type | Id : Id | Var : Type = Exp | Var : Id = Exp
+  syntax VarType ::= Var : Type | #Id : #Id | Var : Type = Exp | Var : #Id = Exp
 
 --- Variables; we include arrays here as well, a[x][y][z]
-  syntax Var ::= Id 
+  syntax Var ::= #Id 
                | Var [ Exp ] [strict prec 1]
 
 --- Declarations
@@ -27,19 +27,19 @@ kmod SKOOL-TYPED-SYNTAX is including #INT + #ID
 --- Variable declarations
   syntax VarDecl ::= var List{VarType} ; [prec 2]
 --- Method/Constructor declarations
-  syntax MethodDecl ::= method Id ( ) : Type Stmt
-                      | method Id ( ) : Id Stmt --- because classes are not types
-                      | method Id ( List{VarType} ) : Type Stmt
-                      | method Id ( List{VarType} ) : Id Stmt --- because classes are not types
+  syntax MethodDecl ::= method #Id ( ) : Type Stmt
+                      | method #Id ( ) : #Id Stmt --- because classes are not types
+                      | method #Id ( List{VarType} ) : Type Stmt
+                      | method #Id ( List{VarType} ) : #Id Stmt --- because classes are not types
 
-                      | method Id ( ) Stmt
-                      | method Id ( List{VarType} ) Stmt
+                      | method #Id ( ) Stmt
+                      | method #Id ( List{VarType} ) Stmt
 --- Class declarations
-  syntax ClassDecl ::= class Id { Stmts }
-                     | class Id extends Id { Stmts }
+  syntax ClassDecl ::= class #Id { Stmts }
+                     | class #Id extends #Id { Stmts }
 
 --- Expressions
-  syntax Exp ::= Int | Bool
+  syntax Exp ::= #Int | #Bool
                | Var
                | ++ Exp            [prec 0]                     --- want to increment o.f and a[5], too
                | Exp + Exp         [strict prec 33 gather(E e)]
@@ -63,14 +63,14 @@ kmod SKOOL-TYPED-SYNTAX is including #INT + #ID
                | Exp ( List{Exp} ) [strict prec 2]  
                | read ( )
 
-               | new Id ( ) [prec 1]
-               | new Id ( List{Exp} ) [strict(2) prec 1]
+               | new #Id ( ) [prec 1]
+               | new #Id ( List{Exp} ) [strict(2) prec 1]
                | this
                | super
-               | Exp . Id [strict(1) prec 1]
-               | Exp instanceOf Id [strict(1) prec 0]  --- checking if object Exp is instance of class Id
+               | Exp . #Id [strict(1) prec 1]
+               | Exp instanceOf #Id [strict(1) prec 0]  --- checking if object Exp is instance of class Id
                | cast Exp to Type [strict(1) prec 0]   --- explicit casting to a type
-               | cast Exp to Id [strict(1) prec 0]     --- explicit casting to a class
+               | cast Exp to #Id [strict(1) prec 0]     --- explicit casting to a class
 
 
 --- Statements
@@ -81,7 +81,7 @@ kmod SKOOL-TYPED-SYNTAX is including #INT + #ID
                 | if Exp then Stmt else Stmt [strict]
                 | if Exp then Stmt
                 | while Exp do Stmt          [strict]
-                | for Id = Exp to Exp do Stmt
+                | for #Id = Exp to Exp do Stmt
                 | return Exp ;               [strict]
                 | write ( List{Exp} ) ;      [strict]  --- variadic
 
@@ -109,7 +109,7 @@ kmod SKOOL-TYPED-SYNTAX is including #INT + #ID
                      | List{Type} , List{Type} [ditto] 
 
 --- List{Id}
-  syntax List{Id}  ::= Id | List{Bottom}
+  syntax List{Id}  ::= #Id | List{Bottom}
                      | List{Id} , List{Id} [ditto]
 
 --- List{VarType}
@@ -137,12 +137,12 @@ kmod SKOOL-TYPED-STATIC-CLASS-TYPE-SYNTAX is including SKOOL-TYPED-SYNTAX
 --- and to then desugar them to constructs using the class type below.       ---
 --------------------------------------------------------------------------------
 
- syntax Type ::=  class Id                             --- class type
+ syntax Type ::=  class #Id                             --- class type
 --- resolving class ids
   macro F[] = (class F)[]
-  macro method F:Id() : F':Id S:Stmt =  method F:Id() : class F':Id S 
-  macro method F:Id(L:List{VarType}) : F':Id  S 
-      = method F:Id(L:List{VarType}) : class F'  S 
+  macro method F:#Id() : F':#Id S:Stmt =  method F:#Id() : class F':#Id S 
+  macro method F:#Id(L:List{VarType}) : F':#Id  S 
+      = method F:#Id(L:List{VarType}) : class F'  S 
   macro F : F' = F : class F'
   macro (F : F' = E) = (F : class F' = E:Exp)
   macro cast E to F = cast E to (class F)
@@ -157,13 +157,13 @@ kmod SKOOL-TYPED-STATIC-DESUGARED-SYNTAX is including SKOOL-TYPED-STATIC-CLASS-T
 
   macro var VT1:VarType, VT2:VarType, L:List{VarType} ; = var VT1 ; var VT2,L ;
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:Id = E1:Exp to E2:Exp do S) = {var X : int ; X=E1; while X <= E2 do {S X=X+1;}}
-  macro method F:Id() : Tp:Type S = method F(.List{Bottom}) : Tp  S
+  macro (for X:#Id = E1:Exp to E2:Exp do S) = {var X : int ; X=E1; while X <= E2 do {S X=X+1;}}
+  macro method F:#Id() : Tp:Type S = method F(.List{Bottom}) : Tp  S
   macro method F() S = method F() : F  S
   macro method F(L) S = method F(L) : F  S
   macro E() = E(.List{Bottom})
   macro O:Exp . F() = O . F(.List{Bottom}) 
-  macro new C:Id() = new C(.List{Bottom})
+  macro new C:#Id() = new C(.List{Bottom})
   macro class C {Ss:Stmts} = class C extends object {Ss}
 endkm
 

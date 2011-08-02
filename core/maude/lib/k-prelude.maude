@@ -1,7 +1,7 @@
 load pl-builtins.maude
 load socket.maude
 load k-model-checker.maude
---- load pl-meta-level
+---load pl-meta-level
 
 --- Level 0
 
@@ -83,7 +83,7 @@ mod K-LISTK-EXTRAS is
   including K-TECHNIQUE .
   var Ks : List{K} .
 
-  op lengthList{K}_ : List{K} -> Nat [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
+  op lengthList{K}_ : List{K} -> #Nat [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
   eq lengthList{K}(.List`{K`}) = 0 .
   eq lengthList{K}(K:K,,Ks) = sNat lengthList{K}(Ks) . 
 
@@ -156,7 +156,7 @@ mod K-MAP-EXTRAS is
 
 
   
-  op $hasMapping : Map K -> Bool   [metadata "latex=(renameTo \\$hasMapping\\mybracket{_,_})"] .
+  op $hasMapping : Map K -> #Bool   [metadata "latex=(renameTo \\$hasMapping\\mybracket{_,_})"] .
   eq $hasMapping ((M:Map (D:K |-> R:K)), D:K) = true .
   eq $hasMapping (M:Map, D:K) = false [owise] .
 
@@ -173,11 +173,11 @@ mod K-SET-EXTRAS is
   eq Set(.List{K}) = . .
   eq Set(K,, Ks) = SetItem(K) Set(Ks) .
 
-  op _in_ : K Set -> Bool .
+  op _in_ : K Set -> #Bool .
   eq K in Set SetItem(K) = true .
   eq K in Set = false [owise] .
 
-  op _in_ : SetItem Set -> Bool .
+  op _in_ : SetItem Set -> #Bool .
   eq SetItem in Set SetItem = true .
   eq SetItem in Set = false [owise] .
 
@@ -194,11 +194,11 @@ mod K-BAG-EXTRAS is
   eq Bag(.List{K}) = . .
   eq Bag(K,, Ks) = BagItem(K) Bag(Ks) .
   
-  op _in_ : K Bag -> Bool .
+  op _in_ : K Bag -> #Bool .
   eq K in Bag BagItem(K) = true .
   eq K in Bag = false [owise] .
 
-  op _in_ : BagItem Bag -> Bool .
+  op _in_ : BagItem Bag -> #Bool .
   eq BagItem in Bag BagItem = true .
   eq BagItem in Bag = false [owise] .
 
@@ -211,22 +211,22 @@ mod K-LIST-EXTRAS is
   including K-TECHNIQUE .
   including #BOOL .
 
-  var K K1 K2 K' : K .  var Ks : List{K} .  var LItem : ListItem .  var List : List .  var N : NzNat .
+  var K K1 K2 K' : K .  var Ks : List{K} .  var LItem : ListItem .  var List : List .  var N : #NzNat .
 
   op List_ : List{K} -> List .
   eq List(.List{K}) = . .
   eq List(K,,Ks) = ListItem(K) List(Ks) .
 
-  op lengthList_ : List -> Nat .
+  op lengthList_ : List -> #Nat .
   eq lengthList(.).List = 0 .
   eq lengthList(LItem List) = sNat lengthList(List) .
 
-  --- op getFromList`{K`}(_,_) : List{K} NzNat -> K .
+  --- op getFromList`{K`}(_,_) : List{K} #NzNat -> K .
   --- eq getFromList{K}((K,,Ks),1) = K .
   --- eq getFromList{K}((K,,Ks),sNat N) = getFromList{K}(Ks,N) .
 
   --- this does not belong here
-  op inKList : K K -> Bool .
+  op inKList : K K -> #Bool .
   eq inKList(K, (K1 ~> K ~> K2)) = true .
   eq inKList(K, K') = false [owise] .
 endm
@@ -236,9 +236,9 @@ mod K-DESTRUCTORS is
   including K-LIST-EXTRAS .
   op getKLabel_ : K -> KLabel [metadata "latex=(renameTo getKLabel\\mybracket{_})"] .
   op getList`{K`}_ : K -> List{K} [metadata "latex=(renameTo _)"]  .
-  --- op getKArg : K NzNat -> K  .
+  --- op getKArg : K #NzNat -> K  .
   op eraseKLabel : KLabel List{K} -> List{K} .
-  var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .  var N : NzNat .
+  var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .  var N : #NzNat .
   eq getKLabel(L(Ks)) = L .
   eq getList{K}(L(Ks)) = Ks .
   --- eq getKArg(L(Ks),N) = getFromList{K}(Ks,N) .
@@ -314,8 +314,8 @@ endm
 mod K-STRICTNESS is 
   including K-TECHNIQUE .
   including #STRING .
-  op freezer : String -> KLabel .
-  op freezeVar : String -> KLabel .
+  op freezer : #String -> KLabel .
+  op freezeVar : #String -> KLabel .
 endm
 
 mod K-CONTEXTS is
@@ -326,14 +326,14 @@ mod K-CONTEXTS is
   op wrap-with : K K -> K .
 endm
 
---- Quoted Labels for syntax
+---( Quoted Labels for syntax
 
 mod K-QUOTED-LABELS is
   including K-TECHNIQUE .
   including #QID .
   subsort Qid < KLabel .
 endm
-
+---)
 
 --- KLabel-Wrappers level
 
@@ -342,7 +342,7 @@ mod K-WRAPPERS-LABELS is
   including #STRING .
   op wklabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op wcelllabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
-  op kList : String -> KLabel [metadata "wrapper=(list)"] .
+  op kList : #String -> KLabel [metadata "wrapper=(list)"] .
   op wbag_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
   op wset_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
   op wlist_ : List -> KLabel [metadata "wrapper=(builtin)"] .
@@ -420,11 +420,11 @@ endm
 
 mod K-CONDITION-SEARCH is
   including K-TECHNIQUE .
-  op search_ : List{K} -> Bool .
-  op search_ : KLabel -> Bool .
-  op search_ : List -> Bool .
-  op search_ : Bag -> Bool .
-  op search_ : Set -> Bool .
+  op search_ : List{K} -> #Bool .
+  op search_ : KLabel -> #Bool .
+  op search_ : List -> #Bool .
+  op search_ : Bag -> #Bool .
+  op search_ : Set -> #Bool .
 endm
 
 --- Anonymous variables level
@@ -441,7 +441,7 @@ mod K-CELL-ATTRS is
   sort CellAttribute CellKey  .
 
   op __ : CellLabel CellAttribute -> CellLabel .
-  op _=_ : CellKey String -> CellAttribute .
+  op _=_ : CellKey #String -> CellAttribute .
 endm  
 
 
@@ -487,18 +487,18 @@ mod K-LATEX is
   including K-TECHNIQUE .
   including K-SENTENCE .
   including #STRING .
-  op @latex : String -> BagItem .
-  ops latex_ : String -> [KSentence] [prec 126 format(b o d)] .
+  op @latex : #String -> BagItem .
+  ops latex_ : #String -> [KSentence] [prec 126 format(b o d)] .
 endm
 
 mod K-BUILTINS is
   including K-TECHNIQUE .
   including PL-BUILTINS .
-  subsort Bool < K .
+  subsort #Bool < K .
   op andBool : -> KLabel .
 
   var NeKList : NeList{K} .
-  var T1 T2 : Bool .
+  var T1 T2 : #Bool .
 
   eq andBool(T1,, T2,, NeKList)
    = andBool(T1 andBool T2,, NeKList) .
@@ -527,123 +527,3 @@ mod K is
   including K-LATEX .
 endm
 
-
-
-mod PURE-K-TECHNIQUE is 
-including K-TECHNIQUE .
-including K-RULES .
-including K-CONFIG .
-including K-POLYMORPHIC-VARIABLES .
-including K-OPEN-CELLS .
-including K-CONTEXTS .
-including K-WHERE .
-including K-DESTRUCTORS .
-including #BOOL .
-including #EXT-BOOL .
-including #NAT .
-including #INT .
-including #RAT .
-including #FLOAT .
-including #STRING .
-including #CONVERSION .
-including #RANDOM .
-including #COUNTER .
-including #ID .
-including K-WRAPPERS-LABELS .
-including MAUDE-IF-THEN-ELSE .
-including K-CONTEXTS .
-including K-RESULT-LABELS .
-subsort FiniteFloat < Builtins .
-subsort Nat < Rat .
-subsort NzInt < Rat .
-subsort NzNat < NzRat .
-subsort NzNat < Rat .
-subsort NzRat < Builtins .
-subsort PosRat < Builtins .
-subsort PosRat < Rat .
-subsort Zero < Rat .
-op Bag_ : List{K}-> Bag .
-op List_ : List{K}-> List .
-op _in_ : BagItem Bag -> Bool .
-op _in_ : K Bag -> Bool .
-op _in_ : K Set -> Bool .
-op _in_ : SetItem Set -> Bool .
-op _|->_ : List{K}List{K}-> Map .
-op inKList : K K -> Bool .
-op keys_ : Map -> Set .
-op lengthList_ : List -> Nat .
-op substList`{K`}Label`(_`,_`,_`) : List{K}KLabel KLabel -> List{K}.
-op $hasMapping : Map K -> Bool[metadata "latex=(renameTo \$hasMapping\mybracket`{_`,_`})"].
-op 'headList`{K`}_ : -> KLabel[metadata "KProperLabel=() arity=(1) latex=(renameTo head\subscript`{`{\scriptstyle\it`{`}List`{K`}`}`}mybracket`{_`})"].
-op 'substKLabel : -> KLabel[metadata "KProperLabel=() arity=(3)"].
-op Bool_ : Bool -> KLabel[metadata "KProperLabel=() wrapper=(builtin)"].
-op Set_ : List{K}-> Set[metadata "latex=(renameTo `{\it`{`}Set`}\mybracket`{_`})"].
-op _-Bag_ : Bag Bag -> Bag[metadata "latex=(renameTo _-\subscript`{`{\scriptstyle\it`{`}Bag`}`}_)"].
-op _-Set_ : Set Set -> Set[metadata "latex=(renameTo _-\subscript`{`{\scriptstyle\it`{`}Set`}`}_)"].
-op _=>_ : Bool Bool -> Bool[prec 125].
-op _`(_`) : Map K -> K[prec 0].
-op _`(_`) : Map List{K}-> List{K}[prec 0].
-op _`[_/_`] : Map K K -> Map[prec 0].
-op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
-op _`[_`] : Map Map -> Map[prec 0].
-op _`[undef/_`] : Map List{K}-> Map[metadata "latex=(renameTo _`[\ensuremath`{\bot\;`}/_`])"].
-op andBool : -> KLabel[metadata "KProperLabel=()"].
-op lengthList`{K`}_ : List{K}-> Nat[metadata "latex=(renameTo length\subscript`{`{\scriptstyle\it`{`}List`{K`}`}`}mybracket`{_`})"].
-op rule_ : Bool ->[KSentence][prec 126 format(b o d)].
-op rule_if_ : Bool K ->[KSentence][prec 126 format(b o b o d)].
-op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex=(renameTo tail\subscript`{`{\scriptstyle\it`{`}List`{K`}`}`}mybracket`{_`})"].
-eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
-eq Bag_(.List`{K`})=(.).Bag .
-eq Bag_(_`,`,_(K:K,Ks:List{K}))= __(BagItem(K:K),Bag_(Ks:List{K})).
-eq List_(.List`{K`})=(.).List .
-eq List_(_`,`,_(K:K,Ks:List{K}))= __(ListItem(K:K),List_(Ks:List{K})).
-eq Set_(.List`{K`})=(.).Set .
-eq Set_(_`,`,_(K:K,Ks:List{K}))= __(SetItem(K:K),Set_(Ks:List{K})).
-eq _-Bag_(.,Bag:Bag)=(.).Bag .
-eq _-Bag_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:BagItem,Bag':Bag),_-Bag_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-Bag_(Bag:Bag,Bag':Bag))).
-eq _-Set_(.,Set:Set)=(.).Set .
-eq _-Set_(__(Set:Set,SetItem:SetItem),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-Set_(Set:Set,Set':Set),__(SetItem:SetItem,_-Set_(Set:Set,Set':Set))).
-eq _`(_`)('headList`{K`}_,_`(_`)(kList("wklist_"),_`,`,_(K:K,Ks:List{K})))= K:K .
-eq _`(_`)('substKLabel,_`,`,_(.,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))=(.).K .
-eq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label1:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label2:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
-eq _`(_`)('substKLabel,_`,`,_(_~>_(K1:NeK,_~>_(K2:NeK,K:K)),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _~>_(_`(_`)('substKLabel,_`,`,_(K1:NeK,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_~>_(_`(_`)('substKLabel,_`,`,_(K2:NeK,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_`(_`)('substKLabel,_`,`,_(K:K,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))))).
-eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
-eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
-eq _`(_`)(andBool,_`,`,_(_`(_`)(Bool_(T1:Bool),.List`{K`}),_`(_`)(Bool_(T2:Bool),.List`{K`})))= _`(_`)(Bool_(_andBool_(T1:Bool,T2:Bool)),.List`{K`}).
-eq _`(_`)(andBool,_`,`,_(_`(_`)(Bool_(T1:Bool),.List`{K`}),_`,`,_(_`(_`)(Bool_(T2:Bool),.List`{K`}),NeKList:NeList{K})))= _`(_`)(andBool,_`,`,_(_`(_`)(Bool_(_andBool_(T1:Bool,T2:Bool)),.List`{K`}),NeKList:NeList{K})).
-eq _`(_`)(__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= K2:K .
-eq _`[_/_`](Map:Map,K2:K,_`,`,_(K1:K,NList1:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K2:K,K1:K),K2:K,NList1:NeList{K}).
-eq _`[_/_`](Map:Map,List:List{K},.List`{K`})= Map:Map .
-eq _`[_/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K1:K,K2:K),NList1:NeList{K},NList2:NeList{K}).
-eq _`[_/_`](__(Map:Map,_|->_(K1:K,K2:K)),K2':K,K1:K)= __(Map:Map,_|->_(K1:K,K2':K)).
-eq _`[_`](__(Map:Map,_|->_(K1:K,K2:K)),__(Map':Map,_|->_(K1:K,K2':K)))= __(_|->_(K1:K,K2':K),_`[_`](Map:Map,Map':Map)).
-eq _`[undef/_`](Map:Map,.List`{K`})= Map:Map .
-eq _`[undef/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`[undef/_`](_`[undef/_`](Map:Map,K1:K),NList1:NeList{K}).
-eq _`[undef/_`](__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= Map:Map .
-eq _in_(BagItem:BagItem,__(Bag:Bag,BagItem:BagItem))= true .
-eq _in_(K:K,__(Bag:Bag,BagItem(K:K)))= true .
-eq _in_(K:K,__(Set:Set,SetItem(K:K)))= true .
-eq _in_(SetItem:SetItem,__(Set:Set,SetItem:SetItem))= true .
-eq _|->_(.List`{K`},List:List{K})=(.).Map .
-eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},K2:K)).
-eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
-eq inKList(K:K,_~>_(K1:K,_~>_(K:K,K2:K)))= true .
-eq keys_(.)=(.).Set .
-eq keys_(__(Map:Map,_|->_(K1:K,K2:K)))= __(SetItem(K1:K),keys_(Map:Map)).
-eq lengthList_(.)= 0 .
-eq lengthList_(__(LItem:ListItem,List:List))= sNat_(lengthList_(List:List)).
-eq lengthList`{K`}_(.List`{K`})= 0 .
-eq lengthList`{K`}_(_`,`,_(K:K,Ks:List{K}))= sNat_(lengthList`{K`}_(Ks:List{K})).
-eq substList`{K`}Label`(_`,_`,_`)(.List`{K`},Label1:KLabel,Label2:KLabel)= .List`{K`} .
-eq substList`{K`}Label`(_`,_`,_`)(_`,`,_(K:K,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`,`,_(_`(_`)('substKLabel,_`,`,_(K:K,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
-eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
-ceq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel))if _=/=Bool_(Label1:KLabel,Label:KLabel)= true .
-eq $hasMapping(M:Map,D:K)= false[owise].
-eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
-eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
-eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
-eq _in_(K:K,Bag:Bag)= false[owise].
-eq _in_(K:K,Set:Set)= false[owise].
-eq _in_(SetItem:SetItem,Set:Set)= false[owise].
-eq inKList(K:K,K':K)= false[owise].
-endm

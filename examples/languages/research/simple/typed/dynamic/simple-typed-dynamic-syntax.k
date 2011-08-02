@@ -7,7 +7,7 @@ module SIMPLE-TYPED-SYNTAX
 //@ \section{Syntax}
 
 //@ Function "main"
-  syntax Id ::= main
+  syntax #Id ::= main
 
 /*@ \subsection{Types}
 We declare here all the types that we will need for declarations: basic types, array types, and function types.
@@ -20,26 +20,26 @@ We declare here all the types that we will need for declarations: basic types, a
  There are two types of declarations: for typed variables (including arrays) and for typed functions 
 */
   syntax Decl ::= var List{VarType} ;
-                | function Id ( List{IdType} ) : Type Stmt
-                | function Id ( ) : Type Stmt
+                | function #Id ( List{IdType} ) : Type Stmt
+                | function #Id ( ) : Type Stmt
 
 /*@ Function parameter declarations now have to include types as well,
  so we define typed identifiers  and typed variables for that purpose
 */
-  syntax IdType ::= Id : Type [prec 2]
+  syntax IdType ::= #Id : Type [prec 2]
   syntax VarType ::= IdType | Var : Type [ditto] 
 
 /*@ Variables; we include arrays here as well, so that, e.g., a[x][y][z]
  can appear anywhere a variable can appear (declarations, lookup, assignment)
 */
-  syntax Var ::= Id
+  syntax Var ::= #Id
                | Var [ List{Exp} ]       [strict prec 1]
 
 
 //@\subsection{Expressions}
-  syntax Exp ::= Int | Bool
+  syntax Exp ::= #Int | #Bool
                | Var
-               | ++ Id             [prec 0]
+               | ++ #Id             [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
                | Exp * Exp         [strict prec 31 gather(E e)]
@@ -71,7 +71,7 @@ We declare here all the types that we will need for declarations: basic types, a
                 | if Exp then Stmt else Stmt  [strict(1) prec 90]
                 | if Exp then Stmt            [prec 89]
                 | while Exp do Stmt           [prec 90]
-                | for Id = Exp to Exp do Stmt [prec 90]
+                | for #Id = Exp to Exp do Stmt [prec 90]
                 | return Exp ;                [strict]
                 | write ( Exp ) ;             [strict]
                 | try Stmt catch ( IdType ) Stmt  [prec 90]
@@ -106,7 +106,7 @@ do not add Bottom as subsort to anything else, like Id, Exp, etc
   syntax List{VarType} ::= VarType | Initializer |  List{IdType}
                      | List{VarType} , List{VarType} [ditto] 
 --- List{Id}
-  syntax List{Id}  ::= Id | List{Bottom}
+  syntax List{Id}  ::= #Id | List{Bottom}
                      | List{Id} , List{Id} [ditto]
 --- List{Exp}
   syntax List{Exp} ::=  Exp | List{Id} 
@@ -125,8 +125,8 @@ so we get rid of the derived ones before we start the semantics
 */
 
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:Id = E1:Exp to E2:Exp do S) = {var X : int ; X=E1; while X <= E2 do {S X=X+1;}}
-  macro function F:Id() : Tp:Type S  = function F(.List{Bottom}) : Tp S
+  macro (for X:#Id = E1:Exp to E2:Exp do S) = {var X : int ; X=E1; while X <= E2 do {S X=X+1;}}
+  macro function F:#Id() : Tp:Type S  = function F(.List{Bottom}) : Tp S
   macro E() = E(.List{Bottom})
 
   macro var VT:VarType, VT':VarType, VTL:List{VarType} ;

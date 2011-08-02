@@ -26,15 +26,15 @@ module AGENTS imports SEQ
              | barrier        
              | broadcast K       [strict]
              | haltAgent
-             | Int
-             | Bool
+             | #Int
+             | #Bool
 
 --- Agents
-  rule [agent-creation] : <agent_> <k>newAgent S:K => N2:Nat<_/k> <me>N1:Nat</me> 
+  rule [agent-creation] : <agent_> <k>newAgent S:K => N2:#Nat<_/k> <me>N1:#Nat</me> 
        <_/agent> <world_>. => SetItem(N2)<_/world> @latex("\\kBR")
        (. => <agent_><me>N2</me><parent>N1</parent><k>S</k><_/agent>) 
        <nextAgent>N2 => sNat N2</nextAgent> [large]
-  rule [agent-completion] : (<agent_><control>.Bag</control> <me>N:Nat</me> <_/agent>=> .) 
+  rule [agent-completion] : (<agent_><control>.Bag</control> <me>N:#Nat</me> <_/agent>=> .) 
        <world_>(SetItem(N) => .)<_/world>
   rule [halt-agent] : <control_> <k>haltAgent<_/k> <_/control> => <control> .Bag </control> .
   rule <k>me => N<_/k> <me>N</me>

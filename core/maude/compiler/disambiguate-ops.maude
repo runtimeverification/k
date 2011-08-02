@@ -106,7 +106,7 @@ fmod DISAMBIGUATE-OPS is
   = makeUnambiguousT(C, T, M, OPDS, OPDM, findOp(M, OPDS, getName(C), nil, getType(C))) .
  eq makeUnambiguousT(V, T, M, OPDS, OPDM) = V .
  eq makeUnambiguousT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
-  = 'if_then_else_fi[makeUnambiguousTs(Trms, 'Bool T T, M, OPDS,OPDM)] .
+  = 'if_then_else_fi[makeUnambiguousTs(Trms, Bool T T, M, OPDS,OPDM)] .
 --- eq makeUnambiguousT('_==Bool_[T1,T2],T,M,OPDS,OPDM)
 ---  = '_==Bool_[makeUnambiguousTs((T1,T2), leastSort(M,T1) leastSort(M, T2), M, OPDS,OPDM)] .
  eq makeUnambiguousT(Q[Trms], T, M, OPDS, OPDM)

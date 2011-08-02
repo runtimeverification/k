@@ -444,7 +444,7 @@ my $latex_special = '[\\#\\$\\{\\}\\[\\]\\&\\^\\_\\%\\~\\\\]';
 my $kvar  = "[A-Za-z][A-Za-z0-9]*[']*";
 
 # Pattern matched by K sorts
-my $ksort = "[A-Z][A-Za-z0-9\\`\\+\\?\\!#]*(?:\\{[A-Z][A-Za-z0-9\\`\\+\\?\\!]*\\})?";
+my $ksort = "[A-Z#][A-Za-z0-9\\`\\+\\?\\!#]*(?:\\{[A-Z#][A-Za-z0-9\\`\\+\\?\\!]*\\})?";
 # TODO: test exhaustively :-)
 
 # Pattern matched by K variables
@@ -475,7 +475,7 @@ my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 my @k_attributes = qw(strict metadata prec format assoc comm id: hybrid gather ditto seqstrict structural large latex );           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
-my $k_sorts = "#Bag#BagItem#Bool#Builtins#CellLabel#CellKey#CellAttribute#Char#Int#K#KAssignments#KHybridLabel#KLabel#KResult#KResultLabel#KSentence#List#ListItem#List{KResult}#List{K}#Map#MapItem#Nat#NeBag#NeK#NeList#NeList{KResult}#NeList{K}#NeMap#NeSet#NzInt#NzNat#Set#SetItem#String#Zero";
+my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
 
 my $comment = join("|", (
         "\\/\\/.*?\n",
@@ -1812,8 +1812,8 @@ sub maudify_module {
     $_ = Unfreeze("MYSTRINGS", $_);
 #     print  "Stage:\n$_\n\n";
     
-# Step: Declare the on-the-fly variables
-    $_ = on_the_fly_kvars($_);
+# Step: Store the on-the-fly variables
+    my $vars = on_the_fly_kvars($_);
     #  print  "Stage:\n$_\n\n";
     
 # Step: Reduce cell notation with _ to cell notation with ...
@@ -1865,15 +1865,26 @@ sub maudify_module {
 		s/(\Q$kl\E)/Freeze($kl, "KLABEL")/sge;		
 	}
 
- 	$_ = spacify($_);
+        s/(subsorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL)/{Freeze($1, "SUBSORTS") . $2;}/sge;
+        s/(sorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL|SUBSORTS)/{Freeze($1, "SORTS") . $2;}/sge;
+
+# print ;
+        $_ = spacify($_);
 
 	$_ = Unfreeze("ATTR", $_);
 	$_ = Unfreeze("STRINGS", $_);
 	$_ = Unfreeze("KLABEL", $_);
+        $_ = Unfreeze("SUBSORTS", $_);
+        $_ = Unfreeze("SORTS", $_);
 
-#	print "$_\n\n";
+# print "$_\n\n";
 #	print "============================\n\n\n";
     
+# Step: Declare the on-the-fly variables
+    s/(?=endkm)/$vars?"$vars ":""/se;
+    #  print  "Stage:\n$_\n\n";
+
+
 # Step: Change .List into (.).List , etc.
     s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
 #    print  "Stage:\n$_\n\n";
@@ -1967,7 +1978,19 @@ sub make_ops {
 	my $sort_decl = "";
 	if ( ! (grep { "$_" eq "$result_sort" } @all_sorts) ) {
 	    $sort_decl = "sort $result_sort";
-	    push(@all_sorts, $result_sort);	    
+#	    print "ADD: $result_sort\n";
+	    push(@all_sorts, $result_sort);
+            my $oh_my = $result_sort;
+#          
+#          Code to add the sorts as tokens
+#
+#            $oh_my =~ s/`//gs;
+#            push(@all_tokens, $oh_my);
+#            print "OH_MY1: $oh_my\n";
+#            $oh_my =~ s/[{}]/`$&/gs;
+#            push(@all_tokens, $oh_my);
+#            print "OH_MY1: $oh_my\n";
+#	    print "ALL: @all_sorts\n\n";
 	}
 
         my $result = "$spaces1 $sort_decl $spaces2";
@@ -2285,6 +2308,10 @@ sub on_the_fly_kvars {
     while (my ($key,$val) = each %kvar_decls) {
 	$kvars .= "kvar $key : $val ";
     }
+    
+    return $kvars;
+    
+    # deprecated
     s/(?=endkm)/$kvars?"$kvars ":""/se;
     return $_;
 }
@@ -2380,7 +2407,6 @@ sub add_sorts {
 # Extracting all the defined sorts
     my @sorts = /\ssorts?((?:\s+$ksort)+)\s+(?=\.|$kmaude_keywords_pattern)/gs;
 
-#    print "\nSORTS: @sorts\n";
 
     @sorts = split(/\s+/, "@sorts");
 	
@@ -2388,8 +2414,12 @@ sub add_sorts {
 # Add these sorts to @all_sorts
     @all_sorts = set(@all_sorts, @sorts);
 
+#    print "ALLSORTS: @all_sorts\n\n";
+#    print "SORTS: @sorts\n\n";
+    
 # Add all sorts with alphanumerics to @all_tokens as well
     @all_tokens = set(@all_tokens, grep /\W/, @sorts);
+#    print "ALLTOKENS: @all_tokens\n\n";
 }
 
 # Next subroutine takes a string (most likely a kmaude module),
@@ -2559,7 +2589,7 @@ sub add_subsorts
     $supersorts = "";
     foreach(@sorts)
     {
-		$supersorts .= "$_ " if ($k_sorts !~ /#$_#/);
+	$supersorts .= "$_ " if ($k_sorts !~ /:$_:/);
     }
     
     return if ($supersorts eq "");
@@ -2837,7 +2867,7 @@ sub addKandKLATEX
 	return $content if $k;
 	
 	my $prelude_sorts = $k_sorts;
-	$prelude_sorts =~ s/#/\|/sg;
+	$prelude_sorts =~ s/:/\|/sg;
 	$prelude_sorts =~ s/^\s*\|//;
 	$prelude_sorts =~ s/\|\s*$//;
 #	print "SORTS: $prelude_sorts\n\n";

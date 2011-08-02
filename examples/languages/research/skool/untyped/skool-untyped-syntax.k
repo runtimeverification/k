@@ -11,7 +11,7 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
-  syntax List{Id}  ::=  Id 
+  syntax List{Id}  ::=  #Id 
                | .List{Id}
                | List{Id} , List{Id} [prec 70 assoc id: .List{Id} strict hybrid]
 
@@ -30,13 +30,13 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
 
 --- variable names
   syntax Var ::= 
-                 Id 
+                 #Id 
                | Exp [ Exp ] [prec 1 strict]
 
 --- expresions
   syntax Exp  ::= 
-                 Var | Int | Bool
-               | ++ Id [prec 0]
+                 Var | #Int | #Bool
+               | ++ #Id [prec 0]
                | Exp + Exp [gather(E e) prec 33 strict]
                | Exp - Exp [gather(E e) prec 33 strict]
                | Exp * Exp [gather(E e) prec 31 strict]
@@ -57,14 +57,14 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
                | Exp ( List{Exp} ) [prec 2 strict]
                | read ( )
              --- <SKOOL added>
-               | new Id ( ) [prec 1]
-               | new Id ( List{Exp} ) [prec 1 strict(2)]
+               | new #Id ( ) [prec 1]
+               | new #Id ( List{Exp} ) [prec 1 strict(2)]
                | this
-               | Exp . Id ( ) [prec 1 strict(1)] 
-               | Exp . Id ( List{Exp} ) [prec 1 strict(1 3)] 
-               | super Id ( ) [prec 1]
-               | super Id ( List{Exp} ) [prec 1 strict(2)]
-               | Exp instanceOf Id [prec 0 strict(1)]
+               | Exp . #Id ( ) [prec 1 strict(1)] 
+               | Exp . #Id ( List{Exp} ) [prec 1 strict(1 3)] 
+               | super #Id ( ) [prec 1]
+               | super #Id ( List{Exp} ) [prec 1 strict(2)]
+               | Exp instanceOf #Id [prec 0 strict(1)]
              --- </SKOOL added>
 
 --- variable declarations
@@ -72,18 +72,18 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
                  var Var ; [prec 2] 
 
 --- <SKOOL modified>
----                | function Id ( ) Stmt 
----                | function  Id ( List{Id} ) Stmt 
+---                | function #Id ( ) Stmt 
+---                | function  #Id ( List{Id} ) Stmt 
 --- </SKOOL modified>
 
 --- <SKOOL added>
   syntax MethodDecl ::=
-                 method Id ( ) Stmt 
-               | method Id ( List{Id} ) Stmt 
+                 method #Id ( ) Stmt 
+               | method #Id ( List{Id} ) Stmt 
 
   syntax ClassDecl ::= 
-                 class Id { Stmts }
-               | class Id extends Id { Stmts }
+                 class #Id { Stmts }
+               | class #Id extends #Id { Stmts }
 --- </SKOOL added>
 
 --- instructions
@@ -95,7 +95,7 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
                | if Exp then Stmt else Stmt [strict(1)]
                | if Exp then Stmt
                | while Exp do Stmt
-               | for Id = Exp to Exp do Stmt
+               | for #Id = Exp to Exp do Stmt
                | return Exp ; [strict]
                | write ( Exp ) ; [strict]
 
@@ -103,8 +103,8 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
   syntax Stmts ::= 
                  VarDecl 
              --- <SKOOL modified>
----                | function Id ( ) Stmt 
----                | function  Id ( List{Id} ) Stmt 
+---                | function #Id ( ) Stmt 
+---                | function  #Id ( List{Id} ) Stmt 
                | MethodDecl
                | ClassDecl
              --- </SKOOL modified>
@@ -112,7 +112,7 @@ kmod SKOOL-UNTYPED-SYNTAX is including #INT + #ID
                | Stmts Stmts [prec 100 gather(e E)]
 
 --- reserved class names
-  syntax Id ::= 
+  syntax #Id ::= 
                  main 
              --- <SKOOL added>
                | object
@@ -132,15 +132,15 @@ kmod SKOOL-UNTYPED-DESUGARED-SYNTAX is including SKOOL-UNTYPED-SYNTAX
 --- so we get rid of the derived ones before we start the semantics          ---
 --------------------------------------------------------------------------------
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
+  macro (for X:#Id = E1:Exp to E2:Exp do S) = {var X; X=E1; while X <= E2 do {S X=X+1;}}
 --- <SKOOL modified>
-  macro method F:Id() S = method F(.List{Id}) S
+  macro method F:#Id() S = method F(.List{Id}) S
 --- </SKOOL modified>
   macro E() = E(.List{Id})
 
 --- <SKOOL added>
   macro O:Exp . F() = O . F(.List{Id}) 
-  macro new C:Id() = new C(.List{Id})
+  macro new C:#Id() = new C(.List{Id})
   macro O . F() = O . F(.List{Id})
   macro super F() = super F(.List{Id})
 

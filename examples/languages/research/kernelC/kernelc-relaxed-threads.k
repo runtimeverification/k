@@ -32,7 +32,7 @@ memory does contain $v$ at $a$;
 memory does contain $v$ at $a$; 
 */
   rule [global-deref]: <k> *N => V <_/k> <buffer> Mem </buffer> 
-      <mem_> N:Nat |-> V <_/mem> 
+      <mem_> N:#Nat |-> V <_/mem> 
     if notBool(N in locations(Mem))
 
 
@@ -72,7 +72,7 @@ memory does contain $v$ at $a$;
 
 //@\subsection{Rule 9} if $p$ holds the lock, and its write buffer is empty, it can end a LOCK'd instruction. 
 
-  rule [release] : <k> release(N) => void <_/k> <id> T:Nat </id> 
+  rule [release] : <k> release(N) => void <_/k> <id> T:#Nat </id> 
        <buffer> .List </buffer> <locks_> N |-> T => .Map <_/locks>
 
 
@@ -101,7 +101,7 @@ memory does contain $v$ at $a$;
 
   //@ Structural rules for maintaining the status of the blocked cell
   rule <k> acquire(N)  <_/k> <blocked> false => true </blocked> 
-       <locks_> N |-> T:Nat <_/locks>       [structural]
+       <locks_> N |-> T:#Nat <_/locks>       [structural]
   rule <k> acquire(N)  <_/k>  <blocked> true => false </blocked> 
        <locks_> Locks <_/locks>
     if notBool(N in keys(Locks))       [structural]
@@ -110,8 +110,8 @@ memory does contain $v$ at $a$;
   //@\subsection{Thread semantics} changes because now all synchronization constrcts are assumed to generate an MFENCE instruction, and thus need to ensure the buffer is empty.
 
   context 'spawn_('_`(_`)(_,,`[HOLE`]:K)) 
-  rule [spawn] : <k> 'spawn_('_`(_`)(X:Id,,Vl:List{Val})) => T <_/k> 
-                 <next> T:Nat => T +Int 1 </next> 
+  rule [spawn] : <k> 'spawn_('_`(_`)(X:#Id,,Vl:List{Val})) => T <_/k> 
+                 <next> T:#Nat => T +Int 1 </next> 
                  <buffer> .List </buffer> 
                  (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> T </id> <_/thread>) 
   rule (<thread_> <k> V:Val </k> <id> T </id> 
@@ -121,7 +121,7 @@ memory does contain $v$ at $a$;
   rule <k> join(N) => 0 <_/k>   <buffer> .List </buffer> 
        <cthreads_> SetItem(N) <_/cthreads> [structural]
 
-  rule [local-inc] : <k> (*N)++ => I:Int <_/k> 
+  rule [local-inc] : <k> (*N)++ => I:#Int <_/k> 
        <buffer_> bwrite(N, I) Mem:List (. => bwrite(N, I +Int 1)) </buffer> 
     if notBool(N in locations(Mem))
 
@@ -131,8 +131,7 @@ memory does contain $v$ at $a$;
 
  //@ Auxilliary helping semantic constructs
 
-  syntax ListItem ::= bwrite ( Nat , Val )
-  syntax K ::= Bool
+  syntax ListItem ::= bwrite ( #Nat , Val )
 
   syntax Set ::= locations List
  

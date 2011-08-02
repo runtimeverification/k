@@ -2,26 +2,26 @@
 --- SKOOL-TYPED-DYNAMIC-SEMANTICS module ---
 --------------------------------------------
 
-kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX + K 
+kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX 
 
 -------------------------------------------------------------
 --- Values that various fragments of programs evaluate to ---
 -------------------------------------------------------------
 
-  syntax Val ::= Int | Bool  
+  syntax Val ::= #Int | #Bool  
                --- Array values are wrapped as specific reference values, where:
                --- 1st argument = the type of the array
                --- 2nd argument = the location of the first element in the array, and
                --- 3rd argument = the array size (array elements are contiguously allocated)
-               | array ( Type , Nat , Nat ) 
+               | array ( Type , #Nat , #Nat ) 
                --- Function values; like arrays, functions also evaluate to their address
                --- (wrapped as a specific "function" value together with the function type
                --- and the object that the function corresponds to) and the address
                --- contains the actual function body (as an untyped "lambda" value")
-               | function ( Type , K , Nat )
+               | function ( Type , K , #Nat )
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}.{#2}"]
                --- Object values
-               | obj ( Id , Nat ) --- [latex "objEnv({#1},{#2})"]
+               | obj ( #Id , #Nat ) --- [latex "objEnv({#1},{#2})"]
                | objEnv ( Bag )   --- [latex "{#1}"]
 
 --- Values are expressions
@@ -55,8 +55,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
                     <crntObj> .K </crntObj>
                     <classes>
                         <class multiplicity="*">
-                            <className> Id:Id </className>
-                            <extends> Id:Id </extends>
+                            <className> Id:#Id </className>
+                            <extends> Id:#Id </extends>
                             <declarations> .K </declarations>
                         </class>
                     </classes>
@@ -80,7 +80,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Array declaration
   context var X[[HOLE]] : T ;
   rule [decl-array]:
-       <k> var X[N:Nat] : T[]; => . <_/k> 
+       <k> var X[N:#Nat] : T[]; => . <_/k> 
        <env> Env => Env[L/X] </env>
        <store_>. => L |-> array(T,sNat(L),N)  sNat(L)..sNat(L) +Nat N |-> initVal(T) <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc> 
@@ -89,7 +89,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Like in SIMPLE, method names are added to the environment and bound to their code
 --- This way, we can easily allow objects to pass and change their methods (see p23)
   rule [decl-method]:
-       <k> method F:Id(XTl) : T S:Stmt => . <_/k>
+       <k> method F:#Id(XTl) : T S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc>
        <crntObj> Obj:K </crntObj>
@@ -97,7 +97,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- Class declaration
   rule [decl-class]:
-       <k> class C1:Id extends C2:Id { Ss:Stmts } => . <_/k>
+       <k> class C1:#Id extends C2:#Id { Ss:Stmts } => . <_/k>
        <classes_> (. => <class>
                             <className> C1 </className>
                             <extends> C2 </extends>
@@ -146,7 +146,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        <store_> L |-> (I => I +Int 1) <_/store>
 
 --- Arithmetic operators
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1:#Int + I2:#Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
@@ -158,14 +158,14 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
-  rule B1:Bool and B2:Bool => B1 andBool B2
+  rule B1:#Bool and B2:#Bool => B1 andBool B2
   rule B1 or B2 => B1 orBool B2
-  rule not(B:Bool) => notBool(B)
+  rule not(B:#Bool) => notBool(B)
 
 --- Array lookup.  Note that we check the array bounds now.
 --- We prefer to use an auxiliary operation, lookup (defined in
 --- the auxilliary operator section below), to avoid locking the store.
-  rule [array-indexing]: array(_,L,M:Nat)[N] => lookup(L +Int N)
+  rule [array-indexing]: array(_,L,M:#Nat)[N] => lookup(L +Int N)
     if N >=Nat 0 andBool N <=Nat M [structural]
 
 --- Size of array
@@ -218,7 +218,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
     if subtypeAll(typeOfAll(Vl), Tl, Cls)
 --- The following _#_#_#_ ListItem construct used above tuples items for stacking.
 --- This is an auxilliary operation but it has no rules, so we declare it here.
-  syntax ListItem ::=    Map # K # K # Type
+  syntax ListItem ::=    Map `# K `# K `# Type
 
 --- Function return.  We define it here because it is related to the above
   rule <k> return(V); ~> _ => upcast(V,T) ~> K </k>
@@ -387,7 +387,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   macro initVal(bool) = false 
   macro initVal(void) = none 
   macro initVal(T:Type[]) = array(T[],0,0) --- array of type T[] of length 0 allocated at location 0
-  macro initVal(C:Id) = obj(C,0)           --- object of class C allocated at location 0
+  macro initVal(C:#Id) = obj(C,0)           --- object of class C allocated at location 0
 --- Note that the first allocated location is 1, so the default arrays/values cannot be accessed
 
 --- idList and typeList
@@ -397,7 +397,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax List{Id}   ::= idList   ( List{VarType} ) 
   syntax List{Type} ::= typeList ( List{VarType} ) 
   rule idList(.List{Bottom}) => .List{Bottom}                [structural]
-  rule idList(X:Id : T, XTl:List{VarType}) => X, idList(XTl) [structural]
+  rule idList(X:#Id : T, XTl:List{VarType}) => X, idList(XTl) [structural]
   rule typeList(.List{Bottom}) => .List{Bottom}              [structural]
   rule typeList(X : T,XTl) => T,typeList(XTl)                [structural]
 
@@ -406,9 +406,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- an array element A[I], or a class member O.X (here X can be a field or a method).
 --- l-value(E) evaluates to a location value of the form loc(L), where L is a natural number.
   syntax Exp ::= l-value ( K )    --- for parsing reasons, we prefer to allow l-value to take a K
-  syntax Val ::= loc ( Nat )
+  syntax Val ::= loc ( #Nat )
 --- Local variable
-  rule <k> l-value(X) => loc(L:Nat) <_/k> <env_> X|->L <_/env>
+  rule <k> l-value(X) => loc(L:#Nat) <_/k> <env_> X|->L <_/env>
 --- Implicit member access
   rule <k> l-value(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
 --- Array element: evaluate the array and its index; then the array lookup rule above applies.
@@ -430,9 +430,9 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- envStack holds an object environment, which is a stack of
 --- environments, one for each class in hierarchy.
   syntax CellLabel ::= envStack       --- cell holding a stack, or List
-  syntax ListItem ::= Id :: BagItem   --- Id is the class name, BagItem is its corresp. environment
-  syntax K ::= lookupMember ( BagItem , Id )  --- BagItem is the envStack cell, Id is the member name
-  syntax K ::= lookup Nat                     --- Nat is the store location
+  syntax ListItem ::= #Id :: BagItem   --- Id is the class name, BagItem is its corresp. environment
+  syntax K ::= lookupMember ( BagItem , #Id )  --- BagItem is the envStack cell, Id is the member name
+  syntax K ::= lookup #Nat                     --- Nat is the store location
 --- lookupMember
 --- First look for the member in the top environment; if found then done.
   rule lookupMember(<envStack> _ :: <env_> X|->L <_/env> <_/envStack>,X) => lookup(L)
@@ -448,8 +448,8 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   syntax List{Type} ::= typeOfAll ( List{Val} )
   rule typeOf(function(T,_,_)) => T                             [structural]
   rule typeOf(array(T,_,_)) => T                                [structural]
-  rule typeOf(I:Int) => int                                     [structural]
-  rule typeOf(B:Bool) => bool                                   [structural]
+  rule typeOf(I:#Int) => int                                     [structural]
+  rule typeOf(B:#Bool) => bool                                   [structural]
   rule typeOf(none) => void                                     [structural]
   rule typeOf(obj(C,_)) => C                                    [structural]
   rule typeOf(objEnv(<envStack> C :: _ <_/envStack>)) => C      [structural]
@@ -467,10 +467,10 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule upcastAll(.List{Bottom},.List{Bottom}) => .List{Bottom}     [structural]
 
 --- subtype, subtypeAll
-  syntax Bool ::= subtype ( Type , Type , Bag ) 
-  syntax Bool ::= subtypeAll ( List{Type} , List{Type} , Bag )
+  syntax #Bool ::= subtype ( Type , Type , Bag ) 
+  syntax #Bool ::= subtypeAll ( List{Type} , List{Type} , Bag )
   rule subtype(T, T, _) => true   [structural]
-  rule subtype((C1 => C2), C':Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>))
+  rule subtype((C1 => C2), C':#Id, (Cls <class_> <className> C1 </className> <extends> C2 </extends> </class>))
     if C1 =/=Bool C'              [structural]
   rule subtype(object,C,_) => C ==Bool object [structural]
   rule subtype(int ,C,_) => false [structural]
@@ -483,14 +483,14 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
   rule subtypeAll(.List{Bottom},.List{Bottom},_) => true [structural]
 
 --- Length
-  syntax Nat ::= `| List{Id} `|
+  syntax #Nat ::= `| List{Id} `|
   rule |.List{Bottom}| => 0           [structural]
   rule |X, Xl:List{Id}| => sNat |Xl|  [structural]
 
 --- Generate sequence of locations
-  syntax List{K} ::= Nat .. Nat
-  rule N1:Nat..N1 => .List{K}         [structural]
-  rule N1..N2:Nat => N1,,sNat N1..N2  [structural]
+  syntax List{K} ::= #Nat .. #Nat
+  rule N1:#Nat..N1 => .List{K}         [structural]
+  rule N1..N2:#Nat => N1,,sNat N1..N2  [structural]
 
 --- Environment recovery
   syntax K ::= env ( Map ) 

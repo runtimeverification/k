@@ -11,5 +11,5 @@ require programs
 
 kmod RUN is including BASIC-RUN + MU-PROGRAMS 
   configuration <T> <k> .K </k> <nextId> 0 </nextId> </T>
-  syntax KResult ::= Id
+  syntax KResult ::= #Id
 endkm

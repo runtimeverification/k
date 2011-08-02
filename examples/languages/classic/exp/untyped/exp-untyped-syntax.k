@@ -8,8 +8,8 @@
 --- type inferenced versions of the EXP languages.
 
 kmod EXP-SYNTAX is including #INT + #ID
-  syntax Exp ::= Int | Bool
-               | Id
+  syntax Exp ::= #Int | #Bool
+               | #Id
                | Exp + Exp                [strict prec 33 gather(E e)]
                | Exp - Exp                [strict prec 33 gather(E e)]
                | Exp * Exp                [strict prec 31 gather(E e)]
@@ -25,16 +25,16 @@ kmod EXP-SYNTAX is including #INT + #ID
                | Exp and Exp              [strict prec 55 gather(E e)]
                | Exp or Exp               [strict prec 59 gather(E e)]
                | not Exp                  [strict prec 53]
-               | lambda Id . Exp          [latex "\lambda{#1}.{#2}"]
-               | mu Id . Exp              [latex "\mu{#1}.{#2}"]
+               | lambda #Id . Exp          [latex "\lambda{#1}.{#2}"]
+               | mu #Id . Exp              [latex "\mu{#1}.{#2}"]
                | Exp Exp                  [strict prec 10 gather(E e)]
-               | let Id = Exp in Exp
-               | letrec Id Id = Exp in Exp
+               | let #Id = Exp in Exp
+               | letrec #Id #Id = Exp in Exp
                | if Exp then Exp else Exp [strict(1)]
 endkm
 
 
 kmod EXP-UNTYPED-DESUGARED-SYNTAX is including EXP-SYNTAX
-  macro let X:Id = E:Exp in E':Exp = (lambda X . E') E
-  macro (letrec F:Id X = E in E') = (let F = mu F . (lambda X . E) in E')
+  macro let X:#Id = E:Exp in E':Exp = (lambda X . E') E
+  macro (letrec F:#Id X = E in E') = (let F = mu F . (lambda X . E) in E')
 endkm

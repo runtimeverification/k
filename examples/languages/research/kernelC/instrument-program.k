@@ -1,12 +1,12 @@
 kmod INSTRUMENT-PROGRAM is including KERNELC-BASIC-SEMANTICS
-  syntax Event ::=  write ( Nat : Nat <- Int ) | read ( Nat : Nat |-> Int ) | spwn ( Nat : Nat ) | acq ( Nat : Nat ) | rel ( Nat : Nat ) 
-  syntax PreEvent ::= rea ( Nat : Nat ) | spw ( Nat )
+  syntax Event ::=  write ( #Nat : #Nat <- #Int ) | read ( #Nat : #Nat |-> #Int ) | spwn ( #Nat : #Nat ) | acq ( #Nat : #Nat ) | rel ( #Nat : #Nat ) 
+  syntax PreEvent ::= rea ( #Nat : #Nat ) | spw ( #Nat )
   syntax Builtins ::= Event
   syntax K ::= PreEvent | Event | Bool
   configuration <k> .K </k> <id> 0 </id> <event> false </event> <trace> .List </trace>
 
-  rule <k> * N:Nat = V:Int ~> (. => write(T: N <- V)) <_/k> 
-       <id> T:Nat </id>
+  rule <k> * N:#Nat = V:#Int ~> (. => write(T: N <- V)) <_/k> 
+       <id> T:#Nat </id>
        <event> false => true </event> 
        [structural]
 

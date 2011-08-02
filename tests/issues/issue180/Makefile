@@ -1,4 +1,4 @@
-COMPILE_OPTIONS ?= -nd
+COMPILE_OPTIONS ?= 
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = SIMPLE-UNTYPED

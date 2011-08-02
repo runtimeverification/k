@@ -1,10 +1,8 @@
 
 kmod ISSUE is
-	including K
-	including #BUILTINS
 	
-	syntax Exp ::= Int | Exp + Exp
-	syntax List{Exp} ::= Exp | () | Exp , Exp [strict assoc hybrid id:()]
+	syntax Exp ::= #Int | Exp + Exp
+	syntax List{Exp} ::= Exp | () | Exp , Exp [strict assoc hybrid id: ()]
 	syntax K ::= test1 | test2
 	
 	rule test1 => 5 , 7 , 8, 9 [structural]

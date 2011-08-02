@@ -5,8 +5,8 @@ load dijkstra
 load programs
 
 kmod RUN is including DIJKSTRA-PROGRAMS
-  op run : Set Id -> Bag
-  macro run(Graph:Set,x:Id) = <graph> Graph </graph> 
+  op run : Set #Id -> Bag
+  macro run(Graph:Set,x:#Id) = <graph> Graph </graph> 
                               <shortest> x |-> 0 </shortest>
 
   rule <graph_> x -_-> _ <_/graph>  

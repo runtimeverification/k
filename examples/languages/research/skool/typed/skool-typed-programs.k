@@ -2,7 +2,7 @@
 
 kmod SKOOL-TYPED-PROGRAMS is including SKOOL-TYPED-SYNTAX
 
-  syntax Id ::= 
+  syntax #Id ::= 
                 a | b | c 
               | d | e | f 
               | g | h | i 

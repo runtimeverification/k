@@ -20,7 +20,7 @@ and then calling main.  Put the list of inputs in the {\sf in} cell. */
 
 //@ Rule for extracting the output once all threads have completed
 
-  rule <T_> <threads> .Bag </threads> <out> S:String </out> <_/T> 
+  rule <T_> <threads> .Bag </threads> <out> S:#String </out> <_/T> 
     => <result> S </result> [structural]
 
 endkm

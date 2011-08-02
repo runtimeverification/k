@@ -1,6 +1,6 @@
 load kernelc
 kmod KERNELC-RACE-DETECTION is  including  KERNELC
- rule < k => race > * N:Nat = _ ...</ k => race > 
+ rule < k => race > * N:#Nat = _ ...</ k => race > 
       < k => race > * N = _ ...</ k => race > [structural]
 
  rule < k => race > * N = _ ...</ k => race > 

@@ -1,5 +1,5 @@
 kmod CALLCC-PROGRAMS is including CALLCC + LAMBDA + IF + EXP + IDS
-  ops k return : -> Id 
+  ops k return : -> #Id 
 
   op p10 : -> K 
   macro p10 = callcc (lambda k . 7)

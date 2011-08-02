@@ -3,7 +3,7 @@ in imppp-programs
 
 kmod IMPPP-CONFIGURATION is including IMPPP-SYNTAX + K
   syntax K ::= AExp | BExp | Stmt
-  syntax KResult ::= Bool | Int
+  syntax KResult ::= #Bool | #Int
 
   configuration
     <T color="yellow">
@@ -23,12 +23,12 @@ endkm
 
 kmod IMPPP-SEMANTICS is including IMPPP-CONFIGURATION
   /*@ \textbf{Variable lookup} */
-  rule <k> X:Id => I <_/k>
-       <env_> X |-> N:Nat <_/env>
-       <store_> N |-> I:Int <_/store>
+  rule <k> X:#Id => I <_/k>
+       <env_> X |-> N:#Nat <_/env>
+       <store_> N |-> I:#Int <_/store>
 
   /*@ \textbf{Arithmetic expressions} */
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1:#Int + I2:#Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
 
   /*@ \textbf{Variable increment} */
@@ -42,7 +42,7 @@ kmod IMPPP-SEMANTICS is including IMPPP-CONFIGURATION
 
   /*@ \textbf{Boolean expressions} */
   rule I1 <= I2 => I1 <=Int I2
-  rule not T:Bool => notBool T
+  rule not T:#Bool => notBool T
   rule true and B:BExp => B
   rule false and B => false
 

@@ -243,7 +243,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   op \value{_} : Term -> Term .
   op \myquote{_} : String -> QidList .
 
-  ceq printTerm(U,C) = \myquote{string(getName(C))} if getType(C) == 'String or getType(C) == 'Char  .
+  ceq printTerm(U,C) = \myquote{string(getName(C))} if getType(C) == String or getType(C) == Char  .
   
   eq printTerm(U,C) = \constant{getName(getOps(U),getName(C), getType(C))}{getType(C)} [owise] .
   eq printTerm(U,V) = \variable{ getName(V) }{getType(V)} .

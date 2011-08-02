@@ -2,7 +2,7 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
 --- There are two main syntactic categories, Exp and Stmt
 
 --- Basic constructs for expressions
-  syntax Exp ::= Bool | Int | Float | Id
+  syntax Exp ::= #Bool | #Int | #Float | #Id
 
 --- Basic arithmetic and boolean operations; they will work with both integers and floats
 --- NOTE: can add more here
@@ -21,7 +21,7 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
   syntax Stmt ::= Exp = Exp ; [prec 80 gather(e E) strict(2)]
 
 --- Variable increment
-  syntax Exp ::= ++ Id [prec 0]
+  syntax Exp ::= ++ #Id [prec 0]
 
 --- Basic statement constructs
   syntax Stmt ::= { }
@@ -36,7 +36,7 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
   syntax Stmt ::= print Exp ; [strict]
 
 --- Memory allocation and pointers
-  syntax Exp ::= & Id
+  syntax Exp ::= & #Id
                | * Exp       [strict]
                | malloc Exp  [strict]
   syntax Stmt ::= free Exp ; [strict]
@@ -58,7 +58,7 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
   syntax Stmt ::= return Exp ;          [strict]
 
 --- Fixed point
-  syntax Exp ::= mu Id . Exp [latex "\mu{#1}.{#2}"]
+  syntax Exp ::= mu #Id . Exp [latex "\mu{#1}.{#2}"]
 
 --- Callcc
   syntax Exp ::= callcc Exp [prec 50 strict]
@@ -96,7 +96,7 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
-  syntax List{Id} ::= Id | ( ) | List{Id} , List{Id} [prec 70 assoc id: () strict hybrid]
+  syntax List{Id} ::= #Id | ( ) | List{Id} , List{Id} [prec 70 assoc id: () strict hybrid]
 --- List{Exp}
   syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]
 endkm
@@ -109,6 +109,6 @@ kmod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX
 --- so we get rid of the derived ones asap (before we start the semantics        ---
 ------------------------------------------------------------------------------------
   macro E() = E(())
-  macro mu X:Id.E:Exp = (lambda().{var X; X=E; return X;})()
+  macro mu X:#Id.E:Exp = (lambda().{var X; X=E; return X;})()
   macro [] = [()]
 endkm

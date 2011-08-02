@@ -9,7 +9,7 @@ The special identifier for the function ``main'' belongs to all programs.
 Each program may use additional identifiers, which need to be declared either
 automatically (when one uses an external parser) or manually (when one writes the program).
 */
-  syntax Id ::= main
+  syntax #Id ::= main
 
 
 /*@ \subsection*{Declarations}
@@ -18,9 +18,9 @@ As syntactic sugar, functions taking zero arguments are given separate syntax, s
 not write the empty list constant.
 */
   syntax Decl ::= var List{Exp} ;
-                | var Id = Exp ;
-                | function Id ( ) Stmt
-                | function Id ( List{Id} ) Stmt
+                | var #Id = Exp ;
+                | function #Id ( ) Stmt
+                | function #Id ( List{Id} ) Stmt
 
 /*@ \subsection*{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes an
@@ -37,7 +37,7 @@ its first argument gets updated, so it cannot be evaluated), the function call
 with zero arguments (because it will get desugared), and the assignment which
 is only strict in its second argument (for the same reason as the increment).
 */
-  syntax Exp ::= Int | Bool | Id
+  syntax Exp ::= #Int | #Bool | #Id
                | ++ Exp            [prec 0]
                | Exp [ List{Exp} ] [strict prec 1] 
                | Exp ( )
@@ -83,7 +83,7 @@ We prefer to tag their units with the corresponding sort to avoid confusion.
 */
 -----------------------------------------------------------------------------
 --- List{Id}; the hybrid attribute says that a list of results becomes itself a result
-  syntax List{Id} ::= Id
+  syntax List{Id} ::= #Id
                     | .List{Id} [latex "\kdot_{\it List\{Id\}}"]
                     | List{Id} , List{Id} [strict hybrid assoc id: .List{Id} prec 70]
 
@@ -104,8 +104,8 @@ arguments, that each conditional has both branches, that there are only
 \texttt{while} loops, and that each variable is declared alone and is
 initialized.
 */
-  macro function F:Id() S = function F(.List{Id}) S:Stmt
+  macro function F:#Id() S = function F(.List{Id}) S:Stmt
   macro E:Exp() = E(.List{Id})
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
-  macro var X:Id; = var X=0;
+  macro var X:#Id; = var X=0;
 endkm

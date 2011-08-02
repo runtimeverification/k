@@ -8,15 +8,15 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 /*@ \subsubsection*{Values} that various fragments of programs evaluate to */
 -------------------------------------------------------------
 
-  syntax Val ::= Int 
+  syntax Val ::= #Int 
                --- Array values are wrapped as specific reference values, where:
                --- 1st argument = the location of the first element in the array, and
                --- 2nd argument = the array size (array elements are contiguously allocated)
-               | array ( Nat , Nat )
+               | array ( #Nat , #Nat )
                --- Function values; like arrays, functions also evaluate to their address
                --- (wrapped as a specific "function" value) and the address contains
                --- the actual function body (as an untyped "lambda" value")
-               | function( Nat )
+               | function( #Nat )
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
 
 --- the values are expressions
@@ -60,8 +60,8 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 //@ \subsection*{Variable declaration}
 
 //@ \subsection*{Array declaration}
-  context var X:Id[_,`[HOLE`]:Exp,_];
-  rule <k> var X[N:Nat]; => . <_/k>
+  context var X:#Id[_,`[HOLE`]:Exp,_];
+  rule <k> var X[N:#Nat]; => . <_/k>
        <env> Env:Map => Env[L/X] </env>
        <store_> . => (L |-> array(sNat L, N)) sNat L..sNat L+Nat N |-> 0 <_/store>
        <nextLoc> L => sNat L +Nat N </nextLoc>
@@ -71,7 +71,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 */
 
 //@ \subsection*{Function declaration}
-  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . <_/k>
+  rule <k> function F:#Id(Xl:List{Id}) S:Stmt => . <_/k>
        <env> Env => Env[L/F] </env>
        <nextLoc> L => L +Nat 2 </nextLoc>
        <store_> . => L|->function(sNat L)  sNat(L)|->lambda(Xl,S) <_/store>
@@ -104,7 +104,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
  to a location value, also introduced below with the auxilliary operations.
 */
   context ++([HOLE] => l-value([HOLE]))
-  rule <k> ++loc(L) => I:Int +Int 1 <_/k>
+  rule <k> ++loc(L) => I:#Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store>
 
 //@ \subsection*{Arithmetic operators}
@@ -114,7 +114,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 Untyped SIMPLE does not check array bounds
 We prefer to use a helper computation item, lookup, to avoid locking the store */
   rule array(L,_)[N] => lookup(L +Int N) [structural]
-  syntax K ::= lookup Nat
+  syntax K ::= lookup #Nat
   rule <k> lookup L => V:Val <_/k> <store_> L |-> V <_/store>
 
 
@@ -150,9 +150,9 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
  l-value(E) evaluates to a location value of the form loc(L), where L is a natural number.
 */
   syntax Exp ::= l-value ( K )    --- for parsing reasons, we prefer to allow l-value to take a K
-  syntax Val ::= loc ( Nat )
+  syntax Val ::= loc ( #Nat )
 --- Local variable
-  rule <k> l-value(X) => loc(L:Nat) <_/k> <env_> X|->L <_/env>
+  rule <k> l-value(X) => loc(L:#Nat) <_/k> <env_> X|->L <_/env>
 --- Array element: evaluate the array and its index; then the array lookup rule above applies.
   context l-value(_[_,`[HOLE`]:Exp,_])
   context l-value([HOLE][_])
@@ -175,14 +175,14 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
   syntax List{Exp} ::= List{Val}
 
 //@ \subsection*{Length}
-  syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
+  syntax #Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
   macro |.List{Id}| = 0  
   macro |X,Xl| = sNat |Xl|
 
 //@ \subsection*{Sequences of locations}
-  syntax List{K} ::= Nat .. Nat
-  rule N1:Nat..N1 => .List{K} [structural]
-  rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
+  syntax List{K} ::= #Nat .. #Nat
+  rule N1:#Nat..N1 => .List{K} [structural]
+  rule N1..N2:#Nat => N1,,sNat N1..N2 [structural]
 
 //@ \subsection*{Environment recovery}
   syntax K ::= env ( Map )

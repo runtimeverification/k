@@ -4,15 +4,15 @@ module IMP-SYNTAX imports #INT + #ID
 give it a short-circuited semantics (its second argument will only be
 evaluated when the first evaluates to true). */
 
-  syntax AExp ::= Id | Int
+  syntax AExp ::= #Id | #Int
                 | AExp + AExp                  [prec 33 gather (E e) strict]
                 | AExp / AExp                  [prec 31 gather (E e) strict]
-  syntax BExp ::= Bool
+  syntax BExp ::= #Bool
                 | AExp <= AExp                 [prec 37 strict]
                 | not BExp                     [prec 53 strict]
                 | BExp and BExp                [prec 55 strict(1)]
   syntax Stmt ::= skip ;
-                | Id = AExp ;                  [prec 40 strict(2)]
+                | #Id = AExp ;                 [prec 40 strict(2)]
                 | Stmt Stmt                    [prec 60 gather (e E)]
                 | if BExp then Stmt else Stmt  [prec 59 strict(1)]
                 | while BExp do Stmt           [prec 59]
@@ -20,7 +20,7 @@ end module
 
 
 module IMP-PROGRAMS imports IMP-SYNTAX
-  syntax Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
+  syntax #Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
                 | n | o | p | q | r | s | t | u | v | w | x | y | z
   syntax Stmt ::= sumPgm
                 | collatzPgm | collatzStmt
@@ -115,7 +115,7 @@ which is labeled $\top$. */
 /*@ \subsection{Results}
 IMP only has two types of results: integers and Booleans. */
 
-  syntax KResult ::= Int | Bool
+  syntax KResult ::= #Int | #Bool
 
 /*@ \subsection{Arithmetic Expressions}
 The \K semantics of each arithmetic construct is defined below.
@@ -129,13 +129,13 @@ rewriting process will get stuck.  This means that our semantics of
 IMP disallows uses of uninitialized variables.  Variables are initialized
 using the assignment statement whose semantics is defined below. */
 
-  rule [my-rule]: <k> X:Id => Sigma(X) <_/k> <state> Sigma:Map </state>
+  rule [my-rule]: <k> X:#Id => Sigma(X) <_/k> <state> Sigma:Map </state>
 
 /*@ \subsubsection{Arithmetic operators}
 There is nothing special about these, except that the rule for division
 has a side condition. */
 
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1:#Int + I2:#Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
 
 /*@ \subsection{Boolean Expressions}
@@ -144,7 +144,7 @@ of \textsf{and}; this is the reason we annotated the syntax of
 \textsf{and} with the \K attribute "strict(1)" instead of "strict". */
 
   rule I1 <= I2 => I1 <=Int I2
-  rule not(T:Bool) => notBool T  
+  rule not(T:#Bool) => notBool T  
   rule true and B:BExp => B  
   rule false and _ => false
 
@@ -165,7 +165,7 @@ is not defined in $X$, and it changes the current mapping of $X$
 (to point to $I$) in case $\Large\sigma$ is defined in $X$.
 At the same time, the assignment is dissolved. */
 
-  rule <k> X=I:Int; => . <_/k> <state> Sigma => Sigma[I/X] </state> 
+  rule <k> X=I:#Int; => . <_/k> <state> Sigma => Sigma[I/X] </state> 
 
 /*@ \subsubsection{Sequential Composition}
 Sequential composition is simply dissolved into the \K's builtin

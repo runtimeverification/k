@@ -29,29 +29,28 @@
 
 mod #LTL is
   protecting #BOOL .
-  sort LTLFormula .
-  subsort LTLFormula < Builtins .
+  sort #LTLFormula .
 
   --- primitive LTL operators
-  ops LTLTrue LTLFalse : -> LTLFormula [ctor format (g o)] .
-  op LTL~_ : LTLFormula -> LTLFormula [ctor prec 53 format (r o d)] .
-  op _LTL/\_ : LTLFormula LTLFormula -> LTLFormula [comm ctor gather (E e) prec 55 format (d r o d)] .
-  op _LTL\/_ : LTLFormula LTLFormula -> LTLFormula [comm ctor gather (E e) prec 59 format (d r o d)] .
-  op LTLO_ : LTLFormula -> LTLFormula [ctor prec 53 format (r o d)] .
-  op _LTLU_ : LTLFormula LTLFormula -> LTLFormula [ctor prec 63 format (d r o d)] .
-  op _LTLR_ : LTLFormula LTLFormula -> LTLFormula [ctor prec 63 format (d r o d)] .
+  ops LTLTrue LTLFalse : -> #LTLFormula [ctor format (g o)] .
+  op LTL~_ : #LTLFormula -> #LTLFormula [ctor prec 53 format (r o d)] .
+  op _LTL/\_ : #LTLFormula #LTLFormula -> #LTLFormula [comm ctor gather (E e) prec 55 format (d r o d)] .
+  op _LTL\/_ : #LTLFormula #LTLFormula -> #LTLFormula [comm ctor gather (E e) prec 59 format (d r o d)] .
+  op LTLO_ : #LTLFormula -> #LTLFormula [ctor prec 53 format (r o d)] .
+  op _LTLU_ : #LTLFormula #LTLFormula -> #LTLFormula [ctor prec 63 format (d r o d)] .
+  op _LTLR_ : #LTLFormula #LTLFormula -> #LTLFormula [ctor prec 63 format (d r o d)] .
 
   --- defined LTL operators
-  op _LTL->_ : LTLFormula LTLFormula -> LTLFormula [gather (e E) prec 65 format (d r o d)] .
-  op _LTL<->_ : LTLFormula LTLFormula -> LTLFormula [prec 65 format (d r o d)] .
-  op LTL<>_ : LTLFormula -> LTLFormula [prec 53 format (r o d)] .
-  op LTL[]_ : LTLFormula -> LTLFormula [prec 53 format (r r d o d)] .
-  op _LTLW_ : LTLFormula LTLFormula -> LTLFormula [prec 63 format (d r o d)] .
-  op _LTL|->_ : LTLFormula LTLFormula -> LTLFormula [prec 63 format (d r o d)] . --- leads-to
-  op _LTL=>_ : LTLFormula LTLFormula -> LTLFormula [gather (e E) prec 65 format (d r o d)] .
-  op _LTL<=>_ : LTLFormula LTLFormula -> LTLFormula [prec 65 format (d r o d)] .
+  op _LTL->_ : #LTLFormula #LTLFormula -> #LTLFormula [gather (e E) prec 65 format (d r o d)] .
+  op _LTL<->_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 65 format (d r o d)] .
+  op LTL<>_ : #LTLFormula -> #LTLFormula [prec 53 format (r o d)] .
+  op LTL[]_ : #LTLFormula -> #LTLFormula [prec 53 format (r r d o d)] .
+  op _LTLW_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 63 format (d r o d)] .
+  op _LTL|->_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 63 format (d r o d)] . --- leads-to
+  op _LTL=>_ : #LTLFormula #LTLFormula -> #LTLFormula [gather (e E) prec 65 format (d r o d)] .
+  op _LTL<=>_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 65 format (d r o d)] .
 
-  vars f g : LTLFormula .
+  vars f g : #LTLFormula .
 
   eq f LTL-> g = LTL~ f LTL\/ g .
   eq f LTL<-> g = (f LTL-> g) LTL/\ (g LTL-> f) .
@@ -83,10 +82,8 @@ mod #LTL-SIMPLIFIER is
 
   sorts TrueLTLFormula FalseLTLFormula PureLTLFormula PE-LTLFormula PU-LTLFormula .
   subsort TrueLTLFormula FalseLTLFormula < PureLTLFormula <
-	  PE-LTLFormula PU-LTLFormula < LTLFormula .
+	  PE-LTLFormula PU-LTLFormula < #LTLFormula .
 	  
-  subsort TrueLTLFormula FalseLTLFormula PureLTLFormula PE-LTLFormula PU-LTLFormula < Builtins .
-
   op LTLTrue : -> TrueLTLFormula [ctor ditto] .
   op LTLFalse : -> FalseLTLFormula [ctor ditto] .
   op _LTL/\_ : PE-LTLFormula PE-LTLFormula -> PE-LTLFormula [ctor ditto] .
@@ -101,15 +98,15 @@ mod #LTL-SIMPLIFIER is
   op _LTLU_ : PE-LTLFormula PE-LTLFormula -> PE-LTLFormula [ctor ditto] .
   op _LTLU_ : PU-LTLFormula PU-LTLFormula -> PU-LTLFormula [ctor ditto] .
   op _LTLU_ : PureLTLFormula PureLTLFormula -> PureLTLFormula [ctor ditto] .
-  op _LTLU_ : TrueLTLFormula LTLFormula -> PE-LTLFormula [ctor ditto] .
+  op _LTLU_ : TrueLTLFormula #LTLFormula -> PE-LTLFormula [ctor ditto] .
   op _LTLU_ : TrueLTLFormula PU-LTLFormula -> PureLTLFormula [ctor ditto] .
   op _LTLR_ : PE-LTLFormula PE-LTLFormula -> PE-LTLFormula [ctor ditto] .
   op _LTLR_ : PU-LTLFormula PU-LTLFormula -> PU-LTLFormula [ctor ditto] .
   op _LTLR_ : PureLTLFormula PureLTLFormula -> PureLTLFormula [ctor ditto] .
-  op _LTLR_ : FalseLTLFormula LTLFormula -> PU-LTLFormula [ctor ditto] .
+  op _LTLR_ : FalseLTLFormula #LTLFormula -> PU-LTLFormula [ctor ditto] .
   op _LTLR_ : FalseLTLFormula PE-LTLFormula -> PureLTLFormula [ctor ditto] .
 
-  vars p q r s : LTLFormula .
+  vars p q r s : #LTLFormula .
   var pe : PE-LTLFormula .
   var pu : PU-LTLFormula .
   var pr : PureLTLFormula .
@@ -146,7 +143,7 @@ mod #LTL-SIMPLIFIER is
   eq (LTLTrue LTLU (LTLFalse LTLR p)) LTL/\ (LTLTrue LTLU (LTLFalse LTLR q)) = LTLTrue LTLU (LTLFalse LTLR (p LTL/\ q)) .
 
   --- <= relation on formula
-  op _<=_ : LTLFormula LTLFormula -> Bool [prec 75] .
+  op _<=_ : #LTLFormula #LTLFormula -> #Bool [prec 75] .
 
   eq p <= p = true .
   eq LTLFalse <= p  = true .
@@ -181,39 +178,38 @@ mod #SAT-SOLVER is
   protecting #LTL .
 
   --- formula lists and results
-  sorts LTLFormulaList SatSolveResult TautCheckResult .
-  subsort LTLFormulaList SatSolveResult TautCheckResult < Builtins .
-  subsort LTLFormula < LTLFormulaList .
-  subsort Bool < SatSolveResult TautCheckResult .
-  op LTLnil : -> LTLFormulaList [ctor] .
-  op _LTL;_ : LTLFormulaList LTLFormulaList -> LTLFormulaList [ctor assoc id: LTLnil] .
-  op LTLmodel : LTLFormulaList LTLFormulaList -> SatSolveResult [ctor] .
+  sorts #LTLFormulaList SatSolveResult #TautCheckResult .
+  subsort #LTLFormula < #LTLFormulaList .
+  subsort #Bool < SatSolveResult #TautCheckResult .
+  op LTLnil : -> #LTLFormulaList [ctor] .
+  op _LTL;_ : #LTLFormulaList #LTLFormulaList -> #LTLFormulaList [ctor assoc id: LTLnil] .
+  op LTLmodel : #LTLFormulaList #LTLFormulaList -> SatSolveResult [ctor] .
 
-  op LTLsatSolve : LTLFormula ~> SatSolveResult
+  op LTLsatSolve : #LTLFormula ~> SatSolveResult
 	[special (
 	   id-hook SatSolverSymbol
-	   op-hook trueSymbol           (LTLTrue : ~> LTLFormula)
-	   op-hook falseSymbol		(LTLFalse : ~> LTLFormula)
-	   op-hook notSymbol		(LTL~_ : LTLFormula ~> LTLFormula)
-	   op-hook nextSymbol		(LTLO_ : LTLFormula ~> LTLFormula)
-	   op-hook andSymbol		(_LTL/\_ : LTLFormula LTLFormula ~> LTLFormula)
-	   op-hook orSymbol		(_LTL\/_ : LTLFormula LTLFormula ~> LTLFormula)
-	   op-hook untilSymbol		(_LTLU_ : LTLFormula LTLFormula ~> LTLFormula)
-	   op-hook releaseSymbol	(_LTLR_ : LTLFormula LTLFormula ~> LTLFormula)
+	   op-hook trueSymbol           (LTLTrue : ~> #LTLFormula)
+	   op-hook falseSymbol		(LTLFalse : ~> #LTLFormula)
+	   op-hook notSymbol		(LTL~_ : #LTLFormula ~> #LTLFormula)
+	   op-hook nextSymbol		(LTLO_ : #LTLFormula ~> #LTLFormula)
+	   op-hook andSymbol		(_LTL/\_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook orSymbol		(_LTL\/_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook untilSymbol		(_LTLU_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook releaseSymbol	(_LTLR_ : #LTLFormula #LTLFormula ~> #LTLFormula)
 	   op-hook formulaListSymbol
-		   (_LTL;_ : LTLFormulaList LTLFormulaList ~> LTLFormulaList)
-	   op-hook nilFormulaListSymbol	(LTLnil : ~> LTLFormulaList)
+		   (_LTL;_ : #LTLFormulaList #LTLFormulaList ~> #LTLFormulaList)
+	   op-hook nilFormulaListSymbol	(LTLnil : ~> #LTLFormulaList)
 	   op-hook modelSymbol
-		   (LTLmodel : LTLFormulaList LTLFormulaList ~> SatSolveResult)
+		   (LTLmodel : #LTLFormulaList #LTLFormulaList ~> SatSolveResult)
 	   term-hook falseTerm		(false)
 	 )] .
 
-  op LTLcounterexample : LTLFormulaList LTLFormulaList -> TautCheckResult [ctor] .
-  op LTLtautCheck : LTLFormula ~> TautCheckResult .
-  op LTL$invert : SatSolveResult -> TautCheckResult .
+  op LTLcounterexample : #LTLFormulaList #LTLFormulaList -> #TautCheckResult [ctor] .
+  op LTLtautCheck : #LTLFormula ~> #TautCheckResult .
+  op LTL$invert : SatSolveResult -> #TautCheckResult .
 
-  var F : LTLFormula .
-  vars L C : LTLFormulaList .
+  var F : #LTLFormula .
+  vars L C : #LTLFormulaList .
   eq LTLtautCheck(F) = LTL$invert(LTLsatSolve(LTL~ F)) .
   eq LTL$invert(false) = true .
   eq LTL$invert(LTLmodel(L, C)) = LTLcounterexample(L, C) .
@@ -221,50 +217,48 @@ endm
 
 mod #SATISFACTION is
   protecting #BOOL .
-  sorts Model-Checker-State Prop .
-  subsorts Model-Checker-State Prop < Builtins .
-  op _LTL|=_ : Model-Checker-State Prop -> Bool [frozen] .
+  sorts #Model-Checker-State #Prop .
+  op _LTL|=_ : #Model-Checker-State #Prop -> #Bool [frozen] .
 endm
 
 mod #MODEL-CHECKER is
   protecting #QID .
   including #SATISFACTION .
   including #LTL .
-  subsort Prop < LTLFormula .
+  subsort #Prop < #LTLFormula .
 
   --- transitions and results
-  sorts RuleName Transition TransitionList ModelCheckResult .
-  subsorts RuleName Transition TransitionList ModelCheckResult < Builtins .
-  subsort Qid < RuleName .
-  subsort Transition < TransitionList .
-  subsort Bool < ModelCheckResult .
-  ops LTLunlabeled LTLdeadlock : -> RuleName .
-  op LTL{_,_} : Model-Checker-State RuleName -> Transition [ctor] .
-  op LTLnil : -> TransitionList [ctor] .
-  op _LTL_ : TransitionList TransitionList -> TransitionList [ctor assoc id: LTLnil] .
-  op LTLcounterexample : TransitionList TransitionList -> ModelCheckResult [ctor] .
+  sorts #RuleName #Transition #TransitionList #ModelCheckResult .
+  subsort #Qid < #RuleName .
+  subsort #Transition < #TransitionList .
+  subsort #Bool < #ModelCheckResult .
+  ops LTLunlabeled LTLdeadlock : -> #RuleName .
+  op LTL{_,_} : #Model-Checker-State #RuleName -> #Transition [ctor] .
+  op LTLnil : -> #TransitionList [ctor] .
+  op _LTL_ : #TransitionList #TransitionList -> #TransitionList [ctor assoc id: LTLnil] .
+  op LTLcounterexample : #TransitionList #TransitionList -> #ModelCheckResult [ctor] .
 
-  op modelCheck : Model-Checker-State LTLFormula ~> ModelCheckResult
+  op modelCheck : #Model-Checker-State #LTLFormula ~> #ModelCheckResult
 	[special (
 	   id-hook ModelCheckerSymbol
-	   op-hook trueSymbol           (LTLTrue : ~> LTLFormula)
-	   op-hook falseSymbol		(LTLFalse : ~> LTLFormula)
-	   op-hook notSymbol		(LTL~_ : LTLFormula ~> LTLFormula)
-	   op-hook nextSymbol		(LTLO_ : LTLFormula ~> LTLFormula)
-	   op-hook andSymbol		(_LTL/\_ : LTLFormula LTLFormula ~> LTLFormula)
-	   op-hook orSymbol		(_LTL\/_ : LTLFormula LTLFormula ~> LTLFormula)
-	   op-hook untilSymbol		(_LTLU_ : LTLFormula LTLFormula ~> LTLFormula)
-	   op-hook releaseSymbol	(_LTLR_ : LTLFormula LTLFormula ~> LTLFormula)
-           op-hook satisfiesSymbol      (_LTL|=_ : Model-Checker-State LTLFormula ~> Bool)
-	   op-hook qidSymbol		(<Qids> : ~> Qid)
-	   op-hook unlabeledSymbol	(LTLunlabeled : ~> RuleName)
-	   op-hook deadlockSymbol	(LTLdeadlock : ~> RuleName)
-	   op-hook transitionSymbol	(LTL{_,_} : Model-Checker-State RuleName ~> Transition)
+	   op-hook trueSymbol           (LTLTrue : ~> #LTLFormula)
+	   op-hook falseSymbol		(LTLFalse : ~> #LTLFormula)
+	   op-hook notSymbol		(LTL~_ : #LTLFormula ~> #LTLFormula)
+	   op-hook nextSymbol		(LTLO_ : #LTLFormula ~> #LTLFormula)
+	   op-hook andSymbol		(_LTL/\_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook orSymbol		(_LTL\/_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook untilSymbol		(_LTLU_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook releaseSymbol	(_LTLR_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+           op-hook satisfiesSymbol      (_LTL|=_ : #Model-Checker-State #LTLFormula ~> #Bool)
+	   op-hook qidSymbol		(<Qids> : ~> #Qid)
+	   op-hook unlabeledSymbol	(LTLunlabeled : ~> #RuleName)
+	   op-hook deadlockSymbol	(LTLdeadlock : ~> #RuleName)
+	   op-hook transitionSymbol	(LTL{_,_} : #Model-Checker-State #RuleName ~> #Transition)
 	   op-hook transitionListSymbol
-		   (_LTL_ : TransitionList TransitionList ~> TransitionList)
-	   op-hook nilTransitionListSymbol	(LTLnil : ~> TransitionList)
+		   (_LTL_ : #TransitionList #TransitionList ~> #TransitionList)
+	   op-hook nilTransitionListSymbol	(LTLnil : ~> #TransitionList)
 	   op-hook counterexampleSymbol
-		   (LTLcounterexample : TransitionList TransitionList ~> ModelCheckResult)
+		   (LTLcounterexample : #TransitionList #TransitionList ~> #ModelCheckResult)
 	   term-hook trueTerm		(true)
 	 )] .
 endm

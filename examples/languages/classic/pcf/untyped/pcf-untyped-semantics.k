@@ -13,9 +13,9 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
       <nextLoc color="gray"> 0 </nextLoc>
     </T>
 
-  kvar L N : Nat
+  kvar L N : #Nat
   kvar E E' : Exp
-  kvar X : Id
+  kvar X : #Id
   kvar V : Val
 
   //@ \textbf{Basic constructs}
@@ -38,7 +38,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
        <store_> L |-> E <_/store>
 
   //@ \textbf{$\lambda$-abstraction}
-  syntax Val ::= closure-lambda ( Map , Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
+  syntax Val ::= closure-lambda ( Map , #Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
   rule <k> lambda X . E => closure-lambda(Env, X, E) <_/k>
        <env> Env </env> 
 

@@ -41,7 +41,7 @@ generation process.  */
   rule I1 % I2 => I1 %Int I2 if I2 !=Int 0 [structural]
   rule I1 <= I2 => Bool2Int(I1 <=Int I2) [structural]
   rule I1 < I2 => Bool2Int(I1 <Int I2) [structural]
-  rule I1:Int == I2:Int => Bool2Int(I1 ==Int I2) [structural] 
+  rule I1:#Int == I2:#Int => Bool2Int(I1 ==Int I2) [structural] 
   rule I1 != I2 =>  Bool2Int((I1 !=Int I2)) [structural]
 
 //@ Expression conditional is desugared into the statement conditional.
@@ -68,8 +68,8 @@ Since their behavior does not depend on the interaction of threads,
 accesses to them are considered structural when analyzing thread 
 interactions.  */
 
-  rule <k> X:Id => V <_/k>       <env_> X |-> V <_/env>    [structural]
-  rule <k> X:Id ++ => I <_/k>    <env_> X |-> (I => I +Int 1) <_/env> 
+  rule <k> X:#Id => V <_/k>       <env_> X |-> V <_/env>    [structural]
+  rule <k> X:#Id ++ => I <_/k>    <env_> X |-> (I => I +Int 1) <_/env> 
   [structural]
   rule <k> X = V => V <_/k>      <env_> X |-> (_ => V) <_/env> [structural]
 
@@ -94,7 +94,7 @@ allocator/memory model. */
 Upon meeting a function declaration, the function is simply saved in the 
 map of functions.  */
 
-  rule <k> __`{_`}(int F:Id, Xl:List{DeclId}, Sts) => . <_/k> 
+  rule <k> __`{_`}(int F:#Id, Xl:List{DeclId}, Sts) => . <_/k> 
        <funs_> . => F |-> int F(Xl) { Sts } <_/funs> 
   [structural]
 
@@ -118,7 +118,7 @@ The reason for pushing the name of the function on the function stack is
 for analysis purposes; it effectively exposes the call stack for 
 debugging, monitoring and trace checking purposes. */
 
-  syntax ListItem ::=  Id # Map # K 
+  syntax ListItem ::=  #Id `# Map `# K 
 
   rule <k> '_`(_`)(F,,Vl:List{Val}) ~> K => Sts </k> 
     <env> Env => (eraseKLabel('int_,getList{K}(Xl)) |-> getList{K}(Vl)) </env>
@@ -153,7 +153,7 @@ of direct matching.  The reason for this is to allow extending the
 semantics to handle execution in the presence of symbolic pointer values. */
 
   rule if(I)_ else St:Stmt => St if I ==Int 0 [structural]
-  rule if(I:Int) St else _ => St if notBool(I ==Int 0) [structural]
+  rule if(I:#Int) St else _ => St if notBool(I ==Int 0) [structural]
   rule <k> while(E:Exp) St => if (E) {St while(E) St} else {} <_/k> 
   [structural]
 
@@ -169,10 +169,10 @@ of reading from the input buffer and that of writing into memory.  To
 contrast that, we make reading of input data into a local variable atomic, 
 as local variables have no concurrency role. */
 
-  syntax K ::= String
+  syntax K ::= #String
   rule [print]: <k> printf("%d;",I) => void <_/k>
-       <out> S:String => S +String Int2String(I) +String ";" </out>
-  rule [read-global]: <k> scanf("%d",N:Nat) => (*N) = I <_/k> 
+       <out> S:#String => S +String Int2String(I) +String ";" </out>
+  rule [read-global]: <k> scanf("%d",N:#Nat) => (*N) = I <_/k> 
        <in> (ListItem(I) => .) <_/in>
   rule [read-local]: <k> scanf("%d",&X) => I <_/k> 
        <in> (ListItem(I) => .) <_/in> 
@@ -189,7 +189,7 @@ invocation time, srand currently has the same semantics independent of
 the provided seed. */
 
   rule <k> rand() => randomRandom(N) <_/k>
-       <rand> N:Nat => N +Nat 1 </rand>
+       <rand> N:#Nat => N +Nat 1 </rand>
 
   rule <k> srand(I) => void <_/k>
 
@@ -197,7 +197,7 @@ the provided seed. */
   
 //@ \subsubsection{Value declarations}
 
-  syntax Val ::= Int | void 
+  syntax Val ::= #Int | void 
   syntax Exp ::= Val 
   syntax KResult ::= List{Val} 
 
@@ -206,8 +206,8 @@ the provided seed. */
 
 //@ \subsubsection{Generating sequences of numbers}
 
-  syntax List{K} ::= Nat .. Nat
-  rule N1:Nat..N1 => .List{K} [structural]
+  syntax List{K} ::= #Nat .. #Nat
+  rule N1:#Nat..N1 => .List{K} [structural]
   rule N1..sNat(N) => N,,N1..N [structural]
 endkm
 
@@ -219,7 +219,7 @@ following the last allocated location.  Since the memory is not reused,
 the purpose of defining {\tt free} is to detect accesses to 
 non-allocated/previously allocated memory.  */
 
-  rule <k> (int *)malloc(N:Nat*sizeof(int)) => N':Nat <_/k>
+  rule <k> (int *)malloc(N:#Nat*sizeof(int)) => N':#Nat <_/k>
        <ptr_> . => N' |-> N <_/ptr>    <br/>
        <mem_> . => N'..N' +Nat N |-> undef <_/mem> 
        <next> N' => N' +Int N </next>  
@@ -234,8 +234,8 @@ kmod KERNELC-CONSISTENT-MEMORY is including KERNELC-SEMANTICS
 /*@ \section{Sequentially consistent memory access}
 The rules below specify atomic access to memory, for all three 
 operations: read, write, and increment. */
-  rule [deref]: <k> *N:Nat => V:Val <_/k> <mem_> N |-> V <_/mem>
-  rule [increment]: <k> (*N)++ => I:Int <_/k> 
+  rule [deref]: <k> *N:#Nat => V:Val <_/k> <mem_> N |-> V <_/mem>
+  rule [increment]: <k> (*N)++ => I:#Int <_/k> 
                     <mem_> N |-> (I => I +Int 1) <_/mem>
   rule [update]: <k> *N=V => V <_/k> 
                  <mem_> N |-> (_ => V) <_/mem>

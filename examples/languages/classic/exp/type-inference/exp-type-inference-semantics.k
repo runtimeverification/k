@@ -1,4 +1,4 @@
-kmod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-TYPE-INFERENCE-DESUGARED-SYNTAX + UNIFICATION + K 
+kmod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-TYPE-INFERENCE-DESUGARED-SYNTAX + UNIFICATION 
   syntax Exp ::= Type
   syntax K ::= Exp | List{TypeSchema}
   syntax KResult ::= Type
@@ -13,9 +13,9 @@ kmod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-TYPE-INFERENCE-DESUGARED-SYNT
                      <nextType> tvar(0) </nextType>
                 </T>
 
-  rule <k> (I:Int => int) <_/k>
-  rule <k> (B:Bool => bool) <_/k>
-  rule <k> (X:Id => T:Type) <_/k> <tenv_> X|->T <_/tenv>
+  rule <k> (I:#Int => int) <_/k>
+  rule <k> (B:#Bool => bool) <_/k>
+  rule <k> (X:#Id => T:Type) <_/k> <tenv_> X|->T <_/tenv>
   rule <k> (L:KLabel(T1:Type,,T2:Type) => int) <_/k> (.Bag => <eqn> T1 = int </eqn> <eqn> T2 = int </eqn>)
     if L ==Bool '_+_ orBool L ==Bool '_-_ orBool L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_
   rule <k> (- T => int) <_/k> (.Bag => <eqn> T = int </eqn>)
@@ -26,7 +26,7 @@ kmod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-TYPE-INFERENCE-DESUGARED-SYNT
   rule <k> (not T => bool) <_/k> (.Bag => <eqn> T = bool </eqn>)
   rule <k> (if T then T1 else T2 => T1) <_/k> (.Bag => <eqn> T = bool </eqn> <eqn> T1 = T2 </eqn>)
 
-  rule <k> lambda X . E:Exp => E ~> mkFunType(Tv:TypeVar) ~> tenv(TEnv:Map) <_/k>
+  rule <k> lambda X . E:Exp => E ~> mkFunType(Tv:#TypeVar) ~> tenv(TEnv:Map) <_/k>
           <tenv> TEnv => TEnv[Tv/X] </tenv> <nextType> (Tv => Tv +Type 1) </nextType>
   rule <k> T1 T2 => Tv <_/k> (.Bag => <eqn> T1 = (T2 -> Tv) </eqn>) <nextType> Tv => Tv +Type 1 </nextType>
 
@@ -43,7 +43,7 @@ kmod EXP-TYPE-INFERENCE-SEMANTICS is including EXP-TYPE-INFERENCE-DESUGARED-SYNT
 --- Auxilliary stuff ---
 ------------------------
 
-  syntax K ::= mkFunType TypeVar [latex "({#1}\rightarrow\square)"] | addEqn Type | tenv Map
+  syntax K ::= mkFunType #TypeVar [latex "({#1}\rightarrow\square)"] | addEqn Type | tenv Map
   rule T ~> mkFunType(Tv) => Tv -> T
   rule <k> T ~> addEqn(Tv) => Tv <_/k> (.Bag => <eqn> Tv = T </eqn>)
   rule <k> T ~> (tenv(TEnv) => .K) <_/k> <tenv>  _  => TEnv </tenv> [structural]

@@ -3,9 +3,8 @@ in challenge-syntax
 in challenge-programs
 
 kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSION 
-  syntax Val ::= Bool | Int | Float
+  syntax Val ::= #Bool | #Int | #Float
   syntax Exp ::= Val
-  syntax K ::= List{Exp} | Stmt
   syntax KResult ::= List{Val}
 
   configuration
@@ -48,9 +47,9 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
 
 --- Basic arithmetic operations; integers are converted to reals when needed
 --- NOTE: add more here
-  rule  I1:Int + I2:Int => I1 +Int I2  
-  rule  I1 + F2:Float => Int2Float(I1) +Float F2 
-  rule  F1:Float + I2 => F1 +Float Int2Float(I2) 
+  rule  I1:#Int + I2:#Int => I1 +Int I2  
+  rule  I1 + F2:#Float => Int2Float(I1) +Float F2 
+  rule  F1:#Float + I2 => F1 +Float Int2Float(I2) 
   rule  F1 + F2 => F1 +Float F2 
 --- following rules for _*_ need to be written like that because of parsing ambiguities: a*b can also be seen as __(a,*b) ...
   rule  _*_(I1,I2) => I1 *Int I2 
@@ -66,22 +65,22 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
   rule  F1 <= I2 => F1 <=Float Int2Float(I2)  
   rule  F1 <= F2 => F1 <=Float F2
   rule  V1:Val == V2:Val => V1 ==Bool V2
-  rule  not T:Bool => notBool T
+  rule  not T:#Bool => notBool T
   rule  true and E:Exp => E
   rule  false and E => false
 
 --- Variable declaration
   rule <k>var Xl:List{Id}; => .<_/k> <env>Env => Env[N..N+Nat|Xl| / getList{K}(Xl)]</env>
-       <store_>. => N..N+Nat|Xl| |-> 0<_/store> <nextLoc>N:Nat => N +Nat |Xl|</nextLoc>
+       <store_>. => N..N+Nat|Xl| |-> 0<_/store> <nextLoc>N:#Nat => N +Nat |Xl|</nextLoc>
 
 --- Variable lookup
-  rule <k>X:Id=>K:K<_/k> <env>X|->N<_/env> <store>N|->K<_/store>
+  rule <k>X:#Id=>K:K<_/k> <env>X|->N<_/env> <store>N|->K<_/store>
 
 --- Variable assignment
   rule <k>X=V:Val;=>.<_/k> <env>X|->N<_/env> <store>N|->(_=>V)<_/store>
 
 --- Variable increment
-  rule <k>++X => I:Int +Int 1<_/k> <env>X|->N<_/env> <store>N|->(I=>I+Int 1)<_/store>
+  rule <k>++X => I:#Int +Int 1<_/k> <env>X|->N<_/env> <store>N|->(I=>I+Int 1)<_/store>
 
 --- Basic statement constructs
   rule  {} => . [structural]
@@ -99,7 +98,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
 --- Memory allocation and pointers
   rule <k>&X => N<_/k> <env>X|->N<_/env>
   rule <k>*N => V<_/k> <store>N|->V<_/store>
-  rule <k>malloc(N1:Nat) => N2:Nat<_/k> <ptr>. => N2|->N1<_/ptr>
+  rule <k>malloc(N1:#Nat) => N2:#Nat<_/k> <ptr>. => N2|->N1<_/ptr>
        <store>. => N2..N1 +Nat N2 |-> 0<_/store> <nextLoc>N2 => N1 +Nat N2</nextLoc>
   rule <k>free(N2); => .<_/k> <ptr>N2|->N1 => .<_/ptr>
        <store>Store:Map => Store[undef/N2..N1 +Nat N2]</store>
@@ -173,7 +172,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
   rule <agents_><k>haltSystem;<_/k><_/agents>=> <agents>.Bag</agents>
 
 --- Code generation (via reflection)
-  syntax KLabel ::= quoteit[ Nat ] [latex "{\it quote}_{\scriptstyle{#1}}"]
+  syntax KLabel ::= quoteit[ #Nat ] [latex "{\it quote}_{\scriptstyle{#1}}"]
                   | box ( KLabel ) [latex "\framebox{#1}"]
   syntax Val ::= code ( List{K} ) [latex "{\it code}({#1})"]
   syntax K ::= K box(~>) K [latex "{#1}\framebox{$\kra$}{#2}" strict]
@@ -216,12 +215,12 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
   syntax List{Exp} ::= List{Val}
 
 --- length
-  syntax Nat ::= `| List{Id} `|
+  syntax #Nat ::= `| List{Id} `|
   rule |()| => 0 [structural]
   rule |X,Xl| => sNat|Xl| [structural]
 
 --- generate sequence of locations
-  syntax List{K} ::= Nat .. Nat
+  syntax List{K} ::= #Nat .. #Nat
   rule N1..N1 => .List{K} [structural]
   rule N1..N2 => N1,,sNat N1..N2 [structural]
 endkm

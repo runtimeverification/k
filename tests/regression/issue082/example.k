@@ -14,7 +14,7 @@ kmod ISSUE082 is // another comment
 /*
 first line of multiline comment
 second line of multiline comment
-1 2*/  op test : /*3 4*/ -> String //5 6
+1 2*/  op test : /*3 4*/ -> #String //5 6
     eq test = "<test>"
 
 /*()))

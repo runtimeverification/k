@@ -2,7 +2,7 @@
 --- SKOOL-TYPED-DYNAMIC-SEMANTICS module ---
 --------------------------------------------
 
-kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX + K 
+kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNTAX 
 
 --- both expression and statements can evaluate to types
   syntax Type ::= stmt | decl | correct
@@ -16,6 +16,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- of expressions, so that becomes a result when it becomes a list of values
 
   syntax KResult ::= List{Type} 
+//  syntax K ::= List{Top} 
 
 ---------------------
 --- Configuration ---
@@ -28,8 +29,8 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
                      <crntClass> .K </crntClass>
                      <classes>
                            <class multiplicity="*"> 
-                                    <className> Id:Id </className>
-                                    <extends multiplicity="?"> Id:Id </extends>
+                                    <className> Id:#Id </className>
+                                    <extends multiplicity="?"> Id:#Id </extends>
                                     <ctenv> .Map </ctenv>
                            </class>
                      </classes>
@@ -55,12 +56,12 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- this rule is to process both field declarations and 
 --- local variables of a function
 
-  rule [decl-variable]: <k> var X:Id : Tp:Type ; => decl <_/k> 
+  rule [decl-variable]: <k> var X:#Id : Tp:Type ; => decl <_/k> 
        <tenv> TEnv:Map => TEnv[Tp / X] </tenv> <pass> Pass </pass>
        if Pass =/=Bool global
 
 --- Array declaration
-  context var X:Id[[HOLE]] : Tp ;
+  context var X:#Id[[HOLE]] : Tp ;
   rule [decl-array]: <k> var X[int] : _`[`](Tp) ; => decl <_/k> 
        <tenv> TEnv => TEnv[ _`[`](Tp)/X] </tenv>  <pass> Pass:Pass </pass>
        if Pass =/=Bool global
@@ -71,7 +72,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 
 --- Method declaration, only inside a class declaration
 --- we add to the typing environment the type of the method.
-  rule [decl-method]: <k> method F:Id(XTl:List{VarType}) : Tp S:Stmt => decl <_/k> 
+  rule [decl-method]: <k> method F:#Id(XTl:List{VarType}) : Tp S:Stmt => decl <_/k> 
        <tenv_> . => F |-> ((typeList(XTl)->Tp)) <_/tenv> 
        <pass> classes </pass> 
 
@@ -79,7 +80,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- we create a class prototype where the field and method declarations will 
 --- be stored.
   rule [decl-class]: 
-       <k> class C1:Id extends C2:Id { Ss:Stmts } => Ss ~> global <_/k>
+       <k> class C1:#Id extends C2:#Id { Ss:Stmts } => Ss ~> global <_/k>
        (. => <class_>
                            <className> C1 </className>          
                            <extends> C2 </extends>
@@ -116,14 +117,14 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 
 --- Typing method bodies: similar to function call
   rule [type-method]: 
-       <k> (method F:Id(XTl:List{VarType}) : Tp S:Stmt => S) <_/k> 
+       <k> (method F:#Id(XTl:List{VarType}) : Tp S:Stmt => S) <_/k> 
        <tenv> _ => getList{K}(idList(XTl)) |-> getList{K}(typeList(XTl)) </tenv> 
        <return> _ => Tp </return> <pass> methods </pass>
 
   
 --- Typing each method in the class.
   rule [type-class]: 
-       <k> class C1:Id extends C2:Id { Ss } => Ss <_/k>
+       <k> class C1:#Id extends C2:#Id { Ss } => Ss <_/k>
        <crntClass> _ => class C1 </crntClass>
        <pass> methods </pass>
 
@@ -133,18 +134,18 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 -------------------
 
 --- typing constants
-  rule I:Int => int 
-  rule B:Bool => bool 
+  rule I:#Int => int 
+  rule B:#Bool => bool 
 
 --- Local variable lookup
 --- If X is in the local environment, then it is a local variable, not a field.
-  rule [lookup-var]: <k> X:Id => Tp <_/k>  
+  rule [lookup-var]: <k> X:#Id => Tp <_/k>  
        <tenv_> X |-> Tp <_/tenv>
 
 --- Field lookup
 --- If X is not in the local environment, then assume that it's a field of "this".
 --- General object lookup defined at its place below (we follow the order in the SKOOL syntax).
-  rule [lookup-field]: <k> X:Id => _._(this,X) <_/k>
+  rule [lookup-field]: <k> X:#Id => _._(this,X) <_/k>
        <tenv> TEnv:Map </tenv>
        if notBool(X in keys(TEnv)) [structural]
 
@@ -194,7 +195,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- new operator
 ---  to type new we only need to check that the class constructor can be
 ---  called with arguments of the given type. 
-  rule [new-object]: (new_`(_`)(C:Id, Tpl)) => _`(_`)(_._(class C,C), Tpl)
+  rule [new-object]: (new_`(_`)(C:#Id, Tpl)) => _`(_`)(_._(class C,C), Tpl)
 
 
 --- this types to the current class
@@ -275,13 +276,13 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 ----------------------------------------------
 
 --- l-value predicate
-  syntax Bool ::= l-value ( K )
+  syntax #Bool ::= l-value ( K )
   rule l-value(X) => true [structural]
   rule l-value(_._(_,_)) => true [structural]
   rule l-value(_`[_`](_,_)) => true [structural]
 
 --- subtype relationship
-  syntax Bool ::= subtype ( List{Type} , List{Type} , Bag )  [latex "{#1}\mathrel{\leq_{{#3}}}{#2}"]
+  syntax #Bool ::= subtype ( List{Type} , List{Type} , Bag )  [latex "{#1}\mathrel{\leq_{{#3}}}{#2}"]
   macro subtype((Tp1:Type,Tp1':Type,Tpl1:List{Type}),(Tp:Type,Tp':Type,Tpl:List{Type}), Cls) = subtype(Tp1,Tp, Cls) andBool subtype((Tp1',Tpl1), (Tp',Tpl), Cls)
   macro subtype(.List{Bottom},.List{Bottom},_) = true 
   macro subtype(Tp, Tp, _) = true
@@ -300,7 +301,7 @@ kmod SKOOL-TYPED-STATIC-SEMANTICS is including SKOOL-TYPED-STATIC-DESUGARED-SYNT
 --- translation of a lists of typed names into a list of the corresponding Ids
   syntax List{Id} ::= idList ( List{VarType} ) 
   macro idList(.List{Bottom}) = .List{Bottom} 
-  macro idList(X:Id : Tp, XTl:List{VarType}) = X, idList(XTl) 
+  macro idList(X:#Id : Tp, XTl:List{VarType}) = X, idList(XTl) 
 
 --- translation of a lists of typed names into a list of the corresponding types
   syntax List{Type} ::= typeList ( List{VarType} ) 

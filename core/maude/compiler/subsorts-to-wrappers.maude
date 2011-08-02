@@ -158,8 +158,8 @@ ceq subsorts2wrappersMb(Mb, M, OPDS, SSDM)
 
  op findPurifyRedex : Term Type Module OpDeclSet SubsortDeclMap ~> Term .
 ceq findPurifyRedex('if_then_else_fi[Trm,T1,T2], T, M, OPDS, SSDM)
-  = 'if_then_else_fi[findPurifyRedex(Trm, 'Bool, M, OPDS, SSDM), findPurifyRedex(T1, T, M, OPDS, SSDM), findPurifyRedex(T2, T, M, OPDS, SSDM)]
- if sortLeq(M, leastSortsT(M, Trm), 'Bool) [print "if " Trm " then " T1 " else " T2 " fi. target type: " T] .
+  = 'if_then_else_fi[findPurifyRedex(Trm, Bool, M, OPDS, SSDM), findPurifyRedex(T1, T, M, OPDS, SSDM), findPurifyRedex(T2, T, M, OPDS, SSDM)]
+ if sortLeq(M, leastSortsT(M, Trm), Bool) [print "if " Trm " then " T1 " else " T2 " fi. target type: " T] .
 
  eq findPurifyRedex(Trm, errorS(Trm', T, Str), M, OPDS, SSDM)
   = errorT(Trm, '`[`]:K, Str) .

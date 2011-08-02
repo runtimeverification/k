@@ -15,7 +15,7 @@ kmod KERNELC-RELAXED is including  KERNELC-RELAXED-THREADS
   [structural]  
 
 ---Rule for extracting the output once all threads have finished
-  rule <T_> <threads> .Bag </threads> <out> S:String </out> <_/T> 
+  rule <T_> <threads> .Bag </threads> <out> S:#String </out> <_/T> 
     => <result> S </result> [structural]
 
 endkm

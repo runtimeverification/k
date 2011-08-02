@@ -1,5 +1,5 @@
 kmod DIJKSTRA-PROGRAMS is including DIJKSTRA
-  ops a b c d e f : -> Id
+  ops a b c d e f : -> #Id
   op p1 : -> Set
   macro p1 = (a - 3 -> b)
              (b - 2 -> f)

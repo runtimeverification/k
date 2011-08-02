@@ -204,7 +204,7 @@ ceq lists2kOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
  eq lists2kT(C, T, M, OPDS, CTORS) = lists2kCV(C, getType(C), CTORS) .
  eq lists2kT(V, T, M, OPDS, CTORS) = lists2kCV(V, getType(V), CTORS)  .
  eq lists2kT('if_then_else_fi[Trms],T,M,OPDS,CTORS)
-  = 'if_then_else_fi[lists2kTs(Trms, 'Bool T T, M, OPDS,CTORS)] .
+  = 'if_then_else_fi[lists2kTs(Trms, Bool T T, M, OPDS,CTORS)] .
 --- eq lists2kT('_==Bool_[Trm,Trm'],T,M,OPDS,CTORS)
 ---  = '_==Bool_[lists2kTs((Trm,Trm'), leastSort(M,Trm) leastSort(M,Trm'), M, OPDS,CTORS)] .
  ceq lists2kT(Q[Trms],T,M,OPDS,CTORS)

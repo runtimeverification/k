@@ -11,7 +11,7 @@ the C language. */
 
 //@ \subsection{Arithmetic expresions}
 
-  syntax Exp ::= Int | Id 
+  syntax Exp ::= #Int | #Id 
                | Exp + Exp [gather (E e) prec 33 strict] 
                | Exp - Exp [gather (E e) prec 33 strict]
                | Exp ++ [prec 0]
@@ -42,7 +42,7 @@ allow initializers at declaration time.  */
   syntax Exp ::= DeclId 
                | PointerId
   syntax DeclId ::= int Exp [prec 40] 
-  syntax PointerId ::= Id 
+  syntax PointerId ::= #Id 
                      | * PointerId [prec 25 strict]
 
 /*@ \subsection{Memory allocation and addressing}
@@ -75,8 +75,8 @@ of the function. */
 
 //@ \subsubsection{Function invocation and return}
 
-  syntax Exp ::= Id ( List{Exp} ) [prec 0 strict(2)] 
-               | Id ( ) [prec 0]
+  syntax Exp ::= #Id ( List{Exp} ) [prec 0 strict(2)] 
+               | #Id ( ) [prec 0]
   syntax Stmt ::= return Exp ; [strict]
 
 /*@ As our current parser is ``algebraic'', the empty list needs to be 
@@ -107,7 +107,7 @@ To allow splitting programs into fragments (statement lists) which are
 then included one in another and to facilitate code reuse we introduce 
 the use of {\tt \#include} preprocessing commands.  */
 
-  syntax StmtList ::= #include < CompilationUnit >
+  syntax StmtList ::= `#include < CompilationUnit >
   syntax CompilationUnit ::= stdio.h | stdlib.h
 
 /*@ The above constants are introduced so that \KERNELC accepts a larger 
@@ -117,7 +117,7 @@ subset of the C programs (refering to standard functions). */
 
   syntax Pgm ::= StmtList 
 
-  syntax Id ::= main
+  syntax #Id ::= main
 
 //@ \subsection{Additional Library Functions}
 
@@ -175,7 +175,7 @@ them. */
 /*@ {\bf Calling a function with zero arguments} is desugared in the 
 normal call with the empty list `()' as argument. */
 
-  macro I:Id () = I (())
+  macro I:#Id () = I (())
 
 /*@ {\bf Standard header inclusion} is ignored, as we give direct 
 semantics for the supported functions. */
@@ -201,7 +201,7 @@ for variable declarations. */
 /*@ {\bf Declaration with initialization} is desugared into the two
 composing operations. */
 
-  macro (int X:Id = E ;) = int X ; X = E ;
+  macro (int X:#Id = E ;) = int X ; X = E ;
 endkm
 
 

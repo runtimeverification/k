@@ -2,7 +2,7 @@
 in /modules/k-visitor
 in /modules/substitution
 
-kmod SIMPLY-SUBTYPED-SYNTAX is including #ID + #INT + K
+kmod SIMPLY-SUBTYPED-SYNTAX is
   /*@ \section*{Syntax}
   This module defines the syntax for this calculus.
   */
@@ -26,11 +26,11 @@ kmod SIMPLY-SUBTYPED-SYNTAX is including #ID + #INT + K
                 | FieldType
                 | Record
 
-  syntax Exp ::= Id
-               | Int
-               | Bool
+  syntax Exp ::= #Id
+               | #Int
+               | #Bool
                | Exp Exp                 [strict prec 10 gather(E e)]
-               | lambda Id : Type . Exp  [latex "\lambda{#1}\mathbin{:}{#2}\mathbin{.}{#3}"]
+               | lambda #Id : Type . Exp  [latex "\lambda{#1}\mathbin{:}{#2}\mathbin{.}{#3}"]
                | Exp . Field             [strict(1) prec 9]
                | Record
 
@@ -60,9 +60,9 @@ kmod SIMPLY-SUBTYPED-SEMANTICS is including SIMPLY-SUBTYPED-SYNTAX + K + SUBSTIT
       <tyenv color="blue"> .Map </tyenv>
     </T>
 
-  kvar B : Bool
-  kvar I : Int
-  kvar X : Id
+  kvar B : #Bool
+  kvar I : #Int
+  kvar X : #Id
   kvar E : Exp
   kvar T T' T1 T1' T2 T2' S S' : Type
   kvar Env : Map
@@ -148,7 +148,7 @@ kmod SIMPLY-SUBTYPED-PROGRAMS is including SIMPLY-SUBTYPED-SEMANTICS
 
   syntax Field ::= age | height | random | foo | bar
 
-  syntax Id ::= x | y
+  syntax #Id ::= x | y
 
   /*@ All of the following programs should type check.
   */

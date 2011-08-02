@@ -32,7 +32,7 @@ are gathered in the {\sf cthreads} cell.  */
 lock is acquired if not already acquired by any thread.  
 Note that we don't model here re-entrant locks. */
 
-  rule <k> acquire(N:Nat) => void <_/k> <id> T:Nat </id> 
+  rule <k> acquire(N:#Nat) => void <_/k> <id> T:#Nat </id> 
        <locks> Locks:Map (. => N |-> T) </locks>
     if notBool(N in keys(Locks))
 
@@ -45,8 +45,8 @@ arguments of the function call (without callng the function, then
 we delegate the function call to a new thread.  */
 
   context 'spawn_('_`(_`)(_,,`[HOLE`]:K)) 
-  rule <k> 'spawn_('_`(_`)(X:Id,,Vl:List{Val})) => T <_/k> 
-       <next> T:Nat => T +Int 1 </next> 
+  rule <k> 'spawn_('_`(_`)(X:#Id,,Vl:List{Val})) => T <_/k> 
+       <next> T:#Nat => T +Int 1 </next> 
        (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> T </id> <_/thread>) 
 
 /*@ \subsection{Thread end and join}  Upon completion a thread registers 

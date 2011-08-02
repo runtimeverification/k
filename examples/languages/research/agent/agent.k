@@ -69,7 +69,7 @@ kmod AGENT is
       <I-O> <in>.List</in> <out>.List</out> </I-O>
     </T>
 
-  syntax KResult ::= Id
+  syntax KResult ::= #Id
 
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
 

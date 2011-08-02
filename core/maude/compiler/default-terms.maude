@@ -117,7 +117,7 @@ fmod DEFAULT-TERMS is
 
   op defaultTermsMb : MembAx Term KRuleSplit ~> MembAxSet .
   eq defaultTermsMb(Mb, T, KRS)
-   = if KRS :: KRuleSplit then plugKRule(setContents(KRS,defaultTermsKR(getContents(KRS),T))) else Mb fi .
+   = if KRS :: KRuleSplit then plugKRule(setContents(KRS,defaultTermsKR(getContents(KRS),T))) else Mb fi [print "mb: " Mb] .
 
   op defaultTermsKR : Term Term ~> Term .
   eq defaultTermsKR(Q[Tl],T) = defaultTermsKR(Tl,T,Q) .

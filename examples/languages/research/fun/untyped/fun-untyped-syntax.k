@@ -22,8 +22,8 @@ context-free language).  */
 /*@ The first group of expression constructs are the same as those of the SIMPLE
 language, so we do not discuss them anymore here. */
 
-  syntax Exp ::= Int | Bool
-               | Id
+  syntax Exp ::= #Int | #Bool
+               | #Id
                | Exp + Exp                [strict prec 33 gather(E e)]
                | Exp - Exp                [strict prec 33 gather(E e)]
                | Exp * Exp                [strict prec 31 gather(E e)]
@@ -59,7 +59,7 @@ abstraction, function application, let and letrec binders, and conditional.
                | cons Exp Exp             [strict]
 
                | ref Exp                  [strict]
-               | & Id
+               | & #Id
                | * Exp                    [strict]
                | Exp := Exp               [strict]
                | Exp ; Exp                [seqstrict prec 110 gather(e E)]
@@ -70,7 +70,7 @@ abstraction, function application, let and letrec binders, and conditional.
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
 --- List{Id}
-  syntax List{Id} ::= Id
+  syntax List{Id} ::= #Id
                     | ( )
                     | List{Id} , List{Id} [strict hybrid assoc id: `(`) prec 70]
 

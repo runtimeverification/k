@@ -1316,7 +1316,7 @@ sub register_subsorts
 		my $t1 = $1;
 		my $t2 = $2;
 
-		$subsortations .= "$t1 < $t2\n";
+		$subsortations .= "\n$t1 < $t2";
 		$sorts_ .= "$t1 " if $sorts_ !~ /$t1/sg;
 		$sorts_ .= "$t2 " if $sorts_ !~ /$t2/sg;
 		$localsorts .= "$t1 " if $localsorts !~ /$t1/sg;
@@ -1392,7 +1392,7 @@ sub find_super_sorts
 {
     # remove the empty spaces at the end
     $sorts_ =~ s/\s+$//sg;
-    
+        
     # split the list
     my @sorts = split(/\s+/, $sorts_);
     
@@ -1406,6 +1406,7 @@ sub find_super_sorts
     my $supersorts = "";
     while(my ($k, $v) = each %supersortmap)
     {
+#	print "KEY: $k VALUE: $v\n";
 	my @values = split(/\s+/, $v);
 	foreach(@values)
 	{
@@ -1431,7 +1432,8 @@ sub super
     # first arg is the sort name
     # second arg is the subsortations set
     (my $sort, my $subs) = @_;
-    
+#    print "SORTS: $sort\nSUBS: $subs\n";
+     
     return "" if !defined $sort;
     return "" if $subs eq "";
     return "" if $sort eq "";
@@ -1451,14 +1453,13 @@ sub super
 	    while ($subs =~ /\s($sort)\s+<\s+(\S+)\s/sg)
 	    {
 		my $ssubs = $subs;
-		$ssubs =~ s/\s($sort)\s+<\s+(\S+)\s//sg;
+		$ssubs =~ s/\s($sort)\s+<\s+(\S+)\s/\n/sg;
 		push(@supers, super($2, $ssubs));
 	    }
 	}
     }
     # each sort is its own supersort
     push(@supers, $sort) if scalar(@supers) == 0;
-    
     "@supers";
 }
 
@@ -2394,8 +2395,8 @@ sub rule_tags
 
 	    if ($attributes =~ /\S/sg)
 	    {
-		print "[ERROR] at $metadata: You have some undeclared tags: \"$attributes\"\n";
-		exit(1);
+#		print "[ERROR] at $metadata: You have some undeclared tags: \"$attributes\"\n";
+#		exit(1);
 	    }
 	   
 	    # re-build the attributes

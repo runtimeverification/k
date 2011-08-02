@@ -1,9 +1,9 @@
 
 
-kmod ISSUE062 is including K + #INT + #ID
+kmod ISSUE062 is 
 
 	
-	syntax Exp ::= Int
+	syntax Exp ::= #Int
                | ! Exp
                | ? Exp
 

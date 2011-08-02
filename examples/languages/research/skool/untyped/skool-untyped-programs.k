@@ -2,7 +2,7 @@
 
 kmod SKOOL-UNTYPED-PROGRAMS is including SKOOL-UNTYPED-SYNTAX
 
-  syntax Id ::= 
+  syntax #Id ::= 
                 a | b | c 
               | d | e | f 
               | g | h | i 

@@ -9,7 +9,7 @@ module THREADS imports SEQ
              | acquire K     [strict]
              | release K     [strict]
              | rendezvous K  [strict]
-             | Nat
+             | #Nat
 
   rule [spawn-thread] : <thread_> <k>spawn S:K 
                                   => skip<_/k> <_/thread>
@@ -25,7 +25,7 @@ module THREADS imports SEQ
                 => SetItem(V))</busy>
     if notBool(V in Busy) [computational]
   rule [reentrant-acquire] : <k>acquire V 
-                             => skip<_/k> <holds_>V|->(N:Nat 
+                             => skip<_/k> <holds_>V|->(N:#Nat 
                                                     => sNat N)<_/holds>
   rule [reentrant-release] : <k>release V 
                              => skip<_/k> <holds_>V|->(sNat N 

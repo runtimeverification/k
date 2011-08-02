@@ -1,9 +1,8 @@
 
 kmod ASSOC is
-	including K + #BOOL + #INT + #ID
 	
-	syntax Exp ::= Id | Val | Exp + Exp
-	syntax Val ::= Int | Bool
+	syntax Exp ::= #Id | Val | Exp + Exp
+	syntax Val ::= #Int | #Bool
         syntax KResult ::= Val
         syntax K ::= Exp
         syntax ValSet ::= .ValSet

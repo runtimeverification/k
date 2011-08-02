@@ -1,18 +1,18 @@
 
-kmod OCL-SYNTAX is including K + #ID + #INT + #BOOL
+kmod OCL-SYNTAX is
 
 
-  syntax Var ::= Id
-  syntax Class ::= Id  // the actual classes depend on a given metamodel..
+  syntax Var ::= #Id
+  syntax Class ::= #Id  // the actual classes depend on a given metamodel..
   syntax Type ::= int | bool | Class | col`(int`) | col`(bool`) | col`(Class`) // may need to add strings as well
-  syntax Attr ::= Id
+  syntax Attr ::= #Id
 
 
 
 
 
 // Expressions : Arithmetical
-  syntax AExp ::= Int | Var 
+  syntax AExp ::= #Int | Var 
                | AExp + AExp         [strict]
                | AExp * AExp         [strict]
                | AExp / AExp         [strict]
@@ -21,7 +21,7 @@ kmod OCL-SYNTAX is including K + #ID + #INT + #BOOL
 
 // Expressions : Boolean
 
-syntax BExp ::= Bool | Var 
+syntax BExp ::= #Bool | Var 
                | AExp < AExp         [strict]
                | AExp <= AExp        [strict]
                | AExp > AExp         [strict]
@@ -48,7 +48,7 @@ syntax CExp ::= empty
                 | Class .allInstances  // "basic constructor" for expressions
                 | AExp [strict]
                 | BExp [strict]
-                | CExp # Attr [strict]  // period generates ambiguity
+                | CExp `# Attr [strict]  // period generates ambiguity
                 | CExp union CExp [strict]
                 | CExp inter CExp [strict]
                 | CExp diff CExp [strict]
@@ -67,8 +67,8 @@ kmod ASSOC is including OCL-SYNTAX
 
 syntax KResult ::= ValSet 
 syntax CExp ::= ValSet 
-syntax AExp ::= Int
-syntax BExp ::= Bool
+syntax AExp ::= #Int
+syntax BExp ::= #Bool
 
 
 
@@ -76,7 +76,7 @@ syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid assoc comm id: .ValSet]
                 | ValSet `Inter ValSet
                 | ValSet `Diff ValSet
 
-syntax Val ::= Bool | Int  | instVal ( Bag ) // or better, instVal(BagItem)
+syntax Val ::= #Bool | #Int  | instVal ( Bag ) // or better, instVal(BagItem)
 
 endkm
 

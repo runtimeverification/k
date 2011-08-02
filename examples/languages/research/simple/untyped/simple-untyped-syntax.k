@@ -17,7 +17,7 @@ Each program may use additional identifiers, which need to be declared either
 automatically (when one uses an external parser) or manually
 (when one writes the program). */
 
-  syntax Id ::= main
+  syntax #Id ::= main
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and
@@ -31,8 +31,8 @@ production with explicitly no arguments; this will be shortly desugared into
 the first one. */
 
   syntax Decl ::= var List{Exp} ;
-                | function Id ( List{Id} ) Stmt
-                | function Id ( ) Stmt
+                | function #Id ( List{Id} ) Stmt
+                | function #Id ( ) Stmt
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -48,7 +48,7 @@ gets updated, so it cannot be evaluated), the function call with zero
 arguments (because it will get desugared), and the assignment which is only
 strict in its second argument (for the same reason as the increment). */
 
-  syntax Exp ::= Int | Bool | Id
+  syntax Exp ::= #Int | #Bool | #Id
                | ++ Exp            [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
@@ -93,10 +93,10 @@ constructs are not strict in any arguments. */
                 | if Exp then Stmt else Stmt   [strict(1) prec 90]
                 | if Exp then Stmt             [prec 89]
                 | while Exp do Stmt            [prec 90]
-                | for Id = Exp to Exp do Stmt  [prec 90]
+                | for #Id = Exp to Exp do Stmt  [prec 90]
                 | return Exp ;                 [strict]
                 | write ( Exp ) ;              [strict]
-                | try Stmt catch ( Id ) Stmt   [prec 90]
+                | try Stmt catch ( #Id ) Stmt   [prec 90]
                 | throw Exp ;                  [strict]
                 | spawn Stmt                   [prec 90]
                 | acquire Exp ;                [strict]
@@ -117,7 +117,7 @@ result.  We prefer to tag their units with the corresponding sort to avoid
 confusion.  */
 
 --- List{Id}; the hybrid attribute says that a list of results becomes a result
-  syntax List{Id} ::= Id
+  syntax List{Id} ::= #Id
                     | .List{Id} [latex "\dotCt{List\{Id\}}"]
                     | List{Id} , List{Id}
                                     [strict hybrid assoc id: .List{Id} prec 70]
@@ -156,9 +156,9 @@ that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:Id = E1:Exp to E2:Exp do S)
+  macro (for X:#Id = E1:Exp to E2:Exp do S)
       = {var X; X=E1; while X <= E2 do {S X=X+1;}}
-  macro function F:Id() S = function F(.List{Id}) S
+  macro function F:#Id() S = function F(.List{Id}) S
   macro E() = E(.List{Id})
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X = E; = var X; X = E;

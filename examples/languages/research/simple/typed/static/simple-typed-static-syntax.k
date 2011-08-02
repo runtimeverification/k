@@ -1,5 +1,5 @@
 
-kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID 
+kmod SIMPLE-TYPED-SYNTAX is 
 
   sorts Var Exp Decl Stmt Stmts
 
@@ -12,7 +12,7 @@ kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID
 
 
   syntax IdType ::= 
-                  Id : Type
+                  #Id : Type
 
 ----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
@@ -30,7 +30,7 @@ kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID
   syntax List{IdType}  ::= IdType | List{Bottom}
                      | List{IdType} , List{IdType} [ditto]
 --- List{Id}
-  syntax List{Id}  ::= Id | List{Bottom}
+  syntax List{Id}  ::= #Id | List{Bottom}
                      | List{Id} , List{Id} [ditto]
 --- List{Exp}
   syntax List{Exp} ::=  Exp | List{Id} 
@@ -38,12 +38,12 @@ kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID
 
 --- variable names
 
-  syntax Var ::= Id 
-                | Id [ Exp ] [prec 1 strict]
+  syntax Var ::= #Id 
+                | #Id [ Exp ] [prec 1 strict]
 
 --- expressions
-  syntax Exp ::=   Var | Int | Bool            
-                | ++ Id [prec 0]
+  syntax Exp ::=   Var | #Int | #Bool            
+                | ++ #Id [prec 0]
                 | Exp + Exp [gather(E e) prec 33 strict]
                 | Exp - Exp [gather(E e) prec 33 strict]
                 | Exp * Exp [gather(E e) prec 31 strict]
@@ -67,8 +67,8 @@ kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID
 
 --- declarations
   syntax Decl ::= var Var : Type ; [prec 2] 
-                | function Id ( ) : Type Stmt 
-                | function  Id ( List{IdType} ) : Type Stmt 
+                | function #Id ( ) : Type Stmt 
+                | function  #Id ( List{IdType} ) : Type Stmt 
 
 --- instructions
   syntax Stmt ::= 
@@ -79,7 +79,7 @@ kmod SIMPLE-TYPED-SYNTAX is including #INT + #ID
                 | if Exp then Stmt else Stmt [strict]
                 | if Exp then Stmt
                 | while Exp do Stmt [strict]
-                | for Id = Exp to Exp do Stmt
+                | for #Id = Exp to Exp do Stmt
                 | return Exp ; [strict]
                 | write ( Exp ) ; [strict]
 --- statements
@@ -94,7 +94,7 @@ kmod SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX is including SIMPLE-TYPED-SYNTAX
 --- so we get rid of the derived ones before we start the semantics          ---
 --------------------------------------------------------------------------------
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:Id = E1:Exp to E2:Exp do S) = {var X : int ; X=E1; while X <= E2 do {S X=X+1;}}
-  macro function F:Id() : Tp:Type S  = function F(.List{Bottom}) : Tp S
+  macro (for X:#Id = E1:Exp to E2:Exp do S) = {var X : int ; X=E1; while X <= E2 do {S X=X+1;}}
+  macro function F:#Id() : Tp:Type S  = function F(.List{Bottom}) : Tp S
   macro E() = E(.List{Bottom})
 endkm

@@ -1,7 +1,7 @@
 in /modules/k-visitor
 in /modules/substitution
 
-kmod SYSTEM-F-SYNTAX is including #ID + K-LATEX
+kmod SYSTEM-F-SYNTAX is 
   /*@ \section*{Syntax}
   This module defines the syntax for System F.
   */
@@ -11,7 +11,7 @@ kmod SYSTEM-F-SYNTAX is including #ID + K-LATEX
   */
   syntax BasicType ::= bool | int
 
-  syntax TypeVar ::= Id
+  syntax TypeVar ::= #Id
 
   // TODO: the precedences and gatherings need to be adjusted to avoid excess
   // parenthesis
@@ -61,7 +61,7 @@ kmod SYSTEM-F-STATIC-SEMANTICS is including SYSTEM-F-SYNTAX + K + SUBSTITUTION
   kvar X : Var
   kvar T T' T1 T2 S : Type
   kvar BT : BasicType
-  kvar Tv : Id
+  kvar Tv : #Id
   kvar Tvs : Set
   kvar E E' : Exp
   kvar Env : Map
@@ -120,7 +120,7 @@ kmod SYSTEM-F-PROGRAMS is including SYSTEM-F-STATIC-SEMANTICS
   This module defines a few programs for testing the definition.
   */
 
-  syntax Id ::= s | t | t1 | t2 | t3
+  syntax #Id ::= s | t | t1 | t2 | t3
   syntax Var ::= b | f | g | i | x | y | z
 
   syntax Exp ::= compose | compose2 | lambdaxx | ctrue | cfalse | cnot

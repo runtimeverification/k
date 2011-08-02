@@ -35,8 +35,8 @@ $\lambda$-abstractions (we do not need to evaluate functions to closures
 because each function is executed in the fixed global environment and
 function definitions cannot be nested). */
 
-  syntax Val ::= Int | Bool
-               | array ( Nat , Nat )
+  syntax Val ::= #Int | #Bool
+               | array ( #Nat , #Nat )
                | lambda ( List{Id} , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
   syntax Exp ::= Val
 
@@ -160,8 +160,8 @@ soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
   syntax K ::= undefined [latex "\bot"]
 
-  rule <k> var X:Id; => . ...</k>
-       <env> Env:Map => Env[L:Nat/X] </env>
+  rule <k> var X:#Id; => . ...</k>
+       <env> Env:Map => Env[L:#Nat/X] </env>
        <store>... . => L|->undefined ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
@@ -178,7 +178,7 @@ Note that, since the dimensions of array declarations can be arbitrary
 expressions, this virtually means that we can dynamically allocate memory in
 SIMPLE by means of array declarations. */
 
-  rule <k> var X[N:Nat]; => . ...</k>
+  rule <k> var X[N:#Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> array(L +Nat 1, N)
                        L +Nat 1 .. L +Nat 1 +Nat N |-> undefined ...</store>
@@ -201,7 +201,7 @@ inside the loop body with fewer dimensions.  The second variable,
 \texttt{\$2}, iterates through and initializes each element of the current
 dimension: */
 
-  syntax Id ::= $1 | $2
+  syntax #Id ::= $1 | $2
   rule var X[N1,N2,Vl]; =>
        var X[N1];
        {
@@ -242,7 +242,7 @@ global variable before declaring a local function).  The type checker of
 SIMPLE, also defined in \K (see examples/simple/typed/static),
 discards programs which do not respect this requirement. */
 
-  rule <k> function F:Id(Xl:List{Id}) S:Stmt => . ...</k>
+  rule <k> function F:#Id(Xl:List{Id}) S:Stmt => . ...</k>
        <env> Env => Env[L/F] </env>
        <store>... . => L|->lambda(Xl,S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
@@ -293,7 +293,7 @@ For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
   context ++([#] => l-value([#]))
-  rule <k> ++loc(L) => I:Int +Int 1 ...</k>
+  rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [nondet]
 
 /*@ \subsection{Arithmetic operators}
@@ -301,7 +301,7 @@ There is nothing special about the following rules.  They rewrite the
 language constructs to their library counterparts when their arguments become
 values of expected sorts: */
 
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1:#Int + I2:#Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
@@ -313,9 +313,9 @@ values of expected sorts: */
   rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
-  rule T1:Bool and T2:Bool => T1 andBool T2
+  rule T1:#Bool and T2:#Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
-  rule not(T:Bool) => notBool(T)
+  rule not(T:#Bool) => notBool(T)
 
 /*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of
@@ -331,7 +331,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
 
   rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
   rule array(L,_)[N] => lookup(L +Int N) [structural]
-  syntax K ::= lookup ( Nat )
+  syntax K ::= lookup ( #Nat )
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [nondet]
 
 /*@ \subsection{Size of an array}
@@ -552,7 +552,7 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= ( Id , Stmt , K , Map , Bag )
+  syntax ListItem ::= ( #Id , Stmt , K , Map , Bag )
   syntax K ::= popx
   rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
        <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
@@ -679,9 +679,9 @@ corresponding store lookup operation. */
 
 --- For parsing reasons, we prefer to allow l-value to take a K
   syntax Exp ::= l-value ( K )
-  syntax Val ::= loc ( Nat )
+  syntax Val ::= loc ( #Nat )
 --- Local variable
-  rule <k> l-value(X) => loc(L:Nat) ...</k> <env>... X|->L ...</env>
+  rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
 --- Array element: evaluate the array and its index;
 --- then the array lookup rule above applies.
   context l-value(_[_,[#]:Exp,_])
@@ -694,7 +694,7 @@ corresponding store lookup operation. */
 The following operation calculates the length of a list of identifiers.
 We make the two rules structural so they they do not count as computations. */
 
-  syntax Nat ::= `| List{Id} `| [latex "\mid\!{#1}\!\mid"]
+  syntax #Nat ::= `| List{Id} `| [latex "\mid\!{#1}\!\mid"]
   rule |.List{Id}| => 0 [structural]
   rule |X,Xl| => |Xl| +Nat 1 [structural]
 
@@ -703,9 +703,9 @@ The following operation expands to the list of natural numbers between two
 given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
-  syntax List{K} ::= Nat .. Nat
-  rule N1:Nat..N1 => .List{K} [structural]
-  rule N1..N2:Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <Nat N2 [structural]
+  syntax List{K} ::= #Nat .. #Nat
+  rule N1:#Nat..N1 => .List{K} [structural]
+  rule N1..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <Nat N2 [structural]
 
 /*@ \subsection{Lists of values}
 Currently we have to explicitly declare the syntactic lists (they will be

@@ -277,7 +277,40 @@ fmod QID-EXTRAS is
 endfm
 
 fmod META-TERM-EXTRAS is
-  including META-TERM .
+  including META-LEVEL .
+  including EXT-BOOL .
+  including INT .
+
+
+  op Bool : -> Sort .
+  eq Bool = '#Bool .
+
+  op String : -> Sort .
+  eq String = '#String .
+
+  op Id : -> Sort .
+  eq Id = '#Id .
+
+  op FiniteFloat : -> Sort .
+  eq FiniteFloat = '#FiniteFloat .
+
+  op Char : -> Sort .
+  eq Char = '#Char .
+
+  op trueCt : -> Constant .
+  eq trueCt = mkConstant('true, Bool) .
+  
+  op falseCt : -> Constant .
+  eq falseCt = mkConstant('false, Bool) .
+
+  op stringCt : String -> Constant .
+  eq stringCt(Str) = mkConstant(getName(upTerm(Str)), String) .
+
+  op getString : Constant ~> String .
+ ceq getString(C) 
+   = substr(string(getName(C)),1, _-_(length(string(getName(C))),2))
+  if getType(C) == String or-else getType(C) == Char .
+
   op errorT : [Term] Term String -> [Term] .
  op errorS : Term Type String -> [Type] .
 
@@ -425,13 +458,6 @@ fmod META-MODULE-EXTRAS is
   op _;;_ : ViewExp ViewExp -> ViewExp 
        [assoc id: mtViewExp] .                       *** view composition  _;_
       
-
-  op trueCt : -> Constant .
-  eq trueCt = 'true.Bool .
-  
-  op falseCt : -> Constant .
-  eq falseCt = 'false.Bool .
-  
   op nullHeader : -> Header .
 
   op setName : Module ModuleExpression -> Module .
@@ -1124,18 +1150,15 @@ fmod META-LEVEL-EXTRAS is
   eq findOp(M, OPDS, Q, Tl,  errorS(Trm, T, Str)) 
    = errorSOp(Trm, T, Str) .
    
-  eq findOp(M, OPDS, Q, nil, 'FiniteFloat)
-   =  (op Q : nil -> 'FiniteFloat [none] .) .
-  eq findOp(M, OPDS, Q, nil, 'String)
-   =  (op Q : nil -> 'String [none] .) .
-  eq findOp(M, OPDS, Q, nil, 'Char)
-   =  (op Q : nil -> 'Char [none] .) .
+ ceq findOp(M, OPDS, Q, nil, S)
+   =  (op Q : nil -> S [none] .) 
+  if S == String or-else S == Char or-else S == FiniteFloat .
   eq findOp(M, OPDS, '_=>_, T T', T'')
    =  (op '_=>_ : T'' T'' -> T'' [none] .) .
   eq findOp(M, OPDS, '_==Bool_, T T', T'')
-   =  (op '_==Bool_ : dup(lubSorts(M,T,T'),2) -> 'Bool [none] .) .
+   =  (op '_==Bool_ : dup(lubSorts(M,T,T'),2) -> Bool [none] .) .
   eq findOp(M, OPDS, '_=/=Bool_, T T', T'')
-   =  (op '_=/=Bool_ : dup(lubSorts(M,T,T'),2) -> 'Bool [none] .) [print "_=/=Bool_: " T "\/" T' ] .
+   =  (op '_=/=Bool_ : dup(lubSorts(M,T,T'),2) -> Bool [none] .) [print "_=/=Bool_: " T "\/" T' ] .
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
    =  (op 'sNat_ : Tl' -> T' [AS] .)
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .

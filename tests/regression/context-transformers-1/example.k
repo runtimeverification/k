@@ -6,9 +6,9 @@ kmod CONTEXT-TRANSFORMERS-TEST is
       <out> .List </out>
     </T>
 
-  syntax K ::= Int | print Int
+  syntax K ::= #Int | print #Int
 
-  rule <k> print I:Int => . <_/k> <out_> . => ListItem(I) </out>
+  rule <k> print I:#Int => . <_/k> <out_> . => ListItem(I) </out>
 
 
   syntax Bag ::= start | end

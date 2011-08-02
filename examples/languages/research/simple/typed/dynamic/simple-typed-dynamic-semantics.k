@@ -8,12 +8,12 @@ module SIMPLE-TYPED-DYNAMIC-SEMANTICS
 /*@ Values that various fragments of programs evaluate to
 */
 
-  syntax Val ::= Int | Bool  
+  syntax Val ::= #Int | #Bool  
                --- Array values are wrapped as specific reference values, where:
                --- 1st argument = the type of the array
                --- 2nd argument = the location of the first element in the array, and
                --- 3rd argument = the array size (array elements are contiguously allocated)
-               | array ( Type , Nat , Nat ) 
+               | array ( Type , #Nat , #Nat ) 
                | lambda ( Type , List{Id} , Stmt ) 
                  [latex "\lambda{#2}.{#3}:{#1}"]
 
@@ -68,13 +68,13 @@ Changes:  the undefined construct is now parameterized by the type
   syntax Exp ::= undefined ( Type )
   
 
-  rule <k> var X:Id : Tp:Type ; => . ...</k>
-       <env> Env:Map => Env[L:Nat/X] </env>
+  rule <k> var X:#Id : Tp:Type ; => . ...</k>
+       <env> Env:Map => Env[L:#Nat/X] </env>
        <store>... . => L|->undefined(Tp) ...</store>     
        <nextLoc> L => sNat(L) </nextLoc>
 
 //@ \subsection{Array declaration}
-  rule <k> var X[N:Nat] : Tp[]; => . ...</k>
+  rule <k> var X[N:#Nat] : Tp[]; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> array(Tp[], sNat L, N) 
                        L +Nat 1 .. L +Nat 1 +Nat N |-> undefined(Tp) ...</store>
@@ -83,7 +83,7 @@ Changes:  the undefined construct is now parameterized by the type
   context var X[_,[#]:Exp,_] : Tp[];
 
 
-  syntax Id ::= $1 | $2
+  syntax #Id ::= $1 | $2
   rule var X[N1,N2,Vl] : Tp[] ; =>
        var X[N1] : Tp[] ;
        {
@@ -99,7 +99,7 @@ Changes:  the undefined construct is now parameterized by the type
 
 
 //@\subsection{Function declaration}
-  rule <k> function F:Id(XTl:List{IdType}) : Tp S:Stmt => . ...</k>
+  rule <k> function F:#Id(XTl:List{IdType}) : Tp S:Stmt => . ...</k>
        <env> Env => Env[L/F] </env>
        <store>... . => L|->lambda(typeList(XTl)->Tp,idList(XTl),S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
@@ -119,11 +119,11 @@ Changes:  the undefined construct is now parameterized by the type
 
   context '++_([#]:K => l-value([#]))
 
-  rule <k> '++_(loc(L)) => I:Int +Int 1 ...</k>
+  rule <k> '++_(loc(L)) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store>
 
 --- Arithmetic operators
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1:#Int + I2:#Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
@@ -135,17 +135,17 @@ Changes:  the undefined construct is now parameterized by the type
   rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
-  rule T1:Bool and T2:Bool => T1 andBool T2
+  rule T1:#Bool and T2:#Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
-  rule not(T:Bool) => notBool(T)
+  rule not(T:#Bool) => notBool(T)
 
 /*@ \subsection{Array lookup}
   Note that we check the array bounds now
   We prefer to use a helper computation item, lookup, to avoid locking the store
 */
   rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
-  rule array(_,L,M:Nat)[N] => lookup(L +Int N) if N >=Nat 0 andBool N <=Nat M [structural]
-  syntax K ::= lookup ( Nat )
+  rule array(_,L,M:#Nat)[N] => lookup(L +Int N) if N >=Nat 0 andBool N <=Nat M [structural]
+  syntax K ::= lookup ( #Nat )
   rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>
 
 //@\subsection{Size of array}
@@ -297,9 +297,9 @@ Semantics by unrolling the loop at the top of the computation (to avoid non-term
 
 --- For parsing reasons, we prefer to allow l-value to take a K
   syntax Exp ::= l-value ( K )
-  syntax Val ::= loc ( Nat )
+  syntax Val ::= loc ( #Nat )
 --- Local variable
-  rule <k> l-value(X) => loc(L:Nat) ...</k> <env>... X|->L ...</env>
+  rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
 --- Array element: evaluate the array and its index;
 --- then the array lookup rule above applies.
   context l-value(_[_,[#]:Exp,_])
@@ -308,14 +308,14 @@ Semantics by unrolling the loop at the top of the computation (to avoid non-term
   rule <k> l-value(lookup(L)) => loc(L) ...</k>
 
 //@\subsection{Length}
-  syntax Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
+  syntax #Nat ::= `| List{Id} `| [latex "\mid\!\!{#1}\!\mid"]
   macro |.List{Bottom}| = 0  
   macro |X,Xl| = sNat |Xl|
 
 //@\subsection{Sequences of locations}
-  syntax List{K} ::= Nat .. Nat
-  rule N1:Nat..N1 => .List{K} [structural]
-  rule N1..N2:Nat => N1,,sNat N1..N2 [structural]
+  syntax List{K} ::= #Nat .. #Nat
+  rule N1:#Nat..N1 => .List{K} [structural]
+  rule N1..N2:#Nat => N1,,sNat N1..N2 [structural]
 
 
 //@\subsection{Lists of values}

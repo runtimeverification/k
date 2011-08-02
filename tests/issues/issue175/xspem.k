@@ -1,21 +1,21 @@
 
 
 
-kmod OCL-SOLVER is including K + #ID
-  syntax Formula ::=  `True | `False | forAll ( Id : Id `| Bool )
+kmod OCL-SOLVER is 
+  syntax Formula ::=  `True | `False | forAll ( #Id : #Id `| #Bool )
   syntax Builtins ::= Formula 
 endkm
 
 kmod META-MODEL is including OCL-SOLVER
 
-  syntax Id ::= object
+  syntax #Id ::= object
 
-  syntax Id ::= initState | state | automaton | transition
+  syntax #Id ::= initState | state | automaton | transition
               | label | trace | dest | orig | in | out | name | active
 
-  syntax K ::= Id | undefined  
+  syntax K ::= #Id | undefined  
 
-  syntax ListItem ::= Id : KLabel [prec 20]
+  syntax ListItem ::= #Id : KLabel [prec 20]
 
 
 
@@ -23,8 +23,8 @@ kmod META-MODEL is including OCL-SOLVER
                   <metamodel>
                     <classes>
                       <class multiplicity="*">
-                         <className> Id:Id </className>
-                         <extends> Id:Id </extends>
+                         <className> Id:#Id </className>
+                         <extends> Id:#Id </extends>
                          <declAttributes> .List  </declAttributes>
                       </class>
                     </classes>
@@ -121,7 +121,7 @@ endkm
 
 kmod AN-AUTOMATON is including META-AUTOMATON
 
-  syntax Id ::= a | b | eps | s0 | s1 | t1 | t2 | t3 
+  syntax #Id ::= a | b | eps | s0 | s1 | t1 | t2 | t3 
 
   syntax Bag ::= anAutomaton
 
