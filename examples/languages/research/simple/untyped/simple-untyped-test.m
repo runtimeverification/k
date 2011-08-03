@@ -8,19 +8,19 @@ rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
 rew run('pArrays, 
-	    (ListItem(Int(6)(.List{K})) ListItem(Int(3)(.List{K}))
-	     ListItem(Int(1)(.List{K})) ListItem(Int(2)(.List{K}))
-                                        ListItem(Int(3)(.List{K}))
-	     ListItem(Int(4)(.List{K})) ListItem(Int(5)(.List{K}))
-                                        ListItem(Int(6)(.List{K}))
-	     ListItem(Int(7)(.List{K})) ListItem(Int(8)(.List{K}))
-                                        ListItem(Int(9)(.List{K}))
-	     ListItem(Int(9)(.List{K})) ListItem(Int(8)(.List{K}))
-                                        ListItem(Int(7)(.List{K}))
-	     ListItem(Int(6)(.List{K})) ListItem(Int(5)(.List{K}))
-                                        ListItem(Int(4)(.List{K}))
-	     ListItem(Int(3)(.List{K})) ListItem(Int(2)(.List{K}))
-                                        ListItem(Int(1)(.List{K}))
+	    (ListItem(#Int(6)(.List{K})) ListItem(#Int(3)(.List{K}))
+	     ListItem(#Int(1)(.List{K})) ListItem(#Int(2)(.List{K}))
+                                        ListItem(#Int(3)(.List{K}))
+	     ListItem(#Int(4)(.List{K})) ListItem(#Int(5)(.List{K}))
+                                        ListItem(#Int(6)(.List{K}))
+	     ListItem(#Int(7)(.List{K})) ListItem(#Int(8)(.List{K}))
+                                        ListItem(#Int(9)(.List{K}))
+	     ListItem(#Int(9)(.List{K})) ListItem(#Int(8)(.List{K}))
+                                        ListItem(#Int(7)(.List{K}))
+	     ListItem(#Int(6)(.List{K})) ListItem(#Int(5)(.List{K}))
+                                        ListItem(#Int(4)(.List{K}))
+	     ListItem(#Int(3)(.List{K})) ListItem(#Int(2)(.List{K}))
+                                        ListItem(#Int(1)(.List{K}))
 	    )) .
 rew run('pExceptions1) .
 rew run('pExceptions2) .
@@ -78,16 +78,16 @@ mod DEKKER-PREDICATES is
   including SIMPLE-UNTYPED .
   including #MODEL-CHECKER .
 
-  op cfg : Bag -> Model-Checker-State .
-  op start : -> Model-Checker-State .
+  op cfg : Bag -> #Model-Checker-State .
+  op start : -> #Model-Checker-State .
   eq start = cfg(run('pDekker)) .
 
-  var X : Id .  var B : Bag .  var M1 M2 : Map .  var Loc : K .
+  var X : #Id .  var B : Bag .  var M1 M2 : Map .  var Loc : K .
 
-  op enabled : Id -> Prop .
+  op enabled : #Id -> #Prop .
   eq cfg(< T > B
-	   < genv > M1 Id X(.List{K}) |-> Loc </ genv >
-           < store > M2 Loc |-> Int 1(.List{K}) </ store >
+	   < genv > M1 #Id X(.List{K}) |-> Loc </ genv >
+           < store > M2 Loc |-> #Int 1(.List{K}) </ store >
 	 </ T >) LTL|= enabled(X) = true .
 endm
 

@@ -211,7 +211,7 @@ mod K-LIST-EXTRAS is
   including K-TECHNIQUE .
   including #BOOL .
 
-  var K K1 K2 K' : K .  var Ks : List{K} .  var LItem : ListItem .  var List : List .  var N : #NzNat .
+  var K K1 K2 K' : K .  var Ks Ks' : List{K} .  var LItem : ListItem .  var List : List .  var N : #NzNat .
 
   op List_ : List{K} -> List .
   eq List(.List{K}) = . .
@@ -229,6 +229,11 @@ mod K-LIST-EXTRAS is
   op inKList : K K -> #Bool .
   eq inKList(K, (K1 ~> K ~> K2)) = true .
   eq inKList(K, K') = false [owise] .
+
+  --- this does not belong here either
+  op _in_ : K List{K} -> #Bool .
+  eq K in (Ks,,K,,Ks') = true .
+  eq K in Ks = false [owise] .
 endm
 
 

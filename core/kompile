@@ -57,11 +57,11 @@ my $maudify_only = 0;
 my $k_prelude_loaded = 0;
 
 # K tags variables
-my $flag_structural = "structural=()";
-my $flag_computational = "transition=()";
-my $flag_nd_strict = "supercool=()";
-my $structural = 0;
-my $computational = 0;
+my $flag_localtransition = "localtransition=()";
+my $flag_transition = "transition=()";
+my $flag_nd_strict = "nd=()";
+my $localtransition = 0;
+my $transition = 0;
 my $nd_strict = 0;
 my $pure = 0;
 
@@ -172,10 +172,10 @@ my $short_help_message =
   -file : the input source file (optional)
 
   Controlling non-determinism
-  -structural \"<tags>\" : tags to become equations 
   -transition \"<tags>\": tags to become rewrite rules 
-              also nondetermistic choice for strictness
-  -supercool \"<tags>\": tags for super cooling rules
+  -nd \"<tags>\": syntax tags triggering super heating
+                  nondetermistic choice for strictness
+  -localtransition \"<tags>\" : rule tags triggering super cooling
   tags are space-separated and can include the tag default
   default values: the name of the option.
 
@@ -320,18 +320,24 @@ sub terminate {
   above mentioned style, and thus could be used to alter the default
   typesetting macros.
   
-  The options -structural, -transition, and -supercool are designed
+  The options -transition, -nd, and -localtransition are designed
   to help fine-tuning the non-determinsm exposed by a definition by 
   changing the abstraction level of the rules and stricness axioms.
-  By default, only rules and heating rules tagged with the 'transition' tag 
-  are turned into rewrite rules and strictness rules tagged with 'supercool' 
-  generate heating rewrite rules, while rules tagged with 'supercool'
-  force the computation to cool completely before any other rule applies.
-  If a rule is tagged both structural and transition, it is considered
-  structural and thus turned into an equation. All rules with no specific 
-  transition/structural tag are considered structural.
+  The option '-nd' lists all the (tags of the) operations which are 
+  intended to be non-deterministic in the implementation.  The option 
+  '-localtransition' enriches the set of transitions to be used when 
+  exploring the behaviors of non-deterministic operations.  If one does 
+  not mention any local transitions, then only the transitions will be 
+  considered.
+  By default, rules tagged with the 'transition' tag 
+  are turned into rewrite rules, syntax/strictness rules tagged with 'nd' 
+  trigger the computing of the entire heating class, while rules tagged 
+  with either 'transition' or 'localtransition' force the computation to 
+  cool completely before any other rule applies.
+  All rules with no specific tag are considered structural and turned into
+  equations.
   The above options allow to change this behavior by specifying explicit
-  sets of tags which are to be handled as structural/transition/supercool.
+  sets of tags which are to be handled as transition/nd/localtransition.
   In addition one can add the reserved tag default to one of the categories
   to dictate the behavior for the rules with none of the specified tags.
   
@@ -390,18 +396,30 @@ sub terminate {
   and
   lang-flat.maude which is lang-flat.k maudified.
 
-  kompile lang -computational \"default\"
-  will transform into rewrite rules all rules which are tagged 
-  as structural.
+  ---- Syntax/Rule tags --- 
+  By default, 'kompile language.k' is equivalent to
 
-  kompile lang -structural \"nd(false) computational\" \\
-      -transition \"structural\" -supercool \"default\"
-  will transform into equations all rules which are tagged with either 
-  computational or nd(false), into rules all those tagged with 
-  structural, will generate rewrite rules for all heating rules tagged 
-  with structural, and will enforce complete cooling for all K rules 
-  containing the k cell.
+  kompile language.k -transition \"transition\" -nd \"nd\" 
+                    -localtransition \"localtransition\"
 
+  This way, one does not need to explicitly add the options above if 
+  one follows the naming convention for the tags.  On the other hand, 
+  if one used the implicit tags and one still wants to kompile the 
+  definition for interpretation speed, then one has to call kompile 
+  with the options
+
+  kompile language.k -transition \"\" -nd \"\" -localtransition \"\"
+
+  Also, once one adds a tag to a category, that category is not including 
+  the default tag anymore.  For example,
+
+  kompile language.k -transition \"nondet\"
+
+  does not include the tags \"transition\" into the -transition set 
+  anymore; it is actually equivalent to:
+
+  kompile language.k -transition \"nondet\"  -nd \"nd\" 
+                     -localtransition \"localtransition\"
 
 " if ($verbose || $help); 
     print "\nERROR: $_[0]\n\n" if defined $_[0];
@@ -472,7 +490,7 @@ my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax k
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
-my @k_attributes = qw(strict metadata prec format assoc comm id: hybrid gather ditto seqstrict structural large latex );           
+my @k_attributes = qw(strict metadata prec format assoc comm id: hybrid gather ditto seqstrict structural transition computational nd localtransition large latex );           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
@@ -689,13 +707,13 @@ foreach (@ARGV) {
     elsif (/^--?crop$/) {
 		$crop = 1;
     }
-    elsif (/^--?structural$/) {
-		$structural = 1;
+    elsif (/^--?localtransition$/) {
+		$localtransition = 1;
     }
     elsif (/^--?transition$/) {
-		$computational = 1;
+		$transition = 1;
     }
-    elsif (/^--?supercool$/) {
+    elsif (/^--?nd$/) {
 		$nd_strict = 1;
     }
     elsif (/^--?pgm$/) { # start compile program param check
@@ -739,7 +757,7 @@ foreach (@ARGV) {
 	# do nothing
 	#	print "MODULES: $_\n";
     }
-    elsif ($structural || $computational || $nd_strict)
+    elsif ($localtransition || $transition || $nd_strict)
     {
     	# do nothing
     }
@@ -815,24 +833,24 @@ if ($args =~ /--?crop\s+($modules_list)/)
 }
 
 # get tags
-if ($args =~ /\-\-?structural\s(.*)/s)
+if ($args =~ /\-\-?localtransition\s(.*)/s)
 {
-	$flag_structural = process_tags($1);
+	$flag_localtransition = process_tags($1);
 }
 
 if ($args =~ /\-\-?transition\s(.*)/s)
 {
-	$flag_computational = process_tags($1);
+	$flag_transition = process_tags($1);
 }
 
-if ($args =~ /\-\-?supercool\s(.*)/s)
+if ($args =~ /\-\-?nd\s(.*)/s)
 {
 	$flag_nd_strict = process_tags($1);
 }
 
-#print "STRUCT: $flag_structural\n";
-#print "COMP: $flag_computational\n";
+#print "TRANSITION: $flag_transition\n";
 #print "ND: $flag_nd_strict\n";
+#print "LOCALTRANSITION: $flag_localtransition\n";
 
 
 # Check if an input file was given and exit if not
@@ -1390,7 +1408,7 @@ sub compile {
 			"load $language_file_name\n",
 			"load $k_all_tools\n",
 			"set print attribute off .\n",
-			"rew compile('$language_module_name, structurals(metadataParse(\"$flag_structural\")) computationals(metadataParse(\"$flag_computational\")) supercools(metadataParse(\"$flag_nd_strict\"))) .\n",
+			"rew compile('$language_module_name, localtransitions(metadataParse(\"$flag_localtransition\")) transitions(metadataParse(\"$flag_transition\")) nds(metadataParse(\"$flag_nd_strict\"))) .\n",
 			"quit\n");
 		
 		my @lines = split(/\n/, $_);
@@ -1416,18 +1434,18 @@ sub compile {
     }
     else
     {
-    my $compile_structurals = "\"$flag_structural\"";
-    my $compile_computationals = "\"$flag_computational\"";
-    my $compile_supercools = "\"$flag_nd_strict\"";    
-    my $action = "(compile $language_module_name structurals $compile_structurals computationals $compile_computationals supercools $compile_supercools .)";
-    $action = "(purify $language_module_name structurals $compile_structurals computationals $compile_computationals supercools $compile_supercools .)" if $pure;
+    my $compile_localtransitions = "\"$flag_localtransition\"";
+    my $compile_transitions = "\"$flag_transition\"";
+    my $compile_nds = "\"$flag_nd_strict\"";    
+    my $action = "(compile $language_module_name transitions $compile_transitions nds $compile_nds localtransitions $compile_localtransitions .)";
+    $action = "(purify $language_module_name transitions $compile_transitions nds $compile_nds localtransitions $compile_localtransitions .)" if $pure;
 	$_ = run_maude("Compiling the definition ... ",
 		"load $k_prelude\n",
 	    "load $language_file_name\n",
 	    "load $k_all_tools\n",
             "---(\n",
             "rew in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???,\n",
-            "structurals(metadataParse(\"$flag_structural\")) computationals(metadataParse(\"$flag_computational\")) supercools(metadataParse(\"$flag_nd_strict\"))) .\n",
+            "localtransitions(metadataParse(\"$flag_localtransition\")) transitions(metadataParse(\"$flag_transition\")) nds(metadataParse(\"$flag_nd_strict\"))) .\n",
             "quit\n",
             "---)\n",
 	    "loop compile .\n",
@@ -2199,7 +2217,7 @@ sub make_metadata {
 #	print "=========\nIN: $_\n=============\n";
 
 
-    s!(ditto|large|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+\w+)|metadata\s+(\w+)!
+    s!(ditto|large|nd|transition|localtransition|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+\w+)|metadata\s+(\w+)!
     my $out = "";
 #	print "\tMatched: $&\n\n";
 	if (defined $1) {

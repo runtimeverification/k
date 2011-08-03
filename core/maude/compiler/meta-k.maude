@@ -263,8 +263,19 @@ fmod META-K-MODULE is
   eq Universal2K(nil) = nil .
 endfm
 
+
+fmod META-K-CONDITION is
+  including K-META-OPS .
+  op makeKCondition : TermList -> Condition .
+  eq makeKCondition(C) = (C = bool2K(trueCt)) .
+  eq makeKCondition(empty) = nil .
+
+  var C : Term .
+endfm
+
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE-EXTRAS .
+  including META-K-CONDITION .
   var O Q : Qid . var T T' T1 T2 Trm Cxt : Term . var S : Type . var C : Term . 
   var Cond Cond' Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
   var AS : AttrSet .  var RK : KRuleKind . var Str : String . 
@@ -763,6 +774,7 @@ endfm
 fmod META-K-CONTEXTS is including K-SORTS .
   including META-MODULE-EXTRAS .
   including K-STRICTNESS-OPS .
+  including META-K-CONDITION .
   var Q : Qid . var T T' : Term . var S : Type . var C : Term .  
   var Cond Cond' : TermList .
   var AS AS' : AttrSet .  var RK : KContextKind .
@@ -901,9 +913,9 @@ fmod COMPILATION-ATTRS is
   including META-ATTRS .
   including RULES-ATTRS .
 
-  op structurals : AttrSet -> Attr .
-  op computationals : AttrSet -> Attr .
-  op supercools : AttrSet -> Attr .
+  op localtransitions : AttrSet -> Attr .
+  op transitions : AttrSet -> Attr .
+  op nds : AttrSet -> Attr .
 endfm
 
 fmod K-ATTRS is 
