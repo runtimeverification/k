@@ -33,7 +33,7 @@ mod STRICTCXT2EQS is
   op defaultCoolEqs : SortSet -> EquationSet .
   eq defaultCoolEqs(S ; Ss)
    = (ceq mkCell(S, kra(mkVariable('K,NeK),kApply(heatLabel,empty),mkVariable('K',K))) 
-       = mkCell(S, 'kra(mkVariable('K,NeK),mkVariable('K',K))) 
+       = mkCell(S, kra(mkVariable('K,NeK),mkVariable('K',K))) 
        if makeKCondition(strictCondTerm(mkVariable('K,NeK), S))
       [metadata(pair("cool","skip-heat"))] .)
     (eq mkCell(cool(S), kra(mkVariable('K,K),kApply(heatLabel,empty),mkVariable('K',K))) 
