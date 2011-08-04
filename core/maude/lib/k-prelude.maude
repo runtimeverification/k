@@ -92,6 +92,11 @@ mod K-LISTK-EXTRAS is
 
   eq headList{K}(K:K,,Ks) = K:K .
   eq tailList{K}(K:K,,Ks) = Ks .
+
+  op _inList{K}_ : K List{K} -> #Bool .
+  eq K inList{K} (Ks,,K,,Ks') = true .
+  eq K inList{K} Ks = false [owise] .
+
 endm
 
 mod K-EXTRAS is
@@ -230,10 +235,6 @@ mod K-LIST-EXTRAS is
   eq inKList(K, (K1 ~> K ~> K2)) = true .
   eq inKList(K, K') = false [owise] .
 
-  --- this does not belong here either
-  op _in_ : K List{K} -> #Bool .
-  eq K in (Ks,,K,,Ks') = true .
-  eq K in Ks = false [owise] .
 endm
 
 

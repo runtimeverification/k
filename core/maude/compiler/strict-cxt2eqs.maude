@@ -117,7 +117,7 @@ mod STRICTCXT2EQS is
    = $heatEqs(Q, T1, T2, Cnd, AS, AS')
      (ceq kWrap(Q, kApply(heatLabel, (mkVariable('AnyHeat1,KList), kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList))), mkVariable('AnyHeat2,KList))))
         = kWrap(Q, kApply(heatLabel, (mkVariable('AnyHeat1,KList), kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList),T2)), mkVariable('AnyHeat2,KList), kApply(redexLabel,kra(T2,mkVariable('RestHeat,K)))))) 
-       if  Cnd /\ '_in_[T2, mkVariable('LHeat,KList)] = falseCt
+       if  Cnd /\ '_inList`{K`}_[T2, mkVariable('LHeat,KList)] = falseCt
      [metadata(AS pair("superheat", ""))] .) .
 
   op $heatEqs : Qid Term Term Condition AttrSet AttrSet -> EquationSet .
