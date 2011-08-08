@@ -283,7 +283,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   ceq printTerm(U,Q[T1,T2]) = 
      printTerm(U,\reduce{T1}{T2}) 
    if Q = replaceS .
-  ceq printTerm(U, Q['0.Zero]) = printTerm(U, qid(string(N,10) + ".Nat")) 
+  ceq printTerm(U, Q['0.#Zero]) = printTerm(U, qid(string(N,10) + ".#Nat")) 
    if N := getNat(string(Q)) .
   ceq printTerm(U, '_`(_`)[Q,'_`,`,_[NeTl]]) = printTerm(U,Q'[NeTl])
    if substr(string(getName(Q)),0,1) = "'" 
