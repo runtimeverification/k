@@ -711,6 +711,9 @@ fmod META-MODULE-EXTRAS is
   eq addOps(OPDS, U) = setOps(U, (OPDS getOps(U))) .
   eq addMbs(MAS, U) = setMbs(U, (MAS getMbs(U))) .
   eq addEqs(EqS, U) = setEqs(U, (EqS getEqs(U))) .
+  eq addEqs(EqS1:[EquationSet] 
+       errorEq(T:[Term], Cxt:[Term], Str:String, AS), U)
+   = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U) .
   eq addRls(RlS, U) = setRls(U, (RlS getRls(U))) .
   eq addRls(errorRl(Cxt:[Term], T:[Term], Str:String, AS:AttrSet), U) 
    = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U) .
@@ -1045,6 +1048,8 @@ fmod META-MODULE-EXTRAS is
     then (mb Trm : T [AS] .)
     else (cmb Trm : T if Cond [AS] .)
     fi .
+ eq plugMb(errorT(T1':[Term], T2':[Term], Str:String), T, AS, Cond)
+  = errorMb(T1':[Term], T2':[Term], Str:String, AS) .
 
  op plugEq : Term Term AttrSet Condition ~> Equation .
  eq plugEq(T1, T2, AS, Cond) 
@@ -1052,6 +1057,10 @@ fmod META-MODULE-EXTRAS is
     then (eq T1 = T2 [AS] .) 
     else (ceq T1 = T2 if Cond [AS] .) 
     fi .
+ eq plugEq(errorT(T1':[Term], T2':[Term], Str:String), T2, AS, Cond)
+  = errorEq(T1':[Term], T2':[Term], Str:String, AS) .
+ eq plugEq(T1, errorT(T1':[Term], T2':[Term], Str:String), AS, Cond)
+  = errorEq(T1':[Term], T2':[Term], Str:String, AS) .
 
  op plugRl : Term Term AttrSet Condition ~> Rule .
  eq plugRl(T1, T2, AS, Cond) 
@@ -1059,6 +1068,11 @@ fmod META-MODULE-EXTRAS is
     then (rl T1 => T2 [AS] .) 
     else (crl T1 => T2 if Cond [AS] .) 
     fi .
+ eq plugRl(errorT(T1':[Term], T2':[Term], Str:String), T2, AS, Cond)
+  = errorRl(T1':[Term], T2':[Term], Str:String, AS) .
+ eq plugRl(T1, errorT(T1':[Term], T2':[Term], Str:String), AS, Cond)
+  = errorRl(T1':[Term], T2':[Term], Str:String, AS) .
+
 
 
   var  M M' : Module .  var Trm T1 T2 : Term .  var Cond : Condition .
