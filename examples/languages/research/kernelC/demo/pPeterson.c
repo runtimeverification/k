@@ -1,4 +1,3 @@
-load kernelc-compiled-demo
 load kernelc-syntax
 load kernelc-threads-syntax
 kmod KERNELC-PETERSON is including KERNELC-THREADS-SYNTAX 
@@ -37,7 +36,7 @@ int main() {
 
 
 syntax Pgm ::= pPeterson 
-syntax Id ::= flag | turn | t | peterson
+syntax #Id ::= flag | turn | t | peterson
             | t1 | t2 
 endkm
 

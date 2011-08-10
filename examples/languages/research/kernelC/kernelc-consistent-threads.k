@@ -34,10 +34,10 @@ Note that we don't model here re-entrant locks. */
 
   rule <k> acquire(N:#Nat) => void <_/k> <id> T:#Nat </id> 
        <locks> Locks:Map (. => N |-> T) </locks>
-    if notBool(N in keys(Locks))
+    if notBool(N in keys(Locks)) [transition]
 
   rule <k> release(N) => void <_/k> <id> T </id> 
-       <locks_> N |-> T => . <_/locks>
+       <locks_> N |-> T => . <_/locks> [transition]
 
 /*@ \subsection{spawn} The semantics of spawn is the one mentioned 
 in the thread syntax.  We first have a context for evaluating the 
@@ -47,7 +47,7 @@ we delegate the function call to a new thread.  */
   context 'spawn_('_`(_`)(_,,`[HOLE`]:K)) 
   rule <k> 'spawn_('_`(_`)(X:#Id,,Vl:List{Val})) => T <_/k> 
        <next> T:#Nat => T +Int 1 </next> 
-       (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> T </id> <_/thread>) 
+       (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> T </id> <_/thread>) [transition]
 
 /*@ \subsection{Thread end and join}  Upon completion a thread registers 
 its {\sf id} in the set of completed threads, which is used as a signal 
@@ -55,7 +55,7 @@ to {\tt join}. */
 
   rule (<thread_> <k> V:Val </k> <fstack> .List </fstack> 
                   <id> T </id> <_/thread> => .) 
-       <cthreads_> . => SetItem(T) <_/cthreads> [structural]
+       <cthreads_> . => SetItem(T) <_/cthreads>
 
-  rule <k> join(T) => 0 <_/k> <cthreads_> SetItem(T) <_/cthreads> [structural]
+  rule <k> join(T) => 0 <_/k> <cthreads_> SetItem(T) <_/cthreads>
 endkm

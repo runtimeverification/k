@@ -1,4 +1,3 @@
-load kernelc-compiled-demo
 load kernelc-syntax
 kmod KERNELC-RECONFIG is including KERNELC-SYNTAX 
 macro pReconfig =
@@ -7,7 +6,7 @@ macro pReconfig =
 #include <stdlib.h>
 
 int nrand(int n) {
-  return random()%n;
+  return rand()%n;
 }
 
 int main() {
@@ -21,6 +20,6 @@ int main() {
 
 
 syntax Pgm ::= pReconfig 
-syntax Id ::=  x | n | nrand  
+syntax #Id ::=  x | n | nrand  
 endkm
 

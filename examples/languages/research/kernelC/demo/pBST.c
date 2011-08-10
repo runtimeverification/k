@@ -1,8 +1,7 @@
-load kernelc-compiled-demo
 load kernelc-syntax
 kmod KERNELC-BST is including KERNELC-SYNTAX 
 syntax Pgm ::= pBST 
-syntax Id ::= val | newNode | insert | find | root | node | v | t
+syntax #Id ::= val | newNode | insert | find | root | node | v | t
 macro pBST =
 
 

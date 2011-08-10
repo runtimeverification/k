@@ -7,9 +7,8 @@ echo "kompile kernelc"
 echo -en "\033[0m"
 cp ../*.k .
 kompile kernelc
-cp kernelc-compiled.maude kernelc-compiled-demo.maude
 echo -en "\033[1;34m"
-echo -n "Done. Now let's compile pAccount" 
+echo -n "Let's compile pAccount" 
 echo -en "\033[0m"
 read
 echo -en "\033[1;34m"
@@ -43,9 +42,8 @@ echo "this might take a while"
 echo "kompile kernelc-race-detection"
 echo -en "\033[0m"
 kompile kernelc-race-detection 2>/dev/null
-cp kernelc-race-detection-compiled.maude kernelc-compiled-demo.maude
 echo -en "\033[1;34m"
-echo "kompile -pgm pAccount  -cmod KERNELC-RACE-DETECTION -pmod KERNELC-ACCOUNT"
+echo "kompile -cfile kernelc-compiled-demo -pgm pAccount  -cmod KERNELC-RACE-DETECTION -pmod KERNELC-ACCOUNT"
 echo -en "\033[0m"
 cp pAccount.c pAccount.k
 kompile -pgm pAccount  -cmod KERNELC-RACE-DETECTION -pmod KERNELC-ACCOUNT 
@@ -58,7 +56,7 @@ echo -n "datarace on b in transfer. go fix it, recompile, then re-check for data
 echo -en "\033[0m"
 read
 echo -en "\033[1;34m"
-echo "kompile -pgm pAccount  -cmod KERNELC-RACE-DETECTION -pmod KERNELC-ACCOUNT"
+echo "kompile -cfile kernelc-compiled-demo -pgm pAccount  -cmod KERNELC-RACE-DETECTION -pmod KERNELC-ACCOUNT"
 echo -en "\033[0m"
 cp pAccount.c pAccount.k
 kompile -pgm pAccount  -cmod KERNELC-RACE-DETECTION -pmod KERNELC-ACCOUNT

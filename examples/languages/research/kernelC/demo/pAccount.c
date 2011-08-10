@@ -1,4 +1,3 @@
-load kernelc-compiled-demo
 load kernelc-syntax
 load kernelc-threads-syntax
 kmod KERNELC-ACCOUNT is including KERNELC-THREADS-SYNTAX 
@@ -72,7 +71,7 @@ int main() {
 
 
 syntax Pgm ::= pAccount 
-syntax Id ::= m | a | b | newAccount | balance | deposit | withdraw | transfer
+syntax #Id ::= m | a | b | newAccount | balance | deposit | withdraw | transfer
             | t1 | t2 | run
 endkm
 
