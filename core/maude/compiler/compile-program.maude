@@ -7,6 +7,7 @@ fmod COMPILE-PROGRAM is
   including META-K-WRAPPERS .
   including K-META-LISTS .
   including ID-TO-STRING .
+  including PARSE-METADATA .
 
   vars Compiled Syntax : Module .
   var SyntaxOps Wrappers Ops : OpDeclSet .  var AS : AttrSet .
