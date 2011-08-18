@@ -29,12 +29,12 @@ ppK :: K -> String
 ppK (KApp klabel argv) = ppKLabel klabel ++ "(" ++ ppKlist argv ++ ")"
 
 ppKLabel :: KLabel -> String
-ppKLabel (KNat i)      = "Nat " ++ show i
-ppKLabel (KInt i)      = "Int " ++ show i
-ppKLabel (KBool True)  = "Bool true"
-ppKLabel (KBool False) = "Bool false"
-ppKLabel (KString s)   = "String " ++ show s
-ppKLabel (KId s)       = "Id " ++ s
+ppKLabel (KNat i)      = "#Nat " ++ show i
+ppKLabel (KInt i)      = "#Int " ++ show i
+ppKLabel (KBool True)  = "#Bool true"
+ppKLabel (KBool False) = "#Bool false"
+ppKLabel (KString s)   = "#String " ++ show s
+ppKLabel (KId s)       = "#Id " ++ s
 ppKLabel (KLabel ps)   = '\'' : concatMap ppPart ps
     where ppPart (Syntax s) = maudeEscape s
           ppPart Hole = "_"

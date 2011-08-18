@@ -62,7 +62,9 @@ klabelpart = syntax <|> hole
 
 -- | Parse a K builtin
 kbuiltin :: Parser KLabel
-kbuiltin = try kid <|> knat <|> kint <|> kstring <|> kbool
+kbuiltin = do
+    char '#'
+    try kid <|> knat <|> kint <|> kstring <|> kbool
 
 -- | Parse an Id builtin: Id x
 kid :: Parser KLabel
