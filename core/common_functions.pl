@@ -2700,7 +2700,7 @@ sub pre_process
     
             # replace module with kmod and
             # endmodule with endkm
-            s/(module)(.*?)(end\s+?module)/kmod$2endkm/sg;
+            s/\b(module)\b(.*?)\b(end\s+?module)\b/kmod$2endkm/sg;
     
             # replace including with imports
             s/(?<!\S)imports(?!\S)/including/sg;
