@@ -22,6 +22,7 @@ The K Framework tool depends on the following software:
     * XML::LibXML::Reader
     * Tree::Nary
     * Text::Diff
+    * File::Spec::Link
 * *Subversion* for downloading the latest version of K.
 * *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
   packages, the following (texlive) packages are needed: `bera`, `datetime`, `ec`,
