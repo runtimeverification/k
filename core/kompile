@@ -4,6 +4,7 @@ use File::Basename;
 use File::Spec;
 use File::Copy;
 use File::Path 2.07 qw( make_path remove_tree );
+use File::Spec::Link;
 use Switch;
 use Cwd;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
@@ -553,9 +554,6 @@ my @all_sorts = ();
 # @all_tokens will hold all defined tokens
 my @all_tokens = @builtin_tokens;
 
-# a map with frozen strings
-my %freeze_map = ();
-
 # variables to store command line arguments
 my $style = "bb";
 my $compile_only = 0;
@@ -773,7 +771,7 @@ foreach (@ARGV) {
     	# do nothing
     }
     else {
-		$language_file_name = getFullName($_);
+	$language_file_name = get_full_name($_);
     }
 }
 
@@ -953,6 +951,8 @@ if ($flat && !$maudify_only)
 	exit(0);
 }
 
+
+
 # Following is executed whenever the option -c was not selected
 if (!$compile_only) {
 # Maudify the .k|.kmaude files reachable from file "$language_file_name"
@@ -964,32 +964,32 @@ if (!$compile_only) {
     
     if ($klabels ne "")
     {
-		my @tmp = split(/\s+/, $klabels);
-		@tmp = uniq(@tmp);
-		my $tmp = "ops @tmp : -> KLabel [metadata \"generated-label=()\"] . ";
-		my $dir = cwd;
-		open FILE,">",$kshared or die "Cannot create $kshared\n";
-		my $prelude = basename($k_prelude);
+	my @tmp = split(/\s+/, $klabels);
+	@tmp = uniq(@tmp);
+	my $tmp = "ops @tmp : -> KLabel [metadata \"generated-label=()\"] . ";
+	my $dir = cwd;
+	open FILE,">",$kshared or die "Cannot create $kshared\n";
+	my $prelude = basename($k_prelude);
 #		print FILE "\*\*\*\(\n$k_license\n\)\*\*\*\n\n\n";
-		print FILE "mod K-SHARED is including K . \n\t$tmp\nendm";
-		close FILE;
-		push(@generated_files, $kshared);
-
-		# add shared in language_file_name.maude
-		my $top_file = $language_file_name;
-		$top_file =~ s!\..+?$!!sg; # delete extension
-		if ( -e "$top_file.maude" )
-		{
-			my $maudified = get_file_content("$top_file.maude");
-		
-			$maudified =~ s/^/in shared\.maude\n/sg;	
-
-			open FILE,">", "$top_file.maude" or die "Cannot open $top_file.maude\n";
-			print FILE $maudified;
-			close FILE;
-		}
+	print FILE "mod K-SHARED is including K . \n\t$tmp\nendm";
+	close FILE;
+	push(@generated_files, $kshared);
+	
+	# add shared in language_file_name.maude
+	my $top_file = $language_file_name;
+	$top_file =~ s!\..+?$!!sg; # delete extension
+	if ( -e "$top_file.maude" )
+	{
+	    my $maudified = get_file_content("$top_file.maude");
+	    
+	    $maudified =~ s/^/in shared\.maude\n/sg;	
+	    
+	    open FILE,">", "$top_file.maude" or die "Cannot open $top_file.maude\n";
+	    print FILE $maudified;
+	    close FILE;
 	}
-
+    }
+    
     
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
@@ -1610,62 +1610,10 @@ sub maudify_file {
     my ($file,$indent) = @_;
 # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
     
-    # print "Process file: $file\n";
-    $file = getFullName($file);
-    
-    addFile(File::Spec->rel2abs($file));
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";
 
-    # hardcoded for avoiding maudification for shared.maude
-    if ($file =~ /shared\.maude/)
-    {
-		return;
-    }
-    
-# Slurp all $file into $_;
-    local $/=undef; open FILE,"<",$file or die "Cannot open $file\n"; local $_ = <FILE>; close FILE;
-
-        # freeze
-	s/($comment)/Freeze($&, "CMTS")/sge;
-
-    # Step: remove tags
-    s!tags(\s.*?\S)(\s*)(?=$kmaude_keywords_pattern|CMTS)!{parse_tags($1);"$2";}!sge;    
-
-        # replace module with kmod and
-	# endmodule with endkm
-	s/(module)(.*?)(end\s+?module)/kmod$2endkm/sg;
-	
-	# replace including with imports
-	s/(?<!\S)imports(?!\S)/including/sg;
-
-
-	# append "is" if necessary
-	s/(kmod\s+\S+)(\s+)(?!is)/$1 is$2/sg;
-	
-	# unfreeze
-	$_ = Unfreeze("CMTS", $_);
-
-# Step: resolve latex comments
-	# store_intermodule_latex($_);
-    $_ = solve_latex($_) if ($latex || $png || $pdf || $ps || $crop || $eps);
-
-    # save comments
-    my ($noComments, $myComments) = remove_comments($_);
-    $_ = $noComments;
-    
-    # Parse the configuration
-    if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
-    {
-	# print "FILE: $file\n";
-	parse_configuration($1, countlines($`), $file);
-    }
-    
-    
-# add line numbers metadata
-    $_ = add_line_numbers($_, $file);
-
-#    print $_;
+    $_ = slurp_k($file, $latex || $png || $pdf || $ps || $crop || $eps);
     
     # resolve rule tags
     $_ = rule_tags($_);
@@ -1673,20 +1621,7 @@ sub maudify_file {
     
 # dots issue: change <cell>.</cell> into <cell> . </cell>
     s!<(.*?)>\.</\1>!<$1> \. </$1>!g;
-    
-# solve modules in imports
-    s!^(\s*)(in|load|require)(\s+)(\S+)!
-    {
-		my ($spaces1, $imp, $spaces2, $path_imp) = ($1, $2, $3, $4);
-		if ( $path_imp =~ m/modules/ )
-		{
-			$path_imp =~ s/^\///sg;
-			$path_imp = File::Spec->catfile($k_base, $path_imp);
-		}
-		"$spaces1$imp$spaces2$path_imp";
-    }
-    !sgme;
-    
+        
 # Replacing dots    
     $_ = replace_dots($_);
     my $temporary = $_;
@@ -1712,38 +1647,6 @@ sub maudify_file {
 	    add_tokens($_);
 	    print "DONE\n" if $verbose;
 	}
-	elsif ( m!^(?:in|load)\s+(\S+)! ) 
-	{
-	    maudify_file(maudify($1, $file), $indent);
-	    
-	    # store imported module
-	    store_import($1);
-	    
-	    s!\.k(maude)?\s*$!\.maude!s;
-	}
-	elsif ( m!^(?:require)\s+(\S+)! ) 
-	{
-	    # print "File $file require: $1\n";
-	    my $import = $1;
-	    if (required($import))
-	    {
-		maudify_file(maudify($1, $file), $indent);
-		
-		# store imported module
-		store_import($import);
-		
-		s!\.k(maude)?\s*$!\.maude!s;
-		s!require!in!sg;
-	    }
-	    else
-	    {
-		s!require\s+\S+!!;
-	    }
-	}
-	else 
-	{
-	    #	    print "Top level pattern:\n$_\n" if $verbose;
-	}
         $maudified = "$maudified$before$_$after";
     }
 
@@ -1751,8 +1654,8 @@ sub maudify_file {
     {
 #        print "ERROR: Cannot finish processing $file\n";
 #        print "ERROR: The following text does not parse:\n$_";
-		print generate_error("ERROR", 1, $file, "unknown line", "Cannot finish processing $file\n");
-		print generate_error("ERROR", 1, $file, "unknown line", "The following text does not parse:\n$_");
+	print generate_error("ERROR", 1, $file, "unknown line", "Cannot finish processing $file\n");
+	print generate_error("ERROR", 1, $file, "unknown line", "The following text does not parse:\n$_");
         exit(1);
     }
     
@@ -1762,7 +1665,7 @@ sub maudify_file {
     if ($file =~ /\.maude/) { return; }
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
-	print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
+    print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
 #    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
@@ -1775,15 +1678,15 @@ sub maudify_file {
     print FILE $maudified;
     close FILE;
 
-	push(@generated_files, $maude_file);
+    push(@generated_files, $maude_file);
 }
 
 
 sub maudify_module {
-    (my $file,my $mno, local $_) = @_;
+    (my $file, my $mno, local $_) = @_;
 
-	# add K or K-LATEX automatically.
-    $_ = addKandKLATEX($_, $file, $mno);
+    # add K or K-LATEX automatically.
+    $_ = addKandKLATEX($_, $file);
 
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
@@ -2477,7 +2380,7 @@ sub spacify {
     }
 
 # Freeze all excluded substrings, which we do NOT want to be spacified
-    $lines =~ s/($exclude)/freeze($1)/gmse;
+    $lines =~ s/($exclude)/Freeze($1, $default_freezer)/gmse;
     
 # Spacify and then freeze each token in reversed topological order
 # This way, we are sure that a subtoken of a token will never be spacified
@@ -2491,7 +2394,7 @@ sub spacify {
     $lines =~ s/_/ _ /gs;
     
 # Next unfreeze all tokens and return the spacified string
-    return unfreeze($lines);
+    return Unfreeze($default_freezer, $lines);
 }
 
 
@@ -2532,62 +2435,10 @@ sub add_spaces {
 #    print "BEFORE: $before\nTOKEN: $token\nAFTER: $after\n\n";
     if ($before =~ /\w$/ && $token =~ /^\w/) { return "$before$token"; }
     if ($after =~ /^\w/ && $token =~ /\w$/) { return "$before$token"; }
-    return ($before.(($before =~ /$maude_special/) ? "":" ").freeze($token).(($after =~ /$maude_special/) ? "":" "));
+    return ($before.(($before =~ /$maude_special/) ? "":" ").Freeze($token, $default_freezer).(($after =~ /$maude_special/) ? "":" "));
 }
 
 
-# Makes certain (sub)strings special, so that they stay "frozen" until other substitutions are complete
-sub freeze {
-    my $string = shift;
-#    print "Freezing: |$string|\n";
-    my $marker = "$default_freezer\b";
-    if (@_) {
-	$marker = shift;
-    }
-    
-    return "$marker".join("$specialSymbol",map(ord,(split('',$string))))."$specialSymbol";
-}
-
-# Makes concrete all the frozen (sub)strings
-sub unfreeze {
-    my $all = shift;
-    my $marker = "$default_freezer\b";
-    if (@_) {
-	$marker = shift;
-    }
-
-    $all =~ s/$marker(\d+(?:$specialSymbol\d+)*)$specialSymbol/join("", map(chr, split("$specialSymbol",$1)))/gse;
-
-    return $all;
-}
-
-# a new version of freezing: use digest - md5
-sub Freeze
-{
-    my ($string, $marker) = (shift, shift);
-    my $frozen_string = $marker . md5_hex($string); #join("", map(ord, split('',md5($string))));
-    $freeze_map{$marker}{$frozen_string} = $string;
-    
-   return $frozen_string;
-}
-
-# unfreezing (newest version) : use digest - md5
-sub Unfreeze
-{
-    my ($marker, $all) = (shift, shift);
-    my $marker_map = $freeze_map{$marker};
-	if (defined $marker_map)
-	{
-		my %map = %$marker_map;
-
-		$all =~ s/($marker([a-f0-9]{32}))/defined $map{$1}?$map{$1}:$1/gse;
-
-	#    while (my ($key, $value) = each(%$marker_map)) {
-	#        $all =~ s/$key/$value/sg;
-	#    }
-	}
-    return $all;
-}
 
 # Takes a list and eliminates duplicates from it
 sub set {
@@ -2863,7 +2714,7 @@ sub add_kprelude_sorts
 		$to_load .= ".maude" if $to_load !~ /\..+?/sg;
 
 		my $fullname = File::Spec->file_name_is_absolute($to_load) ? $to_load : File::Spec->catfile($to_load_dir, $to_load);
-		$fullname = getFullName($fullname);
+		$fullname = get_full_name($fullname);
 
 		my $var = get_file_content($fullname);
 		add_sorts($var);
@@ -2884,7 +2735,6 @@ sub addKandKLATEX
 {
 	my $content = shift;
 	my $file = shift;
-	my $mno = shift;
 	my $k = 0;
 	my $k_latex = 0;
 

@@ -4,6 +4,8 @@ use warnings;
 use File::Spec;
 use File::Basename;
 use File::Temp qw / tempfile /;
+use Digest::MD5 qw(md5 md5_hex md5_base64);
+
 
 our @checksum_files; # used in checksumming kompile program to detect version changes
 my $path = ".";
@@ -579,30 +581,19 @@ sub erase_temp
     }
 }
 
-sub getFullName
+sub get_full_name
 {
     my $file = (shift);
     if ($file eq "")
     {
 	return $file;
     }
-    
-    #  hardcoded to avoid maudification for shared.maude
-    if ($file =~ /shared\.maude$/)
-    {
-	return $file;
-    }
-    
-    $file =~ s/^\.\///;
+        
+#    $file =~ s/^\.\///;
 
-    # if a file is given in absolute path that is understood absolute w.r.t. the K base directory
-    if ($file =~ /^\/modules/) {
-      $file = File::Spec->catfile($k_base,$file);
-    }
-
-    # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
+    # If $file has extension .k, .kmaude, .m or .maude then tests if $file exists and errors if not
     
-    if ($file =~ /\.k?(maude)?$/) {
+    if ($file =~ /\.(k?(maude)?|m)$/) {
 	if (! -e $file) {
 #		print("File $file does not exist\n");
 		print generate_error("ERROR", 1, $file, "unknown line", "file $file does not exist");
@@ -624,6 +615,10 @@ sub getFullName
 	elsif (-e "$file.maude") {
 	    $file .= ".maude";
 	}
+	# If not, then add extension .maude if $file.maude exists
+	elsif (-e "$file.m") {
+	    $file .= ".m";
+	}
 	# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
 	else {
 #		print("Neither of $file.k, $file.kmaude, or $file.maude exist\n");
@@ -635,25 +630,18 @@ sub getFullName
 }
 
 
-sub getFullNameCustom
+sub get_full_name_custom
 {
     my $file = (shift);
     if ($file eq "")
     {
-		return $file;
+	return $file;
     }
 
-    #  hardcoded to avoid maudification for shared.maude
-    if ($file =~ /shared\.maude$/)
-    {
-		return $file;
-    }
-    
-    $file =~ s/^\.\///;
 
-    # If $file has extension .k, .kmaude or .maude then tests if $file exists and errors if not
+    # If $file has extension .k, .kmaude, .m or .maude then tests if $file exists and errors if not
     
-    if ($file =~ /\.k?(maude)?$/) {
+    if ($file =~ /\.(k?(maude)?|m)$/) {
 	if (! -e $file) {
 		return ""; # silently ignore
 	}
@@ -673,6 +661,10 @@ sub getFullNameCustom
 	elsif (-e "$file.maude") {
 	    $file .= ".maude";
 	}
+	# If not, then add extension .maude if $file.maude exists
+	elsif (-e "$file.m") {
+	    $file .= ".m";
+	}
 	# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
 	else {
 		return ""; # silently ignore
@@ -684,8 +676,8 @@ sub appendFileInTree
 {
     my ($child, $parent) = (shift, shift);
         
-    $child = getFullName($child);
-    $parent = getFullName($parent);
+    $child = get_full_name($child);
+    $parent = get_full_name($parent);
 
     if ($parent eq "")
     {
@@ -715,7 +707,7 @@ sub display_node()
 
 sub recurseIntoFiles
 {
-    my $file = getFullName(shift);
+    my $file = get_full_name(shift);
     if ($file =~ m/(k\-prelude|pl\-builtins|shared)/)
     {
 		return;
@@ -740,7 +732,7 @@ sub recurseIntoFiles
 		{
 				my $in = maudify($1, $file);
 				my $v_node = Tree::Nary->find($inclusionFileTree, $Tree::Nary::PRE_ORDER, 
-				$Tree::Nary::TRAVERSE_ALL, getFullName($in));
+				$Tree::Nary::TRAVERSE_ALL, get_full_name($in));
 				if (!$v_node)
 				{
 					appendFileInTree($in,$file);
@@ -887,7 +879,7 @@ sub flattening
 sub recurseFlat
 {
 	my $current_node = (shift);
-	my $file = getFullName($current_node->{data});
+	my $file = get_full_name($current_node->{data});
 	my $out = "";
 	
 	if ($file =~ /\.k(maude)?$/)
@@ -907,7 +899,7 @@ sub recurseFlat
 		{
 			#~ do nothing;
 			my $line = $_;
-			my $decl = getFullName($1);
+			my $decl = get_full_name($1);
 			if ($decl =~ /\.m(aude)?$/)
 			{
 				$include .= "$line\n";
@@ -2584,6 +2576,214 @@ sub op_tags
     "[$attributes]$spaces";
 }
 
+
+	
+	
+#####################
+# Slurp all files   #
+#####################
+
+# Globals
+my @loaded_files = ();
+	
+	
+# ARGS: main language file, $latex if enabled
+# RETURN: the slurped file
+# Recurse into all k files and create one k file
+sub slurp_k
+{
+    # retrieve main file
+    my $file = shift;
+    my $latex_ = shift;
     
+    # convert file path to absolute path
+    $file = File::Spec::Link->full_resolve(File::Spec->rel2abs($file));
+    
+    # get file content
+    local $_ = get_file_content($file);
+    
+    # md5 
+    my $digest = md5_hex($_);
+    return "\n" if file_loaded($digest);
+    
+    # global pre-processing
+    $_ = pre_process($_, $latex_, $file);
+    
+    # get file directory
+    my $file_dir = dirname($file);
+    
+    # Freeze modules
+    s/(kmod.*?endkm)/Freeze($&, "KMOD")/sge;
+    
+    # recurse
+    s/^\s*(in|load|require)\s+(\S+?)(?=\n)/
+    {
+	my $import = $2;
+
+	$import =~ s!^\.\/!!s;
+	$import =~ s!^\/!!s;
+
+	# case 1: import modules relative to $file
+	my $path = get_full_name_custom(File::Spec->catfile($file_dir, $import));
+	if (-e $path)
+	{
+	    slurp_k($path, $latex_);
+	}
+	else
+	{
+	    # case 2: import modules relative to $K_BASE
+	    $path = get_full_name_custom(File::Spec->catfile($ENV{'K_BASE'}, $import));
+
+	    if (-e $path)
+	    {
+		slurp_k($path, $latex_);
+	    }
+	    else
+	    {
+		print "[ERROR] Cannot import file $import in $file\n";
+		exit(1);
+	    }
+	}
+    }
+    /sgme;
+
+    # Unfreeze modules
+    $_ = Unfreeze("KMOD", $_);
+    
+    # put a header
+#    $_ = header($file) . $_;
+    
+    # return
+    $_;
+}
+	
+
+	
+# ARGS: file name
+# Return: a string like:
+#	*************
+#       *** $file ***
+#       *************
+sub header
+{
+    my $file = shift;
+    my $surrounding = "****$file****";
+    $surrounding =~ s/./*/sg;
+    "$surrounding\n*** $file ***\n$surrounding\n\n\n";
+}
+	
+	
+	
+# ARGS: file content, $latex if enabled
+# RETURN: file content
+# Pre-process the main file:
+# - remove comments
+# - solve latex comments
+# - replace module with kmod and end module with endkm
+# - parse configuration
+# - add line numbers metadata
+sub pre_process
+{
+    local $_ = shift;
+    my $latex_ = shift;
+    my $file = shift;
+    
+    # Step: resolve latex comments
+    $_ = solve_latex($_) if $latex_;
+    
+    # save comments
+    my ($noComments, $myComments) = remove_comments($_);
+    $_ = $noComments;
+    
+    # Step: remove tags
+    s!tags(\s.*?\S)(\s*)(?=$kmaude_keywords_pattern|CMTS)!{parse_tags($1);"$2";}!sge;
+    
+            # replace module with kmod and
+            # endmodule with endkm
+            s/(module)(.*?)(end\s+?module)/kmod$2endkm/sg;
+    
+            # replace including with imports
+            s/(?<!\S)imports(?!\S)/including/sg;
+    
+    
+            # append "is" if necessary
+            s/(kmod\s+\S+)(\s+)(?!is)/$1 is$2/sg;
+    
+    
+    
+    # Parse the configuration
+    if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
+    {
+	parse_configuration($1, countlines($`), $file);
+    }
+    
+    
+    # add line numbers metadata
+    $_ = add_line_numbers($_, $file);
+
+    # return
+    $_;
+}
+	
+# ARGS: md5 of a file
+# RETURN: true if file already loaded
+# Return true if file already loaded and 
+# false if not; also append file in @loaded_files
+sub file_loaded
+{
+    my $md = shift;
+    
+    # return 1 if file already loaded
+    for(@loaded_files)
+    {
+	return 1 if ($md eq $_);
+    }
+    
+    # return 0 and append file in @loaded_files if not loaded
+    push(@loaded_files, "$md");
+    
+    0;
+}
+	
+
+	
+	
+	
+	
+############################
+# Freezing                 #
+############################	
+	
+# a map with frozen strings
+my %freeze_map = ();
+	
+	
+# a new version of freezing: use digest - md5
+sub Freeze
+{
+    my ($string, $marker) = (shift, shift);
+    my $frozen_string = $marker . md5_hex($string); # join("", map(ord, split('',md5($string))));
+    $freeze_map{$marker}{$frozen_string} = $string;
+    
+    return $frozen_string;
+}
+	
+# unfreezing (newest version) : use digest - md5
+sub Unfreeze
+{
+    my ($marker, $all) = (shift, shift);
+    my $marker_map = $freeze_map{$marker};
+    if (defined $marker_map)
+    {
+	my %map = %$marker_map;
+	
+	$all =~ s/($marker([a-f0-9]{32}))/defined $map{$1}?$map{$1}:$1/gse;
+    }
+    return $all;
+}
+	
+	
+	
+	
 1;
 
