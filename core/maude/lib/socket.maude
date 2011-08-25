@@ -30,13 +30,13 @@ mod #CONFIGURATION is
   sorts #Socket-Attribute #Socket-AttributeSet .
   subsort #Socket-Attribute < #Socket-AttributeSet .
   op .AttributeSet : -> #Socket-AttributeSet [ctor] .
-  op _,_ : #Socket-AttributeSet #Socket-AttributeSet -> #Socket-AttributeSet [ctor assoc comm id: .AttributeSet] .
+  op _,#Socket_ : #Socket-AttributeSet #Socket-AttributeSet -> #Socket-AttributeSet [ctor assoc comm id: .AttributeSet] .
 
   sorts #Socket-Oid #Socket-Cid #Socket-Object #Socket-Msg #Socket-Portal #Socket-Configuration .
   subsort #Socket-Object #Socket-Msg #Socket-Portal < #Socket-Configuration .
   op <_:_|_> : #Socket-Oid #Socket-Cid #Socket-AttributeSet -> #Socket-Object [ctor object] .
   op .Configuration : -> #Socket-Configuration [ctor] .
-  op __ : #Socket-Configuration #Socket-Configuration -> #Socket-Configuration [ctor config assoc comm id: .Configuration] .
+  op _#Socket_ : #Socket-Configuration #Socket-Configuration -> #Socket-Configuration [ctor config assoc comm id: .Configuration] .
   op <> : -> #Socket-Portal [ctor] .
 endm
 

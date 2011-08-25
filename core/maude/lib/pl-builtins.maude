@@ -922,6 +922,16 @@ mod #COUNTER is
   eq kcounter = counter .
 endm
 
+mod #STRING-EXTRAS is
+  including #STRING .
+  including #EXT-BOOL .
+  including #INT .
+  var C : #Char .
+
+  op #isWhiteSpace : #Char -> #Bool .
+  eq #isWhiteSpace(C) 
+   = (asciiString(C) >=Int 9 and-then asciiString(C) <=Int 13)  or-else C ==Bool " " .
+endm
 
 mod PL-BUILTINS is
 including #BOOL .
@@ -938,6 +948,7 @@ including #COUNTER .
 including #BOOL .
 including #ID .
 including #IF-THEN-ELSE .
+including #STRING-EXTRAS .
 endm
 
 ---set include #BOOL on .
