@@ -490,6 +490,7 @@ my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
 my $k_latex_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'latex');
 my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 
+my $tokens_file = "all_tokens.tok";
 my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
@@ -1679,6 +1680,12 @@ sub maudify_file {
     close FILE;
 
     push(@generated_files, $maude_file);
+
+# Step: put all tokens in .k
+    open F, ">", $tokens_file or print "Cannot save tokens!\n";
+    print F "@all_tokens";
+    close F;
+    push(@generated_files, $tokens_file);
 }
 
 
@@ -1691,6 +1698,16 @@ sub maudify_module {
     build_module_tree($file, $_);
 #    print "Maudifying module with tokens @all_tokens\n";
 
+    # Parse the configuration
+    if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
+    {
+	if (defined $1)
+	{
+	    parse_configuration($1, countlines($`), $file);
+	}
+    }
+    
+    
     my $mname = $1 if /kmod\s+(\S+)/sg;
     if (!$k_auto_incl && $mname eq $language_module_name && !includesK($language_module_name))
     {
@@ -2109,88 +2126,6 @@ sub rule_attribute {
 }
 
 
-# Extract the K attributes and make them Maude metadata
-sub make_metadata {
-    local ($_) = @_;
-    my @k_attributes = ();
-    my $have_k_attributes = 0;
-
-# Match the K specific attributes below and make them into metadata
-# Right now it assumes that no \" can appear inside the metadata string
-# Therefore, the latex attribute is expected to be outside
-
-	# unfreeze ...
-	$_ = Unfreeze("MPGF", $_);
-
-	# freeze locations
-#	s/location\(.*?\)/Freeze($&, "LOCATIONS")/sge;
-	
-	# this freezes the all string, including those inside latex declarations
-   	s/($string_pattern)/Freeze($&,"MTR")/sge;
-
-#	print "=========\nIN: $_\n=============\n";
-
-
-    s!(ditto|large|nd|transition|localtransition|structural|hybrid|arity\s+\d+|(?:seq)?strict(?:\s*\((?:\s*\d+)*\s*\))?|latex\s+\w+)|metadata\s+(\w+)!
-    my $out = "";
-#	print "\tMatched: $&\n\n";
-	if (defined $1) {
-	    local $_ = $1;
-        $have_k_attributes = 1;
-		$_ = Unfreeze("MTR", $_);
-#		print "\tTDG: $_\n";
-		if (/^latex\s+"([^"]*?)"$/gs) 
-	    {
-#			print "Latex attribute $1\n";
-			my $la = $1;
-			$la = Unfreeze("M", $la);
-			push(@k_attributes, "latex=(renameTo \\\\".get_newcommand($la).")") if ($latex || $pdf || $crop || $ps || $eps || $png);
-	    }
-	    else {
-#			print "Push: $_\n\n";
-			push(@k_attributes, $_);
-	    }
-	    $out = "ditto" if $1 =~ m/ditto/;
-	}
-    else {
-		my $data = $2;
-		$data = Unfreeze("MTR", $data);
-		$data =~ s/(^")|("$)//sg;
-#			print "Here: $data\n";
-		push(@k_attributes, $data);
-      }
-		$out
-	!gse;
-    
-	$_ = Unfreeze("MTR", $_);
-#	print "STILL: $_\n";
-	
-#    print "K attributes: @k_attributes\n==============\n\n";
-
-    if (@k_attributes) 
-	{
-#	print "->@k_attributes<-\n";
-
-# print "META: $_\n";
-		if (/(metadata\s+)($string_pattern)/sg)
-		{
-			s!(metadata\s+)(\")(.*?)(\")!"$1$2$3 @k_attributes$4"!se;
-		}
-		else
-		{
-			s!(.)\]$!"$1".(($1=~/[\s\[]/s) ? "":" ")."metadata \"@k_attributes\"\]"!se;
-		}
-	#	print "$_\n";
-    }
-    elsif ($have_k_attributes) {
-        s/^\s*\[\s*\]\s*$//gs;
-    }
-
-#	print "OUT: $_\n\n";
-   return $_;
-}
-
-
 sub get_newcommand 
 {
     local ($_) = @_;
@@ -2536,67 +2471,77 @@ sub add_subsorts
 # exit kompilation (the action is dedicated, the rest of the actions are ignored)
 sub compile_program
 {
-	if ($pgm eq "0" or $cmod eq "0") {
-		print "To compile a single program you need to specify at least -pgm and -cmod\n";
-		exit();
-	}
-	if ($pmod eq "0") {
-		$pmod = uc $pgm;
-	}
-	if ($pname eq "0") {
-		$pname = $pgm;
-	}
-        if ($cfile eq "")
-      {
-	  $cfile =  lc("$cmod-compiled.maude");
-      }
+    if ($pgm eq "0" or $cmod eq "0") {
+	print "To compile a single program you need to specify at least -pgm and -cmod\n";
+	exit();
+    }
+    if ($pmod eq "0") {
+	$pmod = uc $pgm;
+    }
+    if ($pname eq "0") {
+	$pname = $pgm;
+    }
+    if ($cfile eq "")
+    {
+	$cfile =  lc("$cmod-compiled.maude");
+    }
+ 
+    # retrieve tokens 
+    $tokens_file = ".k/$tokens_file";
+    if (!(-e $tokens_file))
+    {
+	print "You have to compile the definition first. Also make sure that file $tokens_file exists.\n";
+	exit(1);
+    }
     
-	maudify_file("$pgm.k", "");
-	my $maudified = get_file_content("$pgm.maude");
+    @all_tokens = split("\s", get_file_content($tokens_file));
+    # print "TOKENS: @all_tokens\n";
 
-        my $compiled =  qx{ sed 2d $cfile};
-
-
-
-	my $compile = 
-"set include PL-BOOL off .
-set include BOOL on .
-load \"$k_tools_dir/" . "prelude-extras\"
-load \"$k_tools_dir/" . "meta-k\"
-load \"$k_tools_dir/" . "printing\"
-load \"$k_tools_dir/" . "metadata-parsing\"
-
-load  \"$k_tools_dir/" . "compile-program-interface\"
----(
-set print attribute on .
-red in COMPILE-PROGRAM-META : compileProgram(\"$cmod\",\"$pmod\",\"$pname\") .
-q
----)
-loop compile-program .
-(compileProgram $cmod $pmod $pname .)
-q
-";
+    
+    maudify_file("$pgm.k", "");
+    my $maudified = get_file_content("$pgm.maude");
+    
+    my $compiled =  qx{ sed 2d $cfile};
+    
+    my $compile = 
+      "set include PL-BOOL off .
+  set include BOOL on .
+  load \"$k_tools_dir/" . "prelude-extras\"
+  load \"$k_tools_dir/" . "meta-k\"
+  load \"$k_tools_dir/" . "printing\"
+  load \"$k_tools_dir/" . "metadata-parsing\"
+  
+  load  \"$k_tools_dir/" . "compile-program-interface\"
+  ---(
+      set print attribute on .
+      red in COMPILE-PROGRAM-META : compileProgram(\"$cmod\",\"$pmod\",\"$pname\") .
+      q
+  ---)
+  loop compile-program .
+  (compileProgram $cmod $pmod $pname .)
+  q
+  ";
 
 	my $tempFile = "programCompile.tmp";
-	#open (MYFILE, ">programCompile.tmp");
+	# open (MYFILE, ">programCompile.tmp");
 	open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
 	print MYFILE "load \"$k_prelude\"\n$maudified\n$compiled\n$compile\n";
 	close(MYFILE);
-	push(@generated_files, $tempFile);
+	# push(@generated_files, $tempFile);
 	
 # run maude with this input
 	my $comp = run_maude("Compiling single program", "in programCompile.tmp");
 # verific? - vezi cum se face verificarea
-	#print "$comp\n";
+	# print "$comp\n";
 	$comp =~ /$begin_compiled_module(.*?)$end_compiled_module/s;
-	#print $1;
+	# print $1;
 
 #	unlink("programCompile.tmp");
 
 	open MYFILE,">","$pgm-compiled.maude" or die "Cannot create $tempFile\n";
 	print MYFILE "load \"$cfile\"\n$1";
 	close(MYFILE);
-	push(@generated_files, "$pgm-compiled.maude");
+#	push(@generated_files, "$pgm-compiled.maude");
 
 	exit();
 }

@@ -121,6 +121,12 @@ sub parse_configuration
     # get configuration content and starting line number.
     ($configuration, $config_line, $file) = (shift, shift, shift);
 
+    if (!(-e $file))
+    {
+	# silently ignore the rest
+	return;
+    }
+    
     # start a "try-catch" session
     try();
     # {    
@@ -731,14 +737,19 @@ my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 my $types = "List|Map|Set|Bag|K";
 
 sub build_map
-{
-    # K configuration
-    local $_ = "<$TAG>" . (shift) . "</$TAG>";
+{   
+    local $_ = shift;
     
-    # parse xml
-    my $document = parse_xml($_);
-
-    build_rec_map($document->getDocumentElement);
+    if (defined)
+    {
+	# K configuration
+	local $_ = "<$TAG>$_</$TAG>";
+	
+	# parse xml
+	my $document = parse_xml($_);
+	
+	build_rec_map($document->getDocumentElement) if defined $document;
+    }
 }
 
 sub build_rec_map
@@ -788,7 +799,7 @@ sub replace_dots
     # build the types map
     if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
     {
-        build_map($1);
+        build_map($1) if defined $1;
     }
     
     # foreach rule

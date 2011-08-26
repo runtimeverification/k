@@ -2687,7 +2687,7 @@ sub pre_process
     local $_ = shift;
     my $latex_ = shift;
     my $file = shift;
-    
+
     # Step: resolve latex comments
     $_ = solve_latex($_) if $latex_;
     
@@ -2709,15 +2709,7 @@ sub pre_process
             # append "is" if necessary
             s/(kmod\s+\S+)(\s+)(?!is)/$1 is$2/sg;
     
-    
-    
-    # Parse the configuration
-    if (/configuration\s+(.*?)\s+(?=$kmaude_keywords_pattern)/sg)
-    {
-	parse_configuration($1, countlines($`), $file);
-    }
-    
-    
+
     # add line numbers metadata
     $_ = add_line_numbers($_, $file);
 
