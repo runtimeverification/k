@@ -26,22 +26,22 @@ require ../../../../tests/regression/threads/programs
 require ../../../../tests/regression/agents/programs
 require ../../../../tests/regression/quote-unquote/programs
 
-kmod AGENT is 
-  including EXP 
-  including LAMBDA
-  including MU
-  including CALLCC
-  including HALT 
-  including IO 
-  including REF 
-  including WHILE 
-  including THREADS 
-  including AGENTS 
-  including QUOTE-UNQUOTE 
+module AGENT
+  imports EXP 
+  imports LAMBDA
+  imports MU
+  imports CALLCC
+  imports HALT 
+  imports IO 
+  imports REF 
+  imports WHILE 
+  imports THREADS 
+  imports AGENTS 
+  imports QUOTE-UNQUOTE 
 
-   including EXP-PROGRAMS + LAMBDA-PROGRAMS + MU-PROGRAMS + CALLCC-PROGRAMS
-   including HALT-PROGRAMS + IO-PROGRAMS + IMP-PROGRAMS 
-   including THREADS-PROGRAMS + AGENTS-PROGRAMS + QUOTE-UNQUOTE-PROGRAMS
+   imports EXP-PROGRAMS + LAMBDA-PROGRAMS + MU-PROGRAMS + CALLCC-PROGRAMS
+   imports HALT-PROGRAMS + IO-PROGRAMS + IMP-PROGRAMS 
+   imports THREADS-PROGRAMS + AGENTS-PROGRAMS + QUOTE-UNQUOTE-PROGRAMS
  configuration
     <T>
       <agent multiplicity="*"> 
@@ -76,5 +76,5 @@ kmod AGENT is
   macro run(KL:KLabel) = <T_> <k>KL(.List{K})</k> <_/T>
   macro run(KL:KLabel,L:List`{K`}) 
       = <T_> <k> KL(.List{K}) </k> <in>List(L)</in> <_/T>
-endkm
+end module
 
