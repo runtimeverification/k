@@ -2548,11 +2548,15 @@ sub compile_program
 	}
         if ($cfile eq "")
       {
-	  $cfile =  lc("$cmod-compiled");
+	  $cfile =  lc("$cmod-compiled.maude");
       }
     
 	maudify_file("$pgm.k", "");
 	my $maudified = get_file_content("$pgm.maude");
+
+        my $compiled =  qx{ sed 2d $cfile};
+
+
 
 	my $compile = 
 "set include PL-BOOL off .
@@ -2576,7 +2580,7 @@ q
 	my $tempFile = "programCompile.tmp";
 	#open (MYFILE, ">programCompile.tmp");
 	open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
-	print MYFILE "load \"$cfile\"\n$maudified\n$compile\n";
+	print MYFILE "load \"$k_prelude\"\n$maudified\n$compiled\n$compile\n";
 	close(MYFILE);
 	push(@generated_files, $tempFile);
 	

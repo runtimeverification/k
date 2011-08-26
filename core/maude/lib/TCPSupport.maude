@@ -6,7 +6,7 @@ mod #TCP-SYNTAX is
 	op containedRequest : #Socket-Configuration -> [#String] .
 	op toSend : #String -> #Socket-Msg .
 	op start : #Nat -> #Socket-Configuration .
-	op tcpRequest : #String -> [#String] .
+	op tcpRequest : #String -> #String .
 endm
 
 mod #TCP-CLIENT is
@@ -74,7 +74,7 @@ mod #TCP-CLIENT is
 	rl start(N) => 
 		<> #Socket
 		< cnum(N) : Client | state: connecting > #Socket
-		createClientTcpSocket(socketManager, cnum(N), "fmse.info.uaic.ro", 10000) .
+		createClientTcpSocket(socketManager, cnum(N), "localhost", 10000) .
 
 endm
 
@@ -85,7 +85,7 @@ mod #TCP-INTERFACE is
 		
 	
 	op errorTCPSyntax : #String -> #String .
-	rl tcpRequest(S:#String) => check(containedRequest(start(counter) #Socket toSend(S:#String +String "\r\n"))) .
+	eq tcpRequest(S:#String) = check(containedRequest(start(counter) #Socket toSend(S:#String +String "\r\n"))) .
 
 	op check : #String -> #String .
 	op getTCPData : #String -> #String .
@@ -105,4 +105,9 @@ mod #TCP-INTERFACE is
 		if substrString(S:#String, 0, lengthString("fail#")) ==Bool "fail#" [print "full error string: " S:#String] .
 		
 	eq check("") = errorTCPSyntax("Unknown error") .
+	eq check(error) = errorTCPSyntax("Unknown error") .
+
+       op #isTCPError : #String -> #Bool .
+       eq #isTCPError(errorTCPSyntax(S:#String)) = true .
+       eq #isTCPError(S:#String) = false [owise] .
 endm

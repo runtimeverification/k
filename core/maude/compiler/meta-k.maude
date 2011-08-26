@@ -365,13 +365,15 @@ fmod K-META-CONFIG is
   including META-TERM-EXTRAS .
   including META-LEVEL .
   including INT .
-  var Label Label' Ct MKey MVal : Constant . var LabelT LabelT' Contents Contents' T : Term .
+  var Label Label' Ct MKey MVal : Constant . var LabelT LabelT' Contents Contents' T T1 T2 : Term .
   var Q Q' : Qid .  var B B' : Multiplicity . var E E' : Ellipses .  var M : Module .  
   var AS AS' : AttrSet .  var MAS : MembAxSet .  var S : Sort .  var Str : String .
   var SC : SplitCell .
   var Trm Cxt : Term .
 
 
+  op URIS : -> Qid . 
+  eq URIS = 'URIS .
 
   op attrsCtorS : -> Qid . eq attrsCtorS = '__ .
   op attrCtorS : -> Qid . eq attrCtorS = '_=_ .
@@ -384,9 +386,15 @@ fmod K-META-CONFIG is
 
 
   op extractConfTerm : Module ~> Term .
-  eq extractConfTerm(M) = extractConfTerm(getMbs(M)) .
+  eq extractConfTerm(M) 
+   = combineConfTerm(extractConfTerm(getMbs(M)),extractConfTerm(getMbs(upModule(URIS, false)))) .
+
   op extractConfTerm : MembAxSet ~> Term .
   eq extractConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = T .
+
+  op combineConfTerm : Term Term ~> Term .
+  eq combineConfTerm(T1, T2) = '__[T1, T2] .
+  eq combineConfTerm(T1, T:[Term]) = T1 [owise] .
 
   op removeConfTerm : Module -> Module .
   eq removeConfTerm(M) = setMbs(M,removeConfTerm(getMbs(M))) .
