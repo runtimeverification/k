@@ -1,4 +1,6 @@
-module IMP-SYNTAX imports #INT + #ID
+require /modules/uris
+
+module IMP-SYNTAX imports #INT + #ID + URIS
 /*@ The following constructs are given the expected strictnesses, except for
 \textsf{and}, which is only strict in its first argument, because we will
 give it a short-circuited semantics (its second argument will only be
@@ -7,6 +9,7 @@ evaluated when the first evaluates to true). */
   syntax AExp ::= #Id | #Int
                 | AExp + AExp                  [prec 33 gather (E e) strict]
                 | AExp / AExp                  [prec 31 gather (E e) strict]
+                | read ( #String )
   syntax BExp ::= #Bool
                 | AExp <= AExp                 [prec 37 strict]
                 | not BExp                     [prec 53 strict]
@@ -16,6 +19,7 @@ evaluated when the first evaluates to true). */
                 | Stmt Stmt                    [prec 60 gather (e E)]
                 | if BExp then Stmt else Stmt  [prec 59 strict(1)]
                 | while BExp do Stmt           [prec 59]
+                | writeln ( AExp ) ;           [strict]
 end module
 
 
@@ -138,6 +142,9 @@ has a side condition. */
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
 
+//@ \subsubsection{Console input}
+  rule <k> read(Str:#String) => #print(Str) ~> #readInt() ...</k>
+
 /*@ \subsection{Boolean Expressions}
 The rules below are straightforward.  Note the short-circuited semantics
 of \textsf{and}; this is the reason we annotated the syntax of
@@ -197,6 +204,10 @@ as a computational step (though we beg one to reconsider)
 then one can remove the ``structural'' tag.  */
 
   rule <k> while B do S => if B then (S while B do S) else skip; <_/k> [structural]
+
+
+//@ \subsubsection{Output}
+  rule <k> writeln(I:#Int); => #printLn(I) ...</k>
 end module
 
 module IMP imports IMP-PROGRAMS + IMP-SEMANTICS 
