@@ -26,16 +26,25 @@ my $config_tree;
 my $iteration_cells = {};
 my $warnings = "";
 my $warnings_file = fresh("kompile_warnings", ".txt");
-my $comment = join("|", (
-        "\\/\\/.*?\n",
-        "\\/\\*.*?\\*\\/",
-		"---\\(.*?---\\)",
-		"---.*?\$",
-		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
-		"\\*\\*\\*.*?\$"
-));
+# my $comment = join("|", (
+#        "\\/\\/.*?\n",
+#        "\\/\\*.*?\\*\\/",
+#		"---\\(.*?---\\)",
+#		"---.*?\$",
+#		"\\*\\*\\*\\(.*?\\*\\*\\*\\)",
+#		"\\*\\*\\*.*?\$"
+# ));
 
-my $string_pattern = "\(?<![^\\\\]\\\\\)\".*?\(?<![^\\\\]\\\\\)\"";                                                                                         
+my $comment = join("|", (
+    "\\/\\/.*?\n",                                                                                                                    
+    "\\/\\*.*?\\*\\/",                                                                                                                
+    "---\\(.*?---\\)",                                                                                                        
+    "---.*?\n",                                                                                                               
+    "\\*\\*\\*\\(.*?\\*\\*\\*\\)",                                                                                            
+    "\\*\\*\\*.*?\n"                                                                                                          
+));    
+
+my $string_pattern = "\(?<![^\\\\]\\\\\)\".*?\(?<![^\\\\]\\\\\)\"";
 
 my $latex_comment = join("|", (
         "\\/\\/@(.*?)(?=\n)",
@@ -1640,15 +1649,15 @@ sub line_numbers
      }
 	elsif ($2 eq "mb")
 	{
-		# mb latex from latex comments
-		my $mb = $1;
-		my $temp_mb = $mb;
-		my $mb_line = countlines($`);
-		
-		$mb =~ s/(mb\s+latex.*)/$1 [metadata "location=($file:$mb_line)"]/sm;
-		# $mb =~ s/(mb\s+latex\s.*?)(\s*)(?=$kmaude_keywords_pattern)/$1 [metadata "location=($file:$mb_line)"]$2/s;
-
-		return $mb . $spaces;
+	    # mb latex from latex comments
+	    my $mb = $1;
+	    my $temp_mb = $mb;
+	    my $mb_line = countlines($`);
+	    
+	    $mb =~ s/(mb\s+latex.*)/$1 [metadata "location=($file:$mb_line)"]/sm;
+	    # $mb =~ s/(mb\s+latex\s.*?)(\s*)(?=$kmaude_keywords_pattern)/$1 [metadata "location=($file:$mb_line)"]$2/s;
+	    
+	    return $mb . $spaces;
 	}
 	elsif ($2 eq "syntax")
 	{
@@ -1709,11 +1718,11 @@ sub line_numbers
 				if ($production !~ /(?<!`)\|\s*$/s)
 				{
 #						print "Production3: $production &$attributes&\n";
-					$production .= " $attributes";
+				    $production .= " $attributes";
 				}
 				else 
 				{
-					$production =~ s/(\|\s*$)/$attributes $1/s;
+				    $production =~ s/(\|\s*$)/$attributes $1/s;
 				}
 
 #					print "PRODUCTION: $production\n\n";
@@ -1727,6 +1736,11 @@ sub line_numbers
 		# $temp =~ s/\Q$syntax\E/$original_syntax/s;
 		return $original_syntax . $spaces;
 	}
+	elsif ($2 eq "configuration")
+	{
+	    my $lines = countlines($`);
+	    $statement . " [metadata \"location=($file:$lines)\"]" . $spaces;
+	}
  	else { return $statement . $spaces;	}
 }
 
@@ -1735,19 +1749,19 @@ sub add_line_numbers
     (local $_, my $file) = (shift, shift);
 
     s/($comment)/
-	{
-		local $_=$1;
-		s!\S!!gs;
-		$_;
+    {
+	local $_=$1;
+	s!\S!!gs;
+	$_;
     }/gsme; 
     
-	my $temp;
-	s/(?<!\S)((rule|syntax|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
+    my $temp;
+    s/(?<!\S)((rule|syntax|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
     {
- 		$temp = line_numbers($1, $2, $3, $file);
+	$temp = line_numbers($1, $2, $3, $file);
     }
-	$temp/sge;
-
+    $temp/sge;
+    
 #	print ;
 
     $_;
@@ -1755,18 +1769,21 @@ sub add_line_numbers
 
 sub add_line_no_mb
 {
-	my  $file = shift;
-	my $lines = shift; # get starting line number
-	local $_ = shift;
-	my $temp = $_;
-
-	while($temp =~ /(mb\s+(configuration)\s.*?)(\s\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
-	{
-		my ($content, $end, $line) = ($1, $3, $lines + countlines($`));
-		s/\Q$content$end\E/$content [metadata "location=($file:$line)"]$end/sg;
-	}
-
-	return $_;
+    my  $file = shift;
+    my $lines = shift; # get starting line number
+    local $_ = shift;
+    my $temp = $_;
+    
+    while($temp =~ /(mb\s+(configuration)\s.*?)(\s\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
+    {
+#	print "Around\n\n$&\n\n\n";
+	my ($content, $end, $line) = ($1, $3, $lines + countlines($`));
+	s/\Q$content$end\E/$content [metadata "location=($file:$line)"]$end/sg;
+    }
+ 
+     
+#    print "$_\n\n";
+    return $_;
 }
 
 sub countlines
@@ -2093,7 +2110,7 @@ sub solve_latex
 	    solve_latex_comments($&);
 	}
 	/sge;
-    
+	
 	$_;
 }
 
@@ -2688,26 +2705,32 @@ sub pre_process
     my $latex_ = shift;
     my $file = shift;
 
-    # Step: resolve latex comments
-    $_ = solve_latex($_) if $latex_;
-    
-    # save comments
-    my ($noComments, $myComments) = remove_comments($_);
-    $_ = $noComments;
+    # Step: replace module with kmod and
+          # freeze comments
+          s/($comment)/Freeze($&, "CMTS")/sge;
     
     # Step: remove tags
     s!tags(\s.*?\S)(\s*)(?=$kmaude_keywords_pattern|CMTS)!{parse_tags($1);"$2";}!sge;
     
-            # replace module with kmod and
-            # endmodule with endkm
-            s/\b(module)\b(.*?)\b(end\s+?module)\b/kmod$2endkm/sg;
     
-            # replace including with imports
-            s/(?<!\S)imports(?!\S)/including/sg;
+        # endmodule with endkm
+        s/\b(module)\b(.*?)(end\s+?module)\b/kmod$2endkm/sg;
     
+        # replace including with imports
+        s/(?<!\S)imports(?!\S)/including/sg;
     
-            # append "is" if necessary
-            s/(kmod\s+\S+)(\s+)(?!is)/$1 is$2/sg;
+        # append "is" if necessary
+        s/(kmod\s+\S+)(\s+)(?!is)/$1 is$2/sg;
+
+          # unfreeze comments
+          $_ = Unfreeze("CMTS", $_);
+    
+    # Step: resolve latex comments
+    $_ = solve_latex($_) if $latex_;
+
+    # save comments
+    my ($noComments, $myComments) = remove_comments($_);
+    $_ = $noComments;
     
 
     # add line numbers metadata

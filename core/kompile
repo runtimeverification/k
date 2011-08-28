@@ -1859,10 +1859,6 @@ sub maudify_module {
 	$_ = Unfreeze("ATTR", $_);
 #	print  "Stage:\n$_\n\n";
    
-# Step: add line numbers for mb configuration and latex 
-	$_ = add_line_no_mb($file, $mno, $_);
-#	print "Stage: \n$_\n\n";
-	
 # Step: Unfreeze everything still frozen
     $_ = Unfreeze("ANONYMOUS", $_);
 #    $_ = unfreeze($_);
@@ -2113,7 +2109,13 @@ sub k2maude {
 									  (rule_attribute($1))?": $2 $1":"$1 : $2"!se;
 									  s!^mb(\s+)context(\s+\[[^\[\]]*\]\s*:)!mb$2$1context!s;
 							        }
-	case /^(configuration)/         { s/^(.*\S)(\s*)$/mb $1 : KSentence .$2/s; }
+	case /^(configuration)/         { 
+	                                    if (/^(.*\S)(\s+)\[\s*metadata/s)
+	                                    {
+						s/^(.*\S)(\s*)(\[\s*metadata.*\S)(\s*)$/mb $1$2 : KSentence $3 . $4/s;
+					    }
+	                                    else { s/^(.*\S)(\s*)/mb $1 : KSentence .$2/s; }
+	                                }
 	else                            { s/(\S)(\s*)$/$1 .$2/s; }
     }
     return $_;
