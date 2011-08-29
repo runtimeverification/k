@@ -86,7 +86,7 @@ mod STRICTCXT2EQS is
   eq heating(M, T1, T2, Q, Cond, AS, AS')
    = {none, 
     (eq T2[hole <- T2[hole <- mkVariable('KCxt,K)]] = T2[hole <- mkVariable('KCxt,K)] [metadata(pair("heating","idem"))] .)
-    heatEqs(Q, T1[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], kra(T2[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)])), AS, AS'), none} [owise] .
+    heatEqs(Q, T1[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], kra(T2[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)),Q),Cond[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))])), AS, AS'), none} [owise] .
 
 
   op heatSuffix : -> TermList .
