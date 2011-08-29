@@ -372,9 +372,6 @@ fmod K-META-CONFIG is
   var Trm Cxt : Term .
 
 
-  op URIS : -> Qid . 
-  eq URIS = 'URIS .
-
   op attrsCtorS : -> Qid . eq attrsCtorS = '__ .
   op attrCtorS : -> Qid . eq attrCtorS = '_=_ .
   op colorKeyS : -> Qid .
@@ -387,7 +384,7 @@ fmod K-META-CONFIG is
 
   op extractConfTerm : Module ~> Term .
   eq extractConfTerm(M) 
-   = combineConfTerm(extractConfTerm(getMbs(M)),extractConfTerm(getMbs(upModule(URIS, false)))) .
+   = extractConfTerm(getMbs(M)) .
 
   op extractConfTerm : MembAxSet ~> Term .
   eq extractConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = T .

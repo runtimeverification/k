@@ -235,7 +235,6 @@ mod K-LIST-EXTRAS is
   op inKList : K K -> #Bool .
   eq inKList(K, (K1 ~> K ~> K2)) = true .
   eq inKList(K, K') = false [owise] .
-
 endm
 
 
@@ -323,6 +322,19 @@ mod K-STRICTNESS is
   including #STRING .
   op freezer : #String -> KLabel .
   op freezeVar : #String -> KLabel .
+
+  op noFreezers_ : K -> #Bool .
+  eq noFreezers(K ~> freezer(S)(Ks) ~> K') = false .
+  eq noFreezers(K) = true [owise] .
+
+  op cool : K -> K .
+  op 'heat : -> KLabel .
+  op 'redex : -> KLabel .
+
+  rl 'heat(Ks,,'redex(K),,Ks') => K ~> 'heat(.List{K}) 
+     [metadata "superheat=(choice)"] .
+
+  vars K K' : K . var Ks Ks' : List{K} . var S : #String .
 endm
 
 mod K-CONTEXTS is

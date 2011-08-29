@@ -22,13 +22,14 @@ mod STRICTCXT2EQS is
   vars T1 T2 : Term . var Cond : TermList .  var Cnd : Condition .
   sort MASEqsPair .
 
-
+---(
   op coolOps : -> OpDeclSet .
   eq coolOps 
    = (op 'cool : K -> K [none] .) 
      (op mkKLabel('heat) : nil -> KLabel [none] .)
      (op mkKLabel('redex) : nil -> KLabel [none] .)
   .
+---)
 
   op defaultCoolEqs : SortSet -> EquationSet .
   eq defaultCoolEqs(S ; Ss)
@@ -51,10 +52,11 @@ mod STRICTCXT2EQS is
      (eq 'cool[mkVariable('zk,K)] = mkVariable('zk,K) 
       [owise metadata(pair("supercool","end"))] .) .
 
-
+---(
   op defaultHeatRules : -> RuleSet .
   eq defaultHeatRules
    = (rl kApply(mkConstant(mkKLabel('heat),KLabel),(mkVariable('K1,KList),kApply(mkConstant(mkKLabel('redex),KLabel), mkVariable('K,K)), mkVariable('K2,KList))) => kra(mkVariable('K,K), kApply(mkConstant(mkKLabel('heat),KLabel),empty)) [metadata(pair("superheat","choice"))] .) .
+---)
 
   op {_,_,_} : MembAxSet EquationSet RuleSet -> MASEqsPair [ctor] .
 
@@ -64,7 +66,7 @@ mod STRICTCXT2EQS is
  ceq strictCxt2eqs(M, Mb MAS, Eqs, Rls, AS)
    = strictCxt2eq(M, MAS, Eqs, Rls, pReplaceCxt(T,1),pReplaceCxt(T,2), getAttrs(KCS), getCondition(KCS), AS)
   if KCS := splitKContext(Mb) /\ T := getContents(KCS) .
-  eq strictCxt2eqs(M, MAS,Eqs, Rls, AS) = {MAS,Eqs, Rls defaultHeatRules} [owise] . 
+  eq strictCxt2eqs(M, MAS,Eqs, Rls, AS) = {MAS,Eqs, Rls} [owise] . 
 
   op strictCxt2eq : Module MembAxSet EquationSet RuleSet Term Term AttrSet TermList AttrSet ~> MASEqsPair .
   eq strictCxt2eq(M, MAS, Eqs, Rls, T1, T2, kstrict(nil,Q) AS, Cond, AS') 
@@ -79,8 +81,12 @@ mod STRICTCXT2EQS is
    
   
   op heating : Module Term Term Qid TermList AttrSet AttrSet -> MASEqsPair .
+ ceq heating(M, T1, T2, Q, Cond, AS, AS')
+   = {none, heatEqs(Q, T1[hole <- mkVariable('Kcxt,NeK)], kra(mkVariable('Kcxt,NeK), freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)])), AS, AS'), none} if T2 = hole .
   eq heating(M, T1, T2, Q, Cond, AS, AS')
-   = {none, heatEqs(Q, T1[hole <- mkVariable('Kcxt,NeK)], kra(T2[hole <- mkVariable('Kcxt,NeK)], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)])), AS, AS'), none} .
+   = {none, 
+    (eq T2[hole <- T2[hole <- mkVariable('KCxt,K)]] = T2[hole <- mkVariable('KCxt,K)] [metadata(pair("heating","idem"))] .)
+    heatEqs(Q, T1[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], kra(T2[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)])), AS, AS'), none} [owise] .
 
 
   op heatSuffix : -> TermList .
@@ -92,20 +98,10 @@ mod STRICTCXT2EQS is
          = kWrap(Q, T1[hole <- mkVariable('Kcxt,NeK)])
         if strictCondTerm(mkVariable('Kcxt,NeK),Q) = bool2K(trueCt)
        [metadata(AS pair("cooling",""))] .) 
-      if T2 == hole then 
-          (eq 'cool[kra(kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)), freezeTerm(M, T1),heatSuffix)]
-        = 'cool[kra(T1[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))],heatSuffix)]
+      (ceq 'cool[kra(mkVariable('Kcxt,NeK), freezeTerm(M, T1),heatSuffix)]
+        = 'cool[kra(T1[hole <- mkVariable('Kcxt,NeK)],heatSuffix)]
+        if 'noFreezers_[mkVariable('Kcxt,NeK)] = trueCt
        [metadata(AS pair("supercool",""))] .)
-      else 
-     (ceq 'cool[kra('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)], freezeTerm(M, T1),heatSuffix)]
-        = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],heatSuffix)]
-        if '_=/=Bool_[getTopLabel(T2),mkVariable('KcxtL,KLabel)] = trueCt 
-       [metadata(AS pair("supercool", "result"))] .)
-     (ceq 'cool[kra(T2[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]], freezeTerm(M, T1),heatSuffix)]
-        = 'cool[kra(T1[hole <- '_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)]],heatSuffix)]
-        if neqBool(strictCondTerm('_`(_`)[mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)],Q), bool2K(trueCt)) = bool2K(trueCt)  
-       [metadata(AS pair("supercool", "wrapper"))] .)
-     fi  
      placeHolder(Q) .
 
   ops heatLabel redexLabel : -> Constant .
@@ -176,7 +172,8 @@ mod STRICTCXT2EQS is
 
   op strictCxt2eqs : Qid Qid MASEqsPair SortSet ~> Module .
   eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss) 
-   = addOps(declareResultLabels(Eqs) coolOps,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), 
+   = addOps(declareResultLabels(Eqs)--- coolOps
+,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), 
         addEqs(generateResultEquations(Eqs), addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) .
 
 
