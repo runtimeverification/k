@@ -16,6 +16,8 @@ mod K-TECHNIQUE is
   subsorts NeK < K .
   op . : -> K .
   op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
+  op _~>_ : NeK K -> NeK [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
+  op _~>_ : K NeK -> NeK [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
 
   sorts List{K} NeList{K} .
 
@@ -331,7 +333,7 @@ mod K-STRICTNESS is
   op 'heat : -> KLabel .
   op 'redex : -> KLabel .
 
-  rl 'heat(Ks,,'redex(K),,Ks') => K ~> 'heat(.List{K}) 
+  rl 'heat(Ks,,'redex(K),,Ks') => K
      [metadata "superheat=(choice)"] .
 
   vars K K' : K . var Ks Ks' : List{K} . var S : #String .

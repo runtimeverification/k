@@ -33,24 +33,37 @@ mod STRICTCXT2EQS is
 
   op defaultCoolEqs : SortSet -> EquationSet .
   eq defaultCoolEqs(S ; Ss)
-   = (ceq mkCell(S, kra(mkVariable('K,NeK),kApply(heatLabel,empty),mkVariable('K',K))) 
+   = 
+   ---(
+     (ceq mkCell(S, kra(mkVariable('K,NeK),kApply(heatLabel,empty),mkVariable('K',K))) 
        = mkCell(S, kra(mkVariable('K,NeK),mkVariable('K',K))) 
        if makeKCondition(strictCondTerm(mkVariable('K,NeK), S))
       [metadata(pair("cool","skip-heat"))] .)
-    (eq mkCell(cool(S), kra(mkVariable('K,K),kApply(heatLabel,empty),mkVariable('K',K))) 
+   (eq mkCell(cool(S), kra(mkVariable('K,K),kApply(heatLabel,empty),mkVariable('K',K))) 
        = mkCell(S, 'cool[kra(mkVariable('K,K),kApply(heatLabel,empty),mkVariable('K',K))]) 
       [metadata(pair("supercool","start"))] .)
-     (eq mkCell(cool(S), mkVariable('K,K)) 
+   (eq mkCell(cool(S), mkVariable('K,K)) 
        = mkCell(S, mkVariable('K,K)) 
       [owise metadata(pair("supercool","skip"))] .)
+	---)
+   (eq mkCell(cool(S), mkVariable('K,K)) 
+       = mkCell(S, 'cool[mkVariable('K,K)]) 
+      [metadata(pair("supercool","start"))] .)
      defaultCoolEqs(Ss) .
   eq defaultCoolEqs(none) 
-   = (ceq 'cool[kra(mkVariable('K,K),kApply(heatLabel,empty),mkVariable('K',K))]
+   = 
+    ---(
+     (ceq 'cool[kra(mkVariable('K,K),kApply(heatLabel,empty),mkVariable('K',K))]
         = 'cool[kra(mkVariable('K,K),mkVariable('K',K))]
        if 'inKList[kApply(heatLabel,empty),mkVariable('K,K)] = falseCt
       [owise metadata(pair("supercool","skip-heat"))] .)
+     (ceq 'cool[mkVariable('zk,K)] = mkVariable('zk,K) 
+       if 'inKList[kApply(heatLabel,empty),mkVariable('zk,K)] = falseCt
+      [metadata(pair("supercool","end"))] .) 
+	  ---)
      (eq 'cool[mkVariable('zk,K)] = mkVariable('zk,K) 
-      [owise metadata(pair("supercool","end"))] .) .
+      [owise metadata(pair("supercool","end"))] .) 
+	  .
 
 ---(
   op defaultHeatRules : -> RuleSet .
@@ -90,7 +103,8 @@ mod STRICTCXT2EQS is
 
 
   op heatSuffix : -> TermList .
-  eq heatSuffix = (mkVariable('Rest1,K),kApply(mkConstant(mkKLabel('heat),KLabel),empty),mkVariable('Rest2,K)) .
+---  eq heatSuffix = (mkVariable('Rest1,K),kApply(mkConstant(mkKLabel('heat),KLabel),empty),mkVariable('Rest2,K)) .
+  eq heatSuffix = mkVariable('Rest1,K) .
 
   op coolingEqs : Module Term Term Qid AttrSet -> EquationSet .
   eq coolingEqs(M, T1, T2, Q, AS)
@@ -98,9 +112,8 @@ mod STRICTCXT2EQS is
          = kWrap(Q, T1[hole <- mkVariable('Kcxt,NeK)])
         if strictCondTerm(mkVariable('Kcxt,NeK),Q) = bool2K(trueCt)
        [metadata(AS pair("cooling",""))] .) 
-      (ceq 'cool[kra(mkVariable('Kcxt,NeK), freezeTerm(M, T1),heatSuffix)]
-        = 'cool[kra(T1[hole <- mkVariable('Kcxt,NeK)],heatSuffix)]
-        if 'noFreezers_[mkVariable('Kcxt,NeK)] = trueCt
+      (eq 'cool[kra(mkVariable('Kcxt,NeK), freezeTerm(M, T1),heatSuffix)]
+        = 'cool[kra(T1[hole <- 'cool[mkVariable('Kcxt,NeK)]],heatSuffix)]
        [metadata(AS pair("supercool",""))] .)
      placeHolder(Q) .
 
