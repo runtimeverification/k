@@ -763,8 +763,9 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
 --- replace the line above with the one below to get unrestricted strictness
 ---  eq kWrap(T) = T .
 
-  ops heatLabel redexLabel coolLabel : -> Constant .
+  ops heatedLabel heatLabel redexLabel coolLabel : -> Constant .
   eq heatLabel = mkConstant('heat,KLabel) .
+  eq heatedLabel = mkConstant('heated,KLabel) .
   eq redexLabel = mkConstant('redex,KLabel) .
   eq coolLabel = mkConstant('cool,KLabel) .
 

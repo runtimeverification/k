@@ -325,12 +325,17 @@ mod K-STRICTNESS is
 
   op cool : -> KLabel .
   op heat : -> KLabel .
+  op heated : -> KLabel .
   op redex : -> KLabel .
 
-  rl heat(Ks,,redex(K),,Ks') => K
+---(
+  eq heat(redex(K),,Ks,,heated(Ks')) = heat(Ks,, heated(Ks',,K)) [owise] .
+  eq heat(redex(K,,NKs),,Ks) = heat(NKs,,Ks) [owise] .
+---)
+  rl heat(heated(Ks,,K,,Ks')) => K
      [metadata "superheat=(choice)"] .
 
-  vars K : K . var Ks Ks' : List{K} .
+  vars K : K . var Ks Ks' : List{K} .  var NKs : NeList{K} .
 endm
 
 mod K-CONTEXTS is

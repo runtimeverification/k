@@ -22,6 +22,17 @@ mod STRICTCXT2EQS is
   vars T1 T2 : Term . var Cond : TermList .  var Cnd : Condition .
   sort MASEqsPair .
 
+  op defaultHeatEqs : SortSet -> EquationSet .
+  eq defaultHeatEqs(S ; Ss)
+   = (eq kWrap(S, kApply(heatLabel,(kApply(redexLabel,(mkVariable(K,K),mkVariable('NKs,NeKList))),mkVariable('Ks,KList))))
+       = kWrap(S, kApply(heatLabel,(mkVariable('NKs,NeKList),mkVariable('Ks,KList))))
+      [owise] .)
+     (eq kWrap(S, kApply(heatLabel,(kApply(redexLabel, mkVariable(K,K)),mkVariable('Ks,KList),kApply(heatedLabel,mkVariable('Ks',KList)))))
+       = kWrap(S, kApply(heatLabel,(mkVariable('Ks,KList),kApply(heatedLabel,(mkVariable('Ks',KList), mkVariable(K,K))))))
+     [owise] .)
+     defaultHeatEqs(Ss)
+  .
+  eq defaultHeatEqs(none) = none .
 
   op defaultCoolEqs : SortSet -> EquationSet .
   eq defaultCoolEqs(S ; Ss)
@@ -89,20 +100,20 @@ mod STRICTCXT2EQS is
   op heatEqs : Qid Term Term Condition AttrSet AttrSet -> EquationSet .
   eq heatEqs(Q, T1, T2, Cnd, AS, AS')
    = $heatEqs(Q, T1, T2, Cnd, AS, AS')
-     (ceq kWrap(Q, kApply(heatLabel, (mkVariable('AnyHeat1,KList), kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList))), mkVariable('AnyHeat2,KList))))
-        = kWrap(Q, kApply(heatLabel, (mkVariable('AnyHeat1,KList), kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList),T2)), mkVariable('AnyHeat2,KList), kApply(redexLabel,kra(T2,mkVariable('RestHeat,K)))))) 
-       if  Cnd /\ '_inList`{K`}_[T2, mkVariable('LHeat,KList)] = falseCt
+     (ceq kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList))), mkVariable('AnyHeat2,KList))))
+        = kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList),kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))))), mkVariable('AnyHeat2,KList)))) 
+       if  Cnd /\ '_inList`{K`}_[kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))), mkVariable('LHeat,KList)] = falseCt
      [metadata(AS pair("superheat", ""))] .) .
 
   op $heatEqs : Qid Term Term Condition AttrSet AttrSet -> EquationSet .
   eq $heatEqs(Q, T1, T2, Cnd, AS A, AS' nds(A AS''))
    = (ceq kWrap(Q, T1)
-        = kWrap(Q, kApply(heatLabel,kApply(redexLabel,T1)))
+        = kWrap(Q, kApply(heatLabel,(kApply(redexLabel,T1),kApply(heatedLabel, empty))))
        if Cnd 
       [metadata(AS A pair("superheat","start"))] .) .
   eq $heatEqs(Q, T1, T2, Cnd, AS, AS' nds(pair("default","") AS''))
    = (ceq kWrap(Q, T1)
-        = kWrap(Q, kApply(heatLabel,kApply(redexLabel,T1)))
+        = kWrap(Q, kApply(heatLabel,(kApply(redexLabel,T1),kApply(heatedLabel, empty))))
        if Cnd
       [metadata(AS pair("default","") pair("superheat","start"))] .) 
   [owise] .
@@ -151,7 +162,7 @@ mod STRICTCXT2EQS is
   op strictCxt2eqs : Qid Qid MASEqsPair SortSet ~> Module .
   eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss) 
    = addOps(declareResultLabels(Eqs)--- coolOps
-,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss), 
+,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss) defaultHeatEqs(Ss), 
         addEqs(generateResultEquations(Eqs), addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) .
 
 
