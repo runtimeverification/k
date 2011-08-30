@@ -100,10 +100,21 @@ mod STRICTCXT2EQS is
   op heatEqs : Qid Term Term Condition AttrSet AttrSet -> EquationSet .
   eq heatEqs(Q, T1, T2, Cnd, AS, AS')
    = $heatEqs(Q, T1, T2, Cnd, AS, AS')
+     superHeat(Q, T1, T2, Cnd, AS, AS') .
+
+  op superHeat : Qid Term Term Condition AttrSet AttrSet -> EquationSet .
+  eq superHeat(Q, T1, T2, Cnd, AS A, AS' nds(A AS'')) =
      (ceq kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList))), mkVariable('AnyHeat2,KList))))
         = kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList),kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))))), mkVariable('AnyHeat2,KList)))) 
        if  Cnd /\ '_inList`{K`}_[kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))), mkVariable('LHeat,KList)] = falseCt
      [metadata(AS pair("superheat", ""))] .) .
+  eq superHeat(Q, T1, T2, Cnd, AS, AS') 
+   = (ceq kWrap(Q, kApply(heatLabel, (kApply(redexLabel, kra(T1,mkVariable('RestHeat,K))), mkVariable('AnyHeat2,KList))))
+        = kWrap(Q, kApply(heatLabel, (kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))), mkVariable('AnyHeat2,KList))))
+       if Cnd
+     [metadata(AS pair("superheat", "nonNd"))] .) 
+  [owise] .
+
 
   op $heatEqs : Qid Term Term Condition AttrSet AttrSet -> EquationSet .
   eq $heatEqs(Q, T1, T2, Cnd, AS A, AS' nds(A AS''))
