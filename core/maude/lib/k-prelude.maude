@@ -332,6 +332,7 @@ mod K-STRICTNESS is
   eq heat(redex(K),,Ks,,heated(Ks')) = heat(Ks,, heated(Ks',,K)) [owise] .
   eq heat(redex(K,,NKs),,Ks) = heat(NKs,,Ks) [owise] .
 ---)
+  eq heat(heated(K)) = K .
   rl heat(heated(Ks,,K,,Ks')) => K
      [metadata "superheat=(choice)"] .
 
