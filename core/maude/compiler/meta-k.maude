@@ -98,7 +98,7 @@ fmod META-K-MODULE is
   ops KProper KResult NeK K KLabel KProperLabel KResultLabel KHybridLabel : -> Sort .
   ops NeProperList ResultList NeResultList NeKList KList : -> Sort .
   eq KProper = 'KProper .  eq KResult = 'KResult .
-  eq NeK = 'NeK .  eq K = 'K .
+  eq NeK = 'KItem .  eq K = 'K .
   eq KLabel = 'KLabel .  eq KHybridLabel = 'KHybridLabel .
   eq KProperLabel = 'KProperLabel .  eq KResultLabel = 'KResultLabel .
   eq ResultList = 'List`{KResult`} .  eq NeProperList = 'NeKProperList .  eq NeResultList = 'NeList`{KResult`} .  eq KList = 'List`{K`} .  eq NeKList = 'NeList`{K`} .
@@ -762,6 +762,11 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
    eq kWrap(Q, T) = mkCell(Q, kra(T,'Rest:K)) .
 --- replace the line above with the one below to get unrestricted strictness
 ---  eq kWrap(T) = T .
+
+  ops heatLabel redexLabel coolLabel : -> Constant .
+  eq heatLabel = mkConstant('heat,KLabel) .
+  eq redexLabel = mkConstant('redex,KLabel) .
+  eq coolLabel = mkConstant('cool,KLabel) .
 
 
   op getTopLabel : Term ~> Term .

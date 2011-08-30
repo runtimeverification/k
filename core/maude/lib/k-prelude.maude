@@ -12,12 +12,10 @@ mod K-TECHNIQUE is
   var K : K . var Ks : List{K} .
   var LItem : ListItem .  var List : List .
 
-  sorts NeK K .
-  subsorts NeK < K .
+  sorts KItem K .
+  subsorts KItem < K .
   op . : -> K .
   op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
-  op _~>_ : NeK K -> NeK [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
-  op _~>_ : K NeK -> NeK [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
 
   sorts List{K} NeList{K} .
 
@@ -33,7 +31,7 @@ mod K-TECHNIQUE is
 
   sorts KLabel .
 
-  op _`(_`) : KLabel List{K} -> NeK [prec 0 gather(& &)] .
+  op _`(_`) : KLabel List{K} -> KItem [prec 0 gather(& &)] .
 
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
@@ -117,8 +115,8 @@ mod K-EXTRAS is
    = Label2(substList{K}Label(Ks,Label1,Label2)) .
  ceq substKLabel(Label(Ks), Label1, Label2) 
    = Label(substList{K}Label(Ks,Label1,Label2)) if Label1 =/=Bool Label .
-  eq substKLabel((K1:NeK ~> K2:NeK ~> K), Label1, Label2)
-   = substKLabel(K1:NeK, Label1, Label2) ~> substKLabel(K2:NeK, Label1, Label2) ~> substKLabel(K, Label1, Label2) .
+  eq substKLabel((K1:KItem ~> K2:KItem ~> K), Label1, Label2)
+   = substKLabel(K1:KItem, Label1, Label2) ~> substKLabel(K2:KItem, Label1, Label2) ~> substKLabel(K, Label1, Label2) .
   eq substKLabel(., Label1, Label2) = . .
 endm
 
@@ -271,7 +269,7 @@ mod K-RESULT is
   var LItem : ListItem .  var List : List .
 
   sorts KResult .
-  subsorts KResult < NeK < K .
+  subsorts KResult < KItem < K .
   subsorts KResult < K .
 
   sorts List{KResult} NeList{KResult} .
@@ -304,7 +302,7 @@ endm
 mod K-PROPER is
   including K-RESULT .
   sort KProper .
-  subsort KProper < NeK K .
+  subsort KProper < KItem K .
 --- next line is useful only if not using <k> wrappers for strictness
 ---  op _~>_ : KProper K -> KProper [ditto] .
   sort NeKProperList .
@@ -325,18 +323,14 @@ mod K-STRICTNESS is
   op freezer : #String -> KLabel .
   op freezeVar : #String -> KLabel .
 
-  op noFreezers_ : K -> #Bool .
-  eq noFreezers(K ~> freezer(S)(Ks) ~> K') = false .
-  eq noFreezers(K) = true [owise] .
+  op cool : -> KLabel .
+  op heat : -> KLabel .
+  op redex : -> KLabel .
 
-  op cool : K -> K .
-  op 'heat : -> KLabel .
-  op 'redex : -> KLabel .
-
-  rl 'heat(Ks,,'redex(K),,Ks') => K
+  rl heat(Ks,,redex(K),,Ks') => K
      [metadata "superheat=(choice)"] .
 
-  vars K K' : K . var Ks Ks' : List{K} . var S : #String .
+  vars K : K . var Ks Ks' : List{K} .
 endm
 
 mod K-CONTEXTS is
