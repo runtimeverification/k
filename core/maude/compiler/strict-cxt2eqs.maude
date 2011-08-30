@@ -64,11 +64,12 @@ mod STRICTCXT2EQS is
   
   op heating : Module Term Term Qid TermList AttrSet AttrSet -> MASEqsPair .
  ceq heating(M, T1, T2, Q, Cond, AS, AS')
-   = {none, heatEqs(Q, T1[hole <- mkVariable('Kcxt,NeK)], kra(mkVariable('Kcxt,NeK), freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)])), AS, AS'), none} if T2 = hole .
+   = {none, heatEqs(Q, T1[hole <- mkVariable('Kcxt,K)], kra(mkVariable('Kcxt,K), freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,K),Q),Cond[hole <- mkVariable('Kcxt,K)])), AS, AS'), none} if T2 = hole .
   eq heating(M, T1, T2, Q, Cond, AS, AS')
    = {none, 
     (eq T2[hole <- T2[hole <- mkVariable('KCxt,K)]] = T2[hole <- mkVariable('KCxt,K)] [metadata(pair("heating","idem"))] .)
-    heatEqs(Q, T1[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], kra(T2[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList)),Q),Cond[hole <- kApply(mkVariable('KcxtL,KLabel),mkVariable('Kcxt,KList))])), AS, AS'), none} [owise] .
+    heatEqs(Q, T1[hole <- kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K))], kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K),  freezeTerm(M, T1)),  makeKCondition(andBool(strictCond(kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K)),Q),Cond[hole <- kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K))])), AS, AS')
+    heatEqs(Q, T1[hole <- mkVariable('Kcxt,NeK)], kra(T2[hole <- mkVariable('Kcxt,NeK)], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)])), AS, AS'), none} [owise] .
 
 
   op heatSuffix : -> TermList .
