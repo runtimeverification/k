@@ -1,7 +1,7 @@
 load .k/imp
 module SUMIO  imports IMP-SYNTAX
 syntax #Id ::= n | s 
-syntax Pgm ::= sumio
+syntax Stmt ::= sumio
 
 macro sumio = (
      n=read("Add numbers up to? n=");
