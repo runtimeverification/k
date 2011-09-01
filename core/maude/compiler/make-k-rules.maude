@@ -72,10 +72,10 @@ fmod MAKE-K-RULES is
 
   op addReplace : Module Module KRuleSplit Substitution AttrSet ~> Module .
   eq addReplace(Flat, M, R{T, Cond, AS A}, Subst, AS' transitions(A AS''))
-    = addRls(plugRl(normalize(Flat,splitReplace(Flat, T,1)), (normalize(Flat,splitReplace(Flat, T,2))[Subst]), metadata(A AS), makeCondition(Cond)), M) .
+    = addRls(plugRl(normalize(Flat,splitReplace(Flat, T,1)), handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS A, AS'), metadata(A AS), makeCondition(Cond)), M) .
 
   eq addReplace(Flat, M, R{T, Cond, AS}, Subst, AS' transitions(pair("default","") AS''))
-    = addRls(plugRl(normalize(Flat,splitReplace(Flat, T,1)), (normalize(Flat,splitReplace(Flat, T,2))[Subst]), metadata(pair("default","") AS), makeCondition(Cond)), M) [owise] .
+    = addRls(plugRl(normalize(Flat,splitReplace(Flat, T,1)), handleTegSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS, AS'), metadata(pair("default","") AS), makeCondition(Cond)), M) [owise] .
 
  eq addReplace(Flat, M,R{T,Cond,AS}, Subst, AS')
    = addEqs(plugEq(normalize(Flat,splitReplace(Flat, T,1)), handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)),Subst, AS, AS'), metadata(pair("default","") AS), makeKCondition(Cond)), M) [owise] . 
