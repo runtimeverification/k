@@ -20,7 +20,7 @@ mod STRICTCXT2EQS is
   var Eqs Eqs' : EquationSet . var Rls Rls' : RuleSet . var Q : Qid .
   vars Type Type' : Type .  var OPDS : OpDeclSet . var KCS : KContextSplit .
   vars T1 T2 : Term . var Cond : TermList .  var Cnd : Condition .
-  sort MASEqsPair .
+  sort MASEqsPair . var Str : String .
 
   op defaultHeatEqs : SortSet -> EquationSet .
   eq defaultHeatEqs(S ; Ss)
