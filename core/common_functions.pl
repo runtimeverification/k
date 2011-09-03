@@ -2606,7 +2606,7 @@ my @loaded_files = ();
 	
 # ARGS: main language file, $latex if enabled
 # RETURN: the slurped file
-# Recurse into all k files and create one k file
+# Recurse int all k files and create one k file
 sub slurp_k
 {
     # retrieve main file

@@ -554,6 +554,7 @@ my @all_sorts = ();
 
 # @all_tokens will hold all defined tokens
 my @all_tokens = @builtin_tokens;
+my @all_syntax = ();
 
 # variables to store command line arguments
 my $style = "bb";
@@ -1683,7 +1684,7 @@ sub maudify_file {
 
 # Step: put all tokens in .k
     open F, ">", $tokens_file or print "Cannot save tokens!\n";
-    print F "@all_tokens";
+    print F "@all_tokens\n@all_syntax";
     close F;
     push(@generated_files, $tokens_file);
 }
@@ -2043,6 +2044,8 @@ sub make_ops {
 
 	$attributes = op_tags($attributes);
 	
+        # store the syntax production
+        push(@all_syntax, $production);
 
 # Generate the Maude replacement of the K syntactic construct
 		my $random = fresh("a", "b");
@@ -2538,7 +2541,7 @@ sub compile_program
 	$comp =~ /$begin_compiled_module(.*?)$end_compiled_module/s;
 	# print $1;
 
-#	unlink("programCompile.tmp");
+	unlink("programCompile.tmp");
 
 	open MYFILE,">","$pgm-compiled.maude" or die "Cannot create $tempFile\n";
 	print MYFILE "load \"$cfile\"\n$1";

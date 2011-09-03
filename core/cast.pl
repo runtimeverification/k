@@ -150,9 +150,14 @@ $_ = $temp;
 $pgm =~ s/\..*$//s;
 my $ids = join(" | ", @identifiers);
 
+
+my $header = "kmod $pmod is including $syntax_module\n\n  syntax $sort_ ::= $pgm\n";
+$header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
+
+
+
 # append module "header"
-s/^/kmod $pmod is including $syntax_module\n\n  
-  syntax $sort_ ::= $pgm\n  syntax #Id ::= $ids\n\n  
+s/^/$header
   macro $pgm = ( /s;
  
 # append end
@@ -224,6 +229,11 @@ sub length_sort
 # get rid of duplicates
 sub set
 {
-    my %map = map { $_ => 1 } shift;
-    keys %map;
+    if (@_)
+    {
+	my %map = map { $_ => 1 } @_;
+	return keys %map;
+    }
+    
+    ();
 }
