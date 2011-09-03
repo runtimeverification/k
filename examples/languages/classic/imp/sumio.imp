@@ -1,13 +1,13 @@
 
 // adds numbers up to
---- given n
+--- number
  
-u=read("Add numbers up to? n=");
+number=read("Add numbers up to? n=");
  
 s=0;
-while not(u<=0) do (
-   s=s+u;
-   u=u+-1;
+while not(number<=0) do (
+   s=s+number;
+   number=number+-1;
 )
 
 
