@@ -1,0 +1,15 @@
+
+// adds numbers up to
+--- given n
+ 
+u=read("Add numbers up to? n=");
+ 
+s=0;
+while not(u<=0) do (
+   s=s+u;
+   u=u+-1;
+)
+
+
+writeln(s);
+
