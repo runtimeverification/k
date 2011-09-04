@@ -4,12 +4,12 @@
  
 number=read("Add numbers up to? n=");
  
-s=0;
+sum=0;
 while not(number<=0) do (
-   s=s+number;
+   sum=sum+number;
    number=number+-1;
 )
 
 
-writeln(s);
+writeln(sum);
 
