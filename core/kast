@@ -16,7 +16,7 @@ my $help;
 
 my $pgm           = "?";
 my $pmod          = "?";
-my $cfile         = "?";
+my $lang         = "?";
 my $sort_         = "?";
 my $syntax_module = "?";
 my $verbose       = 0;
@@ -26,6 +26,12 @@ my $verbose       = 0;
 my @all_tokens  = ();
 my @all_syntax  = ();
 my @identifiers = ();
+my $k_tools_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maude','compiler');
+my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
+
+# compile program 
+my $begin_compiled_module = "---K-MAUDE-GENERATED-OUTPUT-BEGIN---";                                                               
+my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";   
 
 # comments
 my $comment = join("|", (                                                                                                      
@@ -47,7 +53,7 @@ usage() if (@ARGV < 1 or
     ! GetOptions('help|?' => \$help,
 	'pgm=s'     => \$pgm,
 	'pmod=s'    => \$pmod,
-	'cfile=s'   => \$cfile,
+	'lang=s'   => \$lang,
 	'sort=s'    => \$sort_,
 	'smod=s'    => \$syntax_module,
 	'v|verbose' => \$verbose,
@@ -55,19 +61,50 @@ usage() if (@ARGV < 1 or
 
 
 # check if command line options are set.
-arg_error("Please set all command options; -pgm is not given!") if $pgm eq "?";
-arg_error("Please set all command options; -pmod is not given!") if $pmod eq "?";
-arg_error("Please set all command options; -cfile is not given!") if $cfile eq "?";
-arg_error("Please set all command options; -sort is not given!") if $sort_ eq "?";
-arg_error("Please set all command options; -smod is not given!") if $syntax_module eq "?";
+# arg_error("Please set all command options; -pgm is not given!") if $pgm eq "?";
+# arg_error("Please set all command options; -pmod is not given!") if $pmod eq "?";
+# arg_error("Please set all command options; -cfile is not given!") if $lang eq "?";
+arg_error("Please set all needed command options; -sort is not given!") if $sort_ eq "?";
+# arg_error("Please set all needed command options; -smod is not given!") if $syntax_module eq "?";
 
+
+##############################
+# solve command line options #
+##############################
+if ($pgm eq "?")
+{
+    if (-e $ARGV[0])
+    {
+	$pgm  = $ARGV[0];
+    }
+    else
+    {
+	print "If option -pgm is not used then kast program considers the FIRST argument as being the program file. If this file is not found, it returns this error.\n";
+	exit(1);
+    }
+}
+
+my ($fname, $path, $suffix) = fileparse($pgm, qr/\.[^.]*/);
+if ($suffix eq "")
+{
+    print "Cannot infer lang name. Please make sure that $fname has the form \"program_name.lang\" (e.g. helloworld.c).\n \"lang\" (e.g \"c\") is the name of your language; both \"lang.k\" and \"lang-compiled.maude\" must exist.\n";
+    exit(1);
+}
+
+# 1. program module
+$pmod = uc($fname) if ($pmod eq "?");
+# 2. compiled file
+$suffix =~ s/^\.//;
+$lang = $suffix if ($lang eq "?");
+# 3. syntax module
+$syntax_module = uc $lang if ($syntax_module eq "?");
 
 # get the program
 local $_ = get_file_content($pgm);
 my $temp = $_;
 
 # get tokens
-my $dir = dirname($cfile);
+my $dir = dirname($lang);
 my $tokens_file = File::Spec->catfile($dir, ".k/all_tokens.tok");
 my $tokens = get_file_content($tokens_file);
 my @all = split("\n", $tokens);
@@ -143,34 +180,110 @@ s/\s([a-zA-Z_]+)\s/
 print "Found identifiers: @identifiers\n\n" if $verbose;
 
 
+##########################
+# Creating the K module  #
+##########################
 
-# Creating the K module
 $_ = $temp;
 
+# remove extension of program file
 $pgm =~ s/\..*$//s;
 my $ids = join(" | ", @identifiers);
 
 
+# create "header"
 my $header = "kmod $pmod is including $syntax_module\n\n  syntax $sort_ ::= $pgm\n";
 $header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
 
-
-
-# append module "header"
+# Step: append module "header"
 s/^/$header
   macro $pgm = ( /s;
  
-# append end
+# Step: append end
 s/$/)\n\nendkm/s;
 
+# Step: append load .k/$suffix.maude and -compiled
+$_ = "load .k/$lang.maude\n\n$_";
 
 
 # save in $pgm_cast.k
-open FILE, ">", "$pgm\_cast.k" or die "Cannot save in file $pgm\_cast.k";
+my $tmp_file = "$pgm\_cast.k";
+print "Saving everything in $tmp_file...\n" if $verbose;
+open FILE, ">", "$tmp_file" or die "Cannot save in file $tmp_file";
 print FILE;
 close FILE;
+print "Saved.\n\n" if $verbose;
 
-print "Save everything in $pgm\_cast.k\n\nDone.\n" if $verbose;
+#################################
+# maudify the file              #
+#################################
+
+my $output = `kompile -m $tmp_file -flag`;
+print "Output: |$output|\n" if $verbose;
+
+
+#################################
+# compile the file              #
+#################################
+
+$tmp_file =~ s/\..*$//;
+
+my $pname = lc($pmod);
+my $cfile = "$lang-compiled.maude";
+my $cmod = uc($lang);
+
+my $maudified = get_file_content(".k/$tmp_file.maude");
+my $compiled =  qx{ sed 2d $cfile};                                                                                           
+
+my $compile =
+  "set include PL-BOOL off .
+  set include BOOL on .
+  load \"$k_tools_dir/" . "prelude-extras\"
+  load \"$k_tools_dir/" . "meta-k\"
+  load \"$k_tools_dir/" . "printing\"
+  load \"$k_tools_dir/" . "metadata-parsing\"
+  
+  load  \"$k_tools_dir/" . "compile-program-interface\"
+  ---(
+      set print attribute on .
+      red in COMPILE-PROGRAM-META : compileProgram(\"$cmod\",\"$pmod\",\"$pname\") .
+      q
+  ---)
+  loop compile-program .
+  (compileProgram $cmod $pmod $pname .)
+  q
+  ";
+
+my $tempFile = "programCompile.tmp";
+open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
+print MYFILE "load \"$k_prelude\"\n$maudified\nset show advisories off .\n$compiled\nset show advisories on .\n$compile\n";
+close(MYFILE);
+# push(@generated_files, $tempFile);
+
+# run maude with this input
+$output = `maude programCompile.tmp`;
+
+if ($output =~ /$begin_compiled_module(.*?)$end_compiled_module/sg)
+{
+    # save
+    my $name = $pgm;
+    open FILE, ">", "$fname.kast" or die "Cannot create $fname.kast\n";
+    print FILE $1;
+    close FILE;
+}
+else 
+{
+    print "Maude (compileProgram) returned no output ...\n";
+    exit(1);
+}
+
+unlink($tmp_file) if !$verbose;
+unlink("programCompile.tmp") if !$verbose;
+
+
+# print "$output\n\n\n";
+
+
 
 ################
 # end main     #
@@ -188,12 +301,12 @@ print "Save everything in $pgm\_cast.k\n\nDone.\n" if $verbose;
 sub usage
 {
     print "Unknown option: @_\n" if @_;
-    print "usage: cast -pgm program_name -pmod program_module -cfile compiled_file -sort pgm_sort -smod syntax_module\n\t[-verbose]\n\n
+    print "usage: cast [-pgm] program_name [-pmod program_module] [-cfile compiled_file] -sort pgm_sort -smod syntax_module\n\t[-verbose]\n\n
   Options:
   \t-verbose: verbose mode
   \t-pgm    : specify the file where the program is.
   \t-pmod   : specify the name of the module which will wrap the program
-  \t-cfile  : specify a k compiled file
+  \t-lang  : specify a k compiled file
   \t-sort   : specify program sort
   \t-syntax : specify the syntax module name\n\n";
 
