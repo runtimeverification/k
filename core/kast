@@ -274,7 +274,6 @@ if ($output =~ /$begin_compiled_module(.*?)$end_compiled_module/sg)
 else 
 {
     print "Maude (compileProgram) returned no output ...\n";
-    exit(1);
 }
 
 unlink($tmp_file) if !$verbose;
