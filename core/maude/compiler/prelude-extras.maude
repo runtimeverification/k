@@ -388,6 +388,7 @@ fmod META-K-ERROR is
   including META-TERM-EXTRAS .
 
   op moduleError : QidList -> [Module] .
+  op termError : QidList -> [Term] .
   
   op errorAS :  String String -> [Attr] .
   op errorMb : [Term] Term String AttrSet -> [MembAx] .
@@ -579,6 +580,9 @@ fmod META-MODULE-EXTRAS is
   eq getOps(OPDS (op Q : Tl -> S' [AS] .), SS ; S') 
    = getOps(OPDS, SS ; S') (op Q : Tl -> S' [AS] .)  .
   eq getOps(OPDS, SS) = none [owise] .
+
+  op getOps : Module SortSet -> OpDeclSet .
+  eq getOps(M, SS) = getOps(getOps(M), SS) .
 
   op emptyFModule : -> FModule .
   op emptySModule : -> SModule .

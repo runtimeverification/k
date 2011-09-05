@@ -19,6 +19,10 @@ fmod COMPILE-PROGRAM is
 
   op errorTrm : Term Type -> [Term] .
   
+  op compileProgram2Term : Module Module Qid ~> Term .
+  eq compileProgram2Term(Compiled, Syntax, Q)
+   = compileProgram(Compiled, Syntax, getOps(Syntax), Q) .
+
   op compileProgram : Module Module Qid ~> Module .
   eq compileProgram(Compiled, Syntax, Q)
    =  compileProgram(Compiled, Syntax, Q, compileProgram(Compiled, Syntax, getOps(Syntax), Q)) .

@@ -7,15 +7,16 @@ mod COMPILE-PROGRAM-META is
   including META-LEVEL-EXTRAS .
   var NoCompiledPgm CompiledPgm Pgm : String . 
   var QNoCompiledPgm QCompiledPgm QPgm : Qid . 
-  op compileProgram : String String String ~> Module .
+  op compileProgram : String String String ~> Term .
   eq compileProgram(CompiledPgm, NoCompiledPgm, Pgm) = compileProgram(qid(CompiledPgm), qid(NoCompiledPgm), qid(Pgm)) .
-  op compileProgram : Qid Qid Qid ~> Module .
-  eq compileProgram(QCompiledPgm,QNoCompiledPgm, QPgm) = $compileProgram(upModule(QNoCompiledPgm, true), compileProgram(upModule(QCompiledPgm,true), upModule(QNoCompiledPgm, true), QPgm)) .
+  op compileProgram : Qid Qid Qid ~> Term .
+  eq compileProgram(QCompiledPgm,QNoCompiledPgm, QPgm) = $compileProgram(upModule(QNoCompiledPgm, true), compileProgram2Term(upModule(QCompiledPgm,true), upModule(QNoCompiledPgm, true), QPgm)) .
   var Trm : Term . var T : Type .  var Q : Qid .  var M M' : Module .
-  op $compileProgram : Module Module ~> Module .
-  eq $compileProgram(M, M') = M' .
-  eq $compileProgram(M, errorM(Trm, T, Q))
-   = moduleError('\r 'Error: '\o 'The 'sanity 'checks 'phase 'of 'compilation 'failed 'for 'program '\g Q '\o '. '\n '\s '\s 'Term '\n '\t '\r metaPrettyPrint(M, Trm) '\o '\n '\s '\s 'does 'not 'parse 'to 'a 'sort 'but 'rather 'to 'kind '\n '\t '\r T '\o '. '\n '\s '\s 'Please 'resolve 'that 'before 'continuing.) .
+  op $compileProgram : Module Term ~> Term .
+  eq $compileProgram(M, Trm) = Trm .
+  op termError : QidList -> [Term] .
+  eq $compileProgram(M, errorTrm(Trm, T))
+   = termError('\r 'Error: '\o 'The 'sanity 'checks 'phase 'of 'compilation 'failed. '\n '\s '\s 'Term '\n '\t '\r metaPrettyPrint(M, Trm) '\o '\n '\s '\s 'does 'not 'parse 'to 'a 'sort 'but 'rather 'to 'kind '\n '\t '\r T '\o '. '\n '\s '\s 'Please 'resolve 'that 'before 'continuing.) .
 endm
 
 mod COMPILE-PROGRAM-LOOP is 
@@ -23,7 +24,8 @@ mod COMPILE-PROGRAM-LOOP is
   including MODULE-META-PRETTY-PRINT .
   op compile-program : -> System .
   op idle : -> State .
-  var Q NoCompiledPgm CompiledPgm Pgm : Qid . var QIL QIL' : QidList . var FM : [Module] .
+  var Q NoCompiledPgm CompiledPgm Pgm : Qid . var QIL QIL' : QidList . var FM : [Term] .
+  var Compiled Syntax : Module .
   eq compile-program = [nil, idle, 
  'Usage: 'compileProgram '<CompiledModule> '<ProgramModule> '<programName> '.] .
 
@@ -31,14 +33,17 @@ mod COMPILE-PROGRAM-LOOP is
   op wrapper : Qid -> Module .
   eq wrapper(Q) = (mod 'MKKR is including Q . 
                     sorts none . none none none none none endm) .
-  op error : -> [Module] .
-  op print : [Module] -> QidList .
-  var M : Module .
-  eq print(M) = eMetaPrettyPrint(setEqs(M,none), M) .
-  eq print(moduleError(QIL)) = QIL .
+  op error : -> [Term] .
+  op printTrm : Module Module [Term] -> QidList .
+  var T : Term .
+  eq printTrm(Compiled, Syntax, T) 
+   = ('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n  
+     metaPrettyPrint(addOps(getOps(Syntax,'#Id), Compiled), T)
+     '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
+  eq printTrm(Compiled, Syntax, termError(QIL)) = QIL .
  
   crl ['compileProgram CompiledPgm NoCompiledPgm Pgm QIL, idle, QIL'] 
-   => [QIL, idle, print(FM )] 
+   => [QIL, idle, printTrm(upModule(CompiledPgm,false), upModule(NoCompiledPgm, false), FM )] 
    if FM := downTerm(getTerm(
              metaReduce(wrapper('COMPILE-PROGRAM-META),
                         'compileProgram[upTerm(string(CompiledPgm)),upTerm(string(NoCompiledPgm)),upTerm(string(Pgm))])),error) .
