@@ -276,7 +276,8 @@ else
     print "Maude (compileProgram) returned no output ...\n";
 }
 
-unlink($tmp_file) if !$verbose;
+unlink("$tmp_file.k") if !$verbose;
+unlink("$tmp_file.maude") if !$verbose;
 unlink("programCompile.tmp") if !$verbose;
 
 
