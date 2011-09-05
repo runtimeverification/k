@@ -8,6 +8,7 @@ load pure-printing
 load sanity-checks-interface
 
 load many-modules-interface
+load add-eval-interface
 load resolve-ditto-interface
 load complete-k-sorts-interface
 load anon-consts-interface

@@ -1,0 +1,28 @@
+fmod ADD-EVAL is
+  including META-MODULE-EXTRAS .
+  including  META-K-MODULE .
+  including META-K-MODULES .
+  including META-K-BUILTINS .
+  including K-META-CONFIG .
+  including META-K-ERROR .
+  var M M' : Module . 
+  var SS SS' : SortSet .
+  var O : Qid .
+  var MS : ModuleSet .
+  var Ms : Modules .
+  var T : Term .
+  
+  op addEval : Qid Module Term ~> Module .
+  eq addEval(O, M, T) 
+   = setName(addEval(M, T, getVars(T)), O) .
+
+  op addEval : Module Term TermList ~> Module .
+
+
+---  op $PGM : -> K .
+---  op eval : Map -> Bag .
+---  eq eval($PGM |-> `kWrapper(Sort, ,$PGM:Sort)) = `stripOptionals(Cfg)`
+---  eq eval(Map) = eval(Map $PGM |-> kWrapper(`defaultValue(Sort)`)) if $PGM not in keys(Map)
+
+endfm
+
