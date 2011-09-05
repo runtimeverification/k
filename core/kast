@@ -305,9 +305,9 @@ sub usage
   \t-verbose: verbose mode
   \t-pgm    : specify the file where the program is.
   \t-pmod   : specify the name of the module which will wrap the program
-  \t-lang  : specify a k compiled file
+  \t-lang   : specify a k compiled file
   \t-sort   : specify program sort
-  \t-syntax : specify the syntax module name\n\n";
+  \t-smod   : specify the syntax module name\n\n";
 
     exit;
 }
@@ -315,7 +315,7 @@ sub usage
 # print an error message if arguments not set
 sub arg_error
 {
-    print shift . "\n";
+    print shift(@_) . "\n";
     usage();
 }
 
