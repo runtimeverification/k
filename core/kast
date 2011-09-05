@@ -228,7 +228,7 @@ print "Output: |$output|\n" if $verbose;
 
 $tmp_file =~ s/\..*$//;
 
-my $pname = lc($pmod);
+my $pname = $pgm;
 my $cfile = "$lang-compiled.maude";
 my $cmod = uc($lang);
 
