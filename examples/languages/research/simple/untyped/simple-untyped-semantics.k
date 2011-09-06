@@ -104,7 +104,7 @@ will be initialized with the program to evaluate later. */
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> K:K </k>
+                      <k color="green"> $PGM:K </k>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
@@ -117,7 +117,7 @@ will be initialized with the program to evaluate later. */
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
-                  <in color="magenta"> .List </in>
+                  <in color="magenta"> $INPUT:List </in>
                   <out color="brown"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
@@ -367,7 +367,7 @@ inconsistent state (since the exception block modifies it, but that
 modification should be irrelevant once the function returns). */
 
   syntax ListItem ::=  ( Map , K , Bag )
-  rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val}) ~> K => S ~> return(0); </k>
+  rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val}) ~> K:K => S ~> return(0); </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
        <genv> GEnv:Map </genv>

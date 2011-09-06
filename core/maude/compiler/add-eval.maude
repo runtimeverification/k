@@ -1,28 +1,79 @@
 fmod ADD-EVAL is
-  including META-MODULE-EXTRAS .
-  including  META-K-MODULE .
-  including META-K-MODULES .
-  including META-K-BUILTINS .
-  including K-META-CONFIG .
-  including META-K-ERROR .
-  var M M' : Module . 
-  var SS SS' : SortSet .
-  var O : Qid .
-  var MS : ModuleSet .
-  var Ms : Modules .
-  var T : Term .
-  
+  including  K-META-CONFIG .
+  including META-K-WRAPPERS .
+
+  op evalS : -> Qid .
+  eq evalS = '#eval .
+
   op addEval : Qid Module Term ~> Module .
   eq addEval(O, M, T) 
-   = setName(addEval(M, T, getVars(T)), O) .
+   = setName(addEval(M, T, noDuplicates(getVars(T))), O) .
 
   op addEval : Module Term TermList ~> Module .
+  eq addEval(M, T, Tl) 
+   = addEqs(defaultEvalEqs(Tl) mainEvalEq(evalCleanConf(T), evalMap(Tl)),
+     addOps(vars2Ops(Tl) (op evalS : Map -> Bag [none] .),
+            M)) .
 
+
+  op defaultEvalEqs_ : TermList -> EquationSet .
+  eq defaultEvalEqs(empty) = none .
+  eq defaultEvalEqs(V,Tl)
+   = (ceq evalS[mkVariable('M,Map)]
+       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(V),K),wrap2K(emptyCt(getType(V)))],mkVariable('M,Map)]]
+       if '_in_[mkConstant(getName(V),K), 'keys_[mkVariable('M,Map)]] = falseCt 
+       [none] .)
+      defaultEvalEqs(Tl) .
+
+
+  op evalMap_ : TermList -> TermList .
+  eq evalMap(empty) = empty .
+  eq evalMap(V, Tl) = itemCtor(Map)[mkConstant(getName(V),K),wrap2K(V)],evalMap(Tl) .
+
+  op mainEvalEq : TermList TermList -> Equation .
+  eq mainEvalEq(empty, Tl) = mainEvalEq(emptyCt(Bag), Tl) .
+  eq mainEvalEq(T, Tl)  
+   = (eq evalS[mkCollection(Map,Tl)] = T  [none] .) .
+
+  op vars2Ops_ : TermList ~> OpDeclSet .
+  eq vars2Ops(V,Tl) = (op getName(V) : nil -> K [none] .) vars2Ops(Tl) .
+  eq vars2Ops(empty) = none .
 
 ---  op $PGM : -> K .
 ---  op eval : Map -> Bag .
 ---  eq eval($PGM |-> `kWrapper(Sort, ,$PGM:Sort)) = `stripOptionals(Cfg)`
 ---  eq eval(Map) = eval(Map $PGM |-> kWrapper(`defaultValue(Sort)`)) if $PGM not in keys(Map)
 
+
+  op evalCleanConf : Term -> TermList .
+  eq evalCleanConf(T) = evalCleanConf(T,splitKCell(T)) .
+  op evalCleanConf : Term [SplitCell] -> TermList .
+  eq evalCleanConf(T, SC')
+   = if SC' :: SplitCell then if getMultiplicity(SC') == maybe or  getMultiplicity(SC') == any then checkEmpty(SC', evalCleanConf(getContents(SC')))
+     else plugCell(setAttributes(setContents(SC',evalCleanConf(getContents(SC'))),initialCellAttrs)) fi
+     else $evalCleanConf(T) fi .
+  op $evalCleanConf : Term -> TermList .
+  eq $evalCleanConf(Ct) = Ct .
+  eq $evalCleanConf(V) = V .
+  eq $evalCleanConf(Q[Tl]) = $checkEmpty(Q,$evalCleanConfL(Tl)) .
+  op $evalCleanConfL_ : TermList -> TermList .
+  eq $evalCleanConfL(T,Tl) = evalCleanConf(T),$evalCleanConfL(Tl) .
+  eq $evalCleanConfL(empty) = empty .
+
+ 
+  eq setContents(SC, empty) = setContents(SC, emptyCt(Bag)) .
+
+  op checkEmpty : SplitCell TermList -> TermList [strat (2 0 1)] . 
+  eq checkEmpty(SC, empty) = empty .
+  eq checkEmpty(SC, T) = plugCell(setAttributes(setContents(SC,T),initialCellAttrs)) [owise] . 
+
+  op $checkEmpty : Qid TermList -> TermList .
+  eq $checkEmpty(Q, empty) = empty .
+  eq $checkEmpty(Q, Tl) = Q[Tl] [owise] .
+
+  var O Q : Qid . var T : Term . var Tl : TermList .  var V : Variable .
+  var Ct : Constant .
+  var M : Module . 
+  var SC' : [SplitCell] .  var SC : SplitCell .
 endfm
 

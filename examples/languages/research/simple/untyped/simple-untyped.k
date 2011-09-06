@@ -18,10 +18,7 @@ taking a program and an input.  See the README file under k-framework for
 more information on configuration initializers.  */
 
   syntax Bag ::= run ( KLabel ) | run ( KLabel , List )
-  macro run(PgmName:KLabel) =
-          <T>...
-             <k> PgmName(.List{K}) ~> execute </k>
-          ...</T>
+  macro run(PgmName:KLabel) =  run(PgmName, .List)
   macro run(PgmName,Input) =
           <T>...
              <k> PgmName(.List{K}) ~> execute </k>

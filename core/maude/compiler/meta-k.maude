@@ -557,9 +557,14 @@ fmod K-META-CONFIG is
   eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else if S == Set then '__ else 'error fi fi fi fi fi .
   
   op itemCtor : Sort -> Qid .
-  eq itemCtor(S) = if S == Bag then 'BagItem else if S == Map then 'MapItem else if S == List then 'ListItem else if S == Set then 'SetItem else 'error fi fi fi fi .
+  eq itemCtor(S) = if S == Bag then 'BagItem else if S == Map then '_|->_ else if S == List then 'ListItem else if S == Set then 'SetItem else 'error fi fi fi fi .
 
-  var Ty : Type .
+  op mkCollection : Sort TermList ~> Term .
+  eq mkCollection(S, empty) = emptyCt(S) .
+  eq mkCollection(S, Trm) = Trm .
+  eq mkCollection(S, NeTrms) = ctor(S)[NeTrms] .
+
+  var Ty : Type .  var NeTrms : NeTermList .
 
   op getCellType : Module Type ~> Sort .
  ceq getCellType(M, Ty) = Bag if sameKind(M, Ty, Bag) .
@@ -643,7 +648,25 @@ fmod META-K-WRAPPERS is
   op isWrapped : Module Type -> Bool [memo] .
   eq isWrapped(M, T) = T in (klabelsorts ; 'CellLabel ; 'Bag ; 'NeBag ; 'BagItem ; 'Set ; 'NeSet ; 'SetItem ; 'List ; 'NeList ; 'ListItem ; 'Map ; 'NeMap ; 'MapItem ; 'List`{K`} ; 'NeList`{K`} ; 'List`{KResult`} ; 'NeKProperList) 
      or-else isWrapped(getWrappers(getOps(flatten(M))), T) .
+  
+  op wrap2K : Term ~> Term .
+  eq wrap2K('error.K) = emptyCt(K) .
+  eq wrap2K(Trm) = wrap2K(getWrapper(getType(Trm)), Trm) .
+  op wrap2K : Qid Term -> Term .
+  eq wrap2K('_, Trm) = Trm .
+  eq wrap2K(Q, Trm) = Q[Trm] [owise] .
 
+  op getWrapper : Type ~> Qid .
+  eq getWrapper(T) 
+   = if T == 'KLabel then 'wklabel_ else
+     if T == 'CellLabel then 'wcelllabel_ else
+     if T == 'List`{K`} then 'wklist_ else
+     if T == 'Set or-else T == 'SetItem then 'wset_ else
+     if T == 'Bag or-else T == 'BagItem then 'wbag_ else
+     if T == 'List or-else T == 'ListItem then 'wlist_ else
+     if T == 'Map or-else T == 'MapItem then 'wmap_ else '_
+     fi fi fi fi fi fi fi .
+     
   op isWrapped : OpDeclSet Type -> Bool .
   eq isWrapped(OPDS (op Q : T -> T' [AS] .), T) = true .
   eq isWrapped(OPDS, T) = false [owise] .
@@ -656,6 +679,7 @@ fmod META-K-WRAPPERS is
   eq findWrapper(M, OPDS, T) = qid("Could Not Find Wrapper for Type " + string(T)) [owise] .
 
   var M : Module . var Op : OpDecl .  var Str : String .  var T'' : Type .
+  var Trm : Term .
 endfm
 
 fmod STRICT-ATTRS is

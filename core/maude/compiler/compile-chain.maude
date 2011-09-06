@@ -38,7 +38,7 @@ mod COMPILE-ONESHOT is
 
   op allSteps : -> QidList .
   eq allSteps = 'MANY-MODULES 
---- 'ADD-EVAL 
+'ADD-EVAL 
 'RESOLVE-DITTO 
 'COMPLETE-K-SORTS 
 'ANONYMOUS-CONSTANTS --- 'SANITY-CHECKS 
@@ -146,7 +146,7 @@ fmod COMPILE-META is
   op allSteps : -> QidList .
   eq allSteps = 
 'MANY-MODULES 
----'ADD-EVAL 
+'ADD-EVAL 
 'RESOLVE-DITTO 
 'COMPLETE-K-SORTS 
 'ANONYMOUS-CONSTANTS 

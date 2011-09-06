@@ -530,6 +530,7 @@ endm
 
 mod K is 
   including K-TECHNIQUE .
+  including K-WRAPPERS .
   including K-BUILTINS .
   including K-RESULT .              --- to express results syntactically
   including K-RULES .               --- to write k rules with in-place rewriting
