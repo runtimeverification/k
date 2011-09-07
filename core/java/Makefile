@@ -1,5 +1,5 @@
 all: ioserver wrapper
-	jar cf wrapperAndServer.jar -C IOServer/bin . -C Wrapper/bin .
+	jar cfm wrapperAndServer.jar Wrapper/Manifest.txt -C IOServer/bin . -C Wrapper/bin .
 	
 ioserver:
 	@mkdir -p IOServer/bin
