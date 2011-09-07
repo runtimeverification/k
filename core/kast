@@ -97,7 +97,7 @@ $pmod = uc($fname) if ($pmod eq "?");
 $suffix =~ s/^\.//;
 $lang = $suffix if ($lang eq "?");
 # 3. syntax module
-$syntax_module = uc $lang if ($syntax_module eq "?");
+$syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
 
 # get the program
 local $_ = get_file_content($pgm);
