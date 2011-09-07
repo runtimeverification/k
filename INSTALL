@@ -80,7 +80,7 @@ Next, install some of the K Framework's Perl dependencies:
 Unfortunately, Debian does not include a package for the Tree::Nary Perl
 module, so it must be installed manually:
 
-    # cpan -i Tree::Nary
+    # cpan -i Tree::Nary File::Spec::Link
 
 Now you're ready to jump to the section on downloading K.
 
@@ -91,7 +91,7 @@ Install some of the Perl dependencies with pacman:
     # pacman -S perl-xml-libxml perl-text-diff 
 
 Install `perl-xml-dom` and `perl-regexp-common` from AUR. Finally, use `cpan`
-to install the `Tree::Nary` package.
+to install the `Tree::Nary` and `File::Spec::Link` packages.
 
 ### Mac OSX
 
@@ -108,7 +108,7 @@ Use your distribution's package manager to install GNU Make and Perl.
 On most distributions, the following command will install all the needed
 Perl dependencies:
 
-    # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary Text::Diff
+    # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary Text::Diff File::Spec::Link
 	
 
 ## Installing LaTeX
