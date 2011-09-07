@@ -20,7 +20,7 @@ public class Client {
 					socket = new Socket(host.getHostName(), 10000);
 					OutputStreamWriter osw = new OutputStreamWriter(
 							socket.getOutputStream());
-					osw.write("writebyte#1#13#\n");
+					osw.write("0#writebyte#1#13#\n");
 					osw.flush();
 					osw.close();
 					break;

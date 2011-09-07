@@ -4,13 +4,14 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import log.Logger;
 
 import main.IOServer;
 
 public abstract class Command implements Runnable {
 
 	Socket socket;
-	//Long maudeId;
+	public int maudeId;
 
 	public Command(String[] args, Socket socket) { //, Long maudeId) {
 		this.socket = socket;
@@ -18,15 +19,17 @@ public abstract class Command implements Runnable {
 	}
 
 	public void fail(String reason) {
-		IOServer.fail(reason, socket);
+	    Logger.info(maudeId + " is failing because of " + reason);
+		IOServer.fail(maudeId + "#" + reason, socket);
 	}
 
 	public void succeed(String... messages) {
 
-		String success = //maudeId + "#" + 
+		String success = maudeId + "#" + 
 			"success#";
 		for (String s : messages)
 			success += s + "#";
+        Logger.info("sending '" + success + "##' to "+ maudeId);
 		success += "##\n";
 		
 		BufferedWriter output;
@@ -39,10 +42,10 @@ public abstract class Command implements Runnable {
 			output.flush();
 
 			// close everything
-			output.close();
-			socket.close();
+			//output.close();
+			//socket.close();
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

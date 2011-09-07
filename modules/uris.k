@@ -14,7 +14,7 @@ module URIS
              | `String2DotK ( #String ) 
              | `String2Bool ( #String )
              | `#ioError ( #String )
-
+            
   syntax KResult ::= `#EOF | #String
   rule errorTCPSyntax("EOF") => #EOF
 
@@ -143,4 +143,36 @@ module URIS
   rule #readFloat() => #fReadFloat(#stdin)
   rule #fReadFloat(N) => #parseFloat(#fReadToken(N))
   rule #parseFloat(S) => String2Float(S)
+
+  syntax ListItem ::= `#pki ( #Nat , #String ) | `#pko ( #Nat ) 
+                    | `#fListRead | `#getResult ( Bag ) 
+  syntax List ::= `#checkEmptyK ( Bag )
+
+  rule < CL:CellLabel >
+               (#fListRead => #getResult(<k> #fReadFloat(N) </k>)) 
+               #pki(N:#Nat, "#Float") 
+       </ CL >
+  rule < CL:CellLabel >
+                    (#fListRead => #getResult(<k> #fReadToken(N) </k>)) 
+               #pki(N:#Nat, "#String") 
+       </ CL >
+  rule < CL:CellLabel >
+                     (#fListRead => #getResult(<k> #fReadChar(N) </k>)) 
+               #pki(N:#Nat, "#Char") 
+       </ CL >
+  rule < CL:CellLabel >
+                     (#fListRead => #getResult(<k> #fReadInt(N) </k>)) 
+               #pki(N:#Nat, "#Int") 
+       </ CL >
+
+  rule < CL:CellLabel > #pko(N:#Nat) 
+                       (ListItem(K:K) => #checkEmptyK(<k> #fPrint(N,,K) ~> #flush(N) </k>)) 
+                        RestL:List </ CL >
+
+  rule #getResult(<k> S:#String </k>) => ListItem(S)
+  rule #getResult(<k> C:#Char </k>) => ListItem(C)
+  rule #getResult(<k> I:#Int </k>) => ListItem(I)
+  rule #getResult(<k> F:#Float </k>) => ListItem(F)
+  rule #checkEmptyK(<k> .K </k>) => .List
+  
 end module

@@ -64,6 +64,7 @@ public class IOServer {
 
 				// accept
 				clientSocket = serverSocket.accept();
+				Logger.info(clientSocket.toString());
 
 				// parse input
 				Command command = parseCommand(clientSocket);
@@ -99,9 +100,14 @@ public class IOServer {
 			// TODO: here XML should be used...
 			// maudeId#command#args#
 			String[] args = inputLine.split("#");
+			String[] args1 = new String[args.length];
 			
-
-			return createCommand(args, clientSocket);
+			System.arraycopy(args, 1, args1,0, args.length-1);
+			
+			Command command = createCommand(args1, clientSocket);
+            
+            command.maudeId = Integer.parseInt(args[0]);
+			return command;
 
 		} catch (IOException e) {
 			return new CommandUnknown(new String[] { e.getLocalizedMessage() },
@@ -180,9 +186,8 @@ public class IOServer {
 
 			// close everything
 			output.close();
-			
 			socket.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

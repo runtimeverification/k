@@ -11,11 +11,19 @@ endm
 
 mod #TCP-CLIENT is
 	including #TCP-SYNTAX .
+        including #CONVERSION .
 	
 	sort #TCPState .
 		
 	op Client : -> #Socket-Cid .
 	op cnum : #Nat -> #Socket-Oid .
+        op check : #Socket-Oid #String ~> #String .
+        eq check(cnum(N),S) = $check(Int2String(N), findString(S, "#", 0), S) .
+        op $check : #String #Nat #String ~> #String .
+       ceq $check(SN:#String, P:#Nat, S)
+         = substrString(S, P:#Nat +Nat 1, lengthString(S))
+        if SN:#String = substrString(S,0,P:#Nat) 
+        [print SN:#String ", " S ", " P:#Nat].
 	
 	ops idle connecting sending receiving haveAnswer closing connected finished : -> #TCPState [ctor] .
 	
@@ -33,43 +41,43 @@ mod #TCP-CLIENT is
 	
 	rl < Me : Client | state: connecting,#Socket A > #Socket createdSocket(Me, socketManager, Server)
 	=> < Me : Client | state: connected,#Socket connectedTo: Server,#Socket A >
-	[print "connected"] .
+	[print Me " connected"] .
 	
 	----- errors
 	eq containedRequest(C #Socket socketError(Me, socketManager, S))
 	= error
-	[print "socket error: " S] .
+	[print Me " socket error: " S] .
 	eq containedRequest(C #Socket < Me : Client | state: connecting,#Socket  A > #Socket closedSocket(Me, Server, S))
 	= error
-	[print "error connecting: " S] .
+	[print Me " error connecting: " S] .
 	eq containedRequest(C #Socket < Me : Client | state: receiving,#Socket  A > #Socket closedSocket(Me, Server, S))
 	= error
-	[print "error receiving: " S] .
+	[print Me " error receiving: " S] .
 	-----
 	
 	rl < Me : Client | state: connected,#Socket  connectedTo: Server,#Socket  A > #Socket toSend(S)
 	=> < Me : Client | state: sending,#Socket  connectedTo: Server,#Socket  A > #Socket send(Server, Me, S)
-	[print "sending"] .
+	[print Me " sending"] .
 	
 	rl < Me : Client | state: sending,#Socket  A > #Socket sent(Me, Server)
 	=> < Me : Client | state: receiving,#Socket  A > #Socket receive(Server, Me)
-	[print "receiving"] .
+	[print Me " receiving"] .
 	
 	rl < Me : Client | state: receiving,#Socket  A > #Socket received(Me, Server, S)
 	=> < Me : Client | state: haveAnswer,#Socket  answer: S,#Socket  A >
-	[print "have answer"] .
+	[print Me " have answer"] .
 	
 	rl < Me : Client | state: haveAnswer,#Socket  connectedTo: Server,#Socket  A > 
 	=> < Me : Client | state: closing,#Socket  connectedTo: Server,#Socket  A > #Socket closeSocket(Server, Me)
-	[print "closing"] .
+	[print Me " closing"] .
 	
 	rl < Me : Client | state: closing,#Socket  A  > #Socket closedSocket(Me, Server, S)
 	=> < Me : Client | state: finished,#Socket  A  >
-	[print "finished"] .
+	[print Me " finished"] .
 	
-	rl containedRequest(C #Socket < Me : Client | state: finished,#Socket  answer: S,#Socket  A  >)
-	=> S
-	[print "popping out of socket stuff"] .
+	rl containedRequest(<> #Socket < Me : Client | state: finished,#Socket  answer: S,#Socket  A  >)
+	=> check(Me, S)
+	[print Me " popping out of socket stuff"] .
 	
 	rl start(N) => 
 		<> #Socket
@@ -82,10 +90,14 @@ mod #TCP-INTERFACE is
 	including #TCP-SYNTAX .
 	including #TCP-CLIENT .
 	including #COUNTER .
-		
+        including #CONVERSION .
 	
 	op errorTCPSyntax : #String -> #String .
-	eq tcpRequest(S:#String) = check(containedRequest(start(counter) #Socket toSend(S:#String +String "\r\n"))) .
+	eq tcpRequest(S:#String) = $tcpRequest(S:#String, counter) .
+
+	op $tcpRequest : #String #Nat -> #String .
+        eq $tcpRequest(S:#String, N:#Nat) = 
+check(containedRequest(start(N:#Nat) #Socket toSend(Int2String(N:#Nat) +String "#" +String S:#String +String "\r\n"))) .
 
 	op check : #String -> #String .
 	op getTCPData : #String -> #String .
