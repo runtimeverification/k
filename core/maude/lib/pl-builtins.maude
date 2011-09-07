@@ -806,8 +806,9 @@ mod #STRING is
                   term-hook falseTerm (false))] .
 endm
 
-mod #ID is
+mod #ID is including #STRING .
   sort #Id .
+  op id : #String -> #Id .
 endm
 
 mod #CONVERSION is
