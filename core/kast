@@ -261,14 +261,16 @@ close(MYFILE);
 # push(@generated_files, $tempFile);
 
 # run maude with this input
-$output = `maude programCompile.tmp`;
+$output = `maude -no-wrap programCompile.tmp`;
 
 if ($output =~ /$begin_compiled_module(.*?)$end_compiled_module/sg)
 {
     # save
+    my $term = $1;
+    $term =~ s/^\s//sg;
     my $name = $pgm;
     open FILE, ">", "$fname.kast" or die "Cannot create $fname.kast\n";
-    print FILE $1;
+    print FILE $term;
     close FILE;
 }
 else 
