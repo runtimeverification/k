@@ -168,10 +168,10 @@ for my $token (@all_tokens)
 
 
 # collect identifiers
-s/\s([a-zA-Z_]+)\s/
+s/\b([a-zA-Z_]+)(?=(\s|$_))/
 {
     push (@identifiers, $1);
-    " ";
+    "";
 }/sge;
 
 # unique Ids
