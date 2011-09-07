@@ -27,7 +27,7 @@ fmod ADD-EVAL is
 
 
   op evalMap_ : TermList -> TermList .
-  eq evalMap(empty) = empty .
+  eq evalMap(empty) = mkVariable('AndTheOthers, Map) .
   eq evalMap(V, Tl) = itemCtor(Map)[mkConstant(getName(V),K),wrap2K(V)],evalMap(Tl) .
 
   op mainEvalEq : TermList TermList -> Equation .
