@@ -122,7 +122,7 @@ s!($comment)!
     s/\S//gs;
     $_;
 }!gse;
-print "Removed tokens ...\n" if $verbose;
+print "Removed comments ...\n" if $verbose;
 
 
 # remove strings
@@ -191,6 +191,22 @@ $pgm =~ s/\..*$//s;
 my $ids = join(" | ", @identifiers);
 
 
+# remove comments
+s!($comment)!
+{
+    local $_ = $1;
+    s/\S//gs;
+    $_;
+}!gse;
+
+
+# replace found ids with id("...");
+#my @ordered_ids = reverse length_sort(@identifiers);
+#for my $id (@ordered_ids)
+#{
+#    s/($id)/id("$1")/sg;
+#}
+
 # create "header"
 my $header = "kmod $pmod is including $syntax_module\n\n  syntax $sort_ ::= $pgm\n";
 $header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
@@ -231,6 +247,12 @@ $tmp_file =~ s/\..*$//;
 my $pname = $pgm;
 my $cfile = "$lang-compiled.maude";
 my $cmod = uc($lang);
+
+if (!(-e $cfile))
+{
+    print "Cannot find the compiled definition ($cfile).\nCompile your definition first.\n";
+    exit(1);
+}
 
 my $maudified = get_file_content(".k/$tmp_file.maude");
 my $compiled =  qx{ sed 2d $cfile};                                                                                           
