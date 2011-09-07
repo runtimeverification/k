@@ -44,6 +44,7 @@ public class MaudeTask extends Task {
 			
 			List<String> commands = new ArrayList<String>();
 			commands.add(cmd);
+			commands.add("-no-wrap");
 			commands.add(file);
 			maude.command(commands);
 //			maude.environment().put("MAUDE_LIB", "/usr/local/bin/maudeDarwin/maude");
