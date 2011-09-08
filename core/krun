@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+LANG=$1
+KAST=$2
+
+echo "load $LANG-compiled" >$KAST.maude
+echo "erew #eval('\$PGM(.List{K}) |-> (" >> $KAST.maude
+cat $KAST.kast >> $KAST.maude
+echo ")) ." >> $KAST.maude
+echo "q" >> $KAST.maude
+
+java -jar $K_BASE/core/java/wrapperAndServer.jar $KAST.maude
+mv $KAST.maude .k
+
