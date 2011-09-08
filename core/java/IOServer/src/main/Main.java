@@ -9,13 +9,13 @@ public class Main {
 		
 		// Initialize resource system
 		Long r;
-		r = ResourceSystem.getNewResource("stdin:///", null);
+		r = ResourceSystem.getNewResource("stdin:/", null);
 		assert(r == 0);
 		
-		r = ResourceSystem.getNewResource("stdout:///", null);
+		r = ResourceSystem.getNewResource("stdout:/", null);
 		assert(r == 1);
 		
-		r = ResourceSystem.getNewResource("stderr:///", null);
+		r = ResourceSystem.getNewResource("stderr:/", null);
 		assert(r == 2);
 
 		IOServer server = null;

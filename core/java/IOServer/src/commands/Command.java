@@ -20,7 +20,7 @@ public abstract class Command implements Runnable {
 
 	public void fail(String reason) {
 	    Logger.info(maudeId + " is failing because of " + reason);
-		IOServer.fail(maudeId + "#" + reason, socket);
+		IOServer.fail(Integer.toString(maudeId), reason, socket);
 	}
 
 	public void succeed(String... messages) {

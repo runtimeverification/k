@@ -24,6 +24,7 @@ import commands.CommandReopen;
 import commands.CommandSeek;
 import commands.CommandUnknown;
 import commands.CommandWritebyte;
+import commands.CommandEnd;
 
 public class IOServer {
 
@@ -162,6 +163,11 @@ public class IOServer {
 		if (command.equals("eof")) {
 			return new CommandEof(args, socket); //, maudeId);
 		}
+		if (command.equals("end")) {
+		    CommandEnd c = new CommandEnd(args, socket);
+		    c.setPool(pool);
+		    return c;
+		}
 
 		return new CommandUnknown(args, socket); //, (long) 0);
 	}
@@ -171,9 +177,9 @@ public class IOServer {
 	 * @param reason
 	 * @param socket
 	 */
-	public static void fail(String reason, Socket socket) {
+	public static void fail(String msgId, String reason, Socket socket) {
 		
-		reason = "fail#" + reason + "###\n";
+		reason = msgId + "#fail#" + reason + "###\n";
 		
 		BufferedWriter output;
 		try {
@@ -191,6 +197,10 @@ public class IOServer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void fail(String reason, Socket socket) {
+		fail("-1", reason, socket);
 	}
 }
 

@@ -3,7 +3,7 @@ all: ioserver wrapper
 	
 ioserver:
 	@mkdir -p IOServer/bin
-	javac IOServer/src/*/*.java -d IOServer/bin
+	javac -target 1.5 -source 1.5 IOServer/src/*/*.java -d IOServer/bin
 	jar cfm ioserver.jar IOServer/Manifest.txt -C IOServer/bin .
 #jar cf ioserver.jar IOServer/bin/*
 #jar cfe ioserver.jar main.Main IOServer/bin/*/*.class
