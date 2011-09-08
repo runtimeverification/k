@@ -7,6 +7,11 @@ use Getopt::Long;
 use File::Spec;
 use File::Basename;
 
+# specific imports : common_functions.pl
+my $namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
+require $namespace;
+
+
 ################
 # Variables    #
 ################
@@ -200,13 +205,17 @@ s!($comment)!
 }!gse;
 
 
+
 # replace found ids with id("...");
-#my @ordered_ids = reverse length_sort(@identifiers);
-for my $id (@identifiers)
+# also use freeze/unfreeze for strings
+my @ordered_ids = reverse length_sort(@identifiers);
+s/(?<!\\)".*?(?<!\\)"/Freeze($&, "STRINGS")/sge;
+for my $id (@ordered_ids)
 {
     s/(?<![a-zA-Z_0-9])($id)(?![a-zA-Z_0-9])/id("$1")/sg;
 }
-
+$_ = Unfreeze("STRINGS", $_);
+    
 # create "header"
 my $header = "kmod $pmod is including $syntax_module\n\n  syntax $sort_ ::= $pgm\n";
 #$header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
