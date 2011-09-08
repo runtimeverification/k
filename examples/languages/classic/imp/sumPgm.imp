@@ -1,6 +1,14 @@
-n=10;
-s=0;
+write("Add numbers up to (<=0 to quit)? ");
+n=read();
 while not(n<=0) do (
-  s=s+n;
-  n=n+-1;
+  s=0;
+  while not(n<=0) do (
+    s=s+n;
+    n=n+-1;
+  )
+  write("sum=");
+  write(s);
+  write("\nAdd numbers up to (<=0 to quit)? ");
+  n=read();
 )
+write("Done. Enter something to quit: ");

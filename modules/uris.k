@@ -144,28 +144,33 @@ module URIS
   rule #fReadFloat(N) => #parseFloat(#fReadToken(N))
   rule #parseFloat(S) => String2Float(S)
 
-  syntax ListItem ::= `#pki ( #Nat , #String ) | `#pko ( #Nat ) 
+  syntax ListItem ::= `#istream ( #Nat , #String ) | `#ostream ( #Nat ) 
                     | `#fListRead | `#getResult ( Bag ) 
-  syntax List ::= `#checkEmptyK ( Bag )
+  syntax List ::= `#checkEmptyK ( Bag ) 
+                | `#stream ( #String )
+
+
+  rule #stream("stdin:/") => #istream(0,"#Int")
+  rule #stream("stdout:/") => #ostream(1)
 
   rule < CL:CellLabel >
                (#fListRead => #getResult(<k> #fReadFloat(N) </k>)) 
-               #pki(N:#Nat, "#Float") 
+               #istream(N:#Nat, "#Float") 
        </ CL >
   rule < CL:CellLabel >
                     (#fListRead => #getResult(<k> #fReadToken(N) </k>)) 
-               #pki(N:#Nat, "#String") 
+               #istream(N:#Nat, "#String") 
        </ CL >
   rule < CL:CellLabel >
                      (#fListRead => #getResult(<k> #fReadChar(N) </k>)) 
-               #pki(N:#Nat, "#Char") 
+               #istream(N:#Nat, "#Char") 
        </ CL >
   rule < CL:CellLabel >
-                     (#fListRead => #getResult(<k> #fReadInt(N) </k>)) 
-               #pki(N:#Nat, "#Int") 
+                     (.List => #getResult(<k> #fReadInt(N) </k>)) 
+               #istream(N:#Nat, "#Int") 
        </ CL >
 
-  rule < CL:CellLabel > #pko(N:#Nat) 
+  rule < CL:CellLabel > #ostream(N:#Nat) 
                        (ListItem(K:K) => #checkEmptyK(<k> #fPrint(N,,K) ~> #flush(N) </k>)) 
                         RestL:List </ CL >
 
@@ -174,5 +179,8 @@ module URIS
   rule #getResult(<k> I:#Int </k>) => ListItem(I)
   rule #getResult(<k> F:#Float </k>) => ListItem(F)
   rule #checkEmptyK(<k> .K </k>) => .List
+
+  syntax K ::= `#end | `#done
+  rule <k> #end => String2DotK(tcpRequest("end#")) ~> #done </k>
   
 end module

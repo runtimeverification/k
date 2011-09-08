@@ -1,4 +1,5 @@
-m=5;
+write("Test Collatz up to? ");
+m=read();
 s=0;
 while not(m<=2) do (
   n=m;
@@ -11,3 +12,6 @@ while not(m<=2) do (
       then n=n+n+n+1; else n=q;
   )
 )
+write("steps: ");
+write(s);
+write("\nDone. Enter something to quit: ");

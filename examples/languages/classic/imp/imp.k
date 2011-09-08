@@ -1,6 +1,6 @@
 require /modules/uris
 
-module IMP-SYNTAX imports #INT + #ID + URIS
+module IMP-SYNTAX imports URIS
 /*@ The following constructs are given the expected strictnesses, except for
 \textsf{and}, which is only strict in its first argument, because we will
 give it a short-circuited semantics (its second argument will only be
@@ -9,7 +9,7 @@ evaluated when the first evaluates to true). */
   syntax AExp ::= #Id | #Int
                 | AExp + AExp                  [prec 33 gather (E e) strict]
                 | AExp / AExp                  [prec 31 gather (E e) strict]
-                | read ( #String )
+                | read ( )
   syntax BExp ::= #Bool
                 | AExp <= AExp                 [prec 37 strict]
                 | not BExp                     [prec 53 strict]
@@ -19,88 +19,11 @@ evaluated when the first evaluates to true). */
                 | Stmt Stmt                    [prec 60 gather (e E)]
                 | if BExp then Stmt else Stmt  [prec 59 strict(1)]
                 | while BExp do Stmt           [prec 59]
-                | writeln ( AExp ) ;           [strict]
+                | write ( AExp ) ;             [strict]
+                | write ( #String ) ;          [ditto]
 end module
 
-
-module IMP-PROGRAMS imports IMP-SYNTAX
-  syntax #Id   ::= a | b | c | d | e | f | g | h | i | j | k | l | m
-                | n | o | p | q | r | s | t | u | v | w | x | y | z
-  syntax Stmt ::= sumPgm
-                | collatzPgm | collatzStmt
-                | multiplicationStmt | primalityStmt | countPrimesPgm
-
-macro sumPgm = (
-     n=10;
-     s=0;
-     while not(n<=0) do (
-       s=s+n;
-       n=n+-1;
-     )
-)
-
-macro collatzStmt = (
-     while not (n<=1) do (
-       s=s+1;
-       q=n/2;
-       r=q+q+1;
-       if r<=n
-         then n=n+n+n+1; else n=q;
-     )
-)
-
-macro collatzPgm = (
-   m=5;
-   s=0;
-   while not(m<=2) do (
-     n=m;
-     m=m+-1;
-     collatzStmt
-   )
-) 
-
---- fast multiplication (base 2) algorithm
-macro multiplicationStmt = ( 
-  z=0;
-  while not(x<=0) do (
-    q=x/2;
-    r=q+q+1;
-    if r<=x then z=z+y;
-    else skip;
-    x=q;
-    y=y+y;
-  )
-) 
-
-macro primalityStmt = (
-  i=2;
-  q=n/i;
-  t=1;
-  while (i<=q and 1<=t) do (
-    x=i;
-    y=q;
-    multiplicationStmt 
-    if n<=z then t=0; else (
-      i=i+1;
-      q=n/i;
-    )
-  )
-) 
-
-macro countPrimesPgm = (
-   m=10;
-   s=0; n=2;
-   while n<=m do (
-     primalityStmt
-     if 1<=t then s=s+1; else skip;
-     n=n+1;
-   )
-)
-
-end module
-
-
-module IMP-SEMANTICS imports IMP-SYNTAX
+module IMP imports IMP-SYNTAX
 /*@ \section*{Semantics}
 This module defines the semantics of IMP.  We first define
 its configuration, then its results, and then its semantic rules. */
@@ -112,7 +35,9 @@ and clarity, we place the two cells inside another cell, the ``top'' cell
 which is labeled $\top$. */
 
   configuration <T color="yellow">
-                  <k color="green"> .K </k>
+                  <k color="green"> $PGM:Stmt </k>
+                  <in> #stream("stdin:/") </in>
+                  <out> #stream("stdout:/") </out>
                   <state color="red"> .Map </state>
                 </T>
 
@@ -143,7 +68,7 @@ has a side condition. */
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
 
 //@ \subsubsection{Console input}
-  rule <k> read(Str:#String) => #print(Str) ~> #readInt() ...</k>
+  rule <k> read() => I ...</k> <in> ListItem(I) => .List ...</in>
 
 /*@ \subsection{Boolean Expressions}
 The rules below are straightforward.  Note the short-circuited semantics
@@ -205,12 +130,9 @@ then one can remove the ``structural'' tag.  */
 
   rule <k> while B do S => if B then (S while B do S) else skip; <_/k> [structural]
 
-
 //@ \subsubsection{Output}
-  rule <k> writeln(I:#Int); => #printLn(I) ...</k>
+  rule <k> write(I:#Int); => .K ...</k> <out>... .List => ListItem(I) </out>
+  rule <k> write(Str:#String); => .K ...</k> 
+       <out>... .List => ListItem(Str) </out>
 end module
 
-module IMP imports IMP-PROGRAMS + IMP-SEMANTICS 
-  syntax Bag ::= [[ KLabel ]] [latex "\llbracket\,{#1}\,\rrbracket"]
-  macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
-end module

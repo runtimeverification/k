@@ -12,7 +12,7 @@ LATEX_TOPMATTER = README.tex
 MAIN_FILE = imp
 
 # this is a space-separated list of basename maude files to run
-TESTS = imp-test.m
+TESTS = 
 
 TOOL_DIR =  $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk
