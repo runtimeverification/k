@@ -204,7 +204,7 @@ s!($comment)!
 #my @ordered_ids = reverse length_sort(@identifiers);
 for my $id (@identifiers)
 {
-    s/(?<![a-zA-Z])($id)(?![a-zA-Z])/id("$1")/sg;
+    s/(?<![a-zA-Z_0-9])($id)(?![a-zA-Z_0-9])/id("$1")/sg;
 }
 
 # create "header"
