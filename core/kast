@@ -202,14 +202,14 @@ s!($comment)!
 
 # replace found ids with id("...");
 #my @ordered_ids = reverse length_sort(@identifiers);
-#for my $id (@ordered_ids)
-#{
-#    s/($id)/id("$1")/sg;
-#}
+for my $id (@identifiers)
+{
+    s/(?<![a-zA-Z])($id)(?![a-zA-Z])/id("$1")/sg;
+}
 
 # create "header"
 my $header = "kmod $pmod is including $syntax_module\n\n  syntax $sort_ ::= $pgm\n";
-$header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
+#$header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
 
 # Step: append module "header"
 s/^/$header
