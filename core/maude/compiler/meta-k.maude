@@ -82,10 +82,17 @@ fmod META-K-BUILTINS is
   op builtinSorts : Module SortSet -> SortSet .
   eq builtinSorts(M, SS) = intersection(builtinSorts(M), SS) .
 
+  op isBuiltin : Sort ~> Bool .
+  eq isBuiltin(S) = isBuiltinModule(string(S)) .
+
   op isBuiltin : Module ~> Bool .
   eq isBuiltin(M) = isBuiltinModule(string(getName(M))) .
   op isBuiltinModule  : String -> Bool .
   eq isBuiltinModule(Str) = substr(Str, 0,1) == "#" .
+
+
+  op getBuiltinOps : Module ~> OpDeclSet .
+  eq getBuiltinOps(M) = getOps(M, builtinSorts(M)) .
 
   var M : Module . var Str : String .  var S : Sort .  var SS : SortSet .
 endfm

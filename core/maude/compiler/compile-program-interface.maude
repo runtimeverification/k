@@ -1,16 +1,15 @@
-load sanity-checks
-load id-to-string
+---load sanity-checks
 load compile-program
 
 mod COMPILE-PROGRAM-META is
   including COMPILE-PROGRAM .
   including META-LEVEL-EXTRAS .
-  var NoCompiledPgm CompiledPgm Pgm : String . 
-  var QNoCompiledPgm QCompiledPgm QPgm : Qid . 
-  op compileProgram : String String String ~> Term .
-  eq compileProgram(CompiledPgm, NoCompiledPgm, Pgm) = compileProgram(qid(CompiledPgm), qid(NoCompiledPgm), qid(Pgm)) .
-  op compileProgram : Qid Qid Qid ~> Term .
-  eq compileProgram(QCompiledPgm,QNoCompiledPgm, QPgm) = $compileProgram(upModule(QNoCompiledPgm, true), compileProgram2Term(upModule(QCompiledPgm,true), upModule(QNoCompiledPgm, true), QPgm)) .
+  var NoCompiledPgm Pgm : String . 
+  var QNoCompiledPgm QPgm : Qid . 
+  op compileProgram : String String ~> Term .
+  eq compileProgram(NoCompiledPgm, Pgm) = compileProgram(qid(NoCompiledPgm), qid(Pgm)) .
+  op compileProgram : Qid Qid ~> Term .
+  eq compileProgram(QNoCompiledPgm, QPgm) = $compileProgram(upModule(QNoCompiledPgm, true), compileProgram2Term(upModule(QNoCompiledPgm, true), QPgm)) .
   var Trm : Term . var T : Type .  var Q : Qid .  var M M' : Module .
   op $compileProgram : Module Term ~> Term .
   eq $compileProgram(M, Trm) = Trm .
@@ -20,31 +19,34 @@ mod COMPILE-PROGRAM-META is
 endm
 
 mod COMPILE-PROGRAM-LOOP is 
-  including LOOP-MODE + META-LEVEL .
-  including MODULE-META-PRETTY-PRINT .
+  including LOOP-MODE + META-LEVEL-EXTRAS + META-K-BUILTINS .
   op compile-program : -> System .
   op idle : -> State .
-  var Q NoCompiledPgm CompiledPgm Pgm : Qid . var QIL QIL' : QidList . var FM : [Term] .
-  var Compiled Syntax : Module .
+  var Q NoCompiledPgm Pgm : Qid . var QIL QIL' : QidList . var FM : [Term] .
+  var Syntax : Module .
   eq compile-program = [nil, idle, 
- 'Usage: 'compileProgram '<CompiledModule> '<ProgramModule> '<programName> '.] .
+ 'Usage: 'compileProgram '<ProgramModule> '<programName> '.] .
 
 
   op wrapper : Qid -> Module .
   eq wrapper(Q) = (mod 'MKKR is including Q . 
                     sorts none . none none none none none endm) .
   op error : -> [Term] .
-  op printTrm : Module Module [Term] -> QidList .
+  op printTrm : Module [Term] -> QidList .
   var T : Term .
-  eq printTrm(Compiled, Syntax, T) 
+  eq printTrm(Syntax, T) 
    = ('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n  
-     metaPrettyPrint(addOps(getOps(Syntax,'#Id), Compiled), T)
+     metaPrettyPrint(addOps(getBuiltinOps(Syntax) 
+    (op '#_ : 'Universal -> 'KLabel [poly(1)] .)
+    (op '<Qids> : nil -> 'KLabel 
+        [special(id-hook('QuotedIdentifierSymbol, nil))] .)
+     , upModule('K, true)), T)
      '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
-  eq printTrm(Compiled, Syntax, termError(QIL)) = QIL .
+  eq printTrm(Syntax, termError(QIL)) = QIL .
  
-  crl ['compileProgram CompiledPgm NoCompiledPgm Pgm QIL, idle, QIL'] 
-   => [QIL, idle, printTrm(upModule(CompiledPgm,false), upModule(NoCompiledPgm, false), FM )] 
+  crl ['compileProgram NoCompiledPgm Pgm QIL, idle, QIL'] 
+   => [QIL, idle, printTrm(upModule(NoCompiledPgm, true), FM)] 
    if FM := downTerm(getTerm(
              metaReduce(wrapper('COMPILE-PROGRAM-META),
-                        'compileProgram[upTerm(string(CompiledPgm)),upTerm(string(NoCompiledPgm)),upTerm(string(Pgm))])),error) .
+                        'compileProgram[upTerm(string(NoCompiledPgm)),upTerm(string(Pgm))])),error) .
 endm

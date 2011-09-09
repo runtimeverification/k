@@ -6,11 +6,14 @@ use warnings;
 use Getopt::Long;
 use File::Spec;
 use File::Basename;
-
+use Time::HiRes qw( gettimeofday tv_interval);
 # specific imports : common_functions.pl
 my $namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $namespace;
 
+my $tstart = [gettimeofday];
+my $t0 = [gettimeofday];
+my $elapsed = 0;
 
 ################
 # Variables    #
@@ -239,12 +242,21 @@ print FILE;
 close FILE;
 print "Saved.\n\n" if $verbose;
 
+$elapsed = tv_interval ( $t0 );
+print "K file created in $elapsed time\n";
+$t0 = [gettimeofday];
+
+
 #################################
 # maudify the file              #
 #################################
 
 my $output = `kompile -m $tmp_file -flag`;
 print "Output: |$output|\n" if $verbose;
+
+$elapsed = tv_interval ( $t0 );
+print "K file maudified in $elapsed time\n";
+$t0 = [gettimeofday];
 
 
 #################################
@@ -271,28 +283,40 @@ my $compile =
   set include BOOL on .
   load \"$k_tools_dir/" . "prelude-extras\"
   load \"$k_tools_dir/" . "meta-k\"
-  load \"$k_tools_dir/" . "printing\"
-  load \"$k_tools_dir/" . "metadata-parsing\"
   
   load  \"$k_tools_dir/" . "compile-program-interface\"
   ---(
       set print attribute on .
-      red in COMPILE-PROGRAM-META : compileProgram(\"$cmod\",\"$pmod\",\"$pname\") .
+      red in COMPILE-PROGRAM-META : compileProgram(\"$pmod\",\"$pname\") .
       q
   ---)
   loop compile-program .
-  (compileProgram $cmod $pmod $pname .)
+  (compileProgram $pmod $pname .)
   q
   ";
 
 my $tempFile = "programCompile.tmp";
 open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
-print MYFILE "load \"$k_prelude\"\n$maudified\nset show advisories off .\n$compiled\nset show advisories on .\n$compile\n";
+print MYFILE "load \"$k_prelude\"\n$maudified\n$compile\n";
 close(MYFILE);
 # push(@generated_files, $tempFile);
 
+
+$elapsed = tv_interval ( $t0 );
+print "Input for compileProgram generated in $elapsed time\n";
+$t0 = [gettimeofday];
+
+
+
 # run maude with this input
 $output = `maude -no-wrap programCompile.tmp`;
+
+
+$elapsed = tv_interval ( $t0 );
+print "compiling the program took $elapsed time\n";
+$t0 = [gettimeofday];
+
+
 
 if ($output =~ /$begin_compiled_module(.*?)$end_compiled_module/sg)
 {
@@ -312,6 +336,9 @@ else
 unlink("$tmp_file.k") if !$verbose;
 unlink("$tmp_file.maude") if !$verbose;
 unlink("programCompile.tmp") if !$verbose;
+
+$elapsed = tv_interval ( $tstart );
+print "Total time: $elapsed\n";
 
 
 # print "$output\n\n\n";

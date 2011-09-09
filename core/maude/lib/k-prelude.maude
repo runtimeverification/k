@@ -515,6 +515,7 @@ endm
 mod K-BUILTINS is
   including K-TECHNIQUE .
   including PL-BUILTINS .
+  including #TCP-INTERFACE .
   subsort #Bool < K .
   op andBool : -> KLabel .
 
