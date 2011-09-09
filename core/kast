@@ -107,6 +107,11 @@ $lang = $suffix if ($lang eq "?");
 # 3. syntax module
 $syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
 
+
+# message
+print "Maudifying program ... ";
+
+
 # get the program
 local $_ = get_file_content($pgm);
 my $temp = $_;
@@ -176,7 +181,7 @@ for my $token (@all_tokens)
 
 
 # collect identifiers
-s/\b([a-zA-Z_]+)(?=(\s|$_))/
+s/\b([a-zA-Z_\$][a-zA-Z_0-9]*)(?=(\s|$))/
 {
     push (@identifiers, $1);
     "";
@@ -208,7 +213,6 @@ s!($comment)!
 }!gse;
 
 
-
 # replace found ids with id("...");
 # also use freeze/unfreeze for strings
 my @ordered_ids = reverse length_sort(@identifiers);
@@ -217,8 +221,19 @@ for my $id (@ordered_ids)
 {
     s/(?<![a-zA-Z_0-9])($id)(?![a-zA-Z_0-9])/id("$1")/sg;
 }
+
+# s/id\((?<!\\)".*?(?<!\\)"\)/Freeze($&, "STRINGS")/sge;
+
+# spacify
+# print "PROGRAM:\n$_\n\n";
+# my $tks = join("\$\$\$", @all_tokens) . "\$\$\$" . join("\$\$\$", @all_syntax);
+# $_ = spacify($_, $tks);
+# print "PROGRAM:\n$_\n\n";
+
 $_ = Unfreeze("STRINGS", $_);
-    
+# print "PROGRAM:\n$_\n\n";
+
+
 # create "header"
 my $header = "kmod $pmod is including $syntax_module\n\n  syntax $sort_ ::= $pgm\n";
 #$header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
@@ -242,10 +257,6 @@ print FILE;
 close FILE;
 print "Saved.\n\n" if $verbose;
 
-$elapsed = tv_interval ( $t0 );
-print "K file created in $elapsed time\n";
-$t0 = [gettimeofday];
-
 
 #################################
 # maudify the file              #
@@ -255,8 +266,10 @@ my $output = `kompile -m $tmp_file -flag`;
 print "Output: |$output|\n" if $verbose;
 
 $elapsed = tv_interval ( $t0 );
-print "K file maudified in $elapsed time\n";
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n";
 $t0 = [gettimeofday];
+print "Kasting program ...... ";
+
 
 
 #################################
@@ -303,8 +316,9 @@ close(MYFILE);
 
 
 $elapsed = tv_interval ( $t0 );
-print "Input for compileProgram generated in $elapsed time\n";
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n";
 $t0 = [gettimeofday];
+print "Compiling program .... ";
 
 
 
@@ -313,7 +327,7 @@ $output = `maude -no-wrap programCompile.tmp`;
 
 
 $elapsed = tv_interval ( $t0 );
-print "compiling the program took $elapsed time\n";
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n";
 $t0 = [gettimeofday];
 
 
@@ -338,8 +352,7 @@ unlink("$tmp_file.maude") if !$verbose;
 unlink("programCompile.tmp") if !$verbose;
 
 $elapsed = tv_interval ( $tstart );
-print "Total time: $elapsed\n";
-
+print "Total time ........... DONE [" . sprintf("%.3f", $elapsed) . "s]\n\n";
 
 # print "$output\n\n\n";
 
@@ -356,6 +369,39 @@ print "Total time: $elapsed\n";
 ###########
 # utils   #
 ###########
+
+# an attempt to tokenize a program
+sub spacify
+{
+    local $_ = shift;
+    my @tokens = reverse length_sort(split("\$\$\$", shift(@_)));
+    
+
+    my @temp = @tokens;
+    @tokens = ();
+    for my $tok (@temp)
+    {
+	my @keywords = split("[^a-zA-Z]+", $tok);
+	for my $kwd (@keywords)
+	{
+	    push(@tokens, $kwd);
+	}
+	
+	push(@tokens, $tok) if !(scalar @keywords > 0);
+    }
+    
+    
+#    print "TOKENS: |$tokens|\n\n";
+    
+    my $tokens_pattern = "\\b" . join("\\b|\\b", @tokens) . "\\b";
+#    $tokens_pattern =~ s/\\b\|\\b//sg;
+    
+    s/($tokens_pattern)/ $1 /sg;
+
+    $_;
+}
+
+
 
 # print a help message and exit
 sub usage
