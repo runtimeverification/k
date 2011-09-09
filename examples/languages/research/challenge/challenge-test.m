@@ -8,7 +8,7 @@ rew run('p5) .
 rew run('p6) .
 rew run('p7) .
 rew run('p8) .
-rew run('p9, (#Int 5(.List{K}),,#Int -5(.List{K}))) .
+rew run('p9, (# 5(.List{K}),,# -5(.List{K}))) .
 rew run('p10) .
 rew run('p11) .
 rew run('p12) .
@@ -28,10 +28,10 @@ rew run('p25) .
 frew run('p25) .
 frew run('p26) .
 frew run('p27) .
-frew run('p28, (#Int 5(.List{K}),,#Int 3(.List{K}),,#Int 7(.List{K}),,#Int 2(.List{K}),,#Int 9(.List{K}),,#Int 4(.List{K}),,#Int 8(.List{K}),,#Int -1(.List{K}),,#Int 1(.List{K}))) .
-rew run('p28, (#Int 5(.List{K}),,#Int 3(.List{K}),,#Int 7(.List{K}),,#Int 2(.List{K}),,#Int 9(.List{K}),,#Int 4(.List{K}),,#Int 8(.List{K}),,#Int -1(.List{K}),,#Int 1(.List{K}))) .
-frew run('p29, (#Int 5(.List{K}),,#Int 3(.List{K}),,#Int 7(.List{K}),,#Int 2(.List{K}),,#Int 9(.List{K}),,#Int 4(.List{K}),,#Int 8(.List{K}),,#Int 0(.List{K}),,#Int 1(.List{K}))) .
-rew run('p29, (#Int 5(.List{K}),,#Int 3(.List{K}),,#Int 7(.List{K}),,#Int 2(.List{K}),,#Int 9(.List{K}),,#Int 4(.List{K}),,#Int 8(.List{K}),,#Int 0(.List{K}),,#Int 1(.List{K}))) .
+frew run('p28, (# 5(.List{K}),,# 3(.List{K}),,# 7(.List{K}),,# 2(.List{K}),,# 9(.List{K}),,# 4(.List{K}),,# 8(.List{K}),,# -1(.List{K}),,# 1(.List{K}))) .
+rew run('p28, (# 5(.List{K}),,# 3(.List{K}),,# 7(.List{K}),,# 2(.List{K}),,# 9(.List{K}),,# 4(.List{K}),,# 8(.List{K}),,# -1(.List{K}),,# 1(.List{K}))) .
+frew run('p29, (# 5(.List{K}),,# 3(.List{K}),,# 7(.List{K}),,# 2(.List{K}),,# 9(.List{K}),,# 4(.List{K}),,# 8(.List{K}),,# 0(.List{K}),,# 1(.List{K}))) .
+rew run('p29, (# 5(.List{K}),,# 3(.List{K}),,# 7(.List{K}),,# 2(.List{K}),,# 9(.List{K}),,# 4(.List{K}),,# 8(.List{K}),,# 0(.List{K}),,# 1(.List{K}))) .
 
 ---search run('p30) =>! B:Bag .
 ---search run('p31) =>! B:Bag .

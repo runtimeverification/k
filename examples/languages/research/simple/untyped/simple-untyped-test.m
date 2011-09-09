@@ -8,19 +8,19 @@ rew run('pFactorial) .
 rew run('pCollatz) .
 rew run('pSorting) .
 rew run('pArrays, 
-	    (ListItem(#Int(6)(.List{K})) ListItem(#Int(3)(.List{K}))
-	     ListItem(#Int(1)(.List{K})) ListItem(#Int(2)(.List{K}))
-                                        ListItem(#Int(3)(.List{K}))
-	     ListItem(#Int(4)(.List{K})) ListItem(#Int(5)(.List{K}))
-                                        ListItem(#Int(6)(.List{K}))
-	     ListItem(#Int(7)(.List{K})) ListItem(#Int(8)(.List{K}))
-                                        ListItem(#Int(9)(.List{K}))
-	     ListItem(#Int(9)(.List{K})) ListItem(#Int(8)(.List{K}))
-                                        ListItem(#Int(7)(.List{K}))
-	     ListItem(#Int(6)(.List{K})) ListItem(#Int(5)(.List{K}))
-                                        ListItem(#Int(4)(.List{K}))
-	     ListItem(#Int(3)(.List{K})) ListItem(#Int(2)(.List{K}))
-                                        ListItem(#Int(1)(.List{K}))
+	    (ListItem(#(6)(.List{K})) ListItem(#(3)(.List{K}))
+	     ListItem(#(1)(.List{K})) ListItem(#(2)(.List{K}))
+                                        ListItem(#(3)(.List{K}))
+	     ListItem(#(4)(.List{K})) ListItem(#(5)(.List{K}))
+                                        ListItem(#(6)(.List{K}))
+	     ListItem(#(7)(.List{K})) ListItem(#(8)(.List{K}))
+                                        ListItem(#(9)(.List{K}))
+	     ListItem(#(9)(.List{K})) ListItem(#(8)(.List{K}))
+                                        ListItem(#(7)(.List{K}))
+	     ListItem(#(6)(.List{K})) ListItem(#(5)(.List{K}))
+                                        ListItem(#(4)(.List{K}))
+	     ListItem(#(3)(.List{K})) ListItem(#(2)(.List{K}))
+                                        ListItem(#(1)(.List{K}))
 	    )) .
 rew run('pExceptions1) .
 rew run('pExceptions2) .
@@ -86,8 +86,8 @@ mod DEKKER-PREDICATES is
 
   op enabled : #Id -> #Prop .
   eq cfg(< T > B
-	   < genv > M1 #Id X(.List{K}) |-> Loc </ genv >
-           < store > M2 Loc |-> #Int 1(.List{K}) </ store >
+	   < genv > M1 # X(.List{K}) |-> Loc </ genv >
+           < store > M2 Loc |-> # 1(.List{K}) </ store >
 	 </ T >) LTL|= enabled(X) = true .
 endm
 
