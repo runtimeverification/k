@@ -112,6 +112,15 @@ $syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
 print "Maudifying program ... ";
 
 
+##############################################################
+# collect identifiers from program:                          #
+# 1. eliminate comments                                      #
+# 2. eliminate strings                                       #
+# 3. eliminate tokens + keywords from program                #
+# 4. collect all left possible identifiers and declare them  #
+##############################################################
+
+
 # get the program
 local $_ = get_file_content($pgm);
 my $temp = $_;
@@ -142,8 +151,9 @@ print "Removed comments ...\n" if $verbose;
 s/(?<!\\)".*?(?<!\\)"//sg;
 print "Removed strings ...\n" if $verbose;
 
+# syntax contains undescores:
+# remove them and keep only keywords
 my @temp = ();
-# take care of syntax items
 for my $syntax_item (@all_syntax)
 {
     my @keywords = split("[^a-zA-Z]+", $syntax_item);
@@ -160,7 +170,7 @@ for my $syntax_item (@all_syntax)
 
 # print "TOKENS: @all_tokens\n\n@all_syntax\n\nPROGRAM:$_\n\n";
 
-# remove all syntax constructs
+# remove syntax
 for my $syntax_item (@all_syntax)
 {
     # remove bounded alpha-characters
@@ -168,11 +178,9 @@ for my $syntax_item (@all_syntax)
     {
 	s/\b($syntax_item)\b/ /sg;
     }
-    
-#    print "STEP |$syntax_item| : $_\n\n";
 }
 
-# remove tokens (in reversed topological order)
+# remove the rest of tokens (in reversed topological order)
 # make sure this is still needed ...
 for my $token (@all_tokens)
 {
@@ -187,21 +195,36 @@ s/\b([a-zA-Z_\$][a-zA-Z_0-9]*)(?=(\s|$))/
     "";
 }/sge;
 
-# unique Ids
+# make identifiers unique
 @identifiers = set(@identifiers);
 
 print "Found identifiers: @identifiers\n\n" if $verbose;
 
 
-##########################
-# Creating the K module  #
-##########################
+############################
+# end section              #
+############################
 
+
+
+
+
+
+
+##############################
+# Creating the Maude module  #
+# 1. tokenize the program    #
+# 2. create a maude module   #
+##############################
+
+####################
+# 1. tokenization  #
+####################
 $_ = $temp;
 
 # remove extension of program file
 $pgm =~ s/\..*$//s;
-my $ids = join(" | ", @identifiers);
+my $ids = join(" ", @identifiers);
 
 
 # remove comments
@@ -222,61 +245,44 @@ for my $id (@ordered_ids)
     s/(?<![a-zA-Z_0-9])($id)(?![a-zA-Z_0-9])/id("$1")/sg;
 }
 
-# s/id\((?<!\\)".*?(?<!\\)"\)/Freeze($&, "STRINGS")/sge;
+# freeze also the construct id("identifier")
+s/id\((?<!\\)".*?(?<!\\)"\)/Freeze($&, "STRINGS")/sge;
 
 # spacify
-# print "PROGRAM:\n$_\n\n";
-# my $tks = join("\$\$\$", @all_tokens) . "\$\$\$" . join("\$\$\$", @all_syntax);
-# $_ = spacify($_, $tks);
-# print "PROGRAM:\n$_\n\n";
+my @tks = (@all_tokens, @all_syntax);
+$_ = spacify($_, @tks);
 
+# unfreeze everything
 $_ = Unfreeze("STRINGS", $_);
-# print "PROGRAM:\n$_\n\n";
+#  print "PROGRAM:\n$_\n\n";
 
 
-# create "header"
-my $header = "kmod $pmod is including $syntax_module\n\n  syntax $sort_ ::= $pgm\n";
-#$header .= "  syntax #Id ::= $ids\n\n  " if $ids ne "";
+##########################
+# 2. Create maude module #
+##########################
 
-# Step: append module "header"
-s/^/$header
-  macro $pgm = ( /s;
- 
-# Step: append end
-s/$/)\n\nendkm/s;
+# transform program in equation
+$_ = "eq $pgm = ( $_ ) .";
 
-# Step: append load .k/$suffix.maude and -compiled
-$_ = "load .k/$lang.maude\n\n$_";
+# add sort declaration
+s/^/ops $pgm : -> $sort_ .\n/;
 
+# add identifier declarations
+s/^/ops $ids : -> #Id .\n/ if $ids ne "";
 
-# save in $pgm_cast.k
-my $tmp_file = "$pgm\_cast.k";
-print "Saving everything in $tmp_file...\n" if $verbose;
-open FILE, ">", "$tmp_file" or die "Cannot save in file $tmp_file";
-print FILE;
-close FILE;
-print "Saved.\n\n" if $verbose;
+# add mod
+s/^/mod $pmod is including $syntax_module .\n/;
 
+# add endm
+s/$/\nendm/;
 
-#################################
-# maudify the file              #
-#################################
-
-my $output = `kompile -m $tmp_file -flag`;
-print "Output: |$output|\n" if $verbose;
-
-$elapsed = tv_interval ( $t0 );
-print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n";
-$t0 = [gettimeofday];
-print "Kasting program ...... ";
-
+# add imports
+s/^/load .k\/$lang.maude\n/;
 
 
 #################################
 # compile the file              #
 #################################
-
-$tmp_file =~ s/\..*$//;
 
 my $pname = $pgm;
 my $cfile = "$lang-compiled.maude";
@@ -288,8 +294,8 @@ if (!(-e $cfile))
     exit(1);
 }
 
-my $maudified = get_file_content(".k/$tmp_file.maude");
-my $compiled =  qx{ sed 2d $cfile};                                                                                           
+my $maudified = $_;
+my $compiled =  qx{ sed 2d $cfile};
 
 my $compile =
   "set include PL-BOOL off .
@@ -321,9 +327,9 @@ $t0 = [gettimeofday];
 print "Compiling program .... ";
 
 
-
 # run maude with this input
-$output = `maude -no-wrap programCompile.tmp`;
+my $output = `maude -no-wrap programCompile.tmp`;
+
 
 
 $elapsed = tv_interval ( $t0 );
@@ -347,8 +353,6 @@ else
     print "Maude (compileProgram) returned no output ...\n";
 }
 
-unlink("$tmp_file.k") if !$verbose;
-unlink("$tmp_file.maude") if !$verbose;
 unlink("programCompile.tmp") if !$verbose;
 
 $elapsed = tv_interval ( $tstart );
@@ -374,28 +378,36 @@ print "Total time ........... DONE [" . sprintf("%.3f", $elapsed) . "s]\n\n";
 sub spacify
 {
     local $_ = shift;
-    my @tokens = reverse length_sort(split("\$\$\$", shift(@_)));
+    my @tokens = @_;
     
-
     my @temp = @tokens;
     @tokens = ();
     for my $tok (@temp)
     {
-	my @keywords = split("[^a-zA-Z]+", $tok);
+	my @keywords = split("_", $tok);
 	for my $kwd (@keywords)
 	{
-	    push(@tokens, $kwd);
+	    push(@tokens, $kwd) if $kwd ne "";
 	}
-	
-	push(@tokens, $tok) if !(scalar @keywords > 0);
+    }
+
+    @tokens = reverse length_sort(set(@tokens));
+    
+    my @tkz = ();
+    for my $tok (@tokens)
+    {
+	if ($tok ne ";")
+	{
+	    push(@tkz, quotemeta($tok));
+	}
+	else
+	{
+	    push(@tkz, $tok);
+	}
     }
     
-    
-#    print "TOKENS: |$tokens|\n\n";
-    
-    my $tokens_pattern = "\\b" . join("\\b|\\b", @tokens) . "\\b";
-#    $tokens_pattern =~ s/\\b\|\\b//sg;
-    
+    my $tokens_pattern = join("|", @tkz);
+
     s/($tokens_pattern)/ $1 /sg;
 
     $_;
@@ -427,15 +439,15 @@ sub arg_error
 }
 
 # returns file content as string
-sub get_file_content                                                                                                              
-{                                                                                                                                 
-    my $filename = shift;                                                                                                         
+sub get_file_content
+{
+    my $filename = shift;
     
-    open FILEHANDLE, "<", $filename or die "Could not open $filename:\n$!";                                                       
-    my @input = <FILEHANDLE>;                                                                                                     
-    close FILEHANDLE;                                                                                                             
-    
-    return join("", @input);                                                                                                      
+    open FILEHANDLE, "<", $filename or die "Could not open $filename:\n$!";
+    my @input = <FILEHANDLE>;
+    close FILEHANDLE;
+
+    return join("", @input);
 }
 
 # sorts an array by length of its elements
