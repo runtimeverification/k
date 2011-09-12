@@ -1,0 +1,283 @@
+#!/usr/bin/env perl
+
+# imports
+use strict;
+use warnings;
+use Getopt::Long;
+use File::Spec;
+use File::Basename;
+use Time::HiRes qw( gettimeofday tv_interval);
+
+# specific imports : common_functions.pl
+my $namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
+require $namespace;
+$namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'kast_utils.pl');
+require $namespace;
+
+my $tstart = [gettimeofday];
+my $t0 = [gettimeofday];
+my $elapsed = 0;
+
+################
+# Variables    #
+################
+
+# options
+my $help;
+
+my $pgm           = "?";
+my $pmod          = "?";
+my $lang         = "?";
+my $sort_         = "?";
+my $syntax_module = "?";
+my $verbose       = 0;
+
+
+# utils
+my @all_tokens  = ();
+my @all_syntax  = ();
+my @identifiers = ();
+my $k_tools_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maude','compiler');
+my $k_prelude   = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
+
+my $identifiers = File::Spec->catfile((File::Basename::fileparse($0))[1], 'identifiers.pl');
+my $tokenizer   = File::Spec->catfile((File::Basename::fileparse($0))[1], 'tokenizer.pl');
+my $maudifier   = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maudify_program.pl');
+
+
+# compile program 
+my $begin_compiled_module = "---K-MAUDE-GENERATED-OUTPUT-BEGIN---";
+my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";   
+
+# comments
+our $comment;
+
+
+################
+# main         #
+################
+
+# read command line arguments
+usage() if (@ARGV < 1 or
+    ! GetOptions('help|?' => \$help,
+	'pgm=s'     => \$pgm,
+	'pmod=s'    => \$pmod,
+	'lang=s'   => \$lang,
+	'sort=s'    => \$sort_,
+	'smod=s'    => \$syntax_module,
+	'v|verbose' => \$verbose,
+    ) or defined $help );
+
+
+# check if command line options are set.
+# arg_error("Please set all command options; -pgm is not given!") if $pgm eq "?";
+# arg_error("Please set all command options; -pmod is not given!") if $pmod eq "?";
+# arg_error("Please set all command options; -cfile is not given!") if $lang eq "?";
+arg_error("Please set all needed command options; -sort is not given!") if $sort_ eq "?";
+# arg_error("Please set all needed command options; -smod is not given!") if $syntax_module eq "?";
+
+
+##############################
+# solve command line options #
+##############################
+if ($pgm eq "?")
+{
+    if (-e $ARGV[0])
+    {
+	$pgm  = $ARGV[0];
+    }
+    else
+    {
+	print "If option -pgm is not used then kast program considers the FIRST argument as being the program file. If this file is not found, it returns this error.\n";
+	exit(1);
+    }
+}
+
+my ($fname, $path, $suffix) = fileparse($pgm, qr/\.[^.]*/);
+if ($suffix eq "")
+{
+    print "Cannot infer lang name. Please make sure that $fname has the form \"program_name.lang\" (e.g. helloworld.c).\n \"lang\" (e.g \"c\") is the name of your language; both \"lang.k\" and \"lang-compiled.maude\" must exist.\n";
+    exit(1);
+}
+
+# 1. program module
+$pmod = uc($fname) if ($pmod eq "?");
+# 2. compiled file
+$suffix =~ s/^\.//;
+$lang = $suffix if ($lang eq "?");
+# 3. syntax module
+$syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
+
+
+# get the program
+local $_ = get_file_content($pgm);
+
+# get tokens
+my $dir = dirname($lang);
+my $tokens_file = File::Spec->catfile($dir, ".k/all_tokens.tok");
+
+# additional files
+my $idsfile = "ids";
+my $tokenized = "tokenized";
+my $maudified = "maudified";
+
+
+
+
+
+# message
+print "Extracting identifiers ... " if $verbose;
+
+# identifiers
+my $out = `$identifiers $pgm $tokens_file $idsfile`;
+
+$elapsed = tv_interval ( $t0 );
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
+$t0 = [gettimeofday];
+
+
+
+
+
+print "Tokenizing program ....... " if $verbose;
+
+# tokenize
+$out = `$tokenizer $pgm $idsfile $tokens_file $tokenized`;
+
+
+$elapsed = tv_interval ( $t0 );
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
+$t0 = [gettimeofday];
+
+
+print "Maudifying program ....... " if $verbose;
+
+# remove extension of program file
+$pgm =~ s/\..*$//s;
+
+# maudify
+$out = `$maudifier $pgm $lang $syntax_module $sort_ $pmod $tokenized $idsfile $maudified`;
+
+
+$elapsed = tv_interval ( $t0 );
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
+$t0 = [gettimeofday];
+
+
+#################################
+# compile the file              #
+#################################
+
+my $pname = $pgm;
+my $cfile = "$lang-compiled.maude";
+my $cmod = uc($lang);
+
+if (!(-e $cfile))
+{
+    print "Cannot find the compiled definition ($cfile).\nCompile your definition first.\n";
+    exit(1);
+}
+
+$maudified = get_file_content($maudified);
+my $compiled =  qx{ sed 2d $cfile};
+
+my $compile =
+  "set include PL-BOOL off .
+  set include BOOL on .
+  load \"$k_tools_dir/" . "prelude-extras\"
+  load \"$k_tools_dir/" . "meta-k\"
+  
+  load  \"$k_tools_dir/" . "compile-program-interface\"
+  ---(
+      set print attribute on .
+      red in COMPILE-PROGRAM-META : compileProgram(\"$pmod\",\"$pname\") .
+      q
+  ---)
+  loop compile-program .
+  (compileProgram $pmod $pname .)
+  q
+  ";
+
+my $tempFile = "programCompile.tmp";
+open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
+print MYFILE "load \"$k_prelude\"\n$maudified\n$compile\n";
+close(MYFILE);
+# push(@generated_files, $tempFile);
+
+
+$elapsed = tv_interval ( $t0 );
+$t0 = [gettimeofday];
+print "Compiling program ........ " if $verbose;
+
+
+# run maude with this input
+my $output = `maude -no-wrap programCompile.tmp`;
+
+
+
+$elapsed = tv_interval ( $t0 );
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
+$t0 = [gettimeofday];
+
+
+
+if ($output =~ /$begin_compiled_module(.*?)$end_compiled_module/sg)
+{
+    # save
+    my $term = $1;
+    $term =~ s/^\s//sg;
+    my $name = $pgm;
+    open FILE, ">", "$fname.kast" or die "Cannot create $fname.kast\n";
+    print FILE $term;
+    close FILE;
+}
+else 
+{
+    print "Maude (compileProgram) returned no output ...\n";
+}
+
+unlink("programCompile.tmp") if !$verbose;
+
+$elapsed = tv_interval ( $tstart );
+print "Total time ............... DONE [" . sprintf("%.3f", $elapsed) . "s]\n\n" if $verbose;
+
+# print "$output\n\n\n";
+
+
+
+################
+# end main     #
+################
+
+
+
+
+
+###########
+# utils   #
+###########
+
+
+
+# print a help message and exit
+sub usage
+{
+    print "Unknown option: @_\n" if @_;
+    print "usage: cast [-pgm] program_name [-pmod program_module] [-cfile compiled_file] -sort pgm_sort -smod syntax_module\n\t[-verbose]\n\n
+  Options:
+  \t-verbose: verbose mode
+  \t-pgm    : specify the file where the program is.
+  \t-pmod   : specify the name of the module which will wrap the program
+  \t-lang   : specify a k compiled file
+  \t-sort   : specify program sort
+  \t-smod   : specify the syntax module name\n\n";
+
+    exit;
+}
+
+# print an error message if arguments not set
+sub arg_error
+{
+    print shift(@_) . "\n";
+    usage();
+}

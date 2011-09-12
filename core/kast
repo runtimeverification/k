@@ -109,7 +109,7 @@ $syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
 
 
 # message
-print "Maudifying program ... ";
+print "Maudifying program ... " if $verbose;
 
 
 ##############################################################
@@ -133,9 +133,6 @@ my @all = split("\n", $tokens);
 @all_tokens = split('\s', shift(@all));
 @all_syntax = split('\s', shift(@all));
 
-print "Tokens file found ...\n" if $verbose;
-print "TOKENS: @all_tokens\n@all_syntax\n\n" if $verbose;
-print "Prepare for identifying identifiers ...\n" if $verbose;
 
 # remove comments
 s!($comment)!
@@ -144,12 +141,10 @@ s!($comment)!
     s/\S//gs;
     $_;
 }!gse;
-print "Removed comments ...\n" if $verbose;
 
 
 # remove strings
 s/(?<!\\)".*?(?<!\\)"//sg;
-print "Removed strings ...\n" if $verbose;
 
 # syntax contains undescores:
 # remove them and keep only keywords
@@ -197,8 +192,6 @@ s/\b([a-zA-Z_\$][a-zA-Z_0-9]*)(?=(\s|$))/
 
 # make identifiers unique
 @identifiers = set(@identifiers);
-
-print "Found identifiers: @identifiers\n\n" if $verbose;
 
 
 ############################
@@ -322,9 +315,9 @@ close(MYFILE);
 
 
 $elapsed = tv_interval ( $t0 );
-print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n";
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
 $t0 = [gettimeofday];
-print "Compiling program .... ";
+print "Compiling program .... " if $verbose;
 
 
 # run maude with this input
@@ -333,7 +326,7 @@ my $output = `maude -no-wrap programCompile.tmp`;
 
 
 $elapsed = tv_interval ( $t0 );
-print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n";
+print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
 $t0 = [gettimeofday];
 
 
@@ -356,7 +349,7 @@ else
 unlink("programCompile.tmp") if !$verbose;
 
 $elapsed = tv_interval ( $tstart );
-print "Total time ........... DONE [" . sprintf("%.3f", $elapsed) . "s]\n\n";
+print "Total time ........... DONE [" . sprintf("%.3f", $elapsed) . "s]\n\n" if $verbose;
 
 # print "$output\n\n\n";
 
