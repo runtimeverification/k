@@ -76,12 +76,13 @@ runDefaultKast desk (ProgramSource pgm) = do
         T.hPutStr tmpHandle pgm
         hClose tmpHandle
         let kastArgs = defaultKastArgs desk tmpCanonicalFile
+        let kastFile = replaceExtension tmpFile ".kast"
         (ih, oh, eh, ph) <- runInteractiveProcess defaultKastCommand kastArgs Nothing Nothing
         exitCode <- waitForProcess ph
-        when (exitCode /= ExitSuccess) $
+        exists <- doesFileExist kastFile
+        when (exitCode /= ExitSuccess || not exists) $
             die $ "Failed to run kast command:\n"
                ++ "kast " ++ intercalate " " kastArgs
-        let kastFile = replaceExtension tmpFile ".kast"
         kast <- T.readFile kastFile
         removeFile kastFile
         removeFile tmpFile
