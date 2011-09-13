@@ -7,6 +7,7 @@ mod #TCP-SYNTAX is
 	op toSend : #String -> #Socket-Msg .
 	op start : #Nat -> #Socket-Configuration .
 	op tcpRequest : #String -> #String .
+	op #TCPPORT : -> #Nat .
 endm
 
 mod #TCP-CLIENT is
@@ -82,7 +83,7 @@ mod #TCP-CLIENT is
 	rl start(N) => 
 		<> #Socket
 		< cnum(N) : Client | state: connecting > #Socket
-		createClientTcpSocket(socketManager, cnum(N), "localhost", 10000) .
+		createClientTcpSocket(socketManager, cnum(N), "localhost", #TCPPORT) .
 
 endm
 

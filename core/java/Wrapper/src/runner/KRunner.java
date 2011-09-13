@@ -4,10 +4,10 @@ package runner;
 import java.io.IOException;
 import java.util.List;
 import java.io.File;
+import java.text.MessageFormat;
 
 import main.MainServer;
 import tasks.MaudeTask;
-import tasks.Task;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 public class KRunner {
-	private String _maudeCommand = "maude";
+	//private String _maudeCommand = "maude";
 	private OptionParser _parser = new OptionParser();
 	private Logger _logger;
 	
@@ -27,28 +27,38 @@ public class KRunner {
 	private int _port;
 	private boolean _append;
 	private String _outputFile;
-		
+	private String _errorFile;
+	private String _maudeModule;
+	private String _maudeCommandFile;
+	
+	
 	public KRunner(String[] args) throws IOException {
 		//boolean append = true;
 		// parser.accepts("suppressio");
 		
-		OptionSpec<String> maudefile = _parser.accepts("maudefile", "Maude file to run").withRequiredArg().required().ofType(String.class);
+		OptionSpec<String> maudeFile = _parser.accepts("maudeFile", "Maude file to run").withRequiredArg().required().ofType(String.class);
 		OptionSpec<Integer> port = _parser.accepts("port", "Port to use for IO server").withRequiredArg().ofType(Integer.class).defaultsTo(0);
 		OptionSpec<Boolean> append = _parser.accepts("appendLogs", "Whether or not messages should be appended to log files").withRequiredArg().ofType(Boolean.class).defaultsTo(false);
-		OptionSpec<String> outputFile = _parser.accepts("outputfile", "File to save resulting term").withRequiredArg().required().ofType(String.class);
+		OptionSpec<String> outputFile = _parser.accepts("outputFile", "File to save resulting term").withRequiredArg().required().ofType(String.class);
+		OptionSpec<String> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().required().ofType(String.class);
+		OptionSpec<String> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(String.class);
+		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
 
 		OptionSet options;
 		try {
 			options = _parser.parse(args);
 			// _maudeFile = options.valueOf(maudefile).getCanonicalPath();
-			_maudeFile = options.valueOf(maudefile);
+			_maudeFile = options.valueOf(maudeFile);
 			_port = options.valueOf(port);
 			_append = options.valueOf(append);
 			_outputFile = options.valueOf(outputFile);
+			_errorFile = options.valueOf(errorFile);
+			_maudeCommandFile = options.valueOf(maudeCommandFile);
+			_maudeModule = options.valueOf(maudeModuleName);
 		} catch (OptionException e) {
+			System.out.println(e.getMessage() + "\n");
 			usageError();
 		}
-		
 		
 		FileHandler fh = new FileHandler("krunner.log", _append);
 		fh.setFormatter(new SimpleFormatter());
@@ -96,9 +106,19 @@ public class KRunner {
 	public void run() throws Exception {
 		Thread server = startServer();
 		
-		Thread maude = new MaudeTask(_maudeCommand, _maudeFile, _outputFile, _logger);
+		String commandTemplate = 
+			"load {0}\n"
+			+ "mod KRUNNER is including {1} .\n"
+			+ "eq #TCPPORT = {2,number,#} .\n"
+			+ "endm\n"
+			+ "load {3}\n"
+			;
+		String command = MessageFormat.format(commandTemplate, _maudeFile, _maudeModule, _port, _maudeCommandFile);
+		Thread maude = new MaudeTask(command, _outputFile, _errorFile, _logger);
+		
 		maude.start();
 		_logger.info("Maude started");
+		_logger.info("Maude command:\n" + command);
 		
 		maude.join();
 		
