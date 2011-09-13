@@ -1,0 +1,15 @@
+Name:               simple
+Version:            0.1.0
+Synopsis:           A not so simple programming language
+License:            MIT
+License-file:       LICENSE
+Authors:            Grigore Rosu
+Maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
+Tags:               imperative, teaching, classic
+
+Language:
+  Main-module:      SIMPLE
+  Syntax-module:    SIMPLE-SYNTAX
+  Parser:
+    Config:         default-kast
+    Program-sort:   Stmts
