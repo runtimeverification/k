@@ -7,7 +7,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
 
   configuration
     <T color="yellow">
-      <k color="LightGreen"> .K </k>
+      <k color="LightGreen"> $PGM:Exp </k>
       <env color="LightSkyBlue"> .Map </env>
       <store color="white"> .Map </store>
       <nextLoc color="gray"> 0 </nextLoc>
