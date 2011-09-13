@@ -51,7 +51,7 @@ public class MainServer implements Runnable {
 	
 	public static void main(String[] args) throws Exception {
 		MainServer ms = new MainServer(Integer.parseInt(args[0]));
-		ms.start();
+		ms.run();
 		//start(Integer.parseInt(args[0]));
 	}
 }
