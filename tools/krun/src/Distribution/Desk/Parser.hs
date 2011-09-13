@@ -33,7 +33,7 @@ yamlToDesk object = do
 
 getLanguageInfo topFields = do
     fields <- lookupMapping "Language" topFields
-    sourceDir    <- getRequiredText "Source-dir" fields
+    sourceDir    <- getOptionalText "Source-dir" fields
     mainModule   <- getRequiredText "Main-module" fields
     syntaxModule <- getRequiredText "Syntax-module" fields
     parser       <- getParser fields
