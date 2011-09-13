@@ -1,0 +1,1 @@
+(mu f . lambda x . cond (zero? x) true (cond (f (pred x)) false true)) 8
