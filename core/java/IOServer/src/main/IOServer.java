@@ -27,7 +27,6 @@ import commands.CommandWritebyte;
 import commands.CommandEnd;
 
 public class IOServer {
-
 	int port;
 	ServerSocket serverSocket;
 	ThreadPoolExecutor pool;
@@ -35,19 +34,15 @@ public class IOServer {
 	private int POOL_THREADS_SIZE = 10;
 
 	public IOServer(int port) {
-		
 		this.port = port;
-		serverSocket = null;
-		pool = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(POOL_THREADS_SIZE);
-
-		// new server
+		pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(POOL_THREADS_SIZE);
 		createServer();
 	}
 
 	public void createServer() {
 		try {
 			serverSocket = new ServerSocket(port);
+			this.port = serverSocket.getLocalPort();
 		} catch (IOException e) {
 			Logger.severe("Could not listen on port: " + port);
 			Logger.severe("This program will exit with error code: 1");
@@ -62,7 +57,6 @@ public class IOServer {
 		while (true) {
 			Socket clientSocket = null;
 			try {
-
 				// accept
 				clientSocket = serverSocket.accept();
 				Logger.info(clientSocket.toString());
@@ -180,7 +174,7 @@ public class IOServer {
 	public static void fail(String msgId, String reason, Socket socket) {
 		
 		reason = msgId + "#fail#" + reason + "###\n";
-		
+		//System.out.println(reason);
 		BufferedWriter output;
 		try {
 			output = new BufferedWriter(new OutputStreamWriter(

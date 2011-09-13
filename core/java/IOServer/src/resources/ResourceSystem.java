@@ -87,26 +87,65 @@ public class ResourceSystem {
 		return null;
 	}
 
-	private static Resource createResource(URI uri, String[] args) {
-
-		try {
-			if (uri.getScheme().equals("file")) {
-				if (args[2].startsWith("r"))
-					return new ResourceRandFile(uri, args[2]);
-				else
-					return new ResourceOutFile(uri, args[2]);
-			} else if (uri.getScheme().equals("stdin")) {
-				return new ResourceInFile();
-			} else if (uri.getScheme().equals("stdout")) {
-				return new ResourceOutFile(System.out);
-			} else if (uri.getScheme().equals("stderr")) {
-				return new ResourceOutFile(System.err);
-			}
-		} catch (FileNotFoundException e) {
-			return null;
+	private static Resource createResource(URI uri, String[] args) throws ResourceException {
+		if (uri.getScheme().equals("file")) {
+			return createNormalFile(uri, args);
+		} else if (uri.getScheme().equals("stdin")) {
+			return new ResourceInFile();
+		} else if (uri.getScheme().equals("stdout")) {
+			return new ResourceOutFile(System.out);
+		} else if (uri.getScheme().equals("stderr")) {
+			return new ResourceOutFile(System.err);
 		}
 
 		return null;
+	}
+	
+	private static Resource createNormalFile(URI uri, String[] args) throws ResourceException {
+		if (uri.getPath() == null) { // relative path
+			String requestPath = uri.getSchemeSpecificPart();
+			try {
+				String localPath = new java.io.File(".").getCanonicalPath();
+				uri = new java.io.File(localPath, requestPath).toURI();
+			} catch (java.io.IOException e) {
+				throw new ResourceException(e);
+			}
+		}
+		// URI u = uri;
+		// System.out.println(uri);
+		// System.out.println(u.getSchemeSpecificPart());
+		// System.out.println(u.getHost());
+		// System.out.println(u.getPort());
+		// System.out.println(u.getScheme());
+		// System.out.println(u.getUserInfo());
+		// System.out.println(u.getAuthority());
+		// System.out.println(u.getPath());
+		// System.out.println(u.getQuery());
+		// System.out.println(u.getFragment());
+		
+		// String requestPath = uri.getPath();
+		// System.out.println(requestPath);
+		// String path = new java.io.File(".").getCanonicalPath();
+		// System.out.println(path);
+		// URI myURI = new URI("file", null, path, null);
+		// System.out.println(myURI);
+		// System.out.println("Before: " + uri);
+		// uri = myURI.resolve(uri);
+		// System.out.println("After: " + uri);
+		try {
+			if (args[2].startsWith("r")) {
+				return new ResourceRandFile(uri, args[2]);
+			} else {
+				return new ResourceOutFile(uri, args[2]);
+			}
+		} catch (java.io.FileNotFoundException e) {
+			throw new ResourceException(e);
+		}
+		// } catch (FileNotFoundException e) {
+			// return null;
+		// } catch (java.io.IOException e) {
+			// return null;
+		// }
 	}
 
 	public static void remove(Long iD) throws Exception {

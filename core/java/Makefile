@@ -12,6 +12,6 @@ ioserver.jar: $(wildcard IOServer/src/*/*.java) IOServer/Manifest.txt
 	
 wrapper: ioserver  $(wildcard Wrapper/src/*/*.java) Wrapper/Manifest.txt
 	@mkdir -p Wrapper/bin
-	javac Wrapper/src/*/*.java -d Wrapper/bin -cp IOServer/bin/
+	javac Wrapper/src/*/*.java -d Wrapper/bin -cp IOServer/bin:jopt-simple-3.3.jar
 
 	
