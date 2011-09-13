@@ -1,0 +1,23 @@
+Name:               krun
+Version:            0.1.0
+Synopsis:           Execute K definitions (prototype!)
+License:            MIT
+License-file:       LICENSE
+Author:             David Lazar
+Maintainer:         David Lazar <lazar6@illinois.edu>
+Category:           Language
+Build-type:         Simple
+Cabal-version:      >=1.6
+
+Flag static
+  Description:      Build a static binary
+  Default:          False
+
+Executable krun
+  Hs-source-dirs:   src
+  Main-is:          krun.hs
+  Build-depends:    base >= 4 && < 5, process, filepath, directory, text, cmdargs, maude >= 0.1.4, failure, data-object, data-object-yaml
+--  ghc-options:      -Wall
+
+  if flag(static)
+    ghc-options:    -static -optl-static -optl-pthread
