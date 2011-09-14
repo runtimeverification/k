@@ -10,8 +10,6 @@ use Time::HiRes qw( gettimeofday tv_interval);
 # specific imports : common_functions.pl
 my $namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
 require $namespace;
-$namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'ast.pl');
-require $namespace;
 
 my $tstart = [gettimeofday];
 my $t0 = [gettimeofday];
@@ -26,7 +24,8 @@ my $help;
 
 my $pgm           = "?";
 my $pmod          = "?";
-my $lang          = "?";
+my $lang         = "?";
+my $sort_         = "?";
 my $syntax_module = "?";
 my $verbose       = 0;
 
@@ -38,6 +37,9 @@ my @identifiers = ();
 my $k_tools_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maude','compiler');
 my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 
+# compile program 
+my $begin_compiled_module = "---K-MAUDE-GENERATED-OUTPUT-BEGIN---";                                                               
+my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";   
 
 # comments
 my $comment = join("|", (                                                                                                      
@@ -60,10 +62,18 @@ usage() if (@ARGV < 1 or
 	'pgm=s'     => \$pgm,
 	'pmod=s'    => \$pmod,
 	'lang=s'   => \$lang,
+	'sort=s'    => \$sort_,
 	'smod=s'    => \$syntax_module,
 	'v|verbose' => \$verbose,
     ) or defined $help );
 
+
+# check if command line options are set.
+# arg_error("Please set all command options; -pgm is not given!") if $pgm eq "?";
+# arg_error("Please set all command options; -pmod is not given!") if $pmod eq "?";
+# arg_error("Please set all command options; -cfile is not given!") if $lang eq "?";
+arg_error("Please set all needed command options; -sort is not given!") if $sort_ eq "?";
+# arg_error("Please set all needed command options; -smod is not given!") if $syntax_module eq "?";
 
 
 ##############################
@@ -99,11 +109,10 @@ $syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
 
 
 # message
-print "Tokenizing program ... " if $verbose;
+print "Maudifying program ... " if $verbose;
 
 
 ##############################################################
-#  TOKENIZING
 # collect identifiers from program:                          #
 # 1. eliminate comments                                      #
 # 2. eliminate strings                                       #
@@ -159,11 +168,11 @@ for my $syntax_item (@all_syntax)
 # remove syntax
 for my $syntax_item (@all_syntax)
 {
-    $syntax_item =~ s/^_*//;
-    $syntax_item =~ s/_*$//;
-    my @tmp = reverse length_sort(set(split("_", $syntax_item)));
-    my $t   = join ("|", map (quotemeta, @tmp));
-    s/\b($t)\b/  /sg if $t !~ /^\s*$/;
+    # remove bounded alpha-characters
+    if ($syntax_item =~ /\b[a-zA-Z_]+\b/s)
+    {
+	s/\b($syntax_item)\b/ /sg;
+    }
 }
 
 # remove the rest of tokens (in reversed topological order)
@@ -238,58 +247,111 @@ $_ = spacify($_, @tks);
 
 # unfreeze everything
 $_ = Unfreeze("STRINGS", $_);
-# print "PROGRAM:\n$_\n\n";
+#  print "PROGRAM:\n$_\n\n";
+
+
+##########################
+# 2. Create maude module #
+##########################
+
+# transform program in equation
+$_ = "eq $pgm = ( $_ ) .";
+
+# add sort declaration
+s/^/ops $pgm : -> $sort_ .\n/;
+
+# add identifier declarations
+s/^/ops $ids : -> #Id .\n/ if $ids ne "";
+
+# add mod
+s/^/mod $pmod is including $syntax_module .\n/;
+
+# add endm
+s/$/\nendm/;
+
+# add imports
+s/^/load .k\/$lang.maude\n/;
 
 
 #################################
-# kasting                       #
+# compile the file              #
 #################################
 
-my $to_reduce = "mod TEST is including $syntax_module .
-  sort ParsedPrm .
-  op parse_ : Universal -> ParsedPrm [poly(1) strat(0 1)] .
-endm
+my $pname = $pgm;
+my $cfile = "$lang-compiled.maude";
+my $cmod = uc($lang);
+
+if (!(-e $cfile))
+{
+    print "Cannot find the compiled definition ($cfile).\nCompile your definition first.\n";
+    exit(1);
+}
+
+my $maudified = $_;
+my $compiled =  qx{ sed 2d $cfile};
+
+my $compile =
+  "set include PL-BOOL off .
+  set include BOOL on .
+  load \"$k_tools_dir/" . "prelude-extras\"
+  load \"$k_tools_dir/" . "meta-k\"
   
-red parse( $_ ) .
-q";
+  load  \"$k_tools_dir/" . "compile-program-interface\"
+  ---(
+      set print attribute on .
+      red in COMPILE-PROGRAM-META : compileProgram(\"$pmod\",\"$pname\") .
+      q
+  ---)
+  loop compile-program .
+  (compileProgram $pmod $pname .)
+  q
+  ";
 
 my $tempFile = "programCompile.tmp";
 open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
-print MYFILE "load $k_prelude\nload .k\/$lang.maude\n$to_reduce\n";
+print MYFILE "load \"$k_prelude\"\n$maudified\n$compile\n";
 close(MYFILE);
 # push(@generated_files, $tempFile);
 
+
 $elapsed = tv_interval ( $t0 );
 print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
 $t0 = [gettimeofday];
-print "Kasting program ...... " if $verbose;
+print "Compiling program .... " if $verbose;
 
-my $xml_ast = "ast.xml";
 
 # run maude with this input
-my $output = `maude -no-wrap programCompile.tmp -xml-log=$xml_ast`;
+my $output = `maude -no-wrap programCompile.tmp`;
 
-# get ast
-my $ast = get_ast($xml_ast);
 
-# time
+
 $elapsed = tv_interval ( $t0 );
 print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
 $t0 = [gettimeofday];
 
-# clean
+
+
+if ($output =~ /$begin_compiled_module(.*?)$end_compiled_module/sg)
+{
+    # save
+    my $term = $1;
+    $term =~ s/^\s//sg;
+    my $name = $pgm;
+    open FILE, ">", "$fname.kast" or die "Cannot create $fname.kast\n";
+    print FILE $term;
+    close FILE;
+}
+else 
+{
+    print "Maude (compileProgram) returned no output ...\n";
+}
+
 unlink("programCompile.tmp") if !$verbose;
-unlink($xml_ast) if !$verbose;
-
-
-# saving
-open FILE, ">", "$fname.kast" or die "Cannot create $fname.kast\n";
-print FILE $ast;
-close FILE;
-
 
 $elapsed = tv_interval ( $tstart );
 print "Total time ........... DONE [" . sprintf("%.3f", $elapsed) . "s]\n\n" if $verbose;
+
+# print "$output\n\n\n";
 
 
 
@@ -345,6 +407,7 @@ sub spacify
 }
 
 
+
 # print a help message and exit
 sub usage
 {
@@ -355,11 +418,18 @@ sub usage
   \t-pgm    : specify the file where the program is.
   \t-pmod   : specify the name of the module which will wrap the program
   \t-lang   : specify a k compiled file
+  \t-sort   : specify program sort
   \t-smod   : specify the syntax module name\n\n";
 
     exit;
 }
 
+# print an error message if arguments not set
+sub arg_error
+{
+    print shift(@_) . "\n";
+    usage();
+}
 
 # returns file content as string
 sub get_file_content
