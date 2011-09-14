@@ -13,7 +13,7 @@ mod STRICTCXT2EQS-META is
   including STRICTCXT2EQS-METADATA-META .
   including STRICTCXT2EQS .
   including META-LEVEL-EXTRAS .
-  var StrictCxt StrictEqs : String .  var M : Module .
+  var StrictCxt StrictEqs : String .  var M M' : Module .
   var QStrictCxt QStrictEqs : Qid .
   op strictCxt2eqs : String String ~> Module .
   eq strictCxt2eqs(StrictCxt, StrictEqs) 
@@ -25,7 +25,10 @@ mod STRICTCXT2EQS-META is
  .
 
   op compileSTRICTCXT2EQS : Module AttrSet ~> Module .
-  eq compileSTRICTCXT2EQS(M, AS:AttrSet) = addModule(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M), 'k, AS:AttrSet), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
+  eq compileSTRICTCXT2EQS(M, AS:AttrSet) = $compileSTRICTCXT2EQS(setImports(strictCxt2eqs(getName(M), getName(M), M, flatten(M), 'k, AS:AttrSet), including 'K-STRICTNESS .),setMbs(removeImports(M, including 'K-CONTEXTS .),none)) .
+
+  op $compileSTRICTCXT2EQS : Module Module -> Module .
+  eq $compileSTRICTCXT2EQS(M, M') = setName(addModule(M, M'), getName(M)) .
 endm
 
 mod STRICTCXT2EQS-LOOP is 
