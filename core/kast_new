@@ -159,11 +159,11 @@ for my $syntax_item (@all_syntax)
 # remove syntax
 for my $syntax_item (@all_syntax)
 {
-    # remove bounded alpha-characters
-    if ($syntax_item =~ /\b[a-zA-Z_]+\b/s)
-    {
-	s/\b\Q($syntax_item)\E\b/ /sg;
-    }
+    $syntax_item =~ s/^_*//;
+    $syntax_item =~ s/_*$//;
+    my @tmp = reverse length_sort(set(split("_", $syntax_item)));
+    my $t   = join ("|", map (quotemeta, @tmp));
+    s/\b($t)\b/  /sg if $t !~ /^\s*$/;
 }
 
 # remove the rest of tokens (in reversed topological order)
