@@ -103,6 +103,7 @@ print "Tokenizing program ... " if $verbose;
 
 
 ##############################################################
+#  TOKENIZING
 # collect identifiers from program:                          #
 # 1. eliminate comments                                      #
 # 2. eliminate strings                                       #
@@ -161,7 +162,7 @@ for my $syntax_item (@all_syntax)
     # remove bounded alpha-characters
     if ($syntax_item =~ /\b[a-zA-Z_]+\b/s)
     {
-	s/\b($syntax_item)\b/ /sg;
+	s/\b\Q($syntax_item)\E\b/ /sg;
     }
 }
 
@@ -237,15 +238,14 @@ $_ = spacify($_, @tks);
 
 # unfreeze everything
 $_ = Unfreeze("STRINGS", $_);
-#  print "PROGRAM:\n$_\n\n";
-
+# print "PROGRAM:\n$_\n\n";
 
 
 #################################
 # kasting                       #
 #################################
 
-my $to_reduce = "mod TESTBLAVLALALSS is including $syntax_module .
+my $to_reduce = "mod TEST is including $syntax_module .
   sort ParsedPrm .
   op parse_ : Universal -> ParsedPrm [poly(1) strat(0 1)] .
 endm

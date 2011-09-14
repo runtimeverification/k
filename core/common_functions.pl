@@ -2777,7 +2777,9 @@ my %freeze_map = ();
 sub Freeze
 {
     my ($string, $marker) = (shift, shift);
-    my $frozen_string = $marker . md5_hex($string); # join("", map(ord, split('',md5($string))));
+    my $md5_custom = md5_hex($string);
+    $md5_custom =~ s/([a-z])/int(rand(9))/sge;
+    my $frozen_string = $marker . $md5_custom; # join("", map(ord, split('',md5($string))));
     $freeze_map{$marker}{$frozen_string} = $string;
     
     return $frozen_string;
