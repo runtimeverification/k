@@ -16,14 +16,14 @@ rew run('p13) .
 rew run('p14, (Int 10(.List{K}),,Int -2(.List{K}),,Int -1(.List{K}),,Int 0(.List{K}),,Int 10(.List{K}))) .
 rew run('p15, (Int 10(.List{K}),,Int -2(.List{K}),,Int -1(.List{K}),,Int 0(.List{K}),,Int 10(.List{K}))) .
 rew run('p16) .
-search[1] run('p17) =>! B:[Bag] .
-search run('p18) =>! B:[Bag] .
-search run('p19) =>! B:[Bag] .
-search run('p20) =>! B:[Bag] .
-search run('p21) =>! B:[Bag] .
-search run('p22) =>! B:[Bag] .
-search run('p23) =>! B:[Bag] .
-search run('p24) =>! B:[Bag] .
+---search[1] run('p17) =>! B:[Bag] .
+---search run('p18) =>! B:[Bag] .
+---search run('p19) =>! B:[Bag] .
+---search run('p20) =>! B:[Bag] .
+---search run('p21) =>! B:[Bag] .
+---search run('p22) =>! B:[Bag] .
+---search run('p23) =>! B:[Bag] .
+---search run('p24) =>! B:[Bag] .
 rew run('p25) .
 rew run('p26) .
 rew run('p27) .

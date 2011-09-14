@@ -74,6 +74,7 @@ mod STRICTCXT2EQS is
 
   op hasHeatingTag : AttrSet AttrSet -> Bool .
   eq hasHeatingTag(A AS, AS' nds(A AS'')) = true .
+  eq hasHeatingTag(AS, AS' nds(pair("default","") AS'')) = true .
   eq hasHeatingTag(AS, AS') = false [owise] .
 
 

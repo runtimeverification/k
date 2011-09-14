@@ -95,6 +95,7 @@ fmod MAKE-K-RULES is
 
   op superCoolName : Module AttrSet AttrSet -> Module .
   eq superCoolName(M, A AS, AS' localtransitions(A AS'')) = setName(M, '#SUPERCOOL) .
+  eq superCoolName(M, AS, AS' localtransitions(pair("default","") AS'')) = setName(M, '#SUPERCOOL) .
   eq superCoolName(M, AS, AS') = M [owise] .
 
   op setCoolName : Module Qid -> Module .
