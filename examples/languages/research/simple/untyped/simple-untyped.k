@@ -1,6 +1,5 @@
 
 in simple-untyped-syntax
-in simple-untyped-programs
 in simple-untyped-semantics
 
 -----------------------------------------
@@ -8,7 +7,7 @@ in simple-untyped-semantics
 -----------------------------------------
 
 module SIMPLE-UNTYPED
-  imports SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS
+  imports SIMPLE-UNTYPED-SEMANTICS 
 
 /*@ \section{Putting Them All Together} This module puts everything together,
 namely syntax, semantics and programs (note that it includes the SIMPLE
