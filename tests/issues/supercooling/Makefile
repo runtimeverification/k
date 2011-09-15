@@ -1,4 +1,4 @@
-COMPILE_OPTIONS = -localtransition local -nd nerd
+COMPILE_OPTIONS = -supercool local -superheat nerd
 
 # this is the name of the main maude module 
 LANGUAGE_NAME = ISSUE

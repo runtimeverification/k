@@ -23,7 +23,7 @@ mod STRICTCXT2EQS is
   sort MASEqsPair . var Str : String .
 
   op defaultHeatEqs : SortSet AttrSet -> EquationSet .
-  eq defaultHeatEqs(Ss, nds(AS) AS') = defaultHeatEqs(Ss) .
+  eq defaultHeatEqs(Ss, superheats(AS) AS') = defaultHeatEqs(Ss) .
   eq defaultHeatEqs(Ss, AS') = none [owise] .
 
   op defaultHeatEqs : SortSet -> EquationSet .
@@ -39,7 +39,7 @@ mod STRICTCXT2EQS is
   eq defaultHeatEqs(none) = none .
 
   op defaultCoolEqs : SortSet AttrSet -> EquationSet .
-  eq defaultCoolEqs(Ss, AS localtransitions(AS')) = defaultCoolEqs(Ss) .
+  eq defaultCoolEqs(Ss, AS supercools(AS')) = defaultCoolEqs(Ss) .
   eq defaultCoolEqs(Ss, AS) = none [owise] .  
 
   op defaultCoolEqs : SortSet -> EquationSet .
@@ -73,8 +73,8 @@ mod STRICTCXT2EQS is
    = findHeatingAttr(MAS, AS', B or-else hasHeatingTag(AS, AS'), MAS' plugMb(Trm, Ty, AS, Cnd)) .
 
   op hasHeatingTag : AttrSet AttrSet -> Bool .
-  eq hasHeatingTag(A AS, AS' nds(A AS'')) = true .
-  eq hasHeatingTag(AS, AS' nds(pair("default","") AS'')) = true .
+  eq hasHeatingTag(A AS, AS' superheats(A AS'')) = true .
+  eq hasHeatingTag(AS, AS' superheats(pair("default","") AS'')) = true .
   eq hasHeatingTag(AS, AS') = false [owise] .
 
 
@@ -85,7 +85,7 @@ mod STRICTCXT2EQS is
   eq strictCxt2eqs(M,MAS, AS) = strictCxt2eqs(M, findHeatingAttr(MAS, AS, false, none), none, none, AS) .
   op strictCxt2eqs : Module MembAxSet EquationSet RuleSet AttrSet ~> MASEqsPair . 
 
-  eq strictCxt2eqs(M, findHeatingAttr(none, AS, false, MAS), none, none, nds(AS') AS'')
+  eq strictCxt2eqs(M, findHeatingAttr(none, AS, false, MAS), none, none, superheats(AS') AS'')
    = strictCxt2eqs(M, MAS, none, none, AS'') .
  ceq strictCxt2eqs(M, Mb MAS, Eqs, Rls, AS)
    = strictCxt2eq(M, MAS, Eqs, Rls, pReplaceCxt(T,1),pReplaceCxt(T,2), getAttrs(KCS), getCondition(KCS), AS)
@@ -118,7 +118,7 @@ mod STRICTCXT2EQS is
   eq heatSuffix = mkVariable('Rest1,K) .
 
   op coolingEqs : Module Term Term Qid AttrSet AttrSet -> EquationSet .
-  eq coolingEqs(M, T1, T2, Q, AS, localtransitions(AS') AS'')
+  eq coolingEqs(M, T1, T2, Q, AS, supercools(AS') AS'')
    = coolingEqs(M, T1, T2, Q, AS) 
      (eq kWrap(Q, kra(kApply(coolLabel,mkVariable('Kcxt,K)), freezeTerm(M, T1)))
         = kWrap(Q, kApply(coolLabel,T1[hole <- mkVariable('Kcxt,K)]))
@@ -134,14 +134,14 @@ mod STRICTCXT2EQS is
      placeHolder(Q) .
 
   op heatEqs : Qid Term Term Condition AttrSet AttrSet String -> EquationSet .
-  eq heatEqs(Q, T1, T2, Cnd, AS, AS' nds(AS''), Str)
-   = $heatEqs(Q, T1, T2, Cnd, AS, AS' nds(AS''), Str)
-     superHeat(Q, T1, T2, Cnd, AS, AS' nds(AS''), Str) .
+  eq heatEqs(Q, T1, T2, Cnd, AS, AS' superheats(AS''), Str)
+   = $heatEqs(Q, T1, T2, Cnd, AS, AS' superheats(AS''), Str)
+     superHeat(Q, T1, T2, Cnd, AS, AS' superheats(AS''), Str) .
   eq heatEqs(Q, T1, T2, Cnd, AS, AS', Str)
    = $heatEqs(Q, T1, T2, Cnd, AS, AS', Str) [owise] .
 
   op superHeat : Qid Term Term Condition AttrSet AttrSet String -> EquationSet .
-  eq superHeat(Q, T1, T2, Cnd, AS A, AS' nds(A AS''), Str) =
+  eq superHeat(Q, T1, T2, Cnd, AS A, AS' superheats(A AS''), Str) =
      (ceq kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList))), mkVariable('AnyHeat2,KList))))
         = kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList),kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))))), mkVariable('AnyHeat2,KList)))) 
        if  Cnd /\ '_inList`{K`}_[kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))), mkVariable('LHeat,KList)] = falseCt
@@ -155,12 +155,12 @@ mod STRICTCXT2EQS is
 
 
   op $heatEqs : Qid Term Term Condition AttrSet AttrSet String -> EquationSet .
-  eq $heatEqs(Q, T1, T2, Cnd, AS A, AS' nds(A AS''), Str)
+  eq $heatEqs(Q, T1, T2, Cnd, AS A, AS' superheats(A AS''), Str)
    = (ceq kWrap(Q, T1)
         = kWrap(Q, kApply(heatLabel,(kApply(redexLabel,T1),kApply(heatedLabel, empty))))
        if Cnd 
       [metadata(AS A pair("superheat","start" + Str))] .) .
-  eq $heatEqs(Q, T1, T2, Cnd, AS, AS' nds(pair("default","") AS''), Str)
+  eq $heatEqs(Q, T1, T2, Cnd, AS, AS' superheats(pair("default","") AS''), Str)
    = (ceq kWrap(Q, T1)
         = kWrap(Q, kApply(heatLabel,(kApply(redexLabel,T1),kApply(heatedLabel, empty))))
        if Cnd
@@ -205,11 +205,11 @@ mod STRICTCXT2EQS is
   op strictCxt2eqs : Qid Qid Module Module SortSet AttrSet ~> Module .
   var Syntax StrictEqs : Qid . var M Flat : Module .
 
- ceq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS localtransitions(AS')) 
+ ceq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS supercools(AS')) 
    = strictCxt2eqs(Syntax, qid(substr(string(Syntax),length("#SUPERCOOL-"), length(string(Syntax)))),
-                   strictCxt2eqs(Flat, getMbs(M), AS localtransitions(AS')), Ss, AS localtransitions(AS')) 
+                   strictCxt2eqs(Flat, getMbs(M), AS supercools(AS')), Ss, AS supercools(AS')) 
   if substr(string(Syntax),0,length("#SUPERCOOL-")) = "#SUPERCOOL-" [print "generate supercool equations" AS'] . 
-  eq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS localtransitions(AS')) 
+  eq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS supercools(AS')) 
    = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M), AS), Ss, AS) [owise print "don't generate supercool eqs: " AS'] . 
 
   op strictCxt2eqs : Qid Qid MASEqsPair SortSet AttrSet ~> Module .

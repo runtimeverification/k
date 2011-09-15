@@ -958,9 +958,9 @@ fmod COMPILATION-ATTRS is
   including META-ATTRS .
   including RULES-ATTRS .
 
-  op localtransitions : AttrSet -> Attr .
+  op supercools : AttrSet -> Attr .
   op transitions : AttrSet -> Attr .
-  op nds : AttrSet -> Attr .
+  op superheats : AttrSet -> Attr .
 endfm
 
 fmod K-ATTRS is 

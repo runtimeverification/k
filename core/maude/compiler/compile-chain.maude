@@ -220,27 +220,23 @@ mod COMPILE-LOOP is
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
 
   op compile : Qid -> [Module] .
-  eq compile(Q) = compile(Q, localtransitions(none) transitions(none) nds(none)) .
-  op compile-nd : Qid -> [Module] .
-  eq compile-nd(Q) = compile(Q, localtransitions(pair("nd","true")) transitions(pair("computational","")) nds(pair("nd","true"))) .
+  eq compile(Q) = compile(Q, supercools(none) transitions(none) superheats(none)) .
 
   eq print(moduleError(QIL)) = QIL .
   eq purePrint(moduleError(QIL)) = QIL .
-  rl ['compile Q 'transitions QStr 'nds QComp 'localtransitions QSuper QIL, idle, QIL'] 
-   => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) nds(metadataQParse(QComp)) localtransitions(metadataQParse(QSuper))))] [print QStr QComp QSuper] .
+  rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper QIL, idle, QIL'] 
+   => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] [print QStr QComp QSuper] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(none) nds(none) localtransitions(none)) )] .
+   => [QIL, idle, print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none)) )] .
 
   op metadataQParse : Qid -> AttrSet .
   eq metadataQParse(Q) = metadataParse(substr(string(Q),1,_-_(length(string(Q)),2))) .
 
-  rl ['compile-nd Q QIL, idle, QIL']
-  => [QIL, idle, print(compile-nd(Q))] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) nds(pair("nd","")) localtransitions(pair("localtransition",""))) )] .
+   => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))) )] .
 
   rl ['purify Q QIL, idle, QIL'] 
-   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) nds(pair("nd","")) localtransitions(pair("localtransition",""))),'PURE-K-TECHNIQUE))] .
+   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))),'PURE-K-TECHNIQUE))] .
 
   var AS : AttrSet .  var QStr QComp QSuper : Qid .
 endm
