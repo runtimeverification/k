@@ -349,7 +349,7 @@ sub spacify
 sub usage
 {
     print "Unknown option: @_\n" if @_;
-    print "usage: cast [-pgm] program_name [-pmod program_module] [-cfile compiled_file] -sort pgm_sort -smod syntax_module\n\t[-verbose]\n\n
+    print "usage: cast [-pgm] program_name [-pmod program_module] [-cfile compiled_file] -smod syntax_module\n\t[-verbose]\n\n
   Options:
   \t-verbose: verbose mode
   \t-pgm    : specify the file where the program is.
