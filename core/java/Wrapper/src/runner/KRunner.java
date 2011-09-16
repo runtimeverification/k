@@ -23,37 +23,40 @@ public class KRunner {
 	private OptionParser _parser = new OptionParser();
 	private Logger _logger;
 	
-	private String _maudeFile;
+	private File _maudeFile;
+	private String _maudeFileName;
+	private File _maudeCommandFile;
+	private String _maudeCommandFileName;
 	private int _port;
 	private boolean _append;
-	private String _outputFile;
-	private String _errorFile;
+	private String _outputFileName;
+	private String _errorFileName;
 	private String _maudeModule;
-	private String _maudeCommandFile;
 	
 	
-	public KRunner(String[] args) throws IOException {
+	public KRunner(String[] args) throws Exception, IOException {
 		//boolean append = true;
 		// parser.accepts("suppressio");
 		
-		OptionSpec<String> maudeFile = _parser.accepts("maudeFile", "Maude file to run").withRequiredArg().required().ofType(String.class);
+		OptionSpec<File> maudeFile = _parser.accepts("maudeFile", "Maude file to run").withRequiredArg().required().ofType(File.class);
 		OptionSpec<Integer> port = _parser.accepts("port", "Port to use for IO server").withRequiredArg().ofType(Integer.class).defaultsTo(0);
 		OptionSpec<Boolean> append = _parser.accepts("appendLogs", "Whether or not messages should be appended to log files").withRequiredArg().ofType(Boolean.class).defaultsTo(false);
-		OptionSpec<String> outputFile = _parser.accepts("outputFile", "File to save resulting term").withRequiredArg().required().ofType(String.class);
-		OptionSpec<String> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().required().ofType(String.class);
-		OptionSpec<String> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(String.class);
+		OptionSpec<File> outputFile = _parser.accepts("outputFile", "File to save resulting term").withRequiredArg().required().ofType(File.class);
+		OptionSpec<File> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().required().ofType(File.class);
+		OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
 		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
 
 		OptionSet options;
 		try {
 			options = _parser.parse(args);
-			// _maudeFile = options.valueOf(maudefile).getCanonicalPath();
 			_maudeFile = options.valueOf(maudeFile);
+			_maudeFileName = _maudeFile.getCanonicalPath();
+			_maudeCommandFile = options.valueOf(maudeCommandFile);
+			_maudeCommandFileName = _maudeCommandFile.getCanonicalPath();
 			_port = options.valueOf(port);
 			_append = options.valueOf(append);
-			_outputFile = options.valueOf(outputFile);
-			_errorFile = options.valueOf(errorFile);
-			_maudeCommandFile = options.valueOf(maudeCommandFile);
+			_outputFileName = options.valueOf(outputFile).getCanonicalPath();
+			_errorFileName = options.valueOf(errorFile).getCanonicalPath();
 			_maudeModule = options.valueOf(maudeModuleName);
 		} catch (OptionException e) {
 			System.out.println(e.getMessage() + "\n");
@@ -66,26 +69,13 @@ public class KRunner {
 		_logger.addHandler(fh);
 		_logger.setUseParentHandlers(false);
 		
-		// OptionSpec<File> infile = parser.accepts( "infile" ).withRequiredArg().ofType( File.class );
-		// List<String> synonyms = asList( "message", "blurb", "greeting" );
-        // parser.acceptsAll( synonyms ).withRequiredArg();
-		// List<String> nonOptionArgs = options.nonOptionArguments();
-		// if (nonOptionArgs.size() != 1) {
-			// System.out.println("Please invoke with the maude file you want to execute as an argument.");
-			// parser.printHelpOn(System.out);
-			// System.out.println("");
-			// System.exit(1);
-		// }
-		// String filename = nonOptionArgs.get(0);
-
-        // OptionSpec<File> outdir =
-            // parser.accepts( "outdir" ).withRequiredArg().ofType( File.class ).defaultsTo( tempDir );
-        // OptionSpec<Integer> bufferSize =
-            // parser.accepts( "buffer-size" ).withOptionalArg().ofType( Integer.class ).defaultsTo( 4096 );
-        // OptionSpec<Level> level =
-            // parser.accepts( "level" ).withOptionalArg().ofType( Level.class ).defaultsTo( INFO );
-        // OptionSpec<Integer> count =
-            // parser.accepts( "count" ).withOptionalArg().ofType( Integer.class ).defaultsTo( 10 );
+		if (!_maudeFile.exists()) {
+			throw new Exception("Maude file " + _maudeFileName + " does not exist.");
+		}
+		if (!_maudeCommandFile.exists()) {
+			throw new Exception("Command file " + _maudeCommandFileName + " does not exist.");
+		}
+		_logger.info("Maude and command files exist.");
 	}
 	
 	Thread startServer() {
@@ -113,8 +103,8 @@ public class KRunner {
 			+ "endm\n"
 			+ "load {3}\n"
 			;
-		String command = MessageFormat.format(commandTemplate, _maudeFile, _maudeModule, _port, _maudeCommandFile);
-		Thread maude = new MaudeTask(command, _outputFile, _errorFile, _logger);
+		String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
+		Thread maude = new MaudeTask(command, _outputFileName, _errorFileName, _logger);
 		
 		maude.start();
 		_logger.info("Maude started");
