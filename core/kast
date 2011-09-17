@@ -29,6 +29,7 @@ my $pmod          = "?";
 my $lang          = "?";
 my $syntax_module = "?";
 my $verbose       = 0;
+my $out_file      = "?";
 
 
 # utils
@@ -57,11 +58,12 @@ my $comment = join("|", (
 # read command line arguments
 usage() if (@ARGV < 1 or
     ! GetOptions('help|?' => \$help,
-	'pgm=s'     => \$pgm,
-	'pmod=s'    => \$pmod,
-	'lang=s'   => \$lang,
-	'smod=s'    => \$syntax_module,
-	'v|verbose' => \$verbose,
+	'pgm=s'      => \$pgm,
+	'pmod=s'     => \$pmod,
+	'lang=s'     => \$lang,
+	'smod=s'     => \$syntax_module,
+	'o|output=s' => \$out_file,
+	'v|verbose'  => \$verbose,
     ) or defined $help );
 
 
@@ -282,8 +284,9 @@ unlink("programCompile.tmp") if !$verbose;
 unlink($xml_ast) if !$verbose;
 
 
+$out_file = "$fname.kast" if $out_file eq "?";
 # saving
-open FILE, ">", "$fname.kast" or die "Cannot create $fname.kast\n";
+open FILE, ">", "$out_file" or die "Cannot create $out_file\n";
 print FILE $ast;
 close FILE;
 
@@ -351,12 +354,12 @@ sub usage
     print "Unknown option: @_\n" if @_;
     print "usage: cast [-pgm] program_name [-pmod program_module] [-cfile compiled_file] -smod syntax_module\n\t[-verbose]\n\n
   Options:
-  \t-verbose: verbose mode
-  \t-pgm    : specify the file where the program is.
-  \t-pmod   : specify the name of the module which will wrap the program
-  \t-lang   : specify a k compiled file
-  \t-smod   : specify the syntax module name\n\n";
-
+  \t-verbose    : verbose mode
+  \t-pgm        : specify the file where the program is.
+  \t-pmod       : specify the name of the module which will wrap the program
+  \t-lang       : specify a k compiled file
+  \t-smod       : specify the syntax module name
+  \t-o[utput]   : specify the output file\n\n";
     exit;
 }
 
