@@ -89,8 +89,19 @@ runDefaultKast desk (ProgramSource pgm) = do
         return (Kast kast)
 
 
+getTmpDir :: IO FilePath
+getTmpDir = do
+    cwd <- getCurrentDirectory
+    let tmpDir = cwd </> distDir </> "krun_tmp"
+    createDirectoryIfMissing True tmpDir
+    return tmpDir
+
+
 -- Hardcoded defaults:
 -- TODO: get rid of these!
+
+distDir :: FilePath
+distDir = ".k"
 
 compiledFile :: Desk -> FilePath
 compiledFile desk = printf "%s-compiled.maude" (lowercase $ getMainModule desk)
