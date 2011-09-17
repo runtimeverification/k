@@ -101,7 +101,6 @@ defaultKastCommand = "kast"
 defaultKastArgs :: Desk -> FilePath -> [String]
 defaultKastArgs desk pgmFile =
     [ "-pgm", pgmFile
-    , "-sort", getProgramSort desk
     , "-lang", lowercase (getMainModule desk)
     , "-smod", getSyntaxModule desk
     ]
