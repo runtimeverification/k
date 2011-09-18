@@ -101,6 +101,7 @@ public class KRunner {
 			+ "mod KRUNNER is including {1} .\n"
 			+ "eq #TCPPORT = {2,number,#} .\n"
 			+ "endm\n"
+			+ "set show command off .\n"
 			+ "load {3}\n"
 			;
 		String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
