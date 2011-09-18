@@ -60,16 +60,22 @@ klabelpart = syntax <|> hole
     where syntax = Syntax <$> maudeIdentifier
           hole = char '_' >> return Hole
 
+-- TODO: I've quickly modified the builtin parsers below to handle the new
+-- syntax for builtins:
+-- # 42 instead of #Int 42
+-- These modifications may not be entirely correct and require more testing.
+
 -- | Parse a K builtin
 kbuiltin :: Parser KLabel
 kbuiltin = do
-    char '#'
-    try kid <|> knat <|> kint <|> kstring <|> kbool
+    symbol "#"
+    try kbool <|> kint <|> kid <|> kstring
+--    try kid <|> knat <|> kint <|> kstring <|> kbool
 
 -- | Parse an Id builtin: Id x
 kid :: Parser KLabel
 kid = do
-    symbol "Id"
+--    symbol "Id"
     id <- many1 alphaNum
     return (KId id)
 
@@ -83,22 +89,22 @@ knat = do
 -- | Parse an Int builtin: Int 42
 kint :: Parser KLabel
 kint = do
-    symbol "Int"
+--    symbol "Int"
     i <- integer
     return (KInt i)
 
 -- | Parse a String builtin: String "hello"
 kstring :: Parser KLabel
 kstring = do
-    symbol "String"
+--    symbol "String"
     s <- stringLiteral
     return (KString s)
 
 -- | Parse a Bool builtin: Bool true or Bool false
 kbool :: Parser KLabel
 kbool = do
-    symbol "Bool"
-    b <- (symbol "true" >> return True) <|> (string "false" >> return False)
+--    symbol "Bool"
+    b <- (symbol "true" >> return True) <|> (symbol "false" >> return False)
     return (KBool b)
 
 {- Maude identifiers -}
