@@ -1,4 +1,4 @@
-Name:               simple
+Name:               simple-untyped
 Version:            0.1.0
 Synopsis:           A not so simple programming language
 License:            MIT
@@ -8,8 +8,7 @@ Maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
 Tags:               imperative, teaching, classic
 
 Language:
-  Main-module:      SIMPLE
-  Syntax-module:    SIMPLE-SYNTAX
-  Parser:
-    Config:         default-kast
-    Program-sort:   Stmts
+  Main-module:      SIMPLE-UNTYPED
+  Syntax-module:    SIMPLE-UNTYPED-SYNTAX
+  Parser:           kast
+  Output-mode:      maude
