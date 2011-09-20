@@ -9,6 +9,6 @@ Tags:               lambda-calculus, call-by-value, classic
 Language:
   Main-module:      PCF-UNTYPED
   Syntax-module:    PCF-UNTYPED-SYNTAX
-  Parser:
-    Config:         default-kast
-    Program-sort:   Exp
+  Parser:           kast
+  Output-mode:      maude
+  Cell-query:       "//k/text()"
