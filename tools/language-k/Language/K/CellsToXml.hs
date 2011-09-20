@@ -28,10 +28,10 @@ module Language.K.CellsToXml
     ) where
 
 import Control.Applicative ((<|>), (<$>))
-import Data.Attoparsec.Char8
-import Data.Attoparsec.Extra
-import Data.ByteString.Char8 (ByteString)
-import qualified Data.ByteString.Char8 as B
+import Data.Attoparsec.Text
+import Data.Attoparsec.Extra.Text
+import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Char (isAlphaNum)
 
 -- | Transforms output from the K Maude tool (without cruft like the Maude
@@ -49,36 +49,36 @@ import Data.Char (isAlphaNum)
 -- Done "" "<root><env> 0 |-&lt; 42 </env></root>"
 --
 -- TODO: use parseOnly here.
-cellsToXml :: ByteString -> Result ByteString
-cellsToXml s = feed (parse koutput s) B.empty
+cellsToXml :: Text -> Result Text
+cellsToXml s = feed (parse koutput s) T.empty
 
 -- | Same as 'cellsToXml' but lifted to 'Either'.
-cellsToXml' :: ByteString -> Either String ByteString
+cellsToXml' :: Text -> Either String Text
 cellsToXml' = eitherResult . cellsToXml
 
 -- | Parses several cells that make up K output.  The result is wrapped in a
 -- \<root\> element because valid XML documents have only one root.
-koutput :: Parser ByteString
+koutput :: Parser Text
 koutput = xmlify "root" <$> many (spaces >> cell)
 
 -- | Parses a single cell and converts it to valid XML.
-cell :: Parser ByteString
+cell :: Parser Text
 cell = do
     name <- startTag
     insides <- manyTill insides (endTag name)
     return $ xmlify name insides
 
 -- | Parses the insides of a cell: either another cell or content.
-insides :: Parser ByteString
+insides :: Parser Text
 insides = cell <|> content
 
 -- | Parses data that is not structural/markup.  This parser also does XML
 -- escaping in content.
-content :: Parser ByteString
+content :: Parser Text
 content = takeWhile1 (not . needsEscape) <|> escape <$> satisfy needsEscape
 
 -- | Parses a cell start tag such as \"\< foo \>\".
-startTag :: Parser ByteString
+startTag :: Parser Text
 startTag = do
     char '<'
     skipSpace1
@@ -88,7 +88,7 @@ startTag = do
     return name
 
 -- | Parses a cell end tag with the given name, such as \"\</ foo \>\".
-endTag :: ByteString -> Parser ()
+endTag :: Text -> Parser ()
 endTag tag = do
     string "</"
     skipSpace1
@@ -97,9 +97,9 @@ endTag tag = do
     char '>'
     return ()
 
--- | Wraps a list of 'ByteString's in XML tags with the given name.
-xmlify :: ByteString -> [ByteString] -> ByteString
-xmlify tag contents = B.concat $
+-- | Wraps a list of 'Text's in XML tags with the given name.
+xmlify :: Text -> [Text] -> Text
+xmlify tag contents = T.concat $
     ["<", tag, ">"] ++ contents ++ ["</", tag, ">"]
 
 -- | Checks if the given word needs to be escaped in XML.  Only @>@, @<@, and
@@ -111,7 +111,7 @@ needsEscape w =
     || w == '&'
 
 -- | Converts an escape character to the appropriate character entity. 
-escape :: Char -> ByteString
+escape :: Char -> Text
 escape '>' = "&gt;"
 escape '<' = "&lt;"
 escape '&' = "&amp;"

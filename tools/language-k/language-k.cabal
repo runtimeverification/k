@@ -18,11 +18,14 @@ Library
     Language.K.Core.Pretty.RaisedMode
     Language.K.CellsToXml
     Data.Attoparsec.Extra
+    Data.Attoparsec.Extra.Text
     Internal.Lexer
 
   Build-depends:
     base >= 4 && < 5,
     parsec > 3,
     attoparsec,
+    attoparsec-text,
     blaze-builder,
-    bytestring
+    bytestring,
+    text
