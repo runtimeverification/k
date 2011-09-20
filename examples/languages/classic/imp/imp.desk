@@ -10,6 +10,5 @@ Tags:               imperative, teaching, classic
 Language:
   Main-module:      IMP
   Syntax-module:    IMP-SYNTAX
-  Parser:
-    Config:         default-kast
-    Program-sort:   Stmt
+  Parser:           kast
+  Output-mode:      io
