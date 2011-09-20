@@ -4,6 +4,7 @@ module Distribution.Desk.Parser
     ( parseDeskFile
     ) where
 
+import Control.Applicative ((<$>))
 import Control.Failure
 import Control.Monad (join)
 import Data.Object
@@ -17,7 +18,7 @@ parseDeskFile file = do
     desk <- yamlToDesk input
     return desk
 
-yamlToDesk :: (Failure ObjectExtractError m) => Object String String -> m Desk
+yamlToDesk :: (Functor m, Failure ObjectExtractError m) => Object String String -> m Desk
 yamlToDesk object = do
     fields <- fromMapping object
     name        <- getRequiredText "Name"        fields
@@ -36,21 +37,19 @@ getLanguageInfo topFields = do
     sourceDir    <- getOptionalText "Source-dir" fields
     mainModule   <- getRequiredText "Main-module" fields
     syntaxModule <- getRequiredText "Syntax-module" fields
-    parser       <- getParser fields
-    return $ LanguageInfo sourceDir mainModule syntaxModule parser
+    parser       <- readParser <$> getRequiredText "Parser" fields
+    outputMode   <- readOutputMode <$> getRequiredText "Output-mode" fields
+    cellQuery    <- (case outputMode of
+                        PrettyPrint -> getRequiredText
+                        _           -> getOptionalText) "Cell-query" fields
+    return $ LanguageInfo sourceDir mainModule syntaxModule parser outputMode cellQuery
 
-getParser langFields = do
-    fields <- lookupMapping "Parser" langFields
-    config <- getRequiredText "Config" fields
-    case config of
-        "default-kast" -> do
-            programSort <- getRequiredText "Program-sort" fields
-            return $ DefaultKast programSort
-        "external" -> do
-            command <- getRequiredText "Command" fields
-            return $ External command
-        -- TODO: better error handling.
-        _ -> error "Invalid parser configuration."
+readParser "kast" = InternalKast
+readParser _ = error "Support for external parser not implemented yet."
+
+readOutputMode "io" = IOServer
+readOutputMode "maude" = Maude
+readOutputMode "pretty-print" = PrettyPrint
 
 getRequiredText key pairs = lookupScalar key pairs
 

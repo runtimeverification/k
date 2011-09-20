@@ -1,5 +1,5 @@
 Name:               krun
-Version:            0.1.0
+Version:            0.2.0
 Synopsis:           Execute K definitions (prototype!)
 License:            MIT
 License-file:       LICENSE
@@ -16,7 +16,7 @@ Flag static
 Executable krun
   Hs-source-dirs:   src
   Main-is:          krun.hs
-  Build-depends:    base >= 4 && < 5, process, filepath, directory, text, cmdargs, maude >= 0.1.4, failure, data-object, data-object-yaml
+  Build-depends:    base >= 4 && < 5, process, filepath, directory, text, cmdargs, maude >= 0.2.0, failure, data-object, data-object-yaml, hxt, hxt-xpath, language-k
 --  ghc-options:      -Wall
 
   if flag(static)
