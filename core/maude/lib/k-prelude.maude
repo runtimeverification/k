@@ -494,6 +494,7 @@ mod K-CONFIG is
   including K-SENTENCE .
   op configuration_ : Bag -> [KSentence] [prec 127] .
   op multiplicity : -> CellKey .
+  op stream : -> CellKey .
   op color : -> CellKey .
 ---(
   op _* : CellLabel -> CellLabel .

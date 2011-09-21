@@ -1,9 +1,15 @@
 fmod ADD-EVAL is
   including  K-META-CONFIG .
   including META-K-WRAPPERS .
+  including META-K-STREAMS .
 
   op evalS : -> Qid .
   eq evalS = '#eval .
+
+  ops stdinVariable stdoutVariable : -> Variable .
+  eq stdinVariable = mkVariable('$stdin,List) .
+  eq stdoutVariable = mkVariable('$stdout,List) .
+
 
   op addEval : Qid Module Term ~> Module .
   eq addEval(O, M, T) 
@@ -17,7 +23,16 @@ fmod ADD-EVAL is
 
 
   op defaultEvalEqs_ : TermList -> EquationSet .
-  eq defaultEvalEqs(empty) = none .
+  eq defaultEvalEqs(empty) 
+   = (ceq evalS[mkVariable('M,Map)]
+       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(stdinVariable),K),wrap2K(emptyCt(getType(stdinVariable)))],mkVariable('M,Map)]]
+       if '_in_[mkConstant(getName(stdinVariable),K), 'keys_[mkVariable('M,Map)]] = falseCt 
+       [none] .)
+     (ceq evalS[mkVariable('M,Map)]
+       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(stdoutVariable),K),wrap2K(emptyCt(getType(stdoutVariable)))],mkVariable('M,Map)]]
+       if '_in_[mkConstant(getName(stdoutVariable),K), 'keys_[mkVariable('M,Map)]] = falseCt 
+       [none] .)
+   . 
   eq defaultEvalEqs(V,Tl)
    = (ceq evalS[mkVariable('M,Map)]
        = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(V),K),wrap2K(emptyCt(getType(V)))],mkVariable('M,Map)]]
@@ -27,7 +42,9 @@ fmod ADD-EVAL is
 
 
   op evalMap_ : TermList -> TermList .
-  eq evalMap(empty) = mkVariable('AndTheOthers, Map) .
+  eq evalMap(empty) = itemCtor(Map)[mkConstant(getName(stdinVariable), K), wrap2K(stdinVariable)],
+                      itemCtor(Map)[mkConstant(getName(stdoutVariable), K), wrap2K(stdoutVariable)],
+                        mkVariable('AndTheOthers, Map) .
   eq evalMap(V, Tl) = itemCtor(Map)[mkConstant(getName(V),K),wrap2K(V)],evalMap(Tl) .
 
   op mainEvalEq : TermList TermList -> Equation .
@@ -37,7 +54,7 @@ fmod ADD-EVAL is
 
   op vars2Ops_ : TermList ~> OpDeclSet .
   eq vars2Ops(V,Tl) = (op getName(V) : nil -> K [none] .) vars2Ops(Tl) .
-  eq vars2Ops(empty) = none .
+  eq vars2Ops(empty) = (op getName(stdinVariable) : nil -> K [none] .) (op getName(stdoutVariable) : nil -> K [none] .) .
 
 ---  op $PGM : -> K .
 ---  op eval : Map -> Bag .
@@ -49,8 +66,8 @@ fmod ADD-EVAL is
   eq evalCleanConf(T) = evalCleanConf(T,splitKCell(T)) .
   op evalCleanConf : Term [SplitCell] -> TermList .
   eq evalCleanConf(T, SC')
-   = if SC' :: SplitCell then if getMultiplicity(SC') == maybe or  getMultiplicity(SC') == any then checkEmpty(SC', evalCleanConf(getContents(SC')))
-     else plugCell(setAttributes(setContents(SC',evalCleanConf(getContents(SC'))),initialCellAttrs)) fi
+   = if SC' :: SplitCell then if getMultiplicity(SC') == maybe or  getMultiplicity(SC') == any then checkEmpty(SC', evalCleanConf(getContents(SC'), getConnection(SC')))
+     else plugCell(setAttributes(setContents(SC',evalCleanConf(getContents(SC'), getConnection(SC'))),initialCellAttrs)) fi
      else $evalCleanConf(T) fi .
   op $evalCleanConf : Term -> TermList .
   eq $evalCleanConf(Ct) = Ct .
@@ -59,6 +76,12 @@ fmod ADD-EVAL is
   op $evalCleanConfL_ : TermList -> TermList .
   eq $evalCleanConfL(T,Tl) = evalCleanConf(T),$evalCleanConfL(Tl) .
   eq $evalCleanConfL(empty) = empty .
+
+
+  op evalCleanConf : Term [String] -> TermList .
+  eq evalCleanConf(T, "stdin") = mkCollection(List, (stdinVariable, stdinStream)) .
+  eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, stdoutVariable)) .
+  eq evalCleanConf(T, S:[String]) = evalCleanConf(T) [owise] .
 
  
   eq setContents(SC, empty) = setContents(SC, emptyCt(Bag)) .

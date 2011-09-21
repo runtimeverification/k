@@ -7,6 +7,6 @@ cat $KAST.kast >> $KAST.maude
 echo ")) ." >> $KAST.maude
 echo "q" >> $KAST.maude
 
-java -jar $K_BASE/core/java/wrapperAndServer.jar --commandFile $KAST.maude --maudeFile $LANG-compiled --moduleName `echo $LANG | tr a-z A-Z` --errorFile $KAST.err --outputFile  $KAST.out
+java -jar $K_BASE/core/java/wrapperAndServer.jar --commandFile $KAST.maude --maudeFile $LANG-compiled.maude --moduleName `echo $LANG | tr a-z A-Z` --errorFile $KAST.err --outputFile  $KAST.out
 mv $KAST.maude .k
 

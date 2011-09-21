@@ -390,6 +390,8 @@ fmod K-META-CONFIG is
   op attrCtorS : -> Qid . eq attrCtorS = '_=_ .
   op colorKeyS : -> Qid .
   eq colorKeyS = 'color .
+  op connectToKeyS : -> Qid .
+  eq connectToKeyS = 'stream .
   op multiplicityKeyS : -> Qid .
   eq multiplicityKeyS = 'multiplicity .
   op ellipsesKeyS : -> Qid .
@@ -434,11 +436,12 @@ fmod K-META-CONFIG is
 
   op _|->_ : AttrKey AttrVal -> Attr [prec 0] .
   op cellLabel:_ : Term -> Attr .
-  ops multiplicity ellipses color : -> AttrKey  .
+  ops connectTo multiplicity ellipses color : -> AttrKey  .
   subsort Multiplicity Ellipses String < AttrVal .
   
   op symbolAK_ : AttrKey ~> Qid .
   eq symbolAK multiplicity = 'multiplicity .
+  eq symbolAK connectTo = 'stream .
   eq symbolAK ellipses = 'ellipses .
   eq symbolAK color = 'color .
 
@@ -455,12 +458,13 @@ fmod K-META-CONFIG is
   if Q = attrCtorS /\ getType(MKey) = CellKey .
 
   op getAttributeKey_ : Qid -> AttrKey .
-  eq getAttributeKey(Q) = if Q == symbolAK multiplicity then multiplicity else if Q == symbolAK color then color else if Q == symbolAK ellipses then ellipses else error fi fi fi .
+  eq getAttributeKey(Q) = if Q == symbolAK multiplicity then multiplicity else if Q == symbolAK color then color else if Q == symbolAK ellipses then ellipses else if Q == symbolAK connectTo then connectTo else error fi fi fi fi .
 
   op parseAttributeVal : AttrKey String ~> AttrVal .
   eq parseAttributeVal(color, Str) = Str .
   eq parseAttributeVal(ellipses, Str) = getEllipsesValue(Str) .
   eq parseAttributeVal(multiplicity, Str) = getMultiplicityValue(Str) .
+  eq parseAttributeVal(connectTo, Str) = Str .
 
   op parseAttributes : Term -> AttrSet .
   eq parseAttributes(Label) = cellLabel: Label [print "parsed Attributes done: " Label] .
@@ -471,7 +475,7 @@ fmod K-META-CONFIG is
 
   
   op initialCellAttrs : -> AttrSet .
-  eq initialCellAttrs = multiplicity |-> one ellipses |-> none color |-> "black" .
+  eq initialCellAttrs = multiplicity |-> one ellipses |-> none color |-> "black" connectTo |-> "" .
 
   op _[[_]] : AttrSet AttrSet ~> AttrSet .
   eq (AK |-> AV  AS)[[AK |-> AV' AS']] = (AK |-> AV' AS)[[AS']] .
@@ -523,6 +527,9 @@ fmod K-META-CONFIG is
   eq setContents({T,Contents,AS}, Contents') = {T,Contents',AS} .
   eq setContents({T,Contents,AS}, errorT(Trm, Cxt, Str)) = {T,errorT(Trm, Cxt, Str),AS} .
 
+  op getConnection : SplitCell ~> String .
+  eq getConnection({T,Contents,AS}) = AS[connectTo] .
+
   op getMultiplicity : SplitCell -> Multiplicity .
   eq getMultiplicity({T,Contents,AS}) = AS[multiplicity] .
   op setMultiplicity : SplitCell Multiplicity -> SplitCell .
@@ -542,6 +549,7 @@ fmod K-META-CONFIG is
   eq mkString(color, Str) = Str .
   eq mkString(ellipses, E) = symbolES(E) .
   eq mkString(multiplicity, B) = symbolM(B) .
+  eq mkString(connectTo, Str) = Str .
 
 
   op getAttributes : SplitCell -> AttrSet .
@@ -562,7 +570,6 @@ fmod K-META-CONFIG is
   eq CellLabel = 'CellLabel .
   op CellKey : -> Sort .
   eq CellKey = 'CellKey .
-
 
   op emptyCt : Sort -> Constant .
   eq emptyCt(S) = if S == Bag then mkConstant('.,Bag) else if S == Map then mkConstant('.,Map) else if S == List then mkConstant('., List) else if S == K then mkConstant('., K) else if S == Set then mkConstant('., Set) else 'error.K fi fi fi fi fi .
@@ -1121,6 +1128,15 @@ fmod META-K-PREDICATES is
   eq predicateLabel(S) = mkConstant(predicateLabelS(S), KLabel) .
 endfm
 
+
+fmod META-K-STREAMS is 
+  including META-TERM-EXTRAS .
+  including META-K-MODULE .
+  ops stdoutStream stdinStream : -> Term .
+  
+  eq stdoutStream = '#ostream`(_`)['sNat_['0.#Zero]] .
+  eq stdinStream = '#istream`(_`,_`)['0.#Zero,'"#Int".#String] .
+endfm
 
 fmod META-K-COOL is
   including META-TERM-EXTRAS .

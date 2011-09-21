@@ -36,8 +36,8 @@ which is labeled $\top$. */
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Stmt </k>
-                  <in> #stream("stdin:/") </in>
-                  <out> #stream("stdout:/") </out>
+                  <in stream="stdin" > .List </in>
+                  <out stream="stdout" > .List </out>
                   <state color="red"> .Map </state>
                 </T>
 
